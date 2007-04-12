@@ -1,0 +1,4 @@
+/* Localized versions of Info.plist keys */
+
+CFBundleName = "Hog Sample";
+NSHumanReadableCopyright = "© UofA, 2005";

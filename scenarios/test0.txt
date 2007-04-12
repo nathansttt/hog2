@@ -1,0 +1,1 @@
+  60 maps/wc3maps/darkforest.map  58 100 101  78 58.112698
