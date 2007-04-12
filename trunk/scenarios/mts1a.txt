@@ -1,0 +1,1 @@
+60 maps/local/bottleneck5.map  25 15 5  5 12.92893219

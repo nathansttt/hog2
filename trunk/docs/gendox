@@ -1,0 +1,28 @@
+#!/bin/tcsh
+
+# go to main hog directory
+cd /Users/nathanst/Development/ref_hog
+
+# update to latest CVS version
+cvs update -d -A
+
+# go to dox directory
+cd /Users/nathanst/Development/ref_hog/docs
+
+# mount home directory
+open sunkay.cs.ualberta.ca-nathanst- 
+
+# generate new dox
+doxygen
+
+# go to root directory
+cd /Users/nathanst/Development/ref_hog/
+
+# generate latest .tar file
+tar -c -f hog.tar.gz -z --exclude CVS Makefile gpl.txt abstraction/ apps/sample/ apps/Makefile simulation/ util/ shared/ driver/ maps/local/ objs/ bin/
+
+# copy .tar.gz file over
+cp hog.tar.gz /Volumes/nathanst/web_docs/hog.tgz
+
+# log into anzac and run script to fix permissions
+ssh anzac ./fixhogpermissions

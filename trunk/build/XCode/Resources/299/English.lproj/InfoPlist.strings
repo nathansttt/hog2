@@ -1,0 +1,4 @@
+/* Localized versions of Info.plist keys */
+
+CFBundleName = "299";
+NSHumanReadableCopyright = "© UofA, 2005";
