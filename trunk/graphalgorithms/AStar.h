@@ -34,7 +34,7 @@
 #include "graphAbstraction.h"
 #include "fpUtil.h"
 #include <ext/hash_map>
-#include "heap2.h"
+#include "OpenClosedList.h"
 
 namespace AStar3Util
 {
@@ -83,7 +83,7 @@ public:
 		{ return (size_t)(x.currNode->getUniqueID()); }
 	};
 	
-	typedef heap2<AStar3Util::SearchNode, AStar3Util::SearchNodeHash,
+	typedef OpenClosedList<AStar3Util::SearchNode, AStar3Util::SearchNodeHash,
 		AStar3Util::SearchNodeEqual, AStar3Util::SearchNodeCompare> PQueue;
 	
 	typedef __gnu_cxx::hash_map<node*, AStar3Util::SearchNode,
