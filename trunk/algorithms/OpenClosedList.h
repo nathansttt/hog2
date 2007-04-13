@@ -1,5 +1,5 @@
 /*
- * $Id: heap2.h,v 1.9 2006/11/27 23:21:37 nathanst Exp $
+ * $Id: OpenClosedList.h,v 1.9 2006/11/27 23:21:37 nathanst Exp $
  *
  *  hog
  *
@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef HEAP2_H
-#define HEAP2_H
+#ifndef OpenClosedList_H
+#define OpenClosedList_H
 
 #include <cassert>
 #include <vector>
@@ -37,10 +37,10 @@
 
 
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-class heap2 {
+class OpenClosedList {
 public:
-  heap2();
-  ~heap2();
+  OpenClosedList();
+  ~OpenClosedList();
 	void reset();
   void add(OBJ val);
   void decreaseKey(OBJ val);
@@ -62,12 +62,12 @@ private:
 
 
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-heap2<OBJ, HashKey, EqKey, CmpKey>::heap2()
+OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::OpenClosedList()
 {
 }
 
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-heap2<OBJ, HashKey, EqKey, CmpKey>::~heap2()
+OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::~OpenClosedList()
 {
 }
 
@@ -75,17 +75,17 @@ heap2<OBJ, HashKey, EqKey, CmpKey>::~heap2()
 * Remove all objects from queue.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void heap2<OBJ, HashKey, EqKey, CmpKey>::reset()
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::reset()
 {
 	table.clear();
 	_elts.resize(0);
 }
 
 /**
-* Add object into heap2.
+* Add object into OpenClosedList.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void heap2<OBJ, HashKey, EqKey, CmpKey>::add(OBJ val)
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::add(OBJ val)
 {
     assert(table.find(val) == table.end());
 	table[val] = _elts.size();
@@ -100,7 +100,7 @@ void heap2<OBJ, HashKey, EqKey, CmpKey>::add(OBJ val)
 * Indicate that the key for a particular object has decreased.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void heap2<OBJ, HashKey, EqKey, CmpKey>::decreaseKey(OBJ val)
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::decreaseKey(OBJ val)
 {
 	EqKey eq;
 	assert(eq(_elts[table[val]], val));
@@ -110,10 +110,10 @@ void heap2<OBJ, HashKey, EqKey, CmpKey>::decreaseKey(OBJ val)
 }
 
 /**
-* Returns true if the object is in the heap2.
+* Returns true if the object is in the OpenClosedList.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-bool heap2<OBJ, HashKey, EqKey, CmpKey>::isIn(OBJ val)
+bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::isIn(OBJ val)
 {
 	EqKey eq;
   if ((table.find(val) != table.end()) && (table[val] < _elts.size()) &&
@@ -123,10 +123,10 @@ bool heap2<OBJ, HashKey, EqKey, CmpKey>::isIn(OBJ val)
 }
 
 /**
-* Remove the item with the lowest key from the heap2 & re-heapify.
+* Remove the item with the lowest key from the OpenClosedList & re-heapify.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-OBJ heap2<OBJ, HashKey, EqKey, CmpKey>::remove()
+OBJ OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::remove()
 {
   if (empty())
 		return OBJ();
@@ -146,7 +146,7 @@ OBJ heap2<OBJ, HashKey, EqKey, CmpKey>::remove()
 * find this object in the heap and return
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-OBJ heap2<OBJ, HashKey, EqKey, CmpKey>::find(OBJ val)
+OBJ OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::find(OBJ val)
 {
 	if (!isIn(val))
 		return OBJ();
@@ -154,10 +154,10 @@ OBJ heap2<OBJ, HashKey, EqKey, CmpKey>::find(OBJ val)
 }
 
 /**
-* Returns true if no items are in the heap2.
+* Returns true if no items are in the OpenClosedList.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-bool heap2<OBJ, HashKey, EqKey, CmpKey>::empty()
+bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::empty()
 {
   return _elts.size() == 0;
 }
@@ -166,10 +166,10 @@ bool heap2<OBJ, HashKey, EqKey, CmpKey>::empty()
 //* Verify that the heap is internally consistent. Fails assertion if not.
 // */
 //template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-//void heap2<OBJ, HashKey, EqKey, CmpKey>::verifyData()
+//void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::verifyData()
 //{
 //	assert(_elts.size() == table.size());
-//	heap2::IndexTable::iterator iter;
+//	OpenClosedList::IndexTable::iterator iter;
 //	for (iter = table.begin(); iter != table.end(); iter++)
 //	{
 //		EqKey eq;
@@ -178,7 +178,7 @@ bool heap2<OBJ, HashKey, EqKey, CmpKey>::empty()
 //}
 
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void heap2<OBJ, HashKey, EqKey, CmpKey>::heapifyUp(unsigned int index)
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::heapifyUp(unsigned int index)
 {
   if (index == 0) return;
   int parent = (index-1)/2;
@@ -198,7 +198,7 @@ void heap2<OBJ, HashKey, EqKey, CmpKey>::heapifyUp(unsigned int index)
 }
 
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void heap2<OBJ, HashKey, EqKey, CmpKey>::heapifyDown(unsigned int index)
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::heapifyDown(unsigned int index)
 {
 	CmpKey compare;
   unsigned int child1 = index*2+1;
