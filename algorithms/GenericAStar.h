@@ -40,7 +40,7 @@
 
 #include "fpUtil.h"
 #include <ext/hash_map>
-#include "heap2.h"
+#include "OpenClosedList.h"
 #include "SearchEnvironment.h" // for the SearchEnvironment class
 
 
@@ -79,7 +79,7 @@ public:
 		{ return (size_t)(x.currNode); }
 	};
 	
-	typedef heap2<GenericAStarUtil::SearchNode, GenericAStarUtil::SearchNodeHash,
+	typedef OpenClosedList<GenericAStarUtil::SearchNode, GenericAStarUtil::SearchNodeHash,
 		GenericAStarUtil::SearchNodeEqual, GenericAStarUtil::SearchNodeCompare> PQueue;
 	
 	typedef __gnu_cxx::hash_map<uint32_t, GenericAStarUtil::SearchNode > NodeLookupTable;

@@ -24,4 +24,4 @@
  *
  */
 
-#include "heap2.h"
+#include "OpenClosedList.h"
