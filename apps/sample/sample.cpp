@@ -39,7 +39,17 @@
 
 bool mouseTracking;
 int px1, py1, px2, py2;
-int absType = 3;
+int absType = 0;
+
+unitSimulation *unitSim = 0;
+
+int main(int argc, char* argv[])
+{
+	InstallHandlers();
+	RunHOGGUI(argc, argv);
+}
+
+
 
 /**
  * This function is called each time a unitSimulation is deallocated to
@@ -53,7 +63,7 @@ void processStats(statCollection *)
  * This function is used to allocate the unit simulated that you want to run.
  * Any parameters or other experimental setup can be done at this time.
  */
-void createSimulation(unitSimulation * &unitSim)
+void createSimulation()
 {
 	Map *map;
 	if (gDefaultMap[0] == 0)
@@ -75,14 +85,53 @@ void createSimulation(unitSimulation * &unitSim)
 }
 
 /**
- * This function is called once after each [time-step and frame draw]
- * You can do any high level processing, drawing, etc in this function
+ * Allows you to install any keyboard handlers needed for program interaction.
  */
-void frameCallback(unitSimulation *us)
+void InstallHandlers()
 {
+	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
+	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kNoModifier, '\t');
+	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
+	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
+	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
+	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
+
+	InstallKeyboardHandler(MyPathfindingKeyHandler, "Mapbuilding Unit", "Deploy unit that paths to a target, building a map as it travels", kNoModifier, 'd');
+	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add A* Unit", "Deploys a simple a* unit", kNoModifier, 'a');
+	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
+	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
+
+	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
+	
+	InstallWindowHandler(MyWindowHandler);
+
+	InstallMouseClickHandler(MyClickHandler);
+}
+
+void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
+{
+	if (eType == kWindowDestroyed)
+	{
+		RemoveFrameHandler(MyFrameHandler, windowID, 0);
+	}
+	else if (eType == kWindowCreated)
+	{
+		InstallFrameHandler(MyFrameHandler, windowID, 0);
+		if (unitSim == 0)
+			createSimulation();
+	}
+}
+
+void MyFrameHandler(unsigned long windowID, void *data)
+{
+	unitSim->openGLDraw();
+	unitSim->getMap()->openGLDraw(kLines);
+	
 	char tempStr[255];
 	sprintf(tempStr, "Simulation time elapsed: %1.2f, Display Time: %1.2f",
-					us->getSimulationTime(), us->getDisplayTime());
+					unitSim->getSimulationTime(), unitSim->getDisplayTime());
 	submitTextToBuffer(tempStr);
 	
 	if ((mouseTracking) && (px1 != -1) && (px2 != -1) && (py1 != -1) && (py2 != -1))
@@ -90,39 +139,15 @@ void frameCallback(unitSimulation *us)
 		glColor3f(1.0, 1.0, 1.0);
 		GLdouble x1, y1, z1, rad;
 		glBegin(GL_LINES);
-		us->getMap()->getOpenGLCoord(px1, py1, x1, y1, z1, rad);
+		unitSim->getMap()->getOpenGLCoord(px1, py1, x1, y1, z1, rad);
 		glVertex3f(x1, y1, z1-rad);
-		us->getMap()->getOpenGLCoord(px2, py2, x1, y1, z1, rad);
+		unitSim->getMap()->getOpenGLCoord(px2, py2, x1, y1, z1, rad);
 		glVertex3f(x1, y1, z1-rad);
 		glEnd();
 	}
 }
 
-/**
- * Allows you to install any keyboard handlers needed for program interaction.
- */
-void initializeHandlers()
-{
-	installKeyboardHandler(myDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
-	installKeyboardHandler(myDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kNoModifier, '\t');
-	installKeyboardHandler(myDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
-	installKeyboardHandler(myDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
-	installKeyboardHandler(myDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	installKeyboardHandler(myDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
-	installKeyboardHandler(myDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	installKeyboardHandler(myDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
-
-	installKeyboardHandler(myPathfindingKeyHandler, "Mapbuilding Unit", "Deploy unit that paths to a target, building a map as it travels", kNoModifier, 'd');
-	installKeyboardHandler(myRandomUnitKeyHandler, "Add A* Unit", "Deploys a simple a* unit", kNoModifier, 'a');
-	installKeyboardHandler(myRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
-	installKeyboardHandler(myRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
-
-	installCommandLineHandler(myCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
-	
-	installMouseClickHandler(myClickHandler);
-}
-
-int myCLHandler(char *argument[], int maxNumArgs)
+int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if (maxNumArgs <= 1)
 		return 0;
@@ -130,7 +155,7 @@ int myCLHandler(char *argument[], int maxNumArgs)
 	return 2;
 }
 
-void myDisplayHandler(unitSimulation *unitSim, tKeyboardModifier mod, char key)
+void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
@@ -155,7 +180,7 @@ void myDisplayHandler(unitSimulation *unitSim, tKeyboardModifier mod, char key)
 	}
 }
 
-void myRandomUnitKeyHandler(unitSimulation *unitSim, tKeyboardModifier mod, char)
+void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 {
 	int x1, y1, x2, y2;
 	unit *u;
@@ -174,7 +199,7 @@ void myRandomUnitKeyHandler(unitSimulation *unitSim, tKeyboardModifier mod, char
 	unitSim->setmapAbstractionDisplay(1);
 }
 
-void myPathfindingKeyHandler(unitSimulation *unitSim, tKeyboardModifier mod, char)
+void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 {
 	for (int x = 0; x < ((mod==kShiftDown)?(50):(1)); x++)
 	{
@@ -202,7 +227,7 @@ void myPathfindingKeyHandler(unitSimulation *unitSim, tKeyboardModifier mod, cha
 	}
 }
 
-bool myClickHandler(unitSimulation *unitSim, int, int, point3d loc, tButtonType button, tMouseEventType mType)
+bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
 	mouseTracking = false;
 	if (button == kRightButton)
