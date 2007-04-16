@@ -991,12 +991,12 @@ OSStatus disposeGL(pRecContext pContextInfo)
 			deleteFontGL (pContextInfo->regFontList);
 			pContextInfo->regFontList = 0;
 		}
-		if (pContextInfo->unitLayer)
-		{
-			processStats(pContextInfo->unitLayer->getStats());
-			delete pContextInfo->unitLayer;
-			pContextInfo->unitLayer = 0;
-		}
+//		if (pContextInfo->unitLayer)
+//		{
+//			processStats(pContextInfo->unitLayer->getStats());
+//			delete pContextInfo->unitLayer;
+//			pContextInfo->unitLayer = 0;
+//		}
 	}
     
 	return noErr;
@@ -1224,14 +1224,16 @@ void drawGL(pRecContext pContextInfo, bool swap)
 
 	if (pContextInfo->drawing)
 	{
-		if (pContextInfo->unitLayer->getMapAbstractionDisplay())
-			pContextInfo->unitLayer->getMapAbstractionDisplay()->openGLDraw();
-		glEnable(GL_LIGHTING);
-		pContextInfo->unitLayer->openGLDraw();
-		frameCallback(pContextInfo->unitLayer);
-		glDisable(GL_LIGHTING);
-		pContextInfo->unitLayer->getMap()->openGLDraw(kPolygons);
-		glEnable(GL_LIGHTING);
+		HandleFrame(pContextInfo);
+		//CallDrawingCallbacks();
+//		if (pContextInfo->unitLayer->getMapAbstractionDisplay())
+//			pContextInfo->unitLayer->getMapAbstractionDisplay()->openGLDraw();
+//		glEnable(GL_LIGHTING);
+//		pContextInfo->unitLayer->openGLDraw();
+//		frameCallback(pContextInfo->unitLayer);
+//		glDisable(GL_LIGHTING);
+//		pContextInfo->unitLayer->getMap()->openGLDraw(kPolygons);
+//		glEnable(GL_LIGHTING);
 	}
 
 	if (pContextInfo->info) {
@@ -1268,10 +1270,10 @@ static void timerContextCB(pRecContext pContextInfo, WindowRef window)
 		if (!gTrackball || (gTrackingContextInfo != pContextInfo)) {
 			//updateRotation(deltaTime, pContextInfo->fRot, pContextInfo->fVel, pContextInfo->fAccel, pContextInfo->objectRotation);
 		}
-		if (recording)
-			pContextInfo->unitLayer->advanceTime(1.0/30.0);
-		else
-			pContextInfo->unitLayer->advanceTime(deltaTime);
+//		if (recording)
+//			pContextInfo->unitLayer->advanceTime(1.0/30.0);
+//		else
+//			pContextInfo->unitLayer->advanceTime(deltaTime);
 
 		drawGL(pContextInfo, true); // required to do this directly to get animation during resize and drags
 //		frameCallback(pContextInfo->unitLayer);
@@ -1397,7 +1399,7 @@ static OSStatus handleWindowMouseEvents (EventHandlerCallRef myHandler, EventRef
 						case kEventMouseButtonSecondary: bType = kRightButton; break;
 						case kEventMouseButtonTertiary: bType = kMiddleButton; break;
 					}
-					if (handleMouseClick(pContextInfo, (int)location.x, (int)location.y, p, bType, kMouseDown))
+					if (HandleMouseClick(pContextInfo, (int)location.x, (int)location.y, p, bType, kMouseDown))
 						break;
 				}
 				
@@ -1474,7 +1476,7 @@ static OSStatus handleWindowMouseEvents (EventHandlerCallRef myHandler, EventRef
 					case kEventMouseButtonSecondary: bType = kRightButton; break;
 					case kEventMouseButtonTertiary: bType = kMiddleButton; break;
 				}
-				if (handleMouseClick(pContextInfo, (int)location.x, (int)location.y, p, bType, kMouseUp))
+				if (HandleMouseClick(pContextInfo, (int)location.x, (int)location.y, p, bType, kMouseUp))
 					break;
 			}
 
@@ -1510,7 +1512,7 @@ static OSStatus handleWindowMouseEvents (EventHandlerCallRef myHandler, EventRef
 						case kEventMouseButtonSecondary: bType = kRightButton; break;
 						case kEventMouseButtonTertiary: bType = kMiddleButton; break;
 					}
-					if (handleMouseClick(pContextInfo, (int)location.x, (int)location.y, p, bType, kMouseDrag))
+					if (HandleMouseClick(pContextInfo, (int)location.x, (int)location.y, p, bType, kMouseDrag))
 						break;
 				}
 
@@ -1627,6 +1629,7 @@ void createNewWindow(void)
 			pContextInfo->time = UpTime ();
 			InstallEventLoopTimer(GetCurrentEventLoop(), 0, 0.01, getTimerUPP (), (void *) window, &pContextInfo->timer);
 		}
+		HandleWindowEvent(pContextInfo, kWindowCreated);
 	}
 }
 
@@ -1770,7 +1773,8 @@ void savePath(WindowRef window, pRecContext pContextInfo)
 				CFStringGetCString(theReply.saveFileName, &buffer[len+1], 128, kCFStringEncodingASCII);
         {
           printf("You selected \"%s\"\n", buffer);
-					pContextInfo->unitLayer->getMap()->save(buffer);
+					// FIXME
+//					pContextInfo->unitLayer->getMap()->save(buffer);
 					break;
         }        
       }
@@ -1893,7 +1897,8 @@ void saveSimHistory(WindowRef window, pRecContext pContextInfo)
 				CFStringGetCString(theReply.saveFileName, &buffer[len+1], 128, kCFStringEncodingASCII);
         {
           printf("You selected \"%s\"\n", buffer);
-					pContextInfo->unitLayer->saveHistory(buffer);
+					// FIXME
+//					pContextInfo->unitLayer->saveHistory(buffer);
 					break;
         }        
       }
@@ -1901,36 +1906,37 @@ void saveSimHistory(WindowRef window, pRecContext pContextInfo)
   }
 }
 
+// FIXME
 void openSimHistory()
 {
-	WindowRef window = FrontWindow();
-	pRecContext pContextInfo;
-
-	loadPath(gDefaultMap);
-	if (gDefaultMap[0] == 0)
-		return;
-
-	if (window == 0)
-	{
-		createNewWindow();
-		window = FrontWindow();
-		pContextInfo = (pRecContext)GetWRefCon(window);
-		pContextInfo->unitLayer->loadHistory(gDefaultMap);
-	}
-	else {
-		pContextInfo = (pRecContext)GetWRefCon(window);
-		
-		printf("Loading \'%s\'\n", gDefaultMap);
-		processStats(pContextInfo->unitLayer->getStats());
-		delete pContextInfo->unitLayer;
-		createSimulation(pContextInfo->unitLayer);
-		pContextInfo->unitLayer->loadHistory(gDefaultMap);
-	}
-	char pathTitle[1024];
-	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->getMap()->getMapWidth(), pContextInfo->unitLayer->getMap()->getMapHeight());
-	CFStringRef str = CFStringCreateWithCString(NULL, pathTitle, 0);
-	SetWindowTitleWithCFString(window, str);
-	CFRelease(str);
+//	WindowRef window = FrontWindow();
+//	pRecContext pContextInfo;
+//
+//	loadPath(gDefaultMap);
+//	if (gDefaultMap[0] == 0)
+//		return;
+//
+//	if (window == 0)
+//	{
+//		createNewWindow();
+//		window = FrontWindow();
+//		pContextInfo = (pRecContext)GetWRefCon(window);
+////		pContextInfo->unitLayer->loadHistory(gDefaultMap);
+//	}
+//	else {
+//		pContextInfo = (pRecContext)GetWRefCon(window);
+//		
+//		printf("Loading \'%s\'\n", gDefaultMap);
+//		processStats(pContextInfo->unitLayer->getStats());
+//		delete pContextInfo->unitLayer;
+//		createSimulation(pContextInfo->unitLayer);
+//		pContextInfo->unitLayer->loadHistory(gDefaultMap);
+//	}
+//	char pathTitle[1024];
+//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->getMap()->getMapWidth(), pContextInfo->unitLayer->getMap()->getMapHeight());
+//	CFStringRef str = CFStringCreateWithCString(NULL, pathTitle, 0);
+//	SetWindowTitleWithCFString(window, str);
+//	CFRelease(str);
 }
 
 
@@ -1943,26 +1949,28 @@ void openNewMap()
 	if (gDefaultMap[0] == 0)
 		return;
 
-	if (window == 0)
+	if ((1)||(window == 0))
 	{
 		createNewWindow();
 		window = FrontWindow();
 		pContextInfo = (pRecContext)GetWRefCon(window);
+		HandleWindowEvent(pContextInfo, kWindowCreated);
 	}
-	else {
-		pContextInfo = (pRecContext)GetWRefCon(window);
-		
-		printf("Loading \'%s\'\n", gDefaultMap);
-		processStats(pContextInfo->unitLayer->getStats());
-		delete pContextInfo->unitLayer;
-		createSimulation(pContextInfo->unitLayer);
-		//pContextInfo->unitLayer->getMap()->load(gDefaultMap);
-	}
-	char pathTitle[1024];
-	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->getMap()->getMapWidth(), pContextInfo->unitLayer->getMap()->getMapHeight());
-	CFStringRef str = CFStringCreateWithCString(NULL, pathTitle, 0);
-	SetWindowTitleWithCFString(window, str);
-	CFRelease(str);
+//	else {
+//		pContextInfo = (pRecContext)GetWRefCon(window);
+//		
+//		printf("Loading \'%s\'\n", gDefaultMap);
+//		processStats(pContextInfo->unitLayer->getStats());
+//		delete pContextInfo->unitLayer;
+//		createSimulation(pContextInfo->unitLayer);
+//		//pContextInfo->unitLayer->getMap()->load(gDefaultMap);
+//	}
+	
+//	char pathTitle[1024];
+//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->getMap()->getMapWidth(), pContextInfo->unitLayer->getMap()->getMapHeight());
+//	CFStringRef str = CFStringCreateWithCString(NULL, pathTitle, 0);
+//	SetWindowTitleWithCFString(window, str);
+//	CFRelease(str);
 }
 
 // ---------------------------------
@@ -2100,30 +2108,31 @@ static pascal OSStatus appEvtHndlr (EventHandlerCallRef myHandler, EventRef even
 								savePath(window, (pRecContext)GetWRefCon(window));
 							break;
 						case 'EXPT':
-							if (pContextInfo && pContextInfo->unitLayer)
-							{
-								bool paused = pContextInfo->unitLayer->getSimulationPaused();
-								pContextInfo->unitLayer->setSimulationPaused(true);
-								savePicture(window, (pRecContext)GetWRefCon(window)); 
-								pContextInfo->unitLayer->setSimulationPaused(paused);
-							}
+//							if (pContextInfo && pContextInfo->unitLayer)
+//							{
+//								bool paused = pContextInfo->unitLayer->getSimulationPaused();
+//								pContextInfo->unitLayer->setSimulationPaused(true);
+//								savePicture(window, (pRecContext)GetWRefCon(window)); 
+//								pContextInfo->unitLayer->setSimulationPaused(paused);
+//							}
 							break;
 						case 'RMOV':
-							if (recording)
-							{
-								recording = false;
-								bool paused = pContextInfo->unitLayer->getSimulationPaused();
-								pContextInfo->unitLayer->setSimulationPaused(true);
-								exportMovie();
-								pContextInfo->unitLayer->setSimulationPaused(paused);
-							}
-							else {
-								recording = true;
-							}
+//							if (recording)
+//							{
+//								recording = false;
+//								bool paused = pContextInfo->unitLayer->getSimulationPaused();
+//								pContextInfo->unitLayer->setSimulationPaused(true);
+//								exportMovie();
+//								pContextInfo->unitLayer->setSimulationPaused(paused);
+//							}
+//							else {
+//								recording = true;
+//							}
 							break;
 						case 'clsw':
 							if (window) {
-								HideWindow (window);
+								HideWindow(window);
+								HandleWindowEvent(GetCurrentContextInfo(window), kWindowDestroyed);
 								disposeGL(GetCurrentContextInfo(window));  // dump our structures
 								DisposeWindow (window); // if it exists dump it
 							}
@@ -2190,7 +2199,7 @@ static pascal OSStatus appEvtHndlr (EventHandlerCallRef myHandler, EventRef even
 
 #pragma mark ==== main ====
 
-int main(int argc, char* argv[])
+void RunHOGGUI(int argc, char* argv[])
 {
     OSStatus		err;
     EventHandlerRef	ref;
@@ -2202,9 +2211,7 @@ int main(int argc, char* argv[])
 							   { kEventClassMouse, kEventMouseWheelMoved } };
 	ProcessSerialNumber psn = { 0, kCurrentProcess };
 
-	initializeHandlers();
-	processCommandLineArgs(argc, argv);
-	//initializeKeyboardHandlers();
+	ProcessCommandLineArgs(argc, argv);
 
 	StartHIDInput();
 	gStartTime = UpTime (); // get app start time
@@ -2261,6 +2268,5 @@ CantGetNibRef:
 
     // We don't need the nib reference anymore.
     DisposeNibReference (nibRef);
-	return err;
 }
 

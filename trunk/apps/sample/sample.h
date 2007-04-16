@@ -25,8 +25,11 @@
  *
  */
 
-void myDisplayHandler(unitSimulation *, tKeyboardModifier, char key);
-void myPathfindingKeyHandler(unitSimulation *, tKeyboardModifier, char key);
-void myRandomUnitKeyHandler(unitSimulation *, tKeyboardModifier, char key);
-int myCLHandler(char *argument[], int maxNumArgs);
-bool myClickHandler(unitSimulation *, int x, int y, point3d loc, tButtonType, tMouseEventType);
+void MyWindowHandler(unsigned long windowID, tWindowEventType eType);
+void MyFrameHandler(unsigned long windowID, void *data);
+void MyDisplayHandler(unsigned long windowID, tKeyboardModifier, char key);
+void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier, char key);
+void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier, char key);
+int MyCLHandler(char *argument[], int maxNumArgs);
+bool MyClickHandler(unsigned long windowID, int x, int y, point3d loc, tButtonType, tMouseEventType);
+void InstallHandlers();

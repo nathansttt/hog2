@@ -21,33 +21,15 @@
 
 #include <iostream>
 
-//#ifdef OS_MAC
-//#include <OpenGL/gl.h>
-//#include <OpenGL/glu.h>
-//#else
-//#include <GL/gl.h>
-//#include <GL/glut.h>
-//#endif
-
 #include "glUtil.h"
 
-//#include "main.h"
 #include "trackball.h"
 #include "common.h"
-//#include "aStar.h"
-//#include "praStar.h"
-//#include "praStarUnit.h"
-//#include "humanUnit.h"
-//#include "searchUnit.h"
-//#include "sharedAMapGroup.h"
-//#include "unitRaceSimulation.h"
-//#include "unitRewardSimulation.h"
-//#include "rewardUnit.h"
-//#include "constants.h"
 
 // For printing debug info
 static bool const verbose = false;
 
+static unsigned long gNextWindowID = 1;
 char gDefaultMap[1024] = "";
 const recVec gOrigin = { 0.0, 0.0, 0.0 };
 
@@ -56,6 +38,8 @@ using namespace std;
 static std::vector<commandLineCallbackData *> commandLineCallbacks;
 static std::vector<joystickCallbackData *> joystickCallbacks;
 static std::vector<mouseCallbackData *> mouseCallbacks;
+static std::vector<windowCallbackData *> windowCallbacks;
+static std::vector<frameCallbackData *> glDrawCallbacks;
 
 static keyboardCallbackData *keyboardCallbacks[256] = 
 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -88,7 +72,7 @@ const char *getModifierText(tKeyboardModifier t)
 	}
 }
 
-void installKeyboardHandler(keyboardCallback kf, const char *title, const char *description,
+void InstallKeyboardHandler(KeyboardCallback kf, const char *title, const char *description,
 														tKeyboardModifier mod, unsigned char firstKey, unsigned char lastKey)
 {
 	for (int x = firstKey; ; x++)
@@ -99,7 +83,7 @@ void installKeyboardHandler(keyboardCallback kf, const char *title, const char *
 	}
 }
 
-void printKeyboardAssignments()
+void PrintKeyboardAssignments()
 {
 	printf("Legal Keyboard Commands\n-----------------------\n");
 	for (int x = 0; x < 256; x++)
@@ -112,7 +96,7 @@ void printKeyboardAssignments()
 }
 
 
-bool doKeyboardCallbacks(pRecContext pContextInfo, unsigned char keyHit, tKeyboardModifier mod)
+bool DoKeyboardCallbacks(pRecContext pContextInfo, unsigned char keyHit, tKeyboardModifier mod)
 {
 	bool called = false;
 	for (keyboardCallbackData *kd = keyboardCallbacks[keyHit]; kd; kd = kd->next)
@@ -121,24 +105,53 @@ bool doKeyboardCallbacks(pRecContext pContextInfo, unsigned char keyHit, tKeyboa
 		{
 //			printf("(DEBUG) calling: %s%c\t%s\t%s\n", getModifierText(kd->mod), keyHit,
 //						 kd->title, kd->desc);
-			kd->call(pContextInfo->unitLayer, mod, keyHit);
+			kd->call(pContextInfo->windowID, mod, keyHit);
 			called = true;
 		}
 	}
 	if (!called)
 	{
 		printf("Unknown keyboard command %s%c/%d\n\n", getModifierText(mod), keyHit, keyHit);
-		printKeyboardAssignments();
+		PrintKeyboardAssignments();
 	}
 	return false;
 }
 
-void installJoystickHandler(joystickCallback jC, void *userdata)
+void InstallFrameHandler(FrameCallback glCall, unsigned long windowID, void *userdata)
+{
+	glDrawCallbacks.push_back(new frameCallbackData(glCall, windowID, userdata));	
+}
+
+void RemoveFrameHandler(FrameCallback glCall, unsigned long windowID, void *userdata)
+{
+	for (unsigned int x = 0; x < glDrawCallbacks.size(); x++)
+	{
+		if ((glDrawCallbacks[x]->glCall == glCall) &&
+				(glDrawCallbacks[x]->userData == userdata) &&
+				(glDrawCallbacks[x]->windowID == windowID))
+		{
+			delete glDrawCallbacks[x];
+			glDrawCallbacks[x] = glDrawCallbacks[glDrawCallbacks.size()-1];
+			glDrawCallbacks.pop_back();
+		}
+	}
+}
+
+void HandleFrame(pRecContext pContextInfo)
+{
+	for (unsigned int x = 0; x < glDrawCallbacks.size(); x++)
+	{
+		if (glDrawCallbacks[x]->windowID == pContextInfo->windowID)
+			glDrawCallbacks[x]->glCall(pContextInfo->windowID, glDrawCallbacks[x]->userData);
+	}
+}
+
+void InstallJoystickHandler(JoystickCallback jC, void *userdata)
 {
 	joystickCallbacks.push_back(new joystickCallbackData(jC, userdata));	
 }
 
-void removeJoystickHandler(joystickCallback jC, void *userdata)
+void RemoveJoystickHandler(JoystickCallback jC, void *userdata)
 {
 	for (unsigned int x = 0; x < joystickCallbacks.size(); x++)
 	{
@@ -152,22 +165,22 @@ void removeJoystickHandler(joystickCallback jC, void *userdata)
 	}
 }
 
-void handleJoystickMovement(pRecContext pContextInfo, double panX, double panY)
+void HandleJoystickMovement(pRecContext pContextInfo, double panX, double panY)
 {
 	for (unsigned int x = 0; x < joystickCallbacks.size(); x++)
 	{
 		//printf("Calling joystick callback %d\n", x);
-		joystickCallbacks[x]->jC(pContextInfo->unitLayer, panX, panY, joystickCallbacks[x]->userData);
+		joystickCallbacks[x]->jC(pContextInfo->windowID, panX, panY, joystickCallbacks[x]->userData);
 	}
 }
 
-void installCommandLineHandler(commandLineCallback CLC,
+void InstallCommandLineHandler(CommandLineCallback CLC,
 															 const char *arg, const char *param, const char *usage)
 {
 	commandLineCallbacks.push_back(new commandLineCallbackData(CLC, arg, param, usage));
 }
 
-void printCommandLineArguments()
+void PrintCommandLineArguments()
 {
 	printf("Valid command-line flags:\n\n");
 	for (unsigned int x = 0; x < commandLineCallbacks.size(); x++)
@@ -176,7 +189,7 @@ void printCommandLineArguments()
 }
 
 // Process command line arguments
-void processCommandLineArgs(int argc, char *argv[])
+void ProcessCommandLineArgs(int argc, char *argv[])
 {
 	//initializeCommandLineHandlers();
 	// printCommandLineArguments();
@@ -196,19 +209,19 @@ void processCommandLineArgs(int argc, char *argv[])
 		if (lastval == y)
 		{
 			printf("Error: unhandled command-line parameter (%s)\n\n", argv[y]);
-			printCommandLineArguments();
+			PrintCommandLineArguments();
 			y++;
 			//exit(10);
 		}
 	}
 }
 
-void installMouseClickHandler(mouseCallback mC)
+void InstallMouseClickHandler(MouseCallback mC)
 {
 	mouseCallbacks.push_back(new mouseCallbackData(mC));
 }
 
-void removeMouseClickHandler(mouseCallback mC)
+void RemoveMouseClickHandler(MouseCallback mC)
 {
 	for (unsigned int x = 0; x < mouseCallbacks.size(); x++)
 	{
@@ -222,17 +235,44 @@ void removeMouseClickHandler(mouseCallback mC)
 }
 
 // this is called by the OS when it gets a click
-bool handleMouseClick(pRecContext pContextInfo, int x, int y, point3d where,
+bool HandleMouseClick(pRecContext pContextInfo, int x, int y, point3d where,
 											tButtonType button, tMouseEventType mouse)
 {
 	for (unsigned int j = 0; j < mouseCallbacks.size(); j++)
 	{
 		//printf("Calling mouse callback %d\n", x);
-		if (mouseCallbacks[j]->mC(pContextInfo->unitLayer, x, y, where,
+		if (mouseCallbacks[j]->mC(pContextInfo->windowID, x, y, where,
 															button, mouse))
 			return true;
 	}
 	return false;
+}
+
+void InstallWindowHandler(WindowCallback wC)
+{
+	windowCallbacks.push_back(new windowCallbackData(wC));
+}
+
+void RemoveWindowHandler(WindowCallback wC)
+{
+	for (unsigned int x = 0; x < windowCallbacks.size(); x++)
+	{
+		if (windowCallbacks[x]->wC == wC)
+		{
+			delete windowCallbacks[x];
+			windowCallbacks[x] = windowCallbacks[windowCallbacks.size()-1];
+			windowCallbacks.pop_back();
+		}
+	}
+}
+
+void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType e)
+{
+	for (unsigned int j = 0; j < windowCallbacks.size(); j++)
+	{
+		//printf("Calling window callback %d\n", x);
+		windowCallbacks[j]->wC(pContextInfo->windowID, e);
+	}
 }
 
 // intializes context conditions
@@ -299,13 +339,13 @@ void initialConditions(pRecContext pContextInfo)
 	//pContextInfo->abstrMap = new mapAbstraction(pContextInfo->unitLayer->getMap()->);
 //	pContextInfo->unitLayer = new unitSimulation(pContextInfo->unitLayer->getMap()->);
 //	pContextInfo->human = 0;
-
-	createSimulation(pContextInfo->unitLayer);
+	pContextInfo->windowID = gNextWindowID++;
+//	createSimulation(pContextInfo->windowID);
 }
 
 bool doKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt)
 {
-	doKeyboardCallbacks(pContextInfo, tolower(keyHit), 
+	DoKeyboardCallbacks(pContextInfo, tolower(keyHit), 
 											shift?kShiftDown:(cntrl?kControlDown:(alt?kAltDown:kNoModifier)));
 	return false;
 }

@@ -129,7 +129,7 @@ pascal void HIDTimer (EventLoopTimerRef inTimer, void* )
 		//panY = abs (gActionArray [kActionYAxis].value) * gActionArray [kActionYAxis].value * deltaTime * 0.002f / (1500.0f / -pContextInfo->camera.viewPos.z);
 		//pContextInfo->camera.viewPos.y -= panY;
 	}
-	handleJoystickMovement(pContextInfo, panX, panY);
+	HandleJoystickMovement(pContextInfo, panX, panY);
 
 	//	doMouseDelta(panX, panY);
 //	if (gActionArray [kActionZAxis].pDevice && gActionArray [kActionZAxis].pElement && (abs (gActionArray [kActionZAxis].value) > deadZone)) {

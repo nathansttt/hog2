@@ -108,11 +108,7 @@ struct recContext
 	unsigned long xyRatio;
 	
 	long modeFSAA;
-	
-	//Map *map;
-	//mapAbstraction *abstrMap;
-	unitSimulation *unitLayer;
-  //humanUnit *human;
+	unsigned long windowID;
 };
 typedef struct recContext recContext;
 typedef struct recContext * pRecContext;
@@ -132,7 +128,7 @@ void SetLighting(unsigned int mode);
 void initialConditions(pRecContext pContextInfo);
 void resetCamera(recCamera * pCamera);
 
-void processCommandLineArgs(int argc, char *argv[]);
+void ProcessCommandLineArgs(int argc, char *argv[]);
 void handleBatchRTS(int argc, char *argv[], int mode, char *_map);
 void handleBatchPRA(int argc, char *argv[], int mode, char *_map);
 //void runBatchMode(char *mode, char *_map, int xxs, int yys, int xxg, 
@@ -181,23 +177,40 @@ enum tMouseEventType {
 	kMouseDrag // option on the mac
 };
 
+enum tWindowEventType {
+	kWindowCreated,
+	kWindowDestroyed
+};
+
+/**
+* install a FrameCallback to be called once per frame.
+ * This is where you should do any drawing and/or update the unit simulation time.
+ * The void* data is passed back to each call.
+ */
+typedef void (*FrameCallback)(unsigned long windowID, void*);
+
+/**
+* a window callback handler called when a window is created or destroyed
+ */
+typedef void (*WindowCallback)(unsigned long windowID, tWindowEventType);
+
 /**
  * a joystaick callback handler is passed the same data passed in when it was installed
  */
-typedef void (*joystickCallback)(unitSimulation *, double offsetX, double offsetY, void*);
+typedef void (*JoystickCallback)(unsigned long windowID, double offsetX, double offsetY, void*);
 
 /**
  * a mouse callback handler passes the absolute and local mouse coordinates of the click
  * returns true if the click/movement was handled; false if ignored
  */
-typedef bool (*mouseCallback)(unitSimulation *, int x, int y, point3d loc, tButtonType, tMouseEventType);
+typedef bool (*MouseCallback)(unsigned long windowID, int x, int y, point3d loc, tButtonType, tMouseEventType);
 
 /**
  * a keyboard callback handler is passed the current unit simulation, the key
  * that was hit, and any modifiers that were being held down. Note that the
  * modifiers can change the character being passed.
  */
-typedef void (*keyboardCallback)(unitSimulation *,tKeyboardModifier,char);
+typedef void (*KeyboardCallback)(unsigned long windowID, tKeyboardModifier, char);
 /**
  * A command-line callback handler takes in a char** which points to the argument
  * which matches the argument that this handler was installed for. The second
@@ -205,18 +218,18 @@ typedef void (*keyboardCallback)(unitSimulation *,tKeyboardModifier,char);
  * can process and use as many of the remaining arguments, and returns the number
  * of arguments it processed.
  */
-typedef int (*commandLineCallback)(char**, int);
+typedef int (*CommandLineCallback)(char**, int);
 
 class commandLineCallbackData {
 public:
-	commandLineCallbackData(commandLineCallback _CLC, const char *_argument,
+	commandLineCallbackData(CommandLineCallback _CLC, const char *_argument,
 													const char *_param, const char *_desc)
 	:CLC(_CLC), argument(_argument), param(_param), desc(_desc) {}
 
 	void Print()
 	{ printf("%s : %s\n     %s\n", argument, param, desc); }
 	
-	commandLineCallback CLC;
+	CommandLineCallback CLC;
 	const char *argument;
 	const char *param;
 	const char *desc;
@@ -224,11 +237,11 @@ public:
 
 class keyboardCallbackData {
 public:
-	keyboardCallbackData(keyboardCallback kc, const char *_title, const char *_desc,
+	keyboardCallbackData(KeyboardCallback kc, const char *_title, const char *_desc,
 											 tKeyboardModifier _mod, keyboardCallbackData *_next = 0)
 	:call(kc), title(_title), desc(_desc), mod(_mod), next(_next) {}
 	
-	keyboardCallback call;
+	KeyboardCallback call;
 	const char *title;
 	const char *desc;
 	tKeyboardModifier mod;
@@ -237,48 +250,68 @@ public:
 
 class joystickCallbackData {
 public:
-	joystickCallbackData(joystickCallback _jC, void *_userData)
+	joystickCallbackData(JoystickCallback _jC, void *_userData)
 	:jC(_jC)
 	{ userData = _userData; }
 
-	joystickCallback jC;
+	JoystickCallback jC;
 	void *userData;
 };
 
 class mouseCallbackData {
 public:
-	mouseCallbackData(mouseCallback _mC)
+	mouseCallbackData(MouseCallback _mC)
 	:mC(_mC)
 	{}
-	mouseCallback mC;
+	MouseCallback mC;
 };
 
-void installJoystickHandler(joystickCallback jC, void *userdata);
-void removeJoystickHandler(joystickCallback jC, void *userdata);
-// this is called by the OS when it gets joystick movement
-void handleJoystickMovement(pRecContext pContextInfo, double panX, double panY);
+class windowCallbackData {
+public:
+	windowCallbackData(WindowCallback _wC)
+	:wC(_wC)
+	{}
+	WindowCallback wC;
+};
 
-void installMouseClickHandler(mouseCallback jC);
-void removeMouseClickHandler(mouseCallback jC);
-// this is called by the OS when it gets a click
-// returns true if the click was handled and the main app shouldn't handle it
-bool handleMouseClick(pRecContext pContextInfo, int x, int y, point3d where, tButtonType, tMouseEventType);
+class frameCallbackData {
+public:
+	frameCallbackData(FrameCallback _glCall, unsigned long _windowID, void *_userData)
+	:glCall(_glCall)
+	{ windowID = _windowID;
+		userData = _userData; }
+	
+	FrameCallback glCall;
+	unsigned long windowID;
+	void *userData;
+};
 
-void installKeyboardHandler(keyboardCallback kf, const char *title, const char *description,
+void InstallFrameHandler(FrameCallback jC, unsigned long windowID, void *userdata);
+void RemoveFrameHandler(FrameCallback jC, unsigned long windowID, void *userdata);
+void HandleFrame(pRecContext pContextInfo);
+
+void InstallJoystickHandler(JoystickCallback jC, void *userdata);
+void RemoveJoystickHandler(JoystickCallback jC, void *userdata);
+void HandleJoystickMovement(pRecContext pContextInfo, double panX, double panY);
+
+void InstallMouseClickHandler(MouseCallback mC);
+void RemoveMouseClickHandler(MouseCallback mC);
+bool HandleMouseClick(pRecContext pContextInfo, int x, int y, point3d where, tButtonType, tMouseEventType);
+
+void InstallWindowHandler(WindowCallback wC);
+void RemoveWindowHandler(WindowCallback wC);
+void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType);
+
+void InstallKeyboardHandler(KeyboardCallback kf, const char *title, const char *description,
 														tKeyboardModifier mod, unsigned char firstKey, unsigned char lastKey = 0);
-void printKeyboardAssignments();
-void installCommandLineHandler(commandLineCallback, const char *, const char *, const char *);
-void printCommandLineArguments();
+void PrintKeyboardAssignments();
+void InstallCommandLineHandler(CommandLineCallback, const char *, const char *, const char *);
+void PrintCommandLineArguments();
 
-//void initializeApplication(pRecContext pContextInfo);
-void processCommandLineArgs(int argc, char *argv[]);
+void ProcessCommandLineArgs(int argc, char *argv[]);
 
-void createSimulation(unitSimulation * &unitLayer);
-//void initializeKeyboardHandlers();
-//void initializeCommandLineHandlers();
-void initializeHandlers();
-void processStats(statCollection *);
-void frameCallback(unitSimulation *);
+void RunHOGGUI(int argc, char* argv[]);
+
 
 void submitTextToBuffer(const char *val);
 void appendTextToBuffer(char *);
