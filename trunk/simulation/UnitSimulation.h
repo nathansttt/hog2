@@ -103,19 +103,14 @@ public:
 	virtual void addUnit(unit *);
 	virtual void addUnit(unit *, bool block);
 	virtual void addUnitGroup(unitGroup *);
+
 	unitGroup *getUnitGroup(int which);
 	unit *getUnit(int which);
 	unit *findUnit(int x, int y);
-	bool setIgnoreOnTarget(unit*,bool);
-								 
+
+	void clearAllUnits();
+
 	virtual void advanceTime(double amount);
-	void setRealTime(bool);
-	bool getRealTime() { return realTime; }
-	inline void setLockstepTime(bool b) { lockstepTime = b; }
-	bool getLockstepTime() { return lockstepTime; }
-	/** Set if the simulation is asynchronous. */
-	void setAsynchronous() { asynch = true; }
-	void setSynchronous() { asynch = false; }
 	void setSimulationPaused(bool val) { pause = val; }
 	bool getSimulationPaused() { return pause; }
 	/** return the current inside the simulation */
@@ -124,9 +119,33 @@ public:
 	double getDisplayTime() { return viewTime; }
 	void setDisplayTime(double val);
 	void offsetDisplayTime(double val);
+	
+	
+	// simplify timing modes
+	void setRealTime(bool);
+	bool getRealTime() { return realTime; }
+	inline void setLockstepTime(bool b) { lockstepTime = b; }
+	bool getLockstepTime() { return lockstepTime; }
+	/** Set if the simulation is asynchronous. */
+	void setAsynchronous() { asynch = true; }
+	void setSynchronous() { asynch = false; }
+
+
 	void openGLDraw();
 	void print(bool forceOutput = true);
 	virtual bool done();
+
+	/** turns unit blocking on and off */
+	void setUseBlocking(bool val) { blocking = val; }
+	
+	/** setPenalty for thinking. Sets the multiplier used to penalize thinking time. */
+	void setPenalty(double pen) { penalty = pen; }
+	/** getPenalty for thinking. Gets the multiplier used to penalize thinking time. */
+	double getPenalty() { return penalty; }
+
+	
+	//////////////////////////////////////////////////
+	// this may move to the environment -- have to check
 	/** reservationProvider interface */
 	inline bool nodeOccupied(node *currNode)
 	{ if (currNode->getLabelL(kAbstractionLevel) != 0) return false;
@@ -138,45 +157,45 @@ public:
 	virtual bool reserveMove(node *, node *, double, unit *) { return true; }
 	virtual bool clearMove(node *, node *, double, unit *) { return true; }
 	virtual void clearAllReservations() {}
+
 	
-	void clearAllUnits();
-	/** turns unit blocking on and off */
-	void setUseBlocking(bool val) { blocking = val; }
+	/** Toggle open GL display */
+	void toggleNoOpenGLDraw() { noOpenGLDraw = !noOpenGLDraw; }
+	//void setLogFile(FILE *);
+	
+	statCollection *getStats() { return &stats; }
+	void printCollectedStats(bool v) { stats.enablePrintOutput(v); }
+
+
+	//////////////////////////////////////////////////
+	// environment variables, don't belong in unit simulation!
 	void setmapAbstractionDisplay(int _whichMap=kUnitSimulationMap);
 	/** Return which map is being currently displayed. */
 	int getDisplayMapNumber() { return which_map; }
-
+	
 	/** Returns the underlying map. */
 	Map *getMap() { return map; }
 	/** Returns the abstract map from the simulation. */
 	mapAbstraction *getMapAbstraction();
-	
+	/** set chance for move failing. This is the chance that a move will just fail. */
 	/** Returns the nth groups abstract map. (0 is the actual map of the world.) */
 	mapAbstraction *getMapAbstraction(int _which);
 	/** Returns the abstract map currently being displayed. */
 	mapAbstraction *getMapAbstractionDisplay();
 	/** Cycle which abstract map should be displayed. */
 	void cyclemapAbstractionDisplay();
-	
-	/** setPenalty for thinking. Sets the multiplier used to penalize thinking time. */
-	void setPenalty(double pen) { penalty = pen; }
-	/** getPenalty for thinking. Gets the multiplier used to penalize thinking time. */
-	double getPenalty() { return penalty; }
-	/** Toggle open GL display */
-	void toggleNoOpenGLDraw() { noOpenGLDraw = !noOpenGLDraw; }
-	/** set chance for move failing. This is the chance that a move will just fail. */
 	void setMoveStochasticity(double _stochasticity) { stochasticity = _stochasticity; }
 	double getMoveStochasticity() { return stochasticity; }
-	//void setLogFile(FILE *);
-	statCollection *getStats() { return &stats; }
-	void printCollectedStats(bool v) { stats.enablePrintOutput(v); }
+	bool canCrossDiagonally() { return (!disallowDiagonalCrossingMoves); }
+	void setCanCrossDiagonally(bool cross) { disallowDiagonalCrossingMoves = !cross; }
 	void getRandomLocation(int &x, int &y, tTerrain terrain = kGround);
 	void getRandomLocation(int x1, int y1, int &x2, int &y2, tTerrain terrain = kGround);
 	void getRandomLocations(int &x1, int &y1, int &x2, int &y2, tTerrain terrain = kGround);
-
-	bool canCrossDiagonally() { return (!disallowDiagonalCrossingMoves); }
-	void setCanCrossDiagonally(bool cross) { disallowDiagonalCrossingMoves = !cross; }
 	
+	//////////////////////////////////////////////////
+	// ???
+	bool setIgnoreOnTarget(unit*,bool);
+
 protected:
 	unitInfo *findUnit(unit *);	
 	virtual void doPreTimestepCalc();
@@ -221,3 +240,68 @@ protected:
 #define LOCAL_PATH
 
 #endif
+
+//template<class state, class action>
+//class UnitSimulation {
+//public:
+//	UnitSimulation(SearchEnvironment<state, action> *se);
+//	void AddUnit(Unit<state, action> *u);
+//	void StepTime(double);
+//	void SetStepType( );
+//	// kLockStep - each unit goes exactly to the next time
+//	// kRealTime - each unit goes up thinkingTime*thinkingPenalty
+//	// kMinTime - each unit goes up at least step time, but can go longer
+//};
+//
+//template <class state, class action>
+//class Unit {
+//public:
+//	action MakeMove(state) = 0;
+//	UpdateLocation(state, bool) = 0;
+//	void OpenGLDraw() = 0;
+//};
+//
+//template <class state, class action>
+//class UnitGroup {
+//	action MakeMove(unit<state, action> *, state) = 0;
+//	UpdateLocation(state, bool) = 0;
+//	addUnit(Unit<state, action> *u);
+//	void OpenGLDraw() = 0;
+//};
+//
+//template <class state, class action>
+//SearchEnvironment {
+//public:
+//	virtual void GetSuccessors(state nodeID, std::vector<state> &neighbors) = 0;
+//	virtual void GetActions(state nodeID, std::vector<action> &actions) = 0;
+//	virtual double Heuristic(state node1, state node2) = 0;
+//	virtual double GCost(state node1, state node2) = 0;
+//	virtual bool GoalTest(state node, state goal) = 0;
+//	virtual uint32_t GetStateHash(state node) = 0;
+//	virtual uint32_t GetActionHash(action act) = 0;
+//};
+//
+//struct xyLoc {
+//	uint16_t x;
+//	uint16_t y;
+//};
+//
+//class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
+//{
+//public:
+//	MapEnvironment(Map *m);
+//private:
+//	Map *m;
+//};
+//
+//class AbstractMapEnvironment : public SearchEnvironment<node *, edge *>
+//{
+//public:
+//	AbstractMapEnvironment(MapAbstraction *);
+//private:
+//	MapAbstraction *ma;
+//};
+//
+//class AbstractMapUnit : public Unit<node *, edge *>
+//{
+//}
