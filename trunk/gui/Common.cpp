@@ -29,7 +29,7 @@
 // For printing debug info
 static bool const verbose = false;
 
-static unsigned long gNextWindowID = 1;
+static unsigned long gNextWindowID = 0;
 char gDefaultMap[1024] = "";
 const recVec gOrigin = { 0.0, 0.0, 0.0 };
 
@@ -137,12 +137,12 @@ void RemoveFrameHandler(FrameCallback glCall, unsigned long windowID, void *user
 	}
 }
 
-void HandleFrame(pRecContext pContextInfo)
+void HandleFrame(pRecContext pContextInfo, int viewport)
 {
 	for (unsigned int x = 0; x < glDrawCallbacks.size(); x++)
 	{
 		if (glDrawCallbacks[x]->windowID == pContextInfo->windowID)
-			glDrawCallbacks[x]->glCall(pContextInfo->windowID, glDrawCallbacks[x]->userData);
+			glDrawCallbacks[x]->glCall(pContextInfo->windowID, viewport, glDrawCallbacks[x]->userData);
 	}
 }
 
@@ -278,16 +278,6 @@ void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType e)
 // intializes context conditions
 void initialConditions(pRecContext pContextInfo)
 {
-#ifdef OS_MAC
-	BlockZero (pContextInfo, sizeof (recContext));
-#endif
-	resetCamera (&pContextInfo->camera);
-	pContextInfo->fVel[0] = 0.3;
-	pContextInfo->fVel[1] = 0.1;
-	pContextInfo->fVel[2] = 0.2; 
-	pContextInfo->fAccel[0] =  0.003;
-	pContextInfo->fAccel[1] = -0.005;
-	pContextInfo->fAccel[2] =  0.004;
 	pContextInfo->info = kInfoState;
 	pContextInfo->animate = kAnimateState;
 	pContextInfo->drawCaps = 0;
@@ -296,51 +286,35 @@ void initialConditions(pRecContext pContextInfo)
 	pContextInfo->lines = 0;
 	pContextInfo->points = 0;
 	pContextInfo->showCredits = 1;
-	pContextInfo->showLand = 1;
 	pContextInfo->lighting = 4;
 	SetLighting(pContextInfo->lighting);
 //	pContextInfo->paused = false;
 	pContextInfo->drawing = true;
-	
-	pContextInfo->worldRotation[0] = 0;
-	pContextInfo->worldRotation[1] = 0;
-	pContextInfo->worldRotation[2] = 0;
-	pContextInfo->worldRotation[3] = 0;
-	pContextInfo->objectRotation[0] = 0;//180;
-	pContextInfo->objectRotation[1] = 0;
-	pContextInfo->objectRotation[2] = 0;//-0.5;
-	pContextInfo->objectRotation[3] = 0;//0.5;
+	pContextInfo->numPorts = 3;
+	pContextInfo->currPort = 0;
+	for (int x = 0; x < MAXPORTS; x++)
+	{
+		resetCamera(&pContextInfo->camera[x]);
+		for (int y = 0; y < 4; y++)
+		{
+			pContextInfo->rotations[x].worldRotation[y] = 0;
+			pContextInfo->rotations[x].objectRotation[y] = 0;
+		}
+	}
 	
 #ifdef OS_MAC
 	pContextInfo->timer = NULL;
 #endif
 	
-	//	gTrackBallRotation[0] = 180;
-	//	gTrackBallRotation[1] = 0;
-	//	gTrackBallRotation[2] = -0.5;
-	//	gTrackBallRotation[3] = 0.5;
-	//	
-	//	addToRotationTrackball(gTrackBallRotation, pContextInfo->worldRotation);	
 	gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
 	
 	pContextInfo->surface = 0; 
 	pContextInfo->colorScheme = 4;
 	pContextInfo->subdivisions = 64;
 	pContextInfo->xyRatio = 1;
-	
 	pContextInfo->modeFSAA = 0;
 
-	
-//	if (gDefaultMap[0] == 0)
-//		pContextInfo->unitLayer->getMap()-> = new Map(64, 64);
-//	else
-//		pContextInfo->unitLayer->getMap()-> = new Map(gDefaultMap);
-//	pContextInfo->abstrMap = 0;
-	//pContextInfo->abstrMap = new mapAbstraction(pContextInfo->unitLayer->getMap()->);
-//	pContextInfo->unitLayer = new unitSimulation(pContextInfo->unitLayer->getMap()->);
-//	pContextInfo->human = 0;
 	pContextInfo->windowID = gNextWindowID++;
-//	createSimulation(pContextInfo->windowID);
 }
 
 bool doKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt)
@@ -400,34 +374,21 @@ void resetCamera()
 	pRecContext pContextInfo = getCurrentContext();
 	if (!pContextInfo)
 		return;
-
-	resetCamera(&pContextInfo->camera);
-
-	pContextInfo->worldRotation[0] = 0;
-	pContextInfo->worldRotation[1] = 0;
-	pContextInfo->worldRotation[2] = 0;
-	pContextInfo->worldRotation[3] = 0;
-	pContextInfo->objectRotation[0] = 0;//180;
-	pContextInfo->objectRotation[1] = 0;
-	pContextInfo->objectRotation[2] = 0;//-0.5;
-	pContextInfo->objectRotation[3] = 0;//0.5;
+	pContextInfo->numPorts = 1;
+	for (int x = 0; x < MAXPORTS; x++)
+	{
+		resetCamera(&pContextInfo->camera[x]);
+		for (int y = 0; y < 4; y++)
+		{
+			pContextInfo->rotations[x].worldRotation[y] = 0;
+			pContextInfo->rotations[x].objectRotation[y] = 0;
+		}
+	}
 	
-	pContextInfo->fRot[0] = 0.0;
-	pContextInfo->fRot[1] = 0.0;
-	pContextInfo->fRot[2] = 0.0;
-
-	pContextInfo->fVel[0] = 0.0;
-	pContextInfo->fVel[1] = 0.0;
-	pContextInfo->fVel[2] = 0.0;
-
-	pContextInfo->fAccel[0] = 0.0;
-	pContextInfo->fAccel[1] = 0.0;
-	pContextInfo->fAccel[2] = 0.0;
-
 	gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
 	gTrackingContextInfo = 0;
 
-	updateProjection (pContextInfo);  // update projection matrix
+	updateProjection(pContextInfo);  // update projection matrix
 //	updateModelView(pContextInfo);
 }
 
@@ -447,12 +408,6 @@ void resetCamera(recCamera * pCamera)
 	pCamera->viewUp.x = 0;  
 	pCamera->viewUp.y = -.1; 
 	pCamera->viewUp.z = -1;
-	
-	// will be set in resize once the target view size and position is known
-//	pCamera->viewOriginY = 0;
-//	pCamera->viewOriginX = 0;
-//	pCamera->viewHeight = 0;
-//	pCamera->viewWidth = 0;
 }
 
 
@@ -460,14 +415,14 @@ void cameraLookAt(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed)
 {
 	pRecContext pContextInfo = getCurrentContext();
 	if (!pContextInfo)
-		return;
+		return; 
 //	const float cameraSpeed = .1;
-	pContextInfo->camera.viewDir.x = (1-cameraSpeed)*pContextInfo->camera.viewDir.x + cameraSpeed*(x - pContextInfo->camera.viewPos.x);
-	pContextInfo->camera.viewDir.z = (1-cameraSpeed)*pContextInfo->camera.viewDir.z + cameraSpeed*(z - pContextInfo->camera.viewPos.z);
-	pContextInfo->camera.viewDir.y = (1-cameraSpeed)*pContextInfo->camera.viewDir.y + cameraSpeed*(y - pContextInfo->camera.viewPos.y);
+	pContextInfo->camera[pContextInfo->currPort].viewDir.x = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.x + cameraSpeed*(x - pContextInfo->camera[pContextInfo->currPort].viewPos.x);
+	pContextInfo->camera[pContextInfo->currPort].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.z + cameraSpeed*(z - pContextInfo->camera[pContextInfo->currPort].viewPos.z);
+	pContextInfo->camera[pContextInfo->currPort].viewDir.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.y + cameraSpeed*(y - pContextInfo->camera[pContextInfo->currPort].viewPos.y);
 
-	pContextInfo->objectRotation[0] *= (1-cameraSpeed);
-	pContextInfo->worldRotation[0] *= (1-cameraSpeed);
+	pContextInfo->rotations[pContextInfo->currPort].objectRotation[0] *= (1-cameraSpeed);
+	pContextInfo->rotations[pContextInfo->currPort].worldRotation[0] *= (1-cameraSpeed);
 	updateProjection(pContextInfo);
 }
 
@@ -477,9 +432,9 @@ void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed)
 	if (!pContextInfo)
 		return;
 //	const float cameraSpeed = .1;
-	pContextInfo->camera.viewPos.x = (1-cameraSpeed)*pContextInfo->camera.viewPos.x + cameraSpeed*x;
-	pContextInfo->camera.viewPos.y = (1-cameraSpeed)*pContextInfo->camera.viewPos.y + cameraSpeed*y;
-	pContextInfo->camera.viewPos.z = (1-cameraSpeed)*pContextInfo->camera.viewPos.z + cameraSpeed*z;
+	pContextInfo->camera[pContextInfo->currPort].viewPos.x = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.x + cameraSpeed*x;
+	pContextInfo->camera[pContextInfo->currPort].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.y + cameraSpeed*y;
+	pContextInfo->camera[pContextInfo->currPort].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.z + cameraSpeed*z;
 	updateProjection(pContextInfo);
 }
 
@@ -503,3 +458,33 @@ point3d GetOGLPos(int x, int y)
 	
 	return point3d(posX, posY, posZ);
 }
+
+void SetNumPorts(int windowID, int count)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+	if ((count < MAXPORTS) && (count >= 0))
+	{
+		pContextInfo->numPorts = count;
+		updateProjection(pContextInfo);
+	}
+}
+
+int GetNumPorts(int windowID)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+	return pContextInfo->numPorts;
+}
+
+int GetActivePort(int windowID)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+	return pContextInfo->currPort;
+}
+
+void SetActivePort(int windowID, int which)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+	if ((which >= 0) && (which < pContextInfo->numPorts))
+		pContextInfo->currPort = which;
+}
+

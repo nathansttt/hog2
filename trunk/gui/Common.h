@@ -45,6 +45,7 @@ enum {
 	kSamples = 4
 };
 
+const int MAXPORTS = 4;
 // camera/context info
 //typedef struct {
 //	GLdouble x,y,z;
@@ -59,6 +60,15 @@ typedef struct {
 	GLint viewWidth,viewHeight; // current window/screen height and width
 	GLfloat viewOriginX, viewOriginY; // always 0 
 } recCamera;
+
+typedef struct {
+	GLfloat worldRotation[4];
+	GLfloat objectRotation[4];
+} recRotation;	
+
+typedef struct {
+	GLdouble left, right, top, bottom, near, far;
+} recFrustum;
 
 // per view data
 struct recContext
@@ -81,22 +91,23 @@ struct recContext
 	bool lines;
 	bool points;
 	bool showCredits;
-	bool showLand;
 	long lighting;
 //	bool paused;
 	bool drawing;
 	
 	// spin
-	GLfloat fRot [3];
-	GLfloat fVel [3];
-	GLfloat fAccel [3];
+//	GLfloat fRot[3];
+//	GLfloat fVel[3];
+//	GLfloat fAccel[3];
 	
 	// camera handling
-	recCamera camera;
-	GLfloat worldRotation [4];
-	GLfloat objectRotation [4];
+	recCamera globalCamera;
+	recCamera camera[MAXPORTS];
+	recRotation rotations[MAXPORTS];
+	recFrustum frust[MAXPORTS];
+	int numPorts, currPort;
 	GLfloat shapeSize;
-	
+
 	char message[256]; // buffer for message output
 	float msgTime; // message posting time for expiration
 	
@@ -117,7 +128,7 @@ typedef struct recContext * pRecContext;
 extern GLfloat gTrackBallRotation [4];
 extern pRecContext gTrackingContextInfo;
 
-void updateProjection(pRecContext pContextInfo);
+void updateProjection(pRecContext pContextInfo, int viewPort = -1);
 void drawGL(pRecContext pContextInfo, bool swap);
 #ifdef OS_MAC
 pRecContext GetCurrentContextInfo (WindowRef window);
@@ -156,6 +167,10 @@ void calculateAverageTimePerStep(char *_map, char *coordFile, int MAP_SIZE);
 void calculateSubOptimality(char *_map, char *coordFile, int MAP_SIZE);
 extern char gDefaultMap[1024];
 
+void SetNumPorts(int windowID, int count);
+int GetNumPorts(int windowID);
+void SetActivePort(int windowID, int which);
+int GetActivePort(int windowID);
 
 enum tKeyboardModifier {
 	kNoModifier,
@@ -183,11 +198,13 @@ enum tWindowEventType {
 };
 
 /**
-* install a FrameCallback to be called once per frame.
+* install a FrameCallback to be called once per frame and viewport
  * This is where you should do any drawing and/or update the unit simulation time.
+ * The viewports will be processed in order (0..#, max 4), so any global processing
+ * should only be done when the viewport is 0.
  * The void* data is passed back to each call.
  */
-typedef void (*FrameCallback)(unsigned long windowID, void*);
+typedef void (*FrameCallback)(unsigned long windowID, unsigned int viewport, void*);
 
 /**
 * a window callback handler called when a window is created or destroyed
@@ -288,7 +305,7 @@ public:
 
 void InstallFrameHandler(FrameCallback jC, unsigned long windowID, void *userdata);
 void RemoveFrameHandler(FrameCallback jC, unsigned long windowID, void *userdata);
-void HandleFrame(pRecContext pContextInfo);
+void HandleFrame(pRecContext pContextInfo, int viewport);
 
 void InstallJoystickHandler(JoystickCallback jC, void *userdata);
 void RemoveJoystickHandler(JoystickCallback jC, void *userdata);
@@ -316,10 +333,14 @@ void RunHOGGUI(int argc, char* argv[]);
 void submitTextToBuffer(const char *val);
 void appendTextToBuffer(char *);
 pRecContext getCurrentContext();
+pRecContext GetContext(unsigned int windowID);
 void updateModelView(pRecContext pContextInfo);
 void cameraLookAt(GLfloat, GLfloat, GLfloat, float cameraSpeed = 0.1);
 void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1);
 void resetCamera();
 point3d GetOGLPos(int x, int y);
+
+void setPortCamera(pRecContext pContextInfo, int currPort);
+void setViewport(pRecContext pContextInfo, int currPort);
 
 #endif
