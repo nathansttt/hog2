@@ -42,6 +42,7 @@ int px1, py1, px2, py2;
 int absType = 0;
 
 unitSimulation *unitSim = 0;
+unit *cameraTarget = 0;
 
 int main(int argc, char* argv[])
 {
@@ -49,15 +50,6 @@ int main(int argc, char* argv[])
 	RunHOGGUI(argc, argv);
 }
 
-
-
-/**
- * This function is called each time a unitSimulation is deallocated to
- * allow any necessary stat processing beforehand
- */
-void processStats(statCollection *)
-{
-}
 
 /**
  * This function is used to allocate the unit simulated that you want to run.
@@ -90,7 +82,7 @@ void createSimulation()
 void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
-	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kNoModifier, '\t');
+	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
@@ -114,26 +106,61 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 {
 	if (eType == kWindowDestroyed)
 	{
+		printf("Window %ld destroyed\n", windowID);
 		RemoveFrameHandler(MyFrameHandler, windowID, 0);
 	}
 	else if (eType == kWindowCreated)
 	{
+		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		if (unitSim == 0)
 			createSimulation();
 	}
 }
 
-void MyFrameHandler(unsigned long windowID, void *data)
+void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 {
+	if (windowID != 0)
+		return;
+	if (viewport == 0)
+		unitSim->advanceTime(1.0/30.0);
 	unitSim->openGLDraw();
-	unitSim->getMap()->openGLDraw(kLines);
+	switch (viewport%3)
+	{
+		case 0: unitSim->getMap()->openGLDraw(kLines); break;
+		case 1: unitSim->getMap()->openGLDraw(kPoints); break;
+		case 2: unitSim->getMap()->openGLDraw(kPolygons); break;
+	}
 	
 	char tempStr[255];
 	sprintf(tempStr, "Simulation time elapsed: %1.2f, Display Time: %1.2f",
 					unitSim->getSimulationTime(), unitSim->getDisplayTime());
 	submitTextToBuffer(tempStr);
 	
+	if (cameraTarget)
+	{
+		GLdouble x, y, z, r;
+		GLdouble xx, yy, zz;
+		cameraTarget->getOpenGLLocation(unitSim->getMap(), x, y, z, r);
+		if (cameraTarget->getTarget())
+			cameraTarget->getTarget()->getOpenGLLocation(unitSim->getMap(), xx, yy, zz, r);
+		else {
+			xx = -x; 
+			yy = -y;
+		}
+		
+		int oldPort = GetActivePort(windowID);
+		SetActivePort(windowID, 1);
+		cameraMoveTo(xx+3*(xx-x), yy+3*(yy-y), z-0.25, 0.05);
+		cameraLookAt(x, y, z, .2);
+		SetActivePort(windowID, oldPort);
+
+		SetActivePort(windowID, 0);
+		cameraMoveTo(x, y, z-250*r, 0.05);
+		cameraLookAt(x, y, z, .2);
+		SetActivePort(windowID, oldPort);
+	}
+
 	if ((mouseTracking) && (px1 != -1) && (px2 != -1) && (py1 != -1) && (py2 != -1))
 	{
 		glColor3f(1.0, 1.0, 1.0);
@@ -159,7 +186,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '\t': unitSim->cyclemapAbstractionDisplay(); break;
+		case '\t': SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID)); break;
 		case 'p': unitSim->setSimulationPaused(!unitSim->getSimulationPaused()); break;
 		case 'o':
 			if (unitSim->getSimulationPaused())
@@ -195,8 +222,8 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 			unitSim->addUnit(targ = new unit(x2, y2));
 			unitSim->addUnit(u=new searchUnit(x1, y1, targ, new praStar())); break;
 	}
-	u->setSpeed(0.5);
-	unitSim->setmapAbstractionDisplay(1);
+	cameraTarget = u;
+	u->setSpeed(1.0/4.0);
 }
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
@@ -229,6 +256,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier mod, char
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
+	return false;
 	mouseTracking = false;
 	if (button == kRightButton)
 	{
