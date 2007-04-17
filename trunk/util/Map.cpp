@@ -1431,6 +1431,7 @@ tTileset Map::getTileSet()
  */
 void Map::openGLDraw(tDisplay how)
 {
+	glDisable(GL_LIGHTING);
 	if (drawLand)
 	{
 		if (updated)

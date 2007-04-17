@@ -240,6 +240,7 @@ void unit::openGLDraw(mapProvider *mp, simulationInfo *)
  */
 void unit::drawTriangle(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 {
+	glEnable(GL_LIGHTING);
 	drawPyramid(_x, _y, _z, tRadius, 0.75*tRadius);
 }
 
@@ -250,6 +251,7 @@ void unit::drawTriangle(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
  */
 void unit::drawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 {
+	glEnable(GL_LIGHTING);
 	if (sphereDispList)
 	{
 		glTranslatef(_x, _y, _z);
