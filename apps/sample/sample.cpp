@@ -27,22 +27,27 @@
 
 #include "common.h"
 #include "sample.h"
-#include "aStar.h"
-#include "praStar.h"
-#include "searchUnit.h"
-#include "sharedAMapGroup.h"
-#include "mapCliqueAbstraction.h"
-#include "mapQuadTreeAbstraction.h"
-#include "radiusAbstraction.h"
-#include "mapFlatAbstraction.h"
-#include "clusterAbstraction.h"
+//#include "aStar.h"
+//#include "praStar.h"
+//#include "searchUnit.h"
+//#include "sharedAMapGroup.h"
+//#include "mapCliqueAbstraction.h"
+//#include "mapQuadTreeAbstraction.h"
+//#include "radiusAbstraction.h"
+//#include "mapFlatAbstraction.h"
+//#include "clusterAbstraction.h"
+#include "UnitSimulation.h"
+#include "Plot2D.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-unitSimulation *unitSim = 0;
+UnitSimulation<node *, edge*> *unitSim = 0;
 unit *cameraTarget = 0;
+
+Plotting::Plot2D *plot = 0;
+Plotting::Line *distLine = 0;
 
 int main(int argc, char* argv[])
 {
@@ -63,16 +68,16 @@ void createSimulation()
 	else
 		map = new Map(gDefaultMap);
 
-	if (absType == 0)
-		unitSim = new unitSimulation(new mapCliqueAbstraction(map));
-	else if (absType == 1)
-		unitSim = new unitSimulation(new radiusAbstraction(map, 1));
-	else if (absType == 2)
-		unitSim = new unitSimulation(new mapQuadTreeAbstraction(map, 2));
-	else if (absType == 3)
-		unitSim = new unitSimulation(new clusterAbstraction(map, 8));
+//	if (absType == 0)
+//		unitSim = new unitSimulation(new mapCliqueAbstraction(map));
+//	else if (absType == 1)
+//		unitSim = new unitSimulation(new radiusAbstraction(map, 1));
+//	else if (absType == 2)
+//		unitSim = new unitSimulation(new mapQuadTreeAbstraction(map, 2));
+//	else if (absType == 3)
+//		unitSim = new unitSimulation(new clusterAbstraction(map, 8));
 	
-	unitSim->setCanCrossDiagonally(true);
+	//unitSim->setCanCrossDiagonally(true);
 	//unitSim = new unitSimulation(new mapFlatAbstraction(map));
 }
 
@@ -122,15 +127,52 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 {
 	if (windowID != 0)
 		return;
+
 	if (viewport == 0)
+	{
 		unitSim->advanceTime(1.0/30.0);
+	}
+	
+	if (viewport == 0)
+	{
+		if (plot)
+		{
+			if (distLine && cameraTarget)
+			{
+				mapAbstraction *ma = unitSim->getMapAbstraction();
+				int x, y;
+				cameraTarget->getLocation(x, y);
+				node *n1 = ma->getNodeFromMap(x, y);
+				cameraTarget->getTarget()->getLocation(x, y);
+				node *n2 = ma->getNodeFromMap(x, y);
+				distLine->AddPoint(ma->h(n1, n2));
+			}
+			plot->OpenGLDraw();
+			return;
+		}
+	}
+	
 	unitSim->openGLDraw();
 	switch (viewport%3)
 	{
-		case 0: unitSim->getMap()->openGLDraw(kLines); break;
-		case 1: unitSim->getMap()->openGLDraw(kPoints); break;
+		case 0: //unitSim->getMap()->openGLDraw(kLines); break;
+		case 1: //unitSim->getMap()->openGLDraw(kPoints); break;
 		case 2: unitSim->getMap()->openGLDraw(kPolygons); break;
 	}
+	if ((mouseTracking) && (px1 != -1) && (px2 != -1) && (py1 != -1) && (py2 != -1))
+	{
+		glColor3f(1.0, 1.0, 1.0);
+		GLdouble x1, y1, z1, rad;
+		glBegin(GL_LINES);
+		unitSim->getMap()->getOpenGLCoord(px1, py1, x1, y1, z1, rad);
+		glVertex3f(x1, y1, z1-rad);
+		unitSim->getMap()->getOpenGLCoord(px2, py2, x1, y1, z1, rad);
+		glVertex3f(x1, y1, z1-rad);
+		glEnd();
+	}
+	
+	if (viewport != 0)
+		return;
 	
 	char tempStr[255];
 	sprintf(tempStr, "Simulation time elapsed: %1.2f, Display Time: %1.2f",
@@ -155,22 +197,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 		cameraLookAt(x, y, z, .2);
 		SetActivePort(windowID, oldPort);
 
-		SetActivePort(windowID, 0);
-		cameraMoveTo(x, y, z-250*r, 0.05);
-		cameraLookAt(x, y, z, .2);
-		SetActivePort(windowID, oldPort);
-	}
-
-	if ((mouseTracking) && (px1 != -1) && (px2 != -1) && (py1 != -1) && (py2 != -1))
-	{
-		glColor3f(1.0, 1.0, 1.0);
-		GLdouble x1, y1, z1, rad;
-		glBegin(GL_LINES);
-		unitSim->getMap()->getOpenGLCoord(px1, py1, x1, y1, z1, rad);
-		glVertex3f(x1, y1, z1-rad);
-		unitSim->getMap()->getOpenGLCoord(px2, py2, x1, y1, z1, rad);
-		glVertex3f(x1, y1, z1-rad);
-		glEnd();
+//		SetActivePort(windowID, 0);
+//		cameraMoveTo(x, y, z-250*r, 0.05);
+//		cameraLookAt(x, y, z, .2);
+//		SetActivePort(windowID, oldPort);
 	}
 }
 
@@ -222,6 +252,10 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 			unitSim->addUnit(targ = new unit(x2, y2));
 			unitSim->addUnit(u=new searchUnit(x1, y1, targ, new praStar())); break;
 	}
+	delete plot;
+	plot = new Plotting::Plot2D();
+	delete distLine;
+	plot->AddLine(distLine = new Plotting::Line("distline"));
 	cameraTarget = u;
 	u->setSpeed(1.0/4.0);
 }
@@ -256,7 +290,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier mod, char
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
-	return false;
+	//return false;
 	mouseTracking = false;
 	if (button == kRightButton)
 	{
