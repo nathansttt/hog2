@@ -1325,7 +1325,7 @@ void drawGL(pRecContext pContextInfo, bool swap)
 		}
 	}
 	if (swap)
-		aglSwapBuffers (pContextInfo->aglContext);
+		aglSwapBuffers(pContextInfo->aglContext);
 	else
 		glFlush();
 }
