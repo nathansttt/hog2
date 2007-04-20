@@ -32,22 +32,6 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-/*
-// now in fpUtil.h
-
-#pragma mark -
-#pragma mark floating point arithmetic functions/constants:
-
-// Floating point comparissons 
-static const double TOLERANCE = 0.000001;			// floating point tolerance
-inline bool fless(double a, double b) { return (a < b - TOLERANCE); }
-inline bool fgreater(double a, double b) { return (a > b + TOLERANCE); }
-inline bool fequal(double a, double b) { return (a > b - TOLERANCE) && (a < b+TOLERANCE); }
-*/
-
-//#pragma mark -
-//#pragma mark bucketing constants
-
 const int distBucketFirst = 10;	// first bucket: (distBucketFirst-delta,distBucketFirst]
 const int distBucketLast = 100;	// last bucket: (distBucketLast-delta,distBucketLast]
 const int distBucketDelta = 10;	// bucket size
