@@ -35,7 +35,7 @@
 class patrolUnit : public unit {
 public:
 	patrolUnit(int x, int y);
-	patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us);
+//	patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us);
 	virtual const char *getName() { return "patrolUnit"; }
 	virtual tDirection makeMove(mapProvider *, reservationProvider *, simulationInfo *simInfo);
 	void openGLDraw(mapProvider *, simulationInfo *);
