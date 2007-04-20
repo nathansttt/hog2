@@ -36,22 +36,22 @@ patrolUnit::patrolUnit(int _x, int _y)
 	nodesExpanded = nodesTouched = 0;
 }
 
-/** Creates a patrol unit and assigns it numPLocations random locations to patrol.
-    The last location is the unit's starting position to create a loop */
-patrolUnit::patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us)
-:unit(_x, _y)
-{
-	setObjectType(kWorldObject);
-	currTarget = -1;
-	nodesExpanded = nodesTouched = 0;
-	for (int i=1; i<numPLocations; i++)
-	{
-		int xx, yy;
-		us->getRandomLocation(_x,_y,xx,yy);
-		addPatrolLocation(new unit(xx, yy));
-	}
-	addPatrolLocation(new unit(_x, _y));
-}
+///** Creates a patrol unit and assigns it numPLocations random locations to patrol.
+//    The last location is the unit's starting position to create a loop */
+//patrolUnit::patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us)
+//:unit(_x, _y)
+//{
+//	setObjectType(kWorldObject);
+//	currTarget = -1;
+//	nodesExpanded = nodesTouched = 0;
+//	for (int i=1; i<numPLocations; i++)
+//	{
+//		int xx, yy;
+//		us->getRandomLocation(_x,_y,xx,yy);
+//		addPatrolLocation(new unit(xx, yy));
+//	}
+//	addPatrolLocation(new unit(_x, _y));
+//}
 
 tDirection patrolUnit::makeMove(mapProvider *mp, reservationProvider *, simulationInfo *)
 {
