@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <queue>
+#include "Constants.h"
 
 //#include "statCollection.h"
 
@@ -44,32 +45,35 @@
 template <class state, class action>
 class TimeStep {
 public:
-	timeStep(state s, double time)
+	TimeStep(state s, double time)
 	:m_state(s), startTime(time) {}
-	timeStep() { startTime = 0; }
-  state m_State;
+	TimeStep() { startTime = 0; }
+  state m_state;
   double startTime;
 };
 
-template <class state, class action>
+template <class state, class action, class env>
+class Unit;
+
+template <class state, class action, class env>
 class UnitInfo {
 public:
 	UnitInfo() :stateHistory(0) {}
-	Unit<state, action> *agent;
+	Unit<state, action, env> *agent;
 	action lastMove;
 	state startState;
 	state currentState;
 	double thinkTime, moveDist;
 	double nextTime;
 	unsigned int historyIndex;
-	std::vector<timeStep> stateHistory;
+	std::vector<TimeStep<state, action> > stateHistory;
 };
 
-template<class state, class action>
-class UnitInfoCompare {
-public:
-	bool operator()(const UnitInfo<state, action> *u1, const UnitInfo<state, action> *u2);
-};
+//template<class state, class action>
+//class UnitInfoCompare {
+//public:
+//	bool operator()(const UnitInfo<state, action> *u1, const UnitInfo<state, action> *u2);
+//};
 
 
 // kLockStep - each unit goes exactly to the next time
@@ -81,9 +85,12 @@ enum tTimestep {
 };
 
 template <class state, class action>
+class SearchEnvironment;
+
+template <class state, class action, class env>
 class Unit {
 public:
-	Unit(state s, Unit<state, action> *target);
+	Unit(state s, Unit<state, action, env> *target);
 	virtual action MakeMove(SearchEnvironment<state, action>, state) = 0;
 	virtual void UpdateLocation(state, bool) = 0;
 	virtual void GetLocation(state &) = 0;
@@ -92,19 +99,21 @@ public:
 
 template <class state, class action>
 class UnitGroup {
-	virtual action MakeMove(Unit<state, action> *, SearchEnvironment<state, action> *, state) = 0;
+	virtual action MakeMove(Unit<state, action, SearchEnvironment<state, action> > *,
+													SearchEnvironment<state, action> *, state) = 0;
 	virtual void UpdateLocation(state, bool) = 0;
-	void AddUnit(Unit<state, action> *u);
+	void AddUnit(Unit<state, action, SearchEnvironment<state, action> > *u);
 	virtual void OpenGLDraw() = 0;
 };
 
 template <class state, class action>
 class SearchEnvironment {
 public:
+	virtual ~SearchEnvironment() {}
 	virtual void GetSuccessors(state nodeID, std::vector<state> &neighbors) = 0;
 	virtual void GetActions(state nodeID, std::vector<action> &actions) = 0;
-	virtual void GetAction(state s1, state s2) = 0;
-	virtual double Heuristic(state node1, state node2) = 0;
+	virtual action GetAction(state s1, state s2) = 0;
+	virtual double HCost(state node1, state node2) = 0;
 	virtual double GCost(state node1, state node2) = 0;
 	virtual bool GoalTest(state node, state goal) = 0;
 	virtual uint32_t GetStateHash(state node) = 0;
@@ -119,8 +128,8 @@ class UnitSimulation {
 public:
 	UnitSimulation(SearchEnvironment<state, action> *se);
 
-	int AddUnit(Unit<state, action> *u);
-	Unit<state, action> *GetUnit(unsigned int which);
+	int AddUnit(Unit<state, action, SearchEnvironment<state, action> > *u);
+	Unit<state, action, SearchEnvironment<state, action> > *GetUnit(unsigned int which);
 	int AddUnitGroup(UnitGroup<state, action> *ug);
 	UnitGroup<state, action> *GetUnitGroup(unsigned int which);
 	void ClearAllUnits();
@@ -136,11 +145,11 @@ public:
 	double GetThinkingPenalty() { return penalty; }
 private:
 	double penalty;
-	std::vector<UnitInfo<state, action> *> units;
-	std::vector<UnitInfo<state, action> *> displayUnits;
+	std::vector<UnitInfo<state, action, SearchEnvironment<state, action> > *> units;
+	std::vector<UnitInfo<state, action, SearchEnvironment<state, action> > *> displayUnits;
 	std::vector<UnitGroup<state, action> *> unitGroups;
-	std::priority_queue<const UnitInfo<state, action> *,
-	std::vector<UnitInfo<state, action> *>, UnitInfoCompare> moveQ;
+//	std::priority_queue<const UnitInfo<state, action> *,
+//	std::vector<UnitInfo<state, action> *>, UnitInfoCompare> moveQ;
 	SearchEnvironment<state, action> *env;
 	double currTime, viewTime;
 	tTimestep stepType;
@@ -158,9 +167,11 @@ UnitSimulation<state, action>::UnitSimulation(SearchEnvironment<state, action> *
 }
 
 template<class state, class action>
-int UnitSimulation<state, action>::AddUnit(Unit<state, action> *u)
+int UnitSimulation<state, action>::AddUnit(Unit<state, action,
+																					 SearchEnvironment<state, action> > *u)
 {
-	UnitInfo<state, action> *ui = new UnitInfo();
+	UnitInfo<state, action, SearchEnvironment<state, action> > *ui =
+	new UnitInfo<state, action, SearchEnvironment<state, action> >();
 	ui->agent = u;
 	u->GetLocation(ui->startState);
 	ui->currentState = ui->startState;
@@ -175,9 +186,10 @@ int UnitSimulation<state, action>::AddUnit(Unit<state, action> *u)
 	if (u->GetObjectType() == kDisplayOnly)
 	{
 		displayUnits.push_back(ui);
+		return -1;
 	}
 	else {
-		if (keepHistory)
+		if (0)//(keepHistory)
 		{
 			TimeStep<state, action> ts(ui->startState, ui->nextTime);
 			ui->stateHistory.push_back(ts);		
@@ -186,13 +198,13 @@ int UnitSimulation<state, action>::AddUnit(Unit<state, action> *u)
 		if (u->getUnitGroup() == 0)
 			u->setUnitGroup(unitGroups[0]);
 		// add unit to global move queue
-		moveQ.push(ui);
+		//moveQ.push(ui);
+		return units.size()-1;
 	}
-	
 }
 
 template<class state, class action>
-Unit<state, action> *UnitSimulation<state, action>::GetUnit(unsigned int which)
+Unit<state, action, SearchEnvironment<state, action> > *UnitSimulation<state, action>::GetUnit(unsigned int which)
 {
 	if (which < units.size())
 		return units[which];
@@ -203,6 +215,7 @@ template<class state, class action>
 int UnitSimulation<state, action>::AddUnitGroup(UnitGroup<state, action> *ug)
 {
 	unitGroups.push_back(ug);
+	return unitGroups.size()-1;
 }
 
 template<class state, class action>
@@ -218,7 +231,7 @@ void UnitSimulation<state, action>::ClearAllUnits()
 {
 	while (units.size() > 0)
 	{
-		UnitInfo *ui = units.back();
+		UnitInfo<state, action, SearchEnvironment<state, action> > *ui = units.back();
 		//ui->agent->logFinalStats(&stats);
 		units.pop_back();
 		delete ui->agent;
@@ -226,7 +239,7 @@ void UnitSimulation<state, action>::ClearAllUnits()
 	}
 	while (displayUnits.size() > 0)
 	{
-		UnitInfo *ui = displayUnits.back();
+		UnitInfo<state, action, SearchEnvironment<state, action> > *ui = displayUnits.back();
 		displayUnits.pop_back();
 		delete ui->agent;
 		delete ui;
@@ -245,19 +258,23 @@ void UnitSimulation<state, action>::ClearAllUnits()
 template<class state, class action>
 void UnitSimulation<state, action>::StepTime(double)
 {
-	if (paused)
-		return;
-	
-	stats.addStat("simulationTime", "unitSimulation", currTime);
-	doPreTimestepCalc();
-	currTime += amount;
-	doTimestepCalc();
-	doPostTimestepCalc();
-	viewTime = currTime;
+//	if (paused)
+//		return;
+//	
+//	stats.addStat("simulationTime", "unitSimulation", currTime);
+//	doPreTimestepCalc();
+//	currTime += amount;
+//	doTimestepCalc();
+//	doPostTimestepCalc();
+//	viewTime = currTime;
 }
 
 
-
+class simulationInfo {
+public:
+	virtual ~simulationInfo() {}
+	virtual double getSimulationTime() = 0;
+};
 
 //
 //
