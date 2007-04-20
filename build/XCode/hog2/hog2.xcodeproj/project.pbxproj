@@ -73,8 +73,6 @@
 		C4D3B6840BCEE7B300FCD84C /* ReservationProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B47B0BCEE7B200FCD84C /* ReservationProvider.cpp */; };
 		C4D3B6850BCEE7B300FCD84C /* Unit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B47D0BCEE7B200FCD84C /* Unit.cpp */; };
 		C4D3B6860BCEE7B300FCD84C /* UnitGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B47F0BCEE7B200FCD84C /* UnitGroup.cpp */; };
-		C4D3B6870BCEE7B300FCD84C /* UnitRaceSimulation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4810BCEE7B200FCD84C /* UnitRaceSimulation.cpp */; };
-		C4D3B6880BCEE7B300FCD84C /* UnitRewardSimulation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4830BCEE7B200FCD84C /* UnitRewardSimulation.cpp */; };
 		C4D3B6890BCEE7B300FCD84C /* UnitSimulation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4850BCEE7B200FCD84C /* UnitSimulation.cpp */; };
 		C4D3B68A0BCEE7B300FCD84C /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4880BCEE7B200FCD84C /* BitVector.cpp */; };
 		C4D3B68B0BCEE7B300FCD84C /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B48A0BCEE7B200FCD84C /* FPUtil.cpp */; };
@@ -86,6 +84,8 @@
 		C4D3B6910BCEE7B300FCD84C /* StatUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4960BCEE7B200FCD84C /* StatUtil.cpp */; };
 		C4D3B6920BCEE7B300FCD84C /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4980BCEE7B200FCD84C /* Timer.cpp */; };
 		C4D3B7360BCEEC5900FCD84C /* sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B7340BCEEC5900FCD84C /* sample.cpp */; };
+		C4D3C11C0BD6996400FCD84C /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C11B0BD6996400FCD84C /* Plot2D.cpp */; };
+		C4D3C29D0BD951AE00FCD84C /* Map2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C29C0BD951AE00FCD84C /* Map2DEnvironment.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -708,6 +708,10 @@
 		C4D3B4990BCEE7B200FCD84C /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
 		C4D3B7340BCEEC5900FCD84C /* sample.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = sample.cpp; sourceTree = "<group>"; };
 		C4D3B7350BCEEC5900FCD84C /* sample.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = sample.h; sourceTree = "<group>"; };
+		C4D3C11A0BD6996400FCD84C /* Plot2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Plot2D.h; sourceTree = "<group>"; };
+		C4D3C11B0BD6996400FCD84C /* Plot2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plot2D.cpp; sourceTree = "<group>"; };
+		C4D3C29B0BD951AE00FCD84C /* Map2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map2DEnvironment.h; sourceTree = "<group>"; };
+		C4D3C29C0BD951AE00FCD84C /* Map2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map2DEnvironment.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -966,6 +970,8 @@
 		C4D3B27A0BCEE7B000FCD84C /* environments */ = {
 			isa = PBXGroup;
 			children = (
+				C4D3C29B0BD951AE00FCD84C /* Map2DEnvironment.h */,
+				C4D3C29C0BD951AE00FCD84C /* Map2DEnvironment.cpp */,
 			);
 			name = environments;
 			path = ../../../environments;
@@ -1635,6 +1641,8 @@
 				C4D3B4970BCEE7B200FCD84C /* StatUtil.h */,
 				C4D3B4980BCEE7B200FCD84C /* Timer.cpp */,
 				C4D3B4990BCEE7B200FCD84C /* Timer.h */,
+				C4D3C11B0BD6996400FCD84C /* Plot2D.cpp */,
+				C4D3C11A0BD6996400FCD84C /* Plot2D.h */,
 			);
 			name = util;
 			path = ../../../util;
@@ -1782,8 +1790,6 @@
 				C4D3B6840BCEE7B300FCD84C /* ReservationProvider.cpp in Sources */,
 				C4D3B6850BCEE7B300FCD84C /* Unit.cpp in Sources */,
 				C4D3B6860BCEE7B300FCD84C /* UnitGroup.cpp in Sources */,
-				C4D3B6870BCEE7B300FCD84C /* UnitRaceSimulation.cpp in Sources */,
-				C4D3B6880BCEE7B300FCD84C /* UnitRewardSimulation.cpp in Sources */,
 				C4D3B6890BCEE7B300FCD84C /* UnitSimulation.cpp in Sources */,
 				C4D3B68A0BCEE7B300FCD84C /* BitVector.cpp in Sources */,
 				C4D3B68B0BCEE7B300FCD84C /* FPUtil.cpp in Sources */,
@@ -1795,6 +1801,8 @@
 				C4D3B6910BCEE7B300FCD84C /* StatUtil.cpp in Sources */,
 				C4D3B6920BCEE7B300FCD84C /* Timer.cpp in Sources */,
 				C4D3B7360BCEEC5900FCD84C /* sample.cpp in Sources */,
+				C4D3C11C0BD6996400FCD84C /* Plot2D.cpp in Sources */,
+				C4D3C29D0BD951AE00FCD84C /* Map2DEnvironment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
