@@ -54,10 +54,10 @@ public:
 	virtual tDirection makeMove(mapProvider *, reservationProvider *, simulationInfo *simInfo); 
 	
 	virtual void updateLocation(int _x, int _y, bool, simulationInfo *);
-	virtual void openGLDraw(mapProvider *, simulationInfo *);
+	virtual void OpenGLDraw(mapProvider *, simulationInfo *);
 	//void printRoundStats(FILE *f);
-	void logStats(statCollection *stats);
-	void logFinalStats(statCollection *stats);
+	void logStats(StatCollection *stats);
+	void logFinalStats(StatCollection *stats);
 protected:
 	virtual void addPathToCache(path *p);
 	bool getCachedMove(tDirection &dir);

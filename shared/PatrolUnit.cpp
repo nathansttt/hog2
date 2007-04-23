@@ -98,7 +98,7 @@ double patrolUnit::goToLoc(mapAbstraction *aMap, int which)
 	return pathCost;
 }
 
-void patrolUnit::openGLDraw(mapProvider *mp, simulationInfo *)
+void patrolUnit::OpenGLDraw(mapProvider *mp, simulationInfo *)
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = mp->getMap();
@@ -186,7 +186,7 @@ void patrolUnit::addPathToCache(path *p)
 	moves.push_back((tDirection)result);
 }
 
-void patrolUnit::logStats(statCollection *stats)
+void patrolUnit::logStats(StatCollection *stats)
 {
 	if (((nodesExpanded == 0) && (nodesTouched != 0)) ||
 			((nodesExpanded != 0) && (nodesTouched == 0)))
@@ -202,7 +202,7 @@ void patrolUnit::logStats(statCollection *stats)
 	nodesExpanded = nodesTouched = 0;
 }
 
-void patrolUnit::logFinalStats(statCollection *stats)
+void patrolUnit::logFinalStats(StatCollection *stats)
 {
 	a.logFinalStats(stats);
 }

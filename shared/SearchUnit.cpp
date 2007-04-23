@@ -55,29 +55,29 @@ searchUnit::searchUnit(int _x, int _y, unit *_target, spreadExecSearchAlgorithm 
 	nodesTouched = 0;
 }
 
-//searchUnit::searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg)
-//:unit(_x, _y, _r, _g, _b, _target)
-//{
-//	unitType = kWorldObject;
-//	algorithm = alg;
-//	s_algorithm = 0;
-//	spread_cache = 0;
-//	onTarget = false;
-//	nodesExpanded = 0;
-//	nodesTouched = 0;
-//}
+searchUnit::searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg)
+:unit(_x, _y, _r, _g, _b, _target)
+{
+	unitType = kWorldObject;
+	algorithm = alg;
+	s_algorithm = 0;
+	spread_cache = 0;
+	onTarget = false;
+	nodesExpanded = 0;
+	nodesTouched = 0;
+}
 
-//searchUnit::searchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, searchAlgorithm *alg)
-//:unit(_x, _y, _r, _g, _b, _target)
-//{
-//	unitType = kWorldObject;
-//	algorithm = alg;
-//	s_algorithm = 0;
-//	spread_cache = 0;
-//	onTarget = false;
-//	nodesExpanded = 0;
-//	nodesTouched = 0;
-//}
+searchUnit::searchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, searchAlgorithm *alg)
+:unit(_x, _y, _r, _g, _b, _target)
+{
+	unitType = kWorldObject;
+	algorithm = alg;
+	s_algorithm = 0;
+	spread_cache = 0;
+	onTarget = false;
+	nodesExpanded = 0;
+	nodesTouched = 0;
+}
 
 //searchUnit::searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg)
 //:unit(_x, _y, _r, _g, _b, _target)
@@ -289,7 +289,7 @@ void searchUnit::updateLocation(int _x, int _y, bool success, simulationInfo *)
 	x = _x; y = _y;
 }
 
-void searchUnit::openGLDraw(mapProvider *mp, simulationInfo *si)
+void searchUnit::OpenGLDraw(mapProvider *mp, simulationInfo *si)
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = mp->getMap();
@@ -323,7 +323,7 @@ void searchUnit::openGLDraw(mapProvider *mp, simulationInfo *si)
 	drawSphere(xx, yy, zz, rad);
 }
 
-void searchUnit::logStats(statCollection *stats)
+void searchUnit::logStats(StatCollection *stats)
 {
 	if (((nodesExpanded == 0) && (nodesTouched != 0)) ||
 			((nodesExpanded != 0) && (nodesTouched == 0)))
@@ -339,7 +339,7 @@ void searchUnit::logStats(statCollection *stats)
 	nodesExpanded = nodesTouched = 0;
 }
 
-void searchUnit::logFinalStats(statCollection *stats)
+void searchUnit::logFinalStats(StatCollection *stats)
 {
 	algorithm->logFinalStats(stats);
 }

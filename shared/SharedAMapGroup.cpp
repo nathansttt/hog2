@@ -121,7 +121,7 @@ void sharedAMapGroup::updateLocation(unit *u, mapProvider *mp, int _x, int _y, b
 		aMap->repairAbstraction();
 }
 
-void sharedAMapGroup::openGLDraw(mapProvider *, simulationInfo *)
+void sharedAMapGroup::OpenGLDraw(mapProvider *, simulationInfo *)
 {
 	glBegin(GL_QUADS);
 	glColor3f(.25, .25, .25); // kOutOfBounds
@@ -161,7 +161,7 @@ bool sharedAMapGroup::done()
 	return (!sawNewLand);
 }
 
-void sharedAMapGroup::logStats(statCollection *stats)
+void sharedAMapGroup::logStats(StatCollection *stats)
 //void sharedAMapGroup::printRoundStats(unit *, FILE *f)
 {
 	if (newTileCount != 0)
@@ -174,7 +174,7 @@ void sharedAMapGroup::logStats(statCollection *stats)
 }
 
 /** Lets the unit group do what it needs to reset a trial */
-void sharedAMapGroup::startNewTrial(statCollection *stats)
+void sharedAMapGroup::startNewTrial(StatCollection *stats)
 {
 	sawNewLand = false;
 	newTileCount = 0;

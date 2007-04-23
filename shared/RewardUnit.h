@@ -38,7 +38,7 @@ public:
 	virtual const char *getName() { return "rewardUnit"; }
 	virtual double sendReward() { return 1.0; }
 	virtual void receiveReward(double) {}
-	void openGLDraw(mapProvider *, simulationInfo *);
+	void OpenGLDraw(mapProvider *, simulationInfo *);
 };
 
 class rewardSeekingUnit : public rewardUnit {
@@ -47,7 +47,7 @@ public:
 	virtual const char *getName() { return "rewardUnit"; }
 	virtual void receiveReward(double);
 	virtual tDirection makeMove(mapProvider *, reservationProvider *, simulationInfo *simInfo);
-	void openGLDraw(mapProvider *, simulationInfo *);
+	void OpenGLDraw(mapProvider *, simulationInfo *);
 	void addRewardLocation(rewardUnit *);
 private:
 	double goToRewardLoc(mapAbstraction *aMap, int which);
