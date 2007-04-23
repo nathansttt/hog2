@@ -66,61 +66,61 @@ unit::unit(int _x, int _y, unit *_target)
 * Create a unit starting at a given x/y location, r/g/b (0.255), with a potential target.
 */
 // Create a unit with specified color
-unit::unit(int _x, int _y, int _r, int _g, int _b, unit *_target)
-:x(_x), y(_y), target(_target), group(0)
-{
-	unitType = kDisplayOnly;
-	speed = .5;
-	map_revision = -1;
-	
-	//	blocking = true;
-	//	lastMoveSuccess = true;
-	//	aMap = 0;
-	
-	r = (GLfloat)(_r%256)/256.0;
-	g = (GLfloat)(_g%256)/256.0;
-	b = (GLfloat)(_b%256)/256.0;
-	if (target)
-	{
-		if (target->getObjectType() == kDisplayOnly)
-			target->setColor(r, g, b);
-		else
-			setColor(target->r*.8, target->g*.8, target->b*.8);
-	}
-
-	id = unit::unitID++;
-}
+//unit::unit(int _x, int _y, int _r, int _g, int _b, unit *_target)
+//:x(_x), y(_y), target(_target), group(0)
+//{
+//	unitType = kDisplayOnly;
+//	speed = .5;
+//	map_revision = -1;
+//	
+//	//	blocking = true;
+//	//	lastMoveSuccess = true;
+//	//	aMap = 0;
+//	
+//	r = (GLfloat)(_r%256)/256.0;
+//	g = (GLfloat)(_g%256)/256.0;
+//	b = (GLfloat)(_b%256)/256.0;
+//	if (target)
+//	{
+//		if (target->getObjectType() == kDisplayOnly)
+//			target->setColor(r, g, b);
+//		else
+//			setColor(target->r*.8, target->g*.8, target->b*.8);
+//	}
+//
+//	id = unit::unitID++;
+//}
 
 /** Create a unit
 *
 * Create a unit starting at a given x/y location, r/g/b (0.255), with a potential target.
 */
 // Create a unit with specified color
-unit::unit(int _x, int _y, float _r, float _g, float _b, unit *_target)
-:x(_x), y(_y), target(_target), group(0)
-{
-	unitType = kDisplayOnly;
-	speed = .5;
-	map_revision = -1;
-	
-	//	blocking = true;
-	//	lastMoveSuccess = true;
-	//	aMap = 0;
-	
-	r = _r;
-	g = _g;
-	b = _b;
-	if (target)
-	{
-		if (target->getObjectType() == kDisplayOnly)
-			target->setColor(r, g, b);
-		else
-			setColor(target->r*.8, target->g*.8, target->b*.8);
-	}
-	
-	id = unit::unitID++;
-	
-}
+//unit::unit(int _x, int _y, float _r, float _g, float _b, unit *_target)
+//:x(_x), y(_y), target(_target), group(0)
+//{
+//	unitType = kDisplayOnly;
+//	speed = .5;
+//	map_revision = -1;
+//	
+//	//	blocking = true;
+//	//	lastMoveSuccess = true;
+//	//	aMap = 0;
+//	
+//	r = _r;
+//	g = _g;
+//	b = _b;
+//	if (target)
+//	{
+//		if (target->getObjectType() == kDisplayOnly)
+//			target->setColor(r, g, b);
+//		else
+//			setColor(target->r*.8, target->g*.8, target->b*.8);
+//	}
+//	
+//	id = unit::unitID++;
+//	
+//}
 
 
 unit::~unit()
@@ -251,72 +251,73 @@ void unit::drawTriangle(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
  */
 void unit::drawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 {
-	glEnable(GL_LIGHTING);
-	if (sphereDispList)
-	{
-		glTranslatef(_x, _y, _z);
-		glCallList(sphereDispList);
-		glTranslatef(-_x, -_y, -_z);
-		return;
-	}
-	
-	sphereDispList = glGenLists(1);
-	glTranslatef(_x, _y, _z);
-	glNewList(sphereDispList, GL_COMPILE_AND_EXECUTE);
-	int i,j;
-	int n = 64; // precision
-	double theta1,theta2,theta3;
-	point3d e,p,c(0, 0, 0);
-	
-	if (tRadius < 0) tRadius = -tRadius;
-	if (n < 0) n = -n;
-	if (n < 4 || tRadius <= 0)
-	{
-		glBegin(GL_POINTS);
-		glVertex3f(c.x,c.y,c.z);
-		glEnd();
-	}
-	else {
-		for (j=n/4;j<n/2;j++)
-		{
-			theta1 = j * TWOPI / n - PID2;
-			theta2 = (j + 1) * TWOPI / n - PID2;
-			
-			glBegin(GL_QUAD_STRIP);
-			//glBegin(GL_POINTS);
-			//glBegin(GL_TRIANGLE_STRIP);
-			//glBegin(GL_LINE_STRIP);
-			for (i=0;i<=n;i++)
-			{
-				theta3 = i * TWOPI / n;
-				
-				e.x = cos(theta2) * cos(theta3);
-				e.y = cos(theta2) * sin(theta3);
-				e.z = sin(theta2);
-				p.x = c.x + tRadius * e.x;
-				p.y = c.y + tRadius * e.y;
-				p.z = c.z - tRadius * e.z;
-				
-				glNormal3f(-e.x,-e.y,e.z);
-				//glTexCoord2f(i/(double)n,2*(j+1)/(double)n);
-				glVertex3f(p.x,p.y,p.z);
-				
-				e.x = cos(theta1) * cos(theta3);
-				e.y = cos(theta1) * sin(theta3);
-				e.z = sin(theta1);
-				p.x = c.x + tRadius * e.x;
-				p.y = c.y + tRadius * e.y;
-				p.z = c.z - tRadius * e.z;
-				
-				glNormal3f(-e.x,-e.y,e.z);
-				//glTexCoord2f(i/(double)n,2*j/(double)n);
-				glVertex3f(p.x,p.y,p.z);
-			}
-			glEnd();
-		}
-	}
-	glEndList();
-	glTranslatef(-_x, -_y, -_z);
+	DrawSphere(_x, _y, _z, tRadius);
+//	glEnable(GL_LIGHTING);
+//	if (sphereDispList)
+//	{
+//		glTranslatef(_x, _y, _z);
+//		glCallList(sphereDispList);
+//		glTranslatef(-_x, -_y, -_z);
+//		return;
+//	}
+//	
+//	sphereDispList = glGenLists(1);
+//	glTranslatef(_x, _y, _z);
+//	glNewList(sphereDispList, GL_COMPILE_AND_EXECUTE);
+//	int i,j;
+//	int n = 64; // precision
+//	double theta1,theta2,theta3;
+//	point3d e,p,c(0, 0, 0);
+//	
+//	if (tRadius < 0) tRadius = -tRadius;
+//	if (n < 0) n = -n;
+//	if (n < 4 || tRadius <= 0)
+//	{
+//		glBegin(GL_POINTS);
+//		glVertex3f(c.x,c.y,c.z);
+//		glEnd();
+//	}
+//	else {
+//		for (j=n/4;j<n/2;j++)
+//		{
+//			theta1 = j * TWOPI / n - PID2;
+//			theta2 = (j + 1) * TWOPI / n - PID2;
+//			
+//			glBegin(GL_QUAD_STRIP);
+//			//glBegin(GL_POINTS);
+//			//glBegin(GL_TRIANGLE_STRIP);
+//			//glBegin(GL_LINE_STRIP);
+//			for (i=0;i<=n;i++)
+//			{
+//				theta3 = i * TWOPI / n;
+//				
+//				e.x = cos(theta2) * cos(theta3);
+//				e.y = cos(theta2) * sin(theta3);
+//				e.z = sin(theta2);
+//				p.x = c.x + tRadius * e.x;
+//				p.y = c.y + tRadius * e.y;
+//				p.z = c.z - tRadius * e.z;
+//				
+//				glNormal3f(-e.x,-e.y,e.z);
+//				//glTexCoord2f(i/(double)n,2*(j+1)/(double)n);
+//				glVertex3f(p.x,p.y,p.z);
+//				
+//				e.x = cos(theta1) * cos(theta3);
+//				e.y = cos(theta1) * sin(theta3);
+//				e.z = sin(theta1);
+//				p.x = c.x + tRadius * e.x;
+//				p.y = c.y + tRadius * e.y;
+//				p.z = c.z - tRadius * e.z;
+//				
+//				glNormal3f(-e.x,-e.y,e.z);
+//				//glTexCoord2f(i/(double)n,2*j/(double)n);
+//				glVertex3f(p.x,p.y,p.z);
+//			}
+//			glEnd();
+//		}
+//	}
+//	glEndList();
+//	glTranslatef(-_x, -_y, -_z);
 }
 
 /**

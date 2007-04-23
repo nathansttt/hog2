@@ -90,8 +90,9 @@ class SearchEnvironment;
 template <class state, class action, class env>
 class Unit {
 public:
-	Unit(state s, Unit<state, action, env> *target);
-	virtual action MakeMove(SearchEnvironment<state, action>, state) = 0;
+//	Unit(state s, Unit<state, action, env> *target);
+	virtual ~Unit() {}
+	virtual action MakeMove(env *) = 0;
 	virtual void UpdateLocation(state, bool) = 0;
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw() = 0;

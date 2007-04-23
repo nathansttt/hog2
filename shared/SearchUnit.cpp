@@ -55,29 +55,29 @@ searchUnit::searchUnit(int _x, int _y, unit *_target, spreadExecSearchAlgorithm 
 	nodesTouched = 0;
 }
 
-searchUnit::searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg)
-:unit(_x, _y, _r, _g, _b, _target)
-{
-	unitType = kWorldObject;
-	algorithm = alg;
-	s_algorithm = 0;
-	spread_cache = 0;
-	onTarget = false;
-	nodesExpanded = 0;
-	nodesTouched = 0;
-}
+//searchUnit::searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg)
+//:unit(_x, _y, _r, _g, _b, _target)
+//{
+//	unitType = kWorldObject;
+//	algorithm = alg;
+//	s_algorithm = 0;
+//	spread_cache = 0;
+//	onTarget = false;
+//	nodesExpanded = 0;
+//	nodesTouched = 0;
+//}
 
-searchUnit::searchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, searchAlgorithm *alg)
-:unit(_x, _y, _r, _g, _b, _target)
-{
-	unitType = kWorldObject;
-	algorithm = alg;
-	s_algorithm = 0;
-	spread_cache = 0;
-	onTarget = false;
-	nodesExpanded = 0;
-	nodesTouched = 0;
-}
+//searchUnit::searchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, searchAlgorithm *alg)
+//:unit(_x, _y, _r, _g, _b, _target)
+//{
+//	unitType = kWorldObject;
+//	algorithm = alg;
+//	s_algorithm = 0;
+//	spread_cache = 0;
+//	onTarget = false;
+//	nodesExpanded = 0;
+//	nodesTouched = 0;
+//}
 
 //searchUnit::searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg)
 //:unit(_x, _y, _r, _g, _b, _target)

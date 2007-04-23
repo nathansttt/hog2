@@ -32,16 +32,19 @@
 #include "constants.h"
 #include "unitGroup.h"
 #include "unitSimulation.h"
+#include "Map2DEnvironment.h"
 
 /**
 * A unit is the basic object that moves and interacts in the unitSimulation.
  */
 
-class unit {
+
+
+class unit : public Unit<xyLoc, tDirection, MapAbstractionEnvironment> {
 public:
 	unit(int x, int y, unit *target=0);
-	unit(int x, int y, int r, int g, int b, unit *target=0);
-	unit(int x, int y, float r, float g, float b, unit *target=0);
+//	unit(int x, int y, int r, int g, int b, unit *target=0);
+//	unit(int x, int y, float r, float g, float b, unit *target=0);
 	virtual ~unit();
 	virtual const char *getName() { return "basicUnit"; }
 	static void clearDisplayList() { if (sphereDispList != 0) glDeleteLists(sphereDispList, 1); sphereDispList = 0; }
@@ -50,6 +53,25 @@ public:
 		  is saved. */
 	virtual tDirection makeMove(mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
 
+	tDirection MakeMove(MapAbstractionEnvironment *me)
+	{
+		return makeMove(me->GetMapAbstraction(), 0, 0);
+	}
+	
+	void UpdateLocation(xyLoc l, bool success)
+	{
+		updateLocation(l.x, l.y, success, 0);
+	}
+	
+	void GetLocation(xyLoc &l)
+	{
+		int x1, y1;
+		getLocation(x1, y1);
+		l.x = (uint16_t)x1;
+		l.y = (uint16_t)y1;
+	}
+	void OpenGLDraw() = 0;
+	
 	/** get where the unit thinks it is */
 	void getLocation(int &x, int &y);
 	/** updateLocation only tells a unit where it is located, it doesn't physically change the location in the world */
@@ -103,8 +125,8 @@ class randomUnit : public unit {
 public:
 	randomUnit(int _x, int _y)
 	:unit(_x, _y) { unitType = kWorldObject; lastIndex = 0; }
-	randomUnit(int _x, int _y, int _r, int _g, int _b)
-	:unit(_x, _y, _r, _g, _b) { 	unitType = kWorldObject; }
+//	randomUnit(int _x, int _y, int _r, int _g, int _b)
+//	:unit(_x, _y, _r, _g, _b) { 	unitType = kWorldObject; }
 	tDirection makeMove(mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
 	void updateLocation(int _x, int _y, bool, simulationInfo *);
 	virtual const char *getName() { return "randomUnit"; }
@@ -125,8 +147,8 @@ public:
 		coolOffPeriod = _coolOffPeriod;
 		probDirChange = _probDirChange;
 	}
-	billiardBallUnit(int _x, int _y, int _r, int _g, int _b)
-	:unit(_x, _y, _r, _g, _b) { 	unitType = kWorldObject; }
+//	billiardBallUnit(int _x, int _y, int _r, int _g, int _b)
+//	:unit(_x, _y, _r, _g, _b) { 	unitType = kWorldObject; }
 	tDirection makeMove(mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
 	void updateLocation(int _x, int _y, bool, simulationInfo *);
 	virtual const char *getName() { return "billiardBallUnit"; }
@@ -145,8 +167,8 @@ class randomerUnit : public unit {
 public:
 	randomerUnit(int _x, int _y)
 	:unit(_x, _y) { unitType = kWorldObject; }
-	randomerUnit(int _x, int _y, int _r, int _g, int _b)
-	:unit(_x, _y, _r, _g, _b) { unitType = kWorldObject; }
+//	randomerUnit(int _x, int _y, int _r, int _g, int _b)
+//	:unit(_x, _y, _r, _g, _b) { unitType = kWorldObject; }
 	tDirection makeMove(mapProvider *, reservationProvider *, simulationInfo *)
 	{ return possibleDir[random()%numPrimitiveActions]; }
 	virtual const char *getName() { return "randomerUnit"; }
