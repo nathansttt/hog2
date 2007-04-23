@@ -40,7 +40,7 @@ public:
 	sharedAMapGroup(mapProvider *);
 	~sharedAMapGroup();
 	virtual tDirection makeMove(unit *u, mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
-	virtual void openGLDraw(mapProvider *, simulationInfo *);
+	virtual void OpenGLDraw(mapProvider *, simulationInfo *);
 	virtual Map *getMap();
 	virtual mapAbstraction *getMapAbstraction();
 	virtual int getNewTileCount() { return newTileCountPerTrial; }
@@ -50,8 +50,8 @@ public:
 	/** Is the group done with their exploration? */
 	virtual bool done();
 	/** Lets the unit group do what it needs to reset a trial */
-	void startNewTrial(statCollection *stats);
-	void logStats(statCollection *stats);
+	void startNewTrial(StatCollection *stats);
+	void logStats(StatCollection *stats);
 	
 	void setVisibilityRadius(int _visibility);
 	int getVisibilityRadius();

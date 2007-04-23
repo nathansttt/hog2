@@ -38,13 +38,13 @@ public:
 //	patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us);
 	virtual const char *getName() { return "patrolUnit"; }
 	virtual tDirection makeMove(mapProvider *, reservationProvider *, simulationInfo *simInfo);
-	void openGLDraw(mapProvider *, simulationInfo *);
+	void OpenGLDraw(mapProvider *, simulationInfo *);
 	void addPatrolLocation(unit *);
 	unit *getTarget();
 	void updateLocation(int _x, int _y, bool worked, simulationInfo *)
 	{ x = _x; y = _y; if (!worked) { moves.resize(0);	if (currTarget != -1) currTarget = 0; } }
-	void logStats(statCollection *stats);
-		void logFinalStats(statCollection *stats);
+	void logStats(StatCollection *stats);
+		void logFinalStats(StatCollection *stats);
 private:
 	double goToLoc(mapAbstraction *aMap, int which);
 	void addPathToCache(path *p);
