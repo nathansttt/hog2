@@ -71,7 +71,7 @@ void mapAbstraction::toggleDrawAbstraction(int which)
 		levelDraw = levelDraw&(~(1<<which));
 }
 
-void mapAbstraction::openGLDraw()
+void mapAbstraction::OpenGLDraw()
 {
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{

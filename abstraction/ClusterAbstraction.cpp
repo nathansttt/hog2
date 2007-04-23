@@ -1331,9 +1331,9 @@ void clusterAbstraction::printPathAsCoord(path* p)
 	}
 }
 
-void clusterAbstraction::openGLDraw()
+void clusterAbstraction::OpenGLDraw()
 {
-	mapAbstraction::openGLDraw();
+	mapAbstraction::OpenGLDraw();
 	GLdouble xx, yy, zz, rr;
 	glColor3f(0.25, 0.0, 0.75);
 	Map *map = getMap();
