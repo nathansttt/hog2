@@ -28,13 +28,13 @@
 #ifndef MAPPROVIDERINTERFACE_H
 #define MAPPROVIDERINTERFACE_H
 
-#include "map.h"
-#include "mapAbstraction.h"
-
 /**
  * An interface for any class that can provide a map & abstract map, as well as a
  * heuristic for that map.
  */
+
+class Map;
+class mapAbstraction;
 
 class mapProvider {
 public:
@@ -42,5 +42,8 @@ public:
 	virtual Map *getMap() = 0;
 	virtual mapAbstraction *getMapAbstraction() = 0;
 };
+
+#include "map.h"
+#include "mapAbstraction.h"
 
 #endif
