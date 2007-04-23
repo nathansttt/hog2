@@ -1390,7 +1390,7 @@ bool Map::canStep(long x1, long y1, long x2, long y2) const
 }
 
 /**
-* Toggles whether the land is draw when you call openGLDraw
+* Toggles whether the land is draw when you call OpenGLDraw
  */
 void Map::setDrawLand(bool dLand)
 {
@@ -1429,7 +1429,7 @@ tTileset Map::getTileSet()
  * kPolygon is the default mode. The map is cached in a display list unless
  * it changes.
  */
-void Map::openGLDraw(tDisplay how)
+void Map::OpenGLDraw(tDisplay how)
 {
 	glDisable(GL_LIGHTING);
 	if (drawLand)

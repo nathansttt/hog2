@@ -30,8 +30,9 @@
 #include <vector>
 #include <queue>
 #include "Constants.h"
+#include "Unit.h"
 
-//#include "statCollection.h"
+//#include "StatCollection.h"
 
 //#ifdef OS_MAC
 //#include <Carbon/Carbon.h>
@@ -52,14 +53,14 @@ public:
   double startTime;
 };
 
-template <class state, class action, class env>
+template <class state, class action, class environment>
 class Unit;
 
-template <class state, class action, class env>
+template <class state, class action, class environment>
 class UnitInfo {
 public:
 	UnitInfo() :stateHistory(0) {}
-	Unit<state, action, env> *agent;
+	Unit<state, action, environment> *agent;
 	action lastMove;
 	state startState;
 	state currentState;
@@ -87,17 +88,6 @@ enum tTimestep {
 template <class state, class action>
 class SearchEnvironment;
 
-template <class state, class action, class env>
-class Unit {
-public:
-//	Unit(state s, Unit<state, action, env> *target);
-	virtual ~Unit() {}
-	virtual action MakeMove(env *) = 0;
-	virtual void UpdateLocation(state, bool) = 0;
-	virtual void GetLocation(state &) = 0;
-	virtual void OpenGLDraw() = 0;
-};
-
 template <class state, class action>
 class UnitGroup {
 	virtual action MakeMove(Unit<state, action, SearchEnvironment<state, action> > *,
@@ -119,22 +109,25 @@ public:
 	virtual bool GoalTest(state node, state goal) = 0;
 	virtual uint32_t GetStateHash(state node) = 0;
 	virtual uint32_t GetActionHash(action act) = 0;
+	virtual void OpenGLDraw() = 0;
 };
 
 /**
  * The basic simulation class for the world.
  */
-template<class state, class action>
+template<class state, class action, class environment>
 class UnitSimulation {
 public:
-	UnitSimulation(SearchEnvironment<state, action> *se);
+	UnitSimulation(environment *se);
 
-	int AddUnit(Unit<state, action, SearchEnvironment<state, action> > *u);
-	Unit<state, action, SearchEnvironment<state, action> > *GetUnit(unsigned int which);
+	int AddUnit(Unit<state, action, environment> *u);
+	Unit<state, action, environment> *GetUnit(unsigned int which);
 	int AddUnitGroup(UnitGroup<state, action> *ug);
 	UnitGroup<state, action> *GetUnitGroup(unsigned int which);
 	void ClearAllUnits();
 	
+	environment *GetEnvironment() { return env; }
+		
 	void StepTime(double);
 	double GetSimulationTime() { return currTime; }
 	void SetStepType(tTimestep step) { stepType = step; }
@@ -146,18 +139,18 @@ public:
 	double GetThinkingPenalty() { return penalty; }
 private:
 	double penalty;
-	std::vector<UnitInfo<state, action, SearchEnvironment<state, action> > *> units;
-	std::vector<UnitInfo<state, action, SearchEnvironment<state, action> > *> displayUnits;
+	std::vector<UnitInfo<state, action, environment > *> units;
+	std::vector<UnitInfo<state, action, environment > *> displayUnits;
 	std::vector<UnitGroup<state, action> *> unitGroups;
 //	std::priority_queue<const UnitInfo<state, action> *,
 //	std::vector<UnitInfo<state, action> *>, UnitInfoCompare> moveQ;
-	SearchEnvironment<state, action> *env;
+	environment *env;
 	double currTime, viewTime;
 	tTimestep stepType;
 };
 
-template<class state, class action>
-UnitSimulation<state, action>::UnitSimulation(SearchEnvironment<state, action> *se)
+template<class state, class action, class environment>
+UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
 {
 	env = se;
 	stepType = kRealTime;
@@ -167,9 +160,8 @@ UnitSimulation<state, action>::UnitSimulation(SearchEnvironment<state, action> *
 	// allocate default unit group!(?)
 }
 
-template<class state, class action>
-int UnitSimulation<state, action>::AddUnit(Unit<state, action,
-																					 SearchEnvironment<state, action> > *u)
+template<class state, class action, class environment>
+int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, environment > *u)
 {
 	UnitInfo<state, action, SearchEnvironment<state, action> > *ui =
 	new UnitInfo<state, action, SearchEnvironment<state, action> >();
@@ -184,12 +176,12 @@ int UnitSimulation<state, action>::AddUnit(Unit<state, action,
 	//ui->firstMoveThinkTime = -1.0;
 	ui->historyIndex = 0;
 	
-	if (u->GetObjectType() == kDisplayOnly)
-	{
-		displayUnits.push_back(ui);
-		return -1;
-	}
-	else {
+//	if (u->GetObjectType() == kDisplayOnly)
+//	{
+//		displayUnits.push_back(ui);
+//		return -1;
+//	}
+//	else {
 		if (0)//(keepHistory)
 		{
 			TimeStep<state, action> ts(ui->startState, ui->nextTime);
@@ -201,38 +193,38 @@ int UnitSimulation<state, action>::AddUnit(Unit<state, action,
 		// add unit to global move queue
 		//moveQ.push(ui);
 		return units.size()-1;
-	}
+//	}
 }
 
-template<class state, class action>
-Unit<state, action, SearchEnvironment<state, action> > *UnitSimulation<state, action>::GetUnit(unsigned int which)
+template<class state, class action, class environment>
+Unit<state, action, environment> *UnitSimulation<state, action, environment>::GetUnit(unsigned int which)
 {
 	if (which < units.size())
 		return units[which];
 	return 0;
 }
 
-template<class state, class action>
-int UnitSimulation<state, action>::AddUnitGroup(UnitGroup<state, action> *ug)
+template<class state, class action, class environment>
+int UnitSimulation<state, action, environment>::AddUnitGroup(UnitGroup<state, action> *ug)
 {
 	unitGroups.push_back(ug);
 	return unitGroups.size()-1;
 }
 
-template<class state, class action>
-UnitGroup<state, action> *UnitSimulation<state, action>::GetUnitGroup(unsigned int which)
+template<class state, class action, class environment>
+UnitGroup<state, action> *UnitSimulation<state, action, environment>::GetUnitGroup(unsigned int which)
 {
 	if (which < unitGroups.size())
 		return units[which];
 	return 0;
 }
 
-template<class state, class action>
-void UnitSimulation<state, action>::ClearAllUnits()
+template<class state, class action, class environment>
+void UnitSimulation<state, action, environment>::ClearAllUnits()
 {
 	while (units.size() > 0)
 	{
-		UnitInfo<state, action, SearchEnvironment<state, action> > *ui = units.back();
+		UnitInfo<state, action, environment> *ui = units.back();
 		//ui->agent->logFinalStats(&stats);
 		units.pop_back();
 		delete ui->agent;
@@ -240,7 +232,7 @@ void UnitSimulation<state, action>::ClearAllUnits()
 	}
 	while (displayUnits.size() > 0)
 	{
-		UnitInfo<state, action, SearchEnvironment<state, action> > *ui = displayUnits.back();
+		UnitInfo<state, action, environment> *ui = displayUnits.back();
 		displayUnits.pop_back();
 		delete ui->agent;
 		delete ui;
@@ -256,8 +248,8 @@ void UnitSimulation<state, action>::ClearAllUnits()
 	currTime = 0;
 }
 
-template<class state, class action>
-void UnitSimulation<state, action>::StepTime(double)
+template<class state, class action, class environment>
+void UnitSimulation<state, action, environment>::StepTime(double)
 {
 //	if (paused)
 //		return;
@@ -318,7 +310,7 @@ public:
 //	void setSynchronous() { asynch = false; }
 //
 //
-//	void openGLDraw();
+//	void OpenGLDraw();
 //	void print(bool forceOutput = true);
 //	virtual bool done();
 //
@@ -350,7 +342,7 @@ public:
 //	void toggleNoOpenGLDraw() { noOpenGLDraw = !noOpenGLDraw; }
 //	//void setLogFile(FILE *);
 //	
-//	statCollection *getStats() { return &stats; }
+//	StatCollection *getStats() { return &stats; }
 //	void printCollectedStats(bool v) { stats.enablePrintOutput(v); }
 //
 //
@@ -421,7 +413,7 @@ public:
 //	bool noOpenGLDraw;		// turns display on/off
 //	bool keepHistory; // keep action history
 //	
-//	statCollection stats;
+//	StatCollection stats;
 //};
 //
 //#define LOCAL_PATH

@@ -37,6 +37,8 @@ public:
 	bool GoalTest(xyLoc node, xyLoc goal);
 	uint32_t GetStateHash(xyLoc node);
 	uint32_t GetActionHash(tDirection act);
+	void OpenGLDraw() { map->OpenGLDraw(); }
+	Map* GetMap() { return map; }
 protected:
 	Map *map;
 };
@@ -47,6 +49,7 @@ public:
 	MapAbstractionEnvironment(mapAbstraction *ma);
 	virtual ~MapAbstractionEnvironment();
 	mapAbstraction *GetMapAbstraction() { return ma; }
+	void OpenGLDraw() { map->OpenGLDraw(); ma->OpenGLDraw(); }
 private:
 	mapAbstraction *ma;
 };
