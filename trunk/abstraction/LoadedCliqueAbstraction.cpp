@@ -92,7 +92,7 @@ void loadedCliqueAbstraction::toggleDrawAbstraction(int which)
 		levelDraw = levelDraw&(~(1<<which));
 }
 
-void loadedCliqueAbstraction::openGLDraw()
+void loadedCliqueAbstraction::OpenGLDraw()
 {
 	glDisable(GL_LIGHTING);
 	for (unsigned int x = 0; x < abstractions.size(); x++)

@@ -16,7 +16,7 @@
 class BoundingBox {
 public:
 	bool pointInBox(double x, double y, double z);
-	void openGLDraw();
+	void OpenGLDraw();
 	double x1, x2, y1, y2, z1, z2;
 };
 
@@ -38,7 +38,7 @@ public:
   
   //void clearMarkedNodes();
   void clearDisplayLists();
-	void openGLDraw();
+	void OpenGLDraw();
 	void toggleDrawAbstraction(int which);
 	void drawLevelConnections(node *n);
 	void drawGraph(graph *g);
