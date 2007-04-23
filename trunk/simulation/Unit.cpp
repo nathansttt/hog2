@@ -66,61 +66,61 @@ unit::unit(int _x, int _y, unit *_target)
 * Create a unit starting at a given x/y location, r/g/b (0.255), with a potential target.
 */
 // Create a unit with specified color
-//unit::unit(int _x, int _y, int _r, int _g, int _b, unit *_target)
-//:x(_x), y(_y), target(_target), group(0)
-//{
-//	unitType = kDisplayOnly;
-//	speed = .5;
-//	map_revision = -1;
-//	
-//	//	blocking = true;
-//	//	lastMoveSuccess = true;
-//	//	aMap = 0;
-//	
-//	r = (GLfloat)(_r%256)/256.0;
-//	g = (GLfloat)(_g%256)/256.0;
-//	b = (GLfloat)(_b%256)/256.0;
-//	if (target)
-//	{
-//		if (target->getObjectType() == kDisplayOnly)
-//			target->setColor(r, g, b);
-//		else
-//			setColor(target->r*.8, target->g*.8, target->b*.8);
-//	}
-//
-//	id = unit::unitID++;
-//}
+unit::unit(int _x, int _y, int _r, int _g, int _b, unit *_target)
+:x(_x), y(_y), target(_target), group(0)
+{
+	unitType = kDisplayOnly;
+	speed = .5;
+	map_revision = -1;
+	
+	//	blocking = true;
+	//	lastMoveSuccess = true;
+	//	aMap = 0;
+	
+	r = (GLfloat)(_r%256)/256.0;
+	g = (GLfloat)(_g%256)/256.0;
+	b = (GLfloat)(_b%256)/256.0;
+	if (target)
+	{
+		if (target->getObjectType() == kDisplayOnly)
+			target->setColor(r, g, b);
+		else
+			setColor(target->r*.8, target->g*.8, target->b*.8);
+	}
+
+	id = unit::unitID++;
+}
 
 /** Create a unit
 *
 * Create a unit starting at a given x/y location, r/g/b (0.255), with a potential target.
 */
 // Create a unit with specified color
-//unit::unit(int _x, int _y, float _r, float _g, float _b, unit *_target)
-//:x(_x), y(_y), target(_target), group(0)
-//{
-//	unitType = kDisplayOnly;
-//	speed = .5;
-//	map_revision = -1;
-//	
-//	//	blocking = true;
-//	//	lastMoveSuccess = true;
-//	//	aMap = 0;
-//	
-//	r = _r;
-//	g = _g;
-//	b = _b;
-//	if (target)
-//	{
-//		if (target->getObjectType() == kDisplayOnly)
-//			target->setColor(r, g, b);
-//		else
-//			setColor(target->r*.8, target->g*.8, target->b*.8);
-//	}
-//	
-//	id = unit::unitID++;
-//	
-//}
+unit::unit(int _x, int _y, float _r, float _g, float _b, unit *_target)
+:x(_x), y(_y), target(_target), group(0)
+{
+	unitType = kDisplayOnly;
+	speed = .5;
+	map_revision = -1;
+	
+	//	blocking = true;
+	//	lastMoveSuccess = true;
+	//	aMap = 0;
+	
+	r = _r;
+	g = _g;
+	b = _b;
+	if (target)
+	{
+		if (target->getObjectType() == kDisplayOnly)
+			target->setColor(r, g, b);
+		else
+			setColor(target->r*.8, target->g*.8, target->b*.8);
+	}
+	
+	id = unit::unitID++;
+	
+}
 
 
 unit::~unit()
@@ -173,7 +173,7 @@ tDirection unit::makeMove(mapProvider *, reservationProvider *, simulationInfo *
 *
 * No stats collected by default.
 */
-void unit::logStats(statCollection *)
+void unit::logStats(StatCollection *)
 {
 }
 
@@ -219,7 +219,7 @@ void unit::getOpenGLLocation(Map *map, GLdouble &_x, GLdouble &_y, GLdouble &_z,
  *
  * Draw the unit using openGL. Overload this if you want a custom look for the unit.
  */
-void unit::openGLDraw(mapProvider *mp, simulationInfo *)
+void unit::OpenGLDraw(mapProvider *mp, simulationInfo *)
 {
 	Map *map = mp->getMap();
 	GLdouble xx, yy, zz, rad;
@@ -251,197 +251,71 @@ void unit::drawTriangle(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
  */
 void unit::drawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 {
-	DrawSphere(_x, _y, _z, tRadius);
-//	glEnable(GL_LIGHTING);
-//	if (sphereDispList)
-//	{
-//		glTranslatef(_x, _y, _z);
-//		glCallList(sphereDispList);
-//		glTranslatef(-_x, -_y, -_z);
-//		return;
-//	}
-//	
-//	sphereDispList = glGenLists(1);
-//	glTranslatef(_x, _y, _z);
-//	glNewList(sphereDispList, GL_COMPILE_AND_EXECUTE);
-//	int i,j;
-//	int n = 64; // precision
-//	double theta1,theta2,theta3;
-//	point3d e,p,c(0, 0, 0);
-//	
-//	if (tRadius < 0) tRadius = -tRadius;
-//	if (n < 0) n = -n;
-//	if (n < 4 || tRadius <= 0)
-//	{
-//		glBegin(GL_POINTS);
-//		glVertex3f(c.x,c.y,c.z);
-//		glEnd();
-//	}
-//	else {
-//		for (j=n/4;j<n/2;j++)
-//		{
-//			theta1 = j * TWOPI / n - PID2;
-//			theta2 = (j + 1) * TWOPI / n - PID2;
-//			
-//			glBegin(GL_QUAD_STRIP);
-//			//glBegin(GL_POINTS);
-//			//glBegin(GL_TRIANGLE_STRIP);
-//			//glBegin(GL_LINE_STRIP);
-//			for (i=0;i<=n;i++)
-//			{
-//				theta3 = i * TWOPI / n;
-//				
-//				e.x = cos(theta2) * cos(theta3);
-//				e.y = cos(theta2) * sin(theta3);
-//				e.z = sin(theta2);
-//				p.x = c.x + tRadius * e.x;
-//				p.y = c.y + tRadius * e.y;
-//				p.z = c.z - tRadius * e.z;
-//				
-//				glNormal3f(-e.x,-e.y,e.z);
-//				//glTexCoord2f(i/(double)n,2*(j+1)/(double)n);
-//				glVertex3f(p.x,p.y,p.z);
-//				
-//				e.x = cos(theta1) * cos(theta3);
-//				e.y = cos(theta1) * sin(theta3);
-//				e.z = sin(theta1);
-//				p.x = c.x + tRadius * e.x;
-//				p.y = c.y + tRadius * e.y;
-//				p.z = c.z - tRadius * e.z;
-//				
-//				glNormal3f(-e.x,-e.y,e.z);
-//				//glTexCoord2f(i/(double)n,2*j/(double)n);
-//				glVertex3f(p.x,p.y,p.z);
-//			}
-//			glEnd();
-//		}
-//	}
-//	glEndList();
-//	glTranslatef(-_x, -_y, -_z);
-}
-
-/**
-* Make a random move.
- *
- * the random unit follows a certain direction for a random amount of time,
- * and then picks a new direction. makeMove just returns the current direction.
- */
-tDirection randomUnit::makeMove(mapProvider *, reservationProvider *, simulationInfo *)
-{
-	tDirection where = possibleDir[lastIndex];
-	return where;
-}
-
-/**
-* Set location after last move.
- *
- * After moving, the unit picks a new random direction if the move wasn't a success.
- * If it was, it has a 5% chance of changing direction.
- */
-void randomUnit::updateLocation(int _x, int _y, bool success, simulationInfo *)
-{
-	if (success)
-	{ // I moved successfully
-		if (random()%20 == 7)
-			lastIndex = random()%9;
-	}
-	else {
-		lastIndex = random()%9;
-	}
-	x = _x; y = _y;
-}
-
-/**
-* Make a move.
- *
- * the billiard ball unit keeps following the same direction until either a collision
- * or instability
- */
-tDirection billiardBallUnit::makeMove(mapProvider *, reservationProvider *, simulationInfo *)
-{
-	tDirection where = possibleDir[lastIndex];
-	return where;
-}
-
-/**
-* Set location after last move.
- *
- * if the billiard ball unit collides, it will cool off for a period of time
- * otherwise, it may changes its mind if it unstable
- */
-void billiardBallUnit::updateLocation(int _x, int _y, bool success, simulationInfo *)
-{
-	if (success)
-	{ 
-		// I moved successfully
-		// If I was staying put then I should start moving after the coolOffPeriod expires
-		if (lastIndex == kStayIndex && --collisionStatus <= 0) 
-			lastIndex = random()%9;
-		// If I was moving then I may change my mind with probability probDirChange
-		if (lastIndex != kStayIndex && fless(random()%10000,probDirChange*10000.0))
-			lastIndex = random()%9;
-	}
-	else {
-		// I was not successful in my move (i.e., I collided)
-		// start resting
-		collisionStatus = coolOffPeriod;
-		lastIndex = coolOffPeriod > 0 ? kStayIndex : random()%9;		
-	}
-	x = _x; y = _y;
-}
-
-/**
-* Make the next move.
- *
- * Make the next move following the right hand rule.
- */
-tDirection rhrUnit::makeMove(mapProvider *, reservationProvider *, simulationInfo *)
-{
-	tDirection where = possibleDir[lastIndex];
-	return where;
-}
-
-/**
-* set rhr unit location.
- *
- * To follow the right hand rule, we do the following:
- * 1) if the last move was successful, turn 90 degrees to the right and keep going.
- * 2) if the last move wasn't successful, turn 90 degrees to the left and keep going.
- */
-void rhrUnit::updateLocation(int _x, int _y, bool success, simulationInfo *)
-{
-	if (success)
-	{ // I moved successfully
-		lastIndex = (lastIndex+2)%8;
-	}
-	else {
-		lastIndex = (lastIndex+6)%8;
-	}
-	x = _x; y = _y;
-}
-
-/**
-* make teleport move.
- *
- * the teleport unit stays put for some # moves, and then teleports to a new random
- * location.
- */
-tDirection teleportUnit::makeMove(mapProvider *mp, reservationProvider *, simulationInfo *)
-{
-	mapAbstraction *aMap = mp->getMapAbstraction();
-
-	if (timer == 0)
+	glEnable(GL_LIGHTING);
+	if (sphereDispList)
 	{
-		timer = stayTime;
-		x = random()%aMap->getMap()->getMapWidth();
-		y = random()%aMap->getMap()->getMapHeight();
-		return kTeleport;
+		glTranslatef(_x, _y, _z);
+		glCallList(sphereDispList);
+		glTranslatef(-_x, -_y, -_z);
+		return;
 	}
-	timer--;
-	return kStay;
+	
+	sphereDispList = glGenLists(1);
+	glTranslatef(_x, _y, _z);
+	glNewList(sphereDispList, GL_COMPILE_AND_EXECUTE);
+	int i,j;
+	int n = 64; // precision
+	double theta1,theta2,theta3;
+	point3d e,p,c(0, 0, 0);
+	
+	if (tRadius < 0) tRadius = -tRadius;
+	if (n < 0) n = -n;
+	if (n < 4 || tRadius <= 0)
+	{
+		glBegin(GL_POINTS);
+		glVertex3f(c.x,c.y,c.z);
+		glEnd();
+	}
+	else {
+		for (j=n/4;j<n/2;j++)
+		{
+			theta1 = j * TWOPI / n - PID2;
+			theta2 = (j + 1) * TWOPI / n - PID2;
+			
+			glBegin(GL_QUAD_STRIP);
+			//glBegin(GL_POINTS);
+			//glBegin(GL_TRIANGLE_STRIP);
+			//glBegin(GL_LINE_STRIP);
+			for (i=0;i<=n;i++)
+			{
+				theta3 = i * TWOPI / n;
+				
+				e.x = cos(theta2) * cos(theta3);
+				e.y = cos(theta2) * sin(theta3);
+				e.z = sin(theta2);
+				p.x = c.x + tRadius * e.x;
+				p.y = c.y + tRadius * e.y;
+				p.z = c.z - tRadius * e.z;
+				
+				glNormal3f(-e.x,-e.y,e.z);
+				//glTexCoord2f(i/(double)n,2*(j+1)/(double)n);
+				glVertex3f(p.x,p.y,p.z);
+				
+				e.x = cos(theta1) * cos(theta3);
+				e.y = cos(theta1) * sin(theta3);
+				e.z = sin(theta1);
+				p.x = c.x + tRadius * e.x;
+				p.y = c.y + tRadius * e.y;
+				p.z = c.z - tRadius * e.z;
+				
+				glNormal3f(-e.x,-e.y,e.z);
+				//glTexCoord2f(i/(double)n,2*j/(double)n);
+				glVertex3f(p.x,p.y,p.z);
+			}
+			glEnd();
+		}
+	}
+	glEndList();
+	glTranslatef(-_x, -_y, -_z);
 }
 
-void teleportUnit::updateLocation(int _x, int _y, bool, simulationInfo *)
-{
-	x = _x; y = _y;
-}

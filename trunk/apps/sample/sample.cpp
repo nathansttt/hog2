@@ -31,7 +31,7 @@
 //#include "praStar.h"
 //#include "searchUnit.h"
 //#include "sharedAMapGroup.h"
-//#include "mapCliqueAbstraction.h"
+#include "mapCliqueAbstraction.h"
 //#include "mapQuadTreeAbstraction.h"
 //#include "radiusAbstraction.h"
 //#include "mapFlatAbstraction.h"
@@ -39,12 +39,13 @@
 #include "UnitSimulation.h"
 #include "Plot2D.h"
 #include "Map2DEnvironment.h"
+#include "RandomUnits.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-UnitSimulation<xyLoc, tDirection> *unitSim = 0;
+UnitSimulation<xyLoc, tDirection, MapAbstractionEnvironment> *unitSim = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -69,6 +70,7 @@ void createSimulation()
 	else
 		map = new Map(gDefaultMap);
 
+	unitSim = new UnitSimulation<xyLoc, tDirection, MapAbstractionEnvironment>(new MapAbstractionEnvironment(new mapCliqueAbstraction(map)));
 //	if (absType == 0)
 //		unitSim = new unitSimulation(new mapCliqueAbstraction(map));
 //	else if (absType == 1)
@@ -126,14 +128,15 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 {
-//	if (windowID != 0)
-//		return;
-//
-//	if (viewport == 0)
-//	{
-//		unitSim->advanceTime(1.0/30.0);
-//	}
-//	
+	if ((windowID != 0) || (unitSim == 0))
+		return;
+
+	if (viewport == 0)
+	{
+		unitSim->StepTime(1.0/30.0);
+	}
+	unitSim->GetEnvironment()->OpenGLDraw();
+	
 //	if (viewport == 0)
 //	{
 //		if (plot)
@@ -153,12 +156,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 //		}
 //	}
 //	
-//	unitSim->openGLDraw();
+//	unitSim->OpenGLDraw();
 //	switch (viewport%3)
 //	{
-//		case 0: //unitSim->getMap()->openGLDraw(kLines); break;
-//		case 1: //unitSim->getMap()->openGLDraw(kPoints); break;
-//		case 2: unitSim->getMap()->openGLDraw(kPolygons); break;
+//		case 0: //unitSim->getMap()->OpenGLDraw(kLines); break;
+//		case 1: //unitSim->getMap()->OpenGLDraw(kPoints); break;
+//		case 2: unitSim->getMap()->OpenGLDraw(kPolygons); break;
 //	}
 //	if ((mouseTracking) && (px1 != -1) && (px2 != -1) && (py1 != -1) && (py2 != -1))
 //	{
@@ -215,31 +218,34 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
-//	switch (key)
-//	{
-//		case '\t': SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID)); break;
-//		case 'p': unitSim->setSimulationPaused(!unitSim->getSimulationPaused()); break;
-//		case 'o':
+	switch (key)
+	{
+		case '\t': SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID)); break;
+		case 'p': //unitSim->setSimulationPaused(!unitSim->getSimulationPaused()); break;
+		case 'o':
 //			if (unitSim->getSimulationPaused())
 //			{
 //				unitSim->setSimulationPaused(false);
 //				unitSim->advanceTime(.1);
 //				unitSim->setSimulationPaused(true);
 //			}
-//			break;
-//		case ']': absType = (absType+1)%3; break;
-//		case '[': absType = (absType+4)%3; break;
+			break;
+		case ']': absType = (absType+1)%3; break;
+		case '[': absType = (absType+4)%3; break;
 //		case '{': unitSim->setSimulationPaused(true); unitSim->offsetDisplayTime(-0.5); break;
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
-//		default:
-//			if (unitSim->getMapAbstractionDisplay())
-//				unitSim->getMapAbstractionDisplay()->toggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
-//			break;
-//	}
+		default:
+			if (unitSim)
+				unitSim->GetEnvironment()->GetMapAbstraction()->toggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
+			break;
+	}
 }
 
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 {
+	Map *m = unitSim->GetEnvironment()->GetMap();
+	RandomerUnit *r = new RandomerUnit(random()%m->getMapWidth(), random()%m->getMapHeight());
+	int id = unitSim->AddUnit(r);
 //	int x1, y1, x2, y2;
 //	unit *u;
 //	unitSim->getRandomLocation(x1, y1);

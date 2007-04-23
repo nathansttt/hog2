@@ -92,4 +92,11 @@ void drawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width)
 void drawBox(GLfloat x, GLfloat y, GLfloat z, GLfloat radius);
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
 
+//class OpenGLDrawable {
+//public:
+//	virtual ~OpenGLDrawable() {}
+//	virtual void OpenGLDraw(unsigned long windowID) = 0;
+//};
+
+
 #endif

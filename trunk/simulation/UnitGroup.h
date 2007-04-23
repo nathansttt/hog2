@@ -33,7 +33,7 @@
 #include "reservationProvider.h"
 #include "mapProvider.h"
 #include "unitSimulation.h"
-#include "statCollection.h"
+#include "StatCollection.h"
 
 #ifndef UNITGROUP_H
 #define UNITGROUP_H
@@ -55,7 +55,7 @@ public:
 	virtual void think(mapProvider *) { }
 	virtual const char *getName() { return "UnitGroupx"; }
 
-	virtual void openGLDraw(mapProvider *, simulationInfo *);
+	virtual void OpenGLDraw(mapProvider *, simulationInfo *);
 	virtual void addUnit(unit *);
 	virtual void removeUnit(unit *);
 	virtual mapAbstraction *getMapAbstraction();
@@ -65,10 +65,10 @@ public:
 	/** Is the group done with racing? */
 	virtual bool done();
 	/** Lets the unit group do what it needs to reset a trial */
-	virtual void startNewTrial(statCollection *stats);
+	virtual void startNewTrial(StatCollection *stats);
 	// print stats; if we don't know any, get the unit to do it
-	virtual void logStats(statCollection *stats);
-	virtual void logFinalStats(statCollection *) {}
+	virtual void logStats(StatCollection *stats);
+	virtual void logFinalStats(StatCollection *) {}
 	//virtual void printRoundStats(unit *u, FILE *f);
 
 	/** lets the user cycle through the display mode by hitting Shift-Tab */

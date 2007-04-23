@@ -25,13 +25,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "statCollection.h"
+#include "StatCollection.h"
 
-void setupAverageRatio(statCollection *stats, char *stat1, char *stat2);
-void measureAverageRatio(statCollection *stats);
+void setupAverageRatio(StatCollection *stats, char *stat1, char *stat2);
+void measureAverageRatio(StatCollection *stats);
 
-double sumStatEntries(statCollection *stats, const char *category, const char *owner);
-double averageStatEntries(statCollection *stats, const char *category, const char *owner);
-double stdevStatEntries(statCollection *stats, const char *category, const char *owner);
-double maxStatEntries(statCollection *stats, const char *category, const char *owner);
-long unsigned countStatEntries(statCollection *stats, const char *category, const char *owner);
+double sumStatEntries(StatCollection *stats, const char *category, const char *owner);
+double averageStatEntries(StatCollection *stats, const char *category, const char *owner);
+double stdevStatEntries(StatCollection *stats, const char *category, const char *owner);
+double maxStatEntries(StatCollection *stats, const char *category, const char *owner);
+long unsigned countStatEntries(StatCollection *stats, const char *category, const char *owner);

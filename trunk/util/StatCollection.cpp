@@ -1,7 +1,7 @@
 /*
- * $Id: statCollection.cpp,v 1.24 2006/11/07 20:52:26 nathanst Exp $
+ * $Id: StatCollection.cpp,v 1.24 2006/11/07 20:52:26 nathanst Exp $
  *
- *  statCollection.cpp
+ *  StatCollection.cpp
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/1/05.
@@ -25,7 +25,7 @@
  *
  */
 
-#include "statCollection.h"
+#include "StatCollection.h"
 
 
 // typedef union { double fval; long lval; } statValue;
@@ -40,13 +40,13 @@
 //std::vector<char *> owners;
 //std::vector<stat> stats;
 
-statCollection::statCollection()
+StatCollection::StatCollection()
 :categories(), owners(), stats()
 {
 	printOutput = false;
 }
 
-statCollection::~statCollection()
+StatCollection::~StatCollection()
 {
 	for (unsigned int x = 0; x < categories.size(); x++)
 	{
@@ -76,7 +76,7 @@ statCollection::~statCollection()
 /**
 * Add a new stat entry for the given category, owner and value.
  */
-void statCollection::addStat(const char *category, const char *owner, double value)
+void StatCollection::addStat(const char *category, const char *owner, double value)
 {
 	if (!passFilter(category))
 		return;
@@ -96,7 +96,7 @@ void statCollection::addStat(const char *category, const char *owner, double val
 /**
 * Add a new stat entry for the given category, owner and value.
  */
-void statCollection::addStat(const char *category, const char *owner, long value)
+void StatCollection::addStat(const char *category, const char *owner, long value)
 {
 	if (!passFilter(category))
 		return;
@@ -118,7 +118,7 @@ void statCollection::addStat(const char *category, const char *owner, long value
  * value. If the stat doesn't exist with the same category and owner doesn't exist,
  * a new one will be initialized with the given value.
  */
-void statCollection::sumStat(const char *category, const char *owner, double value)
+void StatCollection::sumStat(const char *category, const char *owner, double value)
 {
 	statValue *sv = getLastStat(category, owner);
 	if (sv)
@@ -139,7 +139,7 @@ void statCollection::sumStat(const char *category, const char *owner, double val
  * value. If the stat doesn't exist with the same category and owner doesn't exist,
  * a new one will be initialized with the given value.
  */
-void statCollection::sumStat(const char *category, const char *owner, long value)
+void StatCollection::sumStat(const char *category, const char *owner, long value)
 {
 	statValue *sv = getLastStat(category, owner);
 	if (sv)
@@ -157,17 +157,17 @@ void statCollection::sumStat(const char *category, const char *owner, long value
 /**
 * Remove all stat entries from the collection.
  */
-void statCollection::clearAllStats()
+void StatCollection::clearAllStats()
 {
 	stats.resize(0);
 }
 
-//void statCollection::clearOwnerStats(char *owner);
-//void statCollection::clearCategoryStats(char *category);
+//void StatCollection::clearOwnerStats(char *owner);
+//void StatCollection::clearCategoryStats(char *category);
 /**
 * The number of stats collected so far
  */
-int statCollection::getNumStats() const
+int StatCollection::getNumStats() const
 {
 	return (int)stats.size();
 }
@@ -175,7 +175,7 @@ int statCollection::getNumStats() const
 /**
 * Return the nth stat which has been collected.
  */
-const stat *statCollection::getStatNum(int which) const
+const stat *StatCollection::getStatNum(int which) const
 {
 	return &stats[which];
 }
@@ -183,7 +183,7 @@ const stat *statCollection::getStatNum(int which) const
 /**
 * Given a category ID, return the text description.
  */
-const char *statCollection::lookupCategoryID(int id) const
+const char *StatCollection::lookupCategoryID(int id) const
 {
 	return categories[id];
 }
@@ -191,7 +191,7 @@ const char *statCollection::lookupCategoryID(int id) const
 /**
 * Given a owner ID, return the text description.
  */
-const char *statCollection::lookupOwnerID(int id) const
+const char *StatCollection::lookupOwnerID(int id) const
 {
 	return owners[id];
 }
@@ -201,19 +201,19 @@ const char *statCollection::lookupOwnerID(int id) const
  * collected. All other stats added will be ignored. As many categories
  * can be added as needed.
  */
-void statCollection::addFilter(char *category)
+void StatCollection::addFilter(char *category)
 {
 	addIncludeFilter(category);
 }
 
-void statCollection::addIncludeFilter(char *category) // include only added categories
+void StatCollection::addIncludeFilter(char *category) // include only added categories
 {
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);
 	includeFilters.push_back(str);
 }
 
-void statCollection::addExcludeFilter(char *category) // exclude only added categories
+void StatCollection::addExcludeFilter(char *category) // exclude only added categories
 {
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);
@@ -223,7 +223,7 @@ void statCollection::addExcludeFilter(char *category) // exclude only added cate
 /**
 * Clear any filters being used for stat entry.
  */
-void statCollection::clearFilters()
+void StatCollection::clearFilters()
 {
 	for (unsigned int x = 0; x < excludeFilters.size(); x++)
 	{
@@ -242,7 +242,7 @@ void statCollection::clearFilters()
 /**
 * Given a category, look up the ID. O(# categories) operation. If not found, returns -1.
  */
-int statCollection::lookupCategory(const char *category) const
+int StatCollection::lookupCategory(const char *category) const
 {
 	for (unsigned int x = 0; x < categories.size(); x++)
 		if (strcmp(category, categories[x]) == 0)
@@ -255,7 +255,7 @@ int statCollection::lookupCategory(const char *category) const
 * Add a new category to the category list. If the category exists, returns the id.
  * Otherwise creates the category and returns the id.
  */
-int statCollection::addCategory(const char *category)
+int StatCollection::addCategory(const char *category)
 {
 	int id = lookupCategory(category);
 	if (id != -1)
@@ -269,7 +269,7 @@ int statCollection::addCategory(const char *category)
 /**
 * Given an owner, look up the ID. O(# owners) operation. If not found, returns -1.
  */
-int statCollection::lookupOwner(const char *owner) const
+int StatCollection::lookupOwner(const char *owner) const
 {
 	for (unsigned int x = 0; x < owners.size(); x++)
 		if (strcmp(owner, owners[x]) == 0)
@@ -281,7 +281,7 @@ int statCollection::lookupOwner(const char *owner) const
 * Add a new owner to the owner list. If the owner exists, returns the id.
  * Otherwise creates the owner and returns the id.
  */
-int statCollection::addOwner(const char *owner)
+int StatCollection::addOwner(const char *owner)
 {
 	int id = lookupOwner(owner);
 	if (id != -1)
@@ -296,7 +296,7 @@ int statCollection::addOwner(const char *owner)
 * Find the last stat entered that matches the category and owner. Returns
  * copy of stat entry. Returns true if a stat was found and false otherwise.
  */
-bool statCollection::lookupStat(const char *category, const char *owner, statValue &v) const
+bool StatCollection::lookupStat(const char *category, const char *owner, statValue &v) const
 {
 	if (!passFilter(category))
 	{
@@ -316,7 +316,7 @@ bool statCollection::lookupStat(const char *category, const char *owner, statVal
 	return false;
 }
 
-bool statCollection::lookupStat(unsigned int index, statValue &v) const
+bool StatCollection::lookupStat(unsigned int index, statValue &v) const
 {
 	if (index < stats.size())
 	{
@@ -330,7 +330,7 @@ bool statCollection::lookupStat(unsigned int index, statValue &v) const
 * Find the last stat entered that matches the category and owner. Returns pointer
  * to entry.
  */
-statValue *statCollection::getLastStat(const char *category, const char *owner)
+statValue *StatCollection::getLastStat(const char *category, const char *owner)
 {
 	if (!passFilter(category))
 		return 0;
@@ -348,7 +348,7 @@ statValue *statCollection::getLastStat(const char *category, const char *owner)
 /**
 * Check to see if the category stats should be saved.
  */
-bool statCollection::passFilter(const char *category) const
+bool StatCollection::passFilter(const char *category) const
 {
 	if ((includeFilters.size() == 0) && (excludeFilters.size() == 0))
 		return true;
@@ -371,7 +371,7 @@ bool statCollection::passFilter(const char *category) const
 * Find the next stat entry that matches the given category and owner name. If error occurs,
  * return -1; otherwise, return the found index.
  */
-int statCollection::findNextStat(const char *category, const char *owner, int startIndex) const
+int StatCollection::findNextStat(const char *category, const char *owner, int startIndex) const
 {
 	// Check if the category has been registered
 	if (!passFilter(category))
@@ -398,7 +398,7 @@ int statCollection::findNextStat(const char *category, const char *owner, int st
 * Find the previous stat entry that matches the given category and owner name. If error occurs,
  * return -1; otherwise, return the found index.
  */
-int statCollection::findPrevStat(const char *category, const char *owner, int startIndex) const
+int StatCollection::findPrevStat(const char *category, const char *owner, int startIndex) const
 {
 	// Check if the category has been registered
 	if (!passFilter(category))
@@ -427,7 +427,7 @@ int statCollection::findPrevStat(const char *category, const char *owner, int st
  * look to match the owner name. If error occurs,
  * return -1; otherwise, return the found index.
  */
-int statCollection::findNextStat(const char *what, bool findCategory, int startIndex) const
+int StatCollection::findNextStat(const char *what, bool findCategory, int startIndex) const
 {
 	// Check if the category has been registered
 	if (findCategory && (!passFilter(what)))
@@ -458,7 +458,7 @@ int statCollection::findNextStat(const char *what, bool findCategory, int startI
  * look to match the owner name. If error occurs,
  * return -1; otherwise, return the found index.
  */
-int statCollection::findPrevStat(const char *what, bool findCategory, int startIndex) const
+int StatCollection::findPrevStat(const char *what, bool findCategory, int startIndex) const
 {
 	// Check if the category has been registered
 	if (findCategory && (!passFilter(what)))
@@ -489,7 +489,7 @@ int statCollection::findPrevStat(const char *what, bool findCategory, int startI
 /*
  * Print the Stats Table for debugging purpose for now.
  */
-void statCollection::printStatsTable() const
+void StatCollection::printStatsTable() const
 {
 	printf("Stats Table:\n----------------------------\n");
 	

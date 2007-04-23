@@ -35,7 +35,7 @@ inline double max(double a, double b)
 * Setup the stats so a ratio between two stats for each unit can be
  * properly measured.
  */
-void setupAverageRatio(statCollection *stats, char *stat1, char *stat2)
+void setupAverageRatio(StatCollection *stats, char *stat1, char *stat2)
 {
 	stats->clearAllStats();
 	stats->clearFilters();
@@ -49,7 +49,7 @@ void setupAverageRatio(statCollection *stats, char *stat1, char *stat2)
  * setupAverageRatio.
  *
  */
-void measureAverageRatio(statCollection *stats)
+void measureAverageRatio(StatCollection *stats)
 {
 //	stats->printStatsTable();
 	
@@ -152,7 +152,7 @@ void measureAverageRatio(statCollection *stats)
  * Sum the values of all stat entries for the same (category, owner).
  * Type is automatically known from the entry.
  */
-double sumStatEntries(statCollection *stats, const char *category, const char *owner)
+double sumStatEntries(StatCollection *stats, const char *category, const char *owner)
 {
 	double sum = 0.0;
 	int catID, ownerID;
@@ -173,7 +173,7 @@ double sumStatEntries(statCollection *stats, const char *category, const char *o
 	return sum;
 }
 
-double maxStatEntries(statCollection *stats, const char *category, const char *owner)
+double maxStatEntries(StatCollection *stats, const char *category, const char *owner)
 {
 	double maxval = -9999999999.9;
 	int catID, ownerID;
@@ -194,7 +194,7 @@ double maxStatEntries(statCollection *stats, const char *category, const char *o
 }
 
 /** Count the number of state instances in the stat collection */
-long unsigned countStatEntries(statCollection *stats, const char *category, const char *owner)
+long unsigned countStatEntries(StatCollection *stats, const char *category, const char *owner)
 {
 	long unsigned count = 0;
 	int catID, ownerID;
@@ -208,7 +208,7 @@ long unsigned countStatEntries(statCollection *stats, const char *category, cons
 	return count;
 }
 
-double averageStatEntries(statCollection *stats, const char *category, const char *owner)
+double averageStatEntries(StatCollection *stats, const char *category, const char *owner)
 {
 	double sum = 0.0;
 	double count = 0.0;
@@ -232,7 +232,7 @@ double averageStatEntries(statCollection *stats, const char *category, const cha
 	return 0;
 }
 
-double stdevStatEntries(statCollection *stats, const char *category, const char *owner)
+double stdevStatEntries(StatCollection *stats, const char *category, const char *owner)
 {
 	double average = averageStatEntries(stats, category, owner);
 	double stdev = 0;

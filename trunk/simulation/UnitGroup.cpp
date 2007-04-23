@@ -74,7 +74,7 @@ tDirection unitGroup::makeMove(unit *u, mapProvider *mp, reservationProvider *rp
 	return u->makeMove(mp, rp, simInfo);
 }
 
-void unitGroup::openGLDraw(mapProvider *mp, simulationInfo *)
+void unitGroup::OpenGLDraw(mapProvider *mp, simulationInfo *)
 {
 	Map *map = mp->getMap();
 	glBegin(GL_LINES);
@@ -108,11 +108,11 @@ bool unitGroup::done()
 }
 
 /** Lets the unit group do what it needs to reset a trial */
-void unitGroup::startNewTrial(statCollection *)
+void unitGroup::startNewTrial(StatCollection *)
 {
 }
 
-void unitGroup::logStats(statCollection *)
+void unitGroup::logStats(StatCollection *)
 {
 	//u->logStats(stats);
 	//u->printRoundStats(f);

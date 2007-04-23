@@ -1089,7 +1089,7 @@
 //}
 //
 //
-//void unitSimulation::openGLDraw()
+//void unitSimulation::OpenGLDraw()
 //{
 //	if (noOpenGLDraw)
 //		return;
@@ -1100,16 +1100,16 @@
 //		{
 //			if (which_map-1 == (int)t)
 //			{
-//				unitGroups[t]->openGLDraw(this, this);
+//				unitGroups[t]->OpenGLDraw(this, this);
 //			}
 //		}
 //		for (unsigned int t = 0; t < displayUnits.size(); t++)
 //		{
-//			displayUnits[t]->agent->openGLDraw(this, this);
+//			displayUnits[t]->agent->OpenGLDraw(this, this);
 //		}
 //		for (unsigned int t = 0; t < units.size(); t++)
 //		{
-//			units[t]->agent->openGLDraw(this, this);
+//			units[t]->agent->OpenGLDraw(this, this);
 //		}
 //	}
 //	else {

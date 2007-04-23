@@ -1,7 +1,7 @@
 /*
- * $Id: statCollection.h,v 1.15 2006/09/18 06:20:15 nathanst Exp $
+ * $Id: StatCollection.h,v 1.15 2006/09/18 06:20:15 nathanst Exp $
  *
- *  statCollection.h
+ *  StatCollection.h
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/1/05.
@@ -40,15 +40,15 @@ public:
 };
 
 /**
-* The statCollection class is for collecting stats across different parts of
+* The StatCollection class is for collecting stats across different parts of
  * the simulation. This class aggregates results and allows access to the
  * collected information.
  */ 
 
-class statCollection {
+class StatCollection {
 public:
-	statCollection();
-	~statCollection();
+	StatCollection();
+	~StatCollection();
 	void addStat(const char *category, const char *owner, double value);
 	void addStat(const char *category, const char *owner, long value);
 	void sumStat(const char *category, const char *owner, double value);
