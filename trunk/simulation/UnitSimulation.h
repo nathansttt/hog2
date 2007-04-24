@@ -118,15 +118,15 @@ public:
 template<class state, class action, class environment>
 class UnitSimulation {
 public:
-	UnitSimulation(environment *se);
+	UnitSimulation(environment se);
 
-	int AddUnit(Unit<state, action, environment> *u);
-	Unit<state, action, environment> *GetUnit(unsigned int which);
+	int AddUnit(Unit<state, action, SearchEnvironment<state, action> *> *u);
+	Unit<state, action, SearchEnvironment<state, action>* > *GetUnit(unsigned int which);
 	int AddUnitGroup(UnitGroup<state, action> *ug);
 	UnitGroup<state, action> *GetUnitGroup(unsigned int which);
 	void ClearAllUnits();
 	
-	environment *GetEnvironment() { return env; }
+	environment GetEnvironment() { return env; }
 		
 	void StepTime(double);
 	double GetSimulationTime() { return currTime; }
@@ -139,18 +139,18 @@ public:
 	double GetThinkingPenalty() { return penalty; }
 private:
 	double penalty;
-	std::vector<UnitInfo<state, action, environment > *> units;
-	std::vector<UnitInfo<state, action, environment > *> displayUnits;
+	std::vector<UnitInfo<state, action, SearchEnvironment<state, action>* > *> units;
+	std::vector<UnitInfo<state, action, SearchEnvironment<state, action>* > *> displayUnits;
 	std::vector<UnitGroup<state, action> *> unitGroups;
 //	std::priority_queue<const UnitInfo<state, action> *,
 //	std::vector<UnitInfo<state, action> *>, UnitInfoCompare> moveQ;
-	environment *env;
+	environment env;
 	double currTime, viewTime;
 	tTimestep stepType;
 };
 
 template<class state, class action, class environment>
-UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
+UnitSimulation<state, action, environment>::UnitSimulation(environment se)
 {
 	env = se;
 	stepType = kRealTime;
@@ -161,7 +161,7 @@ UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
 }
 
 template<class state, class action, class environment>
-int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, environment > *u)
+int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, SearchEnvironment<state, action>* > *u)
 {
 	UnitInfo<state, action, SearchEnvironment<state, action> > *ui =
 	new UnitInfo<state, action, SearchEnvironment<state, action> >();
@@ -197,7 +197,7 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 }
 
 template<class state, class action, class environment>
-Unit<state, action, environment> *UnitSimulation<state, action, environment>::GetUnit(unsigned int which)
+Unit<state, action, SearchEnvironment<state, action> *> *UnitSimulation<state, action, environment>::GetUnit(unsigned int which)
 {
 	if (which < units.size())
 		return units[which];

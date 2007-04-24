@@ -45,7 +45,7 @@ public:
 	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0) = 0;
 	int getNodesExpanded() { return nodesExpanded; }
 	int getNodesTouched() { return nodesTouched; }
-	virtual void logFinalStats(statCollection *) {}
+	virtual void logFinalStats(StatCollection *) {}
 
 	//protected:
 	int nodesExpanded;

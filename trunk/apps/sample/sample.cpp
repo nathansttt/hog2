@@ -45,7 +45,7 @@ bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-UnitSimulation<xyLoc, tDirection, MapAbstractionEnvironment> *unitSim = 0;
+UnitSimulation<xyLoc, tDirection, MapAbstractionEnvironment*> *unitSim = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -70,7 +70,7 @@ void createSimulation()
 	else
 		map = new Map(gDefaultMap);
 
-	unitSim = new UnitSimulation<xyLoc, tDirection, MapAbstractionEnvironment>(new MapAbstractionEnvironment(new mapCliqueAbstraction(map)));
+	unitSim = new UnitSimulation<xyLoc, tDirection, MapAbstractionEnvironment *>(new MapAbstractionEnvironment(new mapCliqueAbstraction(map)));
 //	if (absType == 0)
 //		unitSim = new unitSimulation(new mapCliqueAbstraction(map));
 //	else if (absType == 1)
