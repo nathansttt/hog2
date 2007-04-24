@@ -17,7 +17,7 @@
 * A simple map-based unit
  */
 
-class MapUnit : public Unit<xyLoc, tDirection, MapEnvironment> {
+class MapUnit : public Unit<xyLoc, tDirection, MapEnvironment *> {
 public:
 	MapUnit(int x, int y)
 	:loc(x, y) { r = 1.0; g = 0; b = 0;}

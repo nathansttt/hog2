@@ -40,10 +40,10 @@ public:
 	//	Unit(state s, Unit<state, action, env> *target);
 	virtual ~Unit() {}
 	virtual const char *GetName() = 0;
-	virtual action MakeMove(environment *) = 0;
+	virtual action MakeMove(environment) = 0;
 	virtual void UpdateLocation(state, bool) = 0;
 	virtual void GetLocation(state &) = 0;
-	virtual void OpenGLDraw(environment *) = 0;
+	virtual void OpenGLDraw(environment) = 0;
 };
 
 
