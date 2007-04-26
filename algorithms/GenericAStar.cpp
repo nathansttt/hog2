@@ -27,16 +27,10 @@
 
 #include "GenericAStar.h"
 #include "float.h"
+#include "FPUtil.h"
 
 using namespace GenericAStarUtil;
 static const bool verbose = false;
-
-inline double max(double a, double b)
-{
-	if (fgreater(a, b))
-		return a;
-	return b;
-}
 
 const char *GenericAStar::getName()
 {

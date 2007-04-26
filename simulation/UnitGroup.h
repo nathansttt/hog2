@@ -38,6 +38,57 @@
 #ifndef UNITGROUP_H
 #define UNITGROUP_H
 
+template <class state, class action, class environment>
+class Unit;
+
+template <class state, class action, class environment>
+class UnitGroup {
+public:
+	~UnitGroup() {}
+	
+	virtual action MakeMove(Unit<state, action, environment> *u, environment *e)
+{
+		return u->MakeMove(e);
+}
+
+virtual void UpdateLocation(Unit<state, action, environment> *u, state loc, bool success)
+{
+		u->UpdateLocation(loc, success);
+}
+
+void AddUnit(Unit<state, action, environment> *u)
+{
+	// Check if we already have this unit
+	for (unsigned int x = 0; x < members.size(); x++)
+		if (members[x] == u)
+			return;
+	
+	// If not then add the unit to the group and set the unit's group
+	members.push_back(u);
+	u->SetUnitGroup(this);
+}
+
+void RemoveUnit(Unit<state, action, environment> *u)
+{
+	for (unsigned int x = 0; x < members.size(); x++)
+	{
+		if (members[x] == u)
+		{
+			u->SetUnitGroup(0);
+			members[x] = members[members.size()-1];
+			members.pop_back();
+		}
+	}
+}
+
+virtual void OpenGLDraw()
+{ }
+
+private:
+std::vector<Unit<state, action, environment> *> members;
+};
+
+
 class unit;
 class simulationInfo;
 

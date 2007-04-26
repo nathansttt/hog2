@@ -32,6 +32,8 @@ public:
 	void GetSuccessors(xyLoc nodeID, std::vector<xyLoc> &neighbors);
 	void GetActions(xyLoc nodeID, std::vector<tDirection> &actions);
 	tDirection GetAction(xyLoc s1, xyLoc s2);
+	xyLoc ApplyAction(xyLoc s, tDirection dir);
+
 	double HCost(xyLoc node1, xyLoc node2);
 	double GCost(xyLoc node1, xyLoc node2);
 	bool GoalTest(xyLoc node, xyLoc goal);
