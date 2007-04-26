@@ -40,10 +40,29 @@ public:
 	//	Unit(state s, Unit<state, action, env> *target);
 	virtual ~Unit() {}
 	virtual const char *GetName() = 0;
-	virtual action MakeMove(environment) = 0;
+	virtual action MakeMove(environment *) = 0;
 	virtual void UpdateLocation(state, bool) = 0;
 	virtual void GetLocation(state &) = 0;
-	virtual void OpenGLDraw(environment) = 0;
+	virtual void OpenGLDraw(environment *) = 0;
+	UnitGroup<state, action, environment> *GetUnitGroup() { return group; }
+	void SetUnitGroup(UnitGroup<state, action, environment> *_group)
+		{
+			// If we're already set to the given group then do nothing
+			if (_group == group)
+				return;
+		UnitGroup<state, action, environment> *tmp = group;
+			// Set the back pointer
+			group = _group;
+			// If we had a group before then move
+			if (tmp != 0)
+			{
+				tmp->RemoveUnit(this);
+				if (_group)
+					_group->AddUnit(this);
+			}
+		}
+private:
+		UnitGroup<state, action, environment> *group;
 };
 
 

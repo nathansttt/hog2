@@ -27,17 +27,11 @@
 
 #include "aStar.h"
 #include "float.h"
+#include "FPUtil.h"
 
 using namespace AStar3Util;
 static const bool verbose = false;
 //const int gMaxAbstraction = 0;
-
-inline double max(double a, double b)
-{
-	if (fgreater(a, b))
-		return a;
-	return b;
-}
 
 const char *aStar::getName()
 {

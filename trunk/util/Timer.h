@@ -23,6 +23,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef TIMER_H
+#define TIMER_H
+
 #include <stdint.h>
 #include <fstream>
 #ifdef OS_MAC
@@ -30,7 +33,7 @@
 #undef check
 #endif
 
-class Timer{
+class Timer {
 
 #ifndef OS_MAC
 
@@ -77,3 +80,5 @@ public:
 	double getElapsedTime(){return elapsedTime;}
 
 };
+
+#endif

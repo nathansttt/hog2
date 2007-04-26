@@ -42,6 +42,17 @@ void RandomUnit::UpdateLocation(xyLoc l, bool success)
 }
 
 /**
+* Make a random move.
+ *
+ * the random unit follows a certain direction for a random amount of time,
+ * and then picks a new direction. makeMove just returns the current direction.
+ */
+tDirection RandomerUnit::MakeMove(MapEnvironment *)
+{
+	return possibleDir[random()%9];
+}
+
+/**
 * Make a move.
  *
  * the billiard ball unit keeps following the same direction until either a collision

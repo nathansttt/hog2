@@ -45,7 +45,7 @@ bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-UnitSimulation<xyLoc, tDirection, MapAbstractionEnvironment*> *unitSim = 0;
+UnitSimulation<xyLoc, tDirection, MapEnvironment> *unitSim = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -70,7 +70,8 @@ void createSimulation()
 	else
 		map = new Map(gDefaultMap);
 
-	unitSim = new UnitSimulation<xyLoc, tDirection, MapAbstractionEnvironment *>(new MapAbstractionEnvironment(new mapCliqueAbstraction(map)));
+	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
+																																	(OccupancyInterface<xyLoc, tDirection>*)0);
 //	if (absType == 0)
 //		unitSim = new unitSimulation(new mapCliqueAbstraction(map));
 //	else if (absType == 1)
@@ -136,6 +137,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 		unitSim->StepTime(1.0/30.0);
 	}
 	unitSim->GetEnvironment()->OpenGLDraw();
+	for (int x = 0; x < 100; x++)
+	{
+		if (unitSim->GetUnit(x))
+		{
+			Unit<xyLoc, tDirection, MapEnvironment> *u = unitSim->GetUnit(x);
+			u->OpenGLDraw(unitSim->GetEnvironment());
+		}
+		else break;
+	}
 	
 //	if (viewport == 0)
 //	{
@@ -235,8 +245,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		case '{': unitSim->setSimulationPaused(true); unitSim->offsetDisplayTime(-0.5); break;
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
-			if (unitSim)
-				unitSim->GetEnvironment()->GetMapAbstraction()->toggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
+			//if (unitSim)
+			//	unitSim->GetEnvironment()->GetMapAbstraction()->toggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
 			break;
 	}
 }
@@ -246,6 +256,9 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	Map *m = unitSim->GetEnvironment()->GetMap();
 	RandomerUnit *r = new RandomerUnit(random()%m->getMapWidth(), random()%m->getMapHeight());
 	int id = unitSim->AddUnit(r);
+	xyLoc loc;
+	r->GetLocation(loc);
+	printf("Added unit %d at (%d, %d)\n", id, loc.x, loc.y);
 //	int x1, y1, x2, y2;
 //	unit *u;
 //	unitSim->getRandomLocation(x1, y1);

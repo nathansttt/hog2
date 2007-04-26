@@ -28,6 +28,21 @@
 #ifndef RESERVATIONPROVIDER_H
 #define RESERVATIONPROVIDER_H
 
+#include <stdint.h>
+
+template <class state, class action>
+class OccupancyInterface {
+public:
+	virtual ~OccupancyInterface() {}
+	virtual void SetStateOccupied(state, bool) = 0;
+	virtual bool GetStateOccupied(state) = 0;
+	virtual bool CanMove(state, state);
+	virtual bool CanMove(state, state, double, uint32_t ID) = 0;
+	virtual bool ReserveMove(state, state, double, uint32_t ID) = 0;
+	virtual bool ClearMove(state, state, double, uint32_t ID) = 0;
+	virtual bool ClearStates() = 0;
+};
+
 #include "graph.h"
 class unit;
 
@@ -46,3 +61,4 @@ public:
 #include "unit.h"
 
 #endif
+

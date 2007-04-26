@@ -105,6 +105,23 @@ tDirection MapEnvironment::GetAction(xyLoc s1, xyLoc s2)
 	return (tDirection)result;
 }
 
+xyLoc MapEnvironment::ApplyAction(xyLoc s, tDirection dir)
+{
+	switch (dir)
+	{
+		case kN: s.y+=1; break;
+		case kS: s.y-=1; break;
+		case kE: s.x+=1; break;
+		case kW: s.x-=1; break;
+		case kNW: s.y+=1; s.x-=1; break;
+		case kSW: s.y-=1; s.x-=1; break;
+		case kNE: s.y+=1; s.x+=1; break;
+		case kSE: s.y-=1; s.x+=1; break;
+		default: break;
+	}
+	return s;
+}
+
 double MapEnvironment::HCost(xyLoc l1, xyLoc l2)
 {
 	double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));

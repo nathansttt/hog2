@@ -12,16 +12,6 @@
 
 static bool verbose = false;
 
-inline double min(double i, double j)
-{
-	return (fless(i,j))?i:j;
-}
-
-inline double max(double i, double j)
-{
-	return (fgreater(i,j))?i:j;
-}
-
 FringeSearch::FringeSearch()
 :searchAlgorithm()
 {

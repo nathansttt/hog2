@@ -17,11 +17,11 @@
 * A simple map-based unit
  */
 
-class MapUnit : public Unit<xyLoc, tDirection, MapEnvironment *> {
+class MapUnit : public Unit<xyLoc, tDirection, MapEnvironment> {
 public:
 	MapUnit(int x, int y)
 	:loc(x, y) { r = 1.0; g = 0; b = 0;}
-	virtual tDirection MakeMove(MapEnvironment *) = 0;
+
 	virtual void UpdateLocation(xyLoc l, bool)
 	{ loc = l; }
 	virtual void GetLocation(xyLoc &l)

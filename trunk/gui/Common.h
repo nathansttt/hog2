@@ -23,7 +23,7 @@
 #include "mapAbstraction.h"
 #include "unitSimulation.h"
 #include "glUtil.h"
-#include "statCollection.h"
+#include "StatCollection.h"
 
 #ifndef COMMON_H
 #define COMMON_H

@@ -53,7 +53,6 @@ public:
 	const char *GetName() { return "RandomerUnit"; }
 	
 	tDirection MakeMove(MapEnvironment *);
-	void UpdateLocation(xyLoc, bool);
 };
 
 /**

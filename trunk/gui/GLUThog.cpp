@@ -48,7 +48,7 @@ pRecContext getCurrentContext()
 	return pContextInfo;
 }
 
-int main(int argc, char** argv)
+void RunHOGGUI(int argc, char** argv)
 {
   // Init traj global
   startTrajRecap = false;
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 	
 	installCommandLineHandler(processFramesPerSecond, "-fps", "-fps <int>", "[System Option] Specifies the maximum frames per second.");
 	initializeHandlers();
-	processCommandLineArgs(argc, argv);
+	ProcessCommandLineArgs(argc, argv);
 	
 	pContextInfo = new recContext;
 	//resetCamera(&(pContextInfo->camera));
@@ -402,15 +402,15 @@ void resizeWindow(int x, int y)
  */
 void resizeGL(pRecContext pContextInfo, CGRect viewRect)
 {
-    	if (!pContextInfo)
-        	return;
+	if (!pContextInfo)
+			return;
 
 	pContextInfo->camera.viewOriginX = viewRect.origin.x;
 	pContextInfo->camera.viewOriginY = viewRect.origin.y;
 	pContextInfo->camera.viewWidth = (GLint)viewRect.size.width;
 	pContextInfo->camera.viewHeight = (GLint)viewRect.size.height;
-	glViewport (0, 0, pContextInfo->camera.viewWidth, pContextInfo->camera.viewHeight);
-	updateProjection (pContextInfo);  // update projection matrix
+	glViewport(0, 0, pContextInfo->camera.viewWidth, pContextInfo->camera.viewHeight);
+	updateProjection(pContextInfo);  // update projection matrix
 }
 
 
@@ -424,7 +424,6 @@ void updateProjection(pRecContext pContextInfo)
 {
 	GLdouble ratio, radians, wd2;
 	GLdouble left, right, top, bottom, near, far;
-
 
 	// set projection
 	glMatrixMode (GL_PROJECTION);
@@ -462,9 +461,8 @@ void updateProjection(pRecContext pContextInfo)
 /**
  * Updates the viewpoint of the model.
  */
-void updateModelView (pRecContext pContextInfo)
+void updateModelView(pRecContext pContextInfo)
 {
-	
 	// move view
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity ();
@@ -722,10 +720,10 @@ void drawGL (pRecContext pContextInfo)
 	updateModelView (pContextInfo);
 
 	glDisable(GL_LIGHTING);
-	pContextInfo->unitLayer->getMap()->openGLDraw(kPolygons);
+	pContextInfo->unitLayer->getMap()->OpenGLDraw(kPolygons);
 	if (pContextInfo->unitLayer->getMapAbstractionDisplay())
 	{
-		pContextInfo->unitLayer->getMapAbstractionDisplay()->openGLDraw();
+		pContextInfo->unitLayer->getMapAbstractionDisplay()->OpenGLDraw();
 	}
 	glEnable(GL_LIGHTING);
 
@@ -736,7 +734,7 @@ void drawGL (pRecContext pContextInfo)
 	lastTime = currTime;
 	if (pContextInfo->drawing)
 	{
-		pContextInfo->unitLayer->openGLDraw();
+		pContextInfo->unitLayer->OpenGLDraw();
 		if (pContextInfo->info) {
 			glDisable(GL_LIGHTING);
 			drawInfo (pContextInfo);
@@ -771,10 +769,10 @@ void drawGL (pRecContext pContextInfo)
 	updateModelView (pContextInfo);
 
 	glDisable(GL_LIGHTING);
-	pContextInfo->unitLayer->getMap()->openGLDraw(kPolygons);
+	pContextInfo->unitLayer->getMap()->OpenGLDraw(kPolygons);
 	if (pContextInfo->unitLayer->getMapAbstractionDisplay())
 	{
-		pContextInfo->unitLayer->getMapAbstractionDisplay()->openGLDraw();
+		pContextInfo->unitLayer->getMapAbstractionDisplay()->OpenGLDraw();
 	}
 	glEnable(GL_LIGHTING);
 
@@ -785,7 +783,7 @@ void drawGL (pRecContext pContextInfo)
 	lastTime = currTime;
 	if (pContextInfo->drawing)
 	{
-		pContextInfo->unitLayer->openGLDraw();
+		pContextInfo->unitLayer->OpenGLDraw();
 		if (pContextInfo->info) {
 			glDisable(GL_LIGHTING);
 			drawInfo (pContextInfo);
