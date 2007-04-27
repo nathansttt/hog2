@@ -251,13 +251,16 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 //}
 
 template<class state, class action, class environment>
-void UnitSimulation<state, action, environment>::StepTime(double)
+void UnitSimulation<state, action, environment>::StepTime(double timeStep)
 {
 	if (paused)
 		return;
 	
 	stats.addStat("simulationTime", "unitSimulation", currTime);
-//	doPreTimestepCalc();
+	for (unsigned int x = 0; x < units.size(); x++)
+		StepUnitTime(units[x], timeStep);
+	currTime += timeStep;
+	//	doPreTimestepCalc();
 //	currTime += amount;
 //	doTimestepCalc();
 //	doPostTimestepCalc();
@@ -288,17 +291,17 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	moveThinking = t.endTimer();
 	theUnit->lastMove = where;
 	
-	theUnit->thinkTime += moveThinking;
-	stats.addStat("MakeMoveThinkingTime", u->getName(), moveThinking);
+//	theUnit->thinkTime += moveThinking;
+	stats.addStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
 	
 	bool success = MakeUnitMove(theUnit, where, moveTime);
 
 	t.startTimer();
-	u->GetUnitGroup()->UpdateLocation(theUnit->currentState, success);
+	u->GetUnitGroup()->UpdateLocation(theUnit->agent, theUnit->currentState, success);
 	locThinking = t.endTimer();
 
-	theUnit->thinkTime += locThinking;
-	stats.addStat("UpdateLocationThinkingTime", u->getName(), locThinking);
+//	theUnit->thinkTime += locThinking;
+	stats.addStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
 
 	switch (stepType)
 	{
@@ -313,8 +316,8 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 			break;
 	}
 	
-	u->getUnitGroup()->logStats(&stats);
-	u->logStats(&stats);
+	//u->GetUnitGroup()->logStats(&stats);
+	//u->logStats(&stats);
 }
 
 template<class state, class action, class environment>
