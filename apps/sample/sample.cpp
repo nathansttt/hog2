@@ -28,8 +28,8 @@
 #include "common.h"
 #include "sample.h"
 //#include "aStar.h"
-//#include "praStar.h"
-//#include "SearchUnit.h"
+#include "praStar.h"
+#include "SearchUnit.h"
 //#include "sharedAMapGroup.h"
 #include "mapCliqueAbstraction.h"
 //#include "mapQuadTreeAbstraction.h"
@@ -45,7 +45,7 @@ bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-UnitMapSimulation *unitSim = 0;
+UnitAbsMapSimulation *unitSim = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -70,8 +70,11 @@ void createSimulation()
 	else
 		map = new Map(gDefaultMap);
 
-	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
-																																	(OccupancyInterface<xyLoc, tDirection>*)0);
+	unitSim = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new mapCliqueAbstraction(map)),
+																																		 (OccupancyInterface<xyLoc, tDirection>*)0);
+	unitSim->SetStepType(kMinTime);
+//	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
+//																																 (OccupancyInterface<xyLoc, tDirection>*)0);
 //	if (absType == 0)
 //		unitSim = new unitSimulation(new mapCliqueAbstraction(map));
 //	else if (absType == 1)
@@ -141,7 +144,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 	{
 		if (unitSim->GetUnit(x))
 		{
-			Unit<xyLoc, tDirection, MapEnvironment> *u = unitSim->GetUnit(x);
+			Unit<xyLoc, tDirection, AbsMapEnvironment> *u = unitSim->GetUnit(x);
 			u->OpenGLDraw(unitSim->GetEnvironment());
 		}
 		else break;
@@ -230,19 +233,26 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '\t': SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID)); break;
-		case 'p': //unitSim->setSimulationPaused(!unitSim->getSimulationPaused()); break;
+		case '\t':
+			if (mod != kShiftDown)
+				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
+			else
+			{
+				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+			}
+			break;
+		case 'p': unitSim->SetPaused(!unitSim->GetPaused()); break;
 		case 'o':
-//			if (unitSim->getSimulationPaused())
-//			{
-//				unitSim->setSimulationPaused(false);
-//				unitSim->advanceTime(.1);
-//				unitSim->setSimulationPaused(true);
-//			}
+			if (unitSim->GetPaused())
+			{
+				unitSim->SetPaused(false);
+				unitSim->StepTime(1.0/30.0);
+				unitSim->SetPaused(true);
+			}
 			break;
 		case ']': absType = (absType+1)%3; break;
 		case '[': absType = (absType+4)%3; break;
-//		case '{': unitSim->setSimulationPaused(true); unitSim->offsetDisplayTime(-0.5); break;
+//		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
 			//if (unitSim)
@@ -254,11 +264,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 {
 	Map *m = unitSim->GetEnvironment()->GetMap();
-	RandomerUnit *r = new RandomerUnit(random()%m->getMapWidth(), random()%m->getMapHeight());
-	int id = unitSim->AddUnit(r);
-	xyLoc loc;
-	r->GetLocation(loc);
-	printf("Added unit %d at (%d, %d)\n", id, loc.x, loc.y);
+	
+	SearchUnit *su1 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), 0, 0);
+	SearchUnit *su2 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), su1, new praStar());
+	unitSim->AddUnit(su1);
+	unitSim->AddUnit(su2);
+	
+//	RandomerUnit *r = new RandomerUnit(random()%m->getMapWidth(), random()%m->getMapHeight());
+//	int id = unitSim->AddUnit(r);
+//	xyLoc loc;
+//	r->GetLocation(loc);
+//	printf("Added unit %d at (%d, %d)\n", id, loc.x, loc.y);
+
 //	int x1, y1, x2, y2;
 //	unit *u;
 //	unitSim->getRandomLocation(x1, y1);

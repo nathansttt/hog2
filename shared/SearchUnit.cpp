@@ -34,6 +34,7 @@ static const bool verbose = false;
 SearchUnit::SearchUnit(int _x, int _y, AbsMapUnit *_target, SearchAlgorithm *alg)
 :AbsMapUnit(_x, _y)
 {
+	target = _target;
 	algorithm = alg;
 	s_algorithm = 0;
 	spread_cache = 0;
@@ -174,7 +175,8 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, simula
 				printf("STAY ON TARGET!\n");
 				printf("%p target time %1.4f\n", (void*)this, targetTime);
 			}
-			targetTime = simInfo->getSimulationTime();
+			if (simInfo)
+				targetTime = simInfo->getSimulationTime();
 		}
 		onTarget = true;
 //		return kStay;

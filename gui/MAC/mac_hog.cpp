@@ -1264,7 +1264,7 @@ void setPortCamera(pRecContext pContextInfo, int currPort)
 void setViewport(pRecContext pContextInfo, int currPort)
 {
 	const double ratios[4][4][4] =
-  {{{0, 1, 0, 1}},
+  {{{0, 1, 0, 1}}, // x, width%, y, height%
 	 {{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
 	 {{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
 	 {{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
