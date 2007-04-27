@@ -1,5 +1,5 @@
 /*
- * $Id: searchAlgorithm.h,v 1.8 2006/10/18 23:52:25 nathanst Exp $
+ * $Id: SearchAlgorithm.h,v 1.8 2006/10/18 23:52:25 nathanst Exp $
  *
  *  Hierarchical Open Graph File
  *
@@ -37,10 +37,10 @@
  * A generic algorithm which can be used for pathfinding.
  */
 
-class searchAlgorithm {
+class SearchAlgorithm {
 public:
-	searchAlgorithm() { nodesExpanded = nodesTouched = 0; }
-	virtual ~searchAlgorithm() {}
+	SearchAlgorithm() { nodesExpanded = nodesTouched = 0; }
+	virtual ~SearchAlgorithm() {}
 	virtual const char *getName() = 0;
 	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0) = 0;
 	int getNodesExpanded() { return nodesExpanded; }
@@ -52,6 +52,6 @@ public:
 	int nodesTouched;
 };
 
-extern void doRandomPath(graphAbstraction *aMap, searchAlgorithm *sa, bool repeat = false);
+extern void doRandomPath(graphAbstraction *aMap, SearchAlgorithm *sa, bool repeat = false);
 
 #endif

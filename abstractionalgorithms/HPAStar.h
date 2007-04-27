@@ -8,7 +8,7 @@
 #ifndef HPASTAR_H
 #define HPASTAR_H
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "clusterAbstraction.h"
 
 /** 
@@ -18,7 +18,7 @@
  * doing any pathfinding
  */
 
-class hpaStar : public searchAlgorithm {
+class hpaStar : public SearchAlgorithm {
 public:
 	
 	// From HPA* original code - smoothwizard.h

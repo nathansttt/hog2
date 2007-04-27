@@ -31,7 +31,7 @@
 
 int unitGroup::groupID = 0;
 
-unitGroup::unitGroup(mapProvider *)
+unitGroup::unitGroup(MapProvider *)
 {
   id = unitGroup::groupID++;
 }
@@ -69,12 +69,12 @@ void unitGroup::removeUnit(unit *u)
 	}
 }
 
-tDirection unitGroup::makeMove(unit *u, mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
+tDirection unitGroup::makeMove(unit *u, MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
 {
 	return u->makeMove(mp, rp, simInfo);
 }
 
-void unitGroup::OpenGLDraw(mapProvider *mp, simulationInfo *)
+void unitGroup::OpenGLDraw(MapProvider *mp, simulationInfo *)
 {
 	Map *map = mp->getMap();
 	glBegin(GL_LINES);
@@ -91,7 +91,7 @@ void unitGroup::OpenGLDraw(mapProvider *mp, simulationInfo *)
 }
 
 /** Inform the given unit of its current/new location */
-void unitGroup::updateLocation(unit *u, mapProvider *, int _x, int _y,
+void unitGroup::updateLocation(unit *u, MapProvider *, int _x, int _y,
 															 bool success, simulationInfo *simInfo)
 {
 	u->updateLocation(_x, _y, success, simInfo);

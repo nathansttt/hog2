@@ -31,7 +31,7 @@
 #include "mapCliqueAbstraction.h"
 #include "mapFlatAbstraction.h"
 
-sharedAMapGroup::sharedAMapGroup(mapProvider *mp)
+sharedAMapGroup::sharedAMapGroup(MapProvider *mp)
 :unitGroup(mp), aMap(0), seen(0)
 {
 	visRadius = 2;
@@ -58,13 +58,13 @@ sharedAMapGroup::~sharedAMapGroup()
 // In this case we are maintaining our own private
 // copy of the map, and arbitrating how much lookahead each
 // unit gets
-tDirection sharedAMapGroup::makeMove(unit *u, mapProvider *, reservationProvider *rp, simulationInfo *simInfo)
+tDirection sharedAMapGroup::makeMove(unit *u, MapProvider *, reservationProvider *rp, simulationInfo *simInfo)
 {
 	// we now provide the map!
 	return u->makeMove(this, rp, simInfo);
 }
 
-void sharedAMapGroup::updateLocation(unit *u, mapProvider *mp, int _x, int _y, bool success, simulationInfo *simInfo)
+void sharedAMapGroup::updateLocation(unit *u, MapProvider *mp, int _x, int _y, bool success, simulationInfo *simInfo)
 {
 	Map *worldMap = mp->getMap();
 	int rad = visRadius; // how far we can see -- square
@@ -121,7 +121,7 @@ void sharedAMapGroup::updateLocation(unit *u, mapProvider *mp, int _x, int _y, b
 		aMap->repairAbstraction();
 }
 
-void sharedAMapGroup::OpenGLDraw(mapProvider *, simulationInfo *)
+void sharedAMapGroup::OpenGLDraw(MapProvider *, simulationInfo *)
 {
 	glBegin(GL_QUADS);
 	glColor3f(.25, .25, .25); // kOutOfBounds

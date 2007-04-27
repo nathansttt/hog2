@@ -28,7 +28,7 @@
 #ifndef CORRIDORASTAR_H
 #define CORRIDORASTAR_H
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "graph.h"
 #include "heap.h"
 
@@ -38,7 +38,7 @@ if it is to be used properly. After each getPath call the corridor is reset. If
 no corridor is defined, it will explore all nodes.
 */
 
-class corridorAStar : public searchAlgorithm {
+class corridorAStar : public SearchAlgorithm {
 public:
 	corridorAStar();
 	virtual ~corridorAStar() {}

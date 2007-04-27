@@ -29,7 +29,7 @@
 #include "sample.h"
 //#include "aStar.h"
 //#include "praStar.h"
-//#include "searchUnit.h"
+//#include "SearchUnit.h"
 //#include "sharedAMapGroup.h"
 #include "mapCliqueAbstraction.h"
 //#include "mapQuadTreeAbstraction.h"
@@ -45,7 +45,7 @@ bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-UnitSimulation<xyLoc, tDirection, MapEnvironment> *unitSim = 0;
+UnitMapSimulation *unitSim = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -269,8 +269,8 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //		case kShiftDown: unitSim->addUnit(u=new randomUnit(x1, y1)); break;
 //		default:
 //			unit *targ;
-//			unitSim->addUnit(targ = new unit(x2, y2));
-//			unitSim->addUnit(u=new searchUnit(x1, y1, targ, new praStar())); break;
+//	unitSim->addUnit(targ = new unit(x2, y2));
+//	unitSim->addUnit(u=new SearchUnit(x1, y1, targ, new praStar())); break;
 //	}
 //	delete plot;
 //	plot = new Plotting::Plot2D();
@@ -299,7 +299,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier mod, char
 //		//aStar *pra = new aStar();
 //		
 //		unitSim->addUnit(u2);
-//		u = new searchUnit(xx1, yy1, u2, pra);
+//		u = new SearchUnit(xx1, yy1, u2, pra);
 //		// just set the group of the unit, and it will share a map with those
 //		// units.
 //		unitSim->getUnitGroup(1)->addUnit(u);
@@ -335,7 +335,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //				//praStar *pra = new praStar(); pra->setPartialPathLimit(4);
 //				aStar *pra = new aStar();
 //				unitSim->addUnit(u2);
-//				u = new searchUnit(px1, py1, u2, pra);
+//				u = new SearchUnit(px1, py1, u2, pra);
 //				unitSim->addUnit(u);
 //				u->setSpeed(0.5); // time to go 1 distance						
 //			}

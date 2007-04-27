@@ -32,7 +32,7 @@
 static const int verbose = 0;
 
 praStar2::praStar2()
-:searchAlgorithm()
+:SearchAlgorithm()
 {
 	partialLimit = -1;
 	expandSearchRadius = true;

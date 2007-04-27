@@ -30,7 +30,7 @@
 const bool verbose = false;
 
 praStar::praStar()
-:searchAlgorithm()
+:SearchAlgorithm()
 {
 	partialLimit = -1;
 	fixedPlanLevel = -1;

@@ -25,12 +25,12 @@
  *
  */
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 
 #ifndef SPREADEXECSEARCHALGORITHM_H
 #define SPREADEXECSEARCHALGORITHM_H
 
-class spreadExecSearchAlgorithm : public searchAlgorithm {
+class spreadExecSearchAlgorithm : public SearchAlgorithm {
 public:
 	spreadExecSearchAlgorithm() { }
 	virtual const char *getName() { return "unnamed"; }

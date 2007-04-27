@@ -64,7 +64,6 @@
 		C4D3B67B0BCEE7B300FCD84C /* HumanUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4680BCEE7B200FCD84C /* HumanUnit.cpp */; };
 		C4D3B67C0BCEE7B300FCD84C /* PathGeneration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B46A0BCEE7B200FCD84C /* PathGeneration.cpp */; };
 		C4D3B67D0BCEE7B300FCD84C /* PatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B46C0BCEE7B200FCD84C /* PatrolUnit.cpp */; };
-		C4D3B67E0BCEE7B300FCD84C /* PRAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B46E0BCEE7B200FCD84C /* PRAStarUnit.cpp */; };
 		C4D3B67F0BCEE7B300FCD84C /* RewardUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4700BCEE7B200FCD84C /* RewardUnit.cpp */; };
 		C4D3B6800BCEE7B300FCD84C /* SearchUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4720BCEE7B200FCD84C /* SearchUnit.cpp */; };
 		C4D3B6810BCEE7B300FCD84C /* SharedAMapGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4740BCEE7B200FCD84C /* SharedAMapGroup.cpp */; };
@@ -89,6 +88,7 @@
 		C4D3C4170BDD3BD800FCD84C /* RandomUnits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C4160BDD3BD800FCD84C /* RandomUnits.cpp */; };
 		C4D3C41A0BDD3BE600FCD84C /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C4190BDD3BE600FCD84C /* RHRUnit.cpp */; };
 		C4D3C43C0BDD4F4500FCD84C /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C43B0BDD4F4400FCD84C /* MapUnit.cpp */; };
+		C4D3C8360BE2902000FCD84C /* AbsMapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -721,6 +721,8 @@
 		C4D3C4190BDD3BE600FCD84C /* RHRUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RHRUnit.cpp; sourceTree = "<group>"; };
 		C4D3C43A0BDD4F4400FCD84C /* MapUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapUnit.h; sourceTree = "<group>"; };
 		C4D3C43B0BDD4F4400FCD84C /* MapUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MapUnit.cpp; sourceTree = "<group>"; };
+		C4D3C8340BE2902000FCD84C /* AbsMapUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbsMapUnit.h; sourceTree = "<group>"; };
+		C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AbsMapUnit.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -773,7 +775,7 @@
 				C4D3B27B0BCEE7B000FCD84C /* graph */,
 				C4D3B27E0BCEE7B000FCD84C /* graphalgorithms */,
 				C4D3B28D0BCEE7B000FCD84C /* gui */,
-				C4D3C5BC0BDFC2A100FCD84C /* mapabsalgorithms */,
+				C4D3C8330BE2900C00FCD84C /* absmapalgorithms */,
 				C4D3C4140BDD3BBE00FCD84C /* mapalgorithms */,
 				C4D3B4670BCEE7B200FCD84C /* shared */,
 				C4D3B4760BCEE7B200FCD84C /* simulation */,
@@ -1705,12 +1707,14 @@
 			path = ../../../mapalgorithms;
 			sourceTree = SOURCE_ROOT;
 		};
-		C4D3C5BC0BDFC2A100FCD84C /* mapabsalgorithms */ = {
+		C4D3C8330BE2900C00FCD84C /* absmapalgorithms */ = {
 			isa = PBXGroup;
 			children = (
+				C4D3C8340BE2902000FCD84C /* AbsMapUnit.h */,
+				C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */,
 			);
-			name = mapabsalgorithms;
-			path = ../../../mapabsalgorithms;
+			name = absmapalgorithms;
+			path = ../../../absmapalgorithms;
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
@@ -1814,7 +1818,6 @@
 				C4D3B67B0BCEE7B300FCD84C /* HumanUnit.cpp in Sources */,
 				C4D3B67C0BCEE7B300FCD84C /* PathGeneration.cpp in Sources */,
 				C4D3B67D0BCEE7B300FCD84C /* PatrolUnit.cpp in Sources */,
-				C4D3B67E0BCEE7B300FCD84C /* PRAStarUnit.cpp in Sources */,
 				C4D3B67F0BCEE7B300FCD84C /* RewardUnit.cpp in Sources */,
 				C4D3B6800BCEE7B300FCD84C /* SearchUnit.cpp in Sources */,
 				C4D3B6810BCEE7B300FCD84C /* SharedAMapGroup.cpp in Sources */,
@@ -1839,6 +1842,7 @@
 				C4D3C4170BDD3BD800FCD84C /* RandomUnits.cpp in Sources */,
 				C4D3C41A0BDD3BE600FCD84C /* RHRUnit.cpp in Sources */,
 				C4D3C43C0BDD4F4500FCD84C /* MapUnit.cpp in Sources */,
+				C4D3C8360BE2902000FCD84C /* AbsMapUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

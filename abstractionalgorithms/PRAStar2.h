@@ -29,7 +29,7 @@
 #ifndef PRASTAR2_H
 #define PRASTAR2_H
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "heap.h"
 #include "corridorAStar.h"
 
@@ -37,7 +37,7 @@
  * The pra* search algorithm which does partial pathfinding using abstraction.
  */
 
-class praStar2 : public searchAlgorithm {
+class praStar2 : public SearchAlgorithm {
 	
 public:
 	praStar2();

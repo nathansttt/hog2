@@ -332,7 +332,7 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	{
 		success = true;
 		theUnit->currentState = newState;
-		moveCost = env->GCost(oldState, newState);
+		moveCost = env->GCost(oldState, newState)*theUnit->agent->GetSpeed();
 
 		if (envInfo)
 		{
@@ -352,7 +352,7 @@ public:
 
 //
 //
-//class unitSimulation : public mapProvider, reservationProvider, public simulationInfo {
+//class unitSimulation : public MapProvider, reservationProvider, public simulationInfo {
 //public:
 //	unitSimulation(mapAbstraction *, bool keepStats = false);
 //	virtual ~unitSimulation();

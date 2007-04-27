@@ -31,7 +31,7 @@
 #include "map.h"
 #include "mapAbstraction.h"
 #include "reservationProvider.h"
-#include "mapProvider.h"
+#include "MapProvider.h"
 #include "unitSimulation.h"
 #include "StatCollection.h"
 
@@ -98,21 +98,21 @@ class simulationInfo;
 
 class unitGroup {
 public:
-	unitGroup(mapProvider *);
+	unitGroup(MapProvider *);
 	virtual ~unitGroup() {}
-	virtual tDirection makeMove(unit *u, mapProvider *, reservationProvider *, simulationInfo *simInfo);
+	virtual tDirection makeMove(unit *u, MapProvider *, reservationProvider *, simulationInfo *simInfo);
 	/** gives the unit group time to think on a regular basis. In a synchronous simluation
 		this will be called once at the beginning of each timestep. */
-	virtual void think(mapProvider *) { }
+	virtual void think(MapProvider *) { }
 	virtual const char *getName() { return "UnitGroupx"; }
 
-	virtual void OpenGLDraw(mapProvider *, simulationInfo *);
+	virtual void OpenGLDraw(MapProvider *, simulationInfo *);
 	virtual void addUnit(unit *);
 	virtual void removeUnit(unit *);
 	virtual mapAbstraction *getMapAbstraction();
 	
 	/** Inform the given unit of its current/new location */
-	virtual void updateLocation(unit *, mapProvider *, int _x, int _y, bool, simulationInfo *);
+	virtual void updateLocation(unit *, MapProvider *, int _x, int _y, bool, simulationInfo *);
 	/** Is the group done with racing? */
 	virtual bool done();
 	/** Lets the unit group do what it needs to reset a trial */

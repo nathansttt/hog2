@@ -28,14 +28,14 @@
 #define PRASTAR_H
 
 #include <iostream>
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "heap.h"
 
 /**
  * The pra* search algorithm which does partial pathfinding using abstraction.
  */
 
-class praStar : public searchAlgorithm {
+class praStar : public SearchAlgorithm {
 
 public:
 	praStar();

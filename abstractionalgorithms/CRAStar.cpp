@@ -37,7 +37,7 @@ const int MAX_INT = 2147483647;
 static const int verbose = 0;
 
 craStar::craStar()
-:searchAlgorithm()
+:SearchAlgorithm()
 {
 	partialLimit = -1;
 	expandSearchRadius = true;

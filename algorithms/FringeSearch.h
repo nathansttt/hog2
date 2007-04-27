@@ -7,7 +7,7 @@
  *
  */
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 
 #ifndef FRINGESEARCH_H
 #define FRINGESEARCH_H
@@ -27,7 +27,7 @@ public:
 	virtual double h(uint32_t node1, uint32_t node2) = 0;
 };
 
-class FringeSearch : public searchAlgorithm {
+class FringeSearch : public SearchAlgorithm {
 public:
 	FringeSearch();
 	const char *getName() { return bpmx?"BPMXFringeSearch":"FringeSearch"; }

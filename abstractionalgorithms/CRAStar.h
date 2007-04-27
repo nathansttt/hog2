@@ -29,7 +29,7 @@
 #ifndef CRASTAR_H
 #define CRASTAR_H
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "heap.h"
 #include "corridorAStar.h"
 
@@ -37,7 +37,7 @@
 * The pra* search algorithm which does partial pathfinding using abstraction.
  */
 
-class craStar : public searchAlgorithm {
+class craStar : public SearchAlgorithm {
 	
 public:
 	// From HPA* original code - smoothwizard.h

@@ -25,7 +25,7 @@
  *
  */
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "heap.h"
 #include "corridorAStar.h"
 

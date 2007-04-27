@@ -27,7 +27,7 @@
 #ifndef ASTAROld_H
 #define ASTAROld_H
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "heap.h"
 
 // this is a "classic" implementation of A*
@@ -38,7 +38,7 @@
 * A sample A* implementation.
  */
 
-class aStarOld : public searchAlgorithm {
+class aStarOld : public SearchAlgorithm {
 	
 public:
 	aStarOld(double _w = 1.0, bool _doPathDraw = true);

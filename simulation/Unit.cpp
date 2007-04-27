@@ -164,7 +164,7 @@ void unit::setUnitGroup(unitGroup *_group)
 * next step. Overload this function to define your own unit movement. The default
 * action is to stay put.
 */
-tDirection unit::makeMove(mapProvider *, reservationProvider *, simulationInfo *)
+tDirection unit::makeMove(MapProvider *, reservationProvider *, simulationInfo *)
 {
 	return kStay;
 }
@@ -219,7 +219,7 @@ void unit::getOpenGLLocation(Map *map, GLdouble &_x, GLdouble &_y, GLdouble &_z,
  *
  * Draw the unit using openGL. Overload this if you want a custom look for the unit.
  */
-void unit::OpenGLDraw(mapProvider *mp, simulationInfo *)
+void unit::OpenGLDraw(MapProvider *mp, simulationInfo *)
 {
 	Map *map = mp->getMap();
 	GLdouble xx, yy, zz, rad;

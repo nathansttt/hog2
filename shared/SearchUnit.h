@@ -1,5 +1,5 @@
 /*
- * $Id: searchUnit.h,v 1.13 2006/09/18 06:19:31 nathanst Exp $
+ * $Id: SearchUnit.h,v 1.13 2006/09/18 06:19:31 nathanst Exp $
  *
  *  Hierarchical Open Graph File
  *
@@ -26,38 +26,45 @@
 
 #include "unit.h"
 #include "map.h"
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "spreadExecSearchAlgorithm.h"
+#include "AbsMapUnit.h"
 
-#ifndef searchUnit_H
-#define searchUnit_H
+#ifndef SearchUnit_H
+#define SearchUnit_H
 
 /**
-* A general unit which collects path information from a searchAlgorithm and
+* A general unit which collects path information from a SearchAlgorithm and
 * incrementally executes that path in the world
 */
 
-class searchUnit : public unit {
+class SearchUnit : public AbsMapUnit {
 public:
-	searchUnit(int x, int y, unit *target, searchAlgorithm *alg);
-	searchUnit(int x, int y, unit *target, spreadExecSearchAlgorithm *alg);
-	searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg);
-	searchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, searchAlgorithm *alg);
-	virtual ~searchUnit();
-	virtual const char *getName() { return algorithm->getName(); }
-	virtual searchAlgorithm* getAlgorithm() { return algorithm; }
+	SearchUnit(int x, int y, AbsMapUnit *target, SearchAlgorithm *alg);
+//	SearchUnit(int x, int y, unit *target, spreadExecSearchAlgorithm *alg);
+//	SearchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, SearchAlgorithm *alg);
+//	SearchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, SearchAlgorithm *alg);
+	virtual ~SearchUnit();
+	virtual const char *GetName() { return algorithm->getName(); }
+	virtual SearchAlgorithm* getAlgorithm() { return algorithm; }
 	//void setUnitSimulation(unitSimulation *_US) { US = _US; algorithm->setSimulationEnvironment(US); }
 	virtual bool done() { return onTarget; }
-	
+
+	AbsMapUnit *getTarget() { return target; }
+	virtual void setTarget(AbsMapUnit *u) { target = u; }
+
 	//using unit::makeMove;
 	// this is where the World says you are  
-	virtual tDirection makeMove(mapProvider *, reservationProvider *, simulationInfo *simInfo); 
+	virtual tDirection MakeMove(AbsMapEnvironment *ame)
+	{ return makeMove(ame->GetMapAbstraction(), 0, 0); }
+	virtual tDirection makeMove(MapProvider *, reservationProvider *, simulationInfo *simInfo); 
 	
+	void UpdateLocation(xyLoc l, bool success) { updateLocation(l.x, l.y, success, 0); }
 	virtual void updateLocation(int _x, int _y, bool, simulationInfo *);
-	virtual void OpenGLDraw(mapProvider *, simulationInfo *);
+	virtual void OpenGLDraw(AbsMapEnvironment *);
 	//void printRoundStats(FILE *f);
-	void logStats(StatCollection *stats);
-	void logFinalStats(StatCollection *stats);
+	void LogStats(StatCollection *stats);
+	void LogFinalStats(StatCollection *stats);
 protected:
 	virtual void addPathToCache(path *p);
 	bool getCachedMove(tDirection &dir);
@@ -65,9 +72,12 @@ protected:
 	int nodesTouched;
 	std::vector<tDirection> moves;
 	//	path *p;
-	searchAlgorithm *algorithm;
+	SearchAlgorithm *algorithm;
 	spreadExecSearchAlgorithm *s_algorithm;
 	path *spread_cache;
+
+	AbsMapUnit *target;
+
 	double targetTime;
 	bool onTarget;
 };

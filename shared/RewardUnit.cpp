@@ -33,7 +33,7 @@ rewardUnit::rewardUnit(int _x, int _y)
 	setObjectType(kIncidentalUnit);
 }
 
-void rewardUnit::OpenGLDraw(mapProvider *mp, simulationInfo *)
+void rewardUnit::OpenGLDraw(MapProvider *mp, simulationInfo *)
 {
 	Map *map = mp->getMap();
 	GLdouble xx, yy, zz, rad;
@@ -55,7 +55,7 @@ void rewardSeekingUnit::receiveReward(double amount)
 	printf("%s got reward %3.2f!!\n", getName(), amount);
 }
 
-tDirection rewardSeekingUnit::makeMove(mapProvider *mp, reservationProvider *, simulationInfo *)
+tDirection rewardSeekingUnit::makeMove(MapProvider *mp, reservationProvider *, simulationInfo *)
 {
 	mapAbstraction *aMap = mp->getMapAbstraction();
 	if (moves.size() > 0)
@@ -92,7 +92,7 @@ double rewardSeekingUnit::goToRewardLoc(mapAbstraction *aMap, int which)
 	return pathCost;
 }
 
-void rewardSeekingUnit::OpenGLDraw(mapProvider *mp, simulationInfo *)
+void rewardSeekingUnit::OpenGLDraw(MapProvider *mp, simulationInfo *)
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = mp->getMap();
