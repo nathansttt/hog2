@@ -124,7 +124,7 @@ public:
 	void SetStepType(tTimestep step) { stepType = step; }
 	tTimestep GetStepType() { return stepType; }
 	void SetPaused(bool val) { paused = val; }
-	void GetPaused() { return paused; }
+	bool GetPaused() { return paused; }
 
 	/** setPenalty for thinking. Sets the multiplier used to penalize thinking time. */
 	void SetThinkingPenalty(double pen) { penalty = pen; }

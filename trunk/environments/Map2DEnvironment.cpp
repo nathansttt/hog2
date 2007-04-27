@@ -27,27 +27,27 @@ void MapEnvironment::GetSuccessors(xyLoc loc, std::vector<xyLoc> &neighbors)
 	{
 		down = true;
 		neighbors.push_back(xyLoc(loc.x, loc.y+1));
-		if ((map->getTerrainType(loc.x, loc.y-1) == kGround))
-		{
-			up = true;
-			neighbors.push_back(xyLoc(loc.x, loc.y-1));
-		}
-		if ((map->getTerrainType(loc.x-1, loc.y) == kGround))
-		{
-			if ((up && (map->getTerrainType(loc.x-1, loc.y-1) == kGround)))
-				neighbors.push_back(xyLoc(loc.x-1, loc.y-1));
-			if ((down && (map->getTerrainType(loc.x-1, loc.y+1) == kGround)))
-				neighbors.push_back(xyLoc(loc.x-1, loc.y+1));
-			neighbors.push_back(xyLoc(loc.x-1, loc.y));
-		}
-		if ((map->getTerrainType(loc.x+1, loc.y) == kGround))
-		{
-			if ((up && (map->getTerrainType(loc.x+1, loc.y-1) == kGround)))
-				neighbors.push_back(xyLoc(loc.x+1, loc.y-1));
-			if ((down && (map->getTerrainType(loc.x+1, loc.y+1) == kGround)))
-				neighbors.push_back(xyLoc(loc.x+1, loc.y+1));
-			neighbors.push_back(xyLoc(loc.x+1, loc.y));
-		}
+	}
+	if ((map->getTerrainType(loc.x, loc.y-1) == kGround))
+	{
+		up = true;
+		neighbors.push_back(xyLoc(loc.x, loc.y-1));
+	}
+	if ((map->getTerrainType(loc.x-1, loc.y) == kGround))
+	{
+		if ((up && (map->getTerrainType(loc.x-1, loc.y-1) == kGround)))
+			neighbors.push_back(xyLoc(loc.x-1, loc.y-1));
+		if ((down && (map->getTerrainType(loc.x-1, loc.y+1) == kGround)))
+			neighbors.push_back(xyLoc(loc.x-1, loc.y+1));
+		neighbors.push_back(xyLoc(loc.x-1, loc.y));
+	}
+	if ((map->getTerrainType(loc.x+1, loc.y) == kGround))
+	{
+		if ((up && (map->getTerrainType(loc.x+1, loc.y-1) == kGround)))
+			neighbors.push_back(xyLoc(loc.x+1, loc.y-1));
+		if ((down && (map->getTerrainType(loc.x+1, loc.y+1) == kGround)))
+			neighbors.push_back(xyLoc(loc.x+1, loc.y+1));
+		neighbors.push_back(xyLoc(loc.x+1, loc.y));
 	}
 }
 
@@ -58,27 +58,27 @@ void MapEnvironment::GetActions(xyLoc loc, std::vector<tDirection> &actions)
 	{
 		down = true;
 		actions.push_back(kS);
-		if ((map->getTerrainType(loc.x, loc.y-1) == kGround))
-		{
-			up = true;
-			actions.push_back(kN);
-		}
-		if ((map->getTerrainType(loc.x-1, loc.y) == kGround))
-		{
-			if ((up && (map->getTerrainType(loc.x-1, loc.y-1) == kGround)))
-				actions.push_back(kNW);
-			if ((down && (map->getTerrainType(loc.x-1, loc.y+1) == kGround)))
-				actions.push_back(kSW);
-			actions.push_back(kW);
-		}
-		if ((map->getTerrainType(loc.x+1, loc.y) == kGround))
-		{
-			if ((up && (map->getTerrainType(loc.x+1, loc.y-1) == kGround)))
-				actions.push_back(kNE);
-			if ((down && (map->getTerrainType(loc.x+1, loc.y+1) == kGround)))
-				actions.push_back(kSE);
-			actions.push_back(kE);
-		}
+	}
+	if ((map->getTerrainType(loc.x, loc.y-1) == kGround))
+	{
+		up = true;
+		actions.push_back(kN);
+	}
+	if ((map->getTerrainType(loc.x-1, loc.y) == kGround))
+	{
+		if ((up && (map->getTerrainType(loc.x-1, loc.y-1) == kGround)))
+			actions.push_back(kNW);
+		if ((down && (map->getTerrainType(loc.x-1, loc.y+1) == kGround)))
+			actions.push_back(kSW);
+		actions.push_back(kW);
+	}
+	if ((map->getTerrainType(loc.x+1, loc.y) == kGround))
+	{
+		if ((up && (map->getTerrainType(loc.x+1, loc.y-1) == kGround)))
+			actions.push_back(kNE);
+		if ((down && (map->getTerrainType(loc.x+1, loc.y+1) == kGround)))
+			actions.push_back(kSE);
+		actions.push_back(kE);
 	}
 }
 
@@ -110,14 +110,14 @@ xyLoc MapEnvironment::ApplyAction(xyLoc s, tDirection dir)
 	xyLoc old = s;
 	switch (dir)
 	{
-		case kN: s.y+=1; break;
-		case kS: s.y-=1; break;
+		case kN: s.y-=1; break;
+		case kS: s.y+=1; break;
 		case kE: s.x+=1; break;
 		case kW: s.x-=1; break;
-		case kNW: s.y+=1; s.x-=1; break;
-		case kSW: s.y-=1; s.x-=1; break;
-		case kNE: s.y+=1; s.x+=1; break;
-		case kSE: s.y-=1; s.x+=1; break;
+		case kNW: s.y-=1; s.x-=1; break;
+		case kSW: s.y+=1; s.x-=1; break;
+		case kNE: s.y-=1; s.x+=1; break;
+		case kSE: s.y+=1; s.x+=1; break;
 		default: break;
 	}
 	if (map->canStep(s.x, s.y, old.x, old.y))

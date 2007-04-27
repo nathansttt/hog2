@@ -45,7 +45,7 @@ public:
 //	SearchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, SearchAlgorithm *alg);
 //	SearchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, SearchAlgorithm *alg);
 	virtual ~SearchUnit();
-	virtual const char *GetName() { return algorithm->getName(); }
+	virtual const char *GetName() { if (algorithm) return algorithm->getName(); return "none"; }
 	virtual SearchAlgorithm* getAlgorithm() { return algorithm; }
 	//void setUnitSimulation(unitSimulation *_US) { US = _US; algorithm->setSimulationEnvironment(US); }
 	virtual bool done() { return onTarget; }
