@@ -1,5 +1,5 @@
 /*
- * $Id: searchAlgorithm.cpp,v 1.5 2006/10/24 18:18:45 nathanst Exp $
+ * $Id: SearchAlgorithm.cpp,v 1.5 2006/10/24 18:18:45 nathanst Exp $
  *
  *  Hierarchical Open Graph File
  *
@@ -28,7 +28,7 @@
 #include <CoreServices/CoreServices.h>
 #endif
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdint.h>
@@ -37,7 +37,7 @@ using namespace std;
 
 static const int verbose = 0;
 
-void doRandomPath(graphAbstraction *aMap, searchAlgorithm *sa, bool repeat)
+void doRandomPath(graphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 {
 	static double lastLength, lastTime;
 	static node *r1 = 0, *r2 = 0;

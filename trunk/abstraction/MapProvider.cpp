@@ -1,7 +1,7 @@
 /*
- * $Id: mapProvider.cpp,v 1.2 2006/09/18 06:22:14 nathanst Exp $
+ * $Id: MapProvider.cpp,v 1.2 2006/09/18 06:22:14 nathanst Exp $
  *
- *  mapProvider.cpp
+ *  MapProvider.cpp
  *  HOG
  *
  *  Created by Nathan Sturtevant on 5/13/05.
@@ -25,5 +25,5 @@
  *
  */
 
-#include "mapProvider.h"
+#include "MapProvider.h"
 

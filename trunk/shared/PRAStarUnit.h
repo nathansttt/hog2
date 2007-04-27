@@ -30,20 +30,20 @@
 #ifndef PRASTARUNIT_H
 #define PRASTARUNIT_H
 
-#include "searchUnit.h"
+#include "SearchUnit.h"
 #include "constants.h"
 
 /**
  * A unit which caches path information to speed pra*
  */
 
-class praStarUnit : public searchUnit {
+class praStarUnit : public SearchUnit {
 public:
 	praStarUnit(int _x, int _y, unit *_target, praStar *_alg);
 //	praStarUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, praStar *_alg);
 	~praStarUnit() { delete cache; }
 	const char *getName() { sprintf(name, "c%s", algorithm->getName()); return name; }
-	tDirection makeMove(mapProvider *, reservationProvider *, simulationInfo *simInfo); 
+	tDirection makeMove(MapProvider *, reservationProvider *, simulationInfo *simInfo); 
 private:
 	path *cache;
 	praStar *algorithm;

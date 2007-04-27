@@ -27,27 +27,27 @@
 
 #include "praStarUnit.h"
 
-praStarUnit::praStarUnit(int _x, int _y, unit *_target, praStar *_alg)
-:searchUnit(_x, _y, _target, _alg), algorithm(_alg)
+praStarUnit::praStarUnit(int _x, int _y, AbsMapUnit *_target, praStar *_alg)
+:SearchUnit(_x, _y, _target, _alg), algorithm(_alg)
 { cache = 0; }
 
 //praStarUnit::praStarUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, praStar *_alg)
-//:searchUnit(_x, _y, _r, _g, _b, _target, _alg), algorithm(_alg)
+//:SearchUnit(_x, _y, _r, _g, _b, _target, _alg), algorithm(_alg)
 //{ cache = 0; }
 
 
-tDirection praStarUnit::makeMove(mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
+tDirection praStarUnit::makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
 {
 	mapAbstraction *aMap = mp->getMapAbstraction();
 
 	algorithm->setExpandSearchRadius(false);
 	if (moves.size() != 0)
 	{
-		return searchUnit::makeMove(mp, rp, simInfo);
+		return SearchUnit::makeMove(mp, rp, simInfo);
 	}
 	if (cache != 0)
 	{
-		node *n = aMap->getNodeFromMap(x, y);
+		node *n = aMap->getNodeFromMap(loc.x, loc.y);
 		node *l = aMap->getNthParent(n, cache->n->getLabelL(kAbstractionLevel));
 		while (cache && (l != cache->n))
 		{
@@ -66,7 +66,7 @@ tDirection praStarUnit::makeMove(mapProvider *mp, reservationProvider *rp, simul
 	}
 	algorithm->setCache(&cache);
 	//printf("--- cached PRA --- start ---\n");
-	tDirection where =  searchUnit::makeMove(mp, rp, simInfo);
+	tDirection where =  SearchUnit::makeMove(mp, rp, simInfo);
 	//printf("--- cached PRA --- finish ---\n");
 	return where;
 }

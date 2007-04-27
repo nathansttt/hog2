@@ -1,7 +1,7 @@
 /*
- * $Id: mapProvider.h,v 1.5 2006/09/18 06:22:14 nathanst Exp $
+ * $Id: MapProvider.h,v 1.5 2006/09/18 06:22:14 nathanst Exp $
  *
- *  mapProvider.h
+ *  MapProvider.h
  *  HOG
  *
  *  Created by Nathan Sturtevant on 5/10/05.
@@ -36,9 +36,9 @@
 class Map;
 class mapAbstraction;
 
-class mapProvider {
+class MapProvider {
 public:
-	virtual ~mapProvider() {};
+	virtual ~MapProvider() {};
 	virtual Map *getMap() = 0;
 	virtual mapAbstraction *getMapAbstraction() = 0;
 };

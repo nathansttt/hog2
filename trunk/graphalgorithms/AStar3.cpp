@@ -32,7 +32,7 @@ static const int verbose = 0;
 
 // The constructor
 aStarOld::aStarOld(double _weight, bool _doPathDraw)
-:searchAlgorithm()
+:SearchAlgorithm()
 {
 	wh = _weight;
 	doPathDraw = _doPathDraw;

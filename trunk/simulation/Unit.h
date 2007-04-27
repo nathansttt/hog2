@@ -38,12 +38,22 @@ template <class state, class action, class environment>
 class Unit {
 public:
 	//	Unit(state s, Unit<state, action, env> *target);
+	Unit() :speed(0), group(0) {}
 	virtual ~Unit() {}
 	virtual const char *GetName() = 0;
 	virtual action MakeMove(environment *) = 0;
 	virtual void UpdateLocation(state, bool) = 0;
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw(environment *) = 0;
+
+	virtual double GetSpeed() { return speed; }
+	void SetSpeed(double s) { speed = s; }
+
+	/** log an stats that may have been computed during the last run */
+	virtual void LogStats(StatCollection *stats) {}
+	/** log any final one-time stats before a simulation is ended */
+	virtual void LogFinalStats(StatCollection *) {}
+	
 	UnitGroup<state, action, environment> *GetUnitGroup() { return group; }
 	void SetUnitGroup(UnitGroup<state, action, environment> *_group)
 		{
@@ -62,6 +72,7 @@ public:
 			}
 		}
 private:
+		double speed;
 		UnitGroup<state, action, environment> *group;
 };
 
@@ -81,7 +92,7 @@ public:
 	/** The new makeMove only gives a map. The unit simulation won't calculate an
 		  mapAbstraction unless it has to. Thus, in simple pathfinding tests, the overhead
 		  is saved. */
-	virtual tDirection makeMove(mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
+	virtual tDirection makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
 
 	/** get where the unit thinks it is */
 	void getLocation(int &x, int &y);
@@ -101,7 +112,7 @@ public:
 	void setColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
 	void getColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
 
-	virtual void OpenGLDraw(mapProvider *, simulationInfo *simInfo);
+	virtual void OpenGLDraw(MapProvider *, simulationInfo *simInfo);
 	void setObjectType(tObjectType _unitType) { unitType = _unitType; }
 	tObjectType getObjectType() { return unitType; }
 

@@ -29,6 +29,7 @@
 #include "graphAbstraction.h"
 #include "glUtil.h"
 #include "constants.h"
+#include "MapProvider.h"
 
 #ifndef MAPABSTRACTION_H
 #define MAPABSTRACTION_H
@@ -38,7 +39,7 @@
  * to support a few extra functionalities that mapabstractions should have.
  */
 
-class mapAbstraction : public graphAbstraction {
+class mapAbstraction : public graphAbstraction, public MapProvider {
 public:
 	mapAbstraction(Map *_m) :m(_m), levelDraw(0) {}
 	virtual ~mapAbstraction();
@@ -52,7 +53,8 @@ public:
 	void getTileUnderLoc(int &x, int &y, const recVec &);
 
 	Map* getMap() { return m; }
-	
+	mapAbstraction *getMapAbstraction() { return this; }
+
 	virtual double h(node *a, node *b);
 	
 	double octileDistance(double,double,double,double);

@@ -45,15 +45,18 @@ protected:
 	Map *map;
 };
 
-class MapAbstractionEnvironment : public MapEnvironment
+class AbsMapEnvironment : public MapEnvironment
 {
 public:
-	MapAbstractionEnvironment(mapAbstraction *ma);
-	virtual ~MapAbstractionEnvironment();
+	AbsMapEnvironment(mapAbstraction *ma);
+	virtual ~AbsMapEnvironment();
 	mapAbstraction *GetMapAbstraction() { return ma; }
 	void OpenGLDraw() { map->OpenGLDraw(); ma->OpenGLDraw(); }
 private:
 	mapAbstraction *ma;
 };
+
+typedef UnitSimulation<xyLoc, tDirection, MapEnvironment> UnitMapSimulation;
+typedef UnitSimulation<xyLoc, tDirection, AbsMapEnvironment> UnitAbsMapSimulation;
 
 #endif

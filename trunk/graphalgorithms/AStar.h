@@ -29,7 +29,7 @@
 #ifndef ASTAR3_H
 #define ASTAR3_H
 
-#include "searchAlgorithm.h"
+#include "SearchAlgorithm.h"
 #include "path.h"
 #include "graphAbstraction.h"
 #include "fpUtil.h"
@@ -93,7 +93,7 @@ public:
 		AStar3Util::NodeHash, AStar3Util::NodeEqual > Corridor;
 }
 
-class aStar : public searchAlgorithm {
+class aStar : public SearchAlgorithm {
 public:
 	aStar() {}
 	virtual ~aStar() {}

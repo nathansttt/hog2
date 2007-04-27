@@ -13,7 +13,7 @@
 static bool verbose = false;
 
 FringeSearch::FringeSearch()
-:searchAlgorithm()
+:SearchAlgorithm()
 {
 	bpmx = false;
 	currList = &list1;

@@ -32,8 +32,8 @@
 class humanUnit : public unit {
 public:
   humanUnit(int x, int y, unit *target);
-	tDirection makeMove(mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
-  //tDirection makeMove(mapProvider *, reservationProvider *, simulationInfo *simInfo); // this is where the World says you are
+	tDirection makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
+  //tDirection makeMove(MapProvider *, reservationProvider *, simulationInfo *simInfo); // this is where the World says you are
   //	double getSpeed() { return .25; }
 	void setNextDirection(tDirection dir) { nextDir = dir; }
 private:

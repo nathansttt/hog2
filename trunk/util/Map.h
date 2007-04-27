@@ -71,6 +71,9 @@ enum tTerrain {
   kUndefined // mixed type due to split tile
 };
 
+inline bool CanPass(long a, long b)
+{ return (((a&b)&0xF0) != 0); }
+
 // ground split types
 enum tSplit {
   kNoSplit=0,
@@ -213,7 +216,7 @@ public:
   
   void OpenGLDraw(tDisplay how = kPolygons);
   void getOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
-    void getPointFromCoordinate(point3d loc, int &px, int &py) const;
+  void getPointFromCoordinate(point3d loc, int &px, int &py) const;
 	double getCoordinateScale();
 
   void setDrawLand(bool land);

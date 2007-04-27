@@ -53,7 +53,7 @@ patrolUnit::patrolUnit(int _x, int _y)
 //	addPatrolLocation(new unit(_x, _y));
 //}
 
-tDirection patrolUnit::makeMove(mapProvider *mp, reservationProvider *, simulationInfo *)
+tDirection patrolUnit::makeMove(MapProvider *mp, reservationProvider *, simulationInfo *)
 {
 	mapAbstraction *aMap = mp->getMapAbstraction();
 	if (moves.size() > 0)
@@ -98,7 +98,7 @@ double patrolUnit::goToLoc(mapAbstraction *aMap, int which)
 	return pathCost;
 }
 
-void patrolUnit::OpenGLDraw(mapProvider *mp, simulationInfo *)
+void patrolUnit::OpenGLDraw(MapProvider *mp, simulationInfo *)
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = mp->getMap();
@@ -194,7 +194,7 @@ void patrolUnit::logStats(StatCollection *stats)
 		printf("Error; somehow nodes touched/expanded are inconsistent. t:%d e:%d\n",
 					 nodesTouched, nodesExpanded);
 	}
-	// printf("searchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
+	// printf("SearchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
 	if (nodesExpanded != 0)
 		stats->addStat("nodesExpanded", getName(), (long)nodesExpanded);
 	if (nodesTouched != 0)

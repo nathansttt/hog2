@@ -107,6 +107,7 @@ tDirection MapEnvironment::GetAction(xyLoc s1, xyLoc s2)
 
 xyLoc MapEnvironment::ApplyAction(xyLoc s, tDirection dir)
 {
+	xyLoc old = s;
 	switch (dir)
 	{
 		case kN: s.y+=1; break;
@@ -119,7 +120,9 @@ xyLoc MapEnvironment::ApplyAction(xyLoc s, tDirection dir)
 		case kSE: s.y-=1; s.x+=1; break;
 		default: break;
 	}
-	return s;
+	if (map->canStep(s.x, s.y, old.x, old.y))
+		return s;
+	return old;
 }
 
 double MapEnvironment::HCost(xyLoc l1, xyLoc l2)
@@ -155,13 +158,13 @@ uint32_t MapEnvironment::GetActionHash(tDirection act)
 
 /************************************************************/
 
-MapAbstractionEnvironment::MapAbstractionEnvironment(mapAbstraction *_ma)
+AbsMapEnvironment::AbsMapEnvironment(mapAbstraction *_ma)
 :MapEnvironment(_ma->getMap())
 {
 	ma = _ma;
 }
 
-MapAbstractionEnvironment::~MapAbstractionEnvironment()
+AbsMapEnvironment::~AbsMapEnvironment()
 {
 	map = 0;
 	delete ma;

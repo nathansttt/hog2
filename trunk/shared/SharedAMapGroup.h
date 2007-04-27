@@ -35,18 +35,18 @@
  * A group which incrementally builds a map of the world as the units in the group
  * explore the graph.
  */
-class sharedAMapGroup : public unitGroup, public mapProvider {
+class sharedAMapGroup : public unitGroup, public MapProvider {
 public:
-	sharedAMapGroup(mapProvider *);
+	sharedAMapGroup(MapProvider *);
 	~sharedAMapGroup();
-	virtual tDirection makeMove(unit *u, mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
-	virtual void OpenGLDraw(mapProvider *, simulationInfo *);
+	virtual tDirection makeMove(unit *u, MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
+	virtual void OpenGLDraw(MapProvider *, simulationInfo *);
 	virtual Map *getMap();
 	virtual mapAbstraction *getMapAbstraction();
 	virtual int getNewTileCount() { return newTileCountPerTrial; }
 	
 	/** reset the location of a given unit */
-	virtual void updateLocation(unit *, mapProvider *m, int _x, int _y, bool, simulationInfo *);
+	virtual void updateLocation(unit *, MapProvider *m, int _x, int _y, bool, simulationInfo *);
 	/** Is the group done with their exploration? */
 	virtual bool done();
 	/** Lets the unit group do what it needs to reset a trial */

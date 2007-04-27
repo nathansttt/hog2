@@ -1,5 +1,5 @@
 /*
- * $Id: searchUnit.cpp,v 1.22 2006/10/24 18:18:45 nathanst Exp $
+ * $Id: SearchUnit.cpp,v 1.22 2006/10/24 18:18:45 nathanst Exp $
  *
  *  Hierarchical Open Graph File
  *
@@ -25,16 +25,15 @@
  */
 
 #include <iostream>
-#include "searchUnit.h"
+#include "SearchUnit.h"
 
 using namespace std;
 
 static const bool verbose = false;
 
-searchUnit::searchUnit(int _x, int _y, unit *_target, searchAlgorithm *alg)
-:unit(_x, _y, _target)
+SearchUnit::SearchUnit(int _x, int _y, AbsMapUnit *_target, SearchAlgorithm *alg)
+:AbsMapUnit(_x, _y)
 {
-	unitType = kWorldObject;
 	algorithm = alg;
 	s_algorithm = 0;
 	spread_cache = 0;
@@ -43,43 +42,43 @@ searchUnit::searchUnit(int _x, int _y, unit *_target, searchAlgorithm *alg)
 	nodesTouched = 0;
 }
 
-searchUnit::searchUnit(int _x, int _y, unit *_target, spreadExecSearchAlgorithm *alg)
-:unit(_x, _y, _target)
-{
-	unitType = kWorldObject;
-	algorithm = alg;
-	s_algorithm = alg;
-	spread_cache = 0;
-	onTarget = false;
-	nodesExpanded = 0;
-	nodesTouched = 0;
-}
+//SearchUnit::SearchUnit(int _x, int _y, unit *_target, spreadExecSearchAlgorithm *alg)
+//:unit(_x, _y, _target)
+//{
+//	unitType = kWorldObject;
+//	algorithm = alg;
+//	s_algorithm = alg;
+//	spread_cache = 0;
+//	onTarget = false;
+//	nodesExpanded = 0;
+//	nodesTouched = 0;
+//}
+//
+//SearchUnit::SearchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, SearchAlgorithm *alg)
+//:unit(_x, _y, _r, _g, _b, _target)
+//{
+//	unitType = kWorldObject;
+//	algorithm = alg;
+//	s_algorithm = 0;
+//	spread_cache = 0;
+//	onTarget = false;
+//	nodesExpanded = 0;
+//	nodesTouched = 0;
+//}
+//
+//SearchUnit::SearchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, SearchAlgorithm *alg)
+//:unit(_x, _y, _r, _g, _b, _target)
+//{
+//	unitType = kWorldObject;
+//	algorithm = alg;
+//	s_algorithm = 0;
+//	spread_cache = 0;
+//	onTarget = false;
+//	nodesExpanded = 0;
+//	nodesTouched = 0;
+//}
 
-searchUnit::searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg)
-:unit(_x, _y, _r, _g, _b, _target)
-{
-	unitType = kWorldObject;
-	algorithm = alg;
-	s_algorithm = 0;
-	spread_cache = 0;
-	onTarget = false;
-	nodesExpanded = 0;
-	nodesTouched = 0;
-}
-
-searchUnit::searchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, searchAlgorithm *alg)
-:unit(_x, _y, _r, _g, _b, _target)
-{
-	unitType = kWorldObject;
-	algorithm = alg;
-	s_algorithm = 0;
-	spread_cache = 0;
-	onTarget = false;
-	nodesExpanded = 0;
-	nodesTouched = 0;
-}
-
-//searchUnit::searchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, searchAlgorithm *alg)
+//SearchUnit::SearchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, SearchAlgorithm *alg)
 //:unit(_x, _y, _r, _g, _b, _target)
 //{
 //	unitType = kWorldObject;
@@ -89,7 +88,7 @@ searchUnit::searchUnit(int _x, int _y, float _r, float _g, float _b, unit *_targ
 //	nodesTouched = 0;
 //}
 
-searchUnit::~searchUnit()
+SearchUnit::~SearchUnit()
 {
 	if (algorithm)
 		delete algorithm;
@@ -99,7 +98,7 @@ searchUnit::~searchUnit()
 	spread_cache = 0;
 }
 
-bool searchUnit::getCachedMove(tDirection &dir)
+bool SearchUnit::getCachedMove(tDirection &dir)
 {
 	if (moves.size() > 0)
 	{
@@ -118,7 +117,7 @@ bool searchUnit::getCachedMove(tDirection &dir)
 	return false;
 }
 
-tDirection searchUnit::makeMove(mapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
+tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
 {
 	tDirection res;
 	if (getCachedMove(res))
@@ -133,10 +132,10 @@ tDirection searchUnit::makeMove(mapProvider *mp, reservationProvider *rp, simula
 		addPathToCache(spread_cache);
 		node *next_start = spread_cache->tail()->n;
 		int targx, targy;
-		target->getLocation(targx, targy);
+		target->GetLocation(targx, targy);
 		
 		// Get a path by path-planning
-		target->getLocation(targx, targy);
+		target->GetLocation(targx, targy);
 		node *to = aMap->getAbstractGraph(0)->getNode(map->getNodeNum(targx, targy));
 		
 		s_algorithm->setTargets(mp->getMapAbstraction(), next_start, to, rp);
@@ -151,19 +150,19 @@ tDirection searchUnit::makeMove(mapProvider *mp, reservationProvider *rp, simula
 	if (!target)
 	{
 		if (verbose)
-			printf("SU %s: No target, doing nothing\n", this->getName());
-		return unit::makeMove(mp, rp, simInfo);
+			printf("SU %s: No target, doing nothing\n", this->GetName());
+		return kStay;
 	}
 	
 	// Get the position of the target
 	int targx, targy;
-	target->getLocation(targx, targy);
+	target->GetLocation(targx, targy);
 	
 	// Get a path by path-planning
 	graph *g0 = aMap->getAbstractGraph(0);
 	// Get the start and goal nodes
-	node *from = g0->getNode(map->getNodeNum(x, y));
-	target->getLocation(targx, targy);
+	node *from = g0->getNode(map->getNodeNum(loc.x, loc.y));
+	target->GetLocation(targx, targy);
 	node *to = g0->getNode(map->getNodeNum(targx, targy));
 	
 	if (from == to)
@@ -193,23 +192,23 @@ tDirection searchUnit::makeMove(mapProvider *mp, reservationProvider *rp, simula
 	if (p == NULL)
 	{
 		if (verbose)
-			printf("SU %s: Path returned NIL\n", this->getName());
+			printf("SU %s: Path returned NIL\n", this->GetName());
 		return kStay;
 	}
 		
-	if (!(p->n && p->next && p->next->n && (x == p->n->getLabelL(kFirstData)) 
-				 && (y == p->n->getLabelL(kFirstData+1))))
+	if (!(p->n && p->next && p->next->n && (loc.x == p->n->getLabelL(kFirstData)) 
+				 && (loc.y == p->n->getLabelL(kFirstData+1))))
 	{
 		if (p->n)
 			std::cout << *p->n << std::endl;
 		if ((p->next) && (p->next->n))
 			std::cout << *p->next->n << std::endl;
-		std::cout << x << ", " << y << std::endl;
+		std::cout << loc.x << ", " << loc.y << std::endl;
 	}
 
 	// a valid path must have at least 2 nodes and start where the unit is located
-	assert(p->n && p->next && p->next->n && (x == p->n->getLabelL(kFirstData)) 
-				 && (y == p->n->getLabelL(kFirstData+1)));
+	assert(p->n && p->next && p->next->n && (loc.x == p->n->getLabelL(kFirstData)) 
+				 && (loc.y == p->n->getLabelL(kFirstData+1)));
 	
 	addPathToCache(p);
 	if (s_algorithm)
@@ -228,14 +227,14 @@ tDirection searchUnit::makeMove(mapProvider *mp, reservationProvider *rp, simula
 	return dir;
 }
 
-void searchUnit::addPathToCache(path *p)
+void SearchUnit::addPathToCache(path *p)
 {
 	// we are at the last move; abort recursion
 	if (p->next == NULL)
 		return;
 	// there is another move; add it first to cache
 	if (p->next->next)
-		searchUnit::addPathToCache(p->next);
+		SearchUnit::addPathToCache(p->next);
 
 	// ----- Ok, we have a path starting at (x,y) [the current location] and
 	// having at least one more state ----------------------------------------
@@ -251,7 +250,7 @@ void searchUnit::addPathToCache(path *p)
 		case 1: result = kW; break;
 		default :
 			printf("SU: %s : The (x) nodes in the path are not next to each other!\n",
-						 this->getName());
+						 this->GetName());
 			printf("Distance is %ld\n",
 						 p->n->getLabelL(kFirstData)-p->next->n->getLabelL(kFirstData));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
@@ -267,7 +266,7 @@ void searchUnit::addPathToCache(path *p)
 		case 1: result = result|kN; break;
 		default :
 			printf("SU: %s : The (y) nodes in the path are not next to each other!\n",
-						 this->getName());
+						 this->GetName());
 			printf("Distance is %ld\n",
 						 p->n->getLabelL(kFirstData+1)-p->next->n->getLabelL(kFirstData+1));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
@@ -276,7 +275,7 @@ void searchUnit::addPathToCache(path *p)
 	moves.push_back((tDirection)result);
 }
 
-void searchUnit::updateLocation(int _x, int _y, bool success, simulationInfo *)
+void SearchUnit::updateLocation(int _x, int _y, bool success, simulationInfo *)
 {
 	if (!success)
 	{
@@ -284,17 +283,17 @@ void searchUnit::updateLocation(int _x, int _y, bool success, simulationInfo *)
 		delete spread_cache;
 		spread_cache = 0;
 		if (verbose)
-			printf("SU %s: clearing cached moves, (%d,%d)\n", this->getName(),_x,_y);
+			printf("SU %s: clearing cached moves, (%d,%d)\n", this->GetName(),_x,_y);
 	}
-	x = _x; y = _y;
+	loc.x = _x; loc.y = _y;
 }
 
-void searchUnit::OpenGLDraw(mapProvider *mp, simulationInfo *si)
+void SearchUnit::OpenGLDraw(AbsMapEnvironment *ame)
 {
 	GLdouble xx, yy, zz, rad;
-	Map *map = mp->getMap();
+	Map *map = ame->GetMap();
 
-	int posx = x, posy = y;
+	int posx = loc.x, posy = loc.y;
 	map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	glBegin(GL_LINE_STRIP);
@@ -311,19 +310,19 @@ void searchUnit::OpenGLDraw(mapProvider *mp, simulationInfo *si)
 	glEnd();
 	
 	// draw object
-  map->getOpenGLCoord(x, y, xx, yy, zz, rad);
+  map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
 	if (onTarget)
 	{
-		double perc = (1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->getSimulationTime())))));
+		double perc = .25;//(1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->getSimulationTime())))));
 		glColor3f(r*perc, g*perc, b*perc);
 	}
 	else
 		glColor3f(r, g, b);
 	
-	drawSphere(xx, yy, zz, rad);
+	DrawSphere(xx, yy, zz, rad);
 }
 
-void searchUnit::logStats(StatCollection *stats)
+void SearchUnit::LogStats(StatCollection *stats)
 {
 	if (((nodesExpanded == 0) && (nodesTouched != 0)) ||
 			((nodesExpanded != 0) && (nodesTouched == 0)))
@@ -331,20 +330,20 @@ void searchUnit::logStats(StatCollection *stats)
 		printf("Error; somehow nodes touched/expanded are inconsistent. t:%d e:%d\n",
 					 nodesTouched, nodesExpanded);
 	}
-	// printf("searchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
+	// printf("SearchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
 	if (nodesExpanded != 0)
-		stats->addStat("nodesExpanded", getName(), (long)nodesExpanded);
+		stats->addStat("nodesExpanded", GetName(), (long)nodesExpanded);
 	if (nodesTouched != 0)
-		stats->addStat("nodesTouched", getName(), (long)nodesTouched);
+		stats->addStat("nodesTouched", GetName(), (long)nodesTouched);
 	nodesExpanded = nodesTouched = 0;
 }
 
-void searchUnit::logFinalStats(StatCollection *stats)
+void SearchUnit::LogFinalStats(StatCollection *stats)
 {
 	algorithm->logFinalStats(stats);
 }
 
-//void searchUnit::printRoundStats(FILE *f)
+//void SearchUnit::printRoundStats(FILE *f)
 //{
 //	fprintf(f," %d", nodesExpanded);
 //	nodesExpanded = 0;
