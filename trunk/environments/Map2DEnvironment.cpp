@@ -8,7 +8,7 @@
  */
 
 #include "Map2DEnvironment.h"
-#include "fpUtil.h"
+#include "FPUtil.h"
 
 MapEnvironment::MapEnvironment(Map *_m)
 {

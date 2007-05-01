@@ -25,7 +25,7 @@
  *
  */
 
-#include "statUtil.h"
+#include "StatUtil.h"
 #include <math.h>
 
 inline double max(double a, double b)

@@ -23,7 +23,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "humanUnit.h"
+#include "HumanUnit.h"
 
 humanUnit::humanUnit(int _x, int _y, unit *_target)
 :unit(_x, _y, _target)

@@ -38,7 +38,7 @@
 #define UINT32_MAX        4294967295U
 #endif
 
-#include "fpUtil.h"
+#include "FPUtil.h"
 #include <ext/hash_map>
 #include "OpenClosedList.h"
 #include "SearchEnvironment.h" // for the SearchEnvironment class

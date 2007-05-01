@@ -5,11 +5,11 @@
  *
  */
 
-#include "hpaStar.h"
-#include "aStar3.h"
+#include "HpaStar.h"
+#include "AStar3.h"
 
-#include "aStar.h"
-#include "timer.h"
+#include "AStar.h"
+#include "Timer.h"
 
 const static int verbose = 0;
 const int MAX_INT = 2147483647;

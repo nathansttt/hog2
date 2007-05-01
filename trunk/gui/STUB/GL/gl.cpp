@@ -1,4 +1,4 @@
-#include "gl.h"
+#include "Gl.h"
 
 void glBegin ( GLenum mode ) {};
 void glCallList ( GLuint list ) {};

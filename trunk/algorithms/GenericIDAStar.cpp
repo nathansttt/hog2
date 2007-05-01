@@ -9,7 +9,7 @@
 
 #include "GenericIDAStar.h"
 #include <math.h>
-#include "fpUtil.h"
+#include "FPUtil.h"
 
 void GenericIDAStar::getPath(SearchEnvironment *env, uint32_t from, uint32_t to,
 														 std::vector<uint32_t> &thePath)

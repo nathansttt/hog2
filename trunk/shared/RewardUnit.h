@@ -26,8 +26,8 @@
  */
 
 
-#include "unit.h"
-#include "aStar.h"
+#include "Unit.h"
+#include "AStar.h"
 
 #ifndef REWARDUNIT_H
 #define REWARDUNIT_H

@@ -1,4 +1,4 @@
-#include "fpUtil.h"
+#include "FPUtil.h"
 
 /*
  * $Id: fpUtil.cpp,v 1.3 2006/10/18 23:52:53 nathanst Exp $

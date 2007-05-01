@@ -24,10 +24,10 @@
  *
  */
 
-#include "unit.h"
-#include "map.h"
+#include "Unit.h"
+#include "Map.h"
 #include "SearchAlgorithm.h"
-#include "spreadExecSearchAlgorithm.h"
+#include "SpreadExecSearchAlgorithm.h"
 #include "AbsMapUnit.h"
 
 #ifndef SearchUnit_H

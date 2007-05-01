@@ -25,8 +25,8 @@
  *
  */
 
-#include "mapAbstraction.h"
-#include "constants.h"
+#include "MapAbstraction.h"
+#include "Constants.h"
 
 mapAbstraction::~mapAbstraction()
 { 

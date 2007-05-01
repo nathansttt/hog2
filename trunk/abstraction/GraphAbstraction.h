@@ -25,13 +25,13 @@
  *
  */
 
-#include "graph.h"
-#include "path.h"
+#include "Graph.h"
+#include "Path.h"
 
 #ifndef graphAbstraction_H
 #define graphAbstraction_H
 #include <vector>
-#include "constants.h"
+#include "Constants.h"
 
 /**
  * A generic class for basic operations on graph abstractions.

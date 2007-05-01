@@ -25,8 +25,8 @@
  *
  */
 
-//#include "unitRewardSimulation.h"
-//#include "rewardUnit.h"
+//#include "UnitRewardSimulation.h"
+//#include "RewardUnit.h"
 //
 //
 //static const int verbose = 0;

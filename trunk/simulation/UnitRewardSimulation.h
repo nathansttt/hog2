@@ -25,7 +25,7 @@
  *
  */
 
-#include "unitSimulation.h"
+#include "UnitSimulation.h"
 
 #ifndef UNITREWARDSIMULATION_H
 #define UNITREWARDSIMULATION_H

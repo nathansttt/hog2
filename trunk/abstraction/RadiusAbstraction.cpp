@@ -25,8 +25,8 @@
  *
  */
 
-#include "radiusAbstraction.h"
-#include "graph.h"
+#include "RadiusAbstraction.h"
+#include "Graph.h"
 
 radiusAbstraction::radiusAbstraction(Map *_m, int _radius)
 :mapAbstraction(_m), radius(_radius)

@@ -7,9 +7,9 @@
  *
  */
 
-#include "mapOverlay.h"
-#include "fpUtil.h"
-#include "glUtil.h"
+#include "MapOverlay.h"
+#include "FPUtil.h"
+#include "GLUtil.h"
 
 MapOverlay::MapOverlay(Map *_m)
 :m(_m), maxVal(0), minVal(0.0)

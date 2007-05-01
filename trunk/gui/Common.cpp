@@ -21,10 +21,10 @@
 
 #include <iostream>
 
-#include "glUtil.h"
+#include "GLUtil.h"
 
-#include "trackball.h"
-#include "common.h"
+#include "Trackball.h"
+#include "Common.h"
 
 // For printing debug info
 static bool const verbose = false;

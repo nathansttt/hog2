@@ -10,8 +10,8 @@
 #ifndef SEARCHENVIRONMENT_H
 #define SEARCHENVIRONMENT_H
 
-#include "graph.h"
-#include "map.h"
+#include "Graph.h"
+#include "Map.h"
 
 class SearchEnvironment
 {

@@ -10,8 +10,8 @@
 // * May 7, 2004
 // */
 //
-//#include "mapenv.h"
-//#include "pathfind.h"
+//#include "Mapenv.h"
+//#include "Pathfind.h"
 //
 //using namespace std;
 //

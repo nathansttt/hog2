@@ -29,7 +29,7 @@
 
 #include <iostream>
 #include "SearchAlgorithm.h"
-#include "heap.h"
+#include "Heap.h"
 
 /**
  * The pra* search algorithm which does partial pathfinding using abstraction.

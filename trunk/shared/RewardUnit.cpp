@@ -25,7 +25,7 @@
  *
  */
 
-#include "rewardUnit.h"
+#include "RewardUnit.h"
 
 rewardUnit::rewardUnit(int _x, int _y)
 :unit(_x, _y)

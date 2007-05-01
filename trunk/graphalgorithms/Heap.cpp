@@ -21,8 +21,8 @@
 // HOG File
 
 #include <iostream>
-#include "fpUtil.h"
-#include "heap.h"
+#include "FPUtil.h"
+#include "Heap.h"
 
 heap::heap(int s)
 {

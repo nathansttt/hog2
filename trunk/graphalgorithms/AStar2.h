@@ -27,7 +27,7 @@
 #ifndef ASTAR2_H
 #define ASTAR2_H
 
-#include "praStar.h"
+#include "PRAStar.h"
 
 /**
  * A implementation of A* which just re-uses code from PRA*.

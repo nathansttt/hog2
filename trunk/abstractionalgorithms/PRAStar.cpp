@@ -24,8 +24,8 @@
  *
  */
 
-#include "fpUtil.h"
-#include "praStar.h"
+#include "FPUtil.h"
+#include "PRAStar.h"
 
 const bool verbose = false;
 

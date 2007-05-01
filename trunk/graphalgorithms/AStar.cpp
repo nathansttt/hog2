@@ -25,7 +25,7 @@
  *
  */
 
-#include "aStar.h"
+#include "AStar.h"
 #include "float.h"
 #include "FPUtil.h"
 

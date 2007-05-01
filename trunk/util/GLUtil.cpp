@@ -25,12 +25,12 @@
  *
  */
 
-#include "glUtil.h"
+#include "GLUtil.h"
 #include <math.h>
 
 #ifdef NO_OPENGL
-#include "gl.cpp"
-#include "glut.cpp"
+#include "Gl.cpp"
+#include "Glut.cpp"
 #endif
 
 /**

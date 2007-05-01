@@ -25,10 +25,10 @@
  *
  */
 
-#include "map.h"
-#include "graphAbstraction.h"
-#include "glUtil.h"
-#include "constants.h"
+#include "Map.h"
+#include "GraphAbstraction.h"
+#include "GLUtil.h"
+#include "Constants.h"
 #include "MapProvider.h"
 
 #ifndef MAPABSTRACTION_H

@@ -9,7 +9,7 @@
 #include <fstream>
 using std::ifstream;
 
-#include "scenarioLoader.h"
+#include "ScenarioLoader.h"
 #include <assert.h>
 
 /** 

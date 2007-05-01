@@ -26,13 +26,13 @@
  */
 
 #include "SearchAlgorithm.h"
-#include "heap.h"
-#include "corridorAStar.h"
+#include "Heap.h"
+#include "CorridorAStar.h"
 
 #ifndef SPREADPRASTAR_H
 #define SPREADPRASTAR_H
 
-#include "spreadExecSearchAlgorithm.h"
+#include "SpreadExecSearchAlgorithm.h"
 
 class spreadPRAStar : public spreadExecSearchAlgorithm {
 public:

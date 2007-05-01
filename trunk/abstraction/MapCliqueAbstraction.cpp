@@ -25,11 +25,11 @@
  *
  */
 
-#include "mapCliqueAbstraction.h"
-#include "fpUtil.h"
+#include "MapCliqueAbstraction.h"
+#include "FPUtil.h"
 
 using namespace std;
-#include "heap.h"
+#include "Heap.h"
 #include <cmath>
 #include <memory>
 

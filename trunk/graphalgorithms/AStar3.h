@@ -28,7 +28,7 @@
 #define ASTAROld_H
 
 #include "SearchAlgorithm.h"
-#include "heap.h"
+#include "Heap.h"
 
 // this is a "classic" implementation of A*
 // it is not particularly optimized, it is more of an example of how an

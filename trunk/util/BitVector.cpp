@@ -20,7 +20,7 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include "bitVector.h"
+#include "BitVector.h"
 
 bitVector::bitVector(int _size)
 {

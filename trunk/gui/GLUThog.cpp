@@ -19,13 +19,13 @@
  */
 
 
-#include "unitSimulation.h"
+#include "UnitSimulation.h"
 #include <glut.h>
-#include "trackball.h"
-#include "common.h"
+#include "Trackball.h"
+#include "Common.h"
 
 #include <glut.h>
-#include "main.h"
+#include "Main.h"
 #include "TextBox.h"
 
 using namespace std;

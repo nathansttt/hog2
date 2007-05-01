@@ -25,7 +25,7 @@
  *
  */
 
-#include "mapAbstraction.h"
+#include "MapAbstraction.h"
 
 #ifndef RADIUSABSTRACTION_H
 #define RADIUSABSTRACTION_H

@@ -25,7 +25,7 @@
  *
  */
 
-#include "mapFlatAbstraction.h"
+#include "MapFlatAbstraction.h"
 
 mapFlatAbstraction::mapFlatAbstraction(Map *_m)
 :mapAbstraction(_m)

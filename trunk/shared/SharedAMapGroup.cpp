@@ -25,11 +25,11 @@
  *
  */
 
-#include "sharedAMapGroup.h"
-#include "unit.h"
-#include "unitGroup.h"
-#include "mapCliqueAbstraction.h"
-#include "mapFlatAbstraction.h"
+#include "SharedAMapGroup.h"
+#include "Unit.h"
+#include "UnitGroup.h"
+#include "MapCliqueAbstraction.h"
+#include "MapFlatAbstraction.h"
 
 sharedAMapGroup::sharedAMapGroup(MapProvider *mp)
 :unitGroup(mp), aMap(0), seen(0)

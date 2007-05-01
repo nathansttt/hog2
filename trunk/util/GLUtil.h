@@ -26,8 +26,8 @@
  */
 
 #ifdef NO_OPENGL
-#include "gl.h"
-#include "glut.h"
+#include "Gl.h"
+#include "Glut.h"
 #else
 #ifdef OS_MAC
 #include <OpenGL/gl.h>

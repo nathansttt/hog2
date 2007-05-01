@@ -27,11 +27,11 @@
 #ifndef SEARCHALGORITHM_H
 #define SEARCHALGORITHM_H
 
-#include "graph.h"
-#include "path.h"
-#include "mapAbstraction.h"
-#include "unitSimulation.h"
-#include "reservationProvider.h"
+#include "Graph.h"
+#include "Path.h"
+#include "MapAbstraction.h"
+#include "UnitSimulation.h"
+#include "ReservationProvider.h"
 
 /**
  * A generic algorithm which can be used for pathfinding.

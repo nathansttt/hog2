@@ -26,13 +26,13 @@
  */
 
 
-#include "bitVector.h"
-#include "constants.h"
-#include "map.h"
-#include "mapAbstraction.h"
-#include "reservationProvider.h"
+#include "BitVector.h"
+#include "Constants.h"
+#include "Map.h"
+#include "MapAbstraction.h"
+#include "ReservationProvider.h"
 #include "MapProvider.h"
-#include "unitSimulation.h"
+#include "UnitSimulation.h"
 #include "StatCollection.h"
 
 #ifndef UNITGROUP_H
@@ -89,62 +89,62 @@ std::vector<Unit<state, action, environment> *> members;
 };
 
 
-class unit;
-class simulationInfo;
-
-/**
- * A unitGroup provides shared memory and computation for all units within the group.
- */
-
-class unitGroup {
-public:
-	unitGroup(MapProvider *);
-	virtual ~unitGroup() {}
-	virtual tDirection makeMove(unit *u, MapProvider *, reservationProvider *, simulationInfo *simInfo);
-	/** gives the unit group time to think on a regular basis. In a synchronous simluation
-		this will be called once at the beginning of each timestep. */
-	virtual void think(MapProvider *) { }
-	virtual const char *getName() { return "UnitGroupx"; }
-
-	virtual void OpenGLDraw(MapProvider *, simulationInfo *);
-	virtual void addUnit(unit *);
-	virtual void removeUnit(unit *);
-	virtual mapAbstraction *getMapAbstraction();
-	
-	/** Inform the given unit of its current/new location */
-	virtual void updateLocation(unit *, MapProvider *, int _x, int _y, bool, simulationInfo *);
-	/** Is the group done with racing? */
-	virtual bool done();
-	/** Lets the unit group do what it needs to reset a trial */
-	virtual void startNewTrial(StatCollection *stats);
-	// print stats; if we don't know any, get the unit to do it
-	virtual void logStats(StatCollection *stats);
-	virtual void logFinalStats(StatCollection *) {}
-	//virtual void printRoundStats(unit *u, FILE *f);
-
-	/** lets the user cycle through the display mode by hitting Shift-Tab */
-	virtual void cycleDisplayMode(void) { }
-	
-	/** lets the user cycle through the display mode by hitting [ and ] */
-	virtual void increaseDisplayALevel(void) {  }
-	virtual void decreaseDisplayALevel(void) {  }
-	
-	/** allows you to iterate through units in the group */
-	unit *getUnit(unsigned int which);
-	int getGroupID() { return id; }
-
-protected:
-	//friend void unitSimulation::addUnitGroup(unitGroup *);
-	///** This is only for the unit simulation to set when the unitGroup is added. */
-	//virtual void setUnitSimulation(unitSimulation *_us, Map *m);
-	//Map *map;
-	std::vector<unit *> myUnits;
-	//unitSimulation *us;
-	int id;
-	static int groupID;
-};
-
-#include "unit.h"
+//class unit;
+//class simulationInfo;
+//
+///**
+// * A unitGroup provides shared memory and computation for all units within the group.
+// */
+//
+//class unitGroup {
+//public:
+//	unitGroup(MapProvider *);
+//	virtual ~unitGroup() {}
+//	virtual tDirection makeMove(unit *u, MapProvider *, reservationProvider *, simulationInfo *simInfo);
+//	/** gives the unit group time to think on a regular basis. In a synchronous simluation
+//		this will be called once at the beginning of each timestep. */
+//	virtual void think(MapProvider *) { }
+//	virtual const char *getName() { return "UnitGroupx"; }
+//
+//	virtual void OpenGLDraw(MapProvider *, simulationInfo *);
+//	virtual void addUnit(unit *);
+//	virtual void removeUnit(unit *);
+//	virtual mapAbstraction *getMapAbstraction();
+//	
+//	/** Inform the given unit of its current/new location */
+//	virtual void updateLocation(unit *, MapProvider *, int _x, int _y, bool, simulationInfo *);
+//	/** Is the group done with racing? */
+//	virtual bool done();
+//	/** Lets the unit group do what it needs to reset a trial */
+//	virtual void startNewTrial(StatCollection *stats);
+//	// print stats; if we don't know any, get the unit to do it
+//	virtual void logStats(StatCollection *stats);
+//	virtual void logFinalStats(StatCollection *) {}
+//	//virtual void printRoundStats(unit *u, FILE *f);
+//
+//	/** lets the user cycle through the display mode by hitting Shift-Tab */
+//	virtual void cycleDisplayMode(void) { }
+//	
+//	/** lets the user cycle through the display mode by hitting [ and ] */
+//	virtual void increaseDisplayALevel(void) {  }
+//	virtual void decreaseDisplayALevel(void) {  }
+//	
+//	/** allows you to iterate through units in the group */
+//	unit *getUnit(unsigned int which);
+//	int getGroupID() { return id; }
+//
+//protected:
+//	//friend void unitSimulation::addUnitGroup(unitGroup *);
+//	///** This is only for the unit simulation to set when the unitGroup is added. */
+//	//virtual void setUnitSimulation(unitSimulation *_us, Map *m);
+//	//Map *map;
+//	std::vector<unit *> myUnits;
+//	//unitSimulation *us;
+//	int id;
+//	static int groupID;
+//};
+//
+//#include "Unit.h"
 
 #endif
 

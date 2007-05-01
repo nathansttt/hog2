@@ -30,9 +30,9 @@
 #include <vector>
 #include <ext/hash_map>
 
-#include "mapAbstraction.h"
-#include "graph.h" 
-#include "path.h"
+#include "MapAbstraction.h"
+#include "Graph.h" 
+#include "Path.h"
 
 typedef enum{HORIZONTAL,VERTICAL} Orientation;
 

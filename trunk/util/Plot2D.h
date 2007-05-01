@@ -11,8 +11,8 @@
 #define PLOT2D_H
 
 #include <vector>
-#include "glUtil.h"
-#include "fpUtil.h"
+#include "GLUtil.h"
+#include "FPUtil.h"
 
 namespace Plotting {
 
