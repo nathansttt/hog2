@@ -1,4 +1,4 @@
-#include "glut.h"
+#include "Glut.h"
 
 void renderScene();
 

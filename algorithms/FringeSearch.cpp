@@ -8,7 +8,7 @@
  */
 
 #include "FringeSearch.h"
-#include "fpUtil.h"
+#include "FPUtil.h"
 
 static bool verbose = false;
 

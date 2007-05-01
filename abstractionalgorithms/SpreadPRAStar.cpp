@@ -25,8 +25,8 @@
  *
  */
 
-#include "spreadPRAStar.h"
-#include "fpUtil.h"
+#include "SpreadPRAStar.h"
+#include "FPUtil.h"
 
 static const int verbose = 0;
 

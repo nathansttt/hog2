@@ -25,7 +25,7 @@
  *
  */
 
-#include "mapAbstraction.h"
+#include "MapAbstraction.h"
 
 #ifndef MAPCLIQUEABSTRACTION_H
 #define MAPCLIQUEABSTRACTION_H

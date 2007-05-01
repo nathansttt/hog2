@@ -43,7 +43,7 @@ public:
 	virtual bool ClearStates() = 0;
 };
 
-#include "graph.h"
+#include "Graph.h"
 class unit;
 
 class reservationProvider {
@@ -58,7 +58,7 @@ public:
 	virtual void clearAllReservations() = 0;
 };
 
-#include "unit.h"
+#include "Unit.h"
 
 #endif
 

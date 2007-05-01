@@ -9,8 +9,8 @@
 
 using namespace std;
 
-#include "loadedBBAbstraction.h"
-#include "fpUtil.h"
+#include "LoadedBBAbstraction.h"
+#include "FPUtil.h"
 #include <math.h>
 enum {
 	kQuiet = 0x00,

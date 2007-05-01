@@ -25,12 +25,12 @@
  *
  */
 
-#include "loadedCliqueAbstraction.h"
+#include "LoadedCliqueAbstraction.h"
 
 using namespace std;
 
-#include "heap.h"
-#include "fpUtil.h"
+#include "Heap.h"
+#include "FPUtil.h"
 #include <cmath>
 #include <memory>
 #include <vector>

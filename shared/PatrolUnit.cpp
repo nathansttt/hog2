@@ -25,7 +25,7 @@
  *
  */
 
-#include "patrolUnit.h"
+#include "PatrolUnit.h"
 
 
 patrolUnit::patrolUnit(int _x, int _y)

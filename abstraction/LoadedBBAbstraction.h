@@ -7,8 +7,8 @@
  *
  */
 
-#include "graphAbstraction.h"
-#include "glUtil.h"
+#include "GraphAbstraction.h"
+#include "GLUtil.h"
 
 #ifndef LOADEDBBABSTRACTION_H
 #define LOADEDBBABSTRACTION_H

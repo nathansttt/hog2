@@ -19,8 +19,8 @@
 */ 
 
 #include <stack>
-#include "map.h"
-#include "glUtil.h"
+#include "Map.h"
+#include "GLUtil.h"
 
 using namespace std;
 

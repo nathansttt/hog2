@@ -25,10 +25,10 @@
  *
  */
 
-#include "pathGeneration.h"
-#include "map.h"
-#include "aStar.h"
-#include "mapFlatAbstraction.h"
+#include "PathGeneration.h"
+#include "Map.h"
+#include "AStar.h"
+#include "MapFlatAbstraction.h"
 
 // outputs algorithm/path length/time per step
 void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int bucketSize, int pathsPerBucket)

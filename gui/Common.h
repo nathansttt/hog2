@@ -19,10 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */ 
 
-#include "map.h"
-#include "mapAbstraction.h"
-#include "unitSimulation.h"
-#include "glUtil.h"
+#include "Map.h"
+#include "MapAbstraction.h"
+#include "UnitSimulation.h"
+#include "GLUtil.h"
 #include "StatCollection.h"
 
 #ifndef COMMON_H

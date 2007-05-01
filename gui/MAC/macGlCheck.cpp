@@ -48,7 +48,7 @@
  // see glcheck.h for more explanation on the use of CheckOpenGLCaps and it's associated data
 
  
-#include "macGlCheck.h"
+#include "MacGlCheck.h"
 
 #include <OpenGL/OpenGL.h>
 #include <AGL/agl.h>

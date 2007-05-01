@@ -30,8 +30,8 @@
 #define CRASTAR_H
 
 #include "SearchAlgorithm.h"
-#include "heap.h"
-#include "corridorAStar.h"
+#include "Heap.h"
+#include "CorridorAStar.h"
 
 /**
 * The pra* search algorithm which does partial pathfinding using abstraction.

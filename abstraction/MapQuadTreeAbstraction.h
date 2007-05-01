@@ -25,7 +25,7 @@
  *
  */
 
-#include "mapAbstraction.h"
+#include "MapAbstraction.h"
 
 #ifndef MAPQUADTREEABSTRACTION_H
 #define MAPQUADTREEABSTRACTION_H

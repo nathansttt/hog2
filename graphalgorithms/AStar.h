@@ -30,9 +30,9 @@
 #define ASTAR3_H
 
 #include "SearchAlgorithm.h"
-#include "path.h"
-#include "graphAbstraction.h"
-#include "fpUtil.h"
+#include "Path.h"
+#include "GraphAbstraction.h"
+#include "FPUtil.h"
 #include <ext/hash_map>
 #include "OpenClosedList.h"
 

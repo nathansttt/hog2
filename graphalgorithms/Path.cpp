@@ -24,7 +24,7 @@
  *
  */
 
-#include "path.h"
+#include "Path.h"
 
 // Returns the length of the path -- number of steps
 unsigned path::length()

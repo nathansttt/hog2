@@ -24,7 +24,7 @@
  *
  */
 
-#include "aStar2.h"
+#include "AStar2.h"
 
 path *aStar2::getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *)
 {

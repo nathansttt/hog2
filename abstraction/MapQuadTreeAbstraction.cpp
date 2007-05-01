@@ -25,8 +25,8 @@
  *
  */
 
-#include "mapQuadTreeAbstraction.h"
-#include "graph.h"
+#include "MapQuadTreeAbstraction.h"
+#include "Graph.h"
 
 mapQuadTreeAbstraction::mapQuadTreeAbstraction(Map *_m, int _sectorSize)
 :mapAbstraction(_m), sectorSize(_sectorSize)

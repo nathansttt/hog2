@@ -27,7 +27,7 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include "graph.h"
+#include "Graph.h"
 
 /**
  * A linked list of nodes which form a continuous path.

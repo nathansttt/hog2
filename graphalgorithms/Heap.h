@@ -27,7 +27,7 @@
 #include <list>
 
 #define DEFAULT_SIZE 10
-#include "graph.h"
+#include "Graph.h"
 
 /**
  * A simple & efficient heap class which uses graph objects.

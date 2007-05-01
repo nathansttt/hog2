@@ -8,7 +8,7 @@
  */
 
 #include <vector>
-#include "map.h"
+#include "Map.h"
 #include <float.h>
 
 #ifndef MAPOVERLAY_H

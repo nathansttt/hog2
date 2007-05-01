@@ -27,9 +27,9 @@
 #include <OpenGL/glu.h>
 #include <OpenGL/glext.h>
 
-#include "macGlCheck.h"
-#include "trackball.h"
-#include "common.h"
+#include "MacGlCheck.h"
+#include "Trackball.h"
+#include "Common.h"
 #include "HIDSupport.h"
 
 void saveSimHistory(WindowRef window, pRecContext pContextInfo);

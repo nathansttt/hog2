@@ -26,7 +26,7 @@
  */
 
 
-#include "unitGroup.h"
+#include "UnitGroup.h"
 
 #ifndef SHAREDAMAPGROUP_H
 #define SHAREDAMAPGROUP_H

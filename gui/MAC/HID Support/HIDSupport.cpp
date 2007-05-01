@@ -48,8 +48,8 @@
 #include <IOKit/hid/IOHIDUsageTables.h>
 
 #include "HIDSupport.h"
-#include "trackball.h"
-#include "common.h"
+#include "Trackball.h"
+#include "Common.h"
 
 EventLoopTimerRef gHIDTimer = NULL; // input timer
 static actionRec gActionArray [kNumActions]; // array of action records for mapping and values

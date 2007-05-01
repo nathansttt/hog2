@@ -27,11 +27,11 @@
 #ifndef UNITS_H
 #define UNITS_H
 
-#include "mapAbstraction.h"
-#include "path.h"
-#include "constants.h"
-#include "unitGroup.h"
-#include "unitSimulation.h"
+#include "MapAbstraction.h"
+#include "Path.h"
+#include "Constants.h"
+#include "UnitGroup.h"
+#include "UnitSimulation.h"
 
 
 template <class state, class action, class environment>
@@ -81,64 +81,64 @@ private:
 * A unit is the basic object that moves and interacts in the unitSimulation.
  */
 
-class unit {
-public:
-	unit(int x, int y, unit *target=0);
-	unit(int x, int y, int r, int g, int b, unit *target=0);
-	unit(int x, int y, float r, float g, float b, unit *target=0);
-	virtual ~unit();
-	virtual const char *getName() { return "basicUnit"; }
-	static void clearDisplayList() { if (sphereDispList != 0) glDeleteLists(sphereDispList, 1); sphereDispList = 0; }
-	/** The new makeMove only gives a map. The unit simulation won't calculate an
-		  mapAbstraction unless it has to. Thus, in simple pathfinding tests, the overhead
-		  is saved. */
-	virtual tDirection makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
-
-	/** get where the unit thinks it is */
-	void getLocation(int &x, int &y);
-	/** updateLocation only tells a unit where it is located, it doesn't physically change the location in the world */
-	virtual void updateLocation(int _x, int _y, bool, simulationInfo *) { x = _x; y = _y; }
-	/** log an stats that may have been computed during the last run */
-	virtual void logStats(StatCollection *stats);
-	/** log any final one-time stats before a simulation is ended */
-	virtual void logFinalStats(StatCollection *) {}
-	
-	virtual double getSpeed() { return speed; }
-	void setSpeed(double s) { speed = s; }
-	virtual bool done() { return true; }
-
-	unit *getTarget() { return target; }
-	virtual void setTarget(unit *u) { target = u; }
-	void setColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
-	void getColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
-
-	virtual void OpenGLDraw(MapProvider *, simulationInfo *simInfo);
-	void setObjectType(tObjectType _unitType) { unitType = _unitType; }
-	tObjectType getObjectType() { return unitType; }
-
-	unitGroup *getUnitGroup() { return group; }
-	void setUnitGroup(unitGroup *_group);
-
-	void getOpenGLLocation(Map *map, GLdouble &_x, GLdouble &_y, GLdouble &_z, GLdouble &radius);
-
-	int getUnitID() { return id; }
-	
-protected:
-	void drawTriangle(GLdouble x, GLdouble y, GLdouble z, GLdouble tRadius);
-	void drawSphere(GLdouble x, GLdouble y, GLdouble z, GLdouble tRadius);
-	static GLuint sphereDispList;
-	bool mapUpdated(mapAbstraction *aMap);
-
-	tObjectType unitType;
-	int map_revision;
-	int x, y;
-	GLfloat r, g, b;
-	double speed;
-	unit *target;
-	unitGroup *group;
-	int id;
-	static int unitID;
-};
+//class unit {
+//public:
+//	unit(int x, int y, unit *target=0);
+//	unit(int x, int y, int r, int g, int b, unit *target=0);
+//	unit(int x, int y, float r, float g, float b, unit *target=0);
+//	virtual ~unit();
+//	virtual const char *getName() { return "basicUnit"; }
+//	static void clearDisplayList() { if (sphereDispList != 0) glDeleteLists(sphereDispList, 1); sphereDispList = 0; }
+//	/** The new makeMove only gives a map. The unit simulation won't calculate an
+//		  mapAbstraction unless it has to. Thus, in simple pathfinding tests, the overhead
+//		  is saved. */
+//	virtual tDirection makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
+//
+//	/** get where the unit thinks it is */
+//	void getLocation(int &x, int &y);
+//	/** updateLocation only tells a unit where it is located, it doesn't physically change the location in the world */
+//	virtual void updateLocation(int _x, int _y, bool, simulationInfo *) { x = _x; y = _y; }
+//	/** log an stats that may have been computed during the last run */
+//	virtual void logStats(StatCollection *stats);
+//	/** log any final one-time stats before a simulation is ended */
+//	virtual void logFinalStats(StatCollection *) {}
+//	
+//	virtual double getSpeed() { return speed; }
+//	void setSpeed(double s) { speed = s; }
+//	virtual bool done() { return true; }
+//
+//	unit *getTarget() { return target; }
+//	virtual void setTarget(unit *u) { target = u; }
+//	void setColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
+//	void getColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
+//
+//	virtual void OpenGLDraw(MapProvider *, simulationInfo *simInfo);
+//	void setObjectType(tObjectType _unitType) { unitType = _unitType; }
+//	tObjectType getObjectType() { return unitType; }
+//
+//	unitGroup *getUnitGroup() { return group; }
+//	void setUnitGroup(unitGroup *_group);
+//
+//	void getOpenGLLocation(Map *map, GLdouble &_x, GLdouble &_y, GLdouble &_z, GLdouble &radius);
+//
+//	int getUnitID() { return id; }
+//	
+//protected:
+//	void drawTriangle(GLdouble x, GLdouble y, GLdouble z, GLdouble tRadius);
+//	void drawSphere(GLdouble x, GLdouble y, GLdouble z, GLdouble tRadius);
+//	static GLuint sphereDispList;
+//	bool mapUpdated(mapAbstraction *aMap);
+//
+//	tObjectType unitType;
+//	int map_revision;
+//	int x, y;
+//	GLfloat r, g, b;
+//	double speed;
+//	unit *target;
+//	unitGroup *group;
+//	int id;
+//	static int unitID;
+//};
 
 
 

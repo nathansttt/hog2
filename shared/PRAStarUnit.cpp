@@ -25,7 +25,7 @@
  *
  */
 
-#include "praStarUnit.h"
+#include "PRAStarUnit.h"
 
 praStarUnit::praStarUnit(int _x, int _y, AbsMapUnit *_target, praStar *_alg)
 :SearchUnit(_x, _y, _target, _alg), algorithm(_alg)

@@ -27,7 +27,7 @@
 
 using namespace std;
 
-#include "graphAbstraction.h"
+#include "GraphAbstraction.h"
 #include <math.h>
 
 enum {

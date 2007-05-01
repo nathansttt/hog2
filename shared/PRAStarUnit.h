@@ -25,13 +25,13 @@
  *
  */
 
-#include "praStar.h"
+#include "PRAStar.h"
 
 #ifndef PRASTARUNIT_H
 #define PRASTARUNIT_H
 
 #include "SearchUnit.h"
-#include "constants.h"
+#include "Constants.h"
 
 /**
  * A unit which caches path information to speed pra*

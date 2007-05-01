@@ -45,7 +45,7 @@
  *
  */
 
-#include "trackball.h"
+#include "Trackball.h"
 
 #include <math.h>
 

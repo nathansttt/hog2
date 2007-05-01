@@ -9,7 +9,7 @@
 #define HPASTAR_H
 
 #include "SearchAlgorithm.h"
-#include "clusterAbstraction.h"
+#include "ClusterAbstraction.h"
 
 /** 
  * HPA* algorithm as described in (Botea,Mueller,Schaeffer 2004). 

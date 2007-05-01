@@ -25,8 +25,8 @@
  *
  */
 
-#include "corridorAStar.h"
-#include "fpUtil.h"
+#include "CorridorAStar.h"
+#include "FPUtil.h"
 
 const static int verbose = 0;
 

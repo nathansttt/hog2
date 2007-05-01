@@ -21,7 +21,7 @@
 // HOG File
 
 #include <cstdlib>
-#include "graph.h"
+#include "Graph.h"
 
 #include <vector>
 

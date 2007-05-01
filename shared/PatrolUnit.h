@@ -25,9 +25,9 @@
  *
  */
 
-#include "aStar.h"
-#include "praStar.h"
-#include "unit.h"
+#include "AStar.h"
+#include "PRAStar.h"
+#include "Unit.h"
 
 #ifndef PATROLUNIT_H
 #define PATROLUNIT_H

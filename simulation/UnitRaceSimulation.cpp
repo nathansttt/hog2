@@ -25,10 +25,10 @@
  *
  */
 
-#include "unitRaceSimulation.h"
-#include "unit.h"
-#include "unitGroup.h"
-#include "fpUtil.h"
+#include "UnitRaceSimulation.h"
+#include "Unit.h"
+#include "UnitGroup.h"
+#include "FPUtil.h"
 
 static const bool verbose = false;
 

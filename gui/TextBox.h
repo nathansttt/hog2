@@ -25,7 +25,7 @@
  *
  */
 
-#include "glUtil.h"
+#include "GLUtil.h"
 #include <ctype.h>
 #include <stdint.h>
 

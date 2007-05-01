@@ -11,7 +11,7 @@
 #define ABSTRACTIONSEARCHENVIRONMENT_H
 
 #include "SearchEnvironment.h"
-#include "graphAbstraction.h"
+#include "GraphAbstraction.h"
 
 class AbstractionSearchEnvironment : public SearchEnvironment
 {

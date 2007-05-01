@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "praStar2.h"
-#include "fpUtil.h"
+#include "PRAStar2.h"
+#include "FPUtil.h"
 
 static const int verbose = 0;
 

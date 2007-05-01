@@ -27,7 +27,7 @@
 #ifndef HUMANUNIT_H
 #define HUMANUNIT_H
 
-#include "unit.h"
+#include "Unit.h"
 
 class humanUnit : public unit {
 public:

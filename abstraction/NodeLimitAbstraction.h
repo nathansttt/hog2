@@ -23,7 +23,7 @@
  *
  */
 
-#include "mapAbstraction.h"
+#include "MapAbstraction.h"
 
 #ifndef NodeLimitABSTRACTION_H
 #define NodeLimitABSTRACTION_H

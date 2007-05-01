@@ -43,7 +43,7 @@ public:
 	virtual mapAbstraction *getMapAbstraction() = 0;
 };
 
-#include "map.h"
-#include "mapAbstraction.h"
+#include "Map.h"
+#include "MapAbstraction.h"
 
 #endif

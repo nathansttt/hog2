@@ -61,12 +61,8 @@
 		C4D3B4C60BCEE7B300FCD84C /* mac_hog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2A30BCEE7B000FCD84C /* mac_hog.cpp */; };
 		C4D3B4C70BCEE7B300FCD84C /* macGlCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2A40BCEE7B000FCD84C /* macGlCheck.cpp */; };
 		C4D3B4CB0BCEE7B300FCD84C /* Trackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2AE0BCEE7B000FCD84C /* Trackball.cpp */; };
-		C4D3B67B0BCEE7B300FCD84C /* HumanUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4680BCEE7B200FCD84C /* HumanUnit.cpp */; };
 		C4D3B67C0BCEE7B300FCD84C /* PathGeneration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B46A0BCEE7B200FCD84C /* PathGeneration.cpp */; };
-		C4D3B67D0BCEE7B300FCD84C /* PatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B46C0BCEE7B200FCD84C /* PatrolUnit.cpp */; };
-		C4D3B67F0BCEE7B300FCD84C /* RewardUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4700BCEE7B200FCD84C /* RewardUnit.cpp */; };
 		C4D3B6800BCEE7B300FCD84C /* SearchUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4720BCEE7B200FCD84C /* SearchUnit.cpp */; };
-		C4D3B6810BCEE7B300FCD84C /* SharedAMapGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4740BCEE7B200FCD84C /* SharedAMapGroup.cpp */; };
 		C4D3B6820BCEE7B300FCD84C /* Constants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4770BCEE7B200FCD84C /* Constants.cpp */; };
 		C4D3B6830BCEE7B300FCD84C /* MapEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4790BCEE7B200FCD84C /* MapEnv.cpp */; };
 		C4D3B6840BCEE7B300FCD84C /* ReservationProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B47B0BCEE7B200FCD84C /* ReservationProvider.cpp */; };
@@ -82,7 +78,7 @@
 		C4D3B6900BCEE7B300FCD84C /* StatCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4940BCEE7B200FCD84C /* StatCollection.cpp */; };
 		C4D3B6910BCEE7B300FCD84C /* StatUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4960BCEE7B200FCD84C /* StatUtil.cpp */; };
 		C4D3B6920BCEE7B300FCD84C /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4980BCEE7B200FCD84C /* Timer.cpp */; };
-		C4D3B7360BCEEC5900FCD84C /* sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B7340BCEEC5900FCD84C /* sample.cpp */; };
+		C4D3B7360BCEEC5900FCD84C /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B7340BCEEC5900FCD84C /* Sample.cpp */; };
 		C4D3C11C0BD6996400FCD84C /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C11B0BD6996400FCD84C /* Plot2D.cpp */; };
 		C4D3C29D0BD951AE00FCD84C /* Map2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C29C0BD951AE00FCD84C /* Map2DEnvironment.cpp */; };
 		C4D3C4170BDD3BD800FCD84C /* RandomUnits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C4160BDD3BD800FCD84C /* RandomUnits.cpp */; };
@@ -709,8 +705,8 @@
 		C4D3B4970BCEE7B200FCD84C /* StatUtil.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = StatUtil.h; sourceTree = "<group>"; };
 		C4D3B4980BCEE7B200FCD84C /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
 		C4D3B4990BCEE7B200FCD84C /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
-		C4D3B7340BCEEC5900FCD84C /* sample.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = sample.cpp; sourceTree = "<group>"; };
-		C4D3B7350BCEEC5900FCD84C /* sample.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = sample.h; sourceTree = "<group>"; };
+		C4D3B7340BCEEC5900FCD84C /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
+		C4D3B7350BCEEC5900FCD84C /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		C4D3C11A0BD6996400FCD84C /* Plot2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Plot2D.h; sourceTree = "<group>"; };
 		C4D3C11B0BD6996400FCD84C /* Plot2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plot2D.cpp; sourceTree = "<group>"; };
 		C4D3C29B0BD951AE00FCD84C /* Map2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map2DEnvironment.h; sourceTree = "<group>"; };
@@ -1673,8 +1669,8 @@
 		C4D3B7330BCEEC5900FCD84C /* sample */ = {
 			isa = PBXGroup;
 			children = (
-				C4D3B7340BCEEC5900FCD84C /* sample.cpp */,
-				C4D3B7350BCEEC5900FCD84C /* sample.h */,
+				C4D3B7340BCEEC5900FCD84C /* Sample.cpp */,
+				C4D3B7350BCEEC5900FCD84C /* Sample.h */,
 			);
 			path = sample;
 			sourceTree = "<group>";
@@ -1815,12 +1811,8 @@
 				C4D3B4C60BCEE7B300FCD84C /* mac_hog.cpp in Sources */,
 				C4D3B4C70BCEE7B300FCD84C /* macGlCheck.cpp in Sources */,
 				C4D3B4CB0BCEE7B300FCD84C /* Trackball.cpp in Sources */,
-				C4D3B67B0BCEE7B300FCD84C /* HumanUnit.cpp in Sources */,
 				C4D3B67C0BCEE7B300FCD84C /* PathGeneration.cpp in Sources */,
-				C4D3B67D0BCEE7B300FCD84C /* PatrolUnit.cpp in Sources */,
-				C4D3B67F0BCEE7B300FCD84C /* RewardUnit.cpp in Sources */,
 				C4D3B6800BCEE7B300FCD84C /* SearchUnit.cpp in Sources */,
-				C4D3B6810BCEE7B300FCD84C /* SharedAMapGroup.cpp in Sources */,
 				C4D3B6820BCEE7B300FCD84C /* Constants.cpp in Sources */,
 				C4D3B6830BCEE7B300FCD84C /* MapEnv.cpp in Sources */,
 				C4D3B6840BCEE7B300FCD84C /* ReservationProvider.cpp in Sources */,
@@ -1836,7 +1828,7 @@
 				C4D3B6900BCEE7B300FCD84C /* StatCollection.cpp in Sources */,
 				C4D3B6910BCEE7B300FCD84C /* StatUtil.cpp in Sources */,
 				C4D3B6920BCEE7B300FCD84C /* Timer.cpp in Sources */,
-				C4D3B7360BCEEC5900FCD84C /* sample.cpp in Sources */,
+				C4D3B7360BCEEC5900FCD84C /* Sample.cpp in Sources */,
 				C4D3C11C0BD6996400FCD84C /* Plot2D.cpp in Sources */,
 				C4D3C29D0BD951AE00FCD84C /* Map2DEnvironment.cpp in Sources */,
 				C4D3C4170BDD3BD800FCD84C /* RandomUnits.cpp in Sources */,

@@ -25,8 +25,8 @@
  *
  */
 
-#include "graphAbstraction.h"
-#include "glUtil.h"
+#include "GraphAbstraction.h"
+#include "GLUtil.h"
 
 #ifndef loadedCLIQUEABSTRACTION_H
 #define loadedCLIQUEABSTRACTION_H

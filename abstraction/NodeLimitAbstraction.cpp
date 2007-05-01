@@ -25,7 +25,7 @@
 
 
 #include "NodeLimitAbstraction.h"
-#include "graph.h"
+#include "Graph.h"
 
 NodeLimitAbstraction::NodeLimitAbstraction(Map *_m, int _NodeLimit)
 :mapAbstraction(_m), nodeLimit(_NodeLimit)

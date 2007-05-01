@@ -25,7 +25,7 @@
 #ifndef WIDTH_H
 #define WIDTH_H
 
-#include "graph.h"
+#include "Graph.h"
 
 // THESE MACROS ARE EVIL (side-effects)
 //#define MIN(A,B) (((A) < (B)) ? (A) : (B))

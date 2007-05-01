@@ -24,7 +24,7 @@
  *
  */
 
-#include "mapAbstraction.h"
+#include "MapAbstraction.h"
 
 #ifndef MAPLINEABSTRACTION_H
 #define MAPLINEABSTRACTION_H

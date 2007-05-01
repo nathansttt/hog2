@@ -24,9 +24,9 @@
  *
  */
 
-#include "fpUtil.h"
-#include "aStar3.h"
-#include "heap.h"
+#include "FPUtil.h"
+#include "AStar3.h"
+#include "Heap.h"
 
 static const int verbose = 0;
 

@@ -27,9 +27,9 @@
  *
  */
 
-#include "craStar.h"
-#include "fpUtil.h"
-#include "aStar3.h"
+#include "CraStar.h"
+#include "FPUtil.h"
+#include "AStar3.h"
 #include <cfloat>
 #include <limits.h>
 

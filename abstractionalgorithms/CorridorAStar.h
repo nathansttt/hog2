@@ -29,8 +29,8 @@
 #define CORRIDORASTAR_H
 
 #include "SearchAlgorithm.h"
-#include "graph.h"
-#include "heap.h"
+#include "Graph.h"
+#include "Heap.h"
 
 /** Corridor AStar builds a a* path between two nodes, restricting itself to
 a particular corridor, if defined. The corridor must be set before every search
