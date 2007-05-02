@@ -52,7 +52,7 @@ public:
 	
 	/** reset the location of a given unit */
 	void UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *, xyLoc loc, bool success, SimulationInfo *);
-	//virtual void updateLocation(BaseMapUnit *, MapProvider *m, int _x, int _y, bool, SimulationInfo *);
+	//virtual void updateLocation(BaseAbsMapUnit *, MapProvider *m, int _x, int _y, bool, SimulationInfo *);
 	/** Is the group done with their exploration? */
 	virtual bool done();
 	/** Lets the unit group do what it needs to reset a trial */

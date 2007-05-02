@@ -51,7 +51,7 @@ public:
 	
 	virtual action MakeMove(Unit<state, action, environment> *u, environment *e, SimulationInfo *si)
 	{
-		return u->MakeMove(e, si);
+		return u->MakeMove(e, e->GetOccupancyInfo(), si);
 	}
 
 	virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state loc, bool success, SimulationInfo *si)

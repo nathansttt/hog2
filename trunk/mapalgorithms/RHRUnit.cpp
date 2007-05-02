@@ -14,7 +14,7 @@
  *
  * Make the next move following the right hand rule.
  */
-tDirection RHRUnit::MakeMove(MapEnvironment *, SimulationInfo *)
+tDirection RHRUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *)
 {
 	tDirection where = possibleDir[lastIndex];
 	return where;
@@ -27,7 +27,7 @@ tDirection RHRUnit::MakeMove(MapEnvironment *, SimulationInfo *)
  * 1) if the last move was successful, turn 90 degrees to the right and keep going.
  * 2) if the last move wasn't successful, turn 90 degrees to the left and keep going.
  */
-void RHRUnit::UpdateLocation(MapEnvironment *, xyLoc l, bool success, SimulationInfo *)
+void RHRUnit::UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc l, bool success, SimulationInfo *)
 {
 	if (success)
 	{ // I moved successfully

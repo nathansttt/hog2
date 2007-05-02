@@ -13,7 +13,7 @@
 #include "Unit.h"
 #include "Map2DEnvironment.h"
 
-typedef Unit<xyLoc, tDirection, AbsMapEnvironment> BaseMapUnit;
+typedef Unit<xyLoc, tDirection, AbsMapEnvironment> BaseAbsMapUnit;
 
 /**
 * A simple map-based unit

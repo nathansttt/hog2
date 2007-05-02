@@ -33,6 +33,8 @@ const int numActions = 10;
 const tDirection possibleDir[numActions] = { kN, kNE, kE, kSE, kS, kSW, kW, kNW, kStay, kTeleport };
 const int kStayIndex = 8; // index of kStay
 
+typedef OccupancyInterface<xyLoc, tDirection> BaseMapOccupancyInterface;
+
 class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 {
 public:

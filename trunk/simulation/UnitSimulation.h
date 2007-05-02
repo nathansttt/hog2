@@ -312,7 +312,7 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	Unit<state, action, environment>* u = theUnit->agent;
 	
 	t.startTimer();
-	where = u->MakeMove(env, this);
+	where = u->GetUnitGroup()->MakeMove(u, env, this);
 	moveThinking = t.endTimer();
 	theUnit->lastMove = where;
 	

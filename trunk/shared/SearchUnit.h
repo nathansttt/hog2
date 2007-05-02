@@ -55,7 +55,7 @@ public:
 
 	//using unit::makeMove;
 	// this is where the World says you are  
-	virtual tDirection MakeMove(AbsMapEnvironment *ame, SimulationInfo *si)
+	virtual tDirection MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, SimulationInfo *si)
 	{ return makeMove(ame->GetMapAbstraction(), 0, si); }
 	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo); 
 	

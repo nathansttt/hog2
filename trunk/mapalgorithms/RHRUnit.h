@@ -21,8 +21,8 @@ public:
 	:MapUnit(x, y)
   { lastIndex = 0; }
 	const char *GetName() { return "RHRUnit"; }
-	tDirection MakeMove(MapEnvironment *, SimulationInfo *);
-	void UpdateLocation(MapEnvironment *, xyLoc, bool, SimulationInfo *);
+	tDirection MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *);
+	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc, bool, SimulationInfo *);
 private:
 	int lastIndex;
 	xyLoc loc;

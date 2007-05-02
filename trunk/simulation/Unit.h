@@ -41,7 +41,7 @@ public:
 	Unit() :speed(0), group(0) {}
 	virtual ~Unit() {}
 	virtual const char *GetName() = 0;
-	virtual action MakeMove(environment *, SimulationInfo *) = 0;
+	virtual action MakeMove(environment *, OccupancyInterface<state, action> *, SimulationInfo *) = 0;
 	virtual void UpdateLocation(environment *, state, bool, SimulationInfo *) = 0;
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw(environment *) = 0;
