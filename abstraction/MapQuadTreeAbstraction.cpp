@@ -1,7 +1,7 @@
 /*
- * $Id: mapQuadTreeAbstraction.cpp,v 1.8 2006/10/18 23:53:25 nathanst Exp $
+ * $Id: MapQuadTreeAbstraction.cpp,v 1.8 2006/10/18 23:53:25 nathanst Exp $
  *
- *  mapQuadTreeAbstraction.cpp
+ *  MapQuadTreeAbstraction.cpp
  *  hog
  *
  *  Created by Nathan Sturtevant on 8/8/05.
@@ -28,18 +28,18 @@
 #include "MapQuadTreeAbstraction.h"
 #include "Graph.h"
 
-mapQuadTreeAbstraction::mapQuadTreeAbstraction(Map *_m, int _sectorSize)
-:mapAbstraction(_m), sectorSize(_sectorSize)
+MapQuadTreeAbstraction::MapQuadTreeAbstraction(Map *_m, int _sectorSize)
+:MapAbstraction(_m), sectorSize(_sectorSize)
 {
 	assert(_sectorSize>1);
 	buildAbstraction();
 }
 
-mapQuadTreeAbstraction::~mapQuadTreeAbstraction()
+MapQuadTreeAbstraction::~MapQuadTreeAbstraction()
 {
 }
 
-bool mapQuadTreeAbstraction::pathable(node *from, node *to)
+bool MapQuadTreeAbstraction::Pathable(node *from, node *to)
 {
   while (from != to)
 	{
@@ -59,32 +59,32 @@ bool mapQuadTreeAbstraction::pathable(node *from, node *to)
 
 // utility functions
 /** verify that the hierarchy is consistent */
-void mapQuadTreeAbstraction::verifyHierarchy()
+void MapQuadTreeAbstraction::verifyHierarchy()
 {
 }
 
 // hierarchical modifications
 /** remove node from abstraction */
-void mapQuadTreeAbstraction::removeNode(node *)
+void MapQuadTreeAbstraction::removeNode(node *)
 {
 	assert(false);
 }
 
 /** remove edge from abstraction */
-void mapQuadTreeAbstraction::removeEdge(edge *, unsigned int)
+void MapQuadTreeAbstraction::removeEdge(edge *, unsigned int)
 {
 	assert(false);
 }
 
 /** add node to abstraction */
-void mapQuadTreeAbstraction::addNode(node *)
+void MapQuadTreeAbstraction::addNode(node *)
 {
 	// add it to the 
 	assert(false);
 }
 
 /** add edge to abstraction */
-void mapQuadTreeAbstraction::addEdge(edge *, unsigned int)
+void MapQuadTreeAbstraction::addEdge(edge *, unsigned int)
 {
 	// if each end is already connected who cares -- doesn't mess anything up -- just add it throughout
 	assert(false);
@@ -92,14 +92,14 @@ void mapQuadTreeAbstraction::addEdge(edge *, unsigned int)
 
 /** This must be called after any of the above add/remove operations. But the
 operations can be stacked followed by a single repairAbstraction call. */
-void mapQuadTreeAbstraction::repairAbstraction()
+void MapQuadTreeAbstraction::repairAbstraction()
 {
 }
 
-void mapQuadTreeAbstraction::buildAbstraction()
+void MapQuadTreeAbstraction::buildAbstraction()
 {
 	//inefficient for the moment
-	abstractions.push_back(getMapGraph(getMap()));
+	abstractions.push_back(getMapGraph(GetMap()));
 	while (abstractions.back()->getNumEdges() > 0)
 	{
 		graph *g = new graph();
@@ -109,7 +109,7 @@ void mapQuadTreeAbstraction::buildAbstraction()
 	}
 }
 
-void mapQuadTreeAbstraction::addNodes(graph *g)
+void MapQuadTreeAbstraction::addNodes(graph *g)
 {
 	node_iterator ni = abstractions.back()->getNodeIter();
 	for (node *next = abstractions.back()->nodeIterNext(ni); next;
@@ -130,7 +130,7 @@ void mapQuadTreeAbstraction::addNodes(graph *g)
 	}
 }
 
-void mapQuadTreeAbstraction::addEdges(graph *aGraph)
+void MapQuadTreeAbstraction::addEdges(graph *aGraph)
 {
 	graph *g = abstractions.back();
 	edge_iterator ei = g->getEdgeIter();
@@ -152,7 +152,7 @@ void mapQuadTreeAbstraction::addEdges(graph *aGraph)
 	}	
 }
 
-void mapQuadTreeAbstraction::abstractionBFS(node *which, node *parent, int quadrant) // depth in edges...should we try literal distance?
+void MapQuadTreeAbstraction::abstractionBFS(node *which, node *parent, int quadrant) // depth in edges...should we try literal distance?
 {
 	if ((which == 0) || (which->getLabelL(kParent) != -1) || (getQuadrant(which) != quadrant))
 		return;
@@ -165,7 +165,7 @@ void mapQuadTreeAbstraction::abstractionBFS(node *which, node *parent, int quadr
 	}
 }
 
-void mapQuadTreeAbstraction::buildNodeIntoParent(node *n, node *parent)
+void MapQuadTreeAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
 	assert(getAbstractionLevel(n)+1 == getAbstractionLevel(parent));
 	n->setLabelL(kParent, parent->getNum());
@@ -174,7 +174,7 @@ void mapQuadTreeAbstraction::buildNodeIntoParent(node *n, node *parent)
 	parent->setLabelF(kXCoordinate, kUnknownPosition);
 }
 
-int mapQuadTreeAbstraction::getQuadrant(node *which)
+int MapQuadTreeAbstraction::getQuadrant(node *which)
 { // int sectorSize;
 	// 1. get any child
 	node *child = which;
@@ -187,7 +187,7 @@ int mapQuadTreeAbstraction::getQuadrant(node *which)
 	int level = which->getLabelL(kAbstractionLevel);
 	int absSectorSize = (int)pow((double)sectorSize, (double)level+1);
 	
-	int sectorNum = (getMap()->getMapWidth()/absSectorSize)*(yloc/absSectorSize)+(xloc/absSectorSize);
+	int sectorNum = (GetMap()->getMapWidth()/absSectorSize)*(yloc/absSectorSize)+(xloc/absSectorSize);
 	
 	return sectorNum;
 }

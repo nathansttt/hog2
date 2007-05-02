@@ -34,7 +34,7 @@
 //    : m_abstrMap(0), m_map(m), m_graph(g), m_rows(m->getMapHeight()),
 //      m_columns(m->getMapWidth()) {}
 //	
-//  MapEnv(mapAbstraction* am, Map* m, graph* g)
+//  MapEnv(MapAbstraction* am, Map* m, graph* g)
 //    : m_abstrMap(am), m_map(m), m_graph(g), m_rows(m->getMapHeight()),
 //      m_columns(m->getMapWidth()) {}
 //	
@@ -70,7 +70,7 @@
 //	
 //private:
 //
-//  mapAbstraction* m_abstrMap;
+//  MapAbstraction* m_abstrMap;
 //  Map* m_map;
 //  graph* m_graph;
 //  int m_rows;

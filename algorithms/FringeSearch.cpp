@@ -21,11 +21,11 @@ FringeSearch::FringeSearch()
 	hp = 0;
 }
 
-path *FringeSearch::getPath(graphAbstraction *_aMap, node *from, node *to, reservationProvider *)
+path *FringeSearch::getPath(GraphAbstraction *_aMap, node *from, node *to, reservationProvider *)
 {
 	initializeSearch(_aMap, from, to);
 	
-	if ((from == 0) || (to == 0) || (!aMap->pathable(from, to)) || (from == to))
+	if ((from == 0) || (to == 0) || (!aMap->Pathable(from, to)) || (from == to))
 		return 0;
 
 	currList->push_back(from);
@@ -95,7 +95,7 @@ path *FringeSearch::getPath(graphAbstraction *_aMap, node *from, node *to, reser
 	return extractBestPath(to);
 }
 
-void FringeSearch::initializeSearch(graphAbstraction *aGraph, node *from, node *to)
+void FringeSearch::initializeSearch(GraphAbstraction *aGraph, node *from, node *to)
 {
 	nodesTouched = 0;
 	nodesExpanded = 0;
@@ -107,7 +107,7 @@ void FringeSearch::initializeSearch(graphAbstraction *aGraph, node *from, node *
 	costTable.resize(0);
 	aMap = aGraph;
 	goal = to;
-	g = aMap->getAbstractGraph(from->getLabelL(kAbstractionLevel));
+	g = aMap->GetAbstractGraph(from->getLabelL(kAbstractionLevel));
 
 	addCosts(from, 0, 0);
 }

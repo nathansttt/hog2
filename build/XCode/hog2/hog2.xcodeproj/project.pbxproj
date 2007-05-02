@@ -63,7 +63,6 @@
 		C4D3B4CB0BCEE7B300FCD84C /* Trackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2AE0BCEE7B000FCD84C /* Trackball.cpp */; };
 		C4D3B67C0BCEE7B300FCD84C /* PathGeneration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B46A0BCEE7B200FCD84C /* PathGeneration.cpp */; };
 		C4D3B6800BCEE7B300FCD84C /* SearchUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4720BCEE7B200FCD84C /* SearchUnit.cpp */; };
-		C4D3B6820BCEE7B300FCD84C /* Constants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4770BCEE7B200FCD84C /* Constants.cpp */; };
 		C4D3B6830BCEE7B300FCD84C /* MapEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4790BCEE7B200FCD84C /* MapEnv.cpp */; };
 		C4D3B6840BCEE7B300FCD84C /* ReservationProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B47B0BCEE7B200FCD84C /* ReservationProvider.cpp */; };
 		C4D3B6850BCEE7B300FCD84C /* Unit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B47D0BCEE7B200FCD84C /* Unit.cpp */; };
@@ -85,6 +84,8 @@
 		C4D3C41A0BDD3BE600FCD84C /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C4190BDD3BE600FCD84C /* RHRUnit.cpp */; };
 		C4D3C43C0BDD4F4500FCD84C /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C43B0BDD4F4400FCD84C /* MapUnit.cpp */; };
 		C4D3C8360BE2902000FCD84C /* AbsMapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */; };
+		C4D3CE990BE7DBA000FCD84C /* SharedAMapGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4740BCEE7B200FCD84C /* SharedAMapGroup.cpp */; };
+		C4D3CEE30BE7F40300FCD84C /* AbsMapUnitGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3CEE20BE7F40200FCD84C /* AbsMapUnitGroup.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -671,8 +672,6 @@
 		C4D3B4730BCEE7B200FCD84C /* SearchUnit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SearchUnit.h; sourceTree = "<group>"; };
 		C4D3B4740BCEE7B200FCD84C /* SharedAMapGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = SharedAMapGroup.cpp; sourceTree = "<group>"; };
 		C4D3B4750BCEE7B200FCD84C /* SharedAMapGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SharedAMapGroup.h; sourceTree = "<group>"; };
-		C4D3B4770BCEE7B200FCD84C /* Constants.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Constants.cpp; sourceTree = "<group>"; };
-		C4D3B4780BCEE7B200FCD84C /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		C4D3B4790BCEE7B200FCD84C /* MapEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MapEnv.cpp; sourceTree = "<group>"; };
 		C4D3B47A0BCEE7B200FCD84C /* MapEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MapEnv.h; sourceTree = "<group>"; };
 		C4D3B47B0BCEE7B200FCD84C /* ReservationProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ReservationProvider.cpp; sourceTree = "<group>"; };
@@ -719,6 +718,8 @@
 		C4D3C43B0BDD4F4400FCD84C /* MapUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MapUnit.cpp; sourceTree = "<group>"; };
 		C4D3C8340BE2902000FCD84C /* AbsMapUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbsMapUnit.h; sourceTree = "<group>"; };
 		C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AbsMapUnit.cpp; sourceTree = "<group>"; };
+		C4D3CEE10BE7F40200FCD84C /* AbsMapUnitGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbsMapUnitGroup.h; sourceTree = "<group>"; };
+		C4D3CEE20BE7F40200FCD84C /* AbsMapUnitGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AbsMapUnitGroup.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1608,8 +1609,6 @@
 		C4D3B4760BCEE7B200FCD84C /* simulation */ = {
 			isa = PBXGroup;
 			children = (
-				C4D3B4770BCEE7B200FCD84C /* Constants.cpp */,
-				C4D3B4780BCEE7B200FCD84C /* Constants.h */,
 				C4D3B4790BCEE7B200FCD84C /* MapEnv.cpp */,
 				C4D3B47A0BCEE7B200FCD84C /* MapEnv.h */,
 				C4D3B47B0BCEE7B200FCD84C /* ReservationProvider.cpp */,
@@ -1708,6 +1707,8 @@
 			children = (
 				C4D3C8340BE2902000FCD84C /* AbsMapUnit.h */,
 				C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */,
+				C4D3CEE10BE7F40200FCD84C /* AbsMapUnitGroup.h */,
+				C4D3CEE20BE7F40200FCD84C /* AbsMapUnitGroup.cpp */,
 			);
 			name = absmapalgorithms;
 			path = ../../../absmapalgorithms;
@@ -1813,7 +1814,6 @@
 				C4D3B4CB0BCEE7B300FCD84C /* Trackball.cpp in Sources */,
 				C4D3B67C0BCEE7B300FCD84C /* PathGeneration.cpp in Sources */,
 				C4D3B6800BCEE7B300FCD84C /* SearchUnit.cpp in Sources */,
-				C4D3B6820BCEE7B300FCD84C /* Constants.cpp in Sources */,
 				C4D3B6830BCEE7B300FCD84C /* MapEnv.cpp in Sources */,
 				C4D3B6840BCEE7B300FCD84C /* ReservationProvider.cpp in Sources */,
 				C4D3B6850BCEE7B300FCD84C /* Unit.cpp in Sources */,
@@ -1835,6 +1835,8 @@
 				C4D3C41A0BDD3BE600FCD84C /* RHRUnit.cpp in Sources */,
 				C4D3C43C0BDD4F4500FCD84C /* MapUnit.cpp in Sources */,
 				C4D3C8360BE2902000FCD84C /* AbsMapUnit.cpp in Sources */,
+				C4D3CE990BE7DBA000FCD84C /* SharedAMapGroup.cpp in Sources */,
+				C4D3CEE30BE7F40300FCD84C /* AbsMapUnitGroup.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -36,11 +36,11 @@ void hpaStar::setSmoothing(bool smooth){
  * Returns the HPA* path between from and to. 
  * 
  * Before calling this function, set the abstraction with hpaStar::setAbstraction. The abstraction
- * must be of type clusterAbstraction.
+ * must be of type ClusterAbstraction.
  * 
  * Reservation provider isn't used 
  */
-path* hpaStar::getPath(graphAbstraction *aMap, node* from, node* to, reservationProvider *rp)
+path* hpaStar::getPath(GraphAbstraction *aMap, node* from, node* to, reservationProvider *)
 {
 	// Make sure a cluster abstraction has been set & it's the same as the abstraction being passed
 	// in to this function
@@ -72,8 +72,8 @@ path* hpaStar::getPath(graphAbstraction *aMap, node* from, node* to, reservation
 	setUpSearch(from, to);
 
 	// Check if there's a path at all
-	if(!m->pathable(from,to)){
-		if(verbose) std::cout<<"Not pathable\n";
+	if(!m->Pathable(from,to)){
+		if(verbose) std::cout<<"Not Pathable\n";
 		cleanUpSearch();
 		return 0;
  	}
@@ -105,7 +105,7 @@ path* hpaStar::getPath(graphAbstraction *aMap, node* from, node* to, reservation
 		point3d s(upper->getLabelF(kXCoordinate),upper->getLabelF(kYCoordinate),-1);
 		int px;
 		int py;
-		m->getMap()->getPointFromCoordinate(s,px,py);
+		m->GetMap()->getPointFromCoordinate(s,px,py);
 
 		node* newTo = m->getNodeFromMap(px,py);
 		mapPath = findMapPath(thisPart, from, newTo);
@@ -194,7 +194,7 @@ path* hpaStar::findAbstractPath(node* from, node* to)
  */ 
 path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 {
-	graph *g = m->getAbstractGraph(1);
+	graph *g = m->GetAbstractGraph(1);
 	path* curr = abPath;
 
 	path* returnme = 0;
@@ -231,11 +231,11 @@ path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 		point3d s(n->getLabelF(kXCoordinate),n->getLabelF(kYCoordinate),-1);
 		int px;
 		int py;
-		m->getMap()->getPointFromCoordinate(s,px,py);
+		m->GetMap()->getPointFromCoordinate(s,px,py);
 
 		point3d t(n2->getLabelF(kXCoordinate),n2->getLabelF(kYCoordinate),-1);
 		
-		m->getMap()->getPointFromCoordinate(t,px,py);
+		m->GetMap()->getPointFromCoordinate(t,px,py);
 		*/
 
 		e = g->findEdge(n->getNum(), n2->getNum());
@@ -469,7 +469,7 @@ bool hpaStar::nextInLookup(int last, int curr, std::vector<node*> lookup)
  */ 
 path* hpaStar::nextPathNode(node* n, int dir)
 {
-	graph *g = m->getAbstractGraph(0);
+	graph *g = m->GetAbstractGraph(0);
 
 	int px = n->getLabelL(kFirstData);
 	int py = n->getLabelL(kFirstData+1);

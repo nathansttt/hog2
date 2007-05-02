@@ -59,7 +59,7 @@ public:
 
 	craStar();
 	virtual ~craStar() {}
-	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	virtual const char *getName()
 	{ return algName; } 
 	void setPartialPathLimit(int limit)
@@ -90,38 +90,38 @@ public:
 	void setAbstractLevel(int level) { absLevel = level; }
 
 protected:
-	void setupSearch(graphAbstraction *aMap,
+	void setupSearch(GraphAbstraction *aMap,
 			 std::vector<node *> &fromChain, node *from,
 			 std::vector<node *> &toChain, node *to);
 
-	void findGoalNode(graphAbstraction* aMap,node* n, std::vector<node *> &toChain);
-	path *buildNextAbstractPath(graphAbstraction *, path *lastPath,
+	void findGoalNode(GraphAbstraction* aMap,node* n, std::vector<node *> &toChain);
+	path *buildNextAbstractPath(GraphAbstraction *, path *lastPath,
 				    std::vector<node *> &fromChain,
 				    std::vector<node *> &toChain,
 				    reservationProvider *);
 
 
 	path *trimPath(path *lastPath, node *origDest);
-	path* buildAbstractPath(graphAbstraction *aMap, 
+	path* buildAbstractPath(GraphAbstraction *aMap, 
 													std::vector<node *> &fromChain,
 													std::vector<node *> &toChain,
 													reservationProvider *rp);
-	path* doRefinement(graphAbstraction *aMap, path* absPath, 
+	path* doRefinement(GraphAbstraction *aMap, path* absPath, 
 										 std::vector<node*> &fromChain, 
 										 std::vector<node*> &toChain);
 
-	node* getNextNode(graphAbstraction *aMap, node* currentLow, path* returnPath, path* apath, graph* g, int abstractLevel);
+	node* getNextNode(GraphAbstraction *aMap, node* currentLow, path* returnPath, path* apath, graph* g, int abstractLevel);
 
 	int partialLimit;
 	bool expandSearchRadius;
 	corridorAStar cAStar;
   char algName[30];
 
-	path* smoothPath(graphAbstraction* m,path* p);
+	path* smoothPath(GraphAbstraction* m,path* p);
 
 	std::vector<node*> lookup;
-	path* nextPathNode(graphAbstraction* m,node* n, int dir);
-	node* getNextNode(mapAbstraction* m,int x, int y, int dir);
+	path* nextPathNode(GraphAbstraction* m,node* n, int dir);
+	node* getNextNode(MapAbstraction* m,int x, int y, int dir);
 	bool nextInLookup(int last, int curr, std::vector<node*> lookup);
 	int backTwoNodes(int i, std::vector<node*> lookup);
 

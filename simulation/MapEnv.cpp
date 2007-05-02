@@ -47,7 +47,7 @@
 //
 ///**
 // * When finished, start and target will hold two valid, possibly
-// * pathable positions.  That is, the positions will not be an obstacle.
+// * Pathable positions.  That is, the positions will not be an obstacle.
 // */
 //void MapEnv::getStartTarget(int* start, int* target) const
 //{

@@ -152,11 +152,11 @@ void measureAverageRatio(StatCollection *stats)
  * Sum the values of all stat entries for the same (category, owner).
  * Type is automatically known from the entry.
  */
-double sumStatEntries(StatCollection *stats, const char *category, const char *owner)
+double SumStatEntries(StatCollection *stats, const char *category, const char *owner)
 {
 	double sum = 0.0;
 	int catID, ownerID;
-	catID = stats->lookupCategory(category);
+	catID = stats->LookupCategory(category);
 	ownerID = stats->lookupOwner(owner);
 	
 	for (int x = 0; x < (int)stats->getNumStats(); x++)
@@ -177,7 +177,7 @@ double maxStatEntries(StatCollection *stats, const char *category, const char *o
 {
 	double maxval = -9999999999.9;
 	int catID, ownerID;
-	catID = stats->lookupCategory(category);
+	catID = stats->LookupCategory(category);
 	ownerID = stats->lookupOwner(owner);
 	
 	for (int x = 0; x < (int)stats->getNumStats(); x++)
@@ -198,7 +198,7 @@ long unsigned countStatEntries(StatCollection *stats, const char *category, cons
 {
 	long unsigned count = 0;
 	int catID, ownerID;
-	catID = stats->lookupCategory(category);
+	catID = stats->LookupCategory(category);
 	ownerID = stats->lookupOwner(owner);
 	
 	for (int x = 0; x < (int)stats->getNumStats(); x++)
@@ -213,7 +213,7 @@ double averageStatEntries(StatCollection *stats, const char *category, const cha
 	double sum = 0.0;
 	double count = 0.0;
 	int catID, ownerID;
-	catID = stats->lookupCategory(category);
+	catID = stats->LookupCategory(category);
 	ownerID = stats->lookupOwner(owner);
 	
 	for (int x = 0; x < (int)stats->getNumStats(); x++)
@@ -238,7 +238,7 @@ double stdevStatEntries(StatCollection *stats, const char *category, const char 
 	double stdev = 0;
 	double count = 0;
 	int catID, ownerID;
-	catID = stats->lookupCategory(category);
+	catID = stats->LookupCategory(category);
 	ownerID = stats->lookupOwner(owner);
 	
 	for (int x = 0; x < (int)stats->getNumStats(); x++)

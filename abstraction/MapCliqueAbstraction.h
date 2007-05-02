@@ -1,7 +1,7 @@
 /*
- * $Id: mapCliqueAbstraction.h,v 1.10 2007/03/07 21:53:55 nathanst Exp $
+ * $Id: MapCliqueAbstraction.h,v 1.10 2007/03/07 21:53:55 nathanst Exp $
  *
- *  mapCliqueAbstraction.h
+ *  MapCliqueAbstraction.h
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/3/05.
@@ -34,19 +34,19 @@
  * A map abstraction based on the reduction of cliques.
  */
 
-class mapCliqueAbstraction : public mapAbstraction {
+class MapCliqueAbstraction : public MapAbstraction {
 public:
-  mapCliqueAbstraction(Map *, bool uniform = true);
-  virtual ~mapCliqueAbstraction();
+  MapCliqueAbstraction(Map *, bool uniform = true);
+  virtual ~MapCliqueAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
-	virtual mapAbstraction *clone(Map *_m) { return new mapCliqueAbstraction(_m); }
+	virtual MapAbstraction *clone(Map *_m) { return new MapCliqueAbstraction(_m); }
 	virtual void verifyHierarchy();
 //  virtual void draw();
 //  virtual void rebuild();
 //	virtual int getRevision() { return 0; }
 	
-  bool pathable(node *from, node *to);
-  bool pathable(unsigned int from, unsigned int to);
+  bool Pathable(node *from, node *to);
+  bool Pathable(unsigned int from, unsigned int to);
 	//path *getQuickPath(node *from, node *to);
   void getParentHierarchy(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
   //node *getNthParent(node *, int n);

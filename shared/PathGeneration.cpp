@@ -47,8 +47,8 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 		mapSizeY = map->getMapHeight();
 	}
 		
-	mapFlatAbstraction *absMap = new mapFlatAbstraction(map);
-	graph *g = absMap->getAbstractGraph(0);
+	MapFlatAbstraction *absMap = new MapFlatAbstraction(map);
+	graph *g = absMap->GetAbstractGraph(0);
 
 	node *r1, *r2;
 	//  10 maps/bigMaps/600.map  48 151  55 152 7.4142135624
@@ -64,7 +64,7 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 		do {
 			r1 = g->getRandomNode();
 			r2 = g->getRandomNode();
-		} while (!absMap->pathable(r1, r2) || (r1 == r2) ||
+		} while (!absMap->Pathable(r1, r2) || (r1 == r2) ||
 						 ((iterations > maxIterations/2) && (absMap->h(r1, r2) > numBuckets*bucketSize)));
 		
 		aStar a;

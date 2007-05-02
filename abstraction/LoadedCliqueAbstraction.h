@@ -1,7 +1,7 @@
 /*
- * $Id: loadedCliqueAbstraction.h,v 1.4 2006/09/18 06:22:14 nathanst Exp $
+ * $Id: LoadedCliqueAbstraction.h,v 1.4 2006/09/18 06:22:14 nathanst Exp $
  *
- *  loadedCliqueAbstraction.h
+ *  LoadedCliqueAbstraction.h
  *  hog
  *
  *  Created by Nathan Sturtevant on 3/10/06.
@@ -35,18 +35,18 @@
 * A loaded abstraction based on the reduction of cliques.
  */
 
-class loadedCliqueAbstraction : public graphAbstraction {
+class LoadedCliqueAbstraction : public GraphAbstraction {
 public:
-  loadedCliqueAbstraction(char *);
-  virtual ~loadedCliqueAbstraction();
+  LoadedCliqueAbstraction(char *);
+  virtual ~LoadedCliqueAbstraction();
 	virtual void verifyHierarchy();
   double h(node *a, node *b);
 	//  virtual void draw();
 	//  virtual void rebuild();
 	//	virtual int getRevision() { return 0; }
 	
-  bool pathable(node *from, node *to);
-  bool pathable(unsigned int from, unsigned int to);
+  bool Pathable(node *from, node *to);
+  bool Pathable(unsigned int from, unsigned int to);
 	//path *getQuickPath(node *from, node *to);
   void getParentHierarchy(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
   //node *getNthParent(node *, int n);

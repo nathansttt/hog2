@@ -31,7 +31,6 @@
 #define PRASTARUNIT_H
 
 #include "SearchUnit.h"
-#include "Constants.h"
 
 /**
  * A unit which caches path information to speed pra*
@@ -43,7 +42,7 @@ public:
 //	praStarUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, praStar *_alg);
 	~praStarUnit() { delete cache; }
 	const char *getName() { sprintf(name, "c%s", algorithm->getName()); return name; }
-	tDirection makeMove(MapProvider *, reservationProvider *, simulationInfo *simInfo); 
+	tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo); 
 private:
 	path *cache;
 	praStar *algorithm;

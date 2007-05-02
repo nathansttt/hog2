@@ -158,8 +158,8 @@ uint32_t MapEnvironment::GetActionHash(tDirection act)
 
 /************************************************************/
 
-AbsMapEnvironment::AbsMapEnvironment(mapAbstraction *_ma)
-:MapEnvironment(_ma->getMap())
+AbsMapEnvironment::AbsMapEnvironment(MapAbstraction *_ma)
+:MapEnvironment(_ma->GetMap())
 {
 	ma = _ma;
 }

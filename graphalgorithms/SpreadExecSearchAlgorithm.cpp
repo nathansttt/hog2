@@ -27,7 +27,7 @@
 
 #include "SpreadExecSearchAlgorithm.h"
 
-path *spreadExecSearchAlgorithm::getPath(graphAbstraction *_aMap, node *from, node *to, reservationProvider *_rp)
+path *spreadExecSearchAlgorithm::getPath(GraphAbstraction *_aMap, node *from, node *to, reservationProvider *_rp)
 {
 	setTargets(_aMap, from, to, _rp);
 	path *p;

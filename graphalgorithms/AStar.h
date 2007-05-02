@@ -97,7 +97,7 @@ class aStar : public SearchAlgorithm {
 public:
 	aStar() {}
 	virtual ~aStar() {}
-	path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	virtual const char *getName();
 	
 	double getHVal(node *whence);
@@ -124,7 +124,7 @@ private:
 	AStar3Util::NodeLookupTable closedList;
 	node *goal, *start;
 	graph *g;
-	graphAbstraction *abstr;
+	GraphAbstraction *abstr;
 	AStar3Util::Corridor eligibleNodes;
 	int absLevel;
 	//	AStarHeuristic *abstraction;

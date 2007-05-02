@@ -53,9 +53,9 @@ patrolUnit::patrolUnit(int _x, int _y)
 //	addPatrolLocation(new unit(_x, _y));
 //}
 
-tDirection patrolUnit::makeMove(MapProvider *mp, reservationProvider *, simulationInfo *)
+tDirection patrolUnit::makeMove(MapProvider *mp, reservationProvider *, SimulationInfo *)
 {
-	mapAbstraction *aMap = mp->getMapAbstraction();
+	MapAbstraction *aMap = mp->GetMapAbstraction();
 	if (moves.size() > 0)
 	{
 		tDirection dir = moves.back();
@@ -77,7 +77,7 @@ tDirection patrolUnit::makeMove(MapProvider *mp, reservationProvider *, simulati
 	return kStay;
 }
 
-double patrolUnit::goToLoc(mapAbstraction *aMap, int which)
+double patrolUnit::goToLoc(MapAbstraction *aMap, int which)
 {
 	double pathCost=-1;
 	path *p;
@@ -98,10 +98,10 @@ double patrolUnit::goToLoc(mapAbstraction *aMap, int which)
 	return pathCost;
 }
 
-void patrolUnit::OpenGLDraw(MapProvider *mp, simulationInfo *)
+void patrolUnit::OpenGLDraw(MapProvider *mp, SimulationInfo *)
 {
 	GLdouble xx, yy, zz, rad;
-	Map *map = mp->getMap();
+	Map *map = mp->GetMap();
 	int posx = x, posy = y;
 	map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
 	glColor3f(r, g, b);
@@ -196,9 +196,9 @@ void patrolUnit::logStats(StatCollection *stats)
 	}
 	// printf("SearchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
 	if (nodesExpanded != 0)
-		stats->addStat("nodesExpanded", getName(), (long)nodesExpanded);
+		stats->AddStat("nodesExpanded", getName(), (long)nodesExpanded);
 	if (nodesTouched != 0)
-		stats->addStat("nodesTouched", getName(), (long)nodesTouched);
+		stats->AddStat("nodesTouched", getName(), (long)nodesTouched);
 	nodesExpanded = nodesTouched = 0;
 }
 

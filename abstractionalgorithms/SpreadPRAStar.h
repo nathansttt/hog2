@@ -41,15 +41,15 @@ public:
 	void setPartialPathLimit(int limit)
 	{ partialLimit = limit; sprintf(algName, "SpreadPRA*(%d)", partialLimit); }
 	
-	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
-	void setTargets(graphAbstraction *, node *, node *, reservationProvider *);
+	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	void setTargets(GraphAbstraction *, node *, node *, reservationProvider *);
 	int getNumThinkSteps(); 
 	path *think(); 
 private:
-	void setupSearch(graphAbstraction *aMap,
+	void setupSearch(GraphAbstraction *aMap,
 									 std::vector<node *> &fromChain, node *from,
 									 std::vector<node *> &toChain, node *to);
-	path *buildNextAbstractPath(graphAbstraction *, path *lastPath,
+	path *buildNextAbstractPath(GraphAbstraction *, path *lastPath,
 															std::vector<node *> &fromChain,
 															std::vector<node *> &toChain,
 															reservationProvider *);

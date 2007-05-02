@@ -10,7 +10,7 @@
 #include "MapLineAbstraction.h"
 
 MapLineAbstraction::MapLineAbstraction(Map *_map, int dist, bool uniform)
-:mapAbstraction(_map), lineDistance(dist), abstractUniformly(uniform)
+:MapAbstraction(_map), lineDistance(dist), abstractUniformly(uniform)
 {
 	buildAbstraction();
 }
@@ -19,7 +19,7 @@ MapLineAbstraction::~MapLineAbstraction()
 {
 }
 
-bool MapLineAbstraction::MapLineAbstraction::pathable(node *from, node *to)
+bool MapLineAbstraction::MapLineAbstraction::Pathable(node *from, node *to)
 {
 	while (from != to)
 	{
@@ -71,7 +71,7 @@ void MapLineAbstraction::repairAbstraction()
 
 void MapLineAbstraction::buildAbstraction()
 {
-	abstractions.push_back(getMapGraph(getMap()));
+	abstractions.push_back(getMapGraph(GetMap()));
 	while (abstractions.back()->getNumEdges() > 0)
 	{
 //		printf("%d nodes and %d edges in graph %d\n",
@@ -102,9 +102,9 @@ void MapLineAbstraction::addNodes(graph *g)
 
 	if (abstractUniformly)
 	{
-		for (int x = 0; x < getMap()->getMapWidth(); x += xstep)
+		for (int x = 0; x < GetMap()->getMapWidth(); x += xstep)
 		{
-			for (int y = 0; y < getMap()->getMapHeight(); y+= ystep)
+			for (int y = 0; y < GetMap()->getMapHeight(); y+= ystep)
 			{
 				//printf("Next check starts from (%d, %d)\n", x, y);
 				std::vector<node *> nodes;

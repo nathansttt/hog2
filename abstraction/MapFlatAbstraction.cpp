@@ -1,7 +1,7 @@
 /*
- * $Id: mapFlatAbstraction.cpp,v 1.6 2006/10/18 23:53:25 nathanst Exp $
+ * $Id: MapFlatAbstraction.cpp,v 1.6 2006/10/18 23:53:25 nathanst Exp $
  *
- *  mapFlatAbstraction.cpp
+ *  MapFlatAbstraction.cpp
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/10/05.
@@ -27,18 +27,18 @@
 
 #include "MapFlatAbstraction.h"
 
-mapFlatAbstraction::mapFlatAbstraction(Map *_m)
-:mapAbstraction(_m)
+MapFlatAbstraction::MapFlatAbstraction(Map *_m)
+:MapAbstraction(_m)
 {
 	abstractions.push_back(getMapGraph(_m));
 	groupsValid = false;
 }
 
-mapFlatAbstraction::~mapFlatAbstraction()
+MapFlatAbstraction::~MapFlatAbstraction()
 {
 }
 
-void mapFlatAbstraction::buildConnectivityGroups()
+void MapFlatAbstraction::buildConnectivityGroups()
 {
 	int nextNum = 0;
 	graph *g = abstractions[0];
@@ -72,7 +72,7 @@ void mapFlatAbstraction::buildConnectivityGroups()
 	groupsValid = true;
 }
 
-bool mapFlatAbstraction::pathable(node *from, node *to)
+bool MapFlatAbstraction::Pathable(node *from, node *to)
 {
 	if (!groupsValid)
 		buildConnectivityGroups();
@@ -84,22 +84,22 @@ bool mapFlatAbstraction::pathable(node *from, node *to)
 	return (groups[from->getNum()] == groups[to->getNum()]);
 }
 
-void mapFlatAbstraction::verifyHierarchy()
+void MapFlatAbstraction::verifyHierarchy()
 {
 }
 
-void mapFlatAbstraction::removeNode(node *n)
+void MapFlatAbstraction::removeNode(node *n)
 {
 	unsigned int oldID;
 	abstractions[0]->removeNode(n, oldID);
 }
 
-void mapFlatAbstraction::removeEdge(edge *e, unsigned int)
+void MapFlatAbstraction::removeEdge(edge *e, unsigned int)
 {
 	if (e) abstractions[0]->removeEdge(e);
 }
 
-void mapFlatAbstraction::addNode(node *n)
+void MapFlatAbstraction::addNode(node *n)
 {
 //	n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
 //	n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
@@ -112,12 +112,12 @@ void mapFlatAbstraction::addNode(node *n)
 	abstractions[0]->addNode(n);
 }
 
-void mapFlatAbstraction::addEdge(edge *e, unsigned int)
+void MapFlatAbstraction::addEdge(edge *e, unsigned int)
 {
 	abstractions[0]->addEdge(e);	
 }
 
-void mapFlatAbstraction::repairAbstraction()
+void MapFlatAbstraction::repairAbstraction()
 {
 	groupsValid = false;
 }

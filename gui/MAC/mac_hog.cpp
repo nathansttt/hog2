@@ -1663,8 +1663,8 @@ static OSStatus handleKeyInput (EventHandlerCallRef myHandler, EventRef event, B
 				if (doKeyboardCommand(pContextInfo, rawKey, modifiers&shiftKey, modifiers&controlKey, modifiers&optionKey))
 				{
 //					aglSetCurrentContext(pContextInfo->aglContext);
-//					if (pContextInfo->unitLayer->getMapAbstraction())
-//						pContextInfo->unitLayer->getMapAbstraction()->rebuild();
+//					if (pContextInfo->unitLayer->GetMapAbstraction())
+//						pContextInfo->unitLayer->GetMapAbstraction()->rebuild();
 				}
 			}
 		}
@@ -1865,7 +1865,7 @@ void savePath(WindowRef window, pRecContext pContextInfo)
         {
           printf("You selected \"%s\"\n", buffer);
 					// FIXME
-//					pContextInfo->unitLayer->getMap()->save(buffer);
+//					pContextInfo->unitLayer->GetMap()->save(buffer);
 					break;
         }        
       }
@@ -2024,7 +2024,7 @@ void openSimHistory()
 //		pContextInfo->unitLayer->loadHistory(gDefaultMap);
 //	}
 //	char pathTitle[1024];
-//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->getMap()->getMapWidth(), pContextInfo->unitLayer->getMap()->getMapHeight());
+//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->GetMap()->getMapWidth(), pContextInfo->unitLayer->GetMap()->getMapHeight());
 //	CFStringRef str = CFStringCreateWithCString(NULL, pathTitle, 0);
 //	SetWindowTitleWithCFString(window, str);
 //	CFRelease(str);
@@ -2054,11 +2054,11 @@ void openNewMap()
 //		processStats(pContextInfo->unitLayer->getStats());
 //		delete pContextInfo->unitLayer;
 //		createSimulation(pContextInfo->unitLayer);
-//		//pContextInfo->unitLayer->getMap()->load(gDefaultMap);
+//		//pContextInfo->unitLayer->GetMap()->load(gDefaultMap);
 //	}
 	
 //	char pathTitle[1024];
-//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->getMap()->getMapWidth(), pContextInfo->unitLayer->getMap()->getMapHeight());
+//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->GetMap()->getMapWidth(), pContextInfo->unitLayer->GetMap()->getMapHeight());
 //	CFStringRef str = CFStringCreateWithCString(NULL, pathTitle, 0);
 //	SetWindowTitleWithCFString(window, str);
 //	CFRelease(str);

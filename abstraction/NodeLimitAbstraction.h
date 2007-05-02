@@ -28,13 +28,13 @@
 #ifndef NodeLimitABSTRACTION_H
 #define NodeLimitABSTRACTION_H
 
-class NodeLimitAbstraction : public mapAbstraction {
+class NodeLimitAbstraction : public MapAbstraction {
 public:
 	NodeLimitAbstraction(Map *, int nodeLimit);
 	~NodeLimitAbstraction();
-	mapAbstraction *clone(Map *_m) { return new NodeLimitAbstraction(_m, nodeLimit); }
+	MapAbstraction *clone(Map *_m) { return new NodeLimitAbstraction(_m, nodeLimit); }
 	
-	virtual bool pathable(node *from, node *to);
+	virtual bool Pathable(node *from, node *to);
 	
 	// utility functions
 	/** verify that the hierarchy is consistent */

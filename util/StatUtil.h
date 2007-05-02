@@ -30,7 +30,7 @@
 void setupAverageRatio(StatCollection *stats, char *stat1, char *stat2);
 void measureAverageRatio(StatCollection *stats);
 
-double sumStatEntries(StatCollection *stats, const char *category, const char *owner);
+double SumStatEntries(StatCollection *stats, const char *category, const char *owner);
 double averageStatEntries(StatCollection *stats, const char *category, const char *owner);
 double stdevStatEntries(StatCollection *stats, const char *category, const char *owner);
 double maxStatEntries(StatCollection *stats, const char *category, const char *owner);

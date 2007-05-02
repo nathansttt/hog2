@@ -26,8 +26,10 @@
  */
 
 
+#ifndef UNITGROUP_H
+#define UNITGROUP_H
+
 #include "BitVector.h"
-#include "Constants.h"
 #include "Map.h"
 #include "MapAbstraction.h"
 #include "ReservationProvider.h"
@@ -35,62 +37,62 @@
 #include "UnitSimulation.h"
 #include "StatCollection.h"
 
-#ifndef UNITGROUP_H
-#define UNITGROUP_H
-
 template <class state, class action, class environment>
 class Unit;
+
+class SimulationInfo;
 
 template <class state, class action, class environment>
 class UnitGroup {
 public:
-	~UnitGroup() {}
+	virtual ~UnitGroup() {}
 	
-	virtual action MakeMove(Unit<state, action, environment> *u, environment *e)
-{
-		return u->MakeMove(e);
-}
-
-virtual void UpdateLocation(Unit<state, action, environment> *u, state loc, bool success)
-{
-		u->UpdateLocation(loc, success);
-}
-
-void AddUnit(Unit<state, action, environment> *u)
-{
-	// Check if we already have this unit
-	for (unsigned int x = 0; x < members.size(); x++)
-		if (members[x] == u)
-			return;
+	virtual const char *GetName() { return "defaultUnitGroup"; }
 	
-	// If not then add the unit to the group and set the unit's group
-	members.push_back(u);
-	u->SetUnitGroup(this);
-}
-
-void RemoveUnit(Unit<state, action, environment> *u)
-{
-	for (unsigned int x = 0; x < members.size(); x++)
+	virtual action MakeMove(Unit<state, action, environment> *u, environment *e, SimulationInfo *si)
 	{
-		if (members[x] == u)
+		return u->MakeMove(e, si);
+	}
+
+	virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state loc, bool success, SimulationInfo *si)
+	{
+		u->UpdateLocation(e, loc, success, si);
+	}
+	
+	void AddUnit(Unit<state, action, environment> *u)
+	{
+		// Check if we already have this unit
+		for (unsigned int x = 0; x < members.size(); x++)
+			if (members[x] == u)
+				return;
+	
+		// If not then add the unit to the group and set the unit's group
+		members.push_back(u);
+		u->SetUnitGroup(this);
+	}
+
+	void RemoveUnit(Unit<state, action, environment> *u)
+	{
+		for (unsigned int x = 0; x < members.size(); x++)
 		{
-			u->SetUnitGroup(0);
-			members[x] = members[members.size()-1];
-			members.pop_back();
+			if (members[x] == u)
+			{
+				u->SetUnitGroup(0);
+				members[x] = members[members.size()-1];
+				members.pop_back();
+			}
 		}
 	}
-}
 
-virtual void OpenGLDraw()
-{ }
+	virtual void OpenGLDraw() { }
 
 private:
-std::vector<Unit<state, action, environment> *> members;
+	std::vector<Unit<state, action, environment> *> members;
 };
 
 
 //class unit;
-//class simulationInfo;
+//class SimulationInfo;
 //
 ///**
 // * A unitGroup provides shared memory and computation for all units within the group.
@@ -100,19 +102,19 @@ std::vector<Unit<state, action, environment> *> members;
 //public:
 //	unitGroup(MapProvider *);
 //	virtual ~unitGroup() {}
-//	virtual tDirection makeMove(unit *u, MapProvider *, reservationProvider *, simulationInfo *simInfo);
+//	virtual tDirection makeMove(unit *u, MapProvider *, reservationProvider *, SimulationInfo *simInfo);
 //	/** gives the unit group time to think on a regular basis. In a synchronous simluation
 //		this will be called once at the beginning of each timestep. */
 //	virtual void think(MapProvider *) { }
 //	virtual const char *getName() { return "UnitGroupx"; }
 //
-//	virtual void OpenGLDraw(MapProvider *, simulationInfo *);
+//	virtual void OpenGLDraw(MapProvider *, SimulationInfo *);
 //	virtual void addUnit(unit *);
 //	virtual void removeUnit(unit *);
-//	virtual mapAbstraction *getMapAbstraction();
+//	virtual MapAbstraction *GetMapAbstraction();
 //	
 //	/** Inform the given unit of its current/new location */
-//	virtual void updateLocation(unit *, MapProvider *, int _x, int _y, bool, simulationInfo *);
+//	virtual void updateLocation(unit *, MapProvider *, int _x, int _y, bool, SimulationInfo *);
 //	/** Is the group done with racing? */
 //	virtual bool done();
 //	/** Lets the unit group do what it needs to reset a trial */

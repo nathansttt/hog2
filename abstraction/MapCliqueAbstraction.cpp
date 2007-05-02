@@ -1,7 +1,7 @@
 /*
- * $Id: mapCliqueAbstraction.cpp,v 1.19 2007/03/07 21:53:55 nathanst Exp $
+ * $Id: MapCliqueAbstraction.cpp,v 1.19 2007/03/07 21:53:55 nathanst Exp $
  *
- *  mapCliqueAbstraction.cpp
+ *  MapCliqueAbstraction.cpp
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/3/05.
@@ -48,8 +48,8 @@ const int verbose = kQuiet;//kMiscMessages;//kRepairGraph;
  * Constructions a new graph abstraction hierarchy from the graph using the
  * designated abstraction method.
  */
-mapCliqueAbstraction::mapCliqueAbstraction(Map *_m, bool uniform)
-:mapAbstraction(_m), abstractUniformly(uniform)
+MapCliqueAbstraction::MapCliqueAbstraction(Map *_m, bool uniform)
+:MapAbstraction(_m), abstractUniformly(uniform)
 {
 	buildAbstractions();
 #ifdef INSTRUMENT_REPAIR
@@ -58,12 +58,12 @@ mapCliqueAbstraction::mapCliqueAbstraction(Map *_m, bool uniform)
 #endif
 }
 
-mapCliqueAbstraction::~mapCliqueAbstraction()
+MapCliqueAbstraction::~MapCliqueAbstraction()
 {
 	cleanMemory();
 }
 
-void mapCliqueAbstraction::verifyHierarchy()
+void MapCliqueAbstraction::verifyHierarchy()
 {
 	cout << "VERIFY START" << endl;
 	for (unsigned int x = 0; x < abstractions.size(); x++)
@@ -182,14 +182,14 @@ void mapCliqueAbstraction::verifyHierarchy()
 	cout << "VERIFY END" << endl;
 }
 
-void mapCliqueAbstraction::cleanMemory()
+void MapCliqueAbstraction::cleanMemory()
 {
 	clearDisplayLists();
 	while (displayLists.size() > 0)
 		displayLists.pop_back();
 }
 
-void mapCliqueAbstraction::clearDisplayLists()
+void MapCliqueAbstraction::clearDisplayLists()
 {
 	for (unsigned int x = 0; x < displayLists.size(); x++)
 	{
@@ -198,12 +198,12 @@ void mapCliqueAbstraction::clearDisplayLists()
 	}
 }
 
-void mapCliqueAbstraction::buildAbstractions()
+void MapCliqueAbstraction::buildAbstractions()
 {
 	int totalNodes = 0;
 	cleanMemory();
 	
-	abstractions.push_back(getMapGraph(getMap()));
+	abstractions.push_back(getMapGraph(GetMap()));
 	graph *g = abstractions[0];
 	//  abstractions.push_back(g = getMapGraph(m));
 	if (displayLists.size() != 1)
@@ -227,12 +227,12 @@ void mapCliqueAbstraction::buildAbstractions()
 	// printf("%d nodes, excluding bottom level", totalNodes);
 }
 
-graph *mapCliqueAbstraction::abstractGraph(graph *g)
+graph *MapCliqueAbstraction::abstractGraph(graph *g)
 {
 	return cliqueAbstractGraph(g);
 }
 
-//graph *mapCliqueAbstraction::neighborAbstractGraph(graph *g, int width)
+//graph *MapCliqueAbstraction::neighborAbstractGraph(graph *g, int width)
 //{
 //	 std::vector<node *> remainingNodes;
 //	 graph *aGraph = new graph();
@@ -275,7 +275,7 @@ graph *mapCliqueAbstraction::abstractGraph(graph *g)
 //	 return aGraph;
 //}
 	
-void mapCliqueAbstraction::addNodesToParent(graph *g, node *n, node *parent, int width)
+void MapCliqueAbstraction::addNodesToParent(graph *g, node *n, node *parent, int width)
 {
 	if (n->getLabelL(kParent) != -1)
 		return;
@@ -299,11 +299,11 @@ void mapCliqueAbstraction::addNodesToParent(graph *g, node *n, node *parent, int
 }
 
 
-graph *mapCliqueAbstraction::cliqueAbstractGraph(graph *g)
+graph *MapCliqueAbstraction::cliqueAbstractGraph(graph *g)
 {
 	int abLevel = g->getNode(0)->getLabelL(kAbstractionLevel);
 	//	if (g != abstractions[0])
-	//		return graphAbstraction::abstractGraph(g);
+	//		return GraphAbstraction::abstractGraph(g);
 	
 	//  printf("Doing special map abstraction at level %d\n", (int)g->getNode(0)->getLabelL(kAbstractionLevel));
 	
@@ -319,9 +319,9 @@ graph *mapCliqueAbstraction::cliqueAbstractGraph(graph *g)
 	if (abstractUniformly)
 	{
 		// going through the map grid in a regular way, trying to abstract
-		for (int x = 0; x < getMap()->getMapWidth()-1; x+=(2<<abLevel))
+		for (int x = 0; x < GetMap()->getMapWidth()-1; x+=(2<<abLevel))
 		{
-			for (int y = 0; y < getMap()->getMapHeight()-1; y+=(2<<abLevel))
+			for (int y = 0; y < GetMap()->getMapHeight()-1; y+=(2<<abLevel))
 			{
 				// try to abstract (x, y), (x+1, y), (x, y+1) and (x+1, y+1)
 				node *a, *b, *c, *d;
@@ -648,7 +648,7 @@ return aGraph;
 }
 
 
-//graph *mapCliqueAbstraction::cliqueAbstractGraph(graph *g)
+//graph *MapCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //{
 //  //printf("getting abstract graph of level %d\n", g->getNode(0)->getLabelL(kAbstractionLevel));
 //	
@@ -931,7 +931,7 @@ return aGraph;
 //}
 	
 
-void mapCliqueAbstraction::addTunnel(node *n, graph *g, node *newNode)
+void MapCliqueAbstraction::addTunnel(node *n, graph *g, node *newNode)
 {
 	if (verbose&kBuildGraph) printf("Adding node %d to tunnel\n", n->getNum());
 	// check to see if we have neighbors with bf 2 which we can merge with
@@ -954,12 +954,12 @@ void mapCliqueAbstraction::addTunnel(node *n, graph *g, node *newNode)
 	}
 }
 
-bool mapCliqueAbstraction::pathable(unsigned int from, unsigned int to)
+bool MapCliqueAbstraction::Pathable(unsigned int from, unsigned int to)
 {
-	return pathable(abstractions[0]->getNode(from), abstractions[0]->getNode(to));
+	return Pathable(abstractions[0]->getNode(from), abstractions[0]->getNode(to));
 }
 
-bool mapCliqueAbstraction::pathable(node *from, node *to)
+bool MapCliqueAbstraction::Pathable(node *from, node *to)
 {
 	//printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
 	while (from != to)
@@ -978,17 +978,17 @@ bool mapCliqueAbstraction::pathable(node *from, node *to)
 	return true;
 }
 
-void mapCliqueAbstraction::addNode(node *n)
+void MapCliqueAbstraction::addNode(node *n)
 {
 }
 
-void mapCliqueAbstraction::addEdge(edge *, unsigned int)
+void MapCliqueAbstraction::addEdge(edge *, unsigned int)
 {
 }
 
 // for now we'll immediately handle splits, but in the future we should queue up splits
 // and process them in batch form(?)
-void mapCliqueAbstraction::removeEdge(edge *e, unsigned int absLevel)
+void MapCliqueAbstraction::removeEdge(edge *e, unsigned int absLevel)
 {
 	if (e == 0)
 		return;
@@ -1016,7 +1016,7 @@ void mapCliqueAbstraction::removeEdge(edge *e, unsigned int absLevel)
 	return;
 }
 
-void mapCliqueAbstraction::addNodeToRepairQ(node *n)
+void MapCliqueAbstraction::addNodeToRepairQ(node *n)
 {
 	// key is unsigned, so it has to be >= 0
 	if (n)
@@ -1034,7 +1034,7 @@ void mapCliqueAbstraction::addNodeToRepairQ(node *n)
 	}
 }
 
-void mapCliqueAbstraction::removeNodeFromRepairQ(node *n)
+void MapCliqueAbstraction::removeNodeFromRepairQ(node *n)
 {
 	// key is unsigned, so it has to be >= 0
 	//	if ((n->key >= 0) && (n->key < modifiedNodeQ.size()) &&
@@ -1047,7 +1047,7 @@ void mapCliqueAbstraction::removeNodeFromRepairQ(node *n)
 	}
 }
 
-void mapCliqueAbstraction::removeNode(node *n)
+void MapCliqueAbstraction::removeNode(node *n)
 {
 	if (n == 0) return;
 	if (verbose&kRepairGraph)
@@ -1119,7 +1119,7 @@ void mapCliqueAbstraction::removeNode(node *n)
 	}
 }
 
-void mapCliqueAbstraction::repairAbstraction()
+void MapCliqueAbstraction::repairAbstraction()
 {
 	// actually want to sort items...based on abstraction level, doing
 	// lowest abstraction level first
@@ -1156,7 +1156,7 @@ void mapCliqueAbstraction::repairAbstraction()
  * components. Marks the group of each child with kTemporary label &
  * returns the number of groups found.
  */
-int mapCliqueAbstraction::getChildGroups(node *which)
+int MapCliqueAbstraction::getChildGroups(node *which)
 {
 	std::vector<node *> seenStack;
 	seenStack.reserve(which->getLabelL(kNumAbstractedNodes));
@@ -1214,7 +1214,7 @@ int mapCliqueAbstraction::getChildGroups(node *which)
 /*
  * Takes a node & splits it so that it is connected.
  */
-void mapCliqueAbstraction::splitNode(node *parent, int numGroups)
+void MapCliqueAbstraction::splitNode(node *parent, int numGroups)
 {
 	// get all children nodes that we are re-assigning
 	std::vector<node *> children;
@@ -1305,7 +1305,7 @@ void mapCliqueAbstraction::splitNode(node *parent, int numGroups)
 /*
  * Find any node in parent that is a member of "group"
  */
-node *mapCliqueAbstraction::getNodeInGroup(node *parent, int group)
+node *MapCliqueAbstraction::getNodeInGroup(node *parent, int group)
 {
 	graph *g = abstractions[parent->getLabelL(kAbstractionLevel)-1];
 #ifdef INSTRUMENT_REPAIR
@@ -1324,7 +1324,7 @@ node *mapCliqueAbstraction::getNodeInGroup(node *parent, int group)
 /*
  * Count how many nodes are a member of "group"
  */
-int mapCliqueAbstraction::getGroupSize(node *parent, int group)
+int MapCliqueAbstraction::getGroupSize(node *parent, int group)
 {
 	graph *g = abstractions[parent->getLabelL(kAbstractionLevel)-1];
 #ifdef INSTRUMENT_REPAIR
@@ -1345,7 +1345,7 @@ int mapCliqueAbstraction::getGroupSize(node *parent, int group)
  * node as part of a clique. Returns the neighbor node at the child level
  */
 // PRECOND: group only has 1 node
-node *mapCliqueAbstraction::findNeighborCliques(node *parent, int group)
+node *MapCliqueAbstraction::findNeighborCliques(node *parent, int group)
 {
 	node *child = 0;
 	graph *g = abstractions[parent->getLabelL(kAbstractionLevel)-1];
@@ -1370,7 +1370,7 @@ node *mapCliqueAbstraction::findNeighborCliques(node *parent, int group)
  * check to see if the node can be merged into another
  * node as part of a clique. Returns the neighbor node.
  */
-node *mapCliqueAbstraction::findNeighborCliques(node *child)
+node *MapCliqueAbstraction::findNeighborCliques(node *child)
 {
 	graph *g = abstractions[child->getLabelL(kAbstractionLevel)];
 #ifdef INSTRUMENT_REPAIR
@@ -1391,7 +1391,7 @@ node *mapCliqueAbstraction::findNeighborCliques(node *child)
  * the neighbor. If a node has only 1 neighbor it doesn't have to be connected to
  * it, but it must be connected to at least 1 node and every node of degree 2 or greater
  */
-bool mapCliqueAbstraction::checkNeighborClique(node *child, node *neighbor)
+bool MapCliqueAbstraction::checkNeighborClique(node *child, node *neighbor)
 {
 	node *neighborParent = abstractions[neighbor->getLabelL(kAbstractionLevel)+1]->getNode(neighbor->getLabelL(kParent));
 #ifdef INSTRUMENT_REPAIR
@@ -1425,7 +1425,7 @@ bool mapCliqueAbstraction::checkNeighborClique(node *child, node *neighbor)
  * Take all nodes in group of parent and move them into neighbor's group
  * neighbor is one level lower than the parent
  */
-void mapCliqueAbstraction::mergeGroupIntoNeighbor(node *parent, int group, node *neighbor)
+void MapCliqueAbstraction::mergeGroupIntoNeighbor(node *parent, int group, node *neighbor)
 {
 	graph *g;
 	if (neighbor == 0)
@@ -1479,7 +1479,7 @@ void mapCliqueAbstraction::mergeGroupIntoNeighbor(node *parent, int group, node 
 /*
  * take all member of group in parent and make them their own node
  */
-void mapCliqueAbstraction::extractGroupIntoNewNode(node *parent, int group)
+void MapCliqueAbstraction::extractGroupIntoNewNode(node *parent, int group)
 {
 	// make new node...
 	node *newNode;
@@ -1506,7 +1506,7 @@ void mapCliqueAbstraction::extractGroupIntoNewNode(node *parent, int group)
  * Given a new node that is connected, but doesn't have a parent or have its edges
  * abstracted, and insert it into graph.
  */
-void mapCliqueAbstraction::insertNodeIntoHierarchy(node *newNode)
+void MapCliqueAbstraction::insertNodeIntoHierarchy(node *newNode)
 {
 	node *neighbor;
 	if (newNode->getNumEdges() == 0)
@@ -1588,7 +1588,7 @@ void mapCliqueAbstraction::insertNodeIntoHierarchy(node *newNode)
  * Check to see if a node has a parent. If it doesn't, create one, and optionally
  * extend the abstraction level of the graph as well.
  */
-void mapCliqueAbstraction::checkAndCreateParent(node *which)
+void MapCliqueAbstraction::checkAndCreateParent(node *which)
 {
 	if (which->getLabelL(kParent) != -1)
 		return;
@@ -1617,7 +1617,7 @@ void mapCliqueAbstraction::checkAndCreateParent(node *which)
 /*
  * take all nodes in a group of old parent and move them into newParent
  */
-void mapCliqueAbstraction::transferGroup(int group, node *oldParent, node *newParent)
+void MapCliqueAbstraction::transferGroup(int group, node *oldParent, node *newParent)
 {
 	std::vector<node *> groupies;
 	
@@ -1692,7 +1692,7 @@ void mapCliqueAbstraction::transferGroup(int group, node *oldParent, node *newPa
  *
  * same thing with connecting a node with degree 0 to a node with degree 1
  */
-void mapCliqueAbstraction::abstractUpEdge(unsigned int absLevel, edge *e)
+void MapCliqueAbstraction::abstractUpEdge(unsigned int absLevel, edge *e)
 {
 	// 1 find edge in parent
 	graph *g = abstractions[absLevel];
@@ -1736,7 +1736,7 @@ void mapCliqueAbstraction::abstractUpEdge(unsigned int absLevel, edge *e)
 	}
 }
 
-void mapCliqueAbstraction::resetLocationCache(node *n)
+void MapCliqueAbstraction::resetLocationCache(node *n)
 {
 	unsigned int absLevel = n->getLabelL(kAbstractionLevel);
 	while (true)
@@ -1769,7 +1769,7 @@ void mapCliqueAbstraction::resetLocationCache(node *n)
 	}
 }
 
-node *mapCliqueAbstraction::findNodeParent(node *n)
+node *MapCliqueAbstraction::findNodeParent(node *n)
 {
   unsigned int absLevel = n->getLabelL(kAbstractionLevel);
   if (absLevel < abstractions.size()-1)
@@ -1786,7 +1786,7 @@ node *mapCliqueAbstraction::findNodeParent(node *n)
  * Given an edge at a level of abstraction, find the edge that
  * this edge abstracts into.
  */
-edge *mapCliqueAbstraction::findEdgeParent(edge *e, unsigned int absLevel)
+edge *MapCliqueAbstraction::findEdgeParent(edge *e, unsigned int absLevel)
 {
 	if (absLevel >= abstractions.size()-1) return 0;
 	
@@ -1811,7 +1811,7 @@ edge *mapCliqueAbstraction::findEdgeParent(edge *e, unsigned int absLevel)
 	//	return g->findEdge(to->getNum(), from->getNum());
 }
 
-void mapCliqueAbstraction::renameNodeInAbstraction(node *which, unsigned int oldID)
+void MapCliqueAbstraction::renameNodeInAbstraction(node *which, unsigned int oldID)
 {
 	unsigned int absLevel = which->getLabelL(kAbstractionLevel);
 	
@@ -1852,7 +1852,7 @@ void mapCliqueAbstraction::renameNodeInAbstraction(node *which, unsigned int old
  * Measure the number of levels hit during repair. Always returns 0 unless compiled
  * with -D INSTRUMENT_REPAIR
  */
-int mapCliqueAbstraction::measureRepairHits()
+int MapCliqueAbstraction::measureRepairHits()
 {
 	int numHits = 0;
 #ifdef INSTRUMENT_REPAIR

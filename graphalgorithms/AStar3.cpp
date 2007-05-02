@@ -45,16 +45,16 @@ aStarOld::aStarOld(double _weight, bool _doPathDraw)
 
 
 // The same A*, but counts the number of states expanded
-path *aStarOld::getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *aStarOld::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	// Reset the number of states expanded
 	nodesExpanded = 0;
 	nodesTouched = 0;
 	
-	if ((from == 0) || (to == 0) || (!aMap->pathable(from, to)) || (from == to))
+	if ((from == 0) || (to == 0) || (!aMap->Pathable(from, to)) || (from == to))
 		return 0;
 	map = aMap;
-	graph *g = map->getAbstractGraph(from->getLabelL(kAbstractionLevel));
+	graph *g = map->GetAbstractGraph(from->getLabelL(kAbstractionLevel));
 	heap *openList = new heap(30);
 	std::vector<node *> closedList;
 	node *n;

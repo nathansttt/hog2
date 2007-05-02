@@ -29,10 +29,10 @@
 
 #include "MapAbstraction.h"
 #include "Path.h"
-#include "Constants.h"
 #include "UnitGroup.h"
 #include "UnitSimulation.h"
 
+class SimulationInfo;
 
 template <class state, class action, class environment>
 class Unit {
@@ -41,8 +41,8 @@ public:
 	Unit() :speed(0), group(0) {}
 	virtual ~Unit() {}
 	virtual const char *GetName() = 0;
-	virtual action MakeMove(environment *) = 0;
-	virtual void UpdateLocation(state, bool) = 0;
+	virtual action MakeMove(environment *, SimulationInfo *) = 0;
+	virtual void UpdateLocation(environment *, state, bool, SimulationInfo *) = 0;
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw(environment *) = 0;
 
@@ -50,7 +50,7 @@ public:
 	void SetSpeed(double s) { speed = s; }
 
 	/** log an stats that may have been computed during the last run */
-	virtual void LogStats(StatCollection *stats) {}
+	virtual void LogStats(StatCollection *) {}
 	/** log any final one-time stats before a simulation is ended */
 	virtual void LogFinalStats(StatCollection *) {}
 	
@@ -90,14 +90,14 @@ private:
 //	virtual const char *getName() { return "basicUnit"; }
 //	static void clearDisplayList() { if (sphereDispList != 0) glDeleteLists(sphereDispList, 1); sphereDispList = 0; }
 //	/** The new makeMove only gives a map. The unit simulation won't calculate an
-//		  mapAbstraction unless it has to. Thus, in simple pathfinding tests, the overhead
+//		  MapAbstraction unless it has to. Thus, in simple pathfinding tests, the overhead
 //		  is saved. */
-//	virtual tDirection makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
+//	virtual tDirection makeMove(MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo);
 //
 //	/** get where the unit thinks it is */
 //	void getLocation(int &x, int &y);
 //	/** updateLocation only tells a unit where it is located, it doesn't physically change the location in the world */
-//	virtual void updateLocation(int _x, int _y, bool, simulationInfo *) { x = _x; y = _y; }
+//	virtual void updateLocation(int _x, int _y, bool, SimulationInfo *) { x = _x; y = _y; }
 //	/** log an stats that may have been computed during the last run */
 //	virtual void logStats(StatCollection *stats);
 //	/** log any final one-time stats before a simulation is ended */
@@ -112,7 +112,7 @@ private:
 //	void setColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
 //	void getColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
 //
-//	virtual void OpenGLDraw(MapProvider *, simulationInfo *simInfo);
+//	virtual void OpenGLDraw(MapProvider *, SimulationInfo *simInfo);
 //	void setObjectType(tObjectType _unitType) { unitType = _unitType; }
 //	tObjectType getObjectType() { return unitType; }
 //
@@ -127,7 +127,7 @@ private:
 //	void drawTriangle(GLdouble x, GLdouble y, GLdouble z, GLdouble tRadius);
 //	void drawSphere(GLdouble x, GLdouble y, GLdouble z, GLdouble tRadius);
 //	static GLuint sphereDispList;
-//	bool mapUpdated(mapAbstraction *aMap);
+//	bool mapUpdated(MapAbstraction *aMap);
 //
 //	tObjectType unitType;
 //	int map_revision;

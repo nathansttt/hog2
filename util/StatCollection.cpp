@@ -76,7 +76,7 @@ StatCollection::~StatCollection()
 /**
 * Add a new stat entry for the given category, owner and value.
  */
-void StatCollection::addStat(const char *category, const char *owner, double value)
+void StatCollection::AddStat(const char *category, const char *owner, double value)
 {
 	if (!passFilter(category))
 		return;
@@ -96,7 +96,7 @@ void StatCollection::addStat(const char *category, const char *owner, double val
 /**
 * Add a new stat entry for the given category, owner and value.
  */
-void StatCollection::addStat(const char *category, const char *owner, long value)
+void StatCollection::AddStat(const char *category, const char *owner, long value)
 {
 	if (!passFilter(category))
 		return;
@@ -118,7 +118,7 @@ void StatCollection::addStat(const char *category, const char *owner, long value
  * value. If the stat doesn't exist with the same category and owner doesn't exist,
  * a new one will be initialized with the given value.
  */
-void StatCollection::sumStat(const char *category, const char *owner, double value)
+void StatCollection::SumStat(const char *category, const char *owner, double value)
 {
 	statValue *sv = getLastStat(category, owner);
 	if (sv)
@@ -130,7 +130,7 @@ void StatCollection::sumStat(const char *category, const char *owner, double val
 			printf("%s\t%s\t%1.2f\n", category, owner, sv->fval);
 	}
 	else
-		addStat(category, owner, value);
+		AddStat(category, owner, value);
 }
 
 /**
@@ -139,7 +139,7 @@ void StatCollection::sumStat(const char *category, const char *owner, double val
  * value. If the stat doesn't exist with the same category and owner doesn't exist,
  * a new one will be initialized with the given value.
  */
-void StatCollection::sumStat(const char *category, const char *owner, long value)
+void StatCollection::SumStat(const char *category, const char *owner, long value)
 {
 	statValue *sv = getLastStat(category, owner);
 	if (sv)
@@ -151,7 +151,7 @@ void StatCollection::sumStat(const char *category, const char *owner, long value
 			printf("%s\t%s\t%ld\n", category, owner, sv->lval);
 	}
 	else
-		addStat(category, owner, value);
+		AddStat(category, owner, value);
 }
 
 /**
@@ -242,7 +242,7 @@ void StatCollection::clearFilters()
 /**
 * Given a category, look up the ID. O(# categories) operation. If not found, returns -1.
  */
-int StatCollection::lookupCategory(const char *category) const
+int StatCollection::LookupCategory(const char *category) const
 {
 	for (unsigned int x = 0; x < categories.size(); x++)
 		if (strcmp(category, categories[x]) == 0)
@@ -257,7 +257,7 @@ int StatCollection::lookupCategory(const char *category) const
  */
 int StatCollection::addCategory(const char *category)
 {
-	int id = lookupCategory(category);
+	int id = LookupCategory(category);
 	if (id != -1)
 		return id;
 	char *str = new char [strlen(category)+1];
@@ -303,7 +303,7 @@ bool StatCollection::lookupStat(const char *category, const char *owner, statVal
 		return false;
 	}
 	int catID, ownerID;
-	catID = lookupCategory(category);
+	catID = LookupCategory(category);
 	ownerID = lookupOwner(owner);
 	for (int x = (int)stats.size()-1; x >= 0; x--)
 	{
@@ -335,7 +335,7 @@ statValue *StatCollection::getLastStat(const char *category, const char *owner)
 	if (!passFilter(category))
 		return 0;
 	int catID, ownerID;
-	catID = lookupCategory(category);
+	catID = LookupCategory(category);
 	ownerID = lookupOwner(owner);
 	for (int x = (int)stats.size()-1; x >= 0; x--)
 	{
@@ -382,7 +382,7 @@ int StatCollection::findNextStat(const char *category, const char *owner, int st
 		startIndex = 0;
 	
 	int catID, ownerID;
-	catID = lookupCategory(category);
+	catID = LookupCategory(category);
 	ownerID = lookupOwner(owner);
 	
 	for (int x = startIndex; x < (int)stats.size(); x++)
@@ -410,7 +410,7 @@ int StatCollection::findPrevStat(const char *category, const char *owner, int st
 		startIndex = (int) stats.size() -1;
 	
 	int catID, ownerID;
-	catID = lookupCategory(category);
+	catID = LookupCategory(category);
 	ownerID = lookupOwner(owner);
 	
 	for (int x = startIndex; x > 0; x--)
@@ -439,7 +439,7 @@ int StatCollection::findNextStat(const char *what, bool findCategory, int startI
 	
 	int ID;
 	if (findCategory)
-		ID = lookupCategory(what);
+		ID = LookupCategory(what);
 	else
 		ID = lookupOwner(what);
 	
@@ -471,7 +471,7 @@ int StatCollection::findPrevStat(const char *what, bool findCategory, int startI
 	
 	int ID;
 	if (findCategory)
-		ID = lookupCategory(what);
+		ID = LookupCategory(what);
 	else
 		ID = lookupOwner(what);
 	

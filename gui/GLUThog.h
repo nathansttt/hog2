@@ -66,8 +66,8 @@ void updateProjection (pRecContext pContextInfo);
 void updateModelView (pRecContext pContextInfo);
 void pointPath();
 int processFramesPerSecond(char *argument[], int maxNumArgs);
-Map* getMap();
-mapAbstraction* getMapAbstraction();
+Map* GetMap();
+MapAbstraction* GetMapAbstraction();
 pRecContext getCurrentContext();
 //static void drawCaps (pRecContext pContextInfo) {}
 

@@ -164,7 +164,7 @@
 //* next step. Overload this function to define your own unit movement. The default
 //* action is to stay put.
 //*/
-//tDirection unit::makeMove(MapProvider *, reservationProvider *, simulationInfo *)
+//tDirection unit::makeMove(MapProvider *, reservationProvider *, SimulationInfo *)
 //{
 //	return kStay;
 //}
@@ -181,9 +181,9 @@
 //*
 //* returns true if the map has been udpated from the last time we checked.
 //*/
-//bool unit::mapUpdated(mapAbstraction *aMap)
+//bool unit::mapUpdated(MapAbstraction *aMap)
 //{
-//	Map *map = aMap->getMap();
+//	Map *map = aMap->GetMap();
 //	if (map_revision != map->getRevision())
 //	{
 //		map_revision = map->getRevision();
@@ -219,9 +219,9 @@
 // *
 // * Draw the unit using openGL. Overload this if you want a custom look for the unit.
 // */
-//void unit::OpenGLDraw(MapProvider *mp, simulationInfo *)
+//void unit::OpenGLDraw(MapProvider *mp, SimulationInfo *)
 //{
-//	Map *map = mp->getMap();
+//	Map *map = mp->GetMap();
 //	GLdouble xx, yy, zz, rad;
 //	if ((x < 0) || (x >= map->getMapWidth()) || (y < 0) || (y >= map->getMapHeight()))
 //		return;
