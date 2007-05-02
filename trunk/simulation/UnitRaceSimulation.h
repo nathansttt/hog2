@@ -43,7 +43,7 @@ enum tUnitOnTargetStatus {
 
 class unitRaceSimulation : public unitSimulation {
 public:
-	unitRaceSimulation(mapAbstraction *m, bool keepStats = false);
+	unitRaceSimulation(MapAbstraction *m, bool keepStats = false);
 	~unitRaceSimulation();
 	void addUnit(unit *u) { allRacesDone = false; unitSimulation::addUnit(u); }
 	void addUnit(unit *u, bool block)  { allRacesDone = false; unitSimulation::addUnit(u, block); }

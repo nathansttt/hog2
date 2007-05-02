@@ -37,16 +37,16 @@ using namespace std;
 
 static const int verbose = 0;
 
-void doRandomPath(graphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
+void doRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 {
 	static double lastLength, lastTime;
 	static node *r1 = 0, *r2 = 0;
-	graph *g = aMap->getAbstractGraph(0);
+	graph *g = aMap->GetAbstractGraph(0);
 	//if (verbose) cout << "Clearing marked nodes" << endl;
 	//aMap->clearMarkedNodes();
 	
-	//	r1 = ((mapAbstraction*)aMap)->getNodeFromMap(257, 449);
-	//	r2 = ((mapAbstraction*)aMap)->getNodeFromMap(319, 458);
+	//	r1 = ((MapAbstraction*)aMap)->getNodeFromMap(257, 449);
+	//	r2 = ((MapAbstraction*)aMap)->getNodeFromMap(319, 458);
 	if ((!repeat) || (r1 == 0) || (r2 == 0))
 	{
 		lastLength = 0;
@@ -54,11 +54,11 @@ void doRandomPath(graphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 		do {
 			//      do {
 			r1 = g->getRandomNode();
-			//      } while (aMap->getMap()->getTerrainType((long)r1->getLabelL(kFirstData), (long)r1->getLabelL(kFirstData+1)) == kOutOfBounds);
+			//      } while (aMap->GetMap()->getTerrainType((long)r1->getLabelL(kFirstData), (long)r1->getLabelL(kFirstData+1)) == kOutOfBounds);
 			//      do {
 			r2 = g->getRandomNode();
-			//      } while (aMap->getMap()->getTerrainType((long)r2->getLabelL(kFirstData), (long)r2->getLabelL(kFirstData+1)) == kOutOfBounds);
-		} while (!aMap->pathable(r1, r2));
+			//      } while (aMap->GetMap()->getTerrainType((long)r2->getLabelL(kFirstData), (long)r2->getLabelL(kFirstData+1)) == kOutOfBounds);
+		} while (!aMap->Pathable(r1, r2));
 	}
 	
 	if (verbose)

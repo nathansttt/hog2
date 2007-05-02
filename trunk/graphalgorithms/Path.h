@@ -46,7 +46,7 @@ public:
   /** returns the number of steps along the path */
   unsigned length(void); 
 //  /** returns the distance covered by the path */
-//  double distance(graphAbstraction* aMap);
+//  double distance(GraphAbstraction* aMap);
   unsigned degree();
   void print(bool beginning=true);
 };

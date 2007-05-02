@@ -28,7 +28,7 @@
 #include "Graph.h"
 
 NodeLimitAbstraction::NodeLimitAbstraction(Map *_m, int _NodeLimit)
-:mapAbstraction(_m), nodeLimit(_NodeLimit)
+:MapAbstraction(_m), nodeLimit(_NodeLimit)
 {
   assert(_m!=NULL);
 	
@@ -39,7 +39,7 @@ NodeLimitAbstraction::~NodeLimitAbstraction()
 { 
 }
 
-bool NodeLimitAbstraction::pathable(node *from, node *to)
+bool NodeLimitAbstraction::Pathable(node *from, node *to)
 {
   while (from != to)
 	{
@@ -97,7 +97,7 @@ void NodeLimitAbstraction::repairAbstraction()
 void NodeLimitAbstraction::buildAbstraction()
 {
 	//inefficient for the moment
-	abstractions.push_back(getMapGraph(getMap()));
+	abstractions.push_back(getMapGraph(GetMap()));
 	while (abstractions.back()->getNumEdges() > 0)
 	{
 		graph *g = new graph();
@@ -156,7 +156,7 @@ void NodeLimitAbstraction::addEdges(graph *aGraph)
 void NodeLimitAbstraction::abstractionBFS(node *which, node *parent, int count)
 {
 	std::vector<node *> q;
-	graph *g = getAbstractGraph(which);
+	graph *g = GetAbstractGraph(which);
 	
 	buildNodeIntoParent(which, parent);
 	count--;

@@ -55,12 +55,12 @@ public:
 
 	//using unit::makeMove;
 	// this is where the World says you are  
-	virtual tDirection MakeMove(AbsMapEnvironment *ame)
-	{ return makeMove(ame->GetMapAbstraction(), 0, 0); }
-	virtual tDirection makeMove(MapProvider *, reservationProvider *, simulationInfo *simInfo); 
+	virtual tDirection MakeMove(AbsMapEnvironment *ame, SimulationInfo *si)
+	{ return makeMove(ame->GetMapAbstraction(), 0, si); }
+	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo); 
 	
-	void UpdateLocation(xyLoc l, bool success) { updateLocation(l.x, l.y, success, 0); }
-	virtual void updateLocation(int _x, int _y, bool, simulationInfo *);
+	void UpdateLocation(AbsMapEnvironment *, xyLoc l, bool success, SimulationInfo *si) { updateLocation(l.x, l.y, success, si); }
+	virtual void updateLocation(int _x, int _y, bool, SimulationInfo *);
 	virtual void OpenGLDraw(AbsMapEnvironment *);
 	//void printRoundStats(FILE *f);
 	void LogStats(StatCollection *stats);

@@ -26,7 +26,7 @@
 
 #include "AStar2.h"
 
-path *aStar2::getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *)
+path *aStar2::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *)
 {
 	if ((from == 0) || (to == 0) || (from == to))
 		return 0;
@@ -35,7 +35,7 @@ path *aStar2::getPath(graphAbstraction *aMap, node *from, node *to, reservationP
 	
   std::vector<unsigned int> eligibleNodeParents;
 	
-  lastPath = getAbstractPath(map->getAbstractGraph(from->getLabelL(kAbstractionLevel)),
+  lastPath = getAbstractPath(map->GetAbstractGraph(from->getLabelL(kAbstractionLevel)),
 														 from->getNum(), to->getLabelL(kParent),
 														 eligibleNodeParents,
 														 kTemporaryLabel,

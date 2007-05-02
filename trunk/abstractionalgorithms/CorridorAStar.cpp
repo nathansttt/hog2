@@ -40,12 +40,12 @@ void corridorAStar::setCorridor(const std::vector<node *> *c)
 	corridor = c;
 }
 
-path *corridorAStar::getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *corridorAStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	return getBestPath(aMap, from, to, to, rp);
 }
 
-path *corridorAStar::getBestPath(graphAbstraction *aMap, node *from, node *to, node *hGoal, reservationProvider *rp)
+path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *from, node *to, node *hGoal, reservationProvider *rp)
 {
 	nodesExpanded = 0;
 	nodesTouched = 0;
@@ -64,7 +64,7 @@ path *corridorAStar::getBestPath(graphAbstraction *aMap, node *from, node *to, n
 	int corridorLayer = absLayer;
 	if (corridor->size() > 0)
 		corridorLayer = (*corridor)[0]->getLabelL(kAbstractionLevel);
-	graph *absGraph = aMap->getAbstractGraph(absLayer);
+	graph *absGraph = aMap->GetAbstractGraph(absLayer);
 	
   // mark location of eligible nodes
   for (unsigned int x = 0; x < corridor->size(); x++)
@@ -160,7 +160,7 @@ path *corridorAStar::getBestPath(graphAbstraction *aMap, node *from, node *to, n
 	return 0;
 }
 
-path *corridorAStar::getBestPath(graphAbstraction *aMap, node *afrom, node *ato, node *from, node *, reservationProvider *rp)
+path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato, node *from, node *, reservationProvider *rp)
 {
 	nodesExpanded = 0;
 	nodesTouched = 0;
@@ -179,7 +179,7 @@ path *corridorAStar::getBestPath(graphAbstraction *aMap, node *afrom, node *ato,
 	int corridorLayer = absLayer;
 	if (corridor->size() > 0)
 		corridorLayer = (*corridor)[0]->getLabelL(kAbstractionLevel);
-	graph *absGraph = aMap->getAbstractGraph(absLayer);
+	graph *absGraph = aMap->GetAbstractGraph(absLayer);
 	
   // mark location of eligible nodes
   for (unsigned int x = 0; x < corridor->size(); x++)
@@ -298,7 +298,7 @@ path *corridorAStar::getBestPath(graphAbstraction *aMap, node *afrom, node *ato,
 	return 0;
 }
 
-void corridorAStar::relaxEdge(heap *nodeHeap, graph *, graphAbstraction *aMap,
+void corridorAStar::relaxEdge(heap *nodeHeap, graph *, GraphAbstraction *aMap,
 															edge *e, node *from, node *to, node *dest)
 {
   double weight;
@@ -315,7 +315,7 @@ void corridorAStar::relaxEdge(heap *nodeHeap, graph *, graphAbstraction *aMap,
   }
 }
 
-void corridorAStar::relaxFirstEdge(heap *nodeHeap, graph *, graphAbstraction *aMap,
+void corridorAStar::relaxFirstEdge(heap *nodeHeap, graph *, GraphAbstraction *aMap,
 																	 edge *e, node *from, node *afrom, node *ato, node *dest)
 {
   double weight;
@@ -332,7 +332,7 @@ void corridorAStar::relaxFirstEdge(heap *nodeHeap, graph *, graphAbstraction *aM
   }
 }
 
-void corridorAStar::relaxFinalEdge(heap *nodeHeap, graph *, graphAbstraction *aMap,
+void corridorAStar::relaxFinalEdge(heap *nodeHeap, graph *, GraphAbstraction *aMap,
 																	 edge *e, node *from, node *to, node *realDest)
 {
   double weight;

@@ -48,7 +48,7 @@ craStar::craStar()
 	smType = BEGIN;
 }
 
-path *craStar::getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *craStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	//	std::cout<<"find path from "<<*from<<"\nto "<<*to<<std::endl;
 	
@@ -57,7 +57,7 @@ path *craStar::getPath(graphAbstraction *aMap, node *from, node *to, reservation
 	path *lastPath = 0;
 	
 	
-	if (aMap->getAbstractGraph(from->getLabelL(kAbstractionLevel))->findEdge(from->getNum(), to->getNum()))
+	if (aMap->GetAbstractGraph(from->getLabelL(kAbstractionLevel))->findEdge(from->getNum(), to->getNum()))
 		return new path(from, new path(to));
 	
 	setupSearch(aMap, fromChain, from, toChain, to);
@@ -120,7 +120,7 @@ return lastPath;
 * GIven an abstract level parent node n, find a new goal that is a 0-level child of n
 * as well as the parent chain linking them. The parent chain will be stores in toChain.
 */
-void craStar::findGoalNode(graphAbstraction* aMap, node* n, std::vector<node *> &toChain)
+void craStar::findGoalNode(GraphAbstraction* aMap, node* n, std::vector<node *> &toChain)
 {
 	int currLevel = n->getLabelL(kAbstractionLevel);
 	if (currLevel==0)
@@ -129,19 +129,19 @@ void craStar::findGoalNode(graphAbstraction* aMap, node* n, std::vector<node *> 
 		toChain.push_back(n);
 	}
 	else{
-		findGoalNode(aMap,aMap->getAbstractGraph(currLevel-1)->getNode(n->getLabelL(kFirstData)), toChain);
+		findGoalNode(aMap,aMap->GetAbstractGraph(currLevel-1)->getNode(n->getLabelL(kFirstData)), toChain);
 		toChain.push_back(n);
 	}
 }
 
-void craStar::setupSearch(graphAbstraction *aMap,
+void craStar::setupSearch(GraphAbstraction *aMap,
 													std::vector<node *> &fromChain, node *from,
 													std::vector<node *> &toChain, node *to)
 {
 	nodesExpanded = 0;
 	nodesTouched = 0;
 	
-	if ((from == 0) || (to == 0) || (!aMap->pathable(from, to)) || (from == to))
+	if ((from == 0) || (to == 0) || (!aMap->Pathable(from, to)) || (from == to))
 	{
 		if (verbose) {
 			if (!from)
@@ -150,7 +150,7 @@ void craStar::setupSearch(graphAbstraction *aMap,
 				printf("craStar: to == 0\n");
 			if (from == to)
 				printf("craStar: from == to\n");
-			if (from && to && (!aMap->pathable(from, to)))
+			if (from && to && (!aMap->Pathable(from, to)))
 				printf("craStar: no path from %p to %p\n", (void*)from, (void*)to);
 			//cout << "praStar: no path from " << *from << " to " << *to << endl;
 		}
@@ -163,7 +163,7 @@ void craStar::setupSearch(graphAbstraction *aMap,
 	aMap->getParentHierarchy(from, to, fromChain, toChain);
 	
 	unsigned int previousSize = fromChain.size();
-	int minNode = (int)(2*sqrt(aMap->getAbstractGraph(0)->getNumNodes()));
+	int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(0)->getNumNodes()));
 	
 	if (absLevel > 0)
 	{
@@ -177,7 +177,7 @@ void craStar::setupSearch(graphAbstraction *aMap,
 	}
 	else{ // dynamic level selection
 		while ((fromChain.size() > 2) && ((fromChain.size() > (previousSize)/2) ||
-																			(aMap->getAbstractGraph(fromChain.size())->getNumNodes() < minNode)))
+																			(aMap->GetAbstractGraph(fromChain.size())->getNumNodes() < minNode)))
 		{
 			toChain.pop_back();
 			fromChain.pop_back();
@@ -188,7 +188,7 @@ void craStar::setupSearch(graphAbstraction *aMap,
 /**
 * Build an abstract path for quick refinement
  */
-path* craStar::buildAbstractPath(graphAbstraction *aMap, 
+path* craStar::buildAbstractPath(GraphAbstraction *aMap, 
 																 std::vector<node *> &fromChain,
 																 std::vector<node *> &toChain,
 																 reservationProvider *rp)
@@ -218,7 +218,7 @@ path* craStar::buildAbstractPath(graphAbstraction *aMap,
 * Do a quick refinement of an abstract path
  */
 
-path *craStar::doRefinement(graphAbstraction *aMap, path* absPath, std::vector<node*> &fromChain, std::vector<node*> &toChain)
+path *craStar::doRefinement(GraphAbstraction *aMap, path* absPath, std::vector<node*> &fromChain, std::vector<node*> &toChain)
 {
 	assert((fromChain.size() == toChain.size()) && (toChain.back()->getLabelL(kAbstractionLevel) == fromChain.back()->getLabelL(kAbstractionLevel))
 				 && (fromChain.back() == absPath->n));
@@ -263,7 +263,7 @@ path *craStar::doRefinement(graphAbstraction *aMap, path* absPath, std::vector<n
 		apath = apath->next;
 		path* returnPath = new path(currentLow);
 		
-		graph* g = aMap->getAbstractGraph(currentLow->getLabelL(kAbstractionLevel));
+		graph* g = aMap->GetAbstractGraph(currentLow->getLabelL(kAbstractionLevel));
 		
 		// check if the first node is an orphan
 		if (currentLow->getNumEdges()==1)
@@ -325,7 +325,7 @@ path *craStar::doRefinement(graphAbstraction *aMap, path* absPath, std::vector<n
 /**
 * Find the next node of the refined path. 
  */
-node* craStar::getNextNode(graphAbstraction *aMap, node* currentLow, path* returnPath, path* apath, graph* g, int abstractLevel)
+node* craStar::getNextNode(GraphAbstraction *aMap, node* currentLow, path* returnPath, path* apath, graph* g, int abstractLevel)
 {		
 	nodesExpanded++;
 	
@@ -435,7 +435,7 @@ node* craStar::getNextNode(graphAbstraction *aMap, node* currentLow, path* retur
 }
 
 
-path *craStar::buildNextAbstractPath(graphAbstraction *aMap, path *lastPath,
+path *craStar::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 																		 std::vector<node *> &fromChain,
 																		 std::vector<node *> &toChain,
 																		 reservationProvider *rp)
@@ -480,7 +480,7 @@ path *craStar::buildNextAbstractPath(graphAbstraction *aMap, path *lastPath,
 			}
 		}
 		
-		graph *g = aMap->getAbstractGraph(lastPath->n->getLabelL(kAbstractionLevel));
+		graph *g = aMap->GetAbstractGraph(lastPath->n->getLabelL(kAbstractionLevel));
 		// find eligible nodes for lower level expansions
 		for (path *trav = lastPath; trav; trav = trav->next)
 		{
@@ -546,7 +546,7 @@ path *craStar::trimPath(path *lastPath, node *origDest)
  * smoothen the path by replacing parts of the path by 
  * straight lines.
  */
-path* craStar::smoothPath(graphAbstraction *m,path* p)
+path* craStar::smoothPath(GraphAbstraction *m,path* p)
 {
 	findMinMax(p);
 	
@@ -737,14 +737,14 @@ bool craStar::nextInLookup(int last, int curr, std::vector<node*> lookupVal)
  * Return the better path if you find it; 0 if you hit a  
  * wall or obstacle (ie. if you won't find the path) 
  */ 
-path* craStar::nextPathNode(graphAbstraction *m,node* n, int dir)
+path* craStar::nextPathNode(GraphAbstraction *m,node* n, int dir)
 {
-	graph *g = m->getAbstractGraph(0);
+	graph *g = m->GetAbstractGraph(0);
 	
 	int px = n->getLabelL(kFirstData);
 	int py = n->getLabelL(kFirstData+1);
 	
-	node* next = getNextNode(static_cast<mapAbstraction*>(m),px,py,dir);
+	node* next = getNextNode(static_cast<MapAbstraction*>(m),px,py,dir);
 	
 	if (next)
 	{
@@ -785,7 +785,7 @@ path* craStar::nextPathNode(graphAbstraction *m,node* n, int dir)
 * get the next node from map coordinates (x,y) in direction
  * dir. Will return 0 if there's no node here. 
  */
-node* craStar::getNextNode(mapAbstraction *m,int x, int y, int dir)
+node* craStar::getNextNode(MapAbstraction *m,int x, int y, int dir)
 {
 	if ((x < minx) || (x > maxx) || (y < miny) || (y>maxy))
 		return 0;

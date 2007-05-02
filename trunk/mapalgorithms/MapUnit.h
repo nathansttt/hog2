@@ -22,7 +22,7 @@ public:
 	MapUnit(int x, int y)
 	:loc(x, y) { r = 1.0; g = 0; b = 0;}
 
-	virtual void UpdateLocation(xyLoc l, bool)
+	virtual void UpdateLocation(MapEnvironment *, xyLoc l, bool, SimulationInfo *)
 	{ loc = l; }
 	virtual void GetLocation(xyLoc &l)
 	{ l = loc; }

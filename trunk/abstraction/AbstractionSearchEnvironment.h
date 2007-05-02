@@ -16,14 +16,14 @@
 class AbstractionSearchEnvironment : public SearchEnvironment
 {
 public:
-	AbstractionSearchEnvironment(graphAbstraction *_ga, int _level)
+	AbstractionSearchEnvironment(GraphAbstraction *_ga, int _level)
 	:ga(_ga), level(_level) {  }
 	~AbstractionSearchEnvironment() {}
 	void getNeighbors(uint32_t nodeID, std::vector<uint32_t> &neighbors);
 	double heuristic(uint32_t node1, uint32_t node2);
 	double gcost(uint32_t node1, uint32_t node2);
 private:
-		graphAbstraction *ga;
+		GraphAbstraction *ga;
 	int level;
 };
 

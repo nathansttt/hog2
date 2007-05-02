@@ -1,7 +1,7 @@
 /*
- * $Id: mapAbstraction.cpp,v 1.21 2007/03/24 23:34:11 nathanst Exp $
+ * $Id: MapAbstraction.cpp,v 1.21 2007/03/24 23:34:11 nathanst Exp $
  *
- *  mapAbstraction.cpp
+ *  MapAbstraction.cpp
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/3/05.
@@ -26,14 +26,13 @@
  */
 
 #include "MapAbstraction.h"
-#include "Constants.h"
 
-mapAbstraction::~mapAbstraction()
+MapAbstraction::~MapAbstraction()
 { 
 	delete m;
 }
 
-void mapAbstraction::getRandomTileFromNode(node *n, int &x, int &y)
+void MapAbstraction::getRandomTileFromNode(node *n, int &x, int &y)
 {
 	while (getAbstractionLevel(n) != 0)
 		n = getNthChild(n, random()%getNumChildren(n));
@@ -41,7 +40,7 @@ void mapAbstraction::getRandomTileFromNode(node *n, int &x, int &y)
 	y = n->getLabelL(kFirstData+1);
 }
 
-void mapAbstraction::getTileFromNode(node *n, int &x, int &y)
+void MapAbstraction::getTileFromNode(node *n, int &x, int &y)
 {
 	if (getAbstractionLevel(n) != 0)
 	{
@@ -62,7 +61,7 @@ void mapAbstraction::getTileFromNode(node *n, int &x, int &y)
 	//printf("(%d, %d) in x/y\n", x, y);
 }
 
-void mapAbstraction::toggleDrawAbstraction(int which)
+void MapAbstraction::toggleDrawAbstraction(int which)
 {
 	bool drawThis = ((levelDraw>>which)&0x1);
 	if (!drawThis)
@@ -71,7 +70,7 @@ void mapAbstraction::toggleDrawAbstraction(int which)
 		levelDraw = levelDraw&(~(1<<which));
 }
 
-void mapAbstraction::OpenGLDraw()
+void MapAbstraction::OpenGLDraw()
 {
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
@@ -81,7 +80,7 @@ void mapAbstraction::OpenGLDraw()
 }
 
 
-void mapAbstraction::drawGraph(graph *g)
+void MapAbstraction::drawGraph(graph *g)
 {
 	if ((g == 0) || (g->getNumNodes() == 0)) return;
 	
@@ -161,7 +160,7 @@ glEnd();
 //  if (verbose&kBuildGraph) printf("Done\n");
 }
 
-void mapAbstraction::drawLevelConnections(node *n)
+void MapAbstraction::drawLevelConnections(node *n)
 {
 	//	int x, y;
 	//	double offsetx, offsety;
@@ -182,10 +181,10 @@ void mapAbstraction::drawLevelConnections(node *n)
 	//return ans;
 }
 
-void mapAbstraction::getTileUnderLoc(int &x, int &y, const recVec &v)
+void MapAbstraction::getTileUnderLoc(int &x, int &y, const recVec &v)
 {
-	double width = (getMap()->getMapWidth()+1)/2.0;
-	double height = (getMap()->getMapHeight()+1)/2.0;
+	double width = (GetMap()->getMapWidth()+1)/2.0;
+	double height = (GetMap()->getMapHeight()+1)/2.0;
 	double offsetx, offsety;
 	offsetx = offsety = .5;
 	x = (int)(width*(v.x+1.0));
@@ -194,7 +193,7 @@ void mapAbstraction::getTileUnderLoc(int &x, int &y, const recVec &v)
 	//				 v.x, v.y, x, y);
 }
 
-recVec mapAbstraction::getNodeLoc(node *n)
+recVec MapAbstraction::getNodeLoc(node *n)
 {
 	int x, y;
 	//  double offsetx, offsety;
@@ -208,15 +207,15 @@ recVec mapAbstraction::getNodeLoc(node *n)
 		return ans;
 	}
 	
-	//	double width = getMap()->getMapWidth();
-	//	double height = getMap()->getMapHeight();
+	//	double width = GetMap()->getMapWidth();
+	//	double height = GetMap()->getMapHeight();
 	
 	if (n->getLabelL(kAbstractionLevel) == 0)
 	{
 		x = n->getLabelL(kFirstData);
 		y = n->getLabelL(kFirstData+1);
 		
-		Map *mp = getMap();
+		Map *mp = GetMap();
 		double r;
 		mp->getOpenGLCoord(x,y,ans.x,ans.y,ans.z,r);
 		//    switch (n->getLabelL(kFirstData+2)) {
@@ -248,7 +247,7 @@ recVec mapAbstraction::getNodeLoc(node *n)
 			ans.y /= totNodes;//n->getLabelL(kNumAbstractedNodes); 
 				ans.z /= totNodes;//n->getLabelL(kNumAbstractedNodes); 
 	}
-	Map *mp = getMap();
+	Map *mp = GetMap();
 	double r, a, b, c;
 	mp->getOpenGLCoord(0,0,a,b,c,r);
 	// height
@@ -261,7 +260,7 @@ recVec mapAbstraction::getNodeLoc(node *n)
 	return ans;
 }
 
-void mapAbstraction::clearMarkedNodes()
+void MapAbstraction::clearMarkedNodes()
 {
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
@@ -272,7 +271,7 @@ void mapAbstraction::clearMarkedNodes()
 }
 
 // estimate the cost from a to b
-double mapAbstraction::h(node *a, node *b)
+double MapAbstraction::h(node *a, node *b)
 {
 	if ((a == 0) || (b == 0))
 		return 999999999.99;
@@ -285,11 +284,11 @@ double mapAbstraction::h(node *a, node *b)
 	//		} else {
 	//			answer = root2m1*fabs(rv1.y-rv2.y)+fabs(rv1.x-rv2.x);
 	//		}
-	return answer*getMap()->getCoordinateScale();
+	return answer*GetMap()->getCoordinateScale();
 }
 
 /** Computes octile distance. No scaling */
-double mapAbstraction::octileDistance(double x1, double y1, double x2, double y2)
+double MapAbstraction::octileDistance(double x1, double y1, double x2, double y2)
 {
 	double answer = 0.0;
 	const double root2m1 = ROOT_TWO-1;//sqrt(2.0)-1;

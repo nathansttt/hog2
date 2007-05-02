@@ -720,7 +720,7 @@ void drawGL (pRecContext pContextInfo)
 	updateModelView (pContextInfo);
 
 	glDisable(GL_LIGHTING);
-	pContextInfo->unitLayer->getMap()->OpenGLDraw(kPolygons);
+	pContextInfo->unitLayer->GetMap()->OpenGLDraw(kPolygons);
 	if (pContextInfo->unitLayer->getMapAbstractionDisplay())
 	{
 		pContextInfo->unitLayer->getMapAbstractionDisplay()->OpenGLDraw();
@@ -769,7 +769,7 @@ void drawGL (pRecContext pContextInfo)
 	updateModelView (pContextInfo);
 
 	glDisable(GL_LIGHTING);
-	pContextInfo->unitLayer->getMap()->OpenGLDraw(kPolygons);
+	pContextInfo->unitLayer->GetMap()->OpenGLDraw(kPolygons);
 	if (pContextInfo->unitLayer->getMapAbstractionDisplay())
 	{
 		pContextInfo->unitLayer->getMapAbstractionDisplay()->OpenGLDraw();

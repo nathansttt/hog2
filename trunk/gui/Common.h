@@ -153,7 +153,7 @@ void runPRLRTS(char *_map, int xxs, int yys, int xxg, int yyg,
 			   int _dist);
 void randomPathTesting(char *_map);
 void pickStartEnd(int& xs, int& ys, int& xg, int& yg, 
-				  Map *map, graph *g, mapAbstraction* aMap,
+				  Map *map, graph *g, MapAbstraction* aMap,
 				  double& spDist, double& aStarDifficulty, int);
 void scenarioGenerator(char *_map);
 void discrepancy(char* scenName, char* algName, 

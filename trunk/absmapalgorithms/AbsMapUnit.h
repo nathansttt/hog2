@@ -13,6 +13,8 @@
 #include "Unit.h"
 #include "Map2DEnvironment.h"
 
+typedef Unit<xyLoc, tDirection, AbsMapEnvironment> BaseMapUnit;
+
 /**
 * A simple map-based unit
  */
@@ -22,7 +24,7 @@ public:
 	AbsMapUnit(int x, int y)
 	:loc(x, y) { r = 1.0; g = 0; b = 0;}
 	
-	virtual void UpdateLocation(xyLoc l, bool)
+	virtual void UpdateLocation(AbsMapEnvironment *, xyLoc l, bool, SimulationInfo *)
 { loc = l; }
 	virtual void GetLocation(xyLoc &l)
 { l = loc; }

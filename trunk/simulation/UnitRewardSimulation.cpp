@@ -31,7 +31,7 @@
 //
 //static const int verbose = 0;
 //
-//unitRewardSimulation::unitRewardSimulation(mapAbstraction *_m, bool keepStats)
+//unitRewardSimulation::unitRewardSimulation(MapAbstraction *_m, bool keepStats)
 //:unitSimulation(_m, keepStats)
 //{
 //}

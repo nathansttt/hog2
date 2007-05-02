@@ -118,14 +118,14 @@ bool SearchUnit::getCachedMove(tDirection &dir)
 	return false;
 }
 
-tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
+tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo)
 {
 	tDirection res;
 	if (getCachedMove(res))
 		return res;
 
-	Map *map = mp->getMap();
-	mapAbstraction *aMap = mp->getMapAbstraction();
+	Map *map = mp->GetMap();
+	MapAbstraction *aMap = mp->GetMapAbstraction();
 
 	// if we have a cache to be used, use it!
 	if (spread_cache)
@@ -137,9 +137,9 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, simula
 		
 		// Get a path by path-planning
 		target->GetLocation(targx, targy);
-		node *to = aMap->getAbstractGraph(0)->getNode(map->getNodeNum(targx, targy));
+		node *to = aMap->GetAbstractGraph(0)->getNode(map->getNodeNum(targx, targy));
 		
-		s_algorithm->setTargets(mp->getMapAbstraction(), next_start, to, rp);
+		s_algorithm->setTargets(mp->GetMapAbstraction(), next_start, to, rp);
 		delete spread_cache;
 		spread_cache = 0;
 		tDirection dir = moves.back();
@@ -160,7 +160,7 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, simula
 	target->GetLocation(targx, targy);
 	
 	// Get a path by path-planning
-	graph *g0 = aMap->getAbstractGraph(0);
+	graph *g0 = aMap->GetAbstractGraph(0);
 	// Get the start and goal nodes
 	node *from = g0->getNode(map->getNodeNum(loc.x, loc.y));
 	target->GetLocation(targx, targy);
@@ -176,7 +176,7 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, simula
 				printf("%p target time %1.4f\n", (void*)this, targetTime);
 			}
 			if (simInfo)
-				targetTime = simInfo->getSimulationTime();
+				targetTime = simInfo->GetSimulationTime();
 		}
 		onTarget = true;
 //		return kStay;
@@ -216,7 +216,7 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, simula
 	if (s_algorithm)
 	{
 		node *next_start = p->tail()->n;
-		s_algorithm->setTargets(mp->getMapAbstraction(), next_start, to, rp);
+		s_algorithm->setTargets(mp->GetMapAbstraction(), next_start, to, rp);
 	}
 	delete p;
 
@@ -277,7 +277,7 @@ void SearchUnit::addPathToCache(path *p)
 	moves.push_back((tDirection)result);
 }
 
-void SearchUnit::updateLocation(int _x, int _y, bool success, simulationInfo *)
+void SearchUnit::updateLocation(int _x, int _y, bool success, SimulationInfo *)
 {
 	if (!success)
 	{
@@ -315,7 +315,7 @@ void SearchUnit::OpenGLDraw(AbsMapEnvironment *ame)
   map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
 	if (onTarget)
 	{
-		double perc = .25;//(1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->getSimulationTime())))));
+		double perc = .25;//(1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->GetSimulationTime())))));
 		glColor3f(r*perc, g*perc, b*perc);
 	}
 	else
@@ -334,9 +334,9 @@ void SearchUnit::LogStats(StatCollection *stats)
 	}
 	// printf("SearchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
 	if (nodesExpanded != 0)
-		stats->addStat("nodesExpanded", GetName(), (long)nodesExpanded);
+		stats->AddStat("nodesExpanded", GetName(), (long)nodesExpanded);
 	if (nodesTouched != 0)
-		stats->addStat("nodesTouched", GetName(), (long)nodesTouched);
+		stats->AddStat("nodesTouched", GetName(), (long)nodesTouched);
 	nodesExpanded = nodesTouched = 0;
 }
 

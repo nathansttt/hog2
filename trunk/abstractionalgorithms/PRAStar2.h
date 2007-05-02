@@ -42,7 +42,7 @@ class praStar2 : public SearchAlgorithm {
 public:
 	praStar2();
 	virtual ~praStar2() {}
-	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	virtual const char *getName()
 	{ return algName; } 
 	void setPartialPathLimit(int limit)
@@ -79,16 +79,16 @@ public:
   int getNumLevelsUsed() { return numLevels; }
 
 protected:
-	void setupSearch(graphAbstraction *aMap,
+	void setupSearch(GraphAbstraction *aMap,
 			 std::vector<node *> &fromChain, node *from,
 			 std::vector<node *> &toChain, node *to);
-	path *buildNextAbstractPath(graphAbstraction *, path *lastPath,
+	path *buildNextAbstractPath(GraphAbstraction *, path *lastPath,
 				    std::vector<node *> &fromChain,
 				    std::vector<node *> &toChain,
 				    reservationProvider *);
 	path *trimPath(path *lastPath, node *origDest);
 
-  void selectTopAbstractionLevel(graphAbstraction * aMap,
+  void selectTopAbstractionLevel(GraphAbstraction * aMap,
 				 std::vector<node *> &fromChain,
 				 std::vector<node *> & toChain);
 

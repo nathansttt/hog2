@@ -37,11 +37,11 @@
 //}
 //
 ///**
-//* This function returns the mapAbstraction built by this group; 0 if none is built.
+//* This function returns the MapAbstraction built by this group; 0 if none is built.
 // */
-//mapAbstraction *unitGroup::getMapAbstraction()
+//MapAbstraction *unitGroup::GetMapAbstraction()
 //{
-//	return 0; //us->getMapAbstraction(kUnitSimulationMap);
+//	return 0; //us->GetMapAbstraction(kUnitSimulationMap);
 //}
 //
 //void unitGroup::addUnit(unit *u)
@@ -69,14 +69,14 @@
 //	}
 //}
 //
-//tDirection unitGroup::makeMove(unit *u, MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
+//tDirection unitGroup::makeMove(unit *u, MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo)
 //{
 //	return u->makeMove(mp, rp, simInfo);
 //}
 //
-//void unitGroup::OpenGLDraw(MapProvider *mp, simulationInfo *)
+//void unitGroup::OpenGLDraw(MapProvider *mp, SimulationInfo *)
 //{
-//	Map *map = mp->getMap();
+//	Map *map = mp->GetMap();
 //	glBegin(GL_LINES);
 //	glColor3f(.5, .5, .5);
 //	for (unsigned int t = 0; t < myUnits.size(); t++)
@@ -92,7 +92,7 @@
 //
 ///** Inform the given unit of its current/new location */
 //void unitGroup::updateLocation(unit *u, MapProvider *, int _x, int _y,
-//															 bool success, simulationInfo *simInfo)
+//															 bool success, SimulationInfo *simInfo)
 //{
 //	u->updateLocation(_x, _y, success, simInfo);
 //}

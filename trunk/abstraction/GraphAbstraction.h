@@ -1,7 +1,7 @@
 /*
- * $Id: graphAbstraction.h,v 1.14 2007/03/25 00:02:43 nathanst Exp $
+ * $Id: GraphAbstraction.h,v 1.14 2007/03/25 00:02:43 nathanst Exp $
  *
- *  graphAbstraction.h
+ *  GraphAbstraction.h
  *  HOG
  *
  *  Created by Nathan Sturtevant on 1/11/05.
@@ -28,27 +28,55 @@
 #include "Graph.h"
 #include "Path.h"
 
-#ifndef graphAbstraction_H
-#define graphAbstraction_H
+#ifndef GRAPHABSTRACTION_H
+#define GRAPHABSTRACTION_H
 #include <vector>
-#include "Constants.h"
+
+/** Definitions for node labels */
+enum {
+  kAbstractionLevel = 0, // this is a LONG label
+  kNumAbstractedNodes = 1, // nodes that we abstract; this is a LONG label
+  kParent = 2, // node that abstracts us; this is a LONG label
+  kNodeWidth = 3, // the maximum size object that can completely traverse this node; this is a LONG label
+  kTemporaryLabel = 4, // for any temporary usage; this label can be LONG or FLOATING point
+  kXCoordinate = 5, // cache for opengl drawing; this is a FLOATING POINT label
+  kYCoordinate = 6,	// this is a FLOATING POINT label
+  kZCoordinate = 7,	// this is a FLOATING POINT label
+  kNodeBlocked = 8, // this is a LONG label
+  kFirstData = 9
+};
+
+/** kFirstData & beyond:
+* 
+* in abstract graph these are the node numbers of the abstraction (LONG labels)
+*
+* in 0th level abstraction they are the x, y location of the tile
+* along with which side (type tCorner)  (all LONG labels)
+*/
+
+/** Definitions for edge labels */
+enum {
+  kEdgeCapacity=2
+};
+
+const double kUnknownPosition = -50.0;
 
 /**
  * A generic class for basic operations on graph abstractions.
  */
 
-class graphAbstraction {
+class GraphAbstraction {
 public:
-	graphAbstraction() :abstractions() {}
-	virtual ~graphAbstraction();
+	GraphAbstraction() :abstractions() {}
+	virtual ~GraphAbstraction();
 
 	// basic graph functions
 	/** is there a legal path between these 2 nodes? */
-  virtual bool pathable(node *from, node *to) = 0;
+  virtual bool Pathable(node *from, node *to) = 0;
 	/** given 2 nodes, find as much of their hierarchy that exists in the graph */
   void getParentHierarchy(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
 	/** return the abstract graph at the given level */
-  graph* getAbstractGraph(int level) { return abstractions[level]; }
+  graph* GetAbstractGraph(int level) { return abstractions[level]; }
 	/** return the total number of graphs in the hierarchy */
   unsigned int getNumAbstractGraphs() { return abstractions.size(); }
 	/** heuristic cost between any two nodes */
@@ -62,7 +90,7 @@ public:
 	inline long getNumChildren(node *which) { return which->getLabelL(kNumAbstractedNodes); }
 	inline node *getNthChild(node *which, int n) { return abstractions[getAbstractionLevel(which)-1]->getNode(which->getLabelL(kFirstData+n)); }
 	inline long getAbstractionLevel(node *which) { return which->getLabelL(kAbstractionLevel); }
-	inline graph* getAbstractGraph(node *which) { return abstractions[which->getLabelL(kAbstractionLevel)]; }
+	inline graph* GetAbstractGraph(node *which) { return abstractions[which->getLabelL(kAbstractionLevel)]; }
 	// utility functions
 	/** verify that the hierarchy is consistent */
 	virtual void verifyHierarchy() = 0;
@@ -99,7 +127,7 @@ private:
 
 // this class can be defined if you want to solve multiple domains...
 // 
-// class domainAbstraction : public graphAbstraction {
+// class domainAbstraction : public GraphAbstraction {
 // 	void domainAbstraction(abstractableDomain *) = 0;
 // };
 

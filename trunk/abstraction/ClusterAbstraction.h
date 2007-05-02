@@ -1,7 +1,7 @@
 /* 
- * $Id: clusterAbstraction.h,v 1.8 2006/11/09 08:06:13 nathanst Exp $
+ * $Id: ClusterAbstraction.h,v 1.8 2006/11/09 08:06:13 nathanst Exp $
  *
- * clusterAbstraction.cpp
+ * ClusterAbstraction.cpp
  * hog 
  *
  * Created by Renee Jansen on 06/06/06
@@ -134,15 +134,15 @@ private:
  * Cluster abstraction for HPA* algorithm as described in (Botea,Mueller,Schaeffer 2004). 
  * Source code based on HPA* code found at http://www.cs.ualberta.ca/~adib/Home/Download/hpa.tgz
  */
-class clusterAbstraction : public mapAbstraction {
+class ClusterAbstraction : public MapAbstraction {
 public:
-  clusterAbstraction(Map *map, int _clusterSize);
-  ~clusterAbstraction();
-	mapAbstraction* clone(Map* map)
-	{ return new clusterAbstraction(map, clusterSize); }
+  ClusterAbstraction(Map *map, int _clusterSize);
+  ~ClusterAbstraction();
+	MapAbstraction* clone(Map* map)
+	{ return new ClusterAbstraction(map, clusterSize); }
 
 	int getClusterSize() { return clusterSize; };  
-  bool pathable(node* start, node* goal);
+  bool Pathable(node* start, node* goal);
   void verifyHierarchy() {}
   void removeNodes(node* start, node* goal);
 	void removeNode(node*) {}

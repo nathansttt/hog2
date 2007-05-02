@@ -34,13 +34,13 @@
  */
 
 class Map;
-class mapAbstraction;
+class MapAbstraction;
 
 class MapProvider {
 public:
 	virtual ~MapProvider() {};
-	virtual Map *getMap() = 0;
-	virtual mapAbstraction *getMapAbstraction() = 0;
+	virtual Map *GetMap() = 0;
+	virtual MapAbstraction *GetMapAbstraction() = 0;
 };
 
 #include "Map.h"

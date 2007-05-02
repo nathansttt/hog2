@@ -49,10 +49,10 @@ class StatCollection {
 public:
 	StatCollection();
 	~StatCollection();
-	void addStat(const char *category, const char *owner, double value);
-	void addStat(const char *category, const char *owner, long value);
-	void sumStat(const char *category, const char *owner, double value);
-	void sumStat(const char *category, const char *owner, long value);
+	void AddStat(const char *category, const char *owner, double value);
+	void AddStat(const char *category, const char *owner, long value);
+	void SumStat(const char *category, const char *owner, double value);
+	void SumStat(const char *category, const char *owner, long value);
 	
 	void clearAllStats();
 	//	void clearOwnerStats(const char *owner); // not define for now; can be defined if needed
@@ -61,7 +61,7 @@ public:
 	int getNumStats() const;
 	const stat *getStatNum(int which) const;
 	
-	int lookupCategory(const char *category) const;
+	int LookupCategory(const char *category) const;
 	int lookupOwner(const char *owner) const;
 	const char *lookupCategoryID(int id) const;
 	const char *lookupOwnerID(int id) const;

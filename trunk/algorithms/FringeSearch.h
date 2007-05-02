@@ -31,13 +31,13 @@ class FringeSearch : public SearchAlgorithm {
 public:
 	FringeSearch();
 	const char *getName() { return bpmx?"BPMXFringeSearch":"FringeSearch"; }
-	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	void setUseBPMX(bool use) { bpmx = use; }
 	void setHeuristicProvider(heuristicProvider *hh) { hp = hh; }
 	unsigned int getNodesReopened() { return nodesReopened; }
 	unsigned int getHValuesPropagated() { return nodesHPropagated; }
 private:
-	void initializeSearch(graphAbstraction *aGraph, node *from, node *to);
+	void initializeSearch(GraphAbstraction *aGraph, node *from, node *to);
 	bool onClosedList(node *n);
 	bool onOpenList(node *n);
 	void addToClosedList(node *n);
@@ -58,7 +58,7 @@ private:
 	void propagateGValues(node *n);
 	node *goal;
 	graph *g;
-	graphAbstraction *aMap;
+	GraphAbstraction *aMap;
 	heuristicProvider *hp;
 	nodeList list1, list2;
 	nodeList *currList, *nextList;

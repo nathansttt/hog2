@@ -29,12 +29,18 @@
 
 #include <vector>
 #include <queue>
-#include "Constants.h"
 #include "Unit.h"
 #include "ReservationProvider.h"
 #include "Timer.h"
 #include "FPUtil.h"
 #include "StatCollection.h"
+
+
+class SimulationInfo {
+public:
+	virtual ~SimulationInfo() {}
+	virtual double GetSimulationTime() = 0;
+};
 
 /**
  * Private per-unit unitSimulation data.
@@ -94,7 +100,7 @@ public:
 	virtual void GetActions(state nodeID, std::vector<action> &actions) = 0;
 	virtual action GetAction(state s1, state s2) = 0;
 	virtual state ApplyAction(state s, action a) = 0;
-
+	virtual OccupancyInterface<state, action> *GetOccupancyInfo() = 0;
 	virtual double HCost(state node1, state node2) = 0;
 	virtual double GCost(state node1, state node2) = 0;
 	virtual bool GoalTest(state node, state goal) = 0;
@@ -107,12 +113,13 @@ public:
  * The basic simulation class for the world.
  */
 template<class state, class action, class environment>
-class UnitSimulation {
+class UnitSimulation : public SimulationInfo {
 public:
 	UnitSimulation(environment *se, OccupancyInterface<state, action> *envInfo);
 
 	int AddUnit(Unit<state, action, environment> *u);
 	Unit<state, action, environment> *GetUnit(unsigned int which);
+
 	int AddUnitGroup(UnitGroup<state, action, environment> *ug);
 	UnitGroup<state, action, environment> *GetUnitGroup(unsigned int which);
 	void ClearAllUnits();
@@ -134,6 +141,10 @@ private:
 	void StepUnitTime(UnitInfo<state, action, environment> *ui, double timeStep);
 	bool MakeUnitMove(UnitInfo<state, action, environment> *theUnit, action where, double &moveCost);
 
+	virtual void DoPreTimestepCalc();
+	virtual void DoTimestepCalc(double amount);
+	virtual void DoPostTimestepCalc();
+	
 	double penalty;
 	bool paused;
 	std::vector<UnitInfo<state, action, environment> *> units;
@@ -167,7 +178,7 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 	ui->currentState = ui->startState;
 	if (ui->agent->GetUnitGroup() == 0)
 		ui->agent->SetUnitGroup(unitGroups[0]);
-	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, ui->currentState, true);
+	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, env, ui->currentState, true, this);
 	ui->nextTime = currTime;
 //	ui->thinkTime = 0.0;
 //	ui->moveDist = 0.0;
@@ -256,14 +267,28 @@ void UnitSimulation<state, action, environment>::StepTime(double timeStep)
 	if (paused)
 		return;
 	
-	stats.addStat("simulationTime", "unitSimulation", currTime);
+	DoPreTimestepCalc();
+	stats.AddStat("simulationTime", "unitSimulation", currTime);
+	currTime += timeStep;
+	DoTimestepCalc(timeStep);
+	DoPostTimestepCalc();
+}
+
+template<class state, class action, class environment>
+void UnitSimulation<state, action, environment>::DoPreTimestepCalc()
+{
+}
+
+template<class state, class action, class environment>
+void UnitSimulation<state, action, environment>::DoTimestepCalc(double timeStep)
+{
 	for (unsigned int x = 0; x < units.size(); x++)
 		StepUnitTime(units[x], timeStep);
-	currTime += timeStep;
-	//	doPreTimestepCalc();
-//	currTime += amount;
-//	doTimestepCalc();
-//	doPostTimestepCalc();
+}
+
+template<class state, class action, class environment>
+void UnitSimulation<state, action, environment>::DoPostTimestepCalc()
+{
 }
 
 /**
@@ -287,21 +312,21 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	Unit<state, action, environment>* u = theUnit->agent;
 	
 	t.startTimer();
-	where = u->MakeMove(env);
+	where = u->MakeMove(env, this);
 	moveThinking = t.endTimer();
 	theUnit->lastMove = where;
 	
 //	theUnit->thinkTime += moveThinking;
-	stats.addStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
+	stats.AddStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
 	
 	bool success = MakeUnitMove(theUnit, where, moveTime);
 
 	t.startTimer();
-	u->GetUnitGroup()->UpdateLocation(theUnit->agent, theUnit->currentState, success);
+	u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, this);
 	locThinking = t.endTimer();
 
 //	theUnit->thinkTime += locThinking;
-	stats.addStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
+	stats.AddStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
 
 	switch (stepType)
 	{
@@ -344,17 +369,11 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	return success;
 }
 
-class simulationInfo {
-public:
-	virtual ~simulationInfo() {}
-	virtual double getSimulationTime() = 0;
-};
-
 //
 //
-//class unitSimulation : public MapProvider, reservationProvider, public simulationInfo {
+//class unitSimulation : public MapProvider, reservationProvider, public SimulationInfo {
 //public:
-//	unitSimulation(mapAbstraction *, bool keepStats = false);
+//	unitSimulation(MapAbstraction *, bool keepStats = false);
 //	virtual ~unitSimulation();
 //	
 //	bool saveHistory(char *, bool includeMap = true);
@@ -434,14 +453,14 @@ public:
 //	int getDisplayMapNumber() { return which_map; }
 //	
 //	/** Returns the underlying map. */
-//	Map *getMap() { return map; }
+//	Map *GetMap() { return map; }
 //	/** Returns the abstract map from the simulation. */
-//	mapAbstraction *getMapAbstraction();
+//	MapAbstraction *GetMapAbstraction();
 //	/** set chance for move failing. This is the chance that a move will just fail. */
 //	/** Returns the nth groups abstract map. (0 is the actual map of the world.) */
-//	mapAbstraction *getMapAbstraction(int _which);
+//	MapAbstraction *GetMapAbstraction(int _which);
 //	/** Returns the abstract map currently being displayed. */
-//	mapAbstraction *getMapAbstractionDisplay();
+//	MapAbstraction *getMapAbstractionDisplay();
 //	/** Cycle which abstract map should be displayed. */
 //	void cyclemapAbstractionDisplay();
 //	void setMoveStochasticity(double _stochasticity) { stochasticity = _stochasticity; }
@@ -472,7 +491,7 @@ public:
 //	
 //	Map *map;
 //	//FILE *LOGFILE;
-//	mapAbstraction *aMap;
+//	MapAbstraction *aMap;
 //	bitVector *bv;
 //	int which_map;						// the number of the group to display info for
 //	int map_width, map_height, map_revision;

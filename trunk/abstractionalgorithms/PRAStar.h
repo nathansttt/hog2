@@ -40,7 +40,7 @@ class praStar : public SearchAlgorithm {
 public:
 	praStar();
 	virtual ~praStar() {}
-	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	virtual const char *getName() { return algName; } 
 	void setPartialPathLimit(int limit) { partialLimit = limit; 
 		sprintf(algName,"PRA*(%d)",partialLimit); }
@@ -70,7 +70,7 @@ protected:
   int partialLimit;
 	int fixedPlanLevel;
   char algName[30];
-  graphAbstraction *map;
+  GraphAbstraction *map;
 	bool expandSearchRadius;
 	bool planFromMiddle;
 	bool smoothing;

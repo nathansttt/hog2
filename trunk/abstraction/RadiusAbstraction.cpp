@@ -1,7 +1,7 @@
 /*
- * $Id: radiusAbstraction.cpp,v 1.8 2006/10/18 23:53:25 nathanst Exp $
+ * $Id: RadiusAbstraction.cpp,v 1.8 2006/10/18 23:53:25 nathanst Exp $
  *
- *  radiusAbstraction.cpp
+ *  RadiusAbstraction.cpp
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/3/05.
@@ -28,19 +28,19 @@
 #include "RadiusAbstraction.h"
 #include "Graph.h"
 
-radiusAbstraction::radiusAbstraction(Map *_m, int _radius)
-:mapAbstraction(_m), radius(_radius)
+RadiusAbstraction::RadiusAbstraction(Map *_m, int _radius)
+:MapAbstraction(_m), radius(_radius)
 {
   assert(_m!=NULL);
 
   buildAbstraction();
 }
 
-radiusAbstraction::~radiusAbstraction()
+RadiusAbstraction::~RadiusAbstraction()
 { 
 }
 
-bool radiusAbstraction::pathable(node *from, node *to)
+bool RadiusAbstraction::Pathable(node *from, node *to)
 {
   while (from != to)
 	{
@@ -60,30 +60,30 @@ bool radiusAbstraction::pathable(node *from, node *to)
 
 // utility functions
 /** verify that the hierarchy is consistent */
-void radiusAbstraction::verifyHierarchy()
+void RadiusAbstraction::verifyHierarchy()
 {
 }
 
 // hierarchical modifications
 /** remove node from abstraction */
-void radiusAbstraction::removeNode(node *)
+void RadiusAbstraction::removeNode(node *)
 {
 }
 
 /** remove edge from abstraction */
-void radiusAbstraction::removeEdge(edge *, unsigned int)
+void RadiusAbstraction::removeEdge(edge *, unsigned int)
 {
 }
 
 /** add node to abstraction */
-void radiusAbstraction::addNode(node *)
+void RadiusAbstraction::addNode(node *)
 {
 	// add it to the 
 	assert(false);
 }
 
 /** add edge to abstraction */
-void radiusAbstraction::addEdge(edge *, unsigned int)
+void RadiusAbstraction::addEdge(edge *, unsigned int)
 {
 	assert(false);
 	// if each end is already connected who cares -- doesn't mess anything up -- just add it throughout
@@ -91,14 +91,14 @@ void radiusAbstraction::addEdge(edge *, unsigned int)
 
 /** This must be called after any of the above add/remove operations. But the
 operations can be stacked followed by a single repairAbstraction call. */
-void radiusAbstraction::repairAbstraction()
+void RadiusAbstraction::repairAbstraction()
 {
 }
 
-void radiusAbstraction::buildAbstraction()
+void RadiusAbstraction::buildAbstraction()
 {
 	//inefficient for the moment
-	abstractions.push_back(getMapGraph(getMap()));
+	abstractions.push_back(getMapGraph(GetMap()));
 	while (abstractions.back()->getNumEdges() > 0)
 	{
 		graph *g = new graph();
@@ -108,7 +108,7 @@ void radiusAbstraction::buildAbstraction()
 	}
 }
 
-void radiusAbstraction::addNodes(graph *g)
+void RadiusAbstraction::addNodes(graph *g)
 {
 	int count = abstractions.back()->getNumNodes();
 	while (count > 0)
@@ -133,7 +133,7 @@ void radiusAbstraction::addNodes(graph *g)
 	}
 }
 
-void radiusAbstraction::addEdges(graph *aGraph)
+void RadiusAbstraction::addEdges(graph *aGraph)
 {
 	graph *g = abstractions.back();
 	edge_iterator ei = g->getEdgeIter();
@@ -154,7 +154,7 @@ void radiusAbstraction::addEdges(graph *aGraph)
 	}	
 }
 
-void radiusAbstraction::abstractionBFS(node *which, node *parent, int depth) // depth in edges...should we try literal distance?
+void RadiusAbstraction::abstractionBFS(node *which, node *parent, int depth) // depth in edges...should we try literal distance?
 {
 	if ((which == 0) || (which->getLabelL(kParent) != -1))
 		return;
@@ -168,7 +168,7 @@ void radiusAbstraction::abstractionBFS(node *which, node *parent, int depth) // 
 	}
 }
 
-void radiusAbstraction::buildNodeIntoParent(node *n, node *parent)
+void RadiusAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
 	assert(getAbstractionLevel(n)+1 == getAbstractionLevel(parent));
 	n->setLabelL(kParent, parent->getNum());

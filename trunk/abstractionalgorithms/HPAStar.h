@@ -14,7 +14,7 @@
 /** 
  * HPA* algorithm as described in (Botea,Mueller,Schaeffer 2004). 
  *
- * Needs a clusterAbstraction to run - use setAbstraction before 
+ * Needs a ClusterAbstraction to run - use setAbstraction before 
  * doing any pathfinding
  */
 
@@ -40,7 +40,7 @@ public:
 	hpaStar();
 	virtual ~hpaStar(){}
 
-	virtual path* getPath(graphAbstraction *aMap, node* from, node* to, reservationProvider *rp = 0);
+	virtual path* getPath(GraphAbstraction *aMap, node* from, node* to, reservationProvider *rp = 0);
 
 	virtual const char *getName() { return algName; } 
 	void setUpSearch(node* from, node* to);
@@ -62,12 +62,12 @@ public:
 	 */
 	void setSmoothType(SmoothType s) { smType = s; }
 
-	// Ensure that the abstraction is a clusterAbstraction
-	void setAbstraction(clusterAbstraction* _m) { m = _m; } 
+	// Ensure that the abstraction is a ClusterAbstraction
+	void setAbstraction(ClusterAbstraction* _m) { m = _m; } 
 
 protected:
 	char algName[30];
-	clusterAbstraction* m;
+	ClusterAbstraction* m;
 	int partialLimit;
 	node* fromnum;
 	node* tonum;

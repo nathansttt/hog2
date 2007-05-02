@@ -33,7 +33,7 @@ unsigned path::length()
 }
 
 // Return the cummulative distance along a path
-//double path::distance(graphAbstraction* aMap)
+//double path::distance(GraphAbstraction* aMap)
 //{
 //	// check of the path is empty or has only one node
 //	if ((n == NULL) || (next == NULL))

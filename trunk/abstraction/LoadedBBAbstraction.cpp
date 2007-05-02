@@ -1,5 +1,5 @@
 /*
- *  loadedBBAbstraction.cpp
+ *  LoadedBBAbstraction.cpp
  *  hog
  *
  *  Created by Nathan Sturtevant on 4/12/06.
@@ -65,8 +65,8 @@ void BoundingBox::OpenGLDraw()
  * Constructions a new graph abstraction hierarchy from the graph using the
  * designated abstraction method.
  */
-loadedBBAbstraction::loadedBBAbstraction(char *fname, char *boxFile)
-:graphAbstraction()
+LoadedBBAbstraction::LoadedBBAbstraction(char *fname, char *boxFile)
+:GraphAbstraction()
 {
 	levelDraw = 1;
 
@@ -74,12 +74,12 @@ loadedBBAbstraction::loadedBBAbstraction(char *fname, char *boxFile)
 	buildAbstractions(loadGraph(fname));
 }
 
-loadedBBAbstraction::~loadedBBAbstraction()
+LoadedBBAbstraction::~LoadedBBAbstraction()
 {
   cleanMemory();
 }
 
-void loadedBBAbstraction::loadBoxes(char *boxFile)
+void LoadedBBAbstraction::loadBoxes(char *boxFile)
 {
 	FILE *f = fopen(boxFile, "r");
 	if (f)
@@ -101,7 +101,7 @@ void loadedBBAbstraction::loadBoxes(char *boxFile)
 	}
 }
 
-double loadedBBAbstraction::h(node *a, node *b)
+double LoadedBBAbstraction::h(node *a, node *b)
 {
 	double d1 = a->getLabelF(kXCoordinate)-b->getLabelF(kXCoordinate);
 	double d2 = a->getLabelF(kYCoordinate)-b->getLabelF(kYCoordinate);
@@ -109,7 +109,7 @@ double loadedBBAbstraction::h(node *a, node *b)
 	return sqrt(d1*d1+d2*d2+d3*d3);
 }
 
-void loadedBBAbstraction::toggleDrawAbstraction(int which)
+void LoadedBBAbstraction::toggleDrawAbstraction(int which)
 {
   bool drawThis = ((levelDraw>>which)&0x1);
   if (!drawThis)
@@ -118,7 +118,7 @@ void loadedBBAbstraction::toggleDrawAbstraction(int which)
     levelDraw = levelDraw&(~(1<<which));
 }
 
-void loadedBBAbstraction::OpenGLDraw()
+void LoadedBBAbstraction::OpenGLDraw()
 {
 	glDisable(GL_LIGHTING);
   for (unsigned int x = 0; x < abstractions.size(); x++)
@@ -137,7 +137,7 @@ void loadedBBAbstraction::OpenGLDraw()
 	glEnable(GL_LIGHTING);
 }
 
-void loadedBBAbstraction::drawGraph(graph *g)
+void LoadedBBAbstraction::drawGraph(graph *g)
 {
 		if ((g == 0) || (g->getNumNodes() == 0)) return;
 		
@@ -172,7 +172,7 @@ void loadedBBAbstraction::drawGraph(graph *g)
 		//  if (verbose&kBuildGraph) printf("Done\n");
 }
 
-void loadedBBAbstraction::drawLevelConnections(node *n)
+void LoadedBBAbstraction::drawLevelConnections(node *n)
 {
   //	int x, y;
   //	double offsetx, offsety;
@@ -192,7 +192,7 @@ void loadedBBAbstraction::drawLevelConnections(node *n)
   //return ans;
 }
 
-recVec loadedBBAbstraction::getNodeLoc(node *n)
+recVec LoadedBBAbstraction::getNodeLoc(node *n)
 {
 	//  double offsetx, offsety;
   recVec ans;
@@ -227,7 +227,7 @@ recVec loadedBBAbstraction::getNodeLoc(node *n)
 }
 
 
-graph *loadedBBAbstraction::loadGraph(char *fname)
+graph *LoadedBBAbstraction::loadGraph(char *fname)
 {
 	FILE *f = fopen(fname, "r");
 	if (!f)
@@ -287,7 +287,7 @@ graph *loadedBBAbstraction::loadGraph(char *fname)
 	return g;
 }
 
-void loadedBBAbstraction::verifyHierarchy()
+void LoadedBBAbstraction::verifyHierarchy()
 {
 	cout << "VERIFY START" << endl;
 	for (unsigned int x = 0; x < abstractions.size(); x++)
@@ -390,7 +390,7 @@ void loadedBBAbstraction::verifyHierarchy()
 	cout << "VERIFY END" << endl;
 }
 
-void loadedBBAbstraction::cleanMemory()
+void LoadedBBAbstraction::cleanMemory()
 {
   while (abstractions.size() > 0) {
     delete abstractions.back();
@@ -401,7 +401,7 @@ void loadedBBAbstraction::cleanMemory()
 //		displayLists.pop_back();
 }
 
-//void loadedBBAbstraction::clearDisplayLists()
+//void LoadedBBAbstraction::clearDisplayLists()
 //{
 //  for (unsigned int x = 0; x < displayLists.size(); x++) {
 //    if (displayLists[x] != 0) glDeleteLists(displayLists[x], 1);
@@ -409,7 +409,7 @@ void loadedBBAbstraction::cleanMemory()
 //  }
 //}
 
-void loadedBBAbstraction::buildAbstractions(graph *_g)
+void LoadedBBAbstraction::buildAbstractions(graph *_g)
 {
 	int totalNodes = 0;
   cleanMemory();
@@ -441,7 +441,7 @@ void loadedBBAbstraction::buildAbstractions(graph *_g)
 	// printf("%d nodes, excluding bottom level", totalNodes);
 }
 
-graph *loadedBBAbstraction::abstractGraph(graph *g)
+graph *LoadedBBAbstraction::abstractGraph(graph *g)
 {
 	// for each node:
 	// 1. find bounding box
@@ -492,7 +492,7 @@ graph *loadedBBAbstraction::abstractGraph(graph *g)
 	return aGraph;
 }
 
-int loadedBBAbstraction::findBoundingBox(node *n)
+int LoadedBBAbstraction::findBoundingBox(node *n)
 {
 	for (unsigned int x = 0; x < boxes.size(); x++)
 	{
@@ -508,7 +508,7 @@ int loadedBBAbstraction::findBoundingBox(node *n)
 	return -1;
 }
 
-void loadedBBAbstraction::addNeighborsInBox(graph *g, node *n, int which, node *parent)
+void LoadedBBAbstraction::addNeighborsInBox(graph *g, node *n, int which, node *parent)
 {
 	//printf("Thinking about adding %d to parent %d\n", n->getNum(), parent->getNum());
 	if (n->getLabelL(kParent) != -1)
@@ -525,7 +525,7 @@ void loadedBBAbstraction::addNeighborsInBox(graph *g, node *n, int which, node *
 		addNeighborsInBox(g, next, which, parent);
 }
 
-void loadedBBAbstraction::addNodeToParent(node *n, node *parent)
+void LoadedBBAbstraction::addNodeToParent(node *n, node *parent)
 {
 	//printf("Adding %d to parent %d\n", n->getNum(), parent->getNum());
 	n->setLabelL(kParent, parent->getNum());
@@ -533,7 +533,7 @@ void loadedBBAbstraction::addNodeToParent(node *n, node *parent)
 	parent->setLabelL(kNumAbstractedNodes, parent->getLabelL(kNumAbstractedNodes)+1); // number of abstracted nodes
 }
 
-node *loadedBBAbstraction::createNewParent(graph *g, node *n)
+node *LoadedBBAbstraction::createNewParent(graph *g, node *n)
 {
 	node *newNode = new node("l1");
 	g->addNode(newNode);
@@ -546,12 +546,12 @@ node *loadedBBAbstraction::createNewParent(graph *g, node *n)
 	return newNode;
 }
 
-bool loadedBBAbstraction::pathable(unsigned int from, unsigned int to)
+bool LoadedBBAbstraction::Pathable(unsigned int from, unsigned int to)
 {
-	return pathable(abstractions[0]->getNode(from), abstractions[0]->getNode(to));
+	return Pathable(abstractions[0]->getNode(from), abstractions[0]->getNode(to));
 }
 
-bool loadedBBAbstraction::pathable(node *from, node *to)
+bool LoadedBBAbstraction::Pathable(node *from, node *to)
 {
   //printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
   while (from != to) {
@@ -570,23 +570,23 @@ bool loadedBBAbstraction::pathable(node *from, node *to)
 }
 
 
-void loadedBBAbstraction::addNode(node *n)
+void LoadedBBAbstraction::addNode(node *n)
 {
 }
 
-void loadedBBAbstraction::addEdge(edge *e, unsigned int absLevel)
+void LoadedBBAbstraction::addEdge(edge *e, unsigned int absLevel)
 {
 }
 
 //	// for now we'll immediately handle splits, but in the future we should queue up splits
 //// and process them in batch form(?)
-//void loadedBBAbstraction::removeEdge(edge *e, unsigned int absLevel)
+//void LoadedBBAbstraction::removeEdge(edge *e, unsigned int absLevel)
 //{
 //  return;
 //}
 //
 
-node *loadedBBAbstraction::findNodeParent(node *n)
+node *LoadedBBAbstraction::findNodeParent(node *n)
 {
   unsigned int absLevel = n->getLabelL(kAbstractionLevel);
   if (absLevel < abstractions.size()-1)

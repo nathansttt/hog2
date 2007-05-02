@@ -41,9 +41,9 @@ const char *aStar::getName()
 }
 
 
-//aStar::aStar(graphAbstraction *_abstr, node *_start, node *_goal,
+//aStar::aStar(GraphAbstraction *_abstr, node *_start, node *_goal,
 //															 path *corridor, int corridorWidth, int _absLevel)
-path *aStar::getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *aStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	//assert(openList.size() == 0);
 	assert(openQueue.size() == 0);
@@ -52,9 +52,9 @@ path *aStar::getPath(graphAbstraction *aMap, node *from, node *to, reservationPr
 	abstr = aMap;
 	start = from;
 	goal = to;
-	if ((from == 0) || (to == 0) || (from == to) || (!aMap->pathable(from, to)))
+	if ((from == 0) || (to == 0) || (from == to) || (!aMap->Pathable(from, to)))
 		return 0;
-	g = abstr->getAbstractGraph(start);
+	g = abstr->GetAbstractGraph(start);
 	
 	SearchNode first(internalHeuristic(goal, start), 0, 0, start, start);
 	openQueue.add(first);
@@ -237,7 +237,7 @@ void aStar::buildCorridor(path *p, int windowSize)
 {
 	//	Corridor eligibleNodes;
 	for (path *t = p; t; t = t->next)
-		addNeighborsToCorridor(abstr->getAbstractGraph(t->n), t->n, windowSize);
+		addNeighborsToCorridor(abstr->GetAbstractGraph(t->n), t->n, windowSize);
 }
 
 void aStar::addNeighborsToCorridor(graph *_g, node *n, int windowSize)

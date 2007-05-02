@@ -42,21 +42,21 @@ class corridorAStar : public SearchAlgorithm {
 public:
 	corridorAStar();
 	virtual ~corridorAStar() {}
-	path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	/** get the best path from FROM to TO. Use hGoal as the heuristic goal. If TO is not on
 		* the same level as from path will be returned that ends inside the child of TO. */
-	path *getBestPath(graphAbstraction *aMap, node *from, node *to, node *hGoal, reservationProvider *rp = 0);
+	path *getBestPath(GraphAbstraction *aMap, node *from, node *to, node *hGoal, reservationProvider *rp = 0);
 	/** get the best path from aFROM to aTO. Use an insertion edge cost from the original from/to. */
-	path *getBestPath(graphAbstraction *aMap, node *afrom, node *ato, node *from, node *to, reservationProvider *rp = 0);
+	path *getBestPath(GraphAbstraction *aMap, node *afrom, node *ato, node *from, node *to, reservationProvider *rp = 0);
 	void setCorridor(const std::vector<node *> *);
 	virtual const char *getName() { return "corridorAStar"; }
 private:
-		void relaxEdge(heap *nodeHeap, graph *g, graphAbstraction *aMap,
+		void relaxEdge(heap *nodeHeap, graph *g, GraphAbstraction *aMap,
 									 edge *e, node *from, node *to, node *dest);
-	void relaxFirstEdge(heap *nodeHeap, graph *g, graphAbstraction *aMap,
+	void relaxFirstEdge(heap *nodeHeap, graph *g, GraphAbstraction *aMap,
 											edge *e, node *from, node *afrom, node *ato, node *dest);
 
-	void relaxFinalEdge(heap *nodeHeap, graph *g, graphAbstraction *aMap,
+	void relaxFinalEdge(heap *nodeHeap, graph *g, GraphAbstraction *aMap,
 											edge *e, node *from, node *to, node *realDest);
 	path *extractBestPath(graph *g, unsigned int current);
 	const std::vector<node *> *corridor;

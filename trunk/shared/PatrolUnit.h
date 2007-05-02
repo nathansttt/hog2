@@ -37,16 +37,16 @@ public:
 	patrolUnit(int x, int y);
 //	patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us);
 	virtual const char *getName() { return "patrolUnit"; }
-	virtual tDirection makeMove(MapProvider *, reservationProvider *, simulationInfo *simInfo);
-	void OpenGLDraw(MapProvider *, simulationInfo *);
+	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo);
+	void OpenGLDraw(MapProvider *, SimulationInfo *);
 	void addPatrolLocation(unit *);
 	unit *getTarget();
-	void updateLocation(int _x, int _y, bool worked, simulationInfo *)
+	void updateLocation(int _x, int _y, bool worked, SimulationInfo *)
 	{ x = _x; y = _y; if (!worked) { moves.resize(0);	if (currTarget != -1) currTarget = 0; } }
 	void logStats(StatCollection *stats);
 		void logFinalStats(StatCollection *stats);
 private:
-	double goToLoc(mapAbstraction *aMap, int which);
+	double goToLoc(MapAbstraction *aMap, int which);
 	void addPathToCache(path *p);
 	std::vector<tDirection> moves;
 	std::vector<unit *> Locs;

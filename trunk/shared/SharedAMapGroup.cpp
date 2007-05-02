@@ -1,7 +1,7 @@
 /*
- * $Id: sharedAMapGroup.cpp,v 1.14 2006/10/18 23:52:25 nathanst Exp $
+ * $Id: SharedAMapGroup.cpp,v 1.14 2006/10/18 23:52:25 nathanst Exp $
  *
- *  sharedAMapGroup.cpp
+ *  SharedAMapGroup.cpp
  *  HOG
  *
  *  Created by Nathan Sturtevant on 12/16/04.
@@ -31,46 +31,38 @@
 #include "MapCliqueAbstraction.h"
 #include "MapFlatAbstraction.h"
 
-sharedAMapGroup::sharedAMapGroup(MapProvider *mp)
-:unitGroup(mp), aMap(0), seen(0)
+SharedAMapGroup::SharedAMapGroup(MapProvider *mp)
+:aMap(0), seen(0)
 {
 	visRadius = 2;
 	sawNewLand = true;
 	newTileCount = 0;
 	newTileCountPerTrial = 0;
 
-	Map *m = mp->getMap();
+	Map *m = mp->GetMap();
 	map = new Map(m->getMapWidth(), m->getMapHeight());
-	aMap = new mapCliqueAbstraction(map);
-	//aMap = new mapFlatAbstraction(map);
+	aMap = new MapCliqueAbstraction(map);
+	//aMap = new MapFlatAbstraction(map);
 	seen = new bitVector(m->getMapWidth() * m->getMapHeight());
 	
 }
 
-sharedAMapGroup::~sharedAMapGroup()
+SharedAMapGroup::~SharedAMapGroup()
 {
 	delete aMap;
-//	delete map; // map is part of the aMap now, not deleted
 	delete seen;
 }
 
-// the unit group is a proxy for a unit's make move
-// In this case we are maintaining our own private
-// copy of the map, and arbitrating how much lookahead each
-// unit gets
-tDirection sharedAMapGroup::makeMove(unit *u, MapProvider *, reservationProvider *rp, simulationInfo *simInfo)
+//void SharedAMapGroup::updateLocation(BaseMapUnit *u, MapProvider *mp, int _x, int _y, bool success, SimulationInfo *simInfo)
+void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *mp, xyLoc loc, bool success, SimulationInfo *si)
 {
-	// we now provide the map!
-	return u->makeMove(this, rp, simInfo);
-}
-
-void sharedAMapGroup::updateLocation(unit *u, MapProvider *mp, int _x, int _y, bool success, simulationInfo *simInfo)
-{
-	Map *worldMap = mp->getMap();
+	Map *worldMap = mp->GetMap();
 	int rad = visRadius; // how far we can see -- square
 	int x, y, num;
-	u->updateLocation(_x, _y, success, simInfo);
-	u->getLocation(x, y);
+	u->UpdateLocation(mp, loc, success, si);
+	xyLoc l;
+	u->GetLocation(l);
+	x = l.x; y = l.y;
 	bool changed = false;
 	for (int x1 = x-rad; x1 <= x+rad; x1++)
 	{
@@ -89,7 +81,7 @@ void sharedAMapGroup::updateLocation(unit *u, MapProvider *mp, int _x, int _y, b
 				// if it's different that we think, we just remove it.
 				// in the future we'll need to handle water & splits here
 				num = map->getNodeNum(x1, y1);
-				graph *g = aMap->getAbstractGraph(0);
+				graph *g = aMap->GetAbstractGraph(0);
 				if (!worldMap->adjacentEdges(x1, y1, kLeftEdge))
 				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1)); aMap->removeEdge(e, 0); }
 				if (!worldMap->adjacentEdges(x1, y1, kRightEdge))
@@ -121,7 +113,7 @@ void sharedAMapGroup::updateLocation(unit *u, MapProvider *mp, int _x, int _y, b
 		aMap->repairAbstraction();
 }
 
-void sharedAMapGroup::OpenGLDraw(MapProvider *, simulationInfo *)
+void SharedAMapGroup::OpenGLDraw(MapProvider *, SimulationInfo *)
 {
 	glBegin(GL_QUADS);
 	glColor3f(.25, .25, .25); // kOutOfBounds
@@ -145,28 +137,28 @@ void sharedAMapGroup::OpenGLDraw(MapProvider *, simulationInfo *)
 	glEnd();
 }
 
-mapAbstraction *sharedAMapGroup::getMapAbstraction()
+MapAbstraction *SharedAMapGroup::GetMapAbstraction()
 {
 	return aMap;
 }
 
-Map *sharedAMapGroup::getMap()
+Map *SharedAMapGroup::GetMap()
 {
 	return map;
 }
 
 /** Is the group done with their exploration? */
-bool sharedAMapGroup::done()
+bool SharedAMapGroup::done()
 {
 	return (!sawNewLand);
 }
 
-void sharedAMapGroup::logStats(StatCollection *stats)
-//void sharedAMapGroup::printRoundStats(unit *, FILE *f)
+void SharedAMapGroup::logStats(StatCollection *stats)
+//void SharedAMapGroup::printRoundStats(unit *, FILE *f)
 {
 	if (newTileCount != 0)
 	{
-		stats->sumStat("newTilesExplored", getName(), (long)newTileCount);
+		stats->SumStat("newTilesExplored", GetName(), (long)newTileCount);
 		newTileCountPerTrial += newTileCount;
 		newTileCount = 0;
 	}
@@ -174,32 +166,32 @@ void sharedAMapGroup::logStats(StatCollection *stats)
 }
 
 /** Lets the unit group do what it needs to reset a trial */
-void sharedAMapGroup::startNewTrial(StatCollection *stats)
+void SharedAMapGroup::startNewTrial(StatCollection *stats)
 {
 	sawNewLand = false;
 	newTileCount = 0;
 	newTileCountPerTrial = 0;
-	stats->addStat("newTilesExplored", getName(), (long)newTileCount);
+	stats->AddStat("newTilesExplored", GetName(), (long)newTileCount);
 }
 
-void sharedAMapGroup::setVisibilityRadius(int _visibility)
+void SharedAMapGroup::setVisibilityRadius(int _visibility)
 {
 	visRadius = _visibility;
 }
 
-int sharedAMapGroup::getVisibilityRadius()
+int SharedAMapGroup::getVisibilityRadius()
 {
 	return visRadius;
 }
 
-bool sharedAMapGroup::explored(int x, int y)
+bool SharedAMapGroup::explored(int x, int y)
 {
 	return seen->get(y*map->getMapWidth()+x);
 }
 
-bool sharedAMapGroup::explored(unsigned int _node)
+bool SharedAMapGroup::explored(unsigned int _node)
 {
-	node *loc = aMap->getAbstractGraph(0)->getNode(_node);
+	node *loc = aMap->GetAbstractGraph(0)->getNode(_node);
 	return explored((unsigned int)loc->getLabelL(kFirstData), 
 									(unsigned int)loc->getLabelL(kFirstData+1));
 }

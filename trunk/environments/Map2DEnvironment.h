@@ -10,7 +10,6 @@
 #ifndef MAP2DENVIRONMENT_H
 #define MAP2DENVIRONMENT_H
 
-#include "Constants.h"
 #include <stdint.h>
 #include "Map.h"
 #include "MapAbstraction.h"
@@ -24,6 +23,16 @@ public:
 	uint16_t y;
 };
 
+enum tDirection {
+	kN=0x8, kS=0x4, kE=0x2, kW=0x1, kNW=kN|kW, kNE=kN|kE, 
+	kSE=kS|kE, kSW=kS|kW, kStay=0, kTeleport=kSW|kNE
+};
+
+const int numPrimitiveActions = 8;
+const int numActions = 10;
+const tDirection possibleDir[numActions] = { kN, kNE, kE, kSE, kS, kSW, kW, kNW, kStay, kTeleport };
+const int kStayIndex = 8; // index of kStay
+
 class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 {
 public:
@@ -33,6 +42,7 @@ public:
 	void GetActions(xyLoc nodeID, std::vector<tDirection> &actions);
 	tDirection GetAction(xyLoc s1, xyLoc s2);
 	xyLoc ApplyAction(xyLoc s, tDirection dir);
+	virtual OccupancyInterface<xyLoc, tDirection> *GetOccupancyInfo() { return 0; }
 
 	double HCost(xyLoc node1, xyLoc node2);
 	double GCost(xyLoc node1, xyLoc node2);
@@ -48,12 +58,12 @@ protected:
 class AbsMapEnvironment : public MapEnvironment
 {
 public:
-	AbsMapEnvironment(mapAbstraction *ma);
+	AbsMapEnvironment(MapAbstraction *ma);
 	virtual ~AbsMapEnvironment();
-	mapAbstraction *GetMapAbstraction() { return ma; }
+	MapAbstraction *GetMapAbstraction() { return ma; }
 	void OpenGLDraw() { map->OpenGLDraw(); ma->OpenGLDraw(); }
 private:
-	mapAbstraction *ma;
+	MapAbstraction *ma;
 };
 
 typedef UnitSimulation<xyLoc, tDirection, MapEnvironment> UnitMapSimulation;

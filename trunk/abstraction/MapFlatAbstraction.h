@@ -1,7 +1,7 @@
 /*
- * $Id: mapFlatAbstraction.h,v 1.5 2006/10/18 23:53:25 nathanst Exp $
+ * $Id: MapFlatAbstraction.h,v 1.5 2006/10/18 23:53:25 nathanst Exp $
  *
- *  mapFlatAbstraction.h
+ *  MapFlatAbstraction.h
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/10/05.
@@ -30,14 +30,14 @@
 #ifndef MAPFLATABSTRACTION_H
 #define MAPFLATABSTRACTION_H
 
-class mapFlatAbstraction : public mapAbstraction {
+class MapFlatAbstraction : public MapAbstraction {
 public:
-	mapFlatAbstraction(Map *_m);
-	~mapFlatAbstraction();
+	MapFlatAbstraction(Map *_m);
+	~MapFlatAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
-	virtual mapAbstraction *clone(Map *_m) { return new mapFlatAbstraction(_m); }
+	virtual MapAbstraction *clone(Map *_m) { return new MapFlatAbstraction(_m); }
 	
-	virtual bool pathable(node *from, node *to);
+	virtual bool Pathable(node *from, node *to);
 	
 	// utility functions
 	/** verify that the hierarchy is consistent */

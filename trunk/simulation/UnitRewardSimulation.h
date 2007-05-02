@@ -41,7 +41,7 @@
 
 //class unitRewardSimulation : public unitSimulation {
 //public:
-//	unitRewardSimulation(mapAbstraction *m, bool keepStats = false);
+//	unitRewardSimulation(MapAbstraction *m, bool keepStats = false);
 //	~unitRewardSimulation();
 //private:
 //	void doTimestepCalc();

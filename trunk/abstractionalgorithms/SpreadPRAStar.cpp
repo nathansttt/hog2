@@ -37,13 +37,13 @@ spreadPRAStar::spreadPRAStar()
 	expandSearchRadius = true;
 }
 
-path *spreadPRAStar::getPath(graphAbstraction *_aMap, node *from, node *to, reservationProvider *_rp)
+path *spreadPRAStar::getPath(GraphAbstraction *_aMap, node *from, node *to, reservationProvider *_rp)
 {
   std::vector<node *> fromChain;
   std::vector<node *> toChain;
 	path *lastPth = 0;
 	
-  if (_aMap->getAbstractGraph(from->getLabelL(kAbstractionLevel))->findEdge(from->getNum(), to->getNum()))
+  if (_aMap->GetAbstractGraph(from->getLabelL(kAbstractionLevel))->findEdge(from->getNum(), to->getNum()))
     return new path(from, new path(to));
 
 	setupSearch(_aMap, fromChain, from, toChain, to);
@@ -55,7 +55,7 @@ path *spreadPRAStar::getPath(graphAbstraction *_aMap, node *from, node *to, rese
 	return lastPth;
 }
 
-void spreadPRAStar::setTargets(graphAbstraction *_aMap, node *s, node *e, reservationProvider *_rp)
+void spreadPRAStar::setTargets(GraphAbstraction *_aMap, node *s, node *e, reservationProvider *_rp)
 {
 	rp = _rp; start = s; end = e; aMap = _aMap;
 	startChain.resize(0);
@@ -88,14 +88,14 @@ path *spreadPRAStar::think()
 	return 0;
 }
 
-void spreadPRAStar::setupSearch(graphAbstraction *_aMap,
+void spreadPRAStar::setupSearch(GraphAbstraction *_aMap,
 																std::vector<node *> &fromChain, node *from,
 																std::vector<node *> &toChain, node *to)
 {
 	nodesExpanded = 0;
 	nodesTouched = 0;
 	
-  if ((from == 0) || (to == 0) || (!_aMap->pathable(from, to)) || (from == to))
+  if ((from == 0) || (to == 0) || (!_aMap->Pathable(from, to)) || (from == to))
 	{
     if (verbose)
 		{
@@ -105,7 +105,7 @@ void spreadPRAStar::setupSearch(graphAbstraction *_aMap,
 				printf("spreadPRAStar: to == 0\n");
       if (from == to)
 				printf("spreadPRAStar: from == to\n");
-      if (from && to && (!_aMap->pathable(from, to)))
+      if (from && to && (!_aMap->Pathable(from, to)))
 				printf("spreadPRAStar: no path from %p to %p\n", (void*)from, (void*)to);
 			//cout << "praStar: no path from " << *from << " to " << *to << endl;
     }
@@ -114,26 +114,26 @@ void spreadPRAStar::setupSearch(graphAbstraction *_aMap,
 	
   if (verbose)
     printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
-//  if (aMap->getAbstractGraph(0)->findEdge(from->getNum(), to->getNum()))
+//  if (aMap->GetAbstractGraph(0)->findEdge(from->getNum(), to->getNum()))
 //	{ // we are 1 step away
 //    return new path(from, new path(to));
 //  }
 	
   _aMap->getParentHierarchy(from, to, fromChain, toChain);
-	//	assert(aMap->getAbstractGraph(fromChain.back()->getLabelL(kAbstractionLevel))->
+	//	assert(aMap->GetAbstractGraph(fromChain.back()->getLabelL(kAbstractionLevel))->
 	//					findEdge(fromChain.back()->getNum(), toChain.back()->getNum()));
 	
 	unsigned int previousSize = fromChain.size();
-	int minNode = (int)(2*sqrt(_aMap->getAbstractGraph(0)->getNumNodes()));
+	int minNode = (int)(2*sqrt(_aMap->GetAbstractGraph(0)->getNumNodes()));
 	while ((fromChain.size() > 2) && ((fromChain.size() > (previousSize)/2) ||
-																		(_aMap->getAbstractGraph(fromChain.size())->getNumNodes() < minNode)))
+																		(_aMap->GetAbstractGraph(fromChain.size())->getNumNodes() < minNode)))
 	{
 		toChain.pop_back();
 		fromChain.pop_back();
 	}
 }
 
-path *spreadPRAStar::buildNextAbstractPath(graphAbstraction *_aMap, path *lastPth,
+path *spreadPRAStar::buildNextAbstractPath(GraphAbstraction *_aMap, path *lastPth,
 																			std::vector<node *> &fromChain,
 																			std::vector<node *> &toChain,
 																			reservationProvider *_rp)
@@ -177,7 +177,7 @@ path *spreadPRAStar::buildNextAbstractPath(graphAbstraction *_aMap, path *lastPt
 			}
 		}
 		
-		graph *g = _aMap->getAbstractGraph(lastPth->n->getLabelL(kAbstractionLevel));
+		graph *g = _aMap->GetAbstractGraph(lastPth->n->getLabelL(kAbstractionLevel));
 		// find eligible nodes for lower level expansions
 		for (path *trav = lastPth; trav; trav = trav->next)
 		{

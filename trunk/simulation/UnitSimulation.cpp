@@ -42,11 +42,11 @@
 //*
 //* construct a unit simulation around a given map.
 //*/
-//unitSimulation::unitSimulation(mapAbstraction *_aMap, bool keepStats)
+//unitSimulation::unitSimulation(MapAbstraction *_aMap, bool keepStats)
 //:map_revision(-1)
 //{                                                                                
 //	aMap = _aMap;
-//	map = aMap->getMap();
+//	map = aMap->GetMap();
 //	which_map = kUnitSimulationMap;
 //	currTime = 0;
 //	map_height = map->getMapHeight();
@@ -231,7 +231,7 @@
 //	char where[128];
 //	fscanf(f, "MAP %s\n", where);
 //	//delete aMap;
-//	mapAbstraction *tmp = aMap;
+//	MapAbstraction *tmp = aMap;
 //	if (strcmp(where, "INCLUDED") == 0)
 //	{
 //		map = new Map(f);
@@ -239,8 +239,8 @@
 //	else {
 //		map = new Map(where);
 //	}
-//	//map->setDrawLandWhite(tmp->getMap()->getDrawLandWhite());
-//	map->setTileSet(tmp->getMap()->getTileSet());
+//	//map->setDrawLandWhite(tmp->GetMap()->getDrawLandWhite());
+//	map->setTileSet(tmp->GetMap()->getTileSet());
 //	aMap = aMap->clone(map);
 //	delete tmp;
 //	// create map abstraction?!?
@@ -491,7 +491,7 @@
 //
 //
 ///**
-//* Set which map is returned from getMapAbstraction.
+//* Set which map is returned from GetMapAbstraction.
 // *
 // * if you want to view the map of one of the groups instead of
 // * the actual world, you can use thsi function to choose.
@@ -508,9 +508,9 @@
 //}
 //
 ///**
-//* cycle the map returned from getMapAbstraction.
+//* cycle the map returned from GetMapAbstraction.
 // *
-// * selects the next possibile abstract map to be returned from getMapAbstraction.
+// * selects the next possibile abstract map to be returned from GetMapAbstraction.
 // */
 //void unitSimulation::cyclemapAbstractionDisplay()
 //{
@@ -587,7 +587,7 @@
 //	if (pause)
 //		return;
 //	
-//	stats.addStat("simulationTime", "unitSimulation", currTime);
+//	stats.AddStat("simulationTime", "unitSimulation", currTime);
 //	doPreTimestepCalc();
 //	currTime += amount;
 //	doTimestepCalc();
@@ -652,7 +652,7 @@
 //	else
 //		currTime = finalTime;
 //	
-//	stats.addStat("simulationTime", "unitSimulation", currTime);
+//	stats.AddStat("simulationTime", "unitSimulation", currTime);
 //}
 //
 //void unitSimulation::doPostTimestepCalc()
@@ -702,7 +702,7 @@
 //	
 //	thinkingCost = t.endTimer();
 //	theUnit->thinkTime += thinkingCost;
-//	stats.addStat("makeMoveThinkingTime", u->getName(), thinkingCost);
+//	stats.AddStat("makeMoveThinkingTime", u->getName(), thinkingCost);
 //	
 //	if (asynch)
 //		theUnit->nextTime += unitSimulation::penalty*thinkingCost;
@@ -766,7 +766,7 @@
 //	// Check if the move is valid
 //	//if ((map->getTerrainType(newx, newy)>>terrainBits) == (kGround>>terrainBits))
 //	//if (map->canStep(theUnit->currx, theUnit->curry, newx, newy))
-//	if (aMap->getAbstractGraph(0)->findEdge(map->getNodeNum(theUnit->currx, theUnit->curry),
+//	if (aMap->GetAbstractGraph(0)->findEdge(map->getNodeNum(theUnit->currx, theUnit->curry),
 //																					map->getNodeNum(newx, newy)))
 //	{
 //		if ((stochasticity > 0) && ((random()%1023)/1024.0 < stochasticity))
@@ -825,7 +825,7 @@
 //			
 //			theUnit->moveDist += movementCost;
 //			theUnit->nextTime += movementCost*u->getSpeed();
-//			stats.sumStat("distanceMoved", theUnit->agent->getName(), (double)movementCost);
+//			stats.SumStat("distanceMoved", theUnit->agent->getName(), (double)movementCost);
 //			
 //			if (theUnit->blocking) 
 //				bv->set(theUnit->curry*map_width+theUnit->currx, 0);
@@ -965,7 +965,7 @@
 //	{
 //		double thinkingCost = t.endTimer();
 //		u->thinkTime += thinkingCost;
-//		stats.addStat("setLocationThinkingTime", u->agent->getName(), thinkingCost);
+//		stats.AddStat("setLocationThinkingTime", u->agent->getName(), thinkingCost);
 //		if (asynch)
 //			u->nextTime += unitSimulation::penalty*thinkingCost;
 //		
@@ -979,7 +979,7 @@
 //
 //void unitSimulation::updateMap()
 //{
-//	//  if (aMap->getMap()->getRevision() != map_revision)
+//	//  if (aMap->GetMap()->getRevision() != map_revision)
 //	//	{
 //	//    bv->clear();
 //	//    map_revision = map->getRevision();
@@ -1008,21 +1008,21 @@
 //	//	{
 //	////		delete aMap;
 //	//		if (aMap == 0)
-//	//			aMap = new mapAbstraction(map);
+//	//			aMap = new MapAbstraction(map);
 //	//		// printf("Rebuilt abstract map!\n");
 //	//		return true;
 //	//	}
 //	return false;
 //}
 //
-//mapAbstraction *unitSimulation::getMapAbstraction()
+//MapAbstraction *unitSimulation::GetMapAbstraction()
 //{
 //	updateMap();
 //	updatemapAbstraction();
 //	return aMap;
 //}
 //
-//mapAbstraction *unitSimulation::getMapAbstraction(int _which)
+//MapAbstraction *unitSimulation::GetMapAbstraction(int _which)
 //{
 //	if (_which == kUnitSimulationMap)
 //	{
@@ -1032,10 +1032,10 @@
 //	}
 //	if ((_which < 1) || (_which > (int)unitGroups.size()))
 //		return 0;
-//	return unitGroups[_which-1]->getMapAbstraction();
+//	return unitGroups[_which-1]->GetMapAbstraction();
 //}
 //
-//mapAbstraction *unitSimulation::getMapAbstractionDisplay()
+//MapAbstraction *unitSimulation::getMapAbstractionDisplay()
 //{
 //	if (which_map == kUnitSimulationMap)
 //	{
@@ -1043,7 +1043,7 @@
 //		updatemapAbstraction();
 //		return aMap;
 //	}
-//	return unitGroups[which_map-1]->getMapAbstraction();
+//	return unitGroups[which_map-1]->GetMapAbstraction();
 //}
 //
 //
@@ -1057,7 +1057,7 @@
 //}
 //
 ///**
-//* Get random location which is guaranteed to be pathable and which is not
+//* Get random location which is guaranteed to be Pathable and which is not
 // * occupied by any other objects in the world so far.
 // */
 //void unitSimulation::getRandomLocations(int &x1, int &y1, int &x2, int &y2, tTerrain terrain)
@@ -1069,12 +1069,12 @@
 //		y2 = random()%map_height;
 //	} while ((map->getTerrainType(x2, y2) != terrain) ||
 //					 (map->getTerrainType(x1, y1) != terrain) ||
-//					 (!aMap->pathable(aMap->getNodeFromMap(x1, y1), aMap->getNodeFromMap(x2, y2))) ||
+//					 (!aMap->Pathable(aMap->getNodeFromMap(x1, y1), aMap->getNodeFromMap(x2, y2))) ||
 //					 findUnit(x2, y2) || findUnit(x1, y1));
 //}
 //
 ///**
-//* Get random location which is guaranteed to be pathable from the given location and which is not
+//* Get random location which is guaranteed to be Pathable from the given location and which is not
 // * occupied by any other objects in the world so far.
 // */
 //void unitSimulation::getRandomLocation(int x1, int y1, int &x2, int &y2, tTerrain terrain)
@@ -1084,7 +1084,7 @@
 //		y2 = random()%map_height;
 //	} while ((map->getTerrainType(x2, y2) != terrain) ||
 //					 (map->getTerrainType(x1, y1) != terrain) ||
-//					 (!aMap->pathable(aMap->getNodeFromMap(x1, y1), aMap->getNodeFromMap(x2, y2))) ||
+//					 (!aMap->Pathable(aMap->getNodeFromMap(x1, y1), aMap->getNodeFromMap(x2, y2))) ||
 //					 findUnit(x2, y2) || findUnit(x1, y1));
 //}
 //

@@ -1,7 +1,7 @@
 /*
- * $Id: sharedAMapGroup.h,v 1.9 2006/09/18 06:19:31 nathanst Exp $
+ * $Id: SharedAMapGroup.h,v 1.9 2006/09/18 06:19:31 nathanst Exp $
  *
- *  sharedAMapGroup.h
+ *  SharedAMapGroup.h
  *  HOG
  *
  *  Created by Nathan Sturtevant on 12/16/04.
@@ -26,27 +26,33 @@
  */
 
 
-#include "UnitGroup.h"
 
 #ifndef SHAREDAMAPGROUP_H
 #define SHAREDAMAPGROUP_H
+
+#include "AbsMapUnit.h"
+#include "UnitGroup.h"
+#include "AbsMapUnitGroup.h"
+#include "MapProvider.h"
 
 /**
  * A group which incrementally builds a map of the world as the units in the group
  * explore the graph.
  */
-class sharedAMapGroup : public unitGroup, public MapProvider {
+class SharedAMapGroup : public AbsMapUnitGroup, public MapProvider {
 public:
-	sharedAMapGroup(MapProvider *);
-	~sharedAMapGroup();
-	virtual tDirection makeMove(unit *u, MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo);
-	virtual void OpenGLDraw(MapProvider *, simulationInfo *);
-	virtual Map *getMap();
-	virtual mapAbstraction *getMapAbstraction();
+	SharedAMapGroup(MapProvider *);
+	~SharedAMapGroup();
+	virtual const char *GetName() { return "SharedAMapGroup"; }
+	//virtual tDirection makeMove(unit *u, MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo);
+	virtual void OpenGLDraw(MapProvider *, SimulationInfo *);
+	virtual Map *GetMap();
+	virtual MapAbstraction *GetMapAbstraction();
 	virtual int getNewTileCount() { return newTileCountPerTrial; }
 	
 	/** reset the location of a given unit */
-	virtual void updateLocation(unit *, MapProvider *m, int _x, int _y, bool, simulationInfo *);
+	void UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *, xyLoc loc, bool success, SimulationInfo *);
+	//virtual void updateLocation(BaseMapUnit *, MapProvider *m, int _x, int _y, bool, SimulationInfo *);
 	/** Is the group done with their exploration? */
 	virtual bool done();
 	/** Lets the unit group do what it needs to reset a trial */
@@ -59,14 +65,13 @@ public:
 	bool explored(unsigned int _node);
 	//void printRoundStats(unit *, FILE *f);
 
-        int getNewTileCountPerStep() { return newTileCount; }
-
-        bool seenBefore(int x, int y) { return (seen->get(y * map->getMapWidth() + x)); }
+	int getNewTileCountPerStep() { return newTileCount; }
+	bool seenBefore(int x, int y) { return (seen->get(y * map->getMapWidth() + x)); }
 	
 protected:
 	//void setUnitSimulation(unitSimulation *_us, Map *m);
 
-	mapAbstraction *aMap;
+	MapAbstraction *aMap;
 	Map *map;
 	bitVector *seen;
 	int visRadius;

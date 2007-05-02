@@ -32,7 +32,7 @@
 
 static const bool verbose = false;
 
-unitRaceSimulation::unitRaceSimulation(mapAbstraction *m, bool keepStats)
+unitRaceSimulation::unitRaceSimulation(MapAbstraction *m, bool keepStats)
 :unitSimulation(m, keepStats)
 {
 	stopOnConvergence = true;
@@ -140,16 +140,16 @@ void unitRaceSimulation::doPreTimestepCalc()
 	{
 		if (isUnitRacing(units[t]))
 		{
-			stats.addStat("trialDistanceMoved", units[t]->agent->getName(), 
+			stats.AddStat("trialDistanceMoved", units[t]->agent->getName(), 
 										(double) units[t]->moveDist);
-			stats.addStat("reachedTarget", units[t]->agent->getName(), 
+			stats.AddStat("reachedTarget", units[t]->agent->getName(), 
 										(long) (unitOnTargetStatus(units[t]) == kReachedTarget));
 		}
 	}
 	
 	if (!allRacesDone)
 	{
-		stats.addStat("Trial End", "Race Simulation", (long)currRound);
+		stats.AddStat("Trial End", "Race Simulation", (long)currRound);
 		if (verbose)
 		{
 			for (unsigned int t = 0; t < units.size(); t++)
@@ -194,8 +194,8 @@ void unitRaceSimulation::doPreTimestepCalc()
 		}	while ((bv->get(yy2*map_width+xx2)) ||
 						 (map->getTerrainType(xx2, yy2) != kGround) ||
 						 ((xx1==xx2)||(yy1==yy2)) ||
-						 (!getMapAbstraction()->pathable(getMapAbstraction()->getNodeFromMap(xx1, yy1),
-																						 getMapAbstraction()->getNodeFromMap(xx2, yy2))));
+						 (!GetMapAbstraction()->Pathable(GetMapAbstraction()->getNodeFromMap(xx1, yy1),
+																						 GetMapAbstraction()->getNodeFromMap(xx2, yy2))));
 		for (unsigned int t = 0; t < units.size(); t++)
 		{
 			if (isUnitRacing(units[t]))
@@ -234,7 +234,7 @@ void unitRaceSimulation::doPreTimestepCalc()
 		if (!isUnitRacing(units[t]))
 			continue;
 		
-		// stats.addStat("distanceMoved", units[t]->agent->getName(), (double)0);
+		// stats.AddStat("distanceMoved", units[t]->agent->getName(), (double)0);
 		if (units[t]->blocking)
 		{
 			bv->set(units[t]->curry*map_width+units[t]->currx, 0);

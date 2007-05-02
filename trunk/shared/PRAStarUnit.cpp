@@ -36,9 +36,9 @@ praStarUnit::praStarUnit(int _x, int _y, AbsMapUnit *_target, praStar *_alg)
 //{ cache = 0; }
 
 
-tDirection praStarUnit::makeMove(MapProvider *mp, reservationProvider *rp, simulationInfo *simInfo)
+tDirection praStarUnit::makeMove(MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo)
 {
-	mapAbstraction *aMap = mp->getMapAbstraction();
+	MapAbstraction *aMap = mp->GetMapAbstraction();
 
 	algorithm->setExpandSearchRadius(false);
 	if (moves.size() != 0)

@@ -29,13 +29,13 @@
 #ifndef MAPLINEABSTRACTION_H
 #define MAPLINEABSTRACTION_H
 
-class MapLineAbstraction : public mapAbstraction {
+class MapLineAbstraction : public MapAbstraction {
 public:
 	MapLineAbstraction(Map *, int dist = 2, bool uniform = true);
 	~MapLineAbstraction();
-	mapAbstraction *clone(Map *_m) { return new MapLineAbstraction(_m); }
+	MapAbstraction *clone(Map *_m) { return new MapLineAbstraction(_m); }
 	
-	virtual bool pathable(node *from, node *to);
+	virtual bool Pathable(node *from, node *to);
 	
 	// utility functions
 	/** verify that the hierarchy is consistent */

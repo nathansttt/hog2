@@ -42,7 +42,7 @@ public:
 	SearchAlgorithm() { nodesExpanded = nodesTouched = 0; }
 	virtual ~SearchAlgorithm() {}
 	virtual const char *getName() = 0;
-	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0) = 0;
+	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0) = 0;
 	int getNodesExpanded() { return nodesExpanded; }
 	int getNodesTouched() { return nodesTouched; }
 	virtual void logFinalStats(StatCollection *) {}
@@ -52,6 +52,6 @@ public:
 	int nodesTouched;
 };
 
-extern void doRandomPath(graphAbstraction *aMap, SearchAlgorithm *sa, bool repeat = false);
+extern void doRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat = false);
 
 #endif

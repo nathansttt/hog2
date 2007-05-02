@@ -34,9 +34,9 @@ class spreadExecSearchAlgorithm : public SearchAlgorithm {
 public:
 	spreadExecSearchAlgorithm() { }
 	virtual const char *getName() { return "unnamed"; }
-	virtual path *getPath(graphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 
-	virtual void setTargets(graphAbstraction *_aMap, node *s, node *e, reservationProvider *_rp = 0)
+	virtual void setTargets(GraphAbstraction *_aMap, node *s, node *e, reservationProvider *_rp = 0)
 	{ rp = _rp; start = s; end = e; aMap = _aMap; }
 	/** how many times do we have to "think" to find the solution, return -1 if unknown */
 	virtual int getNumThinkSteps() = 0; 
@@ -45,7 +45,7 @@ public:
 protected:
 	node *start, *end;
 	reservationProvider *rp;
-	graphAbstraction *aMap;
+	GraphAbstraction *aMap;
 };
 
 #endif

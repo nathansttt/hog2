@@ -1,7 +1,7 @@
 /*
- * $Id: radiusAbstraction.h,v 1.6 2006/10/18 23:53:25 nathanst Exp $
+ * $Id: RadiusAbstraction.h,v 1.6 2006/10/18 23:53:25 nathanst Exp $
  *
- *  radiusAbstraction.h
+ *  RadiusAbstraction.h
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/3/05.
@@ -30,13 +30,13 @@
 #ifndef RADIUSABSTRACTION_H
 #define RADIUSABSTRACTION_H
 
-class radiusAbstraction : public mapAbstraction {
+class RadiusAbstraction : public MapAbstraction {
 public:
-	radiusAbstraction(Map *, int);
-	~radiusAbstraction();
-	mapAbstraction *clone(Map *_m) { return new radiusAbstraction(_m, radius); }
+	RadiusAbstraction(Map *, int);
+	~RadiusAbstraction();
+	MapAbstraction *clone(Map *_m) { return new RadiusAbstraction(_m, radius); }
 	
-	virtual bool pathable(node *from, node *to);
+	virtual bool Pathable(node *from, node *to);
 	
 	// utility functions
 	/** verify that the hierarchy is consistent */

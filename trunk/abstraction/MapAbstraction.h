@@ -1,7 +1,7 @@
 /*
- * $Id: mapAbstraction.h,v 1.15 2006/11/01 23:02:12 nathanst Exp $
+ * $Id: MapAbstraction.h,v 1.15 2006/11/01 23:02:12 nathanst Exp $
  *
- *  mapAbstraction.h
+ *  MapAbstraction.h
  *  hog
  *
  *  Created by Nathan Sturtevant on 6/3/05.
@@ -28,23 +28,22 @@
 #include "Map.h"
 #include "GraphAbstraction.h"
 #include "GLUtil.h"
-#include "Constants.h"
 #include "MapProvider.h"
 
 #ifndef MAPABSTRACTION_H
 #define MAPABSTRACTION_H
 
 /**
-* This class is designed as an interface to be added onto any type of graphAbstraction
+* This class is designed as an interface to be added onto any type of GraphAbstraction
  * to support a few extra functionalities that mapabstractions should have.
  */
 
-class mapAbstraction : public graphAbstraction, public MapProvider {
+class MapAbstraction : public GraphAbstraction, public MapProvider {
 public:
-	mapAbstraction(Map *_m) :m(_m), levelDraw(0) {}
-	virtual ~mapAbstraction();
+	MapAbstraction(Map *_m) :m(_m), levelDraw(0) {}
+	virtual ~MapAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
-	virtual mapAbstraction *clone(Map *) = 0;
+	virtual MapAbstraction *clone(Map *) = 0;
 	node *getNodeFromMap(int x, int y, tCorner c = kNone) { return abstractions[0]->getNode(m->getNodeNum(x, y, c)); }
 	void getTileFromNode(node *n, int &x, int &y);
 	void getRandomTileFromNode(node *n, int &x, int &y);
@@ -52,8 +51,8 @@ public:
 	/** Given a location (recVec) return the tile under that location */
 	void getTileUnderLoc(int &x, int &y, const recVec &);
 
-	Map* getMap() { return m; }
-	mapAbstraction *getMapAbstraction() { return this; }
+	Map* GetMap() { return m; }
+	MapAbstraction *GetMapAbstraction() { return this; }
 
 	virtual double h(node *a, node *b);
 	

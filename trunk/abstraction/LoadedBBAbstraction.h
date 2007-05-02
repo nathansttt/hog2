@@ -1,5 +1,5 @@
 /*
- *  loadedBBAbstraction.h
+ *  LoadedBBAbstraction.h
  *  hog
  *
  *  Created by Nathan Sturtevant on 4/12/06.
@@ -20,18 +20,18 @@ public:
 	double x1, x2, y1, y2, z1, z2;
 };
 
-class loadedBBAbstraction : public graphAbstraction {
+class LoadedBBAbstraction : public GraphAbstraction {
 public:
-  loadedBBAbstraction(char *, char *);
-  virtual ~loadedBBAbstraction();
+  LoadedBBAbstraction(char *, char *);
+  virtual ~LoadedBBAbstraction();
 	virtual void verifyHierarchy();
   double h(node *a, node *b);
 	//  virtual void draw();
 	//  virtual void rebuild();
 	//	virtual int getRevision() { return 0; }
 	
-  bool pathable(node *from, node *to);
-  bool pathable(unsigned int from, unsigned int to);
+  bool Pathable(node *from, node *to);
+  bool Pathable(unsigned int from, unsigned int to);
 	//path *getQuickPath(node *from, node *to);
   void getParentHierarchy(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
   //node *getNthParent(node *, int n);

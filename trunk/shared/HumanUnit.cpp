@@ -32,7 +32,7 @@ humanUnit::humanUnit(int _x, int _y, unit *_target)
   r = 0.0; g = 0.0; b = 1.0;
 }
 
-tDirection humanUnit::makeMove(MapProvider *, reservationProvider *, simulationInfo *)
+tDirection humanUnit::makeMove(MapProvider *, reservationProvider *, SimulationInfo *)
 {
   b = 1-b;
   tDirection res = nextDir;
