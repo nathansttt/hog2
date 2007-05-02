@@ -53,7 +53,7 @@ SharedAMapGroup::~SharedAMapGroup()
 	delete seen;
 }
 
-//void SharedAMapGroup::updateLocation(BaseMapUnit *u, MapProvider *mp, int _x, int _y, bool success, SimulationInfo *simInfo)
+//void SharedAMapGroup::updateLocation(BaseAbsMapUnit *u, MapProvider *mp, int _x, int _y, bool success, SimulationInfo *simInfo)
 void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *mp, xyLoc loc, bool success, SimulationInfo *si)
 {
 	Map *worldMap = mp->GetMap();
