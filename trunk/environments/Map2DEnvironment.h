@@ -71,4 +71,24 @@ private:
 typedef UnitSimulation<xyLoc, tDirection, MapEnvironment> UnitMapSimulation;
 typedef UnitSimulation<xyLoc, tDirection, AbsMapEnvironment> UnitAbsMapSimulation;
 
+template<>
+void UnitSimulation<xyLoc, tDirection, MapEnvironment>::OpenGLDraw()
+{
+	env->OpenGLDraw();
+	for (unsigned int x = 0; x < units.size(); x++)
+	{
+		units[x]->agent->OpenGLDraw(env);
+	}
+}
+
+template<>
+void UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>::OpenGLDraw()
+{
+	env->OpenGLDraw();
+	for (unsigned int x = 0; x < units.size(); x++)
+	{
+		units[x]->agent->OpenGLDraw(env);
+	}
+}
+
 #endif
