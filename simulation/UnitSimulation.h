@@ -137,6 +137,8 @@ public:
 	void SetThinkingPenalty(double pen) { penalty = pen; }
 	/** getPenalty for thinking. Gets the multiplier used to penalize thinking time. */
 	double GetThinkingPenalty() { return penalty; }
+
+	virtual void OpenGLDraw() { }
 private:
 	void StepUnitTime(UnitInfo<state, action, environment> *ui, double timeStep);
 	bool MakeUnitMove(UnitInfo<state, action, environment> *theUnit, action where, double &moveCost);
