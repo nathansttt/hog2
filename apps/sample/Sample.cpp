@@ -161,7 +161,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 //				int x, y;
 //				cameraTarget->getLocation(x, y);
 //				node *n1 = ma->getNodeFromMap(x, y);
-//				cameraTarget->getTarget()->getLocation(x, y);
+//				cameraTarget->GetGoal()->getLocation(x, y);
 //				node *n2 = ma->getNodeFromMap(x, y);
 //				distLine->AddPoint(ma->h(n1, n2));
 //			}
@@ -202,8 +202,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 //		GLdouble x, y, z, r;
 //		GLdouble xx, yy, zz;
 //		cameraTarget->getOpenGLLocation(unitSim->GetMap(), x, y, z, r);
-//		if (cameraTarget->getTarget())
-//			cameraTarget->getTarget()->getOpenGLLocation(unitSim->GetMap(), xx, yy, zz, r);
+//		if (cameraTarget->GetGoal())
+//			cameraTarget->GetGoal()->getOpenGLLocation(unitSim->GetMap(), xx, yy, zz, r);
 //		else {
 //			xx = -x; 
 //			yy = -y;

@@ -682,8 +682,6 @@
 		C4D3B4800BCEE7B200FCD84C /* UnitGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UnitGroup.h; sourceTree = "<group>"; };
 		C4D3B4810BCEE7B200FCD84C /* UnitRaceSimulation.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = UnitRaceSimulation.cpp; sourceTree = "<group>"; };
 		C4D3B4820BCEE7B200FCD84C /* UnitRaceSimulation.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UnitRaceSimulation.h; sourceTree = "<group>"; };
-		C4D3B4830BCEE7B200FCD84C /* UnitRewardSimulation.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = UnitRewardSimulation.cpp; sourceTree = "<group>"; };
-		C4D3B4840BCEE7B200FCD84C /* UnitRewardSimulation.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UnitRewardSimulation.h; sourceTree = "<group>"; };
 		C4D3B4850BCEE7B200FCD84C /* UnitSimulation.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = UnitSimulation.cpp; sourceTree = "<group>"; };
 		C4D3B4860BCEE7B200FCD84C /* UnitSimulation.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UnitSimulation.h; sourceTree = "<group>"; };
 		C4D3B4880BCEE7B200FCD84C /* BitVector.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BitVector.cpp; sourceTree = "<group>"; };
@@ -1619,8 +1617,6 @@
 				C4D3B4800BCEE7B200FCD84C /* UnitGroup.h */,
 				C4D3B4810BCEE7B200FCD84C /* UnitRaceSimulation.cpp */,
 				C4D3B4820BCEE7B200FCD84C /* UnitRaceSimulation.h */,
-				C4D3B4830BCEE7B200FCD84C /* UnitRewardSimulation.cpp */,
-				C4D3B4840BCEE7B200FCD84C /* UnitRewardSimulation.h */,
 				C4D3B4850BCEE7B200FCD84C /* UnitSimulation.cpp */,
 				C4D3B4860BCEE7B200FCD84C /* UnitSimulation.h */,
 			);
