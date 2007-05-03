@@ -50,7 +50,8 @@ public:
 	//void setUnitSimulation(unitSimulation *_US) { US = _US; algorithm->setSimulationEnvironment(US); }
 	virtual bool done() { return onTarget; }
 
-	AbsMapUnit *getTarget() { return target; }
+	void GetGoal(xyLoc &g) { target->GetLocation(g); }
+	//xyLoc GetGoal() { return target->GetLocation(); }
 	virtual void setTarget(AbsMapUnit *u) { target = u; }
 
 	//using unit::makeMove;

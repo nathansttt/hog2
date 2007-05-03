@@ -58,8 +58,7 @@ public:
 		verbose = false;
 	}
 	~UnitRaceSimulation() {}
-	void AddUnit(unit *u) { allRacesDone = false; unitSimulation::addUnit(u); }
-	void AddUnit(unit *u, bool block)  { allRacesDone = false; unitSimulation::addUnit(u, block); }
+	void AddUnit(Unit<state, action, environment> *u) { allRacesDone = false; unitSimulation::addUnit(u); }
 
 	virtual bool Done() { return allRacesDone; }
 	void SetStopOnConvergence(bool stop) { stopOnConvergence = stop; }
@@ -221,10 +220,10 @@ private:
 			UnitSimulation::doTimestepCalc();
 	}
 	
-	tUnitOnTargetStatus UnitOnTargetStatus(unitInfo *)
+	tUnitOnTargetStatus UnitOnTargetStatus(UnitInfo<state, action, environment> *u)
 	{
 		int x, y;
-		unit *target = u->agent->getTarget();
+		unit *target = u->agent->GetGoal();
 		if (verbose) printf("Unit %s, its target %s\n",u->agent->getName(),target->getName());
 		
 		if (useTravelLimit && (u->moveDist > travelLimit)) return kOutOfTravel;
@@ -238,7 +237,7 @@ private:
 		return kNotOnTarget;
 	}
 	
-	bool UnitOnTarget(unitInfo *)
+	bool UnitOnTarget(UnitInfo<state, action, environment> *u)
 	{
 		switch (unitOnTargetStatus(u)) {
 			case kNoTarget: case kOutOfTravel: case kReachedTarget: return true;
@@ -248,10 +247,10 @@ private:
 		return false;
 	}
 
-	bool IsUnitRacing(unitInfo *u)
+	bool IsUnitRacing(UnitInfo<state, action, environment> *u)
 	{
-		return (!u->ignoreOnTarget && (u->agent->getObjectType() == kWorldObject) &&
-						(u->agent->getTarget() != NULL));
+		return (!u->ignoreOnTarget &&
+						(u->agent->GetGoal() != NULL));
 	}
 	
 	bool allRacesDone;

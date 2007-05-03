@@ -131,7 +131,7 @@ void patrolUnit::addPatrolLocation(unit *ru)
 	Locs.push_back(ru);
 }
 
-unit *patrolUnit::getTarget()
+unit *patrolUnit::GetGoal()
 {
 	if (currTarget == -1)
 		return 0;

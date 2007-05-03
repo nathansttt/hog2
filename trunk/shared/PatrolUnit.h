@@ -40,7 +40,7 @@ public:
 	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo);
 	void OpenGLDraw(MapProvider *, SimulationInfo *);
 	void addPatrolLocation(unit *);
-	unit *getTarget();
+	unit *GetGoal();
 	void updateLocation(int _x, int _y, bool worked, SimulationInfo *)
 	{ x = _x; y = _y; if (!worked) { moves.resize(0);	if (currTarget != -1) currTarget = 0; } }
 	void logStats(StatCollection *stats);

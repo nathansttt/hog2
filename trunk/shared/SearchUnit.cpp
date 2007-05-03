@@ -133,10 +133,12 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 		addPathToCache(spread_cache);
 		node *next_start = spread_cache->tail()->n;
 		int targx, targy;
-		target->GetLocation(targx, targy);
+		xyLoc l;
+		target->GetLocation(l);
+		targx = l.x;
+		targy = l.y;
 		
 		// Get a path by path-planning
-		target->GetLocation(targx, targy);
 		node *to = aMap->GetAbstractGraph(0)->getNode(map->getNodeNum(targx, targy));
 		
 		s_algorithm->setTargets(mp->GetMapAbstraction(), next_start, to, rp);
@@ -157,13 +159,15 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 	
 	// Get the position of the target
 	int targx, targy;
-	target->GetLocation(targx, targy);
-	
+	xyLoc l;
+	target->GetLocation(l);
+	targx = l.x;
+	targy = l.y;
+		
 	// Get a path by path-planning
 	graph *g0 = aMap->GetAbstractGraph(0);
 	// Get the start and goal nodes
 	node *from = g0->getNode(map->getNodeNum(loc.x, loc.y));
-	target->GetLocation(targx, targy);
 	node *to = g0->getNode(map->getNodeNum(targx, targy));
 	
 	if (from == to)

@@ -45,6 +45,7 @@ public:
 	virtual void UpdateLocation(environment *, state, bool, SimulationInfo *) = 0;
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw(environment *) = 0;
+	virtual void GetGoal(state &s) = 0;
 
 	virtual double GetSpeed() { return speed; }
 	void SetSpeed(double s) { speed = s; }
@@ -107,7 +108,7 @@ private:
 //	void setSpeed(double s) { speed = s; }
 //	virtual bool done() { return true; }
 //
-//	unit *getTarget() { return target; }
+//	unit *GetGoal() { return target; }
 //	virtual void setTarget(unit *u) { target = u; }
 //	void setColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
 //	void getColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
