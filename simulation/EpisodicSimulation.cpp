@@ -1,7 +1,7 @@
 /*
- * $Id: unitRaceSimulation.cpp,v 1.29 2007/02/21 02:31:27 bulitko Exp $
+ * $Id: EpisodicSimulation.cpp,v 1.29 2007/02/21 02:31:27 bulitko Exp $
  *
- *  unitRaceSimulation.cpp
+ *  EpisodicSimulation.cpp
  *  HOG
  *
  *  Created by Nathan Sturtevant on 12/17/04.
@@ -25,7 +25,7 @@
  *
  */
 
-#include "UnitRaceSimulation.h"
+#include "EpisodicSimulation.h"
 #include "Unit.h"
 #include "UnitGroup.h"
 #include "FPUtil.h"

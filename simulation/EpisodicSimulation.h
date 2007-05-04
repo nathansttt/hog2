@@ -1,7 +1,7 @@
 /*
- * $Id: unitRaceSimulation.h,v 1.18 2006/11/21 02:56:47 bulitko Exp $
+ * $Id: EpisodicSimulation.h,v 1.18 2006/11/21 02:56:47 bulitko Exp $
  *
- *  unitRaceSimulation.h
+ *  EpisodicSimulation.h
  *  HOG
  *
  *  Created by Nathan Sturtevant on 12/17/04.
@@ -42,9 +42,9 @@ enum tUnitOnTargetStatus {
 };
 
 template<class state, class action, class environment>
-class UnitRaceSimulation : public UnitSimulation<state, action, environment> {
+class EpisodicSimulation : public UnitSimulation<state, action, environment> {
 public:
-	UnitRaceSimulation(environment *e)
+	EpisodicSimulation(environment *e)
 	:UnitSimulation(e)
 	{
 		stopOnConvergence = true;
@@ -57,7 +57,7 @@ public:
 		disjunctiveTrialEnd = false;
 		verbose = false;
 	}
-	~UnitRaceSimulation() {}
+	~EpisodicSimulation() {}
 	void AddUnit(Unit<state, action, environment> *u) { allRacesDone = false; unitSimulation::addUnit(u); }
 
 	virtual bool Done() { return allRacesDone; }
@@ -78,7 +78,7 @@ private:
 			return;
 		
 		if (verbose)
-			printf("unitRaceSimulation::doPreTimestepCalc checking onTarget\n");
+			printf("EpisodicSimulation::doPreTimestepCalc checking onTarget\n");
 		
 		bool trialEnd;
 		
