@@ -11,6 +11,7 @@
 #define MAP2DENVIRONMENT_H
 
 #include <stdint.h>
+#include <iostream>
 #include "Map.h"
 #include "MapAbstraction.h"
 #include "UnitSimulation.h"
@@ -22,6 +23,16 @@ public:
 	uint16_t x;
 	uint16_t y;
 };
+
+std::ostream& operator <<(std::ostream & out, const xyLoc &loc)
+{
+	out << "(" << loc.x << ", " << loc.y << ")";
+	return out;
+}
+
+bool operator==(const xyLoc &l1, const xyLoc &l2) {
+	return (l1.x == l2.x) && (l1.y == l2.y);
+}
 
 enum tDirection {
 	kN=0x8, kS=0x4, kE=0x2, kW=0x1, kNW=kN|kW, kNE=kN|kE, 

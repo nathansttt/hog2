@@ -25,10 +25,10 @@
  *
  */
 
-#include "UnitSimulation.h"
-
 #ifndef UNITRACESIMULATION_H
 #define UNITRACESIMULATION_H
+
+#include "UnitSimulation.h"
 
 /**
  * A class where units repeatedly path from a start to a goal until they have
@@ -45,11 +45,11 @@ template<class state, class action, class environment>
 class EpisodicSimulation : public UnitSimulation<state, action, environment> {
 public:
 	EpisodicSimulation(environment *e)
-	:UnitSimulation(e)
+	:UnitSimulation<state, action, environment>(e)
 	{
 		stopOnConvergence = true;
 		currRound = 0;
-		setUseBlocking(false);
+		//setUseBlocking(false);
 		allRacesDone = false;
 		useTravelLimit = false;
 		useMaxRounds = false;
@@ -58,20 +58,20 @@ public:
 		verbose = false;
 	}
 	~EpisodicSimulation() {}
-	void AddUnit(Unit<state, action, environment> *u) { allRacesDone = false; unitSimulation::addUnit(u); }
+	int AddUnit(Unit<state, action, environment> *u) { allRacesDone = false; return UnitSimulation<state, action, environment>::AddUnit(u); }
 
 	virtual bool Done() { return allRacesDone; }
 	void SetStopOnConvergence(bool stop) { stopOnConvergence = stop; }
 	void SetTargetTolerance(double x) { targetTolerance = x; }
 	double GetTargetTolerance() { return targetTolerance; }
 	void SetDisjunctiveTrialEnd(bool value) { disjunctiveTrialEnd = value; }
-	void SetUseSameStart(bool val) { sameStart = val; }
+	//void SetUseSameStart(bool val) { sameStart = val; }
 	int GetCurrRound() { return currRound; }
 	void SetTravelLimit(double lim) { useTravelLimit = true; travelLimit = lim; }
 	void SetTrialLimit(long maxTrials) { useMaxRounds = true; maxRounds = maxTrials; }
 	void DisableTravelLimit() { useTravelLimit = false; }
 
-private:
+protected:
 	virtual void DoPreTimestepCalc()
 	{
 		if (allRacesDone)
@@ -91,16 +91,16 @@ private:
 			// check to see if all units are on top of their target.
 			// we need to modify this if we are ever to use blocking.
 			// (or unblock units whenver they reach their target?)
-			for (unsigned int t = 0; t < units.size(); t++)
+			for (unsigned int t = 0; t < this->units.size(); t++)
 			{
 				if (verbose) printf("Check unit %d\n",t);
 				
-				if (!isUnitRacing(units[t]))
+				if (!IsUnitRacing(this->units[t]))
 					continue;
 				
 				if (verbose) printf("Unit %d is racing, check if it is on target\n",t);
 				
-				if (!UnitOnTarget(units[t]))
+				if (!UnitOnTarget(this->units[t]))
 				{
 					if (verbose) printf("Unit %d is not on target, break\n",t);
 					trialEnd = false;
@@ -115,16 +115,16 @@ private:
 			// check to see if all units are on top of their target.
 			// we need to modify this if we are ever to use blocking.
 			// (or unblock units whenver they reach their target?)
-			for (unsigned int t = 0; t < units.size(); t++)
+			for (unsigned int t = 0; t < this->units.size(); t++)
 			{
 				if (verbose) printf("Check unit %d\n",t);
 				
-				if (!isUnitRacing(units[t]))
+				if (!IsUnitRacing(this->units[t]))
 					continue;
 				
 				if (verbose) printf("Unit %d is racing, check if it is on target\n",t);
 				
-				if (UnitOnTarget(units[t]))
+				if (UnitOnTarget(this->units[t]))
 				{
 					if (verbose) printf("Unit %d is on target, break\n",t);
 					trialEnd = true;
@@ -135,7 +135,6 @@ private:
 		// if all units are on their target, then start the next round
 		if (!trialEnd)
 		{
-			updateMap();
 			return;
 		}
 		
@@ -144,34 +143,35 @@ private:
 		// Go through all racing units and output stats:
 		// - on the distance traveled
 		// - on whether the target was actually reached
-		for (unsigned int t = 0; t < units.size(); t++)
+		for (unsigned int t = 0; t < this->units.size(); t++)
 		{
-			if (isUnitRacing(units[t]))
+			if (IsUnitRacing(this->units[t]))
 			{
-				stats.AddStat("trialDistanceMoved", units[t]->agent->getName(), 
-											(double) units[t]->moveDist);
-				stats.AddStat("reachedTarget", units[t]->agent->getName(), 
-											(long) (UnitOnTargetStatus(units[t]) == kReachedTarget));
+				this->stats.AddStat("trialDistanceMoved", this->units[t]->agent->GetName(), 
+														(double) this->units[t]->totalDistance);
+				this->stats.AddStat("reachedTarget", this->units[t]->agent->GetName(), 
+														(long) (UnitOnTargetStatus(this->units[t]) == kReachedTarget));
 			}
 		}
 		
 		if (!allRacesDone)
 		{
-			stats.AddStat("Trial End", "Race Simulation", (long)currRound);
+			this->stats.AddStat("Trial End", "Race Simulation", (long)currRound);
 			if (verbose)
 			{
-				for (unsigned int t = 0; t < units.size(); t++)
+				for (unsigned int t = 0; t < this->units.size(); t++)
 				{
-					if (!isUnitRacing(units[t]))
+					if (!IsUnitRacing(this->units[t]))
 						continue;
-					printf("Round ended, moving %d back to (%d, %d)\n",
-								 t, units[t]->startx, units[t]->starty);
+					std::cout << "Round ended, moving " << t << " (" << this->units[t]->agent->GetName()
+					<< ") back to " << this->units[t]->startState << std::endl;
 				}
 			}
 		}
 		
 		// the unit simulation tells us if all groups are done
-		if ((unitSimulation::done() && sameStart && stopOnConvergence) || (useMaxRounds && currRound >= maxRounds))
+		if ((this->EpisodeDone() && /*sameStart &&*/ stopOnConvergence) ||
+				(useMaxRounds && currRound >= maxRounds))
 		{
 			if (verbose) printf("All trials finished; last trial: %d\n", currRound);
 			allRacesDone = true;
@@ -183,55 +183,66 @@ private:
 			printf("Continuing trial: %d\n", currRound);
 		
 		// call void startNewTrial(); on all groups
-		for (unsigned int t = 0; t < unitGroups.size(); t++)
+		for (unsigned int t = 0; t < this->unitGroups.size(); t++)
 		{
-			unitGroups[t]->startNewTrial(&stats);
+			this->unitGroups[t]->StartNewTrial(&this->stats);
 		}
 		
 		// call set location on all units back to their starting location
 		// set unit times to the current time
-		for (unsigned int t = 0; t < units.size(); t++)
+		for (unsigned int t = 0; t < this->units.size(); t++)
 		{
 			// check if the unit is racing. If not then don't reset it
-			if (!isUnitRacing(units[t]))
+			if (!IsUnitRacing(this->units[t]))
 				continue;
 			
 			// stats.AddStat("distanceMoved", units[t]->agent->getName(), (double)0);
-//			if (units[t]->blocking)
+//			if (this->units[t]->blocking)
 //			{
-//				bv->set(units[t]->curry*map_width+units[t]->currx, 0);
-//				bv->set(units[t]->starty*map_width+units[t]->startx, 1);
+//				bv->set(this->units[t]->curry*map_width+units[t]->currx, 0);
+//				bv->set(this->units[t]->starty*map_width+units[t]->startx, 1);
 //			}
-			units[t]->agent->updateLocation(units[t]->startx, units[t]->starty, false, this);
-			units[t]->currx = units[t]->startx;
-			units[t]->curry = units[t]->starty;
-			units[t]->nextTime = currTime;
-			units[t]->thinkTime = 0;
+			this->units[t]->currentState = this->units[t]->startState;
+			this->units[t]->agent->GetUnitGroup()->UpdateLocation(this->units[t]->agent, this->env, this->units[t]->startState, false, this);
+			this->units[t]->nextTime = this->currTime;
+			this->units[t]->totalThinking = 0;
 			//			units[t]->thinkStates = 0;
-			units[t]->moveDist = 0;
+			this->units[t]->totalDistance = 0;
 		}
 		currRound++;
 		// randomize order -- only matters if they are blocking each other
 	}
 
-	virtual void DoTimestepCalc()
+	virtual void DoTimestepCalc(double amount)
 	{
 		if (!allRacesDone)
-			UnitSimulation::doTimestepCalc();
+			UnitSimulation<state, action, environment>::DoTimestepCalc(amount);
+	}
+	
+	virtual bool EpisodeDone()
+	{
+			bool isDone = true;
+			for (unsigned int t = 0; (t < this->units.size())&&(isDone); t++)
+			{
+				state loc, goaloc;
+				this->units[t]->agent->GetLocation(loc);
+				this->units[t]->agent->GetGoal(goaloc);
+				isDone = (loc == goaloc);
+			}
+			return isDone;
 	}
 	
 	tUnitOnTargetStatus UnitOnTargetStatus(UnitInfo<state, action, environment> *u)
 	{
-		int x, y;
-		unit *target = u->agent->GetGoal();
-		if (verbose) printf("Unit %s, its target %s\n",u->agent->getName(),target->getName());
+		state s1, s2;
+		//Unit<state, action, environment> *target = ;
+		//if (verbose) printf("Unit %s, its target %s\n", u->agent->GetName(), target->GetName());
 		
-		if (useTravelLimit && (u->moveDist > travelLimit)) return kOutOfTravel;
+		if (useTravelLimit && (u->totalDistance > travelLimit)) return kOutOfTravel;
 		
-		if (target == NULL) return kNoTarget;
-		
-		target->getLocation(x, y);
-		if (!fgreater(aMap->octileDistance(u->currx,u->curry,x,y),targetTolerance))
+		u->agent->GetLocation(s1);
+		u->agent->GetGoal(s2);
+		if (!fgreater(this->env->GCost(s1, s2),targetTolerance))
 			return kReachedTarget;
 		
 		return kNotOnTarget;
@@ -239,7 +250,7 @@ private:
 	
 	bool UnitOnTarget(UnitInfo<state, action, environment> *u)
 	{
-		switch (unitOnTargetStatus(u)) {
+		switch (UnitOnTargetStatus(u)) {
 			case kNoTarget: case kOutOfTravel: case kReachedTarget: return true;
 			case kNotOnTarget: return false;
 			default: assert(false); 
@@ -249,8 +260,9 @@ private:
 
 	bool IsUnitRacing(UnitInfo<state, action, environment> *u)
 	{
-		return (!u->ignoreOnTarget &&
-						(u->agent->GetGoal() != NULL));
+		return true;
+//		return (!u->ignoreOnTarget &&
+//						(u->agent->GetGoal() != NULL));
 	}
 	
 	bool allRacesDone;

@@ -37,6 +37,7 @@
 //#include "MapFlatAbstraction.h"
 //#include "ClusterAbstraction.h"
 #include "UnitSimulation.h"
+#include "EpisodicSimulation.h"
 #include "Plot2D.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
@@ -70,8 +71,7 @@ void createSimulation()
 	else
 		map = new Map(gDefaultMap);
 
-	unitSim = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)),
-																																		 (OccupancyInterface<xyLoc, tDirection>*)0);
+	unitSim = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
 	unitSim->SetStepType(kMinTime);
 //	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
 //																																 (OccupancyInterface<xyLoc, tDirection>*)0);
