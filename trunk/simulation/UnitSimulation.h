@@ -74,6 +74,8 @@ public:
 //	double thinkTime, moveDist;
 	double nextTime;
 	unsigned int historyIndex;
+	double totalDistance;
+	double totalThinking;
 	std::vector<TimeStep<state, action> > stateHistory;
 };
 
@@ -115,9 +117,9 @@ public:
 template<class state, class action, class environment>
 class UnitSimulation : public SimulationInfo {
 public:
-	UnitSimulation(environment *se, OccupancyInterface<state, action> *envInfo);
+	UnitSimulation(environment *se);
 
-	int AddUnit(Unit<state, action, environment> *u);
+	virtual int AddUnit(Unit<state, action, environment> *u);
 	Unit<state, action, environment> *GetUnit(unsigned int which);
 
 	int AddUnitGroup(UnitGroup<state, action, environment> *ug);
@@ -139,7 +141,7 @@ public:
 	double GetThinkingPenalty() { return penalty; }
 
 	virtual void OpenGLDraw() { }
-private:
+protected:
 	void StepUnitTime(UnitInfo<state, action, environment> *ui, double timeStep);
 	bool MakeUnitMove(UnitInfo<state, action, environment> *theUnit, action where, double &moveCost);
 
@@ -152,17 +154,15 @@ private:
 	std::vector<UnitInfo<state, action, environment> *> units;
 	std::vector<UnitGroup<state, action, environment> *> unitGroups;
 	environment *env;
-	OccupancyInterface<state, action> *envInfo;
 	double currTime, viewTime;
 	tTimestep stepType;
 	StatCollection stats;
 };
 
 template<class state, class action, class environment>
-UnitSimulation<state, action, environment>::UnitSimulation(environment *se, OccupancyInterface<state, action> *_envInfo)
+UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
 {
 	env = se;
-	envInfo = _envInfo;
 	stepType = kRealTime;
 	currTime = 0.0;
 	penalty = 1.0;
@@ -182,8 +182,8 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 		ui->agent->SetUnitGroup(unitGroups[0]);
 	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, env, ui->currentState, true, this);
 	ui->nextTime = currTime;
-//	ui->thinkTime = 0.0;
-//	ui->moveDist = 0.0;
+	ui->totalThinking = 0.0;
+	ui->totalDistance = 0.0;
 	ui->historyIndex = 0;
 	
 	if (0)//(keepHistory)
@@ -270,7 +270,7 @@ void UnitSimulation<state, action, environment>::StepTime(double timeStep)
 		return;
 	
 	DoPreTimestepCalc();
-	stats.AddStat("simulationTime", "unitSimulation", currTime);
+	stats.AddStat("simulationTime", "UnitSimulation", currTime);
 	currTime += timeStep;
 	DoTimestepCalc(timeStep);
 	DoPostTimestepCalc();
@@ -316,9 +316,8 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	t.startTimer();
 	where = u->GetUnitGroup()->MakeMove(u, env, this);
 	moveThinking = t.endTimer();
+	theUnit->totalThinking += moveThinking;
 	theUnit->lastMove = where;
-	
-//	theUnit->thinkTime += moveThinking;
 	stats.AddStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
 	
 	bool success = MakeUnitMove(theUnit, where, moveTime);
@@ -326,8 +325,7 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	t.startTimer();
 	u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, this);
 	locThinking = t.endTimer();
-
-//	theUnit->thinkTime += locThinking;
+	theUnit->totalThinking += locThinking;
 	stats.AddStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
 
 	switch (stepType)
@@ -342,7 +340,6 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 			theUnit->nextTime += min((locThinking+moveThinking)*penalty + moveTime, timeStep);
 			break;
 	}
-	
 	//u->GetUnitGroup()->logStats(&stats);
 	//u->logStats(&stats);
 }
@@ -354,13 +351,15 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	moveCost = 0;
 	state oldState = theUnit->currentState;
 	state newState = env->ApplyAction(theUnit->currentState, where);
+	OccupancyInterface<state, action> *envInfo = env->GetOccupancyInfo();
 	
 	if ((!envInfo) || (envInfo->CanMove(oldState, newState)))
 	{
 		success = true;
 		theUnit->currentState = newState;
 		moveCost = env->GCost(oldState, newState)*theUnit->agent->GetSpeed();
-
+		theUnit->totalDistance += env->GCost(oldState, newState);
+		
 		if (envInfo)
 		{
 			envInfo->SetStateOccupied(oldState, false);

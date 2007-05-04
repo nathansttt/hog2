@@ -84,6 +84,9 @@ public:
 		}
 	}
 
+	virtual void StartNewTrial(StatCollection *stats)
+	{ }
+	
 	virtual void OpenGLDraw() { }
 
 private:
