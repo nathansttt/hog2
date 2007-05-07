@@ -214,7 +214,7 @@ public:
   // returns whether we can step between two locations or not
   bool canStep(long x1, long y1, long x2, long y2) const;
   
-  void OpenGLDraw(tDisplay how = kPolygons);
+  void OpenGLDraw(int window, tDisplay how = kPolygons);
   void getOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
   void getPointFromCoordinate(point3d loc, int &px, int &py) const;
 	double getCoordinateScale();

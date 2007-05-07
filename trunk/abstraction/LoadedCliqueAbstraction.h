@@ -52,7 +52,7 @@ public:
   //node *getNthParent(node *, int n);
   
   void clearDisplayLists();
-	void OpenGLDraw();
+	void OpenGLDraw(int window);
 	void toggleDrawAbstraction(int which);
 	void drawLevelConnections(node *n);
 	void drawGraph(graph *g);

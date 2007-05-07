@@ -87,7 +87,7 @@ public:
 	virtual void StartNewTrial(StatCollection *stats)
 	{ }
 	
-	virtual void OpenGLDraw() { }
+	virtual void OpenGLDraw(int window, environment *, SimulationInfo *) { }
 
 private:
 	std::vector<Unit<state, action, environment> *> members;

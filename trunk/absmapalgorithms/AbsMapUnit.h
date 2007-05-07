@@ -28,7 +28,7 @@ public:
 	{ loc = l; }
 	virtual void GetLocation(xyLoc &l)
 	{ l = loc; }
-	virtual void OpenGLDraw(AbsMapEnvironment *);
+	virtual void OpenGLDraw(int window, AbsMapEnvironment *, SimulationInfo *);
 	//void GetLocation(int &x, int &y) { x = loc.x; y = loc.y; }
 	void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
 	void GetColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }

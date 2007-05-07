@@ -464,9 +464,10 @@ void SetNumPorts(int windowID, int count)
 	pRecContext pContextInfo = GetContext(windowID);
 	if ((count <= MAXPORTS) && (count > 0))
 	{
+		if (pContextInfo->numPorts > count)
+			pContextInfo->currPort = 0;
+
 		pContextInfo->numPorts = count;
-		if (pContextInfo->currPort > count)
-				pContextInfo->currPort = 0;
 		for (int x = 0; x < pContextInfo->numPorts; x++)
 		{
 			setPortCamera(pContextInfo, x);

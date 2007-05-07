@@ -10,7 +10,7 @@
 #include "MapUnit.h"
 #include "GLUtil.h"
 
-void MapUnit::OpenGLDraw(MapEnvironment *me)
+void MapUnit::OpenGLDraw(int window, MapEnvironment *me, SimulationInfo *)
 {
 	Map *map = me->GetMap();
 	GLdouble xx, yy, zz, rad;

@@ -87,9 +87,9 @@ public:
 
 
 // kLockStep - each unit goes exactly to the next time
-// kRealTime - each unit goes up thinkingTime*thinkingPenalty
+// kRealTime - each unit goes up thinkingTime*thinkingPenalty + movement time*speed
 // kMinTime - each unit goes up at least step time, but can go longer
-//            that is, max(next time, thinkingTime*thinkingPenalty)
+//            that is, max(next time, thinkingTime*thinkingPenalty + movement time)
 enum tTimestep {
 	kLockStep, kRealTime, kMinTime
 };
@@ -108,7 +108,7 @@ public:
 	virtual bool GoalTest(state node, state goal) = 0;
 	virtual uint32_t GetStateHash(state node) = 0;
 	virtual uint32_t GetActionHash(action act) = 0;
-	virtual void OpenGLDraw() = 0;
+	virtual void OpenGLDraw(int window) = 0;
 };
 
 /**
@@ -140,7 +140,7 @@ public:
 	/** getPenalty for thinking. Gets the multiplier used to penalize thinking time. */
 	double GetThinkingPenalty() { return penalty; }
 
-	virtual void OpenGLDraw() { }
+	virtual void OpenGLDraw(int window);
 protected:
 	void StepUnitTime(UnitInfo<state, action, environment> *ui, double timeStep);
 	bool MakeUnitMove(UnitInfo<state, action, environment> *theUnit, action where, double &moveCost);
@@ -368,6 +368,16 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	}
 	
 	return success;
+}
+
+template<class state, class action, class environment>
+void UnitSimulation<state, action, environment>::OpenGLDraw(int window)
+{
+	env->OpenGLDraw(window);
+	for (unsigned int x = 0; x < units.size(); x++)
+	{
+		units[x]->agent->OpenGLDraw(window, env, this);
+	}
 }
 
 //

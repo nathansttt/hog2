@@ -331,7 +331,7 @@ recColor getColor(GLfloat v, GLfloat vmin, GLfloat vmax, int type)
   return(c);
 }
 
-void drawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width)
+void DrawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width)
 {
 	glBegin(GL_TRIANGLES);
 	//	glNormal3f(ROOT2D2, -ROOT2D2, 0);
