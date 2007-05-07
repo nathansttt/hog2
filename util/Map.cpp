@@ -1429,7 +1429,7 @@ tTileset Map::getTileSet()
  * kPolygon is the default mode. The map is cached in a display list unless
  * it changes.
  */
-void Map::OpenGLDraw(tDisplay how)
+void Map::OpenGLDraw(int window, tDisplay how)
 {
 	glDisable(GL_LIGHTING);
 	if (drawLand)

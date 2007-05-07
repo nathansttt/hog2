@@ -139,17 +139,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 	{
 		unitSim->StepTime(1.0/30.0);
 	}
-	unitSim->OpenGLDraw();
-	//unitSim->GetEnvironment()->OpenGLDraw();
-//	for (int x = 0; x < 100; x++)
-//	{
-//		if (unitSim->GetUnit(x))
-//		{
-//			Unit<xyLoc, tDirection, AbsMapEnvironment> *u = unitSim->GetUnit(x);
-//			u->OpenGLDraw(unitSim->GetEnvironment());
-//		}
-//		else break;
-//	}
+	unitSim->OpenGLDraw(windowID);
 	
 //	if (viewport == 0)
 //	{
@@ -268,7 +258,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	
 	SearchUnit *su1 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), 0, 0);
 	SearchUnit *su2 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), su1, new praStar());
-	unitSim->AddUnit(su1);
+	//unitSim->AddUnit(su1);
 	unitSim->AddUnit(su2);
 	
 //	RandomerUnit *r = new RandomerUnit(random()%m->getMapWidth(), random()%m->getMapHeight());

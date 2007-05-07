@@ -41,6 +41,7 @@ SearchUnit::SearchUnit(int _x, int _y, AbsMapUnit *_target, SearchAlgorithm *alg
 	onTarget = false;
 	nodesExpanded = 0;
 	nodesTouched = 0;
+	targetTime = 0;
 }
 
 //SearchUnit::SearchUnit(int _x, int _y, unit *_target, spreadExecSearchAlgorithm *alg)
@@ -294,7 +295,7 @@ void SearchUnit::updateLocation(int _x, int _y, bool success, SimulationInfo *)
 	loc.x = _x; loc.y = _y;
 }
 
-void SearchUnit::OpenGLDraw(AbsMapEnvironment *ame)
+void SearchUnit::OpenGLDraw(int window, AbsMapEnvironment *ame, SimulationInfo *si)
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = ame->GetMap();
@@ -319,13 +320,25 @@ void SearchUnit::OpenGLDraw(AbsMapEnvironment *ame)
   map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
 	if (onTarget)
 	{
-		double perc = .25;//(1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->GetSimulationTime())))));
+		double perc = (1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->GetSimulationTime())))));
 		glColor3f(r*perc, g*perc, b*perc);
 	}
 	else
 		glColor3f(r, g, b);
-	
 	DrawSphere(xx, yy, zz, rad);
+
+	// draw target
+	if (target)
+	{
+		xyLoc tloc;
+		target->GetLocation(tloc);
+		map->getOpenGLCoord(tloc.x, tloc.y, xx, yy, zz, rad);
+
+		double perc = (1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->GetSimulationTime())))));
+		glColor3f(r*perc, g*perc, b*perc);
+
+		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
+	}
 }
 
 void SearchUnit::LogStats(StatCollection *stats)

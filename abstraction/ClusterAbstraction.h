@@ -160,7 +160,7 @@ public:
 	int getClusterIdFromCoord(int row, int col) const;
 	void printMapCoord(node* n);
 	void printPathAsCoord(path* p);
-	virtual void OpenGLDraw();
+	virtual void OpenGLDraw(int window);
 
 private:
   int min(int, int);

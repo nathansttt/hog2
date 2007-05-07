@@ -32,7 +32,7 @@ bool BoundingBox::pointInBox(double x, double y, double z)
 					((fless(z, z1) && (!fless(z, z2))) || (fless(z, z2) && (!fless(z, z1)))));
 }
 
-void BoundingBox::OpenGLDraw()
+void BoundingBox::OpenGLDraw(int window)
 {
 	glBegin(GL_LINE_LOOP);
 	glVertex3f(x1, y1, z1);
@@ -118,7 +118,7 @@ void LoadedBBAbstraction::toggleDrawAbstraction(int which)
     levelDraw = levelDraw&(~(1<<which));
 }
 
-void LoadedBBAbstraction::OpenGLDraw()
+void LoadedBBAbstraction::OpenGLDraw(int window)
 {
 	glDisable(GL_LIGHTING);
   for (unsigned int x = 0; x < abstractions.size(); x++)
@@ -131,7 +131,7 @@ void LoadedBBAbstraction::OpenGLDraw()
 		for (unsigned int x = 0; x < boxes.size(); x++)
 		{
 			glColor3f(0, 0, 1);
-			boxes[x].OpenGLDraw();
+			boxes[x].OpenGLDraw(window);
 		}
 	}
 	glEnable(GL_LIGHTING);

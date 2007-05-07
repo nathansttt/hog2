@@ -30,7 +30,7 @@ namespace Plotting {
 		
 		void ClearColor();
 		void SetColor(double, double, double);
-		void OpenGLDraw();
+		void OpenGLDraw(int window);
 		void SetHidden( bool val) { hidden = val; }
 		bool IsHidden() { return hidden; }
 
@@ -65,7 +65,7 @@ namespace Plotting {
 		void SetAxis(double, double, double, double);
 		void Zoom(double);
 		void ResetAxis();
-		void OpenGLDraw();
+		void OpenGLDraw(int window);
 		void SmoothLines();
 	private:
 			double mouseXLoc, mouseYLoc;

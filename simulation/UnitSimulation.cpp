@@ -1127,7 +1127,7 @@
 //				map->getOpenGLCoord(displayUnits[t]->actionHistory[displayUnits[t]->historyIndex].x,
 //														displayUnits[t]->actionHistory[displayUnits[t]->historyIndex].y,
 //														x, y, z, rad);
-//				drawPyramid(x, y, z, rad, rad);
+//				DrawPyramid(x, y, z, rad, rad);
 //			}
 //		}
 //		for (unsigned int t = 0; t < units.size(); t++)

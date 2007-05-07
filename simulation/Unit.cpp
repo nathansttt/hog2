@@ -241,7 +241,7 @@
 //void unit::drawTriangle(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 //{
 //	glEnable(GL_LIGHTING);
-//	drawPyramid(_x, _y, _z, tRadius, 0.75*tRadius);
+//	DrawPyramid(_x, _y, _z, tRadius, 0.75*tRadius);
 //}
 //
 ///**

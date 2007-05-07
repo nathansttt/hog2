@@ -26,7 +26,7 @@ public:
 	{ loc = l; }
 	virtual void GetLocation(xyLoc &l)
 	{ l = loc; }
-	virtual void OpenGLDraw(MapEnvironment *);
+	virtual void OpenGLDraw(int window, MapEnvironment *, SimulationInfo *);
 protected:
 	GLfloat r, g, b;
 	xyLoc loc;

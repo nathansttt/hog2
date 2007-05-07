@@ -62,7 +62,7 @@ public:
 	bool GoalTest(xyLoc node, xyLoc goal);
 	uint32_t GetStateHash(xyLoc node);
 	uint32_t GetActionHash(tDirection act);
-	void OpenGLDraw() { map->OpenGLDraw(); }
+	void OpenGLDraw(int window) { map->OpenGLDraw(window); }
 	Map* GetMap() { return map; }
 protected:
 	Map *map;
@@ -74,7 +74,7 @@ public:
 	AbsMapEnvironment(MapAbstraction *ma);
 	virtual ~AbsMapEnvironment();
 	MapAbstraction *GetMapAbstraction() { return ma; }
-	void OpenGLDraw() { map->OpenGLDraw(); ma->OpenGLDraw(); }
+	void OpenGLDraw(int window) { map->OpenGLDraw(window); ma->OpenGLDraw(window); }
 private:
 	MapAbstraction *ma;
 };
@@ -82,24 +82,24 @@ private:
 typedef UnitSimulation<xyLoc, tDirection, MapEnvironment> UnitMapSimulation;
 typedef UnitSimulation<xyLoc, tDirection, AbsMapEnvironment> UnitAbsMapSimulation;
 
-template<>
-void UnitSimulation<xyLoc, tDirection, MapEnvironment>::OpenGLDraw()
-{
-	env->OpenGLDraw();
-	for (unsigned int x = 0; x < units.size(); x++)
-	{
-		units[x]->agent->OpenGLDraw(env);
-	}
-}
-
-template<>
-void UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>::OpenGLDraw()
-{
-	env->OpenGLDraw();
-	for (unsigned int x = 0; x < units.size(); x++)
-	{
-		units[x]->agent->OpenGLDraw(env);
-	}
-}
+//template<>
+//void UnitSimulation<xyLoc, tDirection, MapEnvironment>::OpenGLDraw()
+//{
+//	env->OpenGLDraw();
+//	for (unsigned int x = 0; x < units.size(); x++)
+//	{
+//		units[x]->agent->OpenGLDraw(env);
+//	}
+//}
+//
+//template<>
+//void UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>::OpenGLDraw()
+//{
+//	env->OpenGLDraw();
+//	for (unsigned int x = 0; x < units.size(); x++)
+//	{
+//		units[x]->agent->OpenGLDraw(env);
+//	}
+//}
 
 #endif

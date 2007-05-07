@@ -59,7 +59,7 @@ public:
 	double octileDistance(double,double,double,double);
 	
 	// display functions
-	virtual void OpenGLDraw();
+	virtual void OpenGLDraw(int window);
 	void toggleDrawAbstraction(int which);
 	void clearMarkedNodes();
 	recVec getNodeLoc(node *n);
