@@ -708,8 +708,8 @@
 		C4D3B4970BCEE7B200FCD84C /* StatUtil.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = StatUtil.h; sourceTree = "<group>"; };
 		C4D3B4980BCEE7B200FCD84C /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
 		C4D3B4990BCEE7B200FCD84C /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
-		C4D3B7340BCEEC5900FCD84C /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
-		C4D3B7350BCEEC5900FCD84C /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
+		C4D3B7340BCEEC5900FCD84C /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Sample.cpp; path = ../pathsample/Sample.cpp; sourceTree = "<group>"; };
+		C4D3B7350BCEEC5900FCD84C /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sample.h; path = ../pathsample/Sample.h; sourceTree = "<group>"; };
 		C4D3C11A0BD6996400FCD84C /* Plot2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Plot2D.h; sourceTree = "<group>"; };
 		C4D3C11B0BD6996400FCD84C /* Plot2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plot2D.cpp; sourceTree = "<group>"; };
 		C4D3C29B0BD951AE00FCD84C /* Map2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map2DEnvironment.h; sourceTree = "<group>"; };
@@ -1665,18 +1665,19 @@
 		C4D3B7320BCEEC5900FCD84C /* apps */ = {
 			isa = PBXGroup;
 			children = (
-				C4D3B7330BCEEC5900FCD84C /* sample */,
+				C4D3B7330BCEEC5900FCD84C /* pathsample */,
 			);
 			name = apps;
 			path = ../../../apps;
 			sourceTree = SOURCE_ROOT;
 		};
-		C4D3B7330BCEEC5900FCD84C /* sample */ = {
+		C4D3B7330BCEEC5900FCD84C /* pathsample */ = {
 			isa = PBXGroup;
 			children = (
 				C4D3B7340BCEEC5900FCD84C /* Sample.cpp */,
 				C4D3B7350BCEEC5900FCD84C /* Sample.h */,
 			);
+			name = pathsample;
 			path = sample;
 			sourceTree = "<group>";
 		};
