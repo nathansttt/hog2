@@ -107,7 +107,7 @@ path* hpaStar::getPath(GraphAbstraction *aMap, node* from, node* to, reservation
 		int py;
 		m->GetMap()->getPointFromCoordinate(s,px,py);
 
-		node* newTo = m->getNodeFromMap(px,py);
+		node* newTo = m->GetNodeFromMap(px,py);
 		mapPath = findMapPath(thisPart, from, newTo);
 		delete thisPart;
 	}
@@ -516,28 +516,28 @@ node* hpaStar::getNextNode(int x, int y, int dir)
 	switch(dir)
 	{
 	case NORTH:
-		return m->getNodeFromMap(x,y+1);
+		return m->GetNodeFromMap(x,y+1);
 		break;
 	case EAST:
-		return m->getNodeFromMap(x+1,y);
+		return m->GetNodeFromMap(x+1,y);
 		break;
 	case SOUTH:
-		return m->getNodeFromMap(x, y-1);
+		return m->GetNodeFromMap(x, y-1);
 		break;
 	case WEST:
-		return m->getNodeFromMap(x-1, y);
+		return m->GetNodeFromMap(x-1, y);
 		break;
 	case NE:
-		return m->getNodeFromMap(x+1, y+1);
+		return m->GetNodeFromMap(x+1, y+1);
 		break;
 	case SE:
-		return m->getNodeFromMap(x+1, y-1);
+		return m->GetNodeFromMap(x+1, y-1);
 		break;
 	case SW:
-		return m->getNodeFromMap(x-1, y-1);
+		return m->GetNodeFromMap(x-1, y-1);
 		break;
 	case NW:
-		return m->getNodeFromMap(x-1, y+1);
+		return m->GetNodeFromMap(x-1, y+1);
 		break;
 	default:
 		return 0;

@@ -86,7 +86,7 @@ path *praStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservation
 		return new path(from, new path(to));
 	}
 	
-	aMap->getParentHierarchy(from, to, fromChain, toChain);
+	aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
 	//	assert(aMap->GetAbstractGraph(fromChain.back()->getLabelL(kAbstractionLevel))->
 	//					findEdge(fromChain.back()->getNum(), toChain.back()->getNum()));
 	
@@ -131,7 +131,7 @@ path *praStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservation
 	else if ((planFromMiddle) && (lastPath == 0))
 	{
 		unsigned int previousSize = fromChain.size();
-		int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(aMap->getAbstractionLevel(fromChain[0]))->getNumNodes()));
+		int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(aMap->GetAbstractionLevel(fromChain[0]))->getNumNodes()));
 		while ((fromChain.size() > 2) && ((fromChain.size() > (previousSize)/2) ||
 																			(aMap->GetAbstractGraph(fromChain.size())->getNumNodes() < minNode)))
 		{
@@ -140,7 +140,7 @@ path *praStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservation
 			fromChain.pop_back();
 		}
 //		printf("Previous size: %d, nodes: %d, limit: %d now: %d\n", previousSize,
-//					 (aMap->GetAbstractGraph(aMap->getAbstractionLevel(fromChain[0]))->getNumNodes()),
+//					 (aMap->GetAbstractGraph(aMap->GetAbstractionLevel(fromChain[0]))->getNumNodes()),
 //					 minNode, toChain.size());
 	}
 	else if (lastPath == 0)
@@ -510,7 +510,7 @@ void praStar::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //	static node *r1, *r2;
 //	if (verbose)
 //		cout << "Clearing marked nodes" << endl;
-//	clearMarkedNodes();
+//	ClearMarkedNodes();
 //	
 //	if (!repeat)
 //	{

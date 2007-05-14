@@ -79,10 +79,10 @@ double rewardSeekingUnit::goToRewardLoc(MapAbstraction *aMap, int which)
 	double pathCost=-1;
 	path *p;
 	node *from, *to;
-	from = aMap->getNodeFromMap(x, y); // gets my location
+	from = aMap->GetNodeFromMap(x, y); // gets my location
 	int tox, toy;
 	rewardLocs[which]->getLocation(tox, toy);
-	to = aMap->getNodeFromMap(tox, toy);
+	to = aMap->GetNodeFromMap(tox, toy);
 	p = a.getPath(aMap, from, to);
 	if (p)
 	{

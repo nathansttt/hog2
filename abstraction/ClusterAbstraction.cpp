@@ -61,7 +61,7 @@ public:
 		corridor = corr;
 		if (corr.size() > 0)
 		{
-			corridorLevel = aMap->getAbstractionLevel(corr[0]);
+			corridorLevel = aMap->GetAbstractionLevel(corr[0]);
 			for (unsigned int x = 0; x < corridor.size(); x++)
 				corridor[x]->setLabelL(kTemporaryLabel, x);
 		}
@@ -72,7 +72,7 @@ public:
 		if (corridor.size() == 0)
 			return true;
 		node *n = aMap->GetAbstractGraph(level)->getNode(nodeID);
-		node *parent = aMap->getNthParent(n, corridorLevel);
+		node *parent = aMap->GetNthParent(n, corridorLevel);
 		if (parent)
 		{
 			unsigned int loc = parent->getLabelL(kTemporaryLabel);
@@ -94,7 +94,7 @@ const static int verbose = 0;
 /**
 * Add an abstract node corresponding to an entrance to the cluster
  */
-void Cluster::addNode(int n)
+void Cluster::AddNode(int n)
 {
 	nodes.push_back(n);
 }
@@ -106,7 +106,7 @@ void Cluster::addNode(int n)
 ClusterAbstraction::ClusterAbstraction(Map *map, int _clusterSize)
 :MapAbstraction(map),clusterSize(_clusterSize)
 {
-	abstractions.push_back(getMapGraph(map));
+	abstractions.push_back(GetMapGraph(map));
 	createClustersAndEntrances();
 	linkEntrancesAndClusters();
 	createAbstractGraph();
@@ -238,8 +238,8 @@ void ClusterAbstraction::createHorizEntrances(int start, int end, int latitude, 
 	{
 		
 		
-		while((i<=end) && (!getNodeFromMap(i,latitude) || !getNodeFromMap(i,latitude+1) 
-											 ||!(g->findEdge(getNodeFromMap(i,latitude)->getNum(), getNodeFromMap(i,latitude+1)->getNum()))))
+		while((i<=end) && (!GetNodeFromMap(i,latitude) || !GetNodeFromMap(i,latitude+1) 
+											 ||!(g->findEdge(GetNodeFromMap(i,latitude)->getNum(), GetNodeFromMap(i,latitude+1)->getNum()))))
 		{
 			i++;
 		}
@@ -250,11 +250,11 @@ void ClusterAbstraction::createHorizEntrances(int start, int end, int latitude, 
 		int begin = i;
 		i++;
 		//int begin = i;
-		//		std::cout<<getNodeFromMap(i,latitude)<<" "<<getNodeFromMap(i,latitude+1)<<std::endl;
-		while((i<=end)&&(getNodeFromMap(i,latitude)) && (getNodeFromMap(i,latitude+1))
-					&& (g->findEdge(getNodeFromMap(i,latitude)->getNum(), getNodeFromMap(i,latitude+1)->getNum()))
-					&& ((i==start) || ((g->findEdge(getNodeFromMap(i-1,latitude)->getNum(), getNodeFromMap(i,latitude)->getNum()))
-														 && (g->findEdge(getNodeFromMap(i-1,latitude+1)->getNum(), getNodeFromMap(i,latitude+1)->getNum())))))
+		//		std::cout<<GetNodeFromMap(i,latitude)<<" "<<GetNodeFromMap(i,latitude+1)<<std::endl;
+		while((i<=end)&&(GetNodeFromMap(i,latitude)) && (GetNodeFromMap(i,latitude+1))
+					&& (g->findEdge(GetNodeFromMap(i,latitude)->getNum(), GetNodeFromMap(i,latitude+1)->getNum()))
+					&& ((i==start) || ((g->findEdge(GetNodeFromMap(i-1,latitude)->getNum(), GetNodeFromMap(i,latitude)->getNum()))
+														 && (g->findEdge(GetNodeFromMap(i-1,latitude+1)->getNum(), GetNodeFromMap(i,latitude+1)->getNum())))))
 		{
 			i++;
 		}
@@ -301,8 +301,8 @@ void ClusterAbstraction::createVertEntrances(int start, int end, int meridian, i
 	{
 		
 		
-		while((i<=end)&& (!getNodeFromMap(meridian,i) || !getNodeFromMap(meridian+1,i)
-											|| (!(g->findEdge(getNodeFromMap(meridian,i)->getNum(), getNodeFromMap(meridian+1,i)->getNum())))))
+		while((i<=end)&& (!GetNodeFromMap(meridian,i) || !GetNodeFromMap(meridian+1,i)
+											|| (!(g->findEdge(GetNodeFromMap(meridian,i)->getNum(), GetNodeFromMap(meridian+1,i)->getNum())))))
 		{
 			i++;
 		}
@@ -316,10 +316,10 @@ void ClusterAbstraction::createVertEntrances(int start, int end, int meridian, i
 		
 		i++;
 		
-		while((i<=end) && (getNodeFromMap(meridian,i)) && (getNodeFromMap(meridian+1,i))
-					&& (g->findEdge(getNodeFromMap(meridian,i)->getNum(), getNodeFromMap(meridian+1,i)->getNum()))
-					&& ((i==start) || ((g->findEdge(getNodeFromMap(meridian,i-1)->getNum(), getNodeFromMap(meridian,i)->getNum()))
-														 && (g->findEdge(getNodeFromMap(meridian+1,i-1)->getNum(), getNodeFromMap(meridian+1,i)->getNum())))))
+		while((i<=end) && (GetNodeFromMap(meridian,i)) && (GetNodeFromMap(meridian+1,i))
+					&& (g->findEdge(GetNodeFromMap(meridian,i)->getNum(), GetNodeFromMap(meridian+1,i)->getNum()))
+					&& ((i==start) || ((g->findEdge(GetNodeFromMap(meridian,i-1)->getNum(), GetNodeFromMap(meridian,i)->getNum()))
+														 && (g->findEdge(GetNodeFromMap(meridian+1,i-1)->getNum(), GetNodeFromMap(meridian+1,i)->getNum())))))
 		{
 			i++;
 		}
@@ -431,14 +431,14 @@ void ClusterAbstraction::addAbsNodes(graph* g)
 				{
 					
 					node* n1 = new node("");
-					newnode1 = g->addNode(n1);
+					newnode1 = g->AddNode(n1);
 					n1->setLabelL(kParent,-1);
 					n1->setLabelL(kAbstractionLevel,1);
 					n1->setLabelF(kXCoordinate,ans.x);
 					n1->setLabelF(kYCoordinate,ans.y);
 					n1->setLabelF(kZCoordinate,-10*r);
 					n1->setLabelL(kNumAbstractedNodes,0);
-					c1.addNode(newnode1);
+					c1.AddNode(newnode1);
 				}
 				else{
 					newnode1 = num;
@@ -452,7 +452,7 @@ void ClusterAbstraction::addAbsNodes(graph* g)
 				{
 					
 					node* n2= new node("");
-					newnode2 = g->addNode(n2);
+					newnode2 = g->AddNode(n2);
 					n2->setLabelL(kParent,-1);
 					n2->setLabelL(kAbstractionLevel,1);
 					n2->setLabelF(kXCoordinate,ans.x);
@@ -460,13 +460,13 @@ void ClusterAbstraction::addAbsNodes(graph* g)
 					n2->setLabelF(kZCoordinate,-10*r);
 					n2->setLabelL(kNumAbstractedNodes,0);
 					
-					c2.addNode(newnode2);
+					c2.AddNode(newnode2);
 				}
 				else{
 					newnode2=num;
 				}
 				//add inter-edge
-				g->addEdge(new edge(newnode1,newnode2,1));
+				g->AddEdge(new edge(newnode1,newnode2,1));
 				
 			}
 				break;
@@ -480,7 +480,7 @@ void ClusterAbstraction::addAbsNodes(graph* g)
 				{
 					
 					node* n1 = new node("");
-					newnode1 = g->addNode(n1);
+					newnode1 = g->AddNode(n1);
 					n1->setLabelL(kParent,-1);
 					n1->setLabelL(kAbstractionLevel,1);
 					n1->setLabelF(kXCoordinate,ans.x);
@@ -488,7 +488,7 @@ void ClusterAbstraction::addAbsNodes(graph* g)
 					n1->setLabelF(kZCoordinate,-10*r);
 					n1->setLabelL(kNumAbstractedNodes,0);
 					
-					c1.addNode(newnode1);
+					c1.AddNode(newnode1);
 				}
 				else{
 					newnode1 = num;
@@ -504,7 +504,7 @@ void ClusterAbstraction::addAbsNodes(graph* g)
 					
 					node* n2 = new node("");
 					
-					newnode2 = g->addNode(n2);
+					newnode2 = g->AddNode(n2);
 					n2->setLabelL(kParent,-1);
 					n2->setLabelL(kAbstractionLevel,1);
 					n2->setLabelF(kXCoordinate,ans.x);
@@ -512,13 +512,13 @@ void ClusterAbstraction::addAbsNodes(graph* g)
 					n2->setLabelF(kZCoordinate,-10*r);
 					n2->setLabelL(kNumAbstractedNodes,0);
 					
-					c2.addNode(newnode2);
+					c2.AddNode(newnode2);
 				}
 				else{
 					newnode2=num;
 				}
 				//add inter-edge
-				g->addEdge(new edge(newnode1, newnode2, 1));
+				g->AddEdge(new edge(newnode1, newnode2, 1));
 				
 			}	     
 				break;
@@ -579,11 +579,11 @@ void ClusterAbstraction::computeClusterPaths(graph* g)
 				
 				map->getPointFromCoordinate(s,px,py);
 				
-				node* start = getNodeFromMap(px,py);
+				node* start = GetNodeFromMap(px,py);
 				
 				map->getPointFromCoordinate(gl,px,py);
 				
-				node* goal = getNodeFromMap(px,py);
+				node* goal = GetNodeFromMap(px,py);
 				
 				int startnum = c.getIthNodeNum(j);
 				int goalnum = c.getIthNodeNum(k);
@@ -594,7 +594,7 @@ void ClusterAbstraction::computeClusterPaths(graph* g)
 //				path* p = astar.getPath(static_cast<MapAbstraction*>(this), start, goal);
 
 				GenericAStar astar;
-				ClusterSearchEnvironment cse(this, getAbstractionLevel(start));
+				ClusterSearchEnvironment cse(this, GetAbstractionLevel(start));
 				cse.setCorridor(corridor);
 				std::vector<uint32_t> resultPath;
 				astar.getPath(&cse, start->getNum(), goal->getNum(),
@@ -610,7 +610,7 @@ void ClusterAbstraction::computeClusterPaths(graph* g)
 					
 					//create edge
 					edge* newedge = new edge(startnum, goalnum, dist);
-					g->addEdge(newedge);
+					g->AddEdge(newedge);
 					
 					//store path
 					paths[newedge] = p;
@@ -727,7 +727,7 @@ void ClusterAbstraction::setUpParents(graph* g)
 		dummyParent->setLabelL(kNodeBlocked, 0);
 		
 		
-		g->addNode(dummyParent);
+		g->AddNode(dummyParent);
 		dummies.push_back(dummyParent);
 		
 		for (int x=c.getHOrig(); x<c.getHOrig()+c.getWidth(); x++)
@@ -738,7 +738,7 @@ void ClusterAbstraction::setUpParents(graph* g)
 				
 				if (map->getNodeNum(x,y) >= 0)
 				{
-					node* n = getNodeFromMap(x,y);
+					node* n = GetNodeFromMap(x,y);
 					buildNodeIntoParent(n, dummyParent);
 				}
 			}
@@ -775,7 +775,7 @@ void ClusterAbstraction::setUpParents(graph* g)
 			{
 				if (map->getNodeNum(x,y) >= 0)
 				{
-					node* mnode = getNodeFromMap(x,y);
+					node* mnode = GetNodeFromMap(x,y);
 					
 					// reset minimum 
 					double minDist = DBL_MAX;
@@ -800,7 +800,7 @@ void ClusterAbstraction::setUpParents(graph* g)
 //						astar.setCorridor(&corridor);
 //						path* p = astar.getPath(static_cast<MapAbstraction*>(this),low,mnode);
 						GenericAStar astar;
-						ClusterSearchEnvironment cse(this, getAbstractionLevel(low));
+						ClusterSearchEnvironment cse(this, GetAbstractionLevel(low));
 						cse.setCorridor(corridor);
 						std::vector<uint32_t> resultPath;
 						astar.getPath(&cse, low->getNum(), mnode->getNum(),
@@ -867,7 +867,7 @@ void ClusterAbstraction::setUpParents(graph* g)
 // 			}
 // 		}
 
-// 		g->removeNode(dummies[i]);
+// 		g->RemoveNode(dummies[i]);
 // 		delete dummies[i];
 // 	}
 
@@ -881,7 +881,7 @@ for (node *next = abstractions[0]->nodeIterNext(ni); next;
 	if ((next->getLabelL(kParent) == -1) || ((next->getLabelL(kParent) >= numOrigNodes) && next->getLabelL(kParent) < numNodesAfter))
 	{
 		node *parent;
-		g->addNode(parent = new node("??"));
+		g->AddNode(parent = new node("??"));
 		parent->setLabelL(kAbstractionLevel, next->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 		parent->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
 		parent->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -897,7 +897,7 @@ for (unsigned int i=dummies.size()-1;i>0; --i)
 	int num = dummies[i]->getNum();
 	
 	
-	g->removeNode(dummies[i]);
+	g->RemoveNode(dummies[i]);
 	node* n = g->getNode(num); 
 	
 	if (n)
@@ -961,7 +961,7 @@ void ClusterAbstraction::createConnectivityGraph()
 		{
 			//		std::cout<<"here inside if\n";
 			node *parent;
-			g->addNode(parent = new node("??"));
+			g->AddNode(parent = new node("??"));
 			parent->setLabelL(kAbstractionLevel, next->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 			parent->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
 			parent->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -1061,7 +1061,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 	if (nnum==-1)
 	{
 		node* newnode = new node("");
-		int nodenum = g->addNode(newnode);
+		int nodenum = g->AddNode(newnode);
 		newnode->setLabelF(kXCoordinate, n->getLabelF(kXCoordinate));
 		newnode->setLabelF(kYCoordinate, n->getLabelF(kYCoordinate));
 		newnode->setLabelF(kZCoordinate, n->getLabelF(kZCoordinate)*2); //should never have to draw this so it doesn't matter
@@ -1090,7 +1090,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 			point3d gl(goalx,goaly,goalz);
 			
 			map->getPointFromCoordinate(gl,px,py);
-			node* goal = getNodeFromMap(px,py);
+			node* goal = GetNodeFromMap(px,py);
 			
 			//  		std::cout<<"corridor has: "<<std::endl;
 			//  		for (unsigned int bla = 0; bla<corridor.size(); bla++){
@@ -1110,7 +1110,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 //			astar.setCorridor(&corridor);
 //			path* p = astar.getPath(static_cast<MapAbstraction*>(this),n , goal);
 			GenericAStar astar;
-			ClusterSearchEnvironment cse(this, getAbstractionLevel(n));
+			ClusterSearchEnvironment cse(this, GetAbstractionLevel(n));
 			cse.setCorridor(corridor);
 			std::vector<uint32_t> resultPath;
 			astar.getPath(&cse, n->getNum(), goal->getNum(),
@@ -1135,7 +1135,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 					newnode->setLabelL(kParent,(g->getNode(num))->getLabelL(kParent));
 				}
 				
-				g->addEdge(newedge);
+				g->AddEdge(newedge);
 				
 				//store path
 				path* p2 = p;
@@ -1150,7 +1150,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 			
 			// This node has its own parent in the connectivity graph
 			node* par = new node("");
-			abstractions[2]->addNode(par);
+			abstractions[2]->AddNode(par);
 			par->setLabelF(kXCoordinate, kUnknownPosition);
 			par->setLabelL(kParent,-1); 
 			par->setLabelL(kNumAbstractedNodes,0);
@@ -1199,7 +1199,7 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 		if (start->getNumEdges() == 0)
 		{
 			
-			abstractions[2]->removeNode(start->getLabelL(kParent));
+			abstractions[2]->RemoveNode(start->getLabelL(kParent));
 		}
 		edge_iterator ei = start->getEdgeIter();
 		edge* e =start->edgeIterNext(ei); 
@@ -1208,14 +1208,14 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 		{
 			
 			temp.erase(e);
-			g->removeEdge(e);
+			g->RemoveEdge(e);
 			delete e;
 			ei = start->getEdgeIter();
 			e = start->edgeIterNext(ei);
 		}
 		int snum = start->getNum();
 		assert((snum == g->getNumNodes()-1) || (snum == g->getNumNodes()-2));
-		g->removeNode(start);
+		g->RemoveNode(start);
 		delete start;
 		//	std::cout<<"removing node\n";
 	}
@@ -1235,7 +1235,7 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 		if (goal->getNumEdges() == 0)
 		{
 			
-			abstractions[2]->removeNode(goal->getLabelL(kParent));
+			abstractions[2]->RemoveNode(goal->getLabelL(kParent));
 			
 		}
 		edge_iterator ei = goal->getEdgeIter();
@@ -1247,13 +1247,13 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 			temp.erase(e);
 			int gnum = goal->getNum();
 			assert((gnum == g->getNumNodes()-1) || (gnum == g->getNumNodes()-2));
-			g->removeEdge(e);
+			g->RemoveEdge(e);
 			delete e;
 			ei = goal->getEdgeIter();
 			e = goal->edgeIterNext(ei);
 		}
 		
-		g->removeNode(goal);
+		g->RemoveNode(goal);
 		delete goal;
 		//		std::cout<<"removing goal node\n";
 	}
@@ -1291,7 +1291,7 @@ node* ClusterAbstraction::getLowLevelNode(node* abstract)
 	int py;
 	map->getPointFromCoordinate(s,px,py);
 	
-	return MapAbstraction::getNodeFromMap(px,py);
+	return MapAbstraction::GetNodeFromMap(px,py);
 }
 
 void ClusterAbstraction::printMapCoord(node* n)

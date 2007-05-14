@@ -70,9 +70,9 @@ public:
   graph_object *clone() const; // clones just the nodes
   graph *cloneAll() const;     // clones everything
 
-  int addNode(node *);
+  int AddNode(node *);
   node *getNode(unsigned int num);
-  void addEdge(edge *);
+  void AddEdge(edge *);
   edge *findDirectedEdge(unsigned int from, unsigned int to);
   edge *findEdge(unsigned int from, unsigned int to);
 	
@@ -87,11 +87,11 @@ public:
   edge_iterator getEdgeIter() const;
   edge *edgeIterNext(edge_iterator&) const;
 
-  void removeEdge(edge *);
+  void RemoveEdge(edge *);
   // returns the node that had it's node number changed along with its previous node number, if any
-  node *removeNode(node *, unsigned int&);
-  void removeNode(node *n) { unsigned int x; removeNode(n, x); } // if you don't care about node #'s
-  void removeNode(unsigned int nodeNum) { removeNode(getNode(nodeNum)); }
+  node *RemoveNode(node *, unsigned int&);
+  void RemoveNode(node *n) { unsigned int x; RemoveNode(n, x); } // if you don't care about node #'s
+  void RemoveNode(unsigned int nodeNum) { RemoveNode(getNode(nodeNum)); }
 	
   int getNumEdges();
   int getNumNodes();
@@ -165,8 +165,8 @@ public:
   const char *getName() const { return name; }
   unsigned int getNum() const { return nodeNum; }
   int getUniqueID() const { return uniqueID; }
-  void addEdge(edge *);
-  void removeEdge(edge *);
+  void AddEdge(edge *);
+  void RemoveEdge(edge *);
 
   // iterator over incoming edges
   edge *edgeIterNextIncoming(edge_iterator&) const;

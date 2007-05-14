@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20286C33FDCF999611CA2CEA /* Carbon.framework */; };
 		C4339AB80BEBA6B3002B8108 /* EpisodicSimulation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4810BCEE7B200FCD84C /* EpisodicSimulation.cpp */; };
+		C4339D030BF2676B002B8108 /* MNPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4339D020BF2676B002B8108 /* MNPuzzle.cpp */; };
+		C4339E230BF28575002B8108 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4339E0F0BF28575002B8108 /* GLUT.framework */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
 		C4D3AFBB0BCEE5B800FCD84C /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF970BCEE5B800FCD84C /* main.nib */; };
 		C4D3AFBD0BCEE5B800FCD84C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9B0BCEE5B800FCD84C /* Info.plist */; };
@@ -96,7 +98,10 @@
 		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		5048396D09E3307300765E4B /* hog2Proj.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Proj.xcconfig; sourceTree = "<group>"; };
 		5048396E09E3307300765E4B /* hog2Target.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Target.xcconfig; sourceTree = "<group>"; };
-		508344B209E5C41E0093A071 /* Sample Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		508344B209E5C41E0093A071 /* Sample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4339D010BF2676B002B8108 /* MNPuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNPuzzle.h; sourceTree = "<group>"; };
+		C4339D020BF2676B002B8108 /* MNPuzzle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNPuzzle.cpp; sourceTree = "<group>"; };
+		C4339E0F0BF28575002B8108 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
 		C4D3AF6E0BCEE5B800FCD84C /* 299.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = 299.icns; sourceTree = "<group>"; };
 		C4D3AF700BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4D3AF720BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
@@ -733,6 +738,7 @@
 				C4D3B0DF0BCEE74D00FCD84C /* OpenGL.framework in Frameworks */,
 				C4D3B0E00BCEE75000FCD84C /* CoreServices.framework in Frameworks */,
 				C4D3B1720BCEE75000FCD84C /* ApplicationServices.framework in Frameworks */,
+				C4339E230BF28575002B8108 /* GLUT.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -742,7 +748,7 @@
 		195DF8CFFE9D517E11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				508344B209E5C41E0093A071 /* Sample Debug.app */,
+				508344B209E5C41E0093A071 /* Sample Release.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -784,6 +790,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				C4339E0F0BF28575002B8108 /* GLUT.framework */,
 				C4D3B0DA0BCEE74C00FCD84C /* AGL.framework */,
 				C4D3B0DB0BCEE74C00FCD84C /* IOKit.framework */,
 				C4D3B0DC0BCEE74C00FCD84C /* OpenGL.framework */,
@@ -981,6 +988,8 @@
 			children = (
 				C4D3C29B0BD951AE00FCD84C /* Map2DEnvironment.h */,
 				C4D3C29C0BD951AE00FCD84C /* Map2DEnvironment.cpp */,
+				C4339D010BF2676B002B8108 /* MNPuzzle.h */,
+				C4339D020BF2676B002B8108 /* MNPuzzle.cpp */,
 			);
 			name = environments;
 			path = ../../../environments;
@@ -1729,7 +1738,7 @@
 			name = Sample;
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = 508344B209E5C41E0093A071 /* Sample Debug.app */;
+			productReference = 508344B209E5C41E0093A071 /* Sample Release.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1835,6 +1844,7 @@
 				C4D3CE990BE7DBA000FCD84C /* SharedAMapGroup.cpp in Sources */,
 				C4D3CEE30BE7F40300FCD84C /* AbsMapUnitGroup.cpp in Sources */,
 				C4339AB80BEBA6B3002B8108 /* EpisodicSimulation.cpp in Sources */,
+				C4339D030BF2676B002B8108 /* MNPuzzle.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

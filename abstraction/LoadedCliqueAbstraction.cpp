@@ -74,16 +74,16 @@ double LoadedCliqueAbstraction::h(node *a, node *b)
 	//	}
 	//	return answer;
 	if (a->getLabelF(kXCoordinate) == kUnknownPosition)
-		getNodeLoc(a);
+		GetNodeLoc(a);
 	if (b->getLabelF(kXCoordinate) == kUnknownPosition)
-		getNodeLoc(b);
+		GetNodeLoc(b);
 	double d1 = a->getLabelF(kXCoordinate)-b->getLabelF(kXCoordinate);
 	double d2 = a->getLabelF(kYCoordinate)-b->getLabelF(kYCoordinate);
 	double d3 = a->getLabelF(kZCoordinate)-b->getLabelF(kZCoordinate);
 	return sqrt(d1*d1+d2*d2+d3*d3);
 }
 
-void LoadedCliqueAbstraction::toggleDrawAbstraction(int which)
+void LoadedCliqueAbstraction::ToggleDrawAbstraction(int which)
 {
 	bool drawThis = ((levelDraw>>which)&0x1);
 	if (!drawThis)
@@ -97,13 +97,13 @@ void LoadedCliqueAbstraction::OpenGLDraw(int window)
 	glDisable(GL_LIGHTING);
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
-		if ((levelDraw >> x) & 1) drawGraph(abstractions[x]);
+		if ((levelDraw >> x) & 1) DrawGraph(abstractions[x]);
 		//glCallList(displayLists[x]);
 	}
 	glEnable(GL_LIGHTING);
 }
 
-void LoadedCliqueAbstraction::drawGraph(graph *g)
+void LoadedCliqueAbstraction::DrawGraph(graph *g)
 {
 	if ((g == 0) || (g->getNumNodes() == 0)) return;
 	
@@ -124,22 +124,22 @@ void LoadedCliqueAbstraction::drawGraph(graph *g)
 		else if (abLevel%2)
 			glColor4f(1-((GLfloat)(abLevel%15)/15.0), ((GLfloat)(abLevel%15)/15.0), 0, 1);
 		else glColor4f(((GLfloat)(abLevel%15)/15.0), 1-((GLfloat)(abLevel%15)/15.0), 0, 1);
-		recVec rv = getNodeLoc(n);
+		recVec rv = GetNodeLoc(n);
 		glVertex3f(rv.x, rv.y, rv.z);
 		
 		n = g->getNode(e->getTo());
-		rv = getNodeLoc(n);
+		rv = GetNodeLoc(n);
 		
 		glVertex3f(rv.x, rv.y, rv.z);
 	}
 	ni = g->getNodeIter();
 	for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
-		drawLevelConnections(n);
+		DrawLevelConnections(n);
 	glEnd();
 	//  if (verbose&kBuildGraph) printf("Done\n");
 }
 
-void LoadedCliqueAbstraction::drawLevelConnections(node *n)
+void LoadedCliqueAbstraction::DrawLevelConnections(node *n)
 {
 	//	int x, y;
 	//	double offsetx, offsety;
@@ -149,10 +149,10 @@ void LoadedCliqueAbstraction::drawLevelConnections(node *n)
 	if (n->getLabelL(kAbstractionLevel) == 0) return;
 	else {
 		glColor4f(.6, .6, .6, .6);
-		recVec v = getNodeLoc(n);
+		recVec v = GetNodeLoc(n);
 		for (int cnt = 0; cnt < n->getLabelL(kNumAbstractedNodes); cnt++)
 		{
-			recVec v1 = getNodeLoc(abstractions[n->getLabelL(kAbstractionLevel)-1]->getNode(n->getLabelL(kFirstData+cnt)));
+			recVec v1 = GetNodeLoc(abstractions[n->getLabelL(kAbstractionLevel)-1]->getNode(n->getLabelL(kFirstData+cnt)));
 			glVertex3f(v.x, v.y, v.z);
 			glVertex3f(v1.x, v1.y, v1.z);
 		}
@@ -160,7 +160,7 @@ void LoadedCliqueAbstraction::drawLevelConnections(node *n)
 	//return ans;
 }
 
-recVec LoadedCliqueAbstraction::getNodeLoc(node *n)
+recVec LoadedCliqueAbstraction::GetNodeLoc(node *n)
 {
 	//  double offsetx, offsety;
 	recVec ans;
@@ -179,7 +179,7 @@ recVec LoadedCliqueAbstraction::getNodeLoc(node *n)
 	{
 		int absLevel = n->getLabelL(kAbstractionLevel)-1;
 		node *nextChild = abstractions[absLevel]->getNode(n->getLabelL(kFirstData+cnt));
-		recVec tmp = getNodeLoc(nextChild);
+		recVec tmp = GetNodeLoc(nextChild);
 		int weight = nextChild->getLabelL(kNumAbstractedNodes);
 		totNodes += weight;
 		ans.x += weight*tmp.x;
@@ -238,7 +238,7 @@ graph *LoadedCliqueAbstraction::loadGraph(char *fname)
 			if (IDS.size() <= (unsigned int)ID)
 				IDS.resize(ID+1);
 			node *n;
-			IDS[ID] = g->addNode(n = new node("l1"));
+			IDS[ID] = g->AddNode(n = new node("l1"));
 			n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
 			n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
 			n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -250,14 +250,14 @@ graph *LoadedCliqueAbstraction::loadGraph(char *fname)
 		else {
 			int ID1, ID2;
 			sscanf(nextLine, "%d %d", &ID1, &ID2);
-			g->addEdge(new edge(IDS[ID1], IDS[ID2], h(g->getNode(ID1), g->getNode(ID2))));
+			g->AddEdge(new edge(IDS[ID1], IDS[ID2], h(g->getNode(ID1), g->getNode(ID2))));
 			//printf("Loaded edge between %d and %d\n", ID1, ID2);
 		}
 	}
 	return g;
 }
 
-void LoadedCliqueAbstraction::verifyHierarchy()
+void LoadedCliqueAbstraction::VerifyHierarchy()
 {
 	cout << "VERIFY START" << endl;
 	for (unsigned int x = 0; x < abstractions.size(); x++)
@@ -304,8 +304,8 @@ void LoadedCliqueAbstraction::verifyHierarchy()
 			}
 			else {
 				//				int x1, y1;
-				//				getTileFromNode(n, x1, y1);
-				//				if (n != getNodeFromMap(x1, y1))
+				//				GetTileFromNode(n, x1, y1);
+				//				if (n != GetNodeFromMap(x1, y1))
 				//					cout << "VERIFY: node doesn't correspond to underlying map" << endl << *n << endl;
 			}
 		}
@@ -445,7 +445,7 @@ graph *LoadedCliqueAbstraction::neighborAbstractGraph(graph *g, int width)
 	{
 		if (n->getLabelL(kParent) != -1) continue;
 		newNode = new node("");
-		aGraph->addNode(newNode);
+		aGraph->AddNode(newNode);
 		
 		newNode->setLabelL(kAbstractionLevel, n->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 		newNode->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
@@ -468,7 +468,7 @@ graph *LoadedCliqueAbstraction::neighborAbstractGraph(graph *g, int width)
 				double weight = h(aGraph->getNode(from), aGraph->getNode(to));
 				f = new edge(from, to, weight);
 				f->setLabelL(kEdgeCapacity, 1);
-				aGraph->addEdge(f);
+				aGraph->AddEdge(f);
 			}
 			else if (f) f->setLabelL(kEdgeCapacity, f->getLabelL(kEdgeCapacity)+1);
 			//		else if (g)
@@ -572,7 +572,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 								g->findEdge(neighbor[z], neighbor[x]))
 						{
 							// we have a 4-clique!
-							int nnum = aGraph->addNode(newNode = new node("4c"));
+							int nnum = aGraph->AddNode(newNode = new node("4c"));
 							n->setLabelL(kParent, nnum);
 							g->getNode(neighbor[x])->setLabelL(kParent, nnum);
 							g->getNode(neighbor[y])->setLabelL(kParent, nnum);
@@ -610,7 +610,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 						if (g->findEdge(neighbor[x], neighbor[y]))
 						{
 							// we have a 3-clique!
-							int nnum = aGraph->addNode(newNode = new node("3c"));
+							int nnum = aGraph->AddNode(newNode = new node("3c"));
 							n->setLabelL(kParent, nnum);
 							g->getNode(neighbor[x])->setLabelL(kParent, nnum);
 							g->getNode(neighbor[y])->setLabelL(kParent, nnum);
@@ -639,7 +639,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 			//				if (g->getNode(neighbor[x])->getLabelL(kParent) != -1)
 			//					continue;
 			//				// we have a 2-clique!
-			//				int nnum = aGraph->addNode(newNode = new node("2c"));
+			//				int nnum = aGraph->AddNode(newNode = new node("2c"));
 			//				n->setLabel(kParent, nnum);
 			//				g->getNode(neighbor[x])->setLabel(kParent, nnum);
 			//
@@ -674,7 +674,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 			if (g->getNode(neighbor)->getLabelL(kParent) == -1)
 			{
 				unsigned int pNum;
-				pNum = aGraph->addNode(newNode = new node("2c"));
+				pNum = aGraph->AddNode(newNode = new node("2c"));
 				orphan->setLabelL(kParent, pNum);
 				g->getNode(neighbor)->setLabelL(kParent, pNum);
 				
@@ -706,7 +706,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 		}
 		if (orphan->getLabelL(kParent) == -1)
 		{
-			orphan->setLabelL(kParent, aGraph->addNode(newNode = new node("stranded*")));
+			orphan->setLabelL(kParent, aGraph->AddNode(newNode = new node("stranded*")));
 			newNode->setLabelL(kAbstractionLevel, orphan->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 			newNode->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
 			newNode->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -733,7 +733,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 				double weight = h(aGraph->getNode(from), aGraph->getNode(to));
 				f = new edge(from, to, weight);
 				f->setLabelL(kEdgeCapacity, 1);
-				aGraph->addEdge(f);
+				aGraph->AddEdge(f);
 				if (verbose&kBuildGraph)
 					printf("Adding edge from %d (%d) to %d (%d) weight %1.2f\n", from, e->getFrom(), to, e->getTo(), weight);
 			}
@@ -771,7 +771,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //  //			int n2 = n->nodeNeighborNext(nbi);
 //  //			if ((g->getNode(n1)->getNumEdges() == 2) || (g->getNode(n2)->getNumEdges() == 2))
 //  //			{
-//  //				int nnum = aGraph->addNode(newNode = new node("tunnel"));
+//  //				int nnum = aGraph->AddNode(newNode = new node("tunnel"));
 //  //				n->setLabel(kParent, nnum);
 //  //				
 //  //				newNode->setLabel(kAbstractionLevel, n->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
@@ -793,7 +793,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //			// why abstract solo nodes; they just get confusing later?
 //			//		if (numEdges == 0)
 //			//		{
-//			//			n->setLabel(kParent, aGraph->addNode(newNode = new node("1c")));
+//			//			n->setLabel(kParent, aGraph->AddNode(newNode = new node("1c")));
 //			//			newNode->setLabel(kAbstractionLevel, n->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 //			//			newNode->setLabel(kNumAbstractedNodes, 1); // number of abstracted nodes
 //			//			newNode->setLabel(kParent, -1); // parent of this node in abstraction hierarchy
@@ -842,7 +842,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //								g->findEdge(neighbor[y], neighbor[z]) &&
 //								g->findEdge(neighbor[z], neighbor[x])) {
 //							// we have a 4-clique!
-//							int nnum = aGraph->addNode(newNode = new node("4c"));
+//							int nnum = aGraph->AddNode(newNode = new node("4c"));
 //							n->setLabelL(kParent, nnum);
 //							g->getNode(neighbor[x])->setLabelL(kParent, nnum);
 //							g->getNode(neighbor[y])->setLabelL(kParent, nnum);
@@ -876,7 +876,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //						//						if (g->findEdge(neighbor[x], neighbor[y]) || g->findEdge(neighbor[y], neighbor[x]))
 //						if (g->findEdge(neighbor[x], neighbor[y])) {
 //							// we have a 3-clique!
-//							int nnum = aGraph->addNode(newNode = new node("3c"));
+//							int nnum = aGraph->AddNode(newNode = new node("3c"));
 //							n->setLabelL(kParent, nnum);
 //							g->getNode(neighbor[x])->setLabelL(kParent, nnum);
 //							g->getNode(neighbor[y])->setLabelL(kParent, nnum);
@@ -905,7 +905,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //			//				if (g->getNode(neighbor[x])->getLabelL(kParent) != -1)
 //			//					continue;
 //			//				// we have a 2-clique!
-//			//				int nnum = aGraph->addNode(newNode = new node("2c"));
+//			//				int nnum = aGraph->AddNode(newNode = new node("2c"));
 //			//				n->setLabel(kParent, nnum);
 //			//				g->getNode(neighbor[x])->setLabel(kParent, nnum);
 //			//
@@ -937,7 +937,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //      int neighbor = (e->getFrom() == orphan->getNum())?e->getTo():e->getFrom();
 //      if (g->getNode(neighbor)->getLabelL(kParent) == -1) {
 //				unsigned int pNum;
-//				pNum = aGraph->addNode(newNode = new node("2c"));
+//				pNum = aGraph->AddNode(newNode = new node("2c"));
 //				orphan->setLabelL(kParent, pNum);
 //				g->getNode(neighbor)->setLabelL(kParent, pNum);
 //				
@@ -966,7 +966,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //      }
 //    }
 //    if (orphan->getLabelL(kParent) == -1) {
-//      orphan->setLabelL(kParent, aGraph->addNode(newNode = new node("stranded*")));
+//      orphan->setLabelL(kParent, aGraph->AddNode(newNode = new node("stranded*")));
 //      newNode->setLabelL(kAbstractionLevel, orphan->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 //      newNode->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
 //      newNode->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -991,7 +991,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //    // else
 //    //		if (orphan->getLabelL(kParent) == -1)
 //    //		{
-//    //		orphan->setLabel(kParent, aGraph->addNode(newNode = new node("stranded*")));
+//    //		orphan->setLabel(kParent, aGraph->AddNode(newNode = new node("stranded*")));
 //    //		newNode->setLabel(kAbstractionLevel, orphan->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 //    //		newNode->setLabel(kNumAbstractedNodes, 1); // number of abstracted nodes
 //    //		newNode->setLabel(kParent, -1); // parent of this node in abstraction hierarchy
@@ -1016,7 +1016,7 @@ graph *LoadedCliqueAbstraction::cliqueAbstractGraph(graph *g)
 //				double weight = h(aGraph->getNode(from), aGraph->getNode(to));
 //				f = new edge(from, to, weight);
 //				f->setLabelL(kEdgeCapacity, 1);
-//				aGraph->addEdge(f);
+//				aGraph->AddEdge(f);
 //				if (verbose&kBuildGraph)
 //					printf("Adding edge from %d (%d) to %d (%d) weight %1.2f\n", from, e->getFrom(), to, e->getTo(), weight);
 //			}
@@ -1081,7 +1081,7 @@ bool LoadedCliqueAbstraction::Pathable(node *from, node *to)
 //	if (absMethod != kloadedCliqueAbstraction)
 //		return 0;
 //	std::vector<node *> fromChain, toChain;
-//	getParentHierarchy(from, to, fromChain, toChain);
+//	GetNumAbstractGraphs(from, to, fromChain, toChain);
 //
 //	if (!GetAbstractGraph(fromChain.back()->getLabelL(kAbstractionLevel))->
 //			findEdge(fromChain.back()->getNum(), toChain.back()->getNum()))
@@ -1100,19 +1100,19 @@ bool LoadedCliqueAbstraction::Pathable(node *from, node *to)
 //	return p;
 //}
 	
-void LoadedCliqueAbstraction::addNode(node *)
+void LoadedCliqueAbstraction::AddNode(node *)
 {
 	assert(false);
 }
 
-void LoadedCliqueAbstraction::addEdge(edge *, unsigned int)
+void LoadedCliqueAbstraction::AddEdge(edge *, unsigned int)
 {
 	assert(false);
 }
 
 // for now we'll immediately handle splits, but in the future we should queue up splits
 // and process them in batch form(?)
-void LoadedCliqueAbstraction::removeEdge(edge *e, unsigned int absLevel)
+void LoadedCliqueAbstraction::RemoveEdge(edge *e, unsigned int absLevel)
 {
 	if (e == 0)
 		return;
@@ -1120,9 +1120,9 @@ void LoadedCliqueAbstraction::removeEdge(edge *e, unsigned int absLevel)
 	if (ep)
 	{
 		ep->setLabelL(kEdgeCapacity, ep->getLabelL(kEdgeCapacity)-1);
-		if (ep->getLabelL(kEdgeCapacity) == 0) removeEdge(ep, absLevel+1);
+		if (ep->getLabelL(kEdgeCapacity) == 0) RemoveEdge(ep, absLevel+1);
 		//printf("Removing edge %p in abstract graph %d\n", e, absLevel);
-		abstractions[absLevel]->removeEdge(e);
+		abstractions[absLevel]->RemoveEdge(e);
 		delete e;
 		return;
 	}
@@ -1135,7 +1135,7 @@ void LoadedCliqueAbstraction::removeEdge(edge *e, unsigned int absLevel)
 	}
 	
 	//printf("Removing edge %p in abstract graph %d\n", e, absLevel);
-	abstractions[absLevel]->removeEdge(e);
+	abstractions[absLevel]->RemoveEdge(e);
 	delete e;
 	return;
 }
@@ -1171,7 +1171,7 @@ void LoadedCliqueAbstraction::removeNodeFromRepairQ(node *n)
 	}
 }
 
-void LoadedCliqueAbstraction::removeNode(node *n)
+void LoadedCliqueAbstraction::RemoveNode(node *n)
 {
 	if (n == 0) return;
 	if (verbose&kRepairGraph)
@@ -1193,7 +1193,7 @@ void LoadedCliqueAbstraction::removeNode(node *n)
 		ep->setLabelL(kEdgeCapacity, ep->getLabelL(kEdgeCapacity)-1);
 		if (ep->getLabelL(kEdgeCapacity) == 0)
 		{
-			removeEdge(ep, n->getLabelL(kAbstractionLevel)+1);
+			RemoveEdge(ep, n->getLabelL(kAbstractionLevel)+1);
 		}
 	}
 	
@@ -1210,7 +1210,7 @@ void LoadedCliqueAbstraction::removeNode(node *n)
 			
 			if (verbose&kRepairGraph)
 				printf("Removing parent!\n");
-			removeNode(np);
+			RemoveNode(np);
 			n->setLabelL(kParent, -1);
 		} else {
 			// find this node (n) and removed it from the list
@@ -1229,7 +1229,7 @@ void LoadedCliqueAbstraction::removeNode(node *n)
 	}
 	unsigned int oldID;
 	// now we can safely remove this node from the graph
-	node *changed = abstractions[absLevel]->removeNode(n, oldID);
+	node *changed = abstractions[absLevel]->RemoveNode(n, oldID);
 	// have to handle changing node here...rename it in the parent & children if necessary
 	if (changed)
 	{
@@ -1237,7 +1237,7 @@ void LoadedCliqueAbstraction::removeNode(node *n)
 	}
 }
 
-void LoadedCliqueAbstraction::repairAbstraction()
+void LoadedCliqueAbstraction::RepairAbstraction()
 {
 	// actually want to sort items...based on abstraction level, doing
 	// lowest abstraction level first
@@ -1571,7 +1571,7 @@ void LoadedCliqueAbstraction::extractGroupIntoNewNode(node *parent, int group)
 	node *newNode;
 	graph *g = abstractions[parent->getLabelL(kAbstractionLevel)];
 	
-	/*unsigned int gpNum = */g->addNode(newNode = new node("split node"));
+	/*unsigned int gpNum = */g->AddNode(newNode = new node("split node"));
 	newNode->setLabelL(kAbstractionLevel, parent->getLabelL(kAbstractionLevel));
 	newNode->setLabelL(kNumAbstractedNodes, 0);
 	newNode->setLabelL(kParent, -1);
@@ -1668,7 +1668,7 @@ void LoadedCliqueAbstraction::checkAndCreateParent(node *which)
 		abstractions.push_back(new graph());
 	}
 	node *parent;
-	unsigned int id = abstractions[absLevel+1]->addNode(parent = new node("created"));
+	unsigned int id = abstractions[absLevel+1]->AddNode(parent = new node("created"));
 	which->setLabelL(kParent, id);
 	parent->setLabelL(kAbstractionLevel, absLevel+1);
 	parent->setLabelL(kNumAbstractedNodes, 1);
@@ -1706,7 +1706,7 @@ void LoadedCliqueAbstraction::transferGroup(int group, node *oldParent, node *ne
 					ep->setLabelL(kEdgeCapacity, ep->getLabelL(kEdgeCapacity)-1);
 					if (ep->getLabelL(kEdgeCapacity) == 0)
 					{
-						removeEdge(ep, nextNode->getLabelL(kAbstractionLevel)+1);
+						RemoveEdge(ep, nextNode->getLabelL(kAbstractionLevel)+1);
 					}
 				}
 			}				
@@ -1784,7 +1784,7 @@ void LoadedCliqueAbstraction::abstractUpEdge(unsigned int absLevel, edge *e)
 		pe->setLabelL(kEdgeCapacity, pe->getLabelL(kEdgeCapacity)+1);
 	// 3 if it doesn't exist, add it, and recurse
 	else {
-		pg->addEdge(pe = new edge(par1, par2, h(pg->getNode(par1), pg->getNode(par2))));
+		pg->AddEdge(pe = new edge(par1, par2, h(pg->getNode(par1), pg->getNode(par2))));
 		pe->setLabelL(kEdgeCapacity, 1);
 		if (verbose&kRepairGraph)
 			cout << "*** Abstracting " << *e << " with edge " << *pe << endl;

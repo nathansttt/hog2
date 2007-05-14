@@ -59,47 +59,47 @@ bool MapQuadTreeAbstraction::Pathable(node *from, node *to)
 
 // utility functions
 /** verify that the hierarchy is consistent */
-void MapQuadTreeAbstraction::verifyHierarchy()
+void MapQuadTreeAbstraction::VerifyHierarchy()
 {
 }
 
 // hierarchical modifications
 /** remove node from abstraction */
-void MapQuadTreeAbstraction::removeNode(node *)
+void MapQuadTreeAbstraction::RemoveNode(node *)
 {
 	assert(false);
 }
 
 /** remove edge from abstraction */
-void MapQuadTreeAbstraction::removeEdge(edge *, unsigned int)
+void MapQuadTreeAbstraction::RemoveEdge(edge *, unsigned int)
 {
 	assert(false);
 }
 
 /** add node to abstraction */
-void MapQuadTreeAbstraction::addNode(node *)
+void MapQuadTreeAbstraction::AddNode(node *)
 {
 	// add it to the 
 	assert(false);
 }
 
 /** add edge to abstraction */
-void MapQuadTreeAbstraction::addEdge(edge *, unsigned int)
+void MapQuadTreeAbstraction::AddEdge(edge *, unsigned int)
 {
 	// if each end is already connected who cares -- doesn't mess anything up -- just add it throughout
 	assert(false);
 }
 
 /** This must be called after any of the above add/remove operations. But the
-operations can be stacked followed by a single repairAbstraction call. */
-void MapQuadTreeAbstraction::repairAbstraction()
+operations can be stacked followed by a single RepairAbstraction call. */
+void MapQuadTreeAbstraction::RepairAbstraction()
 {
 }
 
 void MapQuadTreeAbstraction::buildAbstraction()
 {
 	//inefficient for the moment
-	abstractions.push_back(getMapGraph(GetMap()));
+	abstractions.push_back(GetMapGraph(GetMap()));
 	while (abstractions.back()->getNumEdges() > 0)
 	{
 		graph *g = new graph();
@@ -119,7 +119,7 @@ void MapQuadTreeAbstraction::addNodes(graph *g)
 		if (next->getLabelL(kParent) == -1)
 		{
 			node *parent;
-			g->addNode(parent = new node("??"));
+			g->AddNode(parent = new node("??"));
 			parent->setLabelL(kAbstractionLevel, next->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 			parent->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
 			parent->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -146,7 +146,7 @@ void MapQuadTreeAbstraction::addEdges(graph *aGraph)
 			double weight = h(aGraph->getNode(from), aGraph->getNode(to));
 			f = new edge(from, to, weight);
 			f->setLabelL(kEdgeCapacity, 1);
-			aGraph->addEdge(f);
+			aGraph->AddEdge(f);
 		}
 		else if (f) f->setLabelL(kEdgeCapacity, f->getLabelL(kEdgeCapacity)+1);
 	}	
@@ -167,7 +167,7 @@ void MapQuadTreeAbstraction::abstractionBFS(node *which, node *parent, int quadr
 
 void MapQuadTreeAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
-	assert(getAbstractionLevel(n)+1 == getAbstractionLevel(parent));
+	assert(GetAbstractionLevel(n)+1 == GetAbstractionLevel(parent));
 	n->setLabelL(kParent, parent->getNum());
 	parent->setLabelL(kFirstData+parent->getLabelL(kNumAbstractedNodes), n->getNum());
 	parent->setLabelL(kNumAbstractedNodes, parent->getLabelL(kNumAbstractedNodes)+1);
@@ -179,7 +179,7 @@ int MapQuadTreeAbstraction::getQuadrant(node *which)
 	// 1. get any child
 	node *child = which;
 	while (child->getLabelL(kAbstractionLevel) != 0)
-		child = getNthChild(child, 0);
+		child = GetNthChild(child, 0);
 	
 	int xloc = child->getLabelL(kFirstData); // x loc in map
 	int yloc = child->getLabelL(kFirstData+1); // y loc in map

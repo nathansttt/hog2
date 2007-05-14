@@ -41,12 +41,13 @@
 #include "Plot2D.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
+#include "MNPuzzle.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-UnitAbsMapSimulation *unitSim = 0;
+std::vector<UnitAbsMapSimulation *> unitSims;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -63,7 +64,7 @@ int main(int argc, char* argv[])
  * This function is used to allocate the unit simulated that you want to run.
  * Any parameters or other experimental setup can be done at this time.
  */
-void createSimulation()
+void CreateSimulation(int id)
 {
 	Map *map;
 	if (gDefaultMap[0] == 0)
@@ -71,8 +72,9 @@ void createSimulation()
 	else
 		map = new Map(gDefaultMap);
 
-	unitSim = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
-	unitSim->SetStepType(kMinTime);
+	unitSims.resize(id+1);
+	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
+	unitSims[id]->SetStepType(kMinTime);
 //	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
 //																																 (OccupancyInterface<xyLoc, tDirection>*)0);
 //	if (absType == 0)
@@ -125,22 +127,23 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	{
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
-		if (unitSim == 0)
-			createSimulation();
+		CreateSimulation(windowID);
 	}
 }
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 {
-	if ((windowID != 0) || (unitSim == 0))
+	if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
 		return;
 
 	if (viewport == 0)
 	{
-		unitSim->StepTime(1.0/30.0);
+		unitSims[windowID]->StepTime(1.0/30.0);
 	}
-	unitSim->OpenGLDraw(windowID);
+	unitSims[windowID]->OpenGLDraw(windowID);
 	
+	MNPuzzle p(4, 4);
+	p.OpenGLDraw(windowID);
 //	if (viewport == 0)
 //	{
 //		if (plot)
@@ -150,9 +153,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 //				MapAbstraction *ma = unitSim->GetMapAbstraction();
 //				int x, y;
 //				cameraTarget->getLocation(x, y);
-//				node *n1 = ma->getNodeFromMap(x, y);
+//				node *n1 = ma->GetNodeFromMap(x, y);
 //				cameraTarget->GetGoal()->getLocation(x, y);
-//				node *n2 = ma->getNodeFromMap(x, y);
+//				node *n2 = ma->GetNodeFromMap(x, y);
 //				distLine->AddPoint(ma->h(n1, n2));
 //			}
 //			plot->OpenGLDraw();
@@ -232,13 +235,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
 			}
 			break;
-		case 'p': unitSim->SetPaused(!unitSim->GetPaused()); break;
+		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
-			if (unitSim->GetPaused())
+			if (unitSims[windowID]->GetPaused())
 			{
-				unitSim->SetPaused(false);
-				unitSim->StepTime(1.0/30.0);
-				unitSim->SetPaused(true);
+				unitSims[windowID]->SetPaused(false);
+				unitSims[windowID]->StepTime(1.0/30.0);
+				unitSims[windowID]->SetPaused(true);
 			}
 			break;
 		case ']': absType = (absType+1)%3; break;
@@ -247,19 +250,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
 			//if (unitSim)
-			//	unitSim->GetEnvironment()->GetMapAbstraction()->toggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
+			//	unitSim->GetEnvironment()->GetMapAbstraction()->ToggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
 			break;
 	}
 }
 
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 {
-	Map *m = unitSim->GetEnvironment()->GetMap();
+	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
 	
 	SearchUnit *su1 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), 0, 0);
 	SearchUnit *su2 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), su1, new praStar());
 	//unitSim->AddUnit(su1);
-	unitSim->AddUnit(su2);
+	unitSims[windowID]->AddUnit(su2);
 	
 //	RandomerUnit *r = new RandomerUnit(random()%m->getMapWidth(), random()%m->getMapHeight());
 //	int id = unitSim->AddUnit(r);

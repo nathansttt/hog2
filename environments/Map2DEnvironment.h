@@ -24,13 +24,13 @@ public:
 	uint16_t y;
 };
 
-std::ostream& operator <<(std::ostream & out, const xyLoc &loc)
+static std::ostream& operator <<(std::ostream & out, const xyLoc &loc)
 {
 	out << "(" << loc.x << ", " << loc.y << ")";
 	return out;
 }
 
-bool operator==(const xyLoc &l1, const xyLoc &l2) {
+static bool operator==(const xyLoc &l1, const xyLoc &l2) {
 	return (l1.x == l2.x) && (l1.y == l2.y);
 }
 
@@ -54,14 +54,14 @@ public:
 	void GetSuccessors(xyLoc nodeID, std::vector<xyLoc> &neighbors);
 	void GetActions(xyLoc nodeID, std::vector<tDirection> &actions);
 	tDirection GetAction(xyLoc s1, xyLoc s2);
-	xyLoc ApplyAction(xyLoc s, tDirection dir);
+	void ApplyAction(xyLoc &s, tDirection dir);
 	virtual OccupancyInterface<xyLoc, tDirection> *GetOccupancyInfo() { return 0; }
 
 	double HCost(xyLoc node1, xyLoc node2);
 	double GCost(xyLoc node1, xyLoc node2);
 	bool GoalTest(xyLoc node, xyLoc goal);
-	uint32_t GetStateHash(xyLoc node);
-	uint32_t GetActionHash(tDirection act);
+	uint64_t GetStateHash(xyLoc node);
+	uint64_t GetActionHash(tDirection act);
 	void OpenGLDraw(int window) { map->OpenGLDraw(window); }
 	Map* GetMap() { return map; }
 protected:

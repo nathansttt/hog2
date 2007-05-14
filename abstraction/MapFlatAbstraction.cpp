@@ -30,7 +30,7 @@
 MapFlatAbstraction::MapFlatAbstraction(Map *_m)
 :MapAbstraction(_m)
 {
-	abstractions.push_back(getMapGraph(_m));
+	abstractions.push_back(GetMapGraph(_m));
 	groupsValid = false;
 }
 
@@ -77,29 +77,29 @@ bool MapFlatAbstraction::Pathable(node *from, node *to)
 	if (!groupsValid)
 		buildConnectivityGroups();
 //	int x1, x2, y1, y2;
-//	getTileFromNode(from, x1, y1);
-//	getTileFromNode(to, x2, y2);
+//	GetTileFromNode(from, x1, y1);
+//	GetTileFromNode(to, x2, y2);
 //	printf("(%d, %d) and (%d, %d) %s connected\n", x1, y1, x2, y2,
 //				 ((groups[from->getNum()] == groups[to->getNum()])?"are":"are not"));
 	return (groups[from->getNum()] == groups[to->getNum()]);
 }
 
-void MapFlatAbstraction::verifyHierarchy()
+void MapFlatAbstraction::VerifyHierarchy()
 {
 }
 
-void MapFlatAbstraction::removeNode(node *n)
+void MapFlatAbstraction::RemoveNode(node *n)
 {
 	unsigned int oldID;
-	abstractions[0]->removeNode(n, oldID);
+	abstractions[0]->RemoveNode(n, oldID);
 }
 
-void MapFlatAbstraction::removeEdge(edge *e, unsigned int)
+void MapFlatAbstraction::RemoveEdge(edge *e, unsigned int)
 {
-	if (e) abstractions[0]->removeEdge(e);
+	if (e) abstractions[0]->RemoveEdge(e);
 }
 
-void MapFlatAbstraction::addNode(node *n)
+void MapFlatAbstraction::AddNode(node *n)
 {
 //	n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
 //	n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
@@ -109,15 +109,15 @@ void MapFlatAbstraction::addNode(node *n)
 //	n->setLabelL(kFirstData, x);
 //	n->setLabelL(kFirstData+1, y);
 //	n->setLabelL(kFirstData+2, kNone);
-	abstractions[0]->addNode(n);
+	abstractions[0]->AddNode(n);
 }
 
-void MapFlatAbstraction::addEdge(edge *e, unsigned int)
+void MapFlatAbstraction::AddEdge(edge *e, unsigned int)
 {
-	abstractions[0]->addEdge(e);	
+	abstractions[0]->AddEdge(e);	
 }
 
-void MapFlatAbstraction::repairAbstraction()
+void MapFlatAbstraction::RepairAbstraction()
 {
 	groupsValid = false;
 }

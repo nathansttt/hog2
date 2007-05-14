@@ -41,20 +41,20 @@ public:
 	
 	// utility functions
 	/** verify that the hierarchy is consistent */
-	virtual void verifyHierarchy();
+	virtual void VerifyHierarchy();
 	
 	// hierarchical modifications
 	/** remove node from abstraction */
-	virtual void removeNode(node *n);
+	virtual void RemoveNode(node *n);
 	/** remove edge from abstraction */
-  virtual void removeEdge(edge *e, unsigned int absLevel);
+  virtual void RemoveEdge(edge *e, unsigned int absLevel);
 	/** add node to abstraction */
-	virtual void addNode(node *n);
+	virtual void AddNode(node *n);
 	/** add edge to abstraction */
-	virtual void addEdge(edge *e, unsigned int absLevel);
+	virtual void AddEdge(edge *e, unsigned int absLevel);
 	/** This must be called after any of the above add/remove operations. But the
-		operations can be stacked followed by a single repairAbstraction call. */
-  virtual void repairAbstraction();	
+		operations can be stacked followed by a single RepairAbstraction call. */
+  virtual void RepairAbstraction();	
 private:
 		void buildConnectivityGroups();
 		bool groupsValid;

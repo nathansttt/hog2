@@ -49,7 +49,7 @@ GraphAbstraction::~GraphAbstraction()
   }
 }
 
-void GraphAbstraction::getParentHierarchy(node *from, node *to,
+void GraphAbstraction::GetNumAbstractGraphs(node *from, node *to,
 																					std::vector<node *> &fromChain,
 																					std::vector<node *> &toChain)
 {
@@ -69,7 +69,7 @@ void GraphAbstraction::getParentHierarchy(node *from, node *to,
       getNode(to->getLabelL(kParent));
 		
     if (verbose&kBuildGraph)
-			printf("getParentHierarchy: Moving to nodes #%d and %d\n",
+			printf("GetNumAbstractGraphs: Moving to nodes #%d and %d\n",
 						 from->getNum(), to->getNum());
   }
   fromChain.push_back(from);
@@ -77,7 +77,7 @@ void GraphAbstraction::getParentHierarchy(node *from, node *to,
 }
 
 // get nth-level parent of which node
-node *GraphAbstraction::getNthParent(node *which, int n)
+node *GraphAbstraction::GetNthParent(node *which, int n)
 {
 	while ((which != NULL) && (which->getLabelL(kAbstractionLevel) < n))
 	{
@@ -88,7 +88,7 @@ node *GraphAbstraction::getNthParent(node *which, int n)
 	return which;
 }
 
-void GraphAbstraction::clearMarkedNodes()
+void GraphAbstraction::ClearMarkedNodes()
 {
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
@@ -108,7 +108,7 @@ double GraphAbstraction::distance(path *p)
 	return h(p->n, p->next->n)+distance(p->next);
 }
 
-void GraphAbstraction::measureAbstractionValues(int level, double &n, double &n_dev, double &c, double &c_dev)
+void GraphAbstraction::MeasureAbstractionValues(int level, double &n, double &n_dev, double &c, double &c_dev)
 {
 	assert((level > 0) && (level < (int)abstractions.size()));
 	graph *g = abstractions[level];
@@ -121,7 +121,7 @@ void GraphAbstraction::measureAbstractionValues(int level, double &n, double &n_
 	{
 		ns.push_back(nd->getLabelL(kNumAbstractedNodes));
 		n += ns.back();
-		cs.push_back(computeWidth(nd));
+		cs.push_back(ComputeWidth(nd));
 		c += cs.back();
 		//printf("node %d: #%d width:%d\n", nd->getNum(), ns.back(), cs.back());
 	}
@@ -140,18 +140,18 @@ void GraphAbstraction::measureAbstractionValues(int level, double &n, double &n_
 	c_dev = sqrtf(c_dev);
 }
 
-int GraphAbstraction::computeWidth(node *n)
+int GraphAbstraction::ComputeWidth(node *n)
 {
 //	printf("New WIDTH (%d)\n", n->getNum());
 	int width = 0;
 	for (int child = 0; child < n->getLabelL(kNumAbstractedNodes); child++)
 	{
-		width = std::max(width, widthBFS(getNthChild(n, child), n));
+		width = std::max(width, WidthBFS(GetNthChild(n, child), n));
 	}
 	return width;
 }
 
-int GraphAbstraction::widthBFS(node *child, node *parent)
+int GraphAbstraction::WidthBFS(node *child, node *parent)
 {
 	std::vector<int> depth;
 	std::vector<node *> q;
@@ -185,7 +185,7 @@ int GraphAbstraction::widthBFS(node *child, node *parent)
 	return depth.back();
 }
 
-double GraphAbstraction::measureAverageNodeWidth(int level)
+double GraphAbstraction::MeasureAverageNodeWidth(int level)
 {
 	if ((level > abstractions.size()) || (level <= 0))
 		return 0.0f;
@@ -197,7 +197,7 @@ double GraphAbstraction::measureAverageNodeWidth(int level)
 	node_iterator ni = g->getNodeIter();
 	for (node *nd = g->nodeIterNext(ni); nd; nd = g->nodeIterNext(ni))
 	{
-		double val = measureExpectedNodeWidth(nd);
+		double val = MeasureExpectedNodeWidth(nd);
 		// ignore dead-end nodes
 		if (val != 0)
 		{
@@ -211,7 +211,7 @@ double GraphAbstraction::measureAverageNodeWidth(int level)
 	return 0;
 }
 
-double GraphAbstraction::measureExpectedNodeWidth(node *n)
+double GraphAbstraction::MeasureExpectedNodeWidth(node *n)
 {
 	// for each edge, the number of edges at that depth
 	std::vector<std::vector<int> > edgeInfo;
@@ -226,8 +226,8 @@ double GraphAbstraction::measureExpectedNodeWidth(node *n)
 	int totalExternalEdges = 0;
 	for (int child = 0; child < n->getLabelL(kNumAbstractedNodes); child++)
 	{
-		node *c = getNthChild(n, child);
-		countEdgesAtDistance(c, n, edgeInfo[child]);
+		node *c = GetNthChild(n, child);
+		CountEdgesAtDistance(c, n, edgeInfo[child]);
 		sums.push_back(0);
 		for (unsigned int x = 0; x < edgeInfo[child].size(); x++)
 		{
@@ -274,7 +274,7 @@ double GraphAbstraction::measureExpectedNodeWidth(node *n)
 }
 
 // get the number of edges that n has outside of p
-int GraphAbstraction::getNumExternalEdges(node *n, node *p)
+int GraphAbstraction::GetNumExternalEdges(node *n, node *p)
 {
 	int count = 0;
 	neighbor_iterator ni = n->getNeighborIter();
@@ -282,7 +282,7 @@ int GraphAbstraction::getNumExternalEdges(node *n, node *p)
 	for (int next = n->nodeNeighborNext(ni); next != -1; next = n->nodeNeighborNext(ni))
 	{
 		node *nb = g->getNode(next);
-		if (getParent(nb) != p)
+		if (GetParent(nb) != p)
 			count++;
 	}
 	return count;
@@ -290,7 +290,7 @@ int GraphAbstraction::getNumExternalEdges(node *n, node *p)
 
 // count the number of external edges the child has from the parent at
 // each distance
-int GraphAbstraction::countEdgesAtDistance(node *child, node *parent, std::vector<int> &dists)
+int GraphAbstraction::CountEdgesAtDistance(node *child, node *parent, std::vector<int> &dists)
 {
 	dists.resize(0);
 	
@@ -308,7 +308,7 @@ int GraphAbstraction::countEdgesAtDistance(node *child, node *parent, std::vecto
 		neighbor_iterator ni = q[x]->getNeighborIter();
 		if (depth[x]+1 > dists.size())
 			dists.resize(depth[x]+1);
-		dists[depth[x]] += getNumExternalEdges(q[x], parent);
+		dists[depth[x]] += GetNumExternalEdges(q[x], parent);
 
 		for (int next = q[x]->nodeNeighborNext(ni); next != -1; next = q[x]->nodeNeighborNext(ni))
 		{

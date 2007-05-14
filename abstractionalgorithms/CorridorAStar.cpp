@@ -108,7 +108,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *from, node *to, n
       else if ((currNode->key >= expandedNodes.size()) ||
 							 (expandedNodes[currNode->key] != currNode))
 			{
-				node *par = aMap->getNthParent(currNode, corridorLayer);
+				node *par = aMap->GetNthParent(currNode, corridorLayer);
 				unsigned int parentKey = par->key;
 				
 				// this node is unexpanded if (2) it's parent is in the eligible parent list
@@ -140,7 +140,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *from, node *to, n
 
 		// found a node who's nth parent is inside our target
 		if ((!exactGoal) &&
-				(aMap->getNthParent(n, to->getLabelL(kAbstractionLevel)) == to))
+				(aMap->GetNthParent(n, to->getLabelL(kAbstractionLevel)) == to))
 			break;
 		
     if (n == to) { /*printf("Found goal %d\n", dest);*/ break; }
@@ -233,7 +233,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato,
       else if ((currNode->key >= expandedNodes.size()) ||
 							 (expandedNodes[currNode->key] != currNode))
 			{
-				node *par = aMap->getNthParent(currNode, corridorLayer);
+				node *par = aMap->GetNthParent(currNode, corridorLayer);
 				unsigned int parentKey = par->key;
 				
 				// this node is unexpanded if (2) it's parent is in the eligible parent list
@@ -278,7 +278,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato,
 		
 		// found a node who's nth parent is inside our target
 		if ((!exactGoal) &&
-				(aMap->getNthParent(n, ato->getLabelL(kAbstractionLevel)) == ato))
+				(aMap->GetNthParent(n, ato->getLabelL(kAbstractionLevel)) == ato))
 			break;
 		
     if (n == ato) { /*printf("Found goal %d\n", dest);*/ break; }

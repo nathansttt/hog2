@@ -74,7 +74,7 @@ public:
 	/** is there a legal path between these 2 nodes? */
   virtual bool Pathable(node *from, node *to) = 0;
 	/** given 2 nodes, find as much of their hierarchy that exists in the graph */
-  void getParentHierarchy(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
+  void GetNumAbstractGraphs(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
 	/** return the abstract graph at the given level */
   graph* GetAbstractGraph(int level) { return abstractions[level]; }
 	/** return the total number of graphs in the hierarchy */
@@ -84,45 +84,45 @@ public:
 	/** length in distance of a path */
 	double distance(path *p);
 	/** return nth level parent of which or null if it doesn't exist */
-	node *getNthParent(node *which, int n);
+	node *GetNthParent(node *which, int n);
 
-	inline node *getParent(node *which) { return abstractions[getAbstractionLevel(which)+1]->getNode(which->getLabelL(kParent)); }
-	inline long getNumChildren(node *which) { return which->getLabelL(kNumAbstractedNodes); }
-	inline node *getNthChild(node *which, int n) { return abstractions[getAbstractionLevel(which)-1]->getNode(which->getLabelL(kFirstData+n)); }
-	inline long getAbstractionLevel(node *which) { return which->getLabelL(kAbstractionLevel); }
+	inline node *GetParent(node *which) { return abstractions[GetAbstractionLevel(which)+1]->getNode(which->getLabelL(kParent)); }
+	inline long GetNumChildren(node *which) { return which->getLabelL(kNumAbstractedNodes); }
+	inline node *GetNthChild(node *which, int n) { return abstractions[GetAbstractionLevel(which)-1]->getNode(which->getLabelL(kFirstData+n)); }
+	inline long GetAbstractionLevel(node *which) { return which->getLabelL(kAbstractionLevel); }
 	inline graph* GetAbstractGraph(node *which) { return abstractions[which->getLabelL(kAbstractionLevel)]; }
 	// utility functions
 	/** verify that the hierarchy is consistent */
-	virtual void verifyHierarchy() = 0;
+	virtual void VerifyHierarchy() = 0;
 	/// rebuild hierarchy from original domain */
   // virtual void rebuild() = 0;
 	/// get current revision of hierarchy -- indicates if changes have been made */
 	//virtual int getRevision() = 0;
-	void clearMarkedNodes();
+	void ClearMarkedNodes();
 	
 	// hierarchical modifications
 	/** remove node from abstraction */
-	virtual void removeNode(node *n) = 0;
+	virtual void RemoveNode(node *n) = 0;
 	/** remove edge from abstraction */
-  virtual void removeEdge(edge *e, unsigned int absLevel) = 0;
+  virtual void RemoveEdge(edge *e, unsigned int absLevel) = 0;
 	/** add node to abstraction */
-	virtual void addNode(node *n) = 0;
+	virtual void AddNode(node *n) = 0;
 	/** add edge to abstraction */
-	virtual void addEdge(edge *e, unsigned int absLevel) = 0;
+	virtual void AddEdge(edge *e, unsigned int absLevel) = 0;
 	/** This must be called after any of the above add/remove operations. But the
-		operations can be stacked followed by a single repairAbstraction call. */
-  virtual void repairAbstraction() = 0;
-	virtual int measureRepairHits() { return 0; }
-	void measureAbstractionValues(int level, double &n, double &n_dev, double &c, double &c_dev);
-	double measureAverageNodeWidth(int level);
+		operations can be stacked followed by a single RepairAbstraction call. */
+  virtual void RepairAbstraction() = 0;
+	virtual int MeasureRepairHits() { return 0; }
+	void MeasureAbstractionValues(int level, double &n, double &n_dev, double &c, double &c_dev);
+	double MeasureAverageNodeWidth(int level);
 protected:
 		std::vector<graph *> abstractions;
 private:
-		int computeWidth(node *n);
-		int widthBFS(node *child, node *parent);
-		double measureExpectedNodeWidth(node *n);
-		int getNumExternalEdges(node *n, node *p);
-		int countEdgesAtDistance(node *child, node *parent, std::vector<int> &dists);
+		int ComputeWidth(node *n);
+		int WidthBFS(node *child, node *parent);
+		double MeasureExpectedNodeWidth(node *n);
+		int GetNumExternalEdges(node *n, node *p);
+		int CountEdgesAtDistance(node *child, node *parent, std::vector<int> &dists);
 };
 
 // this class can be defined if you want to solve multiple domains...
