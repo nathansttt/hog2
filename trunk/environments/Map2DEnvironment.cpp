@@ -82,7 +82,7 @@ void MapEnvironment::GetActions(xyLoc loc, std::vector<tDirection> &actions)
 	}
 }
 
-tDirection MapEnvironment::GetAction(xyLoc s1, xyLoc s2)
+tDirection MapEnvironment::GetAction(xyLoc &s1, xyLoc &s2)
 {
 	int result = kStay;
 	switch (s1.x-s2.x)
@@ -125,14 +125,14 @@ void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 	s = old;
 }
 
-double MapEnvironment::HCost(xyLoc l1, xyLoc l2)
+double MapEnvironment::HCost(xyLoc &l1, xyLoc &l2)
 {
 	double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));
 	double b = ((l1.y>l2.y)?(l1.y-l2.y):(l2.y-l1.y));
 	return (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 }
 
-double MapEnvironment::GCost(xyLoc l1, xyLoc l2)
+double MapEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 {
 	double h = HCost(l1, l2);
 	if (fgreater(h, ROOT_TWO))
@@ -140,7 +140,7 @@ double MapEnvironment::GCost(xyLoc l1, xyLoc l2)
 	return h;
 }
 
-bool MapEnvironment::GoalTest(xyLoc node, xyLoc goal)
+bool MapEnvironment::GoalTest(xyLoc &node, xyLoc &goal)
 {
 	return ((node.x == goal.x) && (node.y == goal.y));
 }
@@ -153,6 +153,19 @@ uint64_t MapEnvironment::GetStateHash(xyLoc node)
 uint64_t MapEnvironment::GetActionHash(tDirection act)
 {
 	return (uint32_t) act;
+}
+
+void MapEnvironment::OpenGLDraw(int window)
+{
+	map->OpenGLDraw(window);
+}
+
+void MapEnvironment::OpenGLDraw(int window, xyLoc &l)
+{
+	GLdouble xx, yy, zz, rad;
+	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
+	glColor3f(0.5, 0.5, 0.5);
+	DrawSphere(xx, yy, zz, rad);
 }
 
 
