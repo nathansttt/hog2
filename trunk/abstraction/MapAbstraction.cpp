@@ -32,36 +32,36 @@ MapAbstraction::~MapAbstraction()
 	delete m;
 }
 
-void MapAbstraction::getRandomTileFromNode(node *n, int &x, int &y)
+void MapAbstraction::GetRandomTileFromNode(node *n, int &x, int &y)
 {
-	while (getAbstractionLevel(n) != 0)
-		n = getNthChild(n, random()%getNumChildren(n));
+	while (GetAbstractionLevel(n) != 0)
+		n = GetNthChild(n, random()%GetNumChildren(n));
 	x = n->getLabelL(kFirstData);
 	y = n->getLabelL(kFirstData+1);
 }
 
-void MapAbstraction::getTileFromNode(node *n, int &x, int &y)
+void MapAbstraction::GetTileFromNode(node *n, int &x, int &y)
 {
-	if (getAbstractionLevel(n) != 0)
+	if (GetAbstractionLevel(n) != 0)
 	{
-		getTileUnderLoc(x, y, getNodeLoc(n));
-		node *t = getNodeFromMap(x, y);
-		if (getNthParent(t, getAbstractionLevel(n)) == n)
+		GetTileUnderLoc(x, y, GetNodeLoc(n));
+		node *t = GetNodeFromMap(x, y);
+		if (GetNthParent(t, GetAbstractionLevel(n)) == n)
 		{
 			//			printf("Nth parent is %d (%d), not %d (%d)\n",
-			//						 t->getNum(), getAbstractionLevel(t),
-			//						 n->getNum(), getAbstractionLevel(n));
+			//						 t->getNum(), GetAbstractionLevel(t),
+			//						 n->getNum(), GetAbstractionLevel(n));
 			return;
 		}
-		while (getAbstractionLevel(n) != 0)
-			n = getNthChild(n, 0);
+		while (GetAbstractionLevel(n) != 0)
+			n = GetNthChild(n, 0);
 	}
 	x = n->getLabelL(kFirstData);
 	y = n->getLabelL(kFirstData+1);
 	//printf("(%d, %d) in x/y\n", x, y);
 }
 
-void MapAbstraction::toggleDrawAbstraction(int which)
+void MapAbstraction::ToggleDrawAbstraction(int which)
 {
 	bool drawThis = ((levelDraw>>which)&0x1);
 	if (!drawThis)
@@ -74,13 +74,13 @@ void MapAbstraction::OpenGLDraw(int window)
 {
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
-		if ((levelDraw >> x) & 1) drawGraph(abstractions[x]);
+		if ((levelDraw >> x) & 1) DrawGraph(abstractions[x]);
 		//glCallList(displayLists[x]);
 	}
 }
 
 
-void MapAbstraction::drawGraph(graph *g)
+void MapAbstraction::DrawGraph(graph *g)
 {
 	if ((g == 0) || (g->getNumNodes() == 0)) return;
 	
@@ -110,7 +110,7 @@ void MapAbstraction::drawGraph(graph *g)
 	//		if (n->getLabelL(kNodeBlocked) > 0)
 	//		{
 	//			glColor3f(1, 1, 1);
-	//			recVec rv = getNodeLoc(n);
+	//			recVec rv = GetNodeLoc(n);
 	//			glVertex3f(rv.x, 0, rv.z);
 	//			glVertex3f(rv.x, rv.y, rv.z);
 	//		}
@@ -143,11 +143,11 @@ void MapAbstraction::drawGraph(graph *g)
 		// 		else if (e->getWidth() <= 2.1)
 		// 			glColor4f(0, 1, 0, 1);
 		//if (e->getMarked()) {	
-		recVec rv = getNodeLoc(n);
+		recVec rv = GetNodeLoc(n);
 		glVertex3f(rv.x, rv.y, rv.z);
 		
 		n = g->getNode(e->getTo());
-		rv = getNodeLoc(n);
+		rv = GetNodeLoc(n);
 		
 		glVertex3f(rv.x, rv.y, rv.z);
 		//}
@@ -155,12 +155,12 @@ void MapAbstraction::drawGraph(graph *g)
 //node_iterator
 ni = g->getNodeIter();
 for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
-drawLevelConnections(n);
+DrawLevelConnections(n);
 glEnd();
 //  if (verbose&kBuildGraph) printf("Done\n");
 }
 
-void MapAbstraction::drawLevelConnections(node *n)
+void MapAbstraction::DrawLevelConnections(node *n)
 {
 	//	int x, y;
 	//	double offsetx, offsety;
@@ -170,10 +170,10 @@ void MapAbstraction::drawLevelConnections(node *n)
 	if (n->getLabelL(kAbstractionLevel) == 0) return;
 	else {
 		glColor4f(.6, .6, .6, .6);
-		recVec v = getNodeLoc(n);
+		recVec v = GetNodeLoc(n);
 		for (int cnt = 0; cnt < n->getLabelL(kNumAbstractedNodes); cnt++)
 		{
-			recVec v1 = getNodeLoc(abstractions[n->getLabelL(kAbstractionLevel)-1]->getNode(n->getLabelL(kFirstData+cnt)));
+			recVec v1 = GetNodeLoc(abstractions[n->getLabelL(kAbstractionLevel)-1]->getNode(n->getLabelL(kFirstData+cnt)));
 			glVertex3f(v.x, v.y, v.z);
 			glVertex3f(v1.x, v1.y, v1.z);
 		}
@@ -181,7 +181,7 @@ void MapAbstraction::drawLevelConnections(node *n)
 	//return ans;
 }
 
-void MapAbstraction::getTileUnderLoc(int &x, int &y, const recVec &v)
+void MapAbstraction::GetTileUnderLoc(int &x, int &y, const recVec &v)
 {
 	double width = (GetMap()->getMapWidth()+1)/2.0;
 	double height = (GetMap()->getMapHeight()+1)/2.0;
@@ -193,7 +193,7 @@ void MapAbstraction::getTileUnderLoc(int &x, int &y, const recVec &v)
 	//				 v.x, v.y, x, y);
 }
 
-recVec MapAbstraction::getNodeLoc(node *n)
+recVec MapAbstraction::GetNodeLoc(node *n)
 {
 	int x, y;
 	//  double offsetx, offsety;
@@ -236,7 +236,7 @@ recVec MapAbstraction::getNodeLoc(node *n)
 		{
 			int absLevel = n->getLabelL(kAbstractionLevel)-1;
 			node *nextChild = abstractions[absLevel]->getNode(n->getLabelL(kFirstData+cnt));
-			recVec tmp = getNodeLoc(nextChild);
+			recVec tmp = GetNodeLoc(nextChild);
 			int weight = nextChild->getLabelL(kNumAbstractedNodes);
 			totNodes += weight;
 			ans.x += weight*tmp.x;
@@ -260,7 +260,7 @@ recVec MapAbstraction::getNodeLoc(node *n)
 	return ans;
 }
 
-void MapAbstraction::clearMarkedNodes()
+void MapAbstraction::ClearMarkedNodes()
 {
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
@@ -276,9 +276,9 @@ double MapAbstraction::h(node *a, node *b)
 	if ((a == 0) || (b == 0))
 		return 999999999.99;
 	
-	recVec rv1 = getNodeLoc(a);
-	recVec rv2 = getNodeLoc(b);
-	double answer = octileDistance((double)rv1.x,(double)rv1.y,(double)rv2.x,(double)rv2.y);
+	recVec rv1 = GetNodeLoc(a);
+	recVec rv2 = GetNodeLoc(b);
+	double answer = OctileDistance((double)rv1.x,(double)rv1.y,(double)rv2.x,(double)rv2.y);
 	//		if (fabs(rv1.x-rv2.x) < fabs(rv1.y-rv2.y)) {
 	//			answer = root2m1*fabs(rv1.x-rv2.x)+fabs(rv1.y-rv2.y);
 	//		} else {
@@ -288,7 +288,7 @@ double MapAbstraction::h(node *a, node *b)
 }
 
 /** Computes octile distance. No scaling */
-double MapAbstraction::octileDistance(double x1, double y1, double x2, double y2)
+double MapAbstraction::OctileDistance(double x1, double y1, double x2, double y2)
 {
 	double answer = 0.0;
 	const double root2m1 = ROOT_TWO-1;//sqrt(2.0)-1;
@@ -303,14 +303,14 @@ double MapAbstraction::octileDistance(double x1, double y1, double x2, double y2
 
 
 /**
-* getMapGraph(map)
+* GetMapGraph(map)
  *
  * Given a map, this function uses the external map interfaces to turn it
  * into a graph, and sets the appropriate node numbers for that map. This
  * function should not be called multiple times on the same map, because
  * the original graph map lose it's association with the map.
  */
-graph *getMapGraph(Map *m)
+graph *GetMapGraph(Map *m)
 {
 	// printf("Getting graph representation of world\n");
 	char name[32];
@@ -329,7 +329,7 @@ graph *getMapGraph(Map *m)
 				if (m->getTerrainType(x, y) == kOutOfBounds)
 					continue;
 				sprintf(name, "(%d, %d)", x, y);
-				currTile.tile1.node = g->addNode(n = new node(name));
+				currTile.tile1.node = g->AddNode(n = new node(name));
 				n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
 				n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
 				n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -343,7 +343,7 @@ graph *getMapGraph(Map *m)
 				if (m->getTerrainType(x, y, kLeftEdge) != kOutOfBounds)
 				{
 					sprintf(name, "(%d/%d)", x, y);
-					currTile.tile1.node = g->addNode(n = new node(name));
+					currTile.tile1.node = g->AddNode(n = new node(name));
 					n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
 					n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
 					n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -360,7 +360,7 @@ graph *getMapGraph(Map *m)
 				if (m->getTerrainType(x, y, kRightEdge) != kOutOfBounds)
 				{
 					sprintf(name, "(%d\\%d)", x, y);
-					currTile.tile2.node = g->addNode(n = new node(name));
+					currTile.tile2.node = g->AddNode(n = new node(name));
 					n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
 					n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
 					n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -381,7 +381,7 @@ graph *getMapGraph(Map *m)
 		for (int x = 0; x < m->getMapWidth(); x++)
 		{
 			//cout << "Trying (x, y) = (" << x << ", " << y << ")" << endl;
-			addMapEdges(m, g, x, y);
+			AddMapEdges(m, g, x, y);
 			//			if (!g->verifyGraph())
 			//			{
 			//				cerr << "Broken at (x, y) = (" << x << ", " << y << ")" << endl;
@@ -418,16 +418,16 @@ graph *getMapGraph(Map *m)
 }
 
 /**
-* addMapEdges(map, graph, x, y)
+* AddMapEdges(map, graph, x, y)
  *
- * This is a helper function for getMapGraph that does the work of adding
+ * This is a helper function for GetMapGraph that does the work of adding
  * the graph edges. Each edge is only added once, so while the graph has
  * directional edges, we treat them as being bidirectional.
  */
 static const int gEdgeProb = 100;
 static const int gStraightEdgeProb = 100;
 
-void addMapEdges(Map *m, graph *g, int x, int y)
+void AddMapEdges(Map *m, graph *g, int x, int y)
 {
 	// check 4 surrounding edges
 	// when we get two of them, we add the corresponding diagonal edge(?)...not yet
@@ -443,7 +443,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 			if ((random()%100) < gStraightEdgeProb)
 			{
 				e = new edge(m->getTile(x, y).tile1.node, m->getTile(x-1, y).tile1.node, 1);
-				g->addEdge(e);
+				g->AddEdge(e);
 			}
 		}
 		else if (m->getTile(x-1, y).tile2.node != kNoGraphNode)
@@ -451,7 +451,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 			if ((random()%100) < gStraightEdgeProb)
 			{
 				e = new edge(m->getTile(x, y).tile1.node, m->getTile(x-1, y).tile2.node, 1);
-				g->addEdge(e);
+				g->AddEdge(e);
 			}
 		}
 		if (e)
@@ -472,7 +472,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 						if ((random()%100) < gStraightEdgeProb)
 						{
 							e = new edge(m->getTile(x, y).tile1.node, m->getTile(x, y-1).tile1.node, 1);
-							g->addEdge(e);
+							g->AddEdge(e);
 						}
 					}
 				}
@@ -481,7 +481,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 					if ((random()%100) < gStraightEdgeProb)
 					{
 						e = new edge(m->getTile(x, y).tile1.node, m->getTile(x, y-1).tile2.node, 1);
-						g->addEdge(e);
+						g->AddEdge(e);
 					}
 				}
 			}
@@ -494,7 +494,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 					if ((random()%100) < gStraightEdgeProb)
 					{
 						e = new edge(m->getTile(x, y).tile2.node, m->getTile(x, y-1).tile1.node, 1);
-						g->addEdge(e);
+						g->AddEdge(e);
 					}
 				}
 			}
@@ -503,7 +503,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 				if ((random()%100) < gStraightEdgeProb)
 				{
 					e = new edge(m->getTile(x, y).tile2.node, m->getTile(x, y-1).tile2.node, 1);
-					g->addEdge(e);
+					g->AddEdge(e);
 				}
 			}
 		}
@@ -531,7 +531,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 					if ((random()%100) < gEdgeProb)
 					{
 						e = new edge(m->getTile(x, y).tile1.node, m->getTile(x-1, y-1).tile1.node, ROOT_TWO);
-						g->addEdge(e);
+						g->AddEdge(e);
 					}
 				}
 			}
@@ -540,7 +540,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 				if ((random()%100) < gEdgeProb)
 				{
 					e = new edge(m->getTile(x, y).tile1.node, m->getTile(x-1, y-1).tile2.node, ROOT_TWO);
-					g->addEdge(e);
+					g->AddEdge(e);
 				}
 			}
 			if (e)
@@ -568,7 +568,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 					if ((random()%100) < gEdgeProb)
 					{
 						e = new edge(m->getTile(x, y).tile1.node, m->getTile(x+1, y-1).tile1.node, ROOT_TWO);
-						g->addEdge(e);
+						g->AddEdge(e);
 					}
 				}
 			}
@@ -577,7 +577,7 @@ void addMapEdges(Map *m, graph *g, int x, int y)
 				if ((random()%100) < gEdgeProb)
 				{
 					e = new edge(m->getTile(x, y).tile2.node, m->getTile(x+1, y-1).tile1.node, ROOT_TWO);
-					g->addEdge(e);
+					g->AddEdge(e);
 				}
 			}
 			if (e)

@@ -123,7 +123,7 @@ path *aStar::getPathToNode(node *target, reservationProvider *rp)
 	}
 	if (currentOpenNode == target)
 	{
-		//		if (abstr->getAbstractionLevel(whence) == 0)
+		//		if (abstr->GetAbstractionLevel(whence) == 0)
 		path *p = extractPathToStart(g, currentOpenNode);
 		closedList.clear();
 		//openList.clear();
@@ -265,12 +265,12 @@ void aStar::addNeighborsToCorridor(graph *_g, node *n, int windowSize)
 bool aStar::nodeInCorridor(node *n)
 {
 	return ((eligibleNodes.size() == 0) ||
-					(eligibleNodes.find(abstr->getParent(n)) != eligibleNodes.end()));
+					(eligibleNodes.find(abstr->GetParent(n)) != eligibleNodes.end()));
 }
 
 double aStar::internalHeuristic(node *from, node *to)
 {
-	//	if ((abstr->getAbstractionLevel(from) >= gMaxAbstraction) || (abstraction == 0))
+	//	if ((abstr->GetAbstractionLevel(from) >= gMaxAbstraction) || (abstraction == 0))
 		return abstr->h(from, to);
-	//	return abstraction->getHVal(abstr->getParent(from));
+	//	return abstraction->getHVal(abstr->GetParent(from));
 }

@@ -44,35 +44,35 @@ public:
 	virtual ~MapAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
 	virtual MapAbstraction *clone(Map *) = 0;
-	node *getNodeFromMap(int x, int y, tCorner c = kNone) { return abstractions[0]->getNode(m->getNodeNum(x, y, c)); }
-	void getTileFromNode(node *n, int &x, int &y);
-	void getRandomTileFromNode(node *n, int &x, int &y);
+	node *GetNodeFromMap(int x, int y, tCorner c = kNone) { return abstractions[0]->getNode(m->getNodeNum(x, y, c)); }
+	void GetTileFromNode(node *n, int &x, int &y);
+	void GetRandomTileFromNode(node *n, int &x, int &y);
 
 	/** Given a location (recVec) return the tile under that location */
-	void getTileUnderLoc(int &x, int &y, const recVec &);
+	void GetTileUnderLoc(int &x, int &y, const recVec &);
 
 	Map* GetMap() { return m; }
 	MapAbstraction *GetMapAbstraction() { return this; }
 
 	virtual double h(node *a, node *b);
 	
-	double octileDistance(double,double,double,double);
+	double OctileDistance(double,double,double,double);
 	
 	// display functions
 	virtual void OpenGLDraw(int window);
-	void toggleDrawAbstraction(int which);
-	void clearMarkedNodes();
-	recVec getNodeLoc(node *n);
+	void ToggleDrawAbstraction(int which);
+	void ClearMarkedNodes();
+	recVec GetNodeLoc(node *n);
 private:
 		
-	void drawLevelConnections(node *n);
-	void drawGraph(graph *g);
+	void DrawLevelConnections(node *n);
+	void DrawGraph(graph *g);
 	
 	Map *m;
 	unsigned long levelDraw;
 };
 
-graph *getMapGraph(Map *m);
-void addMapEdges(Map *m, graph *g, int x, int y);
+graph *GetMapGraph(Map *m);
+void AddMapEdges(Map *m, graph *g, int x, int y);
 
 #endif

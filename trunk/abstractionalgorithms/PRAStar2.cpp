@@ -95,7 +95,7 @@ void praStar2::setupSearch(GraphAbstraction *aMap,
 	if (verbose)
 		printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
 	
-	aMap->getParentHierarchy(from, to, fromChain, toChain);
+	aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
 	
 	//Check for fixed plan level and dynamic plan level
 	selectTopAbstractionLevel(aMap, fromChain,toChain);
@@ -122,7 +122,7 @@ void praStar2::selectTopAbstractionLevel(GraphAbstraction *aMap,
 		// Dynamically find middle of hierarchy to start planning
 		
 		unsigned int previousSize = fromChain.size();
-		int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(aMap->getAbstractionLevel(fromChain[0]))->getNumNodes()));
+		int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(aMap->GetAbstractionLevel(fromChain[0]))->getNumNodes()));
 		
 		while ((fromChain.size() > 2) && 
 					 ((fromChain.size() > (previousSize)/2) ||

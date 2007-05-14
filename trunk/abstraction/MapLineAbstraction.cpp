@@ -39,39 +39,39 @@ bool MapLineAbstraction::MapLineAbstraction::Pathable(node *from, node *to)
 
 // utility functions
 /** verify that the hierarchy is consistent */
-void MapLineAbstraction::verifyHierarchy()
+void MapLineAbstraction::VerifyHierarchy()
 {
 	assert(false); // not implemented
 }
 
-void MapLineAbstraction::removeNode(node *)
+void MapLineAbstraction::RemoveNode(node *)
 {
 	assert(false); // not implemented
 }
 
-void MapLineAbstraction::removeEdge(edge *, unsigned int)
+void MapLineAbstraction::RemoveEdge(edge *, unsigned int)
 {
 	assert(false); // not implemented
 }
 
-void MapLineAbstraction::addNode(node *)
+void MapLineAbstraction::AddNode(node *)
 {
 	assert(false); // not implemented
 }
 
-void MapLineAbstraction::addEdge(edge *, unsigned int)
+void MapLineAbstraction::AddEdge(edge *, unsigned int)
 {
 	assert(false); // not implemented
 }
 
-void MapLineAbstraction::repairAbstraction()
+void MapLineAbstraction::RepairAbstraction()
 {
 	assert(false); // not implemented
 }
 
 void MapLineAbstraction::buildAbstraction()
 {
-	abstractions.push_back(getMapGraph(GetMap()));
+	abstractions.push_back(GetMapGraph(GetMap()));
 	while (abstractions.back()->getNumEdges() > 0)
 	{
 //		printf("%d nodes and %d edges in graph %d\n",
@@ -114,11 +114,11 @@ void MapLineAbstraction::addNodes(graph *g)
 					if ((abstractions.size()%2) != 0) // vertical abstraction
 					{
 						//printf("->(%d, %d)\n", x+z*zstep, y);
-						nodes.push_back(getNodeFromMap(x+z*zstep, y));
+						nodes.push_back(GetNodeFromMap(x+z*zstep, y));
 					}
 					else {
 						//printf("->(%d, %d)\n", x, y+z*zstep);
-						nodes.push_back(getNodeFromMap(x, y+z*zstep));
+						nodes.push_back(GetNodeFromMap(x, y+z*zstep));
 					}
 					
 					if (nodes.back() == 0)
@@ -127,7 +127,7 @@ void MapLineAbstraction::addNodes(graph *g)
 						nodes.resize(0);
 						break;
 					}
-					parents.push_back(getNthParent(nodes.back(), abstractions.size()-1));
+					parents.push_back(GetNthParent(nodes.back(), abstractions.size()-1));
 					if ((parents.back() == 0) ||
 							(parents.back()->getLabelL(kParent) != -1) ||
 							((z > 0) && (!toAbstract->findEdge(parents[z]->getNum(), parents[z-1]->getNum()))))
@@ -240,7 +240,7 @@ void MapLineAbstraction::addEdges(graph *aGraph)
 			double weight = h(aGraph->getNode(from), aGraph->getNode(to));
 			f = new edge(from, to, weight);
 			f->setLabelL(kEdgeCapacity, 1);
-			aGraph->addEdge(f);
+			aGraph->AddEdge(f);
 		}
 		else if (f) f->setLabelL(kEdgeCapacity, f->getLabelL(kEdgeCapacity)+1);
 	}	
@@ -248,7 +248,7 @@ void MapLineAbstraction::addEdges(graph *aGraph)
 
 void MapLineAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
-	assert(getAbstractionLevel(n)+1 == getAbstractionLevel(parent));
+	assert(GetAbstractionLevel(n)+1 == GetAbstractionLevel(parent));
 	n->setLabelL(kParent, parent->getNum());
 	parent->setLabelL(kFirstData+parent->getLabelL(kNumAbstractedNodes), n->getNum());
 	parent->setLabelL(kNumAbstractedNodes, parent->getLabelL(kNumAbstractedNodes)+1);
@@ -258,7 +258,7 @@ void MapLineAbstraction::buildNodeIntoParent(node *n, node *parent)
 node *MapLineAbstraction::createParent(graph *g, node *n)
 {
 	node *parent;
-	g->addNode(parent = new node("??"));
+	g->AddNode(parent = new node("??"));
 	assert(parent!=NULL);
 	parent->setLabelL(kAbstractionLevel, n->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 	parent->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes

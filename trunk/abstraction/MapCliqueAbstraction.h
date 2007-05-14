@@ -40,7 +40,7 @@ public:
   virtual ~MapCliqueAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
 	virtual MapAbstraction *clone(Map *_m) { return new MapCliqueAbstraction(_m); }
-	virtual void verifyHierarchy();
+	virtual void VerifyHierarchy();
 //  virtual void draw();
 //  virtual void rebuild();
 //	virtual int getRevision() { return 0; }
@@ -48,23 +48,23 @@ public:
   bool Pathable(node *from, node *to);
   bool Pathable(unsigned int from, unsigned int to);
 	//path *getQuickPath(node *from, node *to);
-  void getParentHierarchy(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
-  //node *getNthParent(node *, int n);
+  void GetNumAbstractGraphs(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
+  //node *GetNthParent(node *, int n);
   
-  void clearMarkedNodes();
+  void ClearMarkedNodes();
   void clearDisplayLists();
 	
   // first step to allowing simple map adjustments...
-  virtual void removeNode(node *n);
-  void removeEdge(edge *e, unsigned int absLevel);
-	virtual void addNode(node *n);
-	virtual void addEdge(edge *e, unsigned int absLevel);
-  // this must be called after removeEdge, but removeNode will take care of itself
-  void repairAbstraction();
+  virtual void RemoveNode(node *n);
+  void RemoveEdge(edge *e, unsigned int absLevel);
+	virtual void AddNode(node *n);
+	virtual void AddEdge(edge *e, unsigned int absLevel);
+  // this must be called after RemoveEdge, but RemoveNode will take care of itself
+  void RepairAbstraction();
   node *findNodeParent(node *n);
   edge *findEdgeParent(edge *e, unsigned int absLevel);
 	
-	int measureRepairHits();
+	int MeasureRepairHits();
 //	virtual int getNumPrimitiveActions() = 0;
 //	virtual node *getNodeForPrimitiveAction(node *, int) = 0;
 protected:

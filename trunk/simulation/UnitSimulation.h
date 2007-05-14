@@ -101,13 +101,13 @@ public:
 	virtual void GetSuccessors(state nodeID, std::vector<state> &neighbors) = 0;
 	virtual void GetActions(state nodeID, std::vector<action> &actions) = 0;
 	virtual action GetAction(state s1, state s2) = 0;
-	virtual state ApplyAction(state s, action a) = 0;
+	virtual void ApplyAction(state &s, action a) = 0;
 	virtual OccupancyInterface<state, action> *GetOccupancyInfo() = 0;
 	virtual double HCost(state node1, state node2) = 0;
 	virtual double GCost(state node1, state node2) = 0;
 	virtual bool GoalTest(state node, state goal) = 0;
-	virtual uint32_t GetStateHash(state node) = 0;
-	virtual uint32_t GetActionHash(action act) = 0;
+	virtual uint64_t GetStateHash(state node) = 0;
+	virtual uint64_t GetActionHash(action act) = 0;
 	virtual void OpenGLDraw(int window) = 0;
 };
 
@@ -350,21 +350,23 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	bool success = false;
 	moveCost = 0;
 	state oldState = theUnit->currentState;
-	state newState = env->ApplyAction(theUnit->currentState, where);
+	env->ApplyAction(theUnit->currentState, where);
 	OccupancyInterface<state, action> *envInfo = env->GetOccupancyInfo();
 	
-	if ((!envInfo) || (envInfo->CanMove(oldState, newState)))
+	if ((!envInfo) || (envInfo->CanMove(oldState, theUnit->currentState)))
 	{
 		success = true;
-		theUnit->currentState = newState;
-		moveCost = env->GCost(oldState, newState)*theUnit->agent->GetSpeed();
-		theUnit->totalDistance += env->GCost(oldState, newState);
+		moveCost = env->GCost(oldState, theUnit->currentState)*theUnit->agent->GetSpeed();
+		theUnit->totalDistance += env->GCost(oldState, theUnit->currentState);
 		
 		if (envInfo)
 		{
 			envInfo->SetStateOccupied(oldState, false);
-			envInfo->SetStateOccupied(newState, true);
+			envInfo->SetStateOccupied(theUnit->currentState, true);
 		}
+	}
+	else {
+		theUnit->currentState = oldState;
 	}
 	
 	return success;

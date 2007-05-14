@@ -980,9 +980,9 @@ OSStatus buildGL(WindowRef window)
 		// setup viewport and prespective
 		resizeGL(pContextInfo, viewRect); // forces projection matrix update
 		
-		SetLighting (4);
+		SetLighting(4);
 		
-		SetPort (portSave);
+		SetPort(portSave);
 	}
 	return err;
 }

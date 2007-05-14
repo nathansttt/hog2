@@ -82,11 +82,11 @@ double patrolUnit::goToLoc(MapAbstraction *aMap, int which)
 	double pathCost=-1;
 	path *p;
 	node *from, *to;
-	from = aMap->getNodeFromMap(x, y); // gets my location
+	from = aMap->GetNodeFromMap(x, y); // gets my location
 	int tox, toy;
 	Locs[which]->getLocation(tox, toy);
 //	printf("Patrol unit going to %d, %d\n", tox, toy);
-	to = aMap->getNodeFromMap(tox, toy);
+	to = aMap->GetNodeFromMap(tox, toy);
 	p = a.getPath(aMap, from, to);
 	nodesExpanded += a.getNodesExpanded();
 	nodesTouched += a.getNodesTouched();

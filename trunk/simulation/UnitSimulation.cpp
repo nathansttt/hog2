@@ -1069,7 +1069,7 @@
 //		y2 = random()%map_height;
 //	} while ((map->getTerrainType(x2, y2) != terrain) ||
 //					 (map->getTerrainType(x1, y1) != terrain) ||
-//					 (!aMap->Pathable(aMap->getNodeFromMap(x1, y1), aMap->getNodeFromMap(x2, y2))) ||
+//					 (!aMap->Pathable(aMap->GetNodeFromMap(x1, y1), aMap->GetNodeFromMap(x2, y2))) ||
 //					 findUnit(x2, y2) || findUnit(x1, y1));
 //}
 //
@@ -1084,7 +1084,7 @@
 //		y2 = random()%map_height;
 //	} while ((map->getTerrainType(x2, y2) != terrain) ||
 //					 (map->getTerrainType(x1, y1) != terrain) ||
-//					 (!aMap->Pathable(aMap->getNodeFromMap(x1, y1), aMap->getNodeFromMap(x2, y2))) ||
+//					 (!aMap->Pathable(aMap->GetNodeFromMap(x1, y1), aMap->GetNodeFromMap(x2, y2))) ||
 //					 findUnit(x2, y2) || findUnit(x1, y1));
 //}
 //

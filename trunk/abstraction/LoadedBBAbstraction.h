@@ -24,7 +24,7 @@ class LoadedBBAbstraction : public GraphAbstraction {
 public:
   LoadedBBAbstraction(char *, char *);
   virtual ~LoadedBBAbstraction();
-	virtual void verifyHierarchy();
+	virtual void VerifyHierarchy();
   double h(node *a, node *b);
 	//  virtual void draw();
 	//  virtual void rebuild();
@@ -33,24 +33,24 @@ public:
   bool Pathable(node *from, node *to);
   bool Pathable(unsigned int from, unsigned int to);
 	//path *getQuickPath(node *from, node *to);
-  void getParentHierarchy(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
-  //node *getNthParent(node *, int n);
+  void GetNumAbstractGraphs(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
+  //node *GetNthParent(node *, int n);
   
-  //void clearMarkedNodes();
+  //void ClearMarkedNodes();
   void clearDisplayLists();
 	void OpenGLDraw(int window);
-	void toggleDrawAbstraction(int which);
-	void drawLevelConnections(node *n);
-	void drawGraph(graph *g);
-	recVec getNodeLoc(node *n);
+	void ToggleDrawAbstraction(int which);
+	void DrawLevelConnections(node *n);
+	void DrawGraph(graph *g);
+	recVec GetNodeLoc(node *n);
 	
   // first step to allowing simple loaded adjustments...
-//  virtual void removeNode(node *n);
-//  void removeEdge(edge *e, unsigned int absLevel);
-	virtual void addNode(node *n);
-	virtual void addEdge(edge *e, unsigned int absLevel);
-  // this must be called after removeEdge, but removeNode will take care of itself
-  //void repairAbstraction();
+//  virtual void RemoveNode(node *n);
+//  void RemoveEdge(edge *e, unsigned int absLevel);
+	virtual void AddNode(node *n);
+	virtual void AddEdge(edge *e, unsigned int absLevel);
+  // this must be called after RemoveEdge, but RemoveNode will take care of itself
+  //void RepairAbstraction();
   node *findNodeParent(node *n);
   edge *findEdgeParent(edge *e, unsigned int absLevel);
 private:
@@ -66,10 +66,10 @@ private:
 		int findBoundingBox(node *n);
 		unsigned long levelDraw;
 
-		virtual void removeNode(node *) { assert(false); }
+		virtual void RemoveNode(node *) { assert(false); }
 		/** remove edge from abstraction */
-		virtual void removeEdge(edge *, unsigned int) { assert(false); }
-		virtual void repairAbstraction() { }
+		virtual void RemoveEdge(edge *, unsigned int) { assert(false); }
+		virtual void RepairAbstraction() { }
 };
 
 #endif

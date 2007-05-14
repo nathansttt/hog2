@@ -41,9 +41,6 @@
 class SearchUnit : public AbsMapUnit {
 public:
 	SearchUnit(int x, int y, AbsMapUnit *target, SearchAlgorithm *alg);
-//	SearchUnit(int x, int y, unit *target, spreadExecSearchAlgorithm *alg);
-//	SearchUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, SearchAlgorithm *alg);
-//	SearchUnit(int _x, int _y, float _r, float _g, float _b, unit *_target, SearchAlgorithm *alg);
 	virtual ~SearchUnit();
 	virtual const char *GetName() { if (algorithm) return algorithm->getName(); return "none"; }
 	virtual SearchAlgorithm* getAlgorithm() { return algorithm; }

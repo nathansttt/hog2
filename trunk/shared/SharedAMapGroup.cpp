@@ -83,24 +83,24 @@ void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> 
 				num = map->getNodeNum(x1, y1);
 				graph *g = aMap->GetAbstractGraph(0);
 				if (!worldMap->adjacentEdges(x1, y1, kLeftEdge))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1)); aMap->removeEdge(e, 0); }
+				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentEdges(x1, y1, kRightEdge))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1)); aMap->removeEdge(e, 0); }
+				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentEdges(x1, y1, kTopEdge))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1, y1-1)); aMap->removeEdge(e, 0); }
+				{ edge *e = g->findEdge(num, map->getNodeNum(x1, y1-1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentEdges(x1, y1, kBottomEdge))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1, y1+1)); aMap->removeEdge(e, 0); }
+				{ edge *e = g->findEdge(num, map->getNodeNum(x1, y1+1)); aMap->RemoveEdge(e, 0); }
 
 				if (!worldMap->adjacentCorners(x1, y1, kTopLeft))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1-1)); aMap->removeEdge(e, 0); }
+				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1-1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentCorners(x1, y1, kTopRight))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1-1)); aMap->removeEdge(e, 0); }
+				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1-1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentCorners(x1, y1, kBottomLeft))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1+1)); aMap->removeEdge(e, 0); }
+				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1+1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentCorners(x1, y1, kBottomRight))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1+1)); aMap->removeEdge(e, 0); }
+				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1+1)); aMap->RemoveEdge(e, 0); }
 				
-				//aMap->removeNode(me);
+				//aMap->RemoveNode(me);
 				map->setTerrainType(x1, y1, (tTerrain)worldMap->getTerrainType(x1, y1));
 				changed = true;
 				
@@ -110,7 +110,7 @@ void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> 
 		}
 	}
 	if (changed)
-		aMap->repairAbstraction();
+		aMap->RepairAbstraction();
 }
 
 void SharedAMapGroup::OpenGLDraw(int window, AbsMapEnvironment *, SimulationInfo *)

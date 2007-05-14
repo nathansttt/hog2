@@ -27,7 +27,7 @@
 //    : m_map(m), m_graph(m->getGraph()), m_rows(rows), m_columns(columns) {}
 //  */
 //  MapEnv(Map* m)
-//    : m_abstrMap(0), m_map(m), m_graph(getMapGraph(m)), m_rows(m->getMapHeight()),
+//    : m_abstrMap(0), m_map(m), m_graph(GetMapGraph(m)), m_rows(m->getMapHeight()),
 //      m_columns(m->getMapWidth()) {}
 //	
 //  MapEnv(Map* m, graph* g)

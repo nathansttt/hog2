@@ -83,7 +83,7 @@ graph_object *graph::clone() const
 	{
     node *n = (node *)nodeIterNext(it);
     if (n) 
-      g->addNode((node*)n->clone());
+      g->AddNode((node*)n->clone());
     else
       break;
   }
@@ -98,7 +98,7 @@ graph *graph::cloneAll() const
 	{
     node *n = (node *)nodeIterNext(it);
     if (n)
-      g->addNode((node*)n->clone());
+      g->AddNode((node*)n->clone());
     else
       break;
   }
@@ -107,14 +107,14 @@ graph *graph::cloneAll() const
 	{
     edge *e = (edge *)edgeIterNext(ei);
     if (e)
-      g->addEdge((edge*)e->clone());
+      g->AddEdge((edge*)e->clone());
     else
       break;
   }
   return g;
 }
 
-int graph::addNode(node *n)
+int graph::AddNode(node *n)
 {
   if (n)
 	{
@@ -136,7 +136,7 @@ node *graph::getNode(unsigned int num)
   return 0;
 }
 
-void graph::addEdge(edge *e)
+void graph::AddEdge(edge *e)
 {
   if (e)
 	{
@@ -144,11 +144,11 @@ void graph::addEdge(edge *e)
     e->edgeNum = _edges.size()-1;
     //_edges[edge_index] = e;
     if (e->getFrom() < _nodes.size())
-      _nodes[e->getFrom()]->addEdge(e);
+      _nodes[e->getFrom()]->AddEdge(e);
     else
       cerr << "Adding edge from illegal index" << endl;
     if (e->getTo() < _nodes.size())
-      _nodes[e->getTo()]->addEdge(e);
+      _nodes[e->getTo()]->AddEdge(e);
     else
       cerr << "Adding edge to illegal index" << endl;
     //edge_index++;
@@ -268,11 +268,11 @@ edge *graph::edgeIterNext(edge_iterator &edge_iter) const
   return 0;
 }
 
-void graph::removeEdge(edge *e)
+void graph::RemoveEdge(edge *e)
 {
   //cout << "Removing edge " << e->edgeNum << " from " << e->from << " to " << e->to << endl;
-  getNode(e->from)->removeEdge(e);
-  getNode(e->to)->removeEdge(e);
+  getNode(e->from)->RemoveEdge(e);
+  getNode(e->to)->RemoveEdge(e);
   unsigned int oldLoc = e->edgeNum;
   edge *replacement = _edges.back();
   //cout << "Removing edge at " << oldLoc << " and putting " << replacement->edgeNum << " in its place" << endl;
@@ -293,7 +293,7 @@ void graph::removeEdge(edge *e)
 }
 
 // returns the node that had it's node number changed, if any
-node *graph::removeNode(node *n, unsigned int &oldID)
+node *graph::RemoveNode(node *n, unsigned int &oldID)
 {
   if (!n) return 0;
 	
@@ -304,7 +304,7 @@ node *graph::removeNode(node *n, unsigned int &oldID)
     //		cout << "incoming has " << n->_edgesIncoming.size() << " and outgoing has "
     //			<< n->_edgesOutgoing.size() << " edges" << endl;
     //		cout << "Going to remove " << e << " " << *e << endl;
-    if (e) removeEdge(e);
+    if (e) RemoveEdge(e);
     else   break;
   }
   //printf("_nodes size is %u\n", _nodes.size());
@@ -573,7 +573,7 @@ graph_object *node::clone() const
   return n;
 }
 
-void node::addEdge(edge *e)
+void node::AddEdge(edge *e)
 {
   if (e)
 	{
@@ -587,7 +587,7 @@ void node::addEdge(edge *e)
   }
 }
 
-void node::removeEdge(edge *e)
+void node::RemoveEdge(edge *e)
 {
   if (nodeNum == e->getTo())
 	{

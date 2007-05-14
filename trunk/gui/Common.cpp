@@ -287,7 +287,7 @@ void initialConditions(pRecContext pContextInfo)
 	pContextInfo->points = 0;
 	pContextInfo->showCredits = 1;
 	pContextInfo->lighting = 4;
-	SetLighting(pContextInfo->lighting);
+	SetLighting(4);
 //	pContextInfo->paused = false;
 	pContextInfo->drawing = true;
 	pContextInfo->numPorts = 3;

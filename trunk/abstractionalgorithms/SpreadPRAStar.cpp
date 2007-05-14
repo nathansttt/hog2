@@ -119,7 +119,7 @@ void spreadPRAStar::setupSearch(GraphAbstraction *_aMap,
 //    return new path(from, new path(to));
 //  }
 	
-  _aMap->getParentHierarchy(from, to, fromChain, toChain);
+  _aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
 	//	assert(aMap->GetAbstractGraph(fromChain.back()->getLabelL(kAbstractionLevel))->
 	//					findEdge(fromChain.back()->getNum(), toChain.back()->getNum()));
 	

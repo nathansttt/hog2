@@ -43,10 +43,10 @@ void doRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 	static node *r1 = 0, *r2 = 0;
 	graph *g = aMap->GetAbstractGraph(0);
 	//if (verbose) cout << "Clearing marked nodes" << endl;
-	//aMap->clearMarkedNodes();
+	//aMap->ClearMarkedNodes();
 	
-	//	r1 = ((MapAbstraction*)aMap)->getNodeFromMap(257, 449);
-	//	r2 = ((MapAbstraction*)aMap)->getNodeFromMap(319, 458);
+	//	r1 = ((MapAbstraction*)aMap)->GetNodeFromMap(257, 449);
+	//	r2 = ((MapAbstraction*)aMap)->GetNodeFromMap(319, 458);
 	if ((!repeat) || (r1 == 0) || (r2 == 0))
 	{
 		lastLength = 0;

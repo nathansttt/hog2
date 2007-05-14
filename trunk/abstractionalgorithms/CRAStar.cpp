@@ -160,7 +160,7 @@ void craStar::setupSearch(GraphAbstraction *aMap,
 	if (verbose)
 		printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
 	
-	aMap->getParentHierarchy(from, to, fromChain, toChain);
+	aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
 	
 	unsigned int previousSize = fromChain.size();
 	int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(0)->getNumNodes()));
@@ -258,7 +258,7 @@ path *craStar::doRefinement(GraphAbstraction *aMap, path* absPath, std::vector<n
 		}
 		node* currentLow = from;
 		
-		assert(aMap->getNthParent(currentLow,abstractLevel) == apath->n);
+		assert(aMap->GetNthParent(currentLow,abstractLevel) == apath->n);
 		
 		apath = apath->next;
 		path* returnPath = new path(currentLow);
@@ -342,14 +342,14 @@ node* craStar::getNextNode(GraphAbstraction *aMap, node* currentLow, path* retur
 	{
 		nodesTouched++;
 		node* neigh = g->getNode(neighborNode);
-		if (aMap->getNthParent(neigh,abstractLevel) == apath->n)
+		if (aMap->GetNthParent(neigh,abstractLevel) == apath->n)
 		{
 			
 			returnPath->tail()->next = new path(neigh);
 			currentLow = neigh;
 			break;
 		}
-		else if (aMap->getNthParent(neigh,abstractLevel) == aMap->getNthParent(currentLow,abstractLevel))
+		else if (aMap->GetNthParent(neigh,abstractLevel) == aMap->GetNthParent(currentLow,abstractLevel))
 		{
 			
 			// same parent as current node --> add to array
@@ -382,7 +382,7 @@ node* craStar::getNextNode(GraphAbstraction *aMap, node* currentLow, path* retur
 			nodesTouched++;
 			node* n2 = g->getNode(n2num);
 			
-			if (aMap->getNthParent(n2,abstractLevel) == apath->n)
+			if (aMap->GetNthParent(n2,abstractLevel) == apath->n)
 			{
 				
 				g->findEdge(currentLow->getNum(),neigh->getNum())->setMarked(true);
@@ -416,7 +416,7 @@ node* craStar::getNextNode(GraphAbstraction *aMap, node* currentLow, path* retur
 					
 					nodesTouched++;
 					node* n2 = g->getNode(nnum);
-					if (aMap->getNthParent(n2,abstractLevel) == apath->n)
+					if (aMap->GetNthParent(n2,abstractLevel) == apath->n)
 					{
 						
 						g->findEdge(currentLow->getNum(),neigh->getNum())->setMarked(true);
@@ -793,28 +793,28 @@ node* craStar::getNextNode(MapAbstraction *m,int x, int y, int dir)
 	switch(dir)
 	{
 		case NORTH:
-			return m->getNodeFromMap(x,y+1);
+			return m->GetNodeFromMap(x,y+1);
 			break;
 		case EAST:
-			return m->getNodeFromMap(x+1,y);
+			return m->GetNodeFromMap(x+1,y);
 			break;
 		case SOUTH:
-			return m->getNodeFromMap(x, y-1);
+			return m->GetNodeFromMap(x, y-1);
 			break;
 		case WEST:
-			return m->getNodeFromMap(x-1, y);
+			return m->GetNodeFromMap(x-1, y);
 			break;
 		case NE:
-			return m->getNodeFromMap(x+1, y+1);
+			return m->GetNodeFromMap(x+1, y+1);
 			break;
 		case SE:
-			return m->getNodeFromMap(x+1, y-1);
+			return m->GetNodeFromMap(x+1, y-1);
 			break;
 		case SW:
-			return m->getNodeFromMap(x-1, y-1);
+			return m->GetNodeFromMap(x-1, y-1);
 			break;
 		case NW:
-			return m->getNodeFromMap(x-1, y+1);
+			return m->GetNodeFromMap(x-1, y+1);
 			break;
 		default:
 			return 0;

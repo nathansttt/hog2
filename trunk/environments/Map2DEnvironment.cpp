@@ -105,7 +105,7 @@ tDirection MapEnvironment::GetAction(xyLoc s1, xyLoc s2)
 	return (tDirection)result;
 }
 
-xyLoc MapEnvironment::ApplyAction(xyLoc s, tDirection dir)
+void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 {
 	xyLoc old = s;
 	switch (dir)
@@ -121,8 +121,8 @@ xyLoc MapEnvironment::ApplyAction(xyLoc s, tDirection dir)
 		default: break;
 	}
 	if (map->canStep(s.x, s.y, old.x, old.y))
-		return s;
-	return old;
+		return;
+	s = old;
 }
 
 double MapEnvironment::HCost(xyLoc l1, xyLoc l2)
@@ -145,12 +145,12 @@ bool MapEnvironment::GoalTest(xyLoc node, xyLoc goal)
 	return ((node.x == goal.x) && (node.y == goal.y));
 }
 
-uint32_t MapEnvironment::GetStateHash(xyLoc node)
+uint64_t MapEnvironment::GetStateHash(xyLoc node)
 {
 	return (node.x<<16)|node.y;
 }
 
-uint32_t MapEnvironment::GetActionHash(tDirection act)
+uint64_t MapEnvironment::GetActionHash(tDirection act)
 {
 	return (uint32_t) act;
 }

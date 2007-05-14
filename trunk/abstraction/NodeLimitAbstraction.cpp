@@ -59,45 +59,45 @@ bool NodeLimitAbstraction::Pathable(node *from, node *to)
 
 // utility functions
 /** verify that the hierarchy is consistent */
-void NodeLimitAbstraction::verifyHierarchy()
+void NodeLimitAbstraction::VerifyHierarchy()
 {
 }
 
 // hierarchical modifications
 /** remove node from abstraction */
-void NodeLimitAbstraction::removeNode(node *)
+void NodeLimitAbstraction::RemoveNode(node *)
 {
 }
 
 /** remove edge from abstraction */
-void NodeLimitAbstraction::removeEdge(edge *, unsigned int)
+void NodeLimitAbstraction::RemoveEdge(edge *, unsigned int)
 {
 }
 
 /** add node to abstraction */
-void NodeLimitAbstraction::addNode(node *)
+void NodeLimitAbstraction::AddNode(node *)
 {
 	// add it to the 
 	assert(false);
 }
 
 /** add edge to abstraction */
-void NodeLimitAbstraction::addEdge(edge *, unsigned int)
+void NodeLimitAbstraction::AddEdge(edge *, unsigned int)
 {
 	assert(false);
 	// if each end is already connected who cares -- doesn't mess anything up -- just add it throughout
 }
 
 /** This must be called after any of the above add/remove operations. But the
-operations can be stacked followed by a single repairAbstraction call. */
-void NodeLimitAbstraction::repairAbstraction()
+operations can be stacked followed by a single RepairAbstraction call. */
+void NodeLimitAbstraction::RepairAbstraction()
 {
 }
 
 void NodeLimitAbstraction::buildAbstraction()
 {
 	//inefficient for the moment
-	abstractions.push_back(getMapGraph(GetMap()));
+	abstractions.push_back(GetMapGraph(GetMap()));
 	while (abstractions.back()->getNumEdges() > 0)
 	{
 		graph *g = new graph();
@@ -119,7 +119,7 @@ void NodeLimitAbstraction::addNodes(graph *g)
 		if (next->getLabelL(kParent) == -1)
 		{
 			node *parent;
-			g->addNode(parent = new node("??"));
+			g->AddNode(parent = new node("??"));
 			assert(parent!=NULL);
 			parent->setLabelL(kAbstractionLevel, next->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 			parent->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
@@ -147,7 +147,7 @@ void NodeLimitAbstraction::addEdges(graph *aGraph)
 			double weight = h(aGraph->getNode(from), aGraph->getNode(to));
 			f = new edge(from, to, weight);
 			f->setLabelL(kEdgeCapacity, 1);
-			aGraph->addEdge(f);
+			aGraph->AddEdge(f);
 		}
 		else if (f) f->setLabelL(kEdgeCapacity, f->getLabelL(kEdgeCapacity)+1);
 	}	
@@ -206,7 +206,7 @@ void NodeLimitAbstraction::abstractionBFS(node *which, node *parent, int count)
 
 void NodeLimitAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
-	assert(getAbstractionLevel(n)+1 == getAbstractionLevel(parent));
+	assert(GetAbstractionLevel(n)+1 == GetAbstractionLevel(parent));
 	n->setLabelL(kParent, parent->getNum());
 	parent->setLabelL(kFirstData+parent->getLabelL(kNumAbstractedNodes), n->getNum());
 	parent->setLabelL(kNumAbstractedNodes, parent->getLabelL(kNumAbstractedNodes)+1);

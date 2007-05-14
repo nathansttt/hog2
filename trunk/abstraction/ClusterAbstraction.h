@@ -67,7 +67,7 @@ public:
      m_width(width),m_height(height)
   {}
 
-  void addNode(int);
+  void AddNode(int);
   int getIthNodeNum(int i) const { return nodes[i];}
   int getNumNodes() const { return nodes.size(); }
   int getHOrig() const { return m_horizOrigin; }
@@ -143,13 +143,13 @@ public:
 
 	int getClusterSize() { return clusterSize; };  
   bool Pathable(node* start, node* goal);
-  void verifyHierarchy() {}
+  void VerifyHierarchy() {}
   void removeNodes(node* start, node* goal);
-	void removeNode(node*) {}
-  void removeEdge(edge*, unsigned int) {}
-  void addNode(node*) {}
-  void addEdge(edge*, unsigned int) {}
-  void repairAbstraction() {}
+	void RemoveNode(node*) {}
+  void RemoveEdge(edge*, unsigned int) {}
+  void AddNode(node*) {}
+  void AddEdge(edge*, unsigned int) {}
+  void RepairAbstraction() {}
 	node* insertNode(node* n, int& expanded, int& touched); 
 	path* getCachedPath(edge* e);
 	node* getLowLevelNode(node* abstract);

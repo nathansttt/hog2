@@ -110,7 +110,7 @@ public:
 	int getMemoryUsage();
 private:
 	//	long nodesTouched, nodesExpanded;
-	inline node *ABSNode(node *n) { return abstr->getNthParent(n, absLevel); }
+	inline node *ABSNode(node *n) { return abstr->GetNthParent(n, absLevel); }
 	path *getPathToNode(node *target, reservationProvider *rp);
 	path *extractPathToStart(graph *g, node *n);
 	node *getNextNode();

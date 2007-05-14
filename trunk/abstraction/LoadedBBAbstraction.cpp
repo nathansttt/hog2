@@ -109,7 +109,7 @@ double LoadedBBAbstraction::h(node *a, node *b)
 	return sqrt(d1*d1+d2*d2+d3*d3);
 }
 
-void LoadedBBAbstraction::toggleDrawAbstraction(int which)
+void LoadedBBAbstraction::ToggleDrawAbstraction(int which)
 {
   bool drawThis = ((levelDraw>>which)&0x1);
   if (!drawThis)
@@ -123,7 +123,7 @@ void LoadedBBAbstraction::OpenGLDraw(int window)
 	glDisable(GL_LIGHTING);
   for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
-    if ((levelDraw >> x) & 1) drawGraph(abstractions[x]);
+    if ((levelDraw >> x) & 1) DrawGraph(abstractions[x]);
     //glCallList(displayLists[x]);
   }
 	if (levelDraw&1)
@@ -137,7 +137,7 @@ void LoadedBBAbstraction::OpenGLDraw(int window)
 	glEnable(GL_LIGHTING);
 }
 
-void LoadedBBAbstraction::drawGraph(graph *g)
+void LoadedBBAbstraction::DrawGraph(graph *g)
 {
 		if ((g == 0) || (g->getNumNodes() == 0)) return;
 		
@@ -157,22 +157,22 @@ void LoadedBBAbstraction::drawGraph(graph *g)
 			else if (abLevel%2)
 				glColor4f(1-((GLfloat)(abLevel%15)/15.0), ((GLfloat)(abLevel%15)/15.0), 0, 1);
 			else glColor4f(((GLfloat)(abLevel%15)/15.0), 1-((GLfloat)(abLevel%15)/15.0), 0, 1);
-			recVec rv = getNodeLoc(n);
+			recVec rv = GetNodeLoc(n);
 			glVertex3f(rv.x, rv.y, rv.z);
 			
 			n = g->getNode(e->getTo());
-			rv = getNodeLoc(n);
+			rv = GetNodeLoc(n);
 			
 			glVertex3f(rv.x, rv.y, rv.z);
 		}
 		ni = g->getNodeIter();
 		for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
-			drawLevelConnections(n);
+			DrawLevelConnections(n);
 		glEnd();
 		//  if (verbose&kBuildGraph) printf("Done\n");
 }
 
-void LoadedBBAbstraction::drawLevelConnections(node *n)
+void LoadedBBAbstraction::DrawLevelConnections(node *n)
 {
   //	int x, y;
   //	double offsetx, offsety;
@@ -182,9 +182,9 @@ void LoadedBBAbstraction::drawLevelConnections(node *n)
   if (n->getLabelL(kAbstractionLevel) == 0) return;
   else {
     glColor4f(.6, .6, .6, .6);
-    recVec v = getNodeLoc(n);
+    recVec v = GetNodeLoc(n);
     for (int cnt = 0; cnt < n->getLabelL(kNumAbstractedNodes); cnt++) {
-      recVec v1 = getNodeLoc(abstractions[n->getLabelL(kAbstractionLevel)-1]->getNode(n->getLabelL(kFirstData+cnt)));
+      recVec v1 = GetNodeLoc(abstractions[n->getLabelL(kAbstractionLevel)-1]->getNode(n->getLabelL(kFirstData+cnt)));
       glVertex3f(v.x, v.y, v.z);
       glVertex3f(v1.x, v1.y, v1.z);
     }
@@ -192,7 +192,7 @@ void LoadedBBAbstraction::drawLevelConnections(node *n)
   //return ans;
 }
 
-recVec LoadedBBAbstraction::getNodeLoc(node *n)
+recVec LoadedBBAbstraction::GetNodeLoc(node *n)
 {
 	//  double offsetx, offsety;
   recVec ans;
@@ -209,7 +209,7 @@ recVec LoadedBBAbstraction::getNodeLoc(node *n)
 	for (int cnt = 0; cnt < n->getLabelL(kNumAbstractedNodes); cnt++) {
 		int absLevel = n->getLabelL(kAbstractionLevel)-1;
 		node *nextChild = abstractions[absLevel]->getNode(n->getLabelL(kFirstData+cnt));
-		recVec tmp = getNodeLoc(nextChild);
+		recVec tmp = GetNodeLoc(nextChild);
 		int weight = nextChild->getLabelL(kNumAbstractedNodes);
 		totNodes += weight;
 		ans.x += weight*tmp.x;
@@ -268,7 +268,7 @@ graph *LoadedBBAbstraction::loadGraph(char *fname)
 			if (IDS.size() <= (unsigned int)ID)
 				IDS.resize(ID+1);
 			node *n;
-			IDS[ID] = g->addNode(n = new node("l1"));
+			IDS[ID] = g->AddNode(n = new node("l1"));
 			n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
 			n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
 			n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -280,14 +280,14 @@ graph *LoadedBBAbstraction::loadGraph(char *fname)
 		else {
 			int ID1, ID2;
 			sscanf(nextLine, "%d %d", &ID1, &ID2);
-			g->addEdge(new edge(IDS[ID1], IDS[ID2], h(g->getNode(ID1), g->getNode(ID2))));
+			g->AddEdge(new edge(IDS[ID1], IDS[ID2], h(g->getNode(ID1), g->getNode(ID2))));
 			//printf("Loaded edge between %d and %d\n", ID1, ID2);
 		}
 	}
 	return g;
 }
 
-void LoadedBBAbstraction::verifyHierarchy()
+void LoadedBBAbstraction::VerifyHierarchy()
 {
 	cout << "VERIFY START" << endl;
 	for (unsigned int x = 0; x < abstractions.size(); x++)
@@ -334,8 +334,8 @@ void LoadedBBAbstraction::verifyHierarchy()
 			}
 			else {
 //				int x1, y1;
-//				getTileFromNode(n, x1, y1);
-//				if (n != getNodeFromMap(x1, y1))
+//				GetTileFromNode(n, x1, y1);
+//				if (n != GetNodeFromMap(x1, y1))
 //					cout << "VERIFY: node doesn't correspond to underlying map" << endl << *n << endl;
 			}
 		}
@@ -481,7 +481,7 @@ graph *LoadedBBAbstraction::abstractGraph(graph *g)
 			double weight = h(aGraph->getNode(from), aGraph->getNode(to));
 			f = new edge(from, to, weight);
 			f->setLabelL(kEdgeCapacity, 1);
-			aGraph->addEdge(f);
+			aGraph->AddEdge(f);
 			//printf("Adding edge to graph!\n");
 		}
 		else if (f) f->setLabelL(kEdgeCapacity, f->getLabelL(kEdgeCapacity)+1);
@@ -536,7 +536,7 @@ void LoadedBBAbstraction::addNodeToParent(node *n, node *parent)
 node *LoadedBBAbstraction::createNewParent(graph *g, node *n)
 {
 	node *newNode = new node("l1");
-	g->addNode(newNode);
+	g->AddNode(newNode);
 	newNode->setLabelL(kAbstractionLevel, n->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
 	newNode->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
 	newNode->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
@@ -570,17 +570,17 @@ bool LoadedBBAbstraction::Pathable(node *from, node *to)
 }
 
 
-void LoadedBBAbstraction::addNode(node *n)
+void LoadedBBAbstraction::AddNode(node *n)
 {
 }
 
-void LoadedBBAbstraction::addEdge(edge *e, unsigned int absLevel)
+void LoadedBBAbstraction::AddEdge(edge *e, unsigned int absLevel)
 {
 }
 
 //	// for now we'll immediately handle splits, but in the future we should queue up splits
 //// and process them in batch form(?)
-//void LoadedBBAbstraction::removeEdge(edge *e, unsigned int absLevel)
+//void LoadedBBAbstraction::RemoveEdge(edge *e, unsigned int absLevel)
 //{
 //  return;
 //}
