@@ -11,23 +11,23 @@
 #include <math.h>
 #include "FPUtil.h"
 
-void GenericIDAStar::getPath(SearchEnvironment *env, uint32_t from, uint32_t to,
+void GenericIDAStar::GetPath(SearchEnvironment *env, uint32_t from, uint32_t to,
 														 std::vector<uint32_t> &thePath)
 {
 	nextBound = 0;
 	nodesExpanded = nodesTouched = 0;
 	thePath.resize(0);
 	//updateNextBound(0, env->heuristic(from, to));
-	updateNextBound(0, floor(env->heuristic(from, to)));
+	UpdateNextBound(0, floor(env->heuristic(from, to)));
 	while (thePath.size() == 0)
 	{
 		nodeTable.clear();
 		printf("Starting iteration with bound %f\n", nextBound);
-		doIteration(env, from, from, to, thePath, nextBound, 0, 0);
+		DoIteration(env, from, from, to, thePath, nextBound, 0, 0);
 	}
 }
 
-double GenericIDAStar::doIteration(SearchEnvironment *env,
+double GenericIDAStar::DoIteration(SearchEnvironment *env,
 																	 uint32_t parent, uint32_t currState, uint32_t goal,
 																	 std::vector<uint32_t> &thePath, double bound, double g,
 																	 double maxH)
@@ -41,7 +41,7 @@ double GenericIDAStar::doIteration(SearchEnvironment *env,
 		h = maxH;
 	if (fgreater(g+h, bound))
 	{
-		updateNextBound(bound, g+h);
+		UpdateNextBound(bound, g+h);
 		//printf("Stopping at (%d, %d). g=%f h=%f\n", currState>>16, currState&0xFFFF, g, h);
 		return h;
 	}
@@ -66,7 +66,7 @@ double GenericIDAStar::doIteration(SearchEnvironment *env,
 			continue;
 		thePath.push_back(neighbors[x]);
 		double edgeCost = env->gcost(currState, neighbors[x]);
-		double childH = doIteration(env, currState, neighbors[x], goal, thePath, bound,
+		double childH = DoIteration(env, currState, neighbors[x], goal, thePath, bound,
 																g+edgeCost, maxH - edgeCost);
 		if (thePath.back() == goal)
 			return 0;
@@ -78,7 +78,7 @@ double GenericIDAStar::doIteration(SearchEnvironment *env,
 			h = childH-edgeCost;
 			if (fgreater(g+h, bound))
 			{
-				updateNextBound(bound, g+h);
+				UpdateNextBound(bound, g+h);
 				return h;
 			}
 		}
@@ -86,7 +86,7 @@ double GenericIDAStar::doIteration(SearchEnvironment *env,
 	return h;
 }
 
-void GenericIDAStar::updateNextBound(double currBound, double fCost)
+void GenericIDAStar::UpdateNextBound(double currBound, double fCost)
 {
 	fCost = floor(fCost);
 	if (!fgreater(nextBound, currBound))

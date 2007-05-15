@@ -12,8 +12,8 @@
 
 #include <stdint.h>
 #include <iostream>
+#include "SearchEnvironment.h"
 #include "UnitSimulation.h"
-
 
 class MNPuzzleState {
 public:
@@ -59,15 +59,15 @@ class MNPuzzle : SearchEnvironment<MNPuzzleState, slideDir> {
 public:
 	MNPuzzle(int width, int height);
 	~MNPuzzle();
-	void GetSuccessors(MNPuzzleState stateID, std::vector<MNPuzzleState> &neighbors);
-	void GetActions(MNPuzzleState stateID, std::vector<slideDir> &actions);
+	void GetSuccessors(MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors);
+	void GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions);
 	slideDir GetAction(MNPuzzleState &s1, MNPuzzleState &s2);
 	void ApplyAction(MNPuzzleState &s, slideDir a);
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
 	double HCost(MNPuzzleState &state1, MNPuzzleState &state2);
 	double GCost(MNPuzzleState &state1, MNPuzzleState &state2);
 	bool GoalTest(MNPuzzleState &state, MNPuzzleState &goal);
-	uint64_t GetStateHash(MNPuzzleState state);
+	uint64_t GetStateHash(MNPuzzleState &state);
 	uint64_t GetActionHash(slideDir act);
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, MNPuzzleState &s);

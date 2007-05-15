@@ -14,7 +14,9 @@
 #include <iostream>
 #include "Map.h"
 #include "MapAbstraction.h"
+#include "SearchEnvironment.h"
 #include "UnitSimulation.h"
+#include "ReservationProvider.h"
 
 struct xyLoc {
 public:
@@ -51,8 +53,8 @@ class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 public:
 	MapEnvironment(Map *m);
 	virtual ~MapEnvironment();
-	void GetSuccessors(xyLoc nodeID, std::vector<xyLoc> &neighbors);
-	void GetActions(xyLoc nodeID, std::vector<tDirection> &actions);
+	void GetSuccessors(xyLoc &nodeID, std::vector<xyLoc> &neighbors);
+	void GetActions(xyLoc &nodeID, std::vector<tDirection> &actions);
 	tDirection GetAction(xyLoc &s1, xyLoc &s2);
 	void ApplyAction(xyLoc &s, tDirection dir);
 	virtual OccupancyInterface<xyLoc, tDirection> *GetOccupancyInfo() { return 0; }
@@ -60,7 +62,7 @@ public:
 	double HCost(xyLoc &node1, xyLoc &node2);
 	double GCost(xyLoc &node1, xyLoc &node2);
 	bool GoalTest(xyLoc &node, xyLoc &goal);
-	uint64_t GetStateHash(xyLoc node);
+	uint64_t GetStateHash(xyLoc &node);
 	uint64_t GetActionHash(tDirection act);
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, xyLoc &l);

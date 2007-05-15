@@ -10,6 +10,10 @@
 #ifndef SEARCHENVIRONMENT_H
 #define SEARCHENVIRONMENT_H
 
+#include <stdint.h>
+#include <vector>
+#include "ReservationProvider.h"
+
 template <class state, class action>
 class SearchEnvironment {
 public:

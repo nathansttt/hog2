@@ -597,7 +597,7 @@ void ClusterAbstraction::computeClusterPaths(graph* g)
 				ClusterSearchEnvironment cse(this, GetAbstractionLevel(start));
 				cse.setCorridor(corridor);
 				std::vector<uint32_t> resultPath;
-				astar.getPath(&cse, start->getNum(), goal->getNum(),
+				astar.GetPath(&cse, start->getNum(), goal->getNum(),
 											resultPath);
 				path *p = 0;
 				for (unsigned int x = 0; x < resultPath.size(); x++)
@@ -803,7 +803,7 @@ void ClusterAbstraction::setUpParents(graph* g)
 						ClusterSearchEnvironment cse(this, GetAbstractionLevel(low));
 						cse.setCorridor(corridor);
 						std::vector<uint32_t> resultPath;
-						astar.getPath(&cse, low->getNum(), mnode->getNum(),
+						astar.GetPath(&cse, low->getNum(), mnode->getNum(),
 													resultPath);
 						path *p = 0;
 						for (unsigned int t = 0; t < resultPath.size(); t++)
@@ -1113,14 +1113,14 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 			ClusterSearchEnvironment cse(this, GetAbstractionLevel(n));
 			cse.setCorridor(corridor);
 			std::vector<uint32_t> resultPath;
-			astar.getPath(&cse, n->getNum(), goal->getNum(),
+			astar.GetPath(&cse, n->getNum(), goal->getNum(),
 										resultPath);
 			path *p = 0;
 			for (unsigned int x = 0; x < resultPath.size(); x++)
 				p = new path(GetAbstractGraph(n)->getNode(resultPath[x]), p);
 			
-			expanded += astar.getNodesExpanded();
-			touched += astar.getNodesTouched();
+			expanded += astar.GetNodesExpanded();
+			touched += astar.GetNodesTouched();
 			
 			if (p!=0)
 			{

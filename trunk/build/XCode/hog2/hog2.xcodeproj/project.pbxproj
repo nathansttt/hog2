@@ -11,7 +11,6 @@
 		C4339AB80BEBA6B3002B8108 /* EpisodicSimulation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4810BCEE7B200FCD84C /* EpisodicSimulation.cpp */; };
 		C4339D030BF2676B002B8108 /* MNPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4339D020BF2676B002B8108 /* MNPuzzle.cpp */; };
 		C4339E230BF28575002B8108 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4339E0F0BF28575002B8108 /* GLUT.framework */; };
-		C433A21A0BF8F9F7002B8108 /* AbstractionSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2420BCEE7B000FCD84C /* AbstractionSearchEnvironment.cpp */; };
 		C433A21B0BF8F9F7002B8108 /* ClusterAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2440BCEE7B000FCD84C /* ClusterAbstraction.cpp */; };
 		C433A21C0BF8F9F7002B8108 /* GraphAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2460BCEE7B000FCD84C /* GraphAbstraction.cpp */; };
 		C433A21D0BF8F9F7002B8108 /* LoadedBBAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2480BCEE7B000FCD84C /* LoadedBBAbstraction.cpp */; };
@@ -33,9 +32,7 @@
 		C433A22D0BF8F9F7002B8108 /* SpreadPRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2690BCEE7B000FCD84C /* SpreadPRAStar.cpp */; };
 		C433A22E0BF8F9F7002B8108 /* FringeSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B26C0BCEE7B000FCD84C /* FringeSearch.cpp */; };
 		C433A22F0BF8F9F7002B8108 /* GenericAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B26E0BCEE7B000FCD84C /* GenericAStar.cpp */; };
-		C433A2300BF8F9F7002B8108 /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2700BCEE7B000FCD84C /* GenericIDAStar.cpp */; };
 		C433A2310BF8F9F7002B8108 /* OpenClosedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2720BCEE7B000FCD84C /* OpenClosedList.cpp */; };
-		C433A2320BF8F9F7002B8108 /* SearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2740BCEE7B000FCD84C /* SearchEnvironment.cpp */; };
 		C433A2330BF8F9F7002B8108 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B27C0BCEE7B000FCD84C /* Graph.cpp */; };
 		C433A2340BF8F9F7002B8108 /* AStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B27F0BCEE7B000FCD84C /* AStar.cpp */; };
 		C433A2350BF8F9F7002B8108 /* AStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2810BCEE7B000FCD84C /* AStar2.cpp */; };
@@ -95,6 +92,9 @@
 		C433A2A20BF8FBF8002B8108 /* PuzzleSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A2A00BF8FBF8002B8108 /* PuzzleSample.cpp */; };
 		C433A2F20BF91330002B8108 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A2F10BF91330002B8108 /* RandomUnit.cpp */; };
 		C433A2F30BF91330002B8108 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A2F10BF91330002B8108 /* RandomUnit.cpp */; };
+		C433A4180BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A4170BFA4E03002B8108 /* SearchEnvironment.cpp */; };
+		C433A4190BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A4170BFA4E03002B8108 /* SearchEnvironment.cpp */; };
+		C433A4710BFA583E002B8108 /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2700BCEE7B000FCD84C /* GenericIDAStar.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
 		C4D3AFBB0BCEE5B800FCD84C /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF970BCEE5B800FCD84C /* main.nib */; };
 		C4D3AFBD0BCEE5B800FCD84C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9B0BCEE5B800FCD84C /* Info.plist */; };
@@ -195,6 +195,8 @@
 		C433A2A10BF8FBF8002B8108 /* PuzzleSample.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = PuzzleSample.h; sourceTree = "<group>"; };
 		C433A2F00BF91330002B8108 /* RandomUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RandomUnit.h; sourceTree = "<group>"; };
 		C433A2F10BF91330002B8108 /* RandomUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RandomUnit.cpp; sourceTree = "<group>"; };
+		C433A4160BFA4E03002B8108 /* SearchEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEnvironment.h; sourceTree = "<group>"; };
+		C433A4170BFA4E03002B8108 /* SearchEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SearchEnvironment.cpp; sourceTree = "<group>"; };
 		C4D3AF6E0BCEE5B800FCD84C /* 299.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = 299.icns; sourceTree = "<group>"; };
 		C4D3AF700BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4D3AF720BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
@@ -1778,6 +1780,8 @@
 				C4D3B4820BCEE7B200FCD84C /* EpisodicSimulation.h */,
 				C4D3B4850BCEE7B200FCD84C /* UnitSimulation.cpp */,
 				C4D3B4860BCEE7B200FCD84C /* UnitSimulation.h */,
+				C433A4170BFA4E03002B8108 /* SearchEnvironment.cpp */,
+				C433A4160BFA4E03002B8108 /* SearchEnvironment.h */,
 			);
 			name = simulation;
 			path = ../../../simulation;
@@ -2027,6 +2031,7 @@
 				C4339AB80BEBA6B3002B8108 /* EpisodicSimulation.cpp in Sources */,
 				C4339D030BF2676B002B8108 /* MNPuzzle.cpp in Sources */,
 				C433A2F20BF91330002B8108 /* RandomUnit.cpp in Sources */,
+				C433A4180BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2034,7 +2039,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C433A21A0BF8F9F7002B8108 /* AbstractionSearchEnvironment.cpp in Sources */,
 				C433A21B0BF8F9F7002B8108 /* ClusterAbstraction.cpp in Sources */,
 				C433A21C0BF8F9F7002B8108 /* GraphAbstraction.cpp in Sources */,
 				C433A21D0BF8F9F7002B8108 /* LoadedBBAbstraction.cpp in Sources */,
@@ -2056,9 +2060,7 @@
 				C433A22D0BF8F9F7002B8108 /* SpreadPRAStar.cpp in Sources */,
 				C433A22E0BF8F9F7002B8108 /* FringeSearch.cpp in Sources */,
 				C433A22F0BF8F9F7002B8108 /* GenericAStar.cpp in Sources */,
-				C433A2300BF8F9F7002B8108 /* GenericIDAStar.cpp in Sources */,
 				C433A2310BF8F9F7002B8108 /* OpenClosedList.cpp in Sources */,
-				C433A2320BF8F9F7002B8108 /* SearchEnvironment.cpp in Sources */,
 				C433A2330BF8F9F7002B8108 /* Graph.cpp in Sources */,
 				C433A2340BF8F9F7002B8108 /* AStar.cpp in Sources */,
 				C433A2350BF8F9F7002B8108 /* AStar2.cpp in Sources */,
@@ -2105,6 +2107,8 @@
 				C433A25F0BF8F9F7002B8108 /* MNPuzzle.cpp in Sources */,
 				C433A2A20BF8FBF8002B8108 /* PuzzleSample.cpp in Sources */,
 				C433A2F30BF91330002B8108 /* RandomUnit.cpp in Sources */,
+				C433A4190BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */,
+				C433A4710BFA583E002B8108 /* GenericIDAStar.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
