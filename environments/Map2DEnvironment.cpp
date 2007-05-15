@@ -20,7 +20,7 @@ MapEnvironment::~MapEnvironment()
 	delete map;
 }
 
-void MapEnvironment::GetSuccessors(xyLoc loc, std::vector<xyLoc> &neighbors)
+void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors)
 {
 	bool up=false, down=false;
 	if ((map->getTerrainType(loc.x, loc.y+1) == kGround))
@@ -51,7 +51,7 @@ void MapEnvironment::GetSuccessors(xyLoc loc, std::vector<xyLoc> &neighbors)
 	}
 }
 
-void MapEnvironment::GetActions(xyLoc loc, std::vector<tDirection> &actions)
+void MapEnvironment::GetActions(xyLoc &loc, std::vector<tDirection> &actions)
 {
 	bool up=false, down=false;
 	if ((map->getTerrainType(loc.x, loc.y+1) == kGround))
@@ -145,7 +145,7 @@ bool MapEnvironment::GoalTest(xyLoc &node, xyLoc &goal)
 	return ((node.x == goal.x) && (node.y == goal.y));
 }
 
-uint64_t MapEnvironment::GetStateHash(xyLoc node)
+uint64_t MapEnvironment::GetStateHash(xyLoc &node)
 {
 	return (node.x<<16)|node.y;
 }

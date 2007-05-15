@@ -32,7 +32,7 @@
 using namespace GenericAStarUtil;
 static const bool verbose = false;
 
-const char *GenericAStar::getName()
+const char *GenericAStar::GetName()
 {
 	static char name[32];
 	sprintf(name, "GenericAStar[]");
@@ -40,15 +40,15 @@ const char *GenericAStar::getName()
 }
 
 
-void GenericAStar::getPath(SearchEnvironment *_env, uint32_t from, uint32_t to,
+void GenericAStar::GetPath(SearchEnvironment *_env, uint32_t from, uint32_t to,
 													 std::vector<uint32_t> &thePath)
 {
-	if (!initializeSearch(_env, from, to, thePath))
+	if (!InitializeSearch(_env, from, to, thePath))
 		return;
-	while (!doSingleSearchStep(thePath)) {}
+	while (!DoSingleSearchStep(thePath)) {}
 }
 
-bool GenericAStar::initializeSearch(SearchEnvironment *_env, uint32_t from, uint32_t to,
+bool GenericAStar::InitializeSearch(SearchEnvironment *_env, uint32_t from, uint32_t to,
 																		std::vector<uint32_t> &thePath)
 {
 	env = _env;
@@ -70,7 +70,7 @@ bool GenericAStar::initializeSearch(SearchEnvironment *_env, uint32_t from, uint
 	return true;
 }
 
-bool GenericAStar::doSingleSearchStep(std::vector<uint32_t> &thePath)
+bool GenericAStar::DoSingleSearchStep(std::vector<uint32_t> &thePath)
 {
 	uint32_t currentOpenNode = UINT32_MAX;
 
@@ -81,11 +81,11 @@ bool GenericAStar::doSingleSearchStep(std::vector<uint32_t> &thePath)
 	}
 			
 	// get top of queue
-	currentOpenNode = getNextNode();
+	currentOpenNode = GetNextNode();
 	
 	if (env->goalTest(currentOpenNode, goal))
 	{
-		extractPathToStart(currentOpenNode, thePath);
+		ExtractPathToStart(currentOpenNode, thePath);
 		closedList.clear();
 		openQueue.reset();
 		env = 0;
@@ -115,22 +115,22 @@ bool GenericAStar::doSingleSearchStep(std::vector<uint32_t> &thePath)
 		else if (openQueue.isIn(SearchNode(neighbor)))
 		{
 			if (verbose) { printf("updating node %d\n", neighbor); }
-			updateWeight(currentOpenNode, neighbor);
+			UpdateWeight(currentOpenNode, neighbor);
 		}
 		else {
 			if (verbose) { printf("addinging node %d\n", neighbor); }
-			addToOpenList(currentOpenNode, neighbor);
+			AddToOpenList(currentOpenNode, neighbor);
 		}
 	}
 	return false;
 }
 
-uint32_t GenericAStar::checkNextNode()
+uint32_t GenericAStar::CheckNextNode()
 {
 	return openQueue.top().currNode;
 }
 
-uint32_t GenericAStar::getNextNode()
+uint32_t GenericAStar::GetNextNode()
 {
 	nodesExpanded++;
 	uint32_t next;
@@ -140,7 +140,7 @@ uint32_t GenericAStar::getNextNode()
 	return next;
 }
 
-void GenericAStar::updateWeight(uint32_t currOpenNode, uint32_t neighbor)
+void GenericAStar::UpdateWeight(uint32_t currOpenNode, uint32_t neighbor)
 {
 	SearchNode prev = openQueue.find(SearchNode(neighbor));
 	SearchNode alt = closedList[currOpenNode];
@@ -155,7 +155,7 @@ void GenericAStar::updateWeight(uint32_t currOpenNode, uint32_t neighbor)
 	}
 }
 
-void GenericAStar::addToOpenList(uint32_t currOpenNode, uint32_t neighbor)
+void GenericAStar::AddToOpenList(uint32_t currOpenNode, uint32_t neighbor)
 {
 	double edgeWeight = env->gcost(currOpenNode, neighbor);
 	SearchNode n(closedList[currOpenNode].gCost+edgeWeight+env->heuristic(neighbor, goal),
@@ -166,7 +166,7 @@ void GenericAStar::addToOpenList(uint32_t currOpenNode, uint32_t neighbor)
 	openQueue.add(n);
 }
 
-void GenericAStar::extractPathToStart(uint32_t goalNode,
+void GenericAStar::ExtractPathToStart(uint32_t goalNode,
 																			std::vector<uint32_t> &thePath)
 {
 	SearchNode n;
@@ -183,23 +183,23 @@ void GenericAStar::extractPathToStart(uint32_t goalNode,
 	thePath.push_back(n.currNode);
 }
 
-void GenericAStar::printStats()
+void GenericAStar::PrintStats()
 {
 	printf("%u items in closed list\n", (unsigned int)closedList.size());
 	printf("%u items in open queue\n", (unsigned int)openQueue.size());
 }
 
-int GenericAStar::getMemoryUsage()
+int GenericAStar::GetMemoryUsage()
 {
 	return closedList.size()+openQueue.size();
 }
 
-closedList_iterator GenericAStar::getClosedListIter() const
+closedList_iterator GenericAStar::GetClosedListIter() const
 {
 	return closedList.begin();
 }
 
-uint32_t GenericAStar::closedListIterNext(closedList_iterator& it) const
+uint32_t GenericAStar::ClosedListIterNext(closedList_iterator& it) const
 {
 	if (it == closedList.end())
 		return UINT32_MAX;

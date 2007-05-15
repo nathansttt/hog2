@@ -20,21 +20,21 @@ class GenericIDAStar {
 public:
 	GenericIDAStar() {}
 	virtual ~GenericIDAStar() {}
-	void getPath(SearchEnvironment *env, uint32_t from, uint32_t to,
+	void GetPath(SearchEnvironment *env, uint32_t from, uint32_t to,
 							 std::vector<uint32_t> &thePath);
 
-	long getNodesExpanded() { return nodesExpanded; }
-	long getNodesTouched() { return nodesTouched; }
-	void resetNodeCount() { nodesExpanded = nodesTouched = 0; }
-	void setUseBDPathMax(bool val) { usePathMax = val; }
+	long GetNodesExpanded() { return nodesExpanded; }
+	long GetNodesTouched() { return nodesTouched; }
+	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
+	void SetUseBDPathMax(bool val) { usePathMax = val; }
 private:
 	unsigned long nodesExpanded, nodesTouched;
 
-	double doIteration(SearchEnvironment *env,
+	double DoIteration(SearchEnvironment *env,
 										 uint32_t parent, uint32_t currState, uint32_t goal,
 										 std::vector<uint32_t> &thePath, double bound, double g,
 										 double maxH);
-	void updateNextBound(double currBound, double fCost);
+	void UpdateNextBound(double currBound, double fCost);
 	double nextBound;
 	NodeHashTable nodeTable;
 	bool usePathMax;

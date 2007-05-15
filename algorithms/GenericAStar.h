@@ -94,32 +94,32 @@ class GenericAStar {
 public:
 	GenericAStar() {}
 	virtual ~GenericAStar() {}
-	void getPath(SearchEnvironment *env, uint32_t from, uint32_t to,
+	void GetPath(SearchEnvironment *env, uint32_t from, uint32_t to,
 							 std::vector<uint32_t> &thePath);
 
-	bool initializeSearch(SearchEnvironment *env, uint32_t from, uint32_t to,
+	bool InitializeSearch(SearchEnvironment *env, uint32_t from, uint32_t to,
 												std::vector<uint32_t> &thePath);
-	bool doSingleSearchStep(std::vector<uint32_t> &thePath);
-	uint32_t checkNextNode();
-	void extractPathToStart(uint32_t n, std::vector<uint32_t> &thePath);
+	bool DoSingleSearchStep(std::vector<uint32_t> &thePath);
+	uint32_t CheckNextNode();
+	void ExtractPathToStart(uint32_t n, std::vector<uint32_t> &thePath);
 
-	virtual const char *getName();
+	virtual const char *GetName();
 	
-	void printStats();
-	long getNodesExpanded() { return nodesExpanded; }
-	long getNodesTouched() { return nodesTouched; }
-	void resetNodeCount() { nodesExpanded = nodesTouched = 0; }
-	int getMemoryUsage();
+	void PrintStats();
+	long GetNodesExpanded() { return nodesExpanded; }
+	long GetNodesTouched() { return nodesTouched; }
+	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
+	int GetMemoryUsage();
 
-	closedList_iterator getClosedListIter() const;
-  uint32_t closedListIterNext(closedList_iterator&) const;
+	closedList_iterator GetClosedListIter() const;
+  uint32_t ClosedListIterNext(closedList_iterator&) const;
 
 private:
 		long nodesTouched, nodesExpanded;
 
-	uint32_t getNextNode();
-	void updateWeight(uint32_t currOpenNode, uint32_t neighbor);
-	void addToOpenList(uint32_t currOpenNode, uint32_t neighbor);
+	uint32_t GetNextNode();
+	void UpdateWeight(uint32_t currOpenNode, uint32_t neighbor);
+	void AddToOpenList(uint32_t currOpenNode, uint32_t neighbor);
 	GenericAStarUtil::PQueue openQueue;
 	GenericAStarUtil::NodeLookupTable closedList; //openList
 	uint32_t goal, start;
