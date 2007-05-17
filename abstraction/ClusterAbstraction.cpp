@@ -27,6 +27,7 @@
 #include "GenericAStar.h"
 #include <cfloat>
 #include <cmath>
+#include <limits>
 
 class ClusterSearchEnvironment : public SearchEnvironment
 {

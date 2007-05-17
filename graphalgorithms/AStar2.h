@@ -35,7 +35,7 @@
 
 class aStar2 : public praStar {
 public:
-  aStar2() :praStar() {}
+  aStar2() : praStar() {}
   path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 };
 

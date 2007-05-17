@@ -5,7 +5,7 @@
  *
  */
 
-#include "HpaStar.h"
+#include "HPAStar.h"
 #include "AStar3.h"
 
 #include "AStar.h"

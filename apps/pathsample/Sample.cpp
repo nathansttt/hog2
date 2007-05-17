@@ -356,4 +356,3 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //	}
 //	return false;
 }
-
