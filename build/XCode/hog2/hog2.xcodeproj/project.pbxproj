@@ -105,7 +105,6 @@
 		C4D3B0DF0BCEE74D00FCD84C /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4D3B0DC0BCEE74C00FCD84C /* OpenGL.framework */; };
 		C4D3B0E00BCEE75000FCD84C /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */; };
 		C4D3B1720BCEE75000FCD84C /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A9504C8FFE6A3BC11CA0CBA /* ApplicationServices.framework */; };
-		C4D3B49A0BCEE7B300FCD84C /* AbstractionSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2420BCEE7B000FCD84C /* AbstractionSearchEnvironment.cpp */; };
 		C4D3B49B0BCEE7B300FCD84C /* ClusterAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2440BCEE7B000FCD84C /* ClusterAbstraction.cpp */; };
 		C4D3B49C0BCEE7B300FCD84C /* GraphAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2460BCEE7B000FCD84C /* GraphAbstraction.cpp */; };
 		C4D3B49D0BCEE7B300FCD84C /* LoadedBBAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2480BCEE7B000FCD84C /* LoadedBBAbstraction.cpp */; };
@@ -129,7 +128,6 @@
 		C4D3B4AF0BCEE7B300FCD84C /* GenericAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B26E0BCEE7B000FCD84C /* GenericAStar.cpp */; };
 		C4D3B4B00BCEE7B300FCD84C /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2700BCEE7B000FCD84C /* GenericIDAStar.cpp */; };
 		C4D3B4B10BCEE7B300FCD84C /* OpenClosedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2720BCEE7B000FCD84C /* OpenClosedList.cpp */; };
-		C4D3B4B20BCEE7B300FCD84C /* SearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2740BCEE7B000FCD84C /* SearchEnvironment.cpp */; };
 		C4D3B4B60BCEE7B300FCD84C /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B27C0BCEE7B000FCD84C /* Graph.cpp */; };
 		C4D3B4B70BCEE7B300FCD84C /* AStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B27F0BCEE7B000FCD84C /* AStar.cpp */; };
 		C4D3B4B80BCEE7B300FCD84C /* AStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2810BCEE7B000FCD84C /* AStar2.cpp */; };
@@ -1960,7 +1958,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C4D3B49A0BCEE7B300FCD84C /* AbstractionSearchEnvironment.cpp in Sources */,
 				C4D3B49B0BCEE7B300FCD84C /* ClusterAbstraction.cpp in Sources */,
 				C4D3B49C0BCEE7B300FCD84C /* GraphAbstraction.cpp in Sources */,
 				C4D3B49D0BCEE7B300FCD84C /* LoadedBBAbstraction.cpp in Sources */,
@@ -1984,7 +1981,6 @@
 				C4D3B4AF0BCEE7B300FCD84C /* GenericAStar.cpp in Sources */,
 				C4D3B4B00BCEE7B300FCD84C /* GenericIDAStar.cpp in Sources */,
 				C4D3B4B10BCEE7B300FCD84C /* OpenClosedList.cpp in Sources */,
-				C4D3B4B20BCEE7B300FCD84C /* SearchEnvironment.cpp in Sources */,
 				C4D3B4B60BCEE7B300FCD84C /* Graph.cpp in Sources */,
 				C4D3B4B70BCEE7B300FCD84C /* AStar.cpp in Sources */,
 				C4D3B4B80BCEE7B300FCD84C /* AStar2.cpp in Sources */,
