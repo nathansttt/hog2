@@ -36,7 +36,7 @@ class patrolUnit : public unit {
 public:
 	patrolUnit(int x, int y);
 //	patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us);
-	virtual const char *getName() { return "patrolUnit"; }
+	virtual const char *GetName() { return "patrolUnit"; }
 	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo);
 	void OpenGLDraw(int window, MapProvider *, SimulationInfo *);
 	void addPatrolLocation(unit *);
@@ -44,7 +44,7 @@ public:
 	void updateLocation(int _x, int _y, bool worked, SimulationInfo *)
 	{ x = _x; y = _y; if (!worked) { moves.resize(0);	if (currTarget != -1) currTarget = 0; } }
 	void logStats(StatCollection *stats);
-		void logFinalStats(StatCollection *stats);
+		void LogFinalStats(StatCollection *stats);
 private:
 	double goToLoc(MapAbstraction *aMap, int which);
 	void addPathToCache(path *p);

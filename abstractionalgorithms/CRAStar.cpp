@@ -48,7 +48,7 @@ craStar::craStar()
 	smType = BEGIN;
 }
 
-path *craStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *craStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	//	std::cout<<"find path from "<<*from<<"\nto "<<*to<<std::endl;
 	
@@ -202,10 +202,10 @@ path* craStar::buildAbstractPath(GraphAbstraction *aMap,
 	to = toChain.back();
 	from = fromChain.back();
 	
-	result = astar->getPath(aMap, from, to, rp);
+	result = astar->GetPath(aMap, from, to, rp);
 	
-	nodesExpanded += astar->getNodesExpanded();
-	nodesTouched += astar->getNodesTouched();
+	nodesExpanded += astar->GetNodesExpanded();
+	nodesTouched += astar->GetNodesTouched();
 	
 	delete astar;
 	
@@ -506,10 +506,10 @@ path *craStar::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 		result = cAStar.getBestPath(aMap, from, to, hTarget, rp);
 	}
 	else {
-		result = cAStar.getPath(aMap, from, to, rp);
+		result = cAStar.GetPath(aMap, from, to, rp);
 	}
-	nodesExpanded += cAStar.getNodesExpanded();
-	nodesTouched += cAStar.getNodesTouched();
+	nodesExpanded += cAStar.GetNodesExpanded();
+	nodesTouched += cAStar.GetNodesTouched();
 	return result;
 }
 

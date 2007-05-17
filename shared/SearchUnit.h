@@ -42,7 +42,7 @@ class SearchUnit : public AbsMapUnit {
 public:
 	SearchUnit(int x, int y, AbsMapUnit *target, SearchAlgorithm *alg);
 	virtual ~SearchUnit();
-	virtual const char *GetName() { if (algorithm) return algorithm->getName(); return "none"; }
+	virtual const char *GetName() { if (algorithm) return algorithm->GetName(); return "none"; }
 	virtual SearchAlgorithm* getAlgorithm() { return algorithm; }
 	//void setUnitSimulation(unitSimulation *_US) { US = _US; algorithm->setSimulationEnvironment(US); }
 	virtual bool done() { return onTarget; }

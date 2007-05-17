@@ -42,8 +42,8 @@ class praStar2 : public SearchAlgorithm {
 public:
 	praStar2();
 	virtual ~praStar2() {}
-	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
-	virtual const char *getName()
+	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual const char *GetName()
 	{ return algName; } 
 	void setPartialPathLimit(int limit)
 	{ partialLimit = limit; sprintf(algName,"PRA2*(%d)", partialLimit); }

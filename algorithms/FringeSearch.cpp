@@ -21,7 +21,7 @@ FringeSearch::FringeSearch()
 	hp = 0;
 }
 
-path *FringeSearch::getPath(GraphAbstraction *_aMap, node *from, node *to, reservationProvider *)
+path *FringeSearch::GetPath(GraphAbstraction *_aMap, node *from, node *to, reservationProvider *)
 {
 	initializeSearch(_aMap, from, to);
 	

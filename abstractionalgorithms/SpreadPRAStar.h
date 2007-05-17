@@ -41,7 +41,7 @@ public:
 	void setPartialPathLimit(int limit)
 	{ partialLimit = limit; sprintf(algName, "SpreadPRA*(%d)", partialLimit); }
 	
-	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	void setTargets(GraphAbstraction *, node *, node *, reservationProvider *);
 	int getNumThinkSteps(); 
 	path *think(); 

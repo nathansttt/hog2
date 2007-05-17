@@ -37,7 +37,7 @@ using namespace std;
 
 static const int verbose = 0;
 
-void doRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
+void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 {
 	static double lastLength, lastTime;
 	static node *r1 = 0, *r2 = 0;
@@ -88,10 +88,10 @@ void doRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 	
 	path *p;
 	
-	p = sa->getPath(aMap, r1, r2);
+	p = sa->GetPath(aMap, r1, r2);
 	//	if (optimal)
 	//		//p = getLibraryPath(r1, r2);
-	//		p = getPath(r1, r2);
+	//		p = GetPath(r1, r2);
 	//	else
 	//		//p = getLibraryPath(r1, r2);
 	//		p = getApproximatePath(r1, r2);
@@ -127,7 +127,7 @@ void doRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 #ifdef OS_MAC
 	cout << "Steps: " << cnt << ", len: " << length << ", time: " << (double)nanosecs/1000000.0
 		;//<< ",  time/step: " << (double)nanosecs/(1000*cnt) << ", time/unit: " << (double)nanosecs/(1000*length);
-		cout << "ms, h() = " << aMap->h(r1, r2) << ", nodes: " << sa->getNodesExpanded() << endl;
+		cout << "ms, h() = " << aMap->h(r1, r2) << ", nodes: " << sa->GetNodesExpanded() << endl;
 		
 		//cout << "DATA\t" << nanosecs << "\t" << length << endl;
 		if (!repeat)

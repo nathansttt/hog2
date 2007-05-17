@@ -44,7 +44,7 @@ void praStar::setCache(path **p)
 	cache = p;
 }
 
-path *praStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *_rp)
+path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *_rp)
 {
 	lengths.resize(0);
 	rp = _rp;
@@ -291,7 +291,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 														unsigned int dest)
 {
 	node *n=0;
-	heap *nodeHeap = new heap(eligibleNodeParents.size());
+	Heap *nodeHeap = new Heap(eligibleNodeParents.size());
 	std::vector<node *> expandedNodes(100);
 	edge_iterator ei;
 	node *currBest = 0;
@@ -328,7 +328,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 			if (verbose) printf("considering neighbor %d\n", which);
 			node *currNode = g->getNode(which);
 			
-			if (nodeHeap->isIn(currNode))
+			if (nodeHeap->IsIn(currNode))
 			{
 				//nodesExpanded++;
 				relaxEdge(nodeHeap, g, e, openNode, which, dest, LABEL);
@@ -368,7 +368,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 					currNode->setLabelF(LABEL, MAXINT);
 					currNode->setKeyLabel(LABEL);
 					currNode->markEdge(0);
-					nodeHeap->add(currNode);
+					nodeHeap->Add(currNode);
 					if (verbose)
 						printf("Adding neighbor %d\n", which);
 					//nodesExpanded++;
@@ -379,7 +379,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 			else { if (verbose) printf("%d already expanded\n", currNode->getNum()); }
 		}
 		
-		n = (node*)nodeHeap->remove();
+		n = (node*)nodeHeap->Remove();
 		if (n == 0)
 		{
 			if (verbose) printf("Error: We expanded every possible node!\n");
@@ -432,7 +432,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 	return dest;
 }
 
-void praStar::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextNode, int dest,
+void praStar::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextNode, int dest,
 												int LABEL)
 {
 	double weight;
@@ -446,29 +446,29 @@ void praStar::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextN
 			printf("Updating %d to %1.4f from %1.4f\n", nextNode, weight, to->getLabelF(LABEL));
 		//weight -= 0.001*(weight-map->h(to, d)); // always lower g-cost slightly so that we tie break in favor of higher g cost
 		to->setLabelF(LABEL, weight);
-		nodeHeap->decreaseKey(to);
+		nodeHeap->DecreaseKey(to);
 		// this is the edge used to get to this node in the min. path tree
 		to->markEdge(e);
 	}
 }
 
 
-//void praStar::addAbstractedNodesToHeap(heap *nodeHeap, graph *g, node *p, unsigned int source,
+//void praStar::addAbstractedNodesToHeap(Heap *nodeHeap, graph *g, node *p, unsigned int source,
 //																			 int LABEL)
 //{
 //  for (int cnt = 0; cnt < p->getLabelL(kNumAbstractedNodes); cnt++) {
 //    node *childNode = g->getNode((unsigned int)p->getLabelL(kFirstData+cnt));
-//    if (nodeHeap->isIn(childNode)) continue;
+//    if (nodeHeap->IsIn(childNode)) continue;
 //    if (verbose) printf("%d ", childNode->getNum());
 //    childNode->setKeyLabel(LABEL);
 //    childNode->setLabelF(LABEL, MAXINT);
 //    childNode->markEdge(0);
-//    if (childNode->getNum() != source) nodeHeap->add(childNode);
+//    if (childNode->getNum() != source) nodeHeap->Add(childNode);
 //  }
 //  if (verbose) printf("\n");
 //}
 //
-//void praStar::addAbstractedNodesAndNeighborsToHeap(heap *nodeHeap, graph *g, node *p,
+//void praStar::addAbstractedNodesAndNeighborsToHeap(Heap *nodeHeap, graph *g, node *p,
 //																									 unsigned int source, int LABEL)
 //{
 //  for (int cnt = 0; cnt < p->getLabelL(kNumAbstractedNodes); cnt++) {
@@ -477,9 +477,9 @@ void praStar::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //    childNode->setKeyLabel(LABEL);
 //    childNode->setLabelF(LABEL, MAXINT);
 //    childNode->markEdge(0);
-//    if ((childNode->getNum() != source) && (!nodeHeap->isIn(childNode))) {
+//    if ((childNode->getNum() != source) && (!nodeHeap->IsIn(childNode))) {
 //      if (verbose) printf("%d ", childNode->getNum());
-//      nodeHeap->add(childNode);
+//      nodeHeap->Add(childNode);
 //    }
 //		
 //    edge_iterator ei = childNode->getEdgeIter(); 
@@ -488,13 +488,13 @@ void praStar::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //      unsigned int which;
 //      if ((which = e->getFrom()) == childNum) which = e->getTo();
 //      neighbor = g->getNode(which);
-//      if (!nodeHeap->isIn(neighbor)) {
+//      if (!nodeHeap->IsIn(neighbor)) {
 //				neighbor->setKeyLabel(LABEL);
 //				neighbor->setLabelF(LABEL, MAXINT);
 //				neighbor->markEdge(0);
 //				if (neighbor->getNum() != source) {
 //					if (verbose) printf("%d ", neighbor->getNum());
-//					nodeHeap->add(neighbor);
+//					nodeHeap->Add(neighbor);
 //				}
 //      }
 //    }
@@ -646,7 +646,7 @@ void praStar::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //		
 //	search->findPath(me, start, target);
 //		
-//	const vector<int>& resultPath = search->getPath();
+//	const vector<int>& resultPath = search->GetPath();
 //	
 //	while(resultPath.size() < 1) {
 //		printf("Bad library path!\n");
@@ -655,7 +655,7 @@ void praStar::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //		
 //		search->findPath(me, start, target);
 //		
-//		resultPath = search->getPath();
+//		resultPath = search->GetPath();
 //	}
 //	
 //	//Display the path

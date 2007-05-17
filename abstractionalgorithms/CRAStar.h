@@ -59,8 +59,8 @@ public:
 
 	craStar();
 	virtual ~craStar() {}
-	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
-	virtual const char *getName()
+	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual const char *GetName()
 	{ return algName; } 
 	void setPartialPathLimit(int limit)
 	{ partialLimit = limit; sprintf(algName,"CRA*(%d)", partialLimit); }

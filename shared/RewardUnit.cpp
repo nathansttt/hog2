@@ -52,7 +52,7 @@ rewardSeekingUnit::rewardSeekingUnit(int _x, int _y)
 
 void rewardSeekingUnit::receiveReward(double amount)
 {
-	printf("%s got reward %3.2f!!\n", getName(), amount);
+	printf("%s got reward %3.2f!!\n", GetName(), amount);
 }
 
 tDirection rewardSeekingUnit::makeMove(MapProvider *mp, reservationProvider *, SimulationInfo *)
@@ -83,7 +83,7 @@ double rewardSeekingUnit::goToRewardLoc(MapAbstraction *aMap, int which)
 	int tox, toy;
 	rewardLocs[which]->getLocation(tox, toy);
 	to = aMap->GetNodeFromMap(tox, toy);
-	p = a.getPath(aMap, from, to);
+	p = a.GetPath(aMap, from, to);
 	if (p)
 	{
 		pathCost = aMap->distance(p);
@@ -145,7 +145,7 @@ void rewardSeekingUnit::addPathToCache(path *p)
 		case 1: result = kW; break;
 		default :
 			printf("SU: %s : The (x) nodes in the path are not next to each other!\n",
-						 this->getName());
+						 this->GetName());
 			printf("Distance is %ld\n",
 						 p->n->getLabelL(kFirstData)-p->next->n->getLabelL(kFirstData));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
@@ -161,7 +161,7 @@ void rewardSeekingUnit::addPathToCache(path *p)
 		case 1: result = result|kN; break;
 		default :
 			printf("SU: %s : The (y) nodes in the path are not next to each other!\n",
-						 this->getName());
+						 this->GetName());
 			printf("Distance is %ld\n",
 						 p->n->getLabelL(kFirstData+1)-p->next->n->getLabelL(kFirstData+1));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";

@@ -70,7 +70,7 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 		aStar a;
 
 		path *p;
-		p = a.getPath(absMap, r1, r2);
+		p = a.GetPath(absMap, r1, r2);
 		
 		int cnt = 0;
 		double length = 0;
@@ -116,7 +116,7 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 				}
 				delete p;
 
-				p = a.getPath(absMap, r1, r2);
+				p = a.GetPath(absMap, r1, r2);
 
 				length = 0; cnt = 0;
 				for (path *q = p; q; q = q->next)

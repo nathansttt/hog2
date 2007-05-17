@@ -40,7 +40,7 @@ void corridorAStar::setCorridor(const std::vector<node *> *c)
 	corridor = c;
 }
 
-path *corridorAStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *corridorAStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	return getBestPath(aMap, from, to, to, rp);
 }
@@ -51,7 +51,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *from, node *to, n
 	nodesTouched = 0;
 
   node *n=0;
-  heap *nodeHeap = new heap(corridor->size());
+  Heap *nodeHeap = new Heap(corridor->size());
   std::vector<node *> expandedNodes(100);
 	neighbor_iterator ni;
 	bool exactGoal = true;
@@ -90,7 +90,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *from, node *to, n
 		{
 			nodesTouched++;
       if (verbose) printf("considering neighbor %d\n", currNode->getNum());
-      if (nodeHeap->isIn(currNode))
+      if (nodeHeap->IsIn(currNode))
 			{
 				nodesExpanded++;
 				relaxEdge(nodeHeap, absGraph, aMap,
@@ -119,7 +119,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *from, node *to, n
 					currNode->setLabelF(kTemporaryLabel, MAXINT);
 					currNode->setKeyLabel(kTemporaryLabel);
 					currNode->markEdge(0);
-					nodeHeap->add(currNode);
+					nodeHeap->Add(currNode);
 					if (verbose) printf("Adding neighbor %d\n", currNode->getNum());
 					nodesExpanded++;
 					relaxEdge(nodeHeap, absGraph, aMap,
@@ -131,7 +131,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *from, node *to, n
       else { if (verbose) printf("%d already expanded\n", currNode->getNum()); }
     }
 		
-    n = (node*)nodeHeap->remove();
+    n = (node*)nodeHeap->Remove();
     if (n == 0)
 		{
 			if (verbose) printf("Error: We expanded every possible node!\n");
@@ -166,7 +166,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato,
 	nodesTouched = 0;
 	
   node *n=0;
-  heap *nodeHeap = new heap(corridor->size());
+  Heap *nodeHeap = new Heap(corridor->size());
   std::vector<node *> expandedNodes(100);
 	neighbor_iterator ni;
 	bool exactGoal = true;
@@ -206,7 +206,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato,
 		{
 			nodesTouched++;
       if (verbose) printf("considering neighbor %d\n", currNode->getNum());
-      if (nodeHeap->isIn(currNode))
+      if (nodeHeap->IsIn(currNode))
 			{
 				nodesExpanded++;
 				if (n == afrom)
@@ -244,7 +244,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato,
 					currNode->setLabelF(kTemporaryLabel, MAXINT);
 					currNode->setKeyLabel(kTemporaryLabel);
 					currNode->markEdge(0);
-					nodeHeap->add(currNode);
+					nodeHeap->Add(currNode);
 					if (verbose) printf("Adding neighbor %d\n", currNode->getNum());
 					nodesExpanded++;
 
@@ -269,7 +269,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato,
       else { if (verbose) printf("%d already expanded\n", currNode->getNum()); }
     }
 		
-    n = (node*)nodeHeap->remove();
+    n = (node*)nodeHeap->Remove();
     if (n == 0)
 		{
 			if (verbose) printf("Error: We expanded every possible node!\n");
@@ -298,7 +298,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato,
 	return 0;
 }
 
-void corridorAStar::relaxEdge(heap *nodeHeap, graph *, GraphAbstraction *aMap,
+void corridorAStar::relaxEdge(Heap *nodeHeap, graph *, GraphAbstraction *aMap,
 															edge *e, node *from, node *to, node *dest)
 {
   double weight;
@@ -309,13 +309,13 @@ void corridorAStar::relaxEdge(heap *nodeHeap, graph *, GraphAbstraction *aMap,
       printf("Updating %d to %1.2f from %1.2f\n", to->getNum(), weight, to->getLabelF(kTemporaryLabel));
 		//weight -= 0.001*(weight-map->h(to, d)); // always lower g-cost slightly so that we tie break in favor of higher g cost
     to->setLabelF(kTemporaryLabel, weight);
-    nodeHeap->decreaseKey(to);
+    nodeHeap->DecreaseKey(to);
     // this is the edge used to get to this node in the min. path tree
     to->markEdge(e);
   }
 }
 
-void corridorAStar::relaxFirstEdge(heap *nodeHeap, graph *, GraphAbstraction *aMap,
+void corridorAStar::relaxFirstEdge(Heap *nodeHeap, graph *, GraphAbstraction *aMap,
 																	 edge *e, node *from, node *afrom, node *ato, node *dest)
 {
   double weight;
@@ -326,13 +326,13 @@ void corridorAStar::relaxFirstEdge(heap *nodeHeap, graph *, GraphAbstraction *aM
       printf("Updating %d to %1.2f from %1.2f\n", ato->getNum(), weight, ato->getLabelF(kTemporaryLabel));
 		//weight -= 0.001*(weight-map->h(ato, d)); // always lower g-cost slightly so that we tie break in favor of higher g cost
     ato->setLabelF(kTemporaryLabel, weight);
-    nodeHeap->decreaseKey(ato);
+    nodeHeap->DecreaseKey(ato);
     // this is the edge used to get to this node in the min. path tree
     ato->markEdge(e);
   }
 }
 
-void corridorAStar::relaxFinalEdge(heap *nodeHeap, graph *, GraphAbstraction *aMap,
+void corridorAStar::relaxFinalEdge(Heap *nodeHeap, graph *, GraphAbstraction *aMap,
 																	 edge *e, node *from, node *to, node *realDest)
 {
   double weight;
@@ -343,7 +343,7 @@ void corridorAStar::relaxFinalEdge(heap *nodeHeap, graph *, GraphAbstraction *aM
       printf("Updating %d to %1.2f from %1.2f\n", to->getNum(), weight, to->getLabelF(kTemporaryLabel));
 		//weight -= 0.001*(weight-map->h(to, d)); // always lower g-cost slightly so that we tie break in favor of higher g cost
     to->setLabelF(kTemporaryLabel, weight);
-    nodeHeap->decreaseKey(to);
+    nodeHeap->DecreaseKey(to);
     // this is the edge used to get to this node in the min. path tree
     to->markEdge(e);
   }

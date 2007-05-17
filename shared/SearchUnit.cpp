@@ -107,8 +107,8 @@ bool SearchUnit::getCachedMove(tDirection &dir)
 		if (s_algorithm && (spread_cache == 0))
 		{
 			spread_cache = s_algorithm->think();
-			nodesExpanded+=algorithm->getNodesExpanded();
-			nodesTouched+=algorithm->getNodesTouched();
+			nodesExpanded+=algorithm->GetNodesExpanded();
+			nodesTouched+=algorithm->GetNodesTouched();
 		}
 		dir = moves.back();
 		moves.pop_back();
@@ -191,9 +191,9 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 //	if (verbose)
 //		printf("SU %p: Getting new path\n", this);
 	path *p;
-	p = algorithm->getPath(aMap, from, to, rp);
-	nodesExpanded+=algorithm->getNodesExpanded();
-	nodesTouched+=algorithm->getNodesTouched();
+	p = algorithm->GetPath(aMap, from, to, rp);
+	nodesExpanded+=algorithm->GetNodesExpanded();
+	nodesTouched+=algorithm->GetNodesTouched();
 
 	// returning an empty path means there is no path between the start and goal
 	if (p == NULL)
@@ -359,7 +359,7 @@ void SearchUnit::LogStats(StatCollection *stats)
 
 void SearchUnit::LogFinalStats(StatCollection *stats)
 {
-	algorithm->logFinalStats(stats);
+	algorithm->LogFinalStats(stats);
 }
 
 //void SearchUnit::printRoundStats(FILE *f)

@@ -41,17 +41,17 @@ class SearchAlgorithm {
 public:
 	SearchAlgorithm() { nodesExpanded = nodesTouched = 0; }
 	virtual ~SearchAlgorithm() {}
-	virtual const char *getName() = 0;
-	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0) = 0;
-	int getNodesExpanded() { return nodesExpanded; }
-	int getNodesTouched() { return nodesTouched; }
-	virtual void logFinalStats(StatCollection *) {}
+	virtual const char *GetName() = 0;
+	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0) = 0;
+	int GetNodesExpanded() { return nodesExpanded; }
+	int GetNodesTouched() { return nodesTouched; }
+	virtual void LogFinalStats(StatCollection *) {}
 
 	//protected:
 	int nodesExpanded;
 	int nodesTouched;
 };
 
-extern void doRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat = false);
+extern void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat = false);
 
 #endif

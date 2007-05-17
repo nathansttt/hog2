@@ -97,15 +97,15 @@ class aStar : public SearchAlgorithm {
 public:
 	aStar() {}
 	virtual ~aStar() {}
-	path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
-	virtual const char *getName();
+	path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual const char *GetName();
 	
 	double getHVal(node *whence);
 	void setCorridor(path *corridor, int width);
 	
 	void printStats();
-	long getNodesExpanded() { return nodesExpanded; }
-	long getNodesTouched() { return nodesTouched; }
+	long GetNodesExpanded() { return nodesExpanded; }
+	long GetNodesTouched() { return nodesTouched; }
 	void resetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	int getMemoryUsage();
 private:

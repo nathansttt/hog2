@@ -1,5 +1,5 @@
 /*
- * $Id: heap.cpp,v 1.6 2006/11/29 17:40:14 nathanst Exp $
+ * $Id: Heap.cpp,v 1.6 2006/11/29 17:40:14 nathanst Exp $
  *
  * This file is part of HOG.
  *
@@ -24,44 +24,44 @@
 #include "FPUtil.h"
 #include "Heap.h"
 
-heap::heap(int s)
+Heap::Heap(int s)
 {
   count = 0;
   _elts.reserve(s);
 }
 
-heap::~heap()
+Heap::~Heap()
 {
 }
 
-unsigned int heap::size()
+unsigned int Heap::size()
 {
 	return _elts.size();
 }
 
 /**
- * Add object into heap.
+ * Add object into Heap.
  */
-void heap::add(graph_object *val)
+void Heap::Add(graph_object *val)
 {
   val->key = count;
   _elts.push_back(val);
   count++;
-  heapifyUp(val->key);
+  HeapifyUp(val->key);
 }
 
 /**
  * Indicate that the key for a particular object has decreased.
  */
-void heap::decreaseKey(graph_object *val)
+void Heap::DecreaseKey(graph_object *val)
 {
-  heapifyUp(val->key);
+  HeapifyUp(val->key);
 }
 
 /**
- * Returns true if the object is in the heap.
+ * Returns true if the object is in the Heap.
  */
-bool heap::isIn(graph_object *val)
+bool Heap::IsIn(graph_object *val)
 {
   if (val->key < _elts.size() &&
 			(_elts[val->key] == val))
@@ -70,31 +70,31 @@ bool heap::isIn(graph_object *val)
 }
 
 /**
- * Remove the item with the lowest key from the heap & re-heapify.
+ * Remove the item with the lowest key from the Heap & re-heapify.
  */
-graph_object *heap::remove()
+graph_object *Heap::Remove()
 {
-  if (empty())
+  if (Empty())
 		return 0;
   count--;
   graph_object *ans = _elts[0];
   _elts[0] = _elts[count];
   _elts[0]->key = 0;
   _elts.pop_back();
-  heapifyDown(0);
+  HeapifyDown(0);
 
   return ans;
 }
 
 /**
- * Returns true if no items are in the heap.
+ * Returns true if no items are in the Heap.
  */
-bool heap::empty()
+bool Heap::Empty()
 {
   return count == 0;
 }
 
-void heap::heapifyUp(int index)
+void Heap::HeapifyUp(int index)
 {
   if (index == 0) return;
   int parent = (index-1)/2;
@@ -106,11 +106,11 @@ void heap::heapifyUp(int index)
     _elts[index] = tmp;
     _elts[parent]->key = parent;
     _elts[index]->key = index;
-    heapifyUp(parent);
+    HeapifyUp(parent);
   }
 }
 
-void heap::heapifyDown(int index)
+void Heap::HeapifyDown(int index)
 {
   int child1 = index*2+1;
   int child2 = index*2+2;
@@ -133,6 +133,6 @@ void heap::heapifyDown(int index)
     _elts[index] = tmp;
     _elts[which]->key = which;
     _elts[index]->key = index;
-    heapifyDown(which);
+    HeapifyDown(which);
   }
 }

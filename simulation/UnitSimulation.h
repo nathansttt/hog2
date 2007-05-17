@@ -207,14 +207,14 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 	while (units.size() > 0)
 	{
 		UnitInfo<state, action, environment> *ui = units.back();
-		//ui->agent->logFinalStats(&stats);
+		//ui->agent->LogFinalStats(&stats);
 		units.pop_back();
 		delete ui->agent;
 		delete ui;
 	}
 	while (unitGroups.size() > 0)
 	{
-		//unitGroups.back()->logFinalStats(&stats);
+		//unitGroups.back()->LogFinalStats(&stats);
 		delete unitGroups.back();
 		unitGroups.pop_back();
 	}

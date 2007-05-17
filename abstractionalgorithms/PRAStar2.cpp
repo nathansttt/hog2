@@ -45,7 +45,7 @@ praStar2::praStar2()
 	topLevel = -1;
 }
 
-path *praStar2::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *praStar2::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	std::vector<node *> fromChain;
 	std::vector<node *> toChain;
@@ -250,10 +250,10 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 			result = cAStar.getBestPath(aMap, from, to, hTarget, rp);
 	}
 	else {
-		result = cAStar.getPath(aMap, from, to, rp);
+		result = cAStar.GetPath(aMap, from, to, rp);
 	}
-	nodesExpanded += cAStar.getNodesExpanded();
-	nodesTouched += cAStar.getNodesTouched();
+	nodesExpanded += cAStar.GetNodesExpanded();
+	nodesTouched += cAStar.GetNodesTouched();
 	return result;
 }
 
