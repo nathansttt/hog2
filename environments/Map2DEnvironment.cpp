@@ -160,7 +160,7 @@ void MapEnvironment::OpenGLDraw(int window)
 	map->OpenGLDraw(window);
 }
 
-void MapEnvironment::OpenGLDraw(int window, xyLoc &l)
+void MapEnvironment::OpenGLDraw(int , xyLoc &l)
 {
 	GLdouble xx, yy, zz, rad;
 	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);

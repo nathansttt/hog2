@@ -144,7 +144,7 @@ void MapLineAbstraction::addNodes(graph *g)
 				//printf("Match!\n");
 				node *parent = createParent(g, parents[0]);
 				//printf("-->Creating parent (%d)\n", parent->getNum());
-				for (int z = 0; z < parents.size(); z++)
+				for (unsigned int z = 0; z < parents.size(); z++)
 				{
 					if (parents[z]->getLabelL(kParent) != -1)
 						break;

@@ -1066,7 +1066,7 @@ void submitTextToBuffer(const char *val)
 
 // draw text info
 // note: this bitmap technique is not the speediest and one should use textures for font in more proformance critical code
-static void drawInfo(pRecContext pContextInfo)
+static void drawInfo(pRecContext )
 {
 //	static float msgPresistance = 240.0f;
 //	char cstr [256];
@@ -1937,7 +1937,7 @@ void loadPath(char *path)
   path[0] = 0;
 }
 
-void saveSimHistory(WindowRef window, pRecContext pContextInfo)
+void saveSimHistory(WindowRef window, pRecContext )
 {
   OSStatus err;
   AEKeyword theKeyword; 

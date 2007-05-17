@@ -294,7 +294,7 @@ int GraphAbstraction::CountEdgesAtDistance(node *child, node *parent, std::vecto
 {
 	dists.resize(0);
 	
-	std::vector<int> depth;
+	std::vector<unsigned int> depth;
 	std::vector<node *> q;
 	graph *g = GetAbstractGraph(child);
 	
@@ -302,7 +302,7 @@ int GraphAbstraction::CountEdgesAtDistance(node *child, node *parent, std::vecto
 	child->key = 0;
 	depth.push_back(0);
 	
-	for (int x = 0; x < q.size(); x++)
+	for (unsigned int x = 0; x < q.size(); x++)
 	{
 		//		printf("Handling node: %d\n", q[x]->getNum());
 		neighbor_iterator ni = q[x]->getNeighborIter();
