@@ -51,7 +51,7 @@ public:
 	virtual int getNewTileCount() { return newTileCountPerTrial; }
 	
 	/** reset the location of a given unit */
-	void UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *, xyLoc loc, bool success, SimulationInfo *);
+	void UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *, xyLoc &loc, bool success, SimulationInfo *);
 	//virtual void updateLocation(BaseAbsMapUnit *, MapProvider *m, int _x, int _y, bool, SimulationInfo *);
 	/** Is the group done with their exploration? */
 	virtual bool done();

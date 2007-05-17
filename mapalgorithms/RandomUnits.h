@@ -23,7 +23,7 @@ public:
 	virtual const char *GetName() { return "randomUnit"; }
 
 	tDirection MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *);
-	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc, bool, SimulationInfo *);
+	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc &, bool, SimulationInfo *);
 private:
 		int lastIndex;
 };
@@ -70,7 +70,7 @@ public:
 	virtual const char *GetName() { return "BilliardBallUnit"; }
 
 	tDirection MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *);
-	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc, bool, SimulationInfo *);
+	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc &, bool, SimulationInfo *);
 private:
 		int lastIndex;
 	int collisionStatus;

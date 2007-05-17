@@ -116,7 +116,7 @@ namespace Plotting {
 		r = _r; g = _g; b = _b;
 	}
 
-	void Line::OpenGLDraw(int window)
+	void Line::OpenGLDraw(int )
 	{
 		if (hidden)
 			return;

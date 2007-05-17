@@ -25,7 +25,7 @@ public:
 	AbsMapUnit(int x, int y)
 	:loc(x, y) { r = 1.0; g = 0; b = 0;}
 	
-	virtual void UpdateLocation(AbsMapEnvironment *, xyLoc l, bool, SimulationInfo *)
+	virtual void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool, SimulationInfo *)
 	{ loc = l; }
 	virtual void GetLocation(xyLoc &l)
 	{ l = loc; }

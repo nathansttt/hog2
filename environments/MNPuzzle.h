@@ -26,8 +26,8 @@ public:
 			puzzle[x] = x;
 		blank = 0;
 	}
-	int width, height;
-	int blank;
+	unsigned int width, height;
+	unsigned int blank;
 	std::vector<int> puzzle;
 };
 
@@ -38,7 +38,7 @@ enum slideDir {
 static std::ostream& operator <<(std::ostream & out, const MNPuzzleState &loc)
 {
 	out << "(" << loc.width << "x" << loc.height << ")";
-	for (int x = 0; x < loc.puzzle.size(); x++)
+	for (unsigned int x = 0; x < loc.puzzle.size(); x++)
 		out << loc.puzzle[x] << " ";
 	return out;
 }
@@ -49,7 +49,7 @@ static bool operator==(const MNPuzzleState &l1, const MNPuzzleState &l2)
 		return false;
 	if (l1.height != l2.height)
 		return false;
-	for (int x = 0; x < l1.puzzle.size(); x++)
+	for (unsigned int x = 0; x < l1.puzzle.size(); x++)
 		if (l1.puzzle[x] != l2.puzzle[x])
 			return false;
 	return true;

@@ -25,7 +25,7 @@ public:
 		env->GetActions(loc, acts);
 		return acts[random()%acts.size()];
 	}
-	virtual void UpdateLocation(environment *, state newloc, bool success, SimulationInfo *)
+	virtual void UpdateLocation(environment *, state &newloc, bool success, SimulationInfo *)
 	{
 		if (success)
 			loc = newloc;

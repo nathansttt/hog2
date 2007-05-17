@@ -54,7 +54,7 @@ public:
 		return u->MakeMove(e, e->GetOccupancyInfo(), si);
 	}
 
-	virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state loc, bool success, SimulationInfo *si)
+	virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state &loc, bool success, SimulationInfo *si)
 	{
 		u->UpdateLocation(e, loc, success, si);
 	}
@@ -84,10 +84,10 @@ public:
 		}
 	}
 
-	virtual void StartNewTrial(StatCollection *stats)
+	virtual void StartNewTrial(StatCollection *)
 	{ }
 	
-	virtual void OpenGLDraw(int window, environment *, SimulationInfo *) { }
+	virtual void OpenGLDraw(int , environment *, SimulationInfo *) { }
 
 private:
 	std::vector<Unit<state, action, environment> *> members;

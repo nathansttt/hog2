@@ -65,7 +65,7 @@ double MapOverlay::getOverlayValue(int x, int y)
 	return values[y*m->getMapWidth()+x];
 }
 
-void MapOverlay::OpenGLDraw(int window)
+void MapOverlay::OpenGLDraw(int )
 {
 	if (displayList)
 	{

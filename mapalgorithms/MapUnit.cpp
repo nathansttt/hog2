@@ -10,11 +10,11 @@
 #include "MapUnit.h"
 #include "GLUtil.h"
 
-void MapUnit::OpenGLDraw(int window, MapEnvironment *me, SimulationInfo *)
+void MapUnit::OpenGLDraw(int , MapEnvironment *me, SimulationInfo *)
 {
 	Map *map = me->GetMap();
 	GLdouble xx, yy, zz, rad;
-	if ((loc.x < 0) || (loc.x >= map->getMapWidth()) || (loc.y < 0) || (loc.y >= map->getMapHeight()))
+	if ((loc.x >= map->getMapWidth()) || (loc.y >= map->getMapHeight()))
 		return;
 	map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
 	glColor3f(r, g, b);
