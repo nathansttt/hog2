@@ -163,7 +163,7 @@ void NodeLimitAbstraction::abstractionBFS(node *which, node *parent, int count)
 	q.push_back(which);
 	which->key = 0;
 	
-	for (int x = 0; x < q.size(); x++)
+	for (unsigned int x = 0; x < q.size(); x++)
 	{
 		if (count <= 0)
 			break;

@@ -47,7 +47,7 @@
 
 // draw caps for this renderer
 // note: this bitmap technique is not the speediest and one should use textures for fonts in more proformance critical code
-static void drawCaps (pRecContext pContextInfo)
+static void drawCaps (pRecContext )
 { // we are already in an orthographic per pixel projection
 //	unsigned short i;
 //	short line = 1, lineStep = 12, leftEdge = -410;
