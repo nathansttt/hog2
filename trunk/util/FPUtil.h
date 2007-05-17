@@ -21,9 +21,14 @@
 #ifndef fpUtil_H
 #define fpUtil_H
 
+#include "float.h"
+#include <limits>
+
 // Somehow DBL_MAX is not defined under Linux?
 #ifndef OS_MAC
-//static const double DBL_MAX = 1.79769313486231500e+308;    // DBL_MAX for non Mac OS
+//#define DBL_MAX std::numeric_limits<double>::max()//1.79769313486231500e+308;    // DBL_MAX for non Mac OS
+//#define DBL_MIN std::numeric_limits<double>::min()// DBL_MIN for non Mac OS
+#define MAXFLOAT std::numeric_limits<float>::max()
 #endif
 
 // Floating point comparisons 

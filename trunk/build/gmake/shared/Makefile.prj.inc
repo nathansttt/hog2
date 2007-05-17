@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/util -I$(ROOT)/simulation -I$(ROOT)/abstraction
+PROJ_CXXFLAGS = -I$(ROOT)/util -I$(ROOT)/graph -I$(ROOT)/simulation -I$(ROOT)/abstraction -I$(ROOT)/absmapalgorithms -I$(ROOT)/abstractionalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/algorithms -I$(ROOT)/environments
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -30,22 +30,10 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-  shared/aStar2.cpp \
-  shared/hpaStar.cpp \
-  shared/praStar.cpp \
-  shared/searchUnit.cpp \
-  shared/aStar3.cpp \
-  shared/humanUnit.cpp \
-  shared/praStarUnit.cpp \
-  shared/sharedAMapGroup.cpp \
-  shared/aStar.cpp \
-  shared/pathGeneration.cpp \
-  shared/rewardUnit.cpp \
-  shared/spreadExecSearchAlgorithm.cpp \
-  shared/corridorAStar.cpp \
-  shared/patrolUnit.cpp \
-  shared/scenarioLoader.cpp \
-  shared/spreadPRAStar.cpp \
-  shared/craStar.cpp \
-  shared/praStar2.cpp \
-  shared/searchAlgorithm.cpp
+	#shared/HumanUnit.cpp \
+	shared/PathGeneration.cpp \
+	#shared/PatrolUnit.cpp \
+	shared/PRAStarUnit.cpp \
+	#shared/RewardUnit.cpp \
+	shared/SearchUnit.cpp \
+	shared/SharedAMapGroup.cpp

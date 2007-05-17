@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = 
+PROJ_CXXFLAGS = -I$(ROOT)/graph
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -30,17 +30,14 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-  util/bitVector.cpp  \
-  util/glUtil.cpp \
-  util/heap2.cpp \
-  util/map.cpp \
-  util/statUtil.cpp \
-  util/fpUtil.cpp \
-  util/graph.cpp \
-  util/heap.cpp \
-  util/statCollection.cpp \
-  util/timer.cpp \
-  util/mapOverlay.cpp \
-  util/path.cpp \
-  util/GenericAStar.cpp
+	util/BitVector.cpp \
+	util/FPUtil.cpp \
+	util/GLUtil.cpp \
+	util/Map.cpp \
+	util/MapOverlay.cpp \
+	util/Plot2D.cpp \
+	util/ScenarioLoader.cpp \
+	util/StatCollection.cpp \
+	util/StatUtil.cpp \
+	util/Timer.cpp
 

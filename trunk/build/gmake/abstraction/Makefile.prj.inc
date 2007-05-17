@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/util -I$(ROOT)/simulation -I$(ROOT)/abstraction
+PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/util -I$(ROOT)/algorithms -I$(ROOT)/graphalgorithms
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -30,13 +30,17 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-  abstraction/clusterAbstraction.cpp \
-  abstraction/mapAbstraction.cpp \
-  abstraction/mapProvider.cpp \
-  abstraction/width.cpp \
-  abstraction/graphAbstraction.cpp \
-  abstraction/mapCliqueAbstraction.cpp \
-  abstraction/mapQuadTreeAbstraction.cpp \
-  abstraction/loadedCliqueAbstraction.cpp \
-  abstraction/mapFlatAbstraction.cpp \
-  abstraction/radiusAbstraction.cpp
+  abstraction/AbstractionSearchEnvironment.cpp \
+  abstraction/ClusterAbstraction.cpp \
+  abstraction/GraphAbstraction.cpp \
+  abstraction/LoadedBBAbstraction.cpp \
+  abstraction/LoadedCliqueAbstraction.cpp \
+  abstraction/MapAbstraction.cpp \
+  abstraction/MapCliqueAbstraction.cpp \
+  abstraction/MapFlatAbstraction.cpp \
+  abstraction/MapLineAbstraction.cpp \
+  abstraction/MapProvider.cpp \
+  abstraction/MapQuadTreeAbstraction.cpp \
+  abstraction/NodeLimitAbstraction.cpp \
+  abstraction/RadiusAbstraction.cpp \
+  abstraction/Width.cpp

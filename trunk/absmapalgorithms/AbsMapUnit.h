@@ -19,6 +19,7 @@ typedef Unit<xyLoc, tDirection, AbsMapEnvironment> BaseAbsMapUnit;
 * A simple map-based unit
  */
 
+
 class AbsMapUnit : public Unit<xyLoc, tDirection, AbsMapEnvironment> {
 public:
 	AbsMapUnit(int x, int y)

@@ -8,6 +8,7 @@
  */
 
 #include "Plot2D.h"
+#include <math.h>
 
 namespace Plotting {
 	

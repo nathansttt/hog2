@@ -10,42 +10,31 @@
 
 # All projects to build in this order.
 PROJECTS = \
+  graph \
   util \
+  algorithms \
+  abstractionalgorithms \
+  graphalgorithms \
+  absmapalgorithms \
   abstraction \
   shared \
   simulation \
-  driver \
+  mapalgorithms \
   apps/sample \
-  apps/299 \
-  apps/aVsPra \
-  apps/cluster \
-  apps/RTS \
-  apps/bidding \
-  apps/FLS \
-  apps/HPAStar \
-  apps/MTS \
-  apps/pathfinding
 
 # Include projects with broken compilation
 PROJECTS_ALL = \
+  graph \
   util \
+  algorithms \
+  abstractionalgorithms \
+  graphalgorithms \
+  absmapalgorithms \
   abstraction \
   shared \
   simulation \
-  driver \
+  mapalgorithms \
   apps/sample \
-  apps/299 \
-  apps/aStarMM \
-  apps/multipleAStarMM \
-  apps/aVsPra \
-  apps/cluster \
-  apps/RTS \
-  apps/sarsa \
-  apps/FLS \
-  apps/HPAStar \
-  apps/MTS \
-  apps/pathfinding \
-  apps/sokoban
 
 # sequentially to avoid same sub-target in sub-make invoked twice
 default:
