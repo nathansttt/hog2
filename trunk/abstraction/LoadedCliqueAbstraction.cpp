@@ -92,12 +92,13 @@ void LoadedCliqueAbstraction::ToggleDrawAbstraction(int which)
 		levelDraw = levelDraw&(~(1<<which));
 }
 
-void LoadedCliqueAbstraction::OpenGLDraw(int window)
+void LoadedCliqueAbstraction::OpenGLDraw(int)
 {
 	glDisable(GL_LIGHTING);
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
-		if ((levelDraw >> x) & 1) DrawGraph(abstractions[x]);
+		if ((levelDraw >> x) & 1)
+			DrawGraph(abstractions[x]);
 		//glCallList(displayLists[x]);
 	}
 	glEnable(GL_LIGHTING);

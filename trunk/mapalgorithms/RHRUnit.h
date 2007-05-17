@@ -22,7 +22,7 @@ public:
   { lastIndex = 0; }
 	const char *GetName() { return "RHRUnit"; }
 	tDirection MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *);
-	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc, bool, SimulationInfo *);
+	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc &, bool, SimulationInfo *);
 private:
 	int lastIndex;
 	xyLoc loc;

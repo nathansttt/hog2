@@ -32,7 +32,7 @@ bool BoundingBox::pointInBox(double x, double y, double z)
 					((fless(z, z1) && (!fless(z, z2))) || (fless(z, z2) && (!fless(z, z1)))));
 }
 
-void BoundingBox::OpenGLDraw(int window)
+void BoundingBox::OpenGLDraw(int)
 {
 	glBegin(GL_LINE_LOOP);
 	glVertex3f(x1, y1, z1);
@@ -570,11 +570,11 @@ bool LoadedBBAbstraction::Pathable(node *from, node *to)
 }
 
 
-void LoadedBBAbstraction::AddNode(node *n)
+void LoadedBBAbstraction::AddNode(node *)
 {
 }
 
-void LoadedBBAbstraction::AddEdge(edge *e, unsigned int absLevel)
+void LoadedBBAbstraction::AddEdge(edge *, unsigned int)
 {
 }
 

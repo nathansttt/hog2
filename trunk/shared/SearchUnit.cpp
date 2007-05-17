@@ -295,7 +295,7 @@ void SearchUnit::updateLocation(int _x, int _y, bool success, SimulationInfo *)
 	loc.x = _x; loc.y = _y;
 }
 
-void SearchUnit::OpenGLDraw(int window, AbsMapEnvironment *ame, SimulationInfo *si)
+void SearchUnit::OpenGLDraw(int , AbsMapEnvironment *ame, SimulationInfo *si)
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = ame->GetMap();

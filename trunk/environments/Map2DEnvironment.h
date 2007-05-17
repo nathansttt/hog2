@@ -64,8 +64,8 @@ public:
 	bool GoalTest(xyLoc &node, xyLoc &goal);
 	uint64_t GetStateHash(xyLoc &node);
 	uint64_t GetActionHash(tDirection act);
-	void OpenGLDraw(int window);
-	void OpenGLDraw(int window, xyLoc &l);
+	virtual void OpenGLDraw(int window);
+	virtual void OpenGLDraw(int window, xyLoc &l);
 	Map* GetMap() { return map; }
 protected:
 	Map *map;
@@ -78,6 +78,7 @@ public:
 	virtual ~AbsMapEnvironment();
 	MapAbstraction *GetMapAbstraction() { return ma; }
 	void OpenGLDraw(int window) { map->OpenGLDraw(window); ma->OpenGLDraw(window); }
+	void OpenGLDraw(int window, xyLoc &l) { MapEnvironment::OpenGLDraw(window, l); }
 private:
 	MapAbstraction *ma;
 };

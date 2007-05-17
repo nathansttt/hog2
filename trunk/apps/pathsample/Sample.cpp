@@ -131,7 +131,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
+void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
 		return;
@@ -255,7 +255,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
-void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
+void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
 	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
 	
@@ -291,7 +291,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	u->setSpeed(1.0/4.0);
 }
 
-void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
+void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 //	for (int x = 0; x < ((mod==kShiftDown)?(50):(1)); x++)
 //	{

@@ -978,7 +978,7 @@ bool MapCliqueAbstraction::Pathable(node *from, node *to)
 	return true;
 }
 
-void MapCliqueAbstraction::AddNode(node *n)
+void MapCliqueAbstraction::AddNode(node *)
 {
 }
 

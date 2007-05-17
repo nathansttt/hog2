@@ -28,7 +28,7 @@ tDirection RandomUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, S
  * After moving, the unit picks a new random direction if the move wasn't a success.
  * If it was, it has a 5% chance of changing direction.
  */
-void RandomUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *, xyLoc l, bool success, SimulationInfo *si)
+void RandomUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *, xyLoc &l, bool success, SimulationInfo *si)
 {
 	MapUnit::UpdateLocation(me, l, success, si);
 	if (success)
@@ -70,7 +70,7 @@ tDirection BilliardBallUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterfac
  * if the billiard ball unit collides, it will cool off for a period of time
  * otherwise, it may changes its mind if it unstable
  */
-void BilliardBallUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *, xyLoc l, bool success, SimulationInfo *si)
+void BilliardBallUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *, xyLoc &l, bool success, SimulationInfo *si)
 {
 	MapUnit::UpdateLocation(me, l, success, si);
 	if (success)

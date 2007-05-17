@@ -57,7 +57,7 @@ public:
 	{ return makeMove(ame->GetMapAbstraction(), 0, si); }
 	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo); 
 	
-	void UpdateLocation(AbsMapEnvironment *, xyLoc l, bool success, SimulationInfo *si) { updateLocation(l.x, l.y, success, si); }
+	void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool success, SimulationInfo *si) { updateLocation(l.x, l.y, success, si); }
 	virtual void updateLocation(int _x, int _y, bool, SimulationInfo *);
 	virtual void OpenGLDraw(int window, AbsMapEnvironment *, SimulationInfo *);
 	//void printRoundStats(FILE *f);

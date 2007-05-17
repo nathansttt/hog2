@@ -42,7 +42,7 @@ public:
 	virtual ~Unit() {}
 	virtual const char *GetName() = 0;
 	virtual action MakeMove(environment *, OccupancyInterface<state, action> *, SimulationInfo *) = 0;
-	virtual void UpdateLocation(environment *, state, bool success, SimulationInfo *) = 0;
+	virtual void UpdateLocation(environment *, state &, bool success, SimulationInfo *) = 0;
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw(int window, environment *, SimulationInfo *) = 0;
 	virtual void GetGoal(state &s) = 0;
