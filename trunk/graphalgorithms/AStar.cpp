@@ -33,7 +33,7 @@ using namespace AStar3Util;
 static const bool verbose = false;
 //const int gMaxAbstraction = 0;
 
-const char *aStar::getName()
+const char *aStar::GetName()
 {
 	static char name[32];
 	sprintf(name, "aStar[]");
@@ -43,7 +43,7 @@ const char *aStar::getName()
 
 //aStar::aStar(GraphAbstraction *_abstr, node *_start, node *_goal,
 //															 path *corridor, int corridorWidth, int _absLevel)
-path *aStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *aStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	//assert(openList.size() == 0);
 	assert(openQueue.size() == 0);
@@ -57,7 +57,7 @@ path *aStar::getPath(GraphAbstraction *aMap, node *from, node *to, reservationPr
 	g = abstr->GetAbstractGraph(start);
 	
 	SearchNode first(internalHeuristic(goal, start), 0, 0, start, start);
-	openQueue.add(first);
+	openQueue.Add(first);
 	//openList[start] = first;
 		
 	return getPathToNode(goal, (from->getLabelL(kAbstractionLevel) == 0)?rp:0);
@@ -107,7 +107,7 @@ path *aStar::getPathToNode(node *target, reservationProvider *rp)
 			{
 				if (verbose) { printf("node %d not in corridor\n", neighbor->getNum()); }
 			}
-			else if (openQueue.isIn(SearchNode(neighbor)))
+			else if (openQueue.IsIn(SearchNode(neighbor)))
 			//else if (openList.find(neighbor) != openList.end())
 			{
 				if (verbose) { printf("updating node %d\n", neighbor->getNum()); }
@@ -140,7 +140,7 @@ node *aStar::getNextNode()
 {
 	nodesExpanded++;
 	node *next;
-	SearchNode it = openQueue.remove();
+	SearchNode it = openQueue.Remove();
 	next = it.currNode;
 //	if (openList.find(next) == openList.end())
 //	{
@@ -161,7 +161,7 @@ node *aStar::getNextNode()
 
 void aStar::updateWeight(node *currOpenNode, node *neighbor, edge *e)
 {
-	assert(openQueue.isIn(SearchNode(neighbor)));
+	assert(openQueue.IsIn(SearchNode(neighbor)));
 	SearchNode prev = openQueue.find(SearchNode(neighbor));
 	//SearchNode prev = openList[neighbor];
 	SearchNode alt = closedList[currOpenNode];
@@ -176,7 +176,7 @@ void aStar::updateWeight(node *currOpenNode, node *neighbor, edge *e)
 		// reset neighbor in queue
 		//openQueue.erase(openQueue.find(neighbor));
 		//openQueue.push(prev);
-		openQueue.decreaseKey(prev);
+		openQueue.DecreaseKey(prev);
 //		openList[neighbor] = prev;
 	}
 }
@@ -189,7 +189,7 @@ void aStar::addToOpenList(node *currOpenNode, node *neighbor, edge *e)
 							 neighbor, currOpenNode/*, closedList[currOpenNode].steps+1*/);
 	if (verbose) 
 	{ printf("Adding %u to openQueue, old size %u, ", neighbor->getNum(), openQueue.size()); }
-	openQueue.add(n);
+	openQueue.Add(n);
 
 	if (verbose)
 	{ 

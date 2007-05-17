@@ -88,7 +88,7 @@ private:
 //	unit(int x, int y, int r, int g, int b, unit *target=0);
 //	unit(int x, int y, float r, float g, float b, unit *target=0);
 //	virtual ~unit();
-//	virtual const char *getName() { return "basicUnit"; }
+//	virtual const char *GetName() { return "basicUnit"; }
 //	static void clearDisplayList() { if (sphereDispList != 0) glDeleteLists(sphereDispList, 1); sphereDispList = 0; }
 //	/** The new makeMove only gives a map. The unit simulation won't calculate an
 //		  MapAbstraction unless it has to. Thus, in simple pathfinding tests, the overhead
@@ -102,7 +102,7 @@ private:
 //	/** log an stats that may have been computed during the last run */
 //	virtual void logStats(StatCollection *stats);
 //	/** log any final one-time stats before a simulation is ended */
-//	virtual void logFinalStats(StatCollection *) {}
+//	virtual void LogFinalStats(StatCollection *) {}
 //	
 //	virtual double getSpeed() { return speed; }
 //	void setSpeed(double s) { speed = s; }

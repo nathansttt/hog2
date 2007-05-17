@@ -42,12 +42,12 @@ class aStarOld : public SearchAlgorithm {
 	
 public:
 	aStarOld(double _w = 1.0, bool _doPathDraw = true);
-	path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
-	virtual const char *getName() { return aStarName; }
+	path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual const char *GetName() { return aStarName; }
 	void drawPath(bool _doPathDraw) { doPathDraw = _doPathDraw; }
 	
 private:
-		void relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextNode, node *to);
+		void relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextNode, node *to);
 	path *extractBestPath(graph *g, unsigned int current);
 	GraphAbstraction *map;
 	double wh;

@@ -32,7 +32,7 @@
 #include <ext/hash_map>
 
 /**
-* A simple & efficient heap class.
+* A simple & efficient Heap class.
  */
 
 
@@ -42,20 +42,20 @@ public:
   OpenClosedList();
   ~OpenClosedList();
 	void reset();
-  void add(OBJ val);
-  void decreaseKey(OBJ val);
-  bool isIn(OBJ val);
-  OBJ remove();
-	void pop() { remove(); }
+  void Add(OBJ val);
+  void DecreaseKey(OBJ val);
+  bool IsIn(OBJ val);
+  OBJ Remove();
+	void pop() { Remove(); }
 	OBJ top() { return _elts[0]; }
 	OBJ find(OBJ val);
-  bool empty();
+  bool Empty();
 	unsigned size() { return _elts.size(); }
 //	void verifyData();
 private:
   std::vector<OBJ> _elts;
-	void heapifyUp(unsigned int index);
-  void heapifyDown(unsigned int index);
+	void HeapifyUp(unsigned int index);
+  void HeapifyDown(unsigned int index);
 	typedef __gnu_cxx::hash_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
 	IndexTable table;
 };
@@ -85,35 +85,35 @@ void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::reset()
 * Add object into OpenClosedList.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::add(OBJ val)
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::Add(OBJ val)
 {
     assert(table.find(val) == table.end());
 	table[val] = _elts.size();
 	//  val->key = count;
   _elts.push_back(val);
   //count++;
-	//  heapifyUp(val->key);
-  heapifyUp(table[val]);
+	//  HeapifyUp(val->key);
+  HeapifyUp(table[val]);
 }
 
 /**
 * Indicate that the key for a particular object has decreased.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::decreaseKey(OBJ val)
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::DecreaseKey(OBJ val)
 {
 	EqKey eq;
 	assert(eq(_elts[table[val]], val));
-  //heapifyUp(val->key);
+  //HeapifyUp(val->key);
 	_elts[table[val]] = val;
-  heapifyUp(table[val]);
+  HeapifyUp(table[val]);
 }
 
 /**
 * Returns true if the object is in the OpenClosedList.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::isIn(OBJ val)
+bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::IsIn(OBJ val)
 {
 	EqKey eq;
   if ((table.find(val) != table.end()) && (table[val] < _elts.size()) &&
@@ -126,9 +126,9 @@ bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::isIn(OBJ val)
 * Remove the item with the lowest key from the OpenClosedList & re-heapify.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-OBJ OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::remove()
+OBJ OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::Remove()
 {
-  if (empty())
+  if (Empty())
 		return OBJ();
   // count--;
   OBJ ans = _elts[0];
@@ -137,18 +137,18 @@ OBJ OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::remove()
   //_elts[0]->key = 0;
   _elts.pop_back();
 	table.erase(ans);
-  heapifyDown(0);
+  HeapifyDown(0);
 	
   return ans;
 }
 
 /**
-* find this object in the heap and return
+* find this object in the Heap and return
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
 OBJ OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::find(OBJ val)
 {
-	if (!isIn(val))
+	if (!IsIn(val))
 		return OBJ();
 	return table.find(val)->first;
 }
@@ -157,13 +157,13 @@ OBJ OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::find(OBJ val)
 * Returns true if no items are in the OpenClosedList.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::empty()
+bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::Empty()
 {
   return _elts.size() == 0;
 }
 
 ///**
-//* Verify that the heap is internally consistent. Fails assertion if not.
+//* Verify that the Heap is internally consistent. Fails assertion if not.
 // */
 //template<typename OBJ, class HashKey, class EqKey, class CmpKey>
 //void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::verifyData()
@@ -178,7 +178,7 @@ bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::empty()
 //}
 
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::heapifyUp(unsigned int index)
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::HeapifyUp(unsigned int index)
 {
   if (index == 0) return;
   int parent = (index-1)/2;
@@ -193,12 +193,12 @@ void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::heapifyUp(unsigned int index)
 		table[_elts[index]] = index;
 		EqKey eq;
 		assert(!eq(_elts[parent], _elts[index]));
-    heapifyUp(parent);
+    HeapifyUp(parent);
   }
 }
 
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::heapifyDown(unsigned int index)
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::HeapifyDown(unsigned int index)
 {
 	CmpKey compare;
   unsigned int child1 = index*2+1;
@@ -226,7 +226,7 @@ void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::heapifyDown(unsigned int index
 		table[_elts[index]] = index;
 //    _elts[which]->key = which;
 //    _elts[index]->key = index;
-    heapifyDown(which);
+    HeapifyDown(which);
   }
 }
 

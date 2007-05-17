@@ -30,8 +30,8 @@ public:
 class FringeSearch : public SearchAlgorithm {
 public:
 	FringeSearch();
-	const char *getName() { return bpmx?"BPMXFringeSearch":"FringeSearch"; }
-	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	const char *GetName() { return bpmx?"BPMXFringeSearch":"FringeSearch"; }
+	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	void setUseBPMX(bool use) { bpmx = use; }
 	void setHeuristicProvider(heuristicProvider *hh) { hp = hh; }
 	unsigned int getNodesReopened() { return nodesReopened; }

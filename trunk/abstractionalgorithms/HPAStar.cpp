@@ -40,7 +40,7 @@ void hpaStar::setSmoothing(bool smooth){
  * 
  * Reservation provider isn't used 
  */
-path* hpaStar::getPath(GraphAbstraction *aMap, node* from, node* to, reservationProvider *)
+path* hpaStar::GetPath(GraphAbstraction *aMap, node* from, node* to, reservationProvider *)
 {
 	// Make sure a cluster abstraction has been set & it's the same as the abstraction being passed
 	// in to this function
@@ -62,9 +62,9 @@ path* hpaStar::getPath(GraphAbstraction *aMap, node* from, node* to, reservation
 	if(m->getClusterIdFromNode(from)==m->getClusterIdFromNode(to))
 	{
 		aStarOld astar;
-		path* p = astar.getPath(m,from,to);
-		nodesExpanded = astar.getNodesExpanded();
-		nodesTouched = astar.getNodesTouched();
+		path* p = astar.GetPath(m,from,to);
+		nodesExpanded = astar.GetNodesExpanded();
+		nodesTouched = astar.GetNodesTouched();
 		if(verbose)std::cout<<"Nodes are inside the same cluster\n";
 		return p;
 	}
@@ -172,9 +172,9 @@ path* hpaStar::findAbstractPath(node* from, node* to)
 	if(verbose)	std::cout<<"HPA*: finding the abstract path\n";
 	aStarOld astar;
 
-	path* p = astar.getPath(m,fromnum, tonum); 
-	nodesExpanded = astar.getNodesExpanded();
-	nodesTouched = astar.getNodesTouched();
+	path* p = astar.GetPath(m,fromnum, tonum); 
+	nodesExpanded = astar.GetNodesExpanded();
+	nodesTouched = astar.GetNodesTouched();
 
 	if(verbose){
 		std::cout<<"Abstract path: ";

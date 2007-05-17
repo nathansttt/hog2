@@ -41,7 +41,7 @@ public:
 	praStarUnit(int _x, int _y, unit *_target, praStar *_alg);
 //	praStarUnit(int _x, int _y, int _r, int _g, int _b, unit *_target, praStar *_alg);
 	~praStarUnit() { delete cache; }
-	const char *getName() { sprintf(name, "c%s", algorithm->getName()); return name; }
+	const char *GetName() { sprintf(name, "c%s", algorithm->GetName()); return name; }
 	tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo); 
 private:
 	path *cache;

@@ -196,7 +196,7 @@ protected:
 			if (!IsUnitRacing(this->units[t]))
 				continue;
 			
-			// stats.AddStat("distanceMoved", units[t]->agent->getName(), (double)0);
+			// stats.AddStat("distanceMoved", units[t]->agent->GetName(), (double)0);
 //			if (this->units[t]->blocking)
 //			{
 //				bv->set(this->units[t]->curry*map_width+units[t]->currx, 0);

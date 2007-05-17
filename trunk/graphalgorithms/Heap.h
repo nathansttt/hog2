@@ -1,5 +1,5 @@
 /*
- * $Id: heap.h,v 1.4 2006/11/29 17:40:14 nathanst Exp $
+ * $Id: Heap.h,v 1.4 2006/11/29 17:40:14 nathanst Exp $
  *
  * This file is part of HOG.
  *
@@ -30,22 +30,22 @@
 #include "Graph.h"
 
 /**
- * A simple & efficient heap class which uses graph objects.
+ * A simple & efficient Heap class which uses graph objects.
  */
 
-class heap {
+class Heap {
 public:
-  heap(int s = DEFAULT_SIZE);
-  ~heap();
+  Heap(int s = DEFAULT_SIZE);
+  ~Heap();
 	unsigned int size();
-  void add(graph_object *val);
-  void decreaseKey(graph_object *val);
-  bool isIn(graph_object *val);
-  graph_object *remove();
-  bool empty();
+  void Add(graph_object *val);
+  void DecreaseKey(graph_object *val);
+  bool IsIn(graph_object *val);
+  graph_object *Remove();
+  bool Empty();
 private:
-  void heapifyUp(int index);
-  void heapifyDown(int index);
+  void HeapifyUp(int index);
+  void HeapifyDown(int index);
   std::vector<graph_object *> _elts;
   int count;
 };

@@ -87,9 +87,9 @@ double patrolUnit::goToLoc(MapAbstraction *aMap, int which)
 	Locs[which]->getLocation(tox, toy);
 //	printf("Patrol unit going to %d, %d\n", tox, toy);
 	to = aMap->GetNodeFromMap(tox, toy);
-	p = a.getPath(aMap, from, to);
-	nodesExpanded += a.getNodesExpanded();
-	nodesTouched += a.getNodesTouched();
+	p = a.GetPath(aMap, from, to);
+	nodesExpanded += a.GetNodesExpanded();
+	nodesTouched += a.GetNodesTouched();
 	if (p)
 	{
 		pathCost = aMap->distance(p);
@@ -161,7 +161,7 @@ void patrolUnit::addPathToCache(path *p)
 		case 1: result = kW; break;
 		default :
 			printf("SU: %s : The (x) nodes in the path are not next to each other!\n",
-						 this->getName());
+						 this->GetName());
 			printf("Distance is %ld\n",
 						 p->n->getLabelL(kFirstData)-p->next->n->getLabelL(kFirstData));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
@@ -177,7 +177,7 @@ void patrolUnit::addPathToCache(path *p)
 		case 1: result = result|kN; break;
 		default :
 			printf("SU: %s : The (y) nodes in the path are not next to each other!\n",
-						 this->getName());
+						 this->GetName());
 			printf("Distance is %ld\n",
 						 p->n->getLabelL(kFirstData+1)-p->next->n->getLabelL(kFirstData+1));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
@@ -196,13 +196,13 @@ void patrolUnit::logStats(StatCollection *stats)
 	}
 	// printf("SearchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
 	if (nodesExpanded != 0)
-		stats->AddStat("nodesExpanded", getName(), (long)nodesExpanded);
+		stats->AddStat("nodesExpanded", GetName(), (long)nodesExpanded);
 	if (nodesTouched != 0)
-		stats->AddStat("nodesTouched", getName(), (long)nodesTouched);
+		stats->AddStat("nodesTouched", GetName(), (long)nodesTouched);
 	nodesExpanded = nodesTouched = 0;
 }
 
-void patrolUnit::logFinalStats(StatCollection *stats)
+void patrolUnit::LogFinalStats(StatCollection *stats)
 {
-	a.logFinalStats(stats);
+	a.LogFinalStats(stats);
 }

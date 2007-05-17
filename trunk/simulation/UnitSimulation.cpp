@@ -87,7 +87,7 @@
 //		unitInfo *ui = units.back();
 //		units.pop_back();
 //		
-//		ui->agent->logFinalStats(&stats);
+//		ui->agent->LogFinalStats(&stats);
 //		
 //		delete ui->agent;
 //		delete ui;
@@ -101,7 +101,7 @@
 //	}
 //	while (unitGroups.size() > 0)
 //	{
-//		unitGroups.back()->logFinalStats(&stats);
+//		unitGroups.back()->LogFinalStats(&stats);
 //		delete unitGroups.back();
 //		unitGroups.pop_back();
 //	}
@@ -416,12 +416,12 @@
 //	which_map = kUnitSimulationMap;
 //	bv->clear();
 //	unit::clearDisplayList();
-//	while (!moveQ.empty())
+//	while (!moveQ.Empty())
 //		moveQ.pop();
 //	while (units.size() > 0)
 //	{
 //		unitInfo *ui = units.back();
-//		ui->agent->logFinalStats(&stats);
+//		ui->agent->LogFinalStats(&stats);
 //		units.pop_back();
 //		delete ui->agent;
 //		delete ui;
@@ -435,7 +435,7 @@
 //	}
 //	while (unitGroups.size() > 0)
 //	{
-//		unitGroups.back()->logFinalStats(&stats);
+//		unitGroups.back()->LogFinalStats(&stats);
 //		delete unitGroups.back();
 //		unitGroups.pop_back();
 //	}
@@ -626,7 +626,7 @@
 //		return;
 //	}
 //	
-//	if (moveQ.empty())
+//	if (moveQ.Empty())
 //		return;
 //	
 //	unitInfo *next = moveQ.top();
@@ -636,7 +636,7 @@
 //		
 //		// this the actual time when the unit moves
 //		currTime = next->nextTime;
-//		if (verbose) printf("Moving %s at time %1.2f\n", next->agent->getName(), currTime);
+//		if (verbose) printf("Moving %s at time %1.2f\n", next->agent->GetName(), currTime);
 //		stepUnitTime(next);
 //		
 //		if ((fless(next->nextTime, finalTime)) && (realTime))
@@ -702,7 +702,7 @@
 //	
 //	thinkingCost = t.endTimer();
 //	theUnit->thinkTime += thinkingCost;
-//	stats.AddStat("makeMoveThinkingTime", u->getName(), thinkingCost);
+//	stats.AddStat("makeMoveThinkingTime", u->GetName(), thinkingCost);
 //	
 //	if (asynch)
 //		theUnit->nextTime += unitSimulation::penalty*thinkingCost;
@@ -710,7 +710,7 @@
 //	//	if (fless(theUnit->firstMoveThinkTime,0.0)) {
 //	//		theUnit->firstMoveThinkTime = thinkingCost;
 //	//		if (verbose) 
-//	//			printf("Unit %s made 1st move in %f ms\n",theUnit->agent->getName(),thinkingCost);
+//	//			printf("Unit %s made 1st move in %f ms\n",theUnit->agent->GetName(),thinkingCost);
 //	//	}
 //	
 //	// The unit wants to stay put
@@ -718,7 +718,7 @@
 //	{
 //		theUnit->nextTime += theUnit->agent->getSpeed();
 //		setAgentLocation(theUnit, true, true); // move was successful; update time
-//																					 // printf("unit %s wants to stay\n",u->getName());
+//																					 // printf("unit %s wants to stay\n",u->GetName());
 //		if (keepHistory)
 //		{
 //			timeStep ts(theUnit->currx, theUnit->curry, theUnit->nextTime);
@@ -773,7 +773,7 @@
 //		{
 //			if (verbose) 
 //				printf("HAHA; move failed for %s because of stochastic environment\n",
-//							 u->getName());
+//							 u->GetName());
 //			setAgentLocation(theUnit, false, true); // move was not successful; update time
 //			if (keepHistory)
 //			{
@@ -787,7 +787,7 @@
 //		{
 //			if (verbose)
 //				printf("Can't move unit %s from (%d, %d) onto other unit (%d, %d); time %1.2f\n",
-//							 u->getName(),theUnit->currx, theUnit->curry, newx, newy, currTime);
+//							 u->GetName(),theUnit->currx, theUnit->curry, newx, newy, currTime);
 //			
 //			// if not asynch then this is the same as a stay move: you have to sit and think
 //			if (!asynch)
@@ -808,7 +808,7 @@
 //		{
 //			if (verbose)
 //				printf("Can't move unit %s from (%d, %d) diagonally past other unit to (%d, %d); time %1.2f\n",
-//							 u->getName(),theUnit->currx, theUnit->curry, newx, newy, currTime);
+//							 u->GetName(),theUnit->currx, theUnit->curry, newx, newy, currTime);
 //			
 //			setAgentLocation(theUnit, false, true); // move was not successful; update time
 //			if (keepHistory)
@@ -825,7 +825,7 @@
 //			
 //			theUnit->moveDist += movementCost;
 //			theUnit->nextTime += movementCost*u->getSpeed();
-//			stats.SumStat("distanceMoved", theUnit->agent->getName(), (double)movementCost);
+//			stats.SumStat("distanceMoved", theUnit->agent->GetName(), (double)movementCost);
 //			
 //			if (theUnit->blocking) 
 //				bv->set(theUnit->curry*map_width+theUnit->currx, 0);
@@ -847,7 +847,7 @@
 //	else {
 //		if (verbose) 
 //			printf("Can't move onto bad terrain\n");
-//		// printf("unit %s wants to move into a wall\n",u->getName());
+//		// printf("unit %s wants to move into a wall\n",u->GetName());
 //		
 //		setAgentLocation(theUnit, false, true);  // move was not successful; update time
 //		if (keepHistory)
@@ -965,13 +965,13 @@
 //	{
 //		double thinkingCost = t.endTimer();
 //		u->thinkTime += thinkingCost;
-//		stats.AddStat("setLocationThinkingTime", u->agent->getName(), thinkingCost);
+//		stats.AddStat("setLocationThinkingTime", u->agent->GetName(), thinkingCost);
 //		if (asynch)
 //			u->nextTime += unitSimulation::penalty*thinkingCost;
 //		
 //		//		if (fless(u->firstMoveThinkTime,0.0)) {
 //		//			u->firstMoveThinkTime = thinkingCost;
-//		//			if (verbose) printf("Unit %s made 1st move in %f ms\n",u->agent->getName(),thinkingCost);
+//		//			if (verbose) printf("Unit %s made 1st move in %f ms\n",u->agent->GetName(),thinkingCost);
 //		//		}
 //	}
 //}

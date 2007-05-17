@@ -109,7 +109,7 @@ private:
 //	/** gives the unit group time to think on a regular basis. In a synchronous simluation
 //		this will be called once at the beginning of each timestep. */
 //	virtual void think(MapProvider *) { }
-//	virtual const char *getName() { return "UnitGroupx"; }
+//	virtual const char *GetName() { return "UnitGroupx"; }
 //
 //	virtual void OpenGLDraw(MapProvider *, SimulationInfo *);
 //	virtual void addUnit(unit *);
@@ -124,7 +124,7 @@ private:
 //	virtual void startNewTrial(StatCollection *stats);
 //	// print stats; if we don't know any, get the unit to do it
 //	virtual void logStats(StatCollection *stats);
-//	virtual void logFinalStats(StatCollection *) {}
+//	virtual void LogFinalStats(StatCollection *) {}
 //	//virtual void printRoundStats(unit *u, FILE *f);
 //
 //	/** lets the user cycle through the display mode by hitting Shift-Tab */

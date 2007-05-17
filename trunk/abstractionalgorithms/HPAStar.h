@@ -40,9 +40,9 @@ public:
 	hpaStar();
 	virtual ~hpaStar(){}
 
-	virtual path* getPath(GraphAbstraction *aMap, node* from, node* to, reservationProvider *rp = 0);
+	virtual path* GetPath(GraphAbstraction *aMap, node* from, node* to, reservationProvider *rp = 0);
 
-	virtual const char *getName() { return algName; } 
+	virtual const char *GetName() { return algName; } 
 	void setUpSearch(node* from, node* to);
 	path* findAbstractPath(node* from, node* to);
 	path* findMapPath(path* abPath,node* from,node* to);

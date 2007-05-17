@@ -41,7 +41,7 @@ typedef unsigned int neighbor_iterator;
 typedef union { double fval; long lval; } labelValue;
 
 /**
- * Parent class for nodes and edges allowing them to be stored in a heap or
+ * Parent class for nodes and edges allowing them to be stored in a Heap or
  * manipulated with other data structures.
  */
 class graph_object {
@@ -162,7 +162,7 @@ public:
   node(const char *);
   graph_object *clone() const;
 
-  const char *getName() const { return name; }
+  const char *GetName() const { return name; }
   unsigned int getNum() const { return nodeNum; }
   int getUniqueID() const { return uniqueID; }
   void AddEdge(edge *);

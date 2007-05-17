@@ -65,7 +65,7 @@ bool GenericAStar::InitializeSearch(SearchEnvironment *_env, uint32_t from, uint
 	}
 
 	SearchNode first(env->heuristic(goal, start), 0, start, start);
-	openQueue.add(first);
+	openQueue.Add(first);
 
 	return true;
 }
@@ -112,7 +112,7 @@ bool GenericAStar::DoSingleSearchStep(std::vector<uint32_t> &thePath)
 			if (verbose) { printf("skipping node %d\n", neighbor); }
 			continue;
 		}
-		else if (openQueue.isIn(SearchNode(neighbor)))
+		else if (openQueue.IsIn(SearchNode(neighbor)))
 		{
 			if (verbose) { printf("updating node %d\n", neighbor); }
 			UpdateWeight(currentOpenNode, neighbor);
@@ -134,7 +134,7 @@ uint32_t GenericAStar::GetNextNode()
 {
 	nodesExpanded++;
 	uint32_t next;
-	SearchNode it = openQueue.remove();
+	SearchNode it = openQueue.Remove();
 	next = it.currNode;
 	closedList[next] = it;
 	return next;
@@ -151,7 +151,7 @@ void GenericAStar::UpdateWeight(uint32_t currOpenNode, uint32_t neighbor)
 		prev.fCost = altCost;
 		prev.gCost = alt.gCost+edgeWeight;
 		prev.prevNode = currOpenNode;
-		openQueue.decreaseKey(prev);
+		openQueue.DecreaseKey(prev);
 	}
 }
 
@@ -163,7 +163,7 @@ void GenericAStar::AddToOpenList(uint32_t currOpenNode, uint32_t neighbor)
 							 neighbor, currOpenNode);
 	if (verbose) 
 	{ printf("Adding %u to openQueue, old size %u\n", neighbor, openQueue.size()); }
-	openQueue.add(n);
+	openQueue.Add(n);
 }
 
 void GenericAStar::ExtractPathToStart(uint32_t goalNode,

@@ -37,7 +37,7 @@ spreadPRAStar::spreadPRAStar()
 	expandSearchRadius = true;
 }
 
-path *spreadPRAStar::getPath(GraphAbstraction *_aMap, node *from, node *to, reservationProvider *_rp)
+path *spreadPRAStar::GetPath(GraphAbstraction *_aMap, node *from, node *to, reservationProvider *_rp)
 {
   std::vector<node *> fromChain;
   std::vector<node *> toChain;
@@ -205,14 +205,14 @@ path *spreadPRAStar::buildNextAbstractPath(GraphAbstraction *_aMap, path *lastPt
 		}
 	}
 	else {
-		result = cAStar.getPath(_aMap, from, to, _rp);
+		result = cAStar.GetPath(_aMap, from, to, _rp);
 		if (result == 0)
 		{
-			if (verbose) printf("NULL result from getPath in spreadPRAStar\n");
+			if (verbose) printf("NULL result from GetPath in spreadPRAStar\n");
 		}
 	}
-	nodesExpanded += cAStar.getNodesExpanded();
-	nodesTouched += cAStar.getNodesTouched();
+	nodesExpanded += cAStar.GetNodesExpanded();
+	nodesTouched += cAStar.GetNodesTouched();
 	return result;
 }
 

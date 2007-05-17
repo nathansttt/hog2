@@ -45,7 +45,7 @@ aStarOld::aStarOld(double _weight, bool _doPathDraw)
 
 
 // The same A*, but counts the number of states expanded
-path *aStarOld::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
+path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp)
 {
 	// Reset the number of states expanded
 	nodesExpanded = 0;
@@ -55,7 +55,7 @@ path *aStarOld::getPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 		return 0;
 	map = aMap;
 	graph *g = map->GetAbstractGraph(from->getLabelL(kAbstractionLevel));
-	heap *openList = new heap(30);
+	Heap *openList = new Heap(30);
 	std::vector<node *> closedList;
 	node *n;
 	
@@ -89,7 +89,7 @@ path *aStarOld::getPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 			node *nextChild = g->getNode(which);
 			
 			// if it's on the open list, we can still update the weight
-			if (openList->isIn(nextChild))
+			if (openList->IsIn(nextChild))
 			{
 				//nodesExpanded++;
 				relaxEdge(openList, g, e, n->getNum(), which, to);
@@ -109,7 +109,7 @@ path *aStarOld::getPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 				nextChild->setLabelF(kTemporaryLabel, MAXINT);
 				nextChild->setKeyLabel(kTemporaryLabel);
 				nextChild->markEdge(0);
-				openList->add(nextChild);
+				openList->Add(nextChild);
 				if (verbose)
 					printf("Adding neighbor/child %d\n", which);
 				//nodesExpanded++;
@@ -118,7 +118,7 @@ path *aStarOld::getPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 		}
 		
 		// get the next (the best) node off the open list
-		n = (node*)openList->remove();
+		n = (node*)openList->Remove();
 		
 		// this means we have expanded all reachable nodes and there is no path
 		if (n == 0) { delete openList; return 0; }
@@ -130,7 +130,7 @@ path *aStarOld::getPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 }
 
 // this is the standard definition of relaxation as in Introduction to Algorithms (cormen, leiserson and rivest)
-void aStarOld::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextNode, node *d)
+void aStarOld::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextNode, node *d)
 {
 	double weight;
 	node *from = g->getNode(source);
@@ -141,7 +141,7 @@ void aStarOld::relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int next
 		if (verbose)
 			printf("Updating %d to %1.2f from %1.2f\n", nextNode, weight, to->getLabelF(kTemporaryLabel));
 		to->setLabelF(kTemporaryLabel, weight);
-		nodeHeap->decreaseKey(to);
+		nodeHeap->DecreaseKey(to);
 		// this is the edge used to get to this node in the min. path tree
 		to->markEdge(e);
 	}

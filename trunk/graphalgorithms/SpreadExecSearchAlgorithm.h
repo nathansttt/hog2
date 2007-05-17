@@ -33,8 +33,8 @@
 class spreadExecSearchAlgorithm : public SearchAlgorithm {
 public:
 	spreadExecSearchAlgorithm() { }
-	virtual const char *getName() { return "unnamed"; }
-	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual const char *GetName() { return "unnamed"; }
+	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 
 	virtual void setTargets(GraphAbstraction *_aMap, node *s, node *e, reservationProvider *_rp = 0)
 	{ rp = _rp; start = s; end = e; aMap = _aMap; }

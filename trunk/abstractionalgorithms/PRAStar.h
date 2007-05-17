@@ -40,8 +40,8 @@ class praStar : public SearchAlgorithm {
 public:
 	praStar();
 	virtual ~praStar() {}
-	virtual path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
-	virtual const char *getName() { return algName; } 
+	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	virtual const char *GetName() { return algName; } 
 	void setPartialPathLimit(int limit) { partialLimit = limit; 
 		sprintf(algName,"PRA*(%d)",partialLimit); }
 	int getPartialPathLimit() { return partialLimit; }
@@ -62,7 +62,7 @@ protected:
 		     std::vector<unsigned int> &eligibleNodeParents, int LABEL,
 		     unsigned int dest);
   
-  void relaxEdge(heap *nodeHeap, graph *g, edge *e, int source, int nextNode, int dest,
+  void relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextNode, int dest,
 		 int LABEL);
 	path *smoothPath(path *p);
 	

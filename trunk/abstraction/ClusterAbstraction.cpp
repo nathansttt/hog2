@@ -591,7 +591,7 @@ void ClusterAbstraction::computeClusterPaths(graph* g)
 				//find path
 //				corridorAStar astar;
 //				astar.setCorridor(&corridor);
-//				path* p = astar.getPath(static_cast<MapAbstraction*>(this), start, goal);
+//				path* p = astar.GetPath(static_cast<MapAbstraction*>(this), start, goal);
 
 				GenericAStar astar;
 				ClusterSearchEnvironment cse(this, GetAbstractionLevel(start));
@@ -798,7 +798,7 @@ void ClusterAbstraction::setUpParents(graph* g)
 						
 						//See if there's a path within this cluster
 //						astar.setCorridor(&corridor);
-//						path* p = astar.getPath(static_cast<MapAbstraction*>(this),low,mnode);
+//						path* p = astar.GetPath(static_cast<MapAbstraction*>(this),low,mnode);
 						GenericAStar astar;
 						ClusterSearchEnvironment cse(this, GetAbstractionLevel(low));
 						cse.setCorridor(corridor);
@@ -1108,7 +1108,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 			//find path
 //			corridorAStar astar;
 //			astar.setCorridor(&corridor);
-//			path* p = astar.getPath(static_cast<MapAbstraction*>(this),n , goal);
+//			path* p = astar.GetPath(static_cast<MapAbstraction*>(this),n , goal);
 			GenericAStar astar;
 			ClusterSearchEnvironment cse(this, GetAbstractionLevel(n));
 			cse.setCorridor(corridor);

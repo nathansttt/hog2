@@ -26,7 +26,7 @@
 
 #include "AStar2.h"
 
-path *aStar2::getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *)
+path *aStar2::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *)
 {
 	if ((from == 0) || (to == 0) || (from == to))
 		return 0;

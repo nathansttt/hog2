@@ -34,7 +34,7 @@
 
 /** Corridor AStar builds a a* path between two nodes, restricting itself to
 a particular corridor, if defined. The corridor must be set before every search
-if it is to be used properly. After each getPath call the corridor is reset. If
+if it is to be used properly. After each GetPath call the corridor is reset. If
 no corridor is defined, it will explore all nodes.
 */
 
@@ -42,21 +42,21 @@ class corridorAStar : public SearchAlgorithm {
 public:
 	corridorAStar();
 	virtual ~corridorAStar() {}
-	path *getPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	/** get the best path from FROM to TO. Use hGoal as the heuristic goal. If TO is not on
 		* the same level as from path will be returned that ends inside the child of TO. */
 	path *getBestPath(GraphAbstraction *aMap, node *from, node *to, node *hGoal, reservationProvider *rp = 0);
 	/** get the best path from aFROM to aTO. Use an insertion edge cost from the original from/to. */
 	path *getBestPath(GraphAbstraction *aMap, node *afrom, node *ato, node *from, node *to, reservationProvider *rp = 0);
 	void setCorridor(const std::vector<node *> *);
-	virtual const char *getName() { return "corridorAStar"; }
+	virtual const char *GetName() { return "corridorAStar"; }
 private:
-		void relaxEdge(heap *nodeHeap, graph *g, GraphAbstraction *aMap,
+		void relaxEdge(Heap *nodeHeap, graph *g, GraphAbstraction *aMap,
 									 edge *e, node *from, node *to, node *dest);
-	void relaxFirstEdge(heap *nodeHeap, graph *g, GraphAbstraction *aMap,
+	void relaxFirstEdge(Heap *nodeHeap, graph *g, GraphAbstraction *aMap,
 											edge *e, node *from, node *afrom, node *ato, node *dest);
 
-	void relaxFinalEdge(heap *nodeHeap, graph *g, GraphAbstraction *aMap,
+	void relaxFinalEdge(Heap *nodeHeap, graph *g, GraphAbstraction *aMap,
 											edge *e, node *from, node *to, node *realDest);
 	path *extractBestPath(graph *g, unsigned int current);
 	const std::vector<node *> *corridor;
