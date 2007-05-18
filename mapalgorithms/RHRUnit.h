@@ -7,10 +7,11 @@
  *
  */
 
+#include "MapUnit.h"
+#include "Map2DEnvironment.h"
+
 #ifndef RHRUNIT_H
 #define RHRUNIT_H
-
-#include "MapUnit.h"
 
 /**
  * A simple unit that attempts to follow walls using the right hand rule.

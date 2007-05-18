@@ -62,12 +62,11 @@ void drawCStringGL (char * cstrOut, GLuint fontList);
 static void drawInfo (pRecContext pContextInfo);
 void resizeWindow(int x, int y);
 void resizeGL(pRecContext pContextInfo, CGRect viewRect);
-void updateProjection (pRecContext pContextInfo);
+//void updateProjection (pRecContext pContextInfo);
 void updateModelView (pRecContext pContextInfo);
 void pointPath();
 int processFramesPerSecond(char *argument[], int maxNumArgs);
-Map* GetMap();
-MapAbstraction* GetMapAbstraction();
+
 pRecContext getCurrentContext();
 //static void drawCaps (pRecContext pContextInfo) {}
 

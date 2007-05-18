@@ -19,11 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */ 
 
-#include "Map.h"
-#include "MapAbstraction.h"
-#include "UnitSimulation.h"
+//#include "Map.h"
+//#include "MapAbstraction.h"
+//#include "UnitSimulation.h"
 #include "GLUtil.h"
-#include "StatCollection.h"
+//#include "StatCollection.h"
 
 #ifndef COMMON_H
 #define COMMON_H
@@ -134,37 +134,13 @@ void drawGL(pRecContext pContextInfo, bool swap);
 pRecContext GetCurrentContextInfo (WindowRef window);
 #endif
 
-bool doKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt);
+bool DoKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt);
 void SetLighting(unsigned int mode);
 void initialConditions(pRecContext pContextInfo);
 void resetCamera(recCamera * pCamera);
 
 void ProcessCommandLineArgs(int argc, char *argv[]);
-void handleBatchRTS(int argc, char *argv[], int mode, char *_map);
-void handleBatchPRA(int argc, char *argv[], int mode, char *_map);
-//void runBatchMode(char *mode, char *_map, int xxs, int yys, int xxg, 
-//				  int yyg, int, double, double, unsigned int, bool _drawMap, double);
-void runSimpleUnitTest(char *_map);
-void runLRTS(char *_map, int xxs, int yys, int xxg, int yyg, 
-			 int _d, double _gamma, double _LQ, unsigned _numRuns, 
-			 bool _drawMap, int _dist);
-void runPRLRTS(char *_map, int xxs, int yys, int xxg, int yyg, 
-			 int _d, double _gamma, double _LQ, unsigned _numRuns, bool _drawMap,
-			   int _dist);
-void randomPathTesting(char *_map);
-void pickStartEnd(int& xs, int& ys, int& xg, int& yg, 
-				  Map *map, graph *g, MapAbstraction* aMap,
-				  double& spDist, double& aStarDifficulty, int);
-void scenarioGenerator(char *_map);
-void discrepancy(char* scenName, char* algName, 
-				 int _d=1, double _gamma=1.0, double _LQ=99999999999.0);
 
-void runScenario(char* scenName, char* algName, 
-				 int _d=1, double _gamma=1.0, double _LQ=99999999999.0);
-
-void calculateAverageTimePerStep(char *_map, char *coordFile, int MAP_SIZE);
-
-void calculateSubOptimality(char *_map, char *coordFile, int MAP_SIZE);
 extern char gDefaultMap[1024];
 
 void SetNumPorts(int windowID, int count);

@@ -31,6 +31,7 @@
 #include "Trackball.h"
 #include "Common.h"
 #include "HIDSupport.h"
+#include <vector>
 
 void saveSimHistory(WindowRef window, pRecContext pContextInfo);
 void openSimHistory();
@@ -540,6 +541,7 @@ public:
 };
 
 std::vector<movieFrame *> frames;
+
 // MacErrors.h
 void captureNextMovieFrame(pRecContext pContextInfo, WindowRef win, double duration)
 {
@@ -1240,43 +1242,6 @@ static void drawInfo(pRecContext )
 
 
 
-void setPortCamera(pRecContext pContextInfo, int currPort)
-{
-	const double ratios[4][4][4] =
-{{{0, 1, 0, 1}},
-{{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
-{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
-{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
-	
-	const double *val = ratios[pContextInfo->numPorts-1][currPort];
-
-	pContextInfo->camera[currPort].viewOriginX = pContextInfo->globalCamera.viewOriginX;
-	pContextInfo->camera[currPort].viewOriginY = pContextInfo->globalCamera.viewOriginY;
-	
-	pContextInfo->camera[currPort].viewWidth = (GLint)(val[1]*pContextInfo->globalCamera.viewWidth);
-	pContextInfo->camera[currPort].viewHeight = (GLint)(val[3]*pContextInfo->globalCamera.viewHeight);
-//	printf("Window %d port %d width: %d, height %d\n",
-//				 pContextInfo->windowID, currPort,
-//				 pContextInfo->camera[currPort].viewWidth,
-//				 pContextInfo->camera[currPort].viewHeight);
-}
-
-void setViewport(pRecContext pContextInfo, int currPort)
-{
-	const double ratios[4][4][4] =
-  {{{0, 1, 0, 1}}, // x, width%, y, height%
-	 {{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
-	 {{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
-	 {{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
-
-	const double *val = ratios[pContextInfo->numPorts-1][currPort];
-	
-	glViewport(val[0]*pContextInfo->globalCamera.viewWidth,
-						 val[2]*pContextInfo->globalCamera.viewHeight,
-						 val[1]*pContextInfo->globalCamera.viewWidth,
-						 val[3]*pContextInfo->globalCamera.viewHeight);
-}
-
 // main OpenGL drawing function
 void drawGL(pRecContext pContextInfo, bool swap)
 {
@@ -1660,7 +1625,7 @@ static OSStatus handleKeyInput (EventHandlerCallRef myHandler, EventRef event, B
 			GetEventParameter(event, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(UInt32), NULL, &modifiers);
 			if ((keyDown) && (!(modifiers&cmdKey)))
 			{
-				if (doKeyboardCommand(pContextInfo, rawKey, modifiers&shiftKey, modifiers&controlKey, modifiers&optionKey))
+				if (DoKeyboardCommand(pContextInfo, rawKey, modifiers&shiftKey, modifiers&controlKey, modifiers&optionKey))
 				{
 //					aglSetCurrentContext(pContextInfo->aglContext);
 //					if (pContextInfo->unitLayer->GetMapAbstraction())
@@ -2142,7 +2107,7 @@ static pascal OSStatus windowEvtHndlr (EventHandlerCallRef myHandler, EventRef e
 					GetWindowPortBounds (window, &rectPort);
 					viewRect.size.width = (float) (rectPort.right - rectPort.left);
 					viewRect.size.height = (float) (rectPort.bottom - rectPort.top);
-					resizeGL (pContextInfo, viewRect);
+					resizeGL(pContextInfo, viewRect);
 					break;
 			}
 			break;
