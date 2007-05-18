@@ -24,6 +24,7 @@ class AbsMapUnit : public Unit<xyLoc, tDirection, AbsMapEnvironment> {
 public:
 	AbsMapUnit(int x, int y)
 	:loc(x, y) { r = 1.0; g = 0; b = 0;}
+	virtual ~AbsMapUnit() {}
 	
 	virtual void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool, SimulationInfo *)
 	{ loc = l; }
