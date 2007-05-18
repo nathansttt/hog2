@@ -19,17 +19,19 @@ typedef Unit<xyLoc, tDirection, AbsMapEnvironment> BaseAbsMapUnit;
 * A simple map-based unit
  */
 
-
 class AbsMapUnit : public Unit<xyLoc, tDirection, AbsMapEnvironment> {
 public:
 	AbsMapUnit(int x, int y)
 	:loc(x, y) { r = 1.0; g = 0; b = 0;}
 	virtual ~AbsMapUnit() {}
 	
+	virtual const char *GetName() = 0;
+	virtual tDirection MakeMove(AbsMapEnvironment *, OccupancyInterface<xyLoc, tDirection> *, SimulationInfo *) = 0;
 	virtual void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool, SimulationInfo *)
 	{ loc = l; }
 	virtual void GetLocation(xyLoc &l)
 	{ l = loc; }
+	virtual void GetGoal(xyLoc &s) = 0;
 	virtual void OpenGLDraw(int window, AbsMapEnvironment *, SimulationInfo *);
 	//void GetLocation(int &x, int &y) { x = loc.x; y = loc.y; }
 	void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
