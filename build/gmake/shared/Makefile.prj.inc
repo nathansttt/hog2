@@ -30,10 +30,10 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-	#shared/HumanUnit.cpp \
 	shared/PathGeneration.cpp \
-	#shared/PatrolUnit.cpp \
-	shared/PRAStarUnit.cpp \
-	#shared/RewardUnit.cpp \
 	shared/SearchUnit.cpp \
 	shared/SharedAMapGroup.cpp
+	#shared/HumanUnit.cpp \
+	#shared/PatrolUnit.cpp \
+	#shared/PRAStarUnit.cpp \
+	#shared/RewardUnit.cpp \

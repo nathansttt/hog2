@@ -1,11 +1,11 @@
 #-----------------------------------------------------------------------------
 # GNU Makefile for static libraries: project dependent part
 #
-# $Id: Makefile.prj.inc,v 1.2 2006/11/01 23:34:14 nathanst Exp $
-# $Source: /usr/cvsroot/project_hog/build/gmake/mapalgorithms/Makefile.prj.inc,v $
+# $Id: Makefile.prj.inc,v 1.3 2006/11/01 23:34:14 nathanst Exp $
+# $Source: /usr/cvsroot/project_hog/build/gmake/util/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = mapalgorithms
+NAME = generic
 DBG_NAME = lib$(NAME).a
 REL_NAME = lib$(NAME).a
 
@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/util -I$(ROOT)/simulation -I$(ROOT)/environments -I$(ROOT)/graph -I$(ROOT)/mapabstraction -I$(ROOT)/abstraction -I$(ROOT)/graphalgorithms
+PROJ_CXXFLAGS = -I$(ROOT)/abstraction -I$(ROOT)/simulation -I$(ROOT)/util -I$(ROOT)/graph -I$(ROOT)/graphalgorithms
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -30,6 +30,5 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-	mapalgorithms/MapUnit.cpp \
-	mapalgorithms/RandomUnits.cpp \
-	mapalgorithms/RHRUnit.cpp
+ generic/RandomUnit.cpp
+
