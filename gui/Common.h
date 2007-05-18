@@ -23,6 +23,7 @@
 //#include "MapAbstraction.h"
 //#include "UnitSimulation.h"
 #include "GLUtil.h"
+#include <stdio.h>
 //#include "StatCollection.h"
 
 #ifndef COMMON_H
