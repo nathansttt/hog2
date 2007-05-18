@@ -23,7 +23,8 @@ PROJECTS = \
   shared \
   simulation \
   util \
-  apps/pathsample
+  apps/pathsample \
+  apps/puzzlesample
 
 # Include projects with broken compilation
 PROJECTS_ALL = \
@@ -40,7 +41,8 @@ PROJECTS_ALL = \
   shared \
   simulation \
   util \
-  apps/pathsample
+  apps/pathsample \
+  apps/puzzlesample
 
 # sequentially to avoid same sub-target in sub-make invoked twice
 default:
