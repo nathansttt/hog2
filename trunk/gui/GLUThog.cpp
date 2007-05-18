@@ -22,10 +22,12 @@
 #include <glut.h>
 #include "Trackball.h"
 #include "Common.h"
-
-#include <glut.h>
 #include "GLUThog.h"
 #include "TextBox.h"
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <string.h>
 
 using namespace std;
 
