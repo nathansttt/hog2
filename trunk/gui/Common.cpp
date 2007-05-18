@@ -20,9 +20,9 @@
  */ 
 
 #include <iostream>
+#include <vector>
 
 #include "GLUtil.h"
-
 #include "Trackball.h"
 #include "Common.h"
 
@@ -317,7 +317,7 @@ void initialConditions(pRecContext pContextInfo)
 	pContextInfo->windowID = gNextWindowID++;
 }
 
-bool doKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt)
+bool DoKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt)
 {
 	DoKeyboardCallbacks(pContextInfo, tolower(keyHit), 
 											shift?kShiftDown:(cntrl?kControlDown:(alt?kAltDown:kNoModifier)));
@@ -436,6 +436,43 @@ void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed)
 	pContextInfo->camera[pContextInfo->currPort].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.y + cameraSpeed*y;
 	pContextInfo->camera[pContextInfo->currPort].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.z + cameraSpeed*z;
 	updateProjection(pContextInfo);
+}
+
+void setPortCamera(pRecContext pContextInfo, int currPort)
+{
+	const double ratios[4][4][4] =
+{{{0, 1, 0, 1}},
+{{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
+{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
+{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
+	
+	const double *val = ratios[pContextInfo->numPorts-1][currPort];
+	
+	pContextInfo->camera[currPort].viewOriginX = pContextInfo->globalCamera.viewOriginX;
+	pContextInfo->camera[currPort].viewOriginY = pContextInfo->globalCamera.viewOriginY;
+	
+	pContextInfo->camera[currPort].viewWidth = (GLint)(val[1]*pContextInfo->globalCamera.viewWidth);
+	pContextInfo->camera[currPort].viewHeight = (GLint)(val[3]*pContextInfo->globalCamera.viewHeight);
+	//	printf("Window %d port %d width: %d, height %d\n",
+	//				 pContextInfo->windowID, currPort,
+	//				 pContextInfo->camera[currPort].viewWidth,
+	//				 pContextInfo->camera[currPort].viewHeight);
+}
+
+void setViewport(pRecContext pContextInfo, int currPort)
+{
+	const double ratios[4][4][4] =
+{{{0, 1, 0, 1}}, // x, width%, y, height%
+{{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
+{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
+{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
+	
+	const double *val = ratios[pContextInfo->numPorts-1][currPort];
+	
+	glViewport(val[0]*pContextInfo->globalCamera.viewWidth,
+						 val[2]*pContextInfo->globalCamera.viewHeight,
+						 val[1]*pContextInfo->globalCamera.viewWidth,
+						 val[3]*pContextInfo->globalCamera.viewHeight);
 }
 
 point3d GetOGLPos(int x, int y)

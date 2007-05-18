@@ -180,11 +180,11 @@
 		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		5048396D09E3307300765E4B /* hog2Proj.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Proj.xcconfig; sourceTree = "<group>"; };
 		5048396E09E3307300765E4B /* hog2Target.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Target.xcconfig; sourceTree = "<group>"; };
-		508344B209E5C41E0093A071 /* Sample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		508344B209E5C41E0093A071 /* Sample Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4339D010BF2676B002B8108 /* MNPuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNPuzzle.h; sourceTree = "<group>"; };
 		C4339D020BF2676B002B8108 /* MNPuzzle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNPuzzle.cpp; sourceTree = "<group>"; };
 		C4339E0F0BF28575002B8108 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
-		C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PuzzleSample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Puzzle Sample Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C433A28F0BF8FB7E002B8108 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = InfoPlist.strings; sourceTree = "<group>"; };
 		C433A2910BF8FB7E002B8108 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = main.nib; sourceTree = "<group>"; };
 		C433A2920BF8FB7E002B8108 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = Info.plist; path = PuzzleSample/Info.plist; sourceTree = "<group>"; };
@@ -856,8 +856,8 @@
 		195DF8CFFE9D517E11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				508344B209E5C41E0093A071 /* Sample Release.app */,
-				C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */,
+				508344B209E5C41E0093A071 /* Sample Debug.app */,
+				C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1891,7 +1891,7 @@
 			name = Sample;
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = 508344B209E5C41E0093A071 /* Sample Release.app */;
+			productReference = 508344B209E5C41E0093A071 /* Sample Debug.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C433A2130BF8F9F7002B8108 /* Puzzle Sample */ = {
@@ -1909,7 +1909,7 @@
 			name = "Puzzle Sample";
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */;
+			productReference = C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

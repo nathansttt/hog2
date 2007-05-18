@@ -7,11 +7,13 @@
  *
  */
 
-#ifndef RANDOMUNITS_H
-#define RANDOMUNITS_H
 
 #include "Unit.h"
 #include "MapUnit.h"
+#include "Map2DEnvironment.h"
+
+#ifndef RANDOMUNITS_H
+#define RANDOMUNITS_H
 
 /**
 * A unit that moves in random directions changing direction randomly.

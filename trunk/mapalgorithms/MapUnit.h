@@ -7,11 +7,11 @@
  *
  */
 
-#ifndef MAPUNIT_H
-#define MAPUNIT_H
-
 #include "Unit.h"
 #include "Map2DEnvironment.h"
+
+#ifndef MAPUNIT_H
+#define MAPUNIT_H
 
 /**
 * A simple map-based unit
