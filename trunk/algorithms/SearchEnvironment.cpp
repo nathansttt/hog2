@@ -63,7 +63,7 @@ double MapSearchEnvironment::heuristic(uint32_t node1, uint32_t node2)
 
 void GraphSearchEnvironment::getNeighbors(uint32_t nodeID, std::vector<uint32_t> &neighbors)
 {
-	node *n1 = g->getNode(nodeID);
+	node *n1 = g->GetNode(nodeID);
 	neighbor_iterator ni = n1->getNeighborIter();
 	for (int next = n1->nodeNeighborNext(ni); next != -1; next = n1->nodeNeighborNext(ni))
 	{
@@ -73,7 +73,7 @@ void GraphSearchEnvironment::getNeighbors(uint32_t nodeID, std::vector<uint32_t>
 
 double GraphSearchEnvironment::heuristic(uint32_t node1, uint32_t node2)
 {
-	edge *e = g->findEdge(node1, node2);
+	edge *e = g->FindEdge(node1, node2);
 	if (e)
 		return e->getWeight();
 	return 0;

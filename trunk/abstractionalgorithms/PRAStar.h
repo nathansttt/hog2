@@ -54,15 +54,15 @@ public:
 	void getAbstractPathLengths(std::vector<int> &len) { len = lengths; }
 protected:
 
-  path *getAbstractPath(graph *g, unsigned int source, unsigned int destParent,
+  path *getAbstractPath(Graph *g, unsigned int source, unsigned int destParent,
 			std::vector<unsigned int> &eligibleNodeParents, int LABEL,
 			unsigned int dest);
   
-  unsigned int astar(graph *g, unsigned int source, unsigned int destParent,
+  unsigned int astar(Graph *g, unsigned int source, unsigned int destParent,
 		     std::vector<unsigned int> &eligibleNodeParents, int LABEL,
 		     unsigned int dest);
   
-  void relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextNode, int dest,
+  void relaxEdge(Heap *nodeHeap, Graph *g, edge *e, int source, int nextNode, int dest,
 		 int LABEL);
 	path *smoothPath(path *p);
 	

@@ -60,9 +60,9 @@ void BoundingBox::OpenGLDraw(int)
 //double x1, x2, y1, y2, z1, z2;
 
 /**
- * Construct a new graph hierarchy.
+ * Construct a new Graph hierarchy.
  *
- * Constructions a new graph abstraction hierarchy from the graph using the
+ * Constructions a new Graph abstraction hierarchy from the Graph using the
  * designated abstraction method.
  */
 LoadedBBAbstraction::LoadedBBAbstraction(char *fname, char *boxFile)
@@ -103,9 +103,9 @@ void LoadedBBAbstraction::loadBoxes(char *boxFile)
 
 double LoadedBBAbstraction::h(node *a, node *b)
 {
-	double d1 = a->getLabelF(kXCoordinate)-b->getLabelF(kXCoordinate);
-	double d2 = a->getLabelF(kYCoordinate)-b->getLabelF(kYCoordinate);
-	double d3 = a->getLabelF(kZCoordinate)-b->getLabelF(kZCoordinate);
+	double d1 = a->GetLabelF(kXCoordinate)-b->GetLabelF(kXCoordinate);
+	double d2 = a->GetLabelF(kYCoordinate)-b->GetLabelF(kYCoordinate);
+	double d3 = a->GetLabelF(kZCoordinate)-b->GetLabelF(kZCoordinate);
 	return sqrt(d1*d1+d2*d2+d3*d3);
 }
 
@@ -137,11 +137,11 @@ void LoadedBBAbstraction::OpenGLDraw(int window)
 	glEnable(GL_LIGHTING);
 }
 
-void LoadedBBAbstraction::DrawGraph(graph *g)
+void LoadedBBAbstraction::DrawGraph(Graph *g)
 {
 		if ((g == 0) || (g->getNumNodes() == 0)) return;
 		
-		int abLevel = g->getNode(0)->getLabelL(kAbstractionLevel);	
+		int abLevel = g->GetNode(0)->GetLabelL(kAbstractionLevel);	
 		
 		glBegin(GL_LINES);
 		glNormal3f(0, 1, 0);
@@ -149,10 +149,10 @@ void LoadedBBAbstraction::DrawGraph(graph *g)
 		edge_iterator ei = g->getEdgeIter();
 		for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei)) {
 			node *n;
-			n = g->getNode(e->getFrom());
+			n = g->GetNode(e->getFrom());
 			
-			if (e->getLabelL(kEdgeCapacity) == 0)      glColor4f(.5, .5, .5, 1);
-			else if (e->getLabelL(kEdgeCapacity) <= 0) glColor4f(.2, .2, .2, 1);
+			if (e->GetLabelL(kEdgeCapacity) == 0)      glColor4f(.5, .5, .5, 1);
+			else if (e->GetLabelL(kEdgeCapacity) <= 0) glColor4f(.2, .2, .2, 1);
 			else if (e->getMarked())                  glColor4f(1, 1, 1, 1);
 			else if (abLevel%2)
 				glColor4f(1-((GLfloat)(abLevel%15)/15.0), ((GLfloat)(abLevel%15)/15.0), 0, 1);
@@ -160,7 +160,7 @@ void LoadedBBAbstraction::DrawGraph(graph *g)
 			recVec rv = GetNodeLoc(n);
 			glVertex3f(rv.x, rv.y, rv.z);
 			
-			n = g->getNode(e->getTo());
+			n = g->GetNode(e->getTo());
 			rv = GetNodeLoc(n);
 			
 			glVertex3f(rv.x, rv.y, rv.z);
@@ -179,12 +179,12 @@ void LoadedBBAbstraction::DrawLevelConnections(node *n)
   //	recVec ans;
   //if (n->getNumOutgoingEdges()+n->getNumIncomingEdges() == 0) return;
 	
-  if (n->getLabelL(kAbstractionLevel) == 0) return;
+  if (n->GetLabelL(kAbstractionLevel) == 0) return;
   else {
     glColor4f(.6, .6, .6, .6);
     recVec v = GetNodeLoc(n);
-    for (int cnt = 0; cnt < n->getLabelL(kNumAbstractedNodes); cnt++) {
-      recVec v1 = GetNodeLoc(abstractions[n->getLabelL(kAbstractionLevel)-1]->getNode(n->getLabelL(kFirstData+cnt)));
+    for (int cnt = 0; cnt < n->GetLabelL(kNumAbstractedNodes); cnt++) {
+      recVec v1 = GetNodeLoc(abstractions[n->GetLabelL(kAbstractionLevel)-1]->GetNode(n->GetLabelL(kFirstData+cnt)));
       glVertex3f(v.x, v.y, v.z);
       glVertex3f(v1.x, v1.y, v1.z);
     }
@@ -197,37 +197,37 @@ recVec LoadedBBAbstraction::GetNodeLoc(node *n)
 	//  double offsetx, offsety;
   recVec ans;
 	
-  if (n->getLabelF(kXCoordinate) != unknownPosition) {
-    ans.x = n->getLabelF(kXCoordinate);
-    ans.y = n->getLabelF(kYCoordinate);
-    ans.z = n->getLabelF(kZCoordinate);
+  if (n->GetLabelF(kXCoordinate) != unknownPosition) {
+    ans.x = n->GetLabelF(kXCoordinate);
+    ans.y = n->GetLabelF(kYCoordinate);
+    ans.z = n->GetLabelF(kZCoordinate);
     return ans;
   }
 	
 	int totNodes = 0;
 	ans.x = ans.y = ans.z = 0;
-	for (int cnt = 0; cnt < n->getLabelL(kNumAbstractedNodes); cnt++) {
-		int absLevel = n->getLabelL(kAbstractionLevel)-1;
-		node *nextChild = abstractions[absLevel]->getNode(n->getLabelL(kFirstData+cnt));
+	for (int cnt = 0; cnt < n->GetLabelL(kNumAbstractedNodes); cnt++) {
+		int absLevel = n->GetLabelL(kAbstractionLevel)-1;
+		node *nextChild = abstractions[absLevel]->GetNode(n->GetLabelL(kFirstData+cnt));
 		recVec tmp = GetNodeLoc(nextChild);
-		int weight = nextChild->getLabelL(kNumAbstractedNodes);
+		int weight = nextChild->GetLabelL(kNumAbstractedNodes);
 		totNodes += weight;
 		ans.x += weight*tmp.x;
 		ans.y += weight*tmp.y;
 		ans.z += weight*tmp.z;
 	}
-	ans.x /= totNodes;//n->getLabelL(kNumAbstractedNodes); 
-	ans.y /= totNodes;//n->getLabelL(kNumAbstractedNodes); 
-	ans.z /= totNodes;//n->getLabelL(kNumAbstractedNodes); 
+	ans.x /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
+	ans.y /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
+	ans.z /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
 
-  n->setLabelF(kXCoordinate, ans.x);
-  n->setLabelF(kYCoordinate, ans.y);
-  n->setLabelF(kZCoordinate, ans.z);
+  n->SetLabelF(kXCoordinate, ans.x);
+  n->SetLabelF(kYCoordinate, ans.y);
+  n->SetLabelF(kZCoordinate, ans.z);
   return ans;
 }
 
 
-graph *LoadedBBAbstraction::loadGraph(char *fname)
+Graph *LoadedBBAbstraction::loadGraph(char *fname)
 {
 	FILE *f = fopen(fname, "r");
 	if (!f)
@@ -238,7 +238,7 @@ graph *LoadedBBAbstraction::loadGraph(char *fname)
 	char nextLine[255];
 	std::vector<unsigned int> IDS;
 	bool nodes = true;
-	graph *g = new graph();
+	Graph *g = new Graph();
 	fgets(nextLine, 255, f);
 	const double VERSION = 1.0;
 	double version;
@@ -269,18 +269,18 @@ graph *LoadedBBAbstraction::loadGraph(char *fname)
 				IDS.resize(ID+1);
 			node *n;
 			IDS[ID] = g->AddNode(n = new node("l1"));
-			n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
-			n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
-			n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
-			n->setLabelF(kXCoordinate, x);
-			n->setLabelF(kYCoordinate, y);
-			n->setLabelF(kZCoordinate, z);
-			n->setLabelL(kNodeBlocked, 0);
+			n->SetLabelL(kAbstractionLevel, 0); // level in abstraction tree
+			n->SetLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
+			n->SetLabelL(kParent, -1); // parent of this node in abstraction hierarchy
+			n->SetLabelF(kXCoordinate, x);
+			n->SetLabelF(kYCoordinate, y);
+			n->SetLabelF(kZCoordinate, z);
+			n->SetLabelL(kNodeBlocked, 0);
 		}
 		else {
 			int ID1, ID2;
 			sscanf(nextLine, "%d %d", &ID1, &ID2);
-			g->AddEdge(new edge(IDS[ID1], IDS[ID2], h(g->getNode(ID1), g->getNode(ID2))));
+			g->AddEdge(new edge(IDS[ID1], IDS[ID2], h(g->GetNode(ID1), g->GetNode(ID2))));
 			//printf("Loaded edge between %d and %d\n", ID1, ID2);
 		}
 	}
@@ -292,21 +292,21 @@ void LoadedBBAbstraction::VerifyHierarchy()
 	cout << "VERIFY START" << endl;
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
-		// first make sure graph is ok
+		// first make sure Graph is ok
 		abstractions[x]->verifyGraph();
 		// then make sure abstraction is ok
 	  node_iterator ni = abstractions[x]->getNodeIter();
 		for (node *n = abstractions[x]->nodeIterNext(ni); n; n = abstractions[x]->nodeIterNext(ni))
 		{
-			// verify graph, because there may be issues...
-			if (n->getLabelL(kParent) != -1)
+			// verify Graph, because there may be issues...
+			if (n->GetLabelL(kParent) != -1)
 			{
-				graph *g = abstractions[x+1];
-				node *parent = g->getNode(n->getLabelL(kParent));
+				Graph *g = abstractions[x+1];
+				node *parent = g->GetNode(n->GetLabelL(kParent));
 				bool found = false;
-				for (int y = 0; y < parent->getLabelL(kNumAbstractedNodes); y++)
+				for (int y = 0; y < parent->GetLabelL(kNumAbstractedNodes); y++)
 				{
-					if (parent->getLabelL(kFirstData+y) == (long)n->getNum())
+					if (parent->GetLabelL(kFirstData+y) == (long)n->getNum())
 					{ found = true; break; }
 				}
 				if (!found)
@@ -317,15 +317,15 @@ void LoadedBBAbstraction::VerifyHierarchy()
 			}
 			if (x > 0)
 			{
-				graph *g = abstractions[x-1];
-				for (int y = 0; y < n->getLabelL(kNumAbstractedNodes); y++)
+				Graph *g = abstractions[x-1];
+				for (int y = 0; y < n->GetLabelL(kNumAbstractedNodes); y++)
 				{
-					node *child = g->getNode(n->getLabelL(kFirstData+y));
+					node *child = g->GetNode(n->GetLabelL(kFirstData+y));
 					if (!child)
 					{
 						cout << "VERIFY: Graph doesn't verify; CHILD is null, parent:" << endl << *n << endl;
 					}
-					else if (child->getLabelL(kParent) != (long)n->getNum())
+					else if (child->GetLabelL(kParent) != (long)n->getNum())
 					{
 						cout << "VERIFY: Graph doesn't verify; parent:" << endl << *n << endl;
 						cout << "VERIFY: Graph doesn't verify; child:" << endl << *child << endl;
@@ -344,8 +344,8 @@ void LoadedBBAbstraction::VerifyHierarchy()
 		for (edge *e = abstractions[x]->edgeIterNext(ei); e; e = abstractions[x]->edgeIterNext(ei))
 		{
 			node *p1, *p2;
-			p1 = findNodeParent(abstractions[x]->getNode(e->getFrom()));
-			p2 = findNodeParent(abstractions[x]->getNode(e->getTo()));
+			p1 = findNodeParent(abstractions[x]->GetNode(e->getFrom()));
+			p2 = findNodeParent(abstractions[x]->GetNode(e->getTo()));
 			if (p1 == p2)
 				continue;
 			if ((p1 == 0) || (p2 == 0))
@@ -353,35 +353,35 @@ void LoadedBBAbstraction::VerifyHierarchy()
 				cout << "VERIFY: One edge parent is null, and the other isn't " << *e << endl << *p1 << endl << *p2 << endl;
 				continue;
 			}
-			if (!abstractions[x+1]->findEdge(p1->getNum(), p2->getNum()))
+			if (!abstractions[x+1]->FindEdge(p1->getNum(), p2->getNum()))
 			{
 				cout << "Didn't find parent edge of " << *e << " at abslevel " << x << endl;
 				cout << *p1 << endl << *p2 << endl;
 			}
 			// VERIFY edge weights
-			if (e->getLabelL(kEdgeCapacity) == 0)
+			if (e->GetLabelL(kEdgeCapacity) == 0)
 				cout << "VERIFY: Edge capacity is 0?!? " << e << endl;
 			if (x > 0) // we can verify the capacity
 			{
 				int count = 0;
 				// we should find kEdgeCapacity edges between the children of p1 and p2
-				p1 = abstractions[x]->getNode(e->getFrom());
-				p2 = abstractions[x]->getNode(e->getTo());
-				for (int c1 = 0; c1 < p1->getLabelL(kNumAbstractedNodes); c1++)
+				p1 = abstractions[x]->GetNode(e->getFrom());
+				p2 = abstractions[x]->GetNode(e->getTo());
+				for (int c1 = 0; c1 < p1->GetLabelL(kNumAbstractedNodes); c1++)
 				{
-					for (int c2 = 0; c2 < p2->getLabelL(kNumAbstractedNodes); c2++)
+					for (int c2 = 0; c2 < p2->GetLabelL(kNumAbstractedNodes); c2++)
 					{
-						if (abstractions[x-1]->findEdge(p1->getLabelL(kFirstData+c1),
-																						p2->getLabelL(kFirstData+c2)))
+						if (abstractions[x-1]->FindEdge(p1->GetLabelL(kFirstData+c1),
+																						p2->GetLabelL(kFirstData+c2)))
 						{
 							count++;
 						}
 					}
 				}
-				if (count != e->getLabelL(kEdgeCapacity))
+				if (count != e->GetLabelL(kEdgeCapacity))
 				{
 					cout << "VERIFY: Edge capactiy of " << *e << " is "
-					<< e->getLabelL(kEdgeCapacity) << " but we only found " << count
+					<< e->GetLabelL(kEdgeCapacity) << " but we only found " << count
 					<< " edges below that abstract into it." << endl;
 				}
 			}
@@ -409,16 +409,16 @@ void LoadedBBAbstraction::cleanMemory()
 //  }
 //}
 
-void LoadedBBAbstraction::buildAbstractions(graph *_g)
+void LoadedBBAbstraction::buildAbstractions(Graph *_g)
 {
 	int totalNodes = 0;
   cleanMemory();
 	abstractions.push_back(_g);
-  graph *g = abstractions[0];
+  Graph *g = abstractions[0];
 //	if (displayLists.size() != 1)
 //		displayLists.push_back(0);
   //if (verbose)
-      printf("Base graph (0) has %d nodes\n", g->getNumNodes());
+      printf("Base Graph (0) has %d nodes\n", g->getNumNodes());
 			g->printStats();
 	
   for (int x = 1; ; x++)
@@ -432,7 +432,7 @@ void LoadedBBAbstraction::buildAbstractions(graph *_g)
 
     if (verbose&kMiscMessages)
 		{
-      printf("Abstract graph #%2d has %d nodes\n", x, g->getNumNodes());
+      printf("Abstract Graph #%2d has %d nodes\n", x, g->getNumNodes());
 			g->printStats();
 		}
 		totalNodes += g->getNumNodes();
@@ -441,28 +441,28 @@ void LoadedBBAbstraction::buildAbstractions(graph *_g)
 	// printf("%d nodes, excluding bottom level", totalNodes);
 }
 
-graph *LoadedBBAbstraction::abstractGraph(graph *g)
+Graph *LoadedBBAbstraction::abstractGraph(Graph *g)
 {
 	// for each node:
 	// 1. find bounding box
 	// 2. add node and all neighbors which are in the bounding box
 	node_iterator ni = g->getNodeIter();
 	node *newNode;
-	graph *aGraph = new graph();
+	Graph *aGraph = new Graph();
 
 	ni = g->getNodeIter();
 	for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
 	{
-		if (n->getLabelL(kParent) != -1) continue;
+		if (n->GetLabelL(kParent) != -1) continue;
 		int which;
-		if (n->getLabelL(kAbstractionLevel) == 0)
+		if (n->GetLabelL(kAbstractionLevel) == 0)
 			which = findBoundingBox(n);
 		else
 			which = -1;
 		//printf("%u abstracted into box %d\n", n->getNum(), which);
 		newNode = createNewParent(aGraph, n);
 		//printf("%u created as parent of %u\n", newNode->getNum(), n->getNum());
-		if ((which == -1) && (n->getLabelL(kAbstractionLevel) == 0))
+		if ((which == -1) && (n->GetLabelL(kAbstractionLevel) == 0))
 			addNodeToParent(n, newNode);
 		else
 			addNeighborsInBox(g, n, which, newNode);
@@ -472,21 +472,21 @@ graph *LoadedBBAbstraction::abstractGraph(graph *g)
 	edge_iterator ei = g->getEdgeIter();
 	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	{
-		int from = g->getNode(e->getFrom())->getLabelL(kParent);
-		int to = g->getNode(e->getTo())->getLabelL(kParent);
+		int from = g->GetNode(e->getFrom())->GetLabelL(kParent);
+		int to = g->GetNode(e->getTo())->GetLabelL(kParent);
 		edge *f=0;
 		
-		if ((from != to) && (!(f = aGraph->findEdge(to, from))))
+		if ((from != to) && (!(f = aGraph->FindEdge(to, from))))
 		{
-			double weight = h(aGraph->getNode(from), aGraph->getNode(to));
+			double weight = h(aGraph->GetNode(from), aGraph->GetNode(to));
 			f = new edge(from, to, weight);
-			f->setLabelL(kEdgeCapacity, 1);
+			f->SetLabelL(kEdgeCapacity, 1);
 			aGraph->AddEdge(f);
-			//printf("Adding edge to graph!\n");
+			//printf("Adding edge to Graph!\n");
 		}
-		else if (f) f->setLabelL(kEdgeCapacity, f->getLabelL(kEdgeCapacity)+1);
+		else if (f) f->SetLabelL(kEdgeCapacity, f->GetLabelL(kEdgeCapacity)+1);
 		//		else if (g)
-		//			g->setLabel(kEdgeCapacity, g->getLabelL(kEdgeCapacity)+1);
+		//			g->setLabel(kEdgeCapacity, g->GetLabelL(kEdgeCapacity)+1);
 	}
 	 
 	return aGraph;
@@ -496,59 +496,59 @@ int LoadedBBAbstraction::findBoundingBox(node *n)
 {
 	for (unsigned int x = 0; x < boxes.size(); x++)
 	{
-		if (boxes[x].pointInBox(n->getLabelF(kXCoordinate),
-																					 n->getLabelF(kYCoordinate),
-																					 n->getLabelF(kZCoordinate)))
+		if (boxes[x].pointInBox(n->GetLabelF(kXCoordinate),
+																					 n->GetLabelF(kYCoordinate),
+																					 n->GetLabelF(kZCoordinate)))
 			return x;
-//		if (boxes[boxes.size()-x-1].pointInBox(n->getLabelF(kXCoordinate),
-//																					 n->getLabelF(kYCoordinate),
-//																					 n->getLabelF(kZCoordinate)))
+//		if (boxes[boxes.size()-x-1].pointInBox(n->GetLabelF(kXCoordinate),
+//																					 n->GetLabelF(kYCoordinate),
+//																					 n->GetLabelF(kZCoordinate)))
 //			return boxes.size()-x-1;
 	}
 	return -1;
 }
 
-void LoadedBBAbstraction::addNeighborsInBox(graph *g, node *n, int which, node *parent)
+void LoadedBBAbstraction::addNeighborsInBox(Graph *g, node *n, int which, node *parent)
 {
 	//printf("Thinking about adding %d to parent %d\n", n->getNum(), parent->getNum());
-	if (n->getLabelL(kParent) != -1)
+	if (n->GetLabelL(kParent) != -1)
 		return;
-	if ((which != -1) && (!boxes[which].pointInBox(n->getLabelF(kXCoordinate),
-																								 n->getLabelF(kYCoordinate),
-																								 n->getLabelF(kZCoordinate))))
+	if ((which != -1) && (!boxes[which].pointInBox(n->GetLabelF(kXCoordinate),
+																								 n->GetLabelF(kYCoordinate),
+																								 n->GetLabelF(kZCoordinate))))
 		return;
 
 	addNodeToParent(n, parent);
 	neighbor_iterator nbi = n->getNeighborIter();
-	for (node *next = g->getNode(n->nodeNeighborNext(nbi));
-			 next; next = g->getNode(n->nodeNeighborNext(nbi)))
+	for (node *next = g->GetNode(n->nodeNeighborNext(nbi));
+			 next; next = g->GetNode(n->nodeNeighborNext(nbi)))
 		addNeighborsInBox(g, next, which, parent);
 }
 
 void LoadedBBAbstraction::addNodeToParent(node *n, node *parent)
 {
 	//printf("Adding %d to parent %d\n", n->getNum(), parent->getNum());
-	n->setLabelL(kParent, parent->getNum());
-	parent->setLabelL(kFirstData+parent->getLabelL(kNumAbstractedNodes), n->getNum());
-	parent->setLabelL(kNumAbstractedNodes, parent->getLabelL(kNumAbstractedNodes)+1); // number of abstracted nodes
+	n->SetLabelL(kParent, parent->getNum());
+	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->getNum());
+	parent->SetLabelL(kNumAbstractedNodes, parent->GetLabelL(kNumAbstractedNodes)+1); // number of abstracted nodes
 }
 
-node *LoadedBBAbstraction::createNewParent(graph *g, node *n)
+node *LoadedBBAbstraction::createNewParent(Graph *g, node *n)
 {
 	node *newNode = new node("l1");
 	g->AddNode(newNode);
-	newNode->setLabelL(kAbstractionLevel, n->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
-	newNode->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
-	newNode->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
-	newNode->setLabelF(kXCoordinate, unknownPosition);
-	newNode->setLabelL(kNodeBlocked, 0);
+	newNode->SetLabelL(kAbstractionLevel, n->GetLabelL(kAbstractionLevel)+1); // level in abstraction tree
+	newNode->SetLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
+	newNode->SetLabelL(kParent, -1); // parent of this node in abstraction hierarchy
+	newNode->SetLabelF(kXCoordinate, unknownPosition);
+	newNode->SetLabelL(kNodeBlocked, 0);
 
 	return newNode;
 }
 
 bool LoadedBBAbstraction::Pathable(unsigned int from, unsigned int to)
 {
-	return Pathable(abstractions[0]->getNode(from), abstractions[0]->getNode(to));
+	return Pathable(abstractions[0]->GetNode(from), abstractions[0]->GetNode(to));
 }
 
 bool LoadedBBAbstraction::Pathable(node *from, node *to)
@@ -556,13 +556,13 @@ bool LoadedBBAbstraction::Pathable(node *from, node *to)
   //printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
   while (from != to) {
     if ((!from) || (!to) ||
-				(abstractions[from->getLabelL(kAbstractionLevel)]->getNumEdges() == 0))
+				(abstractions[from->GetLabelL(kAbstractionLevel)]->getNumEdges() == 0))
       return false;
 		
-    from = abstractions[from->getLabelL(kAbstractionLevel)+1]->
-      getNode(from->getLabelL(kParent));
-    to = abstractions[to->getLabelL(kAbstractionLevel)+1]->
-      getNode(to->getLabelL(kParent));
+    from = abstractions[from->GetLabelL(kAbstractionLevel)+1]->
+      GetNode(from->GetLabelL(kParent));
+    to = abstractions[to->GetLabelL(kAbstractionLevel)+1]->
+      GetNode(to->GetLabelL(kParent));
   }
 	if ((from == 0) || (to == 0))
 		return false;
@@ -588,8 +588,8 @@ void LoadedBBAbstraction::AddEdge(edge *, unsigned int)
 
 node *LoadedBBAbstraction::findNodeParent(node *n)
 {
-  unsigned int absLevel = n->getLabelL(kAbstractionLevel);
+  unsigned int absLevel = n->GetLabelL(kAbstractionLevel);
   if (absLevel < abstractions.size()-1)
-    return abstractions[absLevel+1]->getNode(n->getLabelL(kParent));
+    return abstractions[absLevel+1]->GetNode(n->GetLabelL(kParent));
   return 0;
 }

@@ -6,7 +6,7 @@
 // * Using the pathfinding library, this class will extend the environment
 // * class so that the various pathfinding methods can be used.
 // *
-// * Uses Nathan's map and graph classes as a base.
+// * Uses Nathan's map and Graph classes as a base.
 // *
 // * Copyright (c) Brandon Blanck
 // * May 7, 2004
@@ -30,11 +30,11 @@
 //    : m_abstrMap(0), m_map(m), m_graph(GetMapGraph(m)), m_rows(m->getMapHeight()),
 //      m_columns(m->getMapWidth()) {}
 //	
-//  MapEnv(Map* m, graph* g)
+//  MapEnv(Map* m, Graph* g)
 //    : m_abstrMap(0), m_map(m), m_graph(g), m_rows(m->getMapHeight()),
 //      m_columns(m->getMapWidth()) {}
 //	
-//  MapEnv(MapAbstraction* am, Map* m, graph* g)
+//  MapEnv(MapAbstraction* am, Map* m, Graph* g)
 //    : m_abstrMap(am), m_map(m), m_graph(g), m_rows(m->getMapHeight()),
 //      m_columns(m->getMapWidth()) {}
 //	
@@ -44,7 +44,7 @@
 //	
 //  void getStartTarget(int* start, int* target) const;
 //	
-//  graph* getGraph() { return m_graph; }
+//  Graph* getGraph() { return m_graph; }
 //	
 //  std::vector<char> getCharVector() const;
 //	
@@ -72,7 +72,7 @@
 //
 //  MapAbstraction* m_abstrMap;
 //  Map* m_map;
-//  graph* m_graph;
+//  Graph* m_graph;
 //  int m_rows;
 //  int m_columns;
 //};

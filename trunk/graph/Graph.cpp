@@ -1,5 +1,5 @@
 /*
- * $Id: graph.cpp,v 1.10 2006/10/24 18:23:20 nathanst Exp $
+ * $Id: Graph.cpp,v 1.10 2006/10/24 18:23:20 nathanst Exp $
  *
  * This file is part of HOG.
  *
@@ -38,13 +38,13 @@ ostream& operator <<(ostream & out, const graph_object &_Obj)
 	return out;
 }
 
-graph::graph()
+Graph::Graph()
 :_nodes(), _edges()
 {
 	//node_index = edge_index = 0;
 }
 
-graph::~graph()
+Graph::~Graph()
 {
   //	cout << "destructor got called" << endl;
   node_iterator ni;
@@ -75,9 +75,9 @@ graph::~graph()
   }
 }
 
-graph_object *graph::clone() const
+graph_object *Graph::clone() const
 {
-  graph *g = new graph();
+  Graph *g = new Graph();
   node_iterator it = getNodeIter();
   while (1)
 	{
@@ -90,9 +90,9 @@ graph_object *graph::clone() const
   return g;
 }
 
-graph *graph::cloneAll() const
+Graph *Graph::cloneAll() const
 {
-  graph *g = new graph();
+  Graph *g = new Graph();
   node_iterator it = getNodeIter();
   while (1)
 	{
@@ -114,7 +114,7 @@ graph *graph::cloneAll() const
   return g;
 }
 
-int graph::AddNode(node *n)
+int Graph::AddNode(node *n)
 {
   if (n)
 	{
@@ -130,13 +130,13 @@ int graph::AddNode(node *n)
   return -1;
 }
 
-node *graph::getNode(unsigned int num)
+node *Graph::GetNode(unsigned int num)
 {
   if (num >=0 && num < _nodes.size()) return _nodes[num];
   return 0;
 }
 
-void graph::AddEdge(edge *e)
+void Graph::AddEdge(edge *e)
 {
   if (e)
 	{
@@ -155,9 +155,9 @@ void graph::AddEdge(edge *e)
   }
 }
 
-edge *graph::findDirectedEdge(unsigned int from, unsigned int to)
+edge *Graph::findDirectedEdge(unsigned int from, unsigned int to)
 {
-  node *n = getNode(from);
+  node *n = GetNode(from);
   edge_iterator ei = n->getOutgoingEdgeIter();
   while (1)
 	{
@@ -170,9 +170,9 @@ edge *graph::findDirectedEdge(unsigned int from, unsigned int to)
   return 0;
 }
 
-edge *graph::findEdge(unsigned int from, unsigned int to)
+edge *Graph::FindEdge(unsigned int from, unsigned int to)
 {
-  node *n = getNode(from);
+  node *n = GetNode(from);
 	if (n)
 	{
 		edge_iterator ei = n->getEdgeIter();
@@ -188,44 +188,44 @@ edge *graph::findEdge(unsigned int from, unsigned int to)
   return 0;
 }
 
-bool graph::relax(edge *e, int weightIndex)
+bool Graph::relax(edge *e, int weightIndex)
 {
   int from = e->getFrom();
   int to = e->getTo();
   if (e == 0) return false;
-  double newCost = getNode(from)->getLabelF(weightIndex)+e->getWeight();
-  if (newCost <	getNode(to)->getLabelF(weightIndex))
+  double newCost = GetNode(from)->GetLabelF(weightIndex)+e->getWeight();
+  if (newCost <	GetNode(to)->GetLabelF(weightIndex))
 	{
-    //cout << "re-weighting" << endl << *getNode(to) << endl;
-    getNode(to)->setLabelF(weightIndex, newCost);
-    //cout << *getNode(to) << endl;
+    //cout << "re-weighting" << endl << *GetNode(to) << endl;
+    GetNode(to)->SetLabelF(weightIndex, newCost);
+    //cout << *GetNode(to) << endl;
     return true;
   }
   return false;
 }
 
-bool graph::relaxReverseEdge(edge *e, int weightIndex)
+bool Graph::relaxReverseEdge(edge *e, int weightIndex)
 {
   int from = e->getFrom();
   int to = e->getTo();
   if (e == 0) return false;
-  double newCost = getNode(to)->getLabelF(weightIndex)+e->getWeight();
-  if (newCost <	getNode(from)->getLabelF(weightIndex))
+  double newCost = GetNode(to)->GetLabelF(weightIndex)+e->getWeight();
+  if (newCost <	GetNode(from)->GetLabelF(weightIndex))
 	{
-    getNode(from)->setLabelF(weightIndex, newCost);
+    GetNode(from)->SetLabelF(weightIndex, newCost);
     return true;
   }
   return false;
 }
 
-node *graph::getRandomNode()
+node *Graph::getRandomNode()
 {
   if (_nodes.size() == 0) return 0;
   int rand_val = (int)(((double)random()/RAND_MAX)*_nodes.size());
   return _nodes[rand_val];
 }
 
-edge *graph::getRandomEdge()
+edge *Graph::getRandomEdge()
 {
   if (_edges.size() == 0) return 0;
   //	int rand_val = random()%edge_index;
@@ -235,12 +235,12 @@ edge *graph::getRandomEdge()
 }
 
 // fixme: should be inlined
-node_iterator graph::getNodeIter() const
+node_iterator Graph::getNodeIter() const
 {
   return _nodes.begin();
 }
 
-node *graph::nodeIterNext(node_iterator &node_iter) const
+node *Graph::nodeIterNext(node_iterator &node_iter) const
 {
   if (node_iter != _nodes.end())
 	{
@@ -252,12 +252,12 @@ node *graph::nodeIterNext(node_iterator &node_iter) const
 }
 
 // fixme: should be inlined
-edge_iterator graph::getEdgeIter() const
+edge_iterator Graph::getEdgeIter() const
 {
   return _edges.begin();
 }
 
-edge *graph::edgeIterNext(edge_iterator &edge_iter) const
+edge *Graph::edgeIterNext(edge_iterator &edge_iter) const
 {
   if (edge_iter != _edges.end())
 	{
@@ -268,11 +268,11 @@ edge *graph::edgeIterNext(edge_iterator &edge_iter) const
   return 0;
 }
 
-void graph::RemoveEdge(edge *e)
+void Graph::RemoveEdge(edge *e)
 {
   //cout << "Removing edge " << e->edgeNum << " from " << e->from << " to " << e->to << endl;
-  getNode(e->from)->RemoveEdge(e);
-  getNode(e->to)->RemoveEdge(e);
+  GetNode(e->from)->RemoveEdge(e);
+  GetNode(e->to)->RemoveEdge(e);
   unsigned int oldLoc = e->edgeNum;
   edge *replacement = _edges.back();
   //cout << "Removing edge at " << oldLoc << " and putting " << replacement->edgeNum << " in its place" << endl;
@@ -293,7 +293,7 @@ void graph::RemoveEdge(edge *e)
 }
 
 // returns the node that had it's node number changed, if any
-node *graph::RemoveNode(node *n, unsigned int &oldID)
+node *Graph::RemoveNode(node *n, unsigned int &oldID)
 {
   if (!n) return 0;
 	
@@ -334,19 +334,19 @@ node *graph::RemoveNode(node *n, unsigned int &oldID)
 }
 
 // fixme: should be inlined
-int graph::getNumEdges()
+int Graph::getNumEdges()
 {
   return _edges.size();
 }
 
 // fixme: should be inlined
-int graph::getNumNodes()
+int Graph::getNumNodes()
 {
   return _nodes.size();
 }
 
 // BFS from start node
-vector<node*>* graph::getReachableNodes(node* start)
+vector<node*>* Graph::getReachableNodes(node* start)
 {
   // Non-const array size trick in new compiler; appears as though
   // an initializer is not allowed
@@ -383,7 +383,7 @@ vector<node*>* graph::getReachableNodes(node* start)
   return nodeList;
 }
 
-void graph::Print(ostream &out) const
+void Graph::Print(ostream &out) const
 {
   node_iterator ni = getNodeIter();
   edge_iterator ei = getEdgeIter();
@@ -404,7 +404,7 @@ void graph::Print(ostream &out) const
   }
 }
 
-void graph::printStats()
+void Graph::printStats()
 {
 	cout << getNumEdges() << " total edges; " << getNumNodes() << " total nodes." << endl;
 	int minEdges = getNumEdges();
@@ -433,7 +433,7 @@ void graph::printStats()
 	cout << endl;
 }
 
-bool graph::verifyGraph() const
+bool Graph::verifyGraph() const
 {
   bool verified = true;
   int totalEdges1 = 0, totalEdges2 = 0;
@@ -510,17 +510,17 @@ bool graph::verifyGraph() const
 edge::edge(unsigned int f, unsigned int t, double w)
 : mark(false), from(f), to(t), label()
 { 
-  setLabelF(kEdgeWeight, w);
+  SetLabelF(kEdgeWeight, w);
 	//	if ((from == -1) || (to == -1))
 	//		cerr << "Error - " << from << "->" << to << endl;
 }
 
 void edge::Print(ostream& out) const
 {
-  out << from << "->" << to << " (" << getLabelF(kEdgeWeight) << ")";
+  out << from << "->" << to << " (" << GetLabelF(kEdgeWeight) << ")";
 }
 
-void edge::setLabelF(unsigned int index, double val)
+void edge::SetLabelF(unsigned int index, double val)
 {
   if (index < label.size())
     label[index].fval = val;
@@ -535,7 +535,7 @@ void edge::setLabelF(unsigned int index, double val)
   }
 }
 
-void edge::setLabelL(unsigned int index, long val)
+void edge::SetLabelL(unsigned int index, long val)
 {
   if (index < label.size())
     label[index].lval = val;
@@ -624,7 +624,7 @@ void node::RemoveEdge(edge *e)
   if (markedEdge == e) markedEdge = 0;
 }
 
-void node::setLabelF(unsigned int index, double val)
+void node::SetLabelF(unsigned int index, double val)
 {
   if (index < label.size())
     label[index].fval = val;
@@ -639,7 +639,7 @@ void node::setLabelF(unsigned int index, double val)
   }
 }
 
-void node::setLabelL(unsigned int index, long val)
+void node::SetLabelL(unsigned int index, long val)
 {
   if (index < label.size())
     label[index].lval = val;
@@ -766,7 +766,7 @@ void node::Print(ostream& out) const
   }
 }
 
-ostream& operator <<(ostream & out, const graph &_Graph)
+ostream& operator <<(ostream & out, const Graph &_Graph)
 {
   _Graph.Print(out);
   return out;

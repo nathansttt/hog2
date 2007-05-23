@@ -61,8 +61,8 @@ private:
 	void abstractionBFS(node *which, node *parent, int quadrant);
 	int getQuadrant(node *which);
 	
-	void addEdges(graph *g);
-	void addNodes(graph *g);
+	void addEdges(Graph *g);
+	void addNodes(Graph *g);
 	
 	int sectorSize;
 };

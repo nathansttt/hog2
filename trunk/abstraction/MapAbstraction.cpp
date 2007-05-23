@@ -36,8 +36,8 @@ void MapAbstraction::GetRandomTileFromNode(node *n, int &x, int &y)
 {
 	while (GetAbstractionLevel(n) != 0)
 		n = GetNthChild(n, random()%GetNumChildren(n));
-	x = n->getLabelL(kFirstData);
-	y = n->getLabelL(kFirstData+1);
+	x = n->GetLabelL(kFirstData);
+	y = n->GetLabelL(kFirstData+1);
 }
 
 void MapAbstraction::GetTileFromNode(node *n, int &x, int &y)
@@ -56,8 +56,8 @@ void MapAbstraction::GetTileFromNode(node *n, int &x, int &y)
 		while (GetAbstractionLevel(n) != 0)
 			n = GetNthChild(n, 0);
 	}
-	x = n->getLabelL(kFirstData);
-	y = n->getLabelL(kFirstData+1);
+	x = n->GetLabelL(kFirstData);
+	y = n->GetLabelL(kFirstData+1);
 	//printf("(%d, %d) in x/y\n", x, y);
 }
 
@@ -80,18 +80,18 @@ void MapAbstraction::OpenGLDraw(int )
 }
 
 
-void MapAbstraction::DrawGraph(graph *g)
+void MapAbstraction::DrawGraph(Graph *g)
 {
 	if ((g == 0) || (g->getNumNodes() == 0)) return;
 	
-	int abLevel = g->getNode(0)->getLabelL(kAbstractionLevel);	
+	int abLevel = g->GetNode(0)->GetLabelL(kAbstractionLevel);	
 	
-	//  if (verbose&kBuildGraph) printf("Drawing graph abstraction %d!\n", abLevel);
+	//  if (verbose&kBuildGraph) printf("Drawing Graph abstraction %d!\n", abLevel);
 	glBegin(GL_LINES);
 	glNormal3f(0, 1, 0);
 	
 	//	glColor4f(1-((GLfloat)(abLevel%15)/15.0), ((GLfloat)(abLevel%15)/15.0), .25+((GLfloat)(abLevel%15-8)/30.0), 1);
-	//	switch (g->getNode(0)->getLabelL(kAbstractionLevel)%3)
+	//	switch (g->GetNode(0)->GetLabelL(kAbstractionLevel)%3)
 	//	{
 	//		case 0: glColor4f(1, 0, 0, 1); break;
 	//		case 1: glColor4f(0, 1, 0, 1); break;
@@ -107,7 +107,7 @@ void MapAbstraction::DrawGraph(graph *g)
 	//	ni = g->getNodeIter();
 	//	for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
 	//	{
-	//		if (n->getLabelL(kNodeBlocked) > 0)
+	//		if (n->GetLabelL(kNodeBlocked) > 0)
 	//		{
 	//			glColor3f(1, 1, 1);
 	//			recVec rv = GetNodeLoc(n);
@@ -121,10 +121,10 @@ void MapAbstraction::DrawGraph(graph *g)
 		//int x, y;
 		//double offsetx, offsety;
 		node *n;
-		n = g->getNode(e->getFrom());
+		n = g->GetNode(e->getFrom());
 		
-		if (e->getLabelL(kEdgeCapacity) == 0)      glColor4f(.5, .5, .5, 1);
-		else if (e->getLabelL(kEdgeCapacity) <= 0) glColor4f(.2, .2, .2, 1);
+		if (e->GetLabelL(kEdgeCapacity) == 0)      glColor4f(.5, .5, .5, 1);
+		else if (e->GetLabelL(kEdgeCapacity) <= 0) glColor4f(.2, .2, .2, 1);
 		else if (e->getMarked())                  glColor4f(1, 1, 1, 1);
 		else if (abLevel%2)
 			glColor4f(1-((GLfloat)(abLevel%15)/15.0), ((GLfloat)(abLevel%15)/15.0), 0, 1);
@@ -146,7 +146,7 @@ void MapAbstraction::DrawGraph(graph *g)
 		recVec rv = GetNodeLoc(n);
 		glVertex3f(rv.x, rv.y, rv.z);
 		
-		n = g->getNode(e->getTo());
+		n = g->GetNode(e->getTo());
 		rv = GetNodeLoc(n);
 		
 		glVertex3f(rv.x, rv.y, rv.z);
@@ -167,13 +167,13 @@ void MapAbstraction::DrawLevelConnections(node *n)
 	//	recVec ans;
 	//if (n->getNumOutgoingEdges()+n->getNumIncomingEdges() == 0) return;
 	
-	if (n->getLabelL(kAbstractionLevel) == 0) return;
+	if (n->GetLabelL(kAbstractionLevel) == 0) return;
 	else {
 		glColor4f(.6, .6, .6, .6);
 		recVec v = GetNodeLoc(n);
-		for (int cnt = 0; cnt < n->getLabelL(kNumAbstractedNodes); cnt++)
+		for (int cnt = 0; cnt < n->GetLabelL(kNumAbstractedNodes); cnt++)
 		{
-			recVec v1 = GetNodeLoc(abstractions[n->getLabelL(kAbstractionLevel)-1]->getNode(n->getLabelL(kFirstData+cnt)));
+			recVec v1 = GetNodeLoc(abstractions[n->GetLabelL(kAbstractionLevel)-1]->GetNode(n->GetLabelL(kFirstData+cnt)));
 			glVertex3f(v.x, v.y, v.z);
 			glVertex3f(v1.x, v1.y, v1.z);
 		}
@@ -199,26 +199,26 @@ recVec MapAbstraction::GetNodeLoc(node *n)
 	//  double offsetx, offsety;
 	recVec ans;
 	
-	if (n->getLabelF(kXCoordinate) != kUnknownPosition)
+	if (n->GetLabelF(kXCoordinate) != kUnknownPosition)
 	{
-		ans.x = n->getLabelF(kXCoordinate);
-		ans.y = n->getLabelF(kYCoordinate);
-		ans.z = n->getLabelF(kZCoordinate);
+		ans.x = n->GetLabelF(kXCoordinate);
+		ans.y = n->GetLabelF(kYCoordinate);
+		ans.z = n->GetLabelF(kZCoordinate);
 		return ans;
 	}
 	
 	//	double width = GetMap()->getMapWidth();
 	//	double height = GetMap()->getMapHeight();
 	
-	if (n->getLabelL(kAbstractionLevel) == 0)
+	if (n->GetLabelL(kAbstractionLevel) == 0)
 	{
-		x = n->getLabelL(kFirstData);
-		y = n->getLabelL(kFirstData+1);
+		x = n->GetLabelL(kFirstData);
+		y = n->GetLabelL(kFirstData+1);
 		
 		Map *mp = GetMap();
 		double r;
 		mp->getOpenGLCoord(x,y,ans.x,ans.y,ans.z,r);
-		//    switch (n->getLabelL(kFirstData+2)) {
+		//    switch (n->GetLabelL(kFirstData+2)) {
 		//			case kTopLeft: offsetx = .3; offsety = .3; break;
 		//			case kTopRight: offsetx = .6; offsety = .3; break;
 		//			case kBottomLeft: offsetx = .3; offsety = .6; break;
@@ -232,31 +232,31 @@ recVec MapAbstraction::GetNodeLoc(node *n)
 	else {
 		int totNodes = 0;
 		ans.x = ans.y = ans.z = 0;
-		for (int cnt = 0; cnt < n->getLabelL(kNumAbstractedNodes); cnt++)
+		for (int cnt = 0; cnt < n->GetLabelL(kNumAbstractedNodes); cnt++)
 		{
-			int absLevel = n->getLabelL(kAbstractionLevel)-1;
-			node *nextChild = abstractions[absLevel]->getNode(n->getLabelL(kFirstData+cnt));
+			int absLevel = n->GetLabelL(kAbstractionLevel)-1;
+			node *nextChild = abstractions[absLevel]->GetNode(n->GetLabelL(kFirstData+cnt));
 			recVec tmp = GetNodeLoc(nextChild);
-			int weight = nextChild->getLabelL(kNumAbstractedNodes);
+			int weight = nextChild->GetLabelL(kNumAbstractedNodes);
 			totNodes += weight;
 			ans.x += weight*tmp.x;
 			ans.y += weight*tmp.y;
 			ans.z += weight*tmp.z;
 		}
-		ans.x /= totNodes;//n->getLabelL(kNumAbstractedNodes); 
-			ans.y /= totNodes;//n->getLabelL(kNumAbstractedNodes); 
-				ans.z /= totNodes;//n->getLabelL(kNumAbstractedNodes); 
+		ans.x /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
+			ans.y /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
+				ans.z /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
 	}
 	Map *mp = GetMap();
 	double r, a, b, c;
 	mp->getOpenGLCoord(0,0,a,b,c,r);
 	// height
 	ans.z -= 5.0*r;
-	//ans.z = -(double)5.0*r*(n->getLabelL(kAbstractionLevel)+1.1);
+	//ans.z = -(double)5.0*r*(n->GetLabelL(kAbstractionLevel)+1.1);
 	
-	n->setLabelF(kXCoordinate, ans.x);
-	n->setLabelF(kYCoordinate, ans.y);
-	n->setLabelF(kZCoordinate, ans.z);
+	n->SetLabelF(kXCoordinate, ans.x);
+	n->SetLabelF(kYCoordinate, ans.y);
+	n->SetLabelF(kZCoordinate, ans.z);
 	return ans;
 }
 
@@ -306,15 +306,15 @@ double MapAbstraction::OctileDistance(double x1, double y1, double x2, double y2
 * GetMapGraph(map)
  *
  * Given a map, this function uses the external map interfaces to turn it
- * into a graph, and sets the appropriate node numbers for that map. This
+ * into a Graph, and sets the appropriate node numbers for that map. This
  * function should not be called multiple times on the same map, because
- * the original graph map lose it's association with the map.
+ * the original Graph map lose it's association with the map.
  */
-graph *GetMapGraph(Map *m)
+Graph *GetMapGraph(Map *m)
 {
-	// printf("Getting graph representation of world\n");
+	// printf("Getting Graph representation of world\n");
 	char name[32];
-	graph *g = new graph();
+	Graph *g = new Graph();
 	node *n;
 	for (int y = 0; y < m->getMapHeight(); y++)
 	{
@@ -330,48 +330,48 @@ graph *GetMapGraph(Map *m)
 					continue;
 				sprintf(name, "(%d, %d)", x, y);
 				currTile.tile1.node = g->AddNode(n = new node(name));
-				n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
-				n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
-				n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
-				n->setLabelF(kXCoordinate, kUnknownPosition);
-				n->setLabelL(kNodeBlocked, 0);
-				n->setLabelL(kFirstData, x);
-				n->setLabelL(kFirstData+1, y);
-				n->setLabelL(kFirstData+2, kNone);
+				n->SetLabelL(kAbstractionLevel, 0); // level in abstraction tree
+				n->SetLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
+				n->SetLabelL(kParent, -1); // parent of this node in abstraction hierarchy
+				n->SetLabelF(kXCoordinate, kUnknownPosition);
+				n->SetLabelL(kNodeBlocked, 0);
+				n->SetLabelL(kFirstData, x);
+				n->SetLabelL(kFirstData+1, y);
+				n->SetLabelL(kFirstData+2, kNone);
 			}
 			else {
 				if (m->getTerrainType(x, y, kLeftEdge) != kOutOfBounds)
 				{
 					sprintf(name, "(%d/%d)", x, y);
 					currTile.tile1.node = g->AddNode(n = new node(name));
-					n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
-					n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
-					n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
-					n->setLabelF(kXCoordinate, kUnknownPosition);
-					n->setLabelL(kNodeBlocked, 0);
-					n->setLabelL(kFirstData, x);
-					n->setLabelL(kFirstData+1, y);
+					n->SetLabelL(kAbstractionLevel, 0); // level in abstraction tree
+					n->SetLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
+					n->SetLabelL(kParent, -1); // parent of this node in abstraction hierarchy
+					n->SetLabelF(kXCoordinate, kUnknownPosition);
+					n->SetLabelL(kNodeBlocked, 0);
+					n->SetLabelL(kFirstData, x);
+					n->SetLabelL(kFirstData+1, y);
 					if (currTile.split == kForwardSplit)
-						n->setLabelL(kFirstData+2, kTopLeft);
+						n->SetLabelL(kFirstData+2, kTopLeft);
 					else
-						n->setLabelL(kFirstData+2, kBottomLeft);
+						n->SetLabelL(kFirstData+2, kBottomLeft);
 				}
 				
 				if (m->getTerrainType(x, y, kRightEdge) != kOutOfBounds)
 				{
 					sprintf(name, "(%d\\%d)", x, y);
 					currTile.tile2.node = g->AddNode(n = new node(name));
-					n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
-					n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
-					n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
-					n->setLabelF(kXCoordinate, kUnknownPosition);
-					n->setLabelL(kNodeBlocked, 0);
-					n->setLabelL(kFirstData, x);
-					n->setLabelL(kFirstData+1, y);
+					n->SetLabelL(kAbstractionLevel, 0); // level in abstraction tree
+					n->SetLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
+					n->SetLabelL(kParent, -1); // parent of this node in abstraction hierarchy
+					n->SetLabelF(kXCoordinate, kUnknownPosition);
+					n->SetLabelL(kNodeBlocked, 0);
+					n->SetLabelL(kFirstData, x);
+					n->SetLabelL(kFirstData+1, y);
 					if (currTile.split == kForwardSplit)
-						n->setLabelL(kFirstData+2, kBottomRight);
+						n->SetLabelL(kFirstData+2, kBottomRight);
 					else
-						n->setLabelL(kFirstData+2, kTopRight);
+						n->SetLabelL(kFirstData+2, kTopRight);
 				}
 			}
 		}
@@ -390,7 +390,7 @@ graph *GetMapGraph(Map *m)
 	}
 	// printf("Done\n");
 	
-	// verify graph is correct
+	// verify Graph is correct
 #if 0
 	{
 		node_iterator ni = g->getNodeIter();
@@ -418,16 +418,16 @@ graph *GetMapGraph(Map *m)
 }
 
 /**
-* AddMapEdges(map, graph, x, y)
+* AddMapEdges(map, Graph, x, y)
  *
  * This is a helper function for GetMapGraph that does the work of adding
- * the graph edges. Each edge is only added once, so while the graph has
+ * the Graph edges. Each edge is only added once, so while the Graph has
  * directional edges, we treat them as being bidirectional.
  */
 static const int gEdgeProb = 100;
 static const int gStraightEdgeProb = 100;
 
-void AddMapEdges(Map *m, graph *g, int x, int y)
+void AddMapEdges(Map *m, Graph *g, int x, int y)
 {
 	// check 4 surrounding edges
 	// when we get two of them, we add the corresponding diagonal edge(?)...not yet
@@ -455,7 +455,7 @@ void AddMapEdges(Map *m, graph *g, int x, int y)
 			}
 		}
 		if (e)
-			e->setLabelL(kEdgeCapacity, 1);
+			e->SetLabelL(kEdgeCapacity, 1);
 	}
 	e = 0;
 	// top edge (may be tile 1 or tile 2)
@@ -508,7 +508,7 @@ void AddMapEdges(Map *m, graph *g, int x, int y)
 			}
 		}
 		if (e)
-			e->setLabelL(kEdgeCapacity, 1);
+			e->SetLabelL(kEdgeCapacity, 1);
 	}
 	e = 0;
 	// diagonal UpperLeft edge, always node 1...
@@ -544,7 +544,7 @@ void AddMapEdges(Map *m, graph *g, int x, int y)
 				}
 			}
 			if (e)
-				e->setLabelL(kEdgeCapacity, 1);
+				e->SetLabelL(kEdgeCapacity, 1);
 		}
 	}
 	e = 0;
@@ -581,7 +581,7 @@ void AddMapEdges(Map *m, graph *g, int x, int y)
 				}
 			}
 			if (e)
-				e->setLabelL(kEdgeCapacity, 1);
+				e->SetLabelL(kEdgeCapacity, 1);
 		}
 	}	
 }

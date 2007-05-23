@@ -57,8 +57,8 @@ private:
 	void buildNodeIntoParent(node *n, node *parent);
 	void abstractionBFS(node *which, node *parent, int depth);
 	
-	void addEdges(graph *g);
-	void addNodes(graph *g);
+	void addEdges(Graph *g);
+	void addNodes(Graph *g);
 	
 	int nodeLimit;
 };

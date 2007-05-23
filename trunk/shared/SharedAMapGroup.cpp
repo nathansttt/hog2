@@ -81,24 +81,24 @@ void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> 
 				// if it's different that we think, we just remove it.
 				// in the future we'll need to handle water & splits here
 				num = map->getNodeNum(x1, y1);
-				graph *g = aMap->GetAbstractGraph(0);
+				Graph *g = aMap->GetAbstractGraph(0);
 				if (!worldMap->adjacentEdges(x1, y1, kLeftEdge))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1)); aMap->RemoveEdge(e, 0); }
+				{ edge *e = g->FindEdge(num, map->getNodeNum(x1-1, y1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentEdges(x1, y1, kRightEdge))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1)); aMap->RemoveEdge(e, 0); }
+				{ edge *e = g->FindEdge(num, map->getNodeNum(x1+1, y1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentEdges(x1, y1, kTopEdge))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1, y1-1)); aMap->RemoveEdge(e, 0); }
+				{ edge *e = g->FindEdge(num, map->getNodeNum(x1, y1-1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentEdges(x1, y1, kBottomEdge))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1, y1+1)); aMap->RemoveEdge(e, 0); }
+				{ edge *e = g->FindEdge(num, map->getNodeNum(x1, y1+1)); aMap->RemoveEdge(e, 0); }
 
 				if (!worldMap->adjacentCorners(x1, y1, kTopLeft))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1-1)); aMap->RemoveEdge(e, 0); }
+				{ edge *e = g->FindEdge(num, map->getNodeNum(x1-1, y1-1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentCorners(x1, y1, kTopRight))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1-1)); aMap->RemoveEdge(e, 0); }
+				{ edge *e = g->FindEdge(num, map->getNodeNum(x1+1, y1-1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentCorners(x1, y1, kBottomLeft))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1-1, y1+1)); aMap->RemoveEdge(e, 0); }
+				{ edge *e = g->FindEdge(num, map->getNodeNum(x1-1, y1+1)); aMap->RemoveEdge(e, 0); }
 				if (!worldMap->adjacentCorners(x1, y1, kBottomRight))
-				{ edge *e = g->findEdge(num, map->getNodeNum(x1+1, y1+1)); aMap->RemoveEdge(e, 0); }
+				{ edge *e = g->FindEdge(num, map->getNodeNum(x1+1, y1+1)); aMap->RemoveEdge(e, 0); }
 				
 				//aMap->RemoveNode(me);
 				map->setTerrainType(x1, y1, (tTerrain)worldMap->getTerrainType(x1, y1));
@@ -191,7 +191,7 @@ bool SharedAMapGroup::explored(int x, int y)
 
 bool SharedAMapGroup::explored(unsigned int _node)
 {
-	node *loc = aMap->GetAbstractGraph(0)->getNode(_node);
-	return explored((unsigned int)loc->getLabelL(kFirstData), 
-									(unsigned int)loc->getLabelL(kFirstData+1));
+	node *loc = aMap->GetAbstractGraph(0)->GetNode(_node);
+	return explored((unsigned int)loc->GetLabelL(kFirstData), 
+									(unsigned int)loc->GetLabelL(kFirstData+1));
 }

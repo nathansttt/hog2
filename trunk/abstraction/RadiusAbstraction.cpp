@@ -45,13 +45,13 @@ bool RadiusAbstraction::Pathable(node *from, node *to)
   while (from != to)
 	{
     if ((!from) || (!to) ||
-				(abstractions[from->getLabelL(kAbstractionLevel)]->getNumEdges() == 0))
+				(abstractions[from->GetLabelL(kAbstractionLevel)]->getNumEdges() == 0))
       return false;
 		
-    from = abstractions[from->getLabelL(kAbstractionLevel)+1]->
-      getNode(from->getLabelL(kParent));
-    to = abstractions[to->getLabelL(kAbstractionLevel)+1]->
-      getNode(to->getLabelL(kParent));
+    from = abstractions[from->GetLabelL(kAbstractionLevel)+1]->
+      GetNode(from->GetLabelL(kParent));
+    to = abstractions[to->GetLabelL(kAbstractionLevel)+1]->
+      GetNode(to->GetLabelL(kParent));
   }
 	if ((from == 0) || (to == 0))
 		return false;
@@ -101,14 +101,14 @@ void RadiusAbstraction::buildAbstraction()
 	abstractions.push_back(GetMapGraph(GetMap()));
 	while (abstractions.back()->getNumEdges() > 0)
 	{
-		graph *g = new graph();
+		Graph *g = new Graph();
 		addNodes(g);
 		addEdges(g);
 		abstractions.push_back(g);
 	}
 }
 
-void RadiusAbstraction::addNodes(graph *g)
+void RadiusAbstraction::addNodes(Graph *g)
 {
 	int count = abstractions.back()->getNumNodes();
 	while (count > 0)
@@ -117,46 +117,46 @@ void RadiusAbstraction::addNodes(graph *g)
 		node *next = abstractions.back()->getRandomNode();
 		assert(next!=NULL);
 		// if it isn't abstracted, do a bfs according to the depth and abstract these nodes together
-		if (next->getLabelL(kParent) == -1)
+		if (next->GetLabelL(kParent) == -1)
 		{
 			node *parent;
 			g->AddNode(parent = new node("??"));
 			assert(parent!=NULL);
-			parent->setLabelL(kAbstractionLevel, next->getLabelL(kAbstractionLevel)+1); // level in abstraction tree
-			parent->setLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
-			parent->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
-			parent->setLabelF(kXCoordinate, kUnknownPosition);
-			parent->setLabelL(kNodeBlocked, 0);
+			parent->SetLabelL(kAbstractionLevel, next->GetLabelL(kAbstractionLevel)+1); // level in abstraction tree
+			parent->SetLabelL(kNumAbstractedNodes, 0); // number of abstracted nodes
+			parent->SetLabelL(kParent, -1); // parent of this node in abstraction hierarchy
+			parent->SetLabelF(kXCoordinate, kUnknownPosition);
+			parent->SetLabelL(kNodeBlocked, 0);
 			abstractionBFS(next, parent, radius);
-			count-=parent->getLabelL(kNumAbstractedNodes);
+			count-=parent->GetLabelL(kNumAbstractedNodes);
 		}
 	}
 }
 
-void RadiusAbstraction::addEdges(graph *aGraph)
+void RadiusAbstraction::addEdges(Graph *aGraph)
 {
-	graph *g = abstractions.back();
+	Graph *g = abstractions.back();
 	edge_iterator ei = g->getEdgeIter();
 	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	{
-		int from = g->getNode(e->getFrom())->getLabelL(kParent);
-		int to = g->getNode(e->getTo())->getLabelL(kParent);
+		int from = g->GetNode(e->getFrom())->GetLabelL(kParent);
+		int to = g->GetNode(e->getTo())->GetLabelL(kParent);
 		edge *f=0;
 		
-		if ((from != to) && (!(f = aGraph->findEdge(to, from))))
+		if ((from != to) && (!(f = aGraph->FindEdge(to, from))))
 		{
-			double weight = h(aGraph->getNode(from), aGraph->getNode(to));
+			double weight = h(aGraph->GetNode(from), aGraph->GetNode(to));
 			f = new edge(from, to, weight);
-			f->setLabelL(kEdgeCapacity, 1);
+			f->SetLabelL(kEdgeCapacity, 1);
 			aGraph->AddEdge(f);
 		}
-		else if (f) f->setLabelL(kEdgeCapacity, f->getLabelL(kEdgeCapacity)+1);
+		else if (f) f->SetLabelL(kEdgeCapacity, f->GetLabelL(kEdgeCapacity)+1);
 	}	
 }
 
 void RadiusAbstraction::abstractionBFS(node *which, node *parent, int depth) // depth in edges...should we try literal distance?
 {
-	if ((which == 0) || (which->getLabelL(kParent) != -1))
+	if ((which == 0) || (which->GetLabelL(kParent) != -1))
 		return;
 	buildNodeIntoParent(which, parent);
 	if (depth < 0)
@@ -164,15 +164,15 @@ void RadiusAbstraction::abstractionBFS(node *which, node *parent, int depth) // 
 	neighbor_iterator ni = which->getNeighborIter();
 	for (long tmp = which->nodeNeighborNext(ni); tmp != -1; tmp = which->nodeNeighborNext(ni))
 	{
-		abstractionBFS(abstractions.back()->getNode(tmp), parent, depth-1);
+		abstractionBFS(abstractions.back()->GetNode(tmp), parent, depth-1);
 	}
 }
 
 void RadiusAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
 	assert(GetAbstractionLevel(n)+1 == GetAbstractionLevel(parent));
-	n->setLabelL(kParent, parent->getNum());
-	parent->setLabelL(kFirstData+parent->getLabelL(kNumAbstractedNodes), n->getNum());
-	parent->setLabelL(kNumAbstractedNodes, parent->getLabelL(kNumAbstractedNodes)+1);
-	parent->setLabelF(kXCoordinate, kUnknownPosition);
+	n->SetLabelL(kParent, parent->getNum());
+	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->getNum());
+	parent->SetLabelL(kNumAbstractedNodes, parent->GetLabelL(kNumAbstractedNodes)+1);
+	parent->SetLabelF(kXCoordinate, kUnknownPosition);
 }

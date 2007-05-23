@@ -1,5 +1,5 @@
 /*
- * $Id: graph.h,v 1.9 2006/09/18 06:20:15 nathanst Exp $
+ * $Id: Graph.h,v 1.9 2006/09/18 06:20:15 nathanst Exp $
  *
  * This file is part of HOG.
  *
@@ -30,7 +30,7 @@
 #define MAXINT (1<<30)
 //#define MAXLABELS 15
 
-class graph;
+class Graph;
 class node;
 class edge;
 
@@ -48,7 +48,7 @@ class graph_object {
 public:
   graph_object():key(0) {}
   virtual ~graph_object() {}
-  virtual double getKey() { return 0; }
+  virtual double GetKey() { return 0; }
   virtual void Print(std::ostream&) const;
   virtual graph_object *clone() const = 0;
   unsigned int key; // for use by a data structure to maintain a reverse-lookup
@@ -60,21 +60,21 @@ private:
 std::ostream& operator <<(std::ostream & out, const graph_object &_Obj);
 
 /**
- * A generic graph class.
+ * A generic Graph class.
  */
 
-class graph : public graph_object {
+class Graph : public graph_object {
 public:
-  graph();
-  ~graph();
+  Graph();
+  ~Graph();
   graph_object *clone() const; // clones just the nodes
-  graph *cloneAll() const;     // clones everything
+  Graph *cloneAll() const;     // clones everything
 
   int AddNode(node *);
-  node *getNode(unsigned int num);
+  node *GetNode(unsigned int num);
   void AddEdge(edge *);
   edge *findDirectedEdge(unsigned int from, unsigned int to);
-  edge *findEdge(unsigned int from, unsigned int to);
+  edge *FindEdge(unsigned int from, unsigned int to);
 	
   bool relax(edge *e, int weightIndex);
   bool relaxReverseEdge(edge *e, int weightIndex);
@@ -91,7 +91,7 @@ public:
   // returns the node that had it's node number changed along with its previous node number, if any
   node *RemoveNode(node *, unsigned int&);
   void RemoveNode(node *n) { unsigned int x; RemoveNode(n, x); } // if you don't care about node #'s
-  void RemoveNode(unsigned int nodeNum) { RemoveNode(getNode(nodeNum)); }
+  void RemoveNode(unsigned int nodeNum) { RemoveNode(GetNode(nodeNum)); }
 	
   int getNumEdges();
   int getNumNodes();
@@ -114,24 +114,24 @@ enum {
 };
 
 /**
- * Edge class for connections between \ref node in a \ref graph.
+ * Edge class for connections between \ref node in a \ref Graph.
  */
 class edge : public graph_object {
  public:
 	edge(unsigned int, unsigned int, double);
-	graph_object *clone() const { return new edge(from, to, getLabelF(kEdgeWeight)); }
+	graph_object *clone() const { return new edge(from, to, GetLabelF(kEdgeWeight)); }
 
 	// set/get various labels for each node
-	void setLabelF(unsigned int index, double val);
-	void setLabelL(unsigned int index, long val);
-	inline double getLabelF(unsigned int index) const { if (index < label.size()) return label[index].fval; return MAXINT; }
-	inline long getLabelL(unsigned int index) const { if (index < label.size()) return label[index].lval; return MAXINT; }
+	void SetLabelF(unsigned int index, double val);
+	void SetLabelL(unsigned int index, long val);
+	inline double GetLabelF(unsigned int index) const { if (index < label.size()) return label[index].fval; return MAXINT; }
+	inline long GetLabelL(unsigned int index) const { if (index < label.size()) return label[index].lval; return MAXINT; }
 
-	double getWeight() { return getLabelF(kEdgeWeight); }
-	void setWeight(double val) { setLabelF(kEdgeWeight, val); }
+	double getWeight() { return GetLabelF(kEdgeWeight); }
+	void setWeight(double val) { SetLabelF(kEdgeWeight, val); }
 	
-	double getWidth() { return getLabelF(kEdgeWidth); }
-	void setWidth(double val) { setLabelF(kEdgeWidth, val); }
+	double getWidth() { return GetLabelF(kEdgeWidth); }
+	void setWidth(double val) { SetLabelF(kEdgeWidth, val); }
 	
 	unsigned int getFrom() { return from; }
 	unsigned int getTo() { return to; }
@@ -143,7 +143,7 @@ class edge : public graph_object {
 
 	void Print(std::ostream&) const;
  private:
-	friend class graph;
+	friend class Graph;
 	bool mark;
 	unsigned int from, to;
 //	double weight;
@@ -154,7 +154,7 @@ class edge : public graph_object {
 };
 
 /**
- * Nodes to be stored within a \ref graph.
+ * Nodes to be stored within a \ref Graph.
  */
 
 class node : public graph_object {
@@ -196,15 +196,15 @@ public:
   // chooses which label will be used as the key for
   // priority queue
   void setKeyLabel(int which) { keyLabel = which; }
-  double getKey() { return label[keyLabel].fval; }
+  double GetKey() { return label[keyLabel].fval; }
 
   // set/get various labels for each node
-  void setLabelF(unsigned int index, double val);
-  void setLabelL(unsigned int index, long val);
-  inline double getLabelF(unsigned int index) {
+  void SetLabelF(unsigned int index, double val);
+  void SetLabelL(unsigned int index, long val);
+  inline double GetLabelF(unsigned int index) {
     if (index < label.size()) return label[index].fval; return MAXINT;
   }
-  inline long getLabelL(unsigned int index) {
+  inline long GetLabelL(unsigned int index) {
     if (index < label.size()) return label[index].lval; return MAXINT;
   }
 	
@@ -218,7 +218,7 @@ public:
 
   void Print(std::ostream&) const;
 private:
-  friend class graph;
+  friend class Graph;
   unsigned int nodeNum;//, label[MAXLABELS];
   std::vector<labelValue> label;
   edge *markedEdge;
@@ -232,7 +232,7 @@ private:
   static unsigned int uniqueIDCounter;
 };
 
-std::ostream& operator <<(std::ostream & out, const graph &_Graph);
+std::ostream& operator <<(std::ostream & out, const Graph &_Graph);
 std::ostream& operator <<(std::ostream & out, const node &_Node);
 std::ostream& operator <<(std::ostream & out, const edge &_Edge);
 

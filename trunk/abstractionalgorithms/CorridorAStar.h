@@ -51,14 +51,14 @@ public:
 	void setCorridor(const std::vector<node *> *);
 	virtual const char *GetName() { return "corridorAStar"; }
 private:
-		void relaxEdge(Heap *nodeHeap, graph *g, GraphAbstraction *aMap,
+		void relaxEdge(Heap *nodeHeap, Graph *g, GraphAbstraction *aMap,
 									 edge *e, node *from, node *to, node *dest);
-	void relaxFirstEdge(Heap *nodeHeap, graph *g, GraphAbstraction *aMap,
+	void relaxFirstEdge(Heap *nodeHeap, Graph *g, GraphAbstraction *aMap,
 											edge *e, node *from, node *afrom, node *ato, node *dest);
 
-	void relaxFinalEdge(Heap *nodeHeap, graph *g, GraphAbstraction *aMap,
+	void relaxFinalEdge(Heap *nodeHeap, Graph *g, GraphAbstraction *aMap,
 											edge *e, node *from, node *to, node *realDest);
-	path *extractBestPath(graph *g, unsigned int current);
+	path *extractBestPath(Graph *g, unsigned int current);
 	const std::vector<node *> *corridor;
 	std::vector<node *> emptyCorridor;
 };

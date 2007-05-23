@@ -37,7 +37,7 @@
 
 /**
  * A group which incrementally builds a map of the world as the units in the group
- * explore the graph.
+ * explore the Graph.
  */
 class SharedAMapGroup : public AbsMapUnitGroup, public MapProvider {
 public:

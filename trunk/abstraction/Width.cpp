@@ -31,13 +31,13 @@ using namespace std;
  *
  * This is quite inefficient and should be done in a better way.
  */
-node* findNodeAt(int x, int y, graph* g) 
+node* findNodeAt(int x, int y, Graph* g) 
 {
   node_iterator i = g->getNodeIter();
 	
   for (node* n = g->nodeIterNext(i); n; n = g->nodeIterNext(i))
 	{
-        if (n->getLabelL(kFirstData) == x && n->getLabelL(kFirstData+1) == y)
+        if (n->GetLabelL(kFirstData) == x && n->GetLabelL(kFirstData+1) == y)
       return n;
   }
   return 0;
@@ -102,16 +102,16 @@ float findMax(node* n)
 /**
  * Finds the maximum edge width of all nodes abstracted by x.
  */
-float findMaxAbstracted(node* x, graph* g)
+float findMaxAbstracted(node* x, Graph* g)
 {
 	float max = 0.0f;
 	float tempMax;
-	int numNodes = x->getLabelL(kNumAbstractedNodes);
+	int numNodes = x->GetLabelL(kNumAbstractedNodes);
 	node* n;
 	
 	for (int i = 0; i < numNodes; i++)
 	{
-    		n = g->getNode(x->getLabelL(kFirstData+i));
+    		n = g->GetNode(x->GetLabelL(kFirstData+i));
 		tempMax = findMax(n);
 		
 		if (tempMax > max)
@@ -127,29 +127,29 @@ float findMaxAbstracted(node* x, graph* g)
 /**
  * Finds the minimum node width of all nodes abstracted by x
  */
-float findMinAbstractedNode(node* x, graph* g)
+float findMinAbstractedNode(node* x, Graph* g)
 {
   float min = 0.0f;
-  int numNodes = x->getLabelL(kNumAbstractedNodes);
+  int numNodes = x->GetLabelL(kNumAbstractedNodes);
   node* n;
 	
-  n = g->getNode(x->getLabelL(kFirstData));
+  n = g->GetNode(x->GetLabelL(kFirstData));
   min = n->getWidth();
 	
   edge_iterator ei;
 	
   for (int i = 0; i < numNodes; i++)
 	{
-        n = g->getNode(x->getLabelL(kFirstData+i));
+        n = g->GetNode(x->GetLabelL(kFirstData+i));
 		
     ei = n->getEdgeIter();
     for (edge* e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
 	{
-          if (g->getNode(e->getTo())->getWidth() < min)
-	min = g->getNode(e->getTo())->getWidth();
+          if (g->GetNode(e->getTo())->getWidth() < min)
+	min = g->GetNode(e->getTo())->getWidth();
 				
-      if (g->getNode(e->getFrom())->getWidth() < min)
-	min = g->getNode(e->getFrom())->getWidth();
+      if (g->GetNode(e->getFrom())->getWidth() < min)
+	min = g->GetNode(e->getFrom())->getWidth();
     }
 		
     if (n->getWidth() < min)
@@ -166,11 +166,11 @@ float findMinAbstractedNode(node* x, graph* g)
  * Finds the minimum edge width in a spanning tree of maximal weight constructed from
  * the edges between the nodes abstracted within n.
  *
- * The graph g should be the abstracted graph level one below that of which 'n' is in.
+ * The Graph g should be the abstracted Graph level one below that of which 'n' is in.
  */
-float minSpanningTree(node* n, graph* g)
+float minSpanningTree(node* n, Graph* g)
 {
-  int numNodes = n->getLabelL(kNumAbstractedNodes);
+  int numNodes = n->GetLabelL(kNumAbstractedNodes);
 	
   if (numNodes <= 0) return 0.0f;
 	
@@ -181,7 +181,7 @@ float minSpanningTree(node* n, graph* g)
   // Put all the edges in a vector
   for (int i = 0; i < numNodes; i++)
 	{
-        current = g->getNode(n->getLabelL(kFirstData+i));
+        current = g->GetNode(n->GetLabelL(kFirstData+i));
 		
     ei = current->getEdgeIter();
     for (edge* e = current->edgeIterNext(ei); e; e = current->edgeIterNext(ei))

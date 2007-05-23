@@ -55,7 +55,7 @@ public:
 	void OpenGLDraw(int window);
 	void ToggleDrawAbstraction(int which);
 	void DrawLevelConnections(node *n);
-	void DrawGraph(graph *g);
+	void DrawGraph(Graph *g);
 	recVec GetNodeLoc(node *n);
 
   // first step to allowing simple loaded adjustments...
@@ -71,12 +71,12 @@ public:
 	//	virtual int getNumPrimitiveActions() = 0;
 	//	virtual node *getNodeForPrimitiveAction(node *, int) = 0;
 protected:
-	graph *loadGraph(char *fname);
-	virtual graph *abstractGraph(graph *g);
-	virtual graph *cliqueAbstractGraph(graph *g);
-	virtual graph *neighborAbstractGraph(graph *g, int width = 1);
-	void addNodesToParent(graph *g, node *n, node *parent, int width);
-  void addTunnel(node *n, graph *g, node *newNode);
+	Graph *loadGraph(char *fname);
+	virtual Graph *abstractGraph(Graph *g);
+	virtual Graph *cliqueAbstractGraph(Graph *g);
+	virtual Graph *neighborAbstractGraph(Graph *g, int width = 1);
+	void addNodesToParent(Graph *g, node *n, node *parent, int width);
+  void addTunnel(node *n, Graph *g, node *newNode);
   void renameNodeInAbstraction(node *which, unsigned int oldID);
   int getChildGroups(node *which);
   void splitNode(node *which, int numGroups);
@@ -101,7 +101,7 @@ protected:
 private:
 		unsigned long levelDraw;
 
-		void buildAbstractions(graph*);
+		void buildAbstractions(Graph*);
   void cleanMemory();
 	
   std::vector<GLuint> displayLists;

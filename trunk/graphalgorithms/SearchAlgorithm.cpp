@@ -41,7 +41,7 @@ void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 {
 	static double lastLength, lastTime;
 	static node *r1 = 0, *r2 = 0;
-	graph *g = aMap->GetAbstractGraph(0);
+	Graph *g = aMap->GetAbstractGraph(0);
 	//if (verbose) cout << "Clearing marked nodes" << endl;
 	//aMap->ClearMarkedNodes();
 	
@@ -54,10 +54,10 @@ void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 		do {
 			//      do {
 			r1 = g->getRandomNode();
-			//      } while (aMap->GetMap()->getTerrainType((long)r1->getLabelL(kFirstData), (long)r1->getLabelL(kFirstData+1)) == kOutOfBounds);
+			//      } while (aMap->GetMap()->getTerrainType((long)r1->GetLabelL(kFirstData), (long)r1->GetLabelL(kFirstData+1)) == kOutOfBounds);
 			//      do {
 			r2 = g->getRandomNode();
-			//      } while (aMap->GetMap()->getTerrainType((long)r2->getLabelL(kFirstData), (long)r2->getLabelL(kFirstData+1)) == kOutOfBounds);
+			//      } while (aMap->GetMap()->getTerrainType((long)r2->GetLabelL(kFirstData), (long)r2->GetLabelL(kFirstData+1)) == kOutOfBounds);
 		} while (!aMap->Pathable(r1, r2));
 	}
 	
@@ -117,8 +117,8 @@ void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 		if (q && q->next)
 		{
 			double t1, t2;
-			t1 = q->n->getLabelL(kFirstData)-q->next->n->getLabelL(kFirstData);
-			t2 = q->n->getLabelL(kFirstData+1)-q->next->n->getLabelL(kFirstData+1);
+			t1 = q->n->GetLabelL(kFirstData)-q->next->n->GetLabelL(kFirstData);
+			t2 = q->n->GetLabelL(kFirstData+1)-q->next->n->GetLabelL(kFirstData+1);
 			length += sqrt(t1*t1+t2*t2);
 		}
 		cnt++;

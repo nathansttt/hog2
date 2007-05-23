@@ -48,7 +48,7 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 	}
 		
 	MapFlatAbstraction *absMap = new MapFlatAbstraction(map);
-	graph *g = absMap->GetAbstractGraph(0);
+	Graph *g = absMap->GetAbstractGraph(0);
 
 	node *r1, *r2;
 	//  10 maps/bigMaps/600.map  48 151  55 152 7.4142135624
@@ -79,8 +79,8 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 			if (q && q->next)
 			{
 				double t1, t2;
-				t1 = q->n->getLabelL(kFirstData)-q->next->n->getLabelL(kFirstData);
-				t2 = q->n->getLabelL(kFirstData+1)-q->next->n->getLabelL(kFirstData+1);
+				t1 = q->n->GetLabelL(kFirstData)-q->next->n->GetLabelL(kFirstData);
+				t2 = q->n->GetLabelL(kFirstData+1)-q->next->n->GetLabelL(kFirstData+1);
 				length += sqrt(t1*t1+t2*t2);
 			}
 			cnt++;
@@ -91,8 +91,8 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 			while (p && p->next)
 			{
 				double t1, t2;
-				t1 = p->n->getLabelL(kFirstData)-p->next->n->getLabelL(kFirstData);
-				t2 = p->n->getLabelL(kFirstData+1)-p->next->n->getLabelL(kFirstData+1);
+				t1 = p->n->GetLabelL(kFirstData)-p->next->n->GetLabelL(kFirstData);
+				t2 = p->n->GetLabelL(kFirstData+1)-p->next->n->GetLabelL(kFirstData+1);
 				length -= sqrt(t1*t1+t2*t2);
 				path *t = p;
 				p = p->next;
@@ -124,8 +124,8 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 					if (q && q->next)
 					{
 						double t1, t2;
-						t1 = q->n->getLabelL(kFirstData)-q->next->n->getLabelL(kFirstData);
-						t2 = q->n->getLabelL(kFirstData+1)-q->next->n->getLabelL(kFirstData+1);
+						t1 = q->n->GetLabelL(kFirstData)-q->next->n->GetLabelL(kFirstData);
+						t2 = q->n->GetLabelL(kFirstData+1)-q->next->n->GetLabelL(kFirstData+1);
 						length += sqrt(t1*t1+t2*t2);
 					}
 					cnt++;
@@ -144,8 +144,8 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 		}
 
 		int x1, x2, y1, y2;
-		x1 = r1->getLabelL(kFirstData); y1 = r1->getLabelL(kFirstData+1);
-		x2 = r2->getLabelL(kFirstData); y2 = r2->getLabelL(kFirstData+1);
+		x1 = r1->GetLabelL(kFirstData); y1 = r1->GetLabelL(kFirstData+1);
+		x2 = r2->GetLabelL(kFirstData); y2 = r2->GetLabelL(kFirstData+1);
 		printf("%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%1.2f\n",
 					 (int)(length/bucketSize), _map, mapSizeX, mapSizeY, x1, y1, x2, y2, length);
 		delete p;

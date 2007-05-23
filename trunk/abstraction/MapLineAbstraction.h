@@ -56,10 +56,10 @@ public:
 private:
 	void buildAbstraction();
 	void buildNodeIntoParent(node *n, node *parent);
-	node *createParent(graph *g, node *n);
+	node *createParent(Graph *g, node *n);
 	
-	void addEdges(graph *g);
-	void addNodes(graph *g);
+	void addEdges(Graph *g);
+	void addNodes(Graph *g);
 	int lineDistance;
 	bool abstractUniformly;
 };

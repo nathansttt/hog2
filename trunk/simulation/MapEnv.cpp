@@ -4,7 +4,7 @@
 // * Using the pathfinding library, this class will extend the environment
 // * class so that the various pathfinding methods can be used.
 // *
-// * Uses Nathan's graph class as a base.
+// * Uses Nathan's Graph class as a base.
 // *
 // * Copyright (c) Brandon Blanck
 // * May 7, 2004
@@ -26,8 +26,8 @@
 // */
 //bool MapEnv::isObstacle(node* n) const
 //{
-//	int x = n->getLabelL(kFirstData);
-//	int y = n->getLabelL(kFirstData+1);
+//	int x = n->GetLabelL(kFirstData);
+//	int y = n->GetLabelL(kFirstData+1);
 //	
 //	int terrain = m_map->getTerrainType(x, y);
 //	if (terrain == kGround)
@@ -69,15 +69,15 @@
 //
 //	
 ///**
-// * Returns the heuristic of the graph.
+// * Returns the heuristic of the Graph.
 // *
-// * This is based off of an Octile graph.
+// * This is based off of an Octile Graph.
 // */
 //int MapEnv::getHeuristic(int start, int target) const 
 //{ 
 //	if (m_abstrMap) {
-//		node* a = m_graph->getNode(start);
-//		node* b = m_graph->getNode(target);
+//		node* a = m_graph->GetNode(start);
+//		node* b = m_graph->GetNode(target);
 //		
 //		return (int) (m_abstrMap->h(a, b) * MULTIPLY_CONST);
 //	}
@@ -129,7 +129,7 @@
 //		
 //
 ///**
-// * Returns the number of nodes in the graph.
+// * Returns the number of nodes in the Graph.
 // */
 //int MapEnv::getNumberNodes() const 
 //{
@@ -142,7 +142,7 @@
 //{
 //	//result.reserve(8); // maximum 8 edges
 //	result.clear();
-//	node* n = m_graph->getNode(nodeId);
+//	node* n = m_graph->GetNode(nodeId);
 //	
 //	if (isObstacle(n))
 //	{
@@ -156,7 +156,7 @@
 ////     	{
 ////         	int targetNodeId = e->getTo();
 ////         	assert(isValidNodeId(targetNodeId));
-////         	node* targetNode = m_graph->getNode(targetNodeId);
+////         	node* targetNode = m_graph->GetNode(targetNodeId);
 //// 
 ////         	if ((targetNodeId == lastNodeId) || // don't revisit departed node.
 //// 	 	    (isObstacle(targetNode))) // Obstacles are not passable
@@ -177,7 +177,7 @@
 //		
 //		//int targetNodeId = e->getTo();
 //        	assert(isValidNodeId(targetNodeId));
-//        	node* targetNode = m_graph->getNode(targetNodeId);
+//        	node* targetNode = m_graph->GetNode(targetNodeId);
 //
 //        	if ((targetNodeId == lastNodeId) || // don't revisit departed node.
 //	 	    (isObstacle(targetNode))) // Obstacles are not passable
@@ -195,7 +195,7 @@
 //	
 //bool MapEnv::isValidNodeId(int nodeId) const 
 //{ 
-//	return m_graph->getNode(nodeId);
+//	return m_graph->GetNode(nodeId);
 //}
 //
 //
@@ -212,7 +212,7 @@
 //    result.reserve(numberNodes);
 //    for (int i = 0; i < numberNodes; ++i)
 //    {
-//        if (isObstacle(m_graph->getNode(i)))
+//        if (isObstacle(m_graph->GetNode(i)))
 //            result.push_back('@');
 //	else
 //            result.push_back('.');

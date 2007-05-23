@@ -99,7 +99,7 @@ void Heap::HeapifyUp(int index)
   if (index == 0) return;
   int parent = (index-1)/2;
 
-  if (fgreater(_elts[parent]->getKey(), _elts[index]->getKey()))
+  if (fgreater(_elts[parent]->GetKey(), _elts[index]->GetKey()))
 	{
     graph_object *tmp = _elts[parent];
     _elts[parent] = _elts[index];
@@ -121,12 +121,12 @@ void Heap::HeapifyDown(int index)
     return;
   else if (child2 >= count)
     which = child1;
-  else if (fless(_elts[child1]->getKey(), _elts[child2]->getKey()))
+  else if (fless(_elts[child1]->GetKey(), _elts[child2]->GetKey()))
     which = child1;
   else
     which = child2;
 
-  if (fless(_elts[which]->getKey(), _elts[index]->getKey()))
+  if (fless(_elts[which]->GetKey(), _elts[index]->GetKey()))
 	{
     graph_object *tmp = _elts[which];
     _elts[which] = _elts[index];

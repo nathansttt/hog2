@@ -86,7 +86,7 @@ private:
   int m_vertOrigin; //vertical / row origin
   int m_width; // width of this cluster
   int m_height; // high of this cluster
-  std::vector<int> nodes; // node numbers in abstract graph of the entrances
+  std::vector<int> nodes; // node numbers in abstract Graph of the entrances
 
   
 };
@@ -170,8 +170,8 @@ private:
   void createHorizEntrances(int, int, int, int, int);
   void createVertEntrances(int, int, int, int, int);
   void linkEntrancesAndClusters();
-  void addAbsNodes(graph* g);
-  void computeClusterPaths(graph* g);
+  void addAbsNodes(Graph* g);
+  void computeClusterPaths(Graph* g);
   void addEntrance(Entrance e);
   int getClusterId(int row, int col) const;
 
@@ -186,8 +186,8 @@ private:
   clusterUtil::PathLookupTable paths;
   clusterUtil::PathLookupTable temp;
 		std::vector<path*> newPaths;
-  int nodeExists(const Cluster& c,double x,double y, graph* g);
-  void setUpParents(graph* g);
+  int nodeExists(const Cluster& c,double x,double y, Graph* g);
+  void setUpParents(Graph* g);
 
 	void buildNodeIntoParent(node *n, node *parent);
 	void abstractionBFS(node *which, node *parent, int cluster,int numOrigNodes,int numNodesAfter);
