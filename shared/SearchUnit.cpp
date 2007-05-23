@@ -140,7 +140,7 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 		targy = l.y;
 		
 		// Get a path by path-planning
-		node *to = aMap->GetAbstractGraph(0)->getNode(map->getNodeNum(targx, targy));
+		node *to = aMap->GetAbstractGraph(0)->GetNode(map->getNodeNum(targx, targy));
 		
 		s_algorithm->setTargets(mp->GetMapAbstraction(), next_start, to, rp);
 		delete spread_cache;
@@ -166,10 +166,10 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 	targy = l.y;
 		
 	// Get a path by path-planning
-	graph *g0 = aMap->GetAbstractGraph(0);
+	Graph *g0 = aMap->GetAbstractGraph(0);
 	// Get the start and goal nodes
-	node *from = g0->getNode(map->getNodeNum(loc.x, loc.y));
-	node *to = g0->getNode(map->getNodeNum(targx, targy));
+	node *from = g0->GetNode(map->getNodeNum(loc.x, loc.y));
+	node *to = g0->GetNode(map->getNodeNum(targx, targy));
 	
 	if (from == to)
 	{
@@ -203,8 +203,8 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 		return kStay;
 	}
 		
-	if (!(p->n && p->next && p->next->n && (loc.x == p->n->getLabelL(kFirstData)) 
-				 && (loc.y == p->n->getLabelL(kFirstData+1))))
+	if (!(p->n && p->next && p->next->n && (loc.x == p->n->GetLabelL(kFirstData)) 
+				 && (loc.y == p->n->GetLabelL(kFirstData+1))))
 	{
 		if (p->n)
 			std::cout << *p->n << std::endl;
@@ -214,8 +214,8 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 	}
 
 	// a valid path must have at least 2 nodes and start where the unit is located
-	assert(p->n && p->next && p->next->n && (loc.x == p->n->getLabelL(kFirstData)) 
-				 && (loc.y == p->n->getLabelL(kFirstData+1)));
+	assert(p->n && p->next && p->next->n && (loc.x == p->n->GetLabelL(kFirstData)) 
+				 && (loc.y == p->n->GetLabelL(kFirstData+1)));
 	
 	addPathToCache(p);
 	if (s_algorithm)
@@ -250,7 +250,7 @@ void SearchUnit::addPathToCache(path *p)
 	int result = kStay;
 	
 	// Decide on the horizontal move
-	switch ((p->n->getLabelL(kFirstData)-p->next->n->getLabelL(kFirstData)))
+	switch ((p->n->GetLabelL(kFirstData)-p->next->n->GetLabelL(kFirstData)))
 	{
 		case -1: result = kE; break;
 		case 0: break;
@@ -259,14 +259,14 @@ void SearchUnit::addPathToCache(path *p)
 			printf("SU: %s : The (x) nodes in the path are not next to each other!\n",
 						 this->GetName());
 			printf("Distance is %ld\n",
-						 p->n->getLabelL(kFirstData)-p->next->n->getLabelL(kFirstData));
+						 p->n->GetLabelL(kFirstData)-p->next->n->GetLabelL(kFirstData));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
 			exit(10); break;
 	}
 	
 	// Tack the vertical move onto it
 	// Notice the exploit of particular encoding of kStay, kE, etc. labels
-	switch ((p->n->getLabelL(kFirstData+1)-p->next->n->getLabelL(kFirstData+1)))
+	switch ((p->n->GetLabelL(kFirstData+1)-p->next->n->GetLabelL(kFirstData+1)))
 	{
 		case -1: result = result|kS; break;
 		case 0: break;
@@ -275,7 +275,7 @@ void SearchUnit::addPathToCache(path *p)
 			printf("SU: %s : The (y) nodes in the path are not next to each other!\n",
 						 this->GetName());
 			printf("Distance is %ld\n",
-						 p->n->getLabelL(kFirstData+1)-p->next->n->getLabelL(kFirstData+1));
+						 p->n->GetLabelL(kFirstData+1)-p->next->n->GetLabelL(kFirstData+1));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
 			exit(10); break;
 	}

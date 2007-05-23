@@ -112,18 +112,18 @@ private:
 	//	long nodesTouched, nodesExpanded;
 	inline node *ABSNode(node *n) { return abstr->GetNthParent(n, absLevel); }
 	path *getPathToNode(node *target, reservationProvider *rp);
-	path *extractPathToStart(graph *g, node *n);
+	path *extractPathToStart(Graph *g, node *n);
 	node *getNextNode();
 	void updateWeight(node *currOpenNode, node *neighbor, edge *e);
 	void addToOpenList(node *currOpenNode, node *neighbor, edge *e);
 	bool nodeInCorridor(node *n);
-	void addNeighborsToCorridor(graph *g, node *n, int windowSize);
+	void addNeighborsToCorridor(Graph *g, node *n, int windowSize);
 	void buildCorridor(path *p, int windowSize);
 	double internalHeuristic(node *from, node *to);
 	AStar3Util::PQueue openQueue;
 	AStar3Util::NodeLookupTable closedList;
 	node *goal, *start;
-	graph *g;
+	Graph *g;
 	GraphAbstraction *abstr;
 	AStar3Util::Corridor eligibleNodes;
 	int absLevel;

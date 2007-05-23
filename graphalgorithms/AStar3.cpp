@@ -54,14 +54,14 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 	if ((from == 0) || (to == 0) || (!aMap->Pathable(from, to)) || (from == to))
 		return 0;
 	map = aMap;
-	graph *g = map->GetAbstractGraph(from->getLabelL(kAbstractionLevel));
+	Graph *g = map->GetAbstractGraph(from->GetLabelL(kAbstractionLevel));
 	Heap *openList = new Heap(30);
 	std::vector<node *> closedList;
 	node *n;
 	
 	// label start node cost 0
 	n = from;
-	n->setLabelF(kTemporaryLabel, wh*map->h(n, to));
+	n->SetLabelF(kTemporaryLabel, wh*map->h(n, to));
 	n->markEdge(0);
 	
 	while (1)
@@ -75,7 +75,7 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 		n->key = closedList.size()-1;
 		
 		if (verbose)
-			printf("Working on %d with cost %1.2f\n", n->getNum(), n->getLabelF(kTemporaryLabel));
+			printf("Working on %d with cost %1.2f\n", n->getNum(), n->GetLabelF(kTemporaryLabel));
 		
 		ei = n->getEdgeIter();
 		
@@ -86,7 +86,7 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 			unsigned int which;
 			if ((which = e->getFrom()) == n->getNum()) which = e->getTo();
 			
-			node *nextChild = g->getNode(which);
+			node *nextChild = g->GetNode(which);
 			
 			// if it's on the open list, we can still update the weight
 			if (openList->IsIn(nextChild))
@@ -94,10 +94,10 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 				//nodesExpanded++;
 				relaxEdge(openList, g, e, n->getNum(), which, to);
 			}
-			else if (rp && (from->getLabelL(kAbstractionLevel)==0) && (nextChild != to) &&
+			else if (rp && (from->GetLabelL(kAbstractionLevel)==0) && (nextChild != to) &&
 							 rp->nodeOccupied(nextChild))
 			{
-				//printf("Can't path to %d, %d\n", (unsigned int)nextChild->getLabelL(kFirstData), (unsigned int)nextChild->getLabelL(kFirstData+1));
+				//printf("Can't path to %d, %d\n", (unsigned int)nextChild->GetLabelL(kFirstData), (unsigned int)nextChild->GetLabelL(kFirstData+1));
 				closedList.push_back(nextChild);
 				nextChild->key = closedList.size()-1;
 				// ignore this tile if occupied.
@@ -106,7 +106,7 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 			else if ((nextChild->key >= closedList.size()) ||
 							 (closedList[nextChild->key] != nextChild))
 			{
-				nextChild->setLabelF(kTemporaryLabel, MAXINT);
+				nextChild->SetLabelF(kTemporaryLabel, MAXINT);
 				nextChild->setKeyLabel(kTemporaryLabel);
 				nextChild->markEdge(0);
 				openList->Add(nextChild);
@@ -130,34 +130,34 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 }
 
 // this is the standard definition of relaxation as in Introduction to Algorithms (cormen, leiserson and rivest)
-void aStarOld::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextNode, node *d)
+void aStarOld::relaxEdge(Heap *nodeHeap, Graph *g, edge *e, int source, int nextNode, node *d)
 {
 	double weight;
-	node *from = g->getNode(source);
-	node *to = g->getNode(nextNode);
-	weight = from->getLabelF(kTemporaryLabel)-wh*map->h(from, d)+wh*map->h(to, d)+e->getWeight();
-	if (fless(weight, to->getLabelF(kTemporaryLabel)))
+	node *from = g->GetNode(source);
+	node *to = g->GetNode(nextNode);
+	weight = from->GetLabelF(kTemporaryLabel)-wh*map->h(from, d)+wh*map->h(to, d)+e->getWeight();
+	if (fless(weight, to->GetLabelF(kTemporaryLabel)))
 	{
 		if (verbose)
-			printf("Updating %d to %1.2f from %1.2f\n", nextNode, weight, to->getLabelF(kTemporaryLabel));
-		to->setLabelF(kTemporaryLabel, weight);
+			printf("Updating %d to %1.2f from %1.2f\n", nextNode, weight, to->GetLabelF(kTemporaryLabel));
+		to->SetLabelF(kTemporaryLabel, weight);
 		nodeHeap->DecreaseKey(to);
 		// this is the edge used to get to this node in the min. path tree
 		to->markEdge(e);
 	}
 }
 
-path *aStarOld::extractBestPath(graph *g, unsigned int current)
+path *aStarOld::extractBestPath(Graph *g, unsigned int current)
 {
 	path *p = 0;
 	edge *e;
-	// extract best path from graph -- each node has a single parent in the graph which is the marked edge
+	// extract best path from Graph -- each node has a single parent in the Graph which is the marked edge
 	// for visuallization purposes, an edge can be marked meaning it will be drawn in white
-	while ((e = g->getNode(current)->getMarkedEdge()))
+	while ((e = g->GetNode(current)->getMarkedEdge()))
 	{
 		if (verbose) printf("%d <- ", current);
 		
-		p = new path(g->getNode(current), p);
+		p = new path(g->GetNode(current), p);
 		
 		if (doPathDraw)
 			e->setMarked(true);
@@ -167,7 +167,7 @@ path *aStarOld::extractBestPath(graph *g, unsigned int current)
 		else
 			current = e->getFrom();
 	}
-	p = new path(g->getNode(current), p);
+	p = new path(g->GetNode(current), p);
 	if (verbose) printf("%d\n", current);
 	return p;	
 }

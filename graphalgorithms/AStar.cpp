@@ -60,7 +60,7 @@ path *aStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationPr
 	openQueue.Add(first);
 	//openList[start] = first;
 		
-	return getPathToNode(goal, (from->getLabelL(kAbstractionLevel) == 0)?rp:0);
+	return getPathToNode(goal, (from->GetLabelL(kAbstractionLevel) == 0)?rp:0);
 	//printf("##Initial nodes expanded: %d, touched: %d\n", nodesExpanded, nodesTouched);
 }
 
@@ -90,7 +90,7 @@ path *aStar::getPathToNode(node *target, reservationProvider *rp)
 			nodesTouched++;
 			unsigned int which;
 			if ((which = e->getFrom()) == currentOpenNode->getNum()) which = e->getTo();
-			node *neighbor = g->getNode(which);
+			node *neighbor = g->GetNode(which);
 			assert(neighbor != 0);
 			
 			if (closedList.find(neighbor) != closedList.end())
@@ -207,13 +207,13 @@ void aStar::addToOpenList(node *currOpenNode, node *neighbor, edge *e)
 	}
 }
 
-path *aStar::extractPathToStart(graph *_g, node *goalNode)
+path *aStar::extractPathToStart(Graph *_g, node *goalNode)
 {
 	path *p = 0;
 	SearchNode n = closedList[goalNode];
 	do {
 		if (n.currNode && n.prevNode)
-			_g->findEdge(n.currNode->getNum(), n.prevNode->getNum())->setMarked(true);
+			_g->FindEdge(n.currNode->getNum(), n.prevNode->getNum())->setMarked(true);
 		p = new path(n.currNode, p);
 		n = closedList[n.prevNode];
 	} while (n.currNode != n.prevNode);
@@ -240,7 +240,7 @@ void aStar::buildCorridor(path *p, int windowSize)
 		addNeighborsToCorridor(abstr->GetAbstractGraph(t->n), t->n, windowSize);
 }
 
-void aStar::addNeighborsToCorridor(graph *_g, node *n, int windowSize)
+void aStar::addNeighborsToCorridor(Graph *_g, node *n, int windowSize)
 {
 	// if node is already in corridor, stop
 	//	if (eligibleNodes.find(n) != eligibleNodes.end())
@@ -254,7 +254,7 @@ void aStar::addNeighborsToCorridor(graph *_g, node *n, int windowSize)
 		unsigned int which;
 		if ((which = e->getFrom()) == n->getNum()) which = e->getTo();
 		
-		node *neighbor = _g->getNode(which);
+		node *neighbor = _g->GetNode(which);
 		if (windowSize)
 			addNeighborsToCorridor(_g, neighbor, windowSize-1);
 		else

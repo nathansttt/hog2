@@ -38,13 +38,13 @@ private:
 class GraphSearchEnvironment : public SearchEnvironment
 {
 public:
-	GraphSearchEnvironment(graph *_graph) :g(_graph) {  }
+	GraphSearchEnvironment(Graph *_graph) :g(_graph) {  }
 	~GraphSearchEnvironment() {}
 	void getNeighbors(uint32_t nodeID, std::vector<uint32_t> &neighbors);
 	double heuristic(uint32_t node1, uint32_t node2);
 	double gcost(uint32_t node1, uint32_t node2);
 private:
-	graph *g;
+	Graph *g;
 };
 
 #endif

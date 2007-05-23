@@ -57,7 +57,7 @@ private:
 	void propagateHValues(node *n, int dist = 10000);
 	void propagateGValues(node *n);
 	node *goal;
-	graph *g;
+	Graph *g;
 	GraphAbstraction *aMap;
 	heuristicProvider *hp;
 	nodeList list1, list2;

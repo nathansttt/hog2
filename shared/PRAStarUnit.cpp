@@ -48,7 +48,7 @@ tDirection praStarUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simul
 	if (cache != 0)
 	{
 		node *n = aMap->GetNodeFromMap(loc.x, loc.y);
-		node *l = aMap->GetNthParent(n, cache->n->getLabelL(kAbstractionLevel));
+		node *l = aMap->GetNthParent(n, cache->n->GetLabelL(kAbstractionLevel));
 		while (cache && (l != cache->n))
 		{
 			path *tmp = cache;

@@ -766,7 +766,7 @@
 //	// Check if the move is valid
 //	//if ((map->getTerrainType(newx, newy)>>terrainBits) == (kGround>>terrainBits))
 //	//if (map->canStep(theUnit->currx, theUnit->curry, newx, newy))
-//	if (aMap->GetAbstractGraph(0)->findEdge(map->getNodeNum(theUnit->currx, theUnit->curry),
+//	if (aMap->GetAbstractGraph(0)->FindEdge(map->getNodeNum(theUnit->currx, theUnit->curry),
 //																					map->getNodeNum(newx, newy)))
 //	{
 //		if ((stochasticity > 0) && ((random()%1023)/1024.0 < stochasticity))

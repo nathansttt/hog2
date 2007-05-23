@@ -68,11 +68,11 @@ public:
 //	virtual int getNumPrimitiveActions() = 0;
 //	virtual node *getNodeForPrimitiveAction(node *, int) = 0;
 protected:
-		virtual graph *abstractGraph(graph *g);
-	virtual graph *cliqueAbstractGraph(graph *g);
-	//virtual graph *neighborAbstractGraph(graph *g, int width = 1);
-	void addNodesToParent(graph *g, node *n, node *parent, int width);
-  void addTunnel(node *n, graph *g, node *newNode);
+		virtual Graph *abstractGraph(Graph *g);
+	virtual Graph *cliqueAbstractGraph(Graph *g);
+	//virtual Graph *neighborAbstractGraph(Graph *g, int width = 1);
+	void addNodesToParent(Graph *g, node *n, node *parent, int width);
+  void addTunnel(node *n, Graph *g, node *newNode);
   void renameNodeInAbstraction(node *which, unsigned int oldID);
   int getChildGroups(node *which);
   void splitNode(node *which, int numGroups);

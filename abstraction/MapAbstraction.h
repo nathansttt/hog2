@@ -44,7 +44,7 @@ public:
 	virtual ~MapAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
 	virtual MapAbstraction *clone(Map *) = 0;
-	node *GetNodeFromMap(int x, int y, tCorner c = kNone) { return abstractions[0]->getNode(m->getNodeNum(x, y, c)); }
+	node *GetNodeFromMap(int x, int y, tCorner c = kNone) { return abstractions[0]->GetNode(m->getNodeNum(x, y, c)); }
 	void GetTileFromNode(node *n, int &x, int &y);
 	void GetRandomTileFromNode(node *n, int &x, int &y);
 
@@ -66,13 +66,13 @@ public:
 private:
 		
 	void DrawLevelConnections(node *n);
-	void DrawGraph(graph *g);
+	void DrawGraph(Graph *g);
 	
 	Map *m;
 	unsigned long levelDraw;
 };
 
-graph *GetMapGraph(Map *m);
-void AddMapEdges(Map *m, graph *g, int x, int y);
+Graph *GetMapGraph(Map *m);
+void AddMapEdges(Map *m, Graph *g, int x, int y);
 
 #endif

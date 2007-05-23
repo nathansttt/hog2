@@ -102,7 +102,7 @@ path* hpaStar::GetPath(GraphAbstraction *aMap, node* from, node* to, reservation
 		
 
 		node* upper = trav->tail()->n;
-		point3d s(upper->getLabelF(kXCoordinate),upper->getLabelF(kYCoordinate),-1);
+		point3d s(upper->GetLabelF(kXCoordinate),upper->GetLabelF(kYCoordinate),-1);
 		int px;
 		int py;
 		m->GetMap()->getPointFromCoordinate(s,px,py);
@@ -141,7 +141,7 @@ path* hpaStar::GetPath(GraphAbstraction *aMap, node* from, node* to, reservation
 
 /*
  * setUpSearch sets the number of nodes expanded and touched to 0
- * and inserts the start and goal nodes into the abstract graph
+ * and inserts the start and goal nodes into the abstract Graph
  */ 
 void hpaStar::setUpSearch(node* from, node* to)
 {
@@ -194,7 +194,7 @@ path* hpaStar::findAbstractPath(node* from, node* to)
  */ 
 path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 {
-	graph *g = m->GetAbstractGraph(1);
+	Graph *g = m->GetAbstractGraph(1);
 	path* curr = abPath;
 
 	path* returnme = 0;
@@ -203,7 +203,7 @@ path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 	curr = curr->next;
 	node* n2 = curr->n;
 
-	edge* e = g->findEdge(n->getNum(), n2->getNum());
+	edge* e = g->FindEdge(n->getNum(), n2->getNum());
 
 	path* lowlevel = m->getCachedPath(e);
 
@@ -228,17 +228,17 @@ path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 		n2 = curr->n;
 
 		/*		
-		point3d s(n->getLabelF(kXCoordinate),n->getLabelF(kYCoordinate),-1);
+		point3d s(n->GetLabelF(kXCoordinate),n->GetLabelF(kYCoordinate),-1);
 		int px;
 		int py;
 		m->GetMap()->getPointFromCoordinate(s,px,py);
 
-		point3d t(n2->getLabelF(kXCoordinate),n2->getLabelF(kYCoordinate),-1);
+		point3d t(n2->GetLabelF(kXCoordinate),n2->GetLabelF(kYCoordinate),-1);
 		
 		m->GetMap()->getPointFromCoordinate(t,px,py);
 		*/
 
-		e = g->findEdge(n->getNum(), n2->getNum());
+		e = g->FindEdge(n->getNum(), n2->getNum());
 
 		lowlevel = m->getCachedPath(e);
 		
@@ -272,7 +272,7 @@ path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 }
 
 /**
- * Remove the start & goal nodes from the graph
+ * Remove the start & goal nodes from the Graph
  */
 void hpaStar::cleanUpSearch()
 {
@@ -308,7 +308,7 @@ path* hpaStar::smoothPath(path* p)
 	{
 		lookup.push_back(tmp->n);		
 		// set key=index in lookup
-		tmp->n->setLabelL(kTemporaryLabel,i);
+		tmp->n->SetLabelL(kTemporaryLabel,i);
 		i++;
 	}
 
@@ -324,7 +324,7 @@ path* hpaStar::smoothPath(path* p)
 			break;
 		}
 
-		unsigned int last = lookup[n]->getLabelL(kTemporaryLabel);
+		unsigned int last = lookup[n]->GetLabelL(kTemporaryLabel);
 
 		// Node's temporary label != last --> this node occurs more than
 		// once. Cut out the in between path & go back to beginning of while loop
@@ -339,8 +339,8 @@ path* hpaStar::smoothPath(path* p)
 			continue;
 		}
 
-		int currX = lookup[n]->getLabelL(kFirstData);
-		int currY = lookup[n]->getLabelL(kFirstData+1); 
+		int currX = lookup[n]->GetLabelL(kFirstData);
+		int currY = lookup[n]->GetLabelL(kFirstData+1); 
 		minx = currX - clusterSize;
 		maxx = currX + clusterSize;																		 
 		miny = currY - clusterSize;
@@ -355,29 +355,29 @@ path* hpaStar::smoothPath(path* p)
 			// paste the shortcut into our current path
 			if (pathToNode)
 			{
-				int last = pathToNode->tail()->n->getLabelL(kTemporaryLabel);
-				int curr = pathToNode->n->getLabelL(kTemporaryLabel);
+				int last = pathToNode->tail()->n->GetLabelL(kTemporaryLabel);
+				int curr = pathToNode->n->GetLabelL(kTemporaryLabel);
 				if (last > curr && !nextInLookup(last, curr,lookup))
 				{
 					// make sure it's not the next one					
 					unsigned int index = n;
 					path* pathCopy = pathToNode;
 					//path* backup = pathCopy;
-					unsigned int end = pathToNode->tail()->n->getLabelL(kTemporaryLabel);
+					unsigned int end = pathToNode->tail()->n->GetLabelL(kTemporaryLabel);
 
 					while(pathCopy->next){
 						//make sure we're not overwriting anything
 						assert(index <= end);
 
 						lookup[index]=pathCopy->n;
-						pathCopy->n->setLabelL(kTemporaryLabel,index);
+						pathCopy->n->SetLabelL(kTemporaryLabel,index);
 						pathCopy = pathCopy->next;
 						index++;
 					}
 					assert(index <= end);
 
 					lookup[index]=pathCopy->n;
-					pathCopy->n->setLabelL(kTemporaryLabel,index);
+					pathCopy->n->SetLabelL(kTemporaryLabel,index);
 					
 					index++;	
 
@@ -469,18 +469,18 @@ bool hpaStar::nextInLookup(int last, int curr, std::vector<node*> lookup)
  */ 
 path* hpaStar::nextPathNode(node* n, int dir)
 {
-	graph *g = m->GetAbstractGraph(0);
+	Graph *g = m->GetAbstractGraph(0);
 
-	int px = n->getLabelL(kFirstData);
-	int py = n->getLabelL(kFirstData+1);
+	int px = n->GetLabelL(kFirstData);
+	int py = n->GetLabelL(kFirstData+1);
 	
 	node* next = getNextNode(px,py,dir);
 
 	if(next){
 		nodesTouched++;
 
-		int nextKey = next->getLabelL(kTemporaryLabel);
-		edge* e = g->findEdge(n->getNum(), next->getNum());
+		int nextKey = next->GetLabelL(kTemporaryLabel);
+		edge* e = g->FindEdge(n->getNum(), next->getNum());
 		
 		if(e && (nextKey >= 0) && (nextKey < static_cast<int>(lookup.size())) && (lookup[nextKey]==next)){
 			//we're done - we found the path
@@ -555,8 +555,8 @@ void hpaStar::findMinMax(path* p)
 	
 	while(pcopy->next)
 	{
-		int x = pcopy->n->getLabelL(kFirstData);
-		int y = pcopy->n->getLabelL(kFirstData+1);
+		int x = pcopy->n->GetLabelL(kFirstData);
+		int y = pcopy->n->GetLabelL(kFirstData+1);
 
 		if(x < minx) minx = x;
 		if(x > maxx) maxx = x;
@@ -567,8 +567,8 @@ void hpaStar::findMinMax(path* p)
 		pcopy = pcopy->next;
 	}
 	
-	int x = pcopy->n->getLabelL(kFirstData);
-	int y = pcopy->n->getLabelL(kFirstData+1);
+	int x = pcopy->n->GetLabelL(kFirstData);
+	int y = pcopy->n->GetLabelL(kFirstData+1);
 
 	if(x < minx) minx = x;
 	if(x > maxx) maxx = x;

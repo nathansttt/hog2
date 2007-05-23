@@ -67,7 +67,7 @@ path *FringeSearch::GetPath(GraphAbstraction *_aMap, node *from, node *to, reser
 			nodesTouched++;
 			unsigned int which;
 			if ((which = e->getFrom()) == currOpenNode->getNum()) which = e->getTo();
-			node *neighbor = g->getNode(which);
+			node *neighbor = g->GetNode(which);
 			assert(neighbor != 0);
 
 			if (onClosedList(neighbor))
@@ -107,7 +107,7 @@ void FringeSearch::initializeSearch(GraphAbstraction *aGraph, node *from, node *
 	costTable.resize(0);
 	aMap = aGraph;
 	goal = to;
-	g = aMap->GetAbstractGraph(from->getLabelL(kAbstractionLevel));
+	g = aMap->GetAbstractGraph(from->GetLabelL(kAbstractionLevel));
 
 	addCosts(from, 0, 0);
 }
@@ -188,7 +188,7 @@ double FringeSearch::getHCost(node *n)
 
 void FringeSearch::setHCost(node *n, double val)
 {
-	unsigned long index = n->getLabelL(kTemporaryLabel);
+	unsigned long index = n->GetLabelL(kTemporaryLabel);
 	if ((index < costTable.size()) && (costTable[index].n == n))
 	{
 		costTable[index].hCost = val;
@@ -200,7 +200,7 @@ void FringeSearch::setHCost(node *n, double val)
 
 void FringeSearch::getCosts(node *n, costs &val)
 {
-	unsigned long index = n->getLabelL(kTemporaryLabel);
+	unsigned long index = n->GetLabelL(kTemporaryLabel);
 	if ((index < costTable.size()) && (costTable[index].n == n))
 	{
 		val = costTable[index];
@@ -219,7 +219,7 @@ void FringeSearch::addCosts(node *n, node *parent, edge *e)
 	{
 		val.gCost = getGCost(parent)+e->getWeight();
 		val.hCost = h(n, goal);
-		n->setLabelL(kTemporaryLabel, costTable.size());
+		n->SetLabelL(kTemporaryLabel, costTable.size());
 		costTable.push_back(val);
 
 		if (fgreater(getHCost(parent)-e->getWeight(), h(n, goal)))
@@ -242,7 +242,7 @@ void FringeSearch::addCosts(node *n, node *parent, edge *e)
 	else {
 		val.gCost = getGCost(parent);
 		val.hCost = h(n, goal);
-		n->setLabelL(kTemporaryLabel, costTable.size());
+		n->SetLabelL(kTemporaryLabel, costTable.size());
 		costTable.push_back(val);
 	}
 }
@@ -252,7 +252,7 @@ void FringeSearch::updateCosts(node *n, node *parent, edge *e)
 	if (fgreater(getGCost(n), getGCost(parent)+e->getWeight()))
 	{
 		n->markEdge(e);
-		costs &val = costTable[n->getLabelL(kTemporaryLabel)];
+		costs &val = costTable[n->GetLabelL(kTemporaryLabel)];
 		if (verbose) printf("Updated g-cost of %d from %f to %f (through %d) -- (%f limit)\n", n->getNum(),
 												val.gCost, getGCost(parent)+e->getWeight(), parent->getNum(), currFLimit);
 		val.gCost = getGCost(parent)+e->getWeight();
@@ -266,7 +266,7 @@ path *FringeSearch::extractBestPath(node *n)
 {
 	path *p = 0;
 	edge *e;
-	// extract best path from graph -- each node has a single parent in the graph which is the marked edge
+	// extract best path from Graph -- each node has a single parent in the Graph which is the marked edge
 	// for visuallization purposes, an edge can be marked meaning it will be drawn in white
 	while ((e = n->getMarkedEdge()))
 	{
@@ -277,9 +277,9 @@ path *FringeSearch::extractBestPath(node *n)
 		e->setMarked(true);
 		
 		if (e->getFrom() == n->getNum())
-			n = g->getNode(e->getTo());
+			n = g->GetNode(e->getTo());
 		else
-			n = g->getNode(e->getFrom());
+			n = g->GetNode(e->getFrom());
 	}
 	p = new path(n, p);
 	if (verbose) printf("%d\n", n->getNum());
@@ -316,7 +316,7 @@ void FringeSearch::propagateHValues(node *n, int dist)
 		nodesTouched++;
 		unsigned int which;
 		if ((which = e->getFrom()) == n->getNum()) which = e->getTo();
-		node *neighbor = g->getNode(which);
+		node *neighbor = g->GetNode(which);
 		
 		if (onClosedList(neighbor) || onOpenList(neighbor))
 		{
@@ -348,7 +348,7 @@ void FringeSearch::propagateGValues(node *n)
 		nodesTouched++;
 		unsigned int which;
 		if ((which = e->getFrom()) == n->getNum()) which = e->getTo();
-		node *neighbor = g->getNode(which);
+		node *neighbor = g->GetNode(which);
 		
 		if ((onOpenList(neighbor) || onClosedList(neighbor)))// && (neighbor->getMarkedEdge() == e)
 		{

@@ -48,7 +48,7 @@ enum {
 
 /** kFirstData & beyond:
 * 
-* in abstract graph these are the node numbers of the abstraction (LONG labels)
+* in abstract Graph these are the node numbers of the abstraction (LONG labels)
 *
 * in 0th level abstraction they are the x, y location of the tile
 * along with which side (type tCorner)  (all LONG labels)
@@ -62,7 +62,7 @@ enum {
 const double kUnknownPosition = -50.0;
 
 /**
- * A generic class for basic operations on graph abstractions.
+ * A generic class for basic operations on Graph abstractions.
  */
 
 class GraphAbstraction {
@@ -70,13 +70,13 @@ public:
 	GraphAbstraction() :abstractions() {}
 	virtual ~GraphAbstraction();
 
-	// basic graph functions
+	// basic Graph functions
 	/** is there a legal path between these 2 nodes? */
   virtual bool Pathable(node *from, node *to) = 0;
-	/** given 2 nodes, find as much of their hierarchy that exists in the graph */
+	/** given 2 nodes, find as much of their hierarchy that exists in the Graph */
   void GetNumAbstractGraphs(node *from, node *to, std::vector<node *> &fromChain, std::vector<node *> &toChain);
-	/** return the abstract graph at the given level */
-  graph* GetAbstractGraph(int level) { return abstractions[level]; }
+	/** return the abstract Graph at the given level */
+  Graph* GetAbstractGraph(int level) { return abstractions[level]; }
 	/** return the total number of graphs in the hierarchy */
   unsigned int getNumAbstractGraphs() { return abstractions.size(); }
 	/** heuristic cost between any two nodes */
@@ -86,11 +86,11 @@ public:
 	/** return nth level parent of which or null if it doesn't exist */
 	node *GetNthParent(node *which, int n);
 
-	inline node *GetParent(node *which) { return abstractions[GetAbstractionLevel(which)+1]->getNode(which->getLabelL(kParent)); }
-	inline long GetNumChildren(node *which) { return which->getLabelL(kNumAbstractedNodes); }
-	inline node *GetNthChild(node *which, int n) { return abstractions[GetAbstractionLevel(which)-1]->getNode(which->getLabelL(kFirstData+n)); }
-	inline long GetAbstractionLevel(node *which) { return which->getLabelL(kAbstractionLevel); }
-	inline graph* GetAbstractGraph(node *which) { return abstractions[which->getLabelL(kAbstractionLevel)]; }
+	inline node *GetParent(node *which) { return abstractions[GetAbstractionLevel(which)+1]->GetNode(which->GetLabelL(kParent)); }
+	inline long GetNumChildren(node *which) { return which->GetLabelL(kNumAbstractedNodes); }
+	inline node *GetNthChild(node *which, int n) { return abstractions[GetAbstractionLevel(which)-1]->GetNode(which->GetLabelL(kFirstData+n)); }
+	inline long GetAbstractionLevel(node *which) { return which->GetLabelL(kAbstractionLevel); }
+	inline Graph* GetAbstractGraph(node *which) { return abstractions[which->GetLabelL(kAbstractionLevel)]; }
 	// utility functions
 	/** verify that the hierarchy is consistent */
 	virtual void VerifyHierarchy() = 0;
@@ -116,7 +116,7 @@ public:
 	void MeasureAbstractionValues(int level, double &n, double &n_dev, double &c, double &c_dev);
 	double MeasureAverageNodeWidth(int level);
 protected:
-		std::vector<graph *> abstractions;
+		std::vector<Graph *> abstractions;
 private:
 		int ComputeWidth(node *n);
 		int WidthBFS(node *child, node *parent);

@@ -423,9 +423,9 @@ void UnitSimulation<state, action, environment>::OpenGLDraw(int window)
 //	// this may move to the environment -- have to check
 //	/** reservationProvider interface */
 //	inline bool nodeOccupied(node *currNode)
-//	{ if (currNode->getLabelL(kAbstractionLevel) != 0) return false;
-//		return tileOccupied((unsigned int)currNode->getLabelL(kFirstData),
-//		                    (unsigned int)currNode->getLabelL(kFirstData+1)); }
+//	{ if (currNode->GetLabelL(kAbstractionLevel) != 0) return false;
+//		return tileOccupied((unsigned int)currNode->GetLabelL(kFirstData),
+//		                    (unsigned int)currNode->GetLabelL(kFirstData+1)); }
 //	inline bool tileOccupied(int x, int y) { return bv->get(y*map_width+x); }
 //	/* temporal reservations not supported by unitSimulation */
 //	virtual bool canMove(node *, node *, double, unit *) { return true;}

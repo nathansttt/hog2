@@ -1810,12 +1810,12 @@ void Map::drawLandQuickly()
 }
 
 /**
-* Sets the abstract graph node number for this tile.
+* Sets the abstract Graph node number for this tile.
  *
- * Because we have a graph representation of the map as well, we need some
+ * Because we have a Graph representation of the map as well, we need some
  * way to get back and forth between the representations. This function will
  * set the unique data (nodeNum) for a tile/half tile so that we can go
- * from a tile in the map to a node in the graph.
+ * from a tile in the map to a node in the Graph.
  */
 void Map::setNodeNum(int num, int x, int y, tCorner corner)
 {
@@ -1830,12 +1830,12 @@ void Map::setNodeNum(int num, int x, int y, tCorner corner)
 }
 
 /**
-* Gets the abstract graph node number for this tile.
+* Gets the abstract Graph node number for this tile.
  *
- * Because we have a graph representation of the map as well, we need some
+ * Because we have a Graph representation of the map as well, we need some
  * way to get back and forth between the representations. This function will
  * get the unique data (nodeNum) for a tile/half tile so that we can go
- * from a tile in the map to a node in the graph.
+ * from a tile in the map to a node in the Graph.
  */
 int Map::getNodeNum(int x, int y, tCorner corner)
 {

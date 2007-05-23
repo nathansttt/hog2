@@ -110,7 +110,7 @@ protected:
 										 std::vector<node*> &fromChain, 
 										 std::vector<node*> &toChain);
 
-	node* getNextNode(GraphAbstraction *aMap, node* currentLow, path* returnPath, path* apath, graph* g, int abstractLevel);
+	node* getNextNode(GraphAbstraction *aMap, node* currentLow, path* returnPath, path* apath, Graph* g, int abstractLevel);
 
 	int partialLimit;
 	bool expandSearchRadius;

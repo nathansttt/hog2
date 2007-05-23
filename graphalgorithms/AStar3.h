@@ -47,8 +47,8 @@ public:
 	void drawPath(bool _doPathDraw) { doPathDraw = _doPathDraw; }
 	
 private:
-		void relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextNode, node *to);
-	path *extractBestPath(graph *g, unsigned int current);
+		void relaxEdge(Heap *nodeHeap, Graph *g, edge *e, int source, int nextNode, node *to);
+	path *extractBestPath(Graph *g, unsigned int current);
 	GraphAbstraction *map;
 	double wh;
 	char aStarName[128];

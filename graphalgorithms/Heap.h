@@ -30,7 +30,7 @@
 #include "Graph.h"
 
 /**
- * A simple & efficient Heap class which uses graph objects.
+ * A simple & efficient Heap class which uses Graph objects.
  */
 
 class Heap {

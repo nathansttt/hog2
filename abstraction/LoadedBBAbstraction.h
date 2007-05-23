@@ -41,7 +41,7 @@ public:
 	void OpenGLDraw(int window);
 	void ToggleDrawAbstraction(int which);
 	void DrawLevelConnections(node *n);
-	void DrawGraph(graph *g);
+	void DrawGraph(Graph *g);
 	recVec GetNodeLoc(node *n);
 	
   // first step to allowing simple loaded adjustments...
@@ -55,14 +55,14 @@ public:
   edge *findEdgeParent(edge *e, unsigned int absLevel);
 private:
 		std::vector<BoundingBox> boxes;
-	graph *abstractGraph(graph *g);
+	Graph *abstractGraph(Graph *g);
 	void cleanMemory();
-	void buildAbstractions(graph *g);
+	void buildAbstractions(Graph *g);
 	void loadBoxes(char *boxFile);
-	graph *loadGraph(char *fname);
-	node *createNewParent(graph *, node *n);
+	Graph *loadGraph(char *fname);
+	node *createNewParent(Graph *, node *n);
 		void addNodeToParent(node *n, node *parent);
-		void addNeighborsInBox(graph *g, node *n, int which, node *parent);
+		void addNeighborsInBox(Graph *g, node *n, int which, node *parent);
 		int findBoundingBox(node *n);
 		unsigned long levelDraw;
 

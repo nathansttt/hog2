@@ -76,7 +76,7 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 	
 	if (verbose)
 		printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
-	if (aMap->GetAbstractGraph(0)->findEdge(from->getNum(), to->getNum())) { // we are 1 step away
+	if (aMap->GetAbstractGraph(0)->FindEdge(from->getNum(), to->getNum())) { // we are 1 step away
 		if ((cache) && (*cache))
 		{
 			delete *cache;
@@ -87,8 +87,8 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 	}
 	
 	aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
-	//	assert(aMap->GetAbstractGraph(fromChain.back()->getLabelL(kAbstractionLevel))->
-	//					findEdge(fromChain.back()->getNum(), toChain.back()->getNum()));
+	//	assert(aMap->GetAbstractGraph(fromChain.back()->GetLabelL(kAbstractionLevel))->
+	//					FindEdge(fromChain.back()->getNum(), toChain.back()->getNum()));
 	
 	path *lastPath = 0;
 	if (cache && ((*cache) != 0))
@@ -96,7 +96,7 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 		if (verbose) printf("Checking cache\n");
 		// check to see if cache is consistent with the planning we're going
 		// to do by finding the first node in the abstraction hierarchy
-		if (fromChain.back()->getLabelL(kAbstractionLevel) < (*cache)->n->getLabelL(kAbstractionLevel))
+		if (fromChain.back()->GetLabelL(kAbstractionLevel) < (*cache)->n->GetLabelL(kAbstractionLevel))
 		{
 			delete (*cache);
 			*cache = 0;
@@ -146,8 +146,8 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 	else if (lastPath == 0)
 	{
 		// there should be an edge directly from the last nodes here....
-		//		assert(aMap->GetAbstractGraph(fromChain.back()->getLabelL(kAbstractionLevel))->
-		//					 findEdge(fromChain.back()->getNum(), toChain.back()->getNum()));
+		//		assert(aMap->GetAbstractGraph(fromChain.back()->GetLabelL(kAbstractionLevel))->
+		//					 FindEdge(fromChain.back()->getNum(), toChain.back()->getNum()));
 		// it's possible this will be a path from the node back to itself
 		// but if that's the case, we'll still be ok.
 		lastPath = new path(fromChain.back(), new path(toChain.back()));
@@ -165,13 +165,13 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 		from = fromChain.back();
 		dest = to->getNum();
 		if (verbose)
-			printf("Expanded %d nodes before doing level %d\n", nodesExpanded, (int)from->getLabelL(kAbstractionLevel));		
+			printf("Expanded %d nodes before doing level %d\n", nodesExpanded, (int)from->GetLabelL(kAbstractionLevel));		
 		toChain.pop_back();
 		fromChain.pop_back();
 		
 		if (verbose)
 			printf("Building path from %d to %d (%ld/%ld)\n",
-						 from->getNum(), to->getNum(), from->getLabelL(kParent), to->getLabelL(kParent));
+						 from->getNum(), to->getNum(), from->GetLabelL(kParent), to->GetLabelL(kParent));
 		
 		std::vector<unsigned int> eligibleNodeParents;
 		
@@ -181,27 +181,27 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 			if (partialLimit > 0)
 			{
 				path *trav = lastPath;
-				//for (int x = 0; x < partialLimit*(from->getLabelL(kAbstractionLevel)+1); x++)
+				//for (int x = 0; x < partialLimit*(from->GetLabelL(kAbstractionLevel)+1); x++)
 				for (int x = 0; x < partialLimit; x++)
 					if (trav->next) 
 						trav = trav->next;
-				if ((trav->next != 0) || (trav->n->getNum() != (unsigned)to->getLabelL(kParent)))
+				if ((trav->next != 0) || (trav->n->getNum() != (unsigned)to->GetLabelL(kParent)))
 				{
 					destParent = trav->n->getNum();
 					if (trav->next)
-						dest = trav->next->n->getLabelL(kFirstData);
+						dest = trav->next->n->GetLabelL(kFirstData);
 					else
-						dest = trav->n->getLabelL(kFirstData);
+						dest = trav->n->GetLabelL(kFirstData);
 					delete trav->next;
 					trav->next = 0;
 					if (verbose) printf("Setting target parent to %d\n", destParent);
 				}
 				// set actual target to any node in destParent
 				//				if (trav->next)
-				//					to = aMap->GetAbstractGraph(trav->next->n->getLabelL(kAbstractionLevel)
-				//																			-1)->getNode(trav->n->getLabelL(kFirstData));
+				//					to = aMap->GetAbstractGraph(trav->next->n->GetLabelL(kAbstractionLevel)
+				//																			-1)->GetNode(trav->n->GetLabelL(kFirstData));
 				// later try for best h value to actual target
-				//for (unsigned int x = 1; x < trav->n->getLabelL(kNumAbstractedNodes); x++)
+				//for (unsigned int x = 1; x < trav->n->GetLabelL(kNumAbstractedNodes); x++)
 				
 			}
 			
@@ -225,7 +225,7 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 		if ((lastPath == 0) && (cache))
 		{
 			lastPath = getAbstractPath(map->GetAbstractGraph((unsigned int)from->
-																											 getLabelL(kAbstractionLevel)),
+																											 GetLabelL(kAbstractionLevel)),
 																 from->getNum(), destParent, eligibleNodeParents,
 																 kTemporaryLabel, dest);
 			*cache = lastPath;
@@ -235,7 +235,7 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 			if ((cache && ((*cache) != lastPath)) || (!cache))
 				delete lastPath;
 			lastPath = getAbstractPath(map->GetAbstractGraph((unsigned int)from->
-																											 getLabelL(kAbstractionLevel)),
+																											 GetLabelL(kAbstractionLevel)),
 																 from->getNum(), destParent, eligibleNodeParents,
 																 kTemporaryLabel, dest);
 			lengths[fromChain.size()] = lastPath->length();
@@ -245,7 +245,7 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 	return lastPath;
 }
 
-path *praStar::getAbstractPath(graph *g, unsigned int source, unsigned int destParent,
+path *praStar::getAbstractPath(Graph *g, unsigned int source, unsigned int destParent,
 															 std::vector<unsigned int> &eligibleNodeParents, int LABEL,
 															 unsigned int dest)
 {
@@ -255,10 +255,10 @@ path *praStar::getAbstractPath(graph *g, unsigned int source, unsigned int destP
 	unsigned int current = astar(g, source, destParent, eligibleNodeParents, LABEL, dest);
 	if (current == source) return 0;
 	
-	while ((e = g->getNode(current)->getMarkedEdge()))
+	while ((e = g->GetNode(current)->getMarkedEdge()))
 	{
 		if (verbose) printf("%d <- ", current);
-		p = new path(g->getNode(current), p);
+		p = new path(g->GetNode(current), p);
 		
 		e->setMarked(true);
 		dest = current;
@@ -268,7 +268,7 @@ path *praStar::getAbstractPath(graph *g, unsigned int source, unsigned int destP
 		else
 			current = e->getFrom();
 	}
-	p = new path(g->getNode(current), p);
+	p = new path(g->GetNode(current), p);
 	if (verbose) printf("%d\n", current);
 	return p;
 }
@@ -286,7 +286,7 @@ path *praStar::smoothPath(path *p)
 	return p;
 }
 
-unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destParent,
+unsigned int praStar::astar(Graph *g, unsigned int source, unsigned int destParent,
 														std::vector<unsigned int> &eligibleNodeParents, int LABEL,
 														unsigned int dest)
 {
@@ -298,17 +298,17 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 	bool expandedAnything = false;
 	unsigned int openNode = source;
 	
-	int absLayer = g->getNode(source)->getLabelL(kAbstractionLevel);
+	int absLayer = g->GetNode(source)->GetLabelL(kAbstractionLevel);
 	
 	// mark location of eligible nodes
 	for (unsigned int x = 0; x < eligibleNodeParents.size(); x++)
-		map->GetAbstractGraph(absLayer+1)->getNode(eligibleNodeParents[x])->key = x;
+		map->GetAbstractGraph(absLayer+1)->GetNode(eligibleNodeParents[x])->key = x;
 	
 	// label start node cost 0
-	n = g->getNode(source);
-	n->setLabelF(LABEL, map->h(n, g->getNode(dest)));
+	n = g->GetNode(source);
+	n->SetLabelF(LABEL, map->h(n, g->GetNode(dest)));
 	n->markEdge(0);
-	if (verbose) printf("Starting on %d with cost %1.4f\n", source, n->getLabelF(LABEL));
+	if (verbose) printf("Starting on %d with cost %1.4f\n", source, n->GetLabelF(LABEL));
 	while (1)
 	{
 		nodesExpanded++;
@@ -316,7 +316,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 		n->key = expandedNodes.size()-1;
 		
 		if (verbose)
-			printf("really working on %d with cost %1.4f\n", n->getNum(), n->getLabelF(LABEL));
+			printf("really working on %d with cost %1.4f\n", n->getNum(), n->GetLabelF(LABEL));
 		
 		ei = n->getEdgeIter();
 		
@@ -326,7 +326,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 			unsigned int which;
 			if ((which = e->getFrom()) == openNode) which = e->getTo();
 			if (verbose) printf("considering neighbor %d\n", which);
-			node *currNode = g->getNode(which);
+			node *currNode = g->GetNode(which);
 			
 			if (nodeHeap->IsIn(currNode))
 			{
@@ -337,15 +337,15 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 			else if (rp && (absLayer==0) && (currNode->getNum() != dest) &&
 							 rp->nodeOccupied(currNode))
 			{
-				//printf("Can't path to %d, %d\n", (unsigned int)nextChild->getLabelL(kFirstData), (unsigned int)nextChild->getLabelL(kFirstData+1));
+				//printf("Can't path to %d, %d\n", (unsigned int)nextChild->GetLabelL(kFirstData), (unsigned int)nextChild->GetLabelL(kFirstData+1));
 				expandedNodes.push_back(currNode);
 				currNode->key = expandedNodes.size()-1;
 				// ignore this tile if occupied.
 			}
 #else
-			//else if (currNode->getLabelL(kNodeBlocked) > 0)
-			else if (((n->getNum() != source) && (e->getLabelL(kEdgeCapacity) <= 0)) ||
-							 ((n->getNum() == source) && (e->getLabelL(kEdgeCapacity) < 0)))
+			//else if (currNode->GetLabelL(kNodeBlocked) > 0)
+			else if (((n->getNum() != source) && (e->GetLabelL(kEdgeCapacity) <= 0)) ||
+							 ((n->getNum() == source) && (e->GetLabelL(kEdgeCapacity) < 0)))
 			{
 				expandedNodes.push_back(currNode);
 				currNode->key = expandedNodes.size()-1;
@@ -356,8 +356,8 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 							 (expandedNodes[currNode->key] != currNode))
 			{
 				
-				unsigned int whichParent = (unsigned int)currNode->getLabelL(kParent);
-				unsigned int parentKey = map->GetAbstractGraph(absLayer+1)->getNode(whichParent)->key;
+				unsigned int whichParent = (unsigned int)currNode->GetLabelL(kParent);
+				unsigned int parentKey = map->GetAbstractGraph(absLayer+1)->GetNode(whichParent)->key;
 				
 				// this node is unexpanded if (2) it's parent is in the eligible parent list
 				// (3) or having no eligible parents means we can search anywhere!
@@ -365,7 +365,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 						((parentKey < eligibleNodeParents.size()) &&
 						 (eligibleNodeParents[parentKey] == whichParent)))
 				{
-					currNode->setLabelF(LABEL, MAXINT);
+					currNode->SetLabelF(LABEL, MAXINT);
 					currNode->setKeyLabel(LABEL);
 					currNode->markEdge(0);
 					nodeHeap->Add(currNode);
@@ -390,28 +390,28 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 		openNode = n->getNum();
 		if (openNode == dest) { /*printf("Found goal %d\n", dest);*/ break; }
 		
-		if (verbose) printf("working on %d with cost %1.4f\n", openNode, n->getLabelF(LABEL));
+		if (verbose) printf("working on %d with cost %1.4f\n", openNode, n->GetLabelF(LABEL));
 		
 		if (currBest)
 		{
-			if (currBest->getLabelL(kParent) == n->getLabelL(kParent))
+			if (currBest->GetLabelL(kParent) == n->GetLabelL(kParent))
 			{
 				// these lines cause us to take the node with the best h() value
 				// instead of the first explored node by A* in the abstraction
-				if (currBest->getLabelF(LABEL) >	n->getLabelF(LABEL))
+				if (currBest->GetLabelF(LABEL) >	n->GetLabelF(LABEL))
 					currBest = n;
 			}
-			else if (n->getLabelL(kParent) == (long)destParent)
+			else if (n->GetLabelL(kParent) == (long)destParent)
 			{
 				currBest = n;
-				//printf("Exited 'cause we're in our parent %ld/%d (2)\n", n->getLabelL(kParent), destParent);
+				//printf("Exited 'cause we're in our parent %ld/%d (2)\n", n->GetLabelL(kParent), destParent);
 				break;
 			}
 		} else {
 			currBest = n;
-			if (n->getLabelL(kParent) == (long)destParent)
+			if (n->GetLabelL(kParent) == (long)destParent)
 			{
-				//printf("Exited 'cause we're in our parent %ld/%d (1)\n", n->getLabelL(kParent), destParent);
+				//printf("Exited 'cause we're in our parent %ld/%d (1)\n", n->GetLabelL(kParent), destParent);
 				break;
 			}
 		}
@@ -424,7 +424,7 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 	if ((currBest) && (openNode != dest))
 	{
 		dest = currBest->getNum();
-		if ((partialLimit > 0) && (currBest->getLabelL(kParent) != (long)destParent))
+		if ((partialLimit > 0) && (currBest->GetLabelL(kParent) != (long)destParent))
 		{
 			if (verbose) printf("Error: We somehow didn't end up in our parent...\n");
 		}
@@ -432,20 +432,20 @@ unsigned int praStar::astar(graph *g, unsigned int source, unsigned int destPare
 	return dest;
 }
 
-void praStar::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextNode, int dest,
+void praStar::relaxEdge(Heap *nodeHeap, Graph *g, edge *e, int source, int nextNode, int dest,
 												int LABEL)
 {
 	double weight;
-	node *from = g->getNode(source);
-	node *to = g->getNode(nextNode);
-	node *d = g->getNode(dest);
-	weight = from->getLabelF(LABEL)-map->h(from, d)+map->h(to, d)+e->getWeight();
-	if (fless(weight, to->getLabelF(LABEL)))
+	node *from = g->GetNode(source);
+	node *to = g->GetNode(nextNode);
+	node *d = g->GetNode(dest);
+	weight = from->GetLabelF(LABEL)-map->h(from, d)+map->h(to, d)+e->getWeight();
+	if (fless(weight, to->GetLabelF(LABEL)))
 	{
 		if (verbose)
-			printf("Updating %d to %1.4f from %1.4f\n", nextNode, weight, to->getLabelF(LABEL));
+			printf("Updating %d to %1.4f from %1.4f\n", nextNode, weight, to->GetLabelF(LABEL));
 		//weight -= 0.001*(weight-map->h(to, d)); // always lower g-cost slightly so that we tie break in favor of higher g cost
-		to->setLabelF(LABEL, weight);
+		to->SetLabelF(LABEL, weight);
 		nodeHeap->DecreaseKey(to);
 		// this is the edge used to get to this node in the min. path tree
 		to->markEdge(e);
@@ -453,29 +453,29 @@ void praStar::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextN
 }
 
 
-//void praStar::addAbstractedNodesToHeap(Heap *nodeHeap, graph *g, node *p, unsigned int source,
+//void praStar::addAbstractedNodesToHeap(Heap *nodeHeap, Graph *g, node *p, unsigned int source,
 //																			 int LABEL)
 //{
-//  for (int cnt = 0; cnt < p->getLabelL(kNumAbstractedNodes); cnt++) {
-//    node *childNode = g->getNode((unsigned int)p->getLabelL(kFirstData+cnt));
+//  for (int cnt = 0; cnt < p->GetLabelL(kNumAbstractedNodes); cnt++) {
+//    node *childNode = g->GetNode((unsigned int)p->GetLabelL(kFirstData+cnt));
 //    if (nodeHeap->IsIn(childNode)) continue;
 //    if (verbose) printf("%d ", childNode->getNum());
 //    childNode->setKeyLabel(LABEL);
-//    childNode->setLabelF(LABEL, MAXINT);
+//    childNode->SetLabelF(LABEL, MAXINT);
 //    childNode->markEdge(0);
 //    if (childNode->getNum() != source) nodeHeap->Add(childNode);
 //  }
 //  if (verbose) printf("\n");
 //}
 //
-//void praStar::addAbstractedNodesAndNeighborsToHeap(Heap *nodeHeap, graph *g, node *p,
+//void praStar::addAbstractedNodesAndNeighborsToHeap(Heap *nodeHeap, Graph *g, node *p,
 //																									 unsigned int source, int LABEL)
 //{
-//  for (int cnt = 0; cnt < p->getLabelL(kNumAbstractedNodes); cnt++) {
+//  for (int cnt = 0; cnt < p->GetLabelL(kNumAbstractedNodes); cnt++) {
 //    unsigned int childNum;
-//    node *childNode = g->getNode(childNum = (unsigned int)p->getLabelL(kFirstData+cnt));
+//    node *childNode = g->GetNode(childNum = (unsigned int)p->GetLabelL(kFirstData+cnt));
 //    childNode->setKeyLabel(LABEL);
-//    childNode->setLabelF(LABEL, MAXINT);
+//    childNode->SetLabelF(LABEL, MAXINT);
 //    childNode->markEdge(0);
 //    if ((childNode->getNum() != source) && (!nodeHeap->IsIn(childNode))) {
 //      if (verbose) printf("%d ", childNode->getNum());
@@ -487,10 +487,10 @@ void praStar::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //      node *neighbor;
 //      unsigned int which;
 //      if ((which = e->getFrom()) == childNum) which = e->getTo();
-//      neighbor = g->getNode(which);
+//      neighbor = g->GetNode(which);
 //      if (!nodeHeap->IsIn(neighbor)) {
 //				neighbor->setKeyLabel(LABEL);
-//				neighbor->setLabelF(LABEL, MAXINT);
+//				neighbor->SetLabelF(LABEL, MAXINT);
 //				neighbor->markEdge(0);
 //				if (neighbor->getNum() != source) {
 //					if (verbose) printf("%d ", neighbor->getNum());
@@ -517,10 +517,10 @@ void praStar::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //		do {
 //			do {
 //				r1 = abstractions[0]->getRandomNode();
-//			} while (m->getTerrainType((long)r1->getLabelL(kFirstData), (long)r1->getLabelL(kFirstData+1)) == kOutOfBounds);
+//			} while (m->getTerrainType((long)r1->GetLabelL(kFirstData), (long)r1->GetLabelL(kFirstData+1)) == kOutOfBounds);
 //			do {
 //				r2 = abstractions[0]->getRandomNode();
-//			} while (m->getTerrainType((long)r2->getLabelL(kFirstData), (long)r2->getLabelL(kFirstData+1)) == kOutOfBounds);
+//			} while (m->getTerrainType((long)r2->GetLabelL(kFirstData), (long)r2->GetLabelL(kFirstData+1)) == kOutOfBounds);
 //		} while (!Pathable(r1, r2));
 //	}
 //		
@@ -578,8 +578,8 @@ void praStar::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //		if (q && q->next)
 //		{
 //			double t1, t2;
-//			t1 = q->n->getLabelL(kFirstData)-q->next->n->getLabelL(kFirstData);
-//			t2 = q->n->getLabelL(kFirstData+1)-q->next->n->getLabelL(kFirstData+1);
+//			t1 = q->n->GetLabelL(kFirstData)-q->next->n->GetLabelL(kFirstData);
+//			t2 = q->n->GetLabelL(kFirstData+1)-q->next->n->GetLabelL(kFirstData+1);
 //			length += sqrt(t1*t1+t2*t2);
 //		}
 //		cnt++;
@@ -663,10 +663,10 @@ void praStar::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //	edge *e;
 //	
 //	for (vector<int>::const_iterator i = resultPath.begin(); i != resultPath.end()-1; ++i) {
-//		e = abstractions[0]->findEdge(*(i+1), *i);
+//		e = abstractions[0]->FindEdge(*(i+1), *i);
 //		
 //		if (!e) {
-//			e = abstractions[0]->findEdge(*i, *(i+1));
+//			e = abstractions[0]->FindEdge(*i, *(i+1));
 //			
 //			if (!e) 
 //				printf("Error, invalid edge: From (*i) = %d, To: (*(i+1)) = %d\n", *i, *(i+1));
@@ -677,7 +677,7 @@ void praStar::relaxEdge(Heap *nodeHeap, graph *g, edge *e, int source, int nextN
 //		else {
 //			e->setMarked(true);
 //		}
-//		p = new path(abstractions[0]->getNode(*i), p);
+//		p = new path(abstractions[0]->GetNode(*i), p);
 //	}
 //	return p;
 //}

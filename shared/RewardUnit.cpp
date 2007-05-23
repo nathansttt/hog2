@@ -138,7 +138,7 @@ void rewardSeekingUnit::addPathToCache(path *p)
 	int result = kStay;
 	
 	// Decide on the horizontal move
-	switch ((p->n->getLabelL(kFirstData)-p->next->n->getLabelL(kFirstData)))
+	switch ((p->n->GetLabelL(kFirstData)-p->next->n->GetLabelL(kFirstData)))
 	{
 		case -1: result = kE; break;
 		case 0: break;
@@ -147,14 +147,14 @@ void rewardSeekingUnit::addPathToCache(path *p)
 			printf("SU: %s : The (x) nodes in the path are not next to each other!\n",
 						 this->GetName());
 			printf("Distance is %ld\n",
-						 p->n->getLabelL(kFirstData)-p->next->n->getLabelL(kFirstData));
+						 p->n->GetLabelL(kFirstData)-p->next->n->GetLabelL(kFirstData));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
 			exit(10); break;
 	}
 	
 	// Tack the vertical move onto it
 	// Notice the exploit of particular encoding of kStay, kE, etc. labels
-	switch ((p->n->getLabelL(kFirstData+1)-p->next->n->getLabelL(kFirstData+1)))
+	switch ((p->n->GetLabelL(kFirstData+1)-p->next->n->GetLabelL(kFirstData+1)))
 	{
 		case -1: result = result|kS; break;
 		case 0: break;
@@ -163,7 +163,7 @@ void rewardSeekingUnit::addPathToCache(path *p)
 			printf("SU: %s : The (y) nodes in the path are not next to each other!\n",
 						 this->GetName());
 			printf("Distance is %ld\n",
-						 p->n->getLabelL(kFirstData+1)-p->next->n->getLabelL(kFirstData+1));
+						 p->n->GetLabelL(kFirstData+1)-p->next->n->GetLabelL(kFirstData+1));
 			std::cout << *p->n << "\n" << *p->next->n << "\n";
 			exit(10); break;
 	}

@@ -51,7 +51,7 @@ path *praStar2::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 	std::vector<node *> toChain;
 	path *lastPath = 0;
 	
-	if (aMap->GetAbstractGraph(from->getLabelL(kAbstractionLevel))->findEdge(from->getNum(), to->getNum()))
+	if (aMap->GetAbstractGraph(from->GetLabelL(kAbstractionLevel))->FindEdge(from->getNum(), to->getNum()))
 		return new path(from, new path(to));
 	
 	setupSearch(aMap, fromChain, from, toChain, to);
@@ -61,7 +61,7 @@ path *praStar2::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 	
 	do {
 		lastPath = buildNextAbstractPath(aMap, lastPath, fromChain, toChain, rp);
-	} while (lastPath==0 || lastPath->n->getLabelL(kAbstractionLevel) > 0);
+	} while (lastPath==0 || lastPath->n->GetLabelL(kAbstractionLevel) > 0);
 	
 	return lastPath;
 }
@@ -185,11 +185,11 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 	
 	
 	if (verbose)
-		printf("Expanded %d nodes before doing level %d\n", nodesExpanded, (int)from->getLabelL(kAbstractionLevel));		
+		printf("Expanded %d nodes before doing level %d\n", nodesExpanded, (int)from->GetLabelL(kAbstractionLevel));		
 	
 	if (verbose)
 		printf("Building path from %d to %d (%ld/%ld)\n",
-					 from->getNum(), to->getNum(), from->getLabelL(kParent), to->getLabelL(kParent));
+					 from->getNum(), to->getNum(), from->GetLabelL(kParent), to->GetLabelL(kParent));
 	
 	std::vector<node *> eligibleNodeParents;
 	
@@ -205,7 +205,7 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 					trav = trav->next;
 			// we don't need to reset the target if we have a complete path
 			// but we do if our complete path doesn't end in our target node
-			if ((trav->next != 0) || ((trav->next == 0) && ((int)trav->n->getNum() != to->getLabelL(kParent))))
+			if ((trav->next != 0) || ((trav->next == 0) && ((int)trav->n->getNum() != to->GetLabelL(kParent))))
 			{
 				to = trav->n;
 				if (trav->next)
@@ -218,7 +218,7 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 			}
 		}
 		
-		graph *g = aMap->GetAbstractGraph(lastPath->n->getLabelL(kAbstractionLevel));
+		Graph *g = aMap->GetAbstractGraph(lastPath->n->GetLabelL(kAbstractionLevel));
 		
 		// find eligible nodes for lower level expansions
 		for (path *trav = lastPath; trav; trav = trav->next)
@@ -229,9 +229,9 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 				for (edge *e = trav->n->edgeIterNext(ei); e; e = trav->n->edgeIterNext(ei))
 				{
 					if (e->getFrom() == trav->n->getNum())
-						eligibleNodeParents.push_back(g->getNode(e->getTo()));
+						eligibleNodeParents.push_back(g->GetNode(e->getTo()));
 					else
-						eligibleNodeParents.push_back(g->getNode(e->getFrom()));
+						eligibleNodeParents.push_back(g->GetNode(e->getFrom()));
 				}
 			}
 			eligibleNodeParents.push_back(trav->n);
@@ -267,9 +267,9 @@ path *praStar2::trimPath(path *lastPath, node *origDest)
 		{
 			if (trav->n == origDest)
 				return lastPath;
-			if (trav->n->getLabelL(kParent) != parent)
+			if (trav->n->GetLabelL(kParent) != parent)
 			{
-				parent = trav->n->getLabelL(kParent);
+				parent = trav->n->GetLabelL(kParent);
 				change = last;
 			}
 			last = trav;

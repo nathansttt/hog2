@@ -41,7 +41,7 @@ MapFlatAbstraction::~MapFlatAbstraction()
 void MapFlatAbstraction::buildConnectivityGroups()
 {
 	int nextNum = 0;
-	graph *g = abstractions[0];
+	Graph *g = abstractions[0];
 	groups.resize(g->getNumNodes());
 	for (unsigned int x = 0; x < groups.size(); x++)
 		groups[x] = -1;
@@ -61,8 +61,8 @@ void MapFlatAbstraction::buildConnectivityGroups()
 				{
 					groups[next] = nextNum;
 				}
-				neighbor_iterator n = g->getNode(next)->getNeighborIter();
-				for (int val = g->getNode(next)->nodeNeighborNext(n); val != -1; val = g->getNode(next)->nodeNeighborNext(n))
+				neighbor_iterator n = g->GetNode(next)->getNeighborIter();
+				for (int val = g->GetNode(next)->nodeNeighborNext(n); val != -1; val = g->GetNode(next)->nodeNeighborNext(n))
 					if (groups[val] == -1)
 						stack.push_back(val);
 			}
@@ -101,14 +101,14 @@ void MapFlatAbstraction::RemoveEdge(edge *e, unsigned int)
 
 void MapFlatAbstraction::AddNode(node *n)
 {
-//	n->setLabelL(kAbstractionLevel, 0); // level in abstraction tree
-//	n->setLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
-//	n->setLabelL(kParent, -1); // parent of this node in abstraction hierarchy
-//	n->setLabelF(kXCoordinate, kUnknownPosition);
-//	n->setLabelL(kNodeBlocked, 0);
-//	n->setLabelL(kFirstData, x);
-//	n->setLabelL(kFirstData+1, y);
-//	n->setLabelL(kFirstData+2, kNone);
+//	n->SetLabelL(kAbstractionLevel, 0); // level in abstraction tree
+//	n->SetLabelL(kNumAbstractedNodes, 1); // number of abstracted nodes
+//	n->SetLabelL(kParent, -1); // parent of this node in abstraction hierarchy
+//	n->SetLabelF(kXCoordinate, kUnknownPosition);
+//	n->SetLabelL(kNodeBlocked, 0);
+//	n->SetLabelL(kFirstData, x);
+//	n->SetLabelL(kFirstData+1, y);
+//	n->SetLabelL(kFirstData+2, kNone);
 	abstractions[0]->AddNode(n);
 }
 
