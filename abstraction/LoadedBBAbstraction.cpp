@@ -306,7 +306,7 @@ void LoadedBBAbstraction::VerifyHierarchy()
 				bool found = false;
 				for (int y = 0; y < parent->GetLabelL(kNumAbstractedNodes); y++)
 				{
-					if (parent->GetLabelL(kFirstData+y) == (long)n->getNum())
+					if (parent->GetLabelL(kFirstData+y) == (long)n->GetNum())
 					{ found = true; break; }
 				}
 				if (!found)
@@ -325,7 +325,7 @@ void LoadedBBAbstraction::VerifyHierarchy()
 					{
 						cout << "VERIFY: Graph doesn't verify; CHILD is null, parent:" << endl << *n << endl;
 					}
-					else if (child->GetLabelL(kParent) != (long)n->getNum())
+					else if (child->GetLabelL(kParent) != (long)n->GetNum())
 					{
 						cout << "VERIFY: Graph doesn't verify; parent:" << endl << *n << endl;
 						cout << "VERIFY: Graph doesn't verify; child:" << endl << *child << endl;
@@ -353,7 +353,7 @@ void LoadedBBAbstraction::VerifyHierarchy()
 				cout << "VERIFY: One edge parent is null, and the other isn't " << *e << endl << *p1 << endl << *p2 << endl;
 				continue;
 			}
-			if (!abstractions[x+1]->FindEdge(p1->getNum(), p2->getNum()))
+			if (!abstractions[x+1]->FindEdge(p1->GetNum(), p2->GetNum()))
 			{
 				cout << "Didn't find parent edge of " << *e << " at abslevel " << x << endl;
 				cout << *p1 << endl << *p2 << endl;
@@ -459,9 +459,9 @@ Graph *LoadedBBAbstraction::abstractGraph(Graph *g)
 			which = findBoundingBox(n);
 		else
 			which = -1;
-		//printf("%u abstracted into box %d\n", n->getNum(), which);
+		//printf("%u abstracted into box %d\n", n->GetNum(), which);
 		newNode = createNewParent(aGraph, n);
-		//printf("%u created as parent of %u\n", newNode->getNum(), n->getNum());
+		//printf("%u created as parent of %u\n", newNode->GetNum(), n->GetNum());
 		if ((which == -1) && (n->GetLabelL(kAbstractionLevel) == 0))
 			addNodeToParent(n, newNode);
 		else
@@ -510,7 +510,7 @@ int LoadedBBAbstraction::findBoundingBox(node *n)
 
 void LoadedBBAbstraction::addNeighborsInBox(Graph *g, node *n, int which, node *parent)
 {
-	//printf("Thinking about adding %d to parent %d\n", n->getNum(), parent->getNum());
+	//printf("Thinking about adding %d to parent %d\n", n->GetNum(), parent->GetNum());
 	if (n->GetLabelL(kParent) != -1)
 		return;
 	if ((which != -1) && (!boxes[which].pointInBox(n->GetLabelF(kXCoordinate),
@@ -527,9 +527,9 @@ void LoadedBBAbstraction::addNeighborsInBox(Graph *g, node *n, int which, node *
 
 void LoadedBBAbstraction::addNodeToParent(node *n, node *parent)
 {
-	//printf("Adding %d to parent %d\n", n->getNum(), parent->getNum());
-	n->SetLabelL(kParent, parent->getNum());
-	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->getNum());
+	//printf("Adding %d to parent %d\n", n->GetNum(), parent->GetNum());
+	n->SetLabelL(kParent, parent->GetNum());
+	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->GetNum());
 	parent->SetLabelL(kNumAbstractedNodes, parent->GetLabelL(kNumAbstractedNodes)+1); // number of abstracted nodes
 }
 
@@ -553,7 +553,7 @@ bool LoadedBBAbstraction::Pathable(unsigned int from, unsigned int to)
 
 bool LoadedBBAbstraction::Pathable(node *from, node *to)
 {
-  //printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
+  //printf("At nodes #%d and %d\n", from->GetNum(), to->GetNum());
   while (from != to) {
     if ((!from) || (!to) ||
 				(abstractions[from->GetLabelL(kAbstractionLevel)]->getNumEdges() == 0))

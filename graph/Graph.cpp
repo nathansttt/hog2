@@ -312,9 +312,9 @@ node *Graph::RemoveNode(node *n, unsigned int &oldID)
   _nodes.pop_back();
   if (_nodes.size() > 0)
 	{
-    _nodes[n->getNum()] = tmp;
+    _nodes[n->GetNum()] = tmp;
     oldID = tmp->nodeNum;
-    tmp->nodeNum = n->getNum();
+    tmp->nodeNum = n->GetNum();
   }
 	
   if (n == tmp) return 0;
@@ -363,7 +363,7 @@ vector<node*>* Graph::getReachableNodes(node* start)
   node *n;
   
   nodeList->push_back(start);
-  visitedList[start->getNum()] = 1;
+  visitedList[start->GetNum()] = 1;
   while (index < nodeList->size())
 	{
     n = (*nodeList)[index];
@@ -460,7 +460,7 @@ bool Graph::verifyGraph() const
       continue;
     }
 		else {
-      //cout << "Testing node " << n->getNum() << endl;
+      //cout << "Testing node " << n->GetNum() << endl;
     }
     if (_nodes[n->nodeNum] != n)
 		{
@@ -475,15 +475,15 @@ bool Graph::verifyGraph() const
 		{
       totalEdges1++;
       realCount++;
-      if ((e->getFrom() != n->getNum()) && (e->getTo() != n->getNum()))
+      if ((e->getFrom() != n->GetNum()) && (e->getTo() != n->GetNum()))
 			{
-				cerr << "At node " << n->getNum() << " found edge between " << e->getFrom() << " and " << e->getTo() << endl;
+				cerr << "At node " << n->GetNum() << " found edge between " << e->getFrom() << " and " << e->getTo() << endl;
 				verified = false;
       }
     }
     if (realCount != supposedCount)
 		{
-      cerr << "At node " << n->getNum() << " supposed count is " << supposedCount << " but only found " << realCount << endl;
+      cerr << "At node " << n->GetNum() << " supposed count is " << supposedCount << " but only found " << realCount << endl;
       verified = false;
     }
   }

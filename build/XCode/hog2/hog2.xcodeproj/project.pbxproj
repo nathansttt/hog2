@@ -99,6 +99,7 @@
 		C433A73B0C03604B002B8108 /* FlipSide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A7390C03604B002B8108 /* FlipSide.cpp */; };
 		C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C433A8470C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
+		C433A9F00C04E2EF002B8108 /* CFOptimalRefinement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46CA96E0C040B3C00D96494 /* CFOptimalRefinement.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
 		C4D3AFBB0BCEE5B800FCD84C /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF970BCEE5B800FCD84C /* main.nib */; };
 		C4D3AFBD0BCEE5B800FCD84C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9B0BCEE5B800FCD84C /* Info.plist */; };
@@ -2046,6 +2047,7 @@
 				C433A4180BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */,
 				C433A73A0C03604B002B8108 /* FlipSide.cpp in Sources */,
 				C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */,
+				C433A9F00C04E2EF002B8108 /* CFOptimalRefinement.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

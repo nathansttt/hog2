@@ -41,7 +41,7 @@ path *FringeSearch::GetPath(GraphAbstraction *_aMap, node *from, node *to, reser
 			checkIteration();
 			continue;
 		}
-		if (verbose) printf("Expanding %d\n", currOpenNode->getNum());
+		if (verbose) printf("Expanding %d\n", currOpenNode->GetNum());
 		
 		if (fgreater(getFCost(currOpenNode), currFLimit))
 		{
@@ -66,26 +66,26 @@ path *FringeSearch::GetPath(GraphAbstraction *_aMap, node *from, node *to, reser
 		{
 			nodesTouched++;
 			unsigned int which;
-			if ((which = e->getFrom()) == currOpenNode->getNum()) which = e->getTo();
+			if ((which = e->getFrom()) == currOpenNode->GetNum()) which = e->getTo();
 			node *neighbor = g->GetNode(which);
 			assert(neighbor != 0);
 
 			if (onClosedList(neighbor))
 			{
-				if (verbose) printf("->Child %d on closed list\n", neighbor->getNum());
+				if (verbose) printf("->Child %d on closed list\n", neighbor->GetNum());
 				updateCosts(neighbor, currOpenNode, e);
 				continue;
 			}
 			else if (onOpenList(neighbor))
 			{
-				if (verbose) printf("->Child %d on open list\n", neighbor->getNum());
+				if (verbose) printf("->Child %d on open list\n", neighbor->GetNum());
 				updateCosts(neighbor, currOpenNode, e);
 			}
 			else // not on any list
 			{
 				addCosts(neighbor, currOpenNode, e);
 				addToOpenList(neighbor);
-				if (verbose) printf("->Child %d new to search f(%f) g(%f) h(%f)\n", neighbor->getNum(),
+				if (verbose) printf("->Child %d new to search f(%f) g(%f) h(%f)\n", neighbor->GetNum(),
 							 getFCost(neighbor), getGCost(neighbor), getHCost(neighbor));
 			}
 		}
@@ -124,7 +124,7 @@ void FringeSearch::moveToOpenList1(node *n)
 		return;
 	if ((n->key < nextList->size()) && ((*nextList)[n->key] == n))
 	{
-		if (verbose) printf("Moved %d to current open list\n", n->getNum());
+		if (verbose) printf("Moved %d to current open list\n", n->GetNum());
 		(*nextList)[n->key] = 0;
 		n->key = currList->size();
 		currList->push_back(n);
@@ -194,7 +194,7 @@ void FringeSearch::setHCost(node *n, double val)
 		costTable[index].hCost = val;
 		return;
 	}
-	printf("setHCost Error: node %d not found!\n", n->getNum());
+	printf("setHCost Error: node %d not found!\n", n->GetNum());
 	assert(false);
 }
 
@@ -206,7 +206,7 @@ void FringeSearch::getCosts(node *n, costs &val)
 		val = costTable[index];
 		return;
 	}
-	printf("Error: node %d not found!\n", n->getNum());
+	printf("Error: node %d not found!\n", n->GetNum());
 	assert(false);
 }
 
@@ -231,7 +231,7 @@ void FringeSearch::addCosts(node *n, node *parent, edge *e)
 		{
 			if (fgreater(val.hCost-e->getWeight(), getHCost(parent)))
 			{ // reverse path max!
-				if (verbose) printf("-> %d h value raised from %f to %f\n", parent->getNum(),
+				if (verbose) printf("-> %d h value raised from %f to %f\n", parent->GetNum(),
 														getHCost(parent), getHCost(n)-e->getWeight());
 				setHCost(parent, getHCost(n)-e->getWeight());
 				if (verbose) printf("Doing reverse path max!\n");
@@ -253,8 +253,8 @@ void FringeSearch::updateCosts(node *n, node *parent, edge *e)
 	{
 		n->markEdge(e);
 		costs &val = costTable[n->GetLabelL(kTemporaryLabel)];
-		if (verbose) printf("Updated g-cost of %d from %f to %f (through %d) -- (%f limit)\n", n->getNum(),
-												val.gCost, getGCost(parent)+e->getWeight(), parent->getNum(), currFLimit);
+		if (verbose) printf("Updated g-cost of %d from %f to %f (through %d) -- (%f limit)\n", n->GetNum(),
+												val.gCost, getGCost(parent)+e->getWeight(), parent->GetNum(), currFLimit);
 		val.gCost = getGCost(parent)+e->getWeight();
 		propagateGValues(n);
 		// I check the nextFLimit, because we might want to update it for this node
@@ -270,19 +270,19 @@ path *FringeSearch::extractBestPath(node *n)
 	// for visuallization purposes, an edge can be marked meaning it will be drawn in white
 	while ((e = n->getMarkedEdge()))
 	{
-		if (verbose) printf("%d <- ", n->getNum());
+		if (verbose) printf("%d <- ", n->GetNum());
 		
 		p = new path(n, p);
 		
 		e->setMarked(true);
 		
-		if (e->getFrom() == n->getNum())
+		if (e->getFrom() == n->GetNum())
 			n = g->GetNode(e->getTo());
 		else
 			n = g->GetNode(e->getFrom());
 	}
 	p = new path(n, p);
-	if (verbose) printf("%d\n", n->getNum());
+	if (verbose) printf("%d\n", n->GetNum());
 	return p;	
 }
 
@@ -315,14 +315,14 @@ void FringeSearch::propagateHValues(node *n, int dist)
 	{
 		nodesTouched++;
 		unsigned int which;
-		if ((which = e->getFrom()) == n->getNum()) which = e->getTo();
+		if ((which = e->getFrom()) == n->GetNum()) which = e->getTo();
 		node *neighbor = g->GetNode(which);
 		
 		if (onClosedList(neighbor) || onOpenList(neighbor))
 		{
 			if (fless(getHCost(neighbor), getHCost(n)-e->getWeight())) // do update!
 			{
-				if (verbose) printf("%d h value raised from %f to %f\n", neighbor->getNum(),
+				if (verbose) printf("%d h value raised from %f to %f\n", neighbor->GetNum(),
 														getHCost(neighbor), getHCost(n)-e->getWeight());
 				setHCost(neighbor, getHCost(n)-e->getWeight());
 				propagateHValues(neighbor, dist-1);
@@ -347,7 +347,7 @@ void FringeSearch::propagateGValues(node *n)
 	{
 		nodesTouched++;
 		unsigned int which;
-		if ((which = e->getFrom()) == n->getNum()) which = e->getTo();
+		if ((which = e->getFrom()) == n->GetNum()) which = e->getTo();
 		node *neighbor = g->GetNode(which);
 		
 		if ((onOpenList(neighbor) || onClosedList(neighbor)))// && (neighbor->getMarkedEdge() == e)
@@ -361,8 +361,8 @@ void FringeSearch::propagateGValues(node *n)
 double FringeSearch::h(node *n1, node *n2)
 {
 	if (hp)
-		return hp->h(n1->getNum(), n2->getNum());
-	if ((n1->getNum()+n2->getNum())%2)
+		return hp->h(n1->GetNum(), n2->GetNum());
+	if ((n1->GetNum()+n2->GetNum())%2)
 		return aMap->h(n1, n2);
 	return 0;
 }

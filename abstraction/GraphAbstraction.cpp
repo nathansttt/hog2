@@ -55,7 +55,7 @@ void GraphAbstraction::GetNumAbstractGraphs(node *from, node *to,
 {
   //	while (from->GetLabelL(kParent) != to->GetLabelL(kParent))
   while (!abstractions[from->GetLabelL(kAbstractionLevel)]->
-				 FindEdge(from->getNum(), to->getNum()) &&
+				 FindEdge(from->GetNum(), to->GetNum()) &&
 				 //(from->GetLabelL(kParent) != to->GetLabelL(kParent))
 				 (from != to))
 	{
@@ -70,7 +70,7 @@ void GraphAbstraction::GetNumAbstractGraphs(node *from, node *to,
 		
     if (verbose&kBuildGraph)
 			printf("GetNumAbstractGraphs: Moving to nodes #%d and %d\n",
-						 from->getNum(), to->getNum());
+						 from->GetNum(), to->GetNum());
   }
   fromChain.push_back(from);
   toChain.push_back(to);
@@ -86,6 +86,17 @@ node *GraphAbstraction::GetNthParent(node *which, int n)
 		which = g->GetNode(which->GetLabelL(kParent));
 	}
 	return which;
+}
+
+bool GraphAbstraction::IsParentOf(node *parent, node *child)
+{
+	if (GetAbstractionLevel(child) > GetAbstractionLevel(parent))
+		return false;
+	while (GetAbstractionLevel(child) < GetAbstractionLevel(parent))
+	{
+		child = GetParent(child);
+	}
+	return (parent == child);
 }
 
 void GraphAbstraction::ClearMarkedNodes()
@@ -123,7 +134,7 @@ void GraphAbstraction::MeasureAbstractionValues(int level, double &n, double &n_
 		n += ns.back();
 		cs.push_back(ComputeWidth(nd));
 		c += cs.back();
-		//printf("node %d: #%d width:%d\n", nd->getNum(), ns.back(), cs.back());
+		//printf("node %d: #%d width:%d\n", nd->GetNum(), ns.back(), cs.back());
 	}
 	n/= ns.size();
 	c/= cs.size();
@@ -142,7 +153,7 @@ void GraphAbstraction::MeasureAbstractionValues(int level, double &n, double &n_
 
 int GraphAbstraction::ComputeWidth(node *n)
 {
-//	printf("New WIDTH (%d)\n", n->getNum());
+//	printf("New WIDTH (%d)\n", n->GetNum());
 	int width = 0;
 	for (int child = 0; child < n->GetLabelL(kNumAbstractedNodes); child++)
 	{
@@ -163,19 +174,19 @@ int GraphAbstraction::WidthBFS(node *child, node *parent)
 
 	for (unsigned int x = 0; x < q.size(); x++)
 	{
-//		printf("Handling node: %d\n", q[x]->getNum());
+//		printf("Handling node: %d\n", q[x]->GetNum());
 		neighbor_iterator ni = q[x]->getNeighborIter();
 		for (int next = q[x]->nodeNeighborNext(ni); next != -1; next = q[x]->nodeNeighborNext(ni))
 		{
 			node *neighbor = g->GetNode(next);
 			if ((neighbor->key < q.size()) && (q[neighbor->key] == neighbor))
 			{
-//				printf("         neighbor %d in Q\n", neighbor->getNum());
+//				printf("         neighbor %d in Q\n", neighbor->GetNum());
 				continue;
 			}
-			if (neighbor->GetLabelL(kParent) == parent->getNum())
+			if (neighbor->GetLabelL(kParent) == parent->GetNum())
 			{
-//				printf("         neighbor %d onto Q(%d) depth (%d)\n", neighbor->getNum(), q.size(), depth[x]+1);
+//				printf("         neighbor %d onto Q(%d) depth (%d)\n", neighbor->GetNum(), q.size(), depth[x]+1);
 				neighbor->key = q.size();
 				q.push_back(neighbor);
 				depth.push_back(depth[x]+1);
@@ -203,7 +214,7 @@ double GraphAbstraction::MeasureAverageNodeWidth(int level)
 		{
 			widths.push_back(val);
 			sum += val;
-			//printf("node %d: expected width:%f\n", nd->getNum(), val);
+			//printf("node %d: expected width:%f\n", nd->GetNum(), val);
 		}
 	}
 	if (widths.size() > 0)
@@ -233,7 +244,7 @@ double GraphAbstraction::MeasureExpectedNodeWidth(node *n)
 		{
 			sums.back() += edgeInfo[child][x];
 //			printf("Node %d child %d dist %d has %d edges\n",
-//						 n->getNum(), child, x, edgeInfo[child][x]);
+//						 n->GetNum(), child, x, edgeInfo[child][x]);
 		}
 //		printf("%d total edges [%d]\n", sums[child], child);
 	}
@@ -304,7 +315,7 @@ int GraphAbstraction::CountEdgesAtDistance(node *child, node *parent, std::vecto
 	
 	for (unsigned int x = 0; x < q.size(); x++)
 	{
-		//		printf("Handling node: %d\n", q[x]->getNum());
+		//		printf("Handling node: %d\n", q[x]->GetNum());
 		neighbor_iterator ni = q[x]->getNeighborIter();
 		if (depth[x]+1 > dists.size())
 			dists.resize(depth[x]+1);
@@ -315,12 +326,12 @@ int GraphAbstraction::CountEdgesAtDistance(node *child, node *parent, std::vecto
 			node *neighbor = g->GetNode(next);
 			if ((neighbor->key < q.size()) && (q[neighbor->key] == neighbor))
 			{
-				//				printf("         neighbor %d in Q\n", neighbor->getNum());
+				//				printf("         neighbor %d in Q\n", neighbor->GetNum());
 				continue;
 			}
-			if (neighbor->GetLabelL(kParent) == parent->getNum())
+			if (neighbor->GetLabelL(kParent) == parent->GetNum())
 			{
-				//				printf("         neighbor %d onto Q(%d) depth (%d)\n", neighbor->getNum(), q.size(), depth[x]+1);
+				//				printf("         neighbor %d onto Q(%d) depth (%d)\n", neighbor->GetNum(), q.size(), depth[x]+1);
 				neighbor->key = q.size();
 				q.push_back(neighbor);
 				depth.push_back(depth[x]+1);

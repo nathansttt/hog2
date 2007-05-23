@@ -50,9 +50,9 @@ void MapFlatAbstraction::buildConnectivityGroups()
 	for (node *iter = g->nodeIterNext(ni); iter; iter = g->nodeIterNext(ni))
 	{
 		std::vector<unsigned int> stack;
-		if (groups[iter->getNum()] == -1)
+		if (groups[iter->GetNum()] == -1)
 		{
-			stack.push_back(iter->getNum());
+			stack.push_back(iter->GetNum());
 			while (stack.size() > 0)
 			{
 				unsigned int next = stack.back();
@@ -80,8 +80,8 @@ bool MapFlatAbstraction::Pathable(node *from, node *to)
 //	GetTileFromNode(from, x1, y1);
 //	GetTileFromNode(to, x2, y2);
 //	printf("(%d, %d) and (%d, %d) %s connected\n", x1, y1, x2, y2,
-//				 ((groups[from->getNum()] == groups[to->getNum()])?"are":"are not"));
-	return (groups[from->getNum()] == groups[to->getNum()]);
+//				 ((groups[from->GetNum()] == groups[to->GetNum()])?"are":"are not"));
+	return (groups[from->GetNum()] == groups[to->GetNum()]);
 }
 
 void MapFlatAbstraction::VerifyHierarchy()

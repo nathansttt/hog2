@@ -59,12 +59,12 @@
 //		t = m_graph->getRandomNode();
 //		
 //	} while(isObstacle(s) || isObstacle(t) 
-//		|| !isValidNodeId(s->getNum())
-//		|| !isValidNodeId(t->getNum())
-//		|| s->getNum() == t->getNum());
+//		|| !isValidNodeId(s->GetNum())
+//		|| !isValidNodeId(t->GetNum())
+//		|| s->GetNum() == t->GetNum());
 //	
-//	*start = s->getNum();
-//	*target = t->getNum();
+//	*start = s->GetNum();
+//	*target = t->GetNum();
 //}
 //
 //	
@@ -170,7 +170,7 @@
 //	for (edge* e = n->edgeIterNext(i); e; e = n->edgeIterNext(i))
 //    	{
 //        	int targetNodeId;
-//		if (e->getTo() == n->getNum())
+//		if (e->getTo() == n->GetNum())
 //			targetNodeId = e->getFrom();
 //		else
 //			targetNodeId = e->getTo();

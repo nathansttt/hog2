@@ -168,8 +168,8 @@ void MapQuadTreeAbstraction::abstractionBFS(node *which, node *parent, int quadr
 void MapQuadTreeAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
 	assert(GetAbstractionLevel(n)+1 == GetAbstractionLevel(parent));
-	n->SetLabelL(kParent, parent->getNum());
-	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->getNum());
+	n->SetLabelL(kParent, parent->GetNum());
+	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->GetNum());
 	parent->SetLabelL(kNumAbstractedNodes, parent->GetLabelL(kNumAbstractedNodes)+1);
 	parent->SetLabelF(kXCoordinate, kUnknownPosition);
 }

@@ -130,7 +130,7 @@ void MapLineAbstraction::addNodes(Graph *g)
 					parents.push_back(GetNthParent(nodes.back(), abstractions.size()-1));
 					if ((parents.back() == 0) ||
 							(parents.back()->GetLabelL(kParent) != -1) ||
-							((z > 0) && (!toAbstract->FindEdge(parents[z]->getNum(), parents[z-1]->getNum()))))
+							((z > 0) && (!toAbstract->FindEdge(parents[z]->GetNum(), parents[z-1]->GetNum()))))
 					{
 						//if (parents.back() == 0) printf("(null)\n");
 						//else if (parents.back()->GetLabelL(kParent) != -1) printf("(parent)\n");
@@ -143,14 +143,14 @@ void MapLineAbstraction::addNodes(Graph *g)
 					continue;
 				//printf("Match!\n");
 				node *parent = createParent(g, parents[0]);
-				//printf("-->Creating parent (%d)\n", parent->getNum());
+				//printf("-->Creating parent (%d)\n", parent->GetNum());
 				for (unsigned int z = 0; z < parents.size(); z++)
 				{
 					if (parents[z]->GetLabelL(kParent) != -1)
 						break;
 					buildNodeIntoParent(parents[z], parent);
 					count--;
-					//printf("Abstracting %d, count now %d\n", parents[z]->getNum(), count);
+					//printf("Abstracting %d, count now %d\n", parents[z]->GetNum(), count);
 				}
 			}
 		}
@@ -167,10 +167,10 @@ void MapLineAbstraction::addNodes(Graph *g)
 		if ((n->GetLabelL(kParent) == -1) && (n->getNumEdges() != 0))
 		{
 			node *parent = createParent(g, n);
-			//printf("==>Creating parent (%d)\n", parent->getNum());
+			//printf("==>Creating parent (%d)\n", parent->GetNum());
 			buildNodeIntoParent(n, parent);
 			count -= 1;
-			//printf("Abstracting %d, count now %d\n", n->getNum(), count);
+			//printf("Abstracting %d, count now %d\n", n->GetNum(), count);
 
 			for (int x = 0; x < lineDistance - 1; x++)
 			{
@@ -194,7 +194,7 @@ void MapLineAbstraction::addNodes(Graph *g)
 					buildNodeIntoParent(choice, parent);
 					count -= 1;
 					n = choice;
-					//printf("Abstracting %d, count now %d\n", n->getNum(), count);
+					//printf("Abstracting %d, count now %d\n", n->GetNum(), count);
 				}
 				else {
 					break;
@@ -206,14 +206,14 @@ void MapLineAbstraction::addNodes(Graph *g)
 		{
 			if ((n->key < stopList.size()) && (stopList[n->key] == n))
 			{
-				//printf("Already Removed %d from consideration\n", n->getNum());
+				//printf("Already Removed %d from consideration\n", n->GetNum());
 			}
 			else {
-				//printf("Removing %d from consideration\n", n->getNum());
+				//printf("Removing %d from consideration\n", n->GetNum());
 				count--;
 				n->key = stopList.size();
 				stopList.push_back(n);
-				//printf("Abstracting [%d], count now %d\n", n->getNum(), count);
+				//printf("Abstracting [%d], count now %d\n", n->GetNum(), count);
 			}
 		}
 	}
@@ -249,8 +249,8 @@ void MapLineAbstraction::addEdges(Graph *aGraph)
 void MapLineAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
 	assert(GetAbstractionLevel(n)+1 == GetAbstractionLevel(parent));
-	n->SetLabelL(kParent, parent->getNum());
-	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->getNum());
+	n->SetLabelL(kParent, parent->GetNum());
+	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->GetNum());
 	parent->SetLabelL(kNumAbstractedNodes, parent->GetLabelL(kNumAbstractedNodes)+1);
 	parent->SetLabelF(kXCoordinate, kUnknownPosition);
 }
