@@ -99,6 +99,7 @@
 		C433A73B0C03604B002B8108 /* FlipSide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A7390C03604B002B8108 /* FlipSide.cpp */; };
 		C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C433A8470C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
+		C46CA96F0C040B3C00D96494 /* CFOptimalRefinement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46CA96E0C040B3C00D96494 /* CFOptimalRefinement.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
 		C4D3AFBB0BCEE5B800FCD84C /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF970BCEE5B800FCD84C /* main.nib */; };
 		C4D3AFBD0BCEE5B800FCD84C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9B0BCEE5B800FCD84C /* Info.plist */; };
@@ -203,6 +204,8 @@
 		C433A7390C03604B002B8108 /* FlipSide.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlipSide.cpp; sourceTree = "<group>"; };
 		C433A8440C03ADEB002B8108 /* IDAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDAStar.h; sourceTree = "<group>"; };
 		C433A8450C03ADEB002B8108 /* IDAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IDAStar.cpp; sourceTree = "<group>"; };
+		C46CA96D0C040B3C00D96494 /* CFOptimalRefinement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CFOptimalRefinement.h; sourceTree = "<group>"; };
+		C46CA96E0C040B3C00D96494 /* CFOptimalRefinement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CFOptimalRefinement.cpp; sourceTree = "<group>"; };
 		C4D3AF6E0BCEE5B800FCD84C /* 299.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = 299.icns; sourceTree = "<group>"; };
 		C4D3AF700BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4D3AF720BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
@@ -1108,6 +1111,8 @@
 				C4D3B2680BCEE7B000FCD84C /* PRAStar2.h */,
 				C4D3B2690BCEE7B000FCD84C /* SpreadPRAStar.cpp */,
 				C4D3B26A0BCEE7B000FCD84C /* SpreadPRAStar.h */,
+				C46CA96E0C040B3C00D96494 /* CFOptimalRefinement.cpp */,
+				C46CA96D0C040B3C00D96494 /* CFOptimalRefinement.h */,
 			);
 			name = abstractionalgorithms;
 			path = ../../../abstractionalgorithms;
@@ -2042,6 +2047,7 @@
 				C433A4180BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */,
 				C433A73A0C03604B002B8108 /* FlipSide.cpp in Sources */,
 				C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */,
+				C46CA96F0C040B3C00D96494 /* CFOptimalRefinement.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
