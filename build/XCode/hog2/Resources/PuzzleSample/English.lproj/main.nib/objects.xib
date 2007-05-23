@@ -1,0 +1,235 @@
+<?xml version="1.0" standalone="yes"?>
+<object class="NSIBObjectData">
+  <string name="targetFramework">IBCarbonFramework</string>
+  <object name="rootObject" class="NSCustomObject" id="1">
+    <string name="customClass">NSApplication</string>
+  </object>
+  <array count="28" name="allObjects">
+    <object class="IBCarbonMenu" id="200">
+      <string name="title">main</string>
+      <array count="3" name="items">
+        <object class="IBCarbonMenuItem" id="208">
+          <boolean name="updateSingleItem">TRUE</boolean>
+          <string name="title">HOG - Sample</string>
+          <object name="submenu" class="IBCarbonMenu" id="209">
+            <string name="title">HOG - Sample</string>
+            <array count="2" name="items">
+              <object class="IBCarbonMenuItem" id="211">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">About HOG - Sample</string>
+                <int name="keyEquivalentModifier">0</int>
+              </object>
+              <object class="IBCarbonMenuItem" id="210">
+                <boolean name="separator">TRUE</boolean>
+                <boolean name="updateSingleItem">TRUE</boolean>
+              </object>
+            </array>
+            <string name="name">_NSAppleMenu</string>
+          </object>
+        </object>
+        <object class="IBCarbonMenuItem" id="201">
+          <boolean name="updateSingleItem">TRUE</boolean>
+          <string name="title">File</string>
+          <object name="submenu" class="IBCarbonMenu" id="202">
+            <string name="title">File</string>
+            <array count="10" name="items">
+              <object class="IBCarbonMenuItem" id="203">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">New</string>
+                <string name="keyEquivalent">n</string>
+                <ostype name="command">neww</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="206">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Open Map</string>
+                <string name="keyEquivalent">o</string>
+                <ostype name="command">open</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="227">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Open History</string>
+                <string name="keyEquivalent">O</string>
+                <int name="keyEquivalentModifier">1179648</int>
+                <ostype name="command">ohis</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="204">
+                <boolean name="separator">TRUE</boolean>
+                <boolean name="updateSingleItem">TRUE</boolean>
+              </object>
+              <object class="IBCarbonMenuItem" id="207">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Close</string>
+                <string name="keyEquivalent">w</string>
+                <ostype name="command">clsw</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="205">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Save</string>
+                <string name="keyEquivalent">s</string>
+                <ostype name="command">save</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="228">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Save History</string>
+                <string name="keyEquivalent">S</string>
+                <int name="keyEquivalentModifier">1179648</int>
+                <ostype name="command">shis</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="219">
+                <boolean name="separator">TRUE</boolean>
+                <boolean name="updateSingleItem">TRUE</boolean>
+              </object>
+              <object class="IBCarbonMenuItem" id="220">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Export Screenshot</string>
+                <string name="keyEquivalent">e</string>
+                <ostype name="command">EXPT</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="222">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Record Movie</string>
+                <string name="keyEquivalent">r</string>
+                <ostype name="command">RMOV</ostype>
+              </object>
+            </array>
+          </object>
+        </object>
+        <object class="IBCarbonMenuItem" id="212">
+          <boolean name="updateSingleItem">TRUE</boolean>
+          <string name="title">Map</string>
+          <object name="submenu" class="IBCarbonMenu" id="213">
+            <string name="title">Map</string>
+            <array count="3" name="items">
+              <object class="IBCarbonMenuItem" id="215">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Show Info</string>
+                <string name="keyEquivalent">i</string>
+                <ostype name="command">info</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="214">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Animate</string>
+                <string name="keyEquivalent">a</string>
+                <ostype name="command">gogo</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="216">
+                <boolean name="updateSingleItem">TRUE</boolean>
+                <string name="title">Set Dimensions</string>
+                <string name="keyEquivalent">d</string>
+                <ostype name="command">gogo</ostype>
+              </object>
+            </array>
+          </object>
+        </object>
+      </array>
+      <string name="name">_NSMainMenu</string>
+    </object>
+    <reference idRef="201"/>
+    <reference idRef="202"/>
+    <reference idRef="203"/>
+    <reference idRef="204"/>
+    <reference idRef="205"/>
+    <reference idRef="206"/>
+    <reference idRef="207"/>
+    <reference idRef="208"/>
+    <reference idRef="209"/>
+    <reference idRef="210"/>
+    <reference idRef="211"/>
+    <reference idRef="212"/>
+    <reference idRef="213"/>
+    <reference idRef="214"/>
+    <reference idRef="215"/>
+    <reference idRef="216"/>
+    <object class="IBCarbonWindow" id="217">
+      <string name="windowRect">79 38 779 738 </string>
+      <string name="title">Carbon OpenGL</string>
+      <object name="rootControl" class="IBCarbonRootControl" id="218">
+        <string name="bounds">0 0 700 700 </string>
+      </object>
+      <boolean name="liveResize">TRUE</boolean>
+      <int name="windowPosition">4</int>
+    </object>
+    <reference idRef="218"/>
+    <reference idRef="219"/>
+    <reference idRef="220"/>
+    <reference idRef="222"/>
+    <object class="IBCarbonWindow" id="223">
+      <string name="windowRect">390 300 475 548 </string>
+      <string name="title">Window</string>
+      <object name="rootControl" class="IBCarbonRootControl" id="224">
+        <string name="bounds">0 0 85 248 </string>
+        <array count="2" name="subviews">
+          <object class="IBCarbonProgressBar" id="225">
+            <string name="bounds">48 19 67 229 </string>
+            <ostype name="controlSignature">LOAD</ostype>
+            <int name="controlID">128</int>
+            <boolean name="indeterminate">FALSE</boolean>
+            <int name="maximumValue">1000</int>
+          </object>
+          <object class="IBCarbonStaticText" id="226">
+            <string name="bounds">20 20 36 228 </string>
+            <string name="title">Building and exporting movie...</string>
+          </object>
+        </array>
+      </object>
+      <boolean name="receiveUpdates">FALSE</boolean>
+      <boolean name="liveResize">TRUE</boolean>
+      <int name="carbonWindowClass">3</int>
+      <int name="themeBrush">7</int>
+      <int name="windowPosition">1</int>
+      <boolean name="isConstrained">FALSE</boolean>
+    </object>
+    <reference idRef="224"/>
+    <reference idRef="225"/>
+    <reference idRef="226"/>
+    <reference idRef="227"/>
+    <reference idRef="228"/>
+  </array>
+  <array count="28" name="allParents">
+    <reference idRef="1"/>
+    <reference idRef="200"/>
+    <reference idRef="201"/>
+    <reference idRef="202"/>
+    <reference idRef="202"/>
+    <reference idRef="202"/>
+    <reference idRef="202"/>
+    <reference idRef="202"/>
+    <reference idRef="200"/>
+    <reference idRef="208"/>
+    <reference idRef="209"/>
+    <reference idRef="209"/>
+    <reference idRef="200"/>
+    <reference idRef="212"/>
+    <reference idRef="213"/>
+    <reference idRef="213"/>
+    <reference idRef="213"/>
+    <reference idRef="1"/>
+    <reference idRef="217"/>
+    <reference idRef="202"/>
+    <reference idRef="202"/>
+    <reference idRef="202"/>
+    <reference idRef="1"/>
+    <reference idRef="223"/>
+    <reference idRef="224"/>
+    <reference idRef="224"/>
+    <reference idRef="202"/>
+    <reference idRef="202"/>
+  </array>
+  <dictionary count="7" name="nameTable">
+    <string>Files Owner</string>
+    <reference idRef="1"/>
+    <string>IBCarbonMenuItem41</string>
+    <reference idRef="215"/>
+    <string>IBCarbonMenuItem411</string>
+    <reference idRef="214"/>
+    <string>IBCarbonMenuItem4111</string>
+    <reference idRef="216"/>
+    <string>LoadingWindow</string>
+    <reference idRef="223"/>
+    <string>MainMenu</string>
+    <reference idRef="200"/>
+    <string>MainWindow</string>
+    <reference idRef="217"/>
+  </dictionary>
+  <unsigned_int name="nextObjectID">229</unsigned_int>
+</object>
