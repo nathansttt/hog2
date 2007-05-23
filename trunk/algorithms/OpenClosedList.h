@@ -44,6 +44,7 @@ public:
 	void reset();
   void Add(OBJ val);
   void DecreaseKey(OBJ val);
+  void IncreaseKey(OBJ val);
   bool IsIn(OBJ val);
   OBJ Remove();
 	void pop() { Remove(); }
@@ -107,6 +108,18 @@ void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::DecreaseKey(OBJ val)
   //HeapifyUp(val->key);
 	_elts[table[val]] = val;
   HeapifyUp(table[val]);
+}
+
+/**
+* Indicate that the key for a particular object has increased.
+ */
+template<typename OBJ, class HashKey, class EqKey, class CmpKey>
+void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::IncreaseKey(OBJ val)
+{
+	EqKey eq;
+	assert(eq(_elts[table[val]], val));
+	_elts[table[val]] = val;
+  HeapifyDown(table[val]);
 }
 
 /**
