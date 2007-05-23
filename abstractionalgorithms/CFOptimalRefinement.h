@@ -11,13 +11,15 @@
 #define CFOPTIMALREFINEMENT_H
 
 #include <ext/hash_map>
+#include "SearchAlgorithm.h"
 #include "OpenClosedList.h"
 #include "FPUtil.h"
 #include "Graph.h"
+#include "GraphAbstraction.h"
 
 /** Definitions for node labels */
 enum {
-  kAbstractionLevel = 0, // this is a LONG label
+  //kAbstractionLevel = 0, // this is a LONG label
 	kCorrespondingNode = 1, // this is a LONG label
 	kGCost = 2, // this is a DOUBLE label
 	kHCost = 3, // this is a DOUBLE label
@@ -28,6 +30,7 @@ enum {
 
 struct GNode {
 	GNode(node *nn) :n(nn) {}
+	GNode() :n(0) {}
 	node *n;
 };
 
@@ -72,10 +75,23 @@ public:
 	virtual ~CFOptimalRefinement();
 	virtual const char *GetName();
 	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
+	path *DoOneSearchStep();
+	void InitializeSearch(GraphAbstraction *aMap, node *from, node *to);
 private:
+	node *FindTopLevelNode(node *one, node *two, GraphAbstraction *aMap);
+	void SetInitialValues(node *gNewNode, node *aRealNode, node *gParent);
+	void UpdateNode(node *gNode);
+	void UpdateH(node *gNode);
+	void UpdateG(node *gNode);
+	void UpdateOptH(node *gNode);
+	void MakeNeighborsOpen(node *gNode);
+	void RefineNode(node *gNode);
+	node *GetRealNode(node *gNode);
+	bool ShouldAddEdge(node *aLowerNode, node *aHigherNode);
+
 	PQueue q;
 	node *aStart, *aGoal;
-	node *gStart;
+	node *gStart, *gGoal;
 	GraphAbstraction *absGraph;
 	Graph *g;
 };
