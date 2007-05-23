@@ -32,6 +32,11 @@
 #include "Plot2D.h"
 #include "RandomUnit.h"
 #include "MNPuzzle.h"
+#include "FlipSide.h"
+#include "IDAStar.h"
+
+static FlipSideState fss(5);
+static FlipSide fs(5);
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -75,7 +80,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
@@ -116,6 +121,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 	if (viewport == 0)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
+	}
+	if (viewport == 3)
+	{
+		fs.OpenGLDraw(windowID, fss);
+		return;
 	}
 	if (unitSims[windowID]->GetUnit(viewport))
 	{
@@ -223,12 +233,39 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
+		{
+			if (mod == kShiftDown)
+			{
+				IDAStar<FlipSideState, flipMove> ida;
+				FlipSideState fg(5);
+//				fg.puzzle[0] = 5;
+//				fg.puzzle[1] = 6;
+//				fg.puzzle[2] = 3;
+//				fg.puzzle[3] = 2;
+//				fg.puzzle[4] = 4;
+//				fg.puzzle[5] = 0;
+//				fg.puzzle[6] = 1;
+//				fg.puzzle[7] = 7;
+				std::vector<FlipSideState> path;
+				ida.GetPath(&fs, fss, fg, path);
+				for (int x = 0; x < path.size(); x++)
+					std::cout << path[x] << std::endl;
+			}
+			else {
+				std::vector<flipMove> acts;
+				fs.GetActions(fss, acts);
+				fs.ApplyAction(fss, acts[random()%acts.size()]);
+				FlipSideState fg(5);
+				printf("Distance: %f\n", fs.HCost(fss, fg));
+			}
+			
 			if (unitSims[windowID]->GetPaused())
 			{
 				unitSims[windowID]->SetPaused(false);
 				unitSims[windowID]->StepTime(1.0/30.0);
 				unitSims[windowID]->SetPaused(true);
 			}
+		}
 			break;
 		case ']': absType = (absType+1)%3; break;
 		case '[': absType = (absType+4)%3; break;

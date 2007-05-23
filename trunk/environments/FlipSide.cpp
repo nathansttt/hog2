@@ -20,6 +20,15 @@ FlipSide::~FlipSide()
 
 void FlipSide::GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> &neighbors)
 {
+	std::vector<flipMove> acts;
+	GetActions(stateID, acts);
+	neighbors.resize(0);
+	for (int x = 0; x < acts.size(); x++)
+	{
+		FlipSideState s = stateID;
+		ApplyAction(s, acts[x]);
+		neighbors.push_back(s);
+	}
 }
 
 void FlipSide::GetActions(FlipSideState &stateID, std::vector<flipMove> &actions)
@@ -93,7 +102,7 @@ double FlipSide::HCost(FlipSideState &state1, FlipSideState &state2)
 			hval += tmp;
 		}
 	}
-	return hval/6;
+	return ceil(hval/6);
 }
 
 double FlipSide::GCost(FlipSideState &state1, FlipSideState &state2)

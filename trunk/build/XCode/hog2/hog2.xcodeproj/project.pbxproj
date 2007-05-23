@@ -95,6 +95,10 @@
 		C433A4180BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A4170BFA4E03002B8108 /* SearchEnvironment.cpp */; };
 		C433A4190BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A4170BFA4E03002B8108 /* SearchEnvironment.cpp */; };
 		C433A4710BFA583E002B8108 /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2700BCEE7B000FCD84C /* GenericIDAStar.cpp */; };
+		C433A73A0C03604B002B8108 /* FlipSide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A7390C03604B002B8108 /* FlipSide.cpp */; };
+		C433A73B0C03604B002B8108 /* FlipSide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A7390C03604B002B8108 /* FlipSide.cpp */; };
+		C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
+		C433A8470C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
 		C4D3AFBB0BCEE5B800FCD84C /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF970BCEE5B800FCD84C /* main.nib */; };
 		C4D3AFBD0BCEE5B800FCD84C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9B0BCEE5B800FCD84C /* Info.plist */; };
@@ -195,6 +199,10 @@
 		C433A2F10BF91330002B8108 /* RandomUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RandomUnit.cpp; sourceTree = "<group>"; };
 		C433A4160BFA4E03002B8108 /* SearchEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEnvironment.h; sourceTree = "<group>"; };
 		C433A4170BFA4E03002B8108 /* SearchEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SearchEnvironment.cpp; sourceTree = "<group>"; };
+		C433A7380C03604B002B8108 /* FlipSide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlipSide.h; sourceTree = "<group>"; };
+		C433A7390C03604B002B8108 /* FlipSide.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlipSide.cpp; sourceTree = "<group>"; };
+		C433A8440C03ADEB002B8108 /* IDAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDAStar.h; sourceTree = "<group>"; };
+		C433A8450C03ADEB002B8108 /* IDAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IDAStar.cpp; sourceTree = "<group>"; };
 		C4D3AF6E0BCEE5B800FCD84C /* 299.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = 299.icns; sourceTree = "<group>"; };
 		C4D3AF700BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4D3AF720BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
@@ -877,8 +885,8 @@
 		20286C2AFDCF999611CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				C433A2EF0BF91318002B8108 /* generic */,
 				C4D3B7320BCEEC5900FCD84C /* apps */,
+				C433A2EF0BF91318002B8108 /* generic */,
 				C4D3B2410BCEE7B000FCD84C /* abstraction */,
 				C4D3B25E0BCEE7B000FCD84C /* abstractionalgorithms */,
 				C4D3B26B0BCEE7B000FCD84C /* algorithms */,
@@ -955,6 +963,8 @@
 			children = (
 				C433A2F10BF91330002B8108 /* RandomUnit.cpp */,
 				C433A2F00BF91330002B8108 /* RandomUnit.h */,
+				C433A8450C03ADEB002B8108 /* IDAStar.cpp */,
+				C433A8440C03ADEB002B8108 /* IDAStar.h */,
 			);
 			name = generic;
 			path = ../../../generic;
@@ -1139,6 +1149,8 @@
 				C4D3C29C0BD951AE00FCD84C /* Map2DEnvironment.cpp */,
 				C4339D010BF2676B002B8108 /* MNPuzzle.h */,
 				C4339D020BF2676B002B8108 /* MNPuzzle.cpp */,
+				C433A7380C03604B002B8108 /* FlipSide.h */,
+				C433A7390C03604B002B8108 /* FlipSide.cpp */,
 			);
 			name = environments;
 			path = ../../../environments;
@@ -2028,6 +2040,8 @@
 				C4339D030BF2676B002B8108 /* MNPuzzle.cpp in Sources */,
 				C433A2F20BF91330002B8108 /* RandomUnit.cpp in Sources */,
 				C433A4180BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */,
+				C433A73A0C03604B002B8108 /* FlipSide.cpp in Sources */,
+				C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2105,6 +2119,8 @@
 				C433A2F30BF91330002B8108 /* RandomUnit.cpp in Sources */,
 				C433A4190BFA4E03002B8108 /* SearchEnvironment.cpp in Sources */,
 				C433A4710BFA583E002B8108 /* GenericIDAStar.cpp in Sources */,
+				C433A73B0C03604B002B8108 /* FlipSide.cpp in Sources */,
+				C433A8470C03ADEB002B8108 /* IDAStar.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

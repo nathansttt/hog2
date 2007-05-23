@@ -49,6 +49,7 @@ static std::ostream& operator <<(std::ostream & out, const FlipSideState &loc)
 			out << std::endl;
 		out << loc.puzzle[x] << " ";
 	}
+	out << std::endl;
 	return out;
 }
 
@@ -62,7 +63,7 @@ static bool operator==(const FlipSideState &l1, const FlipSideState &l2)
 	return true;
 }
 
-class FlipSide : SearchEnvironment<FlipSideState, flipMove> {
+class FlipSide : public SearchEnvironment<FlipSideState, flipMove> {
 public:
 	FlipSide(int width = 5);
 	~FlipSide();
