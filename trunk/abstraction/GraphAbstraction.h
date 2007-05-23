@@ -85,7 +85,9 @@ public:
 	double distance(path *p);
 	/** return nth level parent of which or null if it doesn't exist */
 	node *GetNthParent(node *which, int n);
-
+	/** return true if the first node is a parent of or is equal two the second node */
+	bool IsParentOf(node *parent, node *child);
+	
 	inline node *GetParent(node *which) { return abstractions[GetAbstractionLevel(which)+1]->GetNode(which->GetLabelL(kParent)); }
 	inline long GetNumChildren(node *which) { return which->GetLabelL(kNumAbstractedNodes); }
 	inline node *GetNthChild(node *which, int n) { return abstractions[GetAbstractionLevel(which)-1]->GetNode(which->GetLabelL(kFirstData+n)); }

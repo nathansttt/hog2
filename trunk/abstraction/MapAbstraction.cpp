@@ -49,8 +49,8 @@ void MapAbstraction::GetTileFromNode(node *n, int &x, int &y)
 		if (GetNthParent(t, GetAbstractionLevel(n)) == n)
 		{
 			//			printf("Nth parent is %d (%d), not %d (%d)\n",
-			//						 t->getNum(), GetAbstractionLevel(t),
-			//						 n->getNum(), GetAbstractionLevel(n));
+			//						 t->GetNum(), GetAbstractionLevel(t),
+			//						 n->GetNum(), GetAbstractionLevel(n));
 			return;
 		}
 		while (GetAbstractionLevel(n) != 0)
@@ -406,7 +406,7 @@ Graph *GetMapGraph(Map *m)
 				if (ee == 0)
 				{ cout << "**That's impossible; we were told we had " << numEdges << ":(" << n->getNumOutgoingEdges() << "+" << n->getNumIncomingEdges() <<
 					") edges, we're on #" << x << " and we got nil!";
-					cout << "(node " << n->getNum() << ")" << endl;
+					cout << "(node " << n->GetNum() << ")" << endl;
 					break;
 				}
 			}			

@@ -89,33 +89,33 @@ path *aStar::getPathToNode(node *target, reservationProvider *rp)
 		{
 			nodesTouched++;
 			unsigned int which;
-			if ((which = e->getFrom()) == currentOpenNode->getNum()) which = e->getTo();
+			if ((which = e->getFrom()) == currentOpenNode->GetNum()) which = e->getTo();
 			node *neighbor = g->GetNode(which);
 			assert(neighbor != 0);
 			
 			if (closedList.find(neighbor) != closedList.end())
 			{
-				if (verbose) { printf("skipping node %d\n", neighbor->getNum()); }
+				if (verbose) { printf("skipping node %d\n", neighbor->GetNum()); }
 				continue;
 			}
 			else if (rp && (neighbor != target) && rp->nodeOccupied(neighbor))
 			{
-				if (verbose) { printf("skipping occupied node %d\n", neighbor->getNum()); }
+				if (verbose) { printf("skipping occupied node %d\n", neighbor->GetNum()); }
 				continue;
 			}
 			else if (!nodeInCorridor(neighbor))
 			{
-				if (verbose) { printf("node %d not in corridor\n", neighbor->getNum()); }
+				if (verbose) { printf("node %d not in corridor\n", neighbor->GetNum()); }
 			}
 			else if (openQueue.IsIn(SearchNode(neighbor)))
 			//else if (openList.find(neighbor) != openList.end())
 			{
-				if (verbose) { printf("updating node %d\n", neighbor->getNum()); }
+				if (verbose) { printf("updating node %d\n", neighbor->GetNum()); }
 				updateWeight(currentOpenNode, neighbor, e);
 				//assert(openList.size() == openQueue.size());
 			}
 			else {
-				if (verbose) { printf("addinging node %d\n", neighbor->getNum()); }
+				if (verbose) { printf("addinging node %d\n", neighbor->GetNum()); }
 				addToOpenList(currentOpenNode, neighbor, e);
 				//assert(openList.size() == openQueue.size());
 			}
@@ -153,7 +153,7 @@ node *aStar::getNextNode()
 //		printf("openList size %u, openQueue size %u\n", (unsigned int)openList.size(),
 //					 (unsigned int)openQueue.size());
 //		printf("Opening node %d (f = %1.2f, g = %1.2f. [h=%1.2f])\n",
-//					 next->getNum(), it.fCost, it.gCost, abstr->h(next, goal));
+//					 next->GetNum(), it.fCost, it.gCost, abstr->h(next, goal));
 //		assert(openList.size() == openQueue.size());
 //	}
 	return next;
@@ -188,13 +188,13 @@ void aStar::addToOpenList(node *currOpenNode, node *neighbor, edge *e)
 							 e,
 							 neighbor, currOpenNode/*, closedList[currOpenNode].steps+1*/);
 	if (verbose) 
-	{ printf("Adding %u to openQueue, old size %u, ", neighbor->getNum(), openQueue.size()); }
+	{ printf("Adding %u to openQueue, old size %u, ", neighbor->GetNum(), openQueue.size()); }
 	openQueue.Add(n);
 
 	if (verbose)
 	{ 
 		printf("New size %u\n", openQueue.size());
-//		printf("Adding %u to openList, old size %u, ", (unsigned int)neighbor->getNum(),
+//		printf("Adding %u to openList, old size %u, ", (unsigned int)neighbor->GetNum(),
 //					 (unsigned int)openList.size());
 	}
 //	openList[neighbor] = n;
@@ -213,7 +213,7 @@ path *aStar::extractPathToStart(Graph *_g, node *goalNode)
 	SearchNode n = closedList[goalNode];
 	do {
 		if (n.currNode && n.prevNode)
-			_g->FindEdge(n.currNode->getNum(), n.prevNode->getNum())->setMarked(true);
+			_g->FindEdge(n.currNode->GetNum(), n.prevNode->GetNum())->setMarked(true);
 		p = new path(n.currNode, p);
 		n = closedList[n.prevNode];
 	} while (n.currNode != n.prevNode);
@@ -252,7 +252,7 @@ void aStar::addNeighborsToCorridor(Graph *_g, node *n, int windowSize)
 	for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
 	{
 		unsigned int which;
-		if ((which = e->getFrom()) == n->getNum()) which = e->getTo();
+		if ((which = e->getFrom()) == n->GetNum()) which = e->getTo();
 		
 		node *neighbor = _g->GetNode(which);
 		if (windowSize)

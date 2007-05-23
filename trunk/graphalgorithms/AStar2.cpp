@@ -36,10 +36,10 @@ path *aStar2::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationP
   std::vector<unsigned int> eligibleNodeParents;
 	
   lastPath = getAbstractPath(map->GetAbstractGraph(from->GetLabelL(kAbstractionLevel)),
-														 from->getNum(), to->GetLabelL(kParent),
+														 from->GetNum(), to->GetLabelL(kParent),
 														 eligibleNodeParents,
 														 kTemporaryLabel,
-														 to->getNum());
+														 to->GetNum());
   return lastPath;
 }
 	

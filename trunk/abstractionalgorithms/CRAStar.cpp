@@ -57,7 +57,7 @@ path *craStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 	path *lastPath = 0;
 	
 	
-	if (aMap->GetAbstractGraph(from->GetLabelL(kAbstractionLevel))->FindEdge(from->getNum(), to->getNum()))
+	if (aMap->GetAbstractGraph(from->GetLabelL(kAbstractionLevel))->FindEdge(from->GetNum(), to->GetNum()))
 		return new path(from, new path(to));
 	
 	setupSearch(aMap, fromChain, from, toChain, to);
@@ -158,7 +158,7 @@ void craStar::setupSearch(GraphAbstraction *aMap,
 	}
 	
 	if (verbose)
-		printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
+		printf("At nodes #%d and %d\n", from->GetNum(), to->GetNum());
 	
 	aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
 	
@@ -295,7 +295,7 @@ path *craStar::doRefinement(GraphAbstraction *aMap, path* absPath, std::vector<n
 		if (returnPath->tail()->n != to)
 		{
 			
-			if (!g->FindEdge(currentLow->getNum(),to->getNum()))
+			if (!g->FindEdge(currentLow->GetNum(),to->GetNum()))
 			{
 				
 				// check if goal is an orphan
@@ -307,12 +307,12 @@ path *craStar::doRefinement(GraphAbstraction *aMap, path* absPath, std::vector<n
 					nodesTouched++;
 					node* neigh = g->GetNode(neighborNode);
 					returnPath->tail()->next = new path(neigh);
-					g->FindEdge(currentLow->getNum(), neigh->getNum())->setMarked(true);
+					g->FindEdge(currentLow->GetNum(), neigh->GetNum())->setMarked(true);
 					lastnode = neigh;
 				}
 			}
 			
-			g->FindEdge(lastnode->getNum(), to->getNum())->setMarked(true);
+			g->FindEdge(lastnode->GetNum(), to->GetNum())->setMarked(true);
 			returnPath->tail()->next = new path(to);
 		}
 		delete lastPath;
@@ -385,8 +385,8 @@ node* craStar::getNextNode(GraphAbstraction *aMap, node* currentLow, path* retur
 			if (aMap->GetNthParent(n2,abstractLevel) == apath->n)
 			{
 				
-				g->FindEdge(currentLow->getNum(),neigh->getNum())->setMarked(true);
-				g->FindEdge(neigh->getNum(), n2->getNum())->setMarked(true);
+				g->FindEdge(currentLow->GetNum(),neigh->GetNum())->setMarked(true);
+				g->FindEdge(neigh->GetNum(), n2->GetNum())->setMarked(true);
 				
 				returnPath->tail()->next = new path(neigh, new path(n2));
 				currentLow = n2;
@@ -419,8 +419,8 @@ node* craStar::getNextNode(GraphAbstraction *aMap, node* currentLow, path* retur
 					if (aMap->GetNthParent(n2,abstractLevel) == apath->n)
 					{
 						
-						g->FindEdge(currentLow->getNum(),neigh->getNum())->setMarked(true);
-						g->FindEdge(neigh->getNum(), n2->getNum())->setMarked(true);						
+						g->FindEdge(currentLow->GetNum(),neigh->GetNum())->setMarked(true);
+						g->FindEdge(neigh->GetNum(), n2->GetNum())->setMarked(true);						
 						
 						returnPath->tail()->next = new path(neigh, new path(n2));
 						currentLow = n2;
@@ -451,7 +451,7 @@ path *craStar::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 	
 	if (verbose)
 		printf("Building path from %d to %d (%ld/%ld)\n",
-					 from->getNum(), to->getNum(), from->GetLabelL(kParent), to->GetLabelL(kParent));
+					 from->GetNum(), to->GetNum(), from->GetLabelL(kParent), to->GetLabelL(kParent));
 	
 	std::vector<node *> eligibleNodeParents;
 	
@@ -467,7 +467,7 @@ path *craStar::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 					trav = trav->next;
 			// we don't need to reset the target if we have a complete path
 			// but we do if our complete path doesn't end in our target node
-			if ((trav->next != 0) || ((trav->next == 0) && ((int)trav->n->getNum() != to->GetLabelL(kParent))))
+			if ((trav->next != 0) || ((trav->next == 0) && ((int)trav->n->GetNum() != to->GetLabelL(kParent))))
 			{
 				to = trav->n;
 				if (trav->next)
@@ -476,7 +476,7 @@ path *craStar::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 					hTarget = to;
 				delete trav->next;
 				trav->next = 0;
-				if (verbose) printf("Setting target parent to %d\n", to->getNum());
+				if (verbose) printf("Setting target parent to %d\n", to->GetNum());
 			}
 		}
 		
@@ -488,7 +488,7 @@ path *craStar::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 			{
 				edge_iterator ei = trav->n->getEdgeIter();
 				for (edge *e = trav->n->edgeIterNext(ei); e; e = trav->n->edgeIterNext(ei)) {
-					if (e->getFrom() == trav->n->getNum())
+					if (e->getFrom() == trav->n->GetNum())
 						eligibleNodeParents.push_back(g->GetNode(e->getTo()));
 					else
 						eligibleNodeParents.push_back(g->GetNode(e->getFrom()));
@@ -751,7 +751,7 @@ path* craStar::nextPathNode(GraphAbstraction *m,node* n, int dir)
 		
 		nodesTouched++;
 		int nextKey = next->GetLabelL(kTemporaryLabel);
-		edge* e = g->FindEdge(n->getNum(), next->getNum());
+		edge* e = g->FindEdge(n->GetNum(), next->GetNum());
 		
 		if (e && (nextKey >= 0) && (nextKey < static_cast<int>(lookup.size())) && (lookup[nextKey]==next))
 		{

@@ -62,7 +62,7 @@ void path::print(bool beginning)
 		printf("[");
 	
 	if (n != NULL)
-		printf("%d",n->getNum());
+		printf("%d",n->GetNum());
 	else
 		printf("NULL");
 	

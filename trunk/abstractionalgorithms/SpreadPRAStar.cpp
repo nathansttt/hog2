@@ -43,7 +43,7 @@ path *spreadPRAStar::GetPath(GraphAbstraction *_aMap, node *from, node *to, rese
   std::vector<node *> toChain;
 	path *lastPth = 0;
 	
-  if (_aMap->GetAbstractGraph(from->GetLabelL(kAbstractionLevel))->FindEdge(from->getNum(), to->getNum()))
+  if (_aMap->GetAbstractGraph(from->GetLabelL(kAbstractionLevel))->FindEdge(from->GetNum(), to->GetNum()))
     return new path(from, new path(to));
 
 	setupSearch(_aMap, fromChain, from, toChain, to);
@@ -113,15 +113,15 @@ void spreadPRAStar::setupSearch(GraphAbstraction *_aMap,
   }
 	
   if (verbose)
-    printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
-//  if (aMap->GetAbstractGraph(0)->FindEdge(from->getNum(), to->getNum()))
+    printf("At nodes #%d and %d\n", from->GetNum(), to->GetNum());
+//  if (aMap->GetAbstractGraph(0)->FindEdge(from->GetNum(), to->GetNum()))
 //	{ // we are 1 step away
 //    return new path(from, new path(to));
 //  }
 	
   _aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
 	//	assert(aMap->GetAbstractGraph(fromChain.back()->GetLabelL(kAbstractionLevel))->
-	//					FindEdge(fromChain.back()->getNum(), toChain.back()->getNum()));
+	//					FindEdge(fromChain.back()->GetNum(), toChain.back()->GetNum()));
 	
 	unsigned int previousSize = fromChain.size();
 	int minNode = (int)(2*sqrt(_aMap->GetAbstractGraph(0)->getNumNodes()));
@@ -149,7 +149,7 @@ path *spreadPRAStar::buildNextAbstractPath(GraphAbstraction *_aMap, path *lastPt
 	
 	if (verbose)
 		printf("Building path from %d to %d (%ld/%ld)\n",
-					 from->getNum(), to->getNum(), from->GetLabelL(kParent), to->GetLabelL(kParent));
+					 from->GetNum(), to->GetNum(), from->GetLabelL(kParent), to->GetLabelL(kParent));
 	
 	std::vector<node *> eligibleNodeParents;
 	
@@ -165,7 +165,7 @@ path *spreadPRAStar::buildNextAbstractPath(GraphAbstraction *_aMap, path *lastPt
 					trav = trav->next;
 			// we don't need to reset the target if we have a complete path
 			// but we do if our complete path doesn't end in our target node
-			if ((trav->next != 0) || ((trav->next == 0) && ((long)trav->n->getNum() != to->GetLabelL(kParent))))
+			if ((trav->next != 0) || ((trav->next == 0) && ((long)trav->n->GetNum() != to->GetLabelL(kParent))))
 			{
 				to = trav->n;
 				if (trav->next)
@@ -185,7 +185,7 @@ path *spreadPRAStar::buildNextAbstractPath(GraphAbstraction *_aMap, path *lastPt
 			{
 				edge_iterator ei = trav->n->getEdgeIter();
 				for (edge *e = trav->n->edgeIterNext(ei); e; e = trav->n->edgeIterNext(ei)) {
-					if (e->getFrom() == trav->n->getNum())
+					if (e->getFrom() == trav->n->GetNum())
 						eligibleNodeParents.push_back(g->GetNode(e->getTo()));
 					else
 						eligibleNodeParents.push_back(g->GetNode(e->getFrom()));

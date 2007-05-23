@@ -51,7 +51,7 @@ path *praStar2::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 	std::vector<node *> toChain;
 	path *lastPath = 0;
 	
-	if (aMap->GetAbstractGraph(from->GetLabelL(kAbstractionLevel))->FindEdge(from->getNum(), to->getNum()))
+	if (aMap->GetAbstractGraph(from->GetLabelL(kAbstractionLevel))->FindEdge(from->GetNum(), to->GetNum()))
 		return new path(from, new path(to));
 	
 	setupSearch(aMap, fromChain, from, toChain, to);
@@ -93,7 +93,7 @@ void praStar2::setupSearch(GraphAbstraction *aMap,
 	}
 	
 	if (verbose)
-		printf("At nodes #%d and %d\n", from->getNum(), to->getNum());
+		printf("At nodes #%d and %d\n", from->GetNum(), to->GetNum());
 	
 	aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
 	
@@ -189,7 +189,7 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 	
 	if (verbose)
 		printf("Building path from %d to %d (%ld/%ld)\n",
-					 from->getNum(), to->getNum(), from->GetLabelL(kParent), to->GetLabelL(kParent));
+					 from->GetNum(), to->GetNum(), from->GetLabelL(kParent), to->GetLabelL(kParent));
 	
 	std::vector<node *> eligibleNodeParents;
 	
@@ -205,7 +205,7 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 					trav = trav->next;
 			// we don't need to reset the target if we have a complete path
 			// but we do if our complete path doesn't end in our target node
-			if ((trav->next != 0) || ((trav->next == 0) && ((int)trav->n->getNum() != to->GetLabelL(kParent))))
+			if ((trav->next != 0) || ((trav->next == 0) && ((int)trav->n->GetNum() != to->GetLabelL(kParent))))
 			{
 				to = trav->n;
 				if (trav->next)
@@ -214,7 +214,7 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 					hTarget = to;
 				delete trav->next;
 				trav->next = 0;
-				if (verbose) printf("Setting target parent to %d\n", to->getNum());
+				if (verbose) printf("Setting target parent to %d\n", to->GetNum());
 			}
 		}
 		
@@ -228,7 +228,7 @@ path *praStar2::buildNextAbstractPath(GraphAbstraction *aMap, path *lastPath,
 				edge_iterator ei = trav->n->getEdgeIter();
 				for (edge *e = trav->n->edgeIterNext(ei); e; e = trav->n->edgeIterNext(ei))
 				{
-					if (e->getFrom() == trav->n->getNum())
+					if (e->getFrom() == trav->n->GetNum())
 						eligibleNodeParents.push_back(g->GetNode(e->getTo()));
 					else
 						eligibleNodeParents.push_back(g->GetNode(e->getFrom()));

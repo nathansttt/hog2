@@ -75,7 +75,7 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 		n->key = closedList.size()-1;
 		
 		if (verbose)
-			printf("Working on %d with cost %1.2f\n", n->getNum(), n->GetLabelF(kTemporaryLabel));
+			printf("Working on %d with cost %1.2f\n", n->GetNum(), n->GetLabelF(kTemporaryLabel));
 		
 		ei = n->getEdgeIter();
 		
@@ -84,7 +84,7 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 		{
 			nodesTouched++;
 			unsigned int which;
-			if ((which = e->getFrom()) == n->getNum()) which = e->getTo();
+			if ((which = e->getFrom()) == n->GetNum()) which = e->getTo();
 			
 			node *nextChild = g->GetNode(which);
 			
@@ -92,7 +92,7 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 			if (openList->IsIn(nextChild))
 			{
 				//nodesExpanded++;
-				relaxEdge(openList, g, e, n->getNum(), which, to);
+				relaxEdge(openList, g, e, n->GetNum(), which, to);
 			}
 			else if (rp && (from->GetLabelL(kAbstractionLevel)==0) && (nextChild != to) &&
 							 rp->nodeOccupied(nextChild))
@@ -113,7 +113,7 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 				if (verbose)
 					printf("Adding neighbor/child %d\n", which);
 				//nodesExpanded++;
-				relaxEdge(openList, g, e, n->getNum(), which, to);
+				relaxEdge(openList, g, e, n->GetNum(), which, to);
 			}
 		}
 		
@@ -122,11 +122,11 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 		
 		// this means we have expanded all reachable nodes and there is no path
 		if (n == 0) { delete openList; return 0; }
-		if (verbose) printf("Expanding %d\n", n->getNum());
+		if (verbose) printf("Expanding %d\n", n->GetNum());
 		if (n == to) break; // we found the goal
 	}
 	delete openList;
-	return extractBestPath(g, n->getNum());
+	return extractBestPath(g, n->GetNum());
 }
 
 // this is the standard definition of relaxation as in Introduction to Algorithms (cormen, leiserson and rivest)

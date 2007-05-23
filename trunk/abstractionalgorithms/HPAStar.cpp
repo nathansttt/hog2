@@ -203,7 +203,7 @@ path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 	curr = curr->next;
 	node* n2 = curr->n;
 
-	edge* e = g->FindEdge(n->getNum(), n2->getNum());
+	edge* e = g->FindEdge(n->GetNum(), n2->GetNum());
 
 	path* lowlevel = m->getCachedPath(e);
 
@@ -238,7 +238,7 @@ path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 		m->GetMap()->getPointFromCoordinate(t,px,py);
 		*/
 
-		e = g->FindEdge(n->getNum(), n2->getNum());
+		e = g->FindEdge(n->GetNum(), n2->GetNum());
 
 		lowlevel = m->getCachedPath(e);
 		
@@ -480,7 +480,7 @@ path* hpaStar::nextPathNode(node* n, int dir)
 		nodesTouched++;
 
 		int nextKey = next->GetLabelL(kTemporaryLabel);
-		edge* e = g->FindEdge(n->getNum(), next->getNum());
+		edge* e = g->FindEdge(n->GetNum(), next->GetNum());
 		
 		if(e && (nextKey >= 0) && (nextKey < static_cast<int>(lookup.size())) && (lookup[nextKey]==next)){
 			//we're done - we found the path

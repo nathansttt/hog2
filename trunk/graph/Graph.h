@@ -163,7 +163,7 @@ public:
   graph_object *clone() const;
 
   const char *GetName() const { return name; }
-  unsigned int getNum() const { return nodeNum; }
+  unsigned int GetNum() const { return nodeNum; }
   int getUniqueID() const { return uniqueID; }
   void AddEdge(edge *);
   void RemoveEdge(edge *);

@@ -240,7 +240,7 @@ void ClusterAbstraction::createHorizEntrances(int start, int end, int latitude, 
 		
 		
 		while((i<=end) && (!GetNodeFromMap(i,latitude) || !GetNodeFromMap(i,latitude+1) 
-											 ||!(g->FindEdge(GetNodeFromMap(i,latitude)->getNum(), GetNodeFromMap(i,latitude+1)->getNum()))))
+											 ||!(g->FindEdge(GetNodeFromMap(i,latitude)->GetNum(), GetNodeFromMap(i,latitude+1)->GetNum()))))
 		{
 			i++;
 		}
@@ -253,9 +253,9 @@ void ClusterAbstraction::createHorizEntrances(int start, int end, int latitude, 
 		//int begin = i;
 		//		std::cout<<GetNodeFromMap(i,latitude)<<" "<<GetNodeFromMap(i,latitude+1)<<std::endl;
 		while((i<=end)&&(GetNodeFromMap(i,latitude)) && (GetNodeFromMap(i,latitude+1))
-					&& (g->FindEdge(GetNodeFromMap(i,latitude)->getNum(), GetNodeFromMap(i,latitude+1)->getNum()))
-					&& ((i==start) || ((g->FindEdge(GetNodeFromMap(i-1,latitude)->getNum(), GetNodeFromMap(i,latitude)->getNum()))
-														 && (g->FindEdge(GetNodeFromMap(i-1,latitude+1)->getNum(), GetNodeFromMap(i,latitude+1)->getNum())))))
+					&& (g->FindEdge(GetNodeFromMap(i,latitude)->GetNum(), GetNodeFromMap(i,latitude+1)->GetNum()))
+					&& ((i==start) || ((g->FindEdge(GetNodeFromMap(i-1,latitude)->GetNum(), GetNodeFromMap(i,latitude)->GetNum()))
+														 && (g->FindEdge(GetNodeFromMap(i-1,latitude+1)->GetNum(), GetNodeFromMap(i,latitude+1)->GetNum())))))
 		{
 			i++;
 		}
@@ -303,7 +303,7 @@ void ClusterAbstraction::createVertEntrances(int start, int end, int meridian, i
 		
 		
 		while((i<=end)&& (!GetNodeFromMap(meridian,i) || !GetNodeFromMap(meridian+1,i)
-											|| (!(g->FindEdge(GetNodeFromMap(meridian,i)->getNum(), GetNodeFromMap(meridian+1,i)->getNum())))))
+											|| (!(g->FindEdge(GetNodeFromMap(meridian,i)->GetNum(), GetNodeFromMap(meridian+1,i)->GetNum())))))
 		{
 			i++;
 		}
@@ -318,9 +318,9 @@ void ClusterAbstraction::createVertEntrances(int start, int end, int meridian, i
 		i++;
 		
 		while((i<=end) && (GetNodeFromMap(meridian,i)) && (GetNodeFromMap(meridian+1,i))
-					&& (g->FindEdge(GetNodeFromMap(meridian,i)->getNum(), GetNodeFromMap(meridian+1,i)->getNum()))
-					&& ((i==start) || ((g->FindEdge(GetNodeFromMap(meridian,i-1)->getNum(), GetNodeFromMap(meridian,i)->getNum()))
-														 && (g->FindEdge(GetNodeFromMap(meridian+1,i-1)->getNum(), GetNodeFromMap(meridian+1,i)->getNum())))))
+					&& (g->FindEdge(GetNodeFromMap(meridian,i)->GetNum(), GetNodeFromMap(meridian+1,i)->GetNum()))
+					&& ((i==start) || ((g->FindEdge(GetNodeFromMap(meridian,i-1)->GetNum(), GetNodeFromMap(meridian,i)->GetNum()))
+														 && (g->FindEdge(GetNodeFromMap(meridian+1,i-1)->GetNum(), GetNodeFromMap(meridian+1,i)->GetNum())))))
 		{
 			i++;
 		}
@@ -598,7 +598,7 @@ void ClusterAbstraction::computeClusterPaths(Graph* g)
 				ClusterSearchEnvironment cse(this, GetAbstractionLevel(start));
 				cse.setCorridor(corridor);
 				std::vector<uint32_t> resultPath;
-				astar.GetPath(&cse, start->getNum(), goal->getNum(),
+				astar.GetPath(&cse, start->GetNum(), goal->GetNum(),
 											resultPath);
 				path *p = 0;
 				for (unsigned int x = 0; x < resultPath.size(); x++)
@@ -804,7 +804,7 @@ void ClusterAbstraction::setUpParents(Graph* g)
 						ClusterSearchEnvironment cse(this, GetAbstractionLevel(low));
 						cse.setCorridor(corridor);
 						std::vector<uint32_t> resultPath;
-						astar.GetPath(&cse, low->getNum(), mnode->getNum(),
+						astar.GetPath(&cse, low->GetNum(), mnode->GetNum(),
 													resultPath);
 						path *p = 0;
 						for (unsigned int t = 0; t < resultPath.size(); t++)
@@ -859,11 +859,11 @@ void ClusterAbstraction::setUpParents(Graph* g)
 // 		// make sure no node has a dummy for a parent
 // 		for (int j=0; j<dummies[i]->GetLabelL(kNumAbstractedNodes); j++){
 // 			node* child = abstractions[0]->GetNode(dummies[i]->GetLabelL(kFirstData+j));
-// 			if (dummies[i]->getNum()==5289)
+// 			if (dummies[i]->GetNum()==5289)
 // 				std::cout<<"going to check\n";
-// 			if (child->GetLabelL(kParent) == dummies[i]->getNum()){
-// 				if (dummies[i]->getNum()==5289)
-// 					std::cout<<"removing "<<child->getNum()<<std::endl;
+// 			if (child->GetLabelL(kParent) == dummies[i]->GetNum()){
+// 				if (dummies[i]->GetNum()==5289)
+// 					std::cout<<"removing "<<child->GetNum()<<std::endl;
 // 				child->SetLabelL(kParent,-1);
 // 			}
 // 		}
@@ -895,7 +895,7 @@ for (unsigned int i=dummies.size()-1;i>0; --i)
 {
 	
 	
-	int num = dummies[i]->getNum();
+	int num = dummies[i]->GetNum();
 	
 	
 	g->RemoveNode(dummies[i]);
@@ -954,7 +954,7 @@ void ClusterAbstraction::createConnectivityGraph()
 	for (node *next = abstractions[1]->nodeIterNext(ni); next;
 			 next = abstractions[1]->nodeIterNext(ni))
 	{
-		//		std::cout<<"looking at "<<next->getNum()<<std::endl;
+		//		std::cout<<"looking at "<<next->GetNum()<<std::endl;
 		//std::cout<<"parent: "<<next->GetLabelL(kParent)<<std::endl;
 		
 		// if it isn't abstracted, do a bfs according to the cluster and abstract these nodes together
@@ -1012,8 +1012,8 @@ void ClusterAbstraction::buildNodeIntoParent(node *n, node *parent)
 {
 	assert((n->GetLabelL(kAbstractionLevel)+1 == parent->GetLabelL(kAbstractionLevel))&& parent);
 	
-	n->SetLabelL(kParent, parent->getNum());
-	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->getNum());
+	n->SetLabelL(kParent, parent->GetNum());
+	parent->SetLabelL(kFirstData+parent->GetLabelL(kNumAbstractedNodes), n->GetNum());
 	parent->SetLabelL(kNumAbstractedNodes, parent->GetLabelL(kNumAbstractedNodes)+1);
 }
 
@@ -1114,7 +1114,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 			ClusterSearchEnvironment cse(this, GetAbstractionLevel(n));
 			cse.setCorridor(corridor);
 			std::vector<uint32_t> resultPath;
-			astar.GetPath(&cse, n->getNum(), goal->getNum(),
+			astar.GetPath(&cse, n->GetNum(), goal->GetNum(),
 										resultPath);
 			path *p = 0;
 			for (unsigned int x = 0; x < resultPath.size(); x++)
@@ -1214,7 +1214,7 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 			ei = start->getEdgeIter();
 			e = start->edgeIterNext(ei);
 		}
-		int snum = start->getNum();
+		int snum = start->GetNum();
 		assert((snum == g->getNumNodes()-1) || (snum == g->getNumNodes()-2));
 		g->RemoveNode(start);
 		delete start;
@@ -1246,7 +1246,7 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 		{
 			
 			temp.erase(e);
-			int gnum = goal->getNum();
+			int gnum = goal->GetNum();
 			assert((gnum == g->getNumNodes()-1) || (gnum == g->getNumNodes()-2));
 			g->RemoveEdge(e);
 			delete e;
