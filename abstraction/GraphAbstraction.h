@@ -27,6 +27,7 @@
 
 #include "Graph.h"
 #include "Path.h"
+#include "GLUtil.h"
 
 #ifndef GRAPHABSTRACTION_H
 #define GRAPHABSTRACTION_H
@@ -117,6 +118,9 @@ public:
 	virtual int MeasureRepairHits() { return 0; }
 	void MeasureAbstractionValues(int level, double &n, double &n_dev, double &c, double &c_dev);
 	double MeasureAverageNodeWidth(int level);
+
+	virtual void OpenGLDraw(int window) {}
+	virtual recVec GetNodeLoc(node *n) { recVec v; v.x = v.y = v.z = 0; return v; }
 protected:
 		std::vector<Graph *> abstractions;
 private:
