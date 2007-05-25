@@ -35,5 +35,5 @@ SRC_CPP = \
 	abstractionalgorithms/HPAStar.cpp \
 	abstractionalgorithms/PRAStar2.cpp \
 	abstractionalgorithms/PRAStar.cpp \
-	abstractionalgorithms/SpreadPRAStar.cpp
-
+	abstractionalgorithms/SpreadPRAStar.cpp \
+	abstractionalgorithms/CFOptimalRefinement.cpp 
