@@ -27,10 +27,14 @@ const char *CFOptimalRefinement::GetName()
 
 path *CFOptimalRefinement::GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *)
 {
-	InitializeSearch(aMap, from, to);
+	if (!InitializeSearch(aMap, from, to))
+		return 0;
 	path *p = 0;
 	while (p == 0)
+	{
 		p = DoOneSearchStep();
+		//g->Print(std::cout);
+	}
 	return p;
 }
 
@@ -40,18 +44,27 @@ path *CFOptimalRefinement::DoOneSearchStep()
 	{
 		node *gNext = q.top().n;
 		q.pop();
+		printf("Analyzing %d next\n", gNext->GetNum());
+		std::cout << *gNext << std::endl;
 		if (gNext->GetLabelL(kInOpenList) == 1)
 		{
+			printf("Updating node %d\n", gNext->GetNum());
 			UpdateNode(gNext);
 		}
 		else { // in closed list
-			RefineNode(gNext);
+			printf("Refining node %d\n", gNext->GetNum());
+			if (gNext->GetLabelL(kAbstractionLevel) > 0)
+				RefineNode(gNext);
 		}
+	}
+	if ((gStart == 0) || (gStart->GetLabelL(kOptimalFlag) == 0))
+	{
+		return 0;
 	}
 	return new path(aStart, new path(aGoal));
 }
 
-void CFOptimalRefinement::InitializeSearch(GraphAbstraction *aMap, node *from, node *to)
+bool CFOptimalRefinement::InitializeSearch(GraphAbstraction *aMap, node *from, node *to)
 {
 	gStart = 0;
 	absGraph = aMap;
@@ -62,11 +75,14 @@ void CFOptimalRefinement::InitializeSearch(GraphAbstraction *aMap, node *from, n
 	
 	// find most abstract node in Graph
 	node *top = FindTopLevelNode(from, to, aMap);
+	if (top == 0)
+		return false;
 	node *newTop = new node("top");
+	gStart = gGoal = newTop;
+	g->AddNode(newTop);
 	SetInitialValues(newTop, top, 0);
 	q.Add(GNode(newTop));
-	g->AddNode(newTop);
-	gStart = gGoal = newTop;
+	return true;
 }
 
 node *CFOptimalRefinement::FindTopLevelNode(node *one, node *two, GraphAbstraction *aMap)
@@ -84,7 +100,7 @@ node *CFOptimalRefinement::FindTopLevelNode(node *one, node *two, GraphAbstracti
 	node *tmp = FindTopLevelNode(aMap->GetParent(one), aMap->GetParent(two), aMap);
 	if ((tmp == 0) && (one == two))
 		return one;
-	return 0;
+	return tmp;
 }
 
 /*
@@ -110,10 +126,12 @@ void CFOptimalRefinement::SetInitialValues(node *gNewNode, node *aRealNode, node
 
 	if ((gParent == gStart) && (absGraph->IsParentOf(aRealNode, aStart)))
 	{
+		std::cout << "Assigning start to " << *gNewNode << std::endl;
 		gStart = gNewNode;
 	}
 	if ((gParent == gGoal) && (absGraph->IsParentOf(aRealNode, aGoal)))
 	{
+		std::cout << "Assigning goal to " << *gNewNode << std::endl;
 		gGoal = gNewNode;
 	}
 }
@@ -121,8 +139,11 @@ void CFOptimalRefinement::SetInitialValues(node *gNewNode, node *aRealNode, node
 void CFOptimalRefinement::UpdateNode(node *gNode)
 {
 	UpdateH(gNode);
+	std::cout << "After UpdateH " << *gNode << std::endl;
 	UpdateG(gNode);
+	std::cout << "After UpdateG " << *gNode << std::endl;
 	UpdateOptH(gNode);
+	std::cout << "After UpdateOptH " << *gNode << std::endl;
 	gNode->SetLabelL(kInOpenList, 0);
 	q.Add(GNode(gNode));
 }
@@ -185,8 +206,8 @@ void CFOptimalRefinement::UpdateOptH(node *gNode)
 			{
 				node *gNeighbor = g->GetNode(next);
 				if ((gNeighbor->GetLabelL(kOptimalFlag) == 1) &&
-						(gNeighbor->GetLabelF(kGCost) + g->FindEdge(next, gNode->GetNum())->getWeight() ==
-						 gNode->GetLabelF(kHCost)))
+						(fequal(gNeighbor->GetLabelF(kHCost) + g->FindEdge(next, gNode->GetNum())->getWeight(),
+										gNode->GetLabelF(kHCost))))
 				{
 					optH = true;
 				}
@@ -229,8 +250,9 @@ void CFOptimalRefinement::RefineNode(node *gNode)
 	for (unsigned int x = 0; x < aChildren.size(); x++)
 	{
 		gChildren.push_back(new node("child"));
-		SetInitialValues(gChildren[x], aChildren[x], gNode);
 		g->AddNode(gChildren[x]);
+		SetInitialValues(gChildren[x], aChildren[x], gNode);
+		q.Add(GNode(gChildren[x]));
 	}
 
 	// first, connect children to each other
@@ -244,8 +266,8 @@ void CFOptimalRefinement::RefineNode(node *gNode)
 				edge *e;
 				if ((e = aGraph->findDirectedEdge(aChildren[x]->GetNum(), aChildren[y]->GetNum())) != 0)
 				{
-					g->AddEdge(new edge(gChildren[x]->GetNum(), gChildren[y]->GetNum(),
-															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.0));
+					g->AddEdge(new edge(gChildren[x]->GetNum(), gChildren[y]->GetNum(), 1.0));
+					//(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.0));
 				}
 			}
 		}
@@ -262,10 +284,10 @@ void CFOptimalRefinement::RefineNode(node *gNode)
 			for (unsigned int x = 0; x < gChildren.size(); x++)
 			{
 				edge *e;
-				if ((e = aGraph->findDirectedEdge(aChildren[x]->GetNum(), GetRealNode(gNeighbor)->GetNum())) != 0)
+				if ((e = aGraph->FindEdge(aChildren[x]->GetNum(), GetRealNode(gNeighbor)->GetNum())) != 0)
 				{
-					g->AddEdge(new edge(gChildren[x]->GetNum(), gNeighbor->GetNum(),
-															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.0));
+					g->AddEdge(new edge(gChildren[x]->GetNum(), gNeighbor->GetNum(), 1.0));
+					//(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.0));
 				}
 			}
 		}
@@ -307,4 +329,61 @@ bool CFOptimalRefinement::ShouldAddEdge(node *aLowerNode, node *aHigherNode)
 	return false;
 }
 
+void CFOptimalRefinement::OpenGLDraw()
+{
+	if ((g == 0) || (g->getNumNodes() == 0))
+	{
+		return;
+	}
+	
+	glLineWidth(3.0);
+	glBegin(GL_LINES);
+	glNormal3f(0, 1, 0);
+	edge_iterator ei = g->getEdgeIter();
+	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+	{
+		node *n;
+		n = g->GetNode(e->getFrom());
+		if (q.top().n == n)
+			glColor3f(1.0, 0.0, 1.0);
+		else if (n == gStart)
+			glColor3f(0, 0, 1);
+		else if (n == gGoal)
+			glColor3f(0, 1, 0);
+		else if (n->GetLabelL(kOptimalFlag) && n->GetLabelL(kInOpenList))
+			glColor3f(1.0, 1.0, 0);
+		else if (n->GetLabelL(kOptimalFlag))
+			glColor3f(0.6, 0.6, 0);
+		else if (n->GetLabelL(kInOpenList) == 0)
+			glColor3f(0.5, 0.5, 0.5);
+		else
+			glColor3f(1, 1, 1);
+		
+		recVec rv = absGraph->GetNodeLoc(GetRealNode(n));
+		glVertex3f(rv.x, rv.y, rv.z);
+		
+		n = g->GetNode(e->getTo());
+		if (q.top().n == n)
+			glColor3f(1.0, 0.0, 1.0);
+		else if (n == gStart)
+			glColor3f(0, 0, 1);
+		else if (n == gGoal)
+			glColor3f(0, 1, 0);
+		else if (n->GetLabelL(kOptimalFlag) && n->GetLabelL(kInOpenList))
+			glColor3f(1.0, 1.0, 0);
+		else if (n->GetLabelL(kOptimalFlag))
+			glColor3f(0.6, 0.6, 0);
+		else if (n->GetLabelL(kInOpenList) == 0)
+			glColor3f(0.5, 0.5, 0.5);
+		else
+			glColor3f(1, 1, 1);
+		rv = absGraph->GetNodeLoc(GetRealNode(n));
+		
+		glVertex3f(rv.x, rv.y, rv.z);
+	}
+
+	glEnd();
+	glLineWidth(1.0);
+	
+}
 

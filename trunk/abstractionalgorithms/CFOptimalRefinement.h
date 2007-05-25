@@ -40,6 +40,7 @@ struct NodeEqual {
 };
 
 struct NodeCompare {
+	// return true if we prefer i2 over i1
 	bool operator()(const GNode &i1, const GNode &i2)
 	{
 		// if f-cost is tied
@@ -49,8 +50,16 @@ struct NodeCompare {
 			// if both in/not in open list
 			if (i1.n->GetLabelL(kInOpenList) == i2.n->GetLabelL(kInOpenList))
 			{
+				if ((i1.n->GetLabelL(kInOpenList) == 0) && (i1.n->GetLabelL(kAbstractionLevel) == 0))
+					return true;
+				if ((i2.n->GetLabelL(kInOpenList) == 0) && (i2.n->GetLabelL(kAbstractionLevel) == 0))
+					return false;
+
+				return fgreater(std::min(i1.n->GetLabelF(kGCost), i1.n->GetLabelF(kHCost)),
+												std::min(i2.n->GetLabelF(kGCost), i2.n->GetLabelF(kHCost)));
+				
 				// return true if node1 has lower g-cost
-				return (fless(i1.n->GetLabelF(kGCost), i2.n->GetLabelF(kGCost)));
+				//return (fless(i1.n->GetLabelF(kGCost), i2.n->GetLabelF(kGCost)));
 			}
 			// return true if node1 isn't in open list
 			return (i2.n->GetLabelL(kInOpenList));
@@ -76,7 +85,8 @@ public:
 	virtual const char *GetName();
 	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	path *DoOneSearchStep();
-	void InitializeSearch(GraphAbstraction *aMap, node *from, node *to);
+	bool InitializeSearch(GraphAbstraction *aMap, node *from, node *to);
+	void OpenGLDraw();
 private:
 	node *FindTopLevelNode(node *one, node *two, GraphAbstraction *aMap);
 	void SetInitialValues(node *gNewNode, node *aRealNode, node *gParent);
