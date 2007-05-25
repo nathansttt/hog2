@@ -32,6 +32,7 @@
 #include "SearchUnit.h"
 //#include "SharedAMapGroup.h"
 #include "MapCliqueAbstraction.h"
+#include "NodeLimitAbstraction.h"
 //#include "MapQuadTreeAbstraction.h"
 //#include "RadiusAbstraction.h"
 //#include "MapFlatAbstraction.h"
@@ -41,13 +42,14 @@
 #include "Plot2D.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
-#include "MNPuzzle.h"
+#include "CFOptimalRefinement.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
 std::vector<UnitAbsMapSimulation *> unitSims;
+CFOptimalRefinement *CFOR = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -73,7 +75,8 @@ void CreateSimulation(int id)
 		map = new Map(gDefaultMap);
 
 	unitSims.resize(id+1);
-	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
+	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 10)));
+	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
 	unitSims[id]->SetStepType(kMinTime);
 //	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
 //																																 (OccupancyInterface<xyLoc, tDirection>*)0);
@@ -122,6 +125,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	{
 		printf("Window %ld destroyed\n", windowID);
 		RemoveFrameHandler(MyFrameHandler, windowID, 0);
+		delete CFOR;
+		CFOR = 0;
 	}
 	else if (eType == kWindowCreated)
 	{
@@ -139,11 +144,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (viewport == 0)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
+		if ((!unitSims[windowID]->GetPaused()) && CFOR)
+			CFOR->DoOneSearchStep();
+
+		if (CFOR)
+		{
+			CFOR->OpenGLDraw();
+		}
 	}
 	unitSims[windowID]->OpenGLDraw(windowID);
 	
-	MNPuzzle p(4, 4);
-	p.OpenGLDraw(windowID);
 //	if (viewport == 0)
 //	{
 //		if (plot)
@@ -237,6 +247,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
+		{
+			if (CFOR == 0)
+			{
+				CFOR = new CFOptimalRefinement();
+				while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
+																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->getRandomNode(),
+																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->getRandomNode()))
+				{}
+			}
+			if (CFOR->DoOneSearchStep())
+				printf("DONE!!!\n");
+		}
 			if (unitSims[windowID]->GetPaused())
 			{
 				unitSims[windowID]->SetPaused(false);
@@ -249,8 +271,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
-			//if (unitSim)
-			//	unitSim->GetEnvironment()->GetMapAbstraction()->ToggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
+			if (unitSims[windowID])
+				unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->ToggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
 			break;
 	}
 }
@@ -259,8 +281,14 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
 	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
 	
-	SearchUnit *su1 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), 0, 0);
-	SearchUnit *su2 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), su1, new praStar());
+	int x1, y1, x2, y2;
+	x2 = random()%m->getMapWidth();
+	y2 = random()%m->getMapHeight();
+	x1 = random()%m->getMapWidth();
+	y1 = random()%m->getMapHeight();
+	SearchUnit *su1 = new SearchUnit(x1, y1, 0, 0);
+	//SearchUnit *su2 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), su1, new praStar());
+	SearchUnit *su2 = new SearchUnit(x2, y2, su1, new CFOptimalRefinement());
 	//unitSim->AddUnit(su1);
 	unitSims[windowID]->AddUnit(su2);
 	
