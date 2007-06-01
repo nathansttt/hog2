@@ -31,5 +31,6 @@ default : all
 
 SRC_CPP = \
 	environments/Map2DEnvironment.cpp \
+	environments/GraphEnvironment.cpp \
 	environments/MNPuzzle.cpp \
 	environments/FlipSide.cpp

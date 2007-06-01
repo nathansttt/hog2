@@ -2079,12 +2079,12 @@ float Map::getEdgeWidthY(int x, int y)
 
 
 /**
-* makeMaze(map, pathsize)
+* MakeMaze(map, pathsize)
  *
  * A cheap function I hacked together to make psuedo mazes.
  * The only good values for pathSize are 1 and 3.
  */
-void makeMaze(Map *map, int pathSize)
+void MakeMaze(Map *map, int pathSize)
 {
 	int width = map->getMapWidth();
 	int height = map->getMapHeight();

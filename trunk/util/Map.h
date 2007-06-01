@@ -253,6 +253,6 @@ private:
 	tTileset tileSet;
 };
 
-void makeMaze(Map *map, int pathSize = 1);
+void MakeMaze(Map *map, int pathSize = 1);
 
 #endif

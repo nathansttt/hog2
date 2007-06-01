@@ -30,10 +30,17 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
+	abstractionalgorithms/AStar2.cpp \
+	abstractionalgorithms/AStar3.cpp \
+	abstractionalgorithms/AStar.cpp \
 	abstractionalgorithms/CorridorAStar.cpp \
 	abstractionalgorithms/CRAStar.cpp \
 	abstractionalgorithms/HPAStar.cpp \
 	abstractionalgorithms/PRAStar2.cpp \
 	abstractionalgorithms/PRAStar.cpp \
 	abstractionalgorithms/SpreadPRAStar.cpp \
+	abstractionalgorithms/SearchAlgorithm.cpp \
+	abstractionalgorithms/FringeSearch.cpp \
 	abstractionalgorithms/CFOptimalRefinement.cpp 
+
+

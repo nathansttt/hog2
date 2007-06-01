@@ -33,7 +33,7 @@
 //#include "SharedAMapGroup.h"
 #include "MapCliqueAbstraction.h"
 #include "NodeLimitAbstraction.h"
-//#include "MapQuadTreeAbstraction.h"
+#include "MapQuadTreeAbstraction.h"
 //#include "RadiusAbstraction.h"
 //#include "MapFlatAbstraction.h"
 //#include "ClusterAbstraction.h"
@@ -70,13 +70,17 @@ void CreateSimulation(int id)
 {
 	Map *map;
 	if (gDefaultMap[0] == 0)
-		map = new Map(60, 60);
+	{
+		map = new Map(40, 40);
+		MakeMaze(map, 1);
+	}
 	else
 		map = new Map(gDefaultMap);
 
 	unitSims.resize(id+1);
-	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 10)));
-	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
+	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapQuadTreeAbstraction(map, 2)));
+	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 8)));
+	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
 	unitSims[id]->SetStepType(kMinTime);
 //	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
 //																																 (OccupancyInterface<xyLoc, tDirection>*)0);

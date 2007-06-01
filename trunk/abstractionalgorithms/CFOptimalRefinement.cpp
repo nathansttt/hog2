@@ -161,6 +161,8 @@ void CFOptimalRefinement::UpdateH(node *gNode)
 		if (fless(tmpH, minH))
 			minH = tmpH;
 	}
+	if (gNode->GetLabelL(kAbstractionLevel) == 0)
+		minH = std::max(minH, absGraph->h(gNode, aGoal));
 	if (fgreater(minH, gNode->GetLabelF(kHCost)) &&
 			(gNode != gGoal))
 	{
@@ -182,6 +184,8 @@ void CFOptimalRefinement::UpdateG(node *gNode)
 		if (fless(tmpG, minG))
 			minG = tmpG;
 	}
+	if (gNode->GetLabelL(kAbstractionLevel) == 0)
+		minG = std::max(minG, absGraph->h(gNode, aStart));
 	if (fgreater(minG, gNode->GetLabelF(kGCost)) &&
 			(gNode != gStart))
 	{
@@ -266,8 +270,8 @@ void CFOptimalRefinement::RefineNode(node *gNode)
 				edge *e;
 				if ((e = aGraph->findDirectedEdge(aChildren[x]->GetNum(), aChildren[y]->GetNum())) != 0)
 				{
-					g->AddEdge(new edge(gChildren[x]->GetNum(), gChildren[y]->GetNum(), 1.0));
-					//(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.0));
+					g->AddEdge(new edge(gChildren[x]->GetNum(), gChildren[y]->GetNum(), //1.0));
+															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.5));
 				}
 			}
 		}
@@ -286,8 +290,8 @@ void CFOptimalRefinement::RefineNode(node *gNode)
 				edge *e;
 				if ((e = aGraph->FindEdge(aChildren[x]->GetNum(), GetRealNode(gNeighbor)->GetNum())) != 0)
 				{
-					g->AddEdge(new edge(gChildren[x]->GetNum(), gNeighbor->GetNum(), 1.0));
-					//(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.0));
+					g->AddEdge(new edge(gChildren[x]->GetNum(), gNeighbor->GetNum(), //1.0));
+															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.5));
 				}
 			}
 		}

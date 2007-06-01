@@ -78,6 +78,8 @@ struct NodeHash {
 typedef OpenClosedList<GNode, NodeHash, NodeEqual, NodeCompare> PQueue;
 typedef __gnu_cxx::hash_map<uint32_t, GNode> NodeLookupTable;
 
+// variables starting with "a" are in the abstraction
+// variables starting with "g" are in the defined search graph
 class CFOptimalRefinement : public SearchAlgorithm {
 public:
 	CFOptimalRefinement();

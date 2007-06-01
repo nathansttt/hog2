@@ -30,9 +30,8 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-	algorithms/FringeSearch.cpp \
 	algorithms/GenericAStar.cpp \
 	algorithms/GenericIDAStar.cpp \
-	algorithms/OpenClosedList.cpp \
-	algorithms/SearchEnvironment.cpp
+	algorithms/OpenClosedList.cpp
+#	algorithms/SearchEnvironment.cpp
 

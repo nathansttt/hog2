@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/abstraction -I$(ROOT)/util -I$(ROOT)/algorithms -I$(ROOT)/abstractionalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/simulation
+PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/abstraction -I$(ROOT)/util -I$(ROOT)/abstractionalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/simulation -I$(ROOT)/environments -I$(ROOT)/algorithms 
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -30,10 +30,6 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-	graphalgorithms/AStar2.cpp \
-	graphalgorithms/AStar3.cpp \
-	graphalgorithms/AStar.cpp \
 	graphalgorithms/Heap.cpp \
 	graphalgorithms/Path.cpp \
-	graphalgorithms/SearchAlgorithm.cpp \
-	graphalgorithms/SpreadExecSearchAlgorithm.cpp
+  graphalgorithms/MeroB.cpp
