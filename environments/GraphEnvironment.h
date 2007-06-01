@@ -18,7 +18,8 @@
 
 typedef unsigned long graphState;
 
-struct graphMove {
+class graphMove {
+public:
 	graphMove() :from(-1), to(-1) {}
 	graphMove(uint16_t f, uint16_t t) :from(f), to(t) {}
 	uint16_t from, to;
