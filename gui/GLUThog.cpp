@@ -61,7 +61,7 @@ void RunHOGGUI(int argc, char** argv)
 
 	srandom(time(0));
 	
-	InstallCommandLineHandler(processFramesPerSecond, "-fps", "-fps <int>", "[System Option] Specifies the maximum frames per second.");
+//	InstallCommandLineHandler(processFramesPerSecond, "-fps", "-fps <int>", "[System Option] Specifies the maximum frames per second.");
 	//initializeHandlers();
 	ProcessCommandLineArgs(argc, argv);
 	
@@ -96,23 +96,23 @@ void RunHOGGUI(int argc, char** argv)
 
 void createMenus()
 {
-	int menu, submenu;
-	
-	// create the menu and
-	// tell glut that "processMenuEvents" will 
-	// handle the events
-	submenu = glutCreateMenu(processMenuEvents);
-	glutAddMenuEntry("Map1",'map1');
-	glutAddMenuEntry("Map2",'map2');
-	glutAddMenuEntry("Map3",'map3');
-	menu = glutCreateMenu(processMenuEvents);
-	
-	//add entries to our menu
-	glutAddSubMenu("Open Map",submenu);
-	glutAddMenuEntry("Clear Map...",'clar');
-	
-	// attach the menu to the right button
-	glutAttachMenu(GLUT_MIDDLE_BUTTON);
+//	int menu, submenu;
+//	
+//	// create the menu and
+//	// tell glut that "processMenuEvents" will 
+//	// handle the events
+//	submenu = glutCreateMenu(processMenuEvents);
+//	glutAddMenuEntry("Map1",'map1');
+//	glutAddMenuEntry("Map2",'map2');
+//	glutAddMenuEntry("Map3",'map3');
+//	menu = glutCreateMenu(processMenuEvents);
+//	
+//	//add entries to our menu
+//	glutAddSubMenu("Open Map",submenu);
+//	glutAddMenuEntry("Clear Map...",'clar');
+//	
+//	// attach the menu to the right button
+//	glutAttachMenu(GLUT_MIDDLE_BUTTON);
 }
 
 void processMenuEvents(int option)
@@ -149,15 +149,15 @@ void processMenuEvents(int option)
  */
 }
 
-int processFramesPerSecond(char *argument[], int maxNumArgs)
-{
-	if (maxNumArgs <= 1)
-		return 0;
-	fps = atof(argument[1]);
-	if (fps == 0)
-		fps = 1.0;
-	return 2;
-}
+//int processFramesPerSecond(char *argument[], int maxNumArgs)
+//{
+//	if (maxNumArgs <= 1)
+//		return 0;
+//	fps = atof(argument[1]);
+//	if (fps == 0)
+//		fps = 1.0;
+//	return 2;
+//}
 
 //void pointPath() {
 //	

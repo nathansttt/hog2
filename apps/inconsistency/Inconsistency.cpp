@@ -37,6 +37,7 @@
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
+int GraphSizeN = 5;
 
 std::vector<GraphSimulation *> unitSims;
 
@@ -54,7 +55,7 @@ int main(int argc, char* argv[])
 void CreateSimulation(int id)
 {
 	Graph *g;
-	g = MeroBUtil::graphGenerator::genFig2(5);
+	g = MeroBUtil::graphGenerator::genFig2(GraphSizeN);
 	
 	unitSims.resize(id+1);
 	unitSims[id] = new GraphSimulation(new GraphEnvironment(g));
@@ -168,6 +169,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
+			// set N to be whatever size I press
+			GraphSizeN = key-'0';
+			if (GraphSizeN == 0)
+				GraphSizeN = 10;
 			break;
 	}
 }
