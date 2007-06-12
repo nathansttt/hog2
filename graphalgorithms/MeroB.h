@@ -147,7 +147,7 @@ namespace MeroBUtil
 			// add nodes
 			node* n = new node("");
 			n->SetLabelF(GraphSearchConstants::kHCost,0);
-			SetLoc(n, 1, 0.9, 0);
+			SetLoc(n, 0, 0.9, 0);
 			g->AddNode(n);
 
 			for (unsigned int i=1;i<=N-1;i++)

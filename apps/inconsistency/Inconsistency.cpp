@@ -59,6 +59,7 @@ void CreateSimulation(int id)
 	unitSims.resize(id+1);
 	unitSims[id] = new GraphSimulation(new GraphEnvironment(g));
 	unitSims[id]->SetStepType(kMinTime);
+	SetNumPorts(id, 1);
 }
 
 /**
