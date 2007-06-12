@@ -84,6 +84,37 @@ uint64_t GraphEnvironment::GetActionHash(graphMove act)
 
 void GraphEnvironment::OpenGLDraw(int window)
 {
+	if ((g == 0) || (g->getNumNodes() == 0)) return;
+
+	glBegin(GL_LINES);
+	glNormal3f(0, 1, 0);
+		
+	edge_iterator ei = g->getEdgeIter();
+	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+	{
+		//int x, y;
+		//double offsetx, offsety;
+		node *n;
+		n = g->GetNode(e->getFrom());
+		
+		glColor3f(1, 0, 0);
+		if (e->getMarked())
+			glColor3f(1, 1, 1);
+		
+		GLdouble x, y, z;
+		x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+		y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+		z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+		glVertex3f(x, y, z);
+		
+		n = g->GetNode(e->getTo());
+		x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+		y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+		z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+		
+		glVertex3f(x, y, z);
+	}
+	glEnd();
 }
 
 void GraphEnvironment::OpenGLDraw(int window, graphState &s)

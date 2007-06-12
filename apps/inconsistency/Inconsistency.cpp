@@ -27,33 +27,18 @@
 
 #include "Common.h"
 #include "Inconsistency.h"
-//#include "AStar.h"
-#include "PRAStar.h"
 #include "SearchUnit.h"
-//#include "SharedAMapGroup.h"
-#include "MapCliqueAbstraction.h"
-#include "NodeLimitAbstraction.h"
-#include "MapQuadTreeAbstraction.h"
-//#include "RadiusAbstraction.h"
-//#include "MapFlatAbstraction.h"
-//#include "ClusterAbstraction.h"
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
 #include "Plot2D.h"
-#include "Map2DEnvironment.h"
-#include "RandomUnits.h"
-#include "CFOptimalRefinement.h"
+#include "MeroB.h"
+#include "GraphEnvironment.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-std::vector<UnitAbsMapSimulation *> unitSims;
-CFOptimalRefinement *CFOR = 0;
-//unit *cameraTarget = 0;
-
-Plotting::Plot2D *plot = 0;
-Plotting::Line *distLine = 0;
+std::vector<GraphSimulation *> unitSims;
 
 int main(int argc, char* argv[])
 {
@@ -68,33 +53,12 @@ int main(int argc, char* argv[])
  */
 void CreateSimulation(int id)
 {
-	Map *map;
-	if (gDefaultMap[0] == 0)
-	{
-		map = new Map(40, 40);
-		MakeMaze(map, 1);
-	}
-	else
-		map = new Map(gDefaultMap);
-
-	unitSims.resize(id+1);
-	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapQuadTreeAbstraction(map, 2)));
-	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 8)));
-	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
-	unitSims[id]->SetStepType(kMinTime);
-//	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
-//																																 (OccupancyInterface<xyLoc, tDirection>*)0);
-//	if (absType == 0)
-//		unitSim = new unitSimulation(new MapCliqueAbstraction(map));
-//	else if (absType == 1)
-//		unitSim = new unitSimulation(new RadiusAbstraction(map, 1));
-//	else if (absType == 2)
-//		unitSim = new unitSimulation(new MapQuadTreeAbstraction(map, 2));
-//	else if (absType == 3)
-//		unitSim = new unitSimulation(new ClusterAbstraction(map, 8));
+	Graph *g;
+	g = MeroBUtil::graphGenerator::genFig2(5);
 	
-	//unitSim->setCanCrossDiagonally(true);
-	//unitSim = new unitSimulation(new MapFlatAbstraction(map));
+	unitSims.resize(id+1);
+	unitSims[id] = new GraphSimulation(new GraphEnvironment(g));
+	unitSims[id]->SetStepType(kMinTime);
 }
 
 /**
@@ -129,8 +93,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	{
 		printf("Window %ld destroyed\n", windowID);
 		RemoveFrameHandler(MyFrameHandler, windowID, 0);
-		delete CFOR;
-		CFOR = 0;
 	}
 	else if (eType == kWindowCreated)
 	{
@@ -147,86 +109,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 	if (viewport == 0)
 	{
-		unitSims[windowID]->StepTime(1.0/30.0);
-		if ((!unitSims[windowID]->GetPaused()) && CFOR)
-			CFOR->DoOneSearchStep();
-
-		if (CFOR)
-		{
-			CFOR->OpenGLDraw();
-		}
+//		unitSims[windowID]->StepTime(1.0/30.0);
+//		if ((!unitSims[windowID]->GetPaused()) && CFOR)
+//			CFOR->DoOneSearchStep();
+//
+//		if (CFOR)
+//		{
+//			CFOR->OpenGLDraw();
+//		}
 	}
 	unitSims[windowID]->OpenGLDraw(windowID);
-	
-//	if (viewport == 0)
-//	{
-//		if (plot)
-//		{
-//			if (distLine && cameraTarget)
-//			{
-//				MapAbstraction *ma = unitSim->GetMapAbstraction();
-//				int x, y;
-//				cameraTarget->getLocation(x, y);
-//				node *n1 = ma->GetNodeFromMap(x, y);
-//				cameraTarget->GetGoal()->getLocation(x, y);
-//				node *n2 = ma->GetNodeFromMap(x, y);
-//				distLine->AddPoint(ma->h(n1, n2));
-//			}
-//			plot->OpenGLDraw();
-//			return;
-//		}
-//	}
-//	
-//	unitSim->OpenGLDraw();
-//	switch (viewport%3)
-//	{
-//		case 0: //unitSim->GetMap()->OpenGLDraw(kLines); break;
-//		case 1: //unitSim->GetMap()->OpenGLDraw(kPoints); break;
-//		case 2: unitSim->GetMap()->OpenGLDraw(kPolygons); break;
-//	}
-//	if ((mouseTracking) && (px1 != -1) && (px2 != -1) && (py1 != -1) && (py2 != -1))
-//	{
-//		glColor3f(1.0, 1.0, 1.0);
-//		GLdouble x1, y1, z1, rad;
-//		glBegin(GL_LINES);
-//		unitSim->GetMap()->getOpenGLCoord(px1, py1, x1, y1, z1, rad);
-//		glVertex3f(x1, y1, z1-rad);
-//		unitSim->GetMap()->getOpenGLCoord(px2, py2, x1, y1, z1, rad);
-//		glVertex3f(x1, y1, z1-rad);
-//		glEnd();
-//	}
-//	
-//	if (viewport != 0)
-//		return;
-//	
-//	char tempStr[255];
-//	sprintf(tempStr, "Simulation time elapsed: %1.2f, Display Time: %1.2f",
-//					unitSim->getSimulationTime(), unitSim->getDisplayTime());
-//	submitTextToBuffer(tempStr);
-//	
-//	if (cameraTarget)
-//	{
-//		GLdouble x, y, z, r;
-//		GLdouble xx, yy, zz;
-//		cameraTarget->getOpenGLLocation(unitSim->GetMap(), x, y, z, r);
-//		if (cameraTarget->GetGoal())
-//			cameraTarget->GetGoal()->getOpenGLLocation(unitSim->GetMap(), xx, yy, zz, r);
-//		else {
-//			xx = -x; 
-//			yy = -y;
-//		}
-//		
-//		int oldPort = GetActivePort(windowID);
-//		SetActivePort(windowID, 1);
-//		cameraMoveTo(xx+3*(xx-x), yy+3*(yy-y), z-0.25, 0.05);
-//		cameraLookAt(x, y, z, .2);
-//		SetActivePort(windowID, oldPort);
-//
-////		SetActivePort(windowID, 0);
-////		cameraMoveTo(x, y, z-250*r, 0.05);
-////		cameraLookAt(x, y, z, .2);
-////		SetActivePort(windowID, oldPort);
-//	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -252,16 +144,16 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 		{
-			if (CFOR == 0)
-			{
-				CFOR = new CFOptimalRefinement();
-				while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
-																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->getRandomNode(),
-																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->getRandomNode()))
-				{}
-			}
-			if (CFOR->DoOneSearchStep())
-				printf("DONE!!!\n");
+//			if (CFOR == 0)
+//			{
+//				CFOR = new CFOptimalRefinement();
+//				while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
+//																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->getRandomNode(),
+//																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->getRandomNode()))
+//				{}
+//			}
+//			if (CFOR->DoOneSearchStep())
+//				printf("DONE!!!\n");
 		}
 			if (unitSims[windowID]->GetPaused())
 			{
@@ -275,52 +167,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
-			if (unitSims[windowID])
-				unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->ToggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
 			break;
 	}
 }
 
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
-	
-	int x1, y1, x2, y2;
-	x2 = random()%m->getMapWidth();
-	y2 = random()%m->getMapHeight();
-	x1 = random()%m->getMapWidth();
-	y1 = random()%m->getMapHeight();
-	SearchUnit *su1 = new SearchUnit(x1, y1, 0, 0);
-	//SearchUnit *su2 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), su1, new praStar());
-	SearchUnit *su2 = new SearchUnit(x2, y2, su1, new CFOptimalRefinement());
-	//unitSim->AddUnit(su1);
-	unitSims[windowID]->AddUnit(su2);
-	
-//	RandomerUnit *r = new RandomerUnit(random()%m->getMapWidth(), random()%m->getMapHeight());
-//	int id = unitSim->AddUnit(r);
-//	xyLoc loc;
-//	r->GetLocation(loc);
-//	printf("Added unit %d at (%d, %d)\n", id, loc.x, loc.y);
-
-//	int x1, y1, x2, y2;
-//	unit *u;
-//	unitSim->getRandomLocation(x1, y1);
-//	unitSim->getRandomLocation(x2, y2);
-//	switch (mod)
-//	{
-//		case kControlDown: unitSim->addUnit(u=new rhrUnit(x1, y1)); break;
-//		case kShiftDown: unitSim->addUnit(u=new randomUnit(x1, y1)); break;
-//		default:
-//			unit *targ;
-//	unitSim->addUnit(targ = new unit(x2, y2));
-//	unitSim->addUnit(u=new SearchUnit(x1, y1, targ, new praStar())); break;
-//	}
-//	delete plot;
-//	plot = new Plotting::Plot2D();
-//	delete distLine;
-//	plot->AddLine(distLine = new Plotting::Line("distline"));
-//	cameraTarget = u;
-//	u->setSpeed(1.0/4.0);
 }
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
