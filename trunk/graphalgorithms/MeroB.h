@@ -82,7 +82,15 @@ namespace MeroBUtil
 	};
 
 	struct graphGenerator {
-		static Graph* genFig1(int N) {
+		static void SetLoc(node *n, double x, double y, double z)
+		{
+			n->SetLabelL(GraphSearchConstants::kXCoordinate, x);
+			n->SetLabelL(GraphSearchConstants::kYCoordinate, y);
+			n->SetLabelL(GraphSearchConstants::kZCoordinate, z);
+		}
+		
+		static Graph* genFig1(int N)
+	  {
 			// h(0) = h(1) = 0; 
 			// h(i) = 2^(i-1) + 2i - 3, for 1<i<=N
 			// c(i,j) = 2^(i-2) + i - 2^(j-1) - j, for 1<=j<i<=N
@@ -92,11 +100,13 @@ namespace MeroBUtil
 			Graph *g = new Graph();
 
 			// add nodes
-			unsigned int nodeID = 0;
-			for(;nodeID<=N;nodeID++) {
+			
+			for(unsigned int nodeID = 0; nodeID <= N; nodeID++)
+			{
 				node *n = new node("");
-				if(nodeID == 0 || nodeID == 1) {
-					n->SetLabelF(GraphSearchConstants::kHCost,0);
+				if (nodeID == 0 || nodeID == 1)
+				{
+					n->SetLabelF(GraphSearchConstants::kHCost, 0);
 				}
 				else {
 					double h = pow(2,nodeID-1) + 2*nodeID - 3;
@@ -109,8 +119,10 @@ namespace MeroBUtil
 			double c = pow(2,N-1) + N - 2;
 			edge *e = new edge(1,0,c);
 			g->AddEdge(e);
-			for(int j=1;j<N;j++) {
-				for(int i=j+1;i<=N;i++) {
+			for (int j = 1; j < N; j++)
+			{
+				for (int i = j+1; i <= N; i++)
+				{
 					c = pow(2,i-2) + i - pow(2,j-1) - j;
 					e = new edge(i,j,c);
 					g->AddEdge(e);
@@ -120,7 +132,8 @@ namespace MeroBUtil
 			return g;
 		}
 
-		static Graph* genFig2(int N) {
+		static Graph* genFig2(int N)
+	  {
 			// h(0) = h(2N-1) = 0
 			// h(i) = 2(N-1)^2 - N - i + 2, for i = 1,...,N-1
 			// h(N+j) = 2(N-1)(N-2-j) + 1,  for j = 0,...,N-2
@@ -134,13 +147,16 @@ namespace MeroBUtil
 			// add nodes
 			node* n = new node("");
 			n->SetLabelF(GraphSearchConstants::kHCost,0);
+			SetLoc(n, 1, 0.9, 0);
 			g->AddNode(n);
 
-			for(unsigned int i=1;i<=N-1;i++) {
+			for (unsigned int i=1;i<=N-1;i++)
+			{
 				n = new node("");
 				double h = 2*(N-1)*(N-1) - N - i + 2;
 				n->SetLabelF(GraphSearchConstants::kHCost,h);
 				g->AddNode(n);
+				SetLoc(n, -1+2.0/((double)N-1.0), 0.0, 0);
 			}
 
 			for(unsigned int j=0;j<=N-2;j++) {
@@ -148,6 +164,7 @@ namespace MeroBUtil
 				double h = 2*(N-1)*(N-2-j) + 1;
 				n->SetLabelF(GraphSearchConstants::kHCost,h);
 				g->AddNode(n);
+				SetLoc(n, 0-2.0/((double)N-1.0), -0.9+(j%2)?0.5:0.0, 0);
 			}
 
 			n = new node(""); // the last node (2N-1)
@@ -157,20 +174,23 @@ namespace MeroBUtil
 			// add edges
 
 			// type 1
-			for(unsigned int i=1;i<=N-1;i++) {
+			for (unsigned int i=1;i<=N-1;i++)
+			{
 				edge* e = new edge(0,i,1);
 				g->AddEdge(e);
 			}
 
 			// type 2
-			for(unsigned int i=1;i<=N-1;i++) {
+			for (unsigned int i=1;i<=N-1;i++)
+			{
 				double c = 2*(N-1)*(i-1) + 1;
 				edge* e = new edge(i,N,c);
 				g->AddEdge(e);
 			}
 
 			// type 3
-			for(unsigned int i=N;i<=2*N-2;i++) {
+			for (unsigned int i=N;i<=2*N-2;i++)
+			{
 				double c = 2*N - 2;
 				edge* e = new edge(i,i+1,c);
 				g->AddEdge(e);
