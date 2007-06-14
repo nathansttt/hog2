@@ -120,9 +120,9 @@ void GraphEnvironment::OpenGLDraw(int window)
 void GraphEnvironment::OpenGLDraw(int window, graphState &s)
 {
 	node *n = g->GetNode(s);
-	DrawSphere(n->GetLabelF(GraphSearchConstants::kXCoordinate),
-						 n->GetLabelF(GraphSearchConstants::kYCoordinate),
-						 n->GetLabelF(GraphSearchConstants::kZCoordinate),
-						 2.0/(g->getNumNodes()*g->getNumNodes()));
+	DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
+						 (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
+						 (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
+						 (GLdouble)2.0/(g->getNumNodes()*g->getNumNodes()));
 }
 

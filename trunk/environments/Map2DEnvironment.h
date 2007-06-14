@@ -59,8 +59,8 @@ public:
 	void ApplyAction(xyLoc &s, tDirection dir);
 	virtual OccupancyInterface<xyLoc, tDirection> *GetOccupancyInfo() { return 0; }
 
-	double HCost(xyLoc &node1, xyLoc &node2);
-	double GCost(xyLoc &node1, xyLoc &node2);
+	virtual double HCost(xyLoc &node1, xyLoc &node2);
+	virtual double GCost(xyLoc &node1, xyLoc &node2);
 	bool GoalTest(xyLoc &node, xyLoc &goal);
 	uint64_t GetStateHash(xyLoc &node);
 	uint64_t GetActionHash(tDirection act);
