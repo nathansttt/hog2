@@ -33,3 +33,4 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier, char key)
 int MyCLHandler(char *argument[], int maxNumArgs);
 bool MyClickHandler(unsigned long windowID, int x, int y, point3d loc, tButtonType, tMouseEventType);
 void InstallHandlers();
+void preProcessArgs(int argc, char* argv[]);

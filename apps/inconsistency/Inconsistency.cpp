@@ -41,12 +41,48 @@ int GraphSizeN = 5;
 
 std::vector<GraphSimulation *> unitSims;
 
+unsigned int fig = 1;
+unsigned int N = 5;
+unsigned int vid = 1;
+
+graphState from,to;
+std::vector<graphState> thePath;
+Graph* g=0;
+GraphEnvironment* env = 0;
+
+MeroB* ALG = 0;
+
+bool done = false;
+
 int main(int argc, char* argv[])
 {
+	preProcessArgs(argc,argv);
 	InstallHandlers();
 	RunHOGGUI(argc, argv);
 }
 
+
+void preProcessArgs(int argc, char* argv[]) 
+{
+	// -f fig -N n -v vid
+	int i = 1;
+	while(i<argc) {
+		if(strcmp(argv[i],"-f")==0) {
+			fig = atoi(argv[i+1]);
+			i += 2;
+		}
+		else if(strcmp(argv[i],"-N")==0) {
+			N = atoi(argv[i+1]);
+			i += 2;
+		}
+		else if(strcmp(argv[i],"-v")==0) {
+			vid = atoi(argv[i+1]);
+			i += 2;
+		}
+		else
+			i++;
+	}
+}
 
 /**
  * This function is used to allocate the unit simulated that you want to run.
@@ -54,11 +90,25 @@ int main(int argc, char* argv[])
  */
 void CreateSimulation(int id)
 {
-	Graph *g;
-	g = MeroBUtil::graphGenerator::genFig2(GraphSizeN);
+	//Graph *g;
+
+	if(fig == 1) 
+	{
+		g = MeroBUtil::graphGenerator::genFig1(N);
+		from = N;
+		to = 0;
+	}
+	else 
+	{
+		g = MeroBUtil::graphGenerator::genFig2(N);
+		from = 0;
+		to = 2*N - 1;
+	}
 	
+	env = new GraphEnvironment(g);
+
 	unitSims.resize(id+1);
-	unitSims[id] = new GraphSimulation(new GraphEnvironment(g));
+	unitSims[id] = new GraphSimulation(env);
 	unitSims[id]->SetStepType(kMinTime);
 	SetNumPorts(id, 1);
 }
@@ -119,6 +169,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //		{
 //			CFOR->OpenGLDraw();
 //		}
+
+		unitSims[windowID]->StepTime(1.0/30.0);
+		//if((!unitSims[windowID]->GetPaused()) && ALG)
+		//	ALG->DoSingleSearchStep(thePath);
+
+		if(ALG)
+		{
+			ALG->OpenGLDraw();
+		}
 	}
 	unitSims[windowID]->OpenGLDraw(windowID);
 }
@@ -156,6 +215,21 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			}
 //			if (CFOR->DoOneSearchStep())
 //				printf("DONE!!!\n");
+
+			if(ALG == 0) 
+			{
+				ALG = new MeroB(vid);
+				ALG->InitializeSearch(env,g,from,to,thePath);
+			}
+
+			if(!done && ALG->DoSingleSearchStep(thePath)) 
+			{
+				printf("\nFinished! Nodes expanded=%d, Nodes touched=%d.\n", ALG->GetNodesExpanded(),ALG->GetNodesTouched());
+				done = true;
+			}
+
+
+
 		}
 			if (unitSims[windowID]->GetPaused())
 			{
@@ -170,9 +244,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
 			// set N to be whatever size I press
-			GraphSizeN = key-'0';
-			if (GraphSizeN == 0)
-				GraphSizeN = 10;
+			//GraphSizeN = key-'0';
+			//if (GraphSizeN == 0)
+			//	GraphSizeN = 10;
 			break;
 	}
 }
