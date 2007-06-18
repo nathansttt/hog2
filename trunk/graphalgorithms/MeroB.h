@@ -20,6 +20,7 @@
 #define UINT32_MAX        4294967295U
 #endif
 
+const double pi = 3.141592654;
 
 #define MB_A 1
 #define MB_B 2
@@ -38,7 +39,7 @@ namespace MeroBUtil
 		:fCost(0), gCost(0), currNode(curr), prevNode(0) {}
 
 		void copy(double f, double g, graphState curr, graphState prev)
-	  {
+		{
 			fCost = f;
 			gCost = g;
 			currNode = curr;
@@ -92,7 +93,15 @@ namespace MeroBUtil
 //			std::cout << *n << std::endl;
 //			printf("(%f, %f, %f)\n", x, y, z);
 		}
+
+		static void GetLoc(node *n, double &x, double &y, double &z)
+		{
+			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+		}
 		
+		// Note: this is from Martelli paper
 		static Graph* genFig1(int N)
 	  {
 			// h(0) = h(1) = 0; 
@@ -117,6 +126,17 @@ namespace MeroBUtil
 					n->SetLabelF(GraphSearchConstants::kHCost,h);
 				}
 				g->AddNode(n); // the real nodeID is assigned here
+
+				if(nodeID == 0)
+				{
+					SetLoc(n,-1,-1,0);
+				}
+				else // nodes 1 - N will be drawn along 3/4 circle
+				{
+					double alpha = ((double)N - nodeID) * 1.5*pi /(N - 1.0);
+					double beta = alpha - 0.5*pi;
+					SetLoc(n,cos(beta),sin(beta),0);
+				}
 			}
 
 			// add edges
@@ -160,7 +180,7 @@ namespace MeroBUtil
 				double h = 2*(N-1)*(N-1) - N - i + 2;
 				n->SetLabelF(GraphSearchConstants::kHCost,h);
 				g->AddNode(n);
-				SetLoc(n, -1+(double)i*2.0/((double)N-1.0), 0.0, 0);
+				SetLoc(n, -1+(double)(i-1)*2.0/((double)N-2.0), 0.0, 0);
 			}
 
 			for (unsigned int j=0; j<=N-2; j++)
@@ -220,17 +240,21 @@ public:
 	MeroB() { verID = MB_A;}
 	MeroB(unsigned int v) { verID = v; }
 	virtual ~MeroB() {}
-	void GetPath(GraphEnvironment *env, graphState from, graphState to, std::vector<graphState> &thePath);
+	void GetPath(GraphEnvironment *env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
 	long GetNodesExpanded() { return nodesExpanded; }
 	long GetNodesTouched() { return nodesTouched; }
 
-	bool InitializeSearch(GraphEnvironment *env, graphState from, graphState to, std::vector<graphState> &thePath);
+	bool InitializeSearch(GraphEnvironment *env, Graph* g, graphState from, graphState to, std::vector<graphState> &thePath);
 	bool DoSingleSearchStep(std::vector<graphState> &thePath);
 	bool DoSingleStepA(std::vector<graphState> &thePath);
 	bool DoSingleStepB(std::vector<graphState> &thePath);
 	bool DoSingleStepBP(std::vector<graphState> &thePath);
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
+	void OpenGLDraw();
+	void OpenGLDraw(int window);
+	void drawText(double x, double y, double z, float r, float g, float b, char* str);
+	void drawEdge(unsigned int from, unsigned int to, double weight);
 
 private:
 	unsigned int verID;
@@ -242,6 +266,8 @@ private:
 	MeroBUtil::PQueue openQueue;
 	MeroBUtil::NodeLookupTable closedList; 
 	MeroBUtil::GQueue FCache; // storing nodes with f < F, this is temporary cache
+
+	Graph* g; // for OpenGL drawing only
 
 };	
 
