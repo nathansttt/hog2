@@ -100,7 +100,7 @@ namespace MeroBUtil
 		}
 		
 		// Note: this is from Martelli paper
-		static Graph* genFig1(int N)
+		static Graph* genFig1(unsigned int N)
 	  {
 			// h(0) = h(1) = 0; 
 			// h(i) = 2^(i-1) + 2i - 3, for 1<i<=N
@@ -112,7 +112,7 @@ namespace MeroBUtil
 
 			// add nodes
 			
-			for(unsigned int nodeID = 0; nodeID <= N; nodeID++)
+			for (unsigned int nodeID = 0; nodeID <= N; nodeID++)
 			{
 				node *n = new node("");
 				if (nodeID == 0 || nodeID == 1)
@@ -141,9 +141,9 @@ namespace MeroBUtil
 			double c = pow(2,N-1) + N - 2;
 			edge *e = new edge(1,0,c);
 			g->AddEdge(e);
-			for (int j = 1; j < N; j++)
+			for (unsigned int j = 1; j < N; j++)
 			{
-				for (int i = j+1; i <= N; i++)
+				for (unsigned int i = j+1; i <= N; i++)
 				{
 					c = pow(2,i-2) + i - pow(2,j-1) - j;
 					e = new edge(i,j,c);
@@ -154,7 +154,7 @@ namespace MeroBUtil
 			return g;
 		}
 
-		static Graph* genFig2(int N)
+		static Graph* genFig2(unsigned int N)
 	  {
 			// h(0) = h(2N-1) = 0
 			// h(i) = 2(N-1)^2 - N - i + 2, for i = 1,...,N-1
@@ -187,7 +187,7 @@ namespace MeroBUtil
 				double h = 2*(N-1)*(N-2-j) + 1;
 				n->SetLabelF(GraphSearchConstants::kHCost,h);
 				g->AddNode(n);
-				SetLoc(n, -(double)j/((double)N-1.0), 0.9+((j%2)?0.05:0.0), 0);
+				SetLoc(n, -(double)j/((double)N-1.0), 0.9+((j%2)?0.1:0.0), 0);
 			}
 
 			n = new node(""); // the last node (2N-1)
@@ -265,8 +265,7 @@ private:
 	MeroBUtil::NodeLookupTable closedList; 
 	MeroBUtil::GQueue FCache; // storing nodes with f < F, this is temporary cache
 
-	Graph* g; // for OpenGL drawing only
-
+	Graph *g; // for OpenGL drawing only
 };	
 
 #endif
