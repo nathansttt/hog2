@@ -20,8 +20,6 @@
 #define UINT32_MAX        4294967295U
 #endif
 
-const double pi = 3.141592654;
-
 #define MB_A 1
 #define MB_B 2
 #define MB_BP 3
@@ -133,8 +131,8 @@ namespace MeroBUtil
 				}
 				else // nodes 1 - N will be drawn along 3/4 circle
 				{
-					double alpha = ((double)N - nodeID) * 1.5*pi /(N - 1.0);
-					double beta = alpha - 0.5*pi;
+					double alpha = ((double)N - nodeID) * 1.5*PI /(N - 1.0);
+					double beta = alpha - 0.5*PI;
 					SetLoc(n,cos(beta),sin(beta),0);
 				}
 			}
@@ -253,8 +251,8 @@ public:
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
 	void OpenGLDraw();
 	void OpenGLDraw(int window);
-	void drawText(double x, double y, double z, float r, float g, float b, char* str);
-	void drawEdge(unsigned int from, unsigned int to, double weight);
+	void DrawText(double x, double y, double z, float r, float g, float b, char* str);
+	void DrawEdge(unsigned int from, unsigned int to, double weight);
 
 private:
 	unsigned int verID;
