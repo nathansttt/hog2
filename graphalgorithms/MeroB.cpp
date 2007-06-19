@@ -20,7 +20,7 @@ void MeroB::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, graphSta
 		{}
 	
 	if (thePath.size() > 0)
-		printf("\nNodes expanded=%d, Nodes touched=%d.\n",GetNodesExpanded(),GetNodesTouched());
+		printf("\nNodes expanded=%ld, Nodes touched=%ld.\n",GetNodesExpanded(),GetNodesTouched());
 }
 
 bool MeroB::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
@@ -65,7 +65,6 @@ bool MeroB::DoSingleSearchStep(std::vector<graphState> &thePath)
 /* The steps refer to the pseudo codes of the corresponding algorithms */
 
 bool MeroB::DoSingleStepA(std::vector<graphState> &thePath)
-
 {
 	// return false means the search is not finished, true otherwise
 	
@@ -87,7 +86,8 @@ bool MeroB::DoSingleStepA(std::vector<graphState> &thePath)
 	
 	if (verbose)
 	{
-		printf("Expanding node %d , g=%lf, h=%lf, f=%lf.\n",topNodeID,topNode.gCost,topNode.fCost-topNode.gCost,topNode.fCost);
+		printf("Expanding node %ld , gcost=%lf, h=%lf, f=%lf.\n",
+					 topNodeID, topNode.gCost, topNode.fCost-topNode.gCost, topNode.fCost);
 	}
 	
 	/* step (4) */
@@ -113,19 +113,19 @@ bool MeroB::DoSingleStepA(std::vector<graphState> &thePath)
 		/* step (5) */
 		graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
-		double g = topNode.gCost + edgeWeight;
+		double gcost = topNode.gCost + edgeWeight;
 		double h = env->HCost(neighbor,goal);
-		double f = g + h;
+		double f = gcost + h;
 		
 		/* step (6), neither in OPEN nor CLOSED */
 		if (!openQueue.IsIn(MeroBUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end())
 		{
-			MeroBUtil::SearchNode n(f,g,neighbor,topNodeID);
+			MeroBUtil::SearchNode n(f, gcost, neighbor,topNodeID);
 			openQueue.Add(n);
 			
 			if (verbose)
 			{
-				printf("Adding node %d to OPEN, g=%lf, h=%lf, f=%lf.\n",neighbor,g,f-g,f);
+				printf("Adding node %ld to OPEN, gcost=%lf, h=%lf, f=%lf.\n",neighbor,gcost,f-gcost,f);
 			}
 		}
 		
@@ -137,32 +137,32 @@ bool MeroB::DoSingleStepA(std::vector<graphState> &thePath)
 			{
 				neighborNode = openQueue.find(MeroBUtil::SearchNode(neighbor));
 				
-				//if (neighborNode.gCost <= g)
-				if (!fgreater(neighborNode.gCost,g))
+				//if (neighborNode.gCost <= gcost)
+				if (!fgreater(neighborNode.gCost,gcost))
 					continue;
 				
 				if (verbose)
 				{
-					printf("Adjusting node %d in OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+					printf("Adjusting node %ld in OPEN, gcost=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,gcost,f-gcost,f, neighborNode.gCost);
 				}
 				
-				neighborNode.copy(f,g,neighbor,topNodeID); // parent is changed
+				neighborNode.copy(f,gcost,neighbor,topNodeID); // parent is changed
 				openQueue.DecreaseKey(neighborNode);  // adjust its position in OPEN
 			}
 			else if (closedList.find(neighbor) != closedList.end())
 			{
 				neighborNode = closedList.find(neighbor)->second;
 				
-				//if (neighborNode.gCost <= g)
-				if (!fgreater(neighborNode.gCost,g))
+				//if (neighborNode.gCost <= gcost)
+				if (!fgreater(neighborNode.gCost,gcost))
 					continue;
 				
 				if (verbose)
 				{
-					printf("Moving node %d from CLOSED to OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+					printf("Moving node %ld from CLOSED to OPEN, gcost=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,gcost,f-gcost,f, neighborNode.gCost);
 				}
 				
-				neighborNode.copy(f,g,neighbor,topNodeID);  // parent is changed
+				neighborNode.copy(f,gcost,neighbor,topNodeID);  // parent is changed
 				closedList.erase(neighbor);  // delete from CLOSED
 				
 				openQueue.Add(neighborNode); // add to OPEN
@@ -233,7 +233,7 @@ bool MeroB::DoSingleStepB(std::vector<graphState> &thePath)
 	
 	if (verbose)
 	{
-		printf("Expanding node %d , g=%lf, h=%lf, f=%lf.\n",topNodeID,topNode.gCost,topNode.fCost-topNode.gCost,topNode.fCost);
+		printf("Expanding node %ld , gcost=%lf, h=%lf, f=%lf.\n",topNodeID,topNode.gCost,topNode.fCost-topNode.gCost,topNode.fCost);
 	}
 	
 	/* step (4) */
@@ -260,20 +260,20 @@ bool MeroB::DoSingleStepB(std::vector<graphState> &thePath)
 		/* step (5) */
 		graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
-		double g = topNode.gCost + edgeWeight;
+		double gcost = topNode.gCost + edgeWeight;
 		double h = env->HCost(neighbor,goal);
-		double f = g + h;
+		double f = gcost + h;
 		
 		/* step (6), neither in OPEN nor CLOSED */
 		if (!openQueue.IsIn(MeroBUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() )
 			
 		{
-			MeroBUtil::SearchNode n(f,g,neighbor,topNodeID);
+			MeroBUtil::SearchNode n(f,gcost,neighbor,topNodeID);
 			openQueue.Add(n);
 			
 			if (verbose)
 			{
-				printf("Adding node %d to OPEN, g=%lf, h=%lf, f=%lf.\n",neighbor,g,f-g,f);
+				printf("Adding node %ld to OPEN, gcost=%lf, h=%lf, f=%lf.\n",neighbor,gcost,f-gcost,f);
 			}
 		}
 		/* step (7) */
@@ -283,32 +283,33 @@ bool MeroB::DoSingleStepB(std::vector<graphState> &thePath)
 			{
 				neighborNode = openQueue.find(MeroBUtil::SearchNode(neighbor));
 				
-				//if (neighborNode.gCost <= g)
-				if (!fgreater(neighborNode.gCost,g))
+				//if (neighborNode.gCost <= gcost)
+				if (!fgreater(neighborNode.gCost,gcost))
 					continue;
 				
 				if (verbose) 
 				{
-					printf("Adjusting node %d in OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+					printf("Adjusting node %ld in OPEN, gcost=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,gcost,f-gcost,f, neighborNode.gCost);
 				}
 				
-				neighborNode.copy(f,g,neighbor,topNodeID); // parent is changed
+				neighborNode.copy(f,gcost,neighbor,topNodeID); // parent is changed
 				openQueue.DecreaseKey(neighborNode);  // adjust its position in OPEN
 			}
 			else if (closedList.find(neighbor) != closedList.end()) 
 			{
 				neighborNode = closedList.find(neighbor)->second;
 				
-				//if (neighborNode.gCost <= g)
-				if (!fgreater(neighborNode.gCost,g))
+				//if (neighborNode.gCost <= gcost)
+				if (!fgreater(neighborNode.gCost,gcost))
 					continue;
 				
 				if (verbose) 
 				{
-					printf("Moving node %d from CLOSED to OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+					printf("Moving node %ld from CLOSED to OPEN, gcost=%lf, h=%lf, f=%lf; g_old=%lf.\n",
+								 neighbor,gcost,f-gcost,f, neighborNode.gCost);
 				}
 				
-				neighborNode.copy(f,g,neighbor,topNodeID);  // parent is changed
+				neighborNode.copy(f,gcost,neighbor,topNodeID);  // parent is changed
 				closedList.erase(neighbor);  // delete from CLOSED
 				
 				openQueue.Add(neighborNode); // add to OPEN
@@ -377,7 +378,7 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 	
 	if (verbose) 
 	{
-		printf("Expanding node %d , g=%lf, h=%lf, f=%lf.\n",topNodeID,topNode.gCost,topNode.fCost-topNode.gCost,topNode.fCost);
+		printf("Expanding node %ld , gcost=%lf, h=%lf, f=%lf.\n",topNodeID,topNode.gCost,topNode.fCost-topNode.gCost,topNode.fCost);
 	}
 	
 	/* step (4) */
@@ -407,7 +408,7 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 		/* step (5) */
 		graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
-		double g = topNode.gCost + edgeWeight;
+		double gcost = topNode.gCost + edgeWeight;
 		
 		/* step Mero (3a) */
 		double h_tmp; // for printing reports only
@@ -436,10 +437,10 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 		if (verbose) 
 		{
 			if (fgreater(h,h_tmp))
-				printf("Improving h of node %d by Mero rule (a), %lf->%lf\n",neighbor,h_tmp,h);
+				printf("Improving h of node %ld by Mero rule (a), %lf->%lf\n",neighbor,h_tmp,h);
 		}
 		
-		double f = g + h;
+		double f = gcost + h;
 		
 		/* step Mero (3b) */
 		minH2 = min(minH2, h + edgeWeight);
@@ -447,12 +448,12 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 		/* step (6), neither in OPEN nor CLOSED */
 		if (!openQueue.IsIn(MeroBUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
-			MeroBUtil::SearchNode n(f,g,neighbor,topNodeID);
+			MeroBUtil::SearchNode n(f,gcost,neighbor,topNodeID);
 			openQueue.Add(n);
 			
 			if (verbose) 
 			{
-				printf("Adding node %d to OPEN, g=%lf, h=%lf, f=%lf.\n",neighbor,g,f-g,f);
+				printf("Adding node %ld to OPEN, gcost=%lf, h=%lf, f=%lf.\n",neighbor,gcost,f-gcost,f);
 			}
 		}
 		/* step (7) */
@@ -463,12 +464,12 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 			{
 				neighborNode = openQueue.find(MeroBUtil::SearchNode(neighbor));
 				
-				//if (neighborNode.gCost <= g)
-				if (!fgreater(neighborNode.gCost,g)) 
+				//if (neighborNode.gCost <= gcost)
+				if (!fgreater(neighborNode.gCost,gcost)) 
 				{
 					if (fgreater(h , neighborNode.fCost - neighborNode.gCost)) 
 					{
-						// we may fail to update g, but still update h
+						// we may fail to update gcost, but still update h
 						f = h + neighborNode.gCost;
 						neighborNode.fCost = f;
 						openQueue.IncreaseKey(neighborNode);
@@ -478,17 +479,17 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 				
 				if (verbose) 
 				{
-					printf("Adjusting node %d in OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+					printf("Adjusting node %ld in OPEN, gcost=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,gcost,f-gcost,f, neighborNode.gCost);
 				}
 				
 				if (fless(f , neighborNode.fCost)) 
 				{
-					neighborNode.copy(f,g,neighbor,topNodeID); // parent is changed
+					neighborNode.copy(f,gcost,neighbor,topNodeID); // parent is changed
 					openQueue.DecreaseKey(neighborNode);  // adjust its position in OPEN
 				}
 				else 
 				{
-					neighborNode.copy(f,g,neighbor,topNodeID); // parent is changed
+					neighborNode.copy(f,gcost,neighbor,topNodeID); // parent is changed
 					openQueue.IncreaseKey(neighborNode);  // adjust its position in OPEN
 				}
 			}
@@ -496,12 +497,12 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 			{
 				neighborNode = closedList.find(neighbor)->second;
 				
-				//if (neighborNode.gCost <= g)
-				if (!fgreater(neighborNode.gCost,g)) 
+				//if (neighborNode.gCost <= gcost)
+				if (!fgreater(neighborNode.gCost,gcost)) 
 				{
 					if (fgreater(h , neighborNode.fCost - neighborNode.gCost)) 
 					{
-						// we may fail to update g, but still update h
+						// we may fail to update gcost, but still update h
 						f = h + neighborNode.gCost;
 						neighborNode.fCost = f;
 						closedList[neighbor] = neighborNode;
@@ -511,10 +512,10 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 				
 				if (verbose) 
 				{
-					printf("Moving node %d from CLOSED to OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+					printf("Moving node %ld from CLOSED to OPEN, gcost=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,gcost,f-gcost,f, neighborNode.gCost);
 				}
 				
-				neighborNode.copy(f,g,neighbor,topNodeID);  // parent is changed
+				neighborNode.copy(f,gcost,neighbor,topNodeID);  // parent is changed
 				closedList.erase(neighbor);  // delete from CLOSED
 				
 				openQueue.Add(neighborNode); // add to OPEN
@@ -524,12 +525,12 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 	/* step Mero (3b), update h of parent */
 	if (fgreater(minH2 , hTop)) 
 	{
-		topNode.fCost = minH2 + topNode.gCost;  // f = h + g
+		topNode.fCost = minH2 + topNode.gCost;  // f = h + gcost
 		closedList[topNodeID] = topNode;
 		
 		if (verbose) 
 		{
-			printf("Improving h of node %d by Mero rule (b), %lf->%lf\n",topNodeID,hTop,minH2);
+			printf("Improving h of node %ld by Mero rule (b), %lf->%lf\n",topNodeID,hTop,minH2);
 		}
 	}
 	
@@ -554,14 +555,14 @@ void MeroB::ExtractPathToStart(graphState goalNode, std::vector<graphState> &the
 	//thePath.push_back(n.currNode);
 }
 
-void MeroB::OpenGLDraw(int window)
+void MeroB::OpenGLDraw(int)
 {
 	OpenGLDraw();
 }
 
 void MeroB::OpenGLDraw()
 {
-	//float r,g,b;
+	//float r,gcost,b;
 	double x,y,z;
 	MeroBUtil::SearchNode sn;
 	graphState nodeID;
@@ -586,7 +587,7 @@ void MeroB::OpenGLDraw()
 			DrawSphere(x,y,z,0.05);
 
 			memset(buf,0,100);
-			sprintf(buf,"%d[%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
+			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
 		}
 		// if in open
 		else if(openQueue.IsIn(MeroBUtil::SearchNode(nodeID)))
@@ -632,7 +633,7 @@ void MeroB::OpenGLDraw()
 			}
 
 			memset(buf,0,100);
-			sprintf(buf,"%d[%l,%l,%l]",n->GetNum(), (long)sn.gCost, (long)(sn.fCost - sn.gCost), (long)sn.fCost);
+			sprintf(buf,"%d [%ld,%ld,%ld]",n->GetNum(), (long)sn.gCost, (long)(sn.fCost - sn.gCost), (long)sn.fCost);
 		}
 		// neither in open nor closed, white
 		else 
@@ -641,28 +642,33 @@ void MeroB::OpenGLDraw()
 			DrawSphere(x,y,z,0.05);
 
 			memset(buf,0,100);
-			sprintf(buf,"%d[?,%l,?]",n->GetNum(), (long)env->HCost(nodeID,goal));
+			sprintf(buf,"%d [?,%ld,?]",n->GetNum(), (long)env->HCost(nodeID,goal));
 		}
 
 		// draw the text info, in black
-		drawText(x,y,z,0,0,0,buf);
+		DrawText(x,y,z,0,0,0,buf);
 	}
 
 	// draw edges
 	edge_iterator ei = g->getEdgeIter();
 	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	{
-		drawEdge(e->getFrom(), e->getTo(), e->getWeight());
+		DrawEdge(e->getFrom(), e->getTo(), e->getWeight());
 	}
 }
 
-void MeroB::DrawText(double x, double y, double z, float r, float g, float b, char* str)
+void MeroB::DrawText(double x, double y, double z, float r, float gg, float b, char* str)
 {
 	glPushMatrix();
-	glColor3f(r,g,b);
-	glTranslatef(x,y,z);
 	// rotate ?
 
+	glPushMatrix();
+	glColor3f(r,gg,b);
+	glTranslatef(x,y,z);
+	glScalef(1.0/(20*120.0), 1.0/(20*120.0), 1);
+	glRotatef(180, 0.0, 0.0, 1.0);
+	glRotatef(180, 0.0, 1.0, 0.0);
+	
 	int i=0;
 	while(str[i]) 
 	{
@@ -692,7 +698,7 @@ void MeroB::DrawEdge(unsigned int from, unsigned int to, double weight)
 	glEnd();
 
 	// draw weight info
-	sprintf(buf,"%l",(long)weight);
-	drawText((x1+x2)/2, (y1+y2)/2, (z1+z2)/2, 1,0,0, buf); // in red
+	sprintf(buf,"%ld",(long)weight);
+	DrawText((x1+x2)/2, (y1+y2)/2, (z1+z2)/2, 1, 0, 0, buf); // in red
 }
 
