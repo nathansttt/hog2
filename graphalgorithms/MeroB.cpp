@@ -656,7 +656,7 @@ void MeroB::OpenGLDraw()
 	}
 }
 
-void MeroB::drawText(double x, double y, double z, float r, float g, float b, char* str)
+void MeroB::DrawText(double x, double y, double z, float r, float g, float b, char* str)
 {
 	glPushMatrix();
 	glColor3f(r,g,b);
@@ -672,7 +672,7 @@ void MeroB::drawText(double x, double y, double z, float r, float g, float b, ch
 	glPopMatrix();
 }
 
-void MeroB::drawEdge(unsigned int from, unsigned int to, double weight)
+void MeroB::DrawEdge(unsigned int from, unsigned int to, double weight)
 {
 	double x1,y1,z1;
 	double x2,y2,z2;
