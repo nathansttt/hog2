@@ -25,7 +25,8 @@ PROJECTS = \
   util \
   apps/pathsample \
   apps/puzzlesample \
-  apps/inconsistency
+  apps/inconsistency \
+  apps/multiagent
 
 # Include projects with broken compilation
 PROJECTS_ALL = \
@@ -44,7 +45,8 @@ PROJECTS_ALL = \
   util \
   apps/pathsample \
   apps/puzzlesample \
-  apps/inconsistency
+  apps/inconsistency \
+  apps/multiagent
 
 # sequentially to avoid same sub-target in sub-make invoked twice
 default:
