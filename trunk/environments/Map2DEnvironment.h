@@ -58,10 +58,10 @@ public:
 	void GetSuccessors(xyLoc &nodeID, std::vector<xyLoc> &neighbors);
 	void GetActions(xyLoc &nodeID, std::vector<tDirection> &actions);
 	tDirection GetAction(xyLoc &s1, xyLoc &s2);
-	void ApplyAction(xyLoc &s, tDirection dir);
+	virtual void ApplyAction(xyLoc &s, tDirection dir);
 	virtual OccupancyInterface<xyLoc, tDirection> *GetOccupancyInfo() { return 0; }
 
-	bool InvertAction(tDirection &a);
+	virtual bool InvertAction(tDirection &a);
 
 	virtual double HCost(xyLoc &node1, xyLoc &node2);
 	virtual double GCost(xyLoc &node1, xyLoc &node2);

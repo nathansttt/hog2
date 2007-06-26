@@ -69,7 +69,7 @@ public:
 	virtual ~WeightedMap2DEnvironment();
 	void ApplyAction(xyLoc &s, tDirection dir);
 	virtual double GCost(xyLoc &node1, xyLoc &node2);
-	
+
 private:
 	MapOccupancyInterface* MOI;
 };
