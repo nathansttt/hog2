@@ -32,7 +32,7 @@
 #include "NodeLimitAbstraction.h"
 #include "MapQuadTreeAbstraction.h"
 //#include "RadiusAbstraction.h"
-//#include "MapFlatAbstraction.h"
+#include "MapFlatAbstraction.h"
 //#include "ClusterAbstraction.h"
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
@@ -42,6 +42,7 @@
 
 #include "AbsMapPatrolUnit.h"
 //#include "TemplateAStar.h"
+#include "WeightedMap2DEnvironment.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -80,7 +81,11 @@ void CreateSimulation(int id)
 	unitSims.resize(id+1);
 	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapQuadTreeAbstraction(map, 2)));
 	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 8)));
-	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
+	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
+	
+	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment>(new WeightedMap2DEnvironment(new MapFlatAbstraction(map)));
+	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new WeightedMap2DEnvironment(new MapFlatAbstraction(map)));
+	
 	unitSims[id]->SetStepType(kMinTime);
 //	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
 //																																 (OccupancyInterface<xyLoc, tDirection>*)0);
