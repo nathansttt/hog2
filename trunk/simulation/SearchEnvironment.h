@@ -23,6 +23,8 @@ public:
 	virtual action GetAction(state &s1, state &s2) = 0;
 	virtual void ApplyAction(state &s, action a) = 0;
 
+	virtual bool InvertAction(action &a) = 0;
+	
 	virtual double HCost(state &node1, state &node2) = 0;
 	virtual double GCost(state &node1, state &node2) = 0;
 	virtual bool GoalTest(state &node, state &goal) = 0;

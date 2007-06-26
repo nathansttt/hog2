@@ -105,6 +105,23 @@ tDirection MapEnvironment::GetAction(xyLoc &s1, xyLoc &s2)
 	return (tDirection)result;
 }
 
+bool MapEnvironment::InvertAction(tDirection &a)
+{
+	switch (a)
+	{
+		case kN: a = kS; break;
+		case kNE: a = kSW; break;
+		case kE: a = kW; break;
+		case kSE: a = kNW; break;
+		case kS: a = kN; break;
+		case kSW: a = kNE; break;
+		case kW: a = kE; break;
+		case kNW: a = kSE; break;
+		default: break;
+	}
+	return true;
+}
+
 void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 {
 	xyLoc old = s;
