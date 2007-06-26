@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/util -I$(ROOT)/abstraction -I$(ROOT)/simulation -I$(ROOT)/graphalgorithms
+PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/util -I$(ROOT)/abstraction -I$(ROOT)/simulation -I$(ROOT)/graphalgorithms 
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -33,4 +33,6 @@ SRC_CPP = \
 	environments/Map2DEnvironment.cpp \
 	environments/GraphEnvironment.cpp \
 	environments/MNPuzzle.cpp \
-	environments/FlipSide.cpp
+	environments/FlipSide.cpp \
+	environments/WeightedMap2DEnvironment.cpp
+
