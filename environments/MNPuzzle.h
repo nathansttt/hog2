@@ -63,6 +63,8 @@ public:
 	void GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions);
 	slideDir GetAction(MNPuzzleState &s1, MNPuzzleState &s2);
 	void ApplyAction(MNPuzzleState &s, slideDir a);
+	bool InvertAction(slideDir &a);
+	
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
 	double HCost(MNPuzzleState &state1, MNPuzzleState &state2);
 	double GCost(MNPuzzleState &state1, MNPuzzleState &state2);

@@ -43,6 +43,8 @@ public:
 	void GetActions(graphState &stateID, std::vector<graphMove> &actions);
 	graphMove GetAction(graphState &s1, graphState &s2);
 	void ApplyAction(graphState &s, graphMove a);
+	bool InvertAction(graphMove &a);
+
 	OccupancyInterface<graphState, graphMove> *GetOccupancyInfo() { return 0; }
 	double HCost(graphState &state1, graphState &state2);
 	double GCost(graphState &state1, graphState &state2);

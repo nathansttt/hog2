@@ -52,6 +52,17 @@ void GraphEnvironment::ApplyAction(graphState &s, graphMove a)
 	s = a.to;
 }
 
+bool GraphEnvironment::InvertAction(graphMove &a)
+{
+	uint16_t tmp = a.from;
+	a.from = a.to;
+	a.to = tmp;
+	if (g->findDirectedEdge(a.from, a.to))
+		return true;
+	return false;
+}
+
+
 double GraphEnvironment::HCost(graphState &state1, graphState &state2)
 {
 	if (fequal(g->GetNode(state1)->GetLabelF(GraphSearchConstants::kHCost), 0))

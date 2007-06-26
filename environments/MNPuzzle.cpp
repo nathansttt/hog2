@@ -75,6 +75,18 @@ void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a)
 	}
 }
 
+bool MNPuzzle::InvertAction(slideDir &a)
+{
+	switch (a)
+	{
+		case kLeft: a = kRight; break;
+		case kUp: a = kDown; break;
+		case kDown: a = kUp; break;
+		case kRight: a = kLeft; break;
+	}
+	return true;
+}
+
 double MNPuzzle::HCost(MNPuzzleState &state1, MNPuzzleState &state2)
 {
 	assert(state1.height==state2.height);

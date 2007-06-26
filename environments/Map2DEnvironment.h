@@ -36,6 +36,8 @@ static bool operator==(const xyLoc &l1, const xyLoc &l2) {
 	return (l1.x == l2.x) && (l1.y == l2.y);
 }
 
+
+
 enum tDirection {
 	kN=0x8, kS=0x4, kE=0x2, kW=0x1, kNW=kN|kW, kNE=kN|kE, 
 	kSE=kS|kE, kSW=kS|kW, kStay=0, kTeleport=kSW|kNE
@@ -58,6 +60,8 @@ public:
 	tDirection GetAction(xyLoc &s1, xyLoc &s2);
 	void ApplyAction(xyLoc &s, tDirection dir);
 	virtual OccupancyInterface<xyLoc, tDirection> *GetOccupancyInfo() { return 0; }
+
+	bool InvertAction(tDirection &a);
 
 	virtual double HCost(xyLoc &node1, xyLoc &node2);
 	virtual double GCost(xyLoc &node1, xyLoc &node2);

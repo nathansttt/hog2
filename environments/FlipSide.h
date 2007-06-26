@@ -71,6 +71,8 @@ public:
 	void GetActions(FlipSideState &stateID, std::vector<flipMove> &actions);
 	flipMove GetAction(FlipSideState &s1, FlipSideState &s2);
 	void ApplyAction(FlipSideState &s, flipMove a);
+	bool InvertAction(flipMove &a) { return true; } // applying the same action inverts it
+
 	OccupancyInterface<FlipSideState, flipMove> *GetOccupancyInfo() { return 0; }
 	double HCost(FlipSideState &state1, FlipSideState &state2);
 	double GCost(FlipSideState &state1, FlipSideState &state2);
