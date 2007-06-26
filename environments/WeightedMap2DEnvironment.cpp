@@ -12,6 +12,10 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 	}
 }
 
+WeightedMap2DEnvironment::~WeightedMap2DEnvironment()
+{
+}
+
 void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 {
 	xyLoc old = s;
