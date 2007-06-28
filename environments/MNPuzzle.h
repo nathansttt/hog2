@@ -55,7 +55,7 @@ static bool operator==(const MNPuzzleState &l1, const MNPuzzleState &l2)
 	return true;
 }
 
-class MNPuzzle : SearchEnvironment<MNPuzzleState, slideDir> {
+class MNPuzzle : public SearchEnvironment<MNPuzzleState, slideDir> {
 public:
 	MNPuzzle(int width, int height);
 	~MNPuzzle();

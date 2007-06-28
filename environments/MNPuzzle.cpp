@@ -20,15 +20,46 @@ MNPuzzle::~MNPuzzle()
 
 void MNPuzzle::GetSuccessors(MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors)
 {
+	//std::cout << stateID << std::endl;
+	neighbors.resize(0);
+	if ((stateID.blank%stateID.width) != stateID.width-1)
+	{
+		neighbors.push_back(stateID);
+		ApplyAction(neighbors.back(), kRight);
+		//std::cout << neighbors.back() << std::endl;
+	}
+	if ((stateID.blank%stateID.width) != 0)
+	{
+		neighbors.push_back(stateID);
+		ApplyAction(neighbors.back(), kLeft);
+		//std::cout << neighbors.back() << std::endl;
+	}
+
+	if ((stateID.blank/stateID.width) != stateID.height-1)
+	{
+		neighbors.push_back(stateID);
+		ApplyAction(neighbors.back(), kDown);
+		//std::cout << neighbors.back() << std::endl;
+	}
+	if ((stateID.blank/stateID.width) != 0)
+	{
+		neighbors.push_back(stateID);
+		ApplyAction(neighbors.back(), kUp);
+		//std::cout << neighbors.back() << std::endl;
+	}
 }
 
 void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions)
 {
 	actions.resize(0);
-	actions.push_back(kLeft);
-	actions.push_back(kUp);
-	actions.push_back(kDown);
-	actions.push_back(kRight);
+	if ((stateID.blank%stateID.width) != 0)
+		actions.push_back(kLeft);
+	if ((stateID.blank/stateID.width) != stateID.height-1)
+		actions.push_back(kUp);
+	if ((stateID.blank/stateID.width) != 0)
+		actions.push_back(kDown);
+	if ((stateID.blank%stateID.width) != stateID.width-1)
+		actions.push_back(kRight);
 }
 
 slideDir MNPuzzle::GetAction(MNPuzzleState &s1, MNPuzzleState &s2)
