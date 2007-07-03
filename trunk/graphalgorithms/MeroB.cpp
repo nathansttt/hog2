@@ -660,7 +660,7 @@ void MeroB::OpenGLDraw()
 
 void MeroB::DrawText(double x, double y, double z, float r, float gg, float b, char* str)
 {
-	glPushMatrix();
+	//glPushMatrix();
 	// rotate ?
 
 	glPushMatrix();
