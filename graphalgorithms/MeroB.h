@@ -20,6 +20,8 @@
 #define UINT32_MAX        4294967295U
 #endif
 
+//const double pi = 3.141592654;
+
 #define MB_A 1
 #define MB_B 2
 #define MB_BP 3
@@ -112,7 +114,7 @@ namespace MeroBUtil
 
 			// add nodes
 			
-			for (unsigned int nodeID = 0; nodeID <= N; nodeID++)
+			for(unsigned int nodeID = 0; nodeID <= N; nodeID++)
 			{
 				node *n = new node("");
 				if (nodeID == 0 || nodeID == 1)

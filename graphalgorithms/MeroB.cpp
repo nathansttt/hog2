@@ -555,6 +555,7 @@ void MeroB::ExtractPathToStart(graphState goalNode, std::vector<graphState> &the
 	//thePath.push_back(n.currNode);
 }
 
+
 void MeroB::OpenGLDraw(int)
 {
 	OpenGLDraw();
@@ -584,7 +585,7 @@ void MeroB::OpenGLDraw()
 		{
 			sn = hiter->second;
 			glColor3f(1,0,0);  // red
-			DrawSphere(x,y,z,0.05);
+			DrawSphere(x,y,z,0.025);
 
 			memset(buf,0,100);
 			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
@@ -624,12 +625,12 @@ void MeroB::OpenGLDraw()
 			if(topn.currNode == sn.currNode)
 			{
 				glColor3f(0,0,1);
-				DrawSphere(x,y,z,0.05);
+				DrawSphere(x,y,z,0.025);
 			}
 			else // green
 			{
 				glColor3f(0,1,0);
-				DrawSphere(x,y,z,0.05);
+				DrawSphere(x,y,z,0.025);
 			}
 
 			memset(buf,0,100);
@@ -639,14 +640,14 @@ void MeroB::OpenGLDraw()
 		else 
 		{
 			glColor3f(1,1,1); // white
-			DrawSphere(x,y,z,0.05);
+			DrawSphere(x,y,z,0.025);
 
 			memset(buf,0,100);
 			sprintf(buf,"%d [?,%ld,?]",n->GetNum(), (long)env->HCost(nodeID,goal));
 		}
 
 		// draw the text info, in black
-		DrawText(x,y,z,0,0,0,buf);
+		DrawText(x,y,z+0.05,0,0,0,buf);
 	}
 
 	// draw edges
@@ -699,6 +700,6 @@ void MeroB::DrawEdge(unsigned int from, unsigned int to, double weight)
 
 	// draw weight info
 	sprintf(buf,"%ld",(long)weight);
-	DrawText((x1+x2)/2, (y1+y2)/2, (z1+z2)/2, 1, 0, 0, buf); // in red
+	DrawText((x1+x2)/2, (y1+y2)/2, (z1+z2)/2 + 0.05, 1, 0, 0, buf); // in red
 }
 
