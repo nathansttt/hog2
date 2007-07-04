@@ -36,6 +36,7 @@ public:
 
 	virtual void OpenGLDraw(int window) = 0;
 	virtual void OpenGLDraw(int window, state&) = 0;
+	virtual void OpenGLDraw(int window, state&, action&) = 0;
 };
 
 #endif
