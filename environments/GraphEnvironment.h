@@ -74,6 +74,7 @@ public:
 	uint64_t GetActionHash(graphMove act);
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, graphState &s);
+	void OpenGLDraw(int window, graphState &s, graphMove &gm);
 
 	int NumNodesWithinRadius(graphState from, int depth);
 	void PathCountWithinRadius(graphState from, int depth, __gnu_cxx::hash_map<uint64_t, int> &counts, __gnu_cxx::hash_map<uint64_t, double> &aveCosts );

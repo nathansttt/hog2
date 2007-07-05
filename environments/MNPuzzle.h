@@ -73,6 +73,7 @@ public:
 	uint64_t GetActionHash(slideDir act);
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, MNPuzzleState &s);
+	void OpenGLDraw(int, MNPuzzleState &, slideDir &) { /* currently not drawing moves */ }
 private:
 		int width, height;
 };

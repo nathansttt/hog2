@@ -128,13 +128,18 @@ void GraphEnvironment::OpenGLDraw(int window)
 	glEnd();
 }
 
-void GraphEnvironment::OpenGLDraw(int window, graphState &s)
+void GraphEnvironment::OpenGLDraw(int, graphState &s)
 {
 	node *n = g->GetNode(s);
 	DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
 						 (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
 						 (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
 						 (GLdouble)2.0/(g->getNumNodes()*g->getNumNodes()));
+}
+
+void GraphEnvironment::OpenGLDraw(int, graphState &, graphMove &)
+{
+	// if we want to draw a set of moves we use this to do so
 }
 
 

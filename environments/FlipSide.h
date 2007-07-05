@@ -81,6 +81,7 @@ public:
 	uint64_t GetActionHash(flipMove act);
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, FlipSideState &s);
+	void OpenGLDraw(int, FlipSideState &, flipMove &) { /* currently not drawing moves */ }
 private:
 		int width;
 };
