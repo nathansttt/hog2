@@ -43,6 +43,7 @@ int px1, py1, px2, py2;
 int absType = 0;
 
 std::vector<PuzzleSimulation *> unitSims;
+MNPuzzle *mnp = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -68,7 +69,7 @@ void CreateSimulation(int id)
 		map = new Map(gDefaultMap);
 
 	unitSims.resize(id+1);
-	unitSims[id] = new PuzzleSimulation(new MNPuzzle(5, 5));
+	unitSims[id] = new PuzzleSimulation(mnp = new MNPuzzle(3, 3));
 	unitSims[id]->SetStepType(kMinTime);
 }
 
@@ -129,11 +130,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 	}
 	if (unitSims[windowID]->GetUnit(viewport))
 	{
-		printf("Drawing unit %d\n", viewport);
+		//printf("Drawing unit %d\n", viewport);
 		MNPuzzleState s;
 		unitSims[windowID]->GetUnit(viewport)->GetLocation(s);
 		MNPuzzleState g(s.width, s.height);
-		printf("Distance: %f\n", unitSims[windowID]->GetEnvironment()->HCost(s, g));
+		//printf("Distance: %f\n", unitSims[windowID]->GetEnvironment()->HCost(s, g));
 		unitSims[windowID]->GetUnit(viewport)->OpenGLDraw(windowID,
 																											unitSims[windowID]->GetEnvironment(),
 																											unitSims[windowID]);
@@ -234,10 +235,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 		{
+			if (!mnp) break;
 			if (mod == kShiftDown)
 			{
-				IDAStar<FlipSideState, flipMove> ida;
-				FlipSideState fg(5);
+				
+				IDAStar<MNPuzzleState, slideDir> ida;
+//				FlipSideState fg(5);
 //				fg.puzzle[0] = 5;
 //				fg.puzzle[1] = 6;
 //				fg.puzzle[2] = 3;
@@ -246,17 +249,30 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //				fg.puzzle[5] = 0;
 //				fg.puzzle[6] = 1;
 //				fg.puzzle[7] = 7;
-				std::vector<FlipSideState> path;
-				ida.GetPath(&fs, fss, fg, path);
+				std::vector<MNPuzzleState> path;
+//				void GetPath(SearchEnvironment<state, action> *env, state from, state to,
+//										 std::vector<state> &thePath);
+				MNPuzzleState s(3, 3);
+				MNPuzzleState g(3, 3);
+				//s.puzzle[1] = 3;
+				s.puzzle[2] = 3;
+				s.puzzle[3] = 4;
+				s.puzzle[4] = 2;
+				s.puzzle[6] = 8;
+				s.puzzle[7] = 6;
+				s.puzzle[8] = 7;
+				std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
+				ida.GetPath(mnp, s, g, path);
+				std::cout << "Path found, length " << path.size() << std::endl;
 				for (int x = 0; x < path.size(); x++)
 					std::cout << path[x] << std::endl;
 			}
 			else {
-				std::vector<flipMove> acts;
-				fs.GetActions(fss, acts);
-				fs.ApplyAction(fss, acts[random()%acts.size()]);
-				FlipSideState fg(5);
-				printf("Distance: %f\n", fs.HCost(fss, fg));
+//				std::vector<flipMove> acts;
+//				fs.GetActions(fss, acts);
+//				fs.ApplyAction(fss, acts[random()%acts.size()]);
+//				FlipSideState fg(5);
+//				printf("Distance: %f\n", fs.HCost(fss, fg));
 			}
 			
 			if (unitSims[windowID]->GetPaused())
