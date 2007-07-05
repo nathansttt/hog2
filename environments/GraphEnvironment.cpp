@@ -137,3 +137,106 @@ void GraphEnvironment::OpenGLDraw(int window, graphState &s)
 						 (GLdouble)2.0/(g->getNumNodes()*g->getNumNodes()));
 }
 
+
+int GraphEnvironment::NumNodesWithinRadius(graphState from, int depth) {
+	// using BFS
+	int count = 1;
+	std::queue<SimpleNode> myqueue;
+	__gnu_cxx::hash_map<uint64_t, SimpleNode> closedlist;
+
+	std::vector<graphState> neighbors;
+
+	SimpleNode n0(from, from, 0);
+	myqueue.push(n0);
+
+	while(! myqueue.empty()) 
+	{
+		SimpleNode frontN = myqueue.front();
+		uint64_t frontID = GetStateHash(frontN.me);
+		myqueue.pop();
+	
+		if(frontN.depth >= depth)
+			continue;
+
+		GetSuccessors(frontN.me, neighbors);
+
+		for(unsigned int x = 0; x<neighbors.size(); x++)
+		{
+			graphState neighbor = neighbors[x];
+			uint64_t neighborID = GetStateHash(neighbor);
+			if(closedlist.find(neighborID) == closedlist.end())
+			{
+				count++;
+
+				SimpleNode newNode(neighborID,frontID, frontN.depth+1);
+				myqueue.push(newNode);
+			}
+		}
+
+		closedlist[frontID] = frontN;
+	}
+
+	return count;
+}
+
+void GraphEnvironment::PathCountWithinRadius(graphState from, int depth, __gnu_cxx::hash_map<uint64_t, int> &counts, __gnu_cxx::hash_map<uint64_t, double> &aveCosts )
+{
+	// using recursive version of DFS
+	std::vector<SimpleNode> thePath;
+
+	SimpleNode n0(from,from,0);
+	counts[GetStateHash(from)]++;
+	thePath.push_back(n0);
+
+	DFS_VISIT(thePath,depth,counts,aveCosts,0);
+
+	for(__gnu_cxx::hash_map<uint64_t,int> ::iterator it = counts.begin(); it != counts.end(); it++)
+	{
+		if(it->second > 0)
+			aveCosts[it->first] /= it->second;
+	}
+}
+
+void GraphEnvironment::DFS_VISIT(std::vector<SimpleNode> &thePath, int depth, __gnu_cxx::hash_map<uint64_t, int> &counts, __gnu_cxx::hash_map<uint64_t, double> &aveCosts, double gval)
+{
+	std::vector<graphState> neighbors;
+
+	SimpleNode current = thePath.back();
+	if(current.depth >= depth)
+		return;
+
+	GetSuccessors(current.me, neighbors);
+
+	for(unsigned int x = 0; x<neighbors.size(); x++)
+	{
+		graphState neighbor = neighbors[x];
+		if(neighbor == current.parent)
+			continue;
+
+		bool flag = false;
+		std::vector<SimpleNode>::iterator iter;
+		for(iter = thePath.begin(); iter != thePath.end(); iter++) 
+		{
+			if(neighbor == iter->me) 
+			{
+				flag = true; // this neighbor is in the path
+				break;
+			}
+		}
+
+		// this check is important! 
+		if(flag)
+			continue;
+
+		uint64_t uniqueID = GetStateHash(neighbor);
+
+		counts[uniqueID]++;
+		aveCosts[uniqueID] += gval + GCost(current.me,neighbor);
+
+		SimpleNode sn(neighbor, current.me, current.depth+1);
+		thePath.push_back(sn);
+		DFS_VISIT(thePath, depth, counts, aveCosts, aveCosts[uniqueID]);  // recursion
+		thePath.pop_back();
+	}
+}
+

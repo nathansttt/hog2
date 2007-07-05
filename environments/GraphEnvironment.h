@@ -11,6 +11,7 @@
 #define GRAPHENVIRONMENT_H
 
 #include <stdint.h>
+#include <ext/hash_map>
 #include <iostream>
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
@@ -23,6 +24,26 @@ public:
 	graphMove() :from(-1), to(-1) {}
 	graphMove(uint16_t f, uint16_t t) :from(f), to(t) {}
 	uint16_t from, to;
+};
+
+class SimpleNode {
+public:
+	SimpleNode() 
+	{
+		depth = 0;
+		me = 0;
+		parent = 0; 
+	}
+	SimpleNode(graphState m, graphState p, int d) 
+	{
+		depth = d;
+		me = m;
+		parent = p;
+	}
+
+	graphState parent;
+	graphState me;
+	int depth;
 };
 
 namespace GraphSearchConstants
@@ -53,8 +74,14 @@ public:
 	uint64_t GetActionHash(graphMove act);
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, graphState &s);
+
+	int NumNodesWithinRadius(graphState from, int depth);
+	void PathCountWithinRadius(graphState from, int depth, __gnu_cxx::hash_map<uint64_t, int> &counts, __gnu_cxx::hash_map<uint64_t, double> &aveCosts );
+
 private:
 	Graph *g;
+
+	void DFS_VISIT(std::vector<SimpleNode> &thePath, int depth, __gnu_cxx::hash_map<uint64_t, int> &counts, __gnu_cxx::hash_map<uint64_t, double> &aveCosts, double gval);
 };
 
 typedef UnitSimulation<graphState, graphMove, GraphEnvironment> GraphSimulation;
