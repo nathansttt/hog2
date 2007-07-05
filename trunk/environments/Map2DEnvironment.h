@@ -70,6 +70,7 @@ public:
 	uint64_t GetActionHash(tDirection act);
 	virtual void OpenGLDraw(int window);
 	virtual void OpenGLDraw(int window, xyLoc &l);
+	virtual void OpenGLDraw(int, xyLoc &, tDirection &) { /* currently not drawing moves */ }
 	Map* GetMap() { return map; }
 protected:
 	Map *map;
