@@ -46,6 +46,11 @@ public:
 	int depth;
 };
 
+struct Hash64 {
+		size_t operator()(const uint64_t &x) const
+		{ return (size_t)(x); }
+};
+
 namespace GraphSearchConstants
 {
 	enum {
@@ -77,12 +82,12 @@ public:
 	void OpenGLDraw(int window, graphState &s, graphMove &gm);
 
 	int NumNodesWithinRadius(graphState from, int depth);
-	void PathCountWithinRadius(graphState from, int depth, __gnu_cxx::hash_map<uint64_t, int> &counts, __gnu_cxx::hash_map<uint64_t, double> &aveCosts );
+	void PathCountWithinRadius(graphState from, int depth, __gnu_cxx::hash_map<uint64_t, int, Hash64> &counts, __gnu_cxx::hash_map<uint64_t, double, Hash64> &aveCosts );
 
 private:
 	Graph *g;
 
-	void DFS_VISIT(std::vector<SimpleNode> &thePath, int depth, __gnu_cxx::hash_map<uint64_t, int> &counts, __gnu_cxx::hash_map<uint64_t, double> &aveCosts, double gval);
+	void DFSVisit(std::vector<SimpleNode> &thePath, int depth, __gnu_cxx::hash_map<uint64_t, int, Hash64> &counts, __gnu_cxx::hash_map<uint64_t, double, Hash64> &aveCosts, double gval);
 };
 
 typedef UnitSimulation<graphState, graphMove, GraphEnvironment> GraphSimulation;
