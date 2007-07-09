@@ -26,30 +26,8 @@ public:
 	uint16_t from, to;
 };
 
-class SimpleNode {
-public:
-	SimpleNode() 
-	{
-		depth = 0;
-		me = 0;
-		parent = 0; 
-	}
-	SimpleNode(graphState m, graphState p, int d) 
-	{
-		depth = d;
-		me = m;
-		parent = p;
-	}
 
-	graphState parent;
-	graphState me;
-	int depth;
-};
 
-struct Hash64 {
-		size_t operator()(const uint64_t &x) const
-		{ return (size_t)(x); }
-};
 
 namespace GraphSearchConstants
 {
@@ -81,13 +59,10 @@ public:
 	void OpenGLDraw(int window, graphState &s);
 	void OpenGLDraw(int window, graphState &s, graphMove &gm);
 
-	int NumNodesWithinRadius(graphState from, int depth);
-	void PathCountWithinRadius(graphState from, int depth, __gnu_cxx::hash_map<uint64_t, int, Hash64> &counts, __gnu_cxx::hash_map<uint64_t, double, Hash64> &aveCosts );
 
 private:
 	Graph *g;
 
-	void DFSVisit(std::vector<SimpleNode> &thePath, int depth, __gnu_cxx::hash_map<uint64_t, int, Hash64> &counts, __gnu_cxx::hash_map<uint64_t, double, Hash64> &aveCosts, double gval);
 };
 
 typedef UnitSimulation<graphState, graphMove, GraphEnvironment> GraphSimulation;
