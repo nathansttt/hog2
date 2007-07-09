@@ -115,7 +115,7 @@ void GraphCheck::DFSVisit(SearchEnvironment<state, action> &env, std::vector<Sim
 
 		SimpleNode<state> sn(neighbor, current.me, current.depth+1);
 		thePath.push_back(sn);
-		DFSVisit(thePath, depth, counts, aveCosts, aveCosts[uniqueID]);  // recursion
+		DFSVisit(env, thePath, depth, counts, aveCosts, aveCosts[uniqueID]);  // recursion
 		thePath.pop_back();
 	}
 }
