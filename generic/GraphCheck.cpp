@@ -9,7 +9,8 @@
 #include "GraphCheck.h"
 
 
-void GraphCheck::NumNodesWithinRadius(SearchEnvironment<state, action> &env, state from, int depth, int &inner_count, int &leaf_count)
+template <typename state, typename action>
+void GraphCheck<state, action>::NumNodesWithinRadius(SearchEnvironment<state, action> &env, state from, int depth, int &inner_count, int &leaf_count)
 {
 	// using BFS
 	inner_count = 0;
@@ -59,7 +60,8 @@ void GraphCheck::NumNodesWithinRadius(SearchEnvironment<state, action> &env, sta
 	//return count;
 }
 
-void GraphCheck::PathCountWithinRadius(SearchEnvironment<state, action> &env, state from, int depth, __gnu_cxx::hash_map<uint64_t, int, Hash64> &counts, __gnu_cxx::hash_map<uint64_t, double, Hash64> &aveCosts )
+template <typename state, typename action>
+void GraphCheck<state, action>::PathCountWithinRadius(SearchEnvironment<state, action> &env, state from, int depth, __gnu_cxx::hash_map<uint64_t, int, Hash64> &counts, __gnu_cxx::hash_map<uint64_t, double, Hash64> &aveCosts )
 {
 	// using recursive version of DFS
 	std::vector<SimpleNode<state> > thePath;
@@ -77,7 +79,8 @@ void GraphCheck::PathCountWithinRadius(SearchEnvironment<state, action> &env, st
 	}
 }
 
-void GraphCheck::DFSVisit(SearchEnvironment<state, action> &env, std::vector<SimpleNode<state> > &thePath, int depth, __gnu_cxx::hash_map<uint64_t, int, Hash64> &counts, __gnu_cxx::hash_map<uint64_t, double, Hash64> &aveCosts, double gval)
+template <typename state, typename action>
+void GraphCheck<state, action>::DFSVisit(SearchEnvironment<state, action> &env, std::vector<SimpleNode<state> > &thePath, int depth, __gnu_cxx::hash_map<uint64_t, int, Hash64> &counts, __gnu_cxx::hash_map<uint64_t, double, Hash64> &aveCosts, double gval)
 {
 	std::vector<state> neighbors;
 
@@ -94,8 +97,9 @@ void GraphCheck::DFSVisit(SearchEnvironment<state, action> &env, std::vector<Sim
 			continue;
 
 		bool flag = false;
-		std::vector<SimpleNode<state> >::iterator iter;
-		for (iter = thePath.begin(); iter != thePath.end(); iter++) 
+		std::vector< SimpleNode<state> >::iterator iter;
+
+		for ( iter = thePath.begin(); iter != thePath.end(); iter++) 
 		{
 			if (neighbor == iter->me) 
 			{
