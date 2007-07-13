@@ -162,7 +162,9 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 	u->GetLocation(ui->startState);
 	ui->currentState = ui->startState;
 	if (ui->agent->GetUnitGroup() == 0)
+	{
 		ui->agent->SetUnitGroup(unitGroups[0]);
+		}
 	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, env, ui->currentState, true, this);
 	ui->nextTime = currTime;
 	ui->totalThinking = 0.0;
@@ -249,9 +251,11 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 template<class state, class action, class environment>
 void UnitSimulation<state, action, environment>::StepTime(double timeStep)
 {
+	std::cout<<"StepTime\n";
 	if (paused)
+	{
 		return;
-	
+	}
 	DoPreTimestepCalc();
 	stats.AddStat("simulationTime", "UnitSimulation", currTime);
 	currTime += timeStep;
@@ -297,34 +301,44 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	Unit<state, action, environment>* u = theUnit->agent;
 	
 	t.startTimer();
-	where = u->GetUnitGroup()->MakeMove(u, env, this);
-	moveThinking = t.endTimer();
-	theUnit->totalThinking += moveThinking;
-	theUnit->lastMove = where;
-	stats.AddStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
-	
-	bool success = MakeUnitMove(theUnit, where, moveTime);
-
-	t.startTimer();
-	u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, this);
-	locThinking = t.endTimer();
-	theUnit->totalThinking += locThinking;
-	stats.AddStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
-
-	switch (stepType)
+	// need to do if/then check - makemove ok or not? need to stay where you are? 
+	if(u->GetUnitGroup()->MakeMove(u, env, this,where))
 	{
-		case kLockStep:
-			theUnit->nextTime = currTime + timeStep;
+	
+		moveThinking = t.endTimer();
+		theUnit->totalThinking += moveThinking;
+		theUnit->lastMove = where;
+		stats.AddStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
+	
+		bool success = MakeUnitMove(theUnit, where, moveTime);
+
+		t.startTimer();
+		u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, this);
+		locThinking = t.endTimer();
+		theUnit->totalThinking += locThinking;
+		stats.AddStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
+
+		switch (stepType)
+		{
+			case kLockStep:
+				theUnit->nextTime = currTime + timeStep;
+				break;
+			case kRealTime:
+				theUnit->nextTime += (locThinking+moveThinking)*penalty + moveTime;
+				break;
+			case kMinTime:
+				theUnit->nextTime += min((locThinking+moveThinking)*penalty + moveTime,	 timeStep);
 			break;
-		case kRealTime:
-			theUnit->nextTime += (locThinking+moveThinking)*penalty + moveTime;
-			break;
-		case kMinTime:
-			theUnit->nextTime += min((locThinking+moveThinking)*penalty + moveTime, timeStep);
-			break;
+		}
+		//u->GetUnitGroup()->logStats(&stats);
+		//u->logStats(&stats);
 	}
-	//u->GetUnitGroup()->logStats(&stats);
-	//u->logStats(&stats);
+	else // stay where you are
+	{
+		theUnit->nextTime += theUnit->agent->GetSpeed();
+		theUnit->agent->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, true, this);	
+	}
+
 }
 
 template<class state, class action, class environment>

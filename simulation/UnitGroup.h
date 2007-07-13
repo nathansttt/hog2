@@ -49,9 +49,9 @@ public:
 	
 	virtual const char *GetName() { return "defaultUnitGroup"; }
 	
-	virtual action MakeMove(Unit<state, action, environment> *u, environment *e, SimulationInfo *si)
+	virtual bool MakeMove(Unit<state, action, environment> *u, environment *e, SimulationInfo *si, action& a)
 	{
-		return u->MakeMove(e, e->GetOccupancyInfo(), si);
+		return (u->MakeMove(e, e->GetOccupancyInfo(), si,a));
 	}
 
 	virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state &loc, bool success, SimulationInfo *si)
@@ -61,6 +61,7 @@ public:
 	
 	void AddUnit(Unit<state, action, environment> *u)
 	{
+		std::cout<<"adding unit\n";
 		// Check if we already have this unit
 		for (unsigned int x = 0; x < members.size(); x++)
 			if (members[x] == u)

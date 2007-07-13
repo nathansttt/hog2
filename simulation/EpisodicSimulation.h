@@ -58,7 +58,7 @@ public:
 		verbose = false;
 	}
 	~EpisodicSimulation() {}
-	int AddUnit(Unit<state, action, environment> *u) { allRacesDone = false; return UnitSimulation<state, action, environment>::AddUnit(u); }
+	int AddUnit(Unit<state, action, environment> *u) { std::cout<<"ADDING\n";allRacesDone = false; return UnitSimulation<state, action, environment>::AddUnit(u); }
 
 	virtual bool Done() { return allRacesDone; }
 	void SetStopOnConvergence(bool stop) { stopOnConvergence = stop; }
