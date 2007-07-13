@@ -17,13 +17,13 @@
 class AbsMapPatrolUnit : public SearchUnit {
 public:
 	AbsMapPatrolUnit(int x, int y, SearchAlgorithm* alg);
-
+	virtual ~AbsMapPatrolUnit();
 	virtual const char *GetName() { return "AbsMapPatrolUnit"; }
 	
 	virtual bool done() { return false; }
 	
-	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo);
-	virtual tDirection MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, SimulationInfo *si){ std::cout<<"HERE\n"; return makeMove(ame->GetMapAbstraction(), 0, si); }
+	virtual bool makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo, tDirection &);
+	virtual bool MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, SimulationInfo *si, tDirection &dir){ return makeMove(ame->GetMapAbstraction(), 0, si,dir); }
 	//void OpenGLDraw(int window, MapProvider *, SimulationInfo *);
 	virtual void OpenGLDraw(int window, AbsMapEnvironment *, SimulationInfo *);
 	void addPatrolLocation(xyLoc);

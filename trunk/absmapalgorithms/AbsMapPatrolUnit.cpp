@@ -57,15 +57,19 @@ AbsMapPatrolUnit::AbsMapPatrolUnit(int _x, int _y, SearchAlgorithm* alg)
 //	addPatrolLocation(new unit(_x, _y));
 //}
 
-tDirection AbsMapPatrolUnit::makeMove(MapProvider *mp, reservationProvider *, SimulationInfo *)
+AbsMapPatrolUnit::~AbsMapPatrolUnit()
+{
+}
+
+bool AbsMapPatrolUnit::makeMove(MapProvider *mp, reservationProvider *, SimulationInfo *, tDirection &dir)
 {
 	std::cout<<"CurrTarget "<<currTarget<<std::endl;
 	MapAbstraction *aMap = mp->GetMapAbstraction();
 	if (moves.size() > 0)
 	{
-		tDirection dir = moves.back();
+		dir = moves.back();
 		moves.pop_back();
-		return dir;
+		return true;
 	}
 	
 	if (currTarget != -1)
@@ -74,12 +78,13 @@ tDirection AbsMapPatrolUnit::makeMove(MapProvider *mp, reservationProvider *, Si
 		currTarget = (currTarget+1)%Locs.size();
 		if (moves.size() > 0)
 		{
-			tDirection dir = moves.back();
+			dir = moves.back();
 			moves.pop_back();
-			return dir;
+			return true;
 		}
 	}
-	return kStay;
+	dir = kStay;
+	return true;
 }
 
 double AbsMapPatrolUnit::goToLoc(MapAbstraction *aMap, int which)
