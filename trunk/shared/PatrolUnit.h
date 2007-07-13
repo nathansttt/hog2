@@ -32,7 +32,7 @@
 #ifndef PATROLUNIT_H
 #define PATROLUNIT_H
 
-class patrolUnit : public unit {
+class patrolUnit : public Unit {
 public:
 	patrolUnit(int x, int y);
 //	patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us);

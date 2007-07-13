@@ -119,11 +119,10 @@ bool SearchUnit::getCachedMove(tDirection &dir)
 	return false;
 }
 
-tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo)
+bool SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo, tDirection &res)
 {
-	tDirection res;
 	if (getCachedMove(res))
-		return res;
+		return true;
 
 	Map *map = mp->GetMap();
 	MapAbstraction *aMap = mp->GetMapAbstraction();
@@ -145,9 +144,9 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 		s_algorithm->setTargets(mp->GetMapAbstraction(), next_start, to, rp);
 		delete spread_cache;
 		spread_cache = 0;
-		tDirection dir = moves.back();
+		res = moves.back();
 		moves.pop_back();
-		return dir;
+		return true;
 	}
 	
 	// Check if we have a target defined
@@ -155,7 +154,7 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 	{
 		if (verbose)
 			printf("SU %s: No target, doing nothing\n", this->GetName());
-		return kStay;
+		return false;
 	}
 	
 	// Get the position of the target
@@ -200,7 +199,7 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 	{
 		if (verbose)
 			printf("SU %s: Path returned NIL\n", this->GetName());
-		return kStay;
+		return false;
 	}
 		
 	if (!(p->n && p->next && p->next->n && (loc.x == p->n->GetLabelL(kFirstData)) 
@@ -227,11 +226,11 @@ tDirection SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, Simula
 
 	assert(moves.size() > 0);
 
-	tDirection dir = moves.back();
+	res = moves.back();
 	moves.pop_back();
 //	if (verbose)
 //		printf("SU %p: returning move 0x%X\n", this, (int)dir);
-	return dir;
+	return true;
 }
 
 void SearchUnit::addPathToCache(path *p)

@@ -53,9 +53,9 @@ public:
 
 	//using unit::makeMove;
 	// this is where the World says you are  
-	virtual tDirection MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, SimulationInfo *si)
-	{ return makeMove(ame->GetMapAbstraction(), 0, si); }
-	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo); 
+	virtual bool MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, SimulationInfo *si, tDirection &dir)
+		{ return makeMove(ame->GetMapAbstraction(), 0, si,dir); }
+	virtual bool makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo, tDirection &dir); 
 	
 	void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool success, SimulationInfo *si) { updateLocation(l.x, l.y, success, si); }
 	virtual void updateLocation(int _x, int _y, bool, SimulationInfo *);
