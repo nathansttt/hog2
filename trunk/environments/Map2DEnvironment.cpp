@@ -185,7 +185,54 @@ void MapEnvironment::OpenGLDraw(int , xyLoc &l)
 	DrawSphere(xx, yy, zz, rad);
 }
 
+void MapEnvironment::OpenGLDraw(int , xyLoc& s, tDirection &dir)
+{
+	GLdouble xx, yy, zz, rad;
+	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+	
+	glColor3f(0.5, 0.5, 0.5);
+	glBegin(GL_LINE_STRIP);
+	glVertex3f(xx, yy, zz-rad/2);
+	
+	xyLoc initial = s;
+	
+	switch (dir)
+	{
+		case kN: s.y-=1; break;
+		case kS: s.y+=1; break;
+		case kE: s.x+=1; break;
+		case kW: s.x-=1; break;
+		case kNW: s.y-=1; s.x-=1; break;
+		case kSW: s.y+=1; s.x-=1; break;
+		case kNE: s.y-=1; s.x+=1; break;
+		case kSE: s.y+=1; s.x+=1; break;
+		default: break;
+	}
 
+	
+	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+	glVertex3f(xx, yy, zz-rad/2);
+	glEnd();
+	
+	s = initial;
+}
+
+void MapEnvironment::GetNextState(xyLoc &currents, tDirection dir, xyLoc &news)
+ {
+	news = currents;
+ 	switch (dir)
+	{
+ 		case kN: news.y-=1; break;
+ 		case kS: news.y+=1; break;
+ 		case kE: news.x+=1; break;
+ 		case kW: news.x-=1; break;
+ 		case kNW: news.y-=1; news.x-=1; break;
+ 		case kSW: news.y+=1; news.x-=1; break;
+ 		case kNE: news.y-=1; news.x+=1; break;
+ 		case kSE: news.y+=1; news.x+=1; break;
+ 		default: break;
+	}	
+}
 /************************************************************/
 
 AbsMapEnvironment::AbsMapEnvironment(MapAbstraction *_ma)
