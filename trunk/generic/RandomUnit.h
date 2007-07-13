@@ -19,11 +19,12 @@ public:
 	RandomUnit(state startLoc) :loc(startLoc) {}
 	virtual ~RandomUnit() {}
 	virtual const char *GetName() { return "Random Unit"; }
-	virtual action MakeMove(environment *env, OccupancyInterface<state, action> *, SimulationInfo *)
+	virtual bool MakeMove(environment *env, OccupancyInterface<state, action> *, SimulationInfo *, action& a)
 	{
 		std::vector<action> acts;
 		env->GetActions(loc, acts);
-		return acts[random()%acts.size()];
+		a = acts[random()%acts.size()];
+		return true;
 	}
 	virtual void UpdateLocation(environment *, state &newloc, bool success, SimulationInfo *)
 	{
