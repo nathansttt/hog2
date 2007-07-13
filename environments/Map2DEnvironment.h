@@ -18,6 +18,8 @@
 #include "UnitSimulation.h"
 #include "ReservationProvider.h"
 
+#include <cassert>
+
 struct xyLoc {
 public:
 	xyLoc() {}
@@ -50,6 +52,7 @@ const int kStayIndex = 8; // index of kStay
 
 typedef OccupancyInterface<xyLoc, tDirection> BaseMapOccupancyInterface;
 
+
 class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 {
 public:
@@ -70,8 +73,11 @@ public:
 	uint64_t GetActionHash(tDirection act);
 	virtual void OpenGLDraw(int window);
 	virtual void OpenGLDraw(int window, xyLoc &l);
-	virtual void OpenGLDraw(int, xyLoc &, tDirection &) { /* currently not drawing moves */ }
+	virtual void OpenGLDraw(int, xyLoc &, tDirection &);
 	Map* GetMap() { return map; }
+	
+	virtual void GetNextState(xyLoc &currents, tDirection dir, xyLoc &news);
+	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
 protected:
 	Map *map;
 };
@@ -84,6 +90,8 @@ public:
 	MapAbstraction *GetMapAbstraction() { return ma; }
 	void OpenGLDraw(int window) { map->OpenGLDraw(window); ma->OpenGLDraw(window); }
 	void OpenGLDraw(int window, xyLoc &l) { MapEnvironment::OpenGLDraw(window, l); }
+	void OpenGLDraw(int window, xyLoc& s, tDirection &dir) {MapEnvironment::OpenGLDraw(window,s,dir);}
+	
 private:
 	MapAbstraction *ma;
 };
