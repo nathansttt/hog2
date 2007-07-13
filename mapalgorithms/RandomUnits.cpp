@@ -16,10 +16,10 @@
  * the random unit follows a certain direction for a random amount of time,
  * and then picks a new direction. makeMove just returns the current direction.
  */
-tDirection RandomUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *)
+bool RandomUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &dir)
 {
-	tDirection where = possibleDir[lastIndex];
-	return where;
+	dir = possibleDir[lastIndex];
+	return true;
 }
 
 /**
@@ -47,9 +47,10 @@ void RandomUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *,
  * the random unit follows a certain direction for a random amount of time,
  * and then picks a new direction. makeMove just returns the current direction.
  */
-tDirection RandomerUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *)
+bool RandomerUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &dir)
 {
-	return possibleDir[random()%9];
+	dir = possibleDir[random()%9];
+	return true;
 }
 
 /**
@@ -58,10 +59,10 @@ tDirection RandomerUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *,
  * the billiard ball unit keeps following the same direction until either a collision
  * or instability
  */
-tDirection BilliardBallUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *)
+bool BilliardBallUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &dir)
 {
-	tDirection where = possibleDir[lastIndex];
-	return where;
+	dir = possibleDir[lastIndex];
+	return true;
 }
 
 /**
@@ -97,16 +98,18 @@ void BilliardBallUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterf
  * the teleport unit stays put for some # moves, and then teleports to a new random
  * location.
  */
-tDirection TeleportUnit::MakeMove(MapEnvironment *me, BaseMapOccupancyInterface *, SimulationInfo *)
+bool TeleportUnit::MakeMove(MapEnvironment *me, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &dir)
 {
 	if (timer == 0)
 	{
 		timer = stayTime;
 		loc.x = random()%me->GetMap()->getMapWidth();
 		loc.y = random()%me->GetMap()->getMapHeight();
-		return kTeleport;
+		dir = kTeleport;
+		return true;
 	}
 	timer--;
-	return kStay;
+	dir = kStay;
+	return true;
 }
 

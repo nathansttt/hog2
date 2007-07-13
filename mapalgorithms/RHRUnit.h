@@ -22,7 +22,7 @@ public:
 	:MapUnit(x, y)
   { lastIndex = 0; }
 	const char *GetName() { return "RHRUnit"; }
-	tDirection MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *);
+	bool MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &);
 	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc &, bool, SimulationInfo *);
 private:
 	int lastIndex;
