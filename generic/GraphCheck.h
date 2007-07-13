@@ -38,11 +38,8 @@ public:
 };
 
 
+// Hash64 struct has been moved to SearchEnvironment.h
 
-struct Hash64 {
-		size_t operator()(const uint64_t &x) const
-		{ return (size_t)(x); }
-};
 
 template <typename state, typename action>
 class GraphCheck {
