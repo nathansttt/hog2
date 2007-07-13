@@ -14,10 +14,10 @@
  *
  * Make the next move following the right hand rule.
  */
-tDirection RHRUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *)
+bool RHRUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection& dir)
 {
-	tDirection where = possibleDir[lastIndex];
-	return where;
+	dir = possibleDir[lastIndex];
+	return true;
 }
 
 /**
