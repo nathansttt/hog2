@@ -41,7 +41,8 @@
 #include "RandomUnits.h"
 
 #include "AbsMapPatrolUnit.h"
-//#include "TemplateAStar.h"
+#include "TemplateAStar.h"
+#include "GenericSearchUnit.h"
 #include "WeightedMap2DEnvironment.h"
 
 bool mouseTracking;
@@ -49,7 +50,7 @@ int px1, py1, px2, py2;
 int absType = 0;
 
 std::vector<UnitAbsMapSimulation *> unitSims;
-
+//std::vector<UnitWeightedMapSimulation *> unitSims;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -83,8 +84,14 @@ void CreateSimulation(int id)
 	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 8)));
 	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
 	
-	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment>(new WeightedMap2DEnvironment(new MapFlatAbstraction(map)));
-	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new WeightedMap2DEnvironment(new MapFlatAbstraction(map)));
+	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapFlatAbstraction(map)));
+	
+	
+	
+	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new WeightedMap2DEnvironment(new MapFlatAbstraction(map)));
+	
+	
+	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment>(new WeightedMap2DEnvironment (new MapFlatAbstraction(map)));
 	
 	unitSims[id]->SetStepType(kMinTime);
 //	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
@@ -199,7 +206,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
+/*	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
 	
 	int x1, y1, x2, y2;
 	x2 = random()%m->getMapWidth();
@@ -210,7 +217,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	//SearchUnit *su2 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), su1, new praStar());
 	SearchUnit *su2 = new SearchUnit(x2, y2, su1, new aStar());
 	//unitSim->AddUnit(su1);
-	unitSims[windowID]->AddUnit(su2);
+	unitSims[windowID]->AddUnit(su2);*/
 	
 //	RandomerUnit *r = new RandomerUnit(random()%m->getMapWidth(), random()%m->getMapHeight());
 //	int id = unitSim->AddUnit(r);
@@ -250,16 +257,26 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	//}
 
 	int xStart=5, yStart=5, xGoal=50, yGoal=50;
+	xyLoc start;
+	start.x = xStart;
+	start.y = yStart;
+	
 	xyLoc goal;
 	goal.x = xGoal;
 	goal.y = yGoal;
 	
-	aStar* a = new aStar();
-	//TemplateAStar<xyLoc, tDirection>* a = new TemplateAStar<xyLoc, tDirection>();
-	AbsMapPatrolUnit* pUnit = new AbsMapPatrolUnit(xStart,yStart, a);
-	pUnit->addPatrolLocation(goal);
 	
-	unitSims[windowID]->AddUnit(pUnit);
+	//aStar* a = new aStar();
+	
+	
+	TemplateAStar<xyLoc, tDirection>* a = new TemplateAStar<xyLoc, tDirection>();
+	GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>* unit = new GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>(start, goal, a);
+	
+	//AbsMapPatrolUnit* pUnit = new AbsMapPatrolUnit(xStart,yStart, a);
+	//pUnit->addPatrolLocation(goal);
+	
+	//Unit<xyLoc, tDirection, WeightedMap2DEnvironment> *pUnit = new Unit<xyLoc, tDirection, WeightedMap2DEnvironment>;
+	unitSims[windowID]->AddUnit(unit);
 	
 	
 	//pUnit->setSpeed(0.5);
