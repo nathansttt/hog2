@@ -26,7 +26,7 @@ public:
 	virtual ~AbsMapUnit() {}
 	
 	virtual const char *GetName() = 0;
-	virtual tDirection MakeMove(AbsMapEnvironment *, OccupancyInterface<xyLoc, tDirection> *, SimulationInfo *) = 0;
+	virtual bool MakeMove(AbsMapEnvironment *, OccupancyInterface<xyLoc, tDirection> *, SimulationInfo *, tDirection &) = 0;
 	virtual void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool, SimulationInfo *)
 	{ loc = l; }
 	virtual void GetLocation(xyLoc &l)
