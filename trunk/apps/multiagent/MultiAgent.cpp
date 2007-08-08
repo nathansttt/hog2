@@ -43,11 +43,14 @@
 #include "AbsMapPatrolUnit.h"
 #include "TemplateAStar.h"
 #include "GenericSearchUnit.h"
+#include "GenericPatrolUnit.h"
 #include "WeightedMap2DEnvironment.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
+
+AbsMapEnvironment *env=0;
 
 std::vector<UnitAbsMapSimulation *> unitSims;
 //std::vector<UnitWeightedMapSimulation *> unitSims;
@@ -84,7 +87,9 @@ void CreateSimulation(int id)
 	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 8)));
 	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
 	
-	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapFlatAbstraction(map)));
+	env = new AbsMapEnvironment(new MapFlatAbstraction(map));
+	
+	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	
 	
 	
@@ -268,15 +273,22 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	
 	//aStar* a = new aStar();
 	
+	//std::vector<xyLoc> path;
+	TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>* a = new TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>();
+	//a->GetPath(env, start,goal, path);
 	
-	TemplateAStar<xyLoc, tDirection>* a = new TemplateAStar<xyLoc, tDirection>();
-	GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>* unit = new GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>(start, goal, a);
-	
+//	GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>* unit = new GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>(start, goal, a);
+ 	GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment>(start, a);
+// 	
+ 	u->AddPatrolLocation(goal);
+// 	
 	//AbsMapPatrolUnit* pUnit = new AbsMapPatrolUnit(xStart,yStart, a);
 	//pUnit->addPatrolLocation(goal);
 	
 	//Unit<xyLoc, tDirection, WeightedMap2DEnvironment> *pUnit = new Unit<xyLoc, tDirection, WeightedMap2DEnvironment>;
-	unitSims[windowID]->AddUnit(unit);
+
+
+	unitSims[windowID]->AddUnit(u);
 	
 	
 	//pUnit->setSpeed(0.5);
