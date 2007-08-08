@@ -41,7 +41,7 @@
 #include "FPUtil.h"
 #include <ext/hash_map>
 #include "OpenClosedList.h"
-#include "SearchEnvironment.h" // for the SearchEnvironment class
+//#include "SearchEnvironment.h" // for the SearchEnvironment class
 #include "float.h"
 
 #include <algorithm> // for vector reverse
@@ -104,15 +104,14 @@ public:
 /**
 * A templated version of A*, based on HOG genericAStar
 */
-template <class state, class action>
-class TemplateAStar : public GenericSearchAlgorithm<state,action> {
+template <class state, class action, class environment>
+class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
 	TemplateAStar() {}
 	virtual ~TemplateAStar() {}
-	void GetPath(SearchEnvironment<state,action> *env, state& from, state& to,
-							 std::vector<state> &thePath);
+	void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
 
-	void GetPath(SearchEnvironment<state,action> *env, state& from, state& to, std::vector<action> & thePath) {};
+	void GetPath(environment *env, state& from, state& to, std::vector<action> & thePath) {};
 	
 		typedef OpenClosedList<TemplateAStarUtil::SearchNode<state>, TemplateAStarUtil::SearchNodeHash<state>,
 		TemplateAStarUtil::SearchNodeEqual<state>, TemplateAStarUtil::SearchNodeCompare<state> > PQueue;
@@ -126,8 +125,7 @@ public:
 	
 	typedef typename NodeLookupTable::const_iterator closedList_iterator;
 
-	bool InitializeSearch(SearchEnvironment<state,action> *env, state& from, state& to,
-												std::vector<state> &thePath);
+	bool InitializeSearch(environment *env, state& from, state& to, std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	state CheckNextNode();
 	void ExtractPathToStart(state& n, std::vector<state> &thePath);
@@ -152,12 +150,11 @@ private:
 	long nodesTouched, nodesExpanded;
 	bool GetNextNode(state &next);
 	//state GetNextNode();
-	void UpdateWeight(SearchEnvironment<state,action>* env, state& currOpenNode, state& neighbor);
-	void AddToOpenList(SearchEnvironment<state,action>* env, state& currOpenNode, state& neighbor);
+	void UpdateWeight(environment *env, state& currOpenNode, state& neighbor);
+	void AddToOpenList(environment *env, state& currOpenNode, state& neighbor);
 	
-
 	std::vector<state> neighbors;
-	SearchEnvironment<state, action> *env;
+	environment *env;
 	Corridor eligibleNodes;
 };
 
@@ -172,8 +169,8 @@ static const bool verbose = false;
 * @return The name of the algorithm
 */
 
-template <class state, class action>
-const char *TemplateAStar<state,action>::GetName()
+template <class state, class action, class environment>
+const char *TemplateAStar<state,action,environment>::GetName()
 {
 	static char name[32];
 	sprintf(name, "TemplateAStar[]");
@@ -191,13 +188,12 @@ const char *TemplateAStar<state,action>::GetName()
 * @param thePath A vector of states which will contain an optimal path 
 * between from and to when the function returns, if one exists. 
 */
-template <class state, class action>
-void TemplateAStar<state,action>::GetPath(SearchEnvironment<state,action> *_env, state& from, state& to,
-													 std::vector<state> &thePath)
+template <class state, class action, class environment>
+void TemplateAStar<state,action,environment>::GetPath(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
-	if (!InitializeSearch(_env, from, to, thePath))
-		return;
-	while (!DoSingleSearchStep(thePath)) {}
+  	if (!InitializeSearch(_env, from, to, thePath))
+  		return;
+  	while (!DoSingleSearchStep(thePath)) {}
 }
 
 /**
@@ -210,9 +206,8 @@ void TemplateAStar<state,action>::GetPath(SearchEnvironment<state,action> *_env,
 * @param to The goal state
 * @return TRUE if initialization was successful, FALSE otherwise
 */
-template <class state, class action>
-bool TemplateAStar<state,action>::InitializeSearch(SearchEnvironment<state, action> *_env, state& from, state& to,
-																		std::vector<state> &thePath)
+template <class state, class action, class environment>
+bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
 	env = _env;
 	assert(openQueue.size() == 0);
@@ -244,15 +239,13 @@ bool TemplateAStar<state,action>::InitializeSearch(SearchEnvironment<state, acti
 * @return TRUE if there is no path or if we have found the goal, FALSE
 * otherwise
 */
-template <class state, class action>
-bool TemplateAStar<state,action>::DoSingleSearchStep(std::vector<state> &thePath)
+template <class state, class action, class environment>
+bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<state> &thePath)
 {
-	std::cout<<"Doing a single search step\n";
 	state currentOpenNode; //= UINT32_MAX;
 
 	if (openQueue.size() == 0)
 	{
-		std::cout<<"Returning because open queue size is 0\n";
 		thePath.resize(0); // no path found!
 		return true;
 	}
@@ -265,7 +258,6 @@ bool TemplateAStar<state,action>::DoSingleSearchStep(std::vector<state> &thePath
 	
 	if (env->GoalTest(currentOpenNode, goal))
 	{
-		std::cout<<"I found my goal\n";
 		ExtractPathToStart(currentOpenNode, thePath);
 		// Path is backwards - reverse
 		reverse(thePath.begin(), thePath.end()); 
@@ -281,7 +273,6 @@ bool TemplateAStar<state,action>::DoSingleSearchStep(std::vector<state> &thePath
 	neighbors.resize(0);
 	env->GetSuccessors(currentOpenNode, neighbors);
 
-	std::cout<<"I have "<<neighbors.size()<<" neighbors\n";
 	// iterate over all the children
 	for (unsigned int x = 0; x < neighbors.size(); x++)
 	{
@@ -302,7 +293,6 @@ bool TemplateAStar<state,action>::DoSingleSearchStep(std::vector<state> &thePath
 		else {
 //			if (verbose) { printf("addinging node %d\n", neighbor); }
 			AddToOpenList(env, currentOpenNode, neighbor);
-			std::cout<<"openlist size "<<openQueue.size()<<std::endl;
 		}
 	}
 	return false;
@@ -315,8 +305,8 @@ bool TemplateAStar<state,action>::DoSingleSearchStep(std::vector<state> &thePath
 * 
 * @return The first state in the open list. 
 */
-template <class state, class action>
-state TemplateAStar<state, action>::CheckNextNode()
+template <class state, class action, class environment>
+state TemplateAStar<state, action,environment>::CheckNextNode()
 {
 	return openQueue.top().currNode;
 }
@@ -330,8 +320,8 @@ state TemplateAStar<state, action>::CheckNextNode()
 * @return TRUE if next contains a valid state, FALSE if there is no  more states in the
 * open queue 
 */
-template <class state, class action>
-bool TemplateAStar<state,action>::GetNextNode(state &next)
+template <class state, class action, class environment>
+bool TemplateAStar<state,action,environment>::GetNextNode(state &next)
 {
 	nodesExpanded++;
 	if(openQueue.Empty())
@@ -352,8 +342,8 @@ bool TemplateAStar<state,action>::GetNextNode(state &next)
 * @param currOpenNode The node that's currently being expanded
 * @param neighbor The node whose weight will be updated
 */
-template <class state, class action>
-void TemplateAStar<state,action>::UpdateWeight(SearchEnvironment<state,action>* env, state &currOpenNode, state &neighbor)
+template <class state, class action, class environment>
+void TemplateAStar<state,action,environment>::UpdateWeight(environment *env, state &currOpenNode, state &neighbor)
 {
 	SearchNode<state> prev = openQueue.find(SearchNode<state>(neighbor, env->GetStateHash(neighbor)));
 	SearchNode<state> alt = closedList[env->GetStateHash(currOpenNode)];
@@ -376,8 +366,8 @@ void TemplateAStar<state,action>::UpdateWeight(SearchEnvironment<state,action>* 
 * @param currOpenNode the state that's currently being expanded
 * @param neighbor the state to be added to the open list
 */
-template <class state, class action>
-void TemplateAStar<state, action>::AddToOpenList(SearchEnvironment<state,action>* env, state &currOpenNode, state &neighbor)
+template <class state, class action,class environment>
+void TemplateAStar<state, action,environment>::AddToOpenList(environment *env, state &currOpenNode, state &neighbor)
 {
 	//heuristic = hCost????????
 	double edgeWeight = env->GCost(currOpenNode, neighbor);
@@ -396,8 +386,8 @@ void TemplateAStar<state, action>::AddToOpenList(SearchEnvironment<state,action>
 * @param goalNode the goal state
 * @param thePath will contain the path from goalNode to the start state
 */
-template <class state, class action>
-void TemplateAStar<state, action>::ExtractPathToStart(state &goalNode,
+template <class state, class action,class environment>
+void TemplateAStar<state, action,environment>::ExtractPathToStart(state &goalNode,
 																			std::vector<state> &thePath)
 {
 	SearchNode<state> n;
@@ -412,8 +402,6 @@ void TemplateAStar<state, action>::ExtractPathToStart(state &goalNode,
 		n = closedList[env->GetStateHash(n.prevNode)];
 	} while (!(n.currNode == n.prevNode));
 	thePath.push_back(n.currNode);
-	
-// 	
 }
 
 /**
@@ -422,8 +410,8 @@ void TemplateAStar<state, action>::ExtractPathToStart(state &goalNode,
 * @author Nathan Sturtevant
 * @date 03/22/06
 */
-template <class state, class action>
-void TemplateAStar<state, action>::PrintStats()
+template <class state, class action, class environment>
+void TemplateAStar<state, action,environment>::PrintStats()
 {
 	printf("%u items in closed list\n", (unsigned int)closedList.size());
 	printf("%u items in open queue\n", (unsigned int)openQueue.size());
@@ -436,8 +424,8 @@ void TemplateAStar<state, action>::PrintStats()
 * 
 * @return The combined number of elements in the closed list and open queue
 */
-template <class state, class action>
-int TemplateAStar<state, action>::GetMemoryUsage()
+template <class state, class action, class environment>
+int TemplateAStar<state, action,environment>::GetMemoryUsage()
 {
 	return closedList.size()+openQueue.size();
 }
@@ -449,9 +437,9 @@ int TemplateAStar<state, action>::GetMemoryUsage()
 * 
 * @return An iterator pointing to the first node in the closed list
 */
-template <class state, class action>
+template <class state, class action,class environment>
 //__gnu_cxx::hash_map<state, TemplateAStarUtil::SearchNode<state> >::const_iterator
-void TemplateAStar<state, action>::GetClosedListIter(closedList_iterator) //const
+void TemplateAStar<state, action,environment>::GetClosedListIter(closedList_iterator) //const
 {
 	return closedList.begin();
 }
@@ -466,8 +454,8 @@ void TemplateAStar<state, action>::GetClosedListIter(closedList_iterator) //cons
 * @return The next state in the closed list. Returns UINT_MAX if there's no 
 * more states
 */
-template <class state, class action>
-bool TemplateAStar<state, action>::ClosedListIterNext(closedList_iterator& it, state& next) const
+template <class state, class action, class environment>
+bool TemplateAStar<state, action,environment>::ClosedListIterNext(closedList_iterator& it, state& next) const
 {
 	if (it == closedList.end())
 		return false;
