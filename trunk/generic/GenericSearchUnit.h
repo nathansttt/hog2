@@ -11,23 +11,24 @@
 #include "SpreadExecSearchAlgorithm.h"
 #include "AbsMapUnit.h"
 #include "ReservationProvider.h" // occupancy interface - change later
+//#include "SearchEnvironment.h"
 
 #ifndef GENERICSEARCHUNIT_H
 #define GENERICSEARCHUNIT_H
 
 /**
-* A general unit which collects path information from a SearchAlgorithm and
+* A general unit which collects path information from a GenericSearchAlgorithm and
 * incrementally executes that path in the world
 */
 
 template <class state, class action, class environment> 
 class GenericSearchUnit : public Unit<state,action,environment> {
 public:
-	GenericSearchUnit(state &start, state &goal, GenericSearchAlgorithm<state,action> *alg);
-	GenericSearchUnit(state &start, Unit<state,action,environment> *target, GenericSearchAlgorithm<state,action> *alg);
+	GenericSearchUnit(state &start, state &goal, GenericSearchAlgorithm<state,action,environment> *alg);
+	GenericSearchUnit(state &start, Unit<state,action,environment> *target, GenericSearchAlgorithm<state,action,environment> *alg);
 	virtual ~GenericSearchUnit();
 	virtual const char *GetName() { if (algorithm) return algorithm->GetName(); return "None"; }
-	virtual GenericSearchAlgorithm<state,action>* getAlgorithm() { return algorithm; }
+	virtual GenericSearchAlgorithm<state,action,environment>* getAlgorithm() { return algorithm; }
 
 	virtual bool done() {return (loc == goal);}
 	virtual void GetGoal(state &s) { s=goal;} 
@@ -48,13 +49,13 @@ public:
 	void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
 	void GetColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
 protected:
-	virtual void addPathToCache(environment* env, std::vector<state> &path);
+	virtual void AddPathToCache(environment *env, std::vector<state> &path);
 	bool getCachedMove(action &a);
 	int nodesExpanded;
 	int nodesTouched;
 	std::vector<action> moves; // states? actions? what? 
 	//	path *p;
-	GenericSearchAlgorithm<state,action> *algorithm;
+	GenericSearchAlgorithm<state,action,environment> *algorithm;
 
 	Unit<state,action,environment> *target;
 	GLfloat r, g, b;
@@ -65,7 +66,7 @@ protected:
 
 
 template <class state, class action, class environment>
-GenericSearchUnit<state,action,environment>::GenericSearchUnit(state &start, state &targ, GenericSearchAlgorithm<state,action> *alg)
+GenericSearchUnit<state,action,environment>::GenericSearchUnit(state &start, state &targ, GenericSearchAlgorithm<state,action,environment> *alg)
 {
 	loc = start;
 	goal = targ;
@@ -79,7 +80,7 @@ GenericSearchUnit<state,action,environment>::GenericSearchUnit(state &start, sta
 }
 
 template <class state, class action, class environment>
-GenericSearchUnit<state,action,environment>::GenericSearchUnit(state &start, Unit<state,action,environment> *targ, GenericSearchAlgorithm<state,action> *alg)
+GenericSearchUnit<state,action,environment>::GenericSearchUnit(state &start, Unit<state,action,environment> *targ, GenericSearchAlgorithm<state,action,environment> *alg)
 {	
 	target = targ; 
 	targ->getLocation(goal);
@@ -98,10 +99,10 @@ GenericSearchUnit<state,action,environment>::~GenericSearchUnit()
 {
 }
 
-//NEED TO MAKE THIS BOOL --> can return 'false' instead of kStay
 template <class state, class action, class environment>
 bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& a)
 {
+	std::cout<<"GenericSearchUnit makemove\n";
 	if (getCachedMove(a))
 		return true;
 	
@@ -156,7 +157,7 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 	// a valid path must have at least 2 nodes and start where the unit is located
 	assert((path.size() > 1) && (path[0]==loc));
 	
-	addPathToCache(env, path);
+	AddPathToCache(env, path);
 
 	assert(moves.size() > 0);
 
@@ -214,7 +215,7 @@ void GenericSearchUnit<state,action,environment>::LogFinalStats(StatCollection *
 * ??? Rename moves --> actions? Moves only for maps?
 */
 template<class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::addPathToCache(environment* env, std::vector<state> &path)
+void GenericSearchUnit<state,action,environment>::AddPathToCache(environment *env, std::vector<state> &path)
 {
  	for(unsigned int i=0; i<path.size()-1; i++)
  		moves.push_back(env->GetAction(path[i], path[i+1]));
