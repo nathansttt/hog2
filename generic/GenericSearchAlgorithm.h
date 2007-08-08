@@ -28,15 +28,16 @@
 #define GENERICSEARCHALGORITHM_H
 
 #include <vector>
+#include "SearchEnvironment.h"
 
-template <class state, class action>
+template <class state, class action, class environment>
 class GenericSearchAlgorithm
 {
 public:
 	GenericSearchAlgorithm() {};
 	virtual ~GenericSearchAlgorithm() {};
-	virtual void GetPath(SearchEnvironment<state, action> *env, state &from, state &to, std::vector<state> &path) = 0;
-	virtual void GetPath(SearchEnvironment<state, action> *env, state &from, state &to, std::vector<action> &path) = 0;
+	virtual void GetPath(environment *env, state &from, state &to, std::vector<state> &path) = 0;
+	virtual void GetPath(environment *env, state &from, state &to, std::vector<action> &path) = 0;
 	virtual const char *GetName() = 0;
 	virtual int GetNodesExpanded() = 0;
 	virtual int GetNodesTouched() = 0;
