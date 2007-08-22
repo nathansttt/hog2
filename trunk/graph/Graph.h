@@ -131,8 +131,8 @@ class edge : public graph_object {
 	double getWeight() { return GetLabelF(kEdgeWeight); }
 	void setWeight(double val) { SetLabelF(kEdgeWeight, val); }
 	
-	double getWidth() { return GetLabelF(kEdgeWidth); }
-	void setWidth(double val) { SetLabelF(kEdgeWidth, val); }
+//	double getWidth() { return GetLabelF(kEdgeWidth); }
+//	void setWidth(double val) { SetLabelF(kEdgeWidth, val); }
 	
 	unsigned int getFrom() { return from; }
 	unsigned int getTo() { return to; }
