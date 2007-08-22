@@ -47,6 +47,13 @@ enum {
   kFirstData = 9
 };
 
+/** Definitions for edge labels */
+enum {
+	kEdgeWeight = 0,
+	kEdgeWidth = 1
+};
+
+
 /** kFirstData & beyond:
 * 
 * in abstract Graph these are the node numbers of the abstraction (LONG labels)
