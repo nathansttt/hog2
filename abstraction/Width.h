@@ -31,15 +31,15 @@
 //#define MIN(A,B) (((A) < (B)) ? (A) : (B))
 //#define MAX(A,B) (((A) > (B)) ? (A) : (B))
 
-node* findNodeAt(int x, int y, Graph* g);
-edge* findEdgeBetween(int from, int to, Graph* g);
-float findMin(node* n);
-float findMax(node* n);
-float findMaxAbstracted(node* x, Graph* g);
-float findMinAbstractedNode(node* x, Graph* g);
-float minSpanningTree(node* n, Graph* g);
-bool edgeInVector(edge* e, std::vector<edge*> edges);
-void sortEdgeWidths(std::vector<edge*>* edges);
-bool hasCycle(edge* e, std::vector<int> nodes);
+//node* findNodeAt(int x, int y, Graph* g);
+//edge* findEdgeBetween(int from, int to, Graph* g);
+//float findMin(node* n);
+//float findMax(node* n);
+//float findMaxAbstracted(node* x, Graph* g);
+//float findMinAbstractedNode(node* x, Graph* g);
+//float minSpanningTree(node* n, Graph* g);
+//bool edgeInVector(edge* e, std::vector<edge*> edges);
+//void sortEdgeWidths(std::vector<edge*>* edges);
+//bool hasCycle(edge* e, std::vector<int> nodes);
 
 #endif
