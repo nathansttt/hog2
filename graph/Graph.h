@@ -108,10 +108,11 @@ private:
   //unsigned int edge_index;
 };
 
-enum {
-	kEdgeWeight = 0,
-	kEdgeWidth = 1
-};
+// Moved to GraphAbstraction.h
+// enum {
+// 	kEdgeWeight = 0,
+// 	kEdgeWidth = 1
+// };
 
 /**
  * Edge class for connections between \ref node in a \ref Graph.
