@@ -49,7 +49,6 @@ enum {
 
 /** Definitions for edge labels */
 enum {
-	kEdgeWeight = 0,
 	kEdgeWidth = 1
 };
 
