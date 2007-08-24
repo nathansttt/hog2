@@ -10,19 +10,16 @@ template <class state, class action, class environment>
 class GenericPatrolUnit : public GenericSearchUnit<state,action, environment> {
 public:
 	GenericPatrolUnit(state &s, GenericSearchAlgorithm<state,action,environment>* alg);
-
+	GenericPatrolUnit(state &s, GenericSearchAlgorithm<state,action,environment>* alg, GLfloat _r, GLfloat _g, GLfloat _b);
 	virtual const char *GetName() { return "AbsMapPatrolUnit"; } // want alg name as well?
 	
 	virtual bool MakeMove(environment *env, OccupancyInterface<state,action> *, SimulationInfo *si, action &dir);
 	
 	virtual void OpenGLDraw(int window, environment *, SimulationInfo *);
-	void AddPatrolLocation(state &s); // by ref or not?
+	void AddPatrolLocation(state &s); 
 	state& GetGoal(); // get CURRENT goal? 
 	virtual bool done() {return false;}
-	void UpdateLocation(environment *, state &l, bool success, SimulationInfo *si)
-	{ loc = l; if(!success){ moves.resize(0); if(currTarget != -1) currTarget = 0; } }
-//	void updateLocation(int _x, int _y, bool worked, SimulationInfo *)
-//	{ loc.x = _x; loc.y = _y; if (!worked) { moves.resize(0); if (currTarget != -1) currTarget = 0; } }
+	void UpdateLocation(environment *, state &l, bool success, SimulationInfo *si);
 	void LogStats(StatCollection *stats);
 	void LogFinalStats(StatCollection *stats);
 private:
@@ -47,17 +44,38 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericS
 :GenericSearchUnit<state,action,environment>(s,s,alg)
 {
 	locs.push_back(s);
-	
+	loc = s;
 	//setObjectType(kWorldObject);
 	currTarget = -1;
 	nodesExpanded = nodesTouched = 0;
 	
 	algorithm = alg;
+	
+	r = 0.5;
+	g = 0.5;
+	b = 0.5;
+}
+
+template <class state, class action, class environment>
+GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, GenericSearchAlgorithm<state,action,environment>* alg, GLfloat _r, GLfloat _g, GLfloat _b):GenericSearchUnit<state,action,environment>(s,s,alg)
+{
+	locs.push_back(s);
+	loc = s;
+
+	currTarget = -1;
+	nodesExpanded = nodesTouched = 0;
+	
+	algorithm = alg;
+	
+	r = _r;
+	g = _g;
+	b = _b;
 }
 
 template <class state, class action, class environment>
 bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& dir)
 {
+	//std::cout<<"before makemove, patrolunit is at "<<loc<<std::endl;
 	if (moves.size() > 0)
 	{
 		dir = moves.back();
@@ -67,8 +85,16 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 	
 	if (currTarget != -1)
 	{
+		// if we're not yet at our current target, then we don't need to update 
+		// current target
+
+		if(loc == locs[currTarget])
+	 	{
+	 		currTarget = (currTarget+1)%locs.size();
+ 		}
  		GoToLoc(env, currTarget);
-		currTarget = (currTarget+1)%locs.size();
+
+		
 		if (moves.size() > 0)
 		{
 			dir = moves.back();
@@ -113,10 +139,28 @@ void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* en
 template <class state, class action, class environment>
 void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
 {
-	env->OpenGLDraw(window, loc);	
+	env->OpenGLDraw(window, loc,r,g,b);	
 	
 	for(unsigned int i=0; i<locs.size(); i++)
 		env->OpenGLDraw(window, locs[i]);
+}
+
+template <class state, class action, class environment>
+void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo *si)
+{ 
+	//Update occupancy interface
+	env->GetOccupancyInterface()->SetStateOccupied(loc,false);
+	env->GetOccupancyInterface()->SetStateOccupied(l, true);
+	
+	loc = l; 
+	if(!success)
+	{ 
+		moves.resize(0); 
+		if(currTarget != -1) 
+			currTarget = 0; 
+	} 
+	
+	
 }
 
 template <class state, class action, class environment>
