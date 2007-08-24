@@ -17,8 +17,11 @@
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "ReservationProvider.h"
+#include "BitVector.h"
 
 #include <cassert>
+
+#include "BaseMapOccupancyInterface.h"
 
 struct xyLoc {
 public:
@@ -45,12 +48,32 @@ enum tDirection {
 	kSE=kS|kE, kSW=kS|kW, kStay=0, kTeleport=kSW|kNE
 };
 
+class BaseMapOccupancyInterface : OccupancyInterface<xyLoc,tDirection>
+{
+public:
+	BaseMapOccupancyInterface(Map* m);
+	virtual ~BaseMapOccupancyInterface();
+	virtual void SetStateOccupied(xyLoc&, bool);
+	virtual bool GetStateOccupied(xyLoc&);
+	virtual bool CanMove(xyLoc, xyLoc) {return true;}// FIX THIS
+private:
+	bitVector *bitvec; /// For each map position, set if occupied
+	long mapWidth; /// Used to compute index into bitvector
+	long mapHeight; /// used to compute index into bitvector
+	
+	long CalculateIndex(uint16_t x, uint16_t y);
+};
+
+
 const int numPrimitiveActions = 8;
 const int numActions = 10;
 const tDirection possibleDir[numActions] = { kN, kNE, kE, kSE, kS, kSW, kW, kNW, kStay, kTeleport };
 const int kStayIndex = 8; // index of kStay
 
-typedef OccupancyInterface<xyLoc, tDirection> BaseMapOccupancyInterface;
+
+
+
+//typedef OccupancyInterface<xyLoc, tDirection> BaseMapOccupancyInterface;
 
 
 class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
@@ -74,12 +97,16 @@ public:
 	virtual void OpenGLDraw(int window);
 	virtual void OpenGLDraw(int window, xyLoc &l);
 	virtual void OpenGLDraw(int, xyLoc &, tDirection &);
+	virtual void OpenGLDraw(int, xyLoc &l, GLfloat r, GLfloat g, GLfloat b);
 	Map* GetMap() { return map; }
 	
 	virtual void GetNextState(xyLoc &currents, tDirection dir, xyLoc &news);
+	
+	BaseMapOccupancyInterface* GetOccupancyInterface(){return oi;}
 	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
 protected:
 	Map *map;
+	BaseMapOccupancyInterface *oi;
 };
 
 class AbsMapEnvironment : public MapEnvironment
@@ -90,14 +117,18 @@ public:
 	MapAbstraction *GetMapAbstraction() { return ma; }
 	void OpenGLDraw(int window) { map->OpenGLDraw(window); ma->OpenGLDraw(window); }
 	void OpenGLDraw(int window, xyLoc &l) { MapEnvironment::OpenGLDraw(window, l); }
+	void OpenGLDraw(int window, xyLoc &l, GLfloat r, GLfloat g, GLfloat b) {MapEnvironment::OpenGLDraw(window,l,r,g,b);}
 	void OpenGLDraw(int window, xyLoc& s, tDirection &dir) {MapEnvironment::OpenGLDraw(window,s,dir);}
 	
-private:
+	
+protected:
 	MapAbstraction *ma;
+	
 };
 
 typedef UnitSimulation<xyLoc, tDirection, MapEnvironment> UnitMapSimulation;
 typedef UnitSimulation<xyLoc, tDirection, AbsMapEnvironment> UnitAbsMapSimulation;
+
 
 //template<>
 //void UnitSimulation<xyLoc, tDirection, MapEnvironment>::OpenGLDraw()

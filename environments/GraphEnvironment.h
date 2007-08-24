@@ -16,6 +16,7 @@
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "Graph.h"
+#include "GLUtil.h"
 
 typedef unsigned long graphState;
 

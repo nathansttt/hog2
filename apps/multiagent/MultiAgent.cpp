@@ -21,6 +21,8 @@
  *
  */
 
+#include <cstdlib>
+
 #include "Common.h"
 #include "MultiAgent.h"
 #include "AStar.h"
@@ -72,6 +74,7 @@ int main(int argc, char* argv[])
  */
 void CreateSimulation(int id)
 {
+SetNumPorts(id, 1);
 	Map *map;
 //	if (gDefaultMap[0] == 0)
 //	{
@@ -270,6 +273,10 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	goal.x = xGoal;
 	goal.y = yGoal;
 	
+	double r,g,b;
+	r = (double)rand() / RAND_MAX;
+	g = (double)rand() / RAND_MAX;
+	b = (double)rand() / RAND_MAX;
 	
 	//aStar* a = new aStar();
 	
@@ -278,7 +285,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	//a->GetPath(env, start,goal, path);
 	
 //	GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>* unit = new GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>(start, goal, a);
- 	GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment>(start, a);
+ 	GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment>(start, a,r,g,b);
 // 	
  	u->AddPatrolLocation(goal);
 // 	

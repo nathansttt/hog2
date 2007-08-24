@@ -6,13 +6,14 @@
  *  Copyright 2007 Nathan Sturtevant, University of Alberta. All rights reserved.
  *
  */
-
 #include "Map2DEnvironment.h"
 #include "FPUtil.h"
+
 
 MapEnvironment::MapEnvironment(Map *_m)
 {
 	map = _m;
+	oi = new BaseMapOccupancyInterface(map);
 }
 
 MapEnvironment::~MapEnvironment()
@@ -137,8 +138,13 @@ void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 		case kSE: s.y+=1; s.x+=1; break;
 		default: break;
 	}
-	if (map->canStep(s.x, s.y, old.x, old.y))
+	if (map->canStep(s.x, s.y, old.x, old.y) && !(oi->GetStateOccupied(s))) // do occupancy interface check here? 
+	{
+		// Make changes to the occupancy interface	
+		oi->SetStateOccupied(s, false);
+		oi->SetStateOccupied(old, true);
 		return;
+	}
 	s = old;
 }
 
@@ -184,6 +190,15 @@ void MapEnvironment::OpenGLDraw(int , xyLoc &l)
 	glColor3f(0.5, 0.5, 0.5);
 	DrawSphere(xx, yy, zz, rad);
 }
+
+void MapEnvironment::OpenGLDraw(int, xyLoc &l, GLfloat r, GLfloat g, GLfloat b)
+{
+	GLdouble xx, yy, zz, rad;
+	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
+	glColor3f(r,g,b);
+	DrawSphere(xx, yy, zz, rad);
+}
+
 
 void MapEnvironment::OpenGLDraw(int , xyLoc& s, tDirection &dir)
 {
@@ -246,3 +261,82 @@ AbsMapEnvironment::~AbsMapEnvironment()
 	map = 0;
 	delete ma;
 }
+
+/************************************************************/
+
+/** Constructor for the BaseMapOccupancyInterface
+* 
+* @author Renee Jansen
+* @date 08/22/2007
+*
+* @param m The map to which the occupancy interface applies
+*/
+BaseMapOccupancyInterface::BaseMapOccupancyInterface(Map* m)
+{
+ 	mapWidth = m->getMapWidth();
+ 	mapHeight = m->getMapHeight();
+	bitvec = new bitVector(mapWidth * mapHeight);
+	
+	//initialize the bitvector
+	for(int i=0; i<m->getMapWidth(); i++)
+		for(int j=0; j<m->getMapHeight(); j++)
+			bitvec->set(CalculateIndex(i,j), false);
+}
+
+/** Destructor for the BaseMapOccupancyInterface
+* 
+* @author Renee Jansen
+* @date 08/22/2007
+*/
+BaseMapOccupancyInterface::~BaseMapOccupancyInterface()
+{
+	delete bitvec;
+	bitvec = 0;
+}
+
+/** Sets the occupancy of a state.
+* 
+* @author Renee Jansen
+* @date 08/22/2007
+*
+* @param s The state for which we want to set the occupancy
+* @param occupied Whether or not the state is occupied
+*/
+void BaseMapOccupancyInterface::SetStateOccupied(xyLoc &s, bool occupied)
+{
+	// Make sure the location is valid
+	assert(s.x>=0 && s.x<=mapWidth && s.y>=0 && s.y<=mapHeight);
+	bitvec->set(CalculateIndex(s.x,s.y), occupied);
+}
+
+/** Returns the occupancy of a state.
+* 
+* @author Renee Jansen
+* @date 08/22/2007
+*
+* @param s The state for which we want to know the occupancy information
+* @return True if the state is occupied, false otherwise. 
+*/
+bool BaseMapOccupancyInterface::GetStateOccupied(xyLoc &s)
+{
+	assert(s.x>=0 && s.x<=mapWidth && s.y>=0 && s.y<=mapHeight);
+	return bitvec->get(CalculateIndex(s.x,s.y));
+}
+
+/** Gets the index into the bitvector. 
+*
+* Converts (x,y) locations to a position in the bitvector. 
+*
+* @author Renee Jansen
+* @date 08/22/2007
+*
+* @param x The x-coordinate of the location
+* @param y The y-coordinate of the location
+* @return The index into the bit vector
+*/
+//template <class state, class action>
+long BaseMapOccupancyInterface::CalculateIndex(uint16_t x, uint16_t y)
+{
+	return (y * mapWidth) + x;
+}
+
