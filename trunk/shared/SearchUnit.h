@@ -53,7 +53,7 @@ public:
 
 	//using unit::makeMove;
 	// this is where the World says you are  
-	virtual bool MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, SimulationInfo *si, tDirection &dir)
+	virtual bool MakeMove(AbsMapEnvironment *ame, OccupancyInterface<xyLoc,tDirection> *, SimulationInfo *si, tDirection &dir)
 		{ return makeMove(ame->GetMapAbstraction(), 0, si,dir); }
 	virtual bool makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo, tDirection &dir); 
 	
