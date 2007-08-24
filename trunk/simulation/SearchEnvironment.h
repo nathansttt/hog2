@@ -12,7 +12,9 @@
 
 #include <stdint.h>
 #include <vector>
-#include "ReservationProvider.h"
+//#include "ReservationProvider.h"
+#include "OccupancyInterface.h"
+
 
 
 struct Hash64 {
@@ -41,11 +43,12 @@ public:
 	virtual uint64_t GetActionHash(action act) = 0;
 	
 
-	virtual OccupancyInterface<state, action> *GetOccupancyInfo() = 0;
+	virtual OccupancyInterface<state,action> *GetOccupancyInfo() = 0;
 
 	virtual void OpenGLDraw(int window) = 0;
 	virtual void OpenGLDraw(int window, state&) = 0;
 	virtual void OpenGLDraw(int window, state&, action&) = 0;
 };
+
 
 #endif
