@@ -31,6 +31,7 @@
 #include "Path.h"
 #include "UnitGroup.h"
 #include "UnitSimulation.h"
+#include "OccupancyInterface.h"
 
 class SimulationInfo;
 
@@ -41,7 +42,7 @@ public:
 	Unit() :speed(0), group(0) {}
 	virtual ~Unit() {}
 	virtual const char *GetName() = 0;
-	virtual bool MakeMove(environment *, OccupancyInterface<state, action> *, SimulationInfo *, action& a) = 0;
+	virtual bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo *, action& a) = 0;
 	virtual void UpdateLocation(environment *, state &, bool success, SimulationInfo *) = 0;
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw(int window, environment *, SimulationInfo *) = 0;

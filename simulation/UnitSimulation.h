@@ -35,6 +35,7 @@
 #include "FPUtil.h"
 #include "StatCollection.h"
 #include "SearchEnvironment.h"
+#include "OccupancyInterface.h"
 
 class SimulationInfo {
 public:
@@ -304,7 +305,6 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	// need to do if/then check - makemove ok or not? need to stay where you are? 
 	if(u->GetUnitGroup()->MakeMove(u, env, this,where))
 	{
-	
 		moveThinking = t.endTimer();
 		theUnit->totalThinking += moveThinking;
 		theUnit->lastMove = where;
