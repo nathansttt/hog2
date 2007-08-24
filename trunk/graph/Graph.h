@@ -40,6 +40,11 @@ typedef unsigned int neighbor_iterator;
 
 typedef union { double fval; long lval; } labelValue;
 
+/** Definitions for edge labels */
+enum {
+	kEdgeWeight = 0,
+};	
+
 /**
  * Parent class for nodes and edges allowing them to be stored in a Heap or
  * manipulated with other data structures.
