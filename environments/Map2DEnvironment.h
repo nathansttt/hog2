@@ -21,7 +21,7 @@
 
 #include <cassert>
 
-#include "BaseMapOccupancyInterface.h"
+//#include "BaseMapOccupancyInterface.h"
 
 struct xyLoc {
 public:
