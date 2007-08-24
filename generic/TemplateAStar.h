@@ -242,11 +242,12 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<state> &thePath)
 {
-	state currentOpenNode; //= UINT32_MAX;
+	state currentOpenNode; 
 
 	if (openQueue.size() == 0)
 	{
 		thePath.resize(0); // no path found!
+		closedList.clear();
 		return true;
 	}
 			
@@ -267,9 +268,6 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		return true;
 	}
 	
-//	if (verbose) { printf("Opening %d\n", currentOpenNode); }
-
-	
 	neighbors.resize(0);
 	env->GetSuccessors(currentOpenNode, neighbors);
 
@@ -278,23 +276,26 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	{
 		nodesTouched++;
 		state neighbor = neighbors[x];
-		//assert(neighbor != UINT32_MAX); --> no need; this will never happen
 		
 		if (closedList.find(env->GetStateHash(neighbor)) != closedList.end())
 		{
-//			if (verbose) { printf("skipping node %d\n", neighbor); }
 			continue;
 		}
 		else if (openQueue.IsIn(SearchNode<state>(neighbor, env->GetStateHash(neighbor))))
 		{
-//			if (verbose) { printf("updating node %d\n", neighbor); }
 			UpdateWeight(env,currentOpenNode, neighbor);
 		}
+		else if (env->GetOccupancyInterface()->GetStateOccupied(neighbor))
+		{
+			// occupied - don't expand - move to the closed list 
+			SearchNode<state> sn(neighbor, env->GetStateHash(neighbor));
+			closedList[env->GetStateHash(neighbor)] = sn;
+		}
 		else {
-//			if (verbose) { printf("addinging node %d\n", neighbor); }
 			AddToOpenList(env, currentOpenNode, neighbor);
 		}
 	}
+
 	return false;
 }
 
@@ -369,7 +370,6 @@ void TemplateAStar<state,action,environment>::UpdateWeight(environment *env, sta
 template <class state, class action,class environment>
 void TemplateAStar<state, action,environment>::AddToOpenList(environment *env, state &currOpenNode, state &neighbor)
 {
-	//heuristic = hCost????????
 	double edgeWeight = env->GCost(currOpenNode, neighbor);
 	SearchNode<state> n(neighbor, currOpenNode, closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight+env->HCost(neighbor, goal),
 							 closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight, env->GetStateHash(neighbor));
