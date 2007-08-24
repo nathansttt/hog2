@@ -10,6 +10,8 @@
 #include "GraphAbstraction.h"
 #include "GLUtil.h"
 
+#include <cassert>
+
 #ifndef LOADEDBBABSTRACTION_H
 #define LOADEDBBABSTRACTION_H
 
