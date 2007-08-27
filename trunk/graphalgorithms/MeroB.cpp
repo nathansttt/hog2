@@ -213,12 +213,15 @@ bool MeroB::DoSingleStepB(std::vector<graphState> &thePath)
 	else 
 	{
 		topNode = openQueue.Remove();
-		F = topNode.fCost; // update F
 		
-		if (verbose)
-		{
+		if(fgreater(topNode.fCost,F)) 
+		  {
+		    F = topNode.fCost; // update F
+		    if (verbose) 
+		      {
 			printf("F updated to %lf.\n",F);
-		}
+		      }
+		  }
 	}
 	
 	// move remaining nodes from FCache back to openQueue
@@ -355,15 +358,19 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 	if (FCache.size() > 0) 
 	{
 		topNode = FCache.Remove();
+		printf("Expanding a node below F.\n");
 	}
 	else 
 	{
 		topNode = openQueue.Remove();
-		F = topNode.fCost; // update F
 		
-		if (verbose) 
+		if(fgreater(topNode.fCost,F)) 
 		{
-			printf("F updated to %lf.\n",F);
+		  F = topNode.fCost; // update F
+		  if (verbose) 
+		    {
+		      printf("F updated to %lf.\n",F);
+		    }
 		}
 	}
 	
