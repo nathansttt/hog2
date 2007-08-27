@@ -32,34 +32,13 @@
 
 #include "Map2DEnvironment.h" 
 #include "BitVector.h"
+#include "OccupancyInterface.h"
 
-//template <class state, class action>
-class MapOccupancyInterface //: public OccupancyInterface
-{
-public:	
-	MapOccupancyInterface(Map *m);
-	~MapOccupancyInterface();
-	//virtual void SetStateOccupied(state, bool) = 0;
-	void SetStateOccupied(xyLoc, bool);
-	//virtual bool GetStateOccupied(state) = 0;
-	bool GetStateOccupied(xyLoc);
-	//virtual bool CanMove(state, state);
-	//virtual bool CanMove(state, state, double, uint32_t ID) = 0;
-	//virtual bool ReserveMove(state, state, double, uint32_t ID) = 0;
-	//virtual bool ClearMove(state, state, double, uint32_t ID) = 0;
-	//virtual bool ClearStates() = 0;
-
-	
-private:
-	bitVector *bitvec; /// For each map position, set (1) if occupied
-	long mapWidth; /// Used to compute index into bitvector
-	long mapHeight; /// used to compute index into bitvector
-	
-	long CalculateIndex(uint16_t x, uint16_t y);
-	
-
+/** Edge labels */
+enum {
+ 	kForwardCount = 2, // The number of units passing from From to To
+ 	kBackwardCount = 3 // The number of units passing from To to From
 };
-
 
 
 class WeightedMap2DEnvironment : public AbsMapEnvironment 
@@ -69,9 +48,10 @@ public:
 	virtual ~WeightedMap2DEnvironment();
 	void ApplyAction(xyLoc &s, tDirection dir);
 	virtual double GCost(xyLoc &node1, xyLoc &node2);
-
+	BaseMapOccupancyInterface* GetOccupancyInterface(){return oi;}
+	
 private:
-	MapOccupancyInterface* MOI;
+	BaseMapOccupancyInterface* oi;
 };
 
 typedef UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment> UnitWeightedMapSimulation;

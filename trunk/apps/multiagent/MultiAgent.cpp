@@ -52,11 +52,11 @@ bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
-AbsMapEnvironment *env=0;
+//AbsMapEnvironment *env=0;
+WeightedMap2DEnvironment *env = 0;
 
-std::vector<UnitAbsMapSimulation *> unitSims;
-//std::vector<UnitWeightedMapSimulation *> unitSims;
-//unit *cameraTarget = 0;
+//std::vector<UnitAbsMapSimulation *> unitSims;
+std::vector<UnitWeightedMapSimulation *> unitSims;
 
 Plotting::Plot2D *plot = 0;
 Plotting::Line *distLine = 0;
@@ -90,16 +90,17 @@ SetNumPorts(id, 1);
 	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 8)));
 	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapCliqueAbstraction(map)));
 	
-	env = new AbsMapEnvironment(new MapFlatAbstraction(map));
-	
-	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
+	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
+	env = new WeightedMap2DEnvironment(new MapFlatAbstraction(map));
+	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment>(env);	
+		//unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	
 	
 	
 	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(new WeightedMap2DEnvironment(new MapFlatAbstraction(map)));
 	
 	
-	//unitSims[id] = new UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment>(new WeightedMap2DEnvironment (new MapFlatAbstraction(map)));
+	unitSims[id] = new UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment>(env);
 	
 	unitSims[id]->SetStepType(kMinTime);
 //	unitSim = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map),
@@ -256,14 +257,6 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-//	for (int x = 0; x < ((mod==kShiftDown)?(50):(1)); x++)
-//	{
-	//if (unitSims[windowID]->GetUnitGroup(1) == 0)
-	//{
-	//	unitSims[windowID]->AddUnitGroup(new unitGroup(unitSim));
-		//unitSims[windowID]->setmapAbstractionDisplay(2);
-	//}
-
 	int xStart=5, yStart=5, xGoal=50, yGoal=50;
 	xyLoc start;
 	start.x = xStart;
@@ -273,50 +266,27 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	goal.x = xGoal;
 	goal.y = yGoal;
 	
+	xyLoc goalTwo;
+	goalTwo.x = xStart;
+	goalTwo.y = yGoal;
+	
 	double r,g,b;
 	r = (double)rand() / RAND_MAX;
 	g = (double)rand() / RAND_MAX;
 	b = (double)rand() / RAND_MAX;
 	
-	//aStar* a = new aStar();
+	//TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>* a = new TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>();
 	
-	//std::vector<xyLoc> path;
-	TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>* a = new TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>();
-	//a->GetPath(env, start,goal, path);
+	TemplateAStar<xyLoc, tDirection, WeightedMap2DEnvironment> *a = new TemplateAStar<xyLoc, tDirection, WeightedMap2DEnvironment>();
 	
-//	GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>* unit = new GenericSearchUnit<xyLoc, tDirection, AbsMapEnvironment>(start, goal, a);
- 	GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment>(start, a,r,g,b);
-// 	
+ 	//GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment>(start, a,r,g,b);
+//
+	GenericPatrolUnit<xyLoc, tDirection, WeightedMap2DEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection, WeightedMap2DEnvironment>(start, a,r,g,b); 	
+
  	u->AddPatrolLocation(goal);
-// 	
-	//AbsMapPatrolUnit* pUnit = new AbsMapPatrolUnit(xStart,yStart, a);
-	//pUnit->addPatrolLocation(goal);
+ 	//u->AddPatrolLocation(goalTwo);
 	
-	//Unit<xyLoc, tDirection, WeightedMap2DEnvironment> *pUnit = new Unit<xyLoc, tDirection, WeightedMap2DEnvironment>;
-
-
 	unitSims[windowID]->AddUnit(u);
-	
-	
-	//pUnit->setSpeed(0.5);
-	
-//		int xx1, yy1, xx2, yy2;
-//		unitSim->getRandomLocation(xx1, yy1);
-//		unitSim->getRandomLocation(xx2, yy2);
-//		
-//		unit *u, *u2 = new unit(xx2, yy2, 0);
-//		
-//		praStar *pra = new praStar(); pra->setPartialPathLimit(4);
-//		//aStar *pra = new aStar();
-//		
-//		unitSim->addUnit(u2);
-//		u = new SearchUnit(xx1, yy1, u2, pra);
-//		// just set the group of the unit, and it will share a map with those
-//		// units.
-//		unitSim->getUnitGroup(1)->addUnit(u);
-//		unitSim->addUnit(u);
-//		u->setSpeed(0.5); // time to go 1 distance						
-//	}
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)

@@ -1,21 +1,43 @@
 #include "WeightedMap2DEnvironment.h"
 
+
+/**
+* Constructor for the WeightedMap2DEnvironment
+*
+* @param ma The map abstraction the environment uses
+*/
 WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 :AbsMapEnvironment(ma)
 {
 	// initialize all edge counters to 0
 	Graph* g = ma->GetAbstractGraph(0);
-	for(int i=0; i<g->getNumEdges(); i++)
+	edge_iterator ei = g->getEdgeIter();
+	
+	oi = new BaseMapOccupancyInterface(map);
+	
+	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	{
-		// do counter reset here
-		// --> move into separate fn? Will need to redo sometimes? 
+		// Reset the counters
+		e->SetLabelL(kForwardCount, 0);
+		e->SetLabelL(kBackwardCount, 0);
 	}
 }
 
+/**
+* Destructor for the WeightedMap2DEnvironment
+*/
 WeightedMap2DEnvironment::~WeightedMap2DEnvironment()
 {
 }
 
+/**
+* ApplyAction is called when an action is applied. 
+* The current state, occupancy interface, and edge weight
+* are updated if the action can be applied. 
+* 
+* @param s The current state
+* @param dir The action taken from the current state
+*/
 void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 {
 	xyLoc old = s;
@@ -31,84 +53,68 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 		case kSE: s.y+=1; s.x+=1; break;
 		default: break;
 	}
-	if (map->canStep(s.x, s.y, old.x, old.y) && !(MOI->GetStateOccupied(s))) 
-	// ADD CHECK: IF OK WITH MAPOCCUPANCY INTERFACE --> enough (for now) with just GetStateOccupied?
-		return;
-	s = old;
+	
 
+	
+	// May need to do different check as well oi->CanMove for example
+	if (map->canStep(s.x, s.y, old.x, old.y) && !(oi->GetStateOccupied(s))) 
+	{
+		// Update the edge weight (mark the edge)
+		node* from = ma->GetNodeFromMap(old.x, old.y);
+		node* to = ma->GetNodeFromMap(s.x, s.y);
+		edge* e = ma->GetAbstractGraph(0)->FindEdge(from->GetNum(),to->GetNum());
+		
+		if(e->getFrom() == from->GetNum())
+			e->SetLabelL(kForwardCount, e->GetLabelL(kForwardCount) + 1);
+		else
+			e->SetLabelL(kBackwardCount, e->GetLabelL(kBackwardCount)+1);
+		
+		oi->SetStateOccupied(s, false);
+		oi->SetStateOccupied(old, true);
+		
+		return;
+	}
+	s = old;
 }
 
+/**
+* 
+* @param l1 The first location
+* @param l2 The second location
+* @return The weighted G-cost between l1 and l2, if there exists
+* an edge between the two locations, DBL_MAX otherwise. 
+*/
 double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 {
 	double h = HCost(l1, l2);
+
 	if (fgreater(h, ROOT_TWO))
 		return DBL_MAX;
 		
-	// Add a weight 
-	return h;
-}
-
-
-/**********************************************************/
-
-/** 
-* Constructor for MapOccupancyInterface
-* @author Renee Jansen
-* @date 06/21/2007
-*/
-//template <class state, class action>
-MapOccupancyInterface::MapOccupancyInterface(Map* m)
-{
- 	mapWidth = m->getMapWidth();
- 	mapHeight = m->getMapHeight();
-	bitvec = new bitVector(mapWidth * mapHeight);
-}
-
-//template <class state, class action>
-MapOccupancyInterface::~MapOccupancyInterface()
-{
-	delete bitvec;
-	bitvec = 0;
-}
-
-//template <class state, class action>
-void MapOccupancyInterface::SetStateOccupied(xyLoc s, bool occupied)
-{
-	// Make sure the location is valid
-	assert(s.x>0 && s.x<=mapWidth && s.y>0 && s.y<=mapHeight);
-	bitvec->set(CalculateIndex(s.x,s.y), occupied);
-}
-//template <class state, class action>
-bool MapOccupancyInterface::GetStateOccupied(xyLoc s)
-{
-	// Make sure the location is valid
-	assert(s.x>0 && s.x<=mapWidth && s.y>0 && s.y<=mapHeight);
-	return bitvec->get(CalculateIndex(s.x,s.y));
-}
-
-// template <class state, class action>
-// bool MapOccupancyInterface::CanMove(state s, state t)
-// {
-// 	if(bv->get(CalculateIndex(t.x, t.y)) && )
-// 		return false;
-// 	else
-// 		return true;
-// }
-
-
-/** Gets the index into the bitvector. 
-*
-* We need to be able to convert (x,y) locations to a position in the bitvector. 
-*
-* @author Renee Jansen
-* @date 06/22/2007
-*
-* @param x The x-coordinate of the location
-* @param y The y-coordinate of the location
-* @return The index into the bit vector
-*/
-//template <class state, class action>
-long MapOccupancyInterface::CalculateIndex(uint16_t x, uint16_t y)
-{
-	return (y * mapWidth) + x;
+	if(l1 == l2)
+		return 0;	
+	// Get the edge between the two locations
+	Graph* g = ma->GetAbstractGraph(0);
+	node* from = ma->GetNodeFromMap(l1.x, l1.y);
+	node* to = ma->GetNodeFromMap(l2.x, l2.y);
+	edge* e = g->FindEdge(from->GetNum(),to->GetNum());
+	
+	double weight = 0; 
+	
+	// add weight -- 1 / (# units that have passed in the other direction)
+	if(e->getFrom() == from->GetNum())
+		{
+			if(e->GetLabelL(kBackwardCount) == 0)
+				weight = 0; 
+			else
+				weight = 1.0 / (e->GetLabelL(kBackwardCount));
+		}
+	else
+		{
+			if(e->GetLabelL(kForwardCount) == 0)
+				weight = 0;
+			else
+				weight = 1.0 / (e->GetLabelL(kForwardCount) + 1 );
+		}	
+	return h + weight;
 }
