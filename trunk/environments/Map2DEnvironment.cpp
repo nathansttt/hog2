@@ -181,7 +181,21 @@ uint64_t MapEnvironment::GetActionHash(tDirection act)
 void MapEnvironment::OpenGLDraw(int window)
 {
 	map->OpenGLDraw(window);
+	// Draw occupancy interface - occupied = white
+// 	for(int i=0; i<map->getMapWidth(); i++)
+// 		for(int j=0; j<map->getMapHeight(); j++)
+// 		{
+// 			xyLoc l;
+// 				l.x = i;
+// 				l.y = j;
+// 			if(oi->GetStateOccupied(l))
+// 			{
+// 				OpenGLDraw(window, l, 1.0, 1.0, 1.0);
+// 			}
+// 		}
 }
+	
+
 
 void MapEnvironment::OpenGLDraw(int , xyLoc &l)
 {
@@ -200,12 +214,45 @@ void MapEnvironment::OpenGLDraw(int, xyLoc &l, GLfloat r, GLfloat g, GLfloat b)
 }
 
 
-void MapEnvironment::OpenGLDraw(int , xyLoc& s, tDirection &dir)
+void MapEnvironment::OpenGLDraw(int window, xyLoc& s, tDirection &dir)
 {
+	
 	GLdouble xx, yy, zz, rad;
 	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
 	
 	glColor3f(0.5, 0.5, 0.5);
+	glBegin(GL_LINE_STRIP);
+	glVertex3f(xx, yy, zz-rad/2);
+	
+	xyLoc initial = s;
+	
+	switch (dir)
+	{
+		case kN: s.y-=1; break;
+		case kS: s.y+=1; break;
+		case kE: s.x+=1; break;
+		case kW: s.x-=1; break;
+		case kNW: s.y-=1; s.x-=1; break;
+		case kSW: s.y+=1; s.x-=1; break;
+		case kNE: s.y-=1; s.x+=1; break;
+		case kSE: s.y+=1; s.x+=1; break;
+		default: break;
+	}
+
+	
+	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+	glVertex3f(xx, yy, zz-rad/2);
+	glEnd();
+	
+	s = initial;
+}
+
+void MapEnvironment::OpenGLDraw(int window, xyLoc& s, tDirection &dir, GLfloat r, GLfloat g, GLfloat b)
+{
+	GLdouble xx, yy, zz, rad;
+	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+	
+	glColor3f(r,g,b);
 	glBegin(GL_LINE_STRIP);
 	glVertex3f(xx, yy, zz-rad/2);
 	
@@ -254,6 +301,7 @@ AbsMapEnvironment::AbsMapEnvironment(MapAbstraction *_ma)
 :MapEnvironment(_ma->GetMap())
 {
 	ma = _ma;
+	
 }
 
 AbsMapEnvironment::~AbsMapEnvironment()
@@ -282,6 +330,8 @@ BaseMapOccupancyInterface::BaseMapOccupancyInterface(Map* m)
 		for(int j=0; j<m->getMapHeight(); j++)
 			bitvec->set(CalculateIndex(i,j), false);
 }
+
+
 
 /** Destructor for the BaseMapOccupancyInterface
 * 

@@ -33,6 +33,7 @@
 #include "Map2DEnvironment.h" 
 #include "BitVector.h"
 #include "OccupancyInterface.h"
+#include "Graph.h"
 
 /** Edge labels */
 enum {
@@ -49,7 +50,12 @@ public:
 	void ApplyAction(xyLoc &s, tDirection dir);
 	virtual double GCost(xyLoc &node1, xyLoc &node2);
 	BaseMapOccupancyInterface* GetOccupancyInterface(){return oi;}
-	
+	void OpenGLDraw(int window);
+	void OpenGLDraw(int window, xyLoc &l) { AbsMapEnvironment::OpenGLDraw(window, l); }
+	void OpenGLDraw(int window, xyLoc &l, GLfloat r, GLfloat g, GLfloat b) {AbsMapEnvironment::OpenGLDraw(window,l,r,g,b);}
+	void OpenGLDraw(int window, xyLoc& s, tDirection &dir);
+	void OpenGLDraw(int window, xyLoc& s, tDirection &dir, GLfloat r, GLfloat g, GLfloat b) {AbsMapEnvironment::OpenGLDraw(window,s,dir,r,g,b);}
+	void DrawEdge(int window, edge* e);
 private:
 	BaseMapOccupancyInterface* oi;
 };
