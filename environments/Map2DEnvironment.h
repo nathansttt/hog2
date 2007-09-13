@@ -97,6 +97,7 @@ public:
 	virtual void OpenGLDraw(int window);
 	virtual void OpenGLDraw(int window, xyLoc &l);
 	virtual void OpenGLDraw(int, xyLoc &, tDirection &);
+	virtual void OpenGLDraw(int, xyLoc &, tDirection &, GLfloat r, GLfloat g, GLfloat b);
 	virtual void OpenGLDraw(int, xyLoc &l, GLfloat r, GLfloat g, GLfloat b);
 	Map* GetMap() { return map; }
 	
@@ -119,6 +120,7 @@ public:
 	void OpenGLDraw(int window, xyLoc &l) { MapEnvironment::OpenGLDraw(window, l); }
 	void OpenGLDraw(int window, xyLoc &l, GLfloat r, GLfloat g, GLfloat b) {MapEnvironment::OpenGLDraw(window,l,r,g,b);}
 	void OpenGLDraw(int window, xyLoc& s, tDirection &dir) {MapEnvironment::OpenGLDraw(window,s,dir);}
+	void OpenGLDraw(int window, xyLoc &s, tDirection &dir, GLfloat r, GLfloat g, GLfloat b) {MapEnvironment::OpenGLDraw(window,s,dir,r,g,b);}
 	
 	
 protected:
