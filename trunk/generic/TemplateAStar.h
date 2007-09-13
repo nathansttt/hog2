@@ -209,6 +209,7 @@ void TemplateAStar<state,action,environment>::GetPath(environment *_env, state& 
 template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
+	//std::cout<<"Initializing A* search\n";
 	env = _env;
 	assert(openQueue.size() == 0);
 	assert(closedList.size() == 0);
@@ -242,6 +243,7 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<state> &thePath)
 {
+	
 	state currentOpenNode; 
 
 	if (openQueue.size() == 0)
@@ -285,9 +287,9 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		{
 			UpdateWeight(env,currentOpenNode, neighbor);
 		}
-		else if (env->GetOccupancyInterface()->GetStateOccupied(neighbor))
+		else if (env->GetOccupancyInterface()->GetStateOccupied(neighbor) && !(env->GoalTest(neighbor, goal)))
 		{
-			// occupied - don't expand - move to the closed list 
+			//occupied - don't expand - move to the closed list 
 			SearchNode<state> sn(neighbor, env->GetStateHash(neighbor));
 			closedList[env->GetStateHash(neighbor)] = sn;
 		}

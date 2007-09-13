@@ -31,7 +31,7 @@
 #include "GenericSearchAlgorithm.h"
 #include "SpreadExecSearchAlgorithm.h"
 #include "AbsMapUnit.h"
-#include "ReservationProvider.h" // occupancy interface - change later
+//#include "ReservationProvider.h" // occupancy interface - change later
 //#include "SearchEnvironment.h"
 
 #ifndef GENERICSEARCHUNIT_H
@@ -51,7 +51,7 @@ public:
 	virtual const char *GetName() { if (algorithm) return algorithm->GetName(); return "None"; }
 	virtual GenericSearchAlgorithm<state,action,environment>* getAlgorithm() { return algorithm; }
 
-	virtual bool done() {return (loc == goal);}
+	virtual bool Done() {return (loc == goal);}
 	virtual void GetGoal(state &s) { s=goal;} 
 	
 	virtual void SetTarget(Unit<state,action,environment> *u) { target = u; }
@@ -59,7 +59,7 @@ public:
 
 	virtual bool MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& a);
 	
-	virtual void UpdateLocation(environment *env, state &l, bool success, SimulationInfo *si){loc = l;}
+	virtual void UpdateLocation(environment *env, state &l, bool success, SimulationInfo *si);
 	
 	virtual void GetLocation(state& s) {s=loc;}
 	virtual void OpenGLDraw(int window, environment *, SimulationInfo *);
@@ -89,6 +89,7 @@ protected:
 template <class state, class action, class environment>
 GenericSearchUnit<state,action,environment>::GenericSearchUnit(state &start, state &targ, GenericSearchAlgorithm<state,action,environment> *alg)
 {
+
 	loc = start;
 	goal = targ;
 	algorithm = alg;
@@ -98,6 +99,11 @@ GenericSearchUnit<state,action,environment>::GenericSearchUnit(state &start, sta
 	targetTime = 0;
 	
 	target=0;
+	
+	r = (double)rand() / RAND_MAX;
+	g = (double)rand() / RAND_MAX;
+	b = (double)rand() / RAND_MAX;
+
 }
 
 template <class state, class action, class environment>
@@ -123,7 +129,6 @@ GenericSearchUnit<state,action,environment>::~GenericSearchUnit()
 template <class state, class action, class environment>
 bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& a)
 {
-	std::cout<<"GenericSearchUnit makemove\n";
 	if (getCachedMove(a))
 		return true;
 	
@@ -161,7 +166,9 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 		onTarget = false;
 
 	std::vector<state> path;
+
 	algorithm->GetPath(env,from, to, path); 
+	
 	nodesExpanded+=algorithm->GetNodesExpanded();
 	nodesTouched+=algorithm->GetNodesTouched();
 
@@ -182,8 +189,10 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 
 	assert(moves.size() > 0);
 
-	a = moves.back();
-	moves.pop_back();	
+	//a = moves.back();
+	//moves.pop_back();	
+	a = moves.front();
+	moves.erase(moves.begin());
 	return true;
 }
 
@@ -192,20 +201,25 @@ void GenericSearchUnit<state,action,environment>::OpenGLDraw(int window, environ
 {
 	// Draw current + goal states as states. May need to find something
 	// different for the goal
-	env->OpenGLDraw(window, loc);	
-	env->OpenGLDraw(window, goal);
-	
+		
+	if(loc == goal)
+		env->OpenGLDraw(window, loc, 0,0,0);
+	else
+	{	
+	env->OpenGLDraw(window, loc, r, g, b);	
+	env->OpenGLDraw(window, goal, r, g, b);
+	}
 	state current = loc; 
 	state next;
 	
 	// Draw the cached moves
- 	for(unsigned int i=0; i<moves.size(); i++)
-	{
-		env->OpenGLDraw(window,current, moves[i]);
-		env->GetNextState(current, moves[i],next);
-		current = next;
-	}
-	
+  	for(unsigned int i=0; i<moves.size(); i++)
+ 	{
+ 		env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
+ 		env->GetNextState(current, moves[i],next);
+ 		current = next;
+ 	}
+ 	
 }
 
 template <class state, class action, class environment>
@@ -239,7 +253,9 @@ template<class state, class action, class environment>
 void GenericSearchUnit<state,action,environment>::AddPathToCache(environment *env, std::vector<state> &path)
 {
  	for(unsigned int i=0; i<path.size()-1; i++)
+ 	{
  		moves.push_back(env->GetAction(path[i], path[i+1]));
+ 	}
 }
 
 template<class state, class action, class environment>
@@ -247,11 +263,27 @@ bool GenericSearchUnit<state,action,environment>::getCachedMove(action &a)
 {
 	if (moves.size() > 0)
 	{
-		a = moves.back();
-		moves.pop_back();
+		a = moves.front();
+		moves.erase(moves.begin());
+		//a = moves.back();
+		//moves.pop_back();
 		return true;
 	}
 	return false;
+}
+
+template<class state, class action, class environment>
+void GenericSearchUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo *si)
+{
+	//Update occupancy interface
+	env->GetOccupancyInterface()->SetStateOccupied(loc,false);
+	env->GetOccupancyInterface()->SetStateOccupied(l, true);
+	
+	if((!success)||(l == loc))
+	{
+		moves.resize(0);
+	}
+	loc = l;
 }
 
 #endif

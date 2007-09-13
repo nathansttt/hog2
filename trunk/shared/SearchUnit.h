@@ -45,7 +45,7 @@ public:
 	virtual const char *GetName() { if (algorithm) return algorithm->GetName(); return "none"; }
 	virtual SearchAlgorithm* getAlgorithm() { return algorithm; }
 	//void setUnitSimulation(unitSimulation *_US) { US = _US; algorithm->setSimulationEnvironment(US); }
-	virtual bool done() { return onTarget; }
+	virtual bool Done() { return onTarget; }
 
 	void GetGoal(xyLoc &gs) { if (target) target->GetLocation(gs); else GetLocation(gs); }
 	//xyLoc GetGoal() { return target->GetLocation(); }
