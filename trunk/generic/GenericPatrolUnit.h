@@ -58,9 +58,10 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericS
 	
 	algorithm = alg;
 	
-	r = 0.5;
-	g = 0.5;
-	b = 0.5;
+	r = (double)rand() / RAND_MAX;
+	g = (double)rand() / RAND_MAX;
+	b = (double)rand() / RAND_MAX;
+
 }
 
 template <class state, class action, class environment>
@@ -101,16 +102,20 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 
 		if(loc == locs[currTarget])
 	 	{
-	 		if(currTarget == 0)
-	 			counter++;
+
 	 		currTarget = (currTarget+1)%locs.size();
-	 		
+	 		if((numPatrols != -1)&&(currTarget == 1))
+	 			counter++;
  		}
  		
  		if((numPatrols == -1 ) || (counter < numPatrols))
+	 	{
 	 		GoToLoc(env, currTarget);
+	 	}
 		else
-			return false; // don't move - we're done
+		{
+ 			return false; // don't move - we're done
+		}
 		
 		if (moves.size() > 0)
 		{
@@ -158,19 +163,28 @@ void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* en
 template <class state, class action, class environment>
 void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
 {
-	env->OpenGLDraw(window, loc,r,g,b);	
-	
-	for(unsigned int i=0; i<locs.size(); i++)
-		env->OpenGLDraw(window, locs[i]);
+	if(!Done())
+		env->OpenGLDraw(window, loc,r,g,b);	
+	else
+		env->OpenGLDraw(window, loc, 0,0,0);
 		
+	for(unsigned int i=0; i<locs.size(); i++)
+	{
+		state l = locs[i];
+		GLdouble xx, yy, zz, rad;
+		env->GetMapAbstraction()->GetMap()->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
+		glColor3f(r,g,b);
+		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
+		//		env->OpenGLDraw(window, locs[i], r, g, b);
+	}	
 	xyLoc current = loc; 
 	xyLoc next;
-	  	for(unsigned int i=0; i<moves.size(); i++)
- 	{
- 		env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
- 		env->GetNextState(current, moves[i],next);
- 		current = next;
- 	}	
+// 	  	for(unsigned int i=0; i<moves.size(); i++)
+//  	{
+//  		env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
+//  		env->GetNextState(current, moves[i],next);
+//  		current = next;
+//  	}	
 }
 
 template <class state, class action, class environment>
@@ -185,8 +199,8 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 	if((!success)||(l == loc))
 	{ 
 		moves.resize(0); 
-		if(currTarget != -1) 
-			currTarget = 0; 
+		//if(currTarget != -1) 
+		//	currTarget = 0; 
 	} 
 	loc = l; 
 	
@@ -197,7 +211,7 @@ bool GenericPatrolUnit<state,action,environment>::Done()
 {
 	if(numPatrols == -1)
 		return true;
-	else if(counter > numPatrols)
+	else if(counter >= numPatrols)
 		return true;
 	else
 		return false;
