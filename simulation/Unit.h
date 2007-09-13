@@ -48,6 +48,8 @@ public:
 	virtual void OpenGLDraw(int window, environment *, SimulationInfo *) = 0;
 	virtual void GetGoal(state &s) = 0;
 
+	virtual bool Done() { return true;} 
+
 	virtual double GetSpeed() { return speed; }
 	void SetSpeed(double s) { speed = s; }
 
@@ -62,16 +64,27 @@ public:
 			// If we're already set to the given group then do nothing
 			if (_group == group)
 				return;
-		UnitGroup<state, action, environment> *tmp = group;
+			
+			UnitGroup<state, action, environment> *tmp = group;
+			
+			group = 0; 
+			if(tmp)
+				tmp->RemoveUnit(this);
+			
 			// Set the back pointer
 			group = _group;
-			// If we had a group before then move
+			
+			if(_group != 0)
+				_group->AddUnit(this);
+			
+			// OLD CODE
+/*			// If we had a group before then move
 			if (tmp != 0)
 			{
 				tmp->RemoveUnit(this);
 				if (_group)
 					_group->AddUnit(this);
-			}
+			} */ 
 		}
 private:
 		double speed;

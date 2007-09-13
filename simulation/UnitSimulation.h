@@ -119,6 +119,8 @@ public:
 	void SetPaused(bool val) { paused = val; }
 	bool GetPaused() { return paused; }
 
+	bool Done();
+
 	/** setPenalty for thinking. Sets the multiplier used to penalize thinking time. */
 	void SetThinkingPenalty(double pen) { penalty = pen; }
 	/** getPenalty for thinking. Gets the multiplier used to penalize thinking time. */
@@ -149,7 +151,6 @@ UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
 	env = se;
 	stepType = kRealTime;
 	currTime = 0.0;
-	penalty = 1.0;
 	paused = false;
 	unitGroups.push_back(new UnitGroup<state, action, environment>);
 	// allocate default unit group!(?)
@@ -165,7 +166,7 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 	if (ui->agent->GetUnitGroup() == 0)
 	{
 		ui->agent->SetUnitGroup(unitGroups[0]);
-		}
+	}
 	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, env, ui->currentState, true, this);
 	ui->nextTime = currTime;
 	ui->totalThinking = 0.0;
@@ -224,6 +225,18 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 	//unitGroups.push_back(new unitGroup(this));
 	viewTime = 0;
 	currTime = 0;
+}
+
+template<class state, class action, class environment>
+bool UnitSimulation<state,action,environment>::Done()
+{
+	// assumes that all units belong to a unit group
+	for(unsigned int i=0; i<unitGroups.size(); i++)
+	{
+		if(!unitGroups[i]->Done())
+			return false;
+	}
+	return true;
 }
 
 //template<class state, class action, class environment>

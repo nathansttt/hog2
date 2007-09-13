@@ -61,16 +61,24 @@ public:
 	
 	void AddUnit(Unit<state, action, environment> *u)
 	{
-		std::cout<<"adding unit\n";
 		// Check if we already have this unit
 		for (unsigned int x = 0; x < members.size(); x++)
 			if (members[x] == u)
 				return;
-	
+				
 		// If not then add the unit to the group and set the unit's group
 		members.push_back(u);
 		u->SetUnitGroup(this);
 	}
+	
+	bool Done()
+	{
+		for (unsigned int x = 0; x < members.size(); x++)
+      	if (!members[x]->Done())
+         	return false;
+      return true;
+   }
+
 
 	void RemoveUnit(Unit<state, action, environment> *u)
 	{
@@ -90,6 +98,8 @@ public:
 	
 	virtual void OpenGLDraw(int , environment *, SimulationInfo *) { }
 
+	
+	
 private:
 	std::vector<Unit<state, action, environment> *> members;
 };

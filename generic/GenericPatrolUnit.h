@@ -18,13 +18,17 @@ public:
 	virtual void OpenGLDraw(int window, environment *, SimulationInfo *);
 	void AddPatrolLocation(state &s); 
 	state& GetGoal(); // get CURRENT goal? 
-	virtual bool done() {return false;}
+	virtual bool Done(); 
 	void UpdateLocation(environment *, state &l, bool success, SimulationInfo *si);
 	void LogStats(StatCollection *stats);
 	void LogFinalStats(StatCollection *stats);
+	void SetNumPatrols(int num) {numPatrols = num;}
+	
 private:
 	GLfloat r, g, b;
 	xyLoc loc;
+	int numPatrols;
+	int counter;
 
 	// this used to return path cost, but that wasn't used... 
 	/*double*/ void GoToLoc(environment *env, int which);
@@ -43,6 +47,9 @@ template <class state, class action, class environment>
 GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericSearchAlgorithm<state,action,environment>* alg) 
 :GenericSearchUnit<state,action,environment>(s,s,alg)
 {
+	counter = 0; 
+	numPatrols = -1; // infinitely patrol
+	
 	locs.push_back(s);
 	loc = s;
 	//setObjectType(kWorldObject);
@@ -59,6 +66,9 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericS
 template <class state, class action, class environment>
 GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, GenericSearchAlgorithm<state,action,environment>* alg, GLfloat _r, GLfloat _g, GLfloat _b):GenericSearchUnit<state,action,environment>(s,s,alg)
 {
+	counter = 0; 
+	numPatrols = -1; // infinitely patrol
+	
 	locs.push_back(s);
 	loc = s;
 
@@ -75,11 +85,12 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 template <class state, class action, class environment>
 bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& dir)
 {
-	//std::cout<<"before makemove, patrolunit is at "<<loc<<std::endl;
 	if (moves.size() > 0)
 	{
-		dir = moves.back();
-		moves.pop_back();
+		//dir = moves.back();
+		//moves.pop_back();
+		dir = moves.front();
+		moves.erase(moves.begin());
 		return true;
 	}
 	
@@ -90,15 +101,23 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 
 		if(loc == locs[currTarget])
 	 	{
+	 		if(currTarget == 0)
+	 			counter++;
 	 		currTarget = (currTarget+1)%locs.size();
+	 		
  		}
- 		GoToLoc(env, currTarget);
-
+ 		
+ 		if((numPatrols == -1 ) || (counter < numPatrols))
+	 		GoToLoc(env, currTarget);
+		else
+			return false; // don't move - we're done
 		
 		if (moves.size() > 0)
 		{
-			dir = moves.back();
-			moves.pop_back();
+			//dir = moves.back();
+			//moves.pop_back();
+			dir = moves.front();
+			moves.erase(moves.begin());
 			return true;
 		}
 	}
@@ -110,7 +129,7 @@ template <class state, class action, class environment>
 /*double*/void GenericPatrolUnit<state,action,environment>::GoToLoc(environment *env, int which)
 {
 	std::vector<state> path; 
-	
+
 	algorithm->GetPath(env, loc, locs[which],path);
 	
 	nodesExpanded += algorithm->GetNodesExpanded();
@@ -143,6 +162,15 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 	
 	for(unsigned int i=0; i<locs.size(); i++)
 		env->OpenGLDraw(window, locs[i]);
+		
+	xyLoc current = loc; 
+	xyLoc next;
+	  	for(unsigned int i=0; i<moves.size(); i++)
+ 	{
+ 		env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
+ 		env->GetNextState(current, moves[i],next);
+ 		current = next;
+ 	}	
 }
 
 template <class state, class action, class environment>
@@ -152,15 +180,27 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 	env->GetOccupancyInterface()->SetStateOccupied(loc,false);
 	env->GetOccupancyInterface()->SetStateOccupied(l, true);
 	
-	loc = l; 
-	if(!success)
+	
+	//if(!success)
+	if((!success)||(l == loc))
 	{ 
 		moves.resize(0); 
 		if(currTarget != -1) 
 			currTarget = 0; 
 	} 
+	loc = l; 
 	
-	
+}
+
+template <class state, class action, class environment>
+bool GenericPatrolUnit<state,action,environment>::Done()
+{
+	if(numPatrols == -1)
+		return true;
+	else if(counter > numPatrols)
+		return true;
+	else
+		return false;
 }
 
 template <class state, class action, class environment>
