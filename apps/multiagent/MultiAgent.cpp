@@ -117,9 +117,9 @@ void CreateSimulation(int id)
 			break;
 		}
 	}	
-/*	
+	
 	// Test patrol unit
-	xyLoc start, goal, goalTwo, goalThree;
+/*	xyLoc start, goal, goalTwo, goalThree;
 	start.x = 5;
 	start.y = 5;
 	goal.x = 10;
@@ -129,17 +129,17 @@ void CreateSimulation(int id)
 	goalThree.x = 5;
 	goalThree.y = 10;
 	
-	TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>* a = new TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>();
+	TemplateAStar<xyLoc, tDirection,WeightedMap2DEnvironment>* a = new TemplateAStar<xyLoc, tDirection,WeightedMap2DEnvironment>();
 	
-	GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,AbsMapEnvironment>(start, a);
+	GenericPatrolUnit<xyLoc, tDirection,WeightedMap2DEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,WeightedMap2DEnvironment>(start, a);
 	
-	u->AddPatrolLocation(goal);
+	//u->AddPatrolLocation(goal);
 	u->AddPatrolLocation(goalTwo);
-	u->AddPatrolLocation(goalThree);
-	u->SetNumPatrols(3);
+	//u->AddPatrolLocation(goalThree);
+	u->SetNumPatrols(1);
 	
-	unitSims[id]->AddUnit(u);
-	*/
+	wUnitSims[id]->AddUnit(u);*/
+	
 	
 	// TEST adding groups to units, vice versa
 
@@ -184,7 +184,7 @@ void CreateSimulation(int id)
 		std::ifstream input(locsFile);
 	
 		
-		for(unsigned int i = 0; i<25; i++)
+		for(unsigned int i = 0; i<10; i++)
 		{
 			// STORE LOCATIONS SOMEWHERE -- TO PRINT (& do other exp)	
 			int xStart, yStart, xGoal, yGoal;
@@ -198,7 +198,7 @@ void CreateSimulation(int id)
 			start.y = yStart;
 			goal.x = xGoal;
 			goal.y = yGoal;
-			
+				
 			switch(envType)
 			{
 			case 0:
@@ -211,8 +211,8 @@ void CreateSimulation(int id)
 			su->AddPatrolLocation(goal);
 			su->SetNumPatrols(5);	
 			
-			su->SetSpeed(1.0);	
-			
+			su->SetSpeed(2.0);	
+			su->SetColor(1, 0, 0);
 			unitSims[id]->AddUnit(su);
 			break;
 			}
@@ -226,8 +226,9 @@ void CreateSimulation(int id)
 			su->AddPatrolLocation(goal);
 			su->SetNumPatrols(5);
 			
-			su->SetSpeed(1.0);	
-			
+			su->SetSpeed(2.0);	
+			su->SetColor(1, 0, 0);
+
 			wUnitSims[id]->AddUnit(su);
 			break;
 			}
@@ -241,7 +242,7 @@ void CreateSimulation(int id)
 		
 		} // end for
 		
-		for(unsigned int i=0; i<25; i++)
+		for(unsigned int i=0; i<10; i++)
 		{
 			int xStart, yStart, xGoal, yGoal;
 				
@@ -267,7 +268,8 @@ void CreateSimulation(int id)
 					su->AddPatrolLocation(goal);
 					su->SetNumPatrols(5);
 					su->SetSpeed(1.0);	
-			
+					su->SetColor(0, 1, 0);
+
 					unitSims[id]->AddUnit(su);
 					break;
 				}
@@ -281,7 +283,8 @@ void CreateSimulation(int id)
 				su->SetNumPatrols(5);
 				
 				su->SetSpeed(1.0);	
-			
+				su->SetColor(0, 1, 0);
+									
 				wUnitSims[id]->AddUnit(su);
 				break;
 				}
@@ -305,7 +308,7 @@ void CreateSimulation(int id)
 		
 		
 		}
-		
+		wUnitSims[id]->SetPaused(true);
 		input.close();
 		
 		double timestep = 1.5;
@@ -492,12 +495,36 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case 'o':
 		{
-			if (unitSims[windowID]->GetPaused())
+			switch(envType)
 			{
-				unitSims[windowID]->SetPaused(false);
-				unitSims[windowID]->StepTime(1.0/30.0);
-				unitSims[windowID]->SetPaused(true);
-			}
+				case 0:
+				{
+					if (unitSims[windowID]->GetPaused())
+					{
+					unitSims[windowID]->SetPaused(false);
+					unitSims[windowID]->StepTime(1.0/30.0);
+					unitSims[windowID]->SetPaused(true);
+					}
+					break;
+				}
+				case 1:
+				{
+				if (wUnitSims[windowID]->GetPaused())
+				{
+					wUnitSims[windowID]->SetPaused(false);
+					wUnitSims[windowID]->StepTime(1.0/30.0);
+					wUnitSims[windowID]->SetPaused(true);
+				}
+					break;
+				}
+				default:
+				{
+					std::cout<<"Invalid environment\n";
+					break;
+				}
+			}	
+
+			
 			break;
 		}
 		
