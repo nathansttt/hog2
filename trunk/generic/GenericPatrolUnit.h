@@ -25,7 +25,7 @@ public:
 	void SetNumPatrols(int num) {numPatrols = num;}
 	
 private:
-	GLfloat r, g, b;
+	//GLfloat r, g, b;
 	xyLoc loc;
 	int numPatrols;
 	int counter;
@@ -58,9 +58,9 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericS
 	
 	algorithm = alg;
 	
-	r = (double)rand() / RAND_MAX;
-	g = (double)rand() / RAND_MAX;
-	b = (double)rand() / RAND_MAX;
+	this->r = (double)rand() / RAND_MAX;
+	this->g = (double)rand() / RAND_MAX;
+	this->b = (double)rand() / RAND_MAX;
 
 }
 
@@ -78,9 +78,9 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 	
 	algorithm = alg;
 	
-	r = _r;
-	g = _g;
-	b = _b;
+	this->r = _r;
+	this->g = _g;
+	this->b = _b;
 }
 
 template <class state, class action, class environment>
@@ -164,7 +164,7 @@ template <class state, class action, class environment>
 void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
 {
 	if(!Done())
-		env->OpenGLDraw(window, loc,r,g,b);	
+		env->OpenGLDraw(window, loc,this->r,this->g,this->b);	
 	else
 		env->OpenGLDraw(window, loc, 0,0,0);
 		
@@ -173,7 +173,7 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 		state l = locs[i];
 		GLdouble xx, yy, zz, rad;
 		env->GetMapAbstraction()->GetMap()->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
-		glColor3f(r,g,b);
+		glColor3f(this->r,this->g,this->b);
 		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
 		//		env->OpenGLDraw(window, locs[i], r, g, b);
 	}	

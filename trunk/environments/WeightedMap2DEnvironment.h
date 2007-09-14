@@ -34,6 +34,51 @@
 #include "BitVector.h"
 #include "OccupancyInterface.h"
 #include "Graph.h"
+#include <ext/hash_map>
+#include <cmath>
+
+class Vector2D {
+	public:
+		Vector2D(float _x,float _y):x(_x), y(_y) {Normalize();}
+		Vector2D():x(0),y(0) {}
+		void Set(float _x, float _y) { x=_x; y=_y; Normalize();}
+		bool operator==(const Vector2D &rhs) {return ((x == rhs.x)&&(y==rhs.y));}
+		std::ostream& operator <<(std::ostream & out)
+		{
+			out << "(" << x << ", " << y << ")";
+			return out;	
+		}
+	//private:
+		float x, y;
+		void Normalize()
+		{
+			float magnitude = sqrt(x*x + y*y);
+			x /= magnitude;
+			y /= magnitude;
+		}
+};
+
+
+namespace AngleUtil {
+
+	class AngleSearchNode{
+		public:
+			AngleSearchNode(xyLoc &s,uint64_t key)
+				:node(s), hashKey(key) {}
+			xyLoc node;
+			uint64_t hashKey;
+	};
+
+	struct SearchNodeEqual {
+		bool operator()(const AngleSearchNode &i1, const AngleSearchNode &i2)
+		{ return (i1.node == i2.node); } };
+		
+	struct SearchNodeHash {
+		size_t operator()(const AngleSearchNode &x) const
+		{ return (size_t)(x.hashKey); } };
+	
+	 typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
+};
 
 /** Edge labels */
 enum {
@@ -58,9 +103,17 @@ public:
 	void DrawEdge(int window, edge* e);
 private:
 	BaseMapOccupancyInterface* oi;
+	
+	typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
+	AngleLookupTable angleLookup;
 };
 
 typedef UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment> UnitWeightedMapSimulation;
+
+// Weighting with node angles
+
+
+
 
 #endif
 
