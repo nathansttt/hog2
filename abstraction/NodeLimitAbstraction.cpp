@@ -113,7 +113,7 @@ void NodeLimitAbstraction::addNodes(Graph *g)
 	while (count > 0)
 	{
 		// select a random node
-		node *next = abstractions.back()->getRandomNode();
+		node *next = abstractions.back()->GetRandomNode();
 		assert(next!=NULL);
 		// if it isn't abstracted, do a bfs according to the depth and abstract these nodes together
 		if (next->GetLabelL(kParent) == -1)
