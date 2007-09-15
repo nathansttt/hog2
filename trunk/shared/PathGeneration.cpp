@@ -62,8 +62,8 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 		iterations++;
 		// try to find two valid points
 		do {
-			r1 = g->getRandomNode();
-			r2 = g->getRandomNode();
+			r1 = g->GetRandomNode();
+			r2 = g->GetRandomNode();
 		} while (!absMap->Pathable(r1, r2) || (r1 == r2) ||
 						 ((iterations > maxIterations/2) && (absMap->h(r1, r2) > numBuckets*bucketSize)));
 		
