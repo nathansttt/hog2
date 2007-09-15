@@ -588,7 +588,7 @@ void MeroB::OpenGLDraw()
 
 		// if in closed
 		MeroBUtil::NodeLookupTable::iterator hiter;
-		if((hiter = closedList.find(nodeID)) != closedList.end())
+		if ((hiter = closedList.find(nodeID)) != closedList.end())
 		{
 			sn = hiter->second;
 			glColor3f(1,0,0);  // red
@@ -646,6 +646,8 @@ void MeroB::OpenGLDraw()
 		// neither in open nor closed, white
 		else 
 		{
+			continue;
+			
 			glColor3f(1,1,1); // white
 			DrawSphere(x,y,z,0.025);
 
@@ -658,11 +660,11 @@ void MeroB::OpenGLDraw()
 	}
 
 	// draw edges
-	edge_iterator ei = g->getEdgeIter();
-	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
-	{
-		DrawEdge(e->getFrom(), e->getTo(), e->getWeight());
-	}
+//	edge_iterator ei = g->getEdgeIter();
+//	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+//	{
+//		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
+//	}
 }
 
 void MeroB::DrawText(double x, double y, double z, float r, float gg, float b, char* str)
