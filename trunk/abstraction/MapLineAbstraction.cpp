@@ -162,7 +162,7 @@ void MapLineAbstraction::addNodes(Graph *g)
 	while (count > 0)
 	{
 		// select a random node
-		node *n = abstractions.back()->getRandomNode();
+		node *n = abstractions.back()->GetRandomNode();
 		assert(n!=NULL);
 		if ((n->GetLabelL(kParent) == -1) && (n->getNumEdges() != 0))
 		{

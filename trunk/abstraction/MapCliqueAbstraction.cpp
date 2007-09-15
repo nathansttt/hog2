@@ -137,7 +137,7 @@ void MapCliqueAbstraction::VerifyHierarchy()
 			p1 = abstractions[x]->GetNode(e->getFrom());
 			p2 = abstractions[x]->GetNode(e->getTo());
 			// VERIFY edge weights
-			if (!fequal(e->getWeight(), h(p1, p2)))
+			if (!fequal(e->GetWeight(), h(p1, p2)))
 			{
 				cout << "VERIFY: Edge weight doesn't match heuristic cost. Level: " << x << endl;
 				cout << *p1 << endl << *p2 << endl << *e << endl;
@@ -149,7 +149,7 @@ void MapCliqueAbstraction::VerifyHierarchy()
 					<< ", " << p2->GetLabelF(kZCoordinate) << ")" << endl;
 				if (p2->GetLabelL(kAbstractionLevel) == 0)
 					cout << "P2: (" << p2->GetLabelL(kFirstData) << ", " << p2->GetLabelL(kFirstData+1) << ")" << endl;
-				cout << "weight: " << e->getWeight() << " heuristic " << h(p1, p2) << endl;
+				cout << "weight: " << e->GetWeight() << " heuristic " << h(p1, p2) << endl;
 			}
 			if (e->GetLabelL(kEdgeCapacity) == 0)
 				cout << "VERIFY: Edge capacity is 0?!? " << e << endl;
@@ -631,7 +631,7 @@ for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 			//			double weight = (aGraph->GetNode(from)->GetLabelL(kNumAbstractedNodes))+
 			//															 (aGraph->GetNode(to)->GetLabelL(kNumAbstractedNodes));
 			//			weight /= 2;
-			//			weight += e->getWeight();
+			//			weight += e->GetWeight();
 			double weight = h(aGraph->GetNode(from), aGraph->GetNode(to));
 			f = new edge(from, to, weight);
 			f->SetLabelL(kEdgeCapacity, 1);
@@ -914,7 +914,7 @@ return aGraph;
 //				//			double weight = (aGraph->GetNode(from)->GetLabelL(kNumAbstractedNodes))+
 //				//															 (aGraph->GetNode(to)->GetLabelL(kNumAbstractedNodes));
 //				//			weight /= 2;
-//				//			weight += e->getWeight();
+//				//			weight += e->GetWeight();
 //				double weight = h(aGraph->GetNode(from), aGraph->GetNode(to));
 //				f = new edge(from, to, weight);
 //				f->SetLabelL(kEdgeCapacity, 1);

@@ -28,7 +28,7 @@ double AbstractionSearchEnvironment::heuristic(uint32_t node1, uint32_t node2)
 	node *n2 = g->GetNode(node2);
 	edge *e = g->FindEdge(node1, node2);
 	if (e)
-		return e->getWeight();
+		return e->GetWeight();
 	return ga->h(n1, n2);
 }
 
