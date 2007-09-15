@@ -84,8 +84,8 @@ public:
   bool relax(edge *e, int weightIndex);
   bool relaxReverseEdge(edge *e, int weightIndex);
 	
-  node *getRandomNode();
-  edge *getRandomEdge();
+  node *GetRandomNode();
+  edge *GetRandomEdge();
 
   node_iterator getNodeIter() const;
   node *nodeIterNext(node_iterator&) const;
@@ -133,7 +133,7 @@ class edge : public graph_object {
 	inline double GetLabelF(unsigned int index) const { if (index < label.size()) return label[index].fval; return MAXINT; }
 	inline long GetLabelL(unsigned int index) const { if (index < label.size()) return label[index].lval; return MAXINT; }
 
-	double getWeight() { return GetLabelF(kEdgeWeight); }
+	double GetWeight() { return GetLabelF(kEdgeWeight); }
 	void setWeight(double val) { SetLabelF(kEdgeWeight, val); }
 	
 //	double getWidth() { return GetLabelF(kEdgeWidth); }
@@ -193,7 +193,7 @@ public:
 
   edge *getRandomIncomingEdge();
   edge *getRandomOutgoingEdge();
-	edge *getRandomEdge();
+	edge *GetRandomEdge();
 	
   int getNumOutgoingEdges();
   int getNumIncomingEdges();
@@ -201,7 +201,7 @@ public:
 	
   // chooses which label will be used as the key for
   // priority queue
-  void setKeyLabel(int which) { keyLabel = which; }
+  void SetKeyLabel(int which) { keyLabel = which; }
   double GetKey() { return label[keyLabel].fval; }
 
   // set/get various labels for each node

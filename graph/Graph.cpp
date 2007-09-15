@@ -193,7 +193,7 @@ bool Graph::relax(edge *e, int weightIndex)
   int from = e->getFrom();
   int to = e->getTo();
   if (e == 0) return false;
-  double newCost = GetNode(from)->GetLabelF(weightIndex)+e->getWeight();
+  double newCost = GetNode(from)->GetLabelF(weightIndex)+e->GetWeight();
   if (newCost <	GetNode(to)->GetLabelF(weightIndex))
 	{
     //cout << "re-weighting" << endl << *GetNode(to) << endl;
@@ -209,7 +209,7 @@ bool Graph::relaxReverseEdge(edge *e, int weightIndex)
   int from = e->getFrom();
   int to = e->getTo();
   if (e == 0) return false;
-  double newCost = GetNode(to)->GetLabelF(weightIndex)+e->getWeight();
+  double newCost = GetNode(to)->GetLabelF(weightIndex)+e->GetWeight();
   if (newCost <	GetNode(from)->GetLabelF(weightIndex))
 	{
     GetNode(from)->SetLabelF(weightIndex, newCost);
@@ -218,14 +218,14 @@ bool Graph::relaxReverseEdge(edge *e, int weightIndex)
   return false;
 }
 
-node *Graph::getRandomNode()
+node *Graph::GetRandomNode()
 {
   if (_nodes.size() == 0) return 0;
   int rand_val = (int)(((double)random()/RAND_MAX)*_nodes.size());
   return _nodes[rand_val];
 }
 
-edge *Graph::getRandomEdge()
+edge *Graph::GetRandomEdge()
 {
   if (_edges.size() == 0) return 0;
   //	int rand_val = random()%edge_index;
@@ -714,7 +714,7 @@ edge *node::getRandomOutgoingEdge()
   return _edgesOutgoing[rand_val];
 }
 
-edge *node::getRandomEdge()
+edge *node::GetRandomEdge()
 {
   int rand_val = random()%_allEdges.size();
   return _allEdges[rand_val];
