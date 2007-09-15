@@ -33,16 +33,86 @@ public:
 namespace GraphSearchConstants
 {
 	enum {
-		kHCost = 0,
-		kXCoordinate = 1,
-		kYCoordinate = 2,
-		kZCoordinate = 3
+		kXCoordinate = 0,
+		kYCoordinate = 1,
+		kZCoordinate = 2,
+		kHCost = 3, // this is relative to a single goal
+		kMapX = 4,
+		kMapY = 5,
+		kTemporaryLabel
 	};
+
+	const double kStraightEdgeCost = 1.0;
+	const double kDiagonalEdgeCost = ROOT_TWO;
+	
+	Graph *GetGraph(Map *m);
+	void AddEdges(Map *m, Graph *g, int x, int y,
+				  double straigtEdgeCost = 1.0,
+				  double diagEdgeCost = ROOT_TWO,
+				  int straightEdgeProb = 100,
+				  int diagEdgeProb = 100);
 }
+
+// pure virtual class
+class GraphHeuristic {
+public:
+	virtual double HCost(graphState &state1, graphState &state2) = 0;
+private:
+};
+
+// this class uses the label on a graph for a heuristic
+// but the heuristic is only available for a single goal node
+class GraphLabelHeuristic : public GraphHeuristic {
+public:
+	GraphLabelHeuristic(Graph *graph, graphState target)
+	{ g = graph; goal = target; }
+	double HCost(graphState &state1, graphState &state2)
+	{
+		if (state2 == goal)
+			return g->GetNode(state1)->GetLabelF(GraphSearchConstants::kHCost);
+		return 0;
+	}
+private:
+	graphState goal;
+	Graph *g;
+};
+
+class GraphMapHeuristic : public GraphHeuristic {
+public:
+	GraphMapHeuristic(Map *map, Graph *graph)
+	:m(map), g(graph) {}
+	double HCost(graphState &state1, graphState &state2)
+	{
+		int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
+		int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
+		int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
+		int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
+
+		double a = ((x1>x2)?(x1-x2):(x2-x1));
+		double b = ((y1>y2)?(y1-y2):(y2-y1));
+		return (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
+	}
+private:
+	Map *m;
+	Graph *g;
+};
+
+class GraphMapInconsistentHeuristic : public GraphHeuristic {
+public:
+	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
+	double HCost(graphState &state1, graphState &state2);
+private:
+	void GetOptimalDistances(node *n, std::vector<double> &values);
+	void AddHeuristic(std::vector<double> &values, graphState location);
+	Map *m;
+	Graph *g;
+	std::vector<std::vector<double> > heuristics;
+	std::vector<graphState> locations;
+};
 
 class GraphEnvironment : public SearchEnvironment<graphState, graphMove> {
 public:
-	GraphEnvironment(Graph *g);
+	GraphEnvironment(Graph *g, GraphHeuristic *gh);
 	~GraphEnvironment();
 	void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors);
 	void GetActions(graphState &stateID, std::vector<graphMove> &actions);
@@ -59,11 +129,10 @@ public:
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, graphState &s);
 	void OpenGLDraw(int window, graphState &s, graphMove &gm);
-
-
 private:
+	bool directed;
 	Graph *g;
-
+	GraphHeuristic *h;
 };
 
 typedef UnitSimulation<graphState, graphMove, GraphEnvironment> GraphSimulation;
