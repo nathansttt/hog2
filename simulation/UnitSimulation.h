@@ -265,7 +265,7 @@ bool UnitSimulation<state,action,environment>::Done()
 template<class state, class action, class environment>
 void UnitSimulation<state, action, environment>::StepTime(double timeStep)
 {
-	std::cout<<"StepTime\n";
+	//std::cout<<"StepTime\n";
 	if (paused)
 	{
 		return;
