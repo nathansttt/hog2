@@ -55,8 +55,8 @@
 //	node* t;
 //	
 //	do {
-//		s = m_graph->getRandomNode();
-//		t = m_graph->getRandomNode();
+//		s = m_graph->GetRandomNode();
+//		t = m_graph->GetRandomNode();
 //		
 //	} while(isObstacle(s) || isObstacle(t) 
 //		|| !isValidNodeId(s->GetNum())
@@ -183,7 +183,7 @@
 //	 	    (isObstacle(targetNode))) // Obstacles are not passable
 //           		continue;
 //		
-//        	result.push_back(Successor(targetNodeId, (int)(e->getWeight() * MULTIPLY_CONST)));
+//        	result.push_back(Successor(targetNodeId, (int)(e->GetWeight() * MULTIPLY_CONST)));
 //    	}
 //	
 //	
