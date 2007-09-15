@@ -75,7 +75,7 @@ double GraphSearchEnvironment::heuristic(uint32_t node1, uint32_t node2)
 {
 	edge *e = g->FindEdge(node1, node2);
 	if (e)
-		return e->getWeight();
+		return e->GetWeight();
 	return 0;
 }
 
