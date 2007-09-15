@@ -37,7 +37,7 @@
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
-int GraphSizeN = 5;
+int GraphSizeN = 10;
 
 std::vector<GraphSimulation *> unitSims;
 
@@ -92,20 +92,28 @@ void CreateSimulation(int id)
 {
 	//Graph *g;
 
-	if(fig == 1) 
+	if (gDefaultMap[0] != 0)
+	{
+		Map *m = new Map(gDefaultMap);
+		g = GraphSearchConstants::GetGraph(m);
+		env = new GraphEnvironment(g, new GraphMapInconsistentHeuristic(m, g));
+		from = g->GetRandomNode()->GetNum();
+		to = g->GetRandomNode()->GetNum();
+	}
+	else if (fig == 1) 
 	{
 		g = MeroBUtil::graphGenerator::genFig1(N);
 		from = N;
 		to = 0;
+		env = new GraphEnvironment(g, new GraphLabelHeuristic(g, to));
 	}
 	else 
 	{
 		g = MeroBUtil::graphGenerator::genFig2(N);
 		from = 0;
 		to = 2*N - 1;
-	}
-	
-	env = new GraphEnvironment(g);
+		env = new GraphEnvironment(g, new GraphLabelHeuristic(g, to));
+	}	
 
 	unitSims.resize(id+1);
 	unitSims[id] = new GraphSimulation(env);
@@ -209,8 +217,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			{
 //				CFOR = new CFOptimalRefinement();
 //				while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
-//																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->getRandomNode(),
-//																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->getRandomNode()))
+//																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode(),
+//																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
 //				{}
 //			}
 //			if (CFOR->DoOneSearchStep())
