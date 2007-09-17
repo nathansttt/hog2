@@ -10,6 +10,7 @@
 #include "FringeSearch.h"
 #include "FPUtil.h"
 
+using namespace GraphAbstractionConstants;
 static bool verbose = false;
 
 FringeSearch::FringeSearch()
@@ -217,23 +218,23 @@ void FringeSearch::addCosts(node *n, node *parent, edge *e)
 	val.n = n;
 	if ((parent) && (e))
 	{
-		val.gCost = getGCost(parent)+e->getWeight();
+		val.gCost = getGCost(parent)+e->GetWeight();
 		val.hCost = h(n, goal);
 		n->SetLabelL(kTemporaryLabel, costTable.size());
 		costTable.push_back(val);
 
-		if (fgreater(getHCost(parent)-e->getWeight(), h(n, goal)))
+		if (fgreater(getHCost(parent)-e->GetWeight(), h(n, goal)))
 		{ // regular path max
 			if (verbose) printf("Doing regular path max!\n");
-			setHCost(n, getHCost(parent)-e->getWeight());
+			setHCost(n, getHCost(parent)-e->GetWeight());
 		}
 		if (bpmx)
 		{
-			if (fgreater(val.hCost-e->getWeight(), getHCost(parent)))
+			if (fgreater(val.hCost-e->GetWeight(), getHCost(parent)))
 			{ // reverse path max!
 				if (verbose) printf("-> %d h value raised from %f to %f\n", parent->GetNum(),
-														getHCost(parent), getHCost(n)-e->getWeight());
-				setHCost(parent, getHCost(n)-e->getWeight());
+														getHCost(parent), getHCost(n)-e->GetWeight());
+				setHCost(parent, getHCost(n)-e->GetWeight());
 				if (verbose) printf("Doing reverse path max!\n");
 				propagateHValues(parent, 2);
 			}
@@ -249,13 +250,13 @@ void FringeSearch::addCosts(node *n, node *parent, edge *e)
 
 void FringeSearch::updateCosts(node *n, node *parent, edge *e)
 {
-	if (fgreater(getGCost(n), getGCost(parent)+e->getWeight()))
+	if (fgreater(getGCost(n), getGCost(parent)+e->GetWeight()))
 	{
 		n->markEdge(e);
 		costs &val = costTable[n->GetLabelL(kTemporaryLabel)];
 		if (verbose) printf("Updated g-cost of %d from %f to %f (through %d) -- (%f limit)\n", n->GetNum(),
-												val.gCost, getGCost(parent)+e->getWeight(), parent->GetNum(), currFLimit);
-		val.gCost = getGCost(parent)+e->getWeight();
+												val.gCost, getGCost(parent)+e->GetWeight(), parent->GetNum(), currFLimit);
+		val.gCost = getGCost(parent)+e->GetWeight();
 		propagateGValues(n);
 		// I check the nextFLimit, because we might want to update it for this node
 		nextFLimit = min(nextFLimit, getFCost(n));
@@ -320,11 +321,11 @@ void FringeSearch::propagateHValues(node *n, int dist)
 		
 		if (onClosedList(neighbor) || onOpenList(neighbor))
 		{
-			if (fless(getHCost(neighbor), getHCost(n)-e->getWeight())) // do update!
+			if (fless(getHCost(neighbor), getHCost(n)-e->GetWeight())) // do update!
 			{
 				if (verbose) printf("%d h value raised from %f to %f\n", neighbor->GetNum(),
-														getHCost(neighbor), getHCost(n)-e->getWeight());
-				setHCost(neighbor, getHCost(n)-e->getWeight());
+														getHCost(neighbor), getHCost(n)-e->GetWeight());
+				setHCost(neighbor, getHCost(n)-e->GetWeight());
 				propagateHValues(neighbor, dist-1);
 			}
 		}

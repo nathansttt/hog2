@@ -28,6 +28,7 @@
 #include "AStar3.h"
 #include "Heap.h"
 
+using namespace GraphAbstractionConstants;
 static const int verbose = 0;
 
 // The constructor
@@ -107,7 +108,7 @@ path *aStarOld::GetPath(GraphAbstraction *aMap, node *from, node *to, reservatio
 							 (closedList[nextChild->key] != nextChild))
 			{
 				nextChild->SetLabelF(kTemporaryLabel, MAXINT);
-				nextChild->setKeyLabel(kTemporaryLabel);
+				nextChild->SetKeyLabel(kTemporaryLabel);
 				nextChild->markEdge(0);
 				openList->Add(nextChild);
 				if (verbose)
@@ -135,7 +136,7 @@ void aStarOld::relaxEdge(Heap *nodeHeap, Graph *g, edge *e, int source, int next
 	double weight;
 	node *from = g->GetNode(source);
 	node *to = g->GetNode(nextNode);
-	weight = from->GetLabelF(kTemporaryLabel)-wh*map->h(from, d)+wh*map->h(to, d)+e->getWeight();
+	weight = from->GetLabelF(kTemporaryLabel)-wh*map->h(from, d)+wh*map->h(to, d)+e->GetWeight();
 	if (fless(weight, to->GetLabelF(kTemporaryLabel)))
 	{
 		if (verbose)

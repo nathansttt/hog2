@@ -29,6 +29,7 @@
 #include "float.h"
 #include "FPUtil.h"
 
+using namespace GraphAbstractionConstants;
 using namespace AStar3Util;
 static const bool verbose = false;
 //const int gMaxAbstraction = 0;
@@ -165,12 +166,12 @@ void aStar::updateWeight(node *currOpenNode, node *neighbor, edge *e)
 	SearchNode prev = openQueue.find(SearchNode(neighbor));
 	//SearchNode prev = openList[neighbor];
 	SearchNode alt = closedList[currOpenNode];
-	double altCost = alt.gCost+e->getWeight()+(prev.fCost-prev.gCost);
+	double altCost = alt.gCost+e->GetWeight()+(prev.fCost-prev.gCost);
 	if (fgreater(prev.fCost, altCost))
 	{
 		//prev.steps = alt.steps+1;
 		prev.fCost = altCost;
-		prev.gCost = alt.gCost+e->getWeight();
+		prev.gCost = alt.gCost+e->GetWeight();
 		prev.prevNode = currOpenNode;
 		prev.e = e;
 		// reset neighbor in queue
@@ -183,8 +184,8 @@ void aStar::updateWeight(node *currOpenNode, node *neighbor, edge *e)
 
 void aStar::addToOpenList(node *currOpenNode, node *neighbor, edge *e)
 {
-	SearchNode n(closedList[currOpenNode].gCost+e->getWeight()+internalHeuristic(neighbor, goal),
-							 closedList[currOpenNode].gCost+e->getWeight(),
+	SearchNode n(closedList[currOpenNode].gCost+e->GetWeight()+internalHeuristic(neighbor, goal),
+							 closedList[currOpenNode].gCost+e->GetWeight(),
 							 e,
 							 neighbor, currOpenNode/*, closedList[currOpenNode].steps+1*/);
 	if (verbose) 
