@@ -27,6 +27,7 @@
 #include <iostream>
 #include "SearchUnit.h"
 
+using namespace GraphAbstractionConstants;
 using namespace std;
 
 static const bool verbose = false;
