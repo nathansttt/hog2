@@ -245,7 +245,7 @@ namespace GraphSearchConstants {
 		{
 			for (int x = 0; x < m->getMapWidth(); x++)
 			{
-				AddMapEdges(m, g, x, y);
+				AddEdges(m, g, x, y);
 			}
 		}
 		// printf("Done\n");
