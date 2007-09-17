@@ -28,6 +28,7 @@
 #include "LoadedCliqueAbstraction.h"
 
 using namespace std;
+using namespace GraphAbstractionConstants;
 
 #include "Heap.h"
 #include "FPUtil.h"

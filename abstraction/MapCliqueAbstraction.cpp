@@ -27,11 +27,12 @@
 
 #include "MapCliqueAbstraction.h"
 #include "FPUtil.h"
-
-using namespace std;
 #include "Heap.h"
 #include <cmath>
 #include <memory>
+
+using namespace GraphAbstractionConstants;
+using namespace std;
 
 enum {
 	kQuiet = 0x00,

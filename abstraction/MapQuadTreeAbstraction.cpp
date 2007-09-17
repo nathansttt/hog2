@@ -28,6 +28,8 @@
 #include "MapQuadTreeAbstraction.h"
 #include "Graph.h"
 
+using namespace GraphAbstractionConstants;
+
 MapQuadTreeAbstraction::MapQuadTreeAbstraction(Map *_m, int _sectorSize)
 :MapAbstraction(_m), sectorSize(_sectorSize)
 {

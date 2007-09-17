@@ -25,11 +25,13 @@
  *
  */
 
-using namespace std;
 
 #include "GraphAbstraction.h"
 #include <math.h>
 #include <cassert>
+
+using namespace GraphAbstractionConstants;
+using namespace std;
 
 enum {
 	kQuiet = 0x00,
