@@ -8,6 +8,7 @@
  */
 
 #include "GraphEnvironment.h"
+#include "GLUtil.h"
 #include "Heap.h"
 
 using namespace GraphSearchConstants;
