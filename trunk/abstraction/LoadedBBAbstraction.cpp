@@ -7,11 +7,13 @@
  *
  */
 
-using namespace std;
-
 #include "LoadedBBAbstraction.h"
 #include "FPUtil.h"
 #include <math.h>
+
+using namespace std;
+using namespace GraphAbstractionConstants;
+
 enum {
 	kQuiet = 0x00,
 	kBuildGraph = 0x01,

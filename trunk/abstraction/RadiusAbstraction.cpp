@@ -28,6 +28,8 @@
 #include "RadiusAbstraction.h"
 #include "Graph.h"
 
+using namespace GraphAbstractionConstants;
+
 RadiusAbstraction::RadiusAbstraction(Map *_m, int _radius)
 :MapAbstraction(_m), radius(_radius)
 {

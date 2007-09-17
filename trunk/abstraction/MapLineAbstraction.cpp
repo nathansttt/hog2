@@ -9,6 +9,8 @@
 
 #include "MapLineAbstraction.h"
 
+using namespace GraphAbstractionConstants;
+
 MapLineAbstraction::MapLineAbstraction(Map *_map, int dist, bool uniform)
 :MapAbstraction(_map), lineDistance(dist), abstractUniformly(uniform)
 {

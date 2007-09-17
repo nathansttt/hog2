@@ -27,6 +27,8 @@
 
 #include "MapAbstraction.h"
 
+using namespace GraphAbstractionConstants;
+
 MapAbstraction::~MapAbstraction()
 { 
 	delete m;

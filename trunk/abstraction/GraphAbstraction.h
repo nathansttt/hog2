@@ -33,40 +33,42 @@
 #define GRAPHABSTRACTION_H
 #include <vector>
 
-/** Definitions for node labels */
-enum {
-  kAbstractionLevel = 0, // this is a LONG label
-  kNumAbstractedNodes = 1, // nodes that we abstract; this is a LONG label
-  kParent = 2, // node that abstracts us; this is a LONG label
-  kNodeWidth = 3, // the maximum size object that can completely traverse this node; this is a LONG label
-  kTemporaryLabel = 4, // for any temporary usage; this label can be LONG or FLOATING point
-  kXCoordinate = 5, // cache for opengl drawing; this is a FLOATING POINT label
-  kYCoordinate = 6,	// this is a FLOATING POINT label
-  kZCoordinate = 7,	// this is a FLOATING POINT label
-  kNodeBlocked = 8, // this is a LONG label
-  kFirstData = 9
-};
+namespace GraphAbstractionConstants {
+	/** Definitions for node labels */
+	enum {
+	  kAbstractionLevel = 0, // this is a LONG label
+	  kNumAbstractedNodes = 1, // nodes that we abstract; this is a LONG label
+	  kParent = 2, // node that abstracts us; this is a LONG label
+	  kNodeWidth = 3, // the maximum size object that can completely traverse this node; this is a LONG label
+	  kTemporaryLabel = 4, // for any temporary usage; this label can be LONG or FLOATING point
+	  kXCoordinate = 5, // cache for opengl drawing; this is a FLOATING POINT label
+	  kYCoordinate = 6,	// this is a FLOATING POINT label
+	  kZCoordinate = 7,	// this is a FLOATING POINT label
+	  kNodeBlocked = 8, // this is a LONG label
+	  kFirstData = 9
+	};
 
-/** Definitions for edge labels */
-enum {
-	kEdgeWidth = 1
-};
+	/** Definitions for edge labels */
+	enum {
+		kEdgeWidth = 1
+	};
 
 
-/** kFirstData & beyond:
-* 
-* in abstract Graph these are the node numbers of the abstraction (LONG labels)
-*
-* in 0th level abstraction they are the x, y location of the tile
-* along with which side (type tCorner)  (all LONG labels)
-*/
+	/** kFirstData & beyond:
+	* 
+	* in abstract Graph these are the node numbers of the abstraction (LONG labels)
+	*
+	* in 0th level abstraction they are the x, y location of the tile
+	* along with which side (type tCorner)  (all LONG labels)
+	*/
 
-/** Definitions for edge labels */
-enum {
-  kEdgeCapacity=2
-};
+	/** Definitions for edge labels */
+	enum {
+	  kEdgeCapacity=2
+	};
 
-const double kUnknownPosition = -50.0;
+	const double kUnknownPosition = -50.0;
+}
 
 /**
  * A generic class for basic operations on Graph abstractions.
@@ -95,11 +97,11 @@ public:
 	/** return true if the first node is a parent of or is equal two the second node */
 	bool IsParentOf(node *parent, node *child);
 	
-	inline node *GetParent(node *which) { return abstractions[GetAbstractionLevel(which)+1]->GetNode(which->GetLabelL(kParent)); }
-	inline long GetNumChildren(node *which) { return which->GetLabelL(kNumAbstractedNodes); }
-	inline node *GetNthChild(node *which, int n) { return abstractions[GetAbstractionLevel(which)-1]->GetNode(which->GetLabelL(kFirstData+n)); }
-	inline long GetAbstractionLevel(node *which) { return which->GetLabelL(kAbstractionLevel); }
-	inline Graph* GetAbstractGraph(node *which) { return abstractions[which->GetLabelL(kAbstractionLevel)]; }
+	inline node *GetParent(node *which) { return abstractions[GetAbstractionLevel(which)+1]->GetNode(which->GetLabelL(GraphAbstractionConstants::kParent)); }
+	inline long GetNumChildren(node *which) { return which->GetLabelL(GraphAbstractionConstants::kNumAbstractedNodes); }
+	inline node *GetNthChild(node *which, int n) { return abstractions[GetAbstractionLevel(which)-1]->GetNode(which->GetLabelL(GraphAbstractionConstants::kFirstData+n)); }
+	inline long GetAbstractionLevel(node *which) { return which->GetLabelL(GraphAbstractionConstants::kAbstractionLevel); }
+	inline Graph* GetAbstractGraph(node *which) { return abstractions[which->GetLabelL(GraphAbstractionConstants::kAbstractionLevel)]; }
 	// utility functions
 	/** verify that the hierarchy is consistent */
 	virtual void VerifyHierarchy() = 0;

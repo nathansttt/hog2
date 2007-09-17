@@ -23,11 +23,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * 
  */
+
 #include "ClusterAbstraction.h"
 #include "GenericAStar.h"
 #include <cfloat>
 #include <cmath>
 #include <limits>
+
+using namespace GraphAbstractionConstants;
 
 class ClusterSearchEnvironment : public SearchEnvironment
 {
