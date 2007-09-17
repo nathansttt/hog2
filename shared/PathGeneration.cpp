@@ -30,6 +30,8 @@
 #include "AStar.h"
 #include "MapFlatAbstraction.h"
 
+using namespace GraphAbstractionConstants;
+
 // outputs algorithm/path length/time per step
 void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int bucketSize, int pathsPerBucket)
 {

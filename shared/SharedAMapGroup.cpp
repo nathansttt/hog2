@@ -31,6 +31,8 @@
 #include "MapCliqueAbstraction.h"
 #include "MapFlatAbstraction.h"
 
+using namespace GraphAbstractionConstants;
+
 SharedAMapGroup::SharedAMapGroup(MapProvider *mp)
 :aMap(0), seen(0)
 {
