@@ -10,6 +10,8 @@
 #include "GraphEnvironment.h"
 #include "Heap.h"
 
+using namespace GraphSearchConstants;
+
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 :g(_g), h(gh)
 {
@@ -473,16 +475,17 @@ GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *gr
 
 double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &state2)
 {
-//	int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
-//	int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
-//	int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
-//	int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
-//	
-//	double a = ((x1>x2)?(x1-x2):(x2-x1));
-//	double b = ((y1>y2)?(y1-y2):(y2-y1));
-//	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
+	int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
+	int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
+	int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
+	int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
+	
+	double a = ((x1>x2)?(x1-x2):(x2-x1));
+	double b = ((y1>y2)?(y1-y2):(y2-y1));
+	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 //	return val;
-	for (unsigned int x = 0; x < heuristics.size(); x++)
+	//for (unsigned int x = 0; x < heuristics.size(); x++)
+	int x = (x1+x2+y1+y2)%heuristics.size();
 	{
 		double hval = heuristics[x][state1]-heuristics[x][state2];
 		if (hval < 0) hval = -hval;

@@ -39,7 +39,7 @@ namespace GraphSearchConstants
 		kHCost = 3, // this is relative to a single goal
 		kMapX = 4,
 		kMapY = 5,
-		kTemporaryLabel
+		kTemporaryLabel = 6
 	};
 
 	const double kStraightEdgeCost = 1.0;
