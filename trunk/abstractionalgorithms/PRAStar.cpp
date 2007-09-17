@@ -27,6 +27,7 @@
 #include "FPUtil.h"
 #include "PRAStar.h"
 
+using namespace GraphAbstractionConstants;
 const bool verbose = false;
 
 praStar::praStar()
@@ -366,7 +367,7 @@ unsigned int praStar::astar(Graph *g, unsigned int source, unsigned int destPare
 						 (eligibleNodeParents[parentKey] == whichParent)))
 				{
 					currNode->SetLabelF(LABEL, MAXINT);
-					currNode->setKeyLabel(LABEL);
+					currNode->SetKeyLabel(LABEL);
 					currNode->markEdge(0);
 					nodeHeap->Add(currNode);
 					if (verbose)
@@ -439,7 +440,7 @@ void praStar::relaxEdge(Heap *nodeHeap, Graph *g, edge *e, int source, int nextN
 	node *from = g->GetNode(source);
 	node *to = g->GetNode(nextNode);
 	node *d = g->GetNode(dest);
-	weight = from->GetLabelF(LABEL)-map->h(from, d)+map->h(to, d)+e->getWeight();
+	weight = from->GetLabelF(LABEL)-map->h(from, d)+map->h(to, d)+e->GetWeight();
 	if (fless(weight, to->GetLabelF(LABEL)))
 	{
 		if (verbose)
@@ -516,10 +517,10 @@ void praStar::relaxEdge(Heap *nodeHeap, Graph *g, edge *e, int source, int nextN
 //	{
 //		do {
 //			do {
-//				r1 = abstractions[0]->getRandomNode();
+//				r1 = abstractions[0]->GetRandomNode();
 //			} while (m->getTerrainType((long)r1->GetLabelL(kFirstData), (long)r1->GetLabelL(kFirstData+1)) == kOutOfBounds);
 //			do {
-//				r2 = abstractions[0]->getRandomNode();
+//				r2 = abstractions[0]->GetRandomNode();
 //			} while (m->getTerrainType((long)r2->GetLabelL(kFirstData), (long)r2->GetLabelL(kFirstData+1)) == kOutOfBounds);
 //		} while (!Pathable(r1, r2));
 //	}

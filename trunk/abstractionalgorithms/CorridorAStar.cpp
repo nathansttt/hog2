@@ -28,6 +28,7 @@
 #include "CorridorAStar.h"
 #include "FPUtil.h"
 
+using namespace GraphAbstractionConstants;
 const static int verbose = 0;
 
 corridorAStar::corridorAStar()
@@ -117,7 +118,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *from, node *to, n
 						((parentKey < corridor->size()) && ((*corridor)[parentKey] == par)))
 				{
 					currNode->SetLabelF(kTemporaryLabel, MAXINT);
-					currNode->setKeyLabel(kTemporaryLabel);
+					currNode->SetKeyLabel(kTemporaryLabel);
 					currNode->markEdge(0);
 					nodeHeap->Add(currNode);
 					if (verbose) printf("Adding neighbor %d\n", currNode->GetNum());
@@ -242,7 +243,7 @@ path *corridorAStar::getBestPath(GraphAbstraction *aMap, node *afrom, node *ato,
 						((parentKey < corridor->size()) && ((*corridor)[parentKey] == par)))
 				{
 					currNode->SetLabelF(kTemporaryLabel, MAXINT);
-					currNode->setKeyLabel(kTemporaryLabel);
+					currNode->SetKeyLabel(kTemporaryLabel);
 					currNode->markEdge(0);
 					nodeHeap->Add(currNode);
 					if (verbose) printf("Adding neighbor %d\n", currNode->GetNum());
@@ -302,7 +303,7 @@ void corridorAStar::relaxEdge(Heap *nodeHeap, Graph *, GraphAbstraction *aMap,
 															edge *e, node *from, node *to, node *dest)
 {
   double weight;
-  weight = from->GetLabelF(kTemporaryLabel)-aMap->h(from, dest)+aMap->h(to, dest)+e->getWeight();
+  weight = from->GetLabelF(kTemporaryLabel)-aMap->h(from, dest)+aMap->h(to, dest)+e->GetWeight();
   if (fless(weight, to->GetLabelF(kTemporaryLabel)))
 	{
     if (verbose)

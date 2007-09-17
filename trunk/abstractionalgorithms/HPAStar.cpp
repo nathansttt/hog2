@@ -11,6 +11,8 @@
 #include "AStar.h"
 #include "Timer.h"
 
+using namespace GraphAbstractionConstants;
+
 const static int verbose = 0;
 const int MAX_INT = 2147483647;
 

@@ -17,6 +17,8 @@
 #include "Graph.h"
 #include "GraphAbstraction.h"
 
+using namespace GraphAbstractionConstants;
+
 /** Definitions for node labels */
 enum {
   //kAbstractionLevel = 0, // this is a LONG label

@@ -33,6 +33,7 @@
 #include <cfloat>
 #include <limits.h>
 
+using namespace GraphAbstractionConstants;
 const int MAX_INT = 2147483647;
 static const int verbose = 0;
 
