@@ -1,5 +1,6 @@
 #include "WeightedMap2DEnvironment.h"
 
+using namespace GraphAbstractionConstants;
 
 /**
 * Constructor for the WeightedMap2DEnvironment

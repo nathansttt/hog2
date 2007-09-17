@@ -25,6 +25,7 @@
 
 #include "AbsMapPatrolUnit.h"
 
+using namespace GraphAbstractionConstants;
 
 AbsMapPatrolUnit::AbsMapPatrolUnit(int _x, int _y, SearchAlgorithm* alg)
 :SearchUnit(_x,_y,NULL,alg)
