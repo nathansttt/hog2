@@ -24,15 +24,16 @@
  *
  */
 
-#ifdef OS_MAC
-#include <CoreServices/CoreServices.h>
-#endif
+//#ifdef OS_MAC
+//#include <CoreServices/CoreServices.h>
+//#endif
 
 #include "SearchAlgorithm.h"
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdint.h>
 
+using namespace GraphAbstractionConstants;
 using namespace std;
 
 static const int verbose = 0;
@@ -53,10 +54,10 @@ void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 		lastTime = 1;
 		do {
 			//      do {
-			r1 = g->getRandomNode();
+			r1 = g->GetRandomNode();
 			//      } while (aMap->GetMap()->getTerrainType((long)r1->GetLabelL(kFirstData), (long)r1->GetLabelL(kFirstData+1)) == kOutOfBounds);
 			//      do {
-			r2 = g->getRandomNode();
+			r2 = g->GetRandomNode();
 			//      } while (aMap->GetMap()->getTerrainType((long)r2->GetLabelL(kFirstData), (long)r2->GetLabelL(kFirstData+1)) == kOutOfBounds);
 		} while (!aMap->Pathable(r1, r2));
 	}
