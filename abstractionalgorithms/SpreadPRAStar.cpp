@@ -28,6 +28,7 @@
 #include "SpreadPRAStar.h"
 #include "FPUtil.h"
 
+using namespace GraphAbstractionConstants;
 static const int verbose = 0;
 
 spreadPRAStar::spreadPRAStar()

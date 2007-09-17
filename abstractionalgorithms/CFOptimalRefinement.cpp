@@ -10,6 +10,8 @@
 #include "CFOptimalRefinement.h"
 #include <vector>
 
+using namespace GraphAbstractionConstants;
+
 CFOptimalRefinement::CFOptimalRefinement()
 :SearchAlgorithm()
 {
@@ -157,7 +159,7 @@ void CFOptimalRefinement::UpdateH(node *gNode)
 	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
 	{
 		node *gNeighbor = g->GetNode(next);
-		double tmpH = gNeighbor->GetLabelF(kHCost) + g->FindEdge(next, gNode->GetNum())->getWeight();
+		double tmpH = gNeighbor->GetLabelF(kHCost) + g->FindEdge(next, gNode->GetNum())->GetWeight();
 		if (fless(tmpH, minH))
 			minH = tmpH;
 	}
@@ -180,7 +182,7 @@ void CFOptimalRefinement::UpdateG(node *gNode)
 	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
 	{
 		node *gNeighbor = g->GetNode(next);
-		double tmpG = gNeighbor->GetLabelF(kGCost) + g->FindEdge(next, gNode->GetNum())->getWeight();
+		double tmpG = gNeighbor->GetLabelF(kGCost) + g->FindEdge(next, gNode->GetNum())->GetWeight();
 		if (fless(tmpG, minG))
 			minG = tmpG;
 	}
@@ -210,7 +212,7 @@ void CFOptimalRefinement::UpdateOptH(node *gNode)
 			{
 				node *gNeighbor = g->GetNode(next);
 				if ((gNeighbor->GetLabelL(kOptimalFlag) == 1) &&
-						(fequal(gNeighbor->GetLabelF(kHCost) + g->FindEdge(next, gNode->GetNum())->getWeight(),
+						(fequal(gNeighbor->GetLabelF(kHCost) + g->FindEdge(next, gNode->GetNum())->GetWeight(),
 										gNode->GetLabelF(kHCost))))
 				{
 					optH = true;
@@ -271,7 +273,7 @@ void CFOptimalRefinement::RefineNode(node *gNode)
 				if ((e = aGraph->findDirectedEdge(aChildren[x]->GetNum(), aChildren[y]->GetNum())) != 0)
 				{
 					g->AddEdge(new edge(gChildren[x]->GetNum(), gChildren[y]->GetNum(), //1.0));
-															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.5));
+															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->GetWeight():1.5));
 				}
 			}
 		}
@@ -291,7 +293,7 @@ void CFOptimalRefinement::RefineNode(node *gNode)
 				if ((e = aGraph->FindEdge(aChildren[x]->GetNum(), GetRealNode(gNeighbor)->GetNum())) != 0)
 				{
 					g->AddEdge(new edge(gChildren[x]->GetNum(), gNeighbor->GetNum(), //1.0));
-															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->getWeight():1.5));
+															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->GetWeight():1.5));
 				}
 			}
 		}

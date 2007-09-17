@@ -29,6 +29,7 @@
 #include "PRAStar2.h"
 #include "FPUtil.h"
 
+using namespace GraphAbstractionConstants;
 static const int verbose = 0;
 
 praStar2::praStar2()
