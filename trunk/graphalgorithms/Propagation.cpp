@@ -1,4 +1,3 @@
-
 /*
  *  Propagation.cpp
  *  hog2
@@ -31,16 +30,7 @@ void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphStat
 		printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",GetNodesExpanded(),GetNodesTouched(),reopenings);
 
 	//char algname[20];
-	if(verID==0)
-		strcpy(algname,"A*");
-	else if(verID==1)
-		strcpy(algname,"B'");
-	else if(verID==2)
-		strcpy(algname,"Approx");
-	else if(verID==3)
-		strcpy(algname,"BFSRepair");
-	else
-		strcpy(algname,"Delay");
+	
 
 	printf("Algorithm %s, time used=%lf sec, solution cost=%lf, solution edges=%d.\n", algname,usedtime,solutionCost,(int)thePath.size());
 }
@@ -59,6 +49,17 @@ bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, 
 	FCache.reset();
 
 	thePath.clear();
+
+	if(verID==0)
+		strcpy(algname,"A*");
+	else if(verID==1)
+		strcpy(algname,"B'");
+	else if(verID==2)
+		strcpy(algname,"Approx");
+	else if(verID==3)
+		strcpy(algname,"BFSRepair");
+	else
+		strcpy(algname,"Delay");
 
 	if ((from == UINT32_MAX) || (to == UINT32_MAX) || (from == to))
 	{

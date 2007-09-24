@@ -1,3 +1,4 @@
+
 /*
  * $Id: sample.h,v 1.6 2006/09/18 06:23:39 nathanst Exp $
  *
