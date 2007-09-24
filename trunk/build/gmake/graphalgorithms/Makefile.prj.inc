@@ -32,4 +32,5 @@ default : all
 SRC_CPP = \
 	graphalgorithms/Heap.cpp \
 	graphalgorithms/Path.cpp \
-  graphalgorithms/MeroB.cpp
+  graphalgorithms/MeroB.cpp \
+	graphalgorithms/Propagation.cpp
