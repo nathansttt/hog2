@@ -5,9 +5,10 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/apps/sample/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = inconsistency
+NAME = inconsistency2
 DBG_NAME = $(NAME)
 REL_NAME = $(NAME)
+
 
 ROOT = ../../../..
 VPATH = $(ROOT)
@@ -58,4 +59,4 @@ PROJ_REL_DEP = \
 default : all
 
 SRC_CPP = \
-	apps/inconsistency/Inconsistency.cpp \
+  apps/inconsistency/Inconsistency2.cpp \
