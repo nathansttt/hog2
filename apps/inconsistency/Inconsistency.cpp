@@ -1,3 +1,4 @@
+
 /*
  * $Id: Inconsistency.cpp,v 1.23 2006/11/01 23:33:56 nathanst Exp $
  *
@@ -31,26 +32,28 @@
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
 #include "Plot2D.h"
-#include "MeroB.h"
+#include "Propagation.h"
 #include "GraphEnvironment.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
-int GraphSizeN = 10;
+//int GraphSizeN = 10;
 
 std::vector<GraphSimulation *> unitSims;
 
 unsigned int fig = 1;
 unsigned int N = 5;
 unsigned int vid = 1;
+double delta = 0;
 
 graphState from,to;
 std::vector<graphState> thePath;
-Graph* g=0;
+Graph* grp=0;
+Map* mp=0;
 GraphEnvironment* env = 0;
 
-MeroB* ALG = 0;
+Prop* ALG = 0;
 
 bool done = false;
 
@@ -64,10 +67,11 @@ int main(int argc, char* argv[])
 
 void preProcessArgs(int argc, char* argv[]) 
 {
-	// -f fig -N n -v vid
+	// -fig fig -N n -v vid -delta del -map mapfile
 	int i = 1;
+	gDefaultMap[0] = 0;
 	while(i<argc) {
-		if(strcmp(argv[i],"-f")==0) {
+		if(strcmp(argv[i],"-fig")==0) {
 			fig = atoi(argv[i+1]);
 			i += 2;
 		}
@@ -79,8 +83,30 @@ void preProcessArgs(int argc, char* argv[])
 			vid = atoi(argv[i+1]);
 			i += 2;
 		}
+		else if(strcmp(argv[i],"-delta")==0) {
+			sscanf(argv[i+1],"%lf",&delta);
+			i += 2;
+		}
+		else if(strcmp(argv[i],"-map")==0) {
+			strcpy(gDefaultMap,argv[i+1]);
+			i += 2;
+		}
 		else
 			i++;
+	}
+
+	if(strlen(gDefaultMap)) 
+	{
+		FILE * mf = fopen(gDefaultMap,"r");
+		if(!mf)
+		{
+			printf("Map file not exists.\n");
+			exit(-1);
+		}
+		else
+		{
+			fclose(mf);
+		}
 	}
 }
 
@@ -94,26 +120,31 @@ void CreateSimulation(int id)
 
 	if (gDefaultMap[0] != 0)
 	{
-		Map *m = new Map(gDefaultMap);
-		g = GraphSearchConstants::GetGraph(m);
-		env = new GraphEnvironment(g, new GraphMapInconsistentHeuristic(m, g));
-		from = g->GetRandomNode()->GetNum();
-		to = g->GetRandomNode()->GetNum();
+		mp = new Map(gDefaultMap);
+		grp = GraphSearchConstants::GetGraph(mp);
+		env = new GraphEnvironment(grp, new GraphMapInconsistentHeuristic(mp, grp));
+		
+		while(from==to) {
+			from = grp->GetRandomNode()->GetNum();
+			to = grp->GetRandomNode()->GetNum();
+		}
 	}
 	else if (fig == 1) 
 	{
-		g = MeroBUtil::graphGenerator::genFig1(N);
+		grp = PropUtil::graphGenerator::genFig1(N);
 		from = N;
 		to = 0;
-		env = new GraphEnvironment(g, new GraphLabelHeuristic(g, to));
+		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
 	}
 	else 
 	{
-		g = MeroBUtil::graphGenerator::genFig2(N);
+		grp = PropUtil::graphGenerator::genFig2(N);
 		from = 0;
 		to = 2*N - 1;
-		env = new GraphEnvironment(g, new GraphLabelHeuristic(g, to));
+		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
 	}	
+
+	printf("Environment ready.\n");
 
 	unitSims.resize(id+1);
 	unitSims[id] = new GraphSimulation(env);
@@ -130,6 +161,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "Non-interactive mode", "Run all 5 algorithms using the same environment.", kNoModifier, 'k');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
@@ -140,7 +172,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
-	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
+	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -226,13 +258,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 			if(ALG == 0) 
 			{
-				ALG = new MeroB(vid);
-				ALG->InitializeSearch(env,g,from,to,thePath);
+				ALG = new Prop(vid,delta);
+				ALG->InitializeSearch(env,grp,from,to,thePath);
 			}
 
 			if(!done && ALG->DoSingleSearchStep(thePath)) 
 			{
-				printf("\nFinished! Nodes expanded=%d, Nodes touched=%d.\n", ALG->GetNodesExpanded(),ALG->GetNodesTouched());
+				printf("\nDone! Nodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetReopenings());
+				printf("Algorithm %s, solution cost=%lf, solution edges=%d.\n", ALG->algname,ALG->GetSolutionCost(),(int)thePath.size());
 				done = true;
 			}
 
@@ -245,6 +278,28 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				unitSims[windowID]->StepTime(1.0/30.0);
 				unitSims[windowID]->SetPaused(true);
 			}
+			break;
+		case 'k':
+			ALG = new Prop(0);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
+			ALG = new Prop(1);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
+			ALG = new Prop(2,delta);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
+			ALG = new Prop(3);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
+			ALG = new Prop(4);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
 			break;
 		case ']': absType = (absType+1)%3; break;
 		case '[': absType = (absType+4)%3; break;
