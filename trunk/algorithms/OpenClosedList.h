@@ -163,7 +163,7 @@ OBJ OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::find(OBJ val)
 {
 	if (!IsIn(val))
 		return OBJ();
-	return table.find(val)->first;
+    return _elts[table[val]];
 }
 
 /**
