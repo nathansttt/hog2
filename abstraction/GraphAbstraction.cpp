@@ -40,7 +40,7 @@ enum {
 	kMiscMessages = 0x04
 };
 
-const int verbose = kQuiet;//kRepairGraph;
+const static int verbose = kQuiet;//kRepairGraph;
 
 GraphAbstraction::~GraphAbstraction()
 { 

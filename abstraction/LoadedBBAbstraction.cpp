@@ -21,7 +21,7 @@ enum {
 	kMiscMessages = 0x04
 };
 
-const int verbose = kMiscMessages;//kMiscMessages;//kRepairGraph;
+const static int verbose = kMiscMessages;//kMiscMessages;//kRepairGraph;
 
 const double unknownPosition = -5.0;
 
