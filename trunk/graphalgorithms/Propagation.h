@@ -12,6 +12,7 @@
 #define PROPAGATION_H
 
 #include <math.h>
+#include "GraphAlgorithm.h"
 #include "SearchEnvironment.h"
 #include "GraphEnvironment.h"
 #include <deque>
@@ -197,7 +198,7 @@ namespace PropUtil
 			for (unsigned int j=0; j<=N-2; j++)
 			{
 				n = new node("");
-				double h = 2*(N-1)*(N-2-j) + 1;
+				double h = 0;//2*(N-1)*(N-2-j) + 1;
 				n->SetLabelF(GraphSearchConstants::kHCost,h);
 				g->AddNode(n);
 				SetLoc(n, -(double)j/((double)N-1.0), 0.9+((j%2)?0.1:0.0), 0);
@@ -251,7 +252,7 @@ namespace PropUtil
 }
 
 
-class Prop {
+class Prop : public GraphAlgorithm {
 public:
 	Prop() { verID = PROP_BP; delta=0;}
 	Prop(unsigned int v) { verID = v; delta=0;}
@@ -261,6 +262,7 @@ public:
 	
 	long GetNodesExpanded() { return nodesExpanded; }
 	long GetNodesTouched() { return nodesTouched; }
+	long GetNodesReopened() {return nodesReopened;}
 
 	bool InitializeSearch(GraphEnvironment *env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath);
 	bool DoSingleSearchStep(std::vector<graphState> &thePath);
@@ -283,7 +285,6 @@ public:
 	void DrawText(double x, double y, double z, float r, float g, float b, char* str);
 	void DrawEdge(unsigned int from, unsigned int to, double weight);
 
-	int GetReopenings() {return reopenings;}
 	double GetSolutionCost() {return solutionCost;}
 	char algname[20];
 
@@ -305,7 +306,7 @@ private:
 
 	double solutionCost;
 
-	int reopenings;
+	int nodesReopened;
 
 	Graph *grp;  // for drawing only
 
