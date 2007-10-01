@@ -28,7 +28,7 @@
 #include "PRAStar.h"
 
 using namespace GraphAbstractionConstants;
-const bool verbose = false;
+const static bool verbose = false;
 
 praStar::praStar()
 :SearchAlgorithm()
