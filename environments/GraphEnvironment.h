@@ -56,6 +56,7 @@ namespace GraphSearchConstants
 // pure virtual class
 class GraphHeuristic {
 public:
+	virtual ~GraphHeuristic() { }
 	virtual double HCost(graphState &state1, graphState &state2) = 0;
 private:
 };
