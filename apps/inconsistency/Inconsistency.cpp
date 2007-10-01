@@ -34,6 +34,7 @@
 #include "Plot2D.h"
 #include "Propagation.h"
 #include "GraphEnvironment.h"
+#include "AStarDelay.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -42,8 +43,8 @@ int absType = 0;
 
 std::vector<GraphSimulation *> unitSims;
 
-unsigned int fig = 1;
-unsigned int N = 5;
+unsigned int fig = 0;
+unsigned int N = 10;
 unsigned int vid = 1;
 double delta = 0;
 
@@ -53,7 +54,7 @@ Graph* grp=0;
 Map* mp=0;
 GraphEnvironment* env = 0;
 
-Prop* ALG = 0;
+GraphAlgorithm* ALG = 0;
 
 bool done = false;
 
@@ -214,7 +215,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		//if((!unitSims[windowID]->GetPaused()) && ALG)
 		//	ALG->DoSingleSearchStep(thePath);
 
-		if(ALG)
+		if (ALG)
 		{
 			ALG->OpenGLDraw();
 		}
@@ -256,16 +257,17 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			if (CFOR->DoOneSearchStep())
 //				printf("DONE!!!\n");
 
-			if(ALG == 0) 
+			if (ALG == 0) 
 			{
-				ALG = new Prop(vid,delta);
+				ALG = new AStarDelay();
+				//ALG = new Prop(vid,delta);
 				ALG->InitializeSearch(env,grp,from,to,thePath);
 			}
 
-			if(!done && ALG->DoSingleSearchStep(thePath)) 
+			if (!done && ALG->DoSingleSearchStep(thePath)) 
 			{
-				printf("\nDone! Nodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetReopenings());
-				printf("Algorithm %s, solution cost=%lf, solution edges=%d.\n", ALG->algname,ALG->GetSolutionCost(),(int)thePath.size());
+				printf("\nDone! Nodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened());
+				//printf("Algorithm %s, solution cost=%lf, solution edges=%d.\n", ALG->algname,ALG->GetSolutionCost(),(int)thePath.size());
 				done = true;
 			}
 
