@@ -41,7 +41,7 @@ enum {
 	kMiscMessages = 0x04
 };
 
-const int verbose = kQuiet;//kMiscMessages;//kRepairGraph;
+const static int verbose = kQuiet;//kMiscMessages;//kRepairGraph;
 
 /**
 * Construct a new Graph hierarchy.

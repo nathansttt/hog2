@@ -128,7 +128,7 @@ public:
 	double MeasureAverageNodeWidth(int level);
 
 	virtual void OpenGLDraw(int ) {}
-	virtual recVec GetNodeLoc(node *n) { recVec v; v.x = v.y = v.z = 0; return v; }
+	virtual recVec GetNodeLoc(node *) { recVec v; v.x = v.y = v.z = 0; return v; }
 protected:
 		std::vector<Graph *> abstractions;
 private:
