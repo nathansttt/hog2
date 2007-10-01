@@ -9,7 +9,7 @@
 
 #include "MeroB.h"
 
-bool verbose = true;
+const static bool verbose = true;
 
 void MeroB::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
 {
