@@ -11,7 +11,7 @@
 #include <math.h>
 #include "Propagation.h"
 
-bool verbose = false;
+const static bool verbose = false;
 
 void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath) {
 	if(!InitializeSearch(_env,_g,from,to,thePath))
@@ -27,7 +27,7 @@ void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphStat
 	double usedtime = t1.tv_sec-t0.tv_sec + (t1.tv_usec-t0.tv_usec)/1000000.0;
 
 	if(thePath.size() > 0)
-		printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",GetNodesExpanded(),GetNodesTouched(),reopenings);
+		printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",GetNodesExpanded(),GetNodesTouched(),nodesReopened);
 
 	//char algname[20];
 	
@@ -39,7 +39,7 @@ bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, 
 	env = _env;
 	grp = _g;
 	nodesTouched = nodesExpanded = 0;
-	reopenings = 0;
+	nodesReopened = 0;
 	start = from;
 	goal = to;
 	justExpanded = from;
@@ -229,7 +229,7 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
 				closedList.erase(neighbor);  // delete from CLOSED
 
-				reopenings++;
+				nodesReopened++;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
@@ -392,7 +392,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 
 				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
 				closedList.erase(neighbor);  // delete from CLOSED
-				reopenings++;
+				nodesReopened++;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
@@ -575,7 +575,7 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 				if(fgreater(oldG - g , delta)) // if we can reduce g, and not by a small amount, then don't ignore
 				{
 					closedList.erase(neighbor);  // delete from CLOSED
-					reopenings++;
+					nodesReopened++;
 
 					openQueue.Add(neighborNode); // add to OPEN
 				}
@@ -1158,7 +1158,7 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 
 				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
 				closedList.erase(neighbor);  // delete from CLOSED
-				reopenings++;
+				nodesReopened++;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
