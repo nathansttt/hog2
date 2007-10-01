@@ -94,6 +94,18 @@
 		C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C433A8470C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C433A9F00C04E2EF002B8108 /* CFOptimalRefinement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46CA96E0C040B3C00D96494 /* CFOptimalRefinement.cpp */; };
+		C46E4EC20CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
+		C46E4EC30CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
+		C46E4EC40CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
+		C46E4F490CB0ACC600D4D8F6 /* GraphAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4F480CB0ACC600D4D8F6 /* GraphAlgorithm.cpp */; };
+		C46E4F4A0CB0ACC600D4D8F6 /* GraphAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4F480CB0ACC600D4D8F6 /* GraphAlgorithm.cpp */; };
+		C46E4F4B0CB0ACC600D4D8F6 /* GraphAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4F480CB0ACC600D4D8F6 /* GraphAlgorithm.cpp */; };
+		C46E4F990CB0AE5700D4D8F6 /* Propagation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4F970CB0AE5700D4D8F6 /* Propagation.cpp */; };
+		C46E4F9A0CB0AE5700D4D8F6 /* Propagation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4F970CB0AE5700D4D8F6 /* Propagation.cpp */; };
+		C46E4F9B0CB0AE5700D4D8F6 /* Propagation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4F970CB0AE5700D4D8F6 /* Propagation.cpp */; };
+		C46E50A10CB18BDE00D4D8F6 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E509D0CB18BDE00D4D8F6 /* GraphCheck.cpp */; };
+		C46E50A20CB18BDE00D4D8F6 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E509D0CB18BDE00D4D8F6 /* GraphCheck.cpp */; };
+		C46E50A30CB18BDE00D4D8F6 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E509D0CB18BDE00D4D8F6 /* GraphCheck.cpp */; };
 		C4C8422C0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C8422D0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C842380C0CD2A100AFBF7A /* GraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C842370C0CD2A100AFBF7A /* GraphEnvironment.cpp */; };
@@ -276,11 +288,11 @@
 		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		5048396D09E3307300765E4B /* hog2Proj.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Proj.xcconfig; sourceTree = "<group>"; };
 		5048396E09E3307300765E4B /* hog2Target.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Target.xcconfig; sourceTree = "<group>"; };
-		508344B209E5C41E0093A071 /* Sample Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		508344B209E5C41E0093A071 /* Sample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4339D010BF2676B002B8108 /* MNPuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNPuzzle.h; sourceTree = "<group>"; };
 		C4339D020BF2676B002B8108 /* MNPuzzle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNPuzzle.cpp; sourceTree = "<group>"; };
 		C4339E0F0BF28575002B8108 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
-		C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Puzzle Sample Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PuzzleSample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C433A28F0BF8FB7E002B8108 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = InfoPlist.strings; sourceTree = "<group>"; };
 		C433A2910BF8FB7E002B8108 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = main.nib; sourceTree = "<group>"; };
 		C433A2920BF8FB7E002B8108 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = Info.plist; path = PuzzleSample/Info.plist; sourceTree = "<group>"; };
@@ -299,6 +311,19 @@
 		C44B25FA0C076B5200C30C90 /* AStarHeuristic.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AStarHeuristic.h; sourceTree = "<group>"; };
 		C46CA96D0C040B3C00D96494 /* CFOptimalRefinement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CFOptimalRefinement.h; sourceTree = "<group>"; };
 		C46CA96E0C040B3C00D96494 /* CFOptimalRefinement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CFOptimalRefinement.cpp; sourceTree = "<group>"; };
+		C46E4EC00CACA81700D4D8F6 /* AStarDelay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AStarDelay.h; sourceTree = "<group>"; };
+		C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AStarDelay.cpp; sourceTree = "<group>"; };
+		C46E4F470CB0ACC600D4D8F6 /* GraphAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphAlgorithm.h; sourceTree = "<group>"; };
+		C46E4F480CB0ACC600D4D8F6 /* GraphAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GraphAlgorithm.cpp; sourceTree = "<group>"; };
+		C46E4F970CB0AE5700D4D8F6 /* Propagation.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Propagation.cpp; sourceTree = "<group>"; };
+		C46E4F980CB0AE5700D4D8F6 /* Propagation.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Propagation.h; sourceTree = "<group>"; };
+		C46E509A0CB18BDE00D4D8F6 /* GenericPatrolUnit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = GenericPatrolUnit.h; sourceTree = "<group>"; };
+		C46E509B0CB18BDE00D4D8F6 /* GenericSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = GenericSearchAlgorithm.h; sourceTree = "<group>"; };
+		C46E509C0CB18BDE00D4D8F6 /* GenericSearchUnit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = GenericSearchUnit.h; sourceTree = "<group>"; };
+		C46E509D0CB18BDE00D4D8F6 /* GraphCheck.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = GraphCheck.cpp; sourceTree = "<group>"; };
+		C46E509E0CB18BDE00D4D8F6 /* GraphCheck.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = GraphCheck.h; sourceTree = "<group>"; };
+		C46E509F0CB18BDE00D4D8F6 /* TemplateAStar.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TemplateAStar.h; sourceTree = "<group>"; };
+		C46E50A00CB18BDE00D4D8F6 /* VisualizableGenericSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = VisualizableGenericSearchAlgorithm.h; sourceTree = "<group>"; };
 		C4C8422A0C0CD14E00AFBF7A /* MeroB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeroB.h; sourceTree = "<group>"; };
 		C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeroB.cpp; sourceTree = "<group>"; };
 		C4C842360C0CD2A100AFBF7A /* GraphEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphEnvironment.h; sourceTree = "<group>"; };
@@ -315,7 +340,7 @@
 		C4C846110C0F9A2000AFBF7A /* SearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SearchAlgorithm.h; sourceTree = "<group>"; };
 		C4C846120C0F9A2000AFBF7A /* SpreadExecSearchAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = SpreadExecSearchAlgorithm.cpp; sourceTree = "<group>"; };
 		C4C846130C0F9A2000AFBF7A /* SpreadExecSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SpreadExecSearchAlgorithm.h; sourceTree = "<group>"; };
-		C4C8473F0C1F19C300AFBF7A /* Inconsistency Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Inconsistency Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4C8473F0C1F19C300AFBF7A /* Inconsistency Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Inconsistency Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4C847460C1F1A5B00AFBF7A /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4C847480C1F1A5B00AFBF7A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
 		C4C847490C1F1A5B00AFBF7A /* Inconsistency.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Inconsistency.icns; sourceTree = "<group>"; };
@@ -986,9 +1011,9 @@
 		195DF8CFFE9D517E11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				508344B209E5C41E0093A071 /* Sample Debug.app */,
-				C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */,
-				C4C8473F0C1F19C300AFBF7A /* Inconsistency Debug.app */,
+				508344B209E5C41E0093A071 /* Sample Release.app */,
+				C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */,
+				C4C8473F0C1F19C300AFBF7A /* Inconsistency Release.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1084,6 +1109,13 @@
 		C433A2EF0BF91318002B8108 /* generic */ = {
 			isa = PBXGroup;
 			children = (
+				C46E509A0CB18BDE00D4D8F6 /* GenericPatrolUnit.h */,
+				C46E509B0CB18BDE00D4D8F6 /* GenericSearchAlgorithm.h */,
+				C46E509C0CB18BDE00D4D8F6 /* GenericSearchUnit.h */,
+				C46E509D0CB18BDE00D4D8F6 /* GraphCheck.cpp */,
+				C46E509E0CB18BDE00D4D8F6 /* GraphCheck.h */,
+				C46E509F0CB18BDE00D4D8F6 /* TemplateAStar.h */,
+				C46E50A00CB18BDE00D4D8F6 /* VisualizableGenericSearchAlgorithm.h */,
 				C433A2F10BF91330002B8108 /* RandomUnit.cpp */,
 				C433A2F00BF91330002B8108 /* RandomUnit.h */,
 				C433A8450C03ADEB002B8108 /* IDAStar.cpp */,
@@ -1328,12 +1360,18 @@
 		C4D3B27E0BCEE7B000FCD84C /* graphalgorithms */ = {
 			isa = PBXGroup;
 			children = (
+				C46E4F970CB0AE5700D4D8F6 /* Propagation.cpp */,
+				C46E4F980CB0AE5700D4D8F6 /* Propagation.h */,
 				C4D3B2850BCEE7B000FCD84C /* Heap.cpp */,
 				C4D3B2860BCEE7B000FCD84C /* Heap.h */,
 				C4D3B2870BCEE7B000FCD84C /* Path.cpp */,
 				C4D3B2880BCEE7B000FCD84C /* Path.h */,
 				C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */,
 				C4C8422A0C0CD14E00AFBF7A /* MeroB.h */,
+				C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */,
+				C46E4EC00CACA81700D4D8F6 /* AStarDelay.h */,
+				C46E4F480CB0ACC600D4D8F6 /* GraphAlgorithm.cpp */,
+				C46E4F470CB0ACC600D4D8F6 /* GraphAlgorithm.h */,
 			);
 			name = graphalgorithms;
 			path = ../../../graphalgorithms;
@@ -2056,7 +2094,7 @@
 			name = Sample;
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = 508344B209E5C41E0093A071 /* Sample Debug.app */;
+			productReference = 508344B209E5C41E0093A071 /* Sample Release.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C433A2130BF8F9F7002B8108 /* Puzzle Sample */ = {
@@ -2074,7 +2112,7 @@
 			name = "Puzzle Sample";
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */;
+			productReference = C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C4C846E10C1F19C300AFBF7A /* Inconsistency */ = {
@@ -2092,7 +2130,7 @@
 			name = Inconsistency;
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = C4C8473F0C1F19C300AFBF7A /* Inconsistency Debug.app */;
+			productReference = C4C8473F0C1F19C300AFBF7A /* Inconsistency Release.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2228,6 +2266,10 @@
 				C4C8461D0C0F9A2000AFBF7A /* FringeSearch.cpp in Sources */,
 				C4C8461E0C0F9A2000AFBF7A /* SearchAlgorithm.cpp in Sources */,
 				C4C8461F0C0F9A2000AFBF7A /* SpreadExecSearchAlgorithm.cpp in Sources */,
+				C46E4EC30CACA81700D4D8F6 /* AStarDelay.cpp in Sources */,
+				C46E4F4A0CB0ACC600D4D8F6 /* GraphAlgorithm.cpp in Sources */,
+				C46E4F9A0CB0AE5700D4D8F6 /* Propagation.cpp in Sources */,
+				C46E50A20CB18BDE00D4D8F6 /* GraphCheck.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2309,6 +2351,10 @@
 				C4C846170C0F9A2000AFBF7A /* FringeSearch.cpp in Sources */,
 				C4C846180C0F9A2000AFBF7A /* SearchAlgorithm.cpp in Sources */,
 				C4C846190C0F9A2000AFBF7A /* SpreadExecSearchAlgorithm.cpp in Sources */,
+				C46E4EC40CACA81700D4D8F6 /* AStarDelay.cpp in Sources */,
+				C46E4F4B0CB0ACC600D4D8F6 /* GraphAlgorithm.cpp in Sources */,
+				C46E4F9B0CB0AE5700D4D8F6 /* Propagation.cpp in Sources */,
+				C46E50A30CB18BDE00D4D8F6 /* GraphCheck.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2391,6 +2437,10 @@
 				C4C847310C1F19C300AFBF7A /* SearchAlgorithm.cpp in Sources */,
 				C4C847320C1F19C300AFBF7A /* SpreadExecSearchAlgorithm.cpp in Sources */,
 				C4C8475C0C1F1AD000AFBF7A /* Inconsistency.cpp in Sources */,
+				C46E4EC20CACA81700D4D8F6 /* AStarDelay.cpp in Sources */,
+				C46E4F490CB0ACC600D4D8F6 /* GraphAlgorithm.cpp in Sources */,
+				C46E4F990CB0AE5700D4D8F6 /* Propagation.cpp in Sources */,
+				C46E50A10CB18BDE00D4D8F6 /* GraphCheck.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
