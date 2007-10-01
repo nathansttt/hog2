@@ -10,6 +10,7 @@
 #define MEROB_H
 
 #include <math.h>
+#include "GraphAlgorithm.h"
 #include "SearchEnvironment.h"
 #include "GraphEnvironment.h"
 #include <ext/hash_map>
@@ -235,7 +236,7 @@ namespace MeroBUtil
 		MeroBUtil::SearchNodeEqual, MeroBUtil::GGreater> GQueue;
 }
 
-class MeroB {
+class MeroB : public GraphAlgorithm {
 public:
 	MeroB() { verID = MB_A;}
 	MeroB(unsigned int v) { verID = v; }
