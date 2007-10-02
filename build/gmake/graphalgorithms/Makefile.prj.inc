@@ -33,4 +33,6 @@ SRC_CPP = \
 	graphalgorithms/Heap.cpp \
 	graphalgorithms/Path.cpp \
   graphalgorithms/MeroB.cpp \
-	graphalgorithms/Propagation.cpp
+	graphalgorithms/Propagation.cpp \
+	graphalgorithms/AStarDelay.cpp
+
