@@ -127,6 +127,8 @@ public:
 	double GetThinkingPenalty() { return penalty; }
 
 	virtual void OpenGLDraw(int window);
+	
+	StatCollection* GetStats() { return &stats; }
 protected:
 	void StepUnitTime(UnitInfo<state, action, environment> *ui, double timeStep);
 	bool MakeUnitMove(UnitInfo<state, action, environment> *theUnit, action where, double &moveCost);
@@ -211,7 +213,7 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 	while (units.size() > 0)
 	{
 		UnitInfo<state, action, environment> *ui = units.back();
-		//ui->agent->LogFinalStats(&stats);
+		ui->agent->LogFinalStats(&stats);
 		units.pop_back();
 		delete ui->agent;
 		delete ui;
@@ -275,6 +277,9 @@ void UnitSimulation<state, action, environment>::StepTime(double timeStep)
 	currTime += timeStep;
 	DoTimestepCalc(timeStep);
 	DoPostTimestepCalc();
+	
+	//std::cout<<"currTime "<<currTime<<std::endl;
+	//if(Done()) std::cout<<"DONE!!!\n";
 }
 
 template<class state, class action, class environment>
@@ -364,18 +369,25 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	OccupancyInterface<state, action> *envInfo = env->GetOccupancyInfo();
 	
 	if ((!envInfo) || (envInfo->CanMove(oldState, theUnit->currentState)))
-	{
+	{	
 		success = true;
 		moveCost = env->GCost(oldState, theUnit->currentState)*theUnit->agent->GetSpeed();
 		theUnit->totalDistance += env->GCost(oldState, theUnit->currentState);
 		
 		if (envInfo)
 		{
-			envInfo->SetStateOccupied(oldState, false);
-			envInfo->SetStateOccupied(theUnit->currentState, true);
+// update here!
+			envInfo->MoveUnitOccupancy(oldState, theUnit->currentState);
+			//envInfo->SetStateOccupied(oldState, false);
+			//envInfo->SetStateOccupied(theUnit->currentState, true);
 		}
 	}
 	else {
+		if(!envInfo)
+			success = true;
+		else
+			success = false;
+			
 		theUnit->currentState = oldState;
 	}
 	
@@ -390,6 +402,9 @@ void UnitSimulation<state, action, environment>::OpenGLDraw(int window)
 	{
 		units[x]->agent->OpenGLDraw(window, env, this);
 	}
+	
+	for (unsigned int x = 0; x <unitGroups.size(); x++)
+		unitGroups[x]->OpenGLDraw(window,env,this);
 }
 
 //

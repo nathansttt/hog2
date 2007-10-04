@@ -48,14 +48,16 @@ enum tDirection {
 	kSE=kS|kE, kSW=kS|kW, kStay=0, kTeleport=kSW|kNE
 };
 
-class BaseMapOccupancyInterface : OccupancyInterface<xyLoc,tDirection>
+class BaseMapOccupancyInterface : public OccupancyInterface<xyLoc,tDirection>
 {
 public:
 	BaseMapOccupancyInterface(Map* m);
 	virtual ~BaseMapOccupancyInterface();
 	virtual void SetStateOccupied(xyLoc&, bool);
 	virtual bool GetStateOccupied(xyLoc&);
-	virtual bool CanMove(xyLoc, xyLoc) {return true;}// FIX THIS
+	virtual bool CanMove(xyLoc&, xyLoc&);
+	virtual void MoveUnitOccupancy(xyLoc &, xyLoc&);
+	
 private:
 	bitVector *bitvec; /// For each map position, set if occupied
 	long mapWidth; /// Used to compute index into bitvector
@@ -85,7 +87,7 @@ public:
 	void GetActions(xyLoc &nodeID, std::vector<tDirection> &actions);
 	tDirection GetAction(xyLoc &s1, xyLoc &s2);
 	virtual void ApplyAction(xyLoc &s, tDirection dir);
-	virtual OccupancyInterface<xyLoc, tDirection> *GetOccupancyInfo() { return 0; }
+	virtual BaseMapOccupancyInterface *GetOccupancyInfo() { return oi; }
 
 	virtual bool InvertAction(tDirection &a);
 
@@ -103,7 +105,7 @@ public:
 	
 	virtual void GetNextState(xyLoc &currents, tDirection dir, xyLoc &news);
 	
-	BaseMapOccupancyInterface* GetOccupancyInterface(){return oi;}
+	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Mapenv\n";return oi;}
 	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
 protected:
 	Map *map;
@@ -122,7 +124,7 @@ public:
 	void OpenGLDraw(int window, xyLoc& s, tDirection &dir) {MapEnvironment::OpenGLDraw(window,s,dir);}
 	void OpenGLDraw(int window, xyLoc &s, tDirection &dir, GLfloat r, GLfloat g, GLfloat b) {MapEnvironment::OpenGLDraw(window,s,dir,r,g,b);}
 	
-	
+	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"AbsMap\n";return oi;}
 protected:
 	MapAbstraction *ma;
 	

@@ -71,11 +71,13 @@ public:
 		u->SetUnitGroup(this);
 	}
 	
-	bool Done()
+	virtual bool Done()
 	{
 		for (unsigned int x = 0; x < members.size(); x++)
       	if (!members[x]->Done())
+      	{
          	return false;
+         }
       return true;
    }
 

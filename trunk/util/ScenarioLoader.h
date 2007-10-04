@@ -25,16 +25,16 @@ public:
     :startx(sx),starty(sy),goalx(gx),goaly(gy),scaleX(kNoScaling),scaleY(kNoScaling),bucket(b),distance(d),map(m){}
   Experiment(int sx,int sy,int gx,int gy,int sizeX, int sizeY,int b, double d, string m)
     :startx(sx),starty(sy),goalx(gx),goaly(gy),scaleX(sizeX),scaleY(sizeY),bucket(b),distance(d),map(m){}
-  int getStartX(){return startx;}
-  int getStartY(){return starty;}
-  int getGoalX(){return goalx;}
-  int getGoalY(){return goaly;}
-  int getBucket(){return bucket;}
-  double getDistance(){return distance;}
-  void getMapName(char* mymap){strcpy(mymap,map.c_str());}
-	const char *getMapName() { return map.c_str(); }
-  int getXScale(){return scaleX;}
-  int getYScale(){return scaleY;}
+  int GetStartX(){return startx;}
+  int GetStartY(){return starty;}
+  int GetGoalX(){return goalx;}
+  int GetGoalY(){return goaly;}
+  int GetBucket(){return bucket;}
+  double GetDistance(){return distance;}
+  void GetMapName(char* mymap){strcpy(mymap,map.c_str());}
+	const char *GetMapName() { return map.c_str(); }
+  int GetXScale(){return scaleX;}
+  int GetYScale(){return scaleY;}
 
 private:
   int startx, starty, goalx, goaly;
@@ -52,9 +52,9 @@ private:
 class ScenarioLoader{
 public:
   ScenarioLoader(const char *);
-  int getNumExperiments(){return experiments.size();}
-	const char *getScenarioName() { return scenName; }
-  Experiment getNthExperiment(int which){return experiments[which];}
+  int GetNumExperiments(){return experiments.size();}
+	const char *GetScenarioName() { return scenName; }
+  Experiment GetNthExperiment(int which){return experiments[which];}
 
 private:
 		char scenName[1024];

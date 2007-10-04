@@ -138,11 +138,12 @@ void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 		case kSE: s.y+=1; s.x+=1; break;
 		default: break;
 	}
-	if (map->canStep(s.x, s.y, old.x, old.y) && !(oi->GetStateOccupied(s))) // do occupancy interface check here? 
+	if (map->canStep(s.x, s.y, old.x, old.y) && !(oi->GetStateOccupied(s))) 
 	{
+		// UnitSim takes care of this
 		// Make changes to the occupancy interface	
-		oi->SetStateOccupied(s, false);
-		oi->SetStateOccupied(old, true);
+		//oi->SetStateOccupied(s, false);
+		//oi->SetStateOccupied(old, true);
 		return;
 	}
 	s = old;
@@ -180,19 +181,20 @@ uint64_t MapEnvironment::GetActionHash(tDirection act)
 
 void MapEnvironment::OpenGLDraw(int window)
 {
+	std::cout<<"drawing\n";
 	map->OpenGLDraw(window);
 	// Draw occupancy interface - occupied = white
-// 	for(int i=0; i<map->getMapWidth(); i++)
-// 		for(int j=0; j<map->getMapHeight(); j++)
-// 		{
-// 			xyLoc l;
-// 				l.x = i;
-// 				l.y = j;
-// 			if(oi->GetStateOccupied(l))
-// 			{
-// 				OpenGLDraw(window, l, 1.0, 1.0, 1.0);
-// 			}
-// 		}
+	for(int i=0; i<map->getMapWidth(); i++)
+		for(int j=0; j<map->getMapHeight(); j++)
+		{
+			xyLoc l;
+				l.x = i;
+				l.y = j;
+			if(oi->GetStateOccupied(l))
+			{
+				OpenGLDraw(window, l, 1.0, 1.0, 1.0);
+			}
+		}
 }
 	
 
@@ -390,3 +392,32 @@ long BaseMapOccupancyInterface::CalculateIndex(uint16_t x, uint16_t y)
 	return (y * mapWidth) + x;
 }
 
+/** Updates the occupancy interface when a unit moves
+*
+* Sets the old location to be not occupied, and the new location
+* to be occupied.
+* 
+* @author Renee Jansen
+* @date 09/17/2007
+*
+* @param oldState The unit's previous state
+* @param newState The unit's new state
+*/
+void BaseMapOccupancyInterface::MoveUnitOccupancy(xyLoc &oldState, xyLoc &newState)
+{
+	SetStateOccupied(oldState, false);
+	SetStateOccupied(newState, true);
+}
+
+bool BaseMapOccupancyInterface::CanMove(xyLoc &l1, xyLoc &l2)
+{
+	if(!(GetStateOccupied(l2)))
+	{
+		return true;
+	}
+	else
+	{		
+		return false;
+	}
+	
+}
