@@ -275,9 +275,10 @@ bool GenericSearchUnit<state,action,environment>::getCachedMove(action &a)
 template<class state, class action, class environment>
 void GenericSearchUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo *si)
 {
+	// Done in UnitSimulation instead
 	//Update occupancy interface
-	env->GetOccupancyInterface()->SetStateOccupied(loc,false);
-	env->GetOccupancyInterface()->SetStateOccupied(l, true);
+	//env->GetOccupancyInterface()->SetStateOccupied(loc,false);
+	//env->GetOccupancyInterface()->SetStateOccupied(l, true);
 	
 	if((!success)||(l == loc))
 	{

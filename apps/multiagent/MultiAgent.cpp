@@ -41,12 +41,13 @@
 #include "Plot2D.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
-
+#include "WeightedUnitGroup.h"
 #include "AbsMapPatrolUnit.h"
 #include "TemplateAStar.h"
 #include "GenericSearchUnit.h"
 #include "GenericPatrolUnit.h"
 #include "WeightedMap2DEnvironment.h"
+#include "ScenarioLoader.h"
 
 #include <fstream>
 
@@ -65,7 +66,19 @@ std::vector<UnitWeightedMapSimulation *> wUnitSims;
 Plotting::Plot2D *plot = 0;
 Plotting::Line *distLine = 0;
 
+bool runExperiment = false;
+bool weighted = false;
+
 char locsFile[1024];
+char scenFileName[1024];
+char outFileName[1024];
+ScenarioLoader *sl;
+std::vector<char*> names;
+
+double weight = -1; 
+double radius = -1;
+double proportion = -1;
+int numPatrols = 5;
 
 int main(int argc, char* argv[])
 {
@@ -80,7 +93,15 @@ int main(int argc, char* argv[])
 */
 void CreateSimulation(int id)
 {
-	// Only show 1 copy of the map
+	if(scenFileName[0] != 0)
+	{
+		RunScenario(id);
+		//exit(0);
+	}
+		
+		
+		
+/*	// Only show 1 copy of the map
 	SetNumPorts(id, 1);
 	
 	Map *map;
@@ -117,64 +138,187 @@ void CreateSimulation(int id)
 			break;
 		}
 	}	
-	
-	// Test patrol unit
-/*	xyLoc start, goal, goalTwo, goalThree;
-	start.x = 5;
-	start.y = 5;
-	goal.x = 10;
-	goal.y = 5;
-	goalTwo.x = 10;
-	goalTwo.y = 10;
-	goalThree.x = 5;
-	goalThree.y = 10;
-	
-	TemplateAStar<xyLoc, tDirection,WeightedMap2DEnvironment>* a = new TemplateAStar<xyLoc, tDirection,WeightedMap2DEnvironment>();
-	
-	GenericPatrolUnit<xyLoc, tDirection,WeightedMap2DEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,WeightedMap2DEnvironment>(start, a);
-	
-	//u->AddPatrolLocation(goal);
-	u->AddPatrolLocation(goalTwo);
-	//u->AddPatrolLocation(goalThree);
-	u->SetNumPatrols(1);
-	
-	wUnitSims[id]->AddUnit(u);*/
-	
-	
-	// TEST adding groups to units, vice versa
+	*/
+	//RunExperiment(id);
+}
 
+void RunScenario(int id)
+{
+	Experiment e = sl->GetNthExperiment(0);	
+
+	char mname[1024];
+	char newname[1024] = "\0";
+	e.GetMapName(mname);
+	Map* map = new Map(mname);
 	
-// 	std::cout<<"Create two units\n";
-// 	
-// 	xyLoc start,goal;
-// 	start.x = 5; start.y = 5; goal.x = 7; goal.y = 7;
-// 	TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>* a = new TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>();
-// 	GenericSearchUnit<xyLoc,tDirection,AbsMapEnvironment> *su = new GenericSearchUnit<xyLoc,tDirection,AbsMapEnvironment>(start,goal,a);
-// 	 
-// 	std::cout<<"After creating one\n";
-// 	 
-// 	unitSims[id]->AddUnit(su);
-// 	
-// 
-// 	UnitGroup<xyLoc,tDirection,AbsMapEnvironment> *g = su->GetUnitGroup();
-// 	std::cout<<"The first unit belongs to "<<g<<std::endl;
-// 	
-// 		std::cout<<"Create two unit groups\n";
-// 	UnitGroup<xyLoc,tDirection,AbsMapEnvironment> *ug = new UnitGroup<xyLoc,tDirection,AbsMapEnvironment>;
-// 	std::cout<<"Adding unit group "<<unitSims[id]->AddUnitGroup(ug)
-// 	<<" "<<ug<<std::endl;
-// 	
-// 	UnitGroup<xyLoc,tDirection,AbsMapEnvironment> *ug1 = new UnitGroup<xyLoc,tDirection,AbsMapEnvironment>;
-// 	std::cout<<"Adding unit group "<<unitSims[id]->AddUnitGroup(ug1)<<" "<<ug1<<std::endl;
-// 	
-// 	
-// 	
-// 	UnitGroup<xyLoc,tDirection,AbsMapEnvironment> *g2 = su->GetUnitGroup();
-// 	std::cout<<"The first unit now belongs to "<<g2<<std::endl;
-// 	
-// 		su->SetUnitGroup(ug1);
+	unitSims.resize(id+1);
+	env = new AbsMapEnvironment(new MapFlatAbstraction(map));
+	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
+	unitSims[id]->SetStepType(kRealTime);
+	unitSims[id]->SetThinkingPenalty(0);
+//	unitSims[id]->SetPaused(true);
 	
-	// First experiment code - on particular map (Aug 28 2007)
+	
+	
+	WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
+	
+	if(weight != -1)
+		wug->SetWeight(weight);
+	if(proportion != -1)
+		wug->SetProportion(proportion);
+	
+	unitSims[id]->AddUnitGroup(wug);
+	
+
+	char* name;
+	
+	int numExperiments = sl->GetNumExperiments();
+	int i = 0; 
+ 	do
+ 	{
+ 		char num[8];
+ 		sprintf(num,"%d",i);
+ 		name = new char[256];
+ 		strcpy(name,"PatrolUnit");
+ 		strcat(name, num);
+ 		
+ 		names.push_back(name);
+
+		e = sl->GetNthExperiment(i);
+		e.GetMapName(newname);
+		
+		if(strcmp(mname, newname) != 0)
+		{
+			std::cout<<"Scenario file can only use one map\n";
+			exit(1);
+		}
+		
+		xyLoc start, goal;
+		start.x = e.GetStartX();
+		start.y = e.GetStartY();
+		goal.x = e.GetGoalX();
+		goal.y = e.GetGoalY();
+		
+		TemplateAStar<xyLoc, tDirection, AbsMapEnvironment> *alg = new TemplateAStar<xyLoc, tDirection, AbsMapEnvironment>();
+		if(radius != -1)
+			alg->SetRadius(radius);
+			
+ 		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg);
+		su->AddPatrolLocation(goal);
+		su->SetNumPatrols(numPatrols);	
+			
+		su->SetName(name);	
+		su->SetSpeed(1.0);
+		if(start.x < 16)	
+			su->SetColor(1, 0, 0);
+		else
+			su->SetColor(0, 1, 0);
+		wug->AddUnit(su);
+		unitSims[id]->AddUnit(su);
+ 
+
+ 		i++;
+
+ 	} while ( i < numExperiments);
+
+	// Do timing
+
+	if(runExperiment)
+		{
+			if(outFileName[0]==0)
+				strncpy(outFileName, "defaultOut.txt",1024);
+				
+			std::ofstream outfile(outFileName, std::ios::out);
+			//double beginTime = unitSims[id]->GetSimulationTime();
+			//std::cout<<beginTime<<std::endl;
+			
+			
+			double timestep = 1.5;
+			double time = 0.0;
+		
+			outfile<<"Inputfile : "<<scenFileName<<std::endl
+						<<std::endl
+						<<"Speed 1.0 for all units; timeStep 1.5; kRealTime"
+						<<std::endl<<std::endl
+						<<"Weight    : "<<weight<<std::endl
+						<<"Radius    : "<<radius<<std::endl
+						<<"Proportion: "<<proportion<<std::endl
+						<<"NumPatrols: "<<numPatrols<<std::endl<<std::endl;
+						
+		
+			while(!(unitSims[id]->Done()))
+			{
+				unitSims[id]->StepTime(timestep);
+				time += timestep;
+				std::cout<<time<<"\r";
+			}
+			//double endTime = unitSims[id]->GetSimulationTime();
+			//std::cout<<"Simulation time "<<endTime-beginTime<<std::endl;
+			
+			outfile<<"Total simulation time "<<time<<std::endl<<std::endl; 
+			
+//			StatCollection* sc = unitSims[id]->GetStats();
+// 			sc->enablePrintOutput(true);
+// 			sc->addIncludeFilter("nodesExpanded");
+// 			sc->addIncludeFilter("distanceTravelled");
+// 			sc->addIncludeFilter("directionChanges");
+// 			sc->addIncludeFilter("failedMoves");
+			//sc->printStatsTable();
+			
+				// Collect statistics
+			unitSims[id]->ClearAllUnits();
+			PrintStatistics(id,outfile);			
+			exit(0); 			
+		} // end if(runExperiment)
+	//unitSims[id]->ClearAllUnits();
+	//PrintStatistics(id);
+	SetNumPorts(id,1);	
+
+}
+
+void PrintStatistics(int id, std::ofstream &outfile)
+{
+	outfile<<"Unit NodesExpanded TotalDistanceTravelled NumDirectionChanges NumFailedMoves\n";
+	long nodes = 0; long dirChanged = 0; long failedMoves = 0;
+	long tnodes = 0; long tdirChanged = 0; long tfailedMoves = 0; 
+	double dist = 0; 
+	double tdist = 0; 
+	statValue v;
+	for(unsigned int i=0; i<names.size(); i++)\
+	{
+		if (unitSims[id]->GetStats()->lookupStat("nodesExpanded",names[i],v))
+		{
+			nodes = v.lval;
+			tnodes += nodes;
+		}
+		if(unitSims[id]->GetStats()->lookupStat("distanceTravelled",names[i],v))
+		{
+			dist = v.fval;
+			tdist += dist;
+		}
+		if(unitSims[id]->GetStats()->lookupStat("directionChanges",names[i],v))
+		{
+			dirChanged = v.lval;
+			tdirChanged += dirChanged;
+		}
+		if(unitSims[id]->GetStats()->lookupStat("failedMoves",names[i],v))
+		{
+			failedMoves = v.lval;
+			tfailedMoves += failedMoves;
+		}
+		outfile<<i<<" "<<nodes<<" "<<dist<<" "<<dirChanged<<" "<<failedMoves<<std::endl;
+	}	
+	outfile<<std::endl<<"Total "<<tnodes<<" "<<tdist<<" "
+	<<tdirChanged<<" "<<tfailedMoves<<std::endl<<std::endl
+	<<"Average "<<((double)tnodes / (double)(names.size()))
+	<<" "<<(tdist / (double)(names.size()))
+	<<" "<<(tdirChanged / (double)(names.size()))
+	<<" "<<(tfailedMoves / (double)(names.size()))<<std::endl;
+}
+
+void RunExperiment(int id)
+{
+		// First experiment code - on particular map (Aug 28 2007)
 	if(strcmp(gDefaultMap, "../../maps/local/test_s1_ground.map")==0)
 	{
 		// Set up experiment
@@ -183,8 +327,13 @@ void CreateSimulation(int id)
 		
 		std::ifstream input(locsFile);
 	
+		WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
+		if(weighted &&(envType==0))
+		{
+			unitSims[id]->AddUnitGroup(wug);
+		}
 		
-		for(unsigned int i = 0; i<10; i++)
+		for(unsigned int i = 0; i<25; i++)
 		{
 			// STORE LOCATIONS SOMEWHERE -- TO PRINT (& do other exp)	
 			int xStart, yStart, xGoal, yGoal;
@@ -209,10 +358,12 @@ void CreateSimulation(int id)
 				
 			GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg);
 			su->AddPatrolLocation(goal);
-			su->SetNumPatrols(5);	
+			su->SetNumPatrols(numPatrols);	
 			
 			su->SetSpeed(2.0);	
 			su->SetColor(1, 0, 0);
+			if(weighted)
+				wug->AddUnit(su);
 			unitSims[id]->AddUnit(su);
 			break;
 			}
@@ -224,7 +375,7 @@ void CreateSimulation(int id)
 			
 			GenericPatrolUnit<xyLoc,tDirection,WeightedMap2DEnvironment> *su = new GenericPatrolUnit<xyLoc,tDirection,WeightedMap2DEnvironment>(start,alg);
 			su->AddPatrolLocation(goal);
-			su->SetNumPatrols(5);
+			su->SetNumPatrols(numPatrols);
 			
 			su->SetSpeed(2.0);	
 			su->SetColor(1, 0, 0);
@@ -242,7 +393,7 @@ void CreateSimulation(int id)
 		
 		} // end for
 		
-		for(unsigned int i=0; i<10; i++)
+		for(unsigned int i=0; i<25; i++)
 		{
 			int xStart, yStart, xGoal, yGoal;
 				
@@ -266,10 +417,11 @@ void CreateSimulation(int id)
 				
 					GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg);
 					su->AddPatrolLocation(goal);
-					su->SetNumPatrols(5);
+					su->SetNumPatrols(numPatrols);
 					su->SetSpeed(1.0);	
 					su->SetColor(0, 1, 0);
-
+					if(weighted)
+						wug->AddUnit(su);
 					unitSims[id]->AddUnit(su);
 					break;
 				}
@@ -280,7 +432,7 @@ void CreateSimulation(int id)
 				//GenericSearchUnit<xyLoc, tDirection, WeightedMap2DEnvironment> *su = new GenericSearchUnit<xyLoc, tDirection, WeightedMap2DEnvironment>(start,goal,alg);
 				GenericPatrolUnit<xyLoc,tDirection,WeightedMap2DEnvironment> *su = new GenericPatrolUnit<xyLoc,tDirection,WeightedMap2DEnvironment>(start,alg);
 				su->AddPatrolLocation(goal);
-				su->SetNumPatrols(5);
+				su->SetNumPatrols(numPatrols);
 				
 				su->SetSpeed(1.0);	
 				su->SetColor(0, 1, 0);
@@ -308,44 +460,40 @@ void CreateSimulation(int id)
 		
 		
 		}
-		wUnitSims[id]->SetPaused(true);
+		//unitSims[id]->SetPaused(true);
 		input.close();
-		
-		double timestep = 1.5;
-		double time = 0.0;
-		
-/*		switch(envType)
- 	{
-		case 0:
-				while(!(unitSims[id]->Done()))
+		if(runExperiment)
 		{
-			unitSims[id]->StepTime(timestep);
-			time += timestep;
-			//std::cout<<time<<std::endl;
-		}
-
-			break;
-		case 1:
-				while(!(wUnitSims[id]->Done()))
-		{
-			wUnitSims[id]->StepTime(timestep);
-			time += timestep;
-			//std::cout<<time<<std::endl;
-		}
-
-			break;
-		default:
-			std::cout<<"Invalid environment\n";
-			break;
-	}	
-
-		std::cout<<"Simulation finished after "<<time<<" seconds.\n";  
- 		exit(0);*/
- 	}
+			double timestep = 1.5;
+			double time = 0.0;
+		
+			switch(envType)
+ 			{
+				case 0:
+					while(!(unitSims[id]->Done()))
+					{
+						unitSims[id]->StepTime(timestep);
+						time += timestep;
+						std::cout<<time<<"\r";
+					}
+					break;
+				case 1:
+					while(!(wUnitSims[id]->Done()))
+					{
+					wUnitSims[id]->StepTime(timestep);
+					time += timestep;
+					//std::cout<<time<<"\r";
+					}
+					break;
+				default:
+					std::cout<<"Invalid environment\n";
+					break;
+			}	
+			std::cout<<"Simulation finished after "<<time<<" seconds.\n";  
+ 			exit(0);
+		} // end if(runExperiment)
+ 	} // end if certain map file
  	
-	
-	
-
 }
 
 /**
@@ -370,6 +518,16 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the //default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-environment", "-environment envType", "Selects the environment type to be used.");
 	InstallCommandLineHandler(MyCLHandler, "-locs", "-locs filename", "Selects the file with unit start and end locations");
+	
+	InstallCommandLineHandler(MyCLHandler, "-exp", "-exp", "Runs the experiment");
+	InstallCommandLineHandler(MyCLHandler, "-weighted", "-weighted", "Uses a WeightedUnitGroup");
+	InstallCommandLineHandler(MyCLHandler, "-scen", "-scen scenarioFile", "Runs the experiments in the scenariofile");
+	
+	InstallCommandLineHandler(MyCLHandler, "-weight", "-weight w", "Environment is weighted by w");
+	InstallCommandLineHandler(MyCLHandler, "-radius", "-radius r", "TemplateAStar only uses occupancy interface within a heuristic distance of r");
+	InstallCommandLineHandler(MyCLHandler, "-prop", "-prop p", "Set the proportion of old direction to be used in the weighted environment");
+	InstallCommandLineHandler(MyCLHandler, "-patrols", "-patrols p", "Set the number of times to patrol");
+	InstallCommandLineHandler(MyCLHandler, "-outfile", "-outfile filename", "Set the filename for output.");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -403,7 +561,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (viewport == 0)
 			{
 				//unitSims[windowID]->StepTime(1.0/30.0);
-				unitSims[windowID]->StepTime(1.1);
+				unitSims[windowID]->StepTime(1.5);
+				if(unitSims[windowID]->Done())
+					std::cout<<"DONE\n";
 			}
 			unitSims[windowID]->OpenGLDraw(windowID);
 			break;
@@ -416,7 +576,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (viewport == 0)
 			{
 				//wUnitSims[windowID]->StepTime(1.0/30.0);
-				wUnitSims[windowID]->StepTime(1.1);
+				wUnitSims[windowID]->StepTime(1.5);
 			}
 			wUnitSims[windowID]->OpenGLDraw(windowID);		
 			break;
@@ -431,8 +591,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	if (maxNumArgs <= 1)
-				return 0;
+	//if (maxNumArgs <= 1)
+	//			return 0;
+	//FIX THIS --> this could break if bad input is given
 			
 	if(strcmp(argument[0],"-map")==0)
 	{
@@ -453,6 +614,61 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if(strcmp(argument[0],"-locs")==0)
 	{
 		strncpy(locsFile, argument[1],1024);
+	}
+	else if(strcmp(argument[0],"-exp")==0)
+	{
+		runExperiment = true;
+		return 1;
+	}
+	else if(strcmp(argument[0],"-weighted")==0)
+	{
+		weighted = true;
+		return 1;
+	}
+	else if(strcmp(argument[0],"-scen")==0)
+	{
+		strncpy(scenFileName, argument[1],1024);
+		sl = new ScenarioLoader(scenFileName);
+		if(sl->GetNumExperiments()==0)
+		{
+			std::cout<<"No experiments in this scenario file or invalid file.\n";
+			exit(1);
+		}
+	}
+	else if(strcmp(argument[0],"-weight")==0)
+	{
+		weight = atof(argument[1]);
+		if(weight<0)
+		{
+			std::cout<<"Invalid weight. Must be non-negative\n";
+			exit(1);
+		}
+	}
+	else if(strcmp(argument[0],"-radius")==0)
+	{
+		radius = atof(argument[1]);
+		if(radius < 0)
+		{	
+			std::cout<<"Invalid radius. Must be non-negative\n";
+			exit(1);
+		}	
+	}
+	else if(strcmp(argument[0],"-prop")==0)
+	{
+		proportion = atof(argument[1]);
+		if((proportion < 0) || (proportion > 1))
+		{
+			std::cout<<"Invalid proportion. Must be between 0 and 1\n";
+			exit(1);
+		}
+	}
+	else if(strcmp(argument[0],"-patrols")==0)
+	{
+		numPatrols = atoi(argument[1]);
+	}
+	else if(strcmp(argument[0],"-outfile")==0)
+	{
+		strncpy(outFileName, argument[1],1024);
 	}
 	return 2;
 }
@@ -637,3 +853,67 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //	}
 //	return false;
 }
+
+
+
+
+
+// TESTING CODE - probably not useful anymore; just backup
+
+	// Test patrol unit
+/*	xyLoc start, goal, goalTwo, goalThree;
+	start.x = 5;
+	start.y = 5;
+	goal.x = 10;
+	goal.y = 5;
+	goalTwo.x = 10;
+	goalTwo.y = 10;
+	goalThree.x = 5;
+	goalThree.y = 10;
+	
+	TemplateAStar<xyLoc, tDirection,WeightedMap2DEnvironment>* a = new TemplateAStar<xyLoc, tDirection,WeightedMap2DEnvironment>();
+	
+	GenericPatrolUnit<xyLoc, tDirection,WeightedMap2DEnvironment> *u = new GenericPatrolUnit<xyLoc, tDirection,WeightedMap2DEnvironment>(start, a);
+	
+	u->AddPatrolLocation(goal);
+	u->AddPatrolLocation(goalTwo);
+	u->AddPatrolLocation(goalThree);
+	u->SetNumPatrols(1);
+	
+	wUnitSims[id]->AddUnit(u);*/
+	
+	
+	// TEST adding groups to units, vice versa
+
+	
+// 	std::cout<<"Create two units\n";
+// 	
+// 	xyLoc start,goal;
+// 	start.x = 5; start.y = 5; goal.x = 7; goal.y = 7;
+// 	TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>* a = new TemplateAStar<xyLoc, tDirection,AbsMapEnvironment>();
+// 	GenericSearchUnit<xyLoc,tDirection,AbsMapEnvironment> *su = new GenericSearchUnit<xyLoc,tDirection,AbsMapEnvironment>(start,goal,a);
+// 	 
+// 	std::cout<<"After creating one\n";
+// 	 
+// 	unitSims[id]->AddUnit(su);
+// 	
+// 
+// 	UnitGroup<xyLoc,tDirection,AbsMapEnvironment> *g = su->GetUnitGroup();
+// 	std::cout<<"The first unit belongs to "<<g<<std::endl;
+// 	
+// 		std::cout<<"Create two unit groups\n";
+// 	UnitGroup<xyLoc,tDirection,AbsMapEnvironment> *ug = new UnitGroup<xyLoc,tDirection,AbsMapEnvironment>;
+// 	std::cout<<"Adding unit group "<<unitSims[id]->AddUnitGroup(ug)
+// 	<<" "<<ug<<std::endl;
+// 	
+// 	UnitGroup<xyLoc,tDirection,AbsMapEnvironment> *ug1 = new UnitGroup<xyLoc,tDirection,AbsMapEnvironment>;
+// 	std::cout<<"Adding unit group "<<unitSims[id]->AddUnitGroup(ug1)<<" "<<ug1<<std::endl;
+// 	
+// 	
+// 	
+// 	UnitGroup<xyLoc,tDirection,AbsMapEnvironment> *g2 = su->GetUnitGroup();
+// 	std::cout<<"The first unit now belongs to "<<g2<<std::endl;
+// 	
+// 		su->SetUnitGroup(ug1);
+	
+

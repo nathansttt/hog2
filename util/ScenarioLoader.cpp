@@ -43,7 +43,7 @@ ScenarioLoader::ScenarioLoader(const char* fname)
   if (ver==0.0){
     while(sfile>>bucket>>map>>xs>>ys>>xg>>yg>>dist) {
       Experiment exp(xs,ys,xg,yg,bucket,dist,map);
-      experiments.push_back(exp);    
+      experiments.push_back(exp);
     }
   }
   else if(ver==1.0){
@@ -57,6 +57,4 @@ ScenarioLoader::ScenarioLoader(const char* fname)
     assert(0);
   }
 }
-    
 
-  

@@ -11,17 +11,26 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 :AbsMapEnvironment(ma)
 {
 	// initialize all edge counters to 0
-	Graph* g = ma->GetAbstractGraph(0);
-	edge_iterator ei = g->getEdgeIter();
+	//Graph* g = ma->GetAbstractGraph(0);
+	//edge_iterator ei = g->getEdgeIter();
 	
 	oi = new BaseMapOccupancyInterface(map);
-	
-	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
-	{
-		// Reset the counters
-		e->SetLabelL(kForwardCount, 0);
-		e->SetLabelL(kBackwardCount, 0);
-	}
+	diffWeight = 1;
+	oldProportion = 0.7;
+	//for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+	//{
+	//	// Reset the counters
+	//	e->SetLabelL(kForwardCount, 0);
+	//	e->SetLabelL(kBackwardCount, 0);
+	//}
+}
+
+WeightedMap2DEnvironment::WeightedMap2DEnvironment(AbsMapEnvironment *ame)
+:AbsMapEnvironment(ame->GetMapAbstraction())
+{
+		oi = ame->GetOccupancyInfo();
+		diffWeight = 1;
+		oldProportion = 0.7;
 }
 
 /**
@@ -42,25 +51,28 @@ WeightedMap2DEnvironment::~WeightedMap2DEnvironment()
 */
 void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 {
-	Vector2D angle;
+	// this isn't called 
+	
+	std::cout<<"Weighted update action\n";
+	//Vector2D angle;
 	xyLoc old = s;
 	switch (dir)
 	{
-		case kN: s.y-=1; angle.Set(0,-1); break;
-		case kS: s.y+=1; angle.Set(0,1);break;
-		case kE: s.x+=1; angle.Set(1,0); break;
-		case kW: s.x-=1; angle.Set(-1,0);break;
-		case kNW: s.y-=1; s.x-=1; angle.Set(-1,-1); break;
-		case kSW: s.y+=1; s.x-=1; angle.Set(-1,1);break;
-		case kNE: s.y-=1; s.x+=1; angle.Set(1,-1);  break;
-		case kSE: s.y+=1; s.x+=1; angle.Set(1,1); break;
+		case kN: s.y-=1; /*angle.Set(0,-1);*/ break;
+		case kS: s.y+=1; /*angle.Set(0,1);*/break;
+		case kE: s.x+=1; /*angle.Set(1,0);*/ break;
+		case kW: s.x-=1; /*angle.Set(-1,0);*/break;
+		case kNW: s.y-=1; s.x-=1; /*angle.Set(-1,-1);*/ break;
+		case kSW: s.y+=1; s.x-=1; /*angle.Set(-1,1);*/break;
+		case kNE: s.y-=1; s.x+=1; /*angle.Set(1,-1);*/  break;
+		case kSE: s.y+=1; s.x+=1; /*angle.Set(1,1);*/ break;
 		default: break;
 	}
 	
 
 	
 	// May need to do different check as well oi->CanMove for example
-	if (map->canStep(s.x, s.y, old.x, old.y) && !(oi->GetStateOccupied(s))) 
+	if (map->canStep(s.x, s.y, old.x, old.y))// && !(oi->GetStateOccupied(s)))(should be done in unitSim)
 	{
 // 		// Update the edge weight (mark the edge)
 // 		node* from = ma->GetNodeFromMap(old.x, old.y);
@@ -73,6 +85,11 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 // 			e->SetLabelL(kBackwardCount, e->GetLabelL(kBackwardCount)+1);
 
 		// Update the angle
+		
+/*		double oldProportion = 0.8;
+		double newProportion = 1 - oldProportion;
+		
+		// Update angle on new location
 		AngleUtil::AngleSearchNode sn(s,GetStateHash(s));
 		if(angleLookup.find(sn) == angleLookup.end())
 		{
@@ -80,16 +97,77 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 		}
 		else
 		{
-			Vector2D old = angleLookup[sn];
-			angleLookup[sn] = angle; // For now - just the new angle; no combining
+			Vector2D oldAngle = angleLookup[sn];
+			angleLookup[sn] = oldProportion * oldAngle + newProportion * angle;
 		}
 		
-		oi->SetStateOccupied(s, false);
-		oi->SetStateOccupied(old, true);
+		// Update angle on old location
+		AngleUtil::AngleSearchNode sn2(old,GetStateHash(old));
+		if(angleLookup.find(sn2) == angleLookup.end())
+		{
+			angleLookup[sn2] = angle;
+		}
+		else
+		{
+			Vector2D oldAngle = angleLookup[sn2];
+			angleLookup[sn2] = oldProportion * oldAngle + newProportion * angle;
+		}	
+		
+		//UnitSimulation will deal with all occupancy interface 'stuff'
+		//oi->SetStateOccupied(s, false);
+		//oi->SetStateOccupied(old, true);*/
 		
 		return;
 	}
 	s = old;
+}
+
+void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s)
+{
+	if(old == s) 
+		return;
+	tDirection dir = GetAction(old, s);
+	Vector2D angle;
+	
+	switch (dir)
+	{
+		case kN: angle.Set(0,-1); break;
+		case kS: angle.Set(0,1);break;
+		case kE: angle.Set(1,0); break;
+		case kW: angle.Set(-1,0);break;
+		case kNW: angle.Set(-1,-1); break;
+		case kSW: angle.Set(-1,1);break;
+		case kNE: angle.Set(1,-1);  break;
+		case kSE: angle.Set(1,1); break;
+		default: break;
+	}
+	
+	double newProportion = 1 - oldProportion;
+		
+	// Update angle on new location
+	AngleUtil::AngleSearchNode sn(s,GetStateHash(s));
+	if(angleLookup.find(sn) == angleLookup.end())
+	{
+		angleLookup[sn] = angle;
+	}
+	else
+	{
+		Vector2D oldAngle = angleLookup[sn];
+		angleLookup[sn] = oldProportion * oldAngle + newProportion * angle;
+	}
+	
+	// Update angle on old location
+	AngleUtil::AngleSearchNode sn2(old,GetStateHash(old));
+	if(angleLookup.find(sn2) == angleLookup.end())
+	{
+		angleLookup[sn2] = angle;
+	}
+	else
+	{
+		Vector2D oldAngle = angleLookup[sn2];
+		angleLookup[sn2] = oldProportion * oldAngle + newProportion * angle;
+	}			
+	return;
 }
 
 /**
@@ -101,12 +179,14 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 */
 double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 {
-	//std::cout<<"l1 "<<l1<<" l2 "<<l2<<std::endl;
+	// Something not quite right here???
+	
+	//std::cou<t<"l1 "<<l1<<" l2 "<<l2<<std::endl;
 	double h = HCost(l1, l2);
-
+	
 	if (fgreater(h, ROOT_TWO))
 		return DBL_MAX;
-	
+
 	tDirection dir = GetAction(l1,l2);
 	
 	Vector2D angle;
@@ -124,20 +204,34 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 	}
 	
 	
-	AngleUtil::AngleSearchNode sn(l2,GetStateHash(l2));
+	AngleUtil::AngleSearchNode sn(l1,GetStateHash(l1));
 	
+	double weight1 = 0; double weight2 = 0;
 	if(angleLookup.find(sn) != angleLookup.end())
 		{
 			Vector2D old = angleLookup[sn];
-			if(old == angle)
+			
+			//double returnme = h + ( ((old.x-angle.x)*(old.x-angle.x)+(old.y-angle.y)*(old.y-angle.y)));
+			
+			weight1 = diffWeight * ((1 - ((old.x * angle.x)+(old.y * angle.y)))/2);
+/*			if(old == angle)
 			{
 				return h;
 			}
 			else
 			{
 				return 10 * h;
-			}
+			}*/
 		}
+		
+		AngleUtil::AngleSearchNode sn2(l2,GetStateHash(l2));
+		if(angleLookup.find(sn) != angleLookup.end())
+		{
+			Vector2D old = angleLookup[sn2];
+			weight2 = diffWeight * ((1 - ((old.x * angle.x)+(old.y * angle.y)))/2);
+		}
+		
+		return h + (0.5 * weight1 + 0.5 * weight2);
 	
 /*	if(l1 == l2)
 		return 0;	
@@ -170,13 +264,14 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 				weight = 0; 
 		}	
 	return h + 100*weight;*/
-	return h; 
+
 }
 
 void WeightedMap2DEnvironment::OpenGLDraw(int window)
 {	
+	
 	// Draw the map
-	AbsMapEnvironment::OpenGLDraw(window);
+	//AbsMapEnvironment::OpenGLDraw(window);
 	
 	// Draw direction for all nodes
 	
@@ -202,11 +297,21 @@ void WeightedMap2DEnvironment::OpenGLDraw(int window)
 			glColor3f(1.0, 0,0);
 			map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
 			glBegin(GL_LINE_STRIP);
-			glVertex3f(xx, yy, zz-rad/2);	
+			glVertex3f(xx-old.x*rad, yy-old.y*rad, zz-rad/2);
 			
-			xx += old.x * 0.4 / map->getCoordinateScale();
-			yy += old.y * 0.4 / map->getCoordinateScale();
-			glVertex3f(xx, yy, zz-rad/2);	
+			glColor3f(0.0, 0, 0);
+			glVertex3f(xx+old.x*rad, yy+old.y*rad, zz-rad/2);	
+			glEnd();
+			
+			double percOffset=0.5;
+			double lengthOffset=0.5*rad;
+			glBegin(GL_LINE_STRIP);
+			glVertex3f(xx+percOffset*old.x*rad-old.y*lengthOffset,
+							yy+percOffset*old.y*rad+old.x*lengthOffset, zz-rad/2);
+			glVertex3f(xx+old.x*rad, yy+old.y*rad, zz-rad/2);	
+							
+			glVertex3f(xx+percOffset*old.x*rad+old.y*lengthOffset,
+							yy+percOffset*old.y*rad-old.x*lengthOffset, zz-rad/2);
 			glEnd();
 			
 		}

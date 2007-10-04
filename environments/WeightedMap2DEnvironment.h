@@ -48,10 +48,31 @@ class Vector2D {
 			out << "(" << x << ", " << y << ")";
 			return out;	
 		}
+		
+		friend Vector2D operator *(const Vector2D& vec, const double num)
+		{
+			Vector2D returnme(vec.x * num, vec.y * num);
+			return returnme;
+		}
+		
+		friend Vector2D operator *(const double num, const Vector2D& vec)
+		{
+			Vector2D returnme(vec.x * num, vec.y * num);
+			return returnme;
+		}
+		
+		friend Vector2D operator +(const Vector2D& v1, const Vector2D& v2)
+		{
+			Vector2D returnme(v1.x + v2.x, v1.y + v2.y);
+			returnme.Normalize();
+			return returnme;
+		}
 	//private:
 		float x, y;
 		void Normalize()
 		{
+			if((x==0)&&(y==0))
+				return;
 			float magnitude = sqrt(x*x + y*y);
 			x /= magnitude;
 			y /= magnitude;
@@ -91,21 +112,33 @@ class WeightedMap2DEnvironment : public AbsMapEnvironment
 {
 public:
 	WeightedMap2DEnvironment(MapAbstraction *ma);
+	WeightedMap2DEnvironment(AbsMapEnvironment *ame);
 	virtual ~WeightedMap2DEnvironment();
 	void ApplyAction(xyLoc &s, tDirection dir);
 	virtual double GCost(xyLoc &node1, xyLoc &node2);
-	BaseMapOccupancyInterface* GetOccupancyInterface(){return oi;}
+	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Returning "<<oi<<std::endl;return oi;}
+	virtual BaseMapOccupancyInterface* GetOccupancyInfo(){return oi;}
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, xyLoc &l) { AbsMapEnvironment::OpenGLDraw(window, l); }
 	void OpenGLDraw(int window, xyLoc &l, GLfloat r, GLfloat g, GLfloat b) {AbsMapEnvironment::OpenGLDraw(window,l,r,g,b);}
 	void OpenGLDraw(int window, xyLoc& s, tDirection &dir);
 	void OpenGLDraw(int window, xyLoc& s, tDirection &dir, GLfloat r, GLfloat g, GLfloat b) {AbsMapEnvironment::OpenGLDraw(window,s,dir,r,g,b);}
 	void DrawEdge(int window, edge* e);
+	
+	void UpdateAngle(xyLoc &old, xyLoc &s);
+	
+	/** Set the cost of moving in the "wrong" direction */ 
+	void SetWeight(double wt) { diffWeight = wt; }
+	/** Set the weight (proportion) of the old angle */ 
+	void SetProportionOld(double prop) { assert((prop>=0) && (prop <=1)); oldProportion = prop; }
 private:
 	BaseMapOccupancyInterface* oi;
 	
 	typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
 	AngleLookupTable angleLookup;
+	
+	double diffWeight;
+	double oldProportion;
 };
 
 typedef UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment> UnitWeightedMapSimulation;
