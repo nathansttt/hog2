@@ -37,7 +37,7 @@ bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState 
 	closedList.clear();
 	openQueue.reset();
 	delayQueue.reset();
-	fQueue.reset();
+//	fQueue.reset();
 		
 	if ((from == UINT32_MAX) || (to == UINT32_MAX) || (from == to))
 	{
@@ -56,48 +56,58 @@ bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState 
 
 bool AStarDelay::DoSingleSearchStep(std::vector<graphState> &thePath)
 {
-	static bool canReopen = false;
+	static int reopenCount = 0;
 
 	SearchNode topNode;
 	bool found = false;
 	
-	// three lists (1) f-cost with f>F (2) reopen (by g-cost) with f<F
-	// (3) open (by g-cost) with f<F
 
-	// if we are allowed to reopen, take the node with lowest between lists (2) and (3)
-	// otherwise take from (3)/(2), else take from (1)
-	if ((canReopen) && (delayQueue.size() > 0) && (fQueue.size() > 0))
+	// if we are about to open the goal off open, but the delay queue has
+	// lower costs, go to the delay queue first, no matter if we're allowed to
+	// or not
+	if ((delayQueue.size() > 0) && (openQueue.size() > 0) &&
+			(env->GoalTest((openQueue.top()).currNode, goal)) &&
+			(fless(delayQueue.top().gCost, openQueue.top().fCost)))
 	{
-		if (fless(delayQueue.top().gCost, fQueue.top().gCost))
+		do { // throw out nodes with higher cost than goal
+			topNode = delayQueue.Remove();
+		} while (fgreater(topNode.fCost, openQueue.top().fCost));
+		//reopenCount = 0;
+		nodesReopened++;
+		found = true;
+	}
+	else if ((reopenCount < 2) && (delayQueue.size() > 0) && (openQueue.size() > 0))
+	{
+		if (fless(delayQueue.top().gCost, openQueue.top().fCost))
 		{
 			topNode = delayQueue.Remove();
-			canReopen = false;
+			reopenCount++;
 			nodesReopened++;
 		}
 		else {
-			topNode = fQueue.Remove();
-			canReopen = true;
+			topNode = openQueue.Remove();
+			reopenCount = 0;
 		}
 		found = true;
 	}
-	else if ((canReopen) && (delayQueue.size() > 0))
+	else if ((reopenCount < 2) && (delayQueue.size() > 0))
 	{
 		nodesReopened++;
 		topNode = delayQueue.Remove();
-		canReopen = false;
+		reopenCount++;
 		found = true;
 	}
-	else if (fQueue.size() > 0)
-	{
-		topNode = fQueue.Remove();
-		canReopen = true;
-		found = true;
-	}
+//	else if (fQueue.size() > 0)
+//	{
+//		topNode = fQueue.Remove();
+//		canReopen = true;
+//		found = true;
+//	}
 	else if ((openQueue.size() > 0))
 	{
 		F = topNode.fCost;
 		topNode = openQueue.Remove();
-		canReopen = true;
+		reopenCount = 0;
 		found = true;
 	}
 
@@ -173,10 +183,10 @@ double AStarDelay::HandleNeighbor(graphState neighbor, SearchNode &topNode)
 	{
 		return UpdateDelayedNode(neighbor, topNode);
 	} 
-	else if (fQueue.IsIn(SearchNode(neighbor))) // in low g-cost!
-	{
-		return UpdateLowGNode(neighbor, topNode);
-	}
+//	else if (fQueue.IsIn(SearchNode(neighbor))) // in low g-cost!
+//	{
+//		return UpdateLowGNode(neighbor, topNode);
+//	}
 	else { // not opened yet
 		return AddNewNode(neighbor, topNode);
 	}
@@ -193,13 +203,13 @@ double AStarDelay::AddNewNode(graphState neighbor, SearchNode &topNode)
 	double fcost = gcost + h;
 	
 	SearchNode n(fcost, gcost, neighbor, topNodeID);
-	if (fless(fcost, F))
-	{
-		fQueue.Add(n); // nodes with cost < F
-	}
-	else {
+//	if (fless(fcost, F))
+//	{
+//		fQueue.Add(n); // nodes with cost < F
+//	}
+//	else {
 		openQueue.Add(n);
-	}
+//	}
 	return edgeCost+n.fCost-n.gCost;
 }
 
@@ -233,24 +243,20 @@ double AStarDelay::UpdateClosedNode(graphState neighbor, SearchNode &topNode)
 	// check if we should update cost
 	if (fless(topNode.gCost+edgeCost, n.gCost))
 	{
+		double hCost = n.fCost - n.gCost;
+		n.gCost = topNode.gCost+edgeCost;
+
 		// do pathmax here -- update child-h to parent-h - edge cost
-		if (fgreater(topNode.fCost-topNode.gCost, n.fCost-n.gCost))
-		{
-			n.gCost = topNode.gCost+edgeCost;
-			// new heuristic value
-			n.fCost = topNode.fCost-topNode.gCost-edgeCost;
-			n.fCost += n.gCost;
-		}
-		else {
-			n.fCost = n.fCost-n.gCost+topNode.gCost+edgeCost;
-		}
+		hCost = max(topNode.fCost-topNode.gCost-edgeCost, hCost);
+
+		n.fCost = n.gCost + hCost;
 		n.prevNode = topNode.currNode;
 
 		// put into delay list if we can open it
 		closedList.erase(neighbor);  // delete from CLOSED
 		delayQueue.Add(n); // add to delay list
 	}
-	else if (fgreater(topNode.fCost-topNode.gCost, n.fCost-n.gCost))
+	else if (fgreater(topNode.fCost-topNode.gCost-edgeCost, n.fCost-n.gCost)) // pathmax
 	{
 		n.fCost = topNode.fCost-topNode.gCost-edgeCost;
 		n.fCost += n.gCost;
@@ -281,26 +287,26 @@ double AStarDelay::UpdateDelayedNode(graphState neighbor, SearchNode &topNode)
 	return edgeCost+n.fCost-n.gCost;
 }
 
-// return edge cost + h cost
-double AStarDelay::UpdateLowGNode(graphState neighbor, SearchNode &topNode)
-{
-	// lookup node
-	SearchNode n;
-	n = fQueue.find(SearchNode(neighbor));
-	double edgeCost = env->GCost(topNode.currNode, neighbor);
-	
-	if (fless(topNode.gCost+edgeCost, n.gCost))
-	{
-		n.fCost -= n.gCost;
-		n.gCost = topNode.gCost+edgeCost;
-		n.fCost += n.gCost;
-		n.prevNode = topNode.currNode;
-		fQueue.DecreaseKey(n);
-	}
-	
-	// return value for pathmax
-	return edgeCost+n.fCost-n.gCost;
-}
+// //return edge cost + h cost
+//double AStarDelay::UpdateLowGNode(graphState neighbor, SearchNode &topNode)
+//{
+//	// lookup node
+//	SearchNode n;
+//	n = fQueue.find(SearchNode(neighbor));
+//	double edgeCost = env->GCost(topNode.currNode, neighbor);
+//	
+//	if (fless(topNode.gCost+edgeCost, n.gCost))
+//	{
+//		n.fCost -= n.gCost;
+//		n.gCost = topNode.gCost+edgeCost;
+//		n.fCost += n.gCost;
+//		n.prevNode = topNode.currNode;
+//		fQueue.DecreaseKey(n);
+//	}
+//	
+//	// return value for pathmax
+//	return edgeCost+n.fCost-n.gCost;
+//}
 	
 
 //{
@@ -397,7 +403,7 @@ double AStarDelay::UpdateLowGNode(graphState neighbor, SearchNode &topNode)
 //	{
 //		topNode = openQueue.Remove();
 //		
-//		if(fgreater(topNode.fCost,F)) 
+//		if (fgreater(topNode.fCost,F)) 
 //		  {
 //		    F = topNode.fCost; // update F
 //		    if (verbose) 
@@ -547,7 +553,7 @@ double AStarDelay::UpdateLowGNode(graphState neighbor, SearchNode &topNode)
 //	{
 //		topNode = openQueue.Remove();
 //		
-//		if(fgreater(topNode.fCost,F)) 
+//		if (fgreater(topNode.fCost,F)) 
 //		{
 //		  F = topNode.fCost; // update F
 //		  if (verbose) 
@@ -775,23 +781,40 @@ void AStarDelay::OpenGLDraw()
 		if ((hiter = closedList.find(nodeID)) != closedList.end())
 		{
 			sn = hiter->second;
-			glColor3f(1,0,0);  // red
 
 			memset(buf,0,100);
-			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
+			sprintf(buf,"C %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
+			DrawText(x,y,z+0.05,0,0,0,buf);
+
+			glColor3f(1,0,0);  // red
 		}
 		// if in open
-		else if(openQueue.IsIn(SearchNode(nodeID)))
+		else if (openQueue.IsIn(SearchNode(nodeID)))
 		{
+			sn = openQueue.find(SearchNode(nodeID));
+			memset(buf,0,100);
+			sprintf(buf,"O %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
+			DrawText(x,y,z+0.05,0,0,0,buf);
+			
 			glColor3f(0,0,1);  // blue
 		}
-		else if(fQueue.IsIn(SearchNode(nodeID)))
+//		else if (fQueue.IsIn(SearchNode(nodeID)))
+//		{
+//			sn = fQueue.find(SearchNode(nodeID));
+//			memset(buf,0,100);
+//			sprintf(buf,"L %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
+//			DrawText(x,y,z+0.05,0,0,0,buf);
+//
+//			glColor3f(1,1,0);  // yellow
+//		}
+		else if (delayQueue.IsIn(SearchNode(nodeID)))
 		{
-			glColor3f(1,1,0);  // yellow
-		}
-		else if(delayQueue.IsIn(SearchNode(nodeID)))
-		{
-			glColor3f(0,1,1);
+			sn = delayQueue.find(SearchNode(nodeID));
+			memset(buf,0,100);
+			sprintf(buf,"D %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
+			DrawText(x,y,z+0.05,0,0,0,buf);
+
+			glColor3f(1,0,1); // purple
 		}
 		// neither in open nor closed, white
 		else 
@@ -805,11 +828,11 @@ void AStarDelay::OpenGLDraw()
 	}
 
 // draw edges
-//	edge_iterator ei = g->getEdgeIter();
-//	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
-//	{
-//		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
-//	}
+	edge_iterator ei = g->getEdgeIter();
+	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+	{
+		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
+	}
 }
 
 void AStarDelay::DrawText(double x, double y, double z, float r, float gg, float b, char* str)
