@@ -111,22 +111,22 @@ public:
 	void DrawEdge(unsigned int from, unsigned int to, double weight);
 
 private:
-		bool DoSingleStep(AStarDelayUtil::SearchNode &topNode,
-											std::vector<graphState> &thePath);
-		double HandleNeighbor(graphState neighbor,
+	bool DoSingleStep(AStarDelayUtil::SearchNode &topNode,
+										std::vector<graphState> &thePath);
+	double HandleNeighbor(graphState neighbor,
+												AStarDelayUtil::SearchNode &topNode);
+//	double UpdateLowGNode(graphState neighbor,
+//												AStarDelayUtil::SearchNode &topNode);
+	double UpdateDelayedNode(graphState neighbor,
+													 AStarDelayUtil::SearchNode &topNode);
+	double UpdateClosedNode(graphState neighbor,
 													AStarDelayUtil::SearchNode &topNode);
-		double UpdateLowGNode(graphState neighbor,
-													AStarDelayUtil::SearchNode &topNode);
-		double UpdateDelayedNode(graphState neighbor,
-														 AStarDelayUtil::SearchNode &topNode);
-		double UpdateClosedNode(graphState neighbor,
-														AStarDelayUtil::SearchNode &topNode);
-		double UpdateOpenNode(graphState neighbor,
-													AStarDelayUtil::SearchNode &topNode);
-		double AddNewNode(graphState neighbor,
-											AStarDelayUtil::SearchNode &topNode);
+	double UpdateOpenNode(graphState neighbor,
+												AStarDelayUtil::SearchNode &topNode);
+	double AddNewNode(graphState neighbor,
+										AStarDelayUtil::SearchNode &topNode);
 
-		double F;
+	double F;
 	long nodesExpanded, nodesTouched, nodesReopened;
 	std::vector<graphState> neighbors;
 	graphState goal, start;
