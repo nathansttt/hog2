@@ -30,11 +30,11 @@ namespace AStarDelayUtil
 {
 	class SearchNode {
 	public:
-		SearchNode(double _fCost=0, double _gCost=0, graphState curr=0, graphState prev=0)
+		SearchNode(double _fCost=0, double _gCost=0, graphState curr=UINT32_MAX, graphState prev=UINT32_MAX)
 		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev) {}
 
 		SearchNode(graphState curr)
-		:fCost(0), gCost(0), currNode(curr), prevNode(0) {}
+		:fCost(0), gCost(0), currNode(curr), prevNode(curr) {}
 
 		void copy(double f, double g, graphState curr, graphState prev)
 		{
@@ -110,6 +110,10 @@ public:
 	void DrawText(double x, double y, double z, float r, float g, float b, char* str);
 	void DrawEdge(unsigned int from, unsigned int to, double weight);
 
+	double GetSolutionCost() {return solutionCost;}
+	const char* GetName() {return algname;}
+	int GetSolutionEdges() {return pathSize;}
+
 private:
 	bool DoSingleStep(AStarDelayUtil::SearchNode &topNode,
 										std::vector<graphState> &thePath);
@@ -127,6 +131,7 @@ private:
 										AStarDelayUtil::SearchNode &topNode);
 
 	double F;
+
 	long nodesExpanded, nodesTouched, nodesReopened;
 	std::vector<graphState> neighbors;
 	graphState goal, start;
@@ -136,6 +141,10 @@ private:
 	AStarDelayUtil::GQueue delayQueue, fQueue;
 
 	Graph *g; // for OpenGL drawing only
+
+	char algname[20];
+	double solutionCost;
+	int pathSize;
 };	
 
 #endif

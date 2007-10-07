@@ -23,6 +23,10 @@ public:
 	virtual long GetNodesTouched() = 0;
 	virtual long GetNodesReopened() = 0;
 
+	virtual double GetSolutionCost() = 0;
+	virtual const char* GetName() = 0;
+	virtual int GetSolutionEdges() = 0;
+
 	virtual bool InitializeSearch(GraphEnvironment *env, Graph* g, graphState from, graphState to, std::vector<graphState> &thePath) = 0;
 	virtual bool DoSingleSearchStep(std::vector<graphState> &thePath) = 0;
 	virtual void OpenGLDraw() = 0;

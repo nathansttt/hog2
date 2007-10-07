@@ -34,6 +34,7 @@
 #include "Plot2D.h"
 #include "Propagation.h"
 #include "GraphEnvironment.h"
+#include "GraphAlgorithm.h"
 #include "AStarDelay.h"
 
 bool mouseTracking;
@@ -43,8 +44,8 @@ int absType = 0;
 
 std::vector<GraphSimulation *> unitSims;
 
-unsigned int fig = 0;
-unsigned int N = 10;
+unsigned int fig = 1;
+unsigned int N = 5;
 unsigned int vid = 1;
 double delta = 0;
 
@@ -215,7 +216,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		//if((!unitSims[windowID]->GetPaused()) && ALG)
 		//	ALG->DoSingleSearchStep(thePath);
 
-		if (ALG)
+		if(ALG)
 		{
 			ALG->OpenGLDraw();
 		}
@@ -257,17 +258,20 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			if (CFOR->DoOneSearchStep())
 //				printf("DONE!!!\n");
 
-			if (ALG == 0) 
+			if(ALG == 0) 
 			{
-				ALG = new AStarDelay();
-				//ALG = new Prop(vid,delta);
+				if(vid <6)
+					ALG = new Prop(vid,delta);
+				else
+					ALG = new AStarDelay();
 				ALG->InitializeSearch(env,grp,from,to,thePath);
 			}
 
-			if (!done && ALG->DoSingleSearchStep(thePath)) 
+			if(!done && ALG->DoSingleSearchStep(thePath)) 
 			{
-				printf("\nDone! Nodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened());
-				//printf("Algorithm %s, solution cost=%lf, solution edges=%d.\n", ALG->algname,ALG->GetSolutionCost(),(int)thePath.size());
+				printf("\nDone! Nodes expanded=%ld, Nodes touched=%ld, Reopenings=%ld.\n",ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened());
+				printf("Algorithm %s, solution cost=%lf, solution edges=%d.\n", ALG->GetName(),ALG->GetSolutionCost(),ALG->GetSolutionEdges());
+				
 				done = true;
 			}
 
@@ -299,6 +303,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			printf("\n");
 
 			ALG = new Prop(4);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
+			ALG = new Prop(5);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
+			ALG = new AStarDelay();
 			ALG->GetPath(env,grp,from,to,thePath);
 			printf("\n");
 
