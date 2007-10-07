@@ -1,4 +1,3 @@
-
 /*
  *  Propagation.h
  *  hog2
@@ -12,6 +11,7 @@
 #define PROPAGATION_H
 
 #include <math.h>
+#include <cstdlib>
 #include "GraphAlgorithm.h"
 #include "SearchEnvironment.h"
 #include "GraphEnvironment.h"
@@ -25,20 +25,26 @@
 #endif
 
 #define PROP_A        0
-#define PROP_BP       1
-#define PROP_APPROX   2
-#define PROP_BFS      3
-#define PROP_DELAY    4
+#define PROP_B        1
+#define PROP_BP       2
+#define PROP_APPROX   3
+#define PROP_BFS      4
+#define PROP_DELAY    5
 
 namespace PropUtil
 {
 	class SearchNode {
 	public:
-		SearchNode(double _fCost=0, double _gCost=0, graphState curr=0, graphState prev=0)
-		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev),lastExpanded(0),expansions(0),threshold(0) {}
+		/* the no parameter constructor will be called by openclosedlist, and should construct invalid objects */
+		//SearchNode()
+		//:fCost(0),gCost(0),currNode((graphState)-1),prevNode((graphState)-1),lastExpanded(0),expansions(0),threshold(1) {}
+
+		SearchNode(double _fCost=0, double _gCost=0, graphState curr=UINT32_MAX, graphState prev=UINT32_MAX)
+		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev),lastExpanded(0),expansions(0),threshold(0),isGoal(false) {}
 
 		SearchNode(graphState curr)
-		:fCost(0), gCost(0), currNode(curr), prevNode(0),lastExpanded(0),expansions(0),threshold(0) {}
+		:fCost(0), gCost(0), currNode(curr), prevNode(curr),lastExpanded(0),expansions(0),threshold(0),isGoal(false) {}
+
 
 		void copy(double f, double g, graphState curr, graphState prev) {
 			fCost = f;
@@ -56,6 +62,8 @@ namespace PropUtil
 		long lastExpanded;
 		long expansions;
 		long threshold; // = lastExpanded + 2^expansions
+
+		bool isGoal; // is it goal?
 	};
 
 	struct SearchNodeEqual {
@@ -63,12 +71,18 @@ namespace PropUtil
 		{ return (i1.currNode == i2.currNode); } 
 	};
 
+	// comparing f value
 	struct SearchNodeCompare { // true means i2 is preferable over i1
+		// in favor of goal when f ties
 		// prefering larger g, i.e. smaller h is also in favor of goal nodes
 		bool operator()(const SearchNode &i1, const SearchNode &i2)
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
+				if(i2.isGoal) // always prefer a goal node in tie
+					return true;
+				if(i1.isGoal)
+					return false;
 				return (fless(i1.gCost, i2.gCost));
 			}
 			return (fgreater(i1.fCost, i2.fCost));
@@ -77,8 +91,14 @@ namespace PropUtil
 
 	struct GGreater {
 		bool operator()(const SearchNode &i1, const SearchNode &i2) {
-			if(fequal(i1.gCost,i2.gCost))
+			if(fequal(i1.gCost,i2.gCost)) {
+				if(i2.isGoal) // always prefer a goal node in tie
+					return true;
+				if(i1.isGoal)
+					return false;
+
 				return fgreater(i1.fCost,i2.fCost);
+			}
 
 			return fgreater(i1.gCost,i2.gCost);
 		}
@@ -198,7 +218,7 @@ namespace PropUtil
 			for (unsigned int j=0; j<=N-2; j++)
 			{
 				n = new node("");
-				double h = 0;//2*(N-1)*(N-2-j) + 1;
+				double h = 0; // 2*(N-1)*(N-2-j) + 1;
 				n->SetLabelF(GraphSearchConstants::kHCost,h);
 				g->AddNode(n);
 				SetLoc(n, -(double)j/((double)N-1.0), 0.9+((j%2)?0.1:0.0), 0);
@@ -252,7 +272,7 @@ namespace PropUtil
 }
 
 
-class Prop : public GraphAlgorithm {
+class Prop  : public GraphAlgorithm {
 public:
 	Prop() { verID = PROP_BP; delta=0;}
 	Prop(unsigned int v) { verID = v; delta=0;}
@@ -262,11 +282,12 @@ public:
 	
 	long GetNodesExpanded() { return nodesExpanded; }
 	long GetNodesTouched() { return nodesTouched; }
-	long GetNodesReopened() {return nodesReopened;}
+	long GetNodesReopened() {return reopenings;}
 
 	bool InitializeSearch(GraphEnvironment *env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath);
 	bool DoSingleSearchStep(std::vector<graphState> &thePath);
 	bool DoSingleStepA(std::vector<graphState> &thePath);
+	bool DoSingleStepB(std::vector<graphState> &thePath);
 	bool DoSingleStepBP(std::vector<graphState> &thePath);
 	bool DoSingleStepApprox(std::vector<graphState> &thePath);
 	bool DoSingleStepBFS(std::vector<graphState> &thePath);
@@ -275,7 +296,7 @@ public:
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
 
 	void GetLowestG(PropUtil::SearchNode &gNode);
-	bool GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound);
+	bool GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound, long TBound);
 	bool UpdateHOnly(PropUtil::SearchNode &node, double h);
 	void ComputeNewHMero3a(double &h, double &h_tmp, graphState neighbor, double hTop, double edgeWeight);
 	void RelaxOpenNode(double f, double g, graphState neighbor, PropUtil::SearchNode &neighborNode, graphState topNodeID);
@@ -285,7 +306,11 @@ public:
 	void DrawText(double x, double y, double z, float r, float g, float b, char* str);
 	void DrawEdge(unsigned int from, unsigned int to, double weight);
 
+	//int GetReopenings() {return reopenings;}
 	double GetSolutionCost() {return solutionCost;}
+	const char* GetName() {return algname;}
+	int GetSolutionEdges() {return pathSize;}
+
 	char algname[20];
 
 private:
@@ -305,8 +330,9 @@ private:
 	double delta;  // the threshold for approx
 
 	double solutionCost;
+	int pathSize;
 
-	int nodesReopened;
+	long reopenings;
 
 	Graph *grp;  // for drawing only
 

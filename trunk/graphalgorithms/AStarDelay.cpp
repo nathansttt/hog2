@@ -7,23 +7,35 @@
  *
  */
 
+#include <sys/time.h>
+#include <math.h>
 #include "AStarDelay.h"
 
 using namespace AStarDelayUtil;
 using namespace GraphSearchConstants;
 
-const static bool verbose = true;
+const static bool verbose = false;//true;
 
 void AStarDelay::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
 {
 	if (!InitializeSearch(_env,_g,from,to,thePath))
 		return;
 	
+	struct timeval t0,t1;
+
+    gettimeofday(&t0,0);
+
 	while(!DoSingleSearchStep(thePath)) 
 		{}
+
+	gettimeofday(&t1,0);
+
+	double usedtime = t1.tv_sec-t0.tv_sec + (t1.tv_usec-t0.tv_usec)/1000000.0;
 	
-	if (thePath.size() > 0)
-		printf("\nNodes expanded=%ld, Nodes touched=%ld.\n",GetNodesExpanded(),GetNodesTouched());
+	//if(thePath.size() > 0)
+		printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%ld.\n",GetNodesExpanded(),GetNodesTouched(),GetNodesReopened());
+
+	printf("Algorithm AStarDelay, time used=%lf sec, solution cost=%lf, solution edges=%d.\n",usedtime,solutionCost,pathSize);
 }
 
 bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
@@ -38,6 +50,8 @@ bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState 
 	openQueue.reset();
 	delayQueue.reset();
 //	fQueue.reset();
+
+	strcpy(algname,"AStarDelay");
 		
 	if ((from == UINT32_MAX) || (to == UINT32_MAX) || (from == to))
 	{
@@ -60,13 +74,15 @@ bool AStarDelay::DoSingleSearchStep(std::vector<graphState> &thePath)
 
 	SearchNode topNode;
 	bool found = false;
+
+	graphState temporary;
 	
 
 	// if we are about to open the goal off open, but the delay queue has
 	// lower costs, go to the delay queue first, no matter if we're allowed to
 	// or not
 	if ((delayQueue.size() > 0) && (openQueue.size() > 0) &&
-			(env->GoalTest((openQueue.top()).currNode, goal)) &&
+			(env->GoalTest( temporary = (openQueue.top()).currNode, goal)) &&
 			(fless(delayQueue.top().gCost, openQueue.top().fCost)))
 	{
 		do { // throw out nodes with higher cost than goal
@@ -142,6 +158,7 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 	// otherwise we need to delay this node
 	if (env->GoalTest(topNode.currNode, goal))
 	{
+		closedList[topNode.currNode] = topNode; // this is necessary for ExtractPathToStart()
 		ExtractPathToStart(topNode.currNode, thePath);
 		return true;
 	}
@@ -744,11 +761,15 @@ void AStarDelay::ExtractPathToStart(graphState goalNode, std::vector<graphState>
 		n = openQueue.find(SearchNode(goalNode));
 	}
 	
+	solutionCost = 0;
 	do {
+		solutionCost += env->GCost(n.prevNode,n.currNode);
+
 		thePath.push_back(n.currNode);
 		n = closedList[n.prevNode];
 	} while (n.currNode != n.prevNode);
 	//thePath.push_back(n.currNode);
+	pathSize = thePath.size();
 }
 
 

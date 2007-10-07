@@ -11,6 +11,8 @@
 #include <math.h>
 #include "Propagation.h"
 
+//#define MAXINT 2147483648
+
 const static bool verbose = false;
 
 void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath) {
@@ -27,7 +29,7 @@ void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphStat
 	double usedtime = t1.tv_sec-t0.tv_sec + (t1.tv_usec-t0.tv_usec)/1000000.0;
 
 	if(thePath.size() > 0)
-		printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",GetNodesExpanded(),GetNodesTouched(),nodesReopened);
+		printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%d.\n",GetNodesExpanded(),GetNodesTouched(),reopenings);
 
 	//char algname[20];
 	
@@ -39,7 +41,7 @@ bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, 
 	env = _env;
 	grp = _g;
 	nodesTouched = nodesExpanded = 0;
-	nodesReopened = 0;
+	reopenings = 0;
 	start = from;
 	goal = to;
 	justExpanded = from;
@@ -50,16 +52,22 @@ bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, 
 
 	thePath.clear();
 
-	if(verID==0)
+	if(verID==PROP_A)
 		strcpy(algname,"A*");
-	else if(verID==1)
+	else if(verID==PROP_B)
+		strcpy(algname,"B");
+	else if(verID==PROP_BP)
 		strcpy(algname,"B'");
-	else if(verID==2)
+	else if(verID==PROP_APPROX)
 		strcpy(algname,"Approx");
-	else if(verID==3)
+	else if(verID==PROP_BFS)
 		strcpy(algname,"BFSRepair");
-	else
+	else if(verID==PROP_DELAY)
 		strcpy(algname,"Delay");
+	else {
+		printf("I don't know what to do.\n");
+		exit(-1);
+	}
 
 	if ((from == UINT32_MAX) || (to == UINT32_MAX) || (from == to))
 	{
@@ -80,6 +88,8 @@ bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, 
 bool Prop::DoSingleSearchStep(std::vector<graphState> &thePath) {
 	if(verID == PROP_A)
 		return DoSingleStepA(thePath);
+	if(verID == PROP_B)
+		return DoSingleStepB(thePath);
 	else if(verID == PROP_BP) 
 		return DoSingleStepBP(thePath);
 	else if(verID == PROP_APPROX)
@@ -188,6 +198,7 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 		if(!openQueue.IsIn(PropUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end()) 
 		{
 			PropUtil::SearchNode n(f,g,neighbor,topNodeID);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) {
@@ -229,7 +240,138 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
 				closedList.erase(neighbor);  // delete from CLOSED
 
-				nodesReopened++;
+				reopenings++;
+
+				openQueue.Add(neighborNode); // add to OPEN
+			}
+
+		}
+	}
+
+	neighbors.clear();
+
+	return false;
+}
+
+bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
+// return false means the search is not finished, true otherwise
+
+	/* step (2) */
+	if (openQueue.size() == 0)
+	{
+		thePath.resize(0); // no path found!
+		closedList.clear();
+		openQueue.reset();
+		env = 0;
+		return true;
+	}
+
+	/* step (3) */
+	nodesExpanded++;
+
+
+	PropUtil::SearchNode topNode;
+	if(fless(openQueue.top().fCost , F)) 
+	{
+		GetLowestG(topNode);
+		if(verbose)
+			printf("Expanding a node below F.\n");
+	}
+	else 
+	{
+		topNode = openQueue.Remove();
+		
+		if(fgreater(topNode.fCost,F)) 
+		{
+			F = topNode.fCost; // update F
+			if (verbose) 
+			{
+				printf("F updated to %lf.\n",F);
+			}
+		}
+	}
+
+	graphState topNodeID = topNode.currNode;
+	closedList[topNodeID] = topNode;
+
+	if(verbose) {
+		printf("Expanding node %ld , g=%lf, h=%lf, f=%lf.\n",topNodeID,topNode.gCost,topNode.fCost-topNode.gCost,topNode.fCost);
+	}
+
+	justExpanded = topNodeID;
+
+	/* step (4) */
+	if (env->GoalTest(topNodeID, goal))
+	{
+		ExtractPathToStart(topNodeID, thePath);
+		closedList.clear();
+		openQueue.reset();
+		env = 0;
+		return true;
+	}
+
+	/* step (5), computing gi is delayed */
+	neighbors.resize(0);
+	env->GetSuccessors(topNodeID, neighbors);
+
+	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	{
+		nodesTouched++;
+
+		/* step (5) */
+		graphState neighbor = neighbors[x];
+		double edgeWeight = env->GCost(topNodeID,neighbor);
+		double g = topNode.gCost + edgeWeight;
+		double h = env->HCost(neighbor,goal);
+		double f = g + h;
+
+		/* step (6), neither in OPEN nor CLOSED */
+		if(!openQueue.IsIn(PropUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end()) 
+		{
+			PropUtil::SearchNode n(f,g,neighbor,topNodeID);
+			n.isGoal = (neighbor==goal);
+			openQueue.Add(n);
+
+			if(verbose) {
+				printf("Adding node %ld to OPEN, g=%lf, h=%lf, f=%lf.\n",neighbor,g,f-g,f);
+			}
+		}
+
+		/* step (7) */
+		else 
+		{
+			PropUtil::SearchNode neighborNode;
+			if(openQueue.IsIn(PropUtil::SearchNode(neighbor))) 
+			{
+				neighborNode = openQueue.find(PropUtil::SearchNode(neighbor));
+
+				//if(neighborNode.gCost <= g)
+				if(!fgreater(neighborNode.gCost,g))
+					continue;
+				
+				if(verbose) {
+					printf("Adjusting node %ld in OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+				}
+
+				neighborNode.copy(f,g,neighbor,topNodeID); // parent may be changed
+				openQueue.DecreaseKey(neighborNode);  // adjust its position in OPEN
+			}
+			else //if(closedList.find(neighbor) != closedList.end()) 
+			{
+				neighborNode = closedList.find(neighbor)->second;
+
+				//if(neighborNode.gCost <= g)
+				if(!fgreater(neighborNode.gCost,g))
+					continue;
+
+				if(verbose) {
+					printf("Moving node %ld from CLOSED to OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+				}
+
+				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
+				closedList.erase(neighbor);  // delete from CLOSED
+
+				reopenings++;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
@@ -340,6 +482,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 		if(!openQueue.IsIn(PropUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			PropUtil::SearchNode n(f,g,neighbor,topNodeID);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -392,7 +535,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 
 				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
 				closedList.erase(neighbor);  // delete from CLOSED
-				nodesReopened++;
+				reopenings++;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
@@ -514,6 +657,7 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 		if(!openQueue.IsIn(PropUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			PropUtil::SearchNode n(f,g,neighbor,topNodeID);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -571,11 +715,12 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 
 					// this operation is optional, as appears in the variant version of the alg
 					neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
+					closedList[neighbor] = neighborNode; // this line was MISSING !!!
 
 				if(fgreater(oldG - g , delta)) // if we can reduce g, and not by a small amount, then don't ignore
 				{
 					closedList.erase(neighbor);  // delete from CLOSED
-					nodesReopened++;
+					reopenings++;
 
 					openQueue.Add(neighborNode); // add to OPEN
 				}
@@ -710,6 +855,7 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 		if(!openQueue.IsIn(PropUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			PropUtil::SearchNode n(f,g,neighbor,topNodeID);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -730,8 +876,9 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 				if(!fgreater(neighborNode.gCost,g)) 
 				{
 					// we may fail to update g, but still update h
-					if(UpdateHOnly(neighborNode, h))
+					if(UpdateHOnly(neighborNode, h)) {
 						openQueue.IncreaseKey(neighborNode);
+					}
 					
 					continue;
 				}
@@ -760,11 +907,15 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 
 				if(verbose) 
 				{
-					printf("Moving node %ld from CLOSED to OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+					printf("Pushing node %ld to BFSQUEUE, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
 				}
 
 				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
-				
+				closedList[neighbor] = neighborNode;  // This was missing! which causes the BUG !!!
+
+				if(verbose)
+					printf("node %ld now has parent %ld\n",neighbor,neighborNode.prevNode); 
+
 				bfsQueue.clear();
 				bfsQueue.push_front(neighborNode);
 				ClosedListRepair();
@@ -811,6 +962,11 @@ void Prop::ClosedListRepair()
 		bfsQueue.pop_front();
 		graphState topNodeID = topNode.currNode;
 
+		if(verbose) 
+		{
+			printf("BFS: Expanding node %ld , g=%lf, h=%lf, f=%lf.\n",topNodeID,topNode.gCost,topNode.fCost-topNode.gCost,topNode.fCost);
+		}
+
 		surrounding.clear();
 		env->GetSuccessors(topNodeID, surrounding);
 
@@ -832,6 +988,12 @@ void Prop::ClosedListRepair()
 			// to find the max h
 			ComputeNewHMero3a(h, h_tmp, neighbor, hTop, edgeCost);
 
+			if(verbose) 
+			{
+				if(fgreater(h,h_tmp))
+					printf("BFS:Improving h of node %ld by Mero rule (a), %lf->%lf\n",neighbor,h_tmp,h);
+			}
+
 			double f = gc + h;
 
 			/* step Mero (3b) */
@@ -845,13 +1007,22 @@ void Prop::ClosedListRepair()
 				if(!fgreater(neighborNode.gCost , gc))
 				{
 					// we may fail to update g, but still update h
-					if(UpdateHOnly(neighborNode, h))
+					if(UpdateHOnly(neighborNode, h)) {
 						openQueue.IncreaseKey(neighborNode);
+					}
 					
 					continue;
 				}
 
+				if(verbose) 
+				{
+					printf("BFS:Adjusting node %ld in OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,gc,f-gc,f, neighborNode.gCost);
+				}
+
 				RelaxOpenNode(f, gc, neighbor, neighborNode, topNodeID);
+
+				if(verbose)
+					printf("BFS:node %ld now has parent %ld\n",neighbor,neighborNode.prevNode); 
 				
 			}
 			else // must be in closed
@@ -866,9 +1037,17 @@ void Prop::ClosedListRepair()
 					continue;
 				}
 
+				if(verbose) 
+				{
+					printf("BFS:Pushing node %ld to BFSQUEUE, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,gc,f-gc,f, neighborNode.gCost);
+				}
+
 				neighborNode.copy(f,gc,neighbor,topNodeID);
 				closedList[neighbor] = neighborNode; // copy current version back to closed list
 				bfsQueue.push_back(neighborNode); // closed nodes will be pushed into queue
+
+				if(verbose)
+					printf("BFS:node %ld now has parent %ld\n",neighbor,neighborNode.prevNode); 
 			}
 		}
 
@@ -880,7 +1059,7 @@ void Prop::ClosedListRepair()
 
 			if(verbose) 
 			{
-				printf("Improving h of node %ld by Mero rule (b), %lf->%lf\n",topNodeID,hTop,minH2);
+				printf("BFS:Improving h of node %ld by Mero rule (b), %lf->%lf\n",topNodeID,hTop,minH2);
 			}
 		}
 
@@ -918,7 +1097,7 @@ void Prop::GetLowestG(PropUtil::SearchNode &gNode)
 }
 
 // used by Delay alg only
-bool Prop::GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound)
+bool Prop::GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound, long TBound)
 // fBound is to filter some nodes with f>=F, it could be set to DBL_MAX to allow all
 {
 	std::vector<PropUtil::SearchNode> cache;
@@ -927,7 +1106,7 @@ bool Prop::GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, doub
 	while(wList.size() > 0)
 	{
 		PropUtil::SearchNode tNode = wList.Remove();
-		if(fless(tNode.fCost , fBound))
+		if(fless(tNode.fCost , fBound) && tNode.threshold <= TBound)
 			FCache.Add(tNode);
 		else
 			cache.push_back(tNode);
@@ -976,16 +1155,26 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 	// select the node to expand
 	PropUtil::SearchNode topNode;
 	// New. check waitlist first
-	if((WaitList.size() > 0 && WaitList.top().threshold <= nodesExpanded) || openQueue.size()==0) 
+	if((WaitList.size() > 0 && (WaitList.top().threshold <= nodesExpanded) || openQueue.size()==0)) 
 	{
 		//topNode = WaitList.Remove();
-		GetLowestG(WaitList, topNode, DBL_MAX);
+		if(openQueue.size()>0)
+			GetLowestG(WaitList, topNode, DBL_MAX, nodesExpanded);
+		else
+			GetLowestG(WaitList, topNode, DBL_MAX, MAXINT);	
+
+		//printf("[%d,%d,%d,%d]",openQueue.size(),closedList.size(),WaitList.size(),FCache.size());
+		//fprintf(stderr,"."); 
+		// infinitely reach here
 	}
 	else if(fless(openQueue.top().fCost , F)) 
 	{
 		GetLowestG(topNode);
 		if(verbose)
 			printf("Expanding a node below F.\n");
+
+		//fprintf(stderr,".");
+		// never reach here
 	}
 	else 
 	{
@@ -999,6 +1188,9 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 				printf("F updated to %lf.\n",F);
 			}
 		}
+
+		//fprintf(stderr,".");
+		// finitely reach here
 	}
 
 
@@ -1009,24 +1201,20 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 	if (env->GoalTest(topNodeID, goal))
 	{
 		PropUtil::SearchNode wNode;
-		if(GetLowestG(WaitList,wNode,topNode.fCost))
+		if(GetLowestG(WaitList,wNode,topNode.fCost,MAXINT))
 		//if(fless(wfirst.fCost , topNode.fCost))
 		{
-		fprintf(stderr,"we are here\n");
+		//fprintf(stderr,"we are here\n");
 
 			F = topNode.fCost;  // set the F 
 			// move goal to open;
 			openQueue.Add(topNode);
-
-			//fprintf(stderr,"before:%ld\n",topNodeID);
 
 			// select the lowest-g node with f<F
 				//GetLowestG(WaitList,topNode,F); 
 			topNode = wNode;
 
 			topNodeID = topNode.currNode;
-
-			//fprintf(stderr,"after:%ld\n",topNodeID);
 		}
 		else
 		{ // do the normal termination, since we found the goal
@@ -1048,6 +1236,9 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 	{
 		//closedList.erase(topNodeID);
 		WaitList.Add(topNode);
+
+//fprintf(stderr,".");
+		// infinitely reach here
 		return false;
 	}
 
@@ -1101,9 +1292,10 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 		minH2 = min(minH2, h + edgeWeight);
 
 		/* step (6), neither in OPEN nor CLOSED */
-		if(!openQueue.IsIn(PropUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
+		if(!openQueue.IsIn(PropUtil::SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() && !WaitList.IsIn(PropUtil::SearchNode(neighbor)) ) 
 		{
 			PropUtil::SearchNode n(f,g,neighbor,topNodeID);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -1137,7 +1329,7 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 
 				RelaxOpenNode(f, g, neighbor, neighborNode, topNodeID);
 			}
-			else //if(closedList.find(neighbor) != closedList.end()) 
+			else if(closedList.find(neighbor) != closedList.end()) 
 			{
 				neighborNode = closedList.find(neighbor)->second;
 
@@ -1158,9 +1350,31 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 
 				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
 				closedList.erase(neighbor);  // delete from CLOSED
-				nodesReopened++;
+				reopenings++;
 
 				openQueue.Add(neighborNode); // add to OPEN
+			}
+			else { // must be in wait list !!
+				neighborNode = WaitList.find(PropUtil::SearchNode(neighbor));
+
+				//if(neighborNode.gCost <= g) {
+				if(!fgreater(neighborNode.gCost,g)) 
+				{
+					// we may fail to update g, but still update h
+					if(UpdateHOnly(neighborNode, h))
+						WaitList.IncreaseKey(neighborNode); // actually f is not the key in waitlist, but we can update it in this way
+					
+					continue;
+				}
+				
+				if(verbose) 
+				{
+					printf("Adjusting node %ld in WaitList, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+				}
+
+				neighborNode.copy(f,g,neighbor,topNodeID); // parent may be changed
+				WaitList.DecreaseKey(neighborNode); // the threshold does not change, but g decreases, and g is the 2nd key in waitlist
+				//RelaxOpenNode(f, g, neighbor, neighborNode, topNodeID);
 			}
 
 		}
@@ -1195,10 +1409,15 @@ void Prop::ExtractPathToStart(graphState goalNode, std::vector<graphState> &theP
 	solutionCost = 0;
 	do {
 		solutionCost += env->GCost(n.prevNode,n.currNode);
+
+	if(verbose)
+		printf("%ld<-%ld,",n.currNode,n.prevNode);
+
 		thePath.push_back(n.currNode);
 		n = closedList[n.prevNode];
 	} while (n.currNode != n.prevNode);
 	//thePath.push_back(n.currNode);
+	pathSize = thePath.size();
 }
 
 void Prop::OpenGLDraw(int)
