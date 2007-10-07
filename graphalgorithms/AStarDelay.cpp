@@ -51,6 +51,8 @@ bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState 
 	delayQueue.reset();
 //	fQueue.reset();
 
+	thePath.clear();
+
 	strcpy(algname,"AStarDelay");
 		
 	if ((from == UINT32_MAX) || (to == UINT32_MAX) || (from == to))
