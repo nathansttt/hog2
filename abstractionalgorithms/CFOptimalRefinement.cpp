@@ -10,7 +10,7 @@
 #include "CFOptimalRefinement.h"
 #include <vector>
 
-using namespace GraphAbstractionConstants;
+using namespace CFOptimalRefinementConstants;
 
 CFOptimalRefinement::CFOptimalRefinement()
 :SearchAlgorithm()

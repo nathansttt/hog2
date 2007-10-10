@@ -17,68 +17,70 @@
 #include "Graph.h"
 #include "GraphAbstraction.h"
 
-using namespace GraphAbstractionConstants;
+namespace CFOptimalRefinementConstants {
 
-/** Definitions for node labels */
-enum {
-  //kAbstractionLevel = 0, // this is a LONG label
-	kCorrespondingNode = 1, // this is a LONG label
-	kGCost = 2, // this is a DOUBLE label
-	kHCost = 3, // this is a DOUBLE label
-	kOptimalFlag = 4, // this is a LONG label
-	kInOpenList = 5, // this is a LONG label
-	kFirstNeighbor
-};
+	/** Definitions for node labels */
+	enum {
+		kAbstractionLevel = 0, // this is a LONG label
+		kCorrespondingNode = 1, // this is a LONG label
+		kGCost = 2, // this is a DOUBLE label
+		kHCost = 3, // this is a DOUBLE label
+		kOptimalFlag = 4, // this is a LONG label
+		kInOpenList = 5 // this is a LONG label
+	};
 
-struct GNode {
-	GNode(node *nn) :n(nn) {}
-	GNode() :n(0) {}
-	node *n;
-};
+	struct GNode {
+		GNode(node *nn) :n(nn) {}
+		GNode() :n(0) {}
+		node *n;
+	};
 
-struct NodeEqual {
-	bool operator()(const GNode &i1, const GNode &i2)
-	{ return (i1.n->getUniqueID() == i2.n->getUniqueID()); }
-};
+	struct NodeEqual {
+		bool operator()(const GNode &i1, const GNode &i2)
+		{ return (i1.n->getUniqueID() == i2.n->getUniqueID()); }
+	};
 
-struct NodeCompare {
-	// return true if we prefer i2 over i1
-	bool operator()(const GNode &i1, const GNode &i2)
-	{
-		// if f-cost is tied
-		if (fequal(i1.n->GetLabelF(kGCost)+i1.n->GetLabelF(kHCost),
-							 i2.n->GetLabelF(kGCost)+i2.n->GetLabelF(kHCost)))
+	struct NodeCompare {
+		// return true if we prefer i2 over i1
+		bool operator()(const GNode &i1, const GNode &i2)
 		{
-			// if both in/not in open list
-			if (i1.n->GetLabelL(kInOpenList) == i2.n->GetLabelL(kInOpenList))
+			// if f-cost is tied
+			if (fequal(i1.n->GetLabelF(kGCost)+i1.n->GetLabelF(kHCost),
+								 i2.n->GetLabelF(kGCost)+i2.n->GetLabelF(kHCost)))
 			{
-				if ((i1.n->GetLabelL(kInOpenList) == 0) && (i1.n->GetLabelL(kAbstractionLevel) == 0))
-					return true;
-				if ((i2.n->GetLabelL(kInOpenList) == 0) && (i2.n->GetLabelL(kAbstractionLevel) == 0))
-					return false;
+				// if both in/not in open list
+				if (i1.n->GetLabelL(kInOpenList) == i2.n->GetLabelL(kInOpenList))
+				{
+					if ((i1.n->GetLabelL(kInOpenList) == 0) && (i1.n->GetLabelL(kAbstractionLevel) == 0))
+						return true;
+					if ((i2.n->GetLabelL(kInOpenList) == 0) && (i2.n->GetLabelL(kAbstractionLevel) == 0))
+						return false;
 
-				return fgreater(std::min(i1.n->GetLabelF(kGCost), i1.n->GetLabelF(kHCost)),
-												std::min(i2.n->GetLabelF(kGCost), i2.n->GetLabelF(kHCost)));
-				
-				// return true if node1 has lower g-cost
-				//return (fless(i1.n->GetLabelF(kGCost), i2.n->GetLabelF(kGCost)));
+					return fgreater(std::min(i1.n->GetLabelF(kGCost), i1.n->GetLabelF(kHCost)),
+													std::min(i2.n->GetLabelF(kGCost), i2.n->GetLabelF(kHCost)));
+					
+					// return true if node1 has lower g-cost
+					//return (fless(i1.n->GetLabelF(kGCost), i2.n->GetLabelF(kGCost)));
+				}
+				// return true if node1 isn't in open list
+				return (i2.n->GetLabelL(kInOpenList));
 			}
-			// return true if node1 isn't in open list
-			return (i2.n->GetLabelL(kInOpenList));
+			// return true if node1 has higher f-cost
+			return (fgreater(i1.n->GetLabelF(kGCost)+i1.n->GetLabelF(kHCost),
+											 i2.n->GetLabelF(kGCost)+i2.n->GetLabelF(kHCost)));
 		}
-		// return true if node1 has higher f-cost
-		return (fgreater(i1.n->GetLabelF(kGCost)+i1.n->GetLabelF(kHCost),
-										 i2.n->GetLabelF(kGCost)+i2.n->GetLabelF(kHCost)));
-	}
-};
+	};
 
-struct NodeHash {
-		size_t operator()(const GNode &x) const
-		{ return (size_t)(x.n->getUniqueID()); }
-};
+	struct NodeHash {
+			size_t operator()(const GNode &x) const
+			{ return (size_t)(x.n->getUniqueID()); }
+	};
+}
 
-typedef OpenClosedList<GNode, NodeHash, NodeEqual, NodeCompare> PQueue;
-typedef __gnu_cxx::hash_map<uint32_t, GNode> NodeLookupTable;
+typedef OpenClosedList<CFOptimalRefinementConstants::GNode, CFOptimalRefinementConstants::NodeHash,
+CFOptimalRefinementConstants::NodeEqual, CFOptimalRefinementConstants::NodeCompare> PQueue;
+
+typedef __gnu_cxx::hash_map<uint32_t, CFOptimalRefinementConstants::GNode> NodeLookupTable;
 
 // variables starting with "a" are in the abstraction
 // variables starting with "g" are in the defined search graph
