@@ -107,7 +107,7 @@ public:
 template <class state, class action, class environment>
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { radius = 4.0; }
+	TemplateAStar() { radius = 4.0; stopAfterGoal = true; }
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
 
@@ -141,6 +141,8 @@ public:
 	//closedList_iterator GetClosedListIter() const;
 	void GetClosedListIter(closedList_iterator);
 	bool ClosedListIterNext(closedList_iterator& it, state& next) const;
+	bool GetClosedListGCost(state &val, double &gCost) const
+		
   //state ClosedListIterNext(closedList_iterator&) const;
 	int GetNodesExpanded() { return nodesExpanded; }
 	int GetNodesTouched() { return nodesTouched; }
@@ -148,6 +150,10 @@ public:
 	void LogFinalStats(StatCollection *stats) {}
 	
 	void SetRadius(double rad) {radius = rad;}
+	double GetRadius() { return radius; }
+
+	void SetStopAfterGoal(bool val) { stopAfterGoal = val; }
+	bool GetStopAfterGoal() { return stopAfterGoal; }
 private:
 	long nodesTouched, nodesExpanded;
 	bool GetNextNode(state &next);
@@ -158,7 +164,8 @@ private:
 	std::vector<state> neighbors;
 	environment *env;
 	Corridor eligibleNodes;
-	
+	bool stopAfterGoal;
+
 	double radius; // how far around do we consider other agents?
 };
 
@@ -218,6 +225,8 @@ template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
 	env = _env;
+	closedList.clear();
+	openQueue.reset();
 	assert(openQueue.size() == 0);
 	assert(closedList.size() == 0);
 	nodesTouched = nodesExpanded = 0;
@@ -269,14 +278,14 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	}
 	
 	
-	if (env->GoalTest(currentOpenNode, goal))
+	if ((stopAfterGoal) && (env->GoalTest(currentOpenNode, goal)))
 	{
 		ExtractPathToStart(currentOpenNode, thePath);
 		// Path is backwards - reverse
 		reverse(thePath.begin(), thePath.end()); 
-		closedList.clear();
-		openQueue.reset();
-		env = 0;
+//		closedList.clear();
+//		openQueue.reset();
+//		env = 0;
 		return true;
 	}
 	//		state wantFrom, wantTo;
@@ -489,5 +498,26 @@ bool TemplateAStar<state, action,environment>::ClosedListIterNext(closedList_ite
 	return true;
 }
 
+
+/**
+* Get state from the closed list
+ * @author Nathan Sturtevant
+ * @date 10/09/07
+ * 
+ * @param val The state to lookup in the closed list
+ * @gCost The g-cost of the node in the closed list
+ * @return success Whether we found the value or not
+ * more states
+ */
+template <class state, class action, class environment>
+bool TemplateAStar<state, action,environment>::GetClosedListGCost(state &val, double &gCost) const
+{
+	if (closedList.find(val) != closedList.end())
+	{
+		gCost = closedList[val].gCost;
+		return true;
+	}
+	return false;
+}
 
 #endif
