@@ -43,13 +43,15 @@
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
 #include "CFOptimalRefinement.h"
+#include "IRDijkstra.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
 std::vector<UnitAbsMapSimulation *> unitSims;
-CFOptimalRefinement *CFOR = 0;
+//CFOptimalRefinement *CFOR = 0;
+IRDijkstra *CFOR = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -254,7 +256,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 			if (CFOR == 0)
 			{
-				CFOR = new CFOptimalRefinement();
+				//CFOR = new CFOptimalRefinement();
+				CFOR = new IRDijkstra();
 				while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
 																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode(),
 																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
