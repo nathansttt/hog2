@@ -90,7 +90,7 @@ public:
 // kLockStep - each unit goes exactly to the next time
 // kRealTime - each unit goes up thinkingTime*thinkingPenalty + movement time*speed
 // kMinTime - each unit goes up at least step time, but can go longer
-//            that is, max(next time, thinkingTime*thinkingPenalty + movement time)
+//            that is, max(next time, thinkingTime*thinkingPenalty + movement time*speed)
 enum tTimestep {
 	kLockStep, kRealTime, kMinTime
 };
