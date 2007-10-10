@@ -141,7 +141,7 @@ public:
 	//closedList_iterator GetClosedListIter() const;
 	void GetClosedListIter(closedList_iterator);
 	bool ClosedListIterNext(closedList_iterator& it, state& next) const;
-	bool GetClosedListGCost(state &val, double &gCost) const
+	bool GetClosedListGCost(state &val, double &gCost) const;
 		
   //state ClosedListIterNext(closedList_iterator&) const;
 	int GetNodesExpanded() { return nodesExpanded; }
