@@ -28,7 +28,7 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 }
 
 WeightedMap2DEnvironment::WeightedMap2DEnvironment(AbsMapEnvironment *ame)
-:AbsMapEnvironment(ame->GetMapAbstraction())
+:AbsMapEnvironment(ame->GetMapAbstraction()->clone(ame->GetMapAbstraction()->GetMap()->clone()))
 {
 		oi = ame->GetOccupancyInfo();
 		diffWeight = 1;
