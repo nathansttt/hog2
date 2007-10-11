@@ -131,6 +131,16 @@ public:
 	void SetWeight(double wt) { diffWeight = wt; }
 	/** Set the weight (proportion) of the old angle */ 
 	void SetProportionOld(double prop) { assert((prop>=0) && (prop <=1)); oldProportion = prop; }
+	
+	// Use weights within window only
+	void UseWindow(bool b) {useWindow=b;}
+	void SetWindowCenter(xyLoc l) {windowCenter=l;}
+	void SetWindowSize(double d) {windowSize=d;}
+	
+	// Needed for local copy updating of weights
+	void SetAngle(xyLoc &l, Vector2D angle);
+	Vector2D GetAngle(xyLoc &l);
+	
 private:
 	BaseMapOccupancyInterface* oi;
 	
@@ -139,6 +149,12 @@ private:
 	
 	double diffWeight;
 	double oldProportion;
+	
+	// Only use weights within some window
+	xyLoc windowCenter;
+	bool useWindow;
+	double windowSize;
+	
 };
 
 typedef UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment> UnitWeightedMapSimulation;

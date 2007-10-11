@@ -100,7 +100,7 @@ public:
 	
 	virtual void OpenGLDraw(int , environment *, SimulationInfo *) { }
 
-	
+	virtual std::vector<Unit<state,action,environment> *> GetMembers() {return members;}
 	
 private:
 	std::vector<Unit<state, action, environment> *> members;

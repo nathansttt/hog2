@@ -17,6 +17,8 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 	oi = new BaseMapOccupancyInterface(map);
 	diffWeight = 1;
 	oldProportion = 0.7;
+	
+	useWindow = false;
 	//for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	//{
 	//	// Reset the counters
@@ -31,6 +33,7 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(AbsMapEnvironment *ame)
 		oi = ame->GetOccupancyInfo();
 		diffWeight = 1;
 		oldProportion = 0.7;
+		useWindow = false;
 }
 
 /**
@@ -182,6 +185,13 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 	
 	//std::cou<t<"l1 "<<l1<<" l2 "<<l2<<std::endl;
 	double h = HCost(l1, l2);
+	
+	// No weighting if we're using the window and we're outside the window
+	if(useWindow && ( (HCost(windowCenter,l1) > windowSize) || 
+							(HCost(windowCenter, l2) > windowSize)))
+	{
+		return h; 
+	}
 	
 	if (fgreater(h, ROOT_TWO))
 		return DBL_MAX;
@@ -411,5 +421,15 @@ void WeightedMap2DEnvironment::OpenGLDraw(int window, xyLoc& s, tDirection &dir)
 	s = initial;
 }
 
+void WeightedMap2DEnvironment::SetAngle(xyLoc &l, Vector2D angle)
+{
+	AngleUtil::AngleSearchNode sn(l,GetStateHash(l));
+	angleLookup[sn]=angle;
+}
 
+Vector2D WeightedMap2DEnvironment::GetAngle(xyLoc &l)
+{
+	AngleUtil::AngleSearchNode sn(l,GetStateHash(l));
+	return angleLookup[sn];
+}
 
