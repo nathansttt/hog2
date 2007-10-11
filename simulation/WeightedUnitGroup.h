@@ -40,6 +40,11 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			if(myE != e)
 			{
 				wme = new WeightedMap2DEnvironment(e);
+				if(wt != -1)
+					wme->SetWeight(wt);
+				if(prop != -1)
+					wme->SetProportionOld(prop);
+					
 				env = wme;
 				myE = e;
 			}
