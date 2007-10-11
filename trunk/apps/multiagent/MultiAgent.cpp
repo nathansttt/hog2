@@ -158,17 +158,17 @@ void RunScenario(int id)
 	unitSims[id]->SetThinkingPenalty(0);
 //	unitSims[id]->SetPaused(true);
 	
-	
-	
 	WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
 	
-	if(weight != -1)
-		wug->SetWeight(weight);
-	if(proportion != -1)
-		wug->SetProportion(proportion);
+	if(weighted)
+	{	
+		if(weight != -1)
+			wug->SetWeight(weight);
+		if(proportion != -1)
+			wug->SetProportion(proportion);
 	
-	unitSims[id]->AddUnitGroup(wug);
-	
+		unitSims[id]->AddUnitGroup(wug);
+	}
 
 	char* name;
 	
@@ -213,7 +213,7 @@ void RunScenario(int id)
 			su->SetColor(1, 0, 0);
 		else
 			su->SetColor(0, 1, 0);
-		wug->AddUnit(su);
+		if(weighted) wug->AddUnit(su);
 		unitSims[id]->AddUnit(su);
  
 
@@ -244,13 +244,19 @@ void RunScenario(int id)
 						<<"Radius    : "<<radius<<std::endl
 						<<"Proportion: "<<proportion<<std::endl
 						<<"NumPatrols: "<<numPatrols<<std::endl<<std::endl;
-						
+									
 		
 			while(!(unitSims[id]->Done()))
 			{
 				unitSims[id]->StepTime(timestep);
 				time += timestep;
-				std::cout<<time<<"\r";
+				
+				if(time > 10000) 
+				{
+					std::cout<<"Ran out of time. Details in outfile "<<outFileName<<std::endl;
+ 					exit(1);
+				}
+				//std::cout<<time<<"\r";
 			}
 			//double endTime = unitSims[id]->GetSimulationTime();
 			//std::cout<<"Simulation time "<<endTime-beginTime<<std::endl;
@@ -278,9 +284,11 @@ void RunScenario(int id)
 
 void PrintStatistics(int id, std::ofstream &outfile)
 {
-	outfile<<"Unit NodesExpanded TotalDistanceTravelled NumDirectionChanges NumFailedMoves\n";
+	outfile<<"Unit NodesExpanded TotalDistanceTravelled NumDirectionChanges NumDirectionChangesColl NumFailedMoves\n";
 	long nodes = 0; long dirChanged = 0; long failedMoves = 0;
+	long dirChangedColl = 0; 
 	long tnodes = 0; long tdirChanged = 0; long tfailedMoves = 0; 
+	long tdirChangedColl = 0;
 	double dist = 0; 
 	double tdist = 0; 
 	statValue v;
@@ -306,13 +314,20 @@ void PrintStatistics(int id, std::ofstream &outfile)
 			failedMoves = v.lval;
 			tfailedMoves += failedMoves;
 		}
-		outfile<<i<<" "<<nodes<<" "<<dist<<" "<<dirChanged<<" "<<failedMoves<<std::endl;
+		if(unitSims[id]->GetStats()->lookupStat("directionChangesCollision",names[i],v))
+		{
+			dirChangedColl = v.lval;
+			tdirChangedColl += dirChangedColl;
+		}
+		outfile<<i<<" "<<nodes<<" "<<dist<<" "<<dirChanged<<" "
+				 <<dirChangedColl<<" "<<failedMoves<<std::endl;
 	}	
 	outfile<<std::endl<<"Total "<<tnodes<<" "<<tdist<<" "
-	<<tdirChanged<<" "<<tfailedMoves<<std::endl<<std::endl
+	<<tdirChanged<<" "<<tdirChangedColl<<" "<<tfailedMoves<<std::endl<<std::endl
 	<<"Average "<<((double)tnodes / (double)(names.size()))
 	<<" "<<(tdist / (double)(names.size()))
 	<<" "<<(tdirChanged / (double)(names.size()))
+	<<" "<<(tdirChangedColl / (double)(names.size()))
 	<<" "<<(tfailedMoves / (double)(names.size()))<<std::endl;
 }
 
@@ -562,8 +577,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			{
 				//unitSims[windowID]->StepTime(1.0/30.0);
 				unitSims[windowID]->StepTime(1.5);
-				if(unitSims[windowID]->Done())
-					std::cout<<"DONE\n";
+// 				if(unitSims[windowID]->Done())
+// 					std::cout<<"DONE\n";
 			}
 			unitSims[windowID]->OpenGLDraw(windowID);
 			break;

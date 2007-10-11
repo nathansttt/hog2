@@ -179,7 +179,6 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s)
 */
 double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 {
-	// Something not quite right here???
 	
 	//std::cou<t<"l1 "<<l1<<" l2 "<<l2<<std::endl;
 	double h = HCost(l1, l2);

@@ -31,7 +31,7 @@ private:
 	xyLoc loc;
 	int numPatrols;
 	int counter;
-	tDirection oldDir;
+	tDirection oldDir, oldDirColl;
 	double totalDistance;
 	
 	// this used to return path cost, but that wasn't used... 
@@ -47,6 +47,7 @@ private:
 	int nodesTouched;
 	int numFailedMoves;
 	int numDirectionChanges;
+	int numDirectionChangesCollisions;
 	
 	char name[128];
 };
@@ -63,7 +64,7 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericS
 	//setObjectType(kWorldObject);
 	currTarget = -1;
 	nodesExpanded = nodesTouched = numFailedMoves = numDirectionChanges = 0;
-	
+	numDirectionChangesCollisions = 0;
 	algorithm = alg;
 	
 	this->r = (double)rand() / RAND_MAX;
@@ -73,6 +74,7 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericS
 	strncpy(name, "GenericPatrolUnit",128);
 	
 	totalDistance = 0; 
+	oldDir = oldDirColl = kStay;
 }
 
 template <class state, class action, class environment>
@@ -86,7 +88,7 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 
 	currTarget = -1;
 	nodesExpanded = nodesTouched = numFailedMoves = numDirectionChanges = 0;
-	
+	numDirectionChangesCollisions = 0;
 	algorithm = alg;
 	
 	this->r = _r;
@@ -95,7 +97,8 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 	
 	strncpy(name, "GenericPatrolUnit",128);
 	
-	totalDistance = 0; 
+	totalDistance = 0;
+	oldDir = oldDirColl = kStay;
 }
 
 template <class state, class action, class environment>
@@ -214,14 +217,14 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
 		//		env->OpenGLDraw(window, locs[i], r, g, b);
 	}	
-// 	xyLoc current = loc; 
-// 	xyLoc next;
-// 	  	for(unsigned int i=0; i<moves.size(); i++)
-//  	{
-//  		env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
-//  		env->GetNextState(current, moves[i],next);
-//  		current = next;
-//  	}	
+	xyLoc current = loc; 
+	xyLoc next;
+	  	for(unsigned int i=0; i<moves.size(); i++)
+ 	{
+ 		env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
+ 		env->GetNextState(current, moves[i],next);
+ 		current = next;
+ 	}	
 }
 
 template <class state, class action, class environment>
@@ -238,12 +241,12 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 	{
 		tDirection dir = env->GetAction(loc,l);
 		
-		if(totalDistance == 0)
-		{
-			oldDir = dir;
-		}
-		else
-		{
+// 		if(totalDistance == 0)
+// 		{
+// 			oldDir = dir;
+// 		}
+// 		else
+// 		{
 
 			if(dir != oldDir)
 			{
@@ -251,7 +254,12 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 
 				oldDir = dir;
 			}
-		}
+			if(dir != oldDirColl)
+			{
+				numDirectionChangesCollisions++;
+				oldDirColl = dir;
+			}
+//		}
 		totalDistance += env->HCost(loc,l);
 	}
 	
@@ -259,6 +267,7 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 	{ 
 		numFailedMoves++;
 		moves.resize(0); 
+		oldDirColl = kStay;
 		//if(currTarget != -1) 
 		//	currTarget = 0; 
 	} 
@@ -295,6 +304,7 @@ void GenericPatrolUnit<state,action,environment>::LogFinalStats(StatCollection *
 	sc->AddStat("nodesExpanded", GetName(), (long)(nodesExpanded));
 	sc->AddStat("distanceTravelled", GetName(), totalDistance);
 	sc->AddStat("directionChanges",GetName(), (long)(numDirectionChanges));
+	sc->AddStat("directionChangesCollision",GetName(), (long)(numDirectionChangesCollisions);
 	sc->AddStat("failedMoves",GetName(), (long)(numFailedMoves));
 	
 }
