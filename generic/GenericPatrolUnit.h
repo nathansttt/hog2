@@ -304,7 +304,7 @@ void GenericPatrolUnit<state,action,environment>::LogFinalStats(StatCollection *
 	sc->AddStat("nodesExpanded", GetName(), (long)(nodesExpanded));
 	sc->AddStat("distanceTravelled", GetName(), totalDistance);
 	sc->AddStat("directionChanges",GetName(), (long)(numDirectionChanges));
-	sc->AddStat("directionChangesCollision",GetName(), (long)(numDirectionChangesCollisions);
+	sc->AddStat("directionChangesCollision",GetName(), (long)(numDirectionChangesCollisions));
 	sc->AddStat("failedMoves",GetName(), (long)(numFailedMoves));
 	
 }
