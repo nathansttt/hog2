@@ -67,8 +67,8 @@ public:
 	void LogStats(StatCollection *stats);
 	void LogFinalStats(StatCollection *stats);
 	
-	void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
-	void GetColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
+// 	void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
+// 	void GetColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
 protected:
 	virtual void AddPathToCache(environment *env, std::vector<state> &path);
 	bool getCachedMove(action &a);
@@ -79,7 +79,7 @@ protected:
 	GenericSearchAlgorithm<state,action,environment> *algorithm;
 
 	Unit<state,action,environment> *target;
-	GLfloat r, g, b;
+	//GLfloat r, g, b;
 	state loc, goal;
 	double targetTime;
 	bool onTarget;
@@ -100,9 +100,11 @@ GenericSearchUnit<state,action,environment>::GenericSearchUnit(state &start, sta
 	
 	target=0;
 	
-	r = (double)rand() / RAND_MAX;
-	g = (double)rand() / RAND_MAX;
-	b = (double)rand() / RAND_MAX;
+	GLfloat _r,_g,_b;
+	_r = (double)rand() / RAND_MAX;
+	_g = (double)rand() / RAND_MAX;
+	_b = (double)rand() / RAND_MAX;
+	this->SetColor(_r,_g,_b);
 
 }
 
@@ -206,8 +208,10 @@ void GenericSearchUnit<state,action,environment>::OpenGLDraw(int window, environ
 		env->OpenGLDraw(window, loc, 0,0,0);
 	else
 	{	
-	env->OpenGLDraw(window, loc, r, g, b);	
-	env->OpenGLDraw(window, goal, r, g, b);
+		GLfloat _r,_g,_b;
+		this->GetColor(_r,_g,_b);
+	env->OpenGLDraw(window, loc, _r, _g, _b);	
+	env->OpenGLDraw(window, goal, _r, _g, _b);
 	}
 	state current = loc; 
 	state next;

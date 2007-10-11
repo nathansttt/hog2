@@ -80,6 +80,14 @@ double radius = -1;
 double proportion = -1;
 int numPatrols = 5;
 
+bool useWindow = false;
+double windowSize = 0; 
+bool useTrim = false;
+double trimRadius = 0; 
+bool useLocal = false;
+double localRadius = 0; 
+
+WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug;
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
@@ -158,7 +166,7 @@ void RunScenario(int id)
 	unitSims[id]->SetThinkingPenalty(0);
 //	unitSims[id]->SetPaused(true);
 	
-	WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
+	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
 	
 	if(weighted)
 	{	
@@ -168,6 +176,16 @@ void RunScenario(int id)
 			wug->SetProportion(proportion);
 	
 		unitSims[id]->AddUnitGroup(wug);
+	}
+	if(useWindow)
+	{
+		wug->SetUseWindow(true);
+		wug->SetWindowSize(windowSize);
+	}
+	if(useLocal)
+	{
+		wug->UseLocalWeights(true);
+		wug->SetLocalWeightRadius(localRadius); 
 	}
 
 	char* name;
@@ -209,11 +227,16 @@ void RunScenario(int id)
 			
 		su->SetName(name);	
 		su->SetSpeed(1.0);
-		if(start.x < 16)	
+		//if(start.x < 16)	
 			su->SetColor(1, 0, 0);
-		else
-			su->SetColor(0, 1, 0);
+		//else
+		//	su->SetColor(0, 1, 0);
 		if(weighted) wug->AddUnit(su);
+		if(useTrim)
+		{
+			su->SetTrimPath(true);
+			su->SetTrimWindow(trimRadius);
+		}
 		unitSims[id]->AddUnit(su);
  
 
@@ -522,6 +545,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
+	
+	InstallKeyboardHandler(MyDisplayHandler, "Draw next environment", "Cycles through each unit's environment",kAnyModifier,'n');
 //	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase //abstraction type", kAnyModifier, ']');
 //	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease //abstraction type", kAnyModifier, '[');
 
@@ -543,6 +568,10 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-prop", "-prop p", "Set the proportion of old direction to be used in the weighted environment");
 	InstallCommandLineHandler(MyCLHandler, "-patrols", "-patrols p", "Set the number of times to patrol");
 	InstallCommandLineHandler(MyCLHandler, "-outfile", "-outfile filename", "Set the filename for output.");
+	
+	InstallCommandLineHandler(MyCLHandler, "-window", "-window wSize", "Only use weights within a window of size wSize");
+	InstallCommandLineHandler(MyCLHandler, "-trim", "-trim radius", "Trim the path to radius");
+	InstallCommandLineHandler(MyCLHandler, "-local", "-local radius", "Each unit keeps a local copy of weight and updates within a distance of radius");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -685,6 +714,21 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		strncpy(outFileName, argument[1],1024);
 	}
+	else if(strcmp(argument[0],"-window")==0)
+	{
+		useWindow = true;
+		windowSize = atof(argument[1]);
+	}
+	else if(strcmp(argument[0],"-trim")==0)
+	{
+		useTrim = true;
+		trimRadius = atof(argument[1]);
+	}
+	else if(strcmp(argument[0],"-local")==0)
+	{
+		useLocal = true;
+		localRadius = atof(argument[1]);
+	}
 	return 2;
 }
 
@@ -758,7 +802,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			
 			break;
 		}
-		
+		case 'n':
+		{
+			if(useLocal)
+				wug->DrawNextEnvironment();
+			break;
+		}
 //		case ']': absType = (absType+1)%3; break;
 //		case '[': absType = (absType+4)%3; break;
 //		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;

@@ -58,6 +58,9 @@ public:
 	/** log any final one-time stats before a simulation is ended */
 	virtual void LogFinalStats(StatCollection *) {}
 	
+	virtual void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
+	virtual void GetColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
+	
 	UnitGroup<state, action, environment> *GetUnitGroup() { return group; }
 	void SetUnitGroup(UnitGroup<state, action, environment> *_group)
 		{
@@ -89,6 +92,7 @@ public:
 private:
 		double speed;
 		UnitGroup<state, action, environment> *group;
+		GLfloat r, g, b;
 };
 
 

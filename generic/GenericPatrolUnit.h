@@ -26,6 +26,13 @@ public:
 	void LogFinalStats(StatCollection *stats);
 	void SetNumPatrols(int num) {numPatrols = num;}
 	
+	void SetTrimPath(bool b) {trimPath = b;}
+	void SetTrimWindow(double d) {trimWindow = d;}
+	
+// 	void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) {Unit::Set		GLFloat _r,_g,_b;
+// 		GetColor(_r,_g,_b);
+// 		glColor3f(_r,_g,_b);this->r=_r; this->g=_g; this->b=_b;}
+	
 private:
 	//GLfloat r, g, b;
 	xyLoc loc;
@@ -50,6 +57,9 @@ private:
 	int numDirectionChangesCollisions;
 	
 	char name[128];
+	
+	bool trimPath;
+	double trimWindow;
 };
 
 template <class state, class action, class environment>
@@ -67,14 +77,17 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericS
 	numDirectionChangesCollisions = 0;
 	algorithm = alg;
 	
-	this->r = (double)rand() / RAND_MAX;
-	this->g = (double)rand() / RAND_MAX;
-	this->b = (double)rand() / RAND_MAX;
-
+	GLfloat _r,_g,_b;
+	_r = (double)rand() / RAND_MAX;
+	_g = (double)rand() / RAND_MAX;
+	_b = (double)rand() / RAND_MAX;
+	this->SetColor(_r,_g,_b);
 	strncpy(name, "GenericPatrolUnit",128);
 	
 	totalDistance = 0; 
 	oldDir = oldDirColl = kStay;
+	
+	trimPath = false;
 }
 
 template <class state, class action, class environment>
@@ -99,6 +112,8 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 	
 	totalDistance = 0;
 	oldDir = oldDirColl = kStay;
+	
+	trimPath = false;
 }
 
 template <class state, class action, class environment>
@@ -197,14 +212,20 @@ void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* en
 {
 	// should call superclass implementation / use it somehow...
 	 	for(unsigned int i=0; i<p.size()-1; i++)
+	 	{
+	 		if(trimPath && (env->HCost(p[i+1], loc) > trimWindow))
+	 			break;
 	 		moves.push_back(env->GetAction(p[i], p[i+1]));
+	 	}
 }
 
 template <class state, class action, class environment>
 void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
 {
+	GLfloat _r,_g,_b;
+	this->GetColor(_r,_g,_b);
 	if(!Done())
-		env->OpenGLDraw(window, loc,this->r,this->g,this->b);	
+		env->OpenGLDraw(window, loc,_r,_g,_b);	
 	else
 		env->OpenGLDraw(window, loc, 0,0,0);
 		
@@ -213,7 +234,9 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 		state l = locs[i];
 		GLdouble xx, yy, zz, rad;
 		env->GetMapAbstraction()->GetMap()->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
-		glColor3f(this->r,this->g,this->b);
+		GLfloat _r,_g,_b;
+		this->GetColor(_r,_g,_b);
+		glColor3f(_r,_g,_b);
 		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
 		//		env->OpenGLDraw(window, locs[i], r, g, b);
 	}	
