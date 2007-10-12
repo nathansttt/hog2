@@ -132,16 +132,16 @@ path *praStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 	else if ((planFromMiddle) && (lastPath == 0))
 	{
 		unsigned int previousSize = fromChain.size();
-		int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(aMap->GetAbstractionLevel(fromChain[0]))->getNumNodes()));
+		int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(aMap->GetAbstractionLevel(fromChain[0]))->GetNumNodes()));
 		while ((fromChain.size() > 2) && ((fromChain.size() > (previousSize)/2) ||
-																			(aMap->GetAbstractGraph(fromChain.size())->getNumNodes() < minNode)))
+																			(aMap->GetAbstractGraph(fromChain.size())->GetNumNodes() < minNode)))
 		{
-//			printf("At size %d, %d nodes\n", fromChain.size(), aMap->GetAbstractGraph(fromChain.size())->getNumNodes());
+//			printf("At size %d, %d nodes\n", fromChain.size(), aMap->GetAbstractGraph(fromChain.size())->GetNumNodes());
 			toChain.pop_back();
 			fromChain.pop_back();
 		}
 //		printf("Previous size: %d, nodes: %d, limit: %d now: %d\n", previousSize,
-//					 (aMap->GetAbstractGraph(aMap->GetAbstractionLevel(fromChain[0]))->getNumNodes()),
+//					 (aMap->GetAbstractGraph(aMap->GetAbstractionLevel(fromChain[0]))->GetNumNodes()),
 //					 minNode, toChain.size());
 	}
 	else if (lastPath == 0)

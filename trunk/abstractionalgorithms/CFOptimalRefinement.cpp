@@ -337,7 +337,7 @@ bool CFOptimalRefinement::ShouldAddEdge(node *aLowerNode, node *aHigherNode)
 
 void CFOptimalRefinement::OpenGLDraw()
 {
-	if ((g == 0) || (g->getNumNodes() == 0))
+	if ((g == 0) || (g->GetNumNodes() == 0))
 	{
 		return;
 	}

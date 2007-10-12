@@ -164,7 +164,7 @@ void craStar::setupSearch(GraphAbstraction *aMap,
 	aMap->GetNumAbstractGraphs(from, to, fromChain, toChain);
 	
 	unsigned int previousSize = fromChain.size();
-	int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(0)->getNumNodes()));
+	int minNode = (int)(2*sqrt(aMap->GetAbstractGraph(0)->GetNumNodes()));
 	
 	if (absLevel > 0)
 	{
@@ -178,7 +178,7 @@ void craStar::setupSearch(GraphAbstraction *aMap,
 	}
 	else{ // dynamic level selection
 		while ((fromChain.size() > 2) && ((fromChain.size() > (previousSize)/2) ||
-																			(aMap->GetAbstractGraph(fromChain.size())->getNumNodes() < minNode)))
+																			(aMap->GetAbstractGraph(fromChain.size())->GetNumNodes() < minNode)))
 		{
 			toChain.pop_back();
 			fromChain.pop_back();
@@ -267,7 +267,7 @@ path *craStar::doRefinement(GraphAbstraction *aMap, path* absPath, std::vector<n
 		Graph* g = aMap->GetAbstractGraph(currentLow->GetLabelL(kAbstractionLevel));
 		
 		// check if the first node is an orphan
-		if (currentLow->getNumEdges()==1)
+		if (currentLow->GetNumEdges()==1)
 		{
 			
 			neighbor_iterator niter = currentLow->getNeighborIter();
@@ -300,7 +300,7 @@ path *craStar::doRefinement(GraphAbstraction *aMap, path* absPath, std::vector<n
 			{
 				
 				// check if goal is an orphan
-				if (to->getNumEdges() == 1)
+				if (to->GetNumEdges() == 1)
 				{
 					
 					neighbor_iterator niter = to->getNeighborIter();
@@ -330,7 +330,7 @@ node* craStar::getNextNode(GraphAbstraction *aMap, node* currentLow, path* retur
 {		
 	nodesExpanded++;
 	
-	std::vector<node*> neighbors(currentLow->getNumEdges());
+	std::vector<node*> neighbors(currentLow->GetNumEdges());
 	int numInArray = 0; 
 	double minHeur = DBL_MAX;
 	int minIndex = -1;
