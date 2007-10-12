@@ -334,13 +334,13 @@ node *Graph::RemoveNode(node *n, unsigned int &oldID)
 }
 
 // fixme: should be inlined
-int Graph::getNumEdges()
+int Graph::GetNumEdges()
 {
   return _edges.size();
 }
 
 // fixme: should be inlined
-int Graph::getNumNodes()
+int Graph::GetNumNodes()
 {
   return _nodes.size();
 }
@@ -406,26 +406,26 @@ void Graph::Print(ostream &out) const
 
 void Graph::printStats()
 {
-	cout << getNumEdges() << " total edges; " << getNumNodes() << " total nodes." << endl;
-	int minEdges = getNumEdges();
+	cout << GetNumEdges() << " total edges; " << GetNumNodes() << " total nodes." << endl;
+	int minEdges = GetNumEdges();
 	int maxEdges[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   node_iterator ni = getNodeIter();
   while (1)
 	{
     node *n = nodeIterNext(ni);
     if (!n) break;
-		minEdges = min(minEdges, n->getNumEdges());
+		minEdges = min(minEdges, n->GetNumEdges());
 		for (int x = 0; x < 10; x++)
 		{
-			if (n->getNumEdges() > maxEdges[x])
+			if (n->GetNumEdges() > maxEdges[x])
 			{
 				for (int y = x; y < 9; y++)
 					maxEdges[y+1] = maxEdges[y];
-				maxEdges[x] = n->getNumEdges();
+				maxEdges[x] = n->GetNumEdges();
 				break;
 			}
 		}
-		//maxEdges = max(maxEdges, n->getNumEdges());
+		//maxEdges = max(maxEdges, n->GetNumEdges());
   }
 	cout << "Min edges: " << minEdges << ", max edges: ";
 	for (int x = 0; x < 10; x++)
