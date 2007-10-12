@@ -26,7 +26,7 @@ bool MapLineAbstraction::MapLineAbstraction::Pathable(node *from, node *to)
 	while (from != to)
 	{
 		if ((!from) || (!to) ||
-				(abstractions[from->GetLabelL(kAbstractionLevel)]->getNumEdges() == 0))
+				(abstractions[from->GetLabelL(kAbstractionLevel)]->GetNumEdges() == 0))
 			return false;
 		
 		from = abstractions[from->GetLabelL(kAbstractionLevel)+1]->
@@ -74,11 +74,11 @@ void MapLineAbstraction::RepairAbstraction()
 void MapLineAbstraction::buildAbstraction()
 {
 	abstractions.push_back(GetMapGraph(GetMap()));
-	while (abstractions.back()->getNumEdges() > 0)
+	while (abstractions.back()->GetNumEdges() > 0)
 	{
 //		printf("%d nodes and %d edges in Graph %d\n",
-//					 abstractions.back()->getNumNodes(),
-//					 abstractions.back()->getNumEdges(),
+//					 abstractions.back()->GetNumNodes(),
+//					 abstractions.back()->GetNumEdges(),
 //					 abstractions.size()-1);
 		fflush(stdout);
 		Graph *g = new Graph();
@@ -87,14 +87,14 @@ void MapLineAbstraction::buildAbstraction()
 		abstractions.push_back(g);
 	}	
 //	printf("%d nodes and %d edges in Graph %d\n",
-//				 abstractions.back()->getNumNodes(),
-//				 abstractions.back()->getNumEdges(),
+//				 abstractions.back()->GetNumNodes(),
+//				 abstractions.back()->GetNumEdges(),
 //				 abstractions.size()-1);
 }
 
 void MapLineAbstraction::addNodes(Graph *g)
 {
-	int count = abstractions.back()->getNumNodes();
+	int count = abstractions.back()->GetNumNodes();
 	//printf("Initial count: %d\n", count);
 	int xstep = pow(lineDistance,((abstractions.size()+1)/2));
 	int ystep = pow(lineDistance,((abstractions.size())/2));
@@ -166,7 +166,7 @@ void MapLineAbstraction::addNodes(Graph *g)
 		// select a random node
 		node *n = abstractions.back()->GetRandomNode();
 		assert(n!=NULL);
-		if ((n->GetLabelL(kParent) == -1) && (n->getNumEdges() != 0))
+		if ((n->GetLabelL(kParent) == -1) && (n->GetNumEdges() != 0))
 		{
 			node *parent = createParent(g, n);
 			//printf("==>Creating parent (%d)\n", parent->GetNum());
@@ -204,7 +204,7 @@ void MapLineAbstraction::addNodes(Graph *g)
 			}
 
 		}
-		else if (n->getNumEdges() == 0)
+		else if (n->GetNumEdges() == 0)
 		{
 			if ((n->key < stopList.size()) && (stopList[n->key] == n))
 			{

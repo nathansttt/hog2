@@ -141,7 +141,7 @@ void LoadedBBAbstraction::OpenGLDraw(int window)
 
 void LoadedBBAbstraction::DrawGraph(Graph *g)
 {
-		if ((g == 0) || (g->getNumNodes() == 0)) return;
+		if ((g == 0) || (g->GetNumNodes() == 0)) return;
 		
 		int abLevel = g->GetNode(0)->GetLabelL(kAbstractionLevel);	
 		
@@ -420,12 +420,12 @@ void LoadedBBAbstraction::buildAbstractions(Graph *_g)
 //	if (displayLists.size() != 1)
 //		displayLists.push_back(0);
   //if (verbose)
-      printf("Base Graph (0) has %d nodes\n", g->getNumNodes());
+      printf("Base Graph (0) has %d nodes\n", g->GetNumNodes());
 			g->printStats();
 	
   for (int x = 1; ; x++)
 	{
-    if (g->getNumEdges() == 0) break;
+    if (g->GetNumEdges() == 0) break;
 
     if (verbose&kMiscMessages) printf("Building abstraction #%2d\n", x);
 
@@ -434,10 +434,10 @@ void LoadedBBAbstraction::buildAbstractions(Graph *_g)
 
     if (verbose&kMiscMessages)
 		{
-      printf("Abstract Graph #%2d has %d nodes\n", x, g->getNumNodes());
+      printf("Abstract Graph #%2d has %d nodes\n", x, g->GetNumNodes());
 			g->printStats();
 		}
-		totalNodes += g->getNumNodes();
+		totalNodes += g->GetNumNodes();
 //    displayLists.push_back(0);
   }
 	// printf("%d nodes, excluding bottom level", totalNodes);
@@ -558,7 +558,7 @@ bool LoadedBBAbstraction::Pathable(node *from, node *to)
   //printf("At nodes #%d and %d\n", from->GetNum(), to->GetNum());
   while (from != to) {
     if ((!from) || (!to) ||
-				(abstractions[from->GetLabelL(kAbstractionLevel)]->getNumEdges() == 0))
+				(abstractions[from->GetLabelL(kAbstractionLevel)]->GetNumEdges() == 0))
       return false;
 		
     from = abstractions[from->GetLabelL(kAbstractionLevel)+1]->

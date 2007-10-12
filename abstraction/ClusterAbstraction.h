@@ -69,7 +69,7 @@ public:
 
   void AddNode(int);
   int getIthNodeNum(int i) const { return nodes[i];}
-  int getNumNodes() const { return nodes.size(); }
+  int GetNumNodes() const { return nodes.size(); }
   int getHOrig() const { return m_horizOrigin; }
   int getVOrig() const { return m_vertOrigin; }
   int getHeight() const { return m_height; }

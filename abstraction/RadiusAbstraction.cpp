@@ -47,7 +47,7 @@ bool RadiusAbstraction::Pathable(node *from, node *to)
   while (from != to)
 	{
     if ((!from) || (!to) ||
-				(abstractions[from->GetLabelL(kAbstractionLevel)]->getNumEdges() == 0))
+				(abstractions[from->GetLabelL(kAbstractionLevel)]->GetNumEdges() == 0))
       return false;
 		
     from = abstractions[from->GetLabelL(kAbstractionLevel)+1]->
@@ -101,7 +101,7 @@ void RadiusAbstraction::buildAbstraction()
 {
 	//inefficient for the moment
 	abstractions.push_back(GetMapGraph(GetMap()));
-	while (abstractions.back()->getNumEdges() > 0)
+	while (abstractions.back()->GetNumEdges() > 0)
 	{
 		Graph *g = new Graph();
 		addNodes(g);
@@ -112,7 +112,7 @@ void RadiusAbstraction::buildAbstraction()
 
 void RadiusAbstraction::addNodes(Graph *g)
 {
-	int count = abstractions.back()->getNumNodes();
+	int count = abstractions.back()->GetNumNodes();
 	while (count > 0)
 	{
 		// select a random node

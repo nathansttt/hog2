@@ -42,7 +42,7 @@ void MapFlatAbstraction::buildConnectivityGroups()
 {
 	int nextNum = 0;
 	Graph *g = abstractions[0];
-	groups.resize(g->getNumNodes());
+	groups.resize(g->GetNumNodes());
 	for (unsigned int x = 0; x < groups.size(); x++)
 		groups[x] = -1;
 	

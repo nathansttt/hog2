@@ -207,8 +207,8 @@ void ClusterAbstraction::createAbstractGraph()
 	createConnectivityGraph();
 	//		abstractions[2]->Print(std::cout);
 	
-	if (verbose) std::cout<<"abstract Graph has "<<abstractions[1]->getNumNodes()<<" nodes\n";
-	if (verbose) std::cout<<"abstract graphs has "<<abstractions[1]->getNumEdges()<<" edges\n";
+	if (verbose) std::cout<<"abstract Graph has "<<abstractions[1]->GetNumNodes()<<" nodes\n";
+	if (verbose) std::cout<<"abstract graphs has "<<abstractions[1]->GetNumEdges()<<" edges\n";
 }
 
 /* 
@@ -549,7 +549,7 @@ void ClusterAbstraction::computeClusterPaths(Graph* g)
 		Cluster& c = clusters[i];
 		
 		std::vector<node*> corridor; 
-		for (int l=0; l<c.getNumNodes(); l++)
+		for (int l=0; l<c.GetNumNodes(); l++)
 		{
 			corridor.push_back(g->GetNode(c.getIthNodeNum(l)));
 		}
@@ -557,9 +557,9 @@ void ClusterAbstraction::computeClusterPaths(Graph* g)
 			corridor.push_back(c.parents[j]);
 		
 		//int num = 0;
-		for (int j=0; j<c.getNumNodes(); j++)
+		for (int j=0; j<c.GetNumNodes(); j++)
 		{
-			for (int k=j+1; k<c.getNumNodes();k++)
+			for (int k=j+1; k<c.GetNumNodes();k++)
 			{
 				
 				// find bottom level nodes
@@ -664,7 +664,7 @@ Cluster& ClusterAbstraction::getCluster(int id)
 int ClusterAbstraction::nodeExists(const Cluster& c,double x,double y, Graph* g)
 {
 	int n=-1;
-	for (int i=0; i< c.getNumNodes(); i++)
+	for (int i=0; i< c.GetNumNodes(); i++)
 	{
 		
 		n = c.getIthNodeNum(i);
@@ -715,7 +715,7 @@ void ClusterAbstraction::setUpParents(Graph* g)
 	Map* map = MapAbstraction::GetMap();
 	
 	std::vector<node*> dummies; 
-	int numOrigNodes = g->getNumNodes();
+	int numOrigNodes = g->GetNumNodes();
 	
 	// create ALL DUMMY PARENTS first
 	for (unsigned int i=0; i<clusters.size(); i++)
@@ -749,7 +749,7 @@ void ClusterAbstraction::setUpParents(Graph* g)
 		}
 	}
 	
-	int numNodesAfter = g->getNumNodes();
+	int numNodesAfter = g->GetNumNodes();
 	
 	for (unsigned int i=0; i<clusters.size(); i++)
 	{
@@ -759,7 +759,7 @@ void ClusterAbstraction::setUpParents(Graph* g)
 		std::vector<node*> corridor; 
 		corridor.push_back(dummies[i]);
 		
-		for (int l=0; l<c.getNumNodes(); l++)
+		for (int l=0; l<c.GetNumNodes(); l++)
 		{
 			corridor.push_back(g->GetNode(c.getIthNodeNum(l)));
 		}
@@ -786,7 +786,7 @@ void ClusterAbstraction::setUpParents(Graph* g)
 					node* entrance = 0;
 					
 					//for every abstract (entrance node) in this cluster
-					for (int k=0; k<c.getNumNodes(); k++)
+					for (int k=0; k<c.GetNumNodes(); k++)
 					{
 						//get the entrance
 						int nodenum = c.getIthNodeNum(k);
@@ -1047,7 +1047,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 	Cluster& c = getCluster(getClusterIdFromCoord(n->GetLabelL(kFirstData+1), n->GetLabelL(kFirstData)));
 	//	std::cout<<"cluster: "<<&c<<std::endl;
 	//	std::cout<<"id: "<<getClusterIdFromCoord(py,px)<<std::endl;
-	// 		for (int l=0; l<c.getNumNodes(); l++){
+	// 		for (int l=0; l<c.GetNumNodes(); l++){
 	// 			std::cout<<g->GetNode(c.getIthNodeNum(l))<<std::endl;
 	// 			//	corridor.push_back(g->GetNode(c.getIthNodeNum(l)));
 	// 		}
@@ -1074,13 +1074,13 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 		newnode->SetLabelL(kAbstractionLevel,1);
 
 		//  		std::vector<node*> corridor; 
-		//  		for (int l=0; l<c.getNumNodes(); l++){
+		//  		for (int l=0; l<c.GetNumNodes(); l++){
 		//  			std::cout<<g->GetNode(c.getIthNodeNum(l))<<std::endl;
 		//  			corridor.push_back(g->GetNode(c.getIthNodeNum(l)));
 		//  		}
 		
-		//		std::cout<<"nodes: "<<c.getNumNodes()<<std::endl;
-		for (int k=0; k<c.getNumNodes(); k++)
+		//		std::cout<<"nodes: "<<c.GetNumNodes()<<std::endl;
+		for (int k=0; k<c.GetNumNodes(); k++)
 		{
 			//get the entrance
 			int num = c.getIthNodeNum(k);
@@ -1106,7 +1106,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 			std::vector<node*> corridor;
 			for (unsigned int i=0; i<c.parents.size(); i++)
 				corridor.push_back(c.parents[i]);
-			for (int j=0; j<c.getNumNodes(); j++)
+			for (int j=0; j<c.GetNumNodes(); j++)
 				corridor.push_back(g->GetNode(c.getIthNodeNum(j)));
 			
 			//find path
@@ -1200,7 +1200,7 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 	if (num==-1)
 	{
 		
-		if (start->getNumEdges() == 0)
+		if (start->GetNumEdges() == 0)
 		{
 			
 			abstractions[2]->RemoveNode(start->GetLabelL(kParent));
@@ -1218,7 +1218,7 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 			e = start->edgeIterNext(ei);
 		}
 		int snum = start->GetNum();
-		assert((snum == g->getNumNodes()-1) || (snum == g->getNumNodes()-2));
+		assert((snum == g->GetNumNodes()-1) || (snum == g->GetNumNodes()-2));
 		g->RemoveNode(start);
 		delete start;
 		//	std::cout<<"removing node\n";
@@ -1236,21 +1236,21 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 	if (num==-1)
 	{
 		
-		if (goal->getNumEdges() == 0)
+		if (goal->GetNumEdges() == 0)
 		{
 			
 			abstractions[2]->RemoveNode(goal->GetLabelL(kParent));
 			
 		}
 		edge_iterator ei = goal->getEdgeIter();
-		//				std::cout<<"goal->getNumEdges "<<goal->getNumEdges()<<std::endl;
+		//				std::cout<<"goal->GetNumEdges "<<goal->GetNumEdges()<<std::endl;
 		edge* e = goal->edgeIterNext(ei); 
 		while(e)
 		{
 			
 			temp.erase(e);
 			int gnum = goal->GetNum();
-			assert((gnum == g->getNumNodes()-1) || (gnum == g->getNumNodes()-2));
+			assert((gnum == g->GetNumNodes()-1) || (gnum == g->GetNumNodes()-2));
 			g->RemoveEdge(e);
 			delete e;
 			ei = goal->getEdgeIter();

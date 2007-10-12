@@ -46,7 +46,7 @@ bool MapQuadTreeAbstraction::Pathable(node *from, node *to)
   while (from != to)
 	{
     if ((!from) || (!to) ||
-				(abstractions[from->GetLabelL(kAbstractionLevel)]->getNumEdges() == 0))
+				(abstractions[from->GetLabelL(kAbstractionLevel)]->GetNumEdges() == 0))
       return false;
 		
     from = abstractions[from->GetLabelL(kAbstractionLevel)+1]->
@@ -102,7 +102,7 @@ void MapQuadTreeAbstraction::buildAbstraction()
 {
 	//inefficient for the moment
 	abstractions.push_back(GetMapGraph(GetMap()));
-	while (abstractions.back()->getNumEdges() > 0)
+	while (abstractions.back()->GetNumEdges() > 0)
 	{
 		Graph *g = new Graph();
 		addNodes(g);
