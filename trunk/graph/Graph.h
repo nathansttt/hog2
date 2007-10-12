@@ -98,8 +98,8 @@ public:
   void RemoveNode(node *n) { unsigned int x; RemoveNode(n, x); } // if you don't care about node #'s
   void RemoveNode(unsigned int nodeNum) { RemoveNode(GetNode(nodeNum)); }
 	
-  int getNumEdges();
-  int getNumNodes();
+  int GetNumEdges();
+  int GetNumNodes();
   
   std::vector<node*>* getReachableNodes(node* start);
   
@@ -197,7 +197,7 @@ public:
 	
   int getNumOutgoingEdges();
   int getNumIncomingEdges();
-  int getNumEdges() { return getNumOutgoingEdges()+getNumIncomingEdges(); }
+  int GetNumEdges() { return getNumOutgoingEdges()+getNumIncomingEdges(); }
 	
   // chooses which label will be used as the key for
   // priority queue
