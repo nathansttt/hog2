@@ -46,21 +46,33 @@ path *IRDijkstra::DoOneSearchStep()
 		return 0;
 	node *gNext = q.top().n;
 	q.pop();
-	printf("Analyzing %d next\n", gNext->GetNum());
-	std::cout << *gNext << std::endl;
+	//printf("Analyzing %d next\n", gNext->GetNum());
+	//std::cout << *gNext << std::endl;
+
 	
 	if (gNext == gGoal) // we found the goal
 	{
-		closedList[gNext->GetNum()] = GNode(gNext);
-		path *p = ExtractAndRefinePath();
-		if (p)
+		if ((q.size() > 0) &&
+				(fequal(q.top().n->GetLabelF(kGCost), gGoal->GetLabelF(kGCost))))
 		{
-			q.reset();
-			closedList.clear();
+			node *temp = gNext;
+			gNext = q.top().n;
+			q.pop();
+			q.Add(GNode(temp));
 		}
-		return p;
+		else {
+			closedList[gNext->GetNum()] = GNode(gNext);
+			path *p = ExtractAndRefinePath();
+			if (p)
+			{
+				q.reset();
+				closedList.clear();
+			}
+			return p;
+		}
 	}
 
+	nodesExpanded++;
 	ExpandNeighbors(gNext);
 	
 	closedList[gNext->GetNum()] = GNode(gNext);
@@ -78,6 +90,7 @@ bool IRDijkstra::InitializeSearch(GraphAbstraction *aMap, node *from, node *to)
 	aGoal = to;
 	delete g;
 	g = new Graph();
+	nodesExpanded = nodesTouched = nodesRefined = 0;
 	
 	// find most abstract node in Graph
 	node *top = FindTopLevelNode(from, to, aMap);
@@ -132,12 +145,12 @@ void IRDijkstra::SetInitialValues(node *gNewNode, node *aRealNode, node *gParent
 
 	if ((gParent == gStart) && (absGraph->IsParentOf(aRealNode, aStart)))
 	{
-		std::cout << "Assigning start to " << *gNewNode << std::endl;
+		//std::cout << "Assigning start to " << *gNewNode << std::endl;
 		gStart = gNewNode;
 	}
 	if ((gParent == gGoal) && (absGraph->IsParentOf(aRealNode, aGoal)))
 	{
-		std::cout << "Assigning goal to " << *gNewNode << std::endl;
+		//std::cout << "Assigning goal to " << *gNewNode << std::endl;
 		gGoal = gNewNode;
 	}
 }
@@ -147,6 +160,7 @@ void IRDijkstra::ExpandNeighbors(node *gNode)
 	neighbor_iterator ni = gNode->getNeighborIter();
 	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
 	{
+		nodesTouched++;
 		node *gNeighbor = g->GetNode(next);
 		if (q.IsIn(GNode(gNeighbor))) // check for lower cost
 		{
@@ -158,7 +172,7 @@ void IRDijkstra::ExpandNeighbors(node *gNode)
 			}
 		}
 		else if (closedList.find(gNeighbor->GetNum()) != closedList.end())
-		{ // do nothing -- already expanded
+		{
 		}
 		else { // add to open list
 			gNeighbor->SetLabelF(kGCost, gNode->GetLabelF(kGCost)+1.0);
@@ -186,10 +200,10 @@ path *IRDijkstra::ExtractAndRefinePath()
 	GetAllSolutionNodes(gGoal, nodes);
 	for (unsigned int x = 0; x < nodes.size(); x++)
 	{
-		printf("## Refining %d\n", nodes[x]->GetNum());
+		//printf("## Refining %d\n", nodes[x]->GetNum());
 		RefineNode(nodes[x]);
 	}
-		
+	printf("%d refined nodes %d expanded nodes\n", nodesRefined, nodesExpanded);
 	closedList.clear();
 	q.reset();
 	q.Add(GNode(gStart));
@@ -214,8 +228,12 @@ void IRDijkstra::GetAllSolutionNodes(node *goal, std::vector<node*> &nodes)
 			node *gNeighbor = g->GetNode(next);
 			if (closedList.find(gNeighbor->GetNum()) != closedList.end())
 			{
-				if (fequal(gNeighbor->GetLabelF(kGCost) + 1.0, gNode->GetLabelF(kGCost)))
+//				printf("Neighbor (%d) has g-cost %1.2f, solution path through (%d) has cost %1.2f\n",
+//							 gNeighbor->GetNum(), gNeighbor->GetLabelF(kGCost),
+//							 gNode->GetNum(), gNode->GetLabelF(kGCost));
+				if (!fgreater(gNeighbor->GetLabelF(kGCost)+1, gNode->GetLabelF(kGCost)))
 				{
+//					printf("Adding to list!\n");
 					closedList.erase(gNeighbor->GetNum());
 					nodes.push_back(gNeighbor);
 				}
@@ -348,6 +366,9 @@ path *IRDijkstra::GetSolution(node *gNode)
 
 void IRDijkstra::RefineNode(node *gNode)
 {
+	if (absGraph->GetAbstractionLevel(gNode) == 0)
+		return;
+	nodesRefined++;
 	std::vector<node *> aChildren;
 	std::vector<node *> gChildren;
 	node *aNode = GetRealNode(gNode);
@@ -441,7 +462,7 @@ bool IRDijkstra::ShouldAddEdge(node *aLowerNode, node *aHigherNode)
 
 void IRDijkstra::OpenGLDraw()
 {
-	if ((g == 0) || (g->getNumNodes() == 0))
+	if ((g == 0) || (g->GetNumNodes() == 0))
 	{
 		return;
 	}
