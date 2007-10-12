@@ -125,9 +125,9 @@ void spreadPRAStar::setupSearch(GraphAbstraction *_aMap,
 	//					FindEdge(fromChain.back()->GetNum(), toChain.back()->GetNum()));
 	
 	unsigned int previousSize = fromChain.size();
-	int minNode = (int)(2*sqrt(_aMap->GetAbstractGraph(0)->getNumNodes()));
+	int minNode = (int)(2*sqrt(_aMap->GetAbstractGraph(0)->GetNumNodes()));
 	while ((fromChain.size() > 2) && ((fromChain.size() > (previousSize)/2) ||
-																		(_aMap->GetAbstractGraph(fromChain.size())->getNumNodes() < minNode)))
+																		(_aMap->GetAbstractGraph(fromChain.size())->GetNumNodes() < minNode)))
 	{
 		toChain.pop_back();
 		fromChain.pop_back();

@@ -92,8 +92,8 @@ private:
 	path *GetSolution(node *gNode);
 
 	
-	IRDijstraConstants::PQueue q;
-	IRDijstraConstants::NodeLookupTable closedList;
+	IRDijkstraConstants::PQueue q;
+	IRDijkstraConstants::NodeLookupTable closedList;
 	node *aStart, *aGoal;
 	node *gStart, *gGoal;
 	GraphAbstraction *absGraph;
