@@ -44,6 +44,7 @@
 #include "RandomUnits.h"
 #include "CFOptimalRefinement.h"
 #include "IRDijkstra.h"
+#include "IRAStar.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -51,7 +52,7 @@ int absType = 0;
 
 std::vector<UnitAbsMapSimulation *> unitSims;
 //CFOptimalRefinement *CFOR = 0;
-IRDijkstra *CFOR = 0;
+IRAStar *CFOR = 0;
 //unit *cameraTarget = 0;
 
 Plotting::Plot2D *plot = 0;
@@ -73,8 +74,8 @@ void CreateSimulation(int id)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
-		map = new Map(40, 40);
-		MakeMaze(map, 1);
+		map = new Map(140, 140);
+//		MakeMaze(map, 1);
 	}
 	else
 		map = new Map(gDefaultMap);
@@ -257,14 +258,20 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			if (CFOR == 0)
 			{
 				//CFOR = new CFOptimalRefinement();
-				CFOR = new IRDijkstra();
+				//CFOR = new IRDijkstra();
+				CFOR = new IRAStar();
 				while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
 																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode(),
 																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
 				{}
 			}
 			if (CFOR->DoOneSearchStep())
+			{
 				printf("DONE!!!\n");
+				printf("%d nodes expanded, %d nodes refined, %d nodes in problem\n",
+							 CFOR->GetNodesExpanded(), CFOR->GetNodesRefined(),
+							 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetNumNodes());
+			}
 		}
 			if (unitSims[windowID]->GetPaused())
 			{
