@@ -24,9 +24,12 @@ namespace IRAStarConstants {
 		kAbstractionLevel = 0, // this is a LONG label
 		kCorrespondingNode = 1, // this is a LONG label
 		kGCost = 2, // this is a DOUBLE label
-								//		kHCost = 3, // this is a DOUBLE label
-								//		kOptimalFlag = 4, // this is a LONG label
-								//		kInOpenList = 5 // this is a LONG label
+		kHCost = 3,	// this is a DOUBLE label
+		kCachedHCost1 = 4,	// this is a DOUBLE label
+		kCachedHCost2 = 5,	// this is a DOUBLE label
+		//kIteration = 6, // this is a LONG label
+		//		kOptimalFlag = 4, // this is a LONG label
+		//		kInOpenList = 5 // this is a LONG label
 	};
 	
 	struct GNode {
@@ -44,9 +47,9 @@ namespace IRAStarConstants {
 		// return true if we prefer i2 over i1
 		bool operator()(const GNode &i1, const GNode &i2)
 		{
-			// return true if node1 has higher g-cost
-			return (fgreater(i1.n->GetLabelF(kGCost),
-											 i2.n->GetLabelF(kGCost)));
+			// return true if node1 has higher f-cost
+			return (fgreater(i1.n->GetLabelL(kGCost)+i1.n->GetLabelL(kHCost),
+											 i2.n->GetLabelL(kGCost)+i2.n->GetLabelL(kHCost)));
 		}
 	};
 	
@@ -90,15 +93,23 @@ private:
 	void ExpandNeighbors(node *gNode);
 	path *ExtractAndRefinePath();
 	path *GetSolution(node *gNode);
+	double GetHCost(node *);
+	void   SetHCost(node *, double);
+	double GetCachedHCost(node *);
+	void   SetCachedHCost(node *, double);
+	double GetGCost(node *);
+	void   SetGCost(node *, double);
+	double GetFCost(node *);
 	
-	
-	IRDijstraConstants::PQueue q;
-	IRDijstraConstants::NodeLookupTable closedList;
+	IRAStarConstants::PQueue q;
+	IRAStarConstants::NodeLookupTable closedList;
 	node *aStart, *aGoal;
 	node *gStart, *gGoal;
 	GraphAbstraction *absGraph;
 	Graph *g;
 	int nodesRefined;
+	int currentIteration;
+	std::vector<double> iterationLimits;
 };
 
 
