@@ -42,7 +42,8 @@ SRC_CPP = \
 	abstractionalgorithms/SearchAlgorithm.cpp \
 	abstractionalgorithms/FringeSearch.cpp \
 	abstractionalgorithms/CFOptimalRefinement.cpp \
-	abstractionalgorithms/IRDijkstra.cpp 
+	abstractionalgorithms/IRDijkstra.cpp \
+	abstractionalgorithms/IRAStar.cpp 
 
 
 
