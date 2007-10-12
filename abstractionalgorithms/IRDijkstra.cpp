@@ -10,7 +10,7 @@
 #include "IRDijkstra.h"
 #include <vector>
 
-using namespace IRDijstraConstants;
+using namespace IRDijkstraConstants;
 
 IRDijkstra::IRDijkstra()
 :SearchAlgorithm()
