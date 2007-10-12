@@ -46,21 +46,23 @@ path *IRAStar::DoOneSearchStep()
 		return 0;
 	node *gNext = q.top().n;
 	q.pop();
-	//printf("Analyzing %d next\n", gNext->GetNum());
+	//printf("---\nAnalyzing %d next g:%f h:%f\n", gNext->GetNum(), GetGCost(gNext), GetHCost(gNext));
 	//std::cout << *gNext << std::endl;
 
 	
 	if (gNext == gGoal) // we found the goal
 	{
 		if ((q.size() > 0) &&
-				(fequal(q.top().n->GetLabelF(kGCost), gGoal->GetLabelF(kGCost))))
+				(fequal(GetFCost(q.top().n), GetFCost(gGoal))))
 		{
 			node *temp = gNext;
 			gNext = q.top().n;
 			q.pop();
 			q.Add(GNode(temp));
+			//printf("+++\nAnalyzing %d next g:%f h:%f\n", gNext->GetNum(), GetGCost(gNext), GetHCost(gNext));
 		}
 		else {
+			SetCachedHCost(gNext, GetGCost(gNext));
 			closedList[gNext->GetNum()] = GNode(gNext);
 			path *p = ExtractAndRefinePath();
 			if (p)
@@ -75,6 +77,7 @@ path *IRAStar::DoOneSearchStep()
 	nodesExpanded++;
 	ExpandNeighbors(gNext);
 	
+	SetCachedHCost(gNext, GetGCost(gNext));
 	closedList[gNext->GetNum()] = GNode(gNext);
 	return 0;
 }
@@ -84,6 +87,7 @@ bool IRAStar::InitializeSearch(GraphAbstraction *aMap, node *from, node *to)
 	closedList.clear();
 	q.reset();
 
+	currentIteration = 0;
 	gStart = 0;
 	absGraph = aMap;
 	aStart = from;
@@ -133,22 +137,25 @@ void IRAStar::SetInitialValues(node *gNewNode, node *aRealNode, node *gParent)
 	gNewNode->SetLabelL(kCorrespondingNode, aRealNode->GetNum());
 	if (gParent)
 	{
-		gNewNode->SetLabelF(kGCost, gParent->GetLabelF(kGCost));
-		//gNewNode->SetLabelF(kHCost, gParent->GetLabelF(kHCost));
+		gNewNode->SetLabelL(kCachedHCost1, gParent->GetLabelL(kCachedHCost1));
+		gNewNode->SetLabelL(kCachedHCost2, gParent->GetLabelL(kCachedHCost2));
 	}
 	else {
-		gNewNode->SetLabelF(kGCost, 0.0);
-		//gNewNode->SetLabelF(kHCost, 0.0);
+		//gNewNode->SetLabelL(kIteration, -1);
+		SetGCost(gNewNode, 0);
+		SetHCost(gNewNode, 0);
+		gNewNode->SetLabelL(kCachedHCost1, 0);
+		gNewNode->SetLabelL(kCachedHCost2, 0);
 	}
 //	gNewNode->SetLabelL(kOptimalFlag, 0);
 //	gNewNode->SetLabelL(kInOpenList, 1);
 
-	if ((gParent == gStart) && (absGraph->IsParentOf(aRealNode, aStart)))
+	if (absGraph->IsParentOf(aRealNode, aStart) || (aRealNode == aStart))
 	{
 		//std::cout << "Assigning start to " << *gNewNode << std::endl;
 		gStart = gNewNode;
 	}
-	if ((gParent == gGoal) && (absGraph->IsParentOf(aRealNode, aGoal)))
+	if (absGraph->IsParentOf(aRealNode, aGoal) || (aRealNode == aGoal))
 	{
 		//std::cout << "Assigning goal to " << *gNewNode << std::endl;
 		gGoal = gNewNode;
@@ -164,10 +171,12 @@ void IRAStar::ExpandNeighbors(node *gNode)
 		node *gNeighbor = g->GetNode(next);
 		if (q.IsIn(GNode(gNeighbor))) // check for lower cost
 		{
-			if (fless(gNode->GetLabelF(kGCost)+1.0,
-								gNeighbor->GetLabelF(kGCost)))
+			if (fless(GetGCost(gNode)+1.0,
+								GetGCost(gNeighbor)))
 			{
-				gNeighbor->SetLabelF(kGCost, gNode->GetLabelF(kGCost)+1.0);
+				//printf("Updating neighbor %d to gCost %f\n", gNeighbor->GetNum(), GetGCost(gNode)+1);
+				SetGCost(gNeighbor, GetGCost(gNode)+1.0);
+				//gNeighbor->SetLabelL(kIteration, -1);
 				q.DecreaseKey(GNode(gNeighbor));
 			}
 		}
@@ -175,8 +184,11 @@ void IRAStar::ExpandNeighbors(node *gNode)
 		{
 		}
 		else { // add to open list
-			gNeighbor->SetLabelF(kGCost, gNode->GetLabelF(kGCost)+1.0);
+			SetHCost(gNeighbor, GetCachedHCost(gNeighbor));
+			SetGCost(gNeighbor, GetGCost(gNode)+1.0);
 			q.Add(GNode(gNeighbor));
+//			printf("Adding neighbor %d with gCost %f, hCost %f\n",
+//						 gNeighbor->GetNum(), GetGCost(gNode)+1, GetHCost(gNeighbor));
 		}
 	}
 }
@@ -186,6 +198,7 @@ path *IRAStar::ExtractAndRefinePath()
 	bool done = true;
 
 	path *p = GetSolution(gGoal);
+	iterationLimits.push_back(GetGCost(gGoal));
 	for (path *i = p; i; i = i->next)
 	{
 		if (i->n->GetLabelL(kAbstractionLevel) != 0)
@@ -206,6 +219,16 @@ path *IRAStar::ExtractAndRefinePath()
 	printf("%d refined nodes %d expanded nodes\n", nodesRefined, nodesExpanded);
 	closedList.clear();
 	q.reset();
+
+	currentIteration++;
+	if ((currentIteration%2) == 1)
+	{
+		node *tmp = gStart;
+		gStart = gGoal;
+		gGoal = tmp;
+	}
+	SetGCost(gStart, 0);
+	SetHCost(gStart, GetCachedHCost(gStart));
 	q.Add(GNode(gStart));
 		
 	if (done)
@@ -231,7 +254,7 @@ void IRAStar::GetAllSolutionNodes(node *goal, std::vector<node*> &nodes)
 //				printf("Neighbor (%d) has g-cost %1.2f, solution path through (%d) has cost %1.2f\n",
 //							 gNeighbor->GetNum(), gNeighbor->GetLabelF(kGCost),
 //							 gNode->GetNum(), gNode->GetLabelF(kGCost));
-				if (!fgreater(gNeighbor->GetLabelF(kGCost)+1, gNode->GetLabelF(kGCost)))
+				if (!fgreater(GetGCost(gNeighbor)+1, GetGCost(gNode)))
 				{
 //					printf("Adding to list!\n");
 					closedList.erase(gNeighbor->GetNum());
@@ -251,7 +274,7 @@ path *IRAStar::GetSolution(node *gNode)
 		if (closedList.find(gNeighbor->GetNum()) != closedList.end())
 		{
 			node* n = closedList[gNeighbor->GetNum()].n; // silly!
-			if (fequal(n->GetLabelF(kGCost) + 1.0, gNode->GetLabelF(kGCost)))
+			if (fequal(GetGCost(n) + 1.0, GetGCost(gNode)))
 			{
 				return new path(gNode, GetSolution(n));
 			}
@@ -260,114 +283,16 @@ path *IRAStar::GetSolution(node *gNode)
 	return new path(gNode, 0);
 }
 
-//void IRAStar::UpdateNode(node *gNode)
-//{
-//	UpdateH(gNode);
-//	std::cout << "After UpdateH " << *gNode << std::endl;
-//	UpdateG(gNode);
-//	std::cout << "After UpdateG " << *gNode << std::endl;
-//	UpdateOptH(gNode);
-//	std::cout << "After UpdateOptH " << *gNode << std::endl;
-//	gNode->SetLabelL(kInOpenList, 0);
-//	q.Add(GNode(gNode));
-//}
-
-//void IRAStar::UpdateH(node *gNode)
-//{
-//	double minH = DBL_MAX;
-//
-//	// update h
-//	neighbor_iterator ni = gNode->getNeighborIter();
-//	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
-//	{
-//		node *gNeighbor = g->GetNode(next);
-//		double tmpH = gNeighbor->GetLabelF(kHCost) + g->FindEdge(next, gNode->GetNum())->GetWeight();
-//		if (fless(tmpH, minH))
-//			minH = tmpH;
-//	}
-//	if (gNode->GetLabelL(kAbstractionLevel) == 0)
-//		minH = std::max(minH, absGraph->h(gNode, aGoal));
-//	if (fgreater(minH, gNode->GetLabelF(kHCost)) &&
-//			(gNode != gGoal))
-//	{
-//		gNode->SetLabelF(kHCost, minH);
-//		MakeNeighborsOpen(gNode);
-//	}
-//}
-
-//void IRAStar::UpdateG(node *gNode)
-//{
-//	double minG = DBL_MAX;
-//
-//	// update g
-//	neighbor_iterator ni = gNode->getNeighborIter();
-//	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
-//	{
-//		node *gNeighbor = g->GetNode(next);
-//		double tmpG = gNeighbor->GetLabelF(kGCost) + g->FindEdge(next, gNode->GetNum())->GetWeight();
-//		if (fless(tmpG, minG))
-//			minG = tmpG;
-//	}
-//	if (gNode->GetLabelL(kAbstractionLevel) == 0)
-//		minG = std::max(minG, absGraph->h(gNode, aStart));
-//	if (fgreater(minG, gNode->GetLabelF(kGCost)) &&
-//			(gNode != gStart))
-//	{
-//		gNode->SetLabelF(kGCost, minG);
-//		MakeNeighborsOpen(gNode);
-//	}
-//}
-
-//void IRAStar::UpdateOptH(node *gNode)
-//{
-//	bool optH = false;
-//	if ((gNode->GetLabelL(kAbstractionLevel) == 0) &&
-//			(gNode->GetLabelL(kOptimalFlag) == 0))
-//	{
-//		if (gNode == gGoal)
-//		{
-//			optH = true;
-//		}
-//		else {
-//			neighbor_iterator ni = gNode->getNeighborIter();
-//			for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
-//			{
-//				node *gNeighbor = g->GetNode(next);
-//				if ((gNeighbor->GetLabelL(kOptimalFlag) == 1) &&
-//						(fequal(gNeighbor->GetLabelF(kHCost) + g->FindEdge(next, gNode->GetNum())->GetWeight(),
-//										gNode->GetLabelF(kHCost))))
-//				{
-//					optH = true;
-//				}
-//			}
-//		}
-//		
-//		if ((gNode->GetLabelL(kOptimalFlag) == 0) && (optH))
-//		{
-//			gNode->SetLabelL(kOptimalFlag, 1);
-//			MakeNeighborsOpen(gNode);
-//		}
-//	}
-//}
-
-//void IRAStar::MakeNeighborsOpen(node *gNode)
-//{
-//	neighbor_iterator ni = gNode->getNeighborIter();
-//	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
-//	{
-//		node *gNeighbor = g->GetNode(next);
-//		if (gNeighbor->GetLabelL(kInOpenList) == 0)
-//		{
-//			gNeighbor->SetLabelL(kInOpenList, 1);
-//			q.DecreaseKey(GNode(gNeighbor));
-//		}
-//	}
-//}
-
 void IRAStar::RefineNode(node *gNode)
 {
 	if (absGraph->GetAbstractionLevel(gNode) == 0)
+	{
+		if (GetRealNode(gNode) == aStart)
+			gStart = gNode;
+		if (GetRealNode(gNode) == aGoal)
+			gStart = gNode;
 		return;
+	}
 	nodesRefined++;
 	std::vector<node *> aChildren;
 	std::vector<node *> gChildren;
@@ -383,7 +308,9 @@ void IRAStar::RefineNode(node *gNode)
 		gChildren.push_back(new node("child"));
 		g->AddNode(gChildren[x]);
 		SetInitialValues(gChildren[x], aChildren[x], gNode);
-		q.Add(GNode(gChildren[x]));
+		//q.Add(GNode(gChildren[x]));
+//		std::cout << "Adding child:" << std::endl;
+//		std::cout << *gChildren[x] << std::endl;
 	}
 
 	// first, connect children to each other
@@ -515,3 +442,49 @@ void IRAStar::OpenGLDraw()
 	
 }
 
+double IRAStar::GetHCost(node *n)
+{
+//	if (n->GetLabelL(kIteration) < currentIteration-1)
+//		return std::max(iterationLimits.back(), val);
+	return n->GetLabelL(kHCost);
+}
+
+void IRAStar::SetHCost(node *n, double val)
+{
+	n->SetLabelL(kHCost, val);
+}
+
+double IRAStar::GetCachedHCost(node *n)
+{
+	double val = 0;
+	if ((currentIteration%2) == 0)
+		val = n->GetLabelL(kCachedHCost2);
+	else
+		val = n->GetLabelL(kCachedHCost1);
+	
+//	if (n->GetLabelL(kIteration) < currentIteration-1)
+//		return std::max(val-iterationLimits.back(), val);
+}
+
+void IRAStar::SetCachedHCost(node *n, double val)
+{
+	if ((currentIteration%2) == 0)
+		n->SetLabelL(kCachedHCost1, val);
+	else
+		n->SetLabelL(kCachedHCost2, val);
+}
+
+double IRAStar::GetGCost(node *n)
+{
+	return n->GetLabelL(kGCost);
+}
+
+void IRAStar::SetGCost(node *n, double val)
+{
+	n->SetLabelL(kGCost, val);
+}
+
+double IRAStar::GetFCost(node *n)
+{
+	return n->GetLabelL(kGCost)+n->GetLabelL(kHCost);
+}
