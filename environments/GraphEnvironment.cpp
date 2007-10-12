@@ -117,7 +117,7 @@ uint64_t GraphEnvironment::GetActionHash(graphMove act)
 
 void GraphEnvironment::OpenGLDraw(int window)
 {
-	if ((g == 0) || (g->getNumNodes() == 0)) return;
+	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 
 	glBegin(GL_LINES);
 	glNormal3f(0, 1, 0);
@@ -156,7 +156,7 @@ void GraphEnvironment::OpenGLDraw(int, graphState &s)
 	DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
 						 (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
 						 (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
-						 (GLdouble)2.0/(g->getNumNodes()*g->getNumNodes()));
+						 (GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
 }
 
 void GraphEnvironment::OpenGLDraw(int, graphState &, graphMove &)
@@ -506,7 +506,7 @@ void GraphMapInconsistentHeuristic::AddHeuristic(std::vector<double> &values,
 
 void GraphMapInconsistentHeuristic::GetOptimalDistances(node *n, std::vector<double> &values)
 {
-	values.resize(g->getNumNodes());
+	values.resize(g->GetNumNodes());
 	for (unsigned int x = 0; x < values.size(); x++)
 		values[x] = -1.0;
 	n->SetLabelF(kTemporaryLabel, 0.0);
