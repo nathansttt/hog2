@@ -84,7 +84,7 @@ void MapAbstraction::OpenGLDraw(int )
 
 void MapAbstraction::DrawGraph(Graph *g)
 {
-	if ((g == 0) || (g->getNumNodes() == 0)) return;
+	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 	
 	int abLevel = g->GetNode(0)->GetLabelL(kAbstractionLevel);	
 	

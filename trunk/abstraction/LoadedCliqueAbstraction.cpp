@@ -107,7 +107,7 @@ void LoadedCliqueAbstraction::OpenGLDraw(int)
 
 void LoadedCliqueAbstraction::DrawGraph(Graph *g)
 {
-	if ((g == 0) || (g->getNumNodes() == 0)) return;
+	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 	
 	int abLevel = g->GetNode(0)->GetLabelL(kAbstractionLevel);	
 	
@@ -409,21 +409,21 @@ void LoadedCliqueAbstraction::buildAbstractions(Graph *_g)
 	if (displayLists.size() != 1)
 		displayLists.push_back(0);
 	//if (verbose)
-	printf("Base Graph (0) has %d nodes\n", g->getNumNodes());
+	printf("Base Graph (0) has %d nodes\n", g->GetNumNodes());
 	g->printStats();
 	
 	for (int x = 1; ; x++)
 	{
-		if (g->getNumEdges() == 0) break;
+		if (g->GetNumEdges() == 0) break;
 		if (verbose&kMiscMessages) printf("Building abstraction #%2d\n", x);
 		abstractions.push_back(abstractGraph(g));
 		g = abstractions.back();
 		if (verbose&kMiscMessages)
 		{
-			printf("Abstract Graph #%2d has %d nodes\n", x, g->getNumNodes());
+			printf("Abstract Graph #%2d has %d nodes\n", x, g->GetNumNodes());
 			g->printStats();
 		}
-		totalNodes += g->getNumNodes();
+		totalNodes += g->GetNumNodes();
 		displayLists.push_back(0);
 	}
 	// printf("%d nodes, excluding bottom level", totalNodes);
@@ -525,7 +525,7 @@ Graph *LoadedCliqueAbstraction::cliqueAbstractGraph(Graph *g)
 	for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
 	{
 		if (n->GetLabelL(kParent) != -1) continue;
-		int numEdges = n->getNumEdges();//getNumOutgoingEdges() + n->getNumIncomingEdges();
+		int numEdges = n->GetNumEdges();//getNumOutgoingEdges() + n->getNumIncomingEdges();
 			
 			if (numEdges == 1)
 			{
@@ -690,7 +690,7 @@ Graph *LoadedCliqueAbstraction::cliqueAbstractGraph(Graph *g)
 				break;
 			}
 		}
-		if ((orphan->GetLabelL(kParent) == -1) && (orphan->getNumEdges() == 1))
+		if ((orphan->GetLabelL(kParent) == -1) && (orphan->GetNumEdges() == 1))
 		{
 			ei = orphan->getEdgeIter();
 			for (edge *e = orphan->edgeIterNext(ei); e; e = orphan->edgeIterNext(ei))
@@ -766,12 +766,12 @@ Graph *LoadedCliqueAbstraction::cliqueAbstractGraph(Graph *g)
 //  //	{
 //  //		if (n->GetLabelL(kParent) != -1)
 //  //			continue;
-//  //		if (n->getNumEdges() == 2)
+//  //		if (n->GetNumEdges() == 2)
 //  //		{
 //  //			neighbor_iterator nbi = n->getNeighborIter();
 //  //			int n1 = n->nodeNeighborNext(nbi);
 //  //			int n2 = n->nodeNeighborNext(nbi);
-//  //			if ((g->GetNode(n1)->getNumEdges() == 2) || (g->GetNode(n2)->getNumEdges() == 2))
+//  //			if ((g->GetNode(n1)->GetNumEdges() == 2) || (g->GetNode(n2)->GetNumEdges() == 2))
 //  //			{
 //  //				int nnum = aGraph->AddNode(newNode = new node("tunnel"));
 //  //				n->setLabel(kParent, nnum);
@@ -790,7 +790,7 @@ Graph *LoadedCliqueAbstraction::cliqueAbstractGraph(Graph *g)
 //  ni = g->getNodeIter();
 //  for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni)) {
 //    if (n->GetLabelL(kParent) != -1) continue;
-//    int numEdges = n->getNumEdges();//getNumOutgoingEdges() + n->getNumIncomingEdges();
+//    int numEdges = n->GetNumEdges();//getNumOutgoingEdges() + n->getNumIncomingEdges();
 //			
 //			// why abstract solo nodes; they just get confusing later?
 //			//		if (numEdges == 0)
@@ -953,7 +953,7 @@ Graph *LoadedCliqueAbstraction::cliqueAbstractGraph(Graph *g)
 //				break;
 //      }
 //    }
-//    if ((orphan->GetLabelL(kParent) == -1) && (orphan->getNumEdges() == 1)) {
+//    if ((orphan->GetLabelL(kParent) == -1) && (orphan->GetNumEdges() == 1)) {
 //      ei = orphan->getEdgeIter();
 //      for (edge *e = orphan->edgeIterNext(ei); e; e = orphan->edgeIterNext(ei)) {
 //				int neighbor = (e->getFrom() == orphan->GetNum())?e->getTo():e->getFrom();
@@ -1038,14 +1038,14 @@ void LoadedCliqueAbstraction::addTunnel(node *n, Graph *g, node *newNode)
 	neighbor_iterator nbi = n->getNeighborIter();
 	int n1 = n->nodeNeighborNext(nbi);
 	int n2 = n->nodeNeighborNext(nbi);
-	if ((g->GetNode(n1)->GetLabelL(kParent) == -1) && (g->GetNode(n1)->getNumEdges() == 2))
+	if ((g->GetNode(n1)->GetLabelL(kParent) == -1) && (g->GetNode(n1)->GetNumEdges() == 2))
 	{
 		newNode->SetLabelL(kFirstData+newNode->GetLabelL(kNumAbstractedNodes), n1); // nodes stored here
 		newNode->SetLabelL(kNumAbstractedNodes, newNode->GetLabelL(kNumAbstractedNodes)+1);
 		g->GetNode(n1)->SetLabelL(kParent, newNode->GetNum());
 		addTunnel(g->GetNode(n1), g, newNode);
 	}
-	if ((g->GetNode(n2)->GetLabelL(kParent) == -1) && (g->GetNode(n2)->getNumEdges() == 2))
+	if ((g->GetNode(n2)->GetLabelL(kParent) == -1) && (g->GetNode(n2)->GetNumEdges() == 2))
 	{
 		newNode->SetLabelL(kFirstData+newNode->GetLabelL(kNumAbstractedNodes), n2); // nodes stored here
 		newNode->SetLabelL(kNumAbstractedNodes, newNode->GetLabelL(kNumAbstractedNodes)+1);
@@ -1065,7 +1065,7 @@ bool LoadedCliqueAbstraction::Pathable(node *from, node *to)
 	while (from != to)
 	{
 		if ((!from) || (!to) ||
-				(abstractions[from->GetLabelL(kAbstractionLevel)]->getNumEdges() == 0))
+				(abstractions[from->GetLabelL(kAbstractionLevel)]->GetNumEdges() == 0))
 			return false;
 		
 		from = abstractions[from->GetLabelL(kAbstractionLevel)+1]->
@@ -1343,7 +1343,7 @@ void LoadedCliqueAbstraction::splitNode(node *parent, int numGroups)
 	
 	// 1. if parent has no neighbors, we can just split the parent into separate pieces
 	//    since it has already been split. Then we're done.
-	if (parent->getNumEdges() == 0)
+	if (parent->GetNumEdges() == 0)
 	{
 		if (verbose&kRepairGraph)
 			cout << "REM: parent has no neighbors, just splitting and ending" << endl;
@@ -1366,21 +1366,21 @@ void LoadedCliqueAbstraction::splitNode(node *parent, int numGroups)
 		if (groupSize[x] == 1)
 		{
 			node *n = getNodeInGroup(parent, x);
-			if (n->getNumEdges() == 0)
+			if (n->GetNumEdges() == 0)
 			{
 				if (verbose&kRepairGraph)
 					cout << "REM: Reassigning group " << reassigned << " by splitting off group " << x << endl;
 				extractGroupIntoNewNode(parent, x);
 				reassigned++;
 			}
-			else if (n->getNumEdges() == 1)
+			else if (n->GetNumEdges() == 1)
 			{
 				if (verbose&kRepairGraph)
 					cout << "REM: Reassigning group " << reassigned << " by (neighbor) merging group " << x << endl;
 				mergeGroupIntoNeighbor(parent, x);
 				reassigned++;
 			}
-			else { // (n->getNumEdges() > 1) 	   
+			else { // (n->GetNumEdges() > 1) 	   
 				node *neighbor;
 				if ((neighbor = findNeighborCliques(parent, x)))
 				{
@@ -1506,7 +1506,7 @@ bool LoadedCliqueAbstraction::checkNeighborClique(node *child, node *neighbor)
 		// that has more than 1 neighbor
 		if (g->FindEdge(nextChild->GetNum(), child->GetNum()))
 			matches++;
-		else if (nextChild->getNumEdges() > 1)
+		else if (nextChild->GetNumEdges() > 1)
 			return false;
 	}
 	
@@ -1593,9 +1593,9 @@ void LoadedCliqueAbstraction::extractGroupIntoNewNode(node *parent, int group)
 void LoadedCliqueAbstraction::insertNodeIntoHierarchy(node *newNode)
 {
 	node *neighbor;
-	if (newNode->getNumEdges() == 0)
+	if (newNode->GetNumEdges() == 0)
 		return;
-	if (newNode->getNumEdges() == 1)
+	if (newNode->GetNumEdges() == 1)
 	{
 		Graph *g = abstractions[newNode->GetLabelL(kAbstractionLevel)];
 		edge *e = newNode->getEdge(0);
@@ -1768,14 +1768,14 @@ void LoadedCliqueAbstraction::abstractUpEdge(unsigned int absLevel, edge *e)
 	if (par1 == -1)
 	{ //addNodeToRepairQ(g->GetNode(e->getFrom()));
 		if (verbose&kRepairGraph)
-			cout << "This node has " << g->GetNode(e->getFrom())->getNumEdges() <<
+			cout << "This node has " << g->GetNode(e->getFrom())->GetNumEdges() <<
 				" edge(s), but no parent: " << endl << *g->GetNode(e->getFrom()) << endl;
 		return;
 	}
 	if (par2 == -1)
 	{ //addNodeToRepairQ(g->GetNode(e->getFrom()));
 		if (verbose&kRepairGraph)
-			cout << "This node has " << g->GetNode(e->getTo())->getNumEdges() <<
+			cout << "This node has " << g->GetNode(e->getTo())->GetNumEdges() <<
 				" edge(s), but no parent: " << endl << *g->GetNode(e->getTo()) << endl;
 		return;
 	}
