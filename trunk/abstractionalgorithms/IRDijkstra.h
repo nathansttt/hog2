@@ -17,7 +17,7 @@
 #include "Graph.h"
 #include "GraphAbstraction.h"
 
-namespace IRDijstraConstants {
+namespace IRDijkstraConstants {
 
 	/** Definitions for node labels */
 	enum {
