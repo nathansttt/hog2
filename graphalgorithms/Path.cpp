@@ -52,7 +52,7 @@ unsigned path::degree()
 		return 0;
 	
 	// Otherwise, iterate through the rest of the path
-	return n->getNumEdges() + next->degree();
+	return n->GetNumEdges() + next->degree();
 }
 
 // Print the path
