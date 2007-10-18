@@ -32,6 +32,7 @@ default : all
 SRC_CPP = \
 	algorithms/GenericAStar.cpp \
 	algorithms/GenericIDAStar.cpp \
-	algorithms/OpenClosedList.cpp
+	algorithms/OpenClosedList.cpp \
+	algorithms/OpenListB.cpp
 #	algorithms/SearchEnvironment.cpp
 

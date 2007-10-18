@@ -18,7 +18,7 @@
 #include <deque>
 #include <ext/hash_map>
 #include "FPUtil.h"
-#include "OpenClosedList.h"
+#include "OpenListB.h"
 
 #ifndef UINT32_MAX
 #define UINT32_MAX        4294967295U
@@ -35,7 +35,7 @@ namespace PropUtil
 {
 	class SearchNode {
 	public:
-		/* the no parameter constructor will be called by openclosedlist, and should construct invalid objects */
+		/* the no parameter constructor will be called by OpenListB, and should construct invalid objects */
 		//SearchNode()
 		//:fCost(0),gCost(0),currNode((graphState)-1),prevNode((graphState)-1),lastExpanded(0),expansions(0),threshold(1) {}
 
@@ -109,6 +109,12 @@ namespace PropUtil
 			if(i1.threshold == i2.threshold) // threshold is integer
 				return fgreater(i1.gCost,i2.gCost);
 			return i1.threshold > i2.threshold;
+		}
+	};
+
+	struct FExtract {
+		double operator()(const SearchNode &i) {
+			return i.fCost;	
 		}
 	};
 
@@ -188,7 +194,62 @@ namespace PropUtil
 			return g;
 		}
 
+		/* fig 2 is a variant of fig 1 by changing h(N) from 23 to 0 */
 		static Graph* genFig2(unsigned int N)
+	  {
+			// h(0) = h(1) = 0; 
+			// h(i) = 2^(i-1) + 2i - 3, for 1<i<=N
+			// c(i,j) = 2^(i-2) + i - 2^(j-1) - j, for 1<=j<i<=N
+			// c(1,0) = 2^(N-1) + N - 2
+			assert(N >= 3);
+
+			Graph *g = new Graph();
+
+			// add nodes
+			
+			for(unsigned int nodeID = 0; nodeID <= N; nodeID++)
+			{
+				node *n = new node("");
+				if (nodeID == 0 || nodeID == 1 || nodeID==N)
+				{
+					n->SetLabelF(GraphSearchConstants::kHCost, 0);
+				}
+				else {
+					double h = pow(2,nodeID-1) + 2*nodeID - 3;
+					n->SetLabelF(GraphSearchConstants::kHCost,h);
+				}
+				g->AddNode(n); // the real nodeID is assigned here
+
+				if(nodeID == 0)
+				{
+					SetLoc(n,-1,-1,0);
+				}
+				else // nodes 1 - N will be drawn along 3/4 circle
+				{
+					double alpha = ((double)N - nodeID) * 1.5*PI /(N - 1.0);
+					double beta = alpha - 0.5*PI;
+					SetLoc(n,cos(beta),sin(beta),0);
+				}
+			}
+
+			// add edges
+			double c = pow(2,N-1) + N - 2;
+			edge *e = new edge(1,0,c);
+			g->AddEdge(e);
+			for (unsigned int j = 1; j < N; j++)
+			{
+				for (unsigned int i = j+1; i <= N; i++)
+				{
+					c = pow(2,i-2) + i - pow(2,j-1) - j;
+					e = new edge(i,j,c);
+					g->AddEdge(e);
+				}
+			}
+
+			return g;
+		}
+
+		static Graph* genFig3(unsigned int N)
 	  {
 			// h(0) = h(2N-1) = 0
 			// h(i) = 2(N-1)^2 - N - i + 2, for i = 1,...,N-1
@@ -259,16 +320,16 @@ namespace PropUtil
 	};
 
 
-	typedef OpenClosedList<PropUtil::SearchNode, PropUtil::SearchNodeHash,
-		PropUtil::SearchNodeEqual, PropUtil::SearchNodeCompare> PQueue;
+	typedef OpenListB<PropUtil::SearchNode, PropUtil::SearchNodeHash,
+		PropUtil::SearchNodeEqual, PropUtil::SearchNodeCompare, PropUtil::GGreater, PropUtil::FExtract> PQueue;
 
 	typedef __gnu_cxx::hash_map<graphState, PropUtil::SearchNode > NodeLookupTable;
 
-	typedef OpenClosedList<PropUtil::SearchNode, PropUtil::SearchNodeHash,
-		PropUtil::SearchNodeEqual, PropUtil::GGreater> GQueue;
+	typedef OpenListB<PropUtil::SearchNode, PropUtil::SearchNodeHash,
+		PropUtil::SearchNodeEqual, PropUtil::GGreater, PropUtil::GGreater, PropUtil::FExtract> GQueue;
 
-	typedef OpenClosedList<PropUtil::SearchNode, PropUtil::SearchNodeHash,
-		PropUtil::SearchNodeEqual, PropUtil::TGreater> TQueue;
+	typedef OpenListB<PropUtil::SearchNode, PropUtil::SearchNodeHash,
+		PropUtil::SearchNodeEqual, PropUtil::TGreater, PropUtil::GGreater, PropUtil::FExtract> TQueue;
 }
 
 
@@ -282,7 +343,7 @@ public:
 	
 	long GetNodesExpanded() { return nodesExpanded; }
 	long GetNodesTouched() { return nodesTouched; }
-	long GetNodesReopened() {return reopenings;}
+	long GetNodesReopened() {return NodesReopened;}
 
 	bool InitializeSearch(GraphEnvironment *env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath);
 	bool DoSingleSearchStep(std::vector<graphState> &thePath);
@@ -332,7 +393,7 @@ private:
 	double solutionCost;
 	int pathSize;
 
-	long reopenings;
+	long NodesReopened;
 
 	Graph *grp;  // for drawing only
 
