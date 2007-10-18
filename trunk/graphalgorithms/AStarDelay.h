@@ -16,7 +16,7 @@
 #include "GraphEnvironment.h"
 #include <ext/hash_map>
 #include "FPUtil.h"
-#include "OpenClosedList.h"
+#include "OpenListB.h"
 
 #ifndef UINT32_MAX
 #define UINT32_MAX        4294967295U
@@ -77,18 +77,24 @@ namespace AStarDelayUtil
 		}
 	};
 
+	struct FExtract {
+		double operator()(const SearchNode &i) {
+			return i.fCost;	
+		}
+	};
+
 	struct SearchNodeHash {
 		size_t operator()(const SearchNode &x) const
 		{ return (size_t)(x.currNode); }
 	};
 
-	typedef OpenClosedList<AStarDelayUtil::SearchNode, AStarDelayUtil::SearchNodeHash,
-		AStarDelayUtil::SearchNodeEqual, AStarDelayUtil::SearchNodeCompare> PQueue;
+	typedef OpenListB<AStarDelayUtil::SearchNode, AStarDelayUtil::SearchNodeHash,
+		AStarDelayUtil::SearchNodeEqual, AStarDelayUtil::SearchNodeCompare, AStarDelayUtil::GGreater, AStarDelayUtil::FExtract> PQueue;
 
 	typedef __gnu_cxx::hash_map<graphState, AStarDelayUtil::SearchNode > NodeLookupTable;
 
-	typedef OpenClosedList<AStarDelayUtil::SearchNode, AStarDelayUtil::SearchNodeHash,
-		AStarDelayUtil::SearchNodeEqual, AStarDelayUtil::GGreater> GQueue;
+	typedef OpenListB<AStarDelayUtil::SearchNode, AStarDelayUtil::SearchNodeHash,
+		AStarDelayUtil::SearchNodeEqual, AStarDelayUtil::GGreater, AStarDelayUtil::GGreater, AStarDelayUtil::FExtract> GQueue;
 }
 
 class AStarDelay : public GraphAlgorithm {
