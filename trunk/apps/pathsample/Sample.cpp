@@ -152,7 +152,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
 		if ((!unitSims[windowID]->GetPaused()) && CFOR)
-			CFOR->DoOneSearchStep();
+			for (int x = 0; x < 100; x++)
+				CFOR->DoOneSearchStep();
 
 		if (CFOR)
 		{
