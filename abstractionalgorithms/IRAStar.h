@@ -78,7 +78,7 @@ public:
 	void OpenGLDraw();
 	int GetNodesRefined() { return nodesRefined; }
 private:
-		node *FindTopLevelNode(node *one, node *two, GraphAbstraction *aMap);
+	node *FindTopLevelNode(node *one, node *two, GraphAbstraction *aMap);
 	void SetInitialValues(node *gNewNode, node *aRealNode, node *gParent);
 	//	void UpdateNode(node *gNode);
 	//	void UpdateH(node *gNode);

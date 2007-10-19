@@ -16,6 +16,8 @@ IRAStar::IRAStar()
 :SearchAlgorithm()
 {
 	g = 0;
+	// Setting the seed for the random generator
+	srand(4);
 }
 
 IRAStar::~IRAStar()
@@ -218,12 +220,12 @@ path *IRAStar::ExtractAndRefinePath()
 		//printf("## Refining %d\n", nodes[x]->GetNum());
 		RefineNode(nodes[x]);
 	}
-	printf("%d refined nodes %d expanded nodes\n", nodesRefined, nodesExpanded);
+	printf("%d refined nodes %d expanded nodes on iteration %d \n", nodesRefined, nodesExpanded, currentIteration);
 	closedList.clear();
 	q.reset();
 
 	currentIteration++;
-	if ((currentIteration%2) == 1)
+	if( gStart->GetLabelL(kAbstractionLevel)%2 == 0 )  // Always switch diretions on base level
 	{
 		node *tmp = gStart;
 		gStart = gGoal;
