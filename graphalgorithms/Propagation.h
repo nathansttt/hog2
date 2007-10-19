@@ -30,6 +30,7 @@
 #define PROP_APPROX   3
 #define PROP_BFS      4
 #define PROP_DELAY    5
+#define PROP_DP       7  // 6 is AStarDelay
 
 namespace PropUtil
 {
@@ -354,6 +355,10 @@ public:
 	bool DoSingleStepBFS(std::vector<graphState> &thePath);
 	void ClosedListRepair();
 	bool DoSingleStepDelay(std::vector<graphState> &thePath);
+	bool DoSingleStepDP(std::vector<graphState> &thePath);
+	void CleanUpOpen(double solCost);
+	void Categorize(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& closedNeighbors, std::vector<PropUtil::SearchNode>& openNeighbors, std::vector<graphState>& newNeighbors);
+	void ReverseProp(PropUtil::SearchNode& topNode,std::vector<PropUtil::SearchNode>& closedNeighbors, std::vector<PropUtil::SearchNode>& openNeighbors);
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
 
 	void GetLowestG(PropUtil::SearchNode &gNode);
