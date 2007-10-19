@@ -169,13 +169,15 @@ void IRAStar::ExpandNeighbors(node *gNode)
 	{
 		nodesTouched++;
 		node *gNeighbor = g->GetNode(next);
+		edge *e = g->FindEdge(gNode->GetNum(), gNeighbor->GetNum());
+		assert( e != 0 );
 		if (q.IsIn(GNode(gNeighbor))) // check for lower cost
 		{
-			if (fless(GetGCost(gNode)+1.0,
+			if (fless(GetGCost(gNode)+e->GetWeight() /*1.0*/,
 								GetGCost(gNeighbor)))
 			{
 				//printf("Updating neighbor %d to gCost %f\n", gNeighbor->GetNum(), GetGCost(gNode)+1);
-				SetGCost(gNeighbor, GetGCost(gNode)+1.0);
+				SetGCost(gNeighbor, GetGCost(gNode)+e->GetWeight()/*1.0*/);
 				//gNeighbor->SetLabelL(kIteration, -1);
 				q.DecreaseKey(GNode(gNeighbor));
 			}
@@ -185,7 +187,7 @@ void IRAStar::ExpandNeighbors(node *gNode)
 		}
 		else { // add to open list
 			SetHCost(gNeighbor, GetCachedHCost(gNeighbor));
-			SetGCost(gNeighbor, GetGCost(gNode)+1.0);
+			SetGCost(gNeighbor, GetGCost(gNode)+e->GetWeight()/*1.0*/);
 			q.Add(GNode(gNeighbor));
 //			printf("Adding neighbor %d with gCost %f, hCost %f\n",
 //						 gNeighbor->GetNum(), GetGCost(gNode)+1, GetHCost(gNeighbor));
@@ -271,10 +273,12 @@ path *IRAStar::GetSolution(node *gNode)
 	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
 	{
 		node *gNeighbor = g->GetNode(next);
+		edge *e = g->FindEdge(gNode->GetNum(), gNeighbor->GetNum());
+		assert( e != 0 );
 		if (closedList.find(gNeighbor->GetNum()) != closedList.end())
 		{
 			node* n = closedList[gNeighbor->GetNum()].n; // silly!
-			if (fequal(GetGCost(n) + 1.0, GetGCost(gNode)))
+			if (fequal(GetGCost(n) + /*e->GetWeight()*/1.0, GetGCost(gNode)))
 			{
 				return new path(gNode, GetSolution(n));
 			}
@@ -446,6 +450,7 @@ double IRAStar::GetHCost(node *n)
 {
 //	if (n->GetLabelL(kIteration) < currentIteration-1)
 //		return std::max(iterationLimits.back(), val);
+	//return max( n->GetLabelL(kHCost), absGraph->h(n,aGoal) );
 	return n->GetLabelL(kHCost);
 }
 
