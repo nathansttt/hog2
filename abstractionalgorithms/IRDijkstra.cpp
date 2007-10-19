@@ -397,8 +397,8 @@ void IRDijkstra::RefineNode(node *gNode)
 				edge *e;
 				if ((e = aGraph->findDirectedEdge(aChildren[x]->GetNum(), aChildren[y]->GetNum())) != 0)
 				{
-					g->AddEdge(new edge(gChildren[x]->GetNum(), gChildren[y]->GetNum(), //1.0));
-															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->GetWeight():1.5));
+					g->AddEdge(new edge(gChildren[x]->GetNum(), gChildren[y]->GetNum(), 1.0));
+															//(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->GetWeight():1.5));
 				}
 			}
 		}
@@ -417,8 +417,8 @@ void IRDijkstra::RefineNode(node *gNode)
 				edge *e;
 				if ((e = aGraph->FindEdge(aChildren[x]->GetNum(), GetRealNode(gNeighbor)->GetNum())) != 0)
 				{
-					g->AddEdge(new edge(gChildren[x]->GetNum(), gNeighbor->GetNum(), //1.0));
-															(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->GetWeight():1.5));
+					g->AddEdge(new edge(gChildren[x]->GetNum(), gNeighbor->GetNum(), 1.0));
+															//(absGraph->GetAbstractionLevel(aChildren[0])==0)?e->GetWeight():1.5));
 				}
 			}
 		}
