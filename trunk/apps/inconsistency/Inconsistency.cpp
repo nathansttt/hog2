@@ -138,13 +138,19 @@ void CreateSimulation(int id)
 		to = 0;
 		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
 	}
-	else 
+	else if(fig == 2)
 	{
 		grp = PropUtil::graphGenerator::genFig2(N);
+		from = N;
+		to = 0;
+		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
+	}	
+	else {
+		grp = PropUtil::graphGenerator::genFig3(N);
 		from = 0;
 		to = 2*N - 1;
 		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
-	}	
+	}
 
 	printf("Environment ready.\n");
 
@@ -260,7 +266,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 			if(ALG == 0) 
 			{
-				if(vid <6)
+				if(vid != 6)
 					ALG = new Prop(vid,delta);
 				else
 					ALG = new AStarDelay();
@@ -311,6 +317,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			printf("\n");
 
 			ALG = new AStarDelay();
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
+			ALG = new Prop(7);
 			ALG->GetPath(env,grp,from,to,thePath);
 			printf("\n");
 
