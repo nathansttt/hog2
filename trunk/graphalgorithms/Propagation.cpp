@@ -15,6 +15,11 @@ using namespace PropUtil;
 
 //#define MAXINT 2147483648
 
+#define CLOSEDMODE 0
+#define OPENMODE   1
+#define NEWMODE    2
+#define WAITMODE   3
+
 const static bool verbose = false;
 
 void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath) {
@@ -106,27 +111,28 @@ bool Prop::DoSingleSearchStep(std::vector<graphState> &thePath) {
 		return DoSingleStepDP(thePath);
 }
 
-void Prop::ComputeNewHMero3a(double &h, double &h_tmp, graphState neighbor, double hTop, double edgeWeight)
+void Prop::ComputeNewHMero3a(double &h, double &h_tmp, graphState neighbor, SearchNode& nb, double altH, int mode)
 {	// this is necessary because the modified h is stored in the node, not the environment
-	if(openQueue.IsIn(SearchNode(neighbor))) 
+	if(mode == OPENMODE || mode == CLOSEDMODE)//openQueue.IsIn(SearchNode(neighbor))) 
 	{ 
-		SearchNode nb = openQueue.find(SearchNode(neighbor));
-		h = max( nb.fCost - nb.gCost, hTop - edgeWeight);
+		//SearchNode nb = openQueue.find(SearchNode(neighbor));
+		h = max( nb.fCost - nb.gCost, altH);
 
 		h_tmp = nb.fCost - nb.gCost;
 	}
-	else if(closedList.find(neighbor) != closedList.end()) 
-	{
-		SearchNode nb = closedList.find(neighbor)->second;
-		h = max( nb.fCost - nb.gCost, hTop - edgeWeight);
+	//else if(mode == CLOSEDMODE)//closedList.find(neighbor) != closedList.end()) 
+	//{
+	//	//SearchNode nb = closedList.find(neighbor)->second;
+	//	h = max( nb.fCost - nb.gCost, altH);
 
-		h_tmp = nb.fCost - nb.gCost;
-	}
+	//	h_tmp = nb.fCost - nb.gCost;
+	//}
 	else 
 	{
-		h = max( env->HCost(neighbor,goal), hTop - edgeWeight);
+		double envH = env->HCost(neighbor,goal);
+		h = max(envH , altH);
 
-		h_tmp = env->HCost(neighbor,goal);
+		h_tmp = envH;
 	}
 }
 
@@ -189,19 +195,50 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	Categorize(neighbors);
+
+
+	while(true) 
 	{
+		SearchNode neighborNode;
+		graphState neighbor;
+		int mode;
+
+		if(closedNeighbors.size()) 
+		{
+			neighborNode = closedNeighbors.back();
+			neighbor = neighborNode.currNode;
+			closedNeighbors.pop_back();
+			mode = CLOSEDMODE;
+		}
+		else if(openNeighbors.size())
+		{
+			neighborNode = openNeighbors.back();
+			neighbor = neighborNode.currNode;
+			openNeighbors.pop_back();
+			mode = OPENMODE;
+		}
+		else if(newNeighbors.size())
+		{
+			neighbor = newNeighbors.back();
+			newNeighbors.pop_back();
+			mode = NEWMODE;
+		}
+		else
+			break;
+	//for(unsigned int x = 0; x<neighbors.size(); x++) 
+	//{
 		nodesTouched++;
 
 		/* step (5) */
-		graphState neighbor = neighbors[x];
+		//graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double g = topNode.gCost + edgeWeight;
 		double h = env->HCost(neighbor,goal);
 		double f = g + h;
 
 		/* step (6), neither in OPEN nor CLOSED */
-		if(!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end()) 
+		if(mode == NEWMODE)//!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end()) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
 			n.isGoal = (neighbor==goal);
@@ -215,10 +252,10 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 		/* step (7) */
 		else 
 		{
-			SearchNode neighborNode;
-			if(openQueue.IsIn(SearchNode(neighbor))) 
+			//SearchNode neighborNode;
+			if(mode == OPENMODE)//openQueue.IsIn(SearchNode(neighbor))) 
 			{
-				neighborNode = openQueue.find(SearchNode(neighbor));
+				//neighborNode = openQueue.find(SearchNode(neighbor));
 
 				//if(neighborNode.gCost <= g)
 				if(!fgreater(neighborNode.gCost,g))
@@ -233,7 +270,7 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 			}
 			else //if(closedList.find(neighbor) != closedList.end()) 
 			{
-				neighborNode = closedList.find(neighbor)->second;
+				//neighborNode = closedList.find(neighbor)->second;
 
 				//if(neighborNode.gCost <= g)
 				if(!fgreater(neighborNode.gCost,g))
@@ -320,19 +357,50 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	Categorize(neighbors);
+
+
+	while(true) 
 	{
+		SearchNode neighborNode;
+		graphState neighbor;
+		int mode;
+
+		if(closedNeighbors.size()) 
+		{
+			neighborNode = closedNeighbors.back();
+			neighbor = neighborNode.currNode;
+			closedNeighbors.pop_back();
+			mode = CLOSEDMODE;
+		}
+		else if(openNeighbors.size())
+		{
+			neighborNode = openNeighbors.back();
+			neighbor = neighborNode.currNode;
+			openNeighbors.pop_back();
+			mode = OPENMODE;
+		}
+		else if(newNeighbors.size())
+		{
+			neighbor = newNeighbors.back();
+			newNeighbors.pop_back();
+			mode = NEWMODE;
+		}
+		else
+			break;
+	//for(unsigned int x = 0; x<neighbors.size(); x++) 
+	//{
 		nodesTouched++;
 
 		/* step (5) */
-		graphState neighbor = neighbors[x];
+		//graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double g = topNode.gCost + edgeWeight;
 		double h = env->HCost(neighbor,goal);
 		double f = g + h;
 
 		/* step (6), neither in OPEN nor CLOSED */
-		if(!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end()) 
+		if(mode == NEWMODE)//!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end()) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
 			n.isGoal = (neighbor==goal);
@@ -346,10 +414,10 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 		/* step (7) */
 		else 
 		{
-			SearchNode neighborNode;
-			if(openQueue.IsIn(SearchNode(neighbor))) 
+			//SearchNode neighborNode;
+			if(mode == OPENMODE)//openQueue.IsIn(SearchNode(neighbor))) 
 			{
-				neighborNode = openQueue.find(SearchNode(neighbor));
+				//neighborNode = openQueue.find(SearchNode(neighbor));
 
 				//if(neighborNode.gCost <= g)
 				if(!fgreater(neighborNode.gCost,g))
@@ -364,7 +432,7 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 			}
 			else //if(closedList.find(neighbor) != closedList.end()) 
 			{
-				neighborNode = closedList.find(neighbor)->second;
+				//neighborNode = closedList.find(neighbor)->second;
 
 				//if(neighborNode.gCost <= g)
 				if(!fgreater(neighborNode.gCost,g))
@@ -455,15 +523,48 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 
+	Categorize(neighbors);
+
 	double hTop = topNode.fCost - topNode.gCost;
 	double minH2 = DBL_MAX; // min ( edgeWeight(i) + h(neighbor(i)) )
 
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+
+	while(true) 
 	{
+		SearchNode neighborNode;
+		graphState neighbor;
+		int mode;
+
+		if(closedNeighbors.size()) 
+		{
+			neighborNode = closedNeighbors.back();
+			neighbor = neighborNode.currNode;
+			closedNeighbors.pop_back();
+			mode = CLOSEDMODE;
+		}
+		else if(openNeighbors.size())
+		{
+			neighborNode = openNeighbors.back();
+			neighbor = neighborNode.currNode;
+			openNeighbors.pop_back();
+			mode = OPENMODE;
+		}
+		else if(newNeighbors.size())
+		{
+			neighbor = newNeighbors.back();
+			newNeighbors.pop_back();
+			mode = NEWMODE;
+		}
+		else
+			break;
+	//for(unsigned int x = 0; x<neighbors.size(); x++) 
+	//{
 		nodesTouched++;
 
+
+
 		/* step (5) */
-		graphState neighbor = neighbors[x];
+		//graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double g = topNode.gCost + edgeWeight;
 
@@ -471,7 +572,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 		double h_tmp; // for printing reports only
 		double h;
 		
-		ComputeNewHMero3a(h, h_tmp, neighbor, hTop, edgeWeight);
+		ComputeNewHMero3a(h, h_tmp, neighbor, neighborNode, hTop - edgeWeight, mode);
 
 		if(verbose) 
 		{
@@ -485,7 +586,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 		minH2 = min(minH2, h + edgeWeight);
 
 		/* step (6), neither in OPEN nor CLOSED */
-		if(!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
+		if(mode == NEWMODE) //!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
 			n.isGoal = (neighbor==goal);
@@ -500,10 +601,10 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 		/* step (7) */
 		else 
 		{
-			SearchNode neighborNode;
-			if(openQueue.IsIn(SearchNode(neighbor))) 
+			//SearchNode neighborNode;
+			if(mode == OPENMODE) //openQueue.IsIn(SearchNode(neighbor))) 
 			{
-				neighborNode = openQueue.find(SearchNode(neighbor));
+				//neighborNode = openQueue.find(SearchNode(neighbor));
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -523,7 +624,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 			}
 			else //if(closedList.find(neighbor) != closedList.end()) 
 			{
-				neighborNode = closedList.find(neighbor)->second;
+				//neighborNode = closedList.find(neighbor)->second;
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -630,15 +731,46 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 
+	Categorize(neighbors);
+
 	double hTop = topNode.fCost - topNode.gCost;
 	double minH2 = DBL_MAX; // min ( edgeWeight(i) + h(neighbor(i)) )
 
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+
+	while(true) 
 	{
+		SearchNode neighborNode;
+		graphState neighbor;
+		int mode;
+
+		if(closedNeighbors.size()) 
+		{
+			neighborNode = closedNeighbors.back();
+			neighbor = neighborNode.currNode;
+			closedNeighbors.pop_back();
+			mode = CLOSEDMODE;
+		}
+		else if(openNeighbors.size())
+		{
+			neighborNode = openNeighbors.back();
+			neighbor = neighborNode.currNode;
+			openNeighbors.pop_back();
+			mode = OPENMODE;
+		}
+		else if(newNeighbors.size())
+		{
+			neighbor = newNeighbors.back();
+			newNeighbors.pop_back();
+			mode = NEWMODE;
+		}
+		else
+			break;
+	//for(unsigned int x = 0; x<neighbors.size(); x++) 
+	//{
 		nodesTouched++;
 
 		/* step (5) */
-		graphState neighbor = neighbors[x];
+		//graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double g = topNode.gCost + edgeWeight;
 
@@ -646,7 +778,7 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 		double h_tmp; // for printing reports only
 		double h;
 		
-		ComputeNewHMero3a(h, h_tmp, neighbor, hTop, edgeWeight);
+		ComputeNewHMero3a(h, h_tmp, neighbor, neighborNode, hTop - edgeWeight,mode);
 
 		if(verbose) 
 		{
@@ -660,7 +792,7 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 		minH2 = min(minH2, h + edgeWeight);
 
 		/* step (6), neither in OPEN nor CLOSED */
-		if(!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
+		if(mode == NEWMODE) //!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
 			n.isGoal = (neighbor==goal);
@@ -675,10 +807,10 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 		/* step (7) */
 		else 
 		{
-			SearchNode neighborNode;
-			if(openQueue.IsIn(SearchNode(neighbor))) 
+			//SearchNode neighborNode;
+			if(mode == OPENMODE) //openQueue.IsIn(SearchNode(neighbor))) 
 			{
-				neighborNode = openQueue.find(SearchNode(neighbor));
+				//neighborNode = openQueue.find(SearchNode(neighbor));
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -699,7 +831,7 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 			}
 			else //if(closedList.find(neighbor) != closedList.end()) 
 			{
-				neighborNode = closedList.find(neighbor)->second;
+				//neighborNode = closedList.find(neighbor)->second;
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -828,15 +960,46 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 
+	Categorize(neighbors);
+
 	double hTop = topNode.fCost - topNode.gCost;
 	double minH2 = DBL_MAX; // min ( edgeWeight(i) + h(neighbor(i)) )
 
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+
+	while(true) 
 	{
+		SearchNode neighborNode;
+		graphState neighbor;
+		int mode;
+
+		if(closedNeighbors.size()) 
+		{
+			neighborNode = closedNeighbors.back();
+			neighbor = neighborNode.currNode;
+			closedNeighbors.pop_back();
+			mode = CLOSEDMODE;
+		}
+		else if(openNeighbors.size())
+		{
+			neighborNode = openNeighbors.back();
+			neighbor = neighborNode.currNode;
+			openNeighbors.pop_back();
+			mode = OPENMODE;
+		}
+		else if(newNeighbors.size())
+		{
+			neighbor = newNeighbors.back();
+			newNeighbors.pop_back();
+			mode = NEWMODE;
+		}
+		else
+			break;
+	//for(unsigned int x = 0; x<neighbors.size(); x++) 
+	//{
 		nodesTouched++;
 
 		/* step (5) */
-		graphState neighbor = neighbors[x];
+		//graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double g = topNode.gCost + edgeWeight;
 
@@ -844,7 +1007,7 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 		double h_tmp; // for printing reports only
 		double h;
 		
-		ComputeNewHMero3a(h, h_tmp, neighbor, hTop, edgeWeight);
+		ComputeNewHMero3a(h, h_tmp, neighbor, neighborNode, hTop - edgeWeight, mode);
 
 		if(verbose) 
 		{
@@ -858,7 +1021,7 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 		minH2 = min(minH2, h + edgeWeight);
 
 		/* step (6), neither in OPEN nor CLOSED */
-		if(!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
+		if(mode == NEWMODE) //!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
 			n.isGoal = (neighbor==goal);
@@ -873,10 +1036,10 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 		/* step (7) */
 		else 
 		{
-			SearchNode neighborNode;
-			if(openQueue.IsIn(SearchNode(neighbor))) 
+			//SearchNode neighborNode;
+			if(mode == OPENMODE) //openQueue.IsIn(SearchNode(neighbor))) 
 			{
-				neighborNode = openQueue.find(SearchNode(neighbor));
+				//neighborNode = openQueue.find(SearchNode(neighbor));
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -899,7 +1062,7 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 			}
 			else //if(closedList.find(neighbor) != closedList.end()) 
 			{
-				neighborNode = closedList.find(neighbor)->second;
+				//neighborNode = closedList.find(neighbor)->second;
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -976,14 +1139,49 @@ void Prop::ClosedListRepair()
 		surrounding.clear();
 		env->GetSuccessors(topNodeID, surrounding);
 
+		std::vector<SearchNode> openN;
+		std::vector<SearchNode> closedN;
+		std::vector<graphState> newN;
+
+		Categorize2(surrounding,openN,closedN,newN);
+
 		double hTop = topNode.fCost - topNode.gCost;
 		double minH2 = DBL_MAX;
 
-		for(unsigned int x=0;x<surrounding.size();x++) 
+
+		while(true) 
 		{
+			SearchNode neighborNode;
+			graphState neighbor;
+			int mode;
+
+			if(closedN.size()) 
+			{
+				neighborNode = closedN.back();
+				neighbor = neighborNode.currNode;
+				closedN.pop_back();
+				mode = CLOSEDMODE;
+			}
+			else if(openN.size())
+			{
+				neighborNode = openN.back();
+				neighbor = neighborNode.currNode;
+				openN.pop_back();
+				mode = OPENMODE;
+			}
+			else if(newN.size())
+			{
+				neighbor = newN.back();
+				newN.pop_back();
+				mode = NEWMODE;
+			}
+			else
+				break;
+		//for(unsigned int x=0;x<surrounding.size();x++) 
+		//{
 			nodesTouched++;
 
-			graphState neighbor = surrounding[x];
+			//graphState neighbor = surrounding[x];
 			double edgeCost = env->GCost(topNodeID,neighbor);
 			double gc = topNode.gCost + edgeCost;
 			double h;
@@ -992,7 +1190,7 @@ void Prop::ClosedListRepair()
 			/* step Mero (3a) */
 
 			// to find the max h
-			ComputeNewHMero3a(h, h_tmp, neighbor, hTop, edgeCost);
+			ComputeNewHMero3a(h, h_tmp, neighbor, neighborNode, hTop - edgeCost, mode);
 
 			if(verbose) 
 			{
@@ -1006,10 +1204,10 @@ void Prop::ClosedListRepair()
 			minH2 = min(minH2, h + edgeCost);
 
 			// to find the min g
-			SearchNode neighborNode;
-			if(openQueue.IsIn(SearchNode(neighbor)))
+			//SearchNode neighborNode;
+			if(mode == OPENMODE) //openQueue.IsIn(SearchNode(neighbor)))
 			{
-				neighborNode = openQueue.find(SearchNode(neighbor));
+				//neighborNode = openQueue.find(SearchNode(neighbor));
 				if(!fgreater(neighborNode.gCost , gc))
 				{
 					// we may fail to update g, but still update h
@@ -1033,7 +1231,7 @@ void Prop::ClosedListRepair()
 			}
 			else // must be in closed
 			{
-				neighborNode = closedList.find(neighbor)->second;
+				//neighborNode = closedList.find(neighbor)->second;
 				if(!fgreater(neighborNode.gCost , gc)) 
 				{
 					// we may fail to update g, but still update h
@@ -1254,15 +1452,53 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 
+	Categorize(neighbors);
+
 	double hTop = topNode.fCost - topNode.gCost;
 	double minH2 = DBL_MAX; // min ( edgeWeight(i) + h(neighbor(i)) )
 
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+
+	while(true) 
 	{
+		SearchNode neighborNode;
+		graphState neighbor;
+		int mode;
+
+		if(closedNeighbors.size()) 
+		{
+			neighborNode = closedNeighbors.back();
+			neighbor = neighborNode.currNode;
+			closedNeighbors.pop_back();
+			mode = CLOSEDMODE;
+		}
+		else if(openNeighbors.size())
+		{
+			neighborNode = openNeighbors.back();
+			neighbor = neighborNode.currNode;
+			openNeighbors.pop_back();
+			mode = OPENMODE;
+		}
+		else if(waitNeighbors.size())
+		{
+			neighborNode = waitNeighbors.back();
+			neighbor = neighborNode.currNode;
+			waitNeighbors.pop_back();
+			mode = WAITMODE;
+		}
+		else if(newNeighbors.size())
+		{
+			neighbor = newNeighbors.back();
+			newNeighbors.pop_back();
+			mode = NEWMODE;
+		}
+		else
+			break;
+	//for(unsigned int x = 0; x<neighbors.size(); x++) 
+	//{
 		nodesTouched++;
 
 		/* step (5) */
-		graphState neighbor = neighbors[x];
+		//graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double g = topNode.gCost + edgeWeight;
 
@@ -1270,7 +1506,7 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 		double h_tmp; // for printing reports only
 		double h;
 		
-		ComputeNewHMero3a(h, h_tmp, neighbor, hTop, edgeWeight);
+		ComputeNewHMero3a(h, h_tmp, neighbor, neighborNode, hTop - edgeWeight, mode);
 
 		if(verbose) 
 		{
@@ -1284,7 +1520,7 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 		minH2 = min(minH2, h + edgeWeight);
 
 		/* step (6), neither in OPEN nor CLOSED */
-		if(!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() && !WaitList.IsIn(SearchNode(neighbor)) ) 
+		if(mode == NEWMODE) //!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() && !WaitList.IsIn(SearchNode(neighbor)) ) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
 			n.isGoal = (neighbor==goal);
@@ -1299,10 +1535,10 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 		/* step (7) */
 		else 
 		{
-			SearchNode neighborNode;
-			if(openQueue.IsIn(SearchNode(neighbor))) 
+			//SearchNode neighborNode;
+			if(mode == OPENMODE) //openQueue.IsIn(SearchNode(neighbor))) 
 			{
-				neighborNode = openQueue.find(SearchNode(neighbor));
+				//neighborNode = openQueue.find(SearchNode(neighbor));
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -1321,9 +1557,9 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 
 				RelaxOpenNode(f, g, neighbor, neighborNode, topNodeID);
 			}
-			else if(closedList.find(neighbor) != closedList.end()) 
+			else if(mode == CLOSEDMODE) //closedList.find(neighbor) != closedList.end()) 
 			{
-				neighborNode = closedList.find(neighbor)->second;
+				//neighborNode = closedList.find(neighbor)->second;
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -1347,7 +1583,7 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 				openQueue.Add(neighborNode); // add to OPEN
 			}
 			else { // must be in wait list !!
-				neighborNode = WaitList.find(SearchNode(neighbor));
+				//neighborNode = WaitList.find(SearchNode(neighbor));
 
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
@@ -1389,6 +1625,7 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 	return false;
 }
 
+/* NOT used */
 void Prop::CleanUpOpen(double solCost) {
 	while(openQueue.size()) 
 	{
@@ -1401,25 +1638,58 @@ void Prop::CleanUpOpen(double solCost) {
 	}
 }
 
-void Prop::Categorize(std::vector<graphState>& neighbors, std::vector<SearchNode>& closedNeighbors, std::vector<SearchNode>& openNeighbors, std::vector<graphState>& newNeighbors) {
+void Prop::Categorize(std::vector<graphState>& neighbors) {
+	openNeighbors.clear();
+	closedNeighbors.clear();
+	newNeighbors.clear();
+	waitNeighbors.clear();
+
 	for(unsigned int x = 0; x<neighbors.size(); x++) 
 	{
 		graphState neighbor = neighbors[x];
 		NodeLookupTable::iterator iter;
+		SearchNode tmp;
+		SearchNode tmp2;
 
-		if(openQueue.IsIn(neighbor)) {
-			openNeighbors.push_back(openQueue.find(SearchNode(neighbor)));
+		tmp = openQueue.find(SearchNode(neighbor));
+		if(tmp.currNode == neighbor) {  // in OPEN
+			openNeighbors.push_back(tmp);
 		}
-		else if((iter=closedList.find(neighbor)) != closedList.end()) {
+		else if((iter=closedList.find(neighbor)) != closedList.end()) {  // in CLOSED
 			closedNeighbors.push_back(iter->second);
 		}
 		else {
-			newNeighbors.push_back(neighbor);
+			tmp2 = WaitList.find(SearchNode(neighbor));
+			if(tmp2.currNode == neighbor)  // in WaitList
+				waitNeighbors.push_back(tmp2);
+			else   // new node
+				newNeighbors.push_back(neighbor);
 		}
 	}
 }
 
-void Prop::ReverseProp(SearchNode& topNode,std::vector<SearchNode>& closedNeighbors, std::vector<SearchNode>& openNeighbors) {
+void Prop::Categorize2(std::vector<graphState>& neighbors, std::vector<SearchNode>& openN, std::vector<SearchNode>& closedN, std::vector<graphState>& newN) 
+{
+	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	{
+		graphState neighbor = neighbors[x];
+		NodeLookupTable::iterator iter;
+		SearchNode tmp;
+
+		tmp = openQueue.find(SearchNode(neighbor));
+		if(tmp.currNode == neighbor) {
+			openN.push_back(tmp);
+		}
+		else if((iter=closedList.find(neighbor)) != closedList.end()) {
+			closedN.push_back(iter->second);
+		}
+		else {
+			newN.push_back(neighbor);
+		}
+	}
+}
+
+void Prop::ReverseProp(SearchNode& topNode) {
 	graphState topNodeID = topNode.currNode;
 
 	for(std::vector<SearchNode>::iterator iter = closedNeighbors.begin(); iter!=closedNeighbors.end(); iter++) 
@@ -1438,9 +1708,8 @@ void Prop::ReverseProp(SearchNode& topNode,std::vector<SearchNode>& closedNeighb
 	}
 }
 
-#define CLOSEDMODE 0
-#define OPENMODE   1
-#define NEWMODE    2
+
+
 /* Algorithm Dual Propagation. Only applicable to undirected graphs! */
 bool Prop::DoSingleStepDP(std::vector<graphState> &thePath) 
 {
@@ -1483,15 +1752,10 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 	neighbors.resize(0);
 	env->GetSuccessors(topNode.currNode, neighbors);
 
-	// categorize the neighbors
-	std::vector<SearchNode> closedNeighbors;
-	std::vector<SearchNode> openNeighbors;
-	std::vector<graphState> newNeighbors;
-
-	Categorize(neighbors,closedNeighbors,openNeighbors,newNeighbors);
+	Categorize(neighbors);
 
 	// reverseProp() here
-	ReverseProp(topNode,closedNeighbors,openNeighbors);
+	ReverseProp(topNode);
 	
 	graphState topNodeID = topNode.currNode;
 	closedList[topNodeID] = topNode;
@@ -1565,7 +1829,7 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 		double h_tmp; // for printing reports only
 		double h;
 		
-		ComputeNewHMero3a(h, h_tmp, neighbor, hTop, edgeWeight);
+		ComputeNewHMero3a(h, h_tmp, neighbor, neighborNode, hTop - edgeWeight, mode);
 
 		if(verbose) 
 		{
