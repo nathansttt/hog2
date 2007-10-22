@@ -357,14 +357,15 @@ public:
 	bool DoSingleStepDelay(std::vector<graphState> &thePath);
 	bool DoSingleStepDP(std::vector<graphState> &thePath);
 	void CleanUpOpen(double solCost);
-	void Categorize(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& closedNeighbors, std::vector<PropUtil::SearchNode>& openNeighbors, std::vector<graphState>& newNeighbors);
-	void ReverseProp(PropUtil::SearchNode& topNode,std::vector<PropUtil::SearchNode>& closedNeighbors, std::vector<PropUtil::SearchNode>& openNeighbors);
+	void Categorize(std::vector<graphState>& neighbors);
+	void Prop::Categorize2(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& openN, std::vector<PropUtil::SearchNode>& closedN, std::vector<graphState>& newN);
+	void ReverseProp(PropUtil::SearchNode& topNode);
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
 
 	void GetLowestG(PropUtil::SearchNode &gNode);
 	bool GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound, long TBound);
 	bool UpdateHOnly(PropUtil::SearchNode &node, double h);
-	void ComputeNewHMero3a(double &h, double &h_tmp, graphState neighbor, double hTop, double edgeWeight);
+	void ComputeNewHMero3a(double &h, double &h_tmp, graphState neighbor, PropUtil::SearchNode& neighborNode, double altH, int mode);
 	void RelaxOpenNode(double f, double g, graphState neighbor, PropUtil::SearchNode &neighborNode, graphState topNodeID);
 
 	void OpenGLDraw();
@@ -403,6 +404,12 @@ private:
 	Graph *grp;  // for drawing only
 
 	graphState justExpanded; // the node that is expanded in previous round, for drawing only
+
+	// categorize the neighbors
+	std::vector<PropUtil::SearchNode> closedNeighbors;
+	std::vector<PropUtil::SearchNode> openNeighbors;
+	std::vector<PropUtil::SearchNode> waitNeighbors;
+	std::vector<graphState> newNeighbors;
 };
 
 
