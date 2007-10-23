@@ -120,6 +120,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
+	InstallCommandLineHandler(MyCLHandler, "-seed", "-seed integer", "Sets the randomized number generator to use specified key.");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -235,10 +236,21 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	if (maxNumArgs <= 1)
-		return 0;
-	strncpy(gDefaultMap, argument[1], 1024);
-	return 2;
+	if( strcmp( argument[0], "-map" ) == 0 )
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		strncpy(gDefaultMap, argument[1], 1024);
+		return 2;
+	}
+	else if( strcmp( argument[0], "-seed" ) == 0 )
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		srand(atoi(argument[1]));
+		return 2;
+	}
+	return 2; //ignore typos
 }
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
