@@ -90,6 +90,7 @@ private:
 	bool ShouldAddEdge(node *aLowerNode, node *aHigherNode);
 	
 	void GetAllSolutionNodes(node *goal, std::vector<node*> &nodes);
+	bool Inconsistent(node *gNode);
 	void ExpandNeighbors(node *gNode);
 	path *ExtractAndRefinePath();
 	path *GetSolution(node *gNode);
