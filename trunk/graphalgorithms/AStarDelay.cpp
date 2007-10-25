@@ -35,7 +35,7 @@ void AStarDelay::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, gra
 	//if(thePath.size() > 0)
 		printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%ld.\n",GetNodesExpanded(),GetNodesTouched(),GetNodesReopened());
 
-	printf("Algorithm AStarDelay, time used=%lf sec, solution cost=%lf, solution edges=%d.\n",usedtime,solutionCost,pathSize);
+	printf("Algorithm AStarDelay, time used=%lf sec, N/sec=%lf, solution cost=%lf, solution edges=%d.\n",usedtime, GetNodesExpanded()/usedtime,solutionCost,pathSize);
 }
 
 bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 

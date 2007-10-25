@@ -358,7 +358,7 @@ public:
 	bool DoSingleStepDP(std::vector<graphState> &thePath);
 	void CleanUpOpen(double solCost);
 	void Categorize(std::vector<graphState>& neighbors);
-	void Prop::Categorize2(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& openN, std::vector<PropUtil::SearchNode>& closedN, std::vector<graphState>& newN);
+	void Categorize2(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& openN, std::vector<PropUtil::SearchNode>& closedN, std::vector<graphState>& newN);
 	void ReverseProp(PropUtil::SearchNode& topNode);
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
 
@@ -410,6 +410,8 @@ private:
 	std::vector<PropUtil::SearchNode> openNeighbors;
 	std::vector<PropUtil::SearchNode> waitNeighbors;
 	std::vector<graphState> newNeighbors;
+
+	PropUtil::SearchNode* newParent; // new parent for topNode, default is null
 };
 
 
