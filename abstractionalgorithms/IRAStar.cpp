@@ -45,17 +45,17 @@ path *IRAStar::DoOneSearchStep()
 	if (q.size() == 0)
 		return 0;
 	node *gNext = q.top().n;
-
-	// Check for Inconsistencies
-	//if( Inconsistent(gNext) )
-	//{
-	//	printf("  Inconsistency \n");
-	//	return 0;
-	//}
-
 	q.pop();
 	//printf("---\nAnalyzing %d next g:%f h:%f\n", gNext->GetNum(), GetGCost(gNext), GetHCost(gNext));
 	//std::cout << *gNext << std::endl;
+
+	// Check for Inconsistencies:
+	if( Inconsistent(gNext) )
+	{
+		// Do not expand, just put back on open list with new h value
+		q.Add(GNode(gNext));
+		return 0;
+	}
 
 	
 	if (gNext == gGoal) // we found the goal
@@ -145,6 +145,8 @@ void IRAStar::SetInitialValues(node *gNewNode, node *aRealNode, node *gParent)
 	gNewNode->SetLabelL(kCorrespondingNode, aRealNode->GetNum());
 	if (gParent)
 	{
+		SetGCost(gNewNode, 0);
+		SetHCost(gNewNode, 0);
 		gNewNode->SetLabelF(kCachedHCost1, gParent->GetLabelF(kCachedHCost1));
 		gNewNode->SetLabelF(kCachedHCost2, gParent->GetLabelF(kCachedHCost2));
 	}
@@ -178,6 +180,7 @@ bool IRAStar::Inconsistent(node *gNode)
 	neighbor_iterator ni ;
 	node *gNeighbor ;
 	edge *e ;
+	bool changedNodeH = false;
 
 	ni = gNode->getNeighborIter();
 	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
@@ -188,19 +191,23 @@ bool IRAStar::Inconsistent(node *gNode)
 		// Correct the heuristic value of neighboring nodes
 		if ( fless(GetHCost(gNeighbor), GetHCost(gNode)-e->GetWeight()) )
 		{
-			//SetHCost( gNeighbor, GetHCost(gNode)-e->GetWeight());
-			//reopen if g-value changes
+			SetHCost( gNeighbor, GetHCost(gNode)-e->GetWeight());
+			// In Open List (cannot remove because using heap
+			// FIXME:
+			//if( q.IsIn(GNode(gNeighbor)) )
+				// remove from queue and add in again (with new priority)
 		}
 		// Correct the heuristic value of node
 		if ( fless(GetHCost(gNode), GetHCost(gNeighbor)-e->GetWeight()) )
 		{
-			//SetHCost( gNode, GetHCost(gNeighbor)-e->GetWeight());
-			//printf("%f < %f - %f \n", GetHCost(gNeighbor), GetHCost(gNode), e->GetWeight());
-			// Put back on the open list instead of closed list
-			//return true;
+
+			//printf("%f < %f - %f \n", GetHCost(gNode), GetHCost(gNeighbor), e->GetWeight());
+			SetHCost( gNode, GetHCost(gNeighbor)-e->GetWeight());
+			// Put back on the open list instead of closed list (in main loop)
+			changedNodeH = true;
 		}
 	}
-	return false;
+	return changedNodeH;
 }
 
 /* 
@@ -510,15 +517,15 @@ double IRAStar::GetHCost(node *n)
 {
 //	if (n->GetLabelL(kIteration) < currentIteration-1)
 //		return std::max(iterationLimits.back(), val);
-	//return max( n->GetLabelL(kHCost), absGraph->h(n,aGoal) );
+	//return max( n->GetLabelF(kHCost), absGraph->h(n,aGoal) );
 	//return absGraph->h(n,aGoal);
-	//return n->GetLabelL(kHCost);
+	//return n->GetLabelF(kHCost);
 	return std::max( n->GetLabelF(kHCost), GetCachedHCost(n) );
 }
 
 void IRAStar::SetHCost(node *n, double val)
 {
-	n->SetLabelL(kHCost, val);
+	n->SetLabelF(kHCost, val);
 }
 
 double IRAStar::GetCachedHCost(node *n)
@@ -543,15 +550,15 @@ void IRAStar::SetCachedHCost(node *n, double val)
 
 double IRAStar::GetGCost(node *n)
 {
-	return n->GetLabelL(kGCost);
+	return n->GetLabelF(kGCost);
 }
 
 void IRAStar::SetGCost(node *n, double val)
 {
-	n->SetLabelL(kGCost, val);
+	n->SetLabelF(kGCost, val);
 }
 
 double IRAStar::GetFCost(node *n)
 {
-	return n->GetLabelL(kGCost)+n->GetLabelL(kHCost);
+	return n->GetLabelF(kGCost)+n->GetLabelF(kHCost);
 }

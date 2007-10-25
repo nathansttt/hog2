@@ -203,7 +203,7 @@ path *IRDijkstra::ExtractAndRefinePath()
 		//printf("## Refining %d\n", nodes[x]->GetNum());
 		RefineNode(nodes[x]);
 	}
-	printf("%d refined nodes %d expanded nodes\n", nodesRefined, nodesExpanded);
+	printf("%d refined nodes %d expanded nodes with pathlength %u \n", nodesRefined, nodesExpanded, p->length() );
 	closedList.clear();
 	q.reset();
 	q.Add(GNode(gStart));
