@@ -41,7 +41,7 @@ void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphStat
 	//char algname[20];
 	
 
-	printf("Algorithm %s, time used=%lf sec, solution cost=%lf, solution edges=%d.\n", algname,usedtime,solutionCost,(int)thePath.size());
+	printf("Algorithm %s, time used=%lf sec, N/sec=%lf, solution cost=%lf, solution edges=%d.\n", algname,usedtime,GetNodesExpanded()/usedtime,solutionCost,(int)thePath.size());
 }
 
 bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath) {
@@ -95,20 +95,39 @@ bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, 
 }
 
 bool Prop::DoSingleSearchStep(std::vector<graphState> &thePath) {
-	if(verID == PROP_A)
+	switch (verID) 
+	{
+	case PROP_A:
 		return DoSingleStepA(thePath);
-	if(verID == PROP_B)
+	case PROP_B:
 		return DoSingleStepB(thePath);
-	else if(verID == PROP_BP) 
+	case PROP_BP:
 		return DoSingleStepBP(thePath);
-	else if(verID == PROP_APPROX)
+	case PROP_APPROX:
 		return DoSingleStepApprox(thePath);
-	else if(verID == PROP_BFS)
+	case PROP_BFS:
 		return DoSingleStepBFS(thePath);
-	else  if(verID == PROP_DELAY)
+	case PROP_DELAY:
 		return DoSingleStepDelay(thePath);
-	else // PROP_DP
+	case PROP_DP:
 		return DoSingleStepDP(thePath);
+	default:
+		return true;
+	}
+	//if(verID == PROP_A)
+	//	return DoSingleStepA(thePath);
+	//if(verID == PROP_B)
+	//	return DoSingleStepB(thePath);
+	//else if(verID == PROP_BP) 
+	//	return DoSingleStepBP(thePath);
+	//else if(verID == PROP_APPROX)
+	//	return DoSingleStepApprox(thePath);
+	//else if(verID == PROP_BFS)
+	//	return DoSingleStepBFS(thePath);
+	//else  if(verID == PROP_DELAY)
+	//	return DoSingleStepDelay(thePath);
+	//else // PROP_DP
+	//	return DoSingleStepDP(thePath);
 }
 
 void Prop::ComputeNewHMero3a(double &h, double &h_tmp, graphState neighbor, SearchNode& nb, double altH, int mode)
@@ -149,11 +168,7 @@ void Prop::RelaxOpenNode(double f, double g, graphState neighbor, SearchNode &ne
 		neighborNode.copy(f,g,neighbor,topNodeID); // parent may be changed
 		openQueue.IncreaseKey(neighborNode);  // adjust its position in OPEN
 	}
-	//else
-	//{// if f does not change, but since other info may be changed, we must still inform the openQueue !
-	//	neighborNode.copy(f,g,neighbor,topNodeID); // parent may be changed
-	//	openQueue.Update(neighborNode);  
-	//}
+
 }
 
 bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
@@ -896,6 +911,7 @@ bool Prop::UpdateHOnly(SearchNode &neighborNode, double h)
 	return false;
 }
 
+/* after using Categorize(), this algorithm is not quite right. to be fixed later ... */
 bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath) 
 {
 	/* step (2) */
@@ -960,48 +976,64 @@ bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath)
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 
-	Categorize(neighbors);
+	//Categorize(neighbors);
 
 	double hTop = topNode.fCost - topNode.gCost;
 	double minH2 = DBL_MAX; // min ( edgeWeight(i) + h(neighbor(i)) )
 
 
-	while(true) 
-	{
-		SearchNode neighborNode;
-		graphState neighbor;
-		int mode;
-
-		if(closedNeighbors.size()) 
-		{
-			neighborNode = closedNeighbors.back();
-			neighbor = neighborNode.currNode;
-			closedNeighbors.pop_back();
-			mode = CLOSEDMODE;
-		}
-		else if(openNeighbors.size())
-		{
-			neighborNode = openNeighbors.back();
-			neighbor = neighborNode.currNode;
-			openNeighbors.pop_back();
-			mode = OPENMODE;
-		}
-		else if(newNeighbors.size())
-		{
-			neighbor = newNeighbors.back();
-			newNeighbors.pop_back();
-			mode = NEWMODE;
-		}
-		else
-			break;
-	//for(unsigned int x = 0; x<neighbors.size(); x++) 
+	//while(true) 
 	//{
+	//	SearchNode neighborNode;
+	//	graphState neighbor;
+	//	int mode;
+
+	//	if(closedNeighbors.size()) 
+	//	{
+	//		neighborNode = closedNeighbors.back();
+	//		neighbor = neighborNode.currNode;
+	//		closedNeighbors.pop_back();
+	//		mode = CLOSEDMODE;
+	//	}
+	//	else if(openNeighbors.size())
+	//	{
+	//		neighborNode = openNeighbors.back();
+	//		neighbor = neighborNode.currNode;
+	//		openNeighbors.pop_back();
+	//		mode = OPENMODE;
+	//	}
+	//	else if(newNeighbors.size())
+	//	{
+	//		neighbor = newNeighbors.back();
+	//		newNeighbors.pop_back();
+	//		mode = NEWMODE;
+	//	}
+	//	else
+	//		break;
+	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	{
 		nodesTouched++;
 
 		/* step (5) */
-		//graphState neighbor = neighbors[x];
+		graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double g = topNode.gCost + edgeWeight;
+
+		int mode;
+		SearchNode neighborNode;
+		neighborNode = openQueue.find(SearchNode(neighbor));
+		if(neighborNode.currNode == neighbor)
+			mode = OPENMODE;
+		else {
+			NodeLookupTable::iterator iter;
+			if((iter = closedList.find(neighbor)) != closedList.end()) {
+				mode = CLOSEDMODE;
+				neighborNode = iter->second;
+			}
+			else {
+				mode = NEWMODE;
+			}
+		}
 
 		/* step Mero (3a) */
 		double h_tmp; // for printing reports only
@@ -1643,6 +1675,10 @@ void Prop::Categorize(std::vector<graphState>& neighbors) {
 	closedNeighbors.clear();
 	newNeighbors.clear();
 	waitNeighbors.clear();
+	//double currentG = topNode.gCost;
+	//graphState topNodeID = topNode.currNode;
+
+	//newParent = 0; // default to null
 
 	for(unsigned int x = 0; x<neighbors.size(); x++) 
 	{
@@ -1654,9 +1690,19 @@ void Prop::Categorize(std::vector<graphState>& neighbors) {
 		tmp = openQueue.find(SearchNode(neighbor));
 		if(tmp.currNode == neighbor) {  // in OPEN
 			openNeighbors.push_back(tmp);
+			//double newG = tmp.gCost + env->GCost(topNodeID,neighbor);
+			//if(fgreater(currentG, newG)) {
+			//	currentG = newG;
+			//	newParent = &(openNeighbors.back());
+			//}
 		}
 		else if((iter=closedList.find(neighbor)) != closedList.end()) {  // in CLOSED
 			closedNeighbors.push_back(iter->second);
+			//double newG = iter->second.gCost + env->GCost(topNodeID,neighbor);
+			//if(fgreater(currentG,newG)) {
+			//	currentG = newG;
+			//	newParent = &(closedNeighbors.back());
+			//}
 		}
 		else {
 			tmp2 = WaitList.find(SearchNode(neighbor));
@@ -1692,19 +1738,36 @@ void Prop::Categorize2(std::vector<graphState>& neighbors, std::vector<SearchNod
 void Prop::ReverseProp(SearchNode& topNode) {
 	graphState topNodeID = topNode.currNode;
 
+	//if(newParent != 0) {
+	//	double newG = newParent->gCost + env->GCost(topNodeID,newParent->currNode);
+	//	topNode.copy(topNode.fCost - topNode.gCost + newG, newG, topNodeID, newParent->currNode);
+	//}
+
+	newParent = 0;
+	double currentG = topNode.gCost;
 	for(std::vector<SearchNode>::iterator iter = closedNeighbors.begin(); iter!=closedNeighbors.end(); iter++) 
 	{
 		graphState neighbor = iter->currNode;
 		double newG = env->GCost(topNodeID,neighbor) + iter->gCost;
-		if(fgreater(topNode.gCost,newG)) 
-			topNode.copy(topNode.fCost - topNode.gCost + newG, newG, topNodeID, neighbor);
+		if(fgreater(currentG,newG))  {
+			currentG = newG;
+			newParent = &(*iter);
+		}
+			//topNode.copy(topNode.fCost - topNode.gCost + newG, newG, topNodeID, neighbor);
 	}
 	for(std::vector<SearchNode>::iterator iter = openNeighbors.begin(); iter!=openNeighbors.end(); iter++)
 	{
 		graphState neighbor = iter->currNode;
 		double newG = env->GCost(topNodeID,neighbor) + iter->gCost;
-		if(fgreater(topNode.gCost,newG))
-			topNode.copy(topNode.fCost - topNode.gCost + newG, newG, topNodeID, neighbor);
+		if(fgreater(currentG,newG)) {
+			currentG = newG;
+			newParent = &(*iter);
+		}
+			//topNode.copy(topNode.fCost - topNode.gCost + newG, newG, topNodeID, neighbor);
+	}
+
+	if(newParent) {
+		topNode.copy(topNode.fCost - topNode.gCost + currentG, currentG, topNodeID, newParent->currNode);
 	}
 }
 
