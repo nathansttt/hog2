@@ -10,6 +10,8 @@
 #include "IRAStar.h"
 #include <vector>
 
+#define INCONSISTENT_HEURISTIC
+
 using namespace IRAStarConstants;
 
 IRAStar::IRAStar()
@@ -50,12 +52,14 @@ path *IRAStar::DoOneSearchStep()
 	//std::cout << *gNext << std::endl;
 
 	// Check for Inconsistencies:
+#ifdef INCONSISTENT_HEURISTIC
 	if( Inconsistent(gNext) )
 	{
 		// Do not expand, just put back on open list with new h value
 		q.Add(GNode(gNext));
 		return 0;
 	}
+#endif
 
 	
 	if (gNext == gGoal) // we found the goal
@@ -242,15 +246,16 @@ void IRAStar::ExpandNeighbors(node *gNode)
 		// if already in closed list (do nothing if consistent heuristic)
 		else if (closedList.find(gNeighbor->GetNum()) != closedList.end())
 		{
-			//FIXME:
 			// when using an inconsistent heuristic, we might have closed a node with the wrong g-value.
 			// if this is the case, re-open the node
+#ifdef INCONSISTENT_HEURISTIC
 			if (fless(GetGCost(gNode)+e->GetWeight(), GetGCost(gNeighbor) ))
 			{
 				//printf("Re-opening neighbor with g=%f to g=%f\n", GetGCost(gNeighbor), GetGCost(gNode)+e->GetWeight());
 				SetGCost(gNeighbor, GetGCost(gNode)+e->GetWeight()/*1.0*/);
 				q.Add(GNode(gNeighbor));
 			}
+#endif
 		}
 		else { // add to open list
 			SetHCost(gNeighbor, GetCachedHCost(gNeighbor));
@@ -531,7 +536,8 @@ void IRAStar::SetHCost(node *n, double val)
 double IRAStar::GetCachedHCost(node *n)
 {
 	double val = 0;
-	if ((currentIteration%2) == 0)
+	//if ((currentIteration%2) == 0)
+	if( gStart->GetLabelL(kAbstractionLevel)%2 == 0 )  // Always switch diretions on base level
 		val = n->GetLabelF(kCachedHCost2);
 	else
 		val = n->GetLabelF(kCachedHCost1);
@@ -542,7 +548,8 @@ double IRAStar::GetCachedHCost(node *n)
 
 void IRAStar::SetCachedHCost(node *n, double val)
 {
-	if ((currentIteration%2) == 0)
+	//if ((currentIteration%2) == 0)
+	if( gStart->GetLabelL(kAbstractionLevel)%2 == 0 )  // Always switch diretions on base level
 		n->SetLabelF(kCachedHCost1, val);
 	else
 		n->SetLabelF(kCachedHCost2, val);
