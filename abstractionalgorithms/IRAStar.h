@@ -48,8 +48,8 @@ namespace IRAStarConstants {
 		bool operator()(const GNode &i1, const GNode &i2)
 		{
 			// return true if node1 has higher f-cost
-			return (fgreater(i1.n->GetLabelL(kGCost)+i1.n->GetLabelL(kHCost),
-											 i2.n->GetLabelL(kGCost)+i2.n->GetLabelL(kHCost)));
+			return (fgreater(i1.n->GetLabelF(kGCost)+i1.n->GetLabelF(kHCost),
+											 i2.n->GetLabelF(kGCost)+i2.n->GetLabelF(kHCost)));
 		}
 	};
 	
