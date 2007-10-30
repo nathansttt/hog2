@@ -226,7 +226,9 @@ void IRAStar::ExpandNeighbors(node *gNode)
 {
 	neighbor_iterator ni ;
 	node *gNeighbor ;
-	edge *e ;
+	edge *e;
+
+//	printf("Expanding %5d f-cost is %1.2f, g-cost is %1.2f\n", gNode->GetNum(), GetFCost(gNode), GetGCost(gNode));
 
 	ni = gNode->getNeighborIter();
 	for (int next = gNode->nodeNeighborNext(ni); next != -1; next = gNode->nodeNeighborNext(ni))
@@ -234,6 +236,7 @@ void IRAStar::ExpandNeighbors(node *gNode)
 		nodesTouched++;
 		gNeighbor = g->GetNode(next);
 		e = g->FindEdge(gNode->GetNum(), gNeighbor->GetNum());
+		
 		assert( e != 0 );
 		// If already in open list
 		if (q.IsIn(GNode(gNeighbor))) // check for lower cost
