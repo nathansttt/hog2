@@ -25,8 +25,8 @@ namespace IRAStarConstants {
 		kCorrespondingNode = 1, // this is a LONG label
 		kGCost = 2, // this is a DOUBLE label
 		kHCost = 3,	// this is a DOUBLE label
-		kCachedHCost1 = 4,	// this is a DOUBLE label
-		kCachedHCost2 = 5,	// this is a DOUBLE label
+		//kCachedHCost1 = 4,	// this is a DOUBLE label
+		//kCachedHCost2 = 5,	// this is a DOUBLE label
 		//kIteration = 6, // this is a LONG label
 		//		kOptimalFlag = 4, // this is a LONG label
 		//		kInOpenList = 5 // this is a LONG label
@@ -94,10 +94,11 @@ private:
 	void ExpandNeighbors(node *gNode);
 	path *ExtractAndRefinePath();
 	path *GetSolution(node *gNode);
+	void   SetHValues(int f);
 	double GetHCost(node *);
 	void   SetHCost(node *, double);
-	double GetCachedHCost(node *);
-	void   SetCachedHCost(node *, double);
+	//double GetCachedHCost(node *);
+	//void   SetCachedHCost(node *, double);
 	double GetGCost(node *);
 	void   SetGCost(node *, double);
 	double GetFCost(node *);
