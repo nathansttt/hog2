@@ -11,8 +11,12 @@
 #include <vector>
 
 #define HEURISTIC_COLOR
-//#define INCONSISTENT_HEURISTIC
-//#define PATHMAX
+#define MAX_HEURISTIC_VALUE 50.0
+//#define P_G_CACHING
+#define OPTIMAL_PATH_CACHING	// MUST be used with INCONSISTENT_HEURISTIC!!
+				// and should be used with PATHMAX
+#define INCONSISTENT_HEURISTIC
+#define PATHMAX
 
 using namespace IRAStarConstants;
 
@@ -59,7 +63,7 @@ path *IRAStar::DoOneSearchStep()
 	{
 		// Do not expand, just put back on open list with new h value
 		q.Add(GNode(gNext));
-		closedList.remove(gNext->getNum());
+		//closedList.remove(gNext);
 		return 0;
 	}
 #endif
@@ -281,8 +285,10 @@ path *IRAStar::ExtractAndRefinePath()
 	path *p = GetSolution(gGoal);
 
 	//FIXME - commented out because does not work
-	//SetHValues(p->length());		//set heuristic values for all nodes on closed list
-	int f = p->length();
+#ifdef P_G_CACHING
+	SetHValues( p->length() - 1 );		//set heuristic values for all nodes on closed list
+						// path p contains all nodes (not the edges), so the number of edges is slightly less.
+#endif
 
 	iterationLimits.push_back(GetGCost(gGoal));
 	for (path *i = p; i; i = i->next)
@@ -292,14 +298,10 @@ path *IRAStar::ExtractAndRefinePath()
 			done = false;
 		}
 		
-		//Test heuristics
-		//SetHCost( i->n, std::max( 0.0, f - GetGCost(i->n) ) );
-		//if( i->n == gGoal )
-		//	SetHCost( i->n, 0.0 );
-		//else
-		//	SetHCost( i->n, 1.0 );
-		//if( i->n != gGoal )
-			//SetHCost( i->n, 1.0 );
+#ifdef OPTIMAL_PATH_CACHING
+		if( i->n != gGoal )
+			SetHCost( i->n, p->length()-1 - GetGCost(i->n) );
+#endif
 	}
 	if (done)
 		return p;
@@ -308,8 +310,6 @@ path *IRAStar::ExtractAndRefinePath()
 	GetAllSolutionNodes(gGoal, nodes);
 	for (unsigned int x = 0; x < nodes.size(); x++)
 	{
-		if( nodes[x] != gGoal )
-			SetHCost( nodes[x], 1.0 );
 		//printf("## Refining %d\n", nodes[x]->GetNum());
 		RefineNode(nodes[x]);
 	}
@@ -504,58 +504,58 @@ void IRAStar::OpenGLDraw()
 		n = g->GetNode(e->getFrom());
 #ifdef HEURISTIC_COLOR
 		if (q.top().n == n)
-			glColor3f(	GetHCost(n)*0.6+0.4, 
+			glColor3f(	GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4, 
 					0.0, 
-					GetHCost(n)*0.6+0.4);
+					GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4);
 		else if (n == gStart)
 			glColor3f(	0, 
 					0, 
-					GetHCost(n)*0.6+0.4);
+					GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4);
 		else if (n == gGoal)
 			glColor3f(	0, 
-					GetHCost(n)*0.6+0.4,
+					GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4,
 					0);
 		else if (closedList.find(n->GetNum()) != closedList.end()) // on closed list
 			glColor3f(	GetHCost(n), 
 					GetHCost(n), 
 					GetHCost(n));
 		else if (q.IsIn(GNode(n)))
-			glColor3f(	GetHCost(n)*1.0, 
-					GetHCost(n)*1.0, 
-					GetHCost(n)*1.0);
+			glColor3f(	GetHCost(n)*1.0/MAX_HEURISTIC_VALUE, 
+					GetHCost(n)*1.0/MAX_HEURISTIC_VALUE, 
+					GetHCost(n)*1.0/MAX_HEURISTIC_VALUE);
 		else
-			glColor3f(	GetHCost(n)*1.0, 
-					GetHCost(n)*1.0, 
-					GetHCost(n)*1.0);
+			glColor3f(	GetHCost(n)*1.0/MAX_HEURISTIC_VALUE, 
+					GetHCost(n)*1.0/MAX_HEURISTIC_VALUE, 
+					GetHCost(n)*1.0/MAX_HEURISTIC_VALUE);
 		
 		recVec rv = absGraph->GetNodeLoc(GetRealNode(n));
 		glVertex3f(rv.x, rv.y, rv.z);
 		
 		n = g->GetNode(e->getTo());
 		if (q.top().n == n)
-			glColor3f(	GetHCost(n)*0.6+0.4, 
+			glColor3f(	GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4, 
 					0.0, 
-					GetHCost(n)*0.6+0.4);
+					GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4);
 		else if (n == gStart)
 			glColor3f(	0, 
 					0, 
-					GetHCost(n)*0.6+0.4);
+					GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4);
 		else if (n == gGoal)
 			glColor3f(	0, 
-					GetHCost(n)*0.6+0.4,
+					GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4,
 					0);
 		else if (closedList.find(n->GetNum()) != closedList.end()) // on closed list
 			glColor3f(	GetHCost(n), 
 					GetHCost(n), 
 					GetHCost(n));
 		else if (q.IsIn(GNode(n)))
-			glColor3f(	GetHCost(n)*1.0, 
-					GetHCost(n)*1.0, 
-					GetHCost(n)*1.0);
+			glColor3f(	GetHCost(n)*1.0/MAX_HEURISTIC_VALUE, 
+					GetHCost(n)*1.0/MAX_HEURISTIC_VALUE, 
+					GetHCost(n)*1.0/MAX_HEURISTIC_VALUE);
 		else
-			glColor3f(	GetHCost(n)*1.0, 
-					GetHCost(n)*1.0, 
-					GetHCost(n)*1.0);
+			glColor3f(	GetHCost(n)*1.0/MAX_HEURISTIC_VALUE, 
+					GetHCost(n)*1.0/MAX_HEURISTIC_VALUE, 
+					GetHCost(n)*1.0/MAX_HEURISTIC_VALUE);
 #else
 		if (q.top().n == n)
 			glColor3f(1.0, 0.0, 1.0);
@@ -615,7 +615,7 @@ void IRAStar::SetHValues( int f )
 		//	<< " g " << GetGCost(n) 
 		//	<< " h " << f - GetGCost(n) << std::endl;
 		//SetCachedHCost( n, std::max( 0.0, (double) f - GetGCost(n) ) );
-		SetHCost( n, std::max( 0.0, (double) f - GetGCost(n) ) );
+		SetHCost( n, (double)f - GetGCost(n) );
 	}
 }
 
