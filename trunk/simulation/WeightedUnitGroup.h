@@ -11,7 +11,7 @@ template <class state, class action, class environment>
 class WeightedUnitGroup : public UnitGroup<state,action,environment>
 {
 	public:
-		WeightedUnitGroup(){wt = -1; prop = -1; useWindow = false; windowSize = -1; localWeights = false; currDrawEnv = 0; }
+		WeightedUnitGroup(){wt = -1; prop = -1; useWindow = false; windowSize = -1; localWeights = false; currDrawEnv = 0; noweighting = false; }
 //		WeightedUnitGroup(double weight, double proportion) {wt = weight; prop = proportion;}
 		
 		void SetWeight(double weight) {wt = weight;}
@@ -20,6 +20,9 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 		void SetWindowSize(double d) {windowSize = d;}
 		void UseLocalWeights(bool b) {localWeights = b;}
 		void SetLocalWeightRadius (double r) {localRadius = r;}
+		void SetNoWeighting(bool b) {noweighting = b;}
+		
+		
 		
 		virtual ~WeightedUnitGroup() 
 		{	
@@ -50,6 +53,9 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 							unitWme[unitWme.size()-1]->UseWindow(true);
 							unitWme[unitWme.size()-1]->SetWindowSize(windowSize);
 						}
+						if(noweighting)
+							unitWme[unitWme.size()-1]->SetNoWeighting(true);
+							
 						environment* uenv = unitWme[unitWme.size()-1];
 						unitEnv.push_back(uenv);
 					}
@@ -65,6 +71,8 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 					wme->UseWindow(true);
 					wme->SetWindowSize(windowSize);
 				}
+				if(noweighting)
+					wme->SetNoWeighting(true);
 					
 				env = wme;
 				myE = e;
@@ -153,6 +161,9 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 							unitWme[unitWme.size()-1]->UseWindow(true);
 							unitWme[unitWme.size()-1]->SetWindowSize(windowSize);
 						}
+						if(noweighting)
+							unitWme[unitWme.size()-1]->SetNoWeighting(true);
+							
 						environment* uenv = unitWme[unitWme.size()-1];
 						unitEnv.push_back(uenv);
 					}
@@ -169,7 +180,8 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 					wme->UseWindow(true);
 					wme->SetWindowSize(windowSize);
 				}	
-					
+				if(noweighting)
+					wme->SetNoWeighting(true);
 				env = wme;
 				myE = e;
 			}
@@ -198,6 +210,11 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			}
 		}
 		
+		double ComputeArrowMetric()
+		{
+			return wme->ComputeArrowMetric();
+		}
+		
 		
 	private:
 		WeightedMap2DEnvironment* wme;
@@ -212,5 +229,6 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 		bool localWeights;
 		double localRadius;
 		unsigned int currDrawEnv;
+		bool noweighting;
 };
 
