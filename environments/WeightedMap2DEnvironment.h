@@ -140,7 +140,10 @@ public:
 	// Needed for local copy updating of weights
 	void SetAngle(xyLoc &l, Vector2D angle);
 	Vector2D GetAngle(xyLoc &l);
+	void SetNoWeighting(bool b) {noWeighting = b; }
 	
+	double ComputeArrowMetric();
+	Vector2D GetAngleFromDirection(tDirection dir);
 private:
 	BaseMapOccupancyInterface* oi;
 	
@@ -155,6 +158,7 @@ private:
 	bool useWindow;
 	double windowSize;
 	
+	bool noWeighting;
 };
 
 typedef UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment> UnitWeightedMapSimulation;

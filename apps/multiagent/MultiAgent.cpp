@@ -87,6 +87,11 @@ double trimRadius = 0;
 bool useLocal = false;
 double localRadius = 0; 
 
+bool weightedAstar = false;
+double astarweight = 1; 
+
+bool noWeighting = false;
+
 WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug;
 int main(int argc, char* argv[])
 {
@@ -101,6 +106,20 @@ int main(int argc, char* argv[])
 */
 void CreateSimulation(int id)
 {
+// 	Map* map;
+// 	map = new Map("../../maps/local/test_s2_ground.map");
+// 	map->scale(64,64);
+// 	map->save("../../maps/local/test_s2_64.map");
+// 	
+// 	delete map;
+// 	
+// 	map = new Map("../../maps/local/test_s3_ground.map");
+// 	
+// 	map->scale(64,64);
+// 	map->save("../../maps/local/test_s3_64.map");
+// 	
+// 	exit(0);
+// 	
 	if(scenFileName[0] != 0)
 	{
 		RunScenario(id);
@@ -109,8 +128,8 @@ void CreateSimulation(int id)
 		
 		
 		
-/*	// Only show 1 copy of the map
-	SetNumPorts(id, 1);
+	// Only show 1 copy of the map
+/*	SetNumPorts(id, 1);
 	
 	Map *map;
 	if (gDefaultMap[0] == 0)
@@ -120,6 +139,9 @@ void CreateSimulation(int id)
 	else
 		map = new Map(gDefaultMap);
 
+	map->setTileSet(kWinterTile);
+	
+//	unitSims[id]->SetPaused(true);
 	switch(envType)
 	{
 		case 0:
@@ -158,6 +180,7 @@ void RunScenario(int id)
 	char newname[1024] = "\0";
 	e.GetMapName(mname);
 	Map* map = new Map(mname);
+	map->setTileSet(kWinterTile);
 	
 	unitSims.resize(id+1);
 	env = new AbsMapEnvironment(new MapFlatAbstraction(map));
@@ -174,6 +197,8 @@ void RunScenario(int id)
 			wug->SetWeight(weight);
 		if(proportion != -1)
 			wug->SetProportion(proportion);
+ 		if(noWeighting)
+			wug->SetNoWeighting(true);
 	
 		unitSims[id]->AddUnitGroup(wug);
 	}
@@ -220,6 +245,8 @@ void RunScenario(int id)
 		TemplateAStar<xyLoc, tDirection, AbsMapEnvironment> *alg = new TemplateAStar<xyLoc, tDirection, AbsMapEnvironment>();
 		if(radius != -1)
 			alg->SetRadius(radius);
+		if(weightedAstar)
+			alg->SetWeight(astarweight);
 			
  		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg);
 		su->AddPatrolLocation(goal);
@@ -273,8 +300,13 @@ void RunScenario(int id)
 			{
 				unitSims[id]->StepTime(timestep);
 				time += timestep;
-				
-				if(time > 10000) 
+				if(((int)time%15==0) && (wug->GetMembers().size() > 0))
+				{
+					std::cout<<wug->ComputeArrowMetric()<<std::endl;
+				}
+					
+					
+				if(time > 100000) 
 				{
 					std::cout<<"Ran out of time. Details in outfile "<<outFileName<<std::endl;
  					exit(1);
@@ -286,15 +318,13 @@ void RunScenario(int id)
 			
 			outfile<<"Total simulation time "<<time<<std::endl<<std::endl; 
 			
-//			StatCollection* sc = unitSims[id]->GetStats();
-// 			sc->enablePrintOutput(true);
-// 			sc->addIncludeFilter("nodesExpanded");
-// 			sc->addIncludeFilter("distanceTravelled");
-// 			sc->addIncludeFilter("directionChanges");
-// 			sc->addIncludeFilter("failedMoves");
-			//sc->printStatsTable();
-			
-				// Collect statistics
+			// Get the "arrow metric" from the weighted unit group
+// 			if(wug->GetMembers().size() > 0)
+// 			{
+// 				std::cout<<wug->ComputeArrowMetric()<<std::endl;
+// 			}	
+		
+			// Collect statistics
 			unitSims[id]->ClearAllUnits();
 			PrintStatistics(id,outfile);			
 			exit(0); 			
@@ -573,6 +603,8 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-trim", "-trim radius", "Trim the path to radius");
 	InstallCommandLineHandler(MyCLHandler, "-local", "-local radius", "Each unit keeps a local copy of weight and updates within a distance of radius");
 	
+	InstallCommandLineHandler(MyCLHandler, "-astarweight", "-astarweight weight", "Use weighted A*");
+	InstallCommandLineHandler(MyCLHandler, "-noweighting", "-noweighting", "Draw directions but don't do weighting");
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
@@ -728,6 +760,17 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		useLocal = true;
 		localRadius = atof(argument[1]);
+	}
+	else if(strcmp(argument[0],"-astarweight")==0)
+	{
+		weightedAstar = true;
+		astarweight = atof(argument[1]);
+	}	
+	else if(strcmp(argument[0],"-noweighting")==0)
+	{
+		noWeighting = true;
+		weighted = true;
+		return 1;
 	}
 	return 2;
 }

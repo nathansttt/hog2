@@ -19,6 +19,7 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 	oldProportion = 0.7;
 	
 	useWindow = false;
+	noWeighting = false;
 	//for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	//{
 	//	// Reset the counters
@@ -34,6 +35,7 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(AbsMapEnvironment *ame)
 		diffWeight = 1;
 		oldProportion = 0.7;
 		useWindow = false;
+		noWeighting = false;
 }
 
 /**
@@ -186,6 +188,9 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 	//std::cou<t<"l1 "<<l1<<" l2 "<<l2<<std::endl;
 	double h = HCost(l1, l2);
 	
+	if(noWeighting)
+		return h;
+	
 	// No weighting if we're using the window and we're outside the window
 	if(useWindow && ( (HCost(windowCenter,l1) > windowSize) || 
 							(HCost(windowCenter, l2) > windowSize)))
@@ -198,21 +203,8 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 
 	tDirection dir = GetAction(l1,l2);
 	
-	Vector2D angle;
-	switch (dir)
-	{
-		case kN: angle.Set(0,-1); break;
-		case kS: angle.Set(0,1);break;
-		case kE: angle.Set(1,0); break;
-		case kW: angle.Set(-1,0);break;
-		case kNW: angle.Set(-1,-1); break;
-		case kSW: angle.Set(-1,1);break;
-		case kNE: angle.Set(1,-1);  break;
-		case kSE: angle.Set(1,1); break;
-		default: break;
-	}
-	
-	
+	Vector2D angle = GetAngleFromDirection(dir);
+		
 	AngleUtil::AngleSearchNode sn(l1,GetStateHash(l1));
 	
 	double weight1 = 0; double weight2 = 0;
@@ -303,12 +295,14 @@ void WeightedMap2DEnvironment::OpenGLDraw(int window)
 			
 			// Reduce length to 40%
 			GLdouble xx, yy, zz, rad;	
-			glColor3f(1.0, 0,0);
+			//glColor3f(1.0, 0,0);
+			glColor3f(0,0,0);
 			map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+			glLineWidth(2);
 			glBegin(GL_LINE_STRIP);
 			glVertex3f(xx-old.x*rad, yy-old.y*rad, zz-rad/2);
 			
-			glColor3f(0.0, 0, 0);
+			//glColor3f(0.0, 0, 0);
 			glVertex3f(xx+old.x*rad, yy+old.y*rad, zz-rad/2);	
 			glEnd();
 			
@@ -430,6 +424,91 @@ void WeightedMap2DEnvironment::SetAngle(xyLoc &l, Vector2D angle)
 Vector2D WeightedMap2DEnvironment::GetAngle(xyLoc &l)
 {
 	AngleUtil::AngleSearchNode sn(l,GetStateHash(l));
-	return angleLookup[sn];
+	if(angleLookup.find(sn) != angleLookup.end())
+		return angleLookup[sn];
+	else 
+	{
+		Vector2D angle(0,0);
+		return angle;
+	}
 }
 
+double WeightedMap2DEnvironment::ComputeArrowMetric()
+{
+	Graph* g = ma->GetAbstractGraph(0);
+	node_iterator ni = g->getNodeIter();
+	
+	// Create a vector of directions so we can loop through them
+	std::vector<tDirection> directions;
+	directions.push_back(kN);
+	directions.push_back(kNE);
+	directions.push_back(kE);
+	directions.push_back(kSE);
+	directions.push_back(kS);
+	directions.push_back(kSW);
+	directions.push_back(kW);
+	directions.push_back(kNW);
+	
+	int numDotProducts = 0;
+	double totalDotProducts = 0;
+	
+	for(node *n=g->nodeIterNext(ni); n; n=g->nodeIterNext(ni))
+	{
+		
+		xyLoc current;
+		current.x = n->GetLabelL(kFirstData);
+		current.y = n->GetLabelL(kFirstData+1);
+				
+		Vector2D nodeVec = GetAngle(current);
+		if(nodeVec.x == 0 && nodeVec.y == 0) // check if there's no angle stored here
+			continue;
+					
+		double bestDotProd = -1;
+		tDirection bestDir;		
+				
+		for(unsigned int i=0; i<directions.size(); i++)
+		{
+			Vector2D dirVec = GetAngleFromDirection(directions[i]);
+			
+			double dotProd = (nodeVec.x * dirVec.x) + (nodeVec.y * dirVec.y);
+			
+			if(dotProd > bestDotProd)
+			{
+				bestDotProd = dotProd;
+				bestDir = directions[i];
+			}	
+		}
+		
+		// Now that we know the closest direction, find out if there's a node there 
+		xyLoc next;
+		GetNextState(current, bestDir, next);
+			
+		if(!(next==current))
+		{
+			numDotProducts++;
+			Vector2D nextNodeVec = GetAngle(next);
+			double dotprod = (nodeVec.x * nextNodeVec.x) + (nodeVec.y * nextNodeVec.y);
+			totalDotProducts += dotprod;
+		}	
+	}
+	return (totalDotProducts / (double)(numDotProducts));
+}
+
+Vector2D WeightedMap2DEnvironment::GetAngleFromDirection(tDirection dir)
+{
+	Vector2D angle;
+	
+	switch (dir)
+	{
+		case kN: angle.Set(0,-1); break;
+		case kS: angle.Set(0,1);break;
+		case kE: angle.Set(1,0); break;
+		case kW: angle.Set(-1,0);break;
+		case kNW: angle.Set(-1,-1); break;
+		case kSW: angle.Set(-1,1);break;
+		case kNE: angle.Set(1,-1);  break;
+		case kSE: angle.Set(1,1); break;
+		default: break;
+	}
+	return angle;
+}
