@@ -107,7 +107,7 @@ public:
 template <class state, class action, class environment>
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { radius = 4.0; stopAfterGoal = true; }
+	TemplateAStar() { radius = 4.0; stopAfterGoal = true; weight=1; }
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
 
@@ -154,6 +154,15 @@ public:
 
 	void SetStopAfterGoal(bool val) { stopAfterGoal = val; }
 	bool GetStopAfterGoal() { return stopAfterGoal; }
+	
+	/** Use weighted A* and set the weight
+	*
+	* Use f = g + weight * h during search
+	*
+	* @author Renee Jansen
+	* @date 10/23/2007
+	*/
+	void SetWeight (double w){weight = w;}
 private:
 	long nodesTouched, nodesExpanded;
 	bool GetNextNode(state &next);
@@ -167,6 +176,7 @@ private:
 	bool stopAfterGoal;
 
 	double radius; // how far around do we consider other agents?
+	double weight; 
 };
 
 using namespace TemplateAStarUtil;
@@ -241,7 +251,7 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	}
 
 	//SearchNode<state> first(env->heuristic(goal, start), 0, start, start);
-	SearchNode<state> first(start, start, env->HCost(goal, start), 0,env->GetStateHash(start));
+	SearchNode<state> first(start, start, weight*env->HCost(goal, start), 0,env->GetStateHash(start));
 	openQueue.Add(first);
 
 	return true;
@@ -405,7 +415,7 @@ template <class state, class action,class environment>
 void TemplateAStar<state, action,environment>::AddToOpenList(environment *env, state &currOpenNode, state &neighbor)
 {
 	double edgeWeight = env->GCost(currOpenNode, neighbor);
-	SearchNode<state> n(neighbor, currOpenNode, closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight+env->HCost(neighbor, goal),
+	SearchNode<state> n(neighbor, currOpenNode, closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight+weight*env->HCost(neighbor, goal),
 							 closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight, env->GetStateHash(neighbor));
 	
 	openQueue.Add(n);
