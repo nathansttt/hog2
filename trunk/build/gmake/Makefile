@@ -26,7 +26,8 @@ PROJECTS = \
   apps/pathsample \
   apps/puzzlesample \
   apps/inconsistency \
-  apps/multiagent
+  apps/multiagent \
+  apps/measure_inconsistency
 
 # Include projects with broken compilation
 PROJECTS_ALL = \
