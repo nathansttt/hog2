@@ -55,9 +55,9 @@ void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions
 	if ((stateID.blank%stateID.width) != 0)
 		actions.push_back(kLeft);
 	if ((stateID.blank/stateID.width) != stateID.height-1)
-		actions.push_back(kUp);
-	if ((stateID.blank/stateID.width) != 0)
 		actions.push_back(kDown);
+	if ((stateID.blank/stateID.width) != 0)
+		actions.push_back(kUp);
 	if ((stateID.blank%stateID.width) != stateID.width-1)
 		actions.push_back(kRight);
 }
