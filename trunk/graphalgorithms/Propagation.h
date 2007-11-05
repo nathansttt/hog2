@@ -31,6 +31,8 @@
 #define PROP_BFS      4
 #define PROP_DELAY    5
 #define PROP_DP       7  // 6 is AStarDelay
+#define PROP_BPMX     8
+#define PROP_DPMX     9
 
 namespace PropUtil
 {
@@ -65,6 +67,26 @@ namespace PropUtil
 		long threshold; // = lastExpanded + 2^expansions
 
 		bool isGoal; // is it goal?
+	};
+
+	struct SearchNodeEX {
+		SearchNode sn;
+		double weight;
+
+		SearchNodeEX(SearchNode& n, double w) {
+			sn = n;
+			weight = w;
+		}
+	};
+
+	struct StateEX {
+		graphState gs;
+		double weight;
+
+		StateEX(graphState s, double w) {
+			gs = s;
+			weight = w;
+		}
 	};
 
 	struct SearchNodeEqual {
@@ -356,10 +378,15 @@ public:
 	void ClosedListRepair();
 	bool DoSingleStepDelay(std::vector<graphState> &thePath);
 	bool DoSingleStepDP(std::vector<graphState> &thePath);
+	bool DoSingleStepBPMX(std::vector<graphState> &thePath);
+	bool DoSingleStepDPMX(std::vector<graphState> &thePath);
 	void CleanUpOpen(double solCost);
 	void Categorize(std::vector<graphState>& neighbors);
 	void Categorize2(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& openN, std::vector<PropUtil::SearchNode>& closedN, std::vector<graphState>& newN);
 	void ReverseProp(PropUtil::SearchNode& topNode);
+	void ReversePropX1(PropUtil::SearchNode& topNode);
+	void ReversePropX2(PropUtil::SearchNode& topNode);
+	bool NextNeighbor(PropUtil::SearchNode& neighborNode, graphState& neighbor, int& mode);
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
 
 	void GetLowestG(PropUtil::SearchNode &gNode);
