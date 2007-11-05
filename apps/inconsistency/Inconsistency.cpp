@@ -324,6 +324,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			ALG->GetPath(env,grp,from,to,thePath);
 			printf("\n");
 
+			ALG = new Prop(8);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
+			ALG = new Prop(9);
+			ALG->GetPath(env,grp,from,to,thePath);
+			printf("\n");
+
 			break;
 		case ']': absType = (absType+1)%3; break;
 		case '[': absType = (absType+4)%3; break;
