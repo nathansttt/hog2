@@ -48,7 +48,10 @@ void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState
 		edge_iterator ei = n->getEdgeIter();
 		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
 		{
+		  if (stateID != e->getTo())
 			neighbors.push_back(e->getTo());
+		  else
+		        neighbors.push_back(e->getFrom());
 		}
 	}
 }
