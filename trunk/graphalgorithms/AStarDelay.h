@@ -117,7 +117,7 @@ public:
 	void DrawEdge(unsigned int from, unsigned int to, double weight);
 
 	double GetSolutionCost() {return solutionCost;}
-	const char* GetName() {return algname;}
+	const char* GetName() {return "AStarDelay";}
 	int GetSolutionEdges() {return pathSize;}
 
 private:
@@ -148,7 +148,6 @@ private:
 
 	Graph *g; // for OpenGL drawing only
 
-	char algname[20];
 	double solutionCost;
 	int pathSize;
 };	
