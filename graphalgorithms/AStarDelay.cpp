@@ -26,7 +26,7 @@ void AStarDelay::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, gra
     gettimeofday(&t0,0);
 
 	while(!DoSingleSearchStep(thePath)) 
-		{}
+	{}
 
 	gettimeofday(&t1,0);
 
@@ -53,7 +53,7 @@ bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState 
 
 	thePath.clear();
 
-	strcpy(algname,"AStarDelay");
+	//strcpy(algname,"AStarDelay");
 		
 	if ((from == UINT32_MAX) || (to == UINT32_MAX) || (from == to))
 	{
@@ -75,16 +75,19 @@ bool AStarDelay::DoSingleSearchStep(std::vector<graphState> &thePath)
 	static int reopenCount = 0;
 
 	SearchNode topNode;
+	graphState temp;
 	bool found = false;
-
-	graphState temporary;
 	
-
+//	printf("Reopen count: %d. Unique nodes: %ld. Log2 = %f\n",
+//		   reopenCount, nodesExpanded-nodesReopened, log2(nodesExpanded-nodesReopened));
+//	printf("Delay queue: %d Open queue: %d goal? %s\n",
+//		   delayQueue.size(), openQueue.size(),
+//		   (env->GoalTest(temp = openQueue.top().currNode, goal))?"yes":"no");
 	// if we are about to open the goal off open, but the delay queue has
 	// lower costs, go to the delay queue first, no matter if we're allowed to
 	// or not
 	if ((delayQueue.size() > 0) && (openQueue.size() > 0) &&
-			(env->GoalTest( temporary = (openQueue.top()).currNode, goal)) &&
+			(env->GoalTest(temp = openQueue.top().currNode, goal)) &&
 			(fless(delayQueue.top().gCost, openQueue.top().fCost)))
 	{
 		do { // throw out nodes with higher cost than goal
@@ -94,7 +97,7 @@ bool AStarDelay::DoSingleSearchStep(std::vector<graphState> &thePath)
 		nodesReopened++;
 		found = true;
 	}
-	else if ((reopenCount < 2) && (delayQueue.size() > 0) && (openQueue.size() > 0))
+	else if ((reopenCount < log2(nodesExpanded-nodesReopened)) && (delayQueue.size() > 0) && (openQueue.size() > 0))
 	{
 		if (fless(delayQueue.top().gCost, openQueue.top().fCost))
 		{
@@ -108,7 +111,7 @@ bool AStarDelay::DoSingleSearchStep(std::vector<graphState> &thePath)
 		}
 		found = true;
 	}
-	else if ((reopenCount < 2) && (delayQueue.size() > 0))
+	else if ((reopenCount < log2(nodesExpanded-nodesReopened)) && (delayQueue.size() > 0))
 	{
 		nodesReopened++;
 		topNode = delayQueue.Remove();
@@ -131,7 +134,7 @@ bool AStarDelay::DoSingleSearchStep(std::vector<graphState> &thePath)
 
 	if (found)
 	{
-		DoSingleStep(topNode, thePath);
+		return DoSingleStep(topNode, thePath);
 	}
 	else {
 		thePath.resize(0); // no path found!
@@ -160,6 +163,7 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 	// otherwise we need to delay this node
 	if (env->GoalTest(topNode.currNode, goal))
 	{
+		//printf("Found path to goal!\n");
 		closedList[topNode.currNode] = topNode; // this is necessary for ExtractPathToStart()
 		ExtractPathToStart(topNode.currNode, thePath);
 		return true;
