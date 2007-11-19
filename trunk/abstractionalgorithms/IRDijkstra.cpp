@@ -35,7 +35,7 @@ path *IRDijkstra::GetPath(GraphAbstraction *aMap, node *from, node *to, reservat
 	while (p == 0)
 	{
 		p = DoOneSearchStep();
-		//g->Print(std::cout);
+		//std::cout << p << endl;
 	}
 	return p;
 }
@@ -63,6 +63,12 @@ path *IRDijkstra::DoOneSearchStep()
 		else {
 			closedList[gNext->GetNum()] = GNode(gNext);
 			path *p = ExtractAndRefinePath();
+			if(done)
+			{
+				//std::cout<<"finished" << std::endl;
+				//printf("%d refined nodes %d expanded nodes with pathlength %u \n", nodesRefined, nodesExpanded, p->length() );
+				return p;
+			}
 			if (p)
 			{
 				q.reset();
@@ -183,7 +189,7 @@ void IRDijkstra::ExpandNeighbors(node *gNode)
 
 path *IRDijkstra::ExtractAndRefinePath()
 {
-	bool done = true;
+	done = true;
 
 	path *p = GetSolution(gGoal);
 	for (path *i = p; i; i = i->next)
@@ -203,7 +209,7 @@ path *IRDijkstra::ExtractAndRefinePath()
 		//printf("## Refining %d\n", nodes[x]->GetNum());
 		RefineNode(nodes[x]);
 	}
-	printf("%d refined nodes %d expanded nodes with pathlength %u \n", nodesRefined, nodesExpanded, p->length() );
+	//printf("%d refined nodes %d expanded nodes with pathlength %u \n", nodesRefined, nodesExpanded, p->length() );
 	closedList.clear();
 	q.reset();
 	q.Add(GNode(gStart));

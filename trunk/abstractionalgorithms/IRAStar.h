@@ -31,6 +31,13 @@ namespace IRAStarConstants {
 		//		kOptimalFlag = 4, // this is a LONG label
 		//		kInOpenList = 5 // this is a LONG label
 	};
+
+	/** Definitions for the constructor **/
+	enum Caching {
+		NO_CACHING,
+		OPTIMAL_PATH_CACHING,
+		P_G_CACHING
+	};
 	
 	struct GNode {
 		GNode(node *nn) :n(nn) {}
@@ -69,7 +76,8 @@ namespace IRAStarConstants {
 // variables starting with "g" are in the defined search graph
 class IRAStar : public SearchAlgorithm {
 public:
-	IRAStar();
+	//IRAStar( );
+	IRAStar( IRAStarConstants::Caching caching = IRAStarConstants::P_G_CACHING );
 	virtual ~IRAStar();
 	virtual const char *GetName();
 	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
@@ -111,7 +119,9 @@ private:
 	Graph *g;
 	int nodesRefined;
 	int currentIteration;
+	IRAStarConstants::Caching caching;
 	std::vector<double> iterationLimits;
+	bool done;
 };
 
 
