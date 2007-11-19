@@ -99,6 +99,7 @@ private:
 	GraphAbstraction *absGraph;
 	Graph *g;
 	int nodesRefined;
+	bool done;
 };
 
 

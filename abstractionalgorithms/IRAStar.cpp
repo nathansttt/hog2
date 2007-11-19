@@ -12,16 +12,12 @@
 
 #define HEURISTIC_COLOR
 #define MAX_HEURISTIC_VALUE 50.0
-//#define P_G_CACHING
-#define OPTIMAL_PATH_CACHING	// MUST be used with INCONSISTENT_HEURISTIC!!
-				// and should be used with PATHMAX
-#define INCONSISTENT_HEURISTIC
-#define PATHMAX
+#define PATHMAX	// Not necessary, but improves performance for inconsistent heuristics
 
 using namespace IRAStarConstants;
 
-IRAStar::IRAStar()
-:SearchAlgorithm()
+IRAStar::IRAStar( IRAStarConstants::Caching _caching )
+:SearchAlgorithm(), caching(_caching)
 {
 	g = 0;
 }
@@ -57,17 +53,17 @@ path *IRAStar::DoOneSearchStep()
 	//printf("---\nAnalyzing %d next g:%f h:%f\n", gNext->GetNum(), GetGCost(gNext), GetHCost(gNext));
 	//std::cout << *gNext << std::endl;
 
-	// Check for and correct Inconsistencies:
 #ifdef PATHMAX
-	if( Inconsistent(gNext) )
-	{
-		// Do not expand, just put back on open list with new h value
-		q.Add(GNode(gNext));
-		//closedList.remove(gNext);
-		return 0;
-	}
+	// PATHMAX: Check for and corrects Inconsistencies 
+	if( caching == IRAStarConstants::OPTIMAL_PATH_CACHING )
+		if( Inconsistent(gNext) )
+		{
+			// Do not expand, just put back on open list with new h value
+			q.Add(GNode(gNext));
+			//closedList.remove(gNext);
+			return 0;
+		}
 #endif
-
 	
 	if (gNext == gGoal) // we found the goal
 	{
@@ -84,6 +80,12 @@ path *IRAStar::DoOneSearchStep()
 			//SetCachedHCost(gNext, GetGCost(gNext));
 			closedList[gNext->GetNum()] = GNode(gNext);
 			path *p = ExtractAndRefinePath();
+			if(done)
+			{
+				//printf("%d refined nodes %d expanded nodes with pathlength %u \n", nodesRefined, nodesExpanded, p->length() );
+				assert(p);
+				return p;
+			}
 			if (p)
 			{
 				q.reset();
@@ -204,10 +206,9 @@ bool IRAStar::Inconsistent(node *gNode)
 		if ( fless(GetHCost(gNeighbor), GetHCost(gNode)-e->GetWeight()) )
 		{
 			SetHCost( gNeighbor, GetHCost(gNode)-e->GetWeight());
-			// In Open List (cannot remove because using heap
-			// FIXME:
-			//if( q.IsIn(GNode(gNeighbor)) )
-				// remove from queue and add in again (with new priority)
+			// remove from queue and add in again (with new priority)
+			if( q.IsIn(GNode(gNeighbor)) )
+				q.DecreaseKey(GNode(gNeighbor));
 		}
 		// Correct the heuristic value of node
 		if ( fless(GetHCost(gNode), GetHCost(gNeighbor)-e->GetWeight()) )
@@ -257,16 +258,15 @@ void IRAStar::ExpandNeighbors(node *gNode)
 		// if already in closed list (do nothing if consistent heuristic)
 		else if (closedList.find(gNeighbor->GetNum()) != closedList.end())
 		{
-			// when using an inconsistent heuristic, we might have closed a node with the wrong g-value.
+			// when using an INCONSISTENT HEURISTIC, we might have closed a node with the wrong g-value.
 			// if this is the case, re-open the node
-#ifdef INCONSISTENT_HEURISTIC
-			if (fless(GetGCost(gNode)+e->GetWeight(), GetGCost(gNeighbor) ))
-			{
-				//printf("Re-opening neighbor with g=%f to g=%f\n", GetGCost(gNeighbor), GetGCost(gNode)+e->GetWeight());
-				SetGCost(gNeighbor, GetGCost(gNode)+e->GetWeight()/*1.0*/);
-				q.Add(GNode(gNeighbor));
-			}
-#endif
+			if( caching == IRAStarConstants::OPTIMAL_PATH_CACHING )
+				if (fless(GetGCost(gNode)+e->GetWeight(), GetGCost(gNeighbor) ))
+				{
+					//printf("Re-opening neighbor with g=%f to g=%f\n", GetGCost(gNeighbor), GetGCost(gNode)+e->GetWeight());
+					SetGCost(gNeighbor, GetGCost(gNode)+e->GetWeight()/*1.0*/);
+					q.Add(GNode(gNeighbor));
+				}
 		}
 		else { // add to open list
 			//SetHCost(gNeighbor, GetCachedHCost(gNeighbor));
@@ -280,15 +280,13 @@ void IRAStar::ExpandNeighbors(node *gNode)
 
 path *IRAStar::ExtractAndRefinePath()
 {
-	bool done = true;
+	done = true;
 
 	path *p = GetSolution(gGoal);
 
-	//FIXME - commented out because does not work
-#ifdef P_G_CACHING
-	SetHValues( p->length() - 1 );		//set heuristic values for all nodes on closed list
-						// path p contains all nodes (not the edges), so the number of edges is slightly less.
-#endif
+	if( caching == IRAStarConstants::P_G_CACHING )
+		SetHValues( p->length() - 1 );		// set heuristic values for all nodes on closed list
+							// path p contains all nodes (not the edges), so the number of edges is slightly less.
 
 	iterationLimits.push_back(GetGCost(gGoal));
 	for (path *i = p; i; i = i->next)
@@ -298,10 +296,9 @@ path *IRAStar::ExtractAndRefinePath()
 			done = false;
 		}
 		
-#ifdef OPTIMAL_PATH_CACHING
-		if( i->n != gGoal )
-			SetHCost( i->n, p->length()-1 - GetGCost(i->n) );
-#endif
+		if( caching == IRAStarConstants::OPTIMAL_PATH_CACHING )
+			if( i->n != gGoal )
+				SetHCost( i->n, p->length()-1 - GetGCost(i->n) );
 	}
 	if (done)
 		return p;
@@ -313,7 +310,7 @@ path *IRAStar::ExtractAndRefinePath()
 		//printf("## Refining %d\n", nodes[x]->GetNum());
 		RefineNode(nodes[x]);
 	}
-	printf("%d refined nodes %d expanded nodes on iteration %d with pathlength %u \n", nodesRefined, nodesExpanded, currentIteration, p->length() );
+	//printf("%d refined nodes %d expanded nodes on iteration %d with pathlength %u \n", nodesRefined, nodesExpanded, currentIteration, p->length() );
 	closedList.clear();
 	q.reset();
 
