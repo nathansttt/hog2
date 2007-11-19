@@ -45,15 +45,24 @@
 #include "CFOptimalRefinement.h"
 #include "IRDijkstra.h"
 #include "IRAStar.h"
+//#include "GenericAStar.h"
+//#include "FringeSearch.h"
+#include "AStar.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
 std::vector<UnitAbsMapSimulation *> unitSims;
+//aStar *CFOR = 0;
 //CFOptimalRefinement *CFOR = 0;
+//IRDijkstra *CFOR = 0;
 IRAStar *CFOR = 0;
 //unit *cameraTarget = 0;
+
+// Use batch if you want to run a series of tests
+int numInstances = 1;
+path * p = NULL;
 
 Plotting::Plot2D *plot = 0;
 Plotting::Line *distLine = 0;
@@ -62,6 +71,7 @@ int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv);
+	//RunHOG(argc, argv);
 }
 
 
@@ -75,7 +85,7 @@ void CreateSimulation(int id)
 	if (gDefaultMap[0] == 0)
 	{
 		map = new Map(140, 140);
-//		MakeMaze(map, 1);
+		MakeMaze(map, 1);
 	}
 	else
 		map = new Map(gDefaultMap);
@@ -121,6 +131,7 @@ void InstallHandlers()
 
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-seed", "-seed integer", "Sets the randomized number generator to use specified key.");
+	InstallCommandLineHandler(MyCLHandler, "-batch", "-batch numScenarios", "Runs a bunch of test scenarios.");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -154,7 +165,26 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->StepTime(1.0/30.0);
 		if ((!unitSims[windowID]->GetPaused()) && CFOR)
 			for (int x = 0; x < 100; x++)
-				CFOR->DoOneSearchStep();
+			{
+				p = CFOR->DoOneSearchStep();
+				if (p)
+				{
+					//printf("DONE!!!\n");
+					printf("%d nodes expanded, %d nodes refined, %u pathlength \n",
+								 CFOR->GetNodesExpanded(), CFOR->GetNodesRefined(),
+								 p->length() );
+				// New Instance
+				if(--numInstances)
+				{
+					while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
+						unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode(),
+						unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
+					{}
+				}
+				else
+					exit(0);
+			}
+		}
 
 		if (CFOR)
 		{
@@ -250,6 +280,15 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		srand(atoi(argument[1]));
 		return 2;
 	}
+	else if( strcmp( argument[0], "-batch" ) == 0 )
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		numInstances = atoi(argument[1]);
+		assert( numInstances > 0 );
+		printf("numInstances = %d\n", numInstances);
+		return 2;
+	}
 	return 2; //ignore typos
 }
 
@@ -270,20 +309,34 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 			if (CFOR == 0)
 			{
+				//CFOR = new aStar();
 				//CFOR = new CFOptimalRefinement();
 				//CFOR = new IRDijkstra();
-				CFOR = new IRAStar();
+				CFOR = new IRAStar( IRAStarConstants::P_G_CACHING );
+				printf("%d nodes in problem \n", unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetNumNodes());
 				while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
-																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode(),
-																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
+					unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode(),
+					unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
 				{}
 			}
-			if (CFOR->DoOneSearchStep())
+			p = CFOR->DoOneSearchStep();
+			if (p)
 			{
-				printf("DONE!!!\n");
-				printf("%d nodes expanded, %d nodes refined, %d nodes in problem\n",
+				//printf("DONE!!!\n");
+				printf("%d nodes expanded, %d nodes refined, %u pathlength \n",
 							 CFOR->GetNodesExpanded(), CFOR->GetNodesRefined(),
-							 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetNumNodes());
+							 p->length() );
+				// New Instance
+				if(--numInstances)
+				{
+					// New Instance
+					while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
+						unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode(),
+						unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
+					{}
+				}
+				else
+					exit(0);
 			}
 		}
 			if (unitSims[windowID]->GetPaused())
