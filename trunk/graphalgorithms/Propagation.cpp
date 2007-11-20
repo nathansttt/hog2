@@ -9,6 +9,7 @@
 
 #include <sys/time.h>
 #include <math.h>
+#include <deque>
 #include "Propagation.h"
 
 using namespace PropUtil;
@@ -21,6 +22,7 @@ using namespace PropUtil;
 #define WAITMODE   3
 
 const static bool verbose = false;
+bool drawtext = false;
 
 void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath) {
 	if(!InitializeSearch(_env,_g,from,to,thePath))
@@ -77,6 +79,8 @@ bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, 
 		strcpy(algname,"BPMX");
 	else if(verID==PROP_DPMX)
 		strcpy(algname,"DPMX");
+	else if(verID==PROP_BPMXE)
+		strcpy(algname,"BPMXE");
 	else {
 		printf("I don't know what to do.\n");
 		exit(-1);
@@ -118,6 +122,8 @@ bool Prop::DoSingleSearchStep(std::vector<graphState> &thePath) {
 		return DoSingleStepBPMX(thePath);
 	case PROP_DPMX:
 		return DoSingleStepDPMX(thePath);
+	case PROP_BPMXE:
+		return DoSingleStepBPMXE(thePath);
 	default:
 		return true;
 	}
@@ -1732,6 +1738,74 @@ void Prop::ReversePropX1(SearchNode& topNode)
 
 }
 
+#define EC 1  // minimum edge cost
+void Prop::ReversePropX1E(SearchNode& topNode) 
+{
+	double oldh = topNode.fCost - topNode.gCost;
+	double maxh = oldh;
+
+	ET = F + (openQueue.top().fCost - F + EC)*2;
+
+	for(std::vector<SearchNode>::iterator iter=closedNeighbors.begin(); iter!=closedNeighbors.end(); iter++)
+	{
+		double val = (iter->fCost - iter->gCost) - env->GCost(topNode.currNode,iter->currNode);
+		maxh = max(maxh,val);
+		if(val >= oldh + EC) 
+			fifo.push_back(iter->currNode);
+	}
+	for(std::vector<SearchNode>::iterator iter=openNeighbors.begin(); iter!=openNeighbors.end(); iter++) 
+	{
+		double val = (iter->fCost - iter->gCost) - env->GCost(topNode.currNode,iter->currNode);
+		maxh = max(maxh,val);
+		if(val >= oldh + EC) 
+			fifo.push_back(iter->currNode);
+	}
+	for(std::vector<graphState>::iterator iter=newNeighbors.begin(); iter!=newNeighbors.end(); iter++)
+	{
+		double val = env->HCost(*iter,goal) - env->GCost(topNode.currNode,*iter);
+		maxh = max(maxh,val);
+		if(val >= oldh + EC)
+			fifo.push_back(*iter);
+	}
+
+	topNode.fCost = maxh + topNode.gCost;
+
+}
+
+void Prop::BroadcastFence()
+{ // only operate on OPEN
+	std::vector<graphState> myneighbors;
+
+	while(fifo.size()>0)
+	{
+		graphState front = fifo.front();
+		fifo.pop_front();
+
+		myneighbors.clear();
+		env->GetSuccessors(front, myneighbors);
+
+		SearchNode frontNode = openQueue.find(SearchNode(front));
+
+		for(unsigned int x=0;x<myneighbors.size();x++)
+		{
+			graphState neighbor = myneighbors[x];
+			SearchNode nb = openQueue.find(SearchNode(neighbor));
+			if(nb.currNode == neighbor) { // found
+				if(nb.fCost <= ET) {
+					double edgeWeight = env->GCost(front,neighbor);
+					double newh = frontNode.fCost - frontNode.gCost - edgeWeight;
+					double oldh = nb.fCost - nb.gCost;
+					if(newh >= oldh + EC) {
+						nb.fCost = nb.gCost + newh;
+						openQueue.IncreaseKey(nb);  // save it back !
+						fifo.push_back(neighbor);
+					}
+				}
+			}
+		}
+	}
+}
+
 // for DP + BPMX
 void Prop::ReversePropX2(SearchNode& topNode) {
 	graphState topNodeID = topNode.currNode;
@@ -2162,6 +2236,202 @@ bool Prop::DoSingleStepBPMX(std::vector<graphState> &thePath)
 	return false;
 }
 
+
+bool Prop::DoSingleStepBPMXE(std::vector<graphState> &thePath) 
+{
+	/* step (2) */
+	if (openQueue.size() == 0)
+	{
+		thePath.resize(0); // no path found!
+		closedList.clear();
+		openQueue.reset();
+		FCache.reset();
+		env = 0;
+		return true;
+	}
+
+	/* step (3) */
+	nodesExpanded++;
+
+	// select the node to expand
+	SearchNode topNode;
+	if(fless(openQueue.top().fCost , F)) 
+	{
+		GetLowestG(topNode);
+		if(verbose)
+			printf("Expanding a node below F.\n");
+	}
+	else 
+	{
+		topNode = openQueue.Remove();
+		
+		if(fgreater(topNode.fCost,F)) 
+		{
+			F = topNode.fCost; // update F
+			if (verbose) 
+			{
+				printf("F updated to %lf.\n",F);
+			}
+		}
+	}
+
+
+	/* step (5), computing gi is delayed */
+	neighbors.resize(0);
+	env->GetSuccessors(topNode.currNode, neighbors);
+
+	Categorize(neighbors);
+
+	ReversePropX1E(topNode);
+
+	// topnode may be updated in ReverseProp, so put to closed afterwards
+	graphState topNodeID = topNode.currNode;
+	closedList[topNodeID] = topNode;
+
+	if(verbose) 
+	{
+		printf("Expanding node %ld , g=%lf, h=%lf, f=%lf.\n",topNodeID,topNode.gCost,topNode.fCost-topNode.gCost,topNode.fCost);
+	}
+
+	justExpanded = topNodeID;
+
+	/* step (4) */
+	if (env->GoalTest(topNodeID, goal))
+	{
+		ExtractPathToStart(topNodeID, thePath);
+		closedList.clear();
+		openQueue.reset();
+		FCache.reset();
+		env = 0;
+		return true;
+	}
+
+	double hTop = topNode.fCost - topNode.gCost;
+	double minH2 = DBL_MAX; // min ( edgeWeight(i) + h(neighbor(i)) )
+
+
+	while(true) 
+	{
+		SearchNode neighborNode;
+		graphState neighbor;
+		int mode;
+		//double edgeWeight;
+
+		if(!NextNeighbor(neighborNode, neighbor, mode))
+			break;
+	//for(unsigned int x = 0; x<neighbors.size(); x++) 
+	//{
+		nodesTouched++;
+
+
+
+		/* step (5) */
+		//graphState neighbor = neighbors[x];
+		double edgeWeight = env->GCost(topNodeID,neighbor);
+		double g = topNode.gCost + edgeWeight;
+
+		/* step Mero (3a) */
+		double h_tmp; // for printing reports only
+		double h;
+		
+		ComputeNewHMero3a(h, h_tmp, neighbor, neighborNode, hTop - edgeWeight, mode);
+
+		if(verbose) 
+		{
+			if(fgreater(h,h_tmp))
+				printf("Improving h of node %ld by Mero rule (a), %lf->%lf\n",neighbor,h_tmp,h);
+		}
+		
+		double f = g + h;
+
+		/* step Mero (3b) */
+		minH2 = min(minH2, h + edgeWeight);
+
+		/* step (6), neither in OPEN nor CLOSED */
+		if(mode == NEWMODE) //!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
+		{
+			SearchNode n(f,g,neighbor,topNodeID);
+			n.isGoal = (neighbor==goal);
+			openQueue.Add(n);
+
+			if(verbose) 
+			{
+				printf("Adding node %ld to OPEN, g=%lf, h=%lf, f=%lf.\n",neighbor,g,f-g,f);
+			}
+		}
+
+		/* step (7) */
+		else 
+		{
+			//SearchNode neighborNode;
+			if(mode == OPENMODE) //openQueue.IsIn(SearchNode(neighbor))) 
+			{
+				//neighborNode = openQueue.find(SearchNode(neighbor));
+
+				//if(neighborNode.gCost <= g) {
+				if(!fgreater(neighborNode.gCost,g)) 
+				{
+					// we may fail to update g, but still update h
+					if(UpdateHOnly(neighborNode, h))
+						openQueue.IncreaseKey(neighborNode);
+					continue;
+				}
+				
+				if(verbose) 
+				{
+					printf("Adjusting node %ld in OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+				}
+
+				RelaxOpenNode(f, g, neighbor, neighborNode, topNodeID);
+			}
+			else //if(closedList.find(neighbor) != closedList.end()) 
+			{
+				//neighborNode = closedList.find(neighbor)->second;
+
+				//if(neighborNode.gCost <= g) {
+				if(!fgreater(neighborNode.gCost,g)) 
+				{
+					// we may fail to update g, but still update h
+					if(UpdateHOnly(neighborNode, h))
+						closedList[neighbor] = neighborNode;
+					continue;
+				}
+
+				if(verbose) 
+				{
+					printf("Moving node %ld from CLOSED to OPEN, g=%lf, h=%lf, f=%lf; g_old=%lf.\n",neighbor,g,f-g,f, neighborNode.gCost);
+				}
+
+				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
+				closedList.erase(neighbor);  // delete from CLOSED
+				NodesReopened++;
+
+				openQueue.Add(neighborNode); // add to OPEN
+			}
+
+		}
+	}
+
+	/* step Mero (3b), update h of parent */
+	if(fgreater(minH2 , hTop)) 
+	{
+		topNode.fCost = minH2 + topNode.gCost;  // f = h + g
+		closedList[topNodeID] = topNode;
+
+		if(verbose) 
+		{
+			printf("Improving h of node %ld by Mero rule (b), %lf->%lf\n",topNodeID,hTop,minH2);
+		}
+	}
+
+	neighbors.clear();
+
+	BroadcastFence();
+
+	return false;
+}
+
+
 bool Prop::DoSingleStepDPMX(std::vector<graphState> &thePath) 
 {
 	/* step (2) */
@@ -2478,15 +2748,16 @@ void Prop::OpenGLDraw()
 		}
 
 		// draw the text info, in black
-		//DrawText(x,y,z+0.05,0,0,0,buf);
+		if(drawtext)
+			DrawText(x,y,z-0.15,0,0,0,buf);
 	}
 
 	// draw edges
-//	edge_iterator ei = g->getEdgeIter();
-//	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
-//	{
-//		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
-//	}
+	edge_iterator ei = grp->getEdgeIter();
+	for(edge* e = grp->edgeIterNext(ei); e; e = grp->edgeIterNext(ei))
+	{
+		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
+	}
 }
 
 void Prop::DrawText(double x, double y, double z, float r, float gg, float b, char* str)
@@ -2524,13 +2795,15 @@ void Prop::DrawEdge(unsigned int from, unsigned int to, double weight)
 
 	// draw line segment
 	glBegin(GL_LINES);
-	glColor3f(1,1,0); // yellow
+	glColor3f(1,0,0); // red
 	glVertex3f(x1,y1,z1);
 	glVertex3f(x2,y2,z2);
 	glEnd();
 
 	// draw weight info
-	sprintf(buf,"%ld",(long)weight);
-	DrawText((x1+x2)/2, (y1+y2)/2, (z1+z2)/2 + 0.05, 1, 0, 0, buf); // in red
+	if(drawtext) {
+		sprintf(buf,"%ld",(long)weight);
+		DrawText((x1+x2)/2, (y1+y2)/2, (z1+z2)/2 - 0.15, 1, 0, 0, buf); // in red
+	}
 }
 
