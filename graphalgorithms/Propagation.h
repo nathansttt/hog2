@@ -33,6 +33,7 @@
 #define PROP_DP       7  // 6 is AStarDelay
 #define PROP_BPMX     8
 #define PROP_DPMX     9
+#define PROP_BPMXE    10
 
 namespace PropUtil
 {
@@ -405,6 +406,10 @@ public:
 	const char* GetName() {return algname;}
 	int GetSolutionEdges() {return pathSize;}
 
+	bool DoSingleStepBPMXE(std::vector<graphState> &thePath);
+	void ReversePropX1E(PropUtil::SearchNode& topNode);
+	void BroadcastFence();
+
 	char algname[20];
 
 private:
@@ -439,6 +444,9 @@ private:
 	std::vector<graphState> newNeighbors;
 
 	PropUtil::SearchNode* newParent; // new parent for topNode, default is null
+
+	double ET;
+	std::deque<graphState> fifo;
 };
 
 

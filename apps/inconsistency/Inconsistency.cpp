@@ -44,6 +44,8 @@ int absType = 0;
 
 std::vector<GraphSimulation *> unitSims;
 
+extern bool drawtext;
+
 unsigned int fig = 1;
 unsigned int N = 5;
 unsigned int vid = 1;
@@ -92,6 +94,10 @@ void preProcessArgs(int argc, char* argv[])
 		else if(strcmp(argv[i],"-map")==0) {
 			strcpy(gDefaultMap,argv[i+1]);
 			i += 2;
+		}
+		else if(strcmp(argv[i],"-dt")==0) {
+			drawtext = true;
+			i++;
 		}
 		else
 			i++;
