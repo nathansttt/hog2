@@ -61,8 +61,10 @@ IRAStar *CFOR = 0;
 //unit *cameraTarget = 0;
 
 // Use batch if you want to run a series of tests
+bool batch = false;
 int numInstances = 1;
 path * p = NULL;
+int mazeSize = 100;
 
 Plotting::Plot2D *plot = 0;
 Plotting::Line *distLine = 0;
@@ -84,7 +86,7 @@ void CreateSimulation(int id)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
-		map = new Map(140, 140);
+		map = new Map(mazeSize, mazeSize);
 		MakeMaze(map, 1);
 	}
 	else
@@ -132,6 +134,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-seed", "-seed integer", "Sets the randomized number generator to use specified key.");
 	InstallCommandLineHandler(MyCLHandler, "-batch", "-batch numScenarios", "Runs a bunch of test scenarios.");
+	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -163,6 +166,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (viewport == 0)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
+		// If batch mode is on, automatically start the test
+		if( batch && !CFOR )
+			MyDisplayHandler(windowID, (tKeyboardModifier)NULL, 'o');
 		if ((!unitSims[windowID]->GetPaused()) && CFOR)
 			for (int x = 0; x < 100; x++)
 			{
@@ -181,7 +187,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 						unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
 					{}
 				}
-				else
+				else if(batch)
 					exit(0);
 			}
 		}
@@ -285,8 +291,18 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs <= 1)
 			return 0;
 		numInstances = atoi(argument[1]);
+		batch = true;
 		assert( numInstances > 0 );
 		printf("numInstances = %d\n", numInstances);
+		return 2;
+	}
+	else if( strcmp( argument[0], "-size" ) == 0 )
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		mazeSize = atoi(argument[1]);
+		assert( mazeSize > 0 );
+		printf("mazeSize = %d\n", numInstances);
 		return 2;
 	}
 	return 2; //ignore typos
