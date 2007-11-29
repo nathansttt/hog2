@@ -254,10 +254,10 @@ void RunScenario(int id)
 			
 		su->SetName(name);	
 		su->SetSpeed(1.0);
-		//if(start.x < 16)	
+		if(start.x < 16)	
 			su->SetColor(1, 0, 0);
-		//else
-		//	su->SetColor(0, 1, 0);
+		else
+			su->SetColor(0, 1, 0);
 		if(weighted) wug->AddUnit(su);
 		if(useTrim)
 		{
@@ -268,13 +268,16 @@ void RunScenario(int id)
  
 
  		i++;
-
+	//} while(i < numExperiments/2);
  	} while ( i < numExperiments);
-
+	
+	//unitSims[id]->SetPaused(true);
 	// Do timing
 
 	if(runExperiment)
 		{
+			std::vector<double> coherence;
+			
 			if(outFileName[0]==0)
 				strncpy(outFileName, "defaultOut.txt",1024);
 				
@@ -302,7 +305,7 @@ void RunScenario(int id)
 				time += timestep;
 				if(((int)time%15==0) && (wug->GetMembers().size() > 0))
 				{
-					std::cout<<wug->ComputeArrowMetric()<<std::endl;
+					coherence.push_back(wug->ComputeArrowMetric());
 				}
 					
 					
@@ -311,12 +314,14 @@ void RunScenario(int id)
 					std::cout<<"Ran out of time. Details in outfile "<<outFileName<<std::endl;
  					exit(1);
 				}
-				//std::cout<<time<<"\r";
+// 				std::cout<<time<<"\r";
 			}
 			//double endTime = unitSims[id]->GetSimulationTime();
 			//std::cout<<"Simulation time "<<endTime-beginTime<<std::endl;
 			
 			outfile<<"Total simulation time "<<time<<std::endl<<std::endl; 
+			
+			
 			
 			// Get the "arrow metric" from the weighted unit group
 // 			if(wug->GetMembers().size() > 0)
@@ -326,7 +331,14 @@ void RunScenario(int id)
 		
 			// Collect statistics
 			unitSims[id]->ClearAllUnits();
-			PrintStatistics(id,outfile);			
+			PrintStatistics(id,outfile);		
+				
+			outfile<<std::endl;
+			for(unsigned int i=0; i<coherence.size(); i++)
+			{
+				outfile<<coherence[i]<<std::endl;
+			}
+				
 			exit(0); 			
 		} // end if(runExperiment)
 	//unitSims[id]->ClearAllUnits();
