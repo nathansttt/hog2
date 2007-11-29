@@ -240,17 +240,34 @@ void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* en
 template <class state, class action, class environment>
 void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
 {
+	GLfloat _r,_g,_b;
+		if(locs[currTarget].x < (env->GetMap()->getMapWidth() / 2))
+		{
+			_r = 1;
+			_g = 0;
+			_b = 0;
+		}
+		
+		else
+		{
+			_r = 0;
+			_g = 1;
+			_b = 0;
+		}
 	if(drawUnit)
 	{
-		GLfloat _r,_g,_b;
-		this->GetColor(_r,_g,_b);
-		if (si->GetSimulationTime() < lastFailedMove+2)
-		{
-			double interval = (si->GetSimulationTime()-lastFailedMove)/2;
-			_r *= interval;
-			_g *= interval;
-			_b *= interval;
-		}
+		
+		
+		
+		
+		//this->GetColor(_r,_g,_b);
+// 		if (si->GetSimulationTime() < lastFailedMove+2)
+// 		{
+// 			double interval = (si->GetSimulationTime()-lastFailedMove)/2;
+// 			_r *= interval;
+// 			_g *= interval;
+// 			_b *= interval;
+// 		}
 		if(!Done())
 			env->OpenGLDraw(window, loc,_r,_g,_b);	
 		else
@@ -263,25 +280,25 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 		state l = locs[i];
 		GLdouble xx, yy, zz, rad;
 		env->GetMapAbstraction()->GetMap()->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
-		GLfloat _r,_g,_b;
-		this->GetColor(_r,_g,_b);
+		//GLfloat _r,_g,_b;
+		//this->GetColor(_r,_g,_b);
 		glColor3f(_r,_g,_b);
 		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
 		//		env->OpenGLDraw(window, locs[i], r, g, b);
 	}	
 	
 	// Draw the planned path
-	if(drawUnit)
-	{
-		xyLoc current = loc; 
-		xyLoc next;
-	  	for(unsigned int i=0; i<moves.size(); i++)
- 		{
- 			env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
- 			env->GetNextState(current, moves[i],next);
- 			current = next;
- 		}	
-	}
+// 	if(drawUnit)
+// 	{
+// 		xyLoc current = loc; 
+// 		xyLoc next;
+// 	  	for(unsigned int i=0; i<moves.size(); i++)
+//  		{
+//  			env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
+//  			env->GetNextState(current, moves[i],next);
+//  			current = next;
+//  		}	
+// 	}
 }
 
 template <class state, class action, class environment>
