@@ -17,6 +17,7 @@
 #include <ext/hash_map>
 #include "FPUtil.h"
 #include "OpenListB.h"
+#include <deque>
 
 #ifndef UINT32_MAX
 #define UINT32_MAX        4294967295U
@@ -99,7 +100,8 @@ namespace AStarDelayUtil
 
 class AStarDelay : public GraphAlgorithm {
 public:
-	AStarDelay() { }
+	AStarDelay() { bpmxLevel = 0;}
+	AStarDelay(int lev) { bpmxLevel = lev; }
 	virtual ~AStarDelay() {}
 	void GetPath(GraphEnvironment *env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
@@ -119,6 +121,9 @@ public:
 	double GetSolutionCost() {return solutionCost;}
 	const char* GetName() {return "AStarDelay";}
 	int GetSolutionEdges() {return pathSize;}
+
+	void ReversePropX1(AStarDelayUtil::SearchNode& topNode);
+	void Broadcast(int level, int levelcount);
 
 private:
 	bool DoSingleStep(AStarDelayUtil::SearchNode &topNode,
@@ -150,6 +155,11 @@ private:
 
 	double solutionCost;
 	int pathSize;
+
+	int bpmxLevel;
+
+	std::deque<graphState> fifo;
+	std::vector<graphState> myneighbors;
 };	
 
 #endif
