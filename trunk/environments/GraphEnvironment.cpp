@@ -13,6 +13,9 @@
 
 using namespace GraphSearchConstants;
 
+int hmode = 1;
+int HN=10;
+
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 :g(_g), h(gh)
 {
@@ -37,8 +40,9 @@ void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState
 	neighbors.resize(0);
 	node *n = g->GetNode(stateID);
 
-	if(n==0)
+	if(n == 0) {
 		return;
+	}
 
 	if (directed)
 	{
@@ -471,7 +475,7 @@ namespace GraphSearchConstants {
 GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *graph)
 :m(map), g(graph)
 {
-	for (int x = 0; x < 10; x++)
+	for (int x = 0; x < HN /*10*/; x++)
 	{
 		node *n = g->GetRandomNode();
 		graphState loc = n->GetNum();
@@ -479,7 +483,7 @@ GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *gr
 		GetOptimalDistances(n, values);
 		AddHeuristic(values, loc);
 	}
-}
+} 
 
 double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &state2)
 {
@@ -491,14 +495,28 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 	double a = ((x1>x2)?(x1-x2):(x2-x1));
 	double b = ((y1>y2)?(y1-y2):(y2-y1));
 	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
-	//	return val;
+
+	if(hmode == 0)
+		return val;
+
 	//for (unsigned int x = 0; x < heuristics.size(); x++)
-	int x = (x1+x2+y1+y2)%heuristics.size();
-	{
-		double hval = heuristics[x][state1]-heuristics[x][state2];
-		if (hval < 0) hval = -hval;
-		if (fgreater(hval, val))
-			val = hval;
+	if(hmode == 1) {
+		int x = (x1+x2+y1+y2)%heuristics.size();
+		{
+			double hval = heuristics[x][state1]-heuristics[x][state2];
+			if (hval < 0) hval = -hval;
+			if (fgreater(hval, val))
+				val = hval;
+		}
+	}
+	else { // hmode == 2, taking the max
+		for(unsigned int i=0;i<heuristics.size();i++) {
+			double hval = heuristics[i][state1]-heuristics[i][state2];
+			if(hval < 0)
+				hval = -hval;
+			if(fgreater(hval,val))
+				val = hval;
+		}
 	}
 	return val;
 }
