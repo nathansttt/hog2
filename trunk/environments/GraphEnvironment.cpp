@@ -36,6 +36,10 @@ void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState
 {
 	neighbors.resize(0);
 	node *n = g->GetNode(stateID);
+
+	if(n==0)
+		return;
+
 	if (directed)
 	{
 		edge_iterator ei = n->getOutgoingEdgeIter();
@@ -48,10 +52,10 @@ void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState
 		edge_iterator ei = n->getEdgeIter();
 		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
 		{
-		  if (stateID != e->getTo())
-			neighbors.push_back(e->getTo());
-		  else
-		        neighbors.push_back(e->getFrom());
+			if(stateID != e->getTo())
+				neighbors.push_back(e->getTo());
+			else
+				neighbors.push_back(e->getFrom());
 		}
 	}
 }
@@ -487,7 +491,7 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 	double a = ((x1>x2)?(x1-x2):(x2-x1));
 	double b = ((y1>y2)?(y1-y2):(y2-y1));
 	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
-//	return val;
+	//	return val;
 	//for (unsigned int x = 0; x < heuristics.size(); x++)
 	int x = (x1+x2+y1+y2)%heuristics.size();
 	{
