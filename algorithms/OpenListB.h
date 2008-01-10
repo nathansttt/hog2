@@ -24,12 +24,6 @@
  *
 
  modified by Zhifu Zhang
-
- Added FindSpecialMin() which find the node with minimum g in case f<F (as described in Martelli's B).
- This is much more efficient than doing it in the generic way, which has to extract all nodes with f<F, 
- then select one, and push them back.
- The drawback is that it loses some generality. Currently it is only used in Propagation.cpp, AStarDelay.cpp.
-
  */
 
 #ifndef OpenListB_H
@@ -63,6 +57,7 @@ public:
 	unsigned size() { return _elts.size(); }
 //	void verifyData();
   OBJ FindSpecialMin(double F);
+  OBJ FindTieFMin(double F);
 
 private:
   std::vector<OBJ> _elts;
@@ -296,5 +291,49 @@ OBJ OpenListB<OBJ, HashKey, EqKey, CmpKey, SpecialKey, CmpKeyStrictExtract>::Fin
 
 	return _elts[resultIndex];
 }
+
+/* returns the index of the element that has f==F, and has min g, as suggested by Nathan */
+template<typename OBJ, class HashKey, class EqKey, class CmpKey, class SpecialKey, class CmpKeyStrictExtract>
+OBJ OpenListB<OBJ, HashKey, EqKey, CmpKey, SpecialKey, CmpKeyStrictExtract>::FindTieFMin(double F) 
+{
+	std::deque<unsigned int> candidates;
+	CmpKeyStrictExtract extractor;
+	SpecialKey spk;
+
+	if(!fequal(extractor(_elts[0]), F))
+		return OBJ();
+
+	unsigned int resultIndex = 0;
+	candidates.push_back(0);
+
+	while(candidates.size()) 
+	{
+		unsigned int current = candidates.front();
+		candidates.pop_front();
+
+		if(spk(_elts[resultIndex],_elts[current])) 
+		{
+			resultIndex = current;
+		}
+
+		unsigned int count = _elts.size();
+
+		unsigned int child1 = current*2+1;
+		unsigned int child2 = current*2+2;
+		
+		if(child1 < count && fequal(extractor(_elts[child1]),F))
+		{
+			candidates.push_back(child1);
+		}
+
+		if(child2 < count && fequal(extractor(_elts[child2]),F))
+		{
+			candidates.push_back(child2);
+		}
+	}
+
+	return _elts[resultIndex];
+}
+
 
 #endif

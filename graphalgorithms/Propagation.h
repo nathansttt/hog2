@@ -376,22 +376,23 @@ public:
 	bool DoSingleStepBP(std::vector<graphState> &thePath);
 	bool DoSingleStepApprox(std::vector<graphState> &thePath);
 	bool DoSingleStepBFS(std::vector<graphState> &thePath);
-	//void ClosedListRepair();
+	void ClosedListRepair();
 	bool DoSingleStepDelay(std::vector<graphState> &thePath);
 	bool DoSingleStepDP(std::vector<graphState> &thePath);
 	bool DoSingleStepBPMX(std::vector<graphState> &thePath);
 	bool DoSingleStepDPMX(std::vector<graphState> &thePath);
-	//void CleanUpOpen(double solCost);
-	//void Categorize(std::vector<graphState>& neighbors);
-	//void Categorize2(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& openN, std::vector<PropUtil::SearchNode>& closedN, std::vector<graphState>& newN);
+	void CleanUpOpen(double solCost);
+	void Categorize(std::vector<graphState>& neighbors);
+	void Categorize2(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& openN, std::vector<PropUtil::SearchNode>& closedN, std::vector<graphState>& newN);
 	void ReverseProp(PropUtil::SearchNode& topNode);
 	void ReversePropX1(PropUtil::SearchNode& topNode);
 	void ReversePropX2(PropUtil::SearchNode& topNode);
-	//bool NextNeighbor(PropUtil::SearchNode& neighborNode, graphState& neighbor, int& mode);
+	bool NextNeighbor(PropUtil::SearchNode& neighborNode, graphState& neighbor, int& mode);
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
 
 	void GetLowestG(PropUtil::SearchNode &gNode);
-	//bool GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound, long TBound);
+	bool GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound, long TBound);
+	void GetLowestGF(PropUtil::SearchNode &gNode);
 	bool UpdateHOnly(PropUtil::SearchNode &node, double h);
 	void ComputeNewHMero3a(double &h, double &h_tmp, graphState neighbor, PropUtil::SearchNode& neighborNode, double altH, int mode);
 	void RelaxOpenNode(double f, double g, graphState neighbor, PropUtil::SearchNode &neighborNode, graphState topNodeID);
@@ -407,8 +408,8 @@ public:
 	int GetSolutionEdges() {return pathSize;}
 
 	bool DoSingleStepBPMXE(std::vector<graphState> &thePath);
-	//void ReversePropX1E(PropUtil::SearchNode& topNode);
-	//void BroadcastFence();
+	void ReversePropX1E(PropUtil::SearchNode& topNode);
+	void BroadcastFence();
 
 	char algname[20];
 
@@ -417,7 +418,7 @@ private:
 	double F;
 	long nodesExpanded, nodesTouched;
 	std::vector<graphState> neighbors;
-	//std::deque<PropUtil::SearchNode> bfsQueue;
+	std::deque<PropUtil::SearchNode> bfsQueue;
 	graphState goal, start;
 	GraphEnvironment *env;
 	PropUtil::PQueue openQueue;
@@ -438,15 +439,15 @@ private:
 	graphState justExpanded; // the node that is expanded in previous round, for drawing only
 
 	// categorize the neighbors
-	//std::vector<PropUtil::SearchNode> closedNeighbors;
-	//std::vector<PropUtil::SearchNode> openNeighbors;
-	//std::vector<PropUtil::SearchNode> waitNeighbors;
-	//std::vector<graphState> newNeighbors;
+	std::vector<PropUtil::SearchNode> closedNeighbors;
+	std::vector<PropUtil::SearchNode> openNeighbors;
+	std::vector<PropUtil::SearchNode> waitNeighbors;
+	std::vector<graphState> newNeighbors;
 
-	//PropUtil::SearchNode* newParent; // new parent for topNode, default is null
+	PropUtil::SearchNode* newParent; // new parent for topNode, default is null
 
-	//double ET;
-	//std::deque<graphState> fifo;
+	double ET;
+	std::deque<graphState> fifo;
 };
 
 
