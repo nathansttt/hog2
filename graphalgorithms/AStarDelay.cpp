@@ -331,7 +331,7 @@ double AStarDelay::AddNewNode(graphState neighbor, SearchNode &topNode)
 	graphState topNodeID = topNode.currNode;
 	double edgeCost = env->GCost(topNodeID,neighbor);
 	double gcost = topNode.gCost + edgeCost;
-	double h = env->HCost(neighbor,goal);
+	double h = max(env->HCost(neighbor,goal), topNode.fCost - topNode.gCost - edgeCost);
 	double fcost = gcost + h;
 	
 	SearchNode n(fcost, gcost, neighbor, topNodeID);
@@ -353,14 +353,22 @@ double AStarDelay::UpdateOpenNode(graphState neighbor, SearchNode &topNode)
 	n = openQueue.find(SearchNode(neighbor));
 	double edgeCost = env->GCost(topNode.currNode, neighbor);
 
+	double oldf = n.fCost;
+	n.fCost = max(n.fCost , topNode.fCost - topNode.gCost - edgeCost + n.gCost);
+
 	if (fless(topNode.gCost+edgeCost, n.gCost))
 	{
 		n.fCost -= n.gCost;
 		n.gCost = topNode.gCost+edgeCost;
 		n.fCost += n.gCost;
 		n.prevNode = topNode.currNode;
-		openQueue.DecreaseKey(n);
+		if(n.fCost < oldf)
+			openQueue.DecreaseKey(n);
+		else
+			openQueue.IncreaseKey(n);
 	}
+	else if(n.fCost != oldf) 
+		openQueue.IncreaseKey(n);
 	
 	// return value for pathmax
 	return edgeCost+n.fCost-n.gCost;
@@ -406,14 +414,22 @@ double AStarDelay::UpdateDelayedNode(graphState neighbor, SearchNode &topNode)
 	n = delayQueue.find(SearchNode(neighbor));
 	double edgeCost = env->GCost(topNode.currNode, neighbor);
 
+	double oldf = n.fCost;
+	n.fCost = max(n.fCost , topNode.fCost - topNode.gCost - edgeCost + n.gCost);
+
 	if (fless(topNode.gCost+edgeCost, n.gCost))
 	{
 		n.fCost -= n.gCost;
 		n.gCost = topNode.gCost+edgeCost;
 		n.fCost += n.gCost;
 		n.prevNode = topNode.currNode;
-		delayQueue.DecreaseKey(n);
+		if(n.fCost < oldf)
+			delayQueue.DecreaseKey(n);
+		else
+			delayQueue.IncreaseKey(n);
 	}
+	else if(n.fCost != oldf)
+		delayQueue.IncreaseKey(n);
 	
 	// return value for pathmax
 	return edgeCost+n.fCost-n.gCost;
