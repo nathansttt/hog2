@@ -1109,8 +1109,12 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 
 	//Categorize(neighbors);
 
+	bool doReverse = false;
+
+_REVERSE:
 	// reverseProp() here, top node will be updated inside, so put topnode into closed afterwards
-	ReverseProp(topNode);
+	if(doReverse)
+		ReverseProp(topNode);
 	
 	graphState topNodeID = topNode.currNode;
 	closedList[topNodeID] = topNode;
@@ -1220,6 +1224,10 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
 				{
+					if(neighborNode.gCost + edgeWeight < topNode.gCost) {
+						doReverse = true;
+						goto _REVERSE;
+					}
 					// we may fail to update g, but still update h
 					if(UpdateHOnly(neighborNode, h))
 						openQueue.IncreaseKey(neighborNode);
@@ -1240,6 +1248,10 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 				//if(neighborNode.gCost <= g) {
 				if(!fgreater(neighborNode.gCost,g)) 
 				{
+					if(neighborNode.gCost + edgeWeight < topNode.gCost) {
+						doReverse = true;
+						goto _REVERSE;
+					}
 					// we may fail to update g, but still update h
 					if(UpdateHOnly(neighborNode, h))
 						closedList[neighbor] = neighborNode;
