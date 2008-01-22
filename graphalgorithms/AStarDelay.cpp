@@ -367,7 +367,7 @@ double AStarDelay::UpdateOpenNode(graphState neighbor, SearchNode &topNode)
 		else
 			openQueue.IncreaseKey(n);
 	}
-	else if(n.fCost != oldf) 
+	else if(n.fCost > oldf) 
 		openQueue.IncreaseKey(n);
 	
 	// return value for pathmax
@@ -423,12 +423,12 @@ double AStarDelay::UpdateDelayedNode(graphState neighbor, SearchNode &topNode)
 		n.gCost = topNode.gCost+edgeCost;
 		n.fCost += n.gCost;
 		n.prevNode = topNode.currNode;
-		if(n.fCost < oldf)
+		//if(n.fCost < oldf)
 			delayQueue.DecreaseKey(n);
-		else
-			delayQueue.IncreaseKey(n);
+		//else
+		//	delayQueue.IncreaseKey(n);
 	}
-	else if(n.fCost != oldf)
+	else if(n.fCost > oldf)
 		delayQueue.IncreaseKey(n);
 	
 	// return value for pathmax
