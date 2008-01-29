@@ -25,6 +25,7 @@
  *
  */
 #include <fstream>
+#include "Map.h"
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType);
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data);
@@ -37,3 +38,4 @@ void InstallHandlers();
 void RunExperiment(int id);
 void RunScenario(int id);
 void PrintStatistics(int id, std::ofstream &outfile);
+void Initialize(int id, Map* map);

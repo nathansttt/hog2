@@ -20,22 +20,40 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 	
 	useWindow = false;
 	noWeighting = false;
+	
+	queryOldProportion = 0.9;
+	updateOnQuery = false;
+	
+	updateSurrounding = false;
+	surroundingProportion = 0.9;
 	//for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	//{
 	//	// Reset the counters
 	//	e->SetLabelL(kForwardCount, 0);
 	//	e->SetLabelL(kBackwardCount, 0);
 	//}
+	
+	usePerceptron = false;
+	learningRate = 0.1;
 }
 
 WeightedMap2DEnvironment::WeightedMap2DEnvironment(AbsMapEnvironment *ame)
 :AbsMapEnvironment(ame->GetMapAbstraction()->clone(ame->GetMapAbstraction()->GetMap()->clone()))
 {
-		oi = ame->GetOccupancyInfo();
-		diffWeight = 1;
-		oldProportion = 0.7;
-		useWindow = false;
-		noWeighting = false;
+	oi = ame->GetOccupancyInfo();
+	diffWeight = 1;
+	oldProportion = 0.7;
+	useWindow = false;
+	noWeighting = false;
+		
+	queryOldProportion = 0.9;
+	updateOnQuery = false;
+	
+	updateSurrounding = false;
+	surroundingProportion = 0.9;
+	
+	usePerceptron = false;
+	learningRate = 0.1;
 }
 
 /**
@@ -127,7 +145,7 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 	s = old;
 }
 
-void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s)
+void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 {
 	if(old == s) 
 		return;
@@ -146,33 +164,178 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s)
 		case kSE: angle.Set(1,1); break;
 		default: break;
 	}
-	
-	double newProportion = 1 - oldProportion;
+	angle.Normalize(); //<-- otherwise diagonal ones are messed up
+	double newProportion = 1 - oldProp;
 		
-	// Update angle on new location
-	AngleUtil::AngleSearchNode sn(s,GetStateHash(s));
-	if(angleLookup.find(sn) == angleLookup.end())
+	if(updateSurrounding)
 	{
-		angleLookup[sn] = angle;
-	}
+		//Update new location
+		AngleUtil::AngleSearchNode sn(s,GetStateHash(s));
+		if(angleLookup.find(sn) == angleLookup.end())
+		{
+			if(usePerceptron)
+				angleLookup[sn] = learningRate * angle;		
+			else
+			{
+				angle.Normalize();
+				angleLookup[sn] = angle;
+			}
+		}
+		else
+		{
+			if(usePerceptron)
+			{
+				Vector2D oldAngle = angleLookup[sn];
+				
+				float x = oldAngle.x - learningRate * (oldAngle.x - angle.x);
+				float y = oldAngle.y - learningRate * (oldAngle.y - angle.y);
+				
+				Vector2D	newAngle(x,y);
+// 				std::cout<<sqrt(x*x + y*y)<<std::endl;
+				if(sqrt(x*x + y*y) > 1)
+					newAngle.Normalize();
+					
+				angleLookup[sn] = newAngle;
+			}
+			else
+			{
+				Vector2D oldAngle = angleLookup[sn];
+				
+				Vector2D storeme = oldProp * oldAngle + newProportion * angle;
+				storeme.Normalize();
+				angleLookup[sn] = storeme;
+			}
+		}
+		
+		//Update all neighbours of new location
+		std::vector<xyLoc> neighbours; 
+		GetSuccessors(s, neighbours);
+		
+		//oldProp = surroundingProportion;
+		//newProportion = 1 - oldProp;
+		
+		for(unsigned int i=0; i<neighbours.size(); i++)
+		{
+			AngleUtil::AngleSearchNode sn(neighbours[i],GetStateHash(neighbours[i]));
+			if(angleLookup.find(sn) == angleLookup.end())
+			{
+				if(usePerceptron)
+					angleLookup[sn] = surroundingProportion * angle;		
+				else
+				{
+					angle.Normalize();
+					angleLookup[sn] = angle;
+				}
+			}
+			else
+			{
+				if(usePerceptron)
+				{
+					Vector2D oldAngle = angleLookup[sn];
+					
+					float x = oldAngle.x - surroundingProportion * (oldAngle.x - angle.x);
+					float y = oldAngle.y - surroundingProportion * (oldAngle.y - angle.y);
+				
+					Vector2D	newAngle(x,y);
+// 					std::cout<<sqrt(x*x + y*y)<<std::endl;
+					if(sqrt(x*x + y*y) > 1)
+						newAngle.Normalize();
+					
+					angleLookup[sn] = newAngle;
+				}
+				else
+				{
+					Vector2D oldAngle = angleLookup[sn];
+					Vector2D storeme = oldProp * oldAngle + newProportion * angle;
+					storeme.Normalize();
+					angleLookup[sn] = storeme;
+				}
+			}
+		}
+	} // end if(updateSurrounding)
 	else
 	{
-		Vector2D oldAngle = angleLookup[sn];
-		angleLookup[sn] = oldProportion * oldAngle + newProportion * angle;
-	}
+		// Update angle on new location
+		AngleUtil::AngleSearchNode sn(s,GetStateHash(s));
+		if(angleLookup.find(sn) == angleLookup.end())
+		{
+			if(usePerceptron)
+				angleLookup[sn] = learningRate * angle;		
+			else
+			{
+				angle.Normalize();
+				angleLookup[sn] = angle;
+			}
+		}
+		else
+		{
+			if(usePerceptron)
+			{
+				Vector2D oldAngle = angleLookup[sn];
+				
+				float x = oldAngle.x - learningRate * (oldAngle.x - angle.x);
+				float y = oldAngle.y - learningRate * (oldAngle.y - angle.y);
+				
+				Vector2D	newAngle(x,y);
+// 				std::cout<<sqrt(x*x + y*y)<<std::endl;
+				if(sqrt(x*x + y*y) > 1)
+					newAngle.Normalize();
+					
+				angleLookup[sn] = newAngle;
+			}
+			else
+			{
+				Vector2D oldAngle = angleLookup[sn];
+				Vector2D storeme = oldProp * oldAngle + newProportion * angle;
+				storeme.Normalize();
+				angleLookup[sn] = storeme;
+			}
+		}
 	
-	// Update angle on old location
-	AngleUtil::AngleSearchNode sn2(old,GetStateHash(old));
-	if(angleLookup.find(sn2) == angleLookup.end())
-	{
-		angleLookup[sn2] = angle;
+		// Update angle on old location
+		AngleUtil::AngleSearchNode sn2(old,GetStateHash(old));
+		if(angleLookup.find(sn2) == angleLookup.end())
+		{
+			if(usePerceptron)
+				angleLookup[sn] = learningRate * angle;		
+			else
+			{
+				angle.Normalize();
+				angleLookup[sn] = angle;
+			}
+		}
+		else
+		{
+			if(usePerceptron)
+			{
+				Vector2D oldAngle = angleLookup[sn];
+				
+				float x = oldAngle.x - learningRate * (oldAngle.x - angle.x);
+				float y = oldAngle.y - learningRate * (oldAngle.y - angle.y);
+				
+				Vector2D	newAngle(x,y);
+// 				std::cout<<sqrt(x*x + y*y)<<std::endl;
+				if(sqrt(x*x + y*y) > 1)
+					newAngle.Normalize();
+					
+				angleLookup[sn] = newAngle;
+			}
+			else
+			{
+				Vector2D oldAngle = angleLookup[sn];
+				Vector2D storeme = oldProp * oldAngle + newProportion * angle;
+				storeme.Normalize();
+				angleLookup[sn] = storeme;
+			}
+		}			
 	}
-	else
-	{
-		Vector2D oldAngle = angleLookup[sn2];
-		angleLookup[sn2] = oldProportion * oldAngle + newProportion * angle;
-	}			
 	return;
+}
+
+
+void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s)
+{
+	UpdateAngle(old,s,oldProportion);
 }
 
 /**
@@ -184,6 +347,12 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s)
 */
 double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 {
+	// Update angles 
+ 	if(updateOnQuery)
+ 	{
+ 		UpdateAngle(l1,l2,queryOldProportion);
+ 	}
+ 	
 	
 	//std::cou<t<"l1 "<<l1<<" l2 "<<l2<<std::endl;
 	double h = HCost(l1, l2);
@@ -298,7 +467,7 @@ void WeightedMap2DEnvironment::OpenGLDraw(int window)
 			//glColor3f(1.0, 0,0);
 			glColor3f(0,0,0);
 			map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
-			glLineWidth(2);
+			//glLineWidth(2);
 			glBegin(GL_LINE_STRIP);
 			glVertex3f(xx-old.x*rad, yy-old.y*rad, zz-rad/2);
 			
@@ -433,7 +602,7 @@ Vector2D WeightedMap2DEnvironment::GetAngle(xyLoc &l)
 	}
 }
 
-double WeightedMap2DEnvironment::ComputeArrowMetric()
+double WeightedMap2DEnvironment::ComputeArrowMetric(bool doNormalize)
 {
 	Graph* g = ma->GetAbstractGraph(0);
 	node_iterator ni = g->getNodeIter();
@@ -487,8 +656,16 @@ double WeightedMap2DEnvironment::ComputeArrowMetric()
 		{
 			numDotProducts++;
 			Vector2D nextNodeVec = GetAngle(next);
-			double dotprod = (nodeVec.x * nextNodeVec.x) + (nodeVec.y * nextNodeVec.y);
-			totalDotProducts += dotprod;
+			if(doNormalize)
+			{
+				nodeVec.Normalize();
+				nextNodeVec.Normalize();
+			}
+			//double dotprod = (nodeVec.x * nextNodeVec.x) + (nodeVec.y * nextNodeVec.y);
+			//totalDotProducts += dotprod;
+			Vector2D difference((nodeVec.x + nextNodeVec.x)/2, (nodeVec.y + nextNodeVec.y)/2);
+			double addme = sqrt(difference.x * difference.x + difference.y * difference.y);
+			totalDotProducts += addme;
 		}	
 	}
 	return (totalDotProducts / (double)(numDotProducts));
@@ -510,5 +687,8 @@ Vector2D WeightedMap2DEnvironment::GetAngleFromDirection(tDirection dir)
 		case kSE: angle.Set(1,1); break;
 		default: break;
 	}
+	
+	angle.Normalize();
+	
 	return angle;
 }

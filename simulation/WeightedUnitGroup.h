@@ -11,7 +11,7 @@ template <class state, class action, class environment>
 class WeightedUnitGroup : public UnitGroup<state,action,environment>
 {
 	public:
-		WeightedUnitGroup(){wt = -1; prop = -1; useWindow = false; windowSize = -1; localWeights = false; currDrawEnv = 0; noweighting = false; }
+		WeightedUnitGroup(){wt = -1; prop = -1; useWindow = false; windowSize = -1; localWeights = false; currDrawEnv = 0; noweighting = false; updateOnQuery = false; updateSurrounding = false; usePerceptron = false; learningRate = 0; }
 //		WeightedUnitGroup(double weight, double proportion) {wt = weight; prop = proportion;}
 		
 		void SetWeight(double weight) {wt = weight;}
@@ -21,9 +21,11 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 		void UseLocalWeights(bool b) {localWeights = b;}
 		void SetLocalWeightRadius (double r) {localRadius = r;}
 		void SetNoWeighting(bool b) {noweighting = b;}
-		
-		
-		
+		void SetUpdateOnQuery(double d) {updateOnQuery = true; queryProp = d; }
+		void SetUpdateSurrounding(double d) { updateSurrounding = true; surrProp = d; }
+		void UsePerceptron(double lr)	{ usePerceptron = true;	learningRate = lr; }
+
+		WeightedMap2DEnvironment* GetWeightedEnvironment() { return wme; }
 		virtual ~WeightedUnitGroup() 
 		{	
 			delete wme; 
@@ -56,6 +58,21 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 						if(noweighting)
 							unitWme[unitWme.size()-1]->SetNoWeighting(true);
 							
+						if(updateOnQuery)
+						{
+							unitWme[unitWme.size()-1]->SetUpdateOnQuery(true);
+							unitWme[unitWme.size()-1]->SetQueryProportionOld(queryProp);
+						}
+						if(updateSurrounding)
+						{
+							unitWme[unitWme.size()-1]->SetUpdateSurrounding(true);
+							unitWme[unitWme.size()-1]->SetSurroundingProportion(surrProp);		
+						}	
+						if(usePerceptron)
+						{
+							unitWme[unitWme.size()-1]->UsePerceptron(learningRate);
+						}		
+								
 						environment* uenv = unitWme[unitWme.size()-1];
 						unitEnv.push_back(uenv);
 					}
@@ -74,6 +91,20 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 				if(noweighting)
 					wme->SetNoWeighting(true);
 					
+				if(updateOnQuery)
+				{
+					wme->SetUpdateOnQuery(true);
+					wme->SetQueryProportionOld(queryProp);
+				}
+				if(updateSurrounding)
+				{
+					wme->SetUpdateSurrounding(true);
+					wme->SetSurroundingProportion(surrProp);		
+				}		
+				if(usePerceptron)
+				{
+					wme->UsePerceptron(learningRate);
+				}	
 				env = wme;
 				myE = e;
 			}
@@ -164,6 +195,20 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 						if(noweighting)
 							unitWme[unitWme.size()-1]->SetNoWeighting(true);
 							
+						if(updateOnQuery)
+						{
+							unitWme[unitWme.size()-1]->SetUpdateOnQuery(true);
+							unitWme[unitWme.size()-1]->SetQueryProportionOld(queryProp);
+						}
+						if(updateSurrounding)
+						{
+							unitWme[unitWme.size()-1]->SetUpdateSurrounding(true);
+							unitWme[unitWme.size()-1]->SetSurroundingProportion(surrProp);		
+						}	
+						if(usePerceptron)
+						{
+							unitWme[unitWme.size()-1]->UsePerceptron(learningRate);
+						}	
 						environment* uenv = unitWme[unitWme.size()-1];
 						unitEnv.push_back(uenv);
 					}
@@ -182,6 +227,21 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 				}	
 				if(noweighting)
 					wme->SetNoWeighting(true);
+					
+				if(updateOnQuery)
+				{
+					wme->SetUpdateOnQuery(true);
+					wme->SetQueryProportionOld(queryProp);
+				}
+				if(updateSurrounding)
+				{
+					wme->SetUpdateSurrounding(true);
+					wme->SetSurroundingProportion(surrProp);		
+				}				
+				if(usePerceptron)
+				{
+					wme->UsePerceptron(learningRate);
+				}				
 				env = wme;
 				myE = e;
 			}
@@ -210,10 +270,12 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			}
 		}
 		
-		double ComputeArrowMetric()
+		double ComputeArrowMetric(bool b)
 		{
-			return wme->ComputeArrowMetric();
+			return wme->ComputeArrowMetric(b);
 		}
+		
+
 		
 		
 	private:
@@ -230,5 +292,11 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 		double localRadius;
 		unsigned int currDrawEnv;
 		bool noweighting;
+		bool updateOnQuery;
+		double queryProp;
+		bool updateSurrounding;
+		double surrProp;
+		bool usePerceptron;
+		double learningRate;
 };
 

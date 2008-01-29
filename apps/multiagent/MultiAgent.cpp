@@ -48,6 +48,8 @@
 #include "GenericPatrolUnit.h"
 #include "WeightedMap2DEnvironment.h"
 #include "ScenarioLoader.h"
+#include "WeightedPatrolUnit.h"
+//#include "AbstractWeightedSearchAlgorithm.h"
 
 #include <fstream>
 
@@ -92,6 +94,17 @@ double astarweight = 1;
 
 bool noWeighting = false;
 
+bool updateOnQuery = false;
+double queryUpdateProp = 0; 
+
+bool updateSurrounding = false;
+double surroundingProp = 0; 
+
+bool weightpath = false;
+
+bool useperceptron = false;
+double learningrate = 0; 
+
 WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug;
 int main(int argc, char* argv[])
 {
@@ -120,6 +133,93 @@ void CreateSimulation(int id)
 // 	
 // 	exit(0);
 // 	
+	
+	
+	
+	
+/*	int n = 5;
+		
+	Map* map;
+	map = new Map(4*n+10, 2*n+1);
+		
+	map->setTileSet(kWinterTile);
+	
+	Initialize(id, map);
+	SetNumPorts(id, 1);
+	
+	int y = n+1;
+	int x = 6;
+	int goalx = 3*n + 6;
+	char* name;
+	for(int i=0; i<n; i++)
+	{
+	char num[8];
+ 		sprintf(num,"%d",i);
+ 		name = new char[256];
+ 		strcpy(name,"PatrolUnit");
+ 		strcat(name, num);
+ 		
+		xyLoc start, goal;
+		start.x = x;
+		start.y = y;
+		goal.x = goalx;
+		goal.y = y;
+		
+		TemplateAStar<xyLoc, tDirection, AbsMapEnvironment> *alg = new TemplateAStar<xyLoc, tDirection, AbsMapEnvironment>();
+		
+		
+		
+		if(radius != -1)
+			alg->SetRadius(radius);
+		if(weightedAstar)
+			alg->SetWeight(astarweight);
+			
+ 		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg);
+		su->AddPatrolLocation(goal);
+		su->SetNumPatrols(numPatrols);	
+			
+		su->SetName(name);	
+		su->SetSpeed(1.0);
+		if(start.x < 16)	
+			su->SetColor(1, 0, 0);
+		else
+			su->SetColor(0, 1, 0);
+		if(weighted) wug->AddUnit(su);
+		
+		unitSims[id]->AddUnit(su);
+		
+		
+		
+		start.x = goalx;
+		goal.x = x;
+		
+		TemplateAStar<xyLoc, tDirection, AbsMapEnvironment> *alg2 = new TemplateAStar<xyLoc, tDirection, AbsMapEnvironment>();
+		if(radius != -1)
+			alg2->SetRadius(radius);
+		if(weightedAstar)
+			alg2->SetWeight(astarweight);
+			
+ 		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su2 = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg2);
+		su2->AddPatrolLocation(goal);
+		su2->SetNumPatrols(numPatrols);	
+			
+		su2->SetName(name);	
+		su2->SetSpeed(1.0);
+		if(start.x < 16)	
+			su2->SetColor(1, 0, 0);
+		else
+			su2->SetColor(0, 1, 0);
+		if(weighted) wug->AddUnit(su2);
+		
+		unitSims[id]->AddUnit(su2);
+		
+		
+		x++;
+		goalx++;
+	}
+
+	*/
+
 	if(scenFileName[0] != 0)
 	{
 		RunScenario(id);
@@ -129,8 +229,8 @@ void CreateSimulation(int id)
 		
 		
 	// Only show 1 copy of the map
-/*	SetNumPorts(id, 1);
-	
+/*	;
+	SetNumPorts(id, 1)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
@@ -172,18 +272,11 @@ void CreateSimulation(int id)
 	//RunExperiment(id);
 }
 
-void RunScenario(int id)
+void Initialize(int id, Map* map)
 {
-	Experiment e = sl->GetNthExperiment(0);	
-
-	char mname[1024];
-	char newname[1024] = "\0";
-	e.GetMapName(mname);
-	Map* map = new Map(mname);
-	map->setTileSet(kWinterTile);
-	
 	unitSims.resize(id+1);
-	env = new AbsMapEnvironment(new MapFlatAbstraction(map));
+	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
+	env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,8));
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	unitSims[id]->SetStepType(kRealTime);
 	unitSims[id]->SetThinkingPenalty(0);
@@ -212,8 +305,78 @@ void RunScenario(int id)
 		wug->UseLocalWeights(true);
 		wug->SetLocalWeightRadius(localRadius); 
 	}
+	if(updateOnQuery)
+	{
+		wug->SetUpdateOnQuery(queryUpdateProp);
+	}
+	if(updateSurrounding)
+	{
+		wug->SetUpdateSurrounding(surroundingProp);
+	}
+	if(useperceptron)
+	{
+		wug->UsePerceptron(learningrate);
+	}
 
-	char* name;
+}
+
+void RunScenario(int id)
+{
+	Experiment e = sl->GetNthExperiment(0);	
+
+	char mname[1024];
+	char newname[1024] = "\0";
+	e.GetMapName(mname);
+	Map* map = new Map(mname);
+	map->setTileSet(kWinterTile);
+	
+	Initialize(id, map);
+	/*
+	unitSims.resize(id+1);
+	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
+	env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,8));
+	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
+	unitSims[id]->SetStepType(kRealTime);
+	unitSims[id]->SetThinkingPenalty(0);
+//	unitSims[id]->SetPaused(true);
+	
+	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
+	
+	if(weighted)
+	{	
+		if(weight != -1)
+			wug->SetWeight(weight);
+		if(proportion != -1)
+			wug->SetProportion(proportion);
+ 		if(noWeighting)
+			wug->SetNoWeighting(true);
+	
+		unitSims[id]->AddUnitGroup(wug);
+	}
+	if(useWindow)
+	{
+		wug->SetUseWindow(true);
+		wug->SetWindowSize(windowSize);
+	}
+	if(useLocal)
+	{
+		wug->UseLocalWeights(true);
+		wug->SetLocalWeightRadius(localRadius); 
+	}
+	if(updateOnQuery)
+	{
+		wug->SetUpdateOnQuery(queryUpdateProp);
+	}
+	if(updateSurrounding)
+	{
+		wug->SetUpdateSurrounding(surroundingProp);
+	}
+	if(useperceptron)
+	{
+		wug->UsePerceptron(learningrate);
+	}
+	*/
+		char* name;
 	
 	int numExperiments = sl->GetNumExperiments();
 	int i = 0; 
@@ -243,6 +406,9 @@ void RunScenario(int id)
 		goal.y = e.GetGoalY();
 		
 		TemplateAStar<xyLoc, tDirection, AbsMapEnvironment> *alg = new TemplateAStar<xyLoc, tDirection, AbsMapEnvironment>();
+		
+		//AbstractWeightedSearchAlgorithm<xyLoc, tDirection,AbsMapEnvironment> *alg = new AbstractWeightedSearchAlgorithm<xyLoc, tDirection, AbsMapEnvironment>();
+		
 		if(radius != -1)
 			alg->SetRadius(radius);
 		if(weightedAstar)
@@ -276,7 +442,8 @@ void RunScenario(int id)
 
 	if(runExperiment)
 		{
-			std::vector<double> coherence;
+			std::vector<double> c1;
+			std::vector<double> c2;
 			
 			if(outFileName[0]==0)
 				strncpy(outFileName, "defaultOut.txt",1024);
@@ -305,7 +472,10 @@ void RunScenario(int id)
 				time += timestep;
 				if(((int)time%15==0) && (wug->GetMembers().size() > 0))
 				{
-					coherence.push_back(wug->ComputeArrowMetric());
+					c1.push_back(wug->ComputeArrowMetric(true));
+					c2.push_back(wug->ComputeArrowMetric(false));
+					//std::cout<<time<<" "<<normMetric<<" "<<noNormMetric<<std::endl;
+					//coherence.push_back(wug->ComputeArrowMetric());
 				}
 					
 					
@@ -334,13 +504,14 @@ void RunScenario(int id)
 			PrintStatistics(id,outfile);		
 				
 			outfile<<std::endl;
-			for(unsigned int i=0; i<coherence.size(); i++)
+			for(unsigned int i=0; i<c1.size(); i++)
 			{
-				outfile<<coherence[i]<<std::endl;
+				outfile<<c1[i]<<" "<<c2[i]<<std::endl;
 			}
 				
 			exit(0); 			
 		} // end if(runExperiment)
+
 	//unitSims[id]->ClearAllUnits();
 	//PrintStatistics(id);
 	SetNumPorts(id,1);	
@@ -617,6 +788,14 @@ void InstallHandlers()
 	
 	InstallCommandLineHandler(MyCLHandler, "-astarweight", "-astarweight weight", "Use weighted A*");
 	InstallCommandLineHandler(MyCLHandler, "-noweighting", "-noweighting", "Draw directions but don't do weighting");
+	
+	InstallCommandLineHandler(MyCLHandler, "-updateOnQuery", "-updateOnQuery prop", "Update angles when queried. prop is proportion of old angle");
+	InstallCommandLineHandler(MyCLHandler, "-updateSurrounding","-updateSurrounding prop", "Update surrounding angles when agent moves");
+	
+	InstallCommandLineHandler(MyCLHandler, "-weightpath", "-weightpath", "Update angles along planned path");
+	
+	InstallCommandLineHandler(MyCLHandler, "-perceptron", "-perceptron alpha", "Use the perceptron update rule with learning rate alpha");
+	
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
@@ -783,6 +962,26 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		noWeighting = true;
 		weighted = true;
 		return 1;
+	}
+	else if(strcmp(argument[0],"-updateOnQuery")==0)
+	{
+		updateOnQuery = true;
+		queryUpdateProp = atof(argument[1]);
+	}
+	else if(strcmp(argument[0],"-updateSurrounding")==0)
+	{
+		updateSurrounding = true;
+		surroundingProp = atof(argument[1]);
+	}
+	else if(strcmp(argument[0],"-weightpath")==0)
+	{
+		weightpath = true;
+		return 1;
+	}
+	else if(strcmp(argument[0],"-perceptron")==0)
+	{
+		useperceptron = true;
+		learningrate = atof(argument[1]);
 	}
 	return 2;
 }
