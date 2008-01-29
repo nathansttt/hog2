@@ -48,7 +48,7 @@
 #include "GenericPatrolUnit.h"
 #include "WeightedMap2DEnvironment.h"
 #include "ScenarioLoader.h"
-#include "WeightedPatrolUnit.h"
+//#include "WeightedPatrolUnit.h"
 //#include "AbstractWeightedSearchAlgorithm.h"
 
 #include <fstream>
