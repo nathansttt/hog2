@@ -26,7 +26,7 @@ public:
 	void LogFinalStats(StatCollection *stats);
 	void SetNumPatrols(int num) {numPatrols = num;}
 	
-	/** Set wether we want to trim the planned path
+	/** Set whether we want to trim the planned path
 	 * 
 	 * @author Renee Jansen
 	 * @date 10/2007
@@ -54,6 +54,7 @@ public:
 // 		GetColor(_r,_g,_b);
 // 		glColor3f(_r,_g,_b);this->r=_r; this->g=_g; this->b=_b;}
 	
+//private:
 private:
 	//GLfloat r, g, b;
 	xyLoc loc;

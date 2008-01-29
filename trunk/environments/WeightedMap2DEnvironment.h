@@ -39,9 +39,9 @@
 
 class Vector2D {
 	public:
-		Vector2D(float _x,float _y):x(_x), y(_y) {Normalize();}
+		Vector2D(float _x,float _y):x(_x), y(_y) {/*Normalize();*/}
 		Vector2D():x(0),y(0) {}
-		void Set(float _x, float _y) { x=_x; y=_y; Normalize();}
+		void Set(float _x, float _y) { x=_x; y=_y; /*Normalize();*/}
 		bool operator==(const Vector2D &rhs) {return ((x == rhs.x)&&(y==rhs.y));}
 		std::ostream& operator <<(std::ostream & out)
 		{
@@ -64,7 +64,7 @@ class Vector2D {
 		friend Vector2D operator +(const Vector2D& v1, const Vector2D& v2)
 		{
 			Vector2D returnme(v1.x + v2.x, v1.y + v2.y);
-			returnme.Normalize();
+			//returnme.Normalize();
 			return returnme;
 		}
 	//private:
@@ -132,6 +132,13 @@ public:
 	/** Set the weight (proportion) of the old angle */ 
 	void SetProportionOld(double prop) { assert((prop>=0) && (prop <=1)); oldProportion = prop; }
 	
+	void SetUpdateOnQuery(bool b) { updateOnQuery = b;}
+	/** Set the weight (proportion) of the old angle for queried edge updates */
+	void SetQueryProportionOld(double prop) { assert((prop>=0) && (prop <=1)); queryOldProportion = prop; }
+	
+	void SetUpdateSurrounding(bool b) { updateSurrounding = b; }
+	void SetSurroundingProportion(double prop) { assert((prop>=0) && (prop <=1)); surroundingProportion = prop;}
+	
 	// Use weights within window only
 	void UseWindow(bool b) {useWindow=b;}
 	void SetWindowCenter(xyLoc l) {windowCenter=l;}
@@ -142,13 +149,18 @@ public:
 	Vector2D GetAngle(xyLoc &l);
 	void SetNoWeighting(bool b) {noWeighting = b; }
 	
-	double ComputeArrowMetric();
+	// For perceptron update rule
+	void UsePerceptron(double lr) { usePerceptron = true; learningRate = lr; }
+	
+	double ComputeArrowMetric(bool doNormalize=false);
 	Vector2D GetAngleFromDirection(tDirection dir);
 private:
 	BaseMapOccupancyInterface* oi;
 	
 	typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
 	AngleLookupTable angleLookup;
+	
+	void UpdateAngle(xyLoc &old, xyLoc &s, double prop);
 	
 	double diffWeight;
 	double oldProportion;
@@ -159,6 +171,15 @@ private:
 	double windowSize;
 	
 	bool noWeighting;
+	
+	bool updateOnQuery;
+	double queryOldProportion;
+	
+	bool updateSurrounding;
+	double surroundingProportion;
+	
+	bool usePerceptron;
+	double learningRate;
 };
 
 typedef UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment> UnitWeightedMapSimulation;
