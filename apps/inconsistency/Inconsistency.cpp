@@ -46,9 +46,10 @@ std::vector<GraphSimulation *> unitSims;
 
 extern bool drawtext;
 
-unsigned int fig = 1;
+unsigned int fig = 4;
 unsigned int N = 5;
 unsigned int vid = 1;
+
 double delta = 0;
 
 graphState from,to;
@@ -151,13 +152,19 @@ void CreateSimulation(int id)
 		to = 0;
 		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
 	}	
-	else {
+	else if (fig == 3){
 		grp = PropUtil::graphGenerator::genFig3(N);
 		from = 0;
 		to = 2*N - 1;
 		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
 	}
-
+	else {
+		grp = PropUtil::graphGenerator::genFig4(N);
+		from = 0;
+		to = 2*N + 1;
+		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
+	}
+	
 	printf("Environment ready.\n");
 
 	unitSims.resize(id+1);
@@ -259,17 +266,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 		{
-//			if (CFOR == 0)
-//			{
-//				CFOR = new CFOptimalRefinement();
-//				while (!CFOR->InitializeSearch(unitSims[windowID]->GetEnvironment()->GetMapAbstraction(),
-//																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode(),
-//																			 unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph(0)->GetRandomNode()))
-//				{}
-//			}
-//			if (CFOR->DoOneSearchStep())
-//				printf("DONE!!!\n");
-
 			if(ALG == 0) 
 			{
 				if(vid != 6)
@@ -318,9 +314,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			ALG->GetPath(env,grp,from,to,thePath);
 			printf("\n");
 
-			ALG = new Prop(5);
-			ALG->GetPath(env,grp,from,to,thePath);
-			printf("\n");
+//			ALG = new Prop(5);
+//			ALG->GetPath(env,grp,from,to,thePath);
+//			printf("\n");
 
 			ALG = new AStarDelay();
 			ALG->GetPath(env,grp,from,to,thePath);
