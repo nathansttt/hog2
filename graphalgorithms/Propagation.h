@@ -341,6 +341,76 @@ namespace PropUtil
 
 			return g;
 		}
+
+		static Graph* genFig4(unsigned int N)
+		{
+			// h(0) = h(2N-1) = 0
+			// h(i) = N+i-1, for i = 1,...,N-1
+			// h(N+j) = 2(N-1)(N-2-j) + 1,  for j = 0,...,N-2
+			// c(0,i) = 1,  for i = 1,...,N-1
+			// c(i,N) = 2(N-1)(i-1) + 1,  for i = 1,...,N-1
+			// c(i,i+1) = 2N - 2,  for i = N,...,2N-1 (should it be 2N-2 ?)
+			assert(N >= 2);
+			
+			Graph* g = new Graph();
+			
+			// add nodes
+			node* n = new node("");
+			n->SetLabelF(GraphSearchConstants::kHCost,0);
+			SetLoc(n, 0, -0.9, 0);
+			g->AddNode(n);
+			
+			for (unsigned int i=1;i<=N-1;i++)
+			{
+				n = new node("");
+				double h = 2*N-i;
+				n->SetLabelF(GraphSearchConstants::kHCost,h);
+				g->AddNode(n);
+				SetLoc(n, -1+(double)(i-1)*2.0/((double)N-2.0), 0.0, 0);
+			}
+			
+			for (unsigned int j=0; j<=N+1; j++)
+			{
+				n = new node("");
+				double h = 0; // 2*(N-1)*(N-2-j) + 1;
+				n->SetLabelF(GraphSearchConstants::kHCost,h);
+				g->AddNode(n);
+				SetLoc(n, -(double)j/((double)N-1.0), 0.9+((j%2)?0.1:0.0), 0);
+			}
+			
+			n = new node(""); // the last node (2N-1)
+			n->SetLabelF(GraphSearchConstants::kHCost,0);
+			SetLoc(n, -1, 1, 0);
+			g->AddNode(n);
+			
+			// add edges
+			
+			// type 1
+			for (unsigned int i=1;i<=N-1;i++)
+			{
+				edge* e = new edge(0,i,1);
+				g->AddEdge(e);
+			}
+			
+			// type 2
+			for (unsigned int i=1; i<=N-1; i++)
+			{
+				double c = i;
+				edge* e = new edge(i,N,c);
+				g->AddEdge(e);
+			}
+			
+			// type 3
+			for (unsigned int i=N; i<=2*N-1; i++)
+			{
+				double c = 1;
+				edge* e = new edge(i,i+1,c);
+				g->AddEdge(e);
+			}
+			g->AddEdge(new edge(2*N, 2*N+1, N-1));
+			return g;
+		}
+		
 	};
 
 

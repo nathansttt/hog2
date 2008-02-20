@@ -660,11 +660,11 @@ void MeroB::OpenGLDraw()
 	}
 
 	// draw edges
-//	edge_iterator ei = g->getEdgeIter();
-//	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
-//	{
-//		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
-//	}
+	edge_iterator ei = g->getEdgeIter();
+	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+	{
+		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
+	}
 }
 
 void MeroB::DrawText(double x, double y, double z, float r, float gg, float b, char* str)

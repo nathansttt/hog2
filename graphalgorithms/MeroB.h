@@ -122,6 +122,11 @@ namespace MeroBUtil
 				{
 					n->SetLabelF(GraphSearchConstants::kHCost, 0);
 				}
+// EX2
+//				else if (nodeID == N)
+//				{
+//					n->SetLabelF(GraphSearchConstants::kHCost, 0);
+//				}
 				else {
 					double h = pow(2,nodeID-1) + 2*nodeID - 3;
 					n->SetLabelF(GraphSearchConstants::kHCost,h);
@@ -187,7 +192,8 @@ namespace MeroBUtil
 			for (unsigned int j=0; j<=N-2; j++)
 			{
 				n = new node("");
-				double h = 2*(N-1)*(N-2-j) + 1;
+				double h = 0;//2*(N-1)*(N-2-j) + 1;
+				//double h = 2*(N-1)*(N-2-j) + 1;
 				n->SetLabelF(GraphSearchConstants::kHCost,h);
 				g->AddNode(n);
 				SetLoc(n, -(double)j/((double)N-1.0), 0.9+((j%2)?0.1:0.0), 0);
