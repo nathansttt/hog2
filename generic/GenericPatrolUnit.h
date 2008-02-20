@@ -242,19 +242,31 @@ template <class state, class action, class environment>
 void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
 {
 	GLfloat _r,_g,_b;
-		if(locs[currTarget].x < (env->GetMap()->getMapWidth() / 2))
-		{
-			_r = 1;
-			_g = 0;
-			_b = 0;
-		}
-		
-		else
-		{
-			_r = 0;
-			_g = 1;
-			_b = 0;
-		}
+	_r = (GLfloat)locs[currTarget].x/(GLfloat)env->GetMap()->getMapWidth();
+	_b = (GLfloat)locs[currTarget].y/(GLfloat)env->GetMap()->getMapHeight();
+	_g = 0;
+	//_b = (GLfloat)(locs[currTarget].y+locs[currTarget].y)/(GLfloat)(env->GetMap()->getMapHeight()+env->GetMap()->getMapWidth());
+//		if(locs[currTarget].x < (env->GetMap()->getMapWidth() / 2))
+//		{
+//			_r = 1;
+//			_g = 0;
+//			_b = 0;
+//		}
+//		else
+//		{
+//			_r = 0;
+//			_g = 1;
+//			_b = 0;
+//		}
+//	if(locs[currTarget].y < (env->GetMap()->getMapHeight() / 2))
+//	{
+//		_b = 1;
+//		_r = 0;
+//	}
+//	else
+//	{
+//		_b = 0;
+//	}
 	if(drawUnit)
 	{
 		
@@ -276,6 +288,7 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 	} 
 		
 	// Draw the patrol locations	
+if (0)
 	for(unsigned int i=0; i<locs.size(); i++)
 	{
 		state l = locs[i];
