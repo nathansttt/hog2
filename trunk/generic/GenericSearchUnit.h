@@ -80,8 +80,8 @@ protected:
 
 	Unit<state,action,environment> *target;
 	//GLfloat r, g, b;
-	state loc, goal;
-	double targetTime;
+	state loc, goal, lastloc;
+	double targetTime, lastTime;
 	bool onTarget;
 };
 
@@ -199,19 +199,21 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 }
 
 template <class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::OpenGLDraw(int window, environment *env, SimulationInfo *)
+void GenericSearchUnit<state,action,environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
 {
 	// Draw current + goal states as states. May need to find something
 	// different for the goal
 		
-	if(loc == goal)
-		env->OpenGLDraw(window, loc, 0,0,0);
+	if (loc == goal)
+	{
+		env->OpenGLDraw(window, loc, 0, 0, 0);
+	}
 	else
 	{	
 		GLfloat _r,_g,_b;
 		this->GetColor(_r,_g,_b);
-	env->OpenGLDraw(window, loc, _r, _g, _b);	
-	env->OpenGLDraw(window, goal, _r, _g, _b);
+		//env->OpenGLDraw(window, lastLoc, loc, _r, _g, _b);	
+		env->OpenGLDraw(window, goal, _r, _g, _b);
 	}
 	state current = loc; 
 	state next;
@@ -284,10 +286,12 @@ void GenericSearchUnit<state,action,environment>::UpdateLocation(environment *en
 	//env->GetOccupancyInterface()->SetStateOccupied(loc,false);
 	//env->GetOccupancyInterface()->SetStateOccupied(l, true);
 	
-	if((!success)||(l == loc))
+	if ((!success) || (l == loc))
 	{
 		moves.resize(0);
 	}
+	//lastLoc = loc;
+	lastTime = si->GetSimulationTime();
 	loc = l;
 }
 
