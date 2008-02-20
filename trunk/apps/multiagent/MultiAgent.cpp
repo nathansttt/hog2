@@ -828,7 +828,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (viewport == 0)
 			{
 				//unitSims[windowID]->StepTime(1.0/30.0);
-				unitSims[windowID]->StepTime(1.5);
+				unitSims[windowID]->StepTime(0.55);
 // 				if(unitSims[windowID]->Done())
 // 					std::cout<<"DONE\n";
 			}
@@ -843,7 +843,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (viewport == 0)
 			{
 				//wUnitSims[windowID]->StepTime(1.0/30.0);
-				wUnitSims[windowID]->StepTime(1.5);
+				wUnitSims[windowID]->StepTime(0.55);
 			}
 			wUnitSims[windowID]->OpenGLDraw(windowID);		
 			break;
