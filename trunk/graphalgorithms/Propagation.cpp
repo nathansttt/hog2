@@ -22,7 +22,7 @@ using namespace PropUtil;
 #define WAITMODE   3
 
 const static bool verbose = false;
-bool drawtext = false;
+bool drawtext = true;
 
 void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath) {
 	if(!InitializeSearch(_env,_g,from,to,thePath))
