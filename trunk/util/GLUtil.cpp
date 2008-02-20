@@ -399,7 +399,7 @@ void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 	glTranslatef(_x, _y, _z);
 
 	int i,j;
-	int n = 64; // precision
+	int n = 8; // precision
 	double theta1,theta2,theta3;
 	point3d e,p,c(0, 0, 0);
 	
