@@ -312,7 +312,7 @@ void initialConditions(pRecContext pContextInfo)
 	pContextInfo->colorScheme = 4;
 	pContextInfo->subdivisions = 64;
 	pContextInfo->xyRatio = 1;
-	pContextInfo->modeFSAA = 0;
+	pContextInfo->modeFSAA = 1;
 
 	pContextInfo->windowID = gNextWindowID++;
 }
