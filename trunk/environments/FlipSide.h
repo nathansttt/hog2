@@ -76,6 +76,7 @@ public:
 	OccupancyInterface<FlipSideState, flipMove> *GetOccupancyInfo() { return 0; }
 	double HCost(FlipSideState &state1, FlipSideState &state2);
 	double GCost(FlipSideState &state1, FlipSideState &state2);
+	double GCost(FlipSideState &state1, flipMove &act) { return 1.0; }
 	bool GoalTest(FlipSideState &state, FlipSideState &goal);
 	uint64_t GetStateHash(FlipSideState &state);
 	uint64_t GetActionHash(flipMove act);

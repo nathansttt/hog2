@@ -124,6 +124,7 @@ public:
 	OccupancyInterface<graphState, graphMove> *GetOccupancyInfo() { return 0; }
 	double HCost(graphState &state1, graphState &state2);
 	double GCost(graphState &state1, graphState &state2);
+	double GCost(graphState &state1, graphMove &state2);
 	bool GoalTest(graphState &state, graphState &goal);
 	uint64_t GetStateHash(graphState &state);
 	uint64_t GetActionHash(graphMove act);

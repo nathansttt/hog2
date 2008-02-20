@@ -43,6 +43,19 @@ static std::ostream& operator <<(std::ostream & out, const MNPuzzleState &loc)
 	return out;
 }
 
+static std::ostream& operator <<(std::ostream & out, const slideDir &loc)
+{
+	switch (loc)
+	{
+		case kLeft: out << "Left"; break;
+		case kRight: out << "Right"; break;
+		case kUp: out << "Up"; break;
+		case kDown: out << "Down"; break;
+	}
+	return out;
+}
+
+
 static bool operator==(const MNPuzzleState &l1, const MNPuzzleState &l2)
 {
 	if (l1.width != l2.width)
@@ -68,14 +81,21 @@ public:
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
 	double HCost(MNPuzzleState &state1, MNPuzzleState &state2);
 	double GCost(MNPuzzleState &state1, MNPuzzleState &state2);
+	double GCost(MNPuzzleState &state1, slideDir &act) { return 1.0; }
 	bool GoalTest(MNPuzzleState &state, MNPuzzleState &goal);
 	uint64_t GetStateHash(MNPuzzleState &state);
+	uint64_t GetPDBHash(MNPuzzleState &state, const std::vector<int> &tiles);
+	void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 	uint64_t GetActionHash(slideDir act);
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, MNPuzzleState &s);
 	void OpenGLDraw(int, MNPuzzleState &, slideDir &) { /* currently not drawing moves */ }
 private:
-		int width, height;
+	double DoPDBLookup(MNPuzzleState &state);
+	uint64_t Factorial(int val);
+	std::vector<std::vector<uint8_t> > PDB;
+	std::vector<std::vector<int> > PDBkey;
+	int width, height;
 };
 
 typedef UnitSimulation<MNPuzzleState, slideDir, MNPuzzle> PuzzleSimulation;

@@ -439,7 +439,7 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 
 void WeightedMap2DEnvironment::OpenGLDraw(int window)
 {	
-	
+//	return;
 	// Draw the map
 	//AbsMapEnvironment::OpenGLDraw(window);
 	
