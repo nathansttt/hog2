@@ -103,6 +103,13 @@ double GraphEnvironment::HCost(graphState &state1, graphState &state2)
 	return 0;
 }
 
+double GraphEnvironment::GCost(graphState &, graphMove &move)
+{
+	edge *e = g->FindEdge(move.from, move.to);
+	assert(e);
+	return e->GetWeight();
+}
+
 double GraphEnvironment::GCost(graphState &state1, graphState &state2)
 {
 	edge *e = g->FindEdge(state1, state2);

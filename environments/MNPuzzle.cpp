@@ -52,14 +52,14 @@ void MNPuzzle::GetSuccessors(MNPuzzleState &stateID, std::vector<MNPuzzleState> 
 void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions)
 {
 	actions.resize(0);
+	if ((stateID.blank%stateID.width) != stateID.width-1)
+		actions.push_back(kRight);
 	if ((stateID.blank%stateID.width) != 0)
 		actions.push_back(kLeft);
 	if ((stateID.blank/stateID.width) != stateID.height-1)
 		actions.push_back(kDown);
 	if ((stateID.blank/stateID.width) != 0)
 		actions.push_back(kUp);
-	if ((stateID.blank%stateID.width) != stateID.width-1)
-		actions.push_back(kRight);
 }
 
 slideDir MNPuzzle::GetAction(MNPuzzleState &s1, MNPuzzleState &s2)
@@ -145,10 +145,12 @@ double MNPuzzle::HCost(MNPuzzleState &state1, MNPuzzleState &state2)
 			}
 		}
 	}
+	if (PDB.size() != 0)
+		return std::max(hval, DoPDBLookup(state1));
 	return hval;
 }
 
-double MNPuzzle::GCost(MNPuzzleState &state1, MNPuzzleState &state2)
+double MNPuzzle::GCost(MNPuzzleState &, MNPuzzleState &)
 {
 	return 1;
 }
@@ -160,13 +162,54 @@ bool MNPuzzle::GoalTest(MNPuzzleState &state, MNPuzzleState &goal)
 
 uint64_t MNPuzzle::GetStateHash(MNPuzzleState &state)
 {
+	std::vector<int> puzzle = state.puzzle;
 	uint64_t hashVal = 0;
+	int numEntriesLeft = state.puzzle.size();
 	for (unsigned int x = 0; x < state.puzzle.size(); x++)
 	{
-		hashVal = hashVal*state.puzzle.size() + state.puzzle[x];
+		hashVal += puzzle[x]*Factorial(numEntriesLeft-1);
+		numEntriesLeft--;
+		for (unsigned y = x; y < puzzle.size(); y++)
+		{
+			if (puzzle[y] > puzzle[x])
+				puzzle[y]--;
+		}
 	}
 	return hashVal;
 }
+
+/**
+ * Tiles are the tiles we care about
+ */
+uint64_t MNPuzzle::GetPDBHash(MNPuzzleState &state, const std::vector<int> &tiles)
+{
+	std::vector<int> locs;
+	locs.resize(tiles.size());
+	for (unsigned int x = 0; x < state.puzzle.size(); x++)
+	{
+		for (unsigned int y = 0; y < tiles.size(); y++)
+		{
+			if (state.puzzle[x] == tiles[y])
+				locs[y] = x;
+		}
+	}
+
+	uint64_t hashVal = 0;
+	int numEntriesLeft = state.puzzle.size();
+	for (unsigned int x = 0; x < locs.size(); x++)
+	{
+		hashVal += locs[x]*Factorial(numEntriesLeft-1)/Factorial(state.puzzle.size()-tiles.size());
+		numEntriesLeft--;
+		for (unsigned y = x; y < locs.size(); y++)
+		{
+			if (locs[y] > locs[x])
+				locs[y]--;
+		}
+	}
+	assert(hashVal*Factorial(state.puzzle.size()-tiles.size()) < Factorial(state.puzzle.size()));
+	return hashVal;
+}
+
 
 uint64_t MNPuzzle::GetActionHash(slideDir act)
 {
@@ -233,4 +276,51 @@ void MNPuzzle::OpenGLDraw(int window, MNPuzzleState &s)
 	
 	//int width, height;
 	//std::vector<int> puzzle;
+}
+
+uint64_t MNPuzzle::Factorial(int val)
+{
+	static uint64_t table[21] =
+	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
+	6227020800ll, 87178291200ll, 1307674368000ll, 20922789888000ll, 355687428096000ll,
+	6402373705728000ll, 121645100408832000ll, 2432902008176640000ll };
+	if (val > 20)
+		return (uint64_t)-1;
+	return table[val];
+}
+
+void MNPuzzle::LoadPDB(char *fname, const std::vector<int> &tiles, bool )
+{
+	std::vector<int> values(256);
+	uint64_t COUNT = Factorial(width*height)/Factorial(width*height-tiles.size());
+	PDB.resize(PDB.size()+1);
+	PDB.back().resize(COUNT);
+	FILE *f = fopen(fname, "r");
+	if (f)
+	{
+		fread(&(PDB.back()[0]), sizeof(uint8_t), COUNT, f);
+		fclose(f);
+	}
+	PDBkey.push_back(tiles);
+	for (unsigned int x = 0; x < COUNT; x++)
+	{
+		values[(PDB.back()[x])]++;
+	}
+	for (int x = 0; x < 256; x++)
+		printf("%d:\t%d\n", x, values[x]);
+}
+
+double MNPuzzle::DoPDBLookup(MNPuzzleState &state)
+{
+	double val = 0;
+	for (unsigned int x = 0; x < PDB.size(); x++)
+	{
+		uint64_t index = GetPDBHash(state, PDBkey[x]);
+		val = std::max(val, (double)PDB[x][index]);
+		//val += (double)PDB[x][index];
+	}
+	if (width == height) // symmetry
+	{
+	}
+	return val;
 }

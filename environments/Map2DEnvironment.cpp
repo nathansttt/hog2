@@ -156,6 +156,23 @@ double MapEnvironment::HCost(xyLoc &l1, xyLoc &l2)
 	return (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 }
 
+double MapEnvironment::GCost(xyLoc &, tDirection &act)
+{
+	switch (act)
+	{
+		case kN: return 1.0;
+		case kS: return 1.0;
+		case kE: return 1.0;
+		case kW: return 1.0;
+		case kNW: return ROOT_TWO;
+		case kSW: return ROOT_TWO;
+		case kNE: return ROOT_TWO;
+		case kSE: return ROOT_TWO;
+		default: return 0;
+	}
+	return 0;
+}
+
 double MapEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 {
 	double h = HCost(l1, l2);
