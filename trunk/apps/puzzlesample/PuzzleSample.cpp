@@ -34,6 +34,7 @@
 #include "MNPuzzle.h"
 #include "FlipSide.h"
 #include "IDAStar.h"
+#include "Timer.h"
 
 static FlipSideState fss(5);
 static FlipSide fs(5);
@@ -69,7 +70,7 @@ void CreateSimulation(int id)
 		map = new Map(gDefaultMap);
 
 	unitSims.resize(id+1);
-	unitSims[id] = new PuzzleSimulation(mnp = new MNPuzzle(3, 3));
+	unitSims[id] = new PuzzleSimulation(mnp = new MNPuzzle(4, 4));
 	unitSims[id]->SetStepType(kMinTime);
 }
 
@@ -114,7 +115,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
+void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 		if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
 			return;
@@ -136,8 +137,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data)
 		MNPuzzleState g(s.width, s.height);
 		//printf("Distance: %f\n", unitSims[windowID]->GetEnvironment()->HCost(s, g));
 		unitSims[windowID]->GetUnit(viewport)->OpenGLDraw(windowID,
-																											unitSims[windowID]->GetEnvironment(),
-																											unitSims[windowID]);
+														  unitSims[windowID]->GetEnvironment(),
+														  unitSims[windowID]);
 	}
 	//unitSims[windowID]->OpenGLDraw(windowID);
 	
@@ -238,34 +239,29 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			if (!mnp) break;
 			if (mod == kShiftDown)
 			{
-				
 				IDAStar<MNPuzzleState, slideDir> ida;
-//				FlipSideState fg(5);
-//				fg.puzzle[0] = 5;
-//				fg.puzzle[1] = 6;
-//				fg.puzzle[2] = 3;
-//				fg.puzzle[3] = 2;
-//				fg.puzzle[4] = 4;
-//				fg.puzzle[5] = 0;
-//				fg.puzzle[6] = 1;
-//				fg.puzzle[7] = 7;
-				std::vector<MNPuzzleState> path;
-//				void GetPath(SearchEnvironment<state, action> *env, state from, state to,
-//										 std::vector<state> &thePath);
-				MNPuzzleState s(3, 3);
-				MNPuzzleState g(3, 3);
-				//s.puzzle[1] = 3;
-				s.puzzle[2] = 3;
-				s.puzzle[3] = 4;
-				s.puzzle[4] = 2;
-				s.puzzle[6] = 8;
-				s.puzzle[7] = 6;
-				s.puzzle[8] = 7;
+				std::vector<slideDir> path1;
+				std::vector<MNPuzzleState> path2;
+				MNPuzzleState s(4, 4);
+				MNPuzzleState g(4, 4);
+				for (unsigned int x = 0; x < 500; x++)
+				{
+					std::vector<slideDir> acts;
+					mnp->GetActions(s, acts);
+					mnp->ApplyAction(s, acts[random()%acts.size()]);
+				}
 				std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
-				ida.GetPath(mnp, s, g, path);
-				std::cout << "Path found, length " << path.size() << std::endl;
-				for (int x = 0; x < path.size(); x++)
-					std::cout << path[x] << std::endl;
+				Timer t;
+				t.startTimer();
+				ida.GetPath(mnp, s, g, path1);
+				t.endTimer();
+				std::cout << "Path found, length " << path1.size() << " time:" << t.getElapsedTime() << std::endl;
+				t.startTimer();
+				ida.GetPath(mnp, s, g, path2);
+				t.endTimer();
+				std::cout << "Path found, length " << path2.size() << " time:" << t.getElapsedTime() << std::endl;
+//				for (unsigned int x = 0; x < path1.size(); x++)
+//					std::cout << path1[x] << std::endl;
 			}
 			else {
 //				std::vector<flipMove> acts;
@@ -294,7 +290,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
-void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
+void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
 	unitSims[windowID]->GetEnvironment();
 	
@@ -304,11 +300,11 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	unitSims[windowID]->AddUnit(new RandomUnit<MNPuzzleState, slideDir, MNPuzzle>(MNPuzzleState(5, 5)));
 }
 
-void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
+void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 }
 
-bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
+bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
 {
 	return false;
 }
