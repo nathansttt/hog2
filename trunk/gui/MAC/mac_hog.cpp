@@ -413,6 +413,10 @@ void InvertGLImage(char *imageData, long imageSize, long rowBytes)
 	char *tBuffer = NULL;
 	
 	i = j = 0;
+//	for (int x = 0; x < imageSize-4; x+=4)
+//	{
+//		imageData[x+2] = 0;
+//	}
 	
 	tBuffer = (char*)malloc((size_t)imageSize);
 	if (!tBuffer)
@@ -426,7 +430,7 @@ void InvertGLImage(char *imageData, long imageSize, long rowBytes)
 	// Copy rows into tmp buffer one at a time, reversing their order
 	for (i = 0, j = imageSize - rowBytes; i < imageSize; i += rowBytes, j -= rowBytes)
 		memcpy( &tBuffer[j], &imageData[i], (size_t)rowBytes );
-	
+		
 	// Copy tmp buffer back into original buffer
 	memcpy(imageData, tBuffer, (size_t)imageSize);
 	free(tBuffer);
@@ -564,7 +568,8 @@ void captureNextMovieFrame(pRecContext pContextInfo, WindowRef win, double durat
 	
 	// pull GL content down to our image buffer
 	aglSetCurrentContext( ctx );
-	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image);
+	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, image);
+	//glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image);
 	
 	frames.push_back(new movieFrame(image, width, height, duration));
 }
@@ -661,7 +666,7 @@ void exportMovie() //startRecordingMovie(pRecContext pContextInfo, WindowRef win
 	if (err) printf("FSGetCatalogInfo error: %d\n", (int)err);
 	err = FSMakeFSSpec(movieFSSpec.vRefNum, movieFSSpec.parID, "\ptempHogMovie", &movieFSSpec);
 	if (err) printf("FSMakeFSSpec error: %d\n", (int)err);
-  err = CreateMovieFile (&movieFSSpec, 
+	err = CreateMovieFile (&movieFSSpec, 
 													 'TVOD',
 													 smCurrentScript, 
 													 createMovieFileDeleteCurFile | createMovieFileDontCreateResFile,
@@ -2164,26 +2169,24 @@ static pascal OSStatus appEvtHndlr (EventHandlerCallRef myHandler, EventRef even
 								savePath(window, (pRecContext)GetWRefCon(window));
 							break;
 						case 'EXPT':
-//							if (pContextInfo && pContextInfo->unitLayer)
-//							{
-//								bool paused = pContextInfo->unitLayer->getSimulationPaused();
-//								pContextInfo->unitLayer->setSimulationPaused(true);
-//								savePicture(window, (pRecContext)GetWRefCon(window)); 
-//								pContextInfo->unitLayer->setSimulationPaused(paused);
-//							}
+							pContextInfo = (pRecContext)GetWRefCon(window);
+							if (pContextInfo)
+							{
+								savePicture(window, (pRecContext)GetWRefCon(window)); 
+							}
 							break;
 						case 'RMOV':
-//							if (recording)
-//							{
-//								recording = false;
+							if (recording)
+							{
+								recording = false;
 //								bool paused = pContextInfo->unitLayer->getSimulationPaused();
 //								pContextInfo->unitLayer->setSimulationPaused(true);
-//								exportMovie();
+								exportMovie();
 //								pContextInfo->unitLayer->setSimulationPaused(paused);
-//							}
-//							else {
-//								recording = true;
-//							}
+							}
+							else {
+								recording = true;
+							}
 							break;
 						case 'clsw':
 							if (window) {
