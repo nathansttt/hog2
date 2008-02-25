@@ -1,0 +1,21 @@
+version 1.0
+0 ../../maps/local/test_s1_64.map 64 64 8 51 40 51 0
+0 ../../maps/local/test_s1_64.map 64 64 16 49 54 61 0
+0 ../../maps/local/test_s1_64.map 64 64 4 51 57 48 0
+0 ../../maps/local/test_s1_64.map 64 64 28 49 41 46 0
+0 ../../maps/local/test_s1_64.map 64 64 26 51 55 48 0
+0 ../../maps/local/test_s1_64.map 64 64 15 50 48 53 0
+0 ../../maps/local/test_s1_64.map 64 64 23 46 48 55 0
+0 ../../maps/local/test_s1_64.map 64 64 26 49 56 55 0
+0 ../../maps/local/test_s1_64.map 64 64 18 51 40 55 0
+0 ../../maps/local/test_s1_64.map 64 64 19 46 43 60 0
+0 ../../maps/local/test_s1_64.map 64 64 34 59 6 57 0
+0 ../../maps/local/test_s1_64.map 64 64 51 60 29 54 0
+0 ../../maps/local/test_s1_64.map 64 64 61 54 25 60 0
+0 ../../maps/local/test_s1_64.map 64 64 59 58 8 47 0
+0 ../../maps/local/test_s1_64.map 64 64 44 51 23 50 0
+0 ../../maps/local/test_s1_64.map 64 64 50 53 18 57 0
+0 ../../maps/local/test_s1_64.map 64 64 51 58 25 50 0
+0 ../../maps/local/test_s1_64.map 64 64 52 47 18 59 0
+0 ../../maps/local/test_s1_64.map 64 64 58 59 2 53 0
+0 ../../maps/local/test_s1_64.map 64 64 55 54 13 52 0
