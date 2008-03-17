@@ -121,6 +121,8 @@ public:
 	void ApplyAction(graphState &s, graphMove a);
 	bool InvertAction(graphMove &a);
 
+	void SetDirected(bool b) {directed = b;}
+
 	OccupancyInterface<graphState, graphMove> *GetOccupancyInfo() { return 0; }
 	double HCost(graphState &state1, graphState &state2);
 	double GCost(graphState &state1, graphState &state2);
