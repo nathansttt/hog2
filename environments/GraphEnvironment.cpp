@@ -19,7 +19,7 @@ int HN=10;
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 :g(_g), h(gh)
 {
-	directed = true;
+ 	directed = true;
 }
 
 //GraphEnvironment::GraphEnvironment(Map *m)

@@ -150,6 +150,7 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 template <class state, class action, class environment>
 bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& dir)
 {
+	// Return a stored move
 	if (moves.size() > 0)
 	{
 		//dir = moves.back();
@@ -158,11 +159,10 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 		moves.erase(moves.begin());
 		return true;
 	}
-		
+			
 	if (currTarget != -1)
 	{
-		// if we're not yet at our current target, then we don't need to update 
-		// current target
+		// update current target and patrol counter if we're at our target location
 		if(loc == locs[currTarget])
 		{
 			currTarget = (currTarget+1)%locs.size();
@@ -303,15 +303,15 @@ if (0)
 	
 	// Draw the planned path
 // 	if(drawUnit)
-// 	{
-// 		xyLoc current = loc; 
-// 		xyLoc next;
-// 	  	for(unsigned int i=0; i<moves.size(); i++)
-//  		{
-//  			env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
-//  			env->GetNextState(current, moves[i],next);
-//  			current = next;
-//  		}	
+//{
+ 		xyLoc current = loc; 
+ 		xyLoc next;
+ 	  	for(unsigned int i=0; i<moves.size(); i++)
+  		{
+  			env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
+  			env->GetNextState(current, moves[i],next);
+  			current = next;
+  		}	
 // 	}
 }
 
@@ -320,6 +320,7 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 { 
 	if (!success)
 		lastFailedMove = si->GetSimulationTime();
+		
 	// Occupancy interface stuff should be done in UnitSimulation
 	//Update occupancy interface
 	//env->GetOccupancyInterface()->SetStateOccupied(loc,false);
