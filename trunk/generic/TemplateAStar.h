@@ -107,7 +107,7 @@ public:
 template <class state, class action, class environment>
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { radius = 4.0; stopAfterGoal = true; weight=1; }
+	TemplateAStar() { radius = 4.0; stopAfterGoal = true; weight=1; useRadius=true;useOccupancyInfo=true;}
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
 
@@ -129,7 +129,7 @@ public:
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	state CheckNextNode();
 	void ExtractPathToStart(state& n, std::vector<state> &thePath);
-
+	void DoAbstractSearch(){useOccupancyInfo = false; useRadius = false;}
 	virtual const char *GetName();
 	
 	void PrintStats();
@@ -177,6 +177,9 @@ private:
 
 	double radius; // how far around do we consider other agents?
 	double weight; 
+	
+	bool useOccupancyInfo;// = false;
+	bool useRadius;// = false;
 };
 
 using namespace TemplateAStarUtil;
@@ -212,13 +215,12 @@ const char *TemplateAStar<state,action,environment>::GetName()
 template <class state, class action, class environment>
 void TemplateAStar<state,action,environment>::GetPath(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
-	//std::cout<<"\n\ndoing search from "<<from<<" to "<<to<<std::endl;
 	//discardcount=0;
   	if (!InitializeSearch(_env, from, to, thePath))
+  	{	
   		return;
+  	}
   	while (!DoSingleSearchStep(thePath)) {}
-  	//std::cout<<"numexpanded "<<nodesExpanded<<std::endl;
-  //	std::cout<<"numdiscarded "<<discardcount<<std::endl;
 }
 
 /**
@@ -234,6 +236,7 @@ void TemplateAStar<state,action,environment>::GetPath(environment *_env, state& 
 template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
+
 	env = _env;
 	closedList.clear();
 	openQueue.reset();
@@ -245,7 +248,6 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	
 	if (from == to) //assumes that from and to are valid states
 	{
-		//std::cout<<"from is to\n";
 		thePath.resize(0);
 		return false;
 	}
@@ -270,12 +272,10 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<state> &thePath)
 {
-	
 	state currentOpenNode; 
 
 	if (openQueue.size() == 0)
 	{
-		//std::cout<<"open queue empty\n";
 		thePath.resize(0); // no path found!
 		closedList.clear();
 		return true;
@@ -287,7 +287,6 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		printf("Oh no! No more open nodes!\n");
 	}
 	
-	
 	if ((stopAfterGoal) && (env->GoalTest(currentOpenNode, goal)))
 	{
 		ExtractPathToStart(currentOpenNode, thePath);
@@ -298,11 +297,6 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 //		env = 0;
 		return true;
 	}
-	//		state wantFrom, wantTo;
-	//	wantFrom.x = 21; wantFrom.y = 28;
-	//	wantTo.x = 19; wantTo.y = 27;
-		
-	//if((start == wantFrom) && (goal == wantTo))std::cout<<"\ncurrent node "<<currentOpenNode<<std::endl;
 	
 	neighbors.resize(0);
 	env->GetSuccessors(currentOpenNode, neighbors);
@@ -312,31 +306,29 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	{
 		nodesTouched++;
 		state neighbor = neighbors[x];
-		
 
-		
-		//if((start == wantFrom) && (goal == wantTo))std::cout<<"neighbor "<<neighbor<<std::endl;
 		if (closedList.find(env->GetStateHash(neighbor)) != closedList.end())
 		{
-			//if((start == wantFrom) && (goal == wantTo))std::cout<<"on closed list already "<<neighbor<<std::endl;
 			continue;
 		}
 		else if (openQueue.IsIn(SearchNode<state>(neighbor, env->GetStateHash(neighbor))))
 		{
-			//if((start == wantFrom) && (goal == wantTo))std::cout<<"updating "<<neighbor<<std::endl;
 			UpdateWeight(env,currentOpenNode, neighbor);
 		}
-		else if ((env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
+		else if (useRadius && useOccupancyInfo && (env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
 					 //&& ((closedList[env->GetStateHash(currentOpenNode)].gCost+env->GCost(currentOpenNode,neighbor)) < 4))
 		{
+		
+			// March 7 - May want to use GCost to neighbour rather than HCost when checking if it's within 
+			// the radius. 
+			
 			//discardcount++;
-			//if((start == wantFrom) && (goal == wantTo))std::cout<<"not expanding "<<neighbor<<std::endl;
+
 			//occupied - don't expand - move to the closed list 
 			SearchNode<state> sn(neighbor, env->GetStateHash(neighbor));
 			closedList[env->GetStateHash(neighbor)] = sn;
 		}
 		else {
-			//if((start == wantFrom) && (goal == wantTo))std::cout<<"Adding "<<neighbor<<" to open list\n";
 			AddToOpenList(env, currentOpenNode, neighbor);
 		}
 	}
@@ -375,6 +367,7 @@ bool TemplateAStar<state,action,environment>::GetNextNode(state &next)
 	//if(it == openQueue.end())
 	//	return false;
 	next = it.currNode;
+
 	closedList[env->GetStateHash(next)] = it;
 	return true;
 }
@@ -415,6 +408,7 @@ template <class state, class action,class environment>
 void TemplateAStar<state, action,environment>::AddToOpenList(environment *env, state &currOpenNode, state &neighbor)
 {
 	double edgeWeight = env->GCost(currOpenNode, neighbor);
+	
 	SearchNode<state> n(neighbor, currOpenNode, closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight+weight*env->HCost(neighbor, goal),
 							 closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight, env->GetStateHash(neighbor));
 	

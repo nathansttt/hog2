@@ -49,7 +49,7 @@
 #include "WeightedMap2DEnvironment.h"
 #include "ScenarioLoader.h"
 //#include "WeightedPatrolUnit.h"
-//#include "AbstractWeightedSearchAlgorithm.h"
+#include "AbstractWeightedSearchAlgorithm.h"
 
 #include <fstream>
 
@@ -104,6 +104,9 @@ bool weightpath = false;
 
 bool useperceptron = false;
 double learningrate = 0; 
+
+bool abstraction = false;
+int absSize = 0; 
 
 WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug;
 int main(int argc, char* argv[])
@@ -229,8 +232,8 @@ void CreateSimulation(int id)
 		
 		
 	// Only show 1 copy of the map
-/*	;
-	SetNumPorts(id, 1)
+	
+/*	SetNumPorts(id, 1);
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
@@ -268,8 +271,9 @@ void CreateSimulation(int id)
 			break;
 		}
 	}	
-	*/
+	
 	//RunExperiment(id);
+	*/
 }
 
 void Initialize(int id, Map* map)
@@ -282,7 +286,7 @@ void Initialize(int id, Map* map)
 	unitSims[id]->SetThinkingPenalty(0);
 //	unitSims[id]->SetPaused(true);
 	
-	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
+	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>(env);
 	
 	if(weighted)
 	{	
@@ -331,7 +335,7 @@ void RunScenario(int id)
 	map->setTileSet(kWinterTile);
 	
 	Initialize(id, map);
-	/*
+	
 	unitSims.resize(id+1);
 	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
 	env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,8));
@@ -340,7 +344,7 @@ void RunScenario(int id)
 	unitSims[id]->SetThinkingPenalty(0);
 //	unitSims[id]->SetPaused(true);
 	
-	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
+	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>(env);
 	
 	if(weighted)
 	{	
@@ -375,7 +379,7 @@ void RunScenario(int id)
 	{
 		wug->UsePerceptron(learningrate);
 	}
-	*/
+	
 		char* name;
 	
 	int numExperiments = sl->GetNumExperiments();
@@ -405,18 +409,31 @@ void RunScenario(int id)
 		goal.x = e.GetGoalX();
 		goal.y = e.GetGoalY();
 		
-		TemplateAStar<xyLoc, tDirection, AbsMapEnvironment> *alg = new TemplateAStar<xyLoc, tDirection, AbsMapEnvironment>();
+		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su;
 		
-		//AbstractWeightedSearchAlgorithm<xyLoc, tDirection,AbsMapEnvironment> *alg = new AbstractWeightedSearchAlgorithm<xyLoc, tDirection, AbsMapEnvironment>();
-		
-		if(radius != -1)
-			alg->SetRadius(radius);
-		if(weightedAstar)
-			alg->SetWeight(astarweight);
+		if(abstraction)
+		{
+			AbstractWeightedSearchAlgorithm<xyLoc, tDirection,AbsMapEnvironment> *alg1 = new AbstractWeightedSearchAlgorithm<xyLoc, tDirection, AbsMapEnvironment>();
 			
- 		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg);
-		su->AddPatrolLocation(goal);
-		su->SetNumPatrols(numPatrols);	
+			alg1->SetWeightedEnvironment(wug->GetWeightedEnvironment());
+			
+			su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg1);
+		}
+		else
+		{
+			TemplateAStar<xyLoc, tDirection, AbsMapEnvironment> *alg = new TemplateAStar<xyLoc, tDirection, AbsMapEnvironment>();			
+		
+			if(radius != -1)
+				alg->SetRadius(radius);
+			
+			if(weightedAstar)
+				alg->SetWeight(astarweight);
+			
+	 		su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg);
+	 	}
+			su->AddPatrolLocation(goal);
+			su->SetNumPatrols(numPatrols);	
+			//su->SetDrawUnit(false);	
 			
 		su->SetName(name);	
 		su->SetSpeed(1.0);
@@ -436,6 +453,7 @@ void RunScenario(int id)
  		i++;
 	//} while(i < numExperiments/2);
  	} while ( i < numExperiments);
+ 	//} while (i < 2);
 	
 	//unitSims[id]->SetPaused(true);
 	// Do timing
@@ -578,7 +596,7 @@ void RunExperiment(int id)
 		
 		std::ifstream input(locsFile);
 	
-		WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>();
+		WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>(env);
 		if(weighted &&(envType==0))
 		{
 			unitSims[id]->AddUnitGroup(wug);
@@ -796,6 +814,8 @@ void InstallHandlers()
 	
 	InstallCommandLineHandler(MyCLHandler, "-perceptron", "-perceptron alpha", "Use the perceptron update rule with learning rate alpha");
 	
+	InstallCommandLineHandler(MyCLHandler, "-abstraction", "-abstraction size", "Use a sector abstraction with sector size 'size'");
+	
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
@@ -982,6 +1002,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		useperceptron = true;
 		learningrate = atof(argument[1]);
+	}
+	else if(strcmp(argument[0],"-abstraction")==0)
+	{
+		abstraction = true;
+		absSize = atoi(argument[1]);
 	}
 	return 2;
 }

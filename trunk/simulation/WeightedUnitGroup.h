@@ -11,7 +11,7 @@ template <class state, class action, class environment>
 class WeightedUnitGroup : public UnitGroup<state,action,environment>
 {
 	public:
-		WeightedUnitGroup(){wt = -1; prop = -1; useWindow = false; windowSize = -1; localWeights = false; currDrawEnv = 0; noweighting = false; updateOnQuery = false; updateSurrounding = false; usePerceptron = false; learningRate = 0; }
+		WeightedUnitGroup(environment* e){wme = new WeightedMap2DEnvironment(e); wt = -1; prop = -1; useWindow = false; windowSize = -1; localWeights = false; currDrawEnv = 0; noweighting = false; updateOnQuery = false; updateSurrounding = false; usePerceptron = false; learningRate = 0; }
 //		WeightedUnitGroup(double weight, double proportion) {wt = weight; prop = proportion;}
 		
 		void SetWeight(double weight) {wt = weight;}
@@ -129,6 +129,9 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 								
 				return (u->MakeMove(thisUnitsEnv, thisUnitsEnv->GetOccupancyInfo(), si,a));
 			}
+			
+			
+			//u->GetAlgorithm()->SetWeightedEnvironment(wme);
 			
 			return (u->MakeMove(env, env->GetOccupancyInfo(), si,a));
 		}
@@ -260,7 +263,6 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 		
 		virtual void OpenGLDraw(int window, environment *, SimulationInfo *) 
 		{ 
-			//std::cout<<"weighted opengldraw\n";
 			if(currDrawEnv == unitWme.size())
 				wme->OpenGLDraw(window);
 			else

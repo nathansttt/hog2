@@ -632,8 +632,8 @@ double WeightedMap2DEnvironment::ComputeArrowMetric(bool doNormalize)
 		if(nodeVec.x == 0 && nodeVec.y == 0) // check if there's no angle stored here
 			continue;
 					
-		if(sqrt(nodeVec.x	*nodeVec.x + nodeVec.y*nodeVec.y) < 0.5)
-			continue;		
+		//if(sqrt(nodeVec.x	*nodeVec.x + nodeVec.y*nodeVec.y) < 0.5)
+		//	continue;		
 					
 		double bestDotProd = -1;
 		tDirection bestDir;		
