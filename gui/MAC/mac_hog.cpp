@@ -457,7 +457,7 @@ void CompositeGLBufferIntoFile(AGLContext ctx, Rect *bufferRect, const FSSpec *f
 	
 	// pull GL content down to our image buffer
 	aglSetCurrentContext( ctx );
-	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image);
+	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, image);
 	
 	// GL buffers are upside-down relative to QD buffers, so we need to flip it
 	InvertGLImage( image, imageSize, rowBytes );
@@ -515,7 +515,7 @@ void CompositeGLBufferIntoWindow(AGLContext ctx, Rect *bufferRect, WindowRef win
 	
 	// pull GL content down to our image buffer
 	aglSetCurrentContext( ctx );
-	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image);
+	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, image);
 	
 	// GL buffers are upside-down relative to QD buffers, so we need to flip it
 	InvertGLImage( image, imageSize, rowBytes );

@@ -314,6 +314,7 @@ void MapEnvironment::GetNextState(xyLoc &currents, tDirection dir, xyLoc &news)
  		default: break;
 	}	
 }
+
 /************************************************************/
 
 AbsMapEnvironment::AbsMapEnvironment(MapAbstraction *_ma)

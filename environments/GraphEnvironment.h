@@ -115,25 +115,25 @@ class GraphEnvironment : public SearchEnvironment<graphState, graphMove> {
 public:
 	GraphEnvironment(Graph *g, GraphHeuristic *gh);
 	~GraphEnvironment();
-	void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors);
-	void GetActions(graphState &stateID, std::vector<graphMove> &actions);
-	graphMove GetAction(graphState &s1, graphState &s2);
-	void ApplyAction(graphState &s, graphMove a);
-	bool InvertAction(graphMove &a);
+	virtual void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors);
+	virtual void GetActions(graphState &stateID, std::vector<graphMove> &actions);
+	virtual graphMove GetAction(graphState &s1, graphState &s2);
+	virtual void ApplyAction(graphState &s, graphMove a);
+	virtual bool InvertAction(graphMove &a);
 
 	void SetDirected(bool b) {directed = b;}
 
 	OccupancyInterface<graphState, graphMove> *GetOccupancyInfo() { return 0; }
-	double HCost(graphState &state1, graphState &state2);
-	double GCost(graphState &state1, graphState &state2);
-	double GCost(graphState &state1, graphMove &state2);
-	bool GoalTest(graphState &state, graphState &goal);
-	uint64_t GetStateHash(graphState &state);
-	uint64_t GetActionHash(graphMove act);
-	void OpenGLDraw(int window);
-	void OpenGLDraw(int window, graphState &s);
-	void OpenGLDraw(int window, graphState &s, graphMove &gm);
-private:
+	virtual double HCost(graphState &state1, graphState &state2);
+	virtual double GCost(graphState &state1, graphState &state2);
+	virtual double GCost(graphState &state1, graphMove &state2);
+	virtual bool GoalTest(graphState &state, graphState &goal);
+	virtual uint64_t GetStateHash(graphState &state);
+	virtual uint64_t GetActionHash(graphMove act);
+	virtual void OpenGLDraw(int window);
+	virtual void OpenGLDraw(int window, graphState &s);
+	virtual void OpenGLDraw(int window, graphState &s, graphMove &gm);
+protected:
 	bool directed;
 	Graph *g;
 	GraphHeuristic *h;

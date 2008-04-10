@@ -214,16 +214,19 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 	{
 		UnitInfo<state, action, environment> *ui = units.back();
 		ui->agent->LogFinalStats(&stats);
+		OccupancyInterface<state, action> *envInfo = env->GetOccupancyInfo();
+		if (envInfo)
+			envInfo->SetStateOccupied(ui->currentState, false);
 		units.pop_back();
 		delete ui->agent;
 		delete ui;
 	}
-	while (unitGroups.size() > 0)
-	{
-		//unitGroups.back()->LogFinalStats(&stats);
-		delete unitGroups.back();
-		unitGroups.pop_back();
-	}
+//	while (unitGroups.size() > 0)
+//	{
+//		//unitGroups.back()->LogFinalStats(&stats);
+//		delete unitGroups.back();
+//		unitGroups.pop_back();
+//	}
 	//unitGroups.push_back(new unitGroup(this));
 	viewTime = 0;
 	currTime = 0;
