@@ -315,7 +315,7 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		{
 			UpdateWeight(env,currentOpenNode, neighbor);
 		}
-		else if (useRadius && useOccupancyInfo && (env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
+		else if (useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
 					 //&& ((closedList[env->GetStateHash(currentOpenNode)].gCost+env->GCost(currentOpenNode,neighbor)) < 4))
 		{
 		

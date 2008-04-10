@@ -40,7 +40,7 @@ class Unit {
 public:
 	//	Unit(state s, Unit<state, action, env> *target);
 	Unit() :speed(0), group(0) {}
-	virtual ~Unit() {}
+	virtual ~Unit() { SetUnitGroup(0); }
 	virtual const char *GetName() = 0;
 	virtual bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo *, action& a) = 0;
 	virtual void UpdateLocation(environment *, state &, bool success, SimulationInfo *) = 0;

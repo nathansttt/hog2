@@ -450,6 +450,7 @@ void WeightedMap2DEnvironment::OpenGLDraw(int window)
 	
 	xyLoc s;
 	
+	if (1)
 	for(node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
 	{
 			

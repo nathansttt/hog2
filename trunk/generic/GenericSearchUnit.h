@@ -153,11 +153,11 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 	{
 		if (!onTarget)
 		{
-			if (verbose)
-			{
-				printf("STAY ON TARGET!\n");
-				printf("%p target time %1.4f\n", (void*)this, targetTime);
-			}
+//			if (verbose)
+//			{
+//				printf("STAY ON TARGET!\n");
+//				printf("%p target time %1.4f\n", (void*)this, targetTime);
+//			}
 			if (si)
 				targetTime = si->GetSimulationTime();
 		}
@@ -177,8 +177,8 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 	// returning an empty path means there is no path between the start and goal
 	if (path.size()==0)
 	{
-		if (verbose)
-			printf("SU %s: Path returned NIL\n", this->GetName());
+//		if (verbose)
+//			printf("SU %s: Path returned NIL\n", this->GetName());
 		return false;
 		//return kStay **************
 	}
