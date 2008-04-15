@@ -57,7 +57,7 @@ private:
 	typedef __gnu_cxx::hash_map<uint64_t, unsigned long, Hash64> TopSpinHashTable;
 
 	void ExpandNode(graphState &stateID);
-	void Flip(std::vector<int> &arrangement, int index, int radius);
+	int Flip(std::vector<int> &arrangement, int index, int radius);
 
 	TopSpinHashTable hashTable;
 	std::vector<TopSpinGraphData> data;

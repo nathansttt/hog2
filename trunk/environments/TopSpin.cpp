@@ -104,27 +104,32 @@ void TopSpin::ExpandNode(graphState &stateID)
 	//printf("Expanding %lu\n", stateID);
 	for (int x = 0; x < length; x++)
 	{
-		Flip(data[stateID].config, x, flipSize);
+		// returns maximum tile flipped
+		int cost = Flip(data[stateID].config, x, flipSize);
 		// will create the state if it doesn't exist already!
 		graphState s = GetState(data[stateID].config);
 		Flip(data[stateID].config, x, flipSize);
 		if (!g->FindEdge(s, stateID))
-			g->AddEdge(new edge(s, stateID, 1));
+			g->AddEdge(new edge(s, stateID, 1)); // put a cost function here!
 	}
 	data[stateID].expanded = true;
 }
 
-void TopSpin::Flip(std::vector<int> &arrangement, int index, int radius)
+int TopSpin::Flip(std::vector<int> &arrangement, int index, int radius)
 {
+	int maxFlipped = 0;
 	while (radius > 1)
 	{
 		int tmp = arrangement[index];
 		int otherSide = (index+radius-1)%arrangement.size();
+		maxFlipped = std::min(maxFlipped, arrangement[index]);
+		maxFlipped = std::min(maxFlipped, arrangement[otherSide]);
 		arrangement[index] = arrangement[otherSide];
 		arrangement[otherSide] = tmp;
 		radius-=2;
 		index = (index+1)%arrangement.size();
 	}
+	return maxFlipped;
 }
 
 uint64_t TopSpin::GetStateHash(graphState &state)
