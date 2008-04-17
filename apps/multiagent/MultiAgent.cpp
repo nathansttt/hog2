@@ -51,6 +51,8 @@
 //#include "WeightedPatrolUnit.h"
 #include "AbstractWeightedSearchAlgorithm.h"
 
+#include "GreedyDMUnit.h"
+
 #include <fstream>
 
 bool mouseTracking;
@@ -107,6 +109,12 @@ double learningrate = 0;
 
 bool abstraction = false;
 int absSize = 0; 
+
+bool skipAbs = false;
+double skipCutoff = 0; 
+
+bool greedy = false;
+int greedyNum = 0; 
 
 WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug;
 int main(int argc, char* argv[])
@@ -417,6 +425,9 @@ void RunScenario(int id)
 			
 			alg1->SetWeightedEnvironment(wug->GetWeightedEnvironment());
 			
+			if(skipAbs)
+				alg1->SetSkipAbsNode(skipCutoff);
+			
 			su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg1);
 		}
 		else
@@ -455,6 +466,7 @@ void RunScenario(int id)
  	} while ( i < numExperiments);
  	//} while (i < 2);
 	
+
 	//unitSims[id]->SetPaused(true);
 	// Do timing
 
@@ -471,6 +483,7 @@ void RunScenario(int id)
 			//std::cout<<beginTime<<std::endl;
 			
 			
+			//double timestep = 0.55;//1.5
 			double timestep = 1.5;
 			double time = 0.0;
 		
@@ -496,7 +509,8 @@ void RunScenario(int id)
 					//coherence.push_back(wug->ComputeArrowMetric());
 				}
 					
-					
+// 				if(greedy && time > 100)
+// 					break;
 				if(time > 100000) 
 				{
 					std::cout<<"Ran out of time. Details in outfile "<<outFileName<<std::endl;
@@ -527,7 +541,30 @@ void RunScenario(int id)
 				outfile<<c1[i]<<" "<<c2[i]<<std::endl;
 			}
 				
-			exit(0); 			
+			if(!greedy)
+				exit(0); 			
+			else 
+			{ 
+				// Remove old units
+				unitSims[id]->ClearAllUnits();
+				
+				// Add greedy units
+				for(int i=0; i<greedyNum; i++)
+				{
+					//random location to start
+					xyLoc greedyStart;
+					int gx,gy;
+					env->GetMapAbstraction()->GetTileFromNode(GetMapGraph(env->GetMapAbstraction()->GetMap())->GetRandomNode(), gx, gy);
+					
+					greedyStart.x = gx;
+					greedyStart.y = gy;
+	
+					GreedyDMUnit<AbsMapEnvironment> *gdu = new GreedyDMUnit<AbsMapEnvironment>(greedyStart);
+					gdu->SetEnvironment(wug->GetWeightedEnvironment());
+	
+					unitSims[id]->AddUnit(gdu);
+				}
+			}
 		} // end if(runExperiment)
 
 	//unitSims[id]->ClearAllUnits();
@@ -815,6 +852,9 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-perceptron", "-perceptron alpha", "Use the perceptron update rule with learning rate alpha");
 	
 	InstallCommandLineHandler(MyCLHandler, "-abstraction", "-abstraction size", "Use a sector abstraction with sector size 'size'");
+	InstallCommandLineHandler(MyCLHandler, "-skipAbs", "-skipAbs cutoff", "Do partial refinement with abstraction"); 
+	
+	InstallCommandLineHandler(MyCLHandler,"-greedy", "-greedy num", "Do experiment, and place greedy agent afterwards");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -848,7 +888,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (viewport == 0)
 			{
 				//unitSims[windowID]->StepTime(1.0/30.0);
-				unitSims[windowID]->StepTime(0.55);
+				//unitSims[windowID]->StepTime(0.55);
+				unitSims[windowID]->StepTime(1.5);
 // 				if(unitSims[windowID]->Done())
 // 					std::cout<<"DONE\n";
 			}
@@ -863,7 +904,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (viewport == 0)
 			{
 				//wUnitSims[windowID]->StepTime(1.0/30.0);
-				wUnitSims[windowID]->StepTime(0.55);
+				//wUnitSims[windowID]->StepTime(0.55);
+				wUnitSims[windowID]->StepTime(1.5);
 			}
 			wUnitSims[windowID]->OpenGLDraw(windowID);		
 			break;
@@ -1008,6 +1050,17 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		abstraction = true;
 		absSize = atoi(argument[1]);
 	}
+	else if(strcmp(argument[0],"-skipAbs")==0)
+	{
+		skipAbs = true;
+		skipCutoff = atof(argument[1]);
+	}
+	else if(strcmp(argument[0],"-greedy")==0)
+	{
+		greedy = true;
+		greedyNum = atoi(argument[1]);
+	}
+	
 	return 2;
 }
 
