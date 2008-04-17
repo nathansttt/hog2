@@ -229,16 +229,25 @@ class AbstractWeightedSearchAlgorithm : public GenericSearchAlgorithm<state,acti
 		*/
 		void SetWeightedEnvironment(WeightedMap2DEnvironment *w){ wenv = w; }
 		
+		/** Set skip abstract nodes, and partial path refinement
+		* If set to 'true', the algorithm plans to the one-after-next abstract node, and cuts off
+		* the path after pathPerc. 0 \< pathPerc <= 1
+		*/
+		void SetSkipAbsNode(double pathPerc) { assert((refinePart > 0) && (refinePart <= 1)); partialSkip = true; refinePart = pathPerc; }
+		
 	private:
 		int nodesExpanded;
 		int nodesTouched;
 		WeightedMap2DEnvironment *wenv;
+		
+		bool partialSkip;
+		double refinePart;
 };
 
 template<class state, class action, class environment>
 AbstractWeightedSearchAlgorithm<state,action,environment>::AbstractWeightedSearchAlgorithm()
 {
-
+	partialSkip = false;
 }
 
 template<class state, class action, class environment>
@@ -252,6 +261,7 @@ bool AbstractWeightedSearchAlgorithm<state,action,environment>::InitializeSearch
 {
 	nodesExpanded = 0;
 	nodesTouched = 0;
+	return true;
 }
 
 template<class state, class action, class environment>
@@ -280,7 +290,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 	graphState toGs = tonode->GetNum();
 
 	// Check if we're already in the same abstract node
-	if(fromPar == toPar)
+	if(fromPar == toPar) 
 	{
 		// Do straight planning on lower level, using the direction map
 		std::vector<graphState> refpath;
@@ -308,7 +318,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 			thePath.push_back(newloc);
 		}
 	}
-	else
+	else // fromPar != toPar
 	{
 		//Find abstract path
 		std::vector<graphState> abspath;
@@ -353,86 +363,178 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				//std::cout<<newloc<<" ";
 				thePath.push_back(nl);
 				
-		for(unsigned int i=1; i<abspath.size()-1; i++) 
-		//for(unsigned int i=1; i<2; i++)
-		{
-			//if any of my neighbours is a child of this abs node - skip it
-			std::vector<graphState> nb;
-			age->GetSuccessors(start, nb);
-		
-			bool skip = false;
-			for(int k=0; k<nb.size(); k++)
-			{
-				node* neigh = g->GetNode(nb[k]);
-				if(neigh->GetLabelL(GraphAbstractionConstants::kParent) == abspath[i])
-					skip = true;
-			}
-			
+		// if partialSkip is true, we find a path to the one-after-next abstract node, and cut off the path
+		// after some percentage (skipPerc is a value between 0 and 1, indicating the proportion to keep)
+		if(partialSkip)
+ 		{
+ 			//if absPath's length is 2, want to do straight planning to goal (no cut off)
+ 			if(abspath.size()==2)
+ 			{
+				// Do straight planning on lower level, using the direction map
+				std::vector<graphState> refpath;
+				OctileHeuristic *heur = new OctileHeuristic(ma->GetMap(),g);
 
-			if(skip)
-			{
-				//std::cout<<"skipping\n";
-				continue;
-			}
-				
-			//Refine the path
-			//Path to first any child - will get 'fixed' in GoalTest in environment
-			graphState end = abs->GetNode(abspath[i])->GetLabelL(GraphAbstractionConstants::kFirstData);
-			//ma->GetAbstractGraph(0)->GetNode(abspath[i]);
+				AbsGraphEnvironment *graphenv = new AbsGraphEnvironment(g,heur,env,env->GetOccupancyInfo());
+				graphenv->SetFindExactGoal(true); // We don't want just any child of the parent of the goal state
+				graphenv->SetWeightedEnvironment(wenv); 
+				graphenv->SetAbsGraph(abs);	
 		
-			refpath.clear();
+				TemplateAStar<graphState,graphMove,GraphEnvironment> *astar = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
+				astar->GetPath(graphenv,fromGs,toGs,refpath);
 		
-			astar2->GetPath(age,start,end,refpath);
-			nodesExpanded += astar2->GetNodesExpanded();
-			nodesTouched += astar2->GetNodesTouched();
+				nodesExpanded += astar->GetNodesExpanded();
+				nodesTouched += astar->GetNodesTouched();
 				
-			//std::cout<<start<<" to "<<end<<" required "<<astar2->GetNodesExpanded()<<" nodes exp.\n";
-			//std::cout<<"Refining nodes expanded now "<<nodesExpanded<<std::endl;
-			
-			if(refpath.size()>0)
-			{
-				for(int j=1; j<refpath.size(); j++)
+				// Copy the path into thePath, as xyLoc
+				for(unsigned int j=0; j<refpath.size(); j++)
 				{
 					node* newnode = g->GetNode(refpath[j]);
-	
 					xyLoc newloc; 
-					newloc.x = 	newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
+					newloc.x = newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
 					newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
-					//std::cout<<newloc<<" ";
 					thePath.push_back(newloc);
 				}
-			//std::cout<<std::endl;	
-				//std::cout<<"Refpath size is zero!!!\n";
-				start = refpath[refpath.size()-1];
+	 		} // abs path not length 2
+ 			else
+ 			{
+ 				// path to second next abstract node and cut off the path
+				graphState end = abs->GetNode(abspath[2])->GetLabelL(GraphAbstractionConstants::kFirstData);
+ 				
+ 				refpath.clear();
+ 		
+ 				astar2->GetPath(age,start,end,refpath);
+ 				nodesExpanded += astar2->GetNodesExpanded();
+ 				nodesTouched += astar2->GetNodesTouched();
+ 				
+ 				if(refpath.size()>0)
+ 				{
+ 					for(int j=1; j<refpath.size(); j++)
+ 					{
+ 						node* newnode = g->GetNode(refpath[j]);
+ 	
+ 						xyLoc newloc; 
+ 						newloc.x = 	newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
+ 						newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
+ 						thePath.push_back(newloc);
+ 					}
+ 					start = refpath[refpath.size()-1];
+ 				}
+ 			
+ 	
+ 				// Do the last one separate - need to get to exact goal
+ 	
+	 			OctileHeuristic *heur3 = new OctileHeuristic(ma->GetMap(),g);
+ 
+ 				AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,env,env->GetOccupancyInfo());
+ 				absgraphenv2->SetFindExactGoal(true);
+ 				absgraphenv2->SetWeightedEnvironment(wenv);
+ 				absgraphenv2->SetAbsGraph(abs);	
+ 	
+	 			refpath.clear();
+ 
+ 				TemplateAStar<graphState,graphMove,GraphEnvironment> *astar3 = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
+ 				astar3->GetPath(absgraphenv2,start,toGs,refpath);
+ 				nodesExpanded += astar3->GetNodesExpanded();
+ 				nodesTouched += astar3->GetNodesTouched();
+ 			
+ 				for(int j=1; j<refpath.size(); j++)
+ 				{
+ 					node* newnode = g->GetNode(refpath[j]);
+ 					xyLoc newloc; 
+ 					newloc.x = newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
+ 					newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
+ 					thePath.push_back(newloc);
+ 				}
+ 				// Chop off the path 
+ 				int desiredLength = refinePart * thePath.size();
+				
+ 				for(int i=desiredLength; i<thePath.size(); i++)
+ 				{
+ 					thePath.pop_back();
+ 				}
+ 				
+			} // end else (length of abs path > 2)
+		} // end if(partialSkip)
+		else
+		{		
+			for(unsigned int i=1; i<abspath.size()-1; i++) 
+			//for(unsigned int i=1; i<2; i++)
+			{
+				//if any of my neighbours is a child of this abs node - skip it
+				std::vector<graphState> nb;
+				age->GetSuccessors(start, nb);
+			
+				bool skip = false;
+				for(int k=0; k<nb.size(); k++)
+				{
+					node* neigh = g->GetNode(nb[k]);
+					if(neigh->GetLabelL(GraphAbstractionConstants::kParent) == abspath[i])
+						skip = true;
+				}
+					
+				if (skip)
+				{
+					continue;
+				}
+				
+				//Refine the path
+				//Path to first any child - will get 'fixed' in GoalTest in environment
+				graphState end = abs->GetNode(abspath[i])->GetLabelL(GraphAbstractionConstants::kFirstData);
+				//ma->GetAbstractGraph(0)->GetNode(abspath[i]);
+		
+				refpath.clear();
+		
+				astar2->GetPath(age,start,end,refpath);
+				nodesExpanded += astar2->GetNodesExpanded();
+				nodesTouched += astar2->GetNodesTouched();
+				
+				//std::cout<<start<<" to "<<end<<" required "<<astar2->GetNodesExpanded()<<" nodes exp.\n";
+				//std::cout<<"Refining nodes expanded now "<<nodesExpanded<<std::endl;
+			
+				if(refpath.size()>0)
+				{
+					for(int j=1; j<refpath.size(); j++)
+					{
+						node* newnode = g->GetNode(refpath[j]);
+	
+						xyLoc newloc; 
+						newloc.x = 	newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
+						newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
+						//std::cout<<newloc<<" ";
+						thePath.push_back(newloc);
+					}
+					//std::cout<<std::endl;	
+					//std::cout<<"Refpath size is zero!!!\n";
+					start = refpath[refpath.size()-1];
+				}
 			}
-		}
 	
-		// Do the last one separate - need to get to exact goal
+			// Do the last one separate - need to get to exact goal
 	
-		OctileHeuristic *heur3 = new OctileHeuristic(ma->GetMap(),g);
+			OctileHeuristic *heur3 = new OctileHeuristic(ma->GetMap(),g);
 
-		AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,env,env->GetOccupancyInfo());
-		absgraphenv2->SetFindExactGoal(true);
-		absgraphenv2->SetWeightedEnvironment(wenv);
-		absgraphenv2->SetAbsGraph(abs);	
+			AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,env,env->GetOccupancyInfo());
+			absgraphenv2->SetFindExactGoal(true);
+			absgraphenv2->SetWeightedEnvironment(wenv);
+			absgraphenv2->SetAbsGraph(abs);	
 	
-		refpath.clear();
+			refpath.clear();
 
-		TemplateAStar<graphState,graphMove,GraphEnvironment> *astar3 = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
-		astar3->GetPath(absgraphenv2,start,toGs,refpath);
-		nodesExpanded += astar3->GetNodesExpanded();
-		nodesTouched += astar3->GetNodesTouched();
-	//std::cout<<start<<" to "<<toGs<<" required "<<astar3->GetNodesExpanded()<<" nodes exp.\n";
-		//Transfer the path to thePath, as series of xyLoc
-		for(int j=1; j<refpath.size(); j++)
-		{
-			node* newnode = g->GetNode(refpath[j]);
-			xyLoc newloc; 
-			newloc.x = newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
-			newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
-			thePath.push_back(newloc);
-		}
-	}
+			TemplateAStar<graphState,graphMove,GraphEnvironment> *astar3 = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
+			astar3->GetPath(absgraphenv2,start,toGs,refpath);
+			nodesExpanded += astar3->GetNodesExpanded();
+			nodesTouched += astar3->GetNodesTouched();
+		//std::cout<<start<<" to "<<toGs<<" required "<<astar3->GetNodesExpanded()<<" nodes exp.\n";
+			//Transfer the path to thePath, as series of xyLoc
+			for(int j=1; j<refpath.size(); j++)
+			{
+				node* newnode = g->GetNode(refpath[j]);
+				xyLoc newloc; 
+				newloc.x = newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
+				newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
+				thePath.push_back(newloc);
+			}
+		}// end else --> not partialSkip
 	
 	//for (int i=0; i<thePath.size(); i++)
 	//{
@@ -440,6 +542,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 	//}
 	//std::cout<<std::endl<<std::endl;
 	
+	} // end else --> start and goal not same parent
 }
 
 #endif
