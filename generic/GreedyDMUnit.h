@@ -35,29 +35,44 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 			tDirection bestDir;		
 				
 			for(unsigned int i=0; i<directions.size(); i++)
-			{				
-				Vector2D dirVec = wme->GetAngleFromDirection(directions[i]);
-			
-				double dotProd = (nodeVec.x * dirVec.x) + (nodeVec.y * dirVec.y);
-			
-				if(dotProd > bestDotProd)
+			{			
+				xyLoc nextThisDir;
+				wme->GetNextState(loc,directions[i],nextThisDir);
+				if(prevLoc == nextThisDir)
+					continue;	
+				if(env->GetMap()->canStep(loc.x, loc.y, nextThisDir.x, nextThisDir.y))
 				{
-					bestDotProd = dotProd;
-					bestDir = directions[i];
-				}	
-			}		
+					Vector2D dirVec = wme->GetAngleFromDirection(directions[i]);
+					Vector2D nextVec = wme->GetAngle(nextThisDir);
+					
+					//double dotProd = (nodeVec.x * dirVec.x) + (nodeVec.y * dirVec.y);
+					double dotProd = (nodeVec.x * nextVec.x) + (nodeVec.y * nextVec.x);
+					if(dotProd > bestDotProd)
+					{
+						bestDotProd = dotProd;
+						bestDir = directions[i];
+					}	
+				}		
+			}
 			
-			xyLoc next;
-			wme->GetNextState(loc, bestDir, next);
-			
-			//std::cout<<"loc "<<loc<<" next "<<next<<std::endl;
-			if(!(env->GetMap()->canStep(loc.x, loc.y, next.x, next.y))) // make random move
-			{
-				//std::cout<<"can't go here - random\n";
-				a = directions[random()%directions.size()];
-			}	
-			else
+// 			xyLoc next;
+// 			wme->GetNextState(loc, bestDir, next);
+// 			
+// 			//std::cout<<"loc "<<loc<<" next "<<next<<std::endl;
+// 			if(!(env->GetMap()->canStep(loc.x, loc.y, next.x, next.y))) // make best possible move
+// 			{
+// 				
+// 				//std::cout<<"can't go here - random\n";
+// 				a = directions[random()%directions.size()];
+// 			}	
+// 			else
+	
+			if(bestDir != -1)
 				a = bestDir;
+			
+// 			else
+// 				a = directions[random()%directions.size()];
+			
 			return true;
 		}
 		
@@ -65,7 +80,10 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 		virtual void UpdateLocation(environment *, xyLoc &newloc, bool success, SimulationInfo *)
 		{
 			if (success)
+			{
+				prevLoc = loc;
 				loc = newloc;
+			}
 		}
 		
 		virtual void GetLocation(xyLoc &l)
@@ -80,6 +98,6 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 		void SetEnvironment(WeightedMap2DEnvironment *w){wme = w;}
 		
 	private:
-		xyLoc loc;
+		xyLoc loc, prevLoc;
 		WeightedMap2DEnvironment *wme;
 };
