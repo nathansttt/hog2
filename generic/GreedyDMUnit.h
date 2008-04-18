@@ -54,6 +54,9 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 					
 					double dotProd = 0.5 * dotProd1 + 0.5 * dotProd2;
 					
+					if (nextVec.x == 0 && nextVec.y == 0)
+						dotProd = -1;
+
 					//dotProds.push_back(dotProd);
 					
 					if(dotProd > bestDotProd)
