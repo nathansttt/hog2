@@ -32,28 +32,46 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 			}		
 					
 			double bestDotProd = -1;
-			tDirection bestDir;		
+			double secondBestValue = -1;
+			tDirection bestDir = kStay;		
+			tDirection secondBest = kStay;	
+			
+			//std::vector<double> dotProds;
 				
 			for(unsigned int i=0; i<directions.size(); i++)
 			{			
 				xyLoc nextThisDir;
 				wme->GetNextState(loc,directions[i],nextThisDir);
-				if(prevLoc == nextThisDir)
-					continue;	
+				//if(prevLoc == nextThisDir)
+				//	continue;	
 				if(env->GetMap()->canStep(loc.x, loc.y, nextThisDir.x, nextThisDir.y))
 				{
 					Vector2D dirVec = wme->GetAngleFromDirection(directions[i]);
 					Vector2D nextVec = wme->GetAngle(nextThisDir);
 					
-					//double dotProd = (nodeVec.x * dirVec.x) + (nodeVec.y * dirVec.y);
-					double dotProd = (nodeVec.x * nextVec.x) + (nodeVec.y * nextVec.x);
+					double dotProd1 = (nodeVec.x * dirVec.x) + (nodeVec.y * dirVec.y);
+					double dotProd2 = (dirVec.x * nextVec.x) + (dirVec.y * nextVec.y);
+					
+					double dotProd = 0.5 * dotProd1 + 0.5 * dotProd2;
+					
+					//dotProds.push_back(dotProd);
+					
 					if(dotProd > bestDotProd)
 					{
+						//if(abs(bestDotProd-dotProd) < 0.1)
+						secondBest = bestDir;
+						secondBestValue = bestDotProd;
 						bestDotProd = dotProd;
+						
 						bestDir = directions[i];
 					}	
+					
+					
 				}		
 			}
+			
+			// find all dot products within epsilon of best, then randomly choose one of them.
+			
 			
 // 			xyLoc next;
 // 			wme->GetNextState(loc, bestDir, next);
@@ -67,9 +85,16 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 // 			}	
 // 			else
 	
-			if(bestDir != -1)
+	
+			if(secondBest == kStay)
 				a = bestDir;
-			
+			else
+			{
+				if((bestDotProd - secondBestValue < 0.1) && (random()%4 == 1))
+					a = secondBest;
+				else
+					a = bestDir;
+			}
 // 			else
 // 				a = directions[random()%directions.size()];
 			
