@@ -38,14 +38,16 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 			
 			//std::vector<double> dotProds;
 				
-			for(unsigned int i=0; i<directions.size(); i++)
-			{			
+			for (unsigned int i=0; i<directions.size(); i++)
+			{	 		
 				xyLoc nextThisDir;
 				wme->GetNextState(loc,directions[i],nextThisDir);
 				//if(prevLoc == nextThisDir)
 				//	continue;	
-				if(env->GetMap()->canStep(loc.x, loc.y, nextThisDir.x, nextThisDir.y))
+				if (env->GetMap()->canStep(loc.x, loc.y, nextThisDir.x, nextThisDir.y))
 				{
+					if (env->GetOccupancyInfo() && env->GetOccupancyInfo()->GetStateOccupied(nextThisDir))
+						continue;
 					Vector2D dirVec = wme->GetAngleFromDirection(directions[i]);
 					Vector2D nextVec = wme->GetAngle(nextThisDir);
 					
@@ -59,7 +61,7 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 
 					//dotProds.push_back(dotProd);
 					
-					if(dotProd > bestDotProd)
+					if (dotProd >= bestDotProd)
 					{
 						//if(abs(bestDotProd-dotProd) < 0.1)
 						secondBest = bestDir;
