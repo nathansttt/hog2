@@ -636,11 +636,17 @@ double WeightedMap2DEnvironment::ComputeArrowMetric(bool doNormalize)
 		//if(sqrt(nodeVec.x	*nodeVec.x + nodeVec.y*nodeVec.y) < 0.5)
 		//	continue;		
 					
-		double bestDotProd = -1;
+		double bestDotProd = -2;
 		tDirection bestDir;		
 				
 		for(unsigned int i=0; i<directions.size(); i++)
 		{
+			xyLoc nextThisDir;
+			GetNextState(current, directions[i], nextThisDir);
+
+			if(!GetMap()->canStep(current.x, current.y, nextThisDir.x, nextThisDir.y))
+				continue;
+				
 			Vector2D dirVec = GetAngleFromDirection(directions[i]);
 			
 			double dotProd = (nodeVec.x * dirVec.x) + (nodeVec.y * dirVec.y);
@@ -651,6 +657,8 @@ double WeightedMap2DEnvironment::ComputeArrowMetric(bool doNormalize)
 				bestDir = directions[i];
 			}	
 		}
+		
+		if(bestDotProd == -2) continue;
 		
 		// Now that we know the closest direction, find out if there's a node there 
 		xyLoc next;
