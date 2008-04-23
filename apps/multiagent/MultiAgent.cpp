@@ -459,7 +459,7 @@ void RunScenario(int id)
 	
 	unitSims.resize(id+1);
 	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
-	env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,8));
+//env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,8));
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	unitSims[id]->SetStepType(kRealTime);
 	unitSims[id]->SetThinkingPenalty(0);
