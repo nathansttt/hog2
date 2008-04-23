@@ -39,3 +39,4 @@ void RunExperiment(int id);
 void RunScenario(int id);
 void PrintStatistics(int id, std::ofstream &outfile);
 void Initialize(int id, Map* map);
+void DoRandom(int id);
