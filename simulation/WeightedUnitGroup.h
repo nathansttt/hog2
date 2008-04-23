@@ -175,6 +175,7 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 				if (this->GetMembers()[x] == u)
 					return x;
 			}
+			return -1;
 		}
 
 		virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state &loc, bool success, SimulationInfo *si)
