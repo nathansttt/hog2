@@ -72,6 +72,7 @@ Plotting::Line *distLine = 0;
 
 bool runExperiment = false;
 bool weighted = false;
+bool noStats = false;
 
 char locsFile[1024];
 char scenFileName[1024];
@@ -401,11 +402,15 @@ void Initialize(int id, Map* map)
 {
 	unitSims.resize(id+1);
 	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
-	env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,absSize));
+	MapAbstraction *ma;
+	env = new AbsMapEnvironment(ma = new MapQuadTreeAbstraction(map,absSize));
+	ma->ToggleDrawAbstraction(1);
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	unitSims[id]->SetStepType(kRealTime);
 	unitSims[id]->SetThinkingPenalty(0);
-//	unitSims[id]->SetPaused(true);
+	if (noStats)
+		unitSims[id]->SetLogStats(false);
+	//	unitSims[id]->SetPaused(true);
 	
 	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>(env);
 	
@@ -463,6 +468,8 @@ void RunScenario(int id)
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	unitSims[id]->SetStepType(kRealTime);
 	unitSims[id]->SetThinkingPenalty(0);
+	if (noStats)
+		unitSims[id]->SetLogStats(false);
 //	unitSims[id]->SetPaused(true);
 	
 	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>(env);
@@ -540,8 +547,8 @@ void RunScenario(int id)
 			
 			alg1->SetWeightedEnvironment(wug->GetWeightedEnvironment());
 			
-			if(skipAbs)
-				alg1->SetSkipAbsNode(skipCutoff);
+//			if(skipAbs)
+//				alg1->SetSkipAbsNode(skipCutoff);
 			
 			su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg1);
 		}
@@ -922,6 +929,7 @@ void RunExperiment(int id)
 */
 void InstallHandlers()
 {
+	InstallKeyboardHandler(MyDisplayHandler, "Clear Units", "Clear all units in the simulation", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
@@ -970,6 +978,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-skipAbs", "-skipAbs cutoff", "Do partial refinement with abstraction"); 
 	
 	InstallCommandLineHandler(MyCLHandler,"-greedy", "-greedy num", "Do experiment, and place greedy agent afterwards");
+	InstallCommandLineHandler(MyCLHandler,"-nostats", "-nostats", "Don't collect stats. (Speeds up simulation with lots of units)");
 	
 	InstallCommandLineHandler(MyCLHandler,"-random", "-random num", "<num> agents moving randomly, updating DM");
 	InstallWindowHandler(MyWindowHandler);
@@ -1177,11 +1186,17 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		greedy = true;
 		greedyNum = atoi(argument[1]);
 	}
+	else if(strcmp(argument[0],"-nostats")==0)
+	{
+		noStats = true;
+		return 1;
+	}
 	else if(strcmp(argument[0],"-random")==0)
 	{ 
 		doRandom = true;
 		randomNum = atoi(argument[1]);
 	}
+	
 	
 	return 2;
 }
@@ -1190,6 +1205,11 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case '|':
+		{
+			unitSims[windowID]->ClearAllUnits();
+			break;
+		}
 		case '\t':
 		{
 			if (mod != kShiftDown)
