@@ -116,9 +116,10 @@ public:
 	double GetSimulationTime() { return currTime; }
 	void SetStepType(tTimestep step) { stepType = step; }
 	tTimestep GetStepType() { return stepType; }
+
 	void SetPaused(bool val) { paused = val; }
 	bool GetPaused() { return paused; }
-
+	
 	bool Done();
 
 	/** setPenalty for thinking. Sets the multiplier used to penalize thinking time. */
@@ -128,6 +129,8 @@ public:
 
 	virtual void OpenGLDraw(int window);
 	
+	void SetLogStats(bool val) { logStats = val; }
+	bool GetLogStats() { return logStats; }
 	StatCollection* GetStats() { return &stats; }
 protected:
 	void StepUnitTime(UnitInfo<state, action, environment> *ui, double timeStep);
@@ -138,7 +141,7 @@ protected:
 	virtual void DoPostTimestepCalc();
 	
 	double penalty;
-	bool paused;
+	bool paused, logStats;
 	std::vector<UnitInfo<state, action, environment> *> units;
 	std::vector<UnitGroup<state, action, environment> *> unitGroups;
 	environment *env;
@@ -154,6 +157,7 @@ UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
 	stepType = kRealTime;
 	currTime = 0.0;
 	paused = false;
+	logStats = true;
 	unitGroups.push_back(new UnitGroup<state, action, environment>);
 	// allocate default unit group!(?)
 }
@@ -213,7 +217,8 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 	while (units.size() > 0)
 	{
 		UnitInfo<state, action, environment> *ui = units.back();
-		ui->agent->LogFinalStats(&stats);
+		if (logStats)
+			ui->agent->LogFinalStats(&stats);
 		OccupancyInterface<state, action> *envInfo = env->GetOccupancyInfo();
 		if (envInfo)
 			envInfo->SetStateOccupied(ui->currentState, false);
@@ -276,7 +281,8 @@ void UnitSimulation<state, action, environment>::StepTime(double timeStep)
 		return;
 	}
 	DoPreTimestepCalc();
-	stats.AddStat("simulationTime", "UnitSimulation", currTime);
+	if (logStats)
+		stats.AddStat("simulationTime", "UnitSimulation", currTime);
 	currTime += timeStep;
 	DoTimestepCalc(timeStep);
 	DoPostTimestepCalc();
@@ -329,7 +335,8 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 		moveThinking = t.endTimer();
 		theUnit->totalThinking += moveThinking;
 		theUnit->lastMove = where;
-		stats.AddStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
+		if (logStats)
+			stats.AddStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
 	
 		bool success = MakeUnitMove(theUnit, where, moveTime);
 
@@ -337,7 +344,8 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 		u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, this);
 		locThinking = t.endTimer();
 		theUnit->totalThinking += locThinking;
-		stats.AddStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
+		if (logStats)
+			stats.AddStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
 
 		switch (stepType)
 		{
