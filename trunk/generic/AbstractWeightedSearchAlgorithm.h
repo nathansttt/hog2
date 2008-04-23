@@ -312,6 +312,7 @@ bool AbstractWeightedSearchAlgorithm<state,action,environment>::InitializeSearch
 template<class state, class action, class environment>
 void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environment *env, state& from, state& to, std::vector<state> &thePath)
 {	
+
 	//std::cout<<"path from "<<from<<std::endl;
 	// get abs path
 	// if neighbour is child of next abs node, skip this one
@@ -412,6 +413,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		// after some percentage (skipPerc is a value between 0 and 1, indicating the proportion to keep)
 		if(partialSkip)
  		{
+ 		
  			//if absPath's length is 2, want to do straight planning to goal (no cut off)
  			if(abspath.size()==2)
  			{
@@ -493,12 +495,13 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
  				}
  				// Chop off the path 
  				int desiredLength = refinePart * thePath.size();
-			//	std::f<<"desiredlength is "<<desiredLength<<" total is "<<thePath.size()<<std::endl;
- 				for(int i=desiredLength; i<thePath.size(); i++)
+			//	std::cout<<"desiredlength is "<<desiredLength<<" total is "<<thePath.size()<<std::endl;
+				int oldsize = thePath.size();
+ 				for(int i=desiredLength; i<oldsize; i++)
  				{
  					thePath.pop_back();
  				}
- 				
+ 			//	std::cout<<"after "<<thePath.size()<<std::endl;
  				
 			} // end else (length of abs path > 2)
 		} // end if(partialSkip)
@@ -570,7 +573,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 					//	std::cout<<newloc<<" ";
 						thePath.push_back(newloc);
 					}
-						std::cout<<std::endl;	
+						//std::cout<<std::endl;	
 					//std::cout<<"Refpath size is zero!!!\n";
 					start = refpath[refpath.size()-1];
 				}
