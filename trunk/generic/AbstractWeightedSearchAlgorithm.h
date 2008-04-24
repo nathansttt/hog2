@@ -278,7 +278,7 @@ class AbstractWeightedSearchAlgorithm : public GenericSearchAlgorithm<state,acti
 		* If set to 'true', the algorithm plans to the one-after-next abstract node, and cuts off
 		* the path after pathPerc. 0 \< pathPerc <= 1
 		*/
-		void SetSkipAbsNode(double pathPerc) { assert((refinePart > 0) && (refinePart <= 1)); partialSkip = true; refinePart = pathPerc; }
+		void SetSkipAbsNode(double pathPerc) { assert((pathPerc > 0) && (pathPerc <= 1)); partialSkip = true; refinePart = pathPerc; }
 		
 	private:
 		int nodesExpanded;
@@ -347,11 +347,11 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		graphenv->SetWeightedEnvironment(wenv); 
 		graphenv->SetAbsGraph(abs);	
 		
-		TemplateAStar<graphState,graphMove,GraphEnvironment> *astar = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
-		astar->GetPath(graphenv,fromGs,toGs,refpath);
+		TemplateAStar<graphState,graphMove,GraphEnvironment> astar;
+		astar.GetPath(graphenv,fromGs,toGs,refpath);
 		
-		nodesExpanded += astar->GetNodesExpanded();
-		nodesTouched += astar->GetNodesTouched();
+		nodesExpanded += astar.GetNodesExpanded();
+		nodesTouched += astar.GetNodesTouched();
 	//	std::cout<<"No abs path. "<<fromGs<<" to "<<toGs<<" required "<<astar->GetNodesExpanded()<<" nodes exp.\n";
 		
 		// Copy the path into thePath, as xyLoc
@@ -373,12 +373,12 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 
 		GraphEnvironment *graphenv = new GraphEnvironment(abs,heur);
 		graphenv->SetDirected(false);
-		TemplateAStar<graphState,graphMove,GraphEnvironment> *astar = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
-		astar->DoAbstractSearch(); // Don't want to use radius & occupancy interface at abstract level
-		astar->GetPath(graphenv,fromPar,toPar,abspath);
+		TemplateAStar<graphState,graphMove,GraphEnvironment> astar;
+		astar.DoAbstractSearch(); // Don't want to use radius & occupancy interface at abstract level
+		astar.GetPath(graphenv,fromPar,toPar,abspath);
 		
-		nodesExpanded += astar->GetNodesExpanded();
-		nodesTouched += astar->GetNodesTouched();
+		nodesExpanded += astar.GetNodesExpanded();
+		nodesTouched += astar.GetNodesTouched();
 	/*	std::cout<<"Abs path "<<fromPar<<" to "<<toPar<<" required "<<astar->GetNodesExpanded()<<" nodes exp.\n";
 		for(int i=0; i<abspath.size(); i++)
 		{ 
@@ -396,7 +396,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		
 		graphState start = fromGs; 
 	
-		TemplateAStar<graphState,tDirection,AbsGraphEnvironment> *astar2 = new TemplateAStar<graphState, tDirection,AbsGraphEnvironment>();
+		TemplateAStar<graphState,tDirection,AbsGraphEnvironment> astar2;
 	
 		graphState lastloc;
 	
@@ -427,11 +427,11 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				graphenv->SetWeightedEnvironment(wenv); 
 				graphenv->SetAbsGraph(abs);	
 		
-				TemplateAStar<graphState,graphMove,GraphEnvironment> *astar = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
-				astar->GetPath(graphenv,fromGs,toGs,refpath);
+				TemplateAStar<graphState,graphMove,GraphEnvironment> astar;
+				astar.GetPath(graphenv,fromGs,toGs,refpath);
 		
-				nodesExpanded += astar->GetNodesExpanded();
-				nodesTouched += astar->GetNodesTouched();
+				nodesExpanded += astar.GetNodesExpanded();
+				nodesTouched += astar.GetNodesTouched();
 				
 				// Copy the path into thePath, as xyLoc
 				for(unsigned int j=1; j<refpath.size(); j++)
@@ -442,6 +442,8 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 					newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
 					thePath.push_back(newloc);
 				}
+				delete age;
+				delete graphenv;
 	 		} // abs path not length 2
  			else
  			{
@@ -450,9 +452,9 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
  				
  				refpath.clear();
  		
- 				astar2->GetPath(age,start,end,refpath);
- 				nodesExpanded += astar2->GetNodesExpanded();
- 				nodesTouched += astar2->GetNodesTouched();
+ 				astar2.GetPath(age,start,end,refpath);
+ 				nodesExpanded += astar2.GetNodesExpanded();
+ 				nodesTouched += astar2.GetNodesTouched();
  				
  				if(refpath.size()>0)
  				{
@@ -465,45 +467,61 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
  						newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
  						thePath.push_back(newloc);
  					}
- 					start = refpath[refpath.size()-1];
+ 					//start = refpath[refpath.size()-1];
  				}
  			
  	
- 				// Do the last one separate - need to get to exact goal
- 	
-	 			OctileHeuristic *heur3 = new OctileHeuristic(ma->GetMap(),g);
- 
- 				AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,env,env->GetOccupancyInfo());
- 				absgraphenv2->SetFindExactGoal(true);
- 				absgraphenv2->SetWeightedEnvironment(wenv);
- 				absgraphenv2->SetAbsGraph(abs);	
- 	
-	 			refpath.clear();
- 
- 				TemplateAStar<graphState,graphMove,GraphEnvironment> *astar3 = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
- 				astar3->GetPath(absgraphenv2,start,toGs,refpath);
- 				nodesExpanded += astar3->GetNodesExpanded();
- 				nodesTouched += astar3->GetNodesTouched();
- 			
- 				for(int j=1; j<refpath.size(); j++)
- 				{
- 					node* newnode = g->GetNode(refpath[j]);
- 					xyLoc newloc; 
- 					newloc.x = newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
- 					newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
- 					thePath.push_back(newloc);
- 				}
+//  				// Do the last one separate - need to get to exact goal
+//  	
+// 	 			OctileHeuristic *heur3 = new OctileHeuristic(ma->GetMap(),g);
+//  
+//  				AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,env,env->GetOccupancyInfo());
+//  				absgraphenv2->SetFindExactGoal(true);
+//  				absgraphenv2->SetWeightedEnvironment(wenv);
+//  				absgraphenv2->SetAbsGraph(abs);	
+//  	
+// 	 			refpath.clear();
+//  
+//  				TemplateAStar<graphState,graphMove,GraphEnvironment> *astar3 = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
+//  				astar3->GetPath(absgraphenv2,start,toGs,refpath);
+//  				nodesExpanded += astar3->GetNodesExpanded();
+//  				nodesTouched += astar3->GetNodesTouched();
+//  			
+//  				for(int j=1; j<refpath.size(); j++)
+//  				{
+//  					node* newnode = g->GetNode(refpath[j]);
+//  					xyLoc newloc; 
+//  					newloc.x = newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
+//  					newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
+//  					thePath.push_back(newloc);
+//  				}
  				// Chop off the path 
  				int desiredLength = refinePart * thePath.size();
-			//	std::cout<<"desiredlength is "<<desiredLength<<" total is "<<thePath.size()<<std::endl;
-				int oldsize = thePath.size();
- 				for(int i=desiredLength; i<oldsize; i++)
- 				{
- 					thePath.pop_back();
- 				}
- 			//	std::cout<<"after "<<thePath.size()<<std::endl;
  				
+ 				if(desiredLength>3)
+					thePath.resize(desiredLength);
+ 				
+			//	std::cout<<"desiredlength is "<<desiredLength<<" total is "<<thePath.size()<<std::endl;
+				//int oldsize = thePath.size();
+ 				//for(int i=desiredLength; i<oldsize; i++)
+ 				//{
+ 				//	thePath.pop_back();
+ 				//}
+ 				
+//  				std::cout<<"I'm at "<<nl<<std::endl;
+//  				for (int i=0; i<thePath.size(); i++)
+// 				{
+// 					std::cout<<thePath[i]<<" ";
+// 				}
+// 				std::cout<<std::endl<<std::endl;
+ 				
+//  				std::cout<<"after "<<thePath.size()<<std::endl;
+				delete age;
+ 				return;
 			} // end else (length of abs path > 2)
+			
+			
+			
 		} // end if(partialSkip)
 		else//not partialskip
 		{		
@@ -537,8 +555,8 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		
 				refpath.clear();
 		
-				/*********DEBUG********/
-				node* debug = g->GetNode(start);
+			/*********DEBUG********/
+/*				node* debug = g->GetNode(start);
 				xyLoc d; 
 				d.x = debug->GetLabelL(GraphAbstractionConstants::kFirstData);
 				d.y = debug->GetLabelL(GraphAbstractionConstants::kFirstData+1);
@@ -547,16 +565,16 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				xyLoc d2;
 				d2.x = debug->GetLabelL(GraphAbstractionConstants::kFirstData);
 				d2.y = debug->GetLabelL(GraphAbstractionConstants::kFirstData+1);
-		
+		*/
 			//	std::cout<<"searching from "<<d<<" to "<<d2<<std::endl;
 				
 				/*****END DEBUG****/
 				
 				
-				astar2->GetPath(age,start,end,refpath);
+				astar2.GetPath(age,start,end,refpath);
 
-				nodesExpanded += astar2->GetNodesExpanded();
-				nodesTouched += astar2->GetNodesTouched();
+				nodesExpanded += astar2.GetNodesExpanded();
+				nodesTouched += astar2.GetNodesTouched();
 				
 				//std::cout<<start<<" to "<<end<<" required "<<astar2->GetNodesExpanded()<<" nodes exp.\n";
 				//std::cout<<"Refining nodes expanded now "<<nodesExpanded<<std::endl;
@@ -590,10 +608,10 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 	
 			refpath.clear();
 
-			TemplateAStar<graphState,graphMove,GraphEnvironment> *astar3 = new TemplateAStar<graphState, graphMove,GraphEnvironment>();
-			astar3->GetPath(absgraphenv2,start,toGs,refpath);
-			nodesExpanded += astar3->GetNodesExpanded();
-			nodesTouched += astar3->GetNodesTouched();
+			TemplateAStar<graphState,graphMove,GraphEnvironment> astar3;
+			astar3.GetPath(absgraphenv2,start,toGs,refpath);
+			nodesExpanded += astar3.GetNodesExpanded();
+			nodesTouched += astar3.GetNodesTouched();
 		//std::cout<<start<<" to "<<toGs<<" required "<<astar3->GetNodesExpanded()<<" nodes exp.\n";
 			//Transfer the path to thePath, as series of xyLoc
 		//	std::cout<<"last bit "<<std::endl;
@@ -606,6 +624,9 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				//std::cout<<newloc<<" ";
 				thePath.push_back(newloc);
 			}
+			
+			delete age;
+			delete absgraphenv2;
 		}// end else --> not partialSkip
 	
 
