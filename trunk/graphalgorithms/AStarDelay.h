@@ -23,6 +23,13 @@
 #define UINT32_MAX        4294967295U
 #endif
 
+
+#define D_ONE 1
+#define D_TWO 2
+#define D_THREE 3
+#define D_FOUR 4
+#define D_LOG2 5
+#define D_SQRT 6
 //const double pi = 3.141592654;
 
 //typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
@@ -32,10 +39,10 @@ namespace AStarDelayUtil
 	class SearchNode {
 	public:
 		SearchNode(double _fCost=0, double _gCost=0, graphState curr=UINT32_MAX, graphState prev=UINT32_MAX)
-		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev) {}
+		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev),rxp(false) {}
 
 		SearchNode(graphState curr)
-		:fCost(0), gCost(0), currNode(curr), prevNode(curr) {}
+		:fCost(0), gCost(0), currNode(curr), prevNode(curr),rxp(false) {}
 
 		void copy(double f, double g, graphState curr, graphState prev)
 		{
@@ -49,6 +56,9 @@ namespace AStarDelayUtil
 		double gCost;
 		graphState currNode;
 		graphState prevNode;
+		//bool isGoal;
+
+		bool rxp;
 	};
 
 	struct SearchNodeEqual {
@@ -62,6 +72,10 @@ namespace AStarDelayUtil
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
+				//if(i2.isGoal) // always prefer a goal node in tie
+				//	return true;
+				//if(i1.isGoal)
+				//	return false;
 				return (fless(i1.gCost, i2.gCost));
 			}
 			return (fgreater(i1.fCost, i2.fCost));
@@ -71,8 +85,14 @@ namespace AStarDelayUtil
 	struct GGreater {
 		bool operator()(const SearchNode &i1, const SearchNode &i2)
 	  {
-			if (fequal(i1.gCost,i2.gCost))
+			if(fequal(i1.gCost,i2.gCost)) {
+				//if(i2.isGoal) // always prefer a goal node in tie
+				//	return true;
+				//if(i1.isGoal)
+				//	return false;
+
 				return fgreater(i1.fCost,i2.fCost);
+			}
 
 			return fgreater(i1.gCost,i2.gCost);
 		}
@@ -100,8 +120,8 @@ namespace AStarDelayUtil
 
 class AStarDelay : public GraphAlgorithm {
 public:
-	AStarDelay() { bpmxLevel = 0;}
-	AStarDelay(int lev) { bpmxLevel = lev; }
+	AStarDelay() { verID=6; bpmxLevel = 0; fD=2;}
+	AStarDelay(int lev) { verID=6; bpmxLevel = lev; fD=2;}
 	virtual ~AStarDelay() {}
 	void GetPath(GraphEnvironment *env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
@@ -125,10 +145,25 @@ public:
 	void ReversePropX1(AStarDelayUtil::SearchNode& topNode);
 	void Broadcast(int level, int levelcount);
 
+	double solutionCost;
+	int verID;
+	int fD;
+
+
+	unsigned long tickNewExp;
+	unsigned long tickReExp;
+	unsigned long tickBPMX;
+
+	unsigned long nNewExp;
+	unsigned long nReExp;
+	unsigned long nBPMX;
+
 private:
 	bool DoSingleStep(AStarDelayUtil::SearchNode &topNode,
 										std::vector<graphState> &thePath);
 	double HandleNeighbor(graphState neighbor,
+												AStarDelayUtil::SearchNode &topNode);
+	double HandleNeighborX(graphState neighbor,
 												AStarDelayUtil::SearchNode &topNode);
 //	double UpdateLowGNode(graphState neighbor,
 //												AStarDelayUtil::SearchNode &topNode);
@@ -143,6 +178,19 @@ private:
 
 	double F;
 
+	double fDelay(double N) 
+	{
+		switch (fD)
+		{
+		case D_ONE: return 1;
+		case D_TWO: return 2;
+		case D_THREE: return 3;
+		case D_FOUR:  return 4;
+		case D_LOG2:  return log2(N);
+		case D_SQRT:  return sqrt(N);
+		}
+	}
+
 	long nodesExpanded, nodesTouched, nodesReopened;
 	std::vector<graphState> neighbors;
 	graphState goal, start;
@@ -153,13 +201,14 @@ private:
 
 	Graph *g; // for OpenGL drawing only
 
-	double solutionCost;
+	
 	int pathSize;
 
 	int bpmxLevel;
 
 	std::deque<graphState> fifo;
 	std::vector<graphState> myneighbors;
+
 };	
 
 #endif

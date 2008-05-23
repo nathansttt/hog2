@@ -35,6 +35,8 @@
 #define PROP_DPMX     9
 #define PROP_BPMXE    10
 
+#define PROP_DPDLMX   11  // DP + Delay + MX
+
 namespace PropUtil
 {
 	class SearchNode {
@@ -44,10 +46,10 @@ namespace PropUtil
 		//:fCost(0),gCost(0),currNode((graphState)-1),prevNode((graphState)-1),lastExpanded(0),expansions(0),threshold(1) {}
 
 		SearchNode(double _fCost=0, double _gCost=0, graphState curr=UINT32_MAX, graphState prev=UINT32_MAX)
-		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev),lastExpanded(0),expansions(0),threshold(0),isGoal(false) {}
+		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev), rxp(false) {}
 
 		SearchNode(graphState curr)
-		:fCost(0), gCost(0), currNode(curr), prevNode(curr),lastExpanded(0),expansions(0),threshold(0),isGoal(false) {}
+		:fCost(0), gCost(0), currNode(curr), prevNode(curr), rxp(false) {}
 
 
 		void copy(double f, double g, graphState curr, graphState prev) {
@@ -63,11 +65,13 @@ namespace PropUtil
 		graphState prevNode;
 
 		// for delay algorithm (A'?)
-		long lastExpanded;
-		long expansions;
-		long threshold; // = lastExpanded + 2^expansions
+		//long lastExpanded;
+		//long expansions;
+		//long threshold; // = lastExpanded + 2^expansions
 
-		bool isGoal; // is it goal?
+		//bool isGoal; // is it goal?
+
+		bool rxp;
 	};
 
 	struct SearchNodeEX {
@@ -103,10 +107,10 @@ namespace PropUtil
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
-				if(i2.isGoal) // always prefer a goal node in tie
-					return true;
-				if(i1.isGoal)
-					return false;
+				//if(i2.isGoal) // always prefer a goal node in tie
+				//	return true;
+				//if(i1.isGoal)
+				//	return false;
 				return (fless(i1.gCost, i2.gCost));
 			}
 			return (fgreater(i1.fCost, i2.fCost));
@@ -116,10 +120,10 @@ namespace PropUtil
 	struct GGreater {
 		bool operator()(const SearchNode &i1, const SearchNode &i2) {
 			if(fequal(i1.gCost,i2.gCost)) {
-				if(i2.isGoal) // always prefer a goal node in tie
-					return true;
-				if(i1.isGoal)
-					return false;
+				//if(i2.isGoal) // always prefer a goal node in tie
+				//	return true;
+				//if(i1.isGoal)
+				//	return false;
 
 				return fgreater(i1.fCost,i2.fCost);
 			}
@@ -130,9 +134,10 @@ namespace PropUtil
 
 	struct TGreater {
 		bool operator()(const SearchNode &i1, const SearchNode &i2) {
-			if(i1.threshold == i2.threshold) // threshold is integer
-				return fgreater(i1.gCost,i2.gCost);
-			return i1.threshold > i2.threshold;
+			//if(i1.threshold == i2.threshold) // threshold is integer
+			//	return fgreater(i1.gCost,i2.gCost);
+			//return i1.threshold > i2.threshold;
+			return true;
 		}
 	};
 
@@ -410,7 +415,6 @@ namespace PropUtil
 			g->AddEdge(new edge(2*N, 2*N+1, N-1));
 			return g;
 		}
-		
 	};
 
 
@@ -429,9 +433,21 @@ namespace PropUtil
 
 class Prop  : public GraphAlgorithm {
 public:
-	Prop() { verID = PROP_BP; delta=0;}
-	Prop(unsigned int v) { verID = v; delta=0;}
-	Prop(unsigned int v, double del) {verID=v; delta=del;}
+	Prop() { verID = PROP_BP; delta=0; bpmxLevel=1;}  // bpmxLevel is not used if not explicitely calling bpmx root prop
+	Prop(unsigned int v) { 
+		verID = v; delta=0;  
+		if(verID == PROP_BPMX || verID == PROP_DPMX || verID == PROP_BPMXE || verID == PROP_DPDLMX)
+			bpmxLevel=1;
+		else
+			bpmxLevel=0;
+	} // [changed needed, regarding bpmxLevel]
+	Prop(unsigned int v, double del) {
+		verID=v; delta=del;  
+		if(verID == PROP_BPMX || verID == PROP_DPMX || verID == PROP_BPMXE || verID == PROP_DPDLMX)
+			bpmxLevel=1;
+		else
+			bpmxLevel=0;
+	} //[changed needed, regarding bpmxLevel]
 	virtual ~Prop() {}
 	void GetPath(GraphEnvironment *env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
@@ -446,26 +462,29 @@ public:
 	bool DoSingleStepBP(std::vector<graphState> &thePath);
 	bool DoSingleStepApprox(std::vector<graphState> &thePath);
 	bool DoSingleStepBFS(std::vector<graphState> &thePath);
-	void ClosedListRepair();
+	//void ClosedListRepair();
 	bool DoSingleStepDelay(std::vector<graphState> &thePath);
 	bool DoSingleStepDP(std::vector<graphState> &thePath);
 	bool DoSingleStepBPMX(std::vector<graphState> &thePath);
 	bool DoSingleStepDPMX(std::vector<graphState> &thePath);
-	void CleanUpOpen(double solCost);
-	void Categorize(std::vector<graphState>& neighbors);
-	void Categorize2(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& openN, std::vector<PropUtil::SearchNode>& closedN, std::vector<graphState>& newN);
+
+	bool DoSingleStepDPDLMX(std::vector<graphState> &thePath);
+	//void CleanUpOpen(double solCost);
+	//void Categorize(std::vector<graphState>& neighbors);
+	//void Categorize2(std::vector<graphState>& neighbors, std::vector<PropUtil::SearchNode>& openN, std::vector<PropUtil::SearchNode>& closedN, std::vector<graphState>& newN);
 	void ReverseProp(PropUtil::SearchNode& topNode);
 	void ReversePropX1(PropUtil::SearchNode& topNode);
 	void ReversePropX2(PropUtil::SearchNode& topNode);
-	bool NextNeighbor(PropUtil::SearchNode& neighborNode, graphState& neighbor, int& mode);
+	//bool NextNeighbor(PropUtil::SearchNode& neighborNode, graphState& neighbor, int& mode);
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
 
 	void GetLowestG(PropUtil::SearchNode &gNode);
-	bool GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound, long TBound);
 	void GetLowestGF(PropUtil::SearchNode &gNode);
+	//bool GetLowestG(PropUtil::TQueue &wList, PropUtil::SearchNode &gNode, double fBound, long TBound);
 	bool UpdateHOnly(PropUtil::SearchNode &node, double h);
 	void ComputeNewHMero3a(double &h, double &h_tmp, graphState neighbor, PropUtil::SearchNode& neighborNode, double altH, int mode);
 	void RelaxOpenNode(double f, double g, graphState neighbor, PropUtil::SearchNode &neighborNode, graphState topNodeID);
+	void RelaxDelayNode(double f, double g, graphState neighbor, PropUtil::SearchNode &neighborNode, graphState topNodeID);
 
 	void OpenGLDraw();
 	void OpenGLDraw(int window);
@@ -478,28 +497,46 @@ public:
 	int GetSolutionEdges() {return pathSize;}
 
 	bool DoSingleStepBPMXE(std::vector<graphState> &thePath);
-	void ReversePropX1E(PropUtil::SearchNode& topNode);
-	void BroadcastFence();
+	//void ReversePropX1E(PropUtil::SearchNode& topNode);
+	//void BroadcastFence();
 
 	char algname[20];
+	unsigned int verID;
+	double solutionCost;
+
+	int bpmxLevel;
+
+	unsigned long tickNewExp;
+	unsigned long tickReExp;
+	unsigned long tickBPMX;
+
+	unsigned long nNewExp;
+	unsigned long nReExp;
+	unsigned long nBPMX;
 
 private:
-	unsigned int verID;
+	
 	double F;
 	long nodesExpanded, nodesTouched;
 	std::vector<graphState> neighbors;
-	std::deque<PropUtil::SearchNode> bfsQueue;
+	//std::deque<PropUtil::SearchNode> bfsQueue;
 	graphState goal, start;
 	GraphEnvironment *env;
 	PropUtil::PQueue openQueue;
 	PropUtil::NodeLookupTable closedList; 
-	PropUtil::GQueue FCache; // storing nodes with f < F, this is temporary cache. Mero proves that it is not used in B'
+	PropUtil::GQueue FCache;
+	PropUtil::GQueue delayCache; // 
+	int reopenings;
+
+	int fDelay(long N) {
+		return 2;
+	}
 
 	PropUtil::TQueue WaitList; // for delay alg
 
 	double delta;  // the threshold for approx
 
-	double solutionCost;
+	
 	int pathSize;
 
 	long NodesReopened;
@@ -509,15 +546,20 @@ private:
 	graphState justExpanded; // the node that is expanded in previous round, for drawing only
 
 	// categorize the neighbors
-	std::vector<PropUtil::SearchNode> closedNeighbors;
-	std::vector<PropUtil::SearchNode> openNeighbors;
-	std::vector<PropUtil::SearchNode> waitNeighbors;
-	std::vector<graphState> newNeighbors;
+	//std::vector<PropUtil::SearchNode> closedNeighbors;
+	//std::vector<PropUtil::SearchNode> openNeighbors;
+	//std::vector<PropUtil::SearchNode> waitNeighbors;
+	//std::vector<graphState> newNeighbors;
 
-	PropUtil::SearchNode* newParent; // new parent for topNode, default is null
+	//PropUtil::SearchNode* newParent; // new parent for topNode, default is null
 
-	double ET;
+	//double ET;
+	//std::deque<graphState> fifo;
+
+	void Broadcast(int level, int levelcount);
+
 	std::deque<graphState> fifo;
+	std::vector<graphState> myneighbors;
 };
 
 
