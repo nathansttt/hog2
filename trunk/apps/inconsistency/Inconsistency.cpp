@@ -44,7 +44,7 @@ int absType = 0;
 
 std::vector<GraphSimulation *> unitSims;
 
-extern bool drawtext;
+//extern bool drawtext;
 
 unsigned int fig = 4;
 unsigned int N = 5;
@@ -97,7 +97,7 @@ void preProcessArgs(int argc, char* argv[])
 			i += 2;
 		}
 		else if(strcmp(argv[i],"-dt")==0) {
-			drawtext = true;
+		  //	drawtext = true;
 			i++;
 		}
 		else
