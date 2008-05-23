@@ -16,6 +16,10 @@ using namespace GraphSearchConstants;
 
 const static bool verbose = false;//true;
 
+static unsigned long tickStart;
+
+static unsigned long tickGen;
+
 void AStarDelay::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
 {
 	if (!InitializeSearch(_env,_g,from,to,thePath))
@@ -33,9 +37,9 @@ void AStarDelay::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, gra
 	double usedtime = t1.tv_sec-t0.tv_sec + (t1.tv_usec-t0.tv_usec)/1000000.0;
 	
 	//if(thePath.size() > 0)
-		printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%ld.\n",GetNodesExpanded(),GetNodesTouched(),GetNodesReopened());
+	//	printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%ld.\n",GetNodesExpanded(),GetNodesTouched(),GetNodesReopened());
 
-	printf("Algorithm AStarDelay, time used=%lf sec, N/sec=%lf, solution cost=%lf, solution edges=%d.\n",usedtime, GetNodesExpanded()/usedtime,solutionCost,pathSize);
+	//printf("Algorithm AStarDelay, time used=%lf sec, N/sec=%lf, solution cost=%lf, solution edges=%d.\n",usedtime, GetNodesExpanded()/usedtime,solutionCost,pathSize);
 }
 
 bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
@@ -52,6 +56,9 @@ bool AStarDelay::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState 
 //	fQueue.reset();
 
 	thePath.clear();
+
+	tickNewExp = tickReExp = tickBPMX = 0;
+	nNewExp = nReExp = nBPMX = 0;
 
 	//strcpy(algname,"AStarDelay");
 		
@@ -88,18 +95,20 @@ bool AStarDelay::DoSingleSearchStep(std::vector<graphState> &thePath)
 	// or not
 	if ((delayQueue.size() > 0) && (openQueue.size() > 0) &&
 			(env->GoalTest(temp = openQueue.top().currNode, goal)) &&
-			(fless(delayQueue.top().gCost, openQueue.top().fCost)))
+			(fless(delayQueue.top().gCost, openQueue.top().fCost)/*!fgreater(delayQueue.top().fCost, openQueue.top().fCost)*/))
 	{
 		do { // throw out nodes with higher cost than goal
 			topNode = delayQueue.Remove();
-		} while (fgreater(topNode.fCost, openQueue.top().fCost));
+		} while (fgreater(topNode.fCost, openQueue.top().fCost)/*!fless(topNode.fCost, openQueue.top().fCost)*/);
 		//reopenCount = 0;
 		nodesReopened++;
 		found = true;
 	}
-	else if ((reopenCount < log2(nodesExpanded-nodesReopened)) && (delayQueue.size() > 0) && (openQueue.size() > 0))
+	else if ((reopenCount < fDelay(nodesExpanded-nodesReopened)) && (delayQueue.size() > 0) && (openQueue.size() > 0))
 	{
-		if (fless(delayQueue.top().gCost, openQueue.top().fCost))
+		//SearchNodeCompare cmpkey;
+
+		if (fless(delayQueue.top().gCost, openQueue.top().fCost) /*!cmpkey(delayQueue.top() , openQueue.top())*/ )
 		{
 			topNode = delayQueue.Remove();
 			reopenCount++;
@@ -111,7 +120,7 @@ bool AStarDelay::DoSingleSearchStep(std::vector<graphState> &thePath)
 		}
 		found = true;
 	}
-	else if ((reopenCount < log2(nodesExpanded-nodesReopened)) && (delayQueue.size() > 0))
+	else if ((reopenCount < fDelay(nodesExpanded-nodesReopened)) && (delayQueue.size() > 0))
 	{
 		nodesReopened++;
 		topNode = delayQueue.Remove();
@@ -152,6 +161,11 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 															std::vector<graphState> &thePath)
 {
 	nodesExpanded++;
+
+	if(topNode.rxp)
+		nReExp++;
+	else
+		nNewExp++;
 	
 	if (verbose)
 	{
@@ -159,6 +173,8 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 					 topNode.currNode, topNode.gCost, topNode.fCost-topNode.gCost, topNode.fCost);
 	}
 	
+	unsigned long tickTmp = clock();
+
 	// and if there are no lower f-costs on the other open lists...
 	// otherwise we need to delay this node
 	if (env->GoalTest(topNode.currNode, goal))
@@ -173,27 +189,76 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 	neighbors.resize(0);
 	env->GetSuccessors(topNode.currNode, neighbors);
 
-	if(bpmxLevel > 0)
-		ReversePropX1(topNode);
+	tickGen = clock() - tickTmp;
+
+	bool doBPMX = false;
+_BPMX:
+	if(bpmxLevel >= 1)
+		if(doBPMX) {
+			ReversePropX1(topNode);
+
+			// counting supplement
+			if(nodesExpanded%2) {
+				nodesExpanded++;
+
+				if(topNode.rxp)
+					nReExp++;
+				else
+					nNewExp++;
+			}
+		}
+
+
+    tickStart = clock();
 	
 	double minCost = DBL_MAX;
 	for (unsigned int x = 0; x < neighbors.size(); x++)
 	{
 		nodesTouched++;
 		
-		double cost = HandleNeighbor(neighbors[x], topNode);
-		if (fless(cost, minCost))
-			minCost = cost;
+		double cost;
+		
+		if(bpmxLevel >= 1) {
+			cost = HandleNeighborX(neighbors[x], topNode);
+			if(cost == 0) {
+
+				if(topNode.rxp) {
+					tickReExp += clock() - tickStart + tickGen;
+					tickGen = 0;
+				}
+				else {
+					tickNewExp += clock() - tickStart + tickGen;
+					tickGen = 0;
+				}
+
+				doBPMX = true;
+				goto _BPMX;
+			}
+			if (fless(cost, minCost))
+				minCost = cost;
+		}
+
+		else
+			cost = HandleNeighbor(neighbors[x], topNode);
+	}
+
+	if(topNode.rxp) {
+		tickReExp += clock() - tickStart + tickGen;
+	}
+	else {
+		tickNewExp += clock() - tickStart + tickGen;
 	}
 
 	// path max rule (i or ii?)  // this is Mero rule (b), min rule -- allen
-	if (fless(topNode.fCost-topNode.gCost, minCost))
-		topNode.fCost = topNode.gCost+minCost;
+	if(bpmxLevel >= 1)
+		if (fless(topNode.fCost-topNode.gCost, minCost))
+			topNode.fCost = topNode.gCost+minCost;
 	closedList[topNode.currNode] = topNode;
 
-	if(fifo.size() > 0) {
-		Broadcast(1,fifo.size()); // (level, levelcount)
-	}
+	if(bpmxLevel >= 1)
+		if(fifo.size() > 0) {
+			Broadcast(1,fifo.size()); // (level, levelcount)
+		}
 
 	return false;
 }
@@ -201,6 +266,7 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 // for BPMX
 void AStarDelay::ReversePropX1(SearchNode& topNode) 
 {
+	tickStart = clock();
 
 	double maxh = topNode.fCost - topNode.gCost;
 	for(unsigned int x=0;x<neighbors.size();x++) 
@@ -219,9 +285,10 @@ void AStarDelay::ReversePropX1(SearchNode& topNode)
 				NodeLookupTable::iterator iter = closedList.find(neighbor);
 				if(iter != closedList.end()) {
 					neighborNode = iter->second;
+					double oh = maxh;
 					maxh = max(maxh, (neighborNode.fCost - neighborNode.gCost) - env->GCost(topNode.currNode,neighbor));
 
-					if(bpmxLevel > 1) {
+					if(bpmxLevel > 1 && oh < maxh) {
 						fifo.push_back(neighbor);
 					}
 				}
@@ -232,14 +299,22 @@ void AStarDelay::ReversePropX1(SearchNode& topNode)
 		}
 	}
 
+	nBPMX++;
+	tickBPMX += clock() - tickStart;
+
+	nodesExpanded++;
+	nodesTouched += neighbors.size();
 	topNode.fCost = maxh + topNode.gCost;
 }
 
 // multi level BPMX in *closed* list
+/* BPMX can only center around closed nodes, but open nodes can get updated as well*/
 // a recursive function
 void AStarDelay::Broadcast(int level, int levelcount)
 { // we will only enque the newly updated (neighbor) nodes; or neighbor nodes being able to update others
 	NodeLookupTable::iterator iter;
+
+	tickStart = clock();
 
 	for(int i=0;i<levelcount;i++) {
 		graphState front = fifo.front();
@@ -272,9 +347,35 @@ void AStarDelay::Broadcast(int level, int levelcount)
 					fifo.push_back(neighbor);
 				}
 			}
+			else {
+				SearchNode neighborNode = openQueue.find(SearchNode(neighbor));
+				if(neighborNode.currNode == neighbor) {
+					double edgeWeight = env->GCost(front,neighbor);
+
+					double neighborH = neighborNode.fCost - neighborNode.gCost;
+					
+					if(fgreater(neighborH - edgeWeight, frontH)) {
+						frontH = neighborH - edgeWeight;
+						frontNode.fCost = frontNode.gCost + frontH;
+					}
+				}
+				else {
+					neighborNode = delayQueue.find(SearchNode(neighbor));
+					if(neighborNode.currNode == neighbor) {
+						double edgeWeight = env->GCost(front,neighbor);
+
+						double neighborH = neighborNode.fCost - neighborNode.gCost;
+						
+						if(fgreater(neighborH - edgeWeight, frontH)) {
+							frontH = neighborH - edgeWeight;
+							frontNode.fCost = frontNode.gCost + frontH;
+						}
+					}
+				}
+			}
 		}
 		// store frontNode
-		closedList[front].fCost = frontNode.fCost;
+		closedList[front] = frontNode;
 
 		// forward pass
 		for(int x=0;x<myneighbors.size();x++) 
@@ -288,21 +389,53 @@ void AStarDelay::Broadcast(int level, int levelcount)
 				double neighborH = neighborNode.fCost - neighborNode.gCost;
 				
 				if(fgreater(frontH - edgeWeight, neighborH)) {
-					closedList[neighbor].fCost = neighborNode.gCost + frontH - edgeWeight;  // store neighborNode
+					neighborNode.fCost = neighborNode.gCost + frontH - edgeWeight;  // store neighborNode
+					closedList[neighbor] = neighborNode;
 					fifo.push_back(neighbor);
+				}
+			}
+			else {
+				SearchNode neighborNode = openQueue.find(SearchNode(neighbor));
+				if(neighborNode.currNode == neighbor) {
+					double edgeWeight = env->GCost(front,neighbor);
+
+					double neighborH = neighborNode.fCost - neighborNode.gCost;
+					
+					if(fgreater(frontH - edgeWeight, neighborH)) {
+						neighborNode.fCost = neighborNode.gCost + frontH - edgeWeight;
+						openQueue.IncreaseKey(neighborNode);
+					}
+				}
+				else {
+					neighborNode = delayQueue.find(SearchNode(neighbor));
+					if(neighborNode.currNode == neighbor) {
+						double edgeWeight = env->GCost(front,neighbor);
+
+						double neighborH = neighborNode.fCost - neighborNode.gCost;
+						
+						if(fgreater(frontH - edgeWeight, neighborH)) {
+							neighborNode.fCost = neighborNode.gCost + frontH - edgeWeight;
+							delayQueue.IncreaseKey(neighborNode);
+						}
+					}
 				}
 			}
 		}
 	}
 
+	nBPMX++;
+	tickBPMX += clock() - tickStart;
+
+	nodesExpanded++;
+	nodesTouched += levelcount;
+
 	level++;
-	if(level < bpmxLevel)
+	if(level < bpmxLevel && fifo.size() > 0)
 		Broadcast(level, fifo.size());
 }
 
 double AStarDelay::HandleNeighbor(graphState neighbor, SearchNode &topNode)
 {
-	
 	if (openQueue.IsIn(SearchNode(neighbor))) // in OPEN
 	{
 		return UpdateOpenNode(neighbor, topNode);
@@ -325,6 +458,52 @@ double AStarDelay::HandleNeighbor(graphState neighbor, SearchNode &topNode)
 	return 0;
 }
 
+double AStarDelay::HandleNeighborX(graphState neighbor, SearchNode &topNode)
+{
+	SearchNode neighborNode;
+	NodeLookupTable::iterator iter;
+	double edge = env->GCost(topNode.currNode,neighbor);
+	double hTop = topNode.fCost - topNode.gCost;
+
+	if ((neighborNode = openQueue.find(SearchNode(neighbor))).currNode == neighbor) // in OPEN
+	{
+		if(neighborNode.fCost - neighborNode.gCost - edge > hTop) {
+			return 0;
+		}
+
+		return UpdateOpenNode(neighbor, topNode);
+	} 
+	else if ((iter = closedList.find(neighbor)) != closedList.end()) // in CLOSED
+	{
+		neighborNode = iter->second;
+		if(neighborNode.fCost - neighborNode.gCost - edge > hTop) {
+			return 0;
+		}
+
+		return UpdateClosedNode(neighbor, topNode);
+	} 
+	else if ((neighborNode = delayQueue.find(SearchNode(neighbor))).currNode == neighbor) // in DELAY
+	{
+		if(neighborNode.fCost - neighborNode.gCost - edge > hTop) {
+			return 0;
+		}
+
+		return UpdateDelayedNode(neighbor, topNode);
+	} 
+//	else if (fQueue.IsIn(SearchNode(neighbor))) // in low g-cost!
+//	{
+//		return UpdateLowGNode(neighbor, topNode);
+//	}
+	else { // not opened yet
+		if( env->HCost(neighbor,goal) - edge > hTop) {
+			return 0;
+		}
+
+		return AddNewNode(neighbor, topNode);
+	}
+	return 0;
+}
+
 // return edge cost + h cost
 double AStarDelay::AddNewNode(graphState neighbor, SearchNode &topNode)
 {
@@ -335,6 +514,7 @@ double AStarDelay::AddNewNode(graphState neighbor, SearchNode &topNode)
 	double fcost = gcost + h;
 	
 	SearchNode n(fcost, gcost, neighbor, topNodeID);
+	//n.isGoal = (neighbor == goal);
 //	if (fless(fcost, F))
 //	{
 //		fQueue.Add(n); // nodes with cost < F
@@ -354,7 +534,8 @@ double AStarDelay::UpdateOpenNode(graphState neighbor, SearchNode &topNode)
 	double edgeCost = env->GCost(topNode.currNode, neighbor);
 
 	double oldf = n.fCost;
-	n.fCost = max(n.fCost , topNode.fCost - topNode.gCost - edgeCost + n.gCost);
+	if(bpmxLevel >= 1)
+		n.fCost = max(n.fCost , topNode.fCost - topNode.gCost - edgeCost + n.gCost);
 
 	if (fless(topNode.gCost+edgeCost, n.gCost))
 	{
@@ -387,21 +568,30 @@ double AStarDelay::UpdateClosedNode(graphState neighbor, SearchNode &topNode)
 		n.gCost = topNode.gCost+edgeCost;
 
 		// do pathmax here -- update child-h to parent-h - edge cost
-		hCost = max(topNode.fCost-topNode.gCost-edgeCost, hCost);
+		if(bpmxLevel >= 1)
+			hCost = max(topNode.fCost-topNode.gCost-edgeCost, hCost);
 
 		n.fCost = n.gCost + hCost;
 		n.prevNode = topNode.currNode;
 
 		// put into delay list if we can open it
 		closedList.erase(neighbor);  // delete from CLOSED
+
+		n.rxp = true;
 		delayQueue.Add(n); // add to delay list
+		//openQueue.Add(n);
 	}
-	else if (fgreater(topNode.fCost-topNode.gCost-edgeCost, n.fCost-n.gCost)) // pathmax
-	{
-		n.fCost = topNode.fCost-topNode.gCost-edgeCost;
-		n.fCost += n.gCost;
-		closedList[neighbor] = n;
-	}
+	else if(bpmxLevel >= 1)
+		if (fgreater(topNode.fCost-topNode.gCost-edgeCost, n.fCost-n.gCost)) // pathmax
+		{
+			n.fCost = topNode.fCost-topNode.gCost-edgeCost;
+			n.fCost += n.gCost;
+			closedList[neighbor] = n;
+
+			if(bpmxLevel > 1) {
+				fifo.push_back(neighbor);
+			}
+		}
 	// return value for pathmax
 	return edgeCost+n.fCost-n.gCost;
 }
@@ -415,7 +605,8 @@ double AStarDelay::UpdateDelayedNode(graphState neighbor, SearchNode &topNode)
 	double edgeCost = env->GCost(topNode.currNode, neighbor);
 
 	double oldf = n.fCost;
-	n.fCost = max(n.fCost , topNode.fCost - topNode.gCost - edgeCost + n.gCost);
+	if(bpmxLevel >= 1)
+		n.fCost = max(n.fCost , topNode.fCost - topNode.gCost - edgeCost + n.gCost);
 
 	if (fless(topNode.gCost+edgeCost, n.gCost))
 	{
@@ -448,9 +639,9 @@ void AStarDelay::ExtractPathToStart(graphState goalNode, std::vector<graphState>
 		n = openQueue.find(SearchNode(goalNode));
 	}
 	
-	solutionCost = 0;
+	solutionCost = n.gCost;
 	do {
-		solutionCost += env->GCost(n.prevNode,n.currNode);
+		//solutionCost += env->GCost(n.prevNode,n.currNode);
 
 		thePath.push_back(n.currNode);
 		n = closedList[n.prevNode];

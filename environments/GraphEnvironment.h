@@ -102,6 +102,8 @@ class GraphMapInconsistentHeuristic : public GraphHeuristic {
 public:
 	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
 	double HCost(graphState &state1, graphState &state2);
+	static int hmode;
+	static int HN;
 private:
 	void GetOptimalDistances(node *n, std::vector<double> &values);
 	void AddHeuristic(std::vector<double> &values, graphState location);
@@ -137,6 +139,7 @@ protected:
 	bool directed;
 	Graph *g;
 	GraphHeuristic *h;
+
 };
 
 typedef UnitSimulation<graphState, graphMove, GraphEnvironment> GraphSimulation;

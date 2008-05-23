@@ -34,5 +34,5 @@ SRC_CPP = \
 	environments/GraphEnvironment.cpp \
 	environments/MNPuzzle.cpp \
 	environments/FlipSide.cpp \
-	environments/WeightedMap2DEnvironment.cpp
-
+	environments/WeightedMap2DEnvironment.cpp \
+	environments/TopSpin.cpp	

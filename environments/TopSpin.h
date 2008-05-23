@@ -23,6 +23,8 @@ public:
 	void SetState(TopSpin *tss) { ts = tss; }
 	virtual ~TopSpinGraphHeuristic() { }
 	virtual double HCost(graphState &state1, graphState &state2);
+
+	static int THmode;
 private:
 	TopSpin *ts;
 	int pdb;
@@ -45,6 +47,7 @@ public:
 	void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors);
 	void GetActions(graphState &stateID, std::vector<graphMove> &actions);
 	bool GoalTest(graphState &state, graphState &goal);
+	graphState Dual(graphState s);
 	graphState GetState(std::vector<int> &configuration);
 	std::vector<int> &GetState(graphState g);
 	
@@ -57,7 +60,7 @@ private:
 	typedef __gnu_cxx::hash_map<uint64_t, unsigned long, Hash64> TopSpinHashTable;
 
 	void ExpandNode(graphState &stateID);
-	int Flip(std::vector<int> &arrangement, int index, int radius);
+	void Flip(std::vector<int> &arrangement, int index, int radius);
 
 	TopSpinHashTable hashTable;
 	std::vector<TopSpinGraphData> data;

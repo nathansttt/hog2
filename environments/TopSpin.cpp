@@ -9,6 +9,8 @@
 
 #include "TopSpin.h"
 
+int TopSpinGraphHeuristic::THmode = 0;
+
 TopSpin::TopSpin(int m, int k, TopSpinGraphHeuristic *tsh)
 :GraphEnvironment(new Graph(), tsh)
 {
@@ -104,32 +106,27 @@ void TopSpin::ExpandNode(graphState &stateID)
 	//printf("Expanding %lu\n", stateID);
 	for (int x = 0; x < length; x++)
 	{
-		// returns maximum tile flipped
-		int cost = Flip(data[stateID].config, x, flipSize);
+		Flip(data[stateID].config, x, flipSize);
 		// will create the state if it doesn't exist already!
 		graphState s = GetState(data[stateID].config);
 		Flip(data[stateID].config, x, flipSize);
 		if (!g->FindEdge(s, stateID))
-			g->AddEdge(new edge(s, stateID, 1)); // put a cost function here!
+			g->AddEdge(new edge(s, stateID, 1));
 	}
 	data[stateID].expanded = true;
 }
 
-int TopSpin::Flip(std::vector<int> &arrangement, int index, int radius)
+void TopSpin::Flip(std::vector<int> &arrangement, int index, int radius)
 {
-	int maxFlipped = 0;
 	while (radius > 1)
 	{
 		int tmp = arrangement[index];
 		int otherSide = (index+radius-1)%arrangement.size();
-		maxFlipped = std::min(maxFlipped, arrangement[index]);
-		maxFlipped = std::min(maxFlipped, arrangement[otherSide]);
 		arrangement[index] = arrangement[otherSide];
 		arrangement[otherSide] = tmp;
 		radius-=2;
 		index = (index+1)%arrangement.size();
 	}
-	return maxFlipped;
 }
 
 uint64_t TopSpin::GetStateHash(graphState &state)
@@ -137,6 +134,34 @@ uint64_t TopSpin::GetStateHash(graphState &state)
 //	if (!data[state].expanded)
 //		ExpandNode(state);
 	return data[state].hashKey;
+}
+
+graphState TopSpin::Dual(graphState s)
+{
+	if( s == 0) return 0;
+
+	std::vector<int> cfg = data[s].config;
+	std::vector<int> dualCfg = cfg;
+	for(unsigned int x=0;x<cfg.size();x++) {
+		dualCfg[cfg[x]] = x;
+	}
+
+	// normalize 0 to start
+	//int zeroLoc = -1;
+	//for (unsigned int x = 0; x < dualCfg.size(); x++)
+	//{
+	//	if (dualCfg[x] == 0)
+	//	{
+	//		zeroLoc = x;
+	//		break;
+	//	}
+	//}
+	//assert(zeroLoc != -1);
+	//std::vector<int> dualCfg2(dualCfg.size());
+	//for (unsigned int x = 0; x < dualCfg.size(); x++)
+	//	cfg[x] = dualCfg[(zeroLoc+x)%dualCfg.size()];
+
+	return GetState(dualCfg);  // it seems that we can't avoid storing the dual (for now) !
 }
 
 uint64_t TopSpin::GetStateHash(std::vector<int> &config)
@@ -232,7 +257,7 @@ TopSpinGraphHeuristic::TopSpinGraphHeuristic(int psize, int spin, int pdbStates)
 :ts(0), pdb(pdbStates)
 {
 	char filename[256];
-	sprintf(filename, "/Users/nathanst/TS_%d_%d_%d.db", psize, spin, pdb);
+	sprintf(filename, "TS_%d_%d_%d.db", psize, spin, pdb);
 	FILE *f = fopen(filename, "r");
 	if (!f)
 	{
@@ -245,8 +270,11 @@ TopSpinGraphHeuristic::TopSpinGraphHeuristic(int psize, int spin, int pdbStates)
 	fclose(f);
 }
 
+
 double TopSpinGraphHeuristic::HCost(graphState &s1, graphState &s2)
 {
+	graphState sd;
+
 	if (ts == 0)
 		return 0;
 	if ((s1 != 0) && (s2 != 0))
@@ -256,11 +284,21 @@ double TopSpinGraphHeuristic::HCost(graphState &s1, graphState &s2)
 	}
 	if (s1 == 0)
 	{
-		printf("Returning heur value!: %d\n", DB[ts->GetPDBHash(s2, pdb)]);
-		return DB[ts->GetPDBHash(s2, pdb)];
+		if(THmode == 0)
+			sd = s2;
+		else
+			sd = ts->Dual(s2);
+
+		//printf("Returning heur value!: %d\n", DB[ts->GetPDBHash(sd, pdb)]);
+		return DB[ts->GetPDBHash(sd, pdb)];
 	}
-	printf("Returning heur value!: %d\n", DB[ts->GetPDBHash(s1, pdb)]);
-	return DB[ts->GetPDBHash(s1, pdb)];
+
+	if(THmode == 0)
+		sd = s1;
+	else
+		sd = ts->Dual(s1);
+	//printf("Returning heur value!: %d\n", DB[ts->GetPDBHash(sd, pdb)]);
+	return DB[ts->GetPDBHash(sd, pdb)];
 }
 
 

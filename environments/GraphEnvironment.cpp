@@ -13,13 +13,14 @@
 
 using namespace GraphSearchConstants;
 
-int hmode = 1;
-int HN=10;
+int GraphMapInconsistentHeuristic::hmode=1;
+int GraphMapInconsistentHeuristic::HN=10;
+
 
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 :g(_g), h(gh)
 {
- 	directed = true;
+ 	directed = false;
 }
 
 //GraphEnvironment::GraphEnvironment(Map *m)
@@ -33,6 +34,8 @@ GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 GraphEnvironment::~GraphEnvironment()
 {
 	// delete g; ??
+	delete g;
+	delete h;
 }
 
 void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors)
@@ -516,7 +519,7 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 				val = hval;
 		}
 	}
-	else { // hmode == 2, taking the max
+	else if(hmode == 2) { // hmode == 2, taking the max
 		for(unsigned int i=0;i<heuristics.size();i++) {
 			double hval = heuristics[i][state1]-heuristics[i][state2];
 			if(hval < 0)
@@ -525,6 +528,20 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 				val = hval;
 		}
 	}
+	else {  // hmode == 3, return max at grid points, otherwise 0
+		if( (x1+x2) % 4 == 0 && (y1+y2) % 4 == 0) {
+			for(unsigned int i=0;i<heuristics.size();i++) {
+				double hval = heuristics[i][state1]-heuristics[i][state2];
+				if(hval < 0)
+					hval = -hval;
+				if(fgreater(hval,val))
+					val = hval;
+			}
+		}
+		else
+			val = 0;
+	}
+
 	return val;
 }
 
