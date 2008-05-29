@@ -49,10 +49,12 @@ public:
 	bool GoalTest(graphState &state, graphState &goal);
 	graphState Dual(graphState s);
 	graphState GetState(std::vector<int> &configuration);
+	graphState GetState(std::vector<int> &configuration, int zeroLoc);
 	std::vector<int> &GetState(graphState g);
 	
 	uint64_t GetStateHash(graphState &state);
 	uint64_t GetStateHash(std::vector<int> &config);
+	uint64_t GetStateHash(int *config, int config_size);
 	uint64_t GetPDBHash(std::vector<int> &config, int pdb_size);
 	uint64_t GetPDBHash(graphState &state, int pdb_size);
 	uint64_t GetPDBSize(int puzzle_size, int pdb_size);

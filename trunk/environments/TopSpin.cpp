@@ -82,8 +82,15 @@ graphState TopSpin::GetState(std::vector<int> &configuration)
 			break;
 		}
 	}
+	return GetState(configuration, zeroLoc);
+}
+
+graphState TopSpin::GetState(std::vector<int> &configuration, int zeroLoc)
+{
+	static std::vector<int> config(configuration.size());
+	config.resize(configuration.size());
+	
 	assert(zeroLoc != -1);
-	std::vector<int> config(configuration.size());
 	for (unsigned int x = 0; x < config.size(); x++)
 		config[x] = configuration[(zeroLoc+x)%configuration.size()];
 	
@@ -166,6 +173,11 @@ graphState TopSpin::Dual(graphState s)
 
 uint64_t TopSpin::GetStateHash(std::vector<int> &config)
 {
+	return GetStateHash(&config[0], config.size());
+}
+
+uint64_t TopSpin::GetStateHash(int *config, int config_size)
+{
 	// need to handle rotation!
 	
 //	static pdb_rank_t pdb_index( const int8_t *pdbpos, const int num_tiles,
@@ -173,8 +185,8 @@ uint64_t TopSpin::GetStateHash(std::vector<int> &config)
 //	{
 	uint64_t rank;
 	int i, end;
-	int MAX_TILES = config.size();
-	int num_tiles = config.size();
+	int MAX_TILES = config_size;
+	int num_tiles = config_size;
 	int8_t tiles[ MAX_TILES ], loc[ MAX_TILES ];
 	
 	//memset( loc, pdb_size, num_tiles );
@@ -284,6 +296,7 @@ double TopSpinGraphHeuristic::HCost(graphState &s1, graphState &s2)
 	}
 	if (s1 == 0)
 	{
+		//return DB[ts->GetPDBHash(s2, pdb)];
 		if(THmode == 0)
 			sd = s2;
 		else
@@ -292,7 +305,8 @@ double TopSpinGraphHeuristic::HCost(graphState &s1, graphState &s2)
 		//printf("Returning heur value!: %d\n", DB[ts->GetPDBHash(sd, pdb)]);
 		return DB[ts->GetPDBHash(sd, pdb)];
 	}
-
+	//	printf("Returning heur value!: %d\n", DB[ts->GetPDBHash(s1, pdb)]);
+	//return DB[ts->GetPDBHash(s1, pdb)];
 	if(THmode == 0)
 		sd = s1;
 	else
