@@ -184,7 +184,7 @@ private:
 
 using namespace TemplateAStarUtil;
 static const bool verbose = false;
-
+bool firstRound;
 /**
 * Return the name of the algorithm. 
 * @author Nathan Sturtevant
@@ -236,7 +236,9 @@ void TemplateAStar<state,action,environment>::GetPath(environment *_env, state& 
 template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
-
+	//if(useRadius)
+	//std::cout<<"Using radius\n";
+	firstRound = true;
 	env = _env;
 	closedList.clear();
 	openQueue.reset();
@@ -286,7 +288,9 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	{
 		printf("Oh no! No more open nodes!\n");
 	}
-	
+//	std::cout<<"Current open node ";
+	//env->OutputXY(currentOpenNode);
+	//std::cout<<std::endl;
 	if ((stopAfterGoal) && (env->GoalTest(currentOpenNode, goal)))
 	{
 		ExtractPathToStart(currentOpenNode, thePath);
@@ -304,34 +308,81 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	// iterate over all the children
 	for (unsigned int x = 0; x < neighbors.size(); x++)
 	{
+		
 		nodesTouched++;
 		state neighbor = neighbors[x];
+		 
+	//	if(useRadius)
+	//		ngcost = env->Distance(start, neighbor);//sqrt(start.x * neighbor.x + start.y * neighbor.y);
+		double ngcost = closedList[env->GetStateHash(currentOpenNode)].gCost+env->GCost(currentOpenNode,neighbor);
+		
+		//std::cout<<"Ngcost "<<ngcost<<" radius "<<radius<<std::endl;
+/*		if(useRadius && useOccupancyInfo && env->GetOccupancyInfo() &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)))// && (env->HCost(start, neighbor) < radius))
+  		{
+  			
+  			std::cout<<"neighbor "<<neighbor<<"currnode gcost "<<closedList[env->GetStateHash(currentOpenNode)].gCost<<" ";
+ 		
+  			std::cout<<"NGcost "<<ngcost<<std::endl;//in radius not occ\n";
+  		}*/
+		//std::cout<<neighbor<<" ";
+		//env->OutputXY(neighbor);
+// 		if(!(env->GetMap()->canStep(currentOpenNode.x, currentOpenNode.y, neighbor.x, neighbor.y)))
+// 		{	
+// 			std::cout<<" is a bad one\n";
+// 			continue;
+// 		}
+	//	std::cout<<env->HCost(start, neighbor)<<" ";
 
 		if (closedList.find(env->GetStateHash(neighbor)) != closedList.end())
 		{
+		//	std::cout<<" on closed list\n";
 			continue;
 		}
 		else if (openQueue.IsIn(SearchNode<state>(neighbor, env->GetStateHash(neighbor))))
 		{
+		//	std::cout<<" on open list - updating weight\n";
 			UpdateWeight(env,currentOpenNode, neighbor);
 		}
-		else if (useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
+//  		else if(useRadius && useOccupancyInfo && env->GetOccupancyInfo())// && (env->HCost(start, neighbor) < radius))
+//  		{
+//  			std::cout<<"currnode gcost "<<closedList[env->GetStateHash(currentOpenNode)].gCost<<std::endl;
+// 		
+//  			std::cout<<"NGcost "<<ngcost<<" ";//in radius not occ\n";
+//  		}
+// 		else if(useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)))
+// 		{
+// 		//	std::cout<<neighbor<<" minus goal test\n";
+// 		}
+		else if (useRadius && useOccupancyInfo && env->GetOccupancyInfo() &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && (!firstRound || ((ngcost < radius)&& !(env->GoalTest(neighbor, goal)))  ))
+		
+		//&& (ngcost < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
+		
+		//(env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
+		
+		//&& (ngcost < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
+		
+		//
 					 //&& ((closedList[env->GetStateHash(currentOpenNode)].gCost+env->GCost(currentOpenNode,neighbor)) < 4))
 		{
-		
 			// March 7 - May want to use GCost to neighbour rather than HCost when checking if it's within 
 			// the radius. 
 			
 			//discardcount++;
+			//std::cout<<neighbor;
+			//std::cout<<" someone's here, and within my radius\n";
 
 			//occupied - don't expand - move to the closed list 
 			SearchNode<state> sn(neighbor, env->GetStateHash(neighbor));
 			closedList[env->GetStateHash(neighbor)] = sn;
 		}
 		else {
+	//		std::cout<<" adding to open\n";
 			AddToOpenList(env, currentOpenNode, neighbor);
 		}
+		
+		firstRound = false; 
 	}
+//	std::cout<<std::endl;
 	return false;
 }
 
@@ -369,6 +420,7 @@ bool TemplateAStar<state,action,environment>::GetNextNode(state &next)
 	next = it.currNode;
 
 	closedList[env->GetStateHash(next)] = it;
+//	std::cout<<"Getting "<<it.gCost<<" ";
 	return true;
 }
 
