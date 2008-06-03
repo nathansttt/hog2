@@ -404,7 +404,7 @@ void Initialize(int id, Map* map)
 	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
 	MapAbstraction *ma;
 	env = new AbsMapEnvironment(ma = new MapQuadTreeAbstraction(map,absSize));
-	ma->ToggleDrawAbstraction(1);
+	//ma->ToggleDrawAbstraction(1);
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	unitSims[id]->SetStepType(kRealTime);
 	unitSims[id]->SetThinkingPenalty(0);
@@ -547,8 +547,8 @@ void RunScenario(int id)
 			
 			alg1->SetWeightedEnvironment(wug->GetWeightedEnvironment());
 			
-//			if(skipAbs)
-//				alg1->SetSkipAbsNode(skipCutoff);
+			if(skipAbs)
+				alg1->SetSkipAbsNode(skipCutoff);
 			
 			su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg1);
 		}
@@ -586,7 +586,7 @@ void RunScenario(int id)
  		i++;
 	//} while(i < numExperiments/2);
  	} while ( i < numExperiments);
- 	//} while (i < 2);
+ 	//} while (i < 1);
 	
 
 	//unitSims[id]->SetPaused(true);
@@ -1251,7 +1251,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					if (unitSims[windowID]->GetPaused())
 					{
 					unitSims[windowID]->SetPaused(false);
-					unitSims[windowID]->StepTime(1.0/30.0);
+					//unitSims[windowID]->StepTime(1.0/30.0);
+					unitSims[windowID]->StepTime(1.5);
 					unitSims[windowID]->SetPaused(true);
 					}
 					break;

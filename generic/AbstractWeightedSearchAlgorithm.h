@@ -85,13 +85,13 @@ public:
 	//void SetBaseMapOccupancyInterface(BaseMapOccupancyInterface *bmoi){
 	GraphOccupancyInterface *GetOccupancyInfo() { return goi; }
 	
- 	void OutputXY(graphState &n)
+/* 	void OutputXY(graphState &n)
  {
 		node* s1 = g->GetNode(n);
  //		std::cout<<"("<<s1->GetLabelL(GraphAbstractionConstants::kFirstData)<<","
  	//					  <<s1->GetLabelL(GraphAbstractionConstants::kFirstData+1)<<")";
  		
- 	}
+ 	}*/
  	
 	/** Set to true when we want to find the exact goal rather than any child of the parent of the goal*/ 
  	void SetFindExactGoal(bool b) { exactGoal = true; }
@@ -129,8 +129,10 @@ public:
 		if(h)
 		{
 			if(exactGoal)
+			{
+				//std::cout<<"Exact goal\n";
 				return h->HCost(state1,state2);
-			
+			}
 			// if not exact goal, return distance to middle of abstract sector
 			// Get parent of state2
 			node *n = g->GetNode(state2);
@@ -148,6 +150,7 @@ public:
 			st1.x = n1->GetLabelL(GraphAbstractionConstants::kFirstData);
 			st1.y = n1->GetLabelL(GraphAbstractionConstants::kFirstData+1);
 			
+			//std::cout<<"HCOST ABSGRAPHENV\n";
 			return sqrt(pow(st1.x-parx,2) + pow(st1.y-pary,2));
 			
 		}
@@ -155,6 +158,27 @@ public:
 			
 	}
 	
+// 	double Distance(graphState &state1, graphState &state2)
+// 	{
+// 		node* from = g->GetNode(state1);
+// 		
+// 		node* to = g->GetNode(state2);
+// 		
+// 	int x1 = from->GetLabelL(GraphAbstractionConstants::kFirstData);
+// 	int y1 = from->GetLabelL(GraphAbstractionConstants::kFirstData+1);
+// 	int x2 = to->GetLabelL(GraphAbstractionConstants::kFirstData);
+// 	int y2 = to->GetLabelL(GraphAbstractionConstants::kFirstData+1);	
+// 		
+// 	//int x1 = g->GetNode(state1)->GetLabelL(GraphAbstractionConstants::kXCoordinate);
+// 	//int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
+// 	//int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
+// 	//int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
+// 		
+// 	//std::cout<<"x1 "<<x1<<" y1 "<<y1<<" x2 "<<x2<<" y2 "<<y2<<std::endl;
+// 		
+// 	//std::cout<<"Straight returning "<<sqrt(pow(x1-x2,2) + pow(y1-y2,2))<<std::endl;
+// 	return sqrt(pow(x1-x2,2) + pow(y1-y2,2));
+// 	}
 	
 	/** GCost returns a weighted GCost from the WeightedMap2DEnvironment */
 	double GCost(graphState &state1, graphState &state2)
@@ -174,7 +198,7 @@ public:
 		to.y = s2->GetLabelL(GraphAbstractionConstants::kFirstData+1);
 		//std::cout<<to<<" "<<from<<std::endl;
 		//std::cout<<"wenv "<<wenv<<std::endl;
-
+		//std::cout<<"GCOST "<<wenv->GCost(from,to)<<std::endl;
 		return wenv->GCost(from,to);
 	
 		
@@ -219,7 +243,7 @@ public:
 		
 	//std::cout<<"x1 "<<x1<<" y1 "<<y1<<" x2 "<<x2<<" y2 "<<y2<<std::endl;
 		
-	//std::cout<<"returning "<<sqrt(pow(x1-x2,2) + pow(y1-y2,2))<<std::endl;
+	//std::cout<<"Straight returning "<<sqrt(pow(x1-x2,2) + pow(y1-y2,2))<<std::endl;
 	return sqrt(pow(x1-x2,2) + pow(y1-y2,2));
 	}
 private:
@@ -241,7 +265,7 @@ public:
 	
 		double a = ((x1>x2)?(x1-x2):(x2-x1));
 		double b = ((y1>y2)?(y1-y2):(y2-y1));
-	
+		//std::cout<<"Octile returning "<<(a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 		return (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 	}
 private:
@@ -340,9 +364,9 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 	{
 		// Do straight planning on lower level, using the direction map
 		std::vector<graphState> refpath;
-		OctileHeuristic *heur = new OctileHeuristic(ma->GetMap(),g);
+		OctileHeuristic *heuri = new OctileHeuristic(ma->GetMap(),g);
 
-		AbsGraphEnvironment *graphenv = new AbsGraphEnvironment(g,heur,env,env->GetOccupancyInfo());
+		AbsGraphEnvironment *graphenv = new AbsGraphEnvironment(g,heuri,env,env->GetOccupancyInfo());
 		graphenv->SetFindExactGoal(true); // We don't want just any child of the parent of the goal state
 		graphenv->SetWeightedEnvironment(wenv); 
 		graphenv->SetAbsGraph(abs);	
@@ -363,6 +387,15 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 			newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
 			thePath.push_back(newloc);
 		}
+		
+// 		std::cout<<"In final sector ";
+// 		for (int i=0; i<thePath.size(); i++)
+// 		{
+// 			std::cout<<thePath[i]<<" ";
+// 		}
+// 		std::cout<<std::endl<<std::endl;
+// 		
+		return;
 	}
 	else // fromPar != toPar
 	{
@@ -442,8 +475,17 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 					newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
 					thePath.push_back(newloc);
 				}
+				
+/*				std::cout<<"Abs path length 2, partialskip ";
+				for (int i=0; i<thePath.size(); i++)
+				{
+					std::cout<<thePath[i]<<" ";
+				}
+				std::cout<<std::endl<<std::endl;
+				*/
 				delete age;
 				delete graphenv;
+				return;
 	 		} // abs path not length 2
  			else
  			{
@@ -509,13 +551,14 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
  				//}
  				
 //  				std::cout<<"I'm at "<<nl<<std::endl;
-//  				for (int i=0; i<thePath.size(); i++)
-// 				{
-// 					std::cout<<thePath[i]<<" ";
-// 				}
-// 				std::cout<<std::endl<<std::endl;
+  				/*std::cout<<"Partial skip ";
+  				for (int i=0; i<thePath.size(); i++)
+ 				{
+ 					std::cout<<thePath[i]<<" ";
+ 				}
+ 				std::cout<<std::endl<<std::endl;
  				
-//  				std::cout<<"after "<<thePath.size()<<std::endl;
+//  			*/	//td::cout<<"after "<<thePath.size()<<std::endl;
 				delete age;
  				return;
 			} // end else (length of abs path > 2)
@@ -625,16 +668,20 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				thePath.push_back(newloc);
 			}
 			
+// 			std::cout<<"Regular ";
+// 			for (int i=0; i<thePath.size(); i++)
+// 			{
+// 				std::cout<<thePath[i]<<" ";
+// 			}
+// 			std::cout<<std::endl<<std::endl;
+// 			
 			delete age;
 			delete absgraphenv2;
+			return;
 		}// end else --> not partialSkip
 	
 
-//	for (int i=0; i<thePath.size(); i++)
-	//{
-		//std::cout<<thePath[i]<<" ";
-	//}
-	//std::cout<<std::endl<<std::endl;
+
 	
 	} // end else --> start and goal not same parent
 }
