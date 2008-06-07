@@ -363,7 +363,7 @@ int main(int argc, char* argv[])
 			gettimeofday(&t1,0);
 
 			//fprintf(NULLdata,"%ld %lf %d\n",A.GetNodesExpanded(), A.solutionCost, bid);
-			fprintf(AOctdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",A.GetNodesExpanded(), calcTime(t0,t1), bid, A.nNewExp,A.nReExp,A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
+			fprintf(AOctdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",A.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)A.nNewExp,(unsigned long)A.nReExp,(unsigned long)A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
 
 			GraphMapInconsistentHeuristic::hmode = 2;
 
@@ -371,7 +371,7 @@ int main(int argc, char* argv[])
 			A.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(AMaxdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",A.GetNodesExpanded(), calcTime(t0,t1), bid, A.nNewExp,A.nReExp,A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
+			fprintf(AMaxdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",A.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)A.nNewExp,(unsigned long)A.nReExp,(unsigned long)A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
 
 			GraphMapInconsistentHeuristic::hmode = 1;  // careful !!!!
 
@@ -379,73 +379,73 @@ int main(int argc, char* argv[])
 			A.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(Adata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n", A.GetNodesExpanded(), calcTime(t0,t1), bid, A.nNewExp,A.nReExp,A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
+			fprintf(Adata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n", A.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)A.nNewExp,(unsigned long)A.nReExp,(unsigned long)A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
 
 			gettimeofday(&t0,0);
 			B.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(Bdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",B.GetNodesExpanded(), calcTime(t0,t1), bid, B.nNewExp,B.nReExp,B.nBPMX,B.tickNewExp,B.tickReExp,B.tickBPMX);
+			fprintf(Bdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",B.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)B.nNewExp,(unsigned long)B.nReExp,(unsigned long)B.nBPMX,B.tickNewExp,B.tickReExp,B.tickBPMX);
 
 			gettimeofday(&t0,0);
 			BP.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(BPdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BP.GetNodesExpanded(), calcTime(t0,t1), bid, BP.nNewExp,BP.nReExp,BP.nBPMX,BP.tickNewExp,BP.tickReExp,BP.tickBPMX);
+			fprintf(BPdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BP.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)BP.nNewExp,(unsigned long)BP.nReExp,(unsigned long)BP.nBPMX,BP.tickNewExp,BP.tickReExp,BP.tickBPMX);
 
 			gettimeofday(&t0,0);
 			BPMX1.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(BPMXdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BPMX1.GetNodesExpanded(), calcTime(t0,t1), bid, BPMX1.nNewExp,BPMX1.nReExp,BPMX1.nBPMX,BPMX1.tickNewExp,BPMX1.tickReExp,BPMX1.tickBPMX);
+			fprintf(BPMXdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BPMX1.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)BPMX1.nNewExp,(unsigned long)BPMX1.nReExp,(unsigned long)BPMX1.nBPMX,BPMX1.tickNewExp,BPMX1.tickReExp,BPMX1.tickBPMX);
 
 			gettimeofday(&t0,0);
 			BPMX2.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(BPMX2data,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BPMX2.GetNodesExpanded(), calcTime(t0,t1), bid, BPMX2.nNewExp,BPMX2.nReExp,BPMX2.nBPMX,BPMX2.tickNewExp,BPMX2.tickReExp,BPMX2.tickBPMX);
+			fprintf(BPMX2data,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BPMX2.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)BPMX2.nNewExp,(unsigned long)BPMX2.nReExp,(unsigned long)BPMX2.nBPMX,BPMX2.tickNewExp,BPMX2.tickReExp,BPMX2.tickBPMX);
 
 			gettimeofday(&t0,0);
 			BPMX3.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(BPMX3data,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BPMX3.GetNodesExpanded(), calcTime(t0,t1), bid, BPMX3.nNewExp,BPMX3.nReExp,BPMX3.nBPMX,BPMX3.tickNewExp,BPMX3.tickReExp,BPMX3.tickBPMX);
+			fprintf(BPMX3data,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BPMX3.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)BPMX3.nNewExp,(unsigned long)BPMX3.nReExp,(unsigned long)BPMX3.nBPMX,BPMX3.tickNewExp,BPMX3.tickReExp,BPMX3.tickBPMX);
 
 			gettimeofday(&t0,0);
 			BPMXi.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(BPMXidata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BPMXi.GetNodesExpanded(), calcTime(t0,t1), bid, BPMXi.nNewExp,BPMXi.nReExp,BPMXi.nBPMX,BPMXi.tickNewExp,BPMXi.tickReExp,BPMXi.tickBPMX);
+			fprintf(BPMXidata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",BPMXi.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)BPMXi.nNewExp,(unsigned long)BPMXi.nReExp,(unsigned long)BPMXi.nBPMX,BPMXi.tickNewExp,BPMXi.tickReExp,BPMXi.tickBPMX);
 
 			gettimeofday(&t0,0);
 			asd.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(ASD2data,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",asd.GetNodesExpanded(), calcTime(t0,t1), bid, asd.nNewExp,asd.nReExp,asd.nBPMX,asd.tickNewExp,asd.tickReExp,asd.tickBPMX);
+			fprintf(ASD2data,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",asd.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)asd.nNewExp,(unsigned long)asd.nReExp,(unsigned long)asd.nBPMX,asd.tickNewExp,asd.tickReExp,asd.tickBPMX);
 
 			gettimeofday(&t0,0);
 			asdmx.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(ASD2bpmxdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",asdmx.GetNodesExpanded(), calcTime(t0,t1), bid, asdmx.nNewExp,asdmx.nReExp,asdmx.nBPMX,asdmx.tickNewExp,asdmx.tickReExp,asdmx.tickBPMX);
+			fprintf(ASD2bpmxdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",asdmx.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)asdmx.nNewExp,(unsigned long)asdmx.nReExp,(unsigned long)asdmx.nBPMX,asdmx.tickNewExp,asdmx.tickReExp,asdmx.tickBPMX);
 
 			gettimeofday(&t0,0);
 			asdmxinf.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(ASD2bpmxinfdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",asdmxinf.GetNodesExpanded(), calcTime(t0,t1), bid, asdmxinf.nNewExp,asdmxinf.nReExp,asdmxinf.nBPMX,asdmxinf.tickNewExp,asdmxinf.tickReExp,asdmxinf.tickBPMX);
+			fprintf(ASD2bpmxinfdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",asdmxinf.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)asdmxinf.nNewExp,(unsigned long)asdmxinf.nReExp,(unsigned long)asdmxinf.nBPMX,asdmxinf.tickNewExp,asdmxinf.tickReExp,asdmxinf.tickBPMX);
 
 			gettimeofday(&t0,0);
 			DP.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(DPdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",DP.GetNodesExpanded(), calcTime(t0,t1), bid, DP.nNewExp,DP.nReExp,DP.nBPMX,DP.tickNewExp,DP.tickReExp,DP.tickBPMX);
+			fprintf(DPdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",DP.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)DP.nNewExp,(unsigned long)DP.nReExp,(unsigned long)DP.nBPMX,DP.tickNewExp,DP.tickReExp,DP.tickBPMX);
 
 			gettimeofday(&t0,0);
 			DPMX.GetPath(env,g,from,to,thePath);
 			gettimeofday(&t1,0);
 
-			fprintf(DPbpmxdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",DPMX.GetNodesExpanded(), calcTime(t0,t1), bid, DPMX.nNewExp,DPMX.nReExp,DPMX.nBPMX,DPMX.tickNewExp,DPMX.tickReExp,DPMX.tickBPMX);
+			fprintf(DPbpmxdata,"%ld %lf %d %lu %lu %lu %lu %lu %lu\n",DPMX.GetNodesExpanded(), calcTime(t0,t1), bid, (unsigned long)DPMX.nNewExp,(unsigned long)DPMX.nReExp,(unsigned long)DPMX.nBPMX,DPMX.tickNewExp,DPMX.tickReExp,DPMX.tickBPMX);
 
 			gettimeofday(&t0,0);
 			//DPDL2MX.GetPath(env,g,from,to,thePath);

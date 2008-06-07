@@ -227,55 +227,65 @@ int main(int argc, char* argv[])
 			
 			TopSpinGraphHeuristic::THmode = 0;
 
+			// the first run is for caching !
+			A.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
+
 			gettimeofday(&t0,0);
 			A.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(ANormaldata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, A.GetNodesExpanded(), calcTime(t0,t1), A.solutionCost, A.nNewExp,A.nReExp,A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
+			fprintf(ANormaldata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, A.GetNodesExpanded(), calcTime(t0,t1), A.solutionCost, (unsigned long)A.nNewExp,(unsigned long)A.nReExp,(unsigned long)A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
 
 			TopSpinGraphHeuristic::THmode = 1;
 			
+			A.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			A.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(Adata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, A.GetNodesExpanded(), calcTime(t0,t1), A.solutionCost, A.nNewExp,A.nReExp,A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
+			fprintf(Adata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, A.GetNodesExpanded(), calcTime(t0,t1), A.solutionCost, (unsigned long)A.nNewExp,(unsigned long)A.nReExp,(unsigned long)A.nBPMX,A.tickNewExp,A.tickReExp,A.tickBPMX);
 
+			B.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			B.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(Bdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, B.GetNodesExpanded(), calcTime(t0,t1), B.solutionCost, B.nNewExp,B.nReExp,B.nBPMX,B.tickNewExp,B.tickReExp,B.tickBPMX);
+			fprintf(Bdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, B.GetNodesExpanded(), calcTime(t0,t1), B.solutionCost, (unsigned long)B.nNewExp,(unsigned long)B.nReExp,(unsigned long)B.nBPMX,B.tickNewExp,B.tickReExp,B.tickBPMX);
 
+			BP.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			BP.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(BPdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BP.GetNodesExpanded(), calcTime(t0,t1), BP.solutionCost, BP.nNewExp,BP.nReExp,BP.nBPMX,BP.tickNewExp,BP.tickReExp,BP.tickBPMX);
+			fprintf(BPdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BP.GetNodesExpanded(), calcTime(t0,t1), BP.solutionCost, (unsigned long)BP.nNewExp,(unsigned long)BP.nReExp,(unsigned long)BP.nBPMX,BP.tickNewExp,BP.tickReExp,BP.tickBPMX);
 
+			BPMX.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			BPMX.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(BPMXdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BPMX.GetNodesExpanded(), calcTime(t0,t1), BPMX.solutionCost, BPMX.nNewExp,BPMX.nReExp,BPMX.nBPMX,BPMX.tickNewExp,BPMX.tickReExp,BPMX.tickBPMX);
+			fprintf(BPMXdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BPMX.GetNodesExpanded(), calcTime(t0,t1), BPMX.solutionCost, (unsigned long)BPMX.nNewExp,(unsigned long)BPMX.nReExp,(unsigned long)BPMX.nBPMX,BPMX.tickNewExp,BPMX.tickReExp,BPMX.tickBPMX);
 
+			BPMX2.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			BPMX2.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(BPMX2data,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BPMX2.GetNodesExpanded(), calcTime(t0,t1), BPMX2.solutionCost, BPMX2.nNewExp,BPMX2.nReExp,BPMX2.nBPMX,BPMX2.tickNewExp,BPMX2.tickReExp,BPMX2.tickBPMX);
+			fprintf(BPMX2data,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BPMX2.GetNodesExpanded(), calcTime(t0,t1), BPMX2.solutionCost, (unsigned long)BPMX2.nNewExp,(unsigned long)BPMX2.nReExp,(unsigned long)BPMX2.nBPMX,BPMX2.tickNewExp,BPMX2.tickReExp,BPMX2.tickBPMX);
 
+			BPMX3.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			BPMX3.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(BPMX3data,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BPMX3.GetNodesExpanded(), calcTime(t0,t1), BPMX3.solutionCost, BPMX3.nNewExp,BPMX3.nReExp,BPMX3.nBPMX,BPMX3.tickNewExp,BPMX3.tickReExp,BPMX3.tickBPMX);
+			fprintf(BPMX3data,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BPMX3.GetNodesExpanded(), calcTime(t0,t1), BPMX3.solutionCost, (unsigned long)BPMX3.nNewExp,(unsigned long)BPMX3.nReExp,(unsigned long)BPMX3.nBPMX,BPMX3.tickNewExp,BPMX3.tickReExp,BPMX3.tickBPMX);
 
+			BPMXinf.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			BPMXinf.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(BPMXidata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BPMXinf.GetNodesExpanded(), calcTime(t0,t1), BPMXinf.solutionCost, BPMXinf.nNewExp,BPMXinf.nReExp,BPMXinf.nBPMX,BPMXinf.tickNewExp,BPMXinf.tickReExp,BPMXinf.tickBPMX);
+			fprintf(BPMXidata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, BPMXinf.GetNodesExpanded(), calcTime(t0,t1), BPMXinf.solutionCost, (unsigned long)BPMXinf.nNewExp,(unsigned long)BPMXinf.nReExp,(unsigned long)BPMXinf.nBPMX,BPMXinf.tickNewExp,BPMXinf.tickReExp,BPMXinf.tickBPMX);
 
 			//printf("Solution:\n");
 			//for (unsigned int x = 0; x < path.size(); x++)
@@ -283,53 +293,61 @@ int main(int argc, char* argv[])
 			//printf("\n");
 			//printf("%ld nodes expanded\n", alg0.GetNodesExpanded());
 
+			asd2.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			asd2.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(ASD2data,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asd2.GetNodesExpanded(), calcTime(t0,t1), asd2.solutionCost, asd2.nNewExp,asd2.nReExp,asd2.nBPMX,asd2.tickNewExp,asd2.tickReExp,asd2.tickBPMX);
+			fprintf(ASD2data,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asd2.GetNodesExpanded(), calcTime(t0,t1), asd2.solutionCost, (unsigned long)asd2.nNewExp,(unsigned long)asd2.nReExp,(unsigned long)asd2.nBPMX,asd2.tickNewExp,asd2.tickReExp,asd2.tickBPMX);
 
+			asdlog.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			asdlog.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(ASDlogdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asdlog.GetNodesExpanded(), calcTime(t0,t1), asdlog.solutionCost, asdlog.nNewExp,asdlog.nReExp,asdlog.nBPMX,asdlog.tickNewExp,asdlog.tickReExp,asdlog.tickBPMX);
+			fprintf(ASDlogdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asdlog.GetNodesExpanded(), calcTime(t0,t1), asdlog.solutionCost, (unsigned long)asdlog.nNewExp,(unsigned long)asdlog.nReExp,(unsigned long)asdlog.nBPMX,asdlog.tickNewExp,asdlog.tickReExp,asdlog.tickBPMX);
 
+			asd2bpmx.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			asd2bpmx.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(ASD2bpmxdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asd2bpmx.GetNodesExpanded(), calcTime(t0,t1), asd2bpmx.solutionCost, asd2bpmx.nNewExp,asd2bpmx.nReExp,asd2bpmx.nBPMX,asd2bpmx.tickNewExp,asd2bpmx.tickReExp,asd2bpmx.tickBPMX);
+			fprintf(ASD2bpmxdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asd2bpmx.GetNodesExpanded(), calcTime(t0,t1), asd2bpmx.solutionCost, (unsigned long)asd2bpmx.nNewExp,(unsigned long)asd2bpmx.nReExp,(unsigned long)asd2bpmx.nBPMX,asd2bpmx.tickNewExp,asd2bpmx.tickReExp,asd2bpmx.tickBPMX);
 
+			asdlogbpmx.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			asdlogbpmx.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(ASDlogbpmxdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asdlogbpmx.GetNodesExpanded(), calcTime(t0,t1), asdlogbpmx.solutionCost, asdlogbpmx.nNewExp,asdlogbpmx.nReExp,asdlogbpmx.nBPMX,asdlogbpmx.tickNewExp,asdlogbpmx.tickReExp,asdlogbpmx.tickBPMX);
+			fprintf(ASDlogbpmxdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asdlogbpmx.GetNodesExpanded(), calcTime(t0,t1), asdlogbpmx.solutionCost, (unsigned long)asdlogbpmx.nNewExp,(unsigned long)asdlogbpmx.nReExp,(unsigned long)asdlogbpmx.nBPMX,asdlogbpmx.tickNewExp,asdlogbpmx.tickReExp,asdlogbpmx.tickBPMX);
 
+			asd2bpmxinf.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			asd2bpmxinf.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(ASD2bpmxinfdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asd2bpmxinf.GetNodesExpanded(), calcTime(t0,t1), asd2bpmxinf.solutionCost, asd2bpmxinf.nNewExp,asd2bpmxinf.nReExp,asd2bpmxinf.nBPMX,asd2bpmxinf.tickNewExp,asd2bpmxinf.tickReExp,asd2bpmxinf.tickBPMX);
+			fprintf(ASD2bpmxinfdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asd2bpmxinf.GetNodesExpanded(), calcTime(t0,t1), asd2bpmxinf.solutionCost, (unsigned long)asd2bpmxinf.nNewExp,(unsigned long)asd2bpmxinf.nReExp,(unsigned long)asd2bpmxinf.nBPMX,asd2bpmxinf.tickNewExp,asd2bpmxinf.tickReExp,asd2bpmxinf.tickBPMX);
 
+			asdlogbpmxinf.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			asdlogbpmxinf.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(ASDlogbpmxinfdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asdlogbpmxinf.GetNodesExpanded(), calcTime(t0,t1), asdlogbpmxinf.solutionCost, asdlogbpmxinf.nNewExp,asdlogbpmxinf.nReExp,asdlogbpmxinf.nBPMX,asdlogbpmxinf.tickNewExp,asdlogbpmxinf.tickReExp,asdlogbpmxinf.tickBPMX);
+			fprintf(ASDlogbpmxinfdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, asdlogbpmxinf.GetNodesExpanded(), calcTime(t0,t1), asdlogbpmxinf.solutionCost, (unsigned long)asdlogbpmxinf.nNewExp,(unsigned long)asdlogbpmxinf.nReExp,(unsigned long)asdlogbpmxinf.nBPMX,asdlogbpmxinf.tickNewExp,asdlogbpmxinf.tickReExp,asdlogbpmxinf.tickBPMX);
 
+			DP.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			DP.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(DPdata,"%d %d %d %d %ld %lf %lf\n", psize, flipsize, PDB, walk, DP.GetNodesExpanded(), calcTime(t0,t1), DP.solutionCost);
+			fprintf(DPdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, DP.GetNodesExpanded(), calcTime(t0,t1), DP.solutionCost, (unsigned long)DP.nNewExp,(unsigned long)DP.nReExp,(unsigned long)DP.nBPMX,DP.tickNewExp,DP.tickReExp,DP.tickBPMX);
 
+			DPMX.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t0,0);
 			DPMX.GetPath((GraphEnvironment*)ts, 0, start, goal, path);
 			gettimeofday(&t1,0);
 
-			fprintf(DPbpmxdata,"%d %d %d %d %ld %lf %lf\n", psize, flipsize, PDB, walk, DPMX.GetNodesExpanded(), calcTime(t0,t1), DPMX.solutionCost);
+			fprintf(DPbpmxdata,"%d %d %d %d %ld %lf %lf %lu %lu %lu %lu %lu %lu\n", psize, flipsize, PDB, walk, DPMX.GetNodesExpanded(), calcTime(t0,t1), DPMX.solutionCost, (unsigned long)DPMX.nNewExp,(unsigned long)DPMX.nReExp,(unsigned long)DPMX.nBPMX,DPMX.tickNewExp,DPMX.tickReExp,DPMX.tickBPMX);
 
 			gettimeofday(&t0,0);
 			//DPDL2MX.GetPath((GraphEnvironment*)ts, 0, start, goal, path);

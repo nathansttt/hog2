@@ -234,9 +234,9 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 	closedList[topNodeID] = topNode;
 
 	if(topNode.rxp)
-		nReExp++;
+		nReExp += 1;
 	else
-		nNewExp++;
+		nNewExp += 1;
 
 	//tickStart = clock();
 
@@ -407,9 +407,9 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 	}
 
 	if(topNode.rxp)
-		nReExp++;
+		nReExp += 1;
 	else
-		nNewExp++;
+		nNewExp += 1;
 	tickStart = clock();
 
 	graphState topNodeID = topNode.currNode;
@@ -586,9 +586,9 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 	}
 
 	if(topNode.rxp)
-		nReExp++;
+		nReExp += 1;
 	else
-		nNewExp++;
+		nNewExp += 1;
 	
 	graphState topNodeID = topNode.currNode;
 	closedList[topNodeID] = topNode;
@@ -1068,7 +1068,7 @@ void Prop::ReverseProp(SearchNode& topNode) {
 		}
 	}
 
-	nBPMX++;
+	nBPMX += 1;
 	tickBPMX += clock() - tickStart;
 
 	nodesExpanded++;
@@ -1105,7 +1105,7 @@ void Prop::ReversePropX1(SearchNode& topNode)
 		}
 	}
 
-	nBPMX++;
+	nBPMX += 1;
 	tickBPMX += clock() - tickStart;
 
 	nodesExpanded++;
@@ -1168,7 +1168,7 @@ void Prop::ReversePropX2(SearchNode& topNode) {
 
 	topNode.fCost = maxh + topNode.gCost;
 
-	nBPMX++;
+	nBPMX += 1;
 	tickBPMX += clock() - tickStart;
 
 	nodesExpanded++;
@@ -1338,9 +1338,9 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 	}
 
 	if(topNode.rxp)
-		nReExp++;
+		nReExp += 1;
 	else
-		nNewExp++;
+		nNewExp += 1;
 
 	unsigned long tickTmp = clock();
 
@@ -1353,6 +1353,8 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 
 	bool doReverse = false;
 
+	int ichild=0;
+
 _REVERSE:
 	// reverseProp() here, top node will be updated inside, so put topnode into closed afterwards
 	if(doReverse) {
@@ -1362,14 +1364,14 @@ _REVERSE:
 			ReverseProp(topNode);
 
 		// counting supplement
-		if(nodesExpanded%2) {
+		if(nodesExpanded%2) //{
 			nodesExpanded++;
 
 			if(topNode.rxp)
-				nReExp++;
+				nReExp += ichild / (float)neighbors.size();
 			else
-				nNewExp++;
-		}
+				nNewExp += ichild / (float)neighbors.size();
+		//}
 	}
 
 	tickStart = clock();
@@ -1414,7 +1416,7 @@ _REVERSE:
 	//	if(!NextNeighbor(neighborNode, neighbor, mode))
 	//		break;
 	//}
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	for(unsigned int x = 0, ichild=1; x<neighbors.size(); x++,ichild++) 
 	{
 		nodesTouched++;
 
@@ -1641,9 +1643,9 @@ bool Prop::DoSingleStepBPMX(std::vector<graphState> &thePath)
 	}
 
 	if(topNode.rxp)
-		nReExp++;
+		nReExp += 1;
 	else
-		nNewExp++;
+		nNewExp += 1;
 
 	unsigned long tickTmp = clock();
 
@@ -1654,6 +1656,8 @@ bool Prop::DoSingleStepBPMX(std::vector<graphState> &thePath)
 	tickGen = clock() - tickTmp;
 
 	bool doBPMX = false;
+
+	int ichild=0;
 	//Categorize(neighbors);
 _BPMX:
 
@@ -1661,14 +1665,14 @@ _BPMX:
 		ReversePropX1(topNode);
 
 		// counting supplement
-		if(nodesExpanded%2) {
+		if(nodesExpanded%2) //{
 			nodesExpanded++;
 
 			if(topNode.rxp)
-				nReExp++;
+				nReExp += ichild / (float)neighbors.size();
 			else
-				nNewExp++;
-		}
+				nNewExp += ichild / (float)neighbors.size();
+		// }
 	}
 
 	tickStart = clock();
@@ -1708,7 +1712,7 @@ _BPMX:
 
 		//if(!NextNeighbor(neighborNode, neighbor, mode))
 		//	break;
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	for(unsigned int x = 0,ichild=1; x<neighbors.size(); x++,ichild++) 
 	{
 		nodesTouched++;
 
@@ -1960,6 +1964,8 @@ bool Prop::DoSingleStepDPDLMX(std::vector<graphState> &thePath)
 
 	bool doReverse = false;
 
+	int ichild=0;
+
 _REVERSE:
 	// reverseProp() here, top node will be updated inside, so put topnode into closed afterwards
 	if(doReverse) {
@@ -2014,7 +2020,7 @@ _REVERSE:
 	//	if(!NextNeighbor(neighborNode, neighbor, mode))
 	//		break;
 	//}
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	for(unsigned int x = 0,ichild=0; x<neighbors.size(); x++,ichild++) 
 	{
 		nodesTouched++;
 

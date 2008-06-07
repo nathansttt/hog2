@@ -163,9 +163,9 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 	nodesExpanded++;
 
 	if(topNode.rxp)
-		nReExp++;
+		nReExp += 1;
 	else
-		nNewExp++;
+		nNewExp += 1;
 	
 	if (verbose)
 	{
@@ -192,27 +192,30 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 	tickGen = clock() - tickTmp;
 
 	bool doBPMX = false;
+	
+	int ichild=0;
+
 _BPMX:
 	if(bpmxLevel >= 1)
 		if(doBPMX) {
 			ReversePropX1(topNode);
 
 			// counting supplement
-			if(nodesExpanded%2) {
+			if(nodesExpanded%2) //{
 				nodesExpanded++;
 
 				if(topNode.rxp)
-					nReExp++;
+					nReExp += ichild/(float)neighbors.size();
 				else
-					nNewExp++;
-			}
+					nNewExp += ichild/(float)neighbors.size();
+			//}
 		}
 
 
     tickStart = clock();
 	
 	double minCost = DBL_MAX;
-	for (unsigned int x = 0; x < neighbors.size(); x++)
+	for (unsigned int x = 0, ichild=1; x < neighbors.size(); x++,ichild++)
 	{
 		nodesTouched++;
 		
@@ -299,7 +302,7 @@ void AStarDelay::ReversePropX1(SearchNode& topNode)
 		}
 	}
 
-	nBPMX++;
+	nBPMX += 1;
 	tickBPMX += clock() - tickStart;
 
 	nodesExpanded++;
@@ -423,11 +426,11 @@ void AStarDelay::Broadcast(int level, int levelcount)
 		}
 	}
 
-	nBPMX++;
+	nBPMX += 2;
 	tickBPMX += clock() - tickStart;
 
-	nodesExpanded++;
-	nodesTouched += levelcount;
+	nodesExpanded += 2;
+	nodesTouched += 2*levelcount;
 
 	level++;
 	if(level < bpmxLevel && fifo.size() > 0)
