@@ -25,10 +25,13 @@ PROJECTS = \
   util \
   apps/pathsample \
   apps/puzzlesample \
-#  apps/inconsistency \
   apps/multiagent \
   apps/measure_inconsistency \
-  apps/lv.pathfinding	
+#  apps/lv.pathfinding	
+#  apps/inconsistency \
+
+
+
 
 # Include projects with broken compilation
 PROJECTS_ALL = \

@@ -34,7 +34,7 @@ GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 GraphEnvironment::~GraphEnvironment()
 {
 	// delete g; ??
-	delete g;
+	//	delete g;
 	delete h;
 }
 
