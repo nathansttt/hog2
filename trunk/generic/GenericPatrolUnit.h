@@ -79,6 +79,14 @@ private:
 	int numDirectionChanges;
 	int numDirectionChangesCollisions;
 	
+	
+	std::vector<int> nodesExpandedPatrols;
+	std::vector<int> nodesTouchedPatrols;
+	std::vector<int> numFailedMovesPatrols;
+	std::vector<int> numDirectionChangesPatrols;
+	std::vector<int> numDirectionChangesCollisionsPatrols;
+	std::vector<double> totalDistancePatrols;
+	
 	char name[128];
 	
 	bool trimPath;
@@ -174,6 +182,18 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 			currTarget = (currTarget+1)%locs.size();
 			if((numPatrols != -1)&&(currTarget == 1))
 			{	
+				//log stats for this patrol & reset
+				nodesExpandedPatrols.push_back(nodesExpanded);
+				nodesExpanded = 0;
+				numFailedMovesPatrols.push_back(numFailedMoves);
+				numFailedMoves = 0; 
+				numDirectionChangesPatrols.push_back(numDirectionChanges);
+				numDirectionChanges = 0;
+				numDirectionChangesCollisionsPatrols.push_back(numDirectionChangesCollisions);
+				numDirectionChangesCollisions = 0; 
+				totalDistancePatrols.push_back(totalDistance);
+				totalDistance = 0; 
+				
 				counter++;
 			}
 		}
@@ -406,17 +426,35 @@ void GenericPatrolUnit<state,action, environment>::LogStats(StatCollection *sc)
 template <class state, class action, class environment>
 void GenericPatrolUnit<state,action,environment>::LogFinalStats(StatCollection *sc)
 {
+		//Report per loop
+	for(int i=1; i<=numPatrols; i++)
+	{
+		char num[8];
+ 		sprintf(num,"%d",i);
+ 		char* name = new char[256];
+  		strcpy(name,GetName());
+  		strcat(name,"_");
+  		strcat(name, num);
+  		
+  		sc->AddStat("nodesExpanded", name, (long)(nodesExpandedPatrols[i-1]));
+		sc->AddStat("distanceTravelled", name, totalDistancePatrols[i-1]);
+		sc->AddStat("directionChanges",name, (long)(numDirectionChangesPatrols[i-1]));
+		sc->AddStat("directionChangesCollision",name, (long)(numDirectionChangesCollisionsPatrols[i-1]));
+		sc->AddStat("failedMoves",name, (long)(numFailedMovesPatrols[i-1]));
+	}
+
+	
 	//Want: 
 	// * nodesExpanded
 	// * distance travelled
 	// * failedMoves
 	// * change in direction
 	
-	sc->AddStat("nodesExpanded", GetName(), (long)(nodesExpanded));
-	sc->AddStat("distanceTravelled", GetName(), totalDistance);
+/*	sc->AddStat("distanceTravelled", GetName(), totalDistance);
 	sc->AddStat("directionChanges",GetName(), (long)(numDirectionChanges));
+	sc->AddStat("nodesExpanded", GetName(), (long)(nodesExpanded));
 	sc->AddStat("directionChangesCollision",GetName(), (long)(numDirectionChangesCollisions));
-	sc->AddStat("failedMoves",GetName(), (long)(numFailedMoves));
+	sc->AddStat("failedMoves",GetName(), (long)(numFailedMoves));*/
 	
 }
 
