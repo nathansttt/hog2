@@ -570,10 +570,10 @@ void RunScenario(int id)
 			
 		su->SetName(name);	
 		su->SetSpeed(1.0);
-		if(start.x < 16)	
-			su->SetColor(1, 0, 0);
-		else
-			su->SetColor(0, 1, 0);
+// 		if(start.x < 16)	
+// 			su->SetColor(1, 0, 0);
+// 		else
+// 			su->SetColor(0, 1, 0);
 		if(weighted) wug->AddUnit(su);
 		if(useTrim)
 		{
@@ -705,36 +705,51 @@ void PrintStatistics(int id, std::ofstream &outfile)
 	double dist = 0; 
 	double tdist = 0; 
 	statValue v;
-	for(unsigned int i=0; i<names.size(); i++)\
+	
+	for(unsigned int j=1; j<=numPatrols; j++)
 	{
-		if (unitSims[id]->GetStats()->lookupStat("nodesExpanded",names[i],v))
+	
+	for(unsigned int i=0; i<names.size(); i++)
+	{
+	
+		char num[8];
+ 		sprintf(num,"%d",j);
+ 		
+ 		char* namehere = new char[256];
+  		strcpy(namehere,names[i]);
+  		strcat(namehere,"_");
+  		strcat(namehere, num);
+	
+		if (unitSims[id]->GetStats()->lookupStat("nodesExpanded",namehere,v))
 		{
 			nodes = v.lval;
 			tnodes += nodes;
 		}
-		if(unitSims[id]->GetStats()->lookupStat("distanceTravelled",names[i],v))
+		if(unitSims[id]->GetStats()->lookupStat("distanceTravelled",namehere,v))
 		{
 			dist = v.fval;
 			tdist += dist;
 		}
-		if(unitSims[id]->GetStats()->lookupStat("directionChanges",names[i],v))
+		if(unitSims[id]->GetStats()->lookupStat("directionChanges",namehere,v))
 		{
 			dirChanged = v.lval;
 			tdirChanged += dirChanged;
 		}
-		if(unitSims[id]->GetStats()->lookupStat("failedMoves",names[i],v))
+		if(unitSims[id]->GetStats()->lookupStat("failedMoves",namehere,v))
 		{
 			failedMoves = v.lval;
 			tfailedMoves += failedMoves;
 		}
-		if(unitSims[id]->GetStats()->lookupStat("directionChangesCollision",names[i],v))
+		if(unitSims[id]->GetStats()->lookupStat("directionChangesCollision",namehere,v))
 		{
 			dirChangedColl = v.lval;
 			tdirChangedColl += dirChangedColl;
 		}
-		outfile<<i<<" "<<nodes<<" "<<dist<<" "<<dirChanged<<" "
+		
+		outfile<<namehere<<" "<<nodes<<" "<<dist<<" "<<dirChanged<<" "
 				 <<dirChangedColl<<" "<<failedMoves<<std::endl;
 	}	
+	}
 	outfile<<std::endl<<"Total "<<tnodes<<" "<<tdist<<" "
 	<<tdirChanged<<" "<<tdirChangedColl<<" "<<tfailedMoves<<std::endl<<std::endl
 	<<"Average "<<((double)tnodes / (double)(names.size()))

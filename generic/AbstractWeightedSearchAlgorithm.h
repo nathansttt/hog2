@@ -407,6 +407,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		GraphEnvironment *graphenv = new GraphEnvironment(abs,heur);
 		graphenv->SetDirected(false);
 		TemplateAStar<graphState,graphMove,GraphEnvironment> astar;
+
 		astar.DoAbstractSearch(); // Don't want to use radius & occupancy interface at abstract level
 		astar.GetPath(graphenv,fromPar,toPar,abspath);
 		
@@ -427,10 +428,17 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		age->SetWeightedEnvironment(wenv);
 		age->SetAbsGraph(abs);		
 		
+		
+		OctileHeuristic *heurbla = new OctileHeuristic(ma->GetMap(),g);
+		AbsGraphEnvironment *agebla = new AbsGraphEnvironment(g,heurbla,env,env->GetOccupancyInfo()); 
+		agebla->SetWeightedEnvironment(wenv);
+		agebla->SetAbsGraph(abs);		
+		
 		graphState start = fromGs; 
 	
 		TemplateAStar<graphState,tDirection,AbsGraphEnvironment> astar2;
-	
+		astar2.SetRadiusEnvironment(agebla);
+		
 		graphState lastloc;
 	
 		std::vector<graphState> refpath;

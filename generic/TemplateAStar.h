@@ -99,8 +99,6 @@ public:
 }
 
 
-
-
 /**
 * A templated version of A*, based on HOG genericAStar
 */
@@ -152,6 +150,8 @@ public:
 	void SetRadius(double rad) {radius = rad;}
 	double GetRadius() { return radius; }
 
+	void SetRadiusEnvironment(environment *e) {radEnv = e;}
+
 	void SetStopAfterGoal(bool val) { stopAfterGoal = val; }
 	bool GetStopAfterGoal() { return stopAfterGoal; }
 	
@@ -166,7 +166,7 @@ public:
 private:
 	long nodesTouched, nodesExpanded;
 	bool GetNextNode(state &next);
-	//state GetNextNode();
+	//state Node();
 	void UpdateWeight(environment *env, state& currOpenNode, state& neighbor);
 	void AddToOpenList(environment *env, state& currOpenNode, state& neighbor);
 	
@@ -180,6 +180,7 @@ private:
 	
 	bool useOccupancyInfo;// = false;
 	bool useRadius;// = false;
+	environment *radEnv;
 };
 
 using namespace TemplateAStarUtil;
@@ -240,6 +241,7 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	//std::cout<<"Using radius\n";
 	firstRound = true;
 	env = _env;
+	radEnv = _env;
 	closedList.clear();
 	openQueue.reset();
 	assert(openQueue.size() == 0);
@@ -302,8 +304,28 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		return true;
 	}
 	
-	neighbors.resize(0);
-	env->GetSuccessors(currentOpenNode, neighbors);
+
+	
+ 	neighbors.resize(0);
+ 	env->GetSuccessors(currentOpenNode, neighbors);
+// 	
+// 	bool notthisone = false;
+// 	for(unsigned int x = 0; x < neighbors.size(); x++)
+// 	{
+// 		state neighbor = neighbors[x];
+// 		if(neighbor == start)
+// 			notthisone = true;
+// 	}
+
+// 	if(currentOpenNode == start)
+// 		notthisone = true;
+// 	
+	// If in first round node is added to open list, could still be blocked. Check here. 
+// 	if(notthisone && useOccupancyInfo && env->GetOccupancyInfo() && useRadius &&  env->GetOccupancyInfo()->GetStateOccupied(currentOpenNode))
+// 	{
+// 		//may need to update...something? 
+// 		return false;
+// 	}
 
 	// iterate over all the children
 	for (unsigned int x = 0; x < neighbors.size(); x++)
@@ -312,9 +334,10 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		nodesTouched++;
 		state neighbor = neighbors[x];
 		 
+		 
 	//	if(useRadius)
 	//		ngcost = env->Distance(start, neighbor);//sqrt(start.x * neighbor.x + start.y * neighbor.y);
-		double ngcost = closedList[env->GetStateHash(currentOpenNode)].gCost+env->GCost(currentOpenNode,neighbor);
+	//	double ngcost = closedList[env->GetStateHash(currentOpenNode)].gCost+env->GCost(currentOpenNode,neighbor);
 		
 		//std::cout<<"Ngcost "<<ngcost<<" radius "<<radius<<std::endl;
 /*		if(useRadius && useOccupancyInfo && env->GetOccupancyInfo() &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)))// && (env->HCost(start, neighbor) < radius))
@@ -353,7 +376,10 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 // 		{
 // 		//	std::cout<<neighbor<<" minus goal test\n";
 // 		}
-		else if (useRadius && useOccupancyInfo && env->GetOccupancyInfo() &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && (!firstRound || ((ngcost < radius)&& !(env->GoalTest(neighbor, goal)))  ))
+
+//HERE
+		else if (useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (radEnv->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
+	// &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && (!firstRound || ((ngcost < radius)&& !(env->GoalTest(neighbor, goal)))  ))
 		
 		//&& (ngcost < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
 		
@@ -366,6 +392,10 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		{
 			// March 7 - May want to use GCost to neighbour rather than HCost when checking if it's within 
 			// the radius. 
+			
+			
+// 			if(!firstRound && env->GoalTest(neighbor,goal))
+// 				std::cout<<"first round, goal\n";
 			
 			//discardcount++;
 			//std::cout<<neighbor;

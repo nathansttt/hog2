@@ -198,7 +198,7 @@ uint64_t MapEnvironment::GetActionHash(tDirection act)
 
 void MapEnvironment::OpenGLDraw(int window)
 {
-	std::cout<<"drawing\n";
+	//std::cout<<"drawing\n";
 	map->OpenGLDraw(window);
 	// Draw occupancy interface - occupied = white
 	for(int i=0; i<map->getMapWidth(); i++)
