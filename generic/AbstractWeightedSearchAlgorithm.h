@@ -78,7 +78,7 @@ class AbsGraphEnvironment : public GraphEnvironment
 {
 public:
 	AbsGraphEnvironment(Graph *_g, GraphHeuristic *gh, AbsMapEnvironment *me, BaseMapOccupancyInterface *bmoi)
-		:GraphEnvironment(_g,gh){g = _g; h = gh;wenv = 0; regenv = me; goi = new GraphOccupancyInterface(bmoi,g); exactGoal = false; SetDirected(false);}
+		:GraphEnvironment(_g,gh){g = _g; h = gh;wenv = 0; regenv = me; goi = new GraphOccupancyInterface(bmoi,g); exactGoal = false; SetDirected(false); noDummyGoal = false;}
 	void SetAbsGraph(Graph *_g){abs=_g;};
 	void SetWeightedEnvironment(WeightedMap2DEnvironment *w){ wenv = w; }
 	~AbsGraphEnvironment() {};
@@ -100,6 +100,9 @@ public:
 	If exactGoal is not set, GoalTest returns true if state and goal have the same parent*/
 	bool GoalTest(graphState &state, graphState &goal)
 	{
+		if(noDummyGoal)
+			return false;
+			
 		if(exactGoal)
 		{
 			//std::cout<<"exact\n";
@@ -128,7 +131,7 @@ public:
 	{
 		if(h)
 		{
-			if(exactGoal)
+			if(exactGoal || noDummyGoal)
 			{
 				//std::cout<<"Exact goal\n";
 				return h->HCost(state1,state2);
@@ -204,6 +207,10 @@ public:
 		
 	}
 	
+	/* SetNoDummyGoal should be set to true for the dummy environment. 
+	
+	*/
+	void SetNoDummyGoal(bool b) {noDummyGoal = b;}
 	
 private:
 	Graph *g;
@@ -213,6 +220,7 @@ private:
 	AbsMapEnvironment *regenv;
 	GraphOccupancyInterface *goi;
 	bool exactGoal;
+	bool noDummyGoal;
 };
 
 class GraphStraightLineHeuristic : public GraphHeuristic {
@@ -428,11 +436,12 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		age->SetWeightedEnvironment(wenv);
 		age->SetAbsGraph(abs);		
 		
-		
+		//Create a 'dummy' environment for A* to use to check radius
 		OctileHeuristic *heurbla = new OctileHeuristic(ma->GetMap(),g);
 		AbsGraphEnvironment *agebla = new AbsGraphEnvironment(g,heurbla,env,env->GetOccupancyInfo()); 
 		agebla->SetWeightedEnvironment(wenv);
 		agebla->SetAbsGraph(abs);		
+		agebla->SetNoDummyGoal(true);
 		
 		graphState start = fromGs; 
 	
