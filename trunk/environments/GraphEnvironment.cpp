@@ -35,7 +35,7 @@ GraphEnvironment::~GraphEnvironment()
 {
 	// delete g; ??
 	//	delete g;
-	delete h;
+//	delete h;
 }
 
 void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors)
@@ -71,11 +71,30 @@ void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &a
 {
 	actions.resize(0);
 	node *n = g->GetNode(stateID);
-	edge_iterator ei = n->getOutgoingEdgeIter();
-	for (edge *e = n->edgeIterNextOutgoing(ei); e; e = n->edgeIterNextOutgoing(ei))
-	{
-		actions.push_back(graphMove(e->getFrom(), e->getTo()));
+
+	if(n == 0) {
+		return;
 	}
+
+	if (directed)
+	{
+		edge_iterator ei = n->getOutgoingEdgeIter();
+		for (edge *e = n->edgeIterNextOutgoing(ei); e; e = n->edgeIterNextOutgoing(ei))
+		{
+			actions.push_back(graphMove(e->getFrom(),e->getTo()));
+		}
+	}
+	else {
+		edge_iterator ei = n->getEdgeIter();
+		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
+		{
+			if(stateID != e->getTo())
+				actions.push_back(graphMove(e->getFrom(),e->getTo()));
+			else
+				actions.push_back(graphMove(e->getTo(),e->getFrom()));
+		}
+	}
+
 }
 
 graphMove GraphEnvironment::GetAction(graphState &s1, graphState &s2)
