@@ -44,7 +44,7 @@ public:
 	virtual void SetStateOccupied(graphState &gs, bool b )
 	{ xyLoc s = Convert(gs); boi->SetStateOccupied(s,b); }
 	virtual bool GetStateOccupied(graphState &gs)
-	{ xyLoc s = Convert(gs); if(boi->GetStateOccupied(s)) return boi->GetStateOccupied(s);}
+	{ xyLoc s = Convert(gs); return boi->GetStateOccupied(s);}
 	virtual bool CanMove(graphState &gs1, graphState &gs2)
 	{ xyLoc s1 = Convert(gs1); xyLoc s2 = Convert(gs2);return boi->CanMove(s1,s2);}
 	virtual void MoveUnitOccupancy(graphState &gs1, graphState &gs2)
@@ -107,7 +107,7 @@ public:
 		{
 			//std::cout<<"exact\n";
 			return (state == goal);
-}
+		}
 		//std::cout<<"Not exact\n";
 		//std::cout<<"state "<<state<<" goal "<<goal<<std::endl;
 		node *n = g->GetNode(state);
@@ -133,7 +133,11 @@ public:
 		{
 			if(exactGoal || noDummyGoal)
 			{
+				//		Print(state1);
+				//		std::cout<<" to ";
+				//		Print(state2);
 				//std::cout<<"Exact goal\n";
+				// 	std::cout<<" Returning "<<h->HCost(state1,state2)<<std::endl;
 				return h->HCost(state1,state2);
 			}
 			// if not exact goal, return distance to middle of abstract sector
@@ -159,6 +163,13 @@ public:
 		}
 		return 0;
 			
+	}
+
+	void Print(graphState &s)
+	{
+		node *n = g->GetNode(s);
+		std::cout<<"("<<n->GetLabelL(GraphAbstractionConstants::kFirstData)
+						 <<","<<n->GetLabelL(GraphAbstractionConstants::kFirstData+1)<<")";
 	}
 	
 // 	double Distance(graphState &state1, graphState &state2)
@@ -370,6 +381,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 	// Check if we're already in the same abstract node
 	if(fromPar == toPar) 
 	{
+		//		std::cout<<"in same parent\n";
 		// Do straight planning on lower level, using the direction map
 		std::vector<graphState> refpath;
 		OctileHeuristic *heuri = new OctileHeuristic(ma->GetMap(),g);
@@ -421,12 +433,12 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		
 		nodesExpanded += astar.GetNodesExpanded();
 		nodesTouched += astar.GetNodesTouched();
-	/*	std::cout<<"Abs path "<<fromPar<<" to "<<toPar<<" required "<<astar->GetNodesExpanded()<<" nodes exp.\n";
-		for(int i=0; i<abspath.size(); i++)
-		{ 
-				std::cout<<abspath[i]<<" ";
-		}
-			std::cout<<std::endl;*/
+		//	std::cout<<"Abs path "<<fromPar<<" to "<<toPar<<" required "<<astar->GetNodesExpanded()<<" nodes exp.\n";
+		//		for(int i=0; i<abspath.size(); i++)
+		//		{ 
+		//				std::cout<<abspath[i]<<" ";
+		//		}
+		//		std::cout<<std::endl;
 	 
 		//Refinement 
 		//GraphStraightLineHeuristic *heur2 = new GraphStraightLineHeuristic(ma->GetMap(),g);
@@ -467,7 +479,8 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
  			//if absPath's length is 2, want to do straight planning to goal (no cut off)
  			if(abspath.size()==2)
  			{
- 				//std::/*cout*/<<"Size 2\n";
+				
+				// 				std::cout<<"Size 2\n";
 				// Do straight planning on lower level, using the direction map
 				std::vector<graphState> refpath;
 				OctileHeuristic *heur = new OctileHeuristic(ma->GetMap(),g);
@@ -503,9 +516,10 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				delete age;
 				delete graphenv;
 				return;
-	 		} // abs path not length 2
- 			else
+	 		} 
+ 			else // abs path not length 2
  			{
+				//			std::cout<<"Abs longer than 2\n";
  				// path to second next abstract node and cut off the path
 				graphState end = abs->GetNode(abspath[2])->GetLabelL(GraphAbstractionConstants::kFirstData);
  				
@@ -555,7 +569,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 //  					thePath.push_back(newloc);
 //  				}
  				// Chop off the path 
- 				int desiredLength = refinePart * thePath.size();
+ 				int desiredLength = (int)(refinePart * thePath.size());
  				
  				if(desiredLength>3)
 					thePath.resize(desiredLength);
@@ -593,7 +607,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				age->GetSuccessors(start, nb);
 			
 				bool skip = false;
-				for(int k=0; k<nb.size(); k++)
+				for(unsigned int k=0; k<nb.size(); k++)
 				{
 					node* neigh = g->GetNode(nb[k]);
 					if(neigh->GetLabelL(GraphAbstractionConstants::kParent) == abspath[i])
@@ -652,7 +666,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 						thePath.push_back(newloc);
 					}
 						//std::cout<<std::endl;	
-					//std::cout<<"Refpath size is zero!!!\n";
+					//std::cout<<Refpath size is zero!!!\n";
 					start = refpath[refpath.size()-1];
 				}
 			}

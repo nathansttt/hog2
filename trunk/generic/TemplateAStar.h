@@ -105,7 +105,7 @@ public:
 template <class state, class action, class environment>
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { radius = 4.0; stopAfterGoal = true; weight=1; useRadius=true;useOccupancyInfo=true;}
+	TemplateAStar() { radius = 4.0; stopAfterGoal = true; weight=1; useRadius=true;useOccupancyInfo=true; radEnv = 0;}
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
 
@@ -241,7 +241,8 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	//std::cout<<"Using radius\n";
 	firstRound = true;
 	env = _env;
-	radEnv = _env;
+	if(!radEnv)
+		radEnv = _env;
 	closedList.clear();
 	openQueue.reset();
 	assert(openQueue.size() == 0);
@@ -354,7 +355,7 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 // 			std::cout<<" is a bad one\n";
 // 			continue;
 // 		}
-	//	std::cout<<env->HCost(start, neighbor)<<" ";
+	
 
 		if (closedList.find(env->GetStateHash(neighbor)) != closedList.end())
 		{
@@ -378,7 +379,7 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 // 		}
 
 //HERE
-		else if (useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (radEnv->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
+		else if (/*std::cout<<"HERE\n" &&*/ useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (radEnv->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && ((!(radEnv->GoalTest(neighbor, goal)))))// || (currentOpenNode == start )) )
 	// &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && (!firstRound || ((ngcost < radius)&& !(env->GoalTest(neighbor, goal)))  ))
 		
 		//&& (ngcost < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
@@ -396,11 +397,12 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 			
 // 			if(!firstRound && env->GoalTest(neighbor,goal))
 // 				std::cout<<"first round, goal\n";
-			
+			//		std::cout<<start<<" to "<<neighbor<<" "<<radEnv->HCost(start,neighbor)<<std::endl;
+
 			//discardcount++;
 			//std::cout<<neighbor;
 			//std::cout<<" someone's here, and within my radius\n";
-
+			//std::cout<<start<<" to "<<neighbor<<" "<<env->HCost(start, neighbor)<<" "<<std::endl;
 			//occupied - don't expand - move to the closed list 
 			SearchNode<state> sn(neighbor, env->GetStateHash(neighbor));
 			closedList[env->GetStateHash(neighbor)] = sn;
