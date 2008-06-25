@@ -251,7 +251,7 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			}
 			xyLoc s;
 			u->GetLocation(s);
-			wme->UpdateAngle(s, loc);
+			wme->UpdateAngle(s, loc,si->GetSimulationTime());
 			u->UpdateLocation(env, loc, success, si);
 		}
 		
@@ -273,9 +273,9 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			}
 		}
 		
-		double ComputeArrowMetric(bool b)
+		double ComputeArrowMetric(bool b, double t,bool b2, double mt)
 		{
-			return wme->ComputeArrowMetric(b);
+			return wme->ComputeArrowMetric(b,t,b2,mt);
 		}
 		
 

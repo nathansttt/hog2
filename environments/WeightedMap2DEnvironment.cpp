@@ -35,6 +35,7 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 	
 	usePerceptron = false;
 	learningRate = 0.1;
+
 }
 
 WeightedMap2DEnvironment::WeightedMap2DEnvironment(AbsMapEnvironment *ame)
@@ -54,6 +55,7 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(AbsMapEnvironment *ame)
 	
 	usePerceptron = false;
 	learningRate = 0.1;
+
 }
 
 /**
@@ -76,7 +78,7 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 {
 	// this isn't called 
 	
-	std::cout<<"Weighted update action\n";
+	//std::cout<<"Weighted update action\n";
 	//Vector2D angle;
 	xyLoc old = s;
 	switch (dir)
@@ -145,7 +147,7 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
 	s = old;
 }
 
-void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
+void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp, double t)
 {
 	if(old == s) 
 		return;
@@ -174,10 +176,16 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 		if(angleLookup.find(sn) == angleLookup.end())
 		{
 			if(usePerceptron)
+			{
+				Vector2D v = learningRate * angle;
+				v.SetUpdateTime(t); 
 				angleLookup[sn] = learningRate * angle;		
+				
+			}
 			else
 			{
 				angle.Normalize();
+				angle.SetUpdateTime(t);
 				angleLookup[sn] = angle;
 			}
 		}
@@ -195,6 +203,8 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 				if(sqrt(x*x + y*y) > 1)
 					newAngle.Normalize();
 					
+				newAngle.SetUpdateTime(t);
+					
 				angleLookup[sn] = newAngle;
 			}
 			else
@@ -203,6 +213,7 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 				
 				Vector2D storeme = oldProp * oldAngle + newProportion * angle;
 				storeme.Normalize();
+				storeme.SetUpdateTime(t);
 				angleLookup[sn] = storeme;
 			}
 		}
@@ -220,10 +231,15 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 			if(angleLookup.find(sn) == angleLookup.end())
 			{
 				if(usePerceptron)
-					angleLookup[sn] = surroundingProportion * angle;		
+				{
+					Vector2D v = surroundingProportion * angle;
+					v.SetUpdateTime(t);
+					angleLookup[sn] = v;
+				}
 				else
 				{
 					angle.Normalize();
+					angle.SetUpdateTime(t);
 					angleLookup[sn] = angle;
 				}
 			}
@@ -240,7 +256,7 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 // 					std::cout<<sqrt(x*x + y*y)<<std::endl;
 					if(sqrt(x*x + y*y) > 1)
 						newAngle.Normalize();
-					
+					newAngle.SetUpdateTime(t);
 					angleLookup[sn] = newAngle;
 				}
 				else
@@ -248,6 +264,7 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 					Vector2D oldAngle = angleLookup[sn];
 					Vector2D storeme = oldProp * oldAngle + newProportion * angle;
 					storeme.Normalize();
+					storeme.SetUpdateTime(t);
 					angleLookup[sn] = storeme;
 				}
 			}
@@ -260,10 +277,15 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 		if(angleLookup.find(sn) == angleLookup.end())
 		{
 			if(usePerceptron)
-				angleLookup[sn] = learningRate * angle;		
+			{
+				Vector2D v = learningRate * angle;
+				v.SetUpdateTime(t);
+				angleLookup[sn] = v;
+			}
 			else
 			{
 				angle.Normalize();
+				angle.SetUpdateTime(t);
 				angleLookup[sn] = angle;
 			}
 		}
@@ -280,7 +302,8 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 // 				std::cout<<sqrt(x*x + y*y)<<std::endl;
 				if(sqrt(x*x + y*y) > 1)
 					newAngle.Normalize();
-					
+				
+				newAngle.SetUpdateTime(t);
 				angleLookup[sn] = newAngle;
 			}
 			else
@@ -288,6 +311,7 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 				Vector2D oldAngle = angleLookup[sn];
 				Vector2D storeme = oldProp * oldAngle + newProportion * angle;
 				storeme.Normalize();
+				storeme.SetUpdateTime(t);
 				angleLookup[sn] = storeme;
 			}
 		}
@@ -297,10 +321,15 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 		if(angleLookup.find(sn2) == angleLookup.end())
 		{
 			if(usePerceptron)
-				angleLookup[sn] = learningRate * angle;		
+			{
+				Vector2D v = learningRate * angle;
+				v.SetUpdateTime(t);
+				angleLookup[sn] = v;
+			}
 			else
 			{
 				angle.Normalize();
+				angle.SetUpdateTime(t);
 				angleLookup[sn] = angle;
 			}
 		}
@@ -318,6 +347,7 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 				if(sqrt(x*x + y*y) > 1)
 					newAngle.Normalize();
 					
+				newAngle.SetUpdateTime(t);	
 				angleLookup[sn] = newAngle;
 			}
 			else
@@ -325,6 +355,7 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 				Vector2D oldAngle = angleLookup[sn];
 				Vector2D storeme = oldProp * oldAngle + newProportion * angle;
 				storeme.Normalize();
+				storeme.SetUpdateTime(t);
 				angleLookup[sn] = storeme;
 			}
 		}			
@@ -333,9 +364,9 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp)
 }
 
 
-void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s)
+void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double t)
 {
-	UpdateAngle(old,s,oldProportion);
+	UpdateAngle(old,s,oldProportion,t);
 }
 
 /**
@@ -603,7 +634,7 @@ Vector2D WeightedMap2DEnvironment::GetAngle(xyLoc &l)
 	}
 }
 
-double WeightedMap2DEnvironment::ComputeArrowMetric(bool doNormalize)
+double WeightedMap2DEnvironment::ComputeArrowMetric(bool timed, double time, bool doNormalize, double maxtime)
 {
 	Graph* g = ma->GetAbstractGraph(0);
 	node_iterator ni = g->getNodeIter();
@@ -625,61 +656,67 @@ double WeightedMap2DEnvironment::ComputeArrowMetric(bool doNormalize)
 	for(node *n=g->nodeIterNext(ni); n; n=g->nodeIterNext(ni))
 	{
 		
+		
 		xyLoc current;
 		current.x = n->GetLabelL(kFirstData);
 		current.y = n->GetLabelL(kFirstData+1);
 				
 		Vector2D nodeVec = GetAngle(current);
-		if(nodeVec.x == 0 && nodeVec.y == 0) // check if there's no angle stored here
-			continue;
-					
-		//if(sqrt(nodeVec.x	*nodeVec.x + nodeVec.y*nodeVec.y) < 0.5)
-		//	continue;		
-					
-		double bestDotProd = -2;
-		tDirection bestDir;		
-				
-		for(unsigned int i=0; i<directions.size(); i++)
+		
+		if(!timed || (time-nodeVec.GetUpdateTime() < maxtime))
 		{
-			xyLoc nextThisDir;
-			GetNextState(current, directions[i], nextThisDir);
-
-			if(!GetMap()->canStep(current.x, current.y, nextThisDir.x, nextThisDir.y))
+			if(nodeVec.x == 0 && nodeVec.y == 0) // check if there's no angle stored here
 				continue;
+					
+			//if(sqrt(nodeVec.x	*nodeVec.x + nodeVec.y*nodeVec.y) < 0.5)
+			//	continue;		
+					
+			double bestDotProd = -2;
+			tDirection bestDir;		
 				
-			Vector2D dirVec = GetAngleFromDirection(directions[i]);
-			
-			double dotProd = (nodeVec.x * dirVec.x) + (nodeVec.y * dirVec.y);
-			
-			if(dotProd > bestDotProd)
+			for(unsigned int i=0; i<directions.size(); i++)
 			{
-				bestDotProd = dotProd;
-				bestDir = directions[i];
+				xyLoc nextThisDir;
+				GetNextState(current, directions[i], nextThisDir);
+
+				if(!GetMap()->canStep(current.x, current.y, nextThisDir.x, nextThisDir.y))
+					continue;
+				
+				Vector2D dirVec = GetAngleFromDirection(directions[i]);
+			
+				double dotProd = (nodeVec.x * dirVec.x) + (nodeVec.y * dirVec.y);
+			
+				if(dotProd > bestDotProd)
+				{
+					bestDotProd = dotProd;
+					bestDir = directions[i];
+				}	
+			}
+		
+			if(bestDotProd == -2) continue;
+		
+			// Now that we know the closest direction, find out if there's a node there 
+			xyLoc next;
+			GetNextState(current, bestDir, next);
+			
+			if(!(next==current))
+			{
+				numDotProducts++;
+				Vector2D nextNodeVec = GetAngle(next);
+				if(doNormalize)
+				{
+					nodeVec.Normalize();
+					nextNodeVec.Normalize();
+				}
+				//double dotprod = (nodeVec.x * nextNodeVec.x) + (nodeVec.y * nextNodeVec.y);
+				//totalDotProducts += dotprod;
+				Vector2D difference((nodeVec.x + nextNodeVec.x)/2, (nodeVec.y + nextNodeVec.y)/2);
+				double addme = sqrt(difference.x * difference.x + difference.y * difference.y);
+				totalDotProducts += addme;
 			}	
 		}
-		
-		if(bestDotProd == -2) continue;
-		
-		// Now that we know the closest direction, find out if there's a node there 
-		xyLoc next;
-		GetNextState(current, bestDir, next);
-			
-		if(!(next==current))
-		{
-			numDotProducts++;
-			Vector2D nextNodeVec = GetAngle(next);
-			if(doNormalize)
-			{
-				nodeVec.Normalize();
-				nextNodeVec.Normalize();
-			}
-			//double dotprod = (nodeVec.x * nextNodeVec.x) + (nodeVec.y * nextNodeVec.y);
-			//totalDotProducts += dotprod;
-			Vector2D difference((nodeVec.x + nextNodeVec.x)/2, (nodeVec.y + nextNodeVec.y)/2);
-			double addme = sqrt(difference.x * difference.x + difference.y * difference.y);
-			totalDotProducts += addme;
-		}	
 	}
+	//std::cout<<"Timed: "<<timed<<" time: "<<time<<" norm? "<<doNormalize<<" return "<<(totalDotProducts / (double)(numDotProducts))<<std::endl;
 	return (totalDotProducts / (double)(numDotProducts));
 }
 
