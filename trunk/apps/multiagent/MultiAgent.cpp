@@ -118,7 +118,7 @@ bool greedy = false;
 int greedyNum = 0; 
 
 bool doRandom = false;
-int randomNum = 0; 
+int randomNum = 0;
 
 WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug;
 int main(int argc, char* argv[])
@@ -352,9 +352,22 @@ void DoRandom(int id)
 	
 	if(runExperiment)
 	{
-	std::vector<double> c1;
+	/*std::vector<double> c1;
 	std::vector<double> c2;
-			
+	std::vector<double> c3;
+	std::vector<double> c4;		
+	*/		
+	std::vector<double> c;
+	std::vector<double> cn;
+	std::vector<double> c10n;
+	std::vector<double> c10;
+	std::vector<double> c20n;
+	std::vector<double> c20;
+	std::vector<double> c30n;
+	std::vector<double> c30;
+	std::vector<double> c40n;
+	std::vector<double> c40;		
+	
 	if(outFileName[0]==0)
 		strncpy(outFileName, "defaultOut.txt",1024);
 				
@@ -378,16 +391,29 @@ void DoRandom(int id)
 				time += timestep;
 				if(((int)time%15==0) && (wug->GetMembers().size() > 0))
 				{
-					c1.push_back(wug->ComputeArrowMetric(true));
-					c2.push_back(wug->ComputeArrowMetric(false));
+					c.push_back(wug->ComputeArrowMetric(false,time,false,0));
+					cn.push_back(wug->ComputeArrowMetric(false,time,true,0));
+					c10.push_back(wug->ComputeArrowMetric(true,time,false,10));
+					c10n.push_back(wug->ComputeArrowMetric(true,time,true,10));
+					c20.push_back(wug->ComputeArrowMetric(true,time,false,20));
+					c20n.push_back(wug->ComputeArrowMetric(true,time,true,20));
+					c30.push_back(wug->ComputeArrowMetric(true,time,false,30));
+					c30n.push_back(wug->ComputeArrowMetric(true,time,true,30));
+					c40.push_back(wug->ComputeArrowMetric(true,time,false,40));
+					c40n.push_back(wug->ComputeArrowMetric(true,time,false,40));
+					//c1.push_back(wug->ComputeArrowMetric(true,cohtime,true));
+					//c2.push_back(wug->ComputeArrowMetric(true,cohtime,false));
+					//c3.push_back(wug->ComputeArrowMetric(false,cohtime,true));
+					//c4.push_back(wug->ComputeArrowMetric(false,cohtime,false));
 				}
 			}
 
 			outfile<<"Total simulation time "<<time<<std::endl<<std::endl; 
 
-			for(unsigned int i=0; i<c1.size(); i++)
+			for(unsigned int i=0; i<c.size(); i++)
 			{
-				outfile<<c1[i]<<" "<<c2[i]<<std::endl;
+				outfile<<c[i]<<" "<<cn[i]<<" "<<c10[i]<<" "<<c10n[i]<<" "<<c20[i]<<" "<<c20n[i]
+				<<" "<<c30[i]<<" "<<c30n[i]<<" "<<c40[i]<<" "<<c40n[i]<<std::endl;
 			}
 			exit(0);				
 		} // end if(runExperiment)
@@ -594,8 +620,16 @@ void RunScenario(int id)
 
 	if(runExperiment)
 		{
-			std::vector<double> c1;
-			std::vector<double> c2;
+			std::vector<double> c;
+			std::vector<double> cn;
+			std::vector<double> c10n;
+			std::vector<double> c10;
+			std::vector<double> c20n;
+			std::vector<double> c20;
+			std::vector<double> c30n;
+			std::vector<double> c30;
+			std::vector<double> c40n;
+			std::vector<double> c40;
 			
 			if(outFileName[0]==0)
 				strncpy(outFileName, "defaultOut.txt",1024);
@@ -625,8 +659,18 @@ void RunScenario(int id)
 				time += timestep;
 				if(((int)time%15==0) && (wug->GetMembers().size() > 0))
 				{
-					c1.push_back(wug->ComputeArrowMetric(true));
-					c2.push_back(wug->ComputeArrowMetric(false));
+					c.push_back(wug->ComputeArrowMetric(false,time,false,0));
+					cn.push_back(wug->ComputeArrowMetric(false,time,true,0));
+					c10.push_back(wug->ComputeArrowMetric(true,time,false,10));
+					c10n.push_back(wug->ComputeArrowMetric(true,time,true,10));
+					c20.push_back(wug->ComputeArrowMetric(true,time,false,20));
+					c20n.push_back(wug->ComputeArrowMetric(true,time,true,20));
+					c30.push_back(wug->ComputeArrowMetric(true,time,false,30));
+					c30n.push_back(wug->ComputeArrowMetric(true,time,true,30));
+					c40.push_back(wug->ComputeArrowMetric(true,time,false,40));
+					c40n.push_back(wug->ComputeArrowMetric(true,time,false,40));
+					//c1.push_back(wug->ComputeArrowMetric(time,true));
+					//c2.push_back(wug->ComputeArrowMetric(time,false));
 					//std::cout<<time<<" "<<normMetric<<" "<<noNormMetric<<std::endl;
 					//coherence.push_back(wug->ComputeArrowMetric());
 				}
@@ -658,10 +702,13 @@ void RunScenario(int id)
 			PrintStatistics(id,outfile);		
 				
 			outfile<<std::endl;
-			for(unsigned int i=0; i<c1.size(); i++)
+
+				for(unsigned int i=0; i<c.size(); i++)
 			{
-				outfile<<c1[i]<<" "<<c2[i]<<std::endl;
+				outfile<<c[i]<<" "<<cn[i]<<" "<<c10[i]<<" "<<c10n[i]<<" "<<c20[i]<<" "<<c20n[i]
+				<<" "<<c30[i]<<" "<<c30n[i]<<" "<<c40[i]<<" "<<c40n[i]<<std::endl;
 			}
+		
 				
 			if(!greedy)
 				exit(0); 			

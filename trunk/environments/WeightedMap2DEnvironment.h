@@ -39,9 +39,16 @@
 
 class Vector2D {
 	public:
-		Vector2D(float _x,float _y):x(_x), y(_y) {/*Normalize();*/}
-		Vector2D():x(0),y(0) {}
+		Vector2D(float _x,float _y):x(_x),y(_y),updateTime(0),accessTime(0) {/*Normalize();*/}
+		Vector2D():x(0),y(0),updateTime(0),accessTime(0) {}
 		void Set(float _x, float _y) { x=_x; y=_y; /*Normalize();*/}
+		
+		void SetUpdateTime(double t) {updateTime=t;}
+		double GetUpdateTime() {return updateTime;}
+		
+		void SetAccessTime(double t) {accessTime=t;}
+		double GetAccessTime() {return accessTime;}
+	
 		bool operator==(const Vector2D &rhs) {return ((x == rhs.x)&&(y==rhs.y));}
 		std::ostream& operator <<(std::ostream & out)
 		{
@@ -69,6 +76,8 @@ class Vector2D {
 		}
 	//private:
 		float x, y;
+		double updateTime, accessTime;
+		
 		void Normalize()
 		{
 			if((x==0)&&(y==0))
@@ -125,7 +134,7 @@ public:
 	void OpenGLDraw(int window, xyLoc& s, tDirection &dir, GLfloat r, GLfloat g, GLfloat b) {AbsMapEnvironment::OpenGLDraw(window,s,dir,r,g,b);}
 	void DrawEdge(int window, edge* e);
 	
-	void UpdateAngle(xyLoc &old, xyLoc &s);
+	void UpdateAngle(xyLoc &old, xyLoc &s, double t);
 	
 	/** Set the cost of moving in the "wrong" direction */ 
 	void SetWeight(double wt) { diffWeight = wt; }
@@ -152,15 +161,16 @@ public:
 	// For perceptron update rule
 	void UsePerceptron(double lr) { usePerceptron = true; learningRate = lr; }
 	
-	double ComputeArrowMetric(bool doNormalize=false);
+	double ComputeArrowMetric(bool timed=false,double time=0, bool doNormalize=false, double maxtime=0);
 	Vector2D GetAngleFromDirection(tDirection dir);
+
 private:
 	BaseMapOccupancyInterface* oi;
 	
 	typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
 	AngleLookupTable angleLookup;
 	
-	void UpdateAngle(xyLoc &old, xyLoc &s, double prop);
+	void UpdateAngle(xyLoc &old, xyLoc &s, double prop, double t);
 	
 	double diffWeight;
 	double oldProportion;
