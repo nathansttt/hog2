@@ -242,16 +242,15 @@ void GenericPatrolUnit<state,action,environment>::GoToLoc(environment *env, int 
 	
 	//printf("%s ",GetName());
 	algorithm->GetPath(env, loc, locs[which],path);
-	//std::cout<<"pathing to ("<<locs[which].x<<","<<locs[which].y<<")"<<std::endl;
+	//	std::cout<<"At ("<<loc.x<<","<<loc.y<<") pathing to ("<<locs[which].x<<","<<locs[which].y<<")"<<std::endl;
 	nodesExpanded += algorithm->GetNodesExpanded();
 	nodesTouched += algorithm->GetNodesTouched();
-	/*
-	std::cout<<"Path ";
-	for(int i=0; i<path.size();i++)
-	{
-		std::cout<<"("<<path[i].x<<","<<path[i].y<<") ";
-	}
-	std::cout<<std::endl;*/
+	//  	std::cout<<"Path ";
+	//	for(int i=0; i<path.size();i++)
+	//{
+	//	std::cout<<"("<<path[i].x<<","<<path[i].y<<") ";
+	//}
+	//std::cout<<std::endl;
 	if (path.size() > 0)
 	{
 		AddPathToCache(env, path);
@@ -337,20 +336,21 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 		glColor3f(_r,_g,_b);
 		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
 		//		env->OpenGLDraw(window, locs[i], r, g, b);
-	}	*/
+		}	*/
 	
 	// Draw the planned path
 // 	if(drawUnit)
 //{
-//   		xyLoc current = loc; 
-//   		xyLoc next;
-//   	  	for(unsigned int i=0; i<moves.size(); i++)
-//    		{
-//    			env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
-//   			env->GetNextState(current, moves[i],next);
-//    			current = next;
-//    		}	
-// 	}
+
+   		xyLoc current = loc; 
+   		xyLoc next;
+			for(unsigned int i=0; i<moves.size(); i++)
+			{
+				env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
+   			env->GetNextState(current, moves[i],next);
+				current = next;
+			}	
+			// 	}
 }
 
 template <class state, class action, class environment>
