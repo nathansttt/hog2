@@ -138,7 +138,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		//printf("Distance: %f\n", unitSims[windowID]->GetEnvironment()->HCost(s, g));
 		unitSims[windowID]->GetUnit(viewport)->OpenGLDraw(windowID,
 														  unitSims[windowID]->GetEnvironment(),
-														  unitSims[windowID]);
+														  unitSims[windowID]->GetSimulationInfo() );
 	}
 	//unitSims[windowID]->OpenGLDraw(windowID);
 	

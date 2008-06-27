@@ -135,6 +135,7 @@ public:
 	virtual void OpenGLDraw(int window);
 	virtual void OpenGLDraw(int window, graphState &s);
 	virtual void OpenGLDraw(int window, graphState &s, graphMove &gm);
+	Graph *GetGraph() { return g; };
 protected:
 	bool directed;
 	Graph *g;

@@ -16,7 +16,7 @@
  * the random unit follows a certain direction for a random amount of time,
  * and then picks a new direction. makeMove just returns the current direction.
  */
-bool RandomUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &dir)
+bool RandomUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &dir)
 {
 	dir = possibleDir[lastIndex];
 	return true;
@@ -28,7 +28,7 @@ bool RandomUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, Simulat
  * After moving, the unit picks a new random direction if the move wasn't a success.
  * If it was, it has a 5% chance of changing direction.
  */
-void RandomUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *, xyLoc &l, bool success, SimulationInfo *si)
+void RandomUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *, xyLoc &l, bool success, MapSimulationInfo *si)
 {
 	MapUnit::UpdateLocation(me, l, success, si);
 	if (success)
@@ -47,7 +47,7 @@ void RandomUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *,
  * the random unit follows a certain direction for a random amount of time,
  * and then picks a new direction. makeMove just returns the current direction.
  */
-bool RandomerUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &dir)
+bool RandomerUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &dir)
 {
 	dir = possibleDir[random()%9];
 	return true;
@@ -59,7 +59,7 @@ bool RandomerUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, Simul
  * the billiard ball unit keeps following the same direction until either a collision
  * or instability
  */
-bool BilliardBallUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &dir)
+bool BilliardBallUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &dir)
 {
 	dir = possibleDir[lastIndex];
 	return true;
@@ -71,7 +71,7 @@ bool BilliardBallUnit::MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, S
  * if the billiard ball unit collides, it will cool off for a period of time
  * otherwise, it may changes its mind if it unstable
  */
-void BilliardBallUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *, xyLoc &l, bool success, SimulationInfo *si)
+void BilliardBallUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterface *, xyLoc &l, bool success, MapSimulationInfo *si)
 {
 	MapUnit::UpdateLocation(me, l, success, si);
 	if (success)
@@ -98,7 +98,7 @@ void BilliardBallUnit::UpdateLocation(MapEnvironment *me, BaseMapOccupancyInterf
  * the teleport unit stays put for some # moves, and then teleports to a new random
  * location.
  */
-bool TeleportUnit::MakeMove(MapEnvironment *me, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &dir)
+bool TeleportUnit::MakeMove(MapEnvironment *me, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &dir)
 {
 	if (timer == 0)
 	{

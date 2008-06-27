@@ -10,7 +10,7 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 		
 		virtual const char *GetName() { return "Greedy DM following unit"; }
 		
-		virtual bool MakeMove(environment *env, OccupancyInterface<xyLoc, tDirection> *, SimulationInfo *, tDirection& a)
+		virtual bool MakeMove(environment *env, OccupancyInterface<xyLoc, tDirection> *, SimulationInfo<xyLoc,tDirection,environment> *, tDirection& a)
 		{
 			std::vector<tDirection> directions;
 			directions.push_back(kN);
@@ -107,7 +107,7 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 		}
 		
 		
-		virtual void UpdateLocation(environment *, xyLoc &newloc, bool success, SimulationInfo *)
+		virtual void UpdateLocation(environment *, xyLoc &newloc, bool success, SimulationInfo<xyLoc,tDirection,environment> *)
 		{
 			if (success)
 			{
@@ -119,7 +119,7 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 		virtual void GetLocation(xyLoc &l)
 		{ l = loc; }
 	
-		virtual void OpenGLDraw(int window, environment *env, SimulationInfo *)
+		virtual void OpenGLDraw(int window, environment *env, SimulationInfo<xyLoc,tDirection,environment> *)
 		{ env->OpenGLDraw(window, loc); }
 		
 		virtual void GetGoal(xyLoc &s)

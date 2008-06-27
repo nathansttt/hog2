@@ -57,8 +57,8 @@ public:
 		disjunctiveTrialEnd = false;
 		verbose = false;
 	}
-	~EpisodicSimulation() {}
-	int AddUnit(Unit<state, action, environment> *u) { std::cout<<"ADDING\n";allRacesDone = false; return UnitSimulation<state, action, environment>::AddUnit(u); }
+	virtual ~EpisodicSimulation() {}
+	int AddUnit(Unit<state, action, environment> *u, double timeOffset=0.) { std::cout<<"ADDING\n";allRacesDone = false; return UnitSimulation<state, action, environment>::AddUnit(u,timeOffset); }
 
 	virtual bool Done() { return allRacesDone; }
 	void SetStopOnConvergence(bool stop) { stopOnConvergence = stop; }
@@ -203,7 +203,7 @@ protected:
 //				bv->set(this->units[t]->starty*map_width+units[t]->startx, 1);
 //			}
 			this->units[t]->currentState = this->units[t]->startState;
-			this->units[t]->agent->GetUnitGroup()->UpdateLocation(this->units[t]->agent, this->env, this->units[t]->startState, false, this);
+			this->units[t]->agent->GetUnitGroup()->UpdateLocation(this->units[t]->agent, this->env, this->units[t]->startState, false, &(this->sinfo));
 			this->units[t]->nextTime = this->currTime;
 			this->units[t]->totalThinking = 0;
 			//			units[t]->thinkStates = 0;

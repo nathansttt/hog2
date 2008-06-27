@@ -19,6 +19,7 @@ MapEnvironment::MapEnvironment(Map *_m)
 MapEnvironment::~MapEnvironment()
 {
 	delete map;
+	delete oi;
 }
 
 void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors)
@@ -188,7 +189,8 @@ bool MapEnvironment::GoalTest(xyLoc &node, xyLoc &goal)
 
 uint64_t MapEnvironment::GetStateHash(xyLoc &node)
 {
-	return (node.x<<16)|node.y;
+	return (((uint64_t)node.x)<<16)|node.y;
+//	return (node.x<<16)|node.y;
 }
 
 uint64_t MapEnvironment::GetActionHash(tDirection act)

@@ -26,8 +26,9 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <values.h>
 
-#define MAXINT (1<<30)
+//#define MAXINT (1<<30)
 //#define MAXLABELS 15
 
 class Graph;

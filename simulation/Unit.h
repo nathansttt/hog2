@@ -33,6 +33,7 @@
 #include "UnitSimulation.h"
 #include "OccupancyInterface.h"
 
+template<class state, class action, class environment>
 class SimulationInfo;
 
 template <class state, class action, class environment>
@@ -42,10 +43,10 @@ public:
 	Unit() :speed(0), group(0) {}
 	virtual ~Unit() { SetUnitGroup(0); }
 	virtual const char *GetName() = 0;
-	virtual bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo *, action& a) = 0;
-	virtual void UpdateLocation(environment *, state &, bool success, SimulationInfo *) = 0;
+	virtual bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a) = 0;
+	virtual void UpdateLocation(environment *, state &, bool success, SimulationInfo<state,action,environment> *) = 0;
 	virtual void GetLocation(state &) = 0;
-	virtual void OpenGLDraw(int window, environment *, SimulationInfo *) = 0;
+	virtual void OpenGLDraw(int window, environment *, SimulationInfo<state,action,environment> *) = 0;
 	virtual void GetGoal(state &s) = 0;
 
 	virtual bool Done() { return true;} 
@@ -89,10 +90,15 @@ public:
 					_group->AddUnit(this);
 			} */ 
 		}
+
+		virtual unsigned int GetNum() { return unitid; }
+		virtual void SetNum( unsigned int num ) { unitid = num; return; }
+
 private:
 		double speed;
 		UnitGroup<state, action, environment> *group;
 		GLfloat r, g, b;
+		unsigned int unitid;
 };
 
 

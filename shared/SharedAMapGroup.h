@@ -44,15 +44,15 @@ public:
 	SharedAMapGroup(MapProvider *);
 	~SharedAMapGroup();
 	virtual const char *GetName() { return "SharedAMapGroup"; }
-	//virtual tDirection makeMove(unit *u, MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo);
-	virtual void OpenGLDraw(int window, AbsMapEnvironment *, SimulationInfo *);
+	//virtual tDirection makeMove(unit *u, MapProvider *mp, reservationProvider *rp, AbsMapSimulationInfo *simInfo);
+	virtual void OpenGLDraw(int window, AbsMapEnvironment *, AbsMapSimulationInfo *);
 	virtual Map *GetMap();
 	virtual MapAbstraction *GetMapAbstraction();
 	virtual int getNewTileCount() { return newTileCountPerTrial; }
 	
 	/** reset the location of a given unit */
-	void UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *, xyLoc &loc, bool success, SimulationInfo *);
-	//virtual void updateLocation(BaseAbsMapUnit *, MapProvider *m, int _x, int _y, bool, SimulationInfo *);
+	void UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *, xyLoc &loc, bool success, AbsMapSimulationInfo *);
+	//virtual void updateLocation(BaseAbsMapUnit *, MapProvider *m, int _x, int _y, bool, AbsMapSimulationInfo *);
 	/** Is the group done with their exploration? */
 	virtual bool done();
 	/** Lets the unit group do what it needs to reset a trial */

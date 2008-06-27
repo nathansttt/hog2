@@ -57,12 +57,12 @@ public:
 	virtual void SetTarget(Unit<state,action,environment> *u) { target = u; }
 	virtual Unit<state,action,environment>* GetTarget() { return target; }
 
-	virtual bool MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& a);
+	virtual bool MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo<state,action,environment> *si, action& a);
 	
-	virtual void UpdateLocation(environment *env, state &l, bool success, SimulationInfo *si);
+	virtual void UpdateLocation(environment *env, state &l, bool success, SimulationInfo<state,action,environment> *si);
 	
 	virtual void GetLocation(state& s) {s=loc;}
-	virtual void OpenGLDraw(int window, environment *, SimulationInfo *);
+	virtual void OpenGLDraw(int window, environment *, SimulationInfo<state,action,environment> *);
 	//void printRoundStats(FILE *f);
 	void LogStats(StatCollection *stats);
 	void LogFinalStats(StatCollection *stats);
@@ -129,7 +129,7 @@ GenericSearchUnit<state,action,environment>::~GenericSearchUnit()
 }
 
 template <class state, class action, class environment>
-bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& a)
+bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo<state,action,environment> *si, action& a)
 {
 	if (getCachedMove(a))
 		return true;
@@ -199,7 +199,7 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 }
 
 template <class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
+void GenericSearchUnit<state,action,environment>::OpenGLDraw(int window, environment *env, SimulationInfo<state,action,environment> *si)
 {
 	// Draw current + goal states as states. May need to find something
 	// different for the goal
@@ -279,7 +279,7 @@ bool GenericSearchUnit<state,action,environment>::getCachedMove(action &a)
 }
 
 template<class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo *si)
+void GenericSearchUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo<state,action,environment> *si)
 {
 	// Done in UnitSimulation instead
 	//Update occupancy interface
