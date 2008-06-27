@@ -55,8 +55,8 @@ SharedAMapGroup::~SharedAMapGroup()
 	delete seen;
 }
 
-//void SharedAMapGroup::updateLocation(BaseAbsMapUnit *u, MapProvider *mp, int _x, int _y, bool success, SimulationInfo *simInfo)
-void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *mp, xyLoc &loc, bool success, SimulationInfo *si)
+//void SharedAMapGroup::updateLocation(BaseAbsMapUnit *u, MapProvider *mp, int _x, int _y, bool success, AbsMapSimulationInfo *simInfo)
+void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *mp, xyLoc &loc, bool success, AbsMapSimulationInfo *si)
 {
 	Map *worldMap = mp->GetMap();
 	int rad = visRadius; // how far we can see -- square
@@ -115,7 +115,7 @@ void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> 
 		aMap->RepairAbstraction();
 }
 
-void SharedAMapGroup::OpenGLDraw(int , AbsMapEnvironment *, SimulationInfo *)
+void SharedAMapGroup::OpenGLDraw(int , AbsMapEnvironment *, AbsMapSimulationInfo *)
 {
 	glBegin(GL_QUADS);
 	glColor3f(.25, .25, .25); // kOutOfBounds

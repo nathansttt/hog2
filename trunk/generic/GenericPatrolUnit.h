@@ -15,13 +15,13 @@ public:
 	virtual const char *GetName() { return name; } 
 	void SetName(char* myname) { strncpy(name, myname,128); }
 	virtual void GetLocation(xyLoc& s) { s=loc;}
-	virtual bool MakeMove(environment *env, OccupancyInterface<state,action> *, SimulationInfo *si, action &dir);
+	virtual bool MakeMove(environment *env, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *si, action &dir);
 	
-	virtual void OpenGLDraw(int window, environment *, SimulationInfo *);
+	virtual void OpenGLDraw(int window, environment *, SimulationInfo<state,action,environment> *);
 	void AddPatrolLocation(state &s); 
 	state& GetGoal(); // get CURRENT goal? 
 	virtual bool Done(); 
-	void UpdateLocation(environment *, state &l, bool success, SimulationInfo *si);
+	void UpdateLocation(environment *, state &l, bool success, SimulationInfo<state,action,environment> *si);
 	void LogStats(StatCollection *stats);
 	void LogFinalStats(StatCollection *stats);
 	void SetNumPatrols(int num) {numPatrols = num;}
@@ -156,7 +156,7 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 }
 
 template <class state, class action, class environment>
-bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo *si, action& dir)
+bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo<state,action,environment> *si, action& dir)
 {
 	if(Done())
 	{
@@ -276,7 +276,7 @@ void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* en
 }
 
 template <class state, class action, class environment>
-void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo *si)
+void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo<state,action,environment> *si)
 {
 	GLfloat _r,_g,_b;
 //	_r = (GLfloat)locs[currTarget].x/(GLfloat)env->GetMap()->getMapWidth();
@@ -354,7 +354,7 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 }
 
 template <class state, class action, class environment>
-void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo *si)
+void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo<state,action,environment> *si)
 { 
 	if (!success)
 	{

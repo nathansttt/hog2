@@ -40,6 +40,7 @@
 template <class state, class action, class environment>
 class Unit;
 
+template<class state, class action, class environment>
 class SimulationInfo;
 
 template <class state, class action, class environment>
@@ -49,12 +50,12 @@ public:
 	
 	virtual const char *GetName() { return "defaultUnitGroup"; }
 	
-	virtual bool MakeMove(Unit<state, action, environment> *u, environment *e, SimulationInfo *si, action& a)
+	virtual bool MakeMove(Unit<state, action, environment> *u, environment *e, SimulationInfo<state,action,environment> *si, action& a)
 	{
 		return (u->MakeMove(e, e->GetOccupancyInfo(), si,a));
 	}
 
-	virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state &loc, bool success, SimulationInfo *si)
+	virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state &loc, bool success, SimulationInfo<state,action,environment> *si)
 	{
 		u->UpdateLocation(e, loc, success, si);
 	}
@@ -98,7 +99,7 @@ public:
 	virtual void StartNewTrial(StatCollection *)
 	{ }
 	
-	virtual void OpenGLDraw(int , environment *, SimulationInfo *) { }
+	virtual void OpenGLDraw(int , environment *, SimulationInfo<state,action,environment> *) { }
 
 	virtual std::vector<Unit<state,action,environment> *> GetMembers() {return members;}
 	

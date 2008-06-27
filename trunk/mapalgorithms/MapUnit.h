@@ -13,6 +13,8 @@
 #ifndef MAPUNIT_H
 #define MAPUNIT_H
 
+typedef SimulationInfo<xyLoc,tDirection,MapEnvironment> MapSimulationInfo;
+
 /**
 * A simple map-based unit
  */
@@ -22,11 +24,11 @@ public:
 	MapUnit(int x, int y)
 	:loc(x, y) { r = 1.0; g = 0; b = 0;}
 
-	virtual void UpdateLocation(MapEnvironment *, xyLoc &l, bool, SimulationInfo *)
+	virtual void UpdateLocation(MapEnvironment *, xyLoc &l, bool, MapSimulationInfo *)
 	{ loc = l; }
 	virtual void GetLocation(xyLoc &l)
 	{ l = loc; }
-	virtual void OpenGLDraw(int window, MapEnvironment *, SimulationInfo *);
+	virtual void OpenGLDraw(int window, MapEnvironment *, MapSimulationInfo *);
 protected:
 	GLfloat r, g, b;
 	xyLoc loc;

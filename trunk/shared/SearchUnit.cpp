@@ -120,7 +120,7 @@ bool SearchUnit::getCachedMove(tDirection &dir)
 	return false;
 }
 
-bool SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, SimulationInfo *simInfo, tDirection &res)
+bool SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, AbsMapSimulationInfo *simInfo, tDirection &res)
 {
 	if (getCachedMove(res))
 		return true;
@@ -282,7 +282,7 @@ void SearchUnit::addPathToCache(path *p)
 	moves.push_back((tDirection)result);
 }
 
-void SearchUnit::updateLocation(int _x, int _y, bool success, SimulationInfo *)
+void SearchUnit::updateLocation(int _x, int _y, bool success, AbsMapSimulationInfo *)
 {
 	if (!success)
 	{
@@ -295,7 +295,7 @@ void SearchUnit::updateLocation(int _x, int _y, bool success, SimulationInfo *)
 	loc.x = _x; loc.y = _y;
 }
 
-void SearchUnit::OpenGLDraw(int , AbsMapEnvironment *ame, SimulationInfo *si)
+void SearchUnit::OpenGLDraw(int , AbsMapEnvironment *ame, AbsMapSimulationInfo *si)
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = ame->GetMap();

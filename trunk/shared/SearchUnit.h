@@ -53,13 +53,13 @@ public:
 
 	//using unit::makeMove;
 	// this is where the World says you are  
-	virtual bool MakeMove(AbsMapEnvironment *ame, OccupancyInterface<xyLoc,tDirection> *, SimulationInfo *si, tDirection &dir)
+	virtual bool MakeMove(AbsMapEnvironment *ame, OccupancyInterface<xyLoc,tDirection> *, AbsMapSimulationInfo *si, tDirection &dir)
 		{ return makeMove(ame->GetMapAbstraction(), 0, si,dir); }
-	virtual bool makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo, tDirection &dir); 
+	virtual bool makeMove(MapProvider *, reservationProvider *, AbsMapSimulationInfo *simInfo, tDirection &dir); 
 	
-	void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool success, SimulationInfo *si) { updateLocation(l.x, l.y, success, si); }
-	virtual void updateLocation(int _x, int _y, bool, SimulationInfo *);
-	virtual void OpenGLDraw(int window, AbsMapEnvironment *, SimulationInfo *);
+	void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool success, AbsMapSimulationInfo *si) { updateLocation(l.x, l.y, success, si); }
+	virtual void updateLocation(int _x, int _y, bool, AbsMapSimulationInfo *);
+	virtual void OpenGLDraw(int window, AbsMapEnvironment *, AbsMapSimulationInfo *);
 	//void printRoundStats(FILE *f);
 	void LogStats(StatCollection *stats);
 	void LogFinalStats(StatCollection *stats);

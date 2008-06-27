@@ -25,11 +25,11 @@
 #include <limits>
 
 // Somehow DBL_MAX is not defined under Linux?
-#ifndef OS_MAC
+//#ifndef OS_MAC
 //#define DBL_MAX std::numeric_limits<double>::max()//1.79769313486231500e+308;    // DBL_MAX for non Mac OS
 //#define DBL_MIN std::numeric_limits<double>::min()// DBL_MIN for non Mac OS
-#define MAXFLOAT std::numeric_limits<float>::max()
-#endif
+//#define MAXFLOAT std::numeric_limits<float>::max()
+//#endif
 
 // Floating point comparisons 
 static const double TOLERANCE = 0.000001;    // floating point tolerance

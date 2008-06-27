@@ -30,18 +30,12 @@
 #include <vector>
 #include <queue>
 #include "Unit.h"
-#include "ReservationProvider.h"
 #include "Timer.h"
 #include "FPUtil.h"
 #include "StatCollection.h"
 #include "SearchEnvironment.h"
 #include "OccupancyInterface.h"
-
-class SimulationInfo {
-public:
-	virtual ~SimulationInfo() {}
-	virtual double GetSimulationTime() = 0;
-};
+#include "SimulationInfo.h"
 
 /**
  * Private per-unit unitSimulation data.
@@ -92,18 +86,20 @@ public:
 // kMinTime - each unit goes up at least step time, but can go longer
 //            that is, max(next time, thinkingTime*thinkingPenalty + movement time*speed)
 enum tTimestep {
-	kLockStep, kRealTime, kMinTime
+	kLockStep, kRealTime, kMinTime, kUniTime
 };
 
 /**
  * The basic simulation class for the world.
  */
 template<class state, class action, class environment>
-class UnitSimulation : public SimulationInfo {
+class UnitSimulation {
 public:
 	UnitSimulation(environment *se);
+	virtual ~UnitSimulation();
 
-	virtual int AddUnit(Unit<state, action, environment> *u);
+	/*! \param timeOffset is a setting to let the unit start a little bit later */
+	virtual int AddUnit(Unit<state, action, environment> *u, double timeOffset = 0.);
 	Unit<state, action, environment> *GetUnit(unsigned int which);
 
 	int AddUnitGroup(UnitGroup<state, action, environment> *ug);
@@ -114,6 +110,7 @@ public:
 		
 	void StepTime(double);
 	double GetSimulationTime() { return currTime; }
+	double GetTimeToNextStep();
 	void SetStepType(tTimestep step) { stepType = step; }
 	tTimestep GetStepType() { return stepType; }
 
@@ -132,6 +129,10 @@ public:
 	void SetLogStats(bool val) { logStats = val; }
 	bool GetLogStats() { return logStats; }
 	StatCollection* GetStats() { return &stats; }
+	
+
+	virtual SimulationInfo<state,action,environment>* GetSimulationInfo() { return &sinfo; }
+
 protected:
 	void StepUnitTime(UnitInfo<state, action, environment> *ui, double timeStep);
 	bool MakeUnitMove(UnitInfo<state, action, environment> *theUnit, action where, double &moveCost);
@@ -145,9 +146,11 @@ protected:
 	std::vector<UnitInfo<state, action, environment> *> units;
 	std::vector<UnitGroup<state, action, environment> *> unitGroups;
 	environment *env;
-	double currTime, viewTime;
+	double currTime;
 	tTimestep stepType;
 	StatCollection stats;
+
+	SimulationInfo<state,action,environment> sinfo;
 };
 
 template<class state, class action, class environment>
@@ -155,7 +158,8 @@ UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
 {
 	env = se;
 	stepType = kRealTime;
-	currTime = 0.0;
+	penalty = 0.;
+	currTime = 0.;
 	paused = false;
 	logStats = true;
 	unitGroups.push_back(new UnitGroup<state, action, environment>);
@@ -163,7 +167,13 @@ UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
 }
 
 template<class state, class action, class environment>
-int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, environment> *u)
+UnitSimulation<state, action, environment>::~UnitSimulation() {
+	ClearAllUnits();
+	unitGroups.clear();
+}
+
+template<class state, class action, class environment>
+int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, environment> *u, double timeOffset)
 {
 	UnitInfo<state, action, environment> *ui = new UnitInfo<state, action, environment>();
 	ui->agent = u;
@@ -173,8 +183,8 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 	{
 		ui->agent->SetUnitGroup(unitGroups[0]);
 	}
-	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, env, ui->currentState, true, this);
-	ui->nextTime = currTime;
+	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, env, ui->currentState, true, &sinfo );
+	ui->nextTime = currTime + timeOffset;
 	ui->totalThinking = 0.0;
 	ui->totalDistance = 0.0;
 	ui->historyIndex = 0;
@@ -185,6 +195,7 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 		ui->stateHistory.push_back(ts);		
 	}
 	units.push_back(ui);
+	ui->agent->SetNum( units.size() - 1 );
 	return units.size()-1;
 }
 
@@ -233,8 +244,8 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 //		unitGroups.pop_back();
 //	}
 	//unitGroups.push_back(new unitGroup(this));
-	viewTime = 0;
-	currTime = 0;
+	sinfo = SimulationInfo<state,action,environment>();
+	currTime = 0.;
 }
 
 template<class state, class action, class environment>
@@ -271,6 +282,20 @@ bool UnitSimulation<state,action,environment>::Done()
 //	}
 //	return 0;
 //}
+
+template<class state, class action, class environment>
+double UnitSimulation<state,action,environment>::GetTimeToNextStep() {
+	double minimum = DBL_MAX;
+
+	for( unsigned int i = 0; i < units.size(); i++ ) {
+		if( minimum > units[i]->nextTime - currTime )
+			minimum = units[i]->nextTime - currTime;
+	}
+	if( minimum < 1./30. )
+		fprintf( stderr, "Warning: GetTimeToNextStep sank under 1./30. (%g).\n", minimum );
+	return minimum;
+}
+
 
 template<class state, class action, class environment>
 void UnitSimulation<state, action, environment>::StepTime(double timeStep)
@@ -318,10 +343,7 @@ void UnitSimulation<state, action, environment>::DoPostTimestepCalc()
 template<class state, class action, class environment>
 void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, action, environment> *theUnit, double timeStep)
 {
-	if (currTime < theUnit->nextTime)
-	{
-		return;
-	}
+	if (currTime < theUnit->nextTime) return;
 
 	double moveThinking, locThinking, moveTime;
 	action where;
@@ -330,7 +352,7 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	
 	t.startTimer();
 	// need to do if/then check - makemove ok or not? need to stay where you are? 
-	if(u->GetUnitGroup()->MakeMove(u, env, this,where))
+	if(u->GetUnitGroup()->MakeMove(u, env, &sinfo,where))
 	{
 		moveThinking = t.endTimer();
 		theUnit->totalThinking += moveThinking;
@@ -341,7 +363,7 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 		bool success = MakeUnitMove(theUnit, where, moveTime);
 
 		t.startTimer();
-		u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, this);
+		u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, &sinfo);
 		locThinking = t.endTimer();
 		theUnit->totalThinking += locThinking;
 		if (logStats)
@@ -351,6 +373,9 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 		{
 			case kLockStep:
 				theUnit->nextTime = currTime + timeStep;
+				break;
+			case kUniTime:
+				theUnit->nextTime = currTime + 1.;
 				break;
 			case kRealTime:
 				theUnit->nextTime += (locThinking+moveThinking)*penalty + moveTime;
@@ -364,8 +389,11 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	}
 	else // stay where you are
 	{
-		theUnit->nextTime += theUnit->agent->GetSpeed();
-		theUnit->agent->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, true, this);	
+		if( stepType == kUniTime )
+			theUnit->nextTime = currTime + 1.;
+		else
+			theUnit->nextTime += theUnit->agent->GetSpeed();
+		theUnit->agent->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, true, &sinfo);	
 	}
 
 }
@@ -387,10 +415,7 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 		
 		if (envInfo)
 		{
-// update here!
 			envInfo->MoveUnitOccupancy(oldState, theUnit->currentState);
-			//envInfo->SetStateOccupied(oldState, false);
-			//envInfo->SetStateOccupied(theUnit->currentState, true);
 		}
 	}
 	else {
@@ -405,192 +430,21 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	return success;
 }
 
+/* ATTENTION!!!! This function gives a way the current real information,
+ * this is a security issue but for performance we still did it!
+*/
 template<class state, class action, class environment>
 void UnitSimulation<state, action, environment>::OpenGLDraw(int window)
 {
 	env->OpenGLDraw(window);
 	for (unsigned int x = 0; x < units.size(); x++)
 	{
-		units[x]->agent->OpenGLDraw(window, env, this);
+		units[x]->agent->OpenGLDraw(window, env, &sinfo);
 	}
 	
 	for (unsigned int x = 0; x <unitGroups.size(); x++)
-		unitGroups[x]->OpenGLDraw(window,env,this);
+		unitGroups[x]->OpenGLDraw(window,env, &sinfo);
 }
 
-//
-//
-//class unitSimulation : public MapProvider, reservationProvider, public SimulationInfo {
-//public:
-//	unitSimulation(MapAbstraction *, bool keepStats = false);
-//	virtual ~unitSimulation();
-//	
-//	bool saveHistory(char *, bool includeMap = true);
-//	bool loadHistory(char *);
-//	
-//	virtual void addUnit(unit *);
-//	virtual void addUnit(unit *, bool block);
-//	virtual void addUnitGroup(unitGroup *);
-//
-//	unitGroup *getUnitGroup(int which);
-//	unit *getUnit(int which);
-//	unit *findUnit(int x, int y);
-//
-//	void clearAllUnits();
-//
-//	virtual void advanceTime(double amount);
-//	void setSimulationPaused(bool val) { pause = val; }
-//	bool getSimulationPaused() { return pause; }
-//	/** return the current inside the simulation */
-//	double getSimulationTime() { return currTime; }
-//	/** return the current time being drawn */
-//	double getDisplayTime() { return viewTime; }
-//	void setDisplayTime(double val);
-//	void offsetDisplayTime(double val);
-//	
-//	
-//	// simplify timing modes
-//	void setRealTime(bool);
-//	bool getRealTime() { return realTime; }
-//	inline void setLockstepTime(bool b) { lockstepTime = b; }
-//	bool getLockstepTime() { return lockstepTime; }
-//	/** Set if the simulation is asynchronous. */
-//	void setAsynchronous() { asynch = true; }
-//	void setSynchronous() { asynch = false; }
-//
-//
-//	void OpenGLDraw();
-//	void print(bool forceOutput = true);
-//	virtual bool done();
-//
-//	/** turns unit blocking on and off */
-//	void setUseBlocking(bool val) { blocking = val; }
-//	
-//	/** setPenalty for thinking. Sets the multiplier used to penalize thinking time. */
-//	void setPenalty(double pen) { penalty = pen; }
-//	/** getPenalty for thinking. Gets the multiplier used to penalize thinking time. */
-//	double getPenalty() { return penalty; }
-//
-//	
-//	//////////////////////////////////////////////////
-//	// this may move to the environment -- have to check
-//	/** reservationProvider interface */
-//	inline bool nodeOccupied(node *currNode)
-//	{ if (currNode->GetLabelL(kAbstractionLevel) != 0) return false;
-//		return tileOccupied((unsigned int)currNode->GetLabelL(kFirstData),
-//		                    (unsigned int)currNode->GetLabelL(kFirstData+1)); }
-//	inline bool tileOccupied(int x, int y) { return bv->get(y*map_width+x); }
-//	/* temporal reservations not supported by unitSimulation */
-//	virtual bool canMove(node *, node *, double, unit *) { return true;}
-//	virtual bool reserveMove(node *, node *, double, unit *) { return true; }
-//	virtual bool clearMove(node *, node *, double, unit *) { return true; }
-//	virtual void clearAllReservations() {}
-//
-//	
-//	/** Toggle open GL display */
-//	void toggleNoOpenGLDraw() { noOpenGLDraw = !noOpenGLDraw; }
-//	//void setLogFile(FILE *);
-//	
-//	StatCollection *getStats() { return &stats; }
-//	void printCollectedStats(bool v) { stats.enablePrintOutput(v); }
-//
-//
-//	//////////////////////////////////////////////////
-//	// environment variables, don't belong in unit simulation!
-//	void setmapAbstractionDisplay(int _whichMap=kUnitSimulationMap);
-//	/** Return which map is being currently displayed. */
-//	int getDisplayMapNumber() { return which_map; }
-//	
-//	/** Returns the underlying map. */
-//	Map *GetMap() { return map; }
-//	/** Returns the abstract map from the simulation. */
-//	MapAbstraction *GetMapAbstraction();
-//	/** set chance for move failing. This is the chance that a move will just fail. */
-//	/** Returns the nth groups abstract map. (0 is the actual map of the world.) */
-//	MapAbstraction *GetMapAbstraction(int _which);
-//	/** Returns the abstract map currently being displayed. */
-//	MapAbstraction *getMapAbstractionDisplay();
-//	/** Cycle which abstract map should be displayed. */
-//	void cyclemapAbstractionDisplay();
-//	void setMoveStochasticity(double _stochasticity) { stochasticity = _stochasticity; }
-//	double getMoveStochasticity() { return stochasticity; }
-//	bool canCrossDiagonally() { return (!disallowDiagonalCrossingMoves); }
-//	void setCanCrossDiagonally(bool cross) { disallowDiagonalCrossingMoves = !cross; }
-//	void getRandomLocation(int &x, int &y, tTerrain terrain = kGround);
-//	void getRandomLocation(int x1, int y1, int &x2, int &y2, tTerrain terrain = kGround);
-//	void getRandomLocations(int &x1, int &y1, int &x2, int &y2, tTerrain terrain = kGround);
-//	
-//	//////////////////////////////////////////////////
-//	// ???
-//	bool setIgnoreOnTarget(unit*,bool);
-//
-//protected:
-//	unitInfo *findUnit(unit *);	
-//	virtual void doPreTimestepCalc();
-//	virtual void doTimestepCalc();
-//	virtual void doPostTimestepCalc();
-//	void stepUnitTime(unitInfo *);
-//	void setAgentLocation(unitInfo *, bool success = false, bool timer = false);
-//	void updateMap();
-//	bool updatemapAbstraction();
-//	void drawBlockedSquare(int x, int y);
-//// 	void startTimer();
-//// 	double endTimer();
-//	bool findUnitDisplayTime(unitInfo *ui);
-//	
-//	Map *map;
-//	//FILE *LOGFILE;
-//	MapAbstraction *aMap;
-//	bitVector *bv;
-//	int which_map;						// the number of the group to display info for
-//	int map_width, map_height, map_revision;
-//	std::vector<unitInfo *> units;
-//	std::vector<unitInfo *> displayUnits;
-//	std::vector<unitGroup *> unitGroups;
-//	std::priority_queue<const unitInfo*, std::vector<unitInfo *>, unitInfoCompare> moveQ;
-//	double currTime, viewTime;
-//	bool asynch;
-//	bool blocking;		// this is the default for all units added
-//	bool realTime;
-//	bool pause;
-//	bool lockstepTime;      // Finn/Wes - individual unit times will be update exactly according to the amount specified to advanceTime
-//	double penalty;
-//	double stochasticity;
-//	bool unitsMoved;
-//	bool disallowDiagonalCrossingMoves;
-//	double currDist;        // total distance moved so far
-//	bool noOpenGLDraw;		// turns display on/off
-//	bool keepHistory; // keep action history
-//	
-//	StatCollection stats;
-//};
-//
-//#define LOCAL_PATH
 
 #endif
-
-//
-//struct xyLoc {
-//	uint16_t x;
-//	uint16_t y;
-//};
-//
-//class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
-//{
-//public:
-//	MapEnvironment(Map *m);
-//private:
-//	Map *m;
-//};
-//
-//class AbstractMapEnvironment : public SearchEnvironment<node *, edge *>
-//{
-//public:
-//	AbstractMapEnvironment(MapAbstraction *);
-//private:
-//	MapAbstraction *ma;
-//};
-//
-//class AbstractMapUnit : public Unit<node *, edge *>
-//{
-//}

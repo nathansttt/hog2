@@ -22,8 +22,8 @@ public:
 	:MapUnit(x, y)
   { lastIndex = 0; }
 	const char *GetName() { return "RHRUnit"; }
-	bool MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, SimulationInfo *, tDirection &);
-	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc &, bool, SimulationInfo *);
+	bool MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &);
+	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc &, bool, MapSimulationInfo *);
 private:
 	int lastIndex;
 	xyLoc loc;

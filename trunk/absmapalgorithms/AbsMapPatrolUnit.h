@@ -22,15 +22,15 @@ public:
 	
 	virtual bool done() { return false; }
 	
-	virtual bool makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo, tDirection &);
-	virtual bool MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, SimulationInfo *si, tDirection &dir){ return makeMove(ame->GetMapAbstraction(), 0, si,dir); }
-	//void OpenGLDraw(int window, MapProvider *, SimulationInfo *);
-	virtual void OpenGLDraw(int window, AbsMapEnvironment *, SimulationInfo *);
+	virtual bool makeMove(MapProvider *, reservationProvider *, AbsMapSimulationInfo *simInfo, tDirection &);
+	virtual bool MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, AbsMapSimulationInfo *si, tDirection &dir){ return makeMove(ame->GetMapAbstraction(), 0, si,dir); }
+	//void OpenGLDraw(int window, MapProvider *, AbsMapSimulationInfo *);
+	virtual void OpenGLDraw(int window, AbsMapEnvironment *, AbsMapSimulationInfo *);
 	void addPatrolLocation(xyLoc);
 	xyLoc GetGoal();
 		
-	void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool success, SimulationInfo *si) { updateLocation(l.x, l.y, success, si); }	
-	void updateLocation(int _x, int _y, bool worked, SimulationInfo *)
+	void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool success, AbsMapSimulationInfo *si) { updateLocation(l.x, l.y, success, si); }	
+	void updateLocation(int _x, int _y, bool worked, AbsMapSimulationInfo *)
 	{ loc.x = _x; loc.y = _y; if (!worked) { moves.resize(0); if (currTarget != -1) currTarget = 0; } }
 	void logStats(StatCollection *stats);
 		void LogFinalStats(StatCollection *stats);

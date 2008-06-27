@@ -62,7 +62,7 @@ AbsMapPatrolUnit::~AbsMapPatrolUnit()
 {
 }
 
-bool AbsMapPatrolUnit::makeMove(MapProvider *mp, reservationProvider *, SimulationInfo *, tDirection &dir)
+bool AbsMapPatrolUnit::makeMove(MapProvider *mp, reservationProvider *, AbsMapSimulationInfo *, tDirection &dir)
 {
 	std::cout<<"CurrTarget "<<currTarget<<std::endl;
 	MapAbstraction *aMap = mp->GetMapAbstraction();
@@ -111,7 +111,7 @@ double AbsMapPatrolUnit::goToLoc(MapAbstraction *aMap, int which)
 	return pathCost;
 }
 
-void AbsMapPatrolUnit::OpenGLDraw(int window, AbsMapEnvironment *ame, SimulationInfo *si)
+void AbsMapPatrolUnit::OpenGLDraw(int window, AbsMapEnvironment *ame, AbsMapSimulationInfo *si)
 
 {
 	GLdouble xx, yy, zz, rad;

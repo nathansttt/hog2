@@ -9,7 +9,7 @@
 
 #include "AbsMapUnit.h"
 
-void AbsMapUnit::OpenGLDraw(int , AbsMapEnvironment *me, SimulationInfo *)
+void AbsMapUnit::OpenGLDraw(int , AbsMapEnvironment *me, AbsMapSimulationInfo *)
 {
 	Map *map = me->GetMap();
 	GLdouble xx, yy, zz, rad;

@@ -35,7 +35,7 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			
 		virtual const char *GetName() { return "WeightedUnitGroup"; }
 	
-		virtual bool MakeMove(Unit<state, action, environment> *u, environment *e, SimulationInfo *si, action& a)
+		virtual bool MakeMove(Unit<state, action, environment> *u, environment *e, SimulationInfo<state,action,environment> *si, action& a)
 		{
 			if(myE != e)
 			{
@@ -178,7 +178,7 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			return -1;
 		}
 
-		virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state &loc, bool success, SimulationInfo *si)
+		virtual void UpdateLocation(Unit<state, action, environment> *u, environment *e, state &loc, bool success, SimulationInfo<state,action,environment> *si)
 		{
 			if(myE != e)
 			{
@@ -262,7 +262,7 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			currDrawEnv = (currDrawEnv + 1)%(unitWme.size()+1);
 		}
 		
-		virtual void OpenGLDraw(int window, environment *, SimulationInfo *) 
+		virtual void OpenGLDraw(int window, environment *, SimulationInfo<state,action,environment> *) 
 		{ 
 			if(currDrawEnv == unitWme.size())
 				wme->OpenGLDraw(window);
