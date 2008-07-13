@@ -668,7 +668,7 @@ void RunScenario(int id)
 					c30.push_back(wug->ComputeArrowMetric(true,time,false,30));
 					c30n.push_back(wug->ComputeArrowMetric(true,time,true,30));
 					c40.push_back(wug->ComputeArrowMetric(true,time,false,40));
-					c40n.push_back(wug->ComputeArrowMetric(true,time,false,40));
+					c40n.push_back(wug->ComputeArrowMetric(true,time,true,40));
 					//c1.push_back(wug->ComputeArrowMetric(time,true));
 					//c2.push_back(wug->ComputeArrowMetric(time,false));
 					//std::cout<<time<<" "<<normMetric<<" "<<noNormMetric<<std::endl;
