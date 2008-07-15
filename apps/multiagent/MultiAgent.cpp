@@ -249,19 +249,21 @@ void CreateSimulation(int id)
 		
 	// Only show 1 copy of the map
 	
-/*	SetNumPorts(id, 1);
-	Map *map;
-	if (gDefaultMap[0] == 0)
-	{
-		map = new Map(60, 60);
-	}
-	else
-		map = new Map(gDefaultMap);
-
-	map->setTileSet(kWinterTile);
-	
-//	unitSims[id]->SetPaused(true);
-	switch(envType)
+// 	SetNumPorts(id, 1);
+// 	Map *map;
+// 	if (gDefaultMap[0] == 0)
+// 	{
+// 		map = new Map(60, 60);
+// 	}
+// 	else
+// 		map = new Map(gDefaultMap);
+// 
+// 	map->setTileSet(kWinterTile);
+// 		env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,absSize));
+// 	unitSims.resize(id+1);
+// 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
+// 	unitSims[id]->SetPaused(true);
+ /*	switch(envType)
 	{
 		case 0:
 		{
