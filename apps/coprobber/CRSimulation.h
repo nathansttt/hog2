@@ -368,6 +368,7 @@ void CRSimulation<state, action, environment>::StepUnitTime( unsigned int index,
 		} else {
 			t.startTimer();
 			u->UpdateLocation( env, theUnit->currentState, success, s );
+			locThinking = t.endTimer();
 		}
 
 		theUnit->totalThinking += locThinking;

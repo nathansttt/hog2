@@ -2,12 +2,15 @@
 #include <vector>
 #include <math.h>
 #include <sys/times.h>
+#include "Minimax.h"
 #include "MapCliqueAbstraction.h"
 #include "MultilevelCopRobberGame.h"
 #include "RobberUnit.h"
 #include "MySearchUnit.h"
 #include "CRSimulation.h"
 #include "PRAStar.h"
+#include "MinimaxAStar.h"
+#include "TIDAStar.h"
 
 std::vector<CRAbsMapSimulation *> unitSims;
 int mazeSize = 10;
@@ -17,12 +20,14 @@ int mazeSize = 10;
 ------------------------------------------------------------------------------*/
 int main(int argc, char* argv[])
 {
-
+/*
+	// VISUALIZATION
 	InstallHandlers();
 	RunHOGGUI( argc, argv );
-
+*/
 /*
-	Map *m = new Map( "../../maps/local/test_minimax_7.map" );
+	// VALUE ITERATION WITH MULTIPLE LEVELS
+	Map *m = new Map( "../../maps/local/test_coprobber_1.map" );
 
 	unsigned int num_levels = 1;
 	unsigned int num_iterations = 0;
@@ -30,7 +35,7 @@ int main(int argc, char* argv[])
 	double gamma = 1.0;
 
 	MapCliqueAbstraction *mca = new MapCliqueAbstraction( m );
-	MultilevelCopRobberGame* mcrgame = new MultilevelCopRobberGame( mca, 1, true, true );
+	MultilevelCopRobberGame* mcrgame = new MultilevelCopRobberGame( mca, 1, false, true );
 	double **V;
 	unsigned int *iter;
 	mcrgame->GetExpectedStateRewards( 0, gamma, 0.01, precision, V, iter, num_levels, num_iterations );
@@ -44,9 +49,8 @@ int main(int argc, char* argv[])
 	delete mca;
 */
 
-
-
 /*
+	// A NORMAL VALUE ITERATION WITHOUT LEVELS
 	Graph *g = mca->GetAbstractGraph( 0 );
 	MultilevelGraphHeuristic *gh = new MultilevelGraphHeuristic( mca, 0 );
 	GraphEnvironment *genv = new GraphEnvironment( g, gh );
@@ -69,6 +73,7 @@ int main(int argc, char* argv[])
 
 
 /*
+	// OUTPUT OF NODE NUMBERS FOR THE MAP
 	Graph *g = mca->GetAbstractGraph( 0 );
 	node *n = NULL;
 	recVec rv;
@@ -81,6 +86,7 @@ int main(int argc, char* argv[])
 */
 
 /*
+	// CONVERGENCE/SPEED MEASUREMENTS FOR VALUE ITERATION
 	int i, num_cops;
 	unsigned int iter = 0;
 	double precision, epsilon, *V = NULL, gamma;
@@ -154,11 +160,113 @@ int main(int argc, char* argv[])
 
 	fclose( fhandler );
 */
+
+/*
+	// MINIMAX A*
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level; // we do not need this!
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+
+	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *mastar = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, true, true, 0. );
+
+	std::vector<xyLoc> pos;
+	std::vector<std::vector<xyLoc> > path;
+	pos.push_back( pos_robber ); pos.push_back( pos_cop );
+	double minimax = mastar->minimax( pos, path );
+	printf( "result: %g\n", minimax );
+	printf( "the path:\n" );
+	for( unsigned int i = 0; i < path.size(); i++ ) {
+		for( unsigned int j = 0; j < path[i].size(); j++ ) {
+			printf( "(%u %u) ", path[i][j].x, path[i][j].y );
+		}
+		printf( "\n" );
+	}
+
+	delete mastar;
+	delete env;
+*/
+
+
+/*
+	// NORMAL MINIMAX
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_depth;
+	double minimax;
+	std::vector<Minimax<xyLoc,tDirection,MapEnvironment>::CRState> path;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+
+	Minimax<xyLoc,tDirection,MapEnvironment> *minclass = new Minimax<xyLoc,tDirection,MapEnvironment>( env, true );
+
+	std::vector<xyLoc> pos;
+	pos.push_back( pos_robber ); pos.push_back( pos_cop );
+
+	minimax = minclass->minimax( pos, path, true, max_depth );
+
+	printf( "result: %f\n", minimax );
+	printf( "reached level %d in the tree\n", minclass->max_depth_reached );
+	fprintf( stdout, "solution is:\n" );
+	for( unsigned int i = 0; i < path.size(); i++ ) {
+		fprintf( stdout, "(%u,%u) (%u,%u)\n", path[i][0].x, path[i][0].y, path[i][1].x, path[i][1].y );
+		if( (i-1) % 2 ) fprintf( stdout, "----\n" );
+	}
+
+	delete minclass;
+	delete env;
+*/
+
+
+
+	// TIDA*
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+
+	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+
+	std::vector<xyLoc> pos;
+	pos.push_back( pos_robber ); pos.push_back( pos_cop );
+	std::vector<TIDAStar<xyLoc,tDirection,MapEnvironment>::CRState> path;
+
+	double minimax = tidastar->tida( pos, max_recursion_level, path, 1. );
+
+	fprintf( stdout, "tida result: %f\n", minimax );
+	fprintf( stdout, "maximal depth of the computation tree: %u\n", tidastar->maxDepthReached );
+	fprintf( stdout, "solution is:\n" );
+	for( unsigned int i = 0; i < path.size(); i++ ) {
+		fprintf( stdout, "(%u,%u) (%u,%u)\n", path[i][0].x, path[i][0].y, path[i][1].x, path[i][1].y );
+		if( (i-1) % 2 ) fprintf( stdout, "----\n" );
+	}
+
+	delete tidastar;
+	delete env;
+
+
 	return 0;
 }
 
+
 void CreateSimulation( int id ) {
-	Map *map = new Map( "../../maps/local/test_minimax_7.map" );
+	Map *map = new Map( "../../maps/local/test_coprobber_1.map" );
 /*
 	if( gDefaultMap[0] == 0 ) {
 		map = new Map( mazeSize, mazeSize );
@@ -173,7 +281,7 @@ void CreateSimulation( int id ) {
 
 	// the Robber
 	MultilevelCopRobberGame* mcrgame = new MultilevelCopRobberGame( mca, 1, true, true );
-	RobberUnit *ru = new RobberUnit( xyLoc(5,16), mcrgame, "data/markov_level0_map7.stat" );
+	RobberUnit *ru = new RobberUnit( xyLoc(5,10), mcrgame, "data/markov_level0_map1.stat" );
 	ru->SetSpeed( 1. );
 	
 	unitSims.resize( id + 1 );
@@ -184,7 +292,7 @@ void CreateSimulation( int id ) {
 	unitSims[id]->SetStepType( kUniTime );
 
 	// and here come the cops
-	MySearchUnit *c1 = new MySearchUnit( 1, 16, ru->GetNum(), new praStar() );
+	MySearchUnit *c1 = new MySearchUnit( 1, 10, ru->GetNum(), new praStar() );
 	c1->SetSpeed( 1. );
 	unitSims[id]->AddUnit( c1, 1. );
 //	MySearchUnit *c2 = new MySearchUnit( 1, 8, ru->GetNum(), new praStar() );
@@ -265,4 +373,37 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) {
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType) {
 	return false;
+}
+
+
+
+void parseCommandLineParameters( int argc, char* argv[], Map* &m, xyLoc &pos_cop, xyLoc &pos_robber, int &max_recursion_level ) {
+	int curr = 1;
+	int x,y;
+
+	if( argc < 6 ) {
+		fprintf( stderr, "Syntax: followme -map <map> -pc <pos_cop> -pr <pos_robber> -rlevel <max_recursion_level>\n" );
+		fprintf( stderr, "where <pos_cop>/<pos_robber> is of the form x,y\n" );
+		exit(1);
+	}
+
+	while( curr < argc ) {
+		if( strcmp( argv[curr], "-map" ) == 0 ) {
+			m = new Map( argv[curr+1] );
+		}
+		if( strcmp( argv[curr], "-pc" ) == 0 ) {
+			sscanf( argv[curr+1], "%d,%d", &x, &y );
+			pos_cop = xyLoc( x, y );
+		}
+		if( strcmp( argv[curr], "-pr" ) == 0 ) {
+			sscanf( argv[curr+1], "%d,%d", &x, &y );
+			pos_robber = xyLoc( x, y );
+		}
+		if( strcmp( argv[curr], "-rlevel" ) == 0 ) {
+			sscanf( argv[curr+1], "%d", &max_recursion_level );
+		}
+			
+		curr += 2;
+	}
+	return;
 }
