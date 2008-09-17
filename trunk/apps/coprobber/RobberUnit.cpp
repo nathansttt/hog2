@@ -236,6 +236,7 @@ CopRobberGame::CRAction RobberUnit::MakeSimultaneousMove( CopRobberGame::CRState
 	n_my_actions  = my_actions.size();
 	n_opp_actions = opp_actions.size();
 
+/*
 	printf( "Robber Actions: " );
 	for( i = 0; i < n_my_actions; i++ ) {
 		if( my_actions[i].noaction )
@@ -252,6 +253,7 @@ CopRobberGame::CRAction RobberUnit::MakeSimultaneousMove( CopRobberGame::CRState
 			printf( "%u=>%u ", opp_actions[h][1].a.from, opp_actions[h][1].a.to );
 	}
 	printf( "\n" );
+*/
 
 	if( n_opp_actions == 0 ) return CopRobberGame::CRAction();
 	if( n_my_actions  == 0 ) return CopRobberGame::CRAction();
@@ -280,6 +282,7 @@ CopRobberGame::CRAction RobberUnit::MakeSimultaneousMove( CopRobberGame::CRState
 		}
 	}
 
+/*
 	printf( "M = \n" );
 	for( i = 0; i < M->size1; i++ ) {
 		for( j = 0; j < M->size2; j++ ) {
@@ -287,6 +290,7 @@ CopRobberGame::CRAction RobberUnit::MakeSimultaneousMove( CopRobberGame::CRState
 		}
 		printf( "\n" );
 	}
+*/
 
 	p1 = gsl_vector_alloc( n_opp_actions );
 	p2 = gsl_vector_alloc( n_my_actions );
@@ -294,7 +298,7 @@ CopRobberGame::CRAction RobberUnit::MakeSimultaneousMove( CopRobberGame::CRState
 	int k;
 	jrobinson( M, ROBBERUNIT_EPSILON, p1, p2, k );
 
-	printf( "p2 is:\n" ); gsl_vector_fprintf( stdout, p2, "%g" );
+/*	printf( "p2 is:\n" ); gsl_vector_fprintf( stdout, p2, "%g" ); */
 
 	srand( time( NULL ) );
 	rand1 = (double)rand() / (double)RAND_MAX;
@@ -305,7 +309,7 @@ CopRobberGame::CRAction RobberUnit::MakeSimultaneousMove( CopRobberGame::CRState
 		else
 			rand2 += gsl_vector_get( p2, i );
 	}
-	printf( "selection is %u\n", i );
+/*	printf( "selection is %u\n", i ); */
 
 	gsl_matrix_free( M );
 	gsl_vector_free( p1 );
