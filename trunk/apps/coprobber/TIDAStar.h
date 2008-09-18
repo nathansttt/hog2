@@ -1,6 +1,9 @@
 #include <vector>
 #include "SearchEnvironment.h"
 #include "MultiAgentEnvironment.h"
+#include "Minimax.h" // for the function CRHash
+#include <ext/hash_set>
+#include <map>
 
 #ifndef TIDASTAR_H
 #define TIDASTAR_H
@@ -17,6 +20,47 @@ class TIDAStar {
 
 	typedef typename MultiAgentEnvironment<state,action>::MAState CRState;
 
+
+	// SearchCache for the path from the root to the current node
+	struct CRStateHash {
+		size_t operator()( const CRState *s ) const {
+			return CRHash<state>( *s );
+		}
+	};
+	struct CRStateEqual {
+		bool operator()( const CRState *c1, const CRState *c2 ) const {
+			return ( *c1 == *c2 );
+		}
+	};
+	typedef __gnu_cxx::hash_set<CRState*, CRStateHash, CRStateEqual> SearchCache;
+
+	// transposition tables
+	class TPEntry {
+		public:
+		TPEntry( CRState _pos, double _value = 0. ): pos(_pos), value(_value) {};
+		TPEntry( CRState _pos, std::vector<CRState> _path, double _value = 0. ): pos(_pos),path(_path),value(_value) {};
+		CRState pos; // the node that has to be stored
+		std::vector<CRState> path; // path from the leafs to this node
+		double value;
+	};
+	struct TPEntryHash {
+		size_t operator()( const TPEntry &e ) const {
+			return CRHash<state>( e.pos );
+		}
+	};
+	struct TPEntryEqual {
+		bool operator()( const TPEntry &e1, const TPEntry &e2 ) const {
+			return( e1.pos == e2.pos );
+		}
+	};
+
+	typedef __gnu_cxx::hash_set<TPEntry, TPEntryHash, TPEntryEqual> TranspositionTable;
+	typedef std::map<double, TranspositionTable> GTTables;
+	typedef std::pair<double, TranspositionTable> GTTables_Pair;
+
+
+
+	// constructor
 	TIDAStar( environment *_env, bool _canPause ):
 		maxDepthReached(0),
 		env(_env), canPause(_canPause) {};
@@ -38,7 +82,11 @@ class TIDAStar {
 	environment *env;
 	bool canPause;
 	unsigned int nodesExpanded, nodesTouched;
+	// caching the path from the root to the current node (during the computation)
+	SearchCache min_scache, max_scache;
 
+	// transposition table
+	GTTables min_gttables, max_gttables;
 };
 
 
@@ -56,6 +104,14 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 
 	maxDepthReached = maxDepth;
 
+	// just to make sure
+	min_scache.clear();
+	max_scache.clear();
+
+	// just to make sure
+	min_gttables.clear();
+	max_gttables.clear();
+
 	do {
 		b = c;
 //		fprintf( stdout, "set bound to b = %f\n", b );
@@ -67,6 +123,14 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 //			fprintf( stdout, "(%u,%u)(%u,%u) => ", path[i][0].x, path[i][0].y, path[i][1].x, path[i][1].y );
 //		}
 //		fprintf( stdout, "\n" );
+
+		// the temporary search cache should be empty
+		assert( min_scache.empty() );
+		assert( max_scache.empty() );
+
+		min_gttables.clear();
+		max_gttables.clear();
+
 	} while( c > b ); // until c <= b
 
 	// turn the path around to have the path from the root to the leafs
@@ -92,13 +156,66 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCo
 		path.push_back( pos ); // keep track of our terminal position
 		return TerminalCost( pos );
 	}
+	// determine whether we yet encountered this position on the
+	// path from the root to this node
+	// technically we need this to make the game tree finite
+	// although this is not needed in TIDA* (only in MAB, see there)
+	if( minFirst ) {
+		if( min_scache.find( &pos ) != min_scache.end() )
+			return DBL_MAX;
+	} else {
+		if( max_scache.find( &pos ) != max_scache.end() )
+			return DBL_MAX;
+	}
 	if( bound < weight * MinHCost( pos, minFirst ) + gCost ) {
 		return (weight * MinHCost( pos, minFirst ));
 	}
-//	if( maxDepth <= 0 ) {
-//		fprintf( stdout, "=> %f\n", bound-gCost );
-//		return bound - gCost;
-//	}
+
+	if( maxDepth <= 0 ) {
+		return bound - gCost;
+	}
+
+	// transposition table lookup
+	TPEntry mytpentry( pos );
+	typename GTTables::iterator gttit;
+	typename TranspositionTable::iterator tit;
+	if( minFirst ) {
+		gttit = min_gttables.find( gCost );
+		if( gttit != min_gttables.end() ) {
+			// if a transposition table for this gCost was found
+			tit = gttit->second.find( mytpentry );
+			if( tit != gttit->second.end() ) {
+				path = tit->path;
+				return tit->value;
+			}
+		} else {
+			// else create a new transposition table for this gCost
+			GTTables_Pair mypair;
+			mypair.first = gCost;
+			min_gttables.insert( mypair );
+		}
+	} else {
+		gttit = max_gttables.find( gCost );
+		if( gttit != max_gttables.end() ) {
+			tit = gttit->second.find( mytpentry );
+			if( tit != gttit->second.end() ) {
+				path = tit->path;
+				return tit->value;
+			}
+		} else {
+			GTTables_Pair mypair;
+			mypair.first = gCost;
+			max_gttables.insert( mypair );
+		}
+	}
+
+
+	// push the current node on the path cache
+	if( minFirst )
+		min_scache.insert( &pos );
+	else
+		max_scache.insert( &pos );
+
 
 	double result, temp, c;
 	std::vector<state> neighbors;
@@ -174,6 +291,22 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCo
 		}
 	}
 
+	// cleanup
+	// update the list of moves from the root to this nodes parent
+	if( minFirst )
+		min_scache.erase( &pos );
+	else
+		max_scache.erase( &pos );
+
+	// store the current value
+	mytpentry.path = path;
+	mytpentry.value = result;
+	if( minFirst ) {
+		min_gttables.find( gCost )->second.insert( mytpentry );
+	} else {
+		max_gttables.find( gCost )->second.insert( mytpentry );
+	}
+
 	return result;
 }
 
@@ -221,6 +354,6 @@ bool TIDAStar<state,action,environment>::GoalTest( CRState &pos ) {
 template<class state, class action, class environment>
 double TIDAStar<state,action,environment>::TerminalCost( CRState& ) {
 	return 0.;
-}
+};
 
 #endif

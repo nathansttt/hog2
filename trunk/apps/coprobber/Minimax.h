@@ -1,4 +1,5 @@
 #include <ext/hash_set>
+#include <map>
 #include <vector>
 #include <math.h>
 #include "Map2DEnvironment.h"
@@ -10,7 +11,7 @@
 
 // hash function definition
 template<class state>
-uint64_t CRHash( std::vector<state> &pos );
+uint64_t CRHash( const std::vector<state> &pos );
 
 /*!
 	two players minimax implementation
@@ -23,19 +24,44 @@ class Minimax {
 	// type definitions
 	typedef typename MultiAgentEnvironment<state,action>::MAState CRState;
 
+	// SearchCache for the path from the root to the current node
 	struct CRStateHash {
 		size_t operator()( CRState *s ) const {
 			return CRHash<state>( *s );
 		}
 	};
-
 	struct CRStateEqual {
 		bool operator()( const CRState *c1, const CRState *c2 ) const {
 			return ( *c1 == *c2 );
 		}
 	};
-
 	typedef __gnu_cxx::hash_set<CRState*, CRStateHash, CRStateEqual> SearchCache;
+
+	// transposition tables
+	class TPEntry {
+		public:
+		TPEntry( CRState _pos, double _value = 0. ): pos(_pos), value(_value) {};
+		TPEntry( CRState _pos, std::vector<CRState> _path, double _value = 0. ): pos(_pos),path(_path),value(_value) {};
+		CRState pos; // the node that has to be stored
+		std::vector<CRState> path; // path from the leafs to this node
+		double value;
+	};
+	struct TPEntryHash {
+		size_t operator()( const TPEntry &e ) const {
+			return CRHash<state>( e.pos );
+		}
+	};
+	struct TPEntryEqual {
+		bool operator()( const TPEntry &e1, const TPEntry &e2 ) const {
+			return( e1.pos == e2.pos );
+		}
+	};
+
+	typedef __gnu_cxx::hash_set<TPEntry, TPEntryHash, TPEntryEqual> TranspositionTable;
+	typedef std::map<double, TranspositionTable> GTTables;
+	typedef std::pair<double, TranspositionTable> GTTables_Pair;
+
+
 
 	// constructor
 	Minimax( environment *_env, bool _canPause ):
@@ -69,6 +95,8 @@ class Minimax {
 	// caching the path from the root to the current node (during the computation)
 	SearchCache min_scache, max_scache;
 
+	// transposition table
+	GTTables min_gttables, max_gttables;
 };
 
 
@@ -108,11 +136,19 @@ double Minimax<state,action,environment>::minimax( CRState pos, std::vector<CRSt
 	min_scache.clear();
 	max_scache.clear();
 
+	// just to make sure
+	min_gttables.clear();
+	max_gttables.clear();
+
 	result = minimax_help( pos, path, minFirst, max_depth, DBL_MIN, DBL_MAX );
 
 	// the temporary search cache should be empty
-	assert( min_scache.size() == 0 );
-	assert( max_scache.size() == 0 );
+	assert( min_scache.empty() );
+	assert( max_scache.empty() );
+
+	// cleanup
+	min_gttables.clear();
+	max_gttables.clear();
 
 	max_depth_reached = max_depth - max_depth_reached;
 
@@ -144,11 +180,6 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, std::vector
 		return TerminalCost( pos );
 	}
 
-	// in case of a consistent heuristic we can also prune
-	// because we are then guaranteed not to reach the terminals anymore
-	if( beta <= MinHCost( pos, minFirst ) )
-		return DBL_MAX;
-
 	// determine whether we yet encountered this position on the
 	// path from the root to this node
 	// technically we need this to make the game tree finite
@@ -160,12 +191,52 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, std::vector
 			return DBL_MAX;
 	}
 
+	// in case of a consistent heuristic we can also prune
+	// because we are then guaranteed not to reach the terminals anymore
+	if( beta <= MinHCost( pos, minFirst ) )
+		return DBL_MAX;
+
 	// if we reached the bottom of the computation tree
 	if( depth <= 0 ) {
 		path.push_back( pos );
 		return MinHCost( pos, minFirst );
 //		return EvalFunc( pos, minFirst );
 	}
+
+	// transposition table lookup
+	TPEntry mytpentry( pos );
+	typename GTTables::iterator gttit;
+	typename TranspositionTable::iterator tit;
+	if( minFirst ) {
+		gttit = min_gttables.find( depth );
+		if( gttit != min_gttables.end() ) {
+			// if a transposition table for this gCost was found
+			tit = gttit->second.find( mytpentry );
+			if( tit != gttit->second.end() ) {
+				path = tit->path;
+				return tit->value;
+			}
+		} else {
+			// else create a new transposition table for this gCost
+			GTTables_Pair mypair;
+			mypair.first = depth;
+			min_gttables.insert( mypair );
+		}
+	} else {
+		gttit = max_gttables.find( depth );
+		if( gttit != max_gttables.end() ) {
+			tit = gttit->second.find( mytpentry );
+			if( tit != gttit->second.end() ) {
+				path = tit->path;
+				return tit->value;
+			}
+		} else {
+			GTTables_Pair mypair;
+			mypair.first = depth;
+			max_gttables.insert( mypair );
+		}
+	}
+
 
 	// push the current node on the path cache
 	if( minFirst )
@@ -224,6 +295,16 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, std::vector
 		min_scache.erase( &pos );
 	else
 		max_scache.erase( &pos );
+
+	// store the current value
+	mytpentry.path = path;
+	if( minFirst ) {
+		mytpentry.value = beta;
+		min_gttables.find( depth )->second.insert( mytpentry );
+	} else {
+		mytpentry.value = alpha;
+		max_gttables.find( depth )->second.insert( mytpentry );
+	}
 
 	return ( (minFirst)?beta:alpha );
 }
@@ -284,7 +365,7 @@ uint64_t CRHash<state>( CRState &pos ) {
 
 // specification for state=xyLoc
 template<>
-uint64_t CRHash<xyLoc>( std::vector<xyLoc> &pos ) {
+uint64_t CRHash<xyLoc>( const std::vector<xyLoc> &pos ) {
 	return( ((uint64_t)pos[0].x)<<48 | (((uint64_t)pos[0].y)<<48)>>16 |
 		(((uint64_t)pos[1].x)<<48)>>32 | (((uint64_t)pos[1].y)<<48)>>48 );
 }
