@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
 */
 
 
-/*
+
 	// NORMAL MINIMAX
 	Map *m;
 	xyLoc pos_cop, pos_robber;
@@ -225,10 +225,10 @@ int main(int argc, char* argv[])
 
 	delete minclass;
 	delete env;
-*/
 
 
 
+/*
 	// TIDA*
 	Map *m;
 	xyLoc pos_cop, pos_robber;
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
 
 	delete tidastar;
 	delete env;
-
+*/
 
 	return 0;
 }
