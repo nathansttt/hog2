@@ -43,8 +43,11 @@ class Minimax {
 		TPEntry( CRState _pos, double _value = 0. ): pos(_pos), value(_value) {};
 		TPEntry( CRState _pos, std::vector<CRState> _path, double _value = 0. ): pos(_pos),path(_path),value(_value) {};
 		CRState pos; // the node that has to be stored
-		std::vector<CRState> path; // path from the leafs to this node
+		CRState next_pos; // next position in the optimal solution path
+		bool no_next_pos;
 		double value;
+		double alpha;
+		double beta;
 	};
 	struct TPEntryHash {
 		size_t operator()( const TPEntry &e ) const {
@@ -78,7 +81,7 @@ class Minimax {
 
 	protected:
 
-	double minimax_help( CRState pos, std::vector<CRState> &path, bool minFirst, int depth, double alpha, double beta );
+	double minimax_help( CRState pos, bool minFirst, int depth, double alpha, double beta );
 
 	// evaluation function for the leafs
 	double EvalFunc( CRState &pos, bool minsTurn = true );
@@ -93,7 +96,7 @@ class Minimax {
 	environment *env;
 	bool canPause;
 	// caching the path from the root to the current node (during the computation)
-	SearchCache min_scache, max_scache;
+//	SearchCache min_scache, max_scache;
 
 	// transposition table
 	GTTables min_gttables, max_gttables;
@@ -133,27 +136,59 @@ double Minimax<state,action,environment>::minimax( CRState pos, std::vector<CRSt
 	max_depth_reached = max_depth;
 
 	// just to make sure
+	/*
 	min_scache.clear();
 	max_scache.clear();
+	*/
 
 	// just to make sure
 	min_gttables.clear();
 	max_gttables.clear();
 
-	result = minimax_help( pos, path, minFirst, max_depth, DBL_MIN, DBL_MAX );
+	result = minimax_help( pos, minFirst, max_depth, DBL_MIN, DBL_MAX );
 
 	// the temporary search cache should be empty
+	/*
 	assert( min_scache.empty() );
 	assert( max_scache.empty() );
+	*/
+
+	// extract the path from the cache
+	path.clear(); path.push_back( pos );
+	TPEntry mytpentry( pos );
+	typename GTTables::iterator gttit;
+	typename TranspositionTable::iterator tit;
+	GTTables* current_gttables = minFirst?&min_gttables:&max_gttables;
+	GTTables* next_gttables    = minFirst?&max_gttables:&min_gttables;
+	GTTables* temp;
+	int depth = max_depth;
+	// this loop terminates because we only computed down to a certain depth
+	while( true ) {
+		gttit = current_gttables->find( (double)depth );
+		if( gttit != current_gttables->end() ) {
+			tit = gttit->second.find( mytpentry );
+			if( tit != gttit->second.end() ) {
+				if( !tit->no_next_pos ) {
+					path.push_back( tit->next_pos );
+					mytpentry.pos = tit->next_pos;
+					depth--;
+					temp = current_gttables;
+					current_gttables = next_gttables;
+					next_gttables = temp;
+				} else
+					break;
+			} else
+				break;
+		} else
+			break;
+	}
+	
 
 	// cleanup
 	min_gttables.clear();
 	max_gttables.clear();
 
 	max_depth_reached = max_depth - max_depth_reached;
-
-	// reverse the path
-	std::reverse( path.begin(), path.end() );
 
 	return result;
 }
@@ -162,43 +197,51 @@ double Minimax<state,action,environment>::minimax( CRState pos, std::vector<CRSt
 // alpha = minimum score that the maximum player is assured of
 // beta  = maximum score that the minimum player is assured of
 template<class state,class action,class environment>
-double Minimax<state,action,environment>::minimax_help( CRState pos, std::vector<CRState> &path, bool minFirst, int depth, double alpha, double beta ) {
+double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFirst, int depth, double alpha, double beta ) {
 
-//	fprintf( stdout, "considered position (%u,%u) (%u,%u) for player ", pos[0].x, pos[0].y, pos[1].x, pos[1].y );
-//	fprintf( stdout, "%s\n", (minFirst?"min":"max") );
+	/* verbose
+	fprintf( stdout, "considered position (%u,%u) (%u,%u) for player ", pos[0].x, pos[0].y, pos[1].x, pos[1].y );
+	fprintf( stdout, "%s ", (minFirst?"min":"max") );
+	fprintf( stdout, "and alpha=%f beta=%f\n", alpha, beta );
+	*/
 
 	// store the minimal depth reached
 	if( depth < max_depth_reached )
 		max_depth_reached = depth;
 
-	// clear the path
-	path.clear();
-
 	// if we reached a leaf node
 	if( GoalTest( pos ) ) {
-		path.push_back( pos );
+//		fprintf( stdout, "terminal => %f\n", TerminalCost( pos ) );
 		return TerminalCost( pos );
 	}
 
 	// determine whether we yet encountered this position on the
 	// path from the root to this node
 	// technically we need this to make the game tree finite
+	/*
 	if( minFirst ) {
-		if( min_scache.find( &pos ) != min_scache.end() )
+		if( min_scache.find( &pos ) != min_scache.end() ) {
+//			fprintf( stdout, "doubling \\infty\n" );
 			return DBL_MAX;
+		}
 	} else {
-		if( max_scache.find( &pos ) != max_scache.end() )
+		if( max_scache.find( &pos ) != max_scache.end() ) {
+//			fprintf( stdout, "doubling \\infty\n" );
 			return DBL_MAX;
+		}
 	}
+	*/
 
 	// in case of a consistent heuristic we can also prune
 	// because we are then guaranteed not to reach the terminals anymore
-	if( beta <= MinHCost( pos, minFirst ) )
+	if( beta <= MinHCost( pos, minFirst ) ) {
+//		fprintf( stdout, "h-prune \\infty\n" );
 		return DBL_MAX;
+	}
 
 	// if we reached the bottom of the computation tree
 	if( depth <= 0 ) {
-		path.push_back( pos );
+//		fprintf( stdout, "depth prune %f\n", MinHCost( pos, minFirst ) );
 		return MinHCost( pos, minFirst );
 //		return EvalFunc( pos, minFirst );
 	}
@@ -206,49 +249,63 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, std::vector
 	// transposition table lookup
 	TPEntry mytpentry( pos );
 	typename GTTables::iterator gttit;
+	std::pair<typename GTTables::iterator, bool> insert_return;
 	typename TranspositionTable::iterator tit;
-	if( minFirst ) {
-		gttit = min_gttables.find( depth );
-		if( gttit != min_gttables.end() ) {
-			// if a transposition table for this gCost was found
-			tit = gttit->second.find( mytpentry );
-			if( tit != gttit->second.end() ) {
-				path = tit->path;
+	bool old_transposition_available = false;
+	bool old_value_upper_bound = true; // true, false = old value is lower bound, in any other case not needed
+
+	GTTables *current_gttables = minFirst?&min_gttables:&max_gttables;
+	gttit = current_gttables->find( (double)depth );
+	if( gttit != current_gttables->end() ) {
+		// if a transposition table for this gCost was found
+		tit = gttit->second.find( mytpentry );
+		// check if the position is in the hash table
+		if( tit != gttit->second.end() ) {
+
+			old_transposition_available = true;
+
+			// check for usability of the hash table entry
+			if( tit->value <= tit->alpha && tit->value < beta ) {
+				beta = tit->value;
+				old_value_upper_bound = true;
+			}
+			if( tit->beta <= tit->value && alpha < tit->value ) {
+				alpha = tit->value;
+				old_value_upper_bound = false;
+			}
+			if( beta <= alpha ) {
 				return tit->value;
 			}
-		} else {
-			// else create a new transposition table for this gCost
-			GTTables_Pair mypair;
-			mypair.first = depth;
-			min_gttables.insert( mypair );
+			if( tit->alpha < tit->value && tit->value < tit->beta ) {
+				return tit->value;
+			}
+
 		}
 	} else {
-		gttit = max_gttables.find( depth );
-		if( gttit != max_gttables.end() ) {
-			tit = gttit->second.find( mytpentry );
-			if( tit != gttit->second.end() ) {
-				path = tit->path;
-				return tit->value;
-			}
-		} else {
-			GTTables_Pair mypair;
-			mypair.first = depth;
-			max_gttables.insert( mypair );
-		}
+		// else create a new transposition table for this gCost
+		GTTables_Pair mypair;
+		mypair.first = (double)depth;
+		insert_return = current_gttables->insert( mypair );
+		// sanity check: do we still correctly create the transposition tables?
+		assert( insert_return.second );
+		gttit = insert_return.first;
 	}
 
 
 	// push the current node on the path cache
+	/*
 	if( minFirst )
 		min_scache.insert( &pos );
 	else
 		max_scache.insert( &pos );
+	*/
 
 	// variable declarations
 	std::vector<state> next_mystates;
-	CRState child;
+	CRState child, next_pos;
+	bool no_next_pos = true;
 	double child_value, pathcost;
-	std::vector<CRState> mypath;
+	double result=minFirst?beta:alpha;
 
 	// generate the next moves/children
 	int myid = minFirst?1:0;
@@ -263,50 +320,76 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, std::vector
 		child[myid] = next_mystates.back();
 		next_mystates.pop_back();
 
-		pathcost    = MinGCost( pos, child );
-		child_value = pathcost + minimax_help( child, mypath, !minFirst, depth - 1, alpha - pathcost, beta - pathcost );
+		pathcost = MinGCost( pos, child );
 
 		if( minFirst ) {
+		// Min Node
+			child_value = pathcost +
+				minimax_help( child, !minFirst, depth - 1, alpha - pathcost, result - pathcost );
 			// min player updates his score
-			if( child_value < beta ) {
-				beta = child_value;
-				path = mypath;
-				path.push_back( pos );
+			if( child_value < result ) {
+				result = child_value;
+				next_pos = child;
+				no_next_pos = false;
 			}
-		} else {
-			// max player updates his score
-			if( child_value > alpha ) {
-				alpha = child_value;
-				path = mypath;
-				path.push_back( pos );
-			}
-		}
 
-		// alpha-beta pruning
-		if( beta <= alpha ) {
-			break;
+			// beta cutoff
+			if( result <= alpha ) break;
+
+		} else {
+		// Max Node
+			child_value = pathcost +
+				minimax_help( child, !minFirst, depth - 1, result - pathcost, beta - pathcost );
+			// max player updates his score
+			if( child_value > result ) {
+				result = child_value;
+				next_pos = child;
+				no_next_pos = false;
+			}
+
+			// alpha cutoff
+			if( beta <= result ) break;
 		}
 
 	}
 
 	// cleanup
 	// update the list of moves from the root to this nodes parent
+	/*
 	if( minFirst )
 		min_scache.erase( &pos );
 	else
 		max_scache.erase( &pos );
+	*/
 
-	// store the current value
-	mytpentry.path = path;
-	if( minFirst ) {
-		mytpentry.value = beta;
-		min_gttables.find( depth )->second.insert( mytpentry );
-	} else {
-		mytpentry.value = alpha;
-		max_gttables.find( depth )->second.insert( mytpentry );
+	// combine the current value with the old hash entry
+	if( old_transposition_available ) {
+		if( old_value_upper_bound ) {
+			// sanity check
+			assert( result <= tit->value );
+			if( result == tit->value ) // result == tit->value == beta
+				// in this case, result is the correct value, thus we increase the window slightly
+				// to make the ttable lookup correct
+				beta += 1.;
+		} else {
+		// old value is a lower bound
+			// sanity check
+			assert( tit->value <= result );
+			if( result == tit->value ) // result == tit->value == alpha
+				alpha -= 1.;
+		}
+		// the old entry is no longer needed
+		gttit->second.erase( tit );
 	}
+	mytpentry.next_pos = next_pos;
+	mytpentry.no_next_pos = no_next_pos;
+	mytpentry.value = result;
+	mytpentry.alpha = alpha;
+	mytpentry.beta  = beta;
+	gttit->second.insert( mytpentry );
 
-	return ( (minFirst)?beta:alpha );
+//	fprintf( stdout, "%f\n", result ); //minFirst?beta:alpha );
+	return result; //( (minFirst)?beta:alpha );
 }
 
 
