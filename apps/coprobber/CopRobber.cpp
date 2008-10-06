@@ -11,6 +11,10 @@
 #include "PRAStar.h"
 #include "MinimaxAStar.h"
 #include "TIDAStar.h"
+#include "IPNSearch.h"
+#include "IPNTTables.h"
+#include "Dijkstra.h"
+
 
 std::vector<CRAbsMapSimulation *> unitSims;
 int mazeSize = 10;
@@ -161,6 +165,34 @@ int main(int argc, char* argv[])
 	fclose( fhandler );
 */
 
+	// Dijkstra for the entire state space
+	xyLoc pos_cop, pos_robber;
+	Map *m;
+	int max_depth;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
+	GraphEnvironment *env = new GraphEnvironment( g, gh );
+	env->SetDirected( true ); // because the GetGraph routine
+	// adds edges for both directions
+
+	Dijkstra *d = new Dijkstra( env, 2, true );
+	d->dijkstra();
+	d->WriteValuesToDisk( "dijkstra.dat" );
+
+	delete d;
+	delete env;
+	delete gh;
+	delete g;
+	delete m;
+
+
+
 /*
 	// MINIMAX A*
 	Map *m;
@@ -193,7 +225,7 @@ int main(int argc, char* argv[])
 */
 
 
-
+/*
 	// NORMAL MINIMAX
 	Map *m;
 	xyLoc pos_cop, pos_robber;
@@ -225,7 +257,7 @@ int main(int argc, char* argv[])
 
 	delete minclass;
 	delete env;
-
+*/
 
 
 /*
@@ -256,8 +288,83 @@ int main(int argc, char* argv[])
 		fprintf( stdout, "(%u,%u) (%u,%u)\n", path[i][0].x, path[i][0].y, path[i][1].x, path[i][1].y );
 		if( (i-1) % 2 ) fprintf( stdout, "----\n" );
 	}
+	fprintf( stdout, "nodes expanded: %u ( ", tidastar->nodesExpanded );
+	for( unsigned int i = 0; i < tidastar->iteration_nodesExpanded.size(); i++ )
+		fprintf( stdout, "%u ", tidastar->iteration_nodesExpanded[i] );
+	fprintf( stdout, ")\n" );
+	fprintf( stdout, "nodes touched: %u ( ", tidastar->nodesTouched );
+	for( unsigned int i = 0; i < tidastar->iteration_nodesTouched.size(); i++ )
+		fprintf( stdout, "%u ", tidastar->iteration_nodesTouched[i] );
+	fprintf( stdout, ")\n" );
 
 	delete tidastar;
+	delete env;
+*/
+
+
+
+/*
+	// IPN-Search
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+
+	IPNSearch<xyLoc,tDirection,MapEnvironment> *ipns = new IPNSearch<xyLoc,tDirection,MapEnvironment>( env, true );
+
+	std::vector<xyLoc> pos;
+	pos.push_back( pos_robber ); pos.push_back( pos_cop );
+
+	double minimax = ipns->ipn( pos, true );
+
+	fprintf( stdout, "ipn search result: %f\n", minimax );
+
+	delete ipns;
+	delete env;
+*/
+
+
+/*
+	// IPN-Search with transposition tables
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+
+	IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt = new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
+
+	std::vector<xyLoc> pos;
+	pos.push_back( pos_robber ); pos.push_back( pos_cop );
+
+	double minimax = ipntt->ipn( pos, true );
+
+	fprintf( stdout, "ipn search result: %f\n", minimax );
+	fprintf( stdout, "nodes expanded: %u ( ", ipntt->nodesExpanded );
+	for( unsigned int i = 0; i < ipntt->iteration_nodesExpanded.size(); i++ )
+		fprintf( stdout, "%u ", ipntt->iteration_nodesExpanded[i] );
+	fprintf( stdout, ")\n" );
+	fprintf( stdout, "nodes touched: %u ( ", ipntt->nodesTouched );
+	for( unsigned int i = 0; i < ipntt->iteration_nodesTouched.size(); i++ )
+		fprintf( stdout, "%u ", ipntt->iteration_nodesTouched[i] );
+	fprintf( stdout, ")\n" );
+	fprintf( stdout, "nodes updated: %u ( ", ipntt->nodesUpdated );
+	for( unsigned int i = 0; i < ipntt->iteration_nodesUpdated.size(); i++ )
+		fprintf( stdout, "%u ", ipntt->iteration_nodesUpdated[i] );
+	fprintf( stdout, ")\n" );
+
+	delete ipntt;
 	delete env;
 */
 

@@ -3,15 +3,15 @@
 #include "MultiAgentEnvironment.h"
 #include "Minimax.h" // for the function CRHash
 
+#ifndef IPNSEARCH_H
+#define IPNSEARCH_H
+
 
 inline unsigned int uintplus( unsigned int a, unsigned int b ) {
 	if( UINT_MAX - a < b ) return UINT_MAX;
 	return (a+b);
 }
 
-
-#ifndef IPNSEARCH_H
-#define IPNSEARCH_H
 
 /*
 	Implementation of proof number search with (consistent) heuristic
