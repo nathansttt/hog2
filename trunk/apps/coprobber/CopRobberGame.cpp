@@ -31,8 +31,25 @@ void CopRobberGame::GetPossiblePlayerActions( unsigned int player, CRState s, st
 	// the semantics of the game (CopRobberOccupancy)
 	env->GetActions( s[player], orig_actions );
 
-	for( unsigned int i = 0; i < orig_actions.size(); i++ ) {
-		actions.push_back( CRAction( orig_actions[i] ) );
+	if( simultaneous ) {
+		// if we are in a simultaneous game, all actions can be considered
+		// as possible
+		for( unsigned int i = 0; i < orig_actions.size(); i++ ) {
+			actions.push_back( CRAction( orig_actions[i] ) );
+		}
+	} else {
+		// if we are not playing a simultaneous game, we can only consider the
+		// actions possible, that are valid when the other agents stand still
+		CRMove move;
+		CRState temp;
+		move.assign( num_cops+1, CRAction() );
+		for( unsigned int i = 0; i < orig_actions.size(); i++ ) {
+			move[player] = orig_actions[i];
+			temp = s;
+			ApplyAction( temp, move );
+			if( oi->CanMove( s, temp ) )
+				actions.push_back( CRAction( orig_actions[i] ) );
+		}
 	}
 	return;
 }
@@ -55,13 +72,19 @@ void CopRobberGame::GetPossibleOpponentActions( unsigned int excluded_player, CR
 
   actions.clear();
 
+
   // get the actions of each individual agent
 	j = 0;
   for( i = 0; i < num_opps+1; i++ ) {
-    env->GetActions( s[i], p_actions[i] );
 		if( i == excluded_player ) {
-			nmaa = p_actions[i].size() + (playerscanpass?1:0);
+			if( simultaneous ) {
+				env->GetActions( s[i], p_actions[i] );
+				nmaa = p_actions[i].size() + (playerscanpass?1:0);
+			}
+			// if we are not in a simultaneous game, then the excluded player
+			// stands still => CRAction()
 		} else {
+    	env->GetActions( s[i], p_actions[i] );
 	    // if an agent can pass his turn then we augment all the numbers
  	   // by one and 0 becomes the pass action
  	   naa[j] = p_actions[i].size() + (playerscanpass?1:0);
@@ -89,7 +112,7 @@ void CopRobberGame::GetPossibleOpponentActions( unsigned int excluded_player, CR
 				p_state.push_back( temp_s );
 			}
 		}
-		// push_back a temporary actions for the excluded_player
+		// push_back a temporary action for the excluded_player
 		actions[j].push_back( CRAction() );
 		p_state.push_back( s[excluded_player] );
 		// push_back the rest of the player actions
@@ -107,18 +130,28 @@ void CopRobberGame::GetPossibleOpponentActions( unsigned int excluded_player, CR
 
 		found_action = false;
 
-		for( maa = 0; maa < nmaa; maa++ ) {
-			if( !playerscanpass || maa != 0 ) {
-				actions[j][excluded_player] = p_actions[excluded_player][maa-(playerscanpass?1:0)];
-				temp_s = s[excluded_player];
-				env->ApplyAction( temp_s, actions[j][excluded_player].a );
-				p_state[excluded_player] = temp_s;
-			}
+		if( simultaneous ) {
+			// if we are in a simultaneous game, then all possible moves for the
+			// opponents are the moves that work with at least one move from
+			// excluded_player, thus we test all of them and break if we found one
+			for( maa = 0; maa < nmaa; maa++ ) {
+				if( !playerscanpass || maa != 0 ) {
+					actions[j][excluded_player] = p_actions[excluded_player][maa-(playerscanpass?1:0)];
+					temp_s = s[excluded_player];
+					env->ApplyAction( temp_s, actions[j][excluded_player].a );
+					p_state[excluded_player] = temp_s;
+				}
 
-			if( oi->CanMove( s, p_state ) ) {
-				found_action = true;
-				break;
+				if( oi->CanMove( s, p_state ) ) {
+					found_action = true;
+					break;
+				}
 			}
+		} else {
+			// if we are not in a simultaneous game, then we just have to test
+			// the created move (in which excluded_player does CRAction())
+			if( oi->CanMove( s, p_state ) )
+				found_action = true;
 		}
 
 		if( found_action )

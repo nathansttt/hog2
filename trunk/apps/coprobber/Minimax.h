@@ -40,8 +40,8 @@ class Minimax {
 	// transposition tables
 	class TPEntry {
 		public:
-		TPEntry( CRState _pos, double _value = 0. ): pos(_pos), value(_value) {};
-		TPEntry( CRState _pos, std::vector<CRState> _path, double _value = 0. ): pos(_pos),path(_path),value(_value) {};
+		TPEntry( CRState &_pos, double _value = 0. ): pos(_pos), value(_value) {};
+		TPEntry( CRState &_pos, std::vector<CRState> &_path, double _value = 0. ): pos(_pos),path(_path),value(_value) {};
 		CRState pos; // the node that has to be stored
 		CRState next_pos; // next position in the optimal solution path
 		bool no_next_pos;

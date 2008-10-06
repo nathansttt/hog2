@@ -37,8 +37,8 @@ class TIDAStar {
 	// transposition tables
 	class TPEntry {
 		public:
-		TPEntry( CRState _pos, double _value = 0. ): pos(_pos), value(_value) {};
-		TPEntry( CRState _pos, std::vector<CRState> _path, double _value = 0. ): pos(_pos),path(_path),value(_value) {};
+		TPEntry( CRState &_pos, double _value = 0. ): pos(_pos), value(_value) {};
+		TPEntry( CRState &_pos, std::vector<CRState> &_path, double _value = 0. ): pos(_pos),path(_path),value(_value) {};
 		CRState pos; // the node that has to be stored
 		std::vector<CRState> path; // path from the leafs to this node
 		double value;
@@ -70,6 +70,9 @@ class TIDAStar {
 	// when TIDA* is run it updates this value
 	unsigned int maxDepthReached;
 
+	unsigned int nodesExpanded, nodesTouched;
+	std::vector<unsigned int> iteration_nodesExpanded, iteration_nodesTouched;
+
 	protected:
 
 	double tida_update( CRState &pos, double gCost, double bound, unsigned int maxDepth, double weight, bool minFirst, std::vector<CRState> &path );
@@ -81,7 +84,6 @@ class TIDAStar {
 
 	environment *env;
 	bool canPause;
-	unsigned int nodesExpanded, nodesTouched;
 	// caching the path from the root to the current node (during the computation)
 //	SearchCache min_scache, max_scache;
 
@@ -114,7 +116,10 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 	min_gttables.clear();
 	max_gttables.clear();
 
+	unsigned int sumNodesTouched = 0, sumNodesExpanded = 0;
+
 	do {
+		nodesExpanded = 0; nodesTouched = 0;
 		b = c;
 //		fprintf( stdout, "set bound to b = %f\n", b );
 		c = tida_update( pos, 0., b, maxDepth, weight, minFirst, path );
@@ -132,6 +137,11 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 		assert( max_scache.empty() );
 		*/
 
+		iteration_nodesExpanded.push_back( nodesExpanded );
+		iteration_nodesTouched.push_back( nodesTouched );
+		sumNodesExpanded = nodesExpanded;
+		sumNodesTouched  = nodesTouched;
+
 		min_gttables.clear();
 		max_gttables.clear();
 
@@ -142,6 +152,9 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 
 	maxDepthReached = maxDepth - maxDepthReached;
 
+	nodesExpanded = sumNodesExpanded;
+	nodesTouched  = sumNodesTouched;
+
 	return c;
 }
 
@@ -149,6 +162,8 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 template<class state, class action, class environment>
 double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCost, double bound, unsigned int maxDepth, double weight, bool minFirst, std::vector<CRState> &path )
 {
+	nodesTouched++;
+
 	// keep track of the minimal depth parameter that we encounter
 	if( maxDepth < maxDepthReached ) maxDepthReached = maxDepth;
 	path.clear();
@@ -213,6 +228,8 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCo
 		max_scache.insert( &pos );
 	*/
 
+
+	nodesExpanded++;
 
 	double result, temp, c;
 	std::vector<state> neighbors;
