@@ -9,11 +9,12 @@
 #include "MySearchUnit.h"
 #include "CRSimulation.h"
 #include "PRAStar.h"
-#include "MinimaxAStar.h"
 #include "TIDAStar.h"
 #include "IPNSearch.h"
 #include "IPNTTables.h"
 #include "Dijkstra.h"
+#include "MyGraphMapHeuristic.h"
+#include "MinimaxAStar.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -165,6 +166,7 @@ int main(int argc, char* argv[])
 	fclose( fhandler );
 */
 
+/*
 	// Dijkstra for the entire state space
 	xyLoc pos_cop, pos_robber;
 	Map *m;
@@ -190,39 +192,40 @@ int main(int argc, char* argv[])
 	delete gh;
 	delete g;
 	delete m;
+*/
 
 
-
-/*
-	// MINIMAX A*
-	Map *m;
+// Minimax A*
 	xyLoc pos_cop, pos_robber;
-	int max_recursion_level; // we do not need this!
-	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	Map *m;
+	int max_depth;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
 	printf( "map: %s\n", m->getMapName() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
-	MapEnvironment *env = new MapEnvironment( m );
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	MyGraphMapHeuristic *gh = new MyGraphMapHeuristic( m, g );
+	GraphEnvironment *env = new GraphEnvironment( g, gh );
+	env->SetDirected( true ); // because the GetGraph routine
+	// adds edges for both directions
 
-	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *mastar = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, true, true, 0. );
+	MinimaxAStar *astar = new MinimaxAStar( env, 1, true );
+	MinimaxAStar::CRState s;
+	s.push_back( m->getNodeNum( pos_robber.x, pos_robber.y ) );
+	s.push_back( m->getNodeNum( pos_cop.x, pos_cop.y ) );
+	fprintf( stdout, "%u %u\n", m->getNodeNum( pos_robber.x, pos_robber.y ), m->getNodeNum( pos_cop.x, pos_cop.y ) );
 
-	std::vector<xyLoc> pos;
-	std::vector<std::vector<xyLoc> > path;
-	pos.push_back( pos_robber ); pos.push_back( pos_cop );
-	double minimax = mastar->minimax( pos, path );
-	printf( "result: %g\n", minimax );
-	printf( "the path:\n" );
-	for( unsigned int i = 0; i < path.size(); i++ ) {
-		for( unsigned int j = 0; j < path[i].size(); j++ ) {
-			printf( "(%u %u) ", path[i][j].x, path[i][j].y );
-		}
-		printf( "\n" );
-	}
+	double result = astar->astar( s, true, 1. );
+	fprintf( stdout, "result: %f\n", result );
 
-	delete mastar;
+	delete astar;
 	delete env;
-*/
+	delete gh;
+	delete g;
+	delete m;
+
 
 
 /*

@@ -4,14 +4,13 @@
 #include "GraphEnvironment.h"
 #include "CopRobberGame.h"
 
-#ifndef DIJKSTRA_H
-#define DIJKSTRA_H
+#ifndef MINIMAXASTAR_H
+#define MINIMAXASTAR_H
 
 /*
-	Implementation of Dijkstra algorithm (see thesis of Isaza for description)
 	Implementation for one robber and multiple cops
 */
-class Dijkstra {
+class MinimaxAStar {
 
 	public:
 
@@ -22,41 +21,43 @@ class Dijkstra {
 	// priority queue
 	class QueueEntry {
 		public:
-		QueueEntry( CRState _pos, bool mf, double v ):
-			pos(_pos), minFirst(mf), value(v) {};
+		QueueEntry( CRState _pos, bool mf, double fv, double gv ):
+			pos(_pos), minFirst(mf), fvalue(fv), gvalue(gv) {};
 		QueueEntry() {};
 
 		CRState pos;
 		bool minFirst;
-		double value;
+		double fvalue;
+		double gvalue;
 	};
 
-	// be aware of q1.value > q2.value, this changes the ordering of our queue s.t.
+	// be aware of q1.fvalue > q2.fvalue, this changes the ordering of our queue s.t.
 	// we can top() the one with the lowest value
 	struct QueueEntryCompare {
 		bool operator() ( const QueueEntry q1, const QueueEntry q2 ) const {
-			return( q1.value > q2.value );
+			return( q1.fvalue > q2.fvalue );
 		}
 	};
 
 	typedef std::priority_queue<QueueEntry, std::vector<QueueEntry>, QueueEntryCompare> MyPriorityQueue;
 
 	// constructor
-	Dijkstra( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass );
-	~Dijkstra();
+	MinimaxAStar( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass );
+	~MinimaxAStar();
 
-	void dijkstra();
-
-	void WriteValuesToDisk( const char* filename );
+	double astar( CRState pos, bool minFirst, double weight = 1. );
 
 	protected:
 
-	void push_end_states_on_queue();
+	void push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst, double &weight );
 	double compute_target_value( CRState &s );
 
 	// we use these functions independent from the environment implementations
 	// to be more variable in our own calculations
 	double MinGCost( CRState &pos1, CRState &pos2 );
+	// the definition of the heuristic relies on the graph heuristic used
+	// in the submitted graph environment (=> use MyGraphMapHeuristic)
+	double HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 );
 
 	GraphEnvironment *env;
 	unsigned int number_of_cops;
@@ -65,7 +66,7 @@ class Dijkstra {
 
 	// Priority Queues
 	MyPriorityQueue queue;
-	// state => value (h_p, h_t in description of the algorithm)
+	// state => value
 	std::vector<double> min_cost, max_cost;
 
 };
