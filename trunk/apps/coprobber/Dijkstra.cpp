@@ -11,7 +11,7 @@ Dijkstra::~Dijkstra() {
 }
 
 
-void Dijkstra::dijkstra( double weight ) {
+void Dijkstra::dijkstra() {
 	QueueEntry qe, qtemp;
 
 	push_end_states_on_queue();
