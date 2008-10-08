@@ -10,6 +10,8 @@
 #define MINIMAX_H
 
 // hash function definition
+// \see Minimax.cpp for implementation for state=xyLoc
+// \see MinimaxAStar.cpp for implementation for state=graphState
 template<class state>
 uint64_t CRHash( const std::vector<state> &pos );
 
@@ -399,6 +401,7 @@ double Minimax<state,action,environment>::EvalFunc( CRState &pos, bool minsTurn 
 //	return MinHCost( pos, minsTurn );
 }
 
+// \see Minimax.cpp for an implementation for state=xyLoc
 template<class state, class action, class environment>
 double Minimax<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
 	if( canPause )
@@ -406,21 +409,6 @@ double Minimax<state,action,environment>::MinHCost( CRState &pos, bool minsTurn 
 	else
 		// distance from cop to the robber
 		return env->HCost( pos[1], pos[0] );
-}
-
-// specification for state=xyLoc
-template<>
-double Minimax<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool minsTurn ) {
-	double dist;
-	if( abs(pos[1].x - pos[0].x) < abs(pos[1].y - pos[0].y) )
-		dist = abs(pos[1].y - pos[0].y);
-	else
-		dist = abs(pos[1].x - pos[0].x);
-
-	if( canPause )
-		return( 2. * dist - (minsTurn?MinGCost(pos,pos):0.) );
-	else
-		return dist;
 }
 
 
@@ -437,20 +425,6 @@ bool Minimax<state,action,environment>::GoalTest( CRState &pos ) {
 template<class state, class action, class environment>
 double Minimax<state,action,environment>::TerminalCost( CRState& ) {
 	return 0.;
-}
-
-/* doesn't work because we do not have an object env
-template<class state>
-uint64_t CRHash<state>( CRState &pos ) {
-	return (env->GetStateHash( pos[0] )<<32 | (uint32_t)env->GetStateHash( pos[1] ) );
-}
-*/
-
-// specification for state=xyLoc
-template<>
-uint64_t CRHash<xyLoc>( const std::vector<xyLoc> &pos ) {
-	return( ((uint64_t)pos[0].x)<<48 | (((uint64_t)pos[0].y)<<48)>>16 |
-		(((uint64_t)pos[1].x)<<48)>>32 | (((uint64_t)pos[1].y)<<48)>>48 );
 }
 
 

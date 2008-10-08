@@ -1,11 +1,15 @@
 #include <vector>
 #include <queue>
-#include <ext/hash_set>
+#include <ext/hash_map>
 #include "GraphEnvironment.h"
 #include "CopRobberGame.h"
+#include "Minimax.h"
 
 #ifndef MINIMAXASTAR_H
 #define MINIMAXASTAR_H
+
+template<>
+uint64_t CRHash<graphState>( const std::vector<graphState> &s );
 
 /*
 	Implementation for one robber and multiple cops
@@ -39,7 +43,14 @@ class MinimaxAStar {
 		}
 	};
 
+	struct CRStateHash {
+		size_t operator() ( const CRState s ) const {
+			return CRHash<graphState>( s );
+		}
+	};
+
 	typedef std::priority_queue<QueueEntry, std::vector<QueueEntry>, QueueEntryCompare> MyPriorityQueue;
+	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash> MyClosedList;
 
 	// constructor
 	MinimaxAStar( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass );
@@ -67,9 +78,11 @@ class MinimaxAStar {
 	// Priority Queues
 	MyPriorityQueue queue;
 	// state => value
-	std::vector<double> min_cost, max_cost;
+//	std::vector<double> min_cost, max_cost;
+	MyClosedList min_cost, max_cost;
 
 };
+
 
 
 #endif
