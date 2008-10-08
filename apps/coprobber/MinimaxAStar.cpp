@@ -1,5 +1,30 @@
 #include "MinimaxAStar.h"
 
+
+// hash function copied from CopRobberEnvironment.h
+// only that this has to be outside of classes
+// \see CopRobberEnvironment.h Minimax.h
+template<>
+uint64_t CRHash<graphState>( const std::vector<graphState> &node) {
+	uint64_t hash = 0, t;
+	double psize = 64./(double)node.size();
+	double count = 0.;
+	unsigned int i;
+	unsigned char j;
+
+	for( i = 0; i < node.size(); i++ ) {
+		t = node[i];
+		for( j = 0; j < floor(count+psize)-floor(count); j++ ) {
+			hash |= (t & (1<<j))<<(unsigned int)floor(count);
+		}
+		count += psize;
+	}
+	return hash;
+}
+
+
+// MINIMAX A*
+
 MinimaxAStar::MinimaxAStar( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass ):
 	env(_env), number_of_cops(_number_of_cops), canPass(_canPass) {
 
@@ -13,6 +38,7 @@ MinimaxAStar::~MinimaxAStar() {
 
 double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight ) {
 	QueueEntry qe, qtemp;
+	MyClosedList::iterator mclit;
 
 	if( crg->GoalTest( goal_pos, goal_pos ) )
 		return 0.;
@@ -32,18 +58,18 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 		// verbose
 		//fprintf( stdout, "minFirst = %d, pos = (%u,%u), fvalue = %f, gvalue = %f\n", qe.minFirst, qe.pos[0], qe.pos[1], qe.fvalue, qe.gvalue );
 
-		unsigned int num = crg->GetNumberByState( qe.pos );
-
 		if( qe.minFirst ) {
 
-			if( min_cost[num] != DBL_MAX ) {
+			mclit = min_cost.find( qe.pos );
+
+			if( mclit != min_cost.end() ) {
 				// if the gvalue for this position has been set yet
 				// sanity check: check that the gvalue for the position is smaller than the current gvalue that
 				// we expanded
-				assert( min_cost[num] <= qe.gvalue );
+				assert( mclit->second <= qe.gvalue );
 			} else {
 
-				min_cost[num] = qe.gvalue;
+				min_cost[qe.pos] = qe.gvalue;
 
 				// the cops moved in this state, thus we have to find the
 				// opposite actions of the robber here
@@ -65,7 +91,7 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 
 
 					// check whether its value is \infty
-					if( max_cost[ crg->GetNumberByState( qtemp.pos ) ] == DBL_MAX ) {
+					if( max_cost.find( qtemp.pos ) == max_cost.end() ) {
 						qtemp.gvalue = compute_target_value( qtemp.pos );
 						if( qtemp.gvalue != DBL_MAX ) {
 							qtemp.minFirst = !qe.minFirst; // !qe.minFirst == false
@@ -81,14 +107,16 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 
 		} else {
 
-			if( max_cost[num] != DBL_MAX ) {
+			mclit = max_cost.find( qe.pos );
+
+			if( mclit != max_cost.end() ) {
 				// sanity check: we should only set the value of a max position once
 				//fprintf( stdout, "qe.pos = %u,%u ", qe.pos[0], qe.pos[1] );
-				//fprintf( stdout, "max_cost[num] = %f, qe.gvalue = %f\n", max_cost[num], qe.gvalue );
-				assert( max_cost[ num ] == qe.gvalue );
+				//fprintf( stdout, "max_cost[qe.pos] = %f, qe.gvalue = %f\n", mclit->second, qe.gvalue );
+				assert( mclit->second == qe.gvalue );
 			} else {
 
-				max_cost[ num ] = qe.gvalue;
+				max_cost[qe.pos] = qe.gvalue;
 
 				// the robber moved in this state, thus we have to find the
 				// actions of the cops leading to this state
@@ -104,7 +132,7 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 					crg->ApplyAction( qtemp.pos, *it );
 
 					// check agains infinity
-					if( min_cost[ crg->GetNumberByState( qtemp.pos ) ] == DBL_MAX ) {
+					if( min_cost.find( qtemp.pos ) == min_cost.end() ) {
 						qtemp.minFirst = !qe.minFirst; // !qe.minFirst == true
 						qtemp.gvalue   = qe.gvalue + MinGCost( qe.pos, qtemp.pos );
 						qtemp.fvalue   = qtemp.gvalue + weight * HCost( goal_pos, goal_minFirst, qtemp.pos, qtemp.minFirst );
@@ -127,6 +155,7 @@ double MinimaxAStar::compute_target_value( CRState &s ) {
 
 	CRState temp = s;
 	double tempvalue;
+	MyClosedList::iterator mclit;
 	std::vector<graphState> myneighbors;
 	env->GetSuccessors( s[0], myneighbors );
 	if( canPass )
@@ -138,8 +167,11 @@ double MinimaxAStar::compute_target_value( CRState &s ) {
 	
 		// build the state
 		temp[0] = *it;
-		tempvalue = MinGCost( temp, s ) + min_cost[ crg->GetNumberByState( temp ) ];
-		if( tempvalue == DBL_MAX ) return DBL_MAX;
+		mclit = min_cost.find( temp );
+		if( mclit != min_cost.end() )
+			tempvalue = MinGCost( temp, s ) + mclit->second;
+		else
+			return DBL_MAX;
 		if( tempvalue > result ) result = tempvalue;
 	}
 	return result;
@@ -156,8 +188,6 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 	assert( queue.empty() );
 	// get the number of joint states
 	unsigned int num_states = crg->GetNumStates();
-	min_cost.assign( num_states, DBL_MAX );
-	max_cost.assign( num_states, DBL_MAX );
 	// for all states
 	for( unsigned int i = 0; i < num_states; i++ ) {
 
@@ -165,8 +195,8 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 
 		if( crg->GoalTest( pos, pos ) ) {
 
-			min_cost[i] = 0.;
-			max_cost[i] = 0.;
+			min_cost[pos] = 0.;
+			max_cost[pos] = 0.;
 
 			// now push all the states on the queue that are one step away
 			// from the goal
@@ -315,3 +345,4 @@ double MinimaxAStar::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool 
 	}
 
 }
+
