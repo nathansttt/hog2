@@ -34,6 +34,20 @@ class TIDAStar {
 	};
 	typedef __gnu_cxx::hash_set<CRState*, CRStateHash, CRStateEqual> SearchCache;
 
+	/*
+	struct StateHash {
+		size_t operator()( const state s ) const {
+			return( ((uint64_t)s.x)<<32 | (((uint64_t)s.y)<<32)>>32 );
+		}
+	};
+	struct StateEqual {
+		bool operator()( const state s1, const state s2 ) const {
+			return (s1==s2);
+		}
+	};
+	typedef __gnu_cxx::hash_set<state,StateHash,StateEqual> NeighborCache;
+	*/
+
 	// transposition tables
 	class TPEntry {
 		public:
@@ -121,7 +135,7 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 	do {
 		nodesExpanded = 0; nodesTouched = 0;
 		b = c;
-//		fprintf( stdout, "set bound to b = %f\n", b );
+		fprintf( stdout, "set bound to b = %f\n", b );
 		c = tida_update( pos, 0., b, maxDepth, weight, minFirst, path );
 		// verbose
 //		fprintf( stdout, "solution: " );
@@ -139,11 +153,11 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 
 		iteration_nodesExpanded.push_back( nodesExpanded );
 		iteration_nodesTouched.push_back( nodesTouched );
-		sumNodesExpanded = nodesExpanded;
-		sumNodesTouched  = nodesTouched;
+		sumNodesExpanded += nodesExpanded;
+		sumNodesTouched  += nodesTouched;
 
-		min_gttables.clear();
-		max_gttables.clear();
+//		min_gttables.clear();
+//		max_gttables.clear();
 
 	} while( c > b ); // until c <= b
 
@@ -154,6 +168,9 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, unsigned int maxD
 
 	nodesExpanded = sumNodesExpanded;
 	nodesTouched  = sumNodesTouched;
+
+	min_gttables.clear();
+	max_gttables.clear();
 
 	return c;
 }
@@ -238,16 +255,31 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCo
 
 	// get the successor states
 	int myid = minFirst?1:0; // am I cop or robber (robber/max is at 0, cop/min at 1)
+
 	env->GetSuccessors( pos[myid], neighbors );
 	if( canPause ) neighbors.push_back( pos[myid] );
 
 	// in case we are the cop/min player
 	if( minFirst ) {
+
+	/*
+		// TODO: CHANGE ME BACK!!!!
+		NeighborCache ncache;
+		std::vector<state> neighbors2;
+		for( typename std::vector<state>::iterator iti = neighbors.begin(); iti != neighbors.end(); iti++ ) {
+			ncache.insert( *iti );
+			env->GetSuccessors( *iti, neighbors2 );
+			for( typename std::vector<state>::iterator itj = neighbors2.begin(); itj != neighbors2.end(); itj++ )
+				ncache.insert( *itj );
+		}
+	*/
+
 		result = DBL_MAX;
 
-		for( unsigned int i = 0; i < neighbors.size(); i++ ) {
+		//for( typename NeighborCache::iterator iti = ncache.begin(); iti != ncache.end(); iti++ ) {
+		for( typename std::vector<state>::iterator iti = neighbors.begin(); iti != neighbors.end(); iti++ ) {
 			neighbor = pos;
-			neighbor[myid] = neighbors[i];
+			neighbor[myid] = *iti;
 			c = MinGCost( pos, neighbor );
 			temp = c + tida_update( neighbor, gCost + c, bound, maxDepth - 1, weight, !minFirst, childpath );
 
@@ -273,11 +305,12 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCo
 		}
 	// in case we are the robber/max player
 	} else {
+
 		result = DBL_MIN;
 
-		for( unsigned int i = 0; i < neighbors.size(); i++ ) {
+		for( typename std::vector<state>::iterator iti = neighbors.begin(); iti != neighbors.end(); iti++ ) {
 			neighbor = pos;
-			neighbor[myid] = neighbors[i];
+			neighbor[myid] = *iti;
 			c = MinGCost( pos, neighbor );
 			temp = c + tida_update( neighbor, gCost + c, bound, maxDepth - 1, weight, !minFirst, childpath );
 
@@ -347,8 +380,11 @@ double TIDAStar<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool m
 		dist = abs(pos[1].x - pos[0].x);
 
 	if( canPause )
+	// TODO: CHANGE ME BACK!!!!
+	//	return( idist + idist%2 - (minsTurn?MinGCost(pos,pos):0.) );
 		return( 2. * dist - (minsTurn?MinGCost(pos,pos):0.) );
 	else
+	//	return( idist/2 );
 		return dist;
 }
 

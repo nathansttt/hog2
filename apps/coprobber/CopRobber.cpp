@@ -9,7 +9,8 @@
 #include "MySearchUnit.h"
 #include "CRSimulation.h"
 #include "PRAStar.h"
-#include "TIDAStar.h"
+//#include "TIDAStar.h"
+#include "TIDAStar_optimized.h"
 #include "IPNSearch.h"
 #include "IPNTTables.h"
 #include "Dijkstra.h"
@@ -195,6 +196,7 @@ int main(int argc, char* argv[])
 */
 
 
+/*
 // Minimax A*
 	xyLoc pos_cop, pos_robber;
 	Map *m;
@@ -225,7 +227,7 @@ int main(int argc, char* argv[])
 	delete gh;
 	delete g;
 	delete m;
-
+*/
 
 
 /*
@@ -370,6 +372,40 @@ int main(int argc, char* argv[])
 	delete ipntt;
 	delete env;
 */
+
+
+	// optimized TIDA*
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+
+	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+
+	std::vector<xyLoc> pos;
+	pos.push_back( pos_robber ); pos.push_back( pos_cop );
+
+	double minimax = tidastar->tida( pos );
+
+	fprintf( stdout, "tida result: %f\n", minimax );
+	fprintf( stdout, "nodes expanded: %u ( ", tidastar->nodesExpanded );
+	for( unsigned int i = 0; i < tidastar->iteration_nodesExpanded.size(); i++ )
+		fprintf( stdout, "%u ", tidastar->iteration_nodesExpanded[i] );
+	fprintf( stdout, ")\n" );
+	fprintf( stdout, "nodes touched: %u ( ", tidastar->nodesTouched );
+	for( unsigned int i = 0; i < tidastar->iteration_nodesTouched.size(); i++ )
+		fprintf( stdout, "%u ", tidastar->iteration_nodesTouched[i] );
+	fprintf( stdout, ")\n" );
+
+	delete tidastar;
+	delete env;
+
 
 	return 0;
 }
