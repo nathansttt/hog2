@@ -186,6 +186,8 @@ public:
   // returns kUndefined if tile is split and you request kWholeTile
   long getTerrainType(long x, long y, tSplitSide split = kWholeTile) const;
   long getTerrainType(long x, long y, tEdge side) const;
+	void setTerrainType(int32_t x1, int32_t y1,
+						int32_t x2, int32_t y2, tTerrain t);
 
   // if tile is not split and you specify a split side, nothing happens
   // if tile is split and you specify kWholeTile, the split remains,
@@ -253,6 +255,8 @@ private:
 	tTileset tileSet;
 };
 
-void MakeMaze(Map *map, int pathSize = 1);
+void MakeMaze(Map *map);
+void MakeMaze(Map *map, int pathSize);
+void BuildRandomRoomMap(Map *map, int roomSize);
 
 #endif
