@@ -13,6 +13,7 @@
 #include "TIDAStar_optimized.h"
 #include "IPNSearch.h"
 #include "IPNTTables.h"
+//#include "IPNTTables_optimized.h"
 #include "Dijkstra.h"
 #include "MyGraphMapHeuristic.h"
 #include "MinimaxAStar.h"
@@ -335,7 +336,7 @@ int main(int argc, char* argv[])
 */
 
 
-/*
+
 	// IPN-Search with transposition tables
 	Map *m;
 	xyLoc pos_cop, pos_robber;
@@ -371,9 +372,9 @@ int main(int argc, char* argv[])
 
 	delete ipntt;
 	delete env;
-*/
 
 
+/*
 	// optimized TIDA*
 	Map *m;
 	xyLoc pos_cop, pos_robber;
@@ -405,7 +406,7 @@ int main(int argc, char* argv[])
 
 	delete tidastar;
 	delete env;
-
+*/
 
 	return 0;
 }
