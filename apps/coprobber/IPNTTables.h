@@ -24,20 +24,37 @@ class IPNTTables {
 
 	typedef typename MultiAgentEnvironment<state,action>::MAState CRState;
 
+
+	// bounds cache
+	struct CRStateHash {
+		size_t operator()( const CRState &s ) const {
+			return CRHash<state>( s );
+		}
+	};
+	struct CRStateEqual {
+		bool operator()( const CRState &c1, const CRState &c2 ) const {
+			return ( c1 == c2 );
+		}
+	};
+	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash, CRStateEqual> BoundCache;
+
+
 	// transposition tables
 	class TPEntry {
 		public:
-		TPEntry( CRState &_pos ): pos(_pos), iteration_of_last_update(0) {};
+		TPEntry( CRState &_pos ): pos(_pos), last_iteration(0), updated_on_last_iteration(false), iteration_of_update(0) {};
 		TPEntry( CRState &_pos, unsigned int pn, unsigned int dn, bool mf = true, double v = 0., double b = 0. ):
 			pos(_pos), minFirst(mf), proof_number(pn), disproof_number(dn), value(v), bound(b),
-			iteration_of_last_update(0) {};
+			last_iteration(0), updated_on_last_iteration(false), iteration_of_update(0) {};
 
 		CRState pos;
 		bool minFirst;
 		unsigned int proof_number, disproof_number;
 		double value, bound;
 		std::vector<TPEntry*> childs;
-		unsigned int iteration_of_last_update;
+		unsigned int last_iteration;
+		bool updated_on_last_iteration;
+		unsigned int iteration_of_update;
 	};
 	struct TPEntryHash {
 		size_t operator()( const TPEntry *e ) const {
@@ -70,6 +87,8 @@ class IPNTTables {
 
 	// iterates until the root node is proved
 	double ipn_update( CRState &pos, bool minFirst, double bound );
+	// determines whether a node is prunable or not and prunes it right away
+	bool ipn_prunable_node( TPEntry *n );
 	// creates a node and registeres it in the transposition tables
 	TPEntry* ipn_create_node( CRState &pos, bool minFirst, double bound );
 	// updates the values/numbers of a parent due to the values of his childs
@@ -88,6 +107,11 @@ class IPNTTables {
 	environment *env;
 	bool canPause;
 
+	// lower bound cache
+	BoundCache min_lcache, max_lcache;
+	// upper bound cache
+	BoundCache min_ucache, max_ucache;
+
 	// transposition tables
 	GTTables min_gttables, max_gttables;
 };
@@ -101,9 +125,6 @@ class IPNTTables {
 
 template<class state,class action,class environment>
 double IPNTTables<state,action,environment>::ipn( CRState &pos, bool minFirst ) {
-
-	// we have to make sure that we do not submit a terminal node to the algorithm
-	if( GoalTest( pos ) ) return TerminalCost( pos );
 
 	double b, c = MinHCost( pos, minFirst );
 
@@ -137,7 +158,7 @@ double IPNTTables<state,action,environment>::ipn_update( CRState &pos, bool minF
 	unsigned int iteration = 0;
 
 	// create the root search node
-	TPEntry *temptpentry, *root = new TPEntry( pos, 1, 1, true, bound, bound );
+	TPEntry *temptpentry, *root = ipn_create_node( pos, minFirst, bound );
 
 	while( root->proof_number != 0 && root->disproof_number != 0 ) {
 		iteration++;
@@ -157,28 +178,75 @@ double IPNTTables<state,action,environment>::ipn_update( CRState &pos, bool minF
 	else //if( root.disproof_number == 0 )
 		fprintf( stdout, "Root has been disproved with bound %f and value %f\n", bound, root->value );
 
-	// TODO: cleanup such that the objects behind the pointers in the transposition tables are really deleted
+	double result = root->value;
+
 	typename GTTables::iterator gttit;
 	typename TranspositionTable::iterator tit;
 	for( gttit = min_gttables.begin(); gttit != min_gttables.end(); gttit++ ) {
 		while( !gttit->second.empty() ) {
 			tit = gttit->second.begin();
+			temptpentry = *tit;
 			gttit->second.erase( tit );
-			delete (*tit);
+			delete temptpentry;
 		}
 	}
 	for( gttit = max_gttables.begin(); gttit != max_gttables.end(); gttit++ ) {
 		while( !gttit->second.empty() ) {
 			tit = gttit->second.begin();
+			temptpentry = *tit;
 			gttit->second.erase( tit );
-			delete (*tit);
+			delete temptpentry;
 		}
 	}
 	min_gttables.clear();
 	max_gttables.clear();
 
-	double result = root->value;
-	delete root;
+	return result;
+}
+
+
+
+template<class state, class action, class environment>
+bool IPNTTables<state,action,environment>::ipn_prunable_node( TPEntry *n ) {
+
+	bool result = false;
+
+	// upper bound cache lookup
+	typename BoundCache::iterator hcit;
+	BoundCache *current_bcache = (n->minFirst)?&min_ucache:&max_ucache;
+	hcit = current_bcache->find( n->pos );
+	if( hcit != current_bcache->end() ) {
+		if( hcit->second <= n->bound ) {
+			// in this case we disproved the node
+			n->proof_number    = UINT_MAX;
+			n->disproof_number = 0;
+			n->value           = hcit->second;
+			result = true;
+		}
+	}
+
+	// lower bound cache lookup
+	current_bcache = (n->minFirst)?&min_lcache:&max_lcache;
+	hcit = current_bcache->find( n->pos );
+	if( hcit != current_bcache->end() ) {
+		if( n->bound < hcit->second ) {
+			// the node has been proved
+			n->proof_number    = 0;
+			n->disproof_number = UINT_MAX;
+			n->value           = hcit->second;
+			result = true;
+		}
+	} else {
+		// perform heuristic pruning step
+		double heuristic_value = MinHCost( n->pos, n->minFirst );
+		if( n->bound < heuristic_value ) {
+			n->proof_number    = 0;
+			n->disproof_number = UINT_MAX;
+			n->value           = heuristic_value;
+			result = true;
+		}
+	}
+
 	return result;
 }
 
@@ -199,61 +267,49 @@ typename IPNTTables<state,action,environment>::TPEntry* IPNTTables<state,action,
 	TPEntry *mytpentry = new TPEntry( pos );
 	typename GTTables::iterator gttit;
 	typename TranspositionTable::iterator tit;
-	std::pair<typename GTTables::iterator, bool> insert_return;
-	GTTables *current_gttables = minFirst?&min_gttables:&max_gttables;
+	GTTables *current_gttable = (minFirst)?&min_gttables:&max_gttables;
 
-	// find the transposition table for our rest bound
-	gttit = current_gttables->find( bound );
-	if( gttit != current_gttables->end() ) {
-		// in case we found one: search for our position
+	gttit = current_gttable->find( bound );
+	if( gttit != current_gttable->end() ) {
+
 		tit = gttit->second.find( mytpentry );
 		if( tit != gttit->second.end() ) {
 			delete mytpentry; // cleanup
 			return (*tit); // return a pointer on the TPEntry
 		}
 	} else {
-		// in case there isn't a transposition table for our bound yet
-		// create one:
-		GTTables_Pair mypair;
-		mypair.first = bound;
-		insert_return = current_gttables->insert( mypair );
-		// sanity check: are we creating the transposition tables?
-		assert( insert_return.second );
-		gttit = insert_return.first;
+		std::pair<typename GTTables::iterator, bool> mypair = current_gttable->insert( typename GTTables::value_type( bound, TranspositionTable() ) );
+		gttit = mypair.first;
+		assert( mypair.second );
 	}
 
 	// if we didn't find the position in the transposition table then
 	// create a new entry
+	mytpentry->minFirst = minFirst;
+	mytpentry->bound    = bound;
 
 	if( GoalTest( pos ) ) {
 		// if we are at a terminal state
-		if( TerminalCost( pos ) > bound ) {
-			// disproved
-			mytpentry->proof_number    = UINT_MAX;
-			mytpentry->disproof_number = 0;
-			mytpentry->value           = TerminalCost( pos );
-		} else {
-			// proved
+		if( bound < TerminalCost( pos ) ) {
+			// proof
 			mytpentry->proof_number    = 0;
 			mytpentry->disproof_number = UINT_MAX;
 			mytpentry->value           = TerminalCost( pos );
-		}
-	} else {
-		// if we are at a non terminal
-		if( bound < MinHCost( pos, minFirst ) ) {
-			// if there is no possibility to prove this bound in this node, h-prune
+		} else {
+			// disproof
 			mytpentry->proof_number    = UINT_MAX;
 			mytpentry->disproof_number = 0;
-			mytpentry->value           = MinHCost( pos, minFirst );
-		} else {
+			mytpentry->value           = TerminalCost( pos );
+		}
+	} else {
+
+		if( !ipn_prunable_node( mytpentry ) ) {
 			// in every other case
 			mytpentry->proof_number    = 1;
 			mytpentry->disproof_number = 1;
 			mytpentry->value           = bound;
 		}
 	}
-	mytpentry->minFirst = minFirst;
-	mytpentry->bound    = bound;
 
 	// push the entry onto the transposition tables
 	gttit->second.insert( mytpentry );
@@ -269,39 +325,64 @@ void IPNTTables<state,action,environment>::ipn_update_node( TPEntry *n, unsigned
 
 	nodesUpdated++;
 
+	n->last_iteration = iteration;
+	n->updated_on_last_iteration = true;
+	n->iteration_of_update = iteration;
+
 	double child_value;
 	if( n->minFirst ) {
 		// if we are in a min node
-		n->proof_number = UINT_MAX;
-		n->disproof_number = 0;
+		n->proof_number = 0;
+		n->disproof_number = UINT_MAX;
 		n->value = DBL_MAX;
 		for( typename std::vector<TPEntry*>::iterator iti = n->childs.begin(); iti != n->childs.end(); iti++ ) {
-			// proof_number = min( child proof numbers )
-			if( n->proof_number > (*iti)->proof_number ) n->proof_number = (*iti)->proof_number;
-			// disproof_number = sum( child disproof numbers )
-			n->disproof_number = uintplus( n->disproof_number, (*iti)->disproof_number );
+
+			// proof_number = sum( child proof numbers )
+			n->proof_number = uintplus( n->proof_number, (*iti)->proof_number );
+			// disproof_number = min( child disproof numbers )
+			if( n->disproof_number > (*iti)->disproof_number ) n->disproof_number = (*iti)->disproof_number;
 
 			// value = min( childs values )
 			child_value = ( n->bound - (*iti)->bound ) + (*iti)->value;
 			if( n->value > child_value ) n->value = child_value;
 		}
+
+		/*
+		// update lower and upper bounds
+		if( n->proof_number == 0 ) {
+			min_lcache[n->pos] = n->value;
+		} else if( n->disproof_number == 0 ) {
+			min_ucache[n->pos] = n->value;
+		}
+		*/
+
+
 	} else {
 		// if we are in a max node
-		n->proof_number = 0;
-		n->disproof_number = UINT_MAX;
+		n->proof_number = UINT_MAX;
+		n->disproof_number = 0;
 		n->value = DBL_MIN;
 		for( typename std::vector<TPEntry*>::iterator iti = n->childs.begin(); iti != n->childs.end(); iti++ ) {
-			// proof number = sum( child proof numbers )
-			n->proof_number = uintplus( n->proof_number, (*iti)->proof_number );
-			// disproof number = min( child disproof numbers )
-			if( n->disproof_number > (*iti)->disproof_number ) n->disproof_number = (*iti)->disproof_number;
+			// proof number = min( child proof numbers )
+			if( n->proof_number > (*iti)->proof_number ) n->proof_number = (*iti)->proof_number;
+			// disproof number = sum( child disproof numbers )
+			n->disproof_number = uintplus( n->disproof_number, (*iti)->disproof_number );
 
 			// value = max( child values )
 			child_value = (n->bound - (*iti)->bound) + (*iti)->value;
 			if( n->value < child_value ) n->value = child_value;
 		}
+
+		/*
+		if( n->proof_number == 0 ) {
+			max_lcache[n->pos] = n->value;
+		} else if( n->disproof_number == 0 ) {
+			max_ucache[n->pos] = n->value;
+		}
+		*/
+
 	}
-	n->iteration_of_last_update = iteration;
+	return;
 }
 
 
@@ -317,23 +398,29 @@ bool IPNTTables<state,action,environment>::ipn_update_branch( TPEntry *n, TPEntr
 		return false;
 
 	// if this node has been updated throughout this iteration
-	if( n->iteration_of_last_update == iteration ) return true;
-	// the following is not needed anymore since expanded_node->iteration_of_last_update == iteration
-	// if( n == expanded_node ) return true;
+	if( n->last_iteration == iteration ) return n->updated_on_last_iteration;
 
+	// CARE: enabling this can cause bugs when not deleting the subtrees under the nodes.
+	// This is because statistics under this node will not be updated. When later on,
+	// a node in the subtree is rediscovered over a different path (that hasn't been in the problem
+	// within this iteration), then the old stats will be taken from the cache and we have an
+	// un-updated problem!!!
+	// However, when deleting the subtree, we are probably fine to do this here...
 	// if this node is proved yet there is no update needed
-	if( n->proof_number == 0 || n->disproof_number == 0 )
-		return false;
+//	if( n->proof_number == 0 || n->disproof_number == 0 )
+//		return false;
 
 	bool update_needed = false;
 	for( typename std::vector<TPEntry*>::iterator iti = n->childs.begin(); iti != n->childs.end(); iti++ ) {
-		update_needed |= ipn_update_branch( *iti, expanded_node, iteration );
+		if( ipn_update_branch( *iti, expanded_node, iteration ) ) update_needed = true;
 	}
 
 	if( update_needed )
 		ipn_update_node( n, iteration );
-	else
-		n->iteration_of_last_update = iteration;
+	else {
+		n->last_iteration = iteration;
+		n->updated_on_last_iteration = false;
+	}
 
 	return update_needed;
 }
@@ -342,9 +429,19 @@ bool IPNTTables<state,action,environment>::ipn_update_branch( TPEntry *n, TPEntr
 template<class state, class action, class environment>
 void IPNTTables<state,action,environment>::ipn_expand( TPEntry *n, unsigned int &iteration, TPEntry* &expanded_node ) {
 
+	nodesTouched++;
+
+	if( ipn_prunable_node( n ) ) {
+		expanded_node = n;
+		n->last_iteration = iteration;
+		n->updated_on_last_iteration = true;
+		n->iteration_of_update = iteration;
+		return;
+	}
+
 	if( n->childs.empty() ) {
 		// if this node doesn't have any children yet then we create them
-		nodesExpanded++; nodesTouched++;
+		nodesExpanded++;
 
 		// Sanity check: do we expand terminal nodes? This should never happen!
 		assert( !GoalTest( n->pos ) );
@@ -377,21 +474,51 @@ void IPNTTables<state,action,environment>::ipn_expand( TPEntry *n, unsigned int 
 
 	} else {
 
-		nodesTouched++;
-
 		typename std::vector<TPEntry*>::iterator iti, itj;
 		if( n->minFirst ) {
 			for( iti = n->childs.begin(); iti != n->childs.end(); iti++ ) {
-				if( (*iti)->proof_number == n->proof_number ) break;
+				if( (*iti)->disproof_number == n->disproof_number ) break;
 			}
 		} else {
 			for( iti = n->childs.begin(); iti != n->childs.end(); iti++ ) {
-				if( (*iti)->disproof_number == n->disproof_number ) break;
+				if( (*iti)->proof_number == n->proof_number ) break;
 			}
 		}
 
 		// expand to the next child
 		assert( iti != n->childs.end() );
+
+		/*
+		if( iti == n->childs.end() ) {
+			if( n->minFirst ) {
+				fprintf( stdout, "parent = (%u,%u)(%u,%u) minFirst = %d bound = %f\n",
+				         n->pos[0].x, n->pos[0].y, n->pos[1].x, n->pos[1].y, n->minFirst, n->bound );
+				fprintf( stdout, "parents disproof number is %u (seen last on %u(%d),updated last on %u)\n",
+				         n->disproof_number, n->last_iteration, n->updated_on_last_iteration, n->iteration_of_update );
+				for( itj = n->childs.begin(); itj != n->childs.end(); itj++ ) {
+					fprintf( stdout, "child (%u,%u)(%u,%u) %d, bound=%f, dpn = %u, li = %u (%d), update = %u\n",
+					         (*itj)->pos[0].x, (*itj)->pos[0].y, (*itj)->pos[1].x, (*itj)->pos[1].y,
+									 (*itj)->minFirst, (*itj)->bound, (*itj)->disproof_number, (*itj)->last_iteration,
+									 (*itj)->updated_on_last_iteration, (*itj)->iteration_of_update );
+				}
+				fprintf( stdout, "\n" );
+			} else {
+				fprintf( stdout, "parent = (%u,%u)(%u,%u) minFirst = %d bound = %f\n",
+				         n->pos[0].x, n->pos[0].y, n->pos[1].x, n->pos[1].y, n->minFirst, n->bound );
+				fprintf( stdout, "parents proof number is %u (seen last on %u(%d), updated last on %u)\n",
+				         n->proof_number, n->last_iteration, n->updated_on_last_iteration, n->iteration_of_update );
+				for( itj = n->childs.begin(); itj != n->childs.end(); itj++ ) {
+					fprintf( stdout, "child (%u,%u)(%u,%u) %d, bound = %f, pn = %u, li = %u (%d), update = %u\n",
+					         (*itj)->pos[0].x, (*itj)->pos[0].y, (*itj)->pos[1].x, (*itj)->pos[1].y,
+									 (*itj)->minFirst, (*itj)->bound, (*itj)->proof_number, (*itj)->last_iteration,
+									 (*itj)->updated_on_last_iteration, (*itj)->iteration_of_update );
+				}
+				fprintf( stdout, "\n" );
+			}
+			exit(1);
+		}
+		*/
+
 		ipn_expand( *iti, iteration, expanded_node );
 
 		// this is the point where the values are coming back from the computed subtree
