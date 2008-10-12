@@ -59,7 +59,7 @@ Tile::Tile()
 Map::Map(long _width, long _height)
 :width(_width), height(_height)
 {
-	mapType = kRaw;
+	mapType = kOctile;
 	tileSet = kFall;
 	map_name[0] = 0;
 	sizeMultiplier = 1;
@@ -146,6 +146,7 @@ Map::~Map()
 	for (int x = 0; x < width; x++)
 		delete [] land[x];
 	delete [] land;
+	land = 0;
 }
 
 void Map::scale(long newWidth, long newHeight)
@@ -734,10 +735,44 @@ void Map::setSplit(long x, long y, tSplit split)
 */
 long Map::getTerrainType(long x, long y, tSplitSide split) const
 {
+	if (land[0] == 0)
+		printf("land: %p, land[0] = %p\n", land, land[0]);
 	if ((x < 0) || (x >= width) || (y < 0) || (y >= height)) return kUndefined;
 	if (split == kRightSide) return land[x][y].tile2.type;
 	return land[x][y].tile1.type;
 }
+
+/**
+ * Map::SetTerrainType()
+ *
+ * \brief Set all the terrain between two points to be the same
+ *
+ * \param x1 The first x-coordinate to set
+ * \param y1 The first y-coordinate to set
+ * \param x2 The second x-coordinate to set
+ * \param y2 The second y-coordinate to set
+ * \param terrain The terrain for the line between the coordinates
+ * \return none
+ */
+void Map::setTerrainType(int32_t x1, int32_t y1,
+                         int32_t x2, int32_t y2, tTerrain t)
+{
+    updated = true;
+    //printf("---> (%d, %d) to (%d, %d)\n", x1, y1, x2, y2);
+    double xdiff = (int)x1-(int)x2;
+    double ydiff = (int)y1-(int)y2;
+    double dist = sqrt(xdiff*xdiff + ydiff*ydiff);
+    setTerrainType(x1, y1, t);
+    for (double c = 0; c < dist; c += 0.5)
+    {
+        double ratio = c/dist;
+        double newx = (double)x1-xdiff*ratio;
+        double newy = (double)y1-ydiff*ratio;
+        setTerrainType((uint32_t)newx, (uint32_t)newy, t);
+    }
+    setTerrainType(x2, y2, t);
+}
+
 
 /**
 * Get the terrain type for one side of the tile at x, y.
@@ -784,7 +819,8 @@ void Map::setTerrainType(long x, long y, tTerrain type, tSplitSide split)
 	updated = true;
 	map_name[0] = 0;
 	if ((land[x][y].split == kNoSplit) && (split != kWholeTile)) return;
-	
+	if ((y > getMapWidth()-1) || (x > getMapHeight()-1))
+		return;
 	switch (split) {
 		
 		case kWholeTile:
@@ -2157,3 +2193,130 @@ void MakeMaze(Map *map, int pathSize)
 			}
 }
 
+/**
+ * MakeMaze(map)
+ */
+void MakeMaze(Map *map)
+{
+	int width = map->getMapWidth();
+	int height = map->getMapHeight();
+	map->setRectHeight(0, 0, width-1, height-1, 0, kGround);
+	
+	std::vector<int> x;
+	std::vector<int> y;
+
+	x.push_back(0);
+	y.push_back(0);
+
+	while (x.size() > 0)
+	{
+		int val;
+		if (random()%10)
+			val = x.size()-1;
+		else
+			val = random()%x.size();
+
+		printf("Trying to extend (%d, %d)\n", x[val], y[val]);
+		// raise up a corridor and open paths
+		switch (random()%4)
+		{
+			case 0: // NORTH
+			{
+				if ((y[val] > 0) && (map->getHeight(x[val], y[val]-2) == 0))
+				{
+					map->setHeight(x[val], y[val]-1, 1);
+					map->setHeight(x[val], y[val]-2, 1);
+					x.push_back(x[val]);
+					y.push_back(y[val]-2);
+					printf("Extended NORTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
+					break;
+				}
+			}
+			case 1: // SOUTH
+			{
+				if ((y[val] < height-3) && (map->getHeight(x[val], y[val]+2) == 0))
+				{
+					map->setHeight(x[val], y[val]+1, 1);
+					map->setHeight(x[val], y[val]+2, 1);
+					x.push_back(x[val]);
+					y.push_back(y[val]+2);
+					printf("Extended SOUTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
+					break;
+				}
+			}
+			case 2: // EAST
+			{
+				if ((x[val] > 0) && (map->getHeight(x[val]-2, y[val]) == 0))
+				{
+					map->setHeight(x[val]-1, y[val], 1);
+					map->setHeight(x[val]-2, y[val], 1);
+					x.push_back(x[val]-2);
+					y.push_back(y[val]);
+					printf("Extended EAST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
+					break;
+				}
+			}
+			case 3: // WEST
+			{
+				if ((x[val] < width-3) && (map->getHeight(x[val]+2, y[val]) == 0))
+				{
+					map->setHeight(x[val]+1, y[val], 1);
+					map->setHeight(x[val]+2, y[val], 1);
+					x.push_back(x[val]+2);
+					y.push_back(y[val]);
+					printf("Extended WEST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
+				}
+				break;
+			}
+		}
+		
+		// check to see if node is blocked
+		if (((x[val] == 0) || map->getHeight(x[val]-2, y[val]) != 0) && // blocked left
+			((x[val] >= width-3) || map->getHeight(x[val]+2, y[val]) != 0) && // blocked left
+			((y[val] == 0) || map->getHeight(x[val], y[val]-2) != 0) && // blocked up
+			((y[val] >= height-3) || map->getHeight(x[val], y[val]+2) != 0)) // blocked down
+		{
+			printf("(%d, %d) now blocked: %d left\n", x[val], y[val], x.size()-1);
+			x[val] = x.back();
+			y[val] = y.back();
+			x.pop_back();
+			y.pop_back();
+		}
+	}
+
+	for (int a = 0; a < width; a++)
+		for (int b = 0; b < height; b++)
+			if (map->getHeight(a, b) == 0)
+			{
+				//map->setHeight(x, y, 0);
+				map->setTerrainType(a, b, kOutOfBounds);
+			}
+			else
+				map->setHeight(a, b, 0);
+}
+
+void BuildRandomRoomMap(Map *map, int roomSize)
+{
+    int width = map->getMapWidth();
+    int height = map->getMapHeight();
+
+	map->setTerrainType(0, 0, width-1, height-1, kGround);
+    for (int x = 0; x < height; x += roomSize)
+    {
+        // draw a horizontal line
+        map->setTerrainType(0, x, width-1, x, kOutOfBounds);
+        // then punch a bunch of holes in it
+        for (int y = 0; y < width; y += roomSize)
+            if ((rand()%5) != 3) // 20% chance of not creating hole
+                map->setTerrainType(y+rand()%roomSize, x, kGround);
+    }
+    for (int x = 0; x < width; x += roomSize)
+    {
+        // draw a vertical line
+        map->setTerrainType(x, 0, x, height-1, kOutOfBounds);
+        // then punch a bunch of holes in it
+        for (int y = 0; y < height; y += roomSize)
+            if ((rand()%5) != 3) // 20% chance of not creating hole
+                map->setTerrainType(x, y+rand()%roomSize, kGround);
+    }
+}
