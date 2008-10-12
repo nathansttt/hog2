@@ -2207,7 +2207,8 @@ void MakeMaze(Map *map)
 
 	x.push_back(0);
 	y.push_back(0);
-
+	map->setHeight(0, 0, 1);
+	
 	while (x.size() > 0)
 	{
 		int val;
