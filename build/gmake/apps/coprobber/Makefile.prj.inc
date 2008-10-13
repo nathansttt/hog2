@@ -65,4 +65,7 @@ SRC_CPP = \
 	apps/coprobber/MultilevelCopRobberGame.cpp \
 	apps/coprobber/RobberUnit.cpp \
 	apps/coprobber/MySearchUnit.cpp \
+	apps/coprobber/Minimax.cpp \
+	apps/coprobber/Dijkstra.cpp \
+	apps/coprobber/MinimaxAStar.cpp \
 	apps/coprobber/CopRobber.cpp
