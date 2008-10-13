@@ -347,14 +347,12 @@ void IPNTTables<state,action,environment>::ipn_update_node( TPEntry *n, unsigned
 			if( n->value > child_value ) n->value = child_value;
 		}
 
-		/*
 		// update lower and upper bounds
 		if( n->proof_number == 0 ) {
-			min_lcache[n->pos] = n->value;
+			min_lcache[n->pos] = max( min_lcache[n->pos], n->value );
 		} else if( n->disproof_number == 0 ) {
-			min_ucache[n->pos] = n->value;
+			min_ucache[n->pos] = min( min_lcache[n->pos], n->value );
 		}
-		*/
 
 
 	} else {
@@ -373,13 +371,11 @@ void IPNTTables<state,action,environment>::ipn_update_node( TPEntry *n, unsigned
 			if( n->value < child_value ) n->value = child_value;
 		}
 
-		/*
 		if( n->proof_number == 0 ) {
-			max_lcache[n->pos] = n->value;
+			max_lcache[n->pos] = max( max_lcache[n->pos], n->value );
 		} else if( n->disproof_number == 0 ) {
-			max_ucache[n->pos] = n->value;
+			max_ucache[n->pos] = min( max_ucache[n->pos], n->value );
 		}
-		*/
 
 	}
 	return;
