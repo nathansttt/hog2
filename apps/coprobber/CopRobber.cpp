@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
 */
 
 
-/*
+
 // Minimax A*
 	xyLoc pos_cop, pos_robber;
 	Map *m;
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 	delete gh;
 	delete g;
 	delete m;
-*/
+
 
 
 /*
@@ -336,7 +336,7 @@ int main(int argc, char* argv[])
 */
 
 
-
+/*
 	// IPN-Search with transposition tables
 	Map *m;
 	xyLoc pos_cop, pos_robber;
@@ -372,6 +372,7 @@ int main(int argc, char* argv[])
 
 	delete ipntt;
 	delete env;
+*/
 
 
 /*
@@ -406,6 +407,21 @@ int main(int argc, char* argv[])
 
 	delete tidastar;
 	delete env;
+*/
+
+
+// test point generation
+/*
+	// test code to generate a set of mazes
+	char s[20];
+	for( int i = 6; i <= 60; i++ ) {
+		Map *m = new Map( i, i );
+		MakeMaze( m );
+		m->scale( 60,60 );
+		sprintf( s, "mymap_%d.map", i );
+		m->save( s );
+		delete m;
+	}
 */
 
 	return 0;

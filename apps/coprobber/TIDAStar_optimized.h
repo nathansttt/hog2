@@ -36,6 +36,7 @@ class TIDAStar {
 			return ( c1 == c2 );
 		}
 	};
+//	typedef __gnu_cxx::hash_set<CRState, CRStateHash, CRStateEqual> SearchCache;
 	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash, CRStateEqual> BoundCache;
 
 
@@ -67,6 +68,8 @@ class TIDAStar {
 	BoundCache min_lcache, max_lcache;
 	// upper bound cache
 	BoundCache min_ucache, max_ucache;
+
+//	SearchCache min_scache, max_scache;
 };
 
 
@@ -110,6 +113,12 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, bool minFirst ) {
 		sumNodesExpanded += nodesExpanded;
 		sumNodesTouched  += nodesTouched;
 
+/*
+		// sanity check
+		assert( min_scache.empty() );
+		assert( max_scache.empty() );
+*/
+
 	} while( c > b ); // until c <= b
 
 	nodesExpanded = sumNodesExpanded;
@@ -134,6 +143,17 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double bou
 	//if( GoalTest( pos ) ) return TerminalCost( pos );
 	if( pos[0] == pos[1] ) return 0.;
 
+/*
+	// lookup in the path from the root to this node
+	if( minFirst ) {
+		if( min_scache.find( pos ) != min_scache.end() )
+			return DBL_MAX;
+	} else {
+		if( max_scache.find( pos ) != max_scache.end() )
+			return DBL_MAX;
+	}
+*/
+
 	// upper bound cache lookup
 	typename BoundCache::iterator hcit;
 	BoundCache *current_bcache = minFirst?&min_ucache:&max_ucache;
@@ -157,6 +177,7 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double bou
 
 	// in case we are the cop/min player
 	if( minFirst ) {
+//		min_scache.insert( pos );
 
 		env->GetSuccessors( pos[1], neighbors );
 		if( canPause ) neighbors.push_back( pos[1] );
@@ -177,6 +198,7 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double bou
 
 	// in case we are the robber/max player
 	} else {
+//		max_scache.insert( pos );
 
 		env->GetSuccessors( pos[0], neighbors );
 		if( canPause ) neighbors.push_back( pos[0] );
@@ -205,6 +227,13 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double bou
 		current_bcache = minFirst?&min_ucache:&max_ucache;
 		(*current_bcache)[pos] = result;
 	}
+
+/*
+	if( minFirst )
+		min_scache.erase( pos );
+	else
+		max_scache.erase( pos );
+*/
 
 	return result;
 }
