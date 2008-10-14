@@ -517,6 +517,29 @@ int main(int argc, char* argv[])
 			delete env;
 		}
 
+		if( strcmp( argv[2], "rma" ) == 0 ) {
+			g = GraphSearchConstants::GetGraph( m );
+			MyGraphMapHeuristic *gh = new MyGraphMapHeuristic( m, g );
+			GraphEnvironment *env = new GraphEnvironment( g, gh );
+			env->SetDirected( true );
+
+			MinimaxAStar *astar = new MinimaxAStar( env, 1, true );
+			MinimaxAStar::CRState s;
+			s.push_back( m->getNodeNum( rx, ry ) );
+			s.push_back( m->getNodeNum( cx, cy ) );
+
+			clock_start   = clock();
+			result        = astar->astar( s, true, 1. );
+			clock_end     = clock();
+			nodesExpanded = astar->nodesExpanded;
+			nodesTouched  = astar->nodesTouched;
+
+			delete astar;
+			delete env;
+			delete gh;
+			delete g;
+			delete m;
+		}
 
 
 		// write out the statistics
@@ -529,6 +552,8 @@ int main(int argc, char* argv[])
 	fclose( problem_file );
 	fclose( result_file );
 	fprintf( stdout, "Done.\n" );
+
+
 
 	return 0;
 }

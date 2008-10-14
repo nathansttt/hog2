@@ -58,6 +58,8 @@ class MinimaxAStar {
 
 	double astar( CRState pos, bool minFirst, double weight = 1. );
 
+	unsigned int nodesExpanded, nodesTouched;
+
 	protected:
 
 	void push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst, double &weight );
