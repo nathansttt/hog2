@@ -142,7 +142,7 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 					// check agains infinity
 					if( min_cost.find( qtemp.pos ) == min_cost.end() ) {
 						qtemp.minFirst = !qe.minFirst; // !qe.minFirst == true
-						qtemp.gvalue   = qe.gvalue + 1.; //MinGCost( qe.pos, qtemp.pos );
+						qtemp.gvalue   = qe.gvalue + MinGCost( qe.pos, qtemp.pos );
 						qtemp.fvalue   = qtemp.gvalue + weight * HCost( goal_pos, goal_minFirst, qtemp.pos, qtemp.minFirst );
 						queue.push( qtemp );
 
@@ -178,7 +178,7 @@ double MinimaxAStar::compute_target_value( CRState &s ) {
 		temp[0] = *it;
 		mclit = min_cost.find( temp );
 		if( mclit != min_cost.end() )
-			tempvalue = mclit->second + 1.; //MinGCost( temp, s );
+			tempvalue = mclit->second + MinGCost( temp, s );
 		else
 			return DBL_MAX;
 		if( tempvalue > result ) result = tempvalue;
@@ -186,7 +186,6 @@ double MinimaxAStar::compute_target_value( CRState &s ) {
 	return result;
 }
 
-/*
 // this function loops through all possible states for now
 // instead of generating the beginning states directly from the map
 void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst, double &weight ) {
@@ -267,10 +266,9 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 	}
 	return;
 }
-*/
 
 
-
+/*
 // this version is a faster variant of the above function for two players (one cop)
 void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst, double &weight ) {
 	QueueEntry qe;
@@ -310,7 +308,7 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 				nodesTouched++;
 
 				qe.pos[1] = *it;
-				qe.gvalue   = 1.; //MinGCost( qe.pos, pos );
+				qe.gvalue   = MinGCost( qe.pos, pos );
 				qe.fvalue   = qe.gvalue + weight * HCost( goal_pos, goal_minFirst, qe.pos, qe.minFirst );
 				queue.push( qe );
 		}
@@ -319,6 +317,7 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 	}
 	
 };
+*/
 
 
 double MinimaxAStar::MinGCost( CRState&, CRState& ) {

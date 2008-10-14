@@ -19,7 +19,8 @@
 //#include "IPNTTables_optimized.h"
 #include "Dijkstra.h"
 #include "MyGraphMapHeuristic.h"
-#include "MinimaxAStar.h"
+//#include "MinimaxAStar.h"
+#include "MinimaxAStar_optimized.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -464,7 +465,7 @@ int main(int argc, char* argv[])
 	clock_start = clock_end = clock();
 	unsigned int rx,ry,cx,cy;
 	double result = 0;
-	unsigned int nodesExpanded, nodesTouched;
+	unsigned int nodesExpanded = 0, nodesTouched = 0;
 	Map *m; Graph *g;
 
 	if( argc < 4 ) {
@@ -479,10 +480,10 @@ int main(int argc, char* argv[])
 	while( !feof( problem_file ) ) {
 		fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );
 		m = new Map( map_file );
+		MapEnvironment *env = new MapEnvironment( m );
 
 		if( strcmp( argv[2], "tida" ) == 0 ) {
 			// if we want to test TIDA*
-			MapEnvironment *env = new MapEnvironment( m );
 			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
 				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
 
@@ -496,11 +497,9 @@ int main(int argc, char* argv[])
 			nodesTouched  = tidastar->nodesTouched;
 
 			delete tidastar;
-			delete env;
 		}
 
 		if( strcmp( argv[2], "ipn" ) == 0 ) {
-			MapEnvironment *env = new MapEnvironment( m );
 			IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt =
 				new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
 
@@ -514,33 +513,28 @@ int main(int argc, char* argv[])
 			nodesTouched  = ipntt->nodesTouched;
 
 			delete ipntt;
-			delete env;
 		}
 
 		if( strcmp( argv[2], "rma" ) == 0 ) {
-			g = GraphSearchConstants::GetGraph( m );
-			MyGraphMapHeuristic *gh = new MyGraphMapHeuristic( m, g );
-			GraphEnvironment *env = new GraphEnvironment( g, gh );
-			env->SetDirected( true );
-
-			MinimaxAStar *astar = new MinimaxAStar( env, 1, true );
-			MinimaxAStar::CRState s;
-			s.push_back( m->getNodeNum( rx, ry ) );
-			s.push_back( m->getNodeNum( cx, cy ) );
+			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+			std::vector<xyLoc> s;
+			s.push_back( xyLoc( rx, ry ) );
+			s.push_back( xyLoc( cx, cy ) );
 
 			clock_start   = clock();
-			result        = astar->astar( s, true, 1. );
+			result        = astar->astar( s, true );
 			clock_end     = clock();
 			nodesExpanded = astar->nodesExpanded;
 			nodesTouched  = astar->nodesTouched;
 
 			delete astar;
-			delete env;
-			delete gh;
-			delete g;
-			delete m;
 		}
 
+		if( strcmp( argv[2], "minimax" ) == 0 ) {
+		}
+
+		// cleanup
+		delete env;
 
 		// write out the statistics
 		fprintf( result_file, "(%u,%u) (%u,%u) %7.f %lu %u %u %s\n",
