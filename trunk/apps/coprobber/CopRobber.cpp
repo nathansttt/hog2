@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include "Minimax.h"
+#include "Minimax_optimized.h"
 #include "MapCliqueAbstraction.h"
 #include "MultilevelCopRobberGame.h"
 #include "RobberUnit.h"
@@ -460,7 +461,7 @@ int main(int argc, char* argv[])
 
 	// TESTs for "Optimal solutions for Moving Target Search"
 	char map_file[20];
-	FILE *problem_file, *result_file;
+	FILE *problem_file, *result_file, *tida_file_handler;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
 	unsigned int rx,ry,cx,cy;
@@ -476,6 +477,19 @@ int main(int argc, char* argv[])
 
 	problem_file = fopen( argv[1], "r" );
 	result_file  = fopen( argv[3], "w" );
+
+	// in case we want to compute with minimax
+	// we have to get the correct values from a file (hello to TIDA*)
+	if( strcmp( argv[2], "minimax" ) == 0 ) {
+			char s[40];
+			sprintf( s, "tida_%s", argv[1] );
+			tida_file_handler = fopen( s, "r" );
+			if( tida_file_handler == NULL ) {
+				fprintf( stderr, "ERROR: could not find tida value file\n" );
+				exit(1);
+			}
+	}
+
 	// for all the problems in the problem set file
 	while( !feof( problem_file ) ) {
 		fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );
@@ -516,7 +530,8 @@ int main(int argc, char* argv[])
 		}
 
 		if( strcmp( argv[2], "rma" ) == 0 ) {
-			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
+				new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
 			std::vector<xyLoc> s;
 			s.push_back( xyLoc( rx, ry ) );
 			s.push_back( xyLoc( cx, cy ) );
@@ -531,6 +546,23 @@ int main(int argc, char* argv[])
 		}
 
 		if( strcmp( argv[2], "minimax" ) == 0 ) {
+
+			double tida_value;
+			fscanf( tida_file_handler, "(%*u,%*u) (%*u,%*u) %lf %*lu %*u %*u %*s\n",
+				&tida_value );
+
+			MinimaxOptimized<xyLoc,tDirection,MapEnvironment> *minclass =
+				new MinimaxOptimized<xyLoc,tDirection,MapEnvironment>( env, true );
+			std::vector<xyLoc> pos;
+			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
+
+			clock_start   = clock();
+			result        = minclass->minimax( pos, true, (int)floor(tida_value) );
+			clock_end     = clock();
+			nodesExpanded = minclass->nodesExpanded;
+			nodesTouched  = minclass->nodesTouched;
+
+			delete minclass;
 		}
 
 		// cleanup
