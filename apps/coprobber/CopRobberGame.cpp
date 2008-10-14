@@ -31,12 +31,13 @@ void CopRobberGame::GetPossiblePlayerActions( unsigned int player, CRState s, st
 	// the semantics of the game (CopRobberOccupancy)
 	env->GetActions( s[player], orig_actions );
 
-	if( simultaneous ) {
+//	if( simultaneous ) {
 		// if we are in a simultaneous game, all actions can be considered
 		// as possible
-		for( unsigned int i = 0; i < orig_actions.size(); i++ ) {
-			actions.push_back( CRAction( orig_actions[i] ) );
+		for( std::vector<graphMove>::iterator it = orig_actions.begin(); it != orig_actions.end(); it++ ) {
+			actions.push_back( CRAction( *it ) );
 		}
+/*
 	} else {
 		// if we are not playing a simultaneous game, we can only consider the
 		// actions possible, that are valid when the other agents stand still
@@ -51,6 +52,8 @@ void CopRobberGame::GetPossiblePlayerActions( unsigned int player, CRState s, st
 				actions.push_back( CRAction( orig_actions[i] ) );
 		}
 	}
+*/
+
 	return;
 }
 
