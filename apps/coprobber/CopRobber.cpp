@@ -270,6 +270,30 @@ int main(int argc, char* argv[])
 	delete env;
 */
 
+/*
+	// optimized Minimax
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_depth;
+	std::vector<Minimax<xyLoc,tDirection,MapEnvironment>::CRState> path;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+	MinimaxOptimized<xyLoc,tDirection,MapEnvironment> *minclass =
+		new MinimaxOptimized<xyLoc,tDirection,MapEnvironment>( env, true );
+	std::vector<xyLoc> pos;
+	pos.push_back( pos_robber ); pos.push_back( pos_cop );
+	
+	double result = minclass->minimax( pos, true, max_depth );
+	printf( "result: %f\n", result );
+	delete minclass;
+	delete env;
+*/
+
 
 /*
 	// TIDA*
@@ -417,57 +441,77 @@ int main(int argc, char* argv[])
 /*
 // problem set generation
 	char map_file[20];
-	char problem_file[20] = "problem_set4.dat";
+	char problem_file[20] = "problem_set6.dat";
 	Map *m;
 	time_t t; time( &t ); srandom( (unsigned int) t );
 	unsigned int num;
 	int i,j;
-	// problem set 1: i = 1:20, scaled to size 20
+	// problem set 1: i = 6:20, scaled to size 20
 	// problem set 2: i = 16:35, scaled to size 40
 	// problem set 3: i = 20:39, scaled to size 60
 	// problem set 4: i = 30:49, scaled to size 80
 	// problem set 1
 	FILE *fhandler = fopen( problem_file, "w" );
-	for( i = 30; i <= 49; i++ ) {
-		m = new Map( i, i );
-		MakeMaze( m );
-		m->scale( 80,80 );
-		sprintf( map_file, "problem_set4_map%d.map", i );
-		m->save( map_file );
+	FILE *file_with_maps = fopen( argv[1], "r" );
+	while( !feof( file_with_maps ) ) {
+//	for( i = 1; i <= 15; i++ ) {
+//		m = new Map( i, i );
+//		MakeMaze( m );
+//		m->scale( 15,15 );
+//		sprintf( map_file, "problem_set5_map%d.map", i );
+//		m->save( map_file );
+		fscanf( file_with_maps, "%s\n", map_file );
+		m = new Map( map_file );
+		MapEnvironment *env = new MapEnvironment( m );
 		Graph *g = GraphSearchConstants::GetGraph( m );
-		for( j = 0; j < 50; j++ ) {
+		for( j = 0; j < 50;  ) {
 			// generate random position for the robber
 			num = (unsigned int)floor(
 				(double)random()/(double)RAND_MAX * (double)g->GetNumNodes());
-			// print out the starting position for the robber
-			fprintf( fhandler, "(%u,%u) ",
-				g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX),
-				g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY) );
+			unsigned int rx = g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX);
+			unsigned int ry = g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY);
 			// generate random position for the cop
 			num = (unsigned int)floor(
 				(double)random()/(double)RAND_MAX * (double)g->GetNumNodes());
-			// print out the starting position for the cop
-			fprintf( fhandler, "(%u,%u) ",
-				g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX),
-				g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY) );
-			// print out the map that we are in
-			fprintf( fhandler, "%s\n", map_file );
+			unsigned int cx = g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX);
+			unsigned int cy = g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY);
+
+			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
+				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+			std::vector<xyLoc> pos;
+			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
+			double result = tidastar->tida( pos );
+			delete tidastar;
+
+			if( result <= 35. ) {
+				fprintf( stdout, "%f\n", result );
+				// print out the starting position for the robber
+				fprintf( fhandler, "(%u,%u) ", rx, ry );
+				// print out the starting position for the cop
+				fprintf( fhandler, "(%u,%u) ", cx, cy );
+				// print out the map that we are in
+				fprintf( fhandler, "%s\n", map_file );
+				j++;
+			}
 		}
-		
-		delete m;
+	
+		delete env;
+		//delete m;
 	}
 	fclose( fhandler );
+	fclose( file_with_maps );
 */
+
 
 	// TESTs for "Optimal solutions for Moving Target Search"
 	char map_file[20];
-	FILE *problem_file, *result_file, *tida_file_handler;
+	FILE *problem_file, *result_file, *tida_file_handler = NULL;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
 	unsigned int rx,ry,cx,cy;
 	double result = 0;
 	unsigned int nodesExpanded = 0, nodesTouched = 0;
-	Map *m; Graph *g;
+	Map *m;
 
 	if( argc < 4 ) {
 		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
@@ -548,7 +592,7 @@ int main(int argc, char* argv[])
 		if( strcmp( argv[2], "minimax" ) == 0 ) {
 
 			double tida_value;
-			fscanf( tida_file_handler, "(%*u,%*u) (%*u,%*u) %lf %*lu %*u %*u %*s\n",
+			fscanf( tida_file_handler, "(%*u,%*u) (%*u,%*u) %lf %*u %*u %*u %*s\n",
 				&tida_value );
 
 			MinimaxOptimized<xyLoc,tDirection,MapEnvironment> *minclass =

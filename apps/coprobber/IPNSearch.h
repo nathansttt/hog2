@@ -234,6 +234,8 @@ void IPNSearch<state,action,environment>::ipn_expand( SearchNode &n, double boun
 
 template<class state, class action, class environment>
 double IPNSearch<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
+	if( GoalTest( pos ) ) return 0.;
+
 	if( canPause )
 		return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?MinGCost(pos,pos):0.) );
 	else
@@ -244,6 +246,7 @@ double IPNSearch<state,action,environment>::MinHCost( CRState &pos, bool minsTur
 // specification for state=xyLoc
 template<>
 double IPNSearch<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool minsTurn ) {
+	if( GoalTest( pos ) ) return 0.;
 
 	double dist;
 	if( abs(pos[1].x - pos[0].x) < abs(pos[1].y - pos[0].y) )
