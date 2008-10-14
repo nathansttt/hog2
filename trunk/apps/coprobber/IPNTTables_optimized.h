@@ -509,6 +509,8 @@ void IPNTTables<state,action,environment>::ipn_expand( TPEntry *n, TPEntry* &exp
 
 template<class state, class action, class environment>
 double IPNTTables<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
+	if( GoalTest( pos ) ) return 0.;
+
 	if( canPause )
 		return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?MinGCost(pos,pos):0.) );
 	else
@@ -519,6 +521,7 @@ double IPNTTables<state,action,environment>::MinHCost( CRState &pos, bool minsTu
 // specification for state=xyLoc
 template<>
 double IPNTTables<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool minsTurn ) {
+	if( GoalTest( pos ) ) return 0.;
 
 	double dist;
 	dist = max( abs(pos[1].x - pos[0].x), abs(pos[1].y - pos[0].y) );

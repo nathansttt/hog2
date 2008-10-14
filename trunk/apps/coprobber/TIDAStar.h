@@ -362,6 +362,8 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCo
 
 template<class state, class action, class environment>
 double TIDAStar<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
+	if( GoalTest( pos ) ) return 0.;
+
 	if( canPause )
 		return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?MinGCost(pos,pos):0.) );
 	else
@@ -372,6 +374,7 @@ double TIDAStar<state,action,environment>::MinHCost( CRState &pos, bool minsTurn
 // specification for state=xyLoc
 template<>
 double TIDAStar<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool minsTurn ) {
+	if( GoalTest( pos ) ) return 0.;
 
 	double dist;
 	if( abs(pos[1].x - pos[0].x) < abs(pos[1].y - pos[0].y) )

@@ -412,6 +412,8 @@ double Minimax<state,action,environment>::EvalFunc( CRState &pos, bool minsTurn 
 // \see Minimax.cpp for an implementation for state=xyLoc
 template<class state, class action, class environment>
 double Minimax<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
+	if( GoalTest( pos ) ) return 0.;
+
 	if( canPause )
 		return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?MinGCost(pos,pos):0.) );
 	else
