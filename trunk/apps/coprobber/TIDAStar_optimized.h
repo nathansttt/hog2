@@ -105,7 +105,7 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, bool minFirst ) {
 	do {
 		nodesExpanded = 0; nodesTouched = 0;
 		b = c;
-		fprintf( stdout, "set bound to b = %f\n", b );
+		//fprintf( stdout, "set bound to b = %f\n", b );
 		c = tida_update( pos, b, minFirst );
 
 		iteration_nodesExpanded.push_back( nodesExpanded );
