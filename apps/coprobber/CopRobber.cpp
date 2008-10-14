@@ -1,7 +1,9 @@
 #include "CopRobber.h"
 #include <vector>
 #include <math.h>
+#include <stdlib.h>
 #include <sys/times.h>
+#include <string.h>
 #include "Minimax.h"
 #include "MapCliqueAbstraction.h"
 #include "MultilevelCopRobberGame.h"
@@ -197,7 +199,7 @@ int main(int argc, char* argv[])
 */
 
 
-
+/*
 // Minimax A*
 	xyLoc pos_cop, pos_robber;
 	Map *m;
@@ -228,7 +230,7 @@ int main(int argc, char* argv[])
 	delete gh;
 	delete g;
 	delete m;
-
+*/
 
 
 /*
@@ -409,20 +411,99 @@ int main(int argc, char* argv[])
 	delete env;
 */
 
-
-// test point generation
 /*
-	// test code to generate a set of mazes
-	char s[20];
-	for( int i = 6; i <= 60; i++ ) {
-		Map *m = new Map( i, i );
+// problem set generation
+	char map_file[20];
+	char problem_file[20] = "problem_set4.dat";
+	Map *m;
+	time_t t; time( &t ); srandom( (unsigned int) t );
+	unsigned int num;
+	int i,j;
+	// problem set 1: i = 1:20, scaled to size 20
+	// problem set 2: i = 16:35, scaled to size 40
+	// problem set 3: i = 20:39, scaled to size 60
+	// problem set 4: i = 30:49, scaled to size 80
+	// problem set 1
+	FILE *fhandler = fopen( problem_file, "w" );
+	for( i = 30; i <= 49; i++ ) {
+		m = new Map( i, i );
 		MakeMaze( m );
-		m->scale( 60,60 );
-		sprintf( s, "mymap_%d.map", i );
-		m->save( s );
+		m->scale( 80,80 );
+		sprintf( map_file, "problem_set4_map%d.map", i );
+		m->save( map_file );
+		Graph *g = GraphSearchConstants::GetGraph( m );
+		for( j = 0; j < 50; j++ ) {
+			// generate random position for the robber
+			num = (unsigned int)floor(
+				(double)random()/(double)RAND_MAX * (double)g->GetNumNodes());
+			// print out the starting position for the robber
+			fprintf( fhandler, "(%u,%u) ",
+				g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX),
+				g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY) );
+			// generate random position for the cop
+			num = (unsigned int)floor(
+				(double)random()/(double)RAND_MAX * (double)g->GetNumNodes());
+			// print out the starting position for the cop
+			fprintf( fhandler, "(%u,%u) ",
+				g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX),
+				g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY) );
+			// print out the map that we are in
+			fprintf( fhandler, "%s\n", map_file );
+		}
+		
 		delete m;
 	}
+	fclose( fhandler );
 */
+
+	// TESTs for "Optimal solutions for Moving Target Search"
+	char map_file[20];
+	FILE *problem_file, *result_file;
+	unsigned int rx,ry,cx,cy;
+	double result;
+	unsigned int nodesExpanded, nodesTouched;
+	Map *m; Graph *g;
+
+	if( argc < 4 ) {
+		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
+		printf( "where <algorithm> = tida|rma|ipn|minimax\n" );
+		exit(1);
+	}
+
+	problem_file = fopen( argv[1], "r" );
+	result_file  = fopen( argv[3], "w" );
+	// for all the problems in the problem set file
+	while( !feof( problem_file ) ) {
+		fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );
+		m = new Map( map_file );
+
+		if( strcmp( argv[2], "tida" ) == 0 ) {
+			// if we want to test TIDA*
+			MapEnvironment *env = new MapEnvironment( m );
+			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
+				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+
+			std::vector<xyLoc> pos;
+			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
+
+			result = tidastar->tida( pos );
+			nodesExpanded = tidastar->nodesExpanded;
+			nodesTouched  = tidastar->nodesTouched;
+
+			delete tidastar;
+			delete env;
+		}
+
+
+
+		// write out the statistics
+		fprintf( result_file, "(%u,%u) (%u,%u) %7.f %u %u %s\n",
+			rx,ry,cx,cy,result,nodesExpanded,nodesTouched,map_file );
+		//delete m;
+	}
+	fclose( problem_file );
+	fclose( result_file );
+	fprintf( stdout, "Done.\n" );
 
 	return 0;
 }
