@@ -173,10 +173,12 @@ double IPNTTables<state,action,environment>::ipn_update( CRState &pos, bool minF
 	}
 
 	// verbose output
+	/*
 	if( root->proof_number == 0 )
 		fprintf( stdout, "Root has been proved with bound %f and value %f\n", bound, root->value );
 	else //if( root.disproof_number == 0 )
 		fprintf( stdout, "Root has been disproved with bound %f and value %f\n", bound, root->value );
+	*/
 
 	double result = root->value;
 
@@ -288,18 +290,18 @@ typename IPNTTables<state,action,environment>::TPEntry* IPNTTables<state,action,
 	mytpentry->minFirst = minFirst;
 	mytpentry->bound    = bound;
 
-	if( GoalTest( pos ) ) {
+	if( pos[0] == pos[1] ) { //GoalTest( pos ) ) {
 		// if we are at a terminal state
-		if( bound < TerminalCost( pos ) ) {
+		if( bound < 0. ) { // TerminalCost( pos ) ) {
 			// proof
 			mytpentry->proof_number    = 0;
 			mytpentry->disproof_number = UINT_MAX;
-			mytpentry->value           = TerminalCost( pos );
+			mytpentry->value           = 0.; //TerminalCost( pos );
 		} else {
 			// disproof
 			mytpentry->proof_number    = UINT_MAX;
 			mytpentry->disproof_number = 0;
-			mytpentry->value           = TerminalCost( pos );
+			mytpentry->value           = 0.; //TerminalCost( pos );
 		}
 	} else {
 
@@ -455,7 +457,8 @@ void IPNTTables<state,action,environment>::ipn_expand( TPEntry *n, unsigned int 
 			child_pos = n->pos;
 			child_pos[myid] = neighbors[i];
 
-			n->childs.push_back( ipn_create_node( child_pos, !n->minFirst, n->bound - MinGCost( n->pos, child_pos ) ) );
+			//n->childs.push_back( ipn_create_node( child_pos, !n->minFirst, n->bound - MinGCost( n->pos, child_pos ) ) );
+			n->childs.push_back( ipn_create_node( child_pos, !n->minFirst, n->bound - 1. ) );
 		}
 
 		// Sanity check: if this fails it would mean we are in a node that has no
@@ -533,7 +536,8 @@ void IPNTTables<state,action,environment>::ipn_expand( TPEntry *n, unsigned int 
 template<class state, class action, class environment>
 double IPNTTables<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
 	if( canPause )
-		return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?MinGCost(pos,pos):0.) );
+		//return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?MinGCost(pos,pos):0.) );
+		return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?1.:0.) );
 	else
 		// distance from cop to the robber
 		return env->HCost( pos[1], pos[0] );
@@ -550,7 +554,8 @@ double IPNTTables<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool
 		dist = abs(pos[1].x - pos[0].x);
 
 	if( canPause )
-		return( 2. * dist - (minsTurn?MinGCost(pos,pos):0.) );
+		//return( 2. * dist - (minsTurn?MinGCost(pos,pos):0.) );
+		return( 2. * dist - (minsTurn?1.:0.) );
 	else
 		return dist;
 }
