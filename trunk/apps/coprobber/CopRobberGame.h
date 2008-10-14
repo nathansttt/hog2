@@ -32,6 +32,7 @@ class CopRobberGame:
 	virtual void GetPossibleOpponentActions( unsigned int excluded_player, CRState s, std::vector<CRMove> &actions );
 
 	virtual double GetReward( unsigned int player, CRState s, std::vector<CRAction> act );
+	virtual double InitState( CRState s );
 
 	virtual unsigned int GetNumStates() const;
 
