@@ -644,11 +644,11 @@ int main(int argc, char* argv[])
 	while( !feof( problem_file ) ) {
 		fscanf( problem_file, "%s\n", map_file );
 		m = new Map( map_file );
+		Graph *g = GraphSearchConstants::GetGraph( m );
+		GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
+		GraphEnvironment *env = new GraphEnvironment( g, gh );
 
 		if( strcmp( argv[2], "dijkstra" ) == 0 ) {
-			Graph *g = GraphSearchConstants::GetGraph( m );
-			GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
-			GraphEnvironment *env = new GraphEnvironment( g, gh );
 			env->SetDirected( true );
 
 			Dijkstra *d = new Dijkstra( env, 1, true );
@@ -657,9 +657,6 @@ int main(int argc, char* argv[])
 			clock_end = clock();
 
 			delete d;
-			delete env;
-			delete gh;
-			delete g;
 		}
 
 		if( strcmp( argv[2], "markov" ) == 0 ) {
@@ -669,12 +666,7 @@ int main(int argc, char* argv[])
 			double *V = NULL;
 			unsigned int iter = 0;
 
-			MapCliqueAbstraction *mca = new MapCliqueAbstraction( m );
-			Graph *g = mca->GetAbstractGraph( 0 );
-			MultilevelGraphHeuristic *gh = new MultilevelGraphHeuristic( mca, 0 );
-			GraphEnvironment *genv = new GraphEnvironment( g, gh );
-
-			CopRobberGame *game = new CopRobberGame( genv, 1, false, true );
+			CopRobberGame *game = new CopRobberGame( env, 1, false, true );
 
 			clock_start = clock();
 			game->GetExpectedStateRewards( 0, gamma, 0.01, precision, V, iter );
@@ -682,10 +674,11 @@ int main(int argc, char* argv[])
 
 			delete[] V;
 			delete game;
-			delete genv;
-			delete gh;
 		}
 
+		delete env;
+		delete gh;
+		delete g;
 		delete m;
 		// write out the statistics
 		fprintf( result_file, "%lu %s\n",(clock_end-clock_start)/1000,map_file );

@@ -41,6 +41,7 @@ class MarkovGame: public virtual MultiAgentEnvironment<state,action> {
 		to whatever the signification of the game is.
 	*/
 	virtual double GetReward( unsigned int player, MAState s, std::vector<SAAction> act ) = 0;
+	virtual double InitState( MAState s ) = 0;
 
 	virtual unsigned int GetNumStates() const = 0;
 
@@ -316,7 +317,7 @@ void MarkovGame<state,action>::GetExpectedStateRewardsAlternatingActionGame( uns
 	// initialize the values
 	for( i = 0; i < tnes; i++ ) {
 		if( V == NULL )
-			Vs[0][i] = 0.;
+			Vs[0][i] = InitState( GetStateByNumber( i ) ); //0.;
 		Vs[1][i] = Vs[0][i];
 		norm_vec[i] = 0.;
 	}
