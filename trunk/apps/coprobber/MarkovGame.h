@@ -379,19 +379,29 @@ void MarkovGame<state,action>::GetExpectedStateRewardsAlternatingActionGame( uns
 
 				for( j = 0; j < n_opp_actions; j++ ) {
 
-					p_tempaction = opp_actions[j];
-					p_tempaction[player] = my_actions[k];
-
 					p_tempstate = p_state;
-					ApplyAction( p_tempstate, p_tempaction );
+					ApplyAction( p_tempstate, opp_actions[j] );
 
-					if( this->GetOccupancyInfo()->CanMove( p_state, p_tempstate ) ) {
-						Q = GetReward( player, p_state, p_tempaction ) +
+					if( GoalTest( p_tempstate, p_tempstate ) ) {
+						Q = GetReward( player, p_state, opp_actions[j] ) +
 						    gamma * Vs[(size_t)v_old][GetNumberByState(p_tempstate)];
+						if( min > Q ) min = Q;
+					} else {
 
-						if( min > Q ) {
-							min = Q;
+						p_tempaction = opp_actions[j];
+						p_tempaction[player] = my_actions[k];
+
+						p_tempstate = p_state;
+						ApplyAction( p_tempstate, p_tempaction );
+
+						if( this->GetOccupancyInfo()->CanMove( p_state, p_tempstate ) ) {
+							Q = GetReward( player, p_state, p_tempaction ) +
+							    gamma * Vs[(size_t)v_old][GetNumberByState(p_tempstate)];
+
+							if( min > Q ) {
+								min = Q;
 //							printf( "u" );
+							}
 						}
 //						printf( "%g ", Q );
 					}
@@ -414,7 +424,7 @@ void MarkovGame<state,action>::GetExpectedStateRewardsAlternatingActionGame( uns
 		iter4++;
 
 		norm = gsl_blas_dnrm2( &(nvecview.vector) );
-		printf( "norm = %g\n", norm );
+//		printf( "norm = %g\n", norm );
 
 /*
 		if( iter%20 == 0 ) {

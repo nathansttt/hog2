@@ -502,9 +502,9 @@ int main(int argc, char* argv[])
 	fclose( file_with_maps );
 */
 
-
+/*
 	// TESTs for "Optimal solutions for Moving Target Search"
-	char map_file[20];
+	char map_file[100];
 	FILE *problem_file, *result_file, *tida_file_handler = NULL;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
@@ -622,8 +622,77 @@ int main(int argc, char* argv[])
 	fclose( problem_file );
 	fclose( result_file );
 	fprintf( stdout, "Done.\n" );
+*/
 
+	// test of all-state algorithms
+	char map_file[100];
+	FILE *problem_file, *result_file;
+	clock_t clock_start, clock_end;
+	clock_start = clock_end = clock();
+	Map *m;
 
+	if( argc < 4 ) {
+		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
+		printf( "where <algorithm> = dijkstra|markov\n" );
+		exit(1);
+	}
+
+	problem_file = fopen( argv[1], "r" );
+	result_file  = fopen( argv[3], "w" );
+
+	// for all the problems in the problem set file
+	while( !feof( problem_file ) ) {
+		fscanf( problem_file, "%s\n", map_file );
+		m = new Map( map_file );
+
+		if( strcmp( argv[2], "dijkstra" ) == 0 ) {
+			Graph *g = GraphSearchConstants::GetGraph( m );
+			GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
+			GraphEnvironment *env = new GraphEnvironment( g, gh );
+			env->SetDirected( true );
+
+			Dijkstra *d = new Dijkstra( env, 1, true );
+			clock_start = clock();
+			d->dijkstra();
+			clock_end = clock();
+
+			delete d;
+			delete env;
+			delete gh;
+			delete g;
+		}
+
+		if( strcmp( argv[2], "markov" ) == 0 ) {
+
+			double precision = 0.1;
+			double gamma = 1.0;
+			double *V = NULL;
+			unsigned int iter = 0;
+
+			MapCliqueAbstraction *mca = new MapCliqueAbstraction( m );
+			Graph *g = mca->GetAbstractGraph( 0 );
+			MultilevelGraphHeuristic *gh = new MultilevelGraphHeuristic( mca, 0 );
+			GraphEnvironment *genv = new GraphEnvironment( g, gh );
+
+			CopRobberGame *game = new CopRobberGame( genv, 1, false, true );
+
+			clock_start = clock();
+			game->GetExpectedStateRewards( 0, gamma, 0.01, precision, V, iter );
+			clock_end = clock();
+
+			delete[] V;
+			delete game;
+			delete genv;
+			delete gh;
+		}
+
+		delete m;
+		// write out the statistics
+		fprintf( result_file, "%lu %s\n",(clock_end-clock_start)/1000,map_file );
+		fflush( result_file );
+	}
+	fclose( result_file );
+	fclose( problem_file );
 
 	return 0;
 }
