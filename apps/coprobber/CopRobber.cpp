@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/times.h>
 #include <string.h>
+#include <time.h>
 #include "Minimax.h"
 #include "MapCliqueAbstraction.h"
 #include "MultilevelCopRobberGame.h"
@@ -459,8 +460,10 @@ int main(int argc, char* argv[])
 	// TESTs for "Optimal solutions for Moving Target Search"
 	char map_file[20];
 	FILE *problem_file, *result_file;
+	clock_t clock_start, clock_end;
+	clock_start = clock_end = clock();
 	unsigned int rx,ry,cx,cy;
-	double result;
+	double result = 0;
 	unsigned int nodesExpanded, nodesTouched;
 	Map *m; Graph *g;
 
@@ -486,7 +489,9 @@ int main(int argc, char* argv[])
 			std::vector<xyLoc> pos;
 			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
 
-			result = tidastar->tida( pos );
+			clock_start   = clock();
+			result        = tidastar->tida( pos );
+			clock_end     = clock();
 			nodesExpanded = tidastar->nodesExpanded;
 			nodesTouched  = tidastar->nodesTouched;
 
@@ -494,11 +499,31 @@ int main(int argc, char* argv[])
 			delete env;
 		}
 
+		if( strcmp( argv[2], "ipn" ) == 0 ) {
+			MapEnvironment *env = new MapEnvironment( m );
+			IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt =
+				new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
+
+			std::vector<xyLoc> pos;
+			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
+
+			clock_start   = clock();
+			result        = ipntt->ipn( pos, true );
+			clock_end     = clock();
+			nodesExpanded = ipntt->nodesExpanded;
+			nodesTouched  = ipntt->nodesTouched;
+
+			delete ipntt;
+			delete env;
+		}
+
 
 
 		// write out the statistics
-		fprintf( result_file, "(%u,%u) (%u,%u) %7.f %u %u %s\n",
-			rx,ry,cx,cy,result,nodesExpanded,nodesTouched,map_file );
+		fprintf( result_file, "(%u,%u) (%u,%u) %7.f %lu %u %u %s\n",
+			rx,ry,cx,cy,result,(clock_end-clock_start)/1000,
+			nodesExpanded,nodesTouched,map_file );
+		fflush( result_file );
 		//delete m;
 	}
 	fclose( problem_file );
