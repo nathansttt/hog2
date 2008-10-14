@@ -4,49 +4,29 @@
 #include <math.h>
 #include "Map2DEnvironment.h"
 #include "MultiAgentEnvironment.h"
+#include "Minimax.h" // for CRHash
 
 
-#ifndef MINIMAX_H
-#define MINIMAX_H
-
-// hash function definition
-// \see Minimax.cpp for implementation for state=xyLoc
-// \see MinimaxAStar.cpp for implementation for state=graphState
-template<class state>
-uint64_t CRHash( const std::vector<state> &pos );
+#ifndef MINIMAX_OPTIMIZED_H
+#define MINIMAX_OPTIMIZED_H
 
 /*!
 	two players minimax implementation
 */
 template<class state, class action, class environment>
-class Minimax {
+class MinimaxOptimized {
 
 	public:
 
 	// type definitions
 	typedef typename MultiAgentEnvironment<state,action>::MAState CRState;
 
-	// SearchCache for the path from the root to the current node
-	struct CRStateHash {
-		size_t operator()( CRState *s ) const {
-			return CRHash<state>( *s );
-		}
-	};
-	struct CRStateEqual {
-		bool operator()( const CRState *c1, const CRState *c2 ) const {
-			return ( *c1 == *c2 );
-		}
-	};
-	typedef __gnu_cxx::hash_set<CRState*, CRStateHash, CRStateEqual> SearchCache;
 
 	// transposition tables
 	class TPEntry {
 		public:
 		TPEntry( CRState &_pos, double _value = 0. ): pos(_pos), value(_value) {};
-		TPEntry( CRState &_pos, std::vector<CRState> &_path, double _value = 0. ): pos(_pos),path(_path),value(_value) {};
 		CRState pos; // the node that has to be stored
-		CRState next_pos; // next position in the optimal solution path
-		bool no_next_pos;
 		double value;
 		double alpha;
 		double beta;
@@ -69,14 +49,12 @@ class Minimax {
 
 
 	// constructor
-	Minimax( environment *_env, bool _canPause ):
+	MinimaxOptimized( environment *_env, bool _canPause ):
 		max_depth_reached(0), env(_env), canPause(_canPause)
 		{};
 
 	// functions
-//	double iterative_minimax( CRState pos, std::vector<CRState> &path, bool minFirst = true );
-
-	double minimax( CRState pos, std::vector<CRState> &path, bool minFirst = true, int max_depth = 100 );
+	double minimax( CRState pos, bool minFirst = true, int max_depth = 100 );
 
 	// gets updated after each call to minimax (or minimax_update)
 	int max_depth_reached;
@@ -99,8 +77,6 @@ class Minimax {
 	// variables
 	environment *env;
 	bool canPause;
-	// caching the path from the root to the current node (during the computation)
-//	SearchCache min_scache, max_scache;
 
 	// transposition table
 	GTTables min_gttables, max_gttables;
@@ -114,24 +90,10 @@ class Minimax {
 /*------------------------------------------------------------------------------
 | MiniMax Implementation
 ------------------------------------------------------------------------------*/
-/*
-template<class state, class action, class environment>
-double Minimax<state,action,environment>::iterative_minimax( CRState pos, std::vector<CRState> &path, bool minFirst ) {
-
-	double result = 0.;
-	int bound = 0;
-	while( true ) {
-		result = minimax_update( pos, path, minFirst, bound );
-		if( result < (double)bound ) break;
-		bound++;
-	}
-	return result;
-}
-*/
 
 
 template<class state,class action,class environment>
-double Minimax<state,action,environment>::minimax( CRState pos, std::vector<CRState> &path, bool minFirst, int max_depth ) {
+double MinimaxOptimized<state,action,environment>::minimax( CRState pos, bool minFirst, int max_depth ) {
 
 	double result;
 
@@ -160,36 +122,6 @@ double Minimax<state,action,environment>::minimax( CRState pos, std::vector<CRSt
 	assert( max_scache.empty() );
 	*/
 
-	// extract the path from the cache
-	path.clear(); path.push_back( pos );
-	TPEntry mytpentry( pos );
-	typename GTTables::iterator gttit;
-	typename TranspositionTable::iterator tit;
-	GTTables* current_gttables = minFirst?&min_gttables:&max_gttables;
-	GTTables* next_gttables    = minFirst?&max_gttables:&min_gttables;
-	GTTables* temp;
-	int depth = max_depth;
-	// this loop terminates because we only computed down to a certain depth
-	while( true ) {
-		gttit = current_gttables->find( (double)depth );
-		if( gttit != current_gttables->end() ) {
-			tit = gttit->second.find( mytpentry );
-			if( tit != gttit->second.end() ) {
-				if( !tit->no_next_pos ) {
-					path.push_back( tit->next_pos );
-					mytpentry.pos = tit->next_pos;
-					depth--;
-					temp = current_gttables;
-					current_gttables = next_gttables;
-					next_gttables = temp;
-				} else
-					break;
-			} else
-				break;
-		} else
-			break;
-	}
-	
 
 	// cleanup
 	min_gttables.clear();
@@ -204,7 +136,7 @@ double Minimax<state,action,environment>::minimax( CRState pos, std::vector<CRSt
 // alpha = minimum score that the maximum player is assured of
 // beta  = maximum score that the minimum player is assured of
 template<class state,class action,class environment>
-double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFirst, int depth, double alpha, double beta ) {
+double MinimaxOptimized<state,action,environment>::minimax_help( CRState pos, bool minFirst, int depth, double alpha, double beta ) {
 
 	/* verbose
 	fprintf( stdout, "considered position (%u,%u) (%u,%u) for player ", pos[0].x, pos[0].y, pos[1].x, pos[1].y );
@@ -222,23 +154,6 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFir
 //		fprintf( stdout, "terminal => %f\n", TerminalCost( pos ) );
 		return TerminalCost( pos );
 	}
-
-	// determine whether we yet encountered this position on the
-	// path from the root to this node
-	// technically we need this to make the game tree finite
-	/*
-	if( minFirst ) {
-		if( min_scache.find( &pos ) != min_scache.end() ) {
-//			fprintf( stdout, "doubling \\infty\n" );
-			return DBL_MAX;
-		}
-	} else {
-		if( max_scache.find( &pos ) != max_scache.end() ) {
-//			fprintf( stdout, "doubling \\infty\n" );
-			return DBL_MAX;
-		}
-	}
-	*/
 
 	// in case of a consistent heuristic we can also prune
 	// because we are then guaranteed not to reach the terminals anymore
@@ -300,18 +215,9 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFir
 	}
 
 
-	// push the current node on the path cache
-	/*
-	if( minFirst )
-		min_scache.insert( &pos );
-	else
-		max_scache.insert( &pos );
-	*/
-
 	// variable declarations
 	std::vector<state> next_mystates;
-	CRState child, next_pos;
-	bool no_next_pos = true;
+	CRState child;
 	double child_value, pathcost;
 	double result=minFirst?beta:alpha;
 
@@ -339,8 +245,6 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFir
 			// min player updates his score
 			if( child_value < result ) {
 				result = child_value;
-				next_pos = child;
-				no_next_pos = false;
 			}
 
 			// beta cutoff
@@ -353,8 +257,6 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFir
 			// max player updates his score
 			if( child_value > result ) {
 				result = child_value;
-				next_pos = child;
-				no_next_pos = false;
 			}
 
 			// alpha cutoff
@@ -391,8 +293,6 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFir
 		// the old entry is no longer needed
 		gttit->second.erase( tit );
 	}
-	mytpentry.next_pos = next_pos;
-	mytpentry.no_next_pos = no_next_pos;
 	mytpentry.value = result;
 	mytpentry.alpha = alpha;
 	mytpentry.beta  = beta;
@@ -404,14 +304,14 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFir
 
 
 template<class state, class action, class environment>
-double Minimax<state,action,environment>::EvalFunc( CRState &pos, bool minsTurn ) {
+double MinimaxOptimized<state,action,environment>::EvalFunc( CRState &pos, bool minsTurn ) {
 	return 0.;
 //	return MinHCost( pos, minsTurn );
 }
 
-// \see Minimax.cpp for an implementation for state=xyLoc
+// \see MinimaxOptimized.cpp for an implementation for state=xyLoc
 template<class state, class action, class environment>
-double Minimax<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
+double MinimaxOptimized<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
 	if( canPause )
 		return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?MinGCost(pos,pos):0.) );
 	else
@@ -421,17 +321,17 @@ double Minimax<state,action,environment>::MinHCost( CRState &pos, bool minsTurn 
 
 
 template<class state, class action, class environment>
-double Minimax<state,action,environment>::MinGCost( CRState&, CRState& ) {
+double MinimaxOptimized<state,action,environment>::MinGCost( CRState&, CRState& ) {
 	return 1.;
 }
 
 template<class state, class action, class environment>
-bool Minimax<state,action,environment>::GoalTest( CRState &pos ) {
+bool MinimaxOptimized<state,action,environment>::GoalTest( CRState &pos ) {
 	return( pos[0] == pos[1] );
 }
 
 template<class state, class action, class environment>
-double Minimax<state,action,environment>::TerminalCost( CRState& ) {
+double MinimaxOptimized<state,action,environment>::TerminalCost( CRState& ) {
 	return 0.;
 }
 
