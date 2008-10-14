@@ -68,4 +68,5 @@ SRC_CPP = \
 	apps/coprobber/Minimax.cpp \
 	apps/coprobber/Dijkstra.cpp \
 	apps/coprobber/MinimaxAStar.cpp \
+	apps/coprobber/MinimaxAStar_optimized.cpp \
 	apps/coprobber/CopRobber.cpp
