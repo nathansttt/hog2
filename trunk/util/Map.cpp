@@ -819,7 +819,7 @@ void Map::setTerrainType(long x, long y, tTerrain type, tSplitSide split)
 	updated = true;
 	map_name[0] = 0;
 	if ((land[x][y].split == kNoSplit) && (split != kWholeTile)) return;
-	if ((y > getMapWidth()-1) || (x > getMapHeight()-1))
+	if ((y > getMapHeight()-1) || (x > getMapWidth()-1))
 		return;
 	switch (split) {
 		
