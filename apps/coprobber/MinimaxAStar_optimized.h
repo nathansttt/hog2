@@ -51,8 +51,7 @@ class MinimaxAStar {
 
 	// constructor
 	// for usage with state=graphState, action=graphMove, environment=GraphEnvironment
-	MinimaxAStar( environment *_env, unsigned int _number_of_cops, bool _canPass ):
-		env(_env), number_of_cops(_number_of_cops), canPass(_canPass) {};
+	MinimaxAStar( environment *_env, unsigned int _number_of_cops, bool _canPass );
 
 	double astar( CRState pos, bool minFirst );
 
@@ -70,6 +69,9 @@ class MinimaxAStar {
 	// in the submitted graph environment (=> use MyGraphMapHeuristic)
 	double HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 );
 
+	bool GoalTest( CRState &pos );
+	double TerminalCost( CRState &pos );
+
 	environment *env;
 	unsigned int number_of_cops;
 	bool canPass;
@@ -80,14 +82,35 @@ class MinimaxAStar {
 //	std::vector<double> min_cost, max_cost;
 	MyClosedList min_cost, max_cost;
 
+
+	MyClosedList my_minheuristic, my_maxheuristic;
+};
+
+
+/* Header code for MinimaxAStar_optimized.cpp */
+template<>
+void MinimaxAStar<graphState,graphMove,GraphEnvironment>::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst );
+template<>
+void MinimaxAStar<xyLoc,tDirection,MapEnvironment>::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst );
+template<>
+double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 );
+template<>
+double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::MinGCost( CRState &p1, CRState &p2 );
+
+
+/* IMPLEMENTATION */
+
+template<class state,class action,class environment>
+MinimaxAStar<state,action,environment>::MinimaxAStar( environment *_env, unsigned int _number_of_cops, bool _canPass ):
+	env(_env), number_of_cops(_number_of_cops), canPass(_canPass) {
+/*
+	time_t t; time( &t ); srandom( (unsigned int) t );
+	printf( "seed = %u\n", (unsigned int)t );
+*/
 };
 
 
 
-
-
-
-/* IMPLEMENTATION */
 
 template<class state,class action, class environment>
 double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goal_minFirst ) {
@@ -97,8 +120,7 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 
 	nodesExpanded = 0; nodesTouched = 0;
 
-	if( goal_pos[0] == goal_pos[1] )
-		return 0.;
+	if( GoalTest( goal_pos ) ) return TerminalCost( goal_pos );
 
 	push_end_states_on_queue( goal_pos, goal_minFirst );
 
@@ -114,13 +136,13 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 			return qe.gvalue;
 
 		// verbose
-		//fprintf( stdout, "minFirst = %d, pos = (%u,%u), fvalue = %f, gvalue = %f\n", qe.minFirst, qe.pos[0], qe.pos[1], qe.fvalue, qe.gvalue );
+		//fprintf( stdout, "minFirst = %d, pos = (%u,%u)(%u,%u), fvalue = %f, gvalue = %f\n", qe.minFirst, qe.pos[0].x, qe.pos[0].y, qe.pos[1].x, qe.pos[1].y, qe.fvalue, qe.gvalue );
 
 		if( qe.minFirst ) {
 
 			mclit = min_cost.find( qe.pos );
 
-			if( mclit == min_cost.end() ) {
+			if( mclit == min_cost.end() || (mclit != min_cost.end() && mclit->second > qe.gvalue) ) {
 				nodesExpanded++;
 
 				min_cost[qe.pos] = qe.gvalue;
@@ -135,6 +157,14 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 				if( canPass )
 					myneighbors.push_back( qe.pos[0] );
 
+				/*
+				fprintf( stdout, "neighbors = " );
+				for( unsigned int i = 0; i < myneighbors.size(); i++ ) {
+					fprintf( stdout, "(%u,%u) ", myneighbors[i].x, myneighbors[i].y );
+				}
+				fprintf( stdout, "\n" );
+				*/
+
 				qtemp.pos = qe.pos;
 
 				// now, for all successor states
@@ -145,17 +175,18 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 					qtemp.pos[0] = *it;
 
 
-					// check whether its value is \infty
-					if( max_cost.find( qtemp.pos ) == max_cost.end() ) {
-						qtemp.gvalue = compute_target_value( qtemp.pos );
-						if( qtemp.gvalue != DBL_MAX ) {
+					qtemp.gvalue = compute_target_value( qtemp.pos );
+					mclit = max_cost.find( qtemp.pos );
+					if( (mclit == max_cost.end() && qtemp.gvalue != DBL_MAX) ||
+					    (mclit != max_cost.end() && mclit->second > qtemp.gvalue ) ) {
+//						if( qtemp.gvalue != DBL_MAX ) {
 							qtemp.minFirst = false;
 							qtemp.fvalue = qtemp.gvalue + HCost( goal_pos, goal_minFirst, qtemp.pos, qtemp.minFirst );
 							queue.push( qtemp );
 
 							// verbose
-							//fprintf( stdout, "pushing up: %d, (%u,%u), %f, %f\n", qtemp.minFirst, qtemp.pos[0], qtemp.pos[1], qtemp.fvalue, qtemp.gvalue );
-						}
+							//fprintf( stdout, "pushing up: %d, (%u,%u)(%u,%u), g=%f, f=%f\n", qtemp.minFirst, qtemp.pos[0].x, qtemp.pos[0].y, qtemp.pos[1].x, qtemp.pos[1].y, qtemp.gvalue, qtemp.fvalue );
+//						}
 					}
 				}
 			}
@@ -165,7 +196,7 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 
 			mclit = max_cost.find( qe.pos );
 
-			if( mclit == max_cost.end() ) {
+			if( mclit == max_cost.end() || (mclit!=max_cost.end() && mclit->second > qe.gvalue) ) {
 
 				max_cost[qe.pos] = qe.gvalue;
 
@@ -173,6 +204,14 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 				env->GetSuccessors( qe.pos[1], myneighbors );
 				if( canPass )
 					myneighbors.push_back( qe.pos[1] );
+
+				/*
+				fprintf( stdout, "neighbors = " );
+				for( unsigned int i = 0; i < myneighbors.size(); i++ ) {
+					fprintf( stdout, "(%u,%u) ", myneighbors[i].x, myneighbors[i].y );
+				}
+				fprintf( stdout, "\n" );
+				*/
 				
 				qtemp.pos = qe.pos;
 				for( typename std::vector<state>::iterator it = myneighbors.begin();
@@ -180,15 +219,15 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 					nodesTouched++;
 					qtemp.pos[1] = *it;
 
-					// check agains infinity
-					if( min_cost.find( qtemp.pos ) == min_cost.end() ) {
+					qtemp.gvalue   = qe.gvalue + MinGCost( qe.pos, qtemp.pos );
+					mclit = min_cost.find( qtemp.pos );
+					if( mclit == min_cost.end() || (mclit != min_cost.end() && mclit->second > qtemp.gvalue ) ) {
 						qtemp.minFirst = true;
-						qtemp.gvalue   = qe.gvalue + 1.; //MinGCost( qe.pos, qtemp.pos );
 						qtemp.fvalue   = qtemp.gvalue + HCost( goal_pos, goal_minFirst, qtemp.pos, qtemp.minFirst );
 						queue.push( qtemp );
 
 						// verbose
-						//fprintf( stdout, "pushing up: %d, (%u,%u), %f, %f\n", qtemp.minFirst, qtemp.pos[0], qtemp.pos[1], qtemp.fvalue, qtemp.gvalue );
+						//fprintf( stdout, "pushing up: %d, (%u,%u)(%u,%u), g=%f, f=%f\n", qtemp.minFirst, qtemp.pos[0].x, qtemp.pos[0].y, qtemp.pos[1].x, qtemp.pos[1].y, qtemp.gvalue, qtemp.fvalue );
 					}
 				}
 			}
@@ -221,7 +260,7 @@ double MinimaxAStar<state,action,environment>::compute_target_value( CRState &s 
 		temp[0] = *it;
 		mclit = min_cost.find( temp );
 		if( mclit != min_cost.end() )
-			tempvalue = mclit->second + 1.; //MinGCost( temp, s );
+			tempvalue = mclit->second + MinGCost( temp, s );
 		else
 			return DBL_MAX;
 		if( tempvalue > result ) result = tempvalue;
@@ -271,6 +310,16 @@ double MinimaxAStar<state,action,environment>::HCost( CRState &pos1, bool &minFi
 			return( 2. * hmax - 1. );
 	}
 
+}
+
+template<class state, class action, class environment>
+bool MinimaxAStar<state,action,environment>::GoalTest( CRState &pos ) {
+	return (pos[0]==pos[1]);
+}
+
+template<class state, class action, class environment>
+double MinimaxAStar<state,action,environment>::TerminalCost( CRState& ) {
+	return 0.;
 }
 
 #endif

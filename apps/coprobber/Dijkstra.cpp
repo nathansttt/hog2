@@ -233,6 +233,8 @@ void Dijkstra::WriteValuesToDisk( const char* filename ) {
 		s = crg->GetStateByNumber( i );
 		for( j = 0; j < tnp; j++ ) {
 			fprintf( fhandler, "%lu ", s[j] );
+//			fprintf( fhandler, "(%u,%u) ", env->GetGraph()->GetNode(s[j])->GetLabelL(GraphSearchConstants::kMapX),
+//			env->GetGraph()->GetNode(s[j])->GetLabelL(GraphSearchConstants::kMapY));
 		}
 		fprintf( fhandler, "%g\n", min_cost[i] );
 	}
