@@ -22,6 +22,7 @@
 #include "MyGraphMapHeuristic.h"
 //#include "MinimaxAStar.h"
 #include "MinimaxAStar_optimized.h"
+#include "TwoPlayerDijkstra.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -190,7 +191,7 @@ int main(int argc, char* argv[])
 	env->SetDirected( true ); // because the GetGraph routine
 	// adds edges for both directions
 
-	Dijkstra *d = new Dijkstra( env, 2, true );
+	Dijkstra *d = new Dijkstra( env, 1, true );
 	d->dijkstra();
 	d->WriteValuesToDisk( "dijkstra.dat" );
 
@@ -235,6 +236,35 @@ int main(int argc, char* argv[])
 	delete m;
 */
 
+/*
+	// Optimized Minimax A*
+	xyLoc pos_cop, pos_robber;
+	Map *m;
+	int max_depth;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+	MapEnvironment *env = new MapEnvironment( m );
+
+	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
+		new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+	std::vector<xyLoc> s;
+	s.push_back( pos_robber );
+	s.push_back( pos_cop );
+
+	double       result        = astar->astar( s, true );
+	unsigned int nodesExpanded = astar->nodesExpanded;
+	unsigned int nodesTouched  = astar->nodesTouched;
+
+	fprintf( stdout, "result: %f\n", result );
+	fprintf( stdout, "nodesExpanded: %u\n", nodesExpanded );
+	fprintf( stdout, "nodesTouched: %u\n", nodesTouched );
+
+	delete astar;
+	delete env;
+*/
 
 /*
 	// NORMAL MINIMAX
@@ -439,6 +469,34 @@ int main(int argc, char* argv[])
 */
 
 /*
+	// Two Player Dijkstra
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+	TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment> *tpd = new TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>( env, true );
+
+	double result = tpd->tpdijkstra( pos_robber, pos_cop );
+	printf( "result: %f\n", result );
+	printf( "nodes expanded: %u\n", tpd->nodesExpanded );
+	printf( "nodes touched: %u\n", tpd->nodesTouched );
+
+	delete tpd;
+	delete env;
+*/
+
+
+
+
+
+
+/*
 // problem set generation
 	char map_file[20];
 	char problem_file[20] = "problem_set6.dat";
@@ -502,7 +560,8 @@ int main(int argc, char* argv[])
 	fclose( file_with_maps );
 */
 
-/*
+
+
 	// TESTs for "Optimal solutions for Moving Target Search"
 	char map_file[100];
 	FILE *problem_file, *result_file, *tida_file_handler = NULL;
@@ -515,7 +574,7 @@ int main(int argc, char* argv[])
 
 	if( argc < 4 ) {
 		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
-		printf( "where <algorithm> = tida|rma|ipn|minimax\n" );
+		printf( "where <algorithm> = tida|rma|ipn|minimax|tpdijkstra\n" );
 		exit(1);
 	}
 
@@ -609,11 +668,23 @@ int main(int argc, char* argv[])
 			delete minclass;
 		}
 
+		if( strcmp( argv[2], "tpdijkstra" ) == 0 ) {
+			TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment> *tpd = new TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>( env, true );
+
+			clock_start   = clock();
+			result        = tpd->tpdijkstra( xyLoc( rx, ry ), xyLoc( cx, cy ) );
+			clock_end     = clock();
+			nodesExpanded = tpd->nodesExpanded;
+			nodesTouched  = tpd->nodesTouched;
+
+			delete tpd;
+		}
+
 		// cleanup
 		delete env;
 
 		// write out the statistics
-		fprintf( result_file, "(%u,%u) (%u,%u) %7.f %lu %u %u %s\n",
+		fprintf( result_file, "(%u,%u) (%u,%u) %7.4f %lu %u %u %s\n",
 			rx,ry,cx,cy,result,(clock_end-clock_start)/1000,
 			nodesExpanded,nodesTouched,map_file );
 		fflush( result_file );
@@ -622,8 +693,9 @@ int main(int argc, char* argv[])
 	fclose( problem_file );
 	fclose( result_file );
 	fprintf( stdout, "Done.\n" );
-*/
 
+
+/*
 	// test of all-state algorithms
 	char map_file[100];
 	FILE *problem_file, *result_file;
@@ -686,6 +758,7 @@ int main(int argc, char* argv[])
 	}
 	fclose( result_file );
 	fclose( problem_file );
+*/
 
 	return 0;
 }

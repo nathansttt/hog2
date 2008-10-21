@@ -3,7 +3,7 @@
 #include "MultiAgentEnvironment.h"
 #include "Minimax.h" // for the function CRHash
 #include <ext/hash_set>
-#include <map>
+#include <ext/hash_map>
 
 #ifndef TIDASTAR_H
 #define TIDASTAR_H
@@ -58,8 +58,8 @@ class TIDAStar {
 
 	double MinHCost( CRState &pos, bool minsTurn = true );
 	double MinGCost( CRState &pos1, CRState &pos2 );
-	//bool GoalTest( CRState &pos );
-	//double TerminalCost( CRState &pos );
+	bool GoalTest( CRState &pos );
+	double TerminalCost( CRState &pos );
 
 	environment *env;
 	bool canPause;
@@ -78,6 +78,14 @@ class TIDAStar {
 /*------------------------------------------------------------------------------
 | Implementation
 ------------------------------------------------------------------------------*/
+// code templates for TIDAStar_optimized.cpp
+template<>
+double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinHCost( CRState &pos, bool minsTurn );
+template<>
+double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinGCost( CRState &p1, CRState &p2 );
+
+
+
 template<class state, class action, class environment>
 TIDAStar<state,action,environment>::~TIDAStar() {
 	clear_bounds_cache();
@@ -124,6 +132,8 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, bool minFirst ) {
 	nodesExpanded = sumNodesExpanded;
 	nodesTouched  = sumNodesTouched;
 
+	assert( c == b );
+
 	return c;
 }
 
@@ -140,8 +150,8 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double bou
 	// verbose output
 //	fprintf( stdout, "Considering position (%u,%u) (%u,%u) %d\n", pos[0].x, pos[0].y, pos[1].x, pos[1].y, minFirst );
 
-	//if( GoalTest( pos ) ) return TerminalCost( pos );
-	if( pos[0] == pos[1] ) return 0.;
+	if( GoalTest( pos ) ) return TerminalCost( pos );
+//	if( pos[0] == pos[1] ) return 0.;
 
 /*
 	// lookup in the path from the root to this node
@@ -241,11 +251,9 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double bou
 
 
 // protected functions
-
-
 template<class state, class action, class environment>
 double TIDAStar<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
-	if( env->GoalTest( pos, pos ) ) return 0.;
+	if( GoalTest( pos ) ) return TerminalCost( pos ); 
 	if( canPause )
 		return ( 2. * env->HCost( pos[1], pos[0] ) - (minsTurn?MinGCost(pos,pos):0.) );
 	else
@@ -253,24 +261,25 @@ double TIDAStar<state,action,environment>::MinHCost( CRState &pos, bool minsTurn
 		return env->HCost( pos[1], pos[0] );
 }
 
-// specification for state=xyLoc
-template<>
-double TIDAStar<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool minsTurn ) {
-	if( pos[0] == pos[1] ) return 0.;
 
-	double dist;
-	dist = max( abs(pos[1].x - pos[0].x), abs(pos[1].y - pos[0].y) );
-
-	if( canPause )
-		return( 2. * dist - (minsTurn?MinGCost(pos,pos):0.) );
-	else
-		return dist;
+// determines the gcost from one joint state to the next,
+// this is only called on adjacent nodes in the alternating move graph
+template<class state, class action, class environment>
+double TIDAStar<state,action,environment>::MinGCost( CRState &p1, CRState &p2 ) {
+	double result = env->GCost( p1[0], p2[0] ) + env->GCost( p1[1], p2[1] );
+	if( result == 0. ) return 1.; // cost for sitting out
+	return result;
+//	return 1.;
 }
 
+template<class state, class action, class environment>
+bool TIDAStar<state,action,environment>::GoalTest( CRState &pos ) {
+	return (pos[0]==pos[1]);
+}
 
 template<class state, class action, class environment>
-double TIDAStar<state,action,environment>::MinGCost( CRState&, CRState& ) {
-	return 1.;
+double TIDAStar<state,action,environment>::TerminalCost( CRState& ) {
+	return 0.;
 }
 
 #endif
