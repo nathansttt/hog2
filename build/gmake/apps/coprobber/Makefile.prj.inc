@@ -67,7 +67,9 @@ SRC_CPP = \
 	apps/coprobber/MySearchUnit.cpp \
 	apps/coprobber/Minimax.cpp \
 	apps/coprobber/Minimax_optimized.cpp \
+	apps/coprobber/TIDAStar_optimized.cpp \
 	apps/coprobber/Dijkstra.cpp \
 	apps/coprobber/MinimaxAStar.cpp \
 	apps/coprobber/MinimaxAStar_optimized.cpp \
+	apps/coprobber/TwoPlayerDijkstra.cpp \
 	apps/coprobber/CopRobber.cpp
