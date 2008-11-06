@@ -18,7 +18,7 @@
 class MNPuzzleState {
 public:
 	MNPuzzleState() { width = height = -1; }
-	MNPuzzleState(int _width, int _height)
+	MNPuzzleState(unsigned int _width, unsigned int _height)
 	:width(_width), height(_height)
   {
 		puzzle.resize(width*height);
@@ -70,14 +70,16 @@ static bool operator==(const MNPuzzleState &l1, const MNPuzzleState &l2)
 
 class MNPuzzle : public SearchEnvironment<MNPuzzleState, slideDir> {
 public:
-	MNPuzzle(int width, int height);
+	MNPuzzle(unsigned int width, unsigned int height);
+	MNPuzzle(unsigned int width, unsigned int height, std::vector<slideDir> &op_order); // used to set action order
+
 	~MNPuzzle();
 	void GetSuccessors(MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors);
 	void GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions);
 	slideDir GetAction(MNPuzzleState &s1, MNPuzzleState &s2);
 	void ApplyAction(MNPuzzleState &s, slideDir a);
 	bool InvertAction(slideDir &a);
-	
+
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
 	double HCost(MNPuzzleState &state1, MNPuzzleState &state2);
 	double GCost(MNPuzzleState &state1, MNPuzzleState &state2);
@@ -90,12 +92,17 @@ public:
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, MNPuzzleState &s);
 	void OpenGLDraw(int, MNPuzzleState &, slideDir &) { /* currently not drawing moves */ }
+	void StoreGoal(MNPuzzleState &); // stores the locations for the given goal state
+	void ClearGoal(); // clears the current stored information of the goal
 private:
 	double DoPDBLookup(MNPuzzleState &state);
 	uint64_t Factorial(int val);
 	std::vector<std::vector<uint8_t> > PDB;
 	std::vector<std::vector<int> > PDBkey;
-	int width, height;
+	unsigned int width, height;
+	std::vector<std::vector<slideDir> > operators; // stores the operators applicable at each blank position
+	std::vector<unsigned int> goal_xloc; // holds the x locations of the goal
+	std::vector<unsigned int> goal_yloc; // holds the y locations of the goal
 };
 
 typedef UnitSimulation<MNPuzzleState, slideDir, MNPuzzle> PuzzleSimulation;
