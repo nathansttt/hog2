@@ -9,57 +9,144 @@
 
 #include "MNPuzzle.h"
 
-MNPuzzle::MNPuzzle(int _width, int _height)
-:width(_width), height(_height)
+MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height)
+		: width(_width), height(_height)
 {
+
+	// stores applicable operators at each of the width*height positions
+	// The order of operators is Right, Left, Down, Up
+	std::vector<slideDir> ops(4);
+	for (unsigned int blank = 0; blank < width*height; blank++)
+	{
+		ops.resize(0);
+
+		if (blank % width < width - 1)
+		{
+			ops.push_back(kRight);
+		}
+		if (blank % width > 0)
+		{
+			ops.push_back(kLeft);
+		}
+		if (blank < width*height - width)
+		{
+			ops.push_back(kDown);
+		}
+		if (blank > width - 1)
+		{
+			ops.push_back(kUp);
+		}
+
+		operators.push_back(ops);
+	}
+}
+
+MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
+                   std::vector<slideDir> &op_order) :
+		width(_width), height(_height)
+{
+	bool up_act = false;
+	bool down_act = false;
+	bool left_act = false;
+	bool right_act = false;
+
+	assert(op_order.size() == 4);
+
+	for (unsigned int op_num; op_num < 4; op_num++)
+	{
+		if (op_order[op_num] == kUp)
+		{
+			up_act = true;
+		}
+		else if (op_order[op_num] = kDown)
+		{
+			down_act = true;
+		}
+		else if (op_order[op_num] = kLeft)
+		{
+			left_act = true;
+		}
+		else if (op_order[op_num] = kRight)
+		{
+			right_act = true;
+		}
+	}
+
+	assert(up_act && down_act && left_act && right_act);
+
+	// stores applicable operators at each of the width*height positions
+	std::vector<slideDir> ops(4);
+	for (unsigned int blank = 0; blank < width*height; blank++)
+	{
+		ops.resize(0);
+		for (unsigned int op_num = 0; op_num < 4; op_num++)
+		{
+			if (op_order[op_num] == kUp && blank > width - 1)
+			{
+				ops.push_back(kUp);
+			}
+			if (op_order[op_num] == kLeft && blank % width > 0)
+			{
+				ops.push_back(kLeft);
+			}
+			if (op_order[op_num] == kRight && blank % width < width - 1)
+			{
+				ops.push_back(kRight);
+			}
+			if (op_order[op_num] == kDown && blank < width*height - width)
+			{
+				ops.push_back(kDown);
+			}
+		}
+
+		operators.push_back(ops);
+	}
 }
 
 MNPuzzle::~MNPuzzle()
 {
 }
 
-void MNPuzzle::GetSuccessors(MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors)
+void MNPuzzle::StoreGoal(MNPuzzleState &s)
 {
-	//std::cout << stateID << std::endl;
-	neighbors.resize(0);
-	if ((stateID.blank%stateID.width) != stateID.width-1)
+	assert(s.height == height);
+	assert(s.width == width);
+	goal_xloc.resize(width*height);
+	goal_yloc.resize(width*height);
+	for (unsigned int x = 0; x < width; x++)
 	{
-		neighbors.push_back(stateID);
-		ApplyAction(neighbors.back(), kRight);
-		//std::cout << neighbors.back() << std::endl;
+		for (unsigned int y = 0; y < height; y++)
+		{
+			goal_xloc[s.puzzle[x + y*width]] = x;
+			goal_yloc[s.puzzle[x + y*width]] = y;
+		}
 	}
-	if ((stateID.blank%stateID.width) != 0)
-	{
-		neighbors.push_back(stateID);
-		ApplyAction(neighbors.back(), kLeft);
-		//std::cout << neighbors.back() << std::endl;
-	}
+}
 
-	if ((stateID.blank/stateID.width) != stateID.height-1)
+void MNPuzzle::ClearGoal()
+{
+	goal_xloc.clear();
+	goal_yloc.clear();
+}
+void MNPuzzle::GetSuccessors(MNPuzzleState &stateID,
+                             std::vector<MNPuzzleState> &neighbors)
+{
+	neighbors.resize(0);
+
+	for (unsigned int i = 0; i < operators[stateID.blank].size(); i++)
 	{
 		neighbors.push_back(stateID);
-		ApplyAction(neighbors.back(), kDown);
-		//std::cout << neighbors.back() << std::endl;
-	}
-	if ((stateID.blank/stateID.width) != 0)
-	{
-		neighbors.push_back(stateID);
-		ApplyAction(neighbors.back(), kUp);
-		//std::cout << neighbors.back() << std::endl;
+		ApplyAction(neighbors.back(), operators[stateID.blank][i]);
 	}
 }
 
 void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions)
 {
 	actions.resize(0);
-	if ((stateID.blank%stateID.width) != stateID.width-1)
-		actions.push_back(kRight);
-	if ((stateID.blank%stateID.width) != 0)
-		actions.push_back(kLeft);
-	if ((stateID.blank/stateID.width) != stateID.height-1)
-		actions.push_back(kDown);
-	if ((stateID.blank/stateID.width) != 0)
-		actions.push_back(kUp);
+	for (unsigned int i = 0; i < operators[stateID.blank].size(); i++)
+	{
+		actions.push_back(operators[stateID.blank][i]);
+	}
 }
 
 slideDir MNPuzzle::GetAction(MNPuzzleState &s1, MNPuzzleState &s2)
@@ -122,26 +209,47 @@ double MNPuzzle::HCost(MNPuzzleState &state1, MNPuzzleState &state2)
 {
 	assert(state1.height==state2.height);
 	assert(state1.width==state2.width);
-	std::vector<int> xloc(state2.width*state2.height);
-	std::vector<int> yloc(state2.width*state2.height);
 	double hval = 0;
 
-	for (unsigned int x = 0; x < state2.width; x++)
+	if (goal_xloc.size() != 0)
 	{
-		for (unsigned int y = 0; y < state2.height; y++)
+		assert(state1.height == height);
+		assert(state1.width == width);
+
+		for (unsigned int x = 0; x < width; x++)
 		{
-			xloc[state2.puzzle[x + y*state2.width]] = x;
-			yloc[state2.puzzle[x + y*state2.width]] = y;
+			for (unsigned int y = 0; y < height; y++)
+			{
+				if (state1.puzzle[x + y*width] != 0)
+				{
+					hval += (abs(goal_xloc[state1.puzzle[x + y*width]] - x) +
+					         abs(goal_yloc[state1.puzzle[x + y*width]] - y));
+				}
+			}
 		}
 	}
-	for (unsigned int x = 0; x < state1.width; x++)
+	else
 	{
-		for (unsigned int y = 0; y < state1.height; y++)
+		std::vector<int> xloc(state2.width*state2.height);
+		std::vector<int> yloc(state2.width*state2.height);
+
+		for (unsigned int x = 0; x < state2.width; x++)
 		{
-			if (state1.puzzle[x + y*state1.width] != 0)
+			for (unsigned int y = 0; y < state2.height; y++)
 			{
-				hval += (abs(xloc[state1.puzzle[x + y*state1.width]] - x) +
-								 abs(yloc[state1.puzzle[x + y*state1.width]] - y));
+				xloc[state2.puzzle[x + y*state2.width]] = x;
+				yloc[state2.puzzle[x + y*state2.width]] = y;
+			}
+		}
+		for (unsigned int x = 0; x < state1.width; x++)
+		{
+			for (unsigned int y = 0; y < state1.height; y++)
+			{
+				if (state1.puzzle[x + y*state1.width] != 0)
+				{
+					hval += (abs(xloc[state1.puzzle[x + y*state1.width]] - x) +
+					         abs(yloc[state1.puzzle[x + y*state1.width]] - y));
+				}
 			}
 		}
 	}
@@ -232,13 +340,13 @@ void MNPuzzle::OpenGLDraw(int window, MNPuzzleState &s)
 {
 	glLineWidth(1.0);
 	glEnable(GL_LINE_SMOOTH);
-	
+
 	float w = width;
 	float h = height;
-	
-	for (int y = 0; y < height; y++)
+
+	for (unsigned int y = 0; y < height; y++)
 	{
-		for (int x = 0; x < width; x++)
+		for (unsigned int x = 0; x < width; x++)
 		{
 			glPushMatrix();
 			glColor3f(0.0, 1.0, 0.0);
@@ -255,11 +363,11 @@ void MNPuzzle::OpenGLDraw(int window, MNPuzzleState &s)
 			glPopMatrix();
 		}
 	}
-	
+
 	glBegin(GL_LINES);
-	for (int y = 0; y <= height; y++)
+	for (unsigned int y = 0; y <= height; y++)
 	{
-		for (int x = 0; x <= width; x++)
+		for (unsigned int x = 0; x <= width; x++)
 		{
 			glVertex3f(x*2.0/w-1.0, -1, -0.001);
 			glVertex3f(x*2.0/w-1.0, 1, -0.001);
@@ -268,12 +376,12 @@ void MNPuzzle::OpenGLDraw(int window, MNPuzzleState &s)
 		}
 	}
 	glEnd();
-	
+
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_BLEND);
 	//glEnable(GL_LINE_SMOOTH);
 	//output(200, 225, "This is antialiased.");
-	
+
 	//int width, height;
 	//std::vector<int> puzzle;
 }
