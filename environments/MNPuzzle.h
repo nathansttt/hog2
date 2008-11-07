@@ -94,6 +94,8 @@ public:
 	void OpenGLDraw(int, MNPuzzleState &, slideDir &) { /* currently not drawing moves */ }
 	void StoreGoal(MNPuzzleState &); // stores the locations for the given goal state
 	void ClearGoal(); // clears the current stored information of the goal
+
+	static int read_in_mn_puzzles(const char *, bool, unsigned, unsigned, unsigned, std::vector<MNPuzzleState> &);
 private:
 	double DoPDBLookup(MNPuzzleState &state);
 	uint64_t Factorial(int val);
