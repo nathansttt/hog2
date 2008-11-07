@@ -58,15 +58,15 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
 		{
 			up_act = true;
 		}
-		else if (op_order[op_num] = kDown)
+		else if (op_order[op_num] == kDown)
 		{
 			down_act = true;
 		}
-		else if (op_order[op_num] = kLeft)
+		else if (op_order[op_num] == kLeft)
 		{
 			left_act = true;
 		}
-		else if (op_order[op_num] = kRight)
+		else if (op_order[op_num] == kRight)
 		{
 			right_act = true;
 		}
@@ -431,4 +431,102 @@ double MNPuzzle::DoPDBLookup(MNPuzzleState &state)
 	{
 	}
 	return val;
+}
+
+/**
+Reads in MNPuzzle states from the given filename. Each line of the
+input file contains a puzzle state of the given width and height.
+The state is written in the form of listing the tile in each puzzle
+position from 1 to width*height. The blank is represented by the 0
+character.
+
+If any line is found to not be legitimate, either because it does
+not have the proper number of tiles, or the proper tiles, it is
+simply not added to the list of puzzles.
+
+The function will return 1 if reading from the given filename failed,
+and 0 otherwise.
+
+puzz_num_start - should be set as true if the first non-whitespace
+element on each line is the puzzle number, otherwise should be set
+to false.
+
+max_puzzles - the maximum number of puzzles that will be added to
+the puzzle list.
+**/
+int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsigned int width, unsigned int height, unsigned int max_puzzles, std::vector<MNPuzzleState> &puzzles) {
+
+	std::ifstream ifs(filename, std::ios::in);
+
+	if(ifs.fail()) {
+		return 1;
+	}
+
+	std::string s, temp;
+
+	std::vector<unsigned int> puzz_ints;
+	std::vector<bool> tiles_in_puzzle(width*height);
+	bool first = true;
+	unsigned puzz_count = 0;
+
+	while(!ifs.eof() && puzz_count < max_puzzles) {
+		puzz_ints.clear();
+
+		for(unsigned i = 0; i < tiles_in_puzzle.size(); i++) {
+			tiles_in_puzzle[i] = false;
+		}
+
+		getline(ifs, s);
+		for(unsigned int i = 0; i < s.length(); i++) {
+			if(s.at(i) == ' ' || s.at(i) == '\t') {
+				if(temp.length() > 0) {
+					if(puzz_num_start && first) {
+						temp = "";
+						first = false;
+					}
+					else {
+						puzz_ints.push_back(atoi(temp.c_str()));
+						temp = "";
+					}
+				}
+			}
+			else {
+				temp.push_back(s.at(i));
+			}
+		}
+
+		if(temp.length() > 0) {
+			puzz_ints.push_back(atoi(temp.c_str()));
+			temp = "";
+		}
+
+		if(puzz_ints.size() > 0 && puzz_ints.size() == width*height) {
+			MNPuzzleState new_state(width, height);
+			for(unsigned int i = 0; i < puzz_ints.size(); i++) {
+				new_state.puzzle[i] = puzz_ints[i];
+				tiles_in_puzzle[puzz_ints[i]] = true;
+				if(new_state.puzzle[i] == 0) {
+					new_state.blank = i;
+				}
+			}
+
+			bool is_good = true;
+			for(unsigned int i = 0; i < tiles_in_puzzle.size(); i++) {
+				if(tiles_in_puzzle[i] = false) {
+					is_good = false;
+					break;
+				}
+			}
+
+			if(is_good) {
+				puzz_count++;
+				puzzles.push_back(new_state);
+			}
+
+		}
+	}
+
+	ifs.close();
+
+	return 0;
 }
