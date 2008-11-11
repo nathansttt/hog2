@@ -175,8 +175,11 @@ void MyPDBKeyHandler(unsigned long, tKeyboardModifier, char key)
 	}
 	if (key == 't')
 	{
-		printf("Testing top spin!\n");
-		TestTopSpinPDB();
+		for (int x = 0; x < 200; x++)
+		{
+			printf("Testing top spin! (%d of %d)\n", x+1, 200);
+			TestTopSpinPDB();
+		}
 	}
 }
 
@@ -395,7 +398,7 @@ void TestTopSpinPDB()
 {
 	const int psize = 12;
 	TopSpinGraphHeuristic *tsh;
-	TopSpin *ts = new TopSpin(psize, 4, tsh = new TopSpinGraphHeuristic(12, 4, 6));
+	TopSpin *ts = new TopSpin(psize, 4, tsh = new TopSpinGraphHeuristic(12, 4, 5));
 	//TopSpin *ts = new TopSpin(psize, 4, tsh = new TopSpinGraphHeuristic());
 	tsh->SetState(ts);
 
@@ -410,7 +413,7 @@ void TestTopSpinPDB()
 	graphState s1 = ts->GetState(P2);
 	
 	std::vector<graphState> path1;
-	for (int x = 0; x < 10; x++)
+	for (int x = 0; x < 200; x++)
 	{
 		ts->GetSuccessors(s1, path1);
 		s1 = path1[random()%path1.size()];
