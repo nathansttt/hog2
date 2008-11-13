@@ -27,7 +27,8 @@ PROJECTS = \
   apps/puzzlesample \
   apps/multiagent \
   apps/measure_inconsistency \
-	apps/coprobber \
+  apps/dynamicsearch \
+	apps/coprobber
 #  apps/lv.pathfinding	
 #  apps/inconsistency \
 
@@ -53,6 +54,7 @@ PROJECTS_ALL = \
   apps/puzzlesample \
   apps/inconsistency \
   apps/multiagent \
+  apps/dynamicsearch \
 	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice
