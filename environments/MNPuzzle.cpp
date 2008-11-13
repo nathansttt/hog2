@@ -52,7 +52,7 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
 
 	assert(op_order.size() == 4);
 
-	for (unsigned int op_num; op_num < 4; op_num++)
+	for (unsigned int op_num = 0; op_num < 4; op_num++)
 	{
 		if (op_order[op_num] == kUp)
 		{
