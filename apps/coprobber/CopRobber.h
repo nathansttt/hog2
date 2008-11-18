@@ -1,5 +1,8 @@
 #include "Common.h"
 #include "Map2DEnvironment.h"
+#include "Graph.h"
+
+void output_syntax();
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType);
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data);
@@ -10,3 +13,7 @@ void InstallHandlers();
 
 
 void parseCommandLineParameters( int argc, char* argv[], Map* &m, xyLoc &pos_cop, xyLoc &pos_robber, int &max_recursion_level );
+
+Graph *readGraphFromCommandLine( int offset, int argc, char* argv[] );
+Graph* readGraph( FILE *fhandler );
+void writeGraph( FILE *fhandler, Graph *g );

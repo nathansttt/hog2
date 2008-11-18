@@ -179,7 +179,8 @@ bool CopRobberOccupancy<state,action>::CanMove( CRState &s1, CRState &s2 ) {
 
 		for( unsigned int j = 1; j < i; j++ ) {
 			// check that no two cops are moving to the same state
-			if( s2[i] == s2[j] ) return false;
+			// TODO: Change me back!!!
+//			if( s2[i] == s2[j] ) return false;
 
 			// two cops change position, which means they just collidated by
 			// walking over each other
