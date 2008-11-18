@@ -49,6 +49,10 @@ class Dijkstra {
 
 	void WriteValuesToDisk( const char* filename );
 
+	// state => value (h_p, h_t in description of the algorithm)
+	std::vector<double> min_cost, max_cost;
+	CopRobberGame *crg;
+
 	protected:
 
 	void push_end_states_on_queue();
@@ -61,12 +65,9 @@ class Dijkstra {
 	GraphEnvironment *env;
 	unsigned int number_of_cops;
 	bool canPass;
-	CopRobberGame *crg;
 
 	// Priority Queues
 	MyPriorityQueue queue;
-	// state => value (h_p, h_t in description of the algorithm)
-	std::vector<double> min_cost, max_cost;
 
 };
 

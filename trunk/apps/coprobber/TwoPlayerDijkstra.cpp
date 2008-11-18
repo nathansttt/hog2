@@ -5,6 +5,10 @@ uint64_t StateHash<xyLoc>( xyLoc s ) {
 	return( ((uint64_t)s.x)<<32 | (((uint64_t)s.y)<<32)>>32 );
 }
 
+template<>
+uint64_t StateHash<graphState>( graphState s ) {
+	return( (uint64_t) s );
+}
 
 template<>
 double TwoPlayerDijkstra<xyLoc, tDirection, MapEnvironment>::GCost( xyLoc &s1, xyLoc &s2 ) {

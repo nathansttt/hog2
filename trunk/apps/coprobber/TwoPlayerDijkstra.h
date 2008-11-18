@@ -2,7 +2,10 @@
 #include <queue>
 #include <ext/hash_set>
 #include <ext/hash_map>
-#include "Minimax.h" // for CRHash
+#include "MultiAgentEnvironment.h"
+#include "GraphEnvironment.h"
+#include "Map2DEnvironment.h"
+//#include "Minimax.h" // for CRHash
 
 #ifndef TWOPLAYERDIJKSTRA_H
 #define TWOPLAYERDIJKSTRA_H
@@ -50,6 +53,7 @@ class TwoPlayerDijkstra {
 		env(_env), canPass(_canPass) {};
 
 
+	void clear_cache();
 	double tpdijkstra( state pos_robber, state pos_cop );
 
 	unsigned int nodesExpanded, nodesTouched;
@@ -76,6 +80,15 @@ double TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>::GCost( xyLoc &s1, xyL
 
 
 /* IMPLEMENTATION */
+template<class state, class action, class environment>
+void TwoPlayerDijkstra<state,action,environment>::clear_cache() {
+	robber_queue = MyPriorityQueue();
+	cop_queue    = MyPriorityQueue();
+	cop_closed.clear();
+	robber_closed.clear();
+	return;
+}
+
 template<class state,class action,class environment>
 double TwoPlayerDijkstra<state,action,environment>::tpdijkstra( state pos_robber, state pos_cop ) {
 	nodesExpanded = 0; nodesTouched = 0;

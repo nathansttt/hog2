@@ -166,8 +166,8 @@ void Dijkstra::push_end_states_on_queue() {
 
 
 
-/*
 // this version is a faster variant of the above function for two players (one cop)
+/*
 void Dijkstra::push_end_states_on_queue() {
 	QueueEntry qe;
 	node_iterator nit;
@@ -206,6 +206,7 @@ void Dijkstra::push_end_states_on_queue() {
 	
 };
 */
+
 
 
 double Dijkstra::MinGCost( CRState&, CRState& ) {

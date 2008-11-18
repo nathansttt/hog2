@@ -10,7 +10,7 @@
 #define MINIMAXASTAR_H
 
 /*
-	Implementation for one robber and multiple cops
+	Implementation for one robber and one cop
 */
 template<class state,class action,class environment>
 class MinimaxAStar {

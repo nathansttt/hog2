@@ -20,8 +20,8 @@
 //#include "IPNTTables_optimized.h"
 #include "Dijkstra.h"
 #include "MyGraphMapHeuristic.h"
-//#include "MinimaxAStar.h"
-#include "MinimaxAStar_optimized.h"
+#include "MinimaxAStar.h"
+//#include "MinimaxAStar_optimized.h"
 #include "TwoPlayerDijkstra.h"
 
 
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
 	int max_depth;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
-	printf( "map: %s\n", m->getMapName() );
+	//printf( "map: %s\n", m->getMapName() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -190,6 +190,10 @@ int main(int argc, char* argv[])
 	GraphEnvironment *env = new GraphEnvironment( g, gh );
 	env->SetDirected( true ); // because the GetGraph routine
 	// adds edges for both directions
+	//FILE *fhandler = fopen( "testgraph", "r" );
+	//Graph *g = readGraph( fhandler );
+	//fclose( fhandler );
+	//GraphEnvironment *env = new GraphEnvironment( g, NULL );
 
 	Dijkstra *d = new Dijkstra( env, 1, true );
 	d->dijkstra();
@@ -197,34 +201,53 @@ int main(int argc, char* argv[])
 
 	delete d;
 	delete env;
-	delete gh;
+	//delete gh;
 	delete g;
-	delete m;
+	//delete m;
 */
 
 
 /*
-// Minimax A*
+	// Minimax A*
 	xyLoc pos_cop, pos_robber;
-	Map *m;
-	int max_depth;
+	Map *m = NULL;
+	Graph *g = NULL;
+	MyGraphMapHeuristic *gh = NULL;
+	GraphEnvironment *env = NULL;
+	int curr, x, y;
 
-	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
-	printf( "map: %s\n", m->getMapName() );
-	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
-	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
-
-	Graph *g = GraphSearchConstants::GetGraph( m );
-	MyGraphMapHeuristic *gh = new MyGraphMapHeuristic( m, g );
-	GraphEnvironment *env = new GraphEnvironment( g, gh );
-	env->SetDirected( true ); // because the GetGraph routine
-	// adds edges for both directions
-
-	MinimaxAStar *astar = new MinimaxAStar( env, 1, true );
 	MinimaxAStar::CRState s;
-	s.push_back( m->getNodeNum( pos_robber.x, pos_robber.y ) );
-	s.push_back( m->getNodeNum( pos_cop.x, pos_cop.y ) );
-	fprintf( stdout, "%u %u\n", m->getNodeNum( pos_robber.x, pos_robber.y ), m->getNodeNum( pos_cop.x, pos_cop.y ) );
+	curr = 1;
+	while( curr < argc ) {
+		if( strcmp( argv[curr], "-map" ) == 0 ) {
+			m = new Map( argv[curr+1] );
+			g = GraphSearchConstants::GetGraph( m );
+			gh = new MyGraphMapHeuristic( m, g );
+			env = new GraphEnvironment( g, gh );
+			env->SetDirected( true ); // because the GetGraph routine
+	// adds edges for both directions
+		}
+		if( strcmp( argv[curr], "-pc" ) == 0 ) {
+			sscanf( argv[curr+1], "%d,%d", &x, &y );
+			printf( "x = %d, y = %d\n", x, y );
+			s.push_back( m->getNodeNum( x, y ) );
+		}
+		if( strcmp( argv[curr], "-pr" ) == 0 ) {
+			sscanf( argv[curr+1], "%d,%d", &x, &y );
+			printf( "x = %d, y = %d\n", x, y );
+			s.push_back( m->getNodeNum( x, y ) );
+		}
+
+		curr += 2;
+	}
+	printf( "map: %s\n", m->getMapName() );
+	printf( "robber position: %lu\n", s[0] );
+	printf( "cops positions: " );
+	for( unsigned int i = 1; i < s.size(); i++ )
+		printf( "%lu ", s[i] );
+	printf( "\n" );
+
+	MinimaxAStar *astar = new MinimaxAStar( env, 2, true );
 
 	double result = astar->astar( s, true, 1. );
 	fprintf( stdout, "result: %f\n", result );
@@ -235,6 +258,7 @@ int main(int argc, char* argv[])
 	delete g;
 	delete m;
 */
+
 
 /*
 	// Optimized Minimax A*
@@ -561,7 +585,7 @@ int main(int argc, char* argv[])
 */
 
 
-
+/*
 	// TESTs for "Optimal solutions for Moving Target Search"
 	char map_file[100];
 	FILE *problem_file, *result_file, *tida_file_handler = NULL;
@@ -584,7 +608,7 @@ int main(int argc, char* argv[])
 	// in case we want to compute with minimax
 	// we have to get the correct values from a file (hello to TIDA*)
 	if( strcmp( argv[2], "minimax" ) == 0 ) {
-			char s[40];
+			char s[100];
 			sprintf( s, "tida_%s", argv[1] );
 			tida_file_handler = fopen( s, "r" );
 			if( tida_file_handler == NULL ) {
@@ -693,7 +717,7 @@ int main(int argc, char* argv[])
 	fclose( problem_file );
 	fclose( result_file );
 	fprintf( stdout, "Done.\n" );
-
+*/
 
 /*
 	// test of all-state algorithms
@@ -760,9 +784,230 @@ int main(int argc, char* argv[])
 	fclose( problem_file );
 */
 
+
+/*
+	// code for testing various sets of graphs
+
+	for( int i = 4; i <= 9; i++ ) {
+//	char s[10]; sprintf( s, "graph%dc.out", i );
+//	char s[10]; sprintf( s, "graph%dcopwin.out", i );
+	char s[10]; sprintf( s, "planar_conn.%dcopwin.out", i );
+
+		FILE *fhandler = fopen( s, "r" );
+//	FILE *fhandler = fopen( "graph2c.out", "r" );
+//	FILE *fcopwin  = fopen( "planar_out", "w" );
+	int num_cop_win = 0;
+	double maximum_st = 0.;
+	double maximum_ratio = 1.;
+
+	while( !feof( fhandler ) ) {
+		// read the next graph from the file
+		Graph *g = readGraph( fhandler );
+		if( g == NULL ) break;
+		bool is_cop_win = true;
+		std::vector<double>::iterator it;
+
+		// determine whether this graph is cop win or not
+		GraphEnvironment *env = new GraphEnvironment( g, NULL );
+		Dijkstra *d = new Dijkstra( env, 1, true );
+		d->dijkstra();
+		TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment> *tpdijkstra = new TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment>( env, true );
+
+		for( it = d->min_cost.begin(); it != d->min_cost.end(); it++ ) {
+			if( *it == DBL_MAX ) {
+				is_cop_win = false;
+				break;
+			}
+		}
+
+		if( is_cop_win ) {
+//			writeGraph( fcopwin, g );
+			num_cop_win++;
+
+			// determine maximum search time
+			// determine whether the optimal moves for the robber have a move in max_p_r min_p_c V(pr,pc)
+			Dijkstra::CRState pos;
+			pos.push_back( 0 ); pos.push_back( 0 );
+			double maximum_ratio_on_graph = 1.;
+			int maximum_ratio_on_graph_c1 = 0;
+			int maximum_ratio_on_graph_r = 0;
+			double search_time = DBL_MAX;
+			for( int c1 = 0; c1 < g->GetNumNodes(); c1++ ) {
+				graphState c1_state = c1;
+				pos[1] = c1_state;
+				double search_time_max = 0.;
+				for( int r = 0; r < g->GetNumNodes(); r++ ) {
+
+					// if we are not in a terminal position
+					if( r != c1 ) {
+						graphState r_state = r;
+						pos[0] = r_state;
+						search_time_max = max( search_time_max, d->min_cost[d->crg->GetNumberByState(pos)] );
+
+						double temp2 = tpdijkstra->tpdijkstra( r_state, c1_state );
+						double temp = d->min_cost[d->crg->GetNumberByState(pos)]/temp2; ///tpdijkstra->tpdijkstra( r_state, c1_state );
+						tpdijkstra->clear_cache();
+						if( temp > maximum_ratio_on_graph ) {
+//							printf( "temp = %f r = %d c1 = %d, tpdijkstra = %f\n", temp, r, c1, temp2 );
+							maximum_ratio_on_graph = temp;
+							maximum_ratio_on_graph_r  = r;
+							maximum_ratio_on_graph_c1 = c1;
+						}
+
+						// generate all neighbors
+						//std::vector<graphState> neighbors;
+						//std::vector<graphState>::iterator it;
+						//env->GetSuccessors( r_state, neighbors );
+						//neighbors.push_back( r_state );
+						//
+						//double neighbors_max_value = DBL_MIN, neighbors_max_max_min_value = DBL_MIN;
+						//std::vector<double> neighbors_values;
+						//std::vector<double> neighbors_max_min_values;
+						//double temp;
+						//for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
+						//	pos[0] = *it;
+						//	temp = d->min_cost[d->crg->GetNumberByState(pos)];
+						//	neighbors_values.push_back( temp );
+						//	neighbors_max_value = max( neighbors_max_value, temp );
+						//	temp = tpdijkstra->tpdijkstra( *it, c1_state );
+						//	tpdijkstra->clear_cache();
+						//	neighbors_max_min_values.push_back( temp );
+						//	neighbors_max_max_min_value = max( neighbors_max_max_min_value, temp );
+						//}
+						//
+						//bool there_is_an_optimal_move_that_is_in_max_min = false;
+						//for( unsigned int i = 0; i < neighbors.size(); i++ ) {
+						//	if( neighbors_values[i] == neighbors_max_value &&
+						//	    neighbors_max_min_values[i] == neighbors_max_max_min_value ) {
+						//		there_is_an_optimal_move_that_is_in_max_min = true;
+						//		break;
+						//	}
+						//}
+						//
+						//if( !there_is_an_optimal_move_that_is_in_max_min ) {
+						//	// report this graph!!!
+						//	writeGraph( stdout, g );
+						//	printf( "position: r = %d, c1 = %d\n", r, c1 );
+						//}
+					}
+				}
+				search_time = min( search_time, search_time_max );
+			}
+
+			maximum_st = max( maximum_st, search_time );
+			if( maximum_ratio < maximum_ratio_on_graph ) {
+				writeGraph( stdout, g );
+				printf( "ratio is %f for (%d,%d)\n", maximum_ratio_on_graph, maximum_ratio_on_graph_r, maximum_ratio_on_graph_c1 );
+				maximum_ratio = maximum_ratio_on_graph;
+			}
+		}
+
+		delete tpdijkstra;
+		delete d;
+		delete env;
+		delete g;
+	}
+	fclose( fhandler );
+//	fclose( fcopwin );
+	printf( "Number of cop-win graphs: %d\n", num_cop_win );
+	printf( "Maximal time to capture: %f\n", maximum_st );
+	printf( "Maximal ratio: %f\n", maximum_ratio );
+	}
+*/
+
+	// code for Cops and Robber website interface
+	if( argc < 6 ) {
+		output_syntax();
+		return(1);
+	}
+	int num_cops;
+	if( strcmp( argv[1], "-c" ) == 0 ) {
+		num_cops = atoi( argv[2] );
+	} else {
+		output_syntax();
+		return(1);
+	}
+
+	double search_time = DBL_MAX;
+	Graph *g = readGraphFromCommandLine( 3, argc, argv );
+	
+	if( g == NULL ) return 1;
+	std::vector<double>::iterator it;
+
+	// determine whether this graph is cop win or not
+	GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	Dijkstra *d = new Dijkstra( env, num_cops, true );
+	d->dijkstra();
+
+	// determine maximum search time
+	Dijkstra::CRState pos, optimal_init_pos;
+	pos.assign( num_cops + 1, 0 );
+	optimal_init_pos = pos;
+
+	double temp;
+	// for all possible cop initial setups
+	unsigned int num_player_states[num_cops], player_states[num_cops];
+	for( int i = 0; i < num_cops; i++ ) num_player_states[i] = g->GetNumNodes();
+	for( unsigned long hash = 0; hash < pow( g->GetNumNodes(), num_cops ); hash++ ) {
+		dehash_permutation( hash, num_cops, num_player_states, player_states );
+		for( int i = 0; i < num_cops; i++ ) pos[i+1] = player_states[i];
+
+		// for all possible robber initial setups
+		double search_time_max = 0.;
+		int max_init_pos = 0;
+		for( int r = 0; r < g->GetNumNodes(); r++ ) {
+			pos[0] = r;
+			temp = d->min_cost[d->crg->GetNumberByState(pos)];
+			if( search_time_max < temp ) {
+				search_time_max = temp;
+				max_init_pos = r;
+			}
+
+			// output of the current state
+			printf( "%d ", r );
+			for( int i = 0; i < num_cops; i++ )
+				printf( "%u ", player_states[i] );
+			if( temp == DBL_MAX )
+				printf( "infty\n" );
+			else {
+				if( temp > 0. ) temp = (temp + 1.)/2.;
+				printf( "%0.f\n", temp );
+			}
+		}
+
+		if( search_time > search_time_max ) {
+			search_time = search_time_max;
+			optimal_init_pos = pos;
+			optimal_init_pos[0] = max_init_pos;
+		}
+	}
+
+	if( search_time == DBL_MAX )
+		printf( "0 infty\n" );
+	else {
+		// print out the optimal initial position
+		for( unsigned int i = 0; i < optimal_init_pos.size(); i++ ) {
+			printf( "%lu ", optimal_init_pos[i] );
+		}
+		printf( "\n" );
+
+		// print out whether the graph is cop win or not and the search time
+		if( search_time > 0. ) search_time = (search_time + 1.)/2.;
+		printf( "1 %.0f\n", search_time );
+	}
+
 	return 0;
 }
 
+
+
+
+void output_syntax() {
+	printf( "syntax: -c <num_cops> -g <graph>\n" );
+	printf( "where <graph> is: <num_vertices> <num_edges>\n" );
+	printf( "<edge1_vertice1> <edge1_vertice2> [<edge2_vertice1> <edge2_vertice2>...]\n" );
+	return;
+}
 
 void CreateSimulation( int id ) {
 	Map *map = new Map( "../../maps/local/test_coprobber_1.map" );
@@ -905,4 +1150,70 @@ void parseCommandLineParameters( int argc, char* argv[], Map* &m, xyLoc &pos_cop
 		curr += 2;
 	}
 	return;
+}
+
+Graph *readGraphFromCommandLine( int offset, int argc, char* argv[] ) {
+	if( strcmp( argv[offset], "-g" ) != 0 ) {
+		output_syntax();
+		return NULL;
+	}
+	offset++;
+	int num_vertices = atoi( argv[offset] ); //, num_edges = atoi( argv[offset+1] );
+	offset += 2;
+
+	// create all the vertices
+	Graph *g = new Graph();
+	for( int i = 0; i < num_vertices; i++ ) {
+		char s[30]; sprintf( s, "%d", i );
+		node *n = new node( s );
+		g->AddNode( n );
+	}
+
+	while( offset < argc ) {
+		int v1 = atoi( argv[offset] ), v2 = atoi( argv[offset+1] );
+		edge *e = new edge( v1, v2, 1. );
+		g->AddEdge(e);		
+		offset += 2;
+	}
+
+	return g;
+}
+
+// reads a graph from an open file
+Graph* readGraph( FILE *fhandler ) {
+
+	if( feof( fhandler ) )
+		return NULL;
+
+	Graph *g = new Graph();
+	int num_vertices, num_edges;
+	if( !fscanf( fhandler, "%d %d\n", &num_vertices, &num_edges ) ) return NULL;
+
+	for( int i = 0; i < num_vertices; i++ ) {
+		char s[30]; sprintf( s, "%d", i );
+		node *n = new node( s );
+		g->AddNode( n );
+	}
+
+	for( int i = 0; i < num_edges; i++ ) {
+		int v1, v2;
+		fscanf( fhandler, "%d %d", &v1, &v2 );
+		edge *e = new edge( v1, v2, 1. );
+		g->AddEdge( e );
+	}
+	fscanf( fhandler, "\n" );
+
+	return g;
+}
+
+void writeGraph( FILE *fhandler, Graph *g ) {
+	fprintf( fhandler, "%d %d\n", g->GetNumNodes(), g->GetNumEdges() );
+	edge_iterator eit = g->getEdgeIter();
+	edge *e = g->edgeIterNext( eit );
+
+	while( e != NULL ) {
+		fprintf( fhandler, "%u %u  ", e->getFrom(), e->getTo() );
+		e = g->edgeIterNext( eit );
+	}
+	fprintf( fhandler, "\n" );	
 }
