@@ -3,13 +3,10 @@
 #include <ext/hash_map>
 #include "GraphEnvironment.h"
 #include "CopRobberGame.h"
-#include "Minimax.h"
+#include "MyHash.h"
 
 #ifndef MINIMAXASTAR_H
 #define MINIMAXASTAR_H
-
-template<>
-uint64_t CRHash<graphState>( const std::vector<graphState> &s );
 
 /*
 	Implementation for one robber and multiple cops

@@ -23,6 +23,9 @@
 #include "MinimaxAStar.h"
 //#include "MinimaxAStar_optimized.h"
 #include "TwoPlayerDijkstra.h"
+//#include "DSCREnvironment.h"
+#include "DSTPDijkstra.h"
+#include "DSDijkstra.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -182,8 +185,6 @@ int main(int argc, char* argv[])
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
 	//printf( "map: %s\n", m->getMapName() );
-	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
-	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
 	Graph *g = GraphSearchConstants::GetGraph( m );
 	GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
@@ -492,6 +493,7 @@ int main(int argc, char* argv[])
 	delete env;
 */
 
+
 /*
 	// Two Player Dijkstra
 	Map *m;
@@ -517,13 +519,64 @@ int main(int argc, char* argv[])
 
 
 
+/*
+	// Two Player Dijkstra with move generation and possibly fast cop
+	// DSTPDijkstra
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+	std::vector<xyLoc> path;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+	DSTPDijkstra<xyLoc,tDirection> *dstpdijkstra = new DSTPDijkstra<xyLoc,tDirection>( env, 1 );
+
+	// attention: robber moves first here
+	double result = dstpdijkstra->dstpdijkstra( pos_robber, pos_cop, false, path );
+	printf( "result: %f\n", result );
+	printf( "nodes expanded: %u\n", dstpdijkstra->nodesExpanded );
+	printf( "nodes touched: %u\n", dstpdijkstra->nodesTouched );
+	printf( "path (%u): ", (unsigned int)path.size() );
+	for( std::vector<xyLoc>::iterator it = path.begin(); it != path.end(); it++ )
+		printf( "(%u,%u) ", it->x, it->y );
+	printf( "\n" );
+
+	delete dstpdijkstra;
+	delete env;
+*/
+
 
 
 
 /*
+// Dijkstra with different speeds for the entire state space
+// DSDijkstra
+	xyLoc pos_cop, pos_robber;
+	Map *m;
+	int max_depth;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	printf( "map: %s\n", m->getMapName() );
+
+	MapEnvironment *env = new MapEnvironment( m );
+
+	DSDijkstra<xyLoc,tDirection,MapEnvironment> *dsdijkstra = new DSDijkstra<xyLoc,tDirection,MapEnvironment>( env, 1 );
+
+	dsdijkstra->dsdijkstra();
+	dsdijkstra->WriteValuesToDisk( "dsdijkstra.dat" );
+
+	delete dsdijkstra;
+	delete env;
+*/
+
+/*
 // problem set generation
 	char map_file[20];
-	char problem_file[20] = "problem_set6.dat";
+	char problem_file[20] = "problem_set1.dat";
 	Map *m;
 	time_t t; time( &t ); srandom( (unsigned int) t );
 	unsigned int num;
@@ -543,6 +596,7 @@ int main(int argc, char* argv[])
 //		sprintf( map_file, "problem_set5_map%d.map", i );
 //		m->save( map_file );
 		fscanf( file_with_maps, "%s\n", map_file );
+		fprintf( fhandler, "%s\n", map_file );
 		m = new Map( map_file );
 		MapEnvironment *env = new MapEnvironment( m );
 		Graph *g = GraphSearchConstants::GetGraph( m );
@@ -558,23 +612,23 @@ int main(int argc, char* argv[])
 			unsigned int cx = g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX);
 			unsigned int cy = g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY);
 
-			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
-				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
-			std::vector<xyLoc> pos;
-			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
-			double result = tidastar->tida( pos );
-			delete tidastar;
+//			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
+//				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+//			std::vector<xyLoc> pos;
+//			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
+//			double result = tidastar->tida( pos );
+//			delete tidastar;
 
-			if( result <= 35. ) {
-				fprintf( stdout, "%f\n", result );
+//			if( result <= 35. ) {
+//				fprintf( stdout, "%f\n", result );
 				// print out the starting position for the robber
 				fprintf( fhandler, "(%u,%u) ", rx, ry );
 				// print out the starting position for the cop
-				fprintf( fhandler, "(%u,%u) ", cx, cy );
+				fprintf( fhandler, "(%u,%u)\n", cx, cy );
 				// print out the map that we are in
-				fprintf( fhandler, "%s\n", map_file );
+//				fprintf( fhandler, "%s\n", map_file );
 				j++;
-			}
+//			}
 		}
 	
 		delete env;
@@ -583,6 +637,7 @@ int main(int argc, char* argv[])
 	fclose( fhandler );
 	fclose( file_with_maps );
 */
+
 
 
 /*
@@ -846,7 +901,6 @@ int main(int argc, char* argv[])
 
 						double temp2 = tpdijkstra->tpdijkstra( r_state, c1_state );
 						double temp = d->min_cost[d->crg->GetNumberByState(pos)]/temp2; ///tpdijkstra->tpdijkstra( r_state, c1_state );
-						tpdijkstra->clear_cache();
 						if( temp > maximum_ratio_on_graph ) {
 //							printf( "temp = %f r = %d c1 = %d, tpdijkstra = %f\n", temp, r, c1, temp2 );
 							maximum_ratio_on_graph = temp;
@@ -870,7 +924,6 @@ int main(int argc, char* argv[])
 						//	neighbors_values.push_back( temp );
 						//	neighbors_max_value = max( neighbors_max_value, temp );
 						//	temp = tpdijkstra->tpdijkstra( *it, c1_state );
-						//	tpdijkstra->clear_cache();
 						//	neighbors_max_min_values.push_back( temp );
 						//	neighbors_max_max_min_value = max( neighbors_max_max_min_value, temp );
 						//}
@@ -915,6 +968,8 @@ int main(int argc, char* argv[])
 	}
 */
 
+
+/*
 	// code for Cops and Robber website interface
 	if( argc < 6 ) {
 		output_syntax();
@@ -995,6 +1050,110 @@ int main(int argc, char* argv[])
 		if( search_time > 0. ) search_time = (search_time + 1.)/2.;
 		printf( "1 %.0f\n", search_time );
 	}
+*/
+
+
+
+	// Code for MaxMin approximation quality measurements
+	FILE *fhandler = NULL, *foutput = NULL;
+	unsigned int cop_speed = 2;
+	unsigned int maxmin_stepsize = 1;
+	char map_file[20];
+	unsigned int rx, ry, cx, cy;
+
+	// parameter input
+	if( argc < 4 ) {
+		printf( "syntax: -p <problem_file> -o <output_file>\n" );
+		return 1;
+	}
+	if( strcmp( argv[1], "-p" ) == 0 ) {
+		fhandler = fopen( argv[2], "r" );
+	}
+	if( strcmp( argv[3], "-o" ) == 0 ) {
+		foutput = fopen( argv[4], "w" );
+	}
+
+	printf( "problem file: %s\n", argv[2] );
+
+	while( !feof( fhandler ) ) {
+
+		// read first map of the problem file
+		fscanf( fhandler, "%s\n", map_file );
+		fprintf( foutput, "%s\n", map_file );
+		Map *m = new Map( map_file );
+		fprintf( stdout, "map file: %s\n", m->getMapName() );
+		MapEnvironment *env = new MapEnvironment( m );
+
+		// compute the values for the entire space
+		DSDijkstra<xyLoc,tDirection,MapEnvironment> *dsdijkstra =
+			new DSDijkstra<xyLoc,tDirection,MapEnvironment>( env, cop_speed );
+		dsdijkstra->dsdijkstra();
+		fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
+
+		DSTPDijkstra<xyLoc,tDirection> *dstp =
+			new DSTPDijkstra<xyLoc,tDirection>( env, cop_speed );
+
+		// there is always 50 problems for a map
+		for( int i = 0; i < 50; i++ ) {
+			fscanf( fhandler, "(%d,%d) (%d,%d)\n", &rx, &ry, &cx, &cy );
+			fprintf( foutput, "(%u,%u) (%u,%u) ", rx, ry, cx, cy );
+
+			// build the actual position data structure
+			DSDijkstra<xyLoc,tDirection,MapEnvironment>::CRState pos;
+			pos.push_back( xyLoc( rx, ry ) );
+			pos.push_back( xyLoc( cx, cy ) );
+
+			// now find out the optimal value
+			fprintf( foutput, "%f ", dsdijkstra->Value( pos, true ) );
+
+			// make a run for this problem with maxmin
+			std::vector<xyLoc> path;
+			unsigned int counter = 0;
+			double value = 0.;
+			//printf( "(%u,%u)(%u,%u) => ", pos[0].x, pos[0].y, pos[1].x, pos[1].y );
+			//fflush( stdout );
+			while( true ) {
+				pos[1] = dsdijkstra->MakeMove( pos, true );
+				value += 1.;
+				//printf( "(%u,%u)(%u,%u) => ", pos[0].x, pos[0].y, pos[1].x, pos[1].y );
+				//fflush( stdout );
+
+				// test on whether the robber is caught
+				if( pos[0] == pos[1] ) break;
+
+				// if new path has to be computed, do so
+				if( counter == 0 || counter >= path.size() )
+					dstp->dstpdijkstra( pos[0], pos[1], false, path );
+				//printf( "counter = %u, path.size = %u => ", counter, path.size() );
+				// generate next move for the robber
+				pos[0] = path[counter];
+				//printf( "(%u,%u)(%u,%u) => ", pos[0].x, pos[0].y, pos[1].x, pos[1].y );
+				//fflush( stdout );
+				counter++;
+
+				value += 1.;
+
+				// reset counter after maxmin_stepsize
+				if( counter == maxmin_stepsize ) counter = 0;
+
+				if( pos[0] == pos[1] ) break;
+			}
+
+			// output result of the run
+			fprintf( foutput, "%f\n", value );
+			fflush( foutput );
+			//printf( "\n" );
+
+		}
+
+
+		delete dsdijkstra;
+		delete dstp;
+		delete env;	
+	}
+	fclose( fhandler );
+	fclose( foutput );
+
 
 	return 0;
 }

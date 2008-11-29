@@ -1,7 +1,7 @@
 #include <vector>
 #include "SearchEnvironment.h"
 #include "MultiAgentEnvironment.h"
-#include "Minimax.h" // for the function CRHash
+#include "MyHash.h"
 
 #ifndef IPNSEARCH_H
 #define IPNSEARCH_H
@@ -17,6 +17,8 @@ inline unsigned int uintplus( unsigned int a, unsigned int b ) {
 	Implementation of proof number search with (consistent) heuristic
 	enhancement and iterative increase of the bound to be proofed
 	(inspired by TIDA*).
+
+	Implementation for one cop and one robber
 */
 template<class state, class action, class environment>
 class IPNSearch {

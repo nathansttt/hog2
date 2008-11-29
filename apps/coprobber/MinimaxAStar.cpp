@@ -1,28 +1,6 @@
 #include "MinimaxAStar.h"
 
 
-// hash function copied from CopRobberEnvironment.h
-// only that this has to be outside of classes
-// \see CopRobberEnvironment.h Minimax.h
-template<>
-uint64_t CRHash<graphState>( const std::vector<graphState> &node) {
-	uint64_t hash = 0, t;
-	double psize = 64./(double)node.size();
-	double count = 0.;
-	unsigned int i;
-	unsigned char j;
-
-	for( i = 0; i < node.size(); i++ ) {
-		t = node[i];
-		for( j = 0; j < floor(count+psize)-floor(count); j++ ) {
-			hash |= (t & (1<<j))<<(unsigned int)floor(count);
-		}
-		count += psize;
-	}
-	return hash;
-}
-
-
 // MINIMAX A*
 
 MinimaxAStar::MinimaxAStar( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass ):
