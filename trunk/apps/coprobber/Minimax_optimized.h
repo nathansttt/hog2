@@ -4,7 +4,7 @@
 #include <math.h>
 #include "Map2DEnvironment.h"
 #include "MultiAgentEnvironment.h"
-#include "Minimax.h" // for CRHash
+#include "MyHash.h"
 
 
 #ifndef MINIMAX_OPTIMIZED_H

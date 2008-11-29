@@ -1,4 +1,6 @@
 #include "MyHash.h"
+#include "Map2DEnvironment.h"
+#include "GraphEnvironment.h"
 
 unsigned long hash_permutation( unsigned int num_players, unsigned int *num_player_states, unsigned int *player_states ) {
 	unsigned long offset = 1, hash = 0;
@@ -17,3 +19,43 @@ void dehash_permutation( unsigned long hash, unsigned int num_players, unsigned 
 		hash /= offset;
 	}
 }
+
+// specification for state=xyLoc
+template<>
+uint64_t CRHash<xyLoc>( const std::vector<xyLoc> &pos ) {
+	return( ((uint64_t)pos[0].x)<<48 | (((uint64_t)pos[0].y)<<48)>>16 |
+		(((uint64_t)pos[1].x)<<48)>>32 | (((uint64_t)pos[1].y)<<48)>>48 );
+}
+
+// hash function copied from CopRobberEnvironment.h
+// only that this has to be outside of classes
+// \see CopRobberEnvironment.h
+template<>
+uint64_t CRHash<graphState>( const std::vector<graphState> &node) {
+	uint64_t hash = 0, t;
+	double psize = 64./(double)node.size();
+	double count = 0.;
+	unsigned int i;
+	unsigned char j;
+
+	for( i = 0; i < node.size(); i++ ) {
+		t = node[i];
+		for( j = 0; j < floor(count+psize)-floor(count); j++ ) {
+			hash |= (t & (1<<j))<<(unsigned int)floor(count);
+		}
+		count += psize;
+	}
+	return hash;
+}
+
+
+template<>
+uint64_t StateHash<xyLoc>( const xyLoc &s ) {
+	return( ((uint64_t)s.x)<<32 | (((uint64_t)s.y)<<32)>>32 );
+}
+
+template<>
+uint64_t StateHash<graphState>( const graphState &s ) {
+	return( (uint64_t) s );
+}
+

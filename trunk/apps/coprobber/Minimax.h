@@ -2,6 +2,7 @@
 #include <map>
 #include <vector>
 #include <math.h>
+#include "MyHash.h"
 #include "Map2DEnvironment.h"
 #include "MultiAgentEnvironment.h"
 
@@ -9,11 +10,6 @@
 #ifndef MINIMAX_H
 #define MINIMAX_H
 
-// hash function definition
-// \see Minimax.cpp for implementation for state=xyLoc
-// \see MinimaxAStar.cpp for implementation for state=graphState
-template<class state>
-uint64_t CRHash( const std::vector<state> &pos );
 
 /*!
 	two players minimax implementation

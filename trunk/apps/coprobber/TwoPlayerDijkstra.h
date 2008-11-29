@@ -5,14 +5,10 @@
 #include "MultiAgentEnvironment.h"
 #include "GraphEnvironment.h"
 #include "Map2DEnvironment.h"
-//#include "Minimax.h" // for CRHash
+#include "MyHash.h"
 
 #ifndef TWOPLAYERDIJKSTRA_H
 #define TWOPLAYERDIJKSTRA_H
-
-// \see TwoPlayerDijkstra.cpp
-template<class state>
-uint64_t StateHash( state s );
 
 /*
 	Implementation of two player dijkstra for the cop and robber problem
@@ -60,10 +56,6 @@ class TwoPlayerDijkstra {
 
 	protected:
 
-	// we use these functions independent from the environment implementations
-	// to be more variable in our own calculations
-	double GCost( state &s1, state &s2 );
-
 	environment *env;
 	bool canPass;
 
@@ -72,11 +64,6 @@ class TwoPlayerDijkstra {
 	RobberClosedList robber_closed;
 
 };
-
-
-/* Header code for MinimaxAStar_optimized.cpp */
-template<>
-double TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>::GCost( xyLoc &s1, xyLoc &s2 );
 
 
 /* IMPLEMENTATION */
@@ -161,6 +148,7 @@ double TwoPlayerDijkstra<state,action,environment>::tpdijkstra( state pos_robber
 		}
 	}
 
+	clear_cache();
 	return( (double) (last_robber_turn + last_cop_turn) );
 
 }

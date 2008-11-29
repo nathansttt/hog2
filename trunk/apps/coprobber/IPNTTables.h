@@ -3,7 +3,7 @@
 #include <map>
 #include "SearchEnvironment.h"
 #include "MultiAgentEnvironment.h"
-#include "Minimax.h" // for the function CRHash
+#include "MyHash.h"
 #include "IPNSearch.h" // for function uintplus
 
 
@@ -16,6 +16,11 @@
 	(inspired by TIDA*).
 	This implementation differs from IPNSearch.h in so far that it tries
 	to incorporate transposition tables
+
+	Note: This version has been used to generate statistics for
+	"Optimal Solutions to Moving Target Search"
+
+	Implementation for one cop and one robber
 */
 template<class state, class action, class environment>
 class IPNTTables {

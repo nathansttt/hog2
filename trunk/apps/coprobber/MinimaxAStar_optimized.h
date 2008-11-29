@@ -11,6 +11,9 @@
 
 /*
 	Implementation for one robber and one cop
+
+	note: bool canPass is not supported when pushing up the terminal
+	states onto the queue
 */
 template<class state,class action,class environment>
 class MinimaxAStar {
@@ -22,7 +25,7 @@ class MinimaxAStar {
 	// priority queue
 	class QueueEntry {
 		public:
-		QueueEntry( CRState _pos, bool mf, double fv, double gv ):
+		QueueEntry( CRState &_pos, bool mf, double fv, double gv ):
 			pos(_pos), minFirst(mf), fvalue(fv), gvalue(gv) {};
 		QueueEntry() {};
 
@@ -35,13 +38,13 @@ class MinimaxAStar {
 	// be aware of q1.fvalue > q2.fvalue, this changes the ordering of our queue s.t.
 	// we can top() the one with the lowest value
 	struct QueueEntryCompare {
-		bool operator() ( const QueueEntry q1, const QueueEntry q2 ) const {
+		bool operator() ( const QueueEntry &q1, const QueueEntry &q2 ) const {
 			return( q1.fvalue > q2.fvalue );
 		}
 	};
 
 	struct CRStateHash {
-		size_t operator() ( const CRState s ) const {
+		size_t operator() ( const CRState &s ) const {
 			return CRHash<state>( s );
 		}
 	};

@@ -3,12 +3,26 @@
 #include <map>
 #include "SearchEnvironment.h"
 #include "MultiAgentEnvironment.h"
-#include "Minimax.h" // for the function CRHash
+#include "MyHash.h"
 #include "IPNSearch.h" // for function uintplus
 
 
 #ifndef IPNTTABLES_H
 #define IPNTTABLES_H
+
+/*
+	The difference to IPNTTables.h is that we use a tree structure here
+	to keep the tree in memory and perform the updates on this tree (like
+	deletion of subtrees etc).
+	IPNTTables.h used a polynomial space structure (keeping only one node
+	per state and bound) but cannot perform
+	deletion operations due to this structure.
+
+	This version turned out to be slower than IPNTTables.h(!)
+	which is due the space complexity
+
+	Implementation for one cop and one robber
+*/
 
 template<class state, class action, class environment>
 class IPNTTables {

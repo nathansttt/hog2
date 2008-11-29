@@ -1,7 +1,7 @@
 #include <vector>
 #include "SearchEnvironment.h"
 #include "MultiAgentEnvironment.h"
-#include "Minimax.h" // for the function CRHash
+#include "MyHash.h"
 #include <ext/hash_set>
 #include <map>
 
@@ -262,21 +262,8 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCo
 	// in case we are the cop/min player
 	if( minFirst ) {
 
-	/*
-		// TODO: CHANGE ME BACK!!!!
-		NeighborCache ncache;
-		std::vector<state> neighbors2;
-		for( typename std::vector<state>::iterator iti = neighbors.begin(); iti != neighbors.end(); iti++ ) {
-			ncache.insert( *iti );
-			env->GetSuccessors( *iti, neighbors2 );
-			for( typename std::vector<state>::iterator itj = neighbors2.begin(); itj != neighbors2.end(); itj++ )
-				ncache.insert( *itj );
-		}
-	*/
-
 		result = DBL_MAX;
 
-		//for( typename NeighborCache::iterator iti = ncache.begin(); iti != ncache.end(); iti++ ) {
 		for( typename std::vector<state>::iterator iti = neighbors.begin(); iti != neighbors.end(); iti++ ) {
 			neighbor = pos;
 			neighbor[myid] = *iti;

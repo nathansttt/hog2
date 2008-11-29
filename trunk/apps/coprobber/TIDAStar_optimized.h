@@ -1,7 +1,8 @@
 #include <vector>
 #include "SearchEnvironment.h"
 #include "MultiAgentEnvironment.h"
-#include "Minimax.h" // for the function CRHash
+#include "Map2DEnvironment.h"
+#include "MyHash.h"
 #include <ext/hash_set>
 #include <ext/hash_map>
 
