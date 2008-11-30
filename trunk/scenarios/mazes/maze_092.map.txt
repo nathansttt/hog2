@@ -1,4 +1,4 @@
-1
+version 1
 127	maps/mazes/maze_092.map	512	512	325	489	405	374	511.61
 127	maps/mazes/maze_092.map	512	512	421	443	430	368	511.196
 127	maps/mazes/maze_092.map	512	512	133	377	127	201	511.983
