@@ -1,4 +1,4 @@
-1
+version 1
 114	maps/rooms/8room_037.map	512	512	498	305	180	437	457.061
 10	maps/rooms/8room_037.map	512	512	24	268	37	241	42.1421
 63	maps/rooms/8room_037.map	512	512	278	188	234	395	252.095
