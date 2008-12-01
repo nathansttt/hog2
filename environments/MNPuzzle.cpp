@@ -477,6 +477,7 @@ int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsi
 		}
 
 		getline(ifs, s);
+		first = true;
 		for(unsigned int i = 0; i < s.length(); i++) {
 			if(s.at(i) == ' ' || s.at(i) == '\t') {
 				if(temp.length() > 0) {
