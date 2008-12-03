@@ -1,5 +1,6 @@
 #include <vector>
 #include <queue>
+#include <set>
 #include <ext/hash_set>
 #include "MultiAgentEnvironment.h"
 #include "DSCREnvironment.h"
@@ -12,6 +13,9 @@
 /*
 	Dijkstra implementation for one cop and one robber
 	possibly faster cop (using DSCREnvironment.h)
+
+	Note: there is no support for whether the cop/robber can pass their
+	turns or not
 */
 template<class state, class action, class environment>
 class DSDijkstra {
@@ -30,8 +34,6 @@ class DSDijkstra {
 
 	void WriteValuesToDisk( const char* filename );
 	
-	double MinGCost( CRState &pos1, CRState &pos2, bool minFirst );
-
 	// the access to min_cost and max_cost
 	// note: it only makes sense to call these functions after dsdijkstra
 	double Value( CRState &pos, bool minFirst );
@@ -83,6 +85,12 @@ class DSDijkstra {
 	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash> ClosedList;
 	ClosedList min_cost, max_cost;
 
+	// TODO: Make this stable, this will only work with edge costs all set to 1
+	// and a dijkstra algorithm where no states are explored multiple times.
+	// THIS IS TEMPORARY TESTING CODE!
+	//typedef std::set<uint64_t> OpenListIndexSet;
+	//OpenListIndexSet min_olis, max_olis;
+
 };
 
 /*------------------------------------------------------------------------------
@@ -97,11 +105,6 @@ DSDijkstra<state,action,environment>::DSDijkstra( environment *_env, unsigned in
 template<class state, class action, class environment>
 DSDijkstra<state,action,environment>::~DSDijkstra() {
 	delete dscrenv;
-};
-
-template<class state, class action, class environment>
-double DSDijkstra<state,action,environment>::MinGCost( CRState&, CRState&, bool ) {
-	return 1.;
 };
 
 
@@ -138,7 +141,7 @@ double DSDijkstra<state,action,environment>::compute_target_value( CRState &s ) 
 		if( min_cost.find( temp ) == min_cost.end() )
 			return DBL_MAX;
 
-		tempvalue = MinGCost( s, temp, false ) + min_cost[ temp ];
+		tempvalue = dscrenv->RobberGCost( s, temp ) + min_cost[ temp ];
 		if( tempvalue > result ) result = tempvalue;
 	}
 	return result;
@@ -166,6 +169,8 @@ void DSDijkstra<state,action,environment>::dsdijkstra() {
 
 		if( qe.minFirst ) {
 
+			//min_olis.erase( CRHash<state>( qe.pos ) );
+
 			if( min_cost.find( qe.pos ) == min_cost.end() ) {
 
 				min_cost[qe.pos] = qe.value;
@@ -179,19 +184,23 @@ void DSDijkstra<state,action,environment>::dsdijkstra() {
 					qe.pos[0] = *it;
 
 					// check whether its value is not yet set
-					if( max_cost.find( qe.pos ) == max_cost.end() ) {
+					if( max_cost.find( qe.pos ) == max_cost.end() ) { //&&
+					    //max_olis.find( CRHash<state>( qe.pos ) ) == max_olis.end() ) {
 						qe.value = compute_target_value( qe.pos );
 						if( qe.value != DBL_MAX ) {
 							qe.minFirst = false;
 							//printf( "pushed %d (%u,%u)(%u,%u) on queue with %g\n", qe.minFirst,
 							//	qe.pos[0].x, qe.pos[0].y, qe.pos[1].x, qe.pos[1].y, qe.value );
 							queue.push( qe );
+							//max_olis.insert( CRHash<state>( qe.pos ) );
 						}
 					}
 				}
 			}
 
 		} else {
+
+			//max_olis.erase( CRHash<state>( qe.pos ) );
 
 			if( max_cost.find( qe.pos ) == max_cost.end() ) {
 
@@ -208,12 +217,14 @@ void DSDijkstra<state,action,environment>::dsdijkstra() {
 					qtemp.pos[1] = *it;
 
 					// check again whether already set or not
-					if( min_cost.find( qtemp.pos ) == min_cost.end() ) {
+					if( min_cost.find( qtemp.pos ) == min_cost.end() ) { // &&
+					    //min_olis.find( CRHash<state>( qtemp.pos ) ) == min_olis.end() ) {
 						qtemp.minFirst = true;
-						qtemp.value    = qe.value + MinGCost( qtemp.pos, qe.pos, true );
+						qtemp.value    = qe.value + dscrenv->CopGCost( qtemp.pos, qe.pos );
 						//printf( "pushed %d (%u,%u)(%u,%u) on queue with %g\n", qtemp.minFirst,
 						//	qtemp.pos[0].x, qtemp.pos[0].y, qtemp.pos[1].x, qtemp.pos[1].y, qtemp.value );
 						queue.push( qtemp );
+						//min_olis.insert( CRHash<state>( qtemp.pos ) );
 					}
 				}
 			}

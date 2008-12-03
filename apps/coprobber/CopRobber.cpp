@@ -20,12 +20,14 @@
 //#include "IPNTTables_optimized.h"
 #include "Dijkstra.h"
 #include "MyGraphMapHeuristic.h"
-#include "MinimaxAStar.h"
-//#include "MinimaxAStar_optimized.h"
+//#include "MinimaxAStar.h"
+#include "MinimaxAStar_optimized.h"
 #include "TwoPlayerDijkstra.h"
 //#include "DSCREnvironment.h"
 #include "DSTPDijkstra.h"
 #include "DSDijkstra.h"
+#include "DSRMAStar.h"
+#include "DSDijkstra_MemOptim.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -573,6 +575,42 @@ int main(int argc, char* argv[])
 	delete env;
 */
 
+
+/*
+	// RMA* with possibly faster cop => DSRMAStar
+	// Optimized Minimax A*
+	xyLoc pos_cop, pos_robber;
+	Map *m;
+	int max_depth;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+	MapEnvironment *env = new MapEnvironment( m );
+
+	DSRMAStar<xyLoc,tDirection,MapEnvironment> *dsrmastar =
+		new DSRMAStar<xyLoc,tDirection,MapEnvironment>( env, 2 );
+	std::vector<xyLoc> s;
+	s.push_back( pos_robber );
+	s.push_back( pos_cop );
+
+	double       result        = dsrmastar->rmastar( s, true );
+	unsigned int nodesExpanded = dsrmastar->nodesExpanded;
+	unsigned int nodesTouched  = dsrmastar->nodesTouched;
+
+	fprintf( stdout, "result: %f\n", result );
+	fprintf( stdout, "nodesExpanded: %u\n", nodesExpanded );
+	fprintf( stdout, "nodesTouched: %u\n", nodesTouched );
+
+	delete dsrmastar;
+	delete env;
+*/
+
+
+
+
+
 /*
 // problem set generation
 	char map_file[20];
@@ -592,8 +630,8 @@ int main(int argc, char* argv[])
 //	for( i = 1; i <= 15; i++ ) {
 //		m = new Map( i, i );
 //		MakeMaze( m );
-//		m->scale( 15,15 );
-//		sprintf( map_file, "problem_set5_map%d.map", i );
+//		m->scale( 20, 20 );
+//		sprintf( map_file, "testmap.map" ); //"problem_set5_map%d.map", i );
 //		m->save( map_file );
 		fscanf( file_with_maps, "%s\n", map_file );
 		fprintf( fhandler, "%s\n", map_file );
@@ -773,6 +811,8 @@ int main(int argc, char* argv[])
 	fclose( result_file );
 	fprintf( stdout, "Done.\n" );
 */
+
+
 
 /*
 	// test of all-state algorithms
@@ -1054,6 +1094,7 @@ int main(int argc, char* argv[])
 
 
 
+
 	// Code for MaxMin approximation quality measurements
 	FILE *fhandler = NULL, *foutput = NULL;
 	unsigned int cop_speed = 2;
@@ -1082,16 +1123,16 @@ int main(int argc, char* argv[])
 		fprintf( foutput, "%s\n", map_file );
 		Map *m = new Map( map_file );
 		fprintf( stdout, "map file: %s\n", m->getMapName() );
-		MapEnvironment *env = new MapEnvironment( m );
+		Graph *g = GraphSearchConstants::GetGraph( m );
+		GraphEnvironment *env = new GraphEnvironment( g, NULL );
 
 		// compute the values for the entire space
-		DSDijkstra<xyLoc,tDirection,MapEnvironment> *dsdijkstra =
-			new DSDijkstra<xyLoc,tDirection,MapEnvironment>( env, cop_speed );
+		DSDijkstra_MemOptim *dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
 		dsdijkstra->dsdijkstra();
 		fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
 
-		DSTPDijkstra<xyLoc,tDirection> *dstp =
-			new DSTPDijkstra<xyLoc,tDirection>( env, cop_speed );
+		DSTPDijkstra<graphState,graphMove> *dstp =
+			new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
 
 		// there is always 50 problems for a map
 		for( int i = 0; i < 50; i++ ) {
@@ -1099,15 +1140,15 @@ int main(int argc, char* argv[])
 			fprintf( foutput, "(%u,%u) (%u,%u) ", rx, ry, cx, cy );
 
 			// build the actual position data structure
-			DSDijkstra<xyLoc,tDirection,MapEnvironment>::CRState pos;
-			pos.push_back( xyLoc( rx, ry ) );
-			pos.push_back( xyLoc( cx, cy ) );
+			std::vector<graphState> pos;
+			pos.push_back( m->getNodeNum( rx, ry ) );
+			pos.push_back( m->getNodeNum( cx, cy ) );
 
 			// now find out the optimal value
 			fprintf( foutput, "%f ", dsdijkstra->Value( pos, true ) );
 
 			// make a run for this problem with maxmin
-			std::vector<xyLoc> path;
+			std::vector<graphState> path;
 			unsigned int counter = 0;
 			double value = 0.;
 			//printf( "(%u,%u)(%u,%u) => ", pos[0].x, pos[0].y, pos[1].x, pos[1].y );
@@ -1145,7 +1186,6 @@ int main(int argc, char* argv[])
 			//printf( "\n" );
 
 		}
-
 
 		delete dsdijkstra;
 		delete dstp;

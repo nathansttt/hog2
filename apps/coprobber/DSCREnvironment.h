@@ -47,7 +47,9 @@ class DSCREnvironment {
 
 	// transition costs
 	virtual double RobberGCost( CRState &s, state &n );
+	virtual double RobberGCost( CRState &s, CRState &n ) { return RobberGCost( s, n[0] ); };
 	virtual double CopGCost( CRState &s, state &n );
+	virtual double CopGCost( CRState &s, CRState &n ) { return CopGCost( s, n[1] ); };
 
 	protected:
 
