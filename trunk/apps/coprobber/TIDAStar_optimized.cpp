@@ -23,7 +23,6 @@ double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinHCost( CRState &pos, bool
 
 	int a = abs(pos[1].x-pos[0].x);
 	int b = abs(pos[1].y-pos[0].y);
-	int turns   = (a>b)?a:b;
 	double dist = (a>b)?(b*1.5+a-b):(a*1.5+b-a);
 
 	if( canPause )

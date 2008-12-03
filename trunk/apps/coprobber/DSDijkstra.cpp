@@ -38,8 +38,9 @@ void DSDijkstra<graphState,graphMove,GraphEnvironment>::push_end_states_on_queue
 				nodesTouched++;
 
 				qe.pos[1] = *it;
-				qe.value   = MinGCost( qe.pos, pos, true );
+				qe.value   = dscrenv->CopGCost( qe.pos, pos );
 				queue.push( qe );
+				//min_olis.insert( CRHash<graphState>( qe.pos ) );
 		}
 
 		n = g->nodeIterNext( nit );
@@ -85,8 +86,9 @@ void DSDijkstra<xyLoc,tDirection,MapEnvironment>::push_end_states_on_queue() {
 					nodesTouched++;
 
 					qe.pos[1] = *it;
-					qe.value   = MinGCost( qe.pos, pos, true );
+					qe.value   = dscrenv->CopGCost( qe.pos, pos );
 					queue.push( qe );
+					//min_olis.insert( CRHash<xyLoc>( qe.pos ) );
 					//printf( "pushed (%u,%u) (%u,%u) on queue\n", qe.pos[0].x, qe.pos[0].y, qe.pos[1].x, qe.pos[1].y );
 			}
 
