@@ -73,4 +73,6 @@ SRC_CPP = \
 	apps/coprobber/MinimaxAStar_optimized.cpp \
 	apps/coprobber/TwoPlayerDijkstra.cpp \
 	apps/coprobber/DSDijkstra.cpp \
+	apps/coprobber/DSDijkstra_MemOptim.cpp \
+	apps/coprobber/DSRMAStar.cpp \
 	apps/coprobber/CopRobber.cpp
