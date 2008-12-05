@@ -48,11 +48,14 @@ float DSDijkstra_MemOptim::compute_target_value( CRState &s ) {
 	float tempvalue;
 	std::vector<graphState> myneighbors;
 	dscrenv->GetRobberSuccessors( temp, myneighbors );
+	nodesExpanded++;
 
 	// now, for all successor states
 	for( std::vector<graphState>::iterator it = myneighbors.begin();
 	     it != myneighbors.end(); it++ ) {
-	
+
+		nodesTouched++;
+
 		// build the state
 		temp[0] = *it;
 
@@ -77,6 +80,9 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 	min_cost.assign( numnodes*numnodes, FLT_MAX );
 	max_cost.assign( numnodes*numnodes, FLT_MAX );
 
+	nodesExpanded = 0;
+	nodesTouched  = 0;
+
 	push_end_states_on_queue();
 
 	while( !queue.empty() ) {
@@ -96,9 +102,13 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 
 				std::vector<graphState> myneighbors;
 				dscrenv->GetRobberSuccessors( pos, myneighbors, false );
+				nodesExpanded++;
 
 				// now, for all successor states
 				for( it = myneighbors.begin(); it != myneighbors.end(); it++ ) {
+
+					nodesTouched++;
+
 					// build the state
 					pos[0] = *it;
 					qe.pos_hash = CRHash_MemOptim( pos );
@@ -108,8 +118,6 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 						qe.value = compute_target_value( pos );
 						if( qe.value != FLT_MAX ) {
 							qe.minFirst = false;
-							//printf( "pushed %d (%u,%u)(%u,%u) on queue with %g\n", qe.minFirst,
-							//	qe.pos[0].x, qe.pos[0].y, qe.pos[1].x, qe.pos[1].y, qe.value );
 							queue.push( qe );
 						}
 					}
@@ -126,9 +134,12 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 				// get neighbors
 				std::vector<graphState> myneighbors;
 				dscrenv->GetCopSuccessors( postemp, myneighbors );
+				nodesExpanded++;
 
 				for( it = myneighbors.begin(); it != myneighbors.end(); it++ ) {
-					
+
+					nodesTouched++;
+
 					// build the next state
 					postemp[1] = *it;
 					qtemp.pos_hash = CRHash_MemOptim( postemp );
@@ -214,8 +225,6 @@ void DSDijkstra_MemOptim::push_end_states_on_queue() {
 	n = g->nodeIterNext( nit );
 	while( n != NULL ) {
 
-		nodesExpanded++;nodesTouched++;
-
 		pos.clear();
 		pos.push_back( n->GetNum() );
 		pos.push_back( n->GetNum() );
@@ -229,6 +238,8 @@ void DSDijkstra_MemOptim::push_end_states_on_queue() {
 		// if cop moves last
 		neighbors.clear();
 		dscrenv->GetCopSuccessors( pos, neighbors );
+		nodesExpanded++;
+
 		postemp = pos;
 		qe.minFirst = true;
 		for( std::vector<graphState>::iterator it = neighbors.begin(); it != neighbors.end(); it++ ) {

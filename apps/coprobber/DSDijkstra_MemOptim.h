@@ -86,12 +86,6 @@ class DSDijkstra_MemOptim {
 	typedef std::vector<float> ClosedList;
 	ClosedList min_cost, max_cost;
 
-	// TODO: Make this stable, this will only work with edge costs all set to 1
-	// and a dijkstra algorithm where no states are explored multiple times.
-	// THIS IS TEMPORARY TESTING CODE!
-	//typedef std::set<uint64_t> OpenListIndexSet;
-	//OpenListIndexSet min_olis, max_olis;
-
 };
 
 #endif

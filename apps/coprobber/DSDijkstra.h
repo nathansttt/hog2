@@ -157,6 +157,9 @@ void DSDijkstra<state,action,environment>::dsdijkstra() {
 	assert( max_cost.empty() );
 	assert( queue.empty() );
 
+	nodesExpanded = 0;
+	nodesTouched  = 0;
+
 	push_end_states_on_queue();
 
 	while( !queue.empty() ) {
