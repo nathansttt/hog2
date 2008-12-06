@@ -95,7 +95,25 @@ public:
 	void StoreGoal(MNPuzzleState &); // stores the locations for the given goal state
 	void ClearGoal(); // clears the current stored information of the goal
 
-	static int read_in_mn_puzzles(const char *, bool, unsigned, unsigned, unsigned, std::vector<MNPuzzleState> &);
+	/**
+	Creates num_puzzles random MN puzzles of the specified size and stores them in
+	puzzle-vector. All random puzzles are unique and solvable for the standard goal
+	of 0, 1, 2, ..., MN - 1. The method assumes that num_puzzles is no bigger than
+	the total number of solvable problems for that size.
+	**/
+	static void Create_Random_MN_Puzzles(unsigned num_cols, unsigned num_rows, std::vector<MNPuzzleState> &puzzle_vector, unsigned num_puzzles);
+
+	/**
+	Outputs the set of puzzles in puzzle_vector to standard output. The output is of the
+	form "I_0 I_1 ... I_(MN - 1)" where I_K is the element in the Kth position of the
+	puzzle. If the write_puzz_num flag is set as true, the first item of the output is
+	the puzzle number. Puzzles are checked for validity (and that they correspond to the
+	specified size) before they are outputted. 1 is return if the puzzles are not
+	valid, otherwise 0 is returned.
+	**/
+	static int Output_Puzzles(std::vector<MNPuzzleState> &puzzle_vector, unsigned num_cols, unsigned num_rows, bool write_puzz_num);
+
+	static int read_in_mn_puzzles(const char *filename, bool first_counter, unsigned num_cols, unsigned num_rows, unsigned max_puzzles, std::vector<MNPuzzleState> &puzzle_vector);
 private:
 	double DoPDBLookup(MNPuzzleState &state);
 	uint64_t Factorial(int val);
