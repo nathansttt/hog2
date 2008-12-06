@@ -8,6 +8,7 @@
  */
 
 #include "MNPuzzle.h"
+#include <map>
 
 MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height)
 		: width(_width), height(_height)
@@ -482,12 +483,12 @@ int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsi
 			if(s.at(i) == ' ' || s.at(i) == '\t') {
 				if(temp.length() > 0) {
 					if(puzz_num_start && first) {
-						temp = "";
+						temp.clear();
 						first = false;
 					}
 					else {
 						puzz_ints.push_back(atoi(temp.c_str()));
-						temp = "";
+						temp.clear();
 					}
 				}
 			}
@@ -497,6 +498,7 @@ int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsi
 		}
 
 		if(temp.length() > 0) {
+
 			puzz_ints.push_back(atoi(temp.c_str()));
 			temp = "";
 		}
@@ -529,5 +531,130 @@ int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsi
 
 	ifs.close();
 
+	return 0;
+}
+
+/**
+Calculates the number of reverses in the state. Used to determine
+the parity of the permutation for proving solvability.
+**/
+unsigned get_num_reverses(MNPuzzleState s) {
+
+	unsigned reverses = 0;
+	unsigned puzz_size = s.width*s.height;
+	for(unsigned i = 0; i < puzz_size; i++) {
+		if(s.blank == i)
+			continue;
+
+		for(unsigned j = i + 1; j < puzz_size; j++) {
+			if(s.blank != j && s.puzzle[j] < s.puzzle[i])
+				reverses++;
+		}
+	}
+
+	return reverses;
+}
+
+/**
+Randomly generates a puzzle of the specified dimensions
+and returns that puzzle.
+**/
+MNPuzzleState random_puzzle_generator(unsigned num_cols, unsigned num_rows) {
+	MNPuzzleState new_puzz(num_cols, num_rows);
+	unsigned size = num_cols*num_rows;
+	int index = 0;
+	int temp;
+	while(size > 1) {
+		index = rand() % size;
+		temp = new_puzz.puzzle[size - 1];
+		new_puzz.puzzle[size - 1] = new_puzz.puzzle[index];
+		new_puzz.puzzle[index] = temp;
+
+		size--;
+	}
+
+	for(unsigned i = 0; i < num_cols*num_rows; i++) {
+		if(new_puzz.puzzle[i] == 0)
+			new_puzz.blank = i;
+	}
+
+	return new_puzz;
+}
+
+void MNPuzzle::Create_Random_MN_Puzzles(unsigned num_cols, unsigned num_rows, std::vector<MNPuzzleState> &puzzle_vector, unsigned num_puzzles) {
+	std::map<uint64_t, uint64_t> puzzle_map; // used to ensure uniqueness
+
+	MNPuzzle my_puzz(num_cols, num_rows);
+
+	unsigned count = 0;
+	while(count < num_puzzles) {
+		MNPuzzleState next = random_puzzle_generator(num_cols, num_rows);
+		uint64_t next_hash = my_puzz.GetStateHash(next);
+
+		if(puzzle_map.find(next_hash) != puzzle_map.end()) {
+			continue;
+		}
+
+		unsigned reverses = get_num_reverses(next);
+
+		// checks parity to make sure problem is solvable
+		if((num_cols % 2 == 0 && (reverses + (next.blank/num_cols)) % 2 == 0) || (num_cols % 2 == 1 && reverses % 2 == 0)) {
+
+			puzzle_map[next_hash] = next_hash;
+			puzzle_vector.push_back(next);
+			count++;
+		}
+
+	}
+}
+
+int MNPuzzle::Output_Puzzles(std::vector<MNPuzzleState> &puzzle_vector, unsigned num_cols, unsigned num_rows, bool write_puzz_num) {
+
+	unsigned size = num_cols*num_rows;
+	bool in_puzzle[size];
+
+	// check validity of puzzles
+	for(unsigned i = 0; i < puzzle_vector.size(); i++) {
+		for(unsigned j = 0; j < size; j++) {
+			in_puzzle[j] = false;
+		}
+
+		if(puzzle_vector[i].width != num_cols || puzzle_vector[i].height != num_rows) {
+			std::cerr << "Invalid Puzzle: " << puzzle_vector[i] << '\n';
+			return 1;
+		}
+
+		for(unsigned j = 0; j < size; j++) {
+			if(puzzle_vector[i].puzzle[j] >= (int) size || puzzle_vector[i].puzzle[j] < 0) {
+				std::cerr << "Invalid Puzzle: " << puzzle_vector[i] << '\n';
+				return 1;
+			}
+			else if(puzzle_vector[i].puzzle[j] == 0) {
+				assert(puzzle_vector[i].blank == j);
+			}
+
+			in_puzzle[puzzle_vector[i].puzzle[j]] = true;
+		}
+
+		for(unsigned j = 0; j < size; j++) {
+			if(!in_puzzle[j]) {
+				std::cerr << "Invalid Puzzle: " << puzzle_vector[i] << '\n';
+				return 1;
+			}
+		}
+
+	}
+
+	for(unsigned i = 0; i < puzzle_vector.size(); i++) {
+		if(write_puzz_num) {
+			printf("%u ", i + 1);
+		}
+		printf("%d", puzzle_vector[i].puzzle[0]);
+
+		for(unsigned j = 1; j < size; j++) {
+			printf(" %d", puzzle_vector[i].puzzle[j]);
+		}
+		printf("\n");
+	}
 	return 0;
 }

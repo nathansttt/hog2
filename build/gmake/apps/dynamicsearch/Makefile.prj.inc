@@ -61,3 +61,4 @@ default : all
 SRC_CPP = \
 	apps/dynamicsearch/dynsearch.cpp \
 	apps/dynamicsearch/GeneralIDA.cpp \
+	apps/dynamicsearch/experiment_basics.cpp \
