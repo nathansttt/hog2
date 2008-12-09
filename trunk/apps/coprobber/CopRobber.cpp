@@ -640,6 +640,7 @@ int main(int argc, char* argv[])
 */
 
 
+/*
 	// DSCover
 	// Cover for one cop and one robber with DS move generation
 	Map *m;
@@ -669,10 +670,17 @@ int main(int argc, char* argv[])
 	printf( "nodes expanded: %u\n", dscover->nodesExpanded );
 	printf( "nodes touched: %u\n", dscover->nodesTouched );
 
+	graphState s;
+	s = dscover->MakeMove( m->getNodeNum(pos_robber.x,pos_robber.y), m->getNodeNum(pos_cop.x,pos_cop.y), false, g->GetNumNodes() );
+	printf( "next move for the robber: %lu\n", s );
+	s = dscover->MakeMove( m->getNodeNum(pos_robber.x,pos_robber.y), m->getNodeNum(pos_cop.x,pos_cop.y), true, g->GetNumNodes() );
+	printf( "next move for the cop: %lu\n", s );
+
 	delete dscover;
 	delete env;
 	delete g;
 	delete m;
+*/
 
 
 
@@ -1164,7 +1172,7 @@ int main(int argc, char* argv[])
 
 
 
-/*
+
 	// Code for MaxMin approximation quality measurements
 	FILE *fhandler = NULL, *foutput = NULL;
 	unsigned int cop_speed = 2;
@@ -1215,6 +1223,10 @@ int main(int argc, char* argv[])
 		DSTPDijkstra<graphState,graphMove> *dstp =
 			new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
 
+		// object needed for comparison to cover
+		DSCover<graphState,graphMove> *dscover =
+			new DSCover<graphState,graphMove>( env, cop_speed );
+
 		// there is always 1000 problems for a map -> see problem set generation
 		for( int i = 0; i < 1000; i++ ) {
 			fscanf( fhandler, "(%d,%d) (%d,%d)\n", &rx, &ry, &cx, &cy );
@@ -1231,7 +1243,33 @@ int main(int argc, char* argv[])
 			// now find out the optimal value
 			fprintf( foutput, "%g", dsdijkstra->Value( pos, true ) );
 
-			// simulate for all different stepsizes
+			// compute the solution for cover
+			double value = 0.;
+			unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
+			while( true ) {
+				pos[1] = dsdijkstra->MakeMove( pos, true );
+				value += 1.;
+				if( pos[0] == pos[1] ) break;
+
+				clock_start = clock();
+				pos[0] = dscover->MakeMove( pos[0], pos[1], false, g->GetNumNodes() );
+				clock_end   = clock();
+				timer_average      += (clock_end-clock_start)/1000;
+				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+				calculations++;
+
+				value += 1.;
+				if( pos[0] == pos[1] ) break;
+			}
+			double expected_value = (double)timer_average/(double)calculations;
+			double std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
+				- expected_value*expected_value );
+			// output the cover result
+			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+			fflush( foutput );
+
+
+			// do the simulation of MAXMIN approximation for various stepsizes
 			for( unsigned int stepsize = 1; stepsize <= maxmin_stepsize; stepsize++ ) {
 
 				// reset the position to the initial position
@@ -1242,8 +1280,10 @@ int main(int argc, char* argv[])
 				//std::vector<xyLoc> path;
 				std::vector<graphState> path;
 				unsigned int counter = 0;
-				double value = 0.;
-				unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
+				value = 0.;
+				calculations = 0;
+				timer_average = 0;
+				timer_stddiviation = 0;
 				while( true ) {
 					pos[1] = dsdijkstra->MakeMove( pos, true );
 					value += 1.;
@@ -1256,9 +1296,9 @@ int main(int argc, char* argv[])
 						clock_start = clock();
 						dstp->dstpdijkstra( pos[0], pos[1], false, path );
 						clock_end   = clock();
-						calculations++;
 						timer_average      += (clock_end-clock_start)/1000;
 						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+						calculations++;
 					}
 					// generate next move for the robber
 					pos[0] = path[counter];
@@ -1271,8 +1311,8 @@ int main(int argc, char* argv[])
 					if( pos[0] == pos[1] ) break;
 				}
 
-				double expected_value = (double)timer_average/(double)calculations;
-				double std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
+				expected_value = (double)timer_average/(double)calculations;
+				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 					- expected_value*expected_value );
 
 				// output result of the run
@@ -1291,7 +1331,7 @@ int main(int argc, char* argv[])
 	}
 	fclose( fhandler );
 	fclose( foutput );
-*/
+
 
 	return 0;
 }
