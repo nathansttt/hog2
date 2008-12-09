@@ -27,7 +27,7 @@ class DSTPDijkstra {
 
 	typedef typename MultiAgentEnvironment<state,action>::MAState CRState;
 
-	// constructor
+	// constructor & destructor
 	DSTPDijkstra( SearchEnvironment<state,action> *env, unsigned int cop_speed = 1 );
 	~DSTPDijkstra();
 
@@ -114,7 +114,6 @@ double DSTPDijkstra<state,action>::dstpdijkstra( state pos_robber, state pos_cop
 
 	nodesExpanded = 0; nodesTouched = 0;
 
-	// push the robber and the cop onto their open queues
 	std::vector<state> neighbors;
 	typename std::vector<state>::iterator it;
 	QueueEntry qtemp;
@@ -123,6 +122,7 @@ double DSTPDijkstra<state,action>::dstpdijkstra( state pos_robber, state pos_cop
 	state last_caught_state = pos_robber;
 	unsigned int last_cop_turn = 0;
 
+	// push the robber and the cop onto their open queues
 	QueueEntry qcop( pos_cop, 0, pos_cop );
 	cop_queue.push( qcop );
 
@@ -140,7 +140,6 @@ double DSTPDijkstra<state,action>::dstpdijkstra( state pos_robber, state pos_cop
 
 		nodesTouched++;
 
-		neighbors.clear();
 		if( minFirst?(qrobber.numTurns<qcop.numTurns):(qrobber.numTurns<=qcop.numTurns) ) {
 			robber_queue.pop();
 			last_time_popped_from_robber_queue = true;
@@ -189,6 +188,7 @@ double DSTPDijkstra<state,action>::dstpdijkstra( state pos_robber, state pos_cop
 					nodesTouched++;
 					qtemp.s        = *it;
 					qtemp.numTurns = qcop.numTurns + 1;
+					//qtemp.parent  = qcop.s; // not needed
 					cop_queue.push( qtemp );
 				}
 			}

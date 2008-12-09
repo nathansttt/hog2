@@ -172,7 +172,8 @@ void DSCREnvironment<state,action>::Dijkstra( state &s, unsigned int &steps, std
 		openlist.pop();
 
 		if( closedlist.find( qe.pos ) == closedlist.end() ) {
-			neighbors.push_back( qe.pos );
+			if( playerscanpass || !(qe.pos == s) )
+				neighbors.push_back( qe.pos );
 			closedlist.insert( qe.pos );
 
 			// if there can be neighbors from this node
