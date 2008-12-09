@@ -28,6 +28,7 @@
 #include "DSDijkstra.h"
 #include "DSRMAStar.h"
 #include "DSDijkstra_MemOptim.h"
+#include "DSCover.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -197,6 +198,7 @@ int main(int argc, char* argv[])
 	//Graph *g = readGraph( fhandler );
 	//fclose( fhandler );
 	//GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	//env->SetDirected( true );
 
 	Dijkstra *d = new Dijkstra( env, 1, true );
 	d->dijkstra();
@@ -589,6 +591,7 @@ int main(int argc, char* argv[])
 
 	Graph *g = GraphSearchConstants::GetGraph( m );
 	GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	env->SetDirected( true );
 
 	DSDijkstra_MemOptim *dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
 
@@ -637,6 +640,39 @@ int main(int argc, char* argv[])
 */
 
 
+	// DSCover
+	// Cover for one cop and one robber with DS move generation
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+	bool who;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	env->SetDirected( true );
+
+	DSCover<graphState,graphMove> *dscover = new DSCover<graphState,graphMove>( env, 1 );
+
+	unsigned int c = dscover->cover( m->getNodeNum( pos_robber.x, pos_robber.y ),
+		m->getNodeNum( pos_cop.x, pos_cop.y ), true, who );
+
+	if( who )
+		printf( "cop" );
+	else
+		printf( "robber" );
+	printf( " cover: %u\n", c );
+	printf( "nodes expanded: %u\n", dscover->nodesExpanded );
+	printf( "nodes touched: %u\n", dscover->nodesTouched );
+
+	delete dscover;
+	delete env;
+	delete g;
+	delete m;
 
 
 
@@ -871,6 +907,7 @@ int main(int argc, char* argv[])
 		Graph *g = GraphSearchConstants::GetGraph( m );
 		GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
+		env->SetDirected( true );
 
 		if( strcmp( argv[2], "dijkstra" ) == 0 ) {
 			env->SetDirected( true );
@@ -1127,7 +1164,7 @@ int main(int argc, char* argv[])
 
 
 
-
+/*
 	// Code for MaxMin approximation quality measurements
 	FILE *fhandler = NULL, *foutput = NULL;
 	unsigned int cop_speed = 2;
@@ -1162,6 +1199,7 @@ int main(int argc, char* argv[])
 		//MapEnvironment *env = new MapEnvironment( m );
 		Graph *g = GraphSearchConstants::GetGraph( m );
 		GraphEnvironment *env = new GraphEnvironment( g, NULL );
+		env->SetDirected( true );
 
 		// compute the values for the entire space
 		//DSDijkstra<xyLoc,tDirection,MapEnvironment> *dsdijkstra =
@@ -1253,7 +1291,7 @@ int main(int argc, char* argv[])
 	}
 	fclose( fhandler );
 	fclose( foutput );
-
+*/
 
 	return 0;
 }
