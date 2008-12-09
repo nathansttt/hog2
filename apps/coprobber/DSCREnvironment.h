@@ -31,6 +31,10 @@ class DSCREnvironment {
 		bool playerscanpass = true, unsigned int cop_speed = 1 );
 	virtual ~DSCREnvironment();
 
+	// set the playerscanpass variable
+	virtual void SetPlayersCanPass( bool _playerscanpass ) { playerscanpass = _playerscanpass; };
+	virtual bool GetPlayersCanpass() { return playerscanpass; };
+
 	// speed management
 	virtual void SetCopSpeed( unsigned int speed ) { cop_speed = speed; };
 	virtual unsigned int GetCopSpeed() { return cop_speed; };

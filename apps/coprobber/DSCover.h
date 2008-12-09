@@ -19,6 +19,9 @@
 		does support one cop only!
 	note: TPDijkstra actually computes cover and a little bit more.
 	note: in this implementation players are always allowed to pass their turn
+
+	note: although the implementation works for both, cops and robber it should not
+	be used for the cop since cover has lots of flaws concerning move determination
 */
 template<class state,class action>
 class DSCover {
@@ -34,7 +37,14 @@ class DSCover {
 	// who indicates who the cover was computed for
 	// who == false => robber
 	// who == true  => cop
+	// note: this is done to speed up computation since it is no longer necessary
+	// to expand the entire graph
 	unsigned int cover( state pos_robber, state pos_cop, bool minFirst, bool &who );
+
+	// this function needs the number of total states in the graph as a parameter
+	// this is because the cover routine only computes the cover for one of the two agents
+	// the other agent is determined by num_total_states - cover.
+	state MakeMove( state pos_robber, state pos_cop, bool minFirst, unsigned int num_total_states );
 
 	unsigned int nodesExpanded, nodesTouched;
 
@@ -222,5 +232,47 @@ unsigned int DSCover<state,action>::cover( state pos_robber, state pos_cop, bool
 
 	return result;
 };
+
+template<class state,class action>
+state DSCover<state,action>::MakeMove( state pos_robber, state pos_cop, bool minFirst, unsigned int num_total_states ) {
+
+	unsigned int max_cover = 0, temp;
+	state max_cover_state;
+	bool who;
+
+	// dscrenv has been initialized with playerscanpass=false for our computations
+	dscrenv->SetPlayersCanPass( true );
+
+	std::vector<state> neighbors;
+	if( minFirst )
+		dscrenv->GetCopSuccessors( pos_cop, neighbors );
+	else
+		dscrenv->GetRobberSuccessors( pos_robber, neighbors );
+
+	// reset the playerscanpass directive in dscrenv
+	dscrenv->SetPlayersCanPass( false );
+
+	// just to make sure that we're not in an isolated node
+	assert( neighbors.size() > 0 );
+	max_cover_state = neighbors[0];
+
+	// for each successor state compute the cover
+	for( typename std::vector<state>::iterator it = neighbors.begin(); it != neighbors.end(); it++ ) {
+		if( minFirst )
+			temp = cover( pos_robber, *it, false, who ); // !minFirst=false
+		else
+			temp = cover( *it, pos_cop, true, who ); // !minFirst=true
+
+		if( who != minFirst ) temp = num_total_states - temp;
+
+		if( temp > max_cover ) {
+			max_cover = temp;
+			max_cover_state = *it;
+		}
+	}
+
+	return max_cover_state;
+};
+
 
 #endif
