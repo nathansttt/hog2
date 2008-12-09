@@ -1325,6 +1325,7 @@ int main(int argc, char* argv[])
 
 		delete dsdijkstra;
 		delete dstp;
+		delete dscover;
 		delete env;
 		delete g;
 		delete m;
