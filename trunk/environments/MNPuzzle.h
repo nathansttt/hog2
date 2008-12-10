@@ -14,6 +14,8 @@
 #include <iostream>
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
+#include "GraphEnvironment.h"
+#include "Graph.h"
 
 class MNPuzzleState {
 public:
@@ -79,13 +81,15 @@ public:
 	slideDir GetAction(MNPuzzleState &s1, MNPuzzleState &s2);
 	void ApplyAction(MNPuzzleState &s, slideDir a);
 	bool InvertAction(slideDir &a);
-
+	static bool GetParity(MNPuzzleState &state);
+	
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
 	double HCost(MNPuzzleState &state1, MNPuzzleState &state2);
 	double GCost(MNPuzzleState &state1, MNPuzzleState &state2);
 	double GCost(MNPuzzleState &state1, slideDir &act) { return 1.0; }
 	bool GoalTest(MNPuzzleState &state, MNPuzzleState &goal);
 	uint64_t GetStateHash(MNPuzzleState &state);
+	void GetStateFromHash(MNPuzzleState &state, uint64_t hash);
 	uint64_t GetPDBHash(MNPuzzleState &state, const std::vector<int> &tiles);
 	void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 	uint64_t GetActionHash(slideDir act);
@@ -94,7 +98,8 @@ public:
 	void OpenGLDraw(int, MNPuzzleState &, slideDir &) { /* currently not drawing moves */ }
 	void StoreGoal(MNPuzzleState &); // stores the locations for the given goal state
 	void ClearGoal(); // clears the current stored information of the goal
-
+	Graph *GetGraph();
+	
 	/**
 	Creates num_puzzles random MN puzzles of the specified size and stores them in
 	puzzle-vector. All random puzzles are unique and solvable for the standard goal
@@ -123,6 +128,23 @@ private:
 	std::vector<std::vector<slideDir> > operators; // stores the operators applicable at each blank position
 	std::vector<unsigned int> goal_xloc; // holds the x locations of the goal
 	std::vector<unsigned int> goal_yloc; // holds the y locations of the goal
+};
+
+class GraphPuzzleDistanceHeuristic : public GraphHeuristic {
+public:
+	GraphPuzzleDistanceHeuristic(MNPuzzle &mnp, Graph *graph, int count);
+	double HCost(graphState &state1, graphState &state2);
+	void AddHeuristic();
+	int GetNumHeuristics() { return heuristics.size(); }
+	//int hmode;
+	//int HN;
+private:
+	void GetOptimalDistances(node *n, std::vector<double> &values);
+	void AddHeuristic(std::vector<double> &values, graphState location);
+	MNPuzzle puzzle;
+	Graph *g;
+	std::vector<std::vector<double> > heuristics;
+	std::vector<graphState> locations;
 };
 
 typedef UnitSimulation<MNPuzzleState, slideDir, MNPuzzle> PuzzleSimulation;

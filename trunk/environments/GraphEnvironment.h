@@ -37,9 +37,11 @@ namespace GraphSearchConstants
 		kYCoordinate = 1,
 		kZCoordinate = 2,
 		kHCost = 3, // this is relative to a single goal
-		kMapX = 4,
-		kMapY = 5,
-		kTemporaryLabel = 6
+		// wasted space here, but it keeps us consistent with the
+		// map abstraction
+		kMapX = 9,
+		kMapY = 10,
+		kTemporaryLabel = 11
 	};
 
 	const double kStraightEdgeCost = 1.0;
@@ -91,7 +93,9 @@ public:
 
 		double a = ((x1>x2)?(x1-x2):(x2-x1));
 		double b = ((y1>y2)?(y1-y2):(y2-y1));
-		return (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
+		double result = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
+		//printf("GraphMap (%d, %d) to (%d, %d) is %f\n", x1, y1, x2, y2, result);
+		return result;
 	}
 private:
 	Map *m;

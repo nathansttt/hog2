@@ -377,7 +377,7 @@ BaseMapOccupancyInterface::~BaseMapOccupancyInterface()
 void BaseMapOccupancyInterface::SetStateOccupied(xyLoc &s, bool occupied)
 {
 	// Make sure the location is valid
-	assert(s.x>=0 && s.x<=mapWidth && s.y>=0 && s.y<=mapHeight);
+	assert((s.x>=0) && (s.x<mapWidth) && (s.y>=0) && (s.y<mapHeight));
 	bitvec->set(CalculateIndex(s.x,s.y), occupied);
 }
 
