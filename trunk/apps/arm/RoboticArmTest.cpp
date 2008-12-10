@@ -24,7 +24,6 @@
  */
 
 #include "Common.h"
-#include "Sample.h"
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
 #include <deque>
