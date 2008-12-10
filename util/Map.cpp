@@ -1286,7 +1286,7 @@ void Map::setRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain typ
 	updated = true;
 	map_name[0] = 0;
 	revision++;
-	printf("Doing rect between (%ld, %ld) and (%ld, %ld) height %ld\n", x1, y1, x2, y2, h);
+	//printf("Doing rect between (%ld, %ld) and (%ld, %ld) height %ld\n", x1, y1, x2, y2, h);
 	for (int x = x1; x <= x2; x++)
 	{
 		for (int y = y1; y <= y2; y++)
@@ -2217,7 +2217,7 @@ void MakeMaze(Map *map)
 		else
 			val = random()%x.size();
 
-		printf("Trying to extend (%d, %d)\n", x[val], y[val]);
+		//printf("Trying to extend (%d, %d)\n", x[val], y[val]);
 		// raise up a corridor and open paths
 		switch (random()%4)
 		{
@@ -2229,7 +2229,7 @@ void MakeMaze(Map *map)
 					map->setHeight(x[val], y[val]-2, 1);
 					x.push_back(x[val]);
 					y.push_back(y[val]-2);
-					printf("Extended NORTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
+					//printf("Extended NORTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
 					break;
 				}
 			}
@@ -2241,7 +2241,7 @@ void MakeMaze(Map *map)
 					map->setHeight(x[val], y[val]+2, 1);
 					x.push_back(x[val]);
 					y.push_back(y[val]+2);
-					printf("Extended SOUTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
+					//printf("Extended SOUTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
 					break;
 				}
 			}
@@ -2253,7 +2253,7 @@ void MakeMaze(Map *map)
 					map->setHeight(x[val]-2, y[val], 1);
 					x.push_back(x[val]-2);
 					y.push_back(y[val]);
-					printf("Extended EAST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
+					//printf("Extended EAST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
 					break;
 				}
 			}
@@ -2265,7 +2265,7 @@ void MakeMaze(Map *map)
 					map->setHeight(x[val]+2, y[val], 1);
 					x.push_back(x[val]+2);
 					y.push_back(y[val]);
-					printf("Extended WEST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
+					//printf("Extended WEST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
 				}
 				break;
 			}
@@ -2277,7 +2277,7 @@ void MakeMaze(Map *map)
 			((y[val] == 0) || map->getHeight(x[val], y[val]-2) != 0) && // blocked up
 			((y[val] >= height-3) || map->getHeight(x[val], y[val]+2) != 0)) // blocked down
 		{
-			printf("(%d, %d) now blocked: %d left\n", x[val], y[val], x.size()-1);
+			//printf("(%d, %d) now blocked: %d left\n", x[val], y[val], x.size()-1);
 			x[val] = x.back();
 			y[val] = y.back();
 			x.pop_back();
