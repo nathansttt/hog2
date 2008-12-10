@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/abstraction -I$(ROOT)/util -I$(ROOT)/abstractionalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/simulation -I$(ROOT)/environments -I$(ROOT)/algorithms 
+PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/abstraction -I$(ROOT)/utils -I$(ROOT)/abstractionalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/simulation -I$(ROOT)/environments -I$(ROOT)/algorithms 
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -32,7 +32,10 @@ default : all
 SRC_CPP = \
 	graphalgorithms/Heap.cpp \
 	graphalgorithms/Path.cpp \
-  graphalgorithms/MeroB.cpp \
+	graphalgorithms/MeroB.cpp \
 	graphalgorithms/Propagation.cpp \
-	graphalgorithms/AStarDelay.cpp
+	graphalgorithms/AStarDelay.cpp \
+	graphalgorithms/FloydWarshall.cpp \
+
+
 

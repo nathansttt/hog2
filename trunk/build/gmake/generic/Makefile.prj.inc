@@ -2,7 +2,7 @@
 # GNU Makefile for static libraries: project dependent part
 #
 # $Id: Makefile.prj.inc,v 1.3 2006/11/01 23:34:14 nathanst Exp $
-# $Source: /usr/cvsroot/project_hog/build/gmake/util/Makefile.prj.inc,v $
+# $Source: /usr/cvsroot/project_hog/build/gmake/utils/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
 NAME = generic
@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/abstraction -I$(ROOT)/simulation -I$(ROOT)/util -I$(ROOT)/graph -I$(ROOT)/graphalgorithms -I$(ROOT)/environments
+PROJ_CXXFLAGS = -I$(ROOT)/abstraction -I$(ROOT)/simulation -I$(ROOT)/utils -I$(ROOT)/graph -I$(ROOT)/graphalgorithms -I$(ROOT)/environments
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
