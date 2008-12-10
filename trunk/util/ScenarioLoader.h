@@ -18,6 +18,7 @@ static const int kNoScaling = -1;
 /** 
  * Experiments stored by the ScenarioLoader class. 
  */
+class ScenarioLoader;
 
 class Experiment{
 public:
@@ -37,6 +38,7 @@ public:
   int GetYScale(){return scaleY;}
 
 private:
+	friend class ScenarioLoader;
   int startx, starty, goalx, goaly;
   int scaleX;
   int scaleY;
@@ -51,14 +53,17 @@ private:
 
 class ScenarioLoader{
 public:
-  ScenarioLoader(const char *);
-  int GetNumExperiments(){return experiments.size();}
+	ScenarioLoader() { scenName[0] = 0; }
+	ScenarioLoader(const char *);
+	void Save(const char *);
+	int GetNumExperiments(){return experiments.size();}
 	const char *GetScenarioName() { return scenName; }
-  Experiment GetNthExperiment(int which){return experiments[which];}
-
+	Experiment GetNthExperiment(int which)
+	{return experiments[which];}
+	void AddExperiment(Experiment which);
 private:
-		char scenName[1024];
-  std::vector<Experiment> experiments;
+	char scenName[1024];
+	std::vector<Experiment> experiments;
 };
 
 #endif
