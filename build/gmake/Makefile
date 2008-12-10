@@ -22,7 +22,7 @@ PROJECTS = \
   mapalgorithms \
   shared \
   simulation \
-  util \
+  utils \
   apps/pathsample \
   apps/puzzlesample \
   apps/multiagent \
@@ -49,7 +49,7 @@ PROJECTS_ALL = \
   mapalgorithms \
   shared \
   simulation \
-  util \
+  utils \
   apps/pathsample \
   apps/puzzlesample \
   apps/inconsistency \

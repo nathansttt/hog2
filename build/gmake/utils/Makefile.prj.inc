@@ -2,10 +2,10 @@
 # GNU Makefile for static libraries: project dependent part
 #
 # $Id: Makefile.prj.inc,v 1.3 2006/11/01 23:34:14 nathanst Exp $
-# $Source: /usr/cvsroot/project_hog/build/gmake/util/Makefile.prj.inc,v $
+# $Source: /usr/cvsroot/project_hog/build/gmake/utils/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = util
+NAME = utils
 DBG_NAME = lib$(NAME).a
 REL_NAME = lib$(NAME).a
 
@@ -30,14 +30,14 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-	util/BitVector.cpp \
-	util/FPUtil.cpp \
-	util/GLUtil.cpp \
-	util/Map.cpp \
-	util/MapOverlay.cpp \
-	util/Plot2D.cpp \
-	util/ScenarioLoader.cpp \
-	util/StatCollection.cpp \
-	util/StatUtil.cpp \
-	util/Timer.cpp
+	utils/BitVector.cpp \
+	utils/FPUtil.cpp \
+	utils/GLUtil.cpp \
+	utils/Map.cpp \
+	utils/MapOverlay.cpp \
+	utils/Plot2D.cpp \
+	utils/ScenarioLoader.cpp \
+	utils/StatCollection.cpp \
+	utils/StatUtil.cpp \
+	utils/Timer.cpp
 
