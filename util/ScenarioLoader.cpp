@@ -8,6 +8,7 @@
 
 #include <fstream>
 using std::ifstream;
+using std::ofstream;
 
 #include "ScenarioLoader.h"
 #include <assert.h>
@@ -53,8 +54,30 @@ ScenarioLoader::ScenarioLoader(const char* fname)
     }
   }
   else{
-    printf("Invalid version number. Exiting program\n");
-    assert(0);
+    printf("Invalid version number.\n");
+    //assert(0);
   }
+}
+
+void ScenarioLoader::Save(const char *fname)
+{
+//	strncpy(scenName, fname, 1024);
+	ofstream ofile(fname);
+	
+	float ver = 1.0;
+	ofile<<"version "<<ver<<std::endl;
+	
+	
+	for (unsigned int x = 0; x < experiments.size(); x++)
+	{
+		ofile<<experiments[x].bucket<<"\t"<<experiments[x].map<<"\t"<<experiments[x].scaleX<<"\t";
+		ofile<<experiments[x].scaleY<<"\t"<<experiments[x].startx<<"\t"<<experiments[x].starty<<"\t";
+		ofile<<experiments[x].goalx<<"\t"<<experiments[x].goaly<<"\t"<<experiments[x].distance<<std::endl;
+	}
+}
+
+void ScenarioLoader::AddExperiment(Experiment which)
+{
+	experiments.push_back(which);
 }
 
