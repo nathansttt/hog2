@@ -1269,7 +1269,6 @@ void drawGL(pRecContext pContextInfo, bool swap)
 			// set projection
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
-			
 			glFrustum(pContextInfo->frust[x].left, pContextInfo->frust[x].right,
 								pContextInfo->frust[x].bottom, pContextInfo->frust[x].top,
 								pContextInfo->frust[x].near, pContextInfo->frust[x].far);
@@ -1441,10 +1440,10 @@ static OSStatus handleWindowMouseEvents (EventHandlerCallRef myHandler, EventRef
 					GetEventParameter(event, kEventParamMouseLocation, typeQDPoint,
 														NULL, sizeof( Point ), NULL, &loc );
 					QDGlobalToLocalPoint( GetWindowPort( window ), & loc );
-
-					point3d p = GetOGLPos(loc.h, loc.v);
-//					printf("Mouse down hit (%1.2f, %1.2f, %1.2f) in the world (%d, %d) in window\n",
-//								 p.x, p.y, p.z, (int)location.x, (int)location.y);
+					
+					point3d p = GetOGLPos(pContextInfo, loc.h, loc.v);
+					printf("Mouse down hit (%1.2f, %1.2f, %1.2f) in the world (%d, %d) in window\n",
+								 p.x, p.y, p.z, (int)location.x, (int)location.y);
 					tButtonType bType = kLeftButton;
 					switch (button)
 					{
@@ -1523,7 +1522,7 @@ static OSStatus handleWindowMouseEvents (EventHandlerCallRef myHandler, EventRef
 													NULL, sizeof( Point ), NULL, &loc );
 				QDGlobalToLocalPoint( GetWindowPort( window ), & loc );
 				
-				point3d p = GetOGLPos(loc.h, loc.v);
+				point3d p = GetOGLPos(pContextInfo, loc.h, loc.v);
 //				printf("Mouse down hit (%1.2f, %1.2f, %1.2f) in the world (%d, %d) in window\n",
 //							 p.x, p.y, p.z, (int)location.x, (int)location.y);
 				tButtonType bType = kLeftButton;
@@ -1559,7 +1558,7 @@ static OSStatus handleWindowMouseEvents (EventHandlerCallRef myHandler, EventRef
 														NULL, sizeof( Point ), NULL, &loc );
 					QDGlobalToLocalPoint( GetWindowPort( window ), & loc );
 					
-					point3d p = GetOGLPos(loc.h, loc.v);
+					point3d p = GetOGLPos(pContextInfo, loc.h, loc.v);
 //					printf("Mouse down hit (%1.2f, %1.2f, %1.2f) in the world (%d, %d) in window\n",
 //								 p.x, p.y, p.z, (int)location.x, (int)location.y);
 					tButtonType bType = kLeftButton;
@@ -1688,7 +1687,7 @@ void createNewWindow(void)
 		if (!pContextInfo->timer)
 		{
 			pContextInfo->time = UpTime();
-			InstallEventLoopTimer(GetCurrentEventLoop(), 0, 1/30.0, getTimerUPP (), (void *) window, &pContextInfo->timer);
+			InstallEventLoopTimer(GetCurrentEventLoop(), 0, 1/60.0, getTimerUPP (), (void *) window, &pContextInfo->timer);
 		}
 		HandleWindowEvent(pContextInfo, kWindowCreated);
 	}

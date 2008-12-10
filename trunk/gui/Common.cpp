@@ -31,7 +31,7 @@ static bool const verbose = false;
 
 static unsigned long gNextWindowID = 0;
 char gDefaultMap[1024] = "";
-const recVec gOrigin = { 0.0, 0.0, 0.0 };
+const recVec gOrigin(0.0, 0.0, 0.0);
 
 using namespace std;
 
@@ -475,8 +475,17 @@ void setViewport(pRecContext pContextInfo, int currPort)
 						 val[3]*pContextInfo->globalCamera.viewHeight);
 }
 
-point3d GetOGLPos(int x, int y)
+point3d GetOGLPos(pRecContext pContextInfo, int x, int y)
 {
+	setViewport(pContextInfo, pContextInfo->currPort);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(pContextInfo->frust[pContextInfo->currPort].left, pContextInfo->frust[pContextInfo->currPort].right,
+			  pContextInfo->frust[pContextInfo->currPort].bottom, pContextInfo->frust[pContextInfo->currPort].top,
+			  pContextInfo->frust[pContextInfo->currPort].near, pContextInfo->frust[pContextInfo->currPort].far);
+	// projection matrix already set	
+	updateModelView(pContextInfo, pContextInfo->currPort);
+	
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -486,12 +495,12 @@ point3d GetOGLPos(int x, int y)
 	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
 	glGetDoublev( GL_PROJECTION_MATRIX, projection );
 	glGetIntegerv( GL_VIEWPORT, viewport );
-	
 	winX = (float)x;
 	winY = (float)viewport[3] - (float)y;
 	glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
 	
-	gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+	if (gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ) == GL_FALSE)
+		printf("WARNING: gluUnProject failed\n");
 	
 	return point3d(posX, posY, posZ);
 }
