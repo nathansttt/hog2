@@ -209,7 +209,7 @@ void keyPressed(unsigned char key, int x, int y)
  */
 void mouseMovedButton(int x, int y)
 {
-	point3d p = GetOGLPos(x, y);
+	point3d p = GetOGLPos(pContextInfo, x, y);
 	tButtonType bType = kLeftButton;
 	switch (gCurrButton)
 	{
@@ -247,7 +247,7 @@ void mousePressedButton(int button, int state, int x, int y)
 	
 	//printf("Button = %d\n", button);
 	if (state == GLUT_DOWN) {
-		point3d p = GetOGLPos(x, y);
+		point3d p = GetOGLPos(pContextInfo, x, y);
 		tButtonType bType = kLeftButton;
 		switch (gCurrButton)
 		{
@@ -327,7 +327,7 @@ void mousePressedButton(int button, int state, int x, int y)
 	}
 	// stop trackball, pan, or dolly
 	else {
-		point3d p = GetOGLPos(x, y);
+		point3d p = GetOGLPos(pContextInfo, x, y);
 		tButtonType bType = kLeftButton;
 		switch (gCurrButton)
 		{
