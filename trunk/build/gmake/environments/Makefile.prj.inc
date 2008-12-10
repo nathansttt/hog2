@@ -35,4 +35,5 @@ SRC_CPP = \
 	environments/MNPuzzle.cpp \
 	environments/FlipSide.cpp \
 	environments/WeightedMap2DEnvironment.cpp \
-	environments/TopSpin.cpp	
+	environments/TopSpin.cpp	\
+	environments/RoboticArm.cpp
