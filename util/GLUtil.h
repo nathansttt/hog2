@@ -49,6 +49,7 @@
 
 static const double TWOPI = 6.283185307179586476925287;
 static const double PI = 3.141592653589793238462643;
+static const double PID180 = PI/180; // radian conversion
 static const double PID2 = PI/2; // 90degree
 static const double PID3 = PI/3; // 60degree
 static const double PID4 = PI/4; // 45degree
@@ -61,6 +62,8 @@ static const double ROOT2D2 = 0.7071067811865475;
  */
 class recVec {
 public:
+	recVec() {}
+	recVec(GLdouble x_i, GLdouble y_i, GLdouble z_i) :x(x_i), y(y_i), z(z_i) {}
 	void normalise();
   GLdouble x,y,z;
 };
