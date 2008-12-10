@@ -136,6 +136,12 @@ node *Graph::GetNode(unsigned int num)
   return 0;
 }
 
+edge *Graph::GetEdge(unsigned int num)
+{
+	if (num >=0 && num < _edges.size()) return _edges[num];
+	return 0;
+}
+
 void Graph::AddEdge(edge *e)
 {
   if (e)

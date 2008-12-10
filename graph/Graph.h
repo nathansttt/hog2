@@ -26,8 +26,8 @@
 #include <vector>
 #include <list>
 #include <iostream>
-#include <values.h>
-
+//#include <values.h>
+#define MAXINT INT_MAX
 //#define MAXINT (1<<30)
 //#define MAXLABELS 15
 
@@ -77,7 +77,8 @@ public:
   Graph *cloneAll() const;     // clones everything
 
   int AddNode(node *);
-  node *GetNode(unsigned int num);
+	node *GetNode(unsigned int num);
+	edge *GetEdge(unsigned int num);
   void AddEdge(edge *);
   edge *findDirectedEdge(unsigned int from, unsigned int to);
   edge *FindEdge(unsigned int from, unsigned int to);
