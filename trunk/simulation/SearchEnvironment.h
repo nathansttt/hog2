@@ -44,13 +44,25 @@ public:
 	virtual uint64_t GetStateHash(state &node) = 0;
 	virtual uint64_t GetActionHash(action act) = 0;
 	
-
-	virtual OccupancyInterface<state,action> *GetOccupancyInfo() = 0;
+	virtual double GetPathLength(std::vector<state> &neighbors);
+	
+	virtual OccupancyInterface<state,action> *GetOccupancyInfo() { return 0; }
 
 	virtual void OpenGLDraw(int window) = 0;
 	virtual void OpenGLDraw(int window, state&) = 0;
 	virtual void OpenGLDraw(int window, state&, action&) = 0;
+
 };
 
+template <class state, class action>
+double SearchEnvironment<state,action>::GetPathLength(std::vector<state> &neighbors)
+{
+	double length = 0;
+	for (unsigned int x = 1; x < neighbors.size(); x++)
+	{
+		length += GCost(neighbors[x-1], neighbors[x]);
+	}
+	return length;
+}
 
 #endif
