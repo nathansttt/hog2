@@ -128,7 +128,6 @@ public:
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"AbsMap\n";return oi;}
 protected:
 	MapAbstraction *ma;
-	
 };
 
 typedef UnitSimulation<xyLoc, tDirection, MapEnvironment> UnitMapSimulation;

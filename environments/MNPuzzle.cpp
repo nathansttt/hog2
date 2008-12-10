@@ -8,6 +8,8 @@
  */
 
 #include "MNPuzzle.h"
+#include "Heap.h"
+#include "GraphEnvironment.h"
 #include <map>
 
 MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height)
@@ -106,6 +108,88 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
 
 MNPuzzle::~MNPuzzle()
 {
+}
+
+bool MNPuzzle::GetParity(MNPuzzleState &state)
+{
+//	if q is odd, the invariant is the parity (odd or even) of the number of pairs of pieces in reverse order (the parity of the permutation). For the order of the 15 pieces consider line 2 after line 1, etc., like words on a page.
+//	if q is even, the invariant is the parity of the number of pairs of pieces in reverse order plus the row number of the empty square counting from bottom and starting from 0.
+	int swaps = 0;
+	for (unsigned int x = 0; x < state.puzzle.size(); x++)
+	{
+		if (state.puzzle[x] == 0)
+			continue;
+		for (unsigned int y = x+1; y < state.puzzle.size(); y++)
+		{
+			if (state.puzzle[y] == 0)
+				continue;
+			if (state.puzzle[y] < state.puzzle[x])
+				swaps++;
+		}
+	}
+	if ((state.width%2) == 1)
+	{
+		return swaps%2;
+	}
+	return (swaps+(state.puzzle.size()-state.blank-1)/state.width)%2;
+}
+
+
+Graph *MNPuzzle::GetGraph()
+{
+	Graph *g = new Graph();
+	//Factorial(width*height);
+
+	for (int x = 0; x < 362880; x++)
+	{
+		node *n;
+		g->AddNode(n = new node(""));
+		n->SetLabelF(GraphSearchConstants::kXCoordinate, (32768.0-random()%65536)/32768.0);
+		n->SetLabelF(GraphSearchConstants::kYCoordinate, (32768.0-random()%65536)/32768.0);
+		n->SetLabelF(GraphSearchConstants::kZCoordinate, (32768.0-random()%65536)/32768.0);
+	}
+	for (int x = 0; x < 362880; x++)
+	{
+		MNPuzzleState t(3, 3);
+		GetStateFromHash(t, x);
+		std::vector<slideDir> moves;
+		GetActions(t, moves);
+		for (unsigned int y = 0; y < moves.size(); y++)
+		{
+			ApplyAction(t, moves[y]);
+			uint64_t hash = GetStateHash(t);
+			InvertAction(moves[y]);
+			ApplyAction(t, moves[y]);
+			if (!g->FindEdge(x, hash))
+				g->AddEdge(new edge(x, hash, 1));
+		}
+	}
+	// 362880 states
+	// 2x2 area -- roughly 600x600 states, or distance 1 = 1/600
+//	for (int t = 0; t < 362880; t++)
+//	{
+//		node *n = g->GetNode(t);
+//		neighbor_iterator ni = n->getNeighborIter();
+//		for (long tmp = n->nodeNeighborNext(ni); tmp != -1; tmp = n->nodeNeighborNext(ni))
+//		{
+//			double x, y, z;
+//			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+//			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+//			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+//			
+//			double x1, y1, z1;
+//			node *nb = g->GetNode(tmp);
+//			x1 = nb->GetLabelF(GraphSearchConstants::kXCoordinate);
+//			y1 = nb->GetLabelF(GraphSearchConstants::kYCoordinate);
+//			z1 = nb->GetLabelF(GraphSearchConstants::kZCoordinate);
+//			// now move n to be 1/600 away from nb!
+//			n->SetLabelF(GraphSearchConstants::kXCoordinate, 0.5*x + 0.5*x1);
+//			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.5*y + 0.5*y1);
+//			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0.5*z + 0.5*z1);
+//			
+//		}
+//	}
+	return g;
 }
 
 void MNPuzzle::StoreGoal(MNPuzzleState &s)
@@ -285,6 +369,31 @@ uint64_t MNPuzzle::GetStateHash(MNPuzzleState &state)
 		}
 	}
 	return hashVal;
+}
+
+void MNPuzzle::GetStateFromHash(MNPuzzleState &state, uint64_t hash)
+{
+	std::vector<int> puzzle = state.puzzle;
+	uint64_t hashVal = hash;
+
+	int numEntriesLeft = 1;
+	for (int x = state.puzzle.size()-1; x >= 0; x--)
+	{
+		puzzle[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < state.puzzle.size(); y++)
+		{
+			if (puzzle[y] >= puzzle[x])
+				puzzle[y]++;
+		}
+	}
+
+	state.puzzle = puzzle;
+	for (unsigned int x = 0; x < puzzle.size(); x++)
+		if (puzzle[x] == 0)
+			state.blank = x;
+	
 }
 
 /**
@@ -534,25 +643,101 @@ int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsi
 	return 0;
 }
 
-/**
-Calculates the number of reverses in the state. Used to determine
-the parity of the permutation for proving solvability.
-**/
-unsigned get_num_reverses(MNPuzzleState s) {
+GraphPuzzleDistanceHeuristic::GraphPuzzleDistanceHeuristic(MNPuzzle &mnp, Graph *graph, int count)
+:puzzle(mnp), g(graph)
+{
+	for (int x = 0; x < count /*10*/; x++)
+	{
+		AddHeuristic();
+	}
+}
 
-	unsigned reverses = 0;
-	unsigned puzz_size = s.width*s.height;
-	for(unsigned i = 0; i < puzz_size; i++) {
-		if(s.blank == i)
-			continue;
+void GraphPuzzleDistanceHeuristic::AddHeuristic()
+{
+	node *n = 0;
+	while (1)
+	{
+		n = g->GetRandomNode();
+		graphState loc = n->GetNum();
+		MNPuzzleState s;
+		puzzle.GetStateFromHash(s, loc);
+		if (puzzle.GetParity(s) == 0)
+			break;
+	}
+	
+	std::vector<double> values;
+	GetOptimalDistances(n, values);
+	AddHeuristic(values, n->GetNum());
+}
 
-		for(unsigned j = i + 1; j < puzz_size; j++) {
-			if(s.blank != j && s.puzzle[j] < s.puzzle[i])
-				reverses++;
+double GraphPuzzleDistanceHeuristic::HCost(graphState &state1, graphState &state2)
+{
+	MNPuzzleState a(3, 3), b(3, 3);
+	puzzle.GetStateFromHash(a, state1);
+	puzzle.GetStateFromHash(b, state2);
+	double val = puzzle.HCost(a, b);
+	
+	for (unsigned int i=0; i < heuristics.size(); i++)
+	{
+		double hval = heuristics[i][state1]-heuristics[i][state2];
+		if (hval < 0)
+			hval = -hval;
+		if (fgreater(hval,val))
+			val = hval;
+	}
+	
+	return val;
+}
+
+void GraphPuzzleDistanceHeuristic::AddHeuristic(std::vector<double> &values,
+												 graphState location)
+{
+	heuristics.push_back(values);
+	locations.push_back(location);
+}
+
+
+void GraphPuzzleDistanceHeuristic::GetOptimalDistances(node *n, std::vector<double> &values)
+{
+	values.resize(g->GetNumNodes());
+	for (unsigned int x = 0; x < values.size(); x++)
+		values[x] = -1.0;
+	n->SetLabelF(GraphSearchConstants::kTemporaryLabel, 0.0);
+	n->SetKeyLabel(GraphSearchConstants::kTemporaryLabel);
+	Heap h;
+	h.Add(n);
+	while (!h.Empty())
+	{
+		node *next = (node*)h.Remove();
+		//		printf("Heap size %d, working on node %d cost %f\n", h.size(), next->GetNum(),
+		//			   next->GetLabelF(GraphSearchConstants::kTemporaryLabel));
+		double cost = next->GetLabelF(GraphSearchConstants::kTemporaryLabel);
+		values[next->GetNum()] = next->GetLabelF(GraphSearchConstants::kTemporaryLabel);
+		neighbor_iterator ni = next->getNeighborIter();
+		for (long tmp = next->nodeNeighborNext(ni); tmp != -1; tmp = next->nodeNeighborNext(ni))
+		{
+			if (values[tmp] == -1)
+			{
+				node *nb = g->GetNode(tmp);
+				if (h.IsIn(nb))
+				{
+					if (fgreater(nb->GetLabelF(GraphSearchConstants::kTemporaryLabel),
+								 cost + g->FindEdge(next->GetNum(), tmp)->GetWeight()))
+					{
+						nb->SetLabelF(GraphSearchConstants::kTemporaryLabel,
+									  cost+g->FindEdge(next->GetNum(), tmp)->GetWeight());
+						h.DecreaseKey(nb);
+					}
+				}
+				else {
+					nb->SetKeyLabel(GraphSearchConstants::kTemporaryLabel);
+					nb->SetLabelF(GraphSearchConstants::kTemporaryLabel,
+								  cost+g->FindEdge(next->GetNum(), tmp)->GetWeight());
+					h.Add(nb);
+				}
+			}
 		}
 	}
-
-	return reverses;
 }
 
 /**
@@ -581,25 +766,29 @@ MNPuzzleState random_puzzle_generator(unsigned num_cols, unsigned num_rows) {
 	return new_puzz;
 }
 
-void MNPuzzle::Create_Random_MN_Puzzles(unsigned num_cols, unsigned num_rows, std::vector<MNPuzzleState> &puzzle_vector, unsigned num_puzzles) {
+void MNPuzzle::Create_Random_MN_Puzzles(unsigned num_cols, unsigned num_rows, std::vector<MNPuzzleState> &puzzle_vector, unsigned num_puzzles)
+{
 	std::map<uint64_t, uint64_t> puzzle_map; // used to ensure uniqueness
 
 	MNPuzzle my_puzz(num_cols, num_rows);
 
 	unsigned count = 0;
-	while(count < num_puzzles) {
+	while (count < num_puzzles)
+	{
 		MNPuzzleState next = random_puzzle_generator(num_cols, num_rows);
 		uint64_t next_hash = my_puzz.GetStateHash(next);
 
-		if(puzzle_map.find(next_hash) != puzzle_map.end()) {
+		if (puzzle_map.find(next_hash) != puzzle_map.end())
+		{
 			continue;
 		}
 
-		unsigned reverses = get_num_reverses(next);
+		//unsigned reverses = get_num_reverses(next);
 
 		// checks parity to make sure problem is solvable
-		if((num_cols % 2 == 0 && (reverses + (next.blank/num_cols)) % 2 == 0) || (num_cols % 2 == 1 && reverses % 2 == 0)) {
-
+		//if ((num_cols % 2 == 0 && (reverses + (next.blank/num_cols)) % 2 == 0) || (num_cols % 2 == 1 && reverses % 2 == 0))
+		if (GetParity(next))
+		{
 			puzzle_map[next_hash] = next_hash;
 			puzzle_vector.push_back(next);
 			count++;
