@@ -23,6 +23,7 @@ PROJECTS = \
   shared \
   simulation \
   utils \
+  apps/arm \
   apps/pathsample \
   apps/puzzlesample \
   apps/multiagent \
@@ -50,6 +51,7 @@ PROJECTS_ALL = \
   shared \
   simulation \
   utils \
+  apps/arm \
   apps/pathsample \
   apps/puzzlesample \
   apps/inconsistency \
