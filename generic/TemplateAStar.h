@@ -60,7 +60,7 @@ public:
 		SearchNode(state &curr, state &prev, double _fCost, double _gCost, uint64_t key)
 		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev), hashKey(key){}
 
-		SearchNode(state &curr,uint64_t key)
+		SearchNode(state &curr, uint64_t key)
 		:fCost(0), gCost(0), currNode(curr), prevNode(curr), hashKey(key) {}
 
 		// This probably needs to be fixed. Problem is you can't set the states to 
@@ -105,17 +105,16 @@ public:
 template <class state, class action, class environment>
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { radius = 4.0; stopAfterGoal = true; weight=1; useRadius=true;useOccupancyInfo=true; radEnv = 0;}
+	TemplateAStar() { useBPMX = false; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=true;useOccupancyInfo=true; radEnv = 0;}
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
 
-	void GetPath(environment *env, state& from, state& to, std::vector<action> & thePath) {};
+	void GetPath(environment *, state& , state& , std::vector<action> & ) { assert(false); };
 	
-		typedef OpenClosedList<TemplateAStarUtil::SearchNode<state>, TemplateAStarUtil::SearchNodeHash<state>,
+	typedef OpenClosedList<TemplateAStarUtil::SearchNode<state>, TemplateAStarUtil::SearchNodeHash<state>,
 		TemplateAStarUtil::SearchNodeEqual<state>, TemplateAStarUtil::SearchNodeCompare<state> > PQueue;
-		typedef __gnu_cxx::hash_map<uint64_t, TemplateAStarUtil::SearchNode<state>, Hash64 > NodeLookupTable;
 	
-	typedef __gnu_cxx::hash_map<uint64_t, bool,Hash64 > Corridor;
+	typedef __gnu_cxx::hash_map<uint64_t, TemplateAStarUtil::SearchNode<state>, Hash64 > NodeLookupTable;
 	
 	PQueue openQueue;
 	NodeLookupTable closedList; //openList
@@ -140,12 +139,15 @@ public:
 	void GetClosedListIter(closedList_iterator);
 	bool ClosedListIterNext(closedList_iterator& it, state& next) const;
 	bool GetClosedListGCost(state &val, double &gCost) const;
-		
+
+	void SetUseBPMX(bool use) { useBPMX = use; }
+	bool GetUsingBPMX() { return useBPMX; }
+	
   //state ClosedListIterNext(closedList_iterator&) const;
 	int GetNodesExpanded() { return nodesExpanded; }
 	int GetNodesTouched() { return nodesTouched; }
 	
-	void LogFinalStats(StatCollection *stats) {}
+	void LogFinalStats(StatCollection *) {}
 	
 	void SetRadius(double rad) {radius = rad;}
 	double GetRadius() { return radius; }
@@ -167,12 +169,12 @@ private:
 	long nodesTouched, nodesExpanded;
 	bool GetNextNode(state &next);
 	//state Node();
+	void UpdateClosedNode(environment *env, state& currOpenNode, state& neighbor);
 	void UpdateWeight(environment *env, state& currOpenNode, state& neighbor);
 	void AddToOpenList(environment *env, state& currOpenNode, state& neighbor);
 	
 	std::vector<state> neighbors;
 	environment *env;
-	Corridor eligibleNodes;
 	bool stopAfterGoal;
 
 	double radius; // how far around do we consider other agents?
@@ -180,12 +182,13 @@ private:
 	
 	bool useOccupancyInfo;// = false;
 	bool useRadius;// = false;
+	bool firstRound;
+	bool useBPMX;
 	environment *radEnv;
 };
 
 using namespace TemplateAStarUtil;
 static const bool verbose = false;
-bool firstRound;
 /**
 * Return the name of the algorithm. 
 * @author Nathan Sturtevant
@@ -237,6 +240,7 @@ void TemplateAStar<state,action,environment>::GetPath(environment *_env, state& 
 template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
+	thePath.resize(0);
 	//if(useRadius)
 	//std::cout<<"Using radius\n";
 	firstRound = true;
@@ -253,7 +257,6 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	
 	if (from == to) //assumes that from and to are valid states
 	{
-		thePath.resize(0);
 		return false;
 	}
 
@@ -282,16 +285,16 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	if (openQueue.size() == 0)
 	{
 		thePath.resize(0); // no path found!
-		closedList.clear();
+		//closedList.clear();
 		return true;
 	}
 			
 	// get top of queue
-	if(!GetNextNode(currentOpenNode))
+	if (!GetNextNode(currentOpenNode))
 	{
 		printf("Oh no! No more open nodes!\n");
 	}
-//	std::cout<<"Current open node ";
+	//std::cout << "Current open node " << currentOpenNode << " h-value: " << env->HCost(currentOpenNode, goal) << std::endl;
 	//env->OutputXY(currentOpenNode);
 	//std::cout<<std::endl;
 	if ((stopAfterGoal) && (env->GoalTest(currentOpenNode, goal)))
@@ -309,106 +312,40 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	
  	neighbors.resize(0);
  	env->GetSuccessors(currentOpenNode, neighbors);
-// 	
-// 	bool notthisone = false;
-// 	for(unsigned int x = 0; x < neighbors.size(); x++)
-// 	{
-// 		state neighbor = neighbors[x];
-// 		if(neighbor == start)
-// 			notthisone = true;
-// 	}
 
-// 	if(currentOpenNode == start)
-// 		notthisone = true;
-// 	
-	// If in first round node is added to open list, could still be blocked. Check here. 
-// 	if(notthisone && useOccupancyInfo && env->GetOccupancyInfo() && useRadius &&  env->GetOccupancyInfo()->GetStateOccupied(currentOpenNode))
-// 	{
-// 		//may need to update...something? 
-// 		return false;
-// 	}
-
+	if (useBPMX)
+	{
+		SearchNode<state> currNode = closedList[env->GetStateHash(currentOpenNode)];
+		for (unsigned int x = 0; x < neighbors.size(); x++)
+		{
+			double newh = env->HCost(neighbors[x], goal)-env->GCost(currentOpenNode, neighbors[x]);
+			if (fgreater(newh, currNode.fCost-currNode.gCost))
+				currNode.fCost = currNode.gCost + newh;
+		}
+		closedList[env->GetStateHash(currentOpenNode)].fCost = currNode.fCost;
+	}
+	//printf("Expanding %d\n", currentOpenNode);
+	
 	// iterate over all the children
 	for (unsigned int x = 0; x < neighbors.size(); x++)
 	{
-		
 		nodesTouched++;
 		state neighbor = neighbors[x];
-		 
-		 
-	//	if(useRadius)
-	//		ngcost = env->Distance(start, neighbor);//sqrt(start.x * neighbor.x + start.y * neighbor.y);
-	//	double ngcost = closedList[env->GetStateHash(currentOpenNode)].gCost+env->GCost(currentOpenNode,neighbor);
-		
-		//std::cout<<"Ngcost "<<ngcost<<" radius "<<radius<<std::endl;
-/*		if(useRadius && useOccupancyInfo && env->GetOccupancyInfo() &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)))// && (env->HCost(start, neighbor) < radius))
-  		{
-  			
-  			std::cout<<"neighbor "<<neighbor<<"currnode gcost "<<closedList[env->GetStateHash(currentOpenNode)].gCost<<" ";
- 		
-  			std::cout<<"NGcost "<<ngcost<<std::endl;//in radius not occ\n";
-  		}*/
-		//std::cout<<neighbor<<" ";
-		//env->OutputXY(neighbor);
-// 		if(!(env->GetMap()->canStep(currentOpenNode.x, currentOpenNode.y, neighbor.x, neighbor.y)))
-// 		{	
-// 			std::cout<<" is a bad one\n";
-// 			continue;
-// 		}
-	
 
 		if (closedList.find(env->GetStateHash(neighbor)) != closedList.end())
 		{
-		//	std::cout<<" on closed list\n";
-			continue;
+			UpdateClosedNode(env, currentOpenNode, neighbor);
 		}
 		else if (openQueue.IsIn(SearchNode<state>(neighbor, env->GetStateHash(neighbor))))
 		{
-		//	std::cout<<" on open list - updating weight\n";
-			UpdateWeight(env,currentOpenNode, neighbor);
+			UpdateWeight(env, currentOpenNode, neighbor);
 		}
-//  		else if(useRadius && useOccupancyInfo && env->GetOccupancyInfo())// && (env->HCost(start, neighbor) < radius))
-//  		{
-//  			std::cout<<"currnode gcost "<<closedList[env->GetStateHash(currentOpenNode)].gCost<<std::endl;
-// 		
-//  			std::cout<<"NGcost "<<ngcost<<" ";//in radius not occ\n";
-//  		}
-// 		else if(useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)))
-// 		{
-// 		//	std::cout<<neighbor<<" minus goal test\n";
-// 		}
-
-//HERE
-		else if (/*std::cout<<"HERE\n" &&*/ useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (radEnv->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && ((!(radEnv->GoalTest(neighbor, goal)))))// || (currentOpenNode == start )) )
-	// &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && (!firstRound || ((ngcost < radius)&& !(env->GoalTest(neighbor, goal)))  ))
-		
-		//&& (ngcost < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
-		
-		//(env->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
-		
-		//&& (ngcost < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && !(env->GoalTest(neighbor, goal)))
-		
-		//
-					 //&& ((closedList[env->GetStateHash(currentOpenNode)].gCost+env->GCost(currentOpenNode,neighbor)) < 4))
+		else if (useRadius && useOccupancyInfo && env->GetOccupancyInfo() && (radEnv->HCost(start, neighbor) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbor)) && ((!(radEnv->GoalTest(neighbor, goal)))))// || (currentOpenNode == start )) )
 		{
-			// March 7 - May want to use GCost to neighbour rather than HCost when checking if it's within 
-			// the radius. 
-			
-			
-// 			if(!firstRound && env->GoalTest(neighbor,goal))
-// 				std::cout<<"first round, goal\n";
-			//		std::cout<<start<<" to "<<neighbor<<" "<<radEnv->HCost(start,neighbor)<<std::endl;
-
-			//discardcount++;
-			//std::cout<<neighbor;
-			//std::cout<<" someone's here, and within my radius\n";
-			//std::cout<<start<<" to "<<neighbor<<" "<<env->HCost(start, neighbor)<<" "<<std::endl;
-			//occupied - don't expand - move to the closed list 
 			SearchNode<state> sn(neighbor, env->GetStateHash(neighbor));
 			closedList[env->GetStateHash(neighbor)] = sn;
 		}
 		else {
-	//		std::cout<<" adding to open\n";
 			AddToOpenList(env, currentOpenNode, neighbor);
 		}
 		
@@ -457,6 +394,34 @@ bool TemplateAStar<state,action,environment>::GetNextNode(state &next)
 }
 
 /**
+ * Check and update the weight of a closed node. 
+ * @author Nathan Sturtevant
+ * @date 11/10/08
+ * 
+ * @param currOpenNode The node that's currently being expanded
+ * @param neighbor The node whose weight will be updated
+ */
+template <class state, class action, class environment>
+void TemplateAStar<state,action,environment>::UpdateClosedNode(environment *e, state &currOpenNode, state &neighbor)
+{
+	SearchNode<state> prev = closedList[e->GetStateHash(neighbor)];
+	//openQueue.find(SearchNode<state>(neighbor, e->GetStateHash(neighbor)));
+	SearchNode<state> alt = closedList[e->GetStateHash(currOpenNode)];
+	double edgeWeight = e->GCost(currOpenNode, neighbor);
+	double altCost = alt.gCost+edgeWeight+(prev.fCost-prev.gCost);
+	if (fgreater(prev.fCost, altCost))
+	{
+		//printf("Reopening node %d setting parent to %d - %f vs. %f\n", neighbor, currOpenNode, prev.fCost, altCost);
+		prev.fCost = altCost;
+		prev.gCost = alt.gCost+edgeWeight;
+		prev.prevNode = currOpenNode;
+		closedList.erase(e->GetStateHash(neighbor));
+		assert(closedList.find(e->GetStateHash(neighbor)) == closedList.end());
+		openQueue.Add(prev);
+	}
+}
+
+/**
 * Update the weight of a node. 
 * @author Nathan Sturtevant
 * @date 03/22/06
@@ -465,14 +430,15 @@ bool TemplateAStar<state,action,environment>::GetNextNode(state &next)
 * @param neighbor The node whose weight will be updated
 */
 template <class state, class action, class environment>
-void TemplateAStar<state,action,environment>::UpdateWeight(environment *env, state &currOpenNode, state &neighbor)
+void TemplateAStar<state,action,environment>::UpdateWeight(environment *e, state &currOpenNode, state &neighbor)
 {
-	SearchNode<state> prev = openQueue.find(SearchNode<state>(neighbor, env->GetStateHash(neighbor)));
-	SearchNode<state> alt = closedList[env->GetStateHash(currOpenNode)];
-	double edgeWeight = env->GCost(currOpenNode, neighbor);
+	SearchNode<state> prev = openQueue.find(SearchNode<state>(neighbor, e->GetStateHash(neighbor)));
+	SearchNode<state> alt = closedList[e->GetStateHash(currOpenNode)];
+	double edgeWeight = e->GCost(currOpenNode, neighbor);
 	double altCost = alt.gCost+edgeWeight+(prev.fCost-prev.gCost);
 	if (fgreater(prev.fCost, altCost))
 	{
+		//printf("Resetting node %d setting parent to %d\n", neighbor, currOpenNode);
 		prev.fCost = altCost;
 		prev.gCost = alt.gCost+edgeWeight;
 		prev.prevNode = currOpenNode;
@@ -489,12 +455,13 @@ void TemplateAStar<state,action,environment>::UpdateWeight(environment *env, sta
 * @param neighbor the state to be added to the open list
 */
 template <class state, class action,class environment>
-void TemplateAStar<state, action,environment>::AddToOpenList(environment *env, state &currOpenNode, state &neighbor)
+void TemplateAStar<state, action,environment>::AddToOpenList(environment *e, state &currOpenNode, state &neighbor)
 {
-	double edgeWeight = env->GCost(currOpenNode, neighbor);
-	
-	SearchNode<state> n(neighbor, currOpenNode, closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight+weight*env->HCost(neighbor, goal),
-							 closedList[env->GetStateHash(currOpenNode)].gCost+edgeWeight, env->GetStateHash(neighbor));
+	//printf("Adding node %d setting parent to %d\n", neighbor, currOpenNode);
+	double edgeWeight = e->GCost(currOpenNode, neighbor);
+	double hCost = std::max(weight*e->HCost(neighbor, goal), closedList[e->GetStateHash(currOpenNode)].fCost-closedList[e->GetStateHash(currOpenNode)].gCost-weight*edgeWeight);
+	SearchNode<state> n(neighbor, currOpenNode, closedList[e->GetStateHash(currOpenNode)].gCost+edgeWeight+weight*e->HCost(neighbor, goal),
+							 closedList[e->GetStateHash(currOpenNode)].gCost+edgeWeight, e->GetStateHash(neighbor));
 	
 	openQueue.Add(n);
 	
@@ -510,7 +477,7 @@ void TemplateAStar<state, action,environment>::AddToOpenList(environment *env, s
 */
 template <class state, class action,class environment>
 void TemplateAStar<state, action,environment>::ExtractPathToStart(state &goalNode,
-																			std::vector<state> &thePath)
+																  std::vector<state> &thePath)
 {
 	SearchNode<state> n;
 	if (closedList.find(env->GetStateHash(goalNode)) != closedList.end())
@@ -520,8 +487,16 @@ void TemplateAStar<state, action,environment>::ExtractPathToStart(state &goalNod
 	else n = openQueue.find(SearchNode<state>(goalNode, env->GetStateHash(goalNode)));
 
 	do {
+		//printf("Extracting %d with parent %d\n", n.currNode, n.prevNode);
 		thePath.push_back(n.currNode);
-		n = closedList[env->GetStateHash(n.prevNode)];
+		if (closedList.find(env->GetStateHash(n.prevNode)) != closedList.end())
+		{
+			n = closedList[env->GetStateHash(n.prevNode)];
+		}
+		else {
+			printf("No backward path found!\n");
+			break;
+		}
 	} while (!(n.currNode == n.prevNode));
 	thePath.push_back(n.currNode);
 }
@@ -600,9 +575,9 @@ bool TemplateAStar<state, action,environment>::ClosedListIterNext(closedList_ite
 template <class state, class action, class environment>
 bool TemplateAStar<state, action,environment>::GetClosedListGCost(state &val, double &gCost) const
 {
-	if (closedList.find(val) != closedList.end())
+	if (closedList.find(env->GetStateHash(val)) != closedList.end())
 	{
-		gCost = closedList[val].gCost;
+		gCost = closedList.find(env->GetStateHash(val))->second.gCost;
 		return true;
 	}
 	return false;

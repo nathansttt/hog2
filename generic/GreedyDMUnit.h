@@ -12,6 +12,9 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 		
 		virtual bool MakeMove(environment *env, OccupancyInterface<xyLoc, tDirection> *, SimulationInfo<xyLoc,tDirection,environment> *, tDirection& a)
 		{
+//			if (random()%10)
+//			{ a = kStay; return true; }
+			
 			std::vector<tDirection> directions;
 			directions.push_back(kN);
 			directions.push_back(kNE);

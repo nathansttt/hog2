@@ -339,8 +339,8 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
 		}	*/
 	
 	// Draw the planned path
-// 	if(drawUnit)
-//{
+ 	if ((0)&&(drawUnit))
+	{
 
    		xyLoc current = loc; 
    		xyLoc next;
@@ -350,7 +350,7 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, enviro
    			env->GetNextState(current, moves[i],next);
 				current = next;
 			}	
-			// 	}
+	}
 }
 
 template <class state, class action, class environment>
@@ -427,7 +427,7 @@ template <class state, class action, class environment>
 void GenericPatrolUnit<state,action,environment>::LogFinalStats(StatCollection *sc)
 {
 		//Report per loop
-	for(int i=1; i<=numPatrols; i++)
+	for(int i=1; (i<=numPatrols)&&(i<nodesExpandedPatrols.size()); i++)
 	{
 		char num[8];
  		sprintf(num,"%d",i);
