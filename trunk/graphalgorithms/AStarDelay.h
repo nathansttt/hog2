@@ -39,10 +39,10 @@ namespace AStarDelayUtil
 	class SearchNode {
 	public:
 		SearchNode(double _fCost=0, double _gCost=0, graphState curr=UINT32_MAX, graphState prev=UINT32_MAX)
-		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev),rxp(false) {}
+		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev),isGoal(false) {}
 
 		SearchNode(graphState curr)
-		:fCost(0), gCost(0), currNode(curr), prevNode(curr),rxp(false) {}
+		:fCost(0), gCost(0), currNode(curr), prevNode(curr),isGoal(false) {}
 
 		void copy(double f, double g, graphState curr, graphState prev)
 		{
@@ -56,9 +56,9 @@ namespace AStarDelayUtil
 		double gCost;
 		graphState currNode;
 		graphState prevNode;
-		//bool isGoal;
+		bool isGoal;
 
-		bool rxp;
+		//bool rxp;
 	};
 
 	struct SearchNodeEqual {
@@ -72,10 +72,10 @@ namespace AStarDelayUtil
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
-				//if(i2.isGoal) // always prefer a goal node in tie
-				//	return true;
-				//if(i1.isGoal)
-				//	return false;
+				if(i2.isGoal) // always prefer a goal node in tie
+					return true;
+				if(i1.isGoal)
+					return false;
 				return (fless(i1.gCost, i2.gCost));
 			}
 			return (fgreater(i1.fCost, i2.fCost));
@@ -125,8 +125,11 @@ public:
 	virtual ~AStarDelay() {}
 	void GetPath(GraphEnvironment *env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
-	long GetNodesExpanded() { return nodesExpanded; }
+	long GetNodesExpanded() { return (long)nodesExpanded; }
 	long GetNodesTouched() { return nodesTouched; }
+
+	long GetNodesFirstExpanded() {return closedSize;}
+	long GetNodesMetaExpanded() {return metaexpanded;}
 	long GetNodesReopened() { return nodesReopened; }
 
 	bool InitializeSearch(GraphEnvironment *env, Graph* g, graphState from, graphState to, std::vector<graphState> &thePath);
@@ -150,13 +153,20 @@ public:
 	int fD;
 
 
-	unsigned long tickNewExp;
-	unsigned long tickReExp;
-	unsigned long tickBPMX;
+	//unsigned long tickNewExp;
+	//unsigned long tickReExp;
+	//unsigned long tickBPMX;
 
-	unsigned long nNewExp;
-	unsigned long nReExp;
-	unsigned long nBPMX;
+	//unsigned long nNewExp;
+	//unsigned long nReExp;
+	//unsigned long nBPMX;
+
+	long metaexpanded;
+
+	AStarDelayUtil::PQueue openQueue;
+	AStarDelayUtil::NodeLookupTable closedList; 
+
+	long closedSize;
 
 private:
 	bool DoSingleStep(AStarDelayUtil::SearchNode &topNode,
@@ -188,15 +198,16 @@ private:
 		case D_FOUR:  return 4;
 		case D_LOG2:  return log2(N);
 		case D_SQRT:  return sqrt(N);
+		default: return 2;
 		}
 	}
 
-	long nodesExpanded, nodesTouched, nodesReopened;
+	double nodesExpanded;
+	long nodesTouched, nodesReopened;
 	std::vector<graphState> neighbors;
 	graphState goal, start;
 	GraphEnvironment *env;
-	AStarDelayUtil::PQueue openQueue;
-	AStarDelayUtil::NodeLookupTable closedList; 
+
 	AStarDelayUtil::GQueue delayQueue, fQueue;
 
 	Graph *g; // for OpenGL drawing only

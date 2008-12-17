@@ -54,8 +54,11 @@ void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphStat
 bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath) {
 	env = _env;
 	grp = _g;
-	nodesTouched = nodesExpanded = 0;
+	nodesExpanded = 0;
+	nodesTouched =  0;
 	NodesReopened = 0;
+	metaexpanded = 0;
+	closedSize = 0;
 	reopenings = 0;
 	start = from;
 	goal = to;
@@ -95,8 +98,8 @@ bool Prop::InitializeSearch(GraphEnvironment *_env, Graph *_g, graphState from, 
 		exit(-1);
 	}
 
-	tickNewExp = tickReExp = tickBPMX = 0;
-	nNewExp = nReExp = nBPMX = 0;
+	//tickNewExp = tickReExp = tickBPMX = 0;
+	//nNewExp = nReExp = nBPMX = 0;
 
 	if ((from == UINT32_MAX) || (to == UINT32_MAX) || (from == to))
 	{
@@ -228,15 +231,15 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 	}
 
 	/* step (3) */
-	nodesExpanded++;
+	nodesExpanded += 1;
 	SearchNode topNode = openQueue.Remove();
 	graphState topNodeID = topNode.currNode;
 	closedList[topNodeID] = topNode;
 
-	if(topNode.rxp)
-		nReExp += 1;
-	else
-		nNewExp += 1;
+	//if(topNode.rxp)
+	//	nReExp++;
+	//else
+	//	nNewExp++;
 
 	//tickStart = clock();
 
@@ -256,7 +259,7 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 		return true;
 	}
 
-	tickStart = clock();
+	//tickStart = clock();
 
 	/* step (5), computing gi is delayed */
 	neighbors.resize(0);
@@ -306,7 +309,7 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 		if(mode == NEWMODE)//!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end()) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
-			//n.isGoal = (neighbor==goal);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) {
@@ -348,7 +351,7 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 				neighborNode.copy(f,g,neighbor,topNodeID);  // parent may be changed
 				closedList.erase(neighbor);  // delete from CLOSED
 
-				neighborNode.rxp = true;
+				//neighborNode.rxp = true;
 
 				NodesReopened++;
 
@@ -360,10 +363,10 @@ bool Prop::DoSingleStepA(std::vector<graphState> &thePath) {
 
 	neighbors.clear();
 
-	if(topNode.rxp)
-		tickReExp += clock() - tickStart;
-	else
-		tickNewExp += clock() - tickStart;
+	//if(topNode.rxp)
+	//	tickReExp += clock() - tickStart;
+	//else
+	//	tickNewExp += clock() - tickStart;
 
 	return false;
 }
@@ -382,7 +385,7 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 	}
 
 	/* step (3) */
-	nodesExpanded++;
+	nodesExpanded += 1;
 
 
 	SearchNode topNode;
@@ -406,11 +409,11 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 		}
 	}
 
-	if(topNode.rxp)
-		nReExp += 1;
-	else
-		nNewExp += 1;
-	tickStart = clock();
+	//if(topNode.rxp)
+	//	nReExp++;
+	//else
+	//	nNewExp++;
+	//tickStart = clock();
 
 	graphState topNodeID = topNode.currNode;
 	closedList[topNodeID] = topNode;
@@ -480,7 +483,7 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 		if(mode == NEWMODE)//!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end()) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
-			//n.isGoal = (neighbor==goal);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) {
@@ -524,7 +527,7 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 
 				NodesReopened++;
 
-				neighborNode.rxp = true;
+				//neighborNode.rxp = true;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
@@ -534,10 +537,10 @@ bool Prop::DoSingleStepB(std::vector<graphState> &thePath) {
 
 	neighbors.clear();
 
-	if(topNode.rxp)
-		tickReExp += clock() - tickStart;
-	else
-		tickNewExp += clock() - tickStart;
+	//if(topNode.rxp)
+	//	tickReExp += clock() - tickStart;
+	//else
+	//	tickNewExp += clock() - tickStart;
 
 	return false;
 }
@@ -557,7 +560,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 	}
 
 	/* step (3) */
-	nodesExpanded++;
+	nodesExpanded += 1;
 
 	// select the node to expand
 	SearchNode topNode;
@@ -585,10 +588,10 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 		}
 	}
 
-	if(topNode.rxp)
-		nReExp += 1;
-	else
-		nNewExp += 1;
+	//if(topNode.rxp)
+	//	nReExp++;
+	//else
+	//	nNewExp++;
 	
 	graphState topNodeID = topNode.currNode;
 	closedList[topNodeID] = topNode;
@@ -611,7 +614,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 		return true;
 	}
 
-	tickStart = clock();
+	//tickStart = clock();
 
 	/* step (5), computing gi is delayed */
 	neighbors.resize(0);
@@ -680,7 +683,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 		if(mode == NEWMODE) //!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
-			//n.isGoal = (neighbor==goal);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -736,7 +739,7 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 				closedList.erase(neighbor);  // delete from CLOSED
 				NodesReopened++;
 
-				neighborNode.rxp = true;
+				//neighborNode.rxp = true;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
@@ -758,10 +761,10 @@ bool Prop::DoSingleStepBP(std::vector<graphState> &thePath)
 
 	neighbors.clear();
 
-	if(topNode.rxp)
-		tickReExp += clock() - tickStart;
-	else
-		tickNewExp += clock() - tickStart;
+	//if(topNode.rxp)
+	//	tickReExp += clock() - tickStart;
+	//else
+	//	tickNewExp += clock() - tickStart;
 
 	return false;
 }
@@ -781,7 +784,7 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 	}
 
 	/* step (3) */
-	nodesExpanded++;
+	nodesExpanded += 1;
 
 
 	// select the node to expand
@@ -894,7 +897,7 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 		if(mode == NEWMODE) //!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
-			//n.isGoal = (neighbor==goal);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -1037,7 +1040,7 @@ bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
 
 // for DP
 void Prop::ReverseProp(SearchNode& topNode) {
-	tickStart = clock();
+	//tickStart = clock();
 
 ////////////
 	graphState topNodeID = topNode.currNode;
@@ -1068,17 +1071,18 @@ void Prop::ReverseProp(SearchNode& topNode) {
 		}
 	}
 
-	nBPMX += 1;
-	tickBPMX += clock() - tickStart;
+	//nBPMX++;
+	//tickBPMX += clock() - tickStart;
 
-	nodesExpanded++;
+	metaexpanded += 1; //
+	nodesExpanded += 1;
 	nodesTouched += neighbors.size();
 }
 
 // for BPMX
 void Prop::ReversePropX1(SearchNode& topNode) 
 {
-	tickStart = clock();
+	//tickStart = clock();
 	
 	double maxh = topNode.fCost - topNode.gCost;
 	for(unsigned int x=0;x<neighbors.size();x++) 
@@ -1105,10 +1109,11 @@ void Prop::ReversePropX1(SearchNode& topNode)
 		}
 	}
 
-	nBPMX += 1;
-	tickBPMX += clock() - tickStart;
+	//nBPMX++;
+	//tickBPMX += clock() - tickStart;
 
-	nodesExpanded++;
+	metaexpanded += 1; //
+	nodesExpanded += 1;
 	nodesTouched += neighbors.size();
 
 	topNode.fCost = maxh + topNode.gCost;
@@ -1119,7 +1124,7 @@ void Prop::ReversePropX1(SearchNode& topNode)
 // and DPDLMX
 void Prop::ReversePropX2(SearchNode& topNode) {
 
-	tickStart = clock();
+	//tickStart = clock();
 ////////////
 	graphState topNodeID = topNode.currNode;
 	double currentG = topNode.gCost;
@@ -1150,17 +1155,17 @@ void Prop::ReversePropX2(SearchNode& topNode) {
 				maxh = max(maxh, (neighborNode.fCost - neighborNode.gCost) - edge);
 			}
 			else { // new node
-				neighborNode = delayCache.find(SearchNode(neighbor));
-				if(neighborNode.currNode == neighbor) {
-					double edge = env->GCost(topNodeID, neighbor);
-					double newG = edge + neighborNode.gCost;
-					if(fgreater(currentG, newG)) {
-						currentG = newG;
-						topNode.copy(topNode.fCost - topNode.gCost + newG, newG, topNodeID, neighbor);
-					}
-					maxh = max(maxh, (neighborNode.fCost - neighborNode.gCost) - edge);
-				}
-				else
+				//neighborNode = delayCache.find(SearchNode(neighbor));
+				//if(neighborNode.currNode == neighbor) {
+				//	double edge = env->GCost(topNodeID, neighbor);
+				//	double newG = edge + neighborNode.gCost;
+				//	if(fgreater(currentG, newG)) {
+				//		currentG = newG;
+				//		topNode.copy(topNode.fCost - topNode.gCost + newG, newG, topNodeID, neighbor);
+				//	}
+				//	maxh = max(maxh, (neighborNode.fCost - neighborNode.gCost) - edge);
+				//}
+				//else
 					maxh = max(maxh, env->HCost(neighbor,goal) - env->GCost(topNodeID,neighbor));
 			}
 		}
@@ -1168,10 +1173,11 @@ void Prop::ReversePropX2(SearchNode& topNode) {
 
 	topNode.fCost = maxh + topNode.gCost;
 
-	nBPMX += 1;
-	tickBPMX += clock() - tickStart;
+	//nBPMX++;
+	//tickBPMX += clock() - tickStart;
 
-	nodesExpanded++;
+	metaexpanded += 1; //
+	nodesExpanded += 1;
 	nodesTouched += neighbors.size();
 }
 
@@ -1179,7 +1185,7 @@ void Prop::Broadcast(int level, int levelcount)
 { // we will only enque the newly updated (neighbor) nodes; or neighbor nodes being able to update others
 	NodeLookupTable::iterator iter;
 
-	tickStart = clock();
+	//tickStart = clock();
 
 	for(int i=0;i<levelcount;i++) {
 		graphState front = fifo.front();
@@ -1225,17 +1231,17 @@ void Prop::Broadcast(int level, int levelcount)
 					}
 				}
 				else {
-					neighborNode = delayCache.find(SearchNode(neighbor));
-					if(neighborNode.currNode == neighbor) {
-						double edgeWeight = env->GCost(front,neighbor);
-						double neighborH = neighborNode.fCost - neighborNode.gCost;
+					//neighborNode = delayCache.find(SearchNode(neighbor));
+					//if(neighborNode.currNode == neighbor) {
+					//	double edgeWeight = env->GCost(front,neighbor);
+					//	double neighborH = neighborNode.fCost - neighborNode.gCost;
 
-						if(fgreater(neighborH - edgeWeight, frontH)) {
-							frontH = neighborH - edgeWeight;
-							frontNode.fCost = frontNode.gCost + frontH;
-							fifo.push_back(neighbor); // trick: its neighbors guaranteed been generated
-						}
-					}
+					//	if(fgreater(neighborH - edgeWeight, frontH)) {
+					//		frontH = neighborH - edgeWeight;
+					//		frontNode.fCost = frontNode.gCost + frontH;
+					//		fifo.push_back(neighbor); // trick: its neighbors guaranteed been generated
+					//	}
+					//}
 				}
 			}
 		}
@@ -1286,9 +1292,10 @@ void Prop::Broadcast(int level, int levelcount)
 		}
 	}
 
-	nBPMX += 2;
-	tickBPMX += clock() - tickStart;
+	//nBPMX += 2;
+	//tickBPMX += clock() - tickStart;
 
+	metaexpanded += 2; //
 	nodesExpanded += 2;
 	nodesTouched += 2*levelcount;
 
@@ -1313,17 +1320,17 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 	}
 
 	/* step (3) */
-	nodesExpanded++;
+	nodesExpanded += 1;
 
 	// select the node to expand
 	SearchNode topNode;
-	if(fless(openQueue.top().fCost , F)) 
-	{
-		GetLowestG(topNode);
-		if(verbose)
-			printf("Expanding a node below F.\n");
-	}
-	else 
+	//if(fless(openQueue.top().fCost , F)) 
+	//{
+	//	GetLowestG(topNode);
+	//	if(verbose)
+	//		printf("Expanding a node below F.\n");
+	//}
+	//else 
 	{
 		topNode = openQueue.Remove();
 		
@@ -1337,23 +1344,23 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 		}
 	}
 
-	if(topNode.rxp)
-		nReExp += 1;
-	else
-		nNewExp += 1;
+	//if(topNode.rxp)
+	//	nReExp++;
+	//else
+	//	nNewExp++;
 
-	unsigned long tickTmp = clock();
+	unsigned long tickTmp ;//= clock();
 
 	neighbors.resize(0);
 	env->GetSuccessors(topNode.currNode, neighbors);
 
-	tickGen = clock() - tickTmp;
+	//tickGen = clock() - tickTmp;
 
 	//Categorize(neighbors);
 
 	bool doReverse = false;
 
-	int ichild=0;
+	int ichild = 0;
 
 _REVERSE:
 	// reverseProp() here, top node will be updated inside, so put topnode into closed afterwards
@@ -1364,17 +1371,19 @@ _REVERSE:
 			ReverseProp(topNode);
 
 		// counting supplement
-		if(nodesExpanded%2) //{
-			nodesExpanded++;
+		//if(nodesExpanded%2) {
+		//	nodesExpanded += 1;
 
-			if(topNode.rxp)
-				nReExp += ichild / (float)neighbors.size();
-			else
-				nNewExp += ichild / (float)neighbors.size();
+		//	if(topNode.rxp)
+		//		nReExp++;
+		//	else
+		//		nNewExp++;
 		//}
+
+		//nodesExpanded += 1; //ichild / (double)neighbors.size();
 	}
 
-	tickStart = clock();
+	//tickStart = clock();
 	
 	graphState topNodeID = topNode.currNode;
 	closedList[topNodeID] = topNode;
@@ -1416,7 +1425,8 @@ _REVERSE:
 	//	if(!NextNeighbor(neighborNode, neighbor, mode))
 	//		break;
 	//}
-	for(unsigned int x = 0, ichild=1; x<neighbors.size(); x++,ichild++) 
+	unsigned int x;
+	for( x = 0,ichild=1; x<neighbors.size(); x++,ichild++) 
 	{
 		nodesTouched++;
 
@@ -1464,15 +1474,16 @@ _REVERSE:
 
 		if(bpmxLevel >= 1)
 			if(fgreater(h - edgeWeight , hTop)) {
-				if(topNode.rxp) {
-					tickReExp += clock() - tickStart + tickGen;
-					tickGen = 0;
-				}
-				else {
-					tickNewExp += clock() - tickStart + tickGen;
-					tickGen = 0;
-				}
+				//if(topNode.rxp) {
+				//	tickReExp += clock() - tickStart + tickGen;
+				//	tickGen = 0;
+				//}
+				//else {
+				//	tickNewExp += clock() - tickStart + tickGen;
+				//	tickGen = 0;
+				//}
 
+				topNode.fCost = topNode.gCost + h - edgeWeight; // hack: fix for when heuristic morphing
 				doReverse = true;
 				goto _REVERSE;
 			}
@@ -1486,7 +1497,7 @@ _REVERSE:
 		if(mode == NEWMODE) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
-			//n.isGoal = (neighbor==goal);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -1508,14 +1519,14 @@ _REVERSE:
 				{
 					/* covered by backward H propagation check already */
 					if(fless(neighborNode.gCost + edgeWeight , topNode.gCost)) {
-						if(topNode.rxp) {
-							tickReExp += clock() - tickStart + tickGen;
-							tickGen = 0;
-						}
-						else {
-							tickNewExp += clock() - tickStart + tickGen;
-							tickGen = 0;
-						}
+						//if(topNode.rxp) {
+						//	tickReExp += clock() - tickStart + tickGen;
+						//	tickGen = 0;
+						//}
+						//else {
+						//	tickNewExp += clock() - tickStart + tickGen;
+						//	tickGen = 0;
+						//}
 
 						doReverse = true;
 						goto _REVERSE;
@@ -1543,14 +1554,14 @@ _REVERSE:
 				{
 					if(fless(neighborNode.gCost + edgeWeight , topNode.gCost)) {
 
-						if(topNode.rxp) {
-							tickReExp += clock() - tickStart + tickGen;
-							tickGen = 0;
-						}
-						else {
-							tickNewExp += clock() - tickStart + tickGen;
-							tickGen = 0;
-						}
+						//if(topNode.rxp) {
+						//	tickReExp += clock() - tickStart + tickGen;
+						//	tickGen = 0;
+						//}
+						//else {
+						//	tickNewExp += clock() - tickStart + tickGen;
+						//	tickGen = 0;
+						//}
 
 						doReverse = true;
 						goto _REVERSE;
@@ -1571,7 +1582,7 @@ _REVERSE:
 				closedList.erase(neighbor);  // delete from CLOSED
 				NodesReopened++;
 
-				neighborNode.rxp = true;
+				//neighborNode.rxp = true;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
@@ -1594,12 +1605,12 @@ _REVERSE:
 
 	neighbors.clear();
 
-	if(topNode.rxp) {
-		tickReExp += clock() - tickStart + tickGen;
-	}
-	else {
-		tickNewExp += clock() - tickStart + tickGen;
-	}
+	//if(topNode.rxp) {
+	//	tickReExp += clock() - tickStart + tickGen;
+	//}
+	//else {
+	//	tickNewExp += clock() - tickStart + tickGen;
+	//}
 
 	return false;
 }
@@ -1618,7 +1629,7 @@ bool Prop::DoSingleStepBPMX(std::vector<graphState> &thePath)
 	}
 
 	/* step (3) */
-	nodesExpanded++;
+	nodesExpanded += 1;
 
 	// select the node to expand
 	SearchNode topNode;
@@ -1642,40 +1653,42 @@ bool Prop::DoSingleStepBPMX(std::vector<graphState> &thePath)
 		}
 	}
 
-	if(topNode.rxp)
-		nReExp += 1;
-	else
-		nNewExp += 1;
+	//if(topNode.rxp)
+	//	nReExp++;
+	//else
+	//	nNewExp++;
 
-	unsigned long tickTmp = clock();
+	unsigned long tickTmp;// = clock();
 
 	/* step (5), computing gi is delayed */
 	neighbors.resize(0);
 	env->GetSuccessors(topNode.currNode, neighbors);
 
-	tickGen = clock() - tickTmp;
+	//tickGen = clock() - tickTmp;
 
 	bool doBPMX = false;
-
-	int ichild=0;
 	//Categorize(neighbors);
+	int ichild = 0;
+
 _BPMX:
 
 	if(doBPMX) {
 		ReversePropX1(topNode);
 
 		// counting supplement
-		if(nodesExpanded%2) //{
-			nodesExpanded++;
+		//if(nodesExpanded%2) {
+		//	nodesExpanded += 1;
 
-			if(topNode.rxp)
-				nReExp += ichild / (float)neighbors.size();
-			else
-				nNewExp += ichild / (float)neighbors.size();
-		// }
+		//	if(topNode.rxp)
+		//		nReExp++;
+		//	else
+		//		nNewExp++;
+		//}
+
+		//nodesExpanded += 1; //ichild / (double)neighbors.size();
 	}
 
-	tickStart = clock();
+	//tickStart = clock();
 
 	// topnode may be updated in ReverseProp, so put to closed afterwards
 	graphState topNodeID = topNode.currNode;
@@ -1712,7 +1725,8 @@ _BPMX:
 
 		//if(!NextNeighbor(neighborNode, neighbor, mode))
 		//	break;
-	for(unsigned int x = 0,ichild=1; x<neighbors.size(); x++,ichild++) 
+	unsigned int x;
+	for(x = 0,ichild=1; x<neighbors.size(); x++,ichild++) 
 	{
 		nodesTouched++;
 
@@ -1751,16 +1765,17 @@ _BPMX:
 				printf("Improving h of node %ld by Mero rule (a), %lf->%lf\n",neighbor,h_tmp,h);
 		}
 
-		if(h - edgeWeight > hTop) {
-			if(topNode.rxp) {
-				tickReExp += clock() - tickStart + tickGen;
-				tickGen = 0;
-			}
-			else {
-				tickNewExp += clock() - tickStart + tickGen;
-				tickGen = 0;
-			}
+		if(fgreater(h - edgeWeight , hTop)) {
+			//if(topNode.rxp) {
+			//	tickReExp += clock() - tickStart + tickGen;
+			//	tickGen = 0;
+			//}
+			//else {
+			//	tickNewExp += clock() - tickStart + tickGen;
+			//	tickGen = 0;
+			//}
 
+			topNode.fCost = topNode.gCost + h - edgeWeight; // hack: fix for when heuristic morphing
 			doBPMX = true;
 			goto _BPMX;
 		}
@@ -1774,7 +1789,7 @@ _BPMX:
 		if(mode == NEWMODE) //!openQueue.IsIn(SearchNode(neighbor)) && closedList.find(neighbor) == closedList.end() ) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
-			//n.isGoal = (neighbor==goal);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -1834,7 +1849,7 @@ _BPMX:
 				closedList.erase(neighbor);  // delete from CLOSED
 				NodesReopened++;
 
-				neighborNode.rxp = true;
+				//neighborNode.rxp = true;
 
 				openQueue.Add(neighborNode); // add to OPEN
 			}
@@ -1860,10 +1875,10 @@ _BPMX:
 		Broadcast(1,fifo.size()); // (level, levelcount)
 	}
 
-	if(topNode.rxp)
-		tickReExp += clock() - tickStart + tickGen;
-	else
-		tickNewExp += clock() - tickStart + tickGen;
+	//if(topNode.rxp)
+	//	tickReExp += clock() - tickStart + tickGen;
+	//else
+	//	tickNewExp += clock() - tickStart + tickGen;
 
 	return false;
 }
@@ -1891,7 +1906,7 @@ bool Prop::DoSingleStepDPDLMX(std::vector<graphState> &thePath)
 	
 
 	/* step (3) */
-	nodesExpanded++;
+	nodesExpanded += 1;
 
 	// select the node to expand
 	// this is where delay comes into play
@@ -1964,19 +1979,21 @@ bool Prop::DoSingleStepDPDLMX(std::vector<graphState> &thePath)
 
 	bool doReverse = false;
 
-	int ichild=0;
+	int ichild = 0;
 
 _REVERSE:
 	// reverseProp() here, top node will be updated inside, so put topnode into closed afterwards
 	if(doReverse) {
-		if(bpmxLevel >= 1)
+		if(bpmxLevel >= 1) 
 			ReversePropX2(topNode); 
 		else
 			ReverseProp(topNode);
 
 		// counting supplement
-		if(nodesExpanded%2)
-			nodesExpanded++;
+		//if(nodesExpanded%2)
+		//	nodesExpanded += 1;
+		
+		//nodesExpanded += 1; //ichild /(double)neighbors.size();
 	}
 	
 	graphState topNodeID = topNode.currNode;
@@ -2020,7 +2037,8 @@ _REVERSE:
 	//	if(!NextNeighbor(neighborNode, neighbor, mode))
 	//		break;
 	//}
-	for(unsigned int x = 0,ichild=0; x<neighbors.size(); x++,ichild++) 
+	unsigned int x ;
+	for( x = 0,ichild=1; x<neighbors.size(); x++,ichild++) 
 	{
 		nodesTouched++;
 
@@ -2072,6 +2090,7 @@ _REVERSE:
 
 		if(bpmxLevel >= 1)
 			if(fgreater(h - edgeWeight , hTop)) {
+				topNode.fCost = topNode.gCost + h - edgeWeight; // hack: fix for when heuristic morphing
 				doReverse = true;
 				goto _REVERSE;
 			}
@@ -2085,7 +2104,7 @@ _REVERSE:
 		if(mode == NEWMODE) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
-			//n.isGoal = (neighbor==goal);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -2206,7 +2225,7 @@ bool Prop::DoSingleStepDPMX(std::vector<graphState> &thePath)
 	}
 
 	/* step (3) */
-	nodesExpanded++;
+	nodesExpanded += 1;
 
 	// select the node to expand
 	SearchNode topNode;
@@ -2237,6 +2256,8 @@ bool Prop::DoSingleStepDPMX(std::vector<graphState> &thePath)
 
 	// reverseProp() here, top node will be updated inside, so put topnode into closed afterwards
 	ReversePropX2(topNode);
+
+	//nodesExpanded += 1;
 	
 	graphState topNodeID = topNode.currNode;
 	closedList[topNodeID] = topNode;
@@ -2326,7 +2347,7 @@ bool Prop::DoSingleStepDPMX(std::vector<graphState> &thePath)
 		if(mode == NEWMODE) 
 		{
 			SearchNode n(f,g,neighbor,topNodeID);
-			//n.isGoal = (neighbor==goal);
+			n.isGoal = (neighbor==goal);
 			openQueue.Add(n);
 
 			if(verbose) 
@@ -2408,6 +2429,8 @@ void Prop::ExtractPathToStart(graphState goalNode, std::vector<graphState> &theP
 {
 	SearchNode n;
 	NodeLookupTable::iterator iter;
+
+	closedSize = closedList.size();
 
 	if (closedList.find(goalNode) != closedList.end())
 	{
