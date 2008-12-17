@@ -18,11 +18,15 @@
 #include "Graph.h"
 #include "GLUtil.h"
 
+#ifndef UINT32_MAX
+#define UINT32_MAX        4294967295U
+#endif
+
 typedef unsigned long graphState;
 
 class graphMove {
 public:
-	graphMove() :from(-1), to(-1) {}
+	graphMove() :from(UINT32_MAX), to(UINT32_MAX) {}
 	graphMove(uint16_t f, uint16_t t) :from(f), to(t) {}
 	uint16_t from, to;
 };
@@ -37,11 +41,9 @@ namespace GraphSearchConstants
 		kYCoordinate = 1,
 		kZCoordinate = 2,
 		kHCost = 3, // this is relative to a single goal
-		// wasted space here, but it keeps us consistent with the
-		// map abstraction
-		kMapX = 9,
-		kMapY = 10,
-		kTemporaryLabel = 11
+		kMapX = 4,
+		kMapY = 5,
+		kTemporaryLabel = 6
 	};
 
 	const double kStraightEdgeCost = 1.0;
@@ -93,9 +95,7 @@ public:
 
 		double a = ((x1>x2)?(x1-x2):(x2-x1));
 		double b = ((y1>y2)?(y1-y2):(y2-y1));
-		double result = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
-		//printf("GraphMap (%d, %d) to (%d, %d) is %f\n", x1, y1, x2, y2, result);
-		return result;
+		return (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 	}
 private:
 	Map *m;
@@ -115,6 +115,55 @@ private:
 	Graph *g;
 	std::vector<std::vector<double> > heuristics;
 	std::vector<graphState> locations;
+};
+
+class GraphMapPerfectHeuristic : public GraphHeuristic {
+public:
+	GraphMapPerfectHeuristic(Map *map, Graph *graph):m(map), g(graph)
+	{
+		fillProbTable();
+	}
+	double HCost(graphState &state1, graphState &state2)
+	{ // warning: in this implementation HCost(s1,s2) != HCost(s2,s1)
+		int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
+		int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
+		int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
+		int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
+		if(probTable[int(state1)])
+			return GetOctileDistance(x1-x2, y1-y2);
+		else
+			return 0;
+	}
+	~GraphMapPerfectHeuristic() 
+	{
+		delete probTable;
+	}
+	static double prob;
+private:
+	double GetOctileDistance(double dx, double dy) 
+	{
+		dx = fabs(dx);
+		dy = fabs(dy);
+
+		if(dx > dy)
+			return dx-dy + sqrt(2)*dy;
+		else
+			return dy-dx + sqrt(2)*dx;
+	}
+	void fillProbTable() 
+	{
+		int size = m->getMapWidth() * m->getMapHeight();
+		probTable = (bool*)malloc( size );
+		for(int i=0;i<size;i++) {
+			if(drand48() < prob)
+				probTable[i] = 1;
+			else
+				probTable[i] = 0;
+		}
+	}
+	Map *m;
+	Graph *g;
+	bool* probTable;
 };
 
 class GraphEnvironment : public SearchEnvironment<graphState, graphMove> {
@@ -139,7 +188,6 @@ public:
 	virtual void OpenGLDraw(int window);
 	virtual void OpenGLDraw(int window, graphState &s);
 	virtual void OpenGLDraw(int window, graphState &s, graphMove &gm);
-	Graph *GetGraph() { return g; };
 protected:
 	bool directed;
 	Graph *g;

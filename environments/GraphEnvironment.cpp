@@ -10,18 +10,18 @@
 #include "GraphEnvironment.h"
 #include "GLUtil.h"
 #include "Heap.h"
-#include "FloydWarshall.h"
 
 using namespace GraphSearchConstants;
 
-int GraphMapInconsistentHeuristic::hmode=2;
+int GraphMapInconsistentHeuristic::hmode=1;
 int GraphMapInconsistentHeuristic::HN=10;
 
+double GraphMapPerfectHeuristic::prob=0.5;
 
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 :g(_g), h(gh)
 {
- 	directed = false;
+ 	directed = false;//true;
 }
 
 //GraphEnvironment::GraphEnvironment(Map *m)
@@ -35,8 +35,8 @@ GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 GraphEnvironment::~GraphEnvironment()
 {
 	// delete g; ??
-	//	delete g;
-//	delete h;
+	delete g;
+	delete h;
 }
 
 void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors)
@@ -72,30 +72,11 @@ void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &a
 {
 	actions.resize(0);
 	node *n = g->GetNode(stateID);
-
-	if(n == 0) {
-		return;
-	}
-
-	if (directed)
+	edge_iterator ei = n->getOutgoingEdgeIter();
+	for (edge *e = n->edgeIterNextOutgoing(ei); e; e = n->edgeIterNextOutgoing(ei))
 	{
-		edge_iterator ei = n->getOutgoingEdgeIter();
-		for (edge *e = n->edgeIterNextOutgoing(ei); e; e = n->edgeIterNextOutgoing(ei))
-		{
-			actions.push_back(graphMove(e->getFrom(),e->getTo()));
-		}
+		actions.push_back(graphMove(e->getFrom(), e->getTo()));
 	}
-	else {
-		edge_iterator ei = n->getEdgeIter();
-		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
-		{
-			if(stateID != e->getTo())
-				actions.push_back(graphMove(e->getFrom(),e->getTo()));
-			else
-				actions.push_back(graphMove(e->getTo(),e->getFrom()));
-		}
-	}
-
 }
 
 graphMove GraphEnvironment::GetAction(graphState &s1, graphState &s2)
@@ -136,8 +117,6 @@ double GraphEnvironment::GCost(graphState &, graphMove &move)
 double GraphEnvironment::GCost(graphState &state1, graphState &state2)
 {
 	edge *e = g->FindEdge(state1, state2);
-	if (!e)
-		return -1000.0;
 	assert(e);
 	return e->GetWeight();
 }
@@ -507,29 +486,14 @@ namespace GraphSearchConstants {
 GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *graph)
 :m(map), g(graph)
 {
-	std::vector<std::vector<double> > values;
-	FloydWarshall(graph, values);
-	std::vector<int> randomizer;
-	randomizer.resize(values.size());
-	for (int x = 0; x < values.size(); x++)
-		randomizer[x] = x;
-	for (int x = values.size(); x > 0; x--)
+	for (int x = 0; x < HN /*10*/; x++)
 	{
-		int tmp = randomizer[x-1];
-		int switcher = random()%x;
-		randomizer[x-1] = randomizer[switcher];
-		randomizer[switcher] = tmp;
+		node *n = g->GetRandomNode();
+		graphState loc = n->GetNum();
+		std::vector<double> values;
+		GetOptimalDistances(n, values);
+		AddHeuristic(values, loc);
 	}
-	for (int x = 0; x < values.size(); x++)
-		AddHeuristic(values[randomizer[x]], x);
-//	for (int x = 0; x < HN /*10*/; x++)
-//	{
-//		node *n = g->GetRandomNode();
-//		graphState loc = n->GetNum();
-//		std::vector<double> values;
-//		GetOptimalDistances(n, values);
-//		AddHeuristic(values, loc);
-//	}
 } 
 
 double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &state2)
@@ -543,11 +507,11 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 	double b = ((y1>y2)?(y1-y2):(y2-y1));
 	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 
-	if (hmode == 0)
+	if(hmode == 0)
 		return val;
 
 	//for (unsigned int x = 0; x < heuristics.size(); x++)
-	if (hmode == 1) {
+	if(hmode == 1) {
 		int x = (x1+x2+y1+y2)%heuristics.size();
 		{
 			double hval = heuristics[x][state1]-heuristics[x][state2];
@@ -556,13 +520,12 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 				val = hval;
 		}
 	}
-	else if (hmode == 2) { // hmode == 2, taking the max
-		for (unsigned int i = 0; i < heuristics.size() && i < HN; i++)
-		{
+	else if(hmode == 2) { // hmode == 2, taking the max
+		for(unsigned int i=0;i<heuristics.size();i++) {
 			double hval = heuristics[i][state1]-heuristics[i][state2];
-			if (hval < 0)
+			if(hval < 0)
 				hval = -hval;
-			if (fgreater(hval,val))
+			if(fgreater(hval,val))
 				val = hval;
 		}
 	}
@@ -633,3 +596,6 @@ void GraphMapInconsistentHeuristic::GetOptimalDistances(node *n, std::vector<dou
 		}
 	}
 }
+
+
+

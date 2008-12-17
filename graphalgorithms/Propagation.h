@@ -46,10 +46,10 @@ namespace PropUtil
 		//:fCost(0),gCost(0),currNode((graphState)-1),prevNode((graphState)-1),lastExpanded(0),expansions(0),threshold(1) {}
 
 		SearchNode(double _fCost=0, double _gCost=0, graphState curr=UINT32_MAX, graphState prev=UINT32_MAX)
-		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev), rxp(false) {}
+		:fCost(_fCost), gCost(_gCost), currNode(curr), prevNode(prev), isGoal(false) {}
 
 		SearchNode(graphState curr)
-		:fCost(0), gCost(0), currNode(curr), prevNode(curr), rxp(false) {}
+		:fCost(0), gCost(0), currNode(curr), prevNode(curr), isGoal(false) {}
 
 
 		void copy(double f, double g, graphState curr, graphState prev) {
@@ -64,14 +64,9 @@ namespace PropUtil
 		graphState currNode;
 		graphState prevNode;
 
-		// for delay algorithm (A'?)
-		//long lastExpanded;
-		//long expansions;
-		//long threshold; // = lastExpanded + 2^expansions
+		bool isGoal; // is it goal?
 
-		//bool isGoal; // is it goal?
-
-		bool rxp;
+		//bool rxp;
 	};
 
 	struct SearchNodeEX {
@@ -107,11 +102,11 @@ namespace PropUtil
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
-				//if(i2.isGoal) // always prefer a goal node in tie
-				//	return true;
-				//if(i1.isGoal)
-				//	return false;
-				return (fless(i1.gCost, i2.gCost));
+				if(i2.isGoal) // always prefer a goal node in tie
+					return true;
+				if(i1.isGoal)
+					return false;
+				return fless(i1.gCost, i2.gCost); // favor larger g
 			}
 			return (fgreater(i1.fCost, i2.fCost));
 		} 
@@ -451,8 +446,11 @@ public:
 	virtual ~Prop() {}
 	void GetPath(GraphEnvironment *env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
-	long GetNodesExpanded() { return nodesExpanded; }
+	long GetNodesExpanded() { return (long)nodesExpanded; }
 	long GetNodesTouched() { return nodesTouched; }
+
+	long GetNodesFirstExpanded() {return closedSize;}
+	long GetNodesMetaExpanded() {return metaexpanded;}
 	long GetNodesReopened() {return NodesReopened;}
 
 	bool InitializeSearch(GraphEnvironment *env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath);
@@ -506,24 +504,31 @@ public:
 
 	int bpmxLevel;
 
-	unsigned long tickNewExp;
-	unsigned long tickReExp;
-	unsigned long tickBPMX;
+	//unsigned long tickNewExp;
+	//unsigned long tickReExp;
+	//unsigned long tickBPMX;
 
-	unsigned long nNewExp;
-	unsigned long nReExp;
-	unsigned long nBPMX;
+	//unsigned long nNewExp;
+	//unsigned long nReExp;
+	//unsigned long nBPMX;
+
+	long metaexpanded;  // count reverse propagations in bpmx / dp
+
+	PropUtil::PQueue openQueue;
+	PropUtil::NodeLookupTable closedList; 
+
+	long closedSize;
 
 private:
 	
 	double F;
-	long nodesExpanded, nodesTouched;
+	double  nodesExpanded;
+	long nodesTouched;
 	std::vector<graphState> neighbors;
 	//std::deque<PropUtil::SearchNode> bfsQueue;
 	graphState goal, start;
 	GraphEnvironment *env;
-	PropUtil::PQueue openQueue;
-	PropUtil::NodeLookupTable closedList; 
+	
 	PropUtil::GQueue FCache;
 	PropUtil::GQueue delayCache; // 
 	int reopenings;
