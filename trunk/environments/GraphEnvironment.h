@@ -125,12 +125,14 @@ public:
 	}
 	double HCost(graphState &state1, graphState &state2)
 	{ // warning: in this implementation HCost(s1,s2) != HCost(s2,s1)
-		int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
-		int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
-		int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
-		int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
-		if(probTable[int(state1)])
+
+		if(probTable[int(state1)]) {
+			int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
+			int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
+			int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
+			int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
 			return GetOctileDistance(x1-x2, y1-y2);
+		}
 		else
 			return 0;
 	}
