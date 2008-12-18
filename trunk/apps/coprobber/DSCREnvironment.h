@@ -55,6 +55,13 @@ class DSCREnvironment {
 	virtual double CopGCost( CRState &s, state &n );
 	virtual double CopGCost( CRState &s, CRState &n ) { return CopGCost( s, n[1] ); };
 
+	// heuristc distance between two states in the graph/map
+	// assumes, that all transition costs are 1
+	// note: if used with graphs, use MyGraphHeuristic within the GraphEnvironment
+	// if used with maps, we implemented a version ourselfs
+	virtual double HCost( state &s1, state &s2 );
+
+
 	protected:
 
 	// dijkstra algorithm for successor generation for the cops
@@ -158,9 +165,11 @@ double DSCREnvironment<state,action>::CopGCost( CRState&, state& ) {
 	return 1.;
 };
 
-
-
-
+// \see DSCREnvironment.h
+template<>
+double DSCREnvironment<xyLoc,tDirection>::HCost( xyLoc &s1, xyLoc &s2 );
+template<>
+double DSCREnvironment<graphState,graphMove>::HCost( graphState &s1, graphState &s2 );
 
 template<class state, class action>
 void DSCREnvironment<state,action>::Dijkstra( state &s, unsigned int &steps, std::vector<state> &neighbors ) {
