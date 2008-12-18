@@ -29,6 +29,7 @@
 #include "DSRMAStar.h"
 #include "DSDijkstra_MemOptim.h"
 #include "DSCover.h"
+#include "DSHeuristicGreedy.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -684,6 +685,37 @@ int main(int argc, char* argv[])
 
 
 
+	// DSHeuristicGreedy
+	Map *m;
+	xyLoc pc, pr;
+	graphState pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pc, pr, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pc.x, pc.y );
+	printf( "robber position: %d,%d\n", pr.x, pr.y );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	MyGraphMapHeuristic *gh = new MyGraphMapHeuristic( m, g );
+	GraphEnvironment *env = new GraphEnvironment( g, gh );
+	env->SetDirected( true );
+
+	DSHeuristicGreedy<graphState,graphMove> *dshg = new DSHeuristicGreedy<graphState,graphMove>( env, true, 1 );
+
+	pos_robber = m->getNodeNum( pr.x, pr.y );
+	pos_cop    = m->getNodeNum( pc.x, pc.y );
+	printf( "next move for the robber: %lu\n", dshg->MakeMove( pos_robber, pos_cop, false ) );
+	printf( "next move for the cop: %lu\n", dshg->MakeMove( pos_robber, pos_cop, true ) );
+
+	delete dshg;
+	delete env;
+	delete gh;
+	delete g;
+	delete m;
+
+
+
 /*
 // problem set generation
 	char map_file[20];
@@ -1172,7 +1204,7 @@ int main(int argc, char* argv[])
 
 
 
-
+/*
 	// Code for MaxMin approximation quality measurements
 	FILE *fhandler = NULL, *foutput = NULL;
 	unsigned int cop_speed = 2;
@@ -1332,7 +1364,7 @@ int main(int argc, char* argv[])
 	}
 	fclose( fhandler );
 	fclose( foutput );
-
+*/
 
 	return 0;
 }
