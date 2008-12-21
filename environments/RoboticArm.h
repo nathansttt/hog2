@@ -95,6 +95,9 @@ public:
 	RoboticArm(int DOF, double armLength, double tolerance = 0.01);
 	virtual ~RoboticArm();
 
+	double GetTolerance() const { return tolerance; }
+	void GetTipPosition( armAngles &s, double &x, double &y );
+
 	void AddObstacle(line2d obs) { obstacles.push_back(obs); }
 	void GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighbors);
 	void GetActions(armAngles &nodeID, std::vector<armRotations> &actions);
@@ -104,8 +107,8 @@ public:
 	virtual bool InvertAction(armRotations &a);
 	
 	virtual double HCost(armAngles &node1, armAngles &node2);
-	virtual double GCost(armAngles &node1, armAngles &node2);
-	virtual double GCost(armAngles &node1, armRotations &act);
+	virtual double GCost(armAngles &node1, armAngles &node2) { return 1; }
+	virtual double GCost(armAngles &node1, armRotations &act) { return 1; }
 	bool GoalTest(armAngles &node, armAngles &goal);
 	uint64_t GetStateHash(armAngles &node);
 	uint64_t GetActionHash(armRotations act);
@@ -117,15 +120,28 @@ public:
 	virtual void OpenGLDraw(int, armAngles &l, GLfloat r, GLfloat g, GLfloat b);
 	
 	virtual void GetNextState(armAngles &currents, armRotations dir, armAngles &news);
+
+	bool LegalState(armAngles &a);
+
+
+	void GenerateRandomHeuristic( const armAngles &sampleArm );
+	int GenerateHeuristic( const armAngles &sampleArm, armAngles &goal );
+	int GenerateMaxDistHeuristics( const armAngles &sampleArm,
+				       const int numHeuristics );
+
+	// only works if one of the GenerateXXXHeuristic functions has
+	// succeeded.  Returns true if the position is guaranteed to
+	// be valid.  Returns false if the position is either unvalid,
+	// or possibly unvalid
+	bool ValidGoalPosition( double goalX, double goalY );
 private:
 	void DrawLine(line2d l);
-	bool LegalState(armAngles &a);
 	bool LegalArmConfig(armAngles &a);
 	void GenerateLineSegments(armAngles &a, std::vector<line2d> &armSegments);
 
 	void GenerateCPDB();
-	double armLength, tolerance;
 	int DOF;
+	double armLength, tolerance;
 	std::vector<std::vector<bool> > legals;
 	bool m_TableComplete;
 	double GetSin(int angle);
@@ -135,6 +151,62 @@ private:
 	std::vector<double> cosTable;
 	std::vector<line2d> obstacles;
 	std::vector<line2d> armSegments;
+
+	std::vector<uint16_t *> distancesTables;
+	std::vector<uint16_t *> minTipDistancesTables;
+	std::vector<uint16_t *> maxTipDistancesTables;
+	std::vector<uint16_t> tablesNumArms;
+
+
+	// convert an arm configuration into an index
+	uint64_t ArmAnglesIndex( const armAngles &arm );
+	uint64_t NumArmAnglesIndices( const armAngles &arm ) const {
+	  return 1 << ( 9 * arm.GetNumArms() );
+	}
+
+	// convert a tip position into an index
+	int TipPositionIndex( const double x, const double y,
+			      const double minX, const double minY,
+			      const double width );
+	int NumTipPositionIndices() const {
+	  int count = (int)ceil( 2.0 / GetTolerance() );
+	  return count * count;
+	}
+
+	// write/read a binary representation of a configuration
+	// DOES NOT WRITE/READ THE ARM LENGTHS!
+	int WriteArmAngles(FILE *file, armAngles &a);
+	int ReadArmAngles(FILE *file, armAngles &a);
+
+	void UpdateTipDistances( armAngles &arm, uint16_t distance,
+				 uint16_t *minTipDistances,
+				 uint16_t *maxTipDistances );
+
+	// common subroutine for all the different heuristic
+	// generation functions
+	int GenerateHeuristicSub( const armAngles &sampleArm, const bool quiet,
+				  armAngles *goals, const int numGoals,
+				  uint16_t *distances,
+				  uint16_t *minTipDistances,
+				  uint16_t *maxTipDistances,
+				  armAngles &lastAdded );
+	// function needed for GenerateHeuristic
+	// given a file curFile of the frontier of positions at depth
+	// curDistance, generates a file of the positions at curDistance+1
+	// uses and updates distances[] to avoid re-visiting positions
+	// if XXXTipDistances are not NULL, it will update XXXTipDistances
+	// to be the min/maximum distance for all positions with that
+	// tip position
+	uint64_t GenerateNextDepth( FILE *curFile, FILE *nextFile,
+				    uint16_t curDistance, uint16_t *distances,
+				    uint16_t *minTipDistances,
+				    uint16_t *maxTipDistances,
+				    armAngles &lastAdded );
+
+	// use a heuristic table
+	uint16_t UseHeuristic( armAngles &arm, double goalX, double goalY,
+			       uint16_t *distances, uint16_t *minTipDistances,
+			       uint16_t *maxTipDistances );
 };
 
 //typedef UnitSimulation<armAngles, armRotations, MapEnvironment> UnitMapSimulation;
