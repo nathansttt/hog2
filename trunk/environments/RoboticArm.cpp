@@ -126,13 +126,11 @@ int armAngles::GetAngle(int which) const
 
 void armAngles::SetAngle(int which, int value)
 {
-	value-=value&0x1;
-	uint64_t mask = 0x3FFll<<(10*which);
-	mask = ~mask;
-	uint64_t val = (uint64_t)(value&0x3FF);
-	val = val<<(10*which);
-	angles = (angles&(mask));
-	angles |= val;
+	value %= 1024; if( value < 0 ) { value += 1024; }
+	value -= value & 1;
+	uint64_t mask = 1023ll<<(10*which);
+	uint64_t val = ((uint64_t)value)<<(10*which);
+	angles = (angles&~mask)|val;
 }
 
 int armAngles::GetNumArms() const
@@ -189,6 +187,15 @@ RoboticArm::RoboticArm(int dof, double armlength, double fTolerance)
 
 RoboticArm::~RoboticArm()
 {
+}
+
+void RoboticArm::GetTipPosition( armAngles &s, double &x, double &y )
+{
+	std::vector<line2d> armSegments;
+	GenerateLineSegments( s, armSegments );
+	recVec a = armSegments.back().end;
+	x = a.x;
+	y = a.y;
 }
 
 void RoboticArm::GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighbors)
@@ -268,8 +275,9 @@ armRotations RoboticArm::GetAction(armAngles &s1, armAngles &s2)
 void RoboticArm::ApplyAction(armAngles &s, armRotations dir)
 {
 	armAngles newState = s;
-	for (int x = 0; x < newState.GetNumArms(); x++)
+	for (int x = 0; x < newState.GetNumArms(); x++) {
 		newState.SetAngle(x, newState.GetAngle(x)+2*dir.GetRotation(x));
+	}
 	//if (LegalState(newState))
 	s = newState;
 }
@@ -283,18 +291,37 @@ bool RoboticArm::InvertAction(armRotations &a)
 
 double RoboticArm::HCost(armAngles &node1, armAngles &node2)
 {
-//	if (node1.IsGoalState()) return HCost(node2, node1);
-//	assert(node2.IsGoalState());
-//
-//	std::vector<line2d> armSegments1;
-//	GenerateLineSegments(node1, armSegments1);
-//	recVec a = armSegments1.back().end;
-//	double x, y;
-//	node2.GetGoal(x, y);
-//	double actDistance = sqrt((x-a.x)*(x-a.x)+(y-a.y)*(y-a.y));
-//	double movementAmount = (node1.GetNumArms()*armLength*sin(TWOPI*4.0/1024.0));
-//	return actDistance / movementAmount;
+	double h;
 
+	if (node1.IsGoalState()) return HCost(node2, node1);
+	assert(node2.IsGoalState());
+
+	std::vector<line2d> armSegments1;
+	GenerateLineSegments(node1, armSegments1);
+	recVec a = armSegments1.back().end;
+	double x, y;
+	node2.GetGoal(x, y);
+	double actDistance = sqrt((x-a.x)*(x-a.x)+(y-a.y)*(y-a.y));
+	double movementAmount = (node1.GetNumArms()*armLength*sin(TWOPI*4.0/1024.0));
+
+	h = actDistance / movementAmount;
+
+	uint16_t tableH;
+	for( unsigned i = 0; i < distancesTables.size(); ++i ) {
+		if( node1.GetNumArms() == tablesNumArms[ i ] ) {
+			tableH = UseHeuristic( node1, x, y,
+					       distancesTables[ i ],
+					       minTipDistancesTables[ i ],
+					       maxTipDistancesTables[ i ] );
+			if( (double)tableH > h ) {
+				h = (double)tableH;
+			}
+		}
+	}
+
+	return h;
+
+#if 0
 	recVec a, b;
 	if (node1.IsGoalState())
 		node1.GetGoal(a.x, a.y);
@@ -310,8 +337,10 @@ double RoboticArm::HCost(armAngles &node1, armAngles &node2)
 		b = armSegments.back().end;
 	}
 	return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
+#endif
 }
 
+#if 0
 double RoboticArm::GCost(armAngles &node1, armAngles &node2)
 {
 	recVec a, b;
@@ -330,13 +359,16 @@ double RoboticArm::GCost(armAngles &node1, armAngles &node2)
 	}
 	return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
 }
+#endif
 
+#if 0
 double RoboticArm::GCost(armAngles &node1, armRotations &act)
 {
 	armAngles node2;
 	GetNextState(node1, act, node2);
 	return GCost(node1, node2);
 }
+#endif
 
 bool RoboticArm::GoalTest(armAngles &node, armAngles &goal)
 {
@@ -347,7 +379,8 @@ bool RoboticArm::GoalTest(armAngles &node, armAngles &goal)
 	a = armSegments.back().end;
 	double x, y;
 	goal.GetGoal(x, y);
-	return (fabs(x-a.x) < tolerance && fabs(y-a.y) < tolerance);
+	return x-a.x <= tolerance && a.x-x < tolerance
+	  && y-a.y <= tolerance && a.y-y < tolerance;
 }
 
 uint64_t RoboticArm::GetStateHash(armAngles &node)
@@ -549,4 +582,436 @@ void RoboticArm::GenerateCPDB()
 		}
 	}
 	m_TableComplete = true;
+}
+
+
+uint64_t RoboticArm::ArmAnglesIndex( const armAngles &arm )
+{
+	uint64_t idx;
+	int s;
+
+	idx = 0;
+	for( s = 0; s < arm.GetNumArms(); ++s ) {
+		idx <<= 9;
+		idx |= arm.GetAngle( s ) >> 1;
+	}
+
+	return idx;
+}
+
+int RoboticArm::TipPositionIndex( const double x, const double y,
+				  const double minX, const double minY,
+				  const double width )
+{
+	int idx;
+
+	// if we had a guarantee that width was a multiple of
+	// tolerance, we could do a bunch of simplification
+
+	idx = (int)floor( ( y - minY ) / tolerance );
+	idx *= (int)floor( width / tolerance );
+	idx += (int)floor( ( x - minX ) / tolerance );
+
+	return idx;
+}
+
+int RoboticArm::WriteArmAngles(FILE *file, armAngles &a)
+{
+	int s;
+	int16_t v;
+
+	v = a.GetNumArms();
+	if( fwrite( &v, sizeof( v ), 1, file ) < 1 ) {
+		return 0;
+	}
+	for( s = 0; s < a.GetNumArms(); ++s ) {
+		v = a.GetAngle( s );
+		if( fwrite( &v, sizeof( v ), 1, file ) < 1 ) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int RoboticArm::ReadArmAngles(FILE *file, armAngles &a)
+{
+	armAngles angles;
+	int s;
+	int16_t v;
+
+	if( fread( &v, sizeof( v ), 1, file ) < 1 ) {
+		return 0;
+	}
+	angles.SetNumArms( v );
+	for( s = 0; s < angles.GetNumArms(); ++s ) {
+		if( fread( &v, sizeof( v ), 1, file ) < 1 ) {
+			return 0;
+		}
+		angles.SetAngle( s, v );
+	}
+
+	a = angles;
+	return 1;
+}
+
+void RoboticArm::UpdateTipDistances( armAngles &arm, uint16_t distance,
+				     uint16_t *minTipDistances,
+				     uint16_t *maxTipDistances )
+{
+	int idx;
+	double x, y;
+
+	GetTipPosition( arm, x, y );
+	idx = TipPositionIndex( x, y, -1.0, -1.0, 2.0 );
+	if( distance < minTipDistances[ idx ] ) {
+	  minTipDistances[ idx ] = distance;
+	}
+	if( distance > maxTipDistances[ idx ] ) {
+	  maxTipDistances[ idx ] = distance;
+	}
+}
+
+// this works because of two things
+// a) clockwise and counterclockwise are each others inverses
+// and both actions are (potentially) legal moves for every arm segment
+// b) action costs are uniform, so all children which have not
+// been examined are in the next frontier
+// returns the number of states in nextFile
+uint64_t RoboticArm::GenerateNextDepth( FILE *curFile, FILE *nextFile,
+					uint16_t curDistance,
+					uint16_t *distances,
+					uint16_t *minTipDistances,
+					uint16_t *maxTipDistances,
+					armAngles &lastAdded )
+{
+	uint64_t count = 0, idx;
+	unsigned i;
+	armAngles arm;
+	std::vector<armRotations> actions;
+
+	while( ReadArmAngles( curFile, arm ) ) {
+		GetActions( arm, actions );
+		for( i = 0; i < actions.size(); ++i ) {
+			armAngles child = arm;
+			ApplyAction( child, actions[ i ] );
+std::cout << "state " << arm << " has child " << child << std::endl;
+
+			idx = ArmAnglesIndex( child );
+			if( distances[ idx ]
+			    > curDistance + 1 ) {
+				// new arm configuration
+assert( distances[ i ] == 65534 );
+
+				distances[ idx ] = curDistance + 1;
+				WriteArmAngles( nextFile, child );
+				if( minTipDistances ) {
+				  UpdateTipDistances( arm, curDistance + 1,
+						      minTipDistances,
+						      maxTipDistances );
+				}
+				++count;
+			}
+		}
+	}
+
+	lastAdded = arm;
+
+	return count;
+}
+
+
+/* returns 1 if goal will generate a reasonable heuristic, 0 otherwise */
+int RoboticArm::GenerateHeuristicSub( const armAngles &sampleArm,
+				      const bool quiet,
+				      armAngles *goals, const int numGoals,
+				      uint16_t *distances,
+				      uint16_t *minTipDistances,
+				      uint16_t *maxTipDistances,
+				      armAngles &lastAdded )
+{
+	uint64_t count, i, total;
+	int numArms = sampleArm.GetNumArms(), segment, g;
+	uint16_t distance;
+	armAngles arm;
+	FILE *curFile, *nextFile;
+
+	arm.SetNumArms( numArms );
+
+	count = NumArmAnglesIndices( arm );
+	for( i = 0; i < count; ++i ) {
+		distances[ i ] = 65535;
+	}
+
+	count = NumTipPositionIndices();
+	for( i = 0; i < count; ++i ) {
+		minTipDistances[ i ] = 65535;
+		maxTipDistances[ i ] = 0;
+	}
+
+	nextFile = tmpfile();
+	assert( nextFile != NULL );
+
+	count = 0;
+	total = 0;
+
+	if( !quiet ) {
+		printf( "populating depth 0\n" );
+	}
+	for( segment = 0; segment < numArms; ++segment ) {
+		arm.SetAngle( segment, 0 );
+	}
+	while( 1 ) {
+		if( LegalState( arm ) ) {
+		  ++total;
+i = ArmAnglesIndex( arm );
+assert( distances[ i ] == 65535 );
+distances[ i ] = 65534;
+
+		  for( g = 0; g < numGoals; ++g ) {
+		    if( GoalTest( arm, goals[ g ] ) ) {
+		      // new distance 0 (goal) arm configuration
+
+		      distances[ ArmAnglesIndex( arm ) ] = 0;
+		      WriteArmAngles( nextFile, arm );
+		      UpdateTipDistances( arm, 0, minTipDistances,
+					  maxTipDistances );
+		      ++count;
+		      break;
+		    }
+		  }
+		}
+
+		// next configuration
+		segment = 0;
+		do {
+			armRotations action;
+			action.SetRotation( segment, kRotateCW );
+			ApplyAction( arm, action );
+			if( arm.GetAngle( segment ) != 0 ) {
+				break;
+			}
+		} while( ++segment < numArms );
+		if( segment == numArms ) {
+			// tried all configurations
+			break;
+		}
+	}
+
+	printf( "%lu legal states\n", total );
+
+	if( !count ) {
+	  fclose( nextFile );
+	  return 0;
+	}
+
+	distance = 0;
+	total = 0;
+	do {
+		total += count;
+		if( !quiet ) {
+			printf( "%lu states at distance %u\n",
+				count, distance );
+		}
+		curFile = nextFile;
+		rewind( curFile );
+		nextFile = tmpfile();
+
+		count = GenerateNextDepth( curFile, nextFile, distance,
+					   distances, minTipDistances,
+					   maxTipDistances, lastAdded );
+
+		++distance;
+		fclose( curFile );
+	} while( count );
+	fclose( nextFile );
+
+	if( !quiet ) {
+		printf( "%lu total states\n", total );
+	}
+
+	// there seems to be a small disconnected subspace
+	// so make sure goal doesn't correspond to this subspace!
+	if( distances[ ArmAnglesIndex( sampleArm ) ] == 65535 ) {
+		// sample arm not reachable!
+		return 0;
+	}
+
+	return 1;
+}
+
+/* this function generates a table-based heuristic function for
+   the current environment */
+void RoboticArm::GenerateRandomHeuristic( const armAngles &sampleArm )
+{
+	uint16_t *distances, *minTipDistances, *maxTipDistances;
+	armAngles goal, last;
+
+	distances = new uint16_t[ NumArmAnglesIndices( sampleArm ) ];
+	minTipDistances = new uint16_t[ NumTipPositionIndices() ];
+	maxTipDistances = new uint16_t[ NumTipPositionIndices() ];
+
+	do {
+		goal.SetGoal( (double)random()/(double)RAND_MAX * 2.0 - 1.0,
+			      (double)random()/(double)RAND_MAX * 2.0 - 1.0 );
+	} while( !GenerateHeuristicSub( sampleArm, false, &goal, 1, distances,
+					minTipDistances, maxTipDistances,
+					last ) );
+
+	distancesTables.push_back( distances );
+	minTipDistancesTables.push_back( minTipDistances );
+	maxTipDistancesTables.push_back( maxTipDistances );
+	tablesNumArms.push_back( sampleArm.GetNumArms() );
+}
+
+/* this function generates a table-based heuristic function for
+   the current environment */
+int RoboticArm::GenerateHeuristic( const armAngles &sampleArm,
+				   armAngles &goal )
+{
+	uint16_t *distances, *minTipDistances, *maxTipDistances;
+	armAngles last;
+
+	distances = new uint16_t[ NumArmAnglesIndices( sampleArm ) ];
+	minTipDistances = new uint16_t[ NumTipPositionIndices() ];
+	maxTipDistances = new uint16_t[ NumTipPositionIndices() ];
+
+	if( !GenerateHeuristicSub( sampleArm, false, &goal, 1, distances,
+				   minTipDistances, maxTipDistances, last ) ) {
+		delete[] maxTipDistances;
+		delete[] minTipDistances;
+		delete[] distances;
+		return 0;
+	}
+
+	distancesTables.push_back( distances );
+	minTipDistancesTables.push_back( minTipDistances );
+	maxTipDistancesTables.push_back( maxTipDistances );
+	tablesNumArms.push_back( sampleArm.GetNumArms() );
+
+	return 1;
+}
+
+/* this function generates a table-based heuristic function for
+   the current environment */
+int RoboticArm::GenerateMaxDistHeuristics( const armAngles &sampleArm,
+					   const int numHeuristics )
+{
+	int i, ret;
+	uint16_t *distances, *minTipDistances, *maxTipDistances;
+	armAngles goals[ numHeuristics ], last;
+	double x, y;
+
+	last = sampleArm;
+	GetTipPosition( last, x, y );
+	last.SetGoal( x, y );
+	for( i = 0; i < numHeuristics; ++i ) {
+		distances = new uint16_t[ NumArmAnglesIndices( sampleArm ) ];
+		minTipDistances = new uint16_t[ NumTipPositionIndices() ];
+		maxTipDistances = new uint16_t[ NumTipPositionIndices() ];
+
+		printf( "generating next goal position\n" );
+		if( i ) {
+		  ret = GenerateHeuristicSub( sampleArm, true, goals, i,
+					      distances, minTipDistances,
+					      maxTipDistances, goals[ i ] );
+		} else {
+		  ret = GenerateHeuristicSub( sampleArm, true, &last, 1,
+					      distances, minTipDistances,
+					      maxTipDistances, goals[ i ] );
+		}
+		if( !ret ) {
+			delete[] maxTipDistances;
+			delete[] minTipDistances;
+			delete[] distances;
+			return i;
+		}
+		GetTipPosition( goals[ i ], x, y );
+		printf( "new goal position: (%lf,%lf)\n", x, y );
+		goals[ i ].SetGoal( x, y );
+
+
+		if( !GenerateHeuristicSub( sampleArm, false, &goals[ i ], 1,
+					   distances, minTipDistances,
+					   maxTipDistances, last ) ) {
+			delete[] maxTipDistances;
+			delete[] minTipDistances;
+			delete[] distances;
+			return i;
+		}
+
+		distancesTables.push_back( distances );
+		minTipDistancesTables.push_back( minTipDistances );
+		maxTipDistancesTables.push_back( maxTipDistances );
+		tablesNumArms.push_back( sampleArm.GetNumArms() );
+	}
+
+	return 1;
+}
+
+uint16_t RoboticArm::UseHeuristic( armAngles &arm,
+				   double goalX, double goalY,
+				   uint16_t *distances,
+				   uint16_t *minTipDistances,
+				   uint16_t *maxTipDistances )
+{
+	int32_t mind, maxd, t;	// 32 bits because of the subtraction below
+	int i, j, index;
+	double x, y;
+
+	mind = 65535;
+	maxd = 0;
+	for( y = goalY - tolerance, i = 0; i < 3; y += tolerance, ++i ) {
+	  for( x = goalX - tolerance, j = 0; j < 3; x += tolerance, ++j ) {
+	    index =  TipPositionIndex( x, y, -1.0, -1.0, 2.0 );
+	    if( minTipDistances[ index ] < mind ) {
+	      mind = minTipDistances[ index ];
+	    }
+	    if( maxTipDistances[ index ] > maxd ) {
+	      maxd = maxTipDistances[ index ];
+	    }
+	  }
+	}
+
+	t = distances[ ArmAnglesIndex( arm ) ];
+//printf( "dist(s->g)=%u - max(dist(c->g))=%u\n", (unsigned)t, (unsigned)maxd );
+//printf( "min(dist(c->g))=%u - dist(s->g)=%u\n", (unsigned)mind, (unsigned)t );
+	maxd = t - maxd;
+	mind = mind - t;
+	if( mind > maxd ) {
+	  maxd = mind;
+	}
+	if( maxd < 0 ) {
+	  maxd = 0;
+	}
+
+//if( maxd > 0 ) printf( "%u\n", (unsigned)maxd );
+
+	return maxd;
+}
+
+bool RoboticArm::ValidGoalPosition( double goalX, double goalY )
+{
+	int i, j, index;
+	double x, y;
+
+	if( tablesNumArms.size() == 0 ) {
+		// no tables to use, can't prove anything
+		return false;
+	}
+
+	for( y = goalY - tolerance, i = 0; i < 3; y += tolerance, ++i ) {
+	  for( x = goalX - tolerance, j = 0; j < 3; x += tolerance, ++j ) {
+	    index =  TipPositionIndex( x, y, -1.0, -1.0, 2.0 );
+	    if( minTipDistancesTables[ 0 ][ index ]
+		> maxTipDistancesTables[ 0 ][ index ] ) {
+		// given one unreachable square, there's a possibility
+		// that even if the rest are reachable, they're
+		// only reachable because of states that are
+		// actually further than tolerance away from (x,y)
+		return false;
+	    }
+	  }
+	}
+
+	return true;
 }
