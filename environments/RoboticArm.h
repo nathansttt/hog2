@@ -122,7 +122,7 @@ public:
 	virtual void GetNextState(armAngles &currents, armRotations dir, armAngles &news);
 
 	bool LegalState(armAngles &a);
-
+	void GenerateLegalStateTable( armAngles &legalArm );
 
 	void GenerateRandomHeuristic( const armAngles &sampleArm );
 	int GenerateHeuristic( const armAngles &sampleArm, armAngles &goal );
@@ -151,6 +151,8 @@ private:
 	std::vector<double> cosTable;
 	std::vector<line2d> obstacles;
 	std::vector<line2d> armSegments;
+
+	uint8_t *legalStateTable;
 
 	std::vector<uint16_t *> distancesTables;
 	std::vector<uint16_t *> minTipDistancesTables;
