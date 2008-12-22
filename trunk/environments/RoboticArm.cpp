@@ -181,6 +181,7 @@ RoboticArm::RoboticArm(int dof, double armlength, double fTolerance)
 :DOF(dof), armLength(armlength), tolerance(fTolerance)
 {
 	m_TableComplete = false;
+	legalStateTable = NULL;
 	BuildSinCosTables();
 	GenerateCPDB();
 }
@@ -468,6 +469,16 @@ void RoboticArm::GetNextState(armAngles &currents, armRotations dir, armAngles &
 
 bool RoboticArm::LegalState(armAngles &a)
 {
+	if( legalStateTable != NULL ) {
+		uint64_t idx;
+
+		idx = ArmAnglesIndex( a );
+		if( legalStateTable[ idx >> 3 ]  & ( 1 << ( idx & 7 ) ) ) {
+			return true;
+		}
+		return false;
+	}
+
 	GenerateLineSegments(a, armSegments);
 	for (unsigned int x = 0; x < armSegments.size(); x++)
 	{
@@ -694,18 +705,16 @@ uint64_t RoboticArm::GenerateNextDepth( FILE *curFile, FILE *nextFile,
 		for( i = 0; i < actions.size(); ++i ) {
 			armAngles child = arm;
 			ApplyAction( child, actions[ i ] );
-std::cout << "state " << arm << " has child " << child << std::endl;
 
 			idx = ArmAnglesIndex( child );
 			if( distances[ idx ]
 			    > curDistance + 1 ) {
 				// new arm configuration
-assert( distances[ i ] == 65534 );
 
 				distances[ idx ] = curDistance + 1;
 				WriteArmAngles( nextFile, child );
 				if( minTipDistances ) {
-				  UpdateTipDistances( arm, curDistance + 1,
+				  UpdateTipDistances( child, curDistance + 1,
 						      minTipDistances,
 						      maxTipDistances );
 				}
@@ -742,10 +751,12 @@ int RoboticArm::GenerateHeuristicSub( const armAngles &sampleArm,
 		distances[ i ] = 65535;
 	}
 
-	count = NumTipPositionIndices();
-	for( i = 0; i < count; ++i ) {
-		minTipDistances[ i ] = 65535;
-		maxTipDistances[ i ] = 0;
+	if( minTipDistances ) {
+		count = NumTipPositionIndices();
+		for( i = 0; i < count; ++i ) {
+			minTipDistances[ i ] = 65535;
+			maxTipDistances[ i ] = 0;
+		}
 	}
 
 	nextFile = tmpfile();
@@ -763,9 +774,6 @@ int RoboticArm::GenerateHeuristicSub( const armAngles &sampleArm,
 	while( 1 ) {
 		if( LegalState( arm ) ) {
 		  ++total;
-i = ArmAnglesIndex( arm );
-assert( distances[ i ] == 65535 );
-distances[ i ] = 65534;
 
 		  for( g = 0; g < numGoals; ++g ) {
 		    if( GoalTest( arm, goals[ g ] ) ) {
@@ -829,7 +837,7 @@ distances[ i ] = 65534;
 		printf( "%lu total states\n", total );
 	}
 
-	// there seems to be a small disconnected subspace
+	// there are a number of small disconnected subspaces,
 	// so make sure goal doesn't correspond to this subspace!
 	if( distances[ ArmAnglesIndex( sampleArm ) ] == 65535 ) {
 		// sample arm not reachable!
@@ -945,7 +953,7 @@ int RoboticArm::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 		tablesNumArms.push_back( sampleArm.GetNumArms() );
 	}
 
-	return 1;
+	return i;
 }
 
 uint16_t RoboticArm::UseHeuristic( armAngles &arm,
@@ -1014,4 +1022,55 @@ bool RoboticArm::ValidGoalPosition( double goalX, double goalY )
 	}
 
 	return true;
+}
+
+void RoboticArm::GenerateLegalStateTable( armAngles &legalArm )
+{
+	uint64_t count, i;
+	uint16_t *distances, distance;
+	uint8_t *lst;
+	armAngles arm, lastAdded;
+	FILE *curFile, *nextFile;
+
+	printf( "generating legal state table\n" );
+
+	count = NumArmAnglesIndices( legalArm );
+
+	lst = new uint8_t[ ( count + 7 ) >> 3 ];
+	distances = new uint16_t[ count ];
+	for( i = 0; i < count; ++i ) {
+		distances[ i ] = 65535;
+	}
+
+	nextFile = tmpfile();
+	assert( nextFile != NULL );
+
+	distances[ ArmAnglesIndex( legalArm ) ] = 0;
+	WriteArmAngles( nextFile, legalArm );
+
+	distance = 0;
+	do {
+		curFile = nextFile;
+		rewind( curFile );
+		nextFile = tmpfile();
+
+		i = GenerateNextDepth( curFile, nextFile, distance,
+				       distances, NULL, NULL, lastAdded );
+
+		++distance;
+		fclose( curFile );
+	} while( i );
+	fclose( nextFile );
+	printf( "done: maximum distance of %d from chosen state\n",
+		(int)distance );
+
+	memset( lst, 0, ( count + 7 ) >> 3 );
+	for( i = 0; i < count; ++i ) {
+		if( distances[ i ] < 65535 ) {
+			lst[ i >> 3 ] |= 1 << ( i & 7 );
+		}
+	}
+
+	legalStateTable = lst;
+	delete[] distances;
 }

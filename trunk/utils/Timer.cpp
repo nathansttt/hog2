@@ -36,9 +36,11 @@ void Timer::startTimer()
 {
 #ifdef OS_MAC
 	startTime = UpTime();
-#else
+#elif defined( TIMER_USE_CYCLE_COUNTER )
 	CycleCounter c;
 	startTime = c.count();
+#else
+	gettimeofday( &startTime, NULL );
 #endif
 }
 
@@ -86,11 +88,18 @@ double Timer::endTimer()
   uint64_t nanosecs = UnsignedWideToUInt64(diff);
   //cout << nanosecs << " ns elapsed (" << (double)nanosecs/1000000.0 << " ms)" << endl;
   return elapsedTime = (double)(nanosecs/1000000000.0);
-#else
+#elif defined( TIMER_USE_CYCLE_COUNTER )
 	Timer::CycleCounter c;
   double diffTime = (double)(c.count() - startTime);
   const static double ClocksPerSecond = getCPUSpeed() * 1000000.0;
 	elapsedTime = diffTime / ClocksPerSecond;
   return elapsedTime;
+#else
+  struct timeval stopTime;
+
+  gettimeofday( &stopTime, NULL );
+  uint64_t microsecs = stopTime.tv_sec - startTime.tv_sec;
+  microsecs = microsecs * 1000000 + stopTime.tv_usec - startTime.tv_usec;
+  return (double)microsecs / 1000000.0;
 #endif
 }

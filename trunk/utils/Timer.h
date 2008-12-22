@@ -31,11 +31,17 @@
 #ifdef OS_MAC
 #include <Carbon/Carbon.h>
 #undef check
+#else
+#include <sys/time.h>
+#endif
+
+#ifndef OS_MAC
+//#define TIMER_USE_CYCLE_COUNTER
 #endif
 
 class Timer {
 
-#ifndef OS_MAC
+#if !defined( OS_MAC ) && defined( TIMER_USE_CYCLE_COUNTER )
 
 struct CycleCounter {
 public:
@@ -62,9 +68,11 @@ public:
 private:
 #ifdef OS_MAC
   AbsoluteTime startTime;
-#else
+#elif defined( TIMER_USE_CYCLE_COUNTER )
   // clock_t startTime;
   uint64_t startTime;
+#else
+  struct timeval startTime;
 #endif		
 
 	double elapsedTime;
