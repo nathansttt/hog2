@@ -47,20 +47,28 @@ class DSCREnvironment {
 
 	// termination criteria
 	virtual bool GoalTest( CRState &s );
+	virtual bool GoalTest( state &s1, state &s2 );
 	virtual double TerminalCost( CRState &s );
+	virtual double TerminalCost( state &s1, state &s2 );
 
 	// transition costs
-	virtual double RobberGCost( CRState &s, state &n );
-	virtual double RobberGCost( CRState &s, CRState &n ) { return RobberGCost( s, n[0] ); };
-	virtual double CopGCost( CRState &s, state &n );
-	virtual double CopGCost( CRState &s, CRState &n ) { return CopGCost( s, n[1] ); };
+	virtual double RobberGCost( state &s, state &n );
+	virtual double RobberGCost( CRState &s, state &n ) {return RobberGCost(s[1],n);};
+	virtual double RobberGCost( CRState &s, CRState &n ) {return RobberGCost(s[0], n[0]);};
+	virtual double CopGCost( state &s, state &n );
+	virtual double CopGCost( CRState &s, state &n ) {return CopGCost(s[1],n);};
+	virtual double CopGCost( CRState &s, CRState &n ) {return CopGCost(s[1],n[1]);};
 
 	// heuristc distance between two states in the graph/map
 	// assumes, that all transition costs are 1
-	// note: if used with graphs, use MyGraphHeuristic within the GraphEnvironment
-	// if used with maps, we implemented a version ourselfs
+	// note: if used with graphs, use MaximumNormGraphMapHeuristic within the GraphEnvironment
+	// if used with maps, we implemented a version ourself
 	virtual double HCost( state &s1, state &s2 );
 
+	virtual double AccumulatedHCost( state &s1, state &s2, bool minFirst ) {
+		if( minFirst ) return( 2.*HCost(s1,s2)-1. );
+		else return( 2.*HCost(s1,s2) );
+	};
 
 	protected:
 
@@ -151,17 +159,27 @@ bool DSCREnvironment<state,action>::GoalTest( CRState &s ) {
 };
 
 template<class state, class action>
+bool DSCREnvironment<state,action>::GoalTest( state &s1, state &s2 ) {
+	return( s1 == s2 );
+};
+
+template<class state, class action>
 double DSCREnvironment<state,action>::TerminalCost( CRState& ) {
 	return 0.;
 };
 
 template<class state, class action>
-double DSCREnvironment<state,action>::RobberGCost( CRState&, state& ) {
+double DSCREnvironment<state,action>::TerminalCost( state &s1, state &s2 ) {
+	return 0.;
+};
+
+template<class state, class action>
+double DSCREnvironment<state,action>::RobberGCost( state&, state& ) {
 	return 1.;
 };
 
 template<class state, class action>
-double DSCREnvironment<state,action>::CopGCost( CRState&, state& ) {
+double DSCREnvironment<state,action>::CopGCost( state&, state& ) {
 	return 1.;
 };
 
