@@ -17,6 +17,9 @@ void dehash_permutation( unsigned long hash, unsigned int num_players, unsigned 
 template<class state>
 uint64_t CRHash( const std::vector<state> &pos );
 
+template<class state>
+uint64_t CRHash( const state &s1, const state &s2 );
+
 /*
 // \see MyHash.cpp
 template<>

@@ -19,7 +19,7 @@
 #include "IPNTTables.h"
 //#include "IPNTTables_optimized.h"
 #include "Dijkstra.h"
-#include "MyGraphMapHeuristic.h"
+#include "MaximumNormGraphMapHeuristic.h"
 //#include "MinimaxAStar.h"
 #include "MinimaxAStar_optimized.h"
 #include "TwoPlayerDijkstra.h"
@@ -30,6 +30,8 @@
 #include "DSDijkstra_MemOptim.h"
 #include "DSCover.h"
 #include "DSHeuristicGreedy.h"
+#include "DSMinimax.h"
+#include "DSDAM.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -218,7 +220,7 @@ int main(int argc, char* argv[])
 	xyLoc pos_cop, pos_robber;
 	Map *m = NULL;
 	Graph *g = NULL;
-	MyGraphMapHeuristic *gh = NULL;
+	MaximumNormGraphMapHeuristic *gh = NULL;
 	GraphEnvironment *env = NULL;
 	int curr, x, y;
 
@@ -228,7 +230,7 @@ int main(int argc, char* argv[])
 		if( strcmp( argv[curr], "-map" ) == 0 ) {
 			m = new Map( argv[curr+1] );
 			g = GraphSearchConstants::GetGraph( m );
-			gh = new MyGraphMapHeuristic( m, g );
+			gh = new MaximumNormGraphMapHeuristic( g );
 			env = new GraphEnvironment( g, gh );
 			env->SetDirected( true ); // because the GetGraph routine
 	// adds edges for both directions
@@ -296,6 +298,8 @@ int main(int argc, char* argv[])
 	delete env;
 */
 
+
+
 /*
 	// NORMAL MINIMAX
 	Map *m;
@@ -329,6 +333,7 @@ int main(int argc, char* argv[])
 	delete minclass;
 	delete env;
 */
+
 
 /*
 	// optimized Minimax
@@ -684,7 +689,7 @@ int main(int argc, char* argv[])
 */
 
 
-
+/*
 	// DSHeuristicGreedy
 	Map *m;
 	xyLoc pc, pr;
@@ -697,7 +702,7 @@ int main(int argc, char* argv[])
 	printf( "robber position: %d,%d\n", pr.x, pr.y );
 
 	Graph *g = GraphSearchConstants::GetGraph( m );
-	MyGraphMapHeuristic *gh = new MyGraphMapHeuristic( m, g );
+	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
 	GraphEnvironment *env = new GraphEnvironment( g, gh );
 	env->SetDirected( true );
 
@@ -713,7 +718,74 @@ int main(int argc, char* argv[])
 	delete gh;
 	delete g;
 	delete m;
+*/
 
+
+
+/*
+	// DSMinimax
+	Map *m;
+	xyLoc pc, pr;
+	graphState pos_cop, pos_robber;
+	std::vector<graphState> path;
+	int depth;
+
+	parseCommandLineParameters( argc, argv, m, pc, pr, depth );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pc.x, pc.y );
+	printf( "robber position: %d,%d\n", pr.x, pr.y );
+	printf( "computation depth: %d\n", depth );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
+	GraphEnvironment *env = new GraphEnvironment( g, gh );
+	env->SetDirected( true );
+
+	DSMinimax<graphState,graphMove> *dsminimax = new DSMinimax<graphState,graphMove>( env, true, 1 );
+
+	pos_robber = m->getNodeNum( pr.x, pr.y );
+	pos_cop    = m->getNodeNum( pc.x, pc.y );
+	double result = dsminimax->minimax( pos_robber, pos_cop, path, true, depth );
+
+	printf( "result of the computation: %g\n", result );
+	printf( "nodes expanded: %u\n", dsminimax->nodesExpanded );
+	printf( "nodes touched: %u\n", dsminimax->nodesTouched );
+	printf( "moves: " );
+	for( std::vector<graphState>::iterator it = path.begin(); it != path.end(); it++ ) {
+		printf( "=> %lu ", *it );
+	}
+	printf( "\n" );
+
+	delete dsminimax;
+	delete env;
+	delete gh;
+	delete g;
+	delete m;
+*/
+
+	// DSDAM (DS dynamic abstract minimax)
+	Map *m;
+	xyLoc pc, pr;
+	int depth;
+
+	parseCommandLineParameters( argc, argv, m, pc, pr, depth );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d (%d)\n", pc.x, pc.y, mclab->GetNodeFromMap( pc.x, pc.y )->GetNum() );
+	printf( "robber position: %d,%d (%d)\n", pr.x, pr.y, mclab->GetNodeFromMap( pr.x, pr.y )->GetNum() );
+	printf( "computation depth: %d\n", depth );
+
+	DSDAM *dsdam = new DSDAM( mclab, true, 2, true );
+	std::vector<node*> path;
+	dsdam->dam( mclab->GetNodeFromMap( pr.x, pr.y ), mclab->GetNodeFromMap( pc.x, pc.y ), path, false, depth );
+	printf( "path: " );
+	for( std::vector<node*>::iterator it = path.begin(); it != path.end(); it++ ) {
+		printf( "%u (%d) ", (*it)->GetNum(), (*it)->getUniqueID() );
+	}
+	printf( "\n" );
+
+	delete dsdam;
+	delete mclab;
 
 
 /*

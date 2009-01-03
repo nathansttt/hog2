@@ -303,7 +303,7 @@ double MinimaxAStar::MinGCost( CRState&, CRState& ) {
 };
 
 
-// note: this HCost implementation relies on all edge costs 1 and MyGraphMapHeuristic in the GraphEnvironment
+// note: this HCost implementation relies on all edge costs 1 and MaximumNormGraphMapHeuristic in the GraphEnvironment
 // furthermore, it only makes sense with the above definition of MinGCost===1
 double MinimaxAStar::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 ) {
 	double hmax = env->HCost( pos1[0], pos2[0] );

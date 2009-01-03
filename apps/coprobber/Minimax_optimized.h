@@ -157,15 +157,16 @@ double MinimaxOptimized<state,action,environment>::minimax_help( CRState pos, bo
 
 	// in case of a consistent heuristic we can also prune
 	// because we are then guaranteed not to reach the terminals anymore
-	if( beta <= MinHCost( pos, minFirst ) ) {
+	double hcost = MinHCost( pos, minFirst );
+	if( beta <= hcost ) {
 //		fprintf( stdout, "h-prune \\infty\n" );
-		return DBL_MAX;
+		return beta;
 	}
 
 	// if we reached the bottom of the computation tree
 	if( depth <= 0 ) {
 //		fprintf( stdout, "depth prune %f\n", MinHCost( pos, minFirst ) );
-		return MinHCost( pos, minFirst );
+		return hcost;
 //		return EvalFunc( pos, minFirst );
 	}
 
@@ -175,7 +176,7 @@ double MinimaxOptimized<state,action,environment>::minimax_help( CRState pos, bo
 	std::pair<typename GTTables::iterator, bool> insert_return;
 	typename TranspositionTable::iterator tit;
 	bool old_transposition_available = false;
-	bool old_value_upper_bound = true; // true, false = old value is lower bound, in any other case not needed
+	bool old_value_upper_bound = true; // true, false = old value is lower bound
 
 	GTTables *current_gttables = minFirst?&min_gttables:&max_gttables;
 	gttit = current_gttables->find( (double)depth );
@@ -188,13 +189,15 @@ double MinimaxOptimized<state,action,environment>::minimax_help( CRState pos, bo
 			old_transposition_available = true;
 
 			// check for usability of the hash table entry
-			if( tit->value <= tit->alpha && tit->value < beta ) {
-				beta = tit->value;
+			if( tit->value <= tit->alpha ) {
 				old_value_upper_bound = true;
+				if( tit->value < beta )
+					beta = tit->value;
 			}
-			if( tit->beta <= tit->value && alpha < tit->value ) {
-				alpha = tit->value;
+			if( tit->beta <= tit->value ) {
 				old_value_upper_bound = false;
+				if( alpha < tit->value )
+					alpha = tit->value;
 			}
 			if( beta <= alpha ) {
 				return tit->value;
@@ -279,16 +282,15 @@ double MinimaxOptimized<state,action,environment>::minimax_help( CRState pos, bo
 		if( old_value_upper_bound ) {
 			// sanity check
 			assert( result <= tit->value );
-			if( result == tit->value ) // result == tit->value == beta
+			if( result == tit->value )
 				// in this case, result is the correct value, thus we increase the window slightly
 				// to make the ttable lookup correct
-				beta += 1.;
+				beta = result + 1.;
 		} else {
-		// old value is a lower bound
 			// sanity check
 			assert( tit->value <= result );
-			if( result == tit->value ) // result == tit->value == alpha
-				alpha -= 1.;
+			if( result == tit->value )
+				alpha = result - 1.;
 		}
 		// the old entry is no longer needed
 		gttit->second.erase( tit );

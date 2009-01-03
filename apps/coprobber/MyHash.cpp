@@ -49,6 +49,19 @@ uint64_t CRHash<graphState>( const std::vector<graphState> &node) {
 }
 
 
+// specification for state=xyLoc
+template<>
+uint64_t CRHash<xyLoc>( const xyLoc &s1, const xyLoc &s2 ) {
+	return( ((uint64_t)s1.x)<<48 | (((uint64_t)s1.y)<<48)>>16 |
+		(((uint64_t)s2.x)<<48)>>32 | (((uint64_t)s2.y)<<48)>>48 );
+}
+// same for state=graphState
+template<>
+uint64_t CRHash<graphState>( const graphState &s1, const graphState &s2 ) {
+	return( ((uint64_t)s1)<<32 | (((uint64_t)s2)<<32)>>32 );
+};
+
+
 template<>
 uint64_t StateHash<xyLoc>( const xyLoc &s ) {
 	return( ((uint64_t)s.x)<<32 | (((uint64_t)s.y)<<32)>>32 );

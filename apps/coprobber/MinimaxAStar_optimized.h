@@ -69,7 +69,7 @@ class MinimaxAStar {
 	// to be more variable in our own calculations
 	double MinGCost( CRState &pos1, CRState &pos2 );
 	// the definition of the heuristic relies on the graph heuristic used
-	// in the submitted graph environment (=> use MyGraphMapHeuristic)
+	// in the submitted graph environment (=> use MaximumNormGraphMapHeuristic)
 	double HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 );
 
 	bool GoalTest( CRState &pos );
@@ -279,7 +279,7 @@ double MinimaxAStar<state,action,environment>::MinGCost( CRState&, CRState& ) {
 };
 
 
-// note: this HCost implementation relies on all edge costs 1 and MyGraphMapHeuristic in the GraphEnvironment
+// note: this HCost implementation relies on all edge costs 1 and MaximumNormGraphMapHeuristic in the GraphEnvironment
 // furthermore, it only makes sense with the above definition of MinGCost===1
 template<class state,class action,class environment>
 double MinimaxAStar<state,action,environment>::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 ) {
