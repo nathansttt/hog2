@@ -343,3 +343,10 @@ int GraphAbstraction::CountEdgesAtDistance(node *child, node *parent, std::vecto
 	}
 	return depth.back();
 }
+
+node* GraphAbstraction::GetRandomGroundNodeFromNode(node *n)
+{
+	while (GetAbstractionLevel(n) != 0)
+		n = GetNthChild(n, random()%GetNumChildren(n));
+	return n;
+}

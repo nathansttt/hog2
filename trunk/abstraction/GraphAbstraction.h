@@ -100,6 +100,9 @@ public:
 	inline node *GetParent(node *which) { return abstractions[GetAbstractionLevel(which)+1]->GetNode(which->GetLabelL(GraphAbstractionConstants::kParent)); }
 	inline long GetNumChildren(node *which) { return which->GetLabelL(GraphAbstractionConstants::kNumAbstractedNodes); }
 	inline node *GetNthChild(node *which, int n) { return abstractions[GetAbstractionLevel(which)-1]->GetNode(which->GetLabelL(GraphAbstractionConstants::kFirstData+n)); }
+
+	node* GetRandomGroundNodeFromNode(node *n);
+
 	inline long GetAbstractionLevel(node *which) { return which->GetLabelL(GraphAbstractionConstants::kAbstractionLevel); }
 	inline Graph* GetAbstractGraph(node *which) { return abstractions[which->GetLabelL(GraphAbstractionConstants::kAbstractionLevel)]; }
 	// utility functions
