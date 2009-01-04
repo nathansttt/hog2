@@ -22,6 +22,8 @@ class DSDAM {
 
 	void dam( node* pos_robber, node* pos_cop, std::vector<node*> &path, bool minFirst = true, double depth = 5. );
 
+	node* MakeMove( node* pos_robber, node* pos_cop, bool minFirst = true, double depth = 5. );
+
 	// statistic variables that get resetted everytime dam(...) is called
 	unsigned int nodesExpanded, nodesTouched;
 
