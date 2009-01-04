@@ -741,11 +741,11 @@ int main(int argc, char* argv[])
 	GraphEnvironment *env = new GraphEnvironment( g, gh );
 	env->SetDirected( true );
 
-	DSMinimax<graphState,graphMove> *dsminimax = new DSMinimax<graphState,graphMove>( env, true, 1 );
+	DSMinimax<graphState,graphMove> *dsminimax = new DSMinimax<graphState,graphMove>( env, true, 2 );
 
 	pos_robber = m->getNodeNum( pr.x, pr.y );
 	pos_cop    = m->getNodeNum( pc.x, pc.y );
-	double result = dsminimax->minimax( pos_robber, pos_cop, path, true, depth );
+	double result = dsminimax->minimax( pos_robber, pos_cop, path, false, depth );
 
 	printf( "result of the computation: %g\n", result );
 	printf( "nodes expanded: %u\n", dsminimax->nodesExpanded );
@@ -763,6 +763,9 @@ int main(int argc, char* argv[])
 	delete m;
 */
 
+
+
+/*
 	// DSDAM (DS dynamic abstract minimax)
 	Map *m;
 	xyLoc pc, pr;
@@ -786,7 +789,38 @@ int main(int argc, char* argv[])
 
 	delete dsdam;
 	delete mclab;
+*/
 
+
+/*
+	// PRA* test code
+	Map *m = new Map( "../../maps/bgmaps/AR0700SR.map" );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	praStar *pra = new praStar();
+	//pra->setPartialPathLimit( 10 );
+
+	node *from = mclab->GetAbstractGraph(0)->GetNode(0);
+	node *to   = mclab->GetAbstractGraph(0)->GetNode( mclab->GetAbstractGraph(0)->GetNumNodes() - 1 );
+
+	path *p = pra->GetPath( mclab, from, to );
+	path *ptemp = p;
+
+	printf( "path: " );
+	while( ptemp ) {
+		printf( "%d ", ptemp->n->GetNum() );
+		ptemp = ptemp->next;
+	}
+	printf( "\n" );
+
+	delete ptemp;
+	delete p;
+	delete mclab;
+*/
+
+
+/*------------------------------------------------------------------------------
+| test generation code
+------------------------------------------------------------------------------*/
 
 /*
 // problem set generation
@@ -1276,11 +1310,14 @@ int main(int argc, char* argv[])
 
 
 
-/*
+
 	// Code for MaxMin approximation quality measurements
-	FILE *fhandler = NULL, *foutput = NULL;
+	// CONFIG PARAMETER
 	unsigned int cop_speed = 2;
-	unsigned int maxmin_stepsize = 20;
+	unsigned int maxmin_stepsize = 20; // maximum number of steps the maxmin solution is followed
+	double minimax_depth = 5.;
+	
+	FILE *fhandler = NULL, *foutput = NULL;
 	char map_file[20];
 	unsigned int rx, ry, cx, cy;
 	clock_t clock_start, clock_end;
@@ -1309,9 +1346,14 @@ int main(int argc, char* argv[])
 		fprintf( stdout, "map file: %s\n", m->getMapName() );
 
 		//MapEnvironment *env = new MapEnvironment( m );
-		Graph *g = GraphSearchConstants::GetGraph( m );
-		GraphEnvironment *env = new GraphEnvironment( g, NULL );
-		env->SetDirected( true );
+		//Graph *g = GraphSearchConstants::GetGraph( m );
+		//GraphEnvironment *env = new GraphEnvironment( g, NULL );
+		//env->SetDirected( true );
+
+		MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+		Graph *g = mclab->GetAbstractGraph( 0 );
+		MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
+		GraphEnvironment *env = new GraphEnvironment( g, gh );
 
 		// compute the values for the entire space
 		//DSDijkstra<xyLoc,tDirection,MapEnvironment> *dsdijkstra =
@@ -1322,14 +1364,23 @@ int main(int argc, char* argv[])
 		dsdijkstra->dsdijkstra();
 		fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
 
+		// object needed for comparison to cover
+		DSCover<graphState,graphMove> *dscover =
+			new DSCover<graphState,graphMove>( env, cop_speed );
+
+		// object needed for comparison to minimax (with depth 5)
+		DSMinimax<graphState,graphMove> *dsminimax = 
+			new DSMinimax<graphState,graphMove>( env, true, cop_speed );
+
+		// object needed for comparison to dynamic abstract minimax
+		DSDAM *dsdam = new DSDAM( mclab, true, cop_speed );
+
 		//DSTPDijkstra<xyLoc,tDirection> *dstp =
 		//	new DSTPDijkstra<xyLoc,tDirection>( env, cop_speed );
 		DSTPDijkstra<graphState,graphMove> *dstp =
 			new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
 
-		// object needed for comparison to cover
-		DSCover<graphState,graphMove> *dscover =
-			new DSCover<graphState,graphMove>( env, cop_speed );
+
 
 		// there is always 1000 problems for a map -> see problem set generation
 		for( int i = 0; i < 1000; i++ ) {
@@ -1371,6 +1422,72 @@ int main(int argc, char* argv[])
 			// output the cover result
 			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
 			fflush( foutput );
+
+
+			// reset the position to the initial position
+			pos[0] = m->getNodeNum( rx, ry );
+			pos[1] = m->getNodeNum( cx, cy );
+			// compute the solution for minimax
+			value = 0.;
+			calculations = 0; timer_average = 0; timer_stddiviation = 0;
+			while( true ) {
+				pos[1] = dsdijkstra->MakeMove( pos, true );
+				value += 1.;
+				if( pos[0] == pos[1] ) break;
+
+				clock_start = clock();
+				pos[0] = dsminimax->MakeMove( pos[0], pos[1], false, minimax_depth );
+				clock_end   = clock();
+				timer_average      += (clock_end-clock_start)/1000;
+				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+				calculations++;
+
+				value += 1.;
+				if( pos[0] == pos[1] ) break;
+			}
+			expected_value = (double)timer_average/(double)calculations;
+			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
+				- expected_value*expected_value );
+			// output the cover result
+			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+			fflush( foutput );
+
+
+			// reset the position to the initial position
+			pos[0] = m->getNodeNum( rx, ry );
+			pos[1] = m->getNodeNum( cx, cy );
+			// compute the solution for DAM
+			value = 0.;
+			calculations = 0; timer_average = 0; timer_stddiviation = 0;
+			while( true ) {
+				pos[1] = dsdijkstra->MakeMove( pos, true );
+				value += 1.;
+				if( pos[0] == pos[1] ) break;
+
+				node *r = g->GetNode( pos[0] );
+				node *c = g->GetNode( pos[1] );
+
+				printf( "robber@%lu cop@%lu\n", pos[0], pos[1] );
+				clock_start = clock();
+				r = dsdam->MakeMove( r, c, false, minimax_depth );
+				clock_end   = clock();
+				timer_average      += (clock_end-clock_start)/1000;
+				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+				calculations++;
+				pos[0] = r->GetNum();
+				printf( "robber moved to %lu\n", pos[0] );
+
+				value += 1.;
+				if( pos[0] == pos[1] ) break;
+			}
+			expected_value = (double)timer_average/(double)calculations;
+			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
+				- expected_value*expected_value );
+			// output the cover result
+			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+			fflush( foutput );
+
+
 
 
 			// do the simulation of MAXMIN approximation for various stepsizes
@@ -1436,7 +1553,7 @@ int main(int argc, char* argv[])
 	}
 	fclose( fhandler );
 	fclose( foutput );
-*/
+
 
 	return 0;
 }

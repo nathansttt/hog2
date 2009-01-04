@@ -104,11 +104,22 @@ void DSDAM::dam( node* pos_robber, node* pos_cop, std::vector<node*> &resultpath
 	}
 
 	path *p, *ptemp;
-	if( minFirst )
-		p = pra->GetPath( gabs, pos_cop, target );
-	else
-		p = pra->GetPath( gabs, pos_robber, target );
-
+	if( minFirst ) {
+		if( target == pos_cop ) {
+			// we did not change our actual position, thus return a stay immediately
+			resultpath.push_back( target );
+			return;
+		} else
+			p = pra->GetPath( gabs, pos_cop, target );
+	} else {
+		if( target == pos_robber ) {
+			// we did not change our actual position, thus return a stay immediately
+			resultpath.push_back( target );
+			return;
+		} else
+			p = pra->GetPath( gabs, pos_robber, target );
+	}
+	
 	// convert p to a vector
 	ptemp = p;
 	if( minFirst ) {
@@ -138,5 +149,18 @@ void DSDAM::dam( node* pos_robber, node* pos_cop, std::vector<node*> &resultpath
 	delete ptemp;
 	delete p;
 
+	// the path returned by PRA* has the current position in it
+	// this can safely be erased
+	resultpath.erase( resultpath.begin() );
+
 	return;
+};
+
+
+node* DSDAM::MakeMove( node* pos_robber, node* pos_cop, bool minFirst, double depth ) {
+	std::vector<node*> path;
+	dam( pos_robber, pos_cop, path, minFirst, depth );
+	// sanity check
+	assert( path.size() > 0 );
+	return( path[0] );
 };
