@@ -124,6 +124,8 @@ public:
 
 	bool InitializeSearch(environment *env, state& from, state& to, std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
+	void AddAdditionalStartState(state& newState);
+
 	state CheckNextNode();
 	void ExtractPathToStart(state& n, std::vector<state> &thePath);
 	void DoAbstractSearch(){useOccupancyInfo = false; useRadius = false;}
@@ -265,6 +267,18 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	openQueue.Add(first);
 
 	return true;
+}
+
+/**
+ * Add additional start state to the search. This should only be called after Initialize Search and before DoSingleSearchStep.
+ * @author Nathan Sturtevant
+ * @date 01/06/08
+ */
+template <class state, class action, class environment>
+void TemplateAStar<state,action,environment>::AddAdditionalStartState(state& newState)
+{
+	SearchNode<state> first(newState, newState, weight*env->HCost(goal, newState), 0,env->GetStateHash(newState));
+	openQueue.Add(first);
 }
 
 /**
@@ -459,7 +473,7 @@ void TemplateAStar<state, action,environment>::AddToOpenList(environment *e, sta
 {
 	//printf("Adding node %d setting parent to %d\n", neighbor, currOpenNode);
 	double edgeWeight = e->GCost(currOpenNode, neighbor);
-	double hCost = std::max(weight*e->HCost(neighbor, goal), closedList[e->GetStateHash(currOpenNode)].fCost-closedList[e->GetStateHash(currOpenNode)].gCost-weight*edgeWeight);
+	//double hCost = std::max(weight*e->HCost(neighbor, goal), closedList[e->GetStateHash(currOpenNode)].fCost-closedList[e->GetStateHash(currOpenNode)].gCost-weight*edgeWeight);
 	SearchNode<state> n(neighbor, currOpenNode, closedList[e->GetStateHash(currOpenNode)].gCost+edgeWeight+weight*e->HCost(neighbor, goal),
 							 closedList[e->GetStateHash(currOpenNode)].gCost+edgeWeight, e->GetStateHash(neighbor));
 	
