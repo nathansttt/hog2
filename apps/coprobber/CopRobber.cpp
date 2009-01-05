@@ -778,6 +778,10 @@ int main(int argc, char* argv[])
 	printf( "robber position: %d,%d (%d)\n", pr.x, pr.y, mclab->GetNodeFromMap( pr.x, pr.y )->GetNum() );
 	printf( "computation depth: %d\n", depth );
 
+	printf( "\n\nGraphs:\n" );
+	writeGraph( stdout, mclab->GetAbstractGraph(0) );
+	writeGraph( stdout, mclab->GetAbstractGraph(1) );
+
 	DSDAM *dsdam = new DSDAM( mclab, true, 2, true );
 	std::vector<node*> path;
 	dsdam->dam( mclab->GetNodeFromMap( pr.x, pr.y ), mclab->GetNodeFromMap( pc.x, pc.y ), path, false, depth );
@@ -1310,6 +1314,33 @@ int main(int argc, char* argv[])
 
 
 
+/*
+	// test the heuristic for abstraction environments
+	Map *m = new Map( "../../maps/local/test_coprobber_1.map" );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	Graph *g = mclab->GetAbstractGraph( 0 );
+	printf( "graph at level 0:\n" );
+	int num = g->GetNumNodes();
+	for( int i = 0; i < num; i++ ) {
+		node *n = g->GetNode( i );
+		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->getCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->getCoordinateScale() );
+	}
+	printf( "graph at level 1:\n" );
+	g = mclab->GetAbstractGraph( 1 );
+	num = g->GetNumNodes();
+	for( int i = 0; i < num; i++ ) {
+		node *n = g->GetNode( i );
+		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->getCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->getCoordinateScale() );
+	}
+
+	g = mclab->GetAbstractGraph( 1 );
+	MaximumNormAbstractGraphMapHeuristic *h = new MaximumNormAbstractGraphMapHeuristic( g, m );
+	graphState f = 3, t = 4;
+	printf( "h(0,1)@level 0 = %g\n", h->HCost( f, t ) );
+*/
+
+
+
 
 	// Code for MaxMin approximation quality measurements
 	// CONFIG PARAMETER
@@ -1337,6 +1368,15 @@ int main(int argc, char* argv[])
 
 	printf( "problem file: %s\n", argv[2] );
 
+	// syntax explanation output
+	fprintf( foutput, "syntax: robber_pos cop_pos optimal_solution +\n" );
+	fprintf( foutput, "<sol num avg div> for each of the algorithms: cover minimax(%g) dam(%g) heuristicgreedy pathmax(1-%d)\n", minimax_depth, minimax_depth, maxmin_stepsize );
+	fprintf( foutput, "where sol = solution length against optimal cop\n" );
+	fprintf( foutput, "      num = number of computations needed\n" );
+	fprintf( foutput, "      avg = average computation time in ms for each such computation\n" );
+	fprintf( foutput, "      div = standard diviation in ms for all computations\n" );
+	fprintf( foutput, "--------------------------------------------------------------------------------\n\n" );
+
 	while( !feof( fhandler ) ) {
 
 		// read first map of the problem file
@@ -1352,7 +1392,7 @@ int main(int argc, char* argv[])
 
 		MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
 		Graph *g = mclab->GetAbstractGraph( 0 );
-		MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
+		MaximumNormAbstractGraphMapHeuristic *gh = new MaximumNormAbstractGraphMapHeuristic( g, m );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
 
 		// compute the values for the entire space
@@ -1374,6 +1414,9 @@ int main(int argc, char* argv[])
 
 		// object needed for comparison to dynamic abstract minimax
 		DSDAM *dsdam = new DSDAM( mclab, true, cop_speed );
+
+		DSHeuristicGreedy<graphState,graphMove> *dsheuristic =
+			new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
 
 		//DSTPDijkstra<xyLoc,tDirection> *dstp =
 		//	new DSTPDijkstra<xyLoc,tDirection>( env, cop_speed );
@@ -1398,7 +1441,7 @@ int main(int argc, char* argv[])
 			// now find out the optimal value
 			fprintf( foutput, "%g", dsdijkstra->Value( pos, true ) );
 
-			// compute the solution for cover
+			// compute the solution for COVER
 			double value = 0.;
 			unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
 			while( true ) {
@@ -1427,7 +1470,7 @@ int main(int argc, char* argv[])
 			// reset the position to the initial position
 			pos[0] = m->getNodeNum( rx, ry );
 			pos[1] = m->getNodeNum( cx, cy );
-			// compute the solution for minimax
+			// compute the solution for MINIMAX
 			value = 0.;
 			calculations = 0; timer_average = 0; timer_stddiviation = 0;
 			while( true ) {
@@ -1448,7 +1491,6 @@ int main(int argc, char* argv[])
 			expected_value = (double)timer_average/(double)calculations;
 			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 				- expected_value*expected_value );
-			// output the cover result
 			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
 			fflush( foutput );
 
@@ -1456,7 +1498,7 @@ int main(int argc, char* argv[])
 			// reset the position to the initial position
 			pos[0] = m->getNodeNum( rx, ry );
 			pos[1] = m->getNodeNum( cx, cy );
-			// compute the solution for DAM
+			// compute the solution for DYNAMIC ABSTRACT MINIMAX
 			value = 0.;
 			calculations = 0; timer_average = 0; timer_stddiviation = 0;
 			while( true ) {
@@ -1467,7 +1509,6 @@ int main(int argc, char* argv[])
 				node *r = g->GetNode( pos[0] );
 				node *c = g->GetNode( pos[1] );
 
-				printf( "robber@%lu cop@%lu\n", pos[0], pos[1] );
 				clock_start = clock();
 				r = dsdam->MakeMove( r, c, false, minimax_depth );
 				clock_end   = clock();
@@ -1475,7 +1516,6 @@ int main(int argc, char* argv[])
 				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
 				calculations++;
 				pos[0] = r->GetNum();
-				printf( "robber moved to %lu\n", pos[0] );
 
 				value += 1.;
 				if( pos[0] == pos[1] ) break;
@@ -1483,10 +1523,36 @@ int main(int argc, char* argv[])
 			expected_value = (double)timer_average/(double)calculations;
 			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 				- expected_value*expected_value );
-			// output the cover result
 			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
 			fflush( foutput );
 
+
+			// reset the position to the initial position
+			pos[0] = m->getNodeNum( rx, ry );
+			pos[1] = m->getNodeNum( cx, cy );
+			// compute the solution for GREEDY HEURISTIC
+			value = 0.;
+			calculations = 0; timer_average = 0; timer_stddiviation = 0;
+			while( true ) {
+				pos[1] = dsdijkstra->MakeMove( pos, true );
+				value += 1.;
+				if( pos[0] == pos[1] ) break;
+
+				clock_start = clock();
+				pos[0] = dsheuristic->MakeMove( pos[0], pos[1], false );
+				clock_end   = clock();
+				timer_average      += (clock_end-clock_start)/1000;
+				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+				calculations++;
+
+				value += 1.;
+				if( pos[0] == pos[1] ) break;
+			}
+			expected_value = (double)timer_average/(double)calculations;
+			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
+				- expected_value*expected_value );
+			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+			fflush( foutput );
 
 
 
@@ -1553,6 +1619,7 @@ int main(int argc, char* argv[])
 	}
 	fclose( fhandler );
 	fclose( foutput );
+
 
 
 	return 0;

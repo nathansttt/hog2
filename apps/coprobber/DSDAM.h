@@ -1,8 +1,8 @@
 #include <vector>
-#include "DSCREnvironment.h"
+#include "MapAbstraction.h"
 #include "DSMinimax.h"
 #include "PRAStar.h"
-#include "MaximumNormGraphMapHeuristic.h"
+#include "MaximumNormAbstractGraphMapHeuristic.h"
 
 #ifndef DSDAM_H
 #define DSDAM_H
@@ -17,7 +17,7 @@ class DSDAM {
 	public:
 
 	// constructor
-	DSDAM( GraphAbstraction *gabs, bool canPause = true, unsigned int cop_speed = 1, bool useAbstraction = true );
+	DSDAM( MapAbstraction *gabs, bool canPause = true, unsigned int cop_speed = 1, bool useAbstraction = true );
 	~DSDAM();
 
 	void dam( node* pos_robber, node* pos_cop, std::vector<node*> &path, bool minFirst = true, double depth = 5. );
@@ -29,7 +29,7 @@ class DSDAM {
 
 	protected:
 
-	GraphAbstraction *gabs;
+	MapAbstraction *gabs;
 	bool canPause;
 	unsigned int cop_speed;
 	bool useAbstraction;
@@ -39,7 +39,7 @@ class DSDAM {
 	// cache the minimax objects and graph environments for each level of abstraction
 	std::vector<DSMinimax<graphState,graphMove>* > dsminimax;
 	std::vector<GraphEnvironment*> graphenvironments;
-	std::vector<MaximumNormGraphMapHeuristic*> graphmapheuristics;
+	std::vector<MaximumNormAbstractGraphMapHeuristic*> graphmapheuristics;
 };
 
 #endif

@@ -4,12 +4,12 @@
 | Implementation
 ------------------------------------------------------------------------------*/
 
-DSDAM::DSDAM( GraphAbstraction *_gabs, bool _canPause, unsigned int _cop_speed, bool _useAbstraction ):
+DSDAM::DSDAM( MapAbstraction *_gabs, bool _canPause, unsigned int _cop_speed, bool _useAbstraction ):
 	gabs(_gabs), canPause(_canPause), cop_speed(_cop_speed), useAbstraction(_useAbstraction), pra( new praStar() )
 {
 	// create the minimax objects
 	for( unsigned int level = 0; level < gabs->getNumAbstractGraphs(); level++ ) {
-		graphmapheuristics.push_back( new MaximumNormGraphMapHeuristic( gabs->GetAbstractGraph( level ) ) );
+		graphmapheuristics.push_back( new MaximumNormAbstractGraphMapHeuristic( gabs->GetAbstractGraph( level ), gabs->GetMap() ) );
 		graphenvironments.push_back( new GraphEnvironment( gabs->GetAbstractGraph( level ), graphmapheuristics[level] ) );
 		dsminimax.push_back( new DSMinimax<graphState,graphMove>( graphenvironments[level], canPause, cop_speed ) );
 
@@ -36,8 +36,8 @@ DSDAM::~DSDAM() {
 		delete temp;
 	}
 	while( !graphmapheuristics.empty() ) {
-		std::vector<MaximumNormGraphMapHeuristic*>::iterator it = graphmapheuristics.begin();
-		MaximumNormGraphMapHeuristic *temp = *it;
+		std::vector<MaximumNormAbstractGraphMapHeuristic*>::iterator it = graphmapheuristics.begin();
+		MaximumNormAbstractGraphMapHeuristic *temp = *it;
 		graphmapheuristics.erase( it );
 		delete temp;
 	}
@@ -51,6 +51,17 @@ void DSDAM::dam( node* pos_robber, node* pos_cop, std::vector<node*> &resultpath
 	// find the joint hierarchy
 	std::vector<node*> robberChain, copChain;
 	gabs->GetNumAbstractGraphs( pos_robber, pos_cop, robberChain, copChain );
+
+	//verbose
+	//printf( "robber chain: " );
+	//for( std::vector<node*>::iterator it = robberChain.begin(); it != robberChain.end(); it++ ) {
+	//	printf( "%d ", (*it)->GetNum() );
+	//}
+	//printf( "\ncop chain: " );
+	//for( std::vector<node*>::iterator it = copChain.begin(); it != copChain.end(); it++ ) {
+	//	printf( "%d ", (*it)->GetNum() );
+	//}
+	//printf( "\n" );
 
 	// determine the level where we start planning
 	// make a sanity check (to ensure the start level actually makes sense)
