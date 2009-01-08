@@ -33,6 +33,7 @@
 #include "DSMinimax.h"
 #include "DSDAM.h"
 #include "DSDATPDijkstra.h"
+#include "DSRandomBeacons.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -858,6 +859,37 @@ int main(int argc, char* argv[])
 */
 
 
+/*
+	// DSRandomBeacons
+	Map *m;
+	xyLoc pc, pr;
+	graphState pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pc, pr, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pc.x, pc.y );
+	printf( "robber position: %d,%d\n", pr.x, pr.y );
+
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	DSRandomBeacons *dsrandb = new DSRandomBeacons( mclab, true, 2 );
+
+	pos_robber = m->getNodeNum( pr.x, pr.y );
+	pos_cop    = m->getNodeNum( pc.x, pc.y );
+	std::vector<graphState> path;
+	dsrandb->GetPath( pos_robber, pos_cop, 40, path );
+
+	printf( "path: " );
+	for( std::vector<graphState>::iterator it = path.begin(); it != path.end(); it++ ) {
+		printf( "%lu ", *it );
+	}
+	printf( "\n" );
+
+	delete dsrandb;
+	delete mclab;
+*/
+
+
 /*------------------------------------------------------------------------------
 | test generation code
 ------------------------------------------------------------------------------*/
@@ -1378,12 +1410,14 @@ int main(int argc, char* argv[])
 
 
 
+
 	// Code for MaxMin approximation quality measurements
 	// CONFIG PARAMETER
 	unsigned int cop_speed = 2;
 	unsigned int maxmin_stepsize = 20; // maximum number of steps the maxmin solution is followed
 	double minimax_depth = 5.;
 	double dsdatpdijkstra_min_escape = 10.; // minimum number of steps we have to be able to escape
+	unsigned int num_beacons = 40;
 	
 	FILE *fhandler = NULL, *foutput = NULL;
 	char map_file[20];
@@ -1463,6 +1497,8 @@ int main(int argc, char* argv[])
 		// dynamic abstract two player dijkstra/pathmax
 		DSDATPDijkstra *dsdatp = new DSDATPDijkstra( mclab, cop_speed, true );
 
+		// random beacons
+		DSRandomBeacons *dsrandomb = new DSRandomBeacons( mclab, true, cop_speed );
 
 		// there is always 1000 problems for a map -> see problem set generation
 		for( int i = 0; i < 1000; i++ ) {
@@ -1703,10 +1739,62 @@ int main(int argc, char* argv[])
 				fflush( foutput );
 			}
 
+
+			// do the simulation of Random Beacons
+			for( unsigned int stepsize = 1; stepsize <= maxmin_stepsize; stepsize++ ) {
+
+				// reset the position to the initial position
+				pos[0] = m->getNodeNum( rx, ry );
+				pos[1] = m->getNodeNum( cx, cy );
+
+				std::vector<graphState> path;
+				unsigned int counter = 0;
+				value = 0.;
+				calculations = 0;
+				timer_average = 0;
+				timer_stddiviation = 0;
+				while( true ) {
+					pos[1] = dsdijkstra->MakeMove( pos, true );
+					value += 1.;
+
+					// test on whether the robber is caught
+					if( pos[0] == pos[1] ) break;
+
+					// if new path has to be computed, do so
+					if( counter == stepsize || counter >= path.size() ) {
+						clock_start = clock();
+						dsrandomb->GetPath( pos[0], pos[1], num_beacons, path );
+						clock_end   = clock();
+						timer_average      += (clock_end-clock_start)/1000;
+						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+						calculations++;
+
+						// reset counter
+						counter = 0;
+					}
+					// generate next move for the robber
+					pos[0] = path[counter];
+					counter++;
+					value += 1.;
+
+					if( pos[0] == pos[1] ) break;
+				}
+
+				expected_value = (double)timer_average/(double)calculations;
+				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
+					- expected_value*expected_value );
+
+				// output result of the run
+				fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+				fflush( foutput );
+			}
+
+			// finish the line, go to next problem instance
 			fprintf( foutput, "\n" );
 
 		}
 
+		delete dsrandomb;
 		delete dsdijkstra;
 		delete dsdatp;
 		delete dstp;
