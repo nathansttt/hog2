@@ -78,4 +78,5 @@ SRC_CPP = \
 	apps/coprobber/DSDijkstra_MemOptim.cpp \
 	apps/coprobber/DSDAM.cpp \
 	apps/coprobber/DSDATPDijkstra.cpp \
+	apps/coprobber/DSRandomBeacons.cpp \
 	apps/coprobber/CopRobber.cpp
