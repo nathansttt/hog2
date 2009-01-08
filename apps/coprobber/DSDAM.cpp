@@ -47,6 +47,8 @@ DSDAM::~DSDAM() {
 
 void DSDAM::dam( node* pos_robber, node* pos_cop, std::vector<node*> &resultpath, bool minFirst, double depth ) {
 	resultpath.clear();
+	nodesExpanded = 0;
+	nodesTouched = 0;
 
 	// find the joint hierarchy
 	std::vector<node*> robberChain, copChain;
@@ -79,6 +81,8 @@ void DSDAM::dam( node* pos_robber, node* pos_cop, std::vector<node*> &resultpath
 		graphState probber = (graphState) robberChain[level]->GetNum();
 		graphState pcop    = (graphState) copChain[level]->GetNum();
 		double temp = dsminimax[level]->minimax( probber, pcop, numberpath, minFirst, depth );
+		nodesExpanded += dsminimax[level]->nodesExpanded;
+		nodesTouched  += dsminimax[level]->nodesTouched;
 		if( fgreater(temp,0.) ) {
 			// the robber can escape on this level
 

@@ -31,6 +31,9 @@ class DSTPDijkstra {
 	DSTPDijkstra( SearchEnvironment<state,action> *env, unsigned int cop_speed = 1 );
 	~DSTPDijkstra();
 
+	// gives back a path that the robber should follow
+	// minFirst does only mean whether the cop or the robber are to move
+	// first in the situation
 	double dstpdijkstra( state pos_robber, state pos_cop, bool minFirst, std::vector<state> &path );
 
 	unsigned int nodesExpanded, nodesTouched;
