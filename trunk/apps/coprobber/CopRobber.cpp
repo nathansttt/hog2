@@ -32,6 +32,7 @@
 #include "DSHeuristicGreedy.h"
 #include "DSMinimax.h"
 #include "DSDAM.h"
+#include "DSDATPDijkstra.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -543,7 +544,7 @@ int main(int argc, char* argv[])
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
 	MapEnvironment *env = new MapEnvironment( m );
-	DSTPDijkstra<xyLoc,tDirection> *dstpdijkstra = new DSTPDijkstra<xyLoc,tDirection>( env, 1 );
+	DSTPDijkstra<xyLoc,tDirection> *dstpdijkstra = new DSTPDijkstra<xyLoc,tDirection>( env, 2 );
 
 	// attention: robber moves first here
 	double result = dstpdijkstra->dstpdijkstra( pos_robber, pos_cop, false, path );
@@ -616,7 +617,6 @@ int main(int argc, char* argv[])
 
 /*
 	// RMA* with possibly faster cop => DSRMAStar
-	// Optimized Minimax A*
 	xyLoc pos_cop, pos_robber;
 	Map *m;
 	int max_depth;
@@ -736,10 +736,13 @@ int main(int argc, char* argv[])
 	printf( "robber position: %d,%d\n", pr.x, pr.y );
 	printf( "computation depth: %d\n", depth );
 
-	Graph *g = GraphSearchConstants::GetGraph( m );
-	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	Graph *g = mclab->GetAbstractGraph( 0 );
+//	Graph *g = GraphSearchConstants::GetGraph( m );
+//	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
+	MaximumNormAbstractGraphMapHeuristic *gh = new MaximumNormAbstractGraphMapHeuristic( g, m );
 	GraphEnvironment *env = new GraphEnvironment( g, gh );
-	env->SetDirected( true );
+//	env->SetDirected( true );
 
 	DSMinimax<graphState,graphMove> *dsminimax = new DSMinimax<graphState,graphMove>( env, true, 2 );
 
@@ -790,10 +793,43 @@ int main(int argc, char* argv[])
 		printf( "%u (%d) ", (*it)->GetNum(), (*it)->getUniqueID() );
 	}
 	printf( "\n" );
+	printf( "nodesExpanded: %u\n", dsdam->nodesExpanded );
+	printf( "nodesTouched: %u\n", dsdam->nodesTouched );
 
 	delete dsdam;
 	delete mclab;
 */
+
+
+
+/*
+	// DSDATPDijkstra (DS dynamic abstract two player dijkstra)
+	Map *m;
+	xyLoc pc, pr;
+	int minimum_escape_length;
+
+	parseCommandLineParameters( argc, argv, m, pc, pr, minimum_escape_length );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d (%d)\n", pc.x, pc.y, mclab->GetNodeFromMap( pc.x, pc.y )->GetNum() );
+	printf( "robber position: %d,%d (%d)\n", pr.x, pr.y, mclab->GetNodeFromMap( pr.x, pr.y )->GetNum() );
+	printf( "minimum escape length: %d\n", minimum_escape_length );
+
+	DSDATPDijkstra *dsdatpdijkstra = new DSDATPDijkstra( mclab, 2, true );
+	std::vector<node*> path;
+	dsdatpdijkstra->datpdijkstra( mclab->GetNodeFromMap( pr.x, pr.y ), mclab->GetNodeFromMap( pc.x, pc.y ), path, false, minimum_escape_length );
+	printf( "path: " );
+	for( std::vector<node*>::iterator it = path.begin(); it != path.end(); it++ ) {
+		printf( "%u ", (*it)->GetNum() );
+	}
+	printf( "\n" );
+	printf( "nodesExpanded: %u\n", dsdatpdijkstra->nodesExpanded );
+	printf( "nodesTouched: %u\n", dsdatpdijkstra->nodesTouched );
+
+	delete dsdatpdijkstra;
+	delete mclab;
+*/
+
 
 
 /*
@@ -1347,6 +1383,7 @@ int main(int argc, char* argv[])
 	unsigned int cop_speed = 2;
 	unsigned int maxmin_stepsize = 20; // maximum number of steps the maxmin solution is followed
 	double minimax_depth = 5.;
+	double dsdatpdijkstra_min_escape = 10.; // minimum number of steps we have to be able to escape
 	
 	FILE *fhandler = NULL, *foutput = NULL;
 	char map_file[20];
@@ -1370,7 +1407,7 @@ int main(int argc, char* argv[])
 
 	// syntax explanation output
 	fprintf( foutput, "syntax: robber_pos cop_pos optimal_solution +\n" );
-	fprintf( foutput, "<sol num avg div> for each of the algorithms: cover minimax(%g) dam(%g) heuristicgreedy pathmax(1-%d)\n", minimax_depth, minimax_depth, maxmin_stepsize );
+	fprintf( foutput, "<sol num avg div> for each of the algorithms: cover minimax(%g) dam(%g) heuristicgreedy pathmax(1-%d) dapathmax(1-%d)\n", minimax_depth, minimax_depth, maxmin_stepsize, maxmin_stepsize );
 	fprintf( foutput, "where sol = solution length against optimal cop\n" );
 	fprintf( foutput, "      num = number of computations needed\n" );
 	fprintf( foutput, "      avg = average computation time in ms for each such computation\n" );
@@ -1413,7 +1450,7 @@ int main(int argc, char* argv[])
 			new DSMinimax<graphState,graphMove>( env, true, cop_speed );
 
 		// object needed for comparison to dynamic abstract minimax
-		DSDAM *dsdam = new DSDAM( mclab, true, cop_speed );
+		DSDAM *dsdam = new DSDAM( mclab, true, cop_speed, true );
 
 		DSHeuristicGreedy<graphState,graphMove> *dsheuristic =
 			new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
@@ -1423,6 +1460,8 @@ int main(int argc, char* argv[])
 		DSTPDijkstra<graphState,graphMove> *dstp =
 			new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
 
+		// dynamic abstract two player dijkstra/pathmax
+		DSDATPDijkstra *dsdatp = new DSDATPDijkstra( mclab, cop_speed, true );
 
 
 		// there is always 1000 problems for a map -> see problem set generation
@@ -1556,7 +1595,7 @@ int main(int argc, char* argv[])
 
 
 
-			// do the simulation of MAXMIN approximation for various stepsizes
+			// do the simulation of MAXMIN/pathmax approximation for various stepsizes
 			for( unsigned int stepsize = 1; stepsize <= maxmin_stepsize; stepsize++ ) {
 
 				// reset the position to the initial position
@@ -1579,21 +1618,21 @@ int main(int argc, char* argv[])
 					if( pos[0] == pos[1] ) break;
 
 					// if new path has to be computed, do so
-					if( counter == 0 || counter >= path.size() ) {
+					if( counter == stepsize || counter >= path.size() ) {
 						clock_start = clock();
 						dstp->dstpdijkstra( pos[0], pos[1], false, path );
 						clock_end   = clock();
 						timer_average      += (clock_end-clock_start)/1000;
 						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
 						calculations++;
+
+						// reset counter
+						counter = 0;
 					}
 					// generate next move for the robber
 					pos[0] = path[counter];
 					counter++;
 					value += 1.;
-
-					// reset counter after maxmin_stepsize
-					if( counter == stepsize ) counter = 0;
 
 					if( pos[0] == pos[1] ) break;
 				}
@@ -1606,11 +1645,70 @@ int main(int argc, char* argv[])
 				fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
 				fflush( foutput );
 			}
+
+
+
+
+			// do the simulation of Dynamic Abstract Pathmax for various stepsizes
+			for( unsigned int stepsize = 1; stepsize <= maxmin_stepsize; stepsize++ ) {
+
+				// reset the position to the initial position
+				pos[0] = m->getNodeNum( rx, ry );
+				pos[1] = m->getNodeNum( cx, cy );
+
+				// make a run for this problem with maxmin
+				//std::vector<xyLoc> path;
+				std::vector<node*> path;
+				unsigned int counter = 0;
+				value = 0.;
+				calculations = 0;
+				timer_average = 0;
+				timer_stddiviation = 0;
+				while( true ) {
+					pos[1] = dsdijkstra->MakeMove( pos, true );
+					value += 1.;
+
+					// test on whether the robber is caught
+					if( pos[0] == pos[1] ) break;
+
+					node *r = g->GetNode( pos[0] );
+					node *c = g->GetNode( pos[1] );
+
+					// if new path has to be computed, do so
+					if( counter == stepsize || counter >= path.size() ) {
+						clock_start = clock();
+						dsdatp->datpdijkstra( r, c, path, false, dsdatpdijkstra_min_escape );
+						clock_end   = clock();
+						timer_average      += (clock_end-clock_start)/1000;
+						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+						calculations++;
+
+						// reset counter
+						counter = 0;
+					}
+					// generate next move for the robber
+					pos[0] = path[counter]->GetNum();
+					counter++;
+					value += 1.;
+
+					if( pos[0] == pos[1] ) break;
+				}
+
+				expected_value = (double)timer_average/(double)calculations;
+				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
+					- expected_value*expected_value );
+
+				// output result of the run
+				fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+				fflush( foutput );
+			}
+
 			fprintf( foutput, "\n" );
 
 		}
 
 		delete dsdijkstra;
+		delete dsdatp;
 		delete dstp;
 		delete dscover;
 		delete env;
