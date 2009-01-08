@@ -182,6 +182,8 @@ RoboticArm::RoboticArm(int dof, double armlength, double fTolerance)
 {
 	m_TableComplete = false;
 	legalStateTable = NULL;
+	legalGoalTable = NULL;
+	tipPositionTables = NULL;
 	BuildSinCosTables();
 	GenerateCPDB();
 }
@@ -956,6 +958,19 @@ int RoboticArm::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 	return i;
 }
 
+uint16_t RoboticArm::UseHeuristic( armAngles &s, armAngles &g,
+				   uint16_t *distances )
+{
+	uint16_t d_s, d_g;
+
+	d_s = distances[ ArmAnglesIndex( s ) ];
+	d_g = distances[ ArmAnglesIndex( g ) ];
+	if( d_s < d_g ) {
+	  return d_g - d_s;
+	}
+	return d_s - d_g;
+}
+
 uint16_t RoboticArm::UseHeuristic( armAngles &arm,
 				   double goalX, double goalY,
 				   uint16_t *distances,
@@ -1000,23 +1015,35 @@ uint16_t RoboticArm::UseHeuristic( armAngles &arm,
 bool RoboticArm::ValidGoalPosition( double goalX, double goalY )
 {
 	int i, j, index;
-	double x, y;
+	double x, y, tx, ty;
 
-	if( tablesNumArms.size() == 0 ) {
-		// no tables to use, can't prove anything
+	if( legalGoalTable == NULL ) {
+		// no table to use, can't prove anything
 		return false;
 	}
 
 	for( y = goalY - tolerance, i = 0; i < 3; y += tolerance, ++i ) {
 	  for( x = goalX - tolerance, j = 0; j < 3; x += tolerance, ++j ) {
-	    index =  TipPositionIndex( x, y, -1.0, -1.0, 2.0 );
-	    if( minTipDistancesTables[ 0 ][ index ]
-		> maxTipDistancesTables[ 0 ][ index ] ) {
-		// given one unreachable square, there's a possibility
-		// that even if the rest are reachable, they're
-		// only reachable because of states that are
-		// actually further than tolerance away from (x,y)
-		return false;
+	    tx = x;
+	    if( tx < -1.0 ) {
+	      tx = -1.0;
+	    } else if( tx >= 1.0 ) {
+	      tx = 0.999999;
+	    }
+	    ty = y;
+	    if( ty < -1.0 ) {
+	      ty = -1.0;
+	    } else if( ty >= 1.0 ) {
+	      ty = 0.999999;
+	    }
+
+	    index =  TipPositionIndex( tx, ty, -1.0, -1.0, 2.0 );
+	    if( !( legalGoalTable[ index >> 3 ] & ( 1 << ( index & 7 ) ) ) ) {
+	      // given one unreachable square, there's a possibility
+	      // that even if the rest are reachable, they're
+	      // only reachable because of states that are
+	      // actually further than tolerance away from (x,y)
+	      return false;
 	    }
 	  }
 	}
@@ -1026,26 +1053,37 @@ bool RoboticArm::ValidGoalPosition( double goalX, double goalY )
 
 void RoboticArm::GenerateLegalStateTable( armAngles &legalArm )
 {
-	uint64_t count, i;
-	uint16_t *distances, distance;
-	uint8_t *lst;
+	uint64_t numStates, numTip, i;
+	uint16_t *distances, *minTipDistances, *maxTipDistances, distance;
+	uint8_t *lst, *lgt;
 	armAngles arm, lastAdded;
 	FILE *curFile, *nextFile;
 
 	printf( "generating legal state table\n" );
 
-	count = NumArmAnglesIndices( legalArm );
+	numStates = NumArmAnglesIndices( legalArm );
+	numTip = NumTipPositionIndices();
 
-	lst = new uint8_t[ ( count + 7 ) >> 3 ];
-	distances = new uint16_t[ count ];
-	for( i = 0; i < count; ++i ) {
+	lst = new uint8_t[ ( numStates + 7 ) >> 3 ];
+	memset( lst, 0, ( numStates + 7 ) >> 3 );
+	lgt = new uint8_t[ ( numTip + 7 ) >> 3 ];
+	memset( lgt, 0, ( numTip + 7 ) >> 3 );
+	distances = new uint16_t[ numStates ];
+	for( i = 0; i < numStates; ++i ) {
 		distances[ i ] = 65535;
+	}
+	minTipDistances = new uint16_t[ numTip ];
+	maxTipDistances = new uint16_t[ numTip ];
+	for( i = 0; i < numTip; ++i ) {
+		minTipDistances[ i ] = 65535;
+		maxTipDistances[ i ] = 0;
 	}
 
 	nextFile = tmpfile();
 	assert( nextFile != NULL );
 
 	distances[ ArmAnglesIndex( legalArm ) ] = 0;
+	UpdateTipDistances( legalArm, 0, minTipDistances, maxTipDistances );
 	WriteArmAngles( nextFile, legalArm );
 
 	distance = 0;
@@ -1055,7 +1093,8 @@ void RoboticArm::GenerateLegalStateTable( armAngles &legalArm )
 		nextFile = tmpfile();
 
 		i = GenerateNextDepth( curFile, nextFile, distance,
-				       distances, NULL, NULL, lastAdded );
+				       distances, minTipDistances,
+				       maxTipDistances, lastAdded );
 
 		++distance;
 		fclose( curFile );
@@ -1064,13 +1103,69 @@ void RoboticArm::GenerateLegalStateTable( armAngles &legalArm )
 	printf( "done: maximum distance of %d from chosen state\n",
 		(int)distance );
 
-	memset( lst, 0, ( count + 7 ) >> 3 );
-	for( i = 0; i < count; ++i ) {
+	for( i = 0; i < numStates; ++i ) {
 		if( distances[ i ] < 65535 ) {
 			lst[ i >> 3 ] |= 1 << ( i & 7 );
 		}
 	}
 
+	for( i = 0; i < numTip; ++i ) {
+		if( minTipDistances[ i ]
+		    <= maxTipDistances[ i ] ) {
+			lgt[ i >> 3 ] |= 1 << ( i & 7 );
+		}
+	}
+
 	legalStateTable = lst;
+	legalGoalTable = lgt;
+	delete[] maxTipDistances;
+	delete[] minTipDistances;
 	delete[] distances;
+}
+
+void RoboticArm::GenerateTipPositionTables( armAngles &sampleArm )
+{
+	int numArms = sampleArm.GetNumArms(), segment;
+	double x, y;
+	armAngles arm;
+
+	printf( "generating tip position table\n" );
+
+	if( tipPositionTables != NULL ) {
+		return;
+	}
+
+	tipPositionTables = new std::vector<armAngles>
+	  [ NumTipPositionIndices() ];
+
+	arm.SetNumArms( numArms );
+
+	for( segment = 0; segment < numArms; ++segment ) {
+		arm.SetAngle( segment, 0 );
+	}
+	while( 1 ) {
+		if( LegalState( arm ) ) {
+
+		  GetTipPosition( arm, x, y );
+		  tipPositionTables
+		    [ TipPositionIndex( x, y, -1.0, -1.0, 2.0 ) ]
+		    .push_back( arm );
+		}
+
+		// next configuration
+		segment = 0;
+		do {
+			armRotations action;
+			action.SetRotation( segment, kRotateCW );
+			ApplyAction( arm, action );
+			if( arm.GetAngle( segment ) != 0 ) {
+				break;
+			}
+		} while( ++segment < numArms );
+		if( segment == numArms ) {
+			// tried all configurations
+			break;
+		}
+	}
+
 }

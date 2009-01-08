@@ -123,15 +123,15 @@ public:
 
 	bool LegalState(armAngles &a);
 	void GenerateLegalStateTable( armAngles &legalArm );
+	void GenerateTipPositionTables( armAngles &sampleArm );
 
 	void GenerateRandomHeuristic( const armAngles &sampleArm );
 	int GenerateHeuristic( const armAngles &sampleArm, armAngles &goal );
 	int GenerateMaxDistHeuristics( const armAngles &sampleArm,
 				       const int numHeuristics );
 
-	// only works if one of the GenerateXXXHeuristic functions has
-	// succeeded.  Returns true if the position is guaranteed to
-	// be valid.  Returns false if the position is either unvalid,
+	// Returns true if the position is guaranteed to be valid.
+	// Returns false if the position is either unvalid,
 	// or possibly unvalid
 	bool ValidGoalPosition( double goalX, double goalY );
 private:
@@ -153,11 +153,14 @@ private:
 	std::vector<line2d> armSegments;
 
 	uint8_t *legalStateTable;
+	uint8_t *legalGoalTable;
 
 	std::vector<uint16_t *> distancesTables;
 	std::vector<uint16_t *> minTipDistancesTables;
 	std::vector<uint16_t *> maxTipDistancesTables;
 	std::vector<uint16_t> tablesNumArms;
+
+	std::vector<armAngles> *tipPositionTables;
 
 
 	// convert an arm configuration into an index
@@ -206,6 +209,8 @@ private:
 				    armAngles &lastAdded );
 
 	// use a heuristic table
+	uint16_t UseHeuristic( armAngles &s, armAngles &g,
+			       uint16_t *distances );
 	uint16_t UseHeuristic( armAngles &arm, double goalX, double goalY,
 			       uint16_t *distances, uint16_t *minTipDistances,
 			       uint16_t *maxTipDistances );
