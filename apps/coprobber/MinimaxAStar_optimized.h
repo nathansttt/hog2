@@ -58,6 +58,8 @@ class MinimaxAStar {
 
 	double astar( CRState pos, bool minFirst );
 
+	void set_useheuristic( bool _useheuristic ) { useheuristic = _useheuristic; };
+
 	unsigned int nodesExpanded, nodesTouched;
 
 	protected:
@@ -78,6 +80,8 @@ class MinimaxAStar {
 	environment *env;
 	unsigned int number_of_cops;
 	bool canPass;
+
+	bool useheuristic;
 
 	// Priority Queues
 	MyPriorityQueue queue;
@@ -105,7 +109,7 @@ double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::MinGCost( CRState &p1, CRS
 
 template<class state,class action,class environment>
 MinimaxAStar<state,action,environment>::MinimaxAStar( environment *_env, unsigned int _number_of_cops, bool _canPass ):
-	env(_env), number_of_cops(_number_of_cops), canPass(_canPass) {
+	env(_env), number_of_cops(_number_of_cops), canPass(_canPass), useheuristic(true) {
 /*
 	time_t t; time( &t ); srandom( (unsigned int) t );
 	printf( "seed = %u\n", (unsigned int)t );
@@ -283,6 +287,8 @@ double MinimaxAStar<state,action,environment>::MinGCost( CRState&, CRState& ) {
 // furthermore, it only makes sense with the above definition of MinGCost===1
 template<class state,class action,class environment>
 double MinimaxAStar<state,action,environment>::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 ) {
+	if( !useheuristic ) return 0.;
+
 	double hmax = env->HCost( pos1[0], pos2[0] );
 	double hmin = 0.;
 	double h;
