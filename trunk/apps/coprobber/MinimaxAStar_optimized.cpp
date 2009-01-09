@@ -102,6 +102,9 @@ void MinimaxAStar<xyLoc,tDirection,MapEnvironment>::push_end_states_on_queue( CR
 
 template<>
 double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 ) {
+
+	if( !useheuristic ) return 0.;
+
 /*
 	if( minFirst1 == minFirst2 ) {
 		if( my_minheuristic.find( pos2 ) != my_minheuristic.end() )

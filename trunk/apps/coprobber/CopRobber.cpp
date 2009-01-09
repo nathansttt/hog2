@@ -44,6 +44,139 @@ int mazeSize = 10;
 ------------------------------------------------------------------------------*/
 int main(int argc, char* argv[])
 {
+
+
+	// parse command line parameters
+	if( argc < 2 ) {
+		printf( "usage: coprobber <algorithm/test> [algorithm/test params]\n" );
+		printf( "available algorithms/tests:\n" );
+		printf( "testing             - test code of lots of stuff\n" );
+		printf( "dijkstra            - Dijkstra for the entire state space\n" );
+		printf( "rma                 - RMA* (for one cop, lookup code for multiple cops version)\n" );
+		printf( "minimax             - Minimax (one cop)\n" );
+		printf( "minimax_optimized   - Minimax optimized (one cop)\n" );
+		printf( "tida                - TIDA*\n" );
+		printf( "ipn                 - IPN search without transposition tables\n" );
+		printf( "ipnttables          - IPN with transposition tables\n" );
+		printf( "tpdijkstra          - Two player dijkstra\n" );
+		printf( "dstpdijkstra        - different speed two player dijkstra\n" );
+		printf( "dsdijkstra          - different speed dijkstra\n" );
+		printf( "dsdijkstra_memoptim - optimized different speed dijkstra\n" );
+		printf( "dsrma               - different speed RMA*\n" );
+		printf( "dscover             - different speed Cover heuristic\n" );
+		printf( "dsheuristicgreedy   - different speed distance heuristic greedy algorithm\n" );
+		printf( "dsminimax           - different speed minimax\n" );
+		printf( "dsdam               - different speed dynamic abstract minimax\n" );
+		printf( "dsdatpdijkstra      - different speed dynamic abstract two player dijkstra\n" );
+		printf( "dsrandombeacons     - different speed random beacons\n" );
+		printf( "\n" );
+		printf( "testpoints          - generation of problem sets\n" );
+		printf( "experiment_optimal  - experiment for \"Optimal Solutions to MTS\"\n" );
+		printf( "experiment_allstate - Dijkstra vs. Markov\n" );
+		printf( "experiment_graphs   - computation of some statistics on graphs\n" );
+		printf( "website             - website interface\n" );
+		printf( "experiment_suboptimal - experiment for \"Suboptimal Solutions to MTS\"\n" );
+		return(1);
+	}
+
+	if( strcmp( argv[1], "testing" ) == 0 ) {
+		compute_testing( argc, argv );
+	}
+	else if( strcmp( argv[1], "dijkstra" ) == 0 ) {
+		compute_dijkstra( argc, argv );
+	}
+	else if( strcmp( argv[1], "rma" ) == 0 ) {
+		compute_rma( argc, argv );
+	}
+	else if( strcmp( argv[1], "minimax" ) == 0 ) {
+		compute_minimax( argc, argv );
+	}
+	else if( strcmp( argv[1], "minimax_optimized" ) == 0 ) {
+		compute_minimax_optimized( argc, argv );
+	}
+	else if( strcmp( argv[1], "tida" ) == 0 ) {
+		compute_tida( argc, argv );
+	}
+	else if( strcmp( argv[1], "ipn" ) == 0 ) {
+		compute_ipn( argc, argv );
+	}
+	else if( strcmp( argv[1], "ipnttables" ) == 0 ) {
+		compute_ipnttables( argc, argv );
+	}
+	else if( strcmp( argv[1], "tpdijkstra" ) == 0 ) {
+		compute_tpdijkstra( argc, argv );
+	}
+	else if( strcmp( argv[1], "dstpdijkstra" ) == 0 ) {
+		compute_dstpdijkstra( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsdijkstra" ) == 0 ) {
+		compute_dsdijkstra( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsdijkstra_memoptim" ) == 0 ) {
+		compute_dsdijkstra_memoptim( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsrma" ) == 0 ) {
+		compute_dsrma( argc, argv );
+	}
+	else if( strcmp( argv[1], "dscover" ) == 0 ) {
+		compute_dscover( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsheuristicgreedy" ) == 0 ) {
+		compute_dsheuristicgreedy( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsminimax" ) == 0 ) {
+		compute_dsminimax( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsdam" ) == 0 ) {
+		compute_dsdam( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsdatpdijkstra" ) == 0 ) {
+		compute_dsdatpdijkstra( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsrandombeacons" ) == 0 ) {
+		compute_dsrandombeacons( argc, argv );
+	}
+	else if( strcmp( argv[1], "testpoints" ) == 0 ) {
+		compute_testpoints( argc, argv );
+	}
+	else if( strcmp( argv[1], "experiment_optimal" ) == 0 ) {
+		compute_experiment_optimal( argc, argv );
+	}
+	else if( strcmp( argv[1], "experiment_allstate" ) == 0 ) {
+		compute_experiment_allstate( argc, argv );
+	}
+	else if( strcmp( argv[1], "experiment_graphs" ) == 0 ) {
+		compute_experiment_graphs( argc, argv );
+	}
+	else if( strcmp( argv[1], "website" ) == 0 ) {
+		compute_website_interface( argc, argv );
+	}
+	else if( strcmp( argv[1], "experiment_suboptimal" ) == 0 ) {
+		compute_experiment_suboptimal( argc, argv );
+	}
+	else {
+		printf( "ERROR: could not parse your algorithm/test parameter\n" );
+		return 1;
+	}
+
+	return 0;
+}
+
+
+
+
+void output_syntax() {
+	printf( "syntax: -c <num_cops> -g <graph>\n" );
+	printf( "where <graph> is: <num_vertices> <num_edges>\n" );
+	printf( "<edge1_vertice1> <edge1_vertice2> [<edge2_vertice1> <edge2_vertice2>...]\n" );
+	return;
+}
+
+/*------------------------------------------------------------------------------
+| Implementation of all algorithms
+------------------------------------------------------------------------------*/
+
+void compute_testing( int argc, char* argv[] ) {
 /*
 	// VISUALIZATION
 	InstallHandlers();
@@ -186,7 +319,60 @@ int main(int argc, char* argv[])
 */
 
 /*
-	// Dijkstra for the entire state space
+	// PRA* test code
+	Map *m = new Map( "../../maps/bgmaps/AR0700SR.map" );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	praStar *pra = new praStar();
+	//pra->setPartialPathLimit( 10 );
+
+	node *from = mclab->GetAbstractGraph(0)->GetNode(0);
+	node *to   = mclab->GetAbstractGraph(0)->GetNode( mclab->GetAbstractGraph(0)->GetNumNodes() - 1 );
+
+	path *p = pra->GetPath( mclab, from, to );
+	path *ptemp = p;
+
+	printf( "path: " );
+	while( ptemp ) {
+		printf( "%d ", ptemp->n->GetNum() );
+		ptemp = ptemp->next;
+	}
+	printf( "\n" );
+
+	delete ptemp;
+	delete p;
+	delete mclab;
+*/
+
+
+	// test the heuristic for abstraction environments
+	Map *m = new Map( "../../maps/local/test_coprobber_1.map" );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	Graph *g = mclab->GetAbstractGraph( 0 );
+	printf( "graph at level 0:\n" );
+	int num = g->GetNumNodes();
+	for( int i = 0; i < num; i++ ) {
+		node *n = g->GetNode( i );
+		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->getCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->getCoordinateScale() );
+	}
+	printf( "graph at level 1:\n" );
+	g = mclab->GetAbstractGraph( 1 );
+	num = g->GetNumNodes();
+	for( int i = 0; i < num; i++ ) {
+		node *n = g->GetNode( i );
+		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->getCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->getCoordinateScale() );
+	}
+
+	g = mclab->GetAbstractGraph( 1 );
+	MaximumNormAbstractGraphMapHeuristic *h = new MaximumNormAbstractGraphMapHeuristic( g, m );
+	graphState f = 3, t = 4;
+	printf( "h(0,1)@level 0 = %g\n", h->HCost( f, t ) );
+
+	return;
+}
+
+
+// Dijkstra for the entire state space
+void compute_dijkstra( int argc, char* argv[] ) {
 	xyLoc pos_cop, pos_robber;
 	Map *m;
 	int max_depth;
@@ -214,10 +400,11 @@ int main(int argc, char* argv[])
 	//delete gh;
 	delete g;
 	//delete m;
-*/
+}
 
 
-/*
+void compute_rma( int argc, char* argv[] ) {
+	/*
 	// Minimax A*
 	xyLoc pos_cop, pos_robber;
 	Map *m = NULL;
@@ -270,7 +457,7 @@ int main(int argc, char* argv[])
 */
 
 
-/*
+
 	// Optimized Minimax A*
 	xyLoc pos_cop, pos_robber;
 	Map *m;
@@ -298,12 +485,11 @@ int main(int argc, char* argv[])
 
 	delete astar;
 	delete env;
-*/
+}
 
 
-
-/*
-	// NORMAL MINIMAX
+// NORMAL MINIMAX
+void compute_minimax( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pos_cop, pos_robber;
 	int max_depth;
@@ -334,11 +520,11 @@ int main(int argc, char* argv[])
 
 	delete minclass;
 	delete env;
-*/
+}
 
 
-/*
-	// optimized Minimax
+// optimized Minimax
+void compute_minimax_optimized( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pos_cop, pos_robber;
 	int max_depth;
@@ -359,11 +545,12 @@ int main(int argc, char* argv[])
 	printf( "result: %f\n", result );
 	delete minclass;
 	delete env;
-*/
+}
 
 
+// TIDA*
+void compute_tida( int argc, char* argv[] ) {
 /*
-	// TIDA*
 	Map *m;
 	xyLoc pos_cop, pos_robber;
 	int max_recursion_level;
@@ -404,9 +591,42 @@ int main(int argc, char* argv[])
 */
 
 
+	// optimized TIDA*
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
 
-/*
-	// IPN-Search
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	MapEnvironment *env = new MapEnvironment( m );
+
+	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+
+	std::vector<xyLoc> pos;
+	pos.push_back( pos_robber ); pos.push_back( pos_cop );
+
+	double minimax = tidastar->tida( pos );
+
+	fprintf( stdout, "tida result: %f\n", minimax );
+	fprintf( stdout, "nodes expanded: %u ( ", tidastar->nodesExpanded );
+	for( unsigned int i = 0; i < tidastar->iteration_nodesExpanded.size(); i++ )
+		fprintf( stdout, "%u ", tidastar->iteration_nodesExpanded[i] );
+	fprintf( stdout, ")\n" );
+	fprintf( stdout, "nodes touched: %u ( ", tidastar->nodesTouched );
+	for( unsigned int i = 0; i < tidastar->iteration_nodesTouched.size(); i++ )
+		fprintf( stdout, "%u ", tidastar->iteration_nodesTouched[i] );
+	fprintf( stdout, ")\n" );
+
+	delete tidastar;
+	delete env;
+}
+
+
+// IPN-Search
+void compute_ipn( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pos_cop, pos_robber;
 	int max_recursion_level;
@@ -429,11 +649,11 @@ int main(int argc, char* argv[])
 
 	delete ipns;
 	delete env;
-*/
+}
 
 
-/*
-	// IPN-Search with transposition tables
+// IPN-Search with transposition tables
+void compute_ipnttables( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pos_cop, pos_robber;
 	int max_recursion_level;
@@ -468,46 +688,11 @@ int main(int argc, char* argv[])
 
 	delete ipntt;
 	delete env;
-*/
+}
 
 
-/*
-	// optimized TIDA*
-	Map *m;
-	xyLoc pos_cop, pos_robber;
-	int max_recursion_level;
-
-	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
-	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
-	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
-
-	MapEnvironment *env = new MapEnvironment( m );
-
-	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
-
-	std::vector<xyLoc> pos;
-	pos.push_back( pos_robber ); pos.push_back( pos_cop );
-
-	double minimax = tidastar->tida( pos );
-
-	fprintf( stdout, "tida result: %f\n", minimax );
-	fprintf( stdout, "nodes expanded: %u ( ", tidastar->nodesExpanded );
-	for( unsigned int i = 0; i < tidastar->iteration_nodesExpanded.size(); i++ )
-		fprintf( stdout, "%u ", tidastar->iteration_nodesExpanded[i] );
-	fprintf( stdout, ")\n" );
-	fprintf( stdout, "nodes touched: %u ( ", tidastar->nodesTouched );
-	for( unsigned int i = 0; i < tidastar->iteration_nodesTouched.size(); i++ )
-		fprintf( stdout, "%u ", tidastar->iteration_nodesTouched[i] );
-	fprintf( stdout, ")\n" );
-
-	delete tidastar;
-	delete env;
-*/
-
-
-/*
-	// Two Player Dijkstra
+// Two Player Dijkstra
+void compute_tpdijkstra( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pos_cop, pos_robber;
 	int max_recursion_level;
@@ -527,13 +712,12 @@ int main(int argc, char* argv[])
 
 	delete tpd;
 	delete env;
-*/
+}
 
 
-
-/*
-	// Two Player Dijkstra with move generation and possibly fast cop
-	// DSTPDijkstra
+// Two Player Dijkstra with move generation and possibly fast cop
+// DSTPDijkstra
+void compute_dstpdijkstra( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pos_cop, pos_robber;
 	int max_recursion_level;
@@ -559,14 +743,12 @@ int main(int argc, char* argv[])
 
 	delete dstpdijkstra;
 	delete env;
-*/
+}
 
 
-
-
-/*
-	// Dijkstra with different speeds for the entire state space
-	// DSDijkstra
+// Dijkstra with different speeds for the entire state space
+// DSDijkstra
+void compute_dsdijkstra( int argc, char* argv[] ) {
 	xyLoc pos_cop, pos_robber;
 	Map *m;
 	int max_depth;
@@ -583,12 +765,12 @@ int main(int argc, char* argv[])
 
 	delete dsdijkstra;
 	delete env;
-*/
+}
 
 
-/*
-	// Dijkstra with different speeds for the entire state space
-	// DSDijkstra_MemOptim
+// Dijkstra with different speeds for the entire state space
+// DSDijkstra_MemOptim
+void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 	xyLoc pos_cop, pos_robber;
 	Map *m;
 	unsigned int cop_speed = 2;
@@ -613,11 +795,12 @@ int main(int argc, char* argv[])
 	delete env;
 	delete g;
 	delete m;
-*/
+}
 
 
-/*
-	// RMA* with possibly faster cop => DSRMAStar
+
+// RMA* with possibly faster cop => DSRMAStar
+void compute_dsrma( int argc, char* argv[] ) {
 	xyLoc pos_cop, pos_robber;
 	Map *m;
 	int max_depth;
@@ -644,12 +827,12 @@ int main(int argc, char* argv[])
 
 	delete dsrmastar;
 	delete env;
-*/
+}
 
 
-/*
-	// DSCover
-	// Cover for one cop and one robber with DS move generation
+// DSCover
+// Cover for one cop and one robber with DS move generation
+void compute_dscover( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pos_cop, pos_robber;
 	int max_recursion_level;
@@ -687,11 +870,11 @@ int main(int argc, char* argv[])
 	delete env;
 	delete g;
 	delete m;
-*/
+}
 
 
-/*
-	// DSHeuristicGreedy
+// DSHeuristicGreedy
+void compute_dsheuristicgreedy( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pc, pr;
 	graphState pos_cop, pos_robber;
@@ -719,12 +902,12 @@ int main(int argc, char* argv[])
 	delete gh;
 	delete g;
 	delete m;
-*/
+}
 
 
 
-/*
-	// DSMinimax
+// DSMinimax
+void compute_dsminimax( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pc, pr;
 	graphState pos_cop, pos_robber;
@@ -765,12 +948,11 @@ int main(int argc, char* argv[])
 	delete gh;
 	delete g;
 	delete m;
-*/
+}
 
 
-
-/*
-	// DSDAM (DS dynamic abstract minimax)
+// DSDAM (DS dynamic abstract minimax)
+void compute_dsdam( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pc, pr;
 	int depth;
@@ -799,12 +981,11 @@ int main(int argc, char* argv[])
 
 	delete dsdam;
 	delete mclab;
-*/
+}
 
 
-
-/*
-	// DSDATPDijkstra (DS dynamic abstract two player dijkstra)
+// DSDATPDijkstra (DS dynamic abstract two player dijkstra)
+void compute_dsdatpdijkstra( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pc, pr;
 	int minimum_escape_length;
@@ -829,38 +1010,11 @@ int main(int argc, char* argv[])
 
 	delete dsdatpdijkstra;
 	delete mclab;
-*/
+}
 
 
-
-/*
-	// PRA* test code
-	Map *m = new Map( "../../maps/bgmaps/AR0700SR.map" );
-	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
-	praStar *pra = new praStar();
-	//pra->setPartialPathLimit( 10 );
-
-	node *from = mclab->GetAbstractGraph(0)->GetNode(0);
-	node *to   = mclab->GetAbstractGraph(0)->GetNode( mclab->GetAbstractGraph(0)->GetNumNodes() - 1 );
-
-	path *p = pra->GetPath( mclab, from, to );
-	path *ptemp = p;
-
-	printf( "path: " );
-	while( ptemp ) {
-		printf( "%d ", ptemp->n->GetNum() );
-		ptemp = ptemp->next;
-	}
-	printf( "\n" );
-
-	delete ptemp;
-	delete p;
-	delete mclab;
-*/
-
-
-/*
-	// DSRandomBeacons
+// DSRandomBeacons
+void compute_dsrandombeacons( int argc, char* argv[] ) {
 	Map *m;
 	xyLoc pc, pr;
 	graphState pos_cop, pos_robber;
@@ -887,21 +1041,21 @@ int main(int argc, char* argv[])
 
 	delete dsrandb;
 	delete mclab;
-*/
-
+}
 
 /*------------------------------------------------------------------------------
-| test generation code
+| Implementation of tests
 ------------------------------------------------------------------------------*/
 
-/*
 // problem set generation
+void compute_testpoints( int argc, char* argv[] ) {
 	char map_file[20];
 	char problem_file[20] = "problem_set1.dat";
 	Map *m;
 	time_t t; time( &t ); srandom( (unsigned int) t );
 	unsigned int num;
-	int i,j;
+	int j;
+	//int i;
 	// problem set 1: i = 6:20, scaled to size 20
 	// problem set 2: i = 16:35, scaled to size 40
 	// problem set 3: i = 20:39, scaled to size 60
@@ -961,12 +1115,13 @@ int main(int argc, char* argv[])
 	}
 	fclose( fhandler );
 	fclose( file_with_maps );
-*/
+}
 
 
 
-/*
-	// TESTs for "Optimal solutions for Moving Target Search"
+
+// TESTs for "Optimal solutions for Moving Target Search"
+void compute_experiment_optimal( int argc, char* argv[] ) {
 	char map_file[100];
 	FILE *problem_file, *result_file, *tida_file_handler = NULL;
 	clock_t clock_start, clock_end;
@@ -976,20 +1131,20 @@ int main(int argc, char* argv[])
 	unsigned int nodesExpanded = 0, nodesTouched = 0;
 	Map *m;
 
-	if( argc < 4 ) {
+	if( argc < 5 ) {
 		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
 		printf( "where <algorithm> = tida|rma|ipn|minimax|tpdijkstra\n" );
 		exit(1);
 	}
 
-	problem_file = fopen( argv[1], "r" );
-	result_file  = fopen( argv[3], "w" );
+	problem_file = fopen( argv[2], "r" );
+	result_file  = fopen( argv[4], "w" );
 
 	// in case we want to compute with minimax
 	// we have to get the correct values from a file (hello to TIDA*)
-	if( strcmp( argv[2], "minimax" ) == 0 ) {
+	if( strcmp( argv[3], "minimax" ) == 0 ) {
 			char s[100];
-			sprintf( s, "tida_%s", argv[1] );
+			sprintf( s, "tida_%s", argv[2] );
 			tida_file_handler = fopen( s, "r" );
 			if( tida_file_handler == NULL ) {
 				fprintf( stderr, "ERROR: could not find tida value file\n" );
@@ -1003,7 +1158,7 @@ int main(int argc, char* argv[])
 		m = new Map( map_file );
 		MapEnvironment *env = new MapEnvironment( m );
 
-		if( strcmp( argv[2], "tida" ) == 0 ) {
+		if( strcmp( argv[3], "tida" ) == 0 ) {
 			// if we want to test TIDA*
 			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
 				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
@@ -1020,7 +1175,7 @@ int main(int argc, char* argv[])
 			delete tidastar;
 		}
 
-		if( strcmp( argv[2], "ipn" ) == 0 ) {
+		if( strcmp( argv[3], "ipn" ) == 0 ) {
 			IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt =
 				new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
 
@@ -1036,7 +1191,7 @@ int main(int argc, char* argv[])
 			delete ipntt;
 		}
 
-		if( strcmp( argv[2], "rma" ) == 0 ) {
+		if( strcmp( argv[3], "rma" ) == 0 ) {
 			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
 				new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
 			std::vector<xyLoc> s;
@@ -1052,7 +1207,24 @@ int main(int argc, char* argv[])
 			delete astar;
 		}
 
-		if( strcmp( argv[2], "minimax" ) == 0 ) {
+		if( strcmp( argv[3], "rma_dijkstra" ) == 0 ) {
+			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
+				new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+			astar->set_useheuristic( false );
+			std::vector<xyLoc> s;
+			s.push_back( xyLoc( rx, ry ) );
+			s.push_back( xyLoc( cx, cy ) );
+
+			clock_start   = clock();
+			result        = astar->astar( s, true );
+			clock_end     = clock();
+			nodesExpanded = astar->nodesExpanded;
+			nodesTouched  = astar->nodesTouched;
+
+			delete astar;
+		}
+
+		if( strcmp( argv[3], "minimax" ) == 0 ) {
 
 			double tida_value;
 			fscanf( tida_file_handler, "(%*u,%*u) (%*u,%*u) %lf %*u %*u %*u %*s\n",
@@ -1072,7 +1244,7 @@ int main(int argc, char* argv[])
 			delete minclass;
 		}
 
-		if( strcmp( argv[2], "tpdijkstra" ) == 0 ) {
+		if( strcmp( argv[3], "tpdijkstra" ) == 0 ) {
 			TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment> *tpd = new TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>( env, true );
 
 			clock_start   = clock();
@@ -1097,12 +1269,13 @@ int main(int argc, char* argv[])
 	fclose( problem_file );
 	fclose( result_file );
 	fprintf( stdout, "Done.\n" );
-*/
+}
 
 
 
-/*
-	// test of all-state algorithms
+
+// test of all-state algorithms
+void compute_experiment_allstate( int argc, char* argv[] ) {
 	char map_file[100];
 	FILE *problem_file, *result_file;
 	clock_t clock_start, clock_end;
@@ -1165,11 +1338,12 @@ int main(int argc, char* argv[])
 	}
 	fclose( result_file );
 	fclose( problem_file );
-*/
+}
 
 
-/*
-	// code for testing various sets of graphs
+
+// code for testing various sets of graphs
+void compute_experiment_graphs( int argc, char* argv[] ) {
 
 	for( int i = 4; i <= 9; i++ ) {
 //	char s[10]; sprintf( s, "graph%dc.out", i );
@@ -1294,27 +1468,29 @@ int main(int argc, char* argv[])
 	printf( "Maximal time to capture: %f\n", maximum_st );
 	printf( "Maximal ratio: %f\n", maximum_ratio );
 	}
-*/
+}
 
 
-/*
-	// code for Cops and Robber website interface
-	if( argc < 6 ) {
+
+
+// code for Cops and Robber website interface
+void compute_website_interface( int argc, char* argv[] ) {
+	if( argc < 7 ) {
 		output_syntax();
-		return(1);
+		exit(1);
 	}
 	int num_cops;
 	if( strcmp( argv[1], "-c" ) == 0 ) {
-		num_cops = atoi( argv[2] );
+		num_cops = atoi( argv[3] );
 	} else {
 		output_syntax();
-		return(1);
+		exit(1);
 	}
 
 	double search_time = DBL_MAX;
-	Graph *g = readGraphFromCommandLine( 3, argc, argv );
+	Graph *g = readGraphFromCommandLine( 4, argc, argv );
 	
-	if( g == NULL ) return 1;
+	if( g == NULL ) exit(1);
 	std::vector<double>::iterator it;
 
 	// determine whether this graph is cop win or not
@@ -1378,40 +1554,13 @@ int main(int argc, char* argv[])
 		if( search_time > 0. ) search_time = (search_time + 1.)/2.;
 		printf( "1 %.0f\n", search_time );
 	}
-*/
+
+}
 
 
 
-/*
-	// test the heuristic for abstraction environments
-	Map *m = new Map( "../../maps/local/test_coprobber_1.map" );
-	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
-	Graph *g = mclab->GetAbstractGraph( 0 );
-	printf( "graph at level 0:\n" );
-	int num = g->GetNumNodes();
-	for( int i = 0; i < num; i++ ) {
-		node *n = g->GetNode( i );
-		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->getCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->getCoordinateScale() );
-	}
-	printf( "graph at level 1:\n" );
-	g = mclab->GetAbstractGraph( 1 );
-	num = g->GetNumNodes();
-	for( int i = 0; i < num; i++ ) {
-		node *n = g->GetNode( i );
-		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->getCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->getCoordinateScale() );
-	}
-
-	g = mclab->GetAbstractGraph( 1 );
-	MaximumNormAbstractGraphMapHeuristic *h = new MaximumNormAbstractGraphMapHeuristic( g, m );
-	graphState f = 3, t = 4;
-	printf( "h(0,1)@level 0 = %g\n", h->HCost( f, t ) );
-*/
-
-
-
-
-
-	// Code for "Suboptimal Solutions to MTS"
+// Code for "Suboptimal Solutions to MTS"
+void compute_experiment_suboptimal( int argc, char* argv[] ) {
 	// CONFIG PARAMETER
 	unsigned int cop_speed = 2;
 	unsigned int maxmin_stepsize = 20; // maximum number of steps the maxmin solution is followed
@@ -1429,16 +1578,16 @@ int main(int argc, char* argv[])
 	// parameter input
 	if( argc < 4 ) {
 		printf( "syntax: -p <problem_file> -o <output_file>\n" );
-		return 1;
+		exit(1);
 	}
-	if( strcmp( argv[1], "-p" ) == 0 ) {
-		fhandler = fopen( argv[2], "r" );
+	if( strcmp( argv[2], "-p" ) == 0 ) {
+		fhandler = fopen( argv[3], "r" );
 	}
-	if( strcmp( argv[3], "-o" ) == 0 ) {
-		foutput = fopen( argv[4], "w" );
+	if( strcmp( argv[4], "-o" ) == 0 ) {
+		foutput = fopen( argv[5], "w" );
 	}
 
-	printf( "problem file: %s\n", argv[2] );
+	printf( "problem file: %s\n", argv[3] );
 
 	// syntax explanation output
 	fprintf( foutput, "syntax: robber_pos cop_pos optimal_solution +\n" );
@@ -1841,20 +1990,12 @@ int main(int argc, char* argv[])
 	}
 	fclose( fhandler );
 	fclose( foutput );
-
-
-	return 0;
 }
 
 
-
-
-void output_syntax() {
-	printf( "syntax: -c <num_cops> -g <graph>\n" );
-	printf( "where <graph> is: <num_vertices> <num_edges>\n" );
-	printf( "<edge1_vertice1> <edge1_vertice2> [<edge2_vertice1> <edge2_vertice2>...]\n" );
-	return;
-}
+/*------------------------------------------------------------------------------
+| Other stuff
+------------------------------------------------------------------------------*/
 
 void CreateSimulation( int id ) {
 	Map *map = new Map( "../../maps/local/test_coprobber_1.map" );
@@ -1969,10 +2110,10 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 
 
 void parseCommandLineParameters( int argc, char* argv[], Map* &m, xyLoc &pos_cop, xyLoc &pos_robber, int &max_recursion_level ) {
-	int curr = 1;
+	int curr = 2;
 	int x,y;
 
-	if( argc < 6 ) {
+	if( argc < 7 ) {
 		fprintf( stderr, "Syntax: followme -map <map> -pc <pos_cop> -pr <pos_robber> -rlevel <max_recursion_level>\n" );
 		fprintf( stderr, "where <pos_cop>/<pos_robber> is of the form x,y\n" );
 		exit(1);

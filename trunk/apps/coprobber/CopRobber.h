@@ -4,6 +4,35 @@
 
 void output_syntax();
 
+// algorithms
+void compute_testing( int argc, char* argv[] );
+void compute_dijkstra( int argc, char* argv[] );
+void compute_rma( int argc, char* argv[] );
+void compute_minimax( int argc, char* argv[] );
+void compute_minimax_optimized( int argc, char* argv[] );
+void compute_tida( int argc, char* argv[] );
+void compute_ipn( int argc, char* argv[] );
+void compute_ipnttables( int argc, char* argv[] );
+void compute_tpdijkstra( int argc, char* argv[] );
+void compute_dstpdijkstra( int argc, char* argv[] );
+void compute_dsdijkstra( int argc, char* argv[] );
+void compute_dsdijkstra_memoptim( int argc, char* argv[] );
+void compute_dsrma( int argc, char* argv[] );
+void compute_dscover( int argc, char* argv[] );
+void compute_dsheuristicgreedy( int argc, char* argv[] );
+void compute_dsminimax( int argc, char* argv[] );
+void compute_dsdam( int argc, char* argv[] );
+void compute_dsdatpdijkstra( int argc, char* argv[] );
+void compute_dsrandombeacons( int argc, char* argv[] );
+// tests
+void compute_testpoints( int argc, char* argv[] );
+void compute_experiment_optimal( int argc, char* argv[] );
+void compute_experiment_allstate( int argc, char* argv[] );
+void compute_experiment_graphs( int argc, char* argv[] );
+void compute_website_interface( int argc, char* argv[] );
+void compute_experiment_suboptimal( int argc, char* argv[] );
+
+
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType);
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data);
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier, char key);
