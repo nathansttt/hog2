@@ -42,8 +42,10 @@ DSDATPDijkstra::~DSDATPDijkstra() {
 
 void DSDATPDijkstra::datpdijkstra( node* pos_robber, node* pos_cop, std::vector<node*> &resultpath, bool minFirst, double min_escape_length ) {
 	resultpath.clear();
-	nodesExpanded = 0;
-	nodesTouched = 0;
+	myNodesExpanded = 0;
+	nodesExpanded   = 0;
+	myNodesTouched  = 0;
+	nodesTouched    = 0;
 
 	// find the joint hierarchy
 	std::vector<node*> robberChain, copChain;
@@ -76,8 +78,8 @@ void DSDATPDijkstra::datpdijkstra( node* pos_robber, node* pos_cop, std::vector<
 		graphState probber = (graphState) robberChain[level]->GetNum();
 		graphState pcop    = (graphState) copChain[level]->GetNum();
 		double temp = dstpdijkstra[level]->dstpdijkstra( probber, pcop, minFirst, numberpath );
-		nodesExpanded += dstpdijkstra[level]->nodesExpanded;
-		nodesTouched  += dstpdijkstra[level]->nodesTouched;
+		myNodesExpanded += dstpdijkstra[level]->nodesExpanded;
+		myNodesTouched  += dstpdijkstra[level]->nodesTouched;
 		if( fgreater(temp,min_escape_length) || level == 0 ) {
 			// the robber can escape on this level
 			// or we are on the ground level
@@ -179,6 +181,10 @@ void DSDATPDijkstra::datpdijkstra( node* pos_robber, node* pos_cop, std::vector<
 
 	// cleanup
 	delete p;
+
+	// get the statistics from PRA*
+	myNodesExpanded += nodesExpanded;
+	myNodesTouched  += nodesTouched;
 
 	return;
 };

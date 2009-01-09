@@ -27,6 +27,8 @@ class DSRandomBeacons {
 	void GetPath( graphState pos_robber, graphState pos_cop, unsigned int num_beacons,
 		std::vector<graphState> &path );
 
+	unsigned int nodesExpanded, nodesTouched;
+
 	protected:
 
 	MapAbstraction *mabs;

@@ -1,7 +1,7 @@
 #include "TIDAStar_optimized.h"
 
 // specification for state=xyLoc
-/*
+
 template<>
 double TIDAStar<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool minsTurn ) {
 	if( GoalTest( pos ) ) return TerminalCost( pos );
@@ -15,8 +15,13 @@ double TIDAStar<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool m
 	else
 		return dist;
 }
-*/
 
+template<>
+double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinGCost( CRState&, CRState& ) {
+	return 1.;
+}
+
+/*
 template<>
 double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinHCost( CRState &pos, bool minsTurn ) {
 	if( GoalTest( pos ) ) return TerminalCost( pos );
@@ -39,3 +44,4 @@ double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinGCost( CRState &p1, CRSta
 	if( abs(p1[1].x-p2[1].x)==1 && abs(p1[1].y-p2[1].y)==1 ) return 1.5;
 	return 1.;
 }
+*/

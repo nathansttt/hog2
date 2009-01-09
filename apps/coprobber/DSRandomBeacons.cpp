@@ -21,6 +21,7 @@ DSRandomBeacons::~DSRandomBeacons() {
 void DSRandomBeacons::GetPath( graphState pos_robber, graphState pos_cop, unsigned int num_beacons, std::vector<graphState> &resultpath ) {
 
 	resultpath.clear();
+	nodesExpanded = 0; nodesTouched = 0;
 	node *target = NULL;
 	double target_h = DBL_MIN;
 
@@ -29,6 +30,7 @@ void DSRandomBeacons::GetPath( graphState pos_robber, graphState pos_cop, unsign
 
 	for( unsigned int i = 0; i < num_beacons; i++ ) {
 		node *r = g->GetRandomNode();
+		nodesTouched++;
 		graphState rs = r->GetNum();
 		double r_h = dscrenv->HCost( rs, pos_cop );
 		//printf( "testing node %d: %g\n", r->GetNum(), r_h );
@@ -46,6 +48,8 @@ void DSRandomBeacons::GetPath( graphState pos_robber, graphState pos_cop, unsign
 	} else {
 		// generate a PRA* path to this target
 		path *p = pra->GetPath( mabs, probber, target );
+		nodesExpanded += pra->nodesExpanded;
+		nodesTouched  += pra->nodesTouched;
 		// transform the path into a vector
 		path *trav = p->next;
 		while( trav ) {
