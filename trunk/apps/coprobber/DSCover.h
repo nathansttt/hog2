@@ -119,8 +119,6 @@ unsigned int DSCover<state,action>::cover( state pos_robber, state pos_cop, bool
 		return 0;
 	}
 
-	nodesExpanded = 0; nodesTouched = 0;
-
 	// push the robber and the cop onto their open queues
 	QueueEntry qcop( pos_cop, 0, pos_cop );
 	cop_queue.push( qcop );
@@ -235,6 +233,8 @@ unsigned int DSCover<state,action>::cover( state pos_robber, state pos_cop, bool
 
 template<class state,class action>
 state DSCover<state,action>::MakeMove( state pos_robber, state pos_cop, bool minFirst, unsigned int num_total_states ) {
+
+	nodesExpanded = 0; nodesTouched = 0;
 
 	unsigned int max_cover = 0, temp;
 	state max_cover_state;

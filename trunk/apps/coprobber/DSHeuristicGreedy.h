@@ -23,6 +23,8 @@ class DSHeuristicGreedy {
 	// makes a move as described above
 	state MakeMove( state pos_robber, state pos_cop, bool minFirst );
 
+	unsigned int nodesExpanded, nodesTouched;
+
 	protected:
 
 	DSCREnvironment<state,action> *dscrenv;
@@ -46,6 +48,8 @@ DSHeuristicGreedy<state,action>::~DSHeuristicGreedy() {
 template<class state,class action>
 state DSHeuristicGreedy<state,action>::MakeMove( state pos_robber, state pos_cop, bool minFirst ) {
 
+	nodesExpanded = 0; nodesTouched = 0;
+
 	// find out all the possible moves
 	std::vector<state> neighbors;
 	state nextmove = minFirst?pos_cop:pos_robber;
@@ -53,10 +57,12 @@ state DSHeuristicGreedy<state,action>::MakeMove( state pos_robber, state pos_cop
 
 	if( minFirst ) {
 		dscrenv->GetCopSuccessors( pos_cop, neighbors );
+		nodesExpanded++; nodesTouched++;
 		heuristic_value = DBL_MAX;
 		// for each successor state find the one that is best concerning the heuristic
 		for( typename std::vector<state>::iterator it = neighbors.begin();
 			it != neighbors.end(); it++ ) {
+			nodesTouched++;
 			temp = dscrenv->HCost( pos_robber, *it );
 			if( temp < heuristic_value ) {
 				nextmove = *it;
@@ -66,9 +72,11 @@ state DSHeuristicGreedy<state,action>::MakeMove( state pos_robber, state pos_cop
 
 	} else {
 		dscrenv->GetRobberSuccessors( pos_robber, neighbors );
+		nodesExpanded++; nodesTouched++;
 		heuristic_value = DBL_MIN;
 		for( typename std::vector<state>::iterator it = neighbors.begin();
 			it != neighbors.end(); it++ ) {
+			nodesTouched++;
 			temp = dscrenv->HCost( *it, pos_cop );
 			if( temp > heuristic_value ) {
 				nextmove = *it;

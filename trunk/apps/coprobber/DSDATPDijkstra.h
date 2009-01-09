@@ -31,7 +31,7 @@ class DSDATPDijkstra:
 	node* MakeMove( node* pos_robber, node* pos_cop, bool minFirst = true, double min_escape_length = 5. );
 
 	// statistic variables that get resetted everytime datpdijkstra(...) is called
-	unsigned int nodesExpanded, nodesTouched;
+	unsigned int myNodesExpanded, myNodesTouched;
 
 	protected:
 

@@ -629,7 +629,7 @@ int main(int argc, char* argv[])
 	MapEnvironment *env = new MapEnvironment( m );
 
 	DSRMAStar<xyLoc,tDirection,MapEnvironment> *dsrmastar =
-		new DSRMAStar<xyLoc,tDirection,MapEnvironment>( env, 2 );
+		new DSRMAStar<xyLoc,tDirection,MapEnvironment>( env, 1 );
 	std::vector<xyLoc> s;
 	s.push_back( pos_robber );
 	s.push_back( pos_cop );
@@ -782,9 +782,9 @@ int main(int argc, char* argv[])
 	printf( "robber position: %d,%d (%d)\n", pr.x, pr.y, mclab->GetNodeFromMap( pr.x, pr.y )->GetNum() );
 	printf( "computation depth: %d\n", depth );
 
-	printf( "\n\nGraphs:\n" );
-	writeGraph( stdout, mclab->GetAbstractGraph(0) );
-	writeGraph( stdout, mclab->GetAbstractGraph(1) );
+	//printf( "\n\nGraphs:\n" );
+	//writeGraph( stdout, mclab->GetAbstractGraph(0) );
+	//writeGraph( stdout, mclab->GetAbstractGraph(1) );
 
 	DSDAM *dsdam = new DSDAM( mclab, true, 2, true );
 	std::vector<node*> path;
@@ -824,8 +824,8 @@ int main(int argc, char* argv[])
 		printf( "%u ", (*it)->GetNum() );
 	}
 	printf( "\n" );
-	printf( "nodesExpanded: %u\n", dsdatpdijkstra->nodesExpanded );
-	printf( "nodesTouched: %u\n", dsdatpdijkstra->nodesTouched );
+	printf( "nodesExpanded: %u\n", dsdatpdijkstra->myNodesExpanded );
+	printf( "nodesTouched: %u\n", dsdatpdijkstra->myNodesTouched );
 
 	delete dsdatpdijkstra;
 	delete mclab;
@@ -1411,7 +1411,7 @@ int main(int argc, char* argv[])
 
 
 
-	// Code for MaxMin approximation quality measurements
+	// Code for "Suboptimal Solutions to MTS"
 	// CONFIG PARAMETER
 	unsigned int cop_speed = 2;
 	unsigned int maxmin_stepsize = 20; // maximum number of steps the maxmin solution is followed
@@ -1424,6 +1424,7 @@ int main(int argc, char* argv[])
 	unsigned int rx, ry, cx, cy;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
+	unsigned int nodesExpanded = 0, nodesTouched = 0;
 
 	// parameter input
 	if( argc < 4 ) {
@@ -1441,7 +1442,7 @@ int main(int argc, char* argv[])
 
 	// syntax explanation output
 	fprintf( foutput, "syntax: robber_pos cop_pos optimal_solution +\n" );
-	fprintf( foutput, "<sol num avg div> for each of the algorithms: cover minimax(%g) dam(%g) heuristicgreedy pathmax(1-%d) dapathmax(1-%d)\n", minimax_depth, minimax_depth, maxmin_stepsize, maxmin_stepsize );
+	fprintf( foutput, "<sol num avg div> for each of the algorithms: cover minimax(%g) dam(%g) heuristicgreedy pathmax(1-%d) dapathmax(1-%d) dsrandombeacons(1-%d)\n", minimax_depth, minimax_depth, maxmin_stepsize, maxmin_stepsize, maxmin_stepsize );
 	fprintf( foutput, "where sol = solution length against optimal cop\n" );
 	fprintf( foutput, "      num = number of computations needed\n" );
 	fprintf( foutput, "      avg = average computation time in ms for each such computation\n" );
@@ -1519,6 +1520,7 @@ int main(int argc, char* argv[])
 			// compute the solution for COVER
 			double value = 0.;
 			unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
+			nodesExpanded = 0; nodesTouched = 0;
 			while( true ) {
 				pos[1] = dsdijkstra->MakeMove( pos, true );
 				value += 1.;
@@ -1529,6 +1531,8 @@ int main(int argc, char* argv[])
 				clock_end   = clock();
 				timer_average      += (clock_end-clock_start)/1000;
 				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+				nodesExpanded += dscover->nodesExpanded;
+				nodesTouched  += dscover->nodesTouched;
 				calculations++;
 
 				value += 1.;
@@ -1537,8 +1541,10 @@ int main(int argc, char* argv[])
 			double expected_value = (double)timer_average/(double)calculations;
 			double std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 				- expected_value*expected_value );
+			double expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
+			double expected_nodesTouched  = (double)nodesTouched /(double)calculations;
 			// output the cover result
-			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+			fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 			fflush( foutput );
 
 
@@ -1548,6 +1554,7 @@ int main(int argc, char* argv[])
 			// compute the solution for MINIMAX
 			value = 0.;
 			calculations = 0; timer_average = 0; timer_stddiviation = 0;
+			nodesExpanded = 0; nodesTouched = 0;
 			while( true ) {
 				pos[1] = dsdijkstra->MakeMove( pos, true );
 				value += 1.;
@@ -1558,6 +1565,8 @@ int main(int argc, char* argv[])
 				clock_end   = clock();
 				timer_average      += (clock_end-clock_start)/1000;
 				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+				nodesExpanded += dsminimax->nodesExpanded;
+				nodesTouched  += dsminimax->nodesTouched;
 				calculations++;
 
 				value += 1.;
@@ -1566,7 +1575,9 @@ int main(int argc, char* argv[])
 			expected_value = (double)timer_average/(double)calculations;
 			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 				- expected_value*expected_value );
-			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+			expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
+			expected_nodesTouched  = (double)nodesTouched /(double)calculations;
+			fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 			fflush( foutput );
 
 
@@ -1576,6 +1587,7 @@ int main(int argc, char* argv[])
 			// compute the solution for DYNAMIC ABSTRACT MINIMAX
 			value = 0.;
 			calculations = 0; timer_average = 0; timer_stddiviation = 0;
+			nodesExpanded = 0; nodesTouched = 0;
 			while( true ) {
 				pos[1] = dsdijkstra->MakeMove( pos, true );
 				value += 1.;
@@ -1589,6 +1601,8 @@ int main(int argc, char* argv[])
 				clock_end   = clock();
 				timer_average      += (clock_end-clock_start)/1000;
 				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+				nodesExpanded += dsdam->nodesExpanded;
+				nodesTouched  += dsdam->nodesTouched;
 				calculations++;
 				pos[0] = r->GetNum();
 
@@ -1598,7 +1612,9 @@ int main(int argc, char* argv[])
 			expected_value = (double)timer_average/(double)calculations;
 			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 				- expected_value*expected_value );
-			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+			expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
+			expected_nodesTouched  = (double)nodesTouched /(double)calculations;
+			fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 			fflush( foutput );
 
 
@@ -1608,6 +1624,7 @@ int main(int argc, char* argv[])
 			// compute the solution for GREEDY HEURISTIC
 			value = 0.;
 			calculations = 0; timer_average = 0; timer_stddiviation = 0;
+			nodesExpanded = 0; nodesTouched = 0;
 			while( true ) {
 				pos[1] = dsdijkstra->MakeMove( pos, true );
 				value += 1.;
@@ -1618,6 +1635,8 @@ int main(int argc, char* argv[])
 				clock_end   = clock();
 				timer_average      += (clock_end-clock_start)/1000;
 				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+				nodesExpanded += dsheuristic->nodesExpanded;
+				nodesTouched  += dsheuristic->nodesTouched;
 				calculations++;
 
 				value += 1.;
@@ -1626,7 +1645,9 @@ int main(int argc, char* argv[])
 			expected_value = (double)timer_average/(double)calculations;
 			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 				- expected_value*expected_value );
-			fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+			expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
+			expected_nodesTouched  = (double)nodesTouched /(double)calculations;
+			fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 			fflush( foutput );
 
 
@@ -1646,6 +1667,7 @@ int main(int argc, char* argv[])
 				calculations = 0;
 				timer_average = 0;
 				timer_stddiviation = 0;
+				nodesExpanded = 0; nodesTouched = 0;
 				while( true ) {
 					pos[1] = dsdijkstra->MakeMove( pos, true );
 					value += 1.;
@@ -1660,6 +1682,8 @@ int main(int argc, char* argv[])
 						clock_end   = clock();
 						timer_average      += (clock_end-clock_start)/1000;
 						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+						nodesExpanded += dstp->nodesExpanded;
+						nodesTouched  += dstp->nodesTouched;
 						calculations++;
 
 						// reset counter
@@ -1676,9 +1700,11 @@ int main(int argc, char* argv[])
 				expected_value = (double)timer_average/(double)calculations;
 				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 					- expected_value*expected_value );
+				expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
+				expected_nodesTouched  = (double)nodesTouched /(double)calculations;
 
 				// output result of the run
-				fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+				fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 				fflush( foutput );
 			}
 
@@ -1700,6 +1726,7 @@ int main(int argc, char* argv[])
 				calculations = 0;
 				timer_average = 0;
 				timer_stddiviation = 0;
+				nodesExpanded = 0; nodesTouched = 0;
 				while( true ) {
 					pos[1] = dsdijkstra->MakeMove( pos, true );
 					value += 1.;
@@ -1717,6 +1744,8 @@ int main(int argc, char* argv[])
 						clock_end   = clock();
 						timer_average      += (clock_end-clock_start)/1000;
 						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+						nodesExpanded += dsdatp->myNodesExpanded;
+						nodesTouched  += dsdatp->myNodesTouched;
 						calculations++;
 
 						// reset counter
@@ -1733,9 +1762,11 @@ int main(int argc, char* argv[])
 				expected_value = (double)timer_average/(double)calculations;
 				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 					- expected_value*expected_value );
+				expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
+				expected_nodesTouched  = (double)nodesTouched /(double)calculations;
 
 				// output result of the run
-				fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+				fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 				fflush( foutput );
 			}
 
@@ -1753,6 +1784,7 @@ int main(int argc, char* argv[])
 				calculations = 0;
 				timer_average = 0;
 				timer_stddiviation = 0;
+				nodesExpanded = 0; nodesTouched = 0;
 				while( true ) {
 					pos[1] = dsdijkstra->MakeMove( pos, true );
 					value += 1.;
@@ -1767,6 +1799,8 @@ int main(int argc, char* argv[])
 						clock_end   = clock();
 						timer_average      += (clock_end-clock_start)/1000;
 						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+						nodesExpanded += dsrandomb->nodesExpanded;
+						nodesTouched  += dsrandomb->nodesTouched;
 						calculations++;
 
 						// reset counter
@@ -1783,9 +1817,11 @@ int main(int argc, char* argv[])
 				expected_value = (double)timer_average/(double)calculations;
 				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
 					- expected_value*expected_value );
+				expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
+				expected_nodesTouched  = (double)nodesTouched /(double)calculations;
 
 				// output result of the run
-				fprintf( foutput, " %g %lu %g %g", value, calculations, expected_value, std_diviation );
+				fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 				fflush( foutput );
 			}
 
@@ -1805,7 +1841,6 @@ int main(int argc, char* argv[])
 	}
 	fclose( fhandler );
 	fclose( foutput );
-
 
 
 	return 0;

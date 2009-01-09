@@ -134,6 +134,10 @@ void DSDAM::dam( node* pos_robber, node* pos_cop, std::vector<node*> &resultpath
 		} else
 			p = pra->GetPath( gabs, pos_robber, target );
 	}
+
+	// get statistics from PRA*
+	nodesExpanded += pra->nodesExpanded;
+	nodesTouched  += pra->nodesTouched;
 	
 	// convert p to a vector
 	ptemp = p;
