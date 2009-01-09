@@ -1,10 +1,11 @@
 #include <vector>
 #include <queue>
 #include <ext/hash_map>
+#include "MyHash.h"
 #include "GraphEnvironment.h"
 #include "Map2DEnvironment.h"
 #include "CopRobberGame.h"
-#include "Minimax.h"
+#include "FloydWarshall.h"
 
 #ifndef MINIMAXASTAR_H
 #define MINIMAXASTAR_H
@@ -58,7 +59,8 @@ class MinimaxAStar {
 
 	double astar( CRState pos, bool minFirst );
 
-	void set_useheuristic( bool _useheuristic ) { useheuristic = _useheuristic; };
+	void set_useHeuristic( bool _useHeuristic ) { useHeuristic = _useHeuristic; };
+	void set_usePerfectDistanceHeuristic( bool usePerfectDistanceHeuristic );
 
 	unsigned int nodesExpanded, nodesTouched;
 
@@ -81,7 +83,8 @@ class MinimaxAStar {
 	unsigned int number_of_cops;
 	bool canPass;
 
-	bool useheuristic;
+	bool useHeuristic;
+	bool usePerfectDistanceHeuristic;
 
 	// Priority Queues
 	MyPriorityQueue queue;
@@ -90,7 +93,9 @@ class MinimaxAStar {
 	MyClosedList min_cost, max_cost;
 
 
-	MyClosedList my_minheuristic, my_maxheuristic;
+	//MyClosedList my_minheuristic, my_maxheuristic;
+	std::vector<std::vector<double> > distance_heuristic;
+	
 };
 
 
@@ -109,7 +114,7 @@ double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::MinGCost( CRState &p1, CRS
 
 template<class state,class action,class environment>
 MinimaxAStar<state,action,environment>::MinimaxAStar( environment *_env, unsigned int _number_of_cops, bool _canPass ):
-	env(_env), number_of_cops(_number_of_cops), canPass(_canPass), useheuristic(true) {
+	env(_env), number_of_cops(_number_of_cops), canPass(_canPass), useHeuristic(true), usePerfectDistanceHeuristic(false) {
 /*
 	time_t t; time( &t ); srandom( (unsigned int) t );
 	printf( "seed = %u\n", (unsigned int)t );
@@ -117,6 +122,9 @@ MinimaxAStar<state,action,environment>::MinimaxAStar( environment *_env, unsigne
 };
 
 
+// \see MinimaxAStar_optimized.cpp
+template<>
+void MinimaxAStar<xyLoc,tDirection,MapEnvironment>::set_usePerfectDistanceHeuristic( bool );
 
 
 template<class state,class action, class environment>
@@ -287,7 +295,7 @@ double MinimaxAStar<state,action,environment>::MinGCost( CRState&, CRState& ) {
 // furthermore, it only makes sense with the above definition of MinGCost===1
 template<class state,class action,class environment>
 double MinimaxAStar<state,action,environment>::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 ) {
-	if( !useheuristic ) return 0.;
+	if( !useHeuristic ) return 0.;
 
 	double hmax = env->HCost( pos1[0], pos2[0] );
 	double hmin = 0.;

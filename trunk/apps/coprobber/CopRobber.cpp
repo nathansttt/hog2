@@ -1210,7 +1210,24 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 		if( strcmp( argv[3], "rma_dijkstra" ) == 0 ) {
 			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
 				new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
-			astar->set_useheuristic( false );
+			astar->set_useHeuristic( false );
+			std::vector<xyLoc> s;
+			s.push_back( xyLoc( rx, ry ) );
+			s.push_back( xyLoc( cx, cy ) );
+
+			clock_start   = clock();
+			result        = astar->astar( s, true );
+			clock_end     = clock();
+			nodesExpanded = astar->nodesExpanded;
+			nodesTouched  = astar->nodesTouched;
+
+			delete astar;
+		}
+
+		if( strcmp( argv[3], "rma_perfect" ) == 0 ) {
+			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
+				new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+			astar->set_usePerfectDistanceHeuristic( true );
 			std::vector<xyLoc> s;
 			s.push_back( xyLoc( rx, ry ) );
 			s.push_back( xyLoc( cx, cy ) );
