@@ -103,7 +103,7 @@ void MinimaxAStar<xyLoc,tDirection,MapEnvironment>::push_end_states_on_queue( CR
 template<>
 double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 ) {
 
-	if( !useheuristic ) return 0.;
+	if( !useHeuristic ) return 0.;
 
 /*
 	if( minFirst1 == minFirst2 ) {
@@ -121,9 +121,16 @@ double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::HCost( CRState &pos1, bool
 		return 0.;
 	}
 */
+
 	// case where edge costs are all 1
-	double hmax = max(abs(pos1[0].x-pos2[0].x),abs(pos1[0].y-pos2[0].y));
-	double hmin = max(abs(pos1[1].x-pos2[1].x),abs(pos1[1].y-pos2[1].y));
+	double hmax, hmin;
+	if( usePerfectDistanceHeuristic ) {
+		hmax = distance_heuristic[env->GetMap()->getNodeNum(pos1[0].x,pos1[0].y)][env->GetMap()->getNodeNum(pos2[0].x,pos2[0].y)];
+		hmin = distance_heuristic[env->GetMap()->getNodeNum(pos1[1].x,pos1[1].y)][env->GetMap()->getNodeNum(pos2[1].x,pos2[1].y)];
+	} else {
+		hmax = max(abs(pos1[0].x-pos2[0].x),abs(pos1[0].y-pos2[0].y));
+		hmin = max(abs(pos1[1].x-pos2[1].x),abs(pos1[1].y-pos2[1].y));
+	}
 
 	if( minFirst1 == minFirst2 )
 		return( 2. * max(hmax,hmin) );
@@ -187,3 +194,21 @@ double MinimaxAStar<xyLoc, tDirection, MapEnvironment>::MinGCost( CRState &p1, C
 	return 1.;
 }
 
+// test wise, compute the exact distance heuristic (TODO: make this work for every kind of environment)
+template<>
+void MinimaxAStar<xyLoc,tDirection,MapEnvironment>::set_usePerfectDistanceHeuristic( bool set ) {
+	usePerfectDistanceHeuristic = set;
+
+	if( set ) {
+		Map *m = env->GetMap();
+		Graph *g = GraphSearchConstants::GetGraph( m );
+		// set all weights in the graph to 1.
+		edge_iterator eit = g->getEdgeIter();
+		edge *e = g->edgeIterNext( eit );
+		while( e ) {
+			e->setWeight( 1. );
+			e = g->edgeIterNext( eit );
+		}
+		FloydWarshall( g, distance_heuristic );
+	}
+}
