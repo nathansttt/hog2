@@ -1123,6 +1123,7 @@ void compute_testpoints( int argc, char* argv[] ) {
 // TESTs for "Optimal solutions for Moving Target Search"
 void compute_experiment_optimal( int argc, char* argv[] ) {
 	char map_file[100], old_map_file[100];
+	strcpy( map_file, "" );
 	FILE *problem_file, *result_file, *tida_file_handler = NULL;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
@@ -1180,7 +1181,7 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 
 	
 	// for all the problems in the problem set file
-	while( !feof( problem_file ) ) {
+	while( true && strcmp( map_file, "" ) != 0 ) {
 
 		if( strcmp( argv[3], "tida" ) == 0 ) {
 			// if we want to test TIDA*
@@ -1280,6 +1281,7 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			delete minclass;
 			delete tpd;
 			delete env;
+			break;
 		} else {
 			fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );
 			if( strcmp( map_file, old_map_file) != 0 ) {
