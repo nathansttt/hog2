@@ -1122,14 +1122,14 @@ void compute_testpoints( int argc, char* argv[] ) {
 
 // TESTs for "Optimal solutions for Moving Target Search"
 void compute_experiment_optimal( int argc, char* argv[] ) {
-	char map_file[100];
+	char map_file[100], old_map_file[100];
 	FILE *problem_file, *result_file, *tida_file_handler = NULL;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
 	unsigned int rx,ry,cx,cy;
 	double result = 0;
 	unsigned int nodesExpanded = 0, nodesTouched = 0;
-	Map *m;
+	Map *m; MapEnvironment *env;
 
 	if( argc < 5 ) {
 		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
@@ -1152,17 +1152,38 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			}
 	}
 
+
+	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar;
+	IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt;
+	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar;
+	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_dijkstra;
+	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_perfecth;
+	MinimaxOptimized<xyLoc,tDirection,MapEnvironment> *minclass;
+	TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment> *tpd;
+
+	if( !feof( problem_file ) ) {
+		fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );
+		strcpy( old_map_file, map_file );
+		m = new Map( map_file );
+		env = new MapEnvironment( m );
+
+		tidastar       = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+		ipntt          = new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
+		astar          = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+		astar_dijkstra = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+		astar_dijkstra->set_useHeuristic( false );
+		astar_perfecth = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+		astar_perfecth->set_usePerfectDistanceHeuristic( true );
+		minclass       = new MinimaxOptimized<xyLoc,tDirection,MapEnvironment>( env, true );
+		tpd            = new TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>( env, true );
+	}
+
+	
 	// for all the problems in the problem set file
 	while( !feof( problem_file ) ) {
-		fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );
-		m = new Map( map_file );
-		MapEnvironment *env = new MapEnvironment( m );
 
 		if( strcmp( argv[3], "tida" ) == 0 ) {
 			// if we want to test TIDA*
-			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
-				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
-
 			std::vector<xyLoc> pos;
 			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
 
@@ -1171,14 +1192,9 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			clock_end     = clock();
 			nodesExpanded = tidastar->nodesExpanded;
 			nodesTouched  = tidastar->nodesTouched;
-
-			delete tidastar;
 		}
 
 		if( strcmp( argv[3], "ipn" ) == 0 ) {
-			IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt =
-				new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
-
 			std::vector<xyLoc> pos;
 			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
 
@@ -1187,13 +1203,9 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			clock_end     = clock();
 			nodesExpanded = ipntt->nodesExpanded;
 			nodesTouched  = ipntt->nodesTouched;
-
-			delete ipntt;
 		}
 
 		if( strcmp( argv[3], "rma" ) == 0 ) {
-			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
-				new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
 			std::vector<xyLoc> s;
 			s.push_back( xyLoc( rx, ry ) );
 			s.push_back( xyLoc( cx, cy ) );
@@ -1203,52 +1215,37 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			clock_end     = clock();
 			nodesExpanded = astar->nodesExpanded;
 			nodesTouched  = astar->nodesTouched;
-
-			delete astar;
 		}
 
 		if( strcmp( argv[3], "rma_dijkstra" ) == 0 ) {
-			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
-				new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
-			astar->set_useHeuristic( false );
 			std::vector<xyLoc> s;
 			s.push_back( xyLoc( rx, ry ) );
 			s.push_back( xyLoc( cx, cy ) );
 
 			clock_start   = clock();
-			result        = astar->astar( s, true );
+			result        = astar_dijkstra->astar( s, true );
 			clock_end     = clock();
-			nodesExpanded = astar->nodesExpanded;
-			nodesTouched  = astar->nodesTouched;
-
-			delete astar;
+			nodesExpanded = astar_dijkstra->nodesExpanded;
+			nodesTouched  = astar_dijkstra->nodesTouched;
 		}
 
 		if( strcmp( argv[3], "rma_perfect" ) == 0 ) {
-			MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
-				new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
-			astar->set_usePerfectDistanceHeuristic( true );
 			std::vector<xyLoc> s;
 			s.push_back( xyLoc( rx, ry ) );
 			s.push_back( xyLoc( cx, cy ) );
 
 			clock_start   = clock();
-			result        = astar->astar( s, true );
+			result        = astar_perfecth->astar( s, true );
 			clock_end     = clock();
-			nodesExpanded = astar->nodesExpanded;
-			nodesTouched  = astar->nodesTouched;
-
-			delete astar;
+			nodesExpanded = astar_perfecth->nodesExpanded;
+			nodesTouched  = astar_perfecth->nodesTouched;
 		}
 
 		if( strcmp( argv[3], "minimax" ) == 0 ) {
-
 			double tida_value;
 			fscanf( tida_file_handler, "(%*u,%*u) (%*u,%*u) %lf %*u %*u %*u %*s\n",
 				&tida_value );
 
-			MinimaxOptimized<xyLoc,tDirection,MapEnvironment> *minclass =
-				new MinimaxOptimized<xyLoc,tDirection,MapEnvironment>( env, true );
 			std::vector<xyLoc> pos;
 			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
 
@@ -1257,31 +1254,60 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			clock_end     = clock();
 			nodesExpanded = minclass->nodesExpanded;
 			nodesTouched  = minclass->nodesTouched;
-
-			delete minclass;
 		}
 
 		if( strcmp( argv[3], "tpdijkstra" ) == 0 ) {
-			TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment> *tpd = new TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>( env, true );
-
 			clock_start   = clock();
 			result        = tpd->tpdijkstra( xyLoc( rx, ry ), xyLoc( cx, cy ) );
 			clock_end     = clock();
 			nodesExpanded = tpd->nodesExpanded;
 			nodesTouched  = tpd->nodesTouched;
-
-			delete tpd;
 		}
-
-		// cleanup
-		delete env;
 
 		// write out the statistics
 		fprintf( result_file, "(%u,%u) (%u,%u) %7.4f %lu %u %u %s\n",
 			rx,ry,cx,cy,result,(clock_end-clock_start)/1000,
 			nodesExpanded,nodesTouched,map_file );
 		fflush( result_file );
-		//delete m;
+
+		if( feof( problem_file ) ) {
+			// cleanup
+			delete tidastar;
+			delete ipntt;
+			delete astar;
+			delete astar_dijkstra;
+			delete astar_perfecth;
+			delete minclass;
+			delete tpd;
+			delete env;
+		} else {
+			fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );
+			if( strcmp( map_file, old_map_file) != 0 ) {
+				// next map is different, thus delete everything
+				delete tidastar;
+				delete ipntt;
+				delete astar;
+				delete astar_dijkstra;
+				delete astar_perfecth;
+				delete minclass;
+				delete tpd;
+				delete env;
+
+				// create the new classes
+				strcpy( old_map_file, map_file );
+				m = new Map( map_file );
+				env = new MapEnvironment( m );
+				tidastar       = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+				ipntt          = new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
+				astar          = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+				astar_dijkstra = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+				astar_dijkstra->set_useHeuristic( false );
+				astar_perfecth = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+				astar_perfecth->set_usePerfectDistanceHeuristic( true );
+				minclass       = new MinimaxOptimized<xyLoc,tDirection,MapEnvironment>( env, true );
+				tpd            = new TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>( env, true );
+			}
+		}
 	}
 	fclose( problem_file );
 	fclose( result_file );
@@ -1608,11 +1634,13 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 
 	// syntax explanation output
 	fprintf( foutput, "syntax: robber_pos cop_pos optimal_solution +\n" );
-	fprintf( foutput, "<sol num avg div> for each of the algorithms: cover minimax(%g) dam(%g) heuristicgreedy pathmax(1-%d) dapathmax(1-%d) dsrandombeacons(1-%d)\n", minimax_depth, minimax_depth, maxmin_stepsize, maxmin_stepsize, maxmin_stepsize );
+	fprintf( foutput, "<sol num avg div nE nT> for each of the algorithms: cover minimax(%g) dam(%g) heuristicgreedy pathmax(1-%d) dapathmax(1-%d) dsrandombeacons(1-%d)\n", minimax_depth, minimax_depth, maxmin_stepsize, maxmin_stepsize, maxmin_stepsize );
 	fprintf( foutput, "where sol = solution length against optimal cop\n" );
 	fprintf( foutput, "      num = number of computations needed\n" );
 	fprintf( foutput, "      avg = average computation time in ms for each such computation\n" );
 	fprintf( foutput, "      div = standard diviation in ms for all computations\n" );
+	fprintf( foutput, "      nE  = average number of nodes expanded in every computation\n" );
+	fprintf( foutput, "      nT  = average number of nodes touched in every computation\n" );
 	fprintf( foutput, "--------------------------------------------------------------------------------\n\n" );
 
 	while( !feof( fhandler ) ) {
