@@ -92,6 +92,7 @@ class MinimaxAStar {
 //	std::vector<double> min_cost, max_cost;
 	MyClosedList min_cost, max_cost;
 
+	void clear_cache();
 
 	//MyClosedList my_minheuristic, my_maxheuristic;
 	std::vector<std::vector<double> > distance_heuristic;
@@ -108,6 +109,9 @@ template<>
 double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 );
 template<>
 double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::MinGCost( CRState &p1, CRState &p2 );
+template<>
+void MinimaxAStar<xyLoc,tDirection,MapEnvironment>::set_usePerfectDistanceHeuristic( bool );
+
 
 
 /* IMPLEMENTATION */
@@ -121,10 +125,13 @@ MinimaxAStar<state,action,environment>::MinimaxAStar( environment *_env, unsigne
 */
 };
 
-
-// \see MinimaxAStar_optimized.cpp
-template<>
-void MinimaxAStar<xyLoc,tDirection,MapEnvironment>::set_usePerfectDistanceHeuristic( bool );
+template<class state,class action,class environment>
+void MinimaxAStar<state,action,environment>::clear_cache() {
+	min_cost.clear();
+	max_cost.clear();
+	queue = MyPriorityQueue();
+	return;
+}
 
 
 template<class state,class action, class environment>
@@ -147,8 +154,10 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 		nodesTouched++;
 
 		// recursion break
-		if( qe.pos == goal_pos && qe.minFirst == goal_minFirst )
+		if( qe.pos == goal_pos && qe.minFirst == goal_minFirst ) {
+			clear_cache();
 			return qe.gvalue;
+		}
 
 		// verbose
 		//fprintf( stdout, "minFirst = %d, pos = (%u,%u)(%u,%u), fvalue = %f, gvalue = %f\n", qe.minFirst, qe.pos[0].x, qe.pos[0].y, qe.pos[1].x, qe.pos[1].y, qe.fvalue, qe.gvalue );
@@ -250,6 +259,7 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 
 	}
 
+	clear_cache();
 	return DBL_MAX;
 }
 

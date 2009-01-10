@@ -89,7 +89,6 @@ double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinGCost( CRState &p1, CRSta
 
 template<class state, class action, class environment>
 TIDAStar<state,action,environment>::~TIDAStar() {
-	clear_bounds_cache();
 }
 
 
@@ -135,6 +134,8 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, bool minFirst ) {
 
 	assert( c == b );
 
+	// cleanup
+	clear_bounds_cache();
 	return c;
 }
 

@@ -109,6 +109,8 @@ class IPNTTables {
 	bool GoalTest( CRState &pos );
 	double TerminalCost( CRState &pos );
 
+	void clear_bounds_cache();
+
 	environment *env;
 	bool canPause;
 
@@ -127,6 +129,17 @@ class IPNTTables {
 /*------------------------------------------------------------------------------
 | Implementation
 ------------------------------------------------------------------------------*/
+template<class state,class action,class environment>
+void IPNTTables<state,action,environment>::clear_bounds_cache() {
+	min_gttables.clear();
+	max_gttables.clear();
+	min_lcache.clear();
+	max_lcache.clear();
+	min_ucache.clear();
+	max_ucache.clear();
+	return;
+}
+
 
 template<class state,class action,class environment>
 double IPNTTables<state,action,environment>::ipn( CRState &pos, bool minFirst ) {
@@ -151,6 +164,8 @@ double IPNTTables<state,action,environment>::ipn( CRState &pos, bool minFirst ) 
 	nodesExpanded = sumNodesExpanded;
 	nodesTouched  = sumNodesTouched;
 	nodesUpdated  = sumNodesUpdated;
+
+	clear_bounds_cache();
 
 	return c;
 }
