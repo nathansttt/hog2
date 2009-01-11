@@ -22,6 +22,9 @@ void DSRandomBeacons::GetPath( graphState pos_robber, graphState pos_cop, unsign
 
 	resultpath.clear();
 	nodesExpanded = 0; nodesTouched = 0;
+
+	if( pos_robber == pos_cop ) return;
+
 	node *target = NULL;
 	double target_h = DBL_MIN;
 

@@ -47,6 +47,8 @@ void DSDATPDijkstra::datpdijkstra( node* pos_robber, node* pos_cop, std::vector<
 	myNodesTouched  = 0;
 	nodesTouched    = 0;
 
+	if( pos_robber == pos_cop ) return;
+
 	// find the joint hierarchy
 	std::vector<node*> robberChain, copChain;
 	gabs->GetNumAbstractGraphs( pos_robber, pos_cop, robberChain, copChain );
