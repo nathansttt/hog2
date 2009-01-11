@@ -1154,13 +1154,13 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 	}
 
 
-	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar;
-	IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt;
-	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar;
-	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_dijkstra;
-	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_perfecth;
-	MinimaxOptimized<xyLoc,tDirection,MapEnvironment> *minclass;
-	TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment> *tpd;
+	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar = NULL;
+	IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt = NULL;
+	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar = NULL;
+	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_dijkstra = NULL;
+	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_perfecth = NULL;
+	MinimaxOptimized<xyLoc,tDirection,MapEnvironment> *minclass = NULL;
+	TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment> *tpd = NULL;
 
 	if( !feof( problem_file ) ) {
 		fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );

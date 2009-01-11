@@ -113,9 +113,10 @@ void DSTPDijkstra<state,action>::clear_cache() {
 template<class state,class action>
 double DSTPDijkstra<state,action>::dstpdijkstra( state pos_robber, state pos_cop, bool minFirst, std::vector<state> &path ) {
 
-	if( pos_robber == pos_cop ) return 0.;
-
+	path.clear();
 	nodesExpanded = 0; nodesTouched = 0;
+
+	if( pos_robber == pos_cop ) return 0.;
 
 	std::vector<state> neighbors;
 	typename std::vector<state>::iterator it;
