@@ -99,7 +99,7 @@ void TIDAStar<state,action,environment>::clear_bounds_cache() {
 	min_lcache.clear();
 	max_lcache.clear();
 	min_ucache.clear();
-	max_lcache.clear();
+	max_ucache.clear();
 	return;
 }
 
@@ -109,6 +109,8 @@ double TIDAStar<state,action,environment>::tida( CRState &pos, bool minFirst ) {
 	double b, c = MinHCost( pos, minFirst );
 
 	unsigned int sumNodesTouched = 0, sumNodesExpanded = 0;
+	iteration_nodesExpanded.clear();
+	iteration_nodesTouched.clear();
 
 	do {
 		nodesExpanded = 0; nodesTouched = 0;
