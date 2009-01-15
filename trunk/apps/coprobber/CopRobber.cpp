@@ -457,6 +457,22 @@ void compute_rma( int argc, char* argv[] ) {
 */
 
 
+/*
+	// code to compute for large mazes
+	Map *m = new Map( 64, 64 );
+	MakeMaze( m );
+	m->scale( 180, 180 );
+//	m->save( "testmap.map" );
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	MapEnvironment *env = new MapEnvironment( m );
+	clock_t clock_start, clock_end;
+	node *n = g->GetRandomNode();
+	xyLoc pos_robber( n->GetLabelL( GraphSearchConstants::kMapX ), n->GetLabelL( GraphSearchConstants::kMapY ) );
+	std::vector<node*> *reachableNodes = g->getReachableNodes( n );
+	n = (*reachableNodes)[random()%reachableNodes->size()];
+	xyLoc pos_cop( n->GetLabelL( GraphSearchConstants::kMapX ), n->GetLabelL( GraphSearchConstants::kMapY ) );
+*/
+
 
 	// Optimized Minimax A*
 	xyLoc pos_cop, pos_robber;
@@ -467,10 +483,14 @@ void compute_rma( int argc, char* argv[] ) {
 	printf( "map: %s\n", m->getMapName() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
-	MapEnvironment *env = new MapEnvironment( m );
 
+	MapEnvironment *env = new MapEnvironment( m );
 	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar =
 		new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
+//	astar->set_useHeuristic( false );
+//	printf( "Computing perfect distance metric ... " ); fflush( stdout );
+//	astar->set_usePerfectDistanceHeuristic( true );
+//	printf( "done.\n" ); fflush( stdout );
 	std::vector<xyLoc> s;
 	s.push_back( pos_robber );
 	s.push_back( pos_cop );
@@ -609,6 +629,7 @@ void compute_tida( int argc, char* argv[] ) {
 	pos.push_back( pos_robber ); pos.push_back( pos_cop );
 
 	double minimax = tidastar->tida( pos );
+	minimax = tidastar->tida( pos );
 
 	fprintf( stdout, "tida result: %f\n", minimax );
 	fprintf( stdout, "nodes expanded: %u ( ", tidastar->nodesExpanded );
@@ -1050,32 +1071,34 @@ void compute_dsrandombeacons( int argc, char* argv[] ) {
 // problem set generation
 void compute_testpoints( int argc, char* argv[] ) {
 	char map_file[20];
-	char problem_file[20] = "problem_set1.dat";
+	char problem_file[20] = "problem_set5.dat";
 	Map *m;
 	time_t t; time( &t ); srandom( (unsigned int) t );
 	unsigned int num;
 	int j;
-	//int i;
-	// problem set 1: i = 6:20, scaled to size 20
-	// problem set 2: i = 16:35, scaled to size 40
-	// problem set 3: i = 20:39, scaled to size 60
-	// problem set 4: i = 30:49, scaled to size 80
-	// problem set 1
+	int i;
+	// sets for experiment_optimality:
+	// problem set 1: i = 1:15, scaled to size 15
+	// problem set 2: i = 6:20, scaled to size 20
+	// problem set 3: i = 16:35, scaled to size 40
+	// problem set 4: i = 20:39, scaled to size 60
+	// problem set 5: i = 30:49, scaled to size 80
+	// note: experiment_suboptimality used /maps/bgmaps
 	FILE *fhandler = fopen( problem_file, "w" );
-	FILE *file_with_maps = fopen( argv[1], "r" );
-	while( !feof( file_with_maps ) ) {
-//	for( i = 1; i <= 15; i++ ) {
-//		m = new Map( i, i );
-//		MakeMaze( m );
-//		m->scale( 20, 20 );
-//		sprintf( map_file, "testmap.map" ); //"problem_set5_map%d.map", i );
-//		m->save( map_file );
-		fscanf( file_with_maps, "%s\n", map_file );
-		fprintf( fhandler, "%s\n", map_file );
-		m = new Map( map_file );
+//	FILE *file_with_maps = fopen( argv[1], "r" );
+//	while( !feof( file_with_maps ) ) {
+	for( i = 30; i <= 49; i++ ) {
+		m = new Map( i, i );
+		MakeMaze( m );
+		m->scale( 80, 80 );
+		sprintf( map_file, "problem_set5_map%d.map", i );
+		m->save( map_file );
+//		fscanf( file_with_maps, "%s\n", map_file );
+//		fprintf( fhandler, "%s\n", map_file );
+//		m = new Map( map_file );
 		MapEnvironment *env = new MapEnvironment( m );
 		Graph *g = GraphSearchConstants::GetGraph( m );
-		for( j = 0; j < 1000; ) { //50;  ) {
+		for( j = 0; j < 1000; ) {
 			// generate random position for the robber
 			num = (unsigned int)floor(
 				(double)random()/(double)RAND_MAX * (double)g->GetNumNodes());
@@ -1103,9 +1126,9 @@ void compute_testpoints( int argc, char* argv[] ) {
 				// print out the starting position for the robber
 				fprintf( fhandler, "(%u,%u) ", rx, ry );
 				// print out the starting position for the cop
-				fprintf( fhandler, "(%u,%u)\n", cx, cy );
+				fprintf( fhandler, "(%u,%u) ", cx, cy );
 				// print out the map that we are in
-//				fprintf( fhandler, "%s\n", map_file );
+				fprintf( fhandler, "%s\n", map_file );
 				j++;
 //			}
 		}
@@ -1114,7 +1137,7 @@ void compute_testpoints( int argc, char* argv[] ) {
 		//delete m;
 	}
 	fclose( fhandler );
-	fclose( file_with_maps );
+//	fclose( file_with_maps );
 }
 
 
@@ -1130,7 +1153,7 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 	unsigned int rx,ry,cx,cy;
 	double result = 0;
 	unsigned int nodesExpanded = 0, nodesTouched = 0;
-	Map *m; MapEnvironment *env;
+	Map *m = NULL; MapEnvironment *env = NULL;
 
 	if( argc < 5 ) {
 		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
