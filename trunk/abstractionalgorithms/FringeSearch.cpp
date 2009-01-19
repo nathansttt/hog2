@@ -10,6 +10,10 @@
 #include "FringeSearch.h"
 #include "FPUtil.h"
 
+#ifndef MAXFLOAT
+#define MAXFLOAT ((float)3.40282346638528860e+38)
+#endif
+
 using namespace GraphAbstractionConstants;
 static bool verbose = false;
 

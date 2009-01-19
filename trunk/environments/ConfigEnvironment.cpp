@@ -10,6 +10,7 @@
 #include "ConfigEnvironment.h"
 #include "FPUtil.h"
 #include <iostream>
+#include <math.h>
 
 ConfigEnvironment::ConfigEnvironment()
 {
