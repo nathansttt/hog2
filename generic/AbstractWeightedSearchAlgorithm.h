@@ -238,6 +238,7 @@ class GraphStraightLineHeuristic : public GraphHeuristic {
 public:
 	GraphStraightLineHeuristic(Map *map, Graph *graph, Graph *mg)
 	:m(map), g(graph), mapgraph(mg) {}
+	Graph *GetGraph() { return g; }
 	double HCost(graphState &state1, graphState &state2)
 	{
 	//std::cout<<"state1 "<<state1<<" state2 "<<state2<<std::endl;
@@ -275,6 +276,7 @@ class OctileHeuristic : public GraphHeuristic {
 public:
 	OctileHeuristic(Map *map, Graph *graph)
 	:m(map), g(graph) {}
+	Graph *GetGraph() { return g; }
 	double HCost(graphState &state1, graphState &state2)
 	{
 		int x1 = g->GetNode(state1)->GetLabelL(GraphAbstractionConstants::kFirstData);
