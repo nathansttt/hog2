@@ -25,6 +25,9 @@
  *
  */
 
+#include "FPUtil.h"
+#include <ostream>
+
 #ifdef NO_OPENGL
 #include "Gl.h"
 #include "Glut.h"
@@ -56,7 +59,6 @@ static const double PID4 = PI/4; // 45degree
 static const double PID6 = PI/6; // 30degree
 static const double ROOT2D2 = 0.7071067811865475;
 
-
 /**
  * A generic vector (essentially the same as a point, but offers normalization)
  */
@@ -67,6 +69,11 @@ public:
 	void normalise();
   GLdouble x,y,z;
 };
+
+bool operator==(const recVec &l1, const recVec &l2);
+
+std::ostream& operator <<(std::ostream &out, const recVec &loc);
+
 
 /**
  * A color; r/g/b are between 0...1
@@ -84,6 +91,15 @@ public:
   point3d() {}
   point3d(GLfloat a, GLfloat b, GLfloat c) :x(a), y(b), z(c) {}
   GLfloat x, y, z;
+};
+
+class line2d {
+public:
+	line2d() {}
+	line2d(recVec a, recVec b) :start(a), end(b) {}
+	bool crosses(line2d which) const;
+	recVec start;
+	recVec end;
 };
 
 /**
