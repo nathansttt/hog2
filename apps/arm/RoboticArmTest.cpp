@@ -103,7 +103,7 @@ void CreateSimulation(int)
 	config.SetAngle( 0, 512 );
 	config.SetAngle( 1, 512 );
 	config.SetAngle( 2, 512 );
-	r->GenerateTipPositionTables( config );
+	//r->GenerateTipPositionTables( config );
 
 //	config.SetAngle( 0, 790 );
 //	config.SetAngle( 1, 590 );
