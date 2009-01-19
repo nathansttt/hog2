@@ -130,21 +130,12 @@ private:
 	std::vector<unsigned int> goal_yloc; // holds the y locations of the goal
 };
 
-class GraphPuzzleDistanceHeuristic : public GraphHeuristic {
+class GraphPuzzleDistanceHeuristic : public GraphDistanceHeuristic {
 public:
 	GraphPuzzleDistanceHeuristic(MNPuzzle &mnp, Graph *graph, int count);
 	double HCost(graphState &state1, graphState &state2);
-	void AddHeuristic();
-	int GetNumHeuristics() { return heuristics.size(); }
-	//int hmode;
-	//int HN;
 private:
-	void GetOptimalDistances(node *n, std::vector<double> &values);
-	void AddHeuristic(std::vector<double> &values, graphState location);
 	MNPuzzle puzzle;
-	Graph *g;
-	std::vector<std::vector<double> > heuristics;
-	std::vector<graphState> locations;
 };
 
 typedef UnitSimulation<MNPuzzleState, slideDir, MNPuzzle> PuzzleSimulation;

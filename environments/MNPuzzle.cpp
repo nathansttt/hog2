@@ -154,6 +154,7 @@ Graph *MNPuzzle::GetGraph()
 		GetStateFromHash(t, x);
 		std::vector<slideDir> moves;
 		GetActions(t, moves);
+		g->GetNode(x)->SetLabelF(GraphSearchConstants::kZCoordinate, GetParity(t));
 		for (unsigned int y = 0; y < moves.size(); y++)
 		{
 			ApplyAction(t, moves[y]);
@@ -644,30 +645,12 @@ int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsi
 }
 
 GraphPuzzleDistanceHeuristic::GraphPuzzleDistanceHeuristic(MNPuzzle &mnp, Graph *graph, int count)
-:puzzle(mnp), g(graph)
+:GraphDistanceHeuristic(graph), puzzle(mnp)
 {
 	for (int x = 0; x < count /*10*/; x++)
 	{
 		AddHeuristic();
 	}
-}
-
-void GraphPuzzleDistanceHeuristic::AddHeuristic()
-{
-	node *n = 0;
-	while (1)
-	{
-		n = g->GetRandomNode();
-		graphState loc = n->GetNum();
-		MNPuzzleState s;
-		puzzle.GetStateFromHash(s, loc);
-		if (puzzle.GetParity(s) == 0)
-			break;
-	}
-	
-	std::vector<double> values;
-	GetOptimalDistances(n, values);
-	AddHeuristic(values, n->GetNum());
 }
 
 double GraphPuzzleDistanceHeuristic::HCost(graphState &state1, graphState &state2)
@@ -689,56 +672,6 @@ double GraphPuzzleDistanceHeuristic::HCost(graphState &state1, graphState &state
 	return val;
 }
 
-void GraphPuzzleDistanceHeuristic::AddHeuristic(std::vector<double> &values,
-												 graphState location)
-{
-	heuristics.push_back(values);
-	locations.push_back(location);
-}
-
-
-void GraphPuzzleDistanceHeuristic::GetOptimalDistances(node *n, std::vector<double> &values)
-{
-	values.resize(g->GetNumNodes());
-	for (unsigned int x = 0; x < values.size(); x++)
-		values[x] = -1.0;
-	n->SetLabelF(GraphSearchConstants::kTemporaryLabel, 0.0);
-	n->SetKeyLabel(GraphSearchConstants::kTemporaryLabel);
-	Heap h;
-	h.Add(n);
-	while (!h.Empty())
-	{
-		node *next = (node*)h.Remove();
-		//		printf("Heap size %d, working on node %d cost %f\n", h.size(), next->GetNum(),
-		//			   next->GetLabelF(GraphSearchConstants::kTemporaryLabel));
-		double cost = next->GetLabelF(GraphSearchConstants::kTemporaryLabel);
-		values[next->GetNum()] = next->GetLabelF(GraphSearchConstants::kTemporaryLabel);
-		neighbor_iterator ni = next->getNeighborIter();
-		for (long tmp = next->nodeNeighborNext(ni); tmp != -1; tmp = next->nodeNeighborNext(ni))
-		{
-			if (values[tmp] == -1)
-			{
-				node *nb = g->GetNode(tmp);
-				if (h.IsIn(nb))
-				{
-					if (fgreater(nb->GetLabelF(GraphSearchConstants::kTemporaryLabel),
-								 cost + g->FindEdge(next->GetNum(), tmp)->GetWeight()))
-					{
-						nb->SetLabelF(GraphSearchConstants::kTemporaryLabel,
-									  cost+g->FindEdge(next->GetNum(), tmp)->GetWeight());
-						h.DecreaseKey(nb);
-					}
-				}
-				else {
-					nb->SetKeyLabel(GraphSearchConstants::kTemporaryLabel);
-					nb->SetLabelF(GraphSearchConstants::kTemporaryLabel,
-								  cost+g->FindEdge(next->GetNum(), tmp)->GetWeight());
-					h.Add(nb);
-				}
-			}
-		}
-	}
-}
 
 /**
 Randomly generates a puzzle of the specified dimensions
