@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/utils -I$(ROOT)/abstraction -I$(ROOT)/simulation -I$(ROOT)/graphalgorithms 
+PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/utils -I$(ROOT)/abstraction -I$(ROOT)/simulation -I$(ROOT)/graphalgorithms  -I$(ROOT)/generic -I$(ROOT)/algorithms
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -36,4 +36,5 @@ SRC_CPP = \
 	environments/FlipSide.cpp \
 	environments/WeightedMap2DEnvironment.cpp \
 	environments/TopSpin.cpp	\
-	environments/RoboticArm.cpp
+	environments/RoboticArm.cpp  \
+	environments/ConfigEnvironment.cpp
