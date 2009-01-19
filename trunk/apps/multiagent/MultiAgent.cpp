@@ -120,6 +120,8 @@ int greedyNum = 0;
 bool doRandom = false;
 int randomNum = 0;
 
+void RunRandomMapScenario(int id);
+
 WeightedUnitGroup<xyLoc,tDirection,AbsMapEnvironment> *wug;
 int main(int argc, char* argv[])
 {
@@ -244,7 +246,9 @@ void CreateSimulation(int id)
 		RunScenario(id);
 		//exit(0);
 	}
-		
+	else {
+		RunRandomMapScenario(id);
+	}
 		
 		
 	// Only show 1 copy of the map
@@ -568,7 +572,6 @@ void RunScenario(int id)
 		goal.y = e.GetGoalY();
 		
 		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su;
-		
 		if(abstraction)
 		{
 			AbstractWeightedSearchAlgorithm<xyLoc, tDirection,AbsMapEnvironment> *alg1 = new AbstractWeightedSearchAlgorithm<xyLoc, tDirection, AbsMapEnvironment>();
@@ -598,10 +601,10 @@ void RunScenario(int id)
 			
 		su->SetName(name);	
 		su->SetSpeed(1.0);
-// 		if(start.x < 16)	
-// 			su->SetColor(1, 0, 0);
-// 		else
-// 			su->SetColor(0, 1, 0);
+ 		//if (start.x < map->getMapWidth()/2)
+		su->SetColor(1.0-(double)start.x/map->getMapWidth(), (double)start.y/map->getMapHeight(), (double)start.x/map->getMapWidth());
+ 		//else
+ 		//	su->SetColor(0, 1, 0);
 		if(weighted) wug->AddUnit(su);
 		if(useTrim)
 		{
@@ -743,6 +746,258 @@ void RunScenario(int id)
 	SetNumPorts(id,1);	
 
 }
+
+void RunRandomMapScenario(int id)
+{
+	char mname[1024];
+	char newname[1024] = "\0";
+	Map* map = new Map(gDefaultMap);
+	map->setTileSet(kWinterTile);
+	
+	Initialize(id, map);
+	
+	unitSims.resize(id+1);
+	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
+	unitSims[id]->SetStepType(kRealTime);
+	unitSims[id]->SetThinkingPenalty(0);
+	if (noStats)
+		unitSims[id]->SetLogStats(false);
+	
+	wug = new WeightedUnitGroup<xyLoc, tDirection, AbsMapEnvironment>(env);
+	
+	if(weighted)
+	{	
+		if(weight != -1)
+			wug->SetWeight(weight);
+		if(proportion != -1)
+			wug->SetProportion(proportion);
+ 		if(noWeighting)
+			wug->SetNoWeighting(true);
+		
+		unitSims[id]->AddUnitGroup(wug);
+	}
+	if(useWindow)
+	{
+		wug->SetUseWindow(true);
+		wug->SetWindowSize(windowSize);
+	}
+	if(useLocal)
+	{
+		wug->UseLocalWeights(true);
+		wug->SetLocalWeightRadius(localRadius); 
+	}
+	if(updateOnQuery)
+	{
+		wug->SetUpdateOnQuery(queryUpdateProp);
+	}
+	if(updateSurrounding)
+	{
+		wug->SetUpdateSurrounding(surroundingProp);
+	}
+	if(useperceptron)
+	{
+		wug->UsePerceptron(learningrate);
+	}
+	
+	char* name;
+	
+	int numExperiments = 300;
+	int i = 0; 
+ 	do
+ 	{
+ 		char num[8];
+ 		sprintf(num,"%d",i);
+ 		name = new char[256];
+ 		strcpy(name,"PatrolUnit");
+ 		strcat(name, num);
+ 		
+ 		names.push_back(name);
+				
+		xyLoc start, goal;
+		do {
+			start.x = random()%map->getMapWidth();
+			start.y = random()%map->getMapHeight();
+			goal.x = random()%map->getMapWidth();
+			goal.y = random()%map->getMapHeight();
+		} while ((map->getTerrainType(start.x, start.y) != kGround) ||
+				 (map->getTerrainType(goal.x, goal.y) != kGround));
+		
+		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su;
+		if(abstraction)
+		{
+			AbstractWeightedSearchAlgorithm<xyLoc, tDirection,AbsMapEnvironment> *alg1 = new AbstractWeightedSearchAlgorithm<xyLoc, tDirection, AbsMapEnvironment>();
+			
+			alg1->SetWeightedEnvironment(wug->GetWeightedEnvironment());
+			
+			if(skipAbs)
+				alg1->SetSkipAbsNode(skipCutoff);
+			
+			su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg1);
+		}
+		else
+		{
+			TemplateAStar<xyLoc, tDirection, AbsMapEnvironment> *alg = new TemplateAStar<xyLoc, tDirection, AbsMapEnvironment>();			
+			
+			if(radius != -1)
+				alg->SetRadius(radius);
+			
+			if(weightedAstar)
+				alg->SetWeight(astarweight);
+			
+			su = new GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment>(start,alg);
+	 	}
+		su->AddPatrolLocation(goal);
+		su->SetNumPatrols(numPatrols);	
+		//su->SetDrawUnit(false);	
+		
+		su->SetName(name);	
+		su->SetSpeed(1.0);
+ 		//if (start.x < map->getMapWidth()/2)
+		su->SetColor(1.0-(double)start.x/map->getMapWidth(), (double)start.y/map->getMapHeight(), (double)start.x/map->getMapWidth());
+ 		//else
+ 		//	su->SetColor(0, 1, 0);
+		if(weighted) wug->AddUnit(su);
+		if(useTrim)
+		{
+			su->SetTrimPath(true);
+			su->SetTrimWindow(trimRadius);
+		}
+		unitSims[id]->AddUnit(su);
+		
+		
+ 		i++;
+		//} while(i < numExperiments/2);
+ 	} while ( i < numExperiments);
+ 	//} while (i < 1);
+	
+	
+	//unitSims[id]->SetPaused(true);
+	// Do timing
+	
+	if(runExperiment)
+	{
+		std::vector<double> c;
+		std::vector<double> cn;
+		std::vector<double> c10n;
+		std::vector<double> c10;
+		std::vector<double> c20n;
+		std::vector<double> c20;
+		std::vector<double> c30n;
+		std::vector<double> c30;
+		std::vector<double> c40n;
+		std::vector<double> c40;
+		
+		if(outFileName[0]==0)
+			strncpy(outFileName, "defaultOut.txt",1024);
+		
+		std::ofstream outfile(outFileName, std::ios::out);
+		//double beginTime = unitSims[id]->GetSimulationTime();
+		//std::cout<<beginTime<<std::endl;
+		
+		
+		//double timestep = 0.55;//1.5
+		double timestep = 1.5;
+		double time = 0.0;
+		
+		outfile<<"Inputfile : "<<scenFileName<<std::endl
+		<<std::endl
+		<<"Speed 1.0 for all units; timeStep 1.5; kRealTime"
+		<<std::endl<<std::endl
+		<<"Weight    : "<<weight<<std::endl
+		<<"Radius    : "<<radius<<std::endl
+		<<"Proportion: "<<proportion<<std::endl
+		<<"NumPatrols: "<<numPatrols<<std::endl<<std::endl;
+		
+		
+		while(!(unitSims[id]->Done()))
+		{
+			unitSims[id]->StepTime(timestep);
+			time += timestep;
+			if(((int)time%15==0) && (wug->GetMembers().size() > 0))
+			{
+				c.push_back(wug->ComputeArrowMetric(false,time,false,0));
+				cn.push_back(wug->ComputeArrowMetric(false,time,true,0));
+				c10.push_back(wug->ComputeArrowMetric(true,time,false,10));
+				c10n.push_back(wug->ComputeArrowMetric(true,time,true,10));
+				c20.push_back(wug->ComputeArrowMetric(true,time,false,20));
+				c20n.push_back(wug->ComputeArrowMetric(true,time,true,20));
+				c30.push_back(wug->ComputeArrowMetric(true,time,false,30));
+				c30n.push_back(wug->ComputeArrowMetric(true,time,true,30));
+				c40.push_back(wug->ComputeArrowMetric(true,time,false,40));
+				c40n.push_back(wug->ComputeArrowMetric(true,time,true,40));
+				//c1.push_back(wug->ComputeArrowMetric(time,true));
+				//c2.push_back(wug->ComputeArrowMetric(time,false));
+				//std::cout<<time<<" "<<normMetric<<" "<<noNormMetric<<std::endl;
+				//coherence.push_back(wug->ComputeArrowMetric());
+			}
+			
+			// 				if(greedy && time > 100)
+			// 					break;
+			if(time > 100000) 
+			{
+				std::cout<<"Ran out of time. Details in outfile "<<outFileName<<std::endl;
+				exit(1);
+			}
+			// 				std::cout<<time<<"\r";
+		}
+		//double endTime = unitSims[id]->GetSimulationTime();
+		//std::cout<<"Simulation time "<<endTime-beginTime<<std::endl;
+		
+		outfile<<"Total simulation time "<<time<<std::endl<<std::endl; 
+		
+		
+		
+		// Get the "arrow metric" from the weighted unit group
+		// 			if(wug->GetMembers().size() > 0)
+		// 			{
+		// 				std::cout<<wug->ComputeArrowMetric()<<std::endl;
+		// 			}	
+		
+		// Collect statistics
+		unitSims[id]->ClearAllUnits();
+		PrintStatistics(id,outfile);		
+		
+		outfile<<std::endl;
+		
+		for(unsigned int i=0; i<c.size(); i++)
+		{
+			outfile<<c[i]<<" "<<cn[i]<<" "<<c10[i]<<" "<<c10n[i]<<" "<<c20[i]<<" "<<c20n[i]
+			<<" "<<c30[i]<<" "<<c30n[i]<<" "<<c40[i]<<" "<<c40n[i]<<std::endl;
+		}
+		
+		
+		if(!greedy)
+			exit(0); 			
+		else 
+		{ 
+			// Remove old units
+			unitSims[id]->ClearAllUnits();
+			
+			// Add greedy units
+			for(int i=0; i<greedyNum; i++)
+			{
+				//random location to start
+				xyLoc greedyStart;
+				int gx,gy;
+				env->GetMapAbstraction()->GetTileFromNode(GetMapGraph(env->GetMapAbstraction()->GetMap())->GetRandomNode(), gx, gy);
+				
+				greedyStart.x = gx;
+				greedyStart.y = gy;
+				
+				GreedyDMUnit<AbsMapEnvironment> *gdu = new GreedyDMUnit<AbsMapEnvironment>(greedyStart);
+				gdu->SetEnvironment(wug->GetWeightedEnvironment());
+				
+				unitSims[id]->AddUnit(gdu);
+			}
+		}
+	} // end if(runExperiment)
+	
+	//unitSims[id]->ClearAllUnits();
+	//PrintStatistics(id);
+	SetNumPorts(id,1);	
+	
+}
+
 
 void PrintStatistics(int id, std::ofstream &outfile)
 {
@@ -1079,7 +1334,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				//unitSims[windowID]->StepTime(1.0/30.0);
 				//unitSims[windowID]->StepTime(0.55);
 			
-				unitSims[windowID]->StepTime(1.5);
+				unitSims[windowID]->StepTime(2.0);
 // 				if(unitSims[windowID]->Done())
 // 					std::cout<<"DONE\n";
 			}
@@ -1095,7 +1350,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			{
 				//wUnitSims[windowID]->StepTime(1.0/30.0);
 				//wUnitSims[windowID]->StepTime(0.55);
-				wUnitSims[windowID]->StepTime(1.5);
+				wUnitSims[windowID]->StepTime(2.0);
 			}
 			wUnitSims[windowID]->OpenGLDraw(windowID);		
 			break;
@@ -1244,6 +1499,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		skipAbs = true;
 		skipCutoff = atof(argument[1]);
+		printf("Skip Abs is %f\n", skipCutoff);
 	}
 	else if(strcmp(argument[0],"-greedy")==0)
 	{

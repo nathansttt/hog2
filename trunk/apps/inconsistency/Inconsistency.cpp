@@ -37,6 +37,9 @@
 #include "GraphAlgorithm.h"
 #include "AStarDelay.h"
 
+Graph *BuildInconsistentGraph(int d, int w, int h, int c1 = 1000, int c2 = 1000);
+void RunInconsistencyExperiment();
+
 bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
@@ -46,9 +49,9 @@ std::vector<GraphSimulation *> unitSims;
 
 //extern bool drawtext;
 
-unsigned int fig = 4;
+unsigned int fig = 0;
 unsigned int N = 5;
-unsigned int vid = 1;
+unsigned int vid = 6;//PROP_A;//
 
 double delta = 0;
 
@@ -119,6 +122,126 @@ void preProcessArgs(int argc, char* argv[])
 	}
 }
 
+
+Graph *BuildInconsistentGraph(int d, int w, int h, int c1, int c2)
+{
+	//int d = 2;
+	from = d*w*h-1;
+	to = 0;
+	
+	Graph *g = new Graph();
+	int cost[d][w][h];
+	int index[d][w][h];
+	for (int z = 0; z < d; z++)
+	{
+		for (int x = 0; x < w; x++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				node *n;
+				cost[z][x][y] = MAXINT;
+				index[z][x][y] = g->AddNode(n = new node(""));
+				n->SetLabelF(GraphSearchConstants::kXCoordinate, -1.0+2.0*(double)x/(double)(w-1.0));
+				n->SetLabelF(GraphSearchConstants::kYCoordinate, -1.0+2.0*(double)y/(double)(h-1.0));
+				if (d > 1)
+					n->SetLabelF(GraphSearchConstants::kZCoordinate, -1.0+2.0*(double)z/(double)(d-1.0));
+				else
+					n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+			}
+		}
+	}
+	for (int z = 0; z < d; z++)
+	{
+		for (int x = 0; x < w; x++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				if ((x == 0) && (y == 0) && (z == 0))
+				{
+					if (d > 1)
+						g->AddEdge(new edge(index[z+1][x][y], index[z][x][y], c2));
+					if (w > 1)
+						g->AddEdge(new edge(index[z][x+1][y], index[z][x][y], c2));
+					g->AddEdge(new edge(index[z][x][y+1], index[z][x][y], c2));
+					continue;
+				}
+				if (z+1 <d)
+					g->AddEdge(new edge(index[z+1][x][y], index[z][x][y], 1+random()%c1));
+				if (x+1 <w)
+					g->AddEdge(new edge(index[z][x+1][y], index[z][x][y], 1+random()%c1));
+				if (y+1 < h)
+					g->AddEdge(new edge(index[z][x][y+1], index[z][x][y], 1+random()%c1));
+			}
+		}
+	}
+	cost[0][0][0] = 0;
+	while (1)
+	{
+		int changes = 0;
+
+		for (int z = 0; z < d; z++)
+		{
+			for (int x = 0; x < w; x++)
+			{
+				for (int y = 0; y < h; y++)
+				{
+					if (z+1 <d)
+					{
+						int from = index[z][x][y];
+						int to = index[z+1][x][y];
+						edge *e = g->FindEdge(from, to);
+						if (cost[z+1][x][y] > cost[z][x][y] + e->GetWeight())
+						{
+							cost[z+1][x][y] = cost[z][x][y] + g->FindEdge(index[z][x][y], index[z+1][x][y])->GetWeight();
+							changes++;
+						}
+					}
+					if (x+1 <w)
+					{
+						if (cost[z][x+1][y] > cost[z][x][y] + g->FindEdge(index[z][x][y], index[z][x+1][y])->GetWeight())
+						{
+							cost[z][x+1][y] = cost[z][x][y] + g->FindEdge(index[z][x][y], index[z][x+1][y])->GetWeight();
+							changes++;
+						}
+					}
+					if (y+1 < h)
+					{
+						if (cost[z][x][y+1] > cost[z][x][y] + g->FindEdge(index[z][x][y], index[z][x][y+1])->GetWeight())
+						{
+							cost[z][x][y+1] = cost[z][x][y] + g->FindEdge(index[z][x][y], index[z][x][y+1])->GetWeight();
+							changes++;
+						}
+					}
+				}
+			}
+		}
+
+		if (changes == 0)
+			break;
+	}
+	
+	for (int z = 0; z < d; z++)
+	{
+		for (int x = 0; x < w; x++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				//printf("cost of node %d (%d, %d) is %d\n", x, y, index[x][y], cost[x][y]);
+				node *n = g->GetNode(index[z][x][y]);
+				if (cost[z][x][y] == 0)
+					n->SetLabelF(GraphSearchConstants::kHCost, 0);
+				else {
+					//int val = ((random()%4) == 0)?(random()%(cost[z][x][y]+1)):0;
+					int val = random()%(cost[z][x][y]+1);
+					//printf("Assigning h = %d\n", val);
+					n->SetLabelF(GraphSearchConstants::kHCost, (double)val);
+				}
+			}
+		}
+	}
+	return g;
+}
+
 /**
  * This function is used to allocate the unit simulated that you want to run.
  * Any parameters or other experimental setup can be done at this time.
@@ -137,6 +260,14 @@ void CreateSimulation(int id)
 			from = grp->GetRandomNode()->GetNum();
 			to = grp->GetRandomNode()->GetNum();
 		}
+	}
+	else if (fig == 0)
+	{
+		grp = BuildInconsistentGraph(5, N, N);
+//		from = 5*N*N-1;
+//		to = 0;
+		env = new GraphEnvironment(grp, new GraphLabelHeuristic(grp, to));
+		env->SetDirected(true);
 	}
 	else if (fig == 1) 
 	{
@@ -294,6 +425,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'k':
+			RunInconsistencyExperiment();
+			break;
 			ALG = new Prop(0);
 			ALG->GetPath(env,grp,from,to,thePath);
 			printf("\n");
@@ -306,13 +439,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			ALG->GetPath(env,grp,from,to,thePath);
 			printf("\n");
 
-			ALG = new Prop(3);
-			ALG->GetPath(env,grp,from,to,thePath);
-			printf("\n");
+//			ALG = new Prop(3);
+//			ALG->GetPath(env,grp,from,to,thePath);
+//			printf("\n");
 
-			ALG = new Prop(4);
-			ALG->GetPath(env,grp,from,to,thePath);
-			printf("\n");
+//			ALG = new Prop(4);
+//			ALG->GetPath(env,grp,from,to,thePath);
+//			printf("\n");
 
 //			ALG = new Prop(5);
 //			ALG->GetPath(env,grp,from,to,thePath);
@@ -320,19 +453,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 			ALG = new AStarDelay();
 			ALG->GetPath(env,grp,from,to,thePath);
-			printf("\n");
+			printf("Delay\t%ld\t%ld\t%ld\n",ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened());
 
-			ALG = new Prop(7);
-			ALG->GetPath(env,grp,from,to,thePath);
-			printf("\n");
-
-			ALG = new Prop(8);
-			ALG->GetPath(env,grp,from,to,thePath);
-			printf("\n");
-
-			ALG = new Prop(9);
-			ALG->GetPath(env,grp,from,to,thePath);
-			printf("\n");
+//			ALG = new Prop(7);
+//			ALG->GetPath(env,grp,from,to,thePath);
+//			printf("\n");
+//
+//			ALG = new Prop(8);
+//			ALG->GetPath(env,grp,from,to,thePath);
+//			printf("\n");
+//
+//			ALG = new Prop(9);
+//			ALG->GetPath(env,grp,from,to,thePath);
+//			printf("\n");
 
 			break;
 		case ']': absType = (absType+1)%3; break;
@@ -416,4 +549,51 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //		return true;
 //	}
 //	return false;
+}
+
+void RunInconsistencyExperiment()
+{
+	printf("Running experiment\n");
+	ALG = new Prop(0);
+	GraphAlgorithm *asd = new AStarDelay();
+
+	for (int size = 50; size <= 50; size++)
+	{
+		for (int cost = 50; cost <= 10000; cost *= 2)
+		{
+			for (int count = 0; count < 100; count++)
+			{
+				fflush(stdout);
+				Graph *g = BuildInconsistentGraph(size, size, size, 50, cost);
+				env = new GraphEnvironment(g, new GraphLabelHeuristic(g, to));
+				env->SetDirected(true);
+				
+				((Prop*)ALG)->SetAlgorithm(PROP_A);
+				ALG->GetPath(env,g,from,to,thePath);
+				printf("A\t%ld\t%ld\t%ld\t%ld\t%d\n",
+					   ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened(),
+					   size, cost);
+				
+				((Prop*)ALG)->SetAlgorithm(PROP_B);
+				ALG->GetPath(env,g,from,to,thePath);
+				printf("B\t%ld\t%ld\t%ld\t%ld\t%d\n",
+					   ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened(),
+					   size, cost);
+				
+				((Prop*)ALG)->SetAlgorithm(PROP_BP);
+				ALG->GetPath(env,g,from,to,thePath);
+				printf("P\t%ld\t%ld\t%ld\t%ld\t%d\n",
+					   ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened(),
+					   size, cost);
+				
+				asd->GetPath(env,g,from,to,thePath);
+				printf("D\t%ld\t%ld\t%ld\t%ld\t%d\n",
+					   asd->GetNodesExpanded(),asd->GetNodesTouched(),asd->GetNodesReopened(),
+					   size, cost);
+
+				delete env;
+			}
+		}
+	}
+	ALG = 0;
 }
