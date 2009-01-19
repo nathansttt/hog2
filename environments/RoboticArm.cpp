@@ -9,7 +9,7 @@
 
 #include "RoboticArm.h"
 #include "TemplateAStar.h"
-#include "glUtil.h"
+#include "GLUtil.h"
 
 tRotation armRotations::GetRotation(int which) const
 {
