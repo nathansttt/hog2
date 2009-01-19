@@ -7,7 +7,6 @@
  *
  */
 
-#include <values.h>
 #include "FringeSearch.h"
 #include "FPUtil.h"
 

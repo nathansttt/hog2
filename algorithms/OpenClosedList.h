@@ -88,13 +88,17 @@ void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::reset()
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
 void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::Add(OBJ val)
 {
-    assert(table.find(val) == table.end());
+	if ((table.find(val) != table.end()))
+	{
+		printf("Trying to add duplicate node.\n");
+		assert(table.find(val) == table.end());
+	}
 	table[val] = _elts.size();
 	//  val->key = count;
-  _elts.push_back(val);
-  //count++;
+	_elts.push_back(val);
+	//count++;
 	//  HeapifyUp(val->key);
-  HeapifyUp(table[val]);
+	HeapifyUp(table[val]);
 }
 
 /**

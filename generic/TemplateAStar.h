@@ -257,7 +257,7 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	start = from;
 	goal = to;
 	
-	if (from == to) //assumes that from and to are valid states
+	if ((from == to) && (stopAfterGoal)) //assumes that from and to are valid states
 	{
 		return false;
 	}
@@ -401,6 +401,7 @@ bool TemplateAStar<state,action,environment>::GetNextNode(state &next)
 	//if(it == openQueue.end())
 	//	return false;
 	next = it.currNode;
+	//printf("h-cost\t%f\n", it.fCost-it.gCost);
 
 	closedList[env->GetStateHash(next)] = it;
 //	std::cout<<"Getting "<<it.gCost<<" ";
@@ -418,6 +419,7 @@ bool TemplateAStar<state,action,environment>::GetNextNode(state &next)
 template <class state, class action, class environment>
 void TemplateAStar<state,action,environment>::UpdateClosedNode(environment *e, state &currOpenNode, state &neighbor)
 {
+	//printf("Found in closed list!\n");
 	SearchNode<state> prev = closedList[e->GetStateHash(neighbor)];
 	//openQueue.find(SearchNode<state>(neighbor, e->GetStateHash(neighbor)));
 	SearchNode<state> alt = closedList[e->GetStateHash(currOpenNode)];
@@ -446,6 +448,7 @@ void TemplateAStar<state,action,environment>::UpdateClosedNode(environment *e, s
 template <class state, class action, class environment>
 void TemplateAStar<state,action,environment>::UpdateWeight(environment *e, state &currOpenNode, state &neighbor)
 {
+	//printf("Found in open list!\n");
 	SearchNode<state> prev = openQueue.find(SearchNode<state>(neighbor, e->GetStateHash(neighbor)));
 	SearchNode<state> alt = closedList[e->GetStateHash(currOpenNode)];
 	double edgeWeight = e->GCost(currOpenNode, neighbor);
@@ -472,13 +475,18 @@ template <class state, class action,class environment>
 void TemplateAStar<state, action,environment>::AddToOpenList(environment *e, state &currOpenNode, state &neighbor)
 {
 	//printf("Adding node %d setting parent to %d\n", neighbor, currOpenNode);
+	//std::cout << "Adding node " << neighbor << " setting parent to " << currOpenNode << std::endl;
 	double edgeWeight = e->GCost(currOpenNode, neighbor);
-	//double hCost = std::max(weight*e->HCost(neighbor, goal), closedList[e->GetStateHash(currOpenNode)].fCost-closedList[e->GetStateHash(currOpenNode)].gCost-weight*edgeWeight);
-	SearchNode<state> n(neighbor, currOpenNode, closedList[e->GetStateHash(currOpenNode)].gCost+edgeWeight+weight*e->HCost(neighbor, goal),
-							 closedList[e->GetStateHash(currOpenNode)].gCost+edgeWeight, e->GetStateHash(neighbor));
-	
-	openQueue.Add(n);
-	
+
+	double oldfCost = closedList[e->GetStateHash(currOpenNode)].fCost;
+	double oldgCost = closedList[e->GetStateHash(currOpenNode)].gCost;
+	double gCost = oldgCost+edgeWeight;
+	double fCost = gCost+weight*e->HCost(neighbor, goal);
+	if ((useBPMX) && (fless(oldfCost, fCost))) // pathmax rule
+		fCost = oldfCost;
+	SearchNode<state> n(neighbor, currOpenNode, fCost, gCost, e->GetStateHash(neighbor));
+
+	openQueue.Add(n);	
 }
 
 /**
@@ -501,6 +509,7 @@ void TemplateAStar<state, action,environment>::ExtractPathToStart(state &goalNod
 	else n = openQueue.find(SearchNode<state>(goalNode, env->GetStateHash(goalNode)));
 
 	do {
+		//std::cout << "Extracting " << n.currNode << " with parent " << n.prevNode << std::endl;
 		//printf("Extracting %d with parent %d\n", n.currNode, n.prevNode);
 		thePath.push_back(n.currNode);
 		if (closedList.find(env->GetStateHash(n.prevNode)) != closedList.end())
