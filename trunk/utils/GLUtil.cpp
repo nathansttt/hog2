@@ -26,12 +26,25 @@
  */
 
 #include "GLUtil.h"
+#include "FPUtil.h"
 #include <math.h>
 
 #ifdef NO_OPENGL
 #include "Gl.cpp"
 #include "Glut.cpp"
 #endif
+
+bool operator==(const recVec &l1, const recVec &l2)
+{
+	return (fequal(l1.x, l2.x) && fequal(l1.y, l2.y));
+}
+
+std::ostream& operator <<(std::ostream &out, const recVec &loc)
+{
+	out << "(" << loc.x << ", " << loc.y << ")";
+	return out;
+}
+	
 
 /**
 * Normalize a vector.
@@ -54,6 +67,96 @@ void recVec::normalise()
 		y = 0;
 		z = 0;
 	}
+}
+
+bool line2d::crosses(line2d which) const
+{
+	if ((which.start == start) || (which.end == end) ||
+		(which.start == end) || (which.end == start))
+		return false;
+	//input x1,y1 input x2,y2
+	//input u1,v1 input u2,v2
+	line2d here(start, end);
+	double maxx1, maxx2, maxy1, maxy2;
+	double minx1, minx2, miny1, miny2;
+	if (here.start.x > here.end.x)
+	{ maxx1 = here.start.x; minx1 = here.end.x; }
+	else
+	{ maxx1 = here.end.x; minx1 = here.start.x; }
+	
+	if (here.start.y > here.end.y)
+	{ maxy1 = here.start.y; miny1 = here.end.y; }
+	else
+	{ maxy1 = here.end.y; miny1 = here.start.y; }
+	
+	if (which.start.x > which.end.x)
+	{ maxx2 = which.start.x; minx2 = which.end.x; }
+	else
+	{ maxx2 = which.end.x; minx2 = which.start.x; }
+	
+	if (which.start.y > which.end.y)
+	{ maxy2 = which.start.y; miny2 = which.end.y; }
+	else
+	{ maxy2 = which.end.y; miny2 = which.start.y; }
+	
+	if (fless(maxx1,minx2) || fless(maxx2, minx1) || fless(maxy1, miny2) || fless(maxy2, miny1))
+		return false;
+	
+	if (fequal(maxx1, minx1)) // this is "here"
+	{
+		// already know that they share bounding boxes
+		// here, they must cross
+		if ((maxy2 < maxy1) && (miny2 > miny1))
+			return true;
+		
+		// y = mx + b
+		double m = (which.end.y-which.start.y)/(which.end.x-which.start.x);
+		double b = which.start.y - m*which.start.x;
+		double y = m*here.start.x+b;
+		if (fless(y, maxy1) && fgreater(y, miny1)) // on the line
+			return true;
+		return false;
+	}
+	if (fequal(maxx2, minx2)) // this is "which"
+	{
+		// already know that they share bounding boxes
+		// here, they must cross
+		if ((maxy1 < maxy2) && (miny1 > miny2))
+			return true;
+		
+		// y = mx + b
+		double m = (here.end.y-here.start.y)/(here.end.x-here.start.x);
+		double b = here.start.y - m*here.start.x;
+		double y = m*which.start.x+b;
+		if (fless(y, maxy2) && fgreater(y, miny2)) // on the line
+			return true;
+		return false;
+	}
+	
+	double b1 = (which.end.y-which.start.y)/(which.end.x-which.start.x);// (A)
+	double b2 = (here.end.y-here.start.y)/(here.end.x-here.start.x);// (B)
+	
+	double a1 = which.start.y-b1*which.start.x;
+	double a2 = here.start.y-b2*here.start.x;
+	
+	if (fequal(b1, b2))
+		return false;
+	double xi = - (a1-a2)/(b1-b2); //(C)
+	double yi = a1+b1*xi;
+	// these are actual >= but we exempt points
+	if ((!fless((which.start.x-xi)*(xi-which.end.x), 0)) &&
+		(!fless((here.start.x-xi)*(xi-here.end.x), 0)) &&
+		(!fless((which.start.y-yi)*(yi-which.end.y), 0)) &&
+		(!fless((here.start.y-yi)*(yi-here.end.y), 0)))
+	{
+		//printf("lines cross at (%f, %f)\n",xi,yi);
+		return true;
+	}
+	else {
+		return false;
+		//print "lines do not cross";
+	}
+	assert(false);
 }
 
 recColor getColor(GLfloat v, GLfloat vmin, GLfloat vmax, int type)
