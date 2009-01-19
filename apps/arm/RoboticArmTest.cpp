@@ -49,6 +49,8 @@ unsigned int pathLoc = 0;
 std::vector<armAngles> ourPath;
 TemplateAStar<armAngles, armRotations, RoboticArm> astar;
 float totalTime;
+ArmToArmHeuristic *aa = 0;
+void TestArms();
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -77,10 +79,13 @@ void CreateSimulation(int)
 //	r->AddObstacle(line2d(recVec(-1, -1, 0), recVec( 1, -1, 0)));
 //	r->AddObstacle(line2d(recVec( 1, -1, 0), recVec( 1,  1, 0)));
 //	r->AddObstacle(line2d(recVec(-1, -1, 0), recVec(-1,  1, 0)));
-	r->AddObstacle(line2d(recVec(-0.30, -0.30, 0), recVec(0.30, -0.30, 0)));
-	r->AddObstacle(line2d(recVec(-0.30, -0.28, 0), recVec(-0.30, -0.32, 0)));
-	r->AddObstacle(line2d(recVec(0.30, 0.30, 0), recVec(0.30, -0.30, 0)));
+
+	r->AddObstacle(line2d(recVec(-0.32, -0.30, 0), recVec(0.32, -0.30, 0)));
+	////r->AddObstacle(line2d(recVec(-0.30, -0.28, 0), recVec(-0.30, -0.32, 0)));
+	r->AddObstacle(line2d(recVec(0.30, 0.32, 0), recVec(0.30, -0.32, 0)));
 	r->AddObstacle(line2d(recVec(0.28, 0.30, 0), recVec(0.32, 0.30, 0)));
+	r->AddObstacle(line2d(recVec(-0.30, -0.32, 0), recVec(-0.30, 0.32, 0)));
+	r->AddObstacle(line2d(recVec(-0.28, 0.30, 0), recVec(-0.32, 0.30, 0)));
 
 	r->AddObstacle(line2d(recVec(0, 0.50, 0), recVec(0.02, 0.52, 0)));
 	r->AddObstacle(line2d(recVec(0.02, 0.52, 0), recVec(0, 0.54, 0)));
@@ -95,16 +100,20 @@ void CreateSimulation(int)
 #endif
 
 	config.SetNumArms( numArms );
-	config.SetAngle( 0, 790 );
-	config.SetAngle( 1, 590 );
-	config.SetAngle( 2, 596 );
-	r->GenerateLegalStateTable( config );
+	config.SetAngle( 0, 512 );
+	config.SetAngle( 1, 512 );
+	config.SetAngle( 2, 512 );
 	r->GenerateTipPositionTables( config );
 
-	do {
-	  for (int x = 0; x < numArms; x++)
-	    config.SetAngle(x, 512+random()%512);
-	} while( !r->LegalState( config ) );
+//	config.SetAngle( 0, 790 );
+//	config.SetAngle( 1, 590 );
+//	config.SetAngle( 2, 596 );
+//	r->GenerateLegalStateTable( config );
+
+//	do {
+//	  for (int x = 0; x < numArms; x++)
+//	    config.SetAngle(x, 512+random()%512);
+//	} while( !r->LegalState( config ) );
 //	unitSims.resize(id+1);
 //	unitSims[id] = new PuzzleSimulation(new MNPuzzle(4, 4));
 //	unitSims[id]->SetStepType(kMinTime);
@@ -242,6 +251,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyKeyHandler, "0-9", "select segment", kNoModifier, '0', '9');
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CW", kNoModifier, 'a');
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CCW", kNoModifier, 's');
+	InstallKeyboardHandler(MyKeyHandler, "Build Heuristic", "Build differential heuristic", kNoModifier, 'b');
+	InstallKeyboardHandler(MyKeyHandler, "Test Heuristic", "Build & test differential heuristic", kNoModifier, 't');
 	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -266,18 +277,18 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-void MyFrameHandler(unsigned long windowID, unsigned int /*viewport*/, void *)
+void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	static int currFrame = 0;
 	currFrame++;
 
-	r->OpenGLDraw(windowID);
+	r->OpenGLDraw(viewport);
 	if (!validSearch)
 	{
 		if (ourPath.size() == 0)
-			r->OpenGLDraw(windowID, config);
+			r->OpenGLDraw(viewport, config);
 		else
-			r->OpenGLDraw(windowID, ourPath[(pathLoc++)%ourPath.size()]);
+			r->OpenGLDraw(viewport, ourPath[(pathLoc++)%ourPath.size()]);
 	}
 	else {
 		Timer t;
@@ -384,6 +395,22 @@ void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
 				ourPath.resize(0);
 			}
 	}
+	
+	if (key == 't')
+	{
+		TestArms();
+	}
+	
+	if (key == 'b')
+	{
+		if (aa == 0)
+		{
+			aa = new ArmToArmHeuristic(r, config);
+			r->AddHeuristic(aa);
+		}
+		else
+			aa->AddDiffTable();
+	}
 }
 
 bool MyClickHandler(unsigned long , int x, int y, point3d loc, tButtonType whichButton, tMouseEventType mouseEvent)
@@ -392,7 +419,23 @@ bool MyClickHandler(unsigned long , int x, int y, point3d loc, tButtonType which
 	if ((mouseEvent != kMouseDown) || (whichButton != kRightButton))
 		return false;
 	goal.SetGoal(loc.x, loc.y);
-	validSearch = astar.InitializeSearch(r, config, goal, ourPath);
+	if (aa)
+	{
+		const std::vector<armAngles> &pos = aa->GetTipPositions(loc.x, loc.y);
+		if (pos.size() > 0)
+		{
+			goal = pos[0];
+			validSearch = astar.InitializeSearch(r, goal, config, ourPath);
+			for (unsigned int t = 1; t < pos.size(); t++)
+			{
+				goal = pos[t];
+				astar.AddAdditionalStartState(goal);
+			}
+		}
+	}
+	else
+		validSearch = astar.InitializeSearch(r, config, goal, ourPath);
+
 	if (validSearch)
 	{
 		std::cout << "Starting search between: " << config << " and " << goal << std::endl;
@@ -470,3 +513,127 @@ armAngles GetFromMinHeap( std::vector<armAngles> &heap, float *distances )
 	return ret;
 }
 #endif
+
+void TestArms()
+{
+	assert(aa == 0);
+	aa = new ArmToArmHeuristic(r, config, true);
+	r->AddHeuristic(aa);
+	
+	std::vector<armAngles> starts;
+	std::vector<armAngles> goals;
+	
+	// first, get lots of good problems
+	printf("Generating problems\n");
+	while (starts.size() < 500)
+	{
+		if ((starts.size()%500) == 0)
+			printf("Generating problem %d\n", starts.size());
+		double x, y;
+		x = random()%10000;
+		x = 2*x/10000-1;
+		y = random()%10000;
+		y = 2*y/10000-1;
+		//printf("Trying config from (%f, %f) for start\n", x, y);
+		const std::vector<armAngles> &pos = aa->GetTipPositions(x, y);
+		if (pos.size() > 0)
+		{
+			starts.push_back(pos[random()%pos.size()]);
+		}		
+		else
+			continue;
+
+		while (1)
+		{
+			x = random()%10000;
+			x = 2*x/10000-1;
+			y = random()%10000;
+			y = 2*y/10000-1;
+			//printf("Trying (%f, %f) for goal\n", x, y);
+			const std::vector<armAngles> &pos = aa->GetTipPositions(x, y);
+			if (pos.size() > 0)
+			{
+				armAngles goal;
+				goal.SetGoal(x, y);
+				goals.push_back(goal);
+				break;
+			}
+		}
+	}
+	printf("Done generating problems\n");
+	
+//	if (aa == 0)
+//	{
+//		aa = new ArmToArmHeuristic(r, config);
+//		r->AddHeuristic(aa);
+//	}
+//	else
+//		aa->AddDiffTable();
+
+	double totalTime;
+	double totalNodes;
+	double totalHvalue;
+	
+//	aa->AddDiffTable();
+//	aa->AddDiffTable();
+//	aa->AddDiffTable();
+	for (int total = 0; total <= -1; total++)
+	{
+		printf("Solving with %d heuristics\n", total);
+		totalTime = 0;
+		totalNodes = 0;
+		totalHvalue = 0;
+		for (unsigned int x = 0; x < starts.size(); x++)
+		{
+			armAngles goal;
+			double x1, y1;
+			goals[x].GetGoal(x1, y1);
+			const std::vector<armAngles> &pos = aa->GetTipPositions(x1, y1);
+			goal = pos[0];
+			double localHvalue = r->HCost(starts[x], goal);
+			validSearch = astar.InitializeSearch(r, goal, starts[x], ourPath);
+			for (unsigned int t = 1; t < pos.size(); t++)
+			{
+				goal = pos[t];
+				astar.AddAdditionalStartState(goal);
+				localHvalue = min(localHvalue, r->HCost(starts[x], goal));
+			}
+			
+			Timer t;
+			t.startTimer();
+//			while (!astar.DoSingleSearchStep(ourPath))
+//			{}
+			totalHvalue += localHvalue;
+			totalTime += t.endTimer();
+			totalNodes += astar.GetNodesExpanded();
+			printf("%d\t%d\t%f\t%f\n", x, astar.GetNodesExpanded(), t.getElapsedTime(), localHvalue);
+		}
+		totalTime /= starts.size();
+		totalNodes /= starts.size();
+		totalHvalue /= starts.size();
+		printf("time\t%f\tnodes\t%f\thcost\t%f\n", totalTime, totalNodes, totalHvalue);
+		aa->AddDiffTable();
+	}
+
+	printf("Solving with no heuristics the normal way\n");
+	totalTime = 0;
+	totalNodes = 0;
+	for (unsigned int x = 0; x < starts.size(); x++)
+	{
+		validSearch = astar.InitializeSearch(r, starts[x], goals[x], ourPath);
+		
+		Timer t;
+		t.startTimer();
+		while (!astar.DoSingleSearchStep(ourPath))
+		{}
+		totalTime += t.endTimer();
+		totalHvalue += r->HCost(starts[x], goals[x]);
+		totalNodes += astar.GetNodesExpanded();
+		printf("%d\t%d\t%f\t%f\n", x, astar.GetNodesExpanded(), t.getElapsedTime(), r->HCost(starts[x], goals[x]));
+	}
+	totalTime /= starts.size();
+	totalNodes /= starts.size();
+	totalHvalue /= starts.size();
+	printf("time\t%f\tnodes\t%f\n", totalTime, totalNodes);
+	exit(0);
+}
