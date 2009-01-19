@@ -419,6 +419,8 @@
 		C4C847520C1F1A5B00AFBF7A /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4C8474A0C1F1A5B00AFBF7A /* Info.plist */; };
 		C4C8475C0C1F1AD000AFBF7A /* Inconsistency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C847580C1F1ACF00AFBF7A /* Inconsistency.cpp */; };
 		C4C99B150EC16EA800C87E6E /* MultiAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C670CFF191F00301281 /* MultiAgent.cpp */; };
+		C4D188F60F16F05A005DEF84 /* RoboticArmTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F0110ECFD2C5009D90B3 /* RoboticArmTest.cpp */; };
+		C4D18AD70F183D7D005DEF84 /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
 		C4D3AFBD0BCEE5B800FCD84C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9B0BCEE5B800FCD84C /* Info.plist */; };
 		C4D3AFBE0BCEE5B800FCD84C /* Sample.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9C0BCEE5B800FCD84C /* Sample.icns */; };
@@ -492,8 +494,6 @@
 		C4E8273F0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
 		C4E827400EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
 		C4E827410EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
-		C4E8280C0EEF981C00F500C4 /* GraphCanonicalHeuristic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E828080EEF981C00F500C4 /* GraphCanonicalHeuristic.cpp */; };
-		C4E8280D0EEF981C00F500C4 /* LLPDB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8280A0EEF981C00F500C4 /* LLPDB.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -598,6 +598,8 @@
 		C4C847590C1F1ACF00AFBF7A /* Inconsistency.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Inconsistency.h; sourceTree = "<group>"; };
 		C4D034410CDB9A0A00921D30 /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C4D034420CDB9A0A00921D30 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
+		C4D18AD50F183D7D005DEF84 /* ConfigEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigEnvironment.h; sourceTree = "<group>"; };
+		C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConfigEnvironment.cpp; sourceTree = "<group>"; };
 		C4D3AF6E0BCEE5B800FCD84C /* 299.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = 299.icns; sourceTree = "<group>"; };
 		C4D3AF700BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4D3AF720BCEE5B800FCD84C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
@@ -1336,7 +1338,7 @@
 				C4D3C4140BDD3BBE00FCD84C /* mapalgorithms */,
 				C4D3B4670BCEE7B200FCD84C /* shared */,
 				C4D3B4760BCEE7B200FCD84C /* simulation */,
-				C4D3B4870BCEE7B200FCD84C /* util */,
+				C4D3B4870BCEE7B200FCD84C /* utils */,
 				32DBCF6D0370B57F00C91783 /* hog2_Prefix.pch */,
 			);
 			name = Sources;
@@ -1705,6 +1707,8 @@
 				C42A68DA0DA2F15D0005B8A6 /* TopSpin.h */,
 				C4A4F3590ECFD3B5009D90B3 /* RoboticArm.cpp */,
 				C4A4F3580ECFD3B5009D90B3 /* RoboticArm.h */,
+				C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */,
+				C4D18AD50F183D7D005DEF84 /* ConfigEnvironment.h */,
 			);
 			name = environments;
 			path = ../../../environments;
@@ -2353,7 +2357,7 @@
 			path = ../../../simulation;
 			sourceTree = SOURCE_ROOT;
 		};
-		C4D3B4870BCEE7B200FCD84C /* util */ = {
+		C4D3B4870BCEE7B200FCD84C /* utils */ = {
 			isa = PBXGroup;
 			children = (
 				C4D3B4880BCEE7B200FCD84C /* BitVector.cpp */,
@@ -2377,8 +2381,8 @@
 				C4D3C11B0BD6996400FCD84C /* Plot2D.cpp */,
 				C4D3C11A0BD6996400FCD84C /* Plot2D.h */,
 			);
-			name = util;
-			path = ../../../util;
+			name = utils;
+			path = ../../../utils;
 			sourceTree = SOURCE_ROOT;
 		};
 		C4D3B7320BCEEC5900FCD84C /* apps */ = {
@@ -2723,8 +2727,8 @@
 				C42A68E00DA2F15D0005B8A6 /* TopSpin.cpp in Sources */,
 				C4A4F35A0ECFD3B5009D90B3 /* RoboticArm.cpp in Sources */,
 				C4E8273D0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
-				C4E8280C0EEF981C00F500C4 /* GraphCanonicalHeuristic.cpp in Sources */,
-				C4E8280D0EEF981C00F500C4 /* LLPDB.cpp in Sources */,
+				C4D188F60F16F05A005DEF84 /* RoboticArmTest.cpp in Sources */,
+				C4D18AD70F183D7D005DEF84 /* ConfigEnvironment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
