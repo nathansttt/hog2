@@ -61,7 +61,10 @@ namespace GraphSearchConstants
 class GraphHeuristic {
 public:
 	virtual ~GraphHeuristic() { }
+	virtual Graph *GetGraph() = 0;
 	virtual double HCost(graphState &state1, graphState &state2) = 0;
+	// if one is better as the start or goal state, this can swap for you.
+	virtual void ChooseStartGoal(graphState &start, graphState &goal) {}
 private:
 };
 
@@ -71,6 +74,7 @@ class GraphLabelHeuristic : public GraphHeuristic {
 public:
 	GraphLabelHeuristic(Graph *graph, graphState target)
 	{ g = graph; goal = target; }
+	Graph *GetGraph() { return g; }
 	double HCost(graphState &state1, graphState &state2)
 	{
 		if (state2 == goal)
@@ -86,6 +90,7 @@ class GraphMapHeuristic : public GraphHeuristic {
 public:
 	GraphMapHeuristic(Map *map, Graph *graph)
 	:m(map), g(graph) {}
+	Graph *GetGraph() { return g; }
 	double HCost(graphState &state1, graphState &state2)
 	{
 		int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
@@ -102,20 +107,20 @@ private:
 	Graph *g;
 };
 
-class GraphMapInconsistentHeuristic : public GraphHeuristic {
-public:
-	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
-	double HCost(graphState &state1, graphState &state2);
-	static int hmode;
-	static int HN;
-private:
-	void GetOptimalDistances(node *n, std::vector<double> &values);
-	void AddHeuristic(std::vector<double> &values, graphState location);
-	Map *m;
-	Graph *g;
-	std::vector<std::vector<double> > heuristics;
-	std::vector<graphState> locations;
-};
+//class GraphMapInconsistentHeuristic : public GraphHeuristic {
+//public:
+//	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
+//	double HCost(graphState &state1, graphState &state2);
+//	static int hmode;
+//	static int HN;
+//private:
+//	void GetOptimalDistances(node *n, std::vector<double> &values);
+//	void AddHeuristic(std::vector<double> &values, graphState location);
+//	Map *m;
+//	Graph *g;
+//	std::vector<std::vector<double> > heuristics;
+//	std::vector<graphState> locations;
+//};
 
 class GraphMapPerfectHeuristic : public GraphHeuristic {
 public:
@@ -123,6 +128,7 @@ public:
 	{
 		fillProbTable();
 	}
+	Graph *GetGraph() { return g; }
 	double HCost(graphState &state1, graphState &state2)
 	{ // warning: in this implementation HCost(s1,s2) != HCost(s2,s1)
 
@@ -168,6 +174,37 @@ private:
 	bool* probTable;
 };
 
+class GraphDistanceHeuristic : public GraphHeuristic {
+public:
+	GraphDistanceHeuristic(Graph *graph) :g(graph) { smartPlacement = false; }
+	~GraphDistanceHeuristic() {}
+	virtual double HCost(graphState &state1, graphState &state2) = 0;
+	void AddHeuristic(node *n = 0);
+	int GetNumHeuristics() { return heuristics.size(); }
+	void UseSmartPlacement(bool use) { smartPlacement = use; }
+	Graph *GetGraph() { return g; }
+	void ChooseStartGoal(graphState &start, graphState &goal);
+protected:
+	void GetOptimalDistances(node *n, std::vector<double> &values);
+	void AddHeuristic(std::vector<double> &values, graphState location);
+	node *FindFarNode(node *n);
+
+	bool smartPlacement;
+	Graph *g;
+	std::vector<std::vector<double> > heuristics;
+	std::vector<graphState> locations;
+};
+
+class GraphMapInconsistentHeuristic : public GraphDistanceHeuristic {
+public:
+	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
+	double HCost(graphState &state1, graphState &state2);
+	static int hmode;
+	static int HN;
+private:
+	Map *m;
+};
+
 class GraphEnvironment : public SearchEnvironment<graphState, graphMove> {
 public:
 	GraphEnvironment(Graph *g, GraphHeuristic *gh);
@@ -190,6 +227,7 @@ public:
 	virtual void OpenGLDraw(int window);
 	virtual void OpenGLDraw(int window, graphState &s);
 	virtual void OpenGLDraw(int window, graphState &s, graphMove &gm);
+	Graph *GetGraph() { return g; };
 protected:
 	bool directed;
 	Graph *g;

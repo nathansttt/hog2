@@ -20,6 +20,7 @@ class TopSpinGraphHeuristic : public GraphHeuristic {
 public:
 	TopSpinGraphHeuristic(int psize, int spin, int pdb);
 	TopSpinGraphHeuristic();
+	Graph *GetGraph() { return 0; }
 	void SetState(TopSpin *tss) { ts = tss; }
 	virtual ~TopSpinGraphHeuristic() { }
 	virtual double HCost(graphState &state1, graphState &state2);

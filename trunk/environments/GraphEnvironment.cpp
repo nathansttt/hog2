@@ -10,18 +10,18 @@
 #include "GraphEnvironment.h"
 #include "GLUtil.h"
 #include "Heap.h"
+#include "FloydWarshall.h"
 
 using namespace GraphSearchConstants;
 
-int GraphMapInconsistentHeuristic::hmode=1;
+int GraphMapInconsistentHeuristic::hmode=2;
 int GraphMapInconsistentHeuristic::HN=10;
-
 double GraphMapPerfectHeuristic::prob=0.5;
 
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 :g(_g), h(gh)
 {
- 	directed = false;//true;
+ 	directed = false;
 }
 
 //GraphEnvironment::GraphEnvironment(Map *m)
@@ -35,8 +35,8 @@ GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 GraphEnvironment::~GraphEnvironment()
 {
 	// delete g; ??
-	delete g;
-	delete h;
+	//	delete g;
+//	delete h;
 }
 
 void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors)
@@ -72,11 +72,30 @@ void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &a
 {
 	actions.resize(0);
 	node *n = g->GetNode(stateID);
-	edge_iterator ei = n->getOutgoingEdgeIter();
-	for (edge *e = n->edgeIterNextOutgoing(ei); e; e = n->edgeIterNextOutgoing(ei))
-	{
-		actions.push_back(graphMove(e->getFrom(), e->getTo()));
+
+	if(n == 0) {
+		return;
 	}
+
+	if (directed)
+	{
+		edge_iterator ei = n->getOutgoingEdgeIter();
+		for (edge *e = n->edgeIterNextOutgoing(ei); e; e = n->edgeIterNextOutgoing(ei))
+		{
+			actions.push_back(graphMove(e->getFrom(),e->getTo()));
+		}
+	}
+	else {
+		edge_iterator ei = n->getEdgeIter();
+		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
+		{
+			if(stateID != e->getTo())
+				actions.push_back(graphMove(e->getFrom(),e->getTo()));
+			else
+				actions.push_back(graphMove(e->getTo(),e->getFrom()));
+		}
+	}
+
 }
 
 graphMove GraphEnvironment::GetAction(graphState &s1, graphState &s2)
@@ -117,6 +136,8 @@ double GraphEnvironment::GCost(graphState &, graphMove &move)
 double GraphEnvironment::GCost(graphState &state1, graphState &state2)
 {
 	edge *e = g->FindEdge(state1, state2);
+//	if (!e)
+//		return -1000.0;
 	assert(e);
 	return e->GetWeight();
 }
@@ -484,16 +505,31 @@ namespace GraphSearchConstants {
 }
 
 GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *graph)
-:m(map), g(graph)
+:GraphDistanceHeuristic(graph), m(map)
 {
-	for (int x = 0; x < HN /*10*/; x++)
-	{
-		node *n = g->GetRandomNode();
-		graphState loc = n->GetNum();
-		std::vector<double> values;
-		GetOptimalDistances(n, values);
-		AddHeuristic(values, loc);
-	}
+//	std::vector<std::vector<double> > values;
+//	FloydWarshall(graph, values);
+//	std::vector<int> randomizer;
+//	randomizer.resize(values.size());
+//	for (int x = 0; x < values.size(); x++)
+//		randomizer[x] = x;
+//	for (int x = values.size(); x > 0; x--)
+//	{
+//		int tmp = randomizer[x-1];
+//		int switcher = random()%x;
+//		randomizer[x-1] = randomizer[switcher];
+//		randomizer[switcher] = tmp;
+//	}
+//	for (int x = 0; x < values.size(); x++)
+//		AddHeuristic(values[randomizer[x]], x);
+//	for (int x = 0; x < HN /*10*/; x++)
+//	{
+//		node *n = g->GetRandomNode();
+//		graphState loc = n->GetNum();
+//		std::vector<double> values;
+//		GetOptimalDistances(n, values);
+//		AddHeuristic(values, loc);
+//	}
 } 
 
 double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &state2)
@@ -507,11 +543,11 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 	double b = ((y1>y2)?(y1-y2):(y2-y1));
 	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 
-	if(hmode == 0)
+	if (hmode == 0)
 		return val;
 
 	//for (unsigned int x = 0; x < heuristics.size(); x++)
-	if(hmode == 1) {
+	if (hmode == 1) {
 		int x = (x1+x2+y1+y2)%heuristics.size();
 		{
 			double hval = heuristics[x][state1]-heuristics[x][state2];
@@ -520,12 +556,13 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 				val = hval;
 		}
 	}
-	else if(hmode == 2) { // hmode == 2, taking the max
-		for(unsigned int i=0;i<heuristics.size();i++) {
+	else if (hmode == 2) { // hmode == 2, taking the max
+		for (unsigned int i = 0; i < heuristics.size() && i < HN; i++)
+		{
 			double hval = heuristics[i][state1]-heuristics[i][state2];
-			if(hval < 0)
+			if (hval < 0)
 				hval = -hval;
-			if(fgreater(hval,val))
+			if (fgreater(hval,val))
 				val = hval;
 		}
 	}
@@ -546,15 +583,51 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 	return val;
 }
 
-void GraphMapInconsistentHeuristic::AddHeuristic(std::vector<double> &values,
-												 graphState location)
+void GraphDistanceHeuristic::ChooseStartGoal(graphState &start, graphState &goal)
+{
+	if (heuristics.size() == 0)
+		return;
+	double minStart=-1, minGoal=-1;
+
+	minStart = heuristics[0][start];
+	minGoal = heuristics[0][goal];
+	for (unsigned int x = 1; x < heuristics.size(); x++)
+	{
+		if (heuristics[x][start] < minStart)
+			minStart = heuristics[x][start];
+		if (heuristics[x][goal] < minGoal)
+			minGoal = heuristics[x][goal];
+	}
+	if (minStart < minGoal)
+	{
+		graphState tmp;
+		tmp = start;
+		start = goal;
+		goal = tmp;
+	}
+}
+
+void GraphDistanceHeuristic::AddHeuristic(node *n)
+{
+	if (smartPlacement)
+		n = FindFarNode(n);
+	else if (n == 0)
+		n = g->GetRandomNode();
+	
+	std::vector<double> values;
+	GetOptimalDistances(n, values);
+	AddHeuristic(values, n->GetNum());
+}
+
+void GraphDistanceHeuristic::AddHeuristic(std::vector<double> &values, graphState location)
 {
 	heuristics.push_back(values);
 	locations.push_back(location);
 }
 
 
-void GraphMapInconsistentHeuristic::GetOptimalDistances(node *n, std::vector<double> &values)
+
+void GraphDistanceHeuristic::GetOptimalDistances(node *n, std::vector<double> &values)
 {
 	values.resize(g->GetNumNodes());
 	for (unsigned int x = 0; x < values.size(); x++)
@@ -597,5 +670,185 @@ void GraphMapInconsistentHeuristic::GetOptimalDistances(node *n, std::vector<dou
 	}
 }
 
+node *GraphDistanceHeuristic::FindFarNode(node *n)
+{
+	std::vector<double> values;
+	values.resize(g->GetNumNodes());
+	for (unsigned int x = 0; x < values.size(); x++)
+		values[x] = -1;
+
+	Heap h;
+	for (unsigned int x = 0; x < locations.size(); x++)
+	{
+		n = g->GetNode(locations[x]);
+		n->SetLabelF(kTemporaryLabel, 0.0);
+		n->SetKeyLabel(kTemporaryLabel);
+		h.Add(n);
+	}
+	if (locations.size() == 0)
+	{
+		if (n == 0)
+			n = g->GetRandomNode();
+		n->SetLabelF(kTemporaryLabel, 0.0);
+		n->SetKeyLabel(kTemporaryLabel);
+		h.Add(n);
+	}
+
+	while (!h.Empty())
+	{
+		node *next = (node*)h.Remove();
+		//		printf("Heap size %d, working on node %d cost %f\n", h.size(), next->GetNum(),
+		//			   next->GetLabelF(kTemporaryLabel));
+		double cost = next->GetLabelF(kTemporaryLabel);
+		values[next->GetNum()] = next->GetLabelF(kTemporaryLabel);
+		neighbor_iterator ni = next->getNeighborIter();
+		for (long tmp = next->nodeNeighborNext(ni); tmp != -1; tmp = next->nodeNeighborNext(ni))
+		{
+			if (values[tmp] == -1)
+			{
+				node *nb = g->GetNode(tmp);
+				if (h.IsIn(nb))
+				{
+					if (fgreater(nb->GetLabelF(kTemporaryLabel),
+								 cost + g->FindEdge(next->GetNum(), tmp)->GetWeight()))
+					{
+						nb->SetLabelF(kTemporaryLabel,
+									  cost+g->FindEdge(next->GetNum(), tmp)->GetWeight());
+						h.DecreaseKey(nb);
+					}
+				}
+				else {
+					nb->SetKeyLabel(kTemporaryLabel);
+					nb->SetLabelF(kTemporaryLabel,
+								  cost+g->FindEdge(next->GetNum(), tmp)->GetWeight());
+					h.Add(nb);
+				}
+			}
+		}
+		if (h.Empty())
+		{
+//			printf("Selecting node at (%ld, %ld)\n", next->GetLabelL(GraphSearchConstants::kMapX),
+//				   next->GetLabelL(GraphSearchConstants::kMapY));
+			return next;
+		}
+	}
+	return 0;
+}
 
 
+//GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *graph)
+//:m(map), g(graph)
+//{
+//	for (int x = 0; x < HN /*10*/; x++)
+//	{
+//		node *n = g->GetRandomNode();
+//		graphState loc = n->GetNum();
+//		std::vector<double> values;
+//		GetOptimalDistances(n, values);
+//		AddHeuristic(values, loc);
+//	}
+//} 
+//
+//double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &state2)
+//{
+//	int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
+//	int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
+//	int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
+//	int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
+//	
+//	double a = ((x1>x2)?(x1-x2):(x2-x1));
+//	double b = ((y1>y2)?(y1-y2):(y2-y1));
+//	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
+//
+//	if(hmode == 0)
+//		return val;
+//
+//	//for (unsigned int x = 0; x < heuristics.size(); x++)
+//	if(hmode == 1) {
+//		int x = (x1+x2+y1+y2)%heuristics.size();
+//		{
+//			double hval = heuristics[x][state1]-heuristics[x][state2];
+//			if (hval < 0) hval = -hval;
+//			if (fgreater(hval, val))
+//				val = hval;
+//		}
+//	}
+//	else if(hmode == 2) { // hmode == 2, taking the max
+//		for(unsigned int i=0;i<heuristics.size();i++) {
+//			double hval = heuristics[i][state1]-heuristics[i][state2];
+//			if(hval < 0)
+//				hval = -hval;
+//			if(fgreater(hval,val))
+//				val = hval;
+//		}
+//	}
+//	else {  // hmode == 3, return max at grid points, otherwise 0
+//		if( (x1+x2) % 4 == 0 && (y1+y2) % 4 == 0) {
+//			for(unsigned int i=0;i<heuristics.size();i++) {
+//				double hval = heuristics[i][state1]-heuristics[i][state2];
+//				if(hval < 0)
+//					hval = -hval;
+//				if(fgreater(hval,val))
+//					val = hval;
+//			}
+//		}
+//		else
+//			val = 0;
+//	}
+//
+//	return val;
+//}
+//
+//void GraphMapInconsistentHeuristic::AddHeuristic(std::vector<double> &values,
+//												 graphState location)
+//{
+//	heuristics.push_back(values);
+//	locations.push_back(location);
+//}
+//
+//
+//void GraphMapInconsistentHeuristic::GetOptimalDistances(node *n, std::vector<double> &values)
+//{
+//	values.resize(g->GetNumNodes());
+//	for (unsigned int x = 0; x < values.size(); x++)
+//		values[x] = -1.0;
+//	n->SetLabelF(kTemporaryLabel, 0.0);
+//	n->SetKeyLabel(kTemporaryLabel);
+//	Heap h;
+//	h.Add(n);
+//	while (!h.Empty())
+//	{
+//		node *next = (node*)h.Remove();
+////		printf("Heap size %d, working on node %d cost %f\n", h.size(), next->GetNum(),
+////			   next->GetLabelF(kTemporaryLabel));
+//		double cost = next->GetLabelF(kTemporaryLabel);
+//		values[next->GetNum()] = next->GetLabelF(kTemporaryLabel);
+//		neighbor_iterator ni = next->getNeighborIter();
+//		for (long tmp = next->nodeNeighborNext(ni); tmp != -1; tmp = next->nodeNeighborNext(ni))
+//		{
+//			if (values[tmp] == -1)
+//			{
+//				node *nb = g->GetNode(tmp);
+//				if (h.IsIn(nb))
+//				{
+//					if (fgreater(nb->GetLabelF(kTemporaryLabel),
+//								 cost + g->FindEdge(next->GetNum(), tmp)->GetWeight()))
+//					{
+//						nb->SetLabelF(kTemporaryLabel,
+//									  cost+g->FindEdge(next->GetNum(), tmp)->GetWeight());
+//						h.DecreaseKey(nb);
+//					}
+//				}
+//				else {
+//					nb->SetKeyLabel(kTemporaryLabel);
+//					nb->SetLabelF(kTemporaryLabel,
+//								  cost+g->FindEdge(next->GetNum(), tmp)->GetWeight());
+//					h.Add(nb);
+//				}
+//			}
+//		}
+//	}
+//}
+//
+//
+//
