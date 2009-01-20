@@ -16,7 +16,7 @@ using namespace GraphSearchConstants;
 
 //int GraphMapInconsistentHeuristic::hmode=2;
 //int GraphMapInconsistentHeuristic::HN=10;
-double GraphMapPerfectHeuristic::prob=0.5;
+//double GraphMapPerfectHeuristic::prob=0.5;
 
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 :g(_g), h(gh)
@@ -507,6 +507,8 @@ namespace GraphSearchConstants {
 GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *graph)
 :GraphDistanceHeuristic(graph), m(map)
 {
+	SetMode(kMax);
+	SetNumUsedHeuristics(1000);
 //	std::vector<std::vector<double> > values;
 //	FloydWarshall(graph, values);
 //	std::vector<int> randomizer;

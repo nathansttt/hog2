@@ -107,28 +107,15 @@ private:
 	Graph *g;
 };
 
-//class GraphMapInconsistentHeuristic : public GraphHeuristic {
-//public:
-//	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
-//	double HCost(graphState &state1, graphState &state2);
-//	static int hmode;
-//	static int HN;
-//private:
-//	void GetOptimalDistances(node *n, std::vector<double> &values);
-//	void AddHeuristic(std::vector<double> &values, graphState location);
-//	Map *m;
-//	Graph *g;
-//	std::vector<std::vector<double> > heuristics;
-//	std::vector<graphState> locations;
-//};
-
 class GraphMapPerfectHeuristic : public GraphHeuristic {
 public:
 	GraphMapPerfectHeuristic(Map *map, Graph *graph):m(map), g(graph)
 	{
+		prob = 0.5;
 		fillProbTable();
 	}
 	Graph *GetGraph() { return g; }
+	void SetProbability(double p) { prob = p; }
 	double HCost(graphState &state1, graphState &state2)
 	{ // warning: in this implementation HCost(s1,s2) != HCost(s2,s1)
 
@@ -146,7 +133,7 @@ public:
 	{
 		delete probTable;
 	}
-	static double prob;
+	double prob;
 private:
 	double GetOctileDistance(double dx, double dy) 
 	{
