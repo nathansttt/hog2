@@ -272,8 +272,8 @@ void TestPDB()
 	Graph *graph = GraphSearchConstants::GetGraph(map);
 
 	GraphMapInconsistentHeuristic gdh(map, graph);
-	gdh.numHeuristics = 1000;
-	gdh.hmode = kMax;
+	gdh.SetNumUsedHeuristics(1000);
+	gdh.SetMode(kMax);
 	gdh.UseSmartPlacement(true);
 	
 	int which = 0;
@@ -468,8 +468,8 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 			for (int y = 1; y <= 1; y++)
 			{
 				GraphMapInconsistentHeuristic gdh(gch->GetMap(), gch->GetGraph());
-				gdh.numHeuristics = 1000;
-				gdh.hmode = kMax;
+				gdh.SetNumUsedHeuristics(1000);
+				gdh.SetMode(kMax);
 				gdh.UseSmartPlacement((y==0)?false:true);
 				for (int t = 0; t < w; t++)
 					gdh.AddHeuristic();
@@ -575,10 +575,10 @@ void RunBigTest()
 				gmih->AddHeuristic();
 				gmih2->AddHeuristic();
 			}
-			gmih->numHeuristics = gch->GetNumEntries()/g->GetNumNodes();
-			gmih2->numHeuristics = gch->GetNumEntries()/g->GetNumNodes();
-			gmih->hmode = kMax;
-			gmih2->hmode = kMax;
+			gmih->SetNumUsedHeuristics(gch->GetNumEntries()/g->GetNumNodes());
+			gmih2->SetNumUsedHeuristics(gch->GetNumEntries()/g->GetNumNodes());
+			gmih->SetMode(kMax);
+			gmih2->SetMode(kMax);
 			
 			//RunHeuristicTest(sl);
 			//RunTest(sl);
@@ -1160,7 +1160,7 @@ void TestSmallMap()
 	
 	for (int x = 10; x <= 10; x++)
 	{
-		gmih.numHeuristics = x;
+		gmih.SetNumUsedHeuristics(x);
 		
 		int nodes = 0;
 		int touched = 0;

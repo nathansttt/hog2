@@ -207,9 +207,11 @@ class GraphMapInconsistentHeuristic : public GraphDistanceHeuristic {
 public:
 	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
 	double HCost(graphState &state1, graphState &state2);
+	void SetMode(tHeuristicCombination mode) { hmode = mode; }
+	void SetNumUsedHeuristics(int count) { numHeuristics = count; }
+private:
 	tHeuristicCombination hmode;
 	int numHeuristics;
-private:
 	Map *m;
 };
 
