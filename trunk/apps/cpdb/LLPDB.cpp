@@ -272,8 +272,8 @@ void TestPDB()
 	Graph *graph = GraphSearchConstants::GetGraph(map);
 
 	GraphMapInconsistentHeuristic gdh(map, graph);
-	GraphMapInconsistentHeuristic::HN = 1000;
-	GraphMapInconsistentHeuristic::hmode = 2;
+	gdh.numHeuristics = 1000;
+	gdh.hmode = kMax;
 	gdh.UseSmartPlacement(true);
 	
 	int which = 0;
@@ -465,11 +465,11 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 			}
 			freopen("/Users/nathanst/Desktop/octile.txt","a+",stdout);
 			RunTest(sl, gch, gch->GetMap(), lower, upper, nodes[0], hcosts[0], times[0], true);
-			GraphMapInconsistentHeuristic::HN = 100;
-			GraphMapInconsistentHeuristic::hmode = 2;
 			for (int y = 1; y <= 1; y++)
 			{
 				GraphMapInconsistentHeuristic gdh(gch->GetMap(), gch->GetGraph());
+				gdh.numHeuristics = 1000;
+				gdh.hmode = kMax;
 				gdh.UseSmartPlacement((y==0)?false:true);
 				for (int t = 0; t < w; t++)
 					gdh.AddHeuristic();
@@ -566,7 +566,6 @@ void RunBigTest()
 			//GraphMapInconsistentHeuristic::HN = 1+y*y/(g->GetNumNodes());
 			delete gmih;
 			delete gmih2;
-			GraphMapInconsistentHeuristic::HN = 0;
 			gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
 			gmih->UseSmartPlacement(true);
 			gmih2 = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
@@ -576,7 +575,10 @@ void RunBigTest()
 				gmih->AddHeuristic();
 				gmih2->AddHeuristic();
 			}
-			GraphMapInconsistentHeuristic::HN = gch->GetNumEntries()/g->GetNumNodes();
+			gmih->numHeuristics = gch->GetNumEntries()/g->GetNumNodes();
+			gmih2->numHeuristics = gch->GetNumEntries()/g->GetNumNodes();
+			gmih->hmode = kMax;
+			gmih2->hmode = kMax;
 			
 			//RunHeuristicTest(sl);
 			//RunTest(sl);
@@ -1158,7 +1160,7 @@ void TestSmallMap()
 	
 	for (int x = 10; x <= 10; x++)
 	{
-		GraphMapInconsistentHeuristic::HN = x;
+		gmih.numHeuristics = x;
 		
 		int nodes = 0;
 		int touched = 0;
