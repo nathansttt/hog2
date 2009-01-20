@@ -195,12 +195,20 @@ protected:
 	std::vector<graphState> locations;
 };
 
+enum tHeuristicCombination
+{
+	kIgnore = 0, // don't combine with database
+	kRandom = 1, // combine random selection of databases
+	kMax = 2,    // take max of all heuristics
+	kGridMax = 3 // 0 on non-grid points
+};
+
 class GraphMapInconsistentHeuristic : public GraphDistanceHeuristic {
 public:
 	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
 	double HCost(graphState &state1, graphState &state2);
-	static int hmode;
-	static int HN;
+	tHeuristicCombination hmode;
+	int numHeuristics;
 private:
 	Map *m;
 };

@@ -14,8 +14,8 @@
 
 using namespace GraphSearchConstants;
 
-int GraphMapInconsistentHeuristic::hmode=2;
-int GraphMapInconsistentHeuristic::HN=10;
+//int GraphMapInconsistentHeuristic::hmode=2;
+//int GraphMapInconsistentHeuristic::HN=10;
 double GraphMapPerfectHeuristic::prob=0.5;
 
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
@@ -543,11 +543,11 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 	double b = ((y1>y2)?(y1-y2):(y2-y1));
 	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 
-	if (hmode == 0)
+	if (hmode == kIgnore)
 		return val;
 
 	//for (unsigned int x = 0; x < heuristics.size(); x++)
-	if (hmode == 1) {
+	if (hmode == kRandom) {
 		int x = (x1+x2+y1+y2)%heuristics.size();
 		{
 			double hval = heuristics[x][state1]-heuristics[x][state2];
@@ -556,8 +556,8 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 				val = hval;
 		}
 	}
-	else if (hmode == 2) { // hmode == 2, taking the max
-		for (unsigned int i = 0; i < heuristics.size() && i < HN; i++)
+	else if (hmode == kMax) { // hmode == 2, taking the max
+		for (unsigned int i = 0; i < heuristics.size() && i < numHeuristics; i++)
 		{
 			double hval = heuristics[i][state1]-heuristics[i][state2];
 			if (hval < 0)
@@ -566,7 +566,7 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 				val = hval;
 		}
 	}
-	else {  // hmode == 3, return max at grid points, otherwise 0
+	else if (hmode == kGridMax) {  // hmode == 3, return max at grid points, otherwise 0
 		if( (x1+x2) % 4 == 0 && (y1+y2) % 4 == 0) {
 			for(unsigned int i=0;i<heuristics.size();i++) {
 				double hval = heuristics[i][state1]-heuristics[i][state2];
