@@ -34,6 +34,7 @@
 #include "DSDAM.h"
 #include "DSDATPDijkstra.h"
 #include "DSRandomBeacons.h"
+#include "DSPRAStarCop.h"
 
 
 std::vector<CRAbsMapSimulation *> unitSims;
@@ -318,7 +319,7 @@ void compute_testing( int argc, char* argv[] ) {
 	fclose( fhandler );
 */
 
-/*
+
 	// PRA* test code
 	Map *m = new Map( "../../maps/bgmaps/AR0700SR.map" );
 	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
@@ -341,9 +342,8 @@ void compute_testing( int argc, char* argv[] ) {
 	delete ptemp;
 	delete p;
 	delete mclab;
-*/
 
-
+/*
 	// test the heuristic for abstraction environments
 	Map *m = new Map( "../../maps/local/test_coprobber_1.map" );
 	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
@@ -366,6 +366,7 @@ void compute_testing( int argc, char* argv[] ) {
 	MaximumNormAbstractGraphMapHeuristic *h = new MaximumNormAbstractGraphMapHeuristic( g, m );
 	graphState f = 3, t = 4;
 	printf( "h(0,1)@level 0 = %g\n", h->HCost( f, t ) );
+*/
 
 	return;
 }
@@ -1676,24 +1677,17 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		Map *m = new Map( map_file );
 		fprintf( stdout, "map file: %s\n", m->getMapName() );
 
-		//MapEnvironment *env = new MapEnvironment( m );
-		//Graph *g = GraphSearchConstants::GetGraph( m );
-		//GraphEnvironment *env = new GraphEnvironment( g, NULL );
-		//env->SetDirected( true );
-
 		MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
 		Graph *g = mclab->GetAbstractGraph( 0 );
 		MaximumNormAbstractGraphMapHeuristic *gh = new MaximumNormAbstractGraphMapHeuristic( g, m );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
 
-		// compute the values for the entire space
-		//DSDijkstra<xyLoc,tDirection,MapEnvironment> *dsdijkstra =
-		//	new DSDijkstra<xyLoc,tDirection,MapEnvironment>( env, cop_speed );
-		//DSDijkstra<graphState,graphMove,GraphEnvironment> *dsdijkstra =
-		//	new DSDijkstra<graphState,graphMove,GraphEnvironment>( env, cop_speed );
-		DSDijkstra_MemOptim *dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
-		dsdijkstra->dsdijkstra();
-		fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
+		// Solve the entire state space
+		//DSDijkstra_MemOptim *dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
+		//dsdijkstra->dsdijkstra();
+		//fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
+		// or use PRA* to generate cop path
+		DSPRAStarCop *pracop = new DSPRAStarCop( mclab, cop_speed );
 
 		// object needed for comparison to cover
 		DSCover<graphState,graphMove> *dscover =
@@ -1734,14 +1728,16 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			pos.push_back( m->getNodeNum( cx, cy ) );
 
 			// now find out the optimal value
-			fprintf( foutput, "%g", dsdijkstra->Value( pos, true ) );
+			//fprintf( foutput, "%g", dsdijkstra->Value( pos, true ) );
 
 			// compute the solution for COVER
 			double value = 0.;
 			unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
 			nodesExpanded = 0; nodesTouched = 0;
 			while( true ) {
-				pos[1] = dsdijkstra->MakeMove( pos, true );
+
+				//pos[1] = dsdijkstra->MakeMove( pos, true );
+				pos[1] = pracop->MakeMove( pos[0], pos[1] );
 				value += 1.;
 				if( pos[0] == pos[1] ) break;
 
@@ -1775,7 +1771,10 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			calculations = 0; timer_average = 0; timer_stddiviation = 0;
 			nodesExpanded = 0; nodesTouched = 0;
 			while( true ) {
-				pos[1] = dsdijkstra->MakeMove( pos, true );
+
+				//pos[1] = dsdijkstra->MakeMove( pos, true );
+				pos[1] = pracop->MakeMove( pos[0], pos[1] );
+
 				value += 1.;
 				if( pos[0] == pos[1] ) break;
 
@@ -1808,7 +1807,10 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			calculations = 0; timer_average = 0; timer_stddiviation = 0;
 			nodesExpanded = 0; nodesTouched = 0;
 			while( true ) {
-				pos[1] = dsdijkstra->MakeMove( pos, true );
+
+				//pos[1] = dsdijkstra->MakeMove( pos, true );
+				pos[1] = pracop->MakeMove( pos[0], pos[1] );
+
 				value += 1.;
 				if( pos[0] == pos[1] ) break;
 
@@ -1845,7 +1847,10 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			calculations = 0; timer_average = 0; timer_stddiviation = 0;
 			nodesExpanded = 0; nodesTouched = 0;
 			while( true ) {
-				pos[1] = dsdijkstra->MakeMove( pos, true );
+
+				//pos[1] = dsdijkstra->MakeMove( pos, true );
+				pos[1] = pracop->MakeMove( pos[0], pos[1] );
+
 				value += 1.;
 				if( pos[0] == pos[1] ) break;
 
@@ -1879,8 +1884,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				pos[1] = m->getNodeNum( cx, cy );
 
 				// make a run for this problem with maxmin
-				//std::vector<xyLoc> path;
-				std::vector<graphState> path;
+				std::vector<graphState> mypath;
 				unsigned int counter = 0;
 				value = 0.;
 				calculations = 0;
@@ -1888,16 +1892,18 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				timer_stddiviation = 0;
 				nodesExpanded = 0; nodesTouched = 0;
 				while( true ) {
-					pos[1] = dsdijkstra->MakeMove( pos, true );
+
+					//pos[1] = dsdijkstra->MakeMove( pos, true );
+					pos[1] = pracop->MakeMove( pos[0], pos[1] );
 					value += 1.;
 
 					// test on whether the robber is caught
 					if( pos[0] == pos[1] ) break;
 
 					// if new path has to be computed, do so
-					if( counter == stepsize || counter >= path.size() ) {
+					if( counter == stepsize || counter >= mypath.size() ) {
 						clock_start = clock();
-						dstp->dstpdijkstra( pos[0], pos[1], false, path );
+						dstp->dstpdijkstra( pos[0], pos[1], false, mypath );
 						clock_end   = clock();
 						timer_average      += (clock_end-clock_start)/1000;
 						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
@@ -1909,7 +1915,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						counter = 0;
 					}
 					// generate next move for the robber
-					pos[0] = path[counter];
+					pos[0] = mypath[counter];
 					counter++;
 					value += 1.;
 
@@ -1938,8 +1944,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				pos[1] = m->getNodeNum( cx, cy );
 
 				// make a run for this problem with maxmin
-				//std::vector<xyLoc> path;
-				std::vector<node*> path;
+				std::vector<node*> mypath;
 				unsigned int counter = 0;
 				value = 0.;
 				calculations = 0;
@@ -1947,7 +1952,9 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				timer_stddiviation = 0;
 				nodesExpanded = 0; nodesTouched = 0;
 				while( true ) {
-					pos[1] = dsdijkstra->MakeMove( pos, true );
+
+					//pos[1] = dsdijkstra->MakeMove( pos, true );
+					pos[1] = pracop->MakeMove( pos[0], pos[1] );
 					value += 1.;
 
 					// test on whether the robber is caught
@@ -1957,9 +1964,9 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 					node *c = g->GetNode( pos[1] );
 
 					// if new path has to be computed, do so
-					if( counter == stepsize || counter >= path.size() ) {
+					if( counter == stepsize || counter >= mypath.size() ) {
 						clock_start = clock();
-						dsdatp->datpdijkstra( r, c, path, false, dsdatpdijkstra_min_escape );
+						dsdatp->datpdijkstra( r, c, mypath, false, dsdatpdijkstra_min_escape );
 						clock_end   = clock();
 						timer_average      += (clock_end-clock_start)/1000;
 						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
@@ -1971,7 +1978,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						counter = 0;
 					}
 					// generate next move for the robber
-					pos[0] = path[counter]->GetNum();
+					pos[0] = mypath[counter]->GetNum();
 					counter++;
 					value += 1.;
 
@@ -1997,7 +2004,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				pos[0] = m->getNodeNum( rx, ry );
 				pos[1] = m->getNodeNum( cx, cy );
 
-				std::vector<graphState> path;
+				std::vector<graphState> mypath;
 				unsigned int counter = 0;
 				value = 0.;
 				calculations = 0;
@@ -2005,16 +2012,18 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				timer_stddiviation = 0;
 				nodesExpanded = 0; nodesTouched = 0;
 				while( true ) {
-					pos[1] = dsdijkstra->MakeMove( pos, true );
+
+					//pos[1] = dsdijkstra->MakeMove( pos, true );
+					pos[1] = pracop->MakeMove( pos[0], pos[1] );
 					value += 1.;
 
 					// test on whether the robber is caught
 					if( pos[0] == pos[1] ) break;
 
 					// if new path has to be computed, do so
-					if( counter == stepsize || counter >= path.size() ) {
+					if( counter == stepsize || counter >= mypath.size() ) {
 						clock_start = clock();
-						dsrandomb->GetPath( pos[0], pos[1], num_beacons, path );
+						dsrandomb->GetPath( pos[0], pos[1], num_beacons, mypath );
 						clock_end   = clock();
 						timer_average      += (clock_end-clock_start)/1000;
 						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
@@ -2026,7 +2035,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						counter = 0;
 					}
 					// generate next move for the robber
-					pos[0] = path[counter];
+					pos[0] = mypath[counter];
 					counter++;
 					value += 1.;
 
@@ -2050,7 +2059,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		}
 
 		delete dsrandomb;
-		delete dsdijkstra;
+		delete pracop;
+		//delete dsdijkstra;
 		delete dsdatp;
 		delete dstp;
 		delete dscover;
