@@ -1697,18 +1697,18 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		DSMinimax<graphState,graphMove> *dsminimax = 
 			new DSMinimax<graphState,graphMove>( env, true, cop_speed );
 
-		// object needed for comparison to dynamic abstract minimax
+		// object needed for comparison to dynamic abstract minimax (depth 5)
 		DSDAM *dsdam = new DSDAM( mclab, true, cop_speed, true );
 
+		// heuristic greedy
 		DSHeuristicGreedy<graphState,graphMove> *dsheuristic =
 			new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
 
-		//DSTPDijkstra<xyLoc,tDirection> *dstp =
-		//	new DSTPDijkstra<xyLoc,tDirection>( env, cop_speed );
+		// TrailMax/Two player dijkstra
 		DSTPDijkstra<graphState,graphMove> *dstp =
 			new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
 
-		// dynamic abstract two player dijkstra/pathmax
+		// dynamic abstract two player dijkstra/TrailMax
 		DSDATPDijkstra *dsdatp = new DSDATPDijkstra( mclab, cop_speed, true );
 
 		// random beacons
@@ -1717,7 +1717,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		// there is always 1000 problems for a map -> see problem set generation
 		for( int i = 0; i < 1000; i++ ) {
 			fscanf( fhandler, "(%d,%d) (%d,%d)\n", &rx, &ry, &cx, &cy );
-			fprintf( foutput, "(%u,%u) (%u,%u) ", rx, ry, cx, cy );
+			fprintf( foutput, "(%u,%u) (%u,%u)", rx, ry, cx, cy );
 
 			// build the actual position data structure
 			//std::vector<xyLoc> pos;
@@ -1728,7 +1728,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			pos.push_back( m->getNodeNum( cx, cy ) );
 
 			// now find out the optimal value
-			//fprintf( foutput, "%g", dsdijkstra->Value( pos, true ) );
+			//fprintf( foutput, " %g", dsdijkstra->Value( pos, true ) );
 
 			// compute the solution for COVER
 			double value = 0.;
@@ -2059,14 +2059,17 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		}
 
 		delete dsrandomb;
-		delete pracop;
-		//delete dsdijkstra;
 		delete dsdatp;
 		delete dstp;
+		delete dsheuristic;
+		delete dsdam;
+		delete dsminimax;
 		delete dscover;
+		delete pracop;
+		//delete dsdijkstra;
 		delete env;
-		delete g;
-		delete m;
+		delete gh;
+		delete mclab;
 	}
 	fclose( fhandler );
 	fclose( foutput );

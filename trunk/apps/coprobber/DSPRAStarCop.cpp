@@ -13,6 +13,8 @@ graphState DSPRAStarCop::MakeMove( graphState &robber, graphState &cop ) {
 
 	nodesExpanded = 0; nodesTouched = 0;
 
+	if( robber == cop ) return robber;
+
 	node *r = g->GetNode( robber );
 	node *c = g->GetNode( cop );
 
