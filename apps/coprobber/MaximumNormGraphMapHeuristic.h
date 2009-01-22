@@ -17,6 +17,8 @@ public:
 
 		return max( abs(x1-x2), abs(y1-y2) );
   }
+
+	Graph *GetGraph() { return g; };
 private:
   Graph *g;
 };
