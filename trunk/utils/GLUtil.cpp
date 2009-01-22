@@ -28,6 +28,7 @@
 #include "GLUtil.h"
 #include "FPUtil.h"
 #include <math.h>
+#include <assert.h>
 
 #ifdef NO_OPENGL
 #include "Gl.cpp"
