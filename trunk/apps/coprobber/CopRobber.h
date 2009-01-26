@@ -44,5 +44,5 @@ void InstallHandlers();
 void parseCommandLineParameters( int argc, char* argv[], Map* &m, xyLoc &pos_cop, xyLoc &pos_robber, int &max_recursion_level );
 
 Graph *readGraphFromCommandLine( int offset, int argc, char* argv[] );
-Graph* readGraph( FILE *fhandler );
+Graph* readGraph( FILE *fhandler, bool input_with_vertice_coordinates = false );
 void writeGraph( FILE *fhandler, Graph *g );

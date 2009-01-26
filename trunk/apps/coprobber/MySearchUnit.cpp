@@ -252,6 +252,7 @@ void MySearchUnit::OpenGLDraw(int , AbsMapEnvironment *ame, AbsMapSimulationInfo
 		glColor3f(r, g, b);
 	DrawSphere(xx, yy, zz, rad);
 
+/*
 	// draw target
 	if (targetUnit >= 0)
 	{
@@ -263,6 +264,7 @@ void MySearchUnit::OpenGLDraw(int , AbsMapEnvironment *ame, AbsMapSimulationInfo
 
 		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
 	}
+*/
 }
 
 void MySearchUnit::LogStats(StatCollection *stats)
