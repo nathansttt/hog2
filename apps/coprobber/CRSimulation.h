@@ -1,5 +1,5 @@
 
-// Most of this code has been copied from CRSimulation.h
+// Most of this code has been copied from UnitSimulation.h
 // except that it has been customized for Robber-Cop Simulations
 
 #ifndef CRSIMULATION_H
@@ -14,8 +14,6 @@
 #include "SearchEnvironment.h"
 #include "OccupancyInterface.h"
 #include "SimulationInfo.h"
-#include "CRSimulation.h"
-
 
 template <class state, class action, class environment>
 class CRUnitInfo {
@@ -51,7 +49,8 @@ public:
 	typedef typename CopRobberEnvironment<state,action>::CRMove CRMove;
 	typedef typename CopRobberEnvironment<state,action>::CRAction CRAction;
 
-	/*! creates the simulation by specifying the environment, the robber we are working with, when it is first scheduled to move,
+	/*! creates the simulation by specifying the environment,
+	 * the robber we are working with, when it is first scheduled to move,
 	 * and whether players can pass when it's their turn or not */
 	CRSimulation(environment *se, Unit<state,action,environment> *robber, double robberTimeOffset = 0., bool playerscanpause = false );
 	~CRSimulation();

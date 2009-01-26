@@ -20,6 +20,7 @@
 //#include "IPNTTables_optimized.h"
 #include "Dijkstra.h"
 #include "MaximumNormGraphMapHeuristic.h"
+#include "MaximumNormAbstractGraphMapHeuristic.h"
 //#include "MinimaxAStar.h"
 #include "MinimaxAStar_optimized.h"
 #include "TwoPlayerDijkstra.h"
@@ -35,10 +36,15 @@
 #include "DSDATPDijkstra.h"
 #include "DSRandomBeacons.h"
 #include "DSPRAStarCop.h"
+#include "dscrsimulation/DSCRSimulation.h"
+#include "dscrsimulation/TrailMaxUnit.h"
+#include "dscrsimulation/PRAStarUnit.h"
 
 
-std::vector<CRAbsMapSimulation *> unitSims;
+//std::vector<CRAbsMapSimulation *> unitSims;
 int mazeSize = 10;
+DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment> *simulation;
+//GraphEnvironment *graphenv;
 
 /*------------------------------------------------------------------------------
 | Main
@@ -319,7 +325,7 @@ void compute_testing( int argc, char* argv[] ) {
 	fclose( fhandler );
 */
 
-
+/*
 	// PRA* test code
 	Map *m = new Map( "../../maps/bgmaps/AR0700SR.map" );
 	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
@@ -342,6 +348,8 @@ void compute_testing( int argc, char* argv[] ) {
 	delete ptemp;
 	delete p;
 	delete mclab;
+*/
+
 
 /*
 	// test the heuristic for abstraction environments
@@ -367,6 +375,9 @@ void compute_testing( int argc, char* argv[] ) {
 	graphState f = 3, t = 4;
 	printf( "h(0,1)@level 0 = %g\n", h->HCost( f, t ) );
 */
+
+	InstallHandlers();
+	RunHOGGUI( argc, argv );
 
 	return;
 }
@@ -1875,7 +1886,6 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			fflush( foutput );
 
 
-
 			// do the simulation of MAXMIN/pathmax approximation for various stepsizes
 			for( unsigned int stepsize = 1; stepsize <= maxmin_stepsize; stepsize++ ) {
 
@@ -1896,6 +1906,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 					//pos[1] = dsdijkstra->MakeMove( pos, true );
 					pos[1] = pracop->MakeMove( pos[0], pos[1] );
 					value += 1.;
+					printf( "cop(%lu) ", pos[1] );
 
 					// test on whether the robber is caught
 					if( pos[0] == pos[1] ) break;
@@ -1918,9 +1929,11 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 					pos[0] = mypath[counter];
 					counter++;
 					value += 1.;
+					printf( "robber(%lu) ", pos[0] );
 
 					if( pos[0] == pos[1] ) break;
 				}
+				printf( "\n" );
 
 				expected_value = (double)timer_average/(double)calculations;
 				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
@@ -2081,7 +2094,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 ------------------------------------------------------------------------------*/
 
 void CreateSimulation( int id ) {
-	Map *map = new Map( "../../maps/local/test_coprobber_1.map" );
+//	Map *map = new Map( "../../maps/local/test_coprobber_1.map" );
 /*
 	if( gDefaultMap[0] == 0 ) {
 		map = new Map( mazeSize, mazeSize );
@@ -2089,7 +2102,7 @@ void CreateSimulation( int id ) {
 	} else
 		map = new Map( gDefaultMap );
 */
-
+/*
 	MapCliqueAbstraction *mca = new MapCliqueAbstraction( map );
 	AbsMapEnvironment *absenv = new AbsMapEnvironment( mca );
 
@@ -2120,6 +2133,42 @@ void CreateSimulation( int id ) {
 	ru->SetCopUnits( copids );
 
 	sleep( 5 );
+*/
+
+/*
+	FILE *fhandler = fopen( "graph", "r" );
+	Graph *g = readGraph( fhandler, true );
+	printf( "num nodes: %d\n", g->GetNumNodes() );
+	printf( "num edges: %d\n", g->GetNumEdges() );
+	graphenv = new GraphEnvironment( g, NULL );
+*/
+
+	Map *map;
+	if( gDefaultMap[0] == 0 ) {
+		map = new Map( mazeSize, mazeSize );
+		MakeMaze( map, 1 );
+	} else
+		map = new Map( gDefaultMap );
+	MapCliqueAbstraction *mca = new MapCliqueAbstraction( map );
+	AbstractionGraphEnvironment *env = new AbstractionGraphEnvironment( mca, 0, new MaximumNormAbstractGraphMapHeuristic( mca->GetAbstractGraph(0), map ) );
+
+	// global variable, see above
+	simulation = new DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment>( env, true, 2, false );
+
+	TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment> *runit =
+		new TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca->GetNodeFromMap(41,59)->GetNum(), 1, 2 );
+	runit->SetColor( 1., 0., 0. );
+	unsigned int robberunitnumber = simulation->AddRobber( runit, 1. );
+
+	PraStarUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
+		new PraStarUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca, mca->GetNodeFromMap(49,27)->GetNum(), 2 );
+	cunit->SetColor( 0., 0., 1. );
+	unsigned int copunitnumber = simulation->AddCop( cunit, 1. );
+
+	runit->SetCopUnit( copunitnumber );
+	cunit->SetRobberUnit( robberunitnumber );
+
+	sleep( 5 );
 
 	return;
 }
@@ -2141,6 +2190,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType) {
 	else if (eType == kWindowCreated)
 	{
 		printf("Window %ld created\n", windowID);
+		SetNumPorts( windowID, 1 );
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		CreateSimulation(windowID);
 	}
@@ -2148,9 +2198,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType) {
 }
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *) {
+/*
 	if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
 		return;
-
 	if( viewport == 0 ) {
 		sleep( 1 );
 		unitSims[windowID]->OpenGLDraw(windowID);
@@ -2158,6 +2208,21 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *) {
 //		unitSims[windowID]->StepTime( unitSims[windowID]->GetTimeToNextStep() );
 		printf( "simulation time is: %g\n", unitSims[windowID]->GetSimulationTime() );
 		printf( "----------\n" );
+	}
+*/
+/*
+	graphenv->OpenGLDraw( windowID );
+	graphState s = 32511;
+	graphenv->OpenGLDraw( windowID, s );
+*/
+	if( viewport == 0 ) {
+		sleep(1);
+		simulation->OpenGLDraw( windowID );
+		if( !simulation->Done() ) {
+			simulation->StepTime( 1. );
+			printf( "simulation time is: %g\n", simulation->GetSimulationTime() );
+			printf( "---------------\n" );
+		}
 	}
 	return;
 }
@@ -2251,7 +2316,7 @@ Graph *readGraphFromCommandLine( int offset, int argc, char* argv[] ) {
 }
 
 // reads a graph from an open file
-Graph* readGraph( FILE *fhandler ) {
+Graph* readGraph( FILE *fhandler, bool input_with_vertice_coordinates ) {
 
 	if( feof( fhandler ) )
 		return NULL;
@@ -2263,8 +2328,17 @@ Graph* readGraph( FILE *fhandler ) {
 	for( int i = 0; i < num_vertices; i++ ) {
 		char s[30]; sprintf( s, "%d", i );
 		node *n = new node( s );
+		if( input_with_vertice_coordinates ) {
+			double x,y;
+			fscanf( fhandler, "(%lf,%lf) ", &x, &y );
+			n->SetLabelF( GraphSearchConstants::kXCoordinate, x );
+			n->SetLabelF( GraphSearchConstants::kYCoordinate, y );
+			n->SetLabelF( GraphSearchConstants::kZCoordinate, 0. );
+		}
 		g->AddNode( n );
 	}
+
+	if( input_with_vertice_coordinates ) fscanf( fhandler, "\n" );
 
 	for( int i = 0; i < num_edges; i++ ) {
 		int v1, v2;
