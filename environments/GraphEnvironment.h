@@ -16,17 +16,21 @@
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "Graph.h"
+#include "GraphAbstraction.h"
 #include "GLUtil.h"
 
 #ifndef UINT32_MAX
 #define UINT32_MAX        4294967295U
+#endif
+#ifndef UINT16_MAX
+#define UINT16_MAX 65535
 #endif
 
 typedef unsigned long graphState;
 
 class graphMove {
 public:
-	graphMove() :from(UINT32_MAX), to(UINT32_MAX) {}
+	graphMove() :from(UINT16_MAX), to(UINT16_MAX) {}
 	graphMove(uint16_t f, uint16_t t) :from(f), to(t) {}
 	uint16_t from, to;
 };
@@ -205,7 +209,7 @@ private:
 class GraphEnvironment : public SearchEnvironment<graphState, graphMove> {
 public:
 	GraphEnvironment(Graph *g, GraphHeuristic *gh);
-	~GraphEnvironment();
+	virtual ~GraphEnvironment();
 	virtual void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors);
 	virtual void GetActions(graphState &stateID, std::vector<graphMove> &actions);
 	virtual graphMove GetAction(graphState &s1, graphState &s2);
@@ -230,6 +234,17 @@ protected:
 	Graph *g;
 	GraphHeuristic *h;
 
+};
+
+class AbstractionGraphEnvironment: public GraphEnvironment {
+	public:
+	AbstractionGraphEnvironment( GraphAbstraction *gabs, unsigned int level, GraphHeuristic *gh );
+	~AbstractionGraphEnvironment();
+
+	virtual void OpenGLDraw( int window );
+
+	protected:
+	GraphAbstraction *gabs;
 };
 
 typedef UnitSimulation<graphState, graphMove, GraphEnvironment> GraphSimulation;

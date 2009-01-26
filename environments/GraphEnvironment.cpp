@@ -559,7 +559,7 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 		}
 	}
 	else if (hmode == kMax) { // hmode == 2, taking the max
-		for (unsigned int i = 0; i < heuristics.size() && i < numHeuristics; i++)
+		for (unsigned int i = 0; i < heuristics.size() && i < (unsigned int)numHeuristics; i++)
 		{
 			double hval = heuristics[i][state1]-heuristics[i][state2];
 			if (hval < 0)
@@ -851,6 +851,47 @@ node *GraphDistanceHeuristic::FindFarNode(node *n)
 //		}
 //	}
 //}
-//
-//
-//
+
+
+
+AbstractionGraphEnvironment::AbstractionGraphEnvironment( GraphAbstraction *_gabs, unsigned int level, GraphHeuristic *gh ):
+	GraphEnvironment( _gabs->GetAbstractGraph(level), gh ), gabs(_gabs)
+{ };
+
+AbstractionGraphEnvironment::~AbstractionGraphEnvironment() {
+	//~GraphEnvironment();
+};
+
+void AbstractionGraphEnvironment::OpenGLDraw( int window ) {
+	if ((g == 0) || (g->GetNumNodes() == 0)) return;
+
+	glBegin(GL_LINES);
+
+	edge_iterator ei = g->getEdgeIter();
+	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+	{
+		//int x, y;
+		//double offsetx, offsety;
+		node *n;
+		n = g->GetNode(e->getFrom());
+		
+		glColor3f(1, 1, 1);
+		//glColor3f( 1, 0, 0 );
+		//if (e->getMarked())
+		//	glColor3f(1, 1, 1);
+		
+		GLdouble x, y, z;
+		x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
+		y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
+		z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);
+		glVertex3f(x, y, z);
+		
+		n = g->GetNode(e->getTo());
+		x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
+		y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
+		z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);
+		
+		glVertex3f(x, y, z);
+	}
+	glEnd();
+};
