@@ -80,4 +80,6 @@ SRC_CPP = \
 	apps/coprobber/DSDATPDijkstra.cpp \
 	apps/coprobber/DSRandomBeacons.cpp \
 	apps/coprobber/DSPRAStarCop.cpp \
+	apps/coprobber/dscrsimulation/TrailMaxUnit.cpp \
+	apps/coprobber/dscrsimulation/PRAStarUnit.cpp \
 	apps/coprobber/CopRobber.cpp
