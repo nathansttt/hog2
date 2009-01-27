@@ -1906,7 +1906,6 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 					//pos[1] = dsdijkstra->MakeMove( pos, true );
 					pos[1] = pracop->MakeMove( pos[0], pos[1] );
 					value += 1.;
-					printf( "cop(%lu) ", pos[1] );
 
 					// test on whether the robber is caught
 					if( pos[0] == pos[1] ) break;
@@ -1929,11 +1928,9 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 					pos[0] = mypath[counter];
 					counter++;
 					value += 1.;
-					printf( "robber(%lu) ", pos[0] );
 
 					if( pos[0] == pos[1] ) break;
 				}
-				printf( "\n" );
 
 				expected_value = (double)timer_average/(double)calculations;
 				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
