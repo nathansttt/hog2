@@ -28,6 +28,7 @@ class DSPRAStarCop {
 	unsigned int cop_speed;
 	Graph *g;
 	praStar *pra;
+	std::vector<graphState> pathcache;
 
 };
 

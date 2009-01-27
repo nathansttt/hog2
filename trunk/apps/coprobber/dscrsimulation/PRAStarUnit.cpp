@@ -151,8 +151,15 @@ void PraStarUnit<xyLoc,tDirection,MapEnvironment>::GetPraStarPath( MapEnvironmen
 	path *prapath = pra->GetPath( abs, cn, rn );
 	path *temppath = prapath;
 
+	// follow the path maximally half the steps of the path
+	unsigned int steps = prapath->length() / 2;
+	if( steps < cop_speed )
+		steps = cop_speed;
+	else
+		steps -= steps%cop_speed;
+
 	// now put together the path for all the calls
-	for( unsigned int i = 0; i < cop_speed; i++ ) {
+	for( unsigned int i = 0; i < steps; i++ ) {
 		if( temppath->next != NULL ) {
 			node *n = temppath->next->n;
 			int x, y;
@@ -184,8 +191,15 @@ void PraStarUnit<xyLoc,tDirection,AbsMapEnvironment>::GetPraStarPath( AbsMapEnvi
 	path *prapath = pra->GetPath( abs, cn, rn );
 	path *temppath = prapath;
 
+	// follow the path maximally half the steps of the path
+	unsigned int steps = prapath->length() / 2;
+	if( steps < cop_speed )
+		steps = cop_speed;
+	else
+		steps -= steps%cop_speed;
+
 	// now put together the path for all the calls
-	for( unsigned int i = 0; i < cop_speed; i++ ) {
+	for( unsigned int i = 0; i < steps; i++ ) {
 		if( temppath->next != NULL ) {
 			node *n = temppath->next->n;
 			int x, y;
@@ -211,8 +225,15 @@ void PraStarUnit<graphState,graphMove,GraphEnvironment>::GetPraStarPath( GraphEn
 	path *prapath = pra->GetPath( abs, cn, rn );
 	path *temppath = prapath;
 
+	// follow the path maximally half the steps of the path
+	unsigned int steps = prapath->length() / 2;
+	if( steps < cop_speed )
+		steps = cop_speed;
+	else
+		steps -= steps%cop_speed;
+
 	// now put together the path for all the calls
-	for( unsigned int i = 0; i < cop_speed; i++ ) {
+	for( unsigned int i = 0; i < steps; i++ ) {
 		if( temppath->next != NULL ) {
 			pathcache.push_back( temppath->next->n->GetNum() );
 			temppath = temppath->next;
@@ -234,8 +255,15 @@ void PraStarUnit<graphState,graphMove,AbstractionGraphEnvironment>::GetPraStarPa
 	path *prapath = pra->GetPath( abs, cn, rn );
 	path *temppath = prapath;
 
+	// follow the path maximally half the steps of the path
+	unsigned int steps = prapath->length() / 2;
+	if( steps < cop_speed )
+		steps = cop_speed;
+	else
+		steps -= steps%cop_speed;
+
 	// now put together the path for all the calls
-	for( unsigned int i = 0; i < cop_speed; i++ ) {
+	for( unsigned int i = 0; i < steps; i++ ) {
 		if( temppath->next != NULL ) {
 			pathcache.push_back( temppath->next->n->GetNum() );
 			temppath = temppath->next;
