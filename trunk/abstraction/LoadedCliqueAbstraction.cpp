@@ -59,6 +59,14 @@ LoadedCliqueAbstraction::LoadedCliqueAbstraction(char *fname)
 	buildAbstractions(loadGraph(fname));
 }
 
+LoadedCliqueAbstraction::LoadedCliqueAbstraction( Graph *g )
+:GraphAbstraction()
+{
+	assert( g != NULL );
+	levelDraw = 1;
+	buildAbstractions( g );
+}
+
 LoadedCliqueAbstraction::~LoadedCliqueAbstraction()
 {
 	cleanMemory();

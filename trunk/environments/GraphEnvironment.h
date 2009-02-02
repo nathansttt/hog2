@@ -242,9 +242,11 @@ class AbstractionGraphEnvironment: public GraphEnvironment {
 	~AbstractionGraphEnvironment();
 
 	virtual void OpenGLDraw( int window );
+	double scale() { return graphscale; };
 
 	protected:
 	GraphAbstraction *gabs;
+	double graphscale;
 };
 
 typedef UnitSimulation<graphState, graphMove, GraphEnvironment> GraphSimulation;
