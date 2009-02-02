@@ -8,6 +8,7 @@
 #include "Minimax.h"
 #include "Minimax_optimized.h"
 #include "MapCliqueAbstraction.h"
+#include "LoadedCliqueAbstraction.h"
 #include "MultilevelCopRobberGame.h"
 #include "RobberUnit.h"
 #include "MySearchUnit.h"
@@ -38,13 +39,14 @@
 #include "DSPRAStarCop.h"
 #include "dscrsimulation/DSCRSimulation.h"
 #include "dscrsimulation/TrailMaxUnit.h"
-#include "dscrsimulation/PRAStarUnit.h"
+#include "dscrsimulation/PRAStarMapUnit.h"
+#include "dscrsimulation/PRAStarGraphUnit.h"
 
 
 //std::vector<CRAbsMapSimulation *> unitSims;
 int mazeSize = 10;
 DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment> *simulation;
-//GraphEnvironment *graphenv;
+time_t last_simulation_update;
 
 /*------------------------------------------------------------------------------
 | Main
@@ -182,7 +184,6 @@ void output_syntax() {
 /*------------------------------------------------------------------------------
 | Implementation of all algorithms
 ------------------------------------------------------------------------------*/
-
 void compute_testing( int argc, char* argv[] ) {
 /*
 	// VISUALIZATION
@@ -1639,40 +1640,210 @@ void compute_website_interface( int argc, char* argv[] ) {
 
 
 
+
+bool find_algorithm( std::vector<const char*> list, const char* alg ) {
+	for( unsigned int i = 0; i < list.size(); i++ ) {
+		if( strcmp( list[i], alg ) == 0 ) return true;
+	}
+	return false;
+};
+
+
+
+
 // Code for "Suboptimal Solutions to MTS"
 void compute_experiment_suboptimal( int argc, char* argv[] ) {
 	// CONFIG PARAMETER
 	unsigned int cop_speed = 2;
-	unsigned int maxmin_stepsize = 20; // maximum number of steps the maxmin solution is followed
-	double minimax_depth = 5.;
-	double dsdatpdijkstra_min_escape = 10.; // minimum number of steps we have to be able to escape
-	unsigned int num_beacons = 40;
-	
+
+	// variables
 	FILE *fhandler = NULL, *foutput = NULL;
 	char map_file[20];
-	unsigned int rx, ry, cx, cy;
-	clock_t clock_start, clock_end;
-	clock_start = clock_end = clock();
-	unsigned int nodesExpanded = 0, nodesTouched = 0;
+	bool compute_optimal_solution = false;
 
 	// parameter input
 	if( argc < 4 ) {
-		printf( "syntax: -p <problem_file> -o <output_file>\n" );
+		printf( "syntax: -r <robber_algorithms> -c <cop_algorithms> -p <problem_file> -o <output_file>\n" );
+		printf( "<robber_algorithms>:\n" );
+		printf( "  optimal         - optimal robber (the entire state space is solved first)\n" );
+		printf( "  cover           - redefined version of cover\n" );
+		printf( "  minimax <depth> - minimax up to given depth with distance metric evaluation\n" );
+		printf( "  dam <depth>     - dynamic abstract minimax to a given depth\n" );
+		printf( "  greedy          - heuristic hill climbing due to distance metric\n" );
+		printf( "  randombeacons <num_beacons> <k_min> <k_max>\n" );
+		printf( "                  - randombeacons(k) with k=k_min,...,k_max\n" );
+		printf( "  trailmax <k_min> <k_max>\n" );
+		printf( "                  - TrailMax(k) with k=k_min,...,k_max\n" );
+		printf( "  datrailmax <k_min> <k_max> <l>\n" );
+		printf( "                  - Dynamic Abstract TrailMax with k=k_min,...,k_max and given l\n" );
+		printf( "<cop_algorithms>:\n" );
+		printf( "  optimal - optimal cop (entire state space is solved)\n" );
+		printf( "  pra     - cop follows half the PRA* path before recomputing\n" );
 		exit(1);
 	}
-	if( strcmp( argv[2], "-p" ) == 0 ) {
-		fhandler = fopen( argv[3], "r" );
-	}
-	if( strcmp( argv[4], "-o" ) == 0 ) {
-		foutput = fopen( argv[5], "w" );
+	// command line parsing
+	int param_num = 2;
+	int problem_file_argv_num = 2;
+	std::vector<const char*> robber_algorithms;
+	std::vector<std::vector<int> > robber_int_params;
+	std::vector<std::vector<double> > robber_double_params;
+	std::vector<const char*> cop_algorithms;
+	while( param_num < argc ) {
+		if( strcmp( argv[param_num], "-r" ) == 0 ) {
+			param_num++;
+			// parse for all robber algorithms
+			while( param_num < argc && strstr( argv[param_num], "-" ) == NULL ) {
+				if(      strcmp( argv[param_num], "optimal" ) == 0 ) {
+					robber_algorithms.push_back( "optimal" );
+					robber_int_params.push_back( std::vector<int>() );
+					robber_double_params.push_back( std::vector<double>() );
+					compute_optimal_solution = true;
+				}
+				else if( strcmp( argv[param_num], "cover" ) == 0 ) {
+					robber_algorithms.push_back( "cover" );
+					robber_int_params.push_back( std::vector<int>() );
+					robber_double_params.push_back( std::vector<double>() );
+				}
+				else if( strcmp( argv[param_num], "minimax" ) == 0 ) {
+					robber_algorithms.push_back( "minimax" );
+					robber_int_params.push_back( std::vector<int>() );
+					robber_double_params.push_back( std::vector<double>( 1, atof( argv[param_num+1] ) ) );
+					param_num++;
+				}
+				else if( strcmp( argv[param_num], "dam" ) == 0 ) {
+					robber_algorithms.push_back( "dam" );
+					robber_int_params.push_back( std::vector<int>() );
+					robber_double_params.push_back( std::vector<double>( 1, atof( argv[param_num+1] ) ) );
+					param_num++;
+				}
+				else if( strcmp( argv[param_num], "greedy" ) == 0 ) {
+					robber_algorithms.push_back( "greedy" );
+					robber_int_params.push_back( std::vector<int>() );
+					robber_double_params.push_back( std::vector<double>() );
+				}
+				else if( strcmp( argv[param_num], "randombeacons" ) == 0 ) {
+					robber_algorithms.push_back( "randombeacons" );
+					std::vector<int> myparams;
+					myparams.push_back( atoi( argv[param_num+1] ) );
+					myparams.push_back( atoi( argv[param_num+2] ) );
+					myparams.push_back( atoi( argv[param_num+3] ) );
+					robber_int_params.push_back( myparams );
+					robber_double_params.push_back( std::vector<double>() );
+					param_num += 3;
+				}
+				else if( strcmp( argv[param_num], "trailmax" ) == 0 ) {
+					robber_algorithms.push_back( "trailmax" );
+					std::vector<int> myparams;
+					myparams.push_back( atoi( argv[param_num+1] ) );
+					myparams.push_back( atoi( argv[param_num+2] ) );
+					robber_int_params.push_back( myparams );
+					robber_double_params.push_back( std::vector<double>() );
+					param_num += 2;
+				}
+				else if( strcmp( argv[param_num], "datrailmax" ) == 0 ) {
+					robber_algorithms.push_back( "datrailmax" );
+					std::vector<int> myparams;
+					myparams.push_back( atoi( argv[param_num+1] ) );
+					myparams.push_back( atoi( argv[param_num+2] ) );
+					myparams.push_back( atoi( argv[param_num+3] ) );
+					robber_int_params.push_back( myparams );
+					robber_double_params.push_back( std::vector<double>() );
+					param_num += 3;
+				}
+				else fprintf( stderr, "Warning: unsupported robber algorithm %s\n", argv[param_num] );
+
+				param_num++;
+			}
+			if( robber_algorithms.size() == 0 ) {
+				fprintf( stderr, "ERROR: no robber algorithms submitted\n" );
+				exit(1);
+			}
+		}
+		else if( strcmp( argv[param_num], "-c" ) == 0 ) {
+			param_num++;
+			while( param_num < argc && strstr( argv[param_num], "-" ) == NULL ) {
+				if(      strcmp( argv[param_num], "optimal" ) == 0 ) {
+					cop_algorithms.push_back( "optimal" );
+					compute_optimal_solution = true;
+				}
+				else if( strcmp( argv[param_num], "pra"     ) == 0 ) cop_algorithms.push_back( "pra" );
+				else fprintf( stderr, "Warning: unsupported cop algorithm %s\n", argv[param_num] );
+				param_num++;
+			}
+			if( cop_algorithms.size() == 0 ) {
+				fprintf( stderr, "ERROR: no cop algorithms submitted\n" );
+				exit(1);
+			}
+		}
+		else if( strcmp( argv[param_num], "-p" ) == 0 ) {
+			param_num++;
+			fhandler = fopen( argv[param_num], "r" );
+			if( fhandler == NULL ) {
+				fprintf( stderr, "ERROR: could not open problem file\n" );
+				exit(1);
+			}
+			problem_file_argv_num = param_num;
+			param_num++;
+		}
+		else if( strcmp( argv[param_num], "-o" ) == 0 ) {
+			param_num++;
+			foutput = fopen( argv[param_num], "w" );
+			if( foutput == NULL ) {
+				fprintf( stderr, "ERROR: could not open output file\n" );
+				exit(1);
+			}
+			param_num++;
+		}
+		else {
+			fprintf( stderr, "Warning: could not parse parameter: %s\n", argv[param_num] );
+			param_num++;
+		}
 	}
 
-	printf( "problem file: %s\n", argv[3] );
 
-	// syntax explanation output
-	fprintf( foutput, "syntax: robber_pos cop_pos optimal_solution +\n" );
-	fprintf( foutput, "<sol num avg div nE nT> for each of the algorithms: cover minimax(%g) dam(%g) heuristicgreedy pathmax(1-%d) dapathmax(1-%d) dsrandombeacons(1-%d)\n", minimax_depth, minimax_depth, maxmin_stepsize, maxmin_stepsize, maxmin_stepsize );
-	fprintf( foutput, "where sol = solution length against optimal cop\n" );
+
+	// syntax explanation output into output file
+	fprintf( foutput, "problem file: %s\n", argv[problem_file_argv_num] );
+	fprintf( foutput, "cop algorithms: " );
+	for( unsigned int i = 0; i < cop_algorithms.size(); i++ )
+		fprintf( foutput, "%s ", cop_algorithms[i] );
+	fprintf( foutput, "\nrobber algorithms:\n" );
+	for( unsigned int i = 0; i < robber_algorithms.size(); i++ ) {
+		fprintf( foutput, "  %s( ", robber_algorithms[i] );
+		for( unsigned int j = 0; j < robber_int_params[i].size(); j++ )
+			fprintf( foutput, "(int)%d ", robber_int_params[i][j] );
+		for( unsigned int j = 0; j < robber_double_params[i].size(); j++ )
+			fprintf( foutput, "(double)%g ", robber_double_params[i][j] );
+		fprintf( foutput, ")\n" );
+	}
+	fprintf( foutput, "cop speed: %u\n", cop_speed );
+	fprintf( foutput, "columns:\n  1: robber_pos\n  2: cop_pos\n" );
+	param_num = 3;
+	if( compute_optimal_solution ) {
+		fprintf( foutput, "  %d: optimal value of game\n", param_num );
+		param_num++;
+	}
+	for( unsigned int i = 0; i < cop_algorithms.size(); i++ ) {
+		for( unsigned int j = 0; j < robber_algorithms.size(); j++ ) {
+
+			if( strcmp( cop_algorithms[i], "optimal" ) == 0 && strcmp( robber_algorithms[j], "optimal" ) == 0 ) continue;
+
+			int new_param_num = param_num + 6;
+			if( strcmp( robber_algorithms[j], "randombeacons" ) == 0 )
+				new_param_num = param_num + 6 * ( robber_int_params[j][2] - robber_int_params[j][1] + 1 );
+			if( strcmp( robber_algorithms[j], "trailmax" ) == 0 )
+				new_param_num = param_num + 6 * ( robber_int_params[j][1] - robber_int_params[j][0] + 1 );
+			if( strcmp( robber_algorithms[j], "datrailmax" ) == 0 )
+				new_param_num = param_num + 6 * ( robber_int_params[j][1] - robber_int_params[j][0] + 1 );
+			if( strcmp( robber_algorithms[j], "optimal" ) == 0 )
+				new_param_num = param_num + 1;
+
+			fprintf( foutput, "  %d-%d: %s vs %s <format>\n", param_num, new_param_num-1, robber_algorithms[j], cop_algorithms[i] );
+			param_num = new_param_num;
+		}
+	}
+	fprintf( foutput, "where format is <sol num avg div nE nT>\n" );
+	fprintf( foutput, "      sol = solution length against optimal cop\n" );
 	fprintf( foutput, "      num = number of computations needed\n" );
 	fprintf( foutput, "      avg = average computation time in ms for each such computation\n" );
 	fprintf( foutput, "      div = standard diviation in ms for all computations\n" );
@@ -1680,6 +1851,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 	fprintf( foutput, "      nT  = average number of nodes touched in every computation\n" );
 	fprintf( foutput, "--------------------------------------------------------------------------------\n\n" );
 
+
+	// begin of computation code
 	while( !feof( fhandler ) ) {
 
 		// read first map of the problem file
@@ -1693,394 +1866,253 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		MaximumNormAbstractGraphMapHeuristic *gh = new MaximumNormAbstractGraphMapHeuristic( g, m );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
 
-		// Solve the entire state space
-		//DSDijkstra_MemOptim *dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
-		//dsdijkstra->dsdijkstra();
-		//fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
-		// or use PRA* to generate cop path
-		DSPRAStarCop *pracop = new DSPRAStarCop( mclab, cop_speed );
+		// cop objects
+		DSDijkstra_MemOptim *dsdijkstra = NULL;
+		DSPRAStarCop *pracop = NULL;
 
-		// object needed for comparison to cover
-		DSCover<graphState,graphMove> *dscover =
-			new DSCover<graphState,graphMove>( env, cop_speed );
+		// Solve the entire state space if needed
+		if( compute_optimal_solution ) {
+			dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
+			dsdijkstra->dsdijkstra();
+			fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
+		}
+		// PRA* cop
+		if( find_algorithm( cop_algorithms, "pra" ) ) pracop = new DSPRAStarCop( mclab, cop_speed );
 
-		// object needed for comparison to minimax (with depth 5)
-		DSMinimax<graphState,graphMove> *dsminimax = 
-			new DSMinimax<graphState,graphMove>( env, true, cop_speed );
 
-		// object needed for comparison to dynamic abstract minimax (depth 5)
-		DSDAM *dsdam = new DSDAM( mclab, true, cop_speed, true );
+		// robber objects
+		DSCover<graphState,graphMove> *dscover = NULL;
+		DSMinimax<graphState,graphMove> *dsminimax = NULL;
+		DSDAM *dsdam = NULL;
+		DSHeuristicGreedy<graphState,graphMove> *dsheuristic = NULL;
+		DSRandomBeacons *dsrandomb = NULL;
+		DSTPDijkstra<graphState,graphMove> *dstp = NULL; // trailmax
+		DSDATPDijkstra *dsdatp = NULL; // datrailmax
 
-		// heuristic greedy
-		DSHeuristicGreedy<graphState,graphMove> *dsheuristic =
-			new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
+		// initialize robber objects
+		if( find_algorithm( robber_algorithms, "cover"      ) ) dscover     = new DSCover<graphState,graphMove>( env, cop_speed );
+		if( find_algorithm( robber_algorithms, "minimax"    ) ) dsminimax   = new DSMinimax<graphState,graphMove>( env, true, cop_speed );
+		if( find_algorithm( robber_algorithms, "dam"        ) ) dsdam       = new DSDAM( mclab, true, cop_speed, true );
+		if( find_algorithm( robber_algorithms, "greedy"     ) ) dsheuristic = new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
+		if( find_algorithm( robber_algorithms, "trailmax"   ) ) dstp        = new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
+		if( find_algorithm( robber_algorithms, "datrailmax" ) ) dsdatp      = new DSDATPDijkstra( mclab, cop_speed, true );
+		if( find_algorithm( robber_algorithms, "randombeacons" ) ) dsrandomb = new DSRandomBeacons( mclab, true, cop_speed );
 
-		// TrailMax/Two player dijkstra
-		DSTPDijkstra<graphState,graphMove> *dstp =
-			new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
-
-		// dynamic abstract two player dijkstra/TrailMax
-		DSDATPDijkstra *dsdatp = new DSDATPDijkstra( mclab, cop_speed, true );
-
-		// random beacons
-		DSRandomBeacons *dsrandomb = new DSRandomBeacons( mclab, true, cop_speed );
 
 		// there is always 1000 problems for a map -> see problem set generation
 		for( int i = 0; i < 1000; i++ ) {
+			unsigned int rx, ry, cx, cy;
 			fscanf( fhandler, "(%d,%d) (%d,%d)\n", &rx, &ry, &cx, &cy );
 			fprintf( foutput, "(%u,%u) (%u,%u)", rx, ry, cx, cy );
 
 			// build the actual position data structure
-			//std::vector<xyLoc> pos;
-			//pos.push_back( xyLoc( rx, ry ) );
-			//pos.push_back( xyLoc( cx, cy ) );
 			std::vector<graphState> pos;
 			pos.push_back( m->getNodeNum( rx, ry ) );
 			pos.push_back( m->getNodeNum( cx, cy ) );
 
 			// now find out the optimal value
-			//fprintf( foutput, " %g", dsdijkstra->Value( pos, true ) );
+			if( compute_optimal_solution )
+				fprintf( foutput, " %g", dsdijkstra->Value( pos, true ) );
 
-			// compute the solution for COVER
-			double value = 0.;
-			unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
-			nodesExpanded = 0; nodesTouched = 0;
-			while( true ) {
+			// for each cop algorithm
+			for( unsigned int cop_alg = 0; cop_alg < cop_algorithms.size(); cop_alg++ ) {
+				// for each robber algorithm
+				for( unsigned int robber_alg = 0; robber_alg < robber_algorithms.size(); robber_alg++ ) {
 
-				//pos[1] = dsdijkstra->MakeMove( pos, true );
-				pos[1] = pracop->MakeMove( pos[0], pos[1] );
-				value += 1.;
-				if( pos[0] == pos[1] ) break;
+					// we do not play optimal against optimal (that doesn't make sense) ;-)
+					if( strcmp( cop_algorithms[cop_alg],       "optimal" ) == 0 &&
+					    strcmp( robber_algorithms[robber_alg], "optimal" ) == 0 )
+						continue;
 
-				clock_start = clock();
-				pos[0] = dscover->MakeMove( pos[0], pos[1], false, g->GetNumNodes() );
-				clock_end   = clock();
-				timer_average      += (clock_end-clock_start)/1000;
-				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
-				nodesExpanded += dscover->nodesExpanded;
-				nodesTouched  += dscover->nodesTouched;
-				calculations++;
-
-				value += 1.;
-				if( pos[0] == pos[1] ) break;
-			}
-			double expected_value = (double)timer_average/(double)calculations;
-			double std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
-				- expected_value*expected_value );
-			double expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
-			double expected_nodesTouched  = (double)nodesTouched /(double)calculations;
-			// output the cover result
-			fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
-			fflush( foutput );
-
-
-			// reset the position to the initial position
-			pos[0] = m->getNodeNum( rx, ry );
-			pos[1] = m->getNodeNum( cx, cy );
-			// compute the solution for MINIMAX
-			value = 0.;
-			calculations = 0; timer_average = 0; timer_stddiviation = 0;
-			nodesExpanded = 0; nodesTouched = 0;
-			while( true ) {
-
-				//pos[1] = dsdijkstra->MakeMove( pos, true );
-				pos[1] = pracop->MakeMove( pos[0], pos[1] );
-
-				value += 1.;
-				if( pos[0] == pos[1] ) break;
-
-				clock_start = clock();
-				pos[0] = dsminimax->MakeMove( pos[0], pos[1], false, minimax_depth );
-				clock_end   = clock();
-				timer_average      += (clock_end-clock_start)/1000;
-				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
-				nodesExpanded += dsminimax->nodesExpanded;
-				nodesTouched  += dsminimax->nodesTouched;
-				calculations++;
-
-				value += 1.;
-				if( pos[0] == pos[1] ) break;
-			}
-			expected_value = (double)timer_average/(double)calculations;
-			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
-				- expected_value*expected_value );
-			expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
-			expected_nodesTouched  = (double)nodesTouched /(double)calculations;
-			fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
-			fflush( foutput );
-
-
-			// reset the position to the initial position
-			pos[0] = m->getNodeNum( rx, ry );
-			pos[1] = m->getNodeNum( cx, cy );
-			// compute the solution for DYNAMIC ABSTRACT MINIMAX
-			value = 0.;
-			calculations = 0; timer_average = 0; timer_stddiviation = 0;
-			nodesExpanded = 0; nodesTouched = 0;
-			while( true ) {
-
-				//pos[1] = dsdijkstra->MakeMove( pos, true );
-				pos[1] = pracop->MakeMove( pos[0], pos[1] );
-
-				value += 1.;
-				if( pos[0] == pos[1] ) break;
-
-				node *r = g->GetNode( pos[0] );
-				node *c = g->GetNode( pos[1] );
-
-				clock_start = clock();
-				r = dsdam->MakeMove( r, c, false, minimax_depth );
-				clock_end   = clock();
-				timer_average      += (clock_end-clock_start)/1000;
-				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
-				nodesExpanded += dsdam->nodesExpanded;
-				nodesTouched  += dsdam->nodesTouched;
-				calculations++;
-				pos[0] = r->GetNum();
-
-				value += 1.;
-				if( pos[0] == pos[1] ) break;
-			}
-			expected_value = (double)timer_average/(double)calculations;
-			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
-				- expected_value*expected_value );
-			expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
-			expected_nodesTouched  = (double)nodesTouched /(double)calculations;
-			fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
-			fflush( foutput );
-
-
-			// reset the position to the initial position
-			pos[0] = m->getNodeNum( rx, ry );
-			pos[1] = m->getNodeNum( cx, cy );
-			// compute the solution for GREEDY HEURISTIC
-			value = 0.;
-			calculations = 0; timer_average = 0; timer_stddiviation = 0;
-			nodesExpanded = 0; nodesTouched = 0;
-			while( true ) {
-
-				//pos[1] = dsdijkstra->MakeMove( pos, true );
-				pos[1] = pracop->MakeMove( pos[0], pos[1] );
-
-				value += 1.;
-				if( pos[0] == pos[1] ) break;
-
-				clock_start = clock();
-				pos[0] = dsheuristic->MakeMove( pos[0], pos[1], false );
-				clock_end   = clock();
-				timer_average      += (clock_end-clock_start)/1000;
-				timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
-				nodesExpanded += dsheuristic->nodesExpanded;
-				nodesTouched  += dsheuristic->nodesTouched;
-				calculations++;
-
-				value += 1.;
-				if( pos[0] == pos[1] ) break;
-			}
-			expected_value = (double)timer_average/(double)calculations;
-			std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
-				- expected_value*expected_value );
-			expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
-			expected_nodesTouched  = (double)nodesTouched /(double)calculations;
-			fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
-			fflush( foutput );
-
-
-			// do the simulation of MAXMIN/pathmax approximation for various stepsizes
-			for( unsigned int stepsize = 1; stepsize <= maxmin_stepsize; stepsize++ ) {
-
-				// reset the position to the initial position
-				pos[0] = m->getNodeNum( rx, ry );
-				pos[1] = m->getNodeNum( cx, cy );
-
-				// make a run for this problem with maxmin
-				std::vector<graphState> mypath;
-				unsigned int counter = 0;
-				value = 0.;
-				calculations = 0;
-				timer_average = 0;
-				timer_stddiviation = 0;
-				nodesExpanded = 0; nodesTouched = 0;
-				while( true ) {
-
-					//pos[1] = dsdijkstra->MakeMove( pos, true );
-					pos[1] = pracop->MakeMove( pos[0], pos[1] );
-					value += 1.;
-
-					// test on whether the robber is caught
-					if( pos[0] == pos[1] ) break;
-
-					// if new path has to be computed, do so
-					if( counter == stepsize || counter >= mypath.size() ) {
-						clock_start = clock();
-						dstp->dstpdijkstra( pos[0], pos[1], false, mypath );
-						clock_end   = clock();
-						timer_average      += (clock_end-clock_start)/1000;
-						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
-						nodesExpanded += dstp->nodesExpanded;
-						nodesTouched  += dstp->nodesTouched;
-						calculations++;
-
-						// reset counter
-						counter = 0;
+					// determine the parameter range
+					int min_param_range = 0, max_param_range = 0;
+					if( strcmp( robber_algorithms[robber_alg], "randombeacons" ) == 0 ) {
+						min_param_range = robber_int_params[robber_alg][1];
+						max_param_range = robber_int_params[robber_alg][2];
 					}
-					// generate next move for the robber
-					pos[0] = mypath[counter];
-					counter++;
-					value += 1.;
-
-					if( pos[0] == pos[1] ) break;
-				}
-
-				expected_value = (double)timer_average/(double)calculations;
-				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
-					- expected_value*expected_value );
-				expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
-				expected_nodesTouched  = (double)nodesTouched /(double)calculations;
-
-				// output result of the run
-				fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
-				fflush( foutput );
-			}
-
-
-
-
-			// do the simulation of Dynamic Abstract Pathmax for various stepsizes
-			for( unsigned int stepsize = 1; stepsize <= maxmin_stepsize; stepsize++ ) {
-
-				// reset the position to the initial position
-				pos[0] = m->getNodeNum( rx, ry );
-				pos[1] = m->getNodeNum( cx, cy );
-
-				// make a run for this problem with maxmin
-				std::vector<node*> mypath;
-				unsigned int counter = 0;
-				value = 0.;
-				calculations = 0;
-				timer_average = 0;
-				timer_stddiviation = 0;
-				nodesExpanded = 0; nodesTouched = 0;
-				while( true ) {
-
-					//pos[1] = dsdijkstra->MakeMove( pos, true );
-					pos[1] = pracop->MakeMove( pos[0], pos[1] );
-					value += 1.;
-
-					// test on whether the robber is caught
-					if( pos[0] == pos[1] ) break;
-
-					node *r = g->GetNode( pos[0] );
-					node *c = g->GetNode( pos[1] );
-
-					// if new path has to be computed, do so
-					if( counter == stepsize || counter >= mypath.size() ) {
-						clock_start = clock();
-						dsdatp->datpdijkstra( r, c, mypath, false, dsdatpdijkstra_min_escape );
-						clock_end   = clock();
-						timer_average      += (clock_end-clock_start)/1000;
-						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
-						nodesExpanded += dsdatp->myNodesExpanded;
-						nodesTouched  += dsdatp->myNodesTouched;
-						calculations++;
-
-						// reset counter
-						counter = 0;
+					if( strcmp( robber_algorithms[robber_alg], "trailmax" ) == 0 ) {
+						min_param_range = robber_int_params[robber_alg][0];
+						max_param_range = robber_int_params[robber_alg][1];
 					}
-					// generate next move for the robber
-					pos[0] = mypath[counter]->GetNum();
-					counter++;
-					value += 1.;
-
-					if( pos[0] == pos[1] ) break;
-				}
-
-				expected_value = (double)timer_average/(double)calculations;
-				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
-					- expected_value*expected_value );
-				expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
-				expected_nodesTouched  = (double)nodesTouched /(double)calculations;
-
-				// output result of the run
-				fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
-				fflush( foutput );
-			}
-
-
-			// do the simulation of Random Beacons
-			for( unsigned int stepsize = 1; stepsize <= maxmin_stepsize; stepsize++ ) {
-
-				// reset the position to the initial position
-				pos[0] = m->getNodeNum( rx, ry );
-				pos[1] = m->getNodeNum( cx, cy );
-
-				std::vector<graphState> mypath;
-				unsigned int counter = 0;
-				value = 0.;
-				calculations = 0;
-				timer_average = 0;
-				timer_stddiviation = 0;
-				nodesExpanded = 0; nodesTouched = 0;
-				while( true ) {
-
-					//pos[1] = dsdijkstra->MakeMove( pos, true );
-					pos[1] = pracop->MakeMove( pos[0], pos[1] );
-					value += 1.;
-
-					// test on whether the robber is caught
-					if( pos[0] == pos[1] ) break;
-
-					// if new path has to be computed, do so
-					if( counter == stepsize || counter >= mypath.size() ) {
-						clock_start = clock();
-						dsrandomb->GetPath( pos[0], pos[1], num_beacons, mypath );
-						clock_end   = clock();
-						timer_average      += (clock_end-clock_start)/1000;
-						timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
-						nodesExpanded += dsrandomb->nodesExpanded;
-						nodesTouched  += dsrandomb->nodesTouched;
-						calculations++;
-
-						// reset counter
-						counter = 0;
+					if( strcmp( robber_algorithms[robber_alg], "datrailmax" ) == 0 ) {
+						min_param_range = robber_int_params[robber_alg][0];
+						max_param_range = robber_int_params[robber_alg][1];
 					}
-					// generate next move for the robber
-					pos[0] = mypath[counter];
-					counter++;
-					value += 1.;
 
-					if( pos[0] == pos[1] ) break;
-				}
+					for( int current_param = min_param_range; current_param <= max_param_range; current_param++ ) {
 
-				expected_value = (double)timer_average/(double)calculations;
-				std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
-					- expected_value*expected_value );
-				expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
-				expected_nodesTouched  = (double)nodesTouched /(double)calculations;
+						// reset the initial position
+						pos[0] = m->getNodeNum( rx, ry );
+						pos[1] = m->getNodeNum( cx, cy );
+						// variables to keep track of statistics
+						double value = 0.;
+						unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
+						clock_t clock_start, clock_end;
+						clock_start = clock_end = clock();
+						unsigned int nodesExpanded = 0, nodesTouched = 0;
+						std::vector<graphState> mygraphstatepath;
+						std::vector<node*> mynodepath;
+						unsigned int counter = 0;
+						while( true ) {
 
-				// output result of the run
-				fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
-				fflush( foutput );
-			}
+							// cop's move
+							if( strcmp( cop_algorithms[cop_alg], "optimal" ) == 0 ) pos[1] = dsdijkstra->MakeMove( pos, true );
+							if( strcmp( cop_algorithms[cop_alg], "pra"     ) == 0 ) pos[1] = pracop->MakeMove( pos[0], pos[1] );
+							value += 1.;
+							if( pos[0] == pos[1] ) break;
 
+							// robber's move
+							if( strcmp( robber_algorithms[robber_alg], "optimal" ) == 0 ) {
+								pos[0] = dsdijkstra->MakeMove( pos, false );
+							} else {
+								// if the current robber strategy is not "optimal"
+								// cover
+								if( strcmp( robber_algorithms[robber_alg], "cover" ) == 0 ) {
+									clock_start = clock();
+									pos[0] = dscover->MakeMove( pos[0], pos[1], false, g->GetNumNodes() );
+									clock_end   = clock();
+									nodesExpanded += dscover->nodesExpanded;
+									nodesTouched += dscover->nodesTouched;
+									timer_average      += (clock_end-clock_start)/1000;
+									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+									calculations++;
+								}
+								// minimax
+								if( strcmp( robber_algorithms[robber_alg], "minimax" ) == 0 ) {
+									clock_start = clock();
+									pos[0] = dsminimax->MakeMove( pos[0], pos[1], false, robber_double_params[robber_alg][0] );
+									clock_end   = clock();
+									nodesExpanded += dsminimax->nodesExpanded;
+									nodesTouched  += dsminimax->nodesTouched;
+									timer_average      += (clock_end-clock_start)/1000;
+									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+									calculations++;
+								}
+								// dam
+								if( strcmp( robber_algorithms[robber_alg], "dam" ) == 0 ) {
+									node *r = g->GetNode( pos[0] );
+									node *c = g->GetNode( pos[1] );
+									clock_start = clock();
+									r = dsdam->MakeMove( r, c, false, robber_double_params[robber_alg][0] );
+									clock_end   = clock();
+									pos[0] = r->GetNum();
+									nodesExpanded += dsdam->nodesExpanded;
+									nodesTouched  += dsdam->nodesTouched;
+									timer_average      += (clock_end-clock_start)/1000;
+									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+									calculations++;
+								}
+								// greedy
+								if( strcmp( robber_algorithms[robber_alg], "greedy" ) == 0 ) {
+									clock_start = clock();
+									pos[0] = dsheuristic->MakeMove( pos[0], pos[1], false );
+									clock_end   = clock();
+									nodesExpanded += dsheuristic->nodesExpanded;
+									nodesTouched  += dsheuristic->nodesTouched;
+									timer_average      += (clock_end-clock_start)/1000;
+									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+									calculations++;
+								}
+								// Random Beacons
+								if( strcmp( robber_algorithms[robber_alg], "randombeacons" ) == 0 ) {
+									// if new path has to be computed, do so
+									if( counter == (unsigned int)current_param || counter >= mygraphstatepath.size() ) {
+										clock_start = clock();
+										dsrandomb->GetPath( pos[0], pos[1], robber_int_params[robber_alg][0], mygraphstatepath );
+										clock_end   = clock();
+										timer_average      += (clock_end-clock_start)/1000;
+										timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+										nodesExpanded += dsrandomb->nodesExpanded;
+										nodesTouched  += dsrandomb->nodesTouched;
+										calculations++;
+										// reset counter
+										counter = 0;
+									}
+									pos[0] = mygraphstatepath[counter];
+									counter++;
+								}
+								// TrailMax
+								if( strcmp( robber_algorithms[robber_alg], "trailmax" ) == 0 ) {
+									if( counter == (unsigned int)current_param || counter >= mygraphstatepath.size() ) {
+										clock_start = clock();
+										dstp->dstpdijkstra( pos[0], pos[1], false, mygraphstatepath );
+										clock_end   = clock();
+										nodesExpanded += dstp->nodesExpanded;
+										nodesTouched  += dstp->nodesTouched;
+										timer_average      += (clock_end-clock_start)/1000;
+										timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+										calculations++;
+										// reset counter
+										counter = 0;
+									}
+									pos[0] = mygraphstatepath[counter];
+									counter++;
+								}
+								// DATrailMax
+								if( strcmp( robber_algorithms[robber_alg], "datrailmax" ) == 0 ) {
+									node *r = g->GetNode( pos[0] );
+									node *c = g->GetNode( pos[1] );
+									if( counter == (unsigned int)current_param || counter >= mynodepath.size() ) {
+										clock_start = clock();
+										dsdatp->datpdijkstra( r, c, mynodepath, false, robber_int_params[robber_alg][2] );
+										clock_end   = clock();
+										timer_average      += (clock_end-clock_start)/1000;
+										timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+										nodesExpanded += dsdatp->myNodesExpanded;
+										nodesTouched  += dsdatp->myNodesTouched;
+										calculations++;
+										// reset counter
+										counter = 0;
+									}
+									pos[0] = mynodepath[counter]->GetNum();
+									counter++;
+								}
+
+
+
+								value += 1.;
+								if( pos[0] == pos[1] ) break;
+							}
+						}
+						
+						if( strcmp( robber_algorithms[robber_alg], "optimal" ) == 0 ) {
+							fprintf( foutput, " %g", value );
+						} else {
+							double expected_value = (double)timer_average/(double)calculations;
+							double std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
+							                        - expected_value*expected_value );
+							double expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
+							double expected_nodesTouched  = (double)nodesTouched /(double)calculations;
+							fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
+							fflush( foutput );
+						}
+					} // parameter range
+				} // robber algorithms
+			} // cop algorithms
+
+			
 			// finish the line, go to next problem instance
 			fprintf( foutput, "\n" );
 
 		}
 
-		delete dsrandomb;
-		delete dsdatp;
-		delete dstp;
-		delete dsheuristic;
-		delete dsdam;
-		delete dsminimax;
-		delete dscover;
-		delete pracop;
-		//delete dsdijkstra;
+		// delete robber objects
+		if( dsrandomb   != NULL ) delete dsrandomb;
+		if( dsdatp      != NULL ) delete dsdatp;
+		if( dstp        != NULL ) delete dstp;
+		if( dsheuristic != NULL ) delete dsheuristic;
+		if( dsdam       != NULL ) delete dsdam;
+		if( dsminimax   != NULL ) delete dsminimax;
+		if( dscover     != NULL ) delete dscover;
+		// delete cop objects
+		if( pracop     != NULL ) delete pracop;
+		if( dsdijkstra != NULL ) delete dsdijkstra;
+		// delete environments
 		delete env;
 		delete gh;
 		delete mclab;
 	}
+
 	fclose( fhandler );
 	fclose( foutput );
 }
@@ -2098,8 +2130,7 @@ void CreateSimulation( int id ) {
 		MakeMaze( map, 1 );
 	} else
 		map = new Map( gDefaultMap );
-*/
-/*
+
 	MapCliqueAbstraction *mca = new MapCliqueAbstraction( map );
 	AbsMapEnvironment *absenv = new AbsMapEnvironment( mca );
 
@@ -2132,14 +2163,56 @@ void CreateSimulation( int id ) {
 	sleep( 5 );
 */
 
-/*
+
 	FILE *fhandler = fopen( "graph", "r" );
 	Graph *g = readGraph( fhandler, true );
 	printf( "num nodes: %d\n", g->GetNumNodes() );
 	printf( "num edges: %d\n", g->GetNumEdges() );
-	graphenv = new GraphEnvironment( g, NULL );
-*/
+	LoadedCliqueAbstraction *cliqueabs = new LoadedCliqueAbstraction( g );
+	AbstractionGraphEnvironment *env = new AbstractionGraphEnvironment( cliqueabs, 0, NULL );
 
+	simulation = new DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment>( env, true, 2, false );
+	simulation->SetPaused( true );
+	TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment> *runit =
+		new TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>( 21796, 1, 2 );
+	runit->SetColor( 1., 0., 0. );
+	unsigned int robberunitnumber = simulation->AddRobber( runit, 1. );
+	PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
+		new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 21989, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	unsigned int copunitnumber = simulation->AddCop( cunit, 1. );
+
+	runit->SetCopUnit( copunitnumber );
+	cunit->SetRobberUnit( robberunitnumber );
+
+	// add the other cops to the simulation
+	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 16179, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	simulation->AddCop( cunit, 1. );
+	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 1913, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	simulation->AddCop( cunit, 1. );
+	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 139, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	simulation->AddCop( cunit, 1. );
+	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 1896, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	simulation->AddCop( cunit, 1. );
+	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 2706, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	simulation->AddCop( cunit, 1. );
+	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 10415, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	simulation->AddCop( cunit, 1. );
+	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 26047, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	simulation->AddCop( cunit, 1. );
+	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 1104, 2 );
+	cunit->SetColor( 0., 0., 1. );
+	simulation->AddCop( cunit, 1. );
+
+
+/*
 	Map *map;
 	if( gDefaultMap[0] == 0 ) {
 		map = new Map( mazeSize, mazeSize );
@@ -2157,8 +2230,8 @@ void CreateSimulation( int id ) {
 	runit->SetColor( 1., 0., 0. );
 	unsigned int robberunitnumber = simulation->AddRobber( runit, 1. );
 
-	PraStarUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
-		new PraStarUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca, mca->GetNodeFromMap(49,27)->GetNum(), 2 );
+	PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
+		new PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca, mca->GetNodeFromMap(49,27)->GetNum(), 2 );
 	cunit->SetColor( 0., 0., 1. );
 	unsigned int copunitnumber = simulation->AddCop( cunit, 1. );
 
@@ -2166,6 +2239,7 @@ void CreateSimulation( int id ) {
 	cunit->SetRobberUnit( robberunitnumber );
 
 	sleep( 5 );
+*/
 
 	return;
 }
@@ -2174,6 +2248,7 @@ void InstallHandlers() {
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-size integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallWindowHandler(MyWindowHandler);
+	InstallKeyboardHandler(MyDisplayHandler, "pause", "pause/unpause simulation", kAnyModifier, 'p');
 	InstallMouseClickHandler(MyClickHandler);
 	return;
 }
@@ -2190,6 +2265,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType) {
 		SetNumPorts( windowID, 1 );
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		CreateSimulation(windowID);
+		time(&last_simulation_update);
 	}
 	return;
 }
@@ -2213,12 +2289,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *) {
 	graphenv->OpenGLDraw( windowID, s );
 */
 	if( viewport == 0 ) {
-		sleep(1);
 		simulation->OpenGLDraw( windowID );
-		if( !simulation->Done() ) {
-			simulation->StepTime( 1. );
-			printf( "simulation time is: %g\n", simulation->GetSimulationTime() );
-			printf( "---------------\n" );
+		time_t temptime; time(&temptime);
+		if( last_simulation_update < temptime ) {
+			if( !simulation->Done() && !simulation->GetPaused() ) {
+				simulation->StepTime( 1. );
+				printf( "simulation time is: %g\n", simulation->GetSimulationTime() );
+				printf( "---------------\n" );
+			}
+			time(&last_simulation_update);
 		}
 	}
 	return;
@@ -2245,7 +2324,12 @@ int MyCLHandler(char *argument[], int maxNumArgs) {
 }
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) {
-
+	switch( key ) {
+		case 'p': // pause/unpause simulation
+			simulation->SetPaused( !simulation->GetPaused() );
+			break;
+	}
+	return;
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType) {
@@ -2328,9 +2412,13 @@ Graph* readGraph( FILE *fhandler, bool input_with_vertice_coordinates ) {
 		if( input_with_vertice_coordinates ) {
 			double x,y;
 			fscanf( fhandler, "(%lf,%lf) ", &x, &y );
-			n->SetLabelF( GraphSearchConstants::kXCoordinate, x );
-			n->SetLabelF( GraphSearchConstants::kYCoordinate, y );
-			n->SetLabelF( GraphSearchConstants::kZCoordinate, 0. );
+			n->SetLabelL( GraphAbstractionConstants::kAbstractionLevel, 0 );
+			n->SetLabelL( GraphAbstractionConstants::kNumAbstractedNodes, 1 );
+			n->SetLabelL( GraphAbstractionConstants::kParent, -1 );
+			n->SetLabelF( GraphAbstractionConstants::kXCoordinate, x );
+			n->SetLabelF( GraphAbstractionConstants::kYCoordinate, y );
+			n->SetLabelF( GraphAbstractionConstants::kZCoordinate, 0. );
+			n->SetLabelL( GraphAbstractionConstants::kNodeBlocked, 0 );
 		}
 		g->AddNode( n );
 	}
@@ -2340,8 +2428,12 @@ Graph* readGraph( FILE *fhandler, bool input_with_vertice_coordinates ) {
 	for( int i = 0; i < num_edges; i++ ) {
 		int v1, v2;
 		fscanf( fhandler, "%d %d", &v1, &v2 );
-		edge *e = new edge( v1, v2, 1. );
-		g->AddEdge( e );
+		if( input_with_vertice_coordinates ) {
+			double d1 = g->GetNode(v1)->GetLabelF(GraphAbstractionConstants::kXCoordinate) - g->GetNode(v2)->GetLabelF(GraphAbstractionConstants::kXCoordinate);
+			double d2 = g->GetNode(v1)->GetLabelF(GraphAbstractionConstants::kYCoordinate) - g->GetNode(v2)->GetLabelF(GraphAbstractionConstants::kYCoordinate);
+			g->AddEdge( new edge( v1, v2, sqrt( d1*d1 + d2*d2 ) ) );
+		} else
+			g->AddEdge( new edge( v1, v2, 1. ) );
 	}
 	fscanf( fhandler, "\n" );
 
