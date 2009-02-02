@@ -4,24 +4,24 @@
 #include "MapAbstraction.h"
 #include "PRAStar.h"
 
-#ifndef PRASTARUNIT_H
-#define PRASTARUNIT_H
+#ifndef PRASTARMAPUNIT_H
+#define PRASTARMAPUNIT_H
 
 /*!
 	Provides a unit that does PRA* and follows the path
 */
 template<class state,class action,class environment>
-class PraStarUnit: public Unit<state,action,environment> {
+class PraStarMapUnit: public Unit<state,action,environment> {
 
 	public:
-	PraStarUnit( MapAbstraction *abs, state initial_state, unsigned int cop_speed );
-	PraStarUnit( MapAbstraction *abs, state initial_state, unsigned int robberunit, unsigned int cop_speed );
-	~PraStarUnit();
+	PraStarMapUnit( MapAbstraction *abs, state initial_state, unsigned int cop_speed );
+	PraStarMapUnit( MapAbstraction *abs, state initial_state, unsigned int robberunit, unsigned int cop_speed );
+	~PraStarMapUnit();
 
 	// sets the unit number of the robber that we want to run to
 	void SetRobberUnit( unsigned int _robberunit ) { robberunit = _robberunit; };
 
-	// returns PraStarUnit
+	// returns PraStarMapUnit
 	const char *GetName();
 
 	bool MakeMove( environment *env, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *sinfo, action &a );
@@ -59,31 +59,31 @@ class PraStarUnit: public Unit<state,action,environment> {
 | Implementation
 ------------------------------------------------------------------------------*/
 template<class state,class action,class environment>
-PraStarUnit<state,action,environment>::PraStarUnit( MapAbstraction *_abs, state initial_state, unsigned int _cop_speed ):
+PraStarMapUnit<state,action,environment>::PraStarMapUnit( MapAbstraction *_abs, state initial_state, unsigned int _cop_speed ):
 	abs(_abs), current_pos(initial_state), robberunit(0), cop_speed(_cop_speed),
 	done(false), pra( new praStar() )
 { };
 
 template<class state,class action,class environment>
-PraStarUnit<state,action,environment>::PraStarUnit( MapAbstraction *_abs, state initial_state,
+PraStarMapUnit<state,action,environment>::PraStarMapUnit( MapAbstraction *_abs, state initial_state,
 	unsigned int _copunit, unsigned int _cop_speed ):
 	abs(_abs), current_pos(initial_state), robberunit(_copunit), cop_speed(_cop_speed),
 	done(false), pra( new praStar() )
 { };
 
 template<class state,class action,class environment>
-PraStarUnit<state,action,environment>::~PraStarUnit() {
+PraStarMapUnit<state,action,environment>::~PraStarMapUnit() {
 	delete pra;
 };
 
 
 template<class state,class action,class environment>
-const char* PraStarUnit<state,action,environment>::GetName() {
-	return "PraStarUnit";
+const char* PraStarMapUnit<state,action,environment>::GetName() {
+	return "PraStarMapUnit";
 };
 
 template<class state,class action,class environment>
-bool PraStarUnit<state,action,environment>::MakeMove( environment *env, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *sinfo, action &a ) {
+bool PraStarMapUnit<state,action,environment>::MakeMove( environment *env, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *sinfo, action &a ) {
 
 	state robber_pos = sinfo->GetPublicUnitInfo( robberunit )->currentState;
 
@@ -110,36 +110,36 @@ bool PraStarUnit<state,action,environment>::MakeMove( environment *env, Occupanc
 };
 
 template<class state,class action,class environment>
-void PraStarUnit<state,action,environment>::UpdateLocation( environment *, state &s, bool, SimulationInfo<state,action,environment> *sinfo ) {
+void PraStarMapUnit<state,action,environment>::UpdateLocation( environment *, state &s, bool, SimulationInfo<state,action,environment> *sinfo ) {
 	current_pos = s;
 };
 
 
-// \see PraStarUnit.cpp for implementation
+// \see PraStarMapUnit.cpp for implementation
 template<>
-void PraStarUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int window, MapEnvironment *env, SimulationInfo<xyLoc,tDirection,MapEnvironment>* );
+void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int window, MapEnvironment *env, SimulationInfo<xyLoc,tDirection,MapEnvironment>* );
 template<>
-void PraStarUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int window, AbsMapEnvironment *env, SimulationInfo<xyLoc,tDirection,AbsMapEnvironment>* );
+void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int window, AbsMapEnvironment *env, SimulationInfo<xyLoc,tDirection,AbsMapEnvironment>* );
 template<>
-void PraStarUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int window, GraphEnvironment *env, SimulationInfo<graphState,graphMove,GraphEnvironment>* );
+void PraStarMapUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int window, GraphEnvironment *env, SimulationInfo<graphState,graphMove,GraphEnvironment>* );
 template<>
-void PraStarUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int window, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* );
+void PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int window, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* );
 template<>
-tDirection PraStarUnit<xyLoc,tDirection,MapEnvironment>::nomove();
+tDirection PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::nomove();
 template<>
-tDirection PraStarUnit<xyLoc,tDirection,AbsMapEnvironment>::nomove();
+tDirection PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::nomove();
 template<>
-graphMove PraStarUnit<graphState,graphMove,GraphEnvironment>::nomove();
+graphMove PraStarMapUnit<graphState,graphMove,GraphEnvironment>::nomove();
 template<>
-graphMove PraStarUnit<graphState,graphMove,AbstractionGraphEnvironment>::nomove();
+graphMove PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::nomove();
 template<>
-void PraStarUnit<xyLoc,tDirection,MapEnvironment>::GetPraStarPath( MapEnvironment *env, xyLoc robber_pos );
+void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::GetPraStarPath( MapEnvironment *env, xyLoc robber_pos );
 template<>
-void PraStarUnit<xyLoc,tDirection,AbsMapEnvironment>::GetPraStarPath( AbsMapEnvironment *env, xyLoc robber_pos );
+void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::GetPraStarPath( AbsMapEnvironment *env, xyLoc robber_pos );
 template<>
-void PraStarUnit<graphState,graphMove,GraphEnvironment>::GetPraStarPath( GraphEnvironment *env, graphState robber_pos );
+void PraStarMapUnit<graphState,graphMove,GraphEnvironment>::GetPraStarPath( GraphEnvironment *env, graphState robber_pos );
 template<>
-void PraStarUnit<graphState,graphMove,AbstractionGraphEnvironment>::GetPraStarPath( AbstractionGraphEnvironment *env, graphState robber_pos );
+void PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::GetPraStarPath( AbstractionGraphEnvironment *env, graphState robber_pos );
 
 
 #endif

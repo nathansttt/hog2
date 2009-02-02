@@ -32,7 +32,7 @@ void TrailMaxUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int, MapEnvironm
 	}
 	m->getOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
 	if( done )
-		glColor3d( 0., 0., 0. ); // turn black when done
+		glColor3d( 0., 1., 0. ); // turn green when done
 	else
 		glColor3f( r, g, b );
 	DrawSphere( xx, yy, zz, rad );
@@ -61,7 +61,7 @@ void TrailMaxUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int, AbsMapEn
 	}
 	m->getOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
 	if( done )
-		glColor3d( 0., 0., 0. ); // turn black when done
+		glColor3d( 0., 1., 0. ); // turn green when done
 	else
 		glColor3f( r, g, b );
 	DrawSphere( xx, yy, zz, rad );
@@ -83,12 +83,12 @@ void TrailMaxUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int, AbsMapEn
 template<>
 void TrailMaxUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int, GraphEnvironment *env, SimulationInfo<graphState,graphMove,GraphEnvironment>* ) {
 	node *n  = env->GetGraph()->GetNode( current_pos );
-	GLdouble x, y, z, rad = 0.005;
+	GLdouble x, y, z, rad = 0.001;
 	x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
 	y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
 	z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
 	if( done )
-		glColor3d( 0., 0., 0. ); // turn black when done
+		glColor3d( 0., 1., 0. ); // turn green when done
 	else
 		glColor3f( r, g, b );
 	DrawSphere( x, y, z, rad );
@@ -114,12 +114,12 @@ void TrailMaxUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int, Graph
 template<>
 void TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) {
 	node *n  = env->GetGraph()->GetNode( current_pos );
-	GLdouble x, y, z, rad = 0.005;
+	GLdouble x, y, z, rad = env->scale()/2.;
 	x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
 	y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
 	z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);
 	if( done )
-		glColor3d( 0., 0., 0. ); // turn black when done
+		glColor3d( 0., 1., 0. ); // turn green when done
 	else
 		glColor3f( r, g, b );
 	DrawSphere( x, y, z, rad );
