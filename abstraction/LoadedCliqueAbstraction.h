@@ -38,6 +38,7 @@
 class LoadedCliqueAbstraction : public GraphAbstraction {
 public:
   LoadedCliqueAbstraction(char *);
+	LoadedCliqueAbstraction( Graph *g );
   virtual ~LoadedCliqueAbstraction();
 	virtual void VerifyHierarchy();
   double h(node *a, node *b);

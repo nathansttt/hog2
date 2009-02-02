@@ -856,7 +856,34 @@ node *GraphDistanceHeuristic::FindFarNode(node *n)
 
 AbstractionGraphEnvironment::AbstractionGraphEnvironment( GraphAbstraction *_gabs, unsigned int level, GraphHeuristic *gh ):
 	GraphEnvironment( _gabs->GetAbstractGraph(level), gh ), gabs(_gabs)
-{ };
+{
+	// compute graph scale
+	node_iterator ni = g->getNodeIter();
+	node *n;
+	double min_x = DBL_MAX, max_x = DBL_MIN;
+	double min_y = DBL_MAX, max_y = DBL_MIN;
+	double min_z = DBL_MAX, max_z = DBL_MIN;
+	n = g->nodeIterNext( ni );
+	while( n != NULL ) {
+		double x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
+		double y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
+		double z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);
+		if( x < min_x ) min_x = x;
+		if( x > max_x ) max_x = x;
+		if( y < min_y ) min_y = y;
+		if( y > max_y ) max_y = y;
+		if( z < min_z ) min_z = z;
+		if( z > max_z ) max_z = z;
+		n = g->nodeIterNext( ni );
+	}
+	graphscale = 0.;
+	int count = 0;
+	if( fgreater(max_x, min_x) ) { graphscale += max_x-min_x; count++; }
+	if( fgreater(max_y, min_y) ) { graphscale += max_y-min_y; count++; }
+	if( fgreater(max_z, min_z) ) { graphscale += max_z-min_z; count++; }
+	// average over all the dimensions and divide by root(nodecount,dimensions)
+	graphscale /= count * pow( (double)g->GetNumNodes(), 1./(double)count );
+};
 
 AbstractionGraphEnvironment::~AbstractionGraphEnvironment() {
 	//~GraphEnvironment();
