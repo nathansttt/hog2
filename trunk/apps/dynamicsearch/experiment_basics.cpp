@@ -1,4 +1,5 @@
 #include "experiment_basics.h"
+#include <stdio.h>
 
 std::string int_to_string(int i) {
 	std::stringstream s;
@@ -29,6 +30,126 @@ std::vector<std::string> split(const std::string &s, char delim) {
 	return split(s, delim, elems);
 }
 
+int output_exp_info(const char *filename, int num_probs, int num_solvers, const char *nodes_filename, const char *costs_filename) {
+
+	FILE * output_nodes;
+	FILE * output_costs;
+	output_nodes = fopen (nodes_filename,"w");
+	output_costs = fopen (costs_filename,"w");
+
+	std::ifstream ifs(filename);
+
+	if(ifs.fail()) {
+		return 1;
+	}
+
+	std::string s, temp;
+	std::vector<std::string> tokens;
+
+	double nodes [num_solvers][num_probs];
+	double costs [num_solvers][num_probs];
+	double total_nodes [num_probs];
+	double total_cost [num_probs];
+	int total_its[num_solvers];
+	double info1[num_solvers];
+	double info2[num_solvers];
+
+	int prob_count = 0;
+	int solver_count = 0;
+
+	int min_solver = 0;
+	int max_solver = 0;
+	double all_nodes = 0;
+	double all_cost = 0;
+
+	while(!ifs.eof()) {
+		getline(ifs, s);
+		//std::cout << "line: " << s << std::endl;
+
+		if(s.find("=") != std::string::npos) {
+		//if(s.find(":") != std::string::npos) {
+			//printf("HERE\n");
+			prob_count = 0;
+			continue;
+		}
+
+		tokens.resize(0);
+
+		tokens = split(s, '\t');
+
+		if(tokens.size() == 0)
+			continue;
+
+		if(tokens.size() == 2 && prob_count < num_probs){
+			assert(solver_count < num_solvers);
+			assert(prob_count < num_probs);
+
+
+			nodes[solver_count][prob_count] = atof(tokens[0].c_str());
+			costs[solver_count][prob_count] = atof(tokens[1].c_str());
+
+			prob_count++;
+		}
+		else {
+			//std::cout << s << "\n";
+			//printf("%s\n", s);
+			assert(solver_count < num_solvers);
+
+			tokens.resize(0);
+
+			tokens = split(s, ' ');
+
+			total_nodes[solver_count] = atof(tokens[1].c_str());
+			total_cost[solver_count] = atof(tokens[0].c_str());
+
+			if(tokens.size() == 5) {
+				total_its[solver_count] = atoi(tokens[2].c_str());
+				info1[solver_count] = atof(tokens[3].c_str());
+				info2[solver_count] = atof(tokens[4].c_str());
+			}
+
+
+			if(total_nodes[solver_count] < total_nodes[min_solver])
+				min_solver = solver_count;
+
+			if(total_nodes[solver_count] > total_nodes[max_solver])
+				max_solver = solver_count;
+
+			all_nodes += total_nodes[solver_count];
+			all_cost += total_cost[solver_count];
+			solver_count++;
+		}
+	}
+	ifs.close();
+
+	for(int i = 0; i < num_probs; i++) {
+		for(int j = 0; j < num_solvers; j++) {
+			fprintf(output_nodes, "%.0f\t", nodes[j][i]);
+		}
+		fprintf(output_nodes, "\n");
+	}
+	//printf("\n");
+
+	for(int i = 0; i < num_probs; i++) {
+		for(int j = 0; j < num_solvers; j++) {
+			fprintf(output_costs, "%.0f\t", costs[j][i]);
+		}
+		fprintf(output_costs,"\n");
+	}
+
+	//printf("\n");
+	for(int i = 0; i < num_solvers; i++) {
+		printf("%.0f\t%.0f\t%d\t%.2f\t%.2f\n", total_cost[i], total_nodes[i],
+		       total_its[i], info1[i], info2[i]);
+	}
+	printf("\n%.0f\t%.0f\t\t\t%.0f\t%.0f\t\t\t%.0f\t%.0f\n", total_cost[min_solver], total_nodes[min_solver], total_cost[max_solver], total_nodes[max_solver], all_cost/ (double) num_solvers, all_nodes / (double) num_solvers);
+	//printf("\nMin: %.0f\t%.0f\n", total_cost[min_solver], total_nodes[min_solver]);
+	//printf("Max: %.0f\t%.0f\n", total_cost[max_solver], total_nodes[max_solver]);
+	//printf("Av: %.2f\t%.2f\n", all_cost/ (double) num_solvers, all_nodes / (double) num_solvers);
+	fclose(output_nodes);
+	fclose(output_costs);
+	return 0;
+}
 int read_in_extra_puzz_info(const char *filename, std::vector<Puzzle_Info> &info, char delim, unsigned max_info) {
 	std::ifstream ifs(filename);
 
@@ -92,7 +213,7 @@ double batch_puzzles(unsigned num_cols, unsigned num_rows, GeneralIDA<MNPuzzleSt
 
 		total_cost += ida->GetPathCost();
 		total_checked += ida->GetNodesChecked();
-		total_generated += ida->GetNodesGenerated();
+		total_generated += ida->GetNodesTouched();
 		total_expanded += ida->GetNodesExpanded();
 		total_iters += ida->GetNumIters();
 
@@ -102,15 +223,15 @@ double batch_puzzles(unsigned num_cols, unsigned num_rows, GeneralIDA<MNPuzzleSt
 		}
 
 		if(print_all_stats) {
-			printf("%.0f\t%.0f\t%d", ida->GetNodesChecked(), ida->GetPathCost(), ida->GetNumIters());
+			printf("%llu\t%.0f\t%u", ida->GetNodesChecked(), ida->GetPathCost(), ida->GetNumIters());
 
 			if(info.size() == puzzles.size()) {
 				printf("\t%.2f\t%.2f", info[i].first/ ida->GetNodesChecked(), ida->GetPathCost() / info[i].second);
 			}
 			if (print_iters) {
-				std::vector<double> iter = ida->Get_Checked_Iters();
+				std::vector<unsigned long long> iter = ida->Get_Checked_Iters();
 				for (unsigned j = 0; j < iter.size(); j++) {
-					printf("\t%.0f", iter[j]);
+					printf("\t%llu", iter[j]);
 				}
 			}
 			printf("\n");
@@ -153,7 +274,7 @@ double oracle_experiment(std::vector<GeneralIDA<MNPuzzleState, slideDir> *> solv
 	double current_best_av_cost = 0.0;
 
 	double current_largest = 0;
-	std::vector<double> its;
+	std::vector<unsigned long long> its;
 
 	unsigned solver_counter[solvers.size()];
 	std::vector<std::vector <double> > solver_nodes;
@@ -184,7 +305,7 @@ double oracle_experiment(std::vector<GeneralIDA<MNPuzzleState, slideDir> *> solv
 
 				best_solver = j;
 				current_best_checked = solvers[j]->GetNodesChecked();
-				current_best_generated = solvers[j]->GetNodesGenerated();
+				current_best_generated = solvers[j]->GetNodesTouched();
 				current_best_expanded = solvers[j]->GetNodesExpanded();
 
 				current_best_cost = solvers[j]->GetPathCost();
@@ -211,7 +332,7 @@ double oracle_experiment(std::vector<GeneralIDA<MNPuzzleState, slideDir> *> solv
 				printf(" %.2f %.2f", current_best_av_checked, current_best_av_cost);
 			}
 			for(unsigned j = 0; j < its.size(); j++) {
-				printf("\t%.0f", its[j]);
+				printf("\t%lld", its[j]);
 			}
 			printf("\n");
 		}
@@ -349,7 +470,8 @@ unsigned independent_solvers_run(std::vector<GeneralIDA<MNPuzzleState, slideDir>
 	unsigned num_solvers = solvers.size();
 
 	for(unsigned i = 0; i < num_solvers; i++) {
-		solvers[i]->initialize_step_by_step(mnp, start, goal, false);
+		solvers[i]->SetReverseOrder(false);
+		solvers[i]->Initialize(mnp, start, goal);
 	}
 
 	int status = 0;
@@ -357,7 +479,7 @@ unsigned independent_solvers_run(std::vector<GeneralIDA<MNPuzzleState, slideDir>
 	std::vector<slideDir> path;
 	while(status == 0) {
 		solver_counter = (solver_counter + 1) % num_solvers;
-		status = solvers[solver_counter]->move_one_step(mnp, goal, path);
+		status = solvers[solver_counter]->StepAlgorithm(path);
 	}
 
 	return solver_counter;
@@ -461,7 +583,7 @@ double ind_batch_puzzles(std::vector<GeneralIDA<MNPuzzleState, slideDir> *> solv
 			total_checked += solvers[j]->GetNodesChecked();
 			total_prob_nodes_checked += solvers[j]->GetNodesChecked();
 
-			total_generated += solvers[j]->GetNodesGenerated();
+			total_generated += solvers[j]->GetNodesTouched();
 			total_expanded += solvers[j]->GetNodesExpanded();
 		}
 		total_cost += solvers[solved_by]->GetPathCost();
@@ -478,9 +600,9 @@ double ind_batch_puzzles(std::vector<GeneralIDA<MNPuzzleState, slideDir> *> solv
 			if(info.size() == puzzles.size()) {
 				printf(" %.2f %.2f", info[i].first/ total_prob_nodes_checked, solvers[solved_by]->GetPathCost() / info[i].second);
 			}
-			std::vector<double> iter = solvers[solved_by]->Get_Checked_Iters();
+			std::vector<unsigned long long> iter = solvers[solved_by]->Get_Checked_Iters();
 			for(unsigned j = 0; j < iter.size(); j++) {
-				printf("\t%.0f", iter[j]);
+				printf("\t%lld", iter[j]);
 			}
 			printf("\n");
 		}
@@ -636,10 +758,18 @@ void random_ind_puzzles(std::vector<GeneralIDA<MNPuzzleState, slideDir> *> solve
 	}
 }
 
-unsigned rbfs_ind_approx (unsigned start_w_index, unsigned end_w_index, unsigned start_size, unsigned end_size, unsigned num){
-	std::ifstream ifs("../../apps/dynamicsearch/input/rbfs_costs");
-	unsigned puzzle_num = 100;
-	unsigned num_weights = 24;
+unsigned best_of_combo(std::vector<unsigned> &combo, double **nodes, unsigned problem_num) {
+	unsigned best_index = 0;
+	for(unsigned i = 0; i < combo.size(); i++) {
+		if(nodes[combo[i]][problem_num] < nodes[combo[best_index]][problem_num]) { // of best needs updating
+			best_index = i;
+		}
+	}
+	return best_index;
+}
+
+int read_in_approx_info_file(const char *filename, double **container, unsigned num_weights, unsigned puzzle_num){
+	std::ifstream ifs(filename);
 
 	if(ifs.fail()) {
 		assert(false);
@@ -648,59 +778,86 @@ unsigned rbfs_ind_approx (unsigned start_w_index, unsigned end_w_index, unsigned
 
 	std::string s, temp;
 	std::vector<std::string> tokens;
-
-	double nodes[num_weights][puzzle_num];
-	double total_nodes[num_weights];
-	double costs[num_weights][puzzle_num];
 	unsigned count = 0;
-
-	for(unsigned i = 0; i < num_weights; i++) {
-		total_nodes[i] = 0.0;
-	}
-
 	while(!ifs.eof() && count < puzzle_num) {
 		getline(ifs, s);
 
 		tokens.clear();
 		tokens = split(s, '\t');
 
-		if(tokens.size() != num_weights)
+		if(tokens.size() < num_weights)
 			continue;
 
 		for(unsigned i = 0; i < tokens.size(); i++) {
-			costs[i][count] = atof(tokens[i].c_str());
+			container[i][count] = atof(tokens[i].c_str());
 		}
 		count++;
 	}
 	assert(count == puzzle_num);
 	ifs.close();
 
-	std::ifstream ifs2("../../apps/dynamicsearch/input/rbfs_nodes");
+	return 0;
+}
 
-	if(ifs2.fail()) {
-		assert(false);
+void get_rand_combo(std::vector<unsigned> &combo, unsigned start_w_index, unsigned end_w_index, unsigned size) {
+	std::vector<unsigned> solver_index;
+	solver_index.clear();
+	combo.clear();
+
+	// initialize solver_index
+	for(unsigned i = start_w_index; i <= end_w_index; i++) {
+		solver_index.push_back(i);
+	}
+
+	// construct combo
+	for(unsigned i = 0; i < size; i++) {
+		int r = rand();
+		int index = r % solver_index.size();
+		combo.push_back(solver_index[index]);
+
+		solver_index[index] = solver_index.back();
+		solver_index.pop_back();
+	}
+}
+
+unsigned ind_approx (const char *nodes_file, const char *cost_file, unsigned num_weights, unsigned puzzle_num, unsigned start_w_index, unsigned end_w_index, unsigned start_size, unsigned end_size, unsigned num, bool print_all_stats){
+
+	double **nodes;
+	double **costs;
+
+	double all_bests[end_size - start_size + 1][3];
+	double all_worsts[end_size - start_size + 1][3];
+	double all_ratios[end_size - start_size + 1][2];
+	double all_avs[end_size - start_size + 1][4];
+
+	nodes = new double *[num_weights];
+	costs = new double *[num_weights];
+	for(unsigned i = 0; i < num_weights; i++) {
+		nodes[i] = new double[puzzle_num];
+		costs[i] = new double[puzzle_num];
+	}
+
+	double total_nodes[num_weights];
+	unsigned count = 0;
+
+	// get info
+	if(read_in_approx_info_file(cost_file, costs, num_weights, puzzle_num) || read_in_approx_info_file(nodes_file, nodes, num_weights, puzzle_num)) {
+		delete nodes;
+		delete costs;
 		return 1;
 	}
-	count = 0;
 
-	while(!ifs2.eof() && count < puzzle_num) {
-		getline(ifs2, s);
-		tokens.clear();
-		tokens = split(s, '\t');
-
-		if(tokens.size() != num_weights)
-			continue;
-
-		for(unsigned i = 0; i < tokens.size(); i++) {
-			nodes[i][count] = atof(tokens[i].c_str());
-			total_nodes[i] += nodes[i][count];
-		}
-		count++;
+	for(unsigned i = 0; i < num_weights; i++) {
+		total_nodes[i] = 0.0;
 	}
-	assert(count == puzzle_num);
-	ifs2.close();
 
-	std::vector<unsigned> solver_index;
+	// calculate total nodes
+	for(unsigned i = 0; i < puzzle_num; i++) {
+		for(unsigned j = 0; j < num_weights; j++) {
+			total_nodes[j] += nodes[j][i];
+		}
+	}
+
 	std::vector<unsigned> combo;
 	std::map<std::string, std::string> combo_map;
 
@@ -713,6 +870,7 @@ unsigned rbfs_ind_approx (unsigned start_w_index, unsigned end_w_index, unsigned
 
 	unsigned best_index = 0;
 
+	unsigned size_count = 0;
 	// do each desired size
 	for(unsigned size = start_size; size <= end_size; size++) {
 		count = 0; // number of problems
@@ -724,23 +882,7 @@ unsigned rbfs_ind_approx (unsigned start_w_index, unsigned end_w_index, unsigned
 		// for total per size
 		while(count < num) {
 
-			solver_index.clear();
-			combo.clear();
-
-			// initialize solver_index
-			for(unsigned i = start_w_index; i <= end_w_index; i++) {
-				solver_index.push_back(i);
-			}
-
-			// get  combo
-			for(unsigned i = 0; i < size; i++) {
-				int r = rand();
-				int index = r % solver_index.size();
-				combo.push_back(solver_index[index]);
-
-				solver_index[index] = solver_index.back();
-				solver_index.pop_back();
-			}
+			get_rand_combo(combo, start_w_index, end_w_index, size);
 
 			std::sort(combo.begin(), combo.end());
 			std::string combo_key = "";
@@ -759,11 +901,15 @@ unsigned rbfs_ind_approx (unsigned start_w_index, unsigned end_w_index, unsigned
 
 			best_nodes = 0.0;
 			av_weight = 0.0;
+
+			for(unsigned i = 0; i < size; i++) {
+				if(print_all_stats)
+					printf("%d\t", combo[i] + 2);
+				av_weight += combo[i] + 2;
+			}
+
 			// find best_nodes and print combo
 			for(unsigned i = 0; i < size; i++) {
-				//printf("%d\t", combo[i] + 2);
-				av_weight += combo[i] + 2;
-
 				if(best_nodes == 0.0 || total_nodes[combo[i]] < best_nodes)
 					best_nodes = total_nodes[combo[i]];
 			}
@@ -775,13 +921,10 @@ unsigned rbfs_ind_approx (unsigned start_w_index, unsigned end_w_index, unsigned
 			// iterate through all problems
 			for(unsigned i = 0; i < puzzle_num; i++) {
 				current_nodes = 0.0;
-				for(unsigned j = 0; j < size; j++) { // iterate through weights in the combo
-					if(j  == 0 || nodes[combo[j]][i] < current_nodes) { // of best needs updating
-						best_index = j;
-						current_nodes = nodes[combo[j]][i];
-						current_cost = costs[combo[j]][i];
-					}
-				}
+				best_index = best_of_combo(combo, nodes, i);
+				current_nodes = nodes[combo[best_index]][i];
+				current_cost = costs[combo[best_index]][i];
+
 				assert(current_nodes > 0);
 				// gets number of nodes expanded
 				problem_nodes = (current_nodes - 1.0)*size + best_index + 1.0;
@@ -791,7 +934,8 @@ unsigned rbfs_ind_approx (unsigned start_w_index, unsigned end_w_index, unsigned
 
 			best_ratio = total_combo_nodes / best_nodes;
 
-			//printf("\t\t%.0f\t%.0f\t%.2f\t%.4f\n", total_combo_cost, total_combo_nodes, av_weight, best_ratio);
+			if(print_all_stats)
+				printf("\t\t%.0f\t%.0f\t%.2f\t%.4f\n", total_combo_cost, total_combo_nodes, av_weight, best_ratio);
 
 			node_size_av += total_combo_nodes;
 			cost_size_av += total_combo_cost;
@@ -834,12 +978,42 @@ unsigned rbfs_ind_approx (unsigned start_w_index, unsigned end_w_index, unsigned
 		weight_size_av /= num;
 		ratio_size_av /= num;
 
+		all_bests[size_count][0] = cost_size_best; all_bests[size_count][1] = node_size_best; all_bests[size_count][2]= weight_size_best;
+		all_worsts[size_count][0] = cost_size_worst; all_worsts[size_count][1] = node_size_worst; all_worsts[size_count][2] = weight_size_worst;
+		all_ratios[size_count][0] = ratio_size_best; all_ratios[size_count][1] = ratio_size_worst;
+		all_avs[size_count][0] = cost_size_av; all_avs[size_count][1] = node_size_av; all_avs[size_count][2] = weight_size_av; all_avs[size_count][3] = ratio_size_av;
+		/*
 		printf("Min: %.0f\t%.0f\t%.2f\n",cost_size_best, node_size_best, weight_size_best);
 		printf("Max: %.0f\t%.0f\t%.2f\n",cost_size_worst, node_size_worst, weight_size_worst);
 		printf("Ratio: %.4f\t%.4f\n", ratio_size_best, ratio_size_worst);
 		printf("Av: %.0f\t%.0f\t%.2f\t%.4f\n", cost_size_av, node_size_av, weight_size_av, ratio_size_av);
-		printf("\n");
+		printf("\n");*/
+
+		size_count++;
 	}
+
+
+	for(unsigned i = 0; i < size_count; i++) {
+		printf("%.0f\t%.0f\t%.2f\n", all_bests[i][0], all_bests[i][1], all_bests[i][2]);
+	}
+	printf("\n");
+	for(unsigned i = 0; i < size_count; i++) {
+		printf("%.0f\t%.0f\t%.2f\n", all_worsts[i][0], all_worsts[i][1], all_worsts[i][2]);
+	}
+	printf("\n");
+
+	for(unsigned i = 0; i < size_count; i++) {
+		printf("%.0f\t%.0f\t%.2f\t%.4f\n", all_avs[i][0], all_avs[i][1], all_avs[i][2], all_avs[i][3]);
+	}
+	printf("\n");
+
+	for(unsigned i = 0; i < size_count; i++) {
+		printf("%.4f\t%.4f\n", all_ratios[i][0], all_ratios[i][1]);
+	}
+	printf("\n");
+
+	delete nodes;
+	delete costs;
 	return 0;
 }
 
@@ -1024,4 +1198,86 @@ void get_6x3_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num) {
 	if(MNPuzzle::read_in_mn_puzzles("../../apps/dynamicsearch/input/6x3_1000", false, 6, 3, num, puzzles)) {
 		std::cerr << "File Reading Failed\n";
 	}
+}
+
+void get_node_buckets(std::vector<double> &node_vec, double smallest, unsigned num_buckets, double bucket_size) {
+	printf("Num of Buckets: %d\n", num_buckets);
+	printf("Bucket Size: %.2f\n", bucket_size);
+
+	unsigned counter[num_buckets];
+	unsigned curr_bucket = 0;
+	for(unsigned i = 0; i < num_buckets; i++) {
+		counter[i] = 0;
+	}
+
+	for(unsigned i = 0; i < node_vec.size(); i++) {
+		curr_bucket = (unsigned)((node_vec[i] - smallest)/bucket_size);
+		counter[curr_bucket]++;
+	}
+
+	for(unsigned i = 0; i < num_buckets; i++) {
+		printf("%d\t%.0f\t%d\n", i, smallest + bucket_size*(i + 1), counter[i]);
+	}
+}
+int get_distribution(const char *filename, double _num_buckets, double _bucket_size) {
+	std::ifstream ifs(filename);
+
+	if(ifs.fail()) {
+		return 1;
+	}
+
+	std::string s, temp;
+	std::vector<std::string> tokens;
+	std::vector<double> node_vec;
+
+	double smallest = 0;
+	double biggest = 0;
+
+	unsigned count = 0;
+	while(!ifs.eof()) {
+		getline(ifs, s);
+		//std::cout << s << "\n";
+		tokens.resize(0);
+
+		tokens = split(s, '\t');
+
+		if(tokens.size() < 2)
+			continue;
+
+		double nodes = atof(tokens[1].c_str());
+		//std::cout << nodes << "\n";
+		if(count == 0) {
+			biggest = nodes;
+			smallest = nodes;
+		}
+		else if(nodes > biggest) {
+			biggest = nodes;
+		}
+		else if(nodes < smallest) {
+			smallest = nodes;
+		}
+		node_vec.push_back(nodes);
+		count++;
+	}
+
+	ifs.close();
+	printf("Smallest: %.0f\n", smallest);
+	printf("Biggest: %.0f\n", biggest);
+
+	double num_buckets = 0;
+	double bucket_size = 0;
+	if(_bucket_size > 0) {
+		bucket_size = ceil(_bucket_size);
+		num_buckets = ceil((biggest - smallest)/ bucket_size);
+
+		get_node_buckets(node_vec, smallest, (unsigned)num_buckets, (unsigned)bucket_size);
+
+	}
+	printf("\n\n\n");
+	if(_num_buckets > 0) {
+		num_buckets = ceil(_num_buckets);
+		bucket_size = ceil((biggest - smallest)/ num_buckets);
+		get_node_buckets(node_vec, smallest, (unsigned)num_buckets, bucket_size);
+	}
+	return 0;
 }

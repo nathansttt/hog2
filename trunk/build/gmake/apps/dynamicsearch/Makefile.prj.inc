@@ -62,3 +62,5 @@ SRC_CPP = \
 	apps/dynamicsearch/dynsearch.cpp \
 	apps/dynamicsearch/GeneralIDA.cpp \
 	apps/dynamicsearch/experiment_basics.cpp \
+	apps/dynamicsearch/GeneralRBFS.cpp \
+	apps/dynamicsearch/GeneralBeamSearch.cpp
