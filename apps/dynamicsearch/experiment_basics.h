@@ -2,6 +2,7 @@
 #define EXP_BASICS
 
 #include <vector>
+#include <cmath>
 #include <map>
 #include <algorithm>
 #include <sstream>
@@ -34,7 +35,7 @@ double ind_batch_puzzles(std::vector<GeneralIDA<MNPuzzleState, slideDir> *> solv
 
 void random_ind_puzzles(std::vector<GeneralIDA<MNPuzzleState, slideDir> *> solvers, std::vector<double> &solver_info, std::vector<MNPuzzleState> &puzzles, std::vector<Puzzle_Info> &info, std::vector<slideDir> &op_order, unsigned size, unsigned num);
 
-unsigned rbfs_ind_approx(unsigned start_w_index, unsigned end_w_index, unsigned start_size, unsigned end_size, unsigned num);
+unsigned ind_approx(const char *nodes_file, const char *cost_file, unsigned num_weights, unsigned puzzle_num, unsigned start_w_index, unsigned end_w_index, unsigned start_size, unsigned end_size, unsigned num, bool print_all_stats);
 
 void calculate_earned();
 
@@ -46,4 +47,7 @@ void get_4x5_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_5x4_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_3x6_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_6x3_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
+
+int output_exp_info(const char *filename, int num_probs, int num_solvers, const char *nodes_filename, const char *costs_filename);
+int get_distribution(const char *filename, double num_buckets, double bucket_size);
 #endif

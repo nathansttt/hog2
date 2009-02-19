@@ -1,4 +1,4 @@
-#include "GeneralIDA.h"
+#include "GeneralBeamSearch.h"
 
 #include <math.h>
 #include "FPUtil.h"

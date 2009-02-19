@@ -4,6 +4,7 @@
 #include <iostream>
 #include "SearchEnvironment.h"
 #include "FPUtil.h"
+#include "GenericStepAlgorithm.h"
 
 /*
 Class for a general inheritable IDA star like algorithm. The
@@ -22,14 +23,13 @@ Note, the search can be modified in may ways. A bound can be
 placed on the number of nodes expanded, generated, and checked.
 As well, it is possible to force the search to expand the entire
 iteration even after having found a solution.
-
-Also have step by step version of IDA*. In this version, IDA* can be
-asked to progress one node test (whether to expand or not) at a time.
-This algorithm is similarly general and can be over ridden.
 */
 template <class state, class action>
-class GeneralIDA {
+class GeneralIDA : public GenericStepAlgorithm<state, action, SearchEnvironment<state, action> > {
 public:
+	/**
+	General constructor. Sets all values as some defaults
+	**/
 	GeneralIDA() {
 		bound_expanded = false;
 		bound_generated = false;
@@ -38,10 +38,15 @@ public:
 		step_by_step_active = false;
 		h_weight = 1.0;
 		g_weight = 1.0;
+		reverse_order = false;
 	}
 
-	GeneralIDA(double _g_weight, double _h_weight, bool _bound_expanded, bool _bound_generated, bool _bound_checked,
-	           bool _expand_full_iter) {
+	/**
+	Constructor by which all values are set. Specifically the weights, bounds on the number of
+	nodes to expand, generate, and check, and whether or not to expand the full iteration.
+	**/
+	GeneralIDA(double _g_weight, double _h_weight, bool _bound_expanded, bool _bound_generated,
+	           bool _bound_checked, bool _expand_full_iter) {
 		h_weight = _h_weight;
 		g_weight = _g_weight;
 		step_by_step_active = false;
@@ -49,6 +54,8 @@ public:
 		bound_generated = _bound_generated;
 		bound_checked = _bound_checked;
 		expand_full_iter = _expand_full_iter;
+
+		reverse_order = false;
 	}
 
 	virtual ~GeneralIDA() {}
@@ -60,29 +67,35 @@ public:
 	virtual int GetPath(SearchEnvironment<state, action> *env, state from, state to,
 	             std::vector<action> &thePath);
 
+	virtual int GetPath(SearchEnvironment<state, action> *env, state from, state to,
+	                    std::vector<state> &thePath) {return -1;}
+
+	virtual const char * GetName(){return "Basic Weighted IDA*";}
+	virtual void LogFinalStats(StatCollection *stats){}
+
 	/** Get the number of nodes expanded (a node is expanded if the goal test is called) **/
-	double GetNodesExpanded() { return nodesExpanded + nodes_ex_iter; }
+	virtual unsigned long long GetNodesExpanded() { return nodesExpanded + nodes_ex_iter; }
 
 	/** Get the number of nodes generated (if the successors or successor actions
 	 of a node are successors, these are considered generated nodes)**/
-	double GetNodesGenerated() { return nodesGenerated + nodes_gen_iter; }
+	virtual unsigned long long GetNodesTouched() { return nodesGenerated + nodes_gen_iter; }
 
 	/** Get the number of nodes checked to be generated (a node is checked if search_node
 	 is called on it, in which case to_expand is necessarily called on it except in a few
 	 situations regarding expanding an entire iteration) **/
-	double GetNodesChecked() {return nodesChecked + nodes_check_iter; }
+	virtual unsigned long long GetNodesChecked() {return nodesChecked + nodes_check_iter; }
 
 	/** returns the path cost of the last path found **/
 	double GetPathCost() {return best_path_cost; }
 
 	/** Sets a limit on the number of nodes to expand - input 0 for no limit **/
-	void SetExpandedLimit(double limit);
+	virtual bool SetExpandedLimit(unsigned long long limit);
 
 	/** Sets a limit on the number of nodes to generate - input 0 for no limit **/
-	void SetGeneratedLimit(double limit);
+	virtual bool SetTouchedLimit(unsigned long long limit);
 
 	/** Sets a limit on the number of nodes to check - input 0 for no limit **/
-	void SetCheckedLimit(double limit);
+	virtual bool SetCheckedLimit(unsigned long long limit);
 
 	/** Sets whether the entire iteration is to be expanded or not **/
 	void SetExpandFullIteration(bool ex) {expand_full_iter = ex;}
@@ -90,8 +103,7 @@ public:
 	/** Initializes the search to perform in a step by step manner for the given
 	 environment, starting at the given initial state and the given goal
 	 **/
-	void initialize_step_by_step(SearchEnvironment<state, action> *env,
-	                             state from, state to, bool _reverse_order);
+	bool Initialize(SearchEnvironment<state, action> *env, state from, state to);
 
 	unsigned GetNumIters() {return iter_checked.size();}
 	/**
@@ -106,29 +118,50 @@ public:
 	Returns 4 if ran out of nodes to check
 	Returns -1 if a solution is found but the whole iteration has not finished searching.
 	**/
-	int move_one_step(SearchEnvironment<state, action> *env, state &goal, std::vector<action> &thePath);
+	int StepAlgorithm(std::vector<action> &thePath);
+	int StepAlgorithm(std::vector<state> &thePath) {return -1;}
 
-	std::vector<double> Get_Checked_Iters() {return iter_checked;}
-	std::vector<double> Get_Expanded_Iters() {return iter_expanded;}
-	std::vector<double> Get_Generated_Iters() {return iter_generated;}
+	/**
+	Returns a vector with the number of nodes checked, expanded, and generated at each iteration.
+	**/
+	std::vector<unsigned long long> Get_Checked_Iters() {return iter_checked;}
+	std::vector<unsigned long long> Get_Expanded_Iters() {return iter_expanded;}
+	std::vector<unsigned long long> Get_Generated_Iters() {return iter_generated;}
 
+	/**
+	Changes the weights.
+	**/
 	int Change_Weights(double h_g,double h_w) {
-		if(!fless (h_g, 0.0) && !fless(h_w, h_g)) {
+		if(!fless (h_g, 0.0) && !fless(h_w, 0.0)) {
 			h_weight = h_w;
 			g_weight = h_g;
-			return 0;
+			return 1;
 		}
-		return 1;
+		return 0;
 	}
 
-	virtual std::vector<double> Get_Extra_Info() {std::vector<double> dummy; return dummy; }
-
+	/**
+	Returns the value of the applicable weight
+	**/
 	double Get_H_Weight() { return h_weight;}
 	double Get_G_Weight() { return g_weight;}
 
+	/**
+	Whether or not the step by step version of the algorithm is currently active.
+	**/
 	bool Is_Step_Active() {return step_by_step_active;}
 
+	/**
+	Cleans up after the Step by step version of the algorithm.
+	**/
 	virtual void End_Step_By_Step();
+
+	/**
+	Reverses the order of the operators during the step by step version of the algorithm.
+	By default, the step by step will use the opposite ordering of the actions given by
+	the domain. The inputted value should be set to true in order to correct for this.
+	**/
+	void SetReverseOrder(bool setting) {reverse_order = setting;}
 
 protected:
 	/**
@@ -139,9 +172,9 @@ protected:
 	Returns 0 if no solution is found in subtree, 1 if a solution is
 	found, and a number larger than 1 for other statuses
 	ie.
-	2 for ran out of nodes to expand
-	3 for ran out of nodes to generate
-	4 for rant out of nodes to check
+	-2 for ran out of nodes to expand
+	-3 for ran out of nodes to generate
+	-4 for rant out of nodes to check
 	**/
 	virtual int search_node(SearchEnvironment<state, action> *env, state &currState, state &goal, action forbiddenAction, double edge_cost);
 
@@ -166,9 +199,9 @@ protected:
 	// initializes bounds
 	virtual void update_bounds();
 
-	double nodesExpanded, nodesGenerated, nodesChecked;
-	double nodes_ex_iter, nodes_gen_iter, nodes_check_iter;
-	double expanded_limit, generated_limit, checked_limit;
+	unsigned long long nodesExpanded, nodesGenerated, nodesChecked;
+	unsigned long long nodes_ex_iter, nodes_gen_iter, nodes_check_iter;
+	unsigned long long expanded_limit, generated_limit, checked_limit;
 
 	bool bound_expanded;
 	bool bound_generated;
@@ -187,14 +220,16 @@ protected:
 	state active_state;
 	bool step_by_step_active;
 
-	std::vector<double> iter_checked;
-	std::vector<double> iter_generated;
-	std::vector<double> iter_expanded;
+	std::vector<unsigned long long> iter_checked;
+	std::vector<unsigned long long> iter_generated;
+	std::vector<unsigned long long> iter_expanded;
 
 	double h_weight;
 	double g_weight;
 
 	bool reverse_order;
+	SearchEnvironment<state, action> *my_env;
+	state my_goal;
 };
 
 template <class state, class action>
@@ -269,7 +304,6 @@ int GeneralIDA<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	thePath = current_best_path;
 
 	return status;
-
 }
 
 template <class state, class action>
@@ -277,11 +311,11 @@ int GeneralIDA<state, action>::search_node(SearchEnvironment<state, action> *env
 {
 	// check if node bounds are applicable
 	if(bound_expanded && nodesExpanded + nodes_ex_iter >= expanded_limit)
-		return 2;
+		return -2;
 	if(bound_generated && nodesGenerated + nodes_gen_iter >= generated_limit)
-		return 3;
+		return -3;
 	if(bound_checked && nodesChecked + nodes_check_iter >= checked_limit)
-		return 4;
+		return -4;
 
 	double h = env->HCost(currState, goal);
 	double g = g_stack.back() + edge_cost;
@@ -360,36 +394,36 @@ int GeneralIDA<state, action>::search_node(SearchEnvironment<state, action> *env
 }
 
 template <class state, class action>
-void GeneralIDA<state, action>::SetExpandedLimit(double limit) {
+bool GeneralIDA<state, action>::SetExpandedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_expanded = true; expanded_limit = limit;
 	}
 	else {
 		bound_expanded = false;
 	}
-
+	return true;
 }
 
 template <class state, class action>
-void GeneralIDA<state, action>::SetGeneratedLimit(double limit) {
+bool GeneralIDA<state, action>::SetTouchedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_generated = true; generated_limit = limit;
 	}
 	else {
 		bound_generated = false;
 	}
-
+	return true;
 }
 
 template <class state, class action>
-void GeneralIDA<state, action>::SetCheckedLimit(double limit) {
+bool GeneralIDA<state, action>::SetCheckedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_checked = true; checked_limit = limit;
 	}
 	else {
 		bound_checked = false;
 	}
-
+	return true;
 }
 
 template <class state, class action>
@@ -407,9 +441,11 @@ bool GeneralIDA<state, action>::to_expand(double g, double h) {
 }
 
 template <class state, class action>
-void GeneralIDA<state, action>::initialize_step_by_step(SearchEnvironment<state, action> *env, state from, state to, bool _reverse_order) {
+bool GeneralIDA<state, action>::Initialize(SearchEnvironment<state, action> *env, state from, state to) {
 	step_by_step_active = true;
 
+	my_env = env;
+	my_goal = to;
 	active_state = from;
 
 	inversion_stack.resize(0);
@@ -422,8 +458,6 @@ void GeneralIDA<state, action>::initialize_step_by_step(SearchEnvironment<state,
 
 	nodes_gen_iter += act.size();
 	nodes_ex_iter += 1; // since opening expansion done here
-
-	reverse_order = _reverse_order;
 
 	if (reverse_order) {
 		std::vector<action> stack;
@@ -438,12 +472,14 @@ void GeneralIDA<state, action>::initialize_step_by_step(SearchEnvironment<state,
 	else {
 		depth_first_stack.push_back(act);
 	}
+
+	return true;
 }
 
 template <class state, class action>
-int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *env, state &goal, std::vector<action> &thePath) {
+int GeneralIDA<state, action>::StepAlgorithm(std::vector<action> &thePath) {
 	if(!step_by_step_active) // if can't use step by step at this time
-		return 5;
+		return -1;
 
 	// check if node bounds are applicable
 	if(bound_expanded && nodesExpanded + nodes_ex_iter >= expanded_limit) {
@@ -452,7 +488,7 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 		if(sol_found) {
 			thePath = current_best_path;
 		}
-		return 2;
+		return -2;
 	}
 	if(bound_generated && nodesGenerated + nodes_gen_iter >= generated_limit) {
 		update_node_counts();
@@ -460,7 +496,7 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 		if(sol_found) {
 			thePath = current_best_path;
 		}
-		return 3;
+		return -3;
 	}
 	if(bound_checked && nodesChecked + nodes_check_iter >= checked_limit) {
 		update_node_counts();
@@ -468,7 +504,7 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 		if(sol_found) {
 			thePath = current_best_path;
 		}
-		return 4;
+		return -4;
 	}
 
 	// time to start new iteration
@@ -485,7 +521,7 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 
 		// otherwise are starting new iteration
 		std::vector<action> act;
-		env->GetActions(active_state, act);
+		my_env->GetActions(active_state, act);
 		nodes_gen_iter += act.size();
 
 		if (reverse_order) {
@@ -515,12 +551,12 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 	active_path.push_back(to_apply);
 
 	// get new state info
-	double edgeCost = env->GCost(active_state, to_apply);
+	double edgeCost = my_env->GCost(active_state, to_apply);
 	double g = edgeCost + g_stack.back();
 
-	env->ApplyAction(active_state, to_apply);
+	my_env->ApplyAction(active_state, to_apply);
 
-	double h = env->HCost(active_state, goal);
+	double h = my_env->HCost(active_state, my_goal);
 
 	nodes_check_iter++;
 
@@ -530,7 +566,7 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 		nodes_ex_iter++;
 
 		// test if node is a goal - assumes heuristic is admissible
-		if (fequal(h, 0.0) &&  env->GoalTest(active_state, goal)) {
+		if (fequal(h, 0.0) &&  my_env->GoalTest(active_state, my_goal)) {
 			current_best_path = active_path;
 			best_path_cost = g;
 			sol_found = true;
@@ -549,14 +585,14 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 			(depth_first_stack.back()).pop_back();
 
 			// undo last action
-			env->InvertAction(to_apply);
-			env->ApplyAction(active_state, to_apply);
+			my_env->InvertAction(to_apply);
+			my_env->ApplyAction(active_state, to_apply);
 		}
 		else {
 
 			// get applicable actions
 			std::vector<action> new_actions;
-			env->GetActions(active_state, new_actions);
+			my_env->GetActions(active_state, new_actions);
 
 			nodes_gen_iter += new_actions.size();
 
@@ -579,7 +615,7 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 			g_stack.push_back(g);
 			h_stack.push_back(h);
 
-			env->InvertAction(to_apply);
+			my_env->InvertAction(to_apply);
 			inversion_stack.push_back(to_apply);
 
 		}
@@ -590,8 +626,8 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 		(depth_first_stack.back()).pop_back();
 
 		// undo last action
-		env->InvertAction(to_apply);
-		env->ApplyAction(active_state, to_apply);
+		my_env->InvertAction(to_apply);
+		my_env->ApplyAction(active_state, to_apply);
 	}
 
 	// eliminate returning to previous state
@@ -599,7 +635,8 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 	   (depth_first_stack.back()).back() == inversion_stack.back()) {
 		   (depth_first_stack.back()).pop_back();
 	   }
-		// if is not last first level of stack and top level is empty
+		// if is not last first level of stack and top level is empty or no solution
+	// can be found at the current depth with a better cost than has been found thus far
 	while(depth_first_stack.size() > 1 &&
 	      ((depth_first_stack.back()).size() == 0) ||
 	      (expand_full_iter && sol_found &&
@@ -613,7 +650,7 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 		h_stack.pop_back();
 
 		// undo action
-		env->ApplyAction(active_state, inversion_stack.back());
+		my_env->ApplyAction(active_state, inversion_stack.back());
 		inversion_stack.pop_back();
 
 		// eliminate returning to previous state
@@ -627,8 +664,8 @@ int GeneralIDA<state, action>::move_one_step(SearchEnvironment<state, action> *e
 	if(depth_first_stack.size() == 1 && (depth_first_stack.back()).size() == 0) {
 		depth_first_stack.pop_back();
 	}
-	if(sol_found)
-		return -1;
+	if(sol_found) // have not expanded entire iteration, but have found a solution
+		return 2;
 	return 0;
 }
 
