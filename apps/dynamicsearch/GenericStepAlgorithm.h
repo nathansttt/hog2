@@ -8,6 +8,12 @@ as to expand a single node.*/
 #include "SearchEnvironment.h"
 #include "FPUtil.h"
 #include "StatCollection.h"
+#define STEP_NOT_ACTIVE -1
+#define EXPAND_MET -2
+#define TOUCHED_MET -3
+#define CHECKED_MET -4
+#define NO_SOLUTION -5
+
 
 template <class state, class action, class environment>
 class GenericStepAlgorithm {
@@ -99,5 +105,7 @@ public:
 	virtual int StepAlgorithm(std::vector<state> &path) = 0;
 
 	virtual bool Is_Step_Active() = 0;
+
+	virtual double GetPathCost() = 0;
 };
 #endif

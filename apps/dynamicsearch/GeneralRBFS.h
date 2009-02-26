@@ -362,15 +362,15 @@ int GeneralRBFS<state, action>::search_node(SearchEnvironment<state, action> *en
 	// check if node bounds are applicable
 	if(bound_expanded && nodesExpanded + nodes_ex_iter >= expanded_limit) {
 		child_bound = state_cost;
-		return -2;
+		return EXPAND_MET;
 	}
 	if(bound_generated && nodesGenerated + nodes_gen_iter >= generated_limit) {
 		child_bound = state_cost;
-		return -3;
+		return TOUCHED_MET;
 	}
 	if(bound_checked && nodesChecked + nodes_check_iter >= checked_limit){
 		child_bound = state_cost;
-		return -4;
+		return CHECKED_MET;
 	}
 
 	nodes_ex_iter++; // a new node expanded

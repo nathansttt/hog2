@@ -311,11 +311,11 @@ int GeneralIDA<state, action>::search_node(SearchEnvironment<state, action> *env
 {
 	// check if node bounds are applicable
 	if(bound_expanded && nodesExpanded + nodes_ex_iter >= expanded_limit)
-		return -2;
+		return EXPAND_MET;
 	if(bound_generated && nodesGenerated + nodes_gen_iter >= generated_limit)
-		return -3;
+		return TOUCHED_MET;
 	if(bound_checked && nodesChecked + nodes_check_iter >= checked_limit)
-		return -4;
+		return CHECKED_MET;
 
 	double h = env->HCost(currState, goal);
 	double g = g_stack.back() + edge_cost;
@@ -479,7 +479,7 @@ bool GeneralIDA<state, action>::Initialize(SearchEnvironment<state, action> *env
 template <class state, class action>
 int GeneralIDA<state, action>::StepAlgorithm(std::vector<action> &thePath) {
 	if(!step_by_step_active) // if can't use step by step at this time
-		return -1;
+		return STEP_NOT_ACTIVE;
 
 	// check if node bounds are applicable
 	if(bound_expanded && nodesExpanded + nodes_ex_iter >= expanded_limit) {
@@ -488,7 +488,7 @@ int GeneralIDA<state, action>::StepAlgorithm(std::vector<action> &thePath) {
 		if(sol_found) {
 			thePath = current_best_path;
 		}
-		return -2;
+		return EXPAND_MET;
 	}
 	if(bound_generated && nodesGenerated + nodes_gen_iter >= generated_limit) {
 		update_node_counts();
@@ -496,7 +496,7 @@ int GeneralIDA<state, action>::StepAlgorithm(std::vector<action> &thePath) {
 		if(sol_found) {
 			thePath = current_best_path;
 		}
-		return -3;
+		return TOUCHED_MET;
 	}
 	if(bound_checked && nodesChecked + nodes_check_iter >= checked_limit) {
 		update_node_counts();
@@ -504,7 +504,7 @@ int GeneralIDA<state, action>::StepAlgorithm(std::vector<action> &thePath) {
 		if(sol_found) {
 			thePath = current_best_path;
 		}
-		return -4;
+		return CHECKED_MET;
 	}
 
 	// time to start new iteration
