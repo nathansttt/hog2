@@ -7,6 +7,7 @@
 #include "GeneralIDA.h"
 #include "GeneralRBFS.h"
 #include "GeneralBeamSearch.h"
+#include "GeneralBulb.h"
 #include "experiment_basics.h"
 #include "TestSearch.h"
 
@@ -114,6 +115,7 @@ int main(int argc, char** argv)
 	bs.print_beams();
 	bs.StepAlgorithm(state_path);
 	bs.print_beams();*/
+	/*
 	int status = 0;
 	while(status == 0) {
 		status = bs.StepAlgorithm(state_path);
@@ -121,13 +123,22 @@ int main(int argc, char** argv)
 	cout << state_path.size() << endl;
 	for(unsigned l = 0; l < state_path.size() ; l++) {
 		cout << state_path[l] << endl;
-	}
+	}*/
 
-	//bs.GetPath(&mnp, puzzles[num], goal, path);
+	GeneralBulb<MNPuzzleState, slideDir> bulb;
+	bulb.Change_Beam_Size(15);
+	bulb.Change_Memory_Limit(70000);
+	//bulb.SetExpandedLimit(30);
+	bulb.GetPath(&mnp, puzzles[num], goal, state_path);
+
+	cout << state_path.size() << endl;/*
+	for(unsigned l = 0; l < state_path.size() ; l++) {
+		cout << state_path[l] << endl;
+	}*/
 
 	//ida.Initialize(&mnp, puzzles[0], goal);
 	//cout << puzzles[0] << endl;
-	//ida.GetPath(&mnp, puzzles[0], goal, path);
+	//ida.GetPath(&mnp, puzzles[0], goal, path);'
 	/*
 	while(!ida.StepAlgorithm(path)) {
 

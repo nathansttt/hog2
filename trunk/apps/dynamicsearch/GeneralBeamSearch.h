@@ -5,44 +5,7 @@
 #include <algorithm>
 #include <ext/hash_map>
 #include <iostream>
-
-/**
-A class for beam node information. Each beam node contains information regarding
-the actual state, the various costs, the index of the parent in the beam in
-which the parent exists, and the hash key of the node
-**/
-template <class state>
-class BeamNode {
-public:
-	BeamNode() {
-		cost = -1.0;
-	}
-	BeamNode(state &curr, double gCost, double hCost, double fCost, unsigned parent, uint64_t key) {
-		my_state = curr;
-		h_value = hCost;
-		g_value = gCost;
-		cost = fCost;
-		my_key = key;
-		parent_index = parent;
-
-	}
-
-	state my_state;
-	double cost;
-	double h_value;
-	double g_value;
-	uint64_t my_key;
-	unsigned parent_index;
-
-	/**
-	Allows for comparison of BeamNodes for both sorting and merging BeamNode lists
-	**/
-	bool operator <(const BeamNode &second) const{
-		if(cost < second.cost || (cost == second.cost && g_value > second.g_value))
-		   return 1;
-		return 0;
-	}
-};
+#include "BeamNode.h"
 
 /**
 A class for performing regular beam search.
@@ -281,12 +244,12 @@ int GeneralBeamSearch<state, action>::StepAlgorithm(std::vector<state> &path) {
 
 	if(bound_expanded && nodes_expanded >= expanded_limit) {
 		step_by_step_active = false;
-		return -2;
+		return EXPAND_MET;
 	}
 
 	if(bound_touched && nodes_touched >= touched_limit) {
 		step_by_step_active = false;
-		return -3;
+		return TOUCHED_MET;
 	}
 
 	std::vector<BeamNode<state> > children_beam; // new beam for children
@@ -314,7 +277,7 @@ int GeneralBeamSearch<state, action>::StepAlgorithm(std::vector<state> &path) {
 
 		if(bound_checked && nodes_checked >= checked_limit) {
 			step_by_step_active = false;
-			return -4;
+			return CHECKED_MET;
 		}
 
 		double child_g = parent.g_value + my_env->GCost(parent.my_state, children[i]);
@@ -354,7 +317,7 @@ int GeneralBeamSearch<state, action>::StepAlgorithm(std::vector<state> &path) {
 
 		if(nodes_stored >= memory_limit) {
 			step_by_step_active = false;
-			return -5;
+			return NO_SOLUTION;
 		}
 	}
 	else { // beam already full or partially full, need to merge lists
