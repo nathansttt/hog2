@@ -74,15 +74,28 @@ public:
 	bool InvertAction(flipMove &a) { return true; } // applying the same action inverts it
 
 	OccupancyInterface<FlipSideState, flipMove> *GetOccupancyInfo() { return 0; }
+
+	double HCost(FlipSideState &state1){
+		printf("Single State HCost Failure: method not implemented for FlipSide\n");
+		exit(0); return -1.0;}
 	double HCost(FlipSideState &state1, FlipSideState &state2);
 	double GCost(FlipSideState &state1, FlipSideState &state2);
 	double GCost(FlipSideState &state1, flipMove &act) { return 1.0; }
 	bool GoalTest(FlipSideState &state, FlipSideState &goal);
+
+	bool GoalTest(FlipSideState &s){
+		printf("Single State Goal Test Failure: method not implemented for FlipSide\n");
+		exit(0); return false;}
+
 	uint64_t GetStateHash(FlipSideState &state);
 	uint64_t GetActionHash(flipMove act);
 	void OpenGLDraw(int window);
 	void OpenGLDraw(int window, FlipSideState &s);
 	void OpenGLDraw(int, FlipSideState &, flipMove &) { /* currently not drawing moves */ }
+
+	void StoreGoal(FlipSideState &s){}
+	void ClearGoal(){}
+	bool IsGoalStored(){return false;}
 private:
 		int width;
 };

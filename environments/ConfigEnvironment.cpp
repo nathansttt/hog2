@@ -14,6 +14,7 @@
 
 ConfigEnvironment::ConfigEnvironment()
 {
+	goal_stored = false;
 }
 
 ConfigEnvironment::~ConfigEnvironment()
@@ -42,7 +43,7 @@ void ConfigEnvironment::GetSuccessors(recVec &nodeID, std::vector<recVec> &neigh
 //		printf("4 They Cross!\n");
 //	else
 //		printf("4 No crossing here!\n");
-	
+
 	neighbors.resize(0);
 	neighbors.push_back(goal);
 	for (unsigned int x = 0; x < obstacles.size(); x++)
@@ -131,22 +132,22 @@ bool ConfigEnvironment::InvertAction(line2d &a)
 
 double ConfigEnvironment::HCost(recVec &node1, recVec &node2)
 {
-	return sqrt((node1.x-node2.x)*(node1.x-node2.x) + 
-				(node1.y-node2.y)*(node1.y-node2.y) + 
+	return sqrt((node1.x-node2.x)*(node1.x-node2.x) +
+				(node1.y-node2.y)*(node1.y-node2.y) +
 				(node1.z-node2.z)*(node1.z-node2.z));
 }
 
 double ConfigEnvironment::GCost(recVec &node1, recVec &node2)
 {
-	return sqrt((node1.x-node2.x)*(node1.x-node2.x) + 
-				(node1.y-node2.y)*(node1.y-node2.y) + 
+	return sqrt((node1.x-node2.x)*(node1.x-node2.x) +
+				(node1.y-node2.y)*(node1.y-node2.y) +
 				(node1.z-node2.z)*(node1.z-node2.z));
 }
 
 double ConfigEnvironment::GCost(recVec &node1, line2d &act)
 {
-	return sqrt((node1.x-act.end.x)*(node1.x-act.end.x) + 
-				(node1.y-act.end.y)*(node1.y-act.end.y) + 
+	return sqrt((node1.x-act.end.x)*(node1.x-act.end.x) +
+				(node1.y-act.end.y)*(node1.y-act.end.y) +
 				(node1.z-act.end.z)*(node1.z-act.end.z));
 }
 

@@ -98,11 +98,17 @@ public:
 	armRotations GetAction(armAngles &s1, armAngles &s2);
 	virtual void ApplyAction(armAngles &s, armRotations dir);
 	armAngles GetRandomState();
-	
+
 	virtual bool InvertAction(armRotations &a);
-	
+
 	void AddHeuristic(RoboticArmHeuristic *h) { heuristics.push_back(h); }
+
+	virtual double HCost(armAngles &node1){
+		printf("Single State HCost Failure: method not implemented for RoboticArm\n");
+		exit(0); return -1.0;}
+
 	virtual double HCost(armAngles &node1, armAngles &node2);
+
 	virtual double GCost(armAngles &node1, armAngles &node2) { return 1; }
 	virtual double GCost(armAngles &node1, armRotations &act) { return 1; }
 	bool GoalTest(armAngles &node, armAngles &goal);
@@ -114,11 +120,18 @@ public:
 	virtual void OpenGLDraw(int, armAngles &, armRotations &);
 	virtual void OpenGLDraw(int, armAngles &, armRotations &, GLfloat r, GLfloat g, GLfloat b);
 	virtual void OpenGLDraw(int, armAngles &l, GLfloat r, GLfloat g, GLfloat b);
-	
+
 	virtual void GetNextState(armAngles &currents, armRotations dir, armAngles &news);
 
 	bool LegalState(armAngles &a);
 	bool LegalArmConfig(armAngles &a);
+
+	void StoreGoal(armAngles &a){}
+	void ClearGoal(){}
+	bool IsGoalStored(){return false;}
+	virtual bool GoalTest(armAngles &s){
+		printf("Single State Goal Test Failure: method not implemented for RoboticArm\n");
+		exit(0); return false;}
 
 private:
 	void DrawLine(line2d l);
@@ -137,7 +150,7 @@ private:
 	std::vector<line2d> armSegments;
 
 	std::vector<recVec> states;
-	
+
 	std::vector<RoboticArmHeuristic *> heuristics;
 	ConfigEnvironment *ce;
 };
@@ -168,10 +181,10 @@ class ArmToTipHeuristic : public RoboticArmHeuristic {
 public:
 	ArmToTipHeuristic(RoboticArm *r);
 	double HCost(armAngles &node1, armAngles &node2);
-	
+
 	void GenerateLegalStateTable( armAngles &legalArm );
 	void GenerateTipPositionTables( armAngles &sampleArm );
-	
+
 	void GenerateRandomHeuristic( const armAngles &sampleArm );
 	int GenerateHeuristic( const armAngles &sampleArm, armAngles &goal );
 	int GenerateMaxDistHeuristics( const armAngles &sampleArm,
@@ -182,28 +195,28 @@ public:
 	bool ValidGoalPosition( double goalX, double goalY );
 private:
 	void GenerateCPDB();
-	
-	
+
+
 	RoboticArm *ra;
 	bool m_TableComplete;
 
 	uint8_t *legalStateTable;
 	uint8_t *legalGoalTable;
-	
+
 	std::vector<uint16_t *> distancesTables;
 	std::vector<uint16_t *> minTipDistancesTables;
 	std::vector<uint16_t *> maxTipDistancesTables;
 	std::vector<uint16_t> tablesNumArms;
-	
+
 	std::vector<armAngles> *tipPositionTables;
-	
-	
+
+
 	// convert an arm configuration into an index
 	uint64_t ArmAnglesIndex( const armAngles &arm );
 	uint64_t NumArmAnglesIndices( const armAngles &arm ) const {
 		return 1 << ( 9 * arm.GetNumArms() );
 	}
-	
+
 	// convert a tip position into an index
 	int TipPositionIndex( const double x, const double y,
 						 const double minX, const double minY,
@@ -212,16 +225,16 @@ private:
 		int count = (int)ceil( 2.0 / ra->GetTolerance() );
 		return count * count;
 	}
-	
+
 	// write/read a binary representation of a configuration
 	// DOES NOT WRITE/READ THE ARM LENGTHS!
 	int WriteArmAngles(FILE *file, armAngles &a);
 	int ReadArmAngles(FILE *file, armAngles &a);
-	
+
 	void UpdateTipDistances( armAngles &arm, uint16_t distance,
 							uint16_t *minTipDistances,
 							uint16_t *maxTipDistances );
-	
+
 	// common subroutine for all the different heuristic
 	// generation functions
 	int GenerateHeuristicSub( const armAngles &sampleArm, const bool quiet,
@@ -242,7 +255,7 @@ private:
 							   uint16_t *minTipDistances,
 							   uint16_t *maxTipDistances,
 							   armAngles &lastAdded );
-	
+
 	// use a heuristic table
 	uint16_t UseHeuristic( armAngles &s, armAngles &g,
 						  uint16_t *distances );

@@ -8,8 +8,8 @@
 #include <ext/hash_map>
 #define NO_CHILDREN -100
 
-template <class state, class action>
-class GeneralBulb : public GenericStepAlgorithm<state,action, SearchEnvironment<state, action> > {
+template <class state, class action, class environment>
+class GeneralBulb : public GenericStepAlgorithm<state, action, environment> {
 public:
 	GeneralBulb() {
 		step_by_step_active = false;
@@ -22,8 +22,8 @@ public:
 		best_path_cost = -1.0;
 		debug = false;
 	}
-	int GetPath(SearchEnvironment<state, action> *env, state from, state to, std::vector<state> &path);
-	int GetPath(SearchEnvironment<state, action> *env, state from,state to, std::vector<action> &path){return 0;}
+	int GetPath(environment *env, state from, state to, std::vector<state> &path);
+	int GetPath(environment *env, state from, state to, std::vector<action> &path){return 0;}
 
 	unsigned long long GetNodesExpanded(){return nodes_expanded;}
 	unsigned long long GetNodesTouched(){return nodes_touched;}
@@ -35,7 +35,7 @@ public:
 
 	void LogFinalStats(StatCollection *stats){}
 
-	bool Initialize(SearchEnvironment<state, action> *env, state start, state goal){return true;}
+	bool Initialize(environment *env, state start, state goal){return true;}
 	int StepAlgorithm(std::vector<action> &path){return 0;}
 	int StepAlgorithm(std::vector<state> &path){return 0;}
 
@@ -109,14 +109,14 @@ protected:
 	Main recursive function of bulb. Takes in a number of discrepancies to use, the search environment, and a goal.
 	Returns values based on the main status values of a GenericStepAlgorithm
 	**/
-	int BulbProbe(SearchEnvironment<state, action> *env, unsigned discrepancies, state &goal);
+	int BulbProbe(environment *env, unsigned discrepancies, state &goal);
 
 	/**
 	Generates all the unique successors of the last level in beam and stores them in successors. Returns 1 if
 	the goal is found amongst the successors, in which case successors is only set to the goal node.
 	Returns the status values of GenericStepAlgorithm if any of the limits are hit.
 	**/
-	int generate_successors(SearchEnvironment<state, action> *env, std::vector<BeamNode<state> > &successors, state &goal);
+	int generate_successors(environment *env, std::vector<BeamNode<state> > &successors, state &goal);
 
 	/**
 	Returns the desired slice of the successors. If first_slice is set as true, returns the first slice. If
@@ -124,7 +124,7 @@ protected:
 	it returns the slice starting at the given index.
 	Index is then set as the beginning index of the next slice to return.
 	**/
-	int next_slice(SearchEnvironment<state, action> *env, std::vector<BeamNode<state> > &slice, bool first_slice, unsigned &index, state &goal);
+	int next_slice(environment *env, std::vector<BeamNode<state> > &slice, bool first_slice, unsigned &index, state &goal);
 
 	/**
 	Extracts the goal from the beams.  Assumes the first beam contains only the start state, and the last beam
@@ -147,13 +147,13 @@ protected:
 };
 
 /** Calculates f-cost in standard way **/
-template <class state, class action>
-double GeneralBulb<state, action>::get_cost(double g, double h) {
+template <class state, class action, class environment>
+double GeneralBulb<state, action, environment>::get_cost(double g, double h) {
 	return g_weight*g + h_weight*h;
 }
 
-template <class state, class action>
-void GeneralBulb<state, action>::prepare_vars_for_search() {
+template <class state, class action, class environment>
+void GeneralBulb<state, action, environment>::prepare_vars_for_search() {
 	nodes_checked = 0;
 	nodes_expanded = 0;
 	nodes_touched = 0;
@@ -168,8 +168,8 @@ void GeneralBulb<state, action>::prepare_vars_for_search() {
 	iter_checked.clear();
 }
 
-template <class state, class action>
-void GeneralBulb<state, action>::update_node_counts() {
+template <class state, class action, class environment>
+void GeneralBulb<state, action, environment>::update_node_counts() {
 	nodes_expanded += nodes_ex_iter;
 	nodes_touched += nodes_touch_iter;
 	nodes_checked += nodes_check_iter;
@@ -179,9 +179,8 @@ void GeneralBulb<state, action>::update_node_counts() {
 	iter_expanded.push_back(nodes_ex_iter);
 }
 
-template <class state, class action>
-int GeneralBulb<state, action>::GetPath(SearchEnvironment<state, action> *env, state from, state to, std::vector<state> &path) {
-
+template <class state, class action, class environment>
+int GeneralBulb<state, action, environment>::GetPath(environment *env, state from, state to, std::vector<state> &path) {
 	prepare_vars_for_search();
 
 	double h_value = env->HCost(from, to);
@@ -236,8 +235,8 @@ int GeneralBulb<state, action>::GetPath(SearchEnvironment<state, action> *env, s
 
 }
 
-template <class state, class action>
-int GeneralBulb<state, action>::BulbProbe(SearchEnvironment<state, action> *env, unsigned discrepancies, state &goal) {
+template <class state, class action, class environment>
+int GeneralBulb<state, action, environment>::BulbProbe(environment *env, unsigned discrepancies, state &goal) {
 
 	if(beams.size() - 1 > max_depth) {
 		max_depth = beams.size() - 1;
@@ -342,8 +341,8 @@ int GeneralBulb<state, action>::BulbProbe(SearchEnvironment<state, action> *env,
 	return status;
 }
 
-template <class state, class action>
-int GeneralBulb<state, action>::next_slice(SearchEnvironment<state, action> *env, std::vector<BeamNode<state> > &slice, bool first_slice, unsigned &index, state &goal) {
+template <class state, class action, class environment>
+int GeneralBulb<state, action, environment>::next_slice(environment *env, std::vector<BeamNode<state> > &slice, bool first_slice, unsigned &index, state &goal) {
 	slice.clear();
 
 	std::vector<BeamNode<state> > successors;
@@ -382,8 +381,8 @@ int GeneralBulb<state, action>::next_slice(SearchEnvironment<state, action> *env
 	return 0; // goal not found and no limits hit
 }
 
-template <class state, class action>
-int GeneralBulb<state, action>::generate_successors(SearchEnvironment<state, action> *env, std::vector<BeamNode<state> > &successors, state &goal) {
+template <class state, class action, class environment>
+int GeneralBulb<state, action, environment>::generate_successors(environment *env, std::vector<BeamNode<state> > &successors, state &goal) {
 
 	nodes_in_current_layer.clear(); // nodes in current successors list
 	successors.clear();
@@ -459,8 +458,8 @@ int GeneralBulb<state, action>::generate_successors(SearchEnvironment<state, act
 	return 0; // no goal found and no limits hit
 }
 
-template <class state, class action>
-void GeneralBulb<state, action>::extract_goal(std::vector<state> &state_path) {
+template <class state, class action, class environment>
+void GeneralBulb<state, action, environment>::extract_goal(std::vector<state> &state_path) {
 	state_path.resize(beams.size()); // properly resizes beam, last spot will have final node added elsewhere
 
 	unsigned beam_layer = beams.size() - 1;
@@ -475,8 +474,8 @@ void GeneralBulb<state, action>::extract_goal(std::vector<state> &state_path) {
 	state_path[beam_layer] = beams[beam_layer][current_index].my_state;
 }
 
-template <class state, class action>
-void GeneralBulb<state, action>::print_beams(bool last_only) {
+template <class state, class action, class environment>
+void GeneralBulb<state, action, environment>::print_beams(bool last_only) {
 	printf("\n\n");
 	printf("Memory Used: %d\n", nodes_in_beam.size());
 	unsigned i = 0;
@@ -498,8 +497,8 @@ void GeneralBulb<state, action>::print_beams(bool last_only) {
 	}
 }
 
-template <class state, class action>
-bool GeneralBulb<state, action>::SetExpandedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralBulb<state, action, environment>::SetExpandedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_expanded = true; expanded_limit = limit;
 	}
@@ -509,8 +508,8 @@ bool GeneralBulb<state, action>::SetExpandedLimit(unsigned long long limit) {
 	return true;
 }
 
-template <class state, class action>
-bool GeneralBulb<state, action>::SetTouchedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralBulb<state, action, environment>::SetTouchedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_touched = true; touched_limit = limit;
 	}
@@ -520,8 +519,8 @@ bool GeneralBulb<state, action>::SetTouchedLimit(unsigned long long limit) {
 	return true;
 }
 
-template <class state, class action>
-bool GeneralBulb<state, action>::SetCheckedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralBulb<state, action, environment>::SetCheckedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_checked = true; checked_limit = limit;
 	}

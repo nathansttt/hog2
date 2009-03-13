@@ -35,17 +35,35 @@ public:
 	virtual void GetNextState(state &currents, action dir, state &news){};
 
 	virtual bool InvertAction(action &a) = 0;
-	
+
+	/** Stores the goal for use by single-state HCost. **/
+	virtual void StoreGoal(state &s) = 0;
+
+	/** Clears the goal from memory. **/
+	virtual void ClearGoal() = 0;
+
+	/** Returns true if the goal is stored and false otherwise. **/
+	virtual bool IsGoalStored() = 0;
+
+	/** Heuristic value between two arbitrary nodes. **/
 	virtual double HCost(state &node1, state &node2) = 0;
+
+	/** Heuristic value between node and the stored goal. Asserts that the
+	 goal is stored **/
+	virtual double HCost(state &node) = 0;
+
 	virtual double GCost(state &node1, state &node2) = 0;
 	virtual double GCost(state &node, action &act) = 0;
 	virtual bool GoalTest(state &node, state &goal) = 0;
 
+	/** Goal Test if the goal is stored **/
+	virtual bool GoalTest(state &node) = 0;
+
 	virtual uint64_t GetStateHash(state &node) = 0;
 	virtual uint64_t GetActionHash(action act) = 0;
-	
+
 	virtual double GetPathLength(std::vector<state> &neighbors);
-	
+
 	virtual OccupancyInterface<state,action> *GetOccupancyInfo() { return 0; }
 
 	virtual void OpenGLDraw(int window) = 0;

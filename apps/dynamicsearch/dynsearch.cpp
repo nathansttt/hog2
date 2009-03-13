@@ -27,11 +27,13 @@ int main(int argc, char** argv)
 	vector<MNPuzzleState> puzzles;
 	std::vector<double> solver_info;
 
-	get_standard_test_set(puzzles, info, solver_info, 100);
-	/*
-	unsigned num_cols = 3;
-	unsigned num_rows = 6;
-*/
+	//get_standard_test_set(puzzles, info, solver_info, 100);
+	//get_4x5_test_set(puzzles, 100);
+	get_5x5_test_set(puzzles, 100);
+
+	unsigned num_cols = 5;
+	unsigned num_rows = 5;
+
 	std::vector<slideDir> f_op_order;
 	std::vector<slideDir> b_op_order;
 
@@ -45,56 +47,53 @@ int main(int argc, char** argv)
 	b_op_order.push_back(kLeft);
 	b_op_order.push_back(kUp);
 
-	GeneralIDA<MNPuzzleState, slideDir> ida;
+	GeneralIDA<MNPuzzleState, slideDir, MNPuzzle> ida;
 
 	vector<slideDir> path;
 	vector<MNPuzzleState> state_path;
-	MNPuzzleState goal(4, 4);
-	MNPuzzle mnp(4, 4, f_op_order);
+	MNPuzzleState goal(num_cols, num_rows);
+	MNPuzzle mnp(num_cols, num_rows, f_op_order);
 	mnp.StoreGoal(goal);
 
 	//ida.SetCheckedLimit(10);
 	//ida.GetPath(&mnp, puzzles[0], goal, path);
 	//cout << ida.GetNodesChecked() << endl;
-	for(unsigned i = 2; i <= 20; i++) {
-		//cout << "\nWeight: " << i << endl;
+
+	for(double i = 2.0; i <= 25.0; i+= 1.0) {
+		cout << "\nSOLVER IDA*, OP ORDER: " << kUp << ", " << kLeft << ", " << kRight << ", " << kDown << ", Weight: " << i << endl;
+		//cerr << "\nWeight: " << i << endl;
 		ida.Change_Weights(1.0, i);
-		//batch_puzzles(num_cols, num_rows, &ida, puzzles, info, f_op_order, true, false);
-		//ida.GetPath(&mnp, puzzles[49], goal, path);
-		//printf("%.0f\t", ida.GetNodesChecked());
+		general_batch_puzzles(num_cols, num_rows, &ida, puzzles, f_op_order, true, ACTION_PATH);
 	}
-	//cout << '\n';
 
-	/*
-	output_exp_info("../../../../prog_projects/order_weight18", 100, 24, "order_weight18_nodes", "order_weight18_costs");
-	output_exp_info("../../../../prog_projects/order_weight19", 100, 24, "order_weight19_nodes", "order_weight19_costs");
-	output_exp_info("../../../../prog_projects/order_weight20", 100, 24, "order_weight20_nodes", "order_weight20_costs");
-	output_exp_info("../../../../prog_projects/order_weight21", 100, 24, "order_weight21_nodes", "order_weight21_costs");
-	output_exp_info("../../../../prog_projects/order_weight22", 100, 24, "order_weight22_nodes", "order_weight22_costs");
-	output_exp_info("../../../../prog_projects/order_weight23", 100, 24, "order_weight23_nodes", "order_weight23_costs");
-	output_exp_info("../../../../prog_projects/order_weight24", 100, 24, "order_weight24_nodes", "order_weight24_costs");
-	output_exp_info("../../../../prog_projects/order_weight25", 100, 24, "order_weight25_nodes", "order_weight25_costs");*/
-
+	//output_exp_info("../../apps/dynamicsearch/input/output_tester", 100, "c_f", "ex_f", "ch_f", "ch_t");
 
 	//ida.Change_Weights(1.0, 3.0);
-	/*
+
 	unsigned num = 0;
-	GeneralRBFS<MNPuzzleState, slideDir> rbfs;
-	rbfs.Change_Weights(1.0, 3.0);
+	GeneralRBFS<MNPuzzleState, slideDir, MNPuzzle> rbfs;
+	//rbfs.Change_Weights(1.0, 4.0);
+	//general_batch_puzzles(4, 4, &rbfs, puzzles, info, f_op_order, true, ACTION_PATH);
 	//rbfs.SetExpandedLimit(5000);
 
+	/*
 	for(; num < 10; num++) {
 	rbfs.GetPath(&mnp, puzzles[num], goal, path);
 
 	cout << rbfs.GetPathCost() << "\t" << rbfs.GetNodesChecked() << endl;
 	}*/
 
-	unsigned num = 0;
-	GeneralBeamSearch<MNPuzzleState, slideDir> bs;
-	bs.Change_Beam_Size(30);
+	num = 0;
+	GeneralBeamSearch<MNPuzzleState, slideDir, MNPuzzle> bs;
+	bs.Change_Beam_Size(15);
 	bs.Change_Memory_Limit(10000);
-	bs.Select_Duplicate_Prune(false);
-	bs.Initialize(&mnp, puzzles[num], goal);
+	bs.Select_Duplicate_Prune(true);
+	//general_batch_puzzles(4, 4, &bs, puzzles, info, f_op_order, true, STATE_PATH);
+	//bs.GetPath(&mnp, puzzles[num], goal, state_path);
+
+	//cout << state_path.size() << endl;
+	//bs.Initialize(&mnp, puzzles[num], goal);
+
 	/*
 	bs.print_beams();
 	bs.StepAlgorithm(state_path);
@@ -125,13 +124,40 @@ int main(int argc, char** argv)
 		cout << state_path[l] << endl;
 	}*/
 
-	GeneralBulb<MNPuzzleState, slideDir> bulb;
-	bulb.Change_Beam_Size(15);
-	bulb.Change_Memory_Limit(70000);
-	//bulb.SetExpandedLimit(30);
-	bulb.GetPath(&mnp, puzzles[num], goal, state_path);
+	GeneralBulb<MNPuzzleState, slideDir, MNPuzzle> bulb;
+	for(unsigned j = 100000; j <= 100000; j *= 100) {
+		bulb.Change_Memory_Limit(j);
+		//printf("Limit: %d\n", j);
+		/*
+	cout << "\nBeam Size: " << 2 << endl;
+	cerr << "\nBeam Size: " << 2 << endl;
+	bulb.Change_Beam_Size(2);
+		//general_batch_puzzles(num_cols, num_rows, &bulb, puzzles, info, f_op_order, true, STATE_PATH);
 
-	cout << state_path.size() << endl;/*
+	cout << "\nBeam Size: " << 3 << endl;
+	cerr << "\nBeam Size: " << 3 << endl;
+	bulb.Change_Beam_Size(3);
+		//general_batch_puzzles(num_cols, num_rows, &bulb, puzzles, info, f_op_order, true, STATE_PATH);
+
+	cout << "\nBeam Size: " << 4 << endl;
+	cerr << "\nBeam Size: " << 4 << endl;
+	bulb.Change_Beam_Size(4);
+		//general_batch_puzzles(num_cols, num_rows, &bulb, puzzles, info, f_op_order, true, STATE_PATH);
+
+
+	for(unsigned i = 5; i <= 100; i+= 5) {
+		cout << "\nBeam Size: " << i << endl;
+		cerr << "\nBeam Size: " << i << endl;
+		bulb.Change_Beam_Size(i);
+		general_batch_puzzles(num_cols, num_rows, &bulb, puzzles, info, f_op_order, true, STATE_PATH);
+	}*/
+	}
+	//general_batch_puzzles(4, 4, &bulb, puzzles, info, f_op_order, true, STATE_PATH);
+	//bulb.SetExpandedLimit(30);
+	//bulb.GetPath(&mnp, puzzles[num], goal, state_path);
+
+	//cout << state_path.size() << endl;
+/*
 	for(unsigned l = 0; l < state_path.size() ; l++) {
 		cout << state_path[l] << endl;
 	}*/
@@ -145,18 +171,61 @@ int main(int argc, char** argv)
 	}*/
 
 	//cout << ida.GetPathCost() << " " << ida.GetNodesChecked() << endl;
+	string nodes_filename = "../../apps/dynamicsearch/input/4x4_ida_mnp_100__smaller_nodes";
+	string cost_filename = "../../apps/dynamicsearch/input/4x4_ida_mnp_100__smaller_costs";
 
+	unsigned num_weights = 24;
+	unsigned stored_weights = 25;
+	vector<unsigned> desired_puzzles;
+	for(unsigned i = 75; i < 100; i++) {
+		desired_puzzles.push_back(i);
+	}
+
+	vector<unsigned> desired_weights;
+	for(unsigned i = 0; i < num_weights; i++) {
+		desired_weights.push_back(i);
+	}
+
+	vector<unsigned> set_sizes;
+	for(unsigned i = 2; i <= num_weights; i++) {
+		set_sizes.push_back(i);
+	}
+
+	vector<unsigned> num_per_size;
+	num_per_size.push_back(276);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(1000);
+	num_per_size.push_back(276);
+	num_per_size.push_back(24);
+	num_per_size.push_back(1);
+
+	//tt_simulation(nodes_filename.c_str(), cost_filename.c_str(), stored_weights, 100, desired_puzzles, desired_weights, set_sizes, num_per_size, false);
 	/*
-	string nodes_filename = "../../apps/dynamicsearch/input/order_weight10_nodes";
-	string cost_filename = "../../apps/dynamicsearch/input/order_weight10_costs";
 	ind_approx(nodes_filename.c_str(), cost_filename.c_str(), 24, 100, 0, 23, 2, 2, 276, false);
 	cout << "\n3-22\n";
 	ind_approx(nodes_filename.c_str(), cost_filename.c_str(), 24, 100, 0, 23, 3, 22, 250, false);
 	cout << "\n23\n";
 	ind_approx(nodes_filename.c_str(), cost_filename.c_str(), 24, 100, 0, 23, 23, 23, 24, false);
 	cout << "\n24\n";
-	ind_approx(nodes_filename.c_str(), cost_filename.c_str(), 24, 100, 0, 23, 24, 24, 1, false);
-*/
+	ind_approx(nodes_filename.c_str(), cost_filename.c_str(), 24, 100, 0, 23, 24, 24, 1, false);*/
+
 	//output_exp_info("../../apps/dynamicsearch/input/std_ida_tests", 100, 24);
 
 	//get_distribution("../../apps/dynamicsearch/input/temp_stuff", 1000, 0);
@@ -207,5 +276,15 @@ int main(int argc, char** argv)
 	cout << "Nodes Expanded: " << ida.GetNodesExpanded() << endl;
 	cout << "Time:" << t2.getElapsedTime() << endl;*/
 
+	vector<int> pattern;
+	pattern.push_back(0);
+	pattern.push_back(6);
+	pattern.push_back(7);
+	//pattern.push_back(10);
+	//pattern.push_back(11);
+	//pattern.push_back(14);
+	//pattern.push_back(15);
+
+	//mnp.Build_Regular_PDB(goal, pattern, "tempdb");
 	return 0;
 }
