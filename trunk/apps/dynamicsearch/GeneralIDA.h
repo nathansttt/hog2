@@ -24,8 +24,8 @@ placed on the number of nodes expanded, generated, and checked.
 As well, it is possible to force the search to expand the entire
 iteration even after having found a solution.
 */
-template <class state, class action>
-class GeneralIDA : public GenericStepAlgorithm<state, action, SearchEnvironment<state, action> > {
+template <class state, class action, class environment>
+class GeneralIDA : public GenericStepAlgorithm<state, action, environment> {
 public:
 	/**
 	General constructor. Sets all values as some defaults
@@ -64,10 +64,10 @@ public:
 	Finds a path from the node "from" to the node "to" in the search space using
 	an IDA* like algorithm and stores the set of actions in thePath
 	**/
-	virtual int GetPath(SearchEnvironment<state, action> *env, state from, state to,
+	virtual int GetPath(environment *env, state from, state to,
 	             std::vector<action> &thePath);
 
-	virtual int GetPath(SearchEnvironment<state, action> *env, state from, state to,
+	virtual int GetPath(environment *env, state from, state to,
 	                    std::vector<state> &thePath) {return -1;}
 
 	virtual const char * GetName(){return "Basic Weighted IDA*";}
@@ -103,7 +103,7 @@ public:
 	/** Initializes the search to perform in a step by step manner for the given
 	 environment, starting at the given initial state and the given goal
 	 **/
-	bool Initialize(SearchEnvironment<state, action> *env, state from, state to);
+	bool Initialize(environment *env, state from, state to);
 
 	unsigned GetNumIters() {return iter_checked.size();}
 	/**
@@ -176,7 +176,7 @@ protected:
 	-3 for ran out of nodes to generate
 	-4 for rant out of nodes to check
 	**/
-	virtual int search_node(SearchEnvironment<state, action> *env, state &currState, state &goal, action forbiddenAction, double edge_cost);
+	virtual int search_node(environment *env, state &currState, state &goal, action forbiddenAction, double edge_cost);
 
 	double nextBound;
 	double currentBound;
@@ -191,7 +191,7 @@ protected:
 	virtual bool to_expand(double g, double h);
 
 	// initializes search parameters
-	virtual void initialize_search(SearchEnvironment<state, action> *, state, state);
+	virtual void initialize_search(environment *, state, state);
 
 	// initializes node counts
 	virtual void update_node_counts();
@@ -228,12 +228,12 @@ protected:
 	double g_weight;
 
 	bool reverse_order;
-	SearchEnvironment<state, action> *my_env;
+	environment *my_env;
 	state my_goal;
 };
 
-template <class state, class action>
-void GeneralIDA<state, action>::initialize_search(SearchEnvironment<state, action> *env, state from, state to) {
+template <class state, class action, class environment>
+void GeneralIDA<state, action, environment>::initialize_search(environment *env, state from, state to) {
 	nodesExpanded = 0;
 	nodesGenerated = 0;
 	nodesChecked = 0;
@@ -262,8 +262,8 @@ void GeneralIDA<state, action>::initialize_search(SearchEnvironment<state, actio
 	iter_expanded.resize(0);
 }
 
-template <class state, class action>
-void GeneralIDA<state, action>::update_node_counts() {
+template <class state, class action, class environment>
+void GeneralIDA<state, action, environment>::update_node_counts() {
 	nodesExpanded += nodes_ex_iter;
 	nodesGenerated += nodes_gen_iter;
 	nodesChecked += nodes_check_iter;
@@ -277,13 +277,13 @@ void GeneralIDA<state, action>::update_node_counts() {
 	nodes_check_iter = 0;
 }
 
-template <class state, class action>
-void GeneralIDA<state, action>::update_bounds() {
+template <class state, class action, class environment>
+void GeneralIDA<state, action, environment>::update_bounds() {
 	currentBound = nextBound;
 }
 
-template <class state, class action>
-int GeneralIDA<state, action>::GetPath(SearchEnvironment<state, action> *env,
+template <class state, class action, class environment>
+int GeneralIDA<state, action, environment>::GetPath(environment *env,
                                      state from, state to,
                                      std::vector<action> &thePath)
 {
@@ -306,8 +306,8 @@ int GeneralIDA<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	return status;
 }
 
-template <class state, class action>
-int GeneralIDA<state, action>::search_node(SearchEnvironment<state, action> *env, state &currState, state &goal, action forbiddenAction, double edge_cost)
+template <class state, class action, class environment>
+int GeneralIDA<state, action, environment>::search_node(environment *env, state &currState, state &goal, action forbiddenAction, double edge_cost)
 {
 	// check if node bounds are applicable
 	if(bound_expanded && nodesExpanded + nodes_ex_iter >= expanded_limit)
@@ -393,8 +393,8 @@ int GeneralIDA<state, action>::search_node(SearchEnvironment<state, action> *env
 	return my_status;
 }
 
-template <class state, class action>
-bool GeneralIDA<state, action>::SetExpandedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralIDA<state, action, environment>::SetExpandedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_expanded = true; expanded_limit = limit;
 	}
@@ -404,8 +404,8 @@ bool GeneralIDA<state, action>::SetExpandedLimit(unsigned long long limit) {
 	return true;
 }
 
-template <class state, class action>
-bool GeneralIDA<state, action>::SetTouchedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralIDA<state, action, environment>::SetTouchedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_generated = true; generated_limit = limit;
 	}
@@ -415,8 +415,8 @@ bool GeneralIDA<state, action>::SetTouchedLimit(unsigned long long limit) {
 	return true;
 }
 
-template <class state, class action>
-bool GeneralIDA<state, action>::SetCheckedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralIDA<state, action, environment>::SetCheckedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_checked = true; checked_limit = limit;
 	}
@@ -426,8 +426,8 @@ bool GeneralIDA<state, action>::SetCheckedLimit(unsigned long long limit) {
 	return true;
 }
 
-template <class state, class action>
-bool GeneralIDA<state, action>::to_expand(double g, double h) {
+template <class state, class action, class environment>
+bool GeneralIDA<state, action, environment>::to_expand(double g, double h) {
 
 	if (fgreater(g_weight*g + h_weight*h, currentBound))
 	{
@@ -440,8 +440,8 @@ bool GeneralIDA<state, action>::to_expand(double g, double h) {
 	return true;
 }
 
-template <class state, class action>
-bool GeneralIDA<state, action>::Initialize(SearchEnvironment<state, action> *env, state from, state to) {
+template <class state, class action, class environment>
+bool GeneralIDA<state, action, environment>::Initialize(environment *env, state from, state to) {
 	step_by_step_active = true;
 
 	my_env = env;
@@ -476,8 +476,8 @@ bool GeneralIDA<state, action>::Initialize(SearchEnvironment<state, action> *env
 	return true;
 }
 
-template <class state, class action>
-int GeneralIDA<state, action>::StepAlgorithm(std::vector<action> &thePath) {
+template <class state, class action, class environment>
+int GeneralIDA<state, action, environment>::StepAlgorithm(std::vector<action> &thePath) {
 	if(!step_by_step_active) // if can't use step by step at this time
 		return STEP_NOT_ACTIVE;
 
@@ -669,8 +669,8 @@ int GeneralIDA<state, action>::StepAlgorithm(std::vector<action> &thePath) {
 	return 0;
 }
 
-template <class state, class action>
-void GeneralIDA<state, action>::End_Step_By_Step() {
+template <class state, class action, class environment>
+void GeneralIDA<state, action, environment>::End_Step_By_Step() {
 	if(!step_by_step_active)
 		return;
 

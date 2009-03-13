@@ -42,6 +42,8 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height)
 
 		operators.push_back(ops);
 	}
+
+	goal_stored = false;
 }
 
 MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
@@ -104,34 +106,12 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
 
 		operators.push_back(ops);
 	}
+	goal_stored = false;
 }
 
 MNPuzzle::~MNPuzzle()
 {
-}
-
-bool MNPuzzle::GetParity(MNPuzzleState &state)
-{
-//	if q is odd, the invariant is the parity (odd or even) of the number of pairs of pieces in reverse order (the parity of the permutation). For the order of the 15 pieces consider line 2 after line 1, etc., like words on a page.
-//	if q is even, the invariant is the parity of the number of pairs of pieces in reverse order plus the row number of the empty square counting from bottom and starting from 0.
-	int swaps = 0;
-	for (unsigned int x = 0; x < state.puzzle.size(); x++)
-	{
-		if (state.puzzle[x] == 0)
-			continue;
-		for (unsigned int y = x+1; y < state.puzzle.size(); y++)
-		{
-			if (state.puzzle[y] == 0)
-				continue;
-			if (state.puzzle[y] < state.puzzle[x])
-				swaps++;
-		}
-	}
-	if ((state.width%2) == 1)
-	{
-		return swaps%2;
-	}
-	return (swaps+(state.puzzle.size()-state.blank-1)/state.width)%2;
+	ClearGoal();
 }
 
 
@@ -177,7 +157,7 @@ Graph *MNPuzzle::GetGraph()
 //			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
 //			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
 //			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
-//			
+//
 //			double x1, y1, z1;
 //			node *nb = g->GetNode(tmp);
 //			x1 = nb->GetLabelF(GraphSearchConstants::kXCoordinate);
@@ -187,7 +167,7 @@ Graph *MNPuzzle::GetGraph()
 //			n->SetLabelF(GraphSearchConstants::kXCoordinate, 0.5*x + 0.5*x1);
 //			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.5*y + 0.5*y1);
 //			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0.5*z + 0.5*z1);
-//			
+//
 //		}
 //	}
 	return g;
@@ -197,22 +177,59 @@ void MNPuzzle::StoreGoal(MNPuzzleState &s)
 {
 	assert(s.height == height);
 	assert(s.width == width);
-	goal_xloc.resize(width*height);
-	goal_yloc.resize(width*height);
-	for (unsigned int x = 0; x < width; x++)
-	{
-		for (unsigned int y = 0; y < height; y++)
-		{
-			goal_xloc[s.puzzle[x + y*width]] = x;
-			goal_yloc[s.puzzle[x + y*width]] = y;
+
+	// makes sure goal contains all legal
+	bool goal_tester[width*height];
+	for(unsigned int i = 0; i < width*height; i++) {
+		goal_tester[i] = false;
+	}
+
+	for(unsigned int i = 0; i < width*height; i++) {
+		goal_tester[s.puzzle[i]] = true;
+	}
+
+	for(unsigned int i = 0; i < width*height; i++) {
+		if(!goal_tester[i]) {
+			printf("INVALID GOAL\n");
+			assert(goal_tester[i]);
 		}
 	}
+
+	h_increment = new unsigned*[width*height];
+
+	for(unsigned int i = 1; i < width*height; i++) {
+		h_increment[i] = new unsigned [width*height];
+	}
+
+	for(unsigned goal_pos = 0; goal_pos < width*height; goal_pos++) {
+		unsigned tile = s.puzzle[goal_pos];
+		if(tile == 0)
+			continue;
+
+		for(unsigned pos = 0; pos < width*height; pos++) {
+			h_increment[tile][pos] = abs((int) (goal_pos % width) - (int)(pos % width)); // difference in column
+			h_increment[tile][pos] += abs((int) (goal_pos / width) - (int)(pos / width)); // difference in row
+		}
+	}
+
+	goal_stored = true;
+
+	goal = s;
 }
 
+bool MNPuzzle::GoalTest(MNPuzzleState &s) {
+	return (s == goal);
+}
 void MNPuzzle::ClearGoal()
 {
-	goal_xloc.clear();
-	goal_yloc.clear();
+	if(goal_stored) {
+		goal_stored = false;
+		// clears memory allocated for h_increment
+		for(unsigned int i = 1; i < width*height; i++) {
+			delete h_increment[i];
+		}
+		delete h_increment;
+	}
 }
 void MNPuzzle::GetSuccessors(MNPuzzleState &stateID,
                              std::vector<MNPuzzleState> &neighbors)
@@ -291,27 +308,41 @@ bool MNPuzzle::InvertAction(slideDir &a)
 	return true;
 }
 
+double MNPuzzle::HCost(MNPuzzleState &state) {
+	assert(goal_stored);
+
+	assert(state.height == height);
+	assert(state.width == width);
+	double hval = 0;
+
+	// increments amound for each tile location
+	// this calculates the Manhattan distance
+	for(unsigned loc = 0; loc < width*height; loc++) {
+		if(state.puzzle[loc] != 0)
+			hval += h_increment[state.puzzle[loc]][loc];
+	}
+
+	if (PDB.size() != 0) // select between PDB and Manhattan distance if given the chance
+		return std::max(hval, DoPDBLookup(state));
+	return hval;
+}
+
+// TODO Remove PDB heuristic from this heuristic evaluator.
 double MNPuzzle::HCost(MNPuzzleState &state1, MNPuzzleState &state2)
 {
 	assert(state1.height==state2.height);
 	assert(state1.width==state2.width);
 	double hval = 0;
 
-	if (goal_xloc.size() != 0)
+	if (goal_stored) // if goal is stored
 	{
 		assert(state1.height == height);
 		assert(state1.width == width);
 
-		for (unsigned int x = 0; x < width; x++)
-		{
-			for (unsigned int y = 0; y < height; y++)
-			{
-				if (state1.puzzle[x + y*width] != 0)
-				{
-					hval += (abs(goal_xloc[state1.puzzle[x + y*width]] - x) +
-					         abs(goal_yloc[state1.puzzle[x + y*width]] - y));
-				}
-			}
+		// increments amound for each tile location
+		for(unsigned loc = 0; loc < width*height; loc++) {
+			if(state1.puzzle[loc] != 0)
+				hval += h_increment[state1.puzzle[loc]][loc];
 		}
 	}
 	else
@@ -383,7 +414,7 @@ void MNPuzzle::GetStateFromHash(MNPuzzleState &state, uint64_t hash)
 		puzzle[x] = hashVal%numEntriesLeft;
 		hashVal /= numEntriesLeft;
 		numEntriesLeft++;
-		for (int y = x+1; y < state.puzzle.size(); y++)
+		for (int y = x+1; y < (int) state.puzzle.size(); y++)
 		{
 			if (puzzle[y] >= puzzle[x])
 				puzzle[y]++;
@@ -394,39 +425,7 @@ void MNPuzzle::GetStateFromHash(MNPuzzleState &state, uint64_t hash)
 	for (unsigned int x = 0; x < puzzle.size(); x++)
 		if (puzzle[x] == 0)
 			state.blank = x;
-	
-}
 
-/**
- * Tiles are the tiles we care about
- */
-uint64_t MNPuzzle::GetPDBHash(MNPuzzleState &state, const std::vector<int> &tiles)
-{
-	std::vector<int> locs;
-	locs.resize(tiles.size());
-	for (unsigned int x = 0; x < state.puzzle.size(); x++)
-	{
-		for (unsigned int y = 0; y < tiles.size(); y++)
-		{
-			if (state.puzzle[x] == tiles[y])
-				locs[y] = x;
-		}
-	}
-
-	uint64_t hashVal = 0;
-	int numEntriesLeft = state.puzzle.size();
-	for (unsigned int x = 0; x < locs.size(); x++)
-	{
-		hashVal += locs[x]*Factorial(numEntriesLeft-1)/Factorial(state.puzzle.size()-tiles.size());
-		numEntriesLeft--;
-		for (unsigned y = x; y < locs.size(); y++)
-		{
-			if (locs[y] > locs[x])
-				locs[y]--;
-		}
-	}
-	assert(hashVal*Factorial(state.puzzle.size()-tiles.size()) < Factorial(state.puzzle.size()));
-	return hashVal;
 }
 
 
@@ -508,6 +507,7 @@ uint64_t MNPuzzle::Factorial(int val)
 	return table[val];
 }
 
+/*
 void MNPuzzle::LoadPDB(char *fname, const std::vector<int> &tiles, bool )
 {
 	std::vector<int> values(256);
@@ -527,7 +527,7 @@ void MNPuzzle::LoadPDB(char *fname, const std::vector<int> &tiles, bool )
 	}
 	for (int x = 0; x < 256; x++)
 		printf("%d:\t%d\n", x, values[x]);
-}
+}*/
 
 double MNPuzzle::DoPDBLookup(MNPuzzleState &state)
 {
@@ -659,7 +659,7 @@ double GraphPuzzleDistanceHeuristic::HCost(graphState &state1, graphState &state
 	puzzle.GetStateFromHash(a, state1);
 	puzzle.GetStateFromHash(b, state2);
 	double val = puzzle.HCost(a, b);
-	
+
 	for (unsigned int i=0; i < heuristics.size(); i++)
 	{
 		double hval = heuristics[i][state1]-heuristics[i][state2];
@@ -668,7 +668,7 @@ double GraphPuzzleDistanceHeuristic::HCost(graphState &state1, graphState &state
 		if (fgreater(hval,val))
 			val = hval;
 	}
-	
+
 	return val;
 }
 
@@ -699,16 +699,45 @@ MNPuzzleState random_puzzle_generator(unsigned num_cols, unsigned num_rows) {
 	return new_puzz;
 }
 
-void MNPuzzle::Create_Random_MN_Puzzles(unsigned num_cols, unsigned num_rows, std::vector<MNPuzzleState> &puzzle_vector, unsigned num_puzzles)
+//	if q is odd, the invariant is the parity (odd or even) of the number of pairs of pieces in reverse order (the parity of the permutation). For the order of the 15 pieces consider line 2 after line 1, etc., like words on a page.
+//	if q is even, the invariant is the parity of the number of pairs of pieces in reverse order plus the row number of the empty square counting from bottom and starting from 0.
+unsigned MNPuzzle::GetParity(MNPuzzleState &state)
+{
+	unsigned swaps = 0; // counts number of swaps
+	for (unsigned x = 0; x < state.puzzle.size(); x++)
+	{
+		if (state.puzzle[x] == 0) // skip blank
+			continue;
+		for (unsigned y = x + 1; y < state.puzzle.size(); y++)
+		{
+			if (state.puzzle[y] == 0) // skip blank
+				continue;
+			if (state.puzzle[y] < state.puzzle[x])
+				swaps++;
+		}
+	}
+	// if odd num of columns
+	if ((state.width % 2) == 1)
+	{
+		return swaps % 2;
+	}
+
+	// if even num of columns
+	return (swaps + (state.puzzle.size()-state.blank-1)/state.width)%2;
+}
+
+void MNPuzzle::Create_Random_MN_Puzzles(MNPuzzleState &goal, std::vector<MNPuzzleState> &puzzle_vector, unsigned num_puzzles)
 {
 	std::map<uint64_t, uint64_t> puzzle_map; // used to ensure uniqueness
 
-	MNPuzzle my_puzz(num_cols, num_rows);
+	MNPuzzle my_puzz(goal.width, goal.height);
 
 	unsigned count = 0;
+	unsigned goal_parity = GetParity(goal);
+
 	while (count < num_puzzles)
 	{
-		MNPuzzleState next = random_puzzle_generator(num_cols, num_rows);
+		MNPuzzleState next = random_puzzle_generator(goal.width, goal.height);
 		uint64_t next_hash = my_puzz.GetStateHash(next);
 
 		if (puzzle_map.find(next_hash) != puzzle_map.end())
@@ -716,11 +745,8 @@ void MNPuzzle::Create_Random_MN_Puzzles(unsigned num_cols, unsigned num_rows, st
 			continue;
 		}
 
-		//unsigned reverses = get_num_reverses(next);
-
 		// checks parity to make sure problem is solvable
-		//if ((num_cols % 2 == 0 && (reverses + (next.blank/num_cols)) % 2 == 0) || (num_cols % 2 == 1 && reverses % 2 == 0))
-		if (GetParity(next))
+		if (GetParity(next) == goal_parity)
 		{
 			puzzle_map[next_hash] = next_hash;
 			puzzle_vector.push_back(next);

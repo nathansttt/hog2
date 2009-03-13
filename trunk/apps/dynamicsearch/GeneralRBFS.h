@@ -2,13 +2,12 @@
 #define RBFS_H
 
 #include <iostream>
-#include "SearchEnvironment.h"
 #include "FPUtil.h"
 #include "GenericStepAlgorithm.h"
 #include "assert.h"
 
-template <class state, class action>
-class GeneralRBFS : public GenericStepAlgorithm<state, action, SearchEnvironment<state, action> > {
+template <class state, class action, class environment>
+class GeneralRBFS : public GenericStepAlgorithm<state, action, environment> {
 public:
 	GeneralRBFS() {
 		bound_expanded = false;
@@ -27,10 +26,10 @@ public:
 	Finds a path from the node "from" to the node "to" in the search space using
 	an IDA* like algorithm and stores the set of actions in thePath
 	**/
-	virtual int GetPath(SearchEnvironment<state, action> *env, state from, state to,
+	virtual int GetPath(environment *env, state from, state to,
 	                    std::vector<action> &thePath);
 
-	virtual int GetPath(SearchEnvironment<state, action> *env, state from, state to,
+	virtual int GetPath(environment *env, state from, state to,
 	                    std::vector<state> &thePath) {return -1;}
 
 	virtual const char * GetName(){return "Basic RBFS";}
@@ -64,7 +63,7 @@ public:
 	/**
 	Prepares the algorithm for a step by step run.
 	**/
-	virtual bool Initialize(SearchEnvironment<state, action> *env, state from, state to);
+	virtual bool Initialize(environment *env, state from, state to);
 
 	/**
 	Inherited methods for incrementing algorithm by one step.
@@ -115,7 +114,7 @@ protected:
 	bounds), sets the order array (lists the indices of the actions in ascending order of cost), and
 	sets the vectors with other relevant information. Assumes the vectors are of the appropriate size.
 	**/
-	virtual unsigned assign_and_sort(SearchEnvironment<state, action> *env, state &currState, state &goal,
+	virtual unsigned assign_and_sort(environment *env, state &currState, state &goal,
 	                                 double parent_cost, double lower_bound,
 	                                 std::vector<action> &actions, std::vector<action> &inverted,
 	                                 std::vector<unsigned> &order, std::vector<double> &actual_costs, std::vector<double> &costs, std::vector<double> &edge_costs, std::vector<double> &h_values);
@@ -123,7 +122,7 @@ protected:
 	/**
 	Performs the RBFS recursively.
 	**/
-	virtual int search_node(SearchEnvironment<state, action> *env, state &currState, state &goal, double true_state_cost, double state_cost, double upper_bound, double &child_bound);
+	virtual int search_node(environment *env, state &currState, state &goal, double true_state_cost, double state_cost, double upper_bound, double &child_bound);
 
 	/**
 	Returns the cost for this state based on the g and h values.
@@ -144,7 +143,7 @@ protected:
 	std::vector<unsigned long long> iter_generated;
 	std::vector<unsigned long long> iter_expanded;
 
-	SearchEnvironment<state, action> *my_env;
+	environment *my_env;
 	state my_goal;
 	state active_state;
 
@@ -165,8 +164,8 @@ protected:
 	void assert_stack_sizes_correct();
 };
 
-template <class state, class action>
-void GeneralRBFS<state, action>::prepare_vars_for_search() {
+template <class state, class action, class environment>
+void GeneralRBFS<state, action, environment>::prepare_vars_for_search() {
 	nodes_ex_iter = 0;
 	nodes_gen_iter = 0;
 	nodes_check_iter = 0;
@@ -190,8 +189,8 @@ void GeneralRBFS<state, action>::prepare_vars_for_search() {
 }
 
 /** Updates the node counts by adding the nodes from the current iteration to the totals **/
-template <class state, class action>
-void GeneralRBFS<state, action>::update_node_counts() {
+template <class state, class action, class environment>
+void GeneralRBFS<state, action, environment>::update_node_counts() {
 
 	nodesExpanded += nodes_ex_iter;
 	nodesGenerated += nodes_gen_iter;
@@ -206,8 +205,8 @@ void GeneralRBFS<state, action>::update_node_counts() {
 	nodes_check_iter = 0;
 }
 
-template <class state, class action>
-int GeneralRBFS<state, action>::GetPath(SearchEnvironment<state, action> *env, state from, state to, std::vector<action> &thePath) {
+template <class state, class action, class environment>
+int GeneralRBFS<state, action, environment>::GetPath(environment *env, state from, state to, std::vector<action> &thePath) {
 
 	prepare_vars_for_search();
 	std::vector<action> act;
@@ -231,8 +230,8 @@ int GeneralRBFS<state, action>::GetPath(SearchEnvironment<state, action> *env, s
 	return status;
 }
 
-template <class state, class action>
-bool GeneralRBFS<state, action>::SetExpandedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralRBFS<state, action, environment>::SetExpandedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_expanded = true; expanded_limit = limit;
 	}
@@ -242,8 +241,8 @@ bool GeneralRBFS<state, action>::SetExpandedLimit(unsigned long long limit) {
 	return true;
 }
 
-template <class state, class action>
-bool GeneralRBFS<state, action>::SetTouchedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralRBFS<state, action, environment>::SetTouchedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_generated = true; generated_limit = limit;
 	}
@@ -253,8 +252,8 @@ bool GeneralRBFS<state, action>::SetTouchedLimit(unsigned long long limit) {
 	return true;
 }
 
-template <class state, class action>
-bool GeneralRBFS<state, action>::SetCheckedLimit(unsigned long long limit) {
+template <class state, class action, class environment>
+bool GeneralRBFS<state, action, environment>::SetCheckedLimit(unsigned long long limit) {
 	if(limit > 0) {
 		bound_checked = true; checked_limit = limit;
 	}
@@ -264,8 +263,8 @@ bool GeneralRBFS<state, action>::SetCheckedLimit(unsigned long long limit) {
 	return true;
 }
 
-template <class state, class action>
-double GeneralRBFS<state, action>::get_cost(double g, double h) {
+template <class state, class action, class environment>
+double GeneralRBFS<state, action, environment>::get_cost(double g, double h) {
 	return g_weight*g + h_weight*h;
 }
 
@@ -282,8 +281,8 @@ costs are the assigned costs of the actions (sorting is done by this value)
 edge_costs are the costs of each of the actions
 h_values are the h values of the states resulting from the actions
 **/
-template <class state, class action>
-unsigned GeneralRBFS<state, action>::assign_and_sort (SearchEnvironment<state, action> *env, state &currState, state &goal, double parent_cost, double lower_bound, std::vector<action> &actions, std::vector<action> &inverted, std::vector<unsigned> &order, std::vector<double> &actual_costs, std::vector<double> &costs, std::vector<double> &edge_costs, std::vector<double> &h_values) {
+template <class state, class action, class environment>
+unsigned GeneralRBFS<state, action, environment>::assign_and_sort (environment *env, state &currState, state &goal, double parent_cost, double lower_bound, std::vector<action> &actions, std::vector<action> &inverted, std::vector<unsigned> &order, std::vector<double> &actual_costs, std::vector<double> &costs, std::vector<double> &edge_costs, std::vector<double> &h_values) {
 
 	unsigned num_invalid = 0;
 
@@ -342,8 +341,8 @@ unsigned GeneralRBFS<state, action>::assign_and_sort (SearchEnvironment<state, a
 		return actions.size() - num_invalid; // return number of children
 }
 
-template <class state, class action>
-int GeneralRBFS<state, action>::search_node(SearchEnvironment<state, action> *env, state &currState, state &goal, double true_state_cost, double state_cost, double upper_bound, double &child_bound) {
+template <class state, class action, class environment>
+int GeneralRBFS<state, action, environment>::search_node(environment *env, state &currState, state &goal, double true_state_cost, double state_cost, double upper_bound, double &child_bound) {
 
 	assert(g_stack.back() >= 0.0);
 	assert(true_state_cost >= 0.0);
@@ -456,8 +455,8 @@ int GeneralRBFS<state, action>::search_node(SearchEnvironment<state, action> *en
 	child_bound = child_costs[order[0]]; // return cost of best child
 	return 0; // no solution found
 }
-template <class state, class action>
-bool GeneralRBFS<state, action>::Initialize(SearchEnvironment<state, action> *env, state from, state to) {
+template <class state, class action, class environment>
+bool GeneralRBFS<state, action, environment>::Initialize(environment *env, state from, state to) {
 	/*
 	prepare_vars_for_search();
 
@@ -500,8 +499,8 @@ bool GeneralRBFS<state, action>::Initialize(SearchEnvironment<state, action> *en
 	return true;
 }
 
-template <class state, class action>
-void GeneralRBFS<state, action>::assert_stack_sizes_correct() {
+template <class state, class action, class environment>
+void GeneralRBFS<state, action, environment>::assert_stack_sizes_correct() {
 
 	assert(active_path.size() == available_action_stack.size() &&
 	       active_path.size() == available_inversion_stack.size() &&
@@ -516,8 +515,8 @@ void GeneralRBFS<state, action>::assert_stack_sizes_correct() {
 	       g_stack.size() == h_stack.size());
 }
 
-template <class state, class action>
-int GeneralRBFS<state, action>::StepAlgorithm(std::vector<action> &thePath) {
+template <class state, class action, class environment>
+int GeneralRBFS<state, action, environment>::StepAlgorithm(std::vector<action> &thePath) {
 	/*
 	assert_stack_sizes_correct();
 

@@ -52,7 +52,7 @@ namespace GraphSearchConstants
 
 	const double kStraightEdgeCost = 1.0;
 	const double kDiagonalEdgeCost = ROOT_TWO;
-	
+
 	Graph *GetGraph(Map *m);
 	void AddEdges(Map *m, Graph *g, int x, int y,
 				  double straigtEdgeCost = 1.0,
@@ -133,13 +133,13 @@ public:
 		else
 			return 0;
 	}
-	~GraphMapPerfectHeuristic() 
+	~GraphMapPerfectHeuristic()
 	{
 		delete probTable;
 	}
 	double prob;
 private:
-	double GetOctileDistance(double dx, double dy) 
+	double GetOctileDistance(double dx, double dy)
 	{
 		dx = fabs(dx);
 		dy = fabs(dy);
@@ -149,7 +149,7 @@ private:
 		else
 			return dy-dx + sqrt(2)*dx;
 	}
-	void fillProbTable() 
+	void fillProbTable()
 	{
 		int size = m->getMapWidth() * m->getMapHeight();
 		probTable = (bool*)malloc( size );
@@ -229,6 +229,19 @@ public:
 	virtual void OpenGLDraw(int window, graphState &s);
 	virtual void OpenGLDraw(int window, graphState &s, graphMove &gm);
 	Graph *GetGraph() { return g; };
+
+	virtual void StoreGoal(graphState &state1) {}
+	virtual void ClearGoal() {}
+	virtual bool IsGoalStored() {return false;}
+
+	virtual double HCost(graphState &state1) {
+		printf("Single State HCost Failure: method not implemented for RoboticArm\n");
+		exit(0); return -1.0;}
+
+	virtual bool GoalTest(graphState &s){
+		printf("Single State Goal Test Failure: method not implemented for GraphEnvironment\n");
+		exit(0); return false;}
+
 protected:
 	bool directed;
 	Graph *g;
