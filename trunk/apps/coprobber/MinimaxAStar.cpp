@@ -3,22 +3,23 @@
 
 // MINIMAX A*
 
-MinimaxAStar::MinimaxAStar( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass ):
+MinimaxAStarMulti::MinimaxAStarMulti( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass ):
 	env(_env), number_of_cops(_number_of_cops), canPass(_canPass) {
 
 	crg = new CopRobberGame( env, number_of_cops, false, canPass );
 }
 
-MinimaxAStar::~MinimaxAStar() {
+MinimaxAStarMulti::~MinimaxAStarMulti() {
 	delete crg;
 }
 
 
-double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight ) {
+double MinimaxAStarMulti::astar( CRState goal_pos, bool goal_minFirst, double weight ) {
 	QueueEntry qe, qtemp;
 	MyClosedList::iterator mclit;
 
 	nodesExpanded = 0; nodesTouched = 0;
+
 
 	if( crg->GoalTest( goal_pos, goal_pos ) )
 		return 0.;
@@ -33,8 +34,10 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 		nodesTouched++;
 
 		// recursion break
-		if( qe.pos == goal_pos && qe.minFirst == goal_minFirst )
+		if( qe.pos == goal_pos && qe.minFirst == goal_minFirst ) {
+			clear_cache();
 			return qe.gvalue;
+		}
 
 		// verbose
 		//fprintf( stdout, "minFirst = %d, pos = (%u,%u), fvalue = %f, gvalue = %f\n", qe.minFirst, qe.pos[0], qe.pos[1], qe.fvalue, qe.gvalue );
@@ -89,7 +92,6 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 			}
 
 		} else {
-			nodesExpanded++;
 
 			mclit = max_cost.find( qe.pos );
 
@@ -99,6 +101,7 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 				//fprintf( stdout, "max_cost[qe.pos] = %f, qe.gvalue = %f\n", mclit->second, qe.gvalue );
 				assert( mclit->second == qe.gvalue );
 			} else {
+				nodesExpanded++;
 
 				max_cost[qe.pos] = qe.gvalue;
 
@@ -133,10 +136,11 @@ double MinimaxAStar::astar( CRState goal_pos, bool goal_minFirst, double weight 
 
 	}
 
+	clear_cache();
 	return DBL_MAX;
 }
 
-double MinimaxAStar::compute_target_value( CRState &s ) {
+double MinimaxAStarMulti::compute_target_value( CRState &s ) {
 	double result = 0.;
 
 	CRState temp = s;
@@ -146,6 +150,7 @@ double MinimaxAStar::compute_target_value( CRState &s ) {
 	env->GetSuccessors( s[0], myneighbors );
 	if( canPass )
 		myneighbors.push_back( s[0] );
+	nodesExpanded++;
 
 	// now, for all successor states
 	for( std::vector<graphState>::iterator it = myneighbors.begin();
@@ -166,7 +171,7 @@ double MinimaxAStar::compute_target_value( CRState &s ) {
 
 // this function loops through all possible states for now
 // instead of generating the beginning states directly from the map
-void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst, double &weight ) {
+void MinimaxAStarMulti::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst, double &weight ) {
 	QueueEntry qe;
 	CRState pos;
 
@@ -178,6 +183,7 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 	for( unsigned int i = 0; i < num_states; i++ ) {
 
 		pos = crg->GetStateByNumber( i );
+		nodesTouched++;
 
 		if( crg->GoalTest( pos, pos ) ) {
 
@@ -190,8 +196,12 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 			// if cop moves last
 			std::vector<CRMove> cop_actions;
 			crg->GetPossibleOpponentActions( 0, pos, cop_actions );
+			nodesExpanded++;
+
 			for( std::vector<CRMove>::iterator it = cop_actions.begin();
 			     it != cop_actions.end(); it++ ) {
+
+				nodesTouched++;
 
 				// build the next state
 				qe.pos = pos;
@@ -215,17 +225,20 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 		for( unsigned int i = 0; i < num_states; i++ ) {
 
 			pos = crg->GetStateByNumber( i );
+			nodesTouched++;
 
 			if( crg->GoalTest( pos, pos ) ) {
 
 				std::vector<graphState> myneighbors;
 				env->GetSuccessors( pos[0], myneighbors );
+				nodesExpanded++;
 
 				qe.pos = pos;
 
 				// now, for all successor states
 				for( std::vector<graphState>::iterator it = myneighbors.begin();
 				     it != myneighbors.end(); it++ ) {
+					nodesTouched++;
 					// build the state
 					qe.pos[0] = *it;
 
@@ -248,7 +261,7 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 
 /*
 // this version is a faster variant of the above function for two players (one cop)
-void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst, double &weight ) {
+void MinimaxAStarMulti::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFirst, double &weight ) {
 	QueueEntry qe;
 	CRState pos;
 	std::vector<graphState> neighbors;
@@ -298,14 +311,14 @@ void MinimaxAStar::push_end_states_on_queue( CRState &goal_pos, bool &goal_minFi
 */
 
 
-double MinimaxAStar::MinGCost( CRState&, CRState& ) {
+double MinimaxAStarMulti::MinGCost( CRState&, CRState& ) {
 	return 1.;
 };
 
 
 // note: this HCost implementation relies on all edge costs 1 and MaximumNormGraphMapHeuristic in the GraphEnvironment
 // furthermore, it only makes sense with the above definition of MinGCost===1
-double MinimaxAStar::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 ) {
+double MinimaxAStarMulti::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 ) {
 	double hmax = env->HCost( pos1[0], pos2[0] );
 	double hmin = 0.;
 	double h;
@@ -338,3 +351,10 @@ double MinimaxAStar::HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool 
 
 }
 
+
+void MinimaxAStarMulti::clear_cache() {
+	min_cost.clear();
+	max_cost.clear();
+	queue = MyPriorityQueue();
+	return;
+};

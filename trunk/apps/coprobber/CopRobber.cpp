@@ -22,7 +22,7 @@
 #include "Dijkstra.h"
 #include "MaximumNormGraphMapHeuristic.h"
 #include "MaximumNormAbstractGraphMapHeuristic.h"
-//#include "MinimaxAStar.h"
+#include "MinimaxAStar.h"
 #include "MinimaxAStar_optimized.h"
 #include "TwoPlayerDijkstra.h"
 //#include "DSCREnvironment.h"
@@ -41,12 +41,19 @@
 #include "dscrsimulation/TrailMaxUnit.h"
 #include "dscrsimulation/PRAStarMapUnit.h"
 #include "dscrsimulation/PRAStarGraphUnit.h"
+#include "dscrsimulation/OptimalUnit.h"
+#include "TwoCopsDijkstra.h"
+#include "TwoCopsRMAStar.h"
 
 
 //std::vector<CRAbsMapSimulation *> unitSims;
 int mazeSize = 10;
-DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment> *simulation;
+DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment> *simulation = NULL;
+LoadedCliqueAbstraction *cliqueabs = NULL;
+double view_translation_x = 0., view_translation_y = 0., view_translation_z = 0.;
 time_t last_simulation_update;
+
+bool movie_on = false;
 
 /*------------------------------------------------------------------------------
 | Main
@@ -80,9 +87,12 @@ int main(int argc, char* argv[])
 		printf( "dsrandombeacons     - different speed random beacons\n" );
 		printf( "\n" );
 		printf( "testpoints          - generation of problem sets\n" );
+		printf( "testpoints_two_cops - generation of problem sets for two cops on BGMaps\n" );
 		printf( "experiment_optimal  - experiment for \"Optimal Solutions to MTS\"\n" );
+		printf( "experiment_optimal_two_cops  - experiment with optimal algorithms for two cops\n" );
 		printf( "experiment_allstate - Dijkstra vs. Markov\n" );
 		printf( "experiment_graphs   - computation of some statistics on graphs\n" );
+		printf( "characterization_2copwin - test computations for 2-cop-win characterization\n" );
 		printf( "website             - website interface\n" );
 		printf( "experiment_suboptimal - experiment for \"Suboptimal Solutions to MTS\"\n" );
 		return(1);
@@ -148,14 +158,23 @@ int main(int argc, char* argv[])
 	else if( strcmp( argv[1], "testpoints" ) == 0 ) {
 		compute_testpoints( argc, argv );
 	}
+	else if( strcmp( argv[1], "testpoints_two_cops" ) == 0 ) {
+		compute_testpoints_two_cops( argc, argv );
+	}
 	else if( strcmp( argv[1], "experiment_optimal" ) == 0 ) {
 		compute_experiment_optimal( argc, argv );
+	}
+	else if( strcmp( argv[1], "experiment_optimal_two_cops" ) == 0 ) {
+		compute_experiment_optimal_two_cops( argc, argv );
 	}
 	else if( strcmp( argv[1], "experiment_allstate" ) == 0 ) {
 		compute_experiment_allstate( argc, argv );
 	}
 	else if( strcmp( argv[1], "experiment_graphs" ) == 0 ) {
 		compute_experiment_graphs( argc, argv );
+	}
+	else if( strcmp( argv[1], "characterization_2copwin" ) == 0 ) {
+		compute_characterization_2copwin( argc, argv );
 	}
 	else if( strcmp( argv[1], "website" ) == 0 ) {
 		compute_website_interface( argc, argv );
@@ -1156,6 +1175,59 @@ void compute_testpoints( int argc, char* argv[] ) {
 
 
 
+// problem set generation
+void compute_testpoints_two_cops( int argc, char* argv[] ) {
+	char map_file[100], problem_file[100];
+	Map *m = NULL;
+	time_t t; time( &t ); srandom( (unsigned int) t );
+	unsigned int num;
+	int j;
+
+	sprintf( problem_file, "problem_%s.dat", argv[2] );
+	FILE *fhandler = fopen( problem_file, "w" );
+
+	FILE *file_with_maps = fopen( argv[2], "r" );
+	while( !feof( file_with_maps ) ) {
+		fscanf( file_with_maps, "%s\n", map_file );
+		fprintf( fhandler, "%s\n", map_file );
+		m = new Map( map_file );
+		Graph *g = GraphSearchConstants::GetGraph( m );
+
+		for( j = 0; j < 1000; j++ ) {
+			// generate random position for the robber
+			num = (unsigned int)floor(
+				(double)random()/(double)RAND_MAX * (double)g->GetNumNodes());
+			unsigned int rx = g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX);
+			unsigned int ry = g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY);
+
+			// generate random position for the cops
+			// within the nodes that can be reached from the robber ;-)
+			std::vector<node*>* reachable_nodes = g->getReachableNodes( g->GetNode( num ) );
+			num = (unsigned int)floor(
+				(double)random()/(double)RAND_MAX * (double)(reachable_nodes->size()-1) );
+			unsigned int c1x = (*reachable_nodes)[num]->GetLabelL(GraphSearchConstants::kMapX);
+			unsigned int c1y = (*reachable_nodes)[num]->GetLabelL(GraphSearchConstants::kMapY);
+
+			num = (unsigned int)floor(
+				(double)random()/(double)RAND_MAX * (double)(reachable_nodes->size()-1) );
+			unsigned int c2x = (*reachable_nodes)[num]->GetLabelL(GraphSearchConstants::kMapX);
+			unsigned int c2y = (*reachable_nodes)[num]->GetLabelL(GraphSearchConstants::kMapY);
+			delete reachable_nodes;
+
+			fprintf( fhandler, "(%u,%u) ", rx, ry );
+			// print out the starting position for the cops
+			fprintf( fhandler, "(%u,%u) (%u,%u)\n", c1x, c1y, c2x, c2y );
+		}
+
+		delete g;
+		delete m;
+	}
+	fclose( fhandler );
+	fclose( file_with_maps );
+};
+
+
+
 // TESTs for "Optimal solutions for Moving Target Search"
 void compute_experiment_optimal( int argc, char* argv[] ) {
 	char map_file[100], old_map_file[100];
@@ -1191,6 +1263,7 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 
 
 	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar = NULL;
+	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar_perfecth = NULL;
 	IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt = NULL;
 	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar = NULL;
 	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_dijkstra = NULL;
@@ -1205,6 +1278,8 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 		env = new MapEnvironment( m );
 
 		tidastar       = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+		tidastar_perfecth = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+		tidastar_perfecth->set_usePerfectDistanceHeuristic( true );
 		ipntt          = new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
 		astar          = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
 		astar_dijkstra = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
@@ -1229,6 +1304,18 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			clock_end     = clock();
 			nodesExpanded = tidastar->nodesExpanded;
 			nodesTouched  = tidastar->nodesTouched;
+		}
+
+		if( strcmp( argv[3], "tida_perfect" ) == 0 ) {
+			// if we want to test TIDA*
+			std::vector<xyLoc> pos;
+			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
+
+			clock_start   = clock();
+			result        = tidastar_perfecth->tida( pos );
+			clock_end     = clock();
+			nodesExpanded = tidastar_perfecth->nodesExpanded;
+			nodesTouched  = tidastar_perfecth->nodesTouched;
 		}
 
 		if( strcmp( argv[3], "ipn" ) == 0 ) {
@@ -1310,6 +1397,7 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 		if( feof( problem_file ) ) {
 			// cleanup
 			delete tidastar;
+			delete tidastar_perfecth;
 			delete ipntt;
 			delete astar;
 			delete astar_dijkstra;
@@ -1323,6 +1411,7 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			if( strcmp( map_file, old_map_file) != 0 ) {
 				// next map is different, thus delete everything
 				delete tidastar;
+				delete tidastar_perfecth;
 				delete ipntt;
 				delete astar;
 				delete astar_dijkstra;
@@ -1336,6 +1425,8 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 				m = new Map( map_file );
 				env = new MapEnvironment( m );
 				tidastar       = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+				tidastar_perfecth = new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+				tidastar_perfecth->set_usePerfectDistanceHeuristic( true );
 				ipntt          = new IPNTTables<xyLoc,tDirection,MapEnvironment>( env, true );
 				astar          = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
 				astar_dijkstra = new MinimaxAStar<xyLoc,tDirection,MapEnvironment>( env, 1, true );
@@ -1352,6 +1443,109 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 	fprintf( stdout, "Done.\n" );
 }
 
+
+
+// TESTs for "Optimal solutions for Moving Target Search"
+// review rebuttal
+// these experiments for with the problem file syntax of experiment_suboptimal
+void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
+	char map_file[100];
+	FILE *fhandler, *foutput;
+	clock_t clock_start, clock_end;
+	clock_start = clock_end = clock();
+	unsigned int rx, ry, c1x, c1y, c2x, c2y;
+	unsigned int result = 0;
+	unsigned int nodesExpanded = 0, nodesTouched = 0;
+	Map *m = NULL;
+	MaximumNormGraphMapHeuristic *gh = NULL;
+	Graph *g = NULL;
+	GraphEnvironment *env = NULL;
+
+	if( argc < 5 ) {
+		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
+		printf( "where <algorithm> = rma|rma_dijkstra|rma_perfect\n" );
+		exit(1);
+	}
+
+	fhandler = fopen( argv[2], "r" );
+	foutput  = fopen( argv[4], "w" );
+
+	TwoCopsRMAStar *astar          = NULL;
+	TwoCopsRMAStar *astar_dijkstra = NULL;
+	TwoCopsRMAStar *astar_perfecth = NULL;
+
+	while( !feof( fhandler ) ) {
+
+		fscanf( fhandler, "%s\n", map_file );
+		fprintf( foutput, "%s\n", map_file );
+		m = new Map( map_file );
+		fprintf( stdout, "map file: %s\n", m->getMapName() );
+
+		g   = GraphSearchConstants::GetGraph( m );
+		gh  = new MaximumNormGraphMapHeuristic( g );
+		env = new GraphEnvironment( g, gh );
+
+		astar          = new TwoCopsRMAStar( env );
+		astar_dijkstra = new TwoCopsRMAStar( env );
+		astar_dijkstra->set_useHeuristic( false );
+		astar_perfecth = new TwoCopsRMAStar( env );
+		astar_perfecth->set_usePerfectDistanceHeuristic( true );
+
+		for( int i = 0; i < 1000; i++ ) {
+
+			fscanf( fhandler, "(%d,%d) (%d,%d) (%d,%d)\n", &rx, &ry, &c1x, &c1y, &c2x, &c2y );
+			fprintf( foutput, "(%u,%u) (%u,%u) (%u,%u)", rx, ry, c1x, c1y, c2x, c2y );
+			fflush( foutput );
+
+			graphState r  = m->getNodeNum( rx, ry );
+			graphState c1 = m->getNodeNum( c1x, c1y );
+			graphState c2 = m->getNodeNum( c2x, c2y );
+
+			if( strcmp( argv[3], "rma" ) == 0 ) {
+				clock_start   = clock();
+				printf( "r = %lu, c1 = %lu, c2 = %lu\n", r, c1, c2 );
+				result        = astar->rmastar( r, c1, c2, true );
+				clock_end     = clock();
+				nodesExpanded = astar->nodesExpanded;
+				nodesTouched  = astar->nodesTouched;
+				printf( "nodes expanded: %u\n", nodesExpanded );
+				printf( "nodes touched : %u\n", nodesTouched );
+			}
+
+			if( strcmp( argv[3], "rma_dijkstra" ) == 0 ) {
+				clock_start   = clock();
+				result        = astar_dijkstra->rmastar( r, c1, c2, true );
+				clock_end     = clock();
+				nodesExpanded = astar_dijkstra->nodesExpanded;
+				nodesTouched  = astar_dijkstra->nodesTouched;
+			}
+
+			if( strcmp( argv[3], "rma_perfect" ) == 0 ) {
+				clock_start   = clock();
+				result        = astar_perfecth->rmastar( r, c1, c2, true );
+				clock_end     = clock();
+				nodesExpanded = astar_perfecth->nodesExpanded;
+				nodesTouched  = astar_perfecth->nodesTouched;
+			}
+
+			// write out the statistics
+			fprintf( foutput, " %u %lu %u %u\n",
+				result, (clock_end-clock_start)/1000, nodesExpanded, nodesTouched );
+			fflush( foutput );
+
+		} // all problem instances for the map
+		
+		// cleanup
+		delete astar;
+		delete env;
+		delete gh;
+		delete g;
+		delete m;
+	}
+	fclose( fhandler );
+	fclose( foutput );
+	fprintf( stdout, "Done.\n" );
+}
 
 
 
@@ -1427,16 +1621,17 @@ void compute_experiment_allstate( int argc, char* argv[] ) {
 void compute_experiment_graphs( int argc, char* argv[] ) {
 
 	for( int i = 4; i <= 9; i++ ) {
+		printf( "---------------- i = %d ---------------\n", i );
 //	char s[10]; sprintf( s, "graph%dc.out", i );
-//	char s[10]; sprintf( s, "graph%dcopwin.out", i );
-	char s[10]; sprintf( s, "planar_conn.%dcopwin.out", i );
+	char s[10]; sprintf( s, "graph%dcopwin.out", i );
+//	char s[10]; sprintf( s, "planar_conn.%dcopwin.out", i );
 
 		FILE *fhandler = fopen( s, "r" );
-//	FILE *fhandler = fopen( "graph2c.out", "r" );
 //	FILE *fcopwin  = fopen( "planar_out", "w" );
 	int num_cop_win = 0;
-	double maximum_st = 0.;
-	double maximum_ratio = 1.;
+	double maximum_capture_time = DBL_MIN;
+//	double maximum_st = 0.;
+//	double maximum_ratio = 1.;
 
 	while( !feof( fhandler ) ) {
 		// read the next graph from the file
@@ -1449,15 +1644,27 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 		GraphEnvironment *env = new GraphEnvironment( g, NULL );
 		Dijkstra *d = new Dijkstra( env, 1, true );
 		d->dijkstra();
-		TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment> *tpdijkstra = new TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment>( env, true );
+		//TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment> *tpdijkstra = new TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment>( env, true );
 
+		double temp_capture_time = DBL_MIN;
 		for( it = d->min_cost.begin(); it != d->min_cost.end(); it++ ) {
 			if( *it == DBL_MAX ) {
 				is_cop_win = false;
 				break;
 			}
+			temp_capture_time = max( *it, temp_capture_time );
 		}
 
+		if( is_cop_win ) {
+			if( temp_capture_time > maximum_capture_time ) {
+				maximum_capture_time = temp_capture_time;
+				printf( "capture time: %g\n", temp_capture_time );
+				printf( "graph:\n" );
+				writeGraph( stdout, g );
+			}
+			num_cop_win++;
+		}
+/*
 		if( is_cop_win ) {
 //			writeGraph( fcopwin, g );
 			num_cop_win++;
@@ -1537,8 +1744,8 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 				maximum_ratio = maximum_ratio_on_graph;
 			}
 		}
-
-		delete tpdijkstra;
+*/
+//		delete tpdijkstra;
 		delete d;
 		delete env;
 		delete g;
@@ -1546,12 +1753,53 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 	fclose( fhandler );
 //	fclose( fcopwin );
 	printf( "Number of cop-win graphs: %d\n", num_cop_win );
-	printf( "Maximal time to capture: %f\n", maximum_st );
-	printf( "Maximal ratio: %f\n", maximum_ratio );
+	printf( "Maximum capture time: %g\n", maximum_capture_time );
+//	printf( "Maximal time to capture: %f\n", maximum_st );
+//	printf( "Maximal ratio: %f\n", maximum_ratio );
 	}
 }
 
 
+// code for testing 2-cop-win characterization
+void compute_characterization_2copwin( int argc, char* argv[] ) {
+
+	//int i = 9;
+	//char s[30];
+	//sprintf( s, "planar_conn.%d.out", i );
+	//
+	//FILE *fhandler = fopen( s, "r" );
+	//Graph *g = readGraph( fhandler );
+	//fclose( fhandler );
+
+	Map *m = new Map( "AR0082SR.map" );
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
+
+	// determine whether this graph is cop win or not
+	GraphEnvironment *env = new GraphEnvironment( g, gh );
+
+	//TwoCopsDijkstra *tcd = new TwoCopsDijkstra( env );
+	//printf( "2-cop-win: %d\n", tcd->is_two_cop_win() );
+	//tcd->WriteValuesToDisk( "mymap_values.dat" );
+
+	//delete tcd;
+
+	TwoCopsRMAStar *astar = new TwoCopsRMAStar( env );
+	graphState r = m->getNodeNum( 27,39 );
+	graphState c1 = m->getNodeNum( 32,33 );
+	graphState c2 = m->getNodeNum( 31,31 );
+	printf( "%lu %lu %lu => %u\n", r, c1, c2, astar->rmastar( r, c1, c2, true ) );
+	printf( "nodes expanded: %u\n", astar->nodesExpanded );
+	printf( "nodes touched : %u\n", astar->nodesTouched );
+	astar->set_usePerfectDistanceHeuristic( true );
+	printf( "%lu %lu %lu => %u\n", r, c1, c2, astar->rmastar( r, c1, c2, true ) );
+	printf( "nodes expanded: %u\n", astar->nodesExpanded );
+	printf( "nodes touched : %u\n", astar->nodesTouched );
+
+	delete astar;
+	delete env;
+	delete g;
+}
 
 
 // code for Cops and Robber website interface
@@ -1904,6 +2152,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			unsigned int rx, ry, cx, cy;
 			fscanf( fhandler, "(%d,%d) (%d,%d)\n", &rx, &ry, &cx, &cy );
 			fprintf( foutput, "(%u,%u) (%u,%u)", rx, ry, cx, cy );
+			fflush( foutput );
 
 			// build the actual position data structure
 			std::vector<graphState> pos;
@@ -1911,8 +2160,10 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			pos.push_back( m->getNodeNum( cx, cy ) );
 
 			// now find out the optimal value
-			if( compute_optimal_solution )
+			if( compute_optimal_solution ) {
 				fprintf( foutput, " %g", dsdijkstra->Value( pos, true ) );
+				fflush( foutput );
+			}
 
 			// for each cop algorithm
 			for( unsigned int cop_alg = 0; cop_alg < cop_algorithms.size(); cop_alg++ ) {
@@ -2077,6 +2328,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						
 						if( strcmp( robber_algorithms[robber_alg], "optimal" ) == 0 ) {
 							fprintf( foutput, " %g", value );
+							fflush( foutput );
 						} else {
 							double expected_value = (double)timer_average/(double)calculations;
 							double std_diviation  = sqrt( (double)timer_stddiviation/(double)calculations
@@ -2164,26 +2416,82 @@ void CreateSimulation( int id ) {
 */
 
 
+/*
+	int robber_node_num = 21796;
+	int cop_node_num = 21989;
+
 	FILE *fhandler = fopen( "graph", "r" );
 	Graph *g = readGraph( fhandler, true );
 	printf( "num nodes: %d\n", g->GetNumNodes() );
 	printf( "num edges: %d\n", g->GetNumEdges() );
-	LoadedCliqueAbstraction *cliqueabs = new LoadedCliqueAbstraction( g );
+	cliqueabs = new LoadedCliqueAbstraction( g );
 	AbstractionGraphEnvironment *env = new AbstractionGraphEnvironment( cliqueabs, 0, NULL );
 
 	simulation = new DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment>( env, true, 2, false );
 	simulation->SetPaused( true );
 	TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment> *runit =
-		new TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>( 21796, 1, 2 );
+		new TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>( robber_node_num, 1, 2 );
 	runit->SetColor( 1., 0., 0. );
 	unsigned int robberunitnumber = simulation->AddRobber( runit, 1. );
 	PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
-		new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 21989, 2 );
+		new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, cop_node_num, 2 );
 	cunit->SetColor( 0., 0., 1. );
 	unsigned int copunitnumber = simulation->AddCop( cunit, 1. );
 
 	runit->SetCopUnit( copunitnumber );
 	cunit->SetRobberUnit( robberunitnumber );
+
+	// get the translations that are neccessary for port 3 and 4
+	double x1 = g->GetNode( robber_node_num )->GetLabelF( GraphAbstractionConstants::kXCoordinate );
+	double x2 = g->GetNode( cop_node_num    )->GetLabelF( GraphAbstractionConstants::kXCoordinate );
+	double y1 = g->GetNode( robber_node_num )->GetLabelF( GraphAbstractionConstants::kYCoordinate );
+	double y2 = g->GetNode( cop_node_num    )->GetLabelF( GraphAbstractionConstants::kYCoordinate );
+	double z1 = g->GetNode( robber_node_num )->GetLabelF( GraphAbstractionConstants::kZCoordinate );
+	double z2 = g->GetNode( cop_node_num    )->GetLabelF( GraphAbstractionConstants::kZCoordinate );
+
+	//view_translation_x = fabs(x1-x2);
+	//view_translation_y = fabs(y1-y2);
+	//view_translation_z = sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*tan(PI/8.);
+
+	view_translation_x = 7. * env->scale();
+	view_translation_y = 7. * env->scale();
+	view_translation_z = 2. * env->scale();
+	// set camera one on the robber (from the view of the cop)
+	pRecContext context = getCurrentContext();
+	recCamera reccamera = context->camera[0];
+	double factor_x = 1., factor_y = 1.;
+	if( x1-x2 < 0 ) factor_x = -1.;
+	if( y1-y2 < 0 ) factor_y = -1.;
+	reccamera.viewPos.x = x2 - 2. * factor_x * view_translation_x;
+	reccamera.viewPos.y = y2 - 2. * factor_y * view_translation_y;
+	reccamera.viewPos.z = z2 - 2. * view_translation_z;
+	reccamera.viewDir.x = x1 - reccamera.viewPos.x;
+	reccamera.viewDir.y = y1 - reccamera.viewPos.y;
+	reccamera.viewDir.z = z1 - reccamera.viewPos.z;
+	reccamera.viewUp.x = 0.;
+	reccamera.viewUp.y = 0.;
+	reccamera.viewUp.z = -1.;
+	context->camera[0] = reccamera;
+	updateProjection( context, 0 );
+	// set camera two on the cop (from the view of the robber)
+	reccamera = context->camera[1];
+	factor_x = 1., factor_y = 1.;
+	if( x2-x1 < 0 ) factor_x = -1.;
+	if( y2-y1 < 0 ) factor_y = -1.;
+	reccamera.viewPos.x = x1 - 2. * factor_x * view_translation_x;
+	reccamera.viewPos.y = y1 - 2. * factor_y * view_translation_y;
+	reccamera.viewPos.z = z1 - 2. * view_translation_z;
+	reccamera.viewDir.x = x2 - reccamera.viewPos.x;
+	reccamera.viewDir.y = y2 - reccamera.viewPos.y;
+	reccamera.viewDir.z = z2 - reccamera.viewPos.z;
+	reccamera.viewUp.x = 0.;
+	reccamera.viewUp.y = 0.;
+	reccamera.viewUp.z = -1.;
+	context->camera[1] = reccamera;
+	updateProjection( context, 1 );
+
+
+
 
 	// add the other cops to the simulation
 	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 16179, 2 );
@@ -2210,9 +2518,9 @@ void CreateSimulation( int id ) {
 	cunit = new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( cliqueabs, 1104, 2 );
 	cunit->SetColor( 0., 0., 1. );
 	simulation->AddCop( cunit, 1. );
+*/
 
 
-/*
 	Map *map;
 	if( gDefaultMap[0] == 0 ) {
 		map = new Map( mazeSize, mazeSize );
@@ -2225,13 +2533,14 @@ void CreateSimulation( int id ) {
 	// global variable, see above
 	simulation = new DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment>( env, true, 2, false );
 
-	TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment> *runit =
-		new TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca->GetNodeFromMap(41,59)->GetNum(), 1, 2 );
+	//TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment> *runit =
+	//	new TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca->GetNodeFromMap(34,74)->GetNum(), 1, 2 );
+	OptimalUnit *runit = new OptimalUnit( env, mca->GetNodeFromMap(34,74)->GetNum(), 2 );
 	runit->SetColor( 1., 0., 0. );
 	unsigned int robberunitnumber = simulation->AddRobber( runit, 1. );
 
-	PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
-		new PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca, mca->GetNodeFromMap(49,27)->GetNum(), 2 );
+	PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
+		new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca, mca->GetNodeFromMap(76,12)->GetNum(), 2 );
 	cunit->SetColor( 0., 0., 1. );
 	unsigned int copunitnumber = simulation->AddCop( cunit, 1. );
 
@@ -2239,7 +2548,7 @@ void CreateSimulation( int id ) {
 	cunit->SetRobberUnit( robberunitnumber );
 
 	sleep( 5 );
-*/
+
 
 	return;
 }
@@ -2249,6 +2558,7 @@ void InstallHandlers() {
 	InstallCommandLineHandler(MyCLHandler, "-size", "-size integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallWindowHandler(MyWindowHandler);
 	InstallKeyboardHandler(MyDisplayHandler, "pause", "pause/unpause simulation", kAnyModifier, 'p');
+	InstallKeyboardHandler(MyDisplayHandler, "movie", "record several pictures for movie creation", kAnyModifier, 'm' );
 	InstallMouseClickHandler(MyClickHandler);
 	return;
 }
@@ -2263,6 +2573,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType) {
 	{
 		printf("Window %ld created\n", windowID);
 		SetNumPorts( windowID, 1 );
+		SetActivePort( windowID, 0 );
+		//SetNumPorts( windowID, 3 );
+		//SetActivePort( windowID, 2 );
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		CreateSimulation(windowID);
 		time(&last_simulation_update);
@@ -2288,18 +2601,60 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *) {
 	graphState s = 32511;
 	graphenv->OpenGLDraw( windowID, s );
 */
-	if( viewport == 0 ) {
-		simulation->OpenGLDraw( windowID );
-		time_t temptime; time(&temptime);
-		if( last_simulation_update < temptime ) {
-			if( !simulation->Done() && !simulation->GetPaused() ) {
-				simulation->StepTime( 1. );
-				printf( "simulation time is: %g\n", simulation->GetSimulationTime() );
-				printf( "---------------\n" );
-			}
-			time(&last_simulation_update);
+	simulation->OpenGLDraw( windowID );
+	time_t temptime; time(&temptime);
+	if( last_simulation_update < temptime ) {
+		if( !simulation->Done() && !simulation->GetPaused() ) {
+			simulation->StepTime( 1. );
+			printf( "simulation time is: %g\n", simulation->GetSimulationTime() );
+			printf( "---------------\n" );
 		}
+		time(&last_simulation_update);
 	}
+	/*
+	if( viewport == 0 ) {
+		int old_port = GetActivePort( windowID );
+		SetActivePort( windowID, viewport );
+		SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* sinfo = simulation->GetSimulationInfo();
+		node *n = cliqueabs->GetAbstractGraph(0)->GetNode( sinfo->unitinfos[0].currentState );
+		double x1 = n->GetLabelF( GraphAbstractionConstants::kXCoordinate );
+		double y1 = n->GetLabelF( GraphAbstractionConstants::kYCoordinate );
+		double z1 = n->GetLabelF( GraphAbstractionConstants::kZCoordinate );
+		cameraLookAt( x1, y1, z1, 0.4 );
+		n = cliqueabs->GetAbstractGraph(0)->GetNode( sinfo->unitinfos[1].currentState );
+		double x2 = n->GetLabelF( GraphAbstractionConstants::kXCoordinate );
+		double y2 = n->GetLabelF( GraphAbstractionConstants::kYCoordinate );
+		double z2 = n->GetLabelF( GraphAbstractionConstants::kZCoordinate );
+		double factor_x = 1., factor_y = 1.;
+		if( x1-x2 < 0 ) factor_x = -1.;
+		if( y1-y2 < 0 ) factor_y = -1.;
+		if( !fequal( x1, x2 ) || !fequal( y1, y2 ) )
+			cameraMoveTo( x2-2.*factor_x*view_translation_x, y2-2.*factor_y*view_translation_y, z2-2.*view_translation_z, 0.5 );
+
+		SetActivePort( windowID, old_port );
+	}
+	if( viewport == 1 ) {
+		int old_port = GetActivePort( windowID );
+		SetActivePort( windowID, viewport );
+		SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* sinfo = simulation->GetSimulationInfo();
+		node *n = cliqueabs->GetAbstractGraph(0)->GetNode( sinfo->unitinfos[1].currentState );
+		double x1 = n->GetLabelF( GraphAbstractionConstants::kXCoordinate );
+		double y1 = n->GetLabelF( GraphAbstractionConstants::kYCoordinate );
+		double z1 = n->GetLabelF( GraphAbstractionConstants::kZCoordinate );
+		cameraLookAt( x1, y1, z1, 0.4 );
+		n = cliqueabs->GetAbstractGraph(0)->GetNode( sinfo->unitinfos[0].currentState );
+		double x2 = n->GetLabelF( GraphAbstractionConstants::kXCoordinate );
+		double y2 = n->GetLabelF( GraphAbstractionConstants::kYCoordinate );
+		double z2 = n->GetLabelF( GraphAbstractionConstants::kZCoordinate );
+		double factor_x = 1., factor_y = 1.;
+		if( x1-x2 < 0 ) factor_x = -1.;
+		if( y1-y2 < 0 ) factor_y = -1.;
+		if( !fequal( x1, x2 ) || !fequal( y1, y2 ) )
+			cameraMoveTo( x2-2.*factor_x*view_translation_x, y2-2.*factor_y*view_translation_y, z2-2.*view_translation_z, 0.5 );
+
+		SetActivePort( windowID, old_port );
+	}
+	*/
 	return;
 }
 
@@ -2328,6 +2683,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) {
 		case 'p': // pause/unpause simulation
 			simulation->SetPaused( !simulation->GetPaused() );
 			break;
+		case 'm':
+			if( movie_on ) {
+				movie_on = false;
+				//RecordMovie( movie_on );
+			} else {
+				movie_on = true;
+				//RecordMovie( movie_on );
+			}
 	}
 	return;
 }

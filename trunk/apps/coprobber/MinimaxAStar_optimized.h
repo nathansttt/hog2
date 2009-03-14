@@ -167,7 +167,6 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 			mclit = min_cost.find( qe.pos );
 
 			if( mclit == min_cost.end() || (mclit != min_cost.end() && mclit->second > qe.gvalue) ) {
-				nodesExpanded++;
 
 				min_cost[qe.pos] = qe.gvalue;
 
@@ -180,6 +179,7 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 				env->GetSuccessors( qe.pos[0], myneighbors );
 				if( canPass )
 					myneighbors.push_back( qe.pos[0] );
+				nodesExpanded++;
 
 				/*
 				fprintf( stdout, "neighbors = " );
@@ -216,7 +216,6 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 			}
 
 		} else {
-			nodesExpanded++;
 
 			mclit = max_cost.find( qe.pos );
 
@@ -228,6 +227,7 @@ double MinimaxAStar<state,action,environment>::astar( CRState goal_pos, bool goa
 				env->GetSuccessors( qe.pos[1], myneighbors );
 				if( canPass )
 					myneighbors.push_back( qe.pos[1] );
+				nodesExpanded++;
 
 				/*
 				fprintf( stdout, "neighbors = " );
@@ -275,6 +275,7 @@ double MinimaxAStar<state,action,environment>::compute_target_value( CRState &s 
 	env->GetSuccessors( s[0], myneighbors );
 	if( canPass )
 		myneighbors.push_back( s[0] );
+	nodesExpanded++;
 
 	// now, for all successor states
 	for( typename std::vector<state>::iterator it = myneighbors.begin();

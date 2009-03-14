@@ -80,7 +80,9 @@ public:
 
 	void OpenGLDraw(int window);
 
-	SimulationInfo<state,action,environment>* GetSimulationInfo();
+	SimulationInfo<state,action,environment>* GetSimulationInfo() {
+		return &sinfo;
+	};
 
 protected:
 	void StepUnitTime( unsigned int index, double timeStep);

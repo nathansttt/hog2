@@ -1,4 +1,5 @@
 #include "TIDAStar_optimized.h"
+#include "FloydWarshall.h"
 
 // specification for state=xyLoc
 
@@ -8,7 +9,11 @@ double TIDAStar<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool m
 //	if( pos[0] == pos[1] ) return 0.;
 
 	double dist;
-	dist = max( abs(pos[1].x - pos[0].x), abs(pos[1].y - pos[0].y) );
+	if( usePerfectDistanceHeuristic ) {
+		dist = distance_heuristic[env->GetMap()->getNodeNum(pos[1].x,pos[1].y)][env->GetMap()->getNodeNum(pos[0].x,pos[0].y)];
+	} else {
+		dist = max( abs(pos[1].x - pos[0].x), abs(pos[1].y - pos[0].y) );
+	}
 
 	if( canPause )
 		return( 2. * dist - (minsTurn?MinGCost(pos,pos):0.) );
@@ -45,3 +50,22 @@ double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinGCost( CRState &p1, CRSta
 	return 1.;
 }
 */
+
+
+template<>
+void TIDAStar<xyLoc,tDirection,MapEnvironment>::set_usePerfectDistanceHeuristic( bool set ) {
+	usePerfectDistanceHeuristic = set;
+
+	if( set ) {
+		Map *m = env->GetMap();
+		Graph *g = GraphSearchConstants::GetGraph( m );
+		// set all weights in the graph to 1.
+		edge_iterator eit = g->getEdgeIter();
+		edge *e = g->edgeIterNext( eit );
+		while( e ) {
+			e->setWeight( 1. );
+			e = g->edgeIterNext( eit );
+		}
+		FloydWarshall( g, distance_heuristic );
+	}
+};

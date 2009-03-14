@@ -36,9 +36,6 @@ class TrailMaxUnit: public Unit<state,action,environment> {
 
 	protected:
 
-	// gives back kStay for MapEnvironment and (current_pos,current_pos) for GraphEnvironment
-	action nomove();
-
 	GLfloat r, g, b;
 	state current_pos;
 	unsigned int k, copunit, cop_speed;
@@ -76,7 +73,7 @@ bool TrailMaxUnit<state,action,environment>::MakeMove( environment *env, Occupan
 
 	// if the cop that we have to run away from is not set yet
 	if( copunit == 0 || done ) {
-		a = nomove();
+		a = env->GetAction( current_pos, current_pos );
 		return false;
 	}
 
@@ -99,7 +96,7 @@ bool TrailMaxUnit<state,action,environment>::MakeMove( environment *env, Occupan
 		pathcache.erase( pathcache.begin() );
 		return true;
 	} else {
-		a = nomove();
+		a = env->GetAction( current_pos, current_pos );
 		return false;
 	}
 };
@@ -121,14 +118,6 @@ template<>
 void TrailMaxUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int window, GraphEnvironment *env, SimulationInfo<graphState,graphMove,GraphEnvironment>* );
 template<>
 void TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int window, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* );
-template<>
-tDirection TrailMaxUnit<xyLoc,tDirection,MapEnvironment>::nomove();
-template<>
-tDirection TrailMaxUnit<xyLoc,tDirection,AbsMapEnvironment>::nomove();
-template<>
-graphMove TrailMaxUnit<graphState,graphMove,GraphEnvironment>::nomove();
-template<>
-graphMove TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>::nomove();
 
 
 #endif

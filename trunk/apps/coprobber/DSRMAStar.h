@@ -153,12 +153,12 @@ double DSRMAStar<state,action,environment>::rmastar( CRState goal_pos, bool goal
 			mclit = min_cost.find( qe.pos );
 
 			if( mclit == min_cost.end() || (mclit != min_cost.end() && mclit->second > qe.gvalue) ) {
-				nodesExpanded++;
 
 				min_cost[qe.pos] = qe.gvalue;
 
 				// get the predecessor states
 				dscrenv->GetRobberSuccessors( qe.pos, myneighbors, false );
+				nodesExpanded++;
 
 				/*
 				fprintf( stdout, "neighbors = " );
@@ -193,7 +193,6 @@ double DSRMAStar<state,action,environment>::rmastar( CRState goal_pos, bool goal
 			}
 
 		} else {
-			nodesExpanded++;
 
 			mclit = max_cost.find( qe.pos );
 
@@ -202,6 +201,7 @@ double DSRMAStar<state,action,environment>::rmastar( CRState goal_pos, bool goal
 				max_cost[qe.pos] = qe.gvalue;
 
 				dscrenv->GetCopSuccessors( qe.pos, myneighbors );
+				nodesExpanded++;
 
 				/*
 				fprintf( stdout, "neighbors = " );
@@ -247,6 +247,7 @@ double DSRMAStar<state,action,environment>::compute_target_value( CRState &s ) {
 	std::vector<state> myneighbors;
 
 	dscrenv->GetRobberSuccessors( s, myneighbors );
+	nodesExpanded++;
 
 	// now, for all successor states
 	for( typename std::vector<state>::iterator it = myneighbors.begin();

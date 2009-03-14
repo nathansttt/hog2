@@ -26,9 +26,12 @@ void compute_dsdatpdijkstra( int argc, char* argv[] );
 void compute_dsrandombeacons( int argc, char* argv[] );
 // tests
 void compute_testpoints( int argc, char* argv[] );
+void compute_testpoints_two_cops( int argc, char* argv[] );
 void compute_experiment_optimal( int argc, char* argv[] );
+void compute_experiment_optimal_two_cops( int argc, char* argv[] );
 void compute_experiment_allstate( int argc, char* argv[] );
 void compute_experiment_graphs( int argc, char* argv[] );
+void compute_characterization_2copwin( int argc, char* argv[] );
 void compute_website_interface( int argc, char* argv[] );
 void compute_experiment_suboptimal( int argc, char* argv[] );
 
