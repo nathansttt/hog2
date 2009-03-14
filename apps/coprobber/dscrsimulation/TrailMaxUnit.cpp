@@ -2,27 +2,6 @@
 #include "GLUtil.h"
 
 template<>
-tDirection TrailMaxUnit<xyLoc,tDirection,MapEnvironment>::nomove() {
-	return kStay;
-};
-
-template<>
-tDirection TrailMaxUnit<xyLoc,tDirection,AbsMapEnvironment>::nomove() {
-	return kStay;
-};
-
-template<>
-graphMove TrailMaxUnit<graphState,graphMove,GraphEnvironment>::nomove() {
-	return graphMove(current_pos,current_pos);
-};
-
-template<>
-graphMove TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>::nomove() {
-	return graphMove(current_pos,current_pos);
-};
-
-
-template<>
 void TrailMaxUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int, MapEnvironment *env, SimulationInfo<xyLoc,tDirection,MapEnvironment>* ) {
 	GLdouble xx, yy, zz, rad;
 	Map *m = env->GetMap();

@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/absmapalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/shared -I$(ROOT)/abstraction -I$(ROOT)/gui -I$(ROOT)/simulation -I$(ROOT)/abstractionalgorithms -I$(ROOT)/environments -I$(ROOT)/mapalgorithms -I$(ROOT)/algorithms -I$(ROOT)/generic -I$(ROOT)/utils -I$(ROOT)/graph -DGL_GLEXT_PROTOTYPES -L/usr/X11R6/lib -I/usr/include
+PROJ_CXXFLAGS = -I$(ROOT)/absmapalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/shared -I$(ROOT)/abstraction -I$(ROOT)/gui -I$(ROOT)/simulation -I$(ROOT)/abstractionalgorithms -I$(ROOT)/environments -I$(ROOT)/mapalgorithms -I$(ROOT)/algorithms -I$(ROOT)/generic -I$(ROOT)/utils -I$(ROOT)/graph
 
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
@@ -83,4 +83,7 @@ SRC_CPP = \
 	apps/coprobber/dscrsimulation/TrailMaxUnit.cpp \
 	apps/coprobber/dscrsimulation/PRAStarMapUnit.cpp \
 	apps/coprobber/dscrsimulation/PRAStarGraphUnit.cpp \
+	apps/coprobber/dscrsimulation/OptimalUnit.cpp \
+	apps/coprobber/TwoCopsDijkstra.cpp \
+	apps/coprobber/TwoCopsRMAStar.cpp \
 	apps/coprobber/CopRobber.cpp

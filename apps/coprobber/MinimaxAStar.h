@@ -5,13 +5,13 @@
 #include "CopRobberGame.h"
 #include "MyHash.h"
 
-#ifndef MINIMAXASTAR_H
-#define MINIMAXASTAR_H
+#ifndef MINIMAXASTARMULTI_H
+#define MINIMAXASTARMULTI_H
 
 /*
 	Implementation for one robber and multiple cops
 */
-class MinimaxAStar {
+class MinimaxAStarMulti {
 
 	public:
 
@@ -50,8 +50,8 @@ class MinimaxAStar {
 	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash> MyClosedList;
 
 	// constructor
-	MinimaxAStar( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass );
-	~MinimaxAStar();
+	MinimaxAStarMulti( GraphEnvironment *_env, unsigned int _number_of_cops, bool _canPass );
+	~MinimaxAStarMulti();
 
 	double astar( CRState pos, bool minFirst, double weight = 1. );
 
@@ -79,6 +79,8 @@ class MinimaxAStar {
 	// state => value
 //	std::vector<double> min_cost, max_cost;
 	MyClosedList min_cost, max_cost;
+
+	void clear_cache();
 
 };
 

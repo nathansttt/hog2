@@ -239,6 +239,7 @@ void DSDijkstra_MemOptim::push_end_states_on_queue() {
 		neighbors.clear();
 		dscrenv->GetCopSuccessors( pos, neighbors );
 		nodesExpanded++;
+		nodesTouched++;
 
 		postemp = pos;
 		qe.minFirst = true;

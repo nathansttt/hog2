@@ -130,10 +130,13 @@ double DSDijkstra<state,action,environment>::compute_target_value( CRState &s ) 
 	double tempvalue;
 	std::vector<state> myneighbors;
 	dscrenv->GetRobberSuccessors( temp, myneighbors );
+	nodesExpanded++;
 
 	// now, for all successor states
 	for( typename std::vector<state>::iterator it = myneighbors.begin();
 	     it != myneighbors.end(); it++ ) {
+
+		nodesTouched++;
 	
 		// build the state
 		temp[0] = *it;
@@ -166,6 +169,7 @@ void DSDijkstra<state,action,environment>::dsdijkstra() {
 
 		// get the element from the queue
 		qe = queue.top(); queue.pop();
+		nodesTouched++;
 
 		// verbose
 		//fprintf( stdout, "minFirst = %d, pos = (%u,%u)(%u,%u), value = %f\n", qe.minFirst, qe.pos[0].x, qe.pos[0].y, qe.pos[1].x, qe.pos[1].y, qe.value );
@@ -180,9 +184,11 @@ void DSDijkstra<state,action,environment>::dsdijkstra() {
 
 				std::vector<state> myneighbors;
 				dscrenv->GetRobberSuccessors( qe.pos, myneighbors, false );
+				nodesExpanded++;
 
 				// now, for all successor states
 				for( it = myneighbors.begin(); it != myneighbors.end(); it++ ) {
+					nodesTouched++;
 					// build the state
 					qe.pos[0] = *it;
 
@@ -213,8 +219,10 @@ void DSDijkstra<state,action,environment>::dsdijkstra() {
 				// get neighbors
 				std::vector<state> myneighbors;
 				dscrenv->GetCopSuccessors( qtemp.pos, myneighbors );
+				nodesExpanded++;
 
 				for( it = myneighbors.begin(); it != myneighbors.end(); it++ ) {
+					nodesTouched++;
 					
 					// build the next state
 					qtemp.pos[1] = *it;

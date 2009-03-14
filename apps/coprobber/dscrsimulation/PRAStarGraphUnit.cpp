@@ -46,7 +46,7 @@ void PraStarGraphUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int, G
 template<>
 void PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) {
 	node *n  = env->GetGraph()->GetNode( current_pos );
-	GLdouble x, y, z, rad = env->scale()/2.;
+	GLdouble x, y, z, rad = 0.01; //env->scale()/2.;
 	x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
 	y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
 	z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);

@@ -43,12 +43,14 @@ class TIDAStar {
 
 	// constructor
 	TIDAStar( environment *_env, bool _canPause ):
-		env(_env), canPause(_canPause) {};
+		env(_env), canPause(_canPause),usePerfectDistanceHeuristic(false) {};
 	~TIDAStar();
 
 	void clear_bounds_cache();
 
 	double tida( CRState &pos, bool minFirst = true );
+
+	void set_usePerfectDistanceHeuristic( bool usePerfectDistanceHeuristic );
 
 	unsigned int nodesExpanded, nodesTouched;
 	std::vector<unsigned int> iteration_nodesExpanded, iteration_nodesTouched;
@@ -64,6 +66,8 @@ class TIDAStar {
 
 	environment *env;
 	bool canPause;
+	bool usePerfectDistanceHeuristic;
+	std::vector<std::vector<double> > distance_heuristic;
 
 	// lower bound cache
 	BoundCache min_lcache, max_lcache;
@@ -84,6 +88,8 @@ template<>
 double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinHCost( CRState &pos, bool minsTurn );
 template<>
 double TIDAStar<xyLoc, tDirection, MapEnvironment>::MinGCost( CRState &p1, CRState &p2 );
+template<>
+void TIDAStar<xyLoc, tDirection, MapEnvironment>::set_usePerfectDistanceHeuristic( bool set );
 
 
 
@@ -255,6 +261,7 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double bou
 
 
 // protected functions
+/*
 template<class state, class action, class environment>
 double TIDAStar<state,action,environment>::MinHCost( CRState &pos, bool minsTurn ) {
 	if( GoalTest( pos ) ) return TerminalCost( pos ); 
@@ -275,6 +282,7 @@ double TIDAStar<state,action,environment>::MinGCost( CRState &p1, CRState &p2 ) 
 	return result;
 //	return 1.;
 }
+*/
 
 template<class state, class action, class environment>
 bool TIDAStar<state,action,environment>::GoalTest( CRState &pos ) {
