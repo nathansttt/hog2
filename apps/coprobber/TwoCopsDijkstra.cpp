@@ -123,6 +123,7 @@ void TwoCopsDijkstra::GetNeighbors( Position &pos, bool minFirst, std::set<Posit
 | Dijkstra implementation
 ------------------------------------------------------------------------------*/
 void TwoCopsDijkstra::dijkstra() {
+	nodesExpanded = 0; nodesTouched = 0;
 	QueueEntry qe;
 	std::set<Position> neighbors;
 	std::set<Position>::iterator it;
@@ -141,6 +142,7 @@ void TwoCopsDijkstra::dijkstra() {
 		// pop
 		qe = queue.front();
 		queue.pop();
+		nodesTouched++;
 
 		if( qe.minFirst ) {
 			// it is the cop's turn in qe
@@ -150,7 +152,9 @@ void TwoCopsDijkstra::dijkstra() {
 				min_cost[qe.pos] = qe.value;
 				// find all the positions the robber could have come from
 				GetNeighbors( qe.pos, false, neighbors );
+				nodesExpanded++;
 				for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
+					nodesTouched++;
 					qe.pos = *it;
 					if( max_cost[qe.pos] == UINT_MAX ) {
 						qe.value = compute_target_value( qe.pos );
@@ -172,7 +176,9 @@ void TwoCopsDijkstra::dijkstra() {
 				unsigned int backup_value = qe.value;
 				// find all the positions the cops could have come from
 				GetNeighbors( qe.pos, true, neighbors );
+				nodesExpanded++;
 				for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
+					nodesTouched++;
 					qe.pos = *it;
 					if( min_cost[qe.pos] == UINT_MAX ) {
 						qe.minFirst = true;
@@ -199,7 +205,9 @@ unsigned int TwoCopsDijkstra::compute_target_value( Position &pos ) {
 
 	// get the possible positions the robber could move to
 	GetNeighbors( pos, false, neighbors );
+	//nodesExpanded++;
 	for( std::set<Position>::iterator it = neighbors.begin(); it != neighbors.end(); it++ ) {
+		//nodesTouched++;
 		temp = min_cost[*it];
 		if( temp == UINT_MAX ) return UINT_MAX;
 		temp += 1;
@@ -228,6 +236,7 @@ void TwoCopsDijkstra::push_end_states_on_queue() {
 	for( unsigned int i = 0; i < numnodes; i++ ) {
 		// loop through the rest of the graph nodes - cop2
 		for( unsigned int j = i; j < numnodes; j++ ) {
+			nodesTouched++;
 
 			// case 1: robber is caught under cop1
 			crpos[0] = i;
@@ -239,7 +248,9 @@ void TwoCopsDijkstra::push_end_states_on_queue() {
 
 			// neighbors
 			GetNeighbors( pos, true, neighbors );
+			nodesExpanded++;
 			for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
+				nodesTouched++;
 				qe.pos = *it;
 				queue.push( qe );
 			}
@@ -247,6 +258,7 @@ void TwoCopsDijkstra::push_end_states_on_queue() {
 			// case 2: robber is caught under cop2
 			// if cop1 and cop2 are at same position this is not a new case
 			if( i != j ) {
+				nodesTouched++;
 				crpos[0] = j;
 				crpos[1] = i;
 				crpos[2] = j;
@@ -256,7 +268,9 @@ void TwoCopsDijkstra::push_end_states_on_queue() {
 
 				// neighbors
 				GetNeighbors( pos, true, neighbors );
+				nodesExpanded++;
 				for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
+					nodesTouched++;
 					qe.pos = *it;
 					queue.push( qe );
 				}

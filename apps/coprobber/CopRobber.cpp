@@ -44,6 +44,7 @@
 #include "dscrsimulation/OptimalUnit.h"
 #include "TwoCopsDijkstra.h"
 #include "TwoCopsRMAStar.h"
+#include "TwoCopsTIDAStar.h"
 
 
 //std::vector<CRAbsMapSimulation *> unitSims;
@@ -1473,6 +1474,8 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 	TwoCopsRMAStar *astar          = NULL;
 	TwoCopsRMAStar *astar_dijkstra = NULL;
 	TwoCopsRMAStar *astar_perfecth = NULL;
+	TwoCopsTIDAStar *tida          = NULL;
+	TwoCopsTIDAStar *tida_perfecth = NULL;
 
 	while( !feof( fhandler ) ) {
 
@@ -1485,11 +1488,20 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 		gh  = new MaximumNormGraphMapHeuristic( g );
 		env = new GraphEnvironment( g, gh );
 
-		astar          = new TwoCopsRMAStar( env );
-		astar_dijkstra = new TwoCopsRMAStar( env );
-		astar_dijkstra->set_useHeuristic( false );
-		astar_perfecth = new TwoCopsRMAStar( env );
-		astar_perfecth->set_usePerfectDistanceHeuristic( true );
+		if( strcmp( argv[3], "rma" ) == 0 ) {
+			astar          = new TwoCopsRMAStar( env );
+		} else if( strcmp( argv[3], "rma_dijkstra" ) == 0 ) {
+			astar_dijkstra = new TwoCopsRMAStar( env );
+			astar_dijkstra->set_useHeuristic( false );
+		} else if( strcmp( argv[3], "rma_perfect" ) == 0 ) {
+			astar_perfecth = new TwoCopsRMAStar( env );
+			astar_perfecth->set_usePerfectDistanceHeuristic( true );
+		} else if( strcmp( argv[3], "tida" ) == 0 ) {
+			tida           = new TwoCopsTIDAStar( env );
+		} else if( strcmp( argv[3], "tida_perfect" ) == 0 ) {
+			tida_perfecth  = new TwoCopsTIDAStar( env );
+			tida_perfecth->set_usePerfectDistanceHeuristic( true );
+		}
 
 		for( int i = 0; i < 1000; i++ ) {
 
@@ -1503,13 +1515,10 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 
 			if( strcmp( argv[3], "rma" ) == 0 ) {
 				clock_start   = clock();
-				printf( "r = %lu, c1 = %lu, c2 = %lu\n", r, c1, c2 );
 				result        = astar->rmastar( r, c1, c2, true );
 				clock_end     = clock();
 				nodesExpanded = astar->nodesExpanded;
 				nodesTouched  = astar->nodesTouched;
-				printf( "nodes expanded: %u\n", nodesExpanded );
-				printf( "nodes touched : %u\n", nodesTouched );
 			}
 
 			if( strcmp( argv[3], "rma_dijkstra" ) == 0 ) {
@@ -1528,6 +1537,22 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 				nodesTouched  = astar_perfecth->nodesTouched;
 			}
 
+			if( strcmp( argv[3], "tida" ) == 0 ) {
+				clock_start   = clock();
+				result        = tida->tida( r, c1, c2, true );
+				clock_end     = clock();
+				nodesExpanded = tida->nodesExpanded;
+				nodesTouched  = tida->nodesTouched;
+			}
+
+			if( strcmp( argv[3], "tida_perfect" ) == 0 ) {
+				clock_start   = clock();
+				result        = tida_perfecth->tida( r, c1, c2, true );
+				clock_end     = clock();
+				nodesExpanded = tida_perfecth->nodesExpanded;
+				nodesTouched  = tida_perfecth->nodesTouched;
+			}
+
 			// write out the statistics
 			fprintf( foutput, " %u %lu %u %u\n",
 				result, (clock_end-clock_start)/1000, nodesExpanded, nodesTouched );
@@ -1537,6 +1562,10 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 		
 		// cleanup
 		delete astar;
+		delete astar_dijkstra;
+		delete astar_perfecth;
+		delete tida;
+		delete tida_perfecth;
 		delete env;
 		delete gh;
 		delete g;
@@ -1771,7 +1800,7 @@ void compute_characterization_2copwin( int argc, char* argv[] ) {
 	//Graph *g = readGraph( fhandler );
 	//fclose( fhandler );
 
-	Map *m = new Map( "AR0082SR.map" );
+	Map *m = new Map( "mymap.map" );
 	Graph *g = GraphSearchConstants::GetGraph( m );
 	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
 
@@ -1784,19 +1813,21 @@ void compute_characterization_2copwin( int argc, char* argv[] ) {
 
 	//delete tcd;
 
-	TwoCopsRMAStar *astar = new TwoCopsRMAStar( env );
-	graphState r = m->getNodeNum( 27,39 );
-	graphState c1 = m->getNodeNum( 32,33 );
-	graphState c2 = m->getNodeNum( 31,31 );
+	/*TwoCopsRMAStar *astar = new TwoCopsRMAStar( env );
+	astar->set_useHeuristic( false );
+	graphState r = 5;
+	graphState c1 = 0;
+	graphState c2 = 0;
 	printf( "%lu %lu %lu => %u\n", r, c1, c2, astar->rmastar( r, c1, c2, true ) );
 	printf( "nodes expanded: %u\n", astar->nodesExpanded );
 	printf( "nodes touched : %u\n", astar->nodesTouched );
-	astar->set_usePerfectDistanceHeuristic( true );
-	printf( "%lu %lu %lu => %u\n", r, c1, c2, astar->rmastar( r, c1, c2, true ) );
-	printf( "nodes expanded: %u\n", astar->nodesExpanded );
-	printf( "nodes touched : %u\n", astar->nodesTouched );
+	delete astar;*/
+	TwoCopsDijkstra *tcd = new TwoCopsDijkstra( env );
+	tcd->dijkstra();
+	printf( "nodes expanded: %u\n", tcd->nodesExpanded );
+	printf( "nodes touched: %u\n", tcd->nodesTouched );
+	delete tcd;
 
-	delete astar;
 	delete env;
 	delete g;
 }
