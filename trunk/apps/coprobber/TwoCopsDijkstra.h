@@ -35,6 +35,8 @@ class TwoCopsDijkstra {
 
 	unsigned int Value( graphState &r, graphState &c1, graphState &c2 );
 
+	unsigned int nodesExpanded, nodesTouched;
+
 	protected:
 
 	// for internal use within hashing and move generation functions
