@@ -86,4 +86,5 @@ SRC_CPP = \
 	apps/coprobber/dscrsimulation/OptimalUnit.cpp \
 	apps/coprobber/TwoCopsDijkstra.cpp \
 	apps/coprobber/TwoCopsRMAStar.cpp \
+	apps/coprobber/TwoCopsTIDAStar.cpp \
 	apps/coprobber/CopRobber.cpp
