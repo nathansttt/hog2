@@ -128,6 +128,19 @@ void TwoCopsRMAStar::GetNeighbors( Position &pos, bool minFirst, std::set<Positi
 /*------------------------------------------------------------------------------
 | Dijkstra implementation
 ------------------------------------------------------------------------------*/
+/*
+void TwoCopsRMAStar::AddToOpenList( QueueEntry &qe ) {
+	if( queue.IsIn( qe ) ) {
+		QueueEntry qold = queue.find( qe );
+		if( qold.fvalue > qe.fvalue )
+			queue.DecreaseKey( qe );
+	} else
+		queue.Add( qe );
+	return;
+};
+*/
+
+
 unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState &c2, bool minFirst ) {
 
 	nodesExpanded = 0;
@@ -160,8 +173,7 @@ unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState 
 	while( !queue.empty() ) {
 
 		// pop
-		qe = queue.top();
-		queue.pop();
+		qe = queue.top();queue.pop();
 		nodesTouched++;
 
 		if( qe.pos == goal_pos && qe.minFirst == current_goal_minFirst ) {
@@ -177,6 +189,9 @@ unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState 
 			// if value isn't set yet
 			if( mclit == min_cost.end() || (mclit != min_cost.end() && mclit->second > qe.gvalue) ) {
 
+				if( mclit != min_cost.end() )
+					printf( "reexpansion min node\n" );
+
 				min_cost[qe.pos] = qe.gvalue;
 				// find all the positions the robber could have come from
 				GetNeighbors( qe.pos, false, neighbors );
@@ -186,12 +201,15 @@ unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState 
 					nodesTouched++;
 					qe.pos = *it;
 					qe.gvalue = compute_target_value( qe.pos );
+
+					if( qe.gvalue == UINT_MAX ) continue;
+
 					mclit = max_cost.find( qe.pos );
 
-					if( (mclit == max_cost.end() && qe.gvalue != UINT_MAX ) ||
-					    (mclit != max_cost.end() && mclit->second > qe.gvalue) ) {
+					if( mclit == max_cost.end() || (mclit != max_cost.end() && mclit->second > qe.gvalue) ) {
 						qe.minFirst = false;
 						qe.fvalue = qe.gvalue + HCost( qe.pos, qe.minFirst );
+						//AddToOpenList( qe );
 						queue.push( qe );
 					}
 				} // for all previous robber positions
@@ -203,8 +221,13 @@ unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState 
 
 			mclit = max_cost.find( qe.pos );
 
+			assert( mclit == max_cost.end() || (mclit != max_cost.end() && mclit->second >= qe.gvalue) );
+
 			// if value isn't set yet
 			if( mclit == max_cost.end() || (mclit != max_cost.end() && mclit->second > qe.gvalue ) ) {
+
+				if( mclit != max_cost.end() )
+					printf( "reexpansion max node\n" );
 
 				max_cost[qe.pos] = qe.gvalue;
 				unsigned int backup_value = qe.gvalue;
@@ -220,6 +243,7 @@ unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState 
 					if( mclit == min_cost.end() || (mclit != min_cost.end() && mclit->second > qe.gvalue ) ) {
 						qe.minFirst = true;
 						qe.fvalue   = qe.gvalue + HCost( qe.pos, qe.minFirst );
+						//AddToOpenList( qe );
 						queue.push( qe );
 					}
 				}
@@ -296,6 +320,7 @@ void TwoCopsRMAStar::push_end_states_on_queue() {
 				nodesTouched++;
 				qe.pos = *it;
 				qe.fvalue = qe.gvalue + HCost( qe.pos, qe.minFirst );
+				//AddToOpenList( qe );
 				queue.push( qe );
 			}
 
@@ -317,6 +342,7 @@ void TwoCopsRMAStar::push_end_states_on_queue() {
 					nodesTouched++;
 					qe.pos = *it;
 					qe.fvalue = qe.gvalue + HCost( qe.pos, qe.minFirst );
+					//AddToOpenList( qe );
 					queue.push( qe );
 				}
 			}
@@ -340,16 +366,24 @@ unsigned int TwoCopsRMAStar::HCost( Position &pos, bool &minFirst ) {
 
 	if( usePerfectDistanceHeuristic ) {
 		hmax = distance_heuristic[current_goal[0]][crpos[0]];
-		hmin = max( distance_heuristic[current_goal[1]][crpos[1]], distance_heuristic[current_goal[2]][crpos[2]] );
+		double cost11 = distance_heuristic[current_goal[1]][crpos[1]];
+		double cost12 = distance_heuristic[current_goal[1]][crpos[2]];
+		double cost21 = distance_heuristic[current_goal[2]][crpos[1]];
+		double cost22 = distance_heuristic[current_goal[2]][crpos[2]];
+		hmin = min( max( cost11, cost22 ), max( cost12, cost21 ) );
 	} else {
 		hmax = env->HCost( current_goal[0], crpos[0] );
-		hmin = max( env->HCost( current_goal[1], crpos[1] ), env->HCost( current_goal[2], crpos[2] ) );
+		double cost11 = env->HCost( current_goal[1],crpos[1] );
+		double cost12 = env->HCost( current_goal[1],crpos[2] );
+		double cost21 = env->HCost( current_goal[2],crpos[1] );
+		double cost22 = env->HCost( current_goal[2],crpos[2] );
+		hmin = min( max( cost11, cost22 ), max( cost12, cost21 ) );
 	}
 
-	if( minFirst == current_goal_minFirst )
+	if( current_goal_minFirst == minFirst )
 		return( (unsigned int) floor( 2. * max( hmax, hmin ) ) );
 	
-	if( hmax == hmin )
+	if( fequal( hmax, hmin ) )
 		return( (unsigned int) floor( 2. * hmax + 1. ) );
 
 	if( hmax < hmin ) {
