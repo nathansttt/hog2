@@ -9,7 +9,6 @@
 #include "GeneralBeamSearch.h"
 #include "GeneralBulb.h"
 #include "experiment_basics.h"
-#include "TestSearch.h"
 
 using namespace std;
 
@@ -175,7 +174,7 @@ int main(int argc, char** argv)
 	string cost_filename = "../../apps/dynamicsearch/input/4x4_ida_mnp_100__smaller_costs";
 
 	unsigned num_weights = 24;
-	unsigned stored_weights = 25;
+	//unsigned stored_weights = 25;
 	vector<unsigned> desired_puzzles;
 	for(unsigned i = 75; i < 100; i++) {
 		desired_puzzles.push_back(i);
