@@ -122,6 +122,7 @@ double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::HCost( CRState &pos1, bool
 	}
 */
 
+
 	// case where edge costs are all 1
 	double hmax, hmin;
 	if( usePerfectDistanceHeuristic ) {

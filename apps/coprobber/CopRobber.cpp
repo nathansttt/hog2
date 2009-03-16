@@ -1464,7 +1464,7 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 
 	if( argc < 5 ) {
 		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
-		printf( "where <algorithm> = rma|rma_dijkstra|rma_perfect\n" );
+		printf( "where <algorithm> = rma|rma_dijkstra|rma_perfect|tida|tida_perfect\n" );
 		exit(1);
 	}
 
@@ -1800,7 +1800,7 @@ void compute_characterization_2copwin( int argc, char* argv[] ) {
 	//Graph *g = readGraph( fhandler );
 	//fclose( fhandler );
 
-	Map *m = new Map( "mymap.map" );
+	Map *m = new Map( "AR0082SR.map" );
 	Graph *g = GraphSearchConstants::GetGraph( m );
 	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
 
@@ -1813,23 +1813,21 @@ void compute_characterization_2copwin( int argc, char* argv[] ) {
 
 	//delete tcd;
 
-	/*TwoCopsRMAStar *astar = new TwoCopsRMAStar( env );
-	astar->set_useHeuristic( false );
-	graphState r = 5;
-	graphState c1 = 0;
-	graphState c2 = 0;
-	printf( "%lu %lu %lu => %u\n", r, c1, c2, astar->rmastar( r, c1, c2, true ) );
-	printf( "nodes expanded: %u\n", astar->nodesExpanded );
-	printf( "nodes touched : %u\n", astar->nodesTouched );
-	delete astar;*/
-	TwoCopsDijkstra *tcd = new TwoCopsDijkstra( env );
-	tcd->dijkstra();
-	printf( "nodes expanded: %u\n", tcd->nodesExpanded );
-	printf( "nodes touched: %u\n", tcd->nodesTouched );
-	delete tcd;
+	TwoCopsRMAStar *astar = new TwoCopsRMAStar( env );
+	TwoCopsRMAStar::CRState crpos;
+	astar->set_usePerfectDistanceHeuristic( true );
+	crpos[0] = m->getNodeNum(33,42);
+	crpos[1] = m->getNodeNum(26,41);
+	crpos[2] = m->getNodeNum(34,40);
+	printf( "result: %u\n", astar->rmastar( crpos[0],crpos[1],crpos[2],true ) );
+	printf( "nodes Expanded: %u\n", astar->nodesExpanded );
+	printf( "nodes Touched : %u\n", astar->nodesTouched );
+	delete astar;
 
 	delete env;
+	delete gh;
 	delete g;
+	delete m;
 }
 
 
