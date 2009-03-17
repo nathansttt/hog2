@@ -35,6 +35,7 @@ class MultiAgentEnvironment: public SearchEnvironment<std::vector<state>, std::v
 	typedef std::vector<state> MAState;
 	typedef extended_action<action> SAAction; // single agent action
 	typedef std::vector<SAAction> MAMove;
+
 };
 
 /*------------------------------------------------------------------------------
