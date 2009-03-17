@@ -89,6 +89,7 @@ class CopRobberEnvironment : public virtual MultiAgentEnvironment<state,action> 
 	virtual double GCost(CRState &node1, CRState &node2);
 	virtual double GCost(CRState &node, CRMove &act);
 	virtual bool GoalTest(CRState &node, CRState& );
+	virtual bool GoalTest(CRState &node);
 
 	// I would recommend testing these functions extensively before using them
 	// because they won't work well with a lot of agents!
@@ -100,6 +101,14 @@ class CopRobberEnvironment : public virtual MultiAgentEnvironment<state,action> 
 	virtual void OpenGLDraw(int window) {};
 	virtual void OpenGLDraw(int window, CRState&) {};
 	virtual void OpenGLDraw(int window, CRState&, CRMove&) {};
+
+
+	// additional stuff for the new SearchEnvironment interface
+	virtual void StoreGoal(CRState &node) {};
+	virtual void ClearGoal() {};
+	virtual bool IsGoalStored() { return false; };
+	virtual double HCost(CRState &node1) { fprintf( stderr, "ERROR: HCost of one state is not implemented!\n" ); exit(1); return 0.; };
+
 
 	protected:
 	bool playerscanpass;
@@ -400,6 +409,11 @@ double CopRobberEnvironment<state,action>::GCost(CRState &node, CRMove &act) {
 // test's whether the robber has been caught or not
 template<class state, class action>
 bool CopRobberEnvironment<state,action>::GoalTest(CRState &node, CRState& ) {
+	return GoalTest( node );
+};
+
+template<class state, class action>
+bool CopRobberEnvironment<state,action>::GoalTest(CRState &node) {
 	for( unsigned int i = 1; i < node.size(); i++ ) {
 		if( node[0] == node[i] ) return true;
 	}

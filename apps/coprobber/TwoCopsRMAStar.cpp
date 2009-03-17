@@ -189,9 +189,6 @@ unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState 
 			// if value isn't set yet
 			if( mclit == min_cost.end() || (mclit != min_cost.end() && mclit->second > qe.gvalue) ) {
 
-				if( mclit != min_cost.end() )
-					printf( "reexpansion min node\n" );
-
 				min_cost[qe.pos] = qe.gvalue;
 				// find all the positions the robber could have come from
 				GetNeighbors( qe.pos, false, neighbors );
@@ -202,15 +199,16 @@ unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState 
 					qe.pos = *it;
 					qe.gvalue = compute_target_value( qe.pos );
 
-					if( qe.gvalue == UINT_MAX ) continue;
+					if( qe.gvalue != UINT_MAX ) {
 
-					mclit = max_cost.find( qe.pos );
+						mclit = max_cost.find( qe.pos );
 
-					if( mclit == max_cost.end() || (mclit != max_cost.end() && mclit->second > qe.gvalue) ) {
-						qe.minFirst = false;
-						qe.fvalue = qe.gvalue + HCost( qe.pos, qe.minFirst );
-						//AddToOpenList( qe );
-						queue.push( qe );
+						if( mclit == max_cost.end() || (mclit != max_cost.end() && mclit->second > qe.gvalue) ) {
+							qe.minFirst = false;
+							qe.fvalue = qe.gvalue + HCost( qe.pos, qe.minFirst );
+							//AddToOpenList( qe );
+							queue.push( qe );
+						}
 					}
 				} // for all previous robber positions
 
@@ -221,13 +219,10 @@ unsigned int TwoCopsRMAStar::rmastar( graphState &r, graphState &c1, graphState 
 
 			mclit = max_cost.find( qe.pos );
 
-			assert( mclit == max_cost.end() || (mclit != max_cost.end() && mclit->second >= qe.gvalue) );
+			//assert( mclit == max_cost.end() || (mclit != max_cost.end() && mclit->second >= qe.gvalue) );
 
 			// if value isn't set yet
 			if( mclit == max_cost.end() || (mclit != max_cost.end() && mclit->second > qe.gvalue ) ) {
-
-				if( mclit != max_cost.end() )
-					printf( "reexpansion max node\n" );
 
 				max_cost[qe.pos] = qe.gvalue;
 				unsigned int backup_value = qe.gvalue;

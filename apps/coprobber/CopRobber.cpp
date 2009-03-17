@@ -866,7 +866,7 @@ void compute_dsrma( int argc, char* argv[] ) {
 	MapEnvironment *env = new MapEnvironment( m );
 
 	DSRMAStar<xyLoc,tDirection,MapEnvironment> *dsrmastar =
-		new DSRMAStar<xyLoc,tDirection,MapEnvironment>( env, 1 );
+		new DSRMAStar<xyLoc,tDirection,MapEnvironment>( env, 2 );
 	std::vector<xyLoc> s;
 	s.push_back( pos_robber );
 	s.push_back( pos_cop );
