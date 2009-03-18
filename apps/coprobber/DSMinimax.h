@@ -248,6 +248,7 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 
 	// variable declarations
 	std::vector<state> next_mystates;
+	typename std::vector<state>::iterator it;
 	state child, next_pos = minFirst?pos_cop:pos_robber;
 	bool no_next_pos = true;
 	double child_value, pathcost;
@@ -256,19 +257,13 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 	nodesExpanded++;
 
 	// generate the next moves/children
-	if( minFirst )
-		dscrenv->GetCopSuccessors( pos_cop, next_mystates );
-	else
-		dscrenv->GetRobberSuccessors( pos_robber, next_mystates );
-
-	// for all possible next moves
-	while( !next_mystates.empty() ) {
-
-		child = next_mystates.back();
-		next_mystates.pop_back();
-
-		if( minFirst ) {
+	if( minFirst ) {
 		// Min Node
+		dscrenv->GetCopSuccessors( pos_cop, next_mystates );
+
+		for( it = next_mystates.begin(); it != next_mystates.end(); it++ ) {
+
+			child = *it;
 			pathcost = dscrenv->CopGCost( pos_cop, child );
 			if( use_edge_costs )
 				child_value = pathcost +
@@ -284,9 +279,15 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 
 			// beta cutoff
 			if( result <= alpha ) break;
+		}
 
-		} else {
+	} else {
 		// Max Node
+		dscrenv->GetRobberSuccessors( pos_robber, next_mystates );
+
+		for( it = next_mystates.begin(); it != next_mystates.end(); it++ ) {
+
+			child = *it;
 			pathcost = dscrenv->RobberGCost( pos_robber, child );
 			if( use_edge_costs )
 				child_value = pathcost +
