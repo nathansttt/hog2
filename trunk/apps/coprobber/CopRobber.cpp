@@ -2194,6 +2194,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				fflush( foutput );
 			}
 
+
 			// for each cop algorithm
 			for( unsigned int cop_alg = 0; cop_alg < cop_algorithms.size(); cop_alg++ ) {
 				// for each robber algorithm
@@ -2224,6 +2225,9 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						// reset the initial position
 						pos[0] = m->getNodeNum( rx, ry );
 						pos[1] = m->getNodeNum( cx, cy );
+						// initialize the random sequence with 1 so experiments are repeatable
+						srandom( 1 );
+
 						// variables to keep track of statistics
 						double value = 0.;
 						unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
