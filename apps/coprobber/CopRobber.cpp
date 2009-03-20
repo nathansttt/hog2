@@ -45,6 +45,7 @@
 #include "TwoCopsDijkstra.h"
 #include "TwoCopsRMAStar.h"
 #include "TwoCopsTIDAStar.h"
+#include "DSCover2.h"
 
 
 //std::vector<CRAbsMapSimulation *> unitSims;
@@ -81,6 +82,7 @@ int main(int argc, char* argv[])
 		printf( "dsdijkstra_memoptim - optimized different speed dijkstra\n" );
 		printf( "dsrma               - different speed RMA*\n" );
 		printf( "dscover             - different speed Cover heuristic\n" );
+		printf( "dscover2            - Cover due to A. Isaza\n" );
 		printf( "dsheuristicgreedy   - different speed distance heuristic greedy algorithm\n" );
 		printf( "dsminimax           - different speed minimax\n" );
 		printf( "dsdam               - different speed dynamic abstract minimax\n" );
@@ -140,6 +142,9 @@ int main(int argc, char* argv[])
 	}
 	else if( strcmp( argv[1], "dscover" ) == 0 ) {
 		compute_dscover( argc, argv );
+	}
+	else if( strcmp( argv[1], "dscover2" ) == 0 ) {
+		compute_dscover2( argc, argv );
 	}
 	else if( strcmp( argv[1], "dsheuristicgreedy" ) == 0 ) {
 		compute_dsheuristicgreedy( argc, argv );
@@ -925,6 +930,45 @@ void compute_dscover( int argc, char* argv[] ) {
 	delete g;
 	delete m;
 }
+
+
+// DSCover2
+// A. Isaza implementation
+void compute_dscover2( int argc, char* argv[] ) {
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	env->SetDirected( true );
+
+	DSCover2<graphState,graphMove> *dscover2 = new DSCover2<graphState,graphMove>( env, g->GetNumNodes(), 2 );
+
+	graphState r = m->getNodeNum( pos_robber.x, pos_robber.y );
+	graphState c = m->getNodeNum( pos_cop.x, pos_cop.y );
+
+	printf( "robber @ (%u,%u)=%lu\n", pos_robber.x, pos_robber.y, r );
+	printf( "cop    @ (%u,%u)=%lu\n", pos_cop.x, pos_cop.y, c );
+	printf( "states in graph: %d\n", g->GetNumNodes() );
+	printf( "cover value: %g\n", dscover2->value( r, c, true, -0.7 ) );
+	printf( "states covered:   %u\n", dscover2->numCovered() );
+	printf( "states uncovered: %u\n", dscover2->numUncovered() );
+	printf( "nodes expanded:   %u\n", dscover2->nodesExpanded );
+	printf( "nodes touched:    %u\n", dscover2->nodesTouched );
+
+	delete dscover2;
+	delete env;
+	delete g;
+	delete m;
+}
+
+
 
 
 // DSHeuristicGreedy
@@ -1944,6 +1988,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		printf( "<robber_algorithms>:\n" );
 		printf( "  optimal         - optimal robber (the entire state space is solved first)\n" );
 		printf( "  cover           - redefined version of cover\n" );
+		printf( "  cover2 <time>   - A. Isaza cover implementation where time defines when\n" );
+		printf( "                    the robber is to move (assuming the cop moves at time 0.\n" );
 		printf( "  minimax <depth> - minimax up to given depth with distance metric evaluation\n" );
 		printf( "  dam <depth>     - dynamic abstract minimax to a given depth\n" );
 		printf( "  greedy          - heuristic hill climbing due to distance metric\n" );
@@ -1980,6 +2026,12 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 					robber_algorithms.push_back( "cover" );
 					robber_int_params.push_back( std::vector<int>() );
 					robber_double_params.push_back( std::vector<double>() );
+				}
+				else if( strcmp( argv[param_num], "cover2" ) == 0 ) {
+					robber_algorithms.push_back( "cover2" );
+					robber_int_params.push_back( std::vector<int>() );
+					robber_double_params.push_back( std::vector<double>( 1, atof( argv[param_num+1] ) ) );
+					param_num++;
 				}
 				else if( strcmp( argv[param_num], "minimax" ) == 0 ) {
 					robber_algorithms.push_back( "minimax" );
@@ -2159,6 +2211,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 
 		// robber objects
 		DSCover<graphState,graphMove> *dscover = NULL;
+		DSCover2<graphState,graphMove> *dscover2 = NULL;
 		DSMinimax<graphState,graphMove> *dsminimax = NULL;
 		DSDAM *dsdam = NULL;
 		DSHeuristicGreedy<graphState,graphMove> *dsheuristic = NULL;
@@ -2168,6 +2221,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 
 		// initialize robber objects
 		if( find_algorithm( robber_algorithms, "cover"      ) ) dscover     = new DSCover<graphState,graphMove>( env, cop_speed );
+		if( find_algorithm( robber_algorithms, "cover2"     ) ) dscover2    = new DSCover2<graphState,graphMove>( env, g->GetNumNodes(), cop_speed );
 		if( find_algorithm( robber_algorithms, "minimax"    ) ) dsminimax   = new DSMinimax<graphState,graphMove>( env, true, cop_speed );
 		if( find_algorithm( robber_algorithms, "dam"        ) ) dsdam       = new DSDAM( mclab, true, cop_speed, true );
 		if( find_algorithm( robber_algorithms, "greedy"     ) ) dsheuristic = new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
@@ -2256,7 +2310,18 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 									pos[0] = dscover->MakeMove( pos[0], pos[1], false, g->GetNumNodes() );
 									clock_end   = clock();
 									nodesExpanded += dscover->nodesExpanded;
-									nodesTouched += dscover->nodesTouched;
+									nodesTouched  += dscover->nodesTouched;
+									timer_average      += (clock_end-clock_start)/1000;
+									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+									calculations++;
+								}
+								// cover2
+								if( strcmp( robber_algorithms[robber_alg], "cover2" ) == 0 ) {
+									clock_start = clock();
+									pos[0] = dscover2->MakeMove( pos[0], pos[1], false, robber_double_params[robber_alg][0] );
+									clock_end   = clock();
+									nodesExpanded += dscover2->nodesExpanded;
+									nodesTouched  += dscover2->nodesTouched;
 									timer_average      += (clock_end-clock_start)/1000;
 									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
 									calculations++;
