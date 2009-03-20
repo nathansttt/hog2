@@ -232,6 +232,8 @@ state DSCover2<state,action>::MakeMove( state pos_robber, state pos_cop, bool mi
 		exit(1);
 	}
 
+	if( time == 0. ) time = -1.; // see below on why
+
 	if( minFirst ) {
 		fprintf( stderr, "ERROR: cover2 is not yet supported for the cop.\n" );
 		exit(1);
