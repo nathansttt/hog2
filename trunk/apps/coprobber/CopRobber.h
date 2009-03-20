@@ -19,6 +19,7 @@ void compute_dsdijkstra( int argc, char* argv[] );
 void compute_dsdijkstra_memoptim( int argc, char* argv[] );
 void compute_dsrma( int argc, char* argv[] );
 void compute_dscover( int argc, char* argv[] );
+void compute_dscover2( int argc, char* argv[] );
 void compute_dsheuristicgreedy( int argc, char* argv[] );
 void compute_dsminimax( int argc, char* argv[] );
 void compute_dsdam( int argc, char* argv[] );
