@@ -27,7 +27,7 @@ class DSCover2 {
 	unsigned int numCovered()   { return m_num_covered; };
 	unsigned int numUncovered() { return m_num_uncovered; };
 
-	double value( state &r, state &c, bool minFirst = true, double time = 0. );
+	double value( state &r, state &c, bool minFirst = false, bool time_minFirst = true, double time = 0. );
 
 	state MakeMove( state pos_robber, state pos_cop, bool minFirst = true, double time = 0. );
 
@@ -95,7 +95,7 @@ DSCover2<state,action>::~DSCover2() {
 };
 
 template<class state, class action>
-double DSCover2<state,action>::value( state &r, state &c, bool minFirst, double time ) {
+double DSCover2<state,action>::value( state &r, state &c, bool minFirst, bool time_minFirst, double time ) {
 	// it does not make sense to submit anything below -1.0 or above 1.0
 	if( (time < -1. || time > 0.) ) {
 		fprintf( stderr, "ERROR: submitted time for cover2 is not supported.\n" );
@@ -103,7 +103,7 @@ double DSCover2<state,action>::value( state &r, state &c, bool minFirst, double 
 	}
 
 	// calculate the cover
-	calculateCover( r, c, minFirst, time );
+	calculateCover( r, c, time_minFirst, time );
 
 	double cover_percent = double(numCovered()) / double(numCovered() + numUncovered());
 	// the value shall be between -1 and 1
@@ -258,7 +258,7 @@ state DSCover2<state,action>::MakeMove( state pos_robber, state pos_cop, bool mi
 
 	// for each successor state compute the cover
 	for( typename std::vector<state>::iterator it = neighbors.begin(); it != neighbors.end(); it++ ) {
-		temp = value( *it, pos_cop, true, -(time+1) );
+		temp = value( *it, pos_cop, false, true, -(time+1) );
 
 		if( temp > max_cover ) {
 			max_cover = temp;

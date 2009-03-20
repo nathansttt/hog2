@@ -956,7 +956,7 @@ void compute_dscover2( int argc, char* argv[] ) {
 	printf( "robber @ (%u,%u)=%lu\n", pos_robber.x, pos_robber.y, r );
 	printf( "cop    @ (%u,%u)=%lu\n", pos_cop.x, pos_cop.y, c );
 	printf( "states in graph: %d\n", g->GetNumNodes() );
-	printf( "cover value: %g\n", dscover2->value( r, c, true, -0.7 ) );
+	printf( "cover value: %g\n", dscover2->value( r, c, false, true, -0.7 ) );
 	printf( "states covered:   %u\n", dscover2->numCovered() );
 	printf( "states uncovered: %u\n", dscover2->numUncovered() );
 	printf( "nodes expanded:   %u\n", dscover2->nodesExpanded );
