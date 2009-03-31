@@ -1,6 +1,7 @@
 #include "SearchEnvironment.h"
 #include <assert.h>
 #include <deque>
+#include <iostream>
 
 #ifndef PERMPUZZ_H
 #define PERMPUZZ_H
@@ -35,11 +36,76 @@ public:
 	**/
 	void Build_Regular_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename);
 
+	/**
+	Returns a hash value for a permutation puzzle
+	**/
+	virtual uint64_t GetStateHash(state &s);
+
+	/**
+	Constructs a state from a hash value
+	**/
+	virtual void GetStateFromHash(state &s, uint64_t hash);
+
+	uint64_t Factorial(int val);
+
 	// holds a set of Pattern Databases which can be maxed over later
 	std::vector<std::vector<uint8_t> > PDB;
 	// holds the set of distinct items used to build the associated PDB (and therefore needed for hashing)
 	std::vector<std::vector<int> > PDB_distincts;
 };
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::GetStateFromHash(state &s, uint64_t hash)
+{
+	std::vector<int> puzzle = s.puzzle;
+	uint64_t hashVal = hash;
+
+	int numEntriesLeft = 1;
+	for (int x = s.puzzle.size()-1; x >= 0; x--)
+	{
+		puzzle[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < (int) s.puzzle.size(); y++)
+		{
+			if (puzzle[y] >= puzzle[x])
+				puzzle[y]++;
+		}
+	}
+
+	s.puzzle = puzzle;
+}
+
+template <class state, class action>
+uint64_t PermutationPuzzleEnvironment<state, action>::GetStateHash(state &s)
+{
+	std::vector<int> puzzle = s.puzzle;
+	uint64_t hashVal = 0;
+	int numEntriesLeft = s.puzzle.size();
+	for (unsigned int x = 0; x < s.puzzle.size(); x++)
+	{
+		hashVal += puzzle[x]*Factorial(numEntriesLeft-1);
+		numEntriesLeft--;
+		for (unsigned y = x; y < puzzle.size(); y++)
+		{
+			if (puzzle[y] > puzzle[x])
+				puzzle[y]--;
+		}
+	}
+	return hashVal;
+}
+
+template <class state, class action>
+uint64_t PermutationPuzzleEnvironment<state, action>::Factorial(int val)
+{
+	static uint64_t table[21] =
+	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
+			6227020800ll, 87178291200ll, 1307674368000ll, 20922789888000ll, 355687428096000ll,
+			6402373705728000ll, 121645100408832000ll, 2432902008176640000ll };
+	if (val > 20)
+		return (uint64_t)-1;
+	return table[val];
+}
 
 template <class state, class action>
 uint64_t PermutationPuzzleEnvironment<state, action>::nUpperk(int n, int k) {
@@ -180,12 +246,5 @@ void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start
 	}
 
 	fclose(f);
-	/*
-	if (f)
-	{
-		fwrite(&(DB[0]), sizeof(uint8_t), COUNT, f);
-		fclose(f);
-	}*/
 }
-
 #endif

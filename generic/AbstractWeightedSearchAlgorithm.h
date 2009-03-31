@@ -228,12 +228,12 @@ public:
 	virtual bool IsGoalStored() {return false;}
 
 	virtual double HCost(graphState &state1) {
-		printf("Single State HCost Failure: method not implemented for AbsGraphEnvironment\n");
-		exit(0); return -1.0;}
+		fprintf(stderr, "ERROR: Single State HCost not implemented for AbsGraphEnvironment\n");
+		exit(1); return -1.0;}
 
 	bool GoalTest(graphState &s){
-		printf("Single State Goal Test Failure: method not implemented for AbsGraphEnvironment\n");
-		exit(0); return false;}
+		fprintf(stderr, "ERROR: Single State Goal Test not implemented for AbsGraphEnvironment\n");
+		exit(1); return false;}
 
 private:
 	Graph *g;

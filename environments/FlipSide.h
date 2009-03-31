@@ -76,16 +76,16 @@ public:
 	OccupancyInterface<FlipSideState, flipMove> *GetOccupancyInfo() { return 0; }
 
 	double HCost(FlipSideState &state1){
-		printf("Single State HCost Failure: method not implemented for FlipSide\n");
-		exit(0); return -1.0;}
+		fprintf(stderr, "ERROR: Single State HCost not implemented for FlipSide\n");
+		exit(1); return -1.0;}
 	double HCost(FlipSideState &state1, FlipSideState &state2);
 	double GCost(FlipSideState &state1, FlipSideState &state2);
 	double GCost(FlipSideState &state1, flipMove &act) { return 1.0; }
 	bool GoalTest(FlipSideState &state, FlipSideState &goal);
 
 	bool GoalTest(FlipSideState &s){
-		printf("Single State Goal Test Failure: method not implemented for FlipSide\n");
-		exit(0); return false;}
+		fprintf(stderr, "ERROR: Single State Goal Test not implemented for FlipSide\n");
+		exit(1); return false;}
 
 	uint64_t GetStateHash(FlipSideState &state);
 	uint64_t GetActionHash(flipMove act);

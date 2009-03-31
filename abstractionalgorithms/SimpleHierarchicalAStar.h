@@ -28,15 +28,15 @@ class HierarchicalHeuristicEnvironment : public SearchEnvironment<unsigned long,
 	virtual double HCost(unsigned long &node1, unsigned long &node2) = 0;
 
 	virtual double HCost(unsigned long &state1){
-		printf("Single State HCost Failure: method not implemented for HierarchicalHeuristicEnvironment\n");
-		exit(0); return -1.0;}
+		fprintf(stderr, "ERROR: Single State HCost not implemented for HierarchicalHeuristicEnvironment\n");
+		exit(1); return -1.0;}
 
 	virtual double GCost(unsigned long &node1, unsigned long &node2) = 0;
 	virtual bool GoalTest(unsigned long &node, unsigned long &goal) = 0;
 
 	virtual bool GoalTest(unsigned long &s){
-		printf("Single State Goal Test Failure: method not implemented for HierarchicalHeuristicEnvironment\n");
-		exit(0); return false;}
+		fprintf(stderr, "ERROR: Single State Goal Test not implemented for HierarchicalHeuristicEnvironment\n");
+		exit(1); return false;}
 
 	virtual uint64_t GetStateHash(unsigned long &node) = 0;
 	virtual uint64_t GetActionHash(unsigned long act) = 0;

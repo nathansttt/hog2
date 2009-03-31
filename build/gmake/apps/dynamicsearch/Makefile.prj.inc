@@ -64,4 +64,5 @@ SRC_CPP = \
 	apps/dynamicsearch/experiment_basics.cpp \
 	apps/dynamicsearch/GeneralRBFS.cpp \
 	apps/dynamicsearch/GeneralBeamSearch.cpp \
-	apps/dynamicsearch/GeneralBulb.cpp
+	apps/dynamicsearch/GeneralBulb.cpp \
+	apps/dynamicsearch/TurnTakingSimulation.cpp

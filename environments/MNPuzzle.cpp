@@ -15,47 +15,36 @@
 MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height)
 		: width(_width), height(_height)
 {
-
 	// stores applicable operators at each of the width*height positions
-	// The order of operators is Right, Left, Down, Up
-	std::vector<slideDir> ops(4);
-	for (unsigned int blank = 0; blank < width*height; blank++)
-	{
-		ops.resize(0);
-
-		if (blank % width < width - 1)
-		{
-			ops.push_back(kRight);
-		}
-		if (blank % width > 0)
-		{
-			ops.push_back(kLeft);
-		}
-		if (blank < width*height - width)
-		{
-			ops.push_back(kDown);
-		}
-		if (blank > width - 1)
-		{
-			ops.push_back(kUp);
-		}
-
-		operators.push_back(ops);
-	}
-
+	Change_Op_Order(Get_Puzzle_Order(15)); // Right, Left, Down, Up is default operator ordering
 	goal_stored = false;
 }
 
 MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
-                   std::vector<slideDir> &op_order) :
+                   const std::vector<slideDir> op_order) :
 		width(_width), height(_height)
 {
+	Change_Op_Order(op_order);
+	goal_stored = false;
+}
+
+MNPuzzle::~MNPuzzle()
+{
+	ClearGoal();
+}
+
+void MNPuzzle::Change_Op_Order(std::vector<slideDir> op_order) {
+	operators.clear();
+
 	bool up_act = false;
 	bool down_act = false;
 	bool left_act = false;
 	bool right_act = false;
 
-	assert(op_order.size() == 4);
+	if(op_order.size() != 4) {
+		fprintf(stderr, "ERROR: Not enough operators in operator sequence for construction of MNPuzzle\n");
+		exit(1);
+	}
 
 	for (unsigned int op_num = 0; op_num < 4; op_num++)
 	{
@@ -77,7 +66,10 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
 		}
 	}
 
-	assert(up_act && down_act && left_act && right_act);
+	if(!up_act || !down_act || !left_act || !right_act) {
+		fprintf(stderr, "ERROR: Invalid operator sequence for construction of MNPuzzle\n");
+		exit(1);
+	}
 
 	// stores applicable operators at each of the width*height positions
 	std::vector<slideDir> ops(4);
@@ -106,14 +98,7 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
 
 		operators.push_back(ops);
 	}
-	goal_stored = false;
 }
-
-MNPuzzle::~MNPuzzle()
-{
-	ClearGoal();
-}
-
 
 Graph *MNPuzzle::GetGraph()
 {
@@ -334,39 +319,20 @@ double MNPuzzle::HCost(MNPuzzleState &state1, MNPuzzleState &state2)
 	assert(state1.width==state2.width);
 	double hval = 0;
 
-	if (goal_stored) // if goal is stored
-	{
-		assert(state1.height == height);
-		assert(state1.width == width);
+	std::vector<int> xloc(state2.width*state2.height);
+	std::vector<int> yloc(state2.width*state2.height);
 
-		// increments amound for each tile location
-		for(unsigned loc = 0; loc < width*height; loc++) {
-			if(state1.puzzle[loc] != 0)
-				hval += h_increment[state1.puzzle[loc]][loc];
+	for (unsigned int x = 0; x < state2.width; x++) {
+		for (unsigned int y = 0; y < state2.height; y++) {
+			xloc[state2.puzzle[x + y*state2.width]] = x;
+			yloc[state2.puzzle[x + y*state2.width]] = y;
 		}
 	}
-	else
-	{
-		std::vector<int> xloc(state2.width*state2.height);
-		std::vector<int> yloc(state2.width*state2.height);
-
-		for (unsigned int x = 0; x < state2.width; x++)
-		{
-			for (unsigned int y = 0; y < state2.height; y++)
-			{
-				xloc[state2.puzzle[x + y*state2.width]] = x;
-				yloc[state2.puzzle[x + y*state2.width]] = y;
-			}
-		}
-		for (unsigned int x = 0; x < state1.width; x++)
-		{
-			for (unsigned int y = 0; y < state1.height; y++)
-			{
-				if (state1.puzzle[x + y*state1.width] != 0)
-				{
-					hval += (abs(xloc[state1.puzzle[x + y*state1.width]] - x) +
-					         abs(yloc[state1.puzzle[x + y*state1.width]] - y));
-				}
+	for (unsigned int x = 0; x < state1.width; x++) {
+		for (unsigned int y = 0; y < state1.height; y++) {
+			if (state1.puzzle[x + y*state1.width] != 0) {
+				hval += (abs(xloc[state1.puzzle[x + y*state1.width]] - x)
+						+ abs(yloc[state1.puzzle[x + y*state1.width]] - y));
 			}
 		}
 	}
@@ -385,6 +351,7 @@ bool MNPuzzle::GoalTest(MNPuzzleState &state, MNPuzzleState &goal)
 	return (state == goal);
 }
 
+/*
 uint64_t MNPuzzle::GetStateHash(MNPuzzleState &state)
 {
 	std::vector<int> puzzle = state.puzzle;
@@ -427,7 +394,7 @@ void MNPuzzle::GetStateFromHash(MNPuzzleState &state, uint64_t hash)
 			state.blank = x;
 
 }
-
+*/
 
 uint64_t MNPuzzle::GetActionHash(slideDir act)
 {
@@ -496,6 +463,7 @@ void MNPuzzle::OpenGLDraw(int window, MNPuzzleState &s)
 	//std::vector<int> puzzle;
 }
 
+/*
 uint64_t MNPuzzle::Factorial(int val)
 {
 	static uint64_t table[21] =
@@ -506,28 +474,7 @@ uint64_t MNPuzzle::Factorial(int val)
 		return (uint64_t)-1;
 	return table[val];
 }
-
-/*
-void MNPuzzle::LoadPDB(char *fname, const std::vector<int> &tiles, bool )
-{
-	std::vector<int> values(256);
-	uint64_t COUNT = Factorial(width*height)/Factorial(width*height-tiles.size());
-	PDB.resize(PDB.size()+1);
-	PDB.back().resize(COUNT);
-	FILE *f = fopen(fname, "r");
-	if (f)
-	{
-		fread(&(PDB.back()[0]), sizeof(uint8_t), COUNT, f);
-		fclose(f);
-	}
-	PDBkey.push_back(tiles);
-	for (unsigned int x = 0; x < COUNT; x++)
-	{
-		values[(PDB.back()[x])]++;
-	}
-	for (int x = 0; x < 256; x++)
-		printf("%d:\t%d\n", x, values[x]);
-}*/
+*/
 
 double MNPuzzle::DoPDBLookup(MNPuzzleState &state)
 {
@@ -806,3 +753,57 @@ int MNPuzzle::Output_Puzzles(std::vector<MNPuzzleState> &puzzle_vector, unsigned
 	}
 	return 0;
 }
+
+std::vector<slideDir> MNPuzzle::Get_Puzzle_Order(int order_num) {
+	std::vector<slideDir> ops;
+	assert(order_num <= 23);
+	assert(order_num >= 0);
+
+
+	std::vector<int> op_nums(4);
+
+	int num_left = 1;
+	for(int x = 3; x >= 0; x--) {
+		op_nums[x] = order_num % num_left;
+		order_num /= num_left;
+		num_left++;
+
+		for(int y = x+1; y < 4; y++) {
+			if(op_nums[y] >= op_nums[x]) {
+				op_nums[y]++;
+			}
+		}
+	}
+
+	bool up_act = false;
+	bool down_act = false;
+	bool left_act = false;
+	bool right_act = false;
+
+	for(unsigned i = 0; i < 4; i++) {
+		if(op_nums[i] == 0) {
+			ops.push_back(kUp);
+			up_act = true;
+		}
+		else if(op_nums[i] == 1) {
+			ops.push_back(kLeft);
+			left_act = true;
+		}
+		else if(op_nums[i] == 2) {
+			ops.push_back(kRight);
+			right_act = true;
+		}
+		else if(op_nums[i] == 3) {
+			ops.push_back(kDown);
+			down_act = true;
+		}
+	}
+
+	assert(up_act);
+	assert(left_act);
+	assert(right_act);
+	assert(down_act);
+
+	return ops;
+}
+

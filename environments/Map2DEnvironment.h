@@ -92,17 +92,16 @@ public:
 	virtual bool InvertAction(tDirection &a);
 
 	virtual double HCost(xyLoc &node1) {
-		printf("Single State HCost Failure: method not implemented for MapEnvironment\n");
-
-		exit(0); return -1.0;}
+		fprintf(stderr, "ERROR: Single State HCost not implemented for MapEnvironment\n");
+		exit(1); return -1.0;}
 	virtual double HCost(xyLoc &node1, xyLoc &node2);
 	virtual double GCost(xyLoc &node1, xyLoc &node2);
 	virtual double GCost(xyLoc &node1, tDirection &act);
 	bool GoalTest(xyLoc &node, xyLoc &goal);
 
 	bool GoalTest(xyLoc &s){
-		printf("Single State Goal Test Failure: method not implemented for MapEnvironment\n");
-		exit(0); return false;}
+		fprintf(stderr, "ERROR: Single State Goal Test not implemented for MapEnvironment\n");
+		exit(1); return false;}
 
 	uint64_t GetStateHash(xyLoc &node);
 	uint64_t GetActionHash(tDirection act);
