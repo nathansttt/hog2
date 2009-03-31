@@ -35,9 +35,9 @@ public:
 
 	const char *GetName() {return "General Beam Search";}
 
-	virtual unsigned long long GetNodesExpanded() { return nodes_expanded; }
-	virtual unsigned long long GetNodesTouched() { return nodes_touched; }
-	virtual unsigned long long GetNodesChecked() {return nodes_checked; }
+	virtual uint64_t GetNodesExpanded() { return nodes_expanded; }
+	virtual uint64_t GetNodesTouched() { return nodes_touched; }
+	virtual uint64_t GetNodesChecked() {return nodes_checked; }
 
 	void LogFinalStats(StatCollection *stats){}
 
@@ -56,13 +56,13 @@ public:
 	void Change_Memory_Limit(unsigned new_limit) {memory_limit = new_limit;}
 
 	/** Sets a limit on the number of nodes to expand - input 0 for no limit **/
-	virtual bool SetExpandedLimit(unsigned long long limit);
+	virtual bool SetExpandedLimit(uint64_t limit);
 
 	/** Sets a limit on the number of nodes to generate - input 0 for no limit **/
-	virtual bool SetTouchedLimit(unsigned long long limit);
+	virtual bool SetTouchedLimit(uint64_t limit);
 
 	/** Sets a limit on the number of nodes to check - input 0 for no limit **/
-	virtual bool SetCheckedLimit(unsigned long long limit);
+	virtual bool SetCheckedLimit(uint64_t limit);
 
 	/**
 	Checks if the algorithm is ready to be incremented one step
@@ -105,8 +105,8 @@ protected:
 
 	unsigned beam_size;
 	unsigned memory_limit;
-	unsigned long long nodes_checked, nodes_expanded, nodes_touched;
-	unsigned long long expanded_limit, checked_limit, touched_limit;
+	uint64_t nodes_checked, nodes_expanded, nodes_touched;
+	uint64_t expanded_limit, checked_limit, touched_limit;
 
 	bool bound_expanded;
 	bool bound_touched;
@@ -165,7 +165,7 @@ double GeneralBeamSearch<state, action, environment>::get_cost(double g, double 
 }
 
 template <class state, class action, class environment>
-bool GeneralBeamSearch<state, action, environment>::SetExpandedLimit(unsigned long long limit) {
+bool GeneralBeamSearch<state, action, environment>::SetExpandedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_expanded = true; expanded_limit = limit;
 	}
@@ -179,7 +179,14 @@ template <class state, class action, class environment>
 int GeneralBeamSearch<state, action, environment>::GetPath(environment *env, state from, state to, std::vector<state> &path) {
 	prepare_vars_for_search();
 
-	double h_value = env->HCost(from, to);
+	double h_value;
+
+	if(env->IsGoalStored()) {
+		h_value = env->HCost(from);
+	}
+	else {
+		h_value = env->HCost(from, to);
+	}
 	double initial_cost = get_cost(0.0, h_value);
 	uint64_t initial_key = env->GetStateHash(from);
 
@@ -254,7 +261,7 @@ int GeneralBeamSearch<state, action, environment>::expand_beam(environment *env,
 }
 
 template <class state, class action, class environment>
-bool GeneralBeamSearch<state, action, environment>::SetTouchedLimit(unsigned long long limit) {
+bool GeneralBeamSearch<state, action, environment>::SetTouchedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_touched = true; touched_limit = limit;
 	}
@@ -265,7 +272,7 @@ bool GeneralBeamSearch<state, action, environment>::SetTouchedLimit(unsigned lon
 }
 
 template <class state, class action, class environment>
-bool GeneralBeamSearch<state, action, environment>::SetCheckedLimit(unsigned long long limit) {
+bool GeneralBeamSearch<state, action, environment>::SetCheckedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_checked = true; checked_limit = limit;
 	}
@@ -282,7 +289,14 @@ bool GeneralBeamSearch<state, action, environment>::Initialize(environment *env,
 	my_env = env;
 	goal = to;
 
-	double h_value = my_env->HCost(from, goal);
+	double h_value;
+
+	if(env->IsGoalStored()) {
+		h_value = env->HCost(from);
+	}
+	else {
+		h_value = env->HCost(from, goal);
+	}
 	double initial_cost = get_cost(0.0, h_value);
 	uint64_t initial_key = my_env->GetStateHash(from);
 
@@ -356,7 +370,14 @@ int GeneralBeamSearch<state, action, environment>::StepAlgorithm(std::vector<sta
 			double child_g = parent.g_value + my_env->GCost(parent.my_state, children[i]);
 			uint64_t child_key = my_env->GetStateHash(children[i]);
 
-			double child_h =  my_env->HCost(children[i], goal);
+			double child_h;
+
+			if(my_env->IsGoalStored()) {
+				child_h = my_env->HCost(children[i]);
+			}
+			else {
+				child_h = my_env->HCost(children[i], goal);
+			}
 			double child_cost = get_cost(child_g, child_h);
 
 			BeamNode<state> goal(children[i], child_g, child_h, child_cost, beam_index, child_key);
@@ -391,7 +412,14 @@ int GeneralBeamSearch<state, action, environment>::StepAlgorithm(std::vector<sta
 		   (prune_dups && nodes_in_beam.find(child_key) != nodes_in_beam.end())) {
 			   continue;
 		}
-		double child_h =  my_env->HCost(children[i], goal);
+		double child_h;
+
+		if(my_env->IsGoalStored()) {
+			child_h = my_env->HCost(children[i]);
+		}
+		else {
+			child_h = my_env->HCost(children[i], goal);
+		}
 		double child_cost = get_cost(child_g, child_h);
 
 		// construct new BeamNode
@@ -559,7 +587,15 @@ int GeneralBeamSearch<state, action, environment>::generate_all_successors(envir
 
 			double child_g = beams[beams.size() - 1][i].g_value +
 				env->GCost(beams[beams.size() - 1][i].my_state, children[j]);
-			double child_h =  env->HCost(children[j], goal);
+			double child_h;
+
+			if(env->IsGoalStored()) {
+				child_h = env->HCost(children[j]);
+			}
+			else {
+				child_h = env->HCost(children[j], goal);
+			}
+
 			double child_cost = get_cost(child_g, child_h);
 
 			// construct new BeamNode

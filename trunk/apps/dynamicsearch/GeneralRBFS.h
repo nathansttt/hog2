@@ -36,16 +36,16 @@ public:
 	virtual void LogFinalStats(StatCollection *stats){}
 
 	/** Get the number of nodes expanded (a node is expanded if the goal test is called) **/
-	virtual unsigned long long GetNodesExpanded() { return nodesExpanded + nodes_ex_iter; }
+	virtual uint64_t GetNodesExpanded() { return nodesExpanded + nodes_ex_iter; }
 
 	/** Get the number of nodes generated (if the successors or successor actions
 	 of a node are successors, these are considered generated nodes)**/
-	virtual unsigned long long GetNodesTouched() { return nodesGenerated + nodes_gen_iter; }
+	virtual uint64_t GetNodesTouched() { return nodesGenerated + nodes_gen_iter; }
 
 	/** Get the number of nodes checked to be generated (a node is checked if search_node
 	 is called on it, in which case to_expand is necessarily called on it except in a few
 	 situations regarding expanding an entire iteration) **/
-	virtual unsigned long long GetNodesChecked() {return nodesChecked + nodes_check_iter; }
+	virtual uint64_t GetNodesChecked() {return nodesChecked + nodes_check_iter; }
 
 	/**
 	Returns the path of the last path found, unless a search is currently in progress, in
@@ -56,9 +56,9 @@ public:
 	/**
 	Inherited methods for setting limits on th number of nodes expanded, generated, or checked
 	**/
-	virtual bool SetExpandedLimit(unsigned long long limit);
-	virtual bool SetTouchedLimit(unsigned long long limit);
-	virtual bool SetCheckedLimit(unsigned long long limit);
+	virtual bool SetExpandedLimit(uint64_t limit);
+	virtual bool SetTouchedLimit(uint64_t limit);
+	virtual bool SetCheckedLimit(uint64_t limit);
 
 	/**
 	Prepares the algorithm for a step by step run.
@@ -89,9 +89,9 @@ public:
 	}
 
 protected:
-	unsigned long long nodesExpanded, nodesGenerated, nodesChecked; // counts nodes for the categories
-	unsigned long long nodes_ex_iter, nodes_gen_iter, nodes_check_iter; // counts nodes for the categories in the current iteration
-	unsigned long long expanded_limit, generated_limit, checked_limit; // the limits on the given categories
+	uint64_t nodesExpanded, nodesGenerated, nodesChecked; // counts nodes for the categories
+	uint64_t nodes_ex_iter, nodes_gen_iter, nodes_check_iter; // counts nodes for the categories in the current iteration
+	uint64_t expanded_limit, generated_limit, checked_limit; // the limits on the given categories
 
 	bool bound_expanded, bound_generated, bound_checked; // whether the categories are bounded
 
@@ -139,9 +139,9 @@ protected:
 	**/
 	void update_node_counts();
 
-	std::vector<unsigned long long> iter_checked;
-	std::vector<unsigned long long> iter_generated;
-	std::vector<unsigned long long> iter_expanded;
+	std::vector<uint64_t> iter_checked;
+	std::vector<uint64_t> iter_generated;
+	std::vector<uint64_t> iter_expanded;
 
 	environment *my_env;
 	state my_goal;
@@ -214,7 +214,14 @@ int GeneralRBFS<state, action, environment>::GetPath(environment *env, state fro
 
 	bool status = 0;
 
-	double h = env->HCost(from, to);
+	double h;
+
+	if(env->IsGoalStored()) {
+		h = env->HCost(from);
+	}
+	else {
+		h = env->HCost(from, to);
+	}
 
 	h_stack.push_back(h);
 	g_stack.push_back(0.0);
@@ -231,7 +238,7 @@ int GeneralRBFS<state, action, environment>::GetPath(environment *env, state fro
 }
 
 template <class state, class action, class environment>
-bool GeneralRBFS<state, action, environment>::SetExpandedLimit(unsigned long long limit) {
+bool GeneralRBFS<state, action, environment>::SetExpandedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_expanded = true; expanded_limit = limit;
 	}
@@ -242,7 +249,7 @@ bool GeneralRBFS<state, action, environment>::SetExpandedLimit(unsigned long lon
 }
 
 template <class state, class action, class environment>
-bool GeneralRBFS<state, action, environment>::SetTouchedLimit(unsigned long long limit) {
+bool GeneralRBFS<state, action, environment>::SetTouchedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_generated = true; generated_limit = limit;
 	}
@@ -253,7 +260,7 @@ bool GeneralRBFS<state, action, environment>::SetTouchedLimit(unsigned long long
 }
 
 template <class state, class action, class environment>
-bool GeneralRBFS<state, action, environment>::SetCheckedLimit(unsigned long long limit) {
+bool GeneralRBFS<state, action, environment>::SetCheckedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_checked = true; checked_limit = limit;
 	}
@@ -308,7 +315,14 @@ unsigned GeneralRBFS<state, action, environment>::assign_and_sort (environment *
 		edge_costs[i] = env->GCost(currState, actions[i]);
 		env->ApplyAction(currState, actions[i]); // change to child to calculate heuristic
 
-		double h_value = env->HCost(currState, goal);
+		double h_value;
+		if(env->IsGoalStored()) {
+			h_value = env->HCost(currState);
+		}
+		else {
+			h_value = env->HCost(currState, goal);
+		}
+
 		h_values[i] = h_value;
 
 		double g_value = g_stack.back() + edge_costs[i];

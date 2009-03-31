@@ -74,28 +74,28 @@ public:
 	virtual void LogFinalStats(StatCollection *stats){}
 
 	/** Get the number of nodes expanded (a node is expanded if the goal test is called) **/
-	virtual unsigned long long GetNodesExpanded() { return nodesExpanded + nodes_ex_iter; }
+	virtual uint64_t GetNodesExpanded() { return nodesExpanded + nodes_ex_iter; }
 
 	/** Get the number of nodes generated (if the successors or successor actions
 	 of a node are successors, these are considered generated nodes)**/
-	virtual unsigned long long GetNodesTouched() { return nodesGenerated + nodes_gen_iter; }
+	virtual uint64_t GetNodesTouched() { return nodesGenerated + nodes_gen_iter; }
 
 	/** Get the number of nodes checked to be generated (a node is checked if search_node
 	 is called on it, in which case to_expand is necessarily called on it except in a few
 	 situations regarding expanding an entire iteration) **/
-	virtual unsigned long long GetNodesChecked() {return nodesChecked + nodes_check_iter; }
+	virtual uint64_t GetNodesChecked() {return nodesChecked + nodes_check_iter; }
 
 	/** returns the path cost of the last path found **/
 	double GetPathCost() {return best_path_cost; }
 
 	/** Sets a limit on the number of nodes to expand - input 0 for no limit **/
-	virtual bool SetExpandedLimit(unsigned long long limit);
+	virtual bool SetExpandedLimit(uint64_t limit);
 
 	/** Sets a limit on the number of nodes to generate - input 0 for no limit **/
-	virtual bool SetTouchedLimit(unsigned long long limit);
+	virtual bool SetTouchedLimit(uint64_t limit);
 
 	/** Sets a limit on the number of nodes to check - input 0 for no limit **/
-	virtual bool SetCheckedLimit(unsigned long long limit);
+	virtual bool SetCheckedLimit(uint64_t limit);
 
 	/** Sets whether the entire iteration is to be expanded or not **/
 	void SetExpandFullIteration(bool ex) {expand_full_iter = ex;}
@@ -124,9 +124,9 @@ public:
 	/**
 	Returns a vector with the number of nodes checked, expanded, and generated at each iteration.
 	**/
-	std::vector<unsigned long long> Get_Checked_Iters() {return iter_checked;}
-	std::vector<unsigned long long> Get_Expanded_Iters() {return iter_expanded;}
-	std::vector<unsigned long long> Get_Generated_Iters() {return iter_generated;}
+	std::vector<uint64_t> Get_Checked_Iters() {return iter_checked;}
+	std::vector<uint64_t> Get_Expanded_Iters() {return iter_expanded;}
+	std::vector<uint64_t> Get_Generated_Iters() {return iter_generated;}
 
 	/**
 	Changes the weights.
@@ -199,9 +199,9 @@ protected:
 	// initializes bounds
 	virtual void update_bounds();
 
-	unsigned long long nodesExpanded, nodesGenerated, nodesChecked;
-	unsigned long long nodes_ex_iter, nodes_gen_iter, nodes_check_iter;
-	unsigned long long expanded_limit, generated_limit, checked_limit;
+	uint64_t nodesExpanded, nodesGenerated, nodesChecked;
+	uint64_t nodes_ex_iter, nodes_gen_iter, nodes_check_iter;
+	uint64_t expanded_limit, generated_limit, checked_limit;
 
 	bool bound_expanded;
 	bool bound_generated;
@@ -220,9 +220,9 @@ protected:
 	state active_state;
 	bool step_by_step_active;
 
-	std::vector<unsigned long long> iter_checked;
-	std::vector<unsigned long long> iter_generated;
-	std::vector<unsigned long long> iter_expanded;
+	std::vector<uint64_t> iter_checked;
+	std::vector<uint64_t> iter_generated;
+	std::vector<uint64_t> iter_expanded;
 
 	double h_weight;
 	double g_weight;
@@ -244,7 +244,15 @@ void GeneralIDA<state, action, environment>::initialize_search(environment *env,
 	g_stack.resize(0);
 	best_path_cost = -1.0;
 
-	double h = env->HCost(from, to);
+	double h;
+
+	if(env->IsGoalStored()) {
+		h = env->HCost(from);
+	}
+	else {
+		h = env->HCost(from, to);
+	}
+
 	h_stack.push_back(h);
 	g_stack.push_back(0.0);
 
@@ -317,7 +325,14 @@ int GeneralIDA<state, action, environment>::search_node(environment *env, state 
 	if(bound_checked && nodesChecked + nodes_check_iter >= checked_limit)
 		return CHECKED_MET;
 
-	double h = env->HCost(currState, goal);
+	double h;
+	if(env->IsGoalStored()) {
+		h = env->HCost(currState);
+	}
+	else {
+		h = env->HCost(currState, goal);
+	}
+
 	double g = g_stack.back() + edge_cost;
 
 	// use g + h to cut off areas of search where cannot find better solution
@@ -394,7 +409,7 @@ int GeneralIDA<state, action, environment>::search_node(environment *env, state 
 }
 
 template <class state, class action, class environment>
-bool GeneralIDA<state, action, environment>::SetExpandedLimit(unsigned long long limit) {
+bool GeneralIDA<state, action, environment>::SetExpandedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_expanded = true; expanded_limit = limit;
 	}
@@ -405,7 +420,7 @@ bool GeneralIDA<state, action, environment>::SetExpandedLimit(unsigned long long
 }
 
 template <class state, class action, class environment>
-bool GeneralIDA<state, action, environment>::SetTouchedLimit(unsigned long long limit) {
+bool GeneralIDA<state, action, environment>::SetTouchedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_generated = true; generated_limit = limit;
 	}
@@ -416,7 +431,7 @@ bool GeneralIDA<state, action, environment>::SetTouchedLimit(unsigned long long 
 }
 
 template <class state, class action, class environment>
-bool GeneralIDA<state, action, environment>::SetCheckedLimit(unsigned long long limit) {
+bool GeneralIDA<state, action, environment>::SetCheckedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_checked = true; checked_limit = limit;
 	}
@@ -556,7 +571,13 @@ int GeneralIDA<state, action, environment>::StepAlgorithm(std::vector<action> &t
 
 	my_env->ApplyAction(active_state, to_apply);
 
-	double h = my_env->HCost(active_state, my_goal);
+	double h;
+	if(my_env->IsGoalStored()) {
+		my_env->HCost(active_state);
+	}
+	else {
+		my_env->HCost(active_state, my_goal);
+	}
 
 	nodes_check_iter++;
 

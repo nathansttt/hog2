@@ -25,13 +25,13 @@ public:
 	int GetPath(environment *env, state from, state to, std::vector<state> &path);
 	int GetPath(environment *env, state from, state to, std::vector<action> &path){return 0;}
 
-	unsigned long long GetNodesExpanded(){return nodes_expanded;}
-	unsigned long long GetNodesTouched(){return nodes_touched;}
-	unsigned long long GetNodesChecked(){return nodes_checked;}
+	uint64_t GetNodesExpanded(){return nodes_expanded;}
+	uint64_t GetNodesTouched(){return nodes_touched;}
+	uint64_t GetNodesChecked(){return nodes_checked;}
 
-	bool SetExpandedLimit(unsigned long long limit);
-	bool SetTouchedLimit(unsigned long long limit);
-	bool SetCheckedLimit(unsigned long long limit);
+	bool SetExpandedLimit(uint64_t limit);
+	bool SetTouchedLimit(uint64_t limit);
+	bool SetCheckedLimit(uint64_t limit);
 
 	void LogFinalStats(StatCollection *stats){}
 
@@ -93,9 +93,9 @@ protected:
 
 	unsigned beam_size;
 	unsigned memory_limit;
-	unsigned long long nodes_checked, nodes_expanded, nodes_touched;
-	unsigned long long expanded_limit, checked_limit, touched_limit;
-	unsigned long long nodes_ex_iter, nodes_touch_iter, nodes_check_iter;
+	uint64_t nodes_checked, nodes_expanded, nodes_touched;
+	uint64_t expanded_limit, checked_limit, touched_limit;
+	uint64_t nodes_ex_iter, nodes_touch_iter, nodes_check_iter;
 
 	bool bound_expanded;
 	bool bound_touched;
@@ -138,9 +138,9 @@ protected:
 
 	bool debug;
 
-	std::vector<unsigned long long> iter_checked;
-	std::vector<unsigned long long> iter_touched;
-	std::vector<unsigned long long> iter_expanded;
+	std::vector<uint64_t> iter_checked;
+	std::vector<uint64_t> iter_touched;
+	std::vector<uint64_t> iter_expanded;
 
 	void update_node_counts(); // updates the node counts at the end of each iteration
 	// where an iteration is whenever the discrepancies must be increased.
@@ -183,7 +183,15 @@ template <class state, class action, class environment>
 int GeneralBulb<state, action, environment>::GetPath(environment *env, state from, state to, std::vector<state> &path) {
 	prepare_vars_for_search();
 
-	double h_value = env->HCost(from, to);
+	double h_value;
+
+	if(env->IsGoalStored()) {
+		h_value = env->HCost(from);
+	}
+	else {
+		h_value = env->HCost(from, to);
+	}
+
 	double initial_cost = get_cost(0.0, h_value);
 	uint64_t initial_key = env->GetStateHash(from);
 
@@ -419,7 +427,14 @@ int GeneralBulb<state, action, environment>::generate_successors(environment *en
 
 			double child_g = beams[beams.size() - 1][i].g_value +
 				env->GCost(beams[beams.size() - 1][i].my_state, children[j]);
-			double child_h =  env->HCost(children[j], goal);
+			double child_h;
+
+			if(env->IsGoalStored()) {
+				child_h = env->HCost(children[j]);
+			}
+			else {
+				child_h = env->HCost(children[j], goal);
+			}
 			double child_cost = get_cost(child_g, child_h);
 
 			// construct new BeamNode
@@ -498,7 +513,7 @@ void GeneralBulb<state, action, environment>::print_beams(bool last_only) {
 }
 
 template <class state, class action, class environment>
-bool GeneralBulb<state, action, environment>::SetExpandedLimit(unsigned long long limit) {
+bool GeneralBulb<state, action, environment>::SetExpandedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_expanded = true; expanded_limit = limit;
 	}
@@ -509,7 +524,7 @@ bool GeneralBulb<state, action, environment>::SetExpandedLimit(unsigned long lon
 }
 
 template <class state, class action, class environment>
-bool GeneralBulb<state, action, environment>::SetTouchedLimit(unsigned long long limit) {
+bool GeneralBulb<state, action, environment>::SetTouchedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_touched = true; touched_limit = limit;
 	}
@@ -520,7 +535,7 @@ bool GeneralBulb<state, action, environment>::SetTouchedLimit(unsigned long long
 }
 
 template <class state, class action, class environment>
-bool GeneralBulb<state, action, environment>::SetCheckedLimit(unsigned long long limit) {
+bool GeneralBulb<state, action, environment>::SetCheckedLimit(uint64_t limit) {
 	if(limit > 0) {
 		bound_checked = true; checked_limit = limit;
 	}
