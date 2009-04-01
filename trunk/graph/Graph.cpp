@@ -22,6 +22,7 @@
 
 #include <cstdlib>
 #include "Graph.h"
+#include <cstring>
 
 #include <vector>
 

@@ -9,6 +9,7 @@
 
 #include <sys/time.h>
 #include <math.h>
+#include <cstring>
 #include "AStarDelay.h"
 
 using namespace AStarDelayUtil;

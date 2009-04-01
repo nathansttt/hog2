@@ -9,6 +9,7 @@
 
 #include "Plot2D.h"
 #include <math.h>
+#include <cstring>
 
 namespace Plotting {
 	

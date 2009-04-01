@@ -27,6 +27,7 @@
 #include "FPUtil.h"
 #include "AStar3.h"
 #include "Heap.h"
+#include <string.h>
 
 using namespace GraphAbstractionConstants;
 static const int verbose = 0;

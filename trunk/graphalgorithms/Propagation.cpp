@@ -11,6 +11,7 @@
 #include <math.h>
 #include <deque>
 #include "Propagation.h"
+#include <cstring>
 
 using namespace PropUtil;
 

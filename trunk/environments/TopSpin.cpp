@@ -8,6 +8,7 @@
  */
 
 #include "TopSpin.h"
+#include <string.h>
 
 int TopSpinGraphHeuristic::THmode = 0;
 

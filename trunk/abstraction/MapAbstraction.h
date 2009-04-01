@@ -29,6 +29,7 @@
 #include "GraphAbstraction.h"
 #include "GLUtil.h"
 #include "MapProvider.h"
+#include <stdlib.h>
 
 #ifndef MAPABSTRACTION_H
 #define MAPABSTRACTION_H

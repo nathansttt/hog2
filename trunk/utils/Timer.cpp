@@ -26,6 +26,7 @@
 //#include "UnitSimulation.h"
 #include "Timer.h"
 #include <stdint.h>
+#include <cstring>
 
 Timer::Timer()
 {
