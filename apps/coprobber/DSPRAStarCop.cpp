@@ -1,7 +1,7 @@
 #include "DSPRAStarCop.h"
 
 DSPRAStarCop::DSPRAStarCop( GraphAbstraction *_graphabs, unsigned int _cop_speed ):
-	graphabs(_graphabs), cop_speed(_cop_speed), g(graphabs->GetAbstractGraph(0)),
+	graphabs(_graphabs), cop_speed(_cop_speed), pathfraction(2), g(graphabs->GetAbstractGraph(0)),
 	pra(new praStar())
 { };
 
@@ -26,7 +26,7 @@ graphState DSPRAStarCop::MakeMove( graphState &robber, graphState &cop ) {
 		nodesTouched   = pra->nodesTouched;
 		path *temppath = prapath;
 
-		unsigned int steps = prapath->length() / 2 / cop_speed;
+		unsigned int steps = prapath->length() / pathfraction / cop_speed;
 		if( steps == 0 ) steps = 1; // make at least one step
 
 		for( unsigned int i = 0; i < steps; i++ ) {

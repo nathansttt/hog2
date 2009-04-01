@@ -46,6 +46,7 @@
 #include "TwoCopsRMAStar.h"
 #include "TwoCopsTIDAStar.h"
 #include "DSCover2.h"
+#include "AbstractGraphMapHeuristic.h"
 
 
 //std::vector<CRAbsMapSimulation *> unitSims;
@@ -88,12 +89,15 @@ int main(int argc, char* argv[])
 		printf( "dsdam               - different speed dynamic abstract minimax\n" );
 		printf( "dsdatpdijkstra      - different speed dynamic abstract two player dijkstra\n" );
 		printf( "dsrandombeacons     - different speed random beacons\n" );
+		printf( "markov              - compute Markov Game values\n" );
+		printf( "twocopsdijkstra     - dijkstra optimized for two cops\n" );
 		printf( "\n" );
 		printf( "testpoints          - generation of problem sets\n" );
 		printf( "testpoints_two_cops - generation of problem sets for two cops on BGMaps\n" );
 		printf( "experiment_optimal  - experiment for \"Optimal Solutions to MTS\"\n" );
 		printf( "experiment_optimal_two_cops  - experiment with optimal algorithms for two cops\n" );
 		printf( "experiment_allstate - Dijkstra vs. Markov\n" );
+		printf( "experiment_markov   - Markov experiment as used in thesis\n" );
 		printf( "experiment_graphs   - computation of some statistics on graphs\n" );
 		printf( "characterization_2copwin - test computations for 2-cop-win characterization\n" );
 		printf( "website             - website interface\n" );
@@ -161,6 +165,12 @@ int main(int argc, char* argv[])
 	else if( strcmp( argv[1], "dsrandombeacons" ) == 0 ) {
 		compute_dsrandombeacons( argc, argv );
 	}
+	else if( strcmp( argv[1], "markov" ) == 0 ) {
+		compute_markov( argc, argv );
+	}
+	else if( strcmp( argv[1], "twocopsdijkstra" ) == 0 ) {
+		compute_twocopsdijkstra( argc, argv );
+	}
 	else if( strcmp( argv[1], "testpoints" ) == 0 ) {
 		compute_testpoints( argc, argv );
 	}
@@ -175,6 +185,9 @@ int main(int argc, char* argv[])
 	}
 	else if( strcmp( argv[1], "experiment_allstate" ) == 0 ) {
 		compute_experiment_allstate( argc, argv );
+	}
+	else if( strcmp( argv[1], "experiment_markov" ) == 0 ) {
+		compute_experiment_markov( argc, argv );
 	}
 	else if( strcmp( argv[1], "experiment_graphs" ) == 0 ) {
 		compute_experiment_graphs( argc, argv );
@@ -1141,6 +1154,83 @@ void compute_dsrandombeacons( int argc, char* argv[] ) {
 	delete mclab;
 }
 
+
+// Markov Game
+void compute_markov( int argc, char* argv[] ) {
+
+	// config parameters
+	bool simultaneous = true;
+	unsigned int num_cops = 1;
+
+	Map *m;
+	xyLoc pc, pr;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pc, pr, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	// make all the edge costs 1
+	/* this is not neccessary for a normal graph, it only is important when dealing with
+	 * multilevel markov games
+	edge_iterator eit = g->getEdgeIter();
+	edge *e = g->edgeIterNext( eit );
+	while( e ) {
+		e->setWeight( 1. );
+		e = g->edgeIterNext( eit );
+	}
+	*/
+	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
+	//GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
+	GraphEnvironment *env = new GraphEnvironment( g, gh );
+	env->SetDirected( true );
+
+	double precision = 0.1; //1; // precision of the value iteration
+	double epsilon   = 0.01; // precision of the LP solver
+	double gamma = 1.0;
+	double *V = NULL;
+	unsigned int iter = 0;
+
+	// CopRobberGame( environment, num_cops, simultaneous, can_pass )
+	CopRobberGame *game = new CopRobberGame( env, num_cops, simultaneous, true );
+	printf( "computing expected rewards... " ); fflush( stdout );
+	game->GetExpectedStateRewards( 0, gamma, epsilon, precision, V, iter );
+	printf( "done\n" );
+	printf( "number of iterations: %u\n", iter );
+	printf( "precision: %g\n", precision );
+
+	game->WriteExpectedRewardToDisc( "markov_robber.dat", 0, V );
+
+	delete[] V;
+	delete game;
+	delete env;
+	delete g;
+	delete m;
+}
+
+void compute_twocopsdijkstra( int argc, char* argv[] ) {
+	Map *m;
+	xyLoc pc, pr;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pc, pr, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	env->SetDirected( true );
+
+	TwoCopsDijkstra *tcd = new TwoCopsDijkstra( env );
+	printf( "2-cop-win: %d\n", tcd->is_two_cop_win() );
+	tcd->WriteValuesToDisk( "dijkstra_twocops.dat" );
+
+	delete tcd;
+	delete env;
+	delete g;
+	delete m;
+}
+
+
 /*------------------------------------------------------------------------------
 | Implementation of tests
 ------------------------------------------------------------------------------*/
@@ -1531,6 +1621,7 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 		g   = GraphSearchConstants::GetGraph( m );
 		gh  = new MaximumNormGraphMapHeuristic( g );
 		env = new GraphEnvironment( g, gh );
+		env->SetDirected(true);
 
 		if( strcmp( argv[3], "rma" ) == 0 ) {
 			astar          = new TwoCopsRMAStar( env );
@@ -1605,11 +1696,11 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 		} // all problem instances for the map
 		
 		// cleanup
-		delete astar;
-		delete astar_dijkstra;
-		delete astar_perfecth;
-		delete tida;
-		delete tida_perfecth;
+		if( astar != NULL )          delete astar;
+		if( astar_dijkstra != NULL ) delete astar_dijkstra;
+		if( astar_perfecth != NULL ) delete astar_perfecth;
+		if( tida != NULL )           delete tida;
+		if( tida_perfecth != NULL )  delete tida_perfecth;
 		delete env;
 		delete gh;
 		delete g;
@@ -1630,14 +1721,14 @@ void compute_experiment_allstate( int argc, char* argv[] ) {
 	clock_start = clock_end = clock();
 	Map *m;
 
-	if( argc < 4 ) {
+	if( argc < 5 ) {
 		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
 		printf( "where <algorithm> = dijkstra|markov\n" );
 		exit(1);
 	}
 
-	problem_file = fopen( argv[1], "r" );
-	result_file  = fopen( argv[3], "w" );
+	problem_file = fopen( argv[2], "r" );
+	result_file  = fopen( argv[4], "w" );
 
 	// for all the problems in the problem set file
 	while( !feof( problem_file ) ) {
@@ -1648,7 +1739,7 @@ void compute_experiment_allstate( int argc, char* argv[] ) {
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
 		env->SetDirected( true );
 
-		if( strcmp( argv[2], "dijkstra" ) == 0 ) {
+		if( strcmp( argv[3], "dijkstra" ) == 0 ) {
 			env->SetDirected( true );
 
 			Dijkstra *d = new Dijkstra( env, 1, true );
@@ -1659,7 +1750,7 @@ void compute_experiment_allstate( int argc, char* argv[] ) {
 			delete d;
 		}
 
-		if( strcmp( argv[2], "markov" ) == 0 ) {
+		if( strcmp( argv[3], "markov" ) == 0 ) {
 
 			double precision = 0.1;
 			double gamma = 1.0;
@@ -1687,6 +1778,69 @@ void compute_experiment_allstate( int argc, char* argv[] ) {
 	fclose( result_file );
 	fclose( problem_file );
 }
+
+
+// experiment to simulate markov game simulation with different kind
+// of initializations!
+void compute_experiment_markov( int argc, char* argv[] ) {
+
+	// config parameters
+	bool simultaneous = true;
+	unsigned int num_cops = 1;
+
+	char map_file[100];
+	FILE *problem_file, *result_file;
+	unsigned int num_iterations;
+	clock_t clock_start, clock_end;
+	clock_start = clock_end = clock();
+	Map *m;
+
+	if( argc < 5 ) {
+		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
+		printf( "where <algorithm> = markov\n" );
+		exit(1);
+	}
+
+	problem_file = fopen( argv[2], "r" );
+	result_file  = fopen( argv[4], "w" );
+
+	// for all the problems in the problem set file
+	while( !feof( problem_file ) ) {
+		fscanf( problem_file, "%s\n", map_file );
+		m = new Map( map_file );
+		MapCliqueAbstraction *mca = new MapCliqueAbstraction( m );
+		Graph *g = mca->GetAbstractGraph( 0 );
+		num_iterations = 0;
+
+		if( strcmp( argv[3], "markov" ) == 0 ) {
+
+			// more config parameters to fiddle with
+			double precision = 0.1;
+			double gamma = 1.0;
+			double *V = NULL;
+
+			GraphEnvironment *env = new GraphEnvironment( g, NULL );
+			CopRobberGame *game = new CopRobberGame( env, num_cops, simultaneous, true );
+
+			clock_start = clock();
+			game->GetExpectedStateRewards( 0, gamma, 0.01, precision, V, num_iterations );
+			clock_end = clock();
+
+			delete[] V;
+			delete game;
+			delete env;
+		}
+
+		delete mca;
+		// write out the statistics
+		fprintf( result_file, "%u %lu %s\n", num_iterations, (clock_end-clock_start)/1000,map_file );
+		fflush( result_file );
+	}
+	fclose( result_file );
+	fclose( problem_file );
+}
+
+
 
 
 
@@ -1850,6 +2004,7 @@ void compute_characterization_2copwin( int argc, char* argv[] ) {
 
 	// determine whether this graph is cop win or not
 	GraphEnvironment *env = new GraphEnvironment( g, gh );
+	env->SetDirected(true);
 
 	//TwoCopsDijkstra *tcd = new TwoCopsDijkstra( env );
 	//printf( "2-cop-win: %d\n", tcd->is_two_cop_win() );
@@ -2194,6 +2349,9 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		Graph *g = mclab->GetAbstractGraph( 0 );
 		MaximumNormAbstractGraphMapHeuristic *gh = new MaximumNormAbstractGraphMapHeuristic( g, m );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
+		// Isaza comparison
+		// AbstractGraphMapHeuristic *gh_isaza = new AbstractGraphMapHeuristic( g, m );
+		// GraphEnvironment *env_isaza = new GraphEnvironment( g, gh_isaza );
 
 		// cop objects
 		DSDijkstra_MemOptim *dsdijkstra = NULL;
@@ -2206,7 +2364,11 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
 		}
 		// PRA* cop
-		if( find_algorithm( cop_algorithms, "pra" ) ) pracop = new DSPRAStarCop( mclab, cop_speed );
+		if( find_algorithm( cop_algorithms, "pra" ) ) {
+			pracop = new DSPRAStarCop( mclab, cop_speed );
+			// Isaza comparison
+			// pracop->SetPathFraction( UINT_MAX );
+		}
 
 
 		// robber objects
@@ -2284,6 +2446,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 
 						// variables to keep track of statistics
 						double value = 0.;
+						// Isaza comparison
+						// double isaza_time = 0.;
 						unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
 						clock_t clock_start, clock_end;
 						clock_start = clock_end = clock();
@@ -2294,9 +2458,12 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						while( true ) {
 
 							// cop's move
+							//graphState old_pos = pos[1]; // Isaza comparison
 							if( strcmp( cop_algorithms[cop_alg], "optimal" ) == 0 ) pos[1] = dsdijkstra->MakeMove( pos, true );
 							if( strcmp( cop_algorithms[cop_alg], "pra"     ) == 0 ) pos[1] = pracop->MakeMove( pos[0], pos[1] );
 							value += 1.;
+							// Isaza comparison
+							// isaza_time += env_isaza->HCost( old_pos, pos[1] ); // this is actually not quite correct but ok for a first measure
 							if( pos[0] == pos[1] ) break;
 
 							// robber's move
@@ -2434,6 +2601,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 							double expected_nodesExpanded = (double)nodesExpanded/(double)calculations;
 							double expected_nodesTouched  = (double)nodesTouched /(double)calculations;
 							fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
+							// Isaza comparison
+							// fprintf( foutput, " %g %lu %g %g %g %g %g", value, calculations, isaza_time, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 							fflush( foutput );
 						}
 					} // parameter range

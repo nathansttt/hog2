@@ -195,7 +195,8 @@ double CopRobberGame::GetReward( unsigned int player, CRState s, std::vector<CRA
 
 // this works only for two players (one cop)
 double CopRobberGame::InitState( CRState s ) {
-	return env->HCost( s[1], s[0] );	
+	return 0.;
+//	return env->HCost( s[1], s[0] );	
 }
 
 unsigned int CopRobberGame::GetNumStates() const {
