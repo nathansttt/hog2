@@ -19,6 +19,10 @@ class DSPRAStarCop {
 
 	graphState MakeMove( graphState &robber, graphState &cop );
 
+	// follow 1/pathfraction of the path computed by PRA* before recomputing a new path
+	// default set by constructor is 2
+	void SetPathFraction( unsigned int _pathfraction ) { pathfraction = _pathfraction; };
+
 	unsigned int nodesExpanded;
 	unsigned int nodesTouched;
 
@@ -26,6 +30,7 @@ class DSPRAStarCop {
 
 	GraphAbstraction *graphabs;
 	unsigned int cop_speed;
+	unsigned int pathfraction;
 	Graph *g;
 	praStar *pra;
 	std::vector<graphState> pathcache;

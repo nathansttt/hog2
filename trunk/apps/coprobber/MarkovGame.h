@@ -125,7 +125,7 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 	// initialize the values
 	for( i = 0; i < tnes; i++ ) {
 		if( V == NULL )
-			Vs[0][i] = 0.;
+			Vs[0][i] = InitState( GetStateByNumber( i ) ); //0.;
 		Vs[1][i] = Vs[0][i];
 		norm_vec[i] = 0.;
 	}
@@ -216,6 +216,7 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 				}
 			}
 
+
 /*
 			// VERBOSE PRINTOUT
 			printf( "----\n" );
@@ -226,6 +227,7 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 				printf( "\n" );
 			}
 */
+
 
 			p1 = gsl_vector_alloc( n_opp_actions );
 			p2 = gsl_vector_alloc( n_my_actions );
@@ -261,10 +263,13 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 		iter++;
 		iter4++;
 
-		norm = gsl_blas_dnrm2( &(nvecview.vector) );
-		printf( "norm = %g\n", norm );
+		norm = gsl_vector_max( &(nvecview.vector) );
+		printf( "maximum norm of difference = %g\n", norm );
+		//norm = gsl_blas_dnrm2( &(nvecview.vector) );
+		//printf( "euclidean norm of difference = %g\n", norm );
 
 /*
+		// VERBOSE
 		if( iter%20 == 0 ) {
 			printf( "iteration %d reached with %d J.Robinson iterations and norm %f\n", iter, iter3, norm );
 			fflush( stdout );
@@ -424,8 +429,10 @@ void MarkovGame<state,action>::GetExpectedStateRewardsAlternatingActionGame( uns
 		iter++;
 		iter4++;
 
-		norm = gsl_blas_dnrm2( &(nvecview.vector) );
-//		printf( "norm = %g\n", norm );
+		norm = gsl_vector_max( &(nvecview.vector) );
+		printf( "maximum norm of difference = %g\n", norm );
+		//norm = gsl_blas_dnrm2( &(nvecview.vector) );
+		//printf( "norm = %g\n", norm );
 
 /*
 		if( iter%20 == 0 ) {

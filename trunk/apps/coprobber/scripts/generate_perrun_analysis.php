@@ -222,11 +222,11 @@ foreach( $argv as $filename ) {
 	foreach( $robber_algorithm_names as $ra ) {
 		if( $ra == "optimal( )" || $ra == "cover( )" || $ra == "greedy( )" )
 			$robber_algorithms[] = substr( $ra, 0, -3 );
-		elseif( preg_match( "/^cover2\( \(double\)([\d\.]+) \)/", $ra, $match ) )
+		elseif( preg_match( "/^cover2\( \(double\)([\d\.-]+) \)/", $ra, $match ) )
 			$robber_algorithms[] = "cover2(" . $match[1] . ")";
-		elseif( preg_match( "/^minimax\( \(double\)([\d\.]+) \)/", $ra, $match ) )
+		elseif( preg_match( "/^minimax\( \(double\)([\d\.-]+) \)/", $ra, $match ) )
 			$robber_algorithms[] = "minimax(" . $match[1] . ")";
-		elseif( preg_match( "/^dam\( \(double\)([\d\.]+) \)/", $ra, $match ) )
+		elseif( preg_match( "/^dam\( \(double\)([\d\.-]+) \)/", $ra, $match ) )
 			$robber_algorithms[] = "dam(" . $match[1] . ")";
 		elseif( preg_match( "/^randombeacons\( \(int\)(\d+) \(int\)(\d+) \(int\)(\d+) \)/", $ra, $match ) ) {
 			for( $i = intval( $match[2] ); $i <= intval( $match[3] ); $i++ )

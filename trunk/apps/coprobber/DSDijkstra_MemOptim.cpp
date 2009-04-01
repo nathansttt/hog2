@@ -267,6 +267,22 @@ void DSDijkstra_MemOptim::WriteValuesToDisk( const char* filename ) {
 	fprintf( fhandler, "states in space: %lu\n", min_cost.size() );
 	fprintf( fhandler, "expected rewards if cop moves first:\n" );
 	fprintf( fhandler, "\n\n" );
+
+	/*
+	pos.assign( 2, 0 );
+	for( unsigned int i = 0; i < numnodes; i++ ) {
+		for( unsigned int j = i; j < numnodes; j++ ) {
+			pos[0] = i;
+			pos[1] = j;
+			unsigned int h = CRHash_MemOptim( pos );
+			node *r = env->GetGraph()->GetNode( i );
+			node *c = env->GetGraph()->GetNode( j );
+			fprintf( fhandler, "(%ld,%ld) (%ld,%ld) %g %g\n", r->GetLabelL(GraphSearchConstants::kMapX), r->GetLabelL(GraphSearchConstants::kMapY),
+				c->GetLabelL(GraphSearchConstants::kMapX), c->GetLabelL(GraphSearchConstants::kMapY), max_cost[h], min_cost[h] );
+			//fprintf( fhandler, "%lu %lu %g\n", pos[0], pos[1], min_cost[h] );
+		}
+	}
+	*/
 	for( unsigned int i = 0; i < min_cost.size(); i++ ) {
 		pos.clear();
 		MemOptim_Hash_To_CRState( i, pos );
