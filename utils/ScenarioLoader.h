@@ -10,6 +10,7 @@
 #define SCENARIOLOADER_H
 
 #include <vector>
+#include <cstring>
 #include <string>
 using std::string;
 

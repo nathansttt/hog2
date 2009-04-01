@@ -24,6 +24,7 @@
 //#include "UnitSimulation.h"
 #include "GLUtil.h"
 #include <stdio.h>
+#include <cstring>
 //#include "StatCollection.h"
 
 #ifndef COMMON_H

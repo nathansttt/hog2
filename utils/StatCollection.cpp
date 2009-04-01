@@ -26,6 +26,8 @@
  */
 
 #include "StatCollection.h"
+#include <cstring>
+#include <cstdio>
 
 
 // typedef union { double fval; long lval; } statValue;

@@ -36,6 +36,7 @@ using namespace GraphAbstractionConstants;
 #include <memory>
 #include <vector>
 #include <assert.h>
+#include <string.h>
 
 enum {
 	kQuiet = 0x00,

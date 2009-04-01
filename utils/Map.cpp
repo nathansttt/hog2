@@ -21,6 +21,8 @@
 #include <stack>
 #include "Map.h"
 #include "GLUtil.h"
+#include <cstdlib>
+#include <cstring>
 
 using namespace std;
 

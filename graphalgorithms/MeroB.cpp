@@ -8,6 +8,7 @@
  */
 
 #include "MeroB.h"
+#include <cstring>
 
 const static bool verbose = true;
 

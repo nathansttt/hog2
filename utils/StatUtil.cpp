@@ -27,6 +27,7 @@
 
 #include "StatUtil.h"
 #include <math.h>
+#include <cstdio>
 
 inline double max(double a, double b)
 { if (a > b) return a; return b; }

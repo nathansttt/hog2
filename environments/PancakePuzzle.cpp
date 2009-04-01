@@ -1,4 +1,5 @@
 #include "PancakePuzzle.h"
+#include <cstdlib>
 
 PancakePuzzle::PancakePuzzle(unsigned s) {
 	assert(s >= 2);

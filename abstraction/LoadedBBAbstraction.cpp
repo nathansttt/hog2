@@ -10,6 +10,7 @@
 #include "LoadedBBAbstraction.h"
 #include "FPUtil.h"
 #include <math.h>
+#include <string.h>
 
 using namespace std;
 using namespace GraphAbstractionConstants;

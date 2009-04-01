@@ -23,6 +23,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <limits.h>
 #include <vector>
 #include <list>
 #include <iostream>

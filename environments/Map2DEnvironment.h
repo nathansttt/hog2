@@ -11,6 +11,7 @@
 #define MAP2DENVIRONMENT_H
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <iostream>
 #include "Map.h"
 #include "MapAbstraction.h"
