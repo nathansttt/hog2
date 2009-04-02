@@ -27,7 +27,6 @@
 #include "Map2DEnvironment.h"
 #include "MapQuadTreeAbstraction.h"
 #include "Common.h"
-#include "Sample.h"
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
 #include <deque>
