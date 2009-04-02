@@ -24,6 +24,7 @@ PROJECTS = \
   simulation \
   utils \
   apps/arm \
+  apps/cpdb \
   apps/pathsample \
   apps/puzzlesample \
   apps/multiagent \
@@ -52,6 +53,7 @@ PROJECTS_ALL = \
   simulation \
   utils \
   apps/arm \
+  apps/cpdb \
   apps/pathsample \
   apps/puzzlesample \
   apps/inconsistency \
