@@ -13,7 +13,9 @@ graphMove PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>::no
 
 
 template<>
-void PraStarGraphUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int, GraphEnvironment *env, SimulationInfo<graphState,graphMove,GraphEnvironment>* ) {
+void PraStarGraphUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( const GraphEnvironment *env, const SimulationInfo<graphState,graphMove,GraphEnvironment>* ) const {
+	/*
+	// TODO: make the code below compilable
 	node *n  = env->GetGraph()->GetNode( current_pos );
 	GLdouble x, y, z, rad = 0.001;
 	x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
@@ -38,13 +40,15 @@ void PraStarGraphUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int, G
 		}
 		glEnd();
 	}
-
+	*/
 	return;
 
 };
 
 template<>
-void PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) {
+void PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( const AbstractionGraphEnvironment *env, const SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) const {
+	/*
+	// TODO: make the code below compilable
 	node *n  = env->GetGraph()->GetNode( current_pos );
 	GLdouble x, y, z, rad = 0.01; //env->scale()/2.;
 	x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
@@ -69,6 +73,7 @@ void PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLD
 		}
 		glEnd();
 	}
+	*/
 
 	return;
 

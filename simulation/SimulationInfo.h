@@ -17,7 +17,7 @@ public:
 	//SimulationInfo( SimulationInfo<state,action,environment> *sim );
 	//SimulationInfo();
 
-	//virtual ~SimulationInfo() { /*unitinfos.clear();*/ }
+	virtual ~SimulationInfo() { /*unitinfos.clear();*/ }
 	virtual double GetSimulationTime() const = 0;
 
 	virtual unsigned int GetNumUnits() const = 0;
@@ -57,8 +57,8 @@ public:
 	}	
 	
 	state startState;
-	state lastState;
 	state currentState;
+	state lastState;
 	action lastMove;
 
 	double lastTime;

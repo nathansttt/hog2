@@ -26,7 +26,7 @@ class PraStarGraphUnit: public Unit<state,action,environment> {
 	bool MakeMove( environment *env, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *sinfo, action &a );
 	void UpdateLocation( environment *env, state &s, bool success, SimulationInfo<state,action,environment> *sinfo );
 	void GetLocation( state &s ) { s = current_pos; };
-	void OpenGLDraw( int window, environment *env, SimulationInfo<state,action,environment>* );
+	void OpenGLDraw( const environment *env, const SimulationInfo<state,action,environment>* ) const;
 	void GetGoal( state &s ) { s = current_pos; };
 	bool Done() { return done; };
 
@@ -91,7 +91,9 @@ bool PraStarGraphUnit<state,action,environment>::MakeMove( environment *env, Occ
 		return false;
 	}
 
-	state robber_pos = sinfo->GetPublicUnitInfo( robberunit )->currentState;
+	PublicUnitInfo<state,action,environment> pui;
+	sinfo->GetPublicUnitInfo( robberunit, pui );
+	state robber_pos = pui.currentState;
 
 	if( robber_pos == current_pos ) {
 		done = true;
@@ -123,9 +125,9 @@ void PraStarGraphUnit<state,action,environment>::UpdateLocation( environment *, 
 
 // \see PraStarGraphUnit.cpp for implementation
 template<>
-void PraStarGraphUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int window, GraphEnvironment *env, SimulationInfo<graphState,graphMove,GraphEnvironment>* );
+void PraStarGraphUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( const GraphEnvironment *env, const SimulationInfo<graphState,graphMove,GraphEnvironment>* ) const;
 template<>
-void PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int window, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* );
+void PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( const AbstractionGraphEnvironment *env, const SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) const;
 template<>
 graphMove PraStarGraphUnit<graphState,graphMove,GraphEnvironment>::nomove();
 template<>

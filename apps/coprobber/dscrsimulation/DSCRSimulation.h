@@ -25,7 +25,9 @@ public:
 	action lastMove;
 	state startState;
 	state currentState;
+	state lastState;
 	double nextTime;
+	double lastTime;
 	double totalDistance;
 	double totalThinking;
 };
@@ -37,7 +39,7 @@ public:
  * is only designed for one robber)
  */
 template<class state, class action, class environment>
-class DSCRSimulation {
+class DSCRSimulation: public SimulationInfo<state,action,environment> {
 public:
 
 	typedef typename DSCREnvironment<state,action>::CRState CRState;
@@ -50,6 +52,9 @@ public:
 	unsigned int AddRobber( Unit<state,action,environment> *unit, double timeOffset = 0. );
 	/*! add cops to the simulation */
 	unsigned int AddCop( Unit<state, action, environment> *unit, double timeOffset = 0. );
+
+	unsigned int GetNumUnits() const;
+	unsigned int GetNumUnitGroups() const;
 
 	/*!
 		Use this functionality if you want to have the copgroup make moves and such.
@@ -67,8 +72,8 @@ public:
 	environment *GetEnvironment() { return env; }
 
 	void StepTime(double);
-	double GetSimulationTime() { return currTime; }
-	double GetTimeToNextStep();
+	double GetSimulationTime() const { return currTime; }
+	double GetTimeToNextStep() const;
 	void DoNextStep() { StepTime( GetTimeToNextStep() ); };
 
 	void SetPaused(bool val) { paused = val; }
@@ -78,11 +83,11 @@ public:
 	 * or the robber is caught */
 	bool Done();
 
-	void OpenGLDraw(int window);
+	void OpenGLDraw() const;
 
-	SimulationInfo<state,action,environment>* GetSimulationInfo() {
-		return &sinfo;
-	};
+	SimulationInfo<state,action,environment>* GetSimulationInfo() { return this; };
+	void GetPublicUnitInfo(unsigned int which, PublicUnitInfo<state,action,environment> &info) const;
+	unsigned int GetCurrentUnit() const { return currentActor; }
 
 protected:
 	void StepUnitTime( unsigned int index, double timeStep);
@@ -100,7 +105,9 @@ protected:
 	std::vector<DSCRUnitInfo<state, action, environment> *> units;
 	DSCREnvironment<state,action> *dscrenvironment;
 	CRState worldstate;
-	SimulationInfo<state,action,environment> sinfo;
+	mutable unsigned int currentActor;
+	//SimulationInfo<state,action,environment> sinfo;
+	std::vector<PublicUnitInfo<state,action,environment> > unitinfos;
 };
 
 
@@ -121,7 +128,8 @@ template<class state, class action, class environment>
 DSCRSimulation<state, action, environment>::DSCRSimulation(environment *_env,
 	bool playerscanpass, unsigned int cop_speed, bool _simultaneous ):
 	env(_env), simultaneous(_simultaneous), currTime(0.), paused(false), copgroup(NULL),
-	dscrenvironment( new DSCREnvironment<state,action>(env,playerscanpass,cop_speed) )
+	dscrenvironment( new DSCREnvironment<state,action>(env,playerscanpass,cop_speed) ),
+	currentActor(0)
 { };
 
 template<class state, class action, class environment>
@@ -142,9 +150,9 @@ unsigned int DSCRSimulation<state,action,environment>::AddRobber( Unit<state,act
 	unit->GetLocation( ui->startState );
 	ui->currentState = ui->startState;
 
-	SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
-	ui->agent->UpdateLocation( env, ui->currentState, true, s );
-	delete s;
+	//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
+	ui->agent->UpdateLocation( env, ui->currentState, true, this );
+	//delete s;
 
 	ui->nextTime = currTime + timeOffset;
 	ui->totalThinking = 0.;
@@ -166,14 +174,14 @@ unsigned int DSCRSimulation<state,action,environment>::AddCop( Unit<state,action
 	unit->GetLocation( ui->startState );
 	ui->currentState = ui->startState;
 
-	SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
+	//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
 	if( copgroup ) {
 		// if there is a copgroup set we'll update its position through the copgroup
-		copgroup->UpdateLocation( ui->agent, env, ui->currentState, true, s );
+		copgroup->UpdateLocation( ui->agent, env, ui->currentState, true, this );
 	} else {
-		ui->agent->UpdateLocation( env, ui->currentState, true, s );
+		ui->agent->UpdateLocation( env, ui->currentState, true, this );
 	}
-	delete s;
+	//delete s;
 
 	ui->nextTime = currTime + timeOffset;
 	ui->totalThinking = 0.;
@@ -198,6 +206,18 @@ void DSCRSimulation<state,action,environment>::AddCopGroup( UnitGroup<state,acti
 }
 
 
+template<class state,class action,class environment>
+unsigned int DSCRSimulation<state,action,environment>::GetNumUnits() const {
+	return units.size();
+}
+
+template<class state,class action,class environment>
+unsigned int DSCRSimulation<state,action,environment>::GetNumUnitGroups() const {
+	if( copgroup != NULL ) return 1;
+	else return 0;
+}
+
+
 template<class state, class action, class environment>
 Unit<state,action,environment>* DSCRSimulation<state,action,environment>::GetUnit( unsigned int which ) {
 	assert( which < units.size() );
@@ -217,6 +237,7 @@ void DSCRSimulation<state, action, environment>::ClearAllUnits()
 
 	UpdatePublicInfo();
 	currTime = 0.; // reset simulation time
+	currentActor = 0;
 }
 
 
@@ -248,7 +269,7 @@ bool DSCRSimulation<state,action,environment>::Done()
 
 
 template<class state, class action, class environment>
-double DSCRSimulation<state,action,environment>::GetTimeToNextStep() {
+double DSCRSimulation<state,action,environment>::GetTimeToNextStep() const {
 	double minimum = DBL_MAX;
 
 	for( unsigned int i = 0; i < units.size(); i++ ) {
@@ -273,17 +294,19 @@ void DSCRSimulation<state, action, environment>::StepTime(double timeStep)
 
 	currTime += timeStep;
 	for( unsigned int i = 1; i < units.size(); i++ ) {
+		currentActor = i;
 		StepUnitTime( i, timeStep );
 		if( !simultaneous ) UpdatePublicInfo( i ); // update our public information record
 	}
 	if( !Done() ) {
+		currentActor = 0;
 		StepUnitTime( 0, timeStep );
 		if( !simultaneous ) UpdatePublicInfo( 0 );
 	} else {
 		// tell the robber that he's done
-		SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
-		units[0]->agent->UpdateLocation( env, units[0]->currentState, false, s );
-		delete s;
+		//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
+		units[0]->agent->UpdateLocation( env, units[0]->currentState, false, this );
+		//delete s;
 	}
 	if( simultaneous ) UpdatePublicInfo();
 	
@@ -307,7 +330,7 @@ void DSCRSimulation<state, action, environment>::StepUnitTime( unsigned int inde
 
 	// make a copy of the current simulation info
 	// this is done for security reasons
-	SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>(&sinfo);
+	//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>(&sinfo);
 
 
 	// call the agent to make it's move
@@ -315,18 +338,18 @@ void DSCRSimulation<state, action, environment>::StepUnitTime( unsigned int inde
 	if( index > 0 && copgroup ) {
 		// cop in a cop group
 		for( unsigned int i = 0; i < dscrenvironment->GetCopSpeed(); i++ ) {
-			if( ! copgroup->MakeMove( u, env, s, next_action ) ) break;
+			if( ! copgroup->MakeMove( u, env, this, next_action ) ) break;
 			next_actions.push_back( next_action );
 		}
 	} else if( index > 0 ) {
 		// seperate cop
 		for( unsigned int i = 0; i < dscrenvironment->GetCopSpeed(); i++ ) {
-			if( ! u->MakeMove( env, env->GetOccupancyInfo(), s, next_action ) ) break;
+			if( ! u->MakeMove( env, env->GetOccupancyInfo(), this, next_action ) ) break;
 			next_actions.push_back( next_action );
 		}
 	}	else {
 		// robber
-		if( u->MakeMove( env, env->GetOccupancyInfo(), s, next_action ) )
+		if( u->MakeMove( env, env->GetOccupancyInfo(), this, next_action ) )
 			next_actions.push_back( next_action );
 	}
 
@@ -339,13 +362,13 @@ void DSCRSimulation<state, action, environment>::StepUnitTime( unsigned int inde
 	}
 	// notice the agent of his location update
 	if( index && copgroup ) {
-		copgroup->UpdateLocation( u, env, theUnit->currentState, success, s );
+		copgroup->UpdateLocation( u, env, theUnit->currentState, success, this );
 	} else {
-		u->UpdateLocation( env, theUnit->currentState, success, s );
+		u->UpdateLocation( env, theUnit->currentState, success, this );
 	}
 
 	// delete the copy of public unit information
-	delete s;
+	//delete s;
 
 	// next time the agent is to move again
 	// this can be made arbitrarily complex
@@ -362,6 +385,8 @@ bool DSCRSimulation<state, action, environment>::MakeUnitMove( unsigned int inde
 	bool success = true;
 	state current_state = worldstate[index];
 	action last_move = next_actions[0];
+	theUnit->lastState = current_state;
+	theUnit->lastTime  = theUnit->nextTime;
 
 	// compute the result state from the actions
 	// i.e. execute his chosen path
@@ -401,20 +426,20 @@ bool DSCRSimulation<state, action, environment>::MakeUnitMove( unsigned int inde
  * this is a security issue but for performance we still did it!
 */
 template<class state, class action, class environment>
-void DSCRSimulation<state, action, environment>::OpenGLDraw(int window)
+void DSCRSimulation<state, action, environment>::OpenGLDraw() const
 {
-	env->OpenGLDraw(window);
+	env->OpenGLDraw();
 
 //	UpdatePublicInfo();
-	SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
+	//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
 
 	for (unsigned int i = 0; i < units.size(); i++)
-		units[i]->agent->OpenGLDraw( window, env, s );
+		units[i]->agent->OpenGLDraw( env, this );
 
 	if( copgroup )
-		copgroup->OpenGLDraw( window, env, s );
+		copgroup->OpenGLDraw( env, this );
 
-	delete s;
+	//delete s;
 	return;
 }
 
@@ -425,30 +450,20 @@ void DSCRSimulation<state,action,environment>::UpdatePublicInfo( int index ) {
 
 	if( index >= 0 && (unsigned int)index < units.size() ) {
 
-		state goal;
-		units[index]->agent->GetGoal( goal );
-		sinfo.unitinfos[index] = PublicUnitInfo<state,action,environment>(
-			units[index]->agent->GetName(),
-			units[index]->startState, worldstate[index],
-			units[index]->lastMove, units[index]->nextTime, units[index]->agent->GetSpeed(),
-			units[index]->agent->Done(), goal
-		);
+		unitinfos[index].init(
+			units[index]->startState, worldstate[index], units[index]->lastState,
+			units[index]->lastMove, units[index]->lastTime, units[index]->nextTime );
 
 	} else {
 		// update all information
-		sinfo.unitinfos.clear();
-		state goal;
+		unitinfos.clear();
 		for( i = 0; i < units.size(); i++ ) {
-			units[i]->agent->GetGoal( goal );
-
-			sinfo.unitinfos.push_back( PublicUnitInfo<state,action,environment>(
-				units[i]->agent->GetName(),
-				units[i]->startState, worldstate[i],
-				units[i]->lastMove, units[i]->nextTime, units[i]->agent->GetSpeed(),
-				units[i]->agent->Done(), goal
-				) );
+			unitinfos.push_back( PublicUnitInfo<state,action,environment>(
+				units[i]->startState, worldstate[i], units[i]->lastState,
+				units[i]->lastMove, units[i]->lastTime, units[i]->nextTime ) );
 		}
 
+		/*
 		sinfo.unitsingroups.clear();
 		if( copgroup ) {
 			std::vector<Unit<state,action,environment> *> mems = copgroup->GetMembers();
@@ -458,9 +473,24 @@ void DSCRSimulation<state,action,environment>::UpdatePublicInfo( int index ) {
 			}
 			sinfo.unitsingroups.push_back( isingroup );
 		}
+		*/
 	}
 
-	sinfo.currentTime = currTime;
+	//sinfo.currentTime = currTime;
+	return;
+}
+
+template<class state,class action,class environment>
+void DSCRSimulation<state,action,environment>::GetPublicUnitInfo( unsigned int unitnum, PublicUnitInfo<state,action,environment> &info ) const {
+
+	state ss = unitinfos[unitnum].startState;
+	state cs = unitinfos[unitnum].currentState;
+	state ls = unitinfos[unitnum].lastState;
+	action lm = unitinfos[unitnum].lastMove;
+	double lt = unitinfos[unitnum].lastTime;
+	double nt = unitinfos[unitnum].nextTime;
+
+	info.init( ss, cs, ls, lm, lt, nt );
 	return;
 }
 

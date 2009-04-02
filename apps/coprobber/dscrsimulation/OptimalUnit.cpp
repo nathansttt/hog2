@@ -47,7 +47,9 @@ bool OptimalUnit::MakeMove( AbstractionGraphEnvironment *env, OccupancyInterface
 
 	DSDijkstra_MemOptim::CRState mypos;
 	mypos.push_back( current_pos );
-	mypos.push_back( sinfo->GetPublicUnitInfo( copunit )->currentState );
+	PublicUnitInfo<graphState,graphMove,AbstractionGraphEnvironment> pui;
+	sinfo->GetPublicUnitInfo( copunit, pui );
+	mypos.push_back( pui.currentState );
 	graphState next_state = dsdijkstra->MakeMove( mypos, false );
 	a = env->GetAction( current_pos, next_state );
 	return true;
@@ -55,13 +57,17 @@ bool OptimalUnit::MakeMove( AbstractionGraphEnvironment *env, OccupancyInterface
 
 void OptimalUnit::UpdateLocation( AbstractionGraphEnvironment *, graphState &s, bool, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment> *sinfo ) {
 	current_pos = s;
-	if( copunit > 0 && sinfo->GetPublicUnitInfo( copunit )->currentState == current_pos )
+	PublicUnitInfo<graphState,graphMove,AbstractionGraphEnvironment> pui;
+	sinfo->GetPublicUnitInfo( copunit, pui );
+	if( copunit > 0 && pui.currentState == current_pos )
 		done = true;
 };
 
 
 
-void OptimalUnit::OpenGLDraw( int, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) {
+void OptimalUnit::OpenGLDraw( const AbstractionGraphEnvironment *env, const SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) const {
+	/*
+	// TODO: make the code below compilable
 	node *n  = env->GetGraph()->GetNode( current_pos );
 	GLdouble x, y, z, rad = 0.01;// env->scale()/2.;
 	x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
@@ -72,6 +78,6 @@ void OptimalUnit::OpenGLDraw( int, AbstractionGraphEnvironment *env, SimulationI
 	else
 		glColor3f( r, g, b );
 	DrawSphere( x, y, z, rad );
-
+	*/
 	return;
 };

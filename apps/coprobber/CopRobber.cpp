@@ -1716,48 +1716,70 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 // test of all-state algorithms
 void compute_experiment_allstate( int argc, char* argv[] ) {
 	char map_file[100];
+	char dijkstra_file[100];
 	FILE *problem_file, *result_file;
+	unsigned int num_cops;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
 	Map *m;
 
 	if( argc < 5 ) {
-		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
+		printf( "Syntax: <problem set file> <num_cops> <algorithm> <result file>\n" );
 		printf( "where <algorithm> = dijkstra|markov\n" );
 		exit(1);
 	}
 
 	problem_file = fopen( argv[2], "r" );
-	result_file  = fopen( argv[4], "w" );
+	num_cops = atoi( argv[3] );
+	result_file  = fopen( argv[5], "w" );
 
 	// for all the problems in the problem set file
 	while( !feof( problem_file ) ) {
 		fscanf( problem_file, "%s\n", map_file );
 		m = new Map( map_file );
 		Graph *g = GraphSearchConstants::GetGraph( m );
-		GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
+		MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
 		env->SetDirected( true );
 
-		if( strcmp( argv[3], "dijkstra" ) == 0 ) {
-			env->SetDirected( true );
+		if( strcmp( argv[4], "dijkstra" ) == 0 ) {
 
-			Dijkstra *d = new Dijkstra( env, 1, true );
-			clock_start = clock();
-			d->dijkstra();
-			clock_end = clock();
-
-			delete d;
+			switch(num_cops) {
+				case 1: {
+					DSDijkstra<graphState,graphMove,GraphEnvironment> *d = new DSDijkstra<graphState,graphMove,GraphEnvironment>( env, 1 );
+					clock_start = clock();
+					d->dsdijkstra();
+					clock_end = clock();
+					sprintf( dijkstra_file, "dijkstra_%s", map_file );
+					d->WriteValuesToDisk( dijkstra_file );
+					delete d;
+				}
+					break;
+				case 2: {
+					TwoCopsDijkstra *d = new TwoCopsDijkstra( env );
+					clock_start = clock();
+					d->dijkstra();
+					clock_end = clock();
+					sprintf( dijkstra_file, "dijkstra_%s", map_file );
+					d->WriteValuesToDisk( dijkstra_file );
+					delete d;
+				}
+					break;
+				default:
+					fprintf( stderr, "ERROR: number of cops not supported, only 1 and 2\n" );
+					// insert a general Dijkstra implementation here, the normal Dijkstra would
+					// work but does not do intelligent caching
+			}
 		}
 
-		if( strcmp( argv[3], "markov" ) == 0 ) {
+		if( strcmp( argv[4], "markov" ) == 0 ) {
 
 			double precision = 0.1;
 			double gamma = 1.0;
 			double *V = NULL;
 			unsigned int iter = 0;
 
-			CopRobberGame *game = new CopRobberGame( env, 1, false, true );
+			CopRobberGame *game = new CopRobberGame( env, num_cops, false, true );
 
 			clock_start = clock();
 			game->GetExpectedStateRewards( 0, gamma, 0.01, precision, V, iter );
@@ -2864,11 +2886,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *) {
 	}
 */
 /*
-	graphenv->OpenGLDraw( windowID );
+	graphenv->OpenGLDraw();
 	graphState s = 32511;
-	graphenv->OpenGLDraw( windowID, s );
+	graphenv->OpenGLDraw( s );
 */
-	simulation->OpenGLDraw( windowID );
+	simulation->OpenGLDraw();
 	time_t temptime; time(&temptime);
 	if( last_simulation_update < temptime ) {
 		if( !simulation->Done() && !simulation->GetPaused() ) {

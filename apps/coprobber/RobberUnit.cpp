@@ -75,11 +75,14 @@ bool RobberUnit::MakeMove(AbsMapEnvironment *env, OccupancyInterface<xyLoc,tDire
 
 	assert( copunits.size() + 1 == mgame->GetNumPlayers() );
 
+	PublicUnitInfo<xyLoc,tDirection,AbsMapEnvironment> pui;
+
 	// push my position onto the state
 	s.push_back( env->GetMapAbstraction()->GetNodeFromMap( loc.x, loc.y )->GetNum() );
 	// get the current position of all the cops
 	for( i = 0; i < copunits.size(); i++ ) {
-		l = info->GetPublicUnitInfo( copunits[i] )->currentState;
+		info->GetPublicUnitInfo( copunits[i], pui );
+		l = pui.currentState;
 		s.push_back( env->GetMapAbstraction()->GetNodeFromMap( l.x, l.y )->GetNum() );
 	}
 
@@ -91,11 +94,14 @@ bool RobberUnit::MakeMove(AbsMapEnvironment *env, OccupancyInterface<xyLoc,tDire
 	}
 
 	// determine when we and the cops move next
-	double myNextMoveTime = info->GetPublicUnitInfo( GetNum() )->nextTime;
-	double copsNextMoveTime = info->GetPublicUnitInfo( copunits[0] )->nextTime;
+	info->GetPublicUnitInfo( GetNum(), pui );
+	double myNextMoveTime = pui.nextTime;
+	info->GetPublicUnitInfo( copunits[0], pui );
+	double copsNextMoveTime = pui.nextTime;
 	bool copsmovesimultaneously = true;
 	for( i = 1; i < copunits.size(); i++ ) {
-		double temp = info->GetPublicUnitInfo( copunits[i] )->nextTime;
+		info->GetPublicUnitInfo( copunits[i], pui );
+		double temp = pui.nextTime;
 		if( copsNextMoveTime != temp )
 			copsmovesimultaneously = false;
 		if( copsNextMoveTime > temp )
@@ -144,7 +150,9 @@ void RobberUnit::UpdateLocation(AbsMapEnvironment *env, xyLoc &l, bool, AbsMapSi
 	s.push_back( env->GetMapAbstraction()->GetNodeFromMap( loc.x, loc.y )->GetNum() );
 	// get the current position of all the cops
 	for( unsigned int i = 0; i < copunits.size(); i++ ) {
-		l = info->GetPublicUnitInfo( i )->currentState;
+		PublicUnitInfo<xyLoc,tDirection,AbsMapEnvironment> pui;
+		info->GetPublicUnitInfo( i, pui );
+		l = pui.currentState;
 		s.push_back( env->GetMapAbstraction()->GetNodeFromMap( l.x, l.y )->GetNum() );
 	}
 
