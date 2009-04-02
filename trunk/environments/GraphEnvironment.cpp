@@ -39,7 +39,7 @@ GraphEnvironment::~GraphEnvironment()
 //	delete h;
 }
 
-void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors)
+void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const
 {
 	neighbors.resize(0);
 	node *n = g->GetNode(stateID);
@@ -68,7 +68,7 @@ void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState
 	}
 }
 
-void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &actions)
+void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &actions) const
 {
 	actions.resize(0);
 	node *n = g->GetNode(stateID);
@@ -98,18 +98,18 @@ void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &a
 
 }
 
-graphMove GraphEnvironment::GetAction(graphState &s1, graphState &s2)
+graphMove GraphEnvironment::GetAction(graphState &s1, graphState &s2) const
 {
 	return graphMove(s1, s2);
 }
 
-void GraphEnvironment::ApplyAction(graphState &s, graphMove a)
+void GraphEnvironment::ApplyAction(graphState &s, graphMove a) const
 {
 	assert(s == a.from);
 	s = a.to;
 }
 
-bool GraphEnvironment::InvertAction(graphMove &a)
+bool GraphEnvironment::InvertAction(graphMove &a) const
 {
 	uint16_t tmp = a.from;
 	a.from = a.to;
@@ -147,18 +147,18 @@ bool GraphEnvironment::GoalTest(graphState &state, graphState &goal)
 	return state == goal;
 }
 
-uint64_t GraphEnvironment::GetStateHash(graphState &state)
+uint64_t GraphEnvironment::GetStateHash(graphState &state) const
 {
 	return g->GetNode(state)->getUniqueID();
 }
 
-uint64_t GraphEnvironment::GetActionHash(graphMove act)
+uint64_t GraphEnvironment::GetActionHash(graphMove act) const
 {
 	return (g->GetNode(act.from)->getUniqueID()<<16)|
 	(g->GetNode(act.to)->getUniqueID());
 }
 
-void GraphEnvironment::OpenGLDraw(int window)
+void GraphEnvironment::OpenGLDraw() const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 
@@ -193,7 +193,7 @@ void GraphEnvironment::OpenGLDraw(int window)
 	glEnd();
 }
 
-void GraphEnvironment::OpenGLDraw(int, graphState &s)
+void GraphEnvironment::OpenGLDraw(const graphState &s) const
 {
 	node *n = g->GetNode(s);
 	DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
@@ -202,7 +202,7 @@ void GraphEnvironment::OpenGLDraw(int, graphState &s)
 						 (GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
 }
 
-void GraphEnvironment::OpenGLDraw(int, graphState &, graphMove &)
+void GraphEnvironment::OpenGLDraw(const graphState &, const graphMove &) const
 {
 	// if we want to draw a set of moves we use this to do so
 }
@@ -289,7 +289,7 @@ namespace GraphSearchConstants {
 		{
 			for (int x = 0; x < m->getMapWidth(); x++)
 			{
-				AddEdges(m, g, x, y);
+				AddEdges(m, g, x, y);//, 1.0, 1.5);
 			}
 		}
 		// printf("Done\n");
@@ -583,6 +583,28 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 	}
 
 	return val;
+}
+
+void GraphDistanceHeuristic::OpenGLDraw() const
+{
+	static int counter = 0;
+	counter = (counter+1);
+	if (heuristics.size() == 0)
+		return;
+
+	for (unsigned int a = 0; a < locations.size(); a++)
+	{
+		GLdouble x, y, z;
+		node *n = g->GetNode(locations[a]);
+		x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+		y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+		z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+
+		recColor r = getColor((counter+locations[a])%100, 0, 100, 4);
+
+		glColor3f(r.r, r.g, r.b);
+		DrawSphere(x, y, z, 0.05);
+	}
 }
 
 void GraphDistanceHeuristic::ChooseStartGoal(graphState &start, graphState &goal)
@@ -889,7 +911,7 @@ AbstractionGraphEnvironment::~AbstractionGraphEnvironment() {
 	//~GraphEnvironment();
 };
 
-void AbstractionGraphEnvironment::OpenGLDraw( int window ) {
+void AbstractionGraphEnvironment::OpenGLDraw() {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 
 	glBegin(GL_LINES);

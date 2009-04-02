@@ -40,13 +40,13 @@ template <class state, class action, class environment>
 class Unit {
 public:
 	//	Unit(state s, Unit<state, action, env> *target);
-	Unit() :speed(0), group(0) {}
+	Unit() :speed(0), group(0) { SetColor(1.0, 0.0, 0.0); }
 	virtual ~Unit() { SetUnitGroup(0); }
 	virtual const char *GetName() = 0;
 	virtual bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a) = 0;
 	virtual void UpdateLocation(environment *, state &, bool success, SimulationInfo<state,action,environment> *) = 0;
 	virtual void GetLocation(state &) = 0;
-	virtual void OpenGLDraw(int window, environment *, SimulationInfo<state,action,environment> *) = 0;
+	virtual void OpenGLDraw(const environment *, const SimulationInfo<state,action,environment> *) const = 0;
 	virtual void GetGoal(state &s) = 0;
 
 	virtual bool Done() { return true;} 
@@ -60,7 +60,7 @@ public:
 	virtual void LogFinalStats(StatCollection *) {}
 	
 	virtual void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) { r=_r; g=_g; b=_b; }
-	virtual void GetColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) { _r=r; _g=g; _b=b; }
+	virtual void GetColor(GLfloat& _r, GLfloat& _g, GLfloat& _b) const { _r=r; _g=g; _b=b; }
 	
 	UnitGroup<state, action, environment> *GetUnitGroup() { return group; }
 	void SetUnitGroup(UnitGroup<state, action, environment> *_group)

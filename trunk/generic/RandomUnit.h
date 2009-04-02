@@ -33,8 +33,15 @@ public:
 	}
 	virtual void GetLocation(state &l)
 	{ l = loc; }
-	virtual void OpenGLDraw(int window, environment *env, SimulationInfo<state,action,environment> *)
-	{ env->OpenGLDraw(window, loc); }
+	virtual void OpenGLDraw(const environment *env, const SimulationInfo<state,action,environment> *si) const
+	{
+		PublicUnitInfo<state, action, environment> i;
+		si->GetPublicUnitInfo(si->GetCurrentUnit(), i);
+		printf("(%f-%f)/(%f-%f)\n", 
+			   si->GetSimulationTime(), i.lastTime, i.nextTime, i.lastTime);
+		env->OpenGLDraw(i.lastState, i.currentState,
+						(si->GetSimulationTime()-i.lastTime)/(i.nextTime-i.lastTime));
+	}
 	virtual void GetGoal(state &s)
 	{ s = loc; }
 private:

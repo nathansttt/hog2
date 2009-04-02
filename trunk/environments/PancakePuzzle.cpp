@@ -26,7 +26,7 @@ PancakePuzzle::~PancakePuzzle()
 }
 
 void PancakePuzzle::GetSuccessors(PancakePuzzleState &parent,
-                             std::vector<PancakePuzzleState> &children)
+                             std::vector<PancakePuzzleState> &children) const
 {
 	children.resize(0);
 
@@ -38,7 +38,7 @@ void PancakePuzzle::GetSuccessors(PancakePuzzleState &parent,
 	}
 }
 
-void PancakePuzzle::GetActions(PancakePuzzleState &state, std::vector<unsigned> &actions)
+void PancakePuzzle::GetActions(PancakePuzzleState &state, std::vector<unsigned> &actions) const
 {
 	actions.resize(0);
 
@@ -49,7 +49,7 @@ void PancakePuzzle::GetActions(PancakePuzzleState &state, std::vector<unsigned> 
 	}
 }
 
-unsigned PancakePuzzle::GetAction(PancakePuzzleState &parent, PancakePuzzleState &child)
+unsigned PancakePuzzle::GetAction(PancakePuzzleState &parent, PancakePuzzleState &child) const
 {
 	unsigned current_action;
 	bool are_equal = false;
@@ -74,7 +74,7 @@ unsigned PancakePuzzle::GetAction(PancakePuzzleState &parent, PancakePuzzleState
 	return 0;
 }
 
-void PancakePuzzle::ApplyAction(PancakePuzzleState &s, unsigned action)
+void PancakePuzzle::ApplyAction(PancakePuzzleState &s, unsigned action) const
 {
 	assert(s.puzzle.size() == size);
 	assert(action > 1 && action <= size);
@@ -92,7 +92,7 @@ void PancakePuzzle::ApplyAction(PancakePuzzleState &s, unsigned action)
 	}
 }
 
-bool PancakePuzzle::InvertAction(unsigned &a)
+bool PancakePuzzle::InvertAction(unsigned &a) const
 {
 	// ever action is self-inverse
 	assert(a > 1 && a <= size);
@@ -129,7 +129,7 @@ bool PancakePuzzle::GoalTest(PancakePuzzleState &s) {
 	return true;
 }
 
-uint64_t PancakePuzzle::GetActionHash(unsigned act)
+uint64_t PancakePuzzle::GetActionHash(unsigned act) const
 {
 	return (uint64_t) act;
 }

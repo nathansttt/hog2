@@ -77,11 +77,11 @@ public:
 	MNPuzzle(unsigned int width, unsigned int height, const std::vector<slideDir> op_order); // used to set action order
 
 	~MNPuzzle();
-	void GetSuccessors(MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors);
-	void GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions);
-	slideDir GetAction(MNPuzzleState &s1, MNPuzzleState &s2);
-	void ApplyAction(MNPuzzleState &s, slideDir a);
-	bool InvertAction(slideDir &a);
+	void GetSuccessors(MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors) const;
+	void GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions) const;
+	slideDir GetAction(MNPuzzleState &s1, MNPuzzleState &s2) const;
+	void ApplyAction(MNPuzzleState &s, slideDir a) const;
+	bool InvertAction(slideDir &a) const;
 	static unsigned GetParity(MNPuzzleState &state);
 
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
@@ -93,15 +93,18 @@ public:
 	bool GoalTest(MNPuzzleState &state, MNPuzzleState &goal);
 
 	bool GoalTest(MNPuzzleState &s);
+//	uint64_t GetStateHash(MNPuzzleState &state) const;
+//	void GetStateFromHash(MNPuzzleState &state, uint64_t hash) const;
 	//uint64_t GetStateHash(MNPuzzleState &state);
 	//void GetStateFromHash(MNPuzzleState &state, uint64_t hash);
 
 	void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 
-	uint64_t GetActionHash(slideDir act);
-	void OpenGLDraw(int window);
-	void OpenGLDraw(int window, MNPuzzleState &s);
-	void OpenGLDraw(int, MNPuzzleState &, slideDir &) { /* currently not drawing moves */ }
+	uint64_t GetActionHash(slideDir act) const;
+	void OpenGLDraw() const;
+	void OpenGLDraw(const MNPuzzleState &s) const;
+	void OpenGLDraw(const MNPuzzleState &l1, const MNPuzzleState &l2, double v) const;
+	void OpenGLDraw(const MNPuzzleState &, const slideDir &) const { /* currently not drawing moves */ }
 	void StoreGoal(MNPuzzleState &); // stores the locations for the given goal state
 	void ClearGoal(); // clears the current stored information of the goal
 
@@ -151,7 +154,7 @@ public:
 
 private:
 	double DoPDBLookup(MNPuzzleState &state);
-	uint64_t Factorial(int val);
+	uint64_t Factorial(int val) const;
 	std::vector<std::vector<uint8_t> > PDB;
 	std::vector<std::vector<int> > PDBkey;
 	unsigned int width, height;

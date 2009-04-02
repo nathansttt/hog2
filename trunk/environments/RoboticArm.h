@@ -93,13 +93,13 @@ public:
 	void GetTipPosition( armAngles &s, double &x, double &y );
 
 	void AddObstacle(line2d obs);
-	void GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighbors);
-	void GetActions(armAngles &nodeID, std::vector<armRotations> &actions);
-	armRotations GetAction(armAngles &s1, armAngles &s2);
-	virtual void ApplyAction(armAngles &s, armRotations dir);
+	void GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighbors) const;
+	void GetActions(armAngles &nodeID, std::vector<armRotations> &actions) const;
+	armRotations GetAction(armAngles &s1, armAngles &s2) const;
+	virtual void ApplyAction(armAngles &s, armRotations dir) const;
 	armAngles GetRandomState();
 
-	virtual bool InvertAction(armRotations &a);
+	virtual bool InvertAction(armRotations &a) const;
 
 	void AddHeuristic(RoboticArmHeuristic *h) { heuristics.push_back(h); }
 
@@ -112,19 +112,19 @@ public:
 	virtual double GCost(armAngles &node1, armAngles &node2) { return 1; }
 	virtual double GCost(armAngles &node1, armRotations &act) { return 1; }
 	bool GoalTest(armAngles &node, armAngles &goal);
-	uint64_t GetStateHash(armAngles &node);
-	uint64_t GetActionHash(armRotations act);
+	uint64_t GetStateHash(armAngles &node) const;
+	uint64_t GetActionHash(armRotations act) const;
 
-	virtual void OpenGLDraw(int window);
-	virtual void OpenGLDraw(int window, armAngles &l);
-	virtual void OpenGLDraw(int, armAngles &, armRotations &);
-	virtual void OpenGLDraw(int, armAngles &, armRotations &, GLfloat r, GLfloat g, GLfloat b);
-	virtual void OpenGLDraw(int, armAngles &l, GLfloat r, GLfloat g, GLfloat b);
+	virtual void OpenGLDraw() const;
+	virtual void OpenGLDraw(const armAngles &l) const;
+	virtual void OpenGLDraw(const armAngles &, const armRotations &) const;
+//	virtual void OpenGLDraw(const armAngles &, const armRotations &, GLfloat r, GLfloat g, GLfloat b) const;
+//	virtual void OpenGLDraw(const armAngles &l, GLfloat r, GLfloat g, GLfloat b) const;
 
-	virtual void GetNextState(armAngles &currents, armRotations dir, armAngles &news);
+	virtual void GetNextState(armAngles &currents, armRotations dir, armAngles &news) const;
 
-	bool LegalState(armAngles &a);
-	bool LegalArmConfig(armAngles &a);
+	bool LegalState(armAngles &a) const;
+	bool LegalArmConfig(armAngles &a) const;
 
 	void StoreGoal(armAngles &a){}
 	void ClearGoal(){}
@@ -134,20 +134,20 @@ public:
 		exit(0); return false;}
 
 private:
-	void DrawLine(line2d l);
-	void GenerateLineSegments(armAngles &a, std::vector<line2d> &armSegments);
+	void DrawLine(line2d l) const;
+	void GenerateLineSegments(const armAngles &a, std::vector<line2d> &armSegments) const;
 
 	int DOF;
 	double armLength, tolerance;
 	std::vector<std::vector<bool> > legals;
 
-	double GetSin(int angle);
-	double GetCos(int angle);
+	double GetSin(int angle) const;
+	double GetCos(int angle) const;
 	void BuildSinCosTables();
 	std::vector<double> sinTable;
 	std::vector<double> cosTable;
 	std::vector<line2d> obstacles;
-	std::vector<line2d> armSegments;
+	mutable std::vector<line2d> armSegments;
 
 	std::vector<recVec> states;
 

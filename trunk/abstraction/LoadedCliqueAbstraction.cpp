@@ -102,7 +102,7 @@ void LoadedCliqueAbstraction::ToggleDrawAbstraction(int which)
 		levelDraw = levelDraw&(~(1<<which));
 }
 
-void LoadedCliqueAbstraction::OpenGLDraw(int)
+void LoadedCliqueAbstraction::OpenGLDraw() const
 {
 	glDisable(GL_LIGHTING);
 	for (unsigned int x = 0; x < abstractions.size(); x++)
@@ -114,7 +114,7 @@ void LoadedCliqueAbstraction::OpenGLDraw(int)
 	glEnable(GL_LIGHTING);
 }
 
-void LoadedCliqueAbstraction::DrawGraph(Graph *g)
+void LoadedCliqueAbstraction::DrawGraph(Graph *g) const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 	
@@ -150,7 +150,7 @@ void LoadedCliqueAbstraction::DrawGraph(Graph *g)
 	//  if (verbose&kBuildGraph) printf("Done\n");
 }
 
-void LoadedCliqueAbstraction::DrawLevelConnections(node *n)
+void LoadedCliqueAbstraction::DrawLevelConnections(node *n) const
 {
 	//	int x, y;
 	//	double offsetx, offsety;
@@ -171,7 +171,7 @@ void LoadedCliqueAbstraction::DrawLevelConnections(node *n)
 	//return ans;
 }
 
-recVec LoadedCliqueAbstraction::GetNodeLoc(node *n)
+recVec LoadedCliqueAbstraction::GetNodeLoc(node *n) const
 {
 	//  double offsetx, offsety;
 	recVec ans;

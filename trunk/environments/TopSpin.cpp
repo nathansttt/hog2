@@ -42,7 +42,7 @@ TopSpin::~TopSpin()
 {
 }
 
-void TopSpin::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors)
+void TopSpin::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const
 {
 	if (!data[stateID].expanded)
 	{
@@ -52,7 +52,7 @@ void TopSpin::GetSuccessors(graphState &stateID, std::vector<graphState> &neighb
 	return GraphEnvironment::GetSuccessors(stateID, neighbors);
 }
 
-void TopSpin::GetActions(graphState &stateID, std::vector<graphMove> &actions)
+void TopSpin::GetActions(graphState &stateID, std::vector<graphMove> &actions) const
 {
 	if (!data[stateID].expanded)
 	{
@@ -67,12 +67,12 @@ bool TopSpin::GoalTest(graphState &state, graphState &goal)
 	return (state == goal);
 }
 
-std::vector<int> &TopSpin::GetState(graphState gs)
+std::vector<int> &TopSpin::GetState(graphState gs) const
 {
 	return data[gs].config;
 }
 
-graphState TopSpin::GetState(std::vector<int> &configuration)
+graphState TopSpin::GetState(const std::vector<int> &configuration) const
 {
 	int zeroLoc = -1;
 	for (unsigned int x = 0; x < configuration.size(); x++)
@@ -86,7 +86,7 @@ graphState TopSpin::GetState(std::vector<int> &configuration)
 	return GetState(configuration, zeroLoc);
 }
 
-graphState TopSpin::GetState(std::vector<int> &configuration, int zeroLoc)
+graphState TopSpin::GetState(const std::vector<int> &configuration, int zeroLoc) const
 {
 	static std::vector<int> config(configuration.size());
 	config.resize(configuration.size());
@@ -99,7 +99,8 @@ graphState TopSpin::GetState(std::vector<int> &configuration, int zeroLoc)
 	if (hashTable.find(hash) != hashTable.end())
 		return hashTable[hash];
 	node *n;
-	g->AddNode(n = new node(""));
+	g2 = g;
+	g2->AddNode(n = new node(""));
 	data.resize(n->GetNum()+1);
 	data[n->GetNum()].config = config;
 	data[n->GetNum()].hashKey = hash;
@@ -109,8 +110,9 @@ graphState TopSpin::GetState(std::vector<int> &configuration, int zeroLoc)
 	return n->GetNum();
 }
 
-void TopSpin::ExpandNode(graphState &stateID)
+void TopSpin::ExpandNode(graphState &stateID) const
 {
+	g2 = g;
 	//printf("Expanding %lu\n", stateID);
 	for (int x = 0; x < length; x++)
 	{
@@ -119,12 +121,12 @@ void TopSpin::ExpandNode(graphState &stateID)
 		graphState s = GetState(data[stateID].config);
 		Flip(data[stateID].config, x, flipSize);
 		if (!g->FindEdge(s, stateID))
-			g->AddEdge(new edge(s, stateID, 1));
+			g2->AddEdge(new edge(s, stateID, 1));
 	}
 	data[stateID].expanded = true;
 }
 
-void TopSpin::Flip(std::vector<int> &arrangement, int index, int radius)
+void TopSpin::Flip(std::vector<int> &arrangement, int index, int radius) const
 {
 	while (radius > 1)
 	{
@@ -137,7 +139,7 @@ void TopSpin::Flip(std::vector<int> &arrangement, int index, int radius)
 	}
 }
 
-uint64_t TopSpin::GetStateHash(graphState &state)
+uint64_t TopSpin::GetStateHash(graphState &state) const
 {
 //	if (!data[state].expanded)
 //		ExpandNode(state);
@@ -172,12 +174,12 @@ graphState TopSpin::Dual(graphState s)
 	return GetState(dualCfg);  // it seems that we can't avoid storing the dual (for now) !
 }
 
-uint64_t TopSpin::GetStateHash(std::vector<int> &config)
+uint64_t TopSpin::GetStateHash(std::vector<int> &config) const
 {
 	return GetStateHash(&config[0], config.size());
 }
 
-uint64_t TopSpin::GetStateHash(int *config, int config_size)
+uint64_t TopSpin::GetStateHash(int *config, int config_size) const
 {
 	// need to handle rotation!
 	
@@ -211,12 +213,12 @@ uint64_t TopSpin::GetStateHash(int *config, int config_size)
 //	}
 }
 
-uint64_t TopSpin::GetPDBHash(graphState &state, int pdb_size)
+uint64_t TopSpin::GetPDBHash(const graphState &state, int pdb_size) const
 {
 	return GetPDBHash(GetState(state), pdb_size);
 }
 
-uint64_t TopSpin::GetPDBHash(std::vector<int> &config, int pdb_size)
+uint64_t TopSpin::GetPDBHash(const std::vector<int> &config, int pdb_size) const
 {
 	std::vector<int> pdb_pos(config.size());
 	for (unsigned int x = 0; x < config.size(); x++)
@@ -248,7 +250,7 @@ uint64_t TopSpin::GetPDBHash(std::vector<int> &config, int pdb_size)
 	return rank;
 }
 
-uint64_t TopSpin::GetPDBSize(int puzzleSize, int pdb_size)
+uint64_t TopSpin::GetPDBSize(int puzzleSize, int pdb_size) const
 {
 	pdb_size--;
 	uint64_t size;

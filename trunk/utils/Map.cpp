@@ -1467,7 +1467,7 @@ tTileset Map::getTileSet()
  * kPolygon is the default mode. The map is cached in a display list unless
  * it changes.
  */
-void Map::OpenGLDraw(int , tDisplay how)
+void Map::OpenGLDraw(tDisplay how) const
 {
 	glDisable(GL_LIGHTING);
 	if (drawLand)
@@ -1526,11 +1526,29 @@ void Map::getOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, 
 	x = (2*_x-width)*_scale;
 	y = (2*_y-height)*_scale;
 	z = -(double)0.5*(land[_x][_y].tile1.corners[0]+land[_x][_y].tile2.corners[0])*(_scale);//+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
-																																												 //	x = -((double)_x/_scale+1.0/(2.0*_scale)-.5);
-																																												 //	z = -((double)land[_x][_y].tile1.corners[0]/(2*_scale)+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
-																																												 //	//(double)land[_x][_y].tile1.corners[2]/(2*_scale)+(double)land[_x][_y].tile2.corners[0]/(2*_scale))/2.0;
-																																												 //	y = (double)-_y/_scale+1.0/(2.0*_scale)-.5;
-		radius = _scale;
+	radius = _scale;
+}
+
+/**
+ * Get the openGL coordinates of a given tile.
+ *
+ * Given a tile in (x, y) coordinates, it returns the OpenGL space coordinates of
+ * that tile along with the radius of the tile square. The map is drawn in the
+ * x<->z plane, with the y plane up.
+ */
+void Map::getOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
+{
+	int iX = floor(_x);
+	int iY = floor(_y);
+	double _scale;
+	if (height > width)
+		_scale = 1/(double)height;
+	else
+		_scale = 1/(double)width;
+	x = (2*_x-width)*_scale;
+	y = (2*_y-height)*_scale;
+	z = -(double)0.5*(land[iX][iY].tile1.corners[0]+land[iX][iY].tile2.corners[0])*(_scale);//+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
+	radius = _scale;
 }
 
 /**
@@ -1576,7 +1594,7 @@ void Map::getPointFromCoordinate(point3d loc, int &px, int &py) const
  * (technically we don't have to pass the tile, we could get it
 		* from the x,y coordinates)
  */
-void Map::drawTile(Tile *t, int x, int y, tDisplay how)
+void Map::drawTile(Tile *t, int x, int y, tDisplay how) const
 {
 	GLdouble xx, yy, zz, rr;
 	getOpenGLCoord(x,y,xx,yy,zz,rr);
@@ -1683,7 +1701,7 @@ void Map::drawTile(Tile *t, int x, int y, tDisplay how)
  * calls the appropriate openGL functions to set the draw color according
  * to the tile height/type
  */
-void Map::doVertexColor(tTerrain type, int vHeight, bool darken)
+void Map::doVertexColor(tTerrain type, int vHeight, bool darken) const
 {
 	double scaleH = (10.0-vHeight)/10.0;
 	double red=0, green=0, blue=0, alpha = 1.0;
@@ -1760,7 +1778,7 @@ void Map::doVertexColor(tTerrain type, int vHeight, bool darken)
 * does a rough approximation of the normal for a particular halfTile.
  * (if I recall, this isn't perfect...)
  */
-void Map::doNormal(tSplit split, halfTile *t, int /*x*/, int /*y*/)
+void Map::doNormal(tSplit split, halfTile *t, int /*x*/, int /*y*/) const
 {
 	recVec n,pa,pb;
 	
@@ -1790,7 +1808,7 @@ void Map::doNormal(tSplit split, halfTile *t, int /*x*/, int /*y*/)
 	glNormal3f(n.x,n.y,n.z);
 }
 
-void Map::drawLandQuickly()
+void Map::drawLandQuickly() const
 {
 	GLdouble xx, yy, zz, rr;
 	glBegin(GL_QUADS);

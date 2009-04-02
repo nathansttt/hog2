@@ -49,9 +49,9 @@ std::vector<GraphSimulation *> unitSims;
 
 //extern bool drawtext;
 
-unsigned int fig = 0;
+unsigned int fig = 4;
 unsigned int N = 5;
-unsigned int vid = 6;//PROP_A;//
+unsigned int vid = PROP_BP;//6;//PROP_A;//
 
 double delta = 0;
 
@@ -397,9 +397,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 		{
-			if(ALG == 0) 
+			if (ALG == 0) 
 			{
-				if(vid != 6)
+				if (vid != 6)
 					ALG = new Prop(vid,delta);
 				else
 					ALG = new AStarDelay();
@@ -568,19 +568,23 @@ void RunInconsistencyExperiment()
 				env = new GraphEnvironment(g, new GraphLabelHeuristic(g, to));
 				env->SetDirected(true);
 				
-				((Prop*)ALG)->SetAlgorithm(PROP_A);
+				//((Prop*)ALG)->SetAlgorithm(PROP_A);
+				((Prop*)ALG)->verID = PROP_A;
 				ALG->GetPath(env,g,from,to,thePath);
 				printf("A\t%ld\t%ld\t%ld\t%ld\t%d\n",
 					   ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened(),
 					   size, cost);
 				
-				((Prop*)ALG)->SetAlgorithm(PROP_B);
+				//((Prop*)ALG)->SetAlgorithm(PROP_B);
+				((Prop*)ALG)->verID = PROP_B;
+
 				ALG->GetPath(env,g,from,to,thePath);
 				printf("B\t%ld\t%ld\t%ld\t%ld\t%d\n",
 					   ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened(),
 					   size, cost);
 				
-				((Prop*)ALG)->SetAlgorithm(PROP_BP);
+				//((Prop*)ALG)->SetAlgorithm(PROP_BP);
+				((Prop*)ALG)->verID = PROP_BP;
 				ALG->GetPath(env,g,from,to,thePath);
 				printf("P\t%ld\t%ld\t%ld\t%ld\t%d\n",
 					   ALG->GetNodesExpanded(),ALG->GetNodesTouched(),ALG->GetNodesReopened(),

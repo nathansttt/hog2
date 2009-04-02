@@ -30,7 +30,7 @@ public:
 	double HCost(graphState &state1, graphState &state2);
 	void ChooseStartGoal(graphState &start, graphState &goal);
 
-	void OpenGLDraw();
+	void OpenGLDraw() const;
 	int GetNumEntries() {return centerDist.size() + lengths.size() * (lengths.size()); }
 private:
 	void BuildPDB();

@@ -295,8 +295,9 @@ void SearchUnit::updateLocation(int _x, int _y, bool success, AbsMapSimulationIn
 	loc.x = _x; loc.y = _y;
 }
 
-void SearchUnit::OpenGLDraw(int , AbsMapEnvironment *ame, AbsMapSimulationInfo *si)
+void SearchUnit::OpenGLDraw(const AbsMapEnvironment *ame, const AbsMapSimulationInfo *si) const
 {
+	printf("Drawing unit %p\n", this);
 	GLdouble xx, yy, zz, rad;
 	Map *map = ame->GetMap();
 
@@ -317,7 +318,7 @@ void SearchUnit::OpenGLDraw(int , AbsMapEnvironment *ame, AbsMapSimulationInfo *
 	glEnd();
 	
 	// draw object
-  map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
+	map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
 	if (onTarget)
 	{
 		double perc = (1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->GetSimulationTime())))));

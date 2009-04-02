@@ -62,7 +62,7 @@ public:
 	virtual void UpdateLocation(environment *env, state &l, bool success, SimulationInfo<state,action,environment> *si);
 	
 	virtual void GetLocation(state& s) {s=loc;}
-	virtual void OpenGLDraw(int window, environment *, SimulationInfo<state,action,environment> *);
+	virtual void OpenGLDraw(const environment *, const SimulationInfo<state,action,environment> *) const;
 	//void printRoundStats(FILE *f);
 	void LogStats(StatCollection *stats);
 	void LogFinalStats(StatCollection *stats);
@@ -199,21 +199,21 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 }
 
 template <class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::OpenGLDraw(int window, environment *env, SimulationInfo<state,action,environment> *si)
+void GenericSearchUnit<state,action,environment>::OpenGLDraw(const environment *env, const SimulationInfo<state,action,environment> *si) const
 {
 	// Draw current + goal states as states. May need to find something
 	// different for the goal
 		
 	if (loc == goal)
 	{
-		env->OpenGLDraw(window, loc, 0, 0, 0);
+		env->OpenGLDraw(loc/*, 0, 0, 0*/);
 	}
 	else
 	{	
 		GLfloat _r,_g,_b;
 		this->GetColor(_r,_g,_b);
-		//env->OpenGLDraw(window, lastLoc, loc, _r, _g, _b);	
-		env->OpenGLDraw(window, goal, _r, _g, _b);
+		//env->OpenGLDraw(lastLoc, loc, _r, _g, _b);	
+		env->OpenGLDraw(goal/*, _r, _g, _b*/);
 	}
 	state current = loc; 
 	state next;
@@ -221,8 +221,8 @@ void GenericSearchUnit<state,action,environment>::OpenGLDraw(int window, environ
 	// Draw the cached moves
   	for(unsigned int i=0; i<moves.size(); i++)
  	{
- 		env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
- 		env->GetNextState(current, moves[i],next);
+ 		env->OpenGLDraw(current, moves[i]/*,1.0,0,0*/); // draw in red
+ 		env->GetNextState(current, moves[i], next);
  		current = next;
  	}
  	

@@ -117,7 +117,7 @@ namespace Plotting {
 		r = _r; g = _g; b = _b;
 	}
 
-	void Line::OpenGLDraw(int )
+	void Line::OpenGLDraw() const
 	{
 		if (hidden)
 			return;
@@ -333,11 +333,13 @@ namespace Plotting {
 		ResetAxis();
 	}
 
-	void Plot2D::OpenGLDraw(int window)
+	void Plot2D::OpenGLDraw() const
 	{
 		GLint matrixMode;
+		
 		if (recomputeBorders)
-			ResetAxis();
+			assert(false);
+//			ResetAxis();
 		
 		glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
 		
@@ -370,13 +372,14 @@ namespace Plotting {
 		for (unsigned int x = 0; x < lines.size(); x++)
 		{
 			if (lines[x]->GetChanged())
-				recomputeBorders = true;
-			lines[x]->OpenGLDraw(window);
+				assert(false);
+			//recomputeBorders = true;
+			lines[x]->OpenGLDraw();
 		}
 
 		glLineWidth(3.0);
 		if (lastSelectedLine != -1)
-			lines[lastSelectedLine]->OpenGLDraw(window);
+			lines[lastSelectedLine]->OpenGLDraw();
 		glLineWidth(1.0);
 
 		// draw mouse - temporary hack

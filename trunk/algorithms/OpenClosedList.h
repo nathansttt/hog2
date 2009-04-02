@@ -39,24 +39,25 @@
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
 class OpenClosedList {
 public:
-  OpenClosedList();
-  ~OpenClosedList();
+	OpenClosedList();
+	~OpenClosedList();
 	void reset();
-  void Add(OBJ val);
-  void DecreaseKey(OBJ val);
-  void IncreaseKey(OBJ val);
-  bool IsIn(OBJ val);
-  OBJ Remove();
+	void Add(OBJ val);
+	void DecreaseKey(OBJ val);
+	void IncreaseKey(OBJ val);
+	bool IsIn(const OBJ val) const;
+	OBJ Remove();
 	void pop() { Remove(); }
+	const OBJ peek() const { return _elts[0]; }
 	OBJ top() { return _elts[0]; }
 	OBJ find(OBJ val);
-  bool Empty();
+	bool Empty();
 	unsigned size() { return _elts.size(); }
-//	void verifyData();
+	//	void verifyData();
 private:
-  std::vector<OBJ> _elts;
+	std::vector<OBJ> _elts;
 	void HeapifyUp(unsigned int index);
-  void HeapifyDown(unsigned int index);
+	void HeapifyDown(unsigned int index);
 	typedef __gnu_cxx::hash_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
 	IndexTable table;
 };
@@ -130,13 +131,22 @@ void OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::IncreaseKey(OBJ val)
 * Returns true if the object is in the OpenClosedList.
  */
 template<typename OBJ, class HashKey, class EqKey, class CmpKey>
-bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::IsIn(OBJ val)
+bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::IsIn(const OBJ val) const
 {
 	EqKey eq;
-  if ((table.find(val) != table.end()) && (table[val] < _elts.size()) &&
-			(eq(_elts[table[val]], val)))
-		return true;
-  return false;
+	//	typedef __gnu_cxx::hash_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
+	typename IndexTable::const_iterator it;
+	it = table.find(val);
+	if (it != table.end())
+	{
+		const unsigned int stored = (*it).second;
+		if (stored < _elts.size())
+		{
+			if (eq(_elts[stored], val))
+				return true;
+		}
+	}
+	return false;
 }
 
 /**

@@ -77,12 +77,12 @@ public:
 		
 	template <class state>
 	struct SearchNodeEqual {
-		bool operator()(const SearchNode<state> &i1, const SearchNode<state> &i2)
+		bool operator()(const SearchNode<state> &i1, const SearchNode<state> &i2) const
 		{ return (i1.currNode == i2.currNode); } };
 	
 	template <class state>
 	struct SearchNodeCompare {
-		bool operator()(const SearchNode<state> &i1, const SearchNode<state> &i2)
+		bool operator()(const SearchNode<state> &i1, const SearchNode<state> &i2) const
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
@@ -158,6 +158,8 @@ public:
 
 	void SetStopAfterGoal(bool val) { stopAfterGoal = val; }
 	bool GetStopAfterGoal() { return stopAfterGoal; }
+	
+	void OpenGLDraw() const;
 	
 	/** Use weighted A* and set the weight
 	*
@@ -322,8 +324,6 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		return true;
 	}
 	
-
-	
  	neighbors.resize(0);
  	env->GetSuccessors(currentOpenNode, neighbors);
 
@@ -365,6 +365,15 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		
 		firstRound = false; 
 	}
+	
+	if ((openQueue.size() == 0) && (stopAfterGoal == false))
+	{
+		ExtractPathToStart(currentOpenNode, thePath);
+		// Path is backwards - reverse
+		reverse(thePath.begin(), thePath.end()); 
+		return true;
+	}
+	
 //	std::cout<<std::endl;
 	return false;
 }
@@ -584,7 +593,6 @@ bool TemplateAStar<state, action,environment>::ClosedListIterNext(closedList_ite
 	return true;
 }
 
-
 /**
 * Get state from the closed list
  * @author Nathan Sturtevant
@@ -604,6 +612,23 @@ bool TemplateAStar<state, action,environment>::GetClosedListGCost(state &val, do
 		return true;
 	}
 	return false;
+}
+
+/**
+ * Draw the open/closed list
+ * @author Nathan Sturtevant
+ * @date 03/12/09
+ * 
+ */
+template <class state, class action, class environment>
+void TemplateAStar<state, action,environment>::OpenGLDraw() const
+{
+	int x = 0;
+	env->SetColor(0.9, 0.9, 0.9, 0.15);
+	for (closedList_iterator it = closedList.begin(); it != closedList.end(); it++)
+	{
+		env->OpenGLDraw((*it).second.currNode);
+	}
 }
 
 #endif

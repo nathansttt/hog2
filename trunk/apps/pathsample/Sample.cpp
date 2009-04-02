@@ -48,6 +48,8 @@
 //#include "GenericAStar.h"
 //#include "FringeSearch.h"
 #include "AStar.h"
+#include "TemplateAStar.h"
+#include "GraphEnvironment.h"
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -91,7 +93,8 @@ void CreateSimulation(int id)
 	}
 	else
 		map = new Map(gDefaultMap);
-
+	map->setTileSet(kWinter);
+	
 	unitSims.resize(id+1);
 	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new MapQuadTreeAbstraction(map, 2)));
 	//unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, AbsMapEnvironment>(new AbsMapEnvironment(new NodeLimitAbstraction(map, 8)));
@@ -197,7 +200,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			CFOR->OpenGLDraw();
 		}
 	}
-	unitSims[windowID]->OpenGLDraw(windowID);
+	unitSims[windowID]->OpenGLDraw();
 	
 //	if (viewport == 0)
 //	{
@@ -368,7 +371,11 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
 			if (unitSims[windowID])
+			{
+				printf("Abs level %d has %d nodes\n", key-'0',
+					   unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->GetAbstractGraph((key-'0'))->GetNumNodes());
 				unitSims[windowID]->GetEnvironment()->GetMapAbstraction()->ToggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
+			}
 			break;
 	}
 }
@@ -417,7 +424,30 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
-//	for (int x = 0; x < ((mod==kShiftDown)?(50):(1)); x++)
+	AbsMapEnvironment *env = unitSims[0]->GetEnvironment();
+	MapAbstraction *mabs = env->GetMapAbstraction();
+	Map *m = env->GetMap();
+	MapEnvironment ma(m->clone());
+	std::vector<xyLoc> path;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> a;
+	for (int x = 0; x < 10000; x++)
+	{
+		node *n1, *n2;
+		do {
+			Graph *g = mabs->GetAbstractGraph(0);
+			n1 = g->GetRandomNode();
+			n2 = g->GetRandomNode();
+		} while (!mabs->Pathable(n1, n2));
+		mabs->GetTileFromNode(n1, px1, py1);
+		mabs->GetTileFromNode(n2, px2, py2);
+		xyLoc s1, g1;
+		s1.x = px1; s1.y = py1;
+		g1.x = px2; g1.y = py2;
+		a.GetPath(&ma, s1, g1, path);
+		printf("%d\t%d\t%d\t%d\t%1.5f\n", px1, py1, px2, py2, ma.GetPathLength(path));
+	}
+	
+	//	for (int x = 0; x < ((mod==kShiftDown)?(50):(1)); x++)
 //	{
 //		if (unitSim->getUnitGroup(1) == 0)
 //		{
@@ -445,6 +475,41 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
+	if (mType != kMouseUp)
+		return false;
+	
+	AbsMapEnvironment *env = unitSims[0]->GetEnvironment();
+	Map *m = env->GetMap();
+	env->GetMap()->getPointFromCoordinate(loc, px1, py1);
+	printf("Mouse up at (%d, %d)\n", px1, py1);
+
+	MapEnvironment ma(m->clone());
+	std::vector<xyLoc> path;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> a;
+	a.SetStopAfterGoal(false);
+	xyLoc s1;
+	xyLoc g1;
+	s1.x = px1; s1.y = py1;
+	g1.x = px1; g1.y = py1;
+	a.GetPath(&ma, s1, g1, path);
+	printf("Solution: moves %d, length %f\n", path.size(), ma.GetPathLength(path));
+//	for (unsigned int x = 0; x < path.size(); x++)
+//		printf("%lu   ", path[x]);
+//	printf("\n");
+	
+	printf("%d nodes expanded\n", a.GetNodesExpanded());
+	
+	GraphEnvironment ge(env->GetMapAbstraction()->GetAbstractGraph(1), 0);
+	node *n = env->GetMapAbstraction()->GetNodeFromMap(px1, py1);
+	n = env->GetMapAbstraction()->GetParent(n);
+	TemplateAStar<graphState, graphMove, GraphEnvironment> a_g;
+	std::vector<graphState> p1;
+	graphState s2 = n->GetNum(), g2 = n->GetNum();
+	a_g.SetStopAfterGoal(false);
+	a_g.GetPath(&ge, s2, g2, p1);
+	printf("Solution: moves %d, length %f\n", p1.size(), ge.GetPathLength(p1));
+	printf("%d nodes expanded\n", a_g.GetNodesExpanded());
+	
 	return false;
 //	mouseTracking = false;
 //	if (button == kRightButton)

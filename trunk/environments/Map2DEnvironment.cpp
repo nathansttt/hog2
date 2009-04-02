@@ -22,69 +22,70 @@ MapEnvironment::~MapEnvironment()
 	delete oi;
 }
 
-void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors)
+void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors) const
 {
 	bool up=false, down=false;
-	if ((map->getTerrainType(loc.x, loc.y+1) == kGround))
+	// 
+	if ((map->canStep(loc.x, loc.y, loc.x, loc.y+1)))
 	{
 		down = true;
 		neighbors.push_back(xyLoc(loc.x, loc.y+1));
 	}
-	if ((map->getTerrainType(loc.x, loc.y-1) == kGround))
+	if ((map->canStep(loc.x, loc.y, loc.x, loc.y-1)))
 	{
 		up = true;
 		neighbors.push_back(xyLoc(loc.x, loc.y-1));
 	}
-	if ((map->getTerrainType(loc.x-1, loc.y) == kGround))
+	if ((map->canStep(loc.x, loc.y, loc.x-1, loc.y)))
 	{
-		if ((up && (map->getTerrainType(loc.x-1, loc.y-1) == kGround)))
+		if ((up && (map->canStep(loc.x, loc.y, loc.x-1, loc.y-1))))
 			neighbors.push_back(xyLoc(loc.x-1, loc.y-1));
-		if ((down && (map->getTerrainType(loc.x-1, loc.y+1) == kGround)))
+		if ((down && (map->canStep(loc.x, loc.y, loc.x-1, loc.y+1))))
 			neighbors.push_back(xyLoc(loc.x-1, loc.y+1));
 		neighbors.push_back(xyLoc(loc.x-1, loc.y));
 	}
-	if ((map->getTerrainType(loc.x+1, loc.y) == kGround))
+	if ((map->canStep(loc.x, loc.y, loc.x+1, loc.y)))
 	{
-		if ((up && (map->getTerrainType(loc.x+1, loc.y-1) == kGround)))
+		if ((up && (map->canStep(loc.x, loc.y, loc.x+1, loc.y-1))))
 			neighbors.push_back(xyLoc(loc.x+1, loc.y-1));
-		if ((down && (map->getTerrainType(loc.x+1, loc.y+1) == kGround)))
+		if ((down && (map->canStep(loc.x, loc.y, loc.x+1, loc.y+1))))
 			neighbors.push_back(xyLoc(loc.x+1, loc.y+1));
 		neighbors.push_back(xyLoc(loc.x+1, loc.y));
 	}
 }
 
-void MapEnvironment::GetActions(xyLoc &loc, std::vector<tDirection> &actions)
+void MapEnvironment::GetActions(xyLoc &loc, std::vector<tDirection> &actions) const
 {
 	bool up=false, down=false;
-	if ((map->getTerrainType(loc.x, loc.y+1) == kGround))
+	if ((map->canStep(loc.x, loc.y, loc.x, loc.y+1)))
 	{
 		down = true;
 		actions.push_back(kS);
 	}
-	if ((map->getTerrainType(loc.x, loc.y-1) == kGround))
+	if ((map->canStep(loc.x, loc.y, loc.x, loc.y-1)))
 	{
 		up = true;
 		actions.push_back(kN);
 	}
-	if ((map->getTerrainType(loc.x-1, loc.y) == kGround))
+	if ((map->canStep(loc.x, loc.y, loc.x-1, loc.y)))
 	{
-		if ((up && (map->getTerrainType(loc.x-1, loc.y-1) == kGround)))
+		if ((up && (map->canStep(loc.x, loc.y, loc.x-1, loc.y-1))))
 			actions.push_back(kNW);
-		if ((down && (map->getTerrainType(loc.x-1, loc.y+1) == kGround)))
+		if ((down && (map->canStep(loc.x, loc.y, loc.x-1, loc.y+1))))
 			actions.push_back(kSW);
 		actions.push_back(kW);
 	}
-	if ((map->getTerrainType(loc.x+1, loc.y) == kGround))
+	if ((map->canStep(loc.x, loc.y, loc.x+1, loc.y)))
 	{
-		if ((up && (map->getTerrainType(loc.x+1, loc.y-1) == kGround)))
+		if ((up && (map->canStep(loc.x, loc.y, loc.x+1, loc.y-1))))
 			actions.push_back(kNE);
-		if ((down && (map->getTerrainType(loc.x+1, loc.y+1) == kGround)))
+		if ((down && (map->canStep(loc.x, loc.y, loc.x+1, loc.y+1))))
 			actions.push_back(kSE);
 		actions.push_back(kE);
 	}
 }
 
-tDirection MapEnvironment::GetAction(xyLoc &s1, xyLoc &s2)
+tDirection MapEnvironment::GetAction(xyLoc &s1, xyLoc &s2) const
 {
 	int result = kStay;
 	switch (s1.x-s2.x)
@@ -107,7 +108,7 @@ tDirection MapEnvironment::GetAction(xyLoc &s1, xyLoc &s2)
 	return (tDirection)result;
 }
 
-bool MapEnvironment::InvertAction(tDirection &a)
+bool MapEnvironment::InvertAction(tDirection &a) const
 {
 	switch (a)
 	{
@@ -124,7 +125,7 @@ bool MapEnvironment::InvertAction(tDirection &a)
 	return true;
 }
 
-void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir)
+void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 {
 	xyLoc old = s;
 	switch (dir)
@@ -187,21 +188,21 @@ bool MapEnvironment::GoalTest(xyLoc &node, xyLoc &goal)
 	return ((node.x == goal.x) && (node.y == goal.y));
 }
 
-uint64_t MapEnvironment::GetStateHash(xyLoc &node)
+uint64_t MapEnvironment::GetStateHash(xyLoc &node) const
 {
 	return (((uint64_t)node.x)<<16)|node.y;
 //	return (node.x<<16)|node.y;
 }
 
-uint64_t MapEnvironment::GetActionHash(tDirection act)
+uint64_t MapEnvironment::GetActionHash(tDirection act) const
 {
 	return (uint32_t) act;
 }
 
-void MapEnvironment::OpenGLDraw(int window)
+void MapEnvironment::OpenGLDraw() const
 {
 	//std::cout<<"drawing\n";
-	map->OpenGLDraw(window);
+	map->OpenGLDraw();
 	// Draw occupancy interface - occupied = white
 	for(int i=0; i<map->getMapWidth(); i++)
 		for(int j=0; j<map->getMapHeight(); j++)
@@ -211,42 +212,64 @@ void MapEnvironment::OpenGLDraw(int window)
 				l.y = j;
 			if(oi->GetStateOccupied(l))
 			{
-				OpenGLDraw(window, l, 1.0, 1.0, 1.0);
+				SetColor(1.0, 1.0, 1.0, 1.0);
+				OpenGLDraw(l);//, 1.0, 1.0, 1.0);
 			}
 		}
 }
 	
 
 
-void MapEnvironment::OpenGLDraw(int , xyLoc &l)
+void MapEnvironment::OpenGLDraw(const xyLoc &l) const
 {
 	GLdouble xx, yy, zz, rad;
 	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
-	glColor3f(0.5, 0.5, 0.5);
+	GLfloat r, g, b, t;
+	GetColor(r, g, b, t);
+	glColor4f(r, g, b, t);
+	//glColor3f(0.5, 0.5, 0.5);
 	DrawSphere(xx, yy, zz, rad);
 }
 
-void MapEnvironment::OpenGLDraw(int, xyLoc &l, GLfloat r, GLfloat g, GLfloat b)
+void MapEnvironment::OpenGLDraw(const xyLoc &l1, const xyLoc &l2, double v) const
 {
 	GLdouble xx, yy, zz, rad;
-	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
-	glColor3f(r,g,b);
+	GLdouble xx2, yy2, zz2;
+//	map->getOpenGLCoord((float)((1-v)*l1.x+v*l2.x),
+//						(float)((1-v)*l1.y+v*l2.y), xx, yy, zz, rad);
+	printf("%f between (%d, %d) and (%d, %d)\n", v, l1.x, l1.y, l2.x, l2.y);
+	map->getOpenGLCoord(l1.x, l1.y, xx, yy, zz, rad);
+	map->getOpenGLCoord(l2.x, l2.y, xx2, yy2, zz2, rad);
+	//	map->getOpenGLCoord(perc*newState.x + (1-perc)*oldState.x, perc*newState.y + (1-perc)*oldState.y, xx, yy, zz, rad);
+	xx = (1-v)*xx+v*xx2;
+	yy = (1-v)*yy+v*yy2;
+	zz = (1-v)*zz+v*zz2;
+	GLfloat r, g, b, t;
+	GetColor(r, g, b, t);
+	glColor4f(r, g, b, t);
 	DrawSphere(xx, yy, zz, rad);
 }
 
+//void MapEnvironment::OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const
+//{
+//	GLdouble xx, yy, zz, rad;
+//	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
+//	glColor3f(r,g,b);
+//	DrawSphere(xx, yy, zz, rad);
+//}
 
-void MapEnvironment::OpenGLDraw(int window, xyLoc& s, tDirection &dir)
+
+void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) const
 {
 	
+	xyLoc s = initial;
 	GLdouble xx, yy, zz, rad;
 	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
 	
 	glColor3f(0.5, 0.5, 0.5);
 	glBegin(GL_LINE_STRIP);
 	glVertex3f(xx, yy, zz-rad/2);
-	
-	xyLoc initial = s;
-	
+		
 	switch (dir)
 	{
 		case kN: s.y-=1; break;
@@ -265,42 +288,39 @@ void MapEnvironment::OpenGLDraw(int window, xyLoc& s, tDirection &dir)
 	glVertex3f(xx, yy, zz-rad/2);
 	glEnd();
 	
-	s = initial;
 }
 
-void MapEnvironment::OpenGLDraw(int window, xyLoc& s, tDirection &dir, GLfloat r, GLfloat g, GLfloat b)
-{
-	GLdouble xx, yy, zz, rad;
-	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
-	
-	glColor3f(r,g,b);
-	glBegin(GL_LINE_STRIP);
-	glVertex3f(xx, yy, zz-rad/2);
-	
-	xyLoc initial = s;
-	
-	switch (dir)
-	{
-		case kN: s.y-=1; break;
-		case kS: s.y+=1; break;
-		case kE: s.x+=1; break;
-		case kW: s.x-=1; break;
-		case kNW: s.y-=1; s.x-=1; break;
-		case kSW: s.y+=1; s.x-=1; break;
-		case kNE: s.y-=1; s.x+=1; break;
-		case kSE: s.y+=1; s.x+=1; break;
-		default: break;
-	}
+//void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir, GLfloat r, GLfloat g, GLfloat b) const
+//{
+//	xyLoc s = initial;
+//	GLdouble xx, yy, zz, rad;
+//	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+//	
+//	glColor3f(r,g,b);
+//	glBegin(GL_LINE_STRIP);
+//	glVertex3f(xx, yy, zz-rad/2);
+//	
+//	
+//	switch (dir)
+//	{
+//		case kN: s.y-=1; break;
+//		case kS: s.y+=1; break;
+//		case kE: s.x+=1; break;
+//		case kW: s.x-=1; break;
+//		case kNW: s.y-=1; s.x-=1; break;
+//		case kSW: s.y+=1; s.x-=1; break;
+//		case kNE: s.y-=1; s.x+=1; break;
+//		case kSE: s.y+=1; s.x+=1; break;
+//		default: break;
+//	}
+//
+//	
+//	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+//	glVertex3f(xx, yy, zz-rad/2);
+//	glEnd();
+//}
 
-	
-	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
-	glVertex3f(xx, yy, zz-rad/2);
-	glEnd();
-	
-	s = initial;
-}
-
-void MapEnvironment::GetNextState(xyLoc &currents, tDirection dir, xyLoc &news)
+void MapEnvironment::GetNextState(xyLoc &currents, tDirection dir, xyLoc &news) const
  {
 	news = currents;
  	switch (dir)

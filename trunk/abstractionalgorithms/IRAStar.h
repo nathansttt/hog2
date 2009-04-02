@@ -46,13 +46,13 @@ namespace IRAStarConstants {
 	};
 	
 	struct NodeEqual {
-		bool operator()(const GNode &i1, const GNode &i2)
+		bool operator()(const GNode &i1, const GNode &i2) const
 		{ return (i1.n->getUniqueID() == i2.n->getUniqueID()); }
 	};
 	
 	struct NodeCompare {
 		// return true if we prefer i2 over i1
-		bool operator()(const GNode &i1, const GNode &i2)
+		bool operator()(const GNode &i1, const GNode &i2) const
 		{
 			// return true if node1 has higher f-cost
 			return (fgreater(i1.n->GetLabelF(kGCost)+i1.n->GetLabelF(kHCost),
@@ -83,7 +83,7 @@ public:
 	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	path *DoOneSearchStep();
 	bool InitializeSearch(GraphAbstraction *aMap, node *from, node *to);
-	void OpenGLDraw();
+	void OpenGLDraw() const;
 	int GetNodesRefined() { return nodesRefined; }
 private:
 	node *FindTopLevelNode(node *one, node *two, GraphAbstraction *aMap);
@@ -94,7 +94,7 @@ private:
 	//	void UpdateOptH(node *gNode);
 	//	void MakeNeighborsOpen(node *gNode);
 	void RefineNode(node *gNode);
-	node *GetRealNode(node *gNode);
+	node *GetRealNode(node *gNode) const;
 	bool ShouldAddEdge(node *aLowerNode, node *aHigherNode);
 	
 	void GetAllSolutionNodes(node *goal, std::vector<node*> &nodes);
@@ -103,13 +103,13 @@ private:
 	path *ExtractAndRefinePath();
 	path *GetSolution(node *gNode);
 	void   SetHValues(int f);
-	double GetHCost(node *);
+	double GetHCost(node *) const;
 	void   SetHCost(node *, double);
 	//double GetCachedHCost(node *);
 	//void   SetCachedHCost(node *, double);
-	double GetGCost(node *);
+	double GetGCost(node *) const;
 	void   SetGCost(node *, double);
-	double GetFCost(node *);
+	double GetFCost(node *) const;
 	
 	IRAStarConstants::PQueue q;
 	IRAStarConstants::NodeLookupTable closedList;

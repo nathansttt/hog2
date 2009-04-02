@@ -114,7 +114,7 @@ void RoboticArm::GetTipPosition( armAngles &s, double &x, double &y )
 	y = a.y;
 }
 
-void RoboticArm::GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighbors)
+void RoboticArm::GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighbors) const
 {
 	neighbors.resize(0);
 	for (int x = 0; x < nodeID.GetNumArms(); x++)
@@ -136,7 +136,7 @@ void RoboticArm::GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighb
 	}
 }
 
-void RoboticArm::GetActions(armAngles &nodeID, std::vector<armRotations> &actions)
+void RoboticArm::GetActions(armAngles &nodeID, std::vector<armRotations> &actions) const
 {
 	actions.resize(0);
 	for (int x = 0; x < nodeID.GetNumArms(); x++)
@@ -178,7 +178,7 @@ void RoboticArm::GetActions(armAngles &nodeID, std::vector<armRotations> &action
 //	}
 }
 
-armRotations RoboticArm::GetAction(armAngles &s1, armAngles &s2)
+armRotations RoboticArm::GetAction(armAngles &s1, armAngles &s2) const
 {
 	armRotations ar;
 	for (int x = 0; x < s1.GetNumArms(); x++)
@@ -188,7 +188,7 @@ armRotations RoboticArm::GetAction(armAngles &s1, armAngles &s2)
 	return ar;
 }
 
-void RoboticArm::ApplyAction(armAngles &s, armRotations dir)
+void RoboticArm::ApplyAction(armAngles &s, armRotations dir) const
 {
 	armAngles newState = s;
 	for (int x = 0; x < newState.GetNumArms(); x++) {
@@ -198,7 +198,7 @@ void RoboticArm::ApplyAction(armAngles &s, armRotations dir)
 	s = newState;
 }
 
-bool RoboticArm::InvertAction(armRotations &a)
+bool RoboticArm::InvertAction(armRotations &a) const
 {
 	for (int x = 0; x < 6; x++)
 		a.SetRotation(x, (tRotation)(-(int)a.GetRotation(x)));
@@ -330,7 +330,7 @@ bool RoboticArm::GoalTest(armAngles &node, armAngles &goal)
 	  && y-a.y <= tolerance && a.y-y < tolerance;
 }
 
-uint64_t RoboticArm::GetStateHash(armAngles &node)
+uint64_t RoboticArm::GetStateHash(armAngles &node) const
 {
 	// want a perfect hash function
 	//return node.angles;
@@ -341,18 +341,18 @@ uint64_t RoboticArm::GetStateHash(armAngles &node)
 	return res;
 }
 
-uint64_t RoboticArm::GetActionHash(armRotations act)
+uint64_t RoboticArm::GetActionHash(armRotations act) const
 {
 	return act.rotations;
 }
 
-void RoboticArm::OpenGLDraw(int window)
+void RoboticArm::OpenGLDraw() const
 {
-	if (window == 1)
-	{
-		ce->OpenGLDraw(1);
-		return;
-	}
+//	if (window == 1)
+//	{
+//		ce->OpenGLDraw(1);
+//		return;
+//	}
 	glBegin(GL_QUADS);
 	glColor3f(0, 0, 0.1);
 	glVertex3f(-1, -1, 0.1);
@@ -368,18 +368,18 @@ void RoboticArm::OpenGLDraw(int window)
 	}
 }
 
-void RoboticArm::OpenGLDraw(int window, armAngles &a)
+void RoboticArm::OpenGLDraw(const armAngles &a) const
 {
-	if (window == 1)
-	{
-		glColor3f(1, 1, 0);
-		for (unsigned int x = 1; x < states.size(); x++)
-		{
-			DrawLine(line2d(states[x-1], states[x]));
-		}
-		ce->OpenGLDraw(1);
-		return;
-	}
+//	if (window == 1)
+//	{
+//		glColor3f(1, 1, 0);
+//		for (unsigned int x = 1; x < states.size(); x++)
+//		{
+//			DrawLine(line2d(states[x-1], states[x]));
+//		}
+//		ce->OpenGLDraw(1);
+//		return;
+//	}
 
 	recVec e;
 	if (a.IsGoalState())
@@ -409,19 +409,19 @@ void RoboticArm::OpenGLDraw(int window, armAngles &a)
 	
 }
 
-void RoboticArm::OpenGLDraw(int, armAngles &, armRotations &)
+void RoboticArm::OpenGLDraw(const armAngles &, const armRotations &) const
 {
 }
 
-void RoboticArm::OpenGLDraw(int, armAngles &, armRotations &, GLfloat, GLfloat, GLfloat)
-{
-}
+//void RoboticArm::OpenGLDraw(const armAngles &, const armRotations &, GLfloat, GLfloat, GLfloat) const
+//{
+//}
+//
+//void RoboticArm::OpenGLDraw(const armAngles &, GLfloat, GLfloat, GLfloat) const
+//{
+//}
 
-void RoboticArm::OpenGLDraw(int, armAngles &, GLfloat, GLfloat, GLfloat)
-{
-}
-
-void RoboticArm::DrawLine(line2d l)
+void RoboticArm::DrawLine(line2d l) const
 {
 	glLineWidth(5);
 	glBegin(GL_LINES);
@@ -431,13 +431,13 @@ void RoboticArm::DrawLine(line2d l)
 	glLineWidth(1);
 }
 
-void RoboticArm::GetNextState(armAngles &currents, armRotations dir, armAngles &news)
+void RoboticArm::GetNextState(armAngles &currents, armRotations dir, armAngles &news) const
 {
 	news = currents;
 	ApplyAction(news, dir);
 }
 
-bool RoboticArm::LegalState(armAngles &a)
+bool RoboticArm::LegalState(armAngles &a) const
 {
 //	if( legalStateTable != NULL ) {
 //		uint64_t idx;
@@ -467,7 +467,7 @@ bool RoboticArm::LegalState(armAngles &a)
 	return true;
 }
 
-bool RoboticArm::LegalArmConfig(armAngles &a)
+bool RoboticArm::LegalArmConfig(armAngles &a) const
 {
 //	if (m_TableComplete)
 //		return legals[a.GetAngle(1)][a.GetAngle(2)];
@@ -484,7 +484,7 @@ bool RoboticArm::LegalArmConfig(armAngles &a)
 	return true;
 }
 
-void RoboticArm::GenerateLineSegments(armAngles &a, std::vector<line2d> &armSegments1)
+void RoboticArm::GenerateLineSegments(const armAngles &a, std::vector<line2d> &armSegments1) const
 {
 	armSegments1.resize(0);
 	for (int x = 0; x < a.GetNumArms(); x++)
@@ -520,12 +520,12 @@ void RoboticArm::GenerateLineSegments(armAngles &a, std::vector<line2d> &armSegm
 	assert(armSegments1.size() > 0);
 }
 
-double RoboticArm::GetSin(int angle)
+double RoboticArm::GetSin(int angle) const
 {
 	return sinTable[angle];
 }
 
-double RoboticArm::GetCos(int angle)
+double RoboticArm::GetCos(int angle) const
 {
 	return cosTable[angle];
 }

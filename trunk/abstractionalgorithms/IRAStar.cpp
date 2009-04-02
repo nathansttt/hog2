@@ -467,7 +467,7 @@ void IRAStar::RefineNode(node *gNode)
 	g->RemoveNode(gNode);
 }
 
-node *IRAStar::GetRealNode(node *gNode)
+node *IRAStar::GetRealNode(node *gNode) const
 {
 	return absGraph->GetAbstractGraph(gNode->GetLabelL(kAbstractionLevel))->GetNode(gNode->GetLabelL(kCorrespondingNode));
 }
@@ -484,7 +484,7 @@ bool IRAStar::ShouldAddEdge(node *aLowerNode, node *aHigherNode)
 	return false;
 }
 
-void IRAStar::OpenGLDraw()
+void IRAStar::OpenGLDraw() const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0))
 	{
@@ -500,7 +500,7 @@ void IRAStar::OpenGLDraw()
 		node *n;
 		n = g->GetNode(e->getFrom());
 #ifdef HEURISTIC_COLOR
-		if (q.top().n == n)
+		if (q.peek().n == n)
 			glColor3f(	GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4, 
 					0.0, 
 					GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4);
@@ -529,7 +529,7 @@ void IRAStar::OpenGLDraw()
 		glVertex3f(rv.x, rv.y, rv.z);
 		
 		n = g->GetNode(e->getTo());
-		if (q.top().n == n)
+		if (q.peek().n == n)
 			glColor3f(	GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4, 
 					0.0, 
 					GetHCost(n)*0.6/MAX_HEURISTIC_VALUE+0.4);
@@ -616,7 +616,7 @@ void IRAStar::SetHValues( int f )
 	}
 }
 
-double IRAStar::GetHCost(node *n)
+double IRAStar::GetHCost(node *n) const
 {
 //	if (n->GetLabelL(kIteration) < currentIteration-1)
 //		return std::max(iterationLimits.back(), val);
@@ -654,7 +654,7 @@ void IRAStar::SetHCost(node *n, double val)
 //		*/
 //}
 
-double IRAStar::GetGCost(node *n)
+double IRAStar::GetGCost(node *n) const
 {
 	return n->GetLabelF(kGCost);
 }
@@ -664,7 +664,7 @@ void IRAStar::SetGCost(node *n, double val)
 	n->SetLabelF(kGCost, val);
 }
 
-double IRAStar::GetFCost(node *n)
+double IRAStar::GetFCost(node *n) const
 {
 	return n->GetLabelF(kGCost)+n->GetLabelF(kHCost);
 }

@@ -61,11 +61,11 @@ public:
 	};
 		
 	struct SearchNodeEqual {
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 		{ return (i1.currNode == i2.currNode); } };
 	
 	struct SearchNodeCompare {
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{

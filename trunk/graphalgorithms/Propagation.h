@@ -90,7 +90,7 @@ namespace PropUtil
 	};
 
 	struct SearchNodeEqual {
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 		{ return (i1.currNode == i2.currNode); } 
 	};
 
@@ -98,7 +98,7 @@ namespace PropUtil
 	struct SearchNodeCompare { // true means i2 is preferable over i1
 		// in favor of goal when f ties
 		// prefering larger g, i.e. smaller h is also in favor of goal nodes
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
@@ -113,7 +113,8 @@ namespace PropUtil
 	};
 
 	struct GGreater {
-		bool operator()(const SearchNode &i1, const SearchNode &i2) {
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
+		{
 			if(fequal(i1.gCost,i2.gCost)) {
 				//if(i2.isGoal) // always prefer a goal node in tie
 				//	return true;
@@ -128,7 +129,8 @@ namespace PropUtil
 	};
 
 	struct TGreater {
-		bool operator()(const SearchNode &i1, const SearchNode &i2) {
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
+		{
 			//if(i1.threshold == i2.threshold) // threshold is integer
 			//	return fgreater(i1.gCost,i2.gCost);
 			//return i1.threshold > i2.threshold;
@@ -137,7 +139,8 @@ namespace PropUtil
 	};
 
 	struct FExtract {
-		double operator()(const SearchNode &i) {
+		double operator()(const SearchNode &i) const
+		{
 			return i.fCost;	
 		}
 	};
@@ -484,8 +487,8 @@ public:
 	void RelaxOpenNode(double f, double g, graphState neighbor, PropUtil::SearchNode &neighborNode, graphState topNodeID);
 	void RelaxDelayNode(double f, double g, graphState neighbor, PropUtil::SearchNode &neighborNode, graphState topNodeID);
 
-	void OpenGLDraw();
-	void OpenGLDraw(int window);
+	//void OpenGLDraw() const;
+	void OpenGLDraw() const;
 	void DrawText(double x, double y, double z, float r, float g, float b, char* str);
 	void DrawEdge(unsigned int from, unsigned int to, double weight);
 

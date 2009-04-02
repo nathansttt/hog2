@@ -318,7 +318,7 @@ void CFOptimalRefinement::RefineNode(node *gNode)
 	g->RemoveNode(gNode);
 }
 
-node *CFOptimalRefinement::GetRealNode(node *gNode)
+node *CFOptimalRefinement::GetRealNode(node *gNode) const
 {
 	return absGraph->GetAbstractGraph(gNode->GetLabelL(kAbstractionLevel))->GetNode(gNode->GetLabelL(kCorrespondingNode));
 }
@@ -335,7 +335,7 @@ bool CFOptimalRefinement::ShouldAddEdge(node *aLowerNode, node *aHigherNode)
 	return false;
 }
 
-void CFOptimalRefinement::OpenGLDraw()
+void CFOptimalRefinement::OpenGLDraw() const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0))
 	{
@@ -348,28 +348,29 @@ void CFOptimalRefinement::OpenGLDraw()
 	edge_iterator ei = g->getEdgeIter();
 	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	{
-		node *n;
-		n = g->GetNode(e->getFrom());
-		if (q.top().n == n)
+		const node *n1;
+		n1 = g->GetNode(e->getFrom());
+		if (q.peek().n == n1)
 			glColor3f(1.0, 0.0, 1.0);
-		else if (n == gStart)
+		else if (n1 == gStart)
 			glColor3f(0, 0, 1);
-		else if (n == gGoal)
+		else if (n1 == gGoal)
 			glColor3f(0, 1, 0);
-		else if (n->GetLabelL(kOptimalFlag) && n->GetLabelL(kInOpenList))
+		else if (n1->GetLabelL(kOptimalFlag) && n1->GetLabelL(kInOpenList))
 			glColor3f(1.0, 1.0, 0);
-		else if (n->GetLabelL(kOptimalFlag))
+		else if (n1->GetLabelL(kOptimalFlag))
 			glColor3f(0.6, 0.6, 0);
-		else if (n->GetLabelL(kInOpenList) == 0)
+		else if (n1->GetLabelL(kInOpenList) == 0)
 			glColor3f(0.5, 0.5, 0.5);
 		else
 			glColor3f(1, 1, 1);
 		
+		node *n;
 		recVec rv = absGraph->GetNodeLoc(GetRealNode(n));
 		glVertex3f(rv.x, rv.y, rv.z);
 		
 		n = g->GetNode(e->getTo());
-		if (q.top().n == n)
+		if (q.peek().n == n)
 			glColor3f(1.0, 0.0, 1.0);
 		else if (n == gStart)
 			glColor3f(0, 0, 1);

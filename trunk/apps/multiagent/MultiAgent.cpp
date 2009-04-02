@@ -597,7 +597,8 @@ void RunScenario(int id)
 	 	}
 			su->AddPatrolLocation(goal);
 			su->SetNumPatrols(numPatrols);	
-			//su->SetDrawUnit(false);	
+		//su->SetDrawUnit(false);	
+		su->SetDrawUnit(true);	
 			
 		su->SetName(name);	
 		su->SetSpeed(1.0);
@@ -849,7 +850,8 @@ void RunRandomMapScenario(int id)
 		su->AddPatrolLocation(goal);
 		su->SetNumPatrols(numPatrols);	
 		//su->SetDrawUnit(false);	
-		
+		su->SetDrawUnit(true);	
+
 		su->SetName(name);	
 		su->SetSpeed(1.0);
  		//if (start.x < map->getMapWidth()/2)
@@ -1334,11 +1336,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				//unitSims[windowID]->StepTime(1.0/30.0);
 				//unitSims[windowID]->StepTime(0.55);
 			
-				unitSims[windowID]->StepTime(2.0);
+				unitSims[windowID]->StepTime(0.2);
 // 				if(unitSims[windowID]->Done())
 // 					std::cout<<"DONE\n";
 			}
-			unitSims[windowID]->OpenGLDraw(windowID);
+			unitSims[windowID]->OpenGLDraw();
 			break;
 		}
 		case 1:
@@ -1350,9 +1352,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			{
 				//wUnitSims[windowID]->StepTime(1.0/30.0);
 				//wUnitSims[windowID]->StepTime(0.55);
-				wUnitSims[windowID]->StepTime(2.0);
+				wUnitSims[windowID]->StepTime(0.2);
 			}
-			wUnitSims[windowID]->OpenGLDraw(windowID);		
+			wUnitSims[windowID]->OpenGLDraw();		
 			break;
 		}
 		default:

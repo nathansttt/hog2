@@ -53,11 +53,11 @@ public:
   //node *GetNthParent(node *, int n);
   
   void clearDisplayLists();
-	void OpenGLDraw(int window);
+	void OpenGLDraw() const;
 	void ToggleDrawAbstraction(int which);
-	void DrawLevelConnections(node *n);
-	void DrawGraph(Graph *g);
-	recVec GetNodeLoc(node *n);
+	void DrawLevelConnections(node *n) const;
+	void DrawGraph(Graph *g) const;
+	recVec GetNodeLoc(node *n) const;
 
   // first step to allowing simple loaded adjustments...
   virtual void RemoveNode(node *n);

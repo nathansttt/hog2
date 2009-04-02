@@ -21,7 +21,7 @@ ConfigEnvironment::~ConfigEnvironment()
 {
 }
 
-void ConfigEnvironment::GetSuccessors(recVec &nodeID, std::vector<recVec> &neighbors)
+void ConfigEnvironment::GetSuccessors(recVec &nodeID, std::vector<recVec> &neighbors) const
 {
 	//[(-0.300000, -0.320000) to (0.000000, 0.000000)] does not cross [(-0.320000, -0.300000) to (0.320000, -0.300000)]
 //	line2d a(recVec(-0.300000, -0.320000, 0), recVec(0, -0.4, 0));
@@ -66,7 +66,7 @@ void ConfigEnvironment::GetSuccessors(recVec &nodeID, std::vector<recVec> &neigh
 //	std::cout << std::endl;
 }
 
-void ConfigEnvironment::GetActions(recVec &nodeID, std::vector<line2d> &actions)
+void ConfigEnvironment::GetActions(recVec &nodeID, std::vector<line2d> &actions) const
 {
 	actions.resize(0);
 	actions.push_back(line2d(nodeID, goal));
@@ -86,7 +86,7 @@ void ConfigEnvironment::GetActions(recVec &nodeID, std::vector<line2d> &actions)
 	}
 }
 
-bool ConfigEnvironment::Legal(recVec &a, recVec &b)
+bool ConfigEnvironment::Legal(recVec &a, recVec &b) const
 {
 	line2d l(a, b);
 	for (unsigned int x = 0; x < obstacles.size(); x++)
@@ -107,7 +107,7 @@ bool ConfigEnvironment::Legal(recVec &a, recVec &b)
 	return true;
 }
 
-line2d ConfigEnvironment::GetAction(recVec &s1, recVec &s2)
+line2d ConfigEnvironment::GetAction(recVec &s1, recVec &s2) const
 {
 	line2d d;
 	d.start = s1;
@@ -115,13 +115,13 @@ line2d ConfigEnvironment::GetAction(recVec &s1, recVec &s2)
 	return d;
 }
 
-void ConfigEnvironment::ApplyAction(recVec &s, line2d dir)
+void ConfigEnvironment::ApplyAction(recVec &s, line2d dir) const
 {
 	s = dir.end;
 }
 
 
-bool ConfigEnvironment::InvertAction(line2d &a)
+bool ConfigEnvironment::InvertAction(line2d &a) const
 {
 	line2d b = a;
 	a.start = b.end;
@@ -156,7 +156,7 @@ bool ConfigEnvironment::GoalTest(recVec &node, recVec &goal)
 	return (fequal(node.x, goal.x) && fequal(node.y, goal.y) && fequal(node.z, goal.z));
 }
 
-uint64_t ConfigEnvironment::GetStateHash(recVec &node)
+uint64_t ConfigEnvironment::GetStateHash(recVec &node) const
 {
 	int x, y, z;
 	bool nx = node.x<0, ny = node.y<0;
@@ -170,45 +170,45 @@ uint64_t ConfigEnvironment::GetStateHash(recVec &node)
 	return val;
 }
 
-uint64_t ConfigEnvironment::GetActionHash(line2d act)
+uint64_t ConfigEnvironment::GetActionHash(line2d act) const
 {
 	return (GetStateHash(act.start)^GetStateHash(act.end));
 }
 
 
-void ConfigEnvironment::OpenGLDraw(int )
+void ConfigEnvironment::OpenGLDraw() const
 {
 	glColor3f(0, 0, 1.0);
 	for (unsigned int x = 0; x < obstacles.size(); x++)
 		DrawLine(obstacles[x]);
 }
 
-void ConfigEnvironment::OpenGLDraw(int , recVec &l)
+void ConfigEnvironment::OpenGLDraw(const recVec &l) const
 {
 	glBegin(GL_POINT);
 	glVertex3f(l.x, l.y, l.z);
 	glEnd();
 }
 
-void ConfigEnvironment::OpenGLDraw(int, recVec &, line2d &)
+void ConfigEnvironment::OpenGLDraw(const recVec &, const line2d &) const
 {
 }
 
-void ConfigEnvironment::OpenGLDraw(int, recVec &, line2d &, GLfloat r, GLfloat g, GLfloat b)
-{
-}
+//void ConfigEnvironment::OpenGLDraw(const recVec &, const line2d &, GLfloat r, GLfloat g, GLfloat b) const
+//{
+//}
+//
+//void ConfigEnvironment::OpenGLDraw(const recVec &l, GLfloat r, GLfloat g, GLfloat b) const
+//{
+//}
 
-void ConfigEnvironment::OpenGLDraw(int, recVec &l, GLfloat r, GLfloat g, GLfloat b)
-{
-}
 
-
-void ConfigEnvironment::GetNextState(recVec &currents, line2d dir, recVec &news)
+void ConfigEnvironment::GetNextState(recVec &currents, line2d dir, recVec &news) const
 {
 	news = dir.end;
 }
 
-void ConfigEnvironment::DrawLine(line2d l)
+void ConfigEnvironment::DrawLine(line2d l) const
 {
 	glLineWidth(3);
 	glBegin(GL_LINES);

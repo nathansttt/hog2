@@ -39,7 +39,7 @@ class MapAbstraction;
 class MapProvider {
 public:
 	virtual ~MapProvider() {};
-	virtual Map *GetMap() = 0;
+	virtual Map *GetMap() const = 0;
 	virtual MapAbstraction *GetMapAbstraction() = 0;
 };
 

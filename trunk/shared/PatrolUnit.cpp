@@ -98,7 +98,7 @@ double patrolUnit::goToLoc(MapAbstraction *aMap, int which)
 	return pathCost;
 }
 
-void patrolUnit::OpenGLDraw(int window, MapProvider *mp, SimulationInfo *)
+void patrolUnit::OpenGLDraw(const MapProvider *mp, const SimulationInfo *) const
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = mp->GetMap();

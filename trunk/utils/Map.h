@@ -216,16 +216,17 @@ public:
   // returns whether we can step between two locations or not
   bool canStep(long x1, long y1, long x2, long y2) const;
   
-  void OpenGLDraw(int window, tDisplay how = kPolygons);
+  void OpenGLDraw(tDisplay how = kPolygons) const;
   void getOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
+  void getOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
   void getPointFromCoordinate(point3d loc, int &px, int &py) const;
 	double getCoordinateScale();
 
   void setDrawLand(bool land);
   bool getDrawLand() { return drawLand; }
-  void drawTile(Tile *t, int x, int y, tDisplay how);
-  void doVertexColor(tTerrain type, int height, bool darken = false);
-  void doNormal(tSplit split, halfTile *t, int x, int y);
+  void drawTile(Tile *t, int x, int y, tDisplay how) const;
+  void doVertexColor(tTerrain type, int height, bool darken = false) const;
+  void doNormal(tSplit split, halfTile *t, int x, int y) const;
 
   float getEdgeWidthX(int x, int y);
   float getEdgeWidthY(int x, int y);
@@ -242,12 +243,12 @@ private:
 	bool tryLoadRollingStone(FILE *f);
 	bool isLegalStone(char c);
 	void paintRoomInside(int x, int y);
-	void drawLandQuickly();
+	void drawLandQuickly() const;
 	int width, height;
   Tile **land;
   bool drawLand;
-  GLuint dList;
-  bool updated;
+	mutable GLuint dList;
+	mutable bool updated;
 	int sizeMultiplier;
   int revision;
 	char map_name[128];

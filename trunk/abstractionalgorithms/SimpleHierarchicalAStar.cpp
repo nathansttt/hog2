@@ -29,35 +29,35 @@ bool SimpleHierarchicalAStar::InitializeSearch(GraphAbstraction *aMap, node *fro
 {
 }
 
-void SimpleHierarchicalAStar::OpenGLDraw()
+void SimpleHierarchicalAStar::OpenGLDraw() const
 {
 }
 
 
 
 HierarchicalHeuristicEnvironment::~HierarchicalHeuristicEnvironment() {}
-void HierarchicalHeuristicEnvironment::GetSuccessors(unsigned long &nodeID, std::vector<unsigned long> &neighbors)
+void HierarchicalHeuristicEnvironment::GetSuccessors(unsigned long &nodeID, std::vector<unsigned long> &neighbors) const
 {
 }
 
-void HierarchicalHeuristicEnvironment::GetActions(unsigned long &nodeID, std::vector<unsigned long> &actions)
+void HierarchicalHeuristicEnvironment::GetActions(unsigned long &nodeID, std::vector<unsigned long> &actions) const
 {
 }
 
-unsigned long HierarchicalHeuristicEnvironment::GetAction(unsigned long &s1, unsigned long &s2)
+unsigned long HierarchicalHeuristicEnvironment::GetAction(unsigned long &s1, unsigned long &s2) const
 {
 }
 
-void HierarchicalHeuristicEnvironment::ApplyAction(unsigned long &s, unsigned long a)
+void HierarchicalHeuristicEnvironment::ApplyAction(unsigned long &s, unsigned long a) const
 {
 }
 
 
-void HierarchicalHeuristicEnvironment::GetNextState(unsigned long &currents, unsigned long dir, unsigned long &news)
+void HierarchicalHeuristicEnvironment::GetNextState(unsigned long &currents, unsigned long dir, unsigned long &news) const
 {
 }
 
-bool HierarchicalHeuristicEnvironment::InvertAction(unsigned long &a)
+bool HierarchicalHeuristicEnvironment::InvertAction(unsigned long &a) const
 {
 }
 
@@ -75,11 +75,11 @@ bool HierarchicalHeuristicEnvironment::GoalTest(unsigned long &node, unsigned lo
 }
 
 
-uint64_t HierarchicalHeuristicEnvironment::GetStateHash(unsigned long &node)
+uint64_t HierarchicalHeuristicEnvironment::GetStateHash(unsigned long &node) const
 {
 }
 
-uint64_t HierarchicalHeuristicEnvironment::GetActionHash(unsigned long act)
+uint64_t HierarchicalHeuristicEnvironment::GetActionHash(unsigned long act) const
 {
 }
 
@@ -89,15 +89,15 @@ HierarchicalHeuristicEnvironment::OccupancyInterface<unsigned long,unsigned long
 }
 
 
-void OpenGLDraw(int window)
-{
-}
-
-void OpenGLDraw(int window, unsigned long&)
-{
-}
-
-void OpenGLDraw(int window, unsigned long&, unsigned long&)
-{
-}
+//void OpenGLDraw() const
+//{
+//}
+//
+//void OpenGLDraw(unsigned long&) const
+//{
+//}
+//
+//void OpenGLDraw(unsigned long&, unsigned long&) const
+//{
+//}
 

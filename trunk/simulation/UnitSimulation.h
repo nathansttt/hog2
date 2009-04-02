@@ -65,8 +65,10 @@ public:
 	Unit<state, action, environment> *agent;
 	action lastMove;
 	state startState;
+	state lastState;
 	state currentState;
 //	double thinkTime, moveDist;
+	double lastTime;
 	double nextTime;
 	unsigned int historyIndex;
 	double totalDistance;
@@ -93,26 +95,30 @@ enum tTimestep {
  * The basic simulation class for the world.
  */
 template<class state, class action, class environment>
-class UnitSimulation {
+class UnitSimulation : public SimulationInfo<state, action, environment> {
 public:
 	UnitSimulation(environment *se);
 	virtual ~UnitSimulation();
 
 	/*! \param timeOffset is a setting to let the unit start a little bit later */
 	virtual int AddUnit(Unit<state, action, environment> *u, double timeOffset = 0.);
+	unsigned int GetNumUnits() const;
 	Unit<state, action, environment> *GetUnit(unsigned int which);
+	unsigned int GetNumUnitGroups() const;
 
 	int AddUnitGroup(UnitGroup<state, action, environment> *ug);
 	UnitGroup<state, action, environment> *GetUnitGroup(unsigned int which);
 	void ClearAllUnits();
 	
+	virtual void GetPublicUnitInfo(unsigned int which, PublicUnitInfo<state,action,environment> &info) const;
+
 	environment *GetEnvironment() { return env; }
 		
 	void StepTime(double);
-	double GetSimulationTime() { return currTime; }
-	double GetTimeToNextStep();
+	double GetSimulationTime() const { return currTime; }
+	double GetTimeToNextStep() const;
 	void SetStepType(tTimestep step) { stepType = step; }
-	tTimestep GetStepType() { return stepType; }
+	tTimestep GetStepType() const { return stepType; }
 
 	void SetPaused(bool val) { paused = val; }
 	bool GetPaused() { return paused; }
@@ -124,14 +130,15 @@ public:
 	/** getPenalty for thinking. Gets the multiplier used to penalize thinking time. */
 	double GetThinkingPenalty() { return penalty; }
 
-	virtual void OpenGLDraw(int window);
+	virtual void OpenGLDraw() const;
 	
 	void SetLogStats(bool val) { logStats = val; }
 	bool GetLogStats() { return logStats; }
 	StatCollection* GetStats() { return &stats; }
 	
 
-	virtual SimulationInfo<state,action,environment>* GetSimulationInfo() { return &sinfo; }
+	virtual SimulationInfo<state,action,environment>* GetSimulationInfo() { return this; }
+	virtual unsigned int GetCurrentUnit() const { return currentActor; }
 
 protected:
 	void StepUnitTime(UnitInfo<state, action, environment> *ui, double timeStep);
@@ -149,8 +156,8 @@ protected:
 	double currTime;
 	tTimestep stepType;
 	StatCollection stats;
-
-	SimulationInfo<state,action,environment> sinfo;
+	mutable unsigned int currentActor;
+//	SimulationInfo<state,action,environment> sinfo;
 };
 
 template<class state, class action, class environment>
@@ -163,6 +170,7 @@ UnitSimulation<state, action, environment>::UnitSimulation(environment *se)
 	paused = false;
 	logStats = true;
 	unitGroups.push_back(new UnitGroup<state, action, environment>);
+	currentActor = 0;
 	// allocate default unit group!(?)
 }
 
@@ -183,7 +191,7 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 	{
 		ui->agent->SetUnitGroup(unitGroups[0]);
 	}
-	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, env, ui->currentState, true, &sinfo );
+	ui->agent->GetUnitGroup()->UpdateLocation(ui->agent, env, ui->currentState, true, this );
 	ui->nextTime = currTime + timeOffset;
 	ui->totalThinking = 0.0;
 	ui->totalDistance = 0.0;
@@ -197,6 +205,12 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 	units.push_back(ui);
 	ui->agent->SetNum( units.size() - 1 );
 	return units.size()-1;
+}
+
+template<class state, class action, class environment>
+unsigned int UnitSimulation<state, action, environment>::GetNumUnits() const
+{
+	return units.size();
 }
 
 template<class state, class action, class environment>
@@ -215,11 +229,25 @@ int UnitSimulation<state, action, environment>::AddUnitGroup(UnitGroup<state, ac
 }
 
 template<class state, class action, class environment>
+unsigned int UnitSimulation<state, action, environment>::GetNumUnitGroups() const
+{
+	return unitGroups.size();
+}
+
+template<class state, class action, class environment>
 UnitGroup<state, action, environment> *UnitSimulation<state, action, environment>::GetUnitGroup(unsigned int which)
 {
 	if (which < unitGroups.size())
 		return units[which];
 	return 0;
+}
+
+template<class state, class action, class environment>
+void UnitSimulation<state, action, environment>::GetPublicUnitInfo(unsigned int which, PublicUnitInfo<state,action,environment> &info) const
+{
+	info.init(units[which]->startState, units[which]->currentState,
+			  units[which]->lastState, units[which]->lastMove,
+			  units[which]->lastTime, units[which]->nextTime);
 }
 
 template<class state, class action, class environment>
@@ -244,8 +272,9 @@ void UnitSimulation<state, action, environment>::ClearAllUnits()
 //		unitGroups.pop_back();
 //	}
 	//unitGroups.push_back(new unitGroup(this));
-	sinfo = SimulationInfo<state,action,environment>();
+	//sinfo = SimulationInfo<state,action,environment>();
 	currTime = 0.;
+	currentActor = 0;
 }
 
 template<class state, class action, class environment>
@@ -284,7 +313,7 @@ bool UnitSimulation<state,action,environment>::Done()
 //}
 
 template<class state, class action, class environment>
-double UnitSimulation<state,action,environment>::GetTimeToNextStep() {
+double UnitSimulation<state,action,environment>::GetTimeToNextStep() const {
 	double minimum = DBL_MAX;
 
 	for( unsigned int i = 0; i < units.size(); i++ ) {
@@ -325,7 +354,10 @@ template<class state, class action, class environment>
 void UnitSimulation<state, action, environment>::DoTimestepCalc(double timeStep)
 {
 	for (unsigned int x = 0; x < units.size(); x++)
+	{
+		currentActor = x;
 		StepUnitTime(units[x], timeStep);
+	}
 }
 
 template<class state, class action, class environment>
@@ -345,25 +377,28 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 {
 	if (currTime < theUnit->nextTime) return;
 
-	double moveThinking, locThinking, moveTime;
+	double moveThinking=0, locThinking=0, moveTime=0;
 	action where;
 	Timer t;
 	Unit<state, action, environment>* u = theUnit->agent;
 	
 	t.startTimer();
 	// need to do if/then check - makemove ok or not? need to stay where you are? 
-	if(u->GetUnitGroup()->MakeMove(u, env, &sinfo,where))
+	if (u->GetUnitGroup()->MakeMove(u, env, this, where))
 	{
 		moveThinking = t.endTimer();
 		theUnit->totalThinking += moveThinking;
 		theUnit->lastMove = where;
+		theUnit->lastTime = theUnit->nextTime;
+		theUnit->lastState = theUnit->currentState;
 		if (logStats)
 			stats.AddStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
 	
 		bool success = MakeUnitMove(theUnit, where, moveTime);
-
+		//printf("Updating last state\n");
+		
 		t.startTimer();
-		u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, &sinfo);
+		u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, this);
 		locThinking = t.endTimer();
 		theUnit->totalThinking += locThinking;
 		if (logStats)
@@ -378,10 +413,11 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 				theUnit->nextTime = currTime + 1.;
 				break;
 			case kRealTime:
+				//printf("Incrementing time from %f to %f\n", theUnit->nextTime, theUnit->nextTime+moveTime);
 				theUnit->nextTime += (locThinking+moveThinking)*penalty + moveTime;
 				break;
 			case kMinTime:
-				theUnit->nextTime += min((locThinking+moveThinking)*penalty + moveTime,	 timeStep);
+				theUnit->nextTime += max((locThinking+moveThinking)*penalty + moveTime,	 timeStep);
 			break;
 		}
 		//u->GetUnitGroup()->logStats(&stats);
@@ -389,11 +425,14 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	}
 	else // stay where you are
 	{
+		theUnit->lastTime = theUnit->nextTime;
+		theUnit->lastState = theUnit->currentState;
+		
 		if( stepType == kUniTime )
 			theUnit->nextTime = currTime + 1.;
 		else
 			theUnit->nextTime += theUnit->agent->GetSpeed();
-		theUnit->agent->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, true, &sinfo);	
+		theUnit->agent->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, true, this);	
 	}
 
 }
@@ -430,20 +469,21 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	return success;
 }
 
-/* ATTENTION!!!! This function gives a way the current real information,
+/* ATTENTION!!!! This function gives away the current real information,
  * this is a security issue but for performance we still did it!
 */
 template<class state, class action, class environment>
-void UnitSimulation<state, action, environment>::OpenGLDraw(int window)
+void UnitSimulation<state, action, environment>::OpenGLDraw() const
 {
-	env->OpenGLDraw(window);
+	env->OpenGLDraw();
 	for (unsigned int x = 0; x < units.size(); x++)
 	{
-		units[x]->agent->OpenGLDraw(window, env, &sinfo);
+		currentActor = x;
+		units[x]->agent->OpenGLDraw(env, this);
 	}
 	
 	for (unsigned int x = 0; x <unitGroups.size(); x++)
-		unitGroups[x]->OpenGLDraw(window,env, &sinfo);
+		unitGroups[x]->OpenGLDraw(env, this);
 }
 
 

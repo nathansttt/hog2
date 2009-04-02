@@ -115,7 +115,7 @@ void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> 
 		aMap->RepairAbstraction();
 }
 
-void SharedAMapGroup::OpenGLDraw(int , AbsMapEnvironment *, AbsMapSimulationInfo *)
+void SharedAMapGroup::OpenGLDraw(const AbsMapEnvironment *, const AbsMapSimulationInfo *) const
 {
 	glBegin(GL_QUADS);
 	glColor3f(.25, .25, .25); // kOutOfBounds
