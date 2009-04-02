@@ -75,15 +75,15 @@ class CopRobberEnvironment : public virtual MultiAgentEnvironment<state,action> 
 	CopRobberEnvironment( SearchEnvironment<state,action> *env, bool playerscanpass = false );
 	virtual ~CopRobberEnvironment();
 
-	virtual void GetSuccessors( CRState &nodeID, std::vector<CRState> &neighbors );
-	virtual void GetActions( CRState &nodeID, std::vector<CRMove> &actions );
+	virtual void GetSuccessors( CRState &nodeID, std::vector<CRState> &neighbors ) const;
+	virtual void GetActions( CRState &nodeID, std::vector<CRMove> &actions ) const;
 
-	virtual CRMove GetAction(CRState &s1, CRState &s2);
-	virtual void ApplyAction(CRState &s, CRMove a);
+	virtual CRMove GetAction(CRState &s1, CRState &s2) const;
+	virtual void ApplyAction(CRState &s, CRMove a) const;
   
 //	virtual void GetNextState(CRState &currents, action dir, CRState &news){};
 
-	virtual bool InvertAction(CRMove &a);
+	virtual bool InvertAction(CRMove &a) const;
 
 	virtual double HCost(CRState &node1, CRState &node2);
 	virtual double GCost(CRState &node1, CRState &node2);
@@ -93,14 +93,14 @@ class CopRobberEnvironment : public virtual MultiAgentEnvironment<state,action> 
 
 	// I would recommend testing these functions extensively before using them
 	// because they won't work well with a lot of agents!
-	virtual uint64_t GetStateHash(CRState &node);
-	virtual uint64_t GetActionHash(CRMove act);
+	virtual uint64_t GetStateHash(CRState &node) const;
+	virtual uint64_t GetActionHash(CRMove act) const;
 
 	virtual OccupancyInterface<CRState,CRMove> *GetOccupancyInfo() { return oi; };
 
-	virtual void OpenGLDraw(int window) {};
-	virtual void OpenGLDraw(int window, CRState&) {};
-	virtual void OpenGLDraw(int window, CRState&, CRMove&) {};
+	virtual void OpenGLDraw() const {};
+	virtual void OpenGLDraw(const CRState&) const {};
+	virtual void OpenGLDraw(const CRState&, const CRMove&) const {};
 
 
 	// additional stuff for the new SearchEnvironment interface
@@ -218,7 +218,7 @@ CopRobberEnvironment<state,action>::~CopRobberEnvironment() {
 }
 
 template<class state, class action>
-void CopRobberEnvironment<state,action>::GetSuccessors( CRState &nodeID, std::vector<CRState> &neighbors ) {
+void CopRobberEnvironment<state,action>::GetSuccessors( CRState &nodeID, std::vector<CRState> &neighbors ) const {
 
 	unsigned int num_players = nodeID.size();
 
@@ -268,7 +268,7 @@ void CopRobberEnvironment<state,action>::GetSuccessors( CRState &nodeID, std::ve
 }
 
 template<class state, class action>
-void CopRobberEnvironment<state,action>::GetActions( CRState &nodeID, std::vector<CRMove> &actions ) {
+void CopRobberEnvironment<state,action>::GetActions( CRState &nodeID, std::vector<CRMove> &actions ) const {
 
 	unsigned int num_players = nodeID.size();
 
@@ -330,7 +330,7 @@ void CopRobberEnvironment<state,action>::GetActions( CRState &nodeID, std::vecto
 // I'd like to be able to do something here like
 // CRMove CopRobberEnvironment<state,action>::GetAction(CRState &s1, CRState &s2 );
 template<class state, class action>
-typename CopRobberEnvironment<state,action>::CRMove CopRobberEnvironment<state,action>::GetAction(CRState &s1, CRState &s2) {
+typename CopRobberEnvironment<state,action>::CRMove CopRobberEnvironment<state,action>::GetAction(CRState &s1, CRState &s2) const {
 	CRMove result;
 	// safety statement
 	assert( s1.size() == s2.size() );
@@ -345,7 +345,7 @@ typename CopRobberEnvironment<state,action>::CRMove CopRobberEnvironment<state,a
 }
 
 template<class state, class action>
-void CopRobberEnvironment<state,action>::ApplyAction(CRState &s, CRMove a) {
+void CopRobberEnvironment<state,action>::ApplyAction(CRState &s, CRMove a) const {
 	assert( s.size() == a.size() );
 	for( unsigned int i = 0; i < s.size(); i++ ) {
 		if( ! a[i].noaction ) {
@@ -356,7 +356,7 @@ void CopRobberEnvironment<state,action>::ApplyAction(CRState &s, CRMove a) {
 }
 
 template<class state, class action>
-bool CopRobberEnvironment<state,action>::InvertAction(CRMove &a) {
+bool CopRobberEnvironment<state,action>::InvertAction(CRMove &a) const {
 	bool invertible;
 	CRMove old = a;
 
@@ -424,7 +424,7 @@ bool CopRobberEnvironment<state,action>::GoalTest(CRState &node) {
 // this will not work very well with a lot of agents
 // and is buggy with more than 64 agents
 template<class state, class action>
-uint64_t CopRobberEnvironment<state,action>::GetStateHash(CRState &node) {
+uint64_t CopRobberEnvironment<state,action>::GetStateHash(CRState &node) const {
 	uint64_t hash = 0, t;
 	double psize = 64./(double)node.size();
 	double count = 0.;
@@ -442,7 +442,7 @@ uint64_t CopRobberEnvironment<state,action>::GetStateHash(CRState &node) {
 }
 
 template<class state, class action>
-uint64_t CopRobberEnvironment<state,action>::GetActionHash(CRMove act) {
+uint64_t CopRobberEnvironment<state,action>::GetActionHash(CRMove act) const {
 	uint64_t hash = 0, t;
 	double psize = 64./(double)act.size();
 	double count = 0.;

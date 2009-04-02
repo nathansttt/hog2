@@ -29,7 +29,7 @@ class OptimalUnit: public Unit<graphState,graphMove,AbstractionGraphEnvironment>
 	bool MakeMove( AbstractionGraphEnvironment *env, OccupancyInterface<graphState,graphMove> *, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment> *sinfo, graphMove &a );
 	void UpdateLocation( AbstractionGraphEnvironment *env, graphState &s, bool success, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment> *sinfo );
 	void GetLocation( graphState &s ) { s = current_pos; };
-	void OpenGLDraw( int window, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* );
+	void OpenGLDraw( const AbstractionGraphEnvironment *env, const SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) const;
 	void GetGoal( graphState &s ) { s = current_pos; };
 	bool Done() { return done; };
 

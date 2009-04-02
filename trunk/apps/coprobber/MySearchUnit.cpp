@@ -54,6 +54,7 @@ bool MySearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, AbsMapSimu
 
 	Map *map = mp->GetMap();
 	MapAbstraction *aMap = mp->GetMapAbstraction();
+	PublicUnitInfo<xyLoc,tDirection,AbsMapEnvironment> pui;
 
 	// if we have a cache to be used, use it!
 	if (spread_cache)
@@ -61,7 +62,8 @@ bool MySearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, AbsMapSimu
 		addPathToCache(spread_cache);
 		node *next_start = spread_cache->tail()->n;
 		int targx, targy;
-		xyLoc l = simInfo->GetPublicUnitInfo( targetUnit )->currentState;
+		simInfo->GetPublicUnitInfo( targetUnit, pui );
+		xyLoc l = pui.currentState;
 		targx = l.x;
 		targy = l.y;
 		
@@ -86,7 +88,8 @@ bool MySearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, AbsMapSimu
 	
 	// Get the position of the target
 	int targx, targy;
-	xyLoc l = simInfo->GetPublicUnitInfo( targetUnit )->currentState;
+	simInfo->GetPublicUnitInfo( targetUnit, pui );
+	xyLoc l = pui.currentState;
 	targx = l.x;
 	targy = l.y;
 		
@@ -256,7 +259,8 @@ void MySearchUnit::OpenGLDraw(int , AbsMapEnvironment *ame, AbsMapSimulationInfo
 	// draw target
 	if (targetUnit >= 0)
 	{
-		xyLoc tloc = si->GetPublicUnitInfo( targetUnit )->currentState;
+		si->GetPublicUnitInfo( targetUnit, pui );
+		xyLoc tloc = pui.currentState;
 		map->getOpenGLCoord(tloc.x, tloc.y, xx, yy, zz, rad);
 
 		double perc = (1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->GetSimulationTime())))));

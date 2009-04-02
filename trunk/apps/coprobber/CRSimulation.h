@@ -93,7 +93,7 @@ public:
 	/** getPenalty for thinking. Gets the multiplier used to penalize thinking time. */
 	double GetThinkingPenalty() { return penalty; }
 
-	void OpenGLDraw(int window);
+	void OpenGLDraw();
 
 	SimulationInfo<state,action,environment>* GetSimulationInfo();
 
@@ -445,18 +445,18 @@ bool CRSimulation<state, action, environment>::MakeUnitMove( unsigned int index,
  * this is a security issue but for performance we still did it!
 */
 template<class state, class action, class environment>
-void CRSimulation<state, action, environment>::OpenGLDraw(int window)
+void CRSimulation<state, action, environment>::OpenGLDraw()
 {
-	env->OpenGLDraw(window);
+	env->OpenGLDraw();
 
 	UpdatePublicInfo();
 	SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
 
 	for (unsigned int i = 0; i < units.size(); i++)
-		units[i]->agent->OpenGLDraw( window, env, s );
+		units[i]->agent->OpenGLDraw( env, s );
 
 	if( copgroup )
-		copgroup->OpenGLDraw( window, env, s );
+		copgroup->OpenGLDraw( env, s );
 
 	delete s;
 	return;

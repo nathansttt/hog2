@@ -23,7 +23,7 @@ graphMove PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::nomo
 
 
 template<>
-void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int, MapEnvironment *env, SimulationInfo<xyLoc,tDirection,MapEnvironment>* ) {
+void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( const MapEnvironment *env, const SimulationInfo<xyLoc,tDirection,MapEnvironment>* ) const {
 	GLdouble xx, yy, zz, rad;
 	Map *m = env->GetMap();
 	if( current_pos.x >= m->getMapWidth() || current_pos.y >= m->getMapHeight() ) {
@@ -52,7 +52,7 @@ void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int, MapEnviro
 };
 
 template<>
-void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int, AbsMapEnvironment *env, SimulationInfo<xyLoc,tDirection,AbsMapEnvironment>* ) {
+void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( const AbsMapEnvironment *env, const SimulationInfo<xyLoc,tDirection,AbsMapEnvironment>* ) const {
 	GLdouble xx, yy, zz, rad;
 	Map *m = env->GetMap();
 	if( current_pos.x >= m->getMapWidth() || current_pos.y >= m->getMapHeight() ) {
@@ -81,7 +81,9 @@ void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int, AbsMap
 };
 
 template<>
-void PraStarMapUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int, GraphEnvironment *env, SimulationInfo<graphState,graphMove,GraphEnvironment>* ) {
+void PraStarMapUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( const GraphEnvironment *env, const SimulationInfo<graphState,graphMove,GraphEnvironment>* ) const {
+	/*
+	// TODO: make the code below compilable
 	node *n  = env->GetGraph()->GetNode( current_pos );
 	GLdouble x, y, z, rad = 0.005;
 	x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
@@ -106,13 +108,15 @@ void PraStarMapUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int, Gra
 		}
 		glEnd();
 	}
-
+	*/
 	return;
 
 };
 
 template<>
-void PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) {
+void PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( const AbstractionGraphEnvironment *env, const SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) const {
+	/*
+	// TODO: make the code below compilable
 	node *n  = env->GetGraph()->GetNode( current_pos );
 	GLdouble x, y, z, rad = 0.001;
 	x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
@@ -137,7 +141,7 @@ void PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDra
 		}
 		glEnd();
 	}
-
+	*/
 	return;
 
 };

@@ -27,7 +27,7 @@ class PraStarMapUnit: public Unit<state,action,environment> {
 	bool MakeMove( environment *env, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *sinfo, action &a );
 	void UpdateLocation( environment *env, state &s, bool success, SimulationInfo<state,action,environment> *sinfo );
 	void GetLocation( state &s ) { s = current_pos; };
-	void OpenGLDraw( int window, environment *env, SimulationInfo<state,action,environment>* );
+	void OpenGLDraw( const environment *env, const SimulationInfo<state,action,environment>* ) const;
 	void GetGoal( state &s ) { s = current_pos; };
 	bool Done() { return done; };
 
@@ -117,13 +117,13 @@ void PraStarMapUnit<state,action,environment>::UpdateLocation( environment *, st
 
 // \see PraStarMapUnit.cpp for implementation
 template<>
-void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int window, MapEnvironment *env, SimulationInfo<xyLoc,tDirection,MapEnvironment>* );
+void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( const MapEnvironment *env, const SimulationInfo<xyLoc,tDirection,MapEnvironment>* ) const;
 template<>
-void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int window, AbsMapEnvironment *env, SimulationInfo<xyLoc,tDirection,AbsMapEnvironment>* );
+void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( const AbsMapEnvironment *env, const SimulationInfo<xyLoc,tDirection,AbsMapEnvironment>* ) const;
 template<>
-void PraStarMapUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int window, GraphEnvironment *env, SimulationInfo<graphState,graphMove,GraphEnvironment>* );
+void PraStarMapUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( const GraphEnvironment *env, const SimulationInfo<graphState,graphMove,GraphEnvironment>* ) const;
 template<>
-void PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int window, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* );
+void PraStarMapUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( const AbstractionGraphEnvironment *env, const SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) const;
 template<>
 tDirection PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::nomove();
 template<>

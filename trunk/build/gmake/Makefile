@@ -30,7 +30,7 @@ PROJECTS = \
   apps/multiagent \
   apps/measure_inconsistency \
   apps/dynamicsearch \
-	#apps/coprobber
+	apps/coprobber
 #  apps/lv.pathfinding	
 #  apps/inconsistency \
 
@@ -59,7 +59,7 @@ PROJECTS_ALL = \
   apps/inconsistency \
   apps/multiagent \
   apps/dynamicsearch \
-	#apps/coprobber
+	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice
 default:
