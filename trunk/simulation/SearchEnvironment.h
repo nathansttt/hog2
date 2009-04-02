@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <vector>
 //#include "ReservationProvider.h"
+#include <assert.h>
 #include "OccupancyInterface.h"
 #include "GLUtil.h"
 
