@@ -10,6 +10,7 @@
 #include "Plot2D.h"
 #include <math.h>
 #include <cstring>
+#include <assert.h>
 
 namespace Plotting {
 	
