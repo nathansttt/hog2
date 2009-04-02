@@ -18,7 +18,7 @@
 class BoundingBox {
 public:
 	bool pointInBox(double x, double y, double z);
-	void OpenGLDraw(int window);
+	void OpenGLDraw() const;
 	double x1, x2, y1, y2, z1, z2;
 };
 
@@ -40,11 +40,11 @@ public:
   
   //void ClearMarkedNodes();
   void clearDisplayLists();
-	void OpenGLDraw(int window);
+	void OpenGLDraw() const;
 	void ToggleDrawAbstraction(int which);
-	void DrawLevelConnections(node *n);
-	void DrawGraph(Graph *g);
-	recVec GetNodeLoc(node *n);
+	void DrawLevelConnections(node *n) const;
+	void DrawGraph(Graph *g) const;
+	recVec GetNodeLoc(node *n) const;
 	
   // first step to allowing simple loaded adjustments...
 //  virtual void RemoveNode(node *n);

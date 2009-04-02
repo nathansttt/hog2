@@ -72,7 +72,7 @@ void MapAbstraction::ToggleDrawAbstraction(int which)
 		levelDraw = levelDraw&(~(1<<which));
 }
 
-void MapAbstraction::OpenGLDraw(int )
+void MapAbstraction::OpenGLDraw() const
 {
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
@@ -82,7 +82,7 @@ void MapAbstraction::OpenGLDraw(int )
 }
 
 
-void MapAbstraction::DrawGraph(Graph *g)
+void MapAbstraction::DrawGraph(Graph *g) const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 	
@@ -162,7 +162,7 @@ glEnd();
 //  if (verbose&kBuildGraph) printf("Done\n");
 }
 
-void MapAbstraction::DrawLevelConnections(node *n)
+void MapAbstraction::DrawLevelConnections(node *n) const
 {
 	//	int x, y;
 	//	double offsetx, offsety;
@@ -195,7 +195,7 @@ void MapAbstraction::GetTileUnderLoc(int &x, int &y, const recVec &v)
 	//				 v.x, v.y, x, y);
 }
 
-recVec MapAbstraction::GetNodeLoc(node *n)
+recVec MapAbstraction::GetNodeLoc(node *n) const
 {
 	int x, y;
 	//  double offsetx, offsety;

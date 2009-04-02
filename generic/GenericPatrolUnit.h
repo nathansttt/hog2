@@ -14,10 +14,10 @@ public:
 	GenericPatrolUnit(state &s, GenericSearchAlgorithm<state,action,environment>* alg, GLfloat _r, GLfloat _g, GLfloat _b);
 	virtual const char *GetName() { return name; } 
 	void SetName(char* myname) { strncpy(name, myname,128); }
-	virtual void GetLocation(xyLoc& s) { s=loc;}
+	virtual void GetLocation(state& s) { s=loc;}
 	virtual bool MakeMove(environment *env, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *si, action &dir);
 	
-	virtual void OpenGLDraw(int window, environment *, SimulationInfo<state,action,environment> *);
+	virtual void OpenGLDraw(const environment *, const SimulationInfo<state,action,environment> *) const;
 	void AddPatrolLocation(state &s); 
 	state& GetGoal(); // get CURRENT goal? 
 	virtual bool Done(); 
@@ -57,10 +57,10 @@ public:
 //private:
 private:
 	//GLfloat r, g, b;
-	xyLoc loc;
+	state loc;
 	int numPatrols;
 	int counter;
-	tDirection oldDir, oldDirColl;
+	action oldDir, oldDirColl;
 	double totalDistance;
 	double lastFailedMove;
 	
@@ -96,7 +96,7 @@ private:
 };
 
 template <class state, class action, class environment>
-GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericSearchAlgorithm<state,action,environment>* alg) 
+GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, GenericSearchAlgorithm<state,action,environment>* alg) 
 :GenericSearchUnit<state,action,environment>(s,s,alg)
 {
 	lastFailedMove = -10;
@@ -119,7 +119,7 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s,GenericS
 	strncpy(name, "GenericPatrolUnit",128);
 	
 	totalDistance = 0; 
-	oldDir = oldDirColl = kStay;
+	oldDir = oldDirColl;// = kStay;
 	
 	trimPath = false;
 	trimWindow = 5; 
@@ -160,7 +160,7 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 {
 	if(Done())
 	{
-// 		std::cout<<"done\n";
+ 		printf("Done is true (%d)\n", Done());
 		return false;
 	}
 		
@@ -177,7 +177,7 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 	if (currTarget != -1)
 	{
 		// update current target and patrol counter if we're at our target location
-		if(loc == locs[currTarget])
+		if (loc == locs[currTarget])
 		{
 			currTarget = (currTarget+1)%locs.size();
 			if((numPatrols != -1)&&(currTarget == 1))
@@ -199,19 +199,19 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 		}
  		
  		// If we're right beside our goal and it's blocked, make a random move
-		else if(env->GetAction(locs[currTarget], loc) != kTeleport)// && 
-				  //(env->GetAction(locs[currTarget],loc) != kStay))
-		{
-			if(env->GetOccupancyInfo()->GetStateOccupied(locs[currTarget]))
-			{
-//				std::cout<<"Random move\n";
-				srand(time(0));
-				std::vector<tDirection> actions;
- 				env->GetActions(loc, actions);
-				dir = actions[(rand())%(actions.size())];
-				return true;
-			}
-		}
+//		else if(env->GetAction(locs[currTarget], loc) != kTeleport)// && 
+//				  //(env->GetAction(locs[currTarget],loc) != kStay))
+//		{
+//			if(env->GetOccupancyInfo()->GetStateOccupied(locs[currTarget]))
+//			{
+////				std::cout<<"Random move\n";
+//				srand(time(0));
+//				std::vector<tDirection> actions;
+// 				env->GetActions(loc, actions);
+//				dir = actions[(rand())%(actions.size())];
+//				return true;
+//			}
+//		}
  		
  		if((numPatrols == -1 ) || (counter < numPatrols))
 	 	{
@@ -241,10 +241,11 @@ void GenericPatrolUnit<state,action,environment>::GoToLoc(environment *env, int 
 	std::vector<state> path; 
 	
 	//printf("%s ",GetName());
-	algorithm->GetPath(env, loc, locs[which],path);
+	algorithm->GetPath(env, loc, locs[which], path);
 	//	std::cout<<"At ("<<loc.x<<","<<loc.y<<") pathing to ("<<locs[which].x<<","<<locs[which].y<<")"<<std::endl;
 	nodesExpanded += algorithm->GetNodesExpanded();
 	nodesTouched += algorithm->GetNodesTouched();
+	std::cout << algorithm->GetNodesExpanded() << " nodes expanded\n";
 	//  	std::cout<<"Path ";
 	//	for(int i=0; i<path.size();i++)
 	//{
@@ -269,88 +270,43 @@ void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* en
 {
 	for(unsigned int i=0; i<p.size()-1; i++)
 	{
-		if(trimPath && (env->HCost(p[i+1], loc) > trimWindow))
+		if (trimPath && (env->HCost(p[i+1], loc) > trimWindow))
 		break;
 		moves.push_back(env->GetAction(p[i], p[i+1]));
 	}
 }
 
 template <class state, class action, class environment>
-void GenericPatrolUnit<state,action, environment>::OpenGLDraw(int window, environment *env, SimulationInfo<state,action,environment> *si)
+void GenericPatrolUnit<state,action, environment>::OpenGLDraw(const environment *env, const SimulationInfo<state,action,environment> *si) const
 {
-	GLfloat _r,_g,_b;
-//	_r = (GLfloat)locs[currTarget].x/(GLfloat)env->GetMap()->getMapWidth();
-//	_b = (GLfloat)locs[currTarget].y/(GLfloat)env->GetMap()->getMapHeight();
-//	_g = 0;
-	//_b = (GLfloat)(locs[currTarget].y+locs[currTarget].y)/(GLfloat)(env->GetMap()->getMapHeight()+env->GetMap()->getMapWidth());
-// 		if(locs[currTarget].x < (env->GetMap()->getMapWidth() / 2))
-// 		{
-// 			_r = 1;
-// 			_g = 0;
-// 			_b = 0;
-// 		}
-// 		else
-// 		{
-// 			_r = 0;
-// 			_g = 1;
-// 			_b = 0;
-// 		}
-// 	if(locs[currTarget].y < (env->GetMap()->getMapHeight() / 2))
-// 	{
-// 		_b = 1;
-// 		_r = 0;
-// 	}
-// 	else
-// 	{
-// 		_b = 0;
-// 	}
-	if(drawUnit)
+	if (drawUnit)
 	{
-		
-		
-		
-		
-		this->GetColor(_r,_g,_b);
-// 		if (si->GetSimulationTime() < lastFailedMove+2)
-// 		{
-// 			double interval = (si->GetSimulationTime()-lastFailedMove)/2;
-// 			_r *= interval;
-// 			_g *= interval;
-// 			_b *= interval;
-// 		}
-		if(!Done())
-			env->OpenGLDraw(window, loc,_r,_g,_b);	
+		//printf("Drawing %p at \n", this);
+		PublicUnitInfo<state, action, environment> i;
+		si->GetPublicUnitInfo(si->GetCurrentUnit(), i);
+//		printf("(%f-%f)/(%f-%f)\n", 
+//			   si->GetSimulationTime(), i.lastTime, i.nextTime, i.lastTime);
+		env->SetColor(1.0, 0.25, 0.25, 1.0);
+//		std::cout << si->GetCurrentUnit() << " is at " << i.currentState << std::endl;
+		if (fgreater(si->GetSimulationTime(), i.nextTime))
+			env->OpenGLDraw(i.currentState);
 		else
-			env->OpenGLDraw(window, loc, 0,0,0);
-	} 
-		
-	// Draw the patrol locations	
-//if (0)
-/*	for(unsigned int i=0; i<locs.size(); i++)
-	{
-		state l = locs[i];
-		GLdouble xx, yy, zz, rad;
-		env->GetMapAbstraction()->GetMap()->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
-		//GLfloat _r,_g,_b;
-		//this->GetColor(_r,_g,_b);
-		glColor3f(_r,_g,_b);
-		DrawPyramid(xx, yy, zz, 1.1*rad, 0.75*rad);
-		//		env->OpenGLDraw(window, locs[i], r, g, b);
-		}	*/
-	
-	// Draw the planned path
- 	if ((0)&&(drawUnit))
-	{
-
-   		xyLoc current = loc; 
-   		xyLoc next;
-			for(unsigned int i=0; i<moves.size(); i++)
-			{
-				env->OpenGLDraw(window,current, moves[i],1.0,0,0); // draw in red
-   			env->GetNextState(current, moves[i],next);
-				current = next;
-			}	
+			env->OpenGLDraw(i.lastState, i.currentState,
+							(si->GetSimulationTime()-i.lastTime)/(i.nextTime-i.lastTime));
+		algorithm->OpenGLDraw();
 	}
+// 	if ((0)&&(drawUnit))
+//	{
+//
+//   		state current = loc; 
+//   		state next;
+//			for(unsigned int i=0; i<moves.size(); i++)
+//			{
+//				env->OpenGLDraw(current, moves[i]/*,1.0,0,0*/); // draw in red
+//				env->GetNextState(current, moves[i], next);
+//				current = next;
+//			}	
+//	}
 }
 
 template <class state, class action, class environment>
@@ -371,27 +327,27 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 	
 	if(!(l==loc))
 	{
-		tDirection dir = env->GetAction(loc,l);
+		action dir = env->GetAction(loc,l);
 		
-		if(dir != oldDir)
+		if (!(dir == oldDir))
 		{
 			numDirectionChanges++;
 			oldDir = dir;
 		}
-		if(dir != oldDirColl)
+		if (!(dir == oldDirColl))
 		{
 			numDirectionChangesCollisions++;
 			oldDirColl = dir;
 		}
 
-		totalDistance += env->HCost(loc,l);
+		totalDistance += env->HCost(loc, l);
 	}
 	
 	if((!success))//||(l == loc))
 	{ 
 		numFailedMoves++;
 		moves.resize(0); 
-		oldDirColl = kStay;
+		//oldDirColl = kStay;
 		//if(currTarget != -1) 
 		//	currTarget = 0; 
 	} 
@@ -402,19 +358,16 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 template <class state, class action, class environment>
 bool GenericPatrolUnit<state,action,environment>::Done()
 {
-	if(numPatrols == -1)
-		return true;
-	else if(counter >= numPatrols)
+	if (numPatrols == -1)
 	{
-		//std::cout<<"Done\n";
-		return true;
-	}
-	else
-	{
-//		std::cout<<"NOT done at ("<<loc.x<<","<<loc.y<<")\n";
-	//	std::cout<<"counter "<<counter<<" numPatrols "<<numPatrols<<std::endl;
 		return false;
 	}
+	else if (counter >= numPatrols)
+	{
+		printf("Done\n");
+		return true;
+	}
+	return false;
 }
 
 template <class state, class action, class environment>

@@ -18,7 +18,7 @@ FlipSide::~FlipSide()
 {
 }
 
-void FlipSide::GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> &neighbors)
+void FlipSide::GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> &neighbors) const
 {
 	std::vector<flipMove> acts;
 	GetActions(stateID, acts);
@@ -31,7 +31,7 @@ void FlipSide::GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> 
 	}
 }
 
-void FlipSide::GetActions(FlipSideState &stateID, std::vector<flipMove> &actions)
+void FlipSide::GetActions(FlipSideState &stateID, std::vector<flipMove> &actions) const
 {
 	actions.resize(0);
 	for (int x = 0; x < stateID.width-2; x++)
@@ -43,12 +43,12 @@ void FlipSide::GetActions(FlipSideState &stateID, std::vector<flipMove> &actions
 	}
 }
 
-flipMove FlipSide::GetAction(FlipSideState &s1, FlipSideState &s2)
+flipMove FlipSide::GetAction(FlipSideState &s1, FlipSideState &s2) const
 {
 	return flipMove();
 }
 
-void FlipSide::ApplyAction(FlipSideState &s, flipMove a)
+void FlipSide::ApplyAction(FlipSideState &s, flipMove a) const
 {
 	for (int x = 0; x < 3; x++)
 	{
@@ -115,7 +115,7 @@ bool FlipSide::GoalTest(FlipSideState &state, FlipSideState &goal)
 	return (state == goal);
 }
 
-uint64_t FlipSide::GetStateHash(FlipSideState &state)
+uint64_t FlipSide::GetStateHash(FlipSideState &state) const
 {
 	uint64_t hashVal = 0;
 	for (unsigned int x = 0; x < state.puzzle.size(); x++)
@@ -125,17 +125,17 @@ uint64_t FlipSide::GetStateHash(FlipSideState &state)
 	return hashVal;
 }
 
-uint64_t FlipSide::GetActionHash(flipMove act)
+uint64_t FlipSide::GetActionHash(flipMove act) const
 {
 	return (act.top<<16)|act.bottom;
 }
 
-void FlipSide::OpenGLDraw(int window)
+void FlipSide::OpenGLDraw() const
 {
 }
 
 
-void FlipSide::OpenGLDraw(int window, FlipSideState &s)
+void FlipSide::OpenGLDraw(const FlipSideState &s) const
 {
 	glLineWidth(1.0);
 	glEnable(GL_LINE_SMOOTH);

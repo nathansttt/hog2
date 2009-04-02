@@ -56,15 +56,15 @@ public:
 	
 	
 	struct NodeEqual {
-		bool operator()(const node *i1, const node *i2)
+		bool operator()(const node *i1, const node *i2) const
 		{ return (i1->getUniqueID() == i2->getUniqueID()); } };
 	
 	struct SearchNodeEqual {
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 		{ return (i1.currNode->getUniqueID() == i2.currNode->getUniqueID()); } };
 	
 	struct SearchNodeCompare {
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{

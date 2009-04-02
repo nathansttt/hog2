@@ -2459,107 +2459,102 @@ void Prop::ExtractPathToStart(graphState goalNode, std::vector<graphState> &theP
 	pathSize = thePath.size();
 }
 
-void Prop::OpenGLDraw(int)
+void Prop::OpenGLDraw() const
 {
-	OpenGLDraw();
-}
-
-void Prop::OpenGLDraw()
-{
-	// node to expand: blue
-	// in open: green
-	// in closed: red
-	// in waitlist: yellow
-
-	//float r,gcost,b;
-	double x,y,z;
-	SearchNode sn;
-	graphState nodeID;
-	SearchNode topn;
-	char buf[100];
-
-	// draw nodes
-	node_iterator ni = grp->getNodeIter();
-	for(node* n = grp->nodeIterNext(ni); n; n = grp->nodeIterNext(ni))
-	{
-		graphGenerator::GetLoc(n,x,y,z);
-
-		nodeID = (graphState) n->GetNum();
-		// draw sphere first
-
-		// if it's just expanded
-		NodeLookupTable::iterator hiter;
-		if(nodeID == goal) 
-		{
-			glColor3f(1.0, 0.0, 1.0); // Magenta
-			DrawSphere(x,y,z,0.025);
-		}
-		else if(nodeID == justExpanded)
-		{
-			sn = closedList.find(nodeID)->second;
-			glColor3f(0,0,1);  // blue
-			DrawSphere(x,y,z,0.025);
-
-			memset(buf,0,100);
-			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
-		}
-		// if in closed
-		else if ((hiter = closedList.find(nodeID)) != closedList.end())
-		{
-			sn = hiter->second;
-			glColor3f(1,0,0);  // red
-			DrawSphere(x,y,z,0.025);
-
-			memset(buf,0,100);
-			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
-		}
-		// if in open
-		else if(openQueue.IsIn(SearchNode(nodeID)))
-		{
-			sn = openQueue.find(SearchNode(nodeID));
-
-
-			
-				glColor3f(0,1,0);  // green
-				DrawSphere(x,y,z,0.025);
-			
-
-			memset(buf,0,100);
-			sprintf(buf,"%d [%ld,%ld,%ld]",n->GetNum(), (long)sn.gCost, (long)(sn.fCost - sn.gCost), (long)sn.fCost);
-		}
-		else if(WaitList.IsIn(SearchNode(nodeID)))
-		{
-			sn = WaitList.find(SearchNode(nodeID));
-
-			glColor3f(1.0, 1.0, 0.0);  // yellow
-			DrawSphere(x,y,z,0.025);
-
-			memset(buf,0,100);
-			sprintf(buf,"%d [%ld,%ld,%ld]",n->GetNum(), (long)sn.gCost, (long)(sn.fCost - sn.gCost), (long)sn.fCost);
-		}
-		// neither, ignore
-		else 
-		{
-			continue;
-			
-			glColor3f(1,1,1); // white
-			DrawSphere(x,y,z,0.025);
-
-			memset(buf,0,100);
-			sprintf(buf,"%d [?,%ld,?]",n->GetNum(), (long)env->HCost(nodeID,goal));
-		}
-
-		// draw the text info, in black
-		if(drawtext)
-			DrawText(x,y,z-0.15,0,0,0,buf);
-	}
-
-	// draw edges
-	edge_iterator ei = grp->getEdgeIter();
-	for(edge* e = grp->edgeIterNext(ei); e; e = grp->edgeIterNext(ei))
-	{
-		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
-	}
+//	// node to expand: blue
+//	// in open: green
+//	// in closed: red
+//	// in waitlist: yellow
+//
+//	//float r,gcost,b;
+//	double x,y,z;
+//	SearchNode sn;
+//	graphState nodeID;
+//	SearchNode topn;
+//	char buf[100];
+//
+//	// draw nodes
+//	node_iterator ni = grp->getNodeIter();
+//	for(node* n = grp->nodeIterNext(ni); n; n = grp->nodeIterNext(ni))
+//	{
+//		graphGenerator::GetLoc(n,x,y,z);
+//
+//		nodeID = (graphState) n->GetNum();
+//		// draw sphere first
+//
+//		// if it's just expanded
+//		NodeLookupTable::iterator hiter;
+//		if(nodeID == goal) 
+//		{
+//			glColor3f(1.0, 0.0, 1.0); // Magenta
+//			DrawSphere(x,y,z,0.025);
+//		}
+//		else if(nodeID == justExpanded)
+//		{
+//			sn = closedList.find(nodeID)->second;
+//			glColor3f(0,0,1);  // blue
+//			DrawSphere(x,y,z,0.025);
+//
+//			memset(buf,0,100);
+//			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
+//		}
+//		// if in closed
+//		else if ((hiter = closedList.find(nodeID)) != closedList.end())
+//		{
+//			sn = hiter->second;
+//			glColor3f(1,0,0);  // red
+//			DrawSphere(x,y,z,0.025);
+//
+//			memset(buf,0,100);
+//			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
+//		}
+//		// if in open
+//		else if(openQueue.IsIn(SearchNode(nodeID)))
+//		{
+//			sn = openQueue.find(SearchNode(nodeID));
+//
+//
+//			
+//				glColor3f(0,1,0);  // green
+//				DrawSphere(x,y,z,0.025);
+//			
+//
+//			memset(buf,0,100);
+//			sprintf(buf,"%d [%ld,%ld,%ld]",n->GetNum(), (long)sn.gCost, (long)(sn.fCost - sn.gCost), (long)sn.fCost);
+//		}
+//		else if(WaitList.IsIn(SearchNode(nodeID)))
+//		{
+//			sn = WaitList.find(SearchNode(nodeID));
+//
+//			glColor3f(1.0, 1.0, 0.0);  // yellow
+//			DrawSphere(x,y,z,0.025);
+//
+//			memset(buf,0,100);
+//			sprintf(buf,"%d [%ld,%ld,%ld]",n->GetNum(), (long)sn.gCost, (long)(sn.fCost - sn.gCost), (long)sn.fCost);
+//		}
+//		// neither, ignore
+//		else 
+//		{
+//			continue;
+//			
+//			glColor3f(1,1,1); // white
+//			DrawSphere(x,y,z,0.025);
+//
+//			memset(buf,0,100);
+//			sprintf(buf,"%d [?,%ld,?]",n->GetNum(), (long)env->HCost(nodeID,goal));
+//		}
+//
+//		// draw the text info, in black
+//		if(drawtext)
+//			DrawText(x,y,z-0.15,0,0,0,buf);
+//	}
+//
+//	// draw edges
+//	edge_iterator ei = grp->getEdgeIter();
+//	for(edge* e = grp->edgeIterNext(ei); e; e = grp->edgeIterNext(ei))
+//	{
+//		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
+//	}
 }
 
 void Prop::DrawText(double x, double y, double z, float r, float gg, float b, char* str)

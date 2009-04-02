@@ -45,7 +45,7 @@ public:
 	~SharedAMapGroup();
 	virtual const char *GetName() { return "SharedAMapGroup"; }
 	//virtual tDirection makeMove(unit *u, MapProvider *mp, reservationProvider *rp, AbsMapSimulationInfo *simInfo);
-	virtual void OpenGLDraw(int window, AbsMapEnvironment *, AbsMapSimulationInfo *);
+	virtual void OpenGLDraw(const AbsMapEnvironment *, const AbsMapSimulationInfo *) const;
 	virtual Map *GetMap();
 	virtual MapAbstraction *GetMapAbstraction();
 	virtual int getNewTileCount() { return newTileCountPerTrial; }

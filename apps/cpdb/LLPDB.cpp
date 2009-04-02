@@ -71,6 +71,7 @@ GraphCanonicalHeuristic *gch = 0;
 GraphMapInconsistentHeuristic *gmih = 0;
 GraphMapInconsistentHeuristic *gmih2 = 0;
 Graph *stp = 0;
+TemplateAStar<graphState, graphMove, GraphEnvironment> visual_astar;
 
 
 bool mouseTracking;
@@ -108,8 +109,11 @@ void CreateSimulation(int id)
 //			map->save(name);
 //		}
 	}
-	else
+	else {
 		map = new Map(gDefaultMap);
+		map->scale(512, 512);
+		//map->save("/Users/nathanst/Development/hog2/maps/652 maps/map2_big.map");
+	}
 	
 	unitSims.resize(id+1);
 	unitSims[id] = new UnitMapSimulation(new MapEnvironment(map));
@@ -132,7 +136,7 @@ void InstallHandlers()
 	
 	InstallKeyboardHandler(MyPDBKeyHandler, "load PDB", "load PDB", kNoModifier, 'l');
 	InstallKeyboardHandler(MyPDBKeyHandler, "Build PDB", "Build a sliding-tile PDB", kNoModifier, 'b');
-	InstallKeyboardHandler(MyPDBKeyHandler, "Test PDB", "Test a sliding-tile PDB", kNoModifier, 't');
+	InstallKeyboardHandler(MyPDBKeyHandler, "Test PDB", "Test a sliding-tile PDB", kAnyModifier, 't');
 	InstallKeyboardHandler(MyPDBKeyHandler, "Test PDB", "Run Big PDB test", kNoModifier, 'r');
 	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
@@ -176,8 +180,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	else if (gch)
 		gch->OpenGLDraw();
 	else
-		unitSims[windowID]->OpenGLDraw(windowID);
+		unitSims[windowID]->OpenGLDraw();
 	
+	if (gmih)
+	{
+		gmih->OpenGLDraw();
+		visual_astar.OpenGLDraw();
+	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -219,17 +228,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 }
 
 
-void MyPDBKeyHandler(unsigned long, tKeyboardModifier, char key)
+void MyPDBKeyHandler(unsigned long, tKeyboardModifier mod, char key)
 {
 	if (key == 'l')
 	{
 		//TestSmallMap();
 		//TestAPSP();
 
-		TestSTPCanonical();
+		//TestSTPCanonical();
 		
 		//delete gch;
 		//gch = new GraphCanonicalHeuristic("CPDBs/8room_000.map.pdb");
+		gch = new GraphCanonicalHeuristic("CPDBs/8room_002.map.2_10.o.pdb");
 		
 		//BuildScenarioFiles();
 		//BuildScenarioFiles2();
@@ -242,8 +252,44 @@ void MyPDBKeyHandler(unsigned long, tKeyboardModifier, char key)
 	}
 	if (key == 't')
 	{
+		if (gmih == 0)
+		{
+			if (gch)
+			{
+				gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
+			}
+			else {
+				Map *m = unitSims[0]->GetEnvironment()->GetMap();
+				
+				gmih = new GraphMapInconsistentHeuristic(m, GraphSearchConstants::GetGraph(m));
+			}
+			gmih->UseSmartPlacement(true);
+		}
+		gmih->AddHeuristic();
+		if (mod == kShiftDown)
+		{
+			MapEnvironment *menv = unitSims[0]->GetEnvironment();
+			Map *m = menv->GetMap();
+			Graph *g = GraphSearchConstants::GetGraph(m);
+			GraphEnvironment *env = new GraphEnvironment(g, gmih);
+
+			std::vector<graphState> path;
+			for (int x = 0; x < 1; x++)
+			{
+				node *n1, *n2;
+				n1 = g->GetRandomNode();
+				n2 = g->GetRandomNode();
+				graphState s1 = n1->GetNum();
+				graphState g1 = n2->GetNum();
+//				mabs->GetTileFromNode(n1, px1, py1);
+//				mabs->GetTileFromNode(n2, px2, py2);
+				visual_astar.GetPath(env, s1, g1, path);
+				printf("%d\t%d\t%d\t%d\t%1.5f\n", n1->GetLabelL(kMapX), n1->GetLabelL(kMapY),
+					   n2->GetLabelL(kMapX), n2->GetLabelL(kMapY), env->GetPathLength(path));
+			}
+		}
 //		TestMazeCPDBs();
-		TestRoomCPDBs();
+//		TestRoomCPDBs();
 //		TestPDB();
 	}
 	if (key == 'r')
@@ -325,6 +371,7 @@ void TestPDB()
 
 bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
 {
+	//TemplateAStar<armAngles, armRotations, RoboticArm> astar;
 	return false;
 }
 

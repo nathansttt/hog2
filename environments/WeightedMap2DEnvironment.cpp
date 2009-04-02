@@ -74,7 +74,7 @@ WeightedMap2DEnvironment::~WeightedMap2DEnvironment()
 * @param s The current state
 * @param dir The action taken from the current state
 */
-void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir)
+void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 {
 	// this isn't called 
 	
@@ -468,11 +468,11 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 
 }
 
-void WeightedMap2DEnvironment::OpenGLDraw(int window)
+void WeightedMap2DEnvironment::OpenGLDraw() const
 {	
 //	return;
 	// Draw the map
-	//AbsMapEnvironment::OpenGLDraw(window);
+	//AbsMapEnvironment::OpenGLDraw();
 	
 	// Draw direction for all nodes
 	
@@ -492,7 +492,8 @@ void WeightedMap2DEnvironment::OpenGLDraw(int window)
 
 		if(angleLookup.find(sn) != angleLookup.end())
 		{
-			Vector2D old = angleLookup[sn];
+			const Vector2D old = (*angleLookup.find(sn)).second;
+			//const Vector2D old = angleLookup[sn];
 			
 			// Reduce length to 40%
 			GLdouble xx, yy, zz, rad;	
@@ -534,7 +535,7 @@ void WeightedMap2DEnvironment::OpenGLDraw(int window)
 // 	
 }
 
-void WeightedMap2DEnvironment::DrawEdge(int window, edge* e)
+void WeightedMap2DEnvironment::DrawEdge(const edge* e) const
 {
 	Graph* g = ma->GetAbstractGraph(0);
 	node* from = g->GetNode(e->getFrom());
@@ -547,11 +548,11 @@ void WeightedMap2DEnvironment::DrawEdge(int window, edge* e)
 		
 		glColor3f(1.0, 1.0, 1.0);
 		
-		map->getOpenGLCoord(from->GetLabelL(kFirstData), from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+		map->getOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glBegin(GL_LINE_STRIP);
 		glVertex3f(xx, yy, zz-rad/2);	
 	
-		map->getOpenGLCoord(to->GetLabelL(kFirstData), to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+		map->getOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glVertex3f(xx, yy, zz-rad/2);
 		glEnd();
 	}
@@ -560,12 +561,12 @@ void WeightedMap2DEnvironment::DrawEdge(int window, edge* e)
 		// white on "from" side, blue on "to" side
 		glColor3f(1.0, 1.0, 1.0);
 		
-				map->getOpenGLCoord(from->GetLabelL(kFirstData), from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+				map->getOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glBegin(GL_LINE_STRIP);
 		glVertex3f(xx, yy, zz-rad/2);	
 	
 		glColor3f(0,0,1.0);
-		map->getOpenGLCoord(to->GetLabelL(kFirstData), to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+		map->getOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glVertex3f(xx, yy, zz-rad/2);
 		glEnd();
 	}
@@ -573,25 +574,25 @@ void WeightedMap2DEnvironment::DrawEdge(int window, edge* e)
 	{
 		// blue on "from" side, white on "to" side
 		glColor3f(0,0,1.0);
-				map->getOpenGLCoord(from->GetLabelL(kFirstData), from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+				map->getOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glBegin(GL_LINE_STRIP);
 		glVertex3f(xx, yy, zz-rad/2);	
 		
 		
 		glColor3f(1.0, 1.0, 1.0);
-		map->getOpenGLCoord(to->GetLabelL(kFirstData), to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+		map->getOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glVertex3f(xx, yy, zz-rad/2);
 		glEnd();
 	}
 }
 
-void WeightedMap2DEnvironment::OpenGLDraw(int window, xyLoc& s, tDirection &dir)
+void WeightedMap2DEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) const
 {
 	// Figure out which edge this corresponds to
 	// Figure out which direction is preferred
 	//   if none, then keep one colour
 		
-	xyLoc initial = s;
+	xyLoc s = initial;
 	
 	switch (dir)
 	{
@@ -611,9 +612,8 @@ void WeightedMap2DEnvironment::OpenGLDraw(int window, xyLoc& s, tDirection &dir)
 	node* to = ma->GetNodeFromMap(s.x, s.y);
 	edge* e = g->FindEdge(from->GetNum(),to->GetNum());	
 		
-	DrawEdge(window, e);
+	DrawEdge(e);
 	
-	s = initial;
 }
 
 void WeightedMap2DEnvironment::SetAngle(xyLoc &l, Vector2D angle)

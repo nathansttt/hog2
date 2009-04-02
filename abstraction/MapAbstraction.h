@@ -52,7 +52,7 @@ public:
 	/** Given a location (recVec) return the tile under that location */
 	void GetTileUnderLoc(int &x, int &y, const recVec &);
 
-	Map* GetMap() { return m; }
+	Map* GetMap() const { return m; }
 	MapAbstraction *GetMapAbstraction() { return this; }
 
 	virtual double h(node *a, node *b);
@@ -60,14 +60,14 @@ public:
 	double OctileDistance(double,double,double,double);
 	
 	// display functions
-	virtual void OpenGLDraw(int window);
+	virtual void OpenGLDraw() const;
 	void ToggleDrawAbstraction(int which);
 	void ClearMarkedNodes();
-	recVec GetNodeLoc(node *n);
+	recVec GetNodeLoc(node *n) const;
 private:
 		
-	void DrawLevelConnections(node *n);
-	void DrawGraph(Graph *g);
+	void DrawLevelConnections(node *n) const;
+	void DrawGraph(Graph *g) const;
 	
 	Map *m;
 	unsigned long levelDraw;

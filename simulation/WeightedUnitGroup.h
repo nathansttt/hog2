@@ -262,14 +262,14 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			currDrawEnv = (currDrawEnv + 1)%(unitWme.size()+1);
 		}
 		
-		virtual void OpenGLDraw(int window, environment *, SimulationInfo<state,action,environment> *) 
+		virtual void OpenGLDraw(const environment *, const SimulationInfo<state,action,environment> *)  const
 		{ 
 			if(currDrawEnv == unitWme.size())
-				wme->OpenGLDraw(window);
+				wme->OpenGLDraw();
 			else
 			{
-				this->GetMembers()[currDrawEnv]->SetColor(0,0,1);
-				unitWme[currDrawEnv]->OpenGLDraw(window);
+				//this->GetMembers()[currDrawEnv]->SetColor(0,0,1);
+				unitWme[currDrawEnv]->OpenGLDraw();
 			}
 		}
 		

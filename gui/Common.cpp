@@ -139,6 +139,8 @@ void RemoveFrameHandler(FrameCallback glCall, unsigned long windowID, void *user
 
 void HandleFrame(pRecContext pContextInfo, int viewport)
 {
+	glEnable(GL_BLEND); // for text fading
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // ditto
 	for (unsigned int x = 0; x < glDrawCallbacks.size(); x++)
 	{
 		if (glDrawCallbacks[x]->windowID == pContextInfo->windowID)

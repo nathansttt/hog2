@@ -41,13 +41,14 @@ public:
 namespace GraphSearchConstants
 {
 	enum {
-		kXCoordinate = 0,
-		kYCoordinate = 1,
-		kZCoordinate = 2,
-		kHCost = 3, // this is relative to a single goal
-		kMapX = 4,
-		kMapY = 5,
-		kTemporaryLabel = 6
+		kHCost = 0, // this is relative to a single goal
+		kXCoordinate = 5,
+		kYCoordinate = 6,
+		kZCoordinate = 7,
+		kTemporaryLabel = 8,
+		kMapX = 9,
+		kMapY = 10,
+		kFirstData = 11
 	};
 
 	const double kStraightEdgeCost = 1.0;
@@ -69,6 +70,7 @@ public:
 	virtual double HCost(graphState &state1, graphState &state2) = 0;
 	// if one is better as the start or goal state, this can swap for you.
 	virtual void ChooseStartGoal(graphState &start, graphState &goal) {}
+	virtual void OpenGLDraw() const {}
 private:
 };
 
@@ -175,6 +177,7 @@ public:
 	void UseSmartPlacement(bool use) { smartPlacement = use; }
 	Graph *GetGraph() { return g; }
 	void ChooseStartGoal(graphState &start, graphState &goal);
+	void OpenGLDraw() const;
 protected:
 	void GetOptimalDistances(node *n, std::vector<double> &values);
 	void AddHeuristic(std::vector<double> &values, graphState location);
@@ -210,11 +213,11 @@ class GraphEnvironment : public SearchEnvironment<graphState, graphMove> {
 public:
 	GraphEnvironment(Graph *g, GraphHeuristic *gh);
 	virtual ~GraphEnvironment();
-	virtual void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors);
-	virtual void GetActions(graphState &stateID, std::vector<graphMove> &actions);
-	virtual graphMove GetAction(graphState &s1, graphState &s2);
-	virtual void ApplyAction(graphState &s, graphMove a);
-	virtual bool InvertAction(graphMove &a);
+	virtual void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const;
+	virtual void GetActions(graphState &stateID, std::vector<graphMove> &actions) const;
+	virtual graphMove GetAction(graphState &s1, graphState &s2) const;
+	virtual void ApplyAction(graphState &s, graphMove a) const;
+	virtual bool InvertAction(graphMove &a) const;
 
 	void SetDirected(bool b) {directed = b;}
 
@@ -223,11 +226,11 @@ public:
 	virtual double GCost(graphState &state1, graphState &state2);
 	virtual double GCost(graphState &state1, graphMove &state2);
 	virtual bool GoalTest(graphState &state, graphState &goal);
-	virtual uint64_t GetStateHash(graphState &state);
-	virtual uint64_t GetActionHash(graphMove act);
-	virtual void OpenGLDraw(int window);
-	virtual void OpenGLDraw(int window, graphState &s);
-	virtual void OpenGLDraw(int window, graphState &s, graphMove &gm);
+	virtual uint64_t GetStateHash(graphState &state) const;
+	virtual uint64_t GetActionHash(graphMove act) const;
+	virtual void OpenGLDraw() const;
+	virtual void OpenGLDraw(const graphState &s) const;
+	virtual void OpenGLDraw(const graphState &s, const graphMove &gm) const;
 	Graph *GetGraph() { return g; };
 
 	virtual void StoreGoal(graphState &state1) {}
@@ -254,7 +257,7 @@ class AbstractionGraphEnvironment: public GraphEnvironment {
 	AbstractionGraphEnvironment( GraphAbstraction *gabs, unsigned int level, GraphHeuristic *gh );
 	~AbstractionGraphEnvironment();
 
-	virtual void OpenGLDraw( int window );
+	virtual void OpenGLDraw();
 	double scale() { return graphscale; };
 
 	protected:

@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20286C33FDCF999611CA2CEA /* Carbon.framework */; };
-		C412053F0F264F0800DF7E61 /* GraphCanonicalHeuristic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E828080EEF981C00F500C4 /* GraphCanonicalHeuristic.cpp */; };
-		C41205400F264F0900DF7E61 /* LLPDB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8280A0EEF981C00F500C4 /* LLPDB.cpp */; };
+		C409B1A30F7872BF006E6A96 /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AC970B0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp */; };
+		C42016760F437EBB00FBB3D6 /* Inconsistency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C847580C1F1ACF00AFBF7A /* Inconsistency.cpp */; };
 		C4210C6E0CFF198100301281 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */; };
 		C4210C6F0CFF198100301281 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */; };
 		C4210C700CFF198100301281 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */; };
@@ -419,7 +419,6 @@
 		C4C847500C1F1A5B00AFBF7A /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4C847470C1F1A5B00AFBF7A /* main.nib */; };
 		C4C847510C1F1A5B00AFBF7A /* Inconsistency.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4C847490C1F1A5B00AFBF7A /* Inconsistency.icns */; };
 		C4C847520C1F1A5B00AFBF7A /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4C8474A0C1F1A5B00AFBF7A /* Info.plist */; };
-		C4C8475C0C1F1AD000AFBF7A /* Inconsistency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C847580C1F1ACF00AFBF7A /* Inconsistency.cpp */; };
 		C4C99B150EC16EA800C87E6E /* MultiAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C670CFF191F00301281 /* MultiAgent.cpp */; };
 		C4D18AD70F183D7D005DEF84 /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
@@ -495,6 +494,17 @@
 		C4E8273F0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
 		C4E827400EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
 		C4E827410EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
+		C4F347FB0F8484B300104ABE /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B7340BCEEC5900FCD84C /* Sample.cpp */; };
+		C4F348030F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
+		C4F348040F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
+		C4F348050F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
+		C4F348060F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
+		C4F348070F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
+		C4F348080F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
+		C4F348090F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
+		C4F3480A0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
+		C4F3480B0F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
+		C4F3480C0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -505,6 +515,7 @@
 		5048396D09E3307300765E4B /* hog2Proj.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Proj.xcconfig; sourceTree = "<group>"; };
 		5048396E09E3307300765E4B /* hog2Target.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Target.xcconfig; sourceTree = "<group>"; };
 		508344B209E5C41E0093A071 /* Sample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C409B3570F79A65E006E6A96 /* SimulationInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimulationInfo.h; sourceTree = "<group>"; };
 		C4210C670CFF191F00301281 /* MultiAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MultiAgent.cpp; sourceTree = "<group>"; };
 		C4210C680CFF191F00301281 /* MultiAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultiAgent.h; sourceTree = "<group>"; };
 		C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WeightedMap2DEnvironment.cpp; sourceTree = "<group>"; };
@@ -1217,6 +1228,10 @@
 		C4E828090EEF981C00F500C4 /* GraphCanonicalHeuristic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphCanonicalHeuristic.h; sourceTree = "<group>"; };
 		C4E8280A0EEF981C00F500C4 /* LLPDB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LLPDB.cpp; sourceTree = "<group>"; };
 		C4E8280B0EEF981C00F500C4 /* LLPDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LLPDB.h; sourceTree = "<group>"; };
+		C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PancakePuzzle.cpp; sourceTree = "<group>"; };
+		C4F348000F8485F400104ABE /* PancakePuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PancakePuzzle.h; sourceTree = "<group>"; };
+		C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PermutationPuzzleEnvironment.cpp; sourceTree = "<group>"; };
+		C4F348020F8485F400104ABE /* PermutationPuzzleEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PermutationPuzzleEnvironment.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1692,6 +1707,10 @@
 		C4D3B27A0BCEE7B000FCD84C /* environments */ = {
 			isa = PBXGroup;
 			children = (
+				C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */,
+				C4F348000F8485F400104ABE /* PancakePuzzle.h */,
+				C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */,
+				C4F348020F8485F400104ABE /* PermutationPuzzleEnvironment.h */,
 				C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */,
 				C4210C6D0CFF198100301281 /* WeightedMap2DEnvironment.h */,
 				C4D3C29C0BD951AE00FCD84C /* Map2DEnvironment.cpp */,
@@ -2351,6 +2370,7 @@
 				C4D3B4820BCEE7B200FCD84C /* EpisodicSimulation.h */,
 				C4D3B4850BCEE7B200FCD84C /* UnitSimulation.cpp */,
 				C4D3B4860BCEE7B200FCD84C /* UnitSimulation.h */,
+				C409B3570F79A65E006E6A96 /* SimulationInfo.h */,
 				C433A4170BFA4E03002B8108 /* SearchEnvironment.cpp */,
 				C433A4160BFA4E03002B8108 /* SearchEnvironment.h */,
 			);
@@ -2729,8 +2749,10 @@
 				C4A4F35A0ECFD3B5009D90B3 /* RoboticArm.cpp in Sources */,
 				C4E8273D0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
 				C4D18AD70F183D7D005DEF84 /* ConfigEnvironment.cpp in Sources */,
-				C412053F0F264F0800DF7E61 /* GraphCanonicalHeuristic.cpp in Sources */,
-				C41205400F264F0900DF7E61 /* LLPDB.cpp in Sources */,
+				C409B1A30F7872BF006E6A96 /* Directional2DEnvironment.cpp in Sources */,
+				C4F347FB0F8484B300104ABE /* Sample.cpp in Sources */,
+				C4F348030F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
+				C4F348040F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2822,6 +2844,8 @@
 				C478BB050D4FEC1400A1ABC5 /* OpenListB.cpp in Sources */,
 				C42A68DF0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */,
 				C4E8273E0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
+				C4F348050F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
+				C4F348060F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2914,6 +2938,8 @@
 				C42A68DC0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */,
 				C4C99B150EC16EA800C87E6E /* MultiAgent.cpp in Sources */,
 				C4E827400EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
+				C4F348090F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
+				C4F3480A0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3007,6 +3033,8 @@
 				C4AC970C0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp in Sources */,
 				C42A68DD0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */,
 				C4E827410EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
+				C4F3480B0F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
+				C4F3480C0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3088,7 +3116,6 @@
 				C4C847300C1F19C300AFBF7A /* FringeSearch.cpp in Sources */,
 				C4C847310C1F19C300AFBF7A /* SearchAlgorithm.cpp in Sources */,
 				C4C847320C1F19C300AFBF7A /* SpreadExecSearchAlgorithm.cpp in Sources */,
-				C4C8475C0C1F1AD000AFBF7A /* Inconsistency.cpp in Sources */,
 				C46E4EC20CACA81700D4D8F6 /* AStarDelay.cpp in Sources */,
 				C46E4F490CB0ACC600D4D8F6 /* GraphAlgorithm.cpp in Sources */,
 				C46E4F990CB0AE5700D4D8F6 /* Propagation.cpp in Sources */,
@@ -3099,6 +3126,9 @@
 				C478BB060D4FEC1400A1ABC5 /* OpenListB.cpp in Sources */,
 				C42A68DE0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */,
 				C4E8273F0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
+				C42016760F437EBB00FBB3D6 /* Inconsistency.cpp in Sources */,
+				C4F348070F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
+				C4F348080F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

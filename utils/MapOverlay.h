@@ -20,7 +20,7 @@ public:
 	Map *GetMap() { return m; }
 	void setOverlayValue(int x, int y, double value);
 	double getOverlayValue(int x, int y);
-	void OpenGLDraw(int window);
+	void OpenGLDraw() const;
 	void setTransparentValue(double v) { ignoreVal = v; }
 	void setColorMap(int val) { colorMap = val; }
 	int getColorMap() { return colorMap; }
@@ -35,7 +35,7 @@ private:
 	double maxVal, minVal;
 	double ignoreVal;
 	int colorMap;
-  GLuint displayList;
+	mutable GLuint displayList;
 };
 
 #endif

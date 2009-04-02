@@ -42,11 +42,11 @@ public:
 	PancakePuzzle(unsigned size, const std::vector<unsigned> op_order); // used to set action order
 
 	~PancakePuzzle();
-	void GetSuccessors(PancakePuzzleState &state, std::vector<PancakePuzzleState> &neighbors);
-	void GetActions(PancakePuzzleState &state, std::vector<unsigned> &actions);
-	unsigned GetAction(PancakePuzzleState &s1, PancakePuzzleState &s2);
-	void ApplyAction(PancakePuzzleState &s, unsigned a);
-	bool InvertAction(unsigned &a);
+	void GetSuccessors(PancakePuzzleState &state, std::vector<PancakePuzzleState> &neighbors) const;
+	void GetActions(PancakePuzzleState &state, std::vector<unsigned> &actions) const;
+	unsigned GetAction(PancakePuzzleState &s1, PancakePuzzleState &s2) const;
+	void ApplyAction(PancakePuzzleState &s, unsigned a) const;
+	bool InvertAction(unsigned &a) const;
 
 	double HCost(PancakePuzzleState &state1, PancakePuzzleState &state2);
 	double HCost(PancakePuzzleState &state1);
@@ -57,7 +57,7 @@ public:
 
 	bool GoalTest(PancakePuzzleState &s);
 
-	uint64_t GetActionHash(unsigned act);
+	uint64_t GetActionHash(unsigned act) const;
 	void StoreGoal(PancakePuzzleState &); // stores the locations for the given goal state
 	void ClearGoal(){} // clears the current stored information of the goal
 
@@ -69,9 +69,9 @@ public:
 	void Change_Op_Order(const std::vector<unsigned> op_order);
 
 	// currently not drawing anything
-	void OpenGLDraw(int window){}
-	void OpenGLDraw(int window, PancakePuzzleState &s){}
-	void OpenGLDraw(int, PancakePuzzleState &, unsigned &) {}
+	void OpenGLDraw() const{}
+	void OpenGLDraw(const PancakePuzzleState &s) const {}
+	void OpenGLDraw(const PancakePuzzleState &, const unsigned &) const {}
 
 private:
 

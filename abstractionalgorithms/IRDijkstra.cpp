@@ -449,7 +449,7 @@ void IRDijkstra::RefineNode(node *gNode)
 	g->RemoveNode(gNode);
 }
 
-node *IRDijkstra::GetRealNode(node *gNode)
+node *IRDijkstra::GetRealNode(node *gNode) const
 {
 	return absGraph->GetAbstractGraph(gNode->GetLabelL(kAbstractionLevel))->GetNode(gNode->GetLabelL(kCorrespondingNode));
 }
@@ -466,7 +466,7 @@ bool IRDijkstra::ShouldAddEdge(node *aLowerNode, node *aHigherNode)
 	return false;
 }
 
-void IRDijkstra::OpenGLDraw()
+void IRDijkstra::OpenGLDraw() const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0))
 	{
@@ -481,7 +481,7 @@ void IRDijkstra::OpenGLDraw()
 	{
 		node *n;
 		n = g->GetNode(e->getFrom());
-		if (q.top().n == n)
+		if (q.peek().n == n)
 			glColor3f(1.0, 0.0, 1.0);
 		else if (n == gStart)
 			glColor3f(0, 0, 1);
@@ -498,7 +498,7 @@ void IRDijkstra::OpenGLDraw()
 		glVertex3f(rv.x, rv.y, rv.z);
 		
 		n = g->GetNode(e->getTo());
-		if (q.top().n == n)
+		if (q.peek().n == n)
 			glColor3f(1.0, 0.0, 1.0);
 		else if (n == gStart)
 			glColor3f(0, 0, 1);

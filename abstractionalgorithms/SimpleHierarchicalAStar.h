@@ -16,14 +16,14 @@
 class HierarchicalHeuristicEnvironment : public SearchEnvironment<unsigned long, unsigned long>
 {
 	virtual ~HierarchicalHeuristicEnvironment() {}
-	virtual void GetSuccessors(unsigned long &nodeID, std::vector<unsigned long> &neighbors) = 0;
-	virtual void GetActions(unsigned long &nodeID, std::vector<unsigned long> &actions) = 0;
-	virtual unsigned long GetAction(unsigned long &s1, unsigned long &s2) = 0;
-	virtual void ApplyAction(unsigned long &s, unsigned long a) = 0;
+	virtual void GetSuccessors(unsigned long &nodeID, std::vector<unsigned long> &neighbors) const = 0;
+	virtual void GetActions(unsigned long &nodeID, std::vector<unsigned long> &actions) const = 0;
+	virtual unsigned long GetAction(unsigned long &s1, unsigned long &s2) const = 0;
+	virtual void ApplyAction(unsigned long &s, unsigned long a) const = 0;
 
-	virtual void GetNextState(unsigned long &currents, unsigned long dir, unsigned long &news){};
+	virtual void GetNextState(unsigned long &currents, unsigned long dir, unsigned long &news) const{};
 
-	virtual bool InvertAction(unsigned long &a) = 0;
+	virtual bool InvertAction(unsigned long &a) const = 0;
 
 	virtual double HCost(unsigned long &node1, unsigned long &node2) = 0;
 
@@ -38,14 +38,14 @@ class HierarchicalHeuristicEnvironment : public SearchEnvironment<unsigned long,
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for HierarchicalHeuristicEnvironment\n");
 		exit(1); return false;}
 
-	virtual uint64_t GetStateHash(unsigned long &node) = 0;
-	virtual uint64_t GetActionHash(unsigned long act) = 0;
+	virtual uint64_t GetStateHash(unsigned long &node) const = 0;
+	virtual uint64_t GetActionHash(unsigned long act) const = 0;
 
 	virtual OccupancyInterface<unsigned long,unsigned long> *GetOccupancyInfo() = 0;
 
-	virtual void OpenGLDraw(int window) = 0;
-	virtual void OpenGLDraw(int window, unsigned long&) = 0;
-	virtual void OpenGLDraw(int window, unsigned long&, unsigned long&) = 0;
+	virtual void OpenGLDraw() const = 0;
+	virtual void OpenGLDraw(unsigned long&) const = 0;
+	virtual void OpenGLDraw(unsigned long&, unsigned long&) const = 0;
 
 	void StoreGoal(unsigned long &s){}
 	void ClearGoal(){}
@@ -60,7 +60,7 @@ public:
 	virtual path *GetPath(GraphAbstraction *aMap, node *from, node *to, reservationProvider *rp = 0);
 	path *DoOneSearchStep();
 	bool InitializeSearch(GraphAbstraction *aMap, node *from, node *to);
-	void OpenGLDraw();
+	void OpenGLDraw() const;
 private:
 TemplateAStar<unsigned long, unsigned long,
 };

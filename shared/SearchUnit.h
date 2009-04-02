@@ -59,7 +59,7 @@ public:
 	
 	void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool success, AbsMapSimulationInfo *si) { updateLocation(l.x, l.y, success, si); }
 	virtual void updateLocation(int _x, int _y, bool, AbsMapSimulationInfo *);
-	virtual void OpenGLDraw(int window, AbsMapEnvironment *, AbsMapSimulationInfo *);
+	virtual void OpenGLDraw(const AbsMapEnvironment *, const AbsMapSimulationInfo *) const;
 	//void printRoundStats(FILE *f);
 	void LogStats(StatCollection *stats);
 	void LogFinalStats(StatCollection *stats);

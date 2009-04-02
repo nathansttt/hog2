@@ -564,108 +564,108 @@ void MeroB::ExtractPathToStart(graphState goalNode, std::vector<graphState> &the
 }
 
 
-void MeroB::OpenGLDraw(int)
+//void MeroB::OpenGLDraw(int) const
+//{
+//	OpenGLDraw();
+//}
+
+void MeroB::OpenGLDraw() const
 {
-	OpenGLDraw();
-}
-
-void MeroB::OpenGLDraw()
-{
-	//float r,gcost,b;
-	double x,y,z;
-	MeroBUtil::SearchNode sn;
-	graphState nodeID;
-	MeroBUtil::SearchNode topn;
-	char buf[100];
-
-	// draw nodes
-	node_iterator ni = g->getNodeIter();
-	for(node* n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
-	{
-		MeroBUtil::graphGenerator::GetLoc(n,x,y,z);
-
-		nodeID = (graphState) n->GetNum();
-		// draw sphere first
-
-		// if in closed
-		MeroBUtil::NodeLookupTable::iterator hiter;
-		if ((hiter = closedList.find(nodeID)) != closedList.end())
-		{
-			sn = hiter->second;
-			glColor3f(1,0,0);  // red
-			DrawSphere(x,y,z,0.025);
-
-			memset(buf,0,100);
-			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
-		}
-		// if in open
-		else if(openQueue.IsIn(MeroBUtil::SearchNode(nodeID)))
-		{
-			sn = openQueue.find(MeroBUtil::SearchNode(nodeID));
-
-			FCache.reset();
-			while(openQueue.size() > 0) 
-			{
-				MeroBUtil::SearchNode tmpNode = openQueue.top();
-				if (fless(tmpNode.fCost , F)) 
-				{
-					FCache.Add(openQueue.Remove());
-				}
-				else
-					break;
-			}
-
-			if(FCache.size() > 0)
-			{
-				topn = FCache.top();
-			}
-			else 
-			{
-				topn = openQueue.top();
-			}
-
-			while(FCache.size() > 0) 
-			{
-				openQueue.Add(FCache.Remove());
-			}
-
-			// if on top, blue
-			if(topn.currNode == sn.currNode)
-			{
-				glColor3f(0,0,1);
-				DrawSphere(x,y,z,0.025);
-			}
-			else // green
-			{
-				glColor3f(0,1,0);
-				DrawSphere(x,y,z,0.025);
-			}
-
-			memset(buf,0,100);
-			sprintf(buf,"%d [%ld,%ld,%ld]",n->GetNum(), (long)sn.gCost, (long)(sn.fCost - sn.gCost), (long)sn.fCost);
-		}
-		// neither in open nor closed, white
-		else 
-		{
-			continue;
-			
-			glColor3f(1,1,1); // white
-			DrawSphere(x,y,z,0.025);
-
-			memset(buf,0,100);
-			sprintf(buf,"%d [?,%ld,?]",n->GetNum(), (long)env->HCost(nodeID,goal));
-		}
-
-		// draw the text info, in black
-		DrawText(x,y,z+0.05,0,0,0,buf);
-	}
-
-	// draw edges
-	edge_iterator ei = g->getEdgeIter();
-	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
-	{
-		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
-	}
+//	//float r,gcost,b;
+//	double x,y,z;
+//	const MeroBUtil::SearchNode sn;
+//	graphState nodeID;
+//	const MeroBUtil::SearchNode topn;
+//	char buf[100];
+//
+//	// draw nodes
+//	node_iterator ni = g->getNodeIter();
+//	for(node* n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
+//	{
+//		MeroBUtil::graphGenerator::GetLoc(n,x,y,z);
+//
+//		nodeID = (graphState) n->GetNum();
+//		// draw sphere first
+//
+//		// if in closed
+//		MeroBUtil::NodeLookupTable::const_iterator hiter;
+//		if ((hiter = closedList.find(nodeID)) != closedList.end())
+//		{
+//			sn = hiter->second;
+//			glColor3f(1,0,0);  // red
+//			DrawSphere(x,y,z,0.025);
+//
+//			memset(buf,0,100);
+//			sprintf(buf,"%d [%d,%d,%d]",n->GetNum(), (int)sn.gCost, (int)(sn.fCost - sn.gCost), (int)sn.fCost);
+//		}
+//		// if in open
+//		else if (openQueue.IsIn(MeroBUtil::SearchNode(nodeID)))
+//		{
+//			sn = openQueue.find(MeroBUtil::SearchNode(nodeID));
+//
+//			FCache.reset();
+//			while(openQueue.size() > 0) 
+//			{
+//				MeroBUtil::SearchNode tmpNode = openQueue.top();
+//				if (fless(tmpNode.fCost , F)) 
+//				{
+//					FCache.Add(openQueue.Remove());
+//				}
+//				else
+//					break;
+//			}
+//
+//			if(FCache.size() > 0)
+//			{
+//				topn = FCache.top();
+//			}
+//			else 
+//			{
+//				topn = openQueue.top();
+//			}
+//
+//			while(FCache.size() > 0) 
+//			{
+//				openQueue.Add(FCache.Remove());
+//			}
+//
+//			// if on top, blue
+//			if(topn.currNode == sn.currNode)
+//			{
+//				glColor3f(0,0,1);
+//				DrawSphere(x,y,z,0.025);
+//			}
+//			else // green
+//			{
+//				glColor3f(0,1,0);
+//				DrawSphere(x,y,z,0.025);
+//			}
+//
+//			memset(buf,0,100);
+//			sprintf(buf,"%d [%ld,%ld,%ld]",n->GetNum(), (long)sn.gCost, (long)(sn.fCost - sn.gCost), (long)sn.fCost);
+//		}
+//		// neither in open nor closed, white
+//		else 
+//		{
+//			continue;
+//			
+//			glColor3f(1,1,1); // white
+//			DrawSphere(x,y,z,0.025);
+//
+//			memset(buf,0,100);
+//			sprintf(buf,"%d [?,%ld,?]",n->GetNum(), (long)env->HCost(nodeID,goal));
+//		}
+//
+//		// draw the text info, in black
+//		DrawText(x,y,z+0.05,0,0,0,buf);
+//	}
+//
+//	// draw edges
+//	edge_iterator ei = g->getEdgeIter();
+//	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+//	{
+//		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
+//	}
 }
 
 void MeroB::DrawText(double x, double y, double z, float r, float gg, float b, char* str)

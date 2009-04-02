@@ -35,7 +35,7 @@ bool BoundingBox::pointInBox(double x, double y, double z)
 					((fless(z, z1) && (!fless(z, z2))) || (fless(z, z2) && (!fless(z, z1)))));
 }
 
-void BoundingBox::OpenGLDraw(int)
+void BoundingBox::OpenGLDraw() const
 {
 	glBegin(GL_LINE_LOOP);
 	glVertex3f(x1, y1, z1);
@@ -121,7 +121,7 @@ void LoadedBBAbstraction::ToggleDrawAbstraction(int which)
     levelDraw = levelDraw&(~(1<<which));
 }
 
-void LoadedBBAbstraction::OpenGLDraw(int window)
+void LoadedBBAbstraction::OpenGLDraw() const
 {
 	glDisable(GL_LIGHTING);
   for (unsigned int x = 0; x < abstractions.size(); x++)
@@ -134,13 +134,13 @@ void LoadedBBAbstraction::OpenGLDraw(int window)
 		for (unsigned int x = 0; x < boxes.size(); x++)
 		{
 			glColor3f(0, 0, 1);
-			boxes[x].OpenGLDraw(window);
+			boxes[x].OpenGLDraw();
 		}
 	}
 	glEnable(GL_LIGHTING);
 }
 
-void LoadedBBAbstraction::DrawGraph(Graph *g)
+void LoadedBBAbstraction::DrawGraph(Graph *g) const
 {
 		if ((g == 0) || (g->GetNumNodes() == 0)) return;
 		
@@ -175,7 +175,7 @@ void LoadedBBAbstraction::DrawGraph(Graph *g)
 		//  if (verbose&kBuildGraph) printf("Done\n");
 }
 
-void LoadedBBAbstraction::DrawLevelConnections(node *n)
+void LoadedBBAbstraction::DrawLevelConnections(node *n) const
 {
   //	int x, y;
   //	double offsetx, offsety;
@@ -195,7 +195,7 @@ void LoadedBBAbstraction::DrawLevelConnections(node *n)
   //return ans;
 }
 
-recVec LoadedBBAbstraction::GetNodeLoc(node *n)
+recVec LoadedBBAbstraction::GetNodeLoc(node *n) const
 {
 	//  double offsetx, offsety;
   recVec ans;

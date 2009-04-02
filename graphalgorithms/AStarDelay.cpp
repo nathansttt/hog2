@@ -667,88 +667,88 @@ void AStarDelay::ExtractPathToStart(graphState goalNode, std::vector<graphState>
 	pathSize = thePath.size();
 }
 
+//
+//void AStarDelay::OpenGLDraw(int)
+//{
+//	OpenGLDraw();
+//}
 
-void AStarDelay::OpenGLDraw(int)
+void AStarDelay::OpenGLDraw() const
 {
-	OpenGLDraw();
-}
-
-void AStarDelay::OpenGLDraw()
-{
-	//float r,gcost,b;
-	double x,y,z;
-	SearchNode sn;
-	graphState nodeID;
-	SearchNode topn;
-	char buf[100];
-
-	// draw nodes
-	node_iterator ni = g->getNodeIter();
-	for(node* n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
-	{
-		x = n->GetLabelF(kXCoordinate);
-		y = n->GetLabelF(kYCoordinate);
-		z = n->GetLabelF(kZCoordinate);
-
-		nodeID = (graphState) n->GetNum();
-
-		// if in closed
-		NodeLookupTable::iterator hiter;
-		if ((hiter = closedList.find(nodeID)) != closedList.end())
-		{
-			sn = hiter->second;
-
-			memset(buf,0,100);
-			sprintf(buf,"C %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
-			DrawText(x,y,z+0.05,0,0,0,buf);
-
-			glColor3f(1,0,0);  // red
-		}
-		// if in open
-		else if (openQueue.IsIn(SearchNode(nodeID)))
-		{
-			sn = openQueue.find(SearchNode(nodeID));
-			memset(buf,0,100);
-			sprintf(buf,"O %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
-			DrawText(x,y,z+0.05,0,0,0,buf);
-			
-			glColor3f(0,0,1);  // blue
-		}
-//		else if (fQueue.IsIn(SearchNode(nodeID)))
+//	//float r,gcost,b;
+//	double x,y,z;
+//	SearchNode sn;
+//	graphState nodeID;
+//	SearchNode topn;
+//	char buf[100];
+//
+//	// draw nodes
+//	node_iterator ni = g->getNodeIter();
+//	for(node* n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
+//	{
+//		x = n->GetLabelF(kXCoordinate);
+//		y = n->GetLabelF(kYCoordinate);
+//		z = n->GetLabelF(kZCoordinate);
+//
+//		nodeID = (graphState) n->GetNum();
+//
+//		// if in closed
+//		NodeLookupTable::iterator hiter;
+//		if ((hiter = closedList.find(nodeID)) != closedList.end())
 //		{
-//			sn = fQueue.find(SearchNode(nodeID));
+//			sn = hiter->second;
+//
 //			memset(buf,0,100);
-//			sprintf(buf,"L %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
+//			sprintf(buf,"C %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
 //			DrawText(x,y,z+0.05,0,0,0,buf);
 //
-//			glColor3f(1,1,0);  // yellow
+//			glColor3f(1,0,0);  // red
 //		}
-		else if (delayQueue.IsIn(SearchNode(nodeID)))
-		{
-			sn = delayQueue.find(SearchNode(nodeID));
-			memset(buf,0,100);
-			sprintf(buf,"D %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
-			DrawText(x,y,z+0.05,0,0,0,buf);
-
-			glColor3f(1,0,1); // purple
-		}
-		// neither in open nor closed, white
-		else 
-		{
-			glColor3f(1,1,1);  // white
-		}
-		DrawSphere(x,y,z,0.025);
-
-		// draw the text info, in black
-		//DrawText(x,y,z+0.05,0,0,0,buf);
-	}
-
-// draw edges
-	edge_iterator ei = g->getEdgeIter();
-	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
-	{
-		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
-	}
+//		// if in open
+//		else if (openQueue.IsIn(SearchNode(nodeID)))
+//		{
+//			sn = openQueue.find(SearchNode(nodeID));
+//			memset(buf,0,100);
+//			sprintf(buf,"O %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
+//			DrawText(x,y,z+0.05,0,0,0,buf);
+//			
+//			glColor3f(0,0,1);  // blue
+//		}
+////		else if (fQueue.IsIn(SearchNode(nodeID)))
+////		{
+////			sn = fQueue.find(SearchNode(nodeID));
+////			memset(buf,0,100);
+////			sprintf(buf,"L %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
+////			DrawText(x,y,z+0.05,0,0,0,buf);
+////
+////			glColor3f(1,1,0);  // yellow
+////		}
+//		else if (delayQueue.IsIn(SearchNode(nodeID)))
+//		{
+//			sn = delayQueue.find(SearchNode(nodeID));
+//			memset(buf,0,100);
+//			sprintf(buf,"D %1.0f=%1.0f+%1.0f", sn.fCost, sn.gCost, (sn.fCost - sn.gCost));
+//			DrawText(x,y,z+0.05,0,0,0,buf);
+//
+//			glColor3f(1,0,1); // purple
+//		}
+//		// neither in open nor closed, white
+//		else 
+//		{
+//			glColor3f(1,1,1);  // white
+//		}
+//		DrawSphere(x,y,z,0.025);
+//
+//		// draw the text info, in black
+//		//DrawText(x,y,z+0.05,0,0,0,buf);
+//	}
+//
+//// draw edges
+//	edge_iterator ei = g->getEdgeIter();
+//	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+//	{
+//		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
+//	}
 }
 
 void AStarDelay::DrawText(double x, double y, double z, float r, float gg, float b, char* str)
@@ -799,4 +799,3 @@ void AStarDelay::DrawEdge(unsigned int from, unsigned int to, double weight)
 	sprintf(buf,"%ld",(long)weight);
 	DrawText((x1+x2)/2, (y1+y2)/2, (z1+z2)/2 + 0.05, 1, 0, 0, buf); // in red
 }
-

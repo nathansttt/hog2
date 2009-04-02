@@ -206,12 +206,12 @@ void IDAStar<state, action>::UpdateNextBound(double currBound, double fCost)
 	if (!fgreater(nextBound, currBound))
 	{
 		nextBound = fCost;
-		printf("Updating next bound to %f\n", nextBound);
+		//printf("Updating next bound to %f\n", nextBound);
 	}
 	else if (fgreater(fCost, currBound) && fless(fCost, nextBound))
 	{
 		nextBound = fCost;
-		printf("Updating next bound to %f\n", nextBound);
+		//printf("Updating next bound to %f\n", nextBound);
 	}
 }
 

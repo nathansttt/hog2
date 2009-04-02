@@ -124,7 +124,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
 	}
-	unitSims[windowID]->OpenGLDraw(windowID);
+	unitSims[windowID]->OpenGLDraw();
 	
 }
 

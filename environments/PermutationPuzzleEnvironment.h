@@ -13,12 +13,12 @@ public:
 	/**
 	Returns the value of n! / k!
 	**/
-	uint64_t nUpperk(int n, int k);
+	uint64_t nUpperk(int n, int k) const;
 
 	/**
 	Returns the Hash Value of the given state using the given set of distinct items
 	**/
-	virtual uint64_t GetPDBHash(state &s, const std::vector<int> &distinct);
+	virtual uint64_t GetPDBHash(state &s, const std::vector<int> &distinct) const;
 
 	/**
 	Loads the Regular PDB into memory
@@ -39,14 +39,14 @@ public:
 	/**
 	Returns a hash value for a permutation puzzle
 	**/
-	virtual uint64_t GetStateHash(state &s);
+	virtual uint64_t GetStateHash(state &s) const;
 
 	/**
 	Constructs a state from a hash value
 	**/
 	virtual void GetStateFromHash(state &s, uint64_t hash);
 
-	uint64_t Factorial(int val);
+	uint64_t Factorial(int val) const;
 
 	// holds a set of Pattern Databases which can be maxed over later
 	std::vector<std::vector<uint8_t> > PDB;
@@ -77,7 +77,7 @@ void PermutationPuzzleEnvironment<state, action>::GetStateFromHash(state &s, uin
 }
 
 template <class state, class action>
-uint64_t PermutationPuzzleEnvironment<state, action>::GetStateHash(state &s)
+uint64_t PermutationPuzzleEnvironment<state, action>::GetStateHash(state &s) const
 {
 	std::vector<int> puzzle = s.puzzle;
 	uint64_t hashVal = 0;
@@ -96,7 +96,7 @@ uint64_t PermutationPuzzleEnvironment<state, action>::GetStateHash(state &s)
 }
 
 template <class state, class action>
-uint64_t PermutationPuzzleEnvironment<state, action>::Factorial(int val)
+uint64_t PermutationPuzzleEnvironment<state, action>::Factorial(int val) const
 {
 	static uint64_t table[21] =
 	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
@@ -108,7 +108,7 @@ uint64_t PermutationPuzzleEnvironment<state, action>::Factorial(int val)
 }
 
 template <class state, class action>
-uint64_t PermutationPuzzleEnvironment<state, action>::nUpperk(int n, int k) {
+uint64_t PermutationPuzzleEnvironment<state, action>::nUpperk(int n, int k) const {
 	uint64_t value = 1;
 	assert(n >= 0 && k >= 0);
 
@@ -121,7 +121,7 @@ uint64_t PermutationPuzzleEnvironment<state, action>::nUpperk(int n, int k) {
 
 // TODO Change to Myrvold and Ruskey ranking function
 template <class state, class action>
-uint64_t PermutationPuzzleEnvironment<state, action>::GetPDBHash(state &s, const std::vector<int> &distinct) {
+uint64_t PermutationPuzzleEnvironment<state, action>::GetPDBHash(state &s, const std::vector<int> &distinct) const {
 	std::vector<int> locs;
 	locs.resize(distinct.size()); // vector for distinct item locations
 

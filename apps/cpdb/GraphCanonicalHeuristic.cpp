@@ -115,7 +115,8 @@ void GraphCanonicalHeuristic::load(char *file)
 
 	mo  = new MapOverlay(map);
 	mo->setTransparentValue(0);
-	node *r = g->GetRandomNode();
+	std::vector<int> randoms;
+	//node *r = g->GetRandomNode();
 	for (int x = 0; x < map->getMapWidth(); x++)
 	{
 		for (int y = 0; y < map->getMapHeight(); y++)
@@ -125,9 +126,19 @@ void GraphCanonicalHeuristic::load(char *file)
 			{
 				graphState a, b;
 				a = n->GetNum();
-				b = r->GetNum();
-				//				mo->setOverlayValue(x, y, whichPDB[0][a]);
-				mo->setOverlayValue(x, y, HCost(a, b));
+				//b = r->GetNum();
+				if (centerDist[0][a] == 0)
+				{
+					mo->setOverlayValue(x, y, 1.0);
+				}
+				else {
+					while (whichPDB[0][a] >= randoms.size())
+					{
+						randoms.push_back(random()%4096);
+					}
+					mo->setOverlayValue(x, y, randoms[whichPDB[0][a]]);
+				}
+				//mo->setOverlayValue(x, y, HCost(a, b));
 				//				printf("(%d, %d)=%d center distances: %f\n", x, y, n->GetNum(), centerDist[0][n->GetNum()]);
 			}
 			else
@@ -491,10 +502,10 @@ void GraphCanonicalHeuristic::GetPDBValues()
 }
 
 
-void GraphCanonicalHeuristic::OpenGLDraw()
+void GraphCanonicalHeuristic::OpenGLDraw() const
 {
 	if (map)
-		map->OpenGLDraw(0, kPolygons);
+		map->OpenGLDraw(kPolygons);
 	if (mo)
-		mo->OpenGLDraw(0);
+		mo->OpenGLDraw();
 }

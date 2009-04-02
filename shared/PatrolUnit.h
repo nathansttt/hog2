@@ -38,7 +38,7 @@ public:
 //	patrolUnit(int _x, int _y, int numPLocations, unitSimulation* us);
 	virtual const char *GetName() { return "patrolUnit"; }
 	virtual tDirection makeMove(MapProvider *, reservationProvider *, SimulationInfo *simInfo);
-	void OpenGLDraw(int window, MapProvider *, SimulationInfo *);
+	void OpenGLDraw(const MapProvider *, const SimulationInfo *) const;
 	void addPatrolLocation(unit *);
 	unit *GetGoal();
 	void updateLocation(int _x, int _y, bool worked, SimulationInfo *)

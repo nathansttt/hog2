@@ -131,8 +131,8 @@ public:
 	void MeasureAbstractionValues(int level, double &n, double &n_dev, double &c, double &c_dev);
 	double MeasureAverageNodeWidth(int level);
 
-	virtual void OpenGLDraw(int ) {}
-	virtual recVec GetNodeLoc(node *) { recVec v; v.x = v.y = v.z = 0; return v; }
+	virtual void OpenGLDraw() const {}
+	virtual recVec GetNodeLoc(node *) const { recVec v; v.x = v.y = v.z = 0; return v; }
 protected:
 		std::vector<Graph *> abstractions;
 private:

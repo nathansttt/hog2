@@ -1053,7 +1053,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 	// 		}
 	recVec ans;
 	double r;
-	map->getOpenGLCoord(n->GetLabelL(kFirstData),n->GetLabelL(kFirstData+1) , ans.x,ans.y,ans.z,r);
+	map->getOpenGLCoord((int)n->GetLabelL(kFirstData),(int)n->GetLabelL(kFirstData+1) , ans.x,ans.y,ans.z,r);
 	
 	//	std::cout<<"cluster num: "<<getClusterIdFromCoord(py,px)<<std::endl;
 	//	std::cout<<"level "<<n->GetLabelL(kAbstractionLevel)<<std::endl;
@@ -1335,9 +1335,9 @@ void ClusterAbstraction::printPathAsCoord(path* p)
 	}
 }
 
-void ClusterAbstraction::OpenGLDraw(int window)
+void ClusterAbstraction::OpenGLDraw() const
 {
-	MapAbstraction::OpenGLDraw(window);
+	MapAbstraction::OpenGLDraw();
 	GLdouble xx, yy, zz, rr;
 	glColor3f(0.25, 0.0, 0.75);
 	Map *map = GetMap();

@@ -54,13 +54,13 @@ namespace MeroBUtil
 	};
 
 	struct SearchNodeEqual {
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 		{ return (i1.currNode == i2.currNode); } 
 	};
 
 	struct SearchNodeCompare { // true means i2 is preferable over i1
 		// prefering larger g, i.e. smaller h is also in favor of goal nodes
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
@@ -71,7 +71,7 @@ namespace MeroBUtil
 	};
 
 	struct GGreater {
-		bool operator()(const SearchNode &i1, const SearchNode &i2)
+		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 	  {
 			if (fequal(i1.gCost,i2.gCost))
 				return fgreater(i1.fCost,i2.fCost);
@@ -258,8 +258,8 @@ public:
 	bool DoSingleStepB(std::vector<graphState> &thePath);
 	bool DoSingleStepBP(std::vector<graphState> &thePath);
 	void ExtractPathToStart(graphState goalNode, std::vector<graphState> &thePath);
-	void OpenGLDraw();
-	void OpenGLDraw(int window);
+	void OpenGLDraw() const;
+	//void OpenGLDraw() const;
 	void DrawText(double x, double y, double z, float r, float g, float b, char* str);
 	void DrawEdge(unsigned int from, unsigned int to, double weight);
 

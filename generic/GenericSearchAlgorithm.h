@@ -42,6 +42,7 @@ public:
 	virtual int GetNodesExpanded() = 0;
 	virtual int GetNodesTouched() = 0;
 	virtual void LogFinalStats(StatCollection *stats) = 0; 
+	virtual void OpenGLDraw() const {}
 };
 
 

@@ -217,7 +217,7 @@ void MNPuzzle::ClearGoal()
 	}
 }
 void MNPuzzle::GetSuccessors(MNPuzzleState &stateID,
-                             std::vector<MNPuzzleState> &neighbors)
+                             std::vector<MNPuzzleState> &neighbors) const
 {
 	neighbors.resize(0);
 
@@ -228,7 +228,7 @@ void MNPuzzle::GetSuccessors(MNPuzzleState &stateID,
 	}
 }
 
-void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions)
+void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions) const
 {
 	actions.resize(0);
 	for (unsigned int i = 0; i < operators[stateID.blank].size(); i++)
@@ -237,12 +237,12 @@ void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions
 	}
 }
 
-slideDir MNPuzzle::GetAction(MNPuzzleState &s1, MNPuzzleState &s2)
+slideDir MNPuzzle::GetAction(MNPuzzleState &s1, MNPuzzleState &s2) const
 {
 	return kUp;
 }
 
-void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a)
+void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a) const
 {
 	switch (a)
 	{
@@ -281,7 +281,7 @@ void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a)
 	}
 }
 
-bool MNPuzzle::InvertAction(slideDir &a)
+bool MNPuzzle::InvertAction(slideDir &a) const
 {
 	switch (a)
 	{
@@ -351,52 +351,50 @@ bool MNPuzzle::GoalTest(MNPuzzleState &state, MNPuzzleState &goal)
 	return (state == goal);
 }
 
-/*
-uint64_t MNPuzzle::GetStateHash(MNPuzzleState &state)
-{
-	std::vector<int> puzzle = state.puzzle;
-	uint64_t hashVal = 0;
-	int numEntriesLeft = state.puzzle.size();
-	for (unsigned int x = 0; x < state.puzzle.size(); x++)
-	{
-		hashVal += puzzle[x]*Factorial(numEntriesLeft-1);
-		numEntriesLeft--;
-		for (unsigned y = x; y < puzzle.size(); y++)
-		{
-			if (puzzle[y] > puzzle[x])
-				puzzle[y]--;
-		}
-	}
-	return hashVal;
-}
+//uint64_t MNPuzzle::GetStateHash(MNPuzzleState &state) const
+//{
+//	std::vector<int> puzzle = state.puzzle;
+//	uint64_t hashVal = 0;
+//	int numEntriesLeft = state.puzzle.size();
+//	for (unsigned int x = 0; x < state.puzzle.size(); x++)
+//	{
+//		hashVal += puzzle[x]*Factorial(numEntriesLeft-1);
+//		numEntriesLeft--;
+//		for (unsigned y = x; y < puzzle.size(); y++)
+//		{
+//			if (puzzle[y] > puzzle[x])
+//				puzzle[y]--;
+//		}
+//	}
+//	return hashVal;
+//}
+//
+//void MNPuzzle::GetStateFromHash(MNPuzzleState &state, uint64_t hash) const
+//{
+//	std::vector<int> puzzle = state.puzzle;
+//	uint64_t hashVal = hash;
+//
+//	int numEntriesLeft = 1;
+//	for (int x = state.puzzle.size()-1; x >= 0; x--)
+//	{
+//		puzzle[x] = hashVal%numEntriesLeft;
+//		hashVal /= numEntriesLeft;
+//		numEntriesLeft++;
+//		for (int y = x+1; y < (int) state.puzzle.size(); y++)
+//		{
+//			if (puzzle[y] >= puzzle[x])
+//				puzzle[y]++;
+//		}
+//	}
+//
+//	state.puzzle = puzzle;
+//	for (unsigned int x = 0; x < puzzle.size(); x++)
+//		if (puzzle[x] == 0)
+//			state.blank = x;
+//
+//}
 
-void MNPuzzle::GetStateFromHash(MNPuzzleState &state, uint64_t hash)
-{
-	std::vector<int> puzzle = state.puzzle;
-	uint64_t hashVal = hash;
-
-	int numEntriesLeft = 1;
-	for (int x = state.puzzle.size()-1; x >= 0; x--)
-	{
-		puzzle[x] = hashVal%numEntriesLeft;
-		hashVal /= numEntriesLeft;
-		numEntriesLeft++;
-		for (int y = x+1; y < (int) state.puzzle.size(); y++)
-		{
-			if (puzzle[y] >= puzzle[x])
-				puzzle[y]++;
-		}
-	}
-
-	state.puzzle = puzzle;
-	for (unsigned int x = 0; x < puzzle.size(); x++)
-		if (puzzle[x] == 0)
-			state.blank = x;
-
-}
-*/
-
-uint64_t MNPuzzle::GetActionHash(slideDir act)
+uint64_t MNPuzzle::GetActionHash(slideDir act) const
 {
 	switch (act)
 	{
@@ -408,12 +406,12 @@ uint64_t MNPuzzle::GetActionHash(slideDir act)
 	return 4;
 }
 
-void MNPuzzle::OpenGLDraw(int window)
+void MNPuzzle::OpenGLDraw() const
 {
 }
 
 
-void MNPuzzle::OpenGLDraw(int window, MNPuzzleState &s)
+void MNPuzzle::OpenGLDraw(const MNPuzzleState &s) const
 {
 	glLineWidth(1.0);
 	glEnable(GL_LINE_SMOOTH);
@@ -463,8 +461,49 @@ void MNPuzzle::OpenGLDraw(int window, MNPuzzleState &s)
 	//std::vector<int> puzzle;
 }
 
-/*
-uint64_t MNPuzzle::Factorial(int val)
+void MNPuzzle::OpenGLDraw(const MNPuzzleState &s, const MNPuzzleState &l2, double v) const
+{
+	glLineWidth(1.0);
+	glEnable(GL_LINE_SMOOTH);
+	
+	float w = width;
+	float h = height;
+	
+	for (unsigned int y = 0; y < height; y++)
+	{
+		for (unsigned int x = 0; x < width; x++)
+		{
+			glPushMatrix();
+			glColor3f(0.0, 1.0, 0.0);
+			glTranslatef(x*2.0/w-1.0, (1+y)*2.0/h-1.0, -0.001);
+			glScalef(1.0/(w*120.0), 1.0/(h*120.0), 1);
+			glRotatef(180, 0.0, 0.0, 1.0);
+			glRotatef(180, 0.0, 1.0, 0.0);
+			//glTranslatef((float)x/width-0.5, (float)y/height-0.5, 0);
+			if (s.puzzle[x+y*width] > 9)
+				glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+(((s.puzzle[x+y*width])/10)%10));
+			if (s.puzzle[x+y*width] > 0)
+				glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+((s.puzzle[x+y*width])%10));
+			//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
+			glPopMatrix();
+		}
+	}
+	
+	glBegin(GL_LINES);
+	for (unsigned int y = 0; y <= height; y++)
+	{
+		for (unsigned int x = 0; x <= width; x++)
+		{
+			glVertex3f(x*2.0/w-1.0, -1, -0.001);
+			glVertex3f(x*2.0/w-1.0, 1, -0.001);
+			glVertex3f(-1, (y)*2.0/h-1.0, -0.001);
+			glVertex3f(1, (y)*2.0/h-1.0, -0.001);
+		}
+	}
+	glEnd();
+}
+
+uint64_t MNPuzzle::Factorial(int val) const
 {
 	static uint64_t table[21] =
 	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
@@ -474,7 +513,6 @@ uint64_t MNPuzzle::Factorial(int val)
 		return (uint64_t)-1;
 	return table[val];
 }
-*/
 
 double MNPuzzle::DoPDBLookup(MNPuzzleState &state)
 {

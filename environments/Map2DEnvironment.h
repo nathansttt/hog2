@@ -84,13 +84,13 @@ class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 public:
 	MapEnvironment(Map *m);
 	virtual ~MapEnvironment();
-	void GetSuccessors(xyLoc &nodeID, std::vector<xyLoc> &neighbors);
-	void GetActions(xyLoc &nodeID, std::vector<tDirection> &actions);
-	tDirection GetAction(xyLoc &s1, xyLoc &s2);
-	virtual void ApplyAction(xyLoc &s, tDirection dir);
+	void GetSuccessors(xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
+	void GetActions(xyLoc &nodeID, std::vector<tDirection> &actions) const;
+	tDirection GetAction(xyLoc &s1, xyLoc &s2) const;
+	virtual void ApplyAction(xyLoc &s, tDirection dir) const;
 	virtual BaseMapOccupancyInterface *GetOccupancyInfo() { return oi; }
 
-	virtual bool InvertAction(tDirection &a);
+	virtual bool InvertAction(tDirection &a) const;
 
 	virtual double HCost(xyLoc &node1) {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for MapEnvironment\n");
@@ -104,16 +104,17 @@ public:
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for MapEnvironment\n");
 		exit(1); return false;}
 
-	uint64_t GetStateHash(xyLoc &node);
-	uint64_t GetActionHash(tDirection act);
-	virtual void OpenGLDraw(int window);
-	virtual void OpenGLDraw(int window, xyLoc &l);
-	virtual void OpenGLDraw(int, xyLoc &, tDirection &);
-	virtual void OpenGLDraw(int, xyLoc &, tDirection &, GLfloat r, GLfloat g, GLfloat b);
-	virtual void OpenGLDraw(int, xyLoc &l, GLfloat r, GLfloat g, GLfloat b);
-	Map* GetMap() { return map; }
+	uint64_t GetStateHash(xyLoc &node) const;
+	uint64_t GetActionHash(tDirection act) const;
+	virtual void OpenGLDraw() const;
+	virtual void OpenGLDraw(const xyLoc &l) const;
+	virtual void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, double v) const;
+	virtual void OpenGLDraw(const xyLoc &, const tDirection &) const;
+	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;
+	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;
+	Map* GetMap() const { return map; }
 
-	virtual void GetNextState(xyLoc &currents, tDirection dir, xyLoc &news);
+	virtual void GetNextState(xyLoc &currents, tDirection dir, xyLoc &news) const;
 
 	void StoreGoal(xyLoc &g) {} // stores the locations for the given goal state
 	void ClearGoal() {}
@@ -132,11 +133,12 @@ public:
 	AbsMapEnvironment(MapAbstraction *ma);
 	virtual ~AbsMapEnvironment();
 	MapAbstraction *GetMapAbstraction() { return ma; }
-	void OpenGLDraw(int window) { map->OpenGLDraw(window); ma->OpenGLDraw(window); }
-	void OpenGLDraw(int window, xyLoc &l) { MapEnvironment::OpenGLDraw(window, l); }
-	void OpenGLDraw(int window, xyLoc &l, GLfloat r, GLfloat g, GLfloat b) {MapEnvironment::OpenGLDraw(window,l,r,g,b);}
-	void OpenGLDraw(int window, xyLoc& s, tDirection &dir) {MapEnvironment::OpenGLDraw(window,s,dir);}
-	void OpenGLDraw(int window, xyLoc &s, tDirection &dir, GLfloat r, GLfloat g, GLfloat b) {MapEnvironment::OpenGLDraw(window,s,dir,r,g,b);}
+	void OpenGLDraw() const { map->OpenGLDraw(); ma->OpenGLDraw(); }
+	void OpenGLDraw(const xyLoc &l) const { MapEnvironment::OpenGLDraw(l); }
+	void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, double v) const { MapEnvironment::OpenGLDraw(l1, l2, v); }
+	//void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const {MapEnvironment::OpenGLDraw(l,r,g,b);}
+	void OpenGLDraw(const xyLoc& s, const tDirection &dir) const {MapEnvironment::OpenGLDraw(s,dir);}
+	//void OpenGLDraw(const xyLoc &s, const tDirection &dir, GLfloat r, GLfloat g, GLfloat b) const {MapEnvironment::OpenGLDraw(s,dir,r,g,b);}
 
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"AbsMap\n";return oi;}
 protected:

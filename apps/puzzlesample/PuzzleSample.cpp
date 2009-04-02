@@ -126,7 +126,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	if (viewport == 3)
 	{
-		fs.OpenGLDraw(windowID, fss);
+		fs.OpenGLDraw(fss);
 		return;
 	}
 	if (unitSims[windowID]->GetUnit(viewport))
@@ -136,8 +136,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->GetUnit(viewport)->GetLocation(s);
 		MNPuzzleState g(s.width, s.height);
 		//printf("Distance: %f\n", unitSims[windowID]->GetEnvironment()->HCost(s, g));
-		unitSims[windowID]->GetUnit(viewport)->OpenGLDraw(windowID,
-														  unitSims[windowID]->GetEnvironment(),
+		unitSims[windowID]->GetUnit(viewport)->OpenGLDraw(unitSims[windowID]->GetEnvironment(),
 														  unitSims[windowID]->GetSimulationInfo() );
 	}
 	//unitSims[windowID]->OpenGLDraw(windowID);
@@ -256,10 +255,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				ida.GetPath(mnp, s, g, path1);
 				t.endTimer();
 				std::cout << "Path found, length " << path1.size() << " time:" << t.getElapsedTime() << std::endl;
-				t.startTimer();
-				ida.GetPath(mnp, s, g, path2);
-				t.endTimer();
-				std::cout << "Path found, length " << path2.size() << " time:" << t.getElapsedTime() << std::endl;
+//				t.startTimer();
+//				ida.GetPath(mnp, s, g, path2);
+//				t.endTimer();
+//				std::cout << "Path found, length " << path2.size() << " time:" << t.getElapsedTime() << std::endl;
 //				for (unsigned int x = 0; x < path1.size(); x++)
 //					std::cout << path1[x] << std::endl;
 			}

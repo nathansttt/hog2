@@ -142,8 +142,8 @@ class edge : public graph_object {
 //	double getWidth() { return GetLabelF(kEdgeWidth); }
 //	void setWidth(double val) { SetLabelF(kEdgeWidth, val); }
 	
-	unsigned int getFrom() { return from; }
-	unsigned int getTo() { return to; }
+	unsigned int getFrom() const { return from; }
+	unsigned int getTo() const { return to; }
 	
 	void setMarked(bool marked) { mark = marked; }
 	bool getMarked() { return mark; }
@@ -210,10 +210,10 @@ public:
   // set/get various labels for each node
   void SetLabelF(unsigned int index, double val);
   void SetLabelL(unsigned int index, long val);
-  inline double GetLabelF(unsigned int index) {
+  inline double GetLabelF(unsigned int index) const {
     if (index < label.size()) return label[index].fval; return MAXINT;
   }
-  inline long GetLabelL(unsigned int index) {
+  inline long GetLabelL(unsigned int index) const {
     if (index < label.size()) return label[index].lval; return MAXINT;
   }
 	

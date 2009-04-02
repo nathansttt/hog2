@@ -45,7 +45,7 @@ const int MAX_ENTRANCE_WIDTH = 6;
 namespace clusterUtil {
 
 	struct EdgeEqual {
-		bool operator()(const edge* e1, const edge* e2)
+		bool operator()(const edge* e1, const edge* e2) const
 		{return e1->getEdgeNum() == e2->getEdgeNum();}
 	};
 
@@ -160,7 +160,7 @@ public:
 	int getClusterIdFromCoord(int row, int col) const;
 	void printMapCoord(node* n);
 	void printPathAsCoord(path* p);
-	virtual void OpenGLDraw(int window);
+	virtual void OpenGLDraw() const;
 
 private:
   int min(int, int);

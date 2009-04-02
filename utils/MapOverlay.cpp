@@ -15,7 +15,7 @@ MapOverlay::MapOverlay(Map *_m)
 :m(_m), maxVal(0), minVal(0.0)
 {
 	values.resize(m->getMapWidth()*m->getMapHeight());
-	colorMap = 10;
+	colorMap = 4;
 	displayList = 0;
 }
 
@@ -65,7 +65,7 @@ double MapOverlay::getOverlayValue(int x, int y)
 	return values[y*m->getMapWidth()+x];
 }
 
-void MapOverlay::OpenGLDraw(int )
+void MapOverlay::OpenGLDraw() const
 {
 	if (displayList)
 	{
@@ -96,10 +96,10 @@ void MapOverlay::OpenGLDraw(int )
 			last -= 1;
 			GLdouble coverage = 1.0;
 			GLdouble a, b, c, radius;
-			m->getOpenGLCoord(t%(m->getMapWidth()), t/m->getMapWidth(), a, b, c, radius);
+			m->getOpenGLCoord((int)(t%(m->getMapWidth())), (int)(t/m->getMapWidth()), a, b, c, radius);
 			glVertex3f(a-coverage*radius, b+coverage*radius, c-4*radius);
 			glVertex3f(a-coverage*radius, b-coverage*radius, c-4*radius);
-			m->getOpenGLCoord(last%(m->getMapWidth()), last/m->getMapWidth(), a, b, c, radius);
+			m->getOpenGLCoord((int)(last%(m->getMapWidth())), (int)(last/m->getMapWidth()), a, b, c, radius);
 			glVertex3f(a+coverage*radius, b-coverage*radius, c-4*radius);
 			glVertex3f(a+coverage*radius, b+coverage*radius, c-4*radius);
 			t = last;
