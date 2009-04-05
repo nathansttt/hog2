@@ -93,10 +93,6 @@ public:
 	bool GoalTest(MNPuzzleState &state, MNPuzzleState &goal);
 
 	bool GoalTest(MNPuzzleState &s);
-//	uint64_t GetStateHash(MNPuzzleState &state) const;
-//	void GetStateFromHash(MNPuzzleState &state, uint64_t hash) const;
-	//uint64_t GetStateHash(MNPuzzleState &state);
-	//void GetStateFromHash(MNPuzzleState &state, uint64_t hash);
 
 	void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 
@@ -123,15 +119,6 @@ public:
 	the total number of solvable problems for that size.
 	**/
 	static void Create_Random_MN_Puzzles(MNPuzzleState &goal, std::vector<MNPuzzleState> &puzzle_vector, unsigned num_puzzles);
-	/**
-	Outputs the set of puzzles in puzzle_vector to standard output. The output is of the
-	form "I_0 I_1 ... I_(MN - 1)" where I_K is the element in the Kth position of the
-	puzzle. If the write_puzz_num flag is set as true, the first item of the output is
-	the puzzle number. Puzzles are checked for validity (and that they correspond to the
-	specified size) before they are outputted. 1 is return if the puzzles are not
-	valid, otherwise 0 is returned.
-	**/
-	static int Output_Puzzles(std::vector<MNPuzzleState> &puzzle_vector, unsigned num_cols, unsigned num_rows, bool write_puzz_num);
 
 	/**
 	Reads in the the desired number of puzzles from the given filename with the
@@ -147,14 +134,17 @@ public:
 	Returns a possible ordering of the operators. The orders are in a "lexicographic"
 	with the original ordering being Up, Left, Right, Down. This is therefore the order
 	returned with a call of order_num=0. This initial ordering is that used by Korf in
-	his original IDA* experiments. The ordering original used in HOG is returned with a
+	his original IDA* experiments. The ordering originally used in HOG is returned with a
 	call of order_num=15.
 	**/
 	static std::vector<slideDir> Get_Puzzle_Order(int order_num);
 
+	static MNPuzzleState Generate_Random_Puzzle(unsigned num_cols, unsigned num_rows);
+
+	bool State_Check(const MNPuzzleState &to_check);
+
 private:
 	double DoPDBLookup(MNPuzzleState &state);
-	uint64_t Factorial(int val) const;
 	std::vector<std::vector<uint8_t> > PDB;
 	std::vector<std::vector<int> > PDBkey;
 	unsigned int width, height;

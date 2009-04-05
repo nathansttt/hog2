@@ -132,6 +132,25 @@ uint64_t general_batch_puzzles(unsigned num_cols, unsigned num_rows, GenericStep
 	return general_batch(&mnp, solver, puzzles, goal, print_all_stats, type);
 }
 
+uint64_t general_batch_pancake_puzzles(PancakePuzzle &env, unsigned size, GenericStepAlgorithm<PancakePuzzleState, unsigned, PancakePuzzle> *solver, std::vector<PancakePuzzleState> &puzzles, bool print_all_stats, unsigned type){
+
+	PancakePuzzleState goal(size);
+	if(!env.State_Check(goal)) {
+		std::cerr << "Invalid Size for Environment\n";
+	}
+
+	for(unsigned i = 0; i < puzzles.size(); i++) {
+		if(puzzles[i].puzzle.size() != size || !PancakePuzzle::Check_Permutation(puzzles[i].puzzle)) {
+			std::cerr << puzzles[i] << '\n';
+			std::cerr << goal << '\n';
+			std::cerr << "Invalid Puzzle\n";
+			return 0;
+		}
+	}
+
+	return general_batch(&env, solver, puzzles, goal, print_all_stats, type);
+}
+
 unsigned best_of_combo(std::vector<unsigned> &combo, double **nodes, unsigned problem_num) {
 	unsigned best_index = 0;
 	for(unsigned i = 0; i < combo.size(); i++) {
@@ -407,5 +426,39 @@ void get_rand_combo(std::vector<unsigned> &combo, unsigned start_w_index, unsign
 
 		solver_index[index] = solver_index.back();
 		solver_index.pop_back();
+	}
+}
+
+void get_12pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/12pancake_1000", false, 12, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+void get_13pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/13pancake_1000", false, 13, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+void get_14pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/14pancake_1000", false, 14, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+
+void get_16pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/16pancake_1000", false, 16, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+
+void get_18pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/18pancake_1000", false, 18, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+
+void get_20pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/20pancake_1000", false, 20, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
 	}
 }

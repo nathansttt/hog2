@@ -503,17 +503,6 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s, const MNPuzzleState &l2, doubl
 	glEnd();
 }
 
-uint64_t MNPuzzle::Factorial(int val) const
-{
-	static uint64_t table[21] =
-	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
-	6227020800ll, 87178291200ll, 1307674368000ll, 20922789888000ll, 355687428096000ll,
-	6402373705728000ll, 121645100408832000ll, 2432902008176640000ll };
-	if (val > 20)
-		return (uint64_t)-1;
-	return table[val];
-}
-
 double MNPuzzle::DoPDBLookup(MNPuzzleState &state)
 {
 	double val = 0;
@@ -550,82 +539,22 @@ to false.
 max_puzzles - the maximum number of puzzles that will be added to
 the puzzle list.
 **/
-int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsigned int width, unsigned int height, unsigned int max_puzzles, std::vector<MNPuzzleState> &puzzles) {
+int MNPuzzle::read_in_mn_puzzles(const char *filename, bool puzz_num_start, unsigned num_cols, unsigned num_rows, unsigned int max_puzzles, std::vector<MNPuzzleState> &puzzles) {
 
-	std::ifstream ifs(filename, std::ios::in);
+	std::vector<std::vector<int> > permutations;
+	Read_In_Permutations(filename, num_cols*num_rows, max_puzzles, permutations, puzz_num_start);
 
-	if(ifs.fail()) {
-		return 1;
+	// convert permutations into MNPuzzleStates
+	for(unsigned i = 0; i < permutations.size(); i++) {
+		MNPuzzleState new_state(num_cols, num_rows);
+
+		for(unsigned j = 0; j < num_cols*num_rows; j++) {
+			new_state.puzzle[j] = permutations[i][j];
+			if(new_state.puzzle[j] == 0)
+				new_state.blank = j;
+		}
+		puzzles.push_back(new_state);
 	}
-
-	std::string s, temp;
-
-	std::vector<unsigned int> puzz_ints;
-	std::vector<bool> tiles_in_puzzle(width*height);
-	bool first = true;
-	unsigned puzz_count = 0;
-
-	while(!ifs.eof() && puzz_count < max_puzzles) {
-		puzz_ints.clear();
-
-		for(unsigned i = 0; i < tiles_in_puzzle.size(); i++) {
-			tiles_in_puzzle[i] = false;
-		}
-
-		getline(ifs, s);
-		first = true;
-		for(unsigned int i = 0; i < s.length(); i++) {
-			if(s.at(i) == ' ' || s.at(i) == '\t') {
-				if(temp.length() > 0) {
-					if(puzz_num_start && first) {
-						temp.clear();
-						first = false;
-					}
-					else {
-						puzz_ints.push_back(atoi(temp.c_str()));
-						temp.clear();
-					}
-				}
-			}
-			else {
-				temp.push_back(s.at(i));
-			}
-		}
-
-		if(temp.length() > 0) {
-
-			puzz_ints.push_back(atoi(temp.c_str()));
-			temp = "";
-		}
-
-		if(puzz_ints.size() > 0 && puzz_ints.size() == width*height) {
-			MNPuzzleState new_state(width, height);
-			for(unsigned int i = 0; i < puzz_ints.size(); i++) {
-				new_state.puzzle[i] = puzz_ints[i];
-				tiles_in_puzzle[puzz_ints[i]] = true;
-				if(new_state.puzzle[i] == 0) {
-					new_state.blank = i;
-				}
-			}
-
-			bool is_good = true;
-			for(unsigned int i = 0; i < tiles_in_puzzle.size(); i++) {
-				if(tiles_in_puzzle[i] = false) {
-					is_good = false;
-					break;
-				}
-			}
-
-			if(is_good) {
-				puzz_count++;
-				puzzles.push_back(new_state);
-			}
-
-		}
-	}
-
-	ifs.close();
-
 	return 0;
 }
 
@@ -662,24 +591,15 @@ double GraphPuzzleDistanceHeuristic::HCost(graphState &state1, graphState &state
 Randomly generates a puzzle of the specified dimensions
 and returns that puzzle.
 **/
-MNPuzzleState random_puzzle_generator(unsigned num_cols, unsigned num_rows) {
+MNPuzzleState MNPuzzle::Generate_Random_Puzzle(unsigned num_cols, unsigned num_rows) {
 	MNPuzzleState new_puzz(num_cols, num_rows);
-	unsigned size = num_cols*num_rows;
-	int index = 0;
-	int temp;
-	while(size > 1) {
-		index = rand() % size;
-		temp = new_puzz.puzzle[size - 1];
-		new_puzz.puzzle[size - 1] = new_puzz.puzzle[index];
-		new_puzz.puzzle[index] = temp;
+	std::vector<int> permutation = Get_Random_Permutation(num_cols*num_rows);
 
-		size--;
-	}
-
-	for(unsigned i = 0; i < num_cols*num_rows; i++) {
-		if(new_puzz.puzzle[i] == 0)
-			new_puzz.blank = i;
-	}
+		for(unsigned i = 0; i < permutation.size(); i++) {
+			new_puzz.puzzle[i] = permutation[i];
+			if(permutation[i] == 0)
+				new_puzz.blank = i;
+		}
 
 	return new_puzz;
 }
@@ -722,7 +642,7 @@ void MNPuzzle::Create_Random_MN_Puzzles(MNPuzzleState &goal, std::vector<MNPuzzl
 
 	while (count < num_puzzles)
 	{
-		MNPuzzleState next = random_puzzle_generator(goal.width, goal.height);
+		MNPuzzleState next = Generate_Random_Puzzle(goal.width, goal.height);
 		uint64_t next_hash = my_puzz.GetStateHash(next);
 
 		if (puzzle_map.find(next_hash) != puzzle_map.end())
@@ -741,55 +661,23 @@ void MNPuzzle::Create_Random_MN_Puzzles(MNPuzzleState &goal, std::vector<MNPuzzl
 	}
 }
 
-int MNPuzzle::Output_Puzzles(std::vector<MNPuzzleState> &puzzle_vector, unsigned num_cols, unsigned num_rows, bool write_puzz_num) {
+bool MNPuzzle::State_Check(const MNPuzzleState &to_check) {
+	if(to_check.puzzle.size() != width*height)
+		return false;
 
-	unsigned size = num_cols*num_rows;
-	bool in_puzzle[size];
+	if(to_check.width != width)
+		return false;
 
-	// check validity of puzzles
-	for(unsigned i = 0; i < puzzle_vector.size(); i++) {
-		for(unsigned j = 0; j < size; j++) {
-			in_puzzle[j] = false;
-		}
+	if(to_check.height != width)
+		return false;
 
-		if(puzzle_vector[i].width != num_cols || puzzle_vector[i].height != num_rows) {
-			std::cerr << "Invalid Puzzle: " << puzzle_vector[i] << '\n';
-			return 1;
-		}
+	if(to_check.blank >= width*height)
+		return false;
 
-		for(unsigned j = 0; j < size; j++) {
-			if(puzzle_vector[i].puzzle[j] >= (int) size || puzzle_vector[i].puzzle[j] < 0) {
-				std::cerr << "Invalid Puzzle: " << puzzle_vector[i] << '\n';
-				return 1;
-			}
-			else if(puzzle_vector[i].puzzle[j] == 0) {
-				assert(puzzle_vector[i].blank == j);
-			}
+	if(to_check.puzzle[to_check.blank] != 0)
+		return false;
 
-			in_puzzle[puzzle_vector[i].puzzle[j]] = true;
-		}
-
-		for(unsigned j = 0; j < size; j++) {
-			if(!in_puzzle[j]) {
-				std::cerr << "Invalid Puzzle: " << puzzle_vector[i] << '\n';
-				return 1;
-			}
-		}
-
-	}
-
-	for(unsigned i = 0; i < puzzle_vector.size(); i++) {
-		if(write_puzz_num) {
-			printf("%u ", i + 1);
-		}
-		printf("%d", puzzle_vector[i].puzzle[0]);
-
-		for(unsigned j = 1; j < size; j++) {
-			printf(" %d", puzzle_vector[i].puzzle[j]);
-		}
-		printf("\n");
-	}
-	return 0;
+	return true;
 }
 
 std::vector<slideDir> MNPuzzle::Get_Puzzle_Order(int order_num) {

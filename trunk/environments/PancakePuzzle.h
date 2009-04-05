@@ -73,6 +73,21 @@ public:
 	void OpenGLDraw(const PancakePuzzleState &s) const {}
 	void OpenGLDraw(const PancakePuzzleState &, const unsigned &) const {}
 
+	/**
+	**/
+	static void Create_Random_Pancake_Puzzles(std::vector<PancakePuzzleState> &puzzle_vector, unsigned size, unsigned num_puzzles);
+
+	static int read_in_pancake_puzzles(const char *filename, bool first_counter, unsigned size, unsigned max_puzzles, std::vector<PancakePuzzleState> &puzzle_vector);
+
+	bool State_Check(const PancakePuzzleState &to_check) {
+		if(to_check.puzzle.size() != size)
+			return false;
+
+		return true;
+	}
+
+	bool Path_Check(PancakePuzzleState start, PancakePuzzleState goal, std::vector<unsigned> &actions);
+
 private:
 
 	std::vector<unsigned> operators;

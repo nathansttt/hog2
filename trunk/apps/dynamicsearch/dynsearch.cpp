@@ -28,12 +28,12 @@ int main(int argc, char** argv)
 	vector<MNPuzzleState> puzzles;
 	std::vector<double> solver_info;
 
-	get_standard_test_set(puzzles, info, solver_info, 10);
-	//get_4x5_test_set(puzzles, 100);
+	//get_standard_test_set(puzzles, info, solver_info, 100);
+	get_3x6_test_set(puzzles, 10);
 	//get_5x5_test_set(puzzles, 100);
 
-	unsigned num_cols = 4;
-	unsigned num_rows = 4;
+	unsigned num_cols = 3;
+	unsigned num_rows = 6;
 
 	std::vector<slideDir> f_op_order;
 	std::vector<slideDir> b_op_order;
@@ -68,10 +68,10 @@ int main(int argc, char** argv)
 	//cout << ida.GetNodesChecked() << endl;
 
 	for(double i = 3.0; i <= 3.0; i+= 0.05) {
-		cout << "\nSOLVER IDA*, OP ORDER: " << kUp << ", " << kLeft << ", " << kRight << ", " << kDown << ", Weight: " << i << endl;
+		//cout << "\nSOLVER IDA*, OP ORDER: " << kUp << ", " << kLeft << ", " << kRight << ", " << kDown << ", Weight: " << i << endl;
 		//cerr << "\nWeight: " << i << endl;
 		ida.Change_Weights(1.0, i);
-		//general_batch_puzzles(num_cols, num_rows, &ida, puzzles, get_puzzle_order(0), true, ACTION_PATH);
+		//general_batch_puzzles(num_cols, num_rows, &ida, puzzles, f_op_order, true, ACTION_PATH);
 		//general_batch_puzzles(num_cols, num_rows, &ida, puzzles, get_puzzle_order(4), true, ACTION_PATH);
 		//mnp.Change_Op_Order(get_puzzle_order(4));
 	}
@@ -162,14 +162,43 @@ int main(int argc, char** argv)
 
 	//mnp.Build_Regular_PDB(goal, pattern, "tempdb");
 
-	PancakePuzzleState s(10);
+	unsigned pan_size = 12;
+	PancakePuzzle pancake_puzz(pan_size);
+	PancakePuzzleState s(pan_size);
 
-	PancakePuzzle pancake_puzz(10);
+	vector<int> distinct;
+	distinct.push_back(7);
+	distinct.push_back(8);
+	distinct.push_back(9);
+	distinct.push_back(10);
+	distinct.push_back(11);
+	distinct.push_back(12);
+	distinct.push_back(13);
 
-	vector<PancakePuzzleState> av_ops;
-	pancake_puzz.GetSuccessors(s, av_ops);
-	for(unsigned i = 0; i < av_ops.size(); i++) {
-		cout << av_ops[i] << endl;
+	//pancake_puzz.Build_Regular_PDB(s, distinct, "../../apps/dynamicsearch/input/14panc_pdb_7_8_9_10_11_12_13_distinct");
+
+	//puzzles.clear();
+	//MNPuzzle::Create_Random_MN_Puzzles(goal, puzzles, 13);
+	//mnp.Output_Puzzles(puzzles, false);
+
+	vector<PancakePuzzleState> pancake_puzzles;
+	get_12pancake_test_set(pancake_puzzles, 2);
+
+	GeneralIDA<PancakePuzzleState, unsigned, PancakePuzzle> pan_ida;
+	PancakePuzzleState pan_goal(pan_size);
+
+	pancake_puzz.Load_Regular_PDB("../../apps/dynamicsearch/input/12panc_pdb_0_1_2_3_4_5_6_distinct", pan_goal, false);
+	//pancake_puzz.Load_Regular_PDB("../../apps/dynamicsearch/input/14panc_pdb_7_8_9_10_11_12_13_distinct", pan_goal, false);
+
+
+	for(double w = 1.0; w <= 25.0; w++) {
+		pan_ida.Change_Weights(1.0, w);
+		cout << "Weight: " << w << endl;
+		general_batch_pancake_puzzles(pancake_puzz, pan_size, &pan_ida, pancake_puzzles, true, ACTION_PATH);
+
 	}
+
+	//cout << pan_ida.GetPathCost() << endl;
+	//cout << pan_ida.GetNodesExpanded() << endl;
 	return 0;
 }
