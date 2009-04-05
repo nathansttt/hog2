@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include "MNPuzzle.h"
+#include "PancakePuzzle.h"
 #include "GeneralIDA.h"
 #include "GenericStepAlgorithm.h"
 
@@ -31,6 +32,7 @@ uint64_t general_batch(environment *env, GenericStepAlgorithm<state, action, env
 
 uint64_t general_batch_puzzles(unsigned num_cols, unsigned num_rows, GenericStepAlgorithm<MNPuzzleState, slideDir, MNPuzzle> *solver, std::vector<MNPuzzleState> &puzzles, const std::vector<slideDir>, bool print_all_stats, unsigned type);
 
+uint64_t general_batch_pancake_puzzles(PancakePuzzle &env, unsigned size, GenericStepAlgorithm<PancakePuzzleState, unsigned, PancakePuzzle> *solver, std::vector<PancakePuzzleState> &puzzles, bool print_all_stats, unsigned type);
 
 /** This is the korf test set. It is of 4x4 puzle problems. Solver_info contains info on each problem that can be used. num is the number of problems you want appended to puzzles. num cannot exceed 100. **/
 void get_standard_test_set(std::vector<MNPuzzleState> &puzzles, std::vector<Puzzle_Info> &info, std::vector<double> &solver_info, unsigned num);
@@ -44,6 +46,13 @@ void get_5x4_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_3x6_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_6x3_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_5x5_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
+
+void get_12pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num);
+void get_13pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num);
+void get_14pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num);
+void get_16pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num);
+void get_18pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num);
+void get_20pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num);
 
 int get_distribution(const char *filename, double num_buckets, double bucket_size);
 

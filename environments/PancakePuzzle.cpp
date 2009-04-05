@@ -102,8 +102,11 @@ bool PancakePuzzle::InvertAction(unsigned &a) const
 double PancakePuzzle::HCost(PancakePuzzleState &state) {
 	assert(goal_stored);
 	assert(state.puzzle.size() == size);
+	assert(PDB.size() > 0);
+	assert(PDB.size() == PDB_distincts.size());
 
-	return 0.0;
+	double h_cost = Regular_PDB_Lookup(state);
+	return h_cost;
 }
 
 double PancakePuzzle::HCost(PancakePuzzleState &state1, PancakePuzzleState &state2)
@@ -138,6 +141,7 @@ void PancakePuzzle::StoreGoal(PancakePuzzleState &g) {
 	assert(g.puzzle.size() == size);
 
 	goal = g;
+	goal_stored = true;
 }
 
 void PancakePuzzle::Change_Op_Order(const std::vector<unsigned> op_order) {
@@ -171,4 +175,72 @@ void PancakePuzzle::Change_Op_Order(const std::vector<unsigned> op_order) {
 	// assign the default operator ordering
 	for(unsigned i = 0; i < op_order.size(); i++)
 		operators.push_back(op_order[i]);
+}
+
+
+void PancakePuzzle::Create_Random_Pancake_Puzzles(std::vector<PancakePuzzleState> &puzzle_vector, unsigned size, unsigned num_puzzles) {
+
+	std::map<uint64_t, uint64_t> puzzle_map; // used to ensure uniqueness
+
+	PancakePuzzle my_puzz(size);
+
+	unsigned count = 0;
+
+	std::vector<int> perm;
+	PancakePuzzleState potential_puzz(size);
+	while (count < num_puzzles) {
+		perm = Get_Random_Permutation(size);
+
+		// construct puzzle
+		for(unsigned i = 0; i < size; i++) {
+			potential_puzz.puzzle[i] = perm[i];
+		}
+
+		uint64_t next_hash = my_puzz.GetStateHash(potential_puzz);
+
+
+		// make sure is not a duplicate
+		if (puzzle_map.find(next_hash) != puzzle_map.end()) {
+			continue;
+		}
+
+		puzzle_map[next_hash] = next_hash;
+		puzzle_vector.push_back(potential_puzz);
+		count++;
+	}
+
+}
+
+int PancakePuzzle::read_in_pancake_puzzles(const char *filename, bool puzz_num_start, unsigned size, unsigned max_puzzles, std::vector<PancakePuzzleState> &puzzles) {
+
+	std::vector<std::vector<int> > permutations;
+	Read_In_Permutations(filename, size, max_puzzles, permutations, puzz_num_start);
+
+	// convert permutations into PancakePuzzleStates
+	for(unsigned i = 0; i < permutations.size(); i++) {
+		PancakePuzzleState new_state(size);
+
+		for(unsigned j = 0; j < size; j++) {
+			new_state.puzzle[j] = permutations[i][j];
+		}
+		puzzles.push_back(new_state);
+	}
+	return 0;
+}
+
+bool PancakePuzzle::Path_Check(PancakePuzzleState start, PancakePuzzleState goal, std::vector<unsigned> &actions) {
+
+	if(start.puzzle.size() != size || goal.puzzle.size() != size)
+		return false;
+
+	for(unsigned i = 0; i < actions.size(); i++) {
+		if(actions[i] < 2 || actions[i] > size)
+			return false;
+		ApplyAction(start, actions[i]);
+	}
+
+	if(start == goal)
+		return true;
+
+	return false;
 }
