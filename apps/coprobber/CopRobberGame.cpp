@@ -7,11 +7,16 @@ CopRobberGame::CopRobberGame( GraphEnvironment *_genv, unsigned int _num_cops, b
 	CopRobberEnvironment<graphState,graphMove>( (SearchEnvironment<graphState,graphMove>*) _genv, playerscanpass ),
 	MarkovGame<graphState,graphMove>( simultaneous ),
 	num_cops(_num_cops),
-	genv(_genv)
+	genv(_genv),
+	init_with(0),
+	dsdijkstra( NULL ), twocopsdijkstra( NULL )
 {
 }
 
-CopRobberGame::~CopRobberGame() {};
+CopRobberGame::~CopRobberGame() {
+	if( dsdijkstra != NULL ) delete dsdijkstra;
+	if( twocopsdijkstra != NULL ) delete twocopsdijkstra;
+};
 
 unsigned int CopRobberGame::GetNumPlayers() const {
 	return num_cops+1;
@@ -195,9 +200,68 @@ double CopRobberGame::GetReward( unsigned int player, CRState s, std::vector<CRA
 
 // this works only for two players (one cop)
 double CopRobberGame::InitState( CRState s ) {
+	switch( init_with ) {
+		case 0:
+			// initialization with zeros
+			return 0.; break;
+		case 1: {
+			// heuristic initialization
+			double h = 0;
+			for( unsigned int i = 1; i < s.size(); i++ )
+				h = max( h, env->HCost( s[i], s[0] ) );
+			return h; break;
+		}
+		case 2: {
+			// cummulative heuristic initialization
+			// only makes sense when rewards are 1
+			double h = 0;
+			for( unsigned int i = 1; i < s.size(); i++ )
+				h = max( h, env->HCost( s[i], s[0] ) );
+			return( 2*h - 1 ); break;
+		}
+		case 3: {
+			switch( num_cops ) {
+				case 1:
+					return dsdijkstra->Value( s, true ); break;
+				case 2:
+					return twocopsdijkstra->Value( s[0], s[1], s[2] );
+				default:
+					fprintf( stderr, "ERROR: initialization for more than 2 cops is not supported.\n" );
+			}
+			break;
+		}
+		default:
+			fprintf( stderr, "ERROR: type of initialization not supported\n" );
+			exit( 1 );
+			break;
+	}
 	return 0.;
-//	return env->HCost( s[1], s[0] );	
 }
+
+void CopRobberGame::Init_With( int with ) {
+	init_with = with;
+
+	// solve the game
+	if( with == 3 ) {
+		switch( num_cops ) {
+			case 1:
+				dsdijkstra = new DSDijkstra_MemOptim( genv, 1 );
+				dsdijkstra->dsdijkstra();
+				break;
+			case 2:
+				twocopsdijkstra = new TwoCopsDijkstra( genv );
+				twocopsdijkstra->dijkstra();
+				break;
+			default:
+				// insert some more optimized Dijkstra in here
+				fprintf( stderr, "ERROR: more than 2 cops for initialization are currently not supported\n" );
+		}
+	}
+
+	return;
+}
+
+
 
 unsigned int CopRobberGame::GetNumStates() const {
 	return( (unsigned int) pow( genv->GetGraph()->GetNumNodes(), num_cops+1 ) );

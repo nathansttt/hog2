@@ -34,6 +34,8 @@
 #include "DSHeuristicGreedy.h"
 #include "DSMinimax.h"
 #include "DSDAM.h"
+#include "DSIDAM.h"
+#include "DSIDAM2.h"
 #include "DSDATPDijkstra.h"
 #include "DSRandomBeacons.h"
 #include "DSPRAStarCop.h"
@@ -1362,7 +1364,6 @@ void compute_testpoints_two_cops( int argc, char* argv[] ) {
 };
 
 
-
 // TESTs for "Optimal solutions for Moving Target Search"
 void compute_experiment_optimal( int argc, char* argv[] ) {
 	char map_file[100], old_map_file[100];
@@ -1713,93 +1714,155 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 
 
 
+bool help_generate_next_map( Map* &m, int &i, int &j, int argc, char* argv[] ) {
+	if( m != NULL ) delete m;
+	if( argc == 6 ) { // means problem file is submitted
+		FILE *problem_file = fopen( argv[3], "r" );
+		int k = 0;
+		while( k < i && !feof( problem_file ) ) {
+			fscanf( problem_file, "%*s\n" );
+			k++;
+		}
+		if( feof( problem_file ) ) return false;
+		char map_file[100];
+		fscanf( problem_file, "%s\n", map_file );
+		m = new Map( map_file );
+		i++;
+	}
+	else if ( argc == 5 ) {
+		if( j < i ) j++;
+		else { i++; j = 0; }
+		if( i < 20 ) i = 20;
+		if( j < 10 ) j = 10;
+		if( i > 300 ) return false;
+		m = new Map( j, j );
+		MakeMaze( m );
+		m->scale( i, i );
+	}
+	else {
+		fprintf( stderr, "ERROR: wrong argument count\n" );
+		exit( 1 );
+	}
+	return true;
+}
+
+
 // test of all-state algorithms
 void compute_experiment_allstate( int argc, char* argv[] ) {
-	char map_file[100];
-	char dijkstra_file[100];
-	FILE *problem_file, *result_file;
+	//char dijkstra_file[100];
+	FILE *result_file;
+	char algorithm[100];
 	unsigned int num_cops;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
-	Map *m;
+	Map *m = NULL;
 
 	if( argc < 5 ) {
-		printf( "Syntax: <problem set file> <num_cops> <algorithm> <result file>\n" );
+		printf( "Syntax: <num_cops> [<problem_file>] <algorithm> <result file>\n" );
 		printf( "where <algorithm> = dijkstra|markov\n" );
 		exit(1);
 	}
 
-	problem_file = fopen( argv[2], "r" );
-	num_cops = atoi( argv[3] );
-	result_file  = fopen( argv[5], "w" );
+	num_cops = atoi( argv[2] );
+	if( argc == 5 ) {
+		result_file = fopen( argv[4], "w" );
+		strcpy( algorithm, argv[3] );
+	} else {
+		result_file = fopen( argv[5], "w" );
+		strcpy( algorithm, argv[4] );
+	}
 
-	// for all the problems in the problem set file
-	while( !feof( problem_file ) ) {
-		fscanf( problem_file, "%s\n", map_file );
-		m = new Map( map_file );
+	int i = 0, j = 0;
+
+	while( help_generate_next_map( m, i, j, argc, argv ) ) {
+
 		Graph *g = GraphSearchConstants::GetGraph( m );
 		MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
 		env->SetDirected( true );
 
-		if( strcmp( argv[4], "dijkstra" ) == 0 ) {
+		unsigned int numNodes = g->GetNumNodes();
 
+		if( strcmp( algorithm, "dijkstra" ) == 0 ) {
+			unsigned int nodesExpanded = 0;
+			unsigned int nodesTouched = 0;
 			switch(num_cops) {
 				case 1: {
-					DSDijkstra<graphState,graphMove,GraphEnvironment> *d = new DSDijkstra<graphState,graphMove,GraphEnvironment>( env, 1 );
+					DSDijkstra_MemOptim *d = new DSDijkstra_MemOptim( env, 1 );
 					clock_start = clock();
 					d->dsdijkstra();
 					clock_end = clock();
-					sprintf( dijkstra_file, "dijkstra_%s", map_file );
-					d->WriteValuesToDisk( dijkstra_file );
+					nodesExpanded = d->nodesExpanded;
+					nodesTouched  = d->nodesTouched;
+					//sprintf( dijkstra_file, "dijkstra_%03dx%03d_%03d.map", i, i, j );
+					//d->WriteValuesToDisk( dijkstra_file );
 					delete d;
 				}
-					break;
+				break;
 				case 2: {
 					TwoCopsDijkstra *d = new TwoCopsDijkstra( env );
 					clock_start = clock();
 					d->dijkstra();
 					clock_end = clock();
-					sprintf( dijkstra_file, "dijkstra_%s", map_file );
-					d->WriteValuesToDisk( dijkstra_file );
+					nodesExpanded = d->nodesExpanded;
+					nodesTouched  = d->nodesTouched;
+					//sprintf( dijkstra_file, "dijkstra_%03dx%03d_%03d.map", i, i, j );
+					//d->WriteValuesToDisk( dijkstra_file );
 					delete d;
 				}
-					break;
+				break;
 				default:
 					fprintf( stderr, "ERROR: number of cops not supported, only 1 and 2\n" );
+					exit( 1 ); break;
 					// insert a general Dijkstra implementation here, the normal Dijkstra would
 					// work but does not do intelligent caching
 			}
+				// write out the statistics
+			fprintf( result_file, "%d %d %u %lu %u %u\n", i, j, numNodes,
+				(clock_end-clock_start)/1000, nodesExpanded, nodesTouched );
+			fflush( result_file );
 		}
-
-		if( strcmp( argv[4], "markov" ) == 0 ) {
-
+		if( strcmp( algorithm, "markov_null" ) == 0 ||
+		    strcmp( algorithm, "markov_single" ) == 0 ||
+		    strcmp( algorithm, "markov_cummulative" ) == 0 ||
+		    strcmp( algorithm, "markov_alternating" ) == 0 ) {
 			double precision = 0.1;
 			double gamma = 1.0;
 			double *V = NULL;
 			unsigned int iter = 0;
-
-			CopRobberGame *game = new CopRobberGame( env, num_cops, false, true );
+			bool simultaneous = true;
+			CopRobberGame *game = new CopRobberGame( env, num_cops, simultaneous, true );
+			if( strcmp( algorithm, "markov_null" ) == 0 )
+				game->Init_With( 0 );
+			else if( strcmp( algorithm, "markov_single" ) == 0 )
+				game->Init_With( 1 );
+			else if( strcmp( algorithm, "markov_cummulative" ) == 0 )
+				game->Init_With( 2 );
+			else if( strcmp( algorithm, "markov_alternating" ) == 0 )
+				game->Init_With( 3 );
 
 			clock_start = clock();
 			game->GetExpectedStateRewards( 0, gamma, 0.01, precision, V, iter );
 			clock_end = clock();
-
 			delete[] V;
 			delete game;
+
+			// write out the statistics
+			fprintf( result_file, "%d %d %u %lu %u\n", i, j, numNodes,
+				(clock_end-clock_start)/1000, iter );
+			fflush( result_file );
 		}
 
 		delete env;
 		delete gh;
 		delete g;
 		delete m;
-		// write out the statistics
-		fprintf( result_file, "%lu %s\n",(clock_end-clock_start)/1000,map_file );
-		fflush( result_file );
+		m = NULL;
 	}
 	fclose( result_file );
-	fclose( problem_file );
-}
+
+	return;
+};
 
 
 // experiment to simulate markov game simulation with different kind
@@ -2167,9 +2230,14 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		printf( "  cover           - redefined version of cover\n" );
 		printf( "  cover2 <time>   - A. Isaza cover implementation where time defines when\n" );
 		printf( "                    the robber is to move (assuming the cop moves at time 0.\n" );
-		printf( "  minimax <depth> - minimax up to given depth with distance metric evaluation\n" );
-		printf( "  dam <depth>     - dynamic abstract minimax to a given depth\n" );
 		printf( "  greedy          - heuristic hill climbing due to distance metric\n" );
+		printf( "  minimax <depth> - minimax up to given depth with distance metric evaluation\n" );
+		printf( "  dam <fraction> <depth>\n" );
+		printf( "                  - dynamic abstract minimax starting on level fraction to a given depth\n" );
+		printf( "  idam <k_min> <k_max> <fraction> <depth>\n" );
+		printf( "                  - Improved DAM with k=k_min,...,k_max, given fraction and depth\n" );
+		printf( "  idam2 <fraction> <depth>\n" );
+		printf( "                  - Improved DAM with one step refinement\n" );
 		printf( "  randombeacons <num_beacons> <k_min> <k_max>\n" );
 		printf( "                  - randombeacons(k) with k=k_min,...,k_max\n" );
 		printf( "  trailmax <k_min> <k_max>\n" );
@@ -2219,8 +2287,32 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				else if( strcmp( argv[param_num], "dam" ) == 0 ) {
 					robber_algorithms.push_back( "dam" );
 					robber_int_params.push_back( std::vector<int>() );
-					robber_double_params.push_back( std::vector<double>( 1, atof( argv[param_num+1] ) ) );
-					param_num++;
+					std::vector<double> mydoubleparams;
+					mydoubleparams.push_back( atof( argv[param_num+1] ) );
+					mydoubleparams.push_back( atof( argv[param_num+2] ) );
+					robber_double_params.push_back( mydoubleparams );
+					param_num += 2;
+				}
+				else if( strcmp( argv[param_num], "idam" ) == 0 ) {
+					robber_algorithms.push_back( "idam" );
+					std::vector<int> myintparams;
+					myintparams.push_back( atoi( argv[param_num+1] ) );
+					myintparams.push_back( atoi( argv[param_num+2] ) );
+					robber_int_params.push_back( myintparams );
+					std::vector<double> mydoubleparams;
+					mydoubleparams.push_back( atof( argv[param_num+3] ) );
+					mydoubleparams.push_back( atof( argv[param_num+4] ) );
+					robber_double_params.push_back( mydoubleparams );
+					param_num += 4;
+				}
+				else if( strcmp( argv[param_num], "idam2" ) == 0 ) {
+					robber_algorithms.push_back( "idam2" );
+					robber_int_params.push_back( std::vector<int>() );
+					std::vector<double> mydoubleparams;
+					mydoubleparams.push_back( atof( argv[param_num+1] ) );
+					mydoubleparams.push_back( atof( argv[param_num+2] ) );
+					robber_double_params.push_back( mydoubleparams );
+					param_num += 2;
 				}
 				else if( strcmp( argv[param_num], "greedy" ) == 0 ) {
 					robber_algorithms.push_back( "greedy" );
@@ -2341,6 +2433,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				new_param_num = param_num + 6 * ( robber_int_params[j][1] - robber_int_params[j][0] + 1 );
 			if( strcmp( robber_algorithms[j], "datrailmax" ) == 0 )
 				new_param_num = param_num + 6 * ( robber_int_params[j][1] - robber_int_params[j][0] + 1 );
+			if( strcmp( robber_algorithms[j], "idam" ) == 0 )
+				new_param_num = param_num + 6 * ( robber_int_params[j][1] - robber_int_params[j][0] + 1 );
 			if( strcmp( robber_algorithms[j], "optimal" ) == 0 )
 				new_param_num = param_num + 1;
 
@@ -2398,6 +2492,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		DSCover2<graphState,graphMove> *dscover2 = NULL;
 		DSMinimax<graphState,graphMove> *dsminimax = NULL;
 		DSDAM *dsdam = NULL;
+		DSIDAM *dsidam = NULL;
+		DSIDAM2 *dsidam2 = NULL;
 		DSHeuristicGreedy<graphState,graphMove> *dsheuristic = NULL;
 		DSRandomBeacons *dsrandomb = NULL;
 		DSTPDijkstra<graphState,graphMove> *dstp = NULL; // trailmax
@@ -2408,6 +2504,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( find_algorithm( robber_algorithms, "cover2"     ) ) dscover2    = new DSCover2<graphState,graphMove>( env, g->GetNumNodes(), cop_speed );
 		if( find_algorithm( robber_algorithms, "minimax"    ) ) dsminimax   = new DSMinimax<graphState,graphMove>( env, true, cop_speed );
 		if( find_algorithm( robber_algorithms, "dam"        ) ) dsdam       = new DSDAM( mclab, true, cop_speed, true );
+		if( find_algorithm( robber_algorithms, "idam"       ) ) dsidam      = new DSIDAM( mclab, true, cop_speed, true );
+		if( find_algorithm( robber_algorithms, "idam2"      ) ) dsidam2     = new DSIDAM2( mclab, true, cop_speed, true );
 		if( find_algorithm( robber_algorithms, "greedy"     ) ) dsheuristic = new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
 		if( find_algorithm( robber_algorithms, "trailmax"   ) ) dstp        = new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
 		if( find_algorithm( robber_algorithms, "datrailmax" ) ) dsdatp      = new DSDATPDijkstra( mclab, cop_speed, true );
@@ -2454,6 +2552,10 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						max_param_range = robber_int_params[robber_alg][1];
 					}
 					if( strcmp( robber_algorithms[robber_alg], "datrailmax" ) == 0 ) {
+						min_param_range = robber_int_params[robber_alg][0];
+						max_param_range = robber_int_params[robber_alg][1];
+					}
+					if( strcmp( robber_algorithms[robber_alg], "idam" ) == 0 ) {
 						min_param_range = robber_int_params[robber_alg][0];
 						max_param_range = robber_int_params[robber_alg][1];
 					}
@@ -2531,11 +2633,43 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 									node *r = g->GetNode( pos[0] );
 									node *c = g->GetNode( pos[1] );
 									clock_start = clock();
-									r = dsdam->MakeMove( r, c, false, robber_double_params[robber_alg][0] );
+									r = dsdam->MakeMove( r, c, false, robber_double_params[robber_alg][1], robber_double_params[robber_alg][0] );
 									clock_end   = clock();
 									pos[0] = r->GetNum();
 									nodesExpanded += dsdam->nodesExpanded;
 									nodesTouched  += dsdam->nodesTouched;
+									timer_average      += (clock_end-clock_start)/1000;
+									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+									calculations++;
+								}
+								// idam
+								if( strcmp( robber_algorithms[robber_alg], "idam" ) == 0 ) {
+									node *r = g->GetNode( pos[0] );
+									node *c = g->GetNode( pos[1] );
+									if( counter == (unsigned int)current_param || counter >= mynodepath.size() ) {
+										clock_start = clock();
+										dsidam->dam( r, c, mynodepath, false, robber_double_params[robber_alg][1], robber_double_params[robber_alg][0] );
+										clock_end   = clock();
+										timer_average      += (clock_end-clock_start)/1000;
+										timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+										nodesExpanded += dsidam->myNodesExpanded;
+										nodesTouched  += dsidam->myNodesTouched;
+										calculations++;
+										// reset counter
+										counter = 0;
+									}
+									pos[0] = mynodepath[counter]->GetNum();
+									counter++;
+								}
+								if( strcmp( robber_algorithms[robber_alg], "idam2" ) == 0 ) {
+									node *r = g->GetNode( pos[0] );
+									node *c = g->GetNode( pos[1] );
+									clock_start = clock();
+									r = dsidam2->MakeMove( r, c, false, robber_double_params[robber_alg][1], robber_double_params[robber_alg][0] );
+									clock_end   = clock();
+									pos[0] = r->GetNum();
+									nodesExpanded += dsidam2->myNodesExpanded;
+									nodesTouched  += dsidam2->myNodesTouched;
 									timer_average      += (clock_end-clock_start)/1000;
 									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
 									calculations++;
@@ -2643,6 +2777,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( dstp        != NULL ) delete dstp;
 		if( dsheuristic != NULL ) delete dsheuristic;
 		if( dsdam       != NULL ) delete dsdam;
+		if( dsidam      != NULL ) delete dsidam;
 		if( dsminimax   != NULL ) delete dsminimax;
 		if( dscover     != NULL ) delete dscover;
 		// delete cop objects
