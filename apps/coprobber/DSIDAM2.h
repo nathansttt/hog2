@@ -11,6 +11,9 @@
 	improved dynamic abstract minimax (IDAM)
 	code functions with DSCREnvironment, thus possibly faster cop
 
+	this version only takes the next abstract move of the robber
+	and refines it into the ground level
+
 	node: this code only works for the robber!!!
 */
 

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <stdint.h>
+#include <cstdlib>
 
 #ifndef PERMPUZZ_H
 #define PERMPUZZ_H

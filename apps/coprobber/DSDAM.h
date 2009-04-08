@@ -10,6 +10,8 @@
 /*
 	dynamic abstract minimax (DAM)
 	code functions with DSCREnvironment, thus possibly faster cop
+
+	original DAM implementation with additional start_level_fraction parameter
 */
 
 class DSDAM {
