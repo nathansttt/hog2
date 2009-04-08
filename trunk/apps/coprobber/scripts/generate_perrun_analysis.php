@@ -226,8 +226,14 @@ foreach( $argv as $filename ) {
 			$robber_algorithms[] = "cover2(" . $match[1] . ")";
 		elseif( preg_match( "/^minimax\( \(double\)([\d\.-]+) \)/", $ra, $match ) )
 			$robber_algorithms[] = "minimax(" . $match[1] . ")";
-		elseif( preg_match( "/^dam\( \(double\)([\d\.-]+) \)/", $ra, $match ) )
-			$robber_algorithms[] = "dam(" . $match[1] . ")";
+		elseif( preg_match( "/^dam\( \(double\)([\d\.-]+) \(double\)([\d\.-]+) \)/", $ra, $match ) )
+			$robber_algorithms[] = "dam(" . $match[1] . "," . $match[2] . ")";
+		elseif( preg_match( "/^idam\( \(int\)(\d+) \(int\)(\d+) \(double\)([\d\.\-]+) \(double\)([\d\.\-]+) \)/", $ra, $match ) ) {
+			for( $i = intval( $match[1] ); $i <= intval( $match[2] ); $i++ )
+				$robber_algorithms[] = "idam(" . $i . "," . $match[3] . "," . $match[4] . ")";
+		}
+		elseif( preg_match( "/^idam2\( \(double\)([\d\.-]+) \(double\)([\d\.-]+) \)/", $ra, $match ) )
+			$robber_algorithms[] = "idam2(" . $match[1] . "," . $match[2] . ")";
 		elseif( preg_match( "/^randombeacons\( \(int\)(\d+) \(int\)(\d+) \(int\)(\d+) \)/", $ra, $match ) ) {
 			for( $i = intval( $match[2] ); $i <= intval( $match[3] ); $i++ )
 				$robber_algorithms[] = "randombeacons(" . $match[1] . "," . $i . ")";

@@ -48,13 +48,13 @@ float DSDijkstra_MemOptim::compute_target_value( CRState &s ) {
 	float tempvalue;
 	std::vector<graphState> myneighbors;
 	dscrenv->GetRobberSuccessors( temp, myneighbors );
-	nodesExpanded++;
+	//nodesExpanded++;
 
 	// now, for all successor states
 	for( std::vector<graphState>::iterator it = myneighbors.begin();
 	     it != myneighbors.end(); it++ ) {
 
-		nodesTouched++;
+		//nodesTouched++;
 
 		// build the state
 		temp[0] = *it;

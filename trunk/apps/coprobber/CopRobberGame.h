@@ -2,6 +2,8 @@
 #include "Map2DEnvironment.h"
 #include "CopRobberEnvironment.h"
 #include "MarkovGame.h"
+#include "DSDijkstra_MemOptim.h"
+#include "TwoCopsDijkstra.h"
 
 #ifndef COPROBBERGAME_H
 #define COPROBBERGAME_H
@@ -33,6 +35,12 @@ class CopRobberGame:
 
 	virtual double GetReward( unsigned int player, CRState s, std::vector<CRAction> act );
 	virtual double InitState( CRState s );
+	// with == 0 => init with 0
+	// with == 1 => use single agent heuristic
+	// with == 2 => use cummulative heuristic
+	// with == 3 => use alternating game values for initialization
+	// default is 0
+	virtual void Init_With( int with = 0 );
 
 	virtual unsigned int GetNumStates() const;
 
@@ -48,6 +56,12 @@ class CopRobberGame:
 	protected:
 	unsigned int num_cops;
 	GraphEnvironment *genv;
+	int init_with;
+
+	private:
+	// variables that we need for initialization with the values of the alternating game
+	DSDijkstra_MemOptim *dsdijkstra;
+	TwoCopsDijkstra *twocopsdijkstra;
 };
 
 
