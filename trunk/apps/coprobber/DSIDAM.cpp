@@ -128,6 +128,15 @@ void DSIDAM::dam( node* pos_robber, node* pos_cop, std::vector<node*> &resultpat
 	else
 		p = new path( robberChain[level], p );
 
+	// test whether goal position and final position are the same
+	if( p->n == p->tail()->n ) {
+		if( minFirst )
+			resultpath.push_back( pos_cop );
+		else
+			resultpath.push_back( pos_robber );
+		return;
+	}
+
 	// verbose
 	//printf( "path on level %d: ", level );
 	//for( path *trav = p; trav; trav = trav->next ) {

@@ -10,6 +10,10 @@
 /*
 	improved dynamic abstract minimax (IDAM)
 	code functions with DSCREnvironment, thus possibly faster cop
+
+	this version takes the path of actions in the abstract level
+	and refines it into the ground level
+	(however, this can still have weird effects if the abstract path is a circle)
 */
 
 class DSIDAM:
