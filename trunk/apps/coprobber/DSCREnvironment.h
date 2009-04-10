@@ -150,6 +150,8 @@ void DSCREnvironment<state,action>::GetCopSuccessors( CRState &s, std::vector<st
 template<class state, class action>
 void DSCREnvironment<state,action>::GetCopSuccessors( state &s, std::vector<state> &neighbors ) {
 	Dijkstra( s, cop_speed, neighbors );
+	// we reverse the order to expand nodes first where the cop is moving full speed and the "stay" move last
+	std::reverse( neighbors.begin(), neighbors.end() );
 	return;
 };
 

@@ -223,7 +223,7 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double bou
 		env->GetSuccessors( pos[0], neighbors );
 		if( canPause ) neighbors.push_back( pos[0] );
 
-		result = DBL_MIN;
+		result = -DBL_MAX;
 
 		neighbor = pos;
 		for( typename std::vector<state>::iterator iti = neighbors.begin(); iti != neighbors.end(); iti++ ) {

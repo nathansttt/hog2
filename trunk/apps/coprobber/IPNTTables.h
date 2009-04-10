@@ -381,7 +381,7 @@ void IPNTTables<state,action,environment>::ipn_update_node( TPEntry *n, unsigned
 		// if we are in a max node
 		n->proof_number = UINT_MAX;
 		n->disproof_number = 0;
-		n->value = DBL_MIN;
+		n->value = -DBL_MAX;
 		for( typename std::vector<TPEntry*>::iterator iti = n->childs.begin(); iti != n->childs.end(); iti++ ) {
 			// proof number = min( child proof numbers )
 			if( n->proof_number > (*iti)->proof_number ) n->proof_number = (*iti)->proof_number;

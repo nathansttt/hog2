@@ -279,7 +279,7 @@ state DSDijkstra<state,action,environment>::MakeMove( CRState &pos, bool minFirs
 			}
 		}
 	} else {
-		double value = DBL_MIN;
+		double value = -DBL_MAX;
 		dscrenv->GetRobberSuccessors( temppos, neighbors );
 
 		for( it = neighbors.begin(); it != neighbors.end(); it++ ) {

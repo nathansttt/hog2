@@ -114,7 +114,7 @@ double MinimaxOptimized<state,action,environment>::minimax( CRState pos, bool mi
 	min_gttables.clear();
 	max_gttables.clear();
 
-	result = minimax_help( pos, minFirst, max_depth, DBL_MIN, DBL_MAX );
+	result = minimax_help( pos, minFirst, max_depth, -DBL_MAX, DBL_MAX );
 
 	// the temporary search cache should be empty
 	/*
@@ -222,7 +222,9 @@ double MinimaxOptimized<state,action,environment>::minimax_help( CRState pos, bo
 	std::vector<state> next_mystates;
 	CRState child;
 	double child_value, pathcost;
-	double result=minFirst?beta:alpha;
+
+	// ATTENTION: if paths have to be extracted this has to be different!!! (see Minimax.h for an example)
+	double result=minFirst?beta:alpha; // this works but only because we are not extracting paths!
 
 	nodesExpanded++;
 

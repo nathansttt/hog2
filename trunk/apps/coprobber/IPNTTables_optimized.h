@@ -262,7 +262,7 @@ typename IPNTTables<state,action,environment>::TPEntry* IPNTTables<state,action,
 			mytpentry->proof_number    = 1;
 			mytpentry->disproof_number = 1;
 			// the following two work, see the discussion in the paper
-			//mytpentry->value           = minFirst?DBL_MAX:DBL_MIN;
+			//mytpentry->value           = minFirst?DBL_MAX:-DBL_MAX;
 			mytpentry->value           = bound;
 
 			// register the node in the transposition tables
@@ -361,7 +361,7 @@ bool IPNTTables<state,action,environment>::ipn_update_parent_from_children( TPEn
 		// if we are in a max node
 		n->proof_number = UINT_MAX;
 		n->disproof_number = 0;
-		n->value = DBL_MIN;
+		n->value = -DBL_MAX;
 		for( typename std::vector<TPEntry*>::iterator iti = n->children.begin(); iti != n->children.end(); iti++ ) {
 			// proof number = min( child proof numbers )
 			if( n->proof_number > (*iti)->proof_number ) n->proof_number = (*iti)->proof_number;

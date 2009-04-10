@@ -129,7 +129,8 @@ void DSIDAM::dam( node* pos_robber, node* pos_cop, std::vector<node*> &resultpat
 		p = new path( robberChain[level], p );
 
 	// test whether goal position and final position are the same
-	if( p->n == p->tail()->n ) {
+	// this would cause a problem in the refinement process
+	if( level > 0 && p->n == p->tail()->n ) {
 		if( minFirst )
 			resultpath.push_back( pos_cop );
 		else

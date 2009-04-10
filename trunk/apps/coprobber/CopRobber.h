@@ -23,6 +23,7 @@ void compute_dscover2( int argc, char* argv[] );
 void compute_dsheuristicgreedy( int argc, char* argv[] );
 void compute_dsminimax( int argc, char* argv[] );
 void compute_dsdam( int argc, char* argv[] );
+void compute_dsidam( int argc, char* argv[] );
 void compute_dsdatpdijkstra( int argc, char* argv[] );
 void compute_dsrandombeacons( int argc, char* argv[] );
 void compute_markov( int argc, char* argv[] );

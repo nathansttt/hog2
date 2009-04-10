@@ -253,7 +253,7 @@ state DSCover2<state,action>::MakeMove( state pos_robber, state pos_cop, bool mi
 	assert( neighbors.size() > 0 );
 
 	// max_cover is the value of max_cover_state
-	double max_cover = DBL_MIN, temp;
+	double max_cover = -DBL_MAX, temp;
 	state max_cover_state;
 
 	max_cover_state = neighbors[0];

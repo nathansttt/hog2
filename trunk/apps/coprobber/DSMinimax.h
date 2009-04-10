@@ -116,7 +116,7 @@ double DSMinimax<state,action>::minimax( state &pos_robber, state &pos_cop, std:
 	min_gttables.clear();
 	max_gttables.clear();
 
-	result = minimax_help( pos_robber, pos_cop, minFirst, depth, DBL_MIN, DBL_MAX );
+	result = minimax_help( pos_robber, pos_cop, minFirst, depth, -DBL_MAX, DBL_MAX );
 
 	// extract the path from the cache
 	path.clear();
@@ -173,6 +173,7 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 	//fprintf( stdout, "considered position (%lu,%lu) for player ", pos_robber, pos_cop );
 	//fprintf( stdout, "%s ", (minFirst?"min":"max") );
 	//fprintf( stdout, "and alpha=%g beta=%g\n", alpha, beta );
+
 	nodesTouched++;
 
 	if( dscrenv->GoalTest( pos_robber, pos_cop ) ) {
@@ -185,6 +186,9 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 		hcost = dscrenv->AccumulatedHCost( pos_robber, pos_cop, minFirst );
 	else
 		hcost = dscrenv->HCost( pos_robber, pos_cop );
+
+	// verbose
+	//printf( "hcost = %g\n", hcost );
 
 	// in case of an admissible heuristic we can also prune
 	// this is because hcost is then a lower bound and beta is supposed to be an upper bound
@@ -215,6 +219,13 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 		if( tit != gttit->second.end() ) {
 
 			old_transposition_available = true;
+
+			// verbose
+			//printf( "found transition with (a,b,v) = (%g,%g,%g)\n", tit->alpha,tit->beta,tit->value );
+			//if( tit->no_next_pos )
+			//	printf( "no next position for transposition entry\n" );
+			//else
+			//	printf( "next position for transposition entry %lu\n", tit->next_pos );
 
 			// check for usability of the hash table entry
 			if( tit->value <= tit->alpha ) {
@@ -252,13 +263,15 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 	state child, next_pos = minFirst?pos_cop:pos_robber;
 	bool no_next_pos = true;
 	double child_value, pathcost;
-	double result=minFirst?beta:alpha;
+	double result;
 
 	nodesExpanded++;
 
 	// generate the next moves/children
 	if( minFirst ) {
 		// Min Node
+		double decrease_beta = beta;
+		result = DBL_MAX;
 		dscrenv->GetCopSuccessors( pos_cop, next_mystates );
 
 		for( it = next_mystates.begin(); it != next_mystates.end(); it++ ) {
@@ -267,22 +280,26 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 			pathcost = dscrenv->CopGCost( pos_cop, child );
 			if( use_edge_costs )
 				child_value = pathcost +
-					minimax_help( pos_robber, child, !minFirst, depth - pathcost, alpha - pathcost, result - pathcost );
+					minimax_help( pos_robber, child, !minFirst, depth - pathcost, alpha - pathcost, decrease_beta - pathcost );
 			else
-				child_value = minimax_help( pos_robber, child, !minFirst, depth - pathcost, alpha, result );
+				child_value = minimax_help( pos_robber, child, !minFirst, depth - pathcost, alpha, decrease_beta );
 			// min player updates his score
 			if( child_value < result ) {
 				result = child_value;
 				next_pos = child;
 				no_next_pos = false;
 			}
+			if( child_value < decrease_beta )
+				decrease_beta = child_value;
 
 			// beta cutoff
-			if( result <= alpha ) break;
+			if( decrease_beta <= alpha ) break;
 		}
 
 	} else {
 		// Max Node
+		double increase_alpha = alpha;
+		result = -DBL_MAX;
 		dscrenv->GetRobberSuccessors( pos_robber, next_mystates );
 
 		for( it = next_mystates.begin(); it != next_mystates.end(); it++ ) {
@@ -291,18 +308,20 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 			pathcost = dscrenv->RobberGCost( pos_robber, child );
 			if( use_edge_costs )
 				child_value = pathcost +
-					minimax_help( child, pos_cop, !minFirst, depth - pathcost, result - pathcost, beta - pathcost );
+					minimax_help( child, pos_cop, !minFirst, depth - pathcost, increase_alpha - pathcost, beta - pathcost );
 			else
-				child_value = minimax_help( child, pos_cop, !minFirst, depth - pathcost, result, beta );
+				child_value = minimax_help( child, pos_cop, !minFirst, depth - pathcost, increase_alpha, beta );
 			// max player updates his score
 			if( child_value > result ) {
 				result = child_value;
 				next_pos = child;
 				no_next_pos = false;
 			}
+			if( child_value > increase_alpha )
+				increase_alpha = child_value;
 
 			// alpha cutoff
-			if( beta <= result ) break;
+			if( beta <= increase_alpha ) break;
 		}
 
 	}
@@ -310,13 +329,15 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 	// combine the current value with the old hash entry
 	if( old_transposition_available ) {
 		if( old_value_upper_bound ) {
-			// sanity check
+			// sanity checks
 			assert( result <= tit->value );
+			assert( beta <= tit->value );
 			if( result == tit->value )
 				beta = result + 1.;
 		} else {
-			// sanity check
-			assert( tit->value <= result );
+			// sanity checks
+			assert( result >= tit->value );
+			assert( alpha >= tit->value );
 			if( result == tit->value )
 				alpha = result - 1.;
 		}
@@ -330,8 +351,7 @@ double DSMinimax<state,action>::minimax_help( state &pos_robber, state &pos_cop,
 	mytpentry.beta  = beta;
 	gttit->second.insert( mytpentry );
 
-//	fprintf( stdout, "%f\n", result ); //minFirst?beta:alpha );
-	return result; //( (minFirst)?beta:alpha );
+	return result;
 }
 
 

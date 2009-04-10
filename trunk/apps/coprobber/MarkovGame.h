@@ -378,7 +378,7 @@ void MarkovGame<state,action>::GetExpectedStateRewardsAlternatingActionGame( uns
 			printf( "\n" );
 */
 
-			max = DBL_MIN;
+			max = -DBL_MAX;
 
 			for( k = 0; k < n_my_actions; k++ ) {
 				min = DBL_MAX;

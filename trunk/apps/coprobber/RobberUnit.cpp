@@ -201,7 +201,7 @@ CopRobberGame::CRAction RobberUnit::MakeAlternatingMove( CopRobberGame::CRState 
 	if( n_opp_actions == 0 ) return CopRobberGame::CRAction();
 	if( n_my_actions  == 0 ) return CopRobberGame::CRAction();
 
-	max = DBL_MIN;
+	max = -DBL_MAX;
 	for( i = 0; i < n_my_actions; i++ ) {
 		min = DBL_MAX;
 

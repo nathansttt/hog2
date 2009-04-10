@@ -161,6 +161,9 @@ int main(int argc, char* argv[])
 	else if( strcmp( argv[1], "dsdam" ) == 0 ) {
 		compute_dsdam( argc, argv );
 	}
+	else if( strcmp( argv[1], "dsidam" ) == 0 ) {
+		compute_dsidam( argc, argv );
+	}
 	else if( strcmp( argv[1], "dsdatpdijkstra" ) == 0 ) {
 		compute_dsdatpdijkstra( argc, argv );
 	}
@@ -1096,6 +1099,34 @@ void compute_dsdam( int argc, char* argv[] ) {
 	delete mclab;
 }
 
+void compute_dsidam( int argc, char* argv[] ) {
+	Map *m;
+	xyLoc pc, pr;
+	int depth;
+	parseCommandLineParameters( argc, argv, m, pc, pr, depth );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d (%d)\n", pc.x, pc.y, mclab->GetNodeFromMap( pc.x, pc.y )->GetNum() );
+	printf( "robber position: %d,%d (%d)\n", pr.x, pr.y, mclab->GetNodeFromMap( pr.x, pr.y )->GetNum() );
+	printf( "computation depth: %d\n", depth );
+
+	DSIDAM *dsidam = new DSIDAM( mclab, true, 2, true );
+	std::vector<node*> path;
+	dsidam->dam( mclab->GetNodeFromMap( pr.x, pr.y ), mclab->GetNodeFromMap( pc.x, pc.y ), path, false, depth, 0. );
+	printf( "path: " );
+	for( std::vector<node*>::iterator it = path.begin(); it != path.end(); it++ ) {
+		printf( "%u (%d) ", (*it)->GetNum(), (*it)->getUniqueID() );
+	}
+	printf( "\n" );
+	printf( "nodesExpanded: %u\n", dsidam->myNodesExpanded );
+	printf( "nodesTouched: %u\n", dsidam->myNodesTouched );
+
+	delete dsidam;
+	delete mclab;
+
+	return;
+}
+
 
 // DSDATPDijkstra (DS dynamic abstract two player dijkstra)
 void compute_dsdatpdijkstra( int argc, char* argv[] ) {
@@ -1941,7 +1972,7 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 		FILE *fhandler = fopen( s, "r" );
 //	FILE *fcopwin  = fopen( "planar_out", "w" );
 	int num_cop_win = 0;
-	double maximum_capture_time = DBL_MIN;
+	double maximum_capture_time = -DBL_MAX;
 //	double maximum_st = 0.;
 //	double maximum_ratio = 1.;
 
@@ -1958,7 +1989,7 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 		d->dijkstra();
 		//TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment> *tpdijkstra = new TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment>( env, true );
 
-		double temp_capture_time = DBL_MIN;
+		double temp_capture_time = -DBL_MAX;
 		for( it = d->min_cost.begin(); it != d->min_cost.end(); it++ ) {
 			if( *it == DBL_MAX ) {
 				is_cop_win = false;
@@ -2016,7 +2047,7 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 						//env->GetSuccessors( r_state, neighbors );
 						//neighbors.push_back( r_state );
 						//
-						//double neighbors_max_value = DBL_MIN, neighbors_max_max_min_value = DBL_MIN;
+						//double neighbors_max_value = -DBL_MAX, neighbors_max_max_min_value = -DBL_MAX;
 						//std::vector<double> neighbors_values;
 						//std::vector<double> neighbors_max_min_values;
 						//double temp;
@@ -2590,6 +2621,9 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 							// isaza_time += env_isaza->HCost( old_pos, pos[1] ); // this is actually not quite correct but ok for a first measure
 							if( pos[0] == pos[1] ) break;
 
+							// verbose
+							//printf( "robber called at: (%lu,%lu)\n", pos[0], pos[1] );
+
 							// robber's move
 							if( strcmp( robber_algorithms[robber_alg], "optimal" ) == 0 ) {
 								pos[0] = dsdijkstra->MakeMove( pos, false );
@@ -2769,6 +2803,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			// finish the line, go to next problem instance
 			fprintf( foutput, "\n" );
 
+			// verbose printout
+			//break;
 		}
 
 		// delete robber objects

@@ -73,7 +73,7 @@ state DSHeuristicGreedy<state,action>::MakeMove( state pos_robber, state pos_cop
 	} else {
 		dscrenv->GetRobberSuccessors( pos_robber, neighbors );
 		nodesExpanded++; nodesTouched++;
-		heuristic_value = DBL_MIN;
+		heuristic_value = -DBL_MAX;
 		for( typename std::vector<state>::iterator it = neighbors.begin();
 			it != neighbors.end(); it++ ) {
 			nodesTouched++;
