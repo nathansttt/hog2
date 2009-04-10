@@ -211,7 +211,7 @@ void IPNSearch<state,action,environment>::ipn_expand( SearchNode &n, double boun
 			// if we are in a max node
 			n.proof_number = 0;
 			n.disproof_number = UINT_MAX;
-			n.value = DBL_MIN;
+			n.value = -DBL_MAX;
 			for( unsigned int i = 0; i < n.childs.size(); i++ ) {
 				// proof number = sum( child proof numbers )
 				n.proof_number = uintplus( n.proof_number, n.childs[i].proof_number );

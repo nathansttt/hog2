@@ -293,7 +293,7 @@ double TIDAStar<state,action,environment>::tida_update( CRState &pos, double gCo
 	// in case we are the robber/max player
 	} else {
 
-		result = DBL_MIN;
+		result = -DBL_MAX;
 
 		for( typename std::vector<state>::iterator iti = neighbors.begin(); iti != neighbors.end(); iti++ ) {
 			neighbor = pos;

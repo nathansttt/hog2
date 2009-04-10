@@ -147,7 +147,7 @@ double Minimax<state,action,environment>::minimax( CRState pos, std::vector<CRSt
 	min_gttables.clear();
 	max_gttables.clear();
 
-	result = minimax_help( pos, minFirst, max_depth, DBL_MIN, DBL_MAX );
+	result = minimax_help( pos, minFirst, max_depth, -DBL_MAX, DBL_MAX );
 
 	// the temporary search cache should be empty
 	/*
@@ -202,9 +202,9 @@ template<class state,class action,class environment>
 double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFirst, int depth, double alpha, double beta ) {
 
 	/* verbose
-	fprintf( stdout, "considered position (%u,%u) (%u,%u) for player ", pos[0].x, pos[0].y, pos[1].x, pos[1].y );
+	fprintf( stdout, "considered position (%u,%u) (%u,%u) at depth %d for player ", pos[0].x, pos[0].y, pos[1].x, pos[1].y, depth );
 	fprintf( stdout, "%s ", (minFirst?"min":"max") );
-	fprintf( stdout, "and alpha=%f beta=%f\n", alpha, beta );
+	fprintf( stdout, "and alpha=%g beta=%g\n", alpha, beta );
 	*/
 	nodesTouched++;
 
@@ -311,7 +311,8 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFir
 	CRState child, next_pos;
 	bool no_next_pos = true;
 	double child_value, pathcost;
-	double result=minFirst?beta:alpha;
+	double result=minFirst?DBL_MAX:-DBL_MAX;
+	double temp_alphabeta=minFirst?beta:alpha;
 
 	nodesExpanded++;
 
@@ -333,30 +334,34 @@ double Minimax<state,action,environment>::minimax_help( CRState pos, bool minFir
 		if( minFirst ) {
 		// Min Node
 			child_value = pathcost +
-				minimax_help( child, !minFirst, depth - 1, alpha - pathcost, result - pathcost );
+				minimax_help( child, !minFirst, depth - 1, alpha - pathcost, temp_alphabeta - pathcost );
 			// min player updates his score
 			if( child_value < result ) {
 				result = child_value;
 				next_pos = child;
 				no_next_pos = false;
 			}
+			if( child_value < temp_alphabeta )
+				temp_alphabeta = child_value;
 
 			// beta cutoff
-			if( result <= alpha ) break;
+			if( temp_alphabeta <= alpha ) break;
 
 		} else {
 		// Max Node
 			child_value = pathcost +
-				minimax_help( child, !minFirst, depth - 1, result - pathcost, beta - pathcost );
+				minimax_help( child, !minFirst, depth - 1, temp_alphabeta - pathcost, beta - pathcost );
 			// max player updates his score
 			if( child_value > result ) {
 				result = child_value;
 				next_pos = child;
 				no_next_pos = false;
 			}
+			if( child_value > temp_alphabeta )
+				temp_alphabeta = child_value;
 
 			// alpha cutoff
-			if( beta <= result ) break;
+			if( beta <= temp_alphabeta ) break;
 		}
 
 	}

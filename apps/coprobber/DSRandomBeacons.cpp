@@ -26,7 +26,7 @@ void DSRandomBeacons::GetPath( graphState pos_robber, graphState pos_cop, unsign
 	if( pos_robber == pos_cop ) return;
 
 	node *target = NULL;
-	double target_h = DBL_MIN;
+	double target_h = -DBL_MAX;
 
 	Graph *g = mabs->GetAbstractGraph(0);
 	node *probber = g->GetNode( pos_robber );
