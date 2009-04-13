@@ -1,171 +1,123 @@
 #ifndef BULB_H
 #define BULB_H
-#include "StatCollection.h"
-#include "GenericStepAlgorithm.h"
-#include "BeamNode.h"
-#include <assert.h>
-#include <iostream>
-#include <ext/hash_map>
-#define NO_CHILDREN -100
+#include "GeneralBeamSearch.h"
 
 template <class state, class action, class environment>
-class GeneralBulb : public GenericStepAlgorithm<state, action, environment> {
+class GeneralBulb: public GeneralBeamSearch<state, action, environment> {
+	// variables will be using
+
+	using GeneralBeamSearch<state, action, environment>::debug;
+	using GeneralBeamSearch<state, action, environment>::beam_size;
+	using GeneralBeamSearch<state, action, environment>::memory_limit;
+	using GeneralBeamSearch<state, action, environment>::nodes_checked;
+	using GeneralBeamSearch<state, action, environment>::nodes_expanded;
+	using GeneralBeamSearch<state, action, environment>::nodes_touched;
+	using GeneralBeamSearch<state, action, environment>::expanded_limit;
+	using GeneralBeamSearch<state, action, environment>::checked_limit;
+	using GeneralBeamSearch<state, action, environment>::touched_limit;
+	using GeneralBeamSearch<state, action, environment>::bound_expanded;
+	using GeneralBeamSearch<state, action, environment>::bound_touched;
+	using GeneralBeamSearch<state, action, environment>::bound_checked;
+	using GeneralBeamSearch<state, action, environment>::prune_dups;
+	using GeneralBeamSearch<state, action, environment>::nodes_in_current_layer;
+	using GeneralBeamSearch<state, action, environment>::nodes_in_beam;
+	using GeneralBeamSearch<state, action, environment>::my_env;
+	using GeneralBeamSearch<state, action, environment>::goal;
+	using GeneralBeamSearch<state, action, environment>::full_check;
+	using GeneralBeamSearch<state, action, environment>::beams;
+	using GeneralBeamSearch<state, action, environment>::nodes_stored;
+	using GeneralBeamSearch<state, action, environment>::get_cost;
+
+	using GeneralBeamSearch<state, action, environment>::print_beams;
+	using GeneralBeamSearch<state, action, environment>::generate_all_successors;
+	using GeneralBeamSearch<state, action, environment>::clear_memory_footprint;
 public:
 	GeneralBulb() {
-		step_by_step_active = false;
-		beam_size = 1;
-		memory_limit = 50;
-		bound_touched = bound_checked = bound_expanded = false;
-		g_weight = 1.0;
-		h_weight = 1.0;
-
-		best_path_cost = -1.0;
-		debug = false;
-	}
-	int GetPath(environment *env, state from, state to, std::vector<state> &path);
-	int GetPath(environment *env, state from, state to, std::vector<action> &path){return 0;}
-
-	uint64_t GetNodesExpanded(){return nodes_expanded;}
-	uint64_t GetNodesTouched(){return nodes_touched;}
-	uint64_t GetNodesChecked(){return nodes_checked;}
-
-	bool SetExpandedLimit(uint64_t limit);
-	bool SetTouchedLimit(uint64_t limit);
-	bool SetCheckedLimit(uint64_t limit);
-
-	void LogFinalStats(StatCollection *stats){}
-
-	bool Initialize(environment *env, state start, state goal){return true;}
-	int StepAlgorithm(std::vector<action> &path){return 0;}
-	int StepAlgorithm(std::vector<state> &path){return 0;}
-
-	bool Is_Step_Active(){return step_by_step_active;}
-
-	const char *GetName() {return "General Bulb";}
-
-	/**
-	Returns the cost for this state based on the g and h values.
-	**/
-	virtual double get_cost(double g, double h);
-
-	/**
-	Prints information on all items in the beams. For debugging purposes
-	**/
-	void print_beams(bool last_only);
-
-	/** returns the path cost of the last path found **/
-	double GetPathCost() {return best_path_cost; }
-
-	/** Changes the size of the beam. Default setting is 1. Returns true if succeeds, false otherwise. **/
-	bool Change_Beam_Size(unsigned new_beam_size) {
-		if(new_beam_size > 0) { beam_size = new_beam_size; return true; }
-		return false;
+		initial_discrepancies = 0;
+		discrepancies_increment = 1;
+		bound_disc = false;
+		max_disc = 0;
 	}
 
-	/** Changes memory limit for beam search. That is, the number of nodes that can be in the beam
-	 at one time. Default is set at 50.**/
-	void Change_Memory_Limit(unsigned new_limit) {memory_limit = new_limit;}
+	void prepare_vars_for_search();
+	virtual int GetPath(environment *env, state from, state to, std::vector<state> &path);
 
-	/**
-	Returns the value of the applicable weight
-	**/
-	double Get_H_Weight() { return h_weight;}
-	double Get_G_Weight() { return g_weight;}
+	virtual uint64_t GetNodesExpanded() { return nodes_expanded + nodes_ex_iter; }
+	virtual uint64_t GetNodesTouched() { return nodes_touched + nodes_touch_iter; }
+	virtual uint64_t GetNodesChecked() { return nodes_checked + nodes_check_iter; }
 
-	/**
-	Changes the weights. Note, if the problem is constant cost, changing the weights
-	does nothing.
-	**/
-	int Change_Weights(double h_g,double h_w) {
-		if(!fless (h_g, 0.0) && !fless(h_w, 0.0)) {
-			h_weight = h_w;
-			g_weight = h_g;
-			return 1;
+	void Set_Initial_Discrepancies(unsigned i_d) {
+		if(i_d > 0) initial_discrepancies = i_d;
+		else fprintf(stderr, "Invalid Initial Discrepancies\n");
+	}
+
+	void Set_Discrepancies_Increment(unsigned d_i) {
+		if(d_i > 0) discrepancies_increment = d_i;
+		else fprintf(stderr, "Invalid Discrepancies Increment\n");
+	}
+
+	void Set_Max_Discrepancies(int max) {
+		if(max >= 0 && (unsigned)max >= initial_discrepancies) {
+			bound_disc = true;
+			max_disc = (unsigned)max;
 		}
-		return 0;
+		else {
+			bound_disc = false;
+		}
+
 	}
 
 protected:
-	std::vector<std::vector <BeamNode<state> > > beams; // beam construct
-	__gnu_cxx::hash_map<uint64_t, unsigned, Hash64> nodes_in_beam; // nodes in beams not in current layer
-	__gnu_cxx::hash_map<uint64_t, unsigned, Hash64> nodes_in_current_layer; // nodes in beams not in current layer
-	bool step_by_step_active;
-
-	unsigned beam_size;
-	unsigned memory_limit;
-	uint64_t nodes_checked, nodes_expanded, nodes_touched;
-	uint64_t expanded_limit, checked_limit, touched_limit;
 	uint64_t nodes_ex_iter, nodes_touch_iter, nodes_check_iter;
-
-	bool bound_expanded;
-	bool bound_touched;
-	bool bound_checked;
-
-	double g_weight;
-	double h_weight;
-
-	void prepare_vars_for_search();
-	/**
-	Main recursive function of bulb. Takes in a number of discrepancies to use, the search environment, and a goal.
-	Returns values based on the main status values of a GenericStepAlgorithm
-	**/
-	int BulbProbe(environment *env, unsigned discrepancies, state &goal);
-
-	/**
-	Generates all the unique successors of the last level in beam and stores them in successors. Returns 1 if
-	the goal is found amongst the successors, in which case successors is only set to the goal node.
-	Returns the status values of GenericStepAlgorithm if any of the limits are hit.
-	**/
-	int generate_successors(environment *env, std::vector<BeamNode<state> > &successors, state &goal);
-
-	/**
-	Returns the desired slice of the successors. If first_slice is set as true, returns the first slice. If
-	first_slice is set to false and index is smaller than the beam_size, will return the second slice. Otherwise,
-	it returns the slice starting at the given index.
-	Index is then set as the beginning index of the next slice to return.
-	**/
-	int next_slice(environment *env, std::vector<BeamNode<state> > &slice, bool first_slice, unsigned &index, state &goal);
-
-	/**
-	Extracts the goal from the beams.  Assumes the first beam contains only the start state, and the last beam
-	contains only the goal.
-	**/
-	void extract_goal(std::vector<state> &state_path);
-
-	double best_path_cost;
-
-	unsigned max_depth;
-
-	bool debug;
 
 	std::vector<uint64_t> iter_checked;
 	std::vector<uint64_t> iter_touched;
 	std::vector<uint64_t> iter_expanded;
 
-	void update_node_counts(); // updates the node counts at the end of each iteration
-	// where an iteration is whenever the discrepancies must be increased.
-};
+	void update_node_counts();
 
-/** Calculates f-cost in standard way **/
-template <class state, class action, class environment>
-double GeneralBulb<state, action, environment>::get_cost(double g, double h) {
-	return g_weight*g + h_weight*h;
-}
+	virtual void count_new_nodes_expanded(unsigned new_nodes_ex){nodes_ex_iter+= new_nodes_ex;}
+	virtual void count_new_nodes_touched(unsigned new_num){nodes_touch_iter += new_num;};
+	virtual void count_new_nodes_checked(unsigned new_nodes_ch){nodes_check_iter += new_nodes_ch;};
+
+	virtual bool hit_expanded_limit(){
+		if(bound_expanded && (nodes_expanded + nodes_ex_iter >= expanded_limit)) {return true;}
+		return false;
+	}
+	virtual bool hit_touched_limit() {
+		if(bound_touched && (nodes_touched + nodes_touch_iter >= touched_limit)) {return true; }
+		return false;
+	}
+	virtual bool hit_checked_limit(){
+		if(bound_checked && (nodes_checked + nodes_check_iter >= checked_limit)) {return true;}
+		return false;
+	}
+
+	unsigned initial_discrepancies;
+	unsigned discrepancies_increment;
+
+	int BulbProbe(environment *env, unsigned discrepancies, state &goal);
+	int next_slice(environment *env, std::vector<BeamNode<state> > &slice, unsigned &index, state &goal);
+	unsigned max_depth; // maximum depth of the search in the last iteration
+
+	void erase_last_beam_from_hash();
+
+	bool bound_disc;
+	unsigned max_disc;
+};
 
 template <class state, class action, class environment>
 void GeneralBulb<state, action, environment>::prepare_vars_for_search() {
-	nodes_checked = 0;
-	nodes_expanded = 0;
-	nodes_touched = 0;
+	// prepare regular beam search vars as well
+	GeneralBeamSearch<state, action, environment>::prepare_vars_for_search();
 
-	best_path_cost = -1.0;
-	beams.clear();
-	nodes_in_beam.clear();
-
-	best_path_cost = -1.0;
 	iter_expanded.clear();
 	iter_touched.clear();
 	iter_checked.clear();
+
+	nodes_ex_iter = 0;
+	nodes_touch_iter = 0;
+	nodes_check_iter = 0;
 }
 
 template <class state, class action, class environment>
@@ -173,6 +125,10 @@ void GeneralBulb<state, action, environment>::update_node_counts() {
 	nodes_expanded += nodes_ex_iter;
 	nodes_touched += nodes_touch_iter;
 	nodes_checked += nodes_check_iter;
+
+	nodes_ex_iter = 0;
+	nodes_touch_iter = 0;
+	nodes_check_iter = 0;
 
 	iter_checked.push_back(nodes_check_iter);
 	iter_touched.push_back(nodes_touch_iter);
@@ -193,25 +149,34 @@ int GeneralBulb<state, action, environment>::GetPath(environment *env, state fro
 	}
 
 	double initial_cost = get_cost(0.0, h_value);
-	uint64_t initial_key = env->GetStateHash(from);
+	uint64_t initial_key = 0;
+
+	if(prune_dups)
+		initial_key = env->GetStateHash(from);
 
 	// constructs initial beamnode
-	BeamNode<state> start_node(from, 0.0, h_value, initial_cost, 0,initial_key);
+	BeamNode<state> start_node(from, 0.0, h_value, initial_cost, 0, initial_key);
 
+	// construct first beam
 	std::vector<BeamNode<state> > first_layer;
 	first_layer.push_back(start_node);
 	beams.push_back(first_layer);
 
-	nodes_in_beam[initial_key] = 0;
+	if(prune_dups) {
+		beam_position start_position;
+		start_position.beam_num = 0;
+		start_position.beam_pos = 0;
+		Add_To_Beam_Hash(start_node, start_position, nodes_in_beam);
+	}
+
+	unsigned discrepancies = initial_discrepancies;
+	bool first = true;
 	int status = 0;
 
-	unsigned discrepancies = 0;
-
-	bool first = true;
-
-	while(status == 0) {
+	while(status == 0 && (!bound_disc || discrepancies <= max_disc)) {
+		assert(beams.size() == 1);
+		nodes_stored = 1;
 		max_depth = 0;
-		nodes_ex_iter = nodes_touch_iter = nodes_check_iter = 0;
 
 		if(first){
 			nodes_touch_iter = 1;
@@ -230,7 +195,7 @@ int GeneralBulb<state, action, environment>::GetPath(environment *env, state fro
 		}
 
 		if(status == 0)
-			discrepancies++;
+			discrepancies+= discrepancies_increment;
 
 		if(debug)
 			printf("Increasing Discrepancies\n");
@@ -239,6 +204,8 @@ int GeneralBulb<state, action, environment>::GetPath(environment *env, state fro
 	if(status == 1) {
 		extract_goal(path);
 	}
+
+	clear_memory_footprint();
 	return status;
 
 }
@@ -246,137 +213,118 @@ int GeneralBulb<state, action, environment>::GetPath(environment *env, state fro
 template <class state, class action, class environment>
 int GeneralBulb<state, action, environment>::BulbProbe(environment *env, unsigned discrepancies, state &goal) {
 
-	if(beams.size() - 1 > max_depth) {
+	if(beams.size() - 1 > max_depth) { // update max_depth
 		max_depth = beams.size() - 1;
 	}
-	std::vector<BeamNode<state> > slice;
-	unsigned index;
-	int status;
 
-	bool out_of_mem = false;
+	std::vector<BeamNode<state> > slice; // slice to expand
 
-	// if there are discrepancies to use up
-	if(discrepancies != 0) {
+	unsigned index = 0; // index in successors
+	int status; // current status
+	beam_position position;
+	unsigned next_discrepancies; // number of discrepancies in recursive call
 
-		index = 0;
-		// constantly get next slice
-		while(true) {
-			if(debug) {
-				print_beams(false);
-				printf("discrepancies: %d, index: %d\n", discrepancies, index);
-			}
+	if(discrepancies > 0) // if available discrepancies, start with one
+		index = beam_size;
+
+	do {
+		if(debug) {
+			print_beams();
+			printf("discrepancies: %d, index: %d\n", discrepancies, index);
+		}
+
+		// get the next slice and index
+		status = next_slice(env, slice, index, goal);
+
+		if(status == NO_CHILDREN) { // if no children, time to backtrack
+			slice.clear();
+			status = 0; // indicate have failed search
+			break;  // backtrack to previous level since no successors here
+		}
+		else if(status == 1) { // handle goal found
+			assert(slice.size() == 1);
+			beams.push_back(slice); //push slice onto beam
+			slice.clear();
+			return 1;
+		}
+		else if(status != 0) { // handle some status hit
 			slice.clear();
 
-			// get the next index
-			status = next_slice(env, slice, false, index, goal);
-
-			if(status == NO_CHILDREN) // if there are no children, return
+			if(status == LIM_HIT){ // indicate must take another path
+				if(debug)
+					printf("Hit Memory Limit, Backtracking\n");
 				return 0;
-
-			if(status != 0) // if have found goal or hit a limit
-				return status;
-
-			if(slice.size() == 0) // if slice is empty (already got last slice)
-				break;
-
-			// if running out of memory
-			if(nodes_in_beam.size() + slice.size() > memory_limit) {
-				out_of_mem = true;
-				break;
 			}
-
-			// label nodes in slice
-			for(unsigned i = 0; i < slice.size(); i++) {
-				nodes_in_beam[slice[i].my_key] = beams.size();
-			}
-			beams.push_back(slice);
-			// call BulbProbe
-			status = BulbProbe(env, discrepancies - 1, goal);
-
-			// remove slice
-			for(unsigned i = 0; i < slice.size(); i++) {
-				nodes_in_beam.erase(slice[i].my_key);
-			}
-
-			if(status != 0) // if found goal or hit limit
-				return status;
-
-			beams.pop_back();
+			return status; // return this other status
 		}
-	}
 
-	if(out_of_mem) // if ran out of memory when expanding not the best slice, will certainly run out of memory on best slice
-		return 0;
+		if(prune_dups) {
+			for(unsigned i = 0; i < slice.size(); i++) {
+				position.beam_num = beams.size();
+				position.beam_pos = i;
+				Add_To_Beam_Hash(slice[i], position, nodes_in_beam);
+			}
+		}
 
-	slice.clear();
+		beams.push_back(slice); // add slice to beam
+		nodes_stored += slice.size(); // have new nodes stored
+		slice.clear();
 
-	if(debug){
-		print_beams(false);
-		printf("Expanding First Slice\n");
-	}
+		if(index != 0 && index <= beam_size) // first discrepancy is being expanded
+			next_discrepancies = discrepancies;
+		else
+			next_discrepancies = discrepancies - 1;
 
-	// get first slice and expand it
-	status = next_slice(env, slice, true, index, goal);
+		status = BulbProbe(env, next_discrepancies, goal); // recursive call
 
-	// if no children to expand
-	if(status == NO_CHILDREN || slice.size() == 0)
-		return 0;
+		if(status != 0) { // goal found or some limit hit
+			break; // immediately return
+		}
 
-	if(status != 0)
-		return status;
+		if(prune_dups) {
+			erase_last_beam_from_hash();
+		}
+		nodes_stored -= beams[beams.size() - 1].size();
+		beams.pop_back(); // remove slice from beams
+	}while(index == 0 || index > beam_size); // while still slices to check
 
-	// if running out of memory
-	if(nodes_in_beam.size() + slice.size() > memory_limit) {
-		out_of_mem = true;
-		return 0;
-	}
-
-	for(unsigned i = 0; i < slice.size(); i++) {
-		nodes_in_beam[slice[i].my_key] = beams.size();
-	}
-	beams.push_back(slice);
-	status = BulbProbe(env, discrepancies, goal);
-
-	for(unsigned i = 0; i < slice.size(); i++) {
-		nodes_in_beam.erase(slice[i].my_key);
-	}
-
-	if(status != 0) // if found goal or hit limit
-		return status;
-
-	beams.pop_back();
-
-	return status;
+	if(debug)
+		printf("Backtracking\n");
+	return status; // return the status
 }
 
+/**
+If called with 0, will give first slice, and returned index will be greater than 1
+but less than or equal to beam_size.
+Otherwise returns slice starting at the given index, unless there is only a single
+slice to be had (in which case, acts as if was called with 0).
+Once the last slice is returned, the returned index will be 0.
+**/
 template <class state, class action, class environment>
-int GeneralBulb<state, action, environment>::next_slice(environment *env, std::vector<BeamNode<state> > &slice, bool first_slice, unsigned &index, state &goal) {
-	slice.clear();
+int GeneralBulb<state, action, environment>::next_slice(environment *env, std::vector<BeamNode<state> > &slice, unsigned &index, state &goal) {
+	slice.clear(); // holds the next slice, so clear
 
 	std::vector<BeamNode<state> > successors;
 
-	int status = generate_successors(env, successors, goal);
+	int status = generate_all_successors(env, successors, goal);
 
-	if(status == 1) {
+	if(status == 1) {// only return the goal
 		slice.push_back(successors.back());
-		beams.push_back(slice);
+		successors.clear();
 		return 1;
 	}
-	// if have hit some limit
-	if(status != 0)
+	else if(status != 0) { // have hit some limit
 		return status;
+	}
 
-	if(successors.size() == 0) // if there are no successors, let caller know
+	if(successors.size() == 0) // if there are no successors
 		return NO_CHILDREN;
 
 	unsigned succ_index = index;
 
-	if(first_slice) { // if are to return the first slice
+	// if only one possible slice for children
+	if(successors.size() <= beam_size)
 		succ_index = 0;
-	}
-	else if(!first_slice && index < beam_size) { // if index is not to be used, jump to second slice
-		succ_index = beam_size;
-	}
 
 	// build slice
 	while(succ_index < successors.size() && slice.size() < beam_size) {
@@ -385,163 +333,28 @@ int GeneralBulb<state, action, environment>::next_slice(environment *env, std::v
 	}
 
 	index = succ_index; // fix index
+	// if this is last discrepancy and it is not the only slice, next slice should be first one
 
+	if(succ_index == successors.size() && succ_index > beam_size)
+		index = 0; // have taken all discrepancies
+
+	successors.clear();
 	return 0; // goal not found and no limits hit
 }
 
 template <class state, class action, class environment>
-int GeneralBulb<state, action, environment>::generate_successors(environment *env, std::vector<BeamNode<state> > &successors, state &goal) {
+void GeneralBulb<state, action, environment>::erase_last_beam_from_hash() {
+	for(int i = beams[beams.size() - 1].size() - 1; i >= 0; i--) {
+		uint64_t hash_value = beams[beams.size() - 1][i].my_key;
+				//need to erase key here
+		assert(nodes_in_beam.find(hash_value) != nodes_in_beam.end());
+		assert(nodes_in_beam[hash_value].back().beam_num == beams.size() - 1);
+		assert(nodes_in_beam[hash_value].back().beam_pos == (unsigned) i);
 
-	nodes_in_current_layer.clear(); // nodes in current successors list
-	successors.clear();
-
-	std::vector<state> children;
-	assert(beams.size() > 0);
-
-	// iterate through states in last layer of beam
-	for(unsigned i = 0 ; i < beams[beams.size() - 1].size(); i++) {
-		nodes_ex_iter++;
-		// if hit expansion limit
-		if(bound_expanded && nodes_expanded + nodes_ex_iter >= expanded_limit) {
-			return EXPAND_MET;
-		}
-
-		children.clear();
-		env->GetSuccessors(beams[beams.size() - 1][i].my_state, children);
-		nodes_touch_iter += children.size();
-
-		// if hit generated limit
-		if(bound_touched && nodes_touched + nodes_touch_iter >= touched_limit) {
-			return TOUCHED_MET;
-		}
-
-		// iterate through generated child
-		for(unsigned j = 0; j < children.size(); j++) {
-			uint64_t child_key = env->GetStateHash(children[j]);
-
-			// if already have the node stored in beam or in current layer
-			if(nodes_in_beam.find(child_key) != nodes_in_beam.end() ||
-			   nodes_in_current_layer.find(child_key) != nodes_in_current_layer.end()) {
-				continue;
-			}
-
-			double child_g = beams[beams.size() - 1][i].g_value +
-				env->GCost(beams[beams.size() - 1][i].my_state, children[j]);
-			double child_h;
-
-			if(env->IsGoalStored()) {
-				child_h = env->HCost(children[j]);
-			}
-			else {
-				child_h = env->HCost(children[j], goal);
-			}
-			double child_cost = get_cost(child_g, child_h);
-
-			// construct new BeamNode
-			BeamNode<state> new_node(children[j], child_g, child_h, child_cost, i, child_key);
-			successors.push_back(new_node); // add to list of successors
-
-			nodes_check_iter++;
-
-			// if hit nodes checked limit
-			if(bound_checked && nodes_checked + nodes_check_iter >= checked_limit) {
-				return CHECKED_MET;
-			}
-
-			// if have found a goal
-			if(env->GoalTest(children[j], goal)) {
-				successors.clear();
-				successors.push_back(new_node);
-				best_path_cost = child_g;
-				return 1;
-			}
-
-			// label node as stored in current layer
-			nodes_in_current_layer[child_key] = 0;
-		}
+		if(nodes_in_beam[hash_value].size() == 1)
+			nodes_in_beam.erase(hash_value);
+		else
+			nodes_in_beam[hash_value].pop_back();
 	}
-
-	// sorts children
-	sort(successors.begin(), successors.end());
-	if(debug) {
-		printf("Successors: \n");
-		for(unsigned i = 0; i < successors.size(); i++) {
-			std::cout << successors[i].my_state;
-			printf(" G:%.0f H:%.0f Cost:%.0f\n", successors[i].g_value, successors[i].h_value, successors[i].cost);
-		}
-	}
-	return 0; // no goal found and no limits hit
-}
-
-template <class state, class action, class environment>
-void GeneralBulb<state, action, environment>::extract_goal(std::vector<state> &state_path) {
-	state_path.resize(beams.size()); // properly resizes beam, last spot will have final node added elsewhere
-
-	unsigned beam_layer = beams.size() - 1;
-	unsigned current_index = beams[beam_layer].size() - 1;
-
-	while(beam_layer > 0) { // extract states from beam
-		state_path[beam_layer] = beams[beam_layer][current_index].my_state;
-		current_index = beams[beam_layer][current_index].parent_index;
-		beam_layer--;
-	}
-
-	state_path[beam_layer] = beams[beam_layer][current_index].my_state;
-}
-
-template <class state, class action, class environment>
-void GeneralBulb<state, action, environment>::print_beams(bool last_only) {
-	printf("\n\n");
-	printf("Memory Used: %d\n", nodes_in_beam.size());
-	unsigned i = 0;
-
-	if(last_only) {
-		i = beams.size() - 1;
-	}
-	for(; i < beams.size(); i++) {
-		for(unsigned j = 0; j < beams[i].size(); j++) {
-
-			if(!last_only) {
-				for(unsigned k = 0; k < i; k++)
-					printf(" ");
-			}
-
-			std::cout << beams[i][j].my_state;
-			printf(" G:%.0f H:%.0f Cost:%.0f\n", beams[i][j].g_value, beams[i][j].h_value, beams[i][j].cost);
-		}
-	}
-}
-
-template <class state, class action, class environment>
-bool GeneralBulb<state, action, environment>::SetExpandedLimit(uint64_t limit) {
-	if(limit > 0) {
-		bound_expanded = true; expanded_limit = limit;
-	}
-	else {
-		bound_expanded = false;
-	}
-	return true;
-}
-
-template <class state, class action, class environment>
-bool GeneralBulb<state, action, environment>::SetTouchedLimit(uint64_t limit) {
-	if(limit > 0) {
-		bound_touched = true; touched_limit = limit;
-	}
-	else {
-		bound_touched = false;
-	}
-	return true;
-}
-
-template <class state, class action, class environment>
-bool GeneralBulb<state, action, environment>::SetCheckedLimit(uint64_t limit) {
-	if(limit > 0) {
-		bound_checked = true; checked_limit = limit;
-	}
-	else {
-		bound_checked = false;
-	}
-	return true;
 }
 #endif

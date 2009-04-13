@@ -89,6 +89,7 @@ uint64_t general_batch(environment *env, GenericStepAlgorithm<state, action, env
 		if(status != 1) { // if no solution was found
 			if(print_all_stats) {
 				printf("-1\n");
+				fflush(stdout);
 			}
 			continue;
 		}
@@ -106,6 +107,7 @@ uint64_t general_batch(environment *env, GenericStepAlgorithm<state, action, env
 			printf("%llu\t", solver->GetNodesChecked());
 			printf("%llu\t", solver->GetNodesTouched());
 			printf("\n");
+			fflush(stdout);
 		}
 	}
 
@@ -279,6 +281,20 @@ void get_5x5_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num) {
 		std::cerr << "File Reading Failed\n";
 	}
 }
+
+void get_6x6_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num) {
+	if(MNPuzzle::read_in_mn_puzzles("../../apps/dynamicsearch/input/6x6_1000", false, 6, 6, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+
+void get_7x7_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num) {
+	if(MNPuzzle::read_in_mn_puzzles("../../apps/dynamicsearch/input/7x7_1000", false, 7, 7, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+
+
 
 void get_node_buckets(std::vector<double> &node_vec, double smallest, unsigned num_buckets, double bucket_size) {
 	printf("Num of Buckets: %d\n", num_buckets);

@@ -14,6 +14,7 @@
 #include "PancakePuzzle.h"
 #include "GeneralIDA.h"
 #include "GenericStepAlgorithm.h"
+#include <stdlib.h>
 
 #define STATE_PATH 1
 #define ACTION_PATH 2
@@ -46,6 +47,8 @@ void get_5x4_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_3x6_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_6x3_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 void get_5x5_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
+void get_6x6_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
+void get_7x7_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num);
 
 void get_12pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num);
 void get_13pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num);
