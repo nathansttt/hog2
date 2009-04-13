@@ -1,6 +1,11 @@
 #ifndef BEAMNODE_H
 #define BEAMNODE_H
 
+struct beam_position {
+	unsigned beam_num;
+	unsigned beam_pos;
+};
+
 /**
 A class for beam node information. Each beam node contains information regarding
 the actual state, the various costs, the index of the parent in the beam in
@@ -27,6 +32,7 @@ public:
 	double g_value;
 	uint64_t my_key;
 	unsigned parent_index;
+
 
 	/**
 	Allows for comparison of BeamNodes for both sorting and merging BeamNode lists

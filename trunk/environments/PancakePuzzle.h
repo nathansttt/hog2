@@ -88,6 +88,15 @@ public:
 
 	bool Path_Check(PancakePuzzleState start, PancakePuzzleState goal, std::vector<unsigned> &actions);
 
+	/**
+	Returns a possible ordering of the operators. The orders are in a "lexicographic"
+	with the original ordering being 2, 3, ..., num_pancakes. This is therefore the order
+	returned with a call of order_num=0. The default ordering used when a PancakePuzzle
+	environment is created is num_pancakes, ..., 2 which is returned with a call of
+	num_pancakes! -1.
+	**/
+	static std::vector<unsigned> Get_Puzzle_Order(int order_num, unsigned num_pancakes);
+
 private:
 
 	std::vector<unsigned> operators;

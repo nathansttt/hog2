@@ -245,7 +245,7 @@ void TurnTakingSimulation::output_solver_names(vector<unsigned> &solvers_of_inte
 	}
 
 	for(unsigned i = 0; i < solvers_of_interest.size(); i++) {
-		printf("%s\n", solver_names[solvers_of_interest[i]].c_str());
+		printf("%u %s\n", i, solver_names[solvers_of_interest[i]].c_str());
 	}
 }
 
@@ -359,9 +359,11 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 	}
 
 	vector<unsigned> combo;
+	vector<vector <unsigned> > best_combos;
+	vector<vector <unsigned> > worst_combos;
 	map<string, string> combo_map;
 
-	unsigned combo_solved, best_nodes_index, current_nodes_index, best_ratio_solved, worst_ratio_solved, num_solved_best, num_solved_worst = 0;
+	unsigned combo_solved, best_nodes_index, current_nodes_index, best_ratio_solved = 0, worst_ratio_solved = 0, num_solved_best = 0, num_solved_worst = 0;
 	double total_combo_nodes, total_combo_cost;
 	double best_ratio;
 	double node_size_av = 0, cost_size_av = 0, ratio_size_av = 0, num_solved_av = 0;
@@ -382,7 +384,6 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 		num_solved_av = 0.0;
 
 		// for total per size
-		//while(count < num_per_size[counter]) {
 		while(true) {
 
 			// get them by iterating through all possible combinations
@@ -460,6 +461,9 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 				num_solved_worst = combo_solved;
 				best_ratio_solved = combo_solved;
 				worst_ratio_solved = combo_solved;
+
+				best_combos.push_back(combo);
+				worst_combos.push_back(combo);
 			}
 			else { // is not first combo
 
@@ -468,12 +472,18 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 					   node_size_best = total_combo_nodes;
 					   cost_size_best = total_combo_cost;
 					   num_solved_best = combo_solved;
+
+					   best_combos.pop_back();
+					   best_combos.push_back(combo);
 				   }
 				if(num_solved_best > combo_solved ||
 				   (num_solved_best == combo_solved && node_size_worst < total_combo_nodes)) {
 					   node_size_worst = total_combo_nodes;
 					   cost_size_worst = total_combo_cost;
 					   num_solved_worst = combo_solved;
+
+					   worst_combos.pop_back();
+					   worst_combos.push_back(combo);
 				   }
 				if(combo_solved > best_ratio_solved ||
 				   (combo_solved == best_ratio_solved && ratio_size_best > best_ratio))
@@ -511,15 +521,25 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 		size_count++;
 	}
 
+	printf("size_count: %u\n", size_count);
 	printf("Num Per Size\tCost of Best\tNodes of Best\tBest Solved\t");
 	printf("Cost of Worst\tNodes of Worst\tWorst Solved\t");
 	printf("Av Cost\tAv Nodes\tAv Solved\t");
-	printf("Smallest Best Ratio\tAverage Ratio\tWorst Best Ratio\n");
+	printf("Smallest Best Ratio\tAverage Ratio\tWorst Best Ratio\tBest Combo\t\tWorst Combo\n");
 	for(unsigned i = 0; i < size_count; i++) {
 		printf("%d\t%.0f\t%.0f\t%d\t", num_per_size[i], all_bests[i][0], all_bests[i][1], num_solved_best);
 		printf("%.0f\t%.0f\t%d\t", all_worsts[i][0], all_worsts[i][1], num_solved_worst);
 		printf("%.0f\t%.0f\t%.0f\t", all_avs[i][0], all_avs[i][1], all_avs[i][2]);
-		printf("%.4f\t%.4f\t%.4f\n", all_ratios[i][0], all_ratios[i][1], all_ratios[i][2]);
+		printf("%.4f\t%.4f\t%.4f\t", all_ratios[i][0], all_ratios[i][1], all_ratios[i][2]);
+		for(unsigned j = 0; j < best_combos[i].size() - 1; j++) {
+			printf("%u, ", best_combos[i][j]);
+		}
+		printf("%u\t\t", best_combos[i][best_combos[i].size() - 1]);
+
+		for(unsigned j = 0; j < worst_combos[i].size() - 1; j++) {
+			printf("%u, ", worst_combos[i][j]);
+		}
+		printf("%u\n", worst_combos[i][worst_combos[i].size() - 1]);
 	}
 }
 

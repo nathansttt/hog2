@@ -244,3 +244,41 @@ bool PancakePuzzle::Path_Check(PancakePuzzleState start, PancakePuzzleState goal
 
 	return false;
 }
+
+std::vector<unsigned> PancakePuzzle::Get_Puzzle_Order(int order_num, unsigned num_pancakes) {
+	std::vector<unsigned> ops;
+	assert(order_num >= 0);
+	assert(num_pancakes > 0);
+
+
+	std::vector<int> op_nums(num_pancakes -1);
+
+	int num_left = 1;
+	for(int x = num_pancakes - 2; x >= 0; x--) {
+		op_nums[x] = order_num % num_left;
+		order_num /= num_left;
+		num_left++;
+
+		for(int y = x+1; y < ((int)num_pancakes)-1; y++) {
+			if(op_nums[y] >= op_nums[x]) {
+				op_nums[y]++;
+			}
+		}
+	}
+
+	std::vector<bool> actions;
+
+	for(unsigned i = 0; i < num_pancakes - 1; i++) {
+		actions.push_back(false);
+	}
+
+	for(unsigned i = 0; i < num_pancakes - 1; i++) {
+		ops.push_back(op_nums[i] + 2);
+		actions[op_nums[i]] = true;
+	}
+
+	for(unsigned i = 0; i < num_pancakes - 1; i++) {
+		assert(actions[i]);
+	}
+	return ops;
+}
