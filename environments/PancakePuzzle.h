@@ -95,7 +95,7 @@ public:
 	environment is created is num_pancakes, ..., 2 which is returned with a call of
 	num_pancakes! -1.
 	**/
-	static std::vector<unsigned> Get_Puzzle_Order(int order_num, unsigned num_pancakes);
+	static std::vector<unsigned> Get_Puzzle_Order(int64_t order_num, unsigned num_pancakes);
 
 private:
 
