@@ -21,11 +21,11 @@ public:
 	virtual bool input_new_file(const char *input_file);
 	void output_solver_names(vector<unsigned> &solvers_of_interest);
 
-	void simulate(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &set_sizes, vector<unsigned> num_per_size, bool print_all_stats);
+	void simulate(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &set_sizes, vector<unsigned> num_per_size, bool parallel, bool print_all_stats);
 
 	int best_of_combo(vector<unsigned> &, vector<unsigned> &, unsigned);
 
-	void turn_taking_on_weight_set(vector<unsigned> &, vector<unsigned> &, vector<unsigned> &, double &, double &, unsigned &, bool);
+	void turn_taking_on_weight_set(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &combo, double &total_combo_nodes, double &total_combo_cost, unsigned &combo_solved, bool parallel, bool print_histogram, bool print_all);
 protected:
 	vector <string> solver_names;
 	vector<vector<double> > costs;

@@ -30,10 +30,10 @@ int main(int argc, char** argv)
 
 	//get_standard_test_set(puzzles, info, solver_info, 100);
 	//get_3x6_test_set(puzzles, 10);
-	get_7x7_test_set(puzzles, 100);
+	//get_6x6_test_set(puzzles, 100);
 
-	unsigned num_cols = 7;
-	unsigned num_rows = 7;
+	unsigned num_cols = 6;
+	unsigned num_rows = 6;
 
 	std::vector<slideDir> f_op_order;
 	std::vector<slideDir> b_op_order;
@@ -118,8 +118,6 @@ int main(int argc, char** argv)
 	beam_search.debug = false;
 	beam_search.Select_Duplicate_Prune(true);
 	beam_search.Select_Full_Check(true);
-	//beam_search.GetPath(&mnp, puzzles[99], goal, state_path);
-	//cout << beam_search.GetPathCost() <<  " " << beam_search.GetNodesExpanded() << endl;
 
 	GeneralBulb<MNPuzzleState, slideDir, MNPuzzle> bulb;
 	bulb.Select_Full_Check(true);
@@ -129,42 +127,88 @@ int main(int argc, char** argv)
 	bulb.Select_Duplicate_Prune(true);
 	bulb.Select_Full_Check(true);
 	bulb.Set_Max_Discrepancies(0);
-	//bulb.GetPath(&mnp, puzzles[2], goal, state_path);
-	//cout << bulb.GetPathCost() <<  " " << bulb.GetNodesExpanded() << endl;
 
-	for(unsigned i = 10; i <= 10; i++) {
+
+	for(unsigned i = 3; i <= 3; i++) {
 		cout << "\nSOLVER BULB, OP ORDER: " << kUp << ", " << kLeft << ", " << kRight << ", " << kDown << ", Beam Size: " << i << endl;
 		bulb.Change_Beam_Size(i);
 		general_batch_puzzles(num_cols, num_rows, &bulb, puzzles, f_op_order, true, STATE_PATH);
-	}
-	*/
+	}*/
+	/*
+	unsigned my_size = 5;
+	bulb.Change_Beam_Size(my_size);
+	for(unsigned i = 0; i <= 3; i++) {
+		cout << "\nSOLVER Bulb, OP ORDER: " << kUp << ", " << kLeft << ", " << kRight << ", " << kDown << ", Beam Size " << my_size << ", Discrepancy " << i  << endl;
+		bulb.Set_Initial_Discrepancies(i);
+		bulb.Set_Max_Discrepancies(i);
+		general_batch_puzzles(num_cols, num_rows, &bulb, puzzles, f_op_order, true, STATE_PATH);
+	}*/
 
+	/**
+	Prob Bulb Experiments
+	**/
+	/*
+	unsigned my_size = 10;
+	GeneralProbBulb<MNPuzzleState, slideDir, MNPuzzle> prob_bulb;
+	prob_bulb.Select_Full_Check(true);
+	prob_bulb.Change_Beam_Size(my_size);
+	prob_bulb.Change_Memory_Limit(100000);
+	prob_bulb.debug = false;
+	prob_bulb.Select_Duplicate_Prune(true);
+	prob_bulb.Select_Full_Check(true);
+	//prob_bulb.Set_Max_Discrepancies(2);
+
+	double rand_weight = 1.5;
+	prob_bulb.Set_Random_Weight(rand_weight);
+	prob_bulb.Set_Init_Seed(0);
+	prob_bulb.Set_Seed_Inc(100);
+
+	for(double j  = 1.0; j < 3.0; j += 0.5) {
+		for(unsigned i = 0; i < 10000; i+= 1000) {
+
+			cout << "\nSOLVER Bulb, OP ORDER: " << kUp << ", " << kLeft << ", " << kRight << ", " << kDown << ", Beam Size " << my_size << ", Seed " << i  << ", Rand Weight: " << j << endl;
+			prob_bulb.Set_Random_Weight(j);
+			prob_bulb.Set_Init_Seed(i);
+			prob_bulb.Set_Seed_Inc(100);
+
+
+			general_batch_puzzles(num_cols, num_rows, &prob_bulb, puzzles, f_op_order, true, STATE_PATH);
+		}
+	}*/
 	/**
 	Turn-taking experiments
 	**/
-	//TurnTakingSimulation::output_turntaking_input_file("../../apps/dynamicsearch/input/14panc_1pdb_ida_weight_stats", 1000, "../../apps/dynamicsearch/input/14panc_1pdb_ida_weight_tt");
+	//TurnTakingSimulation::output_turntaking_input_file("../../apps/dynamicsearch/input/6x6_ida_weight5", 100, "../../apps/dynamicsearch/input/6x6_ida_weight5_tt");
 
-	/*
+
 	vector<unsigned> desired_puzzles;
-	for(unsigned i = 0; i < 1000; i++) {
+	for(unsigned i = 0; i < 100; i++) {
 		desired_puzzles.push_back(i);
 	}
 
 	unsigned start = 0;
 	unsigned inc = 1;
-	unsigned total_solvers = 24;
+	unsigned total_solvers = 4;
 	vector<unsigned> desired_weights;
 	for(unsigned i = start; i < start + inc*(total_solvers - 1) + 1; i+= inc) {
 		desired_weights.push_back(i);
 	}
 
 	vector<unsigned> set_sizes;
-	for(unsigned i = 2; i <= total_solvers; i++) {
+	//for(unsigned i = 2; i <= total_solvers; i++) {
+	for(unsigned i = total_solvers; i <= total_solvers; i++) {
 		set_sizes.push_back(i);
 	}
 
 	vector<unsigned> num_per_size;
 
+	//for(unsigned i = 2; i <= total_solvers; i++) {
+	for(unsigned i = total_solvers; i <= total_solvers; i++) {
+		num_per_size.push_back(0);
+	}
+
+
+	/*
 	num_per_size.push_back(0);
 	num_per_size.push_back(0);
 
@@ -175,27 +219,20 @@ int main(int argc, char** argv)
 	num_per_size.push_back(0);
 	num_per_size.push_back(0);
 	num_per_size.push_back(0);
-
 */
-	/*
-	num_per_size.push_back(0);
 
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);
-
-	for(unsigned i = 5; i <= 10; i++) {
-		num_per_size.push_back(3000);
+	vector<unsigned> combo;
+	double total_combo_nodes, total_combo_cost;
+	unsigned combo_solved;
+	for(unsigned i = 0; i < 4; i++) {
+		combo.push_back(i);
 	}
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);*/
 	/*
-	TurnTakingSimulation simulator("../../apps/dynamicsearch/input/14panc_1pdb_ida_weight_tt");
+	TurnTakingSimulation simulator("../../apps/dynamicsearch/input/6x6_ida_weight5_tt");
 	simulator.output_solver_names(desired_weights);
-	simulator.simulate(desired_puzzles, desired_weights, set_sizes, num_per_size, false);
-	*/
+	//simulator.simulate(desired_puzzles, desired_weights, set_sizes, num_per_size, true, false);
+	simulator.turn_taking_on_weight_set(desired_puzzles, desired_weights, combo, total_combo_nodes, total_combo_cost, combo_solved, true, false, true);*/
+
 	/*
 	Timer t, t2;
 	t.startTimer();
@@ -238,7 +275,7 @@ int main(int argc, char** argv)
 
 	//mnp.Build_Regular_PDB(goal, pattern, "tempdb");
 
-	unsigned pan_size = 12;
+	unsigned pan_size = 14;
 	PancakePuzzle pancake_puzz(pan_size);
 	PancakePuzzleState s(pan_size);
 
@@ -258,14 +295,14 @@ int main(int argc, char** argv)
 	//mnp.Output_Puzzles(puzzles, false);
 
 	vector<PancakePuzzleState> pancake_puzzles;
-	get_12pancake_test_set(pancake_puzzles, 1000);
+	get_14pancake_test_set(pancake_puzzles, 10);
 
 	PancakePuzzleState pan_goal(pan_size);
 
-	/*
-	pancake_puzz.Load_Regular_PDB("../../apps/dynamicsearch/input/12panc_pdb_0_1_2_3_4_5_distinct", pan_goal, false);
-	pancake_puzz.Load_Regular_PDB("../../apps/dynamicsearch/input/12panc_pdb_6_7_8_9_10_11_distinct", pan_goal, false);
-	*/
+
+	//pancake_puzz.Load_Regular_PDB("../../apps/dynamicsearch/input/14panc_pdb_0_1_2_3_4_5_6_distinct", pan_goal, false);
+	//pancake_puzz.Load_Regular_PDB("../../apps/dynamicsearch/input/14panc_pdb_7_8_9_10_11_12_13_distinct", pan_goal, false);
+
 
 	/**
 	IDA* Pancake Experiments
@@ -287,17 +324,18 @@ int main(int argc, char** argv)
 	/**
 	RBFS Pancake Experiments
 	**/
+
 	/*
 	GeneralRBFS<PancakePuzzleState, unsigned, PancakePuzzle> pan_rbfs;
 
-	for (double w = 1.0; w <= 1.0; w += 1.0) {
+	for (double w = 2.0; w <= 152.0; w += 10.0) {
 		pan_rbfs.Change_Weights(1.0, w);
 		cout << "\nSOLVER RBFS, OP ORDER: ";
 		for (unsigned j = pan_size; j > 1; j--) {
 			cout << j << ", ";
 		}
 		cout << "Weight: " << w << endl;
-		general_batch_pancake_puzzles(pancake_puzz, pan_size, &pan_rbfs, pancake_puzzles, true, ACTION_PATH);
+		general_batch_pancake_puzzles(pancake_puzz, pan_size, &pan_rbfs, pancake_puzzles, false, ACTION_PATH);
 	}
 	*/
 	/**
@@ -329,17 +367,48 @@ int main(int argc, char** argv)
 		cout << "Beam Size: " << i << endl;
 		general_batch_pancake_puzzles(pancake_puzz, pan_size, &pan_bulb, pancake_puzzles, true, STATE_PATH);
 	}
+
 	*/
 
+	/*
 	vector<unsigned> test_ops;
-	for(unsigned i = 0; i < 120; i++) {
-		test_ops.clear();
-		test_ops = PancakePuzzle::Get_Puzzle_Order(i, 6);
+	int64_t num = 0;
+	for(int64_t j = 0; j < 13; j++) {
+		num = j*479001600ll;
+		int r = rand() % 479001600;
+		cout << r << endl;
+		if(j == 12)
+			num += 479001599ll;
+		else if(j != 0)
+			num += r;
 
-		for(unsigned j = 0; j < test_ops.size(); j++) {
-			cout << test_ops[j] << " ";
+		cout << "Num: " << num << "     ";
+		test_ops = PancakePuzzle::Get_Puzzle_Order(num, 14);
+
+		for(unsigned i = 0; i < test_ops.size(); i++) {
+			cout << test_ops[i] << " ";
 		}
-		cout << "\n";
+		cout << endl;
+	}*/
+	info.clear();
+	read_in_extra_puzz_info("../../apps/dynamicsearch/input/6x6_ida_input", info, '\t', 100);
+
+	vector<double> my_weights;
+
+	my_weights.push_back(4);
+
+	for(unsigned i = 6; i < 11; i++) {
+		my_weights.push_back(i);
 	}
+	my_weights.push_back(3);
+	my_weights.push_back(2);
+
+	my_weights.push_back(11);
+	my_weights.push_back(12);
+	my_weights.push_back(13);
+	my_weights.push_back(14);
+	my_weights.push_back(15);
+
+	ida_6x6_experiments(info, my_weights, 1);
 	return 0;
 }
