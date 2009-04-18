@@ -478,3 +478,96 @@ void get_20pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned n
 		std::cerr << "File Reading Failed\n";
 	}
 }
+
+void ida_6x6_experiments(std::vector<Puzzle_Info> &info, std::vector<double> weights, unsigned info_count) {
+	unsigned puzz_num = 100;
+
+	unsigned num_cols = 6;
+	unsigned num_rows = 6;
+	std::vector<MNPuzzleState> puzzles;
+	get_6x6_test_set(puzzles, puzz_num);
+	//get_standard_test_set(puzzles, info, solver_info, puzz_num);
+
+	std::vector<std::vector<uint64_t> > nodes;
+	std::vector<std::vector<double> > cost;
+
+	for(unsigned i = 0; i < puzz_num; i++) {
+		std::vector<uint64_t> new_node_vec(weights.size() + 1);
+		nodes.push_back(new_node_vec);
+
+		std::vector<double> new_cost_vec(weights.size() + 1);
+		cost.push_back(new_cost_vec);
+	}
+
+
+	std::vector<slideDir> f_op_order;
+
+	f_op_order.push_back(kUp);
+	f_op_order.push_back(kLeft);
+	f_op_order.push_back(kRight);
+	f_op_order.push_back(kDown);
+
+	GeneralIDA<MNPuzzleState, slideDir, MNPuzzle> ida;
+	std::vector<slideDir> path;
+
+	MNPuzzleState goal(num_cols, num_rows);
+	MNPuzzle mnp(num_cols, num_rows, f_op_order);
+	mnp.StoreGoal(goal);
+
+	for(unsigned i = 0; i < puzzles.size(); i++) {
+		if(MNPuzzle::GetParity(puzzles[i]) != MNPuzzle::GetParity(goal)) {
+			printf("Bad Puzzle %d\n", i);
+			assert(false);
+		}
+	}
+
+	for(unsigned puzz = 0; puzz < puzz_num; puzz++) {
+
+		uint64_t max = (uint64_t) info[puzz].first;
+		double new_cost = info[puzz].second;
+
+		nodes[puzz][0] = max;
+		cost[puzz][0] = new_cost;
+
+		unsigned weight_index = info_count - 1;
+		for(unsigned i = 0; i < weights.size(); i++) {
+			ida.Change_Weights(1.0, weights[i]);
+			ida.SetExpandedLimit(max);
+			path.clear();
+
+			if(ida.GetPath(&mnp, puzzles[puzz], goal, path) == 1) {
+				max = ida.GetNodesExpanded();
+				new_cost = ida.GetPathCost();
+
+				weight_index = i + info_count;
+
+				nodes[puzz][i+1] = max;
+				cost[puzz][i+1] = new_cost;
+			}
+			else {
+				nodes[puzz][i+1] = 0;
+				cost[puzz][i+1] = 0;
+			}
+		}
+
+		uint64_t work_done = (max - 1)*(weights.size() + 1) + weight_index + 1;
+		printf("%.0f\t%llu\t%llu\n", new_cost, max, work_done);
+	}
+
+
+	printf("EXPANDED\n");
+	for(unsigned i = 0; i < puzz_num; i++) {
+		for(unsigned j = 0; j <= weights.size(); j++) {
+			printf("\t%llu", nodes[i][j]);
+		}
+		printf("\n");
+
+	}
+	printf("\nCOSTS\n");
+	for(unsigned i = 0; i < puzz_num; i++) {
+		for(unsigned j = 0; j <= weights.size(); j++) {
+			printf("\t%.0f", cost[i][j]);
+		}
+		printf("\n");
+	}
+}

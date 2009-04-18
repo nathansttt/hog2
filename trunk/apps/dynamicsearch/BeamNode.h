@@ -1,6 +1,7 @@
 #ifndef BEAMNODE_H
 #define BEAMNODE_H
 
+#include "FPUtil.h"
 struct beam_position {
 	unsigned beam_num;
 	unsigned beam_pos;
@@ -38,7 +39,7 @@ public:
 	Allows for comparison of BeamNodes for both sorting and merging BeamNode lists
 	**/
 	bool operator <(const BeamNode &second) const{
-		if(cost < second.cost || (cost == second.cost && g_value > second.g_value))
+		if(fless(cost, second.cost) || (fequal(cost, second.cost) && fgreater(g_value, second.g_value)))
 			return 1;
 		return 0;
 	}

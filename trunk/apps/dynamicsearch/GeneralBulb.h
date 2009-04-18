@@ -5,7 +5,6 @@
 template <class state, class action, class environment>
 class GeneralBulb: public GeneralBeamSearch<state, action, environment> {
 	// variables will be using
-
 	using GeneralBeamSearch<state, action, environment>::debug;
 	using GeneralBeamSearch<state, action, environment>::beam_size;
 	using GeneralBeamSearch<state, action, environment>::memory_limit;
@@ -39,7 +38,7 @@ public:
 		max_disc = 0;
 	}
 
-	void prepare_vars_for_search();
+	virtual void prepare_vars_for_search();
 	virtual int GetPath(environment *env, state from, state to, std::vector<state> &path);
 
 	virtual uint64_t GetNodesExpanded() { return nodes_expanded + nodes_ex_iter; }
@@ -47,7 +46,7 @@ public:
 	virtual uint64_t GetNodesChecked() { return nodes_checked + nodes_check_iter; }
 
 	void Set_Initial_Discrepancies(unsigned i_d) {
-		if(i_d > 0) initial_discrepancies = i_d;
+		if(i_d >= 0) initial_discrepancies = i_d;
 		else fprintf(stderr, "Invalid Initial Discrepancies\n");
 	}
 
@@ -93,6 +92,7 @@ protected:
 		return false;
 	}
 
+	virtual void prepare_for_level_expansion();
 	unsigned initial_discrepancies;
 	unsigned discrepancies_increment;
 
@@ -209,13 +209,17 @@ int GeneralBulb<state, action, environment>::GetPath(environment *env, state fro
 	return status;
 
 }
+template <class state, class action, class environment>
+void GeneralBulb<state, action, environment>::prepare_for_level_expansion() {
+	if(beams.size() - 1 > max_depth) { // update max_depth
+		max_depth = beams.size() - 1;
+	}
+}
 
 template <class state, class action, class environment>
 int GeneralBulb<state, action, environment>::BulbProbe(environment *env, unsigned discrepancies, state &goal) {
 
-	if(beams.size() - 1 > max_depth) { // update max_depth
-		max_depth = beams.size() - 1;
-	}
+	prepare_for_level_expansion();
 
 	std::vector<BeamNode<state> > slice; // slice to expand
 

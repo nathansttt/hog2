@@ -64,4 +64,6 @@ bool get_next_combo(std::vector<unsigned> &current_combination, unsigned max_num
 void print_combo(std::vector<unsigned> &current_combination);
 
 void get_rand_combo(std::vector<unsigned> &combo, unsigned start_w_index, unsigned end_w_index, unsigned size);
+
+void ida_6x6_experiments(std::vector<Puzzle_Info> &info, std::vector<double> weights, unsigned info_count);
 #endif
