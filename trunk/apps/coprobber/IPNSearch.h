@@ -7,12 +7,6 @@
 #define IPNSEARCH_H
 
 
-inline unsigned int uintplus( unsigned int a, unsigned int b ) {
-	if( UINT_MAX - a < b ) return UINT_MAX;
-	return (a+b);
-}
-
-
 /*
 	Implementation of proof number search with (consistent) heuristic
 	enhancement and iterative increase of the bound to be proofed

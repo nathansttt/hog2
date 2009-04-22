@@ -130,13 +130,13 @@ double DSDijkstra<state,action,environment>::compute_target_value( CRState &s ) 
 	double tempvalue;
 	std::vector<state> myneighbors;
 	dscrenv->GetRobberSuccessors( temp, myneighbors );
-	nodesExpanded++;
+	//nodesExpanded++;
 
 	// now, for all successor states
 	for( typename std::vector<state>::iterator it = myneighbors.begin();
 	     it != myneighbors.end(); it++ ) {
 
-		nodesTouched++;
+		//nodesTouched++;
 	
 		// build the state
 		temp[0] = *it;

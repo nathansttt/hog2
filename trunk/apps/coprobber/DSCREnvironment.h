@@ -65,6 +65,9 @@ class DSCREnvironment {
 	// if used with maps, we implemented a version ourself
 	virtual double HCost( state &s1, state &s2 );
 
+	virtual double AccumulatedHCost( CRState &s, bool minFirst ) {
+		return AccumulatedHCost( s[0], s[1], minFirst );
+	};
 	virtual double AccumulatedHCost( state &s1, state &s2, bool minFirst ) {
 		if( minFirst ) return( 2.*HCost(s1,s2)-1. );
 		else return( 2.*HCost(s1,s2) );

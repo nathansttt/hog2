@@ -49,6 +49,7 @@
 #include "TwoCopsTIDAStar.h"
 #include "DSCover2.h"
 #include "AbstractGraphMapHeuristic.h"
+#include "DSIDFPN.h"
 
 
 //std::vector<CRAbsMapSimulation *> unitSims;
@@ -84,6 +85,7 @@ int main(int argc, char* argv[])
 		printf( "dsdijkstra          - different speed dijkstra\n" );
 		printf( "dsdijkstra_memoptim - optimized different speed dijkstra\n" );
 		printf( "dsrma               - different speed RMA*\n" );
+		printf( "dsidfpn             - different speed iterative depth-first proof-number search\n" );
 		printf( "dscover             - different speed Cover heuristic\n" );
 		printf( "dscover2            - Cover due to A. Isaza\n" );
 		printf( "dsheuristicgreedy   - different speed distance heuristic greedy algorithm\n" );
@@ -130,6 +132,9 @@ int main(int argc, char* argv[])
 	}
 	else if( strcmp( argv[1], "ipnttables" ) == 0 ) {
 		compute_ipnttables( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsidfpn" ) == 0 ) {
+		compute_dsidfpn( argc, argv );
 	}
 	else if( strcmp( argv[1], "tpdijkstra" ) == 0 ) {
 		compute_tpdijkstra( argc, argv );
@@ -768,6 +773,39 @@ void compute_ipnttables( int argc, char* argv[] ) {
 }
 
 
+// DS iterative depth-first proof-number search
+void compute_dsidfpn( int argc, char* argv[] ) {
+	Map *m;
+	xyLoc pos_cop, pos_robber;
+	int max_recursion_level;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
+	printf( "map: %s\n", m->getMapName() );
+	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
+	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	MaximumNormGraphMapHeuristic *gh = new MaximumNormGraphMapHeuristic( g );
+	GraphEnvironment *env = new GraphEnvironment( g, gh );
+	env->SetDirected( true );
+
+	DSIDFPN *dsidfpn = new DSIDFPN( env, 1 );
+
+	graphState rpos = m->getNodeNum( pos_robber.x, pos_robber.y );
+	graphState cpos = m->getNodeNum( pos_cop.x, pos_cop.y );
+
+	double result = dsidfpn->dsidfpn( rpos, cpos, true );
+
+	fprintf( stdout, "dsidfpn search result: %f\n", result );
+
+	delete dsidfpn;
+	delete env;
+	delete g;
+	delete m;
+}
+
+
+
 // Two Player Dijkstra
 void compute_tpdijkstra( int argc, char* argv[] ) {
 	Map *m;
@@ -889,7 +927,7 @@ void compute_dsrma( int argc, char* argv[] ) {
 	MapEnvironment *env = new MapEnvironment( m );
 
 	DSRMAStar<xyLoc,tDirection,MapEnvironment> *dsrmastar =
-		new DSRMAStar<xyLoc,tDirection,MapEnvironment>( env, 2 );
+		new DSRMAStar<xyLoc,tDirection,MapEnvironment>( env, 1 );
 	std::vector<xyLoc> s;
 	s.push_back( pos_robber );
 	s.push_back( pos_cop );
@@ -1406,6 +1444,7 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 	double result = 0;
 	unsigned int nodesExpanded = 0, nodesTouched = 0;
 	Map *m = NULL; MapEnvironment *env = NULL;
+	Graph *g = NULL; MaximumNormGraphMapHeuristic *gh = NULL; GraphEnvironment *graphenv = NULL;
 
 	if( argc < 5 ) {
 		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
@@ -1432,6 +1471,7 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar = NULL;
 	TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar_perfecth = NULL;
 	IPNTTables<xyLoc,tDirection,MapEnvironment> *ipntt = NULL;
+	DSIDFPN *dsidfpn = NULL;
 	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar = NULL;
 	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_dijkstra = NULL;
 	MinimaxAStar<xyLoc,tDirection,MapEnvironment> *astar_perfecth = NULL;
@@ -1455,6 +1495,12 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 		astar_perfecth->set_usePerfectDistanceHeuristic( true );
 		minclass       = new MinimaxOptimized<xyLoc,tDirection,MapEnvironment>( env, true );
 		tpd            = new TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>( env, true );
+
+		g = GraphSearchConstants::GetGraph( m );
+		gh = new MaximumNormGraphMapHeuristic( g );
+		graphenv = new GraphEnvironment( g, gh );
+		graphenv->SetDirected( true );
+		dsidfpn = new DSIDFPN( graphenv, 1 );
 	}
 
 	
@@ -1494,6 +1540,19 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			clock_end     = clock();
 			nodesExpanded = ipntt->nodesExpanded;
 			nodesTouched  = ipntt->nodesTouched;
+		}
+
+		if( strcmp( argv[3], "dsidfpn" ) == 0 ) {
+			graphState rpos = m->getNodeNum( rx, ry );
+			graphState cpos = m->getNodeNum( cx, cy );
+
+			// verbose
+			std::cout << "map: " << map_file << " position: (" << rx << "," << ry << "),(" << cx << "," << cy << ")" << std::endl;
+			clock_start   = clock();
+			result        = dsidfpn->dsidfpn( rpos, cpos, true );
+			clock_end     = clock();
+			nodesExpanded = 0;
+			nodesTouched  = 0;
 		}
 
 		if( strcmp( argv[3], "rma" ) == 0 ) {
@@ -1572,6 +1631,10 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 			delete minclass;
 			delete tpd;
 			delete env;
+			delete dsidfpn;
+			delete g;
+			delete gh;
+			delete graphenv;
 			break;
 		} else {
 			fscanf( problem_file, "(%u,%u) (%u,%u) %s\n", &rx,&ry,&cx,&cy,map_file );
@@ -1586,6 +1649,10 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 				delete minclass;
 				delete tpd;
 				delete env;
+				delete dsidfpn;
+				delete g;
+				delete gh;
+				delete graphenv;
 
 				// create the new classes
 				strcpy( old_map_file, map_file );
@@ -1602,6 +1669,12 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 				astar_perfecth->set_usePerfectDistanceHeuristic( true );
 				minclass       = new MinimaxOptimized<xyLoc,tDirection,MapEnvironment>( env, true );
 				tpd            = new TwoPlayerDijkstra<xyLoc,tDirection,MapEnvironment>( env, true );
+
+				g = GraphSearchConstants::GetGraph( m );
+				gh = new MaximumNormGraphMapHeuristic( g );
+				graphenv = new GraphEnvironment( g, gh );
+				graphenv->SetDirected( true );
+				dsidfpn = new DSIDFPN( graphenv, 1 );
 			}
 		}
 	}
