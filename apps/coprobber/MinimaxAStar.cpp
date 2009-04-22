@@ -150,12 +150,12 @@ double MinimaxAStarMulti::compute_target_value( CRState &s ) {
 	env->GetSuccessors( s[0], myneighbors );
 	if( canPass )
 		myneighbors.push_back( s[0] );
-	nodesExpanded++;
+	//nodesExpanded++;
 
 	// now, for all successor states
 	for( std::vector<graphState>::iterator it = myneighbors.begin();
 	     it != myneighbors.end(); it++ ) {
-		nodesTouched++;
+		//nodesTouched++;
 	
 		// build the state
 		temp[0] = *it;

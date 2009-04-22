@@ -39,4 +39,10 @@ template<>
 uint64_t StateHash<graphState>( const graphState &s );
 */
 
+
+inline unsigned int uintplus( unsigned int a, unsigned int b ) {
+	if( UINT_MAX - a < b ) return UINT_MAX;
+	return (a+b);
+};
+
 #endif

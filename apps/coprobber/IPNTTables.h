@@ -4,7 +4,6 @@
 #include "SearchEnvironment.h"
 #include "MultiAgentEnvironment.h"
 #include "MyHash.h"
-#include "IPNSearch.h" // for function uintplus
 
 
 #ifndef IPNTTABLES_H
@@ -151,7 +150,7 @@ double IPNTTables<state,action,environment>::ipn( CRState &pos, bool minFirst ) 
 	do {
 		nodesExpanded = 0; nodesTouched = 0; nodesUpdated = 0;
 		b = c;
-//		fprintf( stdout, "bound set to %f\n", b );
+		fprintf( stdout, "bound set to %f\n", b );
 		c = ipn_update( pos, minFirst, b );
 		iteration_nodesExpanded.push_back( nodesExpanded );
 		iteration_nodesTouched.push_back( nodesTouched );

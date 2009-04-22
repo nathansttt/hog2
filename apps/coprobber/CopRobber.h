@@ -13,6 +13,7 @@ void compute_minimax_optimized( int argc, char* argv[] );
 void compute_tida( int argc, char* argv[] );
 void compute_ipn( int argc, char* argv[] );
 void compute_ipnttables( int argc, char* argv[] );
+void compute_dsidfpn( int argc, char* argv[] );
 void compute_tpdijkstra( int argc, char* argv[] );
 void compute_dstpdijkstra( int argc, char* argv[] );
 void compute_dsdijkstra( int argc, char* argv[] );
