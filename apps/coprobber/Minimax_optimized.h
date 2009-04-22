@@ -90,6 +90,10 @@ class MinimaxOptimized {
 /*------------------------------------------------------------------------------
 | MiniMax Implementation
 ------------------------------------------------------------------------------*/
+// can be found in Minimax_optimized.cpp
+template<>
+double MinimaxOptimized<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool minsTurn );
+
 
 
 template<class state,class action,class environment>

@@ -109,6 +109,12 @@ class Minimax {
 /*------------------------------------------------------------------------------
 | MiniMax Implementation
 ------------------------------------------------------------------------------*/
+
+// can be found in Minimax.cpp
+template<>
+double Minimax<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool minsTurn );
+
+
 /*
 template<class state, class action, class environment>
 double Minimax<state,action,environment>::iterative_minimax( CRState pos, std::vector<CRState> &path, bool minFirst ) {
