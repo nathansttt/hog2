@@ -76,6 +76,7 @@ SRC_CPP = \
 	apps/coprobber/DSDijkstra.cpp \
 	apps/coprobber/DSRMAStar.cpp \
 	apps/coprobber/DSDijkstra_MemOptim.cpp \
+	apps/coprobber/DSIDFPN.cpp \
 	apps/coprobber/DSDAM.cpp \
 	apps/coprobber/DSIDAM.cpp \
 	apps/coprobber/DSIDAM2.cpp \
