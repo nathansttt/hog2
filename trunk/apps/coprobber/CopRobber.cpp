@@ -1309,7 +1309,7 @@ void compute_twocopsdijkstra( int argc, char* argv[] ) {
 // problem set generation
 void compute_testpoints( int argc, char* argv[] ) {
 	char map_file[20];
-	char problem_file[20] = "problem_set5.dat";
+	char problem_file[20] = "problem_set1.dat";
 	Map *m;
 	time_t t; time( &t ); srandom( (unsigned int) t );
 	unsigned int num;
@@ -1325,11 +1325,11 @@ void compute_testpoints( int argc, char* argv[] ) {
 	FILE *fhandler = fopen( problem_file, "w" );
 //	FILE *file_with_maps = fopen( argv[1], "r" );
 //	while( !feof( file_with_maps ) ) {
-	for( i = 30; i <= 49; i++ ) {
+	for( i = 1; i <= 15; i++ ) {
 		m = new Map( i, i );
 		MakeMaze( m );
-		m->scale( 80, 80 );
-		sprintf( map_file, "problem_set5_map%d.map", i );
+		m->scale( 15, 15 );
+		sprintf( map_file, "problem_set1_map%d.map", i );
 		m->save( map_file );
 //		fscanf( file_with_maps, "%s\n", map_file );
 //		fprintf( fhandler, "%s\n", map_file );
@@ -1352,15 +1352,15 @@ void compute_testpoints( int argc, char* argv[] ) {
 			unsigned int cy = (*reachable_nodes)[num]->GetLabelL(GraphSearchConstants::kMapY);
 			delete reachable_nodes;
 
-//			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
-//				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
-//			std::vector<xyLoc> pos;
-//			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
-//			double result = tidastar->tida( pos );
-//			delete tidastar;
+			TIDAStar<xyLoc,tDirection,MapEnvironment> *tidastar =
+				new TIDAStar<xyLoc,tDirection,MapEnvironment>( env, true );
+			std::vector<xyLoc> pos;
+			pos.push_back( xyLoc(rx,ry) ); pos.push_back( xyLoc(cx,cy) );
+			double result = tidastar->tida( pos );
+			delete tidastar;
 
-//			if( result <= 35. ) {
-//				fprintf( stdout, "%f\n", result );
+			if( result <= 31. ) {
+				fprintf( stdout, "%f\n", result );
 				// print out the starting position for the robber
 				fprintf( fhandler, "(%u,%u) ", rx, ry );
 				// print out the starting position for the cop
@@ -1368,7 +1368,7 @@ void compute_testpoints( int argc, char* argv[] ) {
 				// print out the map that we are in
 				fprintf( fhandler, "%s\n", map_file );
 				j++;
-//			}
+			}
 		}
 	
 		delete env;
@@ -2039,15 +2039,15 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 	for( int i = 4; i <= 9; i++ ) {
 		printf( "---------------- i = %d ---------------\n", i );
 //	char s[10]; sprintf( s, "graph%dc.out", i );
-	char s[10]; sprintf( s, "graph%dcopwin.out", i );
-//	char s[10]; sprintf( s, "planar_conn.%dcopwin.out", i );
+//	char s[10]; sprintf( s, "graph%dcopwin.out", i );
+	char s[10]; sprintf( s, "planar_conn.%dcopwin.out", i );
 
-		FILE *fhandler = fopen( s, "r" );
+	FILE *fhandler = fopen( s, "r" );
 //	FILE *fcopwin  = fopen( "planar_out", "w" );
 	int num_cop_win = 0;
-	double maximum_capture_time = -DBL_MAX;
-//	double maximum_st = 0.;
-//	double maximum_ratio = 1.;
+//	double maximum_capture_time = -DBL_MAX;
+	double maximum_st = 0.;
+	double maximum_ratio = 1.;
 
 	while( !feof( fhandler ) ) {
 		// read the next graph from the file
@@ -2060,17 +2060,18 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 		GraphEnvironment *env = new GraphEnvironment( g, NULL );
 		Dijkstra *d = new Dijkstra( env, 1, true );
 		d->dijkstra();
-		//TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment> *tpdijkstra = new TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment>( env, true );
+		TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment> *tpdijkstra = new TwoPlayerDijkstra<graphState,graphMove,GraphEnvironment>( env, true );
 
-		double temp_capture_time = -DBL_MAX;
+		//double temp_capture_time = -DBL_MAX;
 		for( it = d->min_cost.begin(); it != d->min_cost.end(); it++ ) {
 			if( *it == DBL_MAX ) {
 				is_cop_win = false;
 				break;
 			}
-			temp_capture_time = max( *it, temp_capture_time );
+		//	temp_capture_time = max( *it, temp_capture_time );
 		}
 
+		/*
 		if( is_cop_win ) {
 			if( temp_capture_time > maximum_capture_time ) {
 				maximum_capture_time = temp_capture_time;
@@ -2080,7 +2081,8 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 			}
 			num_cop_win++;
 		}
-/*
+		*/
+
 		if( is_cop_win ) {
 //			writeGraph( fcopwin, g );
 			num_cop_win++;
@@ -2092,6 +2094,7 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 			double maximum_ratio_on_graph = 1.;
 			int maximum_ratio_on_graph_c1 = 0;
 			int maximum_ratio_on_graph_r = 0;
+			double maximum_ratio_on_graph_trailmax = 0.;
 			double search_time = DBL_MAX;
 			for( int c1 = 0; c1 < g->GetNumNodes(); c1++ ) {
 				graphState c1_state = c1;
@@ -2112,6 +2115,7 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 							maximum_ratio_on_graph = temp;
 							maximum_ratio_on_graph_r  = r;
 							maximum_ratio_on_graph_c1 = c1;
+							maximum_ratio_on_graph_trailmax = temp2;
 						}
 
 						// generate all neighbors
@@ -2156,12 +2160,12 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 			maximum_st = max( maximum_st, search_time );
 			if( maximum_ratio < maximum_ratio_on_graph ) {
 				writeGraph( stdout, g );
-				printf( "ratio is %f for (%d,%d)\n", maximum_ratio_on_graph, maximum_ratio_on_graph_r, maximum_ratio_on_graph_c1 );
+				printf( "ratio is %f for (%d,%d) trailmax(%g)\n", maximum_ratio_on_graph, maximum_ratio_on_graph_r, maximum_ratio_on_graph_c1, maximum_ratio_on_graph_trailmax );
 				maximum_ratio = maximum_ratio_on_graph;
 			}
 		}
-*/
-//		delete tpdijkstra;
+
+		delete tpdijkstra;
 		delete d;
 		delete env;
 		delete g;
@@ -2169,9 +2173,9 @@ void compute_experiment_graphs( int argc, char* argv[] ) {
 	fclose( fhandler );
 //	fclose( fcopwin );
 	printf( "Number of cop-win graphs: %d\n", num_cop_win );
-	printf( "Maximum capture time: %g\n", maximum_capture_time );
-//	printf( "Maximal time to capture: %f\n", maximum_st );
-//	printf( "Maximal ratio: %f\n", maximum_ratio );
+//	printf( "Maximum capture time: %g\n", maximum_capture_time );
+	printf( "Maximal time to capture: %f\n", maximum_st );
+	printf( "Maximal ratio: %f\n", maximum_ratio );
 	}
 }
 

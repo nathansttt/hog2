@@ -17,13 +17,14 @@ $content2 = explode( "\n", $content2 );
 if( count( $content1 ) != count( $content2 ) )
 	echo "WARNING: file counts are not the same\n";
 
-foreach( $content1 as $i => $c1 ) {
+$maxindex = min( count($content1), count($content2 ) );
+
+for( $i = 0; $i < $maxindex; $i++ ) {
 	$c1 = explode( " ", $content1[$i] );
 	$c2 = explode( " ", $content2[$i] );
 	if( $c1[$column_number1] != $c2[$column_number2] )
 		echo "row " . ($i+1) . ": " . $c1[$column_number1] . " : " . $c2[$column_number2] . "\n";
 }
-
 
 
 ?>
