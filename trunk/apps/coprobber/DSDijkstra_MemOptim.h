@@ -37,11 +37,15 @@ class DSDijkstra_MemOptim {
 	void dsdijkstra();
 
 	void WriteValuesToDisk( const char* filename );
+	void ReadValuesFromDisk( const char* filename );
 	
 	// the access to min_cost and max_cost
 	// note: it only makes sense to call these functions after dsdijkstra
 	float Value( CRState &pos, bool minFirst );
 	graphState MakeMove( CRState &pos, bool minFirst );
+	void MakeSingleStepsCopMove( CRState &pos, std::vector<graphState> &moves );
+
+	void DrawCopRobberEdges( bool minFirst, graphState pos_opponent );
 
 	unsigned int nodesExpanded;
 	unsigned int nodesTouched;
@@ -85,6 +89,7 @@ class DSDijkstra_MemOptim {
 	// closed lists
 	typedef std::vector<float> ClosedList;
 	ClosedList min_cost, max_cost;
+	float max_max_cost;
 
 };
 

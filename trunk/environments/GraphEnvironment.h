@@ -257,7 +257,7 @@ class AbstractionGraphEnvironment: public GraphEnvironment {
 	AbstractionGraphEnvironment( GraphAbstraction *gabs, unsigned int level, GraphHeuristic *gh );
 	~AbstractionGraphEnvironment();
 
-	virtual void OpenGLDraw();
+	virtual void OpenGLDraw() const;
 	double scale() { return graphscale; };
 
 	protected:

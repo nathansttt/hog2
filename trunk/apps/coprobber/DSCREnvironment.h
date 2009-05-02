@@ -42,8 +42,9 @@ class DSCREnvironment {
 	// move generation
 	virtual void GetRobberSuccessors( CRState &s, std::vector<state> &neighbors, bool take_cop_into_account = true );
 	virtual void GetRobberSuccessors( state &s, std::vector<state> &neighbors );
-	virtual void GetCopSuccessors( CRState &s, std::vector<state> &neighbors );
-	virtual void GetCopSuccessors( state &s,   std::vector<state> &neighbors );
+	// if radius == 0 then it takes the currently set cop_speed as radius
+	virtual void GetCopSuccessors( CRState &s, std::vector<state> &neighbors, unsigned int radius = 0 );
+	virtual void GetCopSuccessors( state &s,   std::vector<state> &neighbors, unsigned int radius = 0 );
 
 	// termination criteria
 	virtual bool GoalTest( CRState &s );
@@ -145,14 +146,15 @@ void DSCREnvironment<state,action>::GetRobberSuccessors( state &s, std::vector<s
 };
 
 template<class state, class action>
-void DSCREnvironment<state,action>::GetCopSuccessors( CRState &s, std::vector<state> &neighbors ) {
-	GetCopSuccessors( s[1], neighbors );
+void DSCREnvironment<state,action>::GetCopSuccessors( CRState &s, std::vector<state> &neighbors, unsigned int radius ) {
+	GetCopSuccessors( s[1], neighbors, radius );
 	return;
 };
 
 template<class state, class action>
-void DSCREnvironment<state,action>::GetCopSuccessors( state &s, std::vector<state> &neighbors ) {
-	Dijkstra( s, cop_speed, neighbors );
+void DSCREnvironment<state,action>::GetCopSuccessors( state &s, std::vector<state> &neighbors, unsigned int radius ) {
+	if( radius == 0 ) radius = cop_speed;
+	Dijkstra( s, radius, neighbors );
 	// we reverse the order to expand nodes first where the cop is moving full speed and the "stay" move last
 	std::reverse( neighbors.begin(), neighbors.end() );
 	return;

@@ -130,6 +130,7 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 
 				max_cost[qe.pos_hash] = qe.value;
 				postemp = pos;
+				max_max_cost = qe.value;
 
 				// get neighbors
 				std::vector<graphState> myneighbors;
@@ -169,6 +170,34 @@ float DSDijkstra_MemOptim::Value( CRState &pos, bool minFirst ) {
 	}
 };
 
+// this implementation only supports cop_speed = 2 because I was to lazy to implement
+// an entire Dijkstra algorithm here
+void DSDijkstra_MemOptim::MakeSingleStepsCopMove( CRState &pos, std::vector<graphState> &moves ) {
+	moves.clear();
+	if( dscrenv->GetCopSpeed() != 2 ) std::cerr << "ERROR: speed != 2 not supported." << std::endl;
+
+	std::vector<graphState> neighbors1, neighbors2;
+	float value = max_cost[CRHash_MemOptim( pos )];
+	graphState first_move = pos[1], second_move = pos[1];
+	CRState temppos = pos;
+
+	dscrenv->GetCopSuccessors( temppos, neighbors1, 1 );
+	for( std::vector<graphState>::iterator it1 = neighbors1.begin(); it1 != neighbors1.end(); it1++ ) {
+		dscrenv->GetCopSuccessors( *it1, neighbors2, 1 );
+		for( std::vector<graphState>::iterator it2 = neighbors2.begin(); it2 != neighbors2.end(); it2++ ) {
+			temppos[1] = *it2;
+			float temp = max_cost[ CRHash_MemOptim( temppos ) ];
+			if( value > temp ) {
+				value = temp;
+				first_move = *it1;
+				second_move = *it2;
+			}
+		}
+	}
+	moves.push_back( first_move );
+	moves.push_back( second_move );
+	return;
+};
 
 graphState DSDijkstra_MemOptim::MakeMove( CRState &pos, bool minFirst ) {
 
@@ -180,25 +209,25 @@ graphState DSDijkstra_MemOptim::MakeMove( CRState &pos, bool minFirst ) {
 
 	// get the available moves
 	if( minFirst ) {
-		float value = FLT_MAX;
+		float value = max_cost[ CRHash_MemOptim( temppos ) ];
 		dscrenv->GetCopSuccessors( temppos, neighbors );
 
 		for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
 			temppos[1] = *it;
 			temp = max_cost[ CRHash_MemOptim( temppos ) ];
-			if( value >= temp ) {
+			if( value > temp ) {
 				value = temp;
 				result = *it;
 			}
 		}
 	} else {
-		float value = FLT_MIN;
+		float value = min_cost[ CRHash_MemOptim( temppos ) ];
 		dscrenv->GetRobberSuccessors( temppos, neighbors );
 
 		for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
 			temppos[0] = *it;
 			temp = min_cost[ CRHash_MemOptim( temppos ) ];
-			if( value <= temp ) {
+			if( value < temp ) {
 				value = temp;
 				result = *it;
 			}
@@ -286,8 +315,113 @@ void DSDijkstra_MemOptim::WriteValuesToDisk( const char* filename ) {
 	for( unsigned int i = 0; i < min_cost.size(); i++ ) {
 		pos.clear();
 		MemOptim_Hash_To_CRState( i, pos );
-		fprintf( fhandler, "%lu %lu %g\n", pos[0], pos[1], min_cost[i] );
+		fprintf( fhandler, "%lu %lu %g %g\n", pos[0], pos[1], min_cost[i], max_cost[i] );
 	}
 	fclose( fhandler );
 	return;
 };
+
+
+
+void DSDijkstra_MemOptim::ReadValuesFromDisk( const char* filename ) {
+	FILE *fhandler;
+	max_max_cost = -FLT_MAX;
+
+	fhandler = fopen( filename, "r" );
+
+	if( fhandler == NULL ) {
+		std::cerr << "ERROR: could not open dijkstra file." << std::endl;
+		exit( 1 );
+	}
+
+	unsigned int num_states;
+	fscanf( fhandler, "states in space: %d\n", &num_states );
+	if( num_states != numnodes*numnodes ) {
+		std::cerr << "ERROR: input file does not have the same amount of states as the map requires." << std::endl;
+		exit( 1 );
+	}
+	fscanf( fhandler, "expected rewards if cop moves first:\n" );
+	fscanf( fhandler, "\n\n" );
+
+	min_cost.assign( numnodes*numnodes, FLT_MAX );
+	max_cost.assign( numnodes*numnodes, FLT_MAX );
+
+	while( !feof( fhandler ) ) {
+		float min_c, max_c;
+		unsigned int pos_0, pos_1;
+		fscanf( fhandler, "%d %d %g %g\n", &pos_0, &pos_1, &min_c, &max_c );
+		CRState pos; pos.push_back( pos_0 ); pos.push_back( pos_1 );
+		size_t hash = CRHash_MemOptim( pos );
+		min_cost[hash] = min_c;
+		max_cost[hash] = max_c;
+		if( max_c > max_max_cost ) max_max_cost = max_c;
+	}
+	fclose( fhandler );
+	return;
+};
+
+
+
+void DSDijkstra_MemOptim::DrawCopRobberEdges( bool minFirst, graphState pos_opponent ) {
+
+	Graph *g = env->GetGraph();
+	CRState pos; pos.assign( 2, 0 );
+	pos[minFirst?0:1] = pos_opponent;
+	edge_iterator eit = g->getEdgeIter();
+	edge *e = g->edgeIterNext( eit );
+
+	glBegin( GL_LINES );
+	double value;
+
+	// color all edges due to their respective distance to the robber
+	while( e != NULL ) {
+
+		// readme:
+		// within the following code, value is always the solution length
+		// when the opponent starts from the submitted position and I would
+		// be in a variable position (that's why we loop over the edges)
+
+		node *n = g->GetNode( e->getFrom() );
+		if( minFirst ) {
+			pos[1]  = e->getFrom();
+			value   = max_cost[ CRHash_MemOptim( pos ) ];
+			//glColor3f( value/max_max_cost, 1.-value/max_max_cost, 1.-fabs(0.5-value/max_max_cost) );
+			glColor3f( 0., 1.-value/max_max_cost, 0. );
+		} else {
+			pos[0] = e->getFrom();
+			value  = min_cost[ CRHash_MemOptim( pos ) ];
+			//glColor3f( 1.-fabs(0.5-value/max_max_cost), value/max_max_cost, 1.-value/max_max_cost );
+			glColor3f( 0., value/max_max_cost, 0. );
+		}
+
+		GLdouble x,y,z;
+		x = n->GetLabelF( GraphAbstractionConstants::kXCoordinate );
+		y = n->GetLabelF( GraphAbstractionConstants::kYCoordinate );
+		z = n->GetLabelF( GraphAbstractionConstants::kZCoordinate );
+		glVertex3f( x, y, z );
+
+		n      = g->GetNode( e->getTo() );
+		if( minFirst ) {
+			pos[1]  = e->getTo();
+			value   = max_cost[ CRHash_MemOptim( pos ) ];
+			//glColor3f( value/max_max_cost, 1.-value/max_max_cost, 1.-fabs(0.5-value/max_max_cost) );
+			glColor3f( 0., 1.-value/max_max_cost, 0. );
+		} else {
+			pos[0] = e->getTo();
+			value  = min_cost[ CRHash_MemOptim( pos ) ];
+			//glColor3f( 1.-fabs(0.5-value/max_max_cost), 1.-value/max_max_cost, value/max_max_cost );
+			glColor3f( 0., value/max_max_cost, 0. );
+		}
+
+		x = n->GetLabelF( GraphAbstractionConstants::kXCoordinate );
+		y = n->GetLabelF( GraphAbstractionConstants::kYCoordinate );
+		z = n->GetLabelF( GraphAbstractionConstants::kZCoordinate );
+		glVertex3f( x, y, z );
+
+		e = g->edgeIterNext( eit );
+	}
+	glEnd();
+
+	return;
+};
+

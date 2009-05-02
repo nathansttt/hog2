@@ -150,10 +150,6 @@ unsigned int DSCRSimulation<state,action,environment>::AddRobber( Unit<state,act
 	unit->GetLocation( ui->startState );
 	ui->currentState = ui->startState;
 
-	//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
-	ui->agent->UpdateLocation( env, ui->currentState, true, this );
-	//delete s;
-
 	ui->nextTime = currTime + timeOffset;
 	ui->totalThinking = 0.;
 	ui->totalDistance = 0.;
@@ -163,6 +159,11 @@ unsigned int DSCRSimulation<state,action,environment>::AddRobber( Unit<state,act
 	ui->agent->SetNum( 0 );
 
 	UpdatePublicInfo();
+
+	//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
+	ui->agent->UpdateLocation( env, ui->currentState, true, this );
+	//delete s;
+
 	return 0;
 };
 
@@ -174,15 +175,6 @@ unsigned int DSCRSimulation<state,action,environment>::AddCop( Unit<state,action
 	unit->GetLocation( ui->startState );
 	ui->currentState = ui->startState;
 
-	//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
-	if( copgroup ) {
-		// if there is a copgroup set we'll update its position through the copgroup
-		copgroup->UpdateLocation( ui->agent, env, ui->currentState, true, this );
-	} else {
-		ui->agent->UpdateLocation( env, ui->currentState, true, this );
-	}
-	//delete s;
-
 	ui->nextTime = currTime + timeOffset;
 	ui->totalThinking = 0.;
 	ui->totalDistance = 0.;
@@ -192,6 +184,16 @@ unsigned int DSCRSimulation<state,action,environment>::AddCop( Unit<state,action
 	ui->agent->SetNum( units.size() - 1 );
 
 	UpdatePublicInfo();
+
+	//SimulationInfo<state,action,environment> *s = new SimulationInfo<state,action,environment>( &sinfo );
+	if( copgroup ) {
+		// if there is a copgroup set we'll update its position through the copgroup
+		copgroup->UpdateLocation( ui->agent, env, ui->currentState, true, this );
+	} else {
+		ui->agent->UpdateLocation( env, ui->currentState, true, this );
+	}
+	//delete s;
+
 	return( units.size()-1 );
 }
 
@@ -221,7 +223,7 @@ unsigned int DSCRSimulation<state,action,environment>::GetNumUnitGroups() const 
 template<class state, class action, class environment>
 Unit<state,action,environment>* DSCRSimulation<state,action,environment>::GetUnit( unsigned int which ) {
 	assert( which < units.size() );
-	return units[which];
+	return units[which]->agent;
 }
 
 
@@ -397,7 +399,7 @@ bool DSCRSimulation<state, action, environment>::MakeUnitMove( unsigned int inde
 		if( index > 0 ) {
 			// if the agent is a cop, check whether he intersects with another cop
 			for( unsigned int i = 1; i < worldstate.size(); i++ ) {
-				if( worldstate[i] == temp_state ) {
+				if( i != index && worldstate[i] == temp_state ) {
 					success = false;
 					break;
 				}

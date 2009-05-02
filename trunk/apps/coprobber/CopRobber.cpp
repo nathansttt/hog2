@@ -5,6 +5,7 @@
 #include <sys/times.h>
 #include <string.h>
 #include <time.h>
+#include <cstdio>
 #include "Minimax.h"
 #include "Minimax_optimized.h"
 #include "MapCliqueAbstraction.h"
@@ -58,6 +59,9 @@ DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment> *simulation = N
 LoadedCliqueAbstraction *cliqueabs = NULL;
 double view_translation_x = 0., view_translation_y = 0., view_translation_z = 0.;
 time_t last_simulation_update;
+xyLoc simulation_position_cop, simulation_position_robber;
+char simulation_dijkstra_file[1024];
+DSDijkstra_MemOptim *simulation_dsdijkstra = NULL;
 
 bool movie_on = false;
 
@@ -876,6 +880,7 @@ void compute_dsdijkstra( int argc, char* argv[] ) {
 	DSDijkstra<xyLoc,tDirection,MapEnvironment> *dsdijkstra = new DSDijkstra<xyLoc,tDirection,MapEnvironment>( env, 1 );
 
 	dsdijkstra->dsdijkstra();
+	std::cout << "writing values to dsdijkstra.dat" << std::endl;
 	dsdijkstra->WriteValuesToDisk( "dsdijkstra.dat" );
 
 	delete dsdijkstra;
@@ -902,6 +907,7 @@ void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 
 	dsdijkstra->dsdijkstra();
 
+	std::cout << "writing values to dsdijkstra.dat" << std::endl;
 	dsdijkstra->WriteValuesToDisk( "dsdijkstra.dat" );
 	printf( "nodes expanded: %u\n", dsdijkstra->nodesExpanded );
 	printf( "nodes touched: %u\n", dsdijkstra->nodesTouched );
@@ -3057,7 +3063,6 @@ void CreateSimulation( int id ) {
 	simulation->AddCop( cunit, 1. );
 */
 
-
 	Map *map;
 	if( gDefaultMap[0] == 0 ) {
 		map = new Map( mazeSize, mazeSize );
@@ -3070,32 +3075,51 @@ void CreateSimulation( int id ) {
 	// global variable, see above
 	simulation = new DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment>( env, true, 2, false );
 
+	// read optimal values in from disk or compute them
+	simulation_dsdijkstra = new DSDijkstra_MemOptim( env, 2 );
+	if( strcmp( simulation_dijkstra_file, "" ) == 0 ) {
+		std::cout << "computing optimal solution..."; fflush( stdout );
+		simulation_dsdijkstra->dsdijkstra();
+		std::cout << "done" << std::endl; fflush( stdout );
+	} else {
+		std::cout << "reading optimal solution from " << simulation_dijkstra_file << "..."; fflush( stdout );
+		simulation_dsdijkstra->ReadValuesFromDisk( simulation_dijkstra_file );
+		std::cout << "done" << std::endl; fflush( stdout );
+	}
+
 	//TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment> *runit =
 	//	new TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca->GetNodeFromMap(34,74)->GetNum(), 1, 2 );
-	OptimalUnit *runit = new OptimalUnit( env, mca->GetNodeFromMap(34,74)->GetNum(), 2 );
+	OptimalUnit *runit;
+	runit = new OptimalUnit( env, mca->GetNodeFromMap(simulation_position_robber.x, simulation_position_robber.y)->GetNum(), (unsigned int)2, true, simulation_dsdijkstra );
 	runit->SetColor( 1., 0., 0. );
 	unsigned int robberunitnumber = simulation->AddRobber( runit, 1. );
 
-	PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
-		new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca, mca->GetNodeFromMap(76,12)->GetNum(), 2 );
+	//PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
+	//	new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca, mca->GetNodeFromMap(simulation_position_cop.x, simulation_position_cop.y)->GetNum(), 2 );
+	OptimalUnit *cunit;
+	cunit = new OptimalUnit( env, mca->GetNodeFromMap(simulation_position_cop.x,simulation_position_cop.y)->GetNum(), (unsigned int)2, false, simulation_dsdijkstra );
 	cunit->SetColor( 0., 0., 1. );
 	unsigned int copunitnumber = simulation->AddCop( cunit, 1. );
 
 	runit->SetCopUnit( copunitnumber );
-	cunit->SetRobberUnit( robberunitnumber );
+	//cunit->SetRobberUnit( robberunitnumber );
+	cunit->SetCopUnit( robberunitnumber );
 
-	sleep( 5 );
-
+	simulation->SetPaused( true );
 
 	return;
 }
 
 void InstallHandlers() {
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
+	InstallCommandLineHandler(MyCLHandler, "-pc", "-pc x,y", "Position of the cop." );
+	InstallCommandLineHandler(MyCLHandler, "-pr", "-pr x,y", "Position of the robber." );
+	InstallCommandLineHandler(MyCLHandler, "-df", "-df filename", "Dijkstra file." );
 	InstallCommandLineHandler(MyCLHandler, "-size", "-size integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallWindowHandler(MyWindowHandler);
 	InstallKeyboardHandler(MyDisplayHandler, "pause", "pause/unpause simulation", kAnyModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "movie", "record several pictures for movie creation", kAnyModifier, 'm' );
+	 InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallMouseClickHandler(MyClickHandler);
 	return;
 }
@@ -3109,7 +3133,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType) {
 	else if (eType == kWindowCreated)
 	{
 		printf("Window %ld created\n", windowID);
-		SetNumPorts( windowID, 1 );
+		SetNumPorts( windowID, 2 );
 		SetActivePort( windowID, 0 );
 		//SetNumPorts( windowID, 3 );
 		//SetActivePort( windowID, 2 );
@@ -3138,7 +3162,21 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *) {
 	graphState s = 32511;
 	graphenv->OpenGLDraw( s );
 */
-	simulation->OpenGLDraw();
+
+	if( simulation_dsdijkstra != NULL ) {
+		for( unsigned int i = 0; i < simulation->GetNumUnits(); i++ )
+			simulation->GetUnit( i )->OpenGLDraw( simulation->GetEnvironment(), simulation );
+		if( viewport == 0 ) {
+			graphState pos_cop;
+			simulation->GetUnit( 1 )->GetLocation( pos_cop );
+			simulation_dsdijkstra->DrawCopRobberEdges( false, pos_cop );
+		} else {
+			graphState pos_robber;
+			simulation->GetUnit( 0 )->GetLocation( pos_robber );
+			simulation_dsdijkstra->DrawCopRobberEdges( true, pos_robber );
+		}
+	} else
+		simulation->OpenGLDraw();
 	time_t temptime; time(&temptime);
 	if( last_simulation_update < temptime ) {
 		if( !simulation->Done() && !simulation->GetPaused() ) {
@@ -3203,6 +3241,25 @@ int MyCLHandler(char *argument[], int maxNumArgs) {
 		strncpy(gDefaultMap, argument[1], 1024);
 		return 2;
 	}
+	else if( strcmp( argument[0], "-pc" ) == 0 ) {
+		if( maxNumArgs <= 1 ) return 0;
+		unsigned int x, y;
+		sscanf( argument[1], "%d,%d", &x, &y );
+		simulation_position_cop = xyLoc( x, y );
+		return 2;
+	}
+	else if( strcmp( argument[0], "-pr" ) == 0 ) {
+		if( maxNumArgs <= 1 ) return 0;
+		unsigned int x, y;
+		sscanf( argument[1], "%d,%d", &x, &y );
+		simulation_position_robber = xyLoc( x, y );
+		return 2;
+	}
+	else if( strcmp( argument[0], "-df" ) == 0 ) {
+		if( maxNumArgs <= 1 ) return 0;
+		strncpy(simulation_dijkstra_file, argument[1], 1024 );
+		return 2;
+	}
 	else if( strcmp( argument[0], "-size" ) == 0 )
 	{
 		if (maxNumArgs <= 1)
@@ -3217,6 +3274,14 @@ int MyCLHandler(char *argument[], int maxNumArgs) {
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) {
 	switch( key ) {
+		case '\t':
+      if (mod != kShiftDown)
+        SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
+      else
+      {
+        SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+      }
+      break;
 		case 'p': // pause/unpause simulation
 			simulation->SetPaused( !simulation->GetPaused() );
 			break;
