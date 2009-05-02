@@ -911,7 +911,7 @@ AbstractionGraphEnvironment::~AbstractionGraphEnvironment() {
 	//~GraphEnvironment();
 };
 
-void AbstractionGraphEnvironment::OpenGLDraw() {
+void AbstractionGraphEnvironment::OpenGLDraw() const {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 
 	glBegin(GL_LINES);
@@ -924,8 +924,8 @@ void AbstractionGraphEnvironment::OpenGLDraw() {
 		node *n;
 		n = g->GetNode(e->getFrom());
 		
-		glColor3f(1, 1, 1);
-		//glColor3f( 1, 0, 0 );
+		glColor3f( 0,0,0 );
+		//glColor3f(1, 0, 0);
 		//if (e->getMarked())
 		//	glColor3f(1, 1, 1);
 		

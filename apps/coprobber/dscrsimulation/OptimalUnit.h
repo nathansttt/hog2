@@ -16,12 +16,12 @@
 class OptimalUnit: public Unit<graphState,graphMove,AbstractionGraphEnvironment> {
 
 	public:
-	OptimalUnit( AbstractionGraphEnvironment *env, graphState initial_state, unsigned int cop_speed );
-	OptimalUnit( AbstractionGraphEnvironment *env, graphState initial_state, unsigned int copunit, unsigned int cop_speed );
+	OptimalUnit( AbstractionGraphEnvironment *env, graphState initial_state, unsigned int cop_speed, bool I_am_a_robber = true, DSDijkstra_MemOptim *dsdijkstra = NULL );
+	OptimalUnit( AbstractionGraphEnvironment *env, graphState initial_state, int copunit, unsigned int cop_speed, bool I_am_a_robber = true, DSDijkstra_MemOptim *dsdijkstra = NULL );
 	~OptimalUnit();
 
 	// sets the unit number of the cop we want to run away from
-	void SetCopUnit( unsigned int _copunit ) { copunit = _copunit; };
+	void SetCopUnit( int _copunit ) { copunit = _copunit; };
 
 	// returns OptimalUnit
 	const char *GetName();
@@ -40,10 +40,16 @@ class OptimalUnit: public Unit<graphState,graphMove,AbstractionGraphEnvironment>
 	protected:
 
 	DSDijkstra_MemOptim *dsdijkstra;
+	bool delete_dsdijkstra_when_getting_destroyed;
+	AbstractionGraphEnvironment *myenv;
 	GLfloat r, g, b;
 	graphState current_pos;
-	unsigned int copunit, cop_speed;
+	int copunit;
+	unsigned int cop_speed;
 	bool done;
+	bool I_am_a_robber;
+	std::vector<graphState> movecache;
+	unsigned int movecacheindex;
 };
 
 #endif
