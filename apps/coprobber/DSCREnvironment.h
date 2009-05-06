@@ -45,6 +45,9 @@ class DSCREnvironment {
 	// if radius == 0 then it takes the currently set cop_speed as radius
 	virtual void GetCopSuccessors( CRState &s, std::vector<state> &neighbors, unsigned int radius = 0 );
 	virtual void GetCopSuccessors( state &s,   std::vector<state> &neighbors, unsigned int radius = 0 );
+	// gives back the real environmental gcosts
+	// Warning: copgcost and robbergcost return 1. which is different from this
+	virtual void GetCopSuccessors( state &s,   std::vector<state> &neighbors, std::vector<float> &gcosts, unsigned int radius = 0 );
 
 	// termination criteria
 	virtual bool GoalTest( CRState &s );
@@ -79,7 +82,7 @@ class DSCREnvironment {
 	// dijkstra algorithm for successor generation for the cops
 	// note that we should actually give back trajectories of the cops and then
 	// detect collision in the cops trajectories...
-	virtual void Dijkstra( state &s, unsigned int &steps, std::vector<state> &neighbors );
+	virtual void Dijkstra( state &s, unsigned int &steps, std::vector<state> &neighbors, std::vector<float> &gcosts );
 
 	// variables
 	SearchEnvironment<state,action> *env;
@@ -96,14 +99,18 @@ class DSCREnvironment {
 	class QueueEntry {
 		public:
 		QueueEntry() {};
-		QueueEntry( state _pos, unsigned int _distance ):pos(_pos),distance(_distance) {};
+		QueueEntry( state _pos, unsigned int _distance, float _gcost ):pos(_pos),distance(_distance),gcost(_gcost) {};
 		state pos;
 		unsigned int distance;
+		float gcost;
 	};
 
 	struct QueueEntryCompare {
 		bool operator() ( const QueueEntry &q1, const QueueEntry &q2 ) const {
-			return( q1.distance > q2.distance );
+			if( fequal( q1.gcost, q2.gcost ) )
+				return( q1.distance > q2.distance );
+			else
+				return( q1.gcost > q2.gcost );
 		}
 	};
 
@@ -153,10 +160,21 @@ void DSCREnvironment<state,action>::GetCopSuccessors( CRState &s, std::vector<st
 
 template<class state, class action>
 void DSCREnvironment<state,action>::GetCopSuccessors( state &s, std::vector<state> &neighbors, unsigned int radius ) {
+	std::vector<float> gcosts;
 	if( radius == 0 ) radius = cop_speed;
-	Dijkstra( s, radius, neighbors );
+	Dijkstra( s, radius, neighbors, gcosts );
 	// we reverse the order to expand nodes first where the cop is moving full speed and the "stay" move last
 	std::reverse( neighbors.begin(), neighbors.end() );
+	return;
+};
+
+template<class state, class action>
+void DSCREnvironment<state,action>::GetCopSuccessors( state &s, std::vector<state> &neighbors, std::vector<float> &gcosts, unsigned int radius ) {
+	if( radius == 0 ) radius = cop_speed;
+	Dijkstra( s, radius, neighbors, gcosts );
+	// we reverse the order to expand nodes first where the cop is moving full speed and the "stay" move last
+	std::reverse( neighbors.begin(), neighbors.end() );
+	std::reverse( gcosts.begin(), gcosts.end() );
 	return;
 };
 
@@ -197,9 +215,9 @@ template<>
 double DSCREnvironment<graphState,graphMove>::HCost( graphState &s1, graphState &s2 );
 
 template<class state, class action>
-void DSCREnvironment<state,action>::Dijkstra( state &s, unsigned int &steps, std::vector<state> &neighbors ) {
+void DSCREnvironment<state,action>::Dijkstra( state &s, unsigned int &steps, std::vector<state> &neighbors, std::vector<float> &gcosts ) {
 	neighbors.clear();
-	openlist.push( QueueEntry( s, 0 ) );
+	openlist.push( QueueEntry( s, 0, 0. ) );
 
 	std::vector<state> tempneighbors;
 	typename std::vector<state>::iterator it;
@@ -210,17 +228,21 @@ void DSCREnvironment<state,action>::Dijkstra( state &s, unsigned int &steps, std
 		openlist.pop();
 
 		if( closedlist.find( qe.pos ) == closedlist.end() ) {
-			if( playerscanpass || !(qe.pos == s) )
+			if( playerscanpass || !(qe.pos == s) ) {
 				neighbors.push_back( qe.pos );
+				gcosts.push_back( qe.gcost );
+			}
 			closedlist.insert( qe.pos );
 
 			// if there can be neighbors from this node
 			if( qe.distance < steps ) {
 				env->GetSuccessors( qe.pos, tempneighbors );
+				// for all neighbors
 				for( it = tempneighbors.begin(); it != tempneighbors.end(); it++ ) {
-					if( closedlist.find( *it ) == closedlist.end() ) {
+					state new_state = *it;
+					if( closedlist.find( new_state ) == closedlist.end() ) {
 						// if not yet in list push it on the open queue
-						openlist.push( QueueEntry( *it, qe.distance + 1 ) );
+						openlist.push( QueueEntry( new_state, qe.distance + 1, qe.gcost + env->GCost(qe.pos, new_state) ) );
 					}
 				}
 				tempneighbors.clear();
