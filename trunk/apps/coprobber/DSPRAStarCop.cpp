@@ -9,9 +9,10 @@ DSPRAStarCop::~DSPRAStarCop() {
 	delete pra;
 };
 
-graphState DSPRAStarCop::MakeMove( graphState &robber, graphState &cop ) {
+graphState DSPRAStarCop::MakeMove( graphState &robber, graphState &cop, float &gcost ) {
 
 	nodesExpanded = 0; nodesTouched = 0;
+	gcost = 0.;
 
 	if( robber == cop ) return robber;
 
@@ -30,12 +31,16 @@ graphState DSPRAStarCop::MakeMove( graphState &robber, graphState &cop ) {
 		if( steps == 0 ) steps = 1; // make at least one step
 
 		for( unsigned int i = 0; i < steps; i++ ) {
+			gcost = 0.;
 			for( unsigned int j = 0; j < cop_speed; j++ ) {
-				if( temppath->next != NULL )
+				if( temppath->next != NULL ) {
+					gcost += graphabs->h(temppath->n,temppath->next->n);
 					temppath = temppath->next;
+				}
 				else
 					break;
 			}
+			gcosts.push_back( gcost );
 			pathcache.push_back( temppath->n->GetNum() );
 			if( temppath->next == NULL ) break;
 		}
@@ -46,11 +51,14 @@ graphState DSPRAStarCop::MakeMove( graphState &robber, graphState &cop ) {
 	}
 
 	if( pathcache.size() > 0 ) {
+		gcost = gcosts[0];
+		gcosts.erase( gcosts.begin() );
 		graphState result = pathcache[0];
 		pathcache.erase( pathcache.begin() );
 		return result;
 	} else {
 		// if we cannot make a move, we'll stay where we are
+		gcost = 1.;
 		return cop;
 	}
 };

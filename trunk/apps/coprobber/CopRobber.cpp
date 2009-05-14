@@ -46,6 +46,7 @@
 #include "dscrsimulation/PRAStarGraphUnit.h"
 #include "dscrsimulation/OptimalUnit.h"
 #include "TwoCopsDijkstra.h"
+#include "TwoCopsDijkstra2.h"
 #include "TwoCopsRMAStar.h"
 #include "TwoCopsTIDAStar.h"
 #include "DSCover2.h"
@@ -62,6 +63,7 @@ time_t last_simulation_update;
 xyLoc simulation_position_cop, simulation_position_robber;
 char simulation_dijkstra_file[1024];
 DSDijkstra_MemOptim *simulation_dsdijkstra = NULL;
+MapCliqueAbstraction *simulation_mca = NULL;
 
 bool movie_on = false;
 
@@ -900,7 +902,8 @@ void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 	printf( "map: %s\n", m->getMapName() );
 
 	Graph *g = GraphSearchConstants::GetGraph( m );
-	GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
+	GraphEnvironment *env = new GraphEnvironment( g, gh );
 	env->SetDirected( true );
 
 	DSDijkstra_MemOptim *dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
@@ -914,6 +917,7 @@ void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 
 	delete dsdijkstra;
 	delete env;
+	delete gh;
 	delete g;
 	delete m;
 }
@@ -1297,7 +1301,8 @@ void compute_twocopsdijkstra( int argc, char* argv[] ) {
 	GraphEnvironment *env = new GraphEnvironment( g, NULL );
 	env->SetDirected( true );
 
-	TwoCopsDijkstra *tcd = new TwoCopsDijkstra( env );
+	//TwoCopsDijkstra *tcd = new TwoCopsDijkstra( env );
+	TwoCopsDijkstra2 *tcd = new TwoCopsDijkstra2( env );
 	printf( "2-cop-win: %d\n", tcd->is_two_cop_win() );
 	tcd->WriteValuesToDisk( "dijkstra_twocops.dat" );
 
@@ -1807,11 +1812,11 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 		} // all problem instances for the map
 		
 		// cleanup
-		if( astar != NULL )          delete astar;
-		if( astar_dijkstra != NULL ) delete astar_dijkstra;
-		if( astar_perfecth != NULL ) delete astar_perfecth;
-		if( tida != NULL )           delete tida;
-		if( tida_perfecth != NULL )  delete tida_perfecth;
+		if( astar != NULL )          { delete astar; astar = NULL; }
+		if( astar_dijkstra != NULL ) { delete astar_dijkstra; astar_dijkstra = NULL; }
+		if( astar_perfecth != NULL ) { delete astar_perfecth; astar_perfecth = NULL; }
+		if( tida != NULL )           { delete tida; tida = NULL; }
+		if( tida_perfecth != NULL )  { delete tida_perfecth; tida_perfecth = NULL; }
 		delete env;
 		delete gh;
 		delete g;
@@ -2236,7 +2241,7 @@ void compute_website_interface( int argc, char* argv[] ) {
 		exit(1);
 	}
 	int num_cops;
-	if( strcmp( argv[1], "-c" ) == 0 ) {
+	if( strcmp( argv[2], "-c" ) == 0 ) {
 		num_cops = atoi( argv[3] );
 	} else {
 		output_syntax();
@@ -2579,9 +2584,6 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		Graph *g = mclab->GetAbstractGraph( 0 );
 		MaximumNormAbstractGraphMapHeuristic *gh = new MaximumNormAbstractGraphMapHeuristic( g, m );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
-		// Isaza comparison
-		// AbstractGraphMapHeuristic *gh_isaza = new AbstractGraphMapHeuristic( g, m );
-		// GraphEnvironment *env_isaza = new GraphEnvironment( g, gh_isaza );
 
 		// cop objects
 		DSDijkstra_MemOptim *dsdijkstra = NULL;
@@ -2597,7 +2599,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( find_algorithm( cop_algorithms, "pra" ) ) {
 			pracop = new DSPRAStarCop( mclab, cop_speed );
 			// Isaza comparison
-			// pracop->SetPathFraction( UINT_MAX );
+			//pracop->SetPathFraction( UINT_MAX );
 		}
 
 
@@ -2685,7 +2687,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						// variables to keep track of statistics
 						double value = 0.;
 						// Isaza comparison
-						// double isaza_time = 0.;
+						double cop_distance_travelled = 0.;
+
 						unsigned long calculations = 0, timer_average = 0, timer_stddiviation = 0;
 						clock_t clock_start, clock_end;
 						clock_start = clock_end = clock();
@@ -2695,13 +2698,25 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 						unsigned int counter = 0;
 						while( true ) {
 
+
+							// this is temporary for some experiment!!! REMOVE
+							/*
+							if( value > 300. ) {
+								std::cerr << "Timeout!" << std::endl;
+								break;
+							}
+							*/
+
+							// verbose
+							//printf( "cop called at: (%lu,%lu)\n", pos[0], pos[1] );
+
 							// cop's move
-							//graphState old_pos = pos[1]; // Isaza comparison
+							float distance_of_cop_move = 0.;
 							if( strcmp( cop_algorithms[cop_alg], "optimal" ) == 0 ) pos[1] = dsdijkstra->MakeMove( pos, true );
-							if( strcmp( cop_algorithms[cop_alg], "pra"     ) == 0 ) pos[1] = pracop->MakeMove( pos[0], pos[1] );
+							if( strcmp( cop_algorithms[cop_alg], "pra"     ) == 0 ) pos[1] = pracop->MakeMove( pos[0], pos[1], distance_of_cop_move );
 							value += 1.;
 							// Isaza comparison
-							// isaza_time += env_isaza->HCost( old_pos, pos[1] ); // this is actually not quite correct but ok for a first measure
+							cop_distance_travelled += distance_of_cop_move;
 							if( pos[0] == pos[1] ) break;
 
 							// verbose
@@ -2875,7 +2890,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 							double expected_nodesTouched  = (double)nodesTouched /(double)calculations;
 							fprintf( foutput, " %g %lu %g %g %g %g", value, calculations, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 							// Isaza comparison
-							// fprintf( foutput, " %g %lu %g %g %g %g %g", value, calculations, isaza_time, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
+							//fprintf( foutput, " %g %lu %g %g %g %g %g", value, calculations, cop_distance_travelled, expected_value, std_diviation, expected_nodesExpanded, expected_nodesTouched );
 							fflush( foutput );
 						}
 					} // parameter range
@@ -3069,8 +3084,8 @@ void CreateSimulation( int id ) {
 		MakeMaze( map, 1 );
 	} else
 		map = new Map( gDefaultMap );
-	MapCliqueAbstraction *mca = new MapCliqueAbstraction( map );
-	AbstractionGraphEnvironment *env = new AbstractionGraphEnvironment( mca, 0, new MaximumNormAbstractGraphMapHeuristic( mca->GetAbstractGraph(0), map ) );
+	simulation_mca = new MapCliqueAbstraction( map );
+	AbstractionGraphEnvironment *env = new AbstractionGraphEnvironment( simulation_mca, 0, new MaximumNormAbstractGraphMapHeuristic( simulation_mca->GetAbstractGraph(0), map ) );
 
 	// global variable, see above
 	simulation = new DSCRSimulation<graphState,graphMove,AbstractionGraphEnvironment>( env, true, 2, false );
@@ -3090,14 +3105,14 @@ void CreateSimulation( int id ) {
 	//TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment> *runit =
 	//	new TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca->GetNodeFromMap(34,74)->GetNum(), 1, 2 );
 	OptimalUnit *runit;
-	runit = new OptimalUnit( env, mca->GetNodeFromMap(simulation_position_robber.x, simulation_position_robber.y)->GetNum(), (unsigned int)2, true, simulation_dsdijkstra );
+	runit = new OptimalUnit( env, simulation_mca->GetNodeFromMap(simulation_position_robber.x, simulation_position_robber.y)->GetNum(), (unsigned int)2, true, simulation_dsdijkstra );
 	runit->SetColor( 1., 0., 0. );
 	unsigned int robberunitnumber = simulation->AddRobber( runit, 1. );
 
 	//PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment> *cunit =
 	//	new PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>( mca, mca->GetNodeFromMap(simulation_position_cop.x, simulation_position_cop.y)->GetNum(), 2 );
 	OptimalUnit *cunit;
-	cunit = new OptimalUnit( env, mca->GetNodeFromMap(simulation_position_cop.x,simulation_position_cop.y)->GetNum(), (unsigned int)2, false, simulation_dsdijkstra );
+	cunit = new OptimalUnit( env, simulation_mca->GetNodeFromMap(simulation_position_cop.x,simulation_position_cop.y)->GetNum(), (unsigned int)2, false, simulation_dsdijkstra );
 	cunit->SetColor( 0., 0., 1. );
 	unsigned int copunitnumber = simulation->AddCop( cunit, 1. );
 
@@ -3119,7 +3134,8 @@ void InstallHandlers() {
 	InstallWindowHandler(MyWindowHandler);
 	InstallKeyboardHandler(MyDisplayHandler, "pause", "pause/unpause simulation", kAnyModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "movie", "record several pictures for movie creation", kAnyModifier, 'm' );
-	 InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+	InstallKeyboardHandler(MyDisplayHandler, "reset", "reset the simulation", kAnyModifier, 'r' );
 	InstallMouseClickHandler(MyClickHandler);
 	return;
 }
@@ -3293,7 +3309,23 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) {
 				movie_on = true;
 				//RecordMovie( movie_on );
 			}
-	}
+			break;
+		case 'r':
+			std::cout << "resetting position" << std::endl;
+			simulation->ClearAllUnits();
+
+			OptimalUnit *runit;
+			runit = new OptimalUnit( simulation->GetEnvironment(), simulation_mca->GetNodeFromMap(simulation_position_robber.x, simulation_position_robber.y)->GetNum(), (unsigned int)2, true, simulation_dsdijkstra );
+			runit->SetColor( 1., 0., 0. );
+			unsigned int robberunitnumber = simulation->AddRobber( runit, 1. );
+			OptimalUnit *cunit;
+			cunit = new OptimalUnit( simulation->GetEnvironment(), simulation_mca->GetNodeFromMap(simulation_position_cop.x,simulation_position_cop.y)->GetNum(), (unsigned int)2, false, simulation_dsdijkstra );
+			cunit->SetColor( 0., 0., 1. );
+			unsigned int copunitnumber = simulation->AddCop( cunit, 1. );
+			runit->SetCopUnit( copunitnumber );
+			cunit->SetCopUnit( robberunitnumber );
+			break;
+		}
 	return;
 }
 
