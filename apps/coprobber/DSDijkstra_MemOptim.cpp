@@ -60,6 +60,13 @@ float DSDijkstra_MemOptim::compute_target_value( CRState &s ) {
 		temp[0] = *it;
 
 		tempvalue = dscrenv->RobberGCost( s, temp ) + min_cost[ CRHash_MemOptim( temp ) ];
+		//tempvalue = min_cost[ CRHash_MemOptim( temp ) ];
+		/* real edge costs
+		if( temp[0] == s[0] )
+			tempvalue = 1. + min_cost[CRHash_MemOptim( temp )];
+		else
+			tempvalue = env->GCost( s[0], temp[0] ) + min_cost[ CRHash_MemOptim( temp ) ];
+		*/
 		if( tempvalue > result ) result = tempvalue;
 
 		if( result == FLT_MAX ) return FLT_MAX;
@@ -134,21 +141,26 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 
 				// get neighbors
 				std::vector<graphState> myneighbors;
-				dscrenv->GetCopSuccessors( postemp, myneighbors );
+				//std::vector<float> gcosts; // real edge costs
+				//dscrenv->GetCopSuccessors( postemp[1], myneighbors, gcosts ); // real edge costs
+				dscrenv->GetCopSuccessors( postemp[1], myneighbors );
 				nodesExpanded++;
 
 				for( it = myneighbors.begin(); it != myneighbors.end(); it++ ) {
+				//for( unsigned int i = 0; i < myneighbors.size(); i++ ) { // real edge costs
 
 					nodesTouched++;
 
 					// build the next state
 					postemp[1] = *it;
+					//postemp[1] = myneighbors[i]; // real edge costs
 					qtemp.pos_hash = CRHash_MemOptim( postemp );
 
 					// check again whether already set or not
 					if( min_cost[ qtemp.pos_hash ] == FLT_MAX ) {
 						qtemp.minFirst = true;
-						qtemp.value    = qe.value + dscrenv->CopGCost( postemp, pos );
+						qtemp.value = qe.value + dscrenv->CopGCost( postemp, pos );
+						//qtemp.value = qe.value + gcosts[i]; // real edge costs
 						//printf( "pushed %d (%u,%u)(%u,%u) on queue with %g\n", qtemp.minFirst,
 						//	qtemp.pos[0].x, qtemp.pos[0].y, qtemp.pos[1].x, qtemp.pos[1].y, qtemp.value );
 						queue.push( qtemp );
@@ -172,6 +184,9 @@ float DSDijkstra_MemOptim::Value( CRState &pos, bool minFirst ) {
 
 // this implementation only supports cop_speed = 2 because I was to lazy to implement
 // an entire Dijkstra algorithm here
+//
+// note: this only works well because of the move ordering, if we used a wait
+// as the first move (from DSCREnvironment) this routine would screw up at the end
 void DSDijkstra_MemOptim::MakeSingleStepsCopMove( CRState &pos, std::vector<graphState> &moves ) {
 	moves.clear();
 	if( dscrenv->GetCopSpeed() != 2 ) std::cerr << "ERROR: speed != 2 not supported." << std::endl;
@@ -266,6 +281,8 @@ void DSDijkstra_MemOptim::push_end_states_on_queue() {
 		//
 		// if cop moves last
 		neighbors.clear();
+		//std::vector<float> gcosts; // real edge costs
+		//dscrenv->GetCopSuccessors( pos[1], neighbors, gcosts ); // real edge costs
 		dscrenv->GetCopSuccessors( pos, neighbors );
 		nodesExpanded++;
 		nodesTouched++;
@@ -273,11 +290,14 @@ void DSDijkstra_MemOptim::push_end_states_on_queue() {
 		postemp = pos;
 		qe.minFirst = true;
 		for( std::vector<graphState>::iterator it = neighbors.begin(); it != neighbors.end(); it++ ) {
+		//for( unsigned int i = 0; i < neighbors.size(); i++ ) { // real edge costs
 				nodesTouched++;
 
 				postemp[1]  = *it;
+				//postemp[1]  = neighbors[i]; // real edge costs
 				qe.pos_hash = CRHash_MemOptim( postemp );
-				qe.value    = dscrenv->CopGCost( postemp, pos );
+				qe.value = dscrenv->CopGCost( postemp, pos );
+				//qe.value = gcosts[i]; // real edge costs
 				queue.push( qe );
 		}
 
@@ -300,7 +320,7 @@ void DSDijkstra_MemOptim::WriteValuesToDisk( const char* filename ) {
 	/*
 	pos.assign( 2, 0 );
 	for( unsigned int i = 0; i < numnodes; i++ ) {
-		for( unsigned int j = i; j < numnodes; j++ ) {
+		for( unsigned int j = 0; j < numnodes; j++ ) {
 			pos[0] = i;
 			pos[1] = j;
 			unsigned int h = CRHash_MemOptim( pos );
@@ -312,11 +332,13 @@ void DSDijkstra_MemOptim::WriteValuesToDisk( const char* filename ) {
 		}
 	}
 	*/
+
 	for( unsigned int i = 0; i < min_cost.size(); i++ ) {
 		pos.clear();
 		MemOptim_Hash_To_CRState( i, pos );
 		fprintf( fhandler, "%lu %lu %g %g\n", pos[0], pos[1], min_cost[i], max_cost[i] );
 	}
+
 	fclose( fhandler );
 	return;
 };

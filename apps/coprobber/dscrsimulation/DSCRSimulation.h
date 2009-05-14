@@ -237,9 +237,9 @@ void DSCRSimulation<state, action, environment>::ClearAllUnits()
 		delete ui;
 	}
 
-	UpdatePublicInfo();
 	currTime = 0.; // reset simulation time
 	currentActor = 0;
+	UpdatePublicInfo();
 }
 
 
