@@ -52,6 +52,7 @@
 #include "DSCover2.h"
 #include "AbstractGraphMapHeuristic.h"
 #include "DSIDFPN.h"
+#include "PerfectGraphHeuristic.h"
 
 
 //std::vector<CRAbsMapSimulation *> unitSims;
@@ -2349,7 +2350,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		printf( "  cover           - redefined version of cover\n" );
 		printf( "  cover2 <time>   - A. Isaza cover implementation where time defines when\n" );
 		printf( "                    the robber is to move (assuming the cop moves at time 0.\n" );
-		printf( "  greedy          - heuristic hill climbing due to distance metric\n" );
+		printf( "  greedy          - heuristic hill climbing due to maximum norm distance metric\n" );
+		printf( "  greedy_perfect  - heuristic hill climbing due to perfect distance metric (edge costs 1)\n" );
 		printf( "  minimax <depth> - minimax up to given depth with distance metric evaluation\n" );
 		printf( "  dam <fraction> <depth>\n" );
 		printf( "                  - dynamic abstract minimax starting on level fraction to a given depth\n" );
@@ -2435,6 +2437,11 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 				}
 				else if( strcmp( argv[param_num], "greedy" ) == 0 ) {
 					robber_algorithms.push_back( "greedy" );
+					robber_int_params.push_back( std::vector<int>() );
+					robber_double_params.push_back( std::vector<double>() );
+				}
+				else if( strcmp( argv[param_num], "greedy_perfect" ) == 0 ) {
+					robber_algorithms.push_back( "greedy_perfect" );
 					robber_int_params.push_back( std::vector<int>() );
 					robber_double_params.push_back( std::vector<double>() );
 				}
@@ -2584,6 +2591,13 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		Graph *g = mclab->GetAbstractGraph( 0 );
 		MaximumNormAbstractGraphMapHeuristic *gh = new MaximumNormAbstractGraphMapHeuristic( g, m );
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
+		// if necessary build the perfect heuristic
+		PerfectGraphHeuristic *gh_perfect = NULL;
+		GraphEnvironment *env_perfect = NULL;
+		if( find_algorithm( robber_algorithms, "greedy_perfect" ) ) {
+			gh_perfect = new PerfectGraphHeuristic( g );
+			env_perfect = new GraphEnvironment( g, gh_perfect );
+		}
 
 		// cop objects
 		DSDijkstra_MemOptim *dsdijkstra = NULL;
@@ -2611,6 +2625,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		DSIDAM *dsidam = NULL;
 		DSIDAM2 *dsidam2 = NULL;
 		DSHeuristicGreedy<graphState,graphMove> *dsheuristic = NULL;
+		DSHeuristicGreedy<graphState,graphMove> *dsheuristic_perfect = NULL;
 		DSRandomBeacons *dsrandomb = NULL;
 		DSTPDijkstra<graphState,graphMove> *dstp = NULL; // trailmax
 		DSDATPDijkstra *dsdatp = NULL; // datrailmax
@@ -2623,6 +2638,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( find_algorithm( robber_algorithms, "idam"       ) ) dsidam      = new DSIDAM( mclab, true, cop_speed, true );
 		if( find_algorithm( robber_algorithms, "idam2"      ) ) dsidam2     = new DSIDAM2( mclab, true, cop_speed, true );
 		if( find_algorithm( robber_algorithms, "greedy"     ) ) dsheuristic = new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
+		if( find_algorithm( robber_algorithms, "greedy_perfect" ) ) dsheuristic_perfect
+			= new DSHeuristicGreedy<graphState,graphMove>( env_perfect, true, cop_speed );
 		if( find_algorithm( robber_algorithms, "trailmax"   ) ) dstp        = new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
 		if( find_algorithm( robber_algorithms, "datrailmax" ) ) dsdatp      = new DSDATPDijkstra( mclab, cop_speed, true );
 		if( find_algorithm( robber_algorithms, "randombeacons" ) ) dsrandomb = new DSRandomBeacons( mclab, true, cop_speed );
@@ -2817,6 +2834,17 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
 									calculations++;
 								}
+								// greedy with perfect heuristic
+								if( strcmp( robber_algorithms[robber_alg], "greedy_perfect" ) == 0 ) {
+									clock_start = clock();
+									pos[0] = dsheuristic_perfect->MakeMove( pos[0], pos[1], false );
+									clock_end   = clock();
+									nodesExpanded += dsheuristic_perfect->nodesExpanded;
+									nodesTouched  += dsheuristic_perfect->nodesTouched;
+									timer_average      += (clock_end-clock_start)/1000;
+									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+									calculations++;
+								}
 								// Random Beacons
 								if( strcmp( robber_algorithms[robber_alg], "randombeacons" ) == 0 ) {
 									// if new path has to be computed, do so
@@ -2910,6 +2938,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( dsdatp      != NULL ) delete dsdatp;
 		if( dstp        != NULL ) delete dstp;
 		if( dsheuristic != NULL ) delete dsheuristic;
+		if( dsheuristic_perfect != NULL ) delete dsheuristic_perfect;
 		if( dsdam       != NULL ) delete dsdam;
 		if( dsidam      != NULL ) delete dsidam;
 		if( dsminimax   != NULL ) delete dsminimax;
@@ -2918,7 +2947,9 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( pracop     != NULL ) delete pracop;
 		if( dsdijkstra != NULL ) delete dsdijkstra;
 		// delete environments
+		if( env_perfect != NULL ) delete env_perfect;
 		delete env;
+		if( gh_perfect != NULL ) delete gh_perfect;
 		delete gh;
 		delete mclab;
 	}

@@ -124,6 +124,7 @@ unsigned int DSCover<state,action>::cover( state pos_robber, state pos_cop, bool
 	cop_queue.push( qcop );
 	QueueEntry qrobber( pos_robber, 0, pos_robber );
 	robber_queue.push( qrobber );
+	nodesTouched += 2;
 
 	// create some variables that will be needed
 	std::vector<state> neighbors;
@@ -152,24 +153,30 @@ unsigned int DSCover<state,action>::cover( state pos_robber, state pos_cop, bool
 
 			if( robber_closed.find( qrobber.s ) == robber_closed.end() &&
 			    cop_closed.find( qrobber.parent ) == cop_closed.end() ) {
-			    //cop_closed.find( qrobber.s ) == cop_closed.end() ) {
 
 				// verbose
 				//printf( "expanded node %lu for the robber\n", qrobber.s );
 
-				nodesExpanded++;
-				robber_cover++;
 				robber_closed.insert( qrobber.s );
 
+				// if we moved into the cop, he thought the node is covered
+				// by him but we just stole it
+				if( cop_closed.find( qrobber.s ) != cop_closed.end() )
+					cop_cover--;
+				robber_cover++;
+
 				dscrenv->GetRobberSuccessors( qrobber.s, neighbors );
+				nodesExpanded++;
 
 				for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
 					nodesTouched++;
-					qtemp.s        = *it;
-					qtemp.numTurns = qrobber.numTurns + 1;
-					qtemp.parent   = qrobber.s;
-					robber_queue.push( qtemp );
-					//printf( "pushing %lu onto the queue for the robber\n", qtemp.s );
+					if( robber_closed.find( *it ) == robber_closed.end() ) {
+						qtemp.s        = *it;
+						qtemp.numTurns = qrobber.numTurns + 1;
+						qtemp.parent   = qrobber.s;
+						robber_queue.push( qtemp );
+						//printf( "pushing %lu onto the queue for the robber\n", qtemp.s );
+					}
 				}
 			}
 
@@ -183,34 +190,33 @@ unsigned int DSCover<state,action>::cover( state pos_robber, state pos_cop, bool
 				// verbose
 				//printf( "expanded node %lu for the cop\n", qcop.s );
 
-				nodesExpanded++;
 				cop_closed.insert( qcop.s );
 
 				// whether or not this state should be counted towards the cop cover
-				// this is the case when the cop is neither capturing the robber
+				// this is the case when
+				// 1. the cop is neither capturing the robber
 				// (in this case the node is counted towards the robber)
-				// and when the state is adjacent to a robbers position (then it
-				// will be counted towards the robber cover in the next turn).
-				bool count_this_node = true;
-				if( robber_closed.find( qcop.s ) != robber_closed.end() )
-					count_this_node = false;
+				// 2. the cop is adjacent to the robber and the robber can move into him
+				// in his next turn. We count this case as cop_cover here and substract it
+				// when the robber moves
+				if( robber_closed.find( qcop.s ) == robber_closed.end() )
+					cop_cover++;
 
 				dscrenv->GetCopSuccessors( qcop.s, neighbors );
+				nodesExpanded++;
 
 				for( it = neighbors.begin(); it != neighbors.end(); it++ ) {
 					nodesTouched++;
-					if( robber_closed.find( *it ) == robber_closed.end() ) {
+
+					if( cop_closed.find( *it ) == cop_closed.end() ) {
 						qtemp.s        = *it;
 						qtemp.numTurns = qcop.numTurns + 1;
 						//qtemp.parent   = qcop.s; // not needed
 						cop_queue.push( qtemp );
 						//printf( "pushing %lu onto the queue for the cop\n", qtemp.s );
-					} else {
-						count_this_node = false;
 					}
 				}
 
-				if( count_this_node ) cop_cover++;
 			}
 		}
 	}

@@ -340,7 +340,6 @@ void TwoCopsDijkstra2::WriteValuesToDisk( const char* filename ) {
 			for( unsigned int c2 = c1; c2 < numnodes; c2++ ) {
 				pos[1] = c1;
 				pos[2] = c2;
-				if( pos[1] > pos[2] ) { graphState temp = pos[2]; pos[2] = pos[1]; pos[1] = temp; };
 
 				//fprintf( fhandler, "%u %u %u %u\n", r, c1, c2, min_cost[CRHash_MemOptim( pos )] );
 
