@@ -2606,8 +2606,11 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		// Solve the entire state space if needed
 		if( compute_optimal_solution ) {
 			dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
+			clock_t clock_start, clock_end;
+			clock_start = clock();
 			dsdijkstra->dsdijkstra();
-			fprintf( stdout, "dijkstra done.\n" ); fflush( stdout );
+			clock_end = clock();
+			fprintf( stdout, "dijkstra done in %ld miliseconds.\n", (clock_end-clock_start)/1000 ); fflush( stdout );
 		}
 		// PRA* cop
 		if( find_algorithm( cop_algorithms, "pra" ) ) {
