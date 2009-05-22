@@ -67,7 +67,7 @@ pRecContext GetContext(unsigned int windowID)
 	pRecContext pContextInfo = (pRecContext) GetWRefCon(f);
 	while (1)
 	{
-		if (pContextInfo->windowID == windowID)
+		if (pContextInfo && (pContextInfo->windowID == windowID))
 			return pContextInfo;
 		f = GetNextWindow (f);
 		if (f == 0)
@@ -1689,7 +1689,6 @@ void createNewWindow(void)
 			pContextInfo->time = UpTime();
 			InstallEventLoopTimer(GetCurrentEventLoop(), 0, 1/60.0, getTimerUPP (), (void *) window, &pContextInfo->timer);
 		}
-		HandleWindowEvent(pContextInfo, kWindowCreated);
 	}
 }
 
@@ -2151,6 +2150,9 @@ static pascal OSStatus appEvtHndlr (EventHandlerCallRef myHandler, EventRef even
 						case 'neww':
 							//if (FrontWindow() == 0)
 							createNewWindow();
+							window = FrontWindow();
+							pContextInfo = (pRecContext)GetWRefCon(window);
+							HandleWindowEvent(pContextInfo, kWindowCreated);
 							result = noErr;
 							break;
 						case 'open':

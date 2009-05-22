@@ -158,9 +158,9 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 template <class state, class action, class environment>
 bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo<state,action,environment> *si, action& dir)
 {
-	if(Done())
+	if (Done())
 	{
- 		printf("Done is true (%d)\n", Done());
+ 		//printf("Done is true (%d)\n", Done());
 		return false;
 	}
 		
@@ -240,18 +240,21 @@ void GenericPatrolUnit<state,action,environment>::GoToLoc(environment *env, int 
 {
 	std::vector<state> path; 
 	
+//	std::cout << "Planning between " << loc << " and " << locs[which] << std::endl;
 	//printf("%s ",GetName());
 	algorithm->GetPath(env, loc, locs[which], path);
 	//	std::cout<<"At ("<<loc.x<<","<<loc.y<<") pathing to ("<<locs[which].x<<","<<locs[which].y<<")"<<std::endl;
 	nodesExpanded += algorithm->GetNodesExpanded();
 	nodesTouched += algorithm->GetNodesTouched();
 	std::cout << algorithm->GetNodesExpanded() << " nodes expanded\n";
-	//  	std::cout<<"Path ";
-	//	for(int i=0; i<path.size();i++)
-	//{
-	//	std::cout<<"("<<path[i].x<<","<<path[i].y<<") ";
-	//}
-	//std::cout<<std::endl;
+//	std::cout << "Path length: " << env->GetPathLength(path) << " (" << path.size() << " moves)" << std::endl;
+//	std::cout << "Initial Heuristic: " << env->HCost(loc, locs[which]) << std::endl;
+//	//  	std::cout<<"Path ";
+//	for(int i=0; i<path.size();i++)
+//	{
+//		std::cout<<"{"<< path[i] << "} ";
+//	}
+//	std::cout<<std::endl;
 	if (path.size() > 0)
 	{
 		AddPathToCache(env, path);
@@ -364,7 +367,7 @@ bool GenericPatrolUnit<state,action,environment>::Done()
 	}
 	else if (counter >= numPatrols)
 	{
-		printf("Done\n");
+		//printf("Done\n");
 		return true;
 	}
 	return false;

@@ -32,7 +32,7 @@
 #include "UnitGroup.h"
 #include "MapCliqueAbstraction.h"
 #include "NodeLimitAbstraction.h"
-#include "MapQuadTreeAbstraction.h"
+#include "MapSectorAbstraction.h"
 //#include "RadiusAbstraction.h"
 #include "MapFlatAbstraction.h"
 //#include "ClusterAbstraction.h"
@@ -263,7 +263,7 @@ void CreateSimulation(int id)
 // 		map = new Map(gDefaultMap);
 // 
 // 	map->setTileSet(kWinterTile);
-// 		env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,absSize));
+// 		env = new AbsMapEnvironment(new MapSectorAbstraction(map,absSize));
 // 	unitSims.resize(id+1);
 // 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 // 	unitSims[id]->SetPaused(true);
@@ -315,7 +315,7 @@ void DoRandom(int id)
 	
 	//unitSims.resize(id+1);
 
-	env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,absSize));
+	env = new AbsMapEnvironment(new MapSectorAbstraction(map,absSize));
 	
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	unitSims[id]->SetStepType(kRealTime);
@@ -435,7 +435,7 @@ void Initialize(int id, Map* map)
 	unitSims.resize(id+1);
 	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
 	MapAbstraction *ma;
-	env = new AbsMapEnvironment(ma = new MapQuadTreeAbstraction(map,absSize));
+	env = new AbsMapEnvironment(ma = new MapSectorAbstraction(map,absSize));
 	//ma->ToggleDrawAbstraction(1);
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	unitSims[id]->SetStepType(kRealTime);
@@ -496,7 +496,7 @@ void RunScenario(int id)
 	
 	unitSims.resize(id+1);
 	//env = new AbsMapEnvironment(new MapFlatAbstraction(map));
-//env = new AbsMapEnvironment(new MapQuadTreeAbstraction(map,8));
+//env = new AbsMapEnvironment(new MapSectorAbstraction(map,8));
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
 	unitSims[id]->SetStepType(kRealTime);
 	unitSims[id]->SetThinkingPenalty(0);

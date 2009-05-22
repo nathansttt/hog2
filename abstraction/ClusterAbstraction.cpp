@@ -705,7 +705,7 @@ int ClusterAbstraction::getClusterIdFromNode(node* n)
  * Connected components that cannot reach any entrance nodes will be assigned their own
  * parent node. 
  *
- * Connected component code borrowed from MapQuadTreeAbstraction.cpp
+ * Connected component code borrowed from MapSectorAbstraction.cpp
  */
 void ClusterAbstraction::setUpParents(Graph* g)
 {
@@ -921,7 +921,7 @@ for (unsigned int i=dummies.size()-1;i>0; --i)
 }
 
 /**
-* 'borrowed' from MapQuadTreeAbstraction.cpp
+* 'borrowed' from MapSectorAbstraction.cpp
  */
 void ClusterAbstraction::abstractionBFS(node *which, node *parent, int cluster, int numOrigNodes, int numNodesAfter)
 {
@@ -1009,7 +1009,7 @@ bool ClusterAbstraction::Pathable(node* from, node* to)
 
 
 /*
- * 'borrowed' from quadTreeAbstraction.cpp 
+ * 'borrowed' from SectorAbstraction.cpp 
  */ 
 void ClusterAbstraction::buildNodeIntoParent(node *n, node *parent)
 {

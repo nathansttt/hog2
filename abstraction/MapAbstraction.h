@@ -67,7 +67,7 @@ public:
 private:
 		
 	void DrawLevelConnections(node *n) const;
-	void DrawGraph(Graph *g) const;
+	void DrawGraph(Graph *g, bool levels = true) const;
 	
 	Map *m;
 	unsigned long levelDraw;

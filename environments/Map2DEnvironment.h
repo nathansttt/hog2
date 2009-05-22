@@ -19,6 +19,7 @@
 #include "UnitSimulation.h"
 #include "ReservationProvider.h"
 #include "BitVector.h"
+#include "GraphEnvironment.h"
 
 #include <cassert>
 
@@ -84,6 +85,8 @@ class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 public:
 	MapEnvironment(Map *m);
 	virtual ~MapEnvironment();
+	void SetGraphHeuristic(GraphHeuristic *h);
+	GraphHeuristic *GetGraphHeuristic();
 	void GetSuccessors(xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
 	void GetActions(xyLoc &nodeID, std::vector<tDirection> &actions) const;
 	tDirection GetAction(xyLoc &s1, xyLoc &s2) const;
@@ -123,6 +126,7 @@ public:
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Mapenv\n";return oi;}
 	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
 protected:
+	GraphHeuristic *h;
 	Map *map;
 	BaseMapOccupancyInterface *oi;
 };

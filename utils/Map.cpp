@@ -1518,6 +1518,8 @@ void Map::OpenGLDraw(tDisplay how) const
  */
 void Map::getOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
 {
+	if ((_x == -1) || (_y == -1))
+		return;
 	double _scale;
 	if (height > width)
 		_scale = 1/(double)height;

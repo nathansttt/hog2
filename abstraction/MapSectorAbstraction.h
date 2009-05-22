@@ -1,7 +1,7 @@
 /*
- * $Id: MapQuadTreeAbstraction.h,v 1.6 2006/10/18 23:53:25 nathanst Exp $
+ * $Id: MapSectorAbstraction.h,v 1.6 2006/10/18 23:53:25 nathanst Exp $
  *
- *  MapQuadTreeAbstraction.h
+ *  MapSectorAbstraction.h
  *  hog
  *
  *  Created by Nathan Sturtevant on 8/8/05.
@@ -27,15 +27,15 @@
 
 #include "MapAbstraction.h"
 
-#ifndef MAPQUADTREEABSTRACTION_H
-#define MAPQUADTREEABSTRACTION_H
+#ifndef MAPSectorABSTRACTION_H
+#define MAPSectorABSTRACTION_H
 
-class MapQuadTreeAbstraction : public MapAbstraction {
+class MapSectorAbstraction : public MapAbstraction {
 public:
-	/** Creat a quadTreeAbstraction of the map. The sector size must be greater than 1 */
-	MapQuadTreeAbstraction(Map *, int);
-	~MapQuadTreeAbstraction();
-	MapAbstraction *clone(Map *_m) { return new MapQuadTreeAbstraction(_m, sectorSize); }
+	/** Creat a SectorAbstraction of the map. The sector size must be greater than 1 */
+	MapSectorAbstraction(Map *, int);
+	~MapSectorAbstraction();
+	MapAbstraction *clone(Map *_m) { return new MapSectorAbstraction(_m, sectorSize); }
 
 	virtual bool Pathable(node *from, node *to);
 	

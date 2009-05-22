@@ -25,7 +25,7 @@
 
 #include "LLPDB.h"
 #include "Map2DEnvironment.h"
-#include "MapQuadTreeAbstraction.h"
+#include "MapSectorAbstraction.h"
 #include "Common.h"
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
@@ -293,10 +293,11 @@ void MyPDBKeyHandler(unsigned long, tKeyboardModifier mod, char key)
 	}
 	if (key == 'r')
 	{
-		if (stp)
-			MoveGraph(stp);
-		else
-			RunBigTest();
+		TestRoomCPDBs();
+//		if (stp)
+//			MoveGraph(stp);
+//		else
+//			RunBigTest();
 	}
 }
 
@@ -485,9 +486,9 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 	std::vector<std::vector<float> > hcosts(8);
 	std::vector<std::vector<int> > nodes(8);
 	
-	for (int w = 10; w <= 20; w+=200)
+	for (int w = 10; w <= 20; w*=20)
 	{
-		for (int x = 3; x < 4; x++)
+		for (int x = 0; x <= 4; x++)
 		{
 			char name[255];
 			sprintf(name, scenario,  x/100, (x/10)%10, x%10);
@@ -496,7 +497,7 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 			if (sl->GetNumExperiments() == 0)
 				continue;
 
-			for (int y = 3; y <= 3; y++)
+			for (int y = 1; y <= 5; y++)
 			{
 				printf("Loading pdb %d\n", y);
 				char pdbname[255];
@@ -506,22 +507,22 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 				else
 					gch->load(pdbname);
 			
-				freopen("/Users/nathanst/Desktop/CH.txt","a+",stdout);
+//				freopen("/Users/nathanst/Desktop/CH.txt","a+",stdout);
 				RunTest(sl, gch, gch->GetMap(), lower, upper, nodes[y], hcosts[y], times[y]);
 			}
-			freopen("/Users/nathanst/Desktop/octile.txt","a+",stdout);
-			RunTest(sl, gch, gch->GetMap(), lower, upper, nodes[0], hcosts[0], times[0], true);
-			for (int y = 1; y <= 1; y++)
-			{
-				GraphMapInconsistentHeuristic gdh(gch->GetMap(), gch->GetGraph());
-				gdh.SetNumUsedHeuristics(1000);
-				gdh.SetMode(kMax);
-				gdh.UseSmartPlacement((y==0)?false:true);
-				for (int t = 0; t < w; t++)
-					gdh.AddHeuristic();
-				freopen("/Users/nathanst/Desktop/DH.txt","a+",stdout);
-				RunTest(sl, &gdh, gch->GetMap(), lower, upper, nodes[6+y], hcosts[6+y], times[6+y]);
-			}
+//			freopen("/Users/nathanst/Desktop/octile.txt","a+",stdout);
+//			RunTest(sl, gch, gch->GetMap(), lower, upper, nodes[0], hcosts[0], times[0], true);
+//			for (int y = 1; y <= 1; y++)
+//			{
+//				GraphMapInconsistentHeuristic gdh(gch->GetMap(), gch->GetGraph());
+//				gdh.SetNumUsedHeuristics(1000);
+//				gdh.SetMode(kMax);
+//				gdh.UseSmartPlacement((y==0)?false:true);
+//				for (int t = 0; t < w; t++)
+//					gdh.AddHeuristic();
+//				freopen("/Users/nathanst/Desktop/DH.txt","a+",stdout);
+//				RunTest(sl, &gdh, gch->GetMap(), lower, upper, nodes[6+y], hcosts[6+y], times[6+y]);
+//			}
 			delete sl;
 		}
 	}
@@ -554,6 +555,7 @@ void RunTest(ScenarioLoader *sl, GraphHeuristic *gcheur, Map *map, float minDist
 	
 	std::vector<graphState> thePath;
 	TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
+	astar.SetUseBPMX(false);
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
 		Experiment e = sl->GetNthExperiment(x);
