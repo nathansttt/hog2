@@ -58,7 +58,7 @@ void MultilevelMarkovGame<state,action>::GetExpectedStateRewards( unsigned int p
 	double norm = precision;
 	MarkovGame<state,action> *game = NULL;
 
-	for( i = 0; i < maxlevel; i++ ) {
+	for( i = 0; i <= maxlevel; i++ ) {
 		iter[i] = 0;
 		V[i] = NULL;
 	}
@@ -67,24 +67,24 @@ void MultilevelMarkovGame<state,action>::GetExpectedStateRewards( unsigned int p
 	// don't be a fool and try >= 0 instead of >= 1, i is an unsigned int, therefore the first would
 	// always be true!
 	for( i = maxlevel; i >= 1; i-- ) {
-		game = GetMarkovGame( i-1 );
+		game = GetMarkovGame( i );
 
 		// VERBOSE
 		char filename[250];
 		if( i != maxlevel ) {
-			sprintf( filename, "er_before_level%u.stat", i-1 );
-			game->WriteExpectedRewardToDisc( filename, player, V[i-1] );
+			sprintf( filename, "er_before_level%u.stat", i );
+			game->WriteExpectedRewardToDisc( filename, player, V[i] );
 		}
 
-		game->GetExpectedStateRewards( player, gamma, epsilon, norm, V[i-1], iter[i-1], maxiter );
+		game->GetExpectedStateRewards( player, gamma, epsilon, norm, V[i], iter[i], maxiter );
 
-		sprintf( filename, "er_after_level%u.stat", i-1 );
-		game->WriteExpectedRewardToDisc( filename, player, V[i-1] );
+		sprintf( filename, "er_after_level%u.stat", i );
+		game->WriteExpectedRewardToDisc( filename, player, V[i] );
 
-		if( i-1 )
-			PushDown( V[i-1], i-1, V[i-2] );
+		//if( i > 0 )
+		PushDown( V[i], i, V[i-1] );
 		
-		printf( "norm after computation on level %u is %g\n", i-1, norm );
+		printf( "norm after computation on level %u is %g\n", i, norm );
 	}
 
 /*
@@ -116,9 +116,8 @@ void MultilevelMarkovGame<state,action>::GetExpectedStateRewards( unsigned int p
 	}
 */
 
-
 	// if the top->down cycle wasn't enough, converge the rest on the lowest level
-	if( norm > precision ) {
+	//if( norm > precision ) {
 		game = GetMarkovGame(0);
 		game->GetExpectedStateRewards( player, gamma, epsilon, precision, V[0], iter[0] );
 
@@ -126,7 +125,7 @@ void MultilevelMarkovGame<state,action>::GetExpectedStateRewards( unsigned int p
 		char filename[250];
 		sprintf( filename, "er_solution_level0.stat" );
 		game->WriteExpectedRewardToDisc( filename, player, V[0] );
-	}
+	//}
 
 	return;
 
@@ -148,15 +147,16 @@ void MultilevelMarkovGame<state,action>::PushDown( double* V_parent, unsigned in
 	}
 
 	for( i = 0; i < num_cstates; i++ ) {
-		// get the parent state
 		cstate = cgame->GetStateByNumber( i );
 
 		if( cgame->GoalTest( cstate, cstate ) ) V_child[i] = 0.;
 		else {
 
+			// get the parent state
 			pstate = GetParent( cstate, parent_level-1 );
 			if( pstate.size() ) {
-				V_child[i] = V_parent[ pgame->GetNumberByState( pstate ) ];
+				// TODO: make this much better!
+				V_child[i] = 2. * V_parent[ pgame->GetNumberByState( pstate ) ];
 			} else {
 				if( allocated )
 					V_child[i] = 0.;

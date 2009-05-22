@@ -1987,58 +1987,105 @@ void compute_experiment_markov( int argc, char* argv[] ) {
 
 	// config parameters
 	bool simultaneous = true;
-	unsigned int num_cops = 1;
+	// more config parameters to fiddle with
+	double precision = 0.01;
+	double gamma = 1.0;
+	double LP_solve_precision = 0.001;
 
-	char map_file[100];
-	FILE *problem_file, *result_file;
-	unsigned int num_iterations;
+//	char map_file[100];
+//	FILE *problem_file, *result_file;
 	clock_t clock_start, clock_end;
 	clock_start = clock_end = clock();
-	Map *m;
+	Map *m = NULL;
 
-	if( argc < 5 ) {
-		printf( "Syntax: <problem set file> <algorithm> <result file>\n" );
-		printf( "where <algorithm> = markov\n" );
+	if( argc < 6 ) {
+		printf( "Syntax: <num_cops> <init_method> <map_file> {<solution_file>|<max_iter>}\n" );
+		printf( "where <init_method> is one of the following:\n" );
+		printf( "  0 - initialize with 0 everywhere\n" );
+		printf( "  1 - initialize with distance metric\n" );
+		printf( "  2 - initialize with forward heuristic (accumulative distance metric\n" );
+		printf( "  3 - solve the alternating game and initialize with that\n" );
+		printf( "  4 - use multilevel markov game\n" );
+		printf( "when using init methods 0-3 specify a solution_file\n" );
+		printf( "when using init method 4 specify how many iterations should be performed on each level\n" );
 		exit(1);
 	}
 
-	problem_file = fopen( argv[2], "r" );
-	result_file  = fopen( argv[4], "w" );
+	unsigned int num_cops = atoi( argv[2] );
+	int init_param = atoi( argv[3] );
+
+//	problem_file = fopen( argv[4], "r" );
+//	result_file  = fopen( argv[5], "w" );
 
 	// for all the problems in the problem set file
-	while( !feof( problem_file ) ) {
-		fscanf( problem_file, "%s\n", map_file );
-		m = new Map( map_file );
+//	while( !feof( problem_file ) ) {
+//		fscanf( problem_file, "%s\n", map_file );
+//		m = new Map( map_file );
+		m = new Map( argv[4] );
 		MapCliqueAbstraction *mca = new MapCliqueAbstraction( m );
 		Graph *g = mca->GetAbstractGraph( 0 );
-		num_iterations = 0;
 
-		if( strcmp( argv[3], "markov" ) == 0 ) {
+		// verbose
+		std::cout << "solving map: " << m->getMapName() << std::endl;
 
-			// more config parameters to fiddle with
-			double precision = 0.1;
-			double gamma = 1.0;
-			double *V = NULL;
-
-			GraphEnvironment *env = new GraphEnvironment( g, NULL );
+		if( init_param < 4 ) {
+			// normal value iteration on Markov Game with different kind of initializations
+			MaximumNormAbstractGraphMapHeuristic *gh = new MaximumNormAbstractGraphMapHeuristic( g, m );
+			GraphEnvironment *env = new GraphEnvironment( g, gh );
 			CopRobberGame *game = new CopRobberGame( env, num_cops, simultaneous, true );
+			game->Init_With( init_param );
 
+			double *V = NULL;
+			unsigned int num_iterations = 0;
 			clock_start = clock();
-			game->GetExpectedStateRewards( 0, gamma, 0.01, precision, V, num_iterations );
+			game->GetExpectedStateRewards( 0, gamma, LP_solve_precision, precision, V, num_iterations );
 			clock_end = clock();
+
+			game->WriteExpectedRewardToDisc( argv[5], 0, V );
 
 			delete[] V;
 			delete game;
 			delete env;
-		}
 
+			// write out the statistics
+			std::cout << "iterations: " << num_iterations << std::endl;
+			std::cout << "time: " << (clock_end-clock_start)/1000 << " ms" << std::endl;
+		} else {
+			// using the multilevel markov game
+			MultilevelCopRobberGame *mlgame = new MultilevelCopRobberGame( mca, num_cops, simultaneous, true );
+			double **V = NULL;
+			unsigned int *num_iterations = NULL;
+			std::cout << "number of abstraction levels: " << mlgame->NumLevels() << std::endl;
+			unsigned int start_level = mlgame->NumLevels(); // / 2;
+			if( start_level > 0 ) start_level--;
+			std::cout << "computation starts on level: " << start_level << std::endl;
+			unsigned int max_level_iterations = atoi( argv[5] );
+			if( start_level <= 0 ) {
+				std::cerr << "ERROR: start level is 0." << std::endl;
+				exit( 1 );
+			}
+			clock_start = clock();
+			mlgame->GetExpectedStateRewards( 0, gamma, LP_solve_precision, precision, V, num_iterations, start_level, max_level_iterations );
+			clock_end = clock();
+
+			for( unsigned int i = 0; i < start_level; i++ )
+				delete[] V[i];
+			delete[] V;
+			delete mlgame;
+
+			for( unsigned int i = start_level; i > 0; i-- ) {
+				printf( "iterations on level %u: %u\n", i-1, num_iterations[i-1] );
+			}
+		}
 		delete mca;
-		// write out the statistics
-		fprintf( result_file, "%u %lu %s\n", num_iterations, (clock_end-clock_start)/1000,map_file );
-		fflush( result_file );
-	}
-	fclose( result_file );
-	fclose( problem_file );
+
+		//fprintf( result_file, "%u %lu %s\n", num_iterations, (clock_end-clock_start)/1000,map_file );
+		//fflush( result_file );
+//	}
+//	fclose( result_file );
+//	fclose( problem_file );
+
+	return;
 }
 
 
@@ -2610,7 +2657,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 			clock_start = clock();
 			dsdijkstra->dsdijkstra();
 			clock_end = clock();
-			fprintf( stdout, "dijkstra done in %ld miliseconds.\n", (clock_end-clock_start)/1000 ); fflush( stdout );
+			fprintf( stdout, "dijkstra done.\n%ld ms %u nE %u nT\n", (clock_end-clock_start)/1000, dsdijkstra->nodesExpanded, dsdijkstra->nodesTouched ); fflush( stdout );
 		}
 		// PRA* cop
 		if( find_algorithm( cop_algorithms, "pra" ) ) {
