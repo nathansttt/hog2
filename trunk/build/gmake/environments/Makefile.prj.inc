@@ -30,8 +30,8 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-	environments/Map2DEnvironment.cpp \
 	environments/GraphEnvironment.cpp \
+	environments/Map2DEnvironment.cpp \
 	environments/PermutationPuzzleEnvironment.cpp \
 	environments/MNPuzzle.cpp \
 	environments/FlipSide.cpp \
