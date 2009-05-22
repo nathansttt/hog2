@@ -113,6 +113,21 @@ private:
 	Graph *g;
 };
 
+class GraphAbstractionHeuristic : public GraphHeuristic {
+public:
+	GraphAbstractionHeuristic(MapAbstraction *mabs, int lev)
+	:mAbs(mabs), level(lev) {}
+	Graph *GetGraph() { return mAbs->GetAbstractGraph(level); }
+	double HCost(graphState &state1, graphState &state2)
+	{
+		return mAbs->h(mAbs->GetAbstractGraph(level)->GetNode(state1),
+					   mAbs->GetAbstractGraph(level)->GetNode(state2));
+	}
+private:
+	MapAbstraction *mAbs;
+	int level;
+};
+
 class GraphMapPerfectHeuristic : public GraphHeuristic {
 public:
 	GraphMapPerfectHeuristic(Map *map, Graph *graph):m(map), g(graph)
@@ -171,7 +186,7 @@ class GraphDistanceHeuristic : public GraphHeuristic {
 public:
 	GraphDistanceHeuristic(Graph *graph) :g(graph) { smartPlacement = false; }
 	~GraphDistanceHeuristic() {}
-	virtual double HCost(graphState &state1, graphState &state2) = 0;
+	virtual double HCost(graphState &state1, graphState &state2);
 	void AddHeuristic(node *n = 0);
 	int GetNumHeuristics() { return heuristics.size(); }
 	void UseSmartPlacement(bool use) { smartPlacement = use; }
@@ -260,7 +275,7 @@ class AbstractionGraphEnvironment: public GraphEnvironment {
 	virtual void OpenGLDraw() const;
 	double scale() { return graphscale; };
 
-	protected:
+protected:
 	GraphAbstraction *gabs;
 	double graphscale;
 };

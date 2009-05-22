@@ -308,7 +308,7 @@ private:
 
 /** A search algorithm which combines direction maps with abstraction
 *
-* This algorithm requires an abstraction environment with a MapQuadTreeAbstraction as well
+* This algorithm requires an abstraction environment with a MapSectorAbstraction as well
 * as a WeightedMap2DEnvironment.
 */
 template <class state, class action, class environment>

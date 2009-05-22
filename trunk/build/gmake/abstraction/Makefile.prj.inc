@@ -40,7 +40,7 @@ SRC_CPP = \
   abstraction/MapFlatAbstraction.cpp \
   abstraction/MapLineAbstraction.cpp \
   abstraction/MapProvider.cpp \
-  abstraction/MapQuadTreeAbstraction.cpp \
+  abstraction/MapSectorAbstraction.cpp \
   abstraction/NodeLimitAbstraction.cpp \
   abstraction/RadiusAbstraction.cpp \
   abstraction/Width.cpp

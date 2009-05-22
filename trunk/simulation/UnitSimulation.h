@@ -187,6 +187,7 @@ int UnitSimulation<state, action, environment>::AddUnit(Unit<state, action, envi
 	ui->agent = u;
 	u->GetLocation(ui->startState);
 	ui->currentState = ui->startState;
+	ui->lastState = ui->startState;
 	if (ui->agent->GetUnitGroup() == 0)
 	{
 		ui->agent->SetUnitGroup(unitGroups[0]);

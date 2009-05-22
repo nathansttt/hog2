@@ -29,6 +29,7 @@
 
 #include <vector>
 #include "SearchEnvironment.h"
+#include "StatCollection.h"
 
 template <class state, class action, class environment>
 class GenericSearchAlgorithm

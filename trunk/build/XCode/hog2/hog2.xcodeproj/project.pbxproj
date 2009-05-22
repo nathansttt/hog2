@@ -31,7 +31,7 @@
 		C433A2210BF8F9F7002B8108 /* MapFlatAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2500BCEE7B000FCD84C /* MapFlatAbstraction.cpp */; };
 		C433A2220BF8F9F7002B8108 /* MapLineAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2520BCEE7B000FCD84C /* MapLineAbstraction.cpp */; };
 		C433A2230BF8F9F7002B8108 /* MapProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2540BCEE7B000FCD84C /* MapProvider.cpp */; };
-		C433A2240BF8F9F7002B8108 /* MapQuadTreeAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapQuadTreeAbstraction.cpp */; };
+		C433A2240BF8F9F7002B8108 /* MapSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapSectorAbstraction.cpp */; };
 		C433A2250BF8F9F7002B8108 /* NodeLimitAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2580BCEE7B000FCD84C /* NodeLimitAbstraction.cpp */; };
 		C433A2260BF8F9F7002B8108 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25A0BCEE7B000FCD84C /* RadiusAbstraction.cpp */; };
 		C433A2270BF8F9F7002B8108 /* Width.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25C0BCEE7B000FCD84C /* Width.cpp */; };
@@ -136,7 +136,7 @@
 		C4AC95E60D6CC2A300DAE6E9 /* MapFlatAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2500BCEE7B000FCD84C /* MapFlatAbstraction.cpp */; };
 		C4AC95E70D6CC2A300DAE6E9 /* MapLineAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2520BCEE7B000FCD84C /* MapLineAbstraction.cpp */; };
 		C4AC95E80D6CC2A300DAE6E9 /* MapProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2540BCEE7B000FCD84C /* MapProvider.cpp */; };
-		C4AC95E90D6CC2A300DAE6E9 /* MapQuadTreeAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapQuadTreeAbstraction.cpp */; };
+		C4AC95E90D6CC2A300DAE6E9 /* MapSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapSectorAbstraction.cpp */; };
 		C4AC95EA0D6CC2A300DAE6E9 /* NodeLimitAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2580BCEE7B000FCD84C /* NodeLimitAbstraction.cpp */; };
 		C4AC95EB0D6CC2A300DAE6E9 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25A0BCEE7B000FCD84C /* RadiusAbstraction.cpp */; };
 		C4AC95EC0D6CC2A300DAE6E9 /* Width.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25C0BCEE7B000FCD84C /* Width.cpp */; };
@@ -226,7 +226,7 @@
 		C4AC968A0D6CCFC600DAE6E9 /* MapFlatAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2500BCEE7B000FCD84C /* MapFlatAbstraction.cpp */; };
 		C4AC968B0D6CCFC600DAE6E9 /* MapLineAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2520BCEE7B000FCD84C /* MapLineAbstraction.cpp */; };
 		C4AC968C0D6CCFC600DAE6E9 /* MapProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2540BCEE7B000FCD84C /* MapProvider.cpp */; };
-		C4AC968D0D6CCFC600DAE6E9 /* MapQuadTreeAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapQuadTreeAbstraction.cpp */; };
+		C4AC968D0D6CCFC600DAE6E9 /* MapSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapSectorAbstraction.cpp */; };
 		C4AC968E0D6CCFC600DAE6E9 /* NodeLimitAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2580BCEE7B000FCD84C /* NodeLimitAbstraction.cpp */; };
 		C4AC968F0D6CCFC600DAE6E9 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25A0BCEE7B000FCD84C /* RadiusAbstraction.cpp */; };
 		C4AC96900D6CCFC600DAE6E9 /* Width.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25C0BCEE7B000FCD84C /* Width.cpp */; };
@@ -317,6 +317,8 @@
 		C4AC96FB0D6CD08000DAE6E9 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4AC96510D6CC51200DAE6E9 /* Info.plist */; };
 		C4AC96FC0D6CD08100DAE6E9 /* MultiAgent.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4AC96520D6CC51200DAE6E9 /* MultiAgent.icns */; };
 		C4AC970C0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AC970B0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp */; };
+		C4BC0D190F918BE5002D0CB9 /* DirectionalPlanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BC0D180F918BE5002D0CB9 /* DirectionalPlanner.cpp */; };
+		C4BF47A70FC6606B00A2D655 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B7340BCEEC5900FCD84C /* Sample.cpp */; };
 		C4C8422C0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C8422D0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C842380C0CD2A100AFBF7A /* GraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C842370C0CD2A100AFBF7A /* GraphEnvironment.cpp */; };
@@ -342,7 +344,7 @@
 		C4C846EE0C1F19C300AFBF7A /* MapFlatAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2500BCEE7B000FCD84C /* MapFlatAbstraction.cpp */; };
 		C4C846EF0C1F19C300AFBF7A /* MapLineAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2520BCEE7B000FCD84C /* MapLineAbstraction.cpp */; };
 		C4C846F00C1F19C300AFBF7A /* MapProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2540BCEE7B000FCD84C /* MapProvider.cpp */; };
-		C4C846F10C1F19C300AFBF7A /* MapQuadTreeAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapQuadTreeAbstraction.cpp */; };
+		C4C846F10C1F19C300AFBF7A /* MapSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapSectorAbstraction.cpp */; };
 		C4C846F20C1F19C300AFBF7A /* NodeLimitAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2580BCEE7B000FCD84C /* NodeLimitAbstraction.cpp */; };
 		C4C846F30C1F19C300AFBF7A /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25A0BCEE7B000FCD84C /* RadiusAbstraction.cpp */; };
 		C4C846F40C1F19C300AFBF7A /* Width.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25C0BCEE7B000FCD84C /* Width.cpp */; };
@@ -439,7 +441,7 @@
 		C4D3B4A10BCEE7B300FCD84C /* MapFlatAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2500BCEE7B000FCD84C /* MapFlatAbstraction.cpp */; };
 		C4D3B4A20BCEE7B300FCD84C /* MapLineAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2520BCEE7B000FCD84C /* MapLineAbstraction.cpp */; };
 		C4D3B4A30BCEE7B300FCD84C /* MapProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2540BCEE7B000FCD84C /* MapProvider.cpp */; };
-		C4D3B4A40BCEE7B300FCD84C /* MapQuadTreeAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapQuadTreeAbstraction.cpp */; };
+		C4D3B4A40BCEE7B300FCD84C /* MapSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2560BCEE7B000FCD84C /* MapSectorAbstraction.cpp */; };
 		C4D3B4A50BCEE7B300FCD84C /* NodeLimitAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2580BCEE7B000FCD84C /* NodeLimitAbstraction.cpp */; };
 		C4D3B4A60BCEE7B300FCD84C /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25A0BCEE7B000FCD84C /* RadiusAbstraction.cpp */; };
 		C4D3B4A70BCEE7B300FCD84C /* Width.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B25C0BCEE7B000FCD84C /* Width.cpp */; };
@@ -494,7 +496,6 @@
 		C4E8273F0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
 		C4E827400EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
 		C4E827410EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
-		C4F347FB0F8484B300104ABE /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B7340BCEEC5900FCD84C /* Sample.cpp */; };
 		C4F348030F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
 		C4F348040F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
 		C4F348050F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
@@ -585,6 +586,112 @@
 		C4AC96EC0D6CCFFE00DAE6E9 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C4AC970A0D6CD40800DAE6E9 /* Directional2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Directional2DEnvironment.h; sourceTree = "<group>"; };
 		C4AC970B0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Directional2DEnvironment.cpp; sourceTree = "<group>"; };
+		C4BC09980F915EDB002D0CB9 /* AbstractGraphMapHeuristic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractGraphMapHeuristic.h; sourceTree = "<group>"; };
+		C4BC09990F915EDB002D0CB9 /* CopRobber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CopRobber.cpp; sourceTree = "<group>"; };
+		C4BC099A0F915EDB002D0CB9 /* CopRobber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CopRobber.h; sourceTree = "<group>"; };
+		C4BC099B0F915EDB002D0CB9 /* CopRobberEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CopRobberEnvironment.h; sourceTree = "<group>"; };
+		C4BC099C0F915EDB002D0CB9 /* CopRobberGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CopRobberGame.cpp; sourceTree = "<group>"; };
+		C4BC099D0F915EDB002D0CB9 /* CopRobberGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CopRobberGame.h; sourceTree = "<group>"; };
+		C4BC099E0F915EDB002D0CB9 /* CRSimulation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CRSimulation.h; sourceTree = "<group>"; };
+		C4BC099F0F915EDB002D0CB9 /* Dijkstra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dijkstra.cpp; sourceTree = "<group>"; };
+		C4BC09A00F915EDB002D0CB9 /* Dijkstra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dijkstra.h; sourceTree = "<group>"; };
+		C4BC09A10F915EDB002D0CB9 /* DSCover.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSCover.h; sourceTree = "<group>"; };
+		C4BC09A20F915EDB002D0CB9 /* DSCover2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSCover2.h; sourceTree = "<group>"; };
+		C4BC09A30F915EDB002D0CB9 /* DSCREnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSCREnvironment.cpp; sourceTree = "<group>"; };
+		C4BC09A40F915EDB002D0CB9 /* DSCREnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSCREnvironment.h; sourceTree = "<group>"; };
+		C4BC09A60F915EDB002D0CB9 /* DSCRSimulation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSCRSimulation.h; sourceTree = "<group>"; };
+		C4BC09A70F915EDB002D0CB9 /* OptimalUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OptimalUnit.cpp; sourceTree = "<group>"; };
+		C4BC09A80F915EDB002D0CB9 /* OptimalUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OptimalUnit.h; sourceTree = "<group>"; };
+		C4BC09A90F915EDB002D0CB9 /* PRAStarGraphUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PRAStarGraphUnit.cpp; sourceTree = "<group>"; };
+		C4BC09AA0F915EDB002D0CB9 /* PRAStarGraphUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PRAStarGraphUnit.h; sourceTree = "<group>"; };
+		C4BC09AB0F915EDB002D0CB9 /* PRAStarMapUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PRAStarMapUnit.cpp; sourceTree = "<group>"; };
+		C4BC09AC0F915EDB002D0CB9 /* PRAStarMapUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PRAStarMapUnit.h; sourceTree = "<group>"; };
+		C4BC09AD0F915EDB002D0CB9 /* TrailMaxUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TrailMaxUnit.cpp; sourceTree = "<group>"; };
+		C4BC09AE0F915EDB002D0CB9 /* TrailMaxUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrailMaxUnit.h; sourceTree = "<group>"; };
+		C4BC09AF0F915EDB002D0CB9 /* DSDAM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSDAM.cpp; sourceTree = "<group>"; };
+		C4BC09B00F915EDB002D0CB9 /* DSDAM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSDAM.h; sourceTree = "<group>"; };
+		C4BC09B10F915EDB002D0CB9 /* DSDATPDijkstra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSDATPDijkstra.cpp; sourceTree = "<group>"; };
+		C4BC09B20F915EDB002D0CB9 /* DSDATPDijkstra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSDATPDijkstra.h; sourceTree = "<group>"; };
+		C4BC09B30F915EDB002D0CB9 /* DSDijkstra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSDijkstra.cpp; sourceTree = "<group>"; };
+		C4BC09B40F915EDB002D0CB9 /* DSDijkstra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSDijkstra.h; sourceTree = "<group>"; };
+		C4BC09B50F915EDB002D0CB9 /* DSDijkstra_MemOptim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSDijkstra_MemOptim.cpp; sourceTree = "<group>"; };
+		C4BC09B60F915EDB002D0CB9 /* DSDijkstra_MemOptim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSDijkstra_MemOptim.h; sourceTree = "<group>"; };
+		C4BC09B70F915EDB002D0CB9 /* DSHeuristicGreedy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSHeuristicGreedy.h; sourceTree = "<group>"; };
+		C4BC09B80F915EDB002D0CB9 /* DSMinimax.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSMinimax.h; sourceTree = "<group>"; };
+		C4BC09B90F915EDB002D0CB9 /* DSPRAStarCop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSPRAStarCop.cpp; sourceTree = "<group>"; };
+		C4BC09BA0F915EDB002D0CB9 /* DSPRAStarCop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSPRAStarCop.h; sourceTree = "<group>"; };
+		C4BC09BB0F915EDB002D0CB9 /* DSRandomBeacons.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSRandomBeacons.cpp; sourceTree = "<group>"; };
+		C4BC09BC0F915EDB002D0CB9 /* DSRandomBeacons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSRandomBeacons.h; sourceTree = "<group>"; };
+		C4BC09BD0F915EDB002D0CB9 /* DSRMAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSRMAStar.cpp; sourceTree = "<group>"; };
+		C4BC09BE0F915EDB002D0CB9 /* DSRMAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSRMAStar.h; sourceTree = "<group>"; };
+		C4BC09BF0F915EDB002D0CB9 /* DSTPDijkstra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSTPDijkstra.h; sourceTree = "<group>"; };
+		C4BC09C00F915EDB002D0CB9 /* IPNSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPNSearch.h; sourceTree = "<group>"; };
+		C4BC09C10F915EDB002D0CB9 /* IPNTTables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPNTTables.h; sourceTree = "<group>"; };
+		C4BC09C20F915EDB002D0CB9 /* IPNTTables_optimized.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPNTTables_optimized.h; sourceTree = "<group>"; };
+		C4BC09C30F915EDB002D0CB9 /* JRobinson.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JRobinson.cpp; sourceTree = "<group>"; };
+		C4BC09C40F915EDB002D0CB9 /* JRobinson.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRobinson.h; sourceTree = "<group>"; };
+		C4BC09C50F915EDB002D0CB9 /* MarkovGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MarkovGame.h; sourceTree = "<group>"; };
+		C4BC09C60F915EDB002D0CB9 /* MaximumNormAbstractGraphMapHeuristic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaximumNormAbstractGraphMapHeuristic.h; sourceTree = "<group>"; };
+		C4BC09C70F915EDB002D0CB9 /* MaximumNormGraphMapHeuristic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaximumNormGraphMapHeuristic.h; sourceTree = "<group>"; };
+		C4BC09C80F915EDB002D0CB9 /* Minimax.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Minimax.cpp; sourceTree = "<group>"; };
+		C4BC09C90F915EDB002D0CB9 /* Minimax.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Minimax.h; sourceTree = "<group>"; };
+		C4BC09CA0F915EDB002D0CB9 /* Minimax_optimized.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Minimax_optimized.cpp; sourceTree = "<group>"; };
+		C4BC09CB0F915EDB002D0CB9 /* Minimax_optimized.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Minimax_optimized.h; sourceTree = "<group>"; };
+		C4BC09CC0F915EDB002D0CB9 /* MinimaxAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MinimaxAStar.cpp; sourceTree = "<group>"; };
+		C4BC09CD0F915EDB002D0CB9 /* MinimaxAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinimaxAStar.h; sourceTree = "<group>"; };
+		C4BC09CE0F915EDB002D0CB9 /* MinimaxAStar_optimized.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MinimaxAStar_optimized.cpp; sourceTree = "<group>"; };
+		C4BC09CF0F915EDB002D0CB9 /* MinimaxAStar_optimized.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinimaxAStar_optimized.h; sourceTree = "<group>"; };
+		C4BC09D00F915EDB002D0CB9 /* MultiAgentEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultiAgentEnvironment.h; sourceTree = "<group>"; };
+		C4BC09D10F915EDB002D0CB9 /* MultilevelCopRobberGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MultilevelCopRobberGame.cpp; sourceTree = "<group>"; };
+		C4BC09D20F915EDB002D0CB9 /* MultilevelCopRobberGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultilevelCopRobberGame.h; sourceTree = "<group>"; };
+		C4BC09D30F915EDB002D0CB9 /* MultilevelMarkovGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultilevelMarkovGame.h; sourceTree = "<group>"; };
+		C4BC09D40F915EDB002D0CB9 /* MyHash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MyHash.cpp; sourceTree = "<group>"; };
+		C4BC09D50F915EDB002D0CB9 /* MyHash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyHash.h; sourceTree = "<group>"; };
+		C4BC09D60F915EDB002D0CB9 /* MySearchUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MySearchUnit.cpp; sourceTree = "<group>"; };
+		C4BC09D70F915EDB002D0CB9 /* MySearchUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MySearchUnit.h; sourceTree = "<group>"; };
+		C4BC09D80F915EDB002D0CB9 /* RobberUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RobberUnit.cpp; sourceTree = "<group>"; };
+		C4BC09D90F915EDB002D0CB9 /* RobberUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RobberUnit.h; sourceTree = "<group>"; };
+		C4BC09DB0F915EDB002D0CB9 /* column_differ.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = column_differ.php; sourceTree = "<group>"; };
+		C4BC09DC0F915EDB002D0CB9 /* countvertices.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = countvertices.php; sourceTree = "<group>"; };
+		C4BC09DD0F915EDB002D0CB9 /* evaluate_runtime.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = evaluate_runtime.php; sourceTree = "<group>"; };
+		C4BC09DE0F915EDB002D0CB9 /* generate_perrun_analysis.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = generate_perrun_analysis.php; sourceTree = "<group>"; };
+		C4BC09DF0F915EDB002D0CB9 /* split_mapfiles.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = split_mapfiles.php; sourceTree = "<group>"; };
+		C4BC09E00F915EDB002D0CB9 /* TIDAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TIDAStar.h; sourceTree = "<group>"; };
+		C4BC09E10F915EDB002D0CB9 /* TIDAStar_optimized.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TIDAStar_optimized.cpp; sourceTree = "<group>"; };
+		C4BC09E20F915EDB002D0CB9 /* TIDAStar_optimized.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TIDAStar_optimized.h; sourceTree = "<group>"; };
+		C4BC09E30F915EDB002D0CB9 /* TwoCopsDijkstra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwoCopsDijkstra.cpp; sourceTree = "<group>"; };
+		C4BC09E40F915EDB002D0CB9 /* TwoCopsDijkstra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwoCopsDijkstra.h; sourceTree = "<group>"; };
+		C4BC09E50F915EDB002D0CB9 /* TwoCopsRMAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwoCopsRMAStar.cpp; sourceTree = "<group>"; };
+		C4BC09E60F915EDB002D0CB9 /* TwoCopsRMAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwoCopsRMAStar.h; sourceTree = "<group>"; };
+		C4BC09E70F915EDB002D0CB9 /* TwoCopsTIDAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwoCopsTIDAStar.cpp; sourceTree = "<group>"; };
+		C4BC09E80F915EDB002D0CB9 /* TwoCopsTIDAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwoCopsTIDAStar.h; sourceTree = "<group>"; };
+		C4BC09E90F915EDB002D0CB9 /* TwoPlayerDijkstra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwoPlayerDijkstra.cpp; sourceTree = "<group>"; };
+		C4BC09EA0F915EDB002D0CB9 /* TwoPlayerDijkstra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwoPlayerDijkstra.h; sourceTree = "<group>"; };
+		C4BC09EC0F915EDB002D0CB9 /* BeamNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BeamNode.h; sourceTree = "<group>"; };
+		C4BC09ED0F915EDB002D0CB9 /* dynsearch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dynsearch.cpp; sourceTree = "<group>"; };
+		C4BC09EE0F915EDB002D0CB9 /* dynsearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dynsearch.h; sourceTree = "<group>"; };
+		C4BC09EF0F915EDB002D0CB9 /* experiment_basics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = experiment_basics.cpp; sourceTree = "<group>"; };
+		C4BC09F00F915EDB002D0CB9 /* experiment_basics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = experiment_basics.h; sourceTree = "<group>"; };
+		C4BC09F10F915EDB002D0CB9 /* GeneralBeamSearch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeneralBeamSearch.cpp; sourceTree = "<group>"; };
+		C4BC09F20F915EDB002D0CB9 /* GeneralBeamSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralBeamSearch.h; sourceTree = "<group>"; };
+		C4BC09F30F915EDB002D0CB9 /* GeneralBulb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeneralBulb.cpp; sourceTree = "<group>"; };
+		C4BC09F40F915EDB002D0CB9 /* GeneralBulb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralBulb.h; sourceTree = "<group>"; };
+		C4BC09F50F915EDB002D0CB9 /* GeneralIDA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeneralIDA.cpp; sourceTree = "<group>"; };
+		C4BC09F60F915EDB002D0CB9 /* GeneralIDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralIDA.h; sourceTree = "<group>"; };
+		C4BC09F70F915EDB002D0CB9 /* GeneralRBFS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeneralRBFS.cpp; sourceTree = "<group>"; };
+		C4BC09F80F915EDB002D0CB9 /* GeneralRBFS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralRBFS.h; sourceTree = "<group>"; };
+		C4BC09F90F915EDB002D0CB9 /* GenericStepAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericStepAlgorithm.h; sourceTree = "<group>"; };
+		C4BC09FB0F915EDB002D0CB9 /* 3x6_1000 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 3x6_1000; sourceTree = "<group>"; };
+		C4BC09FC0F915EDB002D0CB9 /* 4x4_100 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 4x4_100; sourceTree = "<group>"; };
+		C4BC09FD0F915EDB002D0CB9 /* 4x4_1000 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 4x4_1000; sourceTree = "<group>"; };
+		C4BC09FE0F915EDB002D0CB9 /* 4x4_1000_info */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 4x4_1000_info; sourceTree = "<group>"; };
+		C4BC09FF0F915EDB002D0CB9 /* 4x4_100_info */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 4x4_100_info; sourceTree = "<group>"; };
+		C4BC0A000F915EDB002D0CB9 /* 4x5_1000 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 4x5_1000; sourceTree = "<group>"; };
+		C4BC0A010F915EDB002D0CB9 /* 5x4_1000 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 5x4_1000; sourceTree = "<group>"; };
+		C4BC0A020F915EDB002D0CB9 /* TurnTakingSimulation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TurnTakingSimulation.cpp; sourceTree = "<group>"; };
+		C4BC0A030F915EDB002D0CB9 /* TurnTakingSimulation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TurnTakingSimulation.h; sourceTree = "<group>"; };
+		C4BC0D170F918BE5002D0CB9 /* DirectionalPlanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectionalPlanner.h; sourceTree = "<group>"; };
+		C4BC0D180F918BE5002D0CB9 /* DirectionalPlanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DirectionalPlanner.cpp; sourceTree = "<group>"; };
 		C4C8422A0C0CD14E00AFBF7A /* MeroB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeroB.h; sourceTree = "<group>"; };
 		C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeroB.cpp; sourceTree = "<group>"; };
 		C4C842360C0CD2A100AFBF7A /* GraphEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphEnvironment.h; sourceTree = "<group>"; };
@@ -664,8 +771,8 @@
 		C4D3B2530BCEE7B000FCD84C /* MapLineAbstraction.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MapLineAbstraction.h; sourceTree = "<group>"; };
 		C4D3B2540BCEE7B000FCD84C /* MapProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MapProvider.cpp; sourceTree = "<group>"; };
 		C4D3B2550BCEE7B000FCD84C /* MapProvider.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MapProvider.h; sourceTree = "<group>"; };
-		C4D3B2560BCEE7B000FCD84C /* MapQuadTreeAbstraction.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MapQuadTreeAbstraction.cpp; sourceTree = "<group>"; };
-		C4D3B2570BCEE7B000FCD84C /* MapQuadTreeAbstraction.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MapQuadTreeAbstraction.h; sourceTree = "<group>"; };
+		C4D3B2560BCEE7B000FCD84C /* MapSectorAbstraction.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MapSectorAbstraction.cpp; sourceTree = "<group>"; };
+		C4D3B2570BCEE7B000FCD84C /* MapSectorAbstraction.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MapSectorAbstraction.h; sourceTree = "<group>"; };
 		C4D3B2580BCEE7B000FCD84C /* NodeLimitAbstraction.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = NodeLimitAbstraction.cpp; sourceTree = "<group>"; };
 		C4D3B2590BCEE7B000FCD84C /* NodeLimitAbstraction.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NodeLimitAbstraction.h; sourceTree = "<group>"; };
 		C4D3B25A0BCEE7B000FCD84C /* RadiusAbstraction.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = RadiusAbstraction.cpp; sourceTree = "<group>"; };
@@ -1468,6 +1575,8 @@
 			children = (
 				C4AC967B0D6CCE8200DAE6E9 /* directional.cpp */,
 				C4AC967C0D6CCE8200DAE6E9 /* directional.h */,
+				C4BC0D180F918BE5002D0CB9 /* DirectionalPlanner.cpp */,
+				C4BC0D170F918BE5002D0CB9 /* DirectionalPlanner.h */,
 			);
 			path = directional;
 			sourceTree = "<group>";
@@ -1481,6 +1590,150 @@
 				C4AC96EC0D6CCFFE00DAE6E9 /* Info.plist */,
 			);
 			path = directional;
+			sourceTree = "<group>";
+		};
+		C4BC09970F915EDB002D0CB9 /* coprobber (Carsten) */ = {
+			isa = PBXGroup;
+			children = (
+				C4BC09980F915EDB002D0CB9 /* AbstractGraphMapHeuristic.h */,
+				C4BC09990F915EDB002D0CB9 /* CopRobber.cpp */,
+				C4BC099A0F915EDB002D0CB9 /* CopRobber.h */,
+				C4BC099B0F915EDB002D0CB9 /* CopRobberEnvironment.h */,
+				C4BC099C0F915EDB002D0CB9 /* CopRobberGame.cpp */,
+				C4BC099D0F915EDB002D0CB9 /* CopRobberGame.h */,
+				C4BC099E0F915EDB002D0CB9 /* CRSimulation.h */,
+				C4BC099F0F915EDB002D0CB9 /* Dijkstra.cpp */,
+				C4BC09A00F915EDB002D0CB9 /* Dijkstra.h */,
+				C4BC09A10F915EDB002D0CB9 /* DSCover.h */,
+				C4BC09A20F915EDB002D0CB9 /* DSCover2.h */,
+				C4BC09A30F915EDB002D0CB9 /* DSCREnvironment.cpp */,
+				C4BC09A40F915EDB002D0CB9 /* DSCREnvironment.h */,
+				C4BC09A50F915EDB002D0CB9 /* dscrsimulation */,
+				C4BC09AF0F915EDB002D0CB9 /* DSDAM.cpp */,
+				C4BC09B00F915EDB002D0CB9 /* DSDAM.h */,
+				C4BC09B10F915EDB002D0CB9 /* DSDATPDijkstra.cpp */,
+				C4BC09B20F915EDB002D0CB9 /* DSDATPDijkstra.h */,
+				C4BC09B30F915EDB002D0CB9 /* DSDijkstra.cpp */,
+				C4BC09B40F915EDB002D0CB9 /* DSDijkstra.h */,
+				C4BC09B50F915EDB002D0CB9 /* DSDijkstra_MemOptim.cpp */,
+				C4BC09B60F915EDB002D0CB9 /* DSDijkstra_MemOptim.h */,
+				C4BC09B70F915EDB002D0CB9 /* DSHeuristicGreedy.h */,
+				C4BC09B80F915EDB002D0CB9 /* DSMinimax.h */,
+				C4BC09B90F915EDB002D0CB9 /* DSPRAStarCop.cpp */,
+				C4BC09BA0F915EDB002D0CB9 /* DSPRAStarCop.h */,
+				C4BC09BB0F915EDB002D0CB9 /* DSRandomBeacons.cpp */,
+				C4BC09BC0F915EDB002D0CB9 /* DSRandomBeacons.h */,
+				C4BC09BD0F915EDB002D0CB9 /* DSRMAStar.cpp */,
+				C4BC09BE0F915EDB002D0CB9 /* DSRMAStar.h */,
+				C4BC09BF0F915EDB002D0CB9 /* DSTPDijkstra.h */,
+				C4BC09C00F915EDB002D0CB9 /* IPNSearch.h */,
+				C4BC09C10F915EDB002D0CB9 /* IPNTTables.h */,
+				C4BC09C20F915EDB002D0CB9 /* IPNTTables_optimized.h */,
+				C4BC09C30F915EDB002D0CB9 /* JRobinson.cpp */,
+				C4BC09C40F915EDB002D0CB9 /* JRobinson.h */,
+				C4BC09C50F915EDB002D0CB9 /* MarkovGame.h */,
+				C4BC09C60F915EDB002D0CB9 /* MaximumNormAbstractGraphMapHeuristic.h */,
+				C4BC09C70F915EDB002D0CB9 /* MaximumNormGraphMapHeuristic.h */,
+				C4BC09C80F915EDB002D0CB9 /* Minimax.cpp */,
+				C4BC09C90F915EDB002D0CB9 /* Minimax.h */,
+				C4BC09CA0F915EDB002D0CB9 /* Minimax_optimized.cpp */,
+				C4BC09CB0F915EDB002D0CB9 /* Minimax_optimized.h */,
+				C4BC09CC0F915EDB002D0CB9 /* MinimaxAStar.cpp */,
+				C4BC09CD0F915EDB002D0CB9 /* MinimaxAStar.h */,
+				C4BC09CE0F915EDB002D0CB9 /* MinimaxAStar_optimized.cpp */,
+				C4BC09CF0F915EDB002D0CB9 /* MinimaxAStar_optimized.h */,
+				C4BC09D00F915EDB002D0CB9 /* MultiAgentEnvironment.h */,
+				C4BC09D10F915EDB002D0CB9 /* MultilevelCopRobberGame.cpp */,
+				C4BC09D20F915EDB002D0CB9 /* MultilevelCopRobberGame.h */,
+				C4BC09D30F915EDB002D0CB9 /* MultilevelMarkovGame.h */,
+				C4BC09D40F915EDB002D0CB9 /* MyHash.cpp */,
+				C4BC09D50F915EDB002D0CB9 /* MyHash.h */,
+				C4BC09D60F915EDB002D0CB9 /* MySearchUnit.cpp */,
+				C4BC09D70F915EDB002D0CB9 /* MySearchUnit.h */,
+				C4BC09D80F915EDB002D0CB9 /* RobberUnit.cpp */,
+				C4BC09D90F915EDB002D0CB9 /* RobberUnit.h */,
+				C4BC09DA0F915EDB002D0CB9 /* scripts */,
+				C4BC09E00F915EDB002D0CB9 /* TIDAStar.h */,
+				C4BC09E10F915EDB002D0CB9 /* TIDAStar_optimized.cpp */,
+				C4BC09E20F915EDB002D0CB9 /* TIDAStar_optimized.h */,
+				C4BC09E30F915EDB002D0CB9 /* TwoCopsDijkstra.cpp */,
+				C4BC09E40F915EDB002D0CB9 /* TwoCopsDijkstra.h */,
+				C4BC09E50F915EDB002D0CB9 /* TwoCopsRMAStar.cpp */,
+				C4BC09E60F915EDB002D0CB9 /* TwoCopsRMAStar.h */,
+				C4BC09E70F915EDB002D0CB9 /* TwoCopsTIDAStar.cpp */,
+				C4BC09E80F915EDB002D0CB9 /* TwoCopsTIDAStar.h */,
+				C4BC09E90F915EDB002D0CB9 /* TwoPlayerDijkstra.cpp */,
+				C4BC09EA0F915EDB002D0CB9 /* TwoPlayerDijkstra.h */,
+			);
+			name = "coprobber (Carsten)";
+			path = coprobber;
+			sourceTree = "<group>";
+		};
+		C4BC09A50F915EDB002D0CB9 /* dscrsimulation */ = {
+			isa = PBXGroup;
+			children = (
+				C4BC09A60F915EDB002D0CB9 /* DSCRSimulation.h */,
+				C4BC09A70F915EDB002D0CB9 /* OptimalUnit.cpp */,
+				C4BC09A80F915EDB002D0CB9 /* OptimalUnit.h */,
+				C4BC09A90F915EDB002D0CB9 /* PRAStarGraphUnit.cpp */,
+				C4BC09AA0F915EDB002D0CB9 /* PRAStarGraphUnit.h */,
+				C4BC09AB0F915EDB002D0CB9 /* PRAStarMapUnit.cpp */,
+				C4BC09AC0F915EDB002D0CB9 /* PRAStarMapUnit.h */,
+				C4BC09AD0F915EDB002D0CB9 /* TrailMaxUnit.cpp */,
+				C4BC09AE0F915EDB002D0CB9 /* TrailMaxUnit.h */,
+			);
+			path = dscrsimulation;
+			sourceTree = "<group>";
+		};
+		C4BC09DA0F915EDB002D0CB9 /* scripts */ = {
+			isa = PBXGroup;
+			children = (
+				C4BC09DB0F915EDB002D0CB9 /* column_differ.php */,
+				C4BC09DC0F915EDB002D0CB9 /* countvertices.php */,
+				C4BC09DD0F915EDB002D0CB9 /* evaluate_runtime.php */,
+				C4BC09DE0F915EDB002D0CB9 /* generate_perrun_analysis.php */,
+				C4BC09DF0F915EDB002D0CB9 /* split_mapfiles.php */,
+			);
+			path = scripts;
+			sourceTree = "<group>";
+		};
+		C4BC09EB0F915EDB002D0CB9 /* dynamicsearch (Rick) */ = {
+			isa = PBXGroup;
+			children = (
+				C4BC09EC0F915EDB002D0CB9 /* BeamNode.h */,
+				C4BC09ED0F915EDB002D0CB9 /* dynsearch.cpp */,
+				C4BC09EE0F915EDB002D0CB9 /* dynsearch.h */,
+				C4BC09EF0F915EDB002D0CB9 /* experiment_basics.cpp */,
+				C4BC09F00F915EDB002D0CB9 /* experiment_basics.h */,
+				C4BC09F10F915EDB002D0CB9 /* GeneralBeamSearch.cpp */,
+				C4BC09F20F915EDB002D0CB9 /* GeneralBeamSearch.h */,
+				C4BC09F30F915EDB002D0CB9 /* GeneralBulb.cpp */,
+				C4BC09F40F915EDB002D0CB9 /* GeneralBulb.h */,
+				C4BC09F50F915EDB002D0CB9 /* GeneralIDA.cpp */,
+				C4BC09F60F915EDB002D0CB9 /* GeneralIDA.h */,
+				C4BC09F70F915EDB002D0CB9 /* GeneralRBFS.cpp */,
+				C4BC09F80F915EDB002D0CB9 /* GeneralRBFS.h */,
+				C4BC09F90F915EDB002D0CB9 /* GenericStepAlgorithm.h */,
+				C4BC09FA0F915EDB002D0CB9 /* input */,
+				C4BC0A020F915EDB002D0CB9 /* TurnTakingSimulation.cpp */,
+				C4BC0A030F915EDB002D0CB9 /* TurnTakingSimulation.h */,
+			);
+			name = "dynamicsearch (Rick)";
+			path = dynamicsearch;
+			sourceTree = "<group>";
+		};
+		C4BC09FA0F915EDB002D0CB9 /* input */ = {
+			isa = PBXGroup;
+			children = (
+				C4BC09FB0F915EDB002D0CB9 /* 3x6_1000 */,
+				C4BC09FC0F915EDB002D0CB9 /* 4x4_100 */,
+				C4BC09FD0F915EDB002D0CB9 /* 4x4_1000 */,
+				C4BC09FE0F915EDB002D0CB9 /* 4x4_1000_info */,
+				C4BC09FF0F915EDB002D0CB9 /* 4x4_100_info */,
+				C4BC0A000F915EDB002D0CB9 /* 4x5_1000 */,
+				C4BC0A010F915EDB002D0CB9 /* 5x4_1000 */,
+			);
+			path = input;
 			sourceTree = "<group>";
 		};
 		C4C847440C1F1A5B00AFBF7A /* Inconsistency */ = {
@@ -1622,8 +1875,8 @@
 				C4D3B2530BCEE7B000FCD84C /* MapLineAbstraction.h */,
 				C4D3B2540BCEE7B000FCD84C /* MapProvider.cpp */,
 				C4D3B2550BCEE7B000FCD84C /* MapProvider.h */,
-				C4D3B2560BCEE7B000FCD84C /* MapQuadTreeAbstraction.cpp */,
-				C4D3B2570BCEE7B000FCD84C /* MapQuadTreeAbstraction.h */,
+				C4D3B2560BCEE7B000FCD84C /* MapSectorAbstraction.cpp */,
+				C4D3B2570BCEE7B000FCD84C /* MapSectorAbstraction.h */,
 				C4D3B2580BCEE7B000FCD84C /* NodeLimitAbstraction.cpp */,
 				C4D3B2590BCEE7B000FCD84C /* NodeLimitAbstraction.h */,
 				C4D3B25A0BCEE7B000FCD84C /* RadiusAbstraction.cpp */,
@@ -2409,6 +2662,8 @@
 		C4D3B7320BCEEC5900FCD84C /* apps */ = {
 			isa = PBXGroup;
 			children = (
+				C4BC09970F915EDB002D0CB9 /* coprobber (Carsten) */,
+				C4BC09EB0F915EDB002D0CB9 /* dynamicsearch (Rick) */,
 				C4E828070EEF981C00F500C4 /* cpdb */,
 				C4A4F00F0ECFD2A9009D90B3 /* arm */,
 				C4AC967A0D6CCE8200DAE6E9 /* directional */,
@@ -2672,7 +2927,7 @@
 				C4D3B4A10BCEE7B300FCD84C /* MapFlatAbstraction.cpp in Sources */,
 				C4D3B4A20BCEE7B300FCD84C /* MapLineAbstraction.cpp in Sources */,
 				C4D3B4A30BCEE7B300FCD84C /* MapProvider.cpp in Sources */,
-				C4D3B4A40BCEE7B300FCD84C /* MapQuadTreeAbstraction.cpp in Sources */,
+				C4D3B4A40BCEE7B300FCD84C /* MapSectorAbstraction.cpp in Sources */,
 				C4D3B4A50BCEE7B300FCD84C /* NodeLimitAbstraction.cpp in Sources */,
 				C4D3B4A60BCEE7B300FCD84C /* RadiusAbstraction.cpp in Sources */,
 				C4D3B4A70BCEE7B300FCD84C /* Width.cpp in Sources */,
@@ -2750,9 +3005,9 @@
 				C4E8273D0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
 				C4D18AD70F183D7D005DEF84 /* ConfigEnvironment.cpp in Sources */,
 				C409B1A30F7872BF006E6A96 /* Directional2DEnvironment.cpp in Sources */,
-				C4F347FB0F8484B300104ABE /* Sample.cpp in Sources */,
 				C4F348030F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
 				C4F348040F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C4BF47A70FC6606B00A2D655 /* Sample.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2769,7 +3024,7 @@
 				C433A2210BF8F9F7002B8108 /* MapFlatAbstraction.cpp in Sources */,
 				C433A2220BF8F9F7002B8108 /* MapLineAbstraction.cpp in Sources */,
 				C433A2230BF8F9F7002B8108 /* MapProvider.cpp in Sources */,
-				C433A2240BF8F9F7002B8108 /* MapQuadTreeAbstraction.cpp in Sources */,
+				C433A2240BF8F9F7002B8108 /* MapSectorAbstraction.cpp in Sources */,
 				C433A2250BF8F9F7002B8108 /* NodeLimitAbstraction.cpp in Sources */,
 				C433A2260BF8F9F7002B8108 /* RadiusAbstraction.cpp in Sources */,
 				C433A2270BF8F9F7002B8108 /* Width.cpp in Sources */,
@@ -2862,7 +3117,7 @@
 				C4AC95E60D6CC2A300DAE6E9 /* MapFlatAbstraction.cpp in Sources */,
 				C4AC95E70D6CC2A300DAE6E9 /* MapLineAbstraction.cpp in Sources */,
 				C4AC95E80D6CC2A300DAE6E9 /* MapProvider.cpp in Sources */,
-				C4AC95E90D6CC2A300DAE6E9 /* MapQuadTreeAbstraction.cpp in Sources */,
+				C4AC95E90D6CC2A300DAE6E9 /* MapSectorAbstraction.cpp in Sources */,
 				C4AC95EA0D6CC2A300DAE6E9 /* NodeLimitAbstraction.cpp in Sources */,
 				C4AC95EB0D6CC2A300DAE6E9 /* RadiusAbstraction.cpp in Sources */,
 				C4AC95EC0D6CC2A300DAE6E9 /* Width.cpp in Sources */,
@@ -2956,7 +3211,7 @@
 				C4AC968A0D6CCFC600DAE6E9 /* MapFlatAbstraction.cpp in Sources */,
 				C4AC968B0D6CCFC600DAE6E9 /* MapLineAbstraction.cpp in Sources */,
 				C4AC968C0D6CCFC600DAE6E9 /* MapProvider.cpp in Sources */,
-				C4AC968D0D6CCFC600DAE6E9 /* MapQuadTreeAbstraction.cpp in Sources */,
+				C4AC968D0D6CCFC600DAE6E9 /* MapSectorAbstraction.cpp in Sources */,
 				C4AC968E0D6CCFC600DAE6E9 /* NodeLimitAbstraction.cpp in Sources */,
 				C4AC968F0D6CCFC600DAE6E9 /* RadiusAbstraction.cpp in Sources */,
 				C4AC96900D6CCFC600DAE6E9 /* Width.cpp in Sources */,
@@ -3035,6 +3290,7 @@
 				C4E827410EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
 				C4F3480B0F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
 				C4F3480C0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C4BC0D190F918BE5002D0CB9 /* DirectionalPlanner.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3051,7 +3307,7 @@
 				C4C846EE0C1F19C300AFBF7A /* MapFlatAbstraction.cpp in Sources */,
 				C4C846EF0C1F19C300AFBF7A /* MapLineAbstraction.cpp in Sources */,
 				C4C846F00C1F19C300AFBF7A /* MapProvider.cpp in Sources */,
-				C4C846F10C1F19C300AFBF7A /* MapQuadTreeAbstraction.cpp in Sources */,
+				C4C846F10C1F19C300AFBF7A /* MapSectorAbstraction.cpp in Sources */,
 				C4C846F20C1F19C300AFBF7A /* NodeLimitAbstraction.cpp in Sources */,
 				C4C846F30C1F19C300AFBF7A /* RadiusAbstraction.cpp in Sources */,
 				C4C846F40C1F19C300AFBF7A /* Width.cpp in Sources */,

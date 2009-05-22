@@ -69,7 +69,7 @@
 struct deltaSpeedHeading {
 public:
 	int8_t turn; // -3...3
-	int8_t speed; // 0, 1, 2, 4
+	int8_t speed; // +- some amount
 };
 
 // state
@@ -81,6 +81,23 @@ public:
 	float y;
 	int8_t speed;
 	int8_t rotation;
+};
+
+enum model {
+	kHumanoid=0,
+	kVehicle=1,
+	kTank=2
+};
+
+enum heuristicType {
+	kOctileHeuristic,
+	kPerimeterHeuristic,
+	kExtendedPerimeterHeuristic
+};
+
+class GoalTester {
+public:
+	virtual bool goalTest(const xySpeedHeading &i1) const = 0;	
 };
 
 class Directional2DEnvironment : public SearchEnvironment<xySpeedHeading, deltaSpeedHeading>
@@ -100,6 +117,8 @@ public:
 	virtual double HCost(xySpeedHeading &node1, xySpeedHeading &node2);
 	virtual double GCost(xySpeedHeading &node1, xySpeedHeading &node2);
 	virtual double GCost(xySpeedHeading &node1, deltaSpeedHeading &act);
+
+	void SetGoalTest(GoalTester *t) {test = t;}
 	bool GoalTest(xySpeedHeading &node, xySpeedHeading &goal);
 	uint64_t GetStateHash(xySpeedHeading &node) const;
 	uint64_t GetActionHash(deltaSpeedHeading act) const;
@@ -108,14 +127,27 @@ public:
 	virtual void OpenGLDraw(const xySpeedHeading& oldState, const xySpeedHeading &newState, float perc) const;
 	virtual void OpenGLDraw(const xySpeedHeading &, const deltaSpeedHeading &) const;
 	Map* GetMap() { return map; }
-	
+	void SetHeuristicType(heuristicType theType) { hType = theType; }
 	virtual void GetNextState(xySpeedHeading &currents, deltaSpeedHeading dir, xySpeedHeading &news) const;	
 private:
+	bool Legal(xySpeedHeading &node1, deltaSpeedHeading &act) const;
+
 	void BuildHTable();
-	int LookupStateHash(xySpeedHeading &s);
-	int LookupStateHeuristic(xySpeedHeading &s1, xySpeedHeading &s2);
+	void BuildAStarTable();
+	void BuildAngleTables();
+	float mySin(int dir) const;
+	float myCos(int dir) const;
+	float LookupStateHash(xySpeedHeading &s);
+	float LookupStateHeuristic(xySpeedHeading &s1, xySpeedHeading &s2);
+	bool checkLegal;
+	GoalTester *test;
+	model motionModel;
+	heuristicType hType;
 protected:
-	std::vector<std::vector<int> > hTable;
+	std::vector<std::vector<float> > hTable;
+//	std::vector<std::vector<std::vector<float> > > hTable;
+	std::vector<float> cosTable;
+	std::vector<float> sinTable;
 	Map *map;
 };
 
@@ -147,6 +179,12 @@ static std::ostream& operator <<(std::ostream &out, const xySpeedHeading &loc)
 {
 	out << "(" << loc.x << ", " << loc.y << ")";
 	out << "[" << (int)loc.speed << ":" << (int)loc.rotation << "]";
+	return out;
+}
+
+static std::ostream& operator <<(std::ostream &out, const deltaSpeedHeading &loc)
+{
+	out << "{" << ((int)loc.turn) << "|" << ((int)loc.speed) << "}";
 	return out;
 }
 

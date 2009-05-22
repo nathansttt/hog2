@@ -607,6 +607,20 @@ void GraphDistanceHeuristic::OpenGLDraw() const
 	}
 }
 
+double GraphDistanceHeuristic::HCost(graphState &state1, graphState &state2)
+{
+	double val = 0;
+	for (unsigned int i = 0; i < heuristics.size(); i++)
+	{
+		double hval = heuristics[i][state1]-heuristics[i][state2];
+		if (hval < 0)
+			hval = -hval;
+		if (fgreater(hval,val))
+			val = hval;
+	}
+	return val;
+}
+
 void GraphDistanceHeuristic::ChooseStartGoal(graphState &start, graphState &goal)
 {
 	if (heuristics.size() == 0)

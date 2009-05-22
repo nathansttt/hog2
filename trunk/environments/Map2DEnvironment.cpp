@@ -14,12 +14,23 @@ MapEnvironment::MapEnvironment(Map *_m)
 {
 	map = _m;
 	oi = new BaseMapOccupancyInterface(map);
+	h = 0;
 }
 
 MapEnvironment::~MapEnvironment()
 {
-	delete map;
+//	delete map;
 	delete oi;
+}
+
+GraphHeuristic *MapEnvironment::GetGraphHeuristic()
+{
+	return h;
+}
+
+void MapEnvironment::SetGraphHeuristic(GraphHeuristic *gh)
+{
+	h = gh;
 }
 
 void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors) const
@@ -153,9 +164,20 @@ void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 
 double MapEnvironment::HCost(xyLoc &l1, xyLoc &l2)
 {
+	double h1, h2;
 	double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));
 	double b = ((l1.y>l2.y)?(l1.y-l2.y):(l2.y-l1.y));
-	return (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
+	h1 = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
+	if (h == 0)
+		return h1;
+	
+	graphState n1 = map->getNodeNum(l1.x, l1.y);
+	graphState n2 = map->getNodeNum(l2.x, l2.y);
+	if ((n1 != -1) && (n2 != -1))
+		h2 = h->HCost(n1, n2);
+	else
+		h2 = 0;
+	return std::max(h1, h2);
 }
 
 double MapEnvironment::GCost(xyLoc &, tDirection &act)
@@ -349,7 +371,7 @@ AbsMapEnvironment::AbsMapEnvironment(MapAbstraction *_ma)
 AbsMapEnvironment::~AbsMapEnvironment()
 {
 	map = 0;
-	delete ma;
+	//delete ma;
 }
 
 /************************************************************/

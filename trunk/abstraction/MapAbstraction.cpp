@@ -76,13 +76,14 @@ void MapAbstraction::OpenGLDraw() const
 {
 	for (unsigned int x = 0; x < abstractions.size(); x++)
 	{
-		if ((levelDraw >> x) & 1) DrawGraph(abstractions[x]);
+		if ((levelDraw >> x) & 1)
+			DrawGraph(abstractions[x], (x>1)&&((levelDraw>>(x-1))&1));
 		//glCallList(displayLists[x]);
 	}
 }
 
 
-void MapAbstraction::DrawGraph(Graph *g) const
+void MapAbstraction::DrawGraph(Graph *g, bool drawLevel) const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 	
@@ -154,12 +155,16 @@ void MapAbstraction::DrawGraph(Graph *g) const
 		glVertex3f(rv.x, rv.y, rv.z);
 		//}
 	}
-//node_iterator
-ni = g->getNodeIter();
-for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
-DrawLevelConnections(n);
-glEnd();
-//  if (verbose&kBuildGraph) printf("Done\n");
+	//node_iterator
+	ni = g->getNodeIter();
+	
+	if (drawLevel)
+	{
+		for (node *n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
+			DrawLevelConnections(n);
+	}
+	glEnd();
+	//  if (verbose&kBuildGraph) printf("Done\n");
 }
 
 void MapAbstraction::DrawLevelConnections(node *n) const
@@ -246,8 +251,8 @@ recVec MapAbstraction::GetNodeLoc(node *n) const
 			ans.z += weight*tmp.z;
 		}
 		ans.x /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
-			ans.y /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
-				ans.z /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
+		ans.y /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
+		ans.z /= totNodes;//n->GetLabelL(kNumAbstractedNodes); 
 	}
 	Map *mp = GetMap();
 	double r, a, b, c;
@@ -286,7 +291,15 @@ double MapAbstraction::h(node *a, node *b)
 	//		} else {
 	//			answer = root2m1*fabs(rv1.y-rv2.y)+fabs(rv1.x-rv2.x);
 	//		}
-	return answer*GetMap()->getCoordinateScale();
+	answer *= GetMap()->getCoordinateScale();
+//	if (a->GetNumEdges() < 4)
+//		return 9999999;
+//	if (b->GetNumEdges() < 4)
+//		return 9999999;
+	//answer+=(8-a->GetNumEdges()+8-b->GetNumEdges())*5;
+	//if (answer > 1)
+		return answer;
+	//return 1;
 }
 
 /** Computes octile distance. No scaling */

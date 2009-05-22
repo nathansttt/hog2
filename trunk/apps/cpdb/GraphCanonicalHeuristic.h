@@ -11,7 +11,7 @@
 #define GRAPHCANONICALHEURISTIC_H
 
 #include "GraphEnvironment.h"
-#include "MapQuadTreeAbstraction.h"
+#include "MapSectorAbstraction.h"
 #include "Map2DEnvironment.h"
 #include "MapOverlay.h"
 #include <vector>
@@ -42,7 +42,7 @@ private:
 	std::vector<int> centers;
 	std::vector<std::vector<float> > centerDist;
 	std::vector<std::vector<int> > whichPDB;
-	//MapQuadTreeAbstraction *msa;
+	//MapSectorAbstraction *msa;
 	Map *map;
 	Graph *g;
 	GraphEnvironment *ga;
