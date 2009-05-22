@@ -108,6 +108,8 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 	gsl_matrix *M;
 	gsl_vector *p1, *p2;
 	double Q;
+	gsl_vector **Previous_Strategy_Opponent, **Previous_Strategy_Player;
+	double strategy_difference_norm_opponent, strategy_difference_norm_player;
 
 //	iter = 0;
 	tnes = GetNumStates();
@@ -121,6 +123,8 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 	Vs[1] = new double[tnes];
 	norm_vec = new double[tnes];
 	nvecview = gsl_vector_view_array( norm_vec, tnes );
+	Previous_Strategy_Opponent = (gsl_vector**) malloc( tnes * sizeof( gsl_vector* ) );
+	Previous_Strategy_Player   = (gsl_vector**) malloc( tnes * sizeof( gsl_vector* ) );
 
 	// initialize the values
 	for( i = 0; i < tnes; i++ ) {
@@ -128,10 +132,15 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 			Vs[0][i] = InitState( GetStateByNumber( i ) ); //0.;
 		Vs[1][i] = Vs[0][i];
 		norm_vec[i] = 0.;
+		Previous_Strategy_Opponent[i] = NULL;
+		Previous_Strategy_Player[i]   = NULL;
 	}
 
 	// make an update to all the values
 	do {
+
+		strategy_difference_norm_opponent = 0.;
+		strategy_difference_norm_player   = 0.;
 
 		// for all possible states
 		for( i = 0; i < tnes; i++ ) {
@@ -144,7 +153,7 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 */
 
 			// if we are at the end of the game, do not update anymore
-			if( GoalTest( p_state, p_state ) ) continue;
+			if( GoalTest( p_state ) ) continue;
 
 			// get my and the opponent actions
 			GetPossiblePlayerActions( player, p_state, my_actions );
@@ -157,7 +166,7 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 			for( unsigned int h = 0; h < n_my_actions; h++ ) {
 				if( my_actions[h].noaction )
 					printf( "noaction " );
-				else
+				else20090517-cover_correction/
 					printf( "%u=>%u ", my_actions[h].a.from, my_actions[h].a.to );
 			}
 			printf( "\n" );
@@ -236,6 +245,22 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 			jrobinson( M, epsilon, p1, p2, iter2 );
 			iter3 += iter2;
 
+			if( iter4 > 0 ) {
+				// in every iteration other than the first compare to the previous strategy
+				gsl_vector_sub( Previous_Strategy_Opponent[i], p1 );
+				gsl_vector_sub( Previous_Strategy_Player[i], p2 );
+				strategy_difference_norm_opponent += gsl_vector_max( Previous_Strategy_Opponent[i] );
+				strategy_difference_norm_player   += gsl_vector_max( Previous_Strategy_Player[i] );
+			} else {
+				// initialize the two vectors
+				Previous_Strategy_Opponent[i] = gsl_vector_alloc( n_opp_actions );
+				Previous_Strategy_Player[i]   = gsl_vector_alloc( n_my_actions );
+			}
+			// store the values
+			gsl_vector_memcpy( Previous_Strategy_Opponent[i], p1 );
+			gsl_vector_memcpy( Previous_Strategy_Player[i],   p2 );
+
+
 /*
 			// VERBOSE PRINTOUT
 			printf( "p1 = \n" ); gsl_vector_fprintf( stdout, p1, "%g" );
@@ -264,7 +289,9 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 		iter4++;
 
 		norm = gsl_vector_max( &(nvecview.vector) );
-		printf( "maximum norm of difference = %g\n", norm );
+		printf( "%g %g %g\n", norm, strategy_difference_norm_opponent/tnes, strategy_difference_norm_player/tnes );
+		fflush( stdout );
+		//printf( "maximum norm of difference = %g\n", norm );
 		//norm = gsl_blas_dnrm2( &(nvecview.vector) );
 		//printf( "euclidean norm of difference = %g\n", norm );
 
@@ -284,6 +311,16 @@ void MarkovGame<state,action>::GetExpectedStateRewardsSimultaneousActionGame( un
 	// cleanup
 	delete [] Vs[(size_t)(v_old+1)&1];
 	delete [] norm_vec;
+
+	for( unsigned int i = 0; i < tnes; i++ ) {
+		if( Previous_Strategy_Opponent[i] != NULL ) {
+			gsl_vector_free( Previous_Strategy_Opponent[i] );
+			gsl_vector_free( Previous_Strategy_Player[i] );
+		}
+	}
+	delete Previous_Strategy_Opponent;
+	delete Previous_Strategy_Player;
+
 
 	V = Vs[(size_t)v_old];
 	return;

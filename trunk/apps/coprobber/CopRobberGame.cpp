@@ -9,6 +9,7 @@ CopRobberGame::CopRobberGame( GraphEnvironment *_genv, unsigned int _num_cops, b
 	num_cops(_num_cops),
 	genv(_genv),
 	init_with(0),
+	num_nodes(genv->GetGraph()->GetNumNodes()),
 	dsdijkstra( NULL ), twocopsdijkstra( NULL )
 {
 }
@@ -200,6 +201,9 @@ double CopRobberGame::GetReward( unsigned int player, CRState s, std::vector<CRA
 
 // this works only for two players (one cop)
 double CopRobberGame::InitState( CRState s ) {
+
+	if( GoalTest( s ) ) return 0.;
+
 	switch( init_with ) {
 		case 0:
 			// initialization with zeros
@@ -264,13 +268,19 @@ void CopRobberGame::Init_With( int with ) {
 
 
 unsigned int CopRobberGame::GetNumStates() const {
-	return( (unsigned int) pow( genv->GetGraph()->GetNumNodes(), num_cops+1 ) );
+	if( num_cops == 1 )
+		return( num_nodes * num_nodes );
+	else if( num_cops == 2 )
+		return( num_nodes * (num_nodes + 1) / 2 * num_nodes );
+	std::cerr << "ERROR: more than two cops are currently not supported." << std::endl;
+	exit( 1 );
 }
 
 // This function is exploiting knowledge about how the GraphEnvironment works
 // Unfortunately there is no easy way to avoid this
 CopRobberGame::CRState CopRobberGame::GetStateByNumber( unsigned int num ) {
 	CRState p_state;
+/*
 	unsigned int i, nps[num_cops+1], ps[num_cops+1], t;
 	t = genv->GetGraph()->GetNumNodes();
 
@@ -280,11 +290,28 @@ CopRobberGame::CRState CopRobberGame::GetStateByNumber( unsigned int num ) {
 	for( i = 0; i < num_cops+1; i++ ) {
 		p_state.push_back( ps[i] );
 	}
+*/
+
+	// new version that uses good caching
+	if( num_cops == 1 ) {
+		p_state.push_back( (graphState) (num/num_nodes) );
+		p_state.push_back( (graphState) (num%num_nodes) );
+	} else if( num_cops == 2 ) {
+		p_state.push_back( num / (num_nodes*(num_nodes+1)/2) );
+		unsigned int h = num % (num_nodes*(num_nodes+1)/2);
+		p_state.push_back( (unsigned int) floor( num_nodes + 0.5 - sqrt( (num_nodes+0.5)*(num_nodes+0.5) - 2 * h ) ) );
+		p_state.push_back( h - p_state[1]*(p_state[1]+1)/2 - p_state[1]*(num_nodes-p_state[1]-1) );
+	} else {
+		std::cerr << "ERROR: we do not support more than two cops." << std::endl;
+		exit( 1 );
+	}
+
 	return p_state;
 }
 
 // as GetStateByNumber this exploits knowledge about the GraphEnvironment
 unsigned int CopRobberGame::GetNumberByState( CRState s ) {
+/*
 	unsigned int nps[num_cops+1], ps[num_cops+1], t;
 
 	// security statement
@@ -296,6 +323,19 @@ unsigned int CopRobberGame::GetNumberByState( CRState s ) {
 		ps[i]  = (unsigned int) s[i];
 	}
 	return (unsigned int) hash_permutation( num_cops+1, nps, ps );
+*/
+
+	// new code with new hashing
+	if( num_cops == 1 ) {
+		return( s[0] * num_nodes + s[1] );
+	} else if( num_cops == 2 ) {
+		if( s[1] > s[2] ) { graphState temp = s[1]; s[1] = s[2]; s[2] = temp; };
+		return( s[0] * num_nodes*(num_nodes+1)/2 + s[1]*(s[1]+1)/2 + s[1]*(num_nodes-s[1]-1) + s[2] );
+	} else {
+		std::cerr << "ERROR: we do not support more than two cops yet." << std::endl;
+		exit( 1 );
+	}
+
 }
 
 

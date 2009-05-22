@@ -24,7 +24,7 @@ class CopRobberGame:
 	// CopRobberEnvironment.h
 
 
-	CopRobberGame( GraphEnvironment *genv, unsigned int num_cops, bool simultaneous = false, bool playerscanpass = false );
+	CopRobberGame( GraphEnvironment *genv, unsigned int num_cops, bool simultaneous = false, bool playerscanpass = true );
 
 	virtual ~CopRobberGame();
 
@@ -57,6 +57,7 @@ class CopRobberGame:
 	unsigned int num_cops;
 	GraphEnvironment *genv;
 	int init_with;
+	unsigned int num_nodes;
 
 	private:
 	// variables that we need for initialization with the values of the alternating game
