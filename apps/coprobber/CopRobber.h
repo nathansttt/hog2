@@ -18,6 +18,7 @@ void compute_tpdijkstra( int argc, char* argv[] );
 void compute_dstpdijkstra( int argc, char* argv[] );
 void compute_dsdijkstra( int argc, char* argv[] );
 void compute_dsdijkstra_memoptim( int argc, char* argv[] );
+void compute_dsbestresponse( int argc, char* argv[] );
 void compute_dsrma( int argc, char* argv[] );
 void compute_dscover( int argc, char* argv[] );
 void compute_dscover2( int argc, char* argv[] );

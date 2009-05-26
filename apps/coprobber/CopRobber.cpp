@@ -53,6 +53,7 @@
 #include "AbstractGraphMapHeuristic.h"
 #include "DSIDFPN.h"
 #include "PerfectGraphHeuristic.h"
+#include "DSBestResponse.h"
 
 
 //std::vector<CRAbsMapSimulation *> unitSims;
@@ -91,6 +92,7 @@ int main(int argc, char* argv[])
 		printf( "dstpdijkstra        - different speed two player dijkstra\n" );
 		printf( "dsdijkstra          - different speed dijkstra\n" );
 		printf( "dsdijkstra_memoptim - optimized different speed dijkstra\n" );
+		printf( "dsbestresponse      - compute best response for implemented algorithm\n" );
 		printf( "dsrma               - different speed RMA*\n" );
 		printf( "dsidfpn             - different speed iterative depth-first proof-number search\n" );
 		printf( "dscover             - different speed Cover heuristic\n" );
@@ -154,6 +156,9 @@ int main(int argc, char* argv[])
 	}
 	else if( strcmp( argv[1], "dsdijkstra_memoptim" ) == 0 ) {
 		compute_dsdijkstra_memoptim( argc, argv );
+	}
+	else if( strcmp( argv[1], "dsbestresponse" ) == 0 ) {
+		compute_dsbestresponse( argc, argv );
 	}
 	else if( strcmp( argv[1], "dsrma" ) == 0 ) {
 		compute_dsrma( argc, argv );
@@ -922,6 +927,41 @@ void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 	delete g;
 	delete m;
 }
+
+// Compute a best response
+// DSBestResponse
+void compute_dsbestresponse( int argc, char* argv[] ) {
+	xyLoc pos_cop, pos_robber;
+	Map *m;
+	unsigned int cop_speed = 2;
+	int max_depth;
+
+	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	printf( "map: %s\n", m->getMapName() );
+
+	Graph *g = GraphSearchConstants::GetGraph( m );
+	GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	env->SetDirected( true );
+
+	DSTPDijkstra<graphState,graphMove>* ralg =
+		new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
+
+	DSBestResponse *dsbestresponse = new DSBestResponse( env, ralg, cop_speed );
+	dsbestresponse->compute_best_response();
+
+	std::cout << "writing values to dsbestresponse.dat" << std::endl;
+	dsbestresponse->WriteValuesToDisk( "dsbestresponse.dat" );
+
+	printf( "nodes expanded:  %u\n", dsbestresponse->nodesExpanded );
+	printf( "nodes touched:   %u\n", dsbestresponse->nodesTouched );
+	printf( "algorithm calls: %u\n", dsbestresponse->ralgCalls );
+
+	delete dsbestresponse;
+	delete ralg;
+	delete env;
+	delete g;
+	delete m;
+};
 
 
 

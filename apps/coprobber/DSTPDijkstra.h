@@ -10,6 +10,7 @@
 #include "Map2DEnvironment.h"
 #include "MyHash.h"
 #include "DSCREnvironment.h"
+#include "DSRobberAlgorithm.h"
 
 
 /*
@@ -21,7 +22,7 @@
 	note: in this calculation, players are always allowed to pass their turns
 */
 template<class state,class action>
-class DSTPDijkstra {
+class DSTPDijkstra: public DSRobberAlgorithm<state,action> {
 
 	public:
 
@@ -35,6 +36,14 @@ class DSTPDijkstra {
 	// minFirst does only mean whether the cop or the robber are to move
 	// first in the situation
 	double dstpdijkstra( state pos_robber, state pos_cop, bool minFirst, std::vector<state> &path );
+
+	state MakeMove( state pos_robber, state pos_cop, unsigned int ) {
+		if( dscrenv->GoalTest( pos_robber, pos_cop ) )
+			return pos_robber;
+		std::vector<state> path;
+		dstpdijkstra( pos_robber, pos_cop, false, path );
+		return path[0];
+	};
 
 	unsigned int nodesExpanded, nodesTouched;
 
