@@ -14,7 +14,7 @@
 	      and hence all multi-cops code has been discarded
 */
 template<class state, class action>
-class DSCover2 {
+class DSCover2: public DSRobberAlgorithm<state,action> {
 
 	public:
 
@@ -30,6 +30,10 @@ class DSCover2 {
 	double value( state &r, state &c, bool minFirst = false, bool time_minFirst = true, double time = 0. );
 
 	state MakeMove( state pos_robber, state pos_cop, bool minFirst = true, double time = 0. );
+
+	state MakeMove( state pos_robber, state pos_cop, unsigned int ) {
+		return MakeMove( pos_robber, pos_cop, false, 0. );
+	};
 
 	unsigned int nodesExpanded, nodesTouched;
 

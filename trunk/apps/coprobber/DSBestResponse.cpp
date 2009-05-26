@@ -1,20 +1,21 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
-#include "DSDijkstra_MemOptim.h"
+#include "DSBestResponse.h"
 
 /*------------------------------------------------------------------------------
 | Hashing
 ------------------------------------------------------------------------------*/
 // squeze the entire joint state into a 32bit integer
-uint32_t DSDijkstra_MemOptim::CRHash_MemOptim( CRState &s ) {
+uint32_t DSBestResponse::CRHash_MemOptim( CRState &s ) {
 	return( s[0] * numnodes + s[1] );
 //	return( ( (uint32_t)s[0] )<<16 | (((uint32_t)s[1])<<16)>>16 );
 };
 
 // get the joint state back from the hash
-void DSDijkstra_MemOptim::MemOptim_Hash_To_CRState( uint32_t &hash, DSDijkstra_MemOptim::CRState &s ) {
-	s.push_back( (graphState) (hash/numnodes) );
-	s.push_back( (graphState) (hash%numnodes) );
+void DSBestResponse::MemOptim_Hash_To_CRState( uint32_t &hash, DSBestResponse::CRState &s ) {
+	s.resize( 2, 0 );
+	s[0] = (graphState) (hash/numnodes);
+	s[1] = (graphState) (hash%numnodes);
 //	s.push_back( (graphState) (hash>>16) );
 //	s.push_back( (graphState) ( (hash<<16)>>16 ) );
 	return;
@@ -24,9 +25,10 @@ void DSDijkstra_MemOptim::MemOptim_Hash_To_CRState( uint32_t &hash, DSDijkstra_M
 /*------------------------------------------------------------------------------
 | DSDijkstra Memory Optimized - Implementation
 ------------------------------------------------------------------------------*/
-DSDijkstra_MemOptim::DSDijkstra_MemOptim( GraphEnvironment *_env, unsigned int cop_speed ):
+DSBestResponse::DSBestResponse( GraphEnvironment *_env, DSRobberAlgorithm<graphState,graphMove> *_ralg, unsigned int cop_speed ):
 	dscrenv( new DSCREnvironment<graphState,graphMove>( _env, true, cop_speed ) ),
-	env(_env)
+	env(_env),
+	ralg(_ralg)
 {
 	numnodes = env->GetGraph()->GetNumNodes();
 	// this is just to keep errors in computation out
@@ -36,46 +38,43 @@ DSDijkstra_MemOptim::DSDijkstra_MemOptim( GraphEnvironment *_env, unsigned int c
 	}
 };
 
-DSDijkstra_MemOptim::~DSDijkstra_MemOptim() {
+DSBestResponse::~DSBestResponse() {
 	delete dscrenv;
 };
 
 
-float DSDijkstra_MemOptim::compute_target_value( CRState &s ) {
-	float result = 0.;
+float DSBestResponse::compute_target_value( CRState &s ) {
 
 	CRState temp = s;
-	float tempvalue;
-	std::vector<graphState> myneighbors;
-	dscrenv->GetRobberSuccessors( temp, myneighbors );
-	//nodesExpanded++;
-
-	// now, for all successor states
-	for( std::vector<graphState>::iterator it = myneighbors.begin();
-	     it != myneighbors.end(); it++ ) {
-
-		//nodesTouched++;
-
-		// build the state
-		temp[0] = *it;
-
-		tempvalue = dscrenv->RobberGCost( s, temp ) + min_cost[ CRHash_MemOptim( temp ) ];
-		//tempvalue = min_cost[ CRHash_MemOptim( temp ) ];
-		/* real edge costs
-		if( temp[0] == s[0] )
-			tempvalue = 1. + min_cost[CRHash_MemOptim( temp )];
-		else
-			tempvalue = env->GCost( s[0], temp[0] ) + min_cost[ CRHash_MemOptim( temp ) ];
-		*/
-		if( tempvalue > result ) result = tempvalue;
-
-		if( result == FLT_MAX ) return FLT_MAX;
+	// verbose
+	//std::cout << "position: (" << temp[0] << "," << temp[1] << ") => ";
+	uint32_t hash = CRHash_MemOptim( s );
+	if( ralg_moves[hash] >= numnodes ) {
+		ralg_moves[hash] = ralg->MakeMove( s[0], s[1], numnodes );
+		ralgCalls++;
 	}
-	return result;
+	temp[0] = ralg_moves[hash];
+	// verbose
+	//std::cout << temp[0] << std::endl;
+
+	return( dscrenv->RobberGCost( s, temp ) + min_cost[ CRHash_MemOptim( temp ) ] );
+};
+
+void DSBestResponse::compute_robber_moves() {
+	ralg_moves.assign( numnodes*numnodes, 0 );
+
+	CRState s;
+	for( unsigned int i = 0; i < numnodes*numnodes; i++ ) {
+		MemOptim_Hash_To_CRState( i, s );
+
+		ralg_moves[i] = ralg->MakeMove( s[0], s[1], numnodes );
+		ralgCalls++;
+	}
+	return;
 };
 
 
-void DSDijkstra_MemOptim::dsdijkstra() {
+void DSBestResponse::compute_best_response() {
 	QueueEntry qe, qtemp;
 	std::vector<graphState>::iterator it;
 	CRState pos, postemp;
@@ -89,6 +88,10 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 
 	nodesExpanded = 0;
 	nodesTouched  = 0;
+	ralgCalls = 0;
+
+	ralg_moves.assign( numnodes*numnodes, numnodes );
+//	compute_robber_moves();
 
 	push_end_states_on_queue();
 
@@ -96,7 +99,7 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 
 		// get the element from the queue
 		qe = queue.top(); queue.pop();
-		pos.clear(); MemOptim_Hash_To_CRState( qe.pos_hash, pos );
+		MemOptim_Hash_To_CRState( qe.pos_hash, pos );
 
 		// verbose
 		//fprintf( stdout, "minFirst = %d, pos = (%u,%u)(%u,%u), value = %f\n", qe.minFirst, qe.pos[0].x, qe.pos[0].y, qe.pos[1].x, qe.pos[1].y, qe.value );
@@ -174,7 +177,7 @@ void DSDijkstra_MemOptim::dsdijkstra() {
 }
 
 
-float DSDijkstra_MemOptim::Value( CRState &pos, bool minFirst ) {
+float DSBestResponse::Value( CRState &pos, bool minFirst ) {
 	if( minFirst ) {
 		return min_cost[CRHash_MemOptim( pos )];
 	} else {
@@ -187,7 +190,7 @@ float DSDijkstra_MemOptim::Value( CRState &pos, bool minFirst ) {
 //
 // note: this only works well because of the move ordering, if we used a wait
 // as the first move (from DSCREnvironment) this routine would screw up at the end
-void DSDijkstra_MemOptim::MakeSingleStepsCopMove( CRState &pos, std::vector<graphState> &moves ) {
+void DSBestResponse::MakeSingleStepsCopMove( CRState &pos, std::vector<graphState> &moves ) {
 	moves.clear();
 	if( dscrenv->GetCopSpeed() != 2 ) std::cerr << "ERROR: speed != 2 not supported." << std::endl;
 
@@ -214,7 +217,7 @@ void DSDijkstra_MemOptim::MakeSingleStepsCopMove( CRState &pos, std::vector<grap
 	return;
 };
 
-graphState DSDijkstra_MemOptim::MakeMove( CRState &pos, bool minFirst ) {
+graphState DSBestResponse::MakeMove( CRState &pos, bool minFirst ) {
 
 	CRState temppos = pos;
 	std::vector<graphState> neighbors;
@@ -253,7 +256,7 @@ graphState DSDijkstra_MemOptim::MakeMove( CRState &pos, bool minFirst ) {
 };
 
 
-void DSDijkstra_MemOptim::push_end_states_on_queue() {
+void DSBestResponse::push_end_states_on_queue() {
 	QueueEntry qe;
 	CRState pos, postemp;
 	std::vector<graphState> neighbors;
@@ -307,7 +310,7 @@ void DSDijkstra_MemOptim::push_end_states_on_queue() {
 };
 
 
-void DSDijkstra_MemOptim::WriteValuesToDisk( const char* filename ) {
+void DSBestResponse::WriteValuesToDisk( const char* filename ) {
 	FILE *fhandler;
 
 	CRState pos;
@@ -317,24 +320,7 @@ void DSDijkstra_MemOptim::WriteValuesToDisk( const char* filename ) {
 	fprintf( fhandler, "expected rewards if cop moves first:\n" );
 	fprintf( fhandler, "\n\n" );
 
-	/*
-	pos.assign( 2, 0 );
-	for( unsigned int i = 0; i < numnodes; i++ ) {
-		for( unsigned int j = 0; j < numnodes; j++ ) {
-			pos[0] = i;
-			pos[1] = j;
-			unsigned int h = CRHash_MemOptim( pos );
-			node *r = env->GetGraph()->GetNode( i );
-			node *c = env->GetGraph()->GetNode( j );
-			fprintf( fhandler, "(%ld,%ld) (%ld,%ld) %g %g\n", r->GetLabelL(GraphSearchConstants::kMapX), r->GetLabelL(GraphSearchConstants::kMapY),
-				c->GetLabelL(GraphSearchConstants::kMapX), c->GetLabelL(GraphSearchConstants::kMapY), max_cost[h], min_cost[h] );
-			//fprintf( fhandler, "%lu %lu %g\n", pos[0], pos[1], min_cost[h] );
-		}
-	}
-	*/
-
 	for( unsigned int i = 0; i < min_cost.size(); i++ ) {
-		pos.clear();
 		MemOptim_Hash_To_CRState( i, pos );
 		//fprintf( fhandler, "%lu %lu %g %g\n", pos[0], pos[1], min_cost[i], max_cost[i] );
 		fprintf( fhandler, "%lu %lu %g\n", pos[0], pos[1], min_cost[i] );
@@ -346,7 +332,7 @@ void DSDijkstra_MemOptim::WriteValuesToDisk( const char* filename ) {
 
 
 
-void DSDijkstra_MemOptim::ReadValuesFromDisk( const char* filename ) {
+void DSBestResponse::ReadValuesFromDisk( const char* filename ) {
 	FILE *fhandler;
 	max_max_cost = -FLT_MAX;
 
@@ -385,7 +371,7 @@ void DSDijkstra_MemOptim::ReadValuesFromDisk( const char* filename ) {
 
 
 
-void DSDijkstra_MemOptim::DrawCopRobberEdges( bool minFirst, graphState pos_opponent ) {
+void DSBestResponse::DrawCopRobberEdges( bool minFirst, graphState pos_opponent ) {
 
 	Graph *g = env->GetGraph();
 	CRState pos; pos.assign( 2, 0 );

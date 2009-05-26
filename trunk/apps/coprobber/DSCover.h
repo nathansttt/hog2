@@ -11,6 +11,7 @@
 #include "Map2DEnvironment.h"
 #include "MyHash.h"
 #include "DSCREnvironment.h"
+#include "DSRobberAlgorithm.h"
 
 /*
 	Implementation of Cover Heuristic for different speed system
@@ -24,7 +25,7 @@
 	be used for the cop since cover has lots of flaws concerning move determination
 */
 template<class state,class action>
-class DSCover {
+class DSCover: public DSRobberAlgorithm<state,action> {
 
 	public:
 
@@ -45,6 +46,10 @@ class DSCover {
 	// this is because the cover routine only computes the cover for one of the two agents
 	// the other agent is determined by num_total_states - cover.
 	state MakeMove( state pos_robber, state pos_cop, bool minFirst, unsigned int num_total_states );
+
+	state MakeMove( state pos_robber, state pos_cop, unsigned int num_total_states ) {
+		return MakeMove( pos_robber, pos_cop, false, num_total_states );
+	};
 
 	unsigned int nodesExpanded, nodesTouched;
 

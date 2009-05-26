@@ -91,4 +91,5 @@ SRC_CPP = \
 	apps/coprobber/TwoCopsDijkstra2.cpp \
 	apps/coprobber/TwoCopsRMAStar.cpp \
 	apps/coprobber/TwoCopsTIDAStar.cpp \
+	apps/coprobber/DSBestResponse.cpp \
 	apps/coprobber/CopRobber.cpp
