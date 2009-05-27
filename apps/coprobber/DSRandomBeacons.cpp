@@ -66,5 +66,9 @@ void DSRandomBeacons::GetPath( graphState pos_robber, graphState pos_cop, unsign
 	return;
 };
 
-
+graphState DSRandomBeacons::MakeMove( graphState pos_robber, graphState pos_cop, unsigned int ) {
+	std::vector<graphState> path;
+	GetPath( pos_robber, pos_cop, 40, path );
+	return( path[0] );
+};
 

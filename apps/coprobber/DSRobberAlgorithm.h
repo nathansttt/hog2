@@ -14,6 +14,8 @@ class DSRobberAlgorithm {
 
 	public:
 
+	virtual ~DSRobberAlgorithm() {};
+
 	virtual state MakeMove( state pos_robber, state pos_cop, unsigned int num_graph_nodes ) = 0;
 
 };

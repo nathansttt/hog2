@@ -4,6 +4,7 @@
 #include <math.h>
 #include "MyHash.h"
 #include "DSCREnvironment.h"
+#include "DSRobberAlgorithm.h"
 
 
 #ifndef DSMINIMAX_H
@@ -20,7 +21,7 @@
 		  for the leaf nodes.
 */
 template<class state, class action>
-class DSMinimax {
+class DSMinimax: public DSRobberAlgorithm<state,action> {
 
 	public:
 
@@ -38,6 +39,10 @@ class DSMinimax {
 
 	// compute minimax solution and return first next state
 	state MakeMove( state &pos_robber, state &pos_cop, bool minFirst = true, double depth = 5. );
+
+	state MakeMove( state pos_robber, state pos_cop, unsigned int ) {
+		return( MakeMove( pos_robber, pos_cop, false, 5. ) );
+	};
 
 	unsigned int nodesExpanded, nodesTouched;
 

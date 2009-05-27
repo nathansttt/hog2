@@ -902,9 +902,15 @@ void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 	xyLoc pos_cop, pos_robber;
 	Map *m;
 	unsigned int cop_speed = 2;
-	int max_depth;
 
-	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	if( argc < 4 ) {
+		std::cout << "Syntax: " << argv[0] << " <map file> <output file>" << std::endl;
+		exit( 1 );
+	}
+
+	// argv[1] == "bestresponse"
+
+	m = new Map( argv[2] );
 	printf( "map: %s\n", m->getMapName() );
 
 	Graph *g = GraphSearchConstants::GetGraph( m );
@@ -916,8 +922,8 @@ void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 
 	dsdijkstra->dsdijkstra();
 
-	std::cout << "writing values to dsdijkstra.dat" << std::endl;
-	dsdijkstra->WriteValuesToDisk( "dsdijkstra.dat" );
+	std::cout << "writing values to " << argv[3] << std::endl;
+	dsdijkstra->WriteValuesToDisk( argv[3] );
 	printf( "nodes expanded: %u\n", dsdijkstra->nodesExpanded );
 	printf( "nodes touched: %u\n", dsdijkstra->nodesTouched );
 
@@ -934,23 +940,61 @@ void compute_dsbestresponse( int argc, char* argv[] ) {
 	xyLoc pos_cop, pos_robber;
 	Map *m;
 	unsigned int cop_speed = 2;
-	int max_depth;
 
-	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
+	if( argc < 5 ) {
+		std::cout << "Syntax: " << argv[0] << " <map file> <algorithm> <output file>" << std::endl;
+		std::cout << "where <algorithm> can be: trailmax, datrailmax, cover, cover2, dam, idam2, greedy, minimax" << std::endl;
+		exit( 1 );
+	}
+
+	// argv[1] == "bestresponse"
+
+	m = new Map( argv[2] );
 	printf( "map: %s\n", m->getMapName() );
 
-	Graph *g = GraphSearchConstants::GetGraph( m );
+	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+	Graph *g = mclab->GetAbstractGraph( 0 );
 	GraphEnvironment *env = new GraphEnvironment( g, NULL );
-	env->SetDirected( true );
 
-	DSTPDijkstra<graphState,graphMove>* ralg =
-		new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
+	DSRobberAlgorithm<graphState,graphMove> *ralg;
+
+	if( strcmp( argv[3], "trailmax" ) == 0 ) {
+		std::cout << "algorithm: trailmax( 1 )" << std::endl;
+		ralg = new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
+	} else if( strcmp( argv[3], "datrailmax" ) == 0 ) {
+		std::cout << "algorithm: datrailmax( 1, 10 )" << std::endl;
+		ralg = new DSDATPDijkstra( mclab, cop_speed, true );
+	} else if( strcmp( argv[3], "cover" ) == 0 ) {
+		std::cout << "algorithm: cover" << std::endl;
+		ralg = new DSCover<graphState,graphMove>( env, cop_speed );
+	} else if( strcmp( argv[3], "cover2" ) == 0 ) {
+		std::cout << "algorithm: original cover" << std::endl;
+		ralg = new DSCover2<graphState,graphMove>( env, g->GetNumNodes(), cop_speed );
+	} else if( strcmp( argv[3], "dam" ) == 0 ) {
+		std::cout << "algorithm: dam( 0.5, 3 )" << std::endl;
+		ralg = new DSDAM( mclab, true, cop_speed, true );
+	} else if( strcmp( argv[3], "idam2" ) == 0 ) {
+		std::cout << "algorithm: dam1( 0.5, 3 )" << std::endl;
+		ralg = new DSIDAM2( mclab, true, cop_speed, true );
+	} else if( strcmp( argv[3], "greedy" ) == 0 ) {
+		std::cout << "algorithm: greedy" << std::endl;
+		ralg = new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
+	} else if( strcmp( argv[3], "minimax" ) == 0 ) {
+		std::cout << "algorithm: minimax( 5 )" << std::endl;
+		ralg = new DSMinimax<graphState,graphMove>( env, true, cop_speed );
+	//} else if( strcmp( argv[3], "randombeacons" ) == 0 ) {
+	//	std::cout << "algortihm: randombeacons( 40, 1 )" << std::endl;
+	//	ralg = new DSRandomBeacons( mclab, true, cop_speed );
+	} else {
+		std::cout << "ERROR: unknown algorithm" << std::endl;
+		exit( 1 );
+	}
 
 	DSBestResponse *dsbestresponse = new DSBestResponse( env, ralg, cop_speed );
 	dsbestresponse->compute_best_response();
 
-	std::cout << "writing values to dsbestresponse.dat" << std::endl;
-	dsbestresponse->WriteValuesToDisk( "dsbestresponse.dat" );
+	std::cout << "writing values to " << argv[4] << std::endl;
+	dsbestresponse->WriteValuesToDisk( argv[4] );
 
 	printf( "nodes expanded:  %u\n", dsbestresponse->nodesExpanded );
 	printf( "nodes touched:   %u\n", dsbestresponse->nodesTouched );
@@ -959,8 +1003,7 @@ void compute_dsbestresponse( int argc, char* argv[] ) {
 	delete dsbestresponse;
 	delete ralg;
 	delete env;
-	delete g;
-	delete m;
+	delete mclab;
 };
 
 

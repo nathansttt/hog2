@@ -5,6 +5,7 @@
 #include <queue>
 #include "MyHash.h"
 #include "DSCREnvironment.h"
+#include "DSRobberAlgorithm.h"
 
 /*
 	Alejandro Isaza's code of Cover Heuristic

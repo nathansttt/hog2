@@ -1,6 +1,7 @@
 #include <vector>
 #include "MultiAgentEnvironment.h"
 #include "DSCREnvironment.h"
+#include "DSRobberAlgorithm.h"
 
 #ifndef DSHEURISTICGREEDY_H
 #define DSHEURISTICGREEDY_H
@@ -11,7 +12,7 @@
 	the heuristic (octile distance)
 */
 template<class state,class action>
-class DSHeuristicGreedy {
+class DSHeuristicGreedy: public DSRobberAlgorithm<state,action> {
 
 	public:
 
@@ -22,6 +23,8 @@ class DSHeuristicGreedy {
 
 	// makes a move as described above
 	state MakeMove( state pos_robber, state pos_cop, bool minFirst );
+
+	state MakeMove( state pos_robber, state pos_cop, unsigned int );
 
 	unsigned int nodesExpanded, nodesTouched;
 
@@ -88,6 +91,10 @@ state DSHeuristicGreedy<state,action>::MakeMove( state pos_robber, state pos_cop
 	return nextmove;
 };
 
+template<class state,class action>
+state DSHeuristicGreedy<state,action>::MakeMove( state pos_robber, state pos_cop, unsigned int ) {
+	return( MakeMove( pos_robber, pos_cop, false ) );
+};
 
 
 #endif
