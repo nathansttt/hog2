@@ -4,6 +4,7 @@
 #include "DSCREnvironment.h"
 #include "MaximumNormAbstractGraphMapHeuristic.h"
 #include "PRAStar.h"
+#include "DSRobberAlgorithm.h"
 
 #ifndef DSRANDOMBEACONS_H
 #define DSRANDOMBEACONS_H
@@ -13,7 +14,7 @@
 	and then evaluates these beacons heuristically. It then produces
 	a path towards the beacon with the best evaluate (via PRA*).
 */
-class DSRandomBeacons {
+class DSRandomBeacons: public DSRobberAlgorithm<graphState,graphMove> {
 
 	public:
 
@@ -26,6 +27,8 @@ class DSRandomBeacons {
 	// that he should take
 	void GetPath( graphState pos_robber, graphState pos_cop, unsigned int num_beacons,
 		std::vector<graphState> &path );
+
+	graphState MakeMove( graphState pos_robber, graphState pos_cop, unsigned int );
 
 	unsigned int nodesExpanded, nodesTouched;
 

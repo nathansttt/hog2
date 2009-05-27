@@ -3,6 +3,7 @@
 #include "DSMinimax.h"
 #include "PRAStar.h"
 #include "MaximumNormAbstractGraphMapHeuristic.h"
+#include "DSRobberAlgorithm.h"
 
 #ifndef DSIDAM2_H
 #define DSIDAM2_H
@@ -18,7 +19,8 @@
 */
 
 class DSIDAM2:
-	praStar // because we want to use the refinement routines from PRA*
+	praStar, // because we want to use the refinement routines from PRA*
+	public DSRobberAlgorithm<graphState,graphMove>
 {
 
 	public:
@@ -30,6 +32,8 @@ class DSIDAM2:
 	void dam( node* pos_robber, node* pos_cop, std::vector<node*> &path, bool minFirst = true, double depth = 5., double start_level_fraction = 0.5 );
 
 	node* MakeMove( node* pos_robber, node* pos_cop, bool minFirst = true, double depth = 5., double start_level_fraction = 0.5 );
+
+	graphState MakeMove( graphState pos_robber, graphState pos_cop, unsigned int );
 
 	// statistic variables that get resetted everytime dam(...) is called
 	unsigned int myNodesExpanded, myNodesTouched;

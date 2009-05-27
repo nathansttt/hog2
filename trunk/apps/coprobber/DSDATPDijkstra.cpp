@@ -199,3 +199,13 @@ node* DSDATPDijkstra::MakeMove( node* pos_robber, node* pos_cop, bool minFirst, 
 	assert( path.size() > 0 );
 	return( path[0] );
 };
+
+graphState DSDATPDijkstra::MakeMove( graphState pos_robber, graphState pos_cop, unsigned int ) {
+	Graph *g = gabs->GetAbstractGraph( 0 );
+	node *r = g->GetNode( pos_robber );
+	node *c = g->GetNode( pos_cop );
+	std::vector<node*> path;
+	datpdijkstra( r, c, path, false, 10. );
+	assert( path.size() > 0 );
+	return( path[0]->GetNum() );
+};

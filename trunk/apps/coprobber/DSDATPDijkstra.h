@@ -3,6 +3,7 @@
 #include "DSTPDijkstra.h"
 #include "PRAStar.h"
 #include "MaximumNormAbstractGraphMapHeuristic.h"
+#include "DSRobberAlgorithm.h"
 
 #ifndef DSDATPDIJKSTRA_H
 #define DSDATPDIJKSTRA_H
@@ -17,7 +18,7 @@
 */
 
 class DSDATPDijkstra:
-	praStar // because we want to use the refinement routines from PRA*
+	praStar, public DSRobberAlgorithm<graphState,graphMove> // because we want to use the refinement routines from PRA*
 {
 
 	public:
@@ -29,6 +30,8 @@ class DSDATPDijkstra:
 	void datpdijkstra( node* pos_robber, node* pos_cop, std::vector<node*> &path, bool minFirst = true, double min_escape_length = 5. );
 
 	node* MakeMove( node* pos_robber, node* pos_cop, bool minFirst = true, double min_escape_length = 5. );
+
+	graphState MakeMove( graphState pos_robber, graphState pos_cop, unsigned int );
 
 	// statistic variables that get resetted everytime datpdijkstra(...) is called
 	unsigned int myNodesExpanded, myNodesTouched;

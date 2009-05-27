@@ -186,3 +186,13 @@ node* DSDAM::MakeMove( node* pos_robber, node* pos_cop, bool minFirst, double de
 	assert( path.size() > 0 );
 	return( path[0] );
 };
+
+graphState DSDAM::MakeMove( graphState pos_robber, graphState pos_cop, unsigned int ) {
+	Graph *g = gabs->GetAbstractGraph( 0 );
+	node *r  = g->GetNode( pos_robber );
+	node *c  = g->GetNode( pos_cop );
+	std::vector<node*> path;
+	dam( r, c, path, false, 3., 0.5 );
+	assert( path.size() > 0 );
+	return( path[0]->GetNum() );
+};
