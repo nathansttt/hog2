@@ -902,36 +902,47 @@ void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 	xyLoc pos_cop, pos_robber;
 	Map *m;
 	unsigned int cop_speed = 2;
+	clock_t clock_start, clock_end;
 
-	if( argc < 4 ) {
-		std::cout << "Syntax: " << argv[0] << " <map file> <output file>" << std::endl;
+	if( argc < 3 ) {
+		std::cout << "Syntax: " << argv[0] << " <file with maps>" << std::endl;
 		exit( 1 );
 	}
 
 	// argv[1] == "bestresponse"
 
-	m = new Map( argv[2] );
-	printf( "map: %s\n", m->getMapName() );
+	FILE *fhandler = fopen( argv[2], "r" );
+	char map_file[100], opt_file[104];
 
-	Graph *g = GraphSearchConstants::GetGraph( m );
-	GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
-	GraphEnvironment *env = new GraphEnvironment( g, gh );
-	env->SetDirected( true );
+	while( !feof( fhandler ) ) {
 
-	DSDijkstra_MemOptim *dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
+		fscanf( fhandler, "%s\n", map_file );
+		m = new Map( map_file );
+		std::cout << "map: " << m->getMapName() << std::endl;
 
-	dsdijkstra->dsdijkstra();
+		Graph *g = GraphSearchConstants::GetGraph( m );
+		GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
+		GraphEnvironment *env = new GraphEnvironment( g, gh );
+		env->SetDirected( true );
 
-	std::cout << "writing values to " << argv[3] << std::endl;
-	dsdijkstra->WriteValuesToDisk( argv[3] );
-	printf( "nodes expanded: %u\n", dsdijkstra->nodesExpanded );
-	printf( "nodes touched: %u\n", dsdijkstra->nodesTouched );
+		DSDijkstra_MemOptim *dsdijkstra = new DSDijkstra_MemOptim( env, cop_speed );
+		clock_start = clock();
+		dsdijkstra->dsdijkstra();
+		clock_end = clock();
 
-	delete dsdijkstra;
-	delete env;
-	delete gh;
-	delete g;
-	delete m;
+		sprintf( opt_file, "opt_%s", basename( map_file ) );
+		dsdijkstra->WriteValuesToDisk( opt_file );
+		printf( "nodes expanded: %u\n", dsdijkstra->nodesExpanded );
+		printf( "nodes touched: %u\n", dsdijkstra->nodesTouched );
+		printf( "time: %ld ms\n", (clock_end-clock_start)/1000 );
+
+		delete dsdijkstra;
+		delete env;
+		delete gh;
+		delete g;
+		delete m;
+	}
+	fclose( fhandler );
 }
 
 // Compute a best response
@@ -941,69 +952,80 @@ void compute_dsbestresponse( int argc, char* argv[] ) {
 	Map *m;
 	unsigned int cop_speed = 2;
 
-	if( argc < 5 ) {
-		std::cout << "Syntax: " << argv[0] << " <map file> <algorithm> <output file>" << std::endl;
+	if( argc < 4 ) {
+		std::cout << "Syntax: " << argv[0] << " <file with maps> <algorithm>" << std::endl;
 		std::cout << "where <algorithm> can be: trailmax, datrailmax, cover, cover2, dam, idam2, greedy, minimax" << std::endl;
 		exit( 1 );
 	}
 
 	// argv[1] == "bestresponse"
 
-	m = new Map( argv[2] );
-	printf( "map: %s\n", m->getMapName() );
+	FILE* fhandler = fopen( argv[2], "r" );
+	char map_file[100], br_file[103];
+	clock_t clock_start, clock_end;
 
-	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
-	Graph *g = mclab->GetAbstractGraph( 0 );
-	GraphEnvironment *env = new GraphEnvironment( g, NULL );
+	while( !feof( fhandler ) ) {
+		fscanf( fhandler, "%s\n", map_file );
+		m = new Map( map_file );
+		std::cout << "map: " << m->getMapName() << std::endl;
 
-	DSRobberAlgorithm<graphState,graphMove> *ralg;
+		MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
+		Graph *g = mclab->GetAbstractGraph( 0 );
+		GraphEnvironment *env = new GraphEnvironment( g, NULL );
 
-	if( strcmp( argv[3], "trailmax" ) == 0 ) {
-		std::cout << "algorithm: trailmax( 1 )" << std::endl;
-		ralg = new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
-	} else if( strcmp( argv[3], "datrailmax" ) == 0 ) {
-		std::cout << "algorithm: datrailmax( 1, 10 )" << std::endl;
-		ralg = new DSDATPDijkstra( mclab, cop_speed, true );
-	} else if( strcmp( argv[3], "cover" ) == 0 ) {
-		std::cout << "algorithm: cover" << std::endl;
-		ralg = new DSCover<graphState,graphMove>( env, cop_speed );
-	} else if( strcmp( argv[3], "cover2" ) == 0 ) {
-		std::cout << "algorithm: original cover" << std::endl;
-		ralg = new DSCover2<graphState,graphMove>( env, g->GetNumNodes(), cop_speed );
-	} else if( strcmp( argv[3], "dam" ) == 0 ) {
-		std::cout << "algorithm: dam( 0.5, 3 )" << std::endl;
-		ralg = new DSDAM( mclab, true, cop_speed, true );
-	} else if( strcmp( argv[3], "idam2" ) == 0 ) {
-		std::cout << "algorithm: dam1( 0.5, 3 )" << std::endl;
-		ralg = new DSIDAM2( mclab, true, cop_speed, true );
-	} else if( strcmp( argv[3], "greedy" ) == 0 ) {
-		std::cout << "algorithm: greedy" << std::endl;
-		ralg = new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
-	} else if( strcmp( argv[3], "minimax" ) == 0 ) {
-		std::cout << "algorithm: minimax( 5 )" << std::endl;
-		ralg = new DSMinimax<graphState,graphMove>( env, true, cop_speed );
-	//} else if( strcmp( argv[3], "randombeacons" ) == 0 ) {
-	//	std::cout << "algortihm: randombeacons( 40, 1 )" << std::endl;
-	//	ralg = new DSRandomBeacons( mclab, true, cop_speed );
-	} else {
-		std::cout << "ERROR: unknown algorithm" << std::endl;
-		exit( 1 );
+		DSRobberAlgorithm<graphState,graphMove> *ralg;
+
+		if( strcmp( argv[3], "trailmax" ) == 0 ) {
+			std::cout << "algorithm: trailmax( 1 )" << std::endl;
+			ralg = new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
+		} else if( strcmp( argv[3], "datrailmax" ) == 0 ) {
+			std::cout << "algorithm: datrailmax( 1, 10 )" << std::endl;
+			ralg = new DSDATPDijkstra( mclab, cop_speed, true );
+		} else if( strcmp( argv[3], "cover" ) == 0 ) {
+			std::cout << "algorithm: cover" << std::endl;
+			ralg = new DSCover<graphState,graphMove>( env, cop_speed );
+		} else if( strcmp( argv[3], "cover2" ) == 0 ) {
+			std::cout << "algorithm: original cover" << std::endl;
+			ralg = new DSCover2<graphState,graphMove>( env, g->GetNumNodes(), cop_speed );
+		} else if( strcmp( argv[3], "dam" ) == 0 ) {
+			std::cout << "algorithm: dam( 0.5, 3 )" << std::endl;
+			ralg = new DSDAM( mclab, true, cop_speed, true );
+		} else if( strcmp( argv[3], "idam2" ) == 0 ) {
+			std::cout << "algorithm: dam1( 0.5, 3 )" << std::endl;
+			ralg = new DSIDAM2( mclab, true, cop_speed, true );
+		} else if( strcmp( argv[3], "greedy" ) == 0 ) {
+			std::cout << "algorithm: greedy" << std::endl;
+			ralg = new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
+		} else if( strcmp( argv[3], "minimax" ) == 0 ) {
+			std::cout << "algorithm: minimax( 5 )" << std::endl;
+			ralg = new DSMinimax<graphState,graphMove>( env, true, cop_speed );
+		//} else if( strcmp( argv[3], "randombeacons" ) == 0 ) {
+		//	std::cout << "algortihm: randombeacons( 40, 1 )" << std::endl;
+		//	ralg = new DSRandomBeacons( mclab, true, cop_speed );
+		} else {
+			std::cout << "ERROR: unknown algorithm" << std::endl;
+			exit( 1 );
+		}
+
+		DSBestResponse *dsbestresponse = new DSBestResponse( env, ralg, cop_speed );
+		clock_start = clock();
+		dsbestresponse->compute_best_response();
+		clock_end = clock();
+
+		sprintf( br_file, "br_%s_%s", argv[3], basename(map_file) );
+		dsbestresponse->WriteValuesToDisk( br_file );
+
+		printf( "nodes expanded:  %u\n", dsbestresponse->nodesExpanded );
+		printf( "nodes touched:   %u\n", dsbestresponse->nodesTouched );
+		printf( "algorithm calls: %u\n", dsbestresponse->ralgCalls );
+		printf( "time: %ld ms\n", (clock_end-clock_start)/1000 );
+		
+		delete dsbestresponse;
+		delete ralg;
+		delete env;
+		delete mclab;
 	}
-
-	DSBestResponse *dsbestresponse = new DSBestResponse( env, ralg, cop_speed );
-	dsbestresponse->compute_best_response();
-
-	std::cout << "writing values to " << argv[4] << std::endl;
-	dsbestresponse->WriteValuesToDisk( argv[4] );
-
-	printf( "nodes expanded:  %u\n", dsbestresponse->nodesExpanded );
-	printf( "nodes touched:   %u\n", dsbestresponse->nodesTouched );
-	printf( "algorithm calls: %u\n", dsbestresponse->ralgCalls );
-
-	delete dsbestresponse;
-	delete ralg;
-	delete env;
-	delete mclab;
+	fclose( fhandler );
 };
 
 
