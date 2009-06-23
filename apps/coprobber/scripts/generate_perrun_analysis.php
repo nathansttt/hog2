@@ -222,6 +222,8 @@ foreach( $argv as $filename ) {
 	foreach( $robber_algorithm_names as $ra ) {
 		if( $ra == "optimal( )" || $ra == "cover( )" || $ra == "greedy( )" || $ra == "greedy_perfect( )" )
 			$robber_algorithms[] = substr( $ra, 0, -3 );
+		elseif( preg_match( "/^greedy_diff\( \(int\)([\d]+) \)/", $ra, $match ) )
+			$robber_algorithms[] = "greedy_diff(" . $match[1] . ")";
 		elseif( preg_match( "/^cover2\( \(double\)([\d\.-]+) \)/", $ra, $match ) )
 			$robber_algorithms[] = "cover2(" . $match[1] . ")";
 		elseif( preg_match( "/^minimax\( \(double\)([\d\.-]+) \)/", $ra, $match ) )
