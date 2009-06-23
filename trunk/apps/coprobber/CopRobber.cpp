@@ -2481,6 +2481,12 @@ bool find_algorithm( std::vector<const char*> list, const char* alg ) {
 	return false;
 };
 
+bool find_algorithm( std::vector<const char*> list, const char* alg, unsigned int &index ) {
+	for( ; index < list.size(); index++ ) {
+		if( strcmp( list[index], alg ) == 0 ) return true;
+	}
+	return false;
+};
 
 
 
@@ -2504,6 +2510,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		printf( "                    the robber is to move (assuming the cop moves at time 0.\n" );
 		printf( "  greedy          - heuristic hill climbing due to maximum norm distance metric\n" );
 		printf( "  greedy_perfect  - heuristic hill climbing due to perfect distance metric (edge costs 1)\n" );
+		printf( "  greedy_diff     - heuristic hill climbing due to differential heuristics\n" );
 		printf( "  minimax <depth> - minimax up to given depth with distance metric evaluation\n" );
 		printf( "  dam <fraction> <depth>\n" );
 		printf( "                  - dynamic abstract minimax starting on level fraction to a given depth\n" );
@@ -2596,6 +2603,14 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 					robber_algorithms.push_back( "greedy_perfect" );
 					robber_int_params.push_back( std::vector<int>() );
 					robber_double_params.push_back( std::vector<double>() );
+				}
+				else if( strcmp( argv[param_num], "greedy_diff" ) == 0 ) {
+					robber_algorithms.push_back( "greedy_diff" );
+					std::vector<int> myparams;
+					myparams.push_back( atoi( argv[param_num+1] ) );
+					robber_int_params.push_back( myparams );
+					robber_double_params.push_back( std::vector<double>() );
+					param_num += 1;
 				}
 				else if( strcmp( argv[param_num], "randombeacons" ) == 0 ) {
 					robber_algorithms.push_back( "randombeacons" );
@@ -2745,10 +2760,21 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		GraphEnvironment *env = new GraphEnvironment( g, gh );
 		// if necessary build the perfect heuristic
 		PerfectGraphHeuristic *gh_perfect = NULL;
-		GraphEnvironment *env_perfect = NULL;
+		GraphEnvironment *env_perfect     = NULL;
 		if( find_algorithm( robber_algorithms, "greedy_perfect" ) ) {
 			gh_perfect = new PerfectGraphHeuristic( g );
 			env_perfect = new GraphEnvironment( g, gh_perfect );
+		}
+		// if necessary build the differential heuristic
+		GraphDistanceHeuristic *gh_diff = NULL;
+		GraphEnvironment *env_diff      = NULL;
+		unsigned int index = 0;
+		if( find_algorithm( robber_algorithms, "greedy_diff", index ) ) {
+			gh_diff = new GraphDistanceHeuristic( g );
+			gh_diff->UseSmartPlacement( true );
+			for( int i = 0; i < robber_int_params[index][0]; i++ )
+				gh_diff->AddHeuristic();
+			env_diff = new GraphEnvironment( g, gh_diff );
 		}
 
 		// cop objects
@@ -2781,6 +2807,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		DSIDAM2 *dsidam2 = NULL;
 		DSHeuristicGreedy<graphState,graphMove> *dsheuristic = NULL;
 		DSHeuristicGreedy<graphState,graphMove> *dsheuristic_perfect = NULL;
+		DSHeuristicGreedy<graphState,graphMove> *dsheuristic_diff    = NULL;
 		DSRandomBeacons *dsrandomb = NULL;
 		DSTPDijkstra<graphState,graphMove> *dstp = NULL; // trailmax
 		DSDATPDijkstra *dsdatp = NULL; // datrailmax
@@ -2795,6 +2822,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( find_algorithm( robber_algorithms, "greedy"     ) ) dsheuristic = new DSHeuristicGreedy<graphState,graphMove>( env, true, cop_speed );
 		if( find_algorithm( robber_algorithms, "greedy_perfect" ) ) dsheuristic_perfect
 			= new DSHeuristicGreedy<graphState,graphMove>( env_perfect, true, cop_speed );
+		if( find_algorithm( robber_algorithms, "greedy_diff" ) ) dsheuristic_diff
+			= new DSHeuristicGreedy<graphState,graphMove>( env_diff, true, cop_speed );
 		if( find_algorithm( robber_algorithms, "trailmax"   ) ) dstp        = new DSTPDijkstra<graphState,graphMove>( env, cop_speed );
 		if( find_algorithm( robber_algorithms, "datrailmax" ) ) dsdatp      = new DSDATPDijkstra( mclab, cop_speed, true );
 		if( find_algorithm( robber_algorithms, "randombeacons" ) ) dsrandomb = new DSRandomBeacons( mclab, true, cop_speed );
@@ -3000,6 +3029,17 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
 									calculations++;
 								}
+								// greedy with differential heuristic
+								if( strcmp( robber_algorithms[robber_alg], "greedy_diff" ) == 0 ) {
+									clock_start = clock();
+									pos[0] = dsheuristic_diff->MakeMove( pos[0], pos[1], false );
+									clock_end   = clock();
+									nodesExpanded += dsheuristic_diff->nodesExpanded;
+									nodesTouched  += dsheuristic_diff->nodesTouched;
+									timer_average      += (clock_end-clock_start)/1000;
+									timer_stddiviation += (clock_end-clock_start)/1000 * (clock_end-clock_start)/1000;
+									calculations++;
+								}
 								// Random Beacons
 								if( strcmp( robber_algorithms[robber_alg], "randombeacons" ) == 0 ) {
 									// if new path has to be computed, do so
@@ -3094,6 +3134,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( dstp        != NULL ) delete dstp;
 		if( dsheuristic != NULL ) delete dsheuristic;
 		if( dsheuristic_perfect != NULL ) delete dsheuristic_perfect;
+		if( dsheuristic_diff    != NULL ) delete dsheuristic_diff;
 		if( dsdam       != NULL ) delete dsdam;
 		if( dsidam      != NULL ) delete dsidam;
 		if( dsminimax   != NULL ) delete dsminimax;
@@ -3103,8 +3144,10 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		if( dsdijkstra != NULL ) delete dsdijkstra;
 		// delete environments
 		if( env_perfect != NULL ) delete env_perfect;
+		if( env_diff    != NULL ) delete env_diff;
 		delete env;
 		if( gh_perfect != NULL ) delete gh_perfect;
+		if( gh_diff    != NULL ) delete gh_diff;
 		delete gh;
 		delete mclab;
 	}
