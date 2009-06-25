@@ -221,7 +221,6 @@ void GraphCanonicalHeuristic::ChooseStartGoal(graphState &start, graphState &goa
 
 double GraphCanonicalHeuristic::HCost(graphState &state1, graphState &state2)
 {
-	printf("Looking up %d to %d\n", state1, state2);
 	node *n1 = g->GetNode(state1);
 	node *n2 = g->GetNode(state2);
 
