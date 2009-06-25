@@ -221,6 +221,7 @@ void GraphCanonicalHeuristic::ChooseStartGoal(graphState &start, graphState &goa
 
 double GraphCanonicalHeuristic::HCost(graphState &state1, graphState &state2)
 {
+	printf("Looking up %d to %d\n", state1, state2);
 	node *n1 = g->GetNode(state1);
 	node *n2 = g->GetNode(state2);
 
@@ -406,6 +407,7 @@ void GraphCanonicalHeuristic::GetCenters()
 
 			// use the ids in the real map/graph to add centers
 			centers.push_back(map->getNodeNum(locx, locy));
+			//printf("Center[%d] = (%d, %d)\n", (int)centers.size()-1, locx, locy);
 		}
 		delete nla;
 	}
@@ -469,8 +471,12 @@ void GraphCanonicalHeuristic::GetPDBValues()
 						for (unsigned int w = centerDist.size()-1; w > z; w--)
 						{
 							centerDist[w][y] = centerDist[w-1][y];
+							//printf("centerDist[%d][%d] = %f\n", w, y, centerDist[w-1][y]);
 							whichPDB[w][y] = whichPDB[w-1][y];
+							//printf("whichPDB[%d][%d] = %f\n", w, y, whichPDB[w-1][y]);
 						}
+						//printf("centerDist[%d][%d] = %f\n", z, y, len);
+						//printf("whichPDB[%d][%d] = %f\n", z, y, x);
 						centerDist[z][y] = len;
 						whichPDB[z][y] = x;
 						break;
@@ -486,10 +492,11 @@ void GraphCanonicalHeuristic::GetPDBValues()
 //			xyLoc loc2(locx, locy);
 
 			len = -1;
-			g1 = y;
+			g1 = centers[y];
 			if (astar.GetClosedListGCost(g1, len))
 			{ }
 			//printf("(%d, %d)<->(%d, %d) = %f\n", loc1.x, loc1.y, loc2.x, loc2.y, len);
+			//printf("lengths[%d][%d] = %f\n", x, y, len);
 			lengths[x][y] = len;
 			lengths[y][x] = len;
 		}
