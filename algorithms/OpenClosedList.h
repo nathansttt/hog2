@@ -32,7 +32,7 @@
 #include <ext/hash_map>
 
 /**
-* A simple & efficient Heap class.
+* A simple Heap class.
  */
 
 
