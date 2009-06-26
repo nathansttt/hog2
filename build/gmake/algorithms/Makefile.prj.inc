@@ -33,6 +33,7 @@ SRC_CPP = \
 	algorithms/GenericAStar.cpp \
 	algorithms/GenericIDAStar.cpp \
 	algorithms/OpenClosedList.cpp \
+	algorithms/AStarOpenClosed.cpp \
 	algorithms/OpenListB.cpp
 #	algorithms/SearchEnvironment.cpp
 
