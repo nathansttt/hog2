@@ -24,7 +24,7 @@ GraphCanonicalHeuristic::GraphCanonicalHeuristic(Map *m, int numClosest, int siz
 	m_SizeFactor = sizeFactor;
 	m_NumClosest = numClosest;
 	g = GraphSearchConstants::GetGraph(map);
-	ga = new GraphEnvironment(g, new GraphMapHeuristic(m, g));
+	ga = new GraphEnvironment(m, g, new GraphMapHeuristic(m, g));
 	//ma = new MapEnvironment(m->clone());
 	BuildPDB();
 }
@@ -73,7 +73,7 @@ void GraphCanonicalHeuristic::load(char *file)
 
 	map = new Map(f);
 	g = GraphSearchConstants::GetGraph(map);
-	ga = new GraphEnvironment(g, new GraphMapHeuristic(map, g));
+	ga = new GraphEnvironment(map, g, new GraphMapHeuristic(map, g));
 
 //	ma = new MapEnvironment(map->clone());
 //	g = GraphSearchConstants::GetGraph(map);
@@ -223,7 +223,8 @@ double GraphCanonicalHeuristic::HCost(graphState &state1, graphState &state2)
 {
 	node *n1 = g->GetNode(state1);
 	node *n2 = g->GetNode(state2);
-
+	if ((n1 == 0) || (n2 == 0))
+		return 0;
 	double val = 0;
 
 	//printf("[");
@@ -262,7 +263,7 @@ void GraphCanonicalHeuristic::BuildPDB()
 	if (m_NumCanonicals < m_NumClosest)
 		m_NumCanonicals = m_NumClosest;
 	
-	printf("Getting centers\n");
+	printf("Getting centers (%d closest)\n", m_NumCanonicals);
 	GetCenters();
 	//TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 	
@@ -451,6 +452,7 @@ void GraphCanonicalHeuristic::GetPDBValues()
 
 		std::vector<graphState> path;
 		graphState g1 = centers[x], g2 = centers[x];
+		ga->SetDirected(true);
 		astar.GetPath(ga, g1, g2, path);
 
 		// mark closest points
@@ -511,7 +513,19 @@ void GraphCanonicalHeuristic::GetPDBValues()
 void GraphCanonicalHeuristic::OpenGLDraw() const
 {
 	if (map)
+	{
+		//map->setTileSet(kFast);
 		map->OpenGLDraw(kPolygons);
-	if (mo)
-		mo->OpenGLDraw();
+	}
+//	if (ga)
+//	{
+//		ga->SetColor(1, 1, 1, 1);
+//		for (unsigned int x = 0; x < centers.size(); x++)
+//		{
+//			graphState g1 = centers[x];
+//			ga->OpenGLDraw(g1);
+//		}
+//	}
+//	if (mo)
+//		mo->OpenGLDraw();
 }
