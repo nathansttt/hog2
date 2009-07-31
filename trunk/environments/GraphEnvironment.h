@@ -116,7 +116,7 @@ private:
 class GraphAbstractionHeuristic : public GraphHeuristic {
 public:
 	GraphAbstractionHeuristic(MapAbstraction *mabs, int lev)
-	:mAbs(mabs), level(lev) {}
+	:mAbs(mabs), level(lev) { }
 	Graph *GetGraph() { return mAbs->GetAbstractGraph(level); }
 	double HCost(graphState &state1, graphState &state2)
 	{
@@ -227,6 +227,7 @@ private:
 class GraphEnvironment : public SearchEnvironment<graphState, graphMove> {
 public:
 	GraphEnvironment(Graph *g, GraphHeuristic *gh);
+	GraphEnvironment(Map *m, Graph *g, GraphHeuristic *gh);
 	virtual ~GraphEnvironment();
 	virtual void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const;
 	virtual void GetActions(graphState &stateID, std::vector<graphMove> &actions) const;
@@ -234,7 +235,7 @@ public:
 	virtual void ApplyAction(graphState &s, graphMove a) const;
 	virtual bool InvertAction(graphMove &a) const;
 
-	void SetDirected(bool b) {directed = b;}
+	void SetDirected(bool b) { directed = b; }
 
 	OccupancyInterface<graphState, graphMove> *GetOccupancyInfo() { return 0; }
 	virtual double HCost(graphState &state1, graphState &state2);
@@ -262,6 +263,7 @@ public:
 
 protected:
 	bool directed;
+	Map *m;
 	Graph *g;
 	GraphHeuristic *h;
 
@@ -273,6 +275,8 @@ class AbstractionGraphEnvironment: public GraphEnvironment {
 	~AbstractionGraphEnvironment();
 
 	virtual void OpenGLDraw() const;
+	virtual void OpenGLDraw(const graphState &s) const { GraphEnvironment::OpenGLDraw(s); }
+
 	double scale() { return graphscale; };
 
 protected:
