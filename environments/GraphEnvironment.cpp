@@ -21,6 +21,14 @@ using namespace GraphSearchConstants;
 GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 :g(_g), h(gh)
 {
+	m = 0;
+ 	directed = false;
+}
+
+GraphEnvironment::GraphEnvironment(Map *_m, Graph *_g, GraphHeuristic *gh)
+:g(_g), h(gh)
+{
+	m = _m;
  	directed = false;
 }
 
@@ -44,7 +52,8 @@ void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState
 	neighbors.resize(0);
 	node *n = g->GetNode(stateID);
 
-	if(n == 0) {
+	if (n == 0)
+	{
 		return;
 	}
 
@@ -60,7 +69,7 @@ void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState
 		edge_iterator ei = n->getEdgeIter();
 		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
 		{
-			if(stateID != e->getTo())
+			if (stateID != e->getTo())
 				neighbors.push_back(e->getTo());
 			else
 				neighbors.push_back(e->getFrom());
@@ -73,7 +82,8 @@ void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &a
 	actions.resize(0);
 	node *n = g->GetNode(stateID);
 
-	if(n == 0) {
+	if (n == 0)
+	{
 		return;
 	}
 
@@ -195,11 +205,33 @@ void GraphEnvironment::OpenGLDraw() const
 
 void GraphEnvironment::OpenGLDraw(const graphState &s) const
 {
-	node *n = g->GetNode(s);
-	DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
-						 (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
-						 (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
-						 (GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
+	if (m)
+	{
+		GLdouble xx, yy, zz, rad;
+		int x1, y1;
+		node *n = g->GetNode(s);
+		x1 = n->GetLabelL(GraphSearchConstants::kMapX);
+		y1 = n->GetLabelL(GraphSearchConstants::kMapY);
+		m->getOpenGLCoord(x1, y1, xx, yy, zz, rad);
+		GLfloat r, g, b, t;
+		GetColor(r, g, b, t);
+		glColor4f(r, g, b, t);
+		//glColor3f(0.5, 0.5, 0.5);
+		//DrawSphere(xx, yy, zz, rad);
+		glBegin(GL_QUADS);
+		glVertex3d(xx+rad, yy+rad, zz-rad);
+		glVertex3d(xx-rad, yy+rad, zz-rad);
+		glVertex3d(xx-rad, yy-rad, zz-rad);
+		glVertex3d(xx+rad, yy-rad, zz-rad);
+		glEnd();
+	}
+	else {
+		node *n = g->GetNode(s);
+		DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
+				   (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
+				   (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
+				   (GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
+	}
 }
 
 void GraphEnvironment::OpenGLDraw(const graphState &, const graphMove &) const
@@ -551,8 +583,10 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 	//for (unsigned int x = 0; x < heuristics.size(); x++)
 	if (hmode == kRandom) {
 		int x = (x1+x2+y1+y2)%heuristics.size();
+		for (int y = 0; y < numHeuristics; y++)
 		{
-			double hval = heuristics[x][state1]-heuristics[x][state2];
+			int offset = heuristics.size()/numHeuristics;
+			double hval = heuristics[(x+y*offset)%heuristics.size()][state1]-heuristics[(x+y*offset)%heuristics.size()][state2];
 			if (hval < 0) hval = -hval;
 			if (fgreater(hval, val))
 				val = hval;
@@ -587,8 +621,8 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 
 void GraphDistanceHeuristic::OpenGLDraw() const
 {
-	static int counter = 0;
-	counter = (counter+1);
+	static int counter = 50;
+	//counter = (counter+1);
 	if (heuristics.size() == 0)
 		return;
 
@@ -600,7 +634,7 @@ void GraphDistanceHeuristic::OpenGLDraw() const
 		y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
 		z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
 
-		recColor r = getColor((counter+locations[a])%100, 0, 100, 4);
+		recColor r(1.0, 1.0, 1.0);//getColor((counter+locations[a])%100, 0, 100, 4);
 
 		glColor3f(r.r, r.g, r.b);
 		DrawSphere(x, y, z, 0.05);
@@ -723,13 +757,20 @@ node *GraphDistanceHeuristic::FindFarNode(node *n)
 		n->SetKeyLabel(kTemporaryLabel);
 		h.Add(n);
 	}
-	if (locations.size() == 0)
+	if ((locations.size() == 0) && n)
 	{
-		if (n == 0)
-			n = g->GetRandomNode();
 		n->SetLabelF(kTemporaryLabel, 0.0);
 		n->SetKeyLabel(kTemporaryLabel);
 		h.Add(n);
+	}
+	else if (n == 0) { // cheap way of finding largest region with high liklihood
+		for (int x = 0; x < 10; x++)
+		{
+			n = g->GetNode(x*g->GetNumNodes()/10);
+			n->SetLabelF(kTemporaryLabel, 0.0);
+			n->SetKeyLabel(kTemporaryLabel);
+			h.Add(n);
+		}
 	}
 
 	while (!h.Empty())
