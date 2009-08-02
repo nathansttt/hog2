@@ -29,6 +29,7 @@
 #include "FPUtil.h"
 #include <math.h>
 #include <assert.h>
+#include <vector>
 
 #ifdef NO_OPENGL
 #include "Gl.cpp"
@@ -163,7 +164,7 @@ bool line2d::crosses(line2d which) const
 recColor getColor(GLfloat v, GLfloat vmin, GLfloat vmax, int type)
 {
 	double dv,vmid;
-  recColor c = {1.0,1.0,1.0};
+	recColor c(1.0,1.0,1.0);
   recColor c1,c2,c3;
   double ratio;
 	
@@ -498,6 +499,9 @@ void drawBox(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad)
 
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 {
+	static std::vector<double> px_cache;
+	static std::vector<double> py_cache;
+	static std::vector<double> pz_cache;
 	glEnable(GL_LIGHTING);
 	
 	glTranslatef(_x, _y, _z);
@@ -505,17 +509,18 @@ void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 	int i,j;
 	int n = 16; // precision
 	double theta1,theta2,theta3;
-	point3d e,p,c(0, 0, 0);
+	point3d e,p;//,c(0, 0, 0);
 	
 	if (tRadius < 0) tRadius = -tRadius;
 	if (n < 0) n = -n;
 	if (n < 4 || tRadius <= 0)
 	{
 		glBegin(GL_POINTS);
-		glVertex3f(c.x,c.y,c.z);
+		glVertex3f(0, 0, 0);
 		glEnd();
 	}
-	else {
+	else if (px_cache.size() == 0)
+	{
 		for (j=n/4;j<n/2;j++)
 		{
 			theta1 = j * TWOPI / n - PID2;
@@ -532,9 +537,14 @@ void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 				e.x = cos(theta2) * cos(theta3);
 				e.y = cos(theta2) * sin(theta3);
 				e.z = sin(theta2);
-				p.x = c.x + tRadius * e.x;
-				p.y = c.y + tRadius * e.y;
-				p.z = c.z - tRadius * e.z;
+
+				px_cache.push_back(e.x);
+				py_cache.push_back(e.y);
+				pz_cache.push_back(e.z);
+				
+				p.x = tRadius * e.x;
+				p.y = tRadius * e.y;
+				p.z = - tRadius * e.z;
 				
 				glNormal3f(-e.x,-e.y,e.z);
 				//glTexCoord2f(i/(double)n,2*(j+1)/(double)n);
@@ -543,13 +553,35 @@ void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 				e.x = cos(theta1) * cos(theta3);
 				e.y = cos(theta1) * sin(theta3);
 				e.z = sin(theta1);
-				p.x = c.x + tRadius * e.x;
-				p.y = c.y + tRadius * e.y;
-				p.z = c.z - tRadius * e.z;
+
+				px_cache.push_back(e.x);
+				py_cache.push_back(e.y);
+				pz_cache.push_back(e.z);
+
+				p.x = tRadius * e.x;
+				p.y = tRadius * e.y;
+				p.z = - tRadius * e.z;
 				
 				glNormal3f(-e.x,-e.y,e.z);
 				//glTexCoord2f(i/(double)n,2*j/(double)n);
 				glVertex3f(p.x,p.y,p.z);
+			}
+			glEnd();
+		}
+	}
+	else {
+		int which = 0;
+		for (j=n/4;j<n/2;j++)
+		{
+			glBegin(GL_QUAD_STRIP);
+			for (i=0;i<=n;i++)
+			{
+				glNormal3d(-px_cache[which], -py_cache[which], pz_cache[which]);
+				glVertex3d(tRadius*px_cache[which], tRadius*py_cache[which], -tRadius*pz_cache[which]);
+				which++;
+				glNormal3d(-px_cache[which], -py_cache[which], pz_cache[which]);
+				glVertex3d(tRadius*px_cache[which], tRadius*py_cache[which], -tRadius*pz_cache[which]);
+				which++;
 			}
 			glEnd();
 		}
