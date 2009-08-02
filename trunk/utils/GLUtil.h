@@ -81,6 +81,8 @@ std::ostream& operator <<(std::ostream &out, const recVec &loc);
  */
 class recColor {
 public:
+	recColor() {}
+	recColor(GLfloat rr, GLfloat gg, GLfloat bb) :r(rr), g(gg), b(bb) {}
 	GLfloat r,g,b;
 };
 
