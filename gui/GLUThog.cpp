@@ -546,7 +546,7 @@ void appendTextToBuffer(char *tempStr)
 
 	delete myTextBox;
 	point3d a(-.95, .95, -.95), b(.95, -.95, .95);
-	recColor rc = {1, 1, 1};
+	recColor rc(1, 1, 1);
 	myTextBox = new TextBox(pContextInfo->message, 120, a, b, 1000, true);
 	myTextBox->setColor(rc);
 }
@@ -556,7 +556,7 @@ void submitTextToBuffer(const char *val)
 	strncpy(pContextInfo->message, val, 255);
 	delete myTextBox;
 	point3d a(-.95, .95, -.95), b(.95, -.95, .95);
-	recColor rc = {1, 1, 1};
+	recColor rc(1, 1, 1);
 	myTextBox = new TextBox(pContextInfo->message, 120, a, b, 1000, true);
 	myTextBox->setColor(rc);
 }
