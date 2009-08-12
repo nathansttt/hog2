@@ -14,28 +14,28 @@ void MapSearchEnvironment::getNeighbors(uint32_t nodeID, std::vector<uint32_t> &
 	int x1, y1;
 	bool up=false, down=false;
 	x1 = nodeID>>16; y1 = nodeID&0xFFFF;
-	if ((map->getTerrainType(x1, y1+1) == kGround))
+	if ((map->GetTerrainType(x1, y1+1) == kGround))
 	{
 		down = true;
 		neighbors.push_back((x1<<16)|(y1+1));
-		if ((map->getTerrainType(x1, y1-1) == kGround))
+		if ((map->GetTerrainType(x1, y1-1) == kGround))
 		{
 			up = true;
 			neighbors.push_back((x1<<16)|(y1-1));
 		}
-		if ((map->getTerrainType(x1-1, y1) == kGround))
+		if ((map->GetTerrainType(x1-1, y1) == kGround))
 		{
-			if ((up && (map->getTerrainType(x1-1, y1-1) == kGround)))
+			if ((up && (map->GetTerrainType(x1-1, y1-1) == kGround)))
 				neighbors.push_back(((x1-1)<<16)|(y1-1));
-			if ((down && (map->getTerrainType(x1-1, y1+1) == kGround)))
+			if ((down && (map->GetTerrainType(x1-1, y1+1) == kGround)))
 				neighbors.push_back(((x1-1)<<16)|(y1+1));
 			neighbors.push_back(((x1-1)<<16)| y1);
 		}
-		if ((map->getTerrainType(x1+1, y1) == kGround))
+		if ((map->GetTerrainType(x1+1, y1) == kGround))
 		{
-			if ((up && (map->getTerrainType(x1+1, y1-1) == kGround)))
+			if ((up && (map->GetTerrainType(x1+1, y1-1) == kGround)))
 				neighbors.push_back(((x1+1)<<16)|(y1-1));
-			if ((down && (map->getTerrainType(x1+1, y1+1) == kGround)))
+			if ((down && (map->GetTerrainType(x1+1, y1+1) == kGround)))
 				neighbors.push_back(((x1+1)<<16)|(y1+1));
 			neighbors.push_back(((x1+1)<<16)| y1);
 		}

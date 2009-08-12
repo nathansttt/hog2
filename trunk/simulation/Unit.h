@@ -124,7 +124,7 @@ private:
 //	/** updateLocation only tells a unit where it is located, it doesn't physically change the location in the world */
 //	virtual void updateLocation(int _x, int _y, bool, SimulationInfo *) { x = _x; y = _y; }
 //	/** log an stats that may have been computed during the last run */
-//	virtual void logStats(StatCollection *stats);
+//	virtual void LogStats(StatCollection *stats);
 //	/** log any final one-time stats before a simulation is ended */
 //	virtual void LogFinalStats(StatCollection *) {}
 //	

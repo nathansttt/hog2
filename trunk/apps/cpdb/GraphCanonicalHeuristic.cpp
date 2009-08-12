@@ -18,35 +18,35 @@ GraphCanonicalHeuristic::GraphCanonicalHeuristic(Map *m, int numClosest, int siz
 {
 //	if (DBSize == -1)
 //	{
-//		DBSize = (int)pow(m->getMapWidth()*m->getMapHeight(), 0.25)/2;
+//		DBSize = (int)pow(m->GetMapWidth()*m->GetMapHeight(), 0.25)/2;
 //		printf("Dynamically setting size to %d\n", DBSize);
 //	}
 	m_SizeFactor = sizeFactor;
 	m_NumClosest = numClosest;
 	g = GraphSearchConstants::GetGraph(map);
 	ga = new GraphEnvironment(m, g, new GraphMapHeuristic(m, g));
-	//ma = new MapEnvironment(m->clone());
+	//ma = new MapEnvironment(m->Clone());
 	BuildPDB();
 }
 
 GraphCanonicalHeuristic::GraphCanonicalHeuristic(char *file)
 :lengths(), centers(), centerDist(), map(0), g(0), mo(0)
 {
-	load(file);
+	Load(file);
 }
 
-GraphCanonicalHeuristic::GraphCanonicalHeuristic(Graph *g, GraphHeuristic *gh, int numClosest, int sizeFactor)
+GraphCanonicalHeuristic::GraphCanonicalHeuristic(Graph *gr, GraphHeuristic *gh, int numClosest, int sizeFactor)
 {
 	m_SizeFactor = sizeFactor;
 	m_NumClosest = numClosest;
 	//this->g = g->cloneAll();
-	this->g = g;
-	ga = new GraphEnvironment(g, gh);
+	this->g = gr;
+	ga = new GraphEnvironment(gr, gh);
 	map = 0;
 	BuildPDB();
 }
 
-void GraphCanonicalHeuristic::load(char *file)
+void GraphCanonicalHeuristic::Load(char *file)
 {
 	delete map;
 	delete g;
@@ -75,7 +75,7 @@ void GraphCanonicalHeuristic::load(char *file)
 	g = GraphSearchConstants::GetGraph(map);
 	ga = new GraphEnvironment(map, g, new GraphMapHeuristic(map, g));
 
-//	ma = new MapEnvironment(map->clone());
+//	ma = new MapEnvironment(map->Clone());
 //	g = GraphSearchConstants::GetGraph(map);
 	
 	centers.resize(numNodes);
@@ -114,41 +114,41 @@ void GraphCanonicalHeuristic::load(char *file)
 	fclose(f);
 
 	mo  = new MapOverlay(map);
-	mo->setTransparentValue(0);
+	mo->SetTransparentValue(0);
 	std::vector<int> randoms;
 	//node *r = g->GetRandomNode();
-	for (int x = 0; x < map->getMapWidth(); x++)
+	for (int x = 0; x < map->GetMapWidth(); x++)
 	{
-		for (int y = 0; y < map->getMapHeight(); y++)
+		for (int y = 0; y < map->GetMapHeight(); y++)
 		{
-			node *n = g->GetNode(map->getNodeNum(x, y));
+			node *n = g->GetNode(map->GetNodeNum(x, y));
 			if (n)
 			{
-				graphState a, b;
+				graphState a;
 				a = n->GetNum();
 				//b = r->GetNum();
 				if (centerDist[0][a] == 0)
 				{
-					mo->setOverlayValue(x, y, 1.0);
+					mo->SetOverlayValue(x, y, 1.0);
 				}
 				else {
-					while (whichPDB[0][a] >= randoms.size())
+					while (whichPDB[0][a] >= (int)randoms.size())
 					{
 						randoms.push_back(random()%4096);
 					}
-					mo->setOverlayValue(x, y, randoms[whichPDB[0][a]]);
+					mo->SetOverlayValue(x, y, randoms[whichPDB[0][a]]);
 				}
-				//mo->setOverlayValue(x, y, HCost(a, b));
+				//mo->SetOverlayValue(x, y, HCost(a, b));
 				//				printf("(%d, %d)=%d center distances: %f\n", x, y, n->GetNum(), centerDist[0][n->GetNum()]);
 			}
 			else
-				mo->setOverlayValue(x, y, 0);
+				mo->SetOverlayValue(x, y, 0);
 		}
 	}
 }
 
 
-void GraphCanonicalHeuristic::save(char *file)
+void GraphCanonicalHeuristic::Save(char *file)
 {
 	FILE *f = fopen(file, "w+");
 	if (!f)
@@ -159,7 +159,7 @@ void GraphCanonicalHeuristic::save(char *file)
 	fprintf(f, "%d %d %d\n", m_SizeFactor, m_NumClosest, m_NumCanonicals);
 	fprintf(f, "%d\n", (int)whichPDB[0].size());
 
-	map->save(f);
+	map->Save(f);
 
 	//std::vector<int> centers;
 	for (unsigned int x = 0; x < centers.size(); x++)
@@ -277,24 +277,24 @@ void GraphCanonicalHeuristic::BuildPDB()
 	if (map)
 	{
 		mo  = new MapOverlay(map);
-		mo->setTransparentValue(0);
+		mo->SetTransparentValue(0);
 		node *r = g->GetRandomNode();
-		for (int x = 0; x < map->getMapWidth(); x++)
+		for (int x = 0; x < map->GetMapWidth(); x++)
 		{
-			for (int y = 0; y < map->getMapHeight(); y++)
+			for (int y = 0; y < map->GetMapHeight(); y++)
 			{
-				node *n = g->GetNode(map->getNodeNum(x, y));
+				node *n = g->GetNode(map->GetNodeNum(x, y));
 				if (n)
 				{
 					graphState a, b;
 					a = n->GetNum();
 					b = r->GetNum();
-	//				mo->setOverlayValue(x, y, whichPDB[0][a]);
-					mo->setOverlayValue(x, y, HCost(a, b));
+	//				mo->SetOverlayValue(x, y, whichPDB[0][a]);
+					mo->SetOverlayValue(x, y, HCost(a, b));
 	//				printf("(%d, %d)=%d center distances: %f\n", x, y, n->GetNum(), centerDist[0][n->GetNum()]);
 				}
 				else
-					mo->setOverlayValue(x, y, 0);
+					mo->SetOverlayValue(x, y, 0);
 			}
 		}
 	}
@@ -303,7 +303,7 @@ void GraphCanonicalHeuristic::BuildPDB()
 void GraphCanonicalHeuristic::ComputerCenterDistances()
 {
 //	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
-//	//MapEnvironment ma(msa->GetMap()->clone());
+//	//MapEnvironment ma(msa->GetMap()->Clone());
 //	
 //	//Graph *g = msa->GetAbstractGraph(0);
 //	centerDist.resize(g->GetNumNodes());
@@ -334,7 +334,7 @@ void GraphCanonicalHeuristic::GetCenters()
 
 	if ((limit < 10) || (map == 0))
 	{
-		while (centers.size() < limit)
+		while ((int)centers.size() < limit)
 		{
 			int val = g->GetRandomNode()->GetNum();
  			while (g->GetNode(val)->GetLabelF(GraphSearchConstants::kZCoordinate) != 0)
@@ -353,10 +353,10 @@ void GraphCanonicalHeuristic::GetCenters()
 
 	if (map)
 	{
-		Graph *gr;
+		Graph *gr = 0;
 		MapAbstraction *nla;
 		bool found = false;
-		nla = new MapLineAbstraction(map->clone());
+		nla = new MapLineAbstraction(map->Clone());
 		for (unsigned int x = 1; x < nla->getNumAbstractGraphs(); x++)
 		{
 			gr = nla->GetAbstractGraph(x);
@@ -384,7 +384,7 @@ void GraphCanonicalHeuristic::GetCenters()
 			int count = (val*(double)g->GetNumNodes());
 			count /= limit;
 			printf("Trying NLA(%d)\n", count);
-			nla = new NodeLimitAbstraction(map->clone(), count);
+			nla = new NodeLimitAbstraction(map->Clone(), count);
 			gr = nla->GetAbstractGraph(1);
 
 			printf("Wanted %d have %d\n", limit, gr->GetNumNodes());
@@ -406,7 +406,7 @@ void GraphCanonicalHeuristic::GetCenters()
 			nla->GetTileFromNode(gr->GetNode(x), locx, locy);
 
 			// use the ids in the real map/graph to add centers
-			centers.push_back(map->getNodeNum(locx, locy));
+			centers.push_back(map->GetNodeNum(locx, locy));
 			//printf("Center[%d] = (%d, %d)\n", (int)centers.size()-1, locx, locy);
 		}
 		delete nla;
@@ -514,7 +514,7 @@ void GraphCanonicalHeuristic::OpenGLDraw() const
 {
 	if (map)
 	{
-		//map->setTileSet(kFast);
+		//map->SetTileSet(kFast);
 		map->OpenGLDraw(kPolygons);
 	}
 //	if (ga)

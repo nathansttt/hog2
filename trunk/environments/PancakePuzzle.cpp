@@ -38,7 +38,7 @@ void PancakePuzzle::GetSuccessors(PancakePuzzleState &parent,
 	}
 }
 
-void PancakePuzzle::GetActions(PancakePuzzleState &state, std::vector<unsigned> &actions) const
+void PancakePuzzle::GetActions(PancakePuzzleState &, std::vector<unsigned> &actions) const
 {
 	actions.resize(0);
 
@@ -117,9 +117,9 @@ double PancakePuzzle::HCost(PancakePuzzleState &state1, PancakePuzzleState &stat
 	return 0.0;
 }
 
-bool PancakePuzzle::GoalTest(PancakePuzzleState &state, PancakePuzzleState &goal)
+bool PancakePuzzle::GoalTest(PancakePuzzleState &state, PancakePuzzleState &theGoal)
 {
-	return (state == goal);
+	return (state == theGoal);
 }
 
 bool PancakePuzzle::GoalTest(PancakePuzzleState &s) {
@@ -228,9 +228,9 @@ int PancakePuzzle::read_in_pancake_puzzles(const char *filename, bool puzz_num_s
 	return 0;
 }
 
-bool PancakePuzzle::Path_Check(PancakePuzzleState start, PancakePuzzleState goal, std::vector<unsigned> &actions) {
+bool PancakePuzzle::Path_Check(PancakePuzzleState start, PancakePuzzleState theGoal, std::vector<unsigned> &actions) {
 
-	if(start.puzzle.size() != size || goal.puzzle.size() != size)
+	if(start.puzzle.size() != size || theGoal.puzzle.size() != size)
 		return false;
 
 	for(unsigned i = 0; i < actions.size(); i++) {
@@ -239,7 +239,7 @@ bool PancakePuzzle::Path_Check(PancakePuzzleState start, PancakePuzzleState goal
 		ApplyAction(start, actions[i]);
 	}
 
-	if(start == goal)
+	if(start == theGoal)
 		return true;
 
 	return false;

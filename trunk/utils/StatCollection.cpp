@@ -159,7 +159,7 @@ void StatCollection::SumStat(const char *category, const char *owner, long value
 /**
 * Remove all stat entries from the collection.
  */
-void StatCollection::clearAllStats()
+void StatCollection::ClearAllStats()
 {
 	stats.resize(0);
 }
@@ -169,7 +169,7 @@ void StatCollection::clearAllStats()
 /**
 * The number of stats collected so far
  */
-int StatCollection::getNumStats() const
+int StatCollection::GetNumStats() const
 {
 	return (int)stats.size();
 }
@@ -177,7 +177,7 @@ int StatCollection::getNumStats() const
 /**
 * Return the nth stat which has been collected.
  */
-const stat *StatCollection::getStatNum(int which) const
+const stat *StatCollection::GetStatNum(int which) const
 {
 	return &stats[which];
 }
@@ -193,7 +193,7 @@ const char *StatCollection::lookupCategoryID(int id) const
 /**
 * Given a owner ID, return the text description.
  */
-const char *StatCollection::lookupOwnerID(int id) const
+const char *StatCollection::LookupOwnerID(int id) const
 {
 	return owners[id];
 }
@@ -203,19 +203,19 @@ const char *StatCollection::lookupOwnerID(int id) const
  * collected. All other stats added will be ignored. As many categories
  * can be added as needed.
  */
-void StatCollection::addFilter(char *category)
+void StatCollection::AddFilter(char *category)
 {
-	addIncludeFilter(category);
+	AddIncludeFilter(category);
 }
 
-void StatCollection::addIncludeFilter(char *category) // include only added categories
+void StatCollection::AddIncludeFilter(char *category) // include only added categories
 {
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);
 	includeFilters.push_back(str);
 }
 
-void StatCollection::addExcludeFilter(char *category) // exclude only added categories
+void StatCollection::AddExcludeFilter(char *category) // exclude only added categories
 {
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);
@@ -225,7 +225,7 @@ void StatCollection::addExcludeFilter(char *category) // exclude only added cate
 /**
 * Clear any filters being used for stat entry.
  */
-void StatCollection::clearFilters()
+void StatCollection::ClearFilters()
 {
 	for (unsigned int x = 0; x < excludeFilters.size(); x++)
 	{
@@ -271,7 +271,7 @@ int StatCollection::addCategory(const char *category)
 /**
 * Given an owner, look up the ID. O(# owners) operation. If not found, returns -1.
  */
-int StatCollection::lookupOwner(const char *owner) const
+int StatCollection::LookupOwner(const char *owner) const
 {
 	for (unsigned int x = 0; x < owners.size(); x++)
 		if (strcmp(owner, owners[x]) == 0)
@@ -285,7 +285,7 @@ int StatCollection::lookupOwner(const char *owner) const
  */
 int StatCollection::addOwner(const char *owner)
 {
-	int id = lookupOwner(owner);
+	int id = LookupOwner(owner);
 	if (id != -1)
 		return id;
 	char *str = new char [strlen(owner)+1];
@@ -298,7 +298,7 @@ int StatCollection::addOwner(const char *owner)
 * Find the last stat entered that matches the category and owner. Returns
  * copy of stat entry. Returns true if a stat was found and false otherwise.
  */
-bool StatCollection::lookupStat(const char *category, const char *owner, statValue &v) const
+bool StatCollection::LookupStat(const char *category, const char *owner, statValue &v) const
 {
 	if (!passFilter(category))
 	{
@@ -306,7 +306,7 @@ bool StatCollection::lookupStat(const char *category, const char *owner, statVal
 	}
 	int catID, ownerID;
 	catID = LookupCategory(category);
-	ownerID = lookupOwner(owner);
+	ownerID = LookupOwner(owner);
 	for (int x = (int)stats.size()-1; x >= 0; x--)
 	{
 		if ((stats[x].category == catID) && (stats[x].owner == ownerID))
@@ -318,7 +318,7 @@ bool StatCollection::lookupStat(const char *category, const char *owner, statVal
 	return false;
 }
 
-bool StatCollection::lookupStat(unsigned int index, statValue &v) const
+bool StatCollection::LookupStat(unsigned int index, statValue &v) const
 {
 	if (index < stats.size())
 	{
@@ -338,7 +338,7 @@ statValue *StatCollection::getLastStat(const char *category, const char *owner)
 		return 0;
 	int catID, ownerID;
 	catID = LookupCategory(category);
-	ownerID = lookupOwner(owner);
+	ownerID = LookupOwner(owner);
 	for (int x = (int)stats.size()-1; x >= 0; x--)
 	{
 		if ((stats[x].category == catID) && (stats[x].owner == ownerID))
@@ -373,7 +373,7 @@ bool StatCollection::passFilter(const char *category) const
 * Find the next stat entry that matches the given category and owner name. If error occurs,
  * return -1; otherwise, return the found index.
  */
-int StatCollection::findNextStat(const char *category, const char *owner, int startIndex) const
+int StatCollection::FindNextStat(const char *category, const char *owner, int startIndex) const
 {
 	// Check if the category has been registered
 	if (!passFilter(category))
@@ -385,7 +385,7 @@ int StatCollection::findNextStat(const char *category, const char *owner, int st
 	
 	int catID, ownerID;
 	catID = LookupCategory(category);
-	ownerID = lookupOwner(owner);
+	ownerID = LookupOwner(owner);
 	
 	for (int x = startIndex; x < (int)stats.size(); x++)
 	{
@@ -400,7 +400,7 @@ int StatCollection::findNextStat(const char *category, const char *owner, int st
 * Find the previous stat entry that matches the given category and owner name. If error occurs,
  * return -1; otherwise, return the found index.
  */
-int StatCollection::findPrevStat(const char *category, const char *owner, int startIndex) const
+int StatCollection::FindPrevStat(const char *category, const char *owner, int startIndex) const
 {
 	// Check if the category has been registered
 	if (!passFilter(category))
@@ -413,7 +413,7 @@ int StatCollection::findPrevStat(const char *category, const char *owner, int st
 	
 	int catID, ownerID;
 	catID = LookupCategory(category);
-	ownerID = lookupOwner(owner);
+	ownerID = LookupOwner(owner);
 	
 	for (int x = startIndex; x > 0; x--)
 	{
@@ -429,7 +429,7 @@ int StatCollection::findPrevStat(const char *category, const char *owner, int st
  * look to match the owner name. If error occurs,
  * return -1; otherwise, return the found index.
  */
-int StatCollection::findNextStat(const char *what, bool findCategory, int startIndex) const
+int StatCollection::FindNextStat(const char *what, bool findCategory, int startIndex) const
 {
 	// Check if the category has been registered
 	if (findCategory && (!passFilter(what)))
@@ -443,7 +443,7 @@ int StatCollection::findNextStat(const char *what, bool findCategory, int startI
 	if (findCategory)
 		ID = LookupCategory(what);
 	else
-		ID = lookupOwner(what);
+		ID = LookupOwner(what);
 	
 	for (int x = startIndex; x < (int)stats.size(); x++)
 	{
@@ -460,7 +460,7 @@ int StatCollection::findNextStat(const char *what, bool findCategory, int startI
  * look to match the owner name. If error occurs,
  * return -1; otherwise, return the found index.
  */
-int StatCollection::findPrevStat(const char *what, bool findCategory, int startIndex) const
+int StatCollection::FindPrevStat(const char *what, bool findCategory, int startIndex) const
 {
 	// Check if the category has been registered
 	if (findCategory && (!passFilter(what)))
@@ -475,7 +475,7 @@ int StatCollection::findPrevStat(const char *what, bool findCategory, int startI
 	if (findCategory)
 		ID = LookupCategory(what);
 	else
-		ID = lookupOwner(what);
+		ID = LookupOwner(what);
 	
 	for (int x = startIndex; x > 0; x--)
 	{
@@ -491,7 +491,7 @@ int StatCollection::findPrevStat(const char *what, bool findCategory, int startI
 /*
  * Print the Stats Table for debugging purpose for now.
  */
-void StatCollection::printStatsTable() const
+void StatCollection::PrintStatsTable() const
 {
 	printf("Stats Table:\n----------------------------\n");
 	

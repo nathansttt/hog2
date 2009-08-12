@@ -172,9 +172,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //		glColor3f(1.0, 1.0, 1.0);
 //		GLdouble x1, y1, z1, rad;
 //		glBegin(GL_LINES);
-//		unitSim->GetMap()->getOpenGLCoord(px1, py1, x1, y1, z1, rad);
+//		unitSim->GetMap()->GetOpenGLCoord(px1, py1, x1, y1, z1, rad);
 //		glVertex3f(x1, y1, z1-rad);
-//		unitSim->GetMap()->getOpenGLCoord(px2, py2, x1, y1, z1, rad);
+//		unitSim->GetMap()->GetOpenGLCoord(px2, py2, x1, y1, z1, rad);
 //		glVertex3f(x1, y1, z1-rad);
 //		glEnd();
 //	}
@@ -251,14 +251,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				}
 				std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
 				Timer t;
-				t.startTimer();
+				t.StartTimer();
 				ida.GetPath(mnp, s, g, path1);
-				t.endTimer();
-				std::cout << "Path found, length " << path1.size() << " time:" << t.getElapsedTime() << std::endl;
-//				t.startTimer();
+				t.EndTimer();
+				std::cout << "Path found, length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
+//				t.StartTimer();
 //				ida.GetPath(mnp, s, g, path2);
-//				t.endTimer();
-//				std::cout << "Path found, length " << path2.size() << " time:" << t.getElapsedTime() << std::endl;
+//				t.EndTimer();
+//				std::cout << "Path found, length " << path2.size() << " time:" << t.GetElapsedTime() << std::endl;
 //				for (unsigned int x = 0; x < path1.size(); x++)
 //					std::cout << path1[x] << std::endl;
 			}
@@ -293,8 +293,8 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
 	unitSims[windowID]->GetEnvironment();
 	
-//	SearchUnit *su1 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), 0, 0);
-//	SearchUnit *su2 = new SearchUnit(random()%m->getMapWidth(), random()%m->getMapHeight(), su1, new praStar());
+//	SearchUnit *su1 = new SearchUnit(random()%m->GetMapWidth(), random()%m->GetMapHeight(), 0, 0);
+//	SearchUnit *su2 = new SearchUnit(random()%m->GetMapWidth(), random()%m->GetMapHeight(), su1, new praStar());
 //	//unitSim->AddUnit(su1);
 	unitSims[windowID]->AddUnit(new RandomUnit<MNPuzzleState, slideDir, MNPuzzle>(MNPuzzleState(5, 5)));
 }

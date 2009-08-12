@@ -10,7 +10,7 @@ double TIDAStar<xyLoc,tDirection,MapEnvironment>::MinHCost( CRState &pos, bool m
 
 	double dist;
 	if( usePerfectDistanceHeuristic ) {
-		dist = distance_heuristic[env->GetMap()->getNodeNum(pos[1].x,pos[1].y)][env->GetMap()->getNodeNum(pos[0].x,pos[0].y)];
+		dist = distance_heuristic[env->GetMap()->GetNodeNum(pos[1].x,pos[1].y)][env->GetMap()->GetNodeNum(pos[0].x,pos[0].y)];
 	} else {
 		dist = max( abs(pos[1].x - pos[0].x), abs(pos[1].y - pos[0].y) );
 	}

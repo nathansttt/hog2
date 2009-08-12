@@ -16,7 +16,7 @@ public:
 		double x2 = g->GetNode(state2)->GetLabelF(GraphAbstractionConstants::kXCoordinate);
 		double y2 = g->GetNode(state2)->GetLabelF(GraphAbstractionConstants::kYCoordinate);
 
-		return( max( fabs(x1-x2), fabs(y1-y2) ) * m->getCoordinateScale() );
+		return( max( fabs(x1-x2), fabs(y1-y2) ) * m->GetCoordinateScale() );
   };
 
 	Graph *GetGraph() { return g; };

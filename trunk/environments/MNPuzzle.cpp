@@ -237,8 +237,9 @@ void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions
 	}
 }
 
-slideDir MNPuzzle::GetAction(MNPuzzleState &s1, MNPuzzleState &s2) const
+slideDir MNPuzzle::GetAction(MNPuzzleState &, MNPuzzleState &) const
 {
+	assert(false);
 	return kUp;
 }
 
@@ -346,9 +347,9 @@ double MNPuzzle::GCost(MNPuzzleState &, MNPuzzleState &)
 	return 1;
 }
 
-bool MNPuzzle::GoalTest(MNPuzzleState &state, MNPuzzleState &goal)
+bool MNPuzzle::GoalTest(MNPuzzleState &state, MNPuzzleState &theGoal)
 {
-	return (state == goal);
+	return (state == theGoal);
 }
 
 //uint64_t MNPuzzle::GetStateHash(MNPuzzleState &state) const
@@ -461,7 +462,7 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s) const
 	//std::vector<int> puzzle;
 }
 
-void MNPuzzle::OpenGLDraw(const MNPuzzleState &s, const MNPuzzleState &l2, double v) const
+void MNPuzzle::OpenGLDraw(const MNPuzzleState &s, const MNPuzzleState &, float /* v */ ) const
 {
 	glLineWidth(1.0);
 	glEnable(GL_LINE_SMOOTH);

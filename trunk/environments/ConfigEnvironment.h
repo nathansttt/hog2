@@ -25,7 +25,7 @@ public:
 
 	virtual bool InvertAction(line2d &a) const;
 
-	virtual double HCost(recVec &node1){
+	virtual double HCost(recVec &){
 		printf("Single State HCost Failure: method not implemented for ConfigEnvironment\n");
 		exit(0); return -1.0;}
 
@@ -34,7 +34,7 @@ public:
 	virtual double GCost(recVec &node1, line2d &act);
 	bool GoalTest(recVec &node, recVec &goal);
 
-	bool GoalTest(recVec &s){
+	bool GoalTest(recVec &){
 		printf("Single State Goal Test Failure: method not implemented for ConfigEnvironment\n");
 		exit(0); return false;}
 
@@ -44,8 +44,7 @@ public:
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const recVec &l) const;
 	virtual void OpenGLDraw(const recVec &, const line2d &) const;
-//	virtual void OpenGLDraw(const recVec &, const line2d &, GLfloat r, GLfloat g, GLfloat b) const;
-//	virtual void OpenGLDraw(const recVec &l, GLfloat r, GLfloat g, GLfloat b) const;
+	virtual void OpenGLDraw(const recVec&, const recVec&, float) const {}
 
 	virtual void GetNextState(recVec &currents, line2d dir, recVec &news) const;
 

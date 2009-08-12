@@ -55,10 +55,10 @@ void DoRandomPath(GraphAbstraction *aMap, SearchAlgorithm *sa, bool repeat)
 		do {
 			//      do {
 			r1 = g->GetRandomNode();
-			//      } while (aMap->GetMap()->getTerrainType((long)r1->GetLabelL(kFirstData), (long)r1->GetLabelL(kFirstData+1)) == kOutOfBounds);
+			//      } while (aMap->GetMap()->GetTerrainType((long)r1->GetLabelL(kFirstData), (long)r1->GetLabelL(kFirstData+1)) == kOutOfBounds);
 			//      do {
 			r2 = g->GetRandomNode();
-			//      } while (aMap->GetMap()->getTerrainType((long)r2->GetLabelL(kFirstData), (long)r2->GetLabelL(kFirstData+1)) == kOutOfBounds);
+			//      } while (aMap->GetMap()->GetTerrainType((long)r2->GetLabelL(kFirstData), (long)r2->GetLabelL(kFirstData+1)) == kOutOfBounds);
 		} while (!aMap->Pathable(r1, r2));
 	}
 	

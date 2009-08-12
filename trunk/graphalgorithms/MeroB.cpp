@@ -21,7 +21,7 @@ void MeroB::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, graphSta
 		{}
 	
 	if (thePath.size() > 0)
-		printf("\nNodes expanded=%ld, Nodes touched=%ld.\n",GetNodesExpanded(),GetNodesTouched());
+		printf("\nNodes expanded=%lld, Nodes touched=%lld.\n",GetNodesExpanded(),GetNodesTouched());
 }
 
 bool MeroB::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 

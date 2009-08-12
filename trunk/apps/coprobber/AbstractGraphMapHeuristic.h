@@ -20,7 +20,7 @@ public:
 		double a = std::fabs(x1-x2); //((x1>x2)?(x1-x2):(x2-x1));
     double b = std::fabs(y1-y2); //((y1>y2)?(y1-y2):(y2-y1));
 		double result = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
-		return( result * m->getCoordinateScale() );
+		return( result * m->GetCoordinateScale() );
   };
 
 	Graph *GetGraph() { return g; };

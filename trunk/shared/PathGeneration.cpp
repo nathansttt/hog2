@@ -43,10 +43,10 @@ void generatePaths(char *_map, int mapSizeX, int mapSizeY, int numBuckets, int b
 	int maxIterations = 10*numBuckets*pathsPerBucket;
 	Map *map = new Map(_map);
 	if ((mapSizeX != -1) && (mapSizeY != -1))
-		map->scale(mapSizeX, mapSizeY);
+		map->Scale(mapSizeX, mapSizeY);
 	else {
-		mapSizeX = map->getMapWidth();
-		mapSizeY = map->getMapHeight();
+		mapSizeX = map->GetMapWidth();
+		mapSizeY = map->GetMapHeight();
 	}
 		
 	MapFlatAbstraction *absMap = new MapFlatAbstraction(map);

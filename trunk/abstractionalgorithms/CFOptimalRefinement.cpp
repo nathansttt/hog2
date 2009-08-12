@@ -91,9 +91,9 @@ node *CFOptimalRefinement::FindTopLevelNode(node *one, node *two, GraphAbstracti
 {
 	if ((one == 0) || (two == 0))
 		return 0;
-	if (aMap->GetAbstractionLevel(one) >= aMap->getNumAbstractGraphs())
+	if (aMap->GetAbstractionLevel(one) >= (int)aMap->getNumAbstractGraphs())
 		return 0;
-	if (aMap->GetAbstractionLevel(one) == aMap->getNumAbstractGraphs() - 1)
+	if (aMap->GetAbstractionLevel(one) == (int)aMap->getNumAbstractGraphs() - 1)
 	{
 		if (one == two)
 			return one;
@@ -365,7 +365,7 @@ void CFOptimalRefinement::OpenGLDraw() const
 		else
 			glColor3f(1, 1, 1);
 		
-		node *n;
+		node *n = 0; assert(false); // there is a bug here, because n was always uninitialized
 		recVec rv = absGraph->GetNodeLoc(GetRealNode(n));
 		glVertex3f(rv.x, rv.y, rv.z);
 		

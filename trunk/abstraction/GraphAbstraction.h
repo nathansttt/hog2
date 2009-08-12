@@ -112,7 +112,7 @@ public:
 	/// rebuild hierarchy from original domain */
   // virtual void rebuild() = 0;
 	/// get current revision of hierarchy -- indicates if changes have been made */
-	//virtual int getRevision() = 0;
+	//virtual int GetRevision() = 0;
 	void ClearMarkedNodes();
 	
 	// hierarchical modifications

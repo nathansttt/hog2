@@ -35,7 +35,7 @@ public:
 	MapFlatAbstraction(Map *_m);
 	~MapFlatAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
-	virtual MapAbstraction *clone(Map *_m) { return new MapFlatAbstraction(_m); }
+	virtual MapAbstraction *Clone(Map *_m) { return new MapFlatAbstraction(_m); }
 	
 	virtual bool Pathable(node *from, node *to);
 	

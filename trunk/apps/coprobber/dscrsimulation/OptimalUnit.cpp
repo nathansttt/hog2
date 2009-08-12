@@ -108,7 +108,7 @@ void OptimalUnit::UpdateLocation( AbstractionGraphEnvironment *, graphState &s, 
 
 void OptimalUnit::OpenGLDraw( const AbstractionGraphEnvironment *env, const SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) const {
 	node *n  = myenv->GetGraph()->GetNode( current_pos );
-	GLdouble x, y, z, rad = myenv->scale()/4.;
+	GLdouble x, y, z, rad = myenv->Scale()/4.;
 	x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
 	y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
 	z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);

@@ -140,7 +140,7 @@ bool SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, AbsMapSimula
 		targy = l.y;
 		
 		// Get a path by path-planning
-		node *to = aMap->GetAbstractGraph(0)->GetNode(map->getNodeNum(targx, targy));
+		node *to = aMap->GetAbstractGraph(0)->GetNode(map->GetNodeNum(targx, targy));
 		
 		s_algorithm->setTargets(mp->GetMapAbstraction(), next_start, to, rp);
 		delete spread_cache;
@@ -168,8 +168,8 @@ bool SearchUnit::makeMove(MapProvider *mp, reservationProvider *rp, AbsMapSimula
 	// Get a path by path-planning
 	Graph *g0 = aMap->GetAbstractGraph(0);
 	// Get the start and goal nodes
-	node *from = g0->GetNode(map->getNodeNum(loc.x, loc.y));
-	node *to = g0->GetNode(map->getNodeNum(targx, targy));
+	node *from = g0->GetNode(map->GetNodeNum(loc.x, loc.y));
+	node *to = g0->GetNode(map->GetNodeNum(targx, targy));
 	
 	if (from == to)
 	{
@@ -302,7 +302,7 @@ void SearchUnit::OpenGLDraw(const AbsMapEnvironment *ame, const AbsMapSimulation
 	Map *map = ame->GetMap();
 
 	int posx = loc.x, posy = loc.y;
-	map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
+	map->GetOpenGLCoord(posx, posy, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	glBegin(GL_LINE_STRIP);
 	glVertex3f(xx, yy, zz-rad/2);
@@ -311,14 +311,14 @@ void SearchUnit::OpenGLDraw(const AbsMapEnvironment *ame, const AbsMapSimulation
 		posx += ((moves[t]&kE)?1:0) - ((moves[t]&kW)?1:0);
 		posy += ((moves[t]&kS)?1:0) - ((moves[t]&kN)?1:0);
 		
-		map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
+		map->GetOpenGLCoord(posx, posy, xx, yy, zz, rad);
 
 		glVertex3f(xx, yy, zz-rad/2);
 	}
 	glEnd();
 	
 	// draw object
-	map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
 	if (onTarget)
 	{
 		double perc = (1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->GetSimulationTime())))));
@@ -333,7 +333,7 @@ void SearchUnit::OpenGLDraw(const AbsMapEnvironment *ame, const AbsMapSimulation
 	{
 		xyLoc tloc;
 		target->GetLocation(tloc);
-		map->getOpenGLCoord(tloc.x, tloc.y, xx, yy, zz, rad);
+		map->GetOpenGLCoord(tloc.x, tloc.y, xx, yy, zz, rad);
 
 		double perc = (1.0-sqrt(sqrt(abs(sin(targetTime+0.25*si->GetSimulationTime())))));
 		glColor3f(r*perc, g*perc, b*perc);
@@ -350,7 +350,7 @@ void SearchUnit::LogStats(StatCollection *stats)
 		printf("Error; somehow nodes touched/expanded are inconsistent. t:%d e:%d\n",
 					 nodesTouched, nodesExpanded);
 	}
-	// printf("SearchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
+	// printf("SearchUnit::LogStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
 	if (nodesExpanded != 0)
 		stats->AddStat("nodesExpanded", GetName(), (long)nodesExpanded);
 	if (nodesTouched != 0)

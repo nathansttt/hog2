@@ -20,6 +20,12 @@
 
 #include <cassert>
 
+struct dirHeuristicTable {
+	// base location {0, 0}
+	int8_t speed;
+	int8_t rotation;
+	std::vector<std::vector<float> > hTable;
+};
 
 //struct heading {
 //public:
@@ -97,13 +103,14 @@ enum heuristicType {
 
 class GoalTester {
 public:
+	virtual ~GoalTester() {}
 	virtual bool goalTest(const xySpeedHeading &i1) const = 0;	
 };
 
 class Directional2DEnvironment : public SearchEnvironment<xySpeedHeading, deltaSpeedHeading>
 {
 public:
-	Directional2DEnvironment(Map *m);
+	Directional2DEnvironment(Map *m, model envType = kVehicle, heuristicType heuristic = kExtendedPerimeterHeuristic);
 	virtual ~Directional2DEnvironment();
 	void GetSuccessors(xySpeedHeading &nodeID, std::vector<xySpeedHeading> &neighbors) const;
 	void GetActions(xySpeedHeading &nodeID, std::vector<deltaSpeedHeading> &actions) const;
@@ -115,11 +122,15 @@ public:
 	virtual bool InvertAction(deltaSpeedHeading &a) const;
 	
 	virtual double HCost(xySpeedHeading &node1, xySpeedHeading &node2);
+	virtual double HCost(xySpeedHeading &) { assert(false); return 0; }
 	virtual double GCost(xySpeedHeading &node1, xySpeedHeading &node2);
 	virtual double GCost(xySpeedHeading &node1, deltaSpeedHeading &act);
 
+	int GetNumAngles();
+	
 	void SetGoalTest(GoalTester *t) {test = t;}
 	bool GoalTest(xySpeedHeading &node, xySpeedHeading &goal);
+	bool GoalTest(xySpeedHeading &) { assert(false); return false; }
 	uint64_t GetStateHash(xySpeedHeading &node) const;
 	uint64_t GetActionHash(deltaSpeedHeading act) const;
 	virtual void OpenGLDraw() const;
@@ -132,19 +143,22 @@ public:
 private:
 	bool Legal(xySpeedHeading &node1, deltaSpeedHeading &act) const;
 
-	void BuildHTable();
-	void BuildAStarTable();
+	void BuildHTable(dirHeuristicTable &t);
+//	void BuildAStarTable();
 	void BuildAngleTables();
 	float mySin(int dir) const;
 	float myCos(int dir) const;
-	float LookupStateHash(xySpeedHeading &s);
+	float LookupStateHash(xySpeedHeading &s, dirHeuristicTable &t);
+	bool LookupStateHashIndex(xySpeedHeading &s, int &index1, int &index2);
 	float LookupStateHeuristic(xySpeedHeading &s1, xySpeedHeading &s2);
+	void RotateCCW(xySpeedHeading &s, unsigned int rotation) const;
 	bool checkLegal;
 	GoalTester *test;
 	model motionModel;
 	heuristicType hType;
 protected:
-	std::vector<std::vector<float> > hTable;
+	std::vector<dirHeuristicTable> heuristics;
+//	std::vector<std::vector<float> > hTable;
 //	std::vector<std::vector<std::vector<float> > > hTable;
 	std::vector<float> cosTable;
 	std::vector<float> sinTable;

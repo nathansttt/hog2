@@ -114,7 +114,7 @@ recColor getColor(GLfloat v, GLfloat vmin, GLfloat vmax, int type);
 * width from center to edge as width.
 */
 void DrawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width);
-void drawBox(GLfloat x, GLfloat y, GLfloat z, GLfloat radius);
+void DrawBox(GLfloat x, GLfloat y, GLfloat z, GLfloat radius);
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
 
 //class OpenGLDrawable {

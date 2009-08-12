@@ -62,7 +62,7 @@ private:
 	}
 
 	BaseMapOccupancyInterface *boi;
-	//bitVector *bitvec; /// For each map position, set if occupied
+	//BitVector *bitvec; /// For each map position, set if occupied
 
 	//long mapWidth; /// Used to compute index into bitvector
 	//long mapHeight; /// used to compute index into bitvector
@@ -94,7 +94,7 @@ public:
  	}*/
 
 	/** Set to true when we want to find the exact goal rather than any child of the parent of the goal*/
- 	void SetFindExactGoal(bool b) { exactGoal = true; }
+ 	void SetFindExactGoal(bool b) { exactGoal = b; }
 
 	/** If exactGoal is set, GoalTest returns true when state is the same as goal.
 	If exactGoal is not set, GoalTest returns true if state and goal have the same parent*/
@@ -194,6 +194,11 @@ public:
 // 	return sqrt(pow(x1-x2,2) + pow(y1-y2,2));
 // 	}
 
+	virtual double GCost(graphState &state1, graphMove &state2)
+	{
+		return AbsGraphEnvironment::GCost(state1, state2);
+	}
+
 	/** GCost returns a weighted GCost from the WeightedMap2DEnvironment */
 	double GCost(graphState &state1, graphState &state2)
 	{
@@ -223,15 +228,15 @@ public:
 	*/
 	void SetNoDummyGoal(bool b) {noDummyGoal = b;}
 
-	virtual void StoreGoal(graphState &state1) {}
+	virtual void StoreGoal(graphState &) {}
 	virtual void ClearGoal() {}
 	virtual bool IsGoalStored() {return false;}
 
-	virtual double HCost(graphState &state1) {
+	virtual double HCost(graphState &) {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for AbsGraphEnvironment\n");
 		exit(1); return -1.0;}
 
-	bool GoalTest(graphState &s){
+	bool GoalTest(graphState &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for AbsGraphEnvironment\n");
 		exit(1); return false;}
 
@@ -320,11 +325,11 @@ class AbstractWeightedSearchAlgorithm : public GenericSearchAlgorithm<state,acti
 		virtual ~AbstractWeightedSearchAlgorithm();
 		bool InitializeSearch(environment *env, state& from, state& to, std::vector<state> &thePath);
 		virtual void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
-		virtual void GetPath(environment *env, state &from, state &to, std::vector<action> &path) {}
+		virtual void GetPath(environment *, state &, state &, std::vector<action> &) {}
 		virtual const char *GetName() {return "AbstractWeightedSearchAlgorihm";}
-		virtual int GetNodesExpanded() {return nodesExpanded;}
-		virtual int GetNodesTouched()  {return nodesTouched;}
-		virtual void LogFinalStats(StatCollection *stats) {}
+		virtual uint64_t GetNodesExpanded() {return nodesExpanded;}
+		virtual uint64_t GetNodesTouched()  {return nodesTouched;}
+		virtual void LogFinalStats(StatCollection *) {}
 
 		/** Set the weighted environment
 		* This must be set for the algorithm to work
@@ -338,8 +343,8 @@ class AbstractWeightedSearchAlgorithm : public GenericSearchAlgorithm<state,acti
 		void SetSkipAbsNode(double pathPerc) { assert((pathPerc > 0) && (pathPerc <= 1)); partialSkip = true; refinePart = pathPerc; }
 
 	private:
-		int nodesExpanded;
-		int nodesTouched;
+		uint64_t nodesExpanded;
+		uint64_t nodesTouched;
 		WeightedMap2DEnvironment *wenv;
 
 		bool partialSkip;
@@ -359,7 +364,7 @@ AbstractWeightedSearchAlgorithm<state,action,environment>::~AbstractWeightedSear
 }
 
 template<class state, class action, class environment>
-bool AbstractWeightedSearchAlgorithm<state,action,environment>::InitializeSearch(environment *env, state& from, state& to, std::vector<state> &thePath)
+bool AbstractWeightedSearchAlgorithm<state,action,environment>::InitializeSearch(environment *, state& , state& , std::vector<state> &)
 {
 	nodesExpanded = 0;
 	nodesTouched = 0;
@@ -367,18 +372,18 @@ bool AbstractWeightedSearchAlgorithm<state,action,environment>::InitializeSearch
 }
 
 template<class state, class action, class environment>
-void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environment *env, state& from, state& to, std::vector<state> &thePath)
+void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environment *theEnv, state& from, state& to, std::vector<state> &thePath)
 {
 
 	//std::cout<<"path from "<<from<<std::endl;
 	// get abs path
 	// if neighbour is child of next abs node, skip this one
 
-	InitializeSearch(env, from, to, thePath);
+	InitializeSearch(theEnv, from, to, thePath);
 	//std::cout<<"NodesExpanded before starting "<<nodesExpanded<<std::endl;
 	thePath.clear();
 
-	MapAbstraction* ma = env->GetMapAbstraction();
+	MapAbstraction* ma = theEnv->GetMapAbstraction();
 	Graph *abs = ma->GetAbstractGraph(1);
 	Graph *g = ma->GetAbstractGraph(0);
 
@@ -388,7 +393,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 	graphState fromGs = fromnode->GetNum();
 
 	//Find parent of "to"
-	node* tonode = env->GetMapAbstraction()->GetNodeFromMap(to.x,to.y);
+	node* tonode = theEnv->GetMapAbstraction()->GetNodeFromMap(to.x,to.y);
 	graphState toPar = tonode->GetLabelL(GraphAbstractionConstants::kParent);
 	graphState toGs = tonode->GetNum();
 
@@ -400,7 +405,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		std::vector<graphState> refpath;
 		OctileHeuristic *heuri = new OctileHeuristic(ma->GetMap(),g);
 
-		AbsGraphEnvironment *graphenv = new AbsGraphEnvironment(g,heuri,env,env->GetOccupancyInfo());
+		AbsGraphEnvironment *graphenv = new AbsGraphEnvironment(g,heuri,theEnv,theEnv->GetOccupancyInfo());
 		graphenv->SetFindExactGoal(true); // We don't want just any child of the parent of the goal state
 		graphenv->SetWeightedEnvironment(wenv);
 		graphenv->SetAbsGraph(abs);
@@ -458,13 +463,13 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		//GraphStraightLineHeuristic *heur2 = new GraphStraightLineHeuristic(ma->GetMap(),g);
 
 		OctileHeuristic *heur2 = new OctileHeuristic(ma->GetMap(),g);
-		AbsGraphEnvironment *age = new AbsGraphEnvironment(g,heur2,env,env->GetOccupancyInfo());
+		AbsGraphEnvironment *age = new AbsGraphEnvironment(g,heur2,theEnv,theEnv->GetOccupancyInfo());
 		age->SetWeightedEnvironment(wenv);
 		age->SetAbsGraph(abs);
 
 		//Create a 'dummy' environment for A* to use to check radius
 		OctileHeuristic *heurbla = new OctileHeuristic(ma->GetMap(),g);
-		AbsGraphEnvironment *agebla = new AbsGraphEnvironment(g,heurbla,env,env->GetOccupancyInfo());
+		AbsGraphEnvironment *agebla = new AbsGraphEnvironment(g,heurbla,theEnv,theEnv->GetOccupancyInfo());
 		agebla->SetWeightedEnvironment(wenv);
 		agebla->SetAbsGraph(abs);
 		agebla->SetNoDummyGoal(true);
@@ -474,7 +479,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		TemplateAStar<graphState,tDirection,AbsGraphEnvironment> astar2;
 		astar2.SetRadiusEnvironment(agebla);
 
-		graphState lastloc;
+//		graphState lastloc;
 
 		std::vector<graphState> refpath;
 		assert(abspath.size() != 0);
@@ -496,24 +501,24 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 
 				// 				std::cout<<"Size 2\n";
 				// Do straight planning on lower level, using the direction map
-				std::vector<graphState> refpath;
-				OctileHeuristic *heur = new OctileHeuristic(ma->GetMap(),g);
+				std::vector<graphState> refPath;
+				OctileHeuristic *heuri = new OctileHeuristic(ma->GetMap(),g);
 
-				AbsGraphEnvironment *graphenv = new AbsGraphEnvironment(g,heur,env,env->GetOccupancyInfo());
-				graphenv->SetFindExactGoal(true); // We don't want just any child of the parent of the goal state
-				graphenv->SetWeightedEnvironment(wenv);
-				graphenv->SetAbsGraph(abs);
+				AbsGraphEnvironment *graphEnv = new AbsGraphEnvironment(g,heuri,theEnv,theEnv->GetOccupancyInfo());
+				graphEnv->SetFindExactGoal(true); // We don't want just any child of the parent of the goal state
+				graphEnv->SetWeightedEnvironment(wenv);
+				graphEnv->SetAbsGraph(abs);
 
-				TemplateAStar<graphState,graphMove,GraphEnvironment> astar;
-				astar.GetPath(graphenv,fromGs,toGs,refpath);
+				TemplateAStar<graphState,graphMove,GraphEnvironment> AStar;
+				AStar.GetPath(graphEnv,fromGs,toGs,refPath);
 
-				nodesExpanded += astar.GetNodesExpanded();
-				nodesTouched += astar.GetNodesTouched();
+				nodesExpanded += AStar.GetNodesExpanded();
+				nodesTouched += AStar.GetNodesTouched();
 
 				// Copy the path into thePath, as xyLoc
-				for(unsigned int j=1; j<refpath.size(); j++)
+				for(unsigned int j=1; j<refPath.size(); j++)
 				{
-					node* newnode = g->GetNode(refpath[j]);
+					node* newnode = g->GetNode(refPath[j]);
 					xyLoc newloc;
 					newloc.x = newnode->GetLabelL(GraphAbstractionConstants::kFirstData);
 					newloc.y = newnode->GetLabelL(GraphAbstractionConstants::kFirstData+1);
@@ -528,7 +533,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				std::cout<<std::endl<<std::endl;
 				*/
 				delete age;
-				delete graphenv;
+				delete graphEnv;
 				return;
 	 		}
  			else // abs path not length 2
@@ -545,7 +550,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 
  				if(refpath.size()>0)
  				{
- 					for(int j=1; j<refpath.size(); j++)
+ 					for(unsigned int j=1; j<refpath.size(); j++)
  					{
  						node* newnode = g->GetNode(refpath[j]);
 
@@ -562,7 +567,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 //
 // 	 			OctileHeuristic *heur3 = new OctileHeuristic(ma->GetMap(),g);
 //
-//  				AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,env,env->GetOccupancyInfo());
+//  				AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,theEnv,theEnv->GetOccupancyInfo());
 //  				absgraphenv2->SetFindExactGoal(true);
 //  				absgraphenv2->SetWeightedEnvironment(wenv);
 //  				absgraphenv2->SetAbsGraph(abs);
@@ -624,7 +629,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 				for(unsigned int k=0; k<nb.size(); k++)
 				{
 					node* neigh = g->GetNode(nb[k]);
-					if(neigh->GetLabelL(GraphAbstractionConstants::kParent) == abspath[i])
+					if(neigh->GetLabelL(GraphAbstractionConstants::kParent) == (long)abspath[i])
 						skip = true;
 				}
 
@@ -669,7 +674,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 
 				if(refpath.size()>0)
 				{
-					for(int j=1; j<refpath.size(); j++)
+					for(unsigned int j=1; j<refpath.size(); j++)
 					{
 						node* newnode = g->GetNode(refpath[j]);
 						//std::cout<<newnode->GetNum()<<std::endl;
@@ -689,7 +694,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 
 			OctileHeuristic *heur3 = new OctileHeuristic(ma->GetMap(),g);
 
-			AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,env,env->GetOccupancyInfo());
+			AbsGraphEnvironment *absgraphenv2 = new AbsGraphEnvironment(g,heur3,theEnv,theEnv->GetOccupancyInfo());
 			absgraphenv2->SetFindExactGoal(true);
 			absgraphenv2->SetWeightedEnvironment(wenv);
 			absgraphenv2->SetAbsGraph(abs);
@@ -703,7 +708,7 @@ void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environm
 		//std::cout<<start<<" to "<<toGs<<" required "<<astar3->GetNodesExpanded()<<" nodes exp.\n";
 			//Transfer the path to thePath, as series of xyLoc
 		//	std::cout<<"last bit "<<std::endl;
-			for(int j=1; j<refpath.size(); j++)
+			for(unsigned int j=1; j<refpath.size(); j++)
 			{
 				node* newnode = g->GetNode(refpath[j]);
 				xyLoc newloc;

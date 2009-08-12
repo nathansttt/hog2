@@ -39,7 +39,7 @@ public:
 	
   path(node *_n, path *_next=0) : n(_n), next(_next) {}
   ~path() { if (next != NULL) delete next; }
-	path *clone() { return next?(new path(n, next->clone())):new path(n, next);}
+	path *Clone() { return next?(new path(n, next->Clone())):new path(n, next);}
 	path *tail() { if (next) return next->tail(); return this; }
 	/** reverses path in place, and returns pointer to new head of path */
 	path *reverse();
@@ -48,7 +48,7 @@ public:
 //  /** returns the distance covered by the path */
 //  double distance(GraphAbstraction* aMap);
   unsigned degree();
-  void print(bool beginning=true);
+  void Print(bool beginning=true);
 };
 
 #endif 

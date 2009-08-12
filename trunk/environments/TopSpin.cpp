@@ -12,27 +12,27 @@
 
 int TopSpinGraphHeuristic::THmode = 0;
 
-TopSpin::TopSpin(int m, int k, TopSpinGraphHeuristic *tsh)
+TopSpin::TopSpin(int mm, int k, TopSpinGraphHeuristic *tsh)
 :GraphEnvironment(new Graph(), tsh)
 {
-	length = m;
+	length = mm;
 	flipSize = k;
 	directed = false;
 	
-	std::vector<int> config(m);
+	std::vector<int> config(mm);
 	for (unsigned int x = 0; x < config.size(); x++)
 		config[x] = x;
 	GetState(config);
 }
 
-TopSpin::TopSpin(int m, int k)
+TopSpin::TopSpin(int mm, int k)
 :GraphEnvironment(new Graph(), new TopSpinGraphHeuristic())
 {
-	length = m;
+	length = mm;
 	flipSize = k;
 	directed = false;
 	
-	std::vector<int> config(m);
+	std::vector<int> config(mm);
 	for (unsigned int x = 0; x < config.size(); x++)
 		config[x] = x;
 	GetState(config);

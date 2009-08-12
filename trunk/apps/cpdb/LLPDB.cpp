@@ -71,11 +71,12 @@ GraphMapInconsistentHeuristic *gmih = 0;
 GraphMapInconsistentHeuristic *gmih2 = 0;
 Graph *stp = 0;
 TemplateAStar<graphState, graphMove, GraphEnvironment> visual_astar;
+TemplateAStar<graphState, graphMove, GraphEnvironment> visual_astar2;
+std::vector<graphState> globalPath;
+int stepSpeed = 20;
 
-
-bool mouseTracking;
+bool mouseTracking, performingSearch, performingSearch2;
 int px1, py1, px2, py2;
-int absType = 0;
 
 std::vector<UnitMapSimulation *> unitSims;
 
@@ -95,7 +96,7 @@ void CreateSimulation(int id)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
-		map = new Map(256, 256);
+		map = new Map(32, 32);
 //		//MakeMaze(map);
 //		for (int x = 0; x < 100; x++)
 //		{
@@ -103,15 +104,15 @@ void CreateSimulation(int id)
 //			sprintf(name, "maze_%d%d%d.map", x/100, (x%100)/10, (x%10));
 		MakeMaze(map);
 //		BuildRandomRoomMap(map, 8);
-		map->scale(512, 512);
-		map->setTileSet(kWinter);
-//			map->save(name);
+//		map->Scale(512, 512);
+		map->SetTileSet(kWinter);
+//			map->Save(name);
 //		}
 	}
 	else {
 		map = new Map(gDefaultMap);
-		map->scale(512, 512);
-		//map->save("/Users/nathanst/Development/hog2/maps/652 maps/map2_big.map");
+		//map->Scale(512, 512);
+		//map->Save("/Users/nathanst/Development/hog2/maps/652 maps/map2_big.map");
 	}
 	
 	unitSims.resize(id+1);
@@ -177,15 +178,60 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (stp)
 		DrawGraph(stp);
 	else if (gch)
+	{
 		gch->OpenGLDraw();
+		if (mouseTracking)
+		{
+			glBegin(GL_LINES);
+			glColor3f(1.0f, 0.0f, 0.0f);
+			Map *m = gch->GetMap();
+			GLdouble x, y, z, r;
+			m->GetOpenGLCoord(px1, py1, x, y, z, r);
+			glVertex3f(x, y, z-3*r);
+			m->GetOpenGLCoord(px2, py2, x, y, z, r);
+			glVertex3f(x, y, z-3*r);
+			glEnd();
+		}
+		if ((GetNumPorts(windowID) > 1 && viewport == 0) || (GetNumPorts(windowID) == 0))
+		{
+			visual_astar.OpenGLDraw();
+			if (performingSearch)
+				printf("%lld nodes expanded (can)\n", visual_astar.GetNodesExpanded());
+			for (int x = 0; (x < stepSpeed)&&performingSearch; x++)
+			{
+				performingSearch = !visual_astar.DoSingleSearchStep(globalPath);
+				if (!performingSearch)
+				{
+					printf("%lld nodes expanded (can)\n", visual_astar.GetNodesExpanded());
+					printf("%lld unique nodes expanded (can)\n", visual_astar.GetUniqueNodesExpanded());
+				}
+			}
+		}
+		
+		if ((GetNumPorts(windowID) > 1 && viewport == 1) || (GetNumPorts(windowID) == 0))
+		{
+			visual_astar2.OpenGLDraw();
+			if (performingSearch2)
+				printf("%lld nodes expanded (diff)\n", visual_astar2.GetNodesExpanded());
+			for (int x = 0; (x < stepSpeed)&&performingSearch2; x++)
+			{
+				performingSearch2 = !visual_astar2.DoSingleSearchStep(globalPath);
+				if (!performingSearch2)
+				{
+					printf("%lld nodes expanded (diff)\n", visual_astar2.GetNodesExpanded());
+					printf("%lld unique nodes expanded (diff)\n", visual_astar2.GetUniqueNodesExpanded());
+				}
+			}
+		}
+	}
 	else
 		unitSims[windowID]->OpenGLDraw();
 	
-	if (gmih)
-	{
-		gmih->OpenGLDraw();
-		visual_astar.OpenGLDraw();
-	}
+//	if (gmih)
+//	{
+//		gmih->OpenGLDraw();
+//		visual_astar.OpenGLDraw();
+//	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -217,8 +263,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				unitSims[windowID]->SetPaused(true);
 			}
 			break;
-		case ']': absType = (absType+1)%3; break;
-		case '[': absType = (absType+4)%3; break;
+		case ']': stepSpeed*=2; printf("%d at a time\n", stepSpeed); break;
+		case '[': if (stepSpeed > 1) stepSpeed/=2; printf("%d at a time\n", stepSpeed); break;
 			//		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
 			//		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
@@ -237,11 +283,38 @@ void MyPDBKeyHandler(unsigned long, tKeyboardModifier mod, char key)
 		//TestSTPCanonical();
 		
 		//delete gch;
-		//gch = new GraphCanonicalHeuristic("CPDBs/8room_000.map.pdb");
-		gch = new GraphCanonicalHeuristic("CPDBs/8room_002.map.2_10.o.pdb");
+		//gch = new GraphCanonicalHeuristic("CPDBs/maze_000.map.1_10.o.pdb");
+		gch = new GraphCanonicalHeuristic("CPDBs/8room_002.map.3_10.o.pdb");
 		
 		//BuildScenarioFiles();
 		//BuildScenarioFiles2();
+
+		if (gmih == 0 || (gmih->GetGraph() != gch->GetGraph()))
+		{
+			gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
+			gmih->UseSmartPlacement(true);
+			for (int x = 0; x < 10; x++)
+				gmih->AddHeuristic();
+			gmih->SetNumUsedHeuristics(gmih->GetNumHeuristics());
+		}
+
+		px1 = 105; py1 = 405;
+		px2 = 405; py2 = 105;
+		GraphEnvironment *env = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), gch);
+		GraphEnvironment *env2 = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), gmih);
+		GraphEnvironment *env3 = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), new GraphMapHeuristic(gch->GetMap(), gch->GetGraph()));
+		env->SetDirected(true);
+		env2->SetDirected(true);
+		env3->SetDirected(true);
+		Map *m = gch->GetMap();
+		graphState s1 = m->GetNodeNum(px1, py1);
+		graphState g1 = m->GetNodeNum(px2, py2);
+		visual_astar.SetUseBPMX(0);
+		visual_astar2.SetUseBPMX(0);
+		visual_astar.InitializeSearch(env, s1, g1, globalPath);
+		performingSearch = true;
+		visual_astar2.InitializeSearch(env2, s1, g1, globalPath);
+		performingSearch2 = true;
 	}
 	if (key == 'b')
 	{
@@ -258,33 +331,51 @@ void MyPDBKeyHandler(unsigned long, tKeyboardModifier mod, char key)
 				gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
 			}
 			else {
-				Map *m = unitSims[0]->GetEnvironment()->GetMap();
+				gch = new GraphCanonicalHeuristic(unitSims[0]->GetEnvironment()->GetMap(), 2, 10);
+				//Map *m = unitSims[0]->GetEnvironment()->GetMap();
 				
-				gmih = new GraphMapInconsistentHeuristic(m, GraphSearchConstants::GetGraph(m));
+				//gmih = new GraphMapInconsistentHeuristic(m, GraphSearchConstants::GetGraph(m));
+				gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
 			}
 			gmih->UseSmartPlacement(true);
 		}
 		gmih->AddHeuristic();
+		gmih->SetNumUsedHeuristics(gmih->GetNumHeuristics());
 		if (mod == kShiftDown)
 		{
-			MapEnvironment *menv = unitSims[0]->GetEnvironment();
-			Map *m = menv->GetMap();
-			Graph *g = GraphSearchConstants::GetGraph(m);
+			//Map *m = gch->GetMap();
+			Graph *g = gch->GetGraph();
 			GraphEnvironment *env = new GraphEnvironment(g, gmih);
-
+			GraphEnvironment *env2 = new GraphEnvironment(g, gch);
+			env->SetDirected(true);
 			std::vector<graphState> path;
-			for (int x = 0; x < 1; x++)
+			for (int x = 0; x < g->GetNumNodes(); x++)
 			{
-				node *n1, *n2;
-				n1 = g->GetRandomNode();
-				n2 = g->GetRandomNode();
-				graphState s1 = n1->GetNum();
-				graphState g1 = n2->GetNum();
-//				mabs->GetTileFromNode(n1, px1, py1);
-//				mabs->GetTileFromNode(n2, px2, py2);
-				visual_astar.GetPath(env, s1, g1, path);
-				printf("%d\t%d\t%d\t%d\t%1.5f\n", n1->GetLabelL(kMapX), n1->GetLabelL(kMapY),
-					   n2->GetLabelL(kMapX), n2->GetLabelL(kMapY), env->GetPathLength(path));
+				for (int y = x+1; y < g->GetNumNodes(); y++)
+				{
+					printf("%d %d\n", x, y);
+					node *n1, *n2;
+					n1 = g->GetNode(x);
+					n2 = g->GetNode(y);
+					graphState s1 = n1->GetNum();
+					graphState g1 = n2->GetNum();
+	//				mabs->GetTileFromNode(n1, px1, py1);
+	//				mabs->GetTileFromNode(n2, px2, py2);
+
+					double hCost = env2->HCost(s1, g1);
+					visual_astar.GetPath(env, s1, g1, path);
+					printf("(%ld, %ld)\t(%ld, %ld)\t%lld\t%1.5f\th:%f\n", n1->GetLabelL(kMapX), n1->GetLabelL(kMapY),
+						   n2->GetLabelL(kMapX), n2->GetLabelL(kMapY), visual_astar.GetNodesExpanded(),
+						   env->GetPathLength(path), hCost);
+					if ((path.size() > 0) && (hCost - env->GetPathLength(path) > 0.01))
+					{
+						printf("SMALL ERROR\n");
+						env2->HCost(s1, g1);
+					}
+				}
+//				visual_astar.GetPath(env2, s1, g1, path);
+//				printf("(%d, %d)\t(%d, %d)\t%1.5f\n", n1->GetLabelL(kMapX), n1->GetLabelL(kMapY),
+//					   n2->GetLabelL(kMapX), n2->GetLabelL(kMapY), env->GetPathLength(path));
 			}
 		}
 //		TestMazeCPDBs();
@@ -294,6 +385,7 @@ void MyPDBKeyHandler(unsigned long, tKeyboardModifier mod, char key)
 	if (key == 'r')
 	{
 		TestRoomCPDBs();
+		TestMazeCPDBs();
 //		if (stp)
 //			MoveGraph(stp);
 //		else
@@ -314,7 +406,7 @@ void TestPDB()
 	printf("Loading scenario %s\n", name);
 	ScenarioLoader *sl = new ScenarioLoader(name);
 	Map *map = new Map(sl->GetNthExperiment(0).GetMapName());
-	map->scale(sl->GetNthExperiment(0).GetXScale(), sl->GetNthExperiment(0).GetXScale());
+	map->Scale(sl->GetNthExperiment(0).GetXScale(), sl->GetNthExperiment(0).GetXScale());
 	Graph *graph = GraphSearchConstants::GetGraph(map);
 
 	GraphMapInconsistentHeuristic gdh(map, graph);
@@ -365,13 +457,67 @@ void TestPDB()
 		averageNodes /= nodes[x].size();
 		printf("%d\t%1.2f\t%1.2f\t%1.4f\n", x*5, averageNodes, averageHCost, averageTime);
 	}
-	printf("%d\t%1.2f\t%1.2f\t%1.4f\n", graph->GetNumNodes(), optimal/total, optimal/total, 0);
+	printf("%d\t%1.2f\t%1.2f\t%1.4f\n", graph->GetNumNodes(), (double)optimal/total, (double)optimal/total, 0.f);
 }
 
 
-bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
+bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
-	//TemplateAStar<armAngles, armRotations, RoboticArm> astar;
+	if (!gch)
+		gch = new GraphCanonicalHeuristic(unitSims[windowID]->GetEnvironment()->GetMap(), 1, 2);
+	if (!gmih)
+	{
+		gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
+		gmih->UseSmartPlacement(true);
+		for (int x = 0; x < 10; x++)
+			gmih->AddHeuristic();
+		gmih->SetNumUsedHeuristics(10);
+		gmih->SetMode(kMax);
+	}
+	//return false;
+	
+	mouseTracking = false;
+	if (button == kRightButton)
+	{
+		switch (mType)
+		{
+			case kMouseDown:
+				gch->GetMap()->GetPointFromCoordinate(loc, px1, py1);
+				//printf("Mouse down at (%d, %d)\n", px1, py1);
+				break;
+			case kMouseDrag:
+				mouseTracking = true;
+				gch->GetMap()->GetPointFromCoordinate(loc, px2, py2);
+				//printf("Mouse tracking at (%d, %d)\n", px2, py2);
+				break;
+			case kMouseUp:
+			{
+				if ((px1 == -1) || (px2 == -1))
+					break;
+				
+				GraphEnvironment *env = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), gch);
+				GraphEnvironment *env2 = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), gmih);
+				env->SetDirected(true);
+				env2->SetDirected(true);
+				Map *m = gch->GetMap();
+				
+				int s1 = m->GetNodeNum(px1, py1);
+				int g1 = m->GetNodeNum(px2, py2);
+				if ((g1 != -1) && (s1 != -1))
+				{
+					graphState s2 = s1;
+					graphState g2 = g1;
+					visual_astar.SetUseBPMX(1);
+					visual_astar.InitializeSearch(env, s2, g2, globalPath);
+					performingSearch = true;
+					visual_astar2.InitializeSearch(env2, s2, g2, globalPath);
+					performingSearch2 = true;
+				}
+			}
+				break;
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -388,21 +534,21 @@ void BuildMapCPDBs()
 		delete gch;
 		gch = 0;
 		Map *m = new Map(sl->GetNthExperiment(0).GetMapName());
-		m->scale(sl->GetNthExperiment(0).GetXScale(), 
+		m->Scale(sl->GetNthExperiment(0).GetXScale(), 
 				 sl->GetNthExperiment(0).GetYScale());
 		gch = new GraphCanonicalHeuristic(m, 1);
 		
 		char pdbname[255];
 		sprintf(pdbname, "CPDBs/AR0%d%d%dSR.map.pdb", x/100, (x/10)%10, x%10);
-		gch->save(pdbname);		
+		gch->Save(pdbname);		
 	}
 }
 
 void BuildMazeCPDBs()
 {
-	for (int w = 5; w <= 20; w+=15)
+	for (int w = 10; w <= 20; w+=15)
 	{
-		for (int x = 0; x < 5; x++)
+		for (int x = 1; x < 10; x++)
 		{
 			for (int y = 1; y <= 5; y++)
 			{
@@ -416,13 +562,13 @@ void BuildMazeCPDBs()
 				delete gch;
 				gch = 0;
 				Map *m = new Map(sl->GetNthExperiment(0).GetMapName());
-				m->scale(sl->GetNthExperiment(0).GetXScale(), 
+				m->Scale(sl->GetNthExperiment(0).GetXScale(), 
 						 sl->GetNthExperiment(0).GetYScale());
 				gch = new GraphCanonicalHeuristic(m, y, w);
 				
 				char pdbname[255];
 				sprintf(pdbname, "CPDBs/maze_%d%d%d.map.%d_%d.o.pdb", x/100, (x/10)%10, x%10, y, w);
-				gch->save(pdbname);		
+				gch->Save(pdbname);		
 			}
 		}
 	}
@@ -430,9 +576,9 @@ void BuildMazeCPDBs()
 
 void BuildRoomCPDBs()
 {
-	for (int w = 5; w <= 20; w+=15)
+	for (int w = 10; w <= 20; w+=15)
 	{
-		for (int x = 0; x < 5; x++)
+		for (int x = 0; x < 10; x++)
 		{
 			for (int y = 1; y <= 5; y++)
 			{
@@ -446,13 +592,13 @@ void BuildRoomCPDBs()
 				delete gch;
 				gch = 0;
 				Map *m = new Map(sl->GetNthExperiment(0).GetMapName());
-				m->scale(sl->GetNthExperiment(0).GetXScale(), 
+				m->Scale(sl->GetNthExperiment(0).GetXScale(), 
 						 sl->GetNthExperiment(0).GetYScale());
 				gch = new GraphCanonicalHeuristic(m, y, w);
 				
 				char pdbname[255];
 				sprintf(pdbname, "CPDBs/8room_%d%d%d.map.%d_%d.o.pdb", x/100, (x/10)%10, x%10, y, w);
-				gch->save(pdbname);		
+				gch->Save(pdbname);		
 				printf(pdbname);
 				//RunHeuristicTest(sl);
 			}
@@ -462,6 +608,7 @@ void BuildRoomCPDBs()
 
 void TestMazeCPDBs()
 {
+	printf("Testing mazes\n");
 	TestCPDB("scenarios/mazes/maze_%d%d%d.map.txt",
 			 "CPDBs/maze_%d%d%d.map.%d_%d.o.pdb",
 			 512, 768);
@@ -472,6 +619,7 @@ void TestMazeCPDBs()
 
 void TestRoomCPDBs()
 {
+	printf("Testing rooms\n");
 	TestCPDB("scenarios/rooms/8room_%d%d%d.map.txt",
 			 "CPDBs/8room_%d%d%d.map.%d_%d.o.pdb",
 			 256, 512);
@@ -488,7 +636,7 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 	
 	for (int w = 10; w <= 20; w*=20)
 	{
-		for (int x = 0; x <= 4; x++)
+		for (int x = 0; x < 10; x++)
 		{
 			char name[255];
 			sprintf(name, scenario,  x/100, (x/10)%10, x%10);
@@ -497,7 +645,7 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 			if (sl->GetNumExperiments() == 0)
 				continue;
 
-			for (int y = 1; y <= 5; y++)
+			for (int y = 2; y <= 1/*4*/; y++)
 			{
 				printf("Loading pdb %d\n", y);
 				char pdbname[255];
@@ -505,24 +653,43 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 				if (gch == 0)
 					gch = new GraphCanonicalHeuristic(pdbname);
 				else
-					gch->load(pdbname);
+					gch->Load(pdbname);
 			
 //				freopen("/Users/nathanst/Desktop/CH.txt","a+",stdout);
 				RunTest(sl, gch, gch->GetMap(), lower, upper, nodes[y], hcosts[y], times[y]);
 			}
-//			freopen("/Users/nathanst/Desktop/octile.txt","a+",stdout);
-//			RunTest(sl, gch, gch->GetMap(), lower, upper, nodes[0], hcosts[0], times[0], true);
-//			for (int y = 1; y <= 1; y++)
-//			{
-//				GraphMapInconsistentHeuristic gdh(gch->GetMap(), gch->GetGraph());
-//				gdh.SetNumUsedHeuristics(1000);
-//				gdh.SetMode(kMax);
-//				gdh.UseSmartPlacement((y==0)?false:true);
-//				for (int t = 0; t < w; t++)
-//					gdh.AddHeuristic();
+
+			Map *theMap; Graph *theGraph;
+			if (gch)
+			{ theMap = gch->GetMap(); theGraph = gch->GetGraph(); }
+			else {
+				theMap = new Map(sl->GetNthExperiment(0).GetMapName());
+				theMap->Scale(sl->GetNthExperiment(0).GetXScale(), sl->GetNthExperiment(0).GetYScale());
+				theGraph = GraphSearchConstants::GetFourConnectedGraph(theMap);
+			}
+			for (int y = 0; y <= 1; y++)
+			{
+				GraphMapInconsistentHeuristic gdh(theMap, theGraph);
+
+				if (y == 0)
+				{
+					//			freopen("/Users/nathanst/Desktop/octile.txt","a+",stdout);
+					RunTest(sl, &gdh, theMap, lower, upper, nodes[0], hcosts[0], times[0], true);
+				}
+				
+				gdh.SetNumUsedHeuristics(1000);
+				gdh.SetMode(kMax);
+				gdh.UseSmartPlacement((y==0)?false:true);
+				for (int t = 0; t < w; t++)
+					gdh.AddHeuristic();
 //				freopen("/Users/nathanst/Desktop/DH.txt","a+",stdout);
-//				RunTest(sl, &gdh, gch->GetMap(), lower, upper, nodes[6+y], hcosts[6+y], times[6+y]);
-//			}
+				RunTest(sl, &gdh, theMap, lower, upper, nodes[6+y], hcosts[6+y], times[6+y]);
+			}
+			if (!gch)
+			{
+				delete theMap;
+				delete theGraph;
+			}
 			delete sl;
 		}
 	}
@@ -552,34 +719,46 @@ void RunTest(ScenarioLoader *sl, GraphHeuristic *gcheur, Map *map, float minDist
 	GraphMapHeuristic gmh(map, g);
 	GraphEnvironment env1(g, gcheur);
 	GraphEnvironment env2(g, &gmh);
-	
+	env1.SetDirected(true);
+	env2.SetDirected(true);
+		
 	std::vector<graphState> thePath;
 	TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
-	astar.SetUseBPMX(false);
+	astar.SetUseBPMX(1);
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
 		Experiment e = sl->GetNthExperiment(x);
 		if ((e.GetDistance() < minDist) || (e.GetDistance() > maxDist))
 			continue;
-		env1.SetDirected(false);
+		//env1.SetDirected(false);
 		
 		graphState start, goal;
-		start = map->getNodeNum(e.GetStartX(), e.GetStartY());
-		goal = map->getNodeNum(e.GetGoalX(), e.GetGoalY());
-		
+		start = map->GetNodeNum(e.GetStartX(), e.GetStartY());
+		goal = map->GetNodeNum(e.GetGoalX(), e.GetGoalY());
+
+		gcheur->ChooseStartGoal(start, goal);
+
 		if (octile)
 			hcosts.push_back(env2.HCost(start, goal));
 		else
 			hcosts.push_back(env1.HCost(start, goal));
 		
 		Timer t;
-		t.startTimer();
+		t.StartTimer();
 		if (octile)
 			astar.GetPath(&env2, start, goal, thePath);
 		else
 			astar.GetPath(&env1, start, goal, thePath);
-		time.push_back(t.endTimer());
-		nodes.push_back(astar.GetNodesExpanded());
+
+//		if (!octile) // verify results
+//		{
+//			double len = env1.GetPathLength(thePath);
+//			astar.GetPath(&env2, start, goal, thePath);
+//			//if (!fequal(len, env1.GetPathLength(thePath)))
+//			printf("AStar: %f; CanHeuristic: %f; opt: %f\n", env1.GetPathLength(thePath), len, e.GetDistance());
+//		}
+		time.push_back(t.EndTimer());
+		nodes.push_back((int)astar.GetNodesExpanded());
 	}
 }
 
@@ -589,12 +768,12 @@ void RunBigTest()
 	for (int y = 200; y < 2000; y+=200)
 	{
 		printf("------- %d -------\n", y);
-		for (int x = 0; x <= 5; x++) // only have 2 rooms right now
+		for (int x = 0; x <= 0; x++) // only have 1 right now
 		{
 			printf("------- %d -------\n", x);
 			char name[255];
-			sprintf(name, "scenarios/rooms/8room_%d%d%d.map.txt", x/100, (x/10)%10, x%10);
-			//sprintf(name, "scenarios/mazes/maze_%d%d%d.map.txt", x/100, (x/10)%10, x%10);
+			//sprintf(name, "scenarios/rooms/8room_%d%d%d.map.txt", x/100, (x/10)%10, x%10);
+			sprintf(name, "scenarios/mazes/maze_%d%d%d.map.txt", x/100, (x/10)%10, x%10);
 			//sprintf(name, "scenarios/path/AR0%d%d%dSR.map.txt", x/100, (x/10)%10, x%10);
 			ScenarioLoader *sl = new ScenarioLoader(name);
 			if (sl->GetNumExperiments() == 0)
@@ -602,9 +781,9 @@ void RunBigTest()
 			
 			char pdbname[255];
 			//sprintf(pdbname, "CPDBs/AR0%d%d%dSR.map.pdb", x/100, (x/10)%10, x%10);
-			//sprintf(pdbname, "CPDBs/maze_%d%d%d.map.%d.pdb", x/100, (x/10)%10, x%10, y);
+			sprintf(pdbname, "CPDBs/maze_%d%d%d.map.%d.pdb", x/100, (x/10)%10, x%10, y);
 			//sprintf(pdbname, "CPDBs/8room_%d%d%d.map.pdb", x/100, (x/10)%10, x%10);
-			sprintf(pdbname, "CPDBs/8room_%d%d%d.map.%d.pdb", x/100, (x/10)%10, x%10, y);
+			//sprintf(pdbname, "CPDBs/8room_%d%d%d.map.%d.pdb", x/100, (x/10)%10, x%10, y);
 			
 			delete gch;
 			gch = 0;
@@ -629,7 +808,7 @@ void RunBigTest()
 			gmih2->SetMode(kMax);
 			
 			//RunHeuristicTest(sl);
-			//RunTest(sl);
+			RunTest(sl);
 		}
 	}
 }
@@ -661,8 +840,8 @@ void RunTest(ScenarioLoader *sl)
 
 		graphState start, goal;
 
-		start = gch->GetMap()->getNodeNum(e.GetStartX(), e.GetStartY());
-		goal = gch->GetMap()->getNodeNum(e.GetGoalX(), e.GetGoalY());
+		start = gch->GetMap()->GetNodeNum(e.GetStartX(), e.GetStartY());
+		goal = gch->GetMap()->GetNodeNum(e.GetGoalX(), e.GetGoalY());
 		
 		std::vector<graphState> thePath;
 		AStarDelay delay(0);
@@ -747,7 +926,7 @@ void BuildScenarioFiles()
 		sprintf(name, "maps/mazes/maze_%d%d%d.map", x/100, (x/10)%10, x%10);
 		Map *m;
 		m = new Map(name);
-		m->scale(512, 512);
+		m->Scale(512, 512);
 		Graph *g = GraphSearchConstants::GetGraph(m);
 		
 		TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
@@ -816,7 +995,7 @@ void BuildScenarioFiles2()
 		sprintf(name, "maps/rooms/8room_%d%d%d.map", x/100, (x/10)%10, x%10);
 		Map *m;
 		m = new Map(name);
-		m->scale(512, 512);
+		m->Scale(512, 512);
 		Graph *g = GraphSearchConstants::GetGraph(m);
 		
 		TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
@@ -910,9 +1089,9 @@ void TestSTPDiff()
 			graphState start, goal;
 			start = problems[y].first;
 			goal = problems[y].second;
-			t.startTimer();
+			t.StartTimer();
 			astar.GetPath(&ge, start, goal, thePath);
-			time += t.endTimer();
+			time += t.EndTimer();
 			nodes += astar.GetNodesExpanded();
 			touched += astar.GetNodesTouched();
 			hvalues += ge.HCost(start, goal);
@@ -980,9 +1159,9 @@ void TestSTPCanonical()
 			graphState start, goal;
 			start = problems[y].first;
 			goal = problems[y].second;
-			t.startTimer();
+			t.StartTimer();
 			astar.GetPath(&ge, start, goal, thePath);
-			time += t.endTimer();
+			time += t.EndTimer();
 			nodes += astar.GetNodesExpanded();
 			touched += astar.GetNodesTouched();
 			hvalues += ge.HCost(start, goal);
@@ -995,7 +1174,7 @@ void TestSTPCanonical()
 }
 
 
-void MoveGraph(Graph *g)
+void MoveGraph(Graph *)
 {
 //	for (int i = 0 ; i < g->GetNumEdges() ; i++)
 //	{
@@ -1046,7 +1225,7 @@ void MoveGraph(Graph *g)
 //		}
 //	}
 //	
-//	Dimension d = getSize();
+//	Dimension d = GetSize();
 //	for (int i = 0 ; i < nnodes ; i++) {
 //		Node n = nodes[i];
 //		if (!n.fixed) {
@@ -1162,7 +1341,7 @@ void TestAPSP()
 				}
 	//			printf("\n");
 			}
-			if ((s-8)/4 >= buckets.size())
+			if ((s-8)/4 >= (int)buckets.size())
 				buckets.resize((s-8)/4+1);
 			buckets[(s-8)/4] += mVal;
 			printf("States\t%d\tWidth\t%f\n", g->GetNumNodes(), mVal);
@@ -1170,9 +1349,9 @@ void TestAPSP()
 			delete m;
 		}
 		printf("Updated averages:\n");
-		for (int x = 0; x < buckets.size(); x++)
+		for (unsigned int x = 0; x < buckets.size(); x++)
 		{
-			printf("%d\t%f\n", 8+x*4, buckets[x]/cnt);
+			printf("%d\t%f\n", 8+x*4, (float)buckets[x]/cnt);
 		}
 	}
 }
@@ -1183,11 +1362,11 @@ void TestSmallMap()
 	Map *m = new Map(300, 300);
 	//BuildRandomRoomMap(m, 30);
 	MakeMaze(m);
-	m->scale(600, 600);
+	m->Scale(600, 600);
 	Graph *g = GetGraph(m);
 
-	GraphMapInconsistentHeuristic gmih(m, g);
-	GraphEnvironment ge(g, &gmih);
+	GraphMapInconsistentHeuristic gmih3(m, g);
+	GraphEnvironment ge(g, &gmih3);
 	ge.SetDirected(true);
 	while (problems.size() < 200)
 	{
@@ -1198,17 +1377,17 @@ void TestSmallMap()
 	TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
 	std::vector<graphState> thePath;
 	
-	gmih.UseSmartPlacement(true);
+	gmih3.UseSmartPlacement(true);
 	for (int x = 0; x < 10; x++)
 	{
 		printf("Adding heuristic %d\n", x);
-		gmih.AddHeuristic();
+		gmih3.AddHeuristic();
 		printf("Done adding heuristic %d\n", x);
 	}
 	
 	for (int x = 10; x <= 10; x++)
 	{
-		gmih.SetNumUsedHeuristics(x);
+		gmih3.SetNumUsedHeuristics(x);
 		
 		int nodes = 0;
 		int touched = 0;
@@ -1222,7 +1401,7 @@ void TestSmallMap()
 			nodes += astar.GetNodesExpanded();
 			touched += astar.GetNodesTouched();
 			hvalues += ge.HCost(start, goal);
-			printf("%d   %d\n", y, astar.GetNodesExpanded());
+			printf("%d   %lld\n", y, astar.GetNodesExpanded());
 //			if (0 == y%100)
 //				printf("%d ", y);
 		}

@@ -23,7 +23,7 @@ void FlipSide::GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> 
 	std::vector<flipMove> acts;
 	GetActions(stateID, acts);
 	neighbors.resize(0);
-	for (int x = 0; x < acts.size(); x++)
+	for (unsigned int x = 0; x < acts.size(); x++)
 	{
 		FlipSideState s = stateID;
 		ApplyAction(s, acts[x]);
@@ -34,17 +34,18 @@ void FlipSide::GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> 
 void FlipSide::GetActions(FlipSideState &stateID, std::vector<flipMove> &actions) const
 {
 	actions.resize(0);
-	for (int x = 0; x < stateID.width-2; x++)
+	for (unsigned int x = 0; x < stateID.width-2; x++)
 	{
-		for (int y = 0; y < stateID.width-2; y++)
+		for (unsigned int y = 0; y < stateID.width-2; y++)
 		{
 			actions.push_back(flipMove(x, y));
 		}
 	}
 }
 
-flipMove FlipSide::GetAction(FlipSideState &s1, FlipSideState &s2) const
+flipMove FlipSide::GetAction(FlipSideState &, FlipSideState &) const
 {
+	assert(false);
 	return flipMove();
 }
 
@@ -61,8 +62,8 @@ void FlipSide::ApplyAction(FlipSideState &s, flipMove a) const
 double FlipSide::HCost(FlipSideState &state1, FlipSideState &state2)
 {
 	assert(state1.width==state2.width);
-	std::vector<int> xloc(state2.width*2);
-	std::vector<int> yloc(state2.width*2);
+	std::vector<unsigned int> xloc(state2.width*2);
+	std::vector<unsigned int> yloc(state2.width*2);
 	double hval = 0;
 	
 	for (unsigned int x = 0; x < state2.width; x++)
@@ -105,7 +106,7 @@ double FlipSide::HCost(FlipSideState &state1, FlipSideState &state2)
 	return ceil(hval/6);
 }
 
-double FlipSide::GCost(FlipSideState &state1, FlipSideState &state2)
+double FlipSide::GCost(FlipSideState &, FlipSideState &)
 {
 	return 1;
 }

@@ -25,8 +25,8 @@ public:
 	~GraphCanonicalHeuristic();
 	Graph *GetGraph();
 	Map *GetMap();
-	void load(char *file);
-	void save(char *file);
+	void Load(char *file);
+	void Save(char *file);
 	double HCost(graphState &state1, graphState &state2);
 	void ChooseStartGoal(graphState &start, graphState &goal);
 

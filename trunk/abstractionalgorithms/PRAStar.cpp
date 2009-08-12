@@ -518,10 +518,10 @@ void praStar::relaxEdge(Heap *nodeHeap, Graph *g, edge *e, int source, int nextN
 //		do {
 //			do {
 //				r1 = abstractions[0]->GetRandomNode();
-//			} while (m->getTerrainType((long)r1->GetLabelL(kFirstData), (long)r1->GetLabelL(kFirstData+1)) == kOutOfBounds);
+//			} while (m->GetTerrainType((long)r1->GetLabelL(kFirstData), (long)r1->GetLabelL(kFirstData+1)) == kOutOfBounds);
 //			do {
 //				r2 = abstractions[0]->GetRandomNode();
-//			} while (m->getTerrainType((long)r2->GetLabelL(kFirstData), (long)r2->GetLabelL(kFirstData+1)) == kOutOfBounds);
+//			} while (m->GetTerrainType((long)r2->GetLabelL(kFirstData), (long)r2->GetLabelL(kFirstData+1)) == kOutOfBounds);
 //		} while (!Pathable(r1, r2));
 //	}
 //		

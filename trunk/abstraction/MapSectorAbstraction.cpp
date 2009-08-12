@@ -189,7 +189,7 @@ int MapSectorAbstraction::getQuadrant(node *which)
 	int level = which->GetLabelL(kAbstractionLevel);
 	int absSectorSize = (int)pow((double)sectorSize, (double)level+1);
 	
-	int sectorNum = (GetMap()->getMapWidth()/absSectorSize)*(yloc/absSectorSize)+(xloc/absSectorSize);
+	int sectorNum = (GetMap()->GetMapWidth()/absSectorSize)*(yloc/absSectorSize)+(xloc/absSectorSize);
 	
 	return sectorNum;
 }

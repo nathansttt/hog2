@@ -7,8 +7,8 @@ using namespace GraphAbstractionConstants;
 *
 * @param ma The map abstraction the environment uses
 */
-WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
-:AbsMapEnvironment(ma)
+WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *mapAbs)
+:AbsMapEnvironment(mapAbs)
 {
 	// initialize all edge counters to 0
 	//Graph* g = ma->GetAbstractGraph(0);
@@ -39,7 +39,7 @@ WeightedMap2DEnvironment::WeightedMap2DEnvironment(MapAbstraction *ma)
 }
 
 WeightedMap2DEnvironment::WeightedMap2DEnvironment(AbsMapEnvironment *ame)
-:AbsMapEnvironment(ame->GetMapAbstraction()->clone(ame->GetMapAbstraction()->GetMap()->clone()))
+:AbsMapEnvironment(ame->GetMapAbstraction()->Clone(ame->GetMapAbstraction()->GetMap()->Clone()))
 {
 	oi = ame->GetOccupancyInfo();
 	diffWeight = 1;
@@ -97,7 +97,7 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 
 	
 	// May need to do different check as well oi->CanMove for example
-	if (map->canStep(s.x, s.y, old.x, old.y))// && !(oi->GetStateOccupied(s)))(should be done in unitSim)
+	if (map->CanStep(s.x, s.y, old.x, old.y))// && !(oi->GetStateOccupied(s)))(should be done in unitSim)
 	{
 // 		// Update the edge weight (mark the edge)
 // 		node* from = ma->GetNodeFromMap(old.x, old.y);
@@ -227,27 +227,27 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp,
 		
 		for(unsigned int i=0; i<neighbours.size(); i++)
 		{
-			AngleUtil::AngleSearchNode sn(neighbours[i],GetStateHash(neighbours[i]));
-			if(angleLookup.find(sn) == angleLookup.end())
+			AngleUtil::AngleSearchNode searchNode(neighbours[i],GetStateHash(neighbours[i]));
+			if(angleLookup.find(searchNode) == angleLookup.end())
 			{
 				if(usePerceptron)
 				{
 					Vector2D v = surroundingProportion * angle;
 					v.SetUpdateTime(t);
-					angleLookup[sn] = v;
+					angleLookup[searchNode] = v;
 				}
 				else
 				{
 					angle.Normalize();
 					angle.SetUpdateTime(t);
-					angleLookup[sn] = angle;
+					angleLookup[searchNode] = angle;
 				}
 			}
 			else
 			{
 				if(usePerceptron)
 				{
-					Vector2D oldAngle = angleLookup[sn];
+					Vector2D oldAngle = angleLookup[searchNode];
 					
 					float x = oldAngle.x - surroundingProportion * (oldAngle.x - angle.x);
 					float y = oldAngle.y - surroundingProportion * (oldAngle.y - angle.y);
@@ -257,15 +257,15 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp,
 					if(sqrt(x*x + y*y) > 1)
 						newAngle.Normalize();
 					newAngle.SetUpdateTime(t);
-					angleLookup[sn] = newAngle;
+					angleLookup[searchNode] = newAngle;
 				}
 				else
 				{
-					Vector2D oldAngle = angleLookup[sn];
+					Vector2D oldAngle = angleLookup[searchNode];
 					Vector2D storeme = oldProp * oldAngle + newProportion * angle;
 					storeme.Normalize();
 					storeme.SetUpdateTime(t);
-					angleLookup[sn] = storeme;
+					angleLookup[searchNode] = storeme;
 				}
 			}
 		}
@@ -273,27 +273,27 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp,
 	else
 	{
 		// Update angle on new location
-		AngleUtil::AngleSearchNode sn(s,GetStateHash(s));
-		if(angleLookup.find(sn) == angleLookup.end())
+		AngleUtil::AngleSearchNode searchNode(s,GetStateHash(s));
+		if(angleLookup.find(searchNode) == angleLookup.end())
 		{
 			if(usePerceptron)
 			{
 				Vector2D v = learningRate * angle;
 				v.SetUpdateTime(t);
-				angleLookup[sn] = v;
+				angleLookup[searchNode] = v;
 			}
 			else
 			{
 				angle.Normalize();
 				angle.SetUpdateTime(t);
-				angleLookup[sn] = angle;
+				angleLookup[searchNode] = angle;
 			}
 		}
 		else
 		{
 			if(usePerceptron)
 			{
-				Vector2D oldAngle = angleLookup[sn];
+				Vector2D oldAngle = angleLookup[searchNode];
 				
 				float x = oldAngle.x - learningRate * (oldAngle.x - angle.x);
 				float y = oldAngle.y - learningRate * (oldAngle.y - angle.y);
@@ -304,40 +304,40 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp,
 					newAngle.Normalize();
 				
 				newAngle.SetUpdateTime(t);
-				angleLookup[sn] = newAngle;
+				angleLookup[searchNode] = newAngle;
 			}
 			else
 			{
-				Vector2D oldAngle = angleLookup[sn];
+				Vector2D oldAngle = angleLookup[searchNode];
 				Vector2D storeme = oldProp * oldAngle + newProportion * angle;
 				storeme.Normalize();
 				storeme.SetUpdateTime(t);
-				angleLookup[sn] = storeme;
+				angleLookup[searchNode] = storeme;
 			}
 		}
 	
 		// Update angle on old location
-		AngleUtil::AngleSearchNode sn2(old,GetStateHash(old));
-		if(angleLookup.find(sn2) == angleLookup.end())
+		AngleUtil::AngleSearchNode searchNode2(old,GetStateHash(old));
+		if(angleLookup.find(searchNode2) == angleLookup.end())
 		{
 			if(usePerceptron)
 			{
 				Vector2D v = learningRate * angle;
 				v.SetUpdateTime(t);
-				angleLookup[sn] = v;
+				angleLookup[searchNode2] = v; // this was sn before, I changed it to sn2, but it could be wrong
 			}
 			else
 			{
 				angle.Normalize();
 				angle.SetUpdateTime(t);
-				angleLookup[sn] = angle;
+				angleLookup[searchNode2] = angle; // this was sn before, I changed it to sn2, but it could be wrong
 			}
 		}
 		else
 		{
 			if(usePerceptron)
 			{
-				Vector2D oldAngle = angleLookup[sn];
+				Vector2D oldAngle = angleLookup[searchNode];
 				
 				float x = oldAngle.x - learningRate * (oldAngle.x - angle.x);
 				float y = oldAngle.y - learningRate * (oldAngle.y - angle.y);
@@ -348,15 +348,15 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp,
 					newAngle.Normalize();
 					
 				newAngle.SetUpdateTime(t);	
-				angleLookup[sn] = newAngle;
+				angleLookup[searchNode] = newAngle;
 			}
 			else
 			{
-				Vector2D oldAngle = angleLookup[sn];
+				Vector2D oldAngle = angleLookup[searchNode];
 				Vector2D storeme = oldProp * oldAngle + newProportion * angle;
 				storeme.Normalize();
 				storeme.SetUpdateTime(t);
-				angleLookup[sn] = storeme;
+				angleLookup[searchNode] = storeme;
 			}
 		}			
 	}
@@ -386,19 +386,19 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
  	
 	
 	//std::cou<t<"l1 "<<l1<<" l2 "<<l2<<std::endl;
-	double h = HCost(l1, l2);
+	double hCost = HCost(l1, l2);
 	
 	if(noWeighting)
-		return h;
+		return hCost;
 	
 	// No weighting if we're using the window and we're outside the window
 	if(useWindow && ( (HCost(windowCenter,l1) > windowSize) || 
 							(HCost(windowCenter, l2) > windowSize)))
 	{
-		return h; 
+		return hCost; 
 	}
 	
-	if (fgreater(h, ROOT_TWO))
+	if (fgreater(hCost, ROOT_TWO))
 		return DBL_MAX;
 
 	tDirection dir = GetAction(l1,l2);
@@ -432,7 +432,7 @@ double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 			weight2 = diffWeight * ((1 - ((old.x * angle.x)+(old.y * angle.y)))/2);
 		}
 		
-		return h + (0.5 * weight1 + 0.5 * weight2);
+		return hCost + (0.5 * weight1 + 0.5 * weight2);
 	
 /*	if(l1 == l2)
 		return 0;	
@@ -499,7 +499,7 @@ void WeightedMap2DEnvironment::OpenGLDraw() const
 			GLdouble xx, yy, zz, rad;	
 			//glColor3f(1.0, 0,0);
 			glColor3f(0,0,0);
-			map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+			map->GetOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
 			//glLineWidth(2);
 			glBegin(GL_LINE_STRIP);
 			glVertex3f(xx-old.x*rad, yy-old.y*rad, zz-rad/2);
@@ -548,11 +548,11 @@ void WeightedMap2DEnvironment::DrawEdge(const edge* e) const
 		
 		glColor3f(1.0, 1.0, 1.0);
 		
-		map->getOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+		map->GetOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glBegin(GL_LINE_STRIP);
 		glVertex3f(xx, yy, zz-rad/2);	
 	
-		map->getOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+		map->GetOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glVertex3f(xx, yy, zz-rad/2);
 		glEnd();
 	}
@@ -561,12 +561,12 @@ void WeightedMap2DEnvironment::DrawEdge(const edge* e) const
 		// white on "from" side, blue on "to" side
 		glColor3f(1.0, 1.0, 1.0);
 		
-				map->getOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+				map->GetOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glBegin(GL_LINE_STRIP);
 		glVertex3f(xx, yy, zz-rad/2);	
 	
 		glColor3f(0,0,1.0);
-		map->getOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+		map->GetOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glVertex3f(xx, yy, zz-rad/2);
 		glEnd();
 	}
@@ -574,13 +574,13 @@ void WeightedMap2DEnvironment::DrawEdge(const edge* e) const
 	{
 		// blue on "from" side, white on "to" side
 		glColor3f(0,0,1.0);
-				map->getOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+				map->GetOpenGLCoord((int)from->GetLabelL(kFirstData), (int)from->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glBegin(GL_LINE_STRIP);
 		glVertex3f(xx, yy, zz-rad/2);	
 		
 		
 		glColor3f(1.0, 1.0, 1.0);
-		map->getOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
+		map->GetOpenGLCoord((int)to->GetLabelL(kFirstData), (int)to->GetLabelL(kFirstData+1), xx, yy, zz, rad);
 		glVertex3f(xx, yy, zz-rad/2);
 		glEnd();
 	}
@@ -634,7 +634,7 @@ Vector2D WeightedMap2DEnvironment::GetAngle(xyLoc &l)
 	}
 }
 
-double WeightedMap2DEnvironment::ComputeArrowMetric(bool timed, double time, bool doNormalize, double maxtime)
+double WeightedMap2DEnvironment::ComputeArrowMetric(bool timed, double time, bool DoNormalize, double maxtime)
 {
 	Graph* g = ma->GetAbstractGraph(0);
 	node_iterator ni = g->getNodeIter();
@@ -672,14 +672,14 @@ double WeightedMap2DEnvironment::ComputeArrowMetric(bool timed, double time, boo
 			//	continue;		
 					
 			double bestDotProd = -2;
-			tDirection bestDir;		
+			tDirection bestDir = kStay;
 				
 			for(unsigned int i=0; i<directions.size(); i++)
 			{
 				xyLoc nextThisDir;
 				GetNextState(current, directions[i], nextThisDir);
 
-				if(!GetMap()->canStep(current.x, current.y, nextThisDir.x, nextThisDir.y))
+				if(!GetMap()->CanStep(current.x, current.y, nextThisDir.x, nextThisDir.y))
 					continue;
 				
 				Vector2D dirVec = GetAngleFromDirection(directions[i]);
@@ -703,7 +703,7 @@ double WeightedMap2DEnvironment::ComputeArrowMetric(bool timed, double time, boo
 			{
 				numDotProducts++;
 				Vector2D nextNodeVec = GetAngle(next);
-				if(doNormalize)
+				if(DoNormalize)
 				{
 					nodeVec.Normalize();
 					nextNodeVec.Normalize();
@@ -716,7 +716,7 @@ double WeightedMap2DEnvironment::ComputeArrowMetric(bool timed, double time, boo
 			}	
 		}
 	}
-	//std::cout<<"Timed: "<<timed<<" time: "<<time<<" norm? "<<doNormalize<<" return "<<(totalDotProducts / (double)(numDotProducts))<<std::endl;
+	//std::cout<<"Timed: "<<timed<<" time: "<<time<<" norm? "<<DoNormalize<<" return "<<(totalDotProducts / (double)(numDotProducts))<<std::endl;
 	return (totalDotProducts / (double)(numDotProducts));
 }
 

@@ -212,10 +212,10 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 		node *n = g->GetNode(s);
 		x1 = n->GetLabelL(GraphSearchConstants::kMapX);
 		y1 = n->GetLabelL(GraphSearchConstants::kMapY);
-		m->getOpenGLCoord(x1, y1, xx, yy, zz, rad);
-		GLfloat r, g, b, t;
-		GetColor(r, g, b, t);
-		glColor4f(r, g, b, t);
+		m->GetOpenGLCoord(x1, y1, xx, yy, zz, rad);
+		GLfloat red, gre, blue, t;
+		GetColor(red, gre, blue, t);
+		glColor4f(red, gre, blue, t);
 		//glColor3f(0.5, 0.5, 0.5);
 		//DrawSphere(xx, yy, zz, rad);
 		glBegin(GL_QUADS);
@@ -250,23 +250,55 @@ namespace GraphSearchConstants {
 	 * the original Graph map lose it's association with the map.
 	 */
 	Graph *GetGraph(Map *m)
+	{ return GetEightConnectedGraph(m); }
+
+	Graph *GetEightConnectedGraph(Map *m)
+	{
+		Graph *g = new Graph();
+		AddNodesToGraph(m, g);
+		for (int y = 0; y < m->GetMapHeight(); y++)
+		{
+			for (int x = 0; x < m->GetMapWidth(); x++)
+			{
+				AddEdges(m, g, x, y);//, 1.0, 1.5);
+			}
+		}
+		// printf("Done\n");
+		return g;
+	}
+	
+	Graph *GetFourConnectedGraph(Map *m)
+	{
+		Graph *g = new Graph();
+		AddNodesToGraph(m, g);
+		for (int y = 0; y < m->GetMapHeight(); y++)
+		{
+			for (int x = 0; x < m->GetMapWidth(); x++)
+			{
+				AddEdges(m, g, x, y, 1.0, 0.0, 100, 0);//, 1.0, 1.5);
+			}
+		}
+		// printf("Done\n");
+		return g;
+	}
+
+	void AddNodesToGraph(Map *m, Graph *g)
 	{
 		char name[32];
-		Graph *g = new Graph();
 		node *n;
-		for (int y = 0; y < m->getMapHeight(); y++)
+		for (int y = 0; y < m->GetMapHeight(); y++)
 		{
-			for (int x = 0; x < m->getMapWidth(); x++)
+			for (int x = 0; x < m->GetMapWidth(); x++)
 			{
-				Tile &currTile = m->getTile(x, y);
+				Tile &currTile = m->GetTile(x, y);
 				currTile.tile1.node = kNoGraphNode;
 				currTile.tile2.node = kNoGraphNode;
 				
-				if (m->adjacentEdges(x, y, kInternalEdge))
+				if (m->AdjacentEdges(x, y, kInternalEdge))
 				{
 					GLdouble xx, yy, zz, rr;
-					m->getOpenGLCoord(x, y,xx, yy, zz, rr);
-					if (m->getTerrainType(x, y) == kOutOfBounds)
+					m->GetOpenGLCoord(x, y,xx, yy, zz, rr);
+					if (m->GetTerrainType(x, y) == kOutOfBounds)
 						continue;
 					sprintf(name, "(%d, %d)", x, y);
 					currTile.tile1.node = g->AddNode(n = new node(name));
@@ -277,11 +309,11 @@ namespace GraphSearchConstants {
 					n->SetLabelL(kMapY, y);
 				}
 				else {
-					if (m->getTerrainType(x, y, kLeftEdge) != kOutOfBounds)
+					if (m->GetTerrainType(x, y, kLeftEdge) != kOutOfBounds)
 					{
 						GLdouble xx, yy, zz, rr;
-						m->getOpenGLCoord(x, y,xx, yy, zz, rr);
-						if (m->getTerrainType(x, y) == kOutOfBounds)
+						m->GetOpenGLCoord(x, y,xx, yy, zz, rr);
+						if (m->GetTerrainType(x, y) == kOutOfBounds)
 							continue;
 						sprintf(name, "(%d, %d)", x, y);
 						currTile.tile1.node = g->AddNode(n = new node(name));
@@ -291,16 +323,16 @@ namespace GraphSearchConstants {
 						n->SetLabelL(kMapX, x);
 						n->SetLabelL(kMapY, y);
 						//					if (currTile.split == kForwardSplit)
-	//						n->SetLabelL(kFirstData+2, kTopLeft);
-	//					else
-	//						n->SetLabelL(kFirstData+2, kBottomLeft);
+						//						n->SetLabelL(kFirstData+2, kTopLeft);
+						//					else
+						//						n->SetLabelL(kFirstData+2, kBottomLeft);
 					}
 					
-					if (m->getTerrainType(x, y, kRightEdge) != kOutOfBounds)
+					if (m->GetTerrainType(x, y, kRightEdge) != kOutOfBounds)
 					{
 						GLdouble xx, yy, zz, rr;
-						m->getOpenGLCoord(x, y,xx, yy, zz, rr);
-						if (m->getTerrainType(x, y) == kOutOfBounds)
+						m->GetOpenGLCoord(x, y,xx, yy, zz, rr);
+						if (m->GetTerrainType(x, y) == kOutOfBounds)
 							continue;
 						sprintf(name, "(%d, %d)", x, y);
 						currTile.tile1.node = g->AddNode(n = new node(name));
@@ -309,48 +341,14 @@ namespace GraphSearchConstants {
 						n->SetLabelF(kZCoordinate, 00);
 						n->SetLabelL(kMapX, x);
 						n->SetLabelL(kMapY, y);
-	//					if (currTile.split == kForwardSplit)
-	//						n->SetLabelL(kFirstData+2, kBottomRight);
-	//					else
-	//						n->SetLabelL(kFirstData+2, kTopRight);
+						//					if (currTile.split == kForwardSplit)
+						//						n->SetLabelL(kFirstData+2, kBottomRight);
+						//					else
+						//						n->SetLabelL(kFirstData+2, kTopRight);
 					}
 				}
 			}
 		}
-		for (int y = 0; y < m->getMapHeight(); y++)
-		{
-			for (int x = 0; x < m->getMapWidth(); x++)
-			{
-				AddEdges(m, g, x, y);//, 1.0, 1.5);
-			}
-		}
-		// printf("Done\n");
-		
-		// verify Graph is correct
-	#if 0
-		{
-			node_iterator ni = g->getNodeIter();
-			for (n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
-			{
-				int numEdges = n->getNumOutgoingEdges() + n->getNumIncomingEdges();
-				
-				edge *ee;
-				edge_iterator eie = n->getEdgeIter();
-				for (int x = 0; x < numEdges; x++)
-				{
-					ee = n->edgeIterNext(eie);
-					if (ee == 0)
-					{ cout << "**That's impossible; we were told we had " << numEdges << ":(" << n->getNumOutgoingEdges() << "+" << n->getNumIncomingEdges() <<
-						") edges, we're on #" << x << " and we got nil!";
-						cout << "(node " << n->GetNum() << ")" << endl;
-						break;
-					}
-				}			
-			}
-		}
-	#endif
-		
-		return g;
 	}
 
 	/**
@@ -373,83 +371,83 @@ namespace GraphSearchConstants {
 		edge *e = 0;
 		
 		// left edge is always tile1, right edge is always tile 2
-		if ((x >= 1) && (m->adjacentEdges(x, y, kLeftEdge)) && (m->getTile(x, y).tile1.node != kNoGraphNode))
+		if ((x >= 1) && (m->AdjacentEdges(x, y, kLeftEdge)) && (m->GetTile(x, y).tile1.node != kNoGraphNode))
 		{
-			if (m->adjacentEdges(x-1, y, kInternalEdge) && (m->getTile(x-1, y).tile1.node != kNoGraphNode))
+			if (m->AdjacentEdges(x-1, y, kInternalEdge) && (m->GetTile(x-1, y).tile1.node != kNoGraphNode))
 			{
 				if ((random()%100) < straightEdgeProb)
 				{
-					e = new edge(m->getTile(x, y).tile1.node, m->getTile(x-1, y).tile1.node, straigtEdgeCost);
+					e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x-1, y).tile1.node, straigtEdgeCost);
 					g->AddEdge(e);
-					e = new edge(m->getTile(x-1, y).tile1.node, m->getTile(x, y).tile1.node, straigtEdgeCost);
+					e = new edge(m->GetTile(x-1, y).tile1.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
 					g->AddEdge(e);
 				}
 			}
-			else if (m->getTile(x-1, y).tile2.node != kNoGraphNode)
+			else if (m->GetTile(x-1, y).tile2.node != kNoGraphNode)
 			{
 				if ((random()%100) < straightEdgeProb)
 				{
-					e = new edge(m->getTile(x, y).tile1.node, m->getTile(x-1, y).tile2.node, straigtEdgeCost);
+					e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x-1, y).tile2.node, straigtEdgeCost);
 					g->AddEdge(e);
-					e = new edge(m->getTile(x-1, y).tile2.node, m->getTile(x, y).tile1.node, straigtEdgeCost);
+					e = new edge(m->GetTile(x-1, y).tile2.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
 					g->AddEdge(e);
 				}
 			}
 		}
 
 		// top edge (may be tile 1 or tile 2)
-		if ((y >= 1) && (m->adjacentEdges(x, y, kTopEdge)))
+		if ((y >= 1) && (m->AdjacentEdges(x, y, kTopEdge)))
 		{
-			if ((m->adjacentEdges(x, y, kInternalEdge)) || (m->getSplit(x, y) == kForwardSplit))
+			if ((m->AdjacentEdges(x, y, kInternalEdge)) || (m->GetSplit(x, y) == kForwardSplit))
 			{
-				if (m->getTile(x, y).tile1.node != kNoGraphNode)
+				if (m->GetTile(x, y).tile1.node != kNoGraphNode)
 				{
-					if (m->adjacentEdges(x, y-1, kInternalEdge) || (m->getSplit(x, y-1) == kBackwardSplit))
+					if (m->AdjacentEdges(x, y-1, kInternalEdge) || (m->GetSplit(x, y-1) == kBackwardSplit))
 					{
-						if (m->getTile(x, y-1).tile1.node != kNoGraphNode)
+						if (m->GetTile(x, y-1).tile1.node != kNoGraphNode)
 						{
 							if ((random()%100) < straightEdgeProb)
 							{
-								e = new edge(m->getTile(x, y).tile1.node, m->getTile(x, y-1).tile1.node, straigtEdgeCost);
+								e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x, y-1).tile1.node, straigtEdgeCost);
 								g->AddEdge(e);
-								e = new edge(m->getTile(x, y-1).tile1.node, m->getTile(x, y).tile1.node, straigtEdgeCost);
+								e = new edge(m->GetTile(x, y-1).tile1.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
 								g->AddEdge(e);
 							}
 						}
 					}
-					else if (m->getTile(x, y-1).tile2.node != kNoGraphNode)
+					else if (m->GetTile(x, y-1).tile2.node != kNoGraphNode)
 					{
 						if ((random()%100) < straightEdgeProb)
 						{
-							e = new edge(m->getTile(x, y).tile1.node, m->getTile(x, y-1).tile2.node, straigtEdgeCost);
+							e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x, y-1).tile2.node, straigtEdgeCost);
 							g->AddEdge(e);
-							e = new edge(m->getTile(x, y-1).tile2.node, m->getTile(x, y).tile1.node, straigtEdgeCost);
+							e = new edge(m->GetTile(x, y-1).tile2.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
 							g->AddEdge(e);
 						}
 					}
 				}
 			}
 			else {
-				if (m->adjacentEdges(x, y-1, kInternalEdge) || (m->getSplit(x, y-1) == kBackwardSplit))
+				if (m->AdjacentEdges(x, y-1, kInternalEdge) || (m->GetSplit(x, y-1) == kBackwardSplit))
 				{
-					if ((m->getTile(x, y).tile2.node != kNoGraphNode) && (m->getTile(x, y-1).tile1.node != kNoGraphNode))
+					if ((m->GetTile(x, y).tile2.node != kNoGraphNode) && (m->GetTile(x, y-1).tile1.node != kNoGraphNode))
 					{
 						if ((random()%100) < straightEdgeProb)
 						{
-							e = new edge(m->getTile(x, y).tile2.node, m->getTile(x, y-1).tile1.node, straigtEdgeCost);
+							e = new edge(m->GetTile(x, y).tile2.node, m->GetTile(x, y-1).tile1.node, straigtEdgeCost);
 							g->AddEdge(e);
-							e = new edge(m->getTile(x, y-1).tile1.node, m->getTile(x, y).tile2.node, straigtEdgeCost);
+							e = new edge(m->GetTile(x, y-1).tile1.node, m->GetTile(x, y).tile2.node, straigtEdgeCost);
 							g->AddEdge(e);
 						}
 					}
 				}
-				else if ((m->getTile(x, y).tile2.node != kNoGraphNode) && (m->getTile(x, y-1).tile2.node != kNoGraphNode))
+				else if ((m->GetTile(x, y).tile2.node != kNoGraphNode) && (m->GetTile(x, y-1).tile2.node != kNoGraphNode))
 				{
 					if ((random()%100) < straightEdgeProb)
 					{
-						e = new edge(m->getTile(x, y).tile2.node, m->getTile(x, y-1).tile2.node, straigtEdgeCost);
+						e = new edge(m->GetTile(x, y).tile2.node, m->GetTile(x, y-1).tile2.node, straigtEdgeCost);
 						g->AddEdge(e);
-						e = new edge(m->getTile(x, y-1).tile2.node, m->getTile(x, y).tile2.node, straigtEdgeCost);
+						e = new edge(m->GetTile(x, y-1).tile2.node, m->GetTile(x, y).tile2.node, straigtEdgeCost);
 						g->AddEdge(e);
 					}
 				}
@@ -458,37 +456,37 @@ namespace GraphSearchConstants {
 		e = 0;
 		// diagonal UpperLeft edge, always node 1...
 		// (1) we can cross each of the boundaries between tiles
-		if ((x >= 1) && (y >= 1) && (m->adjacentEdges(x, y, kLeftEdge)) && (m->adjacentEdges(x, y, kTopEdge)) &&
-				(m->adjacentEdges(x, y-1, kLeftEdge)) && (m->adjacentEdges(x-1, y, kTopEdge)) &&
-				(m->getTile(x, y).tile1.node != kNoGraphNode))
+		if ((x >= 1) && (y >= 1) && (m->AdjacentEdges(x, y, kLeftEdge)) && (m->AdjacentEdges(x, y, kTopEdge)) &&
+				(m->AdjacentEdges(x, y-1, kLeftEdge)) && (m->AdjacentEdges(x-1, y, kTopEdge)) &&
+				(m->GetTile(x, y).tile1.node != kNoGraphNode))
 		{
 			// (2) we can cross the inner tile boundaries
-			if (((m->adjacentEdges(x-1, y, kInternalEdge)) || (m->getSplit(x-1, y) == kBackwardSplit)) &&
-					((m->adjacentEdges(x, y-1, kInternalEdge)) || (m->getSplit(x, y-1) == kBackwardSplit)) &&
-					((m->adjacentEdges(x-1, y-1, kInternalEdge)) || (m->getSplit(x-1, y-1) == kForwardSplit)) &&
-					((m->adjacentEdges(x, y, kInternalEdge)) || (m->getSplit(x, y) == kForwardSplit)))
+			if (((m->AdjacentEdges(x-1, y, kInternalEdge)) || (m->GetSplit(x-1, y) == kBackwardSplit)) &&
+					((m->AdjacentEdges(x, y-1, kInternalEdge)) || (m->GetSplit(x, y-1) == kBackwardSplit)) &&
+					((m->AdjacentEdges(x-1, y-1, kInternalEdge)) || (m->GetSplit(x-1, y-1) == kForwardSplit)) &&
+					((m->AdjacentEdges(x, y, kInternalEdge)) || (m->GetSplit(x, y) == kForwardSplit)))
 			{
 				// (3) find what tiles to connect
-				if (m->adjacentEdges(x-1, y-1, kInternalEdge))
+				if (m->AdjacentEdges(x-1, y-1, kInternalEdge))
 				{
-					if (m->getTile(x-1, y-1).tile1.node != kNoGraphNode)
+					if (m->GetTile(x-1, y-1).tile1.node != kNoGraphNode)
 					{
 						if ((random()%100) < diagEdgeProb)
 						{
-							e = new edge(m->getTile(x, y).tile1.node, m->getTile(x-1, y-1).tile1.node, diagEdgeCost);
+							e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x-1, y-1).tile1.node, diagEdgeCost);
 							g->AddEdge(e);
-							e = new edge(m->getTile(x-1, y-1).tile1.node, m->getTile(x, y).tile1.node, diagEdgeCost);
+							e = new edge(m->GetTile(x-1, y-1).tile1.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
 							g->AddEdge(e);
 						}
 					}
 				}
-				else if (m->getTile(x-1, y-1).tile2.node != kNoGraphNode)
+				else if (m->GetTile(x-1, y-1).tile2.node != kNoGraphNode)
 				{
 					if ((random()%100) < diagEdgeProb)
 					{
-						e = new edge(m->getTile(x, y).tile1.node, m->getTile(x-1, y-1).tile2.node, diagEdgeCost);
+						e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x-1, y-1).tile2.node, diagEdgeCost);
 						g->AddEdge(e);
-						e = new edge(m->getTile(x-1, y-1).tile2.node, m->getTile(x, y).tile1.node, diagEdgeCost);
+						e = new edge(m->GetTile(x-1, y-1).tile2.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
 						g->AddEdge(e);
 					}
 				}
@@ -497,37 +495,37 @@ namespace GraphSearchConstants {
 
 		// diagonal UpperRight edge
 		// (1) we can cross each of the boundaries between tiles
-		if ((y >= 1) && (x < m->getMapWidth()-1) && (m->adjacentEdges(x, y, kRightEdge)) && (m->adjacentEdges(x, y, kTopEdge)) &&
-				(m->adjacentEdges(x, y-1, kRightEdge)) && (m->adjacentEdges(x+1, y, kTopEdge)) &&
-				(m->getTile(x+1, y-1).tile1.node != kNoGraphNode))
+		if ((y >= 1) && (x < m->GetMapWidth()-1) && (m->AdjacentEdges(x, y, kRightEdge)) && (m->AdjacentEdges(x, y, kTopEdge)) &&
+				(m->AdjacentEdges(x, y-1, kRightEdge)) && (m->AdjacentEdges(x+1, y, kTopEdge)) &&
+				(m->GetTile(x+1, y-1).tile1.node != kNoGraphNode))
 		{
 			// (2) we can cross the inner tile boundaries
-			if (((m->adjacentEdges(x+1, y, kInternalEdge)) || (m->getSplit(x+1, y) == kForwardSplit)) &&
-					((m->adjacentEdges(x, y-1, kInternalEdge)) || (m->getSplit(x, y-1) == kForwardSplit)) &&
-					((m->adjacentEdges(x+1, y-1, kInternalEdge)) || (m->getSplit(x+1, y-1) == kBackwardSplit)) &&
-					((m->adjacentEdges(x, y, kInternalEdge)) || (m->getSplit(x, y) == kBackwardSplit)))
+			if (((m->AdjacentEdges(x+1, y, kInternalEdge)) || (m->GetSplit(x+1, y) == kForwardSplit)) &&
+					((m->AdjacentEdges(x, y-1, kInternalEdge)) || (m->GetSplit(x, y-1) == kForwardSplit)) &&
+					((m->AdjacentEdges(x+1, y-1, kInternalEdge)) || (m->GetSplit(x+1, y-1) == kBackwardSplit)) &&
+					((m->AdjacentEdges(x, y, kInternalEdge)) || (m->GetSplit(x, y) == kBackwardSplit)))
 			{
 				// (3) connect
-				if (m->adjacentEdges(x, y, kInternalEdge))
+				if (m->AdjacentEdges(x, y, kInternalEdge))
 				{
-					if (m->getTile(x, y).tile1.node != kNoGraphNode)
+					if (m->GetTile(x, y).tile1.node != kNoGraphNode)
 					{
 						if ((random()%100) < diagEdgeProb)
 						{
-							e = new edge(m->getTile(x, y).tile1.node, m->getTile(x+1, y-1).tile1.node, diagEdgeCost);
+							e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x+1, y-1).tile1.node, diagEdgeCost);
 							g->AddEdge(e);
-							e = new edge(m->getTile(x+1, y-1).tile1.node, m->getTile(x, y).tile1.node, diagEdgeCost);
+							e = new edge(m->GetTile(x+1, y-1).tile1.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
 							g->AddEdge(e);
 						}
 					}
 				}
-				else if (m->getTile(x, y).tile2.node != kNoGraphNode)
+				else if (m->GetTile(x, y).tile2.node != kNoGraphNode)
 				{
 					if ((random()%100) < diagEdgeProb)
 					{
-						e = new edge(m->getTile(x, y).tile2.node, m->getTile(x+1, y-1).tile1.node, diagEdgeCost);
+						e = new edge(m->GetTile(x, y).tile2.node, m->GetTile(x+1, y-1).tile1.node, diagEdgeCost);
 						g->AddEdge(e);
-						e = new edge(m->getTile(x+1, y-1).tile1.node, m->getTile(x, y).tile2.node, diagEdgeCost);
+						e = new edge(m->GetTile(x+1, y-1).tile1.node, m->GetTile(x, y).tile2.node, diagEdgeCost);
 						g->AddEdge(e);
 					}
 				}
@@ -621,7 +619,7 @@ double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &stat
 
 void GraphDistanceHeuristic::OpenGLDraw() const
 {
-	static int counter = 50;
+	//static int counter = 50;
 	//counter = (counter+1);
 	if (heuristics.size() == 0)
 		return;

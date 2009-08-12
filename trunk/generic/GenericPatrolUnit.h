@@ -20,6 +20,7 @@ public:
 	virtual void OpenGLDraw(const environment *, const SimulationInfo<state,action,environment> *) const;
 	void AddPatrolLocation(state &s); 
 	state& GetGoal(); // get CURRENT goal? 
+	void GetGoal(state &s) { GenericSearchUnit<state, action, environment>::GetGoal(s); } 
 	virtual bool Done(); 
 	void UpdateLocation(environment *, state &l, bool success, SimulationInfo<state,action,environment> *si);
 	void LogStats(StatCollection *stats);
@@ -31,7 +32,7 @@ public:
 	 * @author Renee Jansen
 	 * @date 10/2007
 	 */
-	void SetTrimPath(bool b) {trimPath = b;}
+	void SetTrimPath(bool trim) {trimPath = trim;}
 	
 	/** Set the window at which we want to trim the planned path
 	* 
@@ -49,7 +50,7 @@ public:
 	* @date 10/30/2007
 	*/
 	
-	void SetDrawUnit(bool b) {drawUnit = b;}
+	void SetDrawUnit(bool draw) {drawUnit = draw;}
 // 	void SetColor(GLfloat _r, GLfloat _g, GLfloat _b) {Unit::Set		GLFloat _r,_g,_b;
 // 		GetColor(_r,_g,_b);
 // 		glColor3f(_r,_g,_b);this->r=_r; this->g=_g; this->b=_b;}
@@ -156,7 +157,7 @@ GenericPatrolUnit<state,action,environment>::GenericPatrolUnit(state &s, Generic
 }
 
 template <class state, class action, class environment>
-bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo<state,action,environment> *si, action& dir)
+bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *theEnv, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& dir)
 {
 	if (Done())
 	{
@@ -215,7 +216,7 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
  		
  		if((numPatrols == -1 ) || (counter < numPatrols))
 	 	{
-	 		GoToLoc(env, currTarget);
+	 		GoToLoc(theEnv, currTarget);
 	 	}
 		else
 		{
@@ -236,19 +237,19 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *env, Occ
 }
 
 template <class state, class action, class environment>
-void GenericPatrolUnit<state,action,environment>::GoToLoc(environment *env, int which)
+void GenericPatrolUnit<state,action,environment>::GoToLoc(environment *theEnv, int which)
 {
 	std::vector<state> path; 
 	
 //	std::cout << "Planning between " << loc << " and " << locs[which] << std::endl;
 	//printf("%s ",GetName());
-	algorithm->GetPath(env, loc, locs[which], path);
+	algorithm->GetPath(theEnv, loc, locs[which], path);
 	//	std::cout<<"At ("<<loc.x<<","<<loc.y<<") pathing to ("<<locs[which].x<<","<<locs[which].y<<")"<<std::endl;
 	nodesExpanded += algorithm->GetNodesExpanded();
 	nodesTouched += algorithm->GetNodesTouched();
-	std::cout << algorithm->GetNodesExpanded() << " nodes expanded\n";
-//	std::cout << "Path length: " << env->GetPathLength(path) << " (" << path.size() << " moves)" << std::endl;
-//	std::cout << "Initial Heuristic: " << env->HCost(loc, locs[which]) << std::endl;
+//	std::cout << algorithm->GetNodesExpanded() << " nodes expanded\n";
+//	std::cout << "Path length: " << theEnv->GetPathLength(path) << " (" << path.size() << " moves)" << std::endl;
+//	std::cout << "Initial Heuristic: " << theEnv->HCost(loc, locs[which]) << std::endl;
 //	//  	std::cout<<"Path ";
 //	for(int i=0; i<path.size();i++)
 //	{
@@ -257,7 +258,7 @@ void GenericPatrolUnit<state,action,environment>::GoToLoc(environment *env, int 
 //	std::cout<<std::endl;
 	if (path.size() > 0)
 	{
-		AddPathToCache(env, path);
+		AddPathToCache(theEnv, path);
 	}
 }
 
@@ -269,18 +270,18 @@ void GenericPatrolUnit<state,action,environment>::AddPatrolLocation(state &s)
 }
  
 template <class state, class action, class environment>
-void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* env, std::vector<state> &p)
+void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* theEnv, std::vector<state> &p)
 {
 	for(unsigned int i=0; i<p.size()-1; i++)
 	{
-		if (trimPath && (env->HCost(p[i+1], loc) > trimWindow))
+		if (trimPath && (theEnv->HCost(p[i+1], loc) > trimWindow))
 		break;
-		moves.push_back(env->GetAction(p[i], p[i+1]));
+		moves.push_back(theEnv->GetAction(p[i], p[i+1]));
 	}
 }
 
 template <class state, class action, class environment>
-void GenericPatrolUnit<state,action, environment>::OpenGLDraw(const environment *env, const SimulationInfo<state,action,environment> *si) const
+void GenericPatrolUnit<state,action, environment>::OpenGLDraw(const environment *theEnv, const SimulationInfo<state,action,environment> *si) const
 {
 	if (drawUnit)
 	{
@@ -289,13 +290,14 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(const environment 
 		si->GetPublicUnitInfo(si->GetCurrentUnit(), i);
 //		printf("(%f-%f)/(%f-%f)\n", 
 //			   si->GetSimulationTime(), i.lastTime, i.nextTime, i.lastTime);
-		env->SetColor(1.0, 0.25, 0.25, 1.0);
+		theEnv->SetColor(1.0, 0.25, 0.25, 1.0);
 //		std::cout << si->GetCurrentUnit() << " is at " << i.currentState << std::endl;
 		if (fgreater(si->GetSimulationTime(), i.nextTime))
-			env->OpenGLDraw(i.currentState);
+			theEnv->OpenGLDraw(i.currentState);
 		else
-			env->OpenGLDraw(i.lastState, i.currentState,
+			theEnv->OpenGLDraw(i.lastState, i.currentState,
 							(si->GetSimulationTime()-i.lastTime)/(i.nextTime-i.lastTime));
+		theEnv->SetColor(1.0, 0.25, 0.25, 0.25);
 		algorithm->OpenGLDraw();
 	}
 // 	if ((0)&&(drawUnit))
@@ -313,7 +315,7 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(const environment 
 }
 
 template <class state, class action, class environment>
-void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo<state,action,environment> *si)
+void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *theEnv, state &l, bool success, SimulationInfo<state,action,environment> *si)
 { 
 	if (!success)
 	{
@@ -321,16 +323,10 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 		//std::cout<<"Move failed\n";
 		lastFailedMove = si->GetSimulationTime();
 	}	
-	// Occupancy interface stuff should be done in UnitSimulation
-	//Update occupancy interface
-	//env->GetOccupancyInterface()->SetStateOccupied(loc,false);
-	//env->GetOccupancyInterface()->SetStateOccupied(l, true);
-	
-	//if(!success)
-	
+
 	if(!(l==loc))
 	{
-		action dir = env->GetAction(loc,l);
+		action dir = theEnv->GetAction(loc,l);
 		
 		if (!(dir == oldDir))
 		{
@@ -342,8 +338,6 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 			numDirectionChangesCollisions++;
 			oldDirColl = dir;
 		}
-
-		totalDistance += env->HCost(loc, l);
 	}
 	
 	if((!success))//||(l == loc))
@@ -354,8 +348,8 @@ void GenericPatrolUnit<state,action,environment>::UpdateLocation(environment *en
 		//if(currTarget != -1) 
 		//	currTarget = 0; 
 	} 
-	loc = l; 
-	
+	totalDistance += theEnv->GCost(loc, l);
+	loc = l;
 }
 
 template <class state, class action, class environment>
@@ -376,27 +370,41 @@ bool GenericPatrolUnit<state,action,environment>::Done()
 template <class state, class action, class environment>
 void GenericPatrolUnit<state,action, environment>::LogStats(StatCollection *sc)
 {
-
+	if (nodesExpanded != 0)
+	{
+		sc->AddStat("nodesExpanded", GetName(), (long)nodesExpanded);
+		nodesExpanded = 0;
+	}
+	if (nodesTouched != 0)
+	{
+		sc->AddStat("nodesTouched", GetName(), (long)nodesTouched);
+		nodesExpanded = 0;
+	}
+	if (totalDistance != 0)
+	{
+		sc->SumStat("gCost", GetName(), totalDistance);
+		totalDistance = 0;
+	}
 }
 
 template <class state, class action, class environment>
 void GenericPatrolUnit<state,action,environment>::LogFinalStats(StatCollection *sc)
 {
 		//Report per loop
-	for(int i=1; (i<=numPatrols)&&(i<nodesExpandedPatrols.size()); i++)
+	for(unsigned int i=1; ((int)i<=numPatrols)&&(i<nodesExpandedPatrols.size()); i++)
 	{
 		char num[8];
  		sprintf(num,"%d",i);
- 		char* name = new char[256];
-  		strcpy(name,GetName());
-  		strcat(name,"_");
-  		strcat(name, num);
+ 		char* myname = new char[256];
+  		strcpy(myname,GetName());
+  		strcat(myname,"_");
+  		strcat(myname, num);
   		
-  		sc->AddStat("nodesExpanded", name, (long)(nodesExpandedPatrols[i-1]));
-		sc->AddStat("distanceTravelled", name, totalDistancePatrols[i-1]);
-		sc->AddStat("directionChanges",name, (long)(numDirectionChangesPatrols[i-1]));
-		sc->AddStat("directionChangesCollision",name, (long)(numDirectionChangesCollisionsPatrols[i-1]));
-		sc->AddStat("failedMoves",name, (long)(numFailedMovesPatrols[i-1]));
+  		sc->AddStat("nodesExpanded", myname, (long)(nodesExpandedPatrols[i-1]));
+		sc->AddStat("distanceTravelled", myname, totalDistancePatrols[i-1]);
+		sc->AddStat("directionChanges",myname, (long)(numDirectionChangesPatrols[i-1]));
+		sc->AddStat("directionChangesCollision",myname, (long)(numDirectionChangesCollisionsPatrols[i-1]));
+		sc->AddStat("failedMoves",myname, (long)(numFailedMovesPatrols[i-1]));
 	}
 
 	

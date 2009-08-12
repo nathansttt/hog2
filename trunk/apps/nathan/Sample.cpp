@@ -281,15 +281,15 @@ void SolveRandomProblem(MNPuzzle *mnp1, MNPuzzle *mnp2)
 	std::cout << "mnp2 heuristic:" << mnp2->HCost(s, g) << std::endl;
 
 	Timer t;
-	t.startTimer();
+	t.StartTimer();
 	ida.GetPath(mnp1, s, g, path1);
-	t.endTimer();
-	std::cout << "Path found (mnp1), length " << path1.size() << " time:" << t.getElapsedTime() << std::endl;
+	t.EndTimer();
+	std::cout << "Path found (mnp1), length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
 	
-	t.startTimer();
+	t.StartTimer();
 	ida.GetPath(mnp2, s, g, path1);
-	t.endTimer();
-	std::cout << "Path found (mnp2), length " << path1.size() << " time:" << t.getElapsedTime() << std::endl;
+	t.EndTimer();
+	std::cout << "Path found (mnp2), length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
 }
 
 void SolveNextProblem(MNPuzzle *mnp1, MNPuzzle *mnp2)
@@ -311,15 +311,15 @@ void SolveNextProblem(MNPuzzle *mnp1, MNPuzzle *mnp2)
 	std::cout << "mnp2 heuristic:" << mnp2->HCost(s, g) << std::endl;
 	
 	Timer t;
-	t.startTimer();
+	t.StartTimer();
 	ida.GetPath(mnp1, s, g, path1);
-	t.endTimer();
-	std::cout << "Path found (mnp1), length " << path1.size() << " time:" << t.getElapsedTime() << std::endl;
+	t.EndTimer();
+	std::cout << "Path found (mnp1), length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
 	
-	t.startTimer();
+	t.StartTimer();
 	ida.GetPath(mnp2, s, g, path1);
-	t.endTimer();
-	std::cout << "Path found (mnp2), length " << path1.size() << " time:" << t.getElapsedTime() << std::endl;
+	t.EndTimer();
+	std::cout << "Path found (mnp2), length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
 }
 
 
@@ -435,5 +435,5 @@ void TestTopSpinPDB()
 	for (unsigned int x = 0; x < path1.size(); x++)
 		printf("%lu   ", path1[x]);
 	printf("\n");
-	printf("%d nodes expanded\n", a.GetNodesExpanded());
+	printf("%lld nodes expanded\n", a.GetNodesExpanded());
 }

@@ -51,8 +51,8 @@ public:
 	double HCost(PancakePuzzleState &state1, PancakePuzzleState &state2);
 	double HCost(PancakePuzzleState &state1);
 
-	double GCost(PancakePuzzleState &state1, PancakePuzzleState &state2) {return 2.0;}
-	double GCost(PancakePuzzleState &state1, unsigned &act) { return 1.0; }
+	double GCost(PancakePuzzleState &, PancakePuzzleState &) {return 2.0;}
+	double GCost(PancakePuzzleState &, unsigned &) { return 1.0; }
 	bool GoalTest(PancakePuzzleState &state, PancakePuzzleState &goal);
 
 	bool GoalTest(PancakePuzzleState &s);
@@ -70,8 +70,9 @@ public:
 
 	// currently not drawing anything
 	void OpenGLDraw() const{}
-	void OpenGLDraw(const PancakePuzzleState &s) const {}
+	void OpenGLDraw(const PancakePuzzleState &) const {}
 	void OpenGLDraw(const PancakePuzzleState &, const unsigned &) const {}
+	void OpenGLDraw(const PancakePuzzleState&, const PancakePuzzleState&, float) const {}
 
 	/**
 	**/

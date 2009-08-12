@@ -54,8 +54,8 @@ int jrobinson( const gsl_matrix *A, double epsilon, gsl_vector *p1, gsl_vector *
 	if( N != 0 ) {
 		ret |= gsl_vector_add_constant( p1, (-1.) * (double)(p2->size) );
 		ret |= gsl_vector_add_constant( p2, (-1.) * (double)(p1->size) );
-		ret |= gsl_vector_scale( p1, 1./(double)N );
-		ret |= gsl_vector_scale( p2, 1./(double)N );
+		ret |= gsl_vector_Scale( p1, 1./(double)N );
+		ret |= gsl_vector_Scale( p2, 1./(double)N );
 	} else {
 		// in this case we found an equilibrium without iterating
 		// perform all actions uniform at random

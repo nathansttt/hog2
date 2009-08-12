@@ -56,7 +56,7 @@ unsigned path::degree()
 }
 
 // Print the path
-void path::print(bool beginning)
+void path::Print(bool beginning)
 {
 	if (beginning)
 		printf("[");
@@ -68,7 +68,7 @@ void path::print(bool beginning)
 	
 	if (next != NULL) {
 		printf(",");
-		next->print(false);
+		next->Print(false);
 	}
 	else
 		printf("]");

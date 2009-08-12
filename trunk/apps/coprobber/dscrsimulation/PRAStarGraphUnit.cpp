@@ -50,7 +50,7 @@ void PraStarGraphUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLD
 	/*
 	// TODO: make the code below compilable
 	node *n  = env->GetGraph()->GetNode( current_pos );
-	GLdouble x, y, z, rad = 0.01; //env->scale()/2.;
+	GLdouble x, y, z, rad = 0.01; //env->Scale()/2.;
 	x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
 	y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
 	z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);

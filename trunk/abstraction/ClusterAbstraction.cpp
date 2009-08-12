@@ -145,22 +145,22 @@ void ClusterAbstraction::createClustersAndEntrances()
 	
 	if (verbose) std::cout<<"Creating clusters and entrances\n";
 	
-	for (int j = 0; j < map->getMapHeight(); j+=clusterSize)
+	for (int j = 0; j < map->GetMapHeight(); j+=clusterSize)
 	{
 		col=0; 
-		for (int i = 0; i< map->getMapWidth(); i+=clusterSize)
+		for (int i = 0; i< map->GetMapWidth(); i+=clusterSize)
 		{
-			horizSize = min(clusterSize, map->getMapWidth()-i);
-			vertSize = min(clusterSize, map->getMapHeight()-j);
+			horizSize = min(clusterSize, map->GetMapWidth()-i);
+			vertSize = min(clusterSize, map->GetMapHeight()-j);
 			Cluster cluster(clusterId++,row,col,i,j,horizSize,vertSize);
 			
 			addCluster(cluster);
-			if (j > 0 && j < map->getMapHeight())
+			if (j > 0 && j < map->GetMapHeight())
 			{
 				
 				createHorizEntrances(i,i+horizSize-1,j-1,row-1,col);
 			}
-			if (i > 0 && i < map->getMapWidth())
+			if (i > 0 && i < map->GetMapWidth())
 			{
 				
 				createVertEntrances(j,j+vertSize-1,i-1,row,col-1);
@@ -173,7 +173,7 @@ void ClusterAbstraction::createClustersAndEntrances()
 	rows = row;
 	columns = col;
 	
-	if (verbose) std::cout<<"map is "<<map->getMapHeight()<<" x "<<map->getMapWidth()<<std::endl
+	if (verbose) std::cout<<"map is "<<map->GetMapHeight()<<" x "<<map->GetMapWidth()<<std::endl
 		<<"rows of clusters: "<<rows<<"\ncolumns of clusters: "<<columns<<std::endl;
 }
 
@@ -268,13 +268,13 @@ void ClusterAbstraction::createHorizEntrances(int start, int end, int latitude, 
 		{
 			// create two new entrances, one for each end
 			Entrance entrance1(latitude, begin,-1,-1,
-												 map->getNodeNum(begin,latitude),
-												 map->getNodeNum(begin,latitude+1),
+												 map->GetNodeNum(begin,latitude),
+												 map->GetNodeNum(begin,latitude+1),
 												 row, col, 1, HORIZONTAL);
 			addEntrance(entrance1);
 			Entrance entrance2(latitude, (i - 1),-1,-1,
-												 map->getNodeNum(i-1,latitude),
-												 map->getNodeNum(i-1,latitude+1),
+												 map->GetNodeNum(i-1,latitude),
+												 map->GetNodeNum(i-1,latitude+1),
 												 row, col, 1, HORIZONTAL);
 			addEntrance(entrance2);
 		}
@@ -282,8 +282,8 @@ void ClusterAbstraction::createHorizEntrances(int start, int end, int latitude, 
 		{
 			// create one entrance in the middle 
 			Entrance entrance(latitude, ((i - 1) + begin)/2,-1,-1,
-												map->getNodeNum(((i - 1) + begin)/2,latitude),
-												map->getNodeNum(((i - 1) + begin)/2,latitude+1),
+												map->GetNodeNum(((i - 1) + begin)/2,latitude),
+												map->GetNodeNum(((i - 1) + begin)/2,latitude+1),
 												row, col, (i - begin), HORIZONTAL);
 			addEntrance(entrance);
 		}
@@ -333,13 +333,13 @@ void ClusterAbstraction::createVertEntrances(int start, int end, int meridian, i
 		{
 			// create two entrances, one for each end
 			Entrance entrance1(begin, meridian,-1,-1,
-												 map->getNodeNum(meridian,begin),
-												 map->getNodeNum(meridian+1,begin),
+												 map->GetNodeNum(meridian,begin),
+												 map->GetNodeNum(meridian+1,begin),
 												 row, col, 1, VERTICAL);
 			addEntrance(entrance1);
 			Entrance entrance2((i - 1), meridian,-1,-1,
-												 map->getNodeNum(meridian,i-1),
-												 map->getNodeNum(meridian+1,i-1),
+												 map->GetNodeNum(meridian,i-1),
+												 map->GetNodeNum(meridian+1,i-1),
 												 row, col, 1, VERTICAL);
 			addEntrance(entrance2);
 		}
@@ -347,8 +347,8 @@ void ClusterAbstraction::createVertEntrances(int start, int end, int meridian, i
 		{
 			// create one entrance
 			Entrance entrance(((i - 1) + begin)/2, meridian,-1,-1,
-												map->getNodeNum(meridian,((i - 1) + begin)/2),
-												map->getNodeNum(meridian+1,((i - 1) + begin)/2),
+												map->GetNodeNum(meridian,((i - 1) + begin)/2),
+												map->GetNodeNum(meridian+1,((i - 1) + begin)/2),
 												row, col, (i - begin), VERTICAL);
 			addEntrance(entrance);
 		}
@@ -426,7 +426,7 @@ void ClusterAbstraction::addAbsNodes(Graph* g)
 			case HORIZONTAL:
 			{
 				// create node for 1st cluster
-				map->getOpenGLCoord(entrance.getCenter1Col(), entrance.getCenter1Row(), ans.x,ans.y,ans.z,r);
+				map->GetOpenGLCoord(entrance.getCenter1Col(), entrance.getCenter1Row(), ans.x,ans.y,ans.z,r);
 				
 				Cluster& c1 = getCluster(entrance.getCluster1Id());
 				num = nodeExists(c1,ans.x,ans.y,g);
@@ -448,7 +448,7 @@ void ClusterAbstraction::addAbsNodes(Graph* g)
 					newnode1 = num;
 				}
 				
-				map->getOpenGLCoord(entrance.getCenter1Col(), entrance.getCenter1Row()+1, ans.x,ans.y,ans.z,r);
+				map->GetOpenGLCoord(entrance.getCenter1Col(), entrance.getCenter1Row()+1, ans.x,ans.y,ans.z,r);
 				Cluster& c2 = getCluster(cluster2Id);	  
 				
 				num = nodeExists(c2,ans.x,ans.y,g);
@@ -476,7 +476,7 @@ void ClusterAbstraction::addAbsNodes(Graph* g)
 				break;
 			case VERTICAL:
 			{
-				map->getOpenGLCoord(entrance.getCenter1Col(), entrance.getCenter1Row(), ans.x,ans.y,ans.z,r);
+				map->GetOpenGLCoord(entrance.getCenter1Col(), entrance.getCenter1Row(), ans.x,ans.y,ans.z,r);
 				
 				Cluster& c1 = getCluster(cluster1Id);
 				num = nodeExists(c1,ans.x,ans.y,g);
@@ -499,7 +499,7 @@ void ClusterAbstraction::addAbsNodes(Graph* g)
 				}
 				
 				
-				map->getOpenGLCoord(entrance.getCenter1Col()+1, entrance.getCenter1Row(),ans.x,ans.y,ans.z,r);
+				map->GetOpenGLCoord(entrance.getCenter1Col()+1, entrance.getCenter1Row(),ans.x,ans.y,ans.z,r);
 				
 				Cluster& c2 = getCluster(cluster2Id);
 				num = nodeExists(c2,ans.x,ans.y,g);
@@ -581,11 +581,11 @@ void ClusterAbstraction::computeClusterPaths(Graph* g)
 				int px;
 				int py;
 				
-				map->getPointFromCoordinate(s,px,py);
+				map->GetPointFromCoordinate(s,px,py);
 				
 				node* start = GetNodeFromMap(px,py);
 				
-				map->getPointFromCoordinate(gl,px,py);
+				map->GetPointFromCoordinate(gl,px,py);
 				
 				node* goal = GetNodeFromMap(px,py);
 				
@@ -694,7 +694,7 @@ int ClusterAbstraction::getClusterIdFromNode(node* n)
 		int px;
 		int py;
 		
-		map->getPointFromCoordinate(s,px,py);
+		map->GetPointFromCoordinate(s,px,py);
 		return getClusterIdFromCoord(py,px);
 	}
 }
@@ -737,10 +737,10 @@ void ClusterAbstraction::setUpParents(Graph* g)
 		for (int x=c.getHOrig(); x<c.getHOrig()+c.getWidth(); x++)
 		{
 			
-			for (int y=c.getVOrig(); y<c.getVOrig()+c.getHeight(); y++)
+			for (int y=c.getVOrig(); y<c.getVOrig()+c.GetHeight(); y++)
 			{
 				
-				if (map->getNodeNum(x,y) >= 0)
+				if (map->GetNodeNum(x,y) >= 0)
 				{
 					node* n = GetNodeFromMap(x,y);
 					buildNodeIntoParent(n, dummyParent);
@@ -775,9 +775,9 @@ void ClusterAbstraction::setUpParents(Graph* g)
 		//Find parent for each node 
 		for (int x=c.getHOrig(); x<c.getHOrig()+c.getWidth(); x++)
 		{
-			for (int y=c.getVOrig(); y<c.getVOrig()+c.getHeight(); y++)
+			for (int y=c.getVOrig(); y<c.getVOrig()+c.GetHeight(); y++)
 			{
-				if (map->getNodeNum(x,y) >= 0)
+				if (map->GetNodeNum(x,y) >= 0)
 				{
 					node* mnode = GetNodeFromMap(x,y);
 					
@@ -825,7 +825,7 @@ void ClusterAbstraction::setUpParents(Graph* g)
 							point3d s(n->GetLabelF(kXCoordinate),n->GetLabelF(kYCoordinate),-1);
 							int px;
 							int py;
-							map->getPointFromCoordinate(s,px,py);
+							map->GetPointFromCoordinate(s,px,py);
 							
 							// calculate the distance to this entrance
 							
@@ -849,7 +849,7 @@ void ClusterAbstraction::setUpParents(Graph* g)
 						point3d s(entrance->GetLabelF(kXCoordinate),entrance->GetLabelF(kYCoordinate),-1);
 						int px;
 						int py;
-						map->getPointFromCoordinate(s,px,py);
+						map->GetPointFromCoordinate(s,px,py);
 						buildNodeIntoParent(mnode, entrance);
 					}
 					//					else
@@ -1041,7 +1041,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 	int px;
 	int py;
 	
-	map->getPointFromCoordinate(s,px,py);
+	map->GetPointFromCoordinate(s,px,py);
 	
 	// 	Cluster& c = getCluster(getClusterIdFromCoord(py,px));
 	Cluster& c = getCluster(getClusterIdFromCoord(n->GetLabelL(kFirstData+1), n->GetLabelL(kFirstData)));
@@ -1053,7 +1053,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 	// 		}
 	recVec ans;
 	double r;
-	map->getOpenGLCoord((int)n->GetLabelL(kFirstData),(int)n->GetLabelL(kFirstData+1) , ans.x,ans.y,ans.z,r);
+	map->GetOpenGLCoord((int)n->GetLabelL(kFirstData),(int)n->GetLabelL(kFirstData+1) , ans.x,ans.y,ans.z,r);
 	
 	//	std::cout<<"cluster num: "<<getClusterIdFromCoord(py,px)<<std::endl;
 	//	std::cout<<"level "<<n->GetLabelL(kAbstractionLevel)<<std::endl;
@@ -1093,7 +1093,7 @@ node* ClusterAbstraction::insertNode(node* n, int& expanded, int& touched)
 			
 			point3d gl(goalx,goaly,goalz);
 			
-			map->getPointFromCoordinate(gl,px,py);
+			map->GetPointFromCoordinate(gl,px,py);
 			node* goal = GetNodeFromMap(px,py);
 			
 			//  		std::cout<<"corridor has: "<<std::endl;
@@ -1192,7 +1192,7 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 	point3d s(start->GetLabelF(kXCoordinate),start->GetLabelF(kYCoordinate),-1);
 	int px;
 	int py;
-	map->getPointFromCoordinate(s,px,py);
+	map->GetPointFromCoordinate(s,px,py);
 	
 	Cluster& c = getCluster(getClusterIdFromCoord(py,px));
 	Graph* g = abstractions[1];
@@ -1229,7 +1229,7 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
 	point3d gl(goal->GetLabelF(kXCoordinate),goal->GetLabelF(kYCoordinate),-1);
 	int px2;
 	int py2;
-	map->getPointFromCoordinate(gl,px2,py2);
+	map->GetPointFromCoordinate(gl,px2,py2);
 	
 	Cluster& c2 = getCluster(getClusterIdFromCoord(py2,px2));
 	num = nodeExists(c2,goal->GetLabelF(kXCoordinate),goal->GetLabelF(kYCoordinate),g);
@@ -1277,8 +1277,8 @@ void ClusterAbstraction::removeNodes(node* start, node* goal)
  */ 
 path* ClusterAbstraction::getCachedPath(edge* e) 
 {
-	if (temp[e]) return temp[e]->clone();
-	else if (paths[e]) return paths[e]->clone();
+	if (temp[e]) return temp[e]->Clone();
+	else if (paths[e]) return paths[e]->Clone();
 	else return 0;
 }
 
@@ -1293,7 +1293,7 @@ node* ClusterAbstraction::getLowLevelNode(node* abstract)
 	point3d s(abstract->GetLabelF(kXCoordinate),abstract->GetLabelF(kYCoordinate),-1);
 	int px;
 	int py;
-	map->getPointFromCoordinate(s,px,py);
+	map->GetPointFromCoordinate(s,px,py);
 	
 	return MapAbstraction::GetNodeFromMap(px,py);
 }
@@ -1306,14 +1306,14 @@ void ClusterAbstraction::printMapCoord(node* n)
 	point3d s(n->GetLabelF(kXCoordinate),n->GetLabelF(kYCoordinate),-1);
 	int px;
 	int py;
-	map->getPointFromCoordinate(s,px,py);
+	map->GetPointFromCoordinate(s,px,py);
 	
 	node* parent = g->GetNode(n->GetLabelL(kParent));
 	
 	point3d s2(parent->GetLabelF(kXCoordinate),parent->GetLabelF(kYCoordinate),-1);
 	int px2;
 	int py2;
-	map->getPointFromCoordinate(s2,px2,py2);
+	map->GetPointFromCoordinate(s2,px2,py2);
 	
 	std::cout<<"("<<px<<","<<py<<")"; // parent "<<parent<<"\n";
 																		//("<<px2<<","<<py2<<")\n";
@@ -1341,10 +1341,10 @@ void ClusterAbstraction::OpenGLDraw() const
 	GLdouble xx, yy, zz, rr;
 	glColor3f(0.25, 0.0, 0.75);
 	Map *map = GetMap();
-	map->getOpenGLCoord(0, 0, xx, yy, zz, rr);
+	map->GetOpenGLCoord(0, 0, xx, yy, zz, rr);
 	glBegin(GL_LINES);
-	int numXSectors = (map->getMapWidth()+clusterSize-1)/clusterSize;
-	int numYSectors = (map->getMapHeight()+clusterSize-1)/clusterSize;
+	int numXSectors = (map->GetMapWidth()+clusterSize-1)/clusterSize;
+	int numYSectors = (map->GetMapHeight()+clusterSize-1)/clusterSize;
 	for (int y = 0; y <= numYSectors; y++)
 	{
 		glVertex3f(xx-rr, yy-rr+2*y*rr*clusterSize, zz-5*rr);

@@ -249,8 +249,8 @@ public:
 	virtual ~MeroB() {}
 	void GetPath(GraphEnvironment *env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
-	long GetNodesExpanded() { return nodesExpanded; }
-	long GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesExpanded() { return nodesExpanded; }
+	uint64_t GetNodesTouched() { return nodesTouched; }
 
 	bool InitializeSearch(GraphEnvironment *env, Graph* g, graphState from, graphState to, std::vector<graphState> &thePath);
 	bool DoSingleSearchStep(std::vector<graphState> &thePath);
@@ -266,7 +266,7 @@ public:
 private:
 	unsigned int verID;
 	double F;
-	long nodesExpanded, nodesTouched;
+	uint64_t nodesExpanded, nodesTouched;
 	std::vector<graphState> neighbors;
 	graphState goal, start;
 	GraphEnvironment *env;

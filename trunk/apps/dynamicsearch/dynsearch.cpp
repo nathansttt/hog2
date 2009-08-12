@@ -235,25 +235,25 @@ int main(int argc, char** argv)
 
 	/*
 	Timer t, t2;
-	t.startTimer();
+	t.StartTimer();
 	ida.GetPath(&mnp, puzzles[0], goal, path);
-	t.endTimer();
+	t.EndTimer();
 	cout << "Path found, length: " << path.size() << endl;
 	cout << "Nodes Checked: " << ida.GetNodesChecked() << endl;
 	cout << "Nodes Generated: " << ida.GetNodesGenerated() << endl;
 	cout << "Nodes Expanded: " << ida.GetNodesExpanded() << endl;
-	cout << "Time:" << t.getElapsedTime() << endl;
+	cout << "Time:" << t.GetElapsedTime() << endl;
 	path.resize(0);
 
-	t2.startTimer();
+	t2.StartTimer();
 	ida.initialize_step_by_step(&mnp, puzzles[0], goal, false);
 	while(ida.move_one_step(goal, path) != 1) {}
-	t2.endTimer();
+	t2.EndTimer();
 	cout << "Path found, length: " << path.size() << endl;
 	cout << "Nodes Checked: " << ida.GetNodesChecked() << endl;
 	cout << "Nodes Generated: " << ida.GetNodesGenerated() << endl;
 	cout << "Nodes Expanded: " << ida.GetNodesExpanded() << endl;
-	cout << "Time:" << t2.getElapsedTime() << endl;*/
+	cout << "Time:" << t2.GetElapsedTime() << endl;*/
 
 /*
 	vector<int> pattern;	vector<slideDir> ops;

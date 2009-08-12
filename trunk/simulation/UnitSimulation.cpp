@@ -49,10 +49,10 @@
 //	map = aMap->GetMap();
 //	which_map = kUnitSimulationMap;
 //	currTime = 0;
-//	map_height = map->getMapHeight();
-//	map_width = map->getMapWidth();
-//	bv = new bitVector(map_height*map_width);
-//	map_revision = map->getRevision();
+//	map_height = map->GetMapHeight();
+//	map_width = map->GetMapWidth();
+//	bv = new BitVector(map_height*map_width);
+//	map_revision = map->GetRevision();
 //	//aMap = 0;
 //	penalty = 1.0;
 //	asynch = true;
@@ -144,13 +144,13 @@
 //					 displayUnits[x]->actionHistory.size(), f);
 //		fprintf(f, "\n");
 //	}
-//	if ((!includeMap) && (map->getMapName()))
+//	if ((!includeMap) && (map->GetMapName()))
 //	{
-//		fprintf(f, "MAP %s", map->getMapName());
+//		fprintf(f, "MAP %s", map->GetMapName());
 //	}
 //	else {
 //		fprintf(f, "MAP INCLUDED\n");
-//		map->save(f);
+//		map->Save(f);
 //	}
 //	fclose(f);
 //	return true;
@@ -239,9 +239,9 @@
 //	else {
 //		map = new Map(where);
 //	}
-//	//map->setDrawLandWhite(tmp->GetMap()->getDrawLandWhite());
-//	map->setTileSet(tmp->GetMap()->getTileSet());
-//	aMap = aMap->clone(map);
+//	//map->SetDrawLandWhite(tmp->GetMap()->GetDrawLandWhite());
+//	map->SetTileSet(tmp->GetMap()->GetTileSet());
+//	aMap = aMap->Clone(map);
 //	delete tmp;
 //	// create map abstraction?!?
 //	fclose(f);
@@ -270,7 +270,7 @@
 //	
 //	if ((ui->currx < 0) || (ui->currx >= map_width) ||
 //			(ui->curry < 0) || (ui->curry >= map_height) ||
-//			(bv->get(ui->curry*map_width+ui->currx)))
+//			(bv->Get(ui->curry*map_width+ui->currx)))
 //	{
 //		if (verbose)
 //			printf("Warning -- unit in illegal location; resetting unit to random location\n");
@@ -282,7 +282,7 @@
 //	if (u->getObjectType() != kDisplayOnly)
 //	{
 //		if (blocking)
-//			bv->set(ui->curry*map_width+ui->currx, 1);
+//			bv->Set(ui->curry*map_width+ui->currx, 1);
 //	}
 //	ui->startx = ui->currx;
 //	ui->starty = ui->curry;
@@ -337,7 +337,7 @@
 //	
 //	if ((ui->currx < 0) || (ui->currx >= map_width) ||
 //			(ui->curry < 0) || (ui->curry >= map_height) ||
-//			(bv->get(ui->curry*map_width+ui->currx)))
+//			(bv->Get(ui->curry*map_width+ui->currx)))
 //	{
 //		getRandomLocation(ui->currx, ui->curry);
 //		if (verbose)
@@ -349,7 +349,7 @@
 //	if (u->getObjectType() != kDisplayOnly)
 //	{
 //		if (ui->blocking)
-//			bv->set(ui->curry*map_width+ui->currx, 1);
+//			bv->Set(ui->curry*map_width+ui->currx, 1);
 //	}
 //	ui->startx = ui->currx;
 //	ui->starty = ui->curry;
@@ -679,12 +679,12 @@
 //	
 //	//	if (verbose) printf("[%d] is moving\n", t);
 //	
-//	//	if (blocking && (bv->get(theUnit->curry*map_width+theUnit->currx) != 1))
+//	//	if (blocking && (bv->Get(theUnit->curry*map_width+theUnit->currx) != 1))
 //	//		printf("Unit [%d] should be blocked and isn't\n", t);
 //	
 //	// Start the timer
 //	Timer t;
-//	t.startTimer();
+//	t.StartTimer();
 //	
 //	// Is this unit a part of a group or freelance?
 //	if (u->getUnitGroup() != NULL)
@@ -700,7 +700,7 @@
 //		//theUnit->memory = u->getMemoryUsage();
 //	}
 //	
-//	thinkingCost = t.endTimer();
+//	thinkingCost = t.EndTimer();
 //	theUnit->thinkTime += thinkingCost;
 //	stats.AddStat("makeMoveThinkingTime", u->GetName(), thinkingCost);
 //	
@@ -724,8 +724,8 @@
 //			timeStep ts(theUnit->currx, theUnit->curry, theUnit->nextTime);
 //			theUnit->actionHistory.push_back(ts);		
 //		}
-//		u->logStats(&stats);
-//		u->getUnitGroup()->logStats(&stats);
+//		u->LogStats(&stats);
+//		u->getUnitGroup()->LogStats(&stats);
 //		return;
 //	}
 //	
@@ -734,10 +734,10 @@
 //	{
 //		int n1, n2;
 //		u->getLocation(n1, n2);
-//		if (!bv->get(n2*map_width+n1))
+//		if (!bv->Get(n2*map_width+n1))
 //		{
 //			if (theUnit->blocking) 
-//				bv->set(theUnit->curry*map_width+theUnit->currx, 0);
+//				bv->Set(theUnit->curry*map_width+theUnit->currx, 0);
 //			
 //			theUnit->currx = n1;
 //			theUnit->curry = n2;
@@ -749,12 +749,12 @@
 //			}
 //			
 //			if (theUnit->blocking) 
-//				bv->set(theUnit->curry*map_width+theUnit->currx, 1);
+//				bv->Set(theUnit->curry*map_width+theUnit->currx, 1);
 //		}
 //		unitsMoved = true;
 //		
-//		u->logStats(&stats);
-//		u->getUnitGroup()->logStats(&stats);
+//		u->LogStats(&stats);
+//		u->getUnitGroup()->LogStats(&stats);
 //		return;
 //	}
 //	
@@ -764,10 +764,10 @@
 //	int newy = theUnit->curry + ((where&kS)?1:0) - ((where&kN)?1:0);
 //	
 //	// Check if the move is valid
-//	//if ((map->getTerrainType(newx, newy)>>terrainBits) == (kGround>>terrainBits))
-//	//if (map->canStep(theUnit->currx, theUnit->curry, newx, newy))
-//	if (aMap->GetAbstractGraph(0)->FindEdge(map->getNodeNum(theUnit->currx, theUnit->curry),
-//																					map->getNodeNum(newx, newy)))
+//	//if ((map->GetTerrainType(newx, newy)>>terrainBits) == (kGround>>terrainBits))
+//	//if (map->CanStep(theUnit->currx, theUnit->curry, newx, newy))
+//	if (aMap->GetAbstractGraph(0)->FindEdge(map->GetNodeNum(theUnit->currx, theUnit->curry),
+//																					map->GetNodeNum(newx, newy)))
 //	{
 //		if ((stochasticity > 0) && ((random()%1023)/1024.0 < stochasticity))
 //		{
@@ -783,7 +783,7 @@
 //			unitsMoved = true;
 //		}
 //		// if the place we want to move is occupied, we can't go there
-//		else if (bv->get(newy*map_width+newx))
+//		else if (bv->Get(newy*map_width+newx))
 //		{
 //			if (verbose)
 //				printf("Can't move unit %s from (%d, %d) onto other unit (%d, %d); time %1.2f\n",
@@ -803,8 +803,8 @@
 //		// disallow diagonal moves if either side is blocked
 //		else if (disallowDiagonalCrossingMoves &&
 //						 ((newx != theUnit->currx) && (newy != theUnit->curry)) &&
-//						 ((bv->get(newy*map_width+theUnit->currx) ||
-//							 bv->get(theUnit->curry*map_width+newx))))
+//						 ((bv->Get(newy*map_width+theUnit->currx) ||
+//							 bv->Get(theUnit->curry*map_width+newx))))
 //		{
 //			if (verbose)
 //				printf("Can't move unit %s from (%d, %d) diagonally past other unit to (%d, %d); time %1.2f\n",
@@ -828,7 +828,7 @@
 //			stats.SumStat("distanceMoved", theUnit->agent->GetName(), (double)movementCost);
 //			
 //			if (theUnit->blocking) 
-//				bv->set(theUnit->curry*map_width+theUnit->currx, 0);
+//				bv->Set(theUnit->curry*map_width+theUnit->currx, 0);
 //			
 //			theUnit->currx = newx;
 //			theUnit->curry = newy;
@@ -841,7 +841,7 @@
 //			unitsMoved = true;
 //			
 //			if (theUnit->blocking) 
-//				bv->set(theUnit->curry*map_width+theUnit->currx, 1);
+//				bv->Set(theUnit->curry*map_width+theUnit->currx, 1);
 //		}
 //	}
 //	else {
@@ -857,8 +857,8 @@
 //		}
 //	}
 //	
-//	u->logStats(&stats);
-//	u->getUnitGroup()->logStats(&stats);
+//	u->LogStats(&stats);
+//	u->getUnitGroup()->LogStats(&stats);
 //}
 //
 ///**
@@ -874,15 +874,15 @@
 //	for (unsigned int t = 0; (t < units.size())&&(isDone); t++)
 //	{
 //		if (units[t]->agent->getUnitGroup() == 0)
-//			isDone = units[t]->agent->done();
+//			isDone = units[t]->agent->Done();
 //		else
-//			isDone = units[t]->agent->getUnitGroup()->done();
+//			isDone = units[t]->agent->getUnitGroup()->Done();
 //	}
 //	return isDone;
 //	//	return (!unitsMoved);
 //}
 //
-//// void unitSimulation::startTimer()
+//// void unitSimulation::StartTimer()
 //// {
 //// #ifdef OS_MAC
 ////   startTime = UpTime();
@@ -929,7 +929,7 @@
 //
 //// #endif
 //
-//// double unitSimulation::endTimer()
+//// double unitSimulation::EndTimer()
 //// {
 //// #ifdef OS_MAC
 ////   AbsoluteTime stopTime = UpTime();
@@ -950,7 +950,7 @@
 //	Timer t;
 //	if (timer)
 //	{
-//		t.startTimer();
+//		t.StartTimer();
 //	}
 //	if (u->agent->getUnitGroup() == 0)
 //	{
@@ -963,7 +963,7 @@
 //	}
 //	if (timer)
 //	{
-//		double thinkingCost = t.endTimer();
+//		double thinkingCost = t.EndTimer();
 //		u->thinkTime += thinkingCost;
 //		stats.AddStat("setLocationThinkingTime", u->agent->GetName(), thinkingCost);
 //		if (asynch)
@@ -979,10 +979,10 @@
 //
 //void unitSimulation::updateMap()
 //{
-//	//  if (aMap->GetMap()->getRevision() != map_revision)
+//	//  if (aMap->GetMap()->GetRevision() != map_revision)
 //	//	{
 //	//    bv->clear();
-//	//    map_revision = map->getRevision();
+//	//    map_revision = map->GetRevision();
 //	//
 //	//    for (unsigned int t = 0; t < displayUnits.size(); t++) {
 //	//			getRandomLocation(displayUnits[t]->currx, displayUnits[t]->curry);
@@ -996,7 +996,7 @@
 //	//			
 //	//      if (units[t]->agent->getObjectType() != kDisplayOnly) {
 //	//				if (units[t]->blocking) 
-//	//					bv->set(units[t]->curry*map_width+units[t]->currx, 1);
+//	//					bv->Set(units[t]->curry*map_width+units[t]->currx, 1);
 //	//      }
 //	//    }
 //	//  }
@@ -1004,7 +1004,7 @@
 //
 //bool unitSimulation::updatemapAbstraction()
 //{
-//	//	if (!aMap || (map->getRevision() != map_revision))
+//	//	if (!aMap || (map->GetRevision() != map_revision))
 //	//	{
 //	////		delete aMap;
 //	//		if (aMap == 0)
@@ -1052,8 +1052,8 @@
 //	do {
 //		x = random()%map_width;
 //		y = random()%map_height;
-//	} while ((bv->get(y*map_width+x)) ||
-//					 (map->getTerrainType(x, y) != terrain));
+//	} while ((bv->Get(y*map_width+x)) ||
+//					 (map->GetTerrainType(x, y) != terrain));
 //}
 //
 ///**
@@ -1067,8 +1067,8 @@
 //		y1 = random()%map_height;
 //		x2 = random()%map_width;
 //		y2 = random()%map_height;
-//	} while ((map->getTerrainType(x2, y2) != terrain) ||
-//					 (map->getTerrainType(x1, y1) != terrain) ||
+//	} while ((map->GetTerrainType(x2, y2) != terrain) ||
+//					 (map->GetTerrainType(x1, y1) != terrain) ||
 //					 (!aMap->Pathable(aMap->GetNodeFromMap(x1, y1), aMap->GetNodeFromMap(x2, y2))) ||
 //					 findUnit(x2, y2) || findUnit(x1, y1));
 //}
@@ -1082,8 +1082,8 @@
 //	do {
 //		x2 = random()%map_width;
 //		y2 = random()%map_height;
-//	} while ((map->getTerrainType(x2, y2) != terrain) ||
-//					 (map->getTerrainType(x1, y1) != terrain) ||
+//	} while ((map->GetTerrainType(x2, y2) != terrain) ||
+//					 (map->GetTerrainType(x1, y1) != terrain) ||
 //					 (!aMap->Pathable(aMap->GetNodeFromMap(x1, y1), aMap->GetNodeFromMap(x2, y2))) ||
 //					 findUnit(x2, y2) || findUnit(x1, y1));
 //}
@@ -1124,7 +1124,7 @@
 //				glColor3f(r, g, b);
 //				printf("Getting location -- (%d, %d)\n", displayUnits[t]->actionHistory[displayUnits[t]->historyIndex].x,
 //							 displayUnits[t]->actionHistory[displayUnits[t]->historyIndex].y);
-//				map->getOpenGLCoord(displayUnits[t]->actionHistory[displayUnits[t]->historyIndex].x,
+//				map->GetOpenGLCoord(displayUnits[t]->actionHistory[displayUnits[t]->historyIndex].x,
 //														displayUnits[t]->actionHistory[displayUnits[t]->historyIndex].y,
 //														x, y, z, rad);
 //				DrawPyramid(x, y, z, rad, rad);
@@ -1138,20 +1138,20 @@
 //				GLdouble x, y, z, rad;
 //				units[t]->agent->getColor(r, g, b);
 //				glColor3f(r, g, b);
-//				map->getOpenGLCoord(units[t]->actionHistory[units[t]->historyIndex].x,
+//				map->GetOpenGLCoord(units[t]->actionHistory[units[t]->historyIndex].x,
 //														units[t]->actionHistory[units[t]->historyIndex].y,
 //														x, y, z, rad);
-//				drawBox(x, y, z, rad);
+//				DrawBox(x, y, z, rad);
 //			}
 //		}
 //	}
 //	// test code for drawing the bitmap of blocked squares
-//	//	if ((map_height == map->getMapHeight()) && (map_width == map->getMapWidth()))
+//	//	if ((map_height == map->GetMapHeight()) && (map_width == map->GetMapWidth()))
 //	//	{
 //	//		for (int xx = 0; xx < map_width; xx++)
 //	//			for (int yy = 0; yy < map_height; yy++)
 //	//			{
-//	//				if (bv->get(yy*map_width+xx))
+//	//				if (bv->Get(yy*map_width+xx))
 //	//				{
 //	//					drawBlockedSquare(xx, yy);
 //	//				}
@@ -1176,17 +1176,17 @@
 //	return true;
 //}
 //
-//void unitSimulation::print(bool forceOutput)
+//void unitSimulation::Print(bool forceOutput)
 //{
 //	static int counter = 0;
-//	int scale = (int)(map->getMapHeight()/100)+1;
+//	int scale = (int)(map->GetMapHeight()/100)+1;
 //	counter++;
 //	if (forceOutput)
 //		printf("%c[2J", 27);//, 1, 32);		
 //		if ((counter%10 != 0) && (!forceOutput))
 //			return;
 //		if ((counter%10000 == 0) || (forceOutput))
-//			map->print(scale);
+//			map->Print(scale);
 //		for (unsigned int t = 0; t < displayUnits.size(); t++)
 //		{
 //			printf("%c[%d;%dm", 27, 1, 32);
@@ -1200,13 +1200,13 @@
 //		// reset color to black
 //		printf("%c[%d;%dm", 27, 0, 0);
 //		// go to bottom of map, in case we do other printing
-//		printf("%c[%d;%df", 27, (int)map->getMapHeight()/(2*scale)+1, 1);
+//		printf("%c[%d;%df", 27, (int)map->GetMapHeight()/(2*scale)+1, 1);
 //}
 //
 //void unitSimulation::drawBlockedSquare(int x, int y)
 //{
 //	GLdouble xx, yy, zz, rad;
-//	map->getOpenGLCoord(x, y, xx, yy, zz, rad);
+//	map->GetOpenGLCoord(x, y, xx, yy, zz, rad);
 //	glColor4f(.5, .5, .5, .5);
 //	
 //	glBegin(GL_QUAD_STRIP);

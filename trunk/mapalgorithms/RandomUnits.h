@@ -24,8 +24,9 @@ public:
 	:MapUnit(_x, _y) { lastIndex = 0; }
 	virtual const char *GetName() { return "randomUnit"; }
 
-	bool MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &dir);
-	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc &, bool, MapSimulationInfo *);
+//	virtual bool MakeMove(environment *, OccupancyInterface<state,action> *, MapSimulationInfo *, tDirection& a) = 0;
+	bool MakeMove(MapEnvironment *, OccupancyInterface<xyLoc, tDirection> *, MapSimulationInfo *, tDirection &dir);
+	void UpdateLocation(MapEnvironment *, xyLoc &, bool, MapSimulationInfo *);
 private:
 		int lastIndex;
 };
@@ -39,7 +40,7 @@ public:
 	:MapUnit(x, y), stayTime(_stayTime), timer(_stayTime) { }
 	const char *GetName() { return "TeleportUnit"; }
 
-	bool MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &dir);
+	bool MakeMove(MapEnvironment *, OccupancyInterface<xyLoc, tDirection> *, MapSimulationInfo *, tDirection &dir);
 private:
 	int stayTime;
 	int timer;
@@ -54,7 +55,7 @@ public:
 	:MapUnit(_x, _y) { }
 	const char *GetName() { return "RandomerUnit"; }
 	
-	bool MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &dir);
+	bool MakeMove(MapEnvironment *, OccupancyInterface<xyLoc, tDirection> *, MapSimulationInfo *, tDirection &dir);
 };
 
 /**
@@ -71,8 +72,8 @@ public:
 	}
 	virtual const char *GetName() { return "BilliardBallUnit"; }
 
-	bool MakeMove(MapEnvironment *, BaseMapOccupancyInterface *, MapSimulationInfo *, tDirection &dir);
-	void UpdateLocation(MapEnvironment *, BaseMapOccupancyInterface *, xyLoc &, bool, MapSimulationInfo *);
+	bool MakeMove(MapEnvironment *, OccupancyInterface<xyLoc, tDirection> *, MapSimulationInfo *, tDirection &dir);
+	void UpdateLocation(MapEnvironment *, xyLoc &, bool, MapSimulationInfo *);
 private:
 		int lastIndex;
 	int collisionStatus;

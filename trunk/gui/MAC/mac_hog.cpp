@@ -113,7 +113,7 @@ static void getCurrentCaps(void)
 #pragma mark ---- Utilities ----
 
 // return float elpased time in seconds since app start
-static float getElapsedTime(void)
+static float GetElapsedTime(void)
 {	
 	float deltaTime = (float) AbsoluteDeltaToDuration (UpTime(), gStartTime);
     if (0 > deltaTime)	// if negative microseconds
@@ -143,7 +143,7 @@ void reportError(char * strError)
 {
 	Str255 strErr = "\p";
 
-	gErrorTime = getElapsedTime ();
+	gErrorTime = GetElapsedTime ();
 	sprintf (gErrorMessage, "Error: %s (at time: %0.1f secs)", strError, gErrorTime);
 	 
 	// out as debug string
@@ -845,8 +845,8 @@ void handleWindowDMEvent(void *userData, short theMessage, void *)
 		if (pContextInfo) { // have a valid OpenGl window
 			Rect rectPort;
 			CGRect viewRect = {{0.0f, 0.0f}, {0.0f, 0.0f}};
-			sprintf (pContextInfo->message, "Event: Display Change at %0.1f secs", getElapsedTime ());
-			pContextInfo->msgTime = getElapsedTime ();
+			sprintf (pContextInfo->message, "Event: Display Change at %0.1f secs", GetElapsedTime ());
+			pContextInfo->msgTime = GetElapsedTime ();
 			GetWindowPortBounds (window, &rectPort);
 			viewRect.size.width = (float) (rectPort.right - rectPort.left);
 			viewRect.size.height = (float) (rectPort.bottom - rectPort.top);
@@ -1051,7 +1051,7 @@ void appendTextToBuffer(char *tempStr)
 	pRecContext pContextInfo = (pRecContext) GetWRefCon (window);
 	if (pContextInfo)
 	{
-		pContextInfo->msgTime = getElapsedTime();
+		pContextInfo->msgTime = GetElapsedTime();
 		int ind = strlen(pContextInfo->message);
 		pContextInfo->message[ind] = ' ';
 		sprintf(&pContextInfo->message[ind+1], "%s", tempStr);
@@ -1065,7 +1065,7 @@ void submitTextToBuffer(const char *val)
 	pRecContext pContextInfo = (pRecContext) GetWRefCon (window);
 	if (pContextInfo)
 	{
-		pContextInfo->msgTime = getElapsedTime();
+		pContextInfo->msgTime = GetElapsedTime();
 		strncpy(pContextInfo->message, val, 255);
 	}
 }
@@ -1157,7 +1157,7 @@ static void drawInfo(pRecContext )
 //		// message string
 //	if (pContextInfo->message[0])
 //	{
-//		float currDelta = getElapsedTime () - pContextInfo->msgTime;
+//		float currDelta = GetElapsedTime () - pContextInfo->msgTime;
 //		glColor4f (1.0, 1.0, 1.0, (msgPresistance - currDelta) * 0.1);
 //		glRasterPos3d (10, line++ * 12, 0); 
 //		drawCStringGL (pContextInfo->message, pContextInfo->boldFontList);
@@ -1166,7 +1166,7 @@ static void drawInfo(pRecContext )
 //	}
 //	// global error message
 //	if (gErrorMessage[0]) {
-//		float currDelta = getElapsedTime () - gErrorTime;
+//		float currDelta = GetElapsedTime () - gErrorTime;
 //		glColor4f (1.0, 0.2, 0.2, (msgPresistance - currDelta) * 0.1);
 //		glRasterPos3d (10, line++ * 12, 0); 
 //		drawCStringGL (gErrorMessage, pContextInfo->boldFontList);
@@ -1781,7 +1781,7 @@ void savePicture(WindowRef window, pRecContext pContextInfo)
 }
 
 
-void savePath(WindowRef window, pRecContext pContextInfo)
+void savePath(WindowRef window, pRecContext /*pContextInfo*/)
 {
   OSStatus err;
   AEKeyword theKeyword; 
@@ -1833,7 +1833,7 @@ void savePath(WindowRef window, pRecContext pContextInfo)
         {
           printf("You selected \"%s\"\n", buffer);
 					// FIXME
-//					pContextInfo->unitLayer->GetMap()->save(buffer);
+//					pContextInfo->unitLayer->GetMap()->Save(buffer);
 					break;
         }        
       }
@@ -1992,7 +1992,7 @@ void openSimHistory()
 //		pContextInfo->unitLayer->loadHistory(gDefaultMap);
 //	}
 //	char pathTitle[1024];
-//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->GetMap()->getMapWidth(), pContextInfo->unitLayer->GetMap()->getMapHeight());
+//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->GetMap()->GetMapWidth(), pContextInfo->unitLayer->GetMap()->GetMapHeight());
 //	CFStringRef str = CFStringCreateWithCString(NULL, pathTitle, 0);
 //	SetWindowTitleWithCFString(window, str);
 //	CFRelease(str);
@@ -2022,11 +2022,11 @@ void openNewMap()
 //		processStats(pContextInfo->unitLayer->getStats());
 //		delete pContextInfo->unitLayer;
 //		createSimulation(pContextInfo->unitLayer);
-//		//pContextInfo->unitLayer->GetMap()->load(gDefaultMap);
+//		//pContextInfo->unitLayer->GetMap()->Load(gDefaultMap);
 //	}
 	
 //	char pathTitle[1024];
-//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->GetMap()->getMapWidth(), pContextInfo->unitLayer->GetMap()->getMapHeight());
+//	sprintf(pathTitle, "%s (%ldx%ld)", gDefaultMap, pContextInfo->unitLayer->GetMap()->GetMapWidth(), pContextInfo->unitLayer->GetMap()->GetMapHeight());
 //	CFStringRef str = CFStringCreateWithCString(NULL, pathTitle, 0);
 //	SetWindowTitleWithCFString(window, str);
 //	CFRelease(str);

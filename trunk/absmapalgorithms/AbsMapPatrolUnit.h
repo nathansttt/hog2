@@ -23,11 +23,12 @@ public:
 	virtual bool done() { return false; }
 	
 	virtual bool makeMove(MapProvider *, reservationProvider *, AbsMapSimulationInfo *simInfo, tDirection &);
-	virtual bool MakeMove(AbsMapEnvironment *ame, BaseMapOccupancyInterface *, AbsMapSimulationInfo *si, tDirection &dir){ return makeMove(ame->GetMapAbstraction(), 0, si,dir); }
+	virtual bool MakeMove(AbsMapEnvironment *ame, OccupancyInterface<xyLoc, tDirection> *, AbsMapSimulationInfo *si, tDirection &dir){ return makeMove(ame->GetMapAbstraction(), 0, si,dir); }
 	//void OpenGLDraw(int window, MapProvider *, AbsMapSimulationInfo *);
-	virtual void OpenGLDraw(int window, AbsMapEnvironment *, AbsMapSimulationInfo *);
+	virtual void OpenGLDraw(const AbsMapEnvironment *, const AbsMapSimulationInfo *) const;
 	void addPatrolLocation(xyLoc);
 	xyLoc GetGoal();
+	void GetGoal(xyLoc &gs) { SearchUnit::GetGoal(gs); }
 		
 	void UpdateLocation(AbsMapEnvironment *, xyLoc &l, bool success, AbsMapSimulationInfo *si) { updateLocation(l.x, l.y, success, si); }	
 	void updateLocation(int _x, int _y, bool worked, AbsMapSimulationInfo *)

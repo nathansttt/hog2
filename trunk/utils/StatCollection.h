@@ -54,32 +54,32 @@ public:
 	void SumStat(const char *category, const char *owner, double value);
 	void SumStat(const char *category, const char *owner, long value);
 	
-	void clearAllStats();
+	void ClearAllStats();
 	//	void clearOwnerStats(const char *owner); // not define for now; can be defined if needed
 	//	void clearCategoryStats(const char *category);
 	
-	int getNumStats() const;
-	const stat *getStatNum(int which) const;
+	int GetNumStats() const;
+	const stat *GetStatNum(int which) const;
 	
 	int LookupCategory(const char *category) const;
-	int lookupOwner(const char *owner) const;
+	int LookupOwner(const char *owner) const;
 	const char *lookupCategoryID(int id) const;
-	const char *lookupOwnerID(int id) const;
-	bool lookupStat(const char *category, const char *owner, statValue &) const;
-	bool lookupStat(unsigned int index, statValue &) const;
+	const char *LookupOwnerID(int id) const;
+	bool LookupStat(const char *category, const char *owner, statValue &) const;
+	bool LookupStat(unsigned int index, statValue &) const;
 	
-	void addFilter(char *category); // this is an include filter
-	void addIncludeFilter(char *category); // include only added categories
-	void addExcludeFilter(char *category); // exclude only added categories
-	void clearFilters();
-	void enablePrintOutput(bool pO) { printOutput = pO; }
+	void AddFilter(char *category); // this is an include filter
+	void AddIncludeFilter(char *category); // include only added categories
+	void AddExcludeFilter(char *category); // exclude only added categories
+	void ClearFilters();
+	void EnablePrintOutput(bool pO) { printOutput = pO; }
 	
-	int findNextStat(const char *category, const char *owner, int startIndex=0) const;
-	int findPrevStat(const char *category, const char *owner, int startIndex=-1) const;
-	int findNextStat(const char *what, bool findCategory, int startIndex = 0) const;
-	int findPrevStat(const char *what, bool findCategory, int startIndex = -1) const;
+	int FindNextStat(const char *category, const char *owner, int startIndex=0) const;
+	int FindPrevStat(const char *category, const char *owner, int startIndex=-1) const;
+	int FindNextStat(const char *what, bool findCategory, int startIndex = 0) const;
+	int FindPrevStat(const char *what, bool findCategory, int startIndex = -1) const;
 	
-	void printStatsTable() const;
+	void PrintStatsTable() const;
 	
 private:
 		int addCategory(const char *category);

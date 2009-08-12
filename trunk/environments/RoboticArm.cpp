@@ -56,7 +56,7 @@ int armAngles::GetNumArms() const
 
 void armAngles::SetNumArms(int count)
 {
-	uint64_t mask = 0xFFFFFFFFFFFFFFFll;
+	uint64_t mask = 0xFFFFFFFFFFFFFFFull;
 	uint64_t newCnt = count;
 	newCnt = newCnt << 60;
 	assert(count <= 6);
@@ -107,9 +107,9 @@ RoboticArm::~RoboticArm()
 
 void RoboticArm::GetTipPosition( armAngles &s, double &x, double &y )
 {
-	std::vector<line2d> armSegments;
-	GenerateLineSegments( s, armSegments );
-	recVec a = armSegments.back().end;
+	std::vector<line2d> armSegs;
+	GenerateLineSegments( s, armSegs );
+	recVec a = armSegs.back().end;
 	x = a.x;
 	y = a.y;
 }
@@ -1217,7 +1217,6 @@ int ArmToArmHeuristic::TipPositionIndex( const double x, const double y,
 
 void ArmToArmHeuristic::AddDiffTable()
 {
-	int cnt = 0;
 	armAngles start = SelectStartNode();
 
 	int which = distances.size();

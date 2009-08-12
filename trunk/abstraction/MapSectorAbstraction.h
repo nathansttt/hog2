@@ -35,7 +35,7 @@ public:
 	/** Creat a SectorAbstraction of the map. The sector size must be greater than 1 */
 	MapSectorAbstraction(Map *, int);
 	~MapSectorAbstraction();
-	MapAbstraction *clone(Map *_m) { return new MapSectorAbstraction(_m, sectorSize); }
+	MapAbstraction *Clone(Map *_m) { return new MapSectorAbstraction(_m, sectorSize); }
 
 	virtual bool Pathable(node *from, node *to);
 	

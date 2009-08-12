@@ -113,7 +113,7 @@ Map::Map(const char *filename)
 {
 	sizeMultiplier = 1;
 	land = 0;
-	load(filename);
+	Load(filename);
 	tileSet = kFall;
 }
 
@@ -127,7 +127,7 @@ Map::Map(FILE *f)
 	sizeMultiplier = 1;
 	map_name[0] = 0;
 	land = 0;
-	load(f);
+	Load(f);
 	tileSet = kFall;
 }
 
@@ -151,7 +151,7 @@ Map::~Map()
 	land = 0;
 }
 
-void Map::scale(long newWidth, long newHeight)
+void Map::Scale(long newWidth, long newHeight)
 {
 	Tile **newLand;
 	newLand = new Tile *[newWidth];
@@ -162,13 +162,13 @@ void Map::scale(long newWidth, long newHeight)
 		{
 			newLand[x][y] = land[(x*width)/newWidth][(y*height)/newHeight];
 			
-			if (((y*height)/newHeight > 0) && (adjacentEdges((x*width)/newWidth, (y*height)/newHeight, kTopEdge)))
+			if (((y*height)/newHeight > 0) && (AdjacentEdges((x*width)/newWidth, (y*height)/newHeight, kTopEdge)))
 			{ // make sure top edge is still adjacent
 				newLand[x][y].tile1.corners[0] = newLand[x][y-1].tile1.corners[1];
 				// this won't work with splits...
 				newLand[x][y].tile2.corners[0] = newLand[x][y-1].tile1.corners[2];
 			}
-			if (((x*width)/newWidth > 0) && (adjacentEdges((x*width)/newWidth, (y*height)/newHeight, kLeftEdge)))
+			if (((x*width)/newWidth > 0) && (AdjacentEdges((x*width)/newWidth, (y*height)/newHeight, kLeftEdge)))
 			{ // make sure left edge is still adjacent
 				newLand[x][y].tile1.corners[0] = newLand[x-1][y].tile2.corners[0];
 				// this won't work with splits...
@@ -192,7 +192,7 @@ void Map::scale(long newWidth, long newHeight)
 *
 * Resets the current map by loading the file passed in.
 */
-void Map::load(const char *filename)
+void Map::Load(const char *filename)
 {
 	if (land)
 	{
@@ -205,7 +205,7 @@ void Map::load(const char *filename)
 	FILE *f = fopen(filename, "r");
 	if (f)
 	{
-		load(f);
+		Load(f);
 		fclose(f);
 		strncpy(map_name, filename, 128);
 	}
@@ -227,7 +227,7 @@ void Map::load(const char *filename)
 /** 
 * Resets the current map by loading the file from the pointer passed in.
 */
-void Map::load(FILE *f)
+void Map::Load(FILE *f)
 {
 	if (land)
 	{
@@ -309,27 +309,27 @@ void Map::loadOctile(FILE *f, int high, int wide)
 				case 'O':
 					for (int r = 0; r < sizeMultiplier; r++)
 						for (int s = 0; s < sizeMultiplier; s++)
-							setTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
+							SetTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
 														 kOutOfBounds); break;
 				case 'S':
 					for (int r = 0; r < sizeMultiplier; r++)
 						for (int s = 0; s < sizeMultiplier; s++)
-							setTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
+							SetTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
 														 kSwamp); break;
 				case 'W':
 					for (int r = 0; r < sizeMultiplier; r++)
 						for (int s = 0; s < sizeMultiplier; s++)
-							setTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
+							SetTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
 														 kWater); break;
 				case 'T':
 					for (int r = 0; r < sizeMultiplier; r++)
 						for (int s = 0; s < sizeMultiplier; s++)
-							setTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
+							SetTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
 														 kTrees); break;
 				default:
 					for (int r = 0; r < sizeMultiplier; r++)
 						for (int s = 0; s < sizeMultiplier; s++)
-							setTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
+							SetTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
 														 kGround); break;
 			}
 			for (int r = 0; r < sizeMultiplier; r++)
@@ -362,13 +362,13 @@ void Map::loadOctileCorner(FILE *f, int high, int wide)
 			fscanf(f, "%c", &hc);
 			h = hc-'0'-2;
 			if ((x > 0) && (y < high-1))
-				setCornerHeight(x-1, y, kTopRight, h);
+				SetCornerHeight(x-1, y, kTopRight, h);
 			if ((x < wide-1) && (y > 0))
-				setCornerHeight(x, y-1, kBottomLeft, h);
+				SetCornerHeight(x, y-1, kBottomLeft, h);
 			if ((x > 0) && (y > 0))
-				setCornerHeight(x-1, y-1, kBottomRight, h);
+				SetCornerHeight(x-1, y-1, kBottomRight, h);
 			if ((x < wide-1) && (y < high-1))
-				setCornerHeight(x, y, kTopLeft, h);
+				SetCornerHeight(x, y, kTopLeft, h);
 		}
 		fscanf(f, "\n");
 	}
@@ -381,19 +381,19 @@ void Map::loadOctileCorner(FILE *f, int high, int wide)
 			if ((y == high-1) || (x == wide-1))
 				continue;
 			if (!islower(what))
-				setHeight(x, y, getCornerHeight(x, y, kTopLeft));
+				SetHeight(x, y, GetCornerHeight(x, y, kTopLeft));
 			switch (toupper(what))
 			{
 				case 'O':
-					setTerrainType(x, y, kOutOfBounds); break;
+					SetTerrainType(x, y, kOutOfBounds); break;
 				case 'S':
-					setTerrainType(x, y, kSwamp); break;
+					SetTerrainType(x, y, kSwamp); break;
 				case 'W':
-					setTerrainType(x, y, kWater); break;
+					SetTerrainType(x, y, kWater); break;
 				case 'T':
-					setTerrainType(x, y, kTrees); break;
+					SetTerrainType(x, y, kTrees); break;
 				default:
-					setTerrainType(x, y, kGround); break;
+					SetTerrainType(x, y, kGround); break;
 			}
 			land[x][y].tile1.node = kNoGraphNode;
 			land[x][y].tile2.node = kNoGraphNode;
@@ -460,23 +460,23 @@ bool Map::tryLoadRollingStone(FILE *f)
 			switch (toupper(what))
 			{
 				case ' ':
-					setTerrainType(x, y, kOutOfBounds); printf(" "); break;
+					SetTerrainType(x, y, kOutOfBounds); printf(" "); break;
 				case '#':
-					setTerrainType(x, y, kWater); printf("#"); break;
+					SetTerrainType(x, y, kWater); printf("#"); break;
 				case '$':
-					setTerrainType(x, y, kSwamp); printf("$"); break;
+					SetTerrainType(x, y, kSwamp); printf("$"); break;
 				case '*':
-					setTerrainType(x, y, kBlight); printf("*"); break;
+					SetTerrainType(x, y, kBlight); printf("*"); break;
 				case '@':
 					manx = x; many = y;
-					setTerrainType(x, y, kGrass); printf("@"); break;
+					SetTerrainType(x, y, kGrass); printf("@"); break;
 				case '.':
-					setTerrainType(x, y, kBlight); printf("."); break;
+					SetTerrainType(x, y, kBlight); printf("."); break;
 				case '\n':
 					foundEOL = true;
 					for (; x < width; x++)
 					{
-						setTerrainType(x, y, kOutOfBounds);
+						SetTerrainType(x, y, kOutOfBounds);
 						printf("_"); 
 						land[x][y].tile1.node = kNoGraphNode;
 						land[x][y].tile2.node = kNoGraphNode;
@@ -498,10 +498,10 @@ bool Map::tryLoadRollingStone(FILE *f)
 		for (int y = 0; y < height; y++)
 		{
 			land[x][y].tile1.node = kNoGraphNode;
-			if (getTerrainType(x, y) == kWater)
-				setTerrainType(x, y, kOutOfBounds);
-			setHeight(x,y,0);
-			setSplit(x,y,kNoSplit);
+			if (GetTerrainType(x, y) == kWater)
+				SetTerrainType(x, y, kOutOfBounds);
+			SetHeight(x,y,0);
+			SetSplit(x,y,kNoSplit);
 		}
 	}
 	return true;
@@ -513,10 +513,10 @@ void Map::paintRoomInside(int x, int y)
 		return;
 	if (land[x][y].tile1.node != kNoGraphNode)
 		return;
-	if (getTerrainType(x, y) == kWater)
+	if (GetTerrainType(x, y) == kWater)
 		return;
-	if (getTerrainType(x, y) == kOutOfBounds)
-		setTerrainType(x, y, kGround);
+	if (GetTerrainType(x, y) == kOutOfBounds)
+		SetTerrainType(x, y, kGround);
 	land[x][y].tile1.node = kNoGraphNode+1;
 	paintRoomInside(x+1, y);
 	paintRoomInside(x-1, y);
@@ -538,19 +538,19 @@ bool Map::isLegalStone(char c)
 /** 
 * unimplemented.
 */
-void Map::save(std::stringstream &/*data*/) {}
+void Map::Save(std::stringstream &/*data*/) {}
 
 /** 
 * Saves the current map out to the designated file.
 *
 * Saves the current map out to the designated file.
 */
-void Map::save(const char *filename)
+void Map::Save(const char *filename)
 {
 	FILE *f = fopen(filename, "w+");
 	if (f)
 	{
-		save(f);
+		Save(f);
 		fclose(f);
 	}
 	else {
@@ -563,7 +563,7 @@ void Map::save(const char *filename)
 *
 * Saves the current map out to the designated file.
 */
-void Map::save(FILE *f)
+void Map::Save(FILE *f)
 {
 	switch(mapType)
 	{
@@ -589,7 +589,7 @@ void Map::saveOctile(FILE *f)
 		{
 			for (int x = 0; x < width; x++)
 			{
-				switch (getTerrainType(x, y))
+				switch (GetTerrainType(x, y))
 				{
 					case kGround: fprintf(f, "."); break;
 					case kSwamp: fprintf(f, "S"); break;
@@ -624,7 +624,7 @@ void Map::saveRaw(FILE *f)
 * left normal in the horizontal scale. For the moment we leave ground blank
 * and draw the walls as x/X/^. No other ground type is drawn.
 */
-void Map::print(int _scale)
+void Map::Print(int _scale)
 {
 	//  printf("%c[%d;%dmHeight\n", 27, 4, 30);
 	//  printf("%c[%d;%dm", 27, 0, 0);
@@ -688,7 +688,7 @@ void Map::print(int _scale)
 	printf("\n");
 }
 
-const char *Map::getMapName()
+const char *Map::GetMapName()
 {
 	if (map_name[0] == 0)
 		return "";
@@ -701,7 +701,7 @@ const char *Map::getMapName()
 * returns a reference to the type at a particular x/y location. (starting from 0)
 */
 
-Tile &Map::getTile(long x, long y)
+Tile &Map::GetTile(long x, long y)
 {
 	return land[x][y];
 }
@@ -711,7 +711,7 @@ Tile &Map::getTile(long x, long y)
 *
 * Returns the type of split; either kNoSplit, kForwardSplit, kBackwardSplit
 */
-tSplit Map::getSplit(long x, long y) const
+tSplit Map::GetSplit(long x, long y) const
 {
 	return land[x][y].split;
 }
@@ -721,7 +721,7 @@ tSplit Map::getSplit(long x, long y) const
 *
 * Sets how a map is split; either kNoSplit, kForwardSplit, kBackwardSplit
 */
-void Map::setSplit(long x, long y, tSplit split)
+void Map::SetSplit(long x, long y, tSplit split)
 {
 	revision++;
 	land[x][y].split = split;
@@ -735,7 +735,7 @@ void Map::setSplit(long x, long y, tSplit split)
 * of the whole tile. Possible split values are kWholeTile, kLeftSide, and
 * kRightSide. 
 */
-long Map::getTerrainType(long x, long y, tSplitSide split) const
+long Map::GetTerrainType(long x, long y, tSplitSide split) const
 {
 	if (land[0] == 0)
 		printf("land: %p, land[0] = %p\n", land, land[0]);
@@ -756,7 +756,7 @@ long Map::getTerrainType(long x, long y, tSplitSide split) const
  * \param terrain The terrain for the line between the coordinates
  * \return none
  */
-void Map::setTerrainType(int32_t x1, int32_t y1,
+void Map::SetTerrainType(int32_t x1, int32_t y1,
                          int32_t x2, int32_t y2, tTerrain t)
 {
     updated = true;
@@ -764,15 +764,15 @@ void Map::setTerrainType(int32_t x1, int32_t y1,
     double xdiff = (int)x1-(int)x2;
     double ydiff = (int)y1-(int)y2;
     double dist = sqrt(xdiff*xdiff + ydiff*ydiff);
-    setTerrainType(x1, y1, t);
+    SetTerrainType(x1, y1, t);
     for (double c = 0; c < dist; c += 0.5)
     {
         double ratio = c/dist;
         double newx = (double)x1-xdiff*ratio;
         double newy = (double)y1-ydiff*ratio;
-        setTerrainType((uint32_t)newx, (uint32_t)newy, t);
+        SetTerrainType((uint32_t)newx, (uint32_t)newy, t);
     }
-    setTerrainType(x2, y2, t);
+    SetTerrainType(x2, y2, t);
 }
 
 
@@ -784,7 +784,7 @@ void Map::setTerrainType(int32_t x1, int32_t y1,
  * This function avoids making you figure out all the ways a tile could
  * be split to get the correct value out.
  */
-long Map::getTerrainType(long x, long y, tEdge side) const
+long Map::GetTerrainType(long x, long y, tEdge side) const
 {
 	if ((x < 0) || (x >= width) || (y < 0) || (y >= height)) return kUndefined;
 	if (land[x][y].split == kNoSplit) return land[x][y].tile1.type;
@@ -815,13 +815,13 @@ long Map::getTerrainType(long x, long y, tEdge side) const
 * If tile is split and you specify kWholeTile, the split remains,
 * and the terrain is applied to both sides.
 */
-void Map::setTerrainType(long x, long y, tTerrain type, tSplitSide split)
+void Map::SetTerrainType(long x, long y, tTerrain type, tSplitSide split)
 {
 	revision++;
 	updated = true;
 	map_name[0] = 0;
 	if ((land[x][y].split == kNoSplit) && (split != kWholeTile)) return;
-	if ((y > getMapHeight()-1) || (x > getMapWidth()-1))
+	if ((y > GetMapHeight()-1) || (x > GetMapWidth()-1))
 		return;
 	switch (split) {
 		
@@ -849,7 +849,7 @@ void Map::setTerrainType(long x, long y, tTerrain type, tSplitSide split)
 * returns kUndefinedHeight if the tile is split and you specify
 * the whole tile
 */
-long Map::getHeight(long x, long y, tSplitSide split)
+long Map::GetHeight(long x, long y, tSplitSide split)
 {
 	if ((land[x][y].split != kNoSplit) && (split == kWholeTile)) return kUndefinedHeight;
 	
@@ -878,7 +878,7 @@ long Map::getHeight(long x, long y, tSplitSide split)
 * 
 * Split is kWholeTile, kLeftSide or kRightSide.
 */
-void Map::setHeight(long x, long y, long tHeight, tSplitSide split)
+void Map::SetHeight(long x, long y, long tHeight, tSplitSide split)
 {
 	revision++;
 	switch (split) {
@@ -909,9 +909,9 @@ void Map::setHeight(long x, long y, long tHeight, tSplitSide split)
  * returns kUndefinedHeight if the split is inconsistant with the tile type
  * The combination of a corner and an edge uniquely define a single height
  */
-long Map::getCornerHeight(long x, long y, tCorner which, tEdge edge) const
+long Map::GetCornerHeight(long x, long y, tCorner which, tEdge edge) const
 {
-	if (getSplit(x, y) == kNoSplit)
+	if (GetSplit(x, y) == kNoSplit)
 	{
 		switch (which) {
 			case kTopLeft: return land[x][y].tile1.corners[0];
@@ -938,7 +938,7 @@ long Map::getCornerHeight(long x, long y, tCorner which, tEdge edge) const
 				default: break;
 			}
 		}
-		else if ((edge == kTopEdge) && (getSplit(x, y) == kForwardSplit))
+		else if ((edge == kTopEdge) && (GetSplit(x, y) == kForwardSplit))
 		{
 			switch (which) {
 				case kTopLeft: return land[x][y].tile1.corners[0];
@@ -946,7 +946,7 @@ long Map::getCornerHeight(long x, long y, tCorner which, tEdge edge) const
 				default: break;
 			}
 		}
-		else if ((edge == kTopEdge) && (getSplit(x, y) == kBackwardSplit))
+		else if ((edge == kTopEdge) && (GetSplit(x, y) == kBackwardSplit))
 		{
 			switch (which) {
 				case kTopLeft: return land[x][y].tile2.corners[2];
@@ -954,7 +954,7 @@ long Map::getCornerHeight(long x, long y, tCorner which, tEdge edge) const
 				default: break;
 			}
 		}
-		else if ((edge == kBottomEdge) && (getSplit(x, y) == kForwardSplit))
+		else if ((edge == kBottomEdge) && (GetSplit(x, y) == kForwardSplit))
 		{
 			switch (which) {
 				case kBottomLeft: return land[x][y].tile2.corners[2];
@@ -962,7 +962,7 @@ long Map::getCornerHeight(long x, long y, tCorner which, tEdge edge) const
 				default: break;
 			}
 		}
-		else if ((edge == kBottomEdge) && (getSplit(x, y) == kBackwardSplit))
+		else if ((edge == kBottomEdge) && (GetSplit(x, y) == kBackwardSplit))
 		{
 			switch (which) {
 				case kBottomLeft: return land[x][y].tile1.corners[1];
@@ -983,7 +983,7 @@ long Map::getCornerHeight(long x, long y, tCorner which, tEdge edge) const
  * returns kUndefinedHeight if the split is inconsistant with the tile type
  * The combination of a corner and a split side uniquely define a single height
  */
-long Map::getCornerHeight(long x, long y, tCorner which, tSplitSide split) const
+long Map::GetCornerHeight(long x, long y, tCorner which, tSplitSide split) const
 {
 	if ((land[x][y].split != kNoSplit) && (split == kWholeTile))
 		return kUndefinedHeight;
@@ -1040,7 +1040,7 @@ long Map::getCornerHeight(long x, long y, tCorner which, tSplitSide split) const
  * The combination of a corner and a split side uniquely define a single height,
  * which is returned.
  */
-void Map::setCornerHeight(long x, long y, tCorner which,
+void Map::SetCornerHeight(long x, long y, tCorner which,
 													long cHeight, tSplitSide split)
 {
 	if ((land[x][y].split != kNoSplit) && (split == kWholeTile))
@@ -1100,52 +1100,52 @@ void Map::setCornerHeight(long x, long y, tCorner which,
  * but also takes the 1-radius tiles surrounding that rectangle and
  * smooths them so you get a nice fit of land together.
  */
-void Map::smoothSetRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain type)
+void Map::SmoothSetRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain type)
 {
 	updated = true;
 	map_name[0] = 0;
 	if (x1 > x2)
 	{
-		smoothSetRectHeight(x2, y1, x1, y2, h, type);
+		SmoothSetRectHeight(x2, y1, x1, y2, h, type);
 		return;
 	}
 	else if (y1 > y2)
 	{
-		smoothSetRectHeight(x1, y2, x2, y1, h, type);
+		SmoothSetRectHeight(x1, y2, x2, y1, h, type);
 		return;
 	}
 	printf("Doing smooth rect between (%ld, %ld) and (%ld, %ld) height %ld\n", x1, y1, x2, y2, h);
-	setRectHeight(x1, y1, x2, y2, h, type);
+	SetRectHeight(x1, y1, x2, y2, h, type);
 	
 	// top side
 	for (int x = x1; x <= x2; x++)
 	{
-		setTerrainType(x, y1-1, type);
-		switch(getSplit(x, y1-1)) {
+		SetTerrainType(x, y1-1, type);
+		switch(GetSplit(x, y1-1)) {
 			case kNoSplit:
-				if (getCornerHeight(x, y1-1, kTopLeft) != getCornerHeight(x, y1-1, kTopRight))
+				if (GetCornerHeight(x, y1-1, kTopLeft) != GetCornerHeight(x, y1-1, kTopRight))
 				{ // need to split slanted tile
-					setSplit(x, y1-1, kForwardSplit); // split is arbitarary?
-																						//setCornerHeight(x, y1-1, kBottomLeft, getCornerHeight(x, y1-1, kBottomLeft, kLeftSide), kRightSide);
+					SetSplit(x, y1-1, kForwardSplit); // split is arbitarary?
+																						//SetCornerHeight(x, y1-1, kBottomLeft, GetCornerHeight(x, y1-1, kBottomLeft, kLeftSide), kRightSide);
 					
-					setCornerHeight(x, y1-1, kBottomLeft, h, kRightSide);
-					setCornerHeight(x, y1-1, kBottomRight, h, kRightSide);
-					setCornerHeight(x, y1-1, kBottomLeft, h, kLeftSide);
+					SetCornerHeight(x, y1-1, kBottomLeft, h, kRightSide);
+					SetCornerHeight(x, y1-1, kBottomRight, h, kRightSide);
+					SetCornerHeight(x, y1-1, kBottomLeft, h, kLeftSide);
 				}
 				else {
-					setCornerHeight(x, y1-1, kBottomLeft, h);
-					setCornerHeight(x, y1-1, kBottomRight, h);
+					SetCornerHeight(x, y1-1, kBottomLeft, h);
+					SetCornerHeight(x, y1-1, kBottomRight, h);
 				}
 				break;
 			case kForwardSplit:
-				setCornerHeight(x, y1-1, kBottomLeft, h, kRightSide);
-				setCornerHeight(x, y1-1, kBottomRight, h, kRightSide);
-				setCornerHeight(x, y1-1, kBottomLeft, h, kLeftSide);
+				SetCornerHeight(x, y1-1, kBottomLeft, h, kRightSide);
+				SetCornerHeight(x, y1-1, kBottomRight, h, kRightSide);
+				SetCornerHeight(x, y1-1, kBottomLeft, h, kLeftSide);
 				break;
 			case kBackwardSplit:
-				setCornerHeight(x, y1-1, kBottomLeft, h, kLeftSide);
-				setCornerHeight(x, y1-1, kBottomRight, h, kLeftSide);
-				setCornerHeight(x, y1-1, kBottomRight, h, kRightSide);
+				SetCornerHeight(x, y1-1, kBottomLeft, h, kLeftSide);
+				SetCornerHeight(x, y1-1, kBottomRight, h, kLeftSide);
+				SetCornerHeight(x, y1-1, kBottomRight, h, kRightSide);
 				break;
 		}
 	}
@@ -1153,32 +1153,32 @@ void Map::smoothSetRectHeight(long x1, long y1, long x2, long y2, long h, tTerra
 	// bottom side
 	for (int x = x1; x <= x2; x++)
 	{
-		setTerrainType(x, y2+1, type);
-		switch(getSplit(x, y2+1)) {
+		SetTerrainType(x, y2+1, type);
+		switch(GetSplit(x, y2+1)) {
 			case kNoSplit:
-				if (getCornerHeight(x, y2+1, kBottomLeft) != getCornerHeight(x, y2+1, kBottomRight))
+				if (GetCornerHeight(x, y2+1, kBottomLeft) != GetCornerHeight(x, y2+1, kBottomRight))
 				{ // need to split slanted tile
-					setSplit(x, y2+1, kBackwardSplit); // split is arbitarary?
-																						 //setCornerHeight(x, y2+1, kTopLeft, getCornerHeight(x, y2+1, kTopLeft, kLeftSide), kRightSide);
+					SetSplit(x, y2+1, kBackwardSplit); // split is arbitarary?
+																						 //SetCornerHeight(x, y2+1, kTopLeft, GetCornerHeight(x, y2+1, kTopLeft, kLeftSide), kRightSide);
 					
-					setCornerHeight(x, y2+1, kTopLeft, h, kRightSide);
-					setCornerHeight(x, y2+1, kTopRight, h, kRightSide);
-					setCornerHeight(x, y2+1, kTopLeft, h, kLeftSide);
+					SetCornerHeight(x, y2+1, kTopLeft, h, kRightSide);
+					SetCornerHeight(x, y2+1, kTopRight, h, kRightSide);
+					SetCornerHeight(x, y2+1, kTopLeft, h, kLeftSide);
 				}
 				else {
-					setCornerHeight(x, y2+1, kTopLeft, h);
-					setCornerHeight(x, y2+1, kTopRight, h);
+					SetCornerHeight(x, y2+1, kTopLeft, h);
+					SetCornerHeight(x, y2+1, kTopRight, h);
 				}
 				break;
 			case kBackwardSplit:
-				setCornerHeight(x, y2+1, kTopLeft, h, kRightSide);
-				setCornerHeight(x, y2+1, kTopRight, h, kRightSide);
-				setCornerHeight(x, y2+1, kTopLeft, h, kLeftSide);
+				SetCornerHeight(x, y2+1, kTopLeft, h, kRightSide);
+				SetCornerHeight(x, y2+1, kTopRight, h, kRightSide);
+				SetCornerHeight(x, y2+1, kTopLeft, h, kLeftSide);
 				break;
 			case kForwardSplit:
-				setCornerHeight(x, y2+1, kTopLeft, h, kLeftSide);
-				setCornerHeight(x, y2+1, kTopRight, h, kLeftSide);
-				setCornerHeight(x, y2+1, kTopRight, h, kRightSide);
+				SetCornerHeight(x, y2+1, kTopLeft, h, kLeftSide);
+				SetCornerHeight(x, y2+1, kTopRight, h, kLeftSide);
+				SetCornerHeight(x, y2+1, kTopRight, h, kRightSide);
 				break;
 		}
 	}
@@ -1186,34 +1186,34 @@ void Map::smoothSetRectHeight(long x1, long y1, long x2, long y2, long h, tTerra
 	// left side
 	for (int y = y1; y <= y2; y++)
 	{
-		setTerrainType(x1-1, y, type);
-		switch(getSplit(x1-1, y)) {
+		SetTerrainType(x1-1, y, type);
+		switch(GetSplit(x1-1, y)) {
 			case kNoSplit:
-				if (getCornerHeight(x1-1, y, kTopLeft) != getCornerHeight(x1-1, y, kBottomLeft))
+				if (GetCornerHeight(x1-1, y, kTopLeft) != GetCornerHeight(x1-1, y, kBottomLeft))
 				{ // need to split slanted tile
-					setSplit(x1-1, y, kBackwardSplit); // split is arbitarary?
-					setCornerHeight(x1-1, y, kBottomRight, getCornerHeight(x1-1, y, kTopRight, kLeftSide), kRightSide);
-					setCornerHeight(x1-1, y, kTopLeft, getCornerHeight(x1-1, y, kTopLeft, kLeftSide), kRightSide);
+					SetSplit(x1-1, y, kBackwardSplit); // split is arbitarary?
+					SetCornerHeight(x1-1, y, kBottomRight, GetCornerHeight(x1-1, y, kTopRight, kLeftSide), kRightSide);
+					SetCornerHeight(x1-1, y, kTopLeft, GetCornerHeight(x1-1, y, kTopLeft, kLeftSide), kRightSide);
 					
-					setCornerHeight(x1-1, y, kBottomRight, h, kLeftSide);
-					setCornerHeight(x1-1, y, kBottomRight, h, kRightSide);
-					setCornerHeight(x1-1, y, kTopRight, h, kRightSide);
+					SetCornerHeight(x1-1, y, kBottomRight, h, kLeftSide);
+					SetCornerHeight(x1-1, y, kBottomRight, h, kRightSide);
+					SetCornerHeight(x1-1, y, kTopRight, h, kRightSide);
 				}
 				else {
-					setCornerHeight(x1-1, y, kTopRight, h);
-					setCornerHeight(x1-1, y, kBottomRight, h);
+					SetCornerHeight(x1-1, y, kTopRight, h);
+					SetCornerHeight(x1-1, y, kBottomRight, h);
 				}
 				break;
 			case kBackwardSplit:
-				setCornerHeight(x1-1, y, kBottomRight, h, kLeftSide);
-				setCornerHeight(x1-1, y, kBottomRight, h, kRightSide);
-				setCornerHeight(x1-1, y, kTopRight, h, kRightSide);
-				//setCornerHeight(x1-1, y, kTopLeft, getCornerHeight(x1-1, y, kTopLeft, kLeftSide), kRightSide);
+				SetCornerHeight(x1-1, y, kBottomRight, h, kLeftSide);
+				SetCornerHeight(x1-1, y, kBottomRight, h, kRightSide);
+				SetCornerHeight(x1-1, y, kTopRight, h, kRightSide);
+				//SetCornerHeight(x1-1, y, kTopLeft, GetCornerHeight(x1-1, y, kTopLeft, kLeftSide), kRightSide);
 				break;
 			case kForwardSplit:
-				setCornerHeight(x1-1, y, kTopRight, h, kLeftSide);
-				setCornerHeight(x1-1, y, kBottomRight, h, kRightSide);
-				setCornerHeight(x1-1, y, kTopRight, h, kRightSide);
+				SetCornerHeight(x1-1, y, kTopRight, h, kLeftSide);
+				SetCornerHeight(x1-1, y, kBottomRight, h, kRightSide);
+				SetCornerHeight(x1-1, y, kTopRight, h, kRightSide);
 				break;
 		}
 	}
@@ -1221,60 +1221,60 @@ void Map::smoothSetRectHeight(long x1, long y1, long x2, long y2, long h, tTerra
 	// right side
 	for (int y = y1; y <= y2; y++)
 	{
-		setTerrainType(x2+1, y, type);
-		switch(getSplit(x2+1, y)) {
+		SetTerrainType(x2+1, y, type);
+		switch(GetSplit(x2+1, y)) {
 			case kNoSplit:
-				if (getCornerHeight(x2+1, y, kTopLeft) != getCornerHeight(x2+1, y, kBottomLeft))
+				if (GetCornerHeight(x2+1, y, kTopLeft) != GetCornerHeight(x2+1, y, kBottomLeft))
 				{ // need to split slanted tile
-					setSplit(x2+1, y, kForwardSplit); // split is arbitarary?
-					setCornerHeight(x2+1, y, kTopRight, getCornerHeight(x2+1, y, kTopRight, kRightSide), kLeftSide);
+					SetSplit(x2+1, y, kForwardSplit); // split is arbitarary?
+					SetCornerHeight(x2+1, y, kTopRight, GetCornerHeight(x2+1, y, kTopRight, kRightSide), kLeftSide);
 					
-					setCornerHeight(x2+1, y, kBottomLeft, h, kRightSide);
-					setCornerHeight(x2+1, y, kBottomLeft, h, kLeftSide);
-					setCornerHeight(x2+1, y, kTopLeft, h, kLeftSide);
+					SetCornerHeight(x2+1, y, kBottomLeft, h, kRightSide);
+					SetCornerHeight(x2+1, y, kBottomLeft, h, kLeftSide);
+					SetCornerHeight(x2+1, y, kTopLeft, h, kLeftSide);
 				}
 				else {
-					setCornerHeight(x2+1, y, kTopLeft, h);
-					setCornerHeight(x2+1, y, kBottomLeft, h);
+					SetCornerHeight(x2+1, y, kTopLeft, h);
+					SetCornerHeight(x2+1, y, kBottomLeft, h);
 				}
 				break;
 			case kBackwardSplit:
-				setCornerHeight(x2+1, y, kTopLeft, h, kRightSide);
-				setCornerHeight(x2+1, y, kBottomLeft, h, kLeftSide);
-				setCornerHeight(x2+1, y, kTopLeft, h, kLeftSide);
+				SetCornerHeight(x2+1, y, kTopLeft, h, kRightSide);
+				SetCornerHeight(x2+1, y, kBottomLeft, h, kLeftSide);
+				SetCornerHeight(x2+1, y, kTopLeft, h, kLeftSide);
 				break;
 			case kForwardSplit:
-				setCornerHeight(x2+1, y, kBottomLeft, h, kRightSide);
-				setCornerHeight(x2+1, y, kBottomLeft, h, kLeftSide);
-				setCornerHeight(x2+1, y, kTopLeft, h, kLeftSide);
+				SetCornerHeight(x2+1, y, kBottomLeft, h, kRightSide);
+				SetCornerHeight(x2+1, y, kBottomLeft, h, kLeftSide);
+				SetCornerHeight(x2+1, y, kTopLeft, h, kLeftSide);
 				break;
 		}
 	}
 	
 	
-	setSplit(x1-1, y1-1, kForwardSplit);
-	setTerrainType(x1-1, y1-1, type, kRightSide);
-	setCornerHeight(x1-1, y1-1, kBottomRight, h, kRightSide);
-	setCornerHeight(x1-1, y1-1, kBottomLeft, getCornerHeight(x1-1, y1-1, kBottomLeft, kLeftSide), kRightSide);
-	setCornerHeight(x1-1, y1-1, kTopRight, getCornerHeight(x1-1, y1-1, kTopRight, kRightSide), kLeftSide);
+	SetSplit(x1-1, y1-1, kForwardSplit);
+	SetTerrainType(x1-1, y1-1, type, kRightSide);
+	SetCornerHeight(x1-1, y1-1, kBottomRight, h, kRightSide);
+	SetCornerHeight(x1-1, y1-1, kBottomLeft, GetCornerHeight(x1-1, y1-1, kBottomLeft, kLeftSide), kRightSide);
+	SetCornerHeight(x1-1, y1-1, kTopRight, GetCornerHeight(x1-1, y1-1, kTopRight, kRightSide), kLeftSide);
 	
-	setSplit(x2+1, y2+1, kForwardSplit);
-	setTerrainType(x2+1, y2+1, type, kLeftSide);
-	setCornerHeight(x2+1, y2+1, kTopLeft, h, kLeftSide);
-	setCornerHeight(x2+1, y2+1, kBottomLeft, getCornerHeight(x2+1, y2+1, kBottomLeft, kLeftSide), kRightSide);
-	setCornerHeight(x2+1, y2+1, kTopRight, getCornerHeight(x2+1, y2+1, kTopRight, kRightSide), kLeftSide);
+	SetSplit(x2+1, y2+1, kForwardSplit);
+	SetTerrainType(x2+1, y2+1, type, kLeftSide);
+	SetCornerHeight(x2+1, y2+1, kTopLeft, h, kLeftSide);
+	SetCornerHeight(x2+1, y2+1, kBottomLeft, GetCornerHeight(x2+1, y2+1, kBottomLeft, kLeftSide), kRightSide);
+	SetCornerHeight(x2+1, y2+1, kTopRight, GetCornerHeight(x2+1, y2+1, kTopRight, kRightSide), kLeftSide);
 	
-	setSplit(x1-1, y2+1, kBackwardSplit);
-	setTerrainType(x1-1, y2+1, type, kRightSide);
-	setCornerHeight(x1-1, y2+1, kTopRight, h, kRightSide);
-	setCornerHeight(x1-1, y2+1, kTopLeft, getCornerHeight(x1-1, y2+1, kTopLeft, kLeftSide), kRightSide);
-	setCornerHeight(x1-1, y2+1, kBottomRight, getCornerHeight(x1-1, y2+1, kBottomRight, kRightSide), kLeftSide);
+	SetSplit(x1-1, y2+1, kBackwardSplit);
+	SetTerrainType(x1-1, y2+1, type, kRightSide);
+	SetCornerHeight(x1-1, y2+1, kTopRight, h, kRightSide);
+	SetCornerHeight(x1-1, y2+1, kTopLeft, GetCornerHeight(x1-1, y2+1, kTopLeft, kLeftSide), kRightSide);
+	SetCornerHeight(x1-1, y2+1, kBottomRight, GetCornerHeight(x1-1, y2+1, kBottomRight, kRightSide), kLeftSide);
 	
-	setSplit(x2+1, y1-1, kBackwardSplit);
-	setTerrainType(x2+1, y1-1, type, kLeftSide);
-	setCornerHeight(x2+1, y1-1, kBottomLeft, h, kLeftSide);
-	setCornerHeight(x2+1, y1-1, kTopLeft, getCornerHeight(x2+1, y1-1, kTopLeft, kLeftSide), kRightSide);
-	setCornerHeight(x2+1, y1-1, kBottomRight, getCornerHeight(x2+1, y1-1, kBottomRight, kRightSide), kLeftSide);
+	SetSplit(x2+1, y1-1, kBackwardSplit);
+	SetTerrainType(x2+1, y1-1, type, kLeftSide);
+	SetCornerHeight(x2+1, y1-1, kBottomLeft, h, kLeftSide);
+	SetCornerHeight(x2+1, y1-1, kTopLeft, GetCornerHeight(x2+1, y1-1, kTopLeft, kLeftSide), kRightSide);
+	SetCornerHeight(x2+1, y1-1, kBottomRight, GetCornerHeight(x2+1, y1-1, kBottomRight, kRightSide), kLeftSide);
 }
 
 /**
@@ -1283,7 +1283,7 @@ void Map::smoothSetRectHeight(long x1, long y1, long x2, long y2, long h, tTerra
  * Sets all the tiles in the region between (x1, y1) (x2, y2) to be the same
  * height and terrain type, with no splits.
  */
-void Map::setRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain type)
+void Map::SetRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain type)
 {
 	updated = true;
 	map_name[0] = 0;
@@ -1293,9 +1293,9 @@ void Map::setRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain typ
 	{
 		for (int y = y1; y <= y2; y++)
 		{
-			setSplit(x, y, kNoSplit);
-			setTerrainType(x, y, type);
-			setHeight(x, y, h);
+			SetSplit(x, y, kNoSplit);
+			SetTerrainType(x, y, type);
+			SetHeight(x, y, h);
 		}
 	}
 }
@@ -1307,7 +1307,7 @@ void Map::setRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain typ
  * returns whether the tiles on both sides of that edge have a smooth boundary
  * that a unit should be able to cross.
  */
-bool Map::adjacentEdges(long x, long y, tEdge edge) const
+bool Map::AdjacentEdges(long x, long y, tEdge edge) const
 {
 	if ((x < 0) || (y < 0) || (x >= width) || (y >= height))
 		return false;
@@ -1315,56 +1315,56 @@ bool Map::adjacentEdges(long x, long y, tEdge edge) const
 		case kInternalEdge:
 		{
 			tSplit split;
-			if ((split = getSplit(x, y)) == kNoSplit)
-				return ((getTerrainType(x, y, kLeftSide)>>terrainBits) == (getTerrainType(x, y, kRightSide)>>terrainBits));
+			if ((split = GetSplit(x, y)) == kNoSplit)
+				return ((GetTerrainType(x, y, kLeftSide)>>terrainBits) == (GetTerrainType(x, y, kRightSide)>>terrainBits));
 			else if (split == kForwardSplit)
 			{
-				return ((getCornerHeight(x, y, kTopRight, kLeftSide) == getCornerHeight(x, y, kTopRight, kRightSide)) &&
-								(getCornerHeight(x, y, kBottomLeft, kLeftSide) == getCornerHeight(x, y, kBottomLeft, kRightSide)) &&
-								((getTerrainType(x, y, kLeftSide)>>terrainBits) == (getTerrainType(x, y, kRightSide)>>terrainBits)));
+				return ((GetCornerHeight(x, y, kTopRight, kLeftSide) == GetCornerHeight(x, y, kTopRight, kRightSide)) &&
+								(GetCornerHeight(x, y, kBottomLeft, kLeftSide) == GetCornerHeight(x, y, kBottomLeft, kRightSide)) &&
+								((GetTerrainType(x, y, kLeftSide)>>terrainBits) == (GetTerrainType(x, y, kRightSide)>>terrainBits)));
 			}
 			else if (split == kBackwardSplit)
 			{
-				return ((getCornerHeight(x, y, kTopLeft, kLeftSide) == getCornerHeight(x, y, kTopLeft, kRightSide)) &&
-								(getCornerHeight(x, y, kBottomRight, kLeftSide) == getCornerHeight(x, y, kBottomRight, kRightSide)) &&
-								((getTerrainType(x, y, kLeftSide)>>terrainBits) == (getTerrainType(x, y, kRightSide)>>terrainBits)));
+				return ((GetCornerHeight(x, y, kTopLeft, kLeftSide) == GetCornerHeight(x, y, kTopLeft, kRightSide)) &&
+								(GetCornerHeight(x, y, kBottomRight, kLeftSide) == GetCornerHeight(x, y, kBottomRight, kRightSide)) &&
+								((GetTerrainType(x, y, kLeftSide)>>terrainBits) == (GetTerrainType(x, y, kRightSide)>>terrainBits)));
 			}
 			return false;
 		} break;
 		case kLeftEdge:
 			if (x == 0)
 				return false;
-			return ((getCornerHeight(x, y, kTopLeft, kLeftEdge) == getCornerHeight(x-1, y, kTopRight, kRightEdge)) &&
-							(getCornerHeight(x, y, kBottomLeft, kLeftEdge) == getCornerHeight(x-1, y, kBottomRight, kRightEdge)) &&
-							((getTerrainType(x, y, kLeftSide)>>terrainBits) == (getTerrainType(x-1, y, kRightSide)>>terrainBits)));
+			return ((GetCornerHeight(x, y, kTopLeft, kLeftEdge) == GetCornerHeight(x-1, y, kTopRight, kRightEdge)) &&
+							(GetCornerHeight(x, y, kBottomLeft, kLeftEdge) == GetCornerHeight(x-1, y, kBottomRight, kRightEdge)) &&
+							((GetTerrainType(x, y, kLeftSide)>>terrainBits) == (GetTerrainType(x-1, y, kRightSide)>>terrainBits)));
 			break;
 		case kRightEdge:
 			if (x+1 >= width)
 				return false;
-			return ((getCornerHeight(x, y, kTopRight, kRightEdge) == getCornerHeight(x+1, y, kTopLeft, kLeftEdge)) &&
-							(getCornerHeight(x, y, kBottomRight, kRightEdge) == getCornerHeight(x+1, y, kBottomLeft, kLeftEdge)) &&
-							((getTerrainType(x, y, kRightSide)>>terrainBits) == (getTerrainType(x+1, y, kLeftSide)>>terrainBits)));
+			return ((GetCornerHeight(x, y, kTopRight, kRightEdge) == GetCornerHeight(x+1, y, kTopLeft, kLeftEdge)) &&
+							(GetCornerHeight(x, y, kBottomRight, kRightEdge) == GetCornerHeight(x+1, y, kBottomLeft, kLeftEdge)) &&
+							((GetTerrainType(x, y, kRightSide)>>terrainBits) == (GetTerrainType(x+1, y, kLeftSide)>>terrainBits)));
 			break;
 		case kTopEdge:
 			if (y == 0)
 				return false;
-			return ((getCornerHeight(x, y, kTopRight, kTopEdge) == getCornerHeight(x, y-1, kBottomRight, kBottomEdge)) &&
-							(getCornerHeight(x, y, kTopLeft, kTopEdge) == getCornerHeight(x, y-1, kBottomLeft, kBottomEdge)) &&
-							((getTerrainType(x, y, kTopEdge)>>terrainBits) == (getTerrainType(x, y-1, kBottomEdge)>>terrainBits)));
+			return ((GetCornerHeight(x, y, kTopRight, kTopEdge) == GetCornerHeight(x, y-1, kBottomRight, kBottomEdge)) &&
+							(GetCornerHeight(x, y, kTopLeft, kTopEdge) == GetCornerHeight(x, y-1, kBottomLeft, kBottomEdge)) &&
+							((GetTerrainType(x, y, kTopEdge)>>terrainBits) == (GetTerrainType(x, y-1, kBottomEdge)>>terrainBits)));
 			
 			break;
 		case kBottomEdge:
 			if (y+1 >= height)
 				return false;
-			return ((getCornerHeight(x, y, kBottomRight, kBottomEdge) == getCornerHeight(x, y+1, kTopRight, kTopEdge)) &&
-							(getCornerHeight(x, y, kBottomLeft, kBottomEdge) == getCornerHeight(x, y+1, kTopLeft, kTopEdge)) &&
-							((getTerrainType(x, y, kBottomEdge)>>terrainBits) == (getTerrainType(x, y+1, kTopEdge)>>terrainBits)));
+			return ((GetCornerHeight(x, y, kBottomRight, kBottomEdge) == GetCornerHeight(x, y+1, kTopRight, kTopEdge)) &&
+							(GetCornerHeight(x, y, kBottomLeft, kBottomEdge) == GetCornerHeight(x, y+1, kTopLeft, kTopEdge)) &&
+							((GetTerrainType(x, y, kBottomEdge)>>terrainBits) == (GetTerrainType(x, y+1, kTopEdge)>>terrainBits)));
 			break;
 	}
 	return false;
 }
 
-bool Map::adjacentCorners(long x, long y, tCorner corner) const
+bool Map::AdjacentCorners(long x, long y, tCorner corner) const
 {
 	if ((x < 0) || (y < 0) || (x >= width) || (y >= height))
 		return false;
@@ -1373,31 +1373,31 @@ bool Map::adjacentCorners(long x, long y, tCorner corner) const
 		case kNone:
 			return true;
 		case kTopLeft:
-			if (((x >= 1) && (y >= 1) && (adjacentEdges(x, y, kLeftEdge)) && (adjacentEdges(x, y, kTopEdge)) &&
-					 (adjacentEdges(x, y-1, kLeftEdge)) && (adjacentEdges(x-1, y, kTopEdge))) &&
-					(((adjacentEdges(x-1, y, kInternalEdge)) || (getSplit(x-1, y) == kBackwardSplit)) &&
-					 ((adjacentEdges(x, y-1, kInternalEdge)) || (getSplit(x, y-1) == kBackwardSplit)) &&
-					 ((adjacentEdges(x-1, y-1, kInternalEdge)) || (getSplit(x-1, y-1) == kForwardSplit)) &&
-					 ((adjacentEdges(x, y, kInternalEdge)) || (getSplit(x, y) == kForwardSplit))))
+			if (((x >= 1) && (y >= 1) && (AdjacentEdges(x, y, kLeftEdge)) && (AdjacentEdges(x, y, kTopEdge)) &&
+					 (AdjacentEdges(x, y-1, kLeftEdge)) && (AdjacentEdges(x-1, y, kTopEdge))) &&
+					(((AdjacentEdges(x-1, y, kInternalEdge)) || (GetSplit(x-1, y) == kBackwardSplit)) &&
+					 ((AdjacentEdges(x, y-1, kInternalEdge)) || (GetSplit(x, y-1) == kBackwardSplit)) &&
+					 ((AdjacentEdges(x-1, y-1, kInternalEdge)) || (GetSplit(x-1, y-1) == kForwardSplit)) &&
+					 ((AdjacentEdges(x, y, kInternalEdge)) || (GetSplit(x, y) == kForwardSplit))))
 				return true;
 			return false;
 		case kTopRight:
-			if (((y >= 1) && (x < getMapWidth()-1) && (adjacentEdges(x, y, kRightEdge)) && (adjacentEdges(x, y, kTopEdge)) &&
-					 (adjacentEdges(x, y-1, kRightEdge)) && (adjacentEdges(x+1, y, kTopEdge))) &&
-					(((adjacentEdges(x+1, y, kInternalEdge)) || (getSplit(x+1, y) == kForwardSplit)) &&
-					 ((adjacentEdges(x, y-1, kInternalEdge)) || (getSplit(x, y-1) == kForwardSplit)) &&
-					 ((adjacentEdges(x+1, y-1, kInternalEdge)) || (getSplit(x+1, y-1) == kBackwardSplit)) &&
-					 ((adjacentEdges(x, y, kInternalEdge)) || (getSplit(x, y) == kBackwardSplit))))
+			if (((y >= 1) && (x < GetMapWidth()-1) && (AdjacentEdges(x, y, kRightEdge)) && (AdjacentEdges(x, y, kTopEdge)) &&
+					 (AdjacentEdges(x, y-1, kRightEdge)) && (AdjacentEdges(x+1, y, kTopEdge))) &&
+					(((AdjacentEdges(x+1, y, kInternalEdge)) || (GetSplit(x+1, y) == kForwardSplit)) &&
+					 ((AdjacentEdges(x, y-1, kInternalEdge)) || (GetSplit(x, y-1) == kForwardSplit)) &&
+					 ((AdjacentEdges(x+1, y-1, kInternalEdge)) || (GetSplit(x+1, y-1) == kBackwardSplit)) &&
+					 ((AdjacentEdges(x, y, kInternalEdge)) || (GetSplit(x, y) == kBackwardSplit))))
 				return true;
 			return false;
-		case kBottomLeft: return adjacentCorners(x-1, y+1, kTopRight);
-		case kBottomRight: return adjacentCorners(x+1, y+1, kTopLeft);
+		case kBottomLeft: return AdjacentCorners(x-1, y+1, kTopRight);
+		case kBottomRight: return AdjacentCorners(x+1, y+1, kTopLeft);
 		default: return false;
 	}
 	return false;
 }
 
-bool Map::canStep(long x1, long y1, long x2, long y2) const
+bool Map::CanStep(long x1, long y1, long x2, long y2) const
 {
 	if ((abs(x1-x2) > 1) || (abs(y1-y2) > 1))
 		return false;
@@ -1405,22 +1405,22 @@ bool Map::canStep(long x1, long y1, long x2, long y2) const
 		case 0: //return true;
 			switch (y1-y2) {
 				case 0: return true;
-				case 1: return adjacentEdges(x1, y1, kTopEdge);
-				case -1: return adjacentEdges(x1, y1, kBottomEdge);
+				case 1: return AdjacentEdges(x1, y1, kTopEdge);
+				case -1: return AdjacentEdges(x1, y1, kBottomEdge);
 			}
 			break;
-		case 1: //return adjacentEdges(x1, y1, kLeftEdge);
+		case 1: //return AdjacentEdges(x1, y1, kLeftEdge);
 			switch (y1-y2) {
-				case 0: return adjacentEdges(x1, y1, kLeftEdge);
-				case 1: return adjacentCorners(x1, y1, kTopLeft);
-				case -1: return adjacentCorners(x1, y1, kBottomLeft);
+				case 0: return AdjacentEdges(x1, y1, kLeftEdge);
+				case 1: return AdjacentCorners(x1, y1, kTopLeft);
+				case -1: return AdjacentCorners(x1, y1, kBottomLeft);
 			}
 			break;
-		case -1: //return adjacentEdges(x1, y1, kRightEdge);
+		case -1: //return AdjacentEdges(x1, y1, kRightEdge);
 			switch (y1-y2) {
-				case 0: return adjacentEdges(x1, y1, kRightEdge);
-				case 1: return adjacentCorners(x1, y1, kTopRight);
-				case -1: return adjacentCorners(x1, y1, kBottomRight);
+				case 0: return AdjacentEdges(x1, y1, kRightEdge);
+				case 1: return AdjacentCorners(x1, y1, kTopRight);
+				case -1: return AdjacentCorners(x1, y1, kBottomRight);
 			}
 			break;
 	}
@@ -1430,7 +1430,7 @@ bool Map::canStep(long x1, long y1, long x2, long y2) const
 /**
 * Toggles whether the land is draw when you call OpenGLDraw
  */
-void Map::setDrawLand(bool dLand)
+void Map::SetDrawLand(bool dLand)
 {
 	drawLand = dLand;
 }
@@ -1439,7 +1439,7 @@ void Map::setDrawLand(bool dLand)
 * Choose the tileset used for land colors. Tilesets named xxxTile will draw
  * the map as independant tiles as opposed to a smooth connected map.
  */
-void Map::setTileSet(tTileset ts)
+void Map::SetTileSet(tTileset ts)
 {
 	updated = true; // force the display list to re-draw
 	tileSet = ts;
@@ -1448,7 +1448,7 @@ void Map::setTileSet(tTileset ts)
 /**
 * Get the tileset used for land colors.
  */
-tTileset Map::getTileSet()
+tTileset Map::GetTileSet()
 {
 	return tileSet;
 }
@@ -1499,7 +1499,7 @@ void Map::OpenGLDraw(tDisplay how) const
 				{
 					for (int x = 0; x < width; x++)
 					{
-						drawTile(&land[x][y], x, y, how);
+						DrawTile(&land[x][y], x, y, how);
 					}
 				}
 			}
@@ -1516,7 +1516,7 @@ void Map::OpenGLDraw(tDisplay how) const
  * that tile along with the radius of the tile square. The map is drawn in the
  * x<->z plane, with the y plane up.
  */
-void Map::getOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
+void Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
 {
 	if ((_x == -1) || (_y == -1))
 		return;
@@ -1538,7 +1538,7 @@ void Map::getOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, 
  * that tile along with the radius of the tile square. The map is drawn in the
  * x<->z plane, with the y plane up.
  */
-void Map::getOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
+void Map::GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
 {
 	int iX = floor(_x);
 	int iY = floor(_y);
@@ -1559,7 +1559,7 @@ void Map::getOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble 
  * this value to convert it to map space, where the distance between adjacent tiles
  * is 1.
  */
-double Map::getCoordinateScale()
+double Map::GetCoordinateScale()
 {
 	//	double scale;
 	if (height > width)
@@ -1567,7 +1567,7 @@ double Map::getCoordinateScale()
 	return (double)width/2.0;
 }
 
-void Map::getPointFromCoordinate(point3d loc, int &px, int &py) const
+void Map::GetPointFromCoordinate(point3d loc, int &px, int &py) const
 {
 	double _x, _y;
 	double _scale;
@@ -1596,10 +1596,10 @@ void Map::getPointFromCoordinate(point3d loc, int &px, int &py) const
  * (technically we don't have to pass the tile, we could get it
 		* from the x,y coordinates)
  */
-void Map::drawTile(Tile *t, int x, int y, tDisplay how) const
+void Map::DrawTile(Tile *t, int x, int y, tDisplay how) const
 {
 	GLdouble xx, yy, zz, rr;
-	getOpenGLCoord(x,y,xx,yy,zz,rr);
+	GetOpenGLCoord(x,y,xx,yy,zz,rr);
 	
 	switch (how) {
 		case kPolygons:
@@ -1624,55 +1624,55 @@ void Map::drawTile(Tile *t, int x, int y, tDisplay how) const
 						(tileSet == kFallTile))
 					rr *= 0.9;   // Leave empty grid lines between
 				
-				doVertexColor(t->tile1.type, t->tile1.corners[0], !adjacentCorners(x, y, kTopLeft));
-				doNormal(t->split, &t->tile1, x, y);
+				DoVertexColor(t->tile1.type, t->tile1.corners[0], !AdjacentCorners(x, y, kTopLeft));
+				DoNormal(t->split, &t->tile1, x, y);
 				glVertex3f(xx-rr, yy-rr, -rr*t->tile1.corners[0]);
 				
-				doVertexColor(t->tile1.type, t->tile1.corners[1], !adjacentCorners(x, y, kBottomLeft));
+				DoVertexColor(t->tile1.type, t->tile1.corners[1], !AdjacentCorners(x, y, kBottomLeft));
 				glVertex3f(xx-rr, yy+rr, -rr*t->tile1.corners[1]);
 				
-				doVertexColor(t->tile1.type, t->tile1.corners[2], !adjacentCorners(x, y, kBottomRight));
+				DoVertexColor(t->tile1.type, t->tile1.corners[2], !AdjacentCorners(x, y, kBottomRight));
 				glVertex3f(xx+rr, yy+rr, -rr*t->tile1.corners[2]);
 				
-				doVertexColor(t->tile1.type, t->tile2.corners[0], !adjacentCorners(x, y, kTopRight));
+				DoVertexColor(t->tile1.type, t->tile2.corners[0], !AdjacentCorners(x, y, kTopRight));
 				glVertex3f(xx+rr, yy-rr, -rr*t->tile2.corners[0]);
 			}
 			break;
 		case kForwardSplit:
 			if (t->tile1.type != kOutOfBounds)
 			{
-				doNormal(t->split, &t->tile1, x, y);
-				doVertexColor(t->tile1.type, t->tile1.corners[0]);
+				DoNormal(t->split, &t->tile1, x, y);
+				DoVertexColor(t->tile1.type, t->tile1.corners[0]);
 				glVertex3f(xx-rr, yy-rr, -rr*t->tile1.corners[0]);
-				doVertexColor(t->tile1.type, t->tile1.corners[1]);
+				DoVertexColor(t->tile1.type, t->tile1.corners[1]);
 				glVertex3f(xx-rr, yy+rr, -rr*t->tile1.corners[1]);
-				doVertexColor(t->tile1.type, t->tile1.corners[2]);
+				DoVertexColor(t->tile1.type, t->tile1.corners[2]);
 				glVertex3f(xx+rr, yy-rr, -rr*t->tile1.corners[2]);
 			}
 			if (how == kLines)
 			{ glEnd(); glBegin(GL_LINE_LOOP); }
 			if (t->tile2.type != kOutOfBounds)
 			{
-				doNormal(t->split, &t->tile2, x, y);
-				doVertexColor(t->tile2.type, t->tile2.corners[0]);
+				DoNormal(t->split, &t->tile2, x, y);
+				DoVertexColor(t->tile2.type, t->tile2.corners[0]);
 				glVertex3f(xx+rr, yy-rr, -rr*t->tile2.corners[0]);
-				doVertexColor(t->tile2.type, t->tile2.corners[1]);
+				DoVertexColor(t->tile2.type, t->tile2.corners[1]);
 				glVertex3f(xx+rr, yy+rr, -rr*t->tile2.corners[1]);
-				doVertexColor(t->tile2.type, t->tile2.corners[2]);
+				DoVertexColor(t->tile2.type, t->tile2.corners[2]);
 				glVertex3f(xx-rr, yy+rr, -rr*t->tile2.corners[2]);
 			}
 			break;
 		case kBackwardSplit:
 			if (t->tile1.type != kOutOfBounds)
 			{
-				doNormal(t->split, &t->tile1, x, y);
-				doVertexColor(t->tile1.type, t->tile1.corners[0]);
+				DoNormal(t->split, &t->tile1, x, y);
+				DoVertexColor(t->tile1.type, t->tile1.corners[0]);
 				glVertex3f(xx-rr, yy-rr, -rr*t->tile1.corners[0]);
 				//glVertex3f((double)x/width-.5, (double)2.0*t->tile1.corners[0]/(height+width), (double)y/height-.5);
-				doVertexColor(t->tile1.type, t->tile1.corners[1]);
+				DoVertexColor(t->tile1.type, t->tile1.corners[1]);
 				glVertex3f(xx-rr, yy+rr, -rr*t->tile1.corners[1]);
 				//glVertex3f((double)x/width-.5, (double)2.0*t->tile1.corners[1]/(height+width), (double)y/height+1.0/height-.5);
-				doVertexColor(t->tile1.type, t->tile1.corners[2]);
+				DoVertexColor(t->tile1.type, t->tile1.corners[2]);
 				glVertex3f(xx+rr, yy+rr, -rr*t->tile1.corners[2]);
 				//glVertex3f((double)x/width+1.0/width-.5, (double)2.0*t->tile1.corners[2]/(height+width), (double)y/height+1.0/height-.5);
 			}
@@ -1681,14 +1681,14 @@ void Map::drawTile(Tile *t, int x, int y, tDisplay how) const
 			
 			if (t->tile2.type != kOutOfBounds)
 			{
-				doNormal(t->split, &t->tile2, x, y);
-				doVertexColor(t->tile2.type, t->tile2.corners[0]);
+				DoNormal(t->split, &t->tile2, x, y);
+				DoVertexColor(t->tile2.type, t->tile2.corners[0]);
 				glVertex3f(xx+rr, yy-rr, -rr*t->tile2.corners[0]);
 				//glVertex3f((double)x/width+1.0/width-.5, (double)2.0*t->tile2.corners[0]/(height+width), (double)y/height-.5);
-				doVertexColor(t->tile2.type, t->tile2.corners[1]);
+				DoVertexColor(t->tile2.type, t->tile2.corners[1]);
 				glVertex3f(xx+rr, yy+rr, -rr*t->tile2.corners[1]);
 				//glVertex3f((double)x/width+1.0/width-.5, (double)2.0*t->tile2.corners[1]/(height+width), (double)y/height+1.0/height-.5);
-				doVertexColor(t->tile2.type, t->tile2.corners[2]);
+				DoVertexColor(t->tile2.type, t->tile2.corners[2]);
 				glVertex3f(xx-rr, yy-rr, -rr*t->tile2.corners[2]);
 				//glVertex3f((double)x/width-.5, (double)2.0*t->tile2.corners[2]/(height+width), (double)y/height-.5);
 			}
@@ -1703,7 +1703,7 @@ void Map::drawTile(Tile *t, int x, int y, tDisplay how) const
  * calls the appropriate openGL functions to set the draw color according
  * to the tile height/type
  */
-void Map::doVertexColor(tTerrain type, int vHeight, bool darken) const
+void Map::DoVertexColor(tTerrain type, int vHeight, bool darken) const
 {
 	double scaleH = (10.0-vHeight)/10.0;
 	double red=0, green=0, blue=0, alpha = 1.0;
@@ -1780,7 +1780,7 @@ void Map::doVertexColor(tTerrain type, int vHeight, bool darken) const
 * does a rough approximation of the normal for a particular halfTile.
  * (if I recall, this isn't perfect...)
  */
-void Map::doNormal(tSplit split, halfTile *t, int /*x*/, int /*y*/) const
+void Map::DoNormal(tSplit split, halfTile *t, int /*x*/, int /*y*/) const
 {
 	recVec n,pa,pb;
 	
@@ -1817,33 +1817,33 @@ void Map::drawLandQuickly() const
 	glColor3f(0.5, 0.5, 0.5);
 	for (int y = 0; y < height; y++)
 	{
-		if (getTerrainType(0, y) == kGround)
+		if (GetTerrainType(0, y) == kGround)
 		{
-			getOpenGLCoord(0, y, xx, yy, zz, rr);
+			GetOpenGLCoord(0, y, xx, yy, zz, rr);
 			glVertex3f(xx-rr, yy-rr, zz);
 			glVertex3f(xx-rr, yy+rr, zz);
 		}
 		for (int x = 1; x < width; x++)
 		{
-			if (getTerrainType(x, y) != getTerrainType(x-1, y))
+			if (GetTerrainType(x, y) != GetTerrainType(x-1, y))
 			{
-				if (getTerrainType(x-1, y) == kGround)
+				if (GetTerrainType(x-1, y) == kGround)
 				{
-					getOpenGLCoord(x, y, xx, yy, zz, rr);
+					GetOpenGLCoord(x, y, xx, yy, zz, rr);
 					glVertex3f(xx-rr, yy+rr, zz);
 					glVertex3f(xx-rr, yy-rr, zz);
 				}
-				if (getTerrainType(x, y) == kGround)
+				if (GetTerrainType(x, y) == kGround)
 				{
-					getOpenGLCoord(x, y, xx, yy, zz, rr);
+					GetOpenGLCoord(x, y, xx, yy, zz, rr);
 					glVertex3f(xx-rr, yy-rr, zz);
 					glVertex3f(xx-rr, yy+rr, zz);
 				}
 			}
 		}
-		if (getTerrainType(width-1, y) == kGround)
+		if (GetTerrainType(width-1, y) == kGround)
 		{
-			getOpenGLCoord(width-1, y, xx, yy, zz, rr);
+			GetOpenGLCoord(width-1, y, xx, yy, zz, rr);
 			glVertex3f(xx+rr, yy+rr, zz);
 			glVertex3f(xx+rr, yy-rr, zz);
 		}
@@ -1852,16 +1852,16 @@ void Map::drawLandQuickly() const
 //  this will draw the lines for the map, but can be too busy
 //	for (int y = 0; y < height; y++)
 //	{
-//		getOpenGLCoord(0, y, xx, yy, zz, rr);
+//		GetOpenGLCoord(0, y, xx, yy, zz, rr);
 //		glVertex3f(xx-rr, yy-rr, zz);
-//		getOpenGLCoord(width-1, y, xx, yy, zz, rr);
+//		GetOpenGLCoord(width-1, y, xx, yy, zz, rr);
 //		glVertex3f(xx+rr, yy-rr, zz);
 //	}
 //	for (int y = 0; y < height; y++)
 //	{
-//		getOpenGLCoord(x, 0, xx, yy, zz, rr);
+//		GetOpenGLCoord(x, 0, xx, yy, zz, rr);
 //		glVertex3f(xx-rr, yy-rr, zz);
-//		getOpenGLCoord(x, height-1, xx, yy, zz, rr);
+//		GetOpenGLCoord(x, height-1, xx, yy, zz, rr);
 //		glVertex3f(xx-rr, yy+rr, zz);
 //	}
 	glEnd();
@@ -1875,7 +1875,7 @@ void Map::drawLandQuickly() const
  * set the unique data (nodeNum) for a tile/half tile so that we can go
  * from a tile in the map to a node in the Graph.
  */
-void Map::setNodeNum(int num, int x, int y, tCorner corner)
+void Map::GetNodeNum(int num, int x, int y, tCorner corner)
 {
 	if ((x < 0) || (y < 0) || (x >= width) || (y >= height))
 	{
@@ -1895,7 +1895,7 @@ void Map::setNodeNum(int num, int x, int y, tCorner corner)
  * get the unique data (nodeNum) for a tile/half tile so that we can go
  * from a tile in the map to a node in the Graph.
  */
-int Map::getNodeNum(int x, int y, tCorner corner)
+int Map::GetNodeNum(int x, int y, tCorner corner)
 {
 	if ((x < 0) || (y < 0) || (x >= width) || (y >= height))
 	{
@@ -2054,7 +2054,7 @@ extern "C" {
 /**
 * Returns the edge width between (x, y) and (x+1, y)
  */
-float Map::getEdgeWidthX(int x, int y)
+float Map::GetEdgeWidthX(int x, int y)
 {
 	// Boundary values
 	if (x < 0 || y-1 < 0 || x+1 >= width || y+1 >= height)
@@ -2063,31 +2063,31 @@ float Map::getEdgeWidthX(int x, int y)
 	int index1, index2;	
 	
 	// Check if the edge at (x+1, y) is adjacent (i.e. same height and terrain type)
-	if (!adjacentEdges(x, y, kRightEdge))
+	if (!AdjacentEdges(x, y, kRightEdge))
 	{
 		// different height or terrain, so undefined
 		return 0.0f;
 	}
 	
 	// Check to see that the top edges are both adjacent.  If either is not, get the edge width using the bottom two tiles
-	if (!adjacentEdges(x, y, kTopEdge) || !adjacentEdges(x+1, y, kTopEdge))
+	if (!AdjacentEdges(x, y, kTopEdge) || !AdjacentEdges(x+1, y, kTopEdge))
 	{
 		//(x+1, y+1), (x, y+1), (x+1, y), (x, y)  
-		index1 = (27*getSplit(x+1, y+1)) + (9*getSplit(x, y+1)) + (3*getSplit(x+1, y)) + (getSplit(x, y));
+		index1 = (27*GetSplit(x+1, y+1)) + (9*GetSplit(x, y+1)) + (3*GetSplit(x+1, y)) + (GetSplit(x, y));
 		return edgewidth[index1];
 	}
 	
 	// Check to see that the bottom edges are both adjacent.  If either is not, get the edge width using the top two tiles
-	if (!adjacentEdges(x, y, kBottomEdge) || !adjacentEdges(x+1, y, kBottomEdge))
+	if (!AdjacentEdges(x, y, kBottomEdge) || !AdjacentEdges(x+1, y, kBottomEdge))
 	{
 		//(x, y-1), (x+1, y-1), (x, y) (x+1, y)
-		index1 = (27*getSplit(x, y-1)) + (9*getSplit(x+1, y-1)) + (3*getSplit(x, y)) + (getSplit(x+1, y));
+		index1 = (27*GetSplit(x, y-1)) + (9*GetSplit(x+1, y-1)) + (3*GetSplit(x, y)) + (GetSplit(x+1, y));
 		return edgewidth[index1];
 	}
 	
 	// Otherwise, return the minimum of the edge widths from the top edges and bottom edges
-	index1 = (27*getSplit(x+1, y+1)) + (9*getSplit(x, y+1)) + (3*getSplit(x+1, y)) + (getSplit(x, y));
-	index2 = (27*getSplit(x, y-1)) + (9*getSplit(x+1, y-1)) + (3*getSplit(x, y)) + (getSplit(x+1, y));
+	index1 = (27*GetSplit(x+1, y+1)) + (9*GetSplit(x, y+1)) + (3*GetSplit(x+1, y)) + (GetSplit(x, y));
+	index2 = (27*GetSplit(x, y-1)) + (9*GetSplit(x+1, y-1)) + (3*GetSplit(x, y)) + (GetSplit(x+1, y));
 	
 	return (edgewidth[index1] < edgewidth[index2]) ? (edgewidth[index1]) : (edgewidth[index2]);
 }
@@ -2097,7 +2097,7 @@ float Map::getEdgeWidthX(int x, int y)
 /**
 * Returns the edge width between (x, y) and (x, y+1)
  */
-float Map::getEdgeWidthY(int x, int y)
+float Map::GetEdgeWidthY(int x, int y)
 {
 	// Boundary values
 	if (x-1 < 0 || y < 0 || x+1 >= width || y+1 >= height)
@@ -2106,31 +2106,31 @@ float Map::getEdgeWidthY(int x, int y)
 	int index1, index2;	
 	
 	// Check if the edge at (x, y+1) is adjacent (i.e. same height and terrain type)
-	if (!adjacentEdges(x, y, kBottomEdge))
+	if (!AdjacentEdges(x, y, kBottomEdge))
 	{
 		// different height or terrain, so undefined
 		return 0.0f;
 	}
 	
 	// Check to see that the right edges are both adjacent.  If either is not, get the edge width using the left two tiles
-	if (!adjacentEdges(x, y, kRightEdge) || !adjacentEdges(x, y+1, kRightEdge))
+	if (!AdjacentEdges(x, y, kRightEdge) || !AdjacentEdges(x, y+1, kRightEdge))
 	{
 		//(x-1, y-1), (x-1, y), (x, y+1), (x, y)  
-		index1 = (27*getSplit(x-1, y-1)) + (9*getSplit(x-1, y)) + (3*getSplit(x, y+1)) + (getSplit(x, y));
+		index1 = (27*GetSplit(x-1, y-1)) + (9*GetSplit(x-1, y)) + (3*GetSplit(x, y+1)) + (GetSplit(x, y));
 		return edgewidth[index1];
 	}
 	
 	// Check to see that the left edges are both adjacent.  If either is not, get the edge width using the right two tiles
-	if (!adjacentEdges(x, y, kLeftEdge) || !adjacentEdges(x, y+1, kLeftEdge))
+	if (!AdjacentEdges(x, y, kLeftEdge) || !AdjacentEdges(x, y+1, kLeftEdge))
 	{
 		//(x+1, y), (x+1, y+1), (x, y) (x, y+1)
-		index1 = (27*getSplit(x+1, y)) + (9*getSplit(x+1, y+1)) + (3*getSplit(x, y)) + (getSplit(x, y+1));
+		index1 = (27*GetSplit(x+1, y)) + (9*GetSplit(x+1, y+1)) + (3*GetSplit(x, y)) + (GetSplit(x, y+1));
 		return edgewidth[index1];
 	}
 	
 	// Otherwise, return the minimum of the edge widths from the top edges and bottom edges
-	index1 = (27*getSplit(x-1, y-1)) + (9*getSplit(x-1, y)) + (3*getSplit(x, y+1)) + (getSplit(x, y));
-	index2 = (27*getSplit(x+1, y)) + (9*getSplit(x+1, y+1)) + (3*getSplit(x, y)) + (getSplit(x, y+1));
+	index1 = (27*GetSplit(x-1, y-1)) + (9*GetSplit(x-1, y)) + (3*GetSplit(x, y+1)) + (GetSplit(x, y));
+	index2 = (27*GetSplit(x+1, y)) + (9*GetSplit(x+1, y+1)) + (3*GetSplit(x, y)) + (GetSplit(x, y+1));
 	
 	return (edgewidth[index1] < edgewidth[index2]) ? (edgewidth[index1]) : (edgewidth[index2]);
 }
@@ -2144,9 +2144,9 @@ float Map::getEdgeWidthY(int x, int y)
  */
 void MakeMaze(Map *map, int pathSize)
 {
-	int width = map->getMapWidth();
-	int height = map->getMapHeight();
-	map->setRectHeight(0, 0, width-1, height-1, 0, kGround);
+	int width = map->GetMapWidth();
+	int height = map->GetMapHeight();
+	map->SetRectHeight(0, 0, width-1, height-1, 0, kGround);
 	int pathWidth = 1;
 	for (int t = 0; (pathSize>>t); t++)
 		pathWidth = t+1;
@@ -2155,51 +2155,51 @@ void MakeMaze(Map *map, int pathSize)
 		long x = (random()%width)&(~pathSize); // only path on even tiles
 		long y = (random()%height)&(~pathSize);
 		
-		if (map->getHeight(x, y) <= 1)
+		if (map->GetHeight(x, y) <= 1)
 		{
 			switch(random()%4)
 			{
 				case 0: // NORTH
-					if ((x >= 2*pathWidth) && (map->getHeight(x-2*pathWidth, y)+map->getHeight(x, y) < 2))
+					if ((x >= 2*pathWidth) && (map->GetHeight(x-2*pathWidth, y)+map->GetHeight(x, y) < 2))
 					{
 						for (int t = 0; t < pathWidth; t++)
 						{
-							map->setHeight(x-2, y+t, map->getHeight(x-2, y)+1);
-							map->setHeight(x-1, y+t, map->getHeight(x-1, y)+1);
-							map->setHeight(x, y+t, map->getHeight(x, y)+1);
+							map->SetHeight(x-2, y+t, map->GetHeight(x-2, y)+1);
+							map->SetHeight(x-1, y+t, map->GetHeight(x-1, y)+1);
+							map->SetHeight(x, y+t, map->GetHeight(x, y)+1);
 						}
 					}
 					break;
 				case 1: // SOUTH
-					if ((x < width-2*pathWidth) && (map->getHeight(x+2*pathWidth, y)+map->getHeight(x, y) < 2))
+					if ((x < width-2*pathWidth) && (map->GetHeight(x+2*pathWidth, y)+map->GetHeight(x, y) < 2))
 					{ 
 						for (int t = 0; t < pathWidth; t++)
 						{
-							map->setHeight(x+2, y+t, map->getHeight(x+2, y)+1);
-							map->setHeight(x+1, y+t, map->getHeight(x+1, y)+1);
-							map->setHeight(x, y+t, map->getHeight(x, y)+1);
+							map->SetHeight(x+2, y+t, map->GetHeight(x+2, y)+1);
+							map->SetHeight(x+1, y+t, map->GetHeight(x+1, y)+1);
+							map->SetHeight(x, y+t, map->GetHeight(x, y)+1);
 						}
 					}
 					break;
 				case 2: // WEST
-					if ((y >= 2*pathWidth) && (map->getHeight(x, y-2*pathWidth)+map->getHeight(x, y) < 2))
+					if ((y >= 2*pathWidth) && (map->GetHeight(x, y-2*pathWidth)+map->GetHeight(x, y) < 2))
 					{
 						for (int t = 0; t < pathWidth; t++)
 						{
-							map->setHeight(x+t, y-2, map->getHeight(x, y-2)+1);
-							map->setHeight(x+t, y-1, map->getHeight(x, y-1)+1);
-							map->setHeight(x+t, y, map->getHeight(x, y)+1);
+							map->SetHeight(x+t, y-2, map->GetHeight(x, y-2)+1);
+							map->SetHeight(x+t, y-1, map->GetHeight(x, y-1)+1);
+							map->SetHeight(x+t, y, map->GetHeight(x, y)+1);
 						}
 					}
 					break;
 				case 3: // EAST
-					if ((y < height-2*pathWidth) && (map->getHeight(x, y+2*pathWidth)+map->getHeight(x, y) < 2))
+					if ((y < height-2*pathWidth) && (map->GetHeight(x, y+2*pathWidth)+map->GetHeight(x, y) < 2))
 					{
 						for (int t = 0; t < pathWidth; t++)
 						{
-							map->setHeight(x+t, y+2, map->getHeight(x, y+2)+1);
-							map->setHeight(x+t, y+1, map->getHeight(x, y+1)+1);
-							map->setHeight(x+t, y, map->getHeight(x, y)+1);
+							map->SetHeight(x+t, y+2, map->GetHeight(x, y+2)+1);
+							map->SetHeight(x+t, y+1, map->GetHeight(x, y+1)+1);
+							map->SetHeight(x+t, y, map->GetHeight(x, y)+1);
 						}
 					}
 					break;
@@ -2208,10 +2208,10 @@ void MakeMaze(Map *map, int pathSize)
 	}
 	for (int x = 0; x < width; x++)
 		for (int y = 0; y < height; y++)
-			if (map->getHeight(x, y) > 0)
+			if (map->GetHeight(x, y) > 0)
 			{
-				map->setHeight(x, y, 0);
-				map->setTerrainType(x, y, kOutOfBounds);
+				map->SetHeight(x, y, 0);
+				map->SetTerrainType(x, y, kOutOfBounds);
 			}
 }
 
@@ -2220,16 +2220,16 @@ void MakeMaze(Map *map, int pathSize)
  */
 void MakeMaze(Map *map)
 {
-	int width = map->getMapWidth();
-	int height = map->getMapHeight();
-	map->setRectHeight(0, 0, width-1, height-1, 0, kGround);
+	int width = map->GetMapWidth();
+	int height = map->GetMapHeight();
+	map->SetRectHeight(0, 0, width-1, height-1, 0, kGround);
 	
 	std::vector<int> x;
 	std::vector<int> y;
 
 	x.push_back(0);
 	y.push_back(0);
-	map->setHeight(0, 0, 1);
+	map->SetHeight(0, 0, 1);
 	
 	while (x.size() > 0)
 	{
@@ -2245,10 +2245,10 @@ void MakeMaze(Map *map)
 		{
 			case 0: // NORTH
 			{
-				if ((y[val] > 0) && (map->getHeight(x[val], y[val]-2) == 0))
+				if ((y[val] > 0) && (map->GetHeight(x[val], y[val]-2) == 0))
 				{
-					map->setHeight(x[val], y[val]-1, 1);
-					map->setHeight(x[val], y[val]-2, 1);
+					map->SetHeight(x[val], y[val]-1, 1);
+					map->SetHeight(x[val], y[val]-2, 1);
 					x.push_back(x[val]);
 					y.push_back(y[val]-2);
 					//printf("Extended NORTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
@@ -2257,10 +2257,10 @@ void MakeMaze(Map *map)
 			}
 			case 1: // SOUTH
 			{
-				if ((y[val] < height-3) && (map->getHeight(x[val], y[val]+2) == 0))
+				if ((y[val] < height-3) && (map->GetHeight(x[val], y[val]+2) == 0))
 				{
-					map->setHeight(x[val], y[val]+1, 1);
-					map->setHeight(x[val], y[val]+2, 1);
+					map->SetHeight(x[val], y[val]+1, 1);
+					map->SetHeight(x[val], y[val]+2, 1);
 					x.push_back(x[val]);
 					y.push_back(y[val]+2);
 					//printf("Extended SOUTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
@@ -2269,10 +2269,10 @@ void MakeMaze(Map *map)
 			}
 			case 2: // EAST
 			{
-				if ((x[val] > 0) && (map->getHeight(x[val]-2, y[val]) == 0))
+				if ((x[val] > 0) && (map->GetHeight(x[val]-2, y[val]) == 0))
 				{
-					map->setHeight(x[val]-1, y[val], 1);
-					map->setHeight(x[val]-2, y[val], 1);
+					map->SetHeight(x[val]-1, y[val], 1);
+					map->SetHeight(x[val]-2, y[val], 1);
 					x.push_back(x[val]-2);
 					y.push_back(y[val]);
 					//printf("Extended EAST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
@@ -2281,10 +2281,10 @@ void MakeMaze(Map *map)
 			}
 			case 3: // WEST
 			{
-				if ((x[val] < width-3) && (map->getHeight(x[val]+2, y[val]) == 0))
+				if ((x[val] < width-3) && (map->GetHeight(x[val]+2, y[val]) == 0))
 				{
-					map->setHeight(x[val]+1, y[val], 1);
-					map->setHeight(x[val]+2, y[val], 1);
+					map->SetHeight(x[val]+1, y[val], 1);
+					map->SetHeight(x[val]+2, y[val], 1);
 					x.push_back(x[val]+2);
 					y.push_back(y[val]);
 					//printf("Extended WEST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
@@ -2294,10 +2294,10 @@ void MakeMaze(Map *map)
 		}
 		
 		// check to see if node is blocked
-		if (((x[val] == 0) || map->getHeight(x[val]-2, y[val]) != 0) && // blocked left
-			((x[val] >= width-3) || map->getHeight(x[val]+2, y[val]) != 0) && // blocked left
-			((y[val] == 0) || map->getHeight(x[val], y[val]-2) != 0) && // blocked up
-			((y[val] >= height-3) || map->getHeight(x[val], y[val]+2) != 0)) // blocked down
+		if (((x[val] == 0) || map->GetHeight(x[val]-2, y[val]) != 0) && // blocked left
+			((x[val] >= width-3) || map->GetHeight(x[val]+2, y[val]) != 0) && // blocked left
+			((y[val] == 0) || map->GetHeight(x[val], y[val]-2) != 0) && // blocked up
+			((y[val] >= height-3) || map->GetHeight(x[val], y[val]+2) != 0)) // blocked down
 		{
 			//printf("(%d, %d) now blocked: %d left\n", x[val], y[val], x.size()-1);
 			x[val] = x.back();
@@ -2309,37 +2309,37 @@ void MakeMaze(Map *map)
 
 	for (int a = 0; a < width; a++)
 		for (int b = 0; b < height; b++)
-			if (map->getHeight(a, b) == 0)
+			if (map->GetHeight(a, b) == 0)
 			{
-				//map->setHeight(x, y, 0);
-				map->setTerrainType(a, b, kOutOfBounds);
+				//map->SetHeight(x, y, 0);
+				map->SetTerrainType(a, b, kOutOfBounds);
 			}
 			else
-				map->setHeight(a, b, 0);
+				map->SetHeight(a, b, 0);
 }
 
 void BuildRandomRoomMap(Map *map, int roomSize)
 {
-    int width = map->getMapWidth();
-    int height = map->getMapHeight();
+    int width = map->GetMapWidth();
+    int height = map->GetMapHeight();
 
-	map->setTerrainType(0, 0, width-1, height-1, kGround);
+	map->SetTerrainType(0, 0, width-1, height-1, kGround);
     for (int x = 0; x < height; x += roomSize)
     {
         // draw a horizontal line
-        map->setTerrainType(0, x, width-1, x, kOutOfBounds);
+        map->SetTerrainType(0, x, width-1, x, kOutOfBounds);
         // then punch a bunch of holes in it
         for (int y = 0; y < width; y += roomSize)
             if ((rand()%5) != 3) // 20% chance of not creating hole
-                map->setTerrainType(y+rand()%roomSize, x, kGround);
+                map->SetTerrainType(y+rand()%roomSize, x, kGround);
     }
     for (int x = 0; x < width; x += roomSize)
     {
         // draw a vertical line
-        map->setTerrainType(x, 0, x, height-1, kOutOfBounds);
+        map->SetTerrainType(x, 0, x, height-1, kOutOfBounds);
         // then punch a bunch of holes in it
         for (int y = 0; y < height; y += roomSize)
             if ((rand()%5) != 3) // 20% chance of not creating hole
-                map->setTerrainType(x, y+rand()%roomSize, kGround);
+                map->SetTerrainType(x, y+rand()%roomSize, kGround);
     }
 }

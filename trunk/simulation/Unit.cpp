@@ -173,7 +173,7 @@
 //*
 //* No stats collected by default.
 //*/
-//void unit::logStats(StatCollection *)
+//void unit::LogStats(StatCollection *)
 //{
 //}
 //
@@ -184,9 +184,9 @@
 //bool unit::mapUpdated(MapAbstraction *aMap)
 //{
 //	Map *map = aMap->GetMap();
-//	if (map_revision != map->getRevision())
+//	if (map_revision != map->GetRevision())
 //	{
-//		map_revision = map->getRevision();
+//		map_revision = map->GetRevision();
 //		//printf("%p map_revision updated to %d\n", this, map_revision);
 //		return true;
 //	}
@@ -211,7 +211,7 @@
 // */
 //void unit::getOpenGLLocation(Map *map, GLdouble &_x, GLdouble &_y, GLdouble &_z, GLdouble &radius)
 //{
-//	map->getOpenGLCoord(x, y, _x, _y, _z, radius);
+//	map->GetOpenGLCoord(x, y, _x, _y, _z, radius);
 //}
 //
 ///**
@@ -223,9 +223,9 @@
 //{
 //	Map *map = mp->GetMap();
 //	GLdouble xx, yy, zz, rad;
-//	if ((x < 0) || (x >= map->getMapWidth()) || (y < 0) || (y >= map->getMapHeight()))
+//	if ((x < 0) || (x >= map->GetMapWidth()) || (y < 0) || (y >= map->GetMapHeight()))
 //		return;
-//	map->getOpenGLCoord(x, y, xx, yy, zz, rad);
+//	map->GetOpenGLCoord(x, y, xx, yy, zz, rad);
 //	glColor3f(r, g, b);
 //	if (getObjectType() == kDisplayOnly)
 //		drawTriangle(xx, yy, zz, rad);

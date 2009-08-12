@@ -44,8 +44,8 @@ public:
 	MapAbstraction(Map *_m) :m(_m), levelDraw(0) {}
 	virtual ~MapAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
-	virtual MapAbstraction *clone(Map *) = 0;
-	node *GetNodeFromMap(int x, int y, tCorner c = kNone) { return abstractions[0]->GetNode(m->getNodeNum(x, y, c)); }
+	virtual MapAbstraction *Clone(Map *) = 0;
+	node *GetNodeFromMap(int x, int y, tCorner c = kNone) { return abstractions[0]->GetNode(m->GetNodeNum(x, y, c)); }
 	void GetTileFromNode(node *n, int &x, int &y);
 	void GetRandomTileFromNode(node *n, int &x, int &y);
 

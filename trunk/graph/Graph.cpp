@@ -76,7 +76,7 @@ Graph::~Graph()
 	}
 }
 
-graph_object *Graph::clone() const
+graph_object *Graph::Clone() const
 {
 	Graph *g = new Graph();
 	node_iterator it = getNodeIter();
@@ -84,7 +84,7 @@ graph_object *Graph::clone() const
 	{
 		node *n = (node *)nodeIterNext(it);
 		if (n) 
-			g->AddNode((node*)n->clone());
+			g->AddNode((node*)n->Clone());
 		else
 			break;
 	}
@@ -99,7 +99,7 @@ Graph *Graph::cloneAll() const
 	{
 		node *n = (node *)nodeIterNext(it);
 		if (n)
-			g->AddNode((node*)n->clone());
+			g->AddNode((node*)n->Clone());
 		else
 			break;
 	}
@@ -108,7 +108,7 @@ Graph *Graph::cloneAll() const
 	{
 		edge *e = (edge *)edgeIterNext(ei);
 		if (e)
-			g->AddEdge((edge*)e->clone());
+			g->AddEdge((edge*)e->Clone());
 		else
 			break;
 	}
@@ -572,7 +572,7 @@ node::node(const char *n)
 	uniqueID = uniqueIDCounter++;
 }
 
-graph_object *node::clone() const
+graph_object *node::Clone() const
 {
 	node *n = new node(name);
 	for (unsigned int x = 0; x < label.size(); x++) n->label.push_back(label[x]);

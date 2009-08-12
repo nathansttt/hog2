@@ -35,7 +35,7 @@ public:
 	virtual void UndoAction(state &s, action a) const
 	{ assert(InvertAction(a)); ApplyAction(s, a); }
 
-	virtual void GetNextState(state &currents, action dir, state &news) const {};
+	virtual void GetNextState(state &, action , state &) const { assert(false); };
 
 	virtual bool InvertAction(action &a) const = 0;
 
@@ -81,8 +81,8 @@ public:
 	virtual void OpenGLDraw(const state&, const state&, float) const {}
 	virtual void OpenGLDraw(const state&, const action&) const = 0;
 
-	virtual void SetColor(GLfloat r, GLfloat g, GLfloat b, GLfloat t) const { color.r = r; color.g = g; color.b = b; transparency = t; }
-	virtual void GetColor(GLfloat& r, GLfloat& g, GLfloat& b, GLfloat &t) const { r=color.r; g=color.g; b=color.b; t = transparency;}
+	virtual void SetColor(GLfloat rr, GLfloat g, GLfloat b, GLfloat t) const { color.r = rr; color.g = g; color.b = b; transparency = t; }
+	virtual void GetColor(GLfloat& rr, GLfloat& g, GLfloat& b, GLfloat &t) const { rr=color.r; g=color.g; b=color.b; t = transparency;}
 private:
 	bool bValidSearchGoal;
 	state searchGoal;

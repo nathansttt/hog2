@@ -23,8 +23,8 @@ public:
 	void GetPath(SearchEnvironment *env, uint32_t from, uint32_t to,
 							 std::vector<uint32_t> &thePath);
 
-	long GetNodesExpanded() { return nodesExpanded; }
-	long GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesExpanded() { return nodesExpanded; }
+	uint64_t GetNodesTouched() { return nodesTouched; }
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	void SetUseBDPathMax(bool val) { usePathMax = val; }
 private:

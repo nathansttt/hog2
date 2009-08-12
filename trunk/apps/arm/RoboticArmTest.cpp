@@ -220,7 +220,7 @@ void CreateSimulation(int)
 //	  std::cout << "Starting search between: " << config << " and " << goal << std::endl;
 //
 // 	  Timer t;
-// 	  t.startTimer();
+// 	  t.StartTimer();
 // 	  astar.GetPath( r, config, goal, ourPath );
 // 	  if( ourPath.size() > 0 ) {
 // 	    printf( "Done!" );
@@ -229,7 +229,7 @@ void CreateSimulation(int)
 // 	  }
 // 	  printf( " %d nodes expanded; %1.1f nodes/sec\n",
 // 		  astar.GetNodesExpanded(), 
-//		  (double)astar.GetNodesExpanded() / t.endTimer() );
+//		  (double)astar.GetNodesExpanded() / t.EndTimer() );
 //	}
 //#endif
 }
@@ -277,7 +277,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
+void MyFrameHandler(unsigned long , unsigned int , void *)
 {
 	static int currFrame = 0;
 	currFrame++;
@@ -292,7 +292,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	else {
 		Timer t;
-		t.startTimer();
+		t.StartTimer();
 		for (int x = 0; x < 1000; x++)
 		{
 			if (astar.DoSingleSearchStep(ourPath))
@@ -300,8 +300,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				validSearch = false;
 				if (ourPath.size() > 0)
 				{
-					totalTime += t.endTimer();
-					printf("Done! %d nodes expanded; %1.1f nodes/sec\n",
+					totalTime += t.EndTimer();
+					printf("Done! %lld nodes expanded; %1.1f nodes/sec\n",
 						   astar.GetNodesExpanded(), (double)astar.GetNodesExpanded()/totalTime);
 					config = ourPath.back();
 					pathLoc = 0;
@@ -309,7 +309,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				}
 			}
 		}
-		totalTime += t.endTimer();
+		totalTime += t.EndTimer();
 		if ((currFrame%500) == 499)
 			printf("Currently generating %1.1f nodes/sec\n", (double)astar.GetNodesExpanded()/totalTime);
 		armAngles next = astar.CheckNextNode();
@@ -528,7 +528,7 @@ void TestArms()
 	while (starts.size() < 500)
 	{
 		if ((starts.size()%500) == 0)
-			printf("Generating problem %d\n", starts.size());
+			printf("Generating problem %d\n", (int)starts.size());
 		double x, y;
 		x = random()%10000;
 		x = 2*x/10000-1;
@@ -550,12 +550,12 @@ void TestArms()
 			y = random()%10000;
 			y = 2*y/10000-1;
 			//printf("Trying (%f, %f) for goal\n", x, y);
-			const std::vector<armAngles> &pos = aa->GetTipPositions(x, y);
-			if (pos.size() > 0)
+			const std::vector<armAngles> &pos2 = aa->GetTipPositions(x, y);
+			if (pos2.size() > 0)
 			{
-				armAngles goal;
-				goal.SetGoal(x, y);
-				goals.push_back(goal);
+				armAngles theGoal;
+				theGoal.SetGoal(x, y);
+				goals.push_back(theGoal);
 				break;
 			}
 		}
@@ -570,7 +570,7 @@ void TestArms()
 //	else
 //		aa->AddDiffTable();
 
-	double totalTime;
+	double fTotalTime;
 	double totalNodes;
 	double totalHvalue;
 	
@@ -580,60 +580,60 @@ void TestArms()
 	for (int total = 0; total <= -1; total++)
 	{
 		printf("Solving with %d heuristics\n", total);
-		totalTime = 0;
+		fTotalTime = 0;
 		totalNodes = 0;
 		totalHvalue = 0;
 		for (unsigned int x = 0; x < starts.size(); x++)
 		{
-			armAngles goal;
+			armAngles theGoal;
 			double x1, y1;
 			goals[x].GetGoal(x1, y1);
 			const std::vector<armAngles> &pos = aa->GetTipPositions(x1, y1);
-			goal = pos[0];
-			double localHvalue = r->HCost(starts[x], goal);
-			validSearch = astar.InitializeSearch(r, goal, starts[x], ourPath);
+			theGoal = pos[0];
+			double localHvalue = r->HCost(starts[x], theGoal);
+			validSearch = astar.InitializeSearch(r, theGoal, starts[x], ourPath);
 			for (unsigned int t = 1; t < pos.size(); t++)
 			{
-				goal = pos[t];
-				astar.AddAdditionalStartState(goal);
-				localHvalue = min(localHvalue, r->HCost(starts[x], goal));
+				theGoal = pos[t];
+				astar.AddAdditionalStartState(theGoal);
+				localHvalue = min(localHvalue, r->HCost(starts[x], theGoal));
 			}
 			
 			Timer t;
-			t.startTimer();
+			t.StartTimer();
 //			while (!astar.DoSingleSearchStep(ourPath))
 //			{}
 			totalHvalue += localHvalue;
-			totalTime += t.endTimer();
+			fTotalTime += t.EndTimer();
 			totalNodes += astar.GetNodesExpanded();
-			printf("%d\t%d\t%f\t%f\n", x, astar.GetNodesExpanded(), t.getElapsedTime(), localHvalue);
+			printf("%d\t%lld\t%f\t%f\n", x, astar.GetNodesExpanded(), t.GetElapsedTime(), localHvalue);
 		}
-		totalTime /= starts.size();
+		fTotalTime /= starts.size();
 		totalNodes /= starts.size();
 		totalHvalue /= starts.size();
-		printf("time\t%f\tnodes\t%f\thcost\t%f\n", totalTime, totalNodes, totalHvalue);
+		printf("time\t%f\tnodes\t%f\thcost\t%f\n", fTotalTime, totalNodes, totalHvalue);
 		aa->AddDiffTable();
 	}
 
 	printf("Solving with no heuristics the normal way\n");
-	totalTime = 0;
+	fTotalTime = 0;
 	totalNodes = 0;
 	for (unsigned int x = 0; x < starts.size(); x++)
 	{
 		validSearch = astar.InitializeSearch(r, starts[x], goals[x], ourPath);
 		
 		Timer t;
-		t.startTimer();
+		t.StartTimer();
 		while (!astar.DoSingleSearchStep(ourPath))
 		{}
-		totalTime += t.endTimer();
+		fTotalTime += t.EndTimer();
 		totalHvalue += r->HCost(starts[x], goals[x]);
 		totalNodes += astar.GetNodesExpanded();
-		printf("%d\t%d\t%f\t%f\n", x, astar.GetNodesExpanded(), t.getElapsedTime(), r->HCost(starts[x], goals[x]));
+		printf("%d\t%lld\t%f\t%f\n", x, astar.GetNodesExpanded(), t.GetElapsedTime(), r->HCost(starts[x], goals[x]));
 	}
-	totalTime /= starts.size();
+	fTotalTime /= starts.size();
 	totalNodes /= starts.size();
 	totalHvalue /= starts.size();
-	printf("time\t%f\tnodes\t%f\n", totalTime, totalNodes);
+	printf("time\t%f\tnodes\t%f\n", fTotalTime, totalNodes);
 	exit(0);
 }

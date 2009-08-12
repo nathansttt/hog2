@@ -5,11 +5,11 @@ template<>
 void TrailMaxUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int, MapEnvironment *env, SimulationInfo<xyLoc,tDirection,MapEnvironment>* ) {
 	GLdouble xx, yy, zz, rad;
 	Map *m = env->GetMap();
-	if( current_pos.x >= m->getMapWidth() || current_pos.y >= m->getMapHeight() ) {
+	if( current_pos.x >= m->GetMapWidth() || current_pos.y >= m->GetMapHeight() ) {
 		fprintf( stderr, "Warning: TrailMaxUnit is out of bounds. Could not draw it.\n" );
 		return;
 	}
-	m->getOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
+	m->GetOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
 	if( done )
 		glColor3d( 0., 1., 0. ); // turn green when done
 	else
@@ -21,7 +21,7 @@ void TrailMaxUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( int, MapEnvironm
 		glBegin(GL_LINE_STRIP);
 		glVertex3f( xx, yy, zz-rad/2 );
 		for( unsigned int i = 0; i < pathcache.size(); i++ ) {
-			m->getOpenGLCoord( pathcache[i].x, pathcache[i].y, xx, yy, zz, rad );
+			m->GetOpenGLCoord( pathcache[i].x, pathcache[i].y, xx, yy, zz, rad );
 			glVertex3f( xx, yy, zz-rad/2 );
 		}
 		glEnd();
@@ -34,11 +34,11 @@ template<>
 void TrailMaxUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int, AbsMapEnvironment *env, SimulationInfo<xyLoc,tDirection,AbsMapEnvironment>* ) {
 	GLdouble xx, yy, zz, rad;
 	Map *m = env->GetMap();
-	if( current_pos.x >= m->getMapWidth() || current_pos.y >= m->getMapHeight() ) {
+	if( current_pos.x >= m->GetMapWidth() || current_pos.y >= m->GetMapHeight() ) {
 		fprintf( stderr, "Warning: TrailMaxUnit is out of bounds. Could not draw it.\n" );
 		return;
 	}
-	m->getOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
+	m->GetOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
 	if( done )
 		glColor3d( 0., 1., 0. ); // turn green when done
 	else
@@ -50,7 +50,7 @@ void TrailMaxUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( int, AbsMapEn
 		glBegin(GL_LINE_STRIP);
 		glVertex3f( xx, yy, zz-rad/2 );
 		for( unsigned int i = 0; i < pathcache.size(); i++ ) {
-			m->getOpenGLCoord( pathcache[i].x, pathcache[i].y, xx, yy, zz, rad );
+			m->GetOpenGLCoord( pathcache[i].x, pathcache[i].y, xx, yy, zz, rad );
 			glVertex3f( xx, yy, zz-rad/2 );
 		}
 		glEnd();
@@ -93,7 +93,7 @@ void TrailMaxUnit<graphState,graphMove,GraphEnvironment>::OpenGLDraw( int, Graph
 template<>
 void TrailMaxUnit<graphState,graphMove,AbstractionGraphEnvironment>::OpenGLDraw( int, AbstractionGraphEnvironment *env, SimulationInfo<graphState,graphMove,AbstractionGraphEnvironment>* ) {
 	node *n  = env->GetGraph()->GetNode( current_pos );
-	GLdouble x, y, z, rad = env->scale()/2.;
+	GLdouble x, y, z, rad = env->Scale()/2.;
 	x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
 	y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
 	z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);

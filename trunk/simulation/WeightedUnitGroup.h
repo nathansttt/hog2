@@ -14,8 +14,8 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 		WeightedUnitGroup(environment* e){wme = new WeightedMap2DEnvironment(e); wt = -1; prop = -1; useWindow = false; windowSize = -1; localWeights = false; currDrawEnv = 0; noweighting = false; updateOnQuery = false; updateSurrounding = false; usePerceptron = false; learningRate = 0; }
 //		WeightedUnitGroup(double weight, double proportion) {wt = weight; prop = proportion;}
 		
-		void SetWeight(double weight) {wt = weight;}
-		void SetProportion(double proportion) { prop=proportion;}
+		void SetWeight(double wght) {wt = wght;}
+		void SetProportion(double proport) { prop=proport;}
 		void SetUseWindow(bool b) {useWindow = b;}
 		void SetWindowSize(double d) {windowSize = d;}
 		void UseLocalWeights(bool b) {localWeights = b;}
@@ -145,11 +145,11 @@ class WeightedUnitGroup : public UnitGroup<state,action,environment>
 			//std::cout<<std::endl<<"I'm at "<<currLoc<<std::endl;
 			for(int x = currLoc.x - (int)localRadius; x<=currLoc.x + (int)localRadius; x++)
 			{
-			 	if((x<0)||(x>=uwme->GetMap()->getMapWidth()))
+			 	if((x<0)||(x>=uwme->GetMap()->GetMapWidth()))
 			 		continue;
 				for(int y = currLoc.y - (int)localRadius; y<=currLoc.y + (int)localRadius; y++)
 			 	{
-			 		if((y<0)||(y>=uwme->GetMap()->getMapHeight()))
+			 		if((y<0)||(y>=uwme->GetMap()->GetMapHeight()))
 			 			continue;
 			 			
 			 		// if this location is within localRadius, update angle

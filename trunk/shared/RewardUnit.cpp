@@ -37,7 +37,7 @@ void rewardUnit::OpenGLDraw(const MapProvider *mp, const SimulationInfo *) const
 {
 	Map *map = mp->GetMap();
 	GLdouble xx, yy, zz, rad;
-	map->getOpenGLCoord(x, y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(x, y, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	drawTriangle(xx, yy, zz, rad);
 }
@@ -97,7 +97,7 @@ void rewardSeekingUnit::OpenGLDraw(const MapProvider *mp, const SimulationInfo *
 	GLdouble xx, yy, zz, rad;
 	Map *map = mp->GetMap();
 	int posx = x, posy = y;
-	map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
+	map->GetOpenGLCoord(posx, posy, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	glBegin(GL_LINE_STRIP);
 	glVertex3f(xx, yy+rad/2, zz);
@@ -106,13 +106,13 @@ void rewardSeekingUnit::OpenGLDraw(const MapProvider *mp, const SimulationInfo *
 		posx += ((moves[t]&kE)?1:0) - ((moves[t]&kW)?1:0);
 		posy += ((moves[t]&kS)?1:0) - ((moves[t]&kN)?1:0);
 		
-		map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
+		map->GetOpenGLCoord(posx, posy, xx, yy, zz, rad);
 		
 		glVertex3f(xx, yy+rad/2, zz);
 	}
 	glEnd();
 	
-	map->getOpenGLCoord(x, y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(x, y, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	drawSphere(xx, yy, zz, rad);
 }

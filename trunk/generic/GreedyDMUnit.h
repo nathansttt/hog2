@@ -10,7 +10,7 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 		
 		virtual const char *GetName() { return "Greedy DM following unit"; }
 		
-		virtual bool MakeMove(environment *env, OccupancyInterface<xyLoc, tDirection> *, SimulationInfo<xyLoc,tDirection,environment> *, tDirection& a)
+		virtual bool MakeMove(environment *theEnv, OccupancyInterface<xyLoc, tDirection> *, SimulationInfo<xyLoc,tDirection,environment> *, tDirection& a)
 		{
 //			if (random()%10)
 //			{ a = kStay; return true; }
@@ -47,9 +47,9 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 				wme->GetNextState(loc,directions[i],nextThisDir);
 				//if(prevLoc == nextThisDir)
 				//	continue;	
-				if (env->GetMap()->canStep(loc.x, loc.y, nextThisDir.x, nextThisDir.y))
+				if (theEnv->GetMap()->CanStep(loc.x, loc.y, nextThisDir.x, nextThisDir.y))
 				{
-					if (env->GetOccupancyInfo() && env->GetOccupancyInfo()->GetStateOccupied(nextThisDir))
+					if (theEnv->GetOccupancyInfo() && theEnv->GetOccupancyInfo()->GetStateOccupied(nextThisDir))
 						continue;
 					Vector2D dirVec = wme->GetAngleFromDirection(directions[i]);
 					Vector2D nextVec = wme->GetAngle(nextThisDir);
@@ -85,7 +85,7 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 // 			wme->GetNextState(loc, bestDir, next);
 // 			
 // 			//std::cout<<"loc "<<loc<<" next "<<next<<std::endl;
-// 			if(!(env->GetMap()->canStep(loc.x, loc.y, next.x, next.y))) // make best possible move
+// 			if(!(env->GetMap()->CanStep(loc.x, loc.y, next.x, next.y))) // make best possible move
 // 			{
 // 				
 // 				//std::cout<<"can't go here - random\n";
@@ -122,8 +122,8 @@ class GreedyDMUnit : public Unit<xyLoc,tDirection,environment>
 		virtual void GetLocation(xyLoc &l)
 		{ l = loc; }
 	
-		virtual void OpenGLDraw(const environment *env, const SimulationInfo<xyLoc,tDirection,environment> *) const
-		{ env->OpenGLDraw(loc); }
+		virtual void OpenGLDraw(const environment *theEnv, const SimulationInfo<xyLoc,tDirection,environment> *) const
+		{ theEnv->OpenGLDraw(loc); }
 		
 		virtual void GetGoal(xyLoc &s)
 		{ s = loc; }
