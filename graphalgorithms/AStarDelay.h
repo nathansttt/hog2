@@ -125,12 +125,12 @@ public:
 	virtual ~AStarDelay() {}
 	void GetPath(GraphEnvironment *env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
-	long GetNodesExpanded() { return (long)nodesExpanded; }
-	long GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesExpanded() { return (uint64_t)nodesExpanded; }
+	uint64_t GetNodesTouched() { return nodesTouched; }
 
-	long GetNodesFirstExpanded() {return closedSize;}
-	long GetNodesMetaExpanded() {return metaexpanded;}
-	long GetNodesReopened() { return nodesReopened; }
+	uint64_t GetNodesFirstExpanded() {return closedSize;}
+	uint64_t GetNodesMetaExpanded() {return metaexpanded;}
+	uint64_t GetNodesReopened() { return nodesReopened; }
 
 	bool InitializeSearch(GraphEnvironment *env, Graph* g, graphState from, graphState to, std::vector<graphState> &thePath);
 	bool DoSingleSearchStep(std::vector<graphState> &thePath);
@@ -166,7 +166,7 @@ public:
 	AStarDelayUtil::PQueue openQueue;
 	AStarDelayUtil::NodeLookupTable closedList; 
 
-	long closedSize;
+	uint64_t closedSize;
 
 private:
 	bool DoSingleStep(AStarDelayUtil::SearchNode &topNode,
@@ -203,7 +203,7 @@ private:
 	}
 
 	double nodesExpanded;
-	long nodesTouched, nodesReopened;
+	uint64_t nodesTouched, nodesReopened;
 	std::vector<graphState> neighbors;
 	graphState goal, start;
 	GraphEnvironment *env;

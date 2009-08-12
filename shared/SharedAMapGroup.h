@@ -46,34 +46,34 @@ public:
 	virtual const char *GetName() { return "SharedAMapGroup"; }
 	//virtual tDirection makeMove(unit *u, MapProvider *mp, reservationProvider *rp, AbsMapSimulationInfo *simInfo);
 	virtual void OpenGLDraw(const AbsMapEnvironment *, const AbsMapSimulationInfo *) const;
-	virtual Map *GetMap();
+	virtual Map *GetMap() const;
 	virtual MapAbstraction *GetMapAbstraction();
-	virtual int getNewTileCount() { return newTileCountPerTrial; }
+	virtual int GetNewTileCount() { return newTileCountPerTrial; }
 	
 	/** reset the location of a given unit */
 	void UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> *u, AbsMapEnvironment *, xyLoc &loc, bool success, AbsMapSimulationInfo *);
 	//virtual void updateLocation(BaseAbsMapUnit *, MapProvider *m, int _x, int _y, bool, AbsMapSimulationInfo *);
 	/** Is the group done with their exploration? */
-	virtual bool done();
+	virtual bool Done();
 	/** Lets the unit group do what it needs to reset a trial */
-	void startNewTrial(StatCollection *stats);
-	void logStats(StatCollection *stats);
+	void StartNewTrial(StatCollection *stats);
+	void LogStats(StatCollection *stats);
 	
-	void setVisibilityRadius(int _visibility);
-	int getVisibilityRadius();
-	bool explored(int x, int y);
-	bool explored(unsigned int _node);
+	void SetVisibilityRadius(int _visibility);
+	int GetVisibilityRadius();
+	bool Explored(int x, int y);
+	bool Explored(unsigned int _node);
 	//void printRoundStats(unit *, FILE *f);
 
-	int getNewTileCountPerStep() { return newTileCount; }
-	bool seenBefore(int x, int y) { return (seen->get(y * map->getMapWidth() + x)); }
+	int GetNewTileCountPerStep() { return newTileCount; }
+	bool SeenBefore(int x, int y) { return (seen->Get(y * map->GetMapWidth() + x)); }
 	
 protected:
 	//void setUnitSimulation(unitSimulation *_us, Map *m);
 
 	MapAbstraction *aMap;
 	Map *map;
-	bitVector *seen;
+	BitVector *seen;
 	int visRadius;
 	bool sawNewLand;
 	int newTileCount;

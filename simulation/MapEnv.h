@@ -27,16 +27,16 @@
 //    : m_map(m), m_graph(m->getGraph()), m_rows(rows), m_columns(columns) {}
 //  */
 //  MapEnv(Map* m)
-//    : m_abstrMap(0), m_map(m), m_graph(GetMapGraph(m)), m_rows(m->getMapHeight()),
-//      m_columns(m->getMapWidth()) {}
+//    : m_abstrMap(0), m_map(m), m_graph(GetMapGraph(m)), m_rows(m->GetMapHeight()),
+//      m_columns(m->GetMapWidth()) {}
 //	
 //  MapEnv(Map* m, Graph* g)
-//    : m_abstrMap(0), m_map(m), m_graph(g), m_rows(m->getMapHeight()),
-//      m_columns(m->getMapWidth()) {}
+//    : m_abstrMap(0), m_map(m), m_graph(g), m_rows(m->GetMapHeight()),
+//      m_columns(m->GetMapWidth()) {}
 //	
 //  MapEnv(MapAbstraction* am, Map* m, Graph* g)
-//    : m_abstrMap(am), m_map(m), m_graph(g), m_rows(m->getMapHeight()),
-//      m_columns(m->getMapWidth()) {}
+//    : m_abstrMap(am), m_map(m), m_graph(g), m_rows(m->GetMapHeight()),
+//      m_columns(m->GetMapWidth()) {}
 //	
 //  ~MapEnv() { }
 //	

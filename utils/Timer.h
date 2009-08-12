@@ -83,9 +83,9 @@ public:
 	Timer();
 	~Timer(){}
 
-	void startTimer();
-	double endTimer();
-	double getElapsedTime(){return elapsedTime;}
+	void StartTimer();
+	double EndTimer();
+	double GetElapsedTime(){return elapsedTime;}
 
 };
 

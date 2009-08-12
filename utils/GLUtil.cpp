@@ -462,7 +462,7 @@ void DrawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width)
 	glEnd();
 }
 
-void drawBox(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad)
+void DrawBox(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad)
 {
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f(xx-rad, yy-rad, zz-rad);

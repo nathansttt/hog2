@@ -58,10 +58,10 @@ void DSRMAStar<xyLoc,tDirection,MapEnvironment>::push_end_states_on_queue( CRSta
 	// sanity check: is the queue empty or are there rests?
 	assert( queue.empty() );
 
-	for( long width = 0; width < m->getMapWidth(); width++ ) {
-		for( long height = 0; height < m->getMapHeight(); height++ ) {
+	for( long width = 0; width < m->GetMapWidth(); width++ ) {
+		for( long height = 0; height < m->GetMapHeight(); height++ ) {
 
-			if( m->getTerrainType( width, height ) != kGround ) continue;
+			if( m->GetTerrainType( width, height ) != kGround ) continue;
 
 			nodesExpanded++;nodesTouched++;
 

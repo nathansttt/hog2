@@ -63,10 +63,10 @@ void MinimaxAStar<xyLoc,tDirection,MapEnvironment>::push_end_states_on_queue( CR
 	// sanity check: is the queue empty or are there rests?
 	assert( queue.empty() );
 
-	for( long width = 0; width < m->getMapWidth(); width++ ) {
-		for( long height = 0; height < m->getMapHeight(); height++ ) {
+	for( long width = 0; width < m->GetMapWidth(); width++ ) {
+		for( long height = 0; height < m->GetMapHeight(); height++ ) {
 
-			if( m->getTerrainType( width, height ) != kGround ) continue;
+			if( m->GetTerrainType( width, height ) != kGround ) continue;
 
 			nodesExpanded++;nodesTouched++;
 
@@ -126,8 +126,8 @@ double MinimaxAStar<xyLoc,tDirection,MapEnvironment>::HCost( CRState &pos1, bool
 	// case where edge costs are all 1
 	double hmax, hmin;
 	if( usePerfectDistanceHeuristic ) {
-		hmax = distance_heuristic[env->GetMap()->getNodeNum(pos1[0].x,pos1[0].y)][env->GetMap()->getNodeNum(pos2[0].x,pos2[0].y)];
-		hmin = distance_heuristic[env->GetMap()->getNodeNum(pos1[1].x,pos1[1].y)][env->GetMap()->getNodeNum(pos2[1].x,pos2[1].y)];
+		hmax = distance_heuristic[env->GetMap()->GetNodeNum(pos1[0].x,pos1[0].y)][env->GetMap()->GetNodeNum(pos2[0].x,pos2[0].y)];
+		hmin = distance_heuristic[env->GetMap()->GetNodeNum(pos1[1].x,pos1[1].y)][env->GetMap()->GetNodeNum(pos2[1].x,pos2[1].y)];
 	} else {
 		hmax = max(abs(pos1[0].x-pos2[0].x),abs(pos1[0].y-pos2[0].y));
 		hmin = max(abs(pos1[1].x-pos2[1].x),abs(pos1[1].y-pos2[1].y));

@@ -151,14 +151,14 @@ double ConfigEnvironment::GCost(recVec &node1, line2d &act)
 				(node1.z-act.end.z)*(node1.z-act.end.z));
 }
 
-bool ConfigEnvironment::GoalTest(recVec &node, recVec &goal)
+bool ConfigEnvironment::GoalTest(recVec &node, recVec &theGoal)
 {
-	return (fequal(node.x, goal.x) && fequal(node.y, goal.y) && fequal(node.z, goal.z));
+	return (fequal(node.x, theGoal.x) && fequal(node.y, theGoal.y) && fequal(node.z, theGoal.z));
 }
 
 uint64_t ConfigEnvironment::GetStateHash(recVec &node) const
 {
-	int x, y, z;
+	int x, y;
 	bool nx = node.x<0, ny = node.y<0;
 	x = (int)((double)fabs(node.x)*10000.0);
 	y = (int)((double)fabs(node.y)*10000.0);
@@ -203,7 +203,7 @@ void ConfigEnvironment::OpenGLDraw(const recVec &, const line2d &) const
 //}
 
 
-void ConfigEnvironment::GetNextState(recVec &currents, line2d dir, recVec &news) const
+void ConfigEnvironment::GetNextState(recVec &, line2d dir, recVec &news) const
 {
 	news = dir.end;
 }

@@ -133,9 +133,9 @@ node *IRAStar::FindTopLevelNode(node *one, node *two, GraphAbstraction *aMap)
 {
 	if ((one == 0) || (two == 0))
 		return 0;
-	if (aMap->GetAbstractionLevel(one) >= aMap->getNumAbstractGraphs())
+	if (aMap->GetAbstractionLevel(one) >= (int)aMap->getNumAbstractGraphs())
 		return 0;
-	if (aMap->GetAbstractionLevel(one) == aMap->getNumAbstractGraphs() - 1)
+	if (aMap->GetAbstractionLevel(one) == (int)aMap->getNumAbstractGraphs() - 1)
 	{
 		if (one == two)
 			return one;

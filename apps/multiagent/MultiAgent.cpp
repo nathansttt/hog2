@@ -138,15 +138,15 @@ void CreateSimulation(int id)
 {
 // 	Map* map;
 // 	map = new Map("../../maps/local/test_s2_ground.map");
-// 	map->scale(64,64);
-// 	map->save("../../maps/local/test_s2_64.map");
+// 	map->Scale(64,64);
+// 	map->Save("../../maps/local/test_s2_64.map");
 // 	
 // 	delete map;
 // 	
 // 	map = new Map("../../maps/local/test_s3_ground.map");
 // 	
-// 	map->scale(64,64);
-// 	map->save("../../maps/local/test_s3_64.map");
+// 	map->Scale(64,64);
+// 	map->Save("../../maps/local/test_s3_64.map");
 // 	
 // 	exit(0);
 // 	
@@ -159,7 +159,7 @@ void CreateSimulation(int id)
 	Map* map;
 	map = new Map(4*n+10, 2*n+1);
 		
-	map->setTileSet(kWinterTile);
+	map->SetTileSet(kWinterTile);
 	
 	Initialize(id, map);
 	SetNumPorts(id, 1);
@@ -262,7 +262,7 @@ void CreateSimulation(int id)
 // 	else
 // 		map = new Map(gDefaultMap);
 // 
-// 	map->setTileSet(kWinterTile);
+// 	map->SetTileSet(kWinterTile);
 // 		env = new AbsMapEnvironment(new MapSectorAbstraction(map,absSize));
 // 	unitSims.resize(id+1);
 // 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, AbsMapEnvironment>(env);
@@ -309,7 +309,7 @@ void DoRandom(int id)
 	else
 		map = new Map(gDefaultMap);
 
-	map->setTileSet(kWinterTile);
+	map->SetTileSet(kWinterTile);
 	
 	Initialize(id, map);
 	
@@ -416,10 +416,10 @@ void DoRandom(int id)
 
 			outfile<<"Total simulation time "<<time<<std::endl<<std::endl; 
 
-			for(unsigned int i=0; i<c.size(); i++)
+			for(unsigned int j=0; j<c.size(); j++)
 			{
-				outfile<<c[i]<<" "<<cn[i]<<" "<<c10[i]<<" "<<c10n[i]<<" "<<c20[i]<<" "<<c20n[i]
-				<<" "<<c30[i]<<" "<<c30n[i]<<" "<<c40[i]<<" "<<c40n[i]<<std::endl;
+				outfile<<c[j]<<" "<<cn[j]<<" "<<c10[j]<<" "<<c10n[j]<<" "<<c20[j]<<" "<<c20n[j]
+				<<" "<<c30[j]<<" "<<c30n[j]<<" "<<c40[j]<<" "<<c40n[j]<<std::endl;
 			}
 			exit(0);				
 		} // end if(runExperiment)
@@ -490,7 +490,7 @@ void RunScenario(int id)
 	char newname[1024] = "\0";
 	e.GetMapName(mname);
 	Map* map = new Map(mname);
-	map->setTileSet(kWinterTile);
+	map->SetTileSet(kWinterTile);
 	
 	Initialize(id, map);
 	
@@ -602,8 +602,8 @@ void RunScenario(int id)
 			
 		su->SetName(name);	
 		su->SetSpeed(1.0);
- 		//if (start.x < map->getMapWidth()/2)
-		su->SetColor(1.0-(double)start.x/map->getMapWidth(), (double)start.y/map->getMapHeight(), (double)start.x/map->getMapWidth());
+ 		//if (start.x < map->GetMapWidth()/2)
+		su->SetColor(1.0-(double)start.x/map->GetMapWidth(), (double)start.y/map->GetMapHeight(), (double)start.x/map->GetMapWidth());
  		//else
  		//	su->SetColor(0, 1, 0);
 		if(weighted) wug->AddUnit(su);
@@ -709,10 +709,10 @@ void RunScenario(int id)
 				
 			outfile<<std::endl;
 
-				for(unsigned int i=0; i<c.size(); i++)
+				for(unsigned int j=0; j<c.size(); j++)
 			{
-				outfile<<c[i]<<" "<<cn[i]<<" "<<c10[i]<<" "<<c10n[i]<<" "<<c20[i]<<" "<<c20n[i]
-				<<" "<<c30[i]<<" "<<c30n[i]<<" "<<c40[i]<<" "<<c40n[i]<<std::endl;
+				outfile<<c[j]<<" "<<cn[j]<<" "<<c10[j]<<" "<<c10n[j]<<" "<<c20[j]<<" "<<c20n[j]
+				<<" "<<c30[j]<<" "<<c30n[j]<<" "<<c40[j]<<" "<<c40n[j]<<std::endl;
 			}
 		
 				
@@ -724,7 +724,7 @@ void RunScenario(int id)
 				unitSims[id]->ClearAllUnits();
 				
 				// Add greedy units
-				for(int i=0; i<greedyNum; i++)
+				for(int j=0; j<greedyNum; j++)
 				{
 					//random location to start
 					xyLoc greedyStart;
@@ -750,10 +750,10 @@ void RunScenario(int id)
 
 void RunRandomMapScenario(int id)
 {
-	char mname[1024];
-	char newname[1024] = "\0";
+//	char mname[1024];
+//	char newname[1024] = "\0";
 	Map* map = new Map(gDefaultMap);
-	map->setTileSet(kWinterTile);
+	map->SetTileSet(kWinterTile);
 	
 	Initialize(id, map);
 	
@@ -816,12 +816,12 @@ void RunRandomMapScenario(int id)
 				
 		xyLoc start, goal;
 		do {
-			start.x = random()%map->getMapWidth();
-			start.y = random()%map->getMapHeight();
-			goal.x = random()%map->getMapWidth();
-			goal.y = random()%map->getMapHeight();
-		} while ((map->getTerrainType(start.x, start.y) != kGround) ||
-				 (map->getTerrainType(goal.x, goal.y) != kGround));
+			start.x = random()%map->GetMapWidth();
+			start.y = random()%map->GetMapHeight();
+			goal.x = random()%map->GetMapWidth();
+			goal.y = random()%map->GetMapHeight();
+		} while ((map->GetTerrainType(start.x, start.y) != kGround) ||
+				 (map->GetTerrainType(goal.x, goal.y) != kGround));
 		
 		GenericPatrolUnit<xyLoc,tDirection,AbsMapEnvironment> *su;
 		if(abstraction)
@@ -854,8 +854,8 @@ void RunRandomMapScenario(int id)
 
 		su->SetName(name);	
 		su->SetSpeed(1.0);
- 		//if (start.x < map->getMapWidth()/2)
-		su->SetColor(1.0-(double)start.x/map->getMapWidth(), (double)start.y/map->getMapHeight(), (double)start.x/map->getMapWidth());
+ 		//if (start.x < map->GetMapWidth()/2)
+		su->SetColor(1.0-(double)start.x/map->GetMapWidth(), (double)start.y/map->GetMapHeight(), (double)start.x/map->GetMapWidth());
  		//else
  		//	su->SetColor(0, 1, 0);
 		if(weighted) wug->AddUnit(su);
@@ -961,10 +961,10 @@ void RunRandomMapScenario(int id)
 		
 		outfile<<std::endl;
 		
-		for(unsigned int i=0; i<c.size(); i++)
+		for(unsigned int j=0; j<c.size(); j++)
 		{
-			outfile<<c[i]<<" "<<cn[i]<<" "<<c10[i]<<" "<<c10n[i]<<" "<<c20[i]<<" "<<c20n[i]
-			<<" "<<c30[i]<<" "<<c30n[i]<<" "<<c40[i]<<" "<<c40n[i]<<std::endl;
+			outfile<<c[j]<<" "<<cn[j]<<" "<<c10[j]<<" "<<c10n[j]<<" "<<c20[j]<<" "<<c20n[j]
+			<<" "<<c30[j]<<" "<<c30n[j]<<" "<<c40[j]<<" "<<c40n[j]<<std::endl;
 		}
 		
 		
@@ -976,7 +976,7 @@ void RunRandomMapScenario(int id)
 			unitSims[id]->ClearAllUnits();
 			
 			// Add greedy units
-			for(int i=0; i<greedyNum; i++)
+			for(int j=0; j<greedyNum; j++)
 			{
 				//random location to start
 				xyLoc greedyStart;
@@ -1012,49 +1012,49 @@ void PrintStatistics(int id, std::ofstream &outfile)
 	double tdist = 0; 
 	statValue v;
 	
-	for(unsigned int j=1; j<=numPatrols; j++)
+	for(int j=1; j<=numPatrols; j++)
 	{
 	
-	for(unsigned int i=0; i<names.size(); i++)
-	{
-	
-		char num[8];
- 		sprintf(num,"%d",j);
- 		
- 		char* namehere = new char[256];
-  		strcpy(namehere,names[i]);
-  		strcat(namehere,"_");
-  		strcat(namehere, num);
-	
-		if (unitSims[id]->GetStats()->lookupStat("nodesExpanded",namehere,v))
+		for(unsigned int i=0; i<names.size(); i++)
 		{
-			nodes = v.lval;
-			tnodes += nodes;
-		}
-		if(unitSims[id]->GetStats()->lookupStat("distanceTravelled",namehere,v))
-		{
-			dist = v.fval;
-			tdist += dist;
-		}
-		if(unitSims[id]->GetStats()->lookupStat("directionChanges",namehere,v))
-		{
-			dirChanged = v.lval;
-			tdirChanged += dirChanged;
-		}
-		if(unitSims[id]->GetStats()->lookupStat("failedMoves",namehere,v))
-		{
-			failedMoves = v.lval;
-			tfailedMoves += failedMoves;
-		}
-		if(unitSims[id]->GetStats()->lookupStat("directionChangesCollision",namehere,v))
-		{
-			dirChangedColl = v.lval;
-			tdirChangedColl += dirChangedColl;
-		}
 		
-		outfile<<namehere<<" "<<nodes<<" "<<dist<<" "<<dirChanged<<" "
-				 <<dirChangedColl<<" "<<failedMoves<<std::endl;
-	}	
+			char num[8];
+			sprintf(num,"%d",j);
+			
+			char* namehere = new char[256];
+			strcpy(namehere,names[i]);
+			strcat(namehere,"_");
+			strcat(namehere, num);
+		
+			if (unitSims[id]->GetStats()->LookupStat("nodesExpanded",namehere,v))
+			{
+				nodes = v.lval;
+				tnodes += nodes;
+			}
+			if(unitSims[id]->GetStats()->LookupStat("distanceTravelled",namehere,v))
+			{
+				dist = v.fval;
+				tdist += dist;
+			}
+			if(unitSims[id]->GetStats()->LookupStat("directionChanges",namehere,v))
+			{
+				dirChanged = v.lval;
+				tdirChanged += dirChanged;
+			}
+			if(unitSims[id]->GetStats()->LookupStat("failedMoves",namehere,v))
+			{
+				failedMoves = v.lval;
+				tfailedMoves += failedMoves;
+			}
+			if(unitSims[id]->GetStats()->LookupStat("directionChangesCollision",namehere,v))
+			{
+				dirChangedColl = v.lval;
+				tdirChangedColl += dirChangedColl;
+			}
+			
+			outfile<<namehere<<" "<<nodes<<" "<<dist<<" "<<dirChanged<<" "
+					 <<dirChangedColl<<" "<<failedMoves<<std::endl;
+		}	
 	}
 	outfile<<std::endl<<"Total "<<tnodes<<" "<<tdist<<" "
 	<<tdirChanged<<" "<<tdirChangedColl<<" "<<tfailedMoves<<std::endl<<std::endl
@@ -1065,7 +1065,7 @@ void PrintStatistics(int id, std::ofstream &outfile)
 	<<" "<<(tfailedMoves / (double)(names.size()))<<std::endl;
 }
 
-void RunExperiment(int id)
+void RunExperiment(int )
 {
 // /*		// First experiment code - on particular map (Aug 28 2007)
 // 	if(strcmp(gDefaultMap, "../../maps/local/test_s1_ground.map")==0)
@@ -1250,7 +1250,7 @@ void RunExperiment(int id)
 */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Clear Units", "Clear all units in the simulation", kAnyModifier, '|');
+	InstallKeyboardHandler(MyDisplayHandler, "clear Units", "clear all units in the simulation", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
@@ -1365,7 +1365,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	} // end switch	
 }
 
-int MyCLHandler(char *argument[], int maxNumArgs)
+int MyCLHandler(char *argument[], int )
 {
 	//if (maxNumArgs <= 1)
 	//			return 0;
@@ -1619,14 +1619,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 }
 
-void MySearchUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
+void MySearchUnitKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 // 	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
 // 	xyLoc start, goal;
-// 	start.x = random()%m->getMapWidth();
-// 	start.y = random()%m->getMapHeight();
-// 	goal.x = random()%m->getMapWidth();
-// 	goal.y = random()%m->getMapHeight();
+// 	start.x = random()%m->GetMapWidth();
+// 	start.y = random()%m->GetMapHeight();
+// 	goal.x = random()%m->GetMapWidth();
+// 	goal.y = random()%m->GetMapHeight();
 // 	
 // 		double r,g,b;
 // 	r = (double)rand() / RAND_MAX;
@@ -1640,7 +1640,7 @@ void MySearchUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 // 	unitSims[windowID]->AddUnit(u);
 }
 
-void MyPatrolKeyHandler(unsigned long windowID, tKeyboardModifier , char)
+void MyPatrolKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 // 	int xStart=5, yStart=5, xGoal=50, yGoal=50;
 // 	xyLoc start;
@@ -1677,7 +1677,7 @@ void MyPatrolKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	
 }
 
-bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
+bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
 {
 	return false;
 //	mouseTracking = false;
@@ -1686,19 +1686,19 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //		switch (mType)
 //		{
 //			case kMouseDown:
-//				unitSim->GetMap()->getPointFromCoordinate(loc, px1, py1);
+//				unitSim->GetMap()->GetPointFromCoordinate(loc, px1, py1);
 //				//printf("Mouse down at (%d, %d)\n", px1, py1);
 //				break;
 //			case kMouseDrag:
 //				mouseTracking = true;
-//				unitSim->GetMap()->getPointFromCoordinate(loc, px2, py2);
+//				unitSim->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 //				//printf("Mouse tracking at (%d, %d)\n", px2, py2);
 //				break;
 //			case kMouseUp:
 //			{
 //				if ((px1 == -1) || (px2 == -1))
 //					break;
-//				unitSim->GetMap()->getPointFromCoordinate(loc, px2, py2);
+//				unitSim->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 //				//printf("Mouse up at (%d, %d)\n", px2, py2);
 //				unit *u, *u2 = new unit(px2, py2, 0);
 //				//praStar *pra = new praStar(); pra->setPartialPathLimit(4);

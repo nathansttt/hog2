@@ -146,8 +146,8 @@ public:
 	bool GetUsingBPMX() { return useBPMX; }
 	
 	//state ClosedListIterNext(closedList_iterator&) const;
-	int GetNodesExpanded() { return nodesExpanded; }
-	int GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesExpanded() { return nodesExpanded; }
+	uint64_t GetNodesTouched() { return nodesTouched; }
 	
 	void LogFinalStats(StatCollection *) {}
 	
@@ -170,7 +170,7 @@ public:
 	 */
 	void SetWeight (double w){weight = w;}
 private:
-	long nodesTouched, nodesExpanded;
+	uint64_t nodesTouched, nodesExpanded;
 	bool GetNextNode(state &next);
 	//state Node();
 	void UpdateClosedNode(environment *env, state& currOpenNode, state& neighbor);

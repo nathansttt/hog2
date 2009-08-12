@@ -41,6 +41,7 @@ bool runningSearch2 = false;
 int px1, py1, px2, py2;
 int absType = 0;
 int mazeSize = 128;
+int gStepsPerFrame = 4;
 
 std::vector<UnitMapSimulation *> unitSims;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
@@ -68,11 +69,13 @@ void CreateSimulation(int id)
 	{
 		map = new Map(mazeSize/2, mazeSize/2);
 		MakeMaze(map, 1);
-		map->scale(mazeSize, mazeSize);
+		map->Scale(mazeSize, mazeSize);
 	}
-	else
+	else {
 		map = new Map(gDefaultMap);
-	map->setTileSet(kWinter);
+		map->Scale(512, 512);
+	}
+	map->SetTileSet(kWinter);
 	
 	unitSims.resize(id+1);
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map));
@@ -148,26 +151,27 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		glColor3f(1.0f, 0.0f, 0.0f);
 		Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
 		GLdouble x, y, z, r;
-		m->getOpenGLCoord(px1, py1, x, y, z, r);
+		m->GetOpenGLCoord(px1, py1, x, y, z, r);
 		glVertex3f(x, y, z-3*r);
-		m->getOpenGLCoord(px2, py2, x, y, z, r);
+		m->GetOpenGLCoord(px2, py2, x, y, z, r);
 		glVertex3f(x, y, z-3*r);
 		glEnd();
 	}
 
-//	if (gdh)
-//		gdh->OpenGLDraw();
 	if ((ma1) && (viewport == 0)) // only do this once...
 	{
 		ma1->SetColor(0.0, 0.5, 0.0, 0.75);
+		if (gdh)
+			gdh->OpenGLDraw();
 		if (runningSearch1)
 		{
 			ma1->SetColor(0.0, 0.0, 1.0, 0.75);
-			for (int x = 0; x < 50; x++)
+			for (int x = 0; x < gStepsPerFrame; x++)
 			{
 				if (a1.DoSingleSearchStep(path))
 				{
-					printf("Solution: moves %d, length %f\n", (int)path.size(), ma1->GetPathLength(path));
+					printf("Solution: moves %d, length %f, %lld nodes\n",
+						   (int)path.size(), ma1->GetPathLength(path), a1.GetNodesExpanded());
 					runningSearch1 = false;
 					break;
 				}
@@ -181,11 +185,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (runningSearch2)
 		{
 			ma2->SetColor(1.0, 0.0, 1.0, 0.5);
-			for (int x = 0; x < 50; x++)
+			for (int x = 0; x < gStepsPerFrame; x++)
 			{
 				if (a2.DoSingleSearchStep(path))
 				{
-					printf("Solution: moves %d, length %f\n", (int)path.size(), ma2->GetPathLength(path));
+					printf("Solution: moves %d, length %f, %lld nodes\n",
+						   (int)path.size(), ma1->GetPathLength(path), a2.GetNodesExpanded());
 					runningSearch2 = false;
 					break;
 				}
@@ -219,6 +224,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case '[': if (gStepsPerFrame > 2) gStepsPerFrame /= 2; break;
+		case ']': gStepsPerFrame *= 2; break;
 		case '\t':
 			if (mod != kShiftDown)
 				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
@@ -239,6 +246,35 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 {
+	if (gdh != 0)
+	{
+		int larger = 0;
+		int smaller = 0;
+		int same = 0;
+		for (int x = 0; x < 10000; x++)
+		{
+			Map *m = ma1->GetMap();
+			xyLoc a(random()%m->GetMapWidth(), random()%m->GetMapHeight());
+			xyLoc b(random()%m->GetMapWidth(), random()%m->GetMapHeight());
+			while ((m->GetTerrainType(a.x, a.y) != kGround) &&
+				   (m->GetTerrainType(b.x, b.y) != kGround))
+			{
+				a.x = random()%m->GetMapWidth();
+				b.x = random()%m->GetMapWidth();
+				a.y = random()%m->GetMapHeight();
+				b.y = random()%m->GetMapHeight();
+			}
+			double h1 = ma1->HCost(a, b);
+			double h2 = ma2->HCost(a, b);
+			if (fequal(h1, h2))
+				same++;
+			if (fgreater(h1, h2))
+				larger++;
+			if (fless(h1, h2))
+				smaller++;
+		}
+		printf("larger: %d, smaller: %d, equal: %d\n", larger, smaller, same);
+	}
 //	if (ma == 0)
 //		return;
 //	if (gdh == 0)
@@ -262,10 +298,10 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 //	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
 //	
 //	int x1, y1, x2, y2;
-//	x2 = random()%m->getMapWidth();
-//	y2 = random()%m->getMapHeight();
-//	x1 = random()%m->getMapWidth();
-//	y1 = random()%m->getMapHeight();
+//	x2 = random()%m->GetMapWidth();
+//	y2 = random()%m->GetMapHeight();
+//	x1 = random()%m->GetMapWidth();
+//	y1 = random()%m->GetMapHeight();
 //	SearchUnit *su1 = new SearchUnit(x1, y1, 0, 0);
 //	SearchUnit *su2 = new SearchUnit(x2, y2, su1, new TemplateAStar<xyLoc, tDirection, MapEnvironment>());
 //	//unitSim->AddUnit(su1);
@@ -273,30 +309,67 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 //	
 }
 
-void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
+void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-//	MapEnvironment *env = unitSims[windowID]->GetEnvironment();
-//	Map *m = env->GetMap();
-//
-//	MapEnvironment ma(m->clone());
-//	std::vector<xyLoc> path;
-//	TemplateAStar<xyLoc, tDirection, MapEnvironment> a;
-//	for (int x = 0; x < 10000; x++)
-//	{
-//		node *n1, *n2;
-//		do {
-//			Graph *g = mabs->GetAbstractGraph(0);
-//			n1 = g->GetRandomNode();
-//			n2 = g->GetRandomNode();
-//		} while (!mabs->Pathable(n1, n2));
-//		mabs->GetTileFromNode(n1, px1, py1);
-//		mabs->GetTileFromNode(n2, px2, py2);
-//		xyLoc s1, g1;
-//		s1.x = px1; s1.y = py1;
-//		g1.x = px2; g1.y = py2;
-//		a.GetPath(&ma, s1, g1, path);
-//		printf("%d\t%d\t%d\t%d\t%1.5f\n", px1, py1, px2, py2, ma.GetPathLength(path));
-//	}
+	std::vector<graphState> thePath;
+	MapEnvironment *env = unitSims[windowID]->GetEnvironment();
+	Map *m = env->GetMap();
+	Graph *g = GraphSearchConstants::GetGraph(m);
+
+//	GraphDistanceHeuristic diffHeuristic(g);
+//	diffHeuristic.UseSmartPlacement(true);
+//	for (int x = 0; x < 20; x++)
+//		diffHeuristic.AddHeuristic();
+
+	GraphMapInconsistentHeuristic diffHeuristic(m, g);
+	diffHeuristic.UseSmartPlacement(true);
+	for (int x = 0; x < 20; x++)
+		diffHeuristic.AddHeuristic();
+	
+	GraphEnvironment gEnv(g, &diffHeuristic);
+	gEnv.SetDirected(true);
+
+	diffHeuristic.SetMode(kRandom);
+	diffHeuristic.SetNumUsedHeuristics(2);
+
+	TemplateAStar<graphState, graphMove, GraphEnvironment> taNew;
+	TemplateAStar<graphState, graphMove, GraphEnvironment> taOld;
+	Timer t;
+	
+	for (int x = 0; x < 500; x++)
+	{
+		graphState s1, g1;
+		do {
+			s1 = g->GetRandomNode()->GetNum();
+			g1 = g->GetRandomNode()->GetNum();
+		} while (gEnv.HCost(s1, g1) < 100);
+		double firstLength;
+
+		taNew.SetUseBPMX(false);
+		t.StartTimer();
+		taNew.GetPath(&gEnv, s1, g1, thePath);
+		t.EndTimer();
+		printf("old: %lld nodes expanded. Path length %d / %f. Time: %f\nrate0: %lld %f\n", 
+			   taNew.GetNodesExpanded(), (int)thePath.size(), gEnv.GetPathLength(thePath), t.GetElapsedTime(),
+			   taNew.GetNodesExpanded(), taNew.GetNodesExpanded()/t.GetElapsedTime());
+		firstLength = gEnv.GetPathLength(thePath);
+
+		for (int y = 1; y < 5; y++)
+		{
+			taNew.SetUseBPMX(y);
+			t.StartTimer();
+			taNew.GetPath(&gEnv, s1, g1, thePath);
+			t.EndTimer();
+			printf("new: %lld nodes expanded. Path length %d / %f. Time: %f\nrate%d: %lld %f\n", 
+				   taNew.GetNodesExpanded(), (int)thePath.size(), gEnv.GetPathLength(thePath), t.GetElapsedTime(),
+				   y, taNew.GetNodesExpanded(), taNew.GetNodesExpanded()/t.GetElapsedTime());
+
+			if (gEnv.GetPathLength(thePath) != firstLength)
+				printf("\n\n\n!!!!!!!!!!!!!!!!!! IT FAILED!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n");
+		}
+		printf("--\n");
+	}	
+	delete g;
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
@@ -307,42 +380,49 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 		switch (mType)
 		{
 			case kMouseDown:
-				unitSims[windowID]->GetEnvironment()->GetMap()->getPointFromCoordinate(loc, px1, py1);
+				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px1, py1);
 				//printf("Mouse down at (%d, %d)\n", px1, py1);
 				break;
 			case kMouseDrag:
 				mouseTracking = true;
-				unitSims[windowID]->GetEnvironment()->GetMap()->getPointFromCoordinate(loc, px2, py2);
+				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 				//printf("Mouse tracking at (%d, %d)\n", px2, py2);
 				break;
 			case kMouseUp:
 			{
 				if ((px1 == -1) || (px2 == -1))
 					break;
-				unitSims[windowID]->GetEnvironment()->GetMap()->getPointFromCoordinate(loc, px2, py2);
+				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
 				
 				if (ma1 == 0)
 				{
 					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-					gdh = new GraphDistanceHeuristic(GraphSearchConstants::GetGraph(ma1->GetMap()));
+					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
 					gdh->UseSmartPlacement(true);
 					ma1->SetGraphHeuristic(gdh);
 					for (int x = 0; x < 10; x++)
 						gdh->AddHeuristic();
+					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
+					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
 				}
 				if (ma2 == 0)
 					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
+
 				a1.SetStopAfterGoal(true);
 				a2.SetStopAfterGoal(true);
+				//a2.SetWeight(1.8);
 				xyLoc s1;
 				xyLoc g1;
 				s1.x = px1; s1.y = py1;
 				g1.x = px2; g1.y = py2;
+					   
 				a1.InitializeSearch(ma1, s1, g1, path);
 				a2.InitializeSearch(ma2, s1, g1, path);
+				a2.SetUseBPMX(true);
 				runningSearch1 = true;
 				runningSearch2 = true;
+				
 			}
 			break;
 		}

@@ -72,7 +72,7 @@ public:
   int GetNumNodes() const { return nodes.size(); }
   int getHOrig() const { return m_horizOrigin; }
   int getVOrig() const { return m_vertOrigin; }
-  int getHeight() const { return m_height; }
+  int GetHeight() const { return m_height; }
   int getWidth() const { return m_width; } 
 	void addParent(node* n) { parents.push_back(n); } 
 	std::vector<node*>&  getParents() { return parents; } 
@@ -138,7 +138,7 @@ class ClusterAbstraction : public MapAbstraction {
 public:
   ClusterAbstraction(Map *map, int _clusterSize);
   ~ClusterAbstraction();
-	MapAbstraction* clone(Map* map)
+	MapAbstraction* Clone(Map* map)
 	{ return new ClusterAbstraction(map, clusterSize); }
 
 	int getClusterSize() { return clusterSize; };  

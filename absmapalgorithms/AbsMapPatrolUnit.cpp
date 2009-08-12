@@ -111,13 +111,13 @@ double AbsMapPatrolUnit::goToLoc(MapAbstraction *aMap, int which)
 	return pathCost;
 }
 
-void AbsMapPatrolUnit::OpenGLDraw(int window, AbsMapEnvironment *ame, AbsMapSimulationInfo *si)
+void AbsMapPatrolUnit::OpenGLDraw(const AbsMapEnvironment *ame, const AbsMapSimulationInfo *) const
 
 {
 	GLdouble xx, yy, zz, rad;
 	Map *map = ame->GetMap();
 	int posx = loc.x, posy = loc.y;
-	map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
+	map->GetOpenGLCoord(posx, posy, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	glBegin(GL_LINE_STRIP);
 //	glVertex3f(xx, yy+rad/2, zz);
@@ -127,14 +127,14 @@ void AbsMapPatrolUnit::OpenGLDraw(int window, AbsMapEnvironment *ame, AbsMapSimu
 		posx += ((moves[t]&kE)?1:0) - ((moves[t]&kW)?1:0);
 		posy += ((moves[t]&kS)?1:0) - ((moves[t]&kN)?1:0);
 		
-		map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
+		map->GetOpenGLCoord(posx, posy, xx, yy, zz, rad);
 		
 //		glVertex3f(xx, yy+rad/2, zz);
 		glVertex3f(xx, yy, zz-rad/2);
 	}
 	glEnd();
 	
-	map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	DrawSphere(xx, yy, zz, rad);
 }

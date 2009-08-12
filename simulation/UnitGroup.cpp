@@ -102,19 +102,19 @@
 //bool unitGroup::done()
 //{
 //	for (unsigned int x = 0; x < myUnits.size(); x++)
-//		if (!myUnits[x]->done())
+//		if (!myUnits[x]->Done())
 //			return false;
 //	return true;
 //}
 //
 ///** Lets the unit group do what it needs to reset a trial */
-//void unitGroup::startNewTrial(StatCollection *)
+//void unitGroup::StartNewTrial(StatCollection *)
 //{
 //}
 //
-//void unitGroup::logStats(StatCollection *)
+//void unitGroup::LogStats(StatCollection *)
 //{
-//	//u->logStats(stats);
+//	//u->LogStats(stats);
 //	//u->printRoundStats(f);
 //}
 //

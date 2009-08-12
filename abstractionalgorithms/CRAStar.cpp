@@ -101,7 +101,7 @@ path *craStar::GetPath(GraphAbstraction *aMap, node *from, node *to, reservation
 	
 	//	if (verbose){
 	// 	std::cout<<"before smoothing :";
-	// 	lastPath->print();
+	// 	lastPath->Print();
 	// 	std::cout<<std::endl;
 	//}
 	
@@ -555,7 +555,7 @@ path* craStar::smoothPath(GraphAbstraction *m,path* p)
 	
 	// put the path nodes in a vector
 	lookup.clear();
-//	path* pcopy = p->clone();
+//	path* pcopy = p->Clone();
 //	path* ptr = pcopy;
 	int tempLabel=0; 
 	

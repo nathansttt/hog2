@@ -57,7 +57,7 @@ public:
 	virtual ~graph_object() {}
 	virtual double GetKey() { return 0; }
 	virtual void Print(std::ostream&) const;
-	virtual graph_object *clone() const = 0;
+	virtual graph_object *Clone() const = 0;
 	unsigned int key; // for use by a data structure to maintain a reverse-lookup
 	// to go from an object to a table key in constant time.
 private:
@@ -74,7 +74,7 @@ class Graph : public graph_object {
 public:
 	Graph();
 	~Graph();
-	graph_object *clone() const; // clones just the nodes
+	graph_object *Clone() const; // clones just the nodes
 	Graph *cloneAll() const;     // clones everything
 	
 	int AddNode(node *);
@@ -128,7 +128,7 @@ private:
 class edge : public graph_object {
 public:
 	edge(unsigned int, unsigned int, double);
-	graph_object *clone() const { return new edge(from, to, GetLabelF(kEdgeWeight)); }
+	graph_object *Clone() const { return new edge(from, to, GetLabelF(kEdgeWeight)); }
 	
 	// set/get various labels for each node
 	void SetLabelF(unsigned int index, double val);
@@ -169,7 +169,7 @@ private:
 class node : public graph_object {
 public:
 	node(const char *);
-	graph_object *clone() const;
+	graph_object *Clone() const;
 	
 	const char *GetName() const { return name; }
 	unsigned int GetNum() const { return nodeNum; }

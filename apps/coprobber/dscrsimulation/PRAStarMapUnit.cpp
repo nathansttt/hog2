@@ -26,11 +26,11 @@ template<>
 void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( const MapEnvironment *env, const SimulationInfo<xyLoc,tDirection,MapEnvironment>* ) const {
 	GLdouble xx, yy, zz, rad;
 	Map *m = env->GetMap();
-	if( current_pos.x >= m->getMapWidth() || current_pos.y >= m->getMapHeight() ) {
+	if( current_pos.x >= m->GetMapWidth() || current_pos.y >= m->GetMapHeight() ) {
 		fprintf( stderr, "Warning: PraStarMapUnit is out of bounds. Could not draw it.\n" );
 		return;
 	}
-	m->getOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
+	m->GetOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
 	if( done )
 		glColor3d( 0., 1., 0. ); // turn green when done
 	else
@@ -42,7 +42,7 @@ void PraStarMapUnit<xyLoc,tDirection,MapEnvironment>::OpenGLDraw( const MapEnvir
 		glBegin(GL_LINE_STRIP);
 		glVertex3f( xx, yy, zz-rad/2 );
 		for( unsigned int i = 0; i < pathcache.size(); i++ ) {
-			m->getOpenGLCoord( pathcache[i].x, pathcache[i].y, xx, yy, zz, rad );
+			m->GetOpenGLCoord( pathcache[i].x, pathcache[i].y, xx, yy, zz, rad );
 			glVertex3f( xx, yy, zz-rad/2 );
 		}
 		glEnd();
@@ -55,11 +55,11 @@ template<>
 void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( const AbsMapEnvironment *env, const SimulationInfo<xyLoc,tDirection,AbsMapEnvironment>* ) const {
 	GLdouble xx, yy, zz, rad;
 	Map *m = env->GetMap();
-	if( current_pos.x >= m->getMapWidth() || current_pos.y >= m->getMapHeight() ) {
+	if( current_pos.x >= m->GetMapWidth() || current_pos.y >= m->GetMapHeight() ) {
 		fprintf( stderr, "Warning: PraStarMapUnit is out of bounds. Could not draw it.\n" );
 		return;
 	}
-	m->getOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
+	m->GetOpenGLCoord( current_pos.x, current_pos.y, xx, yy, zz, rad );
 	if( done )
 		glColor3d( 0., 1., 0. ); // turn green when done
 	else
@@ -71,7 +71,7 @@ void PraStarMapUnit<xyLoc,tDirection,AbsMapEnvironment>::OpenGLDraw( const AbsMa
 		glBegin(GL_LINE_STRIP);
 		glVertex3f( xx, yy, zz-rad/2 );
 		for( unsigned int i = 0; i < pathcache.size(); i++ ) {
-			m->getOpenGLCoord( pathcache[i].x, pathcache[i].y, xx, yy, zz, rad );
+			m->GetOpenGLCoord( pathcache[i].x, pathcache[i].y, xx, yy, zz, rad );
 			glVertex3f( xx, yy, zz-rad/2 );
 		}
 		glEnd();

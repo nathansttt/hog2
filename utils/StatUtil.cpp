@@ -38,11 +38,11 @@ inline double max(double a, double b)
  */
 void setupAverageRatio(StatCollection *stats, char *stat1, char *stat2)
 {
-	stats->clearAllStats();
-	stats->clearFilters();
-	stats->addIncludeFilter(stat1);
-	stats->addIncludeFilter(stat2);
-	stats->addIncludeFilter("simulationTime");
+	stats->ClearAllStats();
+	stats->ClearFilters();
+	stats->AddIncludeFilter(stat1);
+	stats->AddIncludeFilter(stat2);
+	stats->AddIncludeFilter("simulationTime");
 }
 
 /**
@@ -52,17 +52,17 @@ void setupAverageRatio(StatCollection *stats, char *stat1, char *stat2)
  */
 void measureAverageRatio(StatCollection *stats)
 {
-//	stats->printStatsTable();
+//	stats->PrintStatsTable();
 	
 	int stat1Type = -1, stat2Type = -1;
 	std::vector<const stat *> stat1;
 	std::vector<const stat *> stat2;
 	int currOwner = -1;
 	
-	for (int x = 0; x < stats->getNumStats(); x++)
+	for (int x = 0; x < stats->GetNumStats(); x++)
 	{
-		const stat *s = stats->getStatNum(x);
-		if (s->owner == stats->lookupOwner("unitSimulation"))
+		const stat *s = stats->GetStatNum(x);
+		if (s->owner == stats->LookupOwner("unitSimulation"))
 		{
 			while (stat1.size() > stat2.size())
 				stat1.pop_back();
@@ -73,7 +73,7 @@ void measureAverageRatio(StatCollection *stats)
 		if (currOwner == -1)
 		{
 			currOwner = s->owner;
-			printf("Collecting stats for %s\n", stats->lookupOwnerID(currOwner));
+			printf("Collecting stats for %s\n", stats->LookupOwnerID(currOwner));
 		}
 		if (s->owner != currOwner)
 			continue;
@@ -136,7 +136,7 @@ void measureAverageRatio(StatCollection *stats)
 	printf("Measuring ratio between %s and %s as collected by %s\n",
 				 stats->lookupCategoryID(stat1Type),
 				 stats->lookupCategoryID(stat2Type),
-				 stats->lookupOwnerID(currOwner));
+				 stats->LookupOwnerID(currOwner));
 	printf("%d stats collected\n%s average %1.4e\n%s average %1.4e\n",
 				 (int)stat1.size(), stats->lookupCategoryID(stat1Type), 
 				 (double)sum1/stat1.size(), stats->lookupCategoryID(stat2Type), 
@@ -158,16 +158,16 @@ double SumStatEntries(StatCollection *stats, const char *category, const char *o
 	double sum = 0.0;
 	int catID, ownerID;
 	catID = stats->LookupCategory(category);
-	ownerID = stats->lookupOwner(owner);
+	ownerID = stats->LookupOwner(owner);
 	
-	for (int x = 0; x < (int)stats->getNumStats(); x++)
+	for (int x = 0; x < (int)stats->GetNumStats(); x++)
 	{
-		if ((stats->getStatNum(x)->category == catID) && (stats->getStatNum(x)->owner == ownerID))
+		if ((stats->GetStatNum(x)->category == catID) && (stats->GetStatNum(x)->owner == ownerID))
 		{
-			if (stats->getStatNum(x)->sType == floatStored)
-				sum += stats->getStatNum(x)->value.fval;
+			if (stats->GetStatNum(x)->sType == floatStored)
+				sum += stats->GetStatNum(x)->value.fval;
 			else
-				sum += (double)stats->getStatNum(x)->value.lval;
+				sum += (double)stats->GetStatNum(x)->value.lval;
 		}
 	}
 	
@@ -179,16 +179,16 @@ double maxStatEntries(StatCollection *stats, const char *category, const char *o
 	double maxval = -9999999999.9;
 	int catID, ownerID;
 	catID = stats->LookupCategory(category);
-	ownerID = stats->lookupOwner(owner);
+	ownerID = stats->LookupOwner(owner);
 	
-	for (int x = 0; x < (int)stats->getNumStats(); x++)
+	for (int x = 0; x < (int)stats->GetNumStats(); x++)
 	{
-		if ((stats->getStatNum(x)->category == catID) && (stats->getStatNum(x)->owner == ownerID))
+		if ((stats->GetStatNum(x)->category == catID) && (stats->GetStatNum(x)->owner == ownerID))
 		{
-			if (stats->getStatNum(x)->sType == floatStored)
-				maxval = max(maxval, stats->getStatNum(x)->value.fval);
+			if (stats->GetStatNum(x)->sType == floatStored)
+				maxval = max(maxval, stats->GetStatNum(x)->value.fval);
 			else
-				maxval = max(maxval, (double)stats->getStatNum(x)->value.lval);
+				maxval = max(maxval, (double)stats->GetStatNum(x)->value.lval);
 		}
 	}
 	return maxval;
@@ -200,10 +200,10 @@ long unsigned countStatEntries(StatCollection *stats, const char *category, cons
 	long unsigned count = 0;
 	int catID, ownerID;
 	catID = stats->LookupCategory(category);
-	ownerID = stats->lookupOwner(owner);
+	ownerID = stats->LookupOwner(owner);
 	
-	for (int x = 0; x < (int)stats->getNumStats(); x++)
-		if ((stats->getStatNum(x)->category == catID) && (stats->getStatNum(x)->owner == ownerID))
+	for (int x = 0; x < (int)stats->GetNumStats(); x++)
+		if ((stats->GetStatNum(x)->category == catID) && (stats->GetStatNum(x)->owner == ownerID))
 			count++;
 				
 	return count;
@@ -215,16 +215,16 @@ double averageStatEntries(StatCollection *stats, const char *category, const cha
 	double count = 0.0;
 	int catID, ownerID;
 	catID = stats->LookupCategory(category);
-	ownerID = stats->lookupOwner(owner);
+	ownerID = stats->LookupOwner(owner);
 	
-	for (int x = 0; x < (int)stats->getNumStats(); x++)
+	for (int x = 0; x < (int)stats->GetNumStats(); x++)
 	{
-		if ((stats->getStatNum(x)->category == catID) && (stats->getStatNum(x)->owner == ownerID))
+		if ((stats->GetStatNum(x)->category == catID) && (stats->GetStatNum(x)->owner == ownerID))
 		{
-			if (stats->getStatNum(x)->sType == floatStored)
-				sum += stats->getStatNum(x)->value.fval;
+			if (stats->GetStatNum(x)->sType == floatStored)
+				sum += stats->GetStatNum(x)->value.fval;
 			else
-				sum += (double)stats->getStatNum(x)->value.lval;
+				sum += (double)stats->GetStatNum(x)->value.lval;
 			count++;
 		}
 	}
@@ -240,18 +240,18 @@ double stdevStatEntries(StatCollection *stats, const char *category, const char 
 	double count = 0;
 	int catID, ownerID;
 	catID = stats->LookupCategory(category);
-	ownerID = stats->lookupOwner(owner);
+	ownerID = stats->LookupOwner(owner);
 	
-	for (int x = 0; x < (int)stats->getNumStats(); x++)
+	for (int x = 0; x < (int)stats->GetNumStats(); x++)
 	{
-		if ((stats->getStatNum(x)->category == catID) && (stats->getStatNum(x)->owner == ownerID))
+		if ((stats->GetStatNum(x)->category == catID) && (stats->GetStatNum(x)->owner == ownerID))
 		{
-			if (stats->getStatNum(x)->sType == floatStored)
-				stdev += (average-stats->getStatNum(x)->value.fval)*
-					(average-stats->getStatNum(x)->value.fval);
+			if (stats->GetStatNum(x)->sType == floatStored)
+				stdev += (average-stats->GetStatNum(x)->value.fval)*
+					(average-stats->GetStatNum(x)->value.fval);
 			else
-				stdev += (average-(double)stats->getStatNum(x)->value.lval)*
-					(average-(double)stats->getStatNum(x)->value.lval);
+				stdev += (average-(double)stats->GetStatNum(x)->value.lval)*
+					(average-(double)stats->GetStatNum(x)->value.lval);
 			count++;
 		}
 	}

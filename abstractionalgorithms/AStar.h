@@ -104,8 +104,8 @@ public:
 	void setCorridor(path *corridor, int width);
 	
 	void printStats();
-	long GetNodesExpanded() { return nodesExpanded; }
-	long GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesExpanded() { return nodesExpanded; }
+	uint64_t GetNodesTouched() { return nodesTouched; }
 	void resetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	int getMemoryUsage();
 private:

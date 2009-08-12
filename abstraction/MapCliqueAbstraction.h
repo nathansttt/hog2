@@ -39,11 +39,11 @@ public:
   MapCliqueAbstraction(Map *, bool uniform = true);
   virtual ~MapCliqueAbstraction();
 	/** return a new abstraction map of the same type as this map abstraction */
-	virtual MapAbstraction *clone(Map *_m) { return new MapCliqueAbstraction(_m); }
+	virtual MapAbstraction *Clone(Map *_m) { return new MapCliqueAbstraction(_m); }
 	virtual void VerifyHierarchy();
 //  virtual void draw();
 //  virtual void rebuild();
-//	virtual int getRevision() { return 0; }
+//	virtual int GetRevision() { return 0; }
 	
   bool Pathable(node *from, node *to);
   bool Pathable(unsigned int from, unsigned int to);

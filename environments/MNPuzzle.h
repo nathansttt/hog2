@@ -89,7 +89,7 @@ public:
 	double HCost(MNPuzzleState &state1);
 
 	double GCost(MNPuzzleState &state1, MNPuzzleState &state2);
-	double GCost(MNPuzzleState &state1, slideDir &act) { return 1.0; }
+	double GCost(MNPuzzleState &, slideDir &) { return 1.0; }
 	bool GoalTest(MNPuzzleState &state, MNPuzzleState &goal);
 
 	bool GoalTest(MNPuzzleState &s);
@@ -99,7 +99,7 @@ public:
 	uint64_t GetActionHash(slideDir act) const;
 	void OpenGLDraw() const;
 	void OpenGLDraw(const MNPuzzleState &s) const;
-	void OpenGLDraw(const MNPuzzleState &l1, const MNPuzzleState &l2, double v) const;
+	void OpenGLDraw(const MNPuzzleState &l1, const MNPuzzleState &l2, float v) const;
 	void OpenGLDraw(const MNPuzzleState &, const slideDir &) const { /* currently not drawing moves */ }
 	void StoreGoal(MNPuzzleState &); // stores the locations for the given goal state
 	void ClearGoal(); // clears the current stored information of the goal

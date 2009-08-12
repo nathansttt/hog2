@@ -421,14 +421,14 @@ void compute_testing( int argc, char* argv[] ) {
 	int num = g->GetNumNodes();
 	for( int i = 0; i < num; i++ ) {
 		node *n = g->GetNode( i );
-		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->getCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->getCoordinateScale() );
+		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->GetCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->GetCoordinateScale() );
 	}
 	printf( "graph at level 1:\n" );
 	g = mclab->GetAbstractGraph( 1 );
 	num = g->GetNumNodes();
 	for( int i = 0; i < num; i++ ) {
 		node *n = g->GetNode( i );
-		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->getCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->getCoordinateScale() );
+		printf( "i=%d : x@%g y@%g\n", i, n->GetLabelF(GraphAbstractionConstants::kXCoordinate) *m->GetCoordinateScale(), n->GetLabelF(GraphAbstractionConstants::kYCoordinate) * m->GetCoordinateScale() );
 	}
 
 	g = mclab->GetAbstractGraph( 1 );
@@ -451,7 +451,7 @@ void compute_dijkstra( int argc, char* argv[] ) {
 	int max_depth;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
-	//printf( "map: %s\n", m->getMapName() );
+	//printf( "map: %s\n", m->GetMapNamee() );
 
 	Graph *g = GraphSearchConstants::GetGraph( m );
 	GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
@@ -500,17 +500,17 @@ void compute_rma( int argc, char* argv[] ) {
 		if( strcmp( argv[curr], "-pc" ) == 0 ) {
 			sscanf( argv[curr+1], "%d,%d", &x, &y );
 			printf( "x = %d, y = %d\n", x, y );
-			s.push_back( m->getNodeNum( x, y ) );
+			s.push_back( m->GetNodeNum( x, y ) );
 		}
 		if( strcmp( argv[curr], "-pr" ) == 0 ) {
 			sscanf( argv[curr+1], "%d,%d", &x, &y );
 			printf( "x = %d, y = %d\n", x, y );
-			s.push_back( m->getNodeNum( x, y ) );
+			s.push_back( m->GetNodeNum( x, y ) );
 		}
 
 		curr += 2;
 	}
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "robber position: %lu\n", s[0] );
 	printf( "cops positions: " );
 	for( unsigned int i = 1; i < s.size(); i++ )
@@ -553,7 +553,7 @@ void compute_rma( int argc, char* argv[] ) {
 	int max_depth;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -590,7 +590,7 @@ void compute_minimax( int argc, char* argv[] ) {
 	std::vector<Minimax<xyLoc,tDirection,MapEnvironment>::CRState> path;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -624,7 +624,7 @@ void compute_minimax_optimized( int argc, char* argv[] ) {
 	std::vector<Minimax<xyLoc,tDirection,MapEnvironment>::CRState> path;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -649,7 +649,7 @@ void compute_tida( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -690,7 +690,7 @@ void compute_tida( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -726,7 +726,7 @@ void compute_ipn( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -753,7 +753,7 @@ void compute_ipnttables( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -792,7 +792,7 @@ void compute_dsidfpn( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -803,8 +803,8 @@ void compute_dsidfpn( int argc, char* argv[] ) {
 
 	DSIDFPN *dsidfpn = new DSIDFPN( env, 1 );
 
-	graphState rpos = m->getNodeNum( pos_robber.x, pos_robber.y );
-	graphState cpos = m->getNodeNum( pos_cop.x, pos_cop.y );
+	graphState rpos = m->GetNodeNum( pos_robber.x, pos_robber.y );
+	graphState cpos = m->GetNodeNum( pos_cop.x, pos_cop.y );
 
 	double result = dsidfpn->dsidfpn( rpos, cpos, true );
 
@@ -825,7 +825,7 @@ void compute_tpdijkstra( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -851,7 +851,7 @@ void compute_dstpdijkstra( int argc, char* argv[] ) {
 	std::vector<xyLoc> path;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -881,7 +881,7 @@ void compute_dsdijkstra( int argc, char* argv[] ) {
 	int max_depth;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 
 	MapEnvironment *env = new MapEnvironment( m );
 
@@ -918,7 +918,7 @@ void compute_dsdijkstra_memoptim( int argc, char* argv[] ) {
 
 		fscanf( fhandler, "%s\n", map_file );
 		m = new Map( map_file );
-		std::cout << "map: " << m->getMapName() << std::endl;
+		std::cout << "map: " << m->GetMapNamee() << std::endl;
 
 		Graph *g = GraphSearchConstants::GetGraph( m );
 		GraphMapHeuristic *gh = new GraphMapHeuristic( m, g );
@@ -967,7 +967,7 @@ void compute_dsbestresponse( int argc, char* argv[] ) {
 	while( !feof( fhandler ) ) {
 		fscanf( fhandler, "%s\n", map_file );
 		m = new Map( map_file );
-		std::cout << "map: " << m->getMapName() << std::endl;
+		std::cout << "map: " << m->GetMapNamee() << std::endl;
 
 		MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
 		Graph *g = mclab->GetAbstractGraph( 0 );
@@ -1037,7 +1037,7 @@ void compute_dsrma( int argc, char* argv[] ) {
 	int max_depth;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_depth );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 	MapEnvironment *env = new MapEnvironment( m );
@@ -1070,7 +1070,7 @@ void compute_dscover( int argc, char* argv[] ) {
 	bool who;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -1080,8 +1080,8 @@ void compute_dscover( int argc, char* argv[] ) {
 
 	DSCover<graphState,graphMove> *dscover = new DSCover<graphState,graphMove>( env, 1 );
 
-	unsigned int c = dscover->cover( m->getNodeNum( pos_robber.x, pos_robber.y ),
-		m->getNodeNum( pos_cop.x, pos_cop.y ), true, who );
+	unsigned int c = dscover->cover( m->GetNodeNum( pos_robber.x, pos_robber.y ),
+		m->GetNodeNum( pos_cop.x, pos_cop.y ), true, who );
 
 	if( who )
 		printf( "cop" );
@@ -1092,9 +1092,9 @@ void compute_dscover( int argc, char* argv[] ) {
 	printf( "nodes touched: %u\n", dscover->nodesTouched );
 
 	graphState s;
-	s = dscover->MakeMove( m->getNodeNum(pos_robber.x,pos_robber.y), m->getNodeNum(pos_cop.x,pos_cop.y), false, g->GetNumNodes() );
+	s = dscover->MakeMove( m->GetNodeNum(pos_robber.x,pos_robber.y), m->GetNodeNum(pos_cop.x,pos_cop.y), false, g->GetNumNodes() );
 	printf( "next move for the robber: %lu\n", s );
-	s = dscover->MakeMove( m->getNodeNum(pos_robber.x,pos_robber.y), m->getNodeNum(pos_cop.x,pos_cop.y), true, g->GetNumNodes() );
+	s = dscover->MakeMove( m->GetNodeNum(pos_robber.x,pos_robber.y), m->GetNodeNum(pos_cop.x,pos_cop.y), true, g->GetNumNodes() );
 	printf( "next move for the cop: %lu\n", s );
 
 	delete dscover;
@@ -1112,7 +1112,7 @@ void compute_dscover2( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pos_cop, pos_robber, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pos_cop.x, pos_cop.y );
 	printf( "robber position: %d,%d\n", pos_robber.x, pos_robber.y );
 
@@ -1122,8 +1122,8 @@ void compute_dscover2( int argc, char* argv[] ) {
 
 	DSCover2<graphState,graphMove> *dscover2 = new DSCover2<graphState,graphMove>( env, g->GetNumNodes(), 2 );
 
-	graphState r = m->getNodeNum( pos_robber.x, pos_robber.y );
-	graphState c = m->getNodeNum( pos_cop.x, pos_cop.y );
+	graphState r = m->GetNodeNum( pos_robber.x, pos_robber.y );
+	graphState c = m->GetNodeNum( pos_cop.x, pos_cop.y );
 
 	printf( "robber @ (%u,%u)=%lu\n", pos_robber.x, pos_robber.y, r );
 	printf( "cop    @ (%u,%u)=%lu\n", pos_cop.x, pos_cop.y, c );
@@ -1151,7 +1151,7 @@ void compute_dsheuristicgreedy( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pc, pr, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pc.x, pc.y );
 	printf( "robber position: %d,%d\n", pr.x, pr.y );
 
@@ -1162,8 +1162,8 @@ void compute_dsheuristicgreedy( int argc, char* argv[] ) {
 
 	DSHeuristicGreedy<graphState,graphMove> *dshg = new DSHeuristicGreedy<graphState,graphMove>( env, true, 1 );
 
-	pos_robber = m->getNodeNum( pr.x, pr.y );
-	pos_cop    = m->getNodeNum( pc.x, pc.y );
+	pos_robber = m->GetNodeNum( pr.x, pr.y );
+	pos_cop    = m->GetNodeNum( pc.x, pc.y );
 	printf( "next move for the robber: %lu\n", dshg->MakeMove( pos_robber, pos_cop, false ) );
 	printf( "next move for the cop: %lu\n", dshg->MakeMove( pos_robber, pos_cop, true ) );
 
@@ -1185,7 +1185,7 @@ void compute_dsminimax( int argc, char* argv[] ) {
 	int depth;
 
 	parseCommandLineParameters( argc, argv, m, pc, pr, depth );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pc.x, pc.y );
 	printf( "robber position: %d,%d\n", pr.x, pr.y );
 	printf( "computation depth: %d\n", depth );
@@ -1200,8 +1200,8 @@ void compute_dsminimax( int argc, char* argv[] ) {
 
 	DSMinimax<graphState,graphMove> *dsminimax = new DSMinimax<graphState,graphMove>( env, true, 2 );
 
-	pos_robber = m->getNodeNum( pr.x, pr.y );
-	pos_cop    = m->getNodeNum( pc.x, pc.y );
+	pos_robber = m->GetNodeNum( pr.x, pr.y );
+	pos_cop    = m->GetNodeNum( pc.x, pc.y );
 	double result = dsminimax->minimax( pos_robber, pos_cop, path, false, depth );
 
 	printf( "result of the computation: %g\n", result );
@@ -1229,7 +1229,7 @@ void compute_dsdam( int argc, char* argv[] ) {
 
 	parseCommandLineParameters( argc, argv, m, pc, pr, depth );
 	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d (%d)\n", pc.x, pc.y, mclab->GetNodeFromMap( pc.x, pc.y )->GetNum() );
 	printf( "robber position: %d,%d (%d)\n", pr.x, pr.y, mclab->GetNodeFromMap( pr.x, pr.y )->GetNum() );
 	printf( "computation depth: %d\n", depth );
@@ -1259,7 +1259,7 @@ void compute_dsidam( int argc, char* argv[] ) {
 	int depth;
 	parseCommandLineParameters( argc, argv, m, pc, pr, depth );
 	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d (%d)\n", pc.x, pc.y, mclab->GetNodeFromMap( pc.x, pc.y )->GetNum() );
 	printf( "robber position: %d,%d (%d)\n", pr.x, pr.y, mclab->GetNodeFromMap( pr.x, pr.y )->GetNum() );
 	printf( "computation depth: %d\n", depth );
@@ -1290,7 +1290,7 @@ void compute_dsdatpdijkstra( int argc, char* argv[] ) {
 
 	parseCommandLineParameters( argc, argv, m, pc, pr, minimum_escape_length );
 	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d (%d)\n", pc.x, pc.y, mclab->GetNodeFromMap( pc.x, pc.y )->GetNum() );
 	printf( "robber position: %d,%d (%d)\n", pr.x, pr.y, mclab->GetNodeFromMap( pr.x, pr.y )->GetNum() );
 	printf( "minimum escape length: %d\n", minimum_escape_length );
@@ -1319,15 +1319,15 @@ void compute_dsrandombeacons( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pc, pr, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 	printf( "cop position: %d,%d\n", pc.x, pc.y );
 	printf( "robber position: %d,%d\n", pr.x, pr.y );
 
 	MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
 	DSRandomBeacons *dsrandb = new DSRandomBeacons( mclab, true, 2 );
 
-	pos_robber = m->getNodeNum( pr.x, pr.y );
-	pos_cop    = m->getNodeNum( pc.x, pc.y );
+	pos_robber = m->GetNodeNum( pr.x, pr.y );
+	pos_cop    = m->GetNodeNum( pc.x, pc.y );
 	std::vector<graphState> path;
 	dsrandb->GetPath( pos_robber, pos_cop, 40, path );
 
@@ -1354,7 +1354,7 @@ void compute_markov( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pc, pr, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 
 	Graph *g = GraphSearchConstants::GetGraph( m );
 	// make all the edge costs 1
@@ -1401,7 +1401,7 @@ void compute_twocopsdijkstra( int argc, char* argv[] ) {
 	int max_recursion_level;
 
 	parseCommandLineParameters( argc, argv, m, pc, pr, max_recursion_level );
-	printf( "map: %s\n", m->getMapName() );
+	printf( "map: %s\n", m->GetMapNamee() );
 
 	Graph *g = GraphSearchConstants::GetGraph( m );
 	GraphEnvironment *env = new GraphEnvironment( g, NULL );
@@ -1660,8 +1660,8 @@ void compute_experiment_optimal( int argc, char* argv[] ) {
 		}
 
 		if( strcmp( argv[3], "dsidfpn" ) == 0 ) {
-			graphState rpos = m->getNodeNum( rx, ry );
-			graphState cpos = m->getNodeNum( cx, cy );
+			graphState rpos = m->GetNodeNum( rx, ry );
+			graphState cpos = m->GetNodeNum( cx, cy );
 
 			// verbose
 			std::cout << "map: " << map_file << " position: (" << rx << "," << ry << "),(" << cx << "," << cy << ")" << std::endl;
@@ -1838,7 +1838,7 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 		fscanf( fhandler, "%s\n", map_file );
 		fprintf( foutput, "%s\n", map_file );
 		m = new Map( map_file );
-		fprintf( stdout, "map file: %s\n", m->getMapName() );
+		fprintf( stdout, "map file: %s\n", m->GetMapNamee() );
 
 		g   = GraphSearchConstants::GetGraph( m );
 		gh  = new MaximumNormGraphMapHeuristic( g );
@@ -1866,9 +1866,9 @@ void compute_experiment_optimal_two_cops( int argc, char* argv[] ) {
 			fprintf( foutput, "(%u,%u) (%u,%u) (%u,%u)", rx, ry, c1x, c1y, c2x, c2y );
 			fflush( foutput );
 
-			graphState r  = m->getNodeNum( rx, ry );
-			graphState c1 = m->getNodeNum( c1x, c1y );
-			graphState c2 = m->getNodeNum( c2x, c2y );
+			graphState r  = m->GetNodeNum( rx, ry );
+			graphState c1 = m->GetNodeNum( c1x, c1y );
+			graphState c2 = m->GetNodeNum( c2x, c2y );
 
 			if( strcmp( argv[3], "rma" ) == 0 ) {
 				clock_start   = clock();
@@ -2131,7 +2131,7 @@ void compute_experiment_markov( int argc, char* argv[] ) {
 		Graph *g = mca->GetAbstractGraph( 0 );
 
 		// verbose
-		std::cout << "solving map: " << m->getMapName() << std::endl;
+		std::cout << "solving map: " << m->GetMapNamee() << std::endl;
 
 		if( init_param < 4 ) {
 			// normal value iteration on Markov Game with different kind of initializations
@@ -2372,9 +2372,9 @@ void compute_characterization_2copwin( int argc, char* argv[] ) {
 	TwoCopsRMAStar *astar = new TwoCopsRMAStar( env );
 	TwoCopsRMAStar::CRState crpos;
 	astar->set_usePerfectDistanceHeuristic( true );
-	crpos[0] = m->getNodeNum(33,42);
-	crpos[1] = m->getNodeNum(26,41);
-	crpos[2] = m->getNodeNum(34,40);
+	crpos[0] = m->GetNodeNum(33,42);
+	crpos[1] = m->GetNodeNum(26,41);
+	crpos[2] = m->GetNodeNum(34,40);
 	printf( "result: %u\n", astar->rmastar( crpos[0],crpos[1],crpos[2],true ) );
 	printf( "nodes Expanded: %u\n", astar->nodesExpanded );
 	printf( "nodes Touched : %u\n", astar->nodesTouched );
@@ -2752,7 +2752,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		fscanf( fhandler, "%s\n", map_file );
 		fprintf( foutput, "%s\n", map_file );
 		Map *m = new Map( map_file );
-		fprintf( stdout, "map file: %s\n", m->getMapName() );
+		fprintf( stdout, "map file: %s\n", m->GetMapNamee() );
 
 		MapCliqueAbstraction *mclab = new MapCliqueAbstraction( m );
 		Graph *g = mclab->GetAbstractGraph( 0 );
@@ -2838,8 +2838,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 
 			// build the actual position data structure
 			std::vector<graphState> pos;
-			pos.push_back( m->getNodeNum( rx, ry ) );
-			pos.push_back( m->getNodeNum( cx, cy ) );
+			pos.push_back( m->GetNodeNum( rx, ry ) );
+			pos.push_back( m->GetNodeNum( cx, cy ) );
 
 			// now find out the optimal value
 			if( compute_optimal_solution ) {
@@ -2880,8 +2880,8 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 					for( int current_param = min_param_range; current_param <= max_param_range; current_param++ ) {
 
 						// reset the initial position
-						pos[0] = m->getNodeNum( rx, ry );
-						pos[1] = m->getNodeNum( cx, cy );
+						pos[0] = m->GetNodeNum( rx, ry );
+						pos[1] = m->GetNodeNum( cx, cy );
 						// initialize the random sequence with 1 so experiments are repeatable
 						srandom( 1 );
 

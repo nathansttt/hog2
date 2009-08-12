@@ -19,9 +19,9 @@ public:
 	virtual ~GraphAlgorithm() {}
 	virtual void GetPath(GraphEnvironment *env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) = 0;
 
-	virtual long GetNodesExpanded() = 0;
-	virtual long GetNodesTouched() = 0;
-	virtual long GetNodesReopened() = 0;
+	virtual uint64_t GetNodesExpanded() = 0;
+	virtual uint64_t GetNodesTouched() = 0;
+	virtual uint64_t GetNodesReopened() = 0;
 
 	virtual double GetSolutionCost() = 0;
 	virtual const char* GetName() = 0;

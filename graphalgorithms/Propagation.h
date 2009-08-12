@@ -129,8 +129,9 @@ namespace PropUtil
 	};
 
 	struct TGreater {
-		bool operator()(const SearchNode &i1, const SearchNode &i2) const
+		bool operator()(const SearchNode &, const SearchNode &) const
 		{
+			assert(false); // parameters ignored, this code must be wrong
 			//if(i1.threshold == i2.threshold) // threshold is integer
 			//	return fgreater(i1.gCost,i2.gCost);
 			//return i1.threshold > i2.threshold;
@@ -449,12 +450,12 @@ public:
 	virtual ~Prop() {}
 	void GetPath(GraphEnvironment *env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath);
 	
-	long GetNodesExpanded() { return (long)nodesExpanded; }
-	long GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesExpanded() { return (uint64_t)nodesExpanded; }
+	uint64_t GetNodesTouched() { return nodesTouched; }
 
-	long GetNodesFirstExpanded() {return closedSize;}
-	long GetNodesMetaExpanded() {return metaexpanded;}
-	long GetNodesReopened() {return NodesReopened;}
+	uint64_t GetNodesFirstExpanded() {return closedSize;}
+	uint64_t GetNodesMetaExpanded() {return metaexpanded;}
+	uint64_t GetNodesReopened() {return NodesReopened;}
 
 	bool InitializeSearch(GraphEnvironment *env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath);
 	bool DoSingleSearchStep(std::vector<graphState> &thePath);
@@ -526,7 +527,7 @@ private:
 	
 	double F;
 	double  nodesExpanded;
-	long nodesTouched;
+	uint64_t nodesTouched;
 	std::vector<graphState> neighbors;
 	//std::deque<PropUtil::SearchNode> bfsQueue;
 	graphState goal, start;
@@ -536,7 +537,7 @@ private:
 	PropUtil::GQueue delayCache; // 
 	int reopenings;
 
-	int fDelay(long N) {
+	int fDelay(long /*N*/) {
 		return 2;
 	}
 

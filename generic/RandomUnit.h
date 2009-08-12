@@ -19,10 +19,10 @@ public:
 	RandomUnit(state startLoc) :loc(startLoc) {}
 	virtual ~RandomUnit() {}
 	virtual const char *GetName() { return "Random Unit"; }
-	virtual bool MakeMove(environment *env, OccupancyInterface<state, action> *, SimulationInfo<state,action,environment> *, action& a)
+	virtual bool MakeMove(environment *theEnv, OccupancyInterface<state, action> *, SimulationInfo<state,action,environment> *, action& a)
 	{
 		std::vector<action> acts;
-		env->GetActions(loc, acts);
+		theEnv->GetActions(loc, acts);
 		a = acts[random()%acts.size()];
 		return true;
 	}
@@ -33,13 +33,13 @@ public:
 	}
 	virtual void GetLocation(state &l)
 	{ l = loc; }
-	virtual void OpenGLDraw(const environment *env, const SimulationInfo<state,action,environment> *si) const
+	virtual void OpenGLDraw(const environment *theEnv, const SimulationInfo<state,action,environment> *si) const
 	{
 		PublicUnitInfo<state, action, environment> i;
 		si->GetPublicUnitInfo(si->GetCurrentUnit(), i);
 		printf("(%f-%f)/(%f-%f)\n", 
 			   si->GetSimulationTime(), i.lastTime, i.nextTime, i.lastTime);
-		env->OpenGLDraw(i.lastState, i.currentState,
+		theEnv->OpenGLDraw(i.lastState, i.currentState,
 						(si->GetSimulationTime()-i.lastTime)/(i.nextTime-i.lastTime));
 	}
 	virtual void GetGoal(state &s)

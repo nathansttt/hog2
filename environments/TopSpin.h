@@ -48,6 +48,8 @@ public:
 	void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const;
 	void GetActions(graphState &stateID, std::vector<graphMove> &actions) const;
 	bool GoalTest(graphState &state, graphState &goal);
+	virtual bool GoalTest(graphState &) { assert(false); return false; }
+	
 	graphState Dual(graphState s);
 	graphState GetState(const std::vector<int> &configuration) const;
 	graphState GetState(const std::vector<int> &configuration, int zeroLoc) const;

@@ -10,10 +10,13 @@
 #include "FPUtil.h"
 
 
-MapEnvironment::MapEnvironment(Map *_m)
+MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 {
 	map = _m;
-	oi = new BaseMapOccupancyInterface(map);
+	if (useOccupancy)
+		oi = new BaseMapOccupancyInterface(map);
+	else
+		oi = 0;
 	h = 0;
 }
 
@@ -37,29 +40,29 @@ void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors) co
 {
 	bool up=false, down=false;
 	// 
-	if ((map->canStep(loc.x, loc.y, loc.x, loc.y+1)))
+	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y+1)))
 	{
 		down = true;
 		neighbors.push_back(xyLoc(loc.x, loc.y+1));
 	}
-	if ((map->canStep(loc.x, loc.y, loc.x, loc.y-1)))
+	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y-1)))
 	{
 		up = true;
 		neighbors.push_back(xyLoc(loc.x, loc.y-1));
 	}
-	if ((map->canStep(loc.x, loc.y, loc.x-1, loc.y)))
+	if ((map->CanStep(loc.x, loc.y, loc.x-1, loc.y)))
 	{
-		if ((up && (map->canStep(loc.x, loc.y, loc.x-1, loc.y-1))))
+		if ((up && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y-1))))
 			neighbors.push_back(xyLoc(loc.x-1, loc.y-1));
-		if ((down && (map->canStep(loc.x, loc.y, loc.x-1, loc.y+1))))
+		if ((down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1))))
 			neighbors.push_back(xyLoc(loc.x-1, loc.y+1));
 		neighbors.push_back(xyLoc(loc.x-1, loc.y));
 	}
-	if ((map->canStep(loc.x, loc.y, loc.x+1, loc.y)))
+	if ((map->CanStep(loc.x, loc.y, loc.x+1, loc.y)))
 	{
-		if ((up && (map->canStep(loc.x, loc.y, loc.x+1, loc.y-1))))
+		if ((up && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y-1))))
 			neighbors.push_back(xyLoc(loc.x+1, loc.y-1));
-		if ((down && (map->canStep(loc.x, loc.y, loc.x+1, loc.y+1))))
+		if ((down && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y+1))))
 			neighbors.push_back(xyLoc(loc.x+1, loc.y+1));
 		neighbors.push_back(xyLoc(loc.x+1, loc.y));
 	}
@@ -68,29 +71,29 @@ void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors) co
 void MapEnvironment::GetActions(xyLoc &loc, std::vector<tDirection> &actions) const
 {
 	bool up=false, down=false;
-	if ((map->canStep(loc.x, loc.y, loc.x, loc.y+1)))
+	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y+1)))
 	{
 		down = true;
 		actions.push_back(kS);
 	}
-	if ((map->canStep(loc.x, loc.y, loc.x, loc.y-1)))
+	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y-1)))
 	{
 		up = true;
 		actions.push_back(kN);
 	}
-	if ((map->canStep(loc.x, loc.y, loc.x-1, loc.y)))
+	if ((map->CanStep(loc.x, loc.y, loc.x-1, loc.y)))
 	{
-		if ((up && (map->canStep(loc.x, loc.y, loc.x-1, loc.y-1))))
+		if ((up && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y-1))))
 			actions.push_back(kNW);
-		if ((down && (map->canStep(loc.x, loc.y, loc.x-1, loc.y+1))))
+		if ((down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1))))
 			actions.push_back(kSW);
 		actions.push_back(kW);
 	}
-	if ((map->canStep(loc.x, loc.y, loc.x+1, loc.y)))
+	if ((map->CanStep(loc.x, loc.y, loc.x+1, loc.y)))
 	{
-		if ((up && (map->canStep(loc.x, loc.y, loc.x+1, loc.y-1))))
+		if ((up && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y-1))))
 			actions.push_back(kNE);
-		if ((down && (map->canStep(loc.x, loc.y, loc.x+1, loc.y+1))))
+		if ((down && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y+1))))
 			actions.push_back(kSE);
 		actions.push_back(kE);
 	}
@@ -151,12 +154,9 @@ void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 		case kSE: s.y+=1; s.x+=1; break;
 		default: break;
 	}
-	if (map->canStep(s.x, s.y, old.x, old.y) && !(oi->GetStateOccupied(s))) 
+	if (map->CanStep(s.x, s.y, old.x, old.y) &&
+		((!oi) || (oi && !(oi->GetStateOccupied(s)))))
 	{
-		// UnitSim takes care of this
-		// Make changes to the occupancy interface	
-		//oi->SetStateOccupied(s, false);
-		//oi->SetStateOccupied(old, true);
 		return;
 	}
 	s = old;
@@ -171,10 +171,14 @@ double MapEnvironment::HCost(xyLoc &l1, xyLoc &l2)
 	if (h == 0)
 		return h1;
 	
-	graphState n1 = map->getNodeNum(l1.x, l1.y);
-	graphState n2 = map->getNodeNum(l2.x, l2.y);
+	int n1 = map->GetNodeNum(l1.x, l1.y);
+	int n2 = map->GetNodeNum(l2.x, l2.y);
 	if ((n1 != -1) && (n2 != -1))
-		h2 = h->HCost(n1, n2);
+	{
+		graphState nn1 = n1;
+		graphState nn2 = n2;
+		h2 = h->HCost(nn1, nn2);
+	}
 	else
 		h2 = 0;
 	return std::max(h1, h2);
@@ -199,10 +203,13 @@ double MapEnvironment::GCost(xyLoc &, tDirection &act)
 
 double MapEnvironment::GCost(xyLoc &l1, xyLoc &l2)
 {
-	double h = HCost(l1, l2);
-	if (fgreater(h, ROOT_TWO))
-		return DBL_MAX;
-	return h;
+	if (l1.x == l2.x) return 1.0;
+	if (l1.y == l2.y) return 1.0;
+		return ROOT_TWO;
+//	double h = HCost(l1, l2);
+//	if (fgreater(h, ROOT_TWO))
+//		return DBL_MAX;
+//	return h;
 }
 
 bool MapEnvironment::GoalTest(xyLoc &node, xyLoc &goal)
@@ -226,13 +233,13 @@ void MapEnvironment::OpenGLDraw() const
 	//std::cout<<"drawing\n";
 	map->OpenGLDraw();
 	// Draw occupancy interface - occupied = white
-	for(int i=0; i<map->getMapWidth(); i++)
-		for(int j=0; j<map->getMapHeight(); j++)
+	for(int i=0; i<map->GetMapWidth(); i++)
+		for(int j=0; j<map->GetMapHeight(); j++)
 		{
 			xyLoc l;
 				l.x = i;
 				l.y = j;
-			if(oi->GetStateOccupied(l))
+			if(oi && oi->GetStateOccupied(l))
 			{
 				SetColor(1.0, 1.0, 1.0, 1.0);
 				OpenGLDraw(l);//, 1.0, 1.0, 1.0);
@@ -245,7 +252,7 @@ void MapEnvironment::OpenGLDraw() const
 void MapEnvironment::OpenGLDraw(const xyLoc &l) const
 {
 	GLdouble xx, yy, zz, rad;
-	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
 	GLfloat r, g, b, t;
 	GetColor(r, g, b, t);
 	glColor4f(r, g, b, t);
@@ -253,16 +260,16 @@ void MapEnvironment::OpenGLDraw(const xyLoc &l) const
 	DrawSphere(xx, yy, zz, rad);
 }
 
-void MapEnvironment::OpenGLDraw(const xyLoc &l1, const xyLoc &l2, double v) const
+void MapEnvironment::OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const
 {
 	GLdouble xx, yy, zz, rad;
 	GLdouble xx2, yy2, zz2;
-//	map->getOpenGLCoord((float)((1-v)*l1.x+v*l2.x),
+//	map->GetOpenGLCoord((float)((1-v)*l1.x+v*l2.x),
 //						(float)((1-v)*l1.y+v*l2.y), xx, yy, zz, rad);
 	printf("%f between (%d, %d) and (%d, %d)\n", v, l1.x, l1.y, l2.x, l2.y);
-	map->getOpenGLCoord(l1.x, l1.y, xx, yy, zz, rad);
-	map->getOpenGLCoord(l2.x, l2.y, xx2, yy2, zz2, rad);
-	//	map->getOpenGLCoord(perc*newState.x + (1-perc)*oldState.x, perc*newState.y + (1-perc)*oldState.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(l1.x, l1.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(l2.x, l2.y, xx2, yy2, zz2, rad);
+	//	map->GetOpenGLCoord(perc*newState.x + (1-perc)*oldState.x, perc*newState.y + (1-perc)*oldState.y, xx, yy, zz, rad);
 	xx = (1-v)*xx+v*xx2;
 	yy = (1-v)*yy+v*yy2;
 	zz = (1-v)*zz+v*zz2;
@@ -275,7 +282,7 @@ void MapEnvironment::OpenGLDraw(const xyLoc &l1, const xyLoc &l2, double v) cons
 //void MapEnvironment::OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const
 //{
 //	GLdouble xx, yy, zz, rad;
-//	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
+//	map->GetOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
 //	glColor3f(r,g,b);
 //	DrawSphere(xx, yy, zz, rad);
 //}
@@ -286,7 +293,7 @@ void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) con
 	
 	xyLoc s = initial;
 	GLdouble xx, yy, zz, rad;
-	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
 	
 	glColor3f(0.5, 0.5, 0.5);
 	glBegin(GL_LINE_STRIP);
@@ -306,7 +313,7 @@ void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) con
 	}
 
 	
-	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
 	glVertex3f(xx, yy, zz-rad/2);
 	glEnd();
 	
@@ -316,7 +323,7 @@ void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) con
 //{
 //	xyLoc s = initial;
 //	GLdouble xx, yy, zz, rad;
-//	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+//	map->GetOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
 //	
 //	glColor3f(r,g,b);
 //	glBegin(GL_LINE_STRIP);
@@ -337,7 +344,7 @@ void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) con
 //	}
 //
 //	
-//	map->getOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+//	map->GetOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
 //	glVertex3f(xx, yy, zz-rad/2);
 //	glEnd();
 //}
@@ -385,14 +392,14 @@ AbsMapEnvironment::~AbsMapEnvironment()
 */
 BaseMapOccupancyInterface::BaseMapOccupancyInterface(Map* m)
 {
- 	mapWidth = m->getMapWidth();
- 	mapHeight = m->getMapHeight();
-	bitvec = new bitVector(mapWidth * mapHeight);
+ 	mapWidth = m->GetMapWidth();
+ 	mapHeight = m->GetMapHeight();
+	bitvec = new BitVector(mapWidth * mapHeight);
 	
 	//initialize the bitvector
-	for(int i=0; i<m->getMapWidth(); i++)
-		for(int j=0; j<m->getMapHeight(); j++)
-			bitvec->set(CalculateIndex(i,j), false);
+	for(int i=0; i<m->GetMapWidth(); i++)
+		for(int j=0; j<m->GetMapHeight(); j++)
+			bitvec->Set(CalculateIndex(i,j), false);
 }
 
 
@@ -419,8 +426,9 @@ BaseMapOccupancyInterface::~BaseMapOccupancyInterface()
 void BaseMapOccupancyInterface::SetStateOccupied(xyLoc &s, bool occupied)
 {
 	// Make sure the location is valid
-	assert((s.x>=0) && (s.x<mapWidth) && (s.y>=0) && (s.y<mapHeight));
-	bitvec->set(CalculateIndex(s.x,s.y), occupied);
+	// unsigned, so must be greater than 0
+	assert(/*(s.x>=0) &&*/ (s.x<mapWidth)/* && (s.y>=0)*/ && (s.y<mapHeight));
+	bitvec->Set(CalculateIndex(s.x,s.y), occupied);
 }
 
 /** Returns the occupancy of a state.
@@ -433,8 +441,9 @@ void BaseMapOccupancyInterface::SetStateOccupied(xyLoc &s, bool occupied)
 */
 bool BaseMapOccupancyInterface::GetStateOccupied(xyLoc &s)
 {
-	assert(s.x>=0 && s.x<=mapWidth && s.y>=0 && s.y<=mapHeight);
-	return bitvec->get(CalculateIndex(s.x,s.y));
+	// unsigned, so must be greater than 0
+	assert(/*s.x>=0 &&*/ s.x<=mapWidth && /*s.y>=0 && */s.y<=mapHeight);
+	return bitvec->Get(CalculateIndex(s.x,s.y));
 }
 
 /** Gets the index into the bitvector. 
@@ -471,7 +480,7 @@ void BaseMapOccupancyInterface::MoveUnitOccupancy(xyLoc &oldState, xyLoc &newSta
 	SetStateOccupied(newState, true);
 }
 
-bool BaseMapOccupancyInterface::CanMove(xyLoc &l1, xyLoc &l2)
+bool BaseMapOccupancyInterface::CanMove(xyLoc &, xyLoc &l2)
 {
 	if(!(GetStateOccupied(l2)))
 	{

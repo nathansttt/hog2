@@ -9,7 +9,11 @@
 /* Begin PBXBuildFile section */
 		8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20286C33FDCF999611CA2CEA /* Carbon.framework */; };
 		C409B1A30F7872BF006E6A96 /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AC970B0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp */; };
-		C42016760F437EBB00FBB3D6 /* Inconsistency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C847580C1F1ACF00AFBF7A /* Inconsistency.cpp */; };
+		C40B232D0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */; };
+		C40B232E0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */; };
+		C40B232F0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */; };
+		C40B23300FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */; };
+		C40B23310FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */; };
 		C4210C6E0CFF198100301281 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */; };
 		C4210C6F0CFF198100301281 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */; };
 		C4210C700CFF198100301281 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */; };
@@ -105,6 +109,8 @@
 		C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C433A8470C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C433A9F00C04E2EF002B8108 /* CFOptimalRefinement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46CA96E0C040B3C00D96494 /* CFOptimalRefinement.cpp */; };
+		C45F51CE1004660300A664AD /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F3590ECFD3B5009D90B3 /* RoboticArm.cpp */; };
+		C45F51CF1004660400A664AD /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
 		C46E4EC20CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
 		C46E4EC30CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
 		C46E4EC40CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
@@ -309,7 +315,6 @@
 		C4AC96DF0D6CCFC600DAE6E9 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4339E0F0BF28575002B8108 /* GLUT.framework */; };
 		C4AC96ED0D6CCFFE00DAE6E9 /* directional.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4AC96E70D6CCFFE00DAE6E9 /* directional.icns */; };
 		C4AC96EE0D6CCFFE00DAE6E9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4AC96E80D6CCFFE00DAE6E9 /* InfoPlist.strings */; };
-		C4AC96F50D6CD06B00DAE6E9 /* directional.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AC967B0D6CCE8200DAE6E9 /* directional.cpp */; };
 		C4AC96F60D6CD07200DAE6E9 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4AC96EA0D6CCFFE00DAE6E9 /* main.nib */; };
 		C4AC96F80D6CD07600DAE6E9 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4AC96EC0D6CCFFE00DAE6E9 /* Info.plist */; };
 		C4AC96F90D6CD07F00DAE6E9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4AC964D0D6CC51200DAE6E9 /* InfoPlist.strings */; };
@@ -317,8 +322,13 @@
 		C4AC96FB0D6CD08000DAE6E9 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4AC96510D6CC51200DAE6E9 /* Info.plist */; };
 		C4AC96FC0D6CD08100DAE6E9 /* MultiAgent.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4AC96520D6CC51200DAE6E9 /* MultiAgent.icns */; };
 		C4AC970C0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AC970B0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp */; };
-		C4BC0D190F918BE5002D0CB9 /* DirectionalPlanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BC0D180F918BE5002D0CB9 /* DirectionalPlanner.cpp */; };
-		C4BF47A70FC6606B00A2D655 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B7340BCEEC5900FCD84C /* Sample.cpp */; };
+		C4B8108E1033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
+		C4B8108F1033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
+		C4B810901033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
+		C4B810911033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
+		C4B810921033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
+		C4B810C410332D3E00EFDB2B /* RoboticArmTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F0110ECFD2C5009D90B3 /* RoboticArmTest.cpp */; };
+		C4B810F11033333A00EFDB2B /* Inconsistency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C847580C1F1ACF00AFBF7A /* Inconsistency.cpp */; };
 		C4C8422C0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C8422D0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C842380C0CD2A100AFBF7A /* GraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C842370C0CD2A100AFBF7A /* GraphEnvironment.cpp */; };
@@ -420,11 +430,9 @@
 		C4C8474F0C1F1A5B00AFBF7A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4C847450C1F1A5B00AFBF7A /* InfoPlist.strings */; };
 		C4C847500C1F1A5B00AFBF7A /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4C847470C1F1A5B00AFBF7A /* main.nib */; };
 		C4C847510C1F1A5B00AFBF7A /* Inconsistency.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4C847490C1F1A5B00AFBF7A /* Inconsistency.icns */; };
-		C4C847520C1F1A5B00AFBF7A /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4C8474A0C1F1A5B00AFBF7A /* Info.plist */; };
 		C4C99B150EC16EA800C87E6E /* MultiAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C670CFF191F00301281 /* MultiAgent.cpp */; };
 		C4D18AD70F183D7D005DEF84 /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
-		C4D3AFBD0BCEE5B800FCD84C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9B0BCEE5B800FCD84C /* Info.plist */; };
 		C4D3AFBE0BCEE5B800FCD84C /* Sample.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9C0BCEE5B800FCD84C /* Sample.icns */; };
 		C4D3B0170BCEE73E00FCD84C /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4D3B0160BCEE73E00FCD84C /* QuickTime.framework */; };
 		C4D3B0DD0BCEE74D00FCD84C /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4D3B0DA0BCEE74C00FCD84C /* AGL.framework */; };
@@ -496,6 +504,8 @@
 		C4E8273F0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
 		C4E827400EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
 		C4E827410EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E8273C0EECD9EA00F500C4 /* FloydWarshall.cpp */; };
+		C4ED1F1F10095C5A00A63B2A /* directional.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AC967B0D6CCE8200DAE6E9 /* directional.cpp */; };
+		C4ED1F2010095C5B00A63B2A /* DirectionalPlanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BC0D180F918BE5002D0CB9 /* DirectionalPlanner.cpp */; };
 		C4F348030F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
 		C4F348040F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
 		C4F348050F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
@@ -517,6 +527,9 @@
 		5048396E09E3307300765E4B /* hog2Target.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Target.xcconfig; sourceTree = "<group>"; };
 		508344B209E5C41E0093A071 /* Sample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C409B3570F79A65E006E6A96 /* SimulationInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimulationInfo.h; sourceTree = "<group>"; };
+		C40B232B0FCB26DF00C22E6A /* AStarOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AStarOpenClosed.h; sourceTree = "<group>"; };
+		C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AStarOpenClosed.cpp; sourceTree = "<group>"; };
+		C40B23330FCC53F700C22E6A /* OldTemplateAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OldTemplateAStar.h; sourceTree = "<group>"; };
 		C4210C670CFF191F00301281 /* MultiAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MultiAgent.cpp; sourceTree = "<group>"; };
 		C4210C680CFF191F00301281 /* MultiAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultiAgent.h; sourceTree = "<group>"; };
 		C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WeightedMap2DEnvironment.cpp; sourceTree = "<group>"; };
@@ -564,6 +577,10 @@
 		C478BAC10D4FB4EF00A1ABC5 /* IRAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRAStar.h; sourceTree = "<group>"; };
 		C478BB020D4FEC1400A1ABC5 /* OpenListB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OpenListB.cpp; sourceTree = "<group>"; };
 		C478BB030D4FEC1400A1ABC5 /* OpenListB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenListB.h; sourceTree = "<group>"; };
+		C47C92430FE303740063E9B7 /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
+		C47C92440FE303740063E9B7 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
+		C47C92490FE30B2B0063E9B7 /* LocalSensingUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalSensingUnit.h; sourceTree = "<group>"; };
+		C47C924A0FE30B2B0063E9B7 /* LocalSensingUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LocalSensingUnit.cpp; sourceTree = "<group>"; };
 		C47E91180CBBF30200B1AFDA /* SimpleHierarchicalAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleHierarchicalAStar.h; sourceTree = "<group>"; };
 		C47E91190CBBF30200B1AFDA /* SimpleHierarchicalAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimpleHierarchicalAStar.cpp; sourceTree = "<group>"; };
 		C47E913B0CBC29F200B1AFDA /* IRDijkstra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRDijkstra.h; sourceTree = "<group>"; };
@@ -586,6 +603,17 @@
 		C4AC96EC0D6CCFFE00DAE6E9 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C4AC970A0D6CD40800DAE6E9 /* Directional2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Directional2DEnvironment.h; sourceTree = "<group>"; };
 		C4AC970B0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Directional2DEnvironment.cpp; sourceTree = "<group>"; };
+		C4B238A110320717000669D2 /* DSIDAM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSIDAM.cpp; sourceTree = "<group>"; };
+		C4B238A210320717000669D2 /* DSIDAM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSIDAM.h; sourceTree = "<group>"; };
+		C4B238A310320717000669D2 /* DSIDAM2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSIDAM2.cpp; sourceTree = "<group>"; };
+		C4B238A410320717000669D2 /* DSIDAM2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSIDAM2.h; sourceTree = "<group>"; };
+		C4B238A510320717000669D2 /* DSIDFPN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DSIDFPN.cpp; sourceTree = "<group>"; };
+		C4B238A610320717000669D2 /* DSIDFPN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSIDFPN.h; sourceTree = "<group>"; };
+		C4B238A710320717000669D2 /* PerfectGraphHeuristic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PerfectGraphHeuristic.h; sourceTree = "<group>"; };
+		C4B238A810320717000669D2 /* TwoCopsDijkstra2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwoCopsDijkstra2.cpp; sourceTree = "<group>"; };
+		C4B238A910320717000669D2 /* TwoCopsDijkstra2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwoCopsDijkstra2.h; sourceTree = "<group>"; };
+		C4B8108C1033292A00EFDB2B /* AbsMapPatrolUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbsMapPatrolUnit.h; sourceTree = "<group>"; };
+		C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AbsMapPatrolUnit.cpp; sourceTree = "<group>"; };
 		C4BC09980F915EDB002D0CB9 /* AbstractGraphMapHeuristic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractGraphMapHeuristic.h; sourceTree = "<group>"; };
 		C4BC09990F915EDB002D0CB9 /* CopRobber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CopRobber.cpp; sourceTree = "<group>"; };
 		C4BC099A0F915EDB002D0CB9 /* CopRobber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CopRobber.h; sourceTree = "<group>"; };
@@ -1540,6 +1568,7 @@
 				C46E509D0CB18BDE00D4D8F6 /* GraphCheck.cpp */,
 				C46E509E0CB18BDE00D4D8F6 /* GraphCheck.h */,
 				C46E509F0CB18BDE00D4D8F6 /* TemplateAStar.h */,
+				C40B23330FCC53F700C22E6A /* OldTemplateAStar.h */,
 				C46E50A00CB18BDE00D4D8F6 /* VisualizableGenericSearchAlgorithm.h */,
 				C433A2F10BF91330002B8108 /* RandomUnit.cpp */,
 				C433A2F00BF91330002B8108 /* RandomUnit.h */,
@@ -1549,6 +1578,17 @@
 			name = generic;
 			path = ../../../generic;
 			sourceTree = SOURCE_ROOT;
+		};
+		C47C92420FE303740063E9B7 /* localsensingsearch */ = {
+			isa = PBXGroup;
+			children = (
+				C47C92430FE303740063E9B7 /* Sample.cpp */,
+				C47C92440FE303740063E9B7 /* Sample.h */,
+				C47C924A0FE30B2B0063E9B7 /* LocalSensingUnit.cpp */,
+				C47C92490FE30B2B0063E9B7 /* LocalSensingUnit.h */,
+			);
+			path = localsensingsearch;
+			sourceTree = "<group>";
 		};
 		C4A4F00F0ECFD2A9009D90B3 /* arm */ = {
 			isa = PBXGroup;
@@ -1595,6 +1635,15 @@
 		C4BC09970F915EDB002D0CB9 /* coprobber (Carsten) */ = {
 			isa = PBXGroup;
 			children = (
+				C4B238A110320717000669D2 /* DSIDAM.cpp */,
+				C4B238A210320717000669D2 /* DSIDAM.h */,
+				C4B238A310320717000669D2 /* DSIDAM2.cpp */,
+				C4B238A410320717000669D2 /* DSIDAM2.h */,
+				C4B238A510320717000669D2 /* DSIDFPN.cpp */,
+				C4B238A610320717000669D2 /* DSIDFPN.h */,
+				C4B238A710320717000669D2 /* PerfectGraphHeuristic.h */,
+				C4B238A810320717000669D2 /* TwoCopsDijkstra2.cpp */,
+				C4B238A910320717000669D2 /* TwoCopsDijkstra2.h */,
 				C4BC09980F915EDB002D0CB9 /* AbstractGraphMapHeuristic.h */,
 				C4BC09990F915EDB002D0CB9 /* CopRobber.cpp */,
 				C4BC099A0F915EDB002D0CB9 /* CopRobber.h */,
@@ -1941,6 +1990,8 @@
 				C4D3B2730BCEE7B000FCD84C /* OpenClosedList.h */,
 				C4D3B2740BCEE7B000FCD84C /* SearchEnvironment.cpp */,
 				C4D3B2750BCEE7B000FCD84C /* SearchEnvironment.h */,
+				C40B232B0FCB26DF00C22E6A /* AStarOpenClosed.h */,
+				C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */,
 			);
 			name = algorithms;
 			path = ../../../algorithms;
@@ -2662,6 +2713,7 @@
 		C4D3B7320BCEEC5900FCD84C /* apps */ = {
 			isa = PBXGroup;
 			children = (
+				C47C92420FE303740063E9B7 /* localsensingsearch */,
 				C4BC09970F915EDB002D0CB9 /* coprobber (Carsten) */,
 				C4BC09EB0F915EDB002D0CB9 /* dynamicsearch (Rick) */,
 				C4E828070EEF981C00F500C4 /* cpdb */,
@@ -2721,6 +2773,8 @@
 		C4D3C8330BE2900C00FCD84C /* absmapalgorithms */ = {
 			isa = PBXGroup;
 			children = (
+				C4B8108C1033292A00EFDB2B /* AbsMapPatrolUnit.h */,
+				C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */,
 				C4D3C8340BE2902000FCD84C /* AbsMapUnit.h */,
 				C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */,
 				C4D3CEE10BE7F40200FCD84C /* AbsMapUnitGroup.h */,
@@ -2861,7 +2915,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */,
-				C4D3AFBD0BCEE5B800FCD84C /* Info.plist in Resources */,
 				C4D3AFBE0BCEE5B800FCD84C /* Sample.icns in Resources */,
 				C4210CD90CFF78AF00301281 /* main.nib in Resources */,
 			);
@@ -2907,7 +2960,6 @@
 				C4C8474F0C1F1A5B00AFBF7A /* InfoPlist.strings in Resources */,
 				C4C847500C1F1A5B00AFBF7A /* main.nib in Resources */,
 				C4C847510C1F1A5B00AFBF7A /* Inconsistency.icns in Resources */,
-				C4C847520C1F1A5B00AFBF7A /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3007,7 +3059,9 @@
 				C409B1A30F7872BF006E6A96 /* Directional2DEnvironment.cpp in Sources */,
 				C4F348030F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
 				C4F348040F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
-				C4BF47A70FC6606B00A2D655 /* Sample.cpp in Sources */,
+				C40B23310FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
+				C4B8108F1033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
+				C4B810C410332D3E00EFDB2B /* RoboticArmTest.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3101,6 +3155,8 @@
 				C4E8273E0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
 				C4F348050F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
 				C4F348060F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C40B23300FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
+				C4B8108E1033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3195,6 +3251,8 @@
 				C4E827400EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
 				C4F348090F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
 				C4F3480A0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C40B232E0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
+				C4B810911033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3284,13 +3342,17 @@
 				C4AC96D30D6CCFC600DAE6E9 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4AC96D40D6CCFC600DAE6E9 /* IRAStar.cpp in Sources */,
 				C4AC96D60D6CCFC600DAE6E9 /* OpenListB.cpp in Sources */,
-				C4AC96F50D6CD06B00DAE6E9 /* directional.cpp in Sources */,
 				C4AC970C0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp in Sources */,
 				C42A68DD0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */,
 				C4E827410EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
 				C4F3480B0F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
 				C4F3480C0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
-				C4BC0D190F918BE5002D0CB9 /* DirectionalPlanner.cpp in Sources */,
+				C40B232D0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
+				C45F51CE1004660300A664AD /* RoboticArm.cpp in Sources */,
+				C45F51CF1004660400A664AD /* ConfigEnvironment.cpp in Sources */,
+				C4ED1F1F10095C5A00A63B2A /* directional.cpp in Sources */,
+				C4ED1F2010095C5B00A63B2A /* DirectionalPlanner.cpp in Sources */,
+				C4B810921033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3382,9 +3444,11 @@
 				C478BB060D4FEC1400A1ABC5 /* OpenListB.cpp in Sources */,
 				C42A68DE0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */,
 				C4E8273F0EECD9EA00F500C4 /* FloydWarshall.cpp in Sources */,
-				C42016760F437EBB00FBB3D6 /* Inconsistency.cpp in Sources */,
 				C4F348070F8485F400104ABE /* PancakePuzzle.cpp in Sources */,
 				C4F348080F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C40B232F0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
+				C4B810901033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
+				C4B810F11033333A00EFDB2B /* Inconsistency.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3589,7 +3653,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3618,7 +3682,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3706,7 +3770,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3735,7 +3799,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3765,7 +3829,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3796,7 +3860,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3814,6 +3878,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_PFE_FILE_C_DIALECTS = "c c++";
 				GCC_PREPROCESSOR_DEFINITIONS = OS_MAC;
+				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
@@ -3826,7 +3891,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3845,6 +3910,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GCC_PFE_FILE_C_DIALECTS = "c c++";
 				GCC_PREPROCESSOR_DEFINITIONS = OS_MAC;
+				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
@@ -3857,7 +3923,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3887,7 +3953,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3916,7 +3982,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;

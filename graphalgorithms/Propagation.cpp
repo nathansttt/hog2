@@ -26,9 +26,9 @@ using namespace PropUtil;
 const static bool verbose = false;
 const static bool drawtext = false;
 
-static unsigned long tickStart;
-
-static unsigned long tickGen;
+//static unsigned long tickStart;
+//
+//static unsigned long tickGen;
 
 void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphState to, std::vector<graphState> &thePath) {
 	if(!InitializeSearch(_env,_g,from,to,thePath))
@@ -41,7 +41,7 @@ void Prop::GetPath(GraphEnvironment *_env, Graph *_g, graphState from, graphStat
 		{}
 	gettimeofday(&t1,0);
 
-	double usedtime = t1.tv_sec-t0.tv_sec + (t1.tv_usec-t0.tv_usec)/1000000.0;
+//	double usedtime = t1.tv_sec-t0.tv_sec + (t1.tv_usec-t0.tv_usec)/1000000.0;
 
 	//if(thePath.size() > 0)
 	//	printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%ld.\n",GetNodesExpanded(),GetNodesTouched(),NodesReopened);
@@ -837,7 +837,7 @@ bool Prop::DoSingleStepApprox(std::vector<graphState> &thePath)
 
 	//Categorize(neighbors);
 
-	double hTop = topNode.fCost - topNode.gCost;
+//	double hTop = topNode.fCost - topNode.gCost;
 	//double minH2 = DBL_MAX; // min ( edgeWeight(i) + h(neighbor(i)) )
 
 
@@ -1001,7 +1001,7 @@ bool Prop::UpdateHOnly(SearchNode &neighborNode, double h)
 }
 
 /* after using Categorize(), this algorithm is not quite right. to be fixed later ... */
-bool Prop::DoSingleStepBFS(std::vector<graphState> &thePath) {
+bool Prop::DoSingleStepBFS(std::vector<graphState> &/*thePath*/) {
 	return true;
 }
 // get lowest g node from OPEN, with f < F
@@ -1034,7 +1034,7 @@ void Prop::GetLowestGF(SearchNode &gNode)
 
 
 // Nathan's alg
-bool Prop::DoSingleStepDelay(std::vector<graphState> &thePath)
+bool Prop::DoSingleStepDelay(std::vector<graphState> &/*thePath*/)
 {
 	return true;
 }
@@ -1203,7 +1203,7 @@ void Prop::Broadcast(int level, int levelcount)
 		env->GetSuccessors(front, myneighbors);
 
 		// backward pass
-		for(int x=0;x<myneighbors.size();x++) 
+		for(unsigned int x = 0; x < myneighbors.size(); x++) 
 		{
 			graphState neighbor = myneighbors[x];
 			 iter = closedList.find(neighbor);
@@ -1250,13 +1250,13 @@ void Prop::Broadcast(int level, int levelcount)
 		closedList[front] = frontNode;
 
 		// forward pass
-		for(int x=0;x<myneighbors.size();x++) 
+		for(unsigned int x = 0; x < myneighbors.size(); x++) 
 		{
 			graphState neighbor = myneighbors[x];
-			NodeLookupTable::iterator iter = closedList.find(neighbor);
-			if(iter != closedList.end()) {
+			NodeLookupTable::iterator theIter = closedList.find(neighbor);
+			if(theIter != closedList.end()) {
 				double edgeWeight = env->GCost(front,neighbor);
-				SearchNode neighborNode = iter->second;
+				SearchNode neighborNode = theIter->second;
 
 				double neighborH = neighborNode.fCost - neighborNode.gCost;
 				
@@ -1350,7 +1350,7 @@ bool Prop::DoSingleStepDP(std::vector<graphState> &thePath)
 	//else
 	//	nNewExp++;
 
-	unsigned long tickTmp ;//= clock();
+//	unsigned long tickTmp ;//= clock();
 
 	neighbors.resize(0);
 	env->GetSuccessors(topNode.currNode, neighbors);
@@ -1659,7 +1659,7 @@ bool Prop::DoSingleStepBPMX(std::vector<graphState> &thePath)
 	//else
 	//	nNewExp++;
 
-	unsigned long tickTmp;// = clock();
+//	unsigned long tickTmp;// = clock();
 
 	/* step (5), computing gi is delayed */
 	neighbors.resize(0);
@@ -1885,7 +1885,7 @@ _BPMX:
 }
 
 
-bool Prop::DoSingleStepBPMXE(std::vector<graphState> &thePath) 
+bool Prop::DoSingleStepBPMXE(std::vector<graphState> &) 
 {
 	return true;
 }

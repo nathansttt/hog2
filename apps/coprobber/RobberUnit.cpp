@@ -170,9 +170,9 @@ void RobberUnit::OpenGLDraw(int , AbsMapEnvironment *me, AbsMapSimulationInfo *)
 {
 	Map *map = me->GetMap();
 	GLdouble xx, yy, zz, rad;
-	if ((loc.x >= map->getMapWidth()) || (loc.y >= map->getMapHeight()))
+	if ((loc.x >= map->GetMapWidth()) || (loc.y >= map->GetMapHeight()))
 		return;
-	map->getOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(loc.x, loc.y, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 //	if (getObjectType() == kDisplayOnly)
 //		drawTriangle(xx, yy, zz, rad);

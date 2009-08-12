@@ -42,10 +42,10 @@ SharedAMapGroup::SharedAMapGroup(MapProvider *mp)
 	newTileCountPerTrial = 0;
 
 	Map *m = mp->GetMap();
-	map = new Map(m->getMapWidth(), m->getMapHeight());
+	map = new Map(m->GetMapWidth(), m->GetMapHeight());
 	aMap = new MapCliqueAbstraction(map);
 	//aMap = new MapFlatAbstraction(map);
-	seen = new bitVector(m->getMapWidth() * m->getMapHeight());
+	seen = new BitVector(m->GetMapWidth() * m->GetMapHeight());
 	
 }
 
@@ -68,46 +68,46 @@ void SharedAMapGroup::UpdateLocation(Unit<xyLoc, tDirection, AbsMapEnvironment> 
 	bool changed = false;
 	for (int x1 = x-rad; x1 <= x+rad; x1++)
 	{
-		if ((x1 < 0) || (x1 >= map->getMapWidth()))
+		if ((x1 < 0) || (x1 >= map->GetMapWidth()))
 			continue;
 		for (int y1 = y-rad; y1 <= y+rad; y1++)
 		{
-			if ((y1 < 0) || (y1 >= map->getMapHeight()))
+			if ((y1 < 0) || (y1 >= map->GetMapHeight()))
 				continue;
 			
 			// if we haven't observed a particular tile, we need to look at it
-			if (!seen->get(y1*map->getMapWidth()+x1))
+			if (!seen->Get(y1*map->GetMapWidth()+x1))
 			{
 				// count a new tile!
 				newTileCount++;
 				// if it's different that we think, we just remove it.
 				// in the future we'll need to handle water & splits here
-				num = map->getNodeNum(x1, y1);
+				num = map->GetNodeNum(x1, y1);
 				Graph *g = aMap->GetAbstractGraph(0);
-				if (!worldMap->adjacentEdges(x1, y1, kLeftEdge))
-				{ edge *e = g->FindEdge(num, map->getNodeNum(x1-1, y1)); aMap->RemoveEdge(e, 0); }
-				if (!worldMap->adjacentEdges(x1, y1, kRightEdge))
-				{ edge *e = g->FindEdge(num, map->getNodeNum(x1+1, y1)); aMap->RemoveEdge(e, 0); }
-				if (!worldMap->adjacentEdges(x1, y1, kTopEdge))
-				{ edge *e = g->FindEdge(num, map->getNodeNum(x1, y1-1)); aMap->RemoveEdge(e, 0); }
-				if (!worldMap->adjacentEdges(x1, y1, kBottomEdge))
-				{ edge *e = g->FindEdge(num, map->getNodeNum(x1, y1+1)); aMap->RemoveEdge(e, 0); }
+				if (!worldMap->AdjacentEdges(x1, y1, kLeftEdge))
+				{ edge *e = g->FindEdge(num, map->GetNodeNum(x1-1, y1)); aMap->RemoveEdge(e, 0); }
+				if (!worldMap->AdjacentEdges(x1, y1, kRightEdge))
+				{ edge *e = g->FindEdge(num, map->GetNodeNum(x1+1, y1)); aMap->RemoveEdge(e, 0); }
+				if (!worldMap->AdjacentEdges(x1, y1, kTopEdge))
+				{ edge *e = g->FindEdge(num, map->GetNodeNum(x1, y1-1)); aMap->RemoveEdge(e, 0); }
+				if (!worldMap->AdjacentEdges(x1, y1, kBottomEdge))
+				{ edge *e = g->FindEdge(num, map->GetNodeNum(x1, y1+1)); aMap->RemoveEdge(e, 0); }
 
-				if (!worldMap->adjacentCorners(x1, y1, kTopLeft))
-				{ edge *e = g->FindEdge(num, map->getNodeNum(x1-1, y1-1)); aMap->RemoveEdge(e, 0); }
-				if (!worldMap->adjacentCorners(x1, y1, kTopRight))
-				{ edge *e = g->FindEdge(num, map->getNodeNum(x1+1, y1-1)); aMap->RemoveEdge(e, 0); }
-				if (!worldMap->adjacentCorners(x1, y1, kBottomLeft))
-				{ edge *e = g->FindEdge(num, map->getNodeNum(x1-1, y1+1)); aMap->RemoveEdge(e, 0); }
-				if (!worldMap->adjacentCorners(x1, y1, kBottomRight))
-				{ edge *e = g->FindEdge(num, map->getNodeNum(x1+1, y1+1)); aMap->RemoveEdge(e, 0); }
+				if (!worldMap->AdjacentCorners(x1, y1, kTopLeft))
+				{ edge *e = g->FindEdge(num, map->GetNodeNum(x1-1, y1-1)); aMap->RemoveEdge(e, 0); }
+				if (!worldMap->AdjacentCorners(x1, y1, kTopRight))
+				{ edge *e = g->FindEdge(num, map->GetNodeNum(x1+1, y1-1)); aMap->RemoveEdge(e, 0); }
+				if (!worldMap->AdjacentCorners(x1, y1, kBottomLeft))
+				{ edge *e = g->FindEdge(num, map->GetNodeNum(x1-1, y1+1)); aMap->RemoveEdge(e, 0); }
+				if (!worldMap->AdjacentCorners(x1, y1, kBottomRight))
+				{ edge *e = g->FindEdge(num, map->GetNodeNum(x1+1, y1+1)); aMap->RemoveEdge(e, 0); }
 				
 				//aMap->RemoveNode(me);
-				map->setTerrainType(x1, y1, (tTerrain)worldMap->getTerrainType(x1, y1));
+				map->SetTerrainType(x1, y1, (tTerrain)worldMap->GetTerrainType(x1, y1));
 				changed = true;
 				
 				sawNewLand = true;
-				seen->set(y1*map->getMapWidth()+x1, true);
+				seen->Set(y1*map->GetMapWidth()+x1, true);
 			}
 		}
 	}
@@ -121,14 +121,14 @@ void SharedAMapGroup::OpenGLDraw(const AbsMapEnvironment *, const AbsMapSimulati
 	glColor3f(.25, .25, .25); // kOutOfBounds
 	glNormal3f(0, 0, 1);
 	GLdouble coverage = 0.9;
-	for (int x = 0; x < map->getMapWidth(); x++)
+	for (int x = 0; x < map->GetMapWidth(); x++)
 	{
-		for (int y = 0; y < map->getMapHeight(); y++)
+		for (int y = 0; y < map->GetMapHeight(); y++)
 		{
 			GLdouble a, b, c, radius;
-			if (!seen->get(y*map->getMapWidth()+x))
+			if (!seen->Get(y*map->GetMapWidth()+x))
 			{
-				map->getOpenGLCoord(x, y, a, b, c, radius);
+				map->GetOpenGLCoord(x, y, a, b, c, radius);
 				glVertex3f(a+coverage*radius, b+coverage*radius, c-4*radius);
 				glVertex3f(a+coverage*radius, b-coverage*radius, c-4*radius);
 				glVertex3f(a-coverage*radius, b-coverage*radius, c-4*radius);
@@ -144,18 +144,18 @@ MapAbstraction *SharedAMapGroup::GetMapAbstraction()
 	return aMap;
 }
 
-Map *SharedAMapGroup::GetMap()
+Map *SharedAMapGroup::GetMap() const
 {
 	return map;
 }
 
 /** Is the group done with their exploration? */
-bool SharedAMapGroup::done()
+bool SharedAMapGroup::Done()
 {
 	return (!sawNewLand);
 }
 
-void SharedAMapGroup::logStats(StatCollection *stats)
+void SharedAMapGroup::LogStats(StatCollection *stats)
 //void SharedAMapGroup::printRoundStats(unit *, FILE *f)
 {
 	if (newTileCount != 0)
@@ -168,7 +168,7 @@ void SharedAMapGroup::logStats(StatCollection *stats)
 }
 
 /** Lets the unit group do what it needs to reset a trial */
-void SharedAMapGroup::startNewTrial(StatCollection *stats)
+void SharedAMapGroup::StartNewTrial(StatCollection *stats)
 {
 	sawNewLand = false;
 	newTileCount = 0;
@@ -176,24 +176,24 @@ void SharedAMapGroup::startNewTrial(StatCollection *stats)
 	stats->AddStat("newTilesExplored", GetName(), (long)newTileCount);
 }
 
-void SharedAMapGroup::setVisibilityRadius(int _visibility)
+void SharedAMapGroup::SetVisibilityRadius(int _visibility)
 {
 	visRadius = _visibility;
 }
 
-int SharedAMapGroup::getVisibilityRadius()
+int SharedAMapGroup::GetVisibilityRadius()
 {
 	return visRadius;
 }
 
-bool SharedAMapGroup::explored(int x, int y)
+bool SharedAMapGroup::Explored(int x, int y)
 {
-	return seen->get(y*map->getMapWidth()+x);
+	return seen->Get(y*map->GetMapWidth()+x);
 }
 
-bool SharedAMapGroup::explored(unsigned int _node)
+bool SharedAMapGroup::Explored(unsigned int _node)
 {
 	node *loc = aMap->GetAbstractGraph(0)->GetNode(_node);
-	return explored((unsigned int)loc->GetLabelL(kFirstData), 
+	return Explored((unsigned int)loc->GetLabelL(kFirstData), 
 									(unsigned int)loc->GetLabelL(kFirstData+1));
 }

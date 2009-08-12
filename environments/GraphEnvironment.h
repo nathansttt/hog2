@@ -54,7 +54,10 @@ namespace GraphSearchConstants
 	const double kStraightEdgeCost = 1.0;
 	const double kDiagonalEdgeCost = ROOT_TWO;
 
+	Graph *GetEightConnectedGraph(Map *m);
+	Graph *GetFourConnectedGraph(Map *m);
 	Graph *GetGraph(Map *m);
+	void AddNodesToGraph(Map *m, Graph *g);
 	void AddEdges(Map *m, Graph *g, int x, int y,
 				  double straigtEdgeCost = 1.0,
 				  double diagEdgeCost = ROOT_TWO,
@@ -69,7 +72,7 @@ public:
 	virtual Graph *GetGraph() = 0;
 	virtual double HCost(graphState &state1, graphState &state2) = 0;
 	// if one is better as the start or goal state, this can swap for you.
-	virtual void ChooseStartGoal(graphState &start, graphState &goal) {}
+	virtual void ChooseStartGoal(graphState &/*start*/, graphState &/*goal*/) {}
 	virtual void OpenGLDraw() const {}
 private:
 };
@@ -168,7 +171,7 @@ private:
 	}
 	void fillProbTable()
 	{
-		int size = m->getMapWidth() * m->getMapHeight();
+		int size = m->GetMapWidth() * m->GetMapHeight();
 		probTable = (bool*)malloc( size );
 		for(int i=0;i<size;i++) {
 			if(drand48() < prob)
@@ -247,19 +250,22 @@ public:
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const graphState &s) const;
 	virtual void OpenGLDraw(const graphState &s, const graphMove &gm) const;
+	virtual void OpenGLDraw(const graphState &s, const graphState&, float) const { OpenGLDraw(s); }
+
 	Graph *GetGraph() { return g; };
 
-	virtual void StoreGoal(graphState &state1) {}
+	virtual void StoreGoal(graphState &) {}
 	virtual void ClearGoal() {}
 	virtual bool IsGoalStored() {return false;}
 
-	virtual double HCost(graphState &state1) {
-		fprintf(stderr, "ERROR: Single State HCost not implemented for RoboticArm\n");
+	virtual double HCost(graphState &) {
+		fprintf(stderr, "ERROR: Single State HCost not implemented for GraphEnvironment\n");
 		exit(1); return -1.0;}
 
-	virtual bool GoalTest(graphState &s){
+	virtual bool GoalTest(graphState &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for GraphEnvironment\n");
-		exit(1); return false;}
+		exit(1); return false;
+	}
 
 protected:
 	bool directed;
@@ -276,8 +282,10 @@ class AbstractionGraphEnvironment: public GraphEnvironment {
 
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const graphState &s) const { GraphEnvironment::OpenGLDraw(s); }
-
-	double scale() { return graphscale; };
+	virtual void OpenGLDraw(const graphState &s, const graphMove &gm) const { GraphEnvironment::OpenGLDraw(s, gm); }
+	virtual void OpenGLDraw(const graphState &s, const graphState&, float) const { OpenGLDraw(s); }
+	
+	double Scale() { return graphscale; };
 
 protected:
 	GraphAbstraction *gabs;

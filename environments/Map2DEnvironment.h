@@ -61,7 +61,7 @@ public:
 	virtual void MoveUnitOccupancy(xyLoc &, xyLoc&);
 
 private:
-	bitVector *bitvec; /// For each map position, set if occupied
+	BitVector *bitvec; /// For each map position, set if occupied
 	long mapWidth; /// Used to compute index into bitvector
 	long mapHeight; /// used to compute index into bitvector
 
@@ -83,7 +83,7 @@ const int kStayIndex = 8; // index of kStay
 class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 {
 public:
-	MapEnvironment(Map *m);
+	MapEnvironment(Map *m, bool useOccupancy = true);
 	virtual ~MapEnvironment();
 	void SetGraphHeuristic(GraphHeuristic *h);
 	GraphHeuristic *GetGraphHeuristic();
@@ -95,7 +95,7 @@ public:
 
 	virtual bool InvertAction(tDirection &a) const;
 
-	virtual double HCost(xyLoc &node1) {
+	virtual double HCost(xyLoc &) {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for MapEnvironment\n");
 		exit(1); return -1.0;}
 	virtual double HCost(xyLoc &node1, xyLoc &node2);
@@ -103,7 +103,7 @@ public:
 	virtual double GCost(xyLoc &node1, tDirection &act);
 	bool GoalTest(xyLoc &node, xyLoc &goal);
 
-	bool GoalTest(xyLoc &s){
+	bool GoalTest(xyLoc &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for MapEnvironment\n");
 		exit(1); return false;}
 
@@ -111,15 +111,16 @@ public:
 	uint64_t GetActionHash(tDirection act) const;
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const xyLoc &l) const;
-	virtual void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, double v) const;
+	virtual void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const;
 	virtual void OpenGLDraw(const xyLoc &, const tDirection &) const;
+
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;
 	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;
 	Map* GetMap() const { return map; }
 
 	virtual void GetNextState(xyLoc &currents, tDirection dir, xyLoc &news) const;
 
-	void StoreGoal(xyLoc &g) {} // stores the locations for the given goal state
+	void StoreGoal(xyLoc &) {} // stores the locations for the given goal state
 	void ClearGoal() {}
 	bool IsGoalStored() {return false;}
 
@@ -139,10 +140,8 @@ public:
 	MapAbstraction *GetMapAbstraction() { return ma; }
 	void OpenGLDraw() const { map->OpenGLDraw(); ma->OpenGLDraw(); }
 	void OpenGLDraw(const xyLoc &l) const { MapEnvironment::OpenGLDraw(l); }
-	void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, double v) const { MapEnvironment::OpenGLDraw(l1, l2, v); }
-	//void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const {MapEnvironment::OpenGLDraw(l,r,g,b);}
 	void OpenGLDraw(const xyLoc& s, const tDirection &dir) const {MapEnvironment::OpenGLDraw(s,dir);}
-	//void OpenGLDraw(const xyLoc &s, const tDirection &dir, GLfloat r, GLfloat g, GLfloat b) const {MapEnvironment::OpenGLDraw(s,dir,r,g,b);}
+	void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const { MapEnvironment::OpenGLDraw(l1, l2, v); }
 
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"AbsMap\n";return oi;}
 protected:

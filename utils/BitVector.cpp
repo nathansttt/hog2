@@ -1,5 +1,5 @@
 /*
- * $Id: bitVector.cpp,v 1.3 2006/09/18 06:20:15 nathanst Exp $
+ * $Id: BitVector.cpp,v 1.3 2006/09/18 06:20:15 nathanst Exp $
  *
  * This file is part of HOG.
  *
@@ -22,7 +22,7 @@
 #include <cstdio>
 #include "BitVector.h"
 
-bitVector::bitVector(int _size)
+BitVector::BitVector(int _size)
 {
   true_size = _size;
   size = (_size>>5)+1;
@@ -30,24 +30,24 @@ bitVector::bitVector(int _size)
   for (int x = 0; x < size; x++) storage[x] = 0;
 }
 
-bitVector::~bitVector()
+BitVector::~BitVector()
 {
   delete [] storage;
 }
 
-void bitVector::clear()
+void BitVector::clear()
 {
   for (int x = 0; x < size; x++) storage[x] = 0;
 }
 
-bitVector *bitVector::clone()
+BitVector *BitVector::Clone()
 {
-  bitVector *bv = new bitVector(true_size);
-  bv->merge(this);
+  BitVector *bv = new BitVector(true_size);
+  bv->Merge(this);
   return bv;
 }
 
-bool bitVector::get(int index) const
+bool BitVector::Get(int index) const
 {
   if ((index>>5) > size) {
     printf("GET %d OUT OF RANGE\n", index);
@@ -56,7 +56,7 @@ bool bitVector::get(int index) const
   return (((storage[index>>5])>>(index&0x1F))&0x1);
 }
 
-void bitVector::set(int index, bool value)
+void BitVector::Set(int index, bool value)
 {
   if ((index>>5) > size) {
     printf("SET %d OUT OF RANGE\n", index);
@@ -68,7 +68,7 @@ void bitVector::set(int index, bool value)
     storage[index>>5] = storage[index>>5]&(~(1<<(index&0x1F)));
 }
 
-void bitVector::merge(bitVector *bv)
+void BitVector::Merge(BitVector *bv)
 {
   if (bv == 0) return;
   if (bv->size != size) {
@@ -78,7 +78,7 @@ void bitVector::merge(bitVector *bv)
   for (int x = 0; x < size; x++) storage[x] |= bv->storage[x];
 }
 
-bool bitVector::equals(bitVector *bv)
+bool BitVector::Equals(BitVector *bv)
 {
   if (bv->size != size) return false;
   for (int x = 0; x < size; x++)
@@ -87,7 +87,7 @@ bool bitVector::equals(bitVector *bv)
   return true;
 }
 
-int bitVector::getNumSetBits()
+int BitVector::GetNumSetBits()
 {
   int sum = 0;
   for (int x = 0; x < size; x++) {

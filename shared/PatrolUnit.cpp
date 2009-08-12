@@ -103,7 +103,7 @@ void patrolUnit::OpenGLDraw(const MapProvider *mp, const SimulationInfo *) const
 	GLdouble xx, yy, zz, rad;
 	Map *map = mp->GetMap();
 	int posx = x, posy = y;
-	map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
+	map->GetOpenGLCoord(posx, posy, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	glBegin(GL_LINE_STRIP);
 //	glVertex3f(xx, yy+rad/2, zz);
@@ -113,14 +113,14 @@ void patrolUnit::OpenGLDraw(const MapProvider *mp, const SimulationInfo *) const
 		posx += ((moves[t]&kE)?1:0) - ((moves[t]&kW)?1:0);
 		posy += ((moves[t]&kS)?1:0) - ((moves[t]&kN)?1:0);
 		
-		map->getOpenGLCoord(posx, posy, xx, yy, zz, rad);
+		map->GetOpenGLCoord(posx, posy, xx, yy, zz, rad);
 		
 //		glVertex3f(xx, yy+rad/2, zz);
 		glVertex3f(xx, yy, zz-rad/2);
 	}
 	glEnd();
 	
-	map->getOpenGLCoord(x, y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(x, y, xx, yy, zz, rad);
 	glColor3f(r, g, b);
 	drawSphere(xx, yy, zz, rad);
 }
@@ -186,7 +186,7 @@ void patrolUnit::addPathToCache(path *p)
 	moves.push_back((tDirection)result);
 }
 
-void patrolUnit::logStats(StatCollection *stats)
+void patrolUnit::LogStats(StatCollection *stats)
 {
 	if (((nodesExpanded == 0) && (nodesTouched != 0)) ||
 			((nodesExpanded != 0) && (nodesTouched == 0)))
@@ -194,7 +194,7 @@ void patrolUnit::logStats(StatCollection *stats)
 		printf("Error; somehow nodes touched/expanded are inconsistent. t:%d e:%d\n",
 					 nodesTouched, nodesExpanded);
 	}
-	// printf("SearchUnit::logStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
+	// printf("SearchUnit::LogStats(nodesExpanded=%d, nodesTouched=%d)\n",nodesExpanded,nodesTouched);
 	if (nodesExpanded != 0)
 		stats->AddStat("nodesExpanded", GetName(), (long)nodesExpanded);
 	if (nodesTouched != 0)

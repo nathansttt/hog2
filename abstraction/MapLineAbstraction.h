@@ -33,7 +33,7 @@ class MapLineAbstraction : public MapAbstraction {
 public:
 	MapLineAbstraction(Map *, int dist = 2, bool uniform = true);
 	~MapLineAbstraction();
-	MapAbstraction *clone(Map *_m) { return new MapLineAbstraction(_m); }
+	MapAbstraction *Clone(Map *_m) { return new MapLineAbstraction(_m); }
 	
 	virtual bool Pathable(node *from, node *to);
 	

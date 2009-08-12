@@ -297,7 +297,7 @@ bool UnitSimulation<state,action,environment>::Done()
 //	Timer t;
 //	if (usetimer)
 //	{
-//		t.startTimer();
+//		t.StartTimer();
 //	}
 //	if (ui->agent->getUnitGroup() == 0)
 //	{
@@ -308,7 +308,7 @@ bool UnitSimulation<state,action,environment>::Done()
 //	}
 //	if (usetimer)
 //	{
-//		return t.endTimer();
+//		return t.EndTimer();
 //	}
 //	return 0;
 //}
@@ -383,11 +383,11 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 	Timer t;
 	Unit<state, action, environment>* u = theUnit->agent;
 	
-	t.startTimer();
+	t.StartTimer();
 	// need to do if/then check - makemove ok or not? need to stay where you are? 
 	if (u->GetUnitGroup()->MakeMove(u, env, this, where))
 	{
-		moveThinking = t.endTimer();
+		moveThinking = t.EndTimer();
 		theUnit->totalThinking += moveThinking;
 		theUnit->lastMove = where;
 		theUnit->lastTime = theUnit->nextTime;
@@ -398,9 +398,9 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 		bool success = MakeUnitMove(theUnit, where, moveTime);
 		//printf("Updating last state\n");
 		
-		t.startTimer();
+		t.StartTimer();
 		u->GetUnitGroup()->UpdateLocation(theUnit->agent, env, theUnit->currentState, success, this);
-		locThinking = t.endTimer();
+		locThinking = t.EndTimer();
 		theUnit->totalThinking += locThinking;
 		if (logStats)
 			stats.AddStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
@@ -421,8 +421,8 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 				theUnit->nextTime += max((locThinking+moveThinking)*penalty + moveTime,	 timeStep);
 			break;
 		}
-		//u->GetUnitGroup()->logStats(&stats);
-		//u->logStats(&stats);
+		//u->GetUnitGroup()->LogStats(&stats);
+		u->LogStats(&stats);
 	}
 	else // stay where you are
 	{
@@ -459,7 +459,7 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 		}
 	}
 	else {
-		if(!envInfo)
+		if (!envInfo)
 			success = true;
 		else
 			success = false;

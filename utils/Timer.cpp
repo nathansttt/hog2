@@ -33,7 +33,7 @@ Timer::Timer()
 	elapsedTime = 0;
 }
 
-void Timer::startTimer()
+void Timer::StartTimer()
 {
 #ifdef OS_MAC
 	startTime = UpTime();
@@ -81,7 +81,7 @@ float Timer::getCPUSpeed()
 
 #endif
 
-double Timer::endTimer()
+double Timer::EndTimer()
 {
 #ifdef OS_MAC
   AbsoluteTime stopTime = UpTime();

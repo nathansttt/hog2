@@ -71,19 +71,19 @@ public:
 	void GetActions(FlipSideState &stateID, std::vector<flipMove> &actions) const;
 	flipMove GetAction(FlipSideState &s1, FlipSideState &s2) const;
 	void ApplyAction(FlipSideState &s, flipMove a) const;
-	bool InvertAction(flipMove &a) const { return true; } // applying the same action inverts it
+	bool InvertAction(flipMove &) const { return true; } // applying the same action inverts it
 
 	//OccupancyInterface<FlipSideState, flipMove> *GetOccupancyInfo() { return 0; }
 
-	double HCost(FlipSideState &state1){
+	double HCost(FlipSideState &){
 		fprintf(stderr, "ERROR: Single State HCost not implemented for FlipSide\n");
 		exit(1); return -1.0;}
 	double HCost(FlipSideState &state1, FlipSideState &state2);
 	double GCost(FlipSideState &state1, FlipSideState &state2);
-	double GCost(FlipSideState &state1, flipMove &act) { return 1.0; }
+	double GCost(FlipSideState &, flipMove &) { return 1.0; }
 	bool GoalTest(FlipSideState &state, FlipSideState &goal);
 
-	bool GoalTest(FlipSideState &s){
+	bool GoalTest(FlipSideState &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for FlipSide\n");
 		exit(1); return false;}
 
@@ -92,8 +92,9 @@ public:
 	void OpenGLDraw() const;
 	void OpenGLDraw(const FlipSideState &s) const;
 	void OpenGLDraw(const FlipSideState &, const flipMove &)  const{ /* currently not drawing moves */ }
+	void OpenGLDraw(const FlipSideState&, const FlipSideState&, float) const { /* currently not drawing moves */ }
 
-	void StoreGoal(FlipSideState &s){}
+	void StoreGoal(FlipSideState &){}
 	void ClearGoal(){}
 	bool IsGoalStored(){return false;}
 private:

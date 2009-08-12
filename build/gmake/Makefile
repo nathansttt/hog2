@@ -28,8 +28,10 @@ PROJECTS = \
   apps/pathsample \
   apps/puzzlesample \
   apps/multiagent \
+  apps/inconsistency \
   apps/measure_inconsistency \
   apps/dynamicsearch \
+  apps/directional \
 #	apps/coprobber
 #  apps/lv.pathfinding	
 #  apps/inconsistency \
@@ -59,6 +61,7 @@ PROJECTS_ALL = \
   apps/inconsistency \
   apps/multiagent \
   apps/dynamicsearch \
+  apps/directional \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice

@@ -17,9 +17,9 @@ using namespace GraphSearchConstants;
 
 const static bool verbose = false;//true;
 
-static unsigned long tickStart;
-
-static unsigned long tickGen;
+//static unsigned long tickStart;
+//
+//static unsigned long tickGen;
 
 void AStarDelay::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
 {
@@ -35,7 +35,7 @@ void AStarDelay::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, gra
 
 	gettimeofday(&t1,0);
 
-	double usedtime = t1.tv_sec-t0.tv_sec + (t1.tv_usec-t0.tv_usec)/1000000.0;
+//	double usedtime = t1.tv_sec-t0.tv_sec + (t1.tv_usec-t0.tv_usec)/1000000.0;
 	
 	//if(thePath.size() > 0)
 	//	printf("\nNodes expanded=%ld, Nodes touched=%ld, Reopenings=%ld.\n",GetNodesExpanded(),GetNodesTouched(),GetNodesReopened());
@@ -176,7 +176,7 @@ bool AStarDelay::DoSingleStep(SearchNode &topNode,
 					 topNode.currNode, topNode.gCost, topNode.fCost-topNode.gCost, topNode.fCost);
 	}
 	
-	unsigned long tickTmp ;//= clock();
+//	unsigned long tickTmp ;//= clock();
 
 	// and if there are no lower f-costs on the other open lists...
 	// otherwise we need to delay this node
@@ -342,7 +342,7 @@ void AStarDelay::Broadcast(int level, int levelcount)
 		env->GetSuccessors(front, myneighbors);
 
 		// backward pass
-		for(int x=0;x<myneighbors.size();x++) 
+		for (unsigned int x = 0; x < myneighbors.size(); x++) 
 		{
 			graphState neighbor = myneighbors[x];
 			 iter = closedList.find(neighbor);
@@ -390,13 +390,14 @@ void AStarDelay::Broadcast(int level, int levelcount)
 		closedList[front] = frontNode;
 
 		// forward pass
-		for(int x=0;x<myneighbors.size();x++) 
+		for (unsigned int x = 0; x < myneighbors.size(); x++) 
 		{
 			graphState neighbor = myneighbors[x];
-			NodeLookupTable::iterator iter = closedList.find(neighbor);
-			if(iter != closedList.end()) {
+			NodeLookupTable::iterator theIter = closedList.find(neighbor);
+			if (theIter != closedList.end())
+			{
 				double edgeWeight = env->GCost(front,neighbor);
-				SearchNode neighborNode = iter->second;
+				SearchNode neighborNode = theIter->second;
 
 				double neighborH = neighborNode.fCost - neighborNode.gCost;
 				

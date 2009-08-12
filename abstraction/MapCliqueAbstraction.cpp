@@ -322,9 +322,9 @@ Graph *MapCliqueAbstraction::cliqueAbstractGraph(Graph *g)
 	if (abstractUniformly)
 	{
 		// going through the map grid in a regular way, trying to abstract
-		for (int x = 0; x < GetMap()->getMapWidth()-1; x+=(2<<abLevel))
+		for (int x = 0; x < GetMap()->GetMapWidth()-1; x+=(2<<abLevel))
 		{
-			for (int y = 0; y < GetMap()->getMapHeight()-1; y+=(2<<abLevel))
+			for (int y = 0; y < GetMap()->GetMapHeight()-1; y+=(2<<abLevel))
 			{
 				// try to abstract (x, y), (x+1, y), (x, y+1) and (x+1, y+1)
 				node *a, *b, *c, *d;

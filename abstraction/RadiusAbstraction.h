@@ -34,7 +34,7 @@ class RadiusAbstraction : public MapAbstraction {
 public:
 	RadiusAbstraction(Map *, int);
 	~RadiusAbstraction();
-	MapAbstraction *clone(Map *_m) { return new RadiusAbstraction(_m, radius); }
+	MapAbstraction *Clone(Map *_m) { return new RadiusAbstraction(_m, radius); }
 	
 	virtual bool Pathable(node *from, node *to);
 	

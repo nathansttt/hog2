@@ -44,7 +44,7 @@ public:
   double h(node *a, node *b);
 	//  virtual void draw();
 	//  virtual void rebuild();
-	//	virtual int getRevision() { return 0; }
+	//	virtual int GetRevision() { return 0; }
 	
   bool Pathable(node *from, node *to);
   bool Pathable(unsigned int from, unsigned int to);

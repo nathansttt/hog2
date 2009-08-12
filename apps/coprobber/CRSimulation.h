@@ -341,15 +341,15 @@ void CRSimulation<state, action, environment>::StepUnitTime( unsigned int index,
 
 	bool moving;
 	if( index && copgroup ) {
-		t.startTimer();
+		t.StartTimer();
 		moving = copgroup->MakeMove( u, env, s, where );
-		moveThinking = t.endTimer();
+		moveThinking = t.EndTimer();
 	}	else {
-		t.startTimer();
+		t.StartTimer();
 		//moving = u->MakeMove( env, NULL, s, where ); would probably work the same way since we're not working with
 		// any OccupancyInterfaces here...
 		moving = u->MakeMove( env, env->GetOccupancyInfo(), s, where );
-		moveThinking = t.endTimer();
+		moveThinking = t.EndTimer();
 	}
 
 	if( moving ) {
@@ -361,13 +361,13 @@ void CRSimulation<state, action, environment>::StepUnitTime( unsigned int index,
 			theUnit->lastMove = where;
 
 		if( index && copgroup ) {
-			t.startTimer();
+			t.StartTimer();
 			copgroup->UpdateLocation( u, env, theUnit->currentState, success, s );
-			locThinking = t.endTimer();
+			locThinking = t.EndTimer();
 		} else {
-			t.startTimer();
+			t.StartTimer();
 			u->UpdateLocation( env, theUnit->currentState, success, s );
-			locThinking = t.endTimer();
+			locThinking = t.EndTimer();
 		}
 
 		theUnit->totalThinking += locThinking;

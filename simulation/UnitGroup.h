@@ -135,9 +135,9 @@ private:
 //	/** Is the group done with racing? */
 //	virtual bool done();
 //	/** Lets the unit group do what it needs to reset a trial */
-//	virtual void startNewTrial(StatCollection *stats);
+//	virtual void StartNewTrial(StatCollection *stats);
 //	// print stats; if we don't know any, get the unit to do it
-//	virtual void logStats(StatCollection *stats);
+//	virtual void LogStats(StatCollection *stats);
 //	virtual void LogFinalStats(StatCollection *) {}
 //	//virtual void printRoundStats(unit *u, FILE *f);
 //

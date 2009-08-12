@@ -1,6 +1,6 @@
 // HOG File
 /*
- * $Id: bitVector.h,v 1.4 2006/09/18 06:20:15 nathanst Exp $
+ * $Id: BitVector.h,v 1.4 2006/09/18 06:20:15 nathanst Exp $
  *
  * This file is part of HOG.
  *
@@ -28,18 +28,18 @@
  * An efficient bit-wise vector implementation.
  */
 
-class bitVector {
+class BitVector {
 public:
-  bitVector(int size);
-  ~bitVector();
+  BitVector(int size);
+  ~BitVector();
   void clear();
-  bitVector *clone();
-  int getSize() { return true_size; }
-  bool get(int index) const;
-  void set(int index, bool value);
-  void merge(bitVector *);
-  bool equals(bitVector *);
-  int getNumSetBits();
+  BitVector *Clone();
+  int GetSize() { return true_size; }
+  bool Get(int index) const;
+  void Set(int index, bool value);
+  void Merge(BitVector *);
+  bool Equals(BitVector *);
+  int GetNumSetBits();
 private:
   int size, true_size;
   uint32_t *storage;

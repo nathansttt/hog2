@@ -80,6 +80,7 @@ static bool operator==(const armRotations &l1, const armRotations &l2) {
 
 class RoboticArmHeuristic {
 public:
+	virtual ~RoboticArmHeuristic() {}
 	virtual double HCost(armAngles &node1, armAngles &node2) = 0;
 };
 
@@ -103,14 +104,14 @@ public:
 
 	void AddHeuristic(RoboticArmHeuristic *h) { heuristics.push_back(h); }
 
-	virtual double HCost(armAngles &node1){
+	virtual double HCost(armAngles &){
 		printf("Single State HCost Failure: method not implemented for RoboticArm\n");
 		exit(0); return -1.0;}
 
 	virtual double HCost(armAngles &node1, armAngles &node2);
 
-	virtual double GCost(armAngles &node1, armAngles &node2) { return 1; }
-	virtual double GCost(armAngles &node1, armRotations &act) { return 1; }
+	virtual double GCost(armAngles &, armAngles &) { return 1; }
+	virtual double GCost(armAngles &, armRotations &) { return 1; }
 	bool GoalTest(armAngles &node, armAngles &goal);
 	uint64_t GetStateHash(armAngles &node) const;
 	uint64_t GetActionHash(armRotations act) const;
@@ -118,6 +119,7 @@ public:
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const armAngles &l) const;
 	virtual void OpenGLDraw(const armAngles &, const armRotations &) const;
+	virtual void OpenGLDraw(const armAngles&, const armAngles&, float) const {}
 //	virtual void OpenGLDraw(const armAngles &, const armRotations &, GLfloat r, GLfloat g, GLfloat b) const;
 //	virtual void OpenGLDraw(const armAngles &l, GLfloat r, GLfloat g, GLfloat b) const;
 
@@ -126,10 +128,10 @@ public:
 	bool LegalState(armAngles &a) const;
 	bool LegalArmConfig(armAngles &a) const;
 
-	void StoreGoal(armAngles &a){}
+	void StoreGoal(armAngles &) {}
 	void ClearGoal(){}
 	bool IsGoalStored(){return false;}
-	virtual bool GoalTest(armAngles &s){
+	virtual bool GoalTest(armAngles &){
 		printf("Single State Goal Test Failure: method not implemented for RoboticArm\n");
 		exit(0); return false;}
 
@@ -158,6 +160,7 @@ private:
 class ArmToArmHeuristic : public RoboticArmHeuristic {
 public:
 	ArmToArmHeuristic(RoboticArm *r, armAngles &initial, bool optimize = false);
+	virtual ~ArmToArmHeuristic() {}
 	double HCost(armAngles &node1, armAngles &node2);
 	void AddDiffTable();
 	bool IsLegalState(armAngles &arm);
@@ -180,6 +183,7 @@ private:
 class ArmToTipHeuristic : public RoboticArmHeuristic {
 public:
 	ArmToTipHeuristic(RoboticArm *r);
+	virtual ~ArmToTipHeuristic() {}
 	double HCost(armAngles &node1, armAngles &node2);
 
 	void GenerateLegalStateTable( armAngles &legalArm );

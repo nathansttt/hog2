@@ -104,9 +104,9 @@ void MapLineAbstraction::addNodes(Graph *g)
 
 	if (abstractUniformly)
 	{
-		for (int x = 0; x < GetMap()->getMapWidth(); x += xstep)
+		for (int x = 0; x < GetMap()->GetMapWidth(); x += xstep)
 		{
-			for (int y = 0; y < GetMap()->getMapHeight(); y+= ystep)
+			for (int y = 0; y < GetMap()->GetMapHeight(); y+= ystep)
 			{
 				//printf("Next check starts from (%d, %d)\n", x, y);
 				std::vector<node *> nodes;

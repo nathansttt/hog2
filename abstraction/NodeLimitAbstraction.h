@@ -32,7 +32,7 @@ class NodeLimitAbstraction : public MapAbstraction {
 public:
 	NodeLimitAbstraction(Map *, int nodeLimit);
 	~NodeLimitAbstraction();
-	MapAbstraction *clone(Map *_m) { return new NodeLimitAbstraction(_m, nodeLimit); }
+	MapAbstraction *Clone(Map *_m) { return new NodeLimitAbstraction(_m, nodeLimit); }
 	
 	virtual bool Pathable(node *from, node *to);
 	

@@ -182,7 +182,7 @@ protected:
 		if (verbose)
 			printf("Continuing trial: %d\n", currRound);
 		
-		// call void startNewTrial(); on all groups
+		// call void StartNewTrial(); on all groups
 		for (unsigned int t = 0; t < this->unitGroups.size(); t++)
 		{
 			this->unitGroups[t]->StartNewTrial(&this->stats);
@@ -199,8 +199,8 @@ protected:
 			// stats.AddStat("distanceMoved", units[t]->agent->GetName(), (double)0);
 //			if (this->units[t]->blocking)
 //			{
-//				bv->set(this->units[t]->curry*map_width+units[t]->currx, 0);
-//				bv->set(this->units[t]->starty*map_width+units[t]->startx, 1);
+//				bv->Set(this->units[t]->curry*map_width+units[t]->currx, 0);
+//				bv->Set(this->units[t]->starty*map_width+units[t]->startx, 1);
 //			}
 			this->units[t]->currentState = this->units[t]->startState;
 			this->units[t]->agent->GetUnitGroup()->UpdateLocation(this->units[t]->agent, this->env, this->units[t]->startState, false, this);

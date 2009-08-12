@@ -106,8 +106,8 @@ public:
 	virtual const char *GetName();
 	
 	void PrintStats();
-	long GetNodesExpanded() { return nodesExpanded; }
-	long GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesExpanded() { return nodesExpanded; }
+	uint64_t GetNodesTouched() { return nodesTouched; }
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	int GetMemoryUsage();
 
@@ -115,7 +115,7 @@ public:
   uint32_t ClosedListIterNext(closedList_iterator&) const;
 
 private:
-		long nodesTouched, nodesExpanded;
+		uint64_t nodesTouched, nodesExpanded;
 
 	uint32_t GetNextNode();
 	void UpdateWeight(uint32_t currOpenNode, uint32_t neighbor);

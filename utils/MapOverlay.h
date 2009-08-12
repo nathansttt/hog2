@@ -18,16 +18,16 @@ class MapOverlay {
 public:
 	MapOverlay(Map *m);
 	Map *GetMap() { return m; }
-	void setOverlayValue(int x, int y, double value);
-	double getOverlayValue(int x, int y);
+	void SetOverlayValue(int x, int y, double value);
+	double GetOverlayValue(int x, int y);
 	void OpenGLDraw() const;
-	void setTransparentValue(double v) { ignoreVal = v; }
-	void setColorMap(int val) { colorMap = val; }
-	int getColorMap() { return colorMap; }
-	void increaseColorMap() { colorMap++; }
-	void decreaseColorMap() { colorMap--; }
-	double getMaxValue() { return maxVal; }
-	double getMinValue() { return minVal; }
+	void SetTransparentValue(double v) { ignoreVal = v; }
+	void SetColorMap(int val) { colorMap = val; }
+	int GetColorMap() { return colorMap; }
+	void IncreaseColorMap() { colorMap++; }
+	void DecreaseColorMap() { colorMap--; }
+	double GetMaxValue() { return maxVal; }
+	double GetMinValue() { return minVal; }
 private:
 	void resetValues();
 	Map *m;

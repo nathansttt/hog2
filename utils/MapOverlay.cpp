@@ -14,7 +14,7 @@
 MapOverlay::MapOverlay(Map *_m)
 :m(_m), maxVal(0), minVal(0.0)
 {
-	values.resize(m->getMapWidth()*m->getMapHeight());
+	values.resize(m->GetMapWidth()*m->GetMapHeight());
 	colorMap = 4;
 	displayList = 0;
 }
@@ -40,9 +40,9 @@ void MapOverlay::resetValues()
 	}
 }
 
-void MapOverlay::setOverlayValue(int x, int y, double value)
+void MapOverlay::SetOverlayValue(int x, int y, double value)
 {
-	if ((x < 0) || (x >= m->getMapWidth()) || (y < 0) || (y >= m->getMapHeight()))
+	if ((x < 0) || (x >= m->GetMapWidth()) || (y < 0) || (y >= m->GetMapHeight()))
 		return;
 	if (displayList)
 	{
@@ -50,7 +50,7 @@ void MapOverlay::setOverlayValue(int x, int y, double value)
 		displayList = 0;
 	}
 	
-	values[y*m->getMapWidth()+x] = value;
+	values[y*m->GetMapWidth()+x] = value;
 	if (value > maxVal)
 		maxVal = value;
 	if (value < minVal)
@@ -58,11 +58,11 @@ void MapOverlay::setOverlayValue(int x, int y, double value)
 	//resetValues();
 }
 
-double MapOverlay::getOverlayValue(int x, int y)
+double MapOverlay::GetOverlayValue(int x, int y)
 {
-	if ((x < 0) || (x >= m->getMapWidth()) || (y < 0) || (y >= m->getMapHeight()))
+	if ((x < 0) || (x >= m->GetMapWidth()) || (y < 0) || (y >= m->GetMapHeight()))
 		return 0;
-	return values[y*m->getMapWidth()+x];
+	return values[y*m->GetMapWidth()+x];
 }
 
 void MapOverlay::OpenGLDraw() const
@@ -90,16 +90,16 @@ void MapOverlay::OpenGLDraw() const
 			}
 			unsigned int last;
 			for (last = t+1;
-					 last < values.size() && (last%(m->getMapWidth()) != 0) &&
+					 last < values.size() && (last%(m->GetMapWidth()) != 0) &&
 					 fequal(values[t], values[last]); last++)
 			{}
 			last -= 1;
 			GLdouble coverage = 1.0;
 			GLdouble a, b, c, radius;
-			m->getOpenGLCoord((int)(t%(m->getMapWidth())), (int)(t/m->getMapWidth()), a, b, c, radius);
+			m->GetOpenGLCoord((int)(t%(m->GetMapWidth())), (int)(t/m->GetMapWidth()), a, b, c, radius);
 			glVertex3f(a-coverage*radius, b+coverage*radius, c-4*radius);
 			glVertex3f(a-coverage*radius, b-coverage*radius, c-4*radius);
-			m->getOpenGLCoord((int)(last%(m->getMapWidth())), (int)(last/m->getMapWidth()), a, b, c, radius);
+			m->GetOpenGLCoord((int)(last%(m->GetMapWidth())), (int)(last/m->GetMapWidth()), a, b, c, radius);
 			glVertex3f(a+coverage*radius, b-coverage*radius, c-4*radius);
 			glVertex3f(a+coverage*radius, b+coverage*radius, c-4*radius);
 			t = last;
@@ -110,11 +110,11 @@ void MapOverlay::OpenGLDraw() const
 		glBegin(GL_QUADS);
 		glNormal3f(0, 0, -1);
 		GLdouble a, b, c, radius;
-		m->getOpenGLCoord(0, 0, a, b, c, radius);
-		double wide = radius*2.0*m->getMapWidth()/100.0;
+		m->GetOpenGLCoord(0, 0, a, b, c, radius);
+		double wide = radius*2.0*m->GetMapWidth()/100.0;
 		glColor3f(0.2, 0.2, 0.2);
-		glVertex3f(a-wide, b+2*m->getMapHeight()*radius+wide, c-4*radius);
-		glVertex3f(a-4*wide, b+2*m->getMapHeight()*radius+wide, c-4*radius);
+		glVertex3f(a-wide, b+2*m->GetMapHeight()*radius+wide, c-4*radius);
+		glVertex3f(a-4*wide, b+2*m->GetMapHeight()*radius+wide, c-4*radius);
 		glVertex3f(a-4*wide, b-wide, c-4*radius);
 		glVertex3f(a-wide, b-wide, c-4*radius);
 		glEnd();
@@ -122,8 +122,8 @@ void MapOverlay::OpenGLDraw() const
 		// white border
 		glBegin(GL_LINE_LOOP);
 		glColor3f(1.0, 1.0, 1.0);
-		glVertex3f(a-wide, b+2*m->getMapHeight()*radius+wide, c-4*radius-radius/10.0);
-		glVertex3f(a-4*wide, b+2*m->getMapHeight()*radius+wide, c-4*radius-radius/10.0);
+		glVertex3f(a-wide, b+2*m->GetMapHeight()*radius+wide, c-4*radius-radius/10.0);
+		glVertex3f(a-4*wide, b+2*m->GetMapHeight()*radius+wide, c-4*radius-radius/10.0);
 		glVertex3f(a-4*wide, b-wide, c-4*radius);
 		glVertex3f(a-wide, b-wide, c-4*radius);
 		glEnd();
@@ -131,15 +131,15 @@ void MapOverlay::OpenGLDraw() const
 		// color bar on the side
 		glBegin(GL_QUAD_STRIP);
 		glNormal3f(0, 0, -1);
-		m->getOpenGLCoord(0, 0, a, b, c, radius);
+		m->GetOpenGLCoord(0, 0, a, b, c, radius);
 		const int stripResolution = 20;
 		for (int x = 0; x <= stripResolution; x++)
 		{
 			recColor r = getColor(minVal + (maxVal-minVal)*((double)x/stripResolution),
 														minVal, maxVal, colorMap);
 			glColor3f(r.r, r.g, r.b);
-			glVertex3f(a-2*wide, b+2*m->getMapHeight()*radius*(1.0-(double)x/stripResolution), c-4*radius-radius/8.0);
-			glVertex3f(a-3*wide, b+2*m->getMapHeight()*radius*(1.0-(double)x/stripResolution), c-4*radius-radius/8.0);
+			glVertex3f(a-2*wide, b+2*m->GetMapHeight()*radius*(1.0-(double)x/stripResolution), c-4*radius-radius/8.0);
+			glVertex3f(a-3*wide, b+2*m->GetMapHeight()*radius*(1.0-(double)x/stripResolution), c-4*radius-radius/8.0);
 		}
 		glEnd();
 
@@ -174,8 +174,8 @@ void MapOverlay::OpenGLDraw() const
 			{
 				if (fequal(x, 0))
 					glColor3f(1.0, 0, 0);
-				glVertex3f(a-1*wide, b+2*m->getMapHeight()*radius*(1.0-(x-minVal)/(maxVal-minVal)), c-4*radius-radius/9.0);
-				glVertex3f(a-4*wide, b+2*m->getMapHeight()*radius*(1.0-(x-minVal)/(maxVal-minVal)), c-4*radius-radius/9.0);
+				glVertex3f(a-1*wide, b+2*m->GetMapHeight()*radius*(1.0-(x-minVal)/(maxVal-minVal)), c-4*radius-radius/9.0);
+				glVertex3f(a-4*wide, b+2*m->GetMapHeight()*radius*(1.0-(x-minVal)/(maxVal-minVal)), c-4*radius-radius/9.0);
 				if (fequal(x, 0))
 					glColor3f(1.0, 1.0, 1.0);
 			}
@@ -183,8 +183,8 @@ void MapOverlay::OpenGLDraw() const
 			{
 				if (fequal(x, 0))
 					glColor3f(1.0, 0, 0);
-				glVertex3f(a-1*wide, b+2*m->getMapHeight()*radius*(1.0-(x-minVal)/(maxVal-minVal)), c-4*radius-radius/9.0);
-				glVertex3f(a-4*wide, b+2*m->getMapHeight()*radius*(1.0-(x-minVal)/(maxVal-minVal)), c-4*radius-radius/9.0);
+				glVertex3f(a-1*wide, b+2*m->GetMapHeight()*radius*(1.0-(x-minVal)/(maxVal-minVal)), c-4*radius-radius/9.0);
+				glVertex3f(a-4*wide, b+2*m->GetMapHeight()*radius*(1.0-(x-minVal)/(maxVal-minVal)), c-4*radius-radius/9.0);
 				if (fequal(x, 0))
 					glColor3f(1.0, 1.0, 1.0);
 			}

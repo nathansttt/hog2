@@ -125,13 +125,13 @@ public:
 	virtual ~WeightedMap2DEnvironment();
 	void ApplyAction(xyLoc &s, tDirection dir) const;
 	virtual double GCost(xyLoc &node1, xyLoc &node2);
+	virtual double GCost(xyLoc &node1, tDirection &act) { return AbsMapEnvironment::GCost(node1, act); }
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Returning "<<oi<<std::endl;return oi;}
 	virtual BaseMapOccupancyInterface* GetOccupancyInfo(){return oi;}
 	void OpenGLDraw() const;
 	void OpenGLDraw(const xyLoc &l)  const{ AbsMapEnvironment::OpenGLDraw(l); }
-	//void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const {AbsMapEnvironment::OpenGLDraw(l,r,g,b);}
 	void OpenGLDraw(const xyLoc& s, const tDirection &dir) const;
-	//void OpenGLDraw(const xyLoc& s, const tDirection &dir, GLfloat r, GLfloat g, GLfloat b) const {AbsMapEnvironment::OpenGLDraw(s,dir,r,g,b);}
+	void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const { MapEnvironment::OpenGLDraw(l1, l2, v); }
 	void DrawEdge(const edge* e) const;
 	
 	void UpdateAngle(xyLoc &old, xyLoc &s, double t);
@@ -161,7 +161,7 @@ public:
 	// For perceptron update rule
 	void UsePerceptron(double lr) { usePerceptron = true; learningRate = lr; }
 	
-	double ComputeArrowMetric(bool timed=false,double time=0, bool doNormalize=false, double maxtime=0);
+	double ComputeArrowMetric(bool timed=false,double time=0, bool DoNormalize=false, double maxtime=0);
 	Vector2D GetAngleFromDirection(tDirection dir);
 
 private:

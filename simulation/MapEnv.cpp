@@ -29,15 +29,15 @@
 //	int x = n->GetLabelL(kFirstData);
 //	int y = n->GetLabelL(kFirstData+1);
 //	
-//	int terrain = m_map->getTerrainType(x, y);
+//	int terrain = m_map->GetTerrainType(x, y);
 //	if (terrain == kGround)
 //		return false;
 //		
-//	terrain = m_map->getTerrainType(x, y, kLeftSide);
+//	terrain = m_map->GetTerrainType(x, y, kLeftSide);
 //	if (terrain == kGround)
 //		return false;
 //	
-//	terrain = m_map->getTerrainType(x, y, kRightSide);
+//	terrain = m_map->GetTerrainType(x, y, kRightSide);
 //		if (terrain == kGround)
 //			return false;
 //

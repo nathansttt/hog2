@@ -109,7 +109,7 @@ void createMenus()
 //	
 //	//add entries to our menu
 //	glutAddSubMenu("Open Map",submenu);
-//	glutAddMenuEntry("Clear Map...",'clar');
+//	glutAddMenuEntry("clear Map...",'clar');
 //	
 //	// attach the menu to the right button
 //	glutAttachMenu(GLUT_MIDDLE_BUTTON);
@@ -653,7 +653,7 @@ void submitTextToBuffer(const char *val)
 ////
 ////	// message string
 ////	/*if (pContextInfo->message[0]) {
-////		float currDelta = getElapsedTime () - pContextInfo->msgTime;
+////		float currDelta = GetElapsedTime () - pContextInfo->msgTime;
 ////		glColor4f (1.0, 1.0, 1.0, (msgPresistance - currDelta) * 0.1);
 ////		glRasterPos3d (10, line++ * 12, 0); 
 ////		drawCStringGL (pContextInfo->message, pContextInfo->boldFontList);
@@ -662,7 +662,7 @@ void submitTextToBuffer(const char *val)
 ////		}*/
 ////	// global error message
 ////	/*if (gErrorMessage[0]) {
-////		float currDelta = getElapsedTime () - gErrorTime;
+////		float currDelta = GetElapsedTime () - gErrorTime;
 ////		glColor4f (1.0, 0.2, 0.2, (msgPresistance - currDelta) * 0.1);
 ////		glRasterPos3d (10, line++ * 12, 0); 
 ////		drawCStringGL (gErrorMessage, pContextInfo->boldFontList);

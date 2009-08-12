@@ -43,7 +43,7 @@ public:
 	unit *GetGoal();
 	void updateLocation(int _x, int _y, bool worked, SimulationInfo *)
 	{ x = _x; y = _y; if (!worked) { moves.resize(0);	if (currTarget != -1) currTarget = 0; } }
-	void logStats(StatCollection *stats);
+	void LogStats(StatCollection *stats);
 		void LogFinalStats(StatCollection *stats);
 private:
 	double goToLoc(MapAbstraction *aMap, int which);
@@ -53,8 +53,8 @@ private:
 	aStar a;
 //	praStar a;
 	int currTarget;
-	int nodesExpanded;
-	int nodesTouched;
+	uint64_t nodesExpanded;
+	uint64_t nodesTouched;
 };
 
 #endif

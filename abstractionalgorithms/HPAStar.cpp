@@ -83,9 +83,9 @@ path* hpaStar::GetPath(GraphAbstraction *aMap, node* from, node* to, reservation
  	else
 		if(verbose) std::cout<<"Pathable\n";
 
-	//	t.startTimer();
+	//	t.StartTimer();
 	path* abPath = findAbstractPath(fromnum,tonum);
-	//std::cout<<"abstract path "<<t.endTimer()<<std::endl;
+	//std::cout<<"abstract path "<<t.EndTimer()<<std::endl;
 
 	if(!abPath){
 		cleanUpSearch();
@@ -107,7 +107,7 @@ path* hpaStar::GetPath(GraphAbstraction *aMap, node* from, node* to, reservation
 		point3d s(upper->GetLabelF(kXCoordinate),upper->GetLabelF(kYCoordinate),-1);
 		int px;
 		int py;
-		m->GetMap()->getPointFromCoordinate(s,px,py);
+		m->GetMap()->GetPointFromCoordinate(s,px,py);
 
 		node* newTo = m->GetNodeFromMap(px,py);
 		mapPath = findMapPath(thisPart, from, newTo);
@@ -115,18 +115,18 @@ path* hpaStar::GetPath(GraphAbstraction *aMap, node* from, node* to, reservation
 	}
 	else
 	{
-		//	t.startTimer();
+		//	t.StartTimer();
 		mapPath = findMapPath(abPath,from,to);
-		//std::cout<<"Found map path "<<t.endTimer()<<std::endl;
+		//std::cout<<"Found map path "<<t.EndTimer()<<std::endl;
 	}
 	
 	path* finalPath = 0; 
 
 	if (smoothing)
 	{
-		//t.startTimer();
+		//t.StartTimer();
 		finalPath = smoothPath(mapPath);
-		//std::cout<<"Smoothing: "<<t.endTimer()<<std::endl<<std::endl;
+		//std::cout<<"Smoothing: "<<t.EndTimer()<<std::endl<<std::endl;
 		delete mapPath;
 	}
 	else {
@@ -156,14 +156,14 @@ void hpaStar::setUpSearch(node* from, node* to)
 	int expanded = 0; 
 	// insert the nodes 
 	//	Timer t; 
-	//	t.startTimer();
+	//	t.StartTimer();
 	fromnum = m->insertNode(from,expanded,touched);
 	nodesExpanded += expanded;
 	nodesTouched += touched;
 	tonum = m->insertNode(to,expanded,touched);
 	nodesExpanded += expanded;
 	nodesTouched += touched;
-	//	std::cout<<"Time taken to insert: "<<t.endTimer();
+	//	std::cout<<"Time taken to insert: "<<t.EndTimer();
 }
 
 /*
@@ -173,15 +173,16 @@ path* hpaStar::findAbstractPath(node* from, node* to)
 {
 	if(verbose)	std::cout<<"HPA*: finding the abstract path\n";
 	aStarOld astar;
-
-	path* p = astar.GetPath(m,fromnum, tonum); 
+	assert(from == fromnum);
+	assert(to == tonum);
+	path* p = astar.GetPath(m, fromnum, tonum); 
 	nodesExpanded = astar.GetNodesExpanded();
 	nodesTouched = astar.GetNodesTouched();
 
 	if(verbose){
 		std::cout<<"Abstract path: ";
 		if(p)
-			p->print();
+			p->Print();
 		else
 			std::cout<<"Null";
 		std::cout<<std::endl;
@@ -194,7 +195,7 @@ path* hpaStar::findAbstractPath(node* from, node* to)
  * finds the map-level path corresponding to the abstract path
  * It uses cached paths for each edge in the abstract path. 
  */ 
-path* hpaStar::findMapPath(path* abPath,node* from,node* to)
+path* hpaStar::findMapPath(path* abPath, node* /*from*/,node* /*to*/)
 {
 	Graph *g = m->GetAbstractGraph(1);
 	path* curr = abPath;
@@ -233,11 +234,11 @@ path* hpaStar::findMapPath(path* abPath,node* from,node* to)
 		point3d s(n->GetLabelF(kXCoordinate),n->GetLabelF(kYCoordinate),-1);
 		int px;
 		int py;
-		m->GetMap()->getPointFromCoordinate(s,px,py);
+		m->GetMap()->GetPointFromCoordinate(s,px,py);
 
 		point3d t(n2->GetLabelF(kXCoordinate),n2->GetLabelF(kYCoordinate),-1);
 		
-		m->GetMap()->getPointFromCoordinate(t,px,py);
+		m->GetMap()->GetPointFromCoordinate(t,px,py);
 		*/
 
 		e = g->FindEdge(n->GetNum(), n2->GetNum());
@@ -281,9 +282,9 @@ void hpaStar::cleanUpSearch()
 	// remove nodes from map
 	if((fromnum!=0) && (tonum != 0)){
 		//		Timer t;
-		//t.startTimer();
+		//t.StartTimer();
 		m->removeNodes(fromnum,tonum);
-		//std::cout<<"It took "<<t.endTimer()<<" to remove nodes\n";
+		//std::cout<<"It took "<<t.EndTimer()<<" to remove nodes\n";
 	}
 	fromnum = 0;
 	tonum = 0;
@@ -333,9 +334,9 @@ path* hpaStar::smoothPath(path* p)
 		if (last!=n)
 		{
 			std::cout<<"in here\n";
- 			for(unsigned int i=n; i<last && i<lookup.size(); i++)
+ 			for(unsigned int j=n; j<last && j<lookup.size(); j++)
 			{
- 				lookup[i]=0;
+ 				lookup[j]=0;
 			}
 			n = last;
 			continue;
@@ -357,9 +358,9 @@ path* hpaStar::smoothPath(path* p)
 			// paste the shortcut into our current path
 			if (pathToNode)
 			{
-				int last = pathToNode->tail()->n->GetLabelL(kTemporaryLabel);
+				int lastNode = pathToNode->tail()->n->GetLabelL(kTemporaryLabel);
 				int curr = pathToNode->n->GetLabelL(kTemporaryLabel);
-				if (last > curr && !nextInLookup(last, curr,lookup))
+				if (lastNode > curr && !nextInLookup(lastNode, curr,lookup))
 				{
 					// make sure it's not the next one					
 					unsigned int index = n;
@@ -415,12 +416,12 @@ path* hpaStar::smoothPath(path* p)
 	}
 
 	//Create smoothed path from lookup table
-	for(unsigned int i=0; i<lookup.size(); i++){
-		if(lookup[i]!=0){
+	for(unsigned int j=0; j<lookup.size(); j++){
+		if(lookup[j]!=0){
 			if(!smooth)
-				smooth = new path(lookup[i],0);
+				smooth = new path(lookup[j],0);
 			else
-				smooth->tail()->next = new path(lookup[i],0);
+				smooth->tail()->next = new path(lookup[j],0);
 		}
 	}
 
@@ -430,14 +431,14 @@ path* hpaStar::smoothPath(path* p)
 /**
  * Find the index of the node two nodes back in the path
  */
-int hpaStar::backTwoNodes(int i, std::vector<node*> lookup)
+int hpaStar::backTwoNodes(int i, std::vector<node*> lookupVec)
 {
 	i--;
-	while(lookup[i]==NULL){
+	while(lookupVec[i]==NULL){
 		i--;
 	}
 	i--;
-	while(lookup[i]==NULL){
+	while(lookupVec[i]==NULL){
 		i--;
 	}
 	return i;
@@ -449,7 +450,7 @@ int hpaStar::backTwoNodes(int i, std::vector<node*> lookup)
  * curr. This is to make sure we don't keep replacing little paths due to null's in
  * the lookup table. 
  */
-bool hpaStar::nextInLookup(int last, int curr, std::vector<node*> lookup)
+bool hpaStar::nextInLookup(int last, int curr, std::vector<node*> lookupVec)
 {
 	if(last<curr) 
 		return false;
@@ -458,7 +459,7 @@ bool hpaStar::nextInLookup(int last, int curr, std::vector<node*> lookup)
 	{
 		if(i==last)
 			return true;
-		if(lookup[i]!=NULL)
+		if(lookupVec[i]!=NULL)
 			return false;
 	}
 	return true;	

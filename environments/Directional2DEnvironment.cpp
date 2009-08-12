@@ -14,14 +14,22 @@
 #define TABLE_SIZE 15
 #define ROW_SIZE (2*TABLE_SIZE+1)
 
-Directional2DEnvironment::Directional2DEnvironment(Map *_m)
+Directional2DEnvironment::Directional2DEnvironment(Map *_m, model envType, heuristicType heuristic)
 {
-	motionModel = kVehicle;
-	hType = kExtendedPerimeterHeuristic;
+	motionModel = envType;//kHumanoid;
+	//hType = kExtendedPerimeterHeuristic;
 	//hType = kPerimeterHeuristic;
-	//hType = kOctileHeuristic;
+	//hType = kOctileHeuristic
+	
+	hType = heuristic;
 	BuildAngleTables();
-	BuildHTable();
+//	heuristics.resize(4);
+//	for (int x = 0; x < 4; x++)
+//	{
+//		heuristics[x].speed = 0;
+//		heuristics[x].rotation = x;
+//		BuildHTable(heuristics[x]);
+//	}
 	SetColor(1.0, 0.25, 0.25, 1.0);
 	map = _m;
 	checkLegal = true;
@@ -31,6 +39,18 @@ Directional2DEnvironment::Directional2DEnvironment(Map *_m)
 Directional2DEnvironment::~Directional2DEnvironment()
 {
 	delete map;
+}
+
+int Directional2DEnvironment::GetNumAngles()
+{
+	switch (motionModel)
+	{
+		case kVehicle: return 16;
+		case kTank: return 24;
+		case kHumanoid: return 16;
+	}
+	assert(!"Unknown motion model");
+	return 0;
 }
 
 void Directional2DEnvironment::GetSuccessors(xySpeedHeading &loc, std::vector<xySpeedHeading> &neighbors) const
@@ -95,6 +115,12 @@ void Directional2DEnvironment::GetActions(xySpeedHeading &loc, std::vector<delta
 			sh.turn = 0;
 			if (Legal(loc, sh))
 				actions.push_back(sh);
+//			sh.turn = 1;
+//			if (Legal(loc, sh))
+//				actions.push_back(sh);
+//			sh.turn = -1;
+//			if (Legal(loc, sh))
+//				actions.push_back(sh);
 		}
 		// slow moves
 		if (loc.speed < 3)
@@ -194,6 +220,16 @@ bool Directional2DEnvironment::InvertAction(deltaSpeedHeading &) const
 {
 	assert(false);
 	return false;
+}
+
+void Directional2DEnvironment::RotateCCW(xySpeedHeading &s, unsigned int rotation) const
+{
+//	GLdouble yoffset = mySin(l.rotation)*s.x;//sin(TWOPI*rot/16)*rad;
+//	GLdouble xoffset = myCos(l.rotation)*s.;//cos(TWOPI*rot/16)*rad;
+	float x1 = s.x;
+	s.x = roundf(s.x*myCos(rotation) + s.y*mySin(rotation));
+	s.y = roundf(s.y*myCos(rotation) - x1*mySin(rotation));
+	s.rotation = (((motionModel==kTank)?24:16)+s.rotation-rotation)%((motionModel==kTank)?24:16);
 }
 
 void Directional2DEnvironment::ApplyAction(xySpeedHeading &s, deltaSpeedHeading dir) const
@@ -361,22 +397,22 @@ bool Directional2DEnvironment::Legal(xySpeedHeading &node1, deltaSpeedHeading &a
 {
 	if (!checkLegal)
 		return true;
-	//int newDir = node1.rotation+act.turn;
+//	int newDir = node1.rotation+act.turn;
 //	int x1 = floor(node1.x);
 //	int y1 = floor(node1.y);
 	xySpeedHeading next=node1;
 	ApplyAction(next, act);
 	if (motionModel != kTank)
 	{
-		return ((map->getTerrainType(node1.x, node1.y) == kGround) &&
-				(map->getTerrainType(next.x, next.y) == kGround) &&
-				(map->getTerrainType((node1.x+next.x)/2, (node1.y+next.y)/2) == kGround));
+		return ((map->GetTerrainType(node1.x, node1.y) == kGround) &&
+				(map->GetTerrainType(next.x, next.y) == kGround) &&
+				(map->GetTerrainType((node1.x+next.x)/2, (node1.y+next.y)/2) == kGround));
 	}
 	else {
-		return ((map->getTerrainType(node1.x, node1.y) == kGround) &&
-				(map->getTerrainType(next.x, next.y) == kGround) &&
-				(map->getTerrainType(node1.x+(-node1.x+next.x)/3, node1.y+(-node1.y+next.y)/3) == kGround) &&
-				(map->getTerrainType(node1.x+2*(-node1.x+next.x)/3, node1.y+2*(-node1.y+next.y)/3) == kGround));
+		return ((map->GetTerrainType(node1.x, node1.y) == kGround) &&
+				(map->GetTerrainType(next.x, next.y) == kGround) &&
+				(map->GetTerrainType(node1.x+(-node1.x+next.x)/3, node1.y+(-node1.y+next.y)/3) == kGround) &&
+				(map->GetTerrainType(node1.x+2*(-node1.x+next.x)/3, node1.y+2*(-node1.y+next.y)/3) == kGround));
 	}
 }
 
@@ -489,15 +525,15 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading& oldState, const 
 
 	GLdouble xx, yy, zz, rad;
 
-	glBegin(GL_LINES);
-	glColor3f(0, 0, 1.0);
-	map->getOpenGLCoord(oldState.x, oldState.y, xx, yy, zz, rad);
-	glVertex3f(xx-rad, yy-rad, zz-rad);
-	map->getOpenGLCoord(newState.x, newState.y, xx, yy, zz, rad);
-	glVertex3f(xx-rad, yy-rad, zz-rad);
-	glEnd();	
+//	glBegin(GL_LINES);
+//	glColor3f(0, 0, 1.0);
+//	map->GetOpenGLCoord(oldState.x, oldState.y, xx, yy, zz, rad);
+//	glVertex3f(xx-rad, yy-rad, zz-rad);
+//	map->GetOpenGLCoord(newState.x, newState.y, xx, yy, zz, rad);
+//	glVertex3f(xx-rad, yy-rad, zz-rad);
+//	glEnd();	
 	
-	map->getOpenGLCoord(perc*newState.x + (1-perc)*oldState.x, perc*newState.y + (1-perc)*oldState.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(perc*newState.x + (1-perc)*oldState.x, perc*newState.y + (1-perc)*oldState.y, xx, yy, zz, rad);
 	
 	float rot = (1-perc)*oldState.rotation+perc*newState.rotation;
 	if ((oldState.rotation >= DEG-4) && (newState.rotation <= 5))
@@ -538,16 +574,16 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading &l) const
 	GLdouble xx, yy, zz, rad;
 	GLfloat r, g, b, t;
 	GetColor(r, g, b, t);
-	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
 
 	GLdouble yoffset = mySin(l.rotation)*rad;//sin(TWOPI*rot/16)*rad;
 	GLdouble xoffset = myCos(l.rotation)*rad;//cos(TWOPI*rot/16)*rad;
 
-	glColor3f(0, 0, 1.0);
-	glBegin(GL_LINE_STRIP);
-	glVertex3f(xx-rad, yy-rad, zz-rad);
-	glVertex3f(xx-rad, yy-rad, zz);
-	glEnd();
+//	glColor3f(0, 0, 1.0);
+//	glBegin(GL_LINE_STRIP);
+//	glVertex3f(xx-rad, yy-rad, zz-rad);
+//	glVertex3f(xx-rad, yy-rad, zz);
+//	glEnd();
 	
 	glBegin(GL_TRIANGLES);
 	recVec surfaceNormal;
@@ -581,13 +617,13 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading &l) const
 void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading& l, const deltaSpeedHeading &) const
 {
 	GLdouble xx, yy, zz, rad;
-	map->getOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
+	map->GetOpenGLCoord(l.x, l.y, xx, yy, zz, rad);
 	glColor3f(0.5f, 0.5f, 0.5);
 	DrawSphere(xx-rad+l.x, yy-rad+l.y, zz, rad);
 }
 
 
-void Directional2DEnvironment::GetNextState(xySpeedHeading &currents, deltaSpeedHeading dir, xySpeedHeading &news) const
+void Directional2DEnvironment::GetNextState(xySpeedHeading &, deltaSpeedHeading , xySpeedHeading &) const
 {
 	assert(false);
 }
@@ -598,9 +634,9 @@ void Directional2DEnvironment::GetNextState(xySpeedHeading &currents, deltaSpeed
 //	return angles[motionModel];
 //}
 
-void Directional2DEnvironment::BuildHTable()
+void Directional2DEnvironment::BuildHTable(dirHeuristicTable &t)
 {
-	const int speedCnt[3] = {3, 5, 3}; // offset to make all speeds positive
+	const int speedCnt[3] = {3, 5, 3}; // number of possible speeds
 	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
 	const int angles[3] = {16, 16, 24};
 	checkLegal = false;
@@ -610,19 +646,31 @@ void Directional2DEnvironment::BuildHTable()
 	// 9x9
 	//std::vector<std::vector<int> > hTable;
 //	hTable.resize(GetModelUniqueAngles());
-	hTable.resize(ROW_SIZE*ROW_SIZE);
-	for (unsigned int x = 0; x < hTable.size(); x++)
+	t.hTable.resize(ROW_SIZE*ROW_SIZE);
+	for (unsigned int x = 0; x < t.hTable.size(); x++)
 	{
-		hTable[x].resize(speedCnt[motionModel]*angles[motionModel]); // 64 = 4 speeds * 16 angles
-		for (unsigned int y = 0; y < hTable[x].size(); y++)
+		t.hTable[x].resize(speedCnt[motionModel]*angles[motionModel]); // 64 = 4 speeds * 16 angles
+		for (unsigned int y = 0; y < t.hTable[x].size(); y++)
 		{
-			hTable[x][y] = -1;
+			t.hTable[x][y] = -1;
 		}
 	}
 	// goal is in the middle
 //	hTable[(hTable.size()-1)/2][0] = 0;
-	int i2 = 0+((0+speeds[motionModel])*angles[motionModel]);
-	hTable[(hTable.size()-1)/2][i2] = 0;
+	xySpeedHeading base(0, 0);
+	base.speed = t.speed;
+	base.rotation = t.rotation;
+	int i1, i2;
+	if (LookupStateHashIndex(base, i1, i2))
+	{
+		t.hTable[i1][i2] = 0;
+	}
+	else {
+		assert(!"Directional2DEnvironment::BuildHTable - Illegal base state");
+	}
+	
+//	int i2 = 0+((0+speeds[motionModel])*angles[motionModel]);
+//	t.hTable[(t.hTable.size()-1)/2][i2] = 0;
 	
 //	if (motionModel == kTank)
 //	{
@@ -635,11 +683,11 @@ void Directional2DEnvironment::BuildHTable()
 	int updates = 1;
 	while (updates != 0)
 	{
-		printf("%d updates\n", updates);
+//		printf("%d updates\n", updates);
 		updates = 0;
-		for (unsigned int x = 0; x < hTable.size(); x++)
+		for (unsigned int x = 0; x < t.hTable.size(); x++)
 		{
-			for (unsigned int y = 0; y < hTable[x].size(); y++)
+			for (unsigned int y = 0; y < t.hTable[x].size(); y++)
 			{
 				xySpeedHeading s;
 				s.x = (float)(x%ROW_SIZE)-(TABLE_SIZE-0.5);//3.5f;
@@ -654,11 +702,11 @@ void Directional2DEnvironment::BuildHTable()
 				GetSuccessors(s, succ);
 				for (unsigned int z = 0; z < succ.size(); z++)
 				{
-					float val = LookupStateHash(succ[z]);
+					float val = LookupStateHash(succ[z], t);
 //					std::cout << succ[z] << " has val " << val << "\n";
 					if (val != -1)
 					{
-						if (hTable[x][y] == -1)
+						if (t.hTable[x][y] == -1)
 						{
 //							int x1 = floorf(s.x);
 //							int y1 = floorf(s.y);
@@ -666,17 +714,17 @@ void Directional2DEnvironment::BuildHTable()
 //							int index2 = (s.rotation&0xF)|((s.speed&0x3)<<4);
 //							std::cout << "{" << index1 << ", " << index2 << "} ";
 							
-							hTable[x][y] = val+GCost(s, succ[z]);
+							t.hTable[x][y] = val+GCost(s, succ[z]);
 							updates++;
 //							std::cout << "Assigning " << val+GCost(s, succ[z]) << " to " << s <<
 //							" (" << x << ", " << y << ")  from " << succ[z] << std::endl;
 						}
 						else {
-							if (fless(val+GCost(s, succ[z]), hTable[x][y]))
+							if (fless(val+GCost(s, succ[z]), t.hTable[x][y]))
 							{
 //								std::cout << "Updating " << val+GCost(s, succ[z]) << " to " << s <<
 //								" (" << x << ", " << y << ")  from " << succ[z] << std::endl;
-								hTable[x][y] = std::min(hTable[x][y], (float)(val+GCost(s, succ[z])));
+								t.hTable[x][y] = std::min(t.hTable[x][y], (float)(val+GCost(s, succ[z])));
 								updates++;
 							}
 						}
@@ -704,7 +752,25 @@ void Directional2DEnvironment::BuildHTable()
 	checkLegal = true;
 }
 
-float Directional2DEnvironment::LookupStateHash(xySpeedHeading &s)
+bool Directional2DEnvironment::LookupStateHashIndex(xySpeedHeading &s,
+													int &index1, int &index2)
+{
+	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
+	const int angles[3] = {16, 16, 24};
+	
+	int x = floorf(s.x);
+	int y = floorf(s.y);
+	
+	if ((x < -TABLE_SIZE) || (x > TABLE_SIZE) || (y < -TABLE_SIZE) || (y > TABLE_SIZE))
+	{
+		return false;
+	}
+	index1 = (x+TABLE_SIZE)+(y+TABLE_SIZE)*(ROW_SIZE);
+	index2 = (s.rotation)+((s.speed+speeds[motionModel])*angles[motionModel]);
+	return true;
+}
+
+float Directional2DEnvironment::LookupStateHash(xySpeedHeading &s, dirHeuristicTable &t)
 {
 	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
 	const int angles[3] = {16, 16, 24};
@@ -714,36 +780,87 @@ float Directional2DEnvironment::LookupStateHash(xySpeedHeading &s)
 	
 	if ((x < -TABLE_SIZE) || (x > TABLE_SIZE) || (y < -TABLE_SIZE) || (y > TABLE_SIZE))
 	{
-//		x/=2;
-//		y/=2;
-//		if ((x < -TABLE_SIZE) || (x > TABLE_SIZE) || (y < -TABLE_SIZE) || (y > TABLE_SIZE))
-			return -1;
-//		int index1 = (x+TABLE_SIZE)+(y+TABLE_SIZE)*(ROW_SIZE);
-//		int index2 = (s.rotation&0xF)|((s.speed&0x3)<<4);
-//		return 2*hTable[index1][index2];
+		return -1;
 	}
 	int index1 = (x+TABLE_SIZE)+(y+TABLE_SIZE)*(ROW_SIZE);
 	int index2 = (s.rotation)+((s.speed+speeds[motionModel])*angles[motionModel]);
 	//printf("Hashing rot: %d speed: %d to %d\n", s.rotation, s.speed, index2);
 	////int index2 = (s.rotation&0xF)|((s.speed&0x3)<<4);
-	return hTable[index1][index2];
+	return t.hTable[index1][index2];
 }
 
 float Directional2DEnvironment::LookupStateHeuristic(xySpeedHeading &s1, xySpeedHeading &s2)
 {
+	const int angles[3] = {16, 16, 24};
+	const int angles90[3] = {4, 4, 6};
+
 	if (hType == kOctileHeuristic)
 		return 0;
 
-	if ((s2.speed != 0) || (s2.rotation != 0))
-		return 0;
+//	if (s2.speed != 0)
+//		return 0;
+	
 	xySpeedHeading s3;
 	s3 = s1;
 	s3.x = floor(s3.x) - floor(s2.x);
 	s3.y = floor(s3.y) - floor(s2.y);
-//	s3.x = floor(s3.x - s2.x);
-//	s3.y = floor(s3.y - s2.y);
+
+	int whichHeuristic = -1;
+	for (unsigned int x = 0; x < heuristics.size(); x++)
+	{
+		if (heuristics[x].rotation == s2.rotation)
+		{
+			//printf("Found exact match\n");
+			whichHeuristic = x;
+			break;
+		}
+		else if ((heuristics[x].rotation%angles90[motionModel]) == s2.rotation%angles90[motionModel])
+		{
+			//printf("Found 90 degree match [%d] Our goal: %d\n", heuristics[x].rotation, s2.rotation);
+			
+			// rotate so they match
+			int rotation = -heuristics[x].rotation+s2.rotation;
+			if (rotation < 0)
+				rotation += angles[motionModel];
+			//std::cout << "Before rotation: " << s3 << std::endl;
+			RotateCCW(s3, rotation);
+			//std::cout << "After rotation: " << s3 << std::endl;
+			//assert(heuristics[x].rotation == s3.rotation);
+			whichHeuristic = x;
+			break;
+		}
+	}
+	if (whichHeuristic == -1)
+	{
+		int which = heuristics.size();
+		heuristics.resize(which+1);
+		// build new heuristic
+		heuristics[which].speed = 0;
+		heuristics[which].rotation = s2.rotation;
+		BuildHTable(heuristics[which]);
+		whichHeuristic = which;
+		
+//		if (heuristics.size() > 0)
+//		{
+//			int rotation = -heuristics[0].rotation+s2.rotation;
+//			if (rotation < 0)
+//				rotation += angles[motionModel];
+////			printf("Table rotation: %d; goal rotation: %d; rotating CCW %d\n",
+////				   heuristics[0].rotation, s2.rotation, rotation);
+////			std::cout << "Before rotation: " << s3 << std::endl;
+//			RotateCCW(s3, rotation);
+////			std::cout << "After rotation: " << s3 << std::endl;
+//			//assert(heuristics[x].rotation == s3.rotation);
+//			whichHeuristic = 0;
+//		}
+//		else {
+//			printf("Found no match\n");
+//			return 0;
+//		}
+	}
+	
 //	std::cout << "Heuristic looking up: " << s3 << std::endl;
-	float val = LookupStateHash(s3);
+	float val = LookupStateHash(s3, heuristics[whichHeuristic]);
 	if (val != -1)
 	{
 //		printf("Looked up %d\n", val);
@@ -754,7 +871,7 @@ float Directional2DEnvironment::LookupStateHeuristic(xySpeedHeading &s1, xySpeed
 
 	s3.x/=2;
 	s3.y/=2;
-	val = LookupStateHash(s3);
+	val = LookupStateHash(s3, heuristics[whichHeuristic]);
 	if (val != -1)
 	{
 		if (motionModel != kVehicle)
@@ -763,65 +880,59 @@ float Directional2DEnvironment::LookupStateHeuristic(xySpeedHeading &s1, xySpeed
 			return 1.5*val;
 	}
 
-//	s3.x/=2;
-//	s3.y/=2;
-//	val = LookupStateHash(s3);
-//	if (val != -1)
-//		return 2.5*val;
-
 	return 0;
 }
 
-void Directional2DEnvironment::BuildAStarTable()
-{
-	//const int speedCnt[3] = {3, 5, 3}; // offset to make all speeds positive
-	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
-	const int angles[3] = {16, 16, 24};
-	
-	heuristicType h = hType;
-	hType = kOctileHeuristic;
-
-	TemplateAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> a;
-	std::vector<xySpeedHeading> path;
-	xySpeedHeading goal;
-	xySpeedHeading start;
-	goal.x = 0.5;
-	goal.y = 0.5;
-	goal.rotation = angles[motionModel]/2;
-	goal.speed = 0;
-	start.x = 0.5;
-	start.y = 0.5;
-	start.rotation = 0;
-	start.speed = 5;
-	a.SetStopAfterGoal(false);
-	a.InitializeSearch(this, goal, start, path);
-	while (!a.DoSingleSearchStep(path))
-	{ static int cnt = 0; if ((++cnt)%1000 == 0) printf("%d\n", cnt); if (cnt > 100000) break; }
-
-	for (unsigned int x = 0; x < hTable.size(); x++)
-	{
-		printf("Entry %d of %d\n", x, (int)hTable.size());
-		for (unsigned int y = 0; y < hTable[x].size(); y++)
-		{
-			//printf("Sub-entry %d of %d\n", y, (int)hTable[x].size());
-			xySpeedHeading s;
-			s.x = (float)(x%ROW_SIZE)-(TABLE_SIZE-0.5);//3.5f;
-			s.y = (float)(x/ROW_SIZE)-(TABLE_SIZE-0.5);//3.5f;
-			// reverse rotation for reverse search
-			s.rotation = (angles[motionModel]/2 + y%angles[motionModel])%angles[motionModel]; ////y&0xF;
-			s.speed = y/angles[motionModel]-speeds[motionModel]; ////(y>>4)&0x3;
-			double cost;
-			a.GetClosedListGCost(s, cost);
-
-			//a.GetPath(this, s, goal, path);
-			
-			hTable[x][y] = cost; //GetPathLength(path);
-		}
-	}		
-	
-	
-	hType = h;
-}
+//void Directional2DEnvironment::BuildAStarTable()
+//{
+//	//const int speedCnt[3] = {3, 5, 3}; // offset to make all speeds positive
+//	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
+//	const int angles[3] = {16, 16, 24};
+//	
+//	heuristicType h = hType;
+//	hType = kOctileHeuristic;
+//
+//	TemplateAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> a;
+//	std::vector<xySpeedHeading> path;
+//	xySpeedHeading goal;
+//	xySpeedHeading start;
+//	goal.x = 0.5;
+//	goal.y = 0.5;
+//	goal.rotation = angles[motionModel]/2;
+//	goal.speed = 0;
+//	start.x = 0.5;
+//	start.y = 0.5;
+//	start.rotation = 0;
+//	start.speed = 5;
+//	a.SetStopAfterGoal(false);
+//	a.InitializeSearch(this, goal, start, path);
+//	while (!a.DoSingleSearchStep(path))
+//	{ static int cnt = 0; if ((++cnt)%1000 == 0) printf("%d\n", cnt); if (cnt > 100000) break; }
+//
+//	for (unsigned int x = 0; x < hTable.size(); x++)
+//	{
+//		printf("Entry %d of %d\n", x, (int)hTable.size());
+//		for (unsigned int y = 0; y < hTable[x].size(); y++)
+//		{
+//			//printf("Sub-entry %d of %d\n", y, (int)hTable[x].size());
+//			xySpeedHeading s;
+//			s.x = (float)(x%ROW_SIZE)-(TABLE_SIZE-0.5);//3.5f;
+//			s.y = (float)(x/ROW_SIZE)-(TABLE_SIZE-0.5);//3.5f;
+//			// reverse rotation for reverse search
+//			s.rotation = (angles[motionModel]/2 + y%angles[motionModel])%angles[motionModel]; ////y&0xF;
+//			s.speed = y/angles[motionModel]-speeds[motionModel]; ////(y>>4)&0x3;
+//			double cost;
+//			a.GetClosedListGCost(s, cost);
+//
+//			//a.GetPath(this, s, goal, path);
+//			
+//			hTable[x][y] = cost; //GetPathLength(path);
+//		}
+//	}		
+//	
+//	
+//	hType = h;
+//}
 
 void Directional2DEnvironment::BuildAngleTables()
 {
@@ -831,7 +942,9 @@ void Directional2DEnvironment::BuildAngleTables()
 	for (int x = 0; x < DEG; x++)
 	{
 		sinTable.push_back(sin(TWOPI*((float)x)/(float)DEG));
+		//printf("sin(%d) = %f\n", x, sinTable.back());
 		cosTable.push_back(cos(TWOPI*((float)x)/(float)DEG));
+		//printf("cos(%d) = %f\n", x, cosTable.back());
 	}
 }
 

@@ -129,7 +129,7 @@ GenericSearchUnit<state,action,environment>::~GenericSearchUnit()
 }
 
 template <class state, class action, class environment>
-bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, OccupancyInterface<state,action> *oi, SimulationInfo<state,action,environment> *si, action& a)
+bool GenericSearchUnit<state,action,environment>::MakeMove(environment *theEnv, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *si, action& a)
 {
 	if (getCachedMove(a))
 		return true;
@@ -169,7 +169,7 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 
 	std::vector<state> path;
 
-	algorithm->GetPath(env,from, to, path); 
+	algorithm->GetPath(theEnv,from, to, path); 
 	
 	nodesExpanded+=algorithm->GetNodesExpanded();
 	nodesTouched+=algorithm->GetNodesTouched();
@@ -187,7 +187,7 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 	// a valid path must have at least 2 nodes and start where the unit is located
 	assert((path.size() > 1) && (path[0]==loc));
 	
-	AddPathToCache(env, path);
+	AddPathToCache(theEnv, path);
 
 	assert(moves.size() > 0);
 
@@ -199,21 +199,21 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *env, Occ
 }
 
 template <class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::OpenGLDraw(const environment *env, const SimulationInfo<state,action,environment> *si) const
+void GenericSearchUnit<state,action,environment>::OpenGLDraw(const environment *theEnv, const SimulationInfo<state,action,environment> *) const
 {
 	// Draw current + goal states as states. May need to find something
 	// different for the goal
 		
 	if (loc == goal)
 	{
-		env->OpenGLDraw(loc/*, 0, 0, 0*/);
+		theEnv->OpenGLDraw(loc/*, 0, 0, 0*/);
 	}
 	else
 	{	
 		GLfloat _r,_g,_b;
 		this->GetColor(_r,_g,_b);
 		//env->OpenGLDraw(lastLoc, loc, _r, _g, _b);	
-		env->OpenGLDraw(goal/*, _r, _g, _b*/);
+		theEnv->OpenGLDraw(goal/*, _r, _g, _b*/);
 	}
 	state current = loc; 
 	state next;
@@ -221,8 +221,8 @@ void GenericSearchUnit<state,action,environment>::OpenGLDraw(const environment *
 	// Draw the cached moves
   	for(unsigned int i=0; i<moves.size(); i++)
  	{
- 		env->OpenGLDraw(current, moves[i]/*,1.0,0,0*/); // draw in red
- 		env->GetNextState(current, moves[i], next);
+ 		theEnv->OpenGLDraw(current, moves[i]/*,1.0,0,0*/); // draw in red
+ 		theEnv->GetNextState(current, moves[i], next);
  		current = next;
  	}
  	
@@ -256,11 +256,11 @@ void GenericSearchUnit<state,action,environment>::LogFinalStats(StatCollection *
 * ??? Rename moves --> actions? Moves only for maps?
 */
 template<class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::AddPathToCache(environment *env, std::vector<state> &path)
+void GenericSearchUnit<state,action,environment>::AddPathToCache(environment *theEnv, std::vector<state> &path)
 {
  	for(unsigned int i=0; i<path.size()-1; i++)
  	{
- 		moves.push_back(env->GetAction(path[i], path[i+1]));
+ 		moves.push_back(theEnv->GetAction(path[i], path[i+1]));
  	}
 }
 
@@ -279,7 +279,7 @@ bool GenericSearchUnit<state,action,environment>::getCachedMove(action &a)
 }
 
 template<class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::UpdateLocation(environment *env, state &l, bool success, SimulationInfo<state,action,environment> *si)
+void GenericSearchUnit<state,action,environment>::UpdateLocation(environment *, state &l, bool success, SimulationInfo<state,action,environment> *si)
 {
 	// Done in UnitSimulation instead
 	//Update occupancy interface
