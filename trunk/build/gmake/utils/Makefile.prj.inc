@@ -39,5 +39,6 @@ SRC_CPP = \
 	utils/ScenarioLoader.cpp \
 	utils/StatCollection.cpp \
 	utils/StatUtil.cpp \
-	utils/Timer.cpp
+	utils/Timer.cpp \
+	utils/StringUtils.cpp
 

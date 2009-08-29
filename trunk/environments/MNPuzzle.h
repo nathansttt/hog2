@@ -17,6 +17,7 @@
 #include "UnitSimulation.h"
 #include "GraphEnvironment.h"
 #include "Graph.h"
+#include <sstream>
 
 class MNPuzzleState {
 public:
@@ -102,6 +103,18 @@ public:
 	void OpenGLDraw(const MNPuzzleState &l1, const MNPuzzleState &l2, float v) const;
 	void OpenGLDraw(const MNPuzzleState &, const slideDir &) const { /* currently not drawing moves */ }
 	void StoreGoal(MNPuzzleState &); // stores the locations for the given goal state
+
+	/** Returns stored goal state if it is stored.**/
+	MNPuzzleState Get_Goal(){
+		if(!goal_stored) {
+			fprintf(stderr, "ERROR: Call to Get_Goal when no goal stored\n");
+			exit(1);
+		}
+		return goal;
+	}
+
+	virtual const std::string GetName();
+
 	void ClearGoal(); // clears the current stored information of the goal
 
 	bool IsGoalStored(){return goal_stored;} // returns if a goal is stored or not
@@ -137,11 +150,18 @@ public:
 	his original IDA* experiments. The ordering originally used in HOG is returned with a
 	call of order_num=15.
 	**/
-	static std::vector<slideDir> Get_Puzzle_Order(int order_num);
+	static std::vector<slideDir> Get_Op_Order_From_Hash(int order_num);
+	std::vector<slideDir> Get_Op_Order(){return ops_in_order;}
 
 	static MNPuzzleState Generate_Random_Puzzle(unsigned num_cols, unsigned num_rows);
 
 	bool State_Check(const MNPuzzleState &to_check);
+
+	unsigned Get_Num_Of_Columns(){return width;}
+	unsigned Get_Num_Of_Rows(){return height;}
+
+	void Set_Use_Manhattan_Heuristic(bool to_use){use_manhattan = to_use;}
+
 
 private:
 	double DoPDBLookup(MNPuzzleState &state);
@@ -149,8 +169,9 @@ private:
 	std::vector<std::vector<int> > PDBkey;
 	unsigned int width, height;
 	std::vector<std::vector<slideDir> > operators; // stores the operators applicable at each blank position
-
+	std::vector<slideDir> ops_in_order;
 	bool goal_stored; // whether a goal is stored or not
+	bool use_manhattan;
 
 	// stores the heuristic value of each tile-position pair indexed by the tile value (0th index is empty)
 	unsigned **h_increment;

@@ -16,8 +16,9 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height)
 		: width(_width), height(_height)
 {
 	// stores applicable operators at each of the width*height positions
-	Change_Op_Order(Get_Puzzle_Order(15)); // Right, Left, Down, Up is default operator ordering
+	Change_Op_Order(Get_Op_Order_From_Hash(15)); // Right, Left, Down, Up is default operator ordering
 	goal_stored = false;
+	use_manhattan = true;
 }
 
 MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
@@ -26,6 +27,7 @@ MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height,
 {
 	Change_Op_Order(op_order);
 	goal_stored = false;
+	use_manhattan = true;
 }
 
 MNPuzzle::~MNPuzzle()
@@ -35,6 +37,7 @@ MNPuzzle::~MNPuzzle()
 
 void MNPuzzle::Change_Op_Order(std::vector<slideDir> op_order) {
 	operators.clear();
+	ops_in_order.clear();
 
 	bool up_act = false;
 	bool down_act = false;
@@ -71,6 +74,10 @@ void MNPuzzle::Change_Op_Order(std::vector<slideDir> op_order) {
 		exit(1);
 	}
 
+	for(unsigned i = 0; i < op_order.size(); i++) {
+		ops_in_order.push_back(op_order[i]);
+	}
+
 	// stores applicable operators at each of the width*height positions
 	std::vector<slideDir> ops(4);
 	for (unsigned int blank = 0; blank < width*height; blank++)
@@ -98,6 +105,39 @@ void MNPuzzle::Change_Op_Order(std::vector<slideDir> op_order) {
 
 		operators.push_back(ops);
 	}
+}
+
+const std::string MNPuzzle::GetName(){
+	std::stringstream name;
+	name << width;
+	name << "x";
+	name << height;
+	name << " Sliding Tile Puzzle";
+
+	if(PDB_distincts.size() > 0) {
+		name << ", PDBS:";
+		for(unsigned i = 0; i < PDB_distincts.size(); i++) {
+			name << " <";
+			for(unsigned j = 0; j < PDB_distincts[i].size() - 1; j++) {
+				name << PDB_distincts[i][j];
+				name << ", ";
+			}
+			name << PDB_distincts[i].back();
+			name << ">";
+		}
+		name << ", Manhattan Distance";
+	}
+	else {
+		name << ", Manhattan Distance";
+	}
+
+	name << ", Op Order: ";
+	for(unsigned op_num = 0; op_num < ops_in_order.size() - 1; op_num++){
+		name << ops_in_order[op_num];
+		name << ", ";
+	}
+	name << ops_in_order.back();
+	return name.str();
 }
 
 Graph *MNPuzzle::GetGraph()
@@ -295,50 +335,86 @@ bool MNPuzzle::InvertAction(slideDir &a) const
 }
 
 double MNPuzzle::HCost(MNPuzzleState &state) {
-	assert(goal_stored);
-
-	assert(state.height == height);
-	assert(state.width == width);
-	double hval = 0;
-
-	// increments amound for each tile location
-	// this calculates the Manhattan distance
-	for(unsigned loc = 0; loc < width*height; loc++) {
-		if(state.puzzle[loc] != 0)
-			hval += h_increment[state.puzzle[loc]][loc];
+	if(!goal_stored) {
+		fprintf(stderr, "ERROR: HCost called with a single state and goal is not stored.\n");
+		exit(1);
+	}
+	if(state.height != height || state.width != width) {
+		fprintf(stderr, "ERROR: HCost called with a single state with wrong size.\n");
+		exit(1);
 	}
 
+	double hval = 0;
+
 	if (PDB.size() != 0) // select between PDB and Manhattan distance if given the chance
-		return std::max(hval, DoPDBLookup(state));
+		hval = std::max(hval, DoPDBLookup(state));
+
+	if(use_manhattan) {
+		double man_dist = 0;
+		// increments amound for each tile location
+		// this calculates the Manhattan distance
+		for(unsigned loc = 0; loc < width*height; loc++) {
+			if(state.puzzle[loc] != 0)
+				man_dist += h_increment[state.puzzle[loc]][loc];
+		}
+		hval = std::max(hval, man_dist);
+	}
+	// if no heuristic
+	else if(PDB.size()==0) {
+		if(goal == state)
+			return 0;
+		else
+			return 1;
+	}
+
 	return hval;
 }
 
 // TODO Remove PDB heuristic from this heuristic evaluator.
 double MNPuzzle::HCost(MNPuzzleState &state1, MNPuzzleState &state2)
 {
-	assert(state1.height==state2.height);
-	assert(state1.width==state2.width);
-	double hval = 0;
-
-	std::vector<int> xloc(state2.width*state2.height);
-	std::vector<int> yloc(state2.width*state2.height);
-
-	for (unsigned int x = 0; x < state2.width; x++) {
-		for (unsigned int y = 0; y < state2.height; y++) {
-			xloc[state2.puzzle[x + y*state2.width]] = x;
-			yloc[state2.puzzle[x + y*state2.width]] = y;
-		}
+	if(state1.height != height || state1.width != width) {
+		fprintf(stderr, "ERROR: HCost called with a state with wrong size.\n");
+		exit(1);
 	}
-	for (unsigned int x = 0; x < state1.width; x++) {
-		for (unsigned int y = 0; y < state1.height; y++) {
-			if (state1.puzzle[x + y*state1.width] != 0) {
-				hval += (abs(xloc[state1.puzzle[x + y*state1.width]] - x)
-						+ abs(yloc[state1.puzzle[x + y*state1.width]] - y));
+	if(state2.height != height || state2.width != width) {
+		fprintf(stderr, "ERROR: HCost called with a state with wrong size.\n");
+		exit(1);
+	}
+
+	double hval = 0;
+	if (PDB.size() != 0)
+		hval = std::max(hval, DoPDBLookup(state1));
+
+	if(use_manhattan) {
+		double man_dist = 0;
+		std::vector<int> xloc(state2.width*state2.height);
+		std::vector<int> yloc(state2.width*state2.height);
+
+		for (unsigned int x = 0; x < state2.width; x++) {
+			for (unsigned int y = 0; y < state2.height; y++) {
+				xloc[state2.puzzle[x + y*state2.width]] = x;
+				yloc[state2.puzzle[x + y*state2.width]] = y;
 			}
 		}
+		for (unsigned int x = 0; x < state1.width; x++) {
+			for (unsigned int y = 0; y < state1.height; y++) {
+				if (state1.puzzle[x + y*state1.width] != 0) {
+					man_dist += (abs(xloc[state1.puzzle[x + y*state1.width]] - x)
+							+ abs(yloc[state1.puzzle[x + y*state1.width]] - y));
+				}
+			}
+		}
+		hval = std::max(hval, man_dist);
 	}
-	if (PDB.size() != 0)
-		return std::max(hval, DoPDBLookup(state1));
+	// if no heuristic
+	else if(PDB.size()==0) {
+		if(state1 == state2)
+			return 0;
+		else
+			return 1;
+	}
+
 	return hval;
 }
 
@@ -351,49 +427,6 @@ bool MNPuzzle::GoalTest(MNPuzzleState &state, MNPuzzleState &theGoal)
 {
 	return (state == theGoal);
 }
-
-//uint64_t MNPuzzle::GetStateHash(MNPuzzleState &state) const
-//{
-//	std::vector<int> puzzle = state.puzzle;
-//	uint64_t hashVal = 0;
-//	int numEntriesLeft = state.puzzle.size();
-//	for (unsigned int x = 0; x < state.puzzle.size(); x++)
-//	{
-//		hashVal += puzzle[x]*Factorial(numEntriesLeft-1);
-//		numEntriesLeft--;
-//		for (unsigned y = x; y < puzzle.size(); y++)
-//		{
-//			if (puzzle[y] > puzzle[x])
-//				puzzle[y]--;
-//		}
-//	}
-//	return hashVal;
-//}
-//
-//void MNPuzzle::GetStateFromHash(MNPuzzleState &state, uint64_t hash) const
-//{
-//	std::vector<int> puzzle = state.puzzle;
-//	uint64_t hashVal = hash;
-//
-//	int numEntriesLeft = 1;
-//	for (int x = state.puzzle.size()-1; x >= 0; x--)
-//	{
-//		puzzle[x] = hashVal%numEntriesLeft;
-//		hashVal /= numEntriesLeft;
-//		numEntriesLeft++;
-//		for (int y = x+1; y < (int) state.puzzle.size(); y++)
-//		{
-//			if (puzzle[y] >= puzzle[x])
-//				puzzle[y]++;
-//		}
-//	}
-//
-//	state.puzzle = puzzle;
-//	for (unsigned int x = 0; x < puzzle.size(); x++)
-//		if (puzzle[x] == 0)
-//			state.blank = x;
-//
-//}
 
 uint64_t MNPuzzle::GetActionHash(slideDir act) const
 {
@@ -466,10 +499,10 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s, const MNPuzzleState &, float /
 {
 	glLineWidth(1.0);
 	glEnable(GL_LINE_SMOOTH);
-	
+
 	float w = width;
 	float h = height;
-	
+
 	for (unsigned int y = 0; y < height; y++)
 	{
 		for (unsigned int x = 0; x < width; x++)
@@ -489,7 +522,7 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s, const MNPuzzleState &, float /
 			glPopMatrix();
 		}
 	}
-	
+
 	glBegin(GL_LINES);
 	for (unsigned int y = 0; y <= height; y++)
 	{
@@ -681,7 +714,7 @@ bool MNPuzzle::State_Check(const MNPuzzleState &to_check) {
 	return true;
 }
 
-std::vector<slideDir> MNPuzzle::Get_Puzzle_Order(int order_num) {
+std::vector<slideDir> MNPuzzle::Get_Op_Order_From_Hash(int order_num) {
 	std::vector<slideDir> ops;
 	assert(order_num <= 23);
 	assert(order_num >= 0);

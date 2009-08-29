@@ -8,6 +8,7 @@ using namespace std;
 class TurnTakingSimulation {
 
 public:
+	TurnTakingSimulation(){}
 	TurnTakingSimulation(const char *input_file);
 
 	static bool parse_input_files(const char *input_file,

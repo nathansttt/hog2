@@ -74,10 +74,20 @@ public:
 	virtual bool State_Check(const state &to_check) = 0;
 
 	/**
-	Ensures that the state contains a valid permutaion. That is, if the state is of size
+	Ensures that the state contains a valid permutation. That is, if the state is of size
 	n, each of the integers from 0 to n-1 occurs exactly once.
 	**/
 	static bool Check_Permutation(const std::vector<int> &to_check);
+
+	bool Validate_Problems(std::vector<state> &puzzles){
+		for(unsigned i = 0; i < puzzles.size(); i++) {
+			if(!State_Check(puzzles[i]) || !Check_Permutation(puzzles[i].puzzle)) {
+				std::cerr << puzzles[i] << '\n';
+				std::cerr << "Invalid Puzzle\n";
+			}
+		}
+		return true;
+	}
 
 	/**
 	Outputs the set of puzzles in puzzle_vector to standard output. The output is of the
@@ -87,7 +97,7 @@ public:
 	True is return if all the puzzles are valid, otherwise false is returned and
 	the puzzles are not outputted.
 	**/
-	bool Output_Puzzles(std::vector<state> &puzzle_vector, bool write_puzz_num);
+	static bool Output_Puzzles(std::vector<state> &puzzle_vector, bool write_puzz_num);
 
 	static bool Read_In_Permutations(const char *filename, unsigned size, unsigned max_puzzles, std::vector<std::vector<int> > &permutations, bool puzz_num_start);
 
@@ -405,7 +415,7 @@ bool PermutationPuzzleEnvironment<state, action>::Output_Puzzles(std::vector<sta
 		/**
 		Make sure all puzzles are for this environment
 		**/
-		if(!Check_Permutation(puzzle_vector[i].puzzle) || !State_Check(puzzle_vector[i])) {
+		if(!Check_Permutation(puzzle_vector[i].puzzle)) {
 			std::cerr << "Invalid Puzzle: " << puzzle_vector[i] << '\n';
 			return false;
 		}

@@ -6,6 +6,7 @@
 #include <ext/hash_map>
 #include <iostream>
 #include "BeamNode.h"
+#include "StringUtils.h"
 #include <assert.h>
 #define NO_CHILDREN -100
 #define LIM_HIT -200
@@ -41,7 +42,7 @@ public:
 	virtual int GetPath(environment *env, state from,
 	            state to, std::vector<action> &path){return 0;}
 
-	virtual const char *GetName() {return "General Beam Search";}
+	virtual const char * GetName();
 
 	virtual uint64_t GetNodesExpanded() { return nodes_expanded; }
 	virtual uint64_t GetNodesTouched() { return nodes_touched; }
@@ -317,8 +318,9 @@ int GeneralBeamSearch<state, action, environment>::expand_beam(environment *env,
 	else if(status == LIM_HIT) { // hit node stored limit
 		return 0;
 	}
-	else if(status != 0) // next beam is empty
+	else if(status != 0){ // next beam is empty
 		return status;
+	}
 
 	// correct size of successors
 	while(successors.size() > beam_size) {
@@ -839,5 +841,23 @@ int GeneralBeamSearch<state, action, environment>::generate_all_successors(envir
 		}
 	}
 	return 0; // no goal found and no limits hit
+}
+
+template <class state, class action, class environment>
+const char * GeneralBeamSearch<state, action, environment>::GetName(){
+	std::string name = "Beam Search(Beam Width = ";
+	name += int_to_string(beam_size);
+	name += ", Memory Limit = ";
+	name += int_to_string(memory_limit);
+	name += ", Prune Duplicates = ";
+	if(prune_dups)
+		name += "true, Full Check = ";
+	else
+		name += "false, Full Check = ";
+	if(full_check)
+		name += "true)";
+	else
+		name += "false)";
+	return name.c_str();
 }
 #endif
