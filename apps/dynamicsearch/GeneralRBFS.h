@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "FPUtil.h"
+#include "StringUtils.h"
 #include "GenericStepAlgorithm.h"
 #include "assert.h"
 
@@ -32,7 +33,15 @@ public:
 	virtual int GetPath(environment *env, state from, state to,
 	                    std::vector<state> &thePath) {return -1;}
 
-	virtual const char * GetName(){return "Basic RBFS";}
+	virtual const char * GetName(){
+		std::string name = "WRBFS(H Weight = ";
+		name += double_to_string(h_weight);
+		name += ", G Weight = ";
+		name += double_to_string(g_weight);
+		name += ")";
+		return name.c_str();
+	}
+
 	virtual void LogFinalStats(StatCollection *stats){}
 
 	/** Get the number of nodes expanded (a node is expanded if the goal test is called) **/

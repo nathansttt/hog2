@@ -10,6 +10,7 @@ PancakePuzzle::PancakePuzzle(unsigned s) {
 		operators.push_back(i);
 
 	goal_stored = false;
+	use_memory_free = true;
 }
 
 PancakePuzzle::PancakePuzzle(unsigned s, const std::vector<unsigned> op_order) {
@@ -18,11 +19,47 @@ PancakePuzzle::PancakePuzzle(unsigned s, const std::vector<unsigned> op_order) {
 	Change_Op_Order(op_order);
 
 	goal_stored = false;
+	use_memory_free = false;
 }
 
 PancakePuzzle::~PancakePuzzle()
 {
 	ClearGoal();
+}
+
+const std::string PancakePuzzle::GetName(){
+	std::stringstream name;
+	name << size;
+	name << " Pancake Puzzle";
+
+	if(PDB_distincts.size() > 0) {
+		name << ", PDBS:";
+		for(unsigned i = 0; i < PDB_distincts.size(); i++) {
+			name << " <";
+			for(unsigned j = 0; j < PDB_distincts[i].size() - 1; j++) {
+				name << PDB_distincts[i][j];
+				name << ", ";
+			}
+			name << PDB_distincts[i].back();
+			name << ">";
+		}
+		if(use_memory_free)
+		name << ", Memory-Free Heuristic";
+	}
+	else if(use_memory_free){
+		name << ", Memory-Free Heuristic";
+	}
+	else {
+		name << ",No Heuristic";
+	}
+
+	name << ", Op Order: ";
+	for(unsigned op_num = 0; op_num < operators.size() - 1; op_num++){
+		name << operators[op_num];
+		name << ", ";
+	}
+	name << operators.back();
+	return name.str();
 }
 
 void PancakePuzzle::GetSuccessors(PancakePuzzleState &parent,
@@ -100,21 +137,82 @@ bool PancakePuzzle::InvertAction(unsigned &a) const
 }
 
 double PancakePuzzle::HCost(PancakePuzzleState &state) {
-	assert(goal_stored);
-	assert(state.puzzle.size() == size);
-	assert(PDB.size() > 0);
-	assert(PDB.size() == PDB_distincts.size());
+	if(!goal_stored) {
+		fprintf(stderr, "ERROR: HCost called with a single state and goal is not stored.\n");
+		exit(1);
+	}
+	if(state.puzzle.size() != size) {
+		fprintf(stderr, "ERROR: HCost called with a single state with wrong size.\n");
+		exit(1);
+	}
+	double h_cost = 0;
 
-	double h_cost = Regular_PDB_Lookup(state);
+	// use PDB heuristic
+	if(PDB.size() > 0) {
+		if(PDB.size() != PDB_distincts.size()) {
+			fprintf(stderr, "ERROR: HCost called with a single state, no use of memory free heuristic, and invalid setup of pattern databases.\n");
+			exit(1);
+		}
+		h_cost = std::max(Regular_PDB_Lookup(state), h_cost);
+	}
+
+	// use memory-free heuristic
+	if(use_memory_free) {
+		h_cost =  std::max(Memory_Free_HCost(state, goal_locations), h_cost);
+	}
+	// if no heuristic
+	else if(PDB.size()==0) {
+		if(goal == state)
+			return 0;
+		else
+			return 1;
+	}
+
 	return h_cost;
 }
 
-double PancakePuzzle::HCost(PancakePuzzleState &state1, PancakePuzzleState &state2)
+double PancakePuzzle::HCost(PancakePuzzleState &state, PancakePuzzleState &goal_state)
 {
-	assert(state1.puzzle.size() == size);
-	assert(state2.puzzle.size() == size);
+	if(state.puzzle.size() != size) {
+		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");
+		exit(1);
+	}
+	if(goal_state.puzzle.size() != size){
+		fprintf(stderr, "ERROR: HCost called with goal with wrong size.\n");
+		exit(1);
+	}
 
-	return 0.0;
+	if(use_memory_free) {
+		std::vector<int> goal_locs(size);
+		for(unsigned i = 0; i < size; i++) {
+			goal_locs[goal_state.puzzle[i]] = i;
+		}
+		return Memory_Free_HCost(state, goal_locs);
+	}
+
+	if(state == goal_state)
+		return 0.0;
+	return 1.0;
+}
+
+double PancakePuzzle::Memory_Free_HCost(PancakePuzzleState &state, std::vector<int> &goal_locs)
+{
+	if(state.puzzle.size() != size) {
+		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");
+		exit(1);
+	}
+
+	double h_count = 0.0;
+	unsigned i = 0;
+	for(; i < size - 1; i++) {
+		int diff = goal_locs[state.puzzle[i]] - goal_locs[state.puzzle[i+1]];
+		if(diff > 1 || diff < - 1)
+			h_count++;
+	}
+	if((unsigned) goal_locs[state.puzzle[i]]!= size -1)
+		h_count++;
+
+	return h_count;
 }
 
 bool PancakePuzzle::GoalTest(PancakePuzzleState &state, PancakePuzzleState &theGoal)
@@ -123,13 +221,15 @@ bool PancakePuzzle::GoalTest(PancakePuzzleState &state, PancakePuzzleState &theG
 }
 
 bool PancakePuzzle::GoalTest(PancakePuzzleState &s) {
-	assert(goal_stored);
-	assert(s.puzzle.size() == size);
-	for(unsigned i = 0; i < s.puzzle.size(); i++) {
-		if(s.puzzle[i] != goal.puzzle[i])
-			return false;
+	if(!goal_stored) {
+		fprintf(stderr, "ERROR: GoalTest called with a single state and goal is not stored.\n");
+		exit(1);
 	}
-	return true;
+	if(s.puzzle.size() != size) {
+		fprintf(stderr, "ERROR: GoalTest called with a single state with wrong size.\n");
+		exit(1);
+	}
+	return (s == goal);
 }
 
 uint64_t PancakePuzzle::GetActionHash(unsigned act) const
@@ -142,6 +242,11 @@ void PancakePuzzle::StoreGoal(PancakePuzzleState &g) {
 
 	goal = g;
 	goal_stored = true;
+
+	goal_locations.resize(size);
+	for(unsigned i = 0; i < size; i++) {
+		goal_locations[goal.puzzle[i]] = i;
+	}
 }
 
 void PancakePuzzle::Change_Op_Order(const std::vector<unsigned> op_order) {

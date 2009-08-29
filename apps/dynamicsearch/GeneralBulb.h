@@ -38,6 +38,7 @@ public:
 		max_disc = 0;
 	}
 
+	virtual const char * GetName();
 	virtual void prepare_vars_for_search();
 	virtual int GetPath(environment *env, state from, state to, std::vector<state> &path);
 
@@ -360,5 +361,32 @@ void GeneralBulb<state, action, environment>::erase_last_beam_from_hash() {
 		else
 			nodes_in_beam[hash_value].pop_back();
 	}
+}
+
+template <class state, class action, class environment>
+const char * GeneralBulb<state, action, environment>::GetName(){
+	std::string name = "BULB(Beam Width = ";
+	name += int_to_string(beam_size);
+	name += ", Memory Limit = ";
+	name += int_to_string(memory_limit);
+	name += ", Prune Duplicates = ";
+	if(prune_dups)
+		name += "true, Full Check = ";
+	else
+		name += "false, Full Check = ";
+	if(full_check)
+		name += "true, Init Disc = ";
+	else
+		name += "false, Init Disc = ";
+	name += int_to_string(initial_discrepancies);
+	name += ", Disc Increment = ";
+	name += int_to_string(discrepancies_increment);
+	name += ", Max Disc = ";
+	if(bound_disc)
+		name += int_to_string(max_disc);
+	else
+		name += "false";
+	name += ")";
+	return name.c_str();
 }
 #endif

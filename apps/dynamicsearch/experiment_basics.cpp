@@ -1,11 +1,5 @@
 #include "experiment_basics.h"
 
-std::string int_to_string(int i) {
-	std::stringstream s;
-	s << i;
-	return s.str();
-}
-
 void warnings() {
 	MNPuzzleState start(4, 4);
 	if(start == start) {
@@ -14,247 +8,11 @@ void warnings() {
 	}
 }
 
-std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
-	std::stringstream ss(s);
-	std::string item;
-	while(std::getline(ss, item, delim)) {
-		elems.push_back(item);
-	}
-	return elems;
-}
-
-
-std::vector<std::string> split(const std::string &s, char delim) {
-	std::vector<std::string> elems;
-	return split(s, delim, elems);
-}
-
-
-int read_in_extra_puzz_info(const char *filename, std::vector<Puzzle_Info> &info, char delim, unsigned max_info) {
-	std::ifstream ifs(filename);
-
-	if(ifs.fail()) {
-		return 1;
-	}
-
-	std::string s, temp;
-	std::vector<std::string> tokens;
-
-	unsigned count = 0;
-	while(!ifs.eof() && count < max_info) {
-		getline(ifs, s);
-
-		tokens.resize(0);
-
-		tokens = split(s, delim);
-
-		if(tokens.size() < 2)
-			return 1;
-
-		double nodes = atof(tokens[0].c_str());
-		double cost = atof(tokens[1].c_str());
-
-		Puzzle_Info new_info(nodes, cost);
-		info.push_back(new_info);
-		count++;
-	}
-
-	ifs.close();
-
-	return 0;
-}
-
-template <class state, class action, class environment>
-uint64_t general_batch(environment *env, GenericStepAlgorithm<state, action, environment> *solver, std::vector<state> &puzzles, state &goal, bool print_all_stats, unsigned type) {
-	double total_checked = 0;
-	double total_touched = 0;
-	double total_expanded = 0;
-
-	double total_cost = 0.0;
-
-	std::vector<action> action_path;
-	std::vector<state> state_path;
-
-	unsigned solved_problems = 0;
-	for(unsigned i = 0; i < puzzles.size(); i++) {
-
-		unsigned status = 0;
-		if(type == ACTION_PATH) {
-			status = solver->GetPath(env, puzzles[i], goal, action_path);
-		}
-		else if(type == STATE_PATH) {
-			status = solver->GetPath(env, puzzles[i], goal, state_path);
-		}
-
-		if(status != 1) { // if no solution was found
-			if(print_all_stats) {
-				printf("-1\n");
-				fflush(stdout);
-			}
-			continue;
-		}
-
-		solved_problems++;
-
-		total_cost += solver->GetPathCost();
-		total_checked += solver->GetNodesChecked();
-		total_touched += solver->GetNodesTouched();
-		total_expanded += solver->GetNodesExpanded();
-
-		if(print_all_stats) {
-			printf("%.0f\t", solver->GetPathCost());
-			printf("%llu\t", solver->GetNodesExpanded());
-			printf("%llu\t", solver->GetNodesChecked());
-			printf("%llu\t", solver->GetNodesTouched());
-			printf("\n");
-			fflush(stdout);
-		}
-	}
-
-	printf("TOTALS\t%.0f\t%.0f\t%.0f\t%.0f\t%d", total_cost, total_expanded, total_checked, total_touched, solved_problems);
-	printf("\n");
-	return (uint64_t) total_checked;
-}
-
-uint64_t general_batch_puzzles(unsigned num_cols, unsigned num_rows, GenericStepAlgorithm<MNPuzzleState, slideDir, MNPuzzle> *solver, std::vector<MNPuzzleState> &puzzles, const std::vector<slideDir> op_order, bool print_all_stats, unsigned type) {
-	MNPuzzleState goal(num_cols, num_rows);
-
-	MNPuzzle mnp(num_cols, num_rows, op_order);
-	mnp.StoreGoal(goal);
-
-	for(unsigned i = 0; i < puzzles.size(); i++) {
-		if(puzzles[i].width != goal.width || puzzles[i].height != goal.height) {
-			std::cerr << puzzles[i] << '\n';
-			std::cerr << goal << '\n';
-			std::cerr << "Invalid Puzzle\n";
-			return 0;
-		}
-	}
-
-	return general_batch(&mnp, solver, puzzles, goal, print_all_stats, type);
-}
-
-uint64_t general_batch_pancake_puzzles(PancakePuzzle &env, unsigned size, GenericStepAlgorithm<PancakePuzzleState, unsigned, PancakePuzzle> *solver, std::vector<PancakePuzzleState> &puzzles, bool print_all_stats, unsigned type){
-
-	PancakePuzzleState goal(size);
-	if(!env.State_Check(goal)) {
-		std::cerr << "Invalid Size for Environment\n";
-	}
-
-	for(unsigned i = 0; i < puzzles.size(); i++) {
-		if(puzzles[i].puzzle.size() != size || !PancakePuzzle::Check_Permutation(puzzles[i].puzzle)) {
-			std::cerr << puzzles[i] << '\n';
-			std::cerr << goal << '\n';
-			std::cerr << "Invalid Puzzle\n";
-			return 0;
-		}
-	}
-
-	return general_batch(&env, solver, puzzles, goal, print_all_stats, type);
-}
-
-unsigned best_of_combo(std::vector<unsigned> &combo, double **nodes, unsigned problem_num) {
-	unsigned best_index = 0;
-	for(unsigned i = 0; i < combo.size(); i++) {
-		if(nodes[combo[i]][problem_num] < nodes[combo[best_index]][problem_num]) { // of best needs updating
-			best_index = i;
-		}
-	}
-	return best_index;
-}
-
-void thousand_info_nodes(std::vector<double> &t_info) {
-	t_info.push_back(392554316);
-	t_info.push_back(85591103);
-	t_info.push_back(80675597);
-	t_info.push_back(76056204);
-	t_info.push_back(78210698);
-	t_info.push_back(86768788);
-	t_info.push_back(87620477);
-	t_info.push_back(125487454);
-	t_info.push_back(181722642);
-	t_info.push_back(227524899);
-	t_info.push_back(318783997);
-	t_info.push_back(428986311);
-	t_info.push_back(608318026);
-	t_info.push_back(549063618);
-	t_info.push_back(802526526);
-	t_info.push_back(863793037);
-	t_info.push_back(1226969606.0);
-	t_info.push_back(1716175992.0);
-	t_info.push_back(2083351131.0);
-	t_info.push_back(2783187131.0);
-	t_info.push_back(2912838379.0);
-	t_info.push_back(4217010467.0);
-	t_info.push_back(5178759400.0);
-	t_info.push_back(7665834854.0);
-}
-
-void hundred_info_nodes(std::vector<double> &t_info) {
-	t_info.push_back(22940770);
-	t_info.push_back(5947832);
-	t_info.push_back(6045138);
-	t_info.push_back(6798974);
-	t_info.push_back(7925958);
-	t_info.push_back(5721882);
-	t_info.push_back(10313715);
-	t_info.push_back(10138364);
-	t_info.push_back(13882196);
-	t_info.push_back(21788151);
-	t_info.push_back(33227438);
-	t_info.push_back(30463845);
-	t_info.push_back(39212893);
-	t_info.push_back(44965543);
-}
-
-void get_standard_test_set(std::vector<MNPuzzleState> &puzzles, std::vector<Puzzle_Info> &info, std::vector<double> &solver_info, unsigned num) {
-	solver_info.clear();
-	solver_info.push_back(22940770);
-	solver_info.push_back(5947832);
-	solver_info.push_back(6045138);
-	solver_info.push_back(6798974);
-	solver_info.push_back(7925958);
-	solver_info.push_back(5721882);
-	solver_info.push_back(10313715);
-	solver_info.push_back(10138364);
-	solver_info.push_back(13882196);
-	solver_info.push_back(21788151);
-	solver_info.push_back(33227438);
-	solver_info.push_back(30463845);
-	solver_info.push_back(39212893);
-	solver_info.push_back(44965543);
-
-	read_in_extra_puzz_info("../../apps/dynamicsearch/input/4x4_100_info", info, ' ', num);
+void get_standard_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num) {
 	MNPuzzle::read_in_mn_puzzles("../../apps/dynamicsearch/input/4x4_100", false, 4, 4, num, puzzles);
 }
 
-void get_big_4x4_test_set(std::vector<MNPuzzleState> &puzzles, std::vector<Puzzle_Info> &info, std::vector<double> &solver_info, unsigned num) {
-	solver_info.clear();
-	solver_info.push_back(392554316);
-	solver_info.push_back(85591103);
-	solver_info.push_back(80675597);
-	solver_info.push_back(76056204);
-	solver_info.push_back(78210698);
-	solver_info.push_back(86768788);
-	solver_info.push_back(87620477);
-	solver_info.push_back(125487454);
-	solver_info.push_back(181722642);
-	solver_info.push_back(227524899);
-	solver_info.push_back(318783997);
-	solver_info.push_back(428986311);
-	solver_info.push_back(608318026);
-	solver_info.push_back(549063618);
-	solver_info.push_back(802526526);
-	solver_info.push_back(863793037);
-	solver_info.push_back(1226969606.0);
-	solver_info.push_back(1716175992.0);
-	solver_info.push_back(2083351131.0);
-	solver_info.push_back(2783187131.0);
-	solver_info.push_back(2912838379.0);
-	solver_info.push_back(4217010467.0);
-	solver_info.push_back(5178759400.0);
-	solver_info.push_back(7665834854.0);
-	read_in_extra_puzz_info("../../apps/dynamicsearch/input/4x4_1000_info", info, ' ', num);
+void get_big_4x4_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num) {
 	MNPuzzle::read_in_mn_puzzles("../../apps/dynamicsearch/input/4x4_1000", true, 4, 4, num, puzzles);
 }
 
@@ -294,127 +52,52 @@ void get_7x7_test_set(std::vector<MNPuzzleState> &puzzles, unsigned num) {
 	}
 }
 
-
-
-void get_node_buckets(std::vector<double> &node_vec, double smallest, unsigned num_buckets, double bucket_size) {
-	printf("Num of Buckets: %d\n", num_buckets);
-	printf("Bucket Size: %.2f\n", bucket_size);
-
-	unsigned counter[num_buckets];
-	unsigned curr_bucket = 0;
-	for(unsigned i = 0; i < num_buckets; i++) {
-		counter[i] = 0;
-	}
-
-	for(unsigned i = 0; i < node_vec.size(); i++) {
-		curr_bucket = (unsigned)((node_vec[i] - smallest)/bucket_size);
-		counter[curr_bucket]++;
-	}
-
-	for(unsigned i = 0; i < num_buckets; i++) {
-		printf("%d\t%.0f\t%d\n", i, smallest + bucket_size*(i + 1), counter[i]);
-	}
-}
-int get_distribution(const char *filename, double _num_buckets, double _bucket_size) {
-	std::ifstream ifs(filename);
-
-	if(ifs.fail()) {
-		return 1;
-	}
-
-	std::string s, temp;
-	std::vector<std::string> tokens;
-	std::vector<double> node_vec;
-
-	double smallest = 0;
-	double biggest = 0;
-
-	unsigned count = 0;
-	while(!ifs.eof()) {
-		getline(ifs, s);
-		//std::cout << s << "\n";
-		tokens.resize(0);
-
-		tokens = split(s, '\t');
-
-		if(tokens.size() < 2)
-			continue;
-
-		double nodes = atof(tokens[1].c_str());
-		//std::cout << nodes << "\n";
-		if(count == 0) {
-			biggest = nodes;
-			smallest = nodes;
-		}
-		else if(nodes > biggest) {
-			biggest = nodes;
-		}
-		else if(nodes < smallest) {
-			smallest = nodes;
-		}
-		node_vec.push_back(nodes);
-		count++;
-	}
-
-	ifs.close();
-	printf("Smallest: %.0f\n", smallest);
-	printf("Biggest: %.0f\n", biggest);
-
-	double num_buckets = 0;
-	double bucket_size = 0;
-	if(_bucket_size > 0) {
-		bucket_size = ceil(_bucket_size);
-		num_buckets = ceil((biggest - smallest)/ bucket_size);
-
-		get_node_buckets(node_vec, smallest, (unsigned)num_buckets, (unsigned)bucket_size);
-
-	}
-	printf("\n\n\n");
-	if(_num_buckets > 0) {
-		num_buckets = ceil(_num_buckets);
-		bucket_size = ceil((biggest - smallest)/ num_buckets);
-		get_node_buckets(node_vec, smallest, (unsigned)num_buckets, bucket_size);
-	}
-	return 0;
-}
-
-bool get_next_combo(std::vector<unsigned> &current_combination, unsigned max_num, unsigned pos, bool set_as_smallest) {
+bool get_next_combo(std::vector<unsigned> &current_combination, unsigned max_num, unsigned pos, bool reset_rest) {
 	assert(max_num >= current_combination.size() - 1);
 
 	// if are to set all positions from here on out as minimum possible
-	if(set_as_smallest) {
-		// if is the first position
+	if(reset_rest) {
+
+		// if is the first position, reset the entire combination recursively
 		if(pos == 0) {
 			current_combination[0] = 0;
 			return get_next_combo(current_combination, max_num, pos + 1, true);
 		}
 
-		// make sure there are enough positions for remaining pieces
+		// make sure there are enough positions for remaining pieces (since in ascending order)
 		assert(current_combination[pos - 1] + current_combination.size() - pos <= max_num);
 
 		// assign as smallest possible
 		current_combination[pos] = current_combination[pos - 1] + 1;
+
+		// if have hit end of combination
 		if(pos == current_combination.size() - 1)
 			return true;
 
-		return get_next_combo(current_combination, max_num, pos+1, true);
+		return get_next_combo(current_combination, max_num, pos + 1, true);
 	}
 
-	// if have hit a number that is too high, must backtrack
+	// if have hit a number that is too high, must backtrack and replace
 	if(current_combination[pos] + current_combination.size() - pos - 1 == max_num) {
 		return false;
 	}
+	// have successfully constructed new combination
 	else if(pos == current_combination.size() - 1) {
 		current_combination[pos]++;
 		return true;
 	}
 
-	if(!get_next_combo(current_combination, max_num, pos+1, false)) {
+	// if have run out of changes below, change this position
+	if(!get_next_combo(current_combination, max_num, pos + 1, false)) {
 		current_combination[pos]++;
-		return get_next_combo(current_combination, max_num, pos+1, true);
+		return get_next_combo(current_combination, max_num, pos + 1, true);
 	}
 
 	return true;
+}
+
+bool get_next_combo(std::vector<unsigned> &current_combination, unsigned max_num, bool reset){
+	get_next_combo(current_combination, max_num, 0, reset);
 }
 
 void print_combo(std::vector<unsigned> &current_combination) {
@@ -424,21 +107,21 @@ void print_combo(std::vector<unsigned> &current_combination) {
 	printf("\n");
 }
 
-void get_rand_combo(std::vector<unsigned> &combo, unsigned start_w_index, unsigned end_w_index, unsigned size) {
+void get_rand_permutation(std::vector<unsigned> &new_perm, unsigned start_index, unsigned end_index, unsigned size) {
 	std::vector<unsigned> solver_index;
 	solver_index.clear();
-	combo.clear();
+	new_perm.clear();
 
 	// initialize solver_index
-	for(unsigned i = start_w_index; i <= end_w_index; i++) {
+	for(unsigned i = start_index; i <= end_index; i++) {
 		solver_index.push_back(i);
 	}
 
-	// construct combo
+	// construct new permutation
 	for(unsigned i = 0; i < size; i++) {
-		int r = rand();
+		int r = random();
 		int index = r % solver_index.size();
-		combo.push_back(solver_index[index]);
+		new_perm.push_back(solver_index[index]);
 
 		solver_index[index] = solver_index.back();
 		solver_index.pop_back();
@@ -461,6 +144,12 @@ void get_14pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned n
 	}
 }
 
+void get_easy_14pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/14panc_50_easy", false, 14, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+
 void get_16pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
 	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/16pancake_1000", false, 16, num, puzzles)) {
 		std::cerr << "File Reading Failed\n";
@@ -479,95 +168,44 @@ void get_20pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned n
 	}
 }
 
-void ida_6x6_experiments(std::vector<Puzzle_Info> &info, std::vector<double> weights, unsigned info_count) {
-	unsigned puzz_num = 100;
-
-	unsigned num_cols = 6;
-	unsigned num_rows = 6;
-	std::vector<MNPuzzleState> puzzles;
-	get_6x6_test_set(puzzles, puzz_num);
-	//get_standard_test_set(puzzles, info, solver_info, puzz_num);
-
-	std::vector<std::vector<uint64_t> > nodes;
-	std::vector<std::vector<double> > cost;
-
-	for(unsigned i = 0; i < puzz_num; i++) {
-		std::vector<uint64_t> new_node_vec(weights.size() + 1);
-		nodes.push_back(new_node_vec);
-
-		std::vector<double> new_cost_vec(weights.size() + 1);
-		cost.push_back(new_cost_vec);
+void get_25pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/25pancake_1000", false, 25, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
 	}
+}
 
-
-	std::vector<slideDir> f_op_order;
-
-	f_op_order.push_back(kUp);
-	f_op_order.push_back(kLeft);
-	f_op_order.push_back(kRight);
-	f_op_order.push_back(kDown);
-
-	GeneralIDA<MNPuzzleState, slideDir, MNPuzzle> ida;
-	std::vector<slideDir> path;
-
-	MNPuzzleState goal(num_cols, num_rows);
-	MNPuzzle mnp(num_cols, num_rows, f_op_order);
-	mnp.StoreGoal(goal);
-
-	for(unsigned i = 0; i < puzzles.size(); i++) {
-		if(MNPuzzle::GetParity(puzzles[i]) != MNPuzzle::GetParity(goal)) {
-			printf("Bad Puzzle %d\n", i);
-			assert(false);
-		}
+void get_30pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/30pancake_1000", false, 30, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
 	}
+}
 
-	for(unsigned puzz = 0; puzz < puzz_num; puzz++) {
-
-		uint64_t max = (uint64_t) info[puzz].first;
-		double new_cost = info[puzz].second;
-
-		nodes[puzz][0] = max;
-		cost[puzz][0] = new_cost;
-
-		unsigned weight_index = info_count - 1;
-		for(unsigned i = 0; i < weights.size(); i++) {
-			ida.Change_Weights(1.0, weights[i]);
-			ida.SetExpandedLimit(max);
-			path.clear();
-
-			if(ida.GetPath(&mnp, puzzles[puzz], goal, path) == 1) {
-				max = ida.GetNodesExpanded();
-				new_cost = ida.GetPathCost();
-
-				weight_index = i + info_count;
-
-				nodes[puzz][i+1] = max;
-				cost[puzz][i+1] = new_cost;
-			}
-			else {
-				nodes[puzz][i+1] = 0;
-				cost[puzz][i+1] = 0;
-			}
-		}
-
-		uint64_t work_done = (max - 1)*(weights.size() + 1) + weight_index + 1;
-		printf("%.0f\t%llu\t%llu\n", new_cost, max, work_done);
+void get_50pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/50pancake_1000", false, 50, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
 	}
+}
 
-
-	printf("EXPANDED\n");
-	for(unsigned i = 0; i < puzz_num; i++) {
-		for(unsigned j = 0; j <= weights.size(); j++) {
-			printf("\t%llu", nodes[i][j]);
-		}
-		printf("\n");
-
+void get_75pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/75pancake_1000", false, 75, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
 	}
-	printf("\nCOSTS\n");
-	for(unsigned i = 0; i < puzz_num; i++) {
-		for(unsigned j = 0; j <= weights.size(); j++) {
-			printf("\t%.0f", cost[i][j]);
-		}
-		printf("\n");
+}
+
+void get_100pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/100pancake_1000", false, 100, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+
+void get_150pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/150pancake_1000", false, 150, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
+	}
+}
+
+void get_200pancake_test_set(std::vector<PancakePuzzleState> &puzzles, unsigned num){
+	if(PancakePuzzle::read_in_pancake_puzzles("../../apps/dynamicsearch/input/200pancake_1000", false, 200, num, puzzles)) {
+		std::cerr << "File Reading Failed\n";
 	}
 }
