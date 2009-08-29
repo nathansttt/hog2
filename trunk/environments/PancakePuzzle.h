@@ -5,6 +5,7 @@
 #include <iostream>
 #include "SearchEnvironment.h"
 #include "PermutationPuzzleEnvironment.h"
+#include <sstream>
 
 class PancakePuzzleState {
 public:
@@ -49,16 +50,31 @@ public:
 	bool InvertAction(unsigned &a) const;
 
 	double HCost(PancakePuzzleState &state1, PancakePuzzleState &state2);
+	double Memory_Free_HCost(PancakePuzzleState &state1, std::vector<int> &goal_locs);
 	double HCost(PancakePuzzleState &state1);
 
-	double GCost(PancakePuzzleState &, PancakePuzzleState &) {return 2.0;}
-	double GCost(PancakePuzzleState &, unsigned &) { return 1.0; }
+	double GCost(PancakePuzzleState &state1, PancakePuzzleState &state2) {return 1.0;}
+	double GCost(PancakePuzzleState &state1, unsigned &act) { return 1.0; }
+
 	bool GoalTest(PancakePuzzleState &state, PancakePuzzleState &goal);
 
 	bool GoalTest(PancakePuzzleState &s);
 
 	uint64_t GetActionHash(unsigned act) const;
 	void StoreGoal(PancakePuzzleState &); // stores the locations for the given goal state
+
+	virtual const std::string GetName();
+	std::vector<unsigned> Get_Op_Order(){return operators;}
+
+	/** Returns stored goal state if it is stored.**/
+	PancakePuzzleState Get_Goal(){
+		if(!goal_stored) {
+			fprintf(stderr, "ERROR: Call to Get_Goal when no goal stored\n");
+			exit(1);
+		}
+		return goal;
+	}
+
 	void ClearGoal(){} // clears the current stored information of the goal
 
 	bool IsGoalStored(){return goal_stored;} // returns if a goal is stored or not
@@ -98,12 +114,16 @@ public:
 	**/
 	static std::vector<unsigned> Get_Puzzle_Order(int64_t order_num, unsigned num_pancakes);
 
+	void Set_Use_Memory_Free_Heuristic(bool to_use){use_memory_free = to_use;}
+
 private:
 
 	std::vector<unsigned> operators;
 	bool goal_stored; // whether a goal is stored or not
+	bool use_memory_free;
 
 	PancakePuzzleState goal;
+	std::vector<int> goal_locations;
 	unsigned size;
 };
 
