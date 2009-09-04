@@ -69,7 +69,7 @@ public:
 	             std::vector<action> &thePath);
 
 	virtual int GetPath(environment *env, state from, state to,
-	                    std::vector<state> &thePath) {return -1;}
+	                    std::vector<state> &thePath);
 
 	virtual const char * GetName(){
 		std::string name = "WIDA*(H Weight = ";
@@ -127,7 +127,9 @@ public:
 	Returns -1 if a solution is found but the whole iteration has not finished searching.
 	**/
 	int StepAlgorithm(std::vector<action> &thePath);
-	int StepAlgorithm(std::vector<state> &thePath) {return -1;}
+	int StepAlgorithm(std::vector<state> &thePath) {
+		fprintf(stderr, "ERROR: Step Algorithm returning states not implemented for GeneralIDA*\n");
+		exit(1);}
 
 	/**
 	Returns a vector with the number of nodes checked, expanded, and generated at each iteration.
@@ -185,11 +187,15 @@ protected:
 	-4 for rant out of nodes to check
 	**/
 	virtual int search_node(environment *env, state &currState, state &goal, action forbiddenAction, double edge_cost);
+	virtual int search_node(environment *env, state &currState, state &goal, state &parent);
+
+	virtual int check_bounds();
 
 	double nextBound;
 	double currentBound;
 
 	std::vector<action> current_best_path;
+	std::vector<state> current_best_state_path;
 	double best_path_cost;
 
 	/**
@@ -219,6 +225,7 @@ protected:
 	bool sol_found;
 
 	std::vector<action> active_path;
+	std::vector<state> active_state_path;
 	std::vector<action> inversion_stack;
 	std::vector<double> g_stack;
 	std::vector<double> h_stack;
@@ -247,13 +254,15 @@ void GeneralIDA<state, action, environment>::initialize_search(environment *env,
 	nodesChecked = 0;
 
 	current_best_path.resize(0);
+	current_best_state_path.resize(0);
 	active_path.resize(0);
+	active_state_path.resize(0);
+
 	h_stack.resize(0);
 	g_stack.resize(0);
 	best_path_cost = -1.0;
 
 	double h;
-
 	if(env->IsGoalStored()) {
 		h = env->HCost(from);
 	}
@@ -261,6 +270,7 @@ void GeneralIDA<state, action, environment>::initialize_search(environment *env,
 		h = env->HCost(from, to);
 	}
 
+	// push on stats for initial state
 	h_stack.push_back(h);
 	g_stack.push_back(0.0);
 
@@ -295,6 +305,7 @@ void GeneralIDA<state, action, environment>::update_node_counts() {
 
 template <class state, class action, class environment>
 void GeneralIDA<state, action, environment>::update_bounds() {
+	assert(currentBound != nextBound);
 	currentBound = nextBound;
 }
 
@@ -323,8 +334,28 @@ int GeneralIDA<state, action, environment>::GetPath(environment *env,
 }
 
 template <class state, class action, class environment>
-int GeneralIDA<state, action, environment>::search_node(environment *env, state &currState, state &goal, action forbiddenAction, double edge_cost)
-{
+int GeneralIDA<state, action, environment>::GetPath(environment *env, state from, state to, std::vector<state> &thePath){
+	initialize_search(env, from, to);
+
+	std::vector<state> succs;
+	env->GetSuccessors(from, succs);
+	int status = 0;
+
+	step_by_step_active = false;
+	while (status == 0)
+	{
+		status = search_node(env, from, to, succs[0]);
+		update_node_counts();
+		update_bounds();
+	}
+	thePath = current_best_state_path;
+
+	return status;
+
+}
+
+template <class state, class action, class environment>
+int GeneralIDA<state, action, environment>::check_bounds() {
 	// check if node bounds are applicable
 	if(bound_expanded && nodesExpanded + nodes_ex_iter >= expanded_limit)
 		return EXPAND_MET;
@@ -332,6 +363,16 @@ int GeneralIDA<state, action, environment>::search_node(environment *env, state 
 		return TOUCHED_MET;
 	if(bound_checked && nodesChecked + nodes_check_iter >= checked_limit)
 		return CHECKED_MET;
+
+	return 1;
+}
+
+template <class state, class action, class environment>
+int GeneralIDA<state, action, environment>::search_node(environment *env, state &currState, state &goal, action forbiddenAction, double edge_cost) {
+
+	int bound_check = check_bounds();
+	if(bound_check != 1)
+		return bound_check;
 
 	double h;
 	if(env->IsGoalStored()) {
@@ -342,6 +383,12 @@ int GeneralIDA<state, action, environment>::search_node(environment *env, state 
 	}
 
 	double g = g_stack.back() + edge_cost;
+
+	/* For Debugging
+	for(unsigned i = 0; i < active_path.size(); i++)
+		printf("\t");
+	std::cout << currState << "       " << h << " " << g << std::endl;
+	*/
 
 	// use g + h to cut off areas of search where cannot find better solution
 	if(expand_full_iter && sol_found && !fless(h + g, best_path_cost))
@@ -368,9 +415,11 @@ int GeneralIDA<state, action, environment>::search_node(environment *env, state 
 	env->GetActions(currState, actions);
 
 	nodes_gen_iter += actions.size();
-	int depth = active_path.size();
 
 	int my_status = 0;
+
+	int depth = active_path.size();
+
 	for (unsigned int x = 0; x < actions.size(); x++)
 	{
 		// if is inversion of last action
@@ -413,6 +462,101 @@ int GeneralIDA<state, action, environment>::search_node(environment *env, state 
 
 	h_stack.pop_back();
 	g_stack.pop_back();
+	return my_status;
+}
+
+template <class state, class action, class environment>
+int GeneralIDA<state, action, environment>::search_node(environment *env, state &currState, state &goal, state &parent) {
+
+	int bound_check = check_bounds();
+	if(bound_check != 1)
+		return bound_check;
+
+	double g = g_stack.back();
+	double h = h_stack.back();
+
+	/* For Debugging
+	for(unsigned i = 0; i < active_state_path.size(); i++)
+		printf("\t");
+	std::cout << currState << "       " << h << " " << g << std::endl;
+	*/
+
+	// use g + h to cut off areas of search where cannot find better solution
+	if(expand_full_iter && sol_found && !fless(h + g, best_path_cost))
+		return 0;
+
+	if(!to_expand(g, h)) {
+		return 0;
+	}
+
+	nodes_ex_iter++;
+
+	if (fequal(h, 0.0) && env->GoalTest(currState, goal)) {
+		current_best_state_path = active_state_path;
+		best_path_cost = g;
+		sol_found = true;
+		return 1; // found goal
+	}
+
+	// generate successors
+	std::vector<state> succs;
+	env->GetSuccessors(currState, succs);
+
+	nodes_gen_iter += succs.size();
+
+	int depth = active_state_path.size();
+
+	int my_status = 0;
+	for (unsigned int x = 0; x < succs.size(); x++)
+	{
+		// if is parent, prune
+		if ((depth != 0) && (succs[x] == parent))
+			continue;
+
+		// use g + h to cut off areas of search where cannot find better solution
+		if(expand_full_iter && sol_found && !fless(h + g, best_path_cost))
+			return my_status;
+
+		nodes_check_iter++;
+
+		double edgeCost = env->GCost(currState, succs[x]);
+
+		// get h_value of child
+		double child_h;
+		if(env->IsGoalStored()) {
+			child_h = env->HCost(succs[x]);
+		}
+		else {
+			child_h = env->HCost(succs[x], goal);
+		}
+
+		// push child info on stacks
+		h_stack.push_back(child_h);
+		g_stack.push_back(g + edgeCost);
+		active_state_path.push_back(succs[x]);
+
+		// recursively search child
+		int status = search_node(env, succs[x], goal, currState);
+
+		// remove child info from stacks
+		active_state_path.pop_back();
+		h_stack.pop_back();
+		g_stack.pop_back();
+
+		// handle status
+		if (status == 1) {
+			if(expand_full_iter)
+				my_status = 1;
+			else {
+				return 1;
+			}
+		}
+		else if(status > 1) {
+			return status;
+		}
+	}
+	assert(h_stack.size() == g_stack.size());
+	assert(h_stack.size() - 1 == active_state_path.size());
 	return my_status;
 }
 

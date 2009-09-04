@@ -5,6 +5,8 @@
 #include "dynsearch.h"
 #include "MNPuzzle.h"
 #include "GeneralIDA.h"
+#include "SortingIDA.h"
+#include "RandomSortingIDA.h"
 #include "GeneralRBFS.h"
 #include "GeneralBeamSearch.h"
 #include "GeneralBulb.h"
@@ -58,7 +60,7 @@ int main(int argc, char** argv)
 
 	// takes puzzles you want to solve
 	unsigned begin_index = 0;
-	unsigned end_index = 999;
+	unsigned end_index = 19;
 	vector<MNPuzzleState> mn_puzzles;
 	for(unsigned i = begin_index; i <= end_index; i++) {
 		mn_puzzles.push_back(temp_mn_puzzles[i]);
@@ -120,12 +122,22 @@ int main(int argc, char** argv)
 	IDA* MN Puzzle Weight Experiments
 	**/
 	/*
-	for(double weight = 3.0; weight <= 6.0; weight+= 1) {
-
+	for(double weight = 3.0; weight <= 3.0; weight+= 1) {
+		//mn_ida.SetExpandedLimit(15);
 		mn_ida.Change_Weights(1.0, weight);
 		general_batch(&mnp, &mn_ida, mn_puzzles, true, ACTION_PATH);
 		cout << "\n";
 	}*/
+
+
+	/** Random Sorting Order Experiments **/
+	RandomSortingIDA<MNPuzzleState, slideDir, MNPuzzle> mn_rsort_ida;
+	mn_rsort_ida.Change_Weights(1.0, 3.0);
+	for(int seed = 10000; seed <= 10040; seed+= 21) {
+		mn_rsort_ida.Change_Seed(seed);
+		general_batch(&mnp, &mn_rsort_ida, mn_puzzles, true, ACTION_PATH);
+		cout << "\n";
+	}
 
 	/**
 	IDA* MN Order Experiments

@@ -348,6 +348,7 @@ unsigned GeneralRBFS<state, action, environment>::assign_and_sort (environment *
 		if(!fequal(lower_bound, parent_cost) && fgreater(lower_bound, costs[i]))
 			costs[i] = lower_bound;
 
+		// am I using bubble sort? Yeesh
 		int j = i - 1;
 		for(; j >= 0; j--) {
 			// if the costs in list is infinite or new child is better
@@ -361,7 +362,7 @@ unsigned GeneralRBFS<state, action, environment>::assign_and_sort (environment *
 		order[j+1] = i; // assign place where new child is to go
 	}
 
-		return actions.size() - num_invalid; // return number of children
+	return actions.size() - num_invalid; // return number of children
 }
 
 template <class state, class action, class environment>
