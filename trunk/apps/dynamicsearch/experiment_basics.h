@@ -33,7 +33,6 @@ std::string batch_header(environment *env, GenericStepAlgorithm<state, action, e
 	header <<  solver->GetName();
 	header << "; DOMAIN: " ;
 	header << env->GetName();
-	header << "\n";
 
 	return header.str();
 }
@@ -112,7 +111,7 @@ void general_batch_orders(environment *env, GenericStepAlgorithm<state, action, 
 	nodes_expanded.clear();
 	for(unsigned i = 0; i < puzz_orders.size(); i++) {
 		env->Change_Op_Order(puzz_orders[i]);
-		std::cout << batch_header(env, solver);
+		std::cout << batch_header(env, solver) << std::endl;
 		general_batch(env, solver, puzzles, print_all_stats, type);
 		std::cout << "\n";
 	}
