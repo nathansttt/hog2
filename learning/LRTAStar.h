@@ -1,0 +1,156 @@
+/*
+ * $Id: LRTAStar.h,v 1.3 2005/10/04 21:38:59 bulitko Exp $
+ *
+ *  HOG File
+ *
+ *  Created by Shanny Lu on Oct 3, 2005.
+ *
+ */
+
+#ifndef LRTASTAR_H
+#define LRTASTAR_H
+
+#include "GenericSearchAlgorithm.h"
+#include "FPUtil.h"
+#include <deque>
+#include <vector>
+#include <ext/hash_map>
+
+// This class defines the LRTA* algorithm
+template <class state, class action, class environment>
+class LRTAStar : public GenericSearchAlgorithm<state,action,environment> {
+public:
+	LRTAStar()
+	{ fAmountLearned = 0.0f; }
+	virtual ~LRTAStar(void) { }
+
+	void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
+	void GetPath(environment *, state& , state& , std::vector<action> & ) { assert(false); };
+	virtual const char *GetName() { return "LRTAStar"; }
+	void SetHCost(environment *env, state &where, double val) { heur[env->GetStateHash(where)] = val; }
+	double HCost(environment *env, state &from, state &to) { return std::max(heur[env->GetStateHash(from)], env->HCost(from, to)); }
+	
+	virtual uint64_t GetNodesExpanded() { return nodesExpanded; }
+	virtual uint64_t GetNodesTouched() { return nodesTouched; }
+	virtual void LogFinalStats(StatCollection *) {}
+
+	double GetAmountLearned() { return fAmountLearned; }
+	void OpenGLDraw() const {}
+	void OpenGLDraw(const environment *env) const;
+private:
+	typedef __gnu_cxx::hash_map<uint64_t, double, Hash64 > LearnedHeuristic;
+
+	LearnedHeuristic heur;
+	double fAmountLearned;
+	uint64_t nodesExpanded, nodesTouched;
+};
+
+/** The core routine of LRTAStar -- computes at most one-move path */
+template <class state, class action, class environment>
+void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::GetPath(environment *env, state& from, state& to, std::vector<state> &thePath)
+{
+	thePath.resize(0);
+	if (from==to)
+		return;
+
+	// Initialization -----------------------------------------------------
+	// Use the benefit rule (i.e., never decrease h[]) ?
+	static const bool benefitRule = true;
+	
+	// Initialize the variables
+	double minF = DBL_MAX;
+	double minG = 0;
+	int minC = -1; 
+	
+	nodesExpanded = 0;
+	nodesTouched = 0;
+	nodesTouched++;
+	
+	// Lookahead --------------------------------------------------------------------
+	// get the current node off the open List
+	nodesExpanded++;
+	
+	// Iterate through all edges coming out of *n
+	std::vector<state> neighbors;
+	env->GetSuccessors(from, neighbors);
+	for (unsigned int x = 0; x < neighbors.size(); x++)
+	{
+		// Generate a child
+		nodesTouched++;
+		
+		// Check if the child's tile is occupied
+		if (env->GetOccupancyInfo() && !env->GetOccupancyInfo()->CanMove(from, neighbors[x]))
+			continue;
+		
+		// Compute the g values
+		double g = env->GCost(from, neighbors[x]);// e->getWeight();
+		
+		// See if the min on this level needs to be updated
+		double h = HCost(env, neighbors[x], to);
+		double f = g + h;
+		
+		if (fless(f, minF))
+		{
+			minF = f;
+			minG = g;
+			minC = (int)x;
+		}
+		// tie break the same as other algorithms
+		if (fequal(f, minF) && fgreater(g, minG))
+		{
+			minF = f;
+			minG = g;
+			minC = (int)x;
+		}
+	}
+	
+	// If there were no legitimate children (e.g., we are blocked out)
+	// then return an empty path
+	if (minC == -1)
+		return;
+	
+	// Update h ---------------------------------------------------------------------
+	
+	// Compute the new h
+	double newH = minF;
+	
+	// Compute the amount of learning
+	double oldH = HCost(env, from, to);
+	double deltaH = newH - oldH;
+	
+	// The benefit rule disallows us to make updates or account for decreases in h
+	if (benefitRule && fless(deltaH, 0.0))
+		deltaH = 0.0;
+	
+	deltaH = fabs(deltaH);			// decreasing h is also learning
+	
+	// update h[from,to]
+	if (fgreater(deltaH,0.0))
+		SetHCost(env, from, newH);
+	
+	// Update the amount learned on this trial
+	// We do this with an if to avoid accumulating floating point errors
+	if (fgreater(deltaH,0.0))
+		fAmountLearned += deltaH;
+	
+	// Move -------------------------------------------------------------------------
+	thePath.push_back(from);
+	thePath.push_back(neighbors[minC]);
+	return;
+}
+
+template <class state, class action, class environment>
+void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::OpenGLDraw(const environment *) const
+{
+//	for (typename LearnedHeuristic::const_iterator it = hashTable.begin(); it != hashTable.end(); it++)
+//	{
+//		if ((*it).second.theState == currentLoc)
+//		{
+//		}
+//		else {
+//			e->OpenGLDraw((*it).second.theState);
+//		}
+//	}
+}
+
+#endif
