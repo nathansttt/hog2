@@ -109,6 +109,9 @@
 		C433A8460C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C433A8470C03ADEB002B8108 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A8450C03ADEB002B8108 /* IDAStar.cpp */; };
 		C433A9F00C04E2EF002B8108 /* CFOptimalRefinement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46CA96E0C040B3C00D96494 /* CFOptimalRefinement.cpp */; };
+		C43F61EE104EE2C200896E99 /* LRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C43F61E8104EE2C200896E99 /* LRTAStar.cpp */; };
+		C43F61EF104EE2C200896E99 /* LRTAStarGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C43F61EA104EE2C200896E99 /* LRTAStarGroup.cpp */; };
+		C43F61F0104EE2C200896E99 /* LRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C43F61EC104EE2C200896E99 /* LRTAStarUnit.cpp */; };
 		C45F51CE1004660300A664AD /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F3590ECFD3B5009D90B3 /* RoboticArm.cpp */; };
 		C45F51CF1004660400A664AD /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
 		C46E4EC20CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
@@ -132,6 +135,9 @@
 		C47E913D0CBC29F200B1AFDA /* IRDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47E913C0CBC29F200B1AFDA /* IRDijkstra.cpp */; };
 		C47E913E0CBC29F200B1AFDA /* IRDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47E913C0CBC29F200B1AFDA /* IRDijkstra.cpp */; };
 		C47E913F0CBC29F200B1AFDA /* IRDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47E913C0CBC29F200B1AFDA /* IRDijkstra.cpp */; };
+		C4A3F2C3104C5FF300AB3D8F /* LocalSensingUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C924A0FE30B2B0063E9B7 /* LocalSensingUnit.cpp */; };
+		C4A3F2C4104C5FF400AB3D8F /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C92430FE303740063E9B7 /* Sample.cpp */; };
+		C4A3F2C8104C66F200AB3D8F /* LocalSensingUnit2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A3F2C7104C66F200AB3D8F /* LocalSensingUnit2.cpp */; };
 		C4A4F35A0ECFD3B5009D90B3 /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F3590ECFD3B5009D90B3 /* RoboticArm.cpp */; };
 		C4AC95E00D6CC2A300DAE6E9 /* ClusterAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2440BCEE7B000FCD84C /* ClusterAbstraction.cpp */; };
 		C4AC95E10D6CC2A300DAE6E9 /* GraphAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B2460BCEE7B000FCD84C /* GraphAbstraction.cpp */; };
@@ -327,7 +333,6 @@
 		C4B810901033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
 		C4B810911033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
 		C4B810921033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
-		C4B810C410332D3E00EFDB2B /* RoboticArmTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F0110ECFD2C5009D90B3 /* RoboticArmTest.cpp */; };
 		C4B810F11033333A00EFDB2B /* Inconsistency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C847580C1F1ACF00AFBF7A /* Inconsistency.cpp */; };
 		C4C8422C0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C8422D0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
@@ -556,6 +561,12 @@
 		C433A7390C03604B002B8108 /* FlipSide.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlipSide.cpp; sourceTree = "<group>"; };
 		C433A8440C03ADEB002B8108 /* IDAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDAStar.h; sourceTree = "<group>"; };
 		C433A8450C03ADEB002B8108 /* IDAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IDAStar.cpp; sourceTree = "<group>"; };
+		C43F61E8104EE2C200896E99 /* LRTAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LRTAStar.cpp; sourceTree = "<group>"; };
+		C43F61E9104EE2C200896E99 /* LRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LRTAStar.h; sourceTree = "<group>"; };
+		C43F61EA104EE2C200896E99 /* LRTAStarGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LRTAStarGroup.cpp; sourceTree = "<group>"; };
+		C43F61EB104EE2C200896E99 /* LRTAStarGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LRTAStarGroup.h; sourceTree = "<group>"; };
+		C43F61EC104EE2C200896E99 /* LRTAStarUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LRTAStarUnit.cpp; sourceTree = "<group>"; };
+		C43F61ED104EE2C200896E99 /* LRTAStarUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LRTAStarUnit.h; sourceTree = "<group>"; };
 		C445B1060DB7F294004AF35B /* AbstractWeightedSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractWeightedSearchAlgorithm.h; sourceTree = "<group>"; };
 		C445B1070DB7F294004AF35B /* GreedyDMUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GreedyDMUnit.h; sourceTree = "<group>"; };
 		C46CA96D0C040B3C00D96494 /* CFOptimalRefinement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CFOptimalRefinement.h; sourceTree = "<group>"; };
@@ -585,6 +596,8 @@
 		C47E91190CBBF30200B1AFDA /* SimpleHierarchicalAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimpleHierarchicalAStar.cpp; sourceTree = "<group>"; };
 		C47E913B0CBC29F200B1AFDA /* IRDijkstra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRDijkstra.h; sourceTree = "<group>"; };
 		C47E913C0CBC29F200B1AFDA /* IRDijkstra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IRDijkstra.cpp; sourceTree = "<group>"; };
+		C4A3F2C6104C66F200AB3D8F /* LocalSensingUnit2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalSensingUnit2.h; sourceTree = "<group>"; };
+		C4A3F2C7104C66F200AB3D8F /* LocalSensingUnit2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LocalSensingUnit2.cpp; sourceTree = "<group>"; };
 		C4A4F0100ECFD2C5009D90B3 /* RoboticArmTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoboticArmTest.h; sourceTree = "<group>"; };
 		C4A4F0110ECFD2C5009D90B3 /* RoboticArmTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RoboticArmTest.cpp; sourceTree = "<group>"; };
 		C4A4F3580ECFD3B5009D90B3 /* RoboticArm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoboticArm.h; sourceTree = "<group>"; };
@@ -1482,6 +1495,7 @@
 				C4D3B26B0BCEE7B000FCD84C /* algorithms */,
 				C4D3B2760BCEE7B000FCD84C /* docs */,
 				C4D3B27A0BCEE7B000FCD84C /* environments */,
+				C43F61E7104EE2C200896E99 /* learning */,
 				C4D3B27B0BCEE7B000FCD84C /* graph */,
 				C4D3B27E0BCEE7B000FCD84C /* graphalgorithms */,
 				C4D3B28D0BCEE7B000FCD84C /* gui */,
@@ -1579,6 +1593,20 @@
 			path = ../../../generic;
 			sourceTree = SOURCE_ROOT;
 		};
+		C43F61E7104EE2C200896E99 /* learning */ = {
+			isa = PBXGroup;
+			children = (
+				C43F61E8104EE2C200896E99 /* LRTAStar.cpp */,
+				C43F61E9104EE2C200896E99 /* LRTAStar.h */,
+				C43F61EA104EE2C200896E99 /* LRTAStarGroup.cpp */,
+				C43F61EB104EE2C200896E99 /* LRTAStarGroup.h */,
+				C43F61EC104EE2C200896E99 /* LRTAStarUnit.cpp */,
+				C43F61ED104EE2C200896E99 /* LRTAStarUnit.h */,
+			);
+			name = learning;
+			path = ../../../learning;
+			sourceTree = SOURCE_ROOT;
+		};
 		C47C92420FE303740063E9B7 /* localsensingsearch */ = {
 			isa = PBXGroup;
 			children = (
@@ -1586,6 +1614,8 @@
 				C47C92440FE303740063E9B7 /* Sample.h */,
 				C47C924A0FE30B2B0063E9B7 /* LocalSensingUnit.cpp */,
 				C47C92490FE30B2B0063E9B7 /* LocalSensingUnit.h */,
+				C4A3F2C7104C66F200AB3D8F /* LocalSensingUnit2.cpp */,
+				C4A3F2C6104C66F200AB3D8F /* LocalSensingUnit2.h */,
 			);
 			path = localsensingsearch;
 			sourceTree = "<group>";
@@ -3061,7 +3091,12 @@
 				C4F348040F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
 				C40B23310FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
 				C4B8108F1033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
-				C4B810C410332D3E00EFDB2B /* RoboticArmTest.cpp in Sources */,
+				C4A3F2C3104C5FF300AB3D8F /* LocalSensingUnit.cpp in Sources */,
+				C4A3F2C4104C5FF400AB3D8F /* Sample.cpp in Sources */,
+				C4A3F2C8104C66F200AB3D8F /* LocalSensingUnit2.cpp in Sources */,
+				C43F61EE104EE2C200896E99 /* LRTAStar.cpp in Sources */,
+				C43F61EF104EE2C200896E99 /* LRTAStarGroup.cpp in Sources */,
+				C43F61F0104EE2C200896E99 /* LRTAStarUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3717,6 +3752,7 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -3747,6 +3783,7 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				SEPARATE_STRIP = YES;
 			};
 			name = Release;

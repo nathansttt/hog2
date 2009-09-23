@@ -19,11 +19,13 @@ PROJECTS = \
   graph \
   graphalgorithms \
   gui \
+  learning \
   mapalgorithms \
   shared \
   simulation \
   utils \
   apps/arm \
+  apps/localsensingsearch \
   apps/cpdb \
   apps/pathsample \
   apps/puzzlesample \
@@ -55,6 +57,7 @@ PROJECTS_ALL = \
   simulation \
   utils \
   apps/arm \
+  apps/localsensingsearch \
   apps/cpdb \
   apps/pathsample \
   apps/puzzlesample \
