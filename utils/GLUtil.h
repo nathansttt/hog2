@@ -28,20 +28,34 @@
 #include "FPUtil.h"
 #include <ostream>
 
+#ifdef __APPLE__
+#include "TargetConditionals.h"
+#endif
+
 #ifdef NO_OPENGL
 #include "Gl.h"
 #include "Glut.h"
 #else
+
+//#ifdef TARGET_OS_IPHONE
+//#include <OpenGLES/ES1/gl.h>
+//#include <OpenGLES/ES1/glext.h>
+//#define GLdouble GLfloat
+//#else
+
 #ifdef OS_MAC
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 #include <AGL/agl.h>
 #else
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
 #endif
+
+//#endif
 #endif
 
 #ifndef GLUTIL_H

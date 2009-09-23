@@ -58,8 +58,26 @@ public:
 		verbose = false;
 	}
 	virtual ~EpisodicSimulation() {}
-	int AddUnit(Unit<state, action, environment> *u, double timeOffset=0.) { std::cout<<"ADDING\n";allRacesDone = false; return UnitSimulation<state, action, environment>::AddUnit(u,timeOffset); }
-
+	int AddUnit(Unit<state, action, environment> *u, double timeOffset=0.)
+	{
+		//std::cout<<"ADDING RACING\n";allRacesDone = false;
+		int val = UnitSimulation<state, action, environment>::AddUnit(u,timeOffset);
+		if (val >= (int)racingInfo.size())
+			racingInfo.resize(val+1);
+		racingInfo[val] = true;
+		return val;
+	}
+	int AddNonRacingUnit(Unit<state, action, environment> *u, double timeOffset=0.)
+	{
+		//std::cout<<"ADDING NONRACING"<<std::endl;
+		allRacesDone = false;
+		int val = UnitSimulation<state, action, environment>::AddUnit(u,timeOffset);
+		if (val >= (int)racingInfo.size())
+			racingInfo.resize(val+1);
+		racingInfo[val] = false;
+		return val;
+	}
+	
 	virtual bool Done() { return allRacesDone; }
 	void SetStopOnConvergence(bool stop) { stopOnConvergence = stop; }
 	void SetTargetTolerance(double x) { targetTolerance = x; }
@@ -70,6 +88,8 @@ public:
 	void SetTravelLimit(double lim) { useTravelLimit = true; travelLimit = lim; }
 	void SetTrialLimit(long maxTrials) { useMaxRounds = true; maxRounds = maxTrials; }
 	void DisableTravelLimit() { useTravelLimit = false; }
+	virtual void ClearAllUnits()
+	{ allRacesDone = false; currRound = 0; UnitSimulation<state, action, environment>::ClearAllUnits(); }
 
 protected:
 	virtual void DoPreTimestepCalc()
@@ -93,7 +113,7 @@ protected:
 			// (or unblock units whenver they reach their target?)
 			for (unsigned int t = 0; t < this->units.size(); t++)
 			{
-				if (verbose) printf("Check unit %d\n",t);
+				if (verbose) printf("Check unit %d (%s)\n", t, this->units[t]->agent->GetName());
 				
 				if (!IsUnitRacing(this->units[t]))
 					continue;
@@ -117,7 +137,7 @@ protected:
 			// (or unblock units whenver they reach their target?)
 			for (unsigned int t = 0; t < this->units.size(); t++)
 			{
-				if (verbose) printf("Check unit %d\n",t);
+				if (verbose) printf("Check unit %d (%s)\n", t, this->units[t]->agent->GetName());
 				
 				if (!IsUnitRacing(this->units[t]))
 					continue;
@@ -219,17 +239,20 @@ protected:
 			UnitSimulation<state, action, environment>::DoTimestepCalc(amount);
 	}
 	
-	virtual bool EpisodeDone()
+	virtual bool EpisodeDone() // this is wrong...should be asking units about learning
 	{
-			bool isDone = true;
-			for (unsigned int t = 0; (t < this->units.size())&&(isDone); t++)
-			{
-				state loc, goaloc;
-				this->units[t]->agent->GetLocation(loc);
-				this->units[t]->agent->GetGoal(goaloc);
-				isDone = (loc == goaloc);
-			}
-			return isDone;
+		//return false;
+		for (unsigned int t = 0; (t < this->units.size()); t++)
+		{
+//			state loc, goaloc;
+//			this->units[t]->agent->GetLocation(loc);
+//			this->units[t]->agent->GetGoal(goaloc);
+			if (!this->units[t]->agent->Done())
+				return false;
+//			if (!(loc == goaloc))
+//				return false;
+		}
+		return true;
 	}
 	
 	tUnitOnTargetStatus UnitOnTargetStatus(UnitInfo<state, action, environment> *u)
@@ -242,7 +265,10 @@ protected:
 		
 		u->agent->GetLocation(s1);
 		u->agent->GetGoal(s2);
-		if (!fgreater(this->env->GCost(s1, s2),targetTolerance))
+		if (s1 == s2)
+			return kReachedTarget;
+		
+		if (!fgreater(this->env->GCost(s1, s2), targetTolerance))
 			return kReachedTarget;
 		
 		return kNotOnTarget;
@@ -260,7 +286,8 @@ protected:
 
 	bool IsUnitRacing(UnitInfo<state, action, environment> *u)
 	{
-		return true;
+		return racingInfo[u->agent->GetNum()];
+//		return true;
 //		return (!u->ignoreOnTarget &&
 //						(u->agent->GetGoal() != NULL));
 	}
@@ -275,6 +302,7 @@ protected:
 	double targetTolerance;
 	bool disjunctiveTrialEnd;
 	bool verbose;
+	std::vector<bool> racingInfo;
 };
 
 #endif

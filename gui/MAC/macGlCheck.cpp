@@ -140,12 +140,12 @@ unsigned char HaveOpenGLCapsChanged (GLCaps aDisplayCaps[],
 
     // get renderer info based on gDevice
     {
-      CGLRendererInfoObj info;
-      long rv = 0;
-			long j, numRenderers = 0;
-      CGLError err = (CGLError)0;
-      long deviceVRAM; // video memory in bytes
-      unsigned long rendererID; // renderer ID
+		CGLRendererInfoObj info;
+		GLint rv = 0;
+		GLint j, numRenderers = 0;
+		CGLError err = (CGLError)0;
+		GLint deviceVRAM; // video memory in bytes
+		GLint rendererID; // renderer ID
       
       err = CGLQueryRendererInfo (aDisplayCaps[i].cglDisplayMask, 
                                   &info, &numRenderers);
@@ -156,7 +156,7 @@ unsigned char HaveOpenGLCapsChanged (GLCaps aDisplayCaps[],
           CGLDescribeRenderer (info, j, kCGLRPAccelerated, &rv); 
           if (true == rv) { // if accelerated
             // what is the renderer ID
-            CGLDescribeRenderer (info, j, kCGLRPRendererID, (long *)&rendererID); 
+            CGLDescribeRenderer (info, j, kCGLRPRendererID, &rendererID); 
             if (rendererID != aDisplayCaps[i].rendererID) // check match
               return 1;
             // what is the VRAM
@@ -275,7 +275,7 @@ void CheckOpenGLCaps (CGDisplayCount maxDspys,
     
     { // get renderer info based on gDevice
       CGLRendererInfoObj info;
-      long j, numRenderers = 0, rv = 0;
+      GLint j, numRenderers = 0, rv = 0;
       err = (CGLError)0;
       
       err = CGLQueryRendererInfo (dCaps[i].cglDisplayMask, 
@@ -289,7 +289,7 @@ void CheckOpenGLCaps (CGDisplayCount maxDspys,
           if (true == rv) { // if accelerated
             // what is the renderer ID
             CGLDescribeRenderer (info, j, kCGLRPRendererID,
-                                 (long *)&dCaps[i].rendererID);
+                                 &dCaps[i].rendererID);
             // can we do full screen?
             CGLDescribeRenderer (info, j, kCGLRPFullScreen, &rv); 
             dCaps[i].fullScreenCapable = (bool) rv;
@@ -311,7 +311,7 @@ void CheckOpenGLCaps (CGDisplayCount maxDspys,
                                             (CGLPixelFormatAttribute)dCaps[i].cglDisplayMask, 
                                             (CGLPixelFormatAttribute)NULL };
       CGLPixelFormatObj pixelFormat = NULL;
-      long numPixelFormats = 0;
+      GLint numPixelFormats = 0;
       CGLContextObj cglContext;
       
       curr_ctx = CGLGetCurrentContext (); // get current CGL context

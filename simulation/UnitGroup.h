@@ -96,8 +96,13 @@ public:
 		}
 	}
 
-	virtual void StartNewTrial(StatCollection *)
-	{ }
+	virtual void StartNewTrial(StatCollection *c)
+	{
+		for (unsigned int x = 0; x < members.size(); x++)
+		{
+			members[x]->StartNewTrial(c);
+		}
+	}
 	
 	virtual void OpenGLDraw(const environment *, const SimulationInfo<state,action,environment> *)  const { }
 

@@ -53,8 +53,8 @@
 // conditions and capabilities as they would like or add their own checks
 
 #include <Carbon/Carbon.h>
-
 #include <ApplicationServices/ApplicationServices.h>
+#include "GLUtil.h"
 
 typedef struct {
   // developers can add capabilities as required
@@ -73,9 +73,9 @@ typedef struct {
   short deviceRefresh; // integer refresh rate in Hz
   
   // Renderer info
-  long deviceVRAM; // video memory in bytes
-  long deviceTextureRAM; // uses current mode (geometry, pixel depth, etc.)
-  unsigned long rendererID; // renderer ID
+  GLint deviceVRAM; // video memory in bytes
+  GLint deviceTextureRAM; // uses current mode (geometry, pixel depth, etc.)
+  GLint rendererID; // renderer ID
   char strRendererName [256]; // name of hardware renderer
   char strRendererVendor [256]; // name of hardware renderer vendor
   char strRendererVersion [256]; // string rep of hardware renderer version
@@ -83,11 +83,11 @@ typedef struct {
   // can add more device specs as you want
   
   // Renderer Caps
-  long textureUnits; // standard gl path max number of texture units
-  long maxTextureSize; // maximum 1D and 2D texture size supported
-  long max3DTextureSize; // maximum 3D texture size supported
-  long maxCubeMapTextureSize; // maximum cube map texture size supported
-  long maxRectTextureSize; // maximum rectangular texture size supported
+  GLint textureUnits; // standard gl path max number of texture units
+  GLint maxTextureSize; // maximum 1D and 2D texture size supported
+  GLint max3DTextureSize; // maximum 3D texture size supported
+  GLint maxCubeMapTextureSize; // maximum cube map texture size supported
+  GLint maxRectTextureSize; // maximum rectangular texture size supported
   
   // OpenGL version support
   unsigned short glVersion; // bcd gl version (ie. 1.4 is 0x0140)

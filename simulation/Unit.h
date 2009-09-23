@@ -91,8 +91,9 @@ public:
 			} */ 
 		}
 
-		virtual unsigned int GetNum() { return unitid; }
-		virtual void SetNum( unsigned int num ) { unitid = num; return; }
+	virtual unsigned int GetNum() { return unitid; }
+	virtual void SetNum( unsigned int num ) { unitid = num; return; }
+	virtual void StartNewTrial(StatCollection *) {}
 
 private:
 		double speed;

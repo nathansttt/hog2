@@ -27,7 +27,7 @@
 
 class armAngles {
 public:
-	armAngles() {}
+	armAngles() { angles = 0; }
 	int GetAngle(int which) const;
 	void SetAngle(int which, int value);
 	int GetNumArms() const;
