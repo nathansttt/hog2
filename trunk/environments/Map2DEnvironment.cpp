@@ -266,7 +266,7 @@ void MapEnvironment::OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const
 	GLdouble xx2, yy2, zz2;
 //	map->GetOpenGLCoord((float)((1-v)*l1.x+v*l2.x),
 //						(float)((1-v)*l1.y+v*l2.y), xx, yy, zz, rad);
-	printf("%f between (%d, %d) and (%d, %d)\n", v, l1.x, l1.y, l2.x, l2.y);
+//	printf("%f between (%d, %d) and (%d, %d)\n", v, l1.x, l1.y, l2.x, l2.y);
 	map->GetOpenGLCoord(l1.x, l1.y, xx, yy, zz, rad);
 	map->GetOpenGLCoord(l2.x, l2.y, xx2, yy2, zz2, rad);
 	//	map->GetOpenGLCoord(perc*newState.x + (1-perc)*oldState.x, perc*newState.y + (1-perc)*oldState.y, xx, yy, zz, rad);

@@ -514,6 +514,7 @@ void RoboticArm::GenerateLineSegments(const armAngles &a, std::vector<line2d> &a
 		
 		end.x = prev.x*GetCos(angle) - prev.y*GetSin(angle) + start.x;
 		end.y = prev.x*GetSin(angle) + prev.y*GetCos(angle) + start.y;
+		end.z = 0;
 		
 		armSegments1.push_back(line2d(start, end));
 	}

@@ -108,7 +108,7 @@ public:
 
 	int AddUnitGroup(UnitGroup<state, action, environment> *ug);
 	UnitGroup<state, action, environment> *GetUnitGroup(unsigned int which);
-	void ClearAllUnits();
+	virtual void ClearAllUnits();
 	
 	virtual void GetPublicUnitInfo(unsigned int which, PublicUnitInfo<state,action,environment> &info) const;
 
@@ -131,6 +131,7 @@ public:
 	double GetThinkingPenalty() { return penalty; }
 
 	virtual void OpenGLDraw() const;
+	virtual void OpenGLDraw(unsigned int whichUnit) const;
 	
 	void SetLogStats(bool val) { logStats = val; }
 	bool GetLogStats() { return logStats; }
@@ -358,6 +359,12 @@ void UnitSimulation<state, action, environment>::DoTimestepCalc(double timeStep)
 	{
 		currentActor = x;
 		StepUnitTime(units[x], timeStep);
+		
+		if (stepType == kRealTime)
+		{
+			while (currTime > units[x]->nextTime)
+				StepUnitTime(units[x], 0);
+		}
 	}
 }
 
@@ -485,6 +492,16 @@ void UnitSimulation<state, action, environment>::OpenGLDraw() const
 	
 	for (unsigned int x = 0; x <unitGroups.size(); x++)
 		unitGroups[x]->OpenGLDraw(env, this);
+}
+
+template<class state, class action, class environment>
+void UnitSimulation<state, action, environment>::OpenGLDraw(unsigned int whichUnit) const
+{
+	if (whichUnit >= units.size())
+		return;
+
+	currentActor = whichUnit;
+	units[whichUnit]->agent->OpenGLDraw(env, this);
 }
 
 
