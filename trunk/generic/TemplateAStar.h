@@ -80,8 +80,8 @@ public:
 	
 	state CheckNextNode();
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
-	{ uint64_t theID; openClosedList.Lookup(env->GetStateHash(node), theID); ExtractPathToStart(theID, thePath); }
-	void ExtractPathToStart(uint64_t node, std::vector<state> &thePath);
+	{ uint64_t theID; openClosedList.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
+	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath);
 	void DoAbstractSearch(){useOccupancyInfo = false; useRadius = false;}
 	virtual const char *GetName();
 	
@@ -269,7 +269,7 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 
 	if ((stopAfterGoal) && (env->GoalTest(openClosedList.Lookup(nodeid).data, goal)))
 	{
-		ExtractPathToStart(nodeid, thePath);
+		ExtractPathToStartFromID(nodeid, thePath);
 		// Path is backwards - reverse
 		reverse(thePath.begin(), thePath.end()); 
 		return true;
@@ -578,7 +578,7 @@ void TemplateAStar<state, action,environment>::FullBPMX(uint64_t nodeID, int dis
  * @param thePath will contain the path from goalNode to the start state
  */
 template <class state, class action,class environment>
-void TemplateAStar<state, action,environment>::ExtractPathToStart(uint64_t node,
+void TemplateAStar<state, action,environment>::ExtractPathToStartFromID(uint64_t node,
 																	 std::vector<state> &thePath)
 {
 	do {
