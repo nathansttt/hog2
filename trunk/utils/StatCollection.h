@@ -68,9 +68,9 @@ public:
 	bool LookupStat(const char *category, const char *owner, statValue &) const;
 	bool LookupStat(unsigned int index, statValue &) const;
 	
-	void AddFilter(char *category); // this is an include filter
-	void AddIncludeFilter(char *category); // include only added categories
-	void AddExcludeFilter(char *category); // exclude only added categories
+	void AddFilter(const char *category); // this is an include filter
+	void AddIncludeFilter(const char *category); // include only added categories
+	void AddExcludeFilter(const char *category); // exclude only added categories
 	void ClearFilters();
 	void EnablePrintOutput(bool pO) { printOutput = pO; }
 	

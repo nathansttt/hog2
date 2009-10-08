@@ -81,7 +81,7 @@ static bool operator==(const armRotations &l1, const armRotations &l2) {
 class RoboticArmHeuristic {
 public:
 	virtual ~RoboticArmHeuristic() {}
-	virtual double HCost(armAngles &node1, armAngles &node2) = 0;
+	virtual double HCost(const armAngles &node1, const armAngles &node2) = 0;
 };
 
 class RoboticArm : public SearchEnvironment<armAngles, armRotations>
@@ -94,9 +94,9 @@ public:
 	void GetTipPosition( armAngles &s, double &x, double &y );
 
 	void AddObstacle(line2d obs);
-	void GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighbors) const;
-	void GetActions(armAngles &nodeID, std::vector<armRotations> &actions) const;
-	armRotations GetAction(armAngles &s1, armAngles &s2) const;
+	void GetSuccessors(const armAngles &nodeID, std::vector<armAngles> &neighbors) const;
+	void GetActions(const armAngles &nodeID, std::vector<armRotations> &actions) const;
+	armRotations GetAction(const armAngles &s1, const armAngles &s2) const;
 	virtual void ApplyAction(armAngles &s, armRotations dir) const;
 	armAngles GetRandomState();
 
@@ -104,16 +104,16 @@ public:
 
 	void AddHeuristic(RoboticArmHeuristic *h) { heuristics.push_back(h); }
 
-	virtual double HCost(armAngles &){
+	virtual double HCost(const armAngles &){
 		printf("Single State HCost Failure: method not implemented for RoboticArm\n");
 		exit(0); return -1.0;}
 
-	virtual double HCost(armAngles &node1, armAngles &node2);
+	virtual double HCost(const armAngles &node1, const armAngles &node2);
 
-	virtual double GCost(armAngles &, armAngles &) { return 1; }
-	virtual double GCost(armAngles &, armRotations &) { return 1; }
+	virtual double GCost(const armAngles &, const armAngles &) { return 1; }
+	virtual double GCost(const armAngles &, const armRotations &) { return 1; }
 	bool GoalTest(armAngles &node, armAngles &goal);
-	uint64_t GetStateHash(armAngles &node) const;
+	uint64_t GetStateHash(const armAngles &node) const;
 	uint64_t GetActionHash(armRotations act) const;
 
 	virtual void OpenGLDraw() const;
@@ -161,7 +161,7 @@ class ArmToArmHeuristic : public RoboticArmHeuristic {
 public:
 	ArmToArmHeuristic(RoboticArm *r, armAngles &initial, bool optimize = false);
 	virtual ~ArmToArmHeuristic() {}
-	double HCost(armAngles &node1, armAngles &node2);
+	double HCost(const armAngles &node1, const armAngles &node2);
 	void AddDiffTable();
 	bool IsLegalState(armAngles &arm);
 	const std::vector<armAngles> &GetTipPositions(double x, double y)
@@ -184,7 +184,7 @@ class ArmToTipHeuristic : public RoboticArmHeuristic {
 public:
 	ArmToTipHeuristic(RoboticArm *r);
 	virtual ~ArmToTipHeuristic() {}
-	double HCost(armAngles &node1, armAngles &node2);
+	double HCost(const armAngles &node1, const armAngles &node2);
 
 	void GenerateLegalStateTable( armAngles &legalArm );
 	void GenerateTipPositionTables( armAngles &sampleArm );
@@ -261,9 +261,9 @@ private:
 							   armAngles &lastAdded );
 
 	// use a heuristic table
-	uint16_t UseHeuristic( armAngles &s, armAngles &g,
+	uint16_t UseHeuristic(const armAngles &s, armAngles &g,
 						  uint16_t *distances );
-	uint16_t UseHeuristic( armAngles &arm, double goalX, double goalY,
+	uint16_t UseHeuristic(const armAngles &arm, double goalX, double goalY,
 						  uint16_t *distances, uint16_t *minTipDistances,
 						  uint16_t *maxTipDistances );
 };

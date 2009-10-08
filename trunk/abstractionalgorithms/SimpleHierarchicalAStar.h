@@ -16,8 +16,8 @@
 class HierarchicalHeuristicEnvironment : public SearchEnvironment<unsigned long, unsigned long>
 {
 	virtual ~HierarchicalHeuristicEnvironment() {}
-	virtual void GetSuccessors(unsigned long &nodeID, std::vector<unsigned long> &neighbors) const = 0;
-	virtual void GetActions(unsigned long &nodeID, std::vector<unsigned long> &actions) const = 0;
+	virtual void GetSuccessors(const unsigned long &nodeID, std::vector<unsigned long> &neighbors) const = 0;
+	virtual void GetActions(const unsigned long &nodeID, std::vector<unsigned long> &actions) const = 0;
 	virtual unsigned long GetAction(unsigned long &s1, unsigned long &s2) const = 0;
 	virtual void ApplyAction(unsigned long &s, unsigned long a) const = 0;
 
@@ -25,20 +25,20 @@ class HierarchicalHeuristicEnvironment : public SearchEnvironment<unsigned long,
 
 	virtual bool InvertAction(unsigned long &a) const = 0;
 
-	virtual double HCost(unsigned long &node1, unsigned long &node2) = 0;
+	virtual double HCost(const unsigned long &node1, const unsigned long &node2) = 0;
 
-	virtual double HCost(unsigned long &state1){
+	virtual double HCost(const unsigned long &state1){
 		fprintf(stderr, "ERROR: Single State HCost not implemented for HierarchicalHeuristicEnvironment\n");
 		exit(1); return -1.0;}
 
-	virtual double GCost(unsigned long &node1, unsigned long &node2) = 0;
+	virtual double GCost(const unsigned long &node1, const unsigned long &node2) = 0;
 	virtual bool GoalTest(unsigned long &node, unsigned long &goal) = 0;
 
 	virtual bool GoalTest(unsigned long &s){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for HierarchicalHeuristicEnvironment\n");
 		exit(1); return false;}
 
-	virtual uint64_t GetStateHash(unsigned long &node) const = 0;
+	virtual uint64_t GetStateHash(const unsigned long &node) const = 0;
 	virtual uint64_t GetActionHash(unsigned long act) const = 0;
 
 	virtual OccupancyInterface<unsigned long,unsigned long> *GetOccupancyInfo() = 0;

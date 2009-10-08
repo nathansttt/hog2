@@ -67,7 +67,7 @@ class DSCREnvironment {
 	// assumes, that all transition costs are 1
 	// note: if used with graphs, use MaximumNormGraphMapHeuristic within the GraphEnvironment
 	// if used with maps, we implemented a version ourself
-	virtual double HCost( state &s1, state &s2 );
+	virtual double HCost(const state &s1, const state &s2 );
 
 	virtual double AccumulatedHCost( CRState &s, bool minFirst ) {
 		return AccumulatedHCost( s[0], s[1], minFirst );
@@ -210,9 +210,9 @@ double DSCREnvironment<state,action>::CopGCost( state&, state& ) {
 
 // \see DSCREnvironment.h
 template<>
-double DSCREnvironment<xyLoc,tDirection>::HCost( xyLoc &s1, xyLoc &s2 );
+double DSCREnvironment<xyLoc,tDirection>::HCost(const xyLoc &s1, const xyLoc &s2 );
 template<>
-double DSCREnvironment<graphState,graphMove>::HCost( graphState &s1, graphState &s2 );
+double DSCREnvironment<graphState,graphMove>::HCost(const graphState &s1, const graphState &s2 );
 
 template<class state, class action>
 void DSCREnvironment<state,action>::Dijkstra( state &s, unsigned int &steps, std::vector<state> &neighbors, std::vector<float> &gcosts ) {

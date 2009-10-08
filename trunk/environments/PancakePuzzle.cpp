@@ -62,7 +62,7 @@ const std::string PancakePuzzle::GetName(){
 	return name.str();
 }
 
-void PancakePuzzle::GetSuccessors(PancakePuzzleState &parent,
+void PancakePuzzle::GetSuccessors(const PancakePuzzleState &parent,
                              std::vector<PancakePuzzleState> &children) const
 {
 	children.resize(0);
@@ -75,7 +75,7 @@ void PancakePuzzle::GetSuccessors(PancakePuzzleState &parent,
 	}
 }
 
-void PancakePuzzle::GetActions(PancakePuzzleState &, std::vector<unsigned> &actions) const
+void PancakePuzzle::GetActions(const PancakePuzzleState &, std::vector<unsigned> &actions) const
 {
 	actions.resize(0);
 
@@ -86,22 +86,21 @@ void PancakePuzzle::GetActions(PancakePuzzleState &, std::vector<unsigned> &acti
 	}
 }
 
-unsigned PancakePuzzle::GetAction(PancakePuzzleState &parent, PancakePuzzleState &child) const
+unsigned PancakePuzzle::GetAction(const PancakePuzzleState &parent, const PancakePuzzleState &child) const
 {
 	unsigned current_action;
 	bool are_equal = false;
 
 	assert(child.puzzle.size() == size);
 	assert(parent.puzzle.size() == size);
+	PancakePuzzleState parentCopy = parent;
 	for(unsigned i = 0; i < operators.size(); i++) {
 		current_action = operators[i];
-		ApplyAction(parent, current_action);
-
-		if(parent == child)
+		ApplyAction(parentCopy, current_action);
+		if(parentCopy == child)
 			are_equal = true;
-
 		InvertAction(current_action);
-		ApplyAction(parent, current_action);
+		ApplyAction(parentCopy, current_action);
 
 		if(are_equal)
 			return operators[i];
@@ -136,7 +135,7 @@ bool PancakePuzzle::InvertAction(unsigned &a) const
 	return true;
 }
 
-double PancakePuzzle::HCost(PancakePuzzleState &state) {
+double PancakePuzzle::HCost(const PancakePuzzleState &state) {
 	if(!goal_stored) {
 		fprintf(stderr, "ERROR: HCost called with a single state and goal is not stored.\n");
 		exit(1);
@@ -171,7 +170,7 @@ double PancakePuzzle::HCost(PancakePuzzleState &state) {
 	return h_cost;
 }
 
-double PancakePuzzle::HCost(PancakePuzzleState &state, PancakePuzzleState &goal_state)
+double PancakePuzzle::HCost(const PancakePuzzleState &state, const PancakePuzzleState &goal_state)
 {
 	if(state.puzzle.size() != size) {
 		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");
@@ -195,7 +194,7 @@ double PancakePuzzle::HCost(PancakePuzzleState &state, PancakePuzzleState &goal_
 	return 1.0;
 }
 
-double PancakePuzzle::Memory_Free_HCost(PancakePuzzleState &state, std::vector<int> &goal_locs)
+double PancakePuzzle::Memory_Free_HCost(const PancakePuzzleState &state, std::vector<int> &goal_locs)
 {
 	if(state.puzzle.size() != size) {
 		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");

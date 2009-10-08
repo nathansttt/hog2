@@ -93,7 +93,7 @@ namespace AngleUtil {
 
 	class AngleSearchNode{
 		public:
-			AngleSearchNode(xyLoc &s,uint64_t key)
+			AngleSearchNode(const xyLoc &s,uint64_t key)
 				:node(s), hashKey(key) {}
 			xyLoc node;
 			uint64_t hashKey;
@@ -124,8 +124,8 @@ public:
 	WeightedMap2DEnvironment(AbsMapEnvironment *ame);
 	virtual ~WeightedMap2DEnvironment();
 	void ApplyAction(xyLoc &s, tDirection dir) const;
-	virtual double GCost(xyLoc &node1, xyLoc &node2);
-	virtual double GCost(xyLoc &node1, tDirection &act) { return AbsMapEnvironment::GCost(node1, act); }
+	virtual double GCost(const xyLoc &node1, const xyLoc &node2);
+	virtual double GCost(const xyLoc &node1, const tDirection &act) { return AbsMapEnvironment::GCost(node1, act); }
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Returning "<<oi<<std::endl;return oi;}
 	virtual BaseMapOccupancyInterface* GetOccupancyInfo(){return oi;}
 	void OpenGLDraw() const;
@@ -134,7 +134,7 @@ public:
 	void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const { MapEnvironment::OpenGLDraw(l1, l2, v); }
 	void DrawEdge(const edge* e) const;
 	
-	void UpdateAngle(xyLoc &old, xyLoc &s, double t);
+	void UpdateAngle(const xyLoc &old, const xyLoc &s, double t);
 	
 	/** Set the cost of moving in the "wrong" direction */ 
 	void SetWeight(double wt) { diffWeight = wt; }
@@ -170,7 +170,7 @@ private:
 	typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
 	AngleLookupTable angleLookup;
 	
-	void UpdateAngle(xyLoc &old, xyLoc &s, double prop, double t);
+	void UpdateAngle(const xyLoc &old, const xyLoc &s, double prop, double t);
 	
 	double diffWeight;
 	double oldProportion;

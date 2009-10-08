@@ -43,18 +43,18 @@ public:
 	PancakePuzzle(unsigned size, const std::vector<unsigned> op_order); // used to set action order
 
 	~PancakePuzzle();
-	void GetSuccessors(PancakePuzzleState &state, std::vector<PancakePuzzleState> &neighbors) const;
-	void GetActions(PancakePuzzleState &state, std::vector<unsigned> &actions) const;
-	unsigned GetAction(PancakePuzzleState &s1, PancakePuzzleState &s2) const;
+	void GetSuccessors(const PancakePuzzleState &state, std::vector<PancakePuzzleState> &neighbors) const;
+	void GetActions(const PancakePuzzleState &state, std::vector<unsigned> &actions) const;
+	unsigned GetAction(const PancakePuzzleState &s1, const PancakePuzzleState &s2) const;
 	void ApplyAction(PancakePuzzleState &s, unsigned a) const;
 	bool InvertAction(unsigned &a) const;
 
-	double HCost(PancakePuzzleState &state1, PancakePuzzleState &state2);
-	double Memory_Free_HCost(PancakePuzzleState &state1, std::vector<int> &goal_locs);
-	double HCost(PancakePuzzleState &state1);
+	double HCost(const PancakePuzzleState &state1, const PancakePuzzleState &state2);
+	double Memory_Free_HCost(const PancakePuzzleState &state1, std::vector<int> &goal_locs);
+	double HCost(const PancakePuzzleState &state1);
 
-	double GCost(PancakePuzzleState &state1, PancakePuzzleState &state2) {return 1.0;}
-	double GCost(PancakePuzzleState &state1, unsigned &act) { return 1.0; }
+	double GCost(const PancakePuzzleState &, const PancakePuzzleState &) {return 1.0;}
+	double GCost(const PancakePuzzleState &, const unsigned &) { return 1.0; }
 
 	bool GoalTest(PancakePuzzleState &state, PancakePuzzleState &goal);
 

@@ -31,8 +31,8 @@ class DirectionalPlanner : public GenericSearchAlgorithm<xySpeedHeading, deltaSp
 public:
 	DirectionalPlanner(MapAbstraction *abst, int refinement = 3) :mapAbs(abst) { age = 0; refineLength = refinement; };
 	virtual ~DirectionalPlanner() { delete age; };
-	virtual void GetPath(Directional2DEnvironment *env, xySpeedHeading &from, xySpeedHeading &to, std::vector<xySpeedHeading> &path);
-	virtual void GetPath(Directional2DEnvironment *, xySpeedHeading &, xySpeedHeading &, std::vector<deltaSpeedHeading> &) { return; }
+	virtual void GetPath(Directional2DEnvironment *env, const xySpeedHeading &from, const xySpeedHeading &to, std::vector<xySpeedHeading> &path);
+	virtual void GetPath(Directional2DEnvironment *, const xySpeedHeading &, const xySpeedHeading &, std::vector<deltaSpeedHeading> &) { return; }
 	virtual const char *GetName() { return "DirAbstractPlanner"; }
 	virtual uint64_t GetNodesExpanded() { return lowLevelSearcher.GetNodesExpanded();/* + abstractSearcher.GetNodesExpanded();*/ }
 	virtual uint64_t GetNodesTouched() { return lowLevelSearcher.GetNodesTouched();/* + abstractSearcher.GetNodesTouched(); */}

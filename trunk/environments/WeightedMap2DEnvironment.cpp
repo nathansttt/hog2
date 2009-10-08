@@ -147,7 +147,7 @@ void WeightedMap2DEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 	s = old;
 }
 
-void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp, double t)
+void WeightedMap2DEnvironment::UpdateAngle(const xyLoc &old, const xyLoc &s, double oldProp, double t)
 {
 	if(old == s) 
 		return;
@@ -364,7 +364,7 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double oldProp,
 }
 
 
-void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double t)
+void WeightedMap2DEnvironment::UpdateAngle(const xyLoc &old, const xyLoc &s, double t)
 {
 	UpdateAngle(old,s,oldProportion,t);
 }
@@ -376,7 +376,7 @@ void WeightedMap2DEnvironment::UpdateAngle(xyLoc &old, xyLoc &s, double t)
 * @return The weighted G-cost between l1 and l2, if there exists
 * an edge between the two locations, DBL_MAX otherwise. 
 */
-double WeightedMap2DEnvironment::GCost(xyLoc &l1, xyLoc &l2)
+double WeightedMap2DEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
 {
 	// Update angles 
  	if(updateOnQuery)

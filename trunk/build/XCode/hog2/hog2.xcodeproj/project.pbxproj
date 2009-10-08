@@ -18,6 +18,21 @@
 		C4210C6F0CFF198100301281 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */; };
 		C4210C700CFF198100301281 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */; };
 		C4210CD90CFF78AF00301281 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF970BCEE5B800FCD84C /* main.nib */; };
+		C4219ECE107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4219ECD107AB547008F9413 /* HeuristicLearningMeasure.cpp */; };
+		C4219ECF107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4219ECD107AB547008F9413 /* HeuristicLearningMeasure.cpp */; };
+		C4219ED0107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4219ECD107AB547008F9413 /* HeuristicLearningMeasure.cpp */; };
+		C4219ED1107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4219ECD107AB547008F9413 /* HeuristicLearningMeasure.cpp */; };
+		C4219ED2107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4219ECD107AB547008F9413 /* HeuristicLearningMeasure.cpp */; };
+		C421A0AF107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0AE107BF4DA008F9413 /* LSSLRTAStar.cpp */; };
+		C421A0B0107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0AE107BF4DA008F9413 /* LSSLRTAStar.cpp */; };
+		C421A0B1107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0AE107BF4DA008F9413 /* LSSLRTAStar.cpp */; };
+		C421A0B2107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0AE107BF4DA008F9413 /* LSSLRTAStar.cpp */; };
+		C421A0B3107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0AE107BF4DA008F9413 /* LSSLRTAStar.cpp */; };
+		C421A0B6107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0B5107BF4EB008F9413 /* LSSLRTAStarUnit.cpp */; };
+		C421A0B7107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0B5107BF4EB008F9413 /* LSSLRTAStarUnit.cpp */; };
+		C421A0B8107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0B5107BF4EB008F9413 /* LSSLRTAStarUnit.cpp */; };
+		C421A0B9107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0B5107BF4EB008F9413 /* LSSLRTAStarUnit.cpp */; };
+		C421A0BA107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C421A0B5107BF4EB008F9413 /* LSSLRTAStarUnit.cpp */; };
 		C42A68DC0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C42A68DB0DA2F15D0005B8A6 /* TopSpin.cpp */; };
 		C42A68DD0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C42A68DB0DA2F15D0005B8A6 /* TopSpin.cpp */; };
 		C42A68DE0DA2F15D0005B8A6 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C42A68DB0DA2F15D0005B8A6 /* TopSpin.cpp */; };
@@ -530,7 +545,7 @@
 		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		5048396D09E3307300765E4B /* hog2Proj.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Proj.xcconfig; sourceTree = "<group>"; };
 		5048396E09E3307300765E4B /* hog2Target.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = hog2Target.xcconfig; sourceTree = "<group>"; };
-		508344B209E5C41E0093A071 /* Sample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		508344B209E5C41E0093A071 /* Sample Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sample Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C409B3570F79A65E006E6A96 /* SimulationInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimulationInfo.h; sourceTree = "<group>"; };
 		C40B232B0FCB26DF00C22E6A /* AStarOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AStarOpenClosed.h; sourceTree = "<group>"; };
 		C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AStarOpenClosed.cpp; sourceTree = "<group>"; };
@@ -539,6 +554,12 @@
 		C4210C680CFF191F00301281 /* MultiAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultiAgent.h; sourceTree = "<group>"; };
 		C4210C6C0CFF198100301281 /* WeightedMap2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WeightedMap2DEnvironment.cpp; sourceTree = "<group>"; };
 		C4210C6D0CFF198100301281 /* WeightedMap2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeightedMap2DEnvironment.h; sourceTree = "<group>"; };
+		C4219ECC107AB547008F9413 /* HeuristicLearningMeasure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HeuristicLearningMeasure.h; sourceTree = "<group>"; };
+		C4219ECD107AB547008F9413 /* HeuristicLearningMeasure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeuristicLearningMeasure.cpp; sourceTree = "<group>"; };
+		C421A0AD107BF4DA008F9413 /* LSSLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSSLRTAStar.h; sourceTree = "<group>"; };
+		C421A0AE107BF4DA008F9413 /* LSSLRTAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LSSLRTAStar.cpp; sourceTree = "<group>"; };
+		C421A0B4107BF4EB008F9413 /* LSSLRTAStarUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSSLRTAStarUnit.h; sourceTree = "<group>"; };
+		C421A0B5107BF4EB008F9413 /* LSSLRTAStarUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LSSLRTAStarUnit.cpp; sourceTree = "<group>"; };
 		C42A68DA0DA2F15D0005B8A6 /* TopSpin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopSpin.h; sourceTree = "<group>"; };
 		C42A68DB0DA2F15D0005B8A6 /* TopSpin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TopSpin.cpp; sourceTree = "<group>"; };
 		C43396F40D737742005A66D2 /* OccupancyInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OccupancyInterface.h; sourceTree = "<group>"; };
@@ -546,7 +567,7 @@
 		C4339D010BF2676B002B8108 /* MNPuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNPuzzle.h; sourceTree = "<group>"; };
 		C4339D020BF2676B002B8108 /* MNPuzzle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNPuzzle.cpp; sourceTree = "<group>"; };
 		C4339E0F0BF28575002B8108 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
-		C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PuzzleSample Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Puzzle Sample Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C433A28F0BF8FB7E002B8108 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = InfoPlist.strings; sourceTree = "<group>"; };
 		C433A2910BF8FB7E002B8108 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = main.nib; sourceTree = "<group>"; };
 		C433A2920BF8FB7E002B8108 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; name = Info.plist; path = PuzzleSample/Info.plist; sourceTree = "<group>"; };
@@ -602,14 +623,14 @@
 		C4A4F0110ECFD2C5009D90B3 /* RoboticArmTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RoboticArmTest.cpp; sourceTree = "<group>"; };
 		C4A4F3580ECFD3B5009D90B3 /* RoboticArm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoboticArm.h; sourceTree = "<group>"; };
 		C4A4F3590ECFD3B5009D90B3 /* RoboticArm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RoboticArm.cpp; sourceTree = "<group>"; };
-		C4AC963F0D6CC2A300DAE6E9 /* MultiAgent Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MultiAgent Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4AC963F0D6CC2A300DAE6E9 /* MultiAgent Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MultiAgent Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4AC964E0D6CC51200DAE6E9 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4AC96500D6CC51200DAE6E9 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
 		C4AC96510D6CC51200DAE6E9 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C4AC96520D6CC51200DAE6E9 /* MultiAgent.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = MultiAgent.icns; sourceTree = "<group>"; };
 		C4AC967B0D6CCE8200DAE6E9 /* directional.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = directional.cpp; sourceTree = "<group>"; };
 		C4AC967C0D6CCE8200DAE6E9 /* directional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = directional.h; sourceTree = "<group>"; };
-		C4AC96E30D6CCFC600DAE6E9 /* Directional Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Directional Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4AC96E30D6CCFC600DAE6E9 /* Directional Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Directional Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4AC96E70D6CCFFE00DAE6E9 /* directional.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = directional.icns; sourceTree = "<group>"; };
 		C4AC96E90D6CCFFE00DAE6E9 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4AC96EB0D6CCFFE00DAE6E9 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
@@ -749,7 +770,7 @@
 		C4C846110C0F9A2000AFBF7A /* SearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SearchAlgorithm.h; sourceTree = "<group>"; };
 		C4C846120C0F9A2000AFBF7A /* SpreadExecSearchAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = SpreadExecSearchAlgorithm.cpp; sourceTree = "<group>"; };
 		C4C846130C0F9A2000AFBF7A /* SpreadExecSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SpreadExecSearchAlgorithm.h; sourceTree = "<group>"; };
-		C4C8473F0C1F19C300AFBF7A /* Inconsistency Release.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Inconsistency Release.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4C8473F0C1F19C300AFBF7A /* Inconsistency Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Inconsistency Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4C847460C1F1A5B00AFBF7A /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C4C847480C1F1A5B00AFBF7A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
 		C4C847490C1F1A5B00AFBF7A /* Inconsistency.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Inconsistency.icns; sourceTree = "<group>"; };
@@ -1464,11 +1485,11 @@
 		195DF8CFFE9D517E11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				508344B209E5C41E0093A071 /* Sample Release.app */,
-				C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */,
-				C4C8473F0C1F19C300AFBF7A /* Inconsistency Release.app */,
-				C4AC963F0D6CC2A300DAE6E9 /* MultiAgent Release.app */,
-				C4AC96E30D6CCFC600DAE6E9 /* Directional Release.app */,
+				508344B209E5C41E0093A071 /* Sample Debug.app */,
+				C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */,
+				C4C8473F0C1F19C300AFBF7A /* Inconsistency Debug.app */,
+				C4AC963F0D6CC2A300DAE6E9 /* MultiAgent Debug.app */,
+				C4AC96E30D6CCFC600DAE6E9 /* Directional Debug.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1602,6 +1623,12 @@
 				C43F61EB104EE2C200896E99 /* LRTAStarGroup.h */,
 				C43F61EC104EE2C200896E99 /* LRTAStarUnit.cpp */,
 				C43F61ED104EE2C200896E99 /* LRTAStarUnit.h */,
+				C4219ECD107AB547008F9413 /* HeuristicLearningMeasure.cpp */,
+				C4219ECC107AB547008F9413 /* HeuristicLearningMeasure.h */,
+				C421A0AE107BF4DA008F9413 /* LSSLRTAStar.cpp */,
+				C421A0AD107BF4DA008F9413 /* LSSLRTAStar.h */,
+				C421A0B5107BF4EB008F9413 /* LSSLRTAStarUnit.cpp */,
+				C421A0B4107BF4EB008F9413 /* LSSLRTAStarUnit.h */,
 			);
 			name = learning;
 			path = ../../../learning;
@@ -2843,7 +2870,7 @@
 			name = Sample;
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = 508344B209E5C41E0093A071 /* Sample Release.app */;
+			productReference = 508344B209E5C41E0093A071 /* Sample Debug.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C433A2130BF8F9F7002B8108 /* Puzzle Sample */ = {
@@ -2861,7 +2888,7 @@
 			name = "Puzzle Sample";
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = C433A26C0BF8F9F7002B8108 /* PuzzleSample Release.app */;
+			productReference = C433A26C0BF8F9F7002B8108 /* Puzzle Sample Debug.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C4AC95D90D6CC2A300DAE6E9 /* MultiAgent */ = {
@@ -2879,7 +2906,7 @@
 			name = MultiAgent;
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = C4AC963F0D6CC2A300DAE6E9 /* MultiAgent Release.app */;
+			productReference = C4AC963F0D6CC2A300DAE6E9 /* MultiAgent Debug.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C4AC967D0D6CCFC600DAE6E9 /* Directional */ = {
@@ -2897,7 +2924,7 @@
 			name = Directional;
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = C4AC96E30D6CCFC600DAE6E9 /* Directional Release.app */;
+			productReference = C4AC96E30D6CCFC600DAE6E9 /* Directional Debug.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C4C846E10C1F19C300AFBF7A /* Inconsistency */ = {
@@ -2915,7 +2942,7 @@
 			name = Inconsistency;
 			productInstallPath = "$(HOME)/Applications";
 			productName = hog2;
-			productReference = C4C8473F0C1F19C300AFBF7A /* Inconsistency Release.app */;
+			productReference = C4C8473F0C1F19C300AFBF7A /* Inconsistency Debug.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -3097,6 +3124,9 @@
 				C43F61EE104EE2C200896E99 /* LRTAStar.cpp in Sources */,
 				C43F61EF104EE2C200896E99 /* LRTAStarGroup.cpp in Sources */,
 				C43F61F0104EE2C200896E99 /* LRTAStarUnit.cpp in Sources */,
+				C4219ED1107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */,
+				C421A0B2107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */,
+				C421A0B9107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3192,6 +3222,9 @@
 				C4F348060F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
 				C40B23300FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
 				C4B8108E1033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
+				C4219ED0107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */,
+				C421A0B1107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */,
+				C421A0B8107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3288,6 +3321,9 @@
 				C4F3480A0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */,
 				C40B232E0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
 				C4B810911033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
+				C4219ECE107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */,
+				C421A0B0107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */,
+				C421A0B7107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3388,6 +3424,9 @@
 				C4ED1F1F10095C5A00A63B2A /* directional.cpp in Sources */,
 				C4ED1F2010095C5B00A63B2A /* DirectionalPlanner.cpp in Sources */,
 				C4B810921033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
+				C4219ECF107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */,
+				C421A0B3107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */,
+				C421A0BA107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3484,6 +3523,9 @@
 				C40B232F0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */,
 				C4B810901033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */,
 				C4B810F11033333A00EFDB2B /* Inconsistency.cpp in Sources */,
+				C4219ED2107AB547008F9413 /* HeuristicLearningMeasure.cpp in Sources */,
+				C421A0AF107BF4DA008F9413 /* LSSLRTAStar.cpp in Sources */,
+				C421A0B6107BF4EB008F9413 /* LSSLRTAStarUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

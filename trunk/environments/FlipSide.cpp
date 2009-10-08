@@ -18,7 +18,7 @@ FlipSide::~FlipSide()
 {
 }
 
-void FlipSide::GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> &neighbors) const
+void FlipSide::GetSuccessors(const FlipSideState &stateID, std::vector<FlipSideState> &neighbors) const
 {
 	std::vector<flipMove> acts;
 	GetActions(stateID, acts);
@@ -31,7 +31,7 @@ void FlipSide::GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> 
 	}
 }
 
-void FlipSide::GetActions(FlipSideState &stateID, std::vector<flipMove> &actions) const
+void FlipSide::GetActions(const FlipSideState &stateID, std::vector<flipMove> &actions) const
 {
 	actions.resize(0);
 	for (unsigned int x = 0; x < stateID.width-2; x++)
@@ -43,7 +43,7 @@ void FlipSide::GetActions(FlipSideState &stateID, std::vector<flipMove> &actions
 	}
 }
 
-flipMove FlipSide::GetAction(FlipSideState &, FlipSideState &) const
+flipMove FlipSide::GetAction(const FlipSideState &, const FlipSideState &) const
 {
 	assert(false);
 	return flipMove();
@@ -59,7 +59,7 @@ void FlipSide::ApplyAction(FlipSideState &s, flipMove a) const
 	}
 }
 
-double FlipSide::HCost(FlipSideState &state1, FlipSideState &state2)
+double FlipSide::HCost(const FlipSideState &state1, const FlipSideState &state2)
 {
 	assert(state1.width==state2.width);
 	std::vector<unsigned int> xloc(state2.width*2);
@@ -106,7 +106,7 @@ double FlipSide::HCost(FlipSideState &state1, FlipSideState &state2)
 	return ceil(hval/6);
 }
 
-double FlipSide::GCost(FlipSideState &, FlipSideState &)
+double FlipSide::GCost(const FlipSideState &, const FlipSideState &)
 {
 	return 1;
 }
@@ -116,7 +116,7 @@ bool FlipSide::GoalTest(FlipSideState &state, FlipSideState &goal)
 	return (state == goal);
 }
 
-uint64_t FlipSide::GetStateHash(FlipSideState &state) const
+uint64_t FlipSide::GetStateHash(const FlipSideState &state) const
 {
 	uint64_t hashVal = 0;
 	for (unsigned int x = 0; x < state.puzzle.size(); x++)

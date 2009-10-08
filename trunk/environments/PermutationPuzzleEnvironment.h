@@ -26,7 +26,7 @@ public:
 	/**
 	Returns the Hash Value of the given state using the given set of distinct items
 	**/
-	virtual uint64_t GetPDBHash(state &s, const std::vector<int> &distinct) const;
+	virtual uint64_t GetPDBHash(const state &s, const std::vector<int> &distinct) const;
 
 	/**
 	Loads the Regular PDB into memory
@@ -36,7 +36,7 @@ public:
 	/**
 	Performs a regular PDB lookup for the given state
 	**/
-	double Regular_PDB_Lookup(state &state);
+	double Regular_PDB_Lookup(const state &state);
 
 	/**
 	Builds a regular PDB given the file name of the file to write the PDB to, and a list of distinct
@@ -47,7 +47,7 @@ public:
 	/**
 	Returns a hash value for a permutation puzzle
 	**/
-	virtual uint64_t GetStateHash(state &s) const;
+	virtual uint64_t GetStateHash(const state &s) const;
 
 	/**
 	Constructs a state from a hash value
@@ -153,7 +153,7 @@ void PermutationPuzzleEnvironment<state, action>::GetStateFromHash(state &s, uin
 }
 
 template <class state, class action>
-uint64_t PermutationPuzzleEnvironment<state, action>::GetStateHash(state &s) const
+uint64_t PermutationPuzzleEnvironment<state, action>::GetStateHash(const state &s) const
 {
 	std::vector<int> puzzle = s.puzzle;
 	uint64_t hashVal = 0;
@@ -197,7 +197,7 @@ uint64_t PermutationPuzzleEnvironment<state, action>::nUpperk(int n, int k) cons
 
 // TODO Change to Myrvold and Ruskey ranking function
 template <class state, class action>
-uint64_t PermutationPuzzleEnvironment<state, action>::GetPDBHash(state &s, const std::vector<int> &distinct) const {
+uint64_t PermutationPuzzleEnvironment<state, action>::GetPDBHash(const state &s, const std::vector<int> &distinct) const {
 	std::vector<int> locs;
 	locs.resize(distinct.size()); // vector for distinct item locations
 
@@ -295,7 +295,7 @@ void PermutationPuzzleEnvironment<state, action>::Load_Regular_PDB(const char *f
 }
 
 template <class state, class action>
-double PermutationPuzzleEnvironment<state, action>::Regular_PDB_Lookup(state &s)
+double PermutationPuzzleEnvironment<state, action>::Regular_PDB_Lookup(const state &s)
 {
 	double val = 0;
 	for (unsigned int x = 0; x < PDB.size(); x++)

@@ -114,7 +114,7 @@ void RoboticArm::GetTipPosition( armAngles &s, double &x, double &y )
 	y = a.y;
 }
 
-void RoboticArm::GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighbors) const
+void RoboticArm::GetSuccessors(const armAngles &nodeID, std::vector<armAngles> &neighbors) const
 {
 	neighbors.resize(0);
 	for (int x = 0; x < nodeID.GetNumArms(); x++)
@@ -136,7 +136,7 @@ void RoboticArm::GetSuccessors(armAngles &nodeID, std::vector<armAngles> &neighb
 	}
 }
 
-void RoboticArm::GetActions(armAngles &nodeID, std::vector<armRotations> &actions) const
+void RoboticArm::GetActions(const armAngles &nodeID, std::vector<armRotations> &actions) const
 {
 	actions.resize(0);
 	for (int x = 0; x < nodeID.GetNumArms(); x++)
@@ -178,7 +178,7 @@ void RoboticArm::GetActions(armAngles &nodeID, std::vector<armRotations> &action
 //	}
 }
 
-armRotations RoboticArm::GetAction(armAngles &s1, armAngles &s2) const
+armRotations RoboticArm::GetAction(const armAngles &s1, const armAngles &s2) const
 {
 	armRotations ar;
 	for (int x = 0; x < s1.GetNumArms(); x++)
@@ -224,7 +224,7 @@ armAngles RoboticArm::GetRandomState()
 	return ar;
 }
 
-double RoboticArm::HCost(armAngles &node1, armAngles &node2)
+double RoboticArm::HCost(const armAngles &node1, const armAngles &node2)
 {
 	double h;
 	if (!node1.IsGoalState() && !node2.IsGoalState())
@@ -284,7 +284,7 @@ double RoboticArm::HCost(armAngles &node1, armAngles &node2)
 }
 
 #if 0
-double RoboticArm::GCost(armAngles &node1, armAngles &node2)
+double RoboticArm::GCost(const armAngles &node1, const armAngles &node2)
 {
 	recVec a, b;
 	if (node1.IsGoalState())
@@ -305,7 +305,7 @@ double RoboticArm::GCost(armAngles &node1, armAngles &node2)
 #endif
 
 #if 0
-double RoboticArm::GCost(armAngles &node1, armRotations &act)
+double RoboticArm::GCost(const armAngles &node1, const armRotations &act)
 {
 	armAngles node2;
 	GetNextState(node1, act, node2);
@@ -330,7 +330,7 @@ bool RoboticArm::GoalTest(armAngles &node, armAngles &goal)
 	  && y-a.y <= tolerance && a.y-y < tolerance;
 }
 
-uint64_t RoboticArm::GetStateHash(armAngles &node) const
+uint64_t RoboticArm::GetStateHash(const armAngles &node) const
 {
 	// want a perfect hash function
 	//return node.angles;
@@ -552,7 +552,7 @@ ArmToTipHeuristic::ArmToTipHeuristic(RoboticArm *r)
 	GenerateCPDB();
 }
 
-double ArmToTipHeuristic::HCost(armAngles &node1, armAngles &node2)
+double ArmToTipHeuristic::HCost(const armAngles &node1, const armAngles &node2)
 {
 	double x, y;
 	node2.GetGoal(x, y);
@@ -962,7 +962,7 @@ int ArmToTipHeuristic::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 	return i;
 }
 
-uint16_t ArmToTipHeuristic::UseHeuristic( armAngles &s, armAngles &g,
+uint16_t ArmToTipHeuristic::UseHeuristic(const armAngles &s, armAngles &g,
 				   uint16_t *distances )
 {
 	uint16_t d_s, d_g;
@@ -975,7 +975,7 @@ uint16_t ArmToTipHeuristic::UseHeuristic( armAngles &s, armAngles &g,
 	return d_s - d_g;
 }
 
-uint16_t ArmToTipHeuristic::UseHeuristic( armAngles &arm,
+uint16_t ArmToTipHeuristic::UseHeuristic(const armAngles &arm,
 				   double goalX, double goalY,
 				   uint16_t *distances,
 				   uint16_t *minTipDistances,
@@ -1181,7 +1181,7 @@ ArmToArmHeuristic::ArmToArmHeuristic(RoboticArm *r, armAngles &initial, bool opt
 	GenerateLegalStates(initial);
 }
 
-double ArmToArmHeuristic::HCost(armAngles &node1, armAngles &node2)
+double ArmToArmHeuristic::HCost(const armAngles &node1, const armAngles &node2)
 {
 	if (node1.IsGoalState() || node2.IsGoalState())
 	{

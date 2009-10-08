@@ -10,7 +10,7 @@ class AbstractGraphMapHeuristic : public GraphHeuristic {
 public:
   AbstractGraphMapHeuristic(Graph *graph, Map *map)
   :g(graph), m(map) {}
-  double HCost(graphState &state1, graphState &state2)
+  double HCost(const graphState &state1, const graphState &state2)
   {
 		double x1 = g->GetNode(state1)->GetLabelF(GraphAbstractionConstants::kXCoordinate);
 		double y1 = g->GetNode(state1)->GetLabelF(GraphAbstractionConstants::kYCoordinate);

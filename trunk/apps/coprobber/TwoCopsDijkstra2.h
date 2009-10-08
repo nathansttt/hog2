@@ -61,7 +61,7 @@ class TwoCopsDijkstra2 {
 	// we're giving back a set here because we want uniqueness of moves
 	void GetNeighbors( Position &pos, bool minFirst, NeighborSet &neighbors );
 
-	float GCost( Position &pos1, Position &pos2 );
+	float GCost(const Position &pos1, const Position &pos2 );
 
 	// functions for dijkstra computation
 	float compute_target_value( Position &s );

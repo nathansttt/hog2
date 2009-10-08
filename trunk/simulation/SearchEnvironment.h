@@ -23,14 +23,21 @@ struct Hash64 {
 		{ return (size_t)(x); }
 };
 
+template <class state>
+class Heuristic {
+public:
+	virtual ~Heuristic() {}
+	virtual double HCost(const state &a, const state &b) = 0;
+};
+
 template <class state, class action>
-class SearchEnvironment {
+class SearchEnvironment : public Heuristic<state> {
 public:
 	virtual ~SearchEnvironment() {}
-	virtual void GetSuccessors(state &nodeID, std::vector<state> &neighbors) const = 0;
-	virtual void GetActions(state &nodeID, std::vector<action> &actions) const = 0;
+	virtual void GetSuccessors(const state &nodeID, std::vector<state> &neighbors) const = 0;
+	virtual void GetActions(const state &nodeID, std::vector<action> &actions) const = 0;
 
-	virtual action GetAction(state &s1, state &s2) const = 0;
+	virtual action GetAction(const state &s1, const state &s2) const = 0;
 	virtual void ApplyAction(state &s, action a) const = 0;
 	virtual void UndoAction(state &s, action a) const
 	{ assert(InvertAction(a)); ApplyAction(s, a); }
@@ -52,22 +59,22 @@ public:
 	{ return bValidSearchGoal; }
 
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(state &node1, state &node2) = 0;
+	virtual double HCost(const state &node1, const state &node2) = 0;
 
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(state &node)
+	virtual double HCost(const state &node)
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 
-	virtual double GCost(state &node1, state &node2) = 0;
-	virtual double GCost(state &node, action &act) = 0;
+	virtual double GCost(const state &node1, const state &node2) = 0;
+	virtual double GCost(const state &node, const action &act) = 0;
 	virtual bool GoalTest(state &node, state &goal) = 0;
 
 	/** Goal Test if the goal is stored **/
 	virtual bool GoalTest(state &node)
 	{ return bValidSearchGoal&&(node == searchGoal); }
 
-	virtual uint64_t GetStateHash(state &node) const = 0;
+	virtual uint64_t GetStateHash(const state &node) const = 0;
 	virtual uint64_t GetActionHash(action act) const = 0;
 
 	virtual double GetPathLength(std::vector<state> &neighbors);

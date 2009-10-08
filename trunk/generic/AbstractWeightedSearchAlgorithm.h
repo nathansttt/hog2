@@ -41,17 +41,17 @@ class GraphOccupancyInterface : public OccupancyInterface<graphState,graphMove>
 public:
 	GraphOccupancyInterface(BaseMapOccupancyInterface *b, Graph *_g){boi=b; g=_g;}
 	virtual ~GraphOccupancyInterface(){}
-	virtual void SetStateOccupied(graphState &gs, bool b )
+	virtual void SetStateOccupied(const graphState &gs, bool b )
 	{ xyLoc s = Convert(gs); boi->SetStateOccupied(s,b); }
-	virtual bool GetStateOccupied(graphState &gs)
+	virtual bool GetStateOccupied(const graphState &gs)
 	{ xyLoc s = Convert(gs); return boi->GetStateOccupied(s);}
-	virtual bool CanMove(graphState &gs1, graphState &gs2)
+	virtual bool CanMove(const graphState &gs1, const graphState &gs2)
 	{ xyLoc s1 = Convert(gs1); xyLoc s2 = Convert(gs2);return boi->CanMove(s1,s2);}
-	virtual void MoveUnitOccupancy(graphState &gs1, graphState &gs2)
+	virtual void MoveUnitOccupancy(const graphState &gs1, const graphState &gs2)
 	{ xyLoc s1 = Convert(gs1); xyLoc s2 = Convert(gs2); boi->MoveUnitOccupancy(s1, s2);}
 
 private:
-	xyLoc Convert(graphState &gs)
+	xyLoc Convert(const graphState &gs)
 	{
 		node* n = g->GetNode(gs);
 
@@ -127,7 +127,7 @@ public:
 		return false;
 	}
 
-	double HCost(graphState &state1, graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2)
 	{
 		if(h)
 		{
@@ -194,13 +194,13 @@ public:
 // 	return sqrt(pow(x1-x2,2) + pow(y1-y2,2));
 // 	}
 
-	virtual double GCost(graphState &state1, graphMove &state2)
+	virtual double GCost(const graphState &state1, const graphMove &state2)
 	{
 		return AbsGraphEnvironment::GCost(state1, state2);
 	}
 
 	/** GCost returns a weighted GCost from the WeightedMap2DEnvironment */
-	double GCost(graphState &state1, graphState &state2)
+	double GCost(const graphState &state1, const graphState &state2)
 	{
 
 		//std::cout<<"Using GCost in new env\n";
@@ -232,7 +232,7 @@ public:
 	virtual void ClearGoal() {}
 	virtual bool IsGoalStored() {return false;}
 
-	virtual double HCost(graphState &) {
+	virtual double HCost(const graphState &) {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for AbsGraphEnvironment\n");
 		exit(1); return -1.0;}
 
@@ -256,7 +256,7 @@ public:
 	GraphStraightLineHeuristic(Map *map, Graph *graph, Graph *mg)
 	:m(map), g(graph), mapgraph(mg) {}
 	Graph *GetGraph() { return g; }
-	double HCost(graphState &state1, graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2)
 	{
 	//std::cout<<"state1 "<<state1<<" state2 "<<state2<<std::endl;
 	//modified for abstract nodes
@@ -294,7 +294,7 @@ public:
 	OctileHeuristic(Map *map, Graph *graph)
 	:m(map), g(graph) {}
 	Graph *GetGraph() { return g; }
-	double HCost(graphState &state1, graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2)
 	{
 		int x1 = g->GetNode(state1)->GetLabelL(GraphAbstractionConstants::kFirstData);
 		int y1 = g->GetNode(state1)->GetLabelL(GraphAbstractionConstants::kFirstData+1);
@@ -323,9 +323,9 @@ class AbstractWeightedSearchAlgorithm : public GenericSearchAlgorithm<state,acti
 
 		AbstractWeightedSearchAlgorithm();
 		virtual ~AbstractWeightedSearchAlgorithm();
-		bool InitializeSearch(environment *env, state& from, state& to, std::vector<state> &thePath);
-		virtual void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
-		virtual void GetPath(environment *, state &, state &, std::vector<action> &) {}
+		bool InitializeSearch(environment *env, const state& from, const state& to, std::vector<state> &thePath);
+		virtual void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
+		virtual void GetPath(environment *, const state &, const state &, std::vector<action> &) {}
 		virtual const char *GetName() {return "AbstractWeightedSearchAlgorihm";}
 		virtual uint64_t GetNodesExpanded() {return nodesExpanded;}
 		virtual uint64_t GetNodesTouched()  {return nodesTouched;}
@@ -364,7 +364,7 @@ AbstractWeightedSearchAlgorithm<state,action,environment>::~AbstractWeightedSear
 }
 
 template<class state, class action, class environment>
-bool AbstractWeightedSearchAlgorithm<state,action,environment>::InitializeSearch(environment *, state& , state& , std::vector<state> &)
+bool AbstractWeightedSearchAlgorithm<state,action,environment>::InitializeSearch(environment *, const state& , const state& , std::vector<state> &)
 {
 	nodesExpanded = 0;
 	nodesTouched = 0;
@@ -372,7 +372,7 @@ bool AbstractWeightedSearchAlgorithm<state,action,environment>::InitializeSearch
 }
 
 template<class state, class action, class environment>
-void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environment *theEnv, state& from, state& to, std::vector<state> &thePath)
+void AbstractWeightedSearchAlgorithm<state,action,environment>::GetPath(environment *theEnv, const state& from, const state& to, std::vector<state> &thePath)
 {
 
 	//std::cout<<"path from "<<from<<std::endl;

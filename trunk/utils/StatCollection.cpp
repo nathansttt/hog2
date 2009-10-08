@@ -203,19 +203,19 @@ const char *StatCollection::LookupOwnerID(int id) const
  * collected. All other stats added will be ignored. As many categories
  * can be added as needed.
  */
-void StatCollection::AddFilter(char *category)
+void StatCollection::AddFilter(const char *category)
 {
 	AddIncludeFilter(category);
 }
 
-void StatCollection::AddIncludeFilter(char *category) // include only added categories
+void StatCollection::AddIncludeFilter(const char *category) // include only added categories
 {
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);
 	includeFilters.push_back(str);
 }
 
-void StatCollection::AddExcludeFilter(char *category) // exclude only added categories
+void StatCollection::AddExcludeFilter(const char *category) // exclude only added categories
 {
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);

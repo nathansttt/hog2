@@ -78,19 +78,19 @@ public:
 	MNPuzzle(unsigned int width, unsigned int height, const std::vector<slideDir> op_order); // used to set action order
 
 	~MNPuzzle();
-	void GetSuccessors(MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors) const;
-	void GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions) const;
-	slideDir GetAction(MNPuzzleState &s1, MNPuzzleState &s2) const;
+	void GetSuccessors(const MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors) const;
+	void GetActions(const MNPuzzleState &stateID, std::vector<slideDir> &actions) const;
+	slideDir GetAction(const MNPuzzleState &s1, const MNPuzzleState &s2) const;
 	void ApplyAction(MNPuzzleState &s, slideDir a) const;
 	bool InvertAction(slideDir &a) const;
 	static unsigned GetParity(MNPuzzleState &state);
 
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
-	double HCost(MNPuzzleState &state1, MNPuzzleState &state2);
-	double HCost(MNPuzzleState &state1);
+	double HCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
+	double HCost(const MNPuzzleState &state1);
 
-	double GCost(MNPuzzleState &state1, MNPuzzleState &state2);
-	double GCost(MNPuzzleState &, slideDir &) { return 1.0; }
+	double GCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
+	double GCost(const MNPuzzleState &, const slideDir &) { return 1.0; }
 	bool GoalTest(MNPuzzleState &state, MNPuzzleState &goal);
 
 	bool GoalTest(MNPuzzleState &s);
@@ -164,7 +164,7 @@ public:
 
 
 private:
-	double DoPDBLookup(MNPuzzleState &state);
+	double DoPDBLookup(const MNPuzzleState &state);
 	std::vector<std::vector<uint8_t> > PDB;
 	std::vector<std::vector<int> > PDBkey;
 	unsigned int width, height;
@@ -181,7 +181,7 @@ private:
 class GraphPuzzleDistanceHeuristic : public GraphDistanceHeuristic {
 public:
 	GraphPuzzleDistanceHeuristic(MNPuzzle &mnp, Graph *graph, int count);
-	double HCost(graphState &state1, graphState &state2);
+	double HCost(const graphState &state1, const graphState &state2);
 private:
 	MNPuzzle puzzle;
 };
