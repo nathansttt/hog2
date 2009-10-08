@@ -66,6 +66,7 @@ void CreateSimulation(int id);
 
 int main(int argc, char* argv[])
 {
+	RunSTPTest();
 	InstallHandlers();
 	RunHOGGUI(argc, argv);
 }
