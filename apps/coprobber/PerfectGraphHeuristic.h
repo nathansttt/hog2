@@ -23,7 +23,7 @@ public:
 		delete g;
 	};
 
-  double HCost(graphState &state1, graphState &state2)
+  double HCost(const graphState &state1, const graphState &state2)
   {
 		return distance_heuristic[state1][state2];
   };

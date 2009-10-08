@@ -15,7 +15,7 @@ class MultilevelGraphHeuristic: public GraphHeuristic {
 	MultilevelGraphHeuristic( GraphAbstraction *_gabstraction, unsigned int _level ):
 		gabstraction(_gabstraction), level(_level) {};
 	virtual ~MultilevelGraphHeuristic() {};
-	virtual double HCost( graphState &state1, graphState &state2 ) {
+	virtual double HCost(const graphState &state1, const graphState &state2 ) {
 		return( gabstraction->h( gabstraction->GetAbstractGraph(level)->GetNode(state1), gabstraction->GetAbstractGraph(level)->GetNode(state2) ) );
 	};
 	virtual Graph *GetGraph() { return gabstraction->GetAbstractGraph(0); };

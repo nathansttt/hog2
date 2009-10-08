@@ -8,7 +8,7 @@ class MaximumNormGraphMapHeuristic : public GraphHeuristic {
 public:
   MaximumNormGraphMapHeuristic(Graph *graph)
   :g(graph) {}
-  double HCost(graphState &state1, graphState &state2)
+  double HCost(const graphState &state1, const graphState &state2)
   {
     int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
     int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);

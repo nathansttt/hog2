@@ -193,6 +193,12 @@ protected:
 		if ((this->EpisodeDone() && /*sameStart &&*/ stopOnConvergence) ||
 				(useMaxRounds && currRound >= maxRounds))
 		{
+			for (unsigned int t = 0; t < this->units.size(); t++)
+			{
+				if (IsUnitRacing(this->units[t]))
+					this->units[t]->agent->LogFinalStats(&this->stats);
+			}
+
 			if (verbose) printf("All trials finished; last trial: %d\n", currRound);
 			allRacesDone = true;
 			return;

@@ -10,7 +10,7 @@
 #include "DirectionalPlanner.h"
 
 void DirectionalPlanner::GetPath(Directional2DEnvironment *env,
-								 xySpeedHeading &from, xySpeedHeading &to,
+								 const xySpeedHeading &from, const xySpeedHeading &to,
 								 std::vector<xySpeedHeading> &path)
 {
 	// 1. Find abstract path between from and two

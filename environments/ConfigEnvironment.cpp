@@ -21,7 +21,7 @@ ConfigEnvironment::~ConfigEnvironment()
 {
 }
 
-void ConfigEnvironment::GetSuccessors(recVec &nodeID, std::vector<recVec> &neighbors) const
+void ConfigEnvironment::GetSuccessors(const recVec &nodeID, std::vector<recVec> &neighbors) const
 {
 	//[(-0.300000, -0.320000) to (0.000000, 0.000000)] does not cross [(-0.320000, -0.300000) to (0.320000, -0.300000)]
 //	line2d a(recVec(-0.300000, -0.320000, 0), recVec(0, -0.4, 0));
@@ -66,7 +66,7 @@ void ConfigEnvironment::GetSuccessors(recVec &nodeID, std::vector<recVec> &neigh
 //	std::cout << std::endl;
 }
 
-void ConfigEnvironment::GetActions(recVec &nodeID, std::vector<line2d> &actions) const
+void ConfigEnvironment::GetActions(const recVec &nodeID, std::vector<line2d> &actions) const
 {
 	actions.resize(0);
 	actions.push_back(line2d(nodeID, goal));
@@ -86,7 +86,7 @@ void ConfigEnvironment::GetActions(recVec &nodeID, std::vector<line2d> &actions)
 	}
 }
 
-bool ConfigEnvironment::Legal(recVec &a, recVec &b) const
+bool ConfigEnvironment::Legal(const recVec &a, const recVec &b) const
 {
 	line2d l(a, b);
 	for (unsigned int x = 0; x < obstacles.size(); x++)
@@ -107,7 +107,7 @@ bool ConfigEnvironment::Legal(recVec &a, recVec &b) const
 	return true;
 }
 
-line2d ConfigEnvironment::GetAction(recVec &s1, recVec &s2) const
+line2d ConfigEnvironment::GetAction(const recVec &s1, const recVec &s2) const
 {
 	line2d d;
 	d.start = s1;
@@ -130,21 +130,21 @@ bool ConfigEnvironment::InvertAction(line2d &a) const
 }
 
 
-double ConfigEnvironment::HCost(recVec &node1, recVec &node2)
+double ConfigEnvironment::HCost(const recVec &node1, const recVec &node2)
 {
 	return sqrt((node1.x-node2.x)*(node1.x-node2.x) +
 				(node1.y-node2.y)*(node1.y-node2.y) +
 				(node1.z-node2.z)*(node1.z-node2.z));
 }
 
-double ConfigEnvironment::GCost(recVec &node1, recVec &node2)
+double ConfigEnvironment::GCost(const recVec &node1, const  recVec &node2)
 {
 	return sqrt((node1.x-node2.x)*(node1.x-node2.x) +
 				(node1.y-node2.y)*(node1.y-node2.y) +
 				(node1.z-node2.z)*(node1.z-node2.z));
 }
 
-double ConfigEnvironment::GCost(recVec &node1, line2d &act)
+double ConfigEnvironment::GCost(const recVec &node1, const line2d &act)
 {
 	return sqrt((node1.x-act.end.x)*(node1.x-act.end.x) +
 				(node1.y-act.end.y)*(node1.y-act.end.y) +
@@ -156,7 +156,7 @@ bool ConfigEnvironment::GoalTest(recVec &node, recVec &theGoal)
 	return (fequal(node.x, theGoal.x) && fequal(node.y, theGoal.y) && fequal(node.z, theGoal.z));
 }
 
-uint64_t ConfigEnvironment::GetStateHash(recVec &node) const
+uint64_t ConfigEnvironment::GetStateHash(const recVec &node) const
 {
 	int x, y;
 	bool nx = node.x<0, ny = node.y<0;

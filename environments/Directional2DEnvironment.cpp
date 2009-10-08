@@ -53,8 +53,9 @@ int Directional2DEnvironment::GetNumAngles()
 	return 0;
 }
 
-void Directional2DEnvironment::GetSuccessors(xySpeedHeading &loc, std::vector<xySpeedHeading> &neighbors) const
+void Directional2DEnvironment::GetSuccessors(const xySpeedHeading &loc, std::vector<xySpeedHeading> &neighbors) const
 {
+	neighbors.resize(0);
 	std::vector<deltaSpeedHeading> acts;
 	GetActions(loc, acts);
 	for (unsigned int x = 0; x < acts.size(); x++)
@@ -65,7 +66,7 @@ void Directional2DEnvironment::GetSuccessors(xySpeedHeading &loc, std::vector<xy
 	}
 }
 
-void Directional2DEnvironment::GetActions(xySpeedHeading &loc, std::vector<deltaSpeedHeading> &actions) const
+void Directional2DEnvironment::GetActions(const xySpeedHeading &loc, std::vector<deltaSpeedHeading> &actions) const
 {
 	if (motionModel == kVehicle)
 	{
@@ -196,7 +197,7 @@ void Directional2DEnvironment::GetActions(xySpeedHeading &loc, std::vector<delta
 	else { assert(false); }
 }
 
-deltaSpeedHeading Directional2DEnvironment::GetAction(xySpeedHeading &one, xySpeedHeading &two) const
+deltaSpeedHeading Directional2DEnvironment::GetAction(const xySpeedHeading &one, const xySpeedHeading &two) const
 {
 	std::vector<deltaSpeedHeading> acts;
 	xySpeedHeading modified;
@@ -379,7 +380,7 @@ void Directional2DEnvironment::UndoAction(xySpeedHeading &s, deltaSpeedHeading d
 	}
 }
 
-double Directional2DEnvironment::HCost(xySpeedHeading &l1, xySpeedHeading &l2)
+double Directional2DEnvironment::HCost(const xySpeedHeading &l1, const xySpeedHeading &l2)
 {
 	float dist = sqrt((l1.x-l2.x)*(l1.x-l2.x)+(l1.y-l2.y)*(l1.y-l2.y));
 	if (motionModel == kHumanoid)
@@ -393,7 +394,7 @@ double Directional2DEnvironment::HCost(xySpeedHeading &l1, xySpeedHeading &l2)
 //	return val+angle;
 }
 
-bool Directional2DEnvironment::Legal(xySpeedHeading &node1, deltaSpeedHeading &act) const
+bool Directional2DEnvironment::Legal(const xySpeedHeading &node1, const deltaSpeedHeading &act) const
 {
 	if (!checkLegal)
 		return true;
@@ -416,7 +417,7 @@ bool Directional2DEnvironment::Legal(xySpeedHeading &node1, deltaSpeedHeading &a
 	}
 }
 
-double Directional2DEnvironment::GCost(xySpeedHeading &a, deltaSpeedHeading &b)
+double Directional2DEnvironment::GCost(const xySpeedHeading &a, const deltaSpeedHeading &b)
 {
 	if (motionModel != kTank)
 	{
@@ -445,7 +446,7 @@ double Directional2DEnvironment::GCost(xySpeedHeading &a, deltaSpeedHeading &b)
 //	return 1.0/fabs(val);
 }
 
-double Directional2DEnvironment::GCost(xySpeedHeading &, xySpeedHeading &b)
+double Directional2DEnvironment::GCost(const xySpeedHeading &, const xySpeedHeading &b)
 {
 	if (motionModel != kTank)
 	{
@@ -490,7 +491,7 @@ bool Directional2DEnvironment::GoalTest(xySpeedHeading &node, xySpeedHeading &go
 //			(node.speed == 0) && (node.rotation == goal.rotation));
 }
 
-uint64_t Directional2DEnvironment::GetStateHash(xySpeedHeading &node) const
+uint64_t Directional2DEnvironment::GetStateHash(const xySpeedHeading &node) const
 {
 	// rotation is 0..15
 	// speed is 0..3
@@ -752,7 +753,7 @@ void Directional2DEnvironment::BuildHTable(dirHeuristicTable &t)
 	checkLegal = true;
 }
 
-bool Directional2DEnvironment::LookupStateHashIndex(xySpeedHeading &s,
+bool Directional2DEnvironment::LookupStateHashIndex(const xySpeedHeading &s,
 													int &index1, int &index2)
 {
 	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
@@ -770,7 +771,7 @@ bool Directional2DEnvironment::LookupStateHashIndex(xySpeedHeading &s,
 	return true;
 }
 
-float Directional2DEnvironment::LookupStateHash(xySpeedHeading &s, dirHeuristicTable &t)
+float Directional2DEnvironment::LookupStateHash(const xySpeedHeading &s, dirHeuristicTable &t)
 {
 	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
 	const int angles[3] = {16, 16, 24};
@@ -789,7 +790,7 @@ float Directional2DEnvironment::LookupStateHash(xySpeedHeading &s, dirHeuristicT
 	return t.hTable[index1][index2];
 }
 
-float Directional2DEnvironment::LookupStateHeuristic(xySpeedHeading &s1, xySpeedHeading &s2)
+float Directional2DEnvironment::LookupStateHeuristic(const xySpeedHeading &s1, const xySpeedHeading &s2)
 {
 	const int angles[3] = {16, 16, 24};
 	const int angles90[3] = {4, 4, 6};

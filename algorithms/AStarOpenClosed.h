@@ -78,6 +78,7 @@ public:
 	void Reopen(uint64_t objKey);
 	//const state &top() { return theHeap[0]; }
 	//OBJ find(OBJ val);
+	unsigned int GetOpenItem(unsigned int which) { return theHeap[which]; }
 	unsigned int OpenSize() const { return theHeap.size(); }
 	unsigned int ClosedSize() const { return size()-OpenSize(); }
 	unsigned size() const { return elements.size(); }

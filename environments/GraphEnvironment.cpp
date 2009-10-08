@@ -47,7 +47,7 @@ GraphEnvironment::~GraphEnvironment()
 //	delete h;
 }
 
-void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const
+void GraphEnvironment::GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const
 {
 	neighbors.resize(0);
 	node *n = g->GetNode(stateID);
@@ -77,7 +77,7 @@ void GraphEnvironment::GetSuccessors(graphState &stateID, std::vector<graphState
 	}
 }
 
-void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &actions) const
+void GraphEnvironment::GetActions(const graphState &stateID, std::vector<graphMove> &actions) const
 {
 	actions.resize(0);
 	node *n = g->GetNode(stateID);
@@ -108,7 +108,7 @@ void GraphEnvironment::GetActions(graphState &stateID, std::vector<graphMove> &a
 
 }
 
-graphMove GraphEnvironment::GetAction(graphState &s1, graphState &s2) const
+graphMove GraphEnvironment::GetAction(const graphState &s1, const graphState &s2) const
 {
 	return graphMove(s1, s2);
 }
@@ -129,21 +129,21 @@ bool GraphEnvironment::InvertAction(graphMove &a) const
 	return false;
 }
 
-double GraphEnvironment::HCost(graphState &state1, graphState &state2)
+double GraphEnvironment::HCost(const graphState &state1, const graphState &state2)
 {
 	if (h)
 		return h->HCost(state1, state2);
 	return 0;
 }
 
-double GraphEnvironment::GCost(graphState &, graphMove &move)
+double GraphEnvironment::GCost(const graphState &, const graphMove &move)
 {
 	edge *e = g->FindEdge(move.from, move.to);
 	assert(e);
 	return e->GetWeight();
 }
 
-double GraphEnvironment::GCost(graphState &state1, graphState &state2)
+double GraphEnvironment::GCost(const graphState &state1, const graphState &state2)
 {
 	edge *e = g->FindEdge(state1, state2);
 //	if (!e)
@@ -157,7 +157,7 @@ bool GraphEnvironment::GoalTest(graphState &state, graphState &goal)
 	return state == goal;
 }
 
-uint64_t GraphEnvironment::GetStateHash(graphState &state) const
+uint64_t GraphEnvironment::GetStateHash(const graphState &state) const
 {
 	return g->GetNode(state)->getUniqueID();
 }
@@ -564,7 +564,7 @@ GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *gr
 //	}
 } 
 
-double GraphMapInconsistentHeuristic::HCost(graphState &state1, graphState &state2)
+double GraphMapInconsistentHeuristic::HCost(const graphState &state1, const graphState &state2)
 {
 	int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
 	int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
@@ -639,7 +639,7 @@ void GraphDistanceHeuristic::OpenGLDraw() const
 	}
 }
 
-double GraphDistanceHeuristic::HCost(graphState &state1, graphState &state2)
+double GraphDistanceHeuristic::HCost(const graphState &state1, const graphState &state2)
 {
 	double val = 0;
 	for (unsigned int i = 0; i < heuristics.size(); i++)

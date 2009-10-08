@@ -74,7 +74,7 @@ class MinimaxAStar {
 	double MinGCost( CRState &pos1, CRState &pos2 );
 	// the definition of the heuristic relies on the graph heuristic used
 	// in the submitted graph environment (=> use MaximumNormGraphMapHeuristic)
-	double HCost( CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 );
+	double HCost(CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 );
 
 	bool GoalTest( CRState &pos );
 	double TerminalCost( CRState &pos );

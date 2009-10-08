@@ -36,11 +36,11 @@ void SimpleHierarchicalAStar::OpenGLDraw() const
 
 
 HierarchicalHeuristicEnvironment::~HierarchicalHeuristicEnvironment() {}
-void HierarchicalHeuristicEnvironment::GetSuccessors(unsigned long &nodeID, std::vector<unsigned long> &neighbors) const
+void HierarchicalHeuristicEnvironment::GetSuccessors(const unsigned long &nodeID, std::vector<unsigned long> &neighbors) const
 {
 }
 
-void HierarchicalHeuristicEnvironment::GetActions(unsigned long &nodeID, std::vector<unsigned long> &actions) const
+void HierarchicalHeuristicEnvironment::GetActions(const unsigned long &nodeID, std::vector<unsigned long> &actions) const
 {
 }
 
@@ -62,11 +62,11 @@ bool HierarchicalHeuristicEnvironment::InvertAction(unsigned long &a) const
 }
 
 
-double HierarchicalHeuristicEnvironment::HCost(unsigned long &node1, unsigned long &node2)
+double HierarchicalHeuristicEnvironment::HCost(const unsigned long &node1, const unsigned long &node2)
 {
 }
 
-double HierarchicalHeuristicEnvironment::GCost(unsigned long &node1, unsigned long &node2)
+double HierarchicalHeuristicEnvironment::GCost(const unsigned long &node1, const unsigned long &node2)
 {
 }
 
@@ -75,7 +75,7 @@ bool HierarchicalHeuristicEnvironment::GoalTest(unsigned long &node, unsigned lo
 }
 
 
-uint64_t HierarchicalHeuristicEnvironment::GetStateHash(unsigned long &node) const
+uint64_t HierarchicalHeuristicEnvironment::GetStateHash(const unsigned long &node) const
 {
 }
 

@@ -20,8 +20,8 @@ namespace LocalSensing {
 	struct stateInfo {
 		stateInfo() { bestGCost = -1; lastFCost = -1; deadCell = false; superfluousCell = false; /*noParent = false;*/ }
 		
-		double bestGCost; // could be reduced to 1 bit -- parity of round
-		double lastFCost;
+		double bestGCost;
+		double lastFCost; // could be reduced to 1 bit -- parity of round
 		bool deadCell;
 		bool superfluousCell;
 //		bool noParent;
@@ -61,10 +61,11 @@ namespace LocalSensing {
 		void GetLocation(state &s) { s = currentLoc; }
 		bool Done() { return (currentLoc == goalLoc);} 
 		
+		void SetWeight(double w) { searchWeight = w; }
 		/** log an stats that may have been computed during the last run */
 		void LogStats(StatCollection *) {}
 		/** log any final one-time stats before a simulation is ended */
-		void LogFinalStats(StatCollection *) {}
+		void LogFinalStats(StatCollection *) { }
 		void StartNewTrial(StatCollection *)
 		{
 //			stateInfo<state, action> &si = hashTable[env->GetStateHash(currentLoc)];
@@ -104,7 +105,7 @@ namespace LocalSensing {
 	{
 		init = false;
 		returnToStart = false;
-		searchWeight = 8.0f;
+		searchWeight = 1.0f;
 		actionCount = 0;
 		env = 0;
 	}
@@ -197,10 +198,13 @@ namespace LocalSensing {
 					//printf("::::: Invoking DualProp rule\n");
 					current.bestGCost = next.bestGCost+e->GCost(neighbors[x], currentLoc);
 					current.optimalParents.resize(0);
+					a = current.toParent;
 					current.toParent = e->GetAction(currentLoc, neighbors[x]);
 					requiredNode = AddOptimalParent(current, current.toParent);
 					current.deadCell = false;
 					return false;
+					// should we go back to our old parent to maintain search tree?
+					// or stay here with a new parent and re-explore?
 				}
 				continue;
 			}

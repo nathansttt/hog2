@@ -42,7 +42,7 @@ TopSpin::~TopSpin()
 {
 }
 
-void TopSpin::GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const
+void TopSpin::GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const
 {
 	if (!data[stateID].expanded)
 	{
@@ -52,7 +52,7 @@ void TopSpin::GetSuccessors(graphState &stateID, std::vector<graphState> &neighb
 	return GraphEnvironment::GetSuccessors(stateID, neighbors);
 }
 
-void TopSpin::GetActions(graphState &stateID, std::vector<graphMove> &actions) const
+void TopSpin::GetActions(const graphState &stateID, std::vector<graphMove> &actions) const
 {
 	if (!data[stateID].expanded)
 	{
@@ -110,7 +110,7 @@ graphState TopSpin::GetState(const std::vector<int> &configuration, int zeroLoc)
 	return n->GetNum();
 }
 
-void TopSpin::ExpandNode(graphState &stateID) const
+void TopSpin::ExpandNode(const graphState &stateID) const
 {
 	g2 = g;
 	//printf("Expanding %lu\n", stateID);
@@ -139,7 +139,7 @@ void TopSpin::Flip(std::vector<int> &arrangement, int index, int radius) const
 	}
 }
 
-uint64_t TopSpin::GetStateHash(graphState &state) const
+uint64_t TopSpin::GetStateHash(const graphState &state) const
 {
 //	if (!data[state].expanded)
 //		ExpandNode(state);
@@ -174,12 +174,12 @@ graphState TopSpin::Dual(graphState s)
 	return GetState(dualCfg);  // it seems that we can't avoid storing the dual (for now) !
 }
 
-uint64_t TopSpin::GetStateHash(std::vector<int> &config) const
+uint64_t TopSpin::GetStateHash(const std::vector<int> &config) const
 {
 	return GetStateHash(&config[0], config.size());
 }
 
-uint64_t TopSpin::GetStateHash(int *config, int config_size) const
+uint64_t TopSpin::GetStateHash(const int *config, int config_size) const
 {
 	// need to handle rotation!
 	
@@ -286,7 +286,7 @@ TopSpinGraphHeuristic::TopSpinGraphHeuristic(int psize, int spin, int pdbStates)
 }
 
 
-double TopSpinGraphHeuristic::HCost(graphState &s1, graphState &s2)
+double TopSpinGraphHeuristic::HCost(const graphState &s1, const graphState &s2)
 {
 	graphState sd;
 

@@ -67,27 +67,27 @@ class FlipSide : public SearchEnvironment<FlipSideState, flipMove> {
 public:
 	FlipSide(int width = 5);
 	~FlipSide();
-	void GetSuccessors(FlipSideState &stateID, std::vector<FlipSideState> &neighbors) const;
-	void GetActions(FlipSideState &stateID, std::vector<flipMove> &actions) const;
-	flipMove GetAction(FlipSideState &s1, FlipSideState &s2) const;
+	void GetSuccessors(const FlipSideState &stateID, std::vector<FlipSideState> &neighbors) const;
+	void GetActions(const FlipSideState &stateID, std::vector<flipMove> &actions) const;
+	flipMove GetAction(const FlipSideState &s1, const FlipSideState &s2) const;
 	void ApplyAction(FlipSideState &s, flipMove a) const;
 	bool InvertAction(flipMove &) const { return true; } // applying the same action inverts it
 
 	//OccupancyInterface<FlipSideState, flipMove> *GetOccupancyInfo() { return 0; }
 
-	double HCost(FlipSideState &){
+	double HCost(const FlipSideState &){
 		fprintf(stderr, "ERROR: Single State HCost not implemented for FlipSide\n");
 		exit(1); return -1.0;}
-	double HCost(FlipSideState &state1, FlipSideState &state2);
-	double GCost(FlipSideState &state1, FlipSideState &state2);
-	double GCost(FlipSideState &, flipMove &) { return 1.0; }
+	double HCost(const FlipSideState &state1, const FlipSideState &state2);
+	double GCost(const FlipSideState &state1, const FlipSideState &state2);
+	double GCost(const FlipSideState &, const flipMove &) { return 1.0; }
 	bool GoalTest(FlipSideState &state, FlipSideState &goal);
 
 	bool GoalTest(FlipSideState &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for FlipSide\n");
 		exit(1); return false;}
 
-	uint64_t GetStateHash(FlipSideState &state) const;
+	uint64_t GetStateHash(const FlipSideState &state) const;
 	uint64_t GetActionHash(flipMove act) const;
 	void OpenGLDraw() const;
 	void OpenGLDraw(const FlipSideState &s) const;

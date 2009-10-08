@@ -55,10 +55,10 @@ class BaseMapOccupancyInterface : public OccupancyInterface<xyLoc,tDirection>
 public:
 	BaseMapOccupancyInterface(Map* m);
 	virtual ~BaseMapOccupancyInterface();
-	virtual void SetStateOccupied(xyLoc&, bool);
-	virtual bool GetStateOccupied(xyLoc&);
-	virtual bool CanMove(xyLoc&, xyLoc&);
-	virtual void MoveUnitOccupancy(xyLoc &, xyLoc&);
+	virtual void SetStateOccupied(const xyLoc&, bool);
+	virtual bool GetStateOccupied(const xyLoc&);
+	virtual bool CanMove(const xyLoc&, const xyLoc&);
+	virtual void MoveUnitOccupancy(const xyLoc &, const xyLoc&);
 
 private:
 	BitVector *bitvec; /// For each map position, set if occupied
@@ -87,27 +87,27 @@ public:
 	virtual ~MapEnvironment();
 	void SetGraphHeuristic(GraphHeuristic *h);
 	GraphHeuristic *GetGraphHeuristic();
-	void GetSuccessors(xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
-	void GetActions(xyLoc &nodeID, std::vector<tDirection> &actions) const;
-	tDirection GetAction(xyLoc &s1, xyLoc &s2) const;
+	void GetSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
+	void GetActions(const xyLoc &nodeID, std::vector<tDirection> &actions) const;
+	tDirection GetAction(const xyLoc &s1, const xyLoc &s2) const;
 	virtual void ApplyAction(xyLoc &s, tDirection dir) const;
 	virtual BaseMapOccupancyInterface *GetOccupancyInfo() { return oi; }
 
 	virtual bool InvertAction(tDirection &a) const;
 
-	virtual double HCost(xyLoc &) {
+	virtual double HCost(const xyLoc &) {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for MapEnvironment\n");
 		exit(1); return -1.0;}
-	virtual double HCost(xyLoc &node1, xyLoc &node2);
-	virtual double GCost(xyLoc &node1, xyLoc &node2);
-	virtual double GCost(xyLoc &node1, tDirection &act);
+	virtual double HCost(const xyLoc &node1, const xyLoc &node2);
+	virtual double GCost(const xyLoc &node1, const xyLoc &node2);
+	virtual double GCost(const xyLoc &node1, const tDirection &act);
 	bool GoalTest(xyLoc &node, xyLoc &goal);
 
 	bool GoalTest(xyLoc &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for MapEnvironment\n");
 		exit(1); return false;}
 
-	uint64_t GetStateHash(xyLoc &node) const;
+	uint64_t GetStateHash(const xyLoc &node) const;
 	uint64_t GetActionHash(tDirection act) const;
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const xyLoc &l) const;
@@ -123,13 +123,16 @@ public:
 	void StoreGoal(xyLoc &) {} // stores the locations for the given goal state
 	void ClearGoal() {}
 	bool IsGoalStored() {return false;}
-
+	void SetDiagonalCost(double val) { DIAGONAL_COST = val; }
+	double GetDiagonalCost() { return DIAGONAL_COST; }
+	
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Mapenv\n";return oi;}
 	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
 protected:
 	GraphHeuristic *h;
 	Map *map;
 	BaseMapOccupancyInterface *oi;
+	double DIAGONAL_COST;
 };
 
 class AbsMapEnvironment : public MapEnvironment

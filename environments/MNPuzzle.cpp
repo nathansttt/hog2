@@ -256,7 +256,7 @@ void MNPuzzle::ClearGoal()
 		delete h_increment;
 	}
 }
-void MNPuzzle::GetSuccessors(MNPuzzleState &stateID,
+void MNPuzzle::GetSuccessors(const MNPuzzleState &stateID,
                              std::vector<MNPuzzleState> &neighbors) const
 {
 	neighbors.resize(0);
@@ -268,7 +268,7 @@ void MNPuzzle::GetSuccessors(MNPuzzleState &stateID,
 	}
 }
 
-void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions) const
+void MNPuzzle::GetActions(const MNPuzzleState &stateID, std::vector<slideDir> &actions) const
 {
 	actions.resize(0);
 	for (unsigned int i = 0; i < operators[stateID.blank].size(); i++)
@@ -277,10 +277,21 @@ void MNPuzzle::GetActions(MNPuzzleState &stateID, std::vector<slideDir> &actions
 	}
 }
 
-slideDir MNPuzzle::GetAction(MNPuzzleState &, MNPuzzleState &) const
+slideDir MNPuzzle::GetAction(const MNPuzzleState &a, const MNPuzzleState &b) const
 {
-	assert(false);
-	return kUp;
+	int row1 = a.blank%width;
+	int col1 = a.blank/height;
+	int row2 = b.blank%width;
+	int col2 = b.blank/height;
+	if (row1 == row2)
+	{
+		if (col1 > col2)
+			return kUp;
+		return kDown;
+	}
+	if (row1 > row2)
+		return kLeft;
+	return kRight;
 }
 
 void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a) const
@@ -334,7 +345,7 @@ bool MNPuzzle::InvertAction(slideDir &a) const
 	return true;
 }
 
-double MNPuzzle::HCost(MNPuzzleState &state) {
+double MNPuzzle::HCost(const MNPuzzleState &state) {
 	if(!goal_stored) {
 		fprintf(stderr, "ERROR: HCost called with a single state and goal is not stored.\n");
 		exit(1);
@@ -371,7 +382,7 @@ double MNPuzzle::HCost(MNPuzzleState &state) {
 }
 
 // TODO Remove PDB heuristic from this heuristic evaluator.
-double MNPuzzle::HCost(MNPuzzleState &state1, MNPuzzleState &state2)
+double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2)
 {
 	if(state1.height != height || state1.width != width) {
 		fprintf(stderr, "ERROR: HCost called with a state with wrong size.\n");
@@ -418,7 +429,7 @@ double MNPuzzle::HCost(MNPuzzleState &state1, MNPuzzleState &state2)
 	return hval;
 }
 
-double MNPuzzle::GCost(MNPuzzleState &, MNPuzzleState &)
+double MNPuzzle::GCost(const MNPuzzleState &, const MNPuzzleState &)
 {
 	return 1;
 }
@@ -537,7 +548,7 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s, const MNPuzzleState &, float /
 	glEnd();
 }
 
-double MNPuzzle::DoPDBLookup(MNPuzzleState &state)
+double MNPuzzle::DoPDBLookup(const MNPuzzleState &state)
 {
 	double val = 0;
 	for (unsigned int x = 0; x < PDB.size(); x++)
@@ -601,7 +612,7 @@ GraphPuzzleDistanceHeuristic::GraphPuzzleDistanceHeuristic(MNPuzzle &mnp, Graph 
 	}
 }
 
-double GraphPuzzleDistanceHeuristic::HCost(graphState &state1, graphState &state2)
+double GraphPuzzleDistanceHeuristic::HCost(const graphState &state1, const graphState &state2)
 {
 	MNPuzzleState a(3, 3), b(3, 3);
 	puzzle.GetStateFromHash(a, state1);

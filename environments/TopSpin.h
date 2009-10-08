@@ -23,7 +23,7 @@ public:
 	Graph *GetGraph() { return 0; }
 	void SetState(TopSpin *tss) { ts = tss; }
 	virtual ~TopSpinGraphHeuristic() { }
-	virtual double HCost(graphState &state1, graphState &state2);
+	virtual double HCost(const graphState &state1, const graphState &state2);
 
 	static int THmode;
 private:
@@ -45,8 +45,8 @@ public:
 	TopSpin(int m, int k, TopSpinGraphHeuristic *tsh);
 	TopSpin(int m, int k);
 	~TopSpin();
-	void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const;
-	void GetActions(graphState &stateID, std::vector<graphMove> &actions) const;
+	void GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const;
+	void GetActions(const graphState &stateID, std::vector<graphMove> &actions) const;
 	bool GoalTest(graphState &state, graphState &goal);
 	virtual bool GoalTest(graphState &) { assert(false); return false; }
 	
@@ -55,16 +55,16 @@ public:
 	graphState GetState(const std::vector<int> &configuration, int zeroLoc) const;
 	std::vector<int> &GetState(graphState g) const;
 	
-	uint64_t GetStateHash(graphState &state) const;
-	uint64_t GetStateHash(std::vector<int> &config) const;
-	uint64_t GetStateHash(int *config, int config_size) const;
+	uint64_t GetStateHash(const graphState &state) const;
+	uint64_t GetStateHash(const std::vector<int> &config) const;
+	uint64_t GetStateHash(const int *config, int config_size) const;
 	uint64_t GetPDBHash(const std::vector<int> &config, int pdb_size) const;
 	uint64_t GetPDBHash(const graphState &state, int pdb_size) const;
 	uint64_t GetPDBSize(int puzzle_size, int pdb_size) const;
 private:
 	typedef __gnu_cxx::hash_map<uint64_t, unsigned long, Hash64> TopSpinHashTable;
 
-	void ExpandNode(graphState &stateID) const;
+	void ExpandNode(const graphState &stateID) const;
 	void Flip(std::vector<int> &arrangement, int index, int radius) const;
 	// these store the actual graph of the state space
 	mutable Graph *g2;

@@ -12,6 +12,7 @@
 
 MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 {
+	DIAGONAL_COST = ROOT_TWO;
 	map = _m;
 	if (useOccupancy)
 		oi = new BaseMapOccupancyInterface(map);
@@ -36,8 +37,9 @@ void MapEnvironment::SetGraphHeuristic(GraphHeuristic *gh)
 	h = gh;
 }
 
-void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors) const
+void MapEnvironment::GetSuccessors(const xyLoc &loc, std::vector<xyLoc> &neighbors) const
 {
+	neighbors.resize(0);
 	bool up=false, down=false;
 	// 
 	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y+1)))
@@ -68,7 +70,7 @@ void MapEnvironment::GetSuccessors(xyLoc &loc, std::vector<xyLoc> &neighbors) co
 	}
 }
 
-void MapEnvironment::GetActions(xyLoc &loc, std::vector<tDirection> &actions) const
+void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actions) const
 {
 	bool up=false, down=false;
 	if ((map->CanStep(loc.x, loc.y, loc.x, loc.y+1)))
@@ -99,7 +101,7 @@ void MapEnvironment::GetActions(xyLoc &loc, std::vector<tDirection> &actions) co
 	}
 }
 
-tDirection MapEnvironment::GetAction(xyLoc &s1, xyLoc &s2) const
+tDirection MapEnvironment::GetAction(const xyLoc &s1, const xyLoc &s2) const
 {
 	int result = kStay;
 	switch (s1.x-s2.x)
@@ -162,12 +164,12 @@ void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 	s = old;
 }
 
-double MapEnvironment::HCost(xyLoc &l1, xyLoc &l2)
+double MapEnvironment::HCost(const xyLoc &l1, const xyLoc &l2)
 {
 	double h1, h2;
 	double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));
 	double b = ((l1.y>l2.y)?(l1.y-l2.y):(l2.y-l1.y));
-	h1 = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
+	h1 = (a>b)?(b*DIAGONAL_COST+a-b):(a*DIAGONAL_COST+b-a);
 	if (h == 0)
 		return h1;
 	
@@ -184,7 +186,7 @@ double MapEnvironment::HCost(xyLoc &l1, xyLoc &l2)
 	return std::max(h1, h2);
 }
 
-double MapEnvironment::GCost(xyLoc &, tDirection &act)
+double MapEnvironment::GCost(const xyLoc &, const tDirection &act)
 {
 	switch (act)
 	{
@@ -192,22 +194,22 @@ double MapEnvironment::GCost(xyLoc &, tDirection &act)
 		case kS: return 1.0;
 		case kE: return 1.0;
 		case kW: return 1.0;
-		case kNW: return ROOT_TWO;
-		case kSW: return ROOT_TWO;
-		case kNE: return ROOT_TWO;
-		case kSE: return ROOT_TWO;
+		case kNW: return DIAGONAL_COST;
+		case kSW: return DIAGONAL_COST;
+		case kNE: return DIAGONAL_COST;
+		case kSE: return DIAGONAL_COST;
 		default: return 0;
 	}
 	return 0;
 }
 
-double MapEnvironment::GCost(xyLoc &l1, xyLoc &l2)
+double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
 {
 	if (l1.x == l2.x) return 1.0;
 	if (l1.y == l2.y) return 1.0;
-		return ROOT_TWO;
+	return DIAGONAL_COST;
 //	double h = HCost(l1, l2);
-//	if (fgreater(h, ROOT_TWO))
+//	if (fgreater(h, DIAGONAL_COST))
 //		return DBL_MAX;
 //	return h;
 }
@@ -217,7 +219,7 @@ bool MapEnvironment::GoalTest(xyLoc &node, xyLoc &goal)
 	return ((node.x == goal.x) && (node.y == goal.y));
 }
 
-uint64_t MapEnvironment::GetStateHash(xyLoc &node) const
+uint64_t MapEnvironment::GetStateHash(const xyLoc &node) const
 {
 	return (((uint64_t)node.x)<<16)|node.y;
 //	return (node.x<<16)|node.y;
@@ -423,7 +425,7 @@ BaseMapOccupancyInterface::~BaseMapOccupancyInterface()
 * @param s The state for which we want to set the occupancy
 * @param occupied Whether or not the state is occupied
 */
-void BaseMapOccupancyInterface::SetStateOccupied(xyLoc &s, bool occupied)
+void BaseMapOccupancyInterface::SetStateOccupied(const xyLoc &s, bool occupied)
 {
 	// Make sure the location is valid
 	// unsigned, so must be greater than 0
@@ -439,7 +441,7 @@ void BaseMapOccupancyInterface::SetStateOccupied(xyLoc &s, bool occupied)
 * @param s The state for which we want to know the occupancy information
 * @return True if the state is occupied, false otherwise. 
 */
-bool BaseMapOccupancyInterface::GetStateOccupied(xyLoc &s)
+bool BaseMapOccupancyInterface::GetStateOccupied(const xyLoc &s)
 {
 	// unsigned, so must be greater than 0
 	assert(/*s.x>=0 &&*/ s.x<=mapWidth && /*s.y>=0 && */s.y<=mapHeight);
@@ -474,13 +476,13 @@ long BaseMapOccupancyInterface::CalculateIndex(uint16_t x, uint16_t y)
 * @param oldState The unit's previous state
 * @param newState The unit's new state
 */
-void BaseMapOccupancyInterface::MoveUnitOccupancy(xyLoc &oldState, xyLoc &newState)
+void BaseMapOccupancyInterface::MoveUnitOccupancy(const xyLoc &oldState, const xyLoc &newState)
 {
 	SetStateOccupied(oldState, false);
 	SetStateOccupied(newState, true);
 }
 
-bool BaseMapOccupancyInterface::CanMove(xyLoc &, xyLoc &l2)
+bool BaseMapOccupancyInterface::CanMove(const xyLoc &, const xyLoc &l2)
 {
 	if(!(GetStateOccupied(l2)))
 	{

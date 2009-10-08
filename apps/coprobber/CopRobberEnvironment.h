@@ -75,8 +75,8 @@ class CopRobberEnvironment : public virtual MultiAgentEnvironment<state,action> 
 	CopRobberEnvironment( SearchEnvironment<state,action> *env, bool playerscanpass = false );
 	virtual ~CopRobberEnvironment();
 
-	virtual void GetSuccessors( CRState &nodeID, std::vector<CRState> &neighbors ) const;
-	virtual void GetActions( CRState &nodeID, std::vector<CRMove> &actions ) const;
+	virtual void GetSuccessors(const  CRState &nodeID, std::vector<CRState> &neighbors ) const;
+	virtual void GetActions(const  CRState &nodeID, std::vector<CRMove> &actions ) const;
 
 	virtual CRMove GetAction(CRState &s1, CRState &s2) const;
 	virtual void ApplyAction(CRState &s, CRMove a) const;
@@ -85,15 +85,15 @@ class CopRobberEnvironment : public virtual MultiAgentEnvironment<state,action> 
 
 	virtual bool InvertAction(CRMove &a) const;
 
-	virtual double HCost(CRState &node1, CRState &node2);
-	virtual double GCost(CRState &node1, CRState &node2);
-	virtual double GCost(CRState &node, CRMove &act);
+	virtual double HCost(const CRState &node1, const CRState &node2);
+	virtual double GCost(const CRState &node1, const CRState &node2);
+	virtual double GCost(const CRState &node, const CRMove &act);
 	virtual bool GoalTest(CRState &node, CRState& );
 	virtual bool GoalTest(CRState &node);
 
 	// I would recommend testing these functions extensively before using them
 	// because they won't work well with a lot of agents!
-	virtual uint64_t GetStateHash(CRState &node) const;
+	virtual uint64_t GetStateHash(const CRState &node) const;
 	virtual uint64_t GetActionHash(CRMove act) const;
 
 	virtual OccupancyInterface<CRState,CRMove> *GetOccupancyInfo() { return oi; };
@@ -107,7 +107,7 @@ class CopRobberEnvironment : public virtual MultiAgentEnvironment<state,action> 
 	virtual void StoreGoal(CRState &node) {};
 	virtual void ClearGoal() {};
 	virtual bool IsGoalStored() { return false; };
-	virtual double HCost(CRState &node1) { fprintf( stderr, "ERROR: HCost of one state is not implemented!\n" ); exit(1); return 0.; };
+	virtual double HCost(const CRState &node1) { fprintf( stderr, "ERROR: HCost of one state is not implemented!\n" ); exit(1); return 0.; };
 
 
 	protected:
@@ -218,7 +218,7 @@ CopRobberEnvironment<state,action>::~CopRobberEnvironment() {
 }
 
 template<class state, class action>
-void CopRobberEnvironment<state,action>::GetSuccessors( CRState &nodeID, std::vector<CRState> &neighbors ) const {
+void CopRobberEnvironment<state,action>::GetSuccessors(const  CRState &nodeID, std::vector<CRState> &neighbors ) const {
 
 	unsigned int num_players = nodeID.size();
 
@@ -268,7 +268,7 @@ void CopRobberEnvironment<state,action>::GetSuccessors( CRState &nodeID, std::ve
 }
 
 template<class state, class action>
-void CopRobberEnvironment<state,action>::GetActions( CRState &nodeID, std::vector<CRMove> &actions ) const {
+void CopRobberEnvironment<state,action>::GetActions(const  CRState &nodeID, std::vector<CRMove> &actions ) const {
 
 	unsigned int num_players = nodeID.size();
 
@@ -374,7 +374,7 @@ bool CopRobberEnvironment<state,action>::InvertAction(CRMove &a) const {
 
 // accumulated HCost of all the state differences
 template<class state, class action>
-double CopRobberEnvironment<state,action>::HCost(CRState &node1, CRState &node2) {
+double CopRobberEnvironment<state,action>::HCost(const CRState &node1, const CRState &node2) {
 	double h = 0.;
 	assert( node1.size() == node2.size() );
 	for( unsigned int i = 0; i < node1.size(); i++ ) {
@@ -385,7 +385,7 @@ double CopRobberEnvironment<state,action>::HCost(CRState &node1, CRState &node2)
 
 // accumulated GCost of all the state differences
 template<class state, class action>
-double CopRobberEnvironment<state,action>::GCost(CRState &node1, CRState &node2) {
+double CopRobberEnvironment<state,action>::GCost(const CRState &node1, const CRState &node2) {
 	double g = 0.;
 	assert( node1.size() == node2.size() );
 	for( unsigned int i = 0; i < node1.size(); i++ ) {
@@ -395,7 +395,7 @@ double CopRobberEnvironment<state,action>::GCost(CRState &node1, CRState &node2)
 }
 
 template<class state, class action>
-double CopRobberEnvironment<state,action>::GCost(CRState &node, CRMove &act) {
+double CopRobberEnvironment<state,action>::GCost(const CRState &node, const CRMove &act) {
 	double g = 0.;
 	assert( node.size() == act.size() );
 	for( unsigned int i = 0; i < node.size(); i++ ) {
@@ -424,7 +424,7 @@ bool CopRobberEnvironment<state,action>::GoalTest(CRState &node) {
 // this will not work very well with a lot of agents
 // and is buggy with more than 64 agents
 template<class state, class action>
-uint64_t CopRobberEnvironment<state,action>::GetStateHash(CRState &node) const {
+uint64_t CopRobberEnvironment<state,action>::GetStateHash(const CRState &node) const {
 	uint64_t hash = 0, t;
 	double psize = 64./(double)node.size();
 	double count = 0.;

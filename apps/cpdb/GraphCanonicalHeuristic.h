@@ -27,7 +27,7 @@ public:
 	Map *GetMap();
 	void Load(char *file);
 	void Save(char *file);
-	double HCost(graphState &state1, graphState &state2);
+	double HCost(const graphState &state1, const graphState &state2);
 	void ChooseStartGoal(graphState &start, graphState &goal);
 
 	void OpenGLDraw() const;

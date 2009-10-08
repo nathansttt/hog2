@@ -70,7 +70,7 @@ class GraphHeuristic {
 public:
 	virtual ~GraphHeuristic() { }
 	virtual Graph *GetGraph() = 0;
-	virtual double HCost(graphState &state1, graphState &state2) = 0;
+	virtual double HCost(const graphState &state1, const graphState &state2) = 0;
 	// if one is better as the start or goal state, this can swap for you.
 	virtual void ChooseStartGoal(graphState &/*start*/, graphState &/*goal*/) {}
 	virtual void OpenGLDraw() const {}
@@ -84,7 +84,7 @@ public:
 	GraphLabelHeuristic(Graph *graph, graphState target)
 	{ g = graph; goal = target; }
 	Graph *GetGraph() { return g; }
-	double HCost(graphState &state1, graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2)
 	{
 		if (state2 == goal)
 			return g->GetNode(state1)->GetLabelF(GraphSearchConstants::kHCost);
@@ -100,7 +100,7 @@ public:
 	GraphMapHeuristic(Map *map, Graph *graph)
 	:m(map), g(graph) {}
 	Graph *GetGraph() { return g; }
-	double HCost(graphState &state1, graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2)
 	{
 		int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
 		int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
@@ -121,7 +121,7 @@ public:
 	GraphAbstractionHeuristic(MapAbstraction *mabs, int lev)
 	:mAbs(mabs), level(lev) { }
 	Graph *GetGraph() { return mAbs->GetAbstractGraph(level); }
-	double HCost(graphState &state1, graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2)
 	{
 		return mAbs->h(mAbs->GetAbstractGraph(level)->GetNode(state1),
 					   mAbs->GetAbstractGraph(level)->GetNode(state2));
@@ -140,7 +140,7 @@ public:
 	}
 	Graph *GetGraph() { return g; }
 	void SetProbability(double p) { prob = p; }
-	double HCost(graphState &state1, graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2)
 	{ // warning: in this implementation HCost(s1,s2) != HCost(s2,s1)
 
 		if(probTable[int(state1)]) {
@@ -189,7 +189,7 @@ class GraphDistanceHeuristic : public GraphHeuristic {
 public:
 	GraphDistanceHeuristic(Graph *graph) :g(graph) { smartPlacement = false; }
 	~GraphDistanceHeuristic() {}
-	virtual double HCost(graphState &state1, graphState &state2);
+	virtual double HCost(const graphState &state1, const graphState &state2);
 	void AddHeuristic(node *n = 0);
 	int GetNumHeuristics() { return heuristics.size(); }
 	void UseSmartPlacement(bool use) { smartPlacement = use; }
@@ -218,7 +218,7 @@ enum tHeuristicCombination
 class GraphMapInconsistentHeuristic : public GraphDistanceHeuristic {
 public:
 	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
-	double HCost(graphState &state1, graphState &state2);
+	double HCost(const graphState &state1, const graphState &state2);
 	void SetMode(tHeuristicCombination mode) { hmode = mode; }
 	void SetNumUsedHeuristics(int count) { numHeuristics = count; }
 private:
@@ -232,20 +232,20 @@ public:
 	GraphEnvironment(Graph *g, GraphHeuristic *gh);
 	GraphEnvironment(Map *m, Graph *g, GraphHeuristic *gh);
 	virtual ~GraphEnvironment();
-	virtual void GetSuccessors(graphState &stateID, std::vector<graphState> &neighbors) const;
-	virtual void GetActions(graphState &stateID, std::vector<graphMove> &actions) const;
-	virtual graphMove GetAction(graphState &s1, graphState &s2) const;
+	virtual void GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const;
+	virtual void GetActions(const graphState &stateID, std::vector<graphMove> &actions) const;
+	virtual graphMove GetAction(const graphState &s1, const graphState &s2) const;
 	virtual void ApplyAction(graphState &s, graphMove a) const;
 	virtual bool InvertAction(graphMove &a) const;
 
 	void SetDirected(bool b) { directed = b; }
 
 	OccupancyInterface<graphState, graphMove> *GetOccupancyInfo() { return 0; }
-	virtual double HCost(graphState &state1, graphState &state2);
-	virtual double GCost(graphState &state1, graphState &state2);
-	virtual double GCost(graphState &state1, graphMove &state2);
+	virtual double HCost(const graphState &state1, const graphState &state2);
+	virtual double GCost(const graphState &state1, const graphState &state2);
+	virtual double GCost(const graphState &state1, const graphMove &state2);
 	virtual bool GoalTest(graphState &state, graphState &goal);
-	virtual uint64_t GetStateHash(graphState &state) const;
+	virtual uint64_t GetStateHash(const graphState &state) const;
 	virtual uint64_t GetActionHash(graphMove act) const;
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const graphState &s) const;
@@ -258,7 +258,7 @@ public:
 	virtual void ClearGoal() {}
 	virtual bool IsGoalStored() {return false;}
 
-	virtual double HCost(graphState &) {
+	virtual double HCost(const graphState &) {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for GraphEnvironment\n");
 		exit(1); return -1.0;}
 

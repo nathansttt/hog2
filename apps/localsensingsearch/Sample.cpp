@@ -37,15 +37,17 @@
 #include "LocalSensingUnit.h"
 #include "LocalSensingUnit2.h"
 #include "LRTAStarUnit.h"
+#include "LSSLRTAStarUnit.h"
 #include "ScenarioLoader.h"
 #include "StatUtil.h"
+#include "HeuristicLearningMeasure.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
 bool runningSearch2 = false;
 int px1, py1, px2, py2;
 int absType = 0;
-int mazeSize = 128;
+int mazeSize = 50;
 
 std::vector<EpisodicSimulation<xyLoc, tDirection, MapEnvironment> *> unitSims;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
@@ -56,6 +58,9 @@ GraphDistanceHeuristic *gdh = 0;
 std::vector<xyLoc> path;
 double stepsPerFrame = 1.0/30.0;
 void RunScenario(char *name);
+void RunScalingTest(int size);
+void RunWorkMeasureTest();
+void RunSTPTest();
 
 void CreateSimulation(int id);
 
@@ -75,9 +80,22 @@ void CreateSimulation(int id)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
-		map = new Map(mazeSize/2, mazeSize/2);
-		MakeMaze(map, 1);
-		map->Scale(mazeSize, mazeSize);
+		map = new Map(mazeSize, mazeSize);
+		map->SetTerrainType(1, mazeSize-2,
+							mazeSize-2, mazeSize-2, kOutOfBounds);
+		map->SetTerrainType(mazeSize-2, 1,
+							mazeSize-2, mazeSize-2, kOutOfBounds);
+
+//		for (int x = 0; x < mazeSize-1; x+=2)
+//		{
+//			map->SetTerrainType(x, ((x/2)%2)?0:1, kOutOfBounds);
+//		}
+//		map->SetTerrainType(0, 2,
+//							mazeSize-1, 2, kOutOfBounds);
+		
+		//MakeMaze(map, 1);
+//		BuildRandomRoomMap(map, 16);
+//		map->Scale(mazeSize, mazeSize);
 	}
 	else
 		map = new Map(gDefaultMap);
@@ -113,6 +131,8 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-size <integer>", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallCommandLineHandler(MyCLHandler, "-scenario", "-scenario <file>", "Load and run a scenario offline.");
+	InstallCommandLineHandler(MyCLHandler, "-scaleTest", "-scaleTest <size>", "Run a scaling test with local minima <size>.");
+	InstallCommandLineHandler(MyCLHandler, "-STPTest", "-STPTest", "Run a STP test.");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -154,7 +174,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->StepTime(stepsPerFrame);
 	}
 	
-	if ((GetNumPorts(windowID) != 2) || (unitSims[windowID]->GetNumUnits() != 2))
+	if ((GetNumPorts(windowID) != 3) || (unitSims[windowID]->GetNumUnits() != 3))
 		unitSims[windowID]->OpenGLDraw();
 	else {
 		unitSims[windowID]->GetEnvironment()->OpenGLDraw();
@@ -196,6 +216,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		RunScenario(argument[1]);
 	}
+	else if (strcmp(argument[0], "-scaleTest") == 0)
+	{
+		RunScalingTest(atoi(argument[1]));
+	}
+	else if (strcmp(argument[0], "-STPTest") == 0)
+	{
+		RunSTPTest();
+	}
 	return 2; //ignore typos
 }
 
@@ -234,10 +262,16 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
-void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
+void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 {
+	if (mod == kShiftDown)
+	{
+		RunWorkMeasureTest();
+		return;
+	}
 	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
-	
+	unitSims[windowID]->ClearAllUnits();
+
 	int x1, y1, x2, y2;
 	do {
 		x2 = random()%m->GetMapWidth();
@@ -246,15 +280,30 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 		y1 = random()%m->GetMapHeight();
 	} while ((m->GetTerrainType(x1, y1) != kGround) || (m->GetTerrainType(x2, y2) != kGround));
 	
-	xyLoc a(x1, y1), b(x2, y2);
-//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
-//	u1->SetSpeed(0.02);
-//	unitSims[windowID]->AddUnit(u1);
-//	unitSims[windowID]->SetTrialLimit(0);
+	//xyLoc a(x1, y1), b(x2, y2);
+	xyLoc a(0, 0), b(mazeSize-1, mazeSize-1);
+	//xyLoc a(0, 0), b(mazeSize-1, 0);
+	
+	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
+	
+	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+	u1->SetWeight(1.0);
+	u1->SetSpeed(0.02);
+	unitSims[windowID]->AddUnit(u1);
 
 	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u2 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
 	u2->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u2);
+
+	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(8));
+	u3->SetSpeed(0.02);
+	unitSims[windowID]->AddUnit(u3);
+	
+	unitSims[windowID]->GetStats()->AddFilter("trialDistanceMoved");
+	unitSims[windowID]->GetStats()->AddFilter("TotalLearning");
+	unitSims[windowID]->GetStats()->EnablePrintOutput(true);
+	unitSims[windowID]->SetTrialLimit(50000);
 }
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
@@ -429,4 +478,146 @@ void RunSingleTest(EpSim *es, const Experiment &e)
 	//es->GetStats()->SumStat("trialDistanceMoved", <#const char *owner#>, <#long value#>);
 	printf("first\t%s\t%d\t%f\n", u1->GetName(), e.GetBucket(), v.fval);
 	printf("sum\t%s\t%d\t%f\n", u1->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "trialDistanceMoved", u1->GetName()));
+}
+
+
+void RunScalingTest(int size)
+{
+	Map *map = new Map(size, size);
+	map->SetTerrainType(1, size-2,
+						size-2, size-2, kOutOfBounds);
+	map->SetTerrainType(size-2, 1,
+						size-2, size-2, kOutOfBounds);
+
+	EpSim *es = new EpSim(new MapEnvironment(map, false));
+	es->SetStepType(kRealTime);
+	es->SetThinkingPenalty(0);
+	
+	es->ClearAllUnits();
+	// add units
+	es->GetStats()->AddFilter("trialDistanceMoved");
+	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->EnablePrintOutput(false);
+	xyLoc a(0, 0), b(size-1, size-1);
+	
+	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
+
+	//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+//	u1->SetSpeed(1.0);
+//	es->AddUnit(u1); // go to goal and stop
+	
+//	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+//	u1->SetSpeed(1.0);
+//	es->AddUnit(u1);
+
+	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+	u1->SetSpeed(1.0);
+	es->AddUnit(u1);
+	
+	es->SetTrialLimit(100000);
+	while (!es->Done())
+	{
+		es->StepTime(10.0);
+	}
+	statValue v;
+	
+	int which = es->GetStats()->FindNextStat("trialDistanceMoved", u1->GetName(), 0);
+	es->GetStats()->LookupStat(which, v);
+	printf("first\t%s\t%d\t%f\n", u1->GetName(), size, v.fval);
+	printf("sum\t%s\t%d\t%f\n", u1->GetName(), size, SumStatEntries(es->GetStats(), "trialDistanceMoved", u1->GetName()));
+	es->GetStats()->LookupStat("TotalLearning", u1->GetName(), v);
+	printf("learning\t%s\t%f\t%f\t%f\n", u1->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+	exit(0);
+}
+
+#include "MNPuzzle.h"
+
+void RunWorkMeasureTest()
+{
+	MNPuzzle *mnp = new MNPuzzle(4, 4);
+	srandom(81);
+	for (int x = 0; x < 50; x++)
+	{
+		HeuristicLearningMeasure<MNPuzzleState, slideDir, MNPuzzle> measure;
+		MNPuzzleState s(4, 4);
+		MNPuzzleState g(4, 4);
+		std::vector<slideDir> acts;
+		for (unsigned int y = 0; y < 100; y++)
+		{
+			mnp->GetActions(s, acts);
+			mnp->ApplyAction(s, acts[random()%acts.size()]);
+		}
+		std::cout << "Start: " << s << std::endl << "Goal: " << g << std::endl;
+		std::cout << "Heuristic: " << mnp->HCost(s, g) << std::endl;
+
+		double requiredLearning = measure.MeasureDifficultly(mnp, s, g);
+		std::cout << "Required learning: " << requiredLearning << std::endl;
+	}
+}
+
+
+void RunSTPTest()
+{
+	typedef EpisodicSimulation<MNPuzzleState, slideDir, MNPuzzle> STPSim;
+	
+	MNPuzzle *mnp = new MNPuzzle(3, 3);
+
+	srandom(81);
+
+	STPSim *es = new STPSim(mnp);
+	es->SetStepType(kRealTime);
+	es->SetThinkingPenalty(0);
+	
+	// add units
+	es->GetStats()->AddFilter("trialDistanceMoved");
+	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->EnablePrintOutput(false);
+	
+	for (int x = 0; x < 100; x++)
+	{
+		es->ClearAllUnits();
+
+		MNPuzzleState s(3, 3);
+		MNPuzzleState g(3, 3);
+		std::vector<slideDir> acts;
+		for (unsigned int y = 0; y < 100; y++)
+		{
+			mnp->GetActions(s, acts);
+			mnp->ApplyAction(s, acts[random()%acts.size()]);
+		}
+		std::cout << "Start: " << s << std::endl << "Goal: " << g << std::endl;
+		std::cout << "Heuristic: " << mnp->HCost(s, g) << std::endl;
+		
+		double requiredLearning;
+		{
+			HeuristicLearningMeasure<MNPuzzleState, slideDir, MNPuzzle> measure;
+			requiredLearning = measure.MeasureDifficultly(mnp, s, g);
+			std::cout << "Required learning: " << requiredLearning << std::endl;
+		}
+		
+		//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+		//	u1->SetSpeed(1.0);
+		//	es->AddUnit(u1); // go to goal and stop
+		
+		LRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle>(s, g, new LRTAStar<MNPuzzleState, slideDir, MNPuzzle>());
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+		
+		es->SetTrialLimit(100000);
+		while (!es->Done())
+		{
+			es->StepTime(10.0);
+		}
+
+		statValue v;
+		
+		int which = es->GetStats()->FindNextStat("trialDistanceMoved", u1->GetName(), 0);
+		es->GetStats()->LookupStat(which, v);
+		printf("first\t%s\t%d\t%f\n", u1->GetName(), x, v.fval);
+		printf("sum\t%s\t%d\t%f\n", u1->GetName(), x, SumStatEntries(es->GetStats(), "trialDistanceMoved", u1->GetName()));
+		es->GetStats()->LookupStat("TotalLearning", u1->GetName(), v);
+		printf("learning\t%s\t%f\t%f\t%f\n", u1->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+	}
+	exit(0);
 }

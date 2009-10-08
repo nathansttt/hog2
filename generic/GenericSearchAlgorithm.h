@@ -37,8 +37,8 @@ class GenericSearchAlgorithm
 public:
 	GenericSearchAlgorithm() {};
 	virtual ~GenericSearchAlgorithm() {};
-	virtual void GetPath(environment *env, state &from, state &to, std::vector<state> &path) = 0;
-	virtual void GetPath(environment *env, state &from, state &to, std::vector<action> &path) = 0;
+	virtual void GetPath(environment *env, const state &from, const state &to, std::vector<state> &path) = 0;
+	virtual void GetPath(environment *env, const state &from, const state &to, std::vector<action> &path) = 0;
 	virtual const char *GetName() = 0;
 	virtual uint64_t GetNodesExpanded() = 0;
 	virtual uint64_t GetNodesTouched() = 0;
