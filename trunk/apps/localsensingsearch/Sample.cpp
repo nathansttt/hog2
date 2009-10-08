@@ -38,6 +38,7 @@
 #include "LocalSensingUnit2.h"
 #include "LRTAStarUnit.h"
 #include "ScenarioLoader.h"
+#include "StatUtil.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -402,25 +403,30 @@ void RunSingleTest(EpSim *es, const Experiment &e)
 {
 	es->ClearAllUnits();
 	// add units
+	es->GetStats()->ClearAllStats();
 	es->GetStats()->AddFilter("trialDistanceMoved");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
 
-	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
-	u1->SetSpeed(1.0);
-	es->AddUnit(u1); // go to goal and stop
-	
-//	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
 //	u1->SetSpeed(1.0);
-//	es->AddUnit(u1);
+//	es->AddUnit(u1); // go to goal and stop
+	
+	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+	u1->SetSpeed(1.0);
+	es->AddUnit(u1);
 
-	es->SetTrialLimit(0);
+	es->SetTrialLimit(100000);
 	while (!es->Done())
 	{
 		es->StepTime(10.0);
 	}
 	statValue v;
-	es->GetStats()->LookupStat("trialDistanceMoved", u1->GetName(), v);
+	
+	int which = es->GetStats()->FindNextStat("trialDistanceMoved", u1->GetName(), 0);
+	es->GetStats()->LookupStat(which, v);
+	//es->GetStats()->LookupStat("trialDistanceMoved", u1->GetName(), v);
 	//es->GetStats()->SumStat("trialDistanceMoved", <#const char *owner#>, <#long value#>);
-	printf("%s\t%d\t%f\n", u1->GetName(), e.GetBucket(), v.fval);
+	printf("first\t%s\t%d\t%f\n", u1->GetName(), e.GetBucket(), v.fval);
+	printf("sum\t%s\t%d\t%f\n", u1->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "trialDistanceMoved", u1->GetName()));
 }
