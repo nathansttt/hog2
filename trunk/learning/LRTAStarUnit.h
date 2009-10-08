@@ -28,7 +28,7 @@ public:
 		totalLearned = 0;
 		StartNewTrial(0);
 	}
-	virtual ~LRTAStarUnit() {}
+	virtual ~LRTAStarUnit() { delete algorithm; }
 	const char *GetName() { return algorithm->GetName(); }
 	bool Done() { return (currentLoc==goalLoc) && fequal(algorithm->GetAmountLearned(), totalLearned); }
 	void StartNewTrial(StatCollection *) {
