@@ -24,15 +24,15 @@ public:
 	{ fAmountLearned = 0.0f; }
 	virtual ~LRTAStar(void) { }
 
-	void GetPath(environment *env, state& from, state& to, std::vector<state> &thePath);
-	void GetPath(environment *, state& , state& , std::vector<action> & ) { assert(false); };
+	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
+	void GetPath(environment *, const state& , const state& , std::vector<action> & ) { assert(false); };
 	virtual const char *GetName() { return "LRTAStar"; }
-	void SetHCost(environment *env, state &where, double val) { heur[env->GetStateHash(where)] = val; }
-	double HCost(environment *env, state &from, state &to) { return std::max(heur[env->GetStateHash(from)], env->HCost(from, to)); }
+	void SetHCost(environment *env, const state &where, double val) { heur[env->GetStateHash(where)] = val; }
+	double HCost(environment *env, const state &from, const state &to) { return std::max(heur[env->GetStateHash(from)], env->HCost(from, to)); }
 	
 	virtual uint64_t GetNodesExpanded() { return nodesExpanded; }
 	virtual uint64_t GetNodesTouched() { return nodesTouched; }
-	virtual void LogFinalStats(StatCollection *) {}
+	virtual void LogFinalStats(StatCollection *s) { s->AddStat("TotalLearning", GetName(),fAmountLearned); }
 
 	double GetAmountLearned() { return fAmountLearned; }
 	void OpenGLDraw() const {}
@@ -47,7 +47,7 @@ private:
 
 /** The core routine of LRTAStar -- computes at most one-move path */
 template <class state, class action, class environment>
-void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::GetPath(environment *env, state& from, state& to, std::vector<state> &thePath)
+void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 {
 	thePath.resize(0);
 	if (from==to)

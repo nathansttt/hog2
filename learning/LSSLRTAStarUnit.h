@@ -1,25 +1,25 @@
 /*
- * $Id: LRTAStarUnit.h,v 1.5 2005/12/09 23:49:44 nathanst Exp $
+ *  LSSLRTAStarUnit.h
+ *  hog2
  *
- *  Hierarchical Open Graph File
+ *  Created by Nathan Sturtevant on 10/6/09.
+ *  Copyright 2009 NS Software. All rights reserved.
  *
- *  Created by Shanny (based on LRTS) on 10/03/05.
- *  Ported to HOG2 9/2/09
  */
 
-#ifndef LRTAStarUnit_H
-#define LRTAStarUnit_H
+#ifndef LSSLRTAStarUnit_H
+#define LSSLRTAStarUnit_H
 
 #include "Unit.h"
 #include <deque>
 #include "FPUtil.h"
-#include "LRTAStar.h"
+#include "LSSLRTAStar.h"
 
 template <class state, class action, class environment>
-class LRTAStarUnit : public Unit<state, action, environment> {
-
+class LSSLRTAStarUnit : public Unit<state, action, environment> {
+	
 public:
-	LRTAStarUnit(state &s, state &target, LRTAStar<state, action, environment> *alg)
+	LSSLRTAStarUnit(state &s, state &target, LSSLRTAStar<state, action, environment> *alg)
 	{
 		currentLoc = s;
 		goalLoc = target;
@@ -28,12 +28,12 @@ public:
 		totalLearned = 0;
 		StartNewTrial(0);
 	}
-	virtual ~LRTAStarUnit() {}
+	virtual ~LSSLRTAStarUnit() {}
 	const char *GetName() { return algorithm->GetName(); }
 	bool Done() { return (currentLoc==goalLoc) && fequal(algorithm->GetAmountLearned(), totalLearned); }
 	void StartNewTrial(StatCollection *) {
-//		printf("New trial: %f learned this trial; %f total\n",
-//			   algorithm->GetAmountLearned()-totalLearned, algorithm->GetAmountLearned());
+				printf("LSSLRTA*: New trial: %f learned this trial; %f total\n",
+					   algorithm->GetAmountLearned()-totalLearned, algorithm->GetAmountLearned());
 		totalLearned = algorithm->GetAmountLearned();
 	}
 	
@@ -56,7 +56,7 @@ public:
 	void GetLocation(state &s) { s = currentLoc; }
 	virtual void LogFinalStats(StatCollection *s) { algorithm->LogFinalStats(s); }
 private:
-	LRTAStar<state, action, environment> *algorithm;			// pointer to the LRTA* algorithm
+	LSSLRTAStar<state, action, environment> *algorithm;			// pointer to the LRTA* algorithm
 	double totalLearned;			// Actual amount learned
 	std::vector<state> path;
 	state currentLoc, goalLoc;
@@ -64,39 +64,20 @@ private:
 };
 
 
-//
-//template <class state, class action, class environment>
-//LRTAStarUnit<state, action, environment>::LRTAStarUnit(state &s, unit *_target, LRTAStar *alg)
-//:searchUnit(_x, _y, _target, alg)
-//{
-//	algorithm = alg;			// set the algorithm
-//	startNewTrial();
-//}
-//
-//template <class state, class action, class environment>
-//LRTAStarUnit<state, action, environment>::~LRTAStarUnit(void)
-//{
-//}
-//
-//// Reset the unit for new trial
-//template <class state, class action, class environment>
-//void LRTAStarUnit<state, action, environment>::startNewTrial() {
-//	totalLearned = algorithm->GetAmountLearned();
-//}	
 
 template <class state, class action, class environment>
-bool LRTAStarUnit<state, action, environment>::MakeMove(environment *e, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a)
+bool LSSLRTAStarUnit<state, action, environment>::MakeMove(environment *e, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a)
 {
 	if (currentLoc == goalLoc)
 		return false;
-//	if (GetUnitGroup() == 0)
-//		return false;
+	//	if (GetUnitGroup() == 0)
+	//		return false;
 	if (path.size() <= 1)
 	{
 		algorithm->GetPath(e, currentLoc, goalLoc, path);
 		if (path.size() <= 1)
 			return false;
-		std::reverse(path.begin(), path.end());
+		//std::reverse(path.begin(), path.end());
 	}
 	a = e->GetAction(path[path.size()-1], path[path.size()-2]);
 	path.pop_back();
@@ -104,11 +85,11 @@ bool LRTAStarUnit<state, action, environment>::MakeMove(environment *e, Occupanc
 }
 
 template <class state, class action, class environment>
-void LRTAStarUnit<state, action, environment>::OpenGLDraw(const environment *e, const SimulationInfo<state,action,environment> *si) const
+void LSSLRTAStarUnit<state, action, environment>::OpenGLDraw(const environment *e, const SimulationInfo<state,action,environment> *si) const
 {
 	PublicUnitInfo<state, action, environment> i;
 	si->GetPublicUnitInfo(si->GetCurrentUnit(), i);
-	e->SetColor(0.5, 0.5, 0.5, 1.0);
+	e->SetColor(0.2, 0.2, 1.0, 1.0);
 	if (fgreater(si->GetSimulationTime(), i.nextTime))
 		e->OpenGLDraw(i.currentState);
 	else
@@ -120,19 +101,19 @@ void LRTAStarUnit<state, action, environment>::OpenGLDraw(const environment *e, 
 	e->OpenGLDraw(goalLoc);
 	e->SetColor(1.0, 1.0, 0.0, 1.0);
 	e->OpenGLDraw(currentLoc);
-
+	
 	algorithm->OpenGLDraw(e);
 	
-//	e->SetColor(0.0, 0.0, 0.5, 0.25);
-//	for (typename LSStateStorage::const_iterator it = hashTable.begin(); it != hashTable.end(); it++)
-//	{
-//		if ((*it).second.theState == currentLoc)
-//		{
-//		}
-//		else {
-//			e->OpenGLDraw((*it).second.theState);
-//		}
-//	}
+	//	e->SetColor(0.0, 0.0, 0.5, 0.25);
+	//	for (typename LSStateStorage::const_iterator it = hashTable.begin(); it != hashTable.end(); it++)
+	//	{
+	//		if ((*it).second.theState == currentLoc)
+	//		{
+	//		}
+	//		else {
+	//			e->OpenGLDraw((*it).second.theState);
+	//		}
+	//	}
 }
 
 #endif
