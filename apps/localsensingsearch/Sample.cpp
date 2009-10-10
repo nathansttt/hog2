@@ -57,8 +57,8 @@ MapEnvironment *ma2 = 0;
 GraphDistanceHeuristic *gdh = 0;
 std::vector<xyLoc> path;
 double stepsPerFrame = 1.0/30.0;
-void RunScenario(char *name);
-void RunScalingTest(int size);
+void RunScenario(char *name, int which);
+void RunScalingTest(int size, int which);
 void RunWorkMeasureTest();
 void RunSTPTest(int which);
 
@@ -214,11 +214,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-scenario") == 0)
 	{
-		RunScenario(argument[1]);
+		RunScenario(argument[1], atoi(argument[2]));
 	}
 	else if (strcmp(argument[0], "-scaleTest") == 0)
 	{
-		RunScalingTest(atoi(argument[1]));
+		RunScalingTest(atoi(argument[1]), atoi(argument[2]));
 	}
 	else if (strcmp(argument[0], "-STPTest") == 0)
 	{
@@ -426,9 +426,9 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 
 
 typedef EpisodicSimulation<xyLoc, tDirection, MapEnvironment> EpSim;
-void RunSingleTest(EpSim *es, const Experiment &e);
+void RunSingleTest(EpSim *es, const Experiment &e, int which);
 
-void RunScenario(char *name)
+void RunScenario(char *name, int which)
 {
 	ScenarioLoader *sl = new ScenarioLoader(name);
 	printf("Loading map: %s\n", sl->GetNthExperiment(0).GetMapName());
@@ -436,19 +436,21 @@ void RunScenario(char *name)
 	Map *map = new Map(sl->GetNthExperiment(0).GetMapName());
 	map->Scale(sl->GetNthExperiment(0).GetXScale(),
 			   sl->GetNthExperiment(0).GetYScale());
-	EpSim *es = new EpSim(new MapEnvironment(map, false));
+	MapEnvironment *me;
+	EpSim *es = new EpSim(me = new MapEnvironment(map, false));
+	me->SetDiagonalCost(1.5);
 	es->SetStepType(kRealTime);
 	es->SetThinkingPenalty(0);
 
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
 		printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
-		RunSingleTest(es, sl->GetNthExperiment(x));
+		RunSingleTest(es, sl->GetNthExperiment(x), which);
 	}
 	exit(0);
 }
 
-void RunSingleTest(EpSim *es, const Experiment &e)
+void RunSingleTest(EpSim *es, const Experiment &e, int which)
 {
 	es->ClearAllUnits();
 	// add units
@@ -457,31 +459,73 @@ void RunSingleTest(EpSim *es, const Experiment &e)
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
 
-//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
-//	u1->SetSpeed(1.0);
-//	es->AddUnit(u1); // go to goal and stop
+	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
 	
-	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
-	u1->SetSpeed(1.0);
-	es->AddUnit(u1);
-
-	es->SetTrialLimit(100000);
+	if (which == 0)
+	{
+		printf("Running RIBS\n");
+		LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1); // go to goal and stop
+	}
+	else if (which == 1)
+	{
+		printf("Running LRTA*\n");
+		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 2)
+	{
+		printf("Running LSS-LRTA*(10)\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 3)
+	{
+		printf("Running LSS-LRTA*(100)\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	
+	es->SetTrialLimit(500000);
 	while (!es->Done())
 	{
 		es->StepTime(10.0);
 	}
 	statValue v;
+	printf("Done\n");
+	int choice = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
+	es->GetStats()->LookupStat(choice, v);
+	printf("first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+	printf("sum\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "trialDistanceMoved", es->GetUnit(0)->GetName()));
+	es->GetStats()->LookupStat("TotalLearning", es->GetUnit(0)->GetName(), v);
+	printf("learning\t%s\t%f\t%f\t%f\n", es->GetUnit(0)->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
 	
-	int which = es->GetStats()->FindNextStat("trialDistanceMoved", u1->GetName(), 0);
-	es->GetStats()->LookupStat(which, v);
-	//es->GetStats()->LookupStat("trialDistanceMoved", u1->GetName(), v);
-	//es->GetStats()->SumStat("trialDistanceMoved", <#const char *owner#>, <#long value#>);
-	printf("first\t%s\t%d\t%f\n", u1->GetName(), e.GetBucket(), v.fval);
-	printf("sum\t%s\t%d\t%f\n", u1->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "trialDistanceMoved", u1->GetName()));
+	choice = es->GetStats()->FindNextStat("nodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
+		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
+		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+	}
+	
+	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
+	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval+1);
 }
 
 
-void RunScalingTest(int size)
+void RunScalingTest(int size, int which)
 {
 	Map *map = new Map(size, size);
 	map->SetTerrainType(1, size-2,
@@ -489,45 +533,85 @@ void RunScalingTest(int size)
 	map->SetTerrainType(size-2, 1,
 						size-2, size-2, kOutOfBounds);
 
-	EpSim *es = new EpSim(new MapEnvironment(map, false));
+	MapEnvironment *me;
+	EpSim *es = new EpSim(me = new MapEnvironment(map, false));
+	me->SetDiagonalCost(1.5);
 	es->SetStepType(kRealTime);
 	es->SetThinkingPenalty(0);
 	
 	es->ClearAllUnits();
 	// add units
 	es->GetStats()->AddFilter("trialDistanceMoved");
+	es->GetStats()->AddFilter("nodesTouched");
+	es->GetStats()->AddFilter("nodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(0, 0), b(size-1, size-1);
 	
 	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
 	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
 
-	//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
-//	u1->SetSpeed(1.0);
-//	es->AddUnit(u1); // go to goal and stop
+	if (which == 0)
+	{
+		printf("Running RIBS\n");
+		LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1); // go to goal and stop
+	}
+	else if (which == 1)
+	{
+		printf("Running LRTA*\n");
+		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 2)
+	{
+		printf("Running LSS-LRTA*(10)\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 3)
+	{
+		printf("Running LSS-LRTA*(100)\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
 	
-//	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
-//	u1->SetSpeed(1.0);
-//	es->AddUnit(u1);
-
-	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
-	u1->SetSpeed(1.0);
-	es->AddUnit(u1);
-	
-	es->SetTrialLimit(100000);
+	es->SetTrialLimit(500000);
 	while (!es->Done())
 	{
 		es->StepTime(10.0);
 	}
 	statValue v;
+	printf("Done\n");
+	int choice = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
+	es->GetStats()->LookupStat(choice, v);
+	printf("first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, v.fval);
+	printf("sum\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "trialDistanceMoved", es->GetUnit(0)->GetName()));
+	es->GetStats()->LookupStat("TotalLearning", es->GetUnit(0)->GetName(), v);
+	printf("learning\t%s\t%f\t%f\t%f\n", es->GetUnit(0)->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+
+	choice = es->GetStats()->FindNextStat("nodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), size, v.lval);
+		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), size, v.lval);
+		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+	}
 	
-	int which = es->GetStats()->FindNextStat("trialDistanceMoved", u1->GetName(), 0);
-	es->GetStats()->LookupStat(which, v);
-	printf("first\t%s\t%d\t%f\n", u1->GetName(), size, v.fval);
-	printf("sum\t%s\t%d\t%f\n", u1->GetName(), size, SumStatEntries(es->GetStats(), "trialDistanceMoved", u1->GetName()));
-	es->GetStats()->LookupStat("TotalLearning", u1->GetName(), v);
-	printf("learning\t%s\t%f\t%f\t%f\n", u1->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
+	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), size, v.lval+1);
 	exit(0);
 }
 
@@ -571,7 +655,10 @@ void RunSTPTest(int which)
 	
 	// add units
 	es->GetStats()->AddFilter("trialDistanceMoved");
+	es->GetStats()->AddFilter("nodesTouched");
+	es->GetStats()->AddFilter("nodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	
 	for (int x = 0; x < 500; x++)
@@ -629,13 +716,32 @@ void RunSTPTest(int which)
 		}
 
 		statValue v;
-		
-		int which = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
-		es->GetStats()->LookupStat(which, v);
+		printf("Done\n");
+		int choice = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
+		es->GetStats()->LookupStat(choice, v);
 		printf("first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, v.fval);
 		printf("sum\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, SumStatEntries(es->GetStats(), "trialDistanceMoved", es->GetUnit(0)->GetName()));
 		es->GetStats()->LookupStat("TotalLearning", es->GetUnit(0)->GetName(), v);
 		printf("learning\t%s\t%f\t%f\t%f\n", es->GetUnit(0)->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+		
+		choice = es->GetStats()->FindNextStat("nodesExpanded", es->GetUnit(0)->GetName(), 0);
+		if (choice != -1)
+		{
+			es->GetStats()->LookupStat(choice, v);
+			printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), x, v.lval);
+			printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
+		}
+		choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
+		if (choice != -1)
+		{
+			es->GetStats()->LookupStat(choice, v);
+			printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), x, v.lval);
+			printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+		}
+		
+		es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
+		printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), x, v.lval+1);
+		exit(0);
 	}
 	exit(0);
 }

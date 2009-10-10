@@ -49,7 +49,7 @@ public:
 	
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & ) { assert(false); };
-	virtual const char *GetName() { return "LSSLRTAStar"; }
+	virtual const char *GetName() { static char name[255]; sprintf(name, "LSSLRTAStar(%d)", nodeExpansionLimit); return name; }
 	void SetHCost(environment *env, state &where, double val) { heur[env->GetStateHash(where)] = val; }
 	double HCost(environment *env, const state &from, const state &to) { return std::max(heur[env->GetStateHash(from)], env->HCost(from, to)); }
 	double HCost(const state &from, const state &to) { return std::max(heur[m_pEnv->GetStateHash(from)], m_pEnv->HCost(from, to)); }
@@ -91,6 +91,8 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 			std::reverse(thePath.begin(), thePath.end());
 			break;
 		}
+	nodesExpanded = astar.GetNodesExpanded();
+	nodesTouched = astar.GetNodesTouched();
 	
 	if (thePath.size() != 0)
 		return;
@@ -112,6 +114,8 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 	ClosedList c;
 	while (q.size() > 0)
 	{
+		nodesExpanded++;
+		nodesTouched++;
 		state s = q.top().theState;
 		if (verbose) std::cout << "Starting with " << s << " h: " << q.top().heuristic << "/" << HCost(s, to) << std::endl;
 		q.pop();
@@ -120,6 +124,7 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 		double hCost = HCost(s, to);
 		for (unsigned int x = 0; x < succ.size(); x++)
 		{
+			nodesTouched++;
 			double succHCost;
 			if (!astar.GetClosedListGCost(succ[x], succHCost))
 			{
