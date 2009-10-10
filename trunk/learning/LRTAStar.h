@@ -32,7 +32,10 @@ public:
 	
 	virtual uint64_t GetNodesExpanded() { return nodesExpanded; }
 	virtual uint64_t GetNodesTouched() { return nodesTouched; }
-	virtual void LogFinalStats(StatCollection *s) { s->AddStat("TotalLearning", GetName(),fAmountLearned); }
+	virtual void LogFinalStats(StatCollection *s)
+	{
+		s->AddStat("TotalLearning", GetName(),fAmountLearned);
+	}
 
 	double GetAmountLearned() { return fAmountLearned; }
 	void OpenGLDraw() const {}

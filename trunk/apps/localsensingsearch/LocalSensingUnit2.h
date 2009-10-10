@@ -65,9 +65,17 @@ namespace LocalSensing {
 		/** log an stats that may have been computed during the last run */
 		void LogStats(StatCollection *) {}
 		/** log any final one-time stats before a simulation is ended */
-		void LogFinalStats(StatCollection *) { }
-		void StartNewTrial(StatCollection *)
+		void LogFinalStats(StatCollection *s)
 		{
+			s->AddStat("nodesExpanded", GetName(), (long)nodesExpanded);
+			s->AddStat("nodesTouched", GetName(), (long)nodesTouched);
+		}
+		void StartNewTrial(StatCollection *s)
+		{
+			s->AddStat("nodesExpanded", GetName(), (long)nodesExpanded);
+			s->AddStat("nodesTouched", GetName(), (long)nodesTouched);
+			nodesExpanded = 0;
+			nodesTouched = 0;
 //			stateInfo<state, action> &si = hashTable[env->GetStateHash(currentLoc)];
 //			stateInfo<state, action> &start = hashTable[env->GetStateHash(startLoc)];
 //			
@@ -87,6 +95,8 @@ namespace LocalSensing {
 		LSStateStorage hashTable;
 		
 		char name[255];
+		unsigned long nodesExpanded, nodesTouched;
+		
 		bool init;
 		bool returnToStart;
 		state currentLoc, startLoc, goalLoc;
@@ -103,6 +113,8 @@ namespace LocalSensing {
 	LocalSensingUnit2<state, action, environment>::LocalSensingUnit2(state &loc, state &goal)
 	:currentLoc(loc), startLoc(loc), goalLoc(goal)
 	{
+		nodesExpanded = 0;
+		nodesTouched = 0;
 		init = false;
 		returnToStart = false;
 		searchWeight = 1.0f;
@@ -140,7 +152,7 @@ namespace LocalSensing {
 			si.lastFCost = searchWeight*e->HCost(currentLoc, goalLoc);
 			si.hCost = e->HCost(currentLoc, goalLoc);
 			si.theState = currentLoc;
-			currentIterationCost = ceil(si.lastFCost);
+			currentIterationCost = si.lastFCost;//ceil(si.lastFCost);
 			init = true;
 		}		
 		
@@ -153,6 +165,8 @@ namespace LocalSensing {
 //		current.hCost = std::max(current.hCost,
 //								 (currentIterationCost-current.bestGCost)/searchWeight);
 		
+		nodesExpanded++;
+		nodesTouched++;
 		std::vector<state> neighbors;
 		e->GetSuccessors(currentLoc, neighbors);		
 		int bestNeighbor = -1;
@@ -166,6 +180,7 @@ namespace LocalSensing {
 
 		for (unsigned int x = 0; x < neighbors.size(); x++)
 		{
+			nodesTouched++;
 			if (verbose) std::cout << "Successor " << x << ": " << neighbors[x] << std::endl;
 			stateInfo<state, action> &next = hashTable[e->GetStateHash(neighbors[x])];
 
@@ -305,7 +320,7 @@ namespace LocalSensing {
 		{
 			if (verbose) std::cout << "Increasing iteration cost to " << nextIterationCost << std::endl;
 			//currentIterationCost = nextIterationCost;
-			currentIterationCost = ceil(nextIterationCost);
+			currentIterationCost = nextIterationCost;//ceil(nextIterationCost);
 			nextIterationCost = DBL_MAX;
 			return false;
 		}

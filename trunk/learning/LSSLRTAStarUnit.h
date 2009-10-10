@@ -31,9 +31,16 @@ public:
 	virtual ~LSSLRTAStarUnit() { delete algorithm; }
 	const char *GetName() { return algorithm->GetName(); }
 	bool Done() { return (currentLoc==goalLoc) && fequal(algorithm->GetAmountLearned(), totalLearned); }
-	void StartNewTrial(StatCollection *) {
-				printf("LSSLRTA*: New trial: %f learned this trial; %f total\n",
-					   algorithm->GetAmountLearned()-totalLearned, algorithm->GetAmountLearned());
+	void StartNewTrial(StatCollection *s) {
+		if (s)
+		{
+			s->AddStat("nodesExpanded", GetName(), nodesExpanded);
+			s->AddStat("nodesTouched", GetName(), nodesTouched);
+		}
+		nodesExpanded = 0;
+		nodesTouched = 0;
+//		printf("LSSLRTA*: New trial: %f learned this trial; %f total\n",
+//			   algorithm->GetAmountLearned()-totalLearned, algorithm->GetAmountLearned());
 		totalLearned = algorithm->GetAmountLearned();
 	}
 	
@@ -54,8 +61,14 @@ public:
 	}
 	void GetGoal(state &s) { s = goalLoc; }
 	void GetLocation(state &s) { s = currentLoc; }
-	virtual void LogFinalStats(StatCollection *s) { algorithm->LogFinalStats(s); }
+	virtual void LogFinalStats(StatCollection *s)
+	{
+		s->AddStat("nodesExpanded", GetName(), nodesExpanded);
+		s->AddStat("nodesTouched", GetName(), nodesTouched);
+		algorithm->LogFinalStats(s);
+	}
 private:
+	long nodesExpanded, nodesTouched;
 	LSSLRTAStar<state, action, environment> *algorithm;			// pointer to the LRTA* algorithm
 	double totalLearned;			// Actual amount learned
 	std::vector<state> path;
@@ -75,6 +88,8 @@ bool LSSLRTAStarUnit<state, action, environment>::MakeMove(environment *e, Occup
 	if (path.size() <= 1)
 	{
 		algorithm->GetPath(e, currentLoc, goalLoc, path);
+		nodesExpanded += algorithm->GetNodesExpanded();
+		nodesTouched += algorithm->GetNodesTouched();
 		if (path.size() <= 1)
 			return false;
 		//std::reverse(path.begin(), path.end());

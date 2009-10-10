@@ -175,8 +175,8 @@ private:
 		int cnt = 0;
 		while (q.size() > 0)
 		{
-			if (((cnt++)%1000) == 0)
-				std::cout << cnt << "\t" << q.size() << "\t" << learning << std::endl;
+//			if (((cnt++)%1000) == 0)
+//				std::cout << cnt << "\t" << q.size() << "\t" << learning << std::endl;
 			state s = q.top().theState;
 			q.pop();
 //			std::cout << s << " " << learnData[env->GetStateHash(s)].learnedHeuristic << std::endl;
