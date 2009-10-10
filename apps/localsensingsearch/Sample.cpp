@@ -456,6 +456,10 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	// add units
 	es->GetStats()->ClearAllStats();
 	es->GetStats()->AddFilter("trialDistanceMoved");
+	es->GetStats()->AddFilter("nodesTouched");
+	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
 
