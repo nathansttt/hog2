@@ -60,13 +60,12 @@ double stepsPerFrame = 1.0/30.0;
 void RunScenario(char *name);
 void RunScalingTest(int size);
 void RunWorkMeasureTest();
-void RunSTPTest();
+void RunSTPTest(int which);
 
 void CreateSimulation(int id);
 
 int main(int argc, char* argv[])
 {
-	RunSTPTest();
 	InstallHandlers();
 	RunHOGGUI(argc, argv);
 }
@@ -223,7 +222,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-STPTest") == 0)
 	{
-		RunSTPTest();
+		RunSTPTest(atoi(argument[1]));
 	}
 	return 2; //ignore typos
 }
@@ -558,11 +557,11 @@ void RunWorkMeasureTest()
 }
 
 
-void RunSTPTest()
+void RunSTPTest(int which)
 {
 	typedef EpisodicSimulation<MNPuzzleState, slideDir, MNPuzzle> STPSim;
 	
-	MNPuzzle *mnp = new MNPuzzle(3, 3);
+	MNPuzzle *mnp = new MNPuzzle(4, 4);
 
 	srandom(81);
 
@@ -575,12 +574,13 @@ void RunSTPTest()
 	es->GetStats()->AddFilter("TotalLearning");
 	es->GetStats()->EnablePrintOutput(false);
 	
-	for (int x = 0; x < 100; x++)
+	for (int x = 0; x < 500; x++)
 	{
 		es->ClearAllUnits();
+		es->GetStats()->ClearAllStats();
 
-		MNPuzzleState s(3, 3);
-		MNPuzzleState g(3, 3);
+		MNPuzzleState s(4, 4);
+		MNPuzzleState g(4, 4);
 		std::vector<slideDir> acts;
 		for (unsigned int y = 0; y < 100; y++)
 		{
@@ -597,14 +597,31 @@ void RunSTPTest()
 			std::cout << "Required learning: " << requiredLearning << std::endl;
 		}
 		
-		//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
-		//	u1->SetSpeed(1.0);
-		//	es->AddUnit(u1); // go to goal and stop
-		
-		LRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle>(s, g, new LRTAStar<MNPuzzleState, slideDir, MNPuzzle>());
-		u1->SetSpeed(1.0);
-		es->AddUnit(u1);
-		
+		if (which == 0)
+		{
+			LocalSensing::LocalSensingUnit2<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LocalSensing::LocalSensingUnit2<MNPuzzleState, slideDir, MNPuzzle>(s, g);
+			u1->SetSpeed(1.0);
+			es->AddUnit(u1); // go to goal and stop
+		}
+		else if (which == 1)
+		{
+			LRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle>(s, g, new LRTAStar<MNPuzzleState, slideDir, MNPuzzle>());
+			u1->SetSpeed(1.0);
+			es->AddUnit(u1);
+		}
+		else if (which == 2)
+		{
+			LSSLRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LSSLRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle>(s, g, new LSSLRTAStar<MNPuzzleState, slideDir, MNPuzzle>(10));
+			u1->SetSpeed(1.0);
+			es->AddUnit(u1);
+		}
+		else if (which == 3)
+		{
+			LSSLRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LSSLRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle>(s, g, new LSSLRTAStar<MNPuzzleState, slideDir, MNPuzzle>(100));
+			u1->SetSpeed(1.0);
+			es->AddUnit(u1);
+		}
+
 		es->SetTrialLimit(100000);
 		while (!es->Done())
 		{
@@ -613,12 +630,12 @@ void RunSTPTest()
 
 		statValue v;
 		
-		int which = es->GetStats()->FindNextStat("trialDistanceMoved", u1->GetName(), 0);
+		int which = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
 		es->GetStats()->LookupStat(which, v);
-		printf("first\t%s\t%d\t%f\n", u1->GetName(), x, v.fval);
-		printf("sum\t%s\t%d\t%f\n", u1->GetName(), x, SumStatEntries(es->GetStats(), "trialDistanceMoved", u1->GetName()));
-		es->GetStats()->LookupStat("TotalLearning", u1->GetName(), v);
-		printf("learning\t%s\t%f\t%f\t%f\n", u1->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+		printf("first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, v.fval);
+		printf("sum\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, SumStatEntries(es->GetStats(), "trialDistanceMoved", es->GetUnit(0)->GetName()));
+		es->GetStats()->LookupStat("TotalLearning", es->GetUnit(0)->GetName(), v);
+		printf("learning\t%s\t%f\t%f\t%f\n", es->GetUnit(0)->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
 	}
 	exit(0);
 }
