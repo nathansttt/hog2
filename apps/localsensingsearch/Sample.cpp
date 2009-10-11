@@ -62,6 +62,9 @@ void RunScalingTest(int size, int which);
 void RunWorkMeasureTest();
 void RunSTPTest(int which);
 
+void RunBigScenario(char *name);
+void RunBigTest(MapEnvironment *me, const Experiment &e);
+
 void CreateSimulation(int id);
 
 int main(int argc, char* argv[])
@@ -214,7 +217,8 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-scenario") == 0)
 	{
-		RunScenario(argument[1], atoi(argument[2]));
+		//RunScenario(argument[1], atoi(argument[2]));
+		RunBigScenario(argument[1]);
 	}
 	else if (strcmp(argument[0], "-scaleTest") == 0)
 	{
@@ -528,6 +532,33 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval+1);
 }
 
+void RunBigScenario(char *name)
+{
+	ScenarioLoader *sl = new ScenarioLoader(name);
+	printf("Loading map: %s\n", sl->GetNthExperiment(0).GetMapName());
+	
+	Map *map = new Map(sl->GetNthExperiment(0).GetMapName());
+	map->Scale(sl->GetNthExperiment(0).GetXScale()*2,
+			   sl->GetNthExperiment(0).GetYScale()*2);
+	MapEnvironment *me;
+	me = new MapEnvironment(map, false);
+	me->SetDiagonalCost(1.5);
+	
+	for (int x = 0; x < sl->GetNumExperiments(); x++)
+	{
+		printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
+		RunBigTest(me, sl->GetNthExperiment(x));
+	}
+	exit(0);
+}
+
+void RunBigTest(MapEnvironment *me, const Experiment &e)
+{
+	xyLoc a(2*e.GetStartX(), 2*e.GetStartY()), b(2*e.GetGoalX(), 2*e.GetGoalY());
+	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+	double requiredLearning = measure.MeasureDifficultly(me, a, b);
+	printf("learning\t%f\t%d\n", requiredLearning, e.GetBucket());
+}
 
 void RunScalingTest(int size, int which)
 {
@@ -745,7 +776,6 @@ void RunSTPTest(int which)
 		
 		es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
 		printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), x, v.lval+1);
-		exit(0);
 	}
 	exit(0);
 }
