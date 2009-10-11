@@ -172,7 +172,7 @@ private:
 
 		std::vector<state> succ;
 		double learning = 0;
-		int cnt = 0;
+//		int cnt = 0;
 		while (q.size() > 0)
 		{
 //			if (((cnt++)%1000) == 0)
