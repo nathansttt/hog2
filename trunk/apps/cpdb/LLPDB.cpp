@@ -665,7 +665,7 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 			else {
 				theMap = new Map(sl->GetNthExperiment(0).GetMapName());
 				theMap->Scale(sl->GetNthExperiment(0).GetXScale(), sl->GetNthExperiment(0).GetYScale());
-				theGraph = GraphSearchConstants::GetFourConnectedGraph(theMap);
+				theGraph = GraphSearchConstants::GetEightConnectedGraph(theMap);
 			}
 			for (int y = 0; y <= 1; y++)
 			{
