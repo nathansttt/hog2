@@ -26,7 +26,12 @@ public:
 
 	int best_of_combo(vector<unsigned> &, vector<unsigned> &, unsigned);
 
-	void turn_taking_on_weight_set(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &combo, double &total_combo_nodes, double &total_combo_cost, unsigned &combo_solved, bool parallel, bool print_histogram, bool print_all);
+	void turn_taking_on_weight_set(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &combo, uint64_t &total_combo_nodes, double &total_combo_cost, unsigned &combo_solved, bool parallel, bool print_histogram, bool print_all);
+
+	void turn_taking_on_weight_set(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &combo, uint64_t &total_combo_nodes, double &total_combo_cost, unsigned &combo_solved, vector<uint64_t> &prob_expanded, vector<double> &sol_cost, bool parallel, bool print_histogram, bool print_all);
+
+	void set_expand_bound(uint64_t _max);
+
 protected:
 	vector <string> solver_names;
 	vector<vector<double> > costs;
@@ -35,5 +40,7 @@ protected:
 	vector<vector<uint64_t> >nodes_touched;
 
 	unsigned num_solvers, num_problems;
+
+	uint64_t max_expand;
 };
 #endif
