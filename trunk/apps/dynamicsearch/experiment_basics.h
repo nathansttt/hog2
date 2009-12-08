@@ -67,7 +67,82 @@ uint64_t general_batch(environment *env, GenericStepAlgorithm<state, action, env
 	std::cout << batch_header(env, solver) << std::endl;
 	for(unsigned i = 0; i < puzzles.size(); i++) {
 
-		unsigned status = 0;
+		int status = 0;
+		// tries to solve the problem
+		if(type == ACTION_PATH) {
+			status = solver->GetPath(env, puzzles[i], goal, action_path);
+		}
+		else if(type == STATE_PATH) {
+			status = solver->GetPath(env, puzzles[i], goal, state_path);
+		}
+
+		if(status != 1) { // if no solution was found
+			if(print_all_stats) {
+				printf("-1\n");
+				fflush(stdout);
+			}
+			continue;
+		}
+
+		solved_problems++;
+
+		total_cost += solver->GetPathCost();
+		total_checked += solver->GetNodesChecked();
+		total_touched += solver->GetNodesTouched();
+		total_expanded += solver->GetNodesExpanded();
+
+		if(print_all_stats) {
+			printf("%4.f\t", solver->GetPathCost());
+			std::cout << solver->GetNodesExpanded() << "\t";
+			std::cout << solver->GetNodesChecked() << "\t";
+			std::cout << solver->GetNodesTouched() << "\n";
+		}
+	}
+	std::cout << "TOTALS\t";
+	printf("%4.f\t", total_cost);
+	std::cout << total_expanded << "\t" << total_checked << "\t" << total_touched << "\t" << solved_problems << "\n";
+	printf("\n");
+	return (uint64_t) total_checked;
+}
+
+/** Perfoms a batch of experiments with given search environment, given solver and set of puzzles.
+	If print_all_stats is true, will print the value of every single puzzle solved. If the puzzle
+	solving failed, prints -1. The type selects what kind of solutions are returned during problem
+	solving. Is used because not all methods are defined for all solvers.
+
+	Note: assumes that the goal is stored in the environment.
+ **/
+template <class state, class action, class environment>
+uint64_t general_batch_prob_expand_limits(environment *env, GenericStepAlgorithm<state, action, environment> *solver, std::vector<state> &puzzles, std::vector<uint64_t> &exp_limit, bool print_all_stats, unsigned type){
+
+	if(puzzles.size() != exp_limit.size()) {
+		std::cerr << "ERROR: general_batch_prob_expand_limits called with unequal length problem and limit lists.\n";
+		exit(1);
+	}
+
+	uint64_t total_checked = 0;
+	uint64_t total_touched = 0;
+	uint64_t total_expanded = 0;
+
+	double total_cost = 0.0;
+
+	std::vector<action> action_path;
+	std::vector<state> state_path;
+
+	if(!env->IsGoalStored()) {
+		std::cerr << "ERROR: general_batch called with environment that does not have the goal stored.\n";
+		exit(1);
+	}
+
+	state goal = env->Get_Goal();
+	unsigned solved_problems = 0;
+
+	// print header for batch solving
+	std::cout << batch_header(env, solver) << std::endl;
+	for(unsigned i = 0; i < puzzles.size(); i++) {
+
+		int status = 0;
+		solver->SetExpandedLimit(exp_limit[i]);
 		// tries to solve the problem
 		if(type == ACTION_PATH) {
 			status = solver->GetPath(env, puzzles[i], goal, action_path);
@@ -111,7 +186,6 @@ void general_batch_orders(environment *env, GenericStepAlgorithm<state, action, 
 	nodes_expanded.clear();
 	for(unsigned i = 0; i < puzz_orders.size(); i++) {
 		env->Change_Op_Order(puzz_orders[i]);
-		std::cout << batch_header(env, solver) << std::endl;
 		general_batch(env, solver, puzzles, print_all_stats, type);
 		std::cout << "\n";
 	}

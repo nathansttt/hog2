@@ -15,6 +15,8 @@
 //#include "TurnTakingUCT.h"
 #include "PancakePuzzle.h"
 //#include "GenericTemplateAStar.h"
+#include <sys/resource.h>
+#include <errno.h>
 
 using namespace std;
 
@@ -29,15 +31,170 @@ void handle_warnings() {
 int main(int argc, char** argv)
 {
 
+	struct rlimit limit;
+	if (getrlimit(RLIMIT_STACK, &limit) != 0) {
+		printf("getrlimit() failed with errno=%d\n", errno);
+		exit(1);
+	}
+	//printf("The soft limit is %llu\n", limit.rlim_cur);
+	//printf("The hard limit is %llu\n", limit.rlim_max);
+
+
+	limit.rlim_cur = 83886080;
+	limit.rlim_max = 83886080;
+	if (setrlimit(RLIMIT_STACK, &limit) != 0) {
+		printf("setrlimit() failed with errno=%d\n", errno);
+		exit(1);
+	}
+
+	/************ Turn-taking experiments **************/
+
+	// creates turn-taking test file
+
+	//TurnTakingSimulation::output_turntaking_input_file("../../apps/dynamicsearch/input/rbfs/5x5_wrbfs_1000", 1000, "../../apps/dynamicsearch/input/rbfs/5x5_wrbfs_1000_tt");
+
+
+	// puzzles to test on
+	vector<unsigned> desired_puzzles;
+
+	// Ruml Experiments
+	/*
+	desired_puzzles.push_back(26);
+	desired_puzzles.push_back(43);
+	desired_puzzles.push_back(44);
+	desired_puzzles.push_back(9);
+	desired_puzzles.push_back(1);
+	desired_puzzles.push_back(27);
+	desired_puzzles.push_back(5);
+	desired_puzzles.push_back(32);
+	desired_puzzles.push_back(31);
+	desired_puzzles.push_back(17);
+	desired_puzzles.push_back(12);
+	desired_puzzles.push_back(14);
+	desired_puzzles.push_back(37);
+	desired_puzzles.push_back(41);
+	desired_puzzles.push_back(36);
+	desired_puzzles.push_back(2);
+	desired_puzzles.push_back(18);
+	desired_puzzles.push_back(38);
+	desired_puzzles.push_back(7);
+	desired_puzzles.push_back(11);
+	desired_puzzles.push_back(42);
+	desired_puzzles.push_back(3);
+	desired_puzzles.push_back(22);
+	desired_puzzles.push_back(29);
+	desired_puzzles.push_back(19);
+	desired_puzzles.push_back(39);
+	desired_puzzles.push_back(35);
+	desired_puzzles.push_back(23);
+	desired_puzzles.push_back(16);
+	desired_puzzles.push_back(12);
+	desired_puzzles.push_back(34);
+	desired_puzzles.push_back(25);
+	desired_puzzles.push_back(0);
+	desired_puzzles.push_back(24);
+	desired_puzzles.push_back(15);
+	desired_puzzles.push_back(13);
+	desired_puzzles.push_back(21);
+	desired_puzzles.push_back(8);
+	desired_puzzles.push_back(6);
+	desired_puzzles.push_back(20);
+	desired_puzzles.push_back(28);
+	desired_puzzles.push_back(4);
+	*/
+
+	for(unsigned i = 0; i < 1000; i++) {
+		desired_puzzles.push_back(i);
+	}
+
+	unsigned total_solvers = 9;
+	unsigned start = 0;
+	unsigned inc = 1;
+	vector<unsigned> desired_solvers;
+
+	// solvers to test on
+	for(unsigned i = start; i < start + inc*(total_solvers - 1) + 1; i+= inc) {
+		desired_solvers.push_back(i);
+	}
+
+	// candidate set sizes to test
+	vector<unsigned> set_sizes;
+	for(unsigned i = 2; i <= total_solvers; i++) {
+	//for(unsigned i = 2; i <= 2; i++) {
+		//for(unsigned i = total_solvers; i <= total_solvers; i++) {
+		set_sizes.push_back(i);
+	}
+
+	// num per candidate set size to test
+	vector<unsigned> num_per_size;
+
+
+	for(unsigned i = 2; i <= total_solvers; i++) {
+	//for(unsigned i = 2; i <= 2; i++) {
+		num_per_size.push_back(0);
+	}
+
+	// for size 24
+	/*
+	num_per_size.push_back(0);
+	num_per_size.push_back(0);
+
+	for(unsigned i = 4; i <= 20; i++) {
+		num_per_size.push_back(10000);
+	}
+	num_per_size.push_back(0);
+	num_per_size.push_back(0);
+	num_per_size.push_back(0);
+	num_per_size.push_back(0);
+	*/
+
+	/** Dovetailing Simulations **/
+
+	// many simulations
+
+
+	TurnTakingSimulation simulator( "../../apps/dynamicsearch/input/rbfs/5x5_wrbfs_1000_tt");
+	//simulator.output_solver_names(desired_solvers);
+	//simulator.simulate(desired_puzzles, desired_solvers, set_sizes, num_per_size, false, false);
+
+	// single candidate set size
+
+	vector<unsigned> combo;
+	uint64_t total_combo_nodes;
+	double total_combo_cost;
+	unsigned combo_solved;
+	for(unsigned i = 0; i < total_solvers; i++) {
+		combo.push_back(i);
+	}
+	vector<uint64_t> prob_expanded;
+	vector<double> prob_cost;
+	simulator.turn_taking_on_weight_set(desired_puzzles, desired_solvers, combo, total_combo_nodes, total_combo_cost, combo_solved, prob_expanded, prob_cost, true, false, false);
+
+
+
+	/** UCT Dovetailing **/
+	/*
+	// many simulations
+	TurnTakingUCT tt_uct("../../apps/dynamicsearch/input/ida/5x5_ida_1000_weight_stats_tt");
+	tt_uct.output_solver_names(desired_solvers);
+	tt_uct.simulate_uct(desired_puzzles, desired_solvers, set_sizes, num_per_size, 0.01, false, false);
+
+	// single size simulations
+	//double total_cost, total_nodes;
+	//unsigned num_solved;
+	//tt_uct.uct_run(desired_puzzles, desired_solvers, 5, total_cost, total_nodes, num_solved, 10, true, false);
+	//printf("%.0f\t%.0f\n", total_cost, total_nodes);
+	*/
+
 	/******************** MN PUZZLE EXPERIMENTS ********************/
 	vector<MNPuzzleState> temp_mn_puzzles;
-	get_big_4x4_test_set(temp_mn_puzzles, 1000);
-	//get_standard_test_set(puzzles, 100);
+	//get_big_4x4_test_set(temp_mn_puzzles, 1000);
+	//get_standard_test_set(temp_mn_puzzles, 100);
 	//get_6x6_test_set(puzzles, 1);
-	//get_6x6_test_set(puzzles, 100);
+	get_5x5_test_set(temp_mn_puzzles, 1000);
 
-	unsigned num_cols = 4;
-	unsigned num_rows = 4;
+	unsigned num_cols = 5;
+	unsigned num_rows = 5;
 
 	std::vector<slideDir> my_op_order;
 	// defines order to use
@@ -60,7 +217,7 @@ int main(int argc, char** argv)
 
 	// takes puzzles you want to solve
 	unsigned begin_index = 0;
-	unsigned end_index = 19;
+	unsigned end_index = 999;
 	vector<MNPuzzleState> mn_puzzles;
 	for(unsigned i = begin_index; i <= end_index; i++) {
 		mn_puzzles.push_back(temp_mn_puzzles[i]);
@@ -131,6 +288,7 @@ int main(int argc, char** argv)
 
 
 	/** Random Sorting Order Experiments **/
+	/*
 	RandomSortingIDA<MNPuzzleState, slideDir, MNPuzzle> mn_rsort_ida;
 	mn_rsort_ida.Change_Weights(1.0, 3.0);
 	for(int seed = 10000; seed <= 10040; seed+= 21) {
@@ -138,6 +296,7 @@ int main(int argc, char** argv)
 		general_batch(&mnp, &mn_rsort_ida, mn_puzzles, true, ACTION_PATH);
 		cout << "\n";
 	}
+	*/
 
 	/**
 	IDA* MN Order Experiments
@@ -152,13 +311,14 @@ int main(int argc, char** argv)
 	/**
 	RBFS MN Puzzle Experiments
 	**/
-	/*
-	for(double weight = 3.0; weight <= 6.0; weight+= 1) {
+
+	for(double weight = 2.0; weight <= 2.0; weight+= 1) {
 
 		mn_rbfs.Change_Weights(1.0, weight);
-		general_batch(&mnp, &mn_rbfs, mn_puzzles, true, ACTION_PATH);
+		//general_batch(&mnp, &mn_rbfs, mn_puzzles, true, ACTION_PATH);
+		general_batch_prob_expand_limits(&mnp, &mn_rbfs, mn_puzzles, prob_expanded, true, ACTION_PATH);
 		cout << "\n";
-	}*/
+	}
 
 	/**
 	RBFS MN Order Experiments
@@ -181,13 +341,14 @@ int main(int argc, char** argv)
 		cout << "\n";
 	}*/
 
+
 	/**
-	RBFS MN Order Experiments
+	WA MN Order Experiments
 	**/
 
 	/*
 	mn_astar.SetMemoryLimit(1000000);
-	for(double weight = 3.0; weight <= 3.0; weight ++) {
+	for(double weight = 1.4; weight <= 1.4; weight ++) {
 		mn_astar.SetWeight(weight);
 		general_batch_orders(&mnp, &mn_astar, mnp_op_orders, mn_puzzles, true, STATE_PATH, nodes_expanded);
 		cout << "\n";
@@ -196,7 +357,7 @@ int main(int argc, char** argv)
 	/** BEAM/BULB MN Puzzle settings **/
 
 	unsigned mn_beam_memory_limit = 1000000;
-	bool mn_beam_prune_dups = true;
+	bool mn_beam_prune_dups = false;
 	bool mn_beam_full_check = true;
 
 	unsigned mn_initial_discrepancies = 0;
@@ -221,8 +382,9 @@ int main(int argc, char** argv)
 	BEAM/BULB MN Puzzle Experiments
 	**/
 
-	/*
+
 	// MN Puzzle Beam Search Experiments
+	/*
 	for(unsigned i = 0; i < 3; i++) {
 		mn_beam_search.Change_Beam_Size(beam_sizes[i]);
 		general_batch(&mnp, &mn_beam_search, mn_puzzles, true, STATE_PATH);
@@ -255,94 +417,6 @@ int main(int argc, char** argv)
 		general_batch_orders(&mnp, &mn_bulb, mnp_op_orders, mn_puzzles, true, STATE_PATH, nodes_expanded);
 		cout << "\n";
 	}*/
-
-	/**
-	Turn-taking experiments
-	**/
-
-	// creates turn-taking test file
-
-	//TurnTakingSimulation::output_turntaking_input_file("../../apps/dynamicsearch/input/ida/16panc_0to5_6to9_ida_op_w10", 100, "../../apps/dynamicsearch/input/ida/16panc_0to5_6to9_ida_op_w10_tt");
-
-
-	// puzzles to test on
-	vector<unsigned> desired_puzzles;
-	for(unsigned i = 0; i < 100; i++) {
-		desired_puzzles.push_back(i);
-	}
-
-	unsigned total_solvers = 15;
-	unsigned start = 0;
-	unsigned inc = 1;
-	vector<unsigned> desired_solvers;
-
-	// solvers to test on
-	for(unsigned i = start; i < start + inc*(total_solvers - 1) + 1; i+= inc) {
-		desired_solvers.push_back(i);
-	}
-
-	// candidate set sizes to test
-	vector<unsigned> set_sizes;
-	for(unsigned i = 2; i <= total_solvers; i++) {
-	//for(unsigned i = 20; i <= 20; i++) {
-		//for(unsigned i = total_solvers; i <= total_solvers; i++) {
-		set_sizes.push_back(i);
-	}
-
-	// num per candidate set size to test
-	vector<unsigned> num_per_size;
-
-	for(unsigned i = 2; i <= total_solvers; i++) {
-	//for(unsigned i = 2; i <= 2; i++) {
-		num_per_size.push_back(0);
-	}
-
-	// for size 24
-	/*
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);
-
-	for(unsigned i = 4; i <= 20; i++) {
-		num_per_size.push_back(10000);
-	}
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);
-	num_per_size.push_back(0);
-	*/
-
-	/** Dovetailing Simulations **/
-
-	// many simulations
-	/*
-	TurnTakingSimulation simulator( "../../apps/dynamicsearch/input/ida/5x5_ida_1000_weight_stats_tt");
-	simulator.output_solver_names(desired_solvers);
-	simulator.simulate(desired_puzzles, desired_solvers, set_sizes, num_per_size, false, false);
-	*/
-	// single candidate set size
-	/*
-	vector<unsigned> combo;
-	double total_combo_nodes, total_combo_cost;
-	unsigned combo_solved;
-	for(unsigned i = 0; i < total_solvers; i++) {
-		combo.push_back(i);
-	}
-	simulator.turn_taking_on_weight_set(desired_puzzles, desired_solvers, combo, total_combo_nodes, total_combo_cost, combo_solved, true, false, true);
-	*/
-
-	/** UCT Dovetailing **/
-	/*
-	// many simulations
-	TurnTakingUCT tt_uct("../../apps/dynamicsearch/input/ida/5x5_ida_1000_weight_stats_tt");
-	tt_uct.output_solver_names(desired_solvers);
-	tt_uct.simulate_uct(desired_puzzles, desired_solvers, set_sizes, num_per_size, 0.01, false, false);
-
-	// single size simulations
-	//double total_cost, total_nodes;
-	//unsigned num_solved;
-	//tt_uct.uct_run(desired_puzzles, desired_solvers, 5, total_cost, total_nodes, num_solved, 10, true, false);
-	//printf("%.0f\t%.0f\n", total_cost, total_nodes);
-	*/
 
 
 	/*

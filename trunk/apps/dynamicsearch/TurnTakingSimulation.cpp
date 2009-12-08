@@ -265,9 +265,12 @@ int TurnTakingSimulation::best_of_combo(vector<unsigned> &solvers_of_interest, v
 	return best_index;
 }
 
-void TurnTakingSimulation::turn_taking_on_weight_set(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &combo, double &total_combo_nodes, double &total_combo_cost, unsigned &combo_solved, bool parallel, bool print_histogram, bool print_all) {
+void TurnTakingSimulation::turn_taking_on_weight_set(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &combo, uint64_t &total_combo_nodes, double &total_combo_cost, unsigned &combo_solved, vector<uint64_t> &prob_expanded, vector<double> &prob_cost, bool parallel, bool print_histogram, bool print_all){
 
-	total_combo_nodes = 0.0;
+	prob_expanded.clear();
+	prob_cost.clear();
+
+	total_combo_nodes = 0;
 	total_combo_cost = 0.0;
 	combo_solved = 0;
 
@@ -282,29 +285,43 @@ void TurnTakingSimulation::turn_taking_on_weight_set(vector<unsigned> &puzzles_o
 
 		int best_index = best_of_combo(solvers_of_interest, combo, puzzles_of_interest[i]);
 
-		if(best_index < 0) // turn-taking did not solve this problem
+		if(best_index < 0) { // turn-taking did not solve this problem
+			prob_expanded.push_back(0);
+			prob_cost.push_back(0);
 			continue;
+		}
 
 		combo_solved++;
 
-		histogram[best_index]++;
 		unsigned best_solver_index = solvers_of_interest[combo[best_index]];
 
-		double current_nodes = nodes_expanded[best_solver_index][puzzles_of_interest[i]];
+		uint64_t current_nodes = nodes_expanded[best_solver_index][puzzles_of_interest[i]];
 		double current_cost = costs[best_solver_index][puzzles_of_interest[i]];
 
 		assert(current_nodes > 0);
 
 		// gets number of nodes expanded
-		double problem_nodes;
+		uint64_t problem_nodes;
 
 		if(parallel)
 			problem_nodes = current_nodes;
 		else
-			problem_nodes = (current_nodes - 1.0)*combo.size() + best_index + 1.0;
+			problem_nodes = (current_nodes - 1)*combo.size() + best_index + 1;
+
+		if(max_expand > 0 && problem_nodes > max_expand) {
+			prob_expanded.push_back(0);
+			prob_cost.push_back(0);
+			continue;
+		}
+
+		prob_expanded.push_back(problem_nodes);
+		prob_cost.push_back(current_cost);
+
+		histogram[best_index]++;
 
 		if(print_all) {
-			printf("%.0f\t%.0f\n", current_cost, problem_nodes);
+			printf("%.0f\t", current_cost);
+			std::cout << problem_nodes << "\n";
 		}
 		total_combo_nodes += problem_nodes; // increment problem
 		total_combo_cost += current_cost;
@@ -315,8 +332,16 @@ void TurnTakingSimulation::turn_taking_on_weight_set(vector<unsigned> &puzzles_o
 			printf("%u\t%u\n", solvers_of_interest[combo[i]], histogram[i]);
 		}
 	}
-
 }
+
+void TurnTakingSimulation::turn_taking_on_weight_set(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &combo, uint64_t &total_combo_nodes, double &total_combo_cost, unsigned &combo_solved, bool parallel, bool print_histogram, bool print_all) {
+
+	vector<uint64_t> prob_expanded;
+	vector<double> prob_cost;
+
+	turn_taking_on_weight_set(puzzles_of_interest, solvers_of_interest, combo, total_combo_nodes, total_combo_cost, combo_solved, prob_expanded, prob_cost, parallel, print_histogram, print_all);
+}
+
 void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vector<unsigned> &solvers_of_interest, vector<unsigned> &set_sizes, vector<unsigned> num_per_size, bool parallel, bool print_all_stats) {
 
 	num_solvers = solver_names.size();
@@ -376,7 +401,8 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 
 	vector<unsigned> all_best_ratio_solved, all_worst_ratio_solved, all_best_solved, all_worst_solved;
 	unsigned combo_solved, best_nodes_index, current_nodes_index, best_ratio_solved = 0, worst_ratio_solved = 0, num_solved_best = 0, num_solved_worst = 0;
-	double total_combo_nodes, total_combo_cost;
+	uint64_t total_combo_nodes;
+	double total_combo_cost;
 	double best_ratio;
 	double node_size_av = 0, cost_size_av = 0, ratio_size_av = 0, num_solved_av = 0;
 	double node_size_best = 0, cost_size_best = 0, ratio_size_best = 0;
@@ -451,8 +477,12 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 			best_ratio = (total_combo_nodes / total_nodes[best_nodes_index])*
 				(total_solved[best_nodes_index] / combo_solved);
 
-			if(print_all_stats)
-				printf(": %.0f\t%.0f\t%.4f\t%d\n", total_combo_cost, total_combo_nodes, best_ratio, combo_solved);
+			if(print_all_stats) {
+				printf(": %.0f\t", total_combo_cost);
+				std::cout << total_combo_nodes << "\t";
+				printf("%.4f\t%d\n", best_ratio, combo_solved);
+				//printf(": %.0f\t%.0f\t%.4f\t%d\n", total_combo_cost, total_combo_nodes, best_ratio, combo_solved);
+			}
 
 			node_size_av += total_combo_nodes;
 			cost_size_av += total_combo_cost;
@@ -548,6 +578,7 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 		printf("%.0f\t%.0f\t%.0f\t", all_avs[i][0], all_avs[i][1], all_avs[i][2]);
 		printf("%.4f\t%.4f\t%.4f\t\t", all_ratios[i][0], all_ratios[i][1], all_ratios[i][2]);
 
+		/*
 		for(unsigned j = 0; j < best_combos[i].size() - 1; j++) {
 			printf("%u, ", best_combos[i][j]);
 		}
@@ -557,6 +588,8 @@ void TurnTakingSimulation::simulate(vector<unsigned> &puzzles_of_interest, vecto
 			printf("%u, ", worst_combos[i][j]);
 		}
 		printf("%u\n", worst_combos[i][worst_combos[i].size() - 1]);
+		*/
+		printf("\n");
 	}
 }
 
@@ -787,4 +820,8 @@ int TurnTakingSimulation::output_turntaking_input_file(const char *filename, int
 
 	fclose(of);
 	return 0;
+}
+
+void TurnTakingSimulation::set_expand_bound(uint64_t _max){
+	max_expand = _max;
 }

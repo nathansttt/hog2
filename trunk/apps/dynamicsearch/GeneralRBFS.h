@@ -221,7 +221,7 @@ int GeneralRBFS<state, action, environment>::GetPath(environment *env, state fro
 	std::vector<action> act;
 	env->GetActions(from, act);
 
-	bool status = 0;
+	int status = 0;
 
 	double h;
 

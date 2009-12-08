@@ -52,7 +52,6 @@ void  RandomSortingIDA<state, action, environment>::sort_succ(environment *env, 
 
 		action to_apply = actions[i];
 		double edgeCost = env->GCost(currState, to_apply);
-		double g = parent_g + edgeCost;
 
 		env->ApplyAction(currState, to_apply);
 
