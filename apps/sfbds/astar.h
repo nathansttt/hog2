@@ -81,12 +81,14 @@ public:
 	unsigned int reopenedNodes;
 	unsigned int bpmxUpdates;
 
+	unsigned int GetOpenQueueSize() { return( open.size() ); };
+
 protected:
 
 	// the most important function to this research
 	// if expand_heuristic is true the start will be expanded
 	// otherwise the goal will be expanded
-	bool expandheuristic( state &start, state &goal, unsigned int coming_from );
+	bool expandheuristic( QueueNode &q );
 
 	// updates the coming_from tag as described below
 	unsigned int update_coming_from( unsigned int &old_flag, bool &expand );
@@ -131,6 +133,8 @@ protected:
 	private:
 	double sanity_fcost_check;
 
+	bool *OpenGLDrawState;
+	void OpenGLDraw_RegisterClosedState( QueueNode &q );
 
 };
 
@@ -142,7 +146,7 @@ protected:
 // Header
 template<class state, class action>
 SFBDSAStar<state,action>::SFBDSAStar( SearchEnvironment<state,action> *_env ):
-	env( _env ) {
+	env( _env ), OpenGLDrawState(NULL) {
 };
 
 template<class state, class action>
@@ -157,6 +161,9 @@ SFBDSAStar<state,action>::~SFBDSAStar() {
 	distances_from_goal.clear();
 	std::cout << "destroyed class and cleared everything" << std::endl << std::flush;
 	*/
+
+	if( OpenGLDrawState != NULL )
+		delete OpenGLDrawState;
 };
 
 
@@ -192,6 +199,12 @@ void SFBDSAStar<state,action>::initialize( state s1, state s2, int _expandheuris
 	sanity_fcost_check = q.fcost;
 	open.push( q );
 
+	// reset the view
+	if( OpenGLDrawState != NULL ) {
+		delete OpenGLDrawState;
+		OpenGLDrawState = NULL;
+	}
+
 	return;
 };
 
@@ -223,8 +236,8 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 
 		if( q.s1 == q.s2 ) return q; // end the search when a terminal is found
 
-		// TODO: reenable this pruning!!!
-/*
+// TODO: enable again
+/* */
 		// prune if the distance from the original start is non-optimal
 		distancesiter = distances_from_start.find( q.s1 );
 		if( distancesiter != distances_from_start.end() && fless( distancesiter->second, q.gcost1 ) ) {
@@ -240,7 +253,7 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 			continue;
 		} else
 			distances_from_goal[q.s2] = q.gcost2;
-*/
+/* */
 
 		// check whether q is already in the closed list
 		closediter1 = closed.find( q );
@@ -264,7 +277,7 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 	//std::cout << "expanding: " << q.s1 << " " << q.s2 << std::endl;
 
 	// now find out which side of q to expand
-	expand = expandheuristic( q.s1, q.s2, q.coming_from );
+	expand = expandheuristic( q );
 	if( expand ) env->GetSuccessors( q.s1, neighbors ); // expand q.s1
 	else         env->GetSuccessors( q.s2, neighbors ); // expand q.s2
 	nodesExpanded++;
@@ -294,8 +307,8 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 			successor.gcost1 = q.gcost1 + transit_cost;
 			successor.gcost2 = q.gcost2;
 
-		// TODO: reenable this pruning!!!
-/*
+// TODO: enable again
+/* */
 			// check whether new successor has sub-optimal distance from the start
 			distancesiter = distances_from_start.find( successor.s1 );
 			if( distancesiter != distances_from_start.end() &&
@@ -304,7 +317,7 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 				continue;
 			} else
 				distances_from_start[successor.s1] = successor.gcost1;
-*/
+/* */
 		} else {
 			successor.p2 = q.s2;
 			successor.p1 = q.p1;
@@ -315,8 +328,8 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 			transit_cost = env->GCost( q.s2, successor.s2 );
 			successor.gcost2 = q.gcost2 + transit_cost;
 
-		// TODO: reenable this pruning!!!
-/*
+// TODO: enable again
+/* */
 			// check whether new successor has sub-optimal distance from the goal
 			distancesiter = distances_from_goal.find( successor.s2 );
 			if( distancesiter != distances_from_goal.end() &&
@@ -325,7 +338,7 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 				continue;
 			} else
 				distances_from_goal[successor.s2] = successor.gcost2;
-*/
+/* */
 		}
 
 		// check whether the successor is already in the closed list
@@ -342,6 +355,7 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 		max_root_hcost = std::max( max_root_hcost, hcost - transit_cost );
 	} // for all successors
 
+
 	if( fless( q.fcost, q.gcost1 + q.gcost2 + max_root_hcost ) ) {
 		// update the hcost of the parent
 		q.fcost = q.gcost1 + q.gcost2 + max_root_hcost;
@@ -352,6 +366,8 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 		closed.erase( closediter1 );
 	// write q to the closed list
 	closed.insert( q );
+	// update the OPENGL drawing
+	OpenGLDraw_RegisterClosedState( q );
 
 	// now update all the hcosts of the successors (BPMX)
 	for( nodeiter = successors.begin(); nodeiter != successors.end(); nodeiter++ ) {
@@ -385,6 +401,7 @@ double SFBDSAStar<state,action>::astar( state s1, state s2, std::vector<state> &
 
 	QueueNode q;
 	bool expanded;
+	//unsigned int counter = 0;
 	// iterate over the queue
 	while( !open.empty() ) {
 		q = step( expanded );
@@ -400,6 +417,12 @@ double SFBDSAStar<state,action>::astar( state s1, state s2, std::vector<state> &
 		//	<< " gcost2=" << q.gcost2
 		//	<< ")" << std::endl;
 		if( q.s1 == q.s2 ) break;
+		// verbose
+		//counter++;
+		//if( counter%1000 == 0 ) {
+		//	std::cout << "closed: " << closed.size() << "   open: " << open.size() << "  expanded: " << nodesExpanded << std::endl;
+		//	counter = 0;
+		//}
 	}
 
 	trace_back_path( q, path );
@@ -483,12 +506,14 @@ void SFBDSAStar<xyLoc,tDirection>::OpenGLDraw( GLdouble rad ) const;
 template<>
 void SFBDSAStar<xyLoc,tDirection>::OpenGLDraw( QueueNode q, bool side, GLdouble rad ) const;
 
+template<>
+void SFBDSAStar<graphState,graphMove>::OpenGLDraw_RegisterClosedState( QueueNode &q );
 
 /*------------------------------------------------------------------------------
 | heuristic for selecting which node to expand
 ------------------------------------------------------------------------------*/
 template<class state, class action>
-bool SFBDSAStar<state,action>::expandheuristic( state &start, state &goal, unsigned int coming_from ) {
+bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 
 	unsigned int num_start, num_goal;
 	double h_start = 0., h_goal = 0.;
@@ -502,19 +527,19 @@ bool SFBDSAStar<state,action>::expandheuristic( state &start, state &goal, unsig
 
 		case 2:
 			// return the side with smaller branching factor
-			env->GetSuccessors( start, successors );
+			env->GetSuccessors( q.s1, successors );
 			num_start = successors.size();
 			successors.clear();
-			env->GetSuccessors( goal, successors );
+			env->GetSuccessors( q.s2, successors );
 			num_goal  = successors.size();
 			// verbose
-			//std::cout << "comparing " << start << "@" << num_start << " with " << goal << "@" << num_goal << std::endl;
+			//std::cout << "comparing " << q.s1 << "@" << num_start << " with " << q.s2 << "@" << num_goal << std::endl;
 
 			// if both sides are equal do not change previous direction
-			if( num_start == num_goal && (coming_from&3) )
-				// if coming_from&4 is 0 then we come from p1 => return true
-				// if coming_from&4 is 1 then we come from p2 => return false
-				return( !(bool)(coming_from&4) );
+			if( num_start == num_goal && (q.coming_from&3) )
+				// if q.coming_from&4 is 0 then we come from p1 => return true
+				// if q.coming_from&4 is 1 then we come from p2 => return false
+				return( !(bool)(q.coming_from&4) );
 
 			// else return the side with smaller branching factor
 			result = (num_start <= num_goal);
@@ -522,10 +547,10 @@ bool SFBDSAStar<state,action>::expandheuristic( state &start, state &goal, unsig
 
 		case 3:
 			// return randomly weighted with the branching factor of each side
-			env->GetSuccessors( start, successors );
+			env->GetSuccessors( q.s1, successors );
 			num_start = successors.size();
 			successors.clear();
-			env->GetSuccessors( goal, successors );
+			env->GetSuccessors( q.s2, successors );
 			num_goal = successors.size();
 			r = random();
 
@@ -534,47 +559,67 @@ bool SFBDSAStar<state,action>::expandheuristic( state &start, state &goal, unsig
 
 		case 4:
 			// return the side with the higher average hcost
-			env->GetSuccessors( start, successors );
+			env->GetSuccessors( q.s1, successors );
 			for( typename std::vector<state>::iterator it = successors.begin(); it != successors.end(); it++ )
-				h_start += env->HCost( *it, goal );
+				h_start += env->HCost( *it, q.s2 );
 			h_start /= (double)successors.size();
 			successors.clear();
-			env->GetSuccessors( goal, successors );
+			env->GetSuccessors( q.s2, successors );
 			for( typename std::vector<state>::iterator it = successors.begin(); it != successors.end(); it++ )
-				h_goal += env->HCost( *it, start );
+				h_goal += env->HCost( *it, q.s1 );
 			h_goal /= (double)successors.size();
 			// verbose
-			//std::cout << "average hcosts for (" << start << "," << goal << ") is " << h_start << " " << h_goal << std::endl;
+			//std::cout << "average hcosts for (" << q.s1 << "," << q.s2 << ") is " << h_start << " " << h_goal << std::endl;
 
 			// if both averages are the same do not change direction
-			if( fequal( h_start, h_goal ) && (coming_from&3) )
-				return( !(bool)(coming_from&4) );
+			if( fequal( h_start, h_goal ) && (q.coming_from&3) )
+				return( !(bool)(q.coming_from&4) );
 			// otherwise return the side with greater average heuristic value
 			result = (h_start >= h_goal);
 			break;
 
 		case 5:
 			// jump if and only if both sides have branching factor of 2
-			env->GetSuccessors( start, successors );
+			env->GetSuccessors( q.s1, successors );
 			num_start = successors.size();
 			successors.clear();
-			env->GetSuccessors( goal, successors );
+			env->GetSuccessors( q.s2, successors );
 			num_goal  = successors.size();
 
 			if( num_start == 2 && num_goal == 2 )
-				result = (bool)(coming_from&4); // change direction
+				result = (bool)(q.coming_from&4); // change direction
 			else if( num_start == 2 )
 				result = false;
 			else if( num_goal == 2 )
 				result = true;
 			else
-				return( !(bool)(coming_from&4) ); // do not change direction
+				return( !(bool)(q.coming_from&4) ); // do not change direction
 			break;
 
+		case 6:
+			env->GetSuccessors( q.s1, successors );
+			num_start = successors.size();
+			successors.clear();
+			env->GetSuccessors( q.s2, successors );
+			num_goal = successors.size();
+
+			if( num_start == 2 && num_goal == 2 ) {
+				if( fequal( q.gcost1, q.gcost2 ) )
+					return( !(bool)(q.coming_from&4) );
+				else
+					result = ( q.gcost1 < q.gcost2 );
+			}
+			else if( num_start == 2 )
+				result = false;
+			else if( num_goal == 2 )
+				result = true;
+			else
+				return( !(bool)(q.coming_from&4) );
+			break;
 	}
 
 	// determine whether we have a jump
-	if( (coming_from&3) && ( (bool)(coming_from&4) == result ) )
+	if( (q.coming_from&3) && ( (bool)(q.coming_from&4) == result ) )
 		numberOfJumps++;
 
 	return result;
