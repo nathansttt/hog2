@@ -60,6 +60,10 @@ public:
 	// if true => start side, if false => goal side
 	QueueNode step( bool &expanded );
 
+	// sets a flag whether advanced pruning (with both sides gcosts) should be done
+	// advanced_pruning is on by default
+	void use_pruning( bool use ) { use_advanced_pruning = use; };
+
 	/*----------------------------------------------------------------------------
 	| visualization
 	----------------------------------------------------------------------------*/
@@ -130,6 +134,8 @@ protected:
 
 	int expandheuristic_param;
 
+	bool use_advanced_pruning;
+
 	private:
 	double sanity_fcost_check;
 
@@ -146,7 +152,7 @@ protected:
 // Header
 template<class state, class action>
 SFBDSAStar<state,action>::SFBDSAStar( SearchEnvironment<state,action> *_env ):
-	env( _env ), OpenGLDrawState(NULL) {
+	env( _env ), use_advanced_pruning( true ), OpenGLDrawState(NULL) {
 };
 
 template<class state, class action>
@@ -232,28 +238,32 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 		if( fgreater( sanity_fcost_check, q.fcost ) ) {
 			std::cerr << "ERROR: fcost decreased in the search although we use BPMX" << std::endl << std::flush;
 			exit( 1 );
+		} else {
+			if( !fequal( sanity_fcost_check, q.fcost ) ) {
+				std::cout << "after fcost " << sanity_fcost_check << " => " << nodesExpanded << " expanded" << std::endl;
+			}
+			sanity_fcost_check = q.fcost;
 		}
 
 		if( q.s1 == q.s2 ) return q; // end the search when a terminal is found
 
-// TODO: enable again
-/* */
-		// prune if the distance from the original start is non-optimal
-		distancesiter = distances_from_start.find( q.s1 );
-		if( distancesiter != distances_from_start.end() && fless( distancesiter->second, q.gcost1 ) ) {
-			distancePruning++;
-			continue;
-		} else
-			distances_from_start[q.s1] = q.gcost1;
+		if( use_advanced_pruning ) {
+			// prune if the distance from the original start is non-optimal
+			distancesiter = distances_from_start.find( q.s1 );
+			if( distancesiter != distances_from_start.end() && fless( distancesiter->second, q.gcost1 ) ) {
+				distancePruning++;
+				continue;
+			} else
+				distances_from_start[q.s1] = q.gcost1;
 
-		// prune if the distance from the original goal is non-optimal
-		distancesiter = distances_from_goal.find( q.s2 );
-		if( distancesiter != distances_from_goal.end() && fless( distancesiter->second, q.gcost2 ) ) {
-			distancePruning++;
-			continue;
-		} else
-			distances_from_goal[q.s2] = q.gcost2;
-/* */
+			// prune if the distance from the original goal is non-optimal
+			distancesiter = distances_from_goal.find( q.s2 );
+			if( distancesiter != distances_from_goal.end() && fless( distancesiter->second, q.gcost2 ) ) {
+				distancePruning++;
+				continue;
+			} else
+				distances_from_goal[q.s2] = q.gcost2;
+		}
 
 		// check whether q is already in the closed list
 		closediter1 = closed.find( q );
@@ -307,18 +317,18 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 			successor.gcost1 = q.gcost1 + transit_cost;
 			successor.gcost2 = q.gcost2;
 
-// TODO: enable again
-/* */
-			// check whether new successor has sub-optimal distance from the start
-			distancesiter = distances_from_start.find( successor.s1 );
-			if( distancesiter != distances_from_start.end() &&
-			    fless( distancesiter->second, successor.gcost1 ) ) {
-				distanceSuccessorPruning++;
-				continue;
-			} else
-				distances_from_start[successor.s1] = successor.gcost1;
-/* */
-		} else {
+			if( use_advanced_pruning ) {
+				// check whether new successor has sub-optimal distance from the start
+				distancesiter = distances_from_start.find( successor.s1 );
+				if( distancesiter != distances_from_start.end() &&
+				    fless( distancesiter->second, successor.gcost1 ) ) {
+					distanceSuccessorPruning++;
+					continue;
+				} else
+					distances_from_start[successor.s1] = successor.gcost1;
+			}
+
+		} else { // !expand
 			successor.p2 = q.s2;
 			successor.p1 = q.p1;
 			successor.coming_from = update_coming_from( q.coming_from, expand );
@@ -328,17 +338,16 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 			transit_cost = env->GCost( q.s2, successor.s2 );
 			successor.gcost2 = q.gcost2 + transit_cost;
 
-// TODO: enable again
-/* */
-			// check whether new successor has sub-optimal distance from the goal
-			distancesiter = distances_from_goal.find( successor.s2 );
-			if( distancesiter != distances_from_goal.end() &&
-			    fless( distancesiter->second, successor.gcost2 ) ) {
-				distanceSuccessorPruning++;
-				continue;
-			} else
-				distances_from_goal[successor.s2] = successor.gcost2;
-/* */
+			if( use_advanced_pruning ) {
+				// check whether new successor has sub-optimal distance from the goal
+				distancesiter = distances_from_goal.find( successor.s2 );
+				if( distancesiter != distances_from_goal.end() &&
+				    fless( distancesiter->second, successor.gcost2 ) ) {
+					distanceSuccessorPruning++;
+					continue;
+				} else
+					distances_from_goal[successor.s2] = successor.gcost2;
+			}
 		}
 
 		// check whether the successor is already in the closed list
