@@ -14,6 +14,7 @@
 
 // project includes
 #include "astar.h"
+#include "MyDiffHeuristic.h"
 
 
 // config parameters
@@ -27,7 +28,7 @@ int compute_sfbds( int argc, char* argv[] ) {
 
 	// Syntax
 	if( argc < 10 ) {
-		std::cout << "Syntax: " << argv[0] << " " << argv[1] << " -map <mapname> -s <x,y> -g <x,y> -h <heuristic> -j <jumping_policy>" << std::endl;
+		std::cout << "Syntax: " << argv[0] << " " << argv[1] << " -map <mapname> -s <x,y> -g <x,y> -h <heuristic> -j <jumping_policy> [-np]" << std::endl;
 		std::cout << "where <jumping_policy> can have the values:" << std::endl;
 		std::cout << "  0 - always expand the start state (=A*)" << std::endl;
 		std::cout << "  1 - always expand the goal state (=A* from goal to start)"
@@ -40,11 +41,13 @@ int compute_sfbds( int argc, char* argv[] ) {
 		std::cout << "<heuristic> can be:" << std::endl;
 		std::cout << "  octile    - octile distance heuristic in maps" << std::endl;
 		std::cout << "  canonical - canonical heuristic" << std::endl;
+		std::cout << "-np is for no advanced pruning" << std::endl;
 		return(1);
 	}
 
 	// default values
 	int expandheuristic_param = 0;
+	bool advanced_pruning = true;
 	char heuristicname[128];
 	Map *m = NULL;
 	xyLoc startloc(0,0), goalloc(0,0);
@@ -58,6 +61,9 @@ int compute_sfbds( int argc, char* argv[] ) {
 		} else if( strcmp( argv[i-1], "-h" ) == 0 ) {
 			strcpy( heuristicname, argv[i] );
 			i -= 2;
+		} else if( strcmp( argv[i], "-np" ) == 0 ) {
+			advanced_pruning = false;
+			i--;
 		} else if( strcmp( argv[i-1], "-map" ) == 0 ) {
 			m = new Map( argv[i] );
 			i -= 2;
@@ -68,7 +74,7 @@ int compute_sfbds( int argc, char* argv[] ) {
 			sscanf( argv[i], "%hu,%hu", &goalloc.x, &goalloc.y );
 			i -= 2;
 		} else {
-			std::cerr << "ERROR: unkown parameter discovered. Exiting." << std::endl;
+			std::cerr << "ERROR: unkown parameter discovered (" << argv[i-1] << "). Exiting." << std::endl;
 			exit(1);
 		}
 	}
@@ -88,7 +94,7 @@ int compute_sfbds( int argc, char* argv[] ) {
 	Graph *g                     = NULL;
 	GraphMapHeuristic *gh        = NULL;
 	GraphCanonicalHeuristic *gch = NULL;
-	GraphDistanceHeuristic *gdh  = NULL;
+	MyDiffHeuristic *gdh         = NULL;
 	GraphEnvironment *env        = NULL;
 
 	// set the environment with respective heuristic
@@ -103,11 +109,8 @@ int compute_sfbds( int argc, char* argv[] ) {
 		env = new GraphEnvironment( g, gch );
 	}
 	else if( strcmp( heuristicname, "differential" ) == 0 ) {
-		g   = GraphSearchConstants::GetGraph( m );
-		gdh = new GraphDistanceHeuristic( g );
-		gdh->UseSmartPlacement( true );
-		for( int i = 0; i < NUMBER_CANONICAL_STATES; i++ )
-			gdh->AddHeuristic();
+		gdh = new MyDiffHeuristic( m, NUMBER_CANONICAL_STATES );
+		g   = gdh->GetGraph();
 		env = new GraphEnvironment( g, gdh );
 	} else {
 		std::cerr << "ERROR: unknown heuristic submitted. Exiting." << std::endl;
@@ -122,6 +125,7 @@ int compute_sfbds( int argc, char* argv[] ) {
 
 	std::vector<graphState> path;
 	SFBDSAStar<graphState,graphMove> *a = new SFBDSAStar<graphState,graphMove>( env );
+	a->use_pruning( advanced_pruning );
 	double result = a->astar( start, goal, path, expandheuristic_param );
 	std::cout << "result value: " << result << std::endl;
 	//std::cout << "result path: " << std::endl;
@@ -229,7 +233,7 @@ int compute_templatea( int argc, char* argv[] ) {
 	Graph *g                     = NULL;
 	GraphMapHeuristic *gh        = NULL;
 	GraphCanonicalHeuristic *gch = NULL;
-	GraphDistanceHeuristic *gdh  = NULL;
+	MyDiffHeuristic *gdh         = NULL;
 	GraphEnvironment *env        = NULL;
 
 	// set the environment with respective heuristic
@@ -244,11 +248,8 @@ int compute_templatea( int argc, char* argv[] ) {
 		env = new GraphEnvironment( g, gch );
 	}
 	else if( strcmp( heuristicname, "differential" ) == 0 ) {
-		g   = GraphSearchConstants::GetGraph( m );
-		gdh = new GraphDistanceHeuristic( g );
-		gdh->UseSmartPlacement( true );
-		for( int i = 0; i < NUMBER_CANONICAL_STATES; i++ )
-			gdh->AddHeuristic();
+		gdh = new MyDiffHeuristic( m, NUMBER_CANONICAL_STATES );
+		g   = gdh->GetGraph();
 		env = new GraphEnvironment( g, gdh );
 	} else {
 		std::cerr << "ERROR: unknown heuristic submitted. Exiting." << std::endl;
@@ -310,7 +311,7 @@ int compute_experiment( int argc, char* argv[] ) {
 
 	// Syntax handling
 	if( argc < 8 ) {
-		std::cout << "Syntax: " << argv[0] << " experiment -f <file> -o <file> -h <heuristic> -j <jumping_policy>" << std::endl;
+		std::cout << "Syntax: " << argv[0] << " experiment -f <file> -o <file> -h <heuristic> -j <jumping_policy> [-np]" << std::endl;
 		std::cout << "where <file> is the input (-f) or output (-o) file of the experiments and" << std::endl;
 		std::cout << "<heuristic> and <jumping_policy> are the same as for method sfbds" << std::endl;
 		return( 1 );
@@ -318,6 +319,7 @@ int compute_experiment( int argc, char* argv[] ) {
 
 	FILE *fin = NULL;
 	std::ofstream fout;
+	bool advanced_pruning = true;
 	int expandheuristic_param = 0;
 	char heuristicname[128];
 
@@ -331,6 +333,10 @@ int compute_experiment( int argc, char* argv[] ) {
 		else if( strcmp( argv[i-1], "-o" ) == 0 ) {
 			fout.open( argv[i], std::ios::out );
 			i -= 2;
+		}
+		else if( strcmp( argv[i], "-np" ) == 0 ) {
+			advanced_pruning = false;
+			i--;
 		}
 		else if( strcmp( argv[i-1], "-h" ) == 0 ) {
 			strcpy( heuristicname, argv[i] );
@@ -360,7 +366,7 @@ int compute_experiment( int argc, char* argv[] ) {
 	Graph *g;
 	GraphMapHeuristic *gh = NULL;
 	GraphCanonicalHeuristic *gch = NULL;
-	GraphDistanceHeuristic *gdh = NULL;
+	MyDiffHeuristic *gdh = NULL;
 	GraphEnvironment *env = NULL;
 	
 	// resetting the random counter to make experiments repeatable
@@ -391,11 +397,8 @@ int compute_experiment( int argc, char* argv[] ) {
 			env = new GraphEnvironment( g, gh );
 		}
 		else if( strcmp( heuristicname, "differential" ) == 0 ) {
-			g   = GraphSearchConstants::GetGraph( m );
-			gdh = new GraphDistanceHeuristic( g );
-			gdh->UseSmartPlacement( true );
-			for( int i = 0; i < NUMBER_CANONICAL_STATES; i++ )
-				gdh->AddHeuristic();
+			gdh = new MyDiffHeuristic( m, NUMBER_CANONICAL_STATES );
+			g   = gdh->GetGraph();
 			env = new GraphEnvironment( g, gdh );
 		} else {
 			std::cerr << "ERROR: unknown heuristic submitted. Exiting." << std::endl;
@@ -406,6 +409,7 @@ int compute_experiment( int argc, char* argv[] ) {
 		// read in 1000 test instances
 		for( i = 0; i < 1000; i++ ) {
 			SFBDSAStar<graphState,graphMove> *astar = new SFBDSAStar<graphState,graphMove>( env );
+			astar->use_pruning( advanced_pruning );
 
 			xyLoc startloc, goalloc;
 			fscanf( fin, "(%hu,%hu) (%hu,%hu)\n", &startloc.x, &startloc.y, &goalloc.x, &goalloc.y );
@@ -523,7 +527,7 @@ int compute_experimenttemplatea( int argc, char* argv[] ) {
 	Graph *g;
 	GraphMapHeuristic *gh = NULL;
 	GraphCanonicalHeuristic *gch = NULL;
-	GraphDistanceHeuristic *gdh = NULL;
+	MyDiffHeuristic *gdh = NULL;
 	GraphEnvironment *env = NULL;
 	
 	// resetting the random counter to make experiments repeatable
@@ -554,11 +558,8 @@ int compute_experimenttemplatea( int argc, char* argv[] ) {
 			env = new GraphEnvironment( g, gh );
 		}
 		else if( strcmp( heuristicname, "differential" ) == 0 ) {
-			g   = GraphSearchConstants::GetGraph( m );
-			gdh = new GraphDistanceHeuristic( g );
-			gdh->UseSmartPlacement( true );
-			for( int i = 0; i < NUMBER_CANONICAL_STATES; i++ )
-				gdh->AddHeuristic();
+			gdh = new MyDiffHeuristic( m, NUMBER_CANONICAL_STATES );
+			g   = gdh->GetGraph();
 			env = new GraphEnvironment( g, gdh );
 		} else {
 			std::cerr << "ERROR: unknown heuristic submitted. Exiting." << std::endl;
@@ -727,6 +728,7 @@ Map *_simulation_map = NULL;
 xyLoc _simulation_startloc(0,0), _simulation_goalloc(0,0);
 unsigned int _simulation_expandheuristic_param = 0;
 char _simulation_heuristicname[128];
+bool _simulation_advanced_pruning = true;
 GraphEnvironment* _simulation_environment = NULL;
 SFBDSAStar<graphState,graphMove>* _simulation_astar = NULL;
 SFBDSAStar<graphState,graphMove>::QueueNode _simulation_last_expanded_node;
@@ -758,6 +760,13 @@ void MyDisplayHandler( unsigned long windowID, tKeyboardModifier mod, char key )
 		case 'p':
 			_simulation_paused = !_simulation_paused;
 			break;
+		case 'n':
+			if( _simulation_astar == NULL )
+				std::cout << "simulation not yet started" << std::endl;
+			else {
+				std::cout << "nodes expanded: " << _simulation_astar->nodesExpanded << std::endl;
+			}
+			break;
 	}
 	return;
 };
@@ -770,20 +779,27 @@ int MyCLHandler( char* argument[], int maxNumArgs ) {
 	// parse the input
 	if( strcmp( argument[0], "-j" ) == 0 ) {
 		_simulation_expandheuristic_param = atoi( argument[1] );
+		return 2;
 	} else if( strcmp( argument[0], "-h" ) == 0 ) {
 		strcpy( _simulation_heuristicname, argument[1] );
+		return 2;
 	} else if( strcmp( argument[0], "-map" ) == 0 ) {
 		_simulation_map = new Map( argument[1] );
+		return 2;
+	} else if( strcmp( argument[0], "-np" ) == 0 ) {
+		_simulation_advanced_pruning = false;
+		return 1;
 	} else if( strcmp( argument[0], "-s" ) == 0 ) {
 		sscanf( argument[1], "%hu,%hu", &_simulation_startloc.x, &_simulation_startloc.y );
+		return 2;
 	} else if( strcmp( argument[0], "-g" ) == 0 ) {
 		sscanf( argument[1], "%hu,%hu", &_simulation_goalloc.x, &_simulation_goalloc.y );
+		return 2;
 	} else {
-		std::cerr << "ERROR: unkown parameter set: "
-			<< argument[0] << " " << argument[1] << std::endl;
+		std::cerr << "ERROR: unkown parameter: " << argument[0] << std::endl;
 	}
-	// go two arguments further
-	return 2;
+	// go one argument further
+	return 1;
 };
 
 void CreateSimulation( unsigned long windowID ) {
@@ -804,7 +820,7 @@ void CreateSimulation( unsigned long windowID ) {
 	Graph *g = NULL;
 	GraphMapHeuristic *gh = NULL;
 	GraphCanonicalHeuristic *gch = NULL;
-	GraphDistanceHeuristic *gdh  = NULL;
+	MyDiffHeuristic *gdh  = NULL;
 	if( strcmp( _simulation_heuristicname, "canonical" ) == 0 ) {
 		gch = new GraphCanonicalHeuristic( _simulation_map, 1, 10 );
 		g   = gch->GetGraph();
@@ -814,11 +830,8 @@ void CreateSimulation( unsigned long windowID ) {
 		gh = new GraphMapHeuristic( _simulation_map, g );
 		_simulation_environment = new GraphEnvironment( g, gh );
 	} else if( strcmp( _simulation_heuristicname, "differential" ) == 0 ) {
-		g   = GraphSearchConstants::GetGraph( _simulation_map );
-		gdh = new GraphDistanceHeuristic( g );
-		gdh->UseSmartPlacement( true );
-		for( int i = 0; i < NUMBER_CANONICAL_STATES; i++ )
-			gdh->AddHeuristic();
+		gdh = new MyDiffHeuristic( _simulation_map, NUMBER_CANONICAL_STATES );
+		g   = gdh->GetGraph();
 		_simulation_environment = new GraphEnvironment( g, gdh );
 	} else {
 		std::cerr << "ERROR: unknown heuristic submitted. Exiting." << std::endl;
@@ -831,6 +844,7 @@ void CreateSimulation( unsigned long windowID ) {
 	std::cout << "goal: " << goal << std::endl;
 
 	_simulation_astar = new SFBDSAStar<graphState,graphMove>( _simulation_environment );
+	_simulation_astar->use_pruning( _simulation_advanced_pruning );
 	_simulation_astar->initialize( start, goal, _simulation_expandheuristic_param );
 
 	return;
@@ -894,9 +908,11 @@ void InstallHandlers() {
 	InstallCommandLineHandler(MyCLHandler, "-g", "-g x,y", "goal position of the search" );
 	InstallCommandLineHandler(MyCLHandler, "-j", "-h jumping_policy", "selects the jumping policy as in the sfbds option" );
 	InstallCommandLineHandler(MyCLHandler, "-h", "-h heuristic", "selects the heuristic function as in the sfbds option" );
+	InstallCommandLineHandler(MyCLHandler, "-np", "-np", "disables advanced pruning" );
 	InstallWindowHandler(MyWindowHandler);
 	InstallKeyboardHandler(MyDisplayHandler,"step","take a node from the open queue", kAnyModifier, 's' );
 	InstallKeyboardHandler(MyDisplayHandler,"pause","pause/unpause simulation", kAnyModifier, 'p' );
+	InstallKeyboardHandler(MyDisplayHandler,"number","number nodes expanded", kAnyModifier, 'n' );
 	InstallMouseClickHandler(MyClickHandler);
 	return;
 };
