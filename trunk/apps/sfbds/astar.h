@@ -63,6 +63,11 @@ public:
 	// sets a flag whether advanced pruning (with both sides gcosts) should be done
 	// advanced_pruning is on by default
 	void use_pruning( bool use ) { use_advanced_pruning = use; };
+	// if you want the algorithm to use
+	// max( h(x,y), h(y,x) ) instead of just plain h(x,y)
+	// set this flag to true. This only makes sense if the heuristic is non-symmetric
+	// this is disabled by default
+	void use_asymmetric_heuristic( bool use ) { use_asymmetric_h = use; };
 
 	/*----------------------------------------------------------------------------
 	| visualization
@@ -84,6 +89,8 @@ public:
 	unsigned int numberOfJumpsInSolution;
 	unsigned int reopenedNodes;
 	unsigned int bpmxUpdates;
+	unsigned int oneSidedReopenings; // does not work unless you disable gcost caches when nodes are
+	                                 // put into the open queue
 
 	unsigned int GetOpenQueueSize() { return( open.size() ); };
 
@@ -120,7 +127,12 @@ protected:
 	typedef __gnu_cxx::hash_set<QueueNode, QueueNodeHash, QueueNodeEqual> AStarClosedList;
 
 	// closed lists for single searches from start and goal
-	typedef __gnu_cxx::hash_map<state, double> DistanceList;
+	struct RegularHash {
+		size_t operator() ( const state s ) const {
+			return regular_state_hash<state>( s );
+		};
+	};
+	typedef __gnu_cxx::hash_map<state, double, RegularHash> DistanceList;
 
 	// traces back the path from q using the closed list
 	void trace_back_path( QueueNode q, std::vector<state> &path );
@@ -135,6 +147,7 @@ protected:
 	int expandheuristic_param;
 
 	bool use_advanced_pruning;
+	bool use_asymmetric_h;
 
 	private:
 	double sanity_fcost_check;
@@ -152,7 +165,8 @@ protected:
 // Header
 template<class state, class action>
 SFBDSAStar<state,action>::SFBDSAStar( SearchEnvironment<state,action> *_env ):
-	env( _env ), use_advanced_pruning( true ), OpenGLDrawState(NULL) {
+	env( _env ), use_advanced_pruning( true ), use_asymmetric_h(false),
+	OpenGLDrawState(NULL) {
 };
 
 template<class state, class action>
@@ -187,6 +201,7 @@ void SFBDSAStar<state,action>::initialize( state s1, state s2, int _expandheuris
 	numberOfJumpsInSolution = 0;
 	reopenedNodes = 0;
 	bpmxUpdates = 0;
+	oneSidedReopenings = 0;
 
 	expandheuristic_param = _expandheuristic_param;
 
@@ -202,8 +217,12 @@ void SFBDSAStar<state,action>::initialize( state s1, state s2, int _expandheuris
 	q.gcost1 = 0;
 	q.gcost2 = 0;
 	q.fcost = env->HCost( s1, s2 );
+	if( use_asymmetric_h )
+		q.fcost = std::max( q.fcost, env->HCost( s2, s1 ) );
 	sanity_fcost_check = q.fcost;
 	open.push( q );
+	distances_from_start[q.s1] = q.gcost1;
+	distances_from_goal[q.s2]  = q.gcost2;
 
 	// reset the view
 	if( OpenGLDrawState != NULL ) {
@@ -234,14 +253,17 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 		q = open.top(); open.pop();
 		nodesPoppedFromOpenQueue++;
 
+		bool one_sided_reexpansion = false;
+
 		// sanity check for BPMX that makes the fcost non-decreasing
 		if( fgreater( sanity_fcost_check, q.fcost ) ) {
 			std::cerr << "ERROR: fcost decreased in the search although we use BPMX" << std::endl << std::flush;
 			exit( 1 );
 		} else {
-			if( !fequal( sanity_fcost_check, q.fcost ) ) {
-				std::cout << "after fcost " << sanity_fcost_check << " => " << nodesExpanded << " expanded" << std::endl;
-			}
+			// verbose
+			//if( !fequal( sanity_fcost_check, q.fcost ) ) {
+			//	std::cout << "after fcost " << sanity_fcost_check << " => " << nodesExpanded << " expanded" << std::endl;
+			//}
 			sanity_fcost_check = q.fcost;
 		}
 
@@ -253,16 +275,22 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 			if( distancesiter != distances_from_start.end() && fless( distancesiter->second, q.gcost1 ) ) {
 				distancePruning++;
 				continue;
-			} else
+			} else {
+				if( distancesiter != distances_from_start.end() && fgreater( distancesiter->second, q.gcost1 ) )
+					one_sided_reexpansion = true;
 				distances_from_start[q.s1] = q.gcost1;
+			}
 
 			// prune if the distance from the original goal is non-optimal
 			distancesiter = distances_from_goal.find( q.s2 );
 			if( distancesiter != distances_from_goal.end() && fless( distancesiter->second, q.gcost2 ) ) {
 				distancePruning++;
 				continue;
-			} else
+			} else {
+				if( distancesiter != distances_from_goal.end() && fgreater( distancesiter->second, q.gcost2 ) )
+					one_sided_reexpansion = true;
 				distances_from_goal[q.s2] = q.gcost2;
+			}
 		}
 
 		// check whether q is already in the closed list
@@ -273,6 +301,9 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 			closedListPrunes++;
 			continue;
 		}
+
+		if( one_sided_reexpansion )
+			oneSidedReopenings++;
 
 		// if we are to expand the node
 		break;
@@ -358,6 +389,8 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 
 		// finding the hcost of the successor
 		hcost = env->HCost( successor.s1, successor.s2 );
+		if( use_asymmetric_h )
+			hcost = std::max( hcost, env->HCost( successor.s2, successor.s1 ) );
 		successor.fcost = successor.gcost1 + successor.gcost2 + hcost;
 		successors.push_back( successor );
 
@@ -514,9 +547,17 @@ template<>
 void SFBDSAStar<xyLoc,tDirection>::OpenGLDraw( GLdouble rad ) const;
 template<>
 void SFBDSAStar<xyLoc,tDirection>::OpenGLDraw( QueueNode q, bool side, GLdouble rad ) const;
+// compatibility
+template<class state,class action>
+void SFBDSAStar<state,action>::OpenGLDraw( GLdouble rad ) const {};
+template<class state,class action>
+void SFBDSAStar<state,action>::OpenGLDraw( QueueNode q, bool side, GLdouble rad ) const {};
 
 template<>
 void SFBDSAStar<graphState,graphMove>::OpenGLDraw_RegisterClosedState( QueueNode &q );
+// for compatibility with all other states and action types
+template<class state,class action>
+void SFBDSAStar<state,action>::OpenGLDraw_RegisterClosedState( QueueNode &q ) {};
 
 /*------------------------------------------------------------------------------
 | heuristic for selecting which node to expand
@@ -567,7 +608,7 @@ bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 			break;
 
 		case 4:
-			// return the side with the higher average hcost
+			// return the side with the higher average hcost - JIL(1)
 			env->GetSuccessors( q.s1, successors );
 			for( typename std::vector<state>::iterator it = successors.begin(); it != successors.end(); it++ )
 				h_start += env->HCost( *it, q.s2 );
@@ -581,8 +622,9 @@ bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 			//std::cout << "average hcosts for (" << q.s1 << "," << q.s2 << ") is " << h_start << " " << h_goal << std::endl;
 
 			// if both averages are the same do not change direction
-			if( fequal( h_start, h_goal ) && (q.coming_from&3) )
+			if( fequal( h_start, h_goal ) && (q.coming_from&3) ) {
 				return( !(bool)(q.coming_from&4) );
+			}
 			// otherwise return the side with greater average heuristic value
 			result = (h_start >= h_goal);
 			break;
@@ -606,6 +648,8 @@ bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 			break;
 
 		case 6:
+			// jump if and only if both sides have branching factor of 2
+			// use gcost as tie breaker
 			env->GetSuccessors( q.s1, successors );
 			num_start = successors.size();
 			successors.clear();
@@ -613,10 +657,10 @@ bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 			num_goal = successors.size();
 
 			if( num_start == 2 && num_goal == 2 ) {
-				if( fequal( q.gcost1, q.gcost2 ) )
+				if( fequal( q.gcost1, q.gcost2 ) && (q.coming_from&3) )
 					return( !(bool)(q.coming_from&4) );
 				else
-					result = ( q.gcost1 < q.gcost2 );
+					result = ( q.gcost1 <= q.gcost2 );
 			}
 			else if( num_start == 2 )
 				result = false;
@@ -625,10 +669,19 @@ bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 			else
 				return( !(bool)(q.coming_from&4) );
 			break;
+
+		case 7: // jump if larger
+			h_start = env->HCost( q.s1, q.s2 );
+			h_goal  = env->HCost( q.s2, q.s1 );
+			if( fequal( h_start, h_goal ) && (q.coming_from&3) ) { // don't jump
+				return( !(bool)(q.coming_from&4) );
+			}
+			result = (h_start >= h_goal);
+			break;
 	}
 
 	// determine whether we have a jump
-	if( (q.coming_from&3) && ( (bool)(q.coming_from&4) == result ) )
+	if( (bool)(q.coming_from&4) == result )
 		numberOfJumps++;
 
 	return result;

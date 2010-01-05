@@ -115,12 +115,14 @@ public:
 	static std::vector<unsigned> Get_Puzzle_Order(int64_t order_num, unsigned num_pancakes);
 
 	void Set_Use_Memory_Free_Heuristic(bool to_use){use_memory_free = to_use;}
+	void Set_Use_Dual_Lookup( bool to_use ) { use_dual_lookup = to_use; };
 
 private:
 
 	std::vector<unsigned> operators;
 	bool goal_stored; // whether a goal is stored or not
 	bool use_memory_free;
+	bool use_dual_lookup;
 
 	PancakePuzzleState goal;
 	std::vector<int> goal_locations;
