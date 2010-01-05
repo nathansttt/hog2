@@ -374,7 +374,7 @@ void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start
 
 	//TODO fix the output of PDBs
 	FILE *f = fopen(pdb_filename, "w");
-	fprintf(f, "%d\n", distinct.size()); // first element is the number of distinct pieces
+	fprintf(f, "%ld\n", distinct.size()); // first element is the number of distinct pieces
 	for(unsigned i = 0; i < distinct.size(); i++) {
 		fprintf(f, "%d\n", distinct[i]); //first few lines are these distinct elements
 	}
@@ -453,7 +453,7 @@ bool PermutationPuzzleEnvironment<state, action>::Read_In_Permutations(const cha
 	bool first = true;
 	unsigned puzz_count = 0;
 
-	while(!ifs.eof() && puzz_count < max_puzzles) {
+	while(!ifs.eof() && (puzz_count < max_puzzles || max_puzzles==0) ) {
 		puzz_ints.clear();
 
 		getline(ifs, s);

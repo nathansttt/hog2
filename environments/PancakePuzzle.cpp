@@ -11,6 +11,7 @@ PancakePuzzle::PancakePuzzle(unsigned s) {
 
 	goal_stored = false;
 	use_memory_free = true;
+	use_dual_lookup = true;
 }
 
 PancakePuzzle::PancakePuzzle(unsigned s, const std::vector<unsigned> op_order) {
@@ -20,6 +21,7 @@ PancakePuzzle::PancakePuzzle(unsigned s, const std::vector<unsigned> op_order) {
 
 	goal_stored = false;
 	use_memory_free = false;
+	use_dual_lookup = true;
 }
 
 PancakePuzzle::~PancakePuzzle()
@@ -179,6 +181,27 @@ double PancakePuzzle::HCost(const PancakePuzzleState &state, const PancakePuzzle
 	if(goal_state.puzzle.size() != size){
 		fprintf(stderr, "ERROR: HCost called with goal with wrong size.\n");
 		exit(1);
+	}
+
+	if( use_dual_lookup ) {
+		// Note: This lookup only works if all PDB's have the same goal
+		//   (or alternatively there is only one PDB)
+
+		// sanity check
+		assert( IsGoalStored() );
+
+		// beta is a remapping of the elements to the goal
+		std::vector<int> beta;
+		beta.resize( size );
+		for( unsigned int i = 0; i < size; i++ )
+			beta[goal_state.puzzle[i]] = goal.puzzle[i];
+
+		PancakePuzzleState t = state;
+		// remap t with respect to beta
+		for( unsigned int i = 0; i < size; i++ )
+			t.puzzle[i] = beta[state.puzzle[i]];
+
+		return Regular_PDB_Lookup( t );
 	}
 
 	if(use_memory_free) {

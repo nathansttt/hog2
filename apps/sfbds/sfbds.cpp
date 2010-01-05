@@ -7,10 +7,13 @@
 
 // HOG2 includes
 #include "Common.h"
+// HOG2 graph and map environments
 #include "Map2DEnvironment.h"
 #include "GraphEnvironment.h"
 #include "GraphCanonicalHeuristic.h"
 #include "TemplateAStar.h"
+// HOG2 Pancake
+#include "PancakePuzzle.h"
 
 // project includes
 #include "astar.h"
@@ -136,6 +139,7 @@ int compute_sfbds( int argc, char* argv[] ) {
 	std::cout << "nodes expanded: " << a->nodesExpanded << std::endl;
 	std::cout << "reopened nodes: " << a->reopenedNodes << std::endl;
 	std::cout << "BPMX updates: " << a->bpmxUpdates << std::endl;
+	std::cout << "one sided reopenings: " << a->oneSidedReopenings << std::endl;
 	std::cout << "successors touched: " << a->successorsTouched << std::endl;
 	std::cout << "nodes popped from open queue: " << a->nodesPoppedFromOpenQueue << std::endl;
 	//std::cout << "predecessor operator pruning: " << a->predecessorOperatorPruning << std::endl;
@@ -443,7 +447,8 @@ int compute_experiment( int argc, char* argv[] ) {
 			fout << astar->numberOfJumps << " ";
 			fout << astar->numberOfJumpsInSolution << " ";
 			fout << astar->reopenedNodes << " ";
-			fout << astar->bpmxUpdates;
+			fout << astar->bpmxUpdates << " ";
+			fout << astar->oneSidedReopenings;
 			fout << std::endl;
 
 			delete astar;
@@ -687,24 +692,31 @@ int compute_testpoints( int argc, char* argv[] ) {
 		std::cout << " ... " << std::flush;
 		fout << (*it).c_str() << std::endl;
 
-		for( int i = 0; i < 1000; i++ ) {
-			unsigned num = (unsigned int) floor(
+		int i = 0;
+		while( i < 1000 ) {
+			unsigned num1 = (unsigned int) floor(
 				(double)random()/(double)RAND_MAX * (double)g->GetNumNodes() );
-			fout << "(";
-			fout << g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapX);
-			fout << ",";
-			fout << g->GetNode(num)->GetLabelL(GraphSearchConstants::kMapY);
-			fout << ") ";
 
-			std::vector<node*>* reachable_nodes = g->getReachableNodes( g->GetNode( num ) );
-			num = (unsigned int)floor(
+			std::vector<node*>* reachable_nodes = g->getReachableNodes( g->GetNode( num1 ) );
+			unsigned num2 = (unsigned int)floor(
 				(double)random()/(double)RAND_MAX * (double)(reachable_nodes->size()-1) );
+
+			// if both are the same
+			if( (*reachable_nodes)[num2]->GetNum() == num1 )
+				continue;
+
 			fout << "(";
-			fout << (*reachable_nodes)[num]->GetLabelL(GraphSearchConstants::kMapX);
+			fout << g->GetNode(num1)->GetLabelL(GraphSearchConstants::kMapX);
 			fout << ",";
-			fout << (*reachable_nodes)[num]->GetLabelL(GraphSearchConstants::kMapY);
+			fout << g->GetNode(num1)->GetLabelL(GraphSearchConstants::kMapY);
+			fout << ") ";
+			fout << "(";
+			fout << (*reachable_nodes)[num2]->GetLabelL(GraphSearchConstants::kMapX);
+			fout << ",";
+			fout << (*reachable_nodes)[num2]->GetLabelL(GraphSearchConstants::kMapY);
 			fout << ")" << std::endl;
 			delete reachable_nodes;
+			i++;
 		}
 
 		delete g;
@@ -717,6 +729,315 @@ int compute_testpoints( int argc, char* argv[] ) {
 }
 
 
+/*------------------------------------------------------------------------------
+| Code for Pancake puzzle
+------------------------------------------------------------------------------*/
+// test state generation
+int compute_pancakestates( int argc, char* argv[] ) {
+
+	// Syntax handling
+	if( argc < 8 ) {
+		std::cout << "Syntax: " << argv[0] << " pancakestates -s <size> -n <number> -o <outputfile>" << std::endl;
+		std::cout << "  writes <number> random pancakestates into the <outputfile>" << std::endl;
+		return( 1 );
+	};
+
+	std::string outputfilename;
+	unsigned int puzzle_size = 0;
+	unsigned int number_of_puzzles = 0;
+
+	// argument parsing
+	int carg = 2;
+	while( carg < argc ) {
+		if( strcmp( argv[carg], "-o" ) == 0 ) {
+			outputfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-n" ) == 0 ) {
+			number_of_puzzles = atoi( argv[carg+1] );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-s" ) == 0 ) {
+			puzzle_size = atoi( argv[carg+1] );
+			carg += 2;
+		} else {
+			std::cerr << "ERROR: unknown parameter discovered. Exiting." << std::endl;
+			exit(1);
+		}
+			
+	}
+
+	std::ofstream fout( outputfilename.c_str(), std::ios::out);
+	if( fout.fail() ) {
+		std::cerr << "ERROR: could not open output file (" << outputfilename << ")" << std::endl;
+		exit(1);
+	}
+
+	// create a puzzle
+	PancakePuzzle *puzzle = new PancakePuzzle( puzzle_size );
+	std::vector<PancakePuzzleState> states;
+	puzzle->Create_Random_Pancake_Puzzles( states, puzzle_size, number_of_puzzles);
+	for( std::vector<PancakePuzzleState>::iterator it = states.begin(); it != states.end(); it++ ) {
+		fout << *it << std::endl;
+	}
+	fout.close();
+
+	return 0;
+};
+
+
+// build PDB for the pancake puzzle
+int compute_pancakepdb( int argc, char* argv[1] ) {
+
+	// syntax
+	if( argc < 8 ) {
+		std::cout << "Syntax: " << argv[0] << " pancakepdb -o <filename> -s <size> -t <tile1> <tile2>" << std::endl;
+		return( 1 );
+	}
+
+	std::string pdbfilename;
+	std::vector<int> tiles;
+	unsigned int puzzle_size = 0;
+
+	// command line parsing
+	int carg = 2;
+	while( carg < argc ) {
+		if( strcmp( argv[carg], "-o" ) == 0 ) {
+			pdbfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-s" ) == 0 ) {
+			puzzle_size = atoi( argv[carg+1] );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-t" ) == 0 ) {
+			for( carg++; carg < argc; carg++ )
+				tiles.push_back( atoi( argv[carg] ) );
+		} else {	
+			std::cerr << "ERROR: unknown argument. Exiting." << std::endl;
+			return( 1 );
+		}
+	}
+
+	// build the puzzle
+	PancakePuzzle *puzzle = new PancakePuzzle( puzzle_size );
+	PancakePuzzleState start(puzzle_size);
+	std::cout << "building PDB ... " << std::flush;
+	puzzle->Build_Regular_PDB( start, tiles, pdbfilename.c_str() );
+	std::cout << "done" << std::endl << std::flush;
+
+	// clean up
+	delete puzzle;
+	return 0;
+};
+
+
+// pancake computation
+int compute_pancake( int argc, char* argv[] ) {
+
+	// Syntax handling
+	if( argc < 10 ) {
+		std::cout << "Syntax: " << argv[0] << " pancake -s <size> -pdb <file> -j <number> -a <0|1> -p <puzzle>" << std::endl;
+		return( 1 );
+	};
+
+	std::string pdbfilename;
+	PancakePuzzleState puzzlestate;
+	unsigned int puzzle_size = 0;
+	unsigned int expandheuristic_param = 0;
+	bool use_both_heuristic_lookups = true;
+
+	// argument parsing
+	int carg = 2;
+	while( carg < argc ) {
+		if( strcmp( argv[carg], "-a" ) == 0 ) {
+			use_both_heuristic_lookups = atoi( argv[carg+1] );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-p" ) == 0 ) {
+			for( carg++; carg < argc; carg++ )
+				puzzlestate.puzzle.push_back( atoi(argv[carg]) );
+		} else if( strcmp( argv[carg], "-pdb" ) == 0 ) {
+			pdbfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-j" ) == 0 ) {
+			expandheuristic_param = atoi( argv[carg+1] );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-s" ) == 0 ) {
+			puzzle_size = atoi( argv[carg+1] );
+			carg += 2;
+		} else {
+			std::cerr << "ERROR: unknown parameter discovered. Exiting." << std::endl;
+			exit(1);
+		}
+	}
+
+	// create environment
+	PancakePuzzle *puzzle = new PancakePuzzle( puzzle_size );
+	// create goal
+	PancakePuzzleState goal(puzzle_size);
+	std::cout << "start: " << puzzlestate << std::endl;
+	std::cout << "goal : " << goal << std::endl;
+	// read PDB
+	std::cout << "reading PDB ... " << std::flush;
+	puzzle->Load_Regular_PDB( pdbfilename.c_str(), goal, false );
+	std::cout << "done" << std::endl << std::flush;
+
+	// create the SFBDS-A* object
+	SFBDSAStar<PancakePuzzleState,unsigned> *astar = new SFBDSAStar<PancakePuzzleState,unsigned>( puzzle );
+	// enable maximization of heuristic lookups
+	astar->use_asymmetric_heuristic( use_both_heuristic_lookups );
+
+	if( puzzlestate == goal ) {
+		std::cerr << "Warning: start and goal are the same." << std::endl;
+	}
+
+	std::vector<PancakePuzzleState> path;
+	// find the solution
+	double solution_value = astar->astar( puzzlestate, goal, path, expandheuristic_param );
+
+	// verbose
+	std::cout << "solution path:" << std::endl;
+	for( unsigned int i = 0; i < path.size(); i++ )
+		std::cout << path[i] << std::endl;
+
+	// solution output
+	std::cout << "solution value: " << solution_value << std::endl
+		<< "nodes expanded: " << astar->nodesExpanded << std::endl
+		<< "nodes popped from openqueue: " << astar->nodesPoppedFromOpenQueue << std::endl
+		<< "successors touched: " << astar->successorsTouched << std::endl
+		<< "distance prunes: " << astar->distancePruning << std::endl
+		<< "distance successor prunes: " << astar->distanceSuccessorPruning << std::endl
+		<< "closed list prunes: " << astar->closedListPrunes << std::endl
+		<< "number of jumps: " << astar->numberOfJumps << std::endl
+		<< "jumps in solution: " << astar->numberOfJumpsInSolution << std::endl
+		<< "reopened nodes: " << astar->reopenedNodes << std::endl
+		<< "bpmx updates: " << astar->bpmxUpdates << std::endl
+		<< "one side reopenings: " << astar->oneSidedReopenings << std::endl;
+
+	// cleanup
+	delete astar;
+	delete puzzle;
+
+	return 0;
+};
+
+
+
+// pancake experiment
+int compute_pancakeex( int argc, char* argv[] ) {
+
+	// Syntax handling
+	if( argc < 10 ) {
+		std::cout << "Syntax: " << argv[0] << " pancakeex -s <size> -f <file> -o <file> -pdb <file> -j <number> -a <0|1> -np" << std::endl;
+		std::cout << "where" << std::endl;
+		std::cout << "  -s <size> is the number of pancakes" << std::endl;
+		std::cout << "  -a <0|1> determines whether both regular and dual lookups should be made" << std::endl;
+		std::cout << "    (enabled by default)" << std::endl;
+		return( 1 );
+	};
+
+	std::string inputfilename;
+	std::string outputfilename;
+	std::string pdbfilename;
+	unsigned int puzzle_size = 0;
+	unsigned int expandheuristic_param = 0;
+	bool use_both_heuristic_lookups = true;
+	bool use_advanced_pruning = true;
+
+	// argument parsing
+	int carg = 2;
+	while( carg < argc ) {
+		if( strcmp( argv[carg], "-f" ) == 0 ) {
+			inputfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-o" ) == 0 ) {
+			outputfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-a" ) == 0 ) {
+			use_both_heuristic_lookups = atoi( argv[carg+1] );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-np" ) == 0 ) {
+			use_advanced_pruning= false;
+			carg++;
+		} else if( strcmp( argv[carg], "-pdb" ) == 0 ) {
+			pdbfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-j" ) == 0 ) {
+			expandheuristic_param = atoi( argv[carg+1] );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-s" ) == 0 ) {
+			puzzle_size = atoi( argv[carg+1] );
+			carg += 2;
+		} else {
+			std::cerr << "ERROR: unknown parameter discovered. Exiting." << std::endl;
+			exit(1);
+		}
+	}
+
+	// create environment
+	std::vector<PancakePuzzleState> states;
+	PancakePuzzle *puzzle = new PancakePuzzle( puzzle_size );
+	// read puzzles
+	puzzle->read_in_pancake_puzzles( inputfilename.c_str(), false, puzzle_size, 0, states );
+	std::cout << "read " << states.size() << " puzzles." << std::endl;
+	// create goal
+	PancakePuzzleState goal(puzzle_size);
+	// read PDB
+	std::cout << "reading PDB ... " << std::flush;
+	puzzle->Load_Regular_PDB( pdbfilename.c_str(), goal, false );
+	std::cout << "done" << std::endl << std::flush;
+	// open output file
+	std::ofstream fout( outputfilename.c_str(), std::ios::out );
+	if( fout.fail() ) {
+		std::cerr << "ERROR: could not open output file. Exiting." << std::endl;
+		exit( 1 );
+	}
+
+	// for each Puzzle state
+	for( std::vector<PancakePuzzleState>::iterator it = states.begin(); it != states.end(); it++ ) {
+		// create the SFBDS-A* object
+		SFBDSAStar<PancakePuzzleState,unsigned> *astar = new SFBDSAStar<PancakePuzzleState,unsigned>( puzzle );
+		// enable maximization of heuristic lookups
+		astar->use_asymmetric_heuristic( use_both_heuristic_lookups );
+		astar->use_pruning( use_advanced_pruning );
+
+		if( *it == goal ) {
+			std::cerr << "Warning: start and goal are the same @ " << goal << std::endl;
+		}
+
+		// verbose
+		//std::cout << "--------- " << *it << " -----------------" << std::endl;
+
+		std::vector<PancakePuzzleState> path;
+		// find the solution
+		double solution_value = astar->astar( *it, goal, path, expandheuristic_param );
+
+		// verbose
+		//std::cout << "-------- path --------------" << std::endl;
+		//for( unsigned int i = 0; i < path.size(); i++ )
+		//	std::cout << path[i] << std::endl;
+
+		// solution output
+		fout << *it << " => ";
+		fout << solution_value << " ";
+		fout << astar->nodesExpanded << " ";
+		fout << astar->nodesPoppedFromOpenQueue << " ";
+		fout << astar->successorsTouched << " ";
+		//fout << astar->predecessorOperatorPruning << " ";
+		fout << astar->distancePruning << " ";
+		fout << astar->distanceSuccessorPruning << " ";
+		fout << astar->closedListPrunes << " ";
+		fout << astar->numberOfJumps << " ";
+		fout << astar->numberOfJumpsInSolution << " ";
+		fout << astar->reopenedNodes << " ";
+		fout << astar->bpmxUpdates << " ";
+		fout << astar->oneSidedReopenings;
+		fout << std::endl;
+
+		delete astar;
+	}
+
+	// cleanup
+	delete puzzle;
+
+	return 0;
+};
 
 
 /*------------------------------------------------------------------------------
@@ -934,12 +1255,16 @@ int main( int argc, char* argv[] ) {
 	if( argc < 2 ) {
 		std::cout << "Syntax: " << argv[0] << " <functionality>" << std::endl;
 		std::cout << "where functionality is one of:" << std::endl;
-		std::cout << "  sfbds       - compute SFBDS for certain heuristics" << std::endl;
-		std::cout << "  experiment  - run an experiment with SFBDS" << std::endl;
-		std::cout << "  visualize   - run a visualization of SFBDS" << std::endl;
-		std::cout << "  testpoints  - compute experiment setups" << std::endl;
-		std::cout << "  templatea   - run template A*" << std::endl;
-		std::cout << "  templateaex - run an experiment with Template A*" << std::endl;
+		std::cout << "  sfbds         - compute SFBDS for certain heuristics" << std::endl;
+		std::cout << "  experiment    - run an experiment with SFBDS" << std::endl;
+		std::cout << "  visualize     - run a visualization of SFBDS" << std::endl;
+		std::cout << "  testpoints    - compute experiment setups" << std::endl;
+		std::cout << "  templatea     - run template A*" << std::endl;
+		std::cout << "  templateaex   - run an experiment with Template A*" << std::endl;
+		std::cout << "  pancakestates - compute test states for the pancake puzzle" << std::endl;
+		std::cout << "  pancakepdb    - builds a PDB for the pancake puzzle" << std::endl;
+		std::cout << "  pancakeex     - run an experiment for the pancake puzzle" << std::endl;
+		std::cout << "  pancake       - compute for one single instance of the pancake puzzle" << std::endl;
 		return(0);
 	}
 
@@ -955,6 +1280,14 @@ int main( int argc, char* argv[] ) {
 		return compute_templatea( argc, argv );
 	else if( strcmp( argv[1], "templateaex" ) == 0 )
 		return compute_experimenttemplatea( argc, argv );
+	else if( strcmp( argv[1], "pancakestates" ) == 0 )
+		return compute_pancakestates( argc, argv );
+	else if( strcmp( argv[1], "pancakepdb" ) == 0 )
+		return compute_pancakepdb( argc, argv );
+	else if( strcmp( argv[1], "pancakeex" ) == 0 )
+		return compute_pancakeex( argc, argv );
+	else if( strcmp( argv[1], "pancake" ) == 0 )
+		return compute_pancake( argc, argv );
 	else {
 		std::cout << "ERROR: no valid method submitted." << std::endl;
 		return(1);
