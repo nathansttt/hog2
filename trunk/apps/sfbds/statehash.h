@@ -22,4 +22,6 @@ uint64_t sfbds_state_hash( state s1, state s2 );
 template<class state>
 uint64_t regular_state_hash( state s1 );
 
+uint64_t factorial( int val );
+
 #endif

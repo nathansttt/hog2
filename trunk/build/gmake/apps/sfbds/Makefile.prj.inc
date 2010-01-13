@@ -62,4 +62,6 @@ SRC_CPP = \
 	apps/sfbds/statehash.cpp \
 	apps/sfbds/astar.cpp \
   apps/cpdb/GraphCanonicalHeuristic.cpp \
+	apps/sfbds/optimalIDAStar.cpp \
+	apps/sfbds/idastar.cpp \
 	apps/sfbds/sfbds.cpp \
