@@ -18,6 +18,8 @@
 // project includes
 #include "astar.h"
 #include "MyDiffHeuristic.h"
+#include "optimalIDAStar.h"
+#include "idastar.h"
 
 
 // config parameters
@@ -1040,6 +1042,224 @@ int compute_pancakeex( int argc, char* argv[] ) {
 };
 
 
+
+/*------------------------------------------------------------------------------
+| Code for IDA*
+------------------------------------------------------------------------------*/
+// pancake computation
+int compute_pancakeida( int argc, char* argv[] ) {
+
+	// Syntax handling
+	if( argc < 10 ) {
+		std::cout << "Syntax: " << argv[0] << " pancake -s <size> -pdb <file> -a <0|1> -bpmx -p <puzzle>" << std::endl;
+		return( 1 );
+	};
+
+	std::string pdbfilename;
+	PancakePuzzleState puzzlestate;
+	unsigned int puzzle_size = 0;
+	bool use_both_heuristic_lookups = true;
+	bool useBPMX = false;
+
+	// argument parsing
+	int carg = 2;
+	while( carg < argc ) {
+		if( strcmp( argv[carg], "-a" ) == 0 ) {
+			use_both_heuristic_lookups = atoi( argv[carg+1] );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-p" ) == 0 ) {
+			for( carg++; carg < argc; carg++ )
+				puzzlestate.puzzle.push_back( atoi(argv[carg]) );
+		} else if( strcmp( argv[carg], "-pdb" ) == 0 ) {
+			pdbfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-bpmx" ) == 0 ) {
+			useBPMX = true;
+			carg++;
+		} else if( strcmp( argv[carg], "-s" ) == 0 ) {
+			puzzle_size = atoi( argv[carg+1] );
+			carg += 2;
+		} else {
+			std::cerr << "ERROR: unknown parameter discovered. Exiting." << std::endl;
+			exit(1);
+		}
+	}
+
+	// create environment
+	PancakePuzzle *puzzle = new PancakePuzzle( puzzle_size );
+	// create goal
+	PancakePuzzleState goal(puzzle_size);
+	std::cout << "start: " << puzzlestate << std::endl;
+	std::cout << "goal : " << goal << std::endl;
+	// read PDB
+	std::cout << "reading PDB ... " << std::flush;
+	puzzle->Load_Regular_PDB( pdbfilename.c_str(), goal, false );
+	std::cout << "done" << std::endl << std::flush;
+
+	// create the optimalIDA* object
+	OptimalIDAStar<PancakePuzzleState,unsigned> *optidastar = new OptimalIDAStar<PancakePuzzleState,unsigned>( puzzle );
+	optidastar->SetUseMaxHeuristic( use_both_heuristic_lookups );
+	optidastar->SetUseBPMX( useBPMX );
+	std::cout << "running IDA* with " << (use_both_heuristic_lookups?"both":"regular") << " lookup(s)" << std::endl;
+	std::cout << "running " << (useBPMX?"with":"without") << " BPMX" << std::endl;
+
+	if( puzzlestate == goal ) {
+		std::cerr << "Warning: start and goal are the same." << std::endl;
+	}
+
+	std::cout << "----------------- optimal IDA* -----------------" << std::endl;
+	double result = optidastar->IDAStar( puzzlestate, goal );
+	//std::cout << "bound used: " << bound << std::endl;
+	std::cout << "result: " << result << "     ";
+	std::cout << "nodes: " << optidastar->necessaryNodesExpanded << "    ";
+	std::cout << "last iter: " << optidastar->necessaryNodesExpandedInLastIteration << std::endl;
+
+	// cleanup
+	delete optidastar;
+
+	// regular IDA*
+	IDAStar<PancakePuzzleState,unsigned> *idastar = new IDAStar<PancakePuzzleState,unsigned>( puzzle );
+	idastar->SetUseMaxHeuristic( use_both_heuristic_lookups );
+	idastar->SetUseBPMX( useBPMX );
+
+	std::cout << "----------------- regular IDA* -----------------" << std::endl;
+	result = idastar->RunIDAStar( puzzlestate, goal );
+	std::cout << "result: " << result << "     ";
+	std::cout << "nodes: " << idastar->nodesExpanded << "    ";
+	std::cout << "last iter: " << idastar->nodesExpandedInLastIteration << std::endl;
+
+	delete idastar;
+	delete puzzle;
+
+	return 0;
+};
+
+
+// pancake experiment with IDA*'s
+int compute_pancakeidaex( int argc, char* argv[] ) {
+
+	// Syntax handling
+	if( argc < 10 ) {
+		std::cout << "Syntax: " << argv[0] << " pancakeidaex -s <size> -f <file> -o <file> -pdb <file> -j <number> -a <0|1> -bpmx" << std::endl;
+		std::cout << "where" << std::endl;
+		std::cout << "  -s <size> is the number of pancakes" << std::endl;
+		std::cout << "  -a <0|1> determines whether both regular and dual lookups should be made" << std::endl;
+		std::cout << "    (enabled by default)" << std::endl;
+		return( 1 );
+	};
+
+	std::string inputfilename;
+	std::string outputfilename;
+	std::string pdbfilename;
+	unsigned int puzzle_size = 0;
+	std::vector<unsigned> policies;
+	bool use_both_heuristic_lookups = true;
+	bool use_bpmx = false;
+
+	// argument parsing
+	int carg = 2;
+	while( carg < argc ) {
+		if( strcmp( argv[carg], "-f" ) == 0 ) {
+			inputfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-o" ) == 0 ) {
+			outputfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-a" ) == 0 ) {
+			use_both_heuristic_lookups = atoi( argv[carg+1] );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-bpmx" ) == 0 ) {
+			use_bpmx = true;
+			carg++;
+		} else if( strcmp( argv[carg], "-pdb" ) == 0 ) {
+			pdbfilename = argv[carg+1];
+			carg += 2;
+		} else if( strcmp( argv[carg], "-j" ) == 0 ) {
+			policies.push_back( atoi( argv[carg+1] ) );
+			carg += 2;
+		} else if( strcmp( argv[carg], "-s" ) == 0 ) {
+			puzzle_size = atoi( argv[carg+1] );
+			carg += 2;
+		} else {
+			std::cerr << "ERROR: unknown parameter discovered. Exiting." << std::endl;
+			exit(1);
+		}
+	}
+
+	// create environment
+	std::vector<PancakePuzzleState> states;
+	PancakePuzzle *puzzle = new PancakePuzzle( puzzle_size );
+	// read puzzles
+	puzzle->read_in_pancake_puzzles( inputfilename.c_str(), false, puzzle_size, 0, states );
+	std::cout << "read " << states.size() << " puzzles." << std::endl;
+	// create goal
+	PancakePuzzleState goal(puzzle_size);
+	// read PDB
+	std::cout << "reading PDB ... " << std::flush;
+	puzzle->Load_Regular_PDB( pdbfilename.c_str(), goal, false );
+	std::cout << "done" << std::endl << std::flush;
+	// open output file
+	std::ofstream fout( outputfilename.c_str(), std::ios::out );
+	if( fout.fail() ) {
+		std::cerr << "ERROR: could not open output file. Exiting." << std::endl;
+		exit( 1 );
+	}
+
+	// for each Puzzle state
+	for( std::vector<PancakePuzzleState>::iterator it = states.begin(); it != states.end(); it++ ) {
+
+		// regular IDA*
+		IDAStar<PancakePuzzleState,unsigned> *idastar = new IDAStar<PancakePuzzleState,unsigned>( puzzle );
+		idastar->SetUseMaxHeuristic( use_both_heuristic_lookups );
+		idastar->SetUseBPMX( use_bpmx );
+		idastar->SetJumpingPolicy( 0 ); // regular A*
+		double result = idastar->RunIDAStar( *it, goal );
+
+		// output the result
+		fout << result << " " << idastar->nodesExpanded << " "
+			<< idastar->nodesExpandedInLastIteration << " " << std::flush;
+
+		double r;
+		// for each policy
+		for( std::vector<unsigned>::iterator policy = policies.begin(); policy != policies.end(); policy++ ) {
+
+			idastar->SetJumpingPolicy( *policy );
+			r = idastar->RunIDAStar( *it, goal );
+
+			// sanity check
+			if( !fequal( r, result ) )
+				std::cerr << "Warning: policy " << *policy << " did not find same solution!" << std::endl;
+
+			fout << idastar->nodesExpanded << " " << idastar->nodesExpandedInLastIteration << " " << std::flush;
+		}
+
+		// optimal IDA*
+		OptimalIDAStar<PancakePuzzleState,unsigned> *optidastar = new OptimalIDAStar<PancakePuzzleState,unsigned>( puzzle );
+		optidastar->SetUseMaxHeuristic( use_both_heuristic_lookups );
+		optidastar->SetUseBPMX( use_bpmx );
+		unsigned nE;
+		r = optidastar->IDAStarIteration( *it, goal, result, nE );
+
+		// sanity check
+		if( !fequal( r, result ) )
+			std::cerr << "Warning: optimal IDA* did not find same solution!" << std::endl;
+
+		// output the optimal number of nodes
+		fout << nE << " => " << *it << std::endl;
+
+		delete idastar;
+		delete optidastar;
+	}
+
+	// cleanup
+	delete puzzle;
+
+	return 0;
+};
+
+
+
+
 /*------------------------------------------------------------------------------
 | Code for visualization of SFBDS
 ------------------------------------------------------------------------------*/
@@ -1265,6 +1485,8 @@ int main( int argc, char* argv[] ) {
 		std::cout << "  pancakepdb    - builds a PDB for the pancake puzzle" << std::endl;
 		std::cout << "  pancakeex     - run an experiment for the pancake puzzle" << std::endl;
 		std::cout << "  pancake       - compute for one single instance of the pancake puzzle" << std::endl;
+		std::cout << "  pancakeida    - optimal IDA* on a pancake puzzle" << std::endl;
+		std::cout << "  pancakeidaex  - experiment with IDA* and jumping policies on the pancakes" << std::endl;
 		return(0);
 	}
 
@@ -1288,6 +1510,10 @@ int main( int argc, char* argv[] ) {
 		return compute_pancakeex( argc, argv );
 	else if( strcmp( argv[1], "pancake" ) == 0 )
 		return compute_pancake( argc, argv );
+	else if( strcmp( argv[1], "pancakeida" ) == 0 )
+		return compute_pancakeida( argc, argv );
+	else if( strcmp( argv[1], "pancakeidaex" ) == 0 )
+		return compute_pancakeidaex( argc, argv );
 	else {
 		std::cout << "ERROR: no valid method submitted." << std::endl;
 		return(1);

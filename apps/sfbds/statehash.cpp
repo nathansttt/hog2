@@ -106,3 +106,4 @@ uint64_t regular_state_hash<PancakePuzzleState>( PancakePuzzleState s ) {
 	}
 	return result;
 };
+
