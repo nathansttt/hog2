@@ -49,6 +49,7 @@ class IDAStar {
 	void GetStateFromHash( uint64_t hash, state &s );
 
 	bool expandheuristic( Node &n, bool last_direction );
+	double heuristicLookup( state &s, state &g, bool bothSides );
 
 	double IDAStarIteration( Node &n, double bound, double h, bool last_direction );
 
@@ -137,11 +138,9 @@ double IDAStar<state,action>::IDAStarIteration( Node &n, double bound, double h,
 
 	// get the heuristic
 	if( useBPMX )
-		h = std::max( h, env->HCost( x, y ) );
+		h = std::max( h, heuristicLookup( x, y, useMaximumHeuristic ) );
 	else
-		h = env->HCost( x, y );
-	if( useMaximumHeuristic )
-		h = std::max( h, env->HCost( y, x ) );
+		h = heuristicLookup( x, y, useMaximumHeuristic );
 
 	// heuristic prune - if bound is exceeded, prune
 	if( fgreater( h, bound ) ) {
@@ -250,12 +249,12 @@ bool IDAStar<state,action>::expandheuristic( Node &n, bool last_direction ) {
 			// return the side with the higher average hcost - JIL(1)
 			env->GetSuccessors( x, successors );
 			for( typename std::vector<state>::iterator it = successors.begin(); it != successors.end(); it++ )
-				h_start += env->HCost( *it, y );
+				h_start += heuristicLookup( *it, y, useMaximumHeuristic );
 			h_start /= (double)successors.size();
 			successors.clear();
 			env->GetSuccessors( y, successors );
 			for( typename std::vector<state>::iterator it = successors.begin(); it != successors.end(); it++ )
-				h_goal += env->HCost( *it, x );
+				h_goal += heuristicLookup( *it, x, useMaximumHeuristic );
 			h_goal /= (double)successors.size();
 
 			// if both averages are the same do not change direction
@@ -266,8 +265,8 @@ bool IDAStar<state,action>::expandheuristic( Node &n, bool last_direction ) {
 			break;
 
 		case 7: // jump if larger
-			h_start = env->HCost( x, y );
-			h_goal  = env->HCost( y, x );
+			h_start = heuristicLookup( x, y, false );
+			h_goal  = heuristicLookup( y, x, false );
 			if( fequal( h_start, h_goal ) )
 				return last_direction;
 			result = (h_start > h_goal);
@@ -278,6 +277,15 @@ bool IDAStar<state,action>::expandheuristic( Node &n, bool last_direction ) {
 	if( last_direction != result )
 		numberOfJumps++;
 
+	return result;
+};
+
+
+template<class state,class action>
+double IDAStar<state,action>::heuristicLookup( state &s, state &g, bool bothSides ) {
+	double result = env->HCost( s, g );
+	if( bothSides )
+		result = std::max( result, env->HCost( g, s ) );
 	return result;
 };
 
