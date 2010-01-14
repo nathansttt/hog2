@@ -234,6 +234,11 @@ double BurnedPancakePuzzle::Memory_Free_HCost(const BurnedPancakePuzzleState &st
 		{
 			h_count++;
 		}
+		else if ((state.puzzle[i] < 0 && state.puzzle[i+1] > 0) ||// sign is different
+				 (state.puzzle[i] > 0 && state.puzzle[i+1] < 0))
+		{
+			h_count+=2;
+		}
 	}
 	if ((unsigned) goal_locs[abs(state.puzzle[i])] != size -1)
 		h_count++;
