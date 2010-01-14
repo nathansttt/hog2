@@ -100,6 +100,7 @@ protected:
 	// if expand_heuristic is true the start will be expanded
 	// otherwise the goal will be expanded
 	bool expandheuristic( QueueNode &q );
+	double heuristicLookup( state &s, state &g, bool bothSides );
 
 	// updates the coming_from tag as described below
 	unsigned int update_coming_from( unsigned int &old_flag, bool &expand );
@@ -216,9 +217,7 @@ void SFBDSAStar<state,action>::initialize( state s1, state s2, int _expandheuris
 	q.s1 = s1; q.s2 = s2; q.coming_from = 0;
 	q.gcost1 = 0;
 	q.gcost2 = 0;
-	q.fcost = env->HCost( s1, s2 );
-	if( use_asymmetric_h )
-		q.fcost = std::max( q.fcost, env->HCost( s2, s1 ) );
+	q.fcost = heuristicLookup( s1, s2, use_asymmetric_h );
 	sanity_fcost_check = q.fcost;
 	open.push( q );
 	distances_from_start[q.s1] = q.gcost1;
@@ -388,9 +387,7 @@ typename SFBDSAStar<state,action>::QueueNode SFBDSAStar<state,action>::step( boo
 			continue;
 
 		// finding the hcost of the successor
-		hcost = env->HCost( successor.s1, successor.s2 );
-		if( use_asymmetric_h )
-			hcost = std::max( hcost, env->HCost( successor.s2, successor.s1 ) );
+		hcost = heuristicLookup( successor.s1, successor.s2, use_asymmetric_h );
 		successor.fcost = successor.gcost1 + successor.gcost2 + hcost;
 		successors.push_back( successor );
 
@@ -611,12 +608,12 @@ bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 			// return the side with the higher average hcost - JIL(1)
 			env->GetSuccessors( q.s1, successors );
 			for( typename std::vector<state>::iterator it = successors.begin(); it != successors.end(); it++ )
-				h_start += env->HCost( *it, q.s2 );
+				h_start += heuristicLookup( *it, q.s2, use_asymmetric_h );
 			h_start /= (double)successors.size();
 			successors.clear();
 			env->GetSuccessors( q.s2, successors );
 			for( typename std::vector<state>::iterator it = successors.begin(); it != successors.end(); it++ )
-				h_goal += env->HCost( *it, q.s1 );
+				h_goal += heuristicLookup( *it, q.s1, use_asymmetric_h );
 			h_goal /= (double)successors.size();
 			// verbose
 			//std::cout << "average hcosts for (" << q.s1 << "," << q.s2 << ") is " << h_start << " " << h_goal << std::endl;
@@ -671,8 +668,8 @@ bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 			break;
 
 		case 7: // jump if larger
-			h_start = env->HCost( q.s1, q.s2 );
-			h_goal  = env->HCost( q.s2, q.s1 );
+			h_start = heuristicLookup( q.s1, q.s2, false );
+			h_goal  = heuristicLookup( q.s2, q.s1, false );
 			if( fequal( h_start, h_goal ) && (q.coming_from&3) ) { // don't jump
 				return( !(bool)(q.coming_from&4) );
 			}
@@ -687,5 +684,12 @@ bool SFBDSAStar<state,action>::expandheuristic( QueueNode &q ) {
 	return result;
 };
 
+template<class state,class action>
+double SFBDSAStar<state,action>::heuristicLookup( state &s, state &g, bool bothSides ) {
+	double result = env->HCost( s, g );
+	if( bothSides )
+		result = std::max( result, env->HCost( g, s ) );
+	return result;
+};
 
 #endif
