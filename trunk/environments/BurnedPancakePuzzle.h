@@ -1,5 +1,5 @@
-#ifndef PANCAKE_H
-#define PANCAKE_H
+#ifndef BURNEDPANCAKE_H
+#define BURNEDPANCAKE_H
 
 #include <stdint.h>
 #include <iostream>
@@ -13,7 +13,7 @@ public:
 	BurnedPancakePuzzleState(unsigned int puzzle_size) {
 		puzzle.resize(puzzle_size);
 		for (unsigned int x = 0; x < puzzle.size(); x++)
-			puzzle[x] = x;
+			puzzle[x] = x+1;
 	}
 	std::vector<int> puzzle;
 };
@@ -21,7 +21,9 @@ public:
 static std::ostream& operator <<(std::ostream & out, const BurnedPancakePuzzleState &loc)
 {
 	for (unsigned int x = 0; x < loc.puzzle.size(); x++)
+	{
 		out << loc.puzzle[x] << " ";
+	}
 	return out;
 }
 
