@@ -207,7 +207,12 @@ double BurnedPancakePuzzle::HCost(const BurnedPancakePuzzleState &state, const B
 		std::vector<int> goal_locs(size);
 		for (unsigned i = 0; i < size; i++)
 		{
-			goal_locs[abs(goal_state.puzzle[i])] = i;
+			int theSign = abs(goal_state.puzzle[i])/goal_state.puzzle[i];
+			goal_locs[abs(goal_state.puzzle[i])-1] = (i+1)*theSign;
+//			std::cout << "goal array: ";
+//			for (unsigned int x = 0; x < size; x++)
+//				std::cout << goal_locs[x] << " ";
+//			std::cout << std::endl;
 		}
 		return Memory_Free_HCost(state, goal_locs);
 	}
@@ -215,6 +220,14 @@ double BurnedPancakePuzzle::HCost(const BurnedPancakePuzzleState &state, const B
 	if (state == goal_state)
 		return 0.0;
 	return 1.0;
+}
+//#define GetDualEntry(s, r, i) (r[abs(s.puzzle[i])-1])
+//#define GetDualEntry(s, r, i) (s.puzzle[r[i]-1])
+int GetDualEntryLoc(const BurnedPancakePuzzleState &state, std::vector<int> &goal_locs, int index)
+{
+	int theSign = abs(state.puzzle[index])/state.puzzle[index];
+	int loc = goal_locs[abs(state.puzzle[index])-1];
+	return loc*theSign;
 }
 
 double BurnedPancakePuzzle::Memory_Free_HCost(const BurnedPancakePuzzleState &state, std::vector<int> &goal_locs)
@@ -229,22 +242,33 @@ double BurnedPancakePuzzle::Memory_Free_HCost(const BurnedPancakePuzzleState &st
 	unsigned i = 0;
 	for (; i < size - 1; i++)
 	{
-		int diff = abs(goal_locs[abs(state.puzzle[i])]) - abs(goal_locs[abs(state.puzzle[i+1])]);
+//		int diff = abs(goal_locs[abs(state.puzzle[i])-1]) - abs(goal_locs[abs(state.puzzle[i+1])-1]);
+		int curr = GetDualEntryLoc(state, goal_locs, i);
+		int next = GetDualEntryLoc(state, goal_locs, i+1);
+		int diff = (abs(abs(curr)-abs(next)));
 		if (diff > 1 || diff < - 1)
 		{
 			h_count++;
 		}
-		else if ((state.puzzle[i] < 0 && state.puzzle[i+1] > 0) ||// sign is different
-				 (state.puzzle[i] > 0 && state.puzzle[i+1] < 0))
+		else if ((curr < 0 && next > 0) ||// sign is different
+				 (curr > 0 && next < 0))
 		{
 			h_count+=2;
 		}
 	}
-	if ((unsigned) goal_locs[abs(state.puzzle[i])] != size -1)
+	int last = GetDualEntryLoc(state, goal_locs, i);
+	//if ((unsigned) goal_locs[abs(state.puzzle[i])-1] != size -1)
+	if (last != (int)size)
 		h_count++;
-	else if (state.puzzle[i] < 0) // in place but must switch out
+	else if (-last == (int)size)
 		h_count+=2;
+//	else if (state.puzzle[i] < 0) // in place but must switch out
+//		h_count+=2;
 
+//	std::cout << "goal array: ";
+//	for (unsigned int x = 0; x < size; x++)
+//		std::cout << goal_locs[x] << " ";
+//	std::cout << std::endl;
 	return h_count;
 }
 
