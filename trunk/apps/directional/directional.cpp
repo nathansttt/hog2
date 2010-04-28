@@ -462,29 +462,44 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
-//	for (int x = 0; x < ((mod==kShiftDown)?(50):(1)); x++)
+//	// attmpt to learn!
+//	Map m(100, 100);
+//	Directional2DEnvironment d(&m);
+//	//Directional2DEnvironment(Map *m, model envType = kVehicle, heuristicType heuristic = kExtendedPerimeterHeuristic);
+//	xySpeedHeading l1(50, 50), l2(50, 50);
+//	__gnu_cxx::hash_map<uint64_t, xySpeedHeading, Hash64 > stateTable;
+//	
+//	std::vector<xySpeedHeading> path;
+//	TemplateAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> alg;
+//	alg.SetStopAfterGoal(false);
+//	alg.InitializeSearch(&d, l1, l1, path);
+//	for (int x = 0; x < 2000; x++)
+//		alg.DoSingleSearchStep(path);
+//	int count = alg.GetNumItems();
+//	LinearRegression lr(37, 1, 1/37.0); // 10 x, 10 y, dist, heading offset [16]
+//	std::vector<double> inputs;
+//	std::vector<double> output(1);
+//	for (unsigned int x = 0; x < count; x++)
 //	{
-//		if (unitSim->getUnitGroup(1) == 0)
-//		{
-//			unitSim->addUnitGroup(new SharedAMapGroup(unitSim));
-//			unitSim->setmapAbstractionDisplay(2);
-//		}
-//		int xx1, yy1, xx2, yy2;
-//		unitSim->getRandomLocation(xx1, yy1);
-//		unitSim->getRandomLocation(xx2, yy2);
-//		
-//		unit *u, *u2 = new unit(xx2, yy2, 0);
-//		
-//		praStar *pra = new praStar(); pra->setPartialPathLimit(4);
-//		//aStar *pra = new aStar();
-//		
-//		unitSim->addUnit(u2);
-//		u = new SearchUnit(xx1, yy1, u2, pra);
-//		// just set the group of the unit, and it will share a map with those
-//		// units.
-//		unitSim->getUnitGroup(1)->addUnit(u);
-//		unitSim->addUnit(u);
-//		u->setSpeed(0.5); // time to go 1 distance						
+//		// note that the start state is always at rest;
+//		// we actually want the goal state at rest?
+//		// or generate everything by backtracking through the parents of each state
+//		const AStarOpenClosedData<xySpeedHeading> val = GetItem(x);
+//		inputs[0] = sqrt((val.data.x-l1.x)*(val.data.x-l1.x)+(val.data.y-l1.)*(val.data.y-l1.y));
+//		// fill in values
+//		if (fabs(val.data.x-l1.x) >= 10)
+//			inputs[10] = 1;
+//		else inputs[1+fabs(val.data.x-l1.x)] = 1;
+//		if (fabs(val.data.y-l1.y) >= 10)
+//			inputs[20] = 1;
+//		else inputs[11+fabs(val.data.y-l1.y)] = 1;
+//		// this is wrong -- I need the possibility of flipping 15/1 is only 2 apart
+//		intputs[30+((int)(fabs(l1.rotation-val.data.rotation)))%16] = 1;
+//		output[0] = val.g;
+//		lr.train(inputs, output);
+//		// get data and learn to predict the g-cost
+//		//val.data.
+//		//val.g;
 //	}
 }
 

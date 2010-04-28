@@ -88,8 +88,8 @@ class CopRobberEnvironment : public virtual MultiAgentEnvironment<state,action> 
 	virtual double HCost(const CRState &node1, const CRState &node2);
 	virtual double GCost(const CRState &node1, const CRState &node2);
 	virtual double GCost(const CRState &node, const CRMove &act);
-	virtual bool GoalTest(CRState &node, CRState& );
-	virtual bool GoalTest(CRState &node);
+	virtual bool GoalTest(const CRState &node, const CRState& );
+	virtual bool GoalTest(const CRState &node);
 
 	// I would recommend testing these functions extensively before using them
 	// because they won't work well with a lot of agents!

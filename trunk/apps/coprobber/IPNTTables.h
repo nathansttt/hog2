@@ -105,7 +105,7 @@ class IPNTTables {
 
 	double MinHCost( CRState &pos, bool minsTurn = true );
 	double MinGCost( CRState &pos1, CRState &pos2 );
-	bool GoalTest( CRState &pos );
+	bool GoalTest(const  CRState &pos );
 	double TerminalCost( CRState &pos );
 
 	void clear_bounds_cache();

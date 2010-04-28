@@ -8,8 +8,3 @@
  */
 
 #include "IDAStar.h"
-
-#include "IDAStar.h"
-#include <math.h>
-#include "FPUtil.h"
-

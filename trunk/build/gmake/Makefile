@@ -34,6 +34,7 @@ PROJECTS = \
   apps/measure_inconsistency \
   apps/dynamicsearch \
   apps/directional \
+  apps/dragonage \
 	apps/sfbds \
 #	apps/coprobber
 #  apps/lv.pathfinding	
@@ -66,6 +67,7 @@ PROJECTS_ALL = \
   apps/multiagent \
   apps/dynamicsearch \
   apps/directional \
+  apps/dragonage \
 	apps/sfbds \
 #	apps/coprobber
 

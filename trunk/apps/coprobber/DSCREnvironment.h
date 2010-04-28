@@ -50,8 +50,8 @@ class DSCREnvironment {
 	virtual void GetCopSuccessors( state &s,   std::vector<state> &neighbors, std::vector<float> &gcosts, unsigned int radius = 0 );
 
 	// termination criteria
-	virtual bool GoalTest( CRState &s );
-	virtual bool GoalTest( state &s1, state &s2 );
+	virtual bool GoalTest(const  CRState &s );
+	virtual bool GoalTest(const  state &s1, const state &s2 );
 	virtual double TerminalCost( CRState &s );
 	virtual double TerminalCost( state &s1, state &s2 );
 

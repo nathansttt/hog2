@@ -32,7 +32,9 @@ default : all
 SRC_CPP = \
 	utils/BitVector.cpp \
 	utils/FPUtil.cpp \
+	utils/FunctionApproximator.cpp \
 	utils/GLUtil.cpp \
+	utils/LinearRegression.cpp \
 	utils/Map.cpp \
 	utils/MapOverlay.cpp \
 	utils/Plot2D.cpp \
@@ -40,5 +42,6 @@ SRC_CPP = \
 	utils/StatCollection.cpp \
 	utils/StatUtil.cpp \
 	utils/Timer.cpp \
+	utils/SwapEndian.cpp \
 	utils/StringUtils.cpp
 

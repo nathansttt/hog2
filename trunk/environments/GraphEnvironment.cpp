@@ -47,6 +47,22 @@ GraphEnvironment::~GraphEnvironment()
 //	delete h;
 }
 
+int GraphEnvironment::GetNumSuccessors(const graphState &stateID) const
+{
+	node *n = g->GetNode(stateID);
+	
+	if (n == 0)
+	{
+		return 0;
+	}
+	
+	if (directed)
+	{
+		return n->getNumOutgoingEdges();
+	}
+	return n->GetNumEdges();
+}
+
 void GraphEnvironment::GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const
 {
 	neighbors.resize(0);
@@ -121,7 +137,7 @@ void GraphEnvironment::ApplyAction(graphState &s, graphMove a) const
 
 bool GraphEnvironment::InvertAction(graphMove &a) const
 {
-	uint16_t tmp = a.from;
+	uint32_t tmp = a.from;
 	a.from = a.to;
 	a.to = tmp;
 	if (g->findDirectedEdge(a.from, a.to))
@@ -133,7 +149,9 @@ double GraphEnvironment::HCost(const graphState &state1, const graphState &state
 {
 	if (h)
 		return h->HCost(state1, state2);
-	return 0;
+	if (state1 == state2)
+		return 0;
+	return 1;// this should be the min edge cost in the graph...
 }
 
 double GraphEnvironment::GCost(const graphState &, const graphMove &move)
@@ -152,7 +170,7 @@ double GraphEnvironment::GCost(const graphState &state1, const graphState &state
 	return e->GetWeight();
 }
 
-bool GraphEnvironment::GoalTest(graphState &state, graphState &goal)
+bool GraphEnvironment::GoalTest(const graphState &state, const graphState &goal)
 {
 	return state == goal;
 }

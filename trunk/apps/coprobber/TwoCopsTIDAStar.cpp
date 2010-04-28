@@ -21,7 +21,7 @@ TwoCopsTIDAStar::Position TwoCopsTIDAStar::CRHash_MemOptim( CRState &s ) {
 	return( s[0] * numnodes*(numnodes+1)/2 + s[1]*(s[1]+1)/2 + s[1]*(numnodes-s[1]-1) + s[2] );
 };
 
-void TwoCopsTIDAStar::MemOptim_Hash_To_CRState( Position &hash, CRState &s ) {
+void TwoCopsTIDAStar::MemOptim_Hash_To_CRState( Position &hash, const CRState &s ) {
 	s[0] = hash / (numnodes*(numnodes+1)/2);
 	Position h = hash % (numnodes*(numnodes+1)/2);
 
@@ -256,7 +256,7 @@ unsigned int TwoCopsTIDAStar::tida_update( Position &pos, unsigned int bound, bo
 };
 
 
-bool TwoCopsTIDAStar::GoalTest( Position &pos ) {
+bool TwoCopsTIDAStar::GoalTest(const  Position &pos ) {
 	CRState crpos;
 	MemOptim_Hash_To_CRState( pos, crpos );
 	return( crpos[0] == crpos[1] || crpos[0] == crpos[2] );

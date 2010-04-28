@@ -32,9 +32,9 @@ public:
 	virtual double HCost(const recVec &node1, const recVec &node2);
 	virtual double GCost(const recVec &node1, const recVec &node2);
 	virtual double GCost(const recVec &node1, const line2d &act);
-	bool GoalTest(recVec &node, recVec &goal);
+	bool GoalTest(const recVec &node, const recVec &goal);
 
-	bool GoalTest(recVec &){
+	bool GoalTest(const recVec &){
 		printf("Single State Goal Test Failure: method not implemented for ConfigEnvironment\n");
 		exit(0); return false;}
 

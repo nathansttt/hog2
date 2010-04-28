@@ -313,7 +313,7 @@ double RoboticArm::GCost(const armAngles &node1, const armRotations &act)
 }
 #endif
 
-bool RoboticArm::GoalTest(armAngles &node, armAngles &goal)
+bool RoboticArm::GoalTest(const armAngles &node, const armAngles &goal)
 {
 	if (!goal.IsGoalState())
 	{

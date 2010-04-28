@@ -44,7 +44,7 @@ class TwoCopsTIDAStar {
 
 	// hashing functions to convert a Position into CRState and vice versa
 	Position CRHash_MemOptim( CRState &s );
-	void MemOptim_Hash_To_CRState( Position &hash, CRState &s );
+	void MemOptim_Hash_To_CRState( Position &hash, const CRState &s );
 
 	void GetNeighbors( Position &pos, bool minFirst, std::set<Position> &neighbors );
 
@@ -52,7 +52,7 @@ class TwoCopsTIDAStar {
 	// TIDA* subroutine
 	unsigned int tida_update( Position &pos, unsigned int bound, bool minFirst );
 
-	bool GoalTest( Position &pos );
+	bool GoalTest(const  Position &pos );
 	// lower estimate on survival time of robber
 	unsigned int HCost( Position &pos, bool &minFirst );
 

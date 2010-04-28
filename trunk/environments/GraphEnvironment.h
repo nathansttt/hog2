@@ -30,13 +30,16 @@ typedef unsigned long graphState;
 
 class graphMove {
 public:
-	graphMove() :from(UINT16_MAX), to(UINT16_MAX) {}
-	graphMove(uint16_t f, uint16_t t) :from(f), to(t) {}
-	uint16_t from, to;
+	graphMove() :from(UINT32_MAX), to(UINT32_MAX) {}
+	graphMove(uint32_t f, uint32_t t) :from(f), to(t) {}
+	uint32_t from, to;
 };
 
 
-
+static bool operator==(const graphMove &l1, const graphMove &l2)
+{
+	return (l1.from == l2.from)&&(l1.to==l2.to);
+}
 
 namespace GraphSearchConstants
 {
@@ -75,6 +78,24 @@ public:
 	virtual void ChooseStartGoal(graphState &/*start*/, graphState &/*goal*/) {}
 	virtual void OpenGLDraw() const {}
 private:
+};
+
+class GraphHeuristicContainer : public GraphHeuristic {
+public:
+	GraphHeuristicContainer(Graph *gg) {g = gg;}
+	~GraphHeuristicContainer() {}
+	virtual Graph *GetGraph() { return g; }
+	void AddHeuristic(GraphHeuristic *h) { heuristics.push_back(h); }
+	virtual double HCost(const graphState &state1, const graphState &state2)
+	{
+		double cost = 0;
+		for (unsigned int x = 0; x < heuristics.size(); x++)
+			cost = max(cost, heuristics[x]->HCost(state1, state2));
+		return cost;
+	}
+private:
+	std::vector<GraphHeuristic*> heuristics;
+	Graph *g;
 };
 
 // this class uses the label on a graph for a heuristic
@@ -215,6 +236,7 @@ enum tHeuristicCombination
 	kGridMax = 3 // 0 on non-grid points
 };
 
+
 class GraphMapInconsistentHeuristic : public GraphDistanceHeuristic {
 public:
 	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
@@ -229,10 +251,11 @@ private:
 
 class GraphEnvironment : public SearchEnvironment<graphState, graphMove> {
 public:
-	GraphEnvironment(Graph *g, GraphHeuristic *gh);
-	GraphEnvironment(Map *m, Graph *g, GraphHeuristic *gh);
+	GraphEnvironment(Graph *g, GraphHeuristic *gh = 0);
+	GraphEnvironment(Map *m, Graph *g, GraphHeuristic *gh = 0);
 	virtual ~GraphEnvironment();
 	virtual void GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const;
+	virtual int GetNumSuccessors(const graphState &stateID) const;
 	virtual void GetActions(const graphState &stateID, std::vector<graphMove> &actions) const;
 	virtual graphMove GetAction(const graphState &s1, const graphState &s2) const;
 	virtual void ApplyAction(graphState &s, graphMove a) const;
@@ -244,7 +267,7 @@ public:
 	virtual double HCost(const graphState &state1, const graphState &state2);
 	virtual double GCost(const graphState &state1, const graphState &state2);
 	virtual double GCost(const graphState &state1, const graphMove &state2);
-	virtual bool GoalTest(graphState &state, graphState &goal);
+	virtual bool GoalTest(const graphState &state, const graphState &goal);
 	virtual uint64_t GetStateHash(const graphState &state) const;
 	virtual uint64_t GetActionHash(graphMove act) const;
 	virtual void OpenGLDraw() const;
@@ -262,7 +285,7 @@ public:
 		fprintf(stderr, "ERROR: Single State HCost not implemented for GraphEnvironment\n");
 		exit(1); return -1.0;}
 
-	virtual bool GoalTest(graphState &){
+	virtual bool GoalTest(const graphState &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for GraphEnvironment\n");
 		exit(1); return false;
 	}

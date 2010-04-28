@@ -237,12 +237,12 @@ double PancakePuzzle::Memory_Free_HCost(const PancakePuzzleState &state, std::ve
 	return h_count;
 }
 
-bool PancakePuzzle::GoalTest(PancakePuzzleState &state, PancakePuzzleState &theGoal)
+bool PancakePuzzle::GoalTest(const PancakePuzzleState &state, const PancakePuzzleState &theGoal)
 {
 	return (state == theGoal);
 }
 
-bool PancakePuzzle::GoalTest(PancakePuzzleState &s) {
+bool PancakePuzzle::GoalTest(const PancakePuzzleState &s) {
 	if(!goal_stored) {
 		fprintf(stderr, "ERROR: GoalTest called with a single state and goal is not stored.\n");
 		exit(1);

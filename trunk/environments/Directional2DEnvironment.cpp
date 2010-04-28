@@ -482,7 +482,7 @@ double Directional2DEnvironment::GCost(const xySpeedHeading &, const xySpeedHead
 //	return h;
 }
 
-bool Directional2DEnvironment::GoalTest(xySpeedHeading &node, xySpeedHeading &goal)
+bool Directional2DEnvironment::GoalTest(const xySpeedHeading &node, const xySpeedHeading &goal)
 {
 	if (test && test->goalTest(node))
 		return true;

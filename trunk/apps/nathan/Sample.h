@@ -28,6 +28,8 @@
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType);
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data);
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier, char key);
+void MyPancakeHandler(unsigned long windowID, tKeyboardModifier, char key);
+void MyFlingHandler(unsigned long windowID, tKeyboardModifier, char key);
 //void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier, char key);
 //void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier, char key);
 

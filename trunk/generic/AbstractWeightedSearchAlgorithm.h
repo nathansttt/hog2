@@ -98,7 +98,7 @@ public:
 
 	/** If exactGoal is set, GoalTest returns true when state is the same as goal.
 	If exactGoal is not set, GoalTest returns true if state and goal have the same parent*/
-	bool GoalTest(graphState &state, graphState &goal)
+	bool GoalTest(const graphState &state, const graphState &goal)
 	{
 		if(noDummyGoal)
 			return false;
@@ -236,7 +236,7 @@ public:
 		fprintf(stderr, "ERROR: Single State HCost not implemented for AbsGraphEnvironment\n");
 		exit(1); return -1.0;}
 
-	bool GoalTest(graphState &){
+	bool GoalTest(const graphState &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for AbsGraphEnvironment\n");
 		exit(1); return false;}
 

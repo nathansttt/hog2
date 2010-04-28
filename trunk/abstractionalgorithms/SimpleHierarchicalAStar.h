@@ -32,9 +32,9 @@ class HierarchicalHeuristicEnvironment : public SearchEnvironment<unsigned long,
 		exit(1); return -1.0;}
 
 	virtual double GCost(const unsigned long &node1, const unsigned long &node2) = 0;
-	virtual bool GoalTest(unsigned long &node, unsigned long &goal) = 0;
+	virtual bool GoalTest(const  unsigned long &node, const  unsigned long &goal) = 0;
 
-	virtual bool GoalTest(unsigned long &s){
+	virtual bool GoalTest(const  unsigned long &s){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for HierarchicalHeuristicEnvironment\n");
 		exit(1); return false;}
 

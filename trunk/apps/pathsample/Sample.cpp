@@ -34,6 +34,7 @@
 #include "AStar.h"
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
+#include "MapSectorAbstraction.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -49,6 +50,9 @@ TemplateAStar<xyLoc, tDirection, MapEnvironment> a2;
 MapEnvironment *ma1 = 0;
 MapEnvironment *ma2 = 0;
 GraphDistanceHeuristic *gdh = 0;
+
+MapSectorAbstraction *msa;
+
 std::vector<xyLoc> path;
 
 int main(int argc, char* argv[])
@@ -73,10 +77,12 @@ void CreateSimulation(int id)
 	}
 	else {
 		map = new Map(gDefaultMap);
-		map->Scale(512, 512);
+//		map->Scale(512, 512);
 	}
 	map->SetTileSet(kWinter);
-	
+	msa = new MapSectorAbstraction(map, 8);
+	msa->ToggleDrawAbstraction(1);
+	msa->ToggleDrawAbstraction(2);
 	unitSims.resize(id+1);
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map));
 	unitSims[id]->SetStepType(kMinTime);
@@ -144,7 +150,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->StepTime(1.0/30.0);
 	}
 	unitSims[windowID]->OpenGLDraw();
-
+	msa->OpenGLDraw();
+	
 	if (mouseTracking)
 	{
 		glBegin(GL_LINES);
@@ -200,6 +207,29 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 }
 
+void doExport()
+{
+	Map *map = new Map(gDefaultMap);
+	map->Scale(512, 512);
+	msa = new MapSectorAbstraction(map, 8);
+	msa->ToggleDrawAbstraction(1);
+	Graph *g = msa->GetAbstractGraph(1);
+	printf("g\n%d %d\n", g->GetNumNodes(), g->GetNumEdges());
+	for (int x = 0; x < g->GetNumNodes(); x++)
+	{
+		node *n = g->GetNode(x);
+		int x1, y1;
+		msa->GetTileFromNode(n, x1, y1);
+		printf("%d %d %d\n", x, x1, y1);
+	}
+	for (int x = 0; x < g->GetNumEdges(); x++)
+	{
+		edge *e = g->GetEdge(x);
+		printf("%d %d\n", e->getFrom(), e->getTo());//, (int)(100.0*e->GetWeight())); // %d 0
+	}
+	exit(0);
+}
+
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if( strcmp( argument[0], "-map" ) == 0 )
@@ -207,6 +237,8 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs <= 1)
 			return 0;
 		strncpy(gDefaultMap, argument[1], 1024);
+
+		doExport();
 		return 2;
 	}
 	else if( strcmp( argument[0], "-size" ) == 0 )

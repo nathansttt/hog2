@@ -29,6 +29,8 @@ public:
 	void Save(char *file);
 	double HCost(const graphState &state1, const graphState &state2);
 	void ChooseStartGoal(graphState &start, graphState &goal);
+	double GetDistToCanonicalState(graphState &which);
+	graphState GetCanonicalStateID(graphState &which);
 
 	void OpenGLDraw() const;
 	int GetNumEntries() {return centerDist.size() + lengths.size() * (lengths.size()); }

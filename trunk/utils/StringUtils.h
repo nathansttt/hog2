@@ -1,5 +1,5 @@
 #ifndef STR_MANIPULATION_UTILS
-#define STR_MANIPULATION_WRITE_UTILS
+#define STR_MANIPULATION_UTILS
 
 #include <vector>
 #include <sstream>

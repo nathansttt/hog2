@@ -12,7 +12,7 @@
 #define GENERICIDASTAR_H
 
 #include <ext/hash_map>
-#include "SearchEnvironment.h" // for the SearchEnvironment class
+#include "OldSearchEnvironment.h" // for the SearchEnvironment class
 
 typedef __gnu_cxx::hash_map<uint32_t, double> NodeHashTable;
 
@@ -20,7 +20,7 @@ class GenericIDAStar {
 public:
 	GenericIDAStar() {}
 	virtual ~GenericIDAStar() {}
-	void GetPath(SearchEnvironment *env, uint32_t from, uint32_t to,
+	void GetPath(OldSearchCode::SearchEnvironment *env, uint32_t from, uint32_t to,
 							 std::vector<uint32_t> &thePath);
 
 	uint64_t GetNodesExpanded() { return nodesExpanded; }
@@ -30,7 +30,7 @@ public:
 private:
 	unsigned long nodesExpanded, nodesTouched;
 
-	double DoIteration(SearchEnvironment *env,
+	double DoIteration(OldSearchCode::SearchEnvironment *env,
 										 uint32_t parent, uint32_t currState, uint32_t goal,
 										 std::vector<uint32_t> &thePath, double bound, double g,
 										 double maxH);

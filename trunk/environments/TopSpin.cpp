@@ -62,7 +62,7 @@ void TopSpin::GetActions(const graphState &stateID, std::vector<graphMove> &acti
 	return GraphEnvironment::GetActions(stateID, actions);
 }
 
-bool TopSpin::GoalTest(graphState &state, graphState &goal)
+bool TopSpin::GoalTest(const graphState &state, const graphState &goal)
 {
 	return (state == goal);
 }

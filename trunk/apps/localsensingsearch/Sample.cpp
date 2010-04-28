@@ -57,13 +57,15 @@ MapEnvironment *ma2 = 0;
 GraphDistanceHeuristic *gdh = 0;
 std::vector<xyLoc> path;
 double stepsPerFrame = 1.0/30.0;
+
+HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+
 void RunScenario(char *name, int which);
 void RunScalingTest(int size, int which);
 void RunWorkMeasureTest();
 void RunSTPTest(int which);
 
-void RunBigScenario(char *name);
-void RunBigTest(MapEnvironment *me, const Experiment &e);
+void RunBigScenario(char *name, int which);
 
 void CreateSimulation(int id);
 
@@ -103,9 +105,10 @@ void CreateSimulation(int id)
 	else
 		map = new Map(gDefaultMap);
 	map->SetTileSet(kWinter);
-	
+	MapEnvironment *me;
 	unitSims.resize(id+1);
-	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map, false));
+	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, MapEnvironment>(me = new MapEnvironment(map, false));
+	me->SetDiagonalCost(1.5);
 	unitSims[id]->SetStepType(kRealTime);//kUniTime
 	unitSims[id]->SetThinkingPenalty(0);
 	unitSims[id]->GetStats()->EnablePrintOutput(true);
@@ -170,6 +173,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
+//void startRecording();
+//void stopRecording();
+static bool recording = false;
+
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	if (viewport == 0)
@@ -177,8 +184,22 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->StepTime(stepsPerFrame);
 	}
 	
-	if ((GetNumPorts(windowID) != 3) || (unitSims[windowID]->GetNumUnits() != 3))
+	if (unitSims[windowID]->GetNumUnits() > 0)
+	{
+		stepsPerFrame*=1.002;//1.01;//
+		if (unitSims[windowID]->Done() && recording)
+		{
+			recording = false;
+//			stopRecording();
+		}
+
+	}
+
+	if (GetNumPorts(windowID) != unitSims[windowID]->GetNumUnits())
+	{
 		unitSims[windowID]->OpenGLDraw();
+		//measure.OpenGLDraw(unitSims[windowID]->GetEnvironment());
+	}
 	else {
 		unitSims[windowID]->GetEnvironment()->OpenGLDraw();
 		unitSims[windowID]->OpenGLDraw(viewport);
@@ -218,7 +239,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-scenario") == 0)
 	{
 		//RunScenario(argument[1], atoi(argument[2]));
-		RunBigScenario(argument[1]);
+		RunBigScenario(argument[1], atoi(argument[2]));
 	}
 	else if (strcmp(argument[0], "-scaleTest") == 0)
 	{
@@ -276,6 +297,9 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
 	unitSims[windowID]->ClearAllUnits();
 
+//	recording = true;
+//	startRecording();
+
 	int x1, y1, x2, y2;
 	do {
 		x2 = random()%m->GetMapWidth();
@@ -286,19 +310,23 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	
 	//xyLoc a(x1, y1), b(x2, y2);
 	xyLoc a(0, 0), b(mazeSize-1, mazeSize-1);
-	//xyLoc a(0, 0), b(mazeSize-1, 0);
-	
-	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
-	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
-	
-	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
-	u1->SetWeight(1.0);
-	u1->SetSpeed(0.02);
-	unitSims[windowID]->AddUnit(u1);
+	//	xyLoc a(0, 0), b(mazeSize-1, 0);
+	GLdouble a1, b1, c1, r1;
+	m->GetOpenGLCoord((x1+x2)/2, (y1+y2)/2, a1, b1, c1, r1);
+	//cameraMoveTo(a1, b1, c1-600*r1, 1.0);
+	//cameraLookAt(a1, b1, c1, 1.0);
 
-	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u2 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
-	u2->SetSpeed(0.02);
-	unitSims[windowID]->AddUnit(u2);
+	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
+	measure.ShowHistogram();
+	
+//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+//	u1->SetWeight(1.0);
+//	u1->SetSpeed(0.02);
+//	unitSims[windowID]->AddUnit(u1);
+
+//	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u2 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+//	u2->SetSpeed(0.02);
+//	unitSims[windowID]->AddUnit(u2);
 
 	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(8));
 	u3->SetSpeed(0.02);
@@ -532,7 +560,9 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval+1);
 }
 
-void RunBigScenario(char *name)
+void RunBigTest(EpSim *es, const Experiment &e, int which);
+
+void RunBigScenario(char *name, int which)
 {
 	ScenarioLoader *sl = new ScenarioLoader(name);
 	printf("Loading map: %s\n", sl->GetNthExperiment(0).GetMapName());
@@ -541,23 +571,98 @@ void RunBigScenario(char *name)
 	map->Scale(sl->GetNthExperiment(0).GetXScale()*2,
 			   sl->GetNthExperiment(0).GetYScale()*2);
 	MapEnvironment *me;
-	me = new MapEnvironment(map, false);
+	EpSim *es = new EpSim(me = new MapEnvironment(map, false));
 	me->SetDiagonalCost(1.5);
+	es->SetStepType(kRealTime);
+	es->SetThinkingPenalty(0);
 	
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
 		printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
-		RunBigTest(me, sl->GetNthExperiment(x));
+		RunBigTest(es, sl->GetNthExperiment(x), which);
 	}
 	exit(0);
 }
 
-void RunBigTest(MapEnvironment *me, const Experiment &e)
+void RunBigTest(EpSim *es, const Experiment &e, int which)
 {
+	if (e.GetBucket() != 127)
+		return;
+	
+	es->ClearAllUnits();
+	// add units
+	es->GetStats()->ClearAllStats();
+	es->GetStats()->AddFilter("trialDistanceMoved");
+	es->GetStats()->AddFilter("nodesTouched");
+	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("Trial End");
+	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(2*e.GetStartX(), 2*e.GetStartY()), b(2*e.GetGoalX(), 2*e.GetGoalY());
-	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
-	double requiredLearning = measure.MeasureDifficultly(me, a, b);
-	printf("learning\t%f\t%d\n", requiredLearning, e.GetBucket());
+	
+	//HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+	double requiredLearning = 1;//measure.MeasureDifficultly(es->GetEnvironment(), a, b);
+	
+	if (which == 0)
+	{
+		printf("Running RIBS\n");
+		LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1); // go to goal and stop
+	}
+	else if (which == 1)
+	{
+		printf("Running LRTA*\n");
+		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 2)
+	{
+		printf("Running LSS-LRTA*(10)\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 3)
+	{
+		printf("Running LSS-LRTA*(100)\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	
+	es->SetTrialLimit(500000);
+	while (!es->Done())
+	{
+		es->StepTime(10.0);
+	}
+	statValue v;
+	printf("Done\n");
+	int choice = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
+	es->GetStats()->LookupStat(choice, v);
+	printf("first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+	printf("sum\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "trialDistanceMoved", es->GetUnit(0)->GetName()));
+	es->GetStats()->LookupStat("TotalLearning", es->GetUnit(0)->GetName(), v);
+	printf("learning\t%s\t%f\t%f\t%f\n", es->GetUnit(0)->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+	
+	choice = es->GetStats()->FindNextStat("nodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
+		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
+		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+	}
+	
+	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
+	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval+1);
 }
 
 void RunScalingTest(int size, int which)
@@ -672,6 +777,7 @@ void RunWorkMeasureTest()
 
 		double requiredLearning = measure.MeasureDifficultly(mnp, s, g);
 		std::cout << "Required learning: " << requiredLearning << std::endl;
+		measure.ShowHistogram();
 	}
 }
 

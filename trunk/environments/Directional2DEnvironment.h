@@ -129,8 +129,8 @@ public:
 	int GetNumAngles();
 	
 	void SetGoalTest(GoalTester *t) {test = t;}
-	bool GoalTest(xySpeedHeading &node, xySpeedHeading &goal);
-	bool GoalTest(xySpeedHeading &) { assert(false); return false; }
+	bool GoalTest(const xySpeedHeading &node, const xySpeedHeading &goal);
+	bool GoalTest(const xySpeedHeading &) { assert(false); return false; }
 	uint64_t GetStateHash(const xySpeedHeading &node) const;
 	uint64_t GetActionHash(deltaSpeedHeading act) const;
 	virtual void OpenGLDraw() const;

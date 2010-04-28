@@ -46,6 +46,7 @@
 #include <algorithm> // for vector reverse
 
 #include "GenericSearchAlgorithm.h"
+static double lastF = 0;
 
 template <class state>
 struct AStarCompare {
@@ -97,6 +98,8 @@ public:
 	bool GetClosedListGCost(const state &val, double &gCost) const;
 	unsigned int GetNumOpenItems() { return openClosedList.OpenSize(); }
 	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return openClosedList.Lookat(openClosedList.GetOpenItem(which)); }
+	inline const AStarOpenClosedData<state> &GetNumItems() { return openClosedList.size(); }
+	inline const AStarOpenClosedData<state> &GetItem(unsigned int which) { return openClosedList.Lookat(which); }
 	
 	void SetUseBPMX(int depth) { useBPMX = depth; }
 	int GetUsingBPMX() { return useBPMX; }
@@ -200,6 +203,8 @@ void TemplateAStar<state,action,environment>::GetPath(environment *_env, const s
 template <class state, class action, class environment>
 bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
 {
+	lastF = 0;
+	
 	theHeuristic = _env;
 	thePath.resize(0);
 	//if(useRadius)
@@ -216,7 +221,7 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	start = from;
 	goal = to;
 	
-	if ((from == to) && (stopAfterGoal)) //assumes that from and to are valid states
+	if (env->GoalTest(from, to) && (stopAfterGoal)) //assumes that from and to are valid states
 	{
 		return false;
 	}
@@ -261,8 +266,11 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		//closedList.clear();
 		return true;
 	}
-	
 	uint64_t nodeid = openClosedList.Close();
+	if (openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h > lastF)
+	{ lastF = openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h;
+		//printf("Updated limit to %f\n", lastF);
+	}
 	if (!openClosedList.Lookup(nodeid).reopened)
 		uniqueNodesExpanded++;
 	nodesExpanded++;

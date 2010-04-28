@@ -115,6 +115,26 @@ Graph *Graph::cloneAll() const
 	return g;
 }
 
+void Graph::Export(const char *fname)
+{
+	FILE *f = fopen(fname, "w+");
+	if (f)
+	{
+		fprintf(f, "d\n%d %d\n", GetNumNodes(), GetNumEdges());
+		edge_iterator ei = getEdgeIter();
+		while (1)
+		{
+			edge *e = (edge *)edgeIterNext(ei);
+			if (e)
+				fprintf(f, "%d %d %d 1\n", e->getFrom(), e->getTo(), (int)(100.0*e->GetWeight()));
+			else
+				break;
+		}
+		fclose(f);
+	}
+}
+
+
 int Graph::AddNode(node *n)
 {
 	if (n)
