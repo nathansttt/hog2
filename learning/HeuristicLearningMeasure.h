@@ -35,11 +35,26 @@ public:
 	}
 };
 
+struct HashDouble { // 2 digits accuracy
+	size_t operator()(const double &x) const
+	{ return (size_t)(x*100); }
+};
+
+class sVal {
+	public:
+	sVal() :count(0) {}
+	sVal(double v) :diff(v), count(0) {}
+	void increase() {count++;}
+	double diff; int count;
+};
+
 template <class state, class action, class environment>
 class HeuristicLearningMeasure {
 public:
 	double MeasureDifficultly(environment *env, const state &start, const state &goal)
 	{
+		learnData.clear();
+		queue.clear();
 		BuildExactDistances(env, start, goal);
 		ComputeRequiredLearning(env, start, goal);
 		std::cout << "Intermediate learning: " << SumLearningRequired() <<
@@ -47,6 +62,44 @@ public:
 		ComputeConsistencyLearning(env, goal);
 		std::cout << "Final learning: " << SumLearningRequired() << std::endl;
 		return SumLearningRequired();
+	}
+	
+	void ShowHistogram()
+	{
+		typedef __gnu_cxx::hash_map<double, sVal, HashDouble> HistogramData;
+		HistogramData histogram;
+		for (typename EnvironmentData::const_iterator it = learnData.begin(); it != learnData.end(); it++)
+		{
+			double diff = (*it).second.learnedHeuristic - (*it).second.initialHeuristic;
+			histogram[diff].increase();
+			histogram[diff].diff = diff;
+		}
+		for (typename HistogramData::const_iterator it = histogram.begin(); it != histogram.end(); it++)
+		{
+			printf("Histogram:\t%f\t%d\n", (*it).second.diff, (*it).second.count);
+		}
+	}
+	
+	void OpenGLDraw(environment *env) const
+	{
+		double maxLearning = 0;
+		for (typename EnvironmentData::const_iterator it = learnData.begin(); it != learnData.end(); it++)
+		{
+			double cnt = (*it).second.learnedHeuristic - (*it).second.initialHeuristic;
+			if (cnt > maxLearning)
+				maxLearning = cnt;
+		}
+		
+		for (typename EnvironmentData::const_iterator it = learnData.begin(); it != learnData.end(); it++)
+		{
+			double r = (*it).second.learnedHeuristic - (*it).second.initialHeuristic;
+			if (r > 0)
+			{
+				env->SetColor(0.5+0.5*r/maxLearning, 0, 0, 0.1+0.8*r/maxLearning);
+				env->OpenGLDraw((*it).second.theState);
+			}
+		}
+		
 	}
 	
 private:
@@ -247,6 +300,7 @@ private:
 //		}
 		std::cout << "Learned on " << learnData.size() << " states." << std::endl;
 	}
+		
 	
 	EnvironmentData learnData;
 	TemplateAStar<state, action, environment> astarStart;

@@ -36,6 +36,8 @@ public:
 	virtual ~SearchEnvironment() {}
 	virtual void GetSuccessors(const state &nodeID, std::vector<state> &neighbors) const = 0;
 	virtual void GetActions(const state &nodeID, std::vector<action> &actions) const = 0;
+	virtual int GetNumSuccessors(const state &stateID) const
+	{ std::vector<state> neighbors; GetSuccessors(stateID, neighbors); return neighbors.size(); }
 
 	virtual action GetAction(const state &s1, const state &s2) const = 0;
 	virtual void ApplyAction(state &s, action a) const = 0;
@@ -68,10 +70,10 @@ public:
 
 	virtual double GCost(const state &node1, const state &node2) = 0;
 	virtual double GCost(const state &node, const action &act) = 0;
-	virtual bool GoalTest(state &node, state &goal) = 0;
+	virtual bool GoalTest(const state &node, const state &goal) = 0;
 
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(state &node)
+	virtual bool GoalTest(const state &node)
 	{ return bValidSearchGoal&&(node == searchGoal); }
 
 	virtual uint64_t GetStateHash(const state &node) const = 0;

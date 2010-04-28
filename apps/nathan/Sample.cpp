@@ -34,6 +34,10 @@
 #include <deque>
 #include "IDAStar.h"
 #include "TemplateAStar.h"
+#include "BurnedPancakePuzzle.h"
+#include "PancakePuzzle.h"
+#include "SFIDAStar.h"
+#include "Fling.h"
 
 void SolveNextProblem(MNPuzzle *mnp1, MNPuzzle *mnp2);
 void SolveRandomProblem(MNPuzzle *mnp1, MNPuzzle *mnp2);
@@ -92,6 +96,9 @@ void InstallHandlers()
 
 	InstallKeyboardHandler(MyPDBKeyHandler, "Build PDB", "Build a sliding-tile PDB", kNoModifier, 'b');
 	InstallKeyboardHandler(MyPDBKeyHandler, "Test PDB", "Test a sliding-tile PDB", kNoModifier, 't');
+
+	InstallKeyboardHandler(MyPancakeHandler, "Run Burned Pancake", "Run Burned Pancake", kNoModifier, 'r');
+	InstallKeyboardHandler(MyFlingHandler, "Run Fling", "Run Fling", kNoModifier, 'f');
 
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -436,4 +443,268 @@ void TestTopSpinPDB()
 		printf("%lu   ", path1[x]);
 	printf("\n");
 	printf("%lld nodes expanded\n", a.GetNodesExpanded());
+}
+
+#include "SFBDPancakePuzzle.h"
+
+void makeHard(PancakePuzzleState &s)
+{
+	int vals[5] = {0, 2, 4, 1, 3};
+	for (unsigned int x = 0; x < s.puzzle.size(); x++)
+	{
+		s.puzzle[x] = vals[x%5]+floor(x/5.0)*5;
+	}
+}
+
+//void MyPancakeHandler3(unsigned long windowID, tKeyboardModifier, char key)
+//{
+//	for (int count = 10; count < 100; count+=5)
+//	{
+//		int puzzleSize = count;
+//		PancakePuzzleState a(puzzleSize);
+//		PancakePuzzleState b(puzzleSize);
+//		
+////		PancakePuzzle pp(puzzleSize);
+////		for (unsigned int x = 0; x < 150; x++)
+////		{
+////			std::vector<unsigned> acts;
+////			pp.GetActions(a, acts);
+////			pp.ApplyAction(a, acts[random()%acts.size()]);
+////		}
+//		makeHard(a);
+//		
+//		SFBDPancakeEnvironment p(puzzleSize);
+//		pancakeStatePair s(a, b);
+//		pancakeStatePair g(a, b);
+//		
+//		IDAStar<pancakeStatePair, pancakeMovePair> ida;
+//		std::vector<pancakeMovePair> path1;
+//
+////		for (unsigned int x = 0; x < 0; x++)
+////		{
+////			std::vector<pancakeMovePair> acts;
+////			p.GetActions(g, acts);
+////			p.ApplyAction(g, acts[random()%acts.size()]);
+////		}
+////		for (unsigned int x = 0; x < 150; x++)
+////		{
+////			std::vector<pancakeMovePair> acts;
+////			p.GetActions(s, acts);
+////			p.ApplyAction(s, acts[random()%acts.size()]);
+////		}
+////		std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
+////		std::cout << "mnp1 heuristic:" << p.HCost(s, g) << std::endl;
+//		
+//		Timer t;
+//		t.StartTimer();
+//		ida.GetPath(&p, s, g, path1);
+//		t.EndTimer();
+//		std::cout << count << "\t" << path1.size() << "\t" << t.GetElapsedTime() << "\t" << ida.GetNodesExpanded() << "\t\t" << s.start << std::endl;
+////		std::cout << "Path found (mnp1), length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
+////		std::cout << ida.GetNodesExpanded() << " nodes expanded" << std::endl;
+//	}
+////	for (unsigned int x = 0; x < path1.size(); x++)
+////	{
+////		std::cout << s << std::endl;
+////		p.ApplyAction(s, path1[x]);
+////	}
+////	std::cout << s << std::endl;
+//}
+
+
+void MyPancakeHandler7(unsigned long , tKeyboardModifier, char )
+{
+	for (int count = 0; count < 100; count+=1)
+	{
+		int puzzleSize = 50;
+		PancakePuzzle p(puzzleSize);
+		PancakePuzzleState s(puzzleSize);
+		PancakePuzzleState g(puzzleSize);
+		
+		SFIDAStar<PancakePuzzleState, unsigned> ida;
+		std::vector<unsigned> path1;
+		
+		for (unsigned int x = 0; x < 0; x++)
+		{
+			std::vector<unsigned> acts;
+			p.GetActions(g, acts);
+			p.ApplyAction(g, acts[random()%acts.size()]);
+		}
+		for (unsigned int x = 0; x < 150; x++)
+		{
+			std::vector<unsigned> acts;
+			p.GetActions(s, acts);
+			p.ApplyAction(s, acts[random()%acts.size()]);
+		}
+//		makeHard(s);
+		
+		Timer t;
+		t.StartTimer();
+		ida.GetPath(&p, s, g, path1);
+		t.EndTimer();
+		std::cout << count << "\t" << path1.size() << "\t" << t.GetElapsedTime() << "\t" << ida.GetNodesExpanded() << std::endl;
+		//		std::cout << "Path found (mnp1), length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
+		//		std::cout << ida.GetNodesExpanded() << " nodes expanded" << std::endl;
+	}
+	//	for (unsigned int x = 0; x < path1.size(); x++)
+	//	{
+	//		std::cout << s << std::endl;
+	//		p.ApplyAction(s, path1[x]);
+	//	}
+	//	std::cout << s << std::endl;
+}
+
+void MyPancakeHandler1(unsigned long , tKeyboardModifier, char )
+{
+	for (int count = 0; count <= 50; count+=1)
+	{
+		int puzzleSize = 10;
+		BurnedPancakePuzzle pp(puzzleSize);
+		BurnedPancakePuzzleState a(puzzleSize);
+		BurnedPancakePuzzleState b(puzzleSize);
+		
+//		IDAStar<PancakePuzzleState, unsigned> ida;
+//		std::vector<unsigned> path1;
+		
+		for (unsigned int x = 0; x < 150; x++)
+		{
+			std::vector<unsigned> acts;
+			pp.GetActions(a, acts);
+			pp.ApplyAction(a, acts[random()%acts.size()]);
+		}
+//		for (unsigned int x = 0; x < 150; x++)
+//		{
+//			std::vector<unsigned> acts;
+//			pp.GetActions(b, acts);
+//			pp.ApplyAction(b, acts[random()%acts.size()]);
+//		}
+		SFBDPancakeEnvironment p(puzzleSize);
+		pancakeStatePair s(a, b);
+		pancakeStatePair g(a, b);
+		
+		IDAStar<pancakeStatePair, pancakeMovePair> ida;
+		std::vector<pancakeMovePair> path1;
+		
+		Timer t;
+		t.StartTimer();
+		ida.GetPath(&p, s, g, path1);
+		t.EndTimer();
+		std::cout << count << "\t" << path1.size() << "\t" << t.GetElapsedTime() << "\t" << ida.GetNodesExpanded();
+		std::cout << "\t\t" << s.start << std::endl;
+	}
+}
+
+//void MyPancakeHandler(unsigned long , tKeyboardModifier, char )
+//{
+//	for (int count = 0; count <= 100; count+=1)
+//	{
+//		int puzzleSize = 10;
+//		BurnedPancakePuzzle p(puzzleSize);
+//		BurnedPancakePuzzleState s(puzzleSize);
+//		BurnedPancakePuzzleState g(puzzleSize);
+//		
+//		IDAStar<BurnedPancakePuzzleState, unsigned> ida;
+//		ida.SetUseBDPathMax(true);
+//		std::vector<unsigned> path1;
+//		
+//		for (unsigned int x = 0; x < 0; x++)
+//		{
+//			std::vector<unsigned> acts;
+//			p.GetActions(g, acts);
+//			p.ApplyAction(g, acts[random()%acts.size()]);
+//		}
+//		for (unsigned int x = 0; x < 150; x++)
+//		{
+//			std::vector<unsigned> acts;
+//			p.GetActions(s, acts);
+//			p.ApplyAction(s, acts[random()%acts.size()]);
+//		}
+//		Timer t;
+//		t.StartTimer();
+//		ida.GetPath(&p, s, g, path1);
+//		t.EndTimer();
+//		std::cout << count << "\t" << path1.size() << "\t" << t.GetElapsedTime() << "\t" << ida.GetNodesExpanded();
+//		std::cout << "\t\t" << s<< std::endl;
+//	}
+//}
+
+void MyPancakeHandler(unsigned long , tKeyboardModifier, char )
+{
+	for (int count = 0; count <= 100; count+=1)
+	{
+		MNPuzzle p(4, 4);
+		MNPuzzleState s(4, 4);
+		MNPuzzleState g(4, 4);
+		
+		IDAStar<MNPuzzleState, slideDir> ida;
+		SFIDAStar<MNPuzzleState, slideDir> sfida;
+		ida.SetUseBDPathMax(true);
+		std::vector<slideDir> path1;
+		std::vector<slideDir> path2;
+		
+//		std::cout << s << std::endl;
+		for (unsigned int x = 0; x < 175; x++)
+		{
+			std::vector<slideDir> acts;
+			p.GetActions(s, acts);
+			assert(acts.size() > 0);
+			p.ApplyAction(s, acts[random()%acts.size()]);
+//			std::cout << s << std::endl;
+		}
+		Timer t1, t2;
+		t1.StartTimer();
+		ida.GetPath(&p, s, g, path1);
+		t1.EndTimer();
+		t2.StartTimer();
+		sfida.GetPath(&p, s, g, path2);
+		t2.EndTimer();
+		std::cout << count << "\t" << path1.size() << "\t" << t1.GetElapsedTime() << "\t" << ida.GetNodesExpanded();
+		std::cout << "\t" << path2.size() << "\t" << t2.GetElapsedTime() << "\t" << sfida.GetNodesExpanded();
+		std::cout << "\t\t" << s << std::endl;
+	}
+}
+
+bool DFS(FlingBoard &f, Fling *env);
+
+void MyFlingHandler(unsigned long , tKeyboardModifier, char )
+{
+	FlingBoard b;
+	b.AddFling(0, 5);
+	b.AddFling(0, 7);
+	b.AddFling(1, 1);
+	b.AddFling(1, 5);
+	b.AddFling(1, 7);
+	b.AddFling(4, 0);
+	b.AddFling(4, 1);
+	b.AddFling(6, 2);
+	b.AddFling(6, 3);
+	b.AddFling(6, 7);
+	std::cout << b << std::endl;
+
+	Fling f;
+	DFS(b, &f);
+//	std::vector<FlingBoard> neighbors;
+//	f.GetSuccessors(b, neighbors);
+//	std::cout << neighbors.size() << " successors" << std::endl;
+//	for (unsigned int x = 0; x < neighbors.size(); x++)
+//		std::cout << neighbors[x] << std::endl;
+	exit(0);
+}
+
+bool DFS(FlingBoard &f, Fling *env)
+{
+	std::vector<FlingBoard> neighbors;
+	if (env->GoalTest(f, f))
+	{ std::cout << f << std::endl; return true; }
+	
+	env->GetSuccessors(f, neighbors);
+	if (neighbors.size() == 0)
+		return false;
+	
+	for (unsigned int x = 0; x < neighbors.size(); x++)
+	{
+		if (DFS(neighbors[x], env))
+		{ std::cout << f << std::endl; return true; }	
+	}
+	return false;
 }

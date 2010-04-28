@@ -30,7 +30,6 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-  abstraction/AbstractionSearchEnvironment.cpp \
   abstraction/ClusterAbstraction.cpp \
   abstraction/GraphAbstraction.cpp \
   abstraction/LoadedBBAbstraction.cpp \
@@ -44,3 +43,4 @@ SRC_CPP = \
   abstraction/NodeLimitAbstraction.cpp \
   abstraction/RadiusAbstraction.cpp \
   abstraction/Width.cpp
+#  abstraction/AbstractionSearchEnvironment.cpp

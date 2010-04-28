@@ -56,9 +56,9 @@ public:
 	double GCost(const PancakePuzzleState &, const PancakePuzzleState &) {return 1.0;}
 	double GCost(const PancakePuzzleState &, const unsigned &) { return 1.0; }
 
-	bool GoalTest(PancakePuzzleState &state, PancakePuzzleState &goal);
+	bool GoalTest(const PancakePuzzleState &state, const PancakePuzzleState &goal);
 
-	bool GoalTest(PancakePuzzleState &s);
+	bool GoalTest(const PancakePuzzleState &s);
 
 	uint64_t GetActionHash(unsigned act) const;
 	void StoreGoal(PancakePuzzleState &); // stores the locations for the given goal state

@@ -16,6 +16,12 @@
 #include <vector>
 #include <ext/hash_map>
 
+template <class state>
+struct learnedData {
+	state theState;
+	double theHeuristic;
+};
+
 // This class defines the LRTA* algorithm
 template <class state, class action, class environment>
 class LRTAStar : public GenericSearchAlgorithm<state,action,environment> {
@@ -27,8 +33,17 @@ public:
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & ) { assert(false); };
 	virtual const char *GetName() { return "LRTAStar"; }
-	void SetHCost(environment *env, const state &where, double val) { heur[env->GetStateHash(where)] = val; }
-	double HCost(environment *env, const state &from, const state &to) { return std::max(heur[env->GetStateHash(from)], env->HCost(from, to)); }
+	void SetHCost(environment *env, const state &where, const state &to, double val)
+	{
+		heur[env->GetStateHash(where)].theHeuristic = val-env->HCost(where, to);
+		heur[env->GetStateHash(where)].theState = where;
+	}
+	double HCost(environment *env, const state &from, const state &to)
+	{
+		if (heur.find(env->GetStateHash(from)) != heur.end())
+			return heur[env->GetStateHash(from)].theHeuristic+env->HCost(from, to);
+		return env->HCost(from, to);
+	}
 	
 	virtual uint64_t GetNodesExpanded() { return nodesExpanded; }
 	virtual uint64_t GetNodesTouched() { return nodesTouched; }
@@ -41,9 +56,10 @@ public:
 	void OpenGLDraw() const {}
 	void OpenGLDraw(const environment *env) const;
 private:
-	typedef __gnu_cxx::hash_map<uint64_t, double, Hash64 > LearnedHeuristic;
+	typedef __gnu_cxx::hash_map<uint64_t, learnedData<state>, Hash64 > LearnedHeuristic;
 
 	LearnedHeuristic heur;
+	state goal;
 	double fAmountLearned;
 	uint64_t nodesExpanded, nodesTouched;
 };
@@ -52,6 +68,7 @@ private:
 template <class state, class action, class environment>
 void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 {
+	goal = to;
 	thePath.resize(0);
 	if (from==to)
 		return;
@@ -129,7 +146,7 @@ void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>:
 	
 	// update h[from,to]
 	if (fgreater(deltaH,0.0))
-		SetHCost(env, from, newH);
+		SetHCost(env, from, to, newH);
 	
 	// Update the amount learned on this trial
 	// We do this with an if to avoid accumulating floating point errors
@@ -143,17 +160,24 @@ void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>:
 }
 
 template <class state, class action, class environment>
-void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::OpenGLDraw(const environment *) const
+void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::OpenGLDraw(const environment *e) const
 {
-//	for (typename LearnedHeuristic::const_iterator it = hashTable.begin(); it != hashTable.end(); it++)
-//	{
-//		if ((*it).second.theState == currentLoc)
-//		{
-//		}
-//		else {
-//			e->OpenGLDraw((*it).second.theState);
-//		}
-//	}
+	double learned = 0;
+	for (typename LearnedHeuristic::const_iterator it = heur.begin(); it != heur.end(); it++)
+	{
+		double thisState = (*it).second.theHeuristic;
+		if (learned < thisState)
+			learned = thisState;
+	}
+	for (typename LearnedHeuristic::const_iterator it = heur.begin(); it != heur.end(); it++)
+	{
+		double r = (*it).second.theHeuristic;
+		if (r > 0)
+		{
+			e->SetColor(0.5+0.5*r/learned, 0, 0, 0.1+0.8*r/learned);
+			e->OpenGLDraw((*it).second.theState);
+		}
+	}
 }
 
 #endif

@@ -151,7 +151,7 @@ double ConfigEnvironment::GCost(const recVec &node1, const line2d &act)
 				(node1.z-act.end.z)*(node1.z-act.end.z));
 }
 
-bool ConfigEnvironment::GoalTest(recVec &node, recVec &theGoal)
+bool ConfigEnvironment::GoalTest(const recVec &node, const recVec &theGoal)
 {
 	return (fequal(node.x, theGoal.x) && fequal(node.y, theGoal.y) && fequal(node.z, theGoal.z));
 }

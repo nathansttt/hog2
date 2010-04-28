@@ -60,5 +60,6 @@ default : all
 
 SRC_CPP = \
 	apps/cpdb/LLPDB.cpp \
-  apps/cpdb/GraphCanonicalHeuristic.cpp
+	apps/cpdb/BidirectionalGraphEnvironment.cpp \
+	apps/cpdb/GraphCanonicalHeuristic.cpp
 

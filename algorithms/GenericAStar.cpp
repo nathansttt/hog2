@@ -31,6 +31,7 @@
 
 using namespace GenericAStarUtil;
 static const bool verbose = false;
+using namespace OldSearchCode;
 
 const char *GenericAStar::GetName()
 {
@@ -43,6 +44,7 @@ const char *GenericAStar::GetName()
 void GenericAStar::GetPath(SearchEnvironment *_env, uint32_t from, uint32_t to,
 													 std::vector<uint32_t> &thePath)
 {
+	thePath.resize(0);
 	if (!InitializeSearch(_env, from, to, thePath))
 		return;
 	while (!DoSingleSearchStep(thePath)) {}

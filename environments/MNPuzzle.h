@@ -91,9 +91,9 @@ public:
 
 	double GCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
 	double GCost(const MNPuzzleState &, const slideDir &) { return 1.0; }
-	bool GoalTest(MNPuzzleState &state, MNPuzzleState &goal);
+	bool GoalTest(const MNPuzzleState &state, const MNPuzzleState &goal);
 
-	bool GoalTest(MNPuzzleState &s);
+	bool GoalTest(const MNPuzzleState &s);
 
 	void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 

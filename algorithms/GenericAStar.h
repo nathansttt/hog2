@@ -41,7 +41,7 @@
 #include "FPUtil.h"
 #include <ext/hash_map>
 #include "OpenClosedList.h"
-#include "SearchEnvironment.h" // for the SearchEnvironment class
+#include "OldSearchEnvironment.h" // for the SearchEnvironment class
 
 
 namespace GenericAStarUtil
@@ -94,10 +94,10 @@ class GenericAStar {
 public:
 	GenericAStar() {}
 	virtual ~GenericAStar() {}
-	void GetPath(SearchEnvironment *env, uint32_t from, uint32_t to,
+	void GetPath(OldSearchCode::SearchEnvironment *env, uint32_t from, uint32_t to,
 							 std::vector<uint32_t> &thePath);
 
-	bool InitializeSearch(SearchEnvironment *env, uint32_t from, uint32_t to,
+	bool InitializeSearch(OldSearchCode::SearchEnvironment *env, uint32_t from, uint32_t to,
 												std::vector<uint32_t> &thePath);
 	bool DoSingleSearchStep(std::vector<uint32_t> &thePath);
 	uint32_t CheckNextNode();
@@ -125,7 +125,7 @@ private:
 	uint32_t goal, start;
 
 	std::vector<uint32_t> neighbors;
-	SearchEnvironment *env;
+	OldSearchCode::SearchEnvironment *env;
 	GenericAStarUtil::Corridor eligibleNodes;
 };
 

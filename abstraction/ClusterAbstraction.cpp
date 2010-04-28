@@ -32,7 +32,7 @@
 
 using namespace GraphAbstractionConstants;
 
-class ClusterSearchEnvironment : public SearchEnvironment
+class ClusterSearchEnvironment : public OldSearchCode::SearchEnvironment
 {
 public:
 	ClusterSearchEnvironment(GraphAbstraction *_aMap, int _level)

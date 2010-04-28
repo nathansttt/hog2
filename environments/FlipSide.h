@@ -81,9 +81,9 @@ public:
 	double HCost(const FlipSideState &state1, const FlipSideState &state2);
 	double GCost(const FlipSideState &state1, const FlipSideState &state2);
 	double GCost(const FlipSideState &, const flipMove &) { return 1.0; }
-	bool GoalTest(FlipSideState &state, FlipSideState &goal);
+	bool GoalTest(const FlipSideState &state, const FlipSideState &goal);
 
-	bool GoalTest(FlipSideState &){
+	bool GoalTest(const FlipSideState &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for FlipSide\n");
 		exit(1); return false;}
 

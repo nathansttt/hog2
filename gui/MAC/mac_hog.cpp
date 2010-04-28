@@ -54,12 +54,26 @@ EventHandlerUPP gWinEvtHandler;			// window event handler
 IBNibRef nibRef = NULL;
 
 AbsoluteTime gStartTime;
-bool recording = false;
+static bool recording = false;
 
 char gErrorMessage[256] = ""; // buffer for error message output
 float gErrorTime = 0.0;
 
 #define kOneSecond            600
+
+void exportMovie();
+
+void startRecording()
+{
+	recording = true;
+}
+
+void stopRecording()
+{
+	recording = false;
+	exportMovie();
+}
+
 
 pRecContext GetContext(unsigned int windowID)
 {

@@ -77,6 +77,8 @@ public:
 	graph_object *Clone() const; // clones just the nodes
 	Graph *cloneAll() const;     // clones everything
 	
+	void Export(const char *fname);
+	
 	int AddNode(node *);
 	node *GetNode(unsigned int num);
 	edge *GetEdge(unsigned int num);

@@ -31,6 +31,7 @@
 #include "EpisodicSimulation.h"
 #include <deque>
 #include "IDAStar.h"
+#include "SFIDAStar.h"
 #include "TemplateAStar.h"
 #include "GraphCanonicalHeuristic.h"
 #include "Propagation.h"
@@ -38,6 +39,9 @@
 #include "AStarDelay.h"
 #include "MNPuzzle.h"
 #include "FloydWarshall.h"
+#include "BidirectionalGraphEnvironment.h"
+#include "UnitCostBidirectionalBFS.h"
+
 using namespace GraphSearchConstants;
 
 void RunBigTest();
@@ -61,6 +65,8 @@ void MoveGraph(Graph *g);
 
 void TestAPSP();
 void TestSmallMap();
+void RunSmallTest(int windowID);
+void ExportMapAsGraph(const char *mapName, const char *graphName);
 
 void RunTest(ScenarioLoader *sl, GraphHeuristic *gcheur, Map *map, float minDist, float maxDist,
 			 std::vector<int> &nodes, std::vector<float> &hcosts, std::vector<float> &time,
@@ -72,10 +78,12 @@ GraphMapInconsistentHeuristic *gmih2 = 0;
 Graph *stp = 0;
 TemplateAStar<graphState, graphMove, GraphEnvironment> visual_astar;
 TemplateAStar<graphState, graphMove, GraphEnvironment> visual_astar2;
+TemplateAStar<graphStatePair, graphMovePair, BidirectionalGraphEnvironment> visual_astar3;
 std::vector<graphState> globalPath;
+std::vector<graphStatePair> globalPath3;
 int stepSpeed = 20;
 
-bool mouseTracking, performingSearch, performingSearch2;
+bool mouseTracking, performingSearch, performingSearch2, performingSearch3;
 int px1, py1, px2, py2;
 
 std::vector<UnitMapSimulation *> unitSims;
@@ -96,14 +104,14 @@ void CreateSimulation(int id)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
-		map = new Map(32, 32);
+		map = new Map(128, 128);
 //		//MakeMaze(map);
 //		for (int x = 0; x < 100; x++)
 //		{
 //			char name[255];
 //			sprintf(name, "maze_%d%d%d.map", x/100, (x%100)/10, (x%10));
-		MakeMaze(map);
-//		BuildRandomRoomMap(map, 8);
+//		MakeMaze(map);
+		BuildRandomRoomMap(map, 12, 80);
 //		map->Scale(512, 512);
 		map->SetTileSet(kWinter);
 //			map->Save(name);
@@ -140,6 +148,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyPDBKeyHandler, "Test PDB", "Run Big PDB test", kNoModifier, 'r');
 	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
+	InstallCommandLineHandler(MyCLHandler, "-convert", "-convert map graph", "Converts a map to a graph");
 	
 	InstallWindowHandler(MyWindowHandler);
 	
@@ -192,6 +201,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			glVertex3f(x, y, z-3*r);
 			glEnd();
 		}
+		if (performingSearch3)
+		{
+			visual_astar3.OpenGLDraw();
+//			if (visual_astar3.DoSingleSearchStep(globalPath3))
+//				performingSearch3 = false;			
+		}
 		if ((GetNumPorts(windowID) > 1 && viewport == 0) || (GetNumPorts(windowID) == 0))
 		{
 			visual_astar.OpenGLDraw();
@@ -238,8 +253,19 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if (maxNumArgs <= 1)
 		return 0;
-	strncpy(gDefaultMap, argument[1], 1024);
-	return 2;
+	if (strcmp(argument[0], "-map") == 0)
+	{
+		strncpy(gDefaultMap, argument[1], 1024);
+		return 2;
+	}
+	else if (strcmp(argument[0], "-convert") == 0)
+	{
+		if (maxNumArgs <= 2)
+			return 0;
+		ExportMapAsGraph(argument[1], argument[2]);
+		exit(0);
+	}
+	return 0;
 }
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
@@ -256,6 +282,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
+			if (performingSearch3)
+				if (visual_astar3.DoSingleSearchStep(globalPath3)) printf("done\n");
 			if (unitSims[windowID]->GetPaused())
 			{
 				unitSims[windowID]->SetPaused(false);
@@ -273,7 +301,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 }
 
 
-void MyPDBKeyHandler(unsigned long, tKeyboardModifier mod, char key)
+void MyPDBKeyHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	if (key == 'l')
 	{
@@ -384,12 +412,16 @@ void MyPDBKeyHandler(unsigned long, tKeyboardModifier mod, char key)
 	}
 	if (key == 'r')
 	{
-		TestRoomCPDBs();
-		TestMazeCPDBs();
-//		if (stp)
-//			MoveGraph(stp);
-//		else
-//			RunBigTest();
+		//printf("no swap\tswap\n");
+		//for (int x = 0; x < 100; x++)
+		RunSmallTest(windowID);
+		
+//		TestRoomCPDBs();
+//		TestMazeCPDBs();
+////		if (stp)
+////			MoveGraph(stp);
+////		else
+////			RunBigTest();
 	}
 }
 
@@ -464,7 +496,7 @@ void TestPDB()
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
 	if (!gch)
-		gch = new GraphCanonicalHeuristic(unitSims[windowID]->GetEnvironment()->GetMap(), 1, 2);
+		gch = new GraphCanonicalHeuristic(unitSims[windowID]->GetEnvironment()->GetMap(), 1, 10);
 	if (!gmih)
 	{
 		gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
@@ -495,24 +527,46 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				if ((px1 == -1) || (px2 == -1))
 					break;
 				
-				GraphEnvironment *env = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), gch);
-				GraphEnvironment *env2 = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), gmih);
-				env->SetDirected(true);
-				env2->SetDirected(true);
+				BidirectionalGraphEnvironment *env = new BidirectionalGraphEnvironment(gch);
 				Map *m = gch->GetMap();
 				
 				int s1 = m->GetNodeNum(px1, py1);
 				int g1 = m->GetNodeNum(px2, py2);
 				if ((g1 != -1) && (s1 != -1))
 				{
-					graphState s2 = s1;
-					graphState g2 = g1;
-					visual_astar.SetUseBPMX(1);
-					visual_astar.InitializeSearch(env, s2, g2, globalPath);
-					performingSearch = true;
-					visual_astar2.InitializeSearch(env2, s2, g2, globalPath);
-					performingSearch2 = true;
+					graphStatePair startPair(s1, g1);
+					visual_astar3.SetUseBPMX(1);
+					//visual_astar3.InitializeSearch(env, startPair, startPair, globalPath3);
+					env->SetUseBidirectional(false);
+					visual_astar3.GetPath(env, startPair, startPair, globalPath3);
+					printf("%d nodes expanded - no swap\n", visual_astar3.GetNodesExpanded());
+					printf("Path length %f\n", env->GetPathLength(globalPath3));
+					
+					env->SetUseBidirectional(true);
+					visual_astar3.GetPath(env, startPair, startPair, globalPath3);
+					printf("%d nodes expanded - swap\n", visual_astar3.GetNodesExpanded());
+					printf("Path length %f\n", env->GetPathLength(globalPath3));
+					performingSearch3 = true;
 				}
+				
+//				GraphEnvironment *env = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), gch);
+//				GraphEnvironment *env2 = new GraphEnvironment(gch->GetMap(), gch->GetGraph(), gmih);
+//				env->SetDirected(true);
+//				env2->SetDirected(true);
+//				Map *m = gch->GetMap();
+//				
+//				int s1 = m->GetNodeNum(px1, py1);
+//				int g1 = m->GetNodeNum(px2, py2);
+//				if ((g1 != -1) && (s1 != -1))
+//				{
+//					graphState s2 = s1;
+//					graphState g2 = g1;
+//					visual_astar.SetUseBPMX(1);
+//					visual_astar.InitializeSearch(env, s2, g2, globalPath);
+//					performingSearch = true;
+//					visual_astar2.InitializeSearch(env2, s2, g2, globalPath);
+//					performingSearch2 = true;
+//				}
 			}
 				break;
 		}
@@ -1360,9 +1414,9 @@ void TestSmallMap()
 {
 	std::vector<std::pair<int, int> > problems;
 	Map *m = new Map(300, 300);
-	//BuildRandomRoomMap(m, 30);
-	MakeMaze(m);
-	m->Scale(600, 600);
+	BuildRandomRoomMap(m, 30);
+//	MakeMaze(m);
+//	m->Scale(600, 600);
 	Graph *g = GetGraph(m);
 
 	GraphMapInconsistentHeuristic gmih3(m, g);
@@ -1409,3 +1463,234 @@ void TestSmallMap()
 	}
 	
 }
+
+void LoadGraph(Graph *g);
+
+void LoadGraph(Graph *g)
+{
+//	for (unsigned int x = 0; x < 100; x++)
+	for (unsigned int x = 0; x < 100000; x++)
+		g->AddNode(new node(""));
+
+//	FILE *f = fopen("/Users/nathanst/Desktop/pywebgraph-2.72/big200", "r");
+//	FILE *f = fopen("/Users/nathanst/Desktop/pywebgraph-2.72/myGraph100", "r");
+//	FILE *f = fopen("/Users/nathanst/Desktop/pywebgraph-2.72/myGraph", "r");
+	FILE *f = fopen("/Users/nathanst/Desktop/pywebgraph-2.72/me", "r");
+	while (f && !feof(f))
+	{
+		int from, to;
+		if (fscanf(f, "%d -- %d\n", &from, &to) == 2)
+		{
+			if (!g->findDirectedEdge(from, to))
+				g->AddEdge(new edge(from, to, 1));
+			//printf("%d -- %d\n", from, to);
+			if (!g->findDirectedEdge(to, from))
+				g->AddEdge(new edge(to, from, 1));
+		}
+	}
+//	printf("edge from 30 to 91 %s\n", g->findDirectedEdge(30, 91)?"exists":"doesn't exist");
+//	printf("edge from 91 to 30 %s\n", g->findDirectedEdge(91, 30)?"exists":"doesn't exist");
+//	{
+//		node *n = g->GetNode(30);
+//		std::cout << "Successors of 30:" << std::endl;
+//		edge_iterator ei = n->getOutgoingEdgeIter();
+//		for (edge *e = n->edgeIterNextOutgoing(ei); e; e = n->edgeIterNextOutgoing(ei))
+//			std::cout << "(" << e->getFrom() << ", " << e->getTo() << ") ";
+//		std::cout << std::endl;
+//
+//		n = g->GetNode(91);
+//		std::cout << "Successors of 91:" << std::endl;
+//		ei = n->getOutgoingEdgeIter();
+//		for (edge *e = n->edgeIterNextOutgoing(ei); e; e = n->edgeIterNextOutgoing(ei))
+//			std::cout << "(" << e->getFrom() << ", " << e->getTo() << ") ";
+//		std::cout << std::endl;
+//	}
+}
+
+//void RunSmallTest(int windowID)
+//{
+//	std::vector<graphState> localPath;
+//	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
+//	if (!gch)
+//		gch = new GraphCanonicalHeuristic(m, 1, 3);
+//	Graph *g = gch->GetGraph();//new Graph();
+//	
+//	BidirectionalGraphEnvironment *env = new BidirectionalGraphEnvironment(gch);
+//	printf("no swap\tswap\n");
+//	
+//	for (int x1 = 4; x1 < m->GetMapWidth(); x1+=16)
+//		for (int y1 = 4; y1 < m->GetMapHeight(); y1+=16)
+//			for (int x = 4; x < m->GetMapWidth(); x+=16)
+//				for (int y = 4; y < m->GetMapHeight(); y+=16)
+//				{
+//					int s1 = m->GetNodeNum(x1, y1);//n1->GetNum();
+//					int g1 = m->GetNodeNum(x, y);//n2->GetNum();
+//					
+//					
+//					graphStatePair startPair(s1, g1);
+//					visual_astar3.SetUseBPMX(1);
+//					//visual_astar3.InitializeSearch(env, startPair, startPair, globalPath3);
+//					env->SetUseBidirectional(false);
+//					visual_astar3.GetPath(env, startPair, startPair, globalPath3);
+//					if (globalPath3.size() == 0)
+//						printf("-\n");
+//					else {
+//						printf("%llu\t", visual_astar3.GetNodesExpanded());
+//						env->SetUseBidirectional(true);
+//						visual_astar3.GetPath(env, startPair, startPair, globalPath3);
+//						printf("%llu\n", visual_astar3.GetNodesExpanded());
+//					}
+//				}
+//	exit(0);
+//}
+
+
+void RunSmallTest(int windowID)
+{
+	std::vector<graphState> localPath;
+	std::vector<graphMove> localMoves;
+	Graph *g = new Graph();
+	LoadGraph(g);
+	
+	printf("#\tbi\tno swap\tswap\n");
+	UnitCostBidirectionalBFS<graphState, graphMove> bibfs;
+	
+//	GraphDistanceHeuristic *grhe = new GraphDistanceHeuristic(g);
+//	grhe->UseSmartPlacement(true);
+//	for (int x = 0; x < 10; x++)
+//		grhe->AddHeuristic();
+
+	BidirectionalGraphEnvironment *env = new BidirectionalGraphEnvironment(g, 0/*grhe*/);
+	GraphEnvironment *genv = new GraphEnvironment(g/*, grhe*/);
+	genv->SetDirected(true);
+	
+	for (int x = 0; x < 100; x++)
+	{
+		node *n1 = g->GetRandomNode();
+		node *n2 = g->GetRandomNode();
+		if (n1->getNumOutgoingEdges() == 0)
+		{ x--; continue; }
+		if (n2->getNumOutgoingEdges() == 0)
+		{ x--; continue; }
+		graphState s1 = n1->GetNum();
+		graphState g1 = n2->GetNum();
+//		printf("%d to %d\n", s1, g1);
+		
+		if (x == 20) continue; 
+//		if (x == 34) continue; 
+//		if (x == 48) continue; 
+//		if (x == 89) continue; 
+		Timer t;
+		t.StartTimer();
+		bibfs.GetPath(genv, s1, g1, localPath);
+		t.EndTimer();
+//		printf("(");
+//		for (unsigned int x = 0; x < localPath.size(); x++)
+//			printf("%d ", localPath[x]);
+//		printf(")\t");
+		printf("%d\t[%d]\t%llu\t%1.4f\t", x, localPath.size(), bibfs.GetNodesExpanded(), t.GetElapsedTime());
+
+		if (localPath.size() == 0) { printf("--\n"); continue; }
+		
+//		graphStatePair startPair(s1, g1);
+//		visual_astar3.SetUseBPMX(1);
+//		//visual_astar3.InitializeSearch(env, startPair, startPair, globalPath3);
+//		env->SetUseBidirectional(false);
+//		t.StartTimer();
+//		visual_astar3.GetPath(env, startPair, startPair, globalPath3);
+//		t.EndTimer();
+//		printf("%llu\t%1.4f\t", visual_astar3.GetNodesExpanded(), t.GetElapsedTime());
+
+//		if (globalPath3.size() == 0) { printf("--\n"); continue; }
+
+//		IDAStar<graphState, graphMove> ida;
+//		t.StartTimer();
+//		ida.GetPath(genv, s1, g1, localMoves);
+//		t.EndTimer();
+//		printf("%llu\t%1.4f\t", ida.GetNodesExpanded(), t.GetElapsedTime());
+
+		SFIDAStar<graphState, graphMove> ida2;
+		t.StartTimer();
+		ida2.GetPath(genv, s1, g1, localMoves);
+		t.EndTimer();
+//		printf("(%d ", localMoves[0].from);
+//		for (unsigned int x = 0; x < localMoves.size(); x++)
+//		{
+//			printf("%d ", localMoves[x].to);
+//		}
+//		printf(")\t");
+		printf("[%d]\t%llu\t%1.4f\n", localMoves.size()+1, ida2.GetNodesExpanded(), t.GetElapsedTime());
+		
+//		if (globalPath3.size() == 0)
+//			printf("-\n");
+//		else {
+//			printf("%llu\t", visual_astar3.GetNodesExpanded());
+//			env->SetUseBidirectional(true);
+//			visual_astar3.GetPath(env, startPair, startPair, globalPath3);
+//			printf("%llu\n", visual_astar3.GetNodesExpanded());
+//		}
+	}
+	exit(0);
+}
+
+void ExportMapAsGraph(const char *mapName, const char *graphName)
+{
+	Map *m = new Map(mapName);
+	m->Scale(512, 512);
+	Graph *g = GetGraph(m);
+	g->Export(graphName);
+	delete g;
+	delete m;
+}
+
+//#include "GenericAStar.h"
+//#include "OldSearchEnvironment.h"
+//
+//void RunSmallTest(int windowID)
+//{
+//	Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
+//	Graph *g = GraphSearchConstants::GetGraph(m);
+//	GraphEnvironment ge(m, g, new GraphMapHeuristic(m, g));
+//	ge.SetDirected(true);
+//	std::vector<graphState> starts;
+//	std::vector<graphState> goals;
+//	while (starts.size() < 200)
+//	{
+//		graphState a = g->GetRandomNode()->GetNum();
+//		graphState b = g->GetRandomNode()->GetNum();
+//		starts.push_back(a);
+//		goals.push_back(b);
+//	}
+//
+//	Timer t;
+//	TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
+//	std::vector<graphState> thePath;
+//	double totalLength = 0;
+//	long totalNodes = 0;
+//	t.StartTimer();
+//	for (unsigned int x = 0; x < starts.size(); x++)
+//	{
+//		astar.GetPath(&ge, starts[x], goals[x], thePath);
+//		totalNodes += astar.GetNodesExpanded();
+//		totalLength += thePath.size();
+//	}
+//	t.EndTimer();
+//	printf("TemplateAStar: %fs elapsed\n", t.GetElapsedTime());
+//	printf("%d nodes, %f distance\n", totalNodes, totalLength);
+//
+//	GenericAStar gas;
+//	OldSearchCode::MapGraphSearchEnvironment mgse(m, g);
+//	std::vector<unsigned int> thePath2;
+//	totalLength = 0;
+//	totalNodes = 0;
+//	t.StartTimer();
+//	for (unsigned int x = 0; x < starts.size(); x++)
+//	{
+//		gas.GetPath(&mgse, starts[x], goals[x], thePath2);
+//		totalNodes += gas.GetNodesExpanded();
+//		totalLength += thePath2.size();
+//	}
+//	t.EndTimer();
+//	printf("GenericAStar: %fs elapsed\n", t.GetElapsedTime());
+//	printf("%d nodes, %f distance\n", totalNodes, totalLength);
+//}

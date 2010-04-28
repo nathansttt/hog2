@@ -70,7 +70,7 @@ class MinimaxOptimized {
 	// consistent heuristic function that provides a lower bound on the solution
 	double MinHCost( CRState &pos, bool minsTurn = true );
 	double MinGCost( CRState &pos1, CRState &pos2 );
-	bool GoalTest( CRState &pos );
+	bool GoalTest(const  CRState &pos );
 	double TerminalCost( CRState &pos );
 
 

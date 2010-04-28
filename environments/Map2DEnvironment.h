@@ -101,9 +101,9 @@ public:
 	virtual double HCost(const xyLoc &node1, const xyLoc &node2);
 	virtual double GCost(const xyLoc &node1, const xyLoc &node2);
 	virtual double GCost(const xyLoc &node1, const tDirection &act);
-	bool GoalTest(xyLoc &node, xyLoc &goal);
+	bool GoalTest(const xyLoc &node, const xyLoc &goal);
 
-	bool GoalTest(xyLoc &){
+	bool GoalTest(const xyLoc &){
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for MapEnvironment\n");
 		exit(1); return false;}
 

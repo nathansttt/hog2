@@ -112,7 +112,7 @@ public:
 
 	virtual double GCost(const armAngles &, const armAngles &) { return 1; }
 	virtual double GCost(const armAngles &, const armRotations &) { return 1; }
-	bool GoalTest(armAngles &node, armAngles &goal);
+	bool GoalTest(const armAngles &node, const armAngles &goal);
 	uint64_t GetStateHash(const armAngles &node) const;
 	uint64_t GetActionHash(armRotations act) const;
 
@@ -131,7 +131,7 @@ public:
 	void StoreGoal(armAngles &) {}
 	void ClearGoal(){}
 	bool IsGoalStored(){return false;}
-	virtual bool GoalTest(armAngles &){
+	virtual bool GoalTest(const armAngles &){
 		printf("Single State Goal Test Failure: method not implemented for RoboticArm\n");
 		exit(0); return false;}
 

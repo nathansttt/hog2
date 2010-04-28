@@ -76,7 +76,7 @@ class MinimaxAStar {
 	// in the submitted graph environment (=> use MaximumNormGraphMapHeuristic)
 	double HCost(CRState &pos1, bool &minFirst1, CRState &pos2, bool &minFirst2 );
 
-	bool GoalTest( CRState &pos );
+	bool GoalTest(const  CRState &pos );
 	double TerminalCost( CRState &pos );
 
 	environment *env;

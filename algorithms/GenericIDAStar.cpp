@@ -11,6 +11,9 @@
 #include <math.h>
 #include "FPUtil.h"
 
+using namespace OldSearchCode;
+
+
 void GenericIDAStar::GetPath(SearchEnvironment *env, uint32_t from, uint32_t to,
 														 std::vector<uint32_t> &thePath)
 {

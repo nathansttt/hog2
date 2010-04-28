@@ -111,7 +111,7 @@ double FlipSide::GCost(const FlipSideState &, const FlipSideState &)
 	return 1;
 }
 
-bool FlipSide::GoalTest(FlipSideState &state, FlipSideState &goal)
+bool FlipSide::GoalTest(const FlipSideState &state, const FlipSideState &goal)
 {
 	return (state == goal);
 }

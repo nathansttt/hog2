@@ -31,6 +31,7 @@ default : all
 
 SRC_CPP = \
 	environments/GraphEnvironment.cpp \
+	environments/GraphRefinementEnvironment.cpp \
 	environments/Map2DEnvironment.cpp \
 	environments/PermutationPuzzleEnvironment.cpp \
 	environments/MNPuzzle.cpp \

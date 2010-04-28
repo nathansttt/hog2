@@ -258,6 +258,6 @@ private:
 
 void MakeMaze(Map *map);
 void MakeMaze(Map *map, int pathSize);
-void BuildRandomRoomMap(Map *map, int roomSize);
+void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability=80);
 
 #endif

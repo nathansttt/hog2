@@ -214,7 +214,7 @@ double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
 //	return h;
 }
 
-bool MapEnvironment::GoalTest(xyLoc &node, xyLoc &goal)
+bool MapEnvironment::GoalTest(const xyLoc &node, const xyLoc &goal)
 {
 	return ((node.x == goal.x) && (node.y == goal.y));
 }

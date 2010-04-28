@@ -24,6 +24,7 @@ GraphCanonicalHeuristic::GraphCanonicalHeuristic(Map *m, int numClosest, int siz
 	m_SizeFactor = sizeFactor;
 	m_NumClosest = numClosest;
 	g = GraphSearchConstants::GetGraph(map);
+//	g = GraphSearchConstants::GetFourConnectedGraph(map);
 	ga = new GraphEnvironment(m, g, new GraphMapHeuristic(m, g));
 	//ma = new MapEnvironment(m->Clone());
 	BuildPDB();
@@ -208,6 +209,20 @@ Map *GraphCanonicalHeuristic::GetMap()
 	return map;
 }
 
+double GraphCanonicalHeuristic::GetDistToCanonicalState(graphState &which)
+{
+	double min = centerDist[0][which];
+	for (unsigned int x = 1; x < centerDist.size(); x++)
+		if (centerDist[x][which] < min)
+			min = centerDist[x][which];
+	return min;
+}
+
+graphState GraphCanonicalHeuristic::GetCanonicalStateID(graphState &which)
+{
+	return whichPDB[0][which];
+}
+
 void GraphCanonicalHeuristic::ChooseStartGoal(graphState &start, graphState &goal)
 {
 	graphState tmp;
@@ -379,8 +394,9 @@ void GraphCanonicalHeuristic::GetCenters()
 		}
 		while (!found)
 		{
+			static double factor = 25.0;
 			double val = random()%75;
-			val = val/25.0+1;
+			val = val/factor+1;
 			int count = (val*(double)g->GetNumNodes());
 			count /= limit;
 			printf("Trying NLA(%d)\n", count);
@@ -393,6 +409,12 @@ void GraphCanonicalHeuristic::GetCenters()
 				printf("Stopping");
 				break;
 			}
+//			if (gr->GetNumNodes() > limit)// too many nodes
+//				factor++;
+//			else {
+//				factor--;
+//			}
+
 			delete nla;
 			nla = 0;
 		}

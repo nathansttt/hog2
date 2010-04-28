@@ -817,6 +817,8 @@ long Map::GetTerrainType(long x, long y, tEdge side) const
 */
 void Map::SetTerrainType(long x, long y, tTerrain type, tSplitSide split)
 {
+	if ((x >= width)||(x<0)) return;
+	if ((y >= height)||(x<0)) return;
 	revision++;
 	updated = true;
 	map_name[0] = 0;
@@ -1518,6 +1520,8 @@ void Map::OpenGLDraw(tDisplay how) const
  */
 void Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
 {
+	if (_x >= width) return;
+	if (_y >= height) return;
 	if ((_x == -1) || (_y == -1))
 		return;
 	double _scale;
@@ -2318,7 +2322,7 @@ void MakeMaze(Map *map)
 				map->SetHeight(a, b, 0);
 }
 
-void BuildRandomRoomMap(Map *map, int roomSize)
+void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)
 {
     int width = map->GetMapWidth();
     int height = map->GetMapHeight();
@@ -2330,7 +2334,7 @@ void BuildRandomRoomMap(Map *map, int roomSize)
         map->SetTerrainType(0, x, width-1, x, kOutOfBounds);
         // then punch a bunch of holes in it
         for (int y = 0; y < width; y += roomSize)
-            if ((rand()%5) != 3) // 20% chance of not creating hole
+            if ((random()%100) < openingProbability) // chance of creating hole
                 map->SetTerrainType(y+rand()%roomSize, x, kGround);
     }
     for (int x = 0; x < width; x += roomSize)
@@ -2339,7 +2343,7 @@ void BuildRandomRoomMap(Map *map, int roomSize)
         map->SetTerrainType(x, 0, x, height-1, kOutOfBounds);
         // then punch a bunch of holes in it
         for (int y = 0; y < height; y += roomSize)
-            if ((rand()%5) != 3) // 20% chance of not creating hole
+            if ((random()%100) < openingProbability) // chance of creating hole
                 map->SetTerrainType(x, y+rand()%roomSize, kGround);
     }
 }
