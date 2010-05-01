@@ -318,13 +318,13 @@ void runProblemSet2(char *problems, int multiplier)
 		astar.GetPath(&env2, gs, gg, thePath);
 		t.EndTimer();
 		printf("%d\t", cost);
-		printf("%llu\t%llu\t%1.2f\t%f\t",
+		printf("%llu\t%llu\t%1.2f\t%e\t",
 			   astar.GetNodesExpanded(), astar.GetNodesTouched(),
 			   env1.GetPathLength(thePath), t.GetElapsedTime());
 		t.StartTimer();
 		astar.GetPath(&env1, gs, gg, thePath);
 		t.EndTimer();
-		printf("%llu\t%llu\t%1.2f\t%f",
+		printf("%llu\t%llu\t%1.2f\t%e",
 			   astar.GetNodesExpanded(), astar.GetNodesTouched(),
 			   env1.GetPathLength(thePath), t.GetElapsedTime());
 		printf("\n");
@@ -453,7 +453,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs <= 1)
 			return 0;
 		strncpy(gDefaultMap, argument[1], 1024);
-		buildProblemSet();
+		//buildProblemSet();
 		//doExport();
 		return 2;
 	}
