@@ -31,11 +31,6 @@
 #include <assert.h>
 #include <vector>
 
-#ifdef NO_OPENGL
-#include "Gl.cpp"
-#include "Glut.cpp"
-#endif
-
 bool operator==(const recVec &l1, const recVec &l2)
 {
 	return (fequal(l1.x, l2.x) && fequal(l1.y, l2.y));

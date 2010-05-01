@@ -13,8 +13,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
+#include <string.h>
 #include "LinearRegression.h"
-#include "swapendian.h"
+#include "SwapEndian.h"
 
 static const float VERSION = 1.1;
 static const float MINVERSION = 1.0;
