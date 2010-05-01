@@ -16,6 +16,10 @@
 #define GLUT_WINDOW_WIDTH  0
 #define GLUT_WINDOW_HEIGHT 0
 
+/* Stroke font constants (use these in GLUT program). */
+#define GLUT_STROKE_ROMAN               ((void*)0)
+#define GLUT_STROKE_MONO_ROMAN          ((void*)1)
+
 void glutAddMenuEntry (char *label, int value) ;
 void glutAddSubMenu (char *label, int submenu) ;
 void glutAttachMenu (int button) ;
@@ -39,4 +43,14 @@ void glutSwapBuffers (void) ;
 void gluLookAt (GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, 
 		GLdouble centerX, GLdouble centerY, GLdouble centerZ,
 		GLdouble upX, GLdouble upY, GLdouble upZ) ;
+
+void glutBitmapCharacter(void *font, int character);
+int glutBitmapWidth(void *font, int character);
+void glutStrokeCharacter(void *font, int character);
+int glutStrokeWidth(void *font, int character);
+int glutBitmapLength(void *font, const unsigned char *string);
+int glutStrokeLength(void *font, const unsigned char *string);
+
+void gluOrtho2D (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top);
+
 #endif

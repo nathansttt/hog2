@@ -10,6 +10,7 @@
 
 # All projects to build in this order.
 PROJECTS = \
+  gui/STUB/GL \
   absmapalgorithms \
   abstraction \
   abstractionalgorithms \
@@ -35,7 +36,7 @@ PROJECTS = \
   apps/dynamicsearch \
   apps/directional \
   apps/dragonage \
-	apps/sfbds \
+  apps/sfbds \
 #	apps/coprobber
 #  apps/lv.pathfinding	
 #  apps/inconsistency \
@@ -45,6 +46,7 @@ PROJECTS = \
 
 # Include projects with broken compilation
 PROJECTS_ALL = \
+  gui/GL \
   absmapalgorithms \
   abstraction \
   abstractionalgorithms \
@@ -68,7 +70,7 @@ PROJECTS_ALL = \
   apps/dynamicsearch \
   apps/directional \
   apps/dragonage \
-	apps/sfbds \
+  apps/sfbds \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice
