@@ -57,6 +57,13 @@ PROJ_REL_DEP = \
   $(REL_BINDIR)/libalgorithms.a \
   $(REL_BINDIR)/libshared.a 
 
+ifeq ("$(OPENGL)", "STUB")
+PROJ_DBG_LIB += -lSTUB
+PROJ_REL_LIB += -lSTUB
+PROJ_DBG_DEP +=   $(DBG_BINDIR)/libSTUB.a
+PROJ_REL_DEP +=   $(REL_BINDIR)/libSTUB.a
+endif
+
 default : all
 
 SRC_CPP = \

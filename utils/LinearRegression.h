@@ -10,7 +10,7 @@
 #ifndef LinearRegression_H
 #define LinearRegression_H
 
-#include "fpUtil.h"
+#include "FPUtil.h"
 #include "FunctionApproximator.h"
 
 class updateData {
