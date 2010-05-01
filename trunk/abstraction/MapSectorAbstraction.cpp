@@ -30,8 +30,18 @@
 
 using namespace GraphAbstractionConstants;
 
+
+
+MapSectorAbstraction::MapSectorAbstraction(Map *_m, int _sectorSize, int _sectorMultiplier)
+:MapAbstraction(_m), sectorSize(_sectorSize), sectorMultiplier(_sectorMultiplier)
+{
+	assert(_sectorSize>1);
+	assert(_sectorMultiplier>1);
+	buildAbstraction();
+}
+
 MapSectorAbstraction::MapSectorAbstraction(Map *_m, int _sectorSize)
-:MapAbstraction(_m), sectorSize(_sectorSize)
+:MapAbstraction(_m), sectorSize(_sectorSize), sectorMultiplier(_sectorSize)
 {
 	assert(_sectorSize>1);
 	buildAbstraction();
@@ -188,7 +198,7 @@ int MapSectorAbstraction::getQuadrant(node *which)
 
 	int level = which->GetLabelL(kAbstractionLevel);
 //	int absSectorSize = (int)pow((double)sectorSize, (double)level+1);
-	int absSectorSize = (int)sectorSize*pow((double)4, (double)level);
+	int absSectorSize = (int)sectorSize*pow((double)sectorMultiplier, (double)level);
 	
 	int sectorNum = (GetMap()->GetMapWidth()/absSectorSize)*(yloc/absSectorSize)+(xloc/absSectorSize);
 	

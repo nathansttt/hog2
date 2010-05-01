@@ -33,6 +33,7 @@
 class MapSectorAbstraction : public MapAbstraction {
 public:
 	/** Creat a SectorAbstraction of the map. The sector size must be greater than 1 */
+	MapSectorAbstraction(Map *, int, int);
 	MapSectorAbstraction(Map *, int);
 	~MapSectorAbstraction();
 	MapAbstraction *Clone(Map *_m) { return new MapSectorAbstraction(_m, sectorSize); }
@@ -64,7 +65,7 @@ private:
 	void addEdges(Graph *g);
 	void addNodes(Graph *g);
 	
-	int sectorSize;
+	int sectorSize, sectorMultiplier;
 };
 
 #endif
