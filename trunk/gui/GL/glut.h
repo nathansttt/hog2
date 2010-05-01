@@ -1,4 +1,4 @@
-#include "Gl.h"
+#include "gl.h"
 
 #ifndef GLUT_H
 #define GLUT_H
