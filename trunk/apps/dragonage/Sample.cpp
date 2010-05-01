@@ -113,8 +113,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
-	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename", "Selects the problem set to run.");
-	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename", "Selects the problem set to run.");
+	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
+	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -274,11 +274,11 @@ void buildProblemSet()
 }
 
 
-void runProblemSet2(char *problems)
+void runProblemSet2(char *problems, int multiplier)
 {
 	Map *map = new Map(gDefaultMap);
 	map->Scale(512, 512);
-	msa = new MapSectorAbstraction(map, 8);
+	msa = new MapSectorAbstraction(map, 8, multiplier);
 	
 	Graph *g = msa->GetAbstractGraph(1);
 	GraphAbstractionHeuristic gah1(msa, 1);
@@ -301,7 +301,8 @@ void runProblemSet2(char *problems)
 		printf("Cannot open file: '%s'\n", problems);
 		exit(0);
 	}
-	printf("len\tnodes\ttoucht\tlen\tdiff_n\tdiff_t\tdiff_l\n");
+	Timer t;
+	printf("len\tnodes\ttoucht\tlen\ttime\tdiff_n\tdiff_t\tdiff_l\ttime\n");
 	while (!feof(f))
 	{
 		int from, to, cost;
@@ -313,22 +314,30 @@ void runProblemSet2(char *problems)
 		gs = s1->GetNum();
 		gg = g1->GetNum();
 		std::vector<graphState> thePath;
+		t.StartTimer();
 		astar.GetPath(&env2, gs, gg, thePath);
+		t.EndTimer();
 		printf("%d\t", cost);
-		printf("%llu\t%llu\t%1.2f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env1.GetPathLength(thePath));
+		printf("%llu\t%llu\t%1.2f\t%f\t",
+			   astar.GetNodesExpanded(), astar.GetNodesTouched(),
+			   env1.GetPathLength(thePath), t.GetElapsedTime());
+		t.StartTimer();
 		astar.GetPath(&env1, gs, gg, thePath);
-		printf("%llu\t%llu\t%1.2f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env1.GetPathLength(thePath));
+		t.EndTimer();
+		printf("%llu\t%llu\t%1.2f\t%f",
+			   astar.GetNodesExpanded(), astar.GetNodesTouched(),
+			   env1.GetPathLength(thePath), t.GetElapsedTime());
 		printf("\n");
 	}
 	fclose(f);
 	exit(0);
 }
 
-void runProblemSet(char *problems)
+void runProblemSet(char *problems, int multiplier)
 {
 	Map *map = new Map(gDefaultMap);
 	map->Scale(512, 512);
-	msa = new MapSectorAbstraction(map, 8);
+	msa = new MapSectorAbstraction(map, 8, multiplier);
 
 	Graph *g = msa->GetAbstractGraph(1);
 	GraphAbstractionHeuristic gah2(msa, 2);
@@ -345,7 +354,8 @@ void runProblemSet(char *problems)
 		printf("Cannot open file: '%s'\n", problems);
 		exit(0);
 	}
-	printf("len\tlvl2n\tlvl2nt\tlvl2len\tlvl1nf\tlvl1ntf\tlvl1tn\tlvl1tt\tlvl1len_f\ttot\ttott\ttot_len\n");
+	printf("len\tlvl2n\tlvl2nt\tlvl2len\tlvl2tim\tlvl1nf\tlvl1ntf\tlvl1tn\tlvl1tt\tlvl1len_f\ttot\ttott\ttot_len\n");
+	Timer t;
 	while (!feof(f))
 	{
 		int from, to, cost;
@@ -357,6 +367,7 @@ void runProblemSet(char *problems)
 		node *g2 = msa->GetParent(g1);
 		uint64_t nodesExpanded = 0;
 		uint64_t nodesTouched = 0;
+		double totalTime = 0;
 		//		printf("Searching from %d to %d in level 1; %d to %d in level 2\n",
 		//			   s1->GetNum(), g1->GetNum(), s2->GetNum(), g2->GetNum());
 		graphState gs1, gs2;
@@ -364,13 +375,15 @@ void runProblemSet(char *problems)
 		gs2 = g2->GetNum();
 		std::vector<graphState> thePath;
 		std::vector<graphState> abstractPath;
+		t.StartTimer();
 		astar.GetPath(&env2, gs1, gs2, abstractPath);
+		totalTime = t.EndTimer();
 		printf("%d\t", cost);
-		printf("%llu\t%llu\t%1.2f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env2.GetPathLength(abstractPath));
+		printf("%llu\t%llu\t%1.2f\t%f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env2.GetPathLength(abstractPath), totalTime);
 		if (abstractPath.size() == 0)
 		{
-			printf("%llu\t%llu\t%llu\t%llu\t%1.2f\t", (uint64_t)0, (uint64_t)0, astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0);
-			printf("%llu\t%llu\t%1.2f\n", astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0);
+			printf("%llu\t%llu\t%llu\t%llu\t%1.2f\t%f\t", (uint64_t)0, (uint64_t)0, astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0, 0.0);
+			printf("%llu\t%llu\t%1.2f\t%f\n", astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0, 0.0);
 //			printf("\n");
 			continue;
 		}
@@ -381,11 +394,13 @@ void runProblemSet(char *problems)
 		env1.SetPlanningCorridor(abstractPath, 2);
 		gs1 = s1->GetNum();
 		gs2 = g1->GetNum();
+		t.StartTimer();
 		astar.GetPath(&env1, gs1, gs2, thePath);
-		printf("%llu\t%llu\t%llu\t%llu\t%1.2f\t",
+		t.EndTimer();
+		printf("%llu\t%llu\t%llu\t%llu\t%1.2f\t%f\t",
 			   astar.GetNodesExpanded(), astar.GetNodesTouched(),
 			   astar.GetNodesExpanded()+nodesExpanded, astar.GetNodesTouched()+nodesTouched,
-			   env1.GetPathLength(thePath));
+			   env1.GetPathLength(thePath), totalTime+t.GetElapsedTime());
 		
 		int abstractStart = 0;
 		gs1 = s1->GetNum();
@@ -402,7 +417,10 @@ void runProblemSet(char *problems)
 			else {
 				env1.SetUseAbstractGoal(false, 0);
 			}
+			t.StartTimer();
 			astar.GetPath(&env1, gs1, gs2, thePath);
+			t.EndTimer();
+			totalTime+=t.GetElapsedTime();
 			abstractStart += refineAmt;
 			gs1 = thePath.back();
 			
@@ -415,7 +433,7 @@ void runProblemSet(char *problems)
 		
 //		printf("%llu\t%llu\t%1.2f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env1.GetPathLength(thePath));
 		thePath.resize(0);
-		printf("%llu\t%llu\t%1.2f\n", nodesExpanded, nodesTouched, totalLength);
+		printf("%llu\t%llu\t%1.2f\t%f\n", nodesExpanded, nodesTouched, totalLength, totalTime);
 		
 //		gs1 = s1->GetNum();
 //		gs2 = g1->GetNum();
@@ -449,11 +467,15 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-problems" ) == 0 )
 	{
-		runProblemSet(argument[1]);
+		if (maxNumArgs <= 2) exit(0);
+		runProblemSet(argument[1], atoi(argument[2]));
+		return 3;
 	}
 	else if (strcmp(argument[0], "-problems2" ) == 0 )
 	{
-		runProblemSet2(argument[1]);
+		if (maxNumArgs <= 2) exit(0);
+		runProblemSet2(argument[1], atoi(argument[2]));
+		return 3;
 	}
 	return 2; //ignore typos
 }
