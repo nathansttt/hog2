@@ -33,8 +33,8 @@
 #endif
 
 #ifdef NO_OPENGL
-#include "Gl.h"
-#include "Glut.h"
+#include "gl.h"
+#include "glut.h"
 #else
 
 //#ifdef TARGET_OS_IPHONE

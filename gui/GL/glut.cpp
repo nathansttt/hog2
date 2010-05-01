@@ -28,3 +28,12 @@ void glutSwapBuffers (void) {};
 void gluLookAt (GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, 
 		GLdouble centerX, GLdouble centerY, GLdouble centerZ,
 		GLdouble upX, GLdouble upY, GLdouble upZ) {};
+
+void glutBitmapCharacter(void *font, int character) { }
+int glutBitmapWidth(void *font, int character) { }
+void glutStrokeCharacter(void *font, int character) { }
+int glutStrokeWidth(void *font, int character) { }
+int glutBitmapLength(void *font, const unsigned char *string) { }
+int glutStrokeLength(void *font, const unsigned char *string) { }
+
+void gluOrtho2D (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top) {}

@@ -114,6 +114,7 @@ void InstallHandlers()
 	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename", "Selects the problem set to run.");
+	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -241,7 +242,7 @@ void buildProblemSet()
 {
 	Map *map = new Map(gDefaultMap);
 	map->Scale(512, 512);
-	msa = new MapSectorAbstraction(map, 8);
+	msa = new MapSectorAbstraction(map, 4);
 	//msa->ToggleDrawAbstraction(1);
 	Graph *g = msa->GetAbstractGraph(1);
 	GraphAbstractionHeuristic gah2(msa, 2);
@@ -434,7 +435,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs <= 1)
 			return 0;
 		strncpy(gDefaultMap, argument[1], 1024);
-		//buildProblemSet();
+		buildProblemSet();
 		//doExport();
 		return 2;
 	}
@@ -449,6 +450,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-problems" ) == 0 )
 	{
 		runProblemSet(argument[1]);
+	}
+	else if (strcmp(argument[0], "-problems2" ) == 0 )
+	{
+		runProblemSet2(argument[1]);
 	}
 	return 2; //ignore typos
 }

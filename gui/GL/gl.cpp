@@ -59,3 +59,9 @@ void glTexParameteri(GLenum target, GLenum pname, GLint param) {};
 void glNormal3fv(const GLfloat *v) {};
 void glCullFace(GLenum mode) {};
 void glTexCoord2f(GLfloat s, GLfloat t) {};
+
+void glVertex2i(GLint x, GLint y) {}
+void glColor3ub(GLubyte red, GLubyte green, GLubyte blue) { }
+void glNormal3d(GLdouble nx, GLdouble ny, GLdouble nz) { }
+void glVertex2d(GLdouble x, GLdouble y) { }
+void glOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar) { }

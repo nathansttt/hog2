@@ -24,12 +24,12 @@ AR = ar
 
 ifeq ($(findstring "Darwin", "$(shell uname -s)"), "Darwin")
 
+ifeq ("$(OPENGL)", "STUB")
+COMMON_CXXFLAGS += -I$(shell pwd | sed "s/hog2.*/hog2/")/gui/ -I$(shell pwd | sed "s/hog2.*/hog2/")/gui/GL/ -DNO_OPENGL
+else
 COMMON_LNFLAGS += -framework Foundation -framework AppKit
 COMMON_CXXFLAGS += -DOS_MAC  
 
-ifeq ("$(OPENGL)", "STUB")
-COMMON_CXXFLAGS += -I./driver/STUB/ -I./driver/STUB/GL/ -DNO_OPENGL
-else
 COMMON_LNFLAGS += -framework GLUT -framework OpenGL
 COMMON_CXXFLAGS += -I/System/Library/Frameworks/GLUT.framework/Versions/A/Headers/
 COMMON_CXXFLAGS += -I/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers/
@@ -40,7 +40,7 @@ else # not darwin
 COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lXi -lXmu
 
 ifeq ("$(OPENGL)", "STUB")
-COMMON_CXXFLAGS += -I./driver/STUB/ -I./driver/STUB/GL/ -DNO_OPENGL
+COMMON_CXXFLAGS += -I$(shell pwd | sed "s/hog2.*/hog2/")/gui/ -I$(shell pwd | sed "s/hog2.*/hog2/")/gui/GL/ -DNO_OPENGL
 else
 COMMON_CXXFLAGS += -I/usr/include/GL
 COMMON_LNFLAGS +=  -lGL -lGLU -lglut
