@@ -14,7 +14,9 @@
 		C40B232F0FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */; };
 		C40B23300FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */; };
 		C40B23310FCB26DF00C22E6A /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40B232C0FCB26DF00C22E6A /* AStarOpenClosed.cpp */; };
-		C40D954B1177BE8C006EBEAF /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40D95491177BE8C006EBEAF /* Sample.cpp */; };
+		C40B7BCE11A460B600DDE74A /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C92430FE303740063E9B7 /* Sample.cpp */; };
+		C40B7BCF11A460B700DDE74A /* LocalSensingUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C924A0FE30B2B0063E9B7 /* LocalSensingUnit.cpp */; };
+		C40B7BD011A460B800DDE74A /* LocalSensingUnit2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A3F2C7104C66F200AB3D8F /* LocalSensingUnit2.cpp */; };
 		C40D955F11781819006EBEAF /* GraphRefinementEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40D955E11781819006EBEAF /* GraphRefinementEnvironment.cpp */; };
 		C40D956011781819006EBEAF /* GraphRefinementEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40D955E11781819006EBEAF /* GraphRefinementEnvironment.cpp */; };
 		C40D956111781819006EBEAF /* GraphRefinementEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40D955E11781819006EBEAF /* GraphRefinementEnvironment.cpp */; };
@@ -3219,8 +3221,10 @@
 				C4D3F0A91149C6FF00050426 /* LinearRegression.cpp in Sources */,
 				C4D3F0B61149C78800050426 /* StringUtils.cpp in Sources */,
 				C4D3F0B71149C78800050426 /* swapendian.cpp in Sources */,
-				C40D954B1177BE8C006EBEAF /* Sample.cpp in Sources */,
 				C40D955F11781819006EBEAF /* GraphRefinementEnvironment.cpp in Sources */,
+				C40B7BCE11A460B600DDE74A /* Sample.cpp in Sources */,
+				C40B7BCF11A460B700DDE74A /* LocalSensingUnit.cpp in Sources */,
+				C40B7BD011A460B800DDE74A /* LocalSensingUnit2.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

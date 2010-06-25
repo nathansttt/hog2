@@ -232,7 +232,7 @@ public:
   float GetEdgeWidthY(int x, int y);
 
   int GetNodeNum(int x, int y, tCorner c = kNone);
-  void GetNodeNum(int num, int x, int y, tCorner c = kNone);
+  void SetNodeNum(int num, int x, int y, tCorner c = kNone);
   int GetRevision() { return revision; }
 private:
 	void loadRaw(FILE *f, int height, int width);

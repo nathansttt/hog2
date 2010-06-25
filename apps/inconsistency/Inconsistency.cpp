@@ -68,6 +68,10 @@ GraphAlgorithm* ALG = 0;
 
 bool done = false;
 
+TemplateAStar<graphState, graphMove, GraphEnvironment> vis1, vis2;
+bool v1 = false, v2 = false;
+bool v1r = false, v2r = false;
+
 int main(int argc, char* argv[])
 {
 	preProcessArgs(argc,argv);
@@ -256,8 +260,9 @@ void CreateSimulation(int id)
 	if (gDefaultMap[0] != 0)
 	{
 		mp = new Map(gDefaultMap);
+//		mp->Scale(512, 512);
 		grp = GraphSearchConstants::GetGraph(mp);
-		env = new GraphEnvironment(grp, new GraphMapInconsistentHeuristic(mp, grp));
+		env = new GraphEnvironment(mp, grp, new GraphMapInconsistentHeuristic(mp, grp));
 		
 		while(gFrom==gTo) {
 			gFrom = grp->GetRandomNode()->GetNum();
@@ -366,7 +371,6 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //		{
 //			CFOR->OpenGLDraw();
 //		}
-
 		unitSims[windowID]->StepTime(1.0/30.0);
 		//if((!unitSims[windowID]->GetPaused()) && ALG)
 		//	ALG->DoSingleSearchStep(gPath);
@@ -376,6 +380,35 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			ALG->OpenGLDraw();
 		}
 	}
+	
+	static std::vector<graphState> ourPath;
+	if (viewport == 0)
+	{
+		if (v1r)
+		{
+			printf("Stepping search 1: f:%f g:%f, h:%f\n",
+				   vis1.GetOpenItem(0).g + vis1.GetOpenItem(0).h,
+				   vis1.GetOpenItem(0).g, vis1.GetOpenItem(0).h);
+			for (int x = 0; x < 10 && v1r; x++)
+				v1r = !vis1.DoSingleSearchStep(ourPath);
+			
+		}
+		if (v1)
+			vis1.OpenGLDraw();
+	}
+	else {
+		if (v2r)
+		{
+			printf("Stepping search 2: f:%f g:%f, h:%f\n",
+				   vis2.GetOpenItem(0).g + vis2.GetOpenItem(0).h,
+				   vis2.GetOpenItem(0).g, vis2.GetOpenItem(0).h);
+			for (int x = 0; x < 10 && v2r; x++)
+				v2r = !vis2.DoSingleSearchStep(ourPath);
+		}
+		if (v2)
+			vis2.OpenGLDraw();
+	}
+
 	unitSims[windowID]->OpenGLDraw();
 }
 
@@ -491,51 +524,98 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyRandomUnitKeyHandler(unsigned long , tKeyboardModifier , char)
 {
+
+	GraphMapInconsistentHeuristic diffHeuristic(mp, grp);
+	diffHeuristic.UseSmartPlacement(true);
+	for (int x = 0; x < 10; x++)
+		diffHeuristic.AddHeuristic();
+	diffHeuristic.SetNumUsedHeuristics(10);
+	double sum = 0;
+	for (int x = 0; x < 10000; x++)
+	{
+		graphState n1 = grp->GetRandomNode()->GetNum();
+		graphState n2 = grp->GetRandomNode()->GetNum();
+		
+		double a, b;
+		
+		diffHeuristic.SetMode(kMax);
+		printf("Max: %f\t", a = diffHeuristic.HCost(n1, n2));
+		diffHeuristic.SetMode(kCompressed);
+		printf("Compressed: %f\t", b = diffHeuristic.HCost(n1, n2));
+		printf("Error: %f\n", a-b);
+		assert(a >= b);
+		sum += a-b;
+		printf("Average error: %f\n", sum/(x+1));
+	}	
 }
 
+// letter d
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
-//	while (1)
-//	{
-//		Timer t;
-//		
-//		t.StartTimer();
-//		a3.GetPath(ma1, s1, g1, path);
-//		t.EndTimer();
-//		printf("new: %d nodes expanded. Path length %d / %f. Time: %f\n", 
-//			   a3.GetNodesExpanded(), (int)path.size(), ma2->GetPathLength(path), t.GetElapsedTime());
-//		
-//		t.StartTimer();
-//		a2.GetPath(ma1, s1, g1, path);
-//		t.EndTimer();
-//		printf("old: %d nodes expanded. Path length %d / %f. Time: %f\n", 
-//			   a2.GetNodesExpanded(), (int)path.size(), ma2->GetPathLength(path), t.GetElapsedTime());
-//	}
+	//115 maps/bgmaps/AR0011SR.map 512 512 190 61 477 321 462.65
+	
+	graphState s1 = grp->GetRandomNode()->GetNum(); //mp->GetNodeNum(190, 61);
+	graphState g1 = grp->GetRandomNode()->GetNum(); //mp->GetNodeNum(477, 321);
+	
+	
+	GraphMapInconsistentHeuristic *diffHeuristic1 = new GraphMapInconsistentHeuristic(mp, grp);
+	diffHeuristic1->UseSmartPlacement(true);
+	diffHeuristic1->SetMode(kRandom);
+	GraphEnvironment *gEnv1 = new GraphEnvironment(mp, grp, diffHeuristic1);
+	gEnv1->SetDirected(true);
+	for (int x = 0; x < 10; x++)
+		diffHeuristic1->AddHeuristic();
+	diffHeuristic1->SetNumUsedHeuristics(10);
+	diffHeuristic1->SetMode(kMax);
+	vis1.SetUseBPMX(0);
+	
+	GraphMapInconsistentHeuristic *diffHeuristic2 = new GraphMapInconsistentHeuristic(mp, grp);
+	diffHeuristic2->UseSmartPlacement(true);
+	diffHeuristic2->SetMode(kRandom);
+	GraphEnvironment *gEnv2 = new GraphEnvironment(mp, grp, diffHeuristic2);
+	gEnv2->SetDirected(true);
+	for (int x = 0; x < 20; x++)
+		diffHeuristic2->AddHeuristic();
+	diffHeuristic2->SetNumUsedHeuristics(2);
+	diffHeuristic2->SetMode(kCompressed);
+	vis2.SetUseBPMX(1);
 
-//	for (int x = 0; x < ((mod==kShiftDown)?(50):(1)); x++)
-//	{
-//		if (unitSim->getUnitGroup(1) == 0)
-//		{
-//			unitSim->addUnitGroup(new SharedAMapGroup(unitSim));
-//			unitSim->setmapAbstractionDisplay(2);
-//		}
-//		int xx1, yy1, xx2, yy2;
-//		unitSim->getRandomLocation(xx1, yy1);
-//		unitSim->getRandomLocation(xx2, yy2);
-//		
-//		unit *u, *u2 = new unit(xx2, yy2, 0);
-//		
-//		praStar *pra = new praStar(); pra->setPartialPathLimit(4);
-//		//aStar *pra = new aStar();
-//		
-//		unitSim->addUnit(u2);
-//		u = new SearchUnit(xx1, yy1, u2, pra);
-//		// just set the group of the unit, and it will share a map with those
-//		// units.
-//		unitSim->getUnitGroup(1)->addUnit(u);
-//		unitSim->addUnit(u);
-//		u->setSpeed(0.5); // time to go 1 distance						
-//	}
+	std::vector<double> test;
+	printf("Benchmarking\n", s1, g1);
+	int total = grp->GetNumNodes();
+	if (total > 30000) total = 30000;
+	
+	for (graphState x = 0; x < total; x+=13)
+	{
+		if ((x%10000) == 0)
+			printf("%d ", x);
+		for (graphState y = 0; y < total; y++)
+		{
+			test.push_back(diffHeuristic2->HCost(y, x));
+		}
+		//printf("%f\n", diffHeuristic2->HCost(x, s1));
+	}
+	printf("Compressing\n");
+	diffHeuristic2->Compress();
+	printf("Testing:\n");
+	int cnt = 0;
+	for (graphState x = 0; x < total; x+=13)
+	{
+		if ((x%10000) == 0)
+			printf("%d ", x);
+		for (graphState y = 0; y < total; y++)
+		{
+			assert(test[cnt] == diffHeuristic2->HCost(y, x));
+			cnt++;
+		}
+		//printf("%f\n", diffHeuristic2->HCost(x, s1));
+	}
+	printf("Compression verified on %d problems\n", cnt);
+	
+	vis1.InitializeSearch(gEnv1, s1, g1, gPath);
+	vis2.InitializeSearch(gEnv2, s1, g1, gPath);
+	v1=true;v1r = true;
+	v2=true;v2r = true;
 }
 
 bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
@@ -668,10 +748,192 @@ void RunExperiments1(ScenarioLoader *sl)
 	}
 	exit(0);
 }
-
-// experiments with 0, 10, ..., 100 differential heuristics
-// 10% of them are used at each step with and without BPMX
+// Compare:
+// * 10 N memory
+// * 100 compressed heuristics
 void RunExperiments(ScenarioLoader *sl)
+{
+	std::vector<graphState> aPath;
+	
+	Map *m = new Map(sl->GetNthExperiment(0).GetMapName());
+	m->Scale(sl->GetNthExperiment(0).GetXScale(), 
+			 sl->GetNthExperiment(0).GetYScale());
+	Graph *g = GraphSearchConstants::GetGraph(m);
+	
+	GraphMapInconsistentHeuristic diffHeuristic(m, g);
+	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetMode(kRandom);
+	
+	GraphEnvironment gEnv(g, &diffHeuristic);
+	gEnv.SetDirected(true);
+	
+	TemplateAStar<graphState, graphMove, GraphEnvironment> taNew;
+	
+	Timer t;
+	
+	for (int x = 0; x < 100; x++)
+		diffHeuristic.AddHeuristic();
+	diffHeuristic.SetNumUsedHeuristics(10);
+	diffHeuristic.Compress();
+	
+	for (int x = 0; x < sl->GetNumExperiments(); x++)
+	{
+		Experiment e = sl->GetNthExperiment(x);
+		
+//		if (e.GetBucket() != 127)
+//			continue;
+		
+		graphState start, goal;
+		start = m->GetNodeNum(e.GetStartX(), e.GetStartY());
+		goal = m->GetNodeNum(e.GetGoalX(), e.GetGoalY());
+		
+		
+		printf("%d\t", e.GetBucket());
+		
+		// compressed, so can't perform regular lookups
+		
+		// 10N memory -- 10 heuristics
+//		diffHeuristic.SetNumUsedHeuristics(10);
+//		diffHeuristic.SetMode(kMax);
+//		taNew.SetUseBPMX(0);
+//			
+//		t.StartTimer();
+//		taNew.GetPath(&gEnv, start, goal, aPath);
+//		t.EndTimer();		
+		printf("%dmx\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+		// 10N memory -- 100 heuristics (10 lookups) no BPMX
+		diffHeuristic.SetNumUsedHeuristics(10);
+		diffHeuristic.SetMode(kCompressed);
+		taNew.SetUseBPMX(0);
+		
+		t.StartTimer();
+		taNew.GetPath(&gEnv, start, goal, aPath);
+		t.EndTimer();		
+		printf("%dcmp\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+		// 10N memory -- 100 heuristics (10 lookups) with BPMX
+		diffHeuristic.SetNumUsedHeuristics(10);
+		diffHeuristic.SetMode(kCompressed);
+		taNew.SetUseBPMX(1);
+		
+		t.StartTimer();
+		taNew.GetPath(&gEnv, start, goal, aPath);
+		t.EndTimer();		
+		printf("%dbx1\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+
+		// 10N memory -- 100 heuristics (10 lookups) with BPMX °
+		diffHeuristic.SetNumUsedHeuristics(10);
+		diffHeuristic.SetMode(kCompressed);
+		taNew.SetUseBPMX(1000);
+		
+		t.StartTimer();
+		taNew.GetPath(&gEnv, start, goal, aPath);
+		t.EndTimer();		
+		printf("%dbxi\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+		printf("\n");
+		
+	}
+	exit(0);
+}
+
+// Compare:
+// * 10 N memory
+// * 1...10 regular lookups
+// * 1...9 random lookups with and without BPMX
+// Only compare on longest problems
+void RunExperiments5(ScenarioLoader *sl)
+{
+	std::vector<graphState> aPath;
+	
+	Map *m = new Map(sl->GetNthExperiment(0).GetMapName());
+	m->Scale(sl->GetNthExperiment(0).GetXScale(), 
+			 sl->GetNthExperiment(0).GetYScale());
+	Graph *g = GraphSearchConstants::GetGraph(m);
+	
+	GraphMapInconsistentHeuristic diffHeuristic(m, g);
+	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetMode(kRandom);
+	
+	GraphEnvironment gEnv(g, &diffHeuristic);
+	gEnv.SetDirected(true);
+	
+	TemplateAStar<graphState, graphMove, GraphEnvironment> taNew;
+	
+	Timer t;
+	
+	for (int x = 0; x < 10; x++)
+		diffHeuristic.AddHeuristic();
+	//diffHeuristic.SetNumUsedHeuristics(diffHeuristic.GetNumHeuristics()/10);
+	
+	for (int x = 0; x < sl->GetNumExperiments(); x++)
+	{
+		Experiment e = sl->GetNthExperiment(x);
+		
+		if (e.GetBucket() != 127)
+			continue;
+		
+		graphState start, goal;
+		start = m->GetNodeNum(e.GetStartX(), e.GetStartY());
+		goal = m->GetNodeNum(e.GetGoalX(), e.GetGoalY());
+		
+		
+		printf("%d\t", e.GetBucket());
+		
+		
+		for (int y = 1; y <= 10; y++)
+		{
+			// N memory -- 1 heuristic
+			diffHeuristic.SetNumUsedHeuristics(y);
+			diffHeuristic.SetMode(kMax);
+			taNew.SetUseBPMX(0);
+			
+			t.StartTimer();
+			taNew.GetPath(&gEnv, start, goal, aPath);
+			t.EndTimer();		
+			printf("%dmx\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+				   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		}
+		
+		for (int y = 1; y <= 9; y++)
+		{
+			for (int z = 0; z <= 1; z++)
+			{
+				// N memory -- 1 heuristic
+				diffHeuristic.SetNumUsedHeuristics(y);
+				diffHeuristic.SetMode(kRandom);
+				taNew.SetUseBPMX(z);
+				
+				t.StartTimer();
+				taNew.GetPath(&gEnv, start, goal, aPath);
+				t.EndTimer();	
+				if (z==0)
+					printf("%drnd\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+						   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+				else
+					printf("%drdb\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+						   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+			}
+		}
+		printf("\n");
+		
+	}
+	exit(0);
+}
+
+
+// Compare:
+// * 1 random lookup of 10 with BPMX
+// * 1 random lookup of 10 without BPMX
+// * octile
+// * max of 10 heuristics
+// * 1 lookup in compressed heuristic
+void RunExperiments4(ScenarioLoader *sl)
 {
 	std::vector<graphState> aPath;
 	
@@ -691,31 +953,116 @@ void RunExperiments(ScenarioLoader *sl)
 
 	Timer t;
 	
+	for (int x = 0; x < 10; x++)
+		diffHeuristic.AddHeuristic();
+	//diffHeuristic.SetNumUsedHeuristics(diffHeuristic.GetNumHeuristics()/10);
+
+	for (int x = 0; x < sl->GetNumExperiments(); x++)
+	{
+		Experiment e = sl->GetNthExperiment(x);
+		
+		graphState start, goal;
+		start = m->GetNodeNum(e.GetStartX(), e.GetStartY());
+		goal = m->GetNodeNum(e.GetGoalX(), e.GetGoalY());
+	
+		
+		printf("%d\t", e.GetBucket());
+		
+		// N memory -- 1 heuristic
+		diffHeuristic.SetNumUsedHeuristics(1);
+		diffHeuristic.SetMode(kMax);
+		taNew.SetUseBPMX(0);
+
+		t.StartTimer();
+		taNew.GetPath(&gEnv, start, goal, aPath);
+		t.EndTimer();		
+		printf("%df\t%lld\t%f\t%f\t", diffHeuristic.GetNumHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+		// N memory -- 10 compressed heuristics no BPMX
+		diffHeuristic.SetNumUsedHeuristics(10);
+		diffHeuristic.SetMode(kCompressed);
+		taNew.SetUseBPMX(0);
+
+		t.StartTimer();
+		taNew.GetPath(&gEnv, start, goal, aPath);
+		t.EndTimer();		
+		printf("%dc\t%lld\t%f\t%f\t", diffHeuristic.GetNumHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+		// N memory -- 10 compressed heuristics BPMX 1
+		diffHeuristic.SetNumUsedHeuristics(10);
+		diffHeuristic.SetMode(kCompressed);
+		taNew.SetUseBPMX(1);
+
+		t.StartTimer();
+		taNew.GetPath(&gEnv, start, goal, aPath);
+		t.EndTimer();		
+		printf("%dcb1\t%lld\t%f\t%f\t", diffHeuristic.GetNumHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+		// N memory -- 10 compressed heuristics BPMX(°)
+		diffHeuristic.SetNumUsedHeuristics(10);
+		diffHeuristic.SetMode(kCompressed);
+		taNew.SetUseBPMX(1000);
+				
+		t.StartTimer();
+		taNew.GetPath(&gEnv, start, goal, aPath);
+		t.EndTimer();		
+		printf("%dcbi\t%lld\t%f\t%f\n", diffHeuristic.GetNumHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+	}
+	exit(0);
+}
+
+// experiments with 0, 10, ..., 100 differential heuristics
+// 10% of them are used at each step with and without BPMX
+void RunExperiments2(ScenarioLoader *sl)
+{
+	std::vector<graphState> aPath;
+	
+	Map *m = new Map(sl->GetNthExperiment(0).GetMapName());
+	m->Scale(sl->GetNthExperiment(0).GetXScale(), 
+			 sl->GetNthExperiment(0).GetYScale());
+	Graph *g = GraphSearchConstants::GetGraph(m);
+	
+	GraphMapInconsistentHeuristic diffHeuristic(m, g);
+	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetMode(kRandom);
+	
+	GraphEnvironment gEnv(g, &diffHeuristic);
+	gEnv.SetDirected(true);
+	
+	TemplateAStar<graphState, graphMove, GraphEnvironment> taNew;
+	
+	Timer t;
+	
 	for (int z = 0; z < 1; z++)
 	{
 		for (int x = 0; x < 10; x++)
 			diffHeuristic.AddHeuristic();
 		diffHeuristic.SetNumUsedHeuristics(diffHeuristic.GetNumHeuristics()/10);
-
+		
 		for (int x = 0; x < sl->GetNumExperiments(); x++)
 		{
 			Experiment e = sl->GetNthExperiment(x);
-//			if (e.GetBucket() != 127)
-//			{ continue; }
+			//			if (e.GetBucket() != 127)
+			//			{ continue; }
 			
 			graphState start, goal;
 			start = m->GetNodeNum(e.GetStartX(), e.GetStartY());
 			goal = m->GetNodeNum(e.GetGoalX(), e.GetGoalY());
 			
-//			taNew.SetUseBPMX(false);
-//			Timer t;
-//			t.StartTimer();
-//			taNew.GetPath(&gEnv, start, goal, aPath);
-//			t.EndTimer();
-//			
-//			printf("%d\t%d.%d\t%d\t%f\t\t%f\n", e.GetBucket(), diffHeuristic.GetNumHeuristics(), diffHeuristic.GetNumHeuristics()/10,
-//				   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
-
+			//			taNew.SetUseBPMX(false);
+			//			Timer t;
+			//			t.StartTimer();
+			//			taNew.GetPath(&gEnv, start, goal, aPath);
+			//			t.EndTimer();
+			//			
+			//			printf("%d\t%d.%d\t%d\t%f\t\t%f\n", e.GetBucket(), diffHeuristic.GetNumHeuristics(), diffHeuristic.GetNumHeuristics()/10,
+			//				   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+			
 			for (int y = 1; y < 6; y++)
 			{
 				if (y == 5)

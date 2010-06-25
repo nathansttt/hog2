@@ -195,8 +195,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 	}
 
-	if (GetNumPorts(windowID) != unitSims[windowID]->GetNumUnits())
+	if (GetNumPorts(windowID) == unitSims[windowID]->GetNumUnits())
 	{
+		unitSims[windowID]->GetEnvironment()->OpenGLDraw();
 		unitSims[windowID]->OpenGLDraw();
 		//measure.OpenGLDraw(unitSims[windowID]->GetEnvironment());
 	}
@@ -307,14 +308,22 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 		x1 = random()%m->GetMapWidth();
 		y1 = random()%m->GetMapHeight();
 	} while ((m->GetTerrainType(x1, y1) != kGround) || (m->GetTerrainType(x2, y2) != kGround));
+
+	do {
+		x2 = random()%m->GetMapWidth();
+		y2 = random()%m->GetMapHeight();
+		x1 = random()%m->GetMapWidth();
+		y1 = random()%m->GetMapHeight();
+	} while ((m->GetTerrainType(x1, y1) != kGround) || (m->GetTerrainType(x2, y2) != kGround));
 	
-	//xyLoc a(x1, y1), b(x2, y2);
-	xyLoc a(0, 0), b(mazeSize-1, mazeSize-1);
+	xyLoc a(x1, y1), b(x2, y2);
+	//xyLoc a(0, 0), b(mazeSize-1, mazeSize-1);
 	//	xyLoc a(0, 0), b(mazeSize-1, 0);
 	GLdouble a1, b1, c1, r1;
 	m->GetOpenGLCoord((x1+x2)/2, (y1+y2)/2, a1, b1, c1, r1);
-	//cameraMoveTo(a1, b1, c1-600*r1, 1.0);
-	//cameraLookAt(a1, b1, c1, 1.0);
+	
+	cameraMoveTo(a1, b1, c1-600*r1, 1.0);
+	cameraLookAt(a1, b1, c1, 1.0);
 
 	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
 	measure.ShowHistogram();
@@ -328,7 +337,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	u2->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u2);
 
-	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(8));
+	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
 	u3->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u3);
 	

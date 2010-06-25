@@ -383,7 +383,7 @@ void runProblemSet(char *problems, int multiplier)
 		if (abstractPath.size() == 0)
 		{
 			printf("%llu\t%llu\t%llu\t%llu\t%1.2f\t%f\t", (uint64_t)0, (uint64_t)0, astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0, 0.0);
-			printf("%llu\t%llu\t%1.2f\t%f\n", astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0, 0.0);
+			printf("%llu\t%llu\t%1.2f\t%f\t%d\t%d\n", astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0, 0.0, 0, 0);
 //			printf("\n");
 			continue;
 		}
@@ -405,7 +405,8 @@ void runProblemSet(char *problems, int multiplier)
 		int abstractStart = 0;
 		gs1 = s1->GetNum();
 		double totalLength = 0;
-		int refineAmt = 5;
+		int refineAmt = 2;
+		int refinedPathNodes = 0;
 		do { // not working yet -- fully check!
 			env1.SetPlanningCorridor(abstractPath, 2, abstractStart);
 			gs2 = g1->GetNum();
@@ -420,6 +421,7 @@ void runProblemSet(char *problems, int multiplier)
 			t.StartTimer();
 			astar.GetPath(&env1, gs1, gs2, thePath);
 			t.EndTimer();
+			refinedPathNodes += thePath.size();
 			totalTime+=t.GetElapsedTime();
 			abstractStart += refineAmt;
 			gs1 = thePath.back();
@@ -433,7 +435,7 @@ void runProblemSet(char *problems, int multiplier)
 		
 //		printf("%llu\t%llu\t%1.2f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env1.GetPathLength(thePath));
 		thePath.resize(0);
-		printf("%llu\t%llu\t%1.2f\t%f\n", nodesExpanded, nodesTouched, totalLength, totalTime);
+		printf("%llu\t%llu\t%1.2f\t%f\t%d\t%d\n", nodesExpanded, nodesTouched, totalLength, totalTime, abstractPath.size(), refinedPathNodes);
 		
 //		gs1 = s1->GetNum();
 //		gs2 = g1->GetNum();
