@@ -233,7 +233,8 @@ enum tHeuristicCombination
 	kIgnore = 0, // don't combine with database
 	kRandom = 1, // combine random selection of databases
 	kMax = 2,    // take max of all heuristics
-	kGridMax = 3 // 0 on non-grid points
+	kGridMax = 3, // 0 on non-grid points
+	kCompressed = 4 // simulates compression down to O(N) memory
 };
 
 
@@ -241,11 +242,20 @@ class GraphMapInconsistentHeuristic : public GraphDistanceHeuristic {
 public:
 	GraphMapInconsistentHeuristic(Map *map, Graph *graph);
 	double HCost(const graphState &state1, const graphState &state2);
-	void SetMode(tHeuristicCombination mode) { hmode = mode; }
-	void SetNumUsedHeuristics(int count) { numHeuristics = count; }
+	void SetMode(tHeuristicCombination mode)
+	{ hmode = mode; if (compressed) hmode = kCompressed; }
+	void SetNumUsedHeuristics(int count)
+	{ numHeuristics = count; if (numHeuristics > GetNumHeuristics()) numHeuristics = GetNumHeuristics(); }
+	int GetNumUsedHeuristics()
+	{ return numHeuristics; }	
+	void Compress();
 private:
+	void FillInCache(std::vector<double> &vals,
+					 std::vector<double> &errors,
+					 graphState state2);
 	tHeuristicCombination hmode;
 	int numHeuristics;
+	bool compressed;
 	Map *m;
 };
 
@@ -295,7 +305,6 @@ protected:
 	Map *m;
 	Graph *g;
 	GraphHeuristic *h;
-
 };
 
 class AbstractionGraphEnvironment: public GraphEnvironment {

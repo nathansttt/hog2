@@ -186,10 +186,18 @@ uint64_t GraphEnvironment::GetActionHash(graphMove act) const
 	(g->GetNode(act.to)->getUniqueID());
 }
 
+
+
 void GraphEnvironment::OpenGLDraw() const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
-
+	
+	if (m)
+	{
+		m->OpenGLDraw();
+		return;
+	}
+	
 	glBegin(GL_LINES);
 	glNormal3f(0, 1, 0);
 		
@@ -555,6 +563,7 @@ namespace GraphSearchConstants {
 GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *graph)
 :GraphDistanceHeuristic(graph), m(map)
 {
+	compressed = false;
 	SetMode(kMax);
 	SetNumUsedHeuristics(1000);
 //	std::vector<std::vector<double> > values;
@@ -597,7 +606,8 @@ double GraphMapInconsistentHeuristic::HCost(const graphState &state1, const grap
 		return val;
 
 	//for (unsigned int x = 0; x < heuristics.size(); x++)
-	if (hmode == kRandom) {
+	if (hmode == kRandom)
+	{
 		int x = (x1+x2+y1+y2)%heuristics.size();
 		for (int y = 0; y < numHeuristics; y++)
 		{
@@ -608,7 +618,8 @@ double GraphMapInconsistentHeuristic::HCost(const graphState &state1, const grap
 				val = hval;
 		}
 	}
-	else if (hmode == kMax) { // hmode == 2, taking the max
+	else if (hmode == kMax) // hmode == 2, taking the max
+	{
 		for (unsigned int i = 0; i < heuristics.size() && i < (unsigned int)numHeuristics; i++)
 		{
 			double hval = heuristics[i][state1]-heuristics[i][state2];
@@ -618,22 +629,175 @@ double GraphMapInconsistentHeuristic::HCost(const graphState &state1, const grap
 				val = hval;
 		}
 	}
-	else if (hmode == kGridMax) {  // hmode == 3, return max at grid points, otherwise 0
-		if( (x1+x2) % 4 == 0 && (y1+y2) % 4 == 0) {
-			for(unsigned int i=0;i<heuristics.size();i++) {
+	else if (hmode == kGridMax)  // hmode == 3, return max at grid points, otherwise 0
+	{
+		if ( (x1+x2) % 4 == 0 && (y1+y2) % 4 == 0)
+		{
+			for (unsigned int i=0;i<heuristics.size();i++)
+			{
 				double hval = heuristics[i][state1]-heuristics[i][state2];
-				if(hval < 0)
+				if (hval < 0)
 					hval = -hval;
-				if(fgreater(hval,val))
+				if (fgreater(hval,val))
 					val = hval;
 			}
 		}
 		else
 			val = 0;
 	}
+	else if (hmode == kCompressed)
+	{
+		// at each state we can only look up the heuristic graphstate%H where H is the # of heuristics
+		static std::vector<double> vals;
+		static std::vector<double> errors;
+		static graphState lastGoal = -1;
+		
+		if (lastGoal != state2)
+		{
+			FillInCache(vals, errors, state2);
+			lastGoal = state2;
+		}
+		
+		if (compressed)
+		{
+			for (unsigned int x = 0; x < heuristics.size(); x++)
+			{
+				double hval = vals[x*numHeuristics+state1%numHeuristics]-heuristics[x][state1];
+				if (hval < 0)
+					hval = -hval;
+				hval -= errors[x*numHeuristics+state1%numHeuristics];
+				if (fgreater(hval,val))
+					val = hval;
+			}
+		}
+		else {
+			for (unsigned int x = (state1%numHeuristics); x < heuristics.size(); x+=numHeuristics)
+			{
+				double hval = vals[x]-heuristics[x][state1];
+				if (hval < 0)
+					hval = -hval;
+				hval -= errors[x];
+				if (fgreater(hval,val))
+					val = hval;
+			}
+		}
+	}
 
 	return val;
 }
+
+// this *should* be correct except for the division at the end
+void GraphMapInconsistentHeuristic::Compress()
+{
+	hmode = kCompressed;
+	compressed = true;
+
+	for (unsigned int state1 = 0; state1 < heuristics[0].size(); state1++)
+	{
+		for (unsigned int x = (state1%numHeuristics), y = 0; x < heuristics.size(); x+=numHeuristics, y++)
+		{
+			heuristics[y][state1] = heuristics[x][state1];
+		}
+	}
+	assert((heuristics.size()%numHeuristics) == 0);
+	heuristics.resize(heuristics.size()/numHeuristics);
+}
+
+void GraphMapInconsistentHeuristic::FillInCache(std::vector<double> &vals,
+												std::vector<double> &errors,
+												graphState state2)
+{
+	int unused;
+	if (!compressed)
+	{
+		unused = heuristics.size(); // set these values to the uncompressed size
+		vals.resize(heuristics.size());
+		errors.resize(heuristics.size());
+	}
+	else {
+		unused = numHeuristics*heuristics.size();
+		vals.resize(unused);
+		errors.resize(unused);
+	}
+	for (unsigned int x = 0; x < vals.size(); x++)
+		vals[x] = errors[x] = -1;
+
+	node *next = g->GetNode(state2);
+	next->SetLabelF(kTemporaryLabel, 0.0);
+	next->SetKeyLabel(kTemporaryLabel);
+	Heap h;
+	h.Add(next);
+
+	if (!compressed)
+	{
+		for (unsigned int x = (state2%numHeuristics); x < heuristics.size(); x+=numHeuristics)
+		{
+			vals[x] = heuristics[x][state2];
+			errors[x] = 0;
+			unused--;
+		}
+	}
+	else {
+		for (unsigned int x = 0; x < heuristics.size(); x++)
+		{
+			vals[x*numHeuristics+state2%numHeuristics] = heuristics[x][state2];
+			errors[x*numHeuristics+state2%numHeuristics] = 0;
+			unused--;
+		}
+	}
+
+	while ((unused > 0) && (!h.Empty()))
+	{
+		next = (node*)h.Remove();
+
+		double cost = next->GetLabelF(kTemporaryLabel);
+		neighbor_iterator ni = next->getNeighborIter();
+		for (long tmp = next->nodeNeighborNext(ni); tmp != -1; tmp = next->nodeNeighborNext(ni))
+		{
+			double edgeCost = g->FindEdge(next->GetNum(), tmp)->GetWeight();
+
+			if (compressed)
+			{
+				for (unsigned int x = 0; x < heuristics.size(); x++)
+				{
+					if (vals[x*numHeuristics+tmp%numHeuristics] == -1)
+					{
+						unused--;
+						vals[x*numHeuristics+tmp%numHeuristics] = heuristics[x][tmp];
+						errors[x*numHeuristics+tmp%numHeuristics] = cost+edgeCost;
+					}
+				}
+			}
+			else {
+				for (unsigned int x = (tmp%numHeuristics); x < heuristics.size(); x+=numHeuristics)
+				{
+					if (vals[x] == -1)
+					{
+						unused--;
+						vals[x] = heuristics[x][tmp];
+						errors[x] = cost+edgeCost;
+					}
+				}
+			}
+			
+			node *nb = g->GetNode(tmp);
+			if (h.IsIn(nb))
+			{
+				if (fgreater(nb->GetLabelF(kTemporaryLabel), cost+edgeCost))
+				{
+					nb->SetLabelF(kTemporaryLabel, cost+edgeCost);
+					h.DecreaseKey(nb);
+				}
+			}
+			else {
+				nb->SetKeyLabel(kTemporaryLabel);
+				nb->SetLabelF(kTemporaryLabel, cost+edgeCost);
+				h.Add(nb);
+			}
+		}
+	}	
+}
+
 
 void GraphDistanceHeuristic::OpenGLDraw() const
 {
