@@ -83,6 +83,8 @@ public:
 
 	virtual OccupancyInterface<state,action> *GetOccupancyInfo()
 	{ return 0; }
+	virtual void SetOccupancyInfo(OccupancyInterface<state,action> *)
+	{ }
 
 	virtual void OpenGLDraw() const = 0;
 	virtual void OpenGLDraw(const state&) const = 0;

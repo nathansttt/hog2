@@ -1879,7 +1879,7 @@ void Map::drawLandQuickly() const
  * set the unique data (nodeNum) for a tile/half tile so that we can go
  * from a tile in the map to a node in the Graph.
  */
-void Map::GetNodeNum(int num, int x, int y, tCorner corner)
+void Map::SetNodeNum(int num, int x, int y, tCorner corner)
 {
 	if ((x < 0) || (y < 0) || (x >= width) || (y >= height))
 	{
