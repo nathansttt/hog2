@@ -35,6 +35,11 @@ public:
 	std::vector<int> puzzle;
 };
 
+/**
+ * Note, direction "kLeft" indicates that the blank is being moved to the left.
+ * That is, a tile is being slid right into the blank position. The other
+ * actions are defined similarly.
+ */
 enum slideDir {
 	kLeft, kUp, kDown, kRight
 };

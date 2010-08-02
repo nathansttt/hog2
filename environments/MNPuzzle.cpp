@@ -84,33 +84,21 @@ void MNPuzzle::Change_Op_Order(std::vector<slideDir> op_order)
 	
 	// stores applicable operators at each of the width*height positions
 	std::vector<slideDir> ops(4);
-	for (unsigned int blank = 0; blank < width*height; blank++)
-	{
+	for (unsigned int blank = 0; blank < width*height; blank++) {
 		ops.resize(0);
-		if (blank != 10) // FIXME: temporary hack to make one tile stick in position
-		{
-			for (unsigned int op_num = 0; op_num < 4; op_num++)
-			{
-				if (op_order[op_num] == kUp && blank > width - 1)
-				{
-					if (blank != 14)
-						ops.push_back(kUp);
-				}
-				if (op_order[op_num] == kLeft && blank % width > 0)
-				{
-					if (blank != 11)
-						ops.push_back(kLeft);
-				}
-				if (op_order[op_num] == kRight && blank % width < width - 1)
-				{
-					if (blank != 9)
-						ops.push_back(kRight);
-				}
-				if (op_order[op_num] == kDown && blank < width*height - width)
-				{
-					if (blank != 6)
-						ops.push_back(kDown);
-				}
+
+		for (unsigned int op_num = 0; op_num < 4; op_num++) {
+			if (op_order[op_num] == kUp && blank > width - 1) {
+				ops.push_back(kUp);
+			}
+			if (op_order[op_num] == kLeft && blank % width > 0) {
+				ops.push_back(kLeft);
+			}
+			if (op_order[op_num] == kRight && blank % width < width - 1) {
+				ops.push_back(kRight);
+			}
+			if (op_order[op_num] == kDown && blank < width * height - width) {
+				ops.push_back(kDown);
 			}
 		}
 		
