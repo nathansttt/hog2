@@ -35,7 +35,7 @@
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
 #include "LocalSensingUnit.h"
-#include "LocalSensingUnit2.h"
+#include "RIBS.h"
 #include "LRTAStarUnit.h"
 #include "LSSLRTAStarUnit.h"
 #include "ScenarioLoader.h"
@@ -328,18 +328,18 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
 	measure.ShowHistogram();
 	
-//	LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
-//	u1->SetWeight(1.0);
-//	u1->SetSpeed(0.02);
-//	unitSims[windowID]->AddUnit(u1);
+	LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
+	u1->SetWeight(1.0);
+	u1->SetSpeed(0.02);
+	unitSims[windowID]->AddUnit(u1);
 
 //	LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u2 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
 //	u2->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u2);
 
-	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
-	u3->SetSpeed(0.02);
-	unitSims[windowID]->AddUnit(u3);
+//	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+//	u3->SetSpeed(0.02);
+//	unitSims[windowID]->AddUnit(u3);
 	
 	unitSims[windowID]->GetStats()->AddFilter("trialDistanceMoved");
 	unitSims[windowID]->GetStats()->AddFilter("TotalLearning");
@@ -510,7 +510,7 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
-		LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+		LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1); // go to goal and stop
 	}
@@ -615,7 +615,7 @@ void RunBigTest(EpSim *es, const Experiment &e, int which)
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
-		LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+		LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1); // go to goal and stop
 	}
@@ -704,7 +704,7 @@ void RunScalingTest(int size, int which)
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
-		LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::LocalSensingUnit2<xyLoc, tDirection, MapEnvironment>(a, b);
+		LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1); // go to goal and stop
 	}
@@ -836,7 +836,7 @@ void RunSTPTest(int which)
 		
 		if (which == 0)
 		{
-			LocalSensing::LocalSensingUnit2<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LocalSensing::LocalSensingUnit2<MNPuzzleState, slideDir, MNPuzzle>(s, g);
+			LocalSensing::RIBS<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LocalSensing::RIBS<MNPuzzleState, slideDir, MNPuzzle>(s, g);
 			u1->SetSpeed(1.0);
 			es->AddUnit(u1); // go to goal and stop
 		}

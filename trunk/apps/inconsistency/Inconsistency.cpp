@@ -41,7 +41,7 @@
 
 Graph *BuildInconsistentGraph(int d, int w, int h, int c1 = 1000, int c2 = 1000);
 void RunInconsistencyExperiment();
-void RunExperiments(ScenarioLoader *sl);
+void RunExperiments(ScenarioLoader *sl, int memory);
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -333,7 +333,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
 	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
-	InstallCommandLineHandler(MyCLHandler, "-scenario", "-scenario filename", "Runs a specified scenario file.");
+	InstallCommandLineHandler(MyCLHandler, "-scenario", "-scenario filename memory", "Runs a specified scenario file with the memory limit.");
 	//InstallCommandLineHandler(MyCLHandler, "-numHeuristics", "-numHeuristics <N>", "Uses the max of N diff heuristics.");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -419,7 +419,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 //	if (strcmp(argument[0], "-numHeuristics") == 0)
 //		numHeuristics = atoi(argument[1]);
 	if (strcmp(argument[0], "-scenario") == 0)
-		RunExperiments(new ScenarioLoader(argument[1]));
+		RunExperiments(new ScenarioLoader(argument[1]), atoi(argument[2]));
 	return 2;
 }
 
@@ -565,7 +565,7 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 	gEnv1->SetDirected(true);
 	for (int x = 0; x < 10; x++)
 		diffHeuristic1->AddHeuristic();
-	diffHeuristic1->SetNumUsedHeuristics(10);
+	diffHeuristic1->SetNumUsedHeuristics(1);
 	diffHeuristic1->SetMode(kMax);
 	vis1.SetUseBPMX(0);
 	
@@ -574,9 +574,9 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 	diffHeuristic2->SetMode(kRandom);
 	GraphEnvironment *gEnv2 = new GraphEnvironment(mp, grp, diffHeuristic2);
 	gEnv2->SetDirected(true);
-	for (int x = 0; x < 20; x++)
+	for (int x = 0; x < 10; x++)
 		diffHeuristic2->AddHeuristic();
-	diffHeuristic2->SetNumUsedHeuristics(2);
+	diffHeuristic2->SetNumUsedHeuristics(10);
 	diffHeuristic2->SetMode(kCompressed);
 	vis2.SetUseBPMX(1);
 
@@ -751,7 +751,7 @@ void RunExperiments1(ScenarioLoader *sl)
 // Compare:
 // * 10 N memory
 // * 100 compressed heuristics
-void RunExperiments(ScenarioLoader *sl)
+void RunExperiments(ScenarioLoader *sl, int memory)
 {
 	std::vector<graphState> aPath;
 	
@@ -771,16 +771,16 @@ void RunExperiments(ScenarioLoader *sl)
 	
 	Timer t;
 	
-	for (int x = 0; x < 100; x++)
+	for (int x = 0; x < memory; x++)
 		diffHeuristic.AddHeuristic();
-	diffHeuristic.SetNumUsedHeuristics(10);
+	diffHeuristic.SetNumUsedHeuristics(memory);
 	diffHeuristic.Compress();
 	
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
 		Experiment e = sl->GetNthExperiment(x);
 		
-//		if (e.GetBucket() != 127)
+//		if (e.GetBucket() < 100)
 //			continue;
 		
 		graphState start, goal;
@@ -790,33 +790,30 @@ void RunExperiments(ScenarioLoader *sl)
 		
 		printf("%d\t", e.GetBucket());
 		
-		// compressed, so can't perform regular lookups
 		
 		// 10N memory -- 10 heuristics
-//		diffHeuristic.SetNumUsedHeuristics(10);
+//		diffHeuristic.SetNumUsedHeuristics(1);
 //		diffHeuristic.SetMode(kMax);
 //		taNew.SetUseBPMX(0);
 //			
 //		t.StartTimer();
 //		taNew.GetPath(&gEnv, start, goal, aPath);
 //		t.EndTimer();		
-		printf("%dmx\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
-			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+//		printf("%dmx\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+//			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
 		
-		// 10N memory -- 100 heuristics (10 lookups) no BPMX
-		diffHeuristic.SetNumUsedHeuristics(10);
-		diffHeuristic.SetMode(kCompressed);
-		taNew.SetUseBPMX(0);
+//		diffHeuristic.SetNumUsedHeuristics(memory);
+//		diffHeuristic.SetMode(kCompressed);
+//		taNew.SetUseBPMX(0);
 		
-		t.StartTimer();
-		taNew.GetPath(&gEnv, start, goal, aPath);
-		t.EndTimer();		
-		printf("%dcmp\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
-			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+//		t.StartTimer();
+//		taNew.GetPath(&gEnv, start, goal, aPath);
+//		t.EndTimer();		
+//		printf("%dcmp\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+//			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
 		
-		// 10N memory -- 100 heuristics (10 lookups) with BPMX
-		diffHeuristic.SetNumUsedHeuristics(10);
-		diffHeuristic.SetMode(kCompressed);
+//		diffHeuristic.SetNumUsedHeuristics(memory);
+//		diffHeuristic.SetMode(kCompressed);
 		taNew.SetUseBPMX(1);
 		
 		t.StartTimer();
@@ -825,9 +822,8 @@ void RunExperiments(ScenarioLoader *sl)
 		printf("%dbx1\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
 			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
 
-		// 10N memory -- 100 heuristics (10 lookups) with BPMX °
-		diffHeuristic.SetNumUsedHeuristics(10);
-		diffHeuristic.SetMode(kCompressed);
+//		diffHeuristic.SetNumUsedHeuristics(memory);
+//		diffHeuristic.SetMode(kCompressed);
 		taNew.SetUseBPMX(1000);
 		
 		t.StartTimer();
@@ -837,7 +833,7 @@ void RunExperiments(ScenarioLoader *sl)
 			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
 		
 		printf("\n");
-		
+		fflush(stdout);
 	}
 	exit(0);
 }

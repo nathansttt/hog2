@@ -1,5 +1,5 @@
 /*
- *  LocalSensingUnit2.h
+ *  RIBS.h
  *  hog2
  *
  *  Created by Nathan Sturtevant on 8/31/09.
@@ -39,11 +39,11 @@ namespace LocalSensing {
 	};
 	
 	template <class state, class action, class environment>
-	class LocalSensingUnit2 : public Unit<state, action, environment> {
+	class RIBS : public Unit<state, action, environment> {
 	public:
-		LocalSensingUnit2(state &loc, state &goal);
+		RIBS(state &loc, state &goal);
 		
-		const char *GetName() { sprintf(name, "LocalSensingUnit2(w=%1.2f)", searchWeight); return name;}
+		const char *GetName() { sprintf(name, "RIBS(w=%1.2f)", searchWeight); return name;}
 		bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a);
 		void OpenGLDraw(const environment *e, const SimulationInfo<state,action,environment> *) const;
 		
@@ -99,8 +99,7 @@ namespace LocalSensing {
 		
 		bool init;
 		bool returnToStart;
-		state currentLoc, startLoc, goalLoc;
-		action lastAction;
+		state currentLoc, startLoc, goalLoc; // start loc is just for drawing purposes
 		double currentIterationCost, currentPathCost;
 		double nextIterationCost;
 		double searchWeight;
@@ -110,7 +109,7 @@ namespace LocalSensing {
 	
 	
 	template <class state, class action, class environment>
-	LocalSensingUnit2<state, action, environment>::LocalSensingUnit2(state &loc, state &goal)
+	RIBS<state, action, environment>::RIBS(state &loc, state &goal)
 	:currentLoc(loc), startLoc(loc), goalLoc(goal)
 	{
 		nodesExpanded = 0;
@@ -123,7 +122,7 @@ namespace LocalSensing {
 	}
 	
 	template <class state, class action, class environment>
-	bool LocalSensingUnit2<state, action, environment>::MakeMove(environment *e, OccupancyInterface<state,action> *,
+	bool RIBS<state, action, environment>::MakeMove(environment *e, OccupancyInterface<state,action> *,
 																SimulationInfo<state,action,environment> *, action& a)
 	{
 		env = e;
@@ -156,7 +155,7 @@ namespace LocalSensing {
 			init = true;
 		}		
 		
-		if (verbose) std::cout << "\nInside LocalSensingUnit2::MakeMove; " << currentPathCost << " limit " << currentIterationCost << std::endl;
+		if (verbose) std::cout << "\nInside RIBS::MakeMove; " << currentPathCost << " limit " << currentIterationCost << std::endl;
 		stateInfo<state, action> &current = hashTable[e->GetStateHash(currentLoc)];
 		if (verbose) std::cout << "MakingMove at node " << currentLoc << " with g-cost " << current.bestGCost <<
 			" on iteration " << currentIterationCost << std::endl;
@@ -330,7 +329,7 @@ namespace LocalSensing {
 	}
 	
 	template <class state, class action, class environment>
-	bool LocalSensingUnit2<state, action, environment>::AddOptimalParent(stateInfo<state, action> &info, action a)
+	bool RIBS<state, action, environment>::AddOptimalParent(stateInfo<state, action> &info, action a)
 	{
 		for (unsigned int x = 0; x < info.optimalParents.size(); x++)
 			if (info.optimalParents[x] == a)
@@ -340,7 +339,7 @@ namespace LocalSensing {
 	}
 
 	template <class state, class action, class environment>
-	void LocalSensingUnit2<state, action, environment>::RemoveChildrenPointers(environment *e, state &where)
+	void RIBS<state, action, environment>::RemoveChildrenPointers(environment *e, state &where)
 	{
 		std::vector<state> neighbors;
 		e->GetSuccessors(where, neighbors);		
@@ -362,7 +361,7 @@ namespace LocalSensing {
 	}
 	
 	template <class state, class action, class environment>
-	void LocalSensingUnit2<state, action, environment>::OpenGLDraw(const environment *e, const SimulationInfo<state,action,environment> *si) const
+	void RIBS<state, action, environment>::OpenGLDraw(const environment *e, const SimulationInfo<state,action,environment> *si) const
 	{
 		PublicUnitInfo<state, action, environment> i;
 		si->GetPublicUnitInfo(si->GetCurrentUnit(), i);

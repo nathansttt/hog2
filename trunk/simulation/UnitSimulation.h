@@ -63,6 +63,7 @@ class UnitInfo {
 public:
 	UnitInfo() :stateHistory(0) {}
 	Unit<state, action, environment> *agent;
+	int GetPriority() { return agent->GetPriority(); }
 	action lastMove;
 	state startState;
 	state lastState;
