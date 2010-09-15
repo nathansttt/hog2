@@ -40,7 +40,7 @@ template <class state, class action, class environment>
 class Unit {
 public:
 	//	Unit(state s, Unit<state, action, env> *target);
-	Unit() :speed(0), group(0) { SetColor(1.0, 0.0, 0.0); }
+	Unit() :speed(0), group(0) { SetColor(1.0, 0.0, 0.0); priority = 999; }
 	virtual ~Unit() { SetUnitGroup(0); }
 	virtual const char *GetName() = 0;
 	virtual bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a) = 0;
@@ -48,7 +48,6 @@ public:
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw(const environment *, const SimulationInfo<state,action,environment> *) const = 0;
 	virtual void GetGoal(state &s) = 0;
-
 	virtual bool Done() { return true;} 
 
 	virtual double GetSpeed() { return speed; }
@@ -95,11 +94,14 @@ public:
 	virtual void SetNum( unsigned int num ) { unitid = num; return; }
 	virtual void StartNewTrial(StatCollection *) {}
 
+	virtual int GetPriority() { return priority; }
+	virtual void SetPriority(int val) { priority = val; }
 private:
-		double speed;
-		UnitGroup<state, action, environment> *group;
-		GLfloat r, g, b;
-		unsigned int unitid;
+	double speed;
+	int priority;
+	UnitGroup<state, action, environment> *group;
+	GLfloat r, g, b;
+	unsigned int unitid;
 };
 
 
