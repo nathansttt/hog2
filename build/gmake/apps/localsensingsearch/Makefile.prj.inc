@@ -67,6 +67,6 @@ default : all
 
 SRC_CPP = \
 	apps/localsensingsearch/LocalSensingUnit.cpp \
-	apps/localsensingsearch/LocalSensingUnit2.cpp \
+	apps/localsensingsearch/RIBS.cpp \
 	apps/localsensingsearch/Sample.cpp
 
