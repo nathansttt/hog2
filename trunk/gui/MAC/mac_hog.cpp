@@ -1845,9 +1845,9 @@ void savePath(WindowRef window, pRecContext /*pContextInfo*/)
 				buffer[len] = '/';
 				CFStringGetCString(theReply.saveFileName, &buffer[len+1], 128, kCFStringEncodingASCII);
         {
-          printf("You selected \"%s\"\n", buffer);
+			printf("You selected \"%s\"\n", buffer);
 					// FIXME
-//					pContextInfo->unitLayer->GetMap()->Save(buffer);
+			//pContextInfo->unitLayer->GetMap()->Save(buffer);
 					break;
         }        
       }

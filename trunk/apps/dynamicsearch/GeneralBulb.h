@@ -42,8 +42,8 @@ public:
 	virtual void prepare_vars_for_search();
 	virtual int GetPath(environment *env, state from, state to, std::vector<state> &path);
 
-	virtual uint64_t GetNodesExpanded() { return nodes_expanded + nodes_ex_iter; }
-	virtual uint64_t GetNodesTouched() { return nodes_touched + nodes_touch_iter; }
+	virtual uint64_t GetNodesExpanded() const { return nodes_expanded + nodes_ex_iter; }
+	virtual uint64_t GetNodesTouched() const { return nodes_touched + nodes_touch_iter; }
 	virtual uint64_t GetNodesChecked() { return nodes_checked + nodes_check_iter; }
 
 	void Set_Initial_Discrepancies(unsigned i_d) {

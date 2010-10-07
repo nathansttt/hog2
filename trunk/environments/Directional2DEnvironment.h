@@ -92,7 +92,10 @@ public:
 enum model {
 	kHumanoid=0,
 	kVehicle=1,
-	kTank=2
+	kTank=2,
+	// the better tank is always moving speed 0, as it can speed up or slow down
+	// in one step anyway. So the regular tank has more states than necessary
+	kBetterTank=3
 };
 
 enum heuristicType {

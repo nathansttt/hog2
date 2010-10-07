@@ -34,8 +34,8 @@ public:
 	virtual void GetPath(Directional2DEnvironment *env, const xySpeedHeading &from, const xySpeedHeading &to, std::vector<xySpeedHeading> &path);
 	virtual void GetPath(Directional2DEnvironment *, const xySpeedHeading &, const xySpeedHeading &, std::vector<deltaSpeedHeading> &) { return; }
 	virtual const char *GetName() { return "DirAbstractPlanner"; }
-	virtual uint64_t GetNodesExpanded() { return lowLevelSearcher.GetNodesExpanded();/* + abstractSearcher.GetNodesExpanded();*/ }
-	virtual uint64_t GetNodesTouched() { return lowLevelSearcher.GetNodesTouched();/* + abstractSearcher.GetNodesTouched(); */}
+	virtual uint64_t GetNodesExpanded() const { return lowLevelSearcher.GetNodesExpanded();/* + abstractSearcher.GetNodesExpanded();*/ }
+	virtual uint64_t GetNodesTouched() const { return lowLevelSearcher.GetNodesTouched();/* + abstractSearcher.GetNodesTouched(); */}
 	virtual void LogFinalStats(StatCollection *) { return; }
 	virtual void OpenGLDraw() const;
 private:

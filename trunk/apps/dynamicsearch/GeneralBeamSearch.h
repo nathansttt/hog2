@@ -44,8 +44,8 @@ public:
 
 	virtual const char * GetName();
 
-	virtual uint64_t GetNodesExpanded() { return nodes_expanded; }
-	virtual uint64_t GetNodesTouched() { return nodes_touched; }
+	virtual uint64_t GetNodesExpanded() const { return nodes_expanded; }
+	virtual uint64_t GetNodesTouched() const { return nodes_touched; }
 	virtual uint64_t GetNodesChecked() {return nodes_checked; }
 
 	virtual void LogFinalStats(StatCollection *stats){}

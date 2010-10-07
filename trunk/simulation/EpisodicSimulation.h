@@ -274,8 +274,8 @@ protected:
 		if (s1 == s2)
 			return kReachedTarget;
 		
-		if (!fgreater(this->env->GCost(s1, s2), targetTolerance))
-			return kReachedTarget;
+//		if (!fgreater(this->env->GCost(s1, s2), targetTolerance))
+//			return kReachedTarget;
 		
 		return kNotOnTarget;
 	}

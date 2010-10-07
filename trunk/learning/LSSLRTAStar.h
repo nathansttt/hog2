@@ -69,8 +69,8 @@ public:
 	double HCost(const state &from, const state &to)
 	{ return HCost(m_pEnv, from, to); }
 	
-	virtual uint64_t GetNodesExpanded() { return nodesExpanded; }
-	virtual uint64_t GetNodesTouched() { return nodesTouched; }
+	virtual uint64_t GetNodesExpanded() const { return nodesExpanded; }
+	virtual uint64_t GetNodesTouched() const { return nodesTouched; }
 	virtual void LogFinalStats(StatCollection *s) { s->AddStat("TotalLearning", GetName(),fAmountLearned); }
 	
 	double GetAmountLearned() { return fAmountLearned; }
@@ -99,6 +99,7 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 	
 	astar.InitializeSearch(env, from, to, thePath);
 	astar.SetHeuristic(this);
+	astar.SetUseBPMX(1);
 	for (int x = 0; x < nodeExpansionLimit; x++)
 		if (astar.DoSingleSearchStep(thePath))
 		{

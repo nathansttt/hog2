@@ -45,8 +45,8 @@ public:
 		return env->HCost(from, to);
 	}
 	
-	virtual uint64_t GetNodesExpanded() { return nodesExpanded; }
-	virtual uint64_t GetNodesTouched() { return nodesTouched; }
+	virtual uint64_t GetNodesExpanded() const { return nodesExpanded; }
+	virtual uint64_t GetNodesTouched() const { return nodesTouched; }
 	virtual void LogFinalStats(StatCollection *s)
 	{
 		s->AddStat("TotalLearning", GetName(),fAmountLearned);
