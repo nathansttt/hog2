@@ -78,6 +78,7 @@ public:
 	bool InitializeSearch(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	void AddAdditionalStartState(state& newState);
+	void AddAdditionalStartState(state& newState, double cost);
 	
 	state CheckNextNode();
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
@@ -98,16 +99,18 @@ public:
 	bool GetClosedListGCost(const state &val, double &gCost) const;
 	unsigned int GetNumOpenItems() { return openClosedList.OpenSize(); }
 	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return openClosedList.Lookat(openClosedList.GetOpenItem(which)); }
-	inline const AStarOpenClosedData<state> &GetNumItems() { return openClosedList.size(); }
+	inline const int GetNumItems() { return openClosedList.size(); }
 	inline const AStarOpenClosedData<state> &GetItem(unsigned int which) { return openClosedList.Lookat(which); }
+	bool HaveExpandedState(const state &val)
+	{ uint64_t key; return openClosedList.Lookup(env->GetStateHash(val), key) != kNotFound; }
 	
 	void SetUseBPMX(int depth) { useBPMX = depth; }
 	int GetUsingBPMX() { return useBPMX; }
 	
 	void SetHeuristic(Heuristic<state> *h) { theHeuristic = h; }
 	
-	uint64_t GetNodesExpanded() { return nodesExpanded; }
-	uint64_t GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesExpanded() const { return nodesExpanded; }
+	uint64_t GetNodesTouched() const { return nodesTouched; }
 	
 	void LogFinalStats(StatCollection *) {}
 	
@@ -248,6 +251,17 @@ void TemplateAStar<state,action,environment>::AddAdditionalStartState(state& new
 }
 
 /**
+ * Add additional start state to the search. This should only be called after Initialize Search
+ * @author Nathan Sturtevant
+ * @date 09/25/10
+ */
+template <class state, class action, class environment>
+void TemplateAStar<state,action,environment>::AddAdditionalStartState(state& newState, double cost)
+{
+	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), cost, weight*theHeuristic->HCost(start, goal));
+}
+
+/**
  * Expand a single node. 
  * @author Nathan Sturtevant
  * @date 03/22/06
@@ -317,6 +331,7 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		switch (neighborLoc[x])
 		{
 			case kClosedList:
+				break;
 				//edgeCost = env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]);
 				
 				if (useBPMX) // propagate best child to parent - do this before potentially re-opening
@@ -722,13 +737,13 @@ void TemplateAStar<state, action,environment>::OpenGLDraw() const
 		const AStarOpenClosedData<state> &data = openClosedList.Lookat(x);
 		if ((data.where == kOpenList) && (data.reopened))
 		{
-			//env->SetColor(0.0, 0.5, 0.5, transparency);
-			//env->OpenGLDraw(data.data);
+			env->SetColor(0.0, 0.5, 0.5, transparency);
+			env->OpenGLDraw(data.data);
 		}
 		else if (data.where == kOpenList) 
 		{
-			//env->SetColor(0.0, 1.0, 0.0, transparency);
-			//env->OpenGLDraw(data.data);
+			env->SetColor(0.0, 1.0, 0.0, transparency);
+			env->OpenGLDraw(data.data);
 		}
 		else if ((data.where == kClosedList) && (data.reopened))
 		{

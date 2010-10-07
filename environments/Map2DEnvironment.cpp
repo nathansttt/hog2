@@ -169,7 +169,9 @@ double MapEnvironment::HCost(const xyLoc &l1, const xyLoc &l2)
 	double h1, h2;
 	double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));
 	double b = ((l1.y>l2.y)?(l1.y-l2.y):(l2.y-l1.y));
+//	return sqrt(a*a+b*b);
 	h1 = (a>b)?(b*DIAGONAL_COST+a-b):(a*DIAGONAL_COST+b-a);
+
 	if (h == 0)
 		return h1;
 	
@@ -319,6 +321,29 @@ void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) con
 	glVertex3f(xx, yy, zz-rad/2);
 	glEnd();
 	
+}
+
+void MapEnvironment::GLLabelState(const xyLoc &s, const char *str) const
+{
+	glPushMatrix();
+
+	GLdouble xx, yy, zz, rad;
+	map->GetOpenGLCoord(s.x, s.y, xx, yy, zz, rad);
+	GLfloat r, g, b, t;
+	GetColor(r, g, b, t);
+	glColor4f(r, g, b, t);
+	
+	glTranslatef(xx-rad, yy+rad/2, zz-rad);
+	glScalef(rad/(300.0), rad/300.0, 1);
+	glRotatef(180, 0.0, 0.0, 1.0);
+	glRotatef(180, 0.0, 1.0, 0.0);
+	//glTranslatef((float)x/width-0.5, (float)y/height-0.5, 0);
+	glDisable(GL_LIGHTING);
+	for (int which = 0; which < strlen(str); which++)
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
+	glEnable(GL_LIGHTING);
+	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
+	glPopMatrix();
 }
 
 //void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir, GLfloat r, GLfloat g, GLfloat b) const

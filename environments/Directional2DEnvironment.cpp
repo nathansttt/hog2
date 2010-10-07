@@ -47,6 +47,7 @@ int Directional2DEnvironment::GetNumAngles()
 	{
 		case kVehicle: return 16;
 		case kTank: return 24;
+		case kBetterTank: return 24;
 		case kHumanoid: return 16;
 	}
 	assert(!"Unknown motion model");
@@ -194,6 +195,28 @@ void Directional2DEnvironment::GetActions(const xySpeedHeading &loc, std::vector
 			}
 		}
 	}
+	else if (motionModel == kBetterTank)
+	{
+		deltaSpeedHeading sh;
+		
+		for (int x = -1; x <= 1; x++)
+		{
+			sh.speed = x;
+			sh.turn = 0;
+			if (Legal(loc, sh) && (x != 0))
+				actions.push_back(sh);
+			
+			for (int y = 1; y <= 3; y++)
+			{
+				sh.turn = y;
+				if (Legal(loc, sh))
+					actions.push_back(sh);
+				sh.turn = -y;
+				if (Legal(loc, sh))
+					actions.push_back(sh);
+			}
+		}
+	}
 	else { assert(false); }
 }
 
@@ -217,8 +240,14 @@ deltaSpeedHeading Directional2DEnvironment::GetAction(const xySpeedHeading &one,
 	return acts[0];
 }
 
-bool Directional2DEnvironment::InvertAction(deltaSpeedHeading &) const
+bool Directional2DEnvironment::InvertAction(deltaSpeedHeading &act) const
 {
+	if (motionModel == kBetterTank)
+	{
+		act.turn = -act.turn;
+		act.speed = -act.speed;
+		return true;
+	}
 	assert(false);
 	return false;
 }
@@ -230,12 +259,12 @@ void Directional2DEnvironment::RotateCCW(xySpeedHeading &s, unsigned int rotatio
 	float x1 = s.x;
 	s.x = roundf(s.x*myCos(rotation) + s.y*mySin(rotation));
 	s.y = roundf(s.y*myCos(rotation) - x1*mySin(rotation));
-	s.rotation = (((motionModel==kTank)?24:16)+s.rotation-rotation)%((motionModel==kTank)?24:16);
+	s.rotation = ((((motionModel==kTank)||(motionModel==kBetterTank))?24:16)+s.rotation-rotation)%(((motionModel==kTank)||(motionModel==kBetterTank))?24:16);
 }
 
 void Directional2DEnvironment::ApplyAction(xySpeedHeading &s, deltaSpeedHeading dir) const
 {
-	if (motionModel != kTank)
+	if ((motionModel != kTank) && (motionModel != kBetterTank))
 	{
 		float xoffset[16] = {1.0,  2.0,  1.0,  1.0,
 							 0.0, -1.0, -1.0, -2.0,
@@ -293,6 +322,39 @@ void Directional2DEnvironment::ApplyAction(xySpeedHeading &s, deltaSpeedHeading 
 		}
 		assert(s.speed >= -1 && s.speed <= 1 && s.rotation >= 0 && s.rotation < 24);
 	}
+	else if (motionModel == kBetterTank)
+	{
+		float xoffset[24] = {1.0,  3.0,  3.0, 1.0,  2.0, 1.0,
+			                 0.0, -1.0, -2.0,-1.0, -3.0,-3.0,
+			                -1.0, -3.0, -3.0,-1.0, -2.0,-1.0,
+			                 0.0,  1.0,  2.0, 1.0,  3.0, 3.0 };
+		float yoffset[24] = {0.0,  1.0,  2.0, 1.0,  3.0, 3.0,
+			                 1.0,  3.0,  3.0, 1.0,  2.0, 1.0,
+			                 0.0, -1.0, -2.0,-1.0, -3.0,-3.0,
+			                -1.0, -3.0, -3.0,-1.0, -2.0,-1.0};
+		s.speed = 0;
+		
+		if (dir.speed > 0)
+		{
+			s.rotation = (24+s.rotation+dir.turn)%24;
+			s.x += xoffset[s.rotation];
+			s.y += yoffset[s.rotation];
+		}
+		else if (dir.speed < 0)
+		{
+			s.x -= xoffset[s.rotation];
+			s.y -= yoffset[s.rotation];
+			s.rotation = (24+s.rotation+dir.turn)%24;
+			//		float tmp = myCos(s.rotation);//*s.speed;
+			//		s.x += tmp;
+			//		tmp = mySin(s.rotation);//*s.speed;
+			//		s.y += tmp;
+		}
+		else {
+			s.rotation = (24+s.rotation+dir.turn)%24;
+		}
+		assert(s.speed >= -1 && s.speed <= 1 && s.rotation >= 0 && s.rotation < 24);
+	}
 	else { // old tank code
 		assert(false);
 		s.speed += dir.speed;
@@ -309,7 +371,7 @@ void Directional2DEnvironment::ApplyAction(xySpeedHeading &s, deltaSpeedHeading 
 
 void Directional2DEnvironment::UndoAction(xySpeedHeading &s, deltaSpeedHeading dir) const
 {	
-	if (motionModel != kTank)
+	if ((motionModel != kTank) && (motionModel != kBetterTank))
 	{
 		float xoffset[16] = {1.0,  2.0,  1.0,  1.0,
 							 0.0, -1.0, -1.0, -2.0,
@@ -339,13 +401,13 @@ void Directional2DEnvironment::UndoAction(xySpeedHeading &s, deltaSpeedHeading d
 	}
 	else if (motionModel == kTank) {
 		float xoffset[24] = {1.0,  3.0,  3.0, 1.0,  2.0, 1.0,
-			                 0.0, -1.0, -2.0,-1.0, -3.0,-3.0,
-							-1.0, -3.0, -3.0,-1.0, -2.0,-1.0,
-		                     0.0,  1.0,  2.0, 1.0,  3.0, 3.0 };
+			0.0, -1.0, -2.0,-1.0, -3.0,-3.0,
+			-1.0, -3.0, -3.0,-1.0, -2.0,-1.0,
+			0.0,  1.0,  2.0, 1.0,  3.0, 3.0 };
 		float yoffset[24] = {0.0,  1.0,  2.0, 1.0,  3.0, 3.0,
-							 1.0,  3.0,  3.0, 1.0,  2.0, 1.0,
-			                 0.0, -1.0, -2.0,-1.0, -3.0,-3.0,
-							-1.0, -3.0, -3.0,-1.0, -2.0,-1.0};
+			1.0,  3.0,  3.0, 1.0,  2.0, 1.0,
+			0.0, -1.0, -2.0,-1.0, -3.0,-3.0,
+			-1.0, -3.0, -3.0,-1.0, -2.0,-1.0};
 		
 		if (s.speed > 0)
 		{
@@ -364,6 +426,39 @@ void Directional2DEnvironment::UndoAction(xySpeedHeading &s, deltaSpeedHeading d
 		}
 		s.rotation = (24+s.rotation-dir.turn)%24;
 		s.speed -= dir.speed;
+		assert(s.speed >= -1 && s.speed <= 1 && s.rotation >= 0 && s.rotation < 24);
+	}
+	else if (motionModel == kBetterTank) {
+		float xoffset[24] = {1.0,  3.0,  3.0, 1.0,  2.0, 1.0,
+			0.0, -1.0, -2.0,-1.0, -3.0,-3.0,
+			-1.0, -3.0, -3.0,-1.0, -2.0,-1.0,
+			0.0,  1.0,  2.0, 1.0,  3.0, 3.0 };
+		float yoffset[24] = {0.0,  1.0,  2.0, 1.0,  3.0, 3.0,
+			1.0,  3.0,  3.0, 1.0,  2.0, 1.0,
+			0.0, -1.0, -2.0,-1.0, -3.0,-3.0,
+			-1.0, -3.0, -3.0,-1.0, -2.0,-1.0};
+		
+		if (dir.speed > 0)
+		{
+			s.x -= xoffset[s.rotation];
+			s.y -= yoffset[s.rotation];
+			s.rotation = (24+s.rotation-dir.turn)%24;
+		}
+		else if (dir.speed < 0)
+		{
+			s.rotation = (24+s.rotation-dir.turn)%24;
+			s.x += xoffset[s.rotation];
+			s.y += yoffset[s.rotation];
+			
+			//		float tmp = myCos(s.rotation);//*s.speed;
+			//		s.x += tmp;
+			//		tmp = mySin(s.rotation);//*s.speed;
+			//		s.y += tmp;
+		}
+		else {
+			s.rotation = (24+s.rotation-dir.turn)%24;
+		}
+		s.speed = 0;
 		assert(s.speed >= -1 && s.speed <= 1 && s.rotation >= 0 && s.rotation < 24);
 	}
 	else { // tank!
@@ -403,7 +498,7 @@ bool Directional2DEnvironment::Legal(const xySpeedHeading &node1, const deltaSpe
 //	int y1 = floor(node1.y);
 	xySpeedHeading next=node1;
 	ApplyAction(next, act);
-	if (motionModel != kTank)
+	if ((motionModel != kTank) && (motionModel != kBetterTank))
 	{
 		return ((map->GetTerrainType(node1.x, node1.y) == kGround) &&
 				(map->GetTerrainType(next.x, next.y) == kGround) &&
@@ -419,7 +514,7 @@ bool Directional2DEnvironment::Legal(const xySpeedHeading &node1, const deltaSpe
 
 double Directional2DEnvironment::GCost(const xySpeedHeading &a, const deltaSpeedHeading &b)
 {
-	if (motionModel != kTank)
+	if ((motionModel != kTank) && (motionModel != kBetterTank))
 	{
 		//	return 1.0;
 		float val =  a.speed+b.speed;
@@ -430,25 +525,39 @@ double Directional2DEnvironment::GCost(const xySpeedHeading &a, const deltaSpeed
 	//	double dist[4] = {1.0, 1.5, 1.42, 1.5};
 		return dist[(16+a.rotation+b.turn)%4]/fabs(val);
 	}
-	else {
+	else if (motionModel == kTank) {
 		float val =  a.speed+b.speed;
 		if (val == 0)
 			return 1.0;
-//		if (val < 0)
-//			val *= 0.9;
 		double dist[6] = {1.0, 3.16, 3.61, 1.42, 3.61, 3.16};
-		//	double dist[4] = {1.0, 1.5, 1.42, 1.5};
 		return dist[(24+a.rotation+b.turn)%6]/fabs(val);
 	}
+	else if (motionModel == kBetterTank) {
+		float val =  b.speed;		
+		double result;
+		if (val == 0)
+			return 1.0;
+		double dist[6] = {1.0, 3.25, 3.75, 1.50, 3.75, 3.25};
+		if (val > 0)
+		{
+			result = dist[(24+a.rotation+b.turn)%6];
+		}
+		else {
+			result = dist[(a.rotation)%6];
+		}
+//		std::cout << "GCost between " << a << " given action " << b << " is " << result << std::endl;
+		return result;
+	}
+	
 	if (fequal(a.speed+b.speed, 0))
 		return 1.0;
 	return 1.4/fabs(a.speed+b.speed);
 //	return 1.0/fabs(val);
 }
 
-double Directional2DEnvironment::GCost(const xySpeedHeading &, const xySpeedHeading &b)
+double Directional2DEnvironment::GCost(const xySpeedHeading &a, const xySpeedHeading &b)
 {
-	if (motionModel != kTank)
+	if ((motionModel != kTank) && (motionModel != kBetterTank))
 	{
 		if (b.speed == 0)
 			return 1.0;
@@ -460,26 +569,35 @@ double Directional2DEnvironment::GCost(const xySpeedHeading &, const xySpeedHead
 	//	printf("rot: %d; speed: %d; val: %f\n", b.rotation, b.speed, ret);
 		return ret;
 	}
-	else {
+	else if (motionModel == kTank)
+	{
 		if (b.speed == 0)
 			return 1.0;
-
+		
 		double dist[6] = {1.0, 3.16, 3.61, 1.42, 3.61, 3.16};
 		double ret;
-//		if (b.speed > 0)
-			ret = dist[(b.rotation)%6]/fabs(b.speed);
-//		else
-//			ret = dist[(b.rotation)%6]/(fabs(b.speed)*0.9);
+		//		if (b.speed > 0)
+		ret = dist[(b.rotation)%6]/fabs(b.speed);
+		//		else
+		//			ret = dist[(b.rotation)%6]/(fabs(b.speed)*0.9);
 		//	printf("rot: %d; speed: %d; val: %f\n", b.rotation, b.speed, ret);
 		return ret;
 	}
-	if (fequal(b.speed, 0))
-		return 1.0;
-	return 1.4/fabs(b.speed);
-//	double h = HCost(l1, l2);
-//	if (fgreater(h, ROOT_TWO))
-//		return DBL_MAX;
-//	return h;
+	else if (motionModel == kBetterTank)
+	{
+		deltaSpeedHeading s = GetAction(a, b);
+		return GCost(a, s);
+//		double dist[6] = {1.0, 3.16, 3.61, 1.42, 3.61, 3.16};
+//		double ret;
+//		if (b.speed-a.speed > 0)
+//			ret = dist[(b.rotation)%6];///fabs(b.speed-a.speed);
+//		else
+//			ret = dist[(a.rotation)%6];///fabs(b.speed-a.speed);
+//		//	printf("rot: %d; speed: %d; val: %f\n", b.rotation, b.speed, ret);
+//		return ret;
+	}
+	assert(false);
+	return 0;
 }
 
 bool Directional2DEnvironment::GoalTest(const xySpeedHeading &node, const xySpeedHeading &goal)
@@ -496,6 +614,10 @@ uint64_t Directional2DEnvironment::GetStateHash(const xySpeedHeading &node) cons
 	// rotation is 0..15
 	// speed is 0..3
 	//	float x;	float y;	uint8_t speed;	uint8_t rotation;
+	if (motionModel == kBetterTank)
+	{
+		return (uint64_t)((uint64_t)node.x<<32)|((uint64_t)node.y<<16)|((uint64_t)node.rotation);
+	}
 	uint64_t hval = (((int)node.x*4)<<16)|((int)node.y*4);
 	hval = (uint64_t)((uint64_t)hval<<32)|((uint64_t)node.rotation<<8)|(uint64_t)(node.speed+4);
 	return hval;
@@ -516,7 +638,7 @@ void Directional2DEnvironment::OpenGLDraw() const
 void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading& oldState, const xySpeedHeading &newState, float perc) const
 {
 	int DEG = 16;
-	if (motionModel == kTank)
+	if ((motionModel == kTank) || (motionModel == kBetterTank))
 		DEG = 24;
 	GLfloat r, g, b, t;
 	GetColor(r, g, b, t);
@@ -551,21 +673,21 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading& oldState, const 
 	}
 	GLdouble yoffset = sin(TWOPI*rot/DEG)*rad;
 	GLdouble xoffset = cos(TWOPI*rot/DEG)*rad;
-	
+
 	glBegin(GL_TRIANGLES);
 	glColor4f(r, g, b/2, t);
-	glVertex3f(xx+xoffset-rad, yy+yoffset-rad, zz);
+	glVertex3f(xx+xoffset, yy+yoffset, zz);
 	glColor4f(r, g/2, b, t);
-	glVertex3f(xx-xoffset-rad, yy-yoffset-rad, zz-rad);
+	glVertex3f(xx-xoffset, yy-yoffset, zz-rad);
 	glColor4f(r, g, b/2, t);
-	glVertex3f(xx-xoffset+0.5*yoffset-rad, yy-yoffset-0.5*xoffset-rad, zz);
+	glVertex3f(xx-xoffset+0.5*yoffset, yy-yoffset-0.5*xoffset, zz);
 	
 	glColor4f(r, g/2, b, t);
-	glVertex3f(xx+xoffset-rad, yy+yoffset-rad, zz);
+	glVertex3f(xx+xoffset, yy+yoffset, zz);
 	glColor4f(r, g, b/2, t);
-	glVertex3f(xx-xoffset-rad, yy-yoffset-rad, zz-rad);
+	glVertex3f(xx-xoffset, yy-yoffset, zz-rad);
 	glColor4f(r, g/2, b, t);
-	glVertex3f(xx-xoffset-0.5*yoffset-rad, yy-yoffset+0.5*xoffset-rad, zz);
+	glVertex3f(xx-xoffset-0.5*yoffset, yy-yoffset+0.5*xoffset, zz);
 	glEnd();
 }
 
@@ -594,11 +716,11 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading &l) const
 	surfaceNormal.normalise();
 	glNormal3f(surfaceNormal.x, surfaceNormal.y, surfaceNormal.z);
 	glColor4f(r, g, b/2, t);
-	glVertex3f(xx+xoffset-rad, yy+yoffset-rad, zz);
+	glVertex3f(xx+xoffset, yy+yoffset, zz);
 	glColor4f(r, g/2, b, t);
-	glVertex3f(xx-xoffset-rad, yy-yoffset-rad, zz-rad);
+	glVertex3f(xx-xoffset, yy-yoffset, zz-rad);
 	glColor4f(r, g, b/2, t);
-	glVertex3f(xx-xoffset+0.5*yoffset-rad, yy-yoffset-0.5*xoffset-rad, zz);
+	glVertex3f(xx-xoffset+0.5*yoffset, yy-yoffset-0.5*xoffset, zz);
 	
 	surfaceNormal.x = (((+0.5*xoffset) * (-rad)) - ((+rad) - (-2*yoffset)));
 	surfaceNormal.y = (((rad) * (-2*xoffset)) - ((-0.5*yoffset) - (rad)));
@@ -606,11 +728,11 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading &l) const
 	surfaceNormal.normalise();
 	glNormal3f(surfaceNormal.x, surfaceNormal.y, surfaceNormal.z);
 	glColor4f(r, g/2, b, t);
-	glVertex3f(xx+xoffset-rad, yy+yoffset-rad, zz);
+	glVertex3f(xx+xoffset, yy+yoffset, zz);
 	glColor4f(r, g, b/2, t);
-	glVertex3f(xx-xoffset-rad, yy-yoffset-rad, zz-rad);
+	glVertex3f(xx-xoffset, yy-yoffset, zz-rad);
 	glColor4f(r, g/2, b, t);
-	glVertex3f(xx-xoffset-0.5*yoffset-rad, yy-yoffset+0.5*xoffset-rad, zz);
+	glVertex3f(xx-xoffset-0.5*yoffset, yy-yoffset+0.5*xoffset, zz);
 	glEnd();	
 }
 
@@ -756,8 +878,8 @@ void Directional2DEnvironment::BuildHTable(dirHeuristicTable &t)
 bool Directional2DEnvironment::LookupStateHashIndex(const xySpeedHeading &s,
 													int &index1, int &index2)
 {
-	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
-	const int angles[3] = {16, 16, 24};
+	const int speeds[4] = {0, 1, 1, 1}; // offset to make all speeds positive
+	const int angles[4] = {16, 16, 24, 24};
 	
 	int x = floorf(s.x);
 	int y = floorf(s.y);
@@ -773,8 +895,8 @@ bool Directional2DEnvironment::LookupStateHashIndex(const xySpeedHeading &s,
 
 float Directional2DEnvironment::LookupStateHash(const xySpeedHeading &s, dirHeuristicTable &t)
 {
-	const int speeds[3] = {0, 1, 1}; // offset to make all speeds positive
-	const int angles[3] = {16, 16, 24};
+	const int speeds[4] = {0, 1, 1, 1}; // offset to make all speeds positive
+	const int angles[4] = {16, 16, 24, 24};
 
 	int x = floorf(s.x);
 	int y = floorf(s.y);
@@ -792,8 +914,8 @@ float Directional2DEnvironment::LookupStateHash(const xySpeedHeading &s, dirHeur
 
 float Directional2DEnvironment::LookupStateHeuristic(const xySpeedHeading &s1, const xySpeedHeading &s2)
 {
-	const int angles[3] = {16, 16, 24};
-	const int angles90[3] = {4, 4, 6};
+	const int angles[4] = {16, 16, 24, 24};
+	const int angles90[4] = {4, 4, 6, 6};
 
 	if (hType == kOctileHeuristic)
 		return 0;
@@ -938,7 +1060,7 @@ float Directional2DEnvironment::LookupStateHeuristic(const xySpeedHeading &s1, c
 void Directional2DEnvironment::BuildAngleTables()
 {
 	int DEG = 16;
-	if (motionModel == kTank)
+	if ((motionModel == kTank) || (motionModel == kBetterTank))
 		DEG = 24;
 	for (int x = 0; x < DEG; x++)
 	{

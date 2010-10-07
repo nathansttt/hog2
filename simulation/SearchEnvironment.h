@@ -91,10 +91,10 @@ public:
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const state&, const state&, float) const {}
 	virtual void OpenGLDraw(const state&, const action&) const = 0;
-
+	virtual void GLLabelState(const state&, const char *) const {} // draw label over state
 	virtual void SetColor(GLfloat rr, GLfloat g, GLfloat b, GLfloat t) const { color.r = rr; color.g = g; color.b = b; transparency = t; }
 	virtual void GetColor(GLfloat& rr, GLfloat& g, GLfloat& b, GLfloat &t) const { rr=color.r; g=color.g; b=color.b; t = transparency;}
-private:
+protected:
 	bool bValidSearchGoal;
 	state searchGoal;
 	mutable recColor color;

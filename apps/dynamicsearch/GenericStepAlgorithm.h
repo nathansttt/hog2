@@ -46,8 +46,8 @@ public:
 	virtual int GetPath(environment *env, state from, state to, std::vector<action> &path) = 0;
 	virtual const char *GetName() = 0;
 
-	virtual uint64_t GetNodesExpanded() = 0; // number of nodes expanded
-	virtual uint64_t GetNodesTouched() = 0; // number of nodes generated
+	virtual uint64_t GetNodesExpanded() const = 0; // number of nodes expanded
+	virtual uint64_t GetNodesTouched() const = 0; // number of nodes generated
 
 	/**
 	Returns the number of nodes on which a goal test has been performed. Note, in many cases (like A*)

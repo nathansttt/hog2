@@ -327,8 +327,8 @@ class AbstractWeightedSearchAlgorithm : public GenericSearchAlgorithm<state,acti
 		virtual void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 		virtual void GetPath(environment *, const state &, const state &, std::vector<action> &) {}
 		virtual const char *GetName() {return "AbstractWeightedSearchAlgorihm";}
-		virtual uint64_t GetNodesExpanded() {return nodesExpanded;}
-		virtual uint64_t GetNodesTouched()  {return nodesTouched;}
+		virtual uint64_t GetNodesExpanded() const {return nodesExpanded;}
+		virtual uint64_t GetNodesTouched() const {return nodesTouched;}
 		virtual void LogFinalStats(StatCollection *) {}
 
 		/** Set the weighted environment

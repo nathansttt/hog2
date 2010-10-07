@@ -150,7 +150,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->StepTime(1.0/30.0);
 	}
 	unitSims[windowID]->OpenGLDraw();
-	msa->OpenGLDraw();
+//	msa->OpenGLDraw();
 	
 	if (mouseTracking)
 	{
@@ -197,7 +197,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				if (a2.DoSingleSearchStep(path))
 				{
 					printf("Solution: moves %d, length %f, %lld nodes\n",
-						   (int)path.size(), ma1->GetPathLength(path), a2.GetNodesExpanded());
+						   (int)path.size(), ma2->GetPathLength(path), a2.GetNodesExpanded());
 					runningSearch2 = false;
 					break;
 				}
@@ -427,32 +427,32 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
 				
-				if (ma1 == 0)
-				{
-					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
-					gdh->UseSmartPlacement(true);
-					ma1->SetGraphHeuristic(gdh);
-					for (int x = 0; x < 10; x++)
-						gdh->AddHeuristic();
-					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
-					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
-				}
+//				if (ma1 == 0)
+//				{
+//					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
+//					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
+//					gdh->UseSmartPlacement(true);
+//					ma1->SetGraphHeuristic(gdh);
+//					for (int x = 0; x < 10; x++)
+//						gdh->AddHeuristic();
+//					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
+//					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
+//				}
 				if (ma2 == 0)
 					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
 
 				a1.SetStopAfterGoal(true);
 				a2.SetStopAfterGoal(true);
-				//a2.SetWeight(1.8);
+//				a2.SetWeight(2.0);
 				xyLoc s1;
 				xyLoc g1;
 				s1.x = px1; s1.y = py1;
 				g1.x = px2; g1.y = py2;
 					   
-				a1.InitializeSearch(ma1, s1, g1, path);
+//				a1.InitializeSearch(ma1, s1, g1, path);
 				a2.InitializeSearch(ma2, s1, g1, path);
-				a2.SetUseBPMX(true);
-				runningSearch1 = true;
+//				a2.SetUseBPMX(false);
+				//runningSearch1 = true;
 				runningSearch2 = true;
 				
 			}

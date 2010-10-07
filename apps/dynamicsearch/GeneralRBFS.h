@@ -45,11 +45,11 @@ public:
 	virtual void LogFinalStats(StatCollection *stats){}
 
 	/** Get the number of nodes expanded (a node is expanded if the goal test is called) **/
-	virtual uint64_t GetNodesExpanded() { return nodesExpanded + nodes_ex_iter; }
+	virtual uint64_t GetNodesExpanded() const { return nodesExpanded + nodes_ex_iter; }
 
 	/** Get the number of nodes generated (if the successors or successor actions
 	 of a node are successors, these are considered generated nodes)**/
-	virtual uint64_t GetNodesTouched() { return nodesGenerated + nodes_gen_iter; }
+	virtual uint64_t GetNodesTouched() const { return nodesGenerated + nodes_gen_iter; }
 
 	/** Get the number of nodes checked to be generated (a node is checked if search_node
 	 is called on it, in which case to_expand is necessarily called on it except in a few

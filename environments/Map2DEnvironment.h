@@ -111,7 +111,7 @@ public:
 	virtual void OpenGLDraw(const xyLoc &l) const;
 	virtual void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const;
 	virtual void OpenGLDraw(const xyLoc &, const tDirection &) const;
-
+	virtual void GLLabelState(const xyLoc &, const char *) const;
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;
 	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;
 	Map* GetMap() const { return map; }
