@@ -42,24 +42,25 @@
 #include "StatUtil.h"
 #include "HeuristicLearningMeasure.h"
 #include "FLRTAStarUnit.h"
+#include "Directional2DEnvironment.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
 bool runningSearch2 = false;
 int px1, py1, px2, py2;
 int absType = 0;
-int mazeSize = 21;
+int mazeSize = 22;
 
-std::vector<EpisodicSimulation<xyLoc, tDirection, MapEnvironment> *> unitSims;
-TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
-TemplateAStar<xyLoc, tDirection, MapEnvironment> a2;
-MapEnvironment *ma1 = 0;
-MapEnvironment *ma2 = 0;
+std::vector<EpisodicSimulation<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *> unitSims;
+TemplateAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> a1;
+TemplateAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> a2;
+Directional2DEnvironment *ma1 = 0;
+Directional2DEnvironment *ma2 = 0;
 GraphDistanceHeuristic *gdh = 0;
-std::vector<xyLoc> path;
+std::vector<xySpeedHeading> path;
 double stepsPerFrame = 1.0/30.0;
 
-HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+HeuristicLearningMeasure<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> measure;
 
 void RunScenario(char *name, int which);
 void RunScalingTest(int size, int which);
@@ -131,13 +132,15 @@ void CreateSimulation(int id)
 //		BuildRandomRoomMap(map, 16);
 //		map->Scale(mazeSize, mazeSize);
 	}
-	else
+	else {
 		map = new Map(gDefaultMap);
+		//map->Scale(512, 512);
+	}
 	map->SetTileSet(kWinter);
-	MapEnvironment *me;
+	Directional2DEnvironment *me;
 	unitSims.resize(id+1);
-	unitSims[id] = new EpisodicSimulation<xyLoc, tDirection, MapEnvironment>(me = new MapEnvironment(map, false));
-	me->SetDiagonalCost(1.5);
+	unitSims[id] = new EpisodicSimulation<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(me = new Directional2DEnvironment(map, kBetterTank, kOctileHeuristic));
+	//	me->SetDiagonalCost(1.5);
 	unitSims[id]->SetStepType(kRealTime);//kUniTime
 	unitSims[id]->SetThinkingPenalty(0);
 	unitSims[id]->GetStats()->EnablePrintOutput(true);
@@ -366,41 +369,48 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 			y1 = random()%m->GetMapHeight();
 		} while ((m->GetTerrainType(x1, y1) != kGround) || (m->GetTerrainType(x2, y2) != kGround));
 	}
+	x1 = 19; y1 = 10; x2 = 4; y2 = 10;
+	xySpeedHeading a(x1, y1), b(x2, y2);
+	//xySpeedHeading a(0, 0), b(mazeSize-1, mazeSize-1);
+	//	xySpeedHeading a(0, 0), b(mazeSize-1, 0);
+	a1.GetPath(unitSims[windowID]->GetEnvironment(), a, b, path);
+	std::cout << "Found path -- " << a1.GetNodesExpanded() << " nodes expanded" << std::endl;
+	std::cout << "Solving " << a << " to " << b << std::endl;
 	
-	xyLoc a(x1, y1), b(x2, y2);
-	//xyLoc a(0, 0), b(mazeSize-1, mazeSize-1);
-	//	xyLoc a(0, 0), b(mazeSize-1, 0);
-	GLdouble a1, b1, c1, r1;
-	m->GetOpenGLCoord((x1+x2)/2, (y1+y2)/2, a1, b1, c1, r1);
-	
+//	GLdouble a1, b1, c1, r1;
+//	m->GetOpenGLCoord((x1+x2)/2, (y1+y2)/2, a1, b1, c1, r1);
 //	cameraMoveTo(a1, b1, c1-600*r1, 1.0);
 //	cameraLookAt(a1, b1, c1, 1.0);
 
 //	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
 //	measure.ShowHistogram();
 	
-//	LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
+//	LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b);
 //	u1->SetWeight(1.0);
 //	u1->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u1);
 
-//	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u2 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+//	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u2 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
 //	u2->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u2);
-//	
-//	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+
+//	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u2 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
+//	u2->SetSpeed(0.02);
+//	unitSims[windowID]->AddUnit(u2);
+	
+//	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u3 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
 //	u3->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u3);
 
-//	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u4 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u4 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
 //	u4->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u4);
 
-//	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
 //	u5->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u5);
 
-	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u6 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 	
@@ -413,7 +423,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
 	std::vector<graphState> thePath;
-	MapEnvironment *env = unitSims[windowID]->GetEnvironment();
+	Directional2DEnvironment *env = unitSims[windowID]->GetEnvironment();
 	Map *m = env->GetMap();
 	Graph *g = GraphSearchConstants::GetGraph(m);
 
@@ -495,31 +505,12 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					break;
 				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
-				
-				if (ma1 == 0)
-				{
-					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-					gdh = new GraphDistanceHeuristic(GraphSearchConstants::GetGraph(ma1->GetMap()));
-					gdh->UseSmartPlacement(true);
-					ma1->SetGraphHeuristic(gdh);
-					for (int x = 0; x < 10; x++)
-						gdh->AddHeuristic();
-				}
-				if (ma2 == 0)
-					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
 
-				a1.SetStopAfterGoal(true);
-				a2.SetStopAfterGoal(true);
-				xyLoc s1;
-				xyLoc g1;
-				s1.x = px1; s1.y = py1;
-				g1.x = px2; g1.y = py2;
-					   
-				a1.InitializeSearch(ma1, s1, g1, path);
-				a2.InitializeSearch(ma2, s1, g1, path);
-				runningSearch1 = true;
-				runningSearch2 = true;
-				
+				xySpeedHeading a(px1, py1);
+				xySpeedHeading b(px2, py2);
+				FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u4 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
+				u4->SetSpeed(0.02);
+				unitSims[windowID]->AddUnit(u4);
 			}
 			break;
 		}
@@ -529,7 +520,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 }
 
 
-typedef EpisodicSimulation<xyLoc, tDirection, MapEnvironment> EpSim;
+typedef EpisodicSimulation<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> EpSim;
 void RunSingleTest(EpSim *es, const Experiment &e, int which);
 
 void RunScenario(char *name, int which)
@@ -540,13 +531,13 @@ void RunScenario(char *name, int which)
 	Map *map = new Map(sl->GetNthExperiment(0).GetMapName());
 	map->Scale(sl->GetNthExperiment(0).GetXScale(),
 			   sl->GetNthExperiment(0).GetYScale());
-	MapEnvironment *me;
-	EpSim *es = new EpSim(me = new MapEnvironment(map, false));
-	me->SetDiagonalCost(1.5);
+	Directional2DEnvironment *me;
+	EpSim *es = new EpSim(me = new Directional2DEnvironment(map, kBetterTank, kOctileHeuristic));
+	//me->SetDiagonalCost(1.5);
 	es->SetStepType(kRealTime);
 	es->SetThinkingPenalty(0);
 
-	for (int x = 0; x < sl->GetNumExperiments(); x++)
+	for (int x = 1; x < sl->GetNumExperiments(); x++)
 	{
 		printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
 		RunSingleTest(es, sl->GetNthExperiment(x), which);
@@ -565,57 +556,57 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	es->GetStats()->AddFilter("TotalLearning");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
-	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
+	xySpeedHeading a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
 
-	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+	HeuristicLearningMeasure<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> measure;
 	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
 	
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
-		LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
+		LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1); // go to goal and stop
 	}
 	else if (which == 1)
 	{
 		printf("Running LRTA*\n");
-		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>());
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 2)
 	{
 		printf("Running LSS-LRTA*(10)\n");
-		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 3)
 	{
 		printf("Running LSS-LRTA*(100)\n");
-		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 4)
 	{
 		printf("Running FLRTA*(1)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
 	else if (which == 5)
 	{
 		printf("Running FLRTA*(10)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
 	else if (which == 6)
 	{
 		printf("Running FLRTA*(100)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
@@ -663,9 +654,9 @@ void RunBigScenario(char *name, int which)
 	Map *map = new Map(sl->GetNthExperiment(0).GetMapName());
 	map->Scale(sl->GetNthExperiment(0).GetXScale()*2,
 			   sl->GetNthExperiment(0).GetYScale()*2);
-	MapEnvironment *me;
-	EpSim *es = new EpSim(me = new MapEnvironment(map, false));
-	me->SetDiagonalCost(1.5);
+	Directional2DEnvironment *me;
+	EpSim *es = new EpSim(me = new Directional2DEnvironment(map, kBetterTank, kOctileHeuristic));
+	//me->SetDiagonalCost(1.5);
 	es->SetStepType(kRealTime);
 	es->SetThinkingPenalty(0);
 	
@@ -691,36 +682,36 @@ void RunBigTest(EpSim *es, const Experiment &e, int which)
 	es->GetStats()->AddFilter("TotalLearning");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
-	xyLoc a(2*e.GetStartX(), 2*e.GetStartY()), b(2*e.GetGoalX(), 2*e.GetGoalY());
+	xySpeedHeading a(2*e.GetStartX(), 2*e.GetStartY()), b(2*e.GetGoalX(), 2*e.GetGoalY());
 	
-	//HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+	//HeuristicLearningMeasure<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> measure;
 	double requiredLearning = 1;//measure.MeasureDifficultly(es->GetEnvironment(), a, b);
 	
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
-		LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
+		LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1); // go to goal and stop
 	}
 	else if (which == 1)
 	{
 		printf("Running LRTA*\n");
-		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>());
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 2)
 	{
 		printf("Running LSS-LRTA*(10)\n");
-		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 3)
 	{
 		printf("Running LSS-LRTA*(100)\n");
-		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
@@ -766,9 +757,9 @@ void RunScalingTest(int size, int which)
 	map->SetTerrainType(size-2, 1,
 						size-2, size-2, kOutOfBounds);
 
-	MapEnvironment *me;
-	EpSim *es = new EpSim(me = new MapEnvironment(map, false));
-	me->SetDiagonalCost(1.5);
+	Directional2DEnvironment *me;
+	EpSim *es = new EpSim(me = new Directional2DEnvironment(map, kBetterTank, kOctileHeuristic));
+	//me->SetDiagonalCost(1.5);
 	es->SetStepType(kRealTime);
 	es->SetThinkingPenalty(0);
 	
@@ -780,57 +771,57 @@ void RunScalingTest(int size, int which)
 	es->GetStats()->AddFilter("TotalLearning");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
-	xyLoc a(0, 0), b(size-1, size-1);
+	xySpeedHeading a(0, 0), b(size-1, size-1);
 	
-	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+	HeuristicLearningMeasure<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> measure;
 	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
 
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
-		LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
+		LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1); // go to goal and stop
 	}
 	else if (which == 1)
 	{
 		printf("Running LRTA*\n");
-		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>());
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 2)
 	{
 		printf("Running LSS-LRTA*(10)\n");
-		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 3)
 	{
 		printf("Running LSS-LRTA*(100)\n");
-		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 4)
 	{
 		printf("Running FLRTA*(1)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
 		u5->SetSpeed(0.02);
 		es->AddUnit(u5);
 	}
 	else if (which == 5)
 	{
 		printf("Running FLRTA*(10)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
 		u5->SetSpeed(0.02);
 		es->AddUnit(u5);
 	}
 	else if (which == 6)
 	{
 		printf("Running FLRTA*(100)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
 		u5->SetSpeed(0.02);
 		es->AddUnit(u5);
 	}
