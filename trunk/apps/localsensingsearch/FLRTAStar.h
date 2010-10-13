@@ -65,15 +65,16 @@ namespace FLRTA {
 	template <class state, class action, class environment>
 	class FLRTAStar : public GenericSearchAlgorithm<state,action,environment>, public Heuristic<state> {
 	public:
-		FLRTAStar(int nodeLimit = 8)
+		FLRTAStar(int nodeLimit = 8, double weight = 1.5)
 		{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; /*pe = 0;*/ nodeLearningLimit = 1;
-			fWeight = 1.5;
+			fWeight = weight; orderRedundant = false;
 		}
 		virtual ~FLRTAStar(void) { /*delete pe;*/ }
 		
 		void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 		void GetPath(environment *, const state& , const state& , std::vector<action> & ) { assert(false); };
-		virtual const char *GetName() { static char name[255]; sprintf(name, "FLRTAStar(%d,%1.1f)", nodeExpansionLimit, fWeight); return name; }
+		virtual const char *GetName() { static char name[255]; sprintf(name, "FLRTAStar(%d,%1.1f,%c)", nodeExpansionLimit, fWeight, orderRedundant?'o':'u'); return name; }
+		void SetOrderRedundant(bool val) { orderRedundant = val; }
 		
 		void KillState(const state &where)
 		{
@@ -176,8 +177,8 @@ namespace FLRTA {
 					return false;
 				}
 				if (verbose) std::cout << DBL_MAX << succ[x] << " has no status -- gcost: " << GCost(succ[x]) << std::endl;
-//				if (IsBestParent(succ[x], where))
-//					return false;
+				if (orderRedundant && IsBestParent(succ[x], where))
+					return false;
 			}
 			return true;
 		}
@@ -243,7 +244,7 @@ namespace FLRTA {
 		uint64_t nodesExpanded, nodesTouched;
 		int nodeExpansionLimit, nodeLearningLimit;
 		state theEnd;
-	
+		bool orderRedundant;
 		
 //		TemplateAStar<state, action, PseudoEnvironment> astar;
 		AStarOpenClosed<state, dblCmp<state> > aoc;
@@ -259,6 +260,7 @@ namespace FLRTA {
 //		counter++;
 //		if (0 == counter%1000)
 //			std::cout << stateData.size() << " states with learned data" << std::endl;
+		nodesExpanded = nodesTouched = 0;
 		m_pEnv = env;
 		thePath.resize(0);
 		theEnd = to;
@@ -400,7 +402,7 @@ namespace FLRTA {
 				// dead; ignore(?)
 				x--;
 				//tempDead.push_back(aoc.Lookat(next).data)
-				std::cout << aoc.Lookat(next).data << " is dead; left on closed (LSS)" << std::endl;
+				if (verbose) std::cout << aoc.Lookat(next).data << " is dead; left on closed (LSS)" << std::endl;
 				continue;
 			}
 			else {
@@ -437,6 +439,7 @@ namespace FLRTA {
 	template <class state, class action, class environment>
 	void FLRTAStar<state, action, environment>::PropagateGCosts(const state &next, const state &to, bool alsoExpand)
 	{
+		nodesExpanded++;
 		if (verbose) std::cout << "=Propagating from: " << next << (alsoExpand?" and expanding":" not expanding") << std::endl;
 		// decrease g-cost as long as somewhere on aoc / expand if requested
 		std::vector<state> neighbors;
@@ -449,6 +452,7 @@ namespace FLRTA {
 			((pLoc==kOpenList)?("open"):((pLoc==kClosedList)?"closed":"none")) << std::endl;
 		for (unsigned int x = 0; x < neighbors.size(); x++)
 		{
+			nodesTouched++;
 			double edgeCost = m_pEnv->GCost(next, neighbors[x]);
 			uint64_t childKey;
 			//std::cout << "Hashing state:10 " << std::endl << neighbors[x] << std::endl;
@@ -544,7 +548,6 @@ namespace FLRTA {
 			state s = q.top().theState;
 			if (verbose) std::cout << "Doing update from " << s << " g: " << q.top().value << "/" << GCost(s) << std::endl;
 			q.pop();
-			env->GetSuccessors(s, succ);
 			//std::cout << "GCost state:11 " << std::endl << s << std::endl;
 			double gCost = GCost(s);
 			bool largerGCost = false;
@@ -598,12 +601,14 @@ namespace FLRTA {
 //						q.push(borderData<state>(succ[x], DBL_MAX));
 //				}
 //			}
-			else if (IsRedundant(s))
+			else if (IsRedundant(s)) // catches the dead case too
 			{
 				if (verbose) 
 					std::cout<<"Marking " << s << " as redundant" << std::endl;
 				KillState(s);
 				//put successors back on queue in case they are dead too
+				nodesExpanded++;
+				env->GetSuccessors(s, succ);
 				for (unsigned int x = 0; x < succ.size(); x++)
 				{
 					uint64_t tmpKey;

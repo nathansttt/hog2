@@ -123,7 +123,10 @@ uint64_t AStarOpenClosed<state, CmpKey>::AddOpenNode(const state &val, uint64_t 
 {
 	// should do lookup here...
 	if (table.find(hash) != table.end())
+	{
+		//return -1; // TODO: find correct id and return
 		assert(false);
+	}
 	elements.push_back(AStarOpenClosedData<state>(val, g, h, parent, theHeap.size(), kOpenList));
 	if (parent == kTAStarNoNode)
 		elements.back().parentID = elements.size()-1;
