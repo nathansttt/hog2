@@ -35,7 +35,7 @@
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
 #include "MapSectorAbstraction.h"
-#include "ContractionHierarchy.h"
+//#include "ContractionHierarchy.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 	RunHOGGUI(argc, argv);
 }
 
-ContractionHierarchy *ch;
+//ContractionHierarchy *ch;
 /**
  * This function is used to allocate the unit simulated that you want to run.
  * Any parameters or other experimental setup can be done at this time.
@@ -88,7 +88,7 @@ void CreateSimulation(int id)
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map));
 	unitSims[id]->SetStepType(kMinTime);
 	
-	ch = new ContractionHierarchy(map, GraphSearchConstants::GetGraph(map));
+	//ch = new ContractionHierarchy(map, GraphSearchConstants::GetGraph(map));
 }
 
 /**
@@ -150,9 +150,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	if (viewport == 0)
 	{
-		//unitSims[windowID]->StepTime(1.0/30.0);
-		ch->OpenGLDraw();
-		ch->Contract();
+		unitSims[windowID]->StepTime(1.0/30.0);
+//		ch->OpenGLDraw();
+//		ch->Contract();
 		return;
 	}
 	unitSims[windowID]->OpenGLDraw();
@@ -275,7 +275,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 		{
-			ch->Contract();
+			//ch->Contract();
 		}
 			break;
 		default:
