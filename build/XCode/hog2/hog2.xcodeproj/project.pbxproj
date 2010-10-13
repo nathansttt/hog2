@@ -132,7 +132,6 @@
 		C43F61F0104EE2C200896E99 /* LRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C43F61EC104EE2C200896E99 /* LRTAStarUnit.cpp */; };
 		C45F51CE1004660300A664AD /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F3590ECFD3B5009D90B3 /* RoboticArm.cpp */; };
 		C45F51CF1004660400A664AD /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
-		C4602B56125A44A000361480 /* Sample2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4602B55125A44A000361480 /* Sample2.cpp */; };
 		C46E4EC20CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
 		C46E4EC30CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
 		C46E4EC40CACA81700D4D8F6 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46E4EC10CACA81700D4D8F6 /* AStarDelay.cpp */; };
@@ -349,14 +348,20 @@
 		C4B2482A124C0E0500DAD9FB /* RIBS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A3F2C7104C66F200AB3D8F /* RIBS.cpp */; };
 		C4B2482B124C0E0600DAD9FB /* FLRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F6EBF812417B5100CAC7F0 /* FLRTAStar.cpp */; };
 		C4B2482C124C0E0700DAD9FB /* FLRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F6EBFB12417B7900CAC7F0 /* FLRTAStarUnit.cpp */; };
-		C4B24886124EDB3300DAD9FB /* PuzzleSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C433A2A00BF8FBF8002B8108 /* PuzzleSample.cpp */; };
 		C4B24893124EDBEB00DAD9FB /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C433A2920BF8FB7E002B8108 /* Info.plist */; };
-		C4B248A0124EDD6000DAD9FB /* MNAgentPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B2489F124EDD6000DAD9FB /* MNAgentPuzzle.cpp */; };
 		C4B8108E1033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
 		C4B8108F1033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
 		C4B810901033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
 		C4B810911033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
 		C4B810921033292A00EFDB2B /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B8108D1033292A00EFDB2B /* AbsMapPatrolUnit.cpp */; };
+		C4BCFF2512623059008760EB /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C92430FE303740063E9B7 /* Sample.cpp */; };
+		C4BCFF4F1263B5EE008760EB /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BCFF4E1263B5EE008760EB /* ContractionHierarchy.cpp */; };
+		C4BCFF5912643781008760EB /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BCFF4E1263B5EE008760EB /* ContractionHierarchy.cpp */; };
+		C4BCFF6E12643C8D008760EB /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B7340BCEEC5900FCD84C /* Sample.cpp */; };
+		C4BCFF7112643D52008760EB /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AC970B0D6CD40800DAE6E9 /* Directional2DEnvironment.cpp */; };
+		C4BCFF7212643D53008760EB /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F3590ECFD3B5009D90B3 /* RoboticArm.cpp */; };
+		C4BCFF7312643D55008760EB /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
+		C4BCFF7412643D56008760EB /* Fling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3EFDC1142048200050426 /* Fling.cpp */; };
 		C4C8422C0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C8422D0C0CD14E00AFBF7A /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */; };
 		C4C842380C0CD2A100AFBF7A /* GraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C842370C0CD2A100AFBF7A /* GraphEnvironment.cpp */; };
@@ -577,7 +582,6 @@
 		C4F3480A0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
 		C4F3480B0F8485F400104ABE /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F347FF0F8485F400104ABE /* PancakePuzzle.cpp */; };
 		C4F3480C0F8485F400104ABE /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F348010F8485F400104ABE /* PermutationPuzzleEnvironment.cpp */; };
-		C4F669B8125D729600016E1F /* Sample2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4602B55125A44A000361480 /* Sample2.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -803,6 +807,8 @@
 		C4BC0A030F915EDB002D0CB9 /* TurnTakingSimulation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TurnTakingSimulation.h; sourceTree = "<group>"; };
 		C4BC0D170F918BE5002D0CB9 /* DirectionalPlanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectionalPlanner.h; sourceTree = "<group>"; };
 		C4BC0D180F918BE5002D0CB9 /* DirectionalPlanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DirectionalPlanner.cpp; sourceTree = "<group>"; };
+		C4BCFF4D1263B5EE008760EB /* ContractionHierarchy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContractionHierarchy.h; sourceTree = "<group>"; };
+		C4BCFF4E1263B5EE008760EB /* ContractionHierarchy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ContractionHierarchy.cpp; sourceTree = "<group>"; };
 		C4C8422A0C0CD14E00AFBF7A /* MeroB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeroB.h; sourceTree = "<group>"; };
 		C4C8422B0C0CD14E00AFBF7A /* MeroB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeroB.cpp; sourceTree = "<group>"; };
 		C4C842360C0CD2A100AFBF7A /* GraphEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphEnvironment.h; sourceTree = "<group>"; };
@@ -2195,6 +2201,8 @@
 			children = (
 				C4D3B27C0BCEE7B000FCD84C /* Graph.cpp */,
 				C4D3B27D0BCEE7B000FCD84C /* Graph.h */,
+				C4BCFF4E1263B5EE008760EB /* ContractionHierarchy.cpp */,
+				C4BCFF4D1263B5EE008760EB /* ContractionHierarchy.h */,
 			);
 			name = graph;
 			path = ../../../graph;
@@ -3249,7 +3257,8 @@
 				C4B2482A124C0E0500DAD9FB /* RIBS.cpp in Sources */,
 				C4B2482B124C0E0600DAD9FB /* FLRTAStar.cpp in Sources */,
 				C4B2482C124C0E0700DAD9FB /* FLRTAStarUnit.cpp in Sources */,
-				C4F669B8125D729600016E1F /* Sample2.cpp in Sources */,
+				C4BCFF2512623059008760EB /* Sample.cpp in Sources */,
+				C4BCFF5912643781008760EB /* ContractionHierarchy.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3354,9 +3363,12 @@
 				C4D3F0B81149C78800050426 /* StringUtils.cpp in Sources */,
 				C4D3F0B91149C78800050426 /* swapendian.cpp in Sources */,
 				C40D956011781819006EBEAF /* GraphRefinementEnvironment.cpp in Sources */,
-				C4B24886124EDB3300DAD9FB /* PuzzleSample.cpp in Sources */,
-				C4B248A0124EDD6000DAD9FB /* MNAgentPuzzle.cpp in Sources */,
-				C4602B56125A44A000361480 /* Sample2.cpp in Sources */,
+				C4BCFF4F1263B5EE008760EB /* ContractionHierarchy.cpp in Sources */,
+				C4BCFF6E12643C8D008760EB /* Sample.cpp in Sources */,
+				C4BCFF7112643D52008760EB /* Directional2DEnvironment.cpp in Sources */,
+				C4BCFF7212643D53008760EB /* RoboticArm.cpp in Sources */,
+				C4BCFF7312643D55008760EB /* ConfigEnvironment.cpp in Sources */,
+				C4BCFF7412643D56008760EB /* Fling.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -323,7 +323,7 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	}
 	
 	// iterate again updating costs and writing out to memory
-	for (unsigned int x = 0; x < neighbors.size(); x++)
+	for (int x = 0; x < neighbors.size(); x++)
 	{
 		nodesTouched++;
 		//double edgeCost;
@@ -384,6 +384,11 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 											   openClosedList.Lookup(nodeid).g+edgeCosts[x],
 											   std::max(theHeuristic->HCost(neighbors[x], goal), openClosedList.Lookup(nodeid).h-edgeCosts[x]),
 											   nodeid);
+//					if (loc == -1)
+//					{ // duplicate edges
+//						neighborLoc[x] = kOpenList;
+//						x--;
+//					}
 				}
 		}
 	}
