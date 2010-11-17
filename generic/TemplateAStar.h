@@ -331,7 +331,6 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 		switch (neighborLoc[x])
 		{
 			case kClosedList:
-				break;
 				//edgeCost = env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]);
 				
 				if (useBPMX) // propagate best child to parent - do this before potentially re-opening
