@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with HOG; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/ 
+ */ 
 
 // HOG File
 
@@ -47,9 +47,9 @@ enum tTileset {
 };
 
 enum tDisplay {
-  kPolygons,
-  kLines,
-  kPoints
+	kPolygons,
+	kLines,
+	kPoints
 };
 
 // types of ground
@@ -60,15 +60,15 @@ enum tDisplay {
 const int terrainBits = 4;
 
 enum tTerrain {
-  kOutOfBounds =0x0, // not part of map
-  kOutOfBounds2=0x1, // not part of map - different color
-  kWater=0x10,     // water
-  kGround=0x20,     // ground
-  kSwamp=0x21,
+	kOutOfBounds =0x0, // not part of map
+	kOutOfBounds2=0x1, // not part of map - different color
+	kWater=0x10,     // water
+	kGround=0x20,     // ground
+	kSwamp=0x21,
 	kGrass=0x22,
 	kBlight=0x23,
-  kTrees=0x30,
-  kUndefined // mixed type due to split tile
+	kTrees=0x30,
+	kUndefined // mixed type due to split tile
 };
 
 inline bool CanPass(long a, long b)
@@ -76,24 +76,24 @@ inline bool CanPass(long a, long b)
 
 // ground split types
 enum tSplit {
-  kNoSplit=0,
-  kForwardSplit=1, // ie like forward slash
-  kBackwardSplit=2     // ie like back slash
+	kNoSplit=0,
+	kForwardSplit=1, // ie like forward slash
+	kBackwardSplit=2     // ie like back slash
 };
 
 // specifying which side of the split you want
 enum tSplitSide {
-  kWholeTile = 1,
-  kLeftSide = 2,
-  kRightSide = 3
+	kWholeTile = 1,
+	kLeftSide = 2,
+	kRightSide = 3
 };
 
 enum tEdge {
-  kInternalEdge,
-  kLeftEdge,
-  kRightEdge,
-  kTopEdge,
-  kBottomEdge
+	kInternalEdge,
+	kLeftEdge,
+	kRightEdge,
+	kTopEdge,
+	kBottomEdge
 };
 
 // other constants
@@ -105,20 +105,20 @@ const int kNoGraphNode = -1;
 
 // corner types
 enum tCorner {
-  kNone = 0,
-  kTopLeft = 1,
-  kTopRight = 2,
-  kBottomLeft = 3,
-  kBottomRight = 4
+	kNone = 0,
+	kTopLeft = 1,
+	kTopRight = 2,
+	kBottomLeft = 3,
+	kBottomRight = 4
 };
 
 class halfTile {
 public:
-  halfTile();
-
-  long corners[3];
-  tTerrain type;
-  long node;
+	halfTile();
+	
+	long corners[3];
+	tTerrain type;
+	long node;
 };
 
 class Tile {
@@ -152,88 +152,89 @@ enum tMapType {
 
 class Map {
 public:
-  Map(long width, long height);
-  Map(const char *filename);
+	Map(long width, long height);
+	Map(const char *filename);
 	Map(Map *);
 	Map(FILE *);
-  Map(std::istringstream &data);
-  ~Map();
-  void Load(const char *filename);
-  void Load(FILE *f);
+	Map(std::istringstream &data);
+	~Map();
+	void Load(const char *filename);
+	void Load(FILE *f);
 	void setSizeMultipler(int _sizeMultiplier)
 	{ sizeMultiplier = _sizeMultiplier; }
 	void Scale(long newWidth, long newHeight);
-  void Save(std::stringstream &data);
-  void Save(const char *filename);
-  void Save(FILE *f);
+	void Trim();
+	void Save(std::stringstream &data);
+	void Save(const char *filename);
+	void Save(FILE *f);
 	Map *Clone() { return new Map(this); }
 	const char *GetMapName();
 	void Print(int scale = 1);
 	/** return the width of the map */
-  inline long GetMapWidth() const { return width; }
+	inline long GetMapWidth() const { return width; }
 	/** return the height of the map */
-  inline long GetMapHeight() const { return height; }
-
+	inline long GetMapHeight() const { return height; }
+	
 	void SetTileSet(tTileset ts);
 	tTileset GetTileSet();
 	
-  Tile &GetTile(long x, long y);
+	Tile &GetTile(long x, long y);
 	
-  tSplit GetSplit(long x, long y) const;
-  void SetSplit(long x, long y, tSplit split);
-
-
-  // returns kUndefined if tile is split and you request kWholeTile
-  long GetTerrainType(long x, long y, tSplitSide split = kWholeTile) const;
-  long GetTerrainType(long x, long y, tEdge side) const;
+	tSplit GetSplit(long x, long y) const;
+	void SetSplit(long x, long y, tSplit split);
+	
+	
+	// returns kUndefined if tile is split and you request kWholeTile
+	long GetTerrainType(long x, long y, tSplitSide split = kWholeTile) const;
+	long GetTerrainType(long x, long y, tEdge side) const;
 	void SetTerrainType(int32_t x1, int32_t y1,
 						int32_t x2, int32_t y2, tTerrain t);
-
-  // if tile is not split and you specify a split side, nothing happens
-  // if tile is split and you specify kWholeTile, the split remains,
-  // and the terrain is applied to both sides
-  void SetTerrainType(long x, long y, tTerrain type, tSplitSide split = kWholeTile);
-
-  // returns kUndefinedHeight if the tile is split and you specify
-  // the whole tile
-  long GetHeight(long x, long y, tSplitSide split = kWholeTile);
-
-  // if you specify a split, and the tile isn't split that direction,
-  // the tile will be split that direction, and then the height applied
-  void SetHeight(long x, long y, long height, tSplitSide split = kWholeTile);
-
-  // returns kUndefinedHeight if the split is inconsistant with the tile type
-  long GetCornerHeight(long x, long y, tCorner which, tEdge edge) const;
-  long GetCornerHeight(long x, long y, tCorner which, tSplitSide split = kWholeTile) const;
-  void SetCornerHeight(long x, long y, tCorner which, long height, tSplitSide split = kWholeTile);
-
-
-  // ===============================================
-  void SmoothSetRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain type = kGround);
-  void SetRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain type = kGround);
-  bool AdjacentEdges(long x, long y, tEdge edge) const;
-  bool AdjacentCorners(long x, long y, tCorner corner) const;
-  // returns whether we can step between two locations or not
-  bool CanStep(long x1, long y1, long x2, long y2) const;
-  
-  void OpenGLDraw(tDisplay how = kPolygons) const;
-  void GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
-  void GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
-  void GetPointFromCoordinate(point3d loc, int &px, int &py) const;
+	
+	// if tile is not split and you specify a split side, nothing happens
+	// if tile is split and you specify kWholeTile, the split remains,
+	// and the terrain is applied to both sides
+	void SetTerrainType(long x, long y, tTerrain type, tSplitSide split = kWholeTile);
+	
+	// returns kUndefinedHeight if the tile is split and you specify
+	// the whole tile
+	long GetHeight(long x, long y, tSplitSide split = kWholeTile);
+	
+	// if you specify a split, and the tile isn't split that direction,
+	// the tile will be split that direction, and then the height applied
+	void SetHeight(long x, long y, long height, tSplitSide split = kWholeTile);
+	
+	// returns kUndefinedHeight if the split is inconsistant with the tile type
+	long GetCornerHeight(long x, long y, tCorner which, tEdge edge) const;
+	long GetCornerHeight(long x, long y, tCorner which, tSplitSide split = kWholeTile) const;
+	void SetCornerHeight(long x, long y, tCorner which, long height, tSplitSide split = kWholeTile);
+	
+	
+	// ===============================================
+	void SmoothSetRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain type = kGround);
+	void SetRectHeight(long x1, long y1, long x2, long y2, long h, tTerrain type = kGround);
+	bool AdjacentEdges(long x, long y, tEdge edge) const;
+	bool AdjacentCorners(long x, long y, tCorner corner) const;
+	// returns whether we can step between two locations or not
+	bool CanStep(long x1, long y1, long x2, long y2) const;
+	
+	void OpenGLDraw(tDisplay how = kPolygons) const;
+	void GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
+	void GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
+	void GetPointFromCoordinate(point3d loc, int &px, int &py) const;
 	double GetCoordinateScale();
-
-  void SetDrawLand(bool land);
-  bool GetDrawLand() { return drawLand; }
-  void DrawTile(Tile *t, int x, int y, tDisplay how) const;
-  void DoVertexColor(tTerrain type, int height, bool darken = false) const;
-  void DoNormal(tSplit split, halfTile *t, int x, int y) const;
-
-  float GetEdgeWidthX(int x, int y);
-  float GetEdgeWidthY(int x, int y);
-
-  int GetNodeNum(int x, int y, tCorner c = kNone);
-  void SetNodeNum(int num, int x, int y, tCorner c = kNone);
-  int GetRevision() { return revision; }
+	
+	void SetDrawLand(bool land);
+	bool GetDrawLand() { return drawLand; }
+	void DrawTile(Tile *t, int x, int y, tDisplay how) const;
+	void DoVertexColor(tTerrain type, int height, bool darken = false) const;
+	void DoNormal(tSplit split, halfTile *t, int x, int y) const;
+	
+	float GetEdgeWidthX(int x, int y);
+	float GetEdgeWidthY(int x, int y);
+	
+	int GetNodeNum(int x, int y, tCorner c = kNone);
+	void SetNodeNum(int num, int x, int y, tCorner c = kNone);
+	int GetRevision() { return revision; }
 private:
 	void loadRaw(FILE *f, int height, int width);
 	void loadOctile(FILE *f, int height, int width);
@@ -241,23 +242,25 @@ private:
 	void saveOctile(FILE *f);
 	void saveRaw(FILE *f);
 	bool tryLoadRollingStone(FILE *f);
+	bool tryDragonAge(FILE *f);
 	bool isLegalStone(char c);
 	void paintRoomInside(int x, int y);
 	void drawLandQuickly() const;
 	int width, height;
-  Tile **land;
-  bool drawLand;
+	Tile **land;
+	bool drawLand;
 	mutable GLuint dList;
 	mutable bool updated;
 	int sizeMultiplier;
-  int revision;
+	int revision;
 	char map_name[128];
 	tMapType mapType;
 	tTileset tileSet;
 };
 
-void MakeMaze(Map *map);
+void MakeMaze(Map *map, int width = 1);
 void MakeMaze(Map *map, int pathSize);
+void MakePseudoMaze(Map *map, int pathSize);
 void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability=80);
 
 #endif

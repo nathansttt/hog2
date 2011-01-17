@@ -355,6 +355,7 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 					openClosedList.Lookup(neighborID[x]).parentID = nodeid;
 					openClosedList.Lookup(neighborID[x]).g = openClosedList.Lookup(nodeid).g+edgeCosts[x];
 					openClosedList.KeyChanged(neighborID[x]);
+					// TODO: unify the KeyChanged calls.
 				}
 				if (useBPMX) // propagate best child to parent
 				{

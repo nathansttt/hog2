@@ -71,7 +71,8 @@ public:
 	
 	virtual uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	virtual uint64_t GetNodesTouched() const { return nodesTouched; }
-	virtual void LogFinalStats(StatCollection *s) { s->AddStat("TotalLearning", GetName(),fAmountLearned); }
+	virtual void LogFinalStats(StatCollection *s)
+	{ s->AddStat("TotalLearning", GetName(),fAmountLearned); }
 	
 	double GetAmountLearned() { return fAmountLearned; }
 	void OpenGLDraw() const {}
@@ -109,6 +110,7 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 		}
 	nodesExpanded = astar.GetNodesExpanded();
 	nodesTouched = astar.GetNodesTouched();
+//	std::cout << GetName() << " " << nodesExpanded << " expanded by A* with expansion limit " << nodeExpansionLimit << std::endl;
 	
 	if (thePath.size() != 0)
 		return;
@@ -179,7 +181,8 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 			}
 		}
 	}
-	
+	//std::cout << GetName() << " " << nodesExpanded-nodeExpansionLimit << " expanded during learning" << std::endl;
+
 	// 3. construct best path
 	astar.ExtractPathToStart(first, thePath);
 	if (verbose) std::cout << "LSS-LRTA* heading towards " << thePath[0] << "with h-value " << HCost(env, thePath[0], to) << std::endl;
