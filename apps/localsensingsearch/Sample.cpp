@@ -207,8 +207,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-//void startRecording();
-//void stopRecording();
+void startRecording();
+void stopRecording();
 static bool recording = false;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
@@ -224,7 +224,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			stepsPerFrame*=1.002;//1.01;//
 		if (unitSims[windowID]->Done() && recording)
 		{
-			recording = false;
+//			recording = false;
 //			stopRecording();
 		}
 
@@ -329,6 +329,37 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'd':
 		{
+			printf("First travel:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				statValue v;
+				int choice = unitSims[windowID]->GetStats()->FindNextStat("trialDistanceMoved", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v);
+				
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(), v.fval);
+			}
+			printf("First nodes:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				statValue v;
+				int choice = unitSims[windowID]->GetStats()->FindNextStat("nodesExpanded", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v);
+				
+				printf("%s\t%ld\n", unitSims[windowID]->GetUnit(x)->GetName(), v.lval);
+			}
+			printf("First Nodes/travel:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				statValue v1;
+				int choice = unitSims[windowID]->GetStats()->FindNextStat("nodesExpanded", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v1);
+				statValue v2;
+				choice = unitSims[windowID]->GetStats()->FindNextStat("trialDistanceMoved", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v2);
+				
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(), v1.lval/v2.fval);			
+			}
+
 			printf("Total travel:\n");
 			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
 			{
@@ -337,7 +368,27 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 									  "trialDistanceMoved",
 									  unitSims[windowID]->GetUnit(x)->GetName()));
 			}
-
+			printf("Total nodes:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(),
+					   SumStatEntries(unitSims[windowID]->GetStats(),
+									  "nodesExpanded",
+									  unitSims[windowID]->GetUnit(x)->GetName()));
+			}
+			printf("Nodes/travel:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(),
+					   SumStatEntries(unitSims[windowID]->GetStats(),
+									  "nodesExpanded",
+									  unitSims[windowID]->GetUnit(x)->GetName())/
+					   SumStatEntries(unitSims[windowID]->GetStats(),
+									  "trialDistanceMoved",
+									  unitSims[windowID]->GetUnit(x)->GetName())
+					   );
+			}
+			
 		}
 		default:
 			break;
@@ -387,8 +438,13 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	GLdouble a1, b1, c1, r1;
 	m->GetOpenGLCoord((x1+x2)/2, (y1+y2)/2, a1, b1, c1, r1);
 	
-//	cameraMoveTo(a1, b1, c1-600*r1, 1.0);
-//	cameraLookAt(a1, b1, c1, 1.0);
+	for (int x = 0; x < 4; x++)
+	{ break;
+		cameraMoveTo(a1, b1, c1-600*r1, 1.0, x);
+		cameraLookAt(a1, b1, c1, 1.0, x);
+	}
+	stepsPerFrame = 1.0/30.0;//1.0/120.0;
+	int lookAheadSize = 10;
 
 //	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
 //	measure.ShowHistogram();
@@ -398,13 +454,13 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	u1->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u1);
 
-//	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u2 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+//	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u2 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
 //	u2->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u2);
 //	
-//	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
-//	u3->SetSpeed(0.02);
-//	unitSims[windowID]->AddUnit(u3);
+	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u3 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize));
+	u3->SetSpeed(0.02);
+	unitSims[windowID]->AddUnit(u3);
 
 //	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u4 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
 //	u4->SetSpeed(0.02);
@@ -415,25 +471,34 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	unitSims[windowID]->AddUnit(u5);
 
 	FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
-	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, 100));
+	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.5));
 	f->SetOrderRedundant(true);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 
-	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, 1.5));
+	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 15));
 	f->SetOrderRedundant(true);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 
-	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, 1.0));
+	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.2));
 	f->SetOrderRedundant(true);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
+
+//	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, 100.5));
+//	f->SetOrderRedundant(true);
+//	u6->SetSpeed(0.02);
+//	unitSims[windowID]->AddUnit(u6);
 	
 	unitSims[windowID]->GetStats()->AddFilter("trialDistanceMoved");
 	unitSims[windowID]->GetStats()->AddFilter("TotalLearning");
+	unitSims[windowID]->GetStats()->AddFilter("nodesExpanded");
 	unitSims[windowID]->GetStats()->EnablePrintOutput(true);
 	unitSims[windowID]->SetTrialLimit(50000);
+	
+	SetNumPorts(windowID, 1+(unitSims[windowID]->GetNumUnits()-1)%MAXPORTS);
+
 }
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
@@ -444,12 +509,12 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	Graph *g = GraphSearchConstants::GetGraph(m);
 
 //	GraphDistanceHeuristic diffHeuristic(g);
-//	diffHeuristic.UseSmartPlacement(true);
+//	diffHeuristic.SetPlacement(kAvoidPlacement);
 //	for (int x = 0; x < 20; x++)
 //		diffHeuristic.AddHeuristic();
 
 	GraphMapInconsistentHeuristic diffHeuristic(m, g);
-	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	for (int x = 0; x < 20; x++)
 		diffHeuristic.AddHeuristic();
 	
@@ -526,7 +591,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				{
 					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
 					gdh = new GraphDistanceHeuristic(GraphSearchConstants::GetGraph(ma1->GetMap()));
-					gdh->UseSmartPlacement(true);
+					gdh->SetPlacement(kAvoidPlacement);
 					ma1->SetGraphHeuristic(gdh);
 					for (int x = 0; x < 10; x++)
 						gdh->AddHeuristic();
@@ -589,15 +654,14 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	// add units
 	es->GetStats()->ClearAllStats();
 	es->GetStats()->AddFilter("trialDistanceMoved");
-	es->GetStats()->AddFilter("nodesTouched");
 	es->GetStats()->AddFilter("nodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
 
-	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
-	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
+//	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
+//	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
 	
 	if (which == 0)
 	{
@@ -661,7 +725,7 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	printf("dist-first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
 	printf("dist-sum\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "trialDistanceMoved", es->GetUnit(0)->GetName()));
 	es->GetStats()->LookupStat("TotalLearning", es->GetUnit(0)->GetName(), v);
-	printf("learning\t%s\t%f\t%f\t%f\n", es->GetUnit(0)->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+//	printf("learning\t%s\t%f\t%f\t%f\n", es->GetUnit(0)->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
 	
 	choice = es->GetStats()->FindNextStat("nodesExpanded", es->GetUnit(0)->GetName(), 0);
 	if (choice != -1)
@@ -670,13 +734,13 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
 		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
 	}
-	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
-	if (choice != -1)
-	{
-		es->GetStats()->LookupStat(choice, v);
-		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
-		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
-	}
+//	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
+//	if (choice != -1)
+//	{
+//		es->GetStats()->LookupStat(choice, v);
+//		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
+//		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+//	}
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
 	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval+1);

@@ -49,7 +49,7 @@ bool runningSearch1 = false;
 bool runningSearch2 = false;
 int px1, py1, px2, py2;
 int absType = 0;
-int mazeSize = 10;
+int mazeSize = 30;
 
 std::vector<EpisodicSimulation<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *> unitSims;
 TemplateAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> a1;
@@ -272,16 +272,16 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-scenario") == 0)
 	{
-		RunScenario(argument[1], atoi(argument[2]));
+		//RunScenario(argument[1], atoi(argument[2]));
 		//RunBigScenario(argument[1], atoi(argument[2]));
 	}
 	else if (strcmp(argument[0], "-scaleTest") == 0)
 	{
-		RunScalingTest(atoi(argument[1]), atoi(argument[2]));
+		//RunScalingTest(atoi(argument[1]), atoi(argument[2]));
 	}
 	else if (strcmp(argument[0], "-STPTest") == 0)
 	{
-		RunSTPTest(atoi(argument[1]));
+		//RunSTPTest(atoi(argument[1]));
 	}
 	return 2; //ignore typos
 }
@@ -318,6 +318,38 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'd':
 		{
+			printf("First travel:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				statValue v;
+				int choice = unitSims[windowID]->GetStats()->FindNextStat("trialDistanceMoved", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v);
+				
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(), v.fval);
+			}
+			printf("First nodes:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				statValue v;
+				int choice = unitSims[windowID]->GetStats()->FindNextStat("nodesExpanded", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v);
+				
+				printf("%s\t%ld\n", unitSims[windowID]->GetUnit(x)->GetName(), v.lval);
+			}
+			printf("First Nodes/travel:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				statValue v1;
+				int choice = unitSims[windowID]->GetStats()->FindNextStat("nodesExpanded", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v1);
+				statValue v2;
+				choice = unitSims[windowID]->GetStats()->FindNextStat("trialDistanceMoved", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v2);
+				
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(), v1.lval/v2.fval);			
+			}
+			
+			
 			printf("Total travel:\n");
 			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
 			{
@@ -326,7 +358,27 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 									  "trialDistanceMoved",
 									  unitSims[windowID]->GetUnit(x)->GetName()));
 			}
-
+			printf("Total nodes:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(),
+					   SumStatEntries(unitSims[windowID]->GetStats(),
+									  "nodesExpanded",
+									  unitSims[windowID]->GetUnit(x)->GetName()));
+			}
+			printf("Nodes/travel:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(),
+					   SumStatEntries(unitSims[windowID]->GetStats(),
+									  "nodesExpanded",
+									  unitSims[windowID]->GetUnit(x)->GetName())/
+					   SumStatEntries(unitSims[windowID]->GetStats(),
+									  "trialDistanceMoved",
+									  unitSims[windowID]->GetUnit(x)->GetName())
+					   );
+			}
+			
 		}
 		default:
 			break;
@@ -373,10 +425,10 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	xySpeedHeading a(x1, y1), b(x2, y2);
 	//xySpeedHeading a(0, 0), b(mazeSize-1, mazeSize-1);
 	//	xySpeedHeading a(0, 0), b(mazeSize-1, 0);
-	a1.GetPath(unitSims[windowID]->GetEnvironment(), a, b, path);
+	//a1.GetPath(unitSims[windowID]->GetEnvironment(), a, b, path);
 	std::cout << "Found path -- " << a1.GetNodesExpanded() << " nodes expanded" << std::endl;
 	std::cout << "Solving " << a << " to " << b << std::endl;
-	
+	stepsPerFrame = 1.0/120.0;
 //	GLdouble a1, b1, c1, r1;
 //	m->GetOpenGLCoord((x1+x2)/2, (y1+y2)/2, a1, b1, c1, r1);
 //	cameraMoveTo(a1, b1, c1-600*r1, 1.0);
@@ -385,10 +437,10 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
 //	measure.ShowHistogram();
 	
-	LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b);
-	u1->SetWeight(1.0);
-	u1->SetSpeed(0.02);
-	unitSims[windowID]->AddUnit(u1);
+//	LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LocalSensing::RIBS<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b);
+//	u1->SetWeight(1.0);
+//	u1->SetSpeed(0.02);
+//	unitSims[windowID]->AddUnit(u1);
 
 //	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u2 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
 //	u2->SetSpeed(0.02);
@@ -398,28 +450,31 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	u2->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u2);
 	
-	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u3 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
+	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u3 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
 	u3->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u3);
 
-//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u4 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100));
-//	u4->SetSpeed(0.02);
-//	unitSims[windowID]->AddUnit(u4);
+	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u4 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, 100));
+	u4->SetSpeed(0.02);
+	unitSims[windowID]->AddUnit(u4);
 
-//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
-//	u5->SetSpeed(0.02);
-//	unitSims[windowID]->AddUnit(u5);
+	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, 1.5));
+	u5->SetSpeed(0.02);
+	unitSims[windowID]->AddUnit(u5);
 
 	FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
-	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u6 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
+	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u6 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, 5));
 	f->SetOrderRedundant(false);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 	
 	unitSims[windowID]->GetStats()->AddFilter("trialDistanceMoved");
 	unitSims[windowID]->GetStats()->AddFilter("TotalLearning");
+	unitSims[windowID]->GetStats()->AddFilter("nodesExpanded");
 	unitSims[windowID]->GetStats()->EnablePrintOutput(true);
 	unitSims[windowID]->SetTrialLimit(50000);
+
+	SetNumPorts(windowID, 1+(unitSims[windowID]->GetNumUnits()-1)%MAXPORTS);
 }
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
@@ -430,12 +485,12 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	Graph *g = GraphSearchConstants::GetGraph(m);
 
 //	GraphDistanceHeuristic diffHeuristic(g);
-//	diffHeuristic.UseSmartPlacement(true);
+//	diffHeuristic.SetPlacement(kAvoidPlacement);
 //	for (int x = 0; x < 20; x++)
 //		diffHeuristic.AddHeuristic();
 
 	GraphMapInconsistentHeuristic diffHeuristic(m, g);
-	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	for (int x = 0; x < 20; x++)
 		diffHeuristic.AddHeuristic();
 	

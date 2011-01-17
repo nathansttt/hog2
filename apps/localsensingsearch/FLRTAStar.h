@@ -61,7 +61,6 @@ namespace FLRTA {
 		}
 	};
 	
-	
 	template <class state, class action, class environment>
 	class FLRTAStar : public GenericSearchAlgorithm<state,action,environment>, public Heuristic<state> {
 	public:
@@ -232,9 +231,11 @@ namespace FLRTA {
 	private:
 		typedef __gnu_cxx::hash_map<uint64_t, learnedStateData<state>, Hash64 > LearnedStateData;
 		typedef __gnu_cxx::hash_map<uint64_t, bool, Hash64 > ClosedList;
+		void ExtractBestPath(environment *env, const state &from, const state &to, std::vector<state> &thePath);
+		void MakeTrappedMove(environment *env, const state &from, std::vector<state> &thePath);
 		
 		void ExpandLSS(const state &from, const state &to, std::vector<state> &thePath);
-		void DoGCostLearning(environment *env, const state &goal);
+		void MarkDeadRedundant(environment *env, const state &goal);
 		void DoHCostLearning(environment *env, const state &from, const state &to);
 		void PropagateGCosts(const state &next, const state &to, bool alsoExpand);
 		
@@ -246,44 +247,51 @@ namespace FLRTA {
 		state theEnd;
 		bool orderRedundant;
 		
-//		TemplateAStar<state, action, PseudoEnvironment> astar;
-		AStarOpenClosed<state, dblCmp<state> > aoc;
+		typedef std::priority_queue<borderData<state>,std::vector<borderData<state> >,compareBorderData<state> > pQueue;	
+		pQueue gCostQueue;
 
-//		PseudoEnvironment *pe;
+		AStarOpenClosed<state, dblCmp<state> > aoc;
 	};
 	
 	/** The core routine of FLRTAStar -- computes at most one-move path */
 	template <class state, class action, class environment>
 	void FLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 	{
-//		static int counter = 0;
-//		counter++;
-//		if (0 == counter%1000)
-//			std::cout << stateData.size() << " states with learned data" << std::endl;
 		nodesExpanded = nodesTouched = 0;
 		m_pEnv = env;
 		thePath.resize(0);
 		theEnd = to;
 		aoc.Reset();
+		assert(gCostQueue.empty());
 		if (from==to)
 			return;
 		
-		//std::cout << "GCost state:4 " << std::endl << from << std::endl;
 		if (GCost(from) == DBL_MAX)
 			SetGCost(env, from, 0);
 
 		ExpandLSS(from, to, thePath);
-		
+//		if (nodesExpanded >= nodeExpansionLimit)
+//			std::cout << GetName() << " Lookahead " << nodeExpansionLimit << ", " << nodesExpanded-nodeExpansionLimit << " expanded during g-cost propagation" << std::endl;
+//		else
+//			std::cout << GetName() << " Lookahead " << nodeExpansionLimit << ", " << 0 << " expanded during g-cost propagation" << std::endl;
+		// in case goal was found in LSS
 		if (thePath.size() != 0)
 			return;
-		//state first = this->DoHCostLearning(env, from, to);
-
+		uint64_t old = nodesExpanded;
 		DoHCostLearning(env, from, to);
+//		std::cout << GetName() << " " << nodesExpanded-old << " learning expansions before dead/redundant " << std::endl;
+		MarkDeadRedundant(env, to);
+//		std::cout << GetName() << nodesExpanded << " total nodes this step" << std::endl;
+		ExtractBestPath(env, from, to, thePath);
 		
-		DoGCostLearning(env, to);
+		
+		if (verbose) std::cout << "FLRTA* heading towards " << thePath[0] << " with h-value " << HCost(env, thePath[0], to) << std::endl;
+	}
 
-		state best; //= astar.GetItem(0).data;
-//		double bestG;
+	template <class state, class action, class environment>
+	void FLRTAStar<state, action, environment>::ExtractBestPath(environment *env, const state &from, const state &to, std::vector<state> &thePath)
+	{
+		state best;
 		unsigned int cnt = 0;
 		for (; cnt < aoc.OpenSize(); cnt++)
 		{
@@ -291,43 +299,13 @@ namespace FLRTA {
 				!(aoc.Lookat(aoc.GetOpenItem(cnt)).data == from))
 			{
 				best = aoc.Lookat(aoc.GetOpenItem(cnt)).data;
-//				bestG = aoc.Lookat(cnt).g;
 				break;
 			}
 		}
 		// no path found, go backwards in g-cost
 		if (cnt == aoc.OpenSize())
 		{
-			std::vector<state> succ;
-			env->GetSuccessors(from, succ);
-			int back = -1;
-			bool found = false;
-			for (unsigned int x = 0; x < succ.size(); x++)
-			{
-				//std::cout << "GCost state:5 " << std::endl << succ[x] << from << std::endl;
-				//std::cout << "GCost state:6 " << std::endl << succ[x] << succ[back] << std::endl;
-				if ((back == -1) && (GCost(succ[x]) < GCost(from)))
-				{
-					back = x;
-					found = true;
-				}
-				else if ((back != -1) && (GCost(succ[x]) < GCost(succ[back])))
-				{
-					back = x;
-					found = true;
-				}
-			}
-			if (!found)
-			{
-				std::cout << "No successors of " << from << " with smaller g-cost than " << GCost(from) << std::endl;
-				for (unsigned int x = 0; x < succ.size(); x++)
-					std::cout << succ[x] << " has cost " << GCost(succ[x]) << std::endl;
-				assert(!"Invalid environment; apparently cannot reach all predecessors of a state");
-				exit(0);
-			}
-			thePath.push_back(succ[back]);
-			thePath.push_back(from);
-			if (verbose) std::cout << "FLRTA* heading towards " << thePath[0] << " with h-value " << HCost(env, thePath[0], to) << std::endl;
+			MakeTrappedMove(env, from, thePath);
 			return;
 		}
 		// 3. Find node with highest f-cost / g-cost
@@ -336,47 +314,63 @@ namespace FLRTA {
 			const AStarOpenClosedData<state> data = aoc.Lookat(aoc.GetOpenItem(cnt));
 			if (IsDead(data.data))
 				continue;
-//			if (fgreater(FCost(best, to), FCost(data.data, to)))
-			//std::cout << "GCost state:7 " << std::endl << best << data.data << std::endl;
 			if (fgreater(GCost(best)+fWeight*HCost(best, to),
 						 GCost(data.data)+fWeight*HCost(data.data, to)) &&
 				!(data.data == from))
 			{
 				best = data.data;
-//				bestG = data.g;
 			}
 			else if (fequal(GCost(best)+fWeight*HCost(best, to), GCost(data.data)+fWeight*HCost(data.data, to)) &&
-//					 (GCost(from)+data.g == GCost(data.data)) &&
 					 fgreater(GCost(data.data), GCost(best)) &&
 					 !(data.data == from))
-//			else if (fequal(FCost(best, to), FCost(data.data, to)) &&
-//					 fgreater(GCost(data.data), GCost(best)))
 			{
 				best = data.data;
-//				bestG = data.g;
 			}
 		}
 		// 4. construct best path
-		//		astar.ExtractPathToStart(best, thePath);
 		if (verbose) std::cout << "Moving towards " << best << " cost " << GCost(best) << std::endl;
-		uint64_t node;
-		//std::cout << "Hashing state:7 " << std::endl << best << std::endl;
-		aoc.Lookup(env->GetStateHash(best), node);
-		do {
-//			std::cout << aoc.Lookup(node).data << " ";
+			uint64_t node;
+			aoc.Lookup(env->GetStateHash(best), node);
+			do {
+				thePath.push_back(aoc.Lookup(node).data);
+				node = aoc.Lookup(node).parentID;
+			} while (aoc.Lookup(node).parentID != node);
 			thePath.push_back(aoc.Lookup(node).data);
-			node = aoc.Lookup(node).parentID;
-		} while (aoc.Lookup(node).parentID != node);
-//		std::cout << aoc.Lookup(node).data << " " << std::endl;
-		thePath.push_back(aoc.Lookup(node).data);
-//		if (best == to)
-//		{
-////			fWeight = pow(fWeight, 0.95);
-////			printf("%s weight to %f\n", GetName(), fWeight);
-//		}
+	}
 
-		
-		if (verbose) std::cout << "FLRTA* heading towards " << thePath[0] << " with h-value " << HCost(env, thePath[0], to) << std::endl;
+	template <class state, class action, class environment>
+	void FLRTAStar<state, action, environment>::MakeTrappedMove(environment *env, const state &from, std::vector<state> &thePath)
+	{
+		std::vector<state> succ;
+		env->GetSuccessors(from, succ);
+		nodesExpanded++;
+		int back = -1;
+		bool found = false;
+		for (unsigned int x = 0; x < succ.size(); x++)
+		{
+			if ((back == -1) && (GCost(succ[x]) < GCost(from)))
+			{
+				back = x;
+				found = true;
+			}
+			else if ((back != -1) && (GCost(succ[x]) < GCost(succ[back])))
+			{
+				back = x;
+				found = true;
+			}
+		}
+		if (!found)
+		{
+			std::cout << "No successors of " << from << " with smaller g-cost than " << GCost(from) << std::endl;
+			for (unsigned int x = 0; x < succ.size(); x++)
+				std::cout << succ[x] << " has cost " << GCost(succ[x]) << std::endl;
+			assert(!"Invalid environment; apparently cannot reach all predecessors of a state");
+			exit(0);
+		}
+		thePath.push_back(succ[back]);
+		thePath.push_back(from);
+		//if (verbose) std::cout << "FLRTA* heading towards " << thePath[0] << " with h-value " << HCost(env, thePath[0], to) << std::endl;
+		return;
 	}
 
 	template <class state, class action, class environment>
@@ -427,23 +421,41 @@ namespace FLRTA {
 		}
 		
 		// 4. finish propagation from edge of open list
-		for (int x = 0; x < aoc.OpenSize(); x++)
+		for (unsigned int x = 0; x < aoc.OpenSize(); x++)
 		{
 			state s = aoc.Lookat(aoc.GetOpenItem(x)).data;
-			PropagateGCosts(s, to, false);
+			gCostQueue.push(borderData<state>(s, GCost(s)));
 		}
-				
+		while (!gCostQueue.empty())
+		{
+			state s = gCostQueue.top().theState;
+			gCostQueue.pop();
+			std::vector<state> neighbors;
+			m_pEnv->GetSuccessors(s, neighbors);
+			nodesExpanded++;
+			for (unsigned int x = 0; x < neighbors.size(); x++)
+			{
+				uint64_t childKey;
+				double edgeCost = m_pEnv->GCost(s, neighbors[x]);
+				if ((GCost(s) != DBL_MAX) && (fless(GCost(s)+edgeCost, GCost(neighbors[x]))))
+				{
+					SetGCost(m_pEnv, neighbors[x], GCost(s)+edgeCost);
+					if (aoc.Lookup(m_pEnv->GetStateHash(neighbors[x]), childKey) != kNotFound)
+						gCostQueue.push(borderData<state>(neighbors[x], GCost(neighbors[x])));
+				}
+			}
+		}
 	}
 
 
 	template <class state, class action, class environment>
 	void FLRTAStar<state, action, environment>::PropagateGCosts(const state &next, const state &to, bool alsoExpand)
 	{
-		nodesExpanded++;
 		if (verbose) std::cout << "=Propagating from: " << next << (alsoExpand?" and expanding":" not expanding") << std::endl;
 		// decrease g-cost as long as somewhere on aoc / expand if requested
 		std::vector<state> neighbors;
 		m_pEnv->GetSuccessors(next, neighbors);
+		nodesExpanded++;
 		uint64_t parentKey;
 		//std::cout << "Hashing state:9 " << std::endl << next << std::endl;
 		dataLocation pLoc = aoc.Lookup(m_pEnv->GetStateHash(next), parentKey);
@@ -462,23 +474,18 @@ namespace FLRTA {
 			{
 				if (cLoc == kNotFound) // add node even if it is dead!
 				{
-//					if (verbose) std::cout << " Before Add, parent: " << next << std::endl;
 					if (verbose) std::cout << "Adding " << neighbors[x] << " to open" << std::endl;
-					//std::cout << "Hashing state:11 " << std::endl << neighbors[x] << std::endl;
 					aoc.AddOpenNode(neighbors[x], m_pEnv->GetStateHash(neighbors[x]),
 									aoc.Lookat(parentKey).g+edgeCost, HCost(neighbors[x], to), parentKey);
-//					if (verbose) std::cout << " After Add, parent: " << next << std::endl;
 				}
 				else if (cLoc == kOpenList)
-				{
+				{   // these are local g costs
 					if (fless(aoc.Lookup(parentKey).g+edgeCost, aoc.Lookup(childKey).g))
 					{
-//						if (verbose) std::cout << " Before Update, parent: " << next << std::endl;
 						if (verbose) std::cout << "Updating " << neighbors[x] << " on open" << std::endl;
 						aoc.Lookup(childKey).parentID = parentKey;
 						aoc.Lookup(childKey).g = aoc.Lookup(parentKey).g+edgeCost;
 						aoc.KeyChanged(childKey);
-//						if (verbose) std::cout << " After Update, parent: " << next << std::endl;
 					}
 				}
 				else if (cLoc == kClosedList)
@@ -493,38 +500,54 @@ namespace FLRTA {
 				}
 			}
 
-			//if (verbose) std::cout << "<Lowering costs from parent " << next << " to child " << neighbors[x] << std::endl;
-			// shorter g-cost to this node from global search perspective
-			//std::cout << "GCost state:8 " << std::endl << next << neighbors[x] << std::endl;
+			// shorter g-cost to neighbors[x] from global search perspective
 			if ((GCost(next) != DBL_MAX) && (fless(GCost(next)+edgeCost, GCost(neighbors[x]))))
 			{
 				bool propagate = false;
-				if (IsDead(neighbors[x]) && (cLoc == kClosedList)) // TODO: add this line to proof
-					propagate = true;
-				if (verbose) std::cout << "Updating " << neighbors[x] << " from " << GCost(neighbors[x]) <<
-					" to " << GCost(next) << "(" << next << ") + " << edgeCost << " = " << GCost(next)+edgeCost << std::endl;
-				SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
-				if (cLoc != kNotFound)
+				if (IsDead(neighbors[x]) && (cLoc == kClosedList)) // important step in proof!
 				{
-					// 3. if neighbor is on CLOSED/OPEN and has g-cost reduced, continue the propagation
+					aoc.Reopen(childKey);
+					propagate = true;
+					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
+					if (verbose) std::cout << "Updating " << neighbors[x] << " from " << GCost(neighbors[x]) <<
+						" to " << GCost(next) << "(" << next << ") + " << edgeCost << " = " << GCost(next)+edgeCost << std::endl;
 					PropagateGCosts(neighbors[x], to, propagate);
 				}
+				else {
+					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
+//					if (cLoc != kNotFound)
+//						PropagateGCosts(neighbors[x], to, propagate);
+				}
+//				else {
+//					if (verbose) std::cout << "Updating " << neighbors[x] << " from " << GCost(neighbors[x]) <<
+//						" to " << GCost(next) << "(" << next << ") + " << edgeCost << " = " << GCost(next)+edgeCost << std::endl;
+//					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
+//
+//					// if it's on the open we'll check later
+//					if (cLoc == kClosedList)
+//						gCostQueue.push(borderData<state>(neighbors[x], -GCost(data.data)));
+//
+//					if (cLoc != kNotFound)
+//					{
+//						// 3. if neighbor is on CLOSED/OPEN and has g-cost reduced, continue the propagation
+//						PropagateGCosts(neighbors[x], to, propagate);
+//					}
+//				}
 			}
 			// shorter g-cost from neighbor to here, reverse search
 			//std::cout << "GCost state:9 " << std::endl << next << neighbors[x] << std::endl;
-			if (fless(edgeCost+GCost(neighbors[x]), GCost(next)))
-			{
-				PropagateGCosts(neighbors[x], to, false);
-			}
+//			if (fless(edgeCost+GCost(neighbors[x]), GCost(next)))
+//			{
+//				PropagateGCosts(neighbors[x], to, false);
+//			}
 		}
 		if (verbose) std::cout << "=Done Propagating from: " << next << std::endl;
 	}
 	
 	template <class state, class action, class environment>
-	void FLRTAStar<state, action, environment>::DoGCostLearning(environment *env, const state &goal)
+	void FLRTAStar<state, action, environment>::MarkDeadRedundant(environment *env, const state &goal)
 	{
 		// 1. put all open nodes in pqueue
-		typedef std::priority_queue<borderData<state>,std::vector<borderData<state> >,compareBorderData<state> > pQueue;	
 		pQueue q;
 		
 		unsigned int openSize = aoc.size();
@@ -533,8 +556,7 @@ namespace FLRTA {
 			const AStarOpenClosedData<state> data = aoc.Lookat(x);//astar.GetItem(x);
 			//if ((data.where == kClosedList) || (nodeExpansionLimit == 1))
 			{
-				//std::cout << "GCost state:10 " << std::endl << data.data << std::endl;
-				q.push(borderData<state>(data.data, GCost(data.data)));
+				q.push(borderData<state>(data.data, -GCost(data.data)));
 				if (verbose) std::cout <<std::endl<< ">>>Preparing state: " << data.data << " g: " << GCost(data.data) << std::endl;
 			}
 		}
@@ -543,40 +565,11 @@ namespace FLRTA {
 		state first = q.top().theState;
 		while (q.size() > 0)
 		{
-			//		nodesExpanded++;
-			//		nodesTouched++;
+			//nodesExpanded++;
+			//nodesTouched++;
 			state s = q.top().theState;
 			if (verbose) std::cout << "Doing update from " << s << " g: " << q.top().value << "/" << GCost(s) << std::endl;
 			q.pop();
-			//std::cout << "GCost state:11 " << std::endl << s << std::endl;
-			double gCost = GCost(s);
-			bool largerGCost = false;
-//			for (unsigned int x = 0; x < succ.size(); x++)
-//			{
-//				double edgeCost = env->GCost(s, succ[x]);
-//				//std::cout << "GCost state:12 " << std::endl << succ[x] << std::endl;
-//				double succGCost = min(gCost + edgeCost, GCost(succ[x]));
-//				//if (verbose) std::cout << "Successor: [" << x << "]" << succ[x] << " has g-cost " << GCost(succ[x]) << std::endl;
-//				if (GCost(succ[x]) > succGCost)
-//				{
-//					largerGCost = true;
-//					if (verbose) std::cout << "**Decreasing " << succ[x] << "from g: " << GCost(succ[x]) << " to g: " << succGCost << std::endl;
-//					SetGCost(env, succ[x], succGCost);
-//					if (verbose) std::cout << "**Cost is now " << GCost(succ[x]) << std::endl;
-//					//SetHCost(env, succ[x], goal, 0); // now part of set g-cost
-//					//if (astar.HaveExpandedState(succ[x]))
-//					uint64_t tmpKey;
-//					//std::cout << "Hashing state:12 " << std::endl << succ[x] << std::endl;
-//					if (kClosedList == aoc.Lookup(env->GetStateHash(succ[x]), tmpKey))
-//						q.push(borderData<state>(succ[x], succGCost));
-//				}
-//				else if ((GCost(succ[x]) == (gCost + edgeCost)) && (!IsDead(succ[x])))
-//				{
-//					largerGCost = true;
-//				}
-//				else {
-//				}
-//			}
 
 			if (IsDead(s) || (s == goal))
 				continue;
@@ -586,37 +579,22 @@ namespace FLRTA {
 				if (verbose) std::cout<<"Marking " << GCost(s) << ":" << HCost(s, goal) << " " << s << " as dead -- too far from goal: " << GCost(goal) << goal << std::endl;
 				KillState(s);
 			}
-//			else if (largerGCost == false)
-//			{
-//				if (verbose) 
-//					std::cout<<"Marking " << s << " as dead" << std::endl;
-//				KillState(s);
-//				//put successors back on queue in case they are dead too
-//				for (unsigned int x = 0; x < succ.size(); x++)
-//				{
-//					uint64_t tmpKey;
-//					//std::cout << "Hashing state:13 " << std::endl << succ[x] << std::endl;
-//					if ((kNotFound != aoc.Lookup(env->GetStateHash(succ[x]), tmpKey)) && (!IsDead(succ[x])))
-//						//if (astar.HaveExpandedState(succ[x]) && !IsDead(succ[x]))
-//						q.push(borderData<state>(succ[x], DBL_MAX));
-//				}
-//			}
 			else if (IsRedundant(s)) // catches the dead case too
 			{
 				if (verbose) 
 					std::cout<<"Marking " << s << " as redundant" << std::endl;
 				KillState(s);
 				//put successors back on queue in case they are dead too
-				nodesExpanded++;
-				env->GetSuccessors(s, succ);
-				for (unsigned int x = 0; x < succ.size(); x++)
-				{
-					uint64_t tmpKey;
+//				nodesExpanded++;
+//				env->GetSuccessors(s, succ);
+//				for (unsigned int x = 0; x < succ.size(); x++)
+//				{
+//					uint64_t tmpKey;
 					//std::cout << "Hashing state:14 " << std::endl << succ[x] << std::endl;
-					if ((kNotFound != aoc.Lookup(env->GetStateHash(succ[x]), tmpKey)) && (!IsDead(succ[x])))
-						//if (astar.HaveExpandedState(succ[x]) && !IsDead(succ[x]))
-						q.push(borderData<state>(succ[x], DBL_MAX));
-				}
+//					if ((kNotFound != aoc.Lookup(env->GetStateHash(succ[x]), tmpKey)) && (!IsDead(succ[x])))
+//						//if (astar.HaveExpandedState(succ[x]) && !IsDead(succ[x]))
+//						q.push(borderData<state>(succ[x], DBL_MAX));
+//				}
 			}
 		}
 	}
@@ -626,7 +604,6 @@ namespace FLRTA {
 	void FLRTAStar<state, action, environment>::DoHCostLearning(environment *env, const state &from, const state &to)
 	{
 		// 1. put all open nodes in pqueue
-		typedef std::priority_queue<borderData<state>,std::vector<borderData<state> >,compareBorderData<state> > pQueue;	
 		pQueue q;
 
 		// for successors
@@ -639,17 +616,11 @@ namespace FLRTA {
 			if (!IsDead(data.data))
 			{
 				q.push(borderData<state>(data.data, HCost(data.data, to)));
-//			q.push(borderData<state>(data.data, data.h));
 				if (verbose) std::cout << "Preparing border state: " << data.data << " h: " << data.h << std::endl;
 			}
 		}
 		if (q.size() == 0)
 		{
-//			for (unsigned int x = 0; x < openSize; x++)
-//			{
-//				const AStarOpenClosedData<state> data = aoc.Lookat(aoc.GetOpenItem(x));
-//				q.push(borderData<state>(data.data, HCost(data.data, to)));
-//			}
 			return;
 		}
 		
@@ -657,13 +628,13 @@ namespace FLRTA {
 		ClosedList c;
 		while (q.size() > 0)
 		{
-			nodesExpanded++;
-			nodesTouched++;
 			state s = q.top().theState;
 			if (verbose) std::cout << "Propagating from " << s << " h: " << q.top().value << "/" << HCost(s, to) << std::endl;
 			q.pop();
 			//			std::cout << s << " " << learnData[env->GetStateHash(s)].learnedHeuristic << std::endl;
 			env->GetSuccessors(s, succ);
+			nodesExpanded++;
+			nodesTouched++;
 			double hCost = HCost(s, to);
 			for (unsigned int x = 0; x < succ.size(); x++)
 			{
@@ -731,14 +702,17 @@ namespace FLRTA {
 		{
 			uint64_t node;
 			dataLocation loc = (aoc.Lookup(m_pEnv->GetStateHash((*it).second.theState), node));
-//			if (loc == kNotFound) continue;
+			//if (loc != kOpenList) continue;
 
-			if ((*it).second.dead)
-				sprintf(str, " %1.1f", (*it).second.gCost);
-			else
-				sprintf(str, "%1.1f %1.1f", (*it).second.gCost, (*it).second.hCost+m_pEnv->HCost((*it).second.theState, theEnd));
-			e->SetColor(0.9, 0.9, 0.9, 1);
-			e->GLLabelState((*it).second.theState, str);
+			//if (loc == kOpenList)
+			{
+				if ((*it).second.dead)
+					sprintf(str, " %1.1f", (*it).second.gCost);
+				else
+					sprintf(str, "%1.1f %1.1f", (*it).second.gCost, (*it).second.hCost+m_pEnv->HCost((*it).second.theState, theEnd));
+				e->SetColor(0.9, 0.9, 0.9, 1);
+				e->GLLabelState((*it).second.theState, str);
+			}
 			if ((*it).second.dead)
 			{
 				e->SetColor(0.0, 0.0+((loc==kOpenList)?0.5:0.0), 0.0, 1);
