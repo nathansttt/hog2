@@ -526,7 +526,7 @@ void MyRandomUnitKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 
 	GraphMapInconsistentHeuristic diffHeuristic(mp, grp);
-	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	for (int x = 0; x < 10; x++)
 		diffHeuristic.AddHeuristic();
 	diffHeuristic.SetNumUsedHeuristics(10);
@@ -559,7 +559,7 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 	
 	
 	GraphMapInconsistentHeuristic *diffHeuristic1 = new GraphMapInconsistentHeuristic(mp, grp);
-	diffHeuristic1->UseSmartPlacement(true);
+	diffHeuristic1->SetPlacement(kAvoidPlacement);
 	diffHeuristic1->SetMode(kRandom);
 	GraphEnvironment *gEnv1 = new GraphEnvironment(mp, grp, diffHeuristic1);
 	gEnv1->SetDirected(true);
@@ -570,7 +570,7 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 	vis1.SetUseBPMX(0);
 	
 	GraphMapInconsistentHeuristic *diffHeuristic2 = new GraphMapInconsistentHeuristic(mp, grp);
-	diffHeuristic2->UseSmartPlacement(true);
+	diffHeuristic2->SetPlacement(kAvoidPlacement);
 	diffHeuristic2->SetMode(kRandom);
 	GraphEnvironment *gEnv2 = new GraphEnvironment(mp, grp, diffHeuristic2);
 	gEnv2->SetDirected(true);
@@ -718,7 +718,7 @@ void RunExperiments1(ScenarioLoader *sl)
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	
 	GraphDistanceHeuristic diffHeuristic(g);
-	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	
 	GraphEnvironment gEnv(g, &diffHeuristic);
 	gEnv.SetDirected(true);
@@ -761,11 +761,16 @@ void RunExperiments(ScenarioLoader *sl, int memory)
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	
 	GraphMapInconsistentHeuristic diffHeuristic(m, g);
-	diffHeuristic.UseSmartPlacement(true);
+	GraphMapInconsistentHeuristic diff1(m, g);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	diffHeuristic.SetMode(kRandom);
+	diff1.SetPlacement(kAvoidPlacement);
+	diff1.SetMode(kMax);
 	
 	GraphEnvironment gEnv(g, &diffHeuristic);
 	gEnv.SetDirected(true);
+	GraphEnvironment gEnv2(g, &diff1);
+	gEnv2.SetDirected(true);
 	
 	TemplateAStar<graphState, graphMove, GraphEnvironment> taNew;
 	
@@ -775,6 +780,8 @@ void RunExperiments(ScenarioLoader *sl, int memory)
 		diffHeuristic.AddHeuristic();
 	diffHeuristic.SetNumUsedHeuristics(memory);
 	diffHeuristic.Compress();
+	diff1.AddHeuristic();
+	diff1.SetNumUsedHeuristics(1);
 	
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
@@ -814,7 +821,15 @@ void RunExperiments(ScenarioLoader *sl, int memory)
 		
 //		diffHeuristic.SetNumUsedHeuristics(memory);
 //		diffHeuristic.SetMode(kCompressed);
-		taNew.SetUseBPMX(1);
+		taNew.SetUseBPMX(0);
+		
+		t.StartTimer();
+		taNew.GetPath(&gEnv2, start, goal, aPath);
+		t.EndTimer();		
+		printf("%dbx1\t%lld\t%f\t%f\t", diff1.GetNumUsedHeuristics(),
+			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+		taNew.SetUseBPMX(0);
 		
 		t.StartTimer();
 		taNew.GetPath(&gEnv, start, goal, aPath);
@@ -822,15 +837,23 @@ void RunExperiments(ScenarioLoader *sl, int memory)
 		printf("%dbx1\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
 			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
 
-//		diffHeuristic.SetNumUsedHeuristics(memory);
-//		diffHeuristic.SetMode(kCompressed);
-		taNew.SetUseBPMX(1000);
+		taNew.SetUseBPMX(1);
 		
 		t.StartTimer();
 		taNew.GetPath(&gEnv, start, goal, aPath);
 		t.EndTimer();		
-		printf("%dbxi\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+		printf("%dbx1\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
 			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
+		
+//		diffHeuristic.SetNumUsedHeuristics(memory);
+//		diffHeuristic.SetMode(kCompressed);
+//		taNew.SetUseBPMX(1000);
+//		
+//		t.StartTimer();
+//		taNew.GetPath(&gEnv, start, goal, aPath);
+//		t.EndTimer();		
+//		printf("%dbxi\t%lld\t%f\t%f\t", diffHeuristic.GetNumUsedHeuristics(),
+//			   taNew.GetNodesExpanded(), t.GetElapsedTime(), gEnv.GetPathLength(aPath));
 		
 		printf("\n");
 		fflush(stdout);
@@ -853,7 +876,7 @@ void RunExperiments5(ScenarioLoader *sl)
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	
 	GraphMapInconsistentHeuristic diffHeuristic(m, g);
-	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	diffHeuristic.SetMode(kRandom);
 	
 	GraphEnvironment gEnv(g, &diffHeuristic);
@@ -939,7 +962,7 @@ void RunExperiments4(ScenarioLoader *sl)
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	
 	GraphMapInconsistentHeuristic diffHeuristic(m, g);
-	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	diffHeuristic.SetMode(kRandom);
 	
 	GraphEnvironment gEnv(g, &diffHeuristic);
@@ -1024,7 +1047,7 @@ void RunExperiments2(ScenarioLoader *sl)
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	
 	GraphMapInconsistentHeuristic diffHeuristic(m, g);
-	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	diffHeuristic.SetMode(kRandom);
 	
 	GraphEnvironment gEnv(g, &diffHeuristic);

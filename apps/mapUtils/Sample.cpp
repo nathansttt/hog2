@@ -36,13 +36,14 @@
 #include "GraphEnvironment.h"
 #include "MapSectorAbstraction.h"
 #include "GraphRefinementEnvironment.h"
+#include "ScenarioLoader.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
 bool runningSearch2 = false;
 int px1, py1, px2, py2;
 int absType = 0;
-int mazeSize = 128;
+int mazeSize = 100;
 int gStepsPerFrame = 4;
 
 std::vector<UnitMapSimulation *> unitSims;
@@ -75,18 +76,18 @@ void CreateSimulation(int id)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
-		map = new Map(mazeSize/2, mazeSize/2);
+		map = new Map(mazeSize, mazeSize);
 		MakeMaze(map, 1);
-		map->Scale(mazeSize, mazeSize);
+//		map->Scale(mazeSize, mazeSize);
 	}
 	else {
 		map = new Map(gDefaultMap);
-		map->Scale(512, 512);
+		//map->Scale(512, 512);
 	}
 	map->SetTileSet(kWinter);
 	msa = new MapSectorAbstraction(map, 8);
-	msa->ToggleDrawAbstraction(1);
-	msa->ToggleDrawAbstraction(2);
+	msa->ToggleDrawAbstraction(0);
+	//msa->ToggleDrawAbstraction(2);
 	//msa->ToggleDrawAbstraction(3);
 	unitSims.resize(id+1);
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map));
@@ -112,6 +113,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 	
+	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Resizes map to specified dimensions and saves");
+	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
@@ -176,8 +179,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if ((ma1) && (viewport == 0)) // only do this once...
 	{
 		ma1->SetColor(0.0, 0.5, 0.0, 0.75);
-		if (gdh)
-			gdh->OpenGLDraw();
+//		if (gdh)
+//			gdh->OpenGLDraw();
 		if (runningSearch1)
 		{
 			ma1->SetColor(0.0, 0.0, 1.0, 0.75);
@@ -240,36 +243,42 @@ void doExport()
 
 void buildProblemSet()
 {
-	Map *map = new Map(gDefaultMap);
-	map->Scale(512, 512);
-	msa = new MapSectorAbstraction(map, 4);
-	//msa->ToggleDrawAbstraction(1);
-	Graph *g = msa->GetAbstractGraph(1);
-	GraphAbstractionHeuristic gah2(msa, 2);
-	GraphAbstractionHeuristic gah1(msa, 1);
+	ScenarioLoader s;
+	printf(gDefaultMap); printf("\n");
+	Map map(gDefaultMap);
+	Graph *g = GraphSearchConstants::GetGraph(&map);
+	GraphDistanceHeuristic gdh(g);
+	gdh.SetPlacement(kFarPlacement);
+	// make things go fast; we're doing tons of searches, so use a good heuristic
+	for (unsigned int x = 0; x < 30; x++)
+		gdh.AddHeuristic();
+	GraphEnvironment *ge = new GraphEnvironment(&map, g, &gdh);
+	ge->SetDirected(false);
 	
-	GraphRefinementEnvironment env2(msa, 2, &gah2);
-	GraphRefinementEnvironment env1(msa, 1, &gah1);
-	env1.SetDirected(false);
-	env2.SetDirected(false);
-	
-	for (unsigned int x = 0; x < 10000; x++)
+	for (unsigned int x = 0; x < 100000; x++)
 	{
+		if (0==x%100)
+		{ printf("\r%d", x); fflush(stdout); }
 		node *s1 = g->GetRandomNode();
 		node *g1 = g->GetRandomNode();
-		node *s2 = msa->GetParent(s1);
-		node *g2 = msa->GetParent(g1);
-		uint64_t nodesExpanded = 0;
-		printf("%d\t%d\t",  s1->GetNum(), g1->GetNum());
+//		uint64_t nodesExpanded = 0;
+//		printf("%d\t%d\t",  s1->GetNum(), g1->GetNum());
 		graphState gs1, gs2;
 		gs1 = s1->GetNum();
 		gs2 = g1->GetNum();
 		std::vector<graphState> thePath;
-		
-		astar.GetPath(&env1, gs1, gs2, thePath);
-		printf("%d\n", (int)env1.GetPathLength(thePath));
-	}		
-	
+		astar.GetPath(ge, gs1, gs2, thePath);
+//		printf("%d\n", (int)ge->GetPathLength(thePath));
+
+		Experiment e(s1->GetLabelL(GraphSearchConstants::kMapX), s1->GetLabelL(GraphSearchConstants::kMapY),
+					 g1->GetLabelL(GraphSearchConstants::kMapX), g1->GetLabelL(GraphSearchConstants::kMapY),
+					 map.GetMapWidth(), map.GetMapHeight(), ge->GetPathLength(thePath)/4, ge->GetPathLength(thePath), gDefaultMap);
+		s.AddExperiment(e);
+	}
+	printf("\n");
+	char name[255];
+	sprintf(name, "%s.scen", gDefaultMap);
+	s.Save(name);
 	exit(0);
 }
 
@@ -450,12 +459,32 @@ void runProblemSet(char *problems, int multiplier)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
+	if (strcmp( argument[0], "-makeMaze" ) == 0 )
+	{
+		if (maxNumArgs <= 4)
+			return 0;
+		Map map(atoi(argument[1]), atoi(argument[2]));
+		MakeMaze(&map, atoi(argument[3]));
+		map.Save(argument[4]);
+		exit(0);
+		return 5;
+	}
+	if (strcmp( argument[0], "-resize" ) == 0 )
+	{
+		if (maxNumArgs <= 4)
+			return 0;
+		Map map(argument[1]);
+		map.Scale(atoi(argument[2]), atoi(argument[3]));
+		map.Save(argument[4]);
+		exit(0);
+		return 5;
+	}
 	if (strcmp( argument[0], "-map" ) == 0 )
 	{
 		if (maxNumArgs <= 1)
 			return 0;
 		strncpy(gDefaultMap, argument[1], 1024);
-		//buildProblemSet();
+		buildProblemSet();
 		//doExport();
 		return 2;
 	}
@@ -594,6 +623,7 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 		printf("Tot\t%llu\t%llu\n", nodesExpanded, nodesTouched);
 	}
 }
+
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {

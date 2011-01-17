@@ -206,14 +206,20 @@ private:
 	bool* probTable;
 };
 
+enum placementScheme {
+	kFarPlacement,
+	kRandomPlacement,
+	kAvoidPlacement
+};
+
 class GraphDistanceHeuristic : public GraphHeuristic {
 public:
-	GraphDistanceHeuristic(Graph *graph) :g(graph) { smartPlacement = false; }
+	GraphDistanceHeuristic(Graph *graph) :g(graph) { placement = kRandomPlacement; }
 	~GraphDistanceHeuristic() {}
 	virtual double HCost(const graphState &state1, const graphState &state2);
 	void AddHeuristic(node *n = 0);
 	int GetNumHeuristics() { return heuristics.size(); }
-	void UseSmartPlacement(bool use) { smartPlacement = use; }
+	void SetPlacement(placementScheme s) { placement = s; }
 	Graph *GetGraph() { return g; }
 	void ChooseStartGoal(graphState &start, graphState &goal);
 	void OpenGLDraw() const;
@@ -221,11 +227,21 @@ protected:
 	void GetOptimalDistances(node *n, std::vector<double> &values);
 	void AddHeuristic(std::vector<double> &values, graphState location);
 	node *FindFarNode(node *n);
-
-	bool smartPlacement;
+	node *FindAvoidNode(node *n);
+	node *FindBestChild(int best, std::vector<double> &dist,
+						std::vector<double> &weight);
+	void ComputeSizes(node *n, std::vector<double> &dist,
+					  std::vector<double> &weight, std::vector<double> &sizes);
+		
+	placementScheme placement;
 	Graph *g;
 	std::vector<std::vector<double> > heuristics;
 	std::vector<graphState> locations;
+
+	// for avoid node computation
+	std::vector<double> dist;
+	std::vector<double> weight;
+	std::vector<double> sizes;	
 };
 
 enum tHeuristicCombination

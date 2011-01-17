@@ -320,7 +320,7 @@ void MyPDBKeyHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		if (gmih == 0 || (gmih->GetGraph() != gch->GetGraph()))
 		{
 			gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
-			gmih->UseSmartPlacement(true);
+			gmih->SetPlacement(kAvoidPlacement);
 			for (int x = 0; x < 10; x++)
 				gmih->AddHeuristic();
 			gmih->SetNumUsedHeuristics(gmih->GetNumHeuristics());
@@ -365,7 +365,7 @@ void MyPDBKeyHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				//gmih = new GraphMapInconsistentHeuristic(m, GraphSearchConstants::GetGraph(m));
 				gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
 			}
-			gmih->UseSmartPlacement(true);
+			gmih->SetPlacement(kAvoidPlacement);
 		}
 		gmih->AddHeuristic();
 		gmih->SetNumUsedHeuristics(gmih->GetNumHeuristics());
@@ -444,7 +444,7 @@ void TestPDB()
 	GraphMapInconsistentHeuristic gdh(map, graph);
 	gdh.SetNumUsedHeuristics(1000);
 	gdh.SetMode(kMax);
-	gdh.UseSmartPlacement(true);
+	gdh.SetPlacement(kAvoidPlacement);
 	
 	int which = 0;
 	printf("Solving with %d heuristics\n", gdh.GetNumHeuristics());
@@ -500,7 +500,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 	if (!gmih)
 	{
 		gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
-		gmih->UseSmartPlacement(true);
+		gmih->SetPlacement(kAvoidPlacement);
 		for (int x = 0; x < 10; x++)
 			gmih->AddHeuristic();
 		gmih->SetNumUsedHeuristics(10);
@@ -733,7 +733,7 @@ void TestCPDB(char *scenario, char *pdb, int lower, int upper)
 				
 				gdh.SetNumUsedHeuristics(1000);
 				gdh.SetMode(kMax);
-				gdh.UseSmartPlacement((y==0)?false:true);
+				gdh.SetPlacement((y==0)?kRandomPlacement:kAvoidPlacement);
 				for (int t = 0; t < w; t++)
 					gdh.AddHeuristic();
 //				freopen("/Users/nathanst/Desktop/DH.txt","a+",stdout);
@@ -848,9 +848,9 @@ void RunBigTest()
 			delete gmih;
 			delete gmih2;
 			gmih = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
-			gmih->UseSmartPlacement(true);
+			gmih->SetPlacement(kAvoidPlacement);
 			gmih2 = new GraphMapInconsistentHeuristic(gch->GetMap(), gch->GetGraph());
-			gmih2->UseSmartPlacement(false);
+			gmih2->SetPlacement(kRandomPlacement);
 			for (int t = 0; t < gch->GetNumEntries()/g->GetNumNodes(); t++)
 			{
 				gmih->AddHeuristic();
@@ -1125,7 +1125,7 @@ void TestSTPDiff()
 	stp = g;
 	GraphPuzzleDistanceHeuristic gpdh(p, g, 0);
 	GraphEnvironment ge(g, &gpdh);
-	gpdh.UseSmartPlacement(true);
+	gpdh.SetPlacement(kAvoidPlacement);
 	ge.SetDirected(false);
 	TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
 	std::vector<graphState> thePath;
@@ -1431,7 +1431,7 @@ void TestSmallMap()
 	TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
 	std::vector<graphState> thePath;
 	
-	gmih3.UseSmartPlacement(true);
+	gmih3.SetPlacement(kAvoidPlacement);
 	for (int x = 0; x < 10; x++)
 	{
 		printf("Adding heuristic %d\n", x);
@@ -1556,7 +1556,7 @@ void RunSmallTest(int windowID)
 	UnitCostBidirectionalBFS<graphState, graphMove> bibfs;
 	
 //	GraphDistanceHeuristic *grhe = new GraphDistanceHeuristic(g);
-//	grhe->UseSmartPlacement(true);
+//	grhe->SetPlacement(kAvoidPlacement);
 //	for (int x = 0; x < 10; x++)
 //		grhe->AddHeuristic();
 

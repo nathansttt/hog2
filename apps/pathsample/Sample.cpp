@@ -40,9 +40,10 @@
 bool mouseTracking = false;
 bool runningSearch1 = false;
 bool runningSearch2 = false;
+bool bSaveAndQuit = false;
 int px1, py1, px2, py2;
 int absType = 0;
-int mazeSize = 128;
+int mazeSize = 512;
 int gStepsPerFrame = 4;
 
 std::vector<UnitMapSimulation *> unitSims;
@@ -51,6 +52,7 @@ TemplateAStar<xyLoc, tDirection, MapEnvironment> a2;
 MapEnvironment *ma1 = 0;
 MapEnvironment *ma2 = 0;
 GraphDistanceHeuristic *gdh = 0;
+GraphDistanceHeuristic *gdh2 = 0;
 
 MapSectorAbstraction *msa;
 
@@ -81,9 +83,11 @@ void CreateSimulation(int id)
 //		map->Scale(512, 512);
 	}
 	map->SetTileSet(kWinter);
-	msa = new MapSectorAbstraction(map, 8);
-	msa->ToggleDrawAbstraction(1);
-	msa->ToggleDrawAbstraction(2);
+//	msa = new MapSectorAbstraction(map, 2);
+//	msa->ToggleDrawAbstraction(0);
+//	msa->ToggleDrawAbstraction(1);
+//	msa->ToggleDrawAbstraction(3);
+//	msa->ToggleDrawAbstraction(4);
 	unitSims.resize(id+1);
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map));
 	unitSims[id]->SetStepType(kMinTime);
@@ -111,7 +115,9 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
+	InstallCommandLineHandler(MyCLHandler, "-convert", "-map file1 file2", "Converts a map and saves as file2, then exits");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
+
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -131,6 +137,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		ma2 = 0;
 		delete gdh;
 		gdh = 0;
+		delete gdh2;
+		gdh2 = 0;
 		delete unitSims[windowID];
 		unitSims[windowID] = 0;
 		runningSearch1 = false;
@@ -151,12 +159,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (viewport == 0)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
-//		ch->OpenGLDraw();
+		
+		//		ch->OpenGLDraw();
 //		ch->Contract();
-		return;
+//		return;
 	}
-	unitSims[windowID]->OpenGLDraw();
-//	msa->OpenGLDraw();
+	unitSims[windowID]->GetEnvironment()->GetMap()->OpenGLDraw();
+	if (msa) msa->OpenGLDraw();
 	
 	if (mouseTracking)
 	{
@@ -171,11 +180,17 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		glEnd();
 	}
 
+	if ((gdh) && (gdh2))
+	{
+		if (viewport == 0)
+			gdh->OpenGLDraw();
+		if (viewport == 1)
+			gdh2->OpenGLDraw();
+	}
+
 	if ((ma1) && (viewport == 0)) // only do this once...
 	{
 		ma1->SetColor(0.0, 0.5, 0.0, 0.75);
-		if (gdh)
-			gdh->OpenGLDraw();
 		if (runningSearch1)
 		{
 			ma1->SetColor(0.0, 0.0, 1.0, 0.75);
@@ -211,6 +226,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 		a2.OpenGLDraw();
 	}
+
+	if (bSaveAndQuit)
+	{
+		SaveScreenshot(windowID, gDefaultMap);
+		exit(0);
+	}
 }
 
 void doExport()
@@ -238,7 +259,7 @@ void doExport()
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	if( strcmp( argument[0], "-map" ) == 0 )
+	if (strcmp(argument[0], "-map") == 0)
 	{
 		if (maxNumArgs <= 1)
 			return 0;
@@ -247,7 +268,17 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		doExport();
 		return 2;
 	}
-	else if( strcmp( argument[0], "-size" ) == 0 )
+	else if (strcmp(argument[0], "-convert") == 0)
+	  {
+		  if (maxNumArgs <= 2)
+			  return 0;
+		  Map m(argument[1]);
+		  m.Save(argument[2]);
+		  strncpy(gDefaultMap, argument[1], 1024);
+		  bSaveAndQuit = true;
+		  return 3;
+	  }
+	else if (strcmp(argument[0], "-size" ) == 0)
 	{
 		if (maxNumArgs <= 1)
 			return 0;
@@ -262,6 +293,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case '0': case '1': case '2': case '3': case '4': case '5':
+			case '6': case '7': case '8': case '9':
+			msa->ToggleDrawAbstraction(key); break;
 		case '[': if (gStepsPerFrame > 2) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;
 		case '\t':
@@ -283,28 +317,54 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
-void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
+void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
+	if (gdh == 0)
+	{
+		gdh = new GraphDistanceHeuristic(GraphSearchConstants::GetGraph(unitSims[windowID]->GetEnvironment()->GetMap()));
+		gdh->SetPlacement(kFarPlacement);
+	}
+	if (gdh2 == 0)
+	{
+		gdh2 = new GraphDistanceHeuristic(GraphSearchConstants::GetGraph(unitSims[windowID]->GetEnvironment()->GetMap()));
+		gdh2->SetPlacement(kAvoidPlacement);
+	}
 	if (gdh != 0)
+	{
+		gdh->AddHeuristic();
+	}
+	if (gdh2 != 0)
+	{
+		gdh2->AddHeuristic();
+	}
+	
+	if ((gdh != 0) && (gdh2 != 0))
 	{
 		int larger = 0;
 		int smaller = 0;
 		int same = 0;
+		double sum1 = 0, sum2 = 0;
 		for (int x = 0; x < 10000; x++)
 		{
-			Map *m = ma1->GetMap();
-			xyLoc a(random()%m->GetMapWidth(), random()%m->GetMapHeight());
-			xyLoc b(random()%m->GetMapWidth(), random()%m->GetMapHeight());
-			while ((m->GetTerrainType(a.x, a.y) != kGround) &&
-				   (m->GetTerrainType(b.x, b.y) != kGround))
-			{
-				a.x = random()%m->GetMapWidth();
-				b.x = random()%m->GetMapWidth();
-				a.y = random()%m->GetMapHeight();
-				b.y = random()%m->GetMapHeight();
-			}
-			double h1 = ma1->HCost(a, b);
-			double h2 = ma2->HCost(a, b);
+			Graph *g = gdh->GetGraph();
+//			xyLoc a(random()%m->GetMapWidth(), random()%m->GetMapHeight());
+//			xyLoc b(random()%m->GetMapWidth(), random()%m->GetMapHeight());
+//			while ((m->GetTerrainType(a.x, a.y) != kGround) &&
+//				   (m->GetTerrainType(b.x, b.y) != kGround))
+//			{
+//				a.x = random()%m->GetMapWidth();
+//				b.x = random()%m->GetMapWidth();
+//				a.y = random()%m->GetMapHeight();
+//				b.y = random()%m->GetMapHeight();
+//			}
+
+			graphState a, b;
+			a = g->GetRandomNode()->GetNum();
+			b = g->GetRandomNode()->GetNum();
+			double h1 = gdh->HCost(a, b);
+			sum1+= h1;
+			double h2 = gdh2->HCost(a, b);
+			sum2+= h2;
 			if (fequal(h1, h2))
 				same++;
 			if (fgreater(h1, h2))
@@ -312,14 +372,15 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 			if (fless(h1, h2))
 				smaller++;
 		}
-		printf("larger: %d, smaller: %d, equal: %d\n", larger, smaller, same);
+		printf("Far larger: %d, Avoid larger: %d, equal: %d\n", larger, smaller, same);
+		printf("Far: %1.3f; Avoid: %1.3f\n", sum1, sum2);
 	}
 //	if (ma == 0)
 //		return;
 //	if (gdh == 0)
 //	{
 //		gdh = new GraphDistanceHeuristic(GraphSearchConstants::GetGraph(ma->GetMap()));
-//		gdh->UseSmartPlacement(true);
+//		gdh->SetPlacement(kAvoidPlacement);
 //		ma->SetGraphHeuristic(gdh);
 //		for (int x = 0; x < 10; x++)
 //			gdh->AddHeuristic();
@@ -356,12 +417,12 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	Graph *g = GraphSearchConstants::GetGraph(m);
 
 //	GraphDistanceHeuristic diffHeuristic(g);
-//	diffHeuristic.UseSmartPlacement(true);
+//	diffHeuristic.SetPlacement(kAvoidPlacement);
 //	for (int x = 0; x < 20; x++)
 //		diffHeuristic.AddHeuristic();
 
 	GraphMapInconsistentHeuristic diffHeuristic(m, g);
-	diffHeuristic.UseSmartPlacement(true);
+	diffHeuristic.SetPlacement(kAvoidPlacement);
 	for (int x = 0; x < 20; x++)
 		diffHeuristic.AddHeuristic();
 	
@@ -434,17 +495,17 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
 				
-//				if (ma1 == 0)
-//				{
-//					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
+				if (ma1 == 0)
+				{
+					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
+				}
 //					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
-//					gdh->UseSmartPlacement(true);
+//					gdh->SetPlacement(kAvoidPlacement);
 //					ma1->SetGraphHeuristic(gdh);
 //					for (int x = 0; x < 10; x++)
 //						gdh->AddHeuristic();
 //					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
 //					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
-//				}
 				if (ma2 == 0)
 					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
 
@@ -456,7 +517,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				s1.x = px1; s1.y = py1;
 				g1.x = px2; g1.y = py2;
 					   
-//				a1.InitializeSearch(ma1, s1, g1, path);
+				a1.InitializeSearch(ma1, s1, g1, path);
 				a2.InitializeSearch(ma2, s1, g1, path);
 //				a2.SetUseBPMX(false);
 				//runningSearch1 = true;

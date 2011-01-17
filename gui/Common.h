@@ -306,15 +306,15 @@ void PrintCommandLineArguments();
 void ProcessCommandLineArgs(int argc, char *argv[]);
 
 void RunHOGGUI(int argc, char* argv[]);
-
+void SaveScreenshot(int windowID, const char *filename);
 
 void submitTextToBuffer(const char *val);
 void appendTextToBuffer(char *);
 pRecContext getCurrentContext();
 pRecContext GetContext(unsigned int windowID);
 void updateModelView(pRecContext pContextInfo, int currPort);
-void cameraLookAt(GLfloat, GLfloat, GLfloat, float cameraSpeed = 0.1);
-void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1);
+void cameraLookAt(GLfloat, GLfloat, GLfloat, float cameraSpeed = 0.1, int port = -1);
+void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1, int port = -1);
 void resetCamera();
 point3d GetOGLPos(pRecContext pContextInfo, int x, int y);
 

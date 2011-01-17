@@ -289,18 +289,99 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
+#include "MNAgentPuzzle.h"
+#include "SequenceAlignment.h"
+#include "BFS.h"
+#include "DFID.h"
+#include "DFS.h"
+#include "NaryTree.h"
+
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-	unitSims[windowID]->GetEnvironment();
-	
-//	SearchUnit *su1 = new SearchUnit(random()%m->GetMapWidth(), random()%m->GetMapHeight(), 0, 0);
-//	SearchUnit *su2 = new SearchUnit(random()%m->GetMapWidth(), random()%m->GetMapHeight(), su1, new praStar());
-//	//unitSim->AddUnit(su1);
-	unitSims[windowID]->AddUnit(new RandomUnit<MNPuzzleState, slideDir, MNPuzzle>(MNPuzzleState(5, 5)));
+	BFS<MNAgentPuzzleState, MNAgentPuzzleAction> bfs;
+	for (unsigned int x = 1; x < 9; x++)
+	{
+		MNAgentEnvironment mnae;
+		MNAgentPuzzleState mnps(3, 3, x);
+		std::cout << mnps << std::endl;
+		std::vector<MNAgentPuzzleState> s;
+//		for (unsigned int y = 0; y < (9-x); y++)
+//		{
+//			std::cout << (9-x) << " agents, domain abstraction of " << y << " tiles." << std::endl;
+			mnae.SetDomainAbstractionSize(3);
+			bfs.GetPath(&mnae, mnps, mnps, s);
+//		}
+	}
 }
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
+	if (1)
+	{
+		BFS<MNPuzzleState, slideDir> bfs;
+		DFS<MNPuzzleState, slideDir> dfs;
+		DFID<MNPuzzleState, slideDir> dfid2;
+		MNPuzzle mnae33(3, 3);
+		MNPuzzle mnae34(3, 4);
+		MNPuzzleState mnps33(3, 3);
+		MNPuzzleState mnps34(3, 4);
+		std::vector<MNPuzzleState> s;
+		std::vector<slideDir> s2;
+		dfid2.GetPath(&mnae33, mnps33, mnps33, s2);
+//		dfid2.GetPath(&mnae34, mnps34, mnps34, s2);
+//		bfs.GetPath(&mnae33, mnps33, mnps33, s);
+//		bfs.GetPath(&mnae34, mnps34, mnps34, s);
+	}
+	
+	if (0)
+	{
+		std::vector<NaryState> narypath;
+		DFS<NaryState, NaryAction> dfs1;
+		DFID<NaryState, NaryAction> dfid;
+		NaryTree t1(2, 10);
+		NaryTree t2(3, 10);
+		NaryTree t3(4, 10);
+		NaryState s1 = 0, g1;
+		dfs1.GetPath(&t1, s1, s1, narypath);
+		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
+		dfs1.GetPath(&t2, s1, s1, narypath);
+		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
+		dfs1.GetPath(&t3, s1, s1, narypath);
+		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
+
+		g1 = 2048-2;
+		dfid.GetPath(&t1, s1, g1, narypath);
+		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
+		g1 = 88573-2;
+		dfid.GetPath(&t2, s1, g1, narypath);
+		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
+		g1 = 1398101-2;
+		dfid.GetPath(&t3, s1, g1, narypath);
+		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
+	}
+
+	if (0)
+	{
+		std::vector<SequenceAlignmentState> statePath;
+		BFS<SequenceAlignmentState, SequenceAlignmentAction> bfs;
+		DFS<SequenceAlignmentState, SequenceAlignmentAction> dfs;
+		DFID<SequenceAlignmentState, SequenceAlignmentAction> dfid;
+
+		for (unsigned int x = 1; x < 13; x++)
+		{
+			SequenceAlignment sa10(x);
+			SequenceAlignmentState s1 = 0, g1 = -1;
+
+			bfs.GetPath(&sa10, s1, s1, statePath);
+			std::cout << bfs.GetNodesExpanded() << " total BFS nodes expanded" << std::endl;
+			
+			dfs.GetPath(&sa10, s1, s1, statePath);
+			std::cout << dfs.GetNodesExpanded() << " total DFS nodes expanded" << std::endl;
+			
+			dfid.GetPath(&sa10, s1, g1, statePath);
+			std::cout << dfid.GetNodesExpanded() << " total DFID nodes expanded" << std::endl;
+		}
+	}
 }
 
 bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )

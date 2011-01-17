@@ -41,4 +41,5 @@ SRC_CPP = \
 	environments/TopSpin.cpp	\
 	environments/RoboticArm.cpp  \
 	environments/ConfigEnvironment.cpp \
-	environments/PancakePuzzle.cpp
+	environments/PancakePuzzle.cpp \
+	environments/MNAgentPuzzle.cpp

@@ -36,6 +36,7 @@ PROJECTS = \
   apps/dynamicsearch \
   apps/directional \
   apps/dragonage \
+  apps/mapUtils \
   apps/sfbds \
 #	apps/coprobber
 #  apps/lv.pathfinding	

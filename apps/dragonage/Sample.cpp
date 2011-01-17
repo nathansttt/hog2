@@ -283,7 +283,7 @@ void runProblemSet2(char *problems, int multiplier)
 	Graph *g = msa->GetAbstractGraph(1);
 	GraphAbstractionHeuristic gah1(msa, 1);
 	GraphDistanceHeuristic localGDH(g);
-	localGDH.UseSmartPlacement(true);
+	localGDH.SetPlacement(kAvoidPlacement);
 	for (unsigned int x = 0; x < 10; x++)
 		localGDH.AddHeuristic();
 
@@ -626,7 +626,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				{
 					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
 					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
-					gdh->UseSmartPlacement(true);
+					gdh->SetPlacement(kAvoidPlacement);
 					ma1->SetGraphHeuristic(gdh);
 					for (int x = 0; x < 10; x++)
 						gdh->AddHeuristic();

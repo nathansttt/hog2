@@ -186,6 +186,45 @@ void Map::Scale(long newWidth, long newHeight)
 	map_name[0] = 0;
 }
 
+void Map::Trim()
+{
+	int MinX = width-1, MinY = height-1, MaxX = 0, MaxY = 0;
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			if (GetTerrainType(x, y) != kOutOfBounds)
+			{
+				MinX = min(MinX, x);
+				MaxX = max(MaxX, x);
+				MinY = min(MinY, y);
+				MaxY = max(MaxY, y);
+			}
+		}
+	}
+
+	int newWidth = MaxX-MinX+1;
+	int newHeight = MaxY-MinY+1;
+	Tile **newLand;
+	newLand = new Tile *[newWidth];
+	for (int x = 0; x < newWidth; x++)
+	{
+		newLand[x] = new Tile [newHeight];
+		for (int y = 0; y < newHeight; y++)
+		{
+			newLand[x][y] = land[x+MinX][y+MinY];
+		}
+	}
+	for (int x = 0; x < width; x++) delete [] land[x];
+	delete [] land;
+	land = newLand;
+	width = newWidth;
+	height = newHeight;
+	revision++;
+	updated = true;
+	map_name[0] = 0;
+}
+
 
 /** 
 * Resets the current map by loading the file passed in.
@@ -249,8 +288,18 @@ void Map::Load(FILE *f)
 			loadOctileCorner(f, height, width);
 		else if (strcmp(format, "raw") == 0)
 			loadRaw(f, height, width);
+		return;
 	}
-	else if (!tryLoadRollingStone(f))
+	if (tryLoadRollingStone(f))
+	{
+		return;
+	}
+	if (tryDragonAge(f))
+	{
+		Trim();
+		return;
+	}
+
 	{
 		printf("Unknown map type; aborting load!\n");
 		width = height = 64;
@@ -400,6 +449,177 @@ void Map::loadOctileCorner(FILE *f, int high, int wide)
 		}
 		fscanf(f, "\n");
 	}
+}
+
+#include <vector>
+
+struct header 
+{
+	
+	uint32_t magic;
+	uint32_t version;
+	uint32_t platform;
+	uint32_t filetype;
+	uint32_t fileversion;
+	uint32_t structcount;
+	uint32_t dataoffset;
+};
+
+struct structArray
+{
+	uint32_t id;
+	uint32_t fieldCnt;
+	uint32_t fieldOffset;
+	uint32_t structSize;
+};
+
+struct fieldData
+{
+	uint32_t label;
+	uint32_t fieldType;
+	uint32_t index;
+};
+
+struct fullData
+{
+	structArray sa;
+	std::vector<fieldData> fields;
+};
+
+bool Map::tryDragonAge(FILE *f)
+{
+	rewind(f);
+	header h;
+	fread(&h, sizeof(header), 1, f);
+	printf("MGC: %c%c%c%c\n", h.magic&0xFF, (h.magic>>8)&0xFF,
+		   (h.magic>>16)&0xFF, (h.magic>>24)&0xFF);
+	printf("GFF: %c%c%c%c\n", h.version&0xFF, (h.version>>8)&0xFF,
+		   (h.version>>16)&0xFF, (h.version>>24)&0xFF);
+	printf("TGT: %c%c%c%c\n", h.platform&0xFF, (h.platform>>8)&0xFF,
+		   (h.platform>>16)&0xFF, (h.platform>>24)&0xFF);
+	printf("TYP: %c%c%c%c\n", h.filetype&0xFF, (h.filetype>>8)&0xFF,
+		   (h.filetype>>16)&0xFF, (h.filetype>>24)&0xFF);
+	printf("FVR: %c%c%c%c\n", h.fileversion&0xFF, (h.fileversion>>8)&0xFF,
+		   (h.fileversion>>16)&0xFF, (h.fileversion>>24)&0xFF);
+	printf("STRUCT: %d\n", h.structcount);
+	printf("DATA: 0x%X\n", h.dataoffset);
+	
+	if (('G' != (char)(h.magic&0xFF)) ||
+		('F' != (char)(h.magic>>8)&0xFF) ||
+		('F' != (char)(h.magic>>16)&0xFF) ||
+		(' ' != (char)(h.magic>>24)&0xFF))
+	{
+		if ('G' != (char)(h.magic&0xFF)) printf("bad g\n");
+		if ('F' != (char)(h.magic>>8)&0xFF) printf("bad f1\n");
+		if ('F' != (char)(h.magic>>16)&0xFF) printf("bad f2\n");
+		if (' ' != (char)(h.magic>>24)&0xFF) printf("bad <space>\n");
+		printf("DAO: bad magic\n");
+		return false;
+	}
+	if (('V' != (char)h.version&0xFF) ||
+		('4' != (char)(h.version>>8)&0xFF) ||
+		('.' != (char)(h.version>>16)&0xFF) ||
+		('0' != (char)(h.version>>24)&0xFF))
+	{
+		printf("DAO: bad version\n");
+		return false;
+	}
+	if (('P' != (char)h.platform&0xFF) ||
+		('C' != (char)(h.platform>>8)&0xFF) ||
+		(' ' != (char)(h.platform>>16)&0xFF) ||
+		(' ' != (char)(h.platform>>24)&0xFF))
+	{
+		printf("DAO: bad platform\n");
+		return false;
+	}
+	if (('A' != (char)h.filetype&0xFF) ||
+		('R' != (char)(h.filetype>>8)&0xFF) ||
+		('L' != (char)(h.filetype>>16)&0xFF) ||
+		(' ' != (char)(h.filetype>>24)&0xFF))
+	{
+		printf("DAO: bad file type\n");
+		return false;
+	}
+	if (('V' != (char)h.fileversion&0xFF) ||
+		('4' != (char)(h.fileversion>>8)&0xFF) ||
+		('.' != (char)(h.fileversion>>16)&0xFF) ||
+		('0' != (char)(h.fileversion>>24)&0xFF))
+	{
+		printf("DAO: bad file version\n");
+		return false;
+	}
+	
+	std::vector<fullData> fd;
+	fd.resize(h.structcount);
+	//structArray sa
+	for (unsigned int x = 0; x < h.structcount; x++)
+	{
+		fread(&fd[x].sa, sizeof(fd[x].sa), 1, f);
+//		printf("Struct %d of %d\n", x, h.structcount-1);
+//		printf("ID: %c%c%c%c\n", fd[x].sa.id&0xFF, (fd[x].sa.id>>8)&0xFF,
+//			   (fd[x].sa.id>>16)&0xFF, (fd[x].sa.id>>24)&0xFF);
+//		printf("%d fields at 0x%X offset size %d\n",
+//			   fd[x].sa.fieldCnt, fd[x].sa.fieldOffset, fd[x].sa.structSize);
+	}
+	
+	for (unsigned int x = 0; x < h.structcount; x++)
+	{
+		fd[x].fields.resize(fd[x].sa.fieldCnt);
+		fread(&fd[x].fields[0], sizeof(fieldData), fd[x].sa.fieldCnt, f);
+	}
+	for (unsigned int x = 0; x < h.structcount; x++)
+	{
+//		printf("Struct %d of %d ", x, h.structcount-1);
+//		printf("ID: %c%c%c%c\n", fd[x].sa.id&0xFF, (fd[x].sa.id>>8)&0xFF,
+//			   (fd[x].sa.id>>16)&0xFF, (fd[x].sa.id>>24)&0xFF);
+		for (unsigned int y = 0; y < fd[x].sa.fieldCnt; y++)
+		{
+//			printf("Field %d of %d\n", y, fd[x].sa.fieldCnt-1);
+//			printf("LABEL: %d\n", fd[x].fields[y].label);
+//			printf("AT: 0x%X\n", fd[x].fields[y].index);
+			fseek(f, fd[x].fields[y].index+h.dataoffset, SEEK_SET);
+			if ((fd[x].fields[y].label == 3086) ||
+				(fd[x].fields[y].label == 3087) ||
+				(fd[x].fields[y].label == 3092))
+			{
+				uint32_t loc;
+				fread(&loc, sizeof(loc), 1, f);
+//				printf("VALUE: %d\n", loc);
+				if (fd[x].fields[y].label == 3086)
+				{ width = loc; }
+				if (fd[x].fields[y].label == 3087)
+				{ height = loc; }
+				if (fd[x].fields[y].label == 3092)
+				{
+					mapType = kOctile;
+					land = new Tile *[width];
+					for (int x = 0; x < width; x++) land[x] = new Tile [height];
+					drawLand = true;
+					dList = 0;
+					updated = true;
+					
+					fseek(f, h.dataoffset+loc, SEEK_SET);
+					fread(&loc, sizeof(loc), 1, f);
+//					printf("DATA SIZE: %d\n", loc);
+					for (unsigned int z = 0; z < loc; z++)
+					{
+						uint8_t next;
+						fread(&next, sizeof(next), 1, f);
+//						printf("%2x ", next);
+						if (next < 0x9)
+							SetTerrainType(z%width, z/width, kGround);
+						else if (next < 0xa)
+							SetTerrainType(z%width, z/width, kTrees);
+						else
+							SetTerrainType(z%width, z/width, kOutOfBounds);
+						
+					}
+//					printf("\n");
+				}
+			}
+		}
+	}
+	return true;
 }
 
 // check to see if we can load it as a rolling stone puzzle
@@ -632,7 +852,7 @@ void Map::Print(int _scale)
 	//    printf("%c[%d;%dm%d\n", 27, 1, 31+x, x);
 	//  printf("\n");
 	// clear the screen
-	printf("%c[H", 27);
+//	printf("%c[H", 27);
 	for (int y = 0; y < height; y+=2*_scale)
 	{
 		for (int x = 0; x < width; x+=_scale)
@@ -684,7 +904,7 @@ void Map::Print(int _scale)
 		}
 		printf("\n");
 	}
-	printf("%c[%d;%dm", 27, 0, 0);
+//	printf("%c[%d;%dm", 27, 0, 0);
 	printf("\n");
 }
 
@@ -2146,7 +2366,7 @@ float Map::GetEdgeWidthY(int x, int y)
  * A cheap function I hacked together to make psuedo mazes.
  * The only good values for pathSize are 1 and 3.
  */
-void MakeMaze(Map *map, int pathSize)
+void MakePseudoMaze(Map *map, int pathSize)
 {
 	int width = map->GetMapWidth();
 	int height = map->GetMapHeight();
@@ -2222,26 +2442,49 @@ void MakeMaze(Map *map, int pathSize)
 /**
  * MakeMaze(map)
  */
-void MakeMaze(Map *map)
+void MakeMaze(Map *map, int corridorWidth)
 {
 	int width = map->GetMapWidth();
 	int height = map->GetMapHeight();
+	int boxSize = corridorWidth+1;
+	// fill the whole map empty
 	map->SetRectHeight(0, 0, width-1, height-1, 0, kGround);
-	
+	// block all the walls
+	for (int x = 0; x < width; x+=boxSize)
+		map->SetRectHeight(x, 0, x, height-1, 0, kOutOfBounds);
+	for (int y = 0; y < height; y+=boxSize)
+		map->SetRectHeight(0, y, width-1, y, 0, kOutOfBounds);
+	// mark univisited states
+	for (int x = 0; x < width; x+=boxSize)
+		for (int y = 0; y < height; y += boxSize)
+			map->SetTerrainType(x+1, y+1, kOutOfBounds);
 	std::vector<int> x;
 	std::vector<int> y;
 
+//	x.push_back(width/(2*boxSize));
+//	y.push_back(height/(2*boxSize));
 	x.push_back(0);
 	y.push_back(0);
-	map->SetHeight(0, 0, 1);
-	
+//	map->SetHeight(0, 0, 1);
+	map->SetTerrainType(x.back()*boxSize+1, y.back()*boxSize+1, kGround);
+
 	while (x.size() > 0)
 	{
+		bool lastRandom = false;
+//		map->Print();
 		int val;
-		if (random()%10)
+		
+		if (lastRandom || (1 == random()%3))
+		{
 			val = x.size()-1;
-		else
-			val = random()%x.size();
+			if (1 == random()%30)
+				lastRandom = false;
+		}
+		else {
+			// bias towards end of array
+			val = ((random()%(3*x.size()/2))+x.size()/2)%x.size();
+			lastRandom = true;
+		}
 
 		//printf("Trying to extend (%d, %d)\n", x[val], y[val]);
 		// raise up a corridor and open paths
@@ -2249,77 +2492,83 @@ void MakeMaze(Map *map)
 		{
 			case 0: // NORTH
 			{
-				if ((y[val] > 0) && (map->GetHeight(x[val], y[val]-2) == 0))
+				if ((y[val] > 0) && (map->GetTerrainType(x[val]*boxSize+1, (y[val]-1)*boxSize+1) == kOutOfBounds))
 				{
-					map->SetHeight(x[val], y[val]-1, 1);
-					map->SetHeight(x[val], y[val]-2, 1);
+					for (int t = 0; t < boxSize-1; t++)
+					{
+						map->SetTerrainType(x[val]*boxSize+1+t, y[val]*boxSize, kGround);
+					}
 					x.push_back(x[val]);
-					y.push_back(y[val]-2);
+					y.push_back(y[val]-1);
+					// mark cell as unblocked
+					map->SetTerrainType(x.back()*boxSize+1, y.back()*boxSize+1, kGround);
 					//printf("Extended NORTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
 					break;
 				}
 			}
 			case 1: // SOUTH
 			{
-				if ((y[val] < height-3) && (map->GetHeight(x[val], y[val]+2) == 0))
+				if ((y[val] < (height+boxSize-1)/boxSize) && (map->GetTerrainType(x[val]*boxSize+1, (y[val]+1)*boxSize+1) == kOutOfBounds))
 				{
-					map->SetHeight(x[val], y[val]+1, 1);
-					map->SetHeight(x[val], y[val]+2, 1);
+					for (int t = 0; t < boxSize-1; t++)
+					{
+						map->SetTerrainType(x[val]*boxSize+1+t, (y[val]+1)*boxSize, kGround);
+					}
 					x.push_back(x[val]);
-					y.push_back(y[val]+2);
+					y.push_back(y[val]+1);
+					// mark cell as unblocked
+					map->SetTerrainType(x.back()*boxSize+1, y.back()*boxSize+1, kGround);
 					//printf("Extended SOUTH to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
 					break;
 				}
 			}
 			case 2: // EAST
 			{
-				if ((x[val] > 0) && (map->GetHeight(x[val]-2, y[val]) == 0))
+				if (((x[val]+1)*boxSize+1 < width) && (map->GetTerrainType((x[val]+1)*boxSize+1, y[val]*boxSize+1) == kOutOfBounds))
 				{
-					map->SetHeight(x[val]-1, y[val], 1);
-					map->SetHeight(x[val]-2, y[val], 1);
-					x.push_back(x[val]-2);
+					for (int t = 0; t < boxSize-1; t++)
+					{
+						map->SetTerrainType((x[val]+1)*boxSize, y[val]*boxSize+1+t, kGround);
+					}
+					x.push_back(x[val]+1);
 					y.push_back(y[val]);
+					// mark cell as unblocked
+					map->SetTerrainType(x.back()*boxSize+1, y.back()*boxSize+1, kGround);
 					//printf("Extended EAST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
 					break;
 				}
 			}
 			case 3: // WEST
 			{
-				if ((x[val] < width-3) && (map->GetHeight(x[val]+2, y[val]) == 0))
+				if ((x[val] > 0) && (map->GetTerrainType((x[val]-1)*boxSize+1, y[val]*boxSize+1) == kOutOfBounds))
 				{
-					map->SetHeight(x[val]+1, y[val], 1);
-					map->SetHeight(x[val]+2, y[val], 1);
-					x.push_back(x[val]+2);
+					for (int t = 0; t < boxSize-1; t++)
+					{
+						map->SetTerrainType(x[val]*boxSize, y[val]*boxSize+1+t, kGround);
+					}
+					x.push_back(x[val]-1);
 					y.push_back(y[val]);
+					// mark cell as unblocked
+					map->SetTerrainType(x.back()*boxSize+1, y.back()*boxSize+1, kGround);
 					//printf("Extended WEST to (%d, %d) [size %d]\n", x.back(), y.back(), x.size());
 				}
 				break;
 			}
 		}
 		
-		// check to see if node is blocked
-		if (((x[val] == 0) || map->GetHeight(x[val]-2, y[val]) != 0) && // blocked left
-			((x[val] >= width-3) || map->GetHeight(x[val]+2, y[val]) != 0) && // blocked left
-			((y[val] == 0) || map->GetHeight(x[val], y[val]-2) != 0) && // blocked up
-			((y[val] >= height-3) || map->GetHeight(x[val], y[val]+2) != 0)) // blocked down
+		// check to see if node is blocked on all sides
+		if (((x[val] == 0) || map->GetTerrainType((x[val]-1)*boxSize+1, y[val]*boxSize+1) == kGround) && // blocked left
+			(((x[val]+1)*boxSize+1 >= width) || map->GetTerrainType((x[val]+1)*boxSize+1, y[val]*boxSize+1) == kGround) && // blocked right
+			((y[val] == 0) || map->GetTerrainType(x[val]*boxSize+1, (y[val]-1)*boxSize+1) == kGround) && // blocked up
+			(((y[val]+1)*boxSize+1 >= height) || map->GetTerrainType(x[val]*boxSize+1, (y[val]+1)*boxSize+1) == kGround)) // blocked down
 		{
-			//printf("(%d, %d) now blocked: %d left\n", x[val], y[val], x.size()-1);
+		//	printf("(%d, %d) now blocked: %d left\n", x[val], y[val], x.size()-1);
 			x[val] = x.back();
 			y[val] = y.back();
 			x.pop_back();
 			y.pop_back();
 		}
 	}
-
-	for (int a = 0; a < width; a++)
-		for (int b = 0; b < height; b++)
-			if (map->GetHeight(a, b) == 0)
-			{
-				//map->SetHeight(x, y, 0);
-				map->SetTerrainType(a, b, kOutOfBounds);
-			}
-			else
-				map->SetHeight(a, b, 0);
 }
 
 void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)

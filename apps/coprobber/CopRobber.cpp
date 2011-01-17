@@ -2771,7 +2771,7 @@ void compute_experiment_suboptimal( int argc, char* argv[] ) {
 		unsigned int index = 0;
 		if( find_algorithm( robber_algorithms, "greedy_diff", index ) ) {
 			gh_diff = new GraphDistanceHeuristic( g );
-			gh_diff->UseSmartPlacement( true );
+			gh_diff->SetPlacement(kAvoidPlacement);//UseSmartPlacement( true );
 			for( int i = 0; i < robber_int_params[index][0]; i++ )
 				gh_diff->AddHeuristic();
 			env_diff = new GraphEnvironment( g, gh_diff );

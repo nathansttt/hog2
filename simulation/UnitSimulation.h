@@ -61,7 +61,7 @@ class UnitGroup;
 template <class state, class action, class environment>
 class UnitInfo {
 public:
-	UnitInfo() :stateHistory(0) {}
+	UnitInfo() :stateHistory(0), converged(false) {}
 	Unit<state, action, environment> *agent;
 	int GetPriority() { return agent->GetPriority(); }
 	action lastMove;
@@ -74,6 +74,7 @@ public:
 	unsigned int historyIndex;
 	double totalDistance;
 	double totalThinking;
+	bool converged;
 	std::vector<TimeStep<state, action> > stateHistory;
 };
 

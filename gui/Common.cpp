@@ -413,31 +413,52 @@ void resetCamera(recCamera * pCamera)
 }
 
 
-void cameraLookAt(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed)
+void cameraLookAt(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
 {
 	pRecContext pContextInfo = getCurrentContext();
 	if (!pContextInfo)
 		return; 
 //	const float cameraSpeed = .1;
-	pContextInfo->camera[pContextInfo->currPort].viewDir.x = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.x + cameraSpeed*(x - pContextInfo->camera[pContextInfo->currPort].viewPos.x);
-	pContextInfo->camera[pContextInfo->currPort].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.z + cameraSpeed*(z - pContextInfo->camera[pContextInfo->currPort].viewPos.z);
-	pContextInfo->camera[pContextInfo->currPort].viewDir.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.y + cameraSpeed*(y - pContextInfo->camera[pContextInfo->currPort].viewPos.y);
+	if (port == -1)
+	{
+		pContextInfo->camera[pContextInfo->currPort].viewDir.x = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.x + cameraSpeed*(x - pContextInfo->camera[pContextInfo->currPort].viewPos.x);
+		pContextInfo->camera[pContextInfo->currPort].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.z + cameraSpeed*(z - pContextInfo->camera[pContextInfo->currPort].viewPos.z);
+		pContextInfo->camera[pContextInfo->currPort].viewDir.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.y + cameraSpeed*(y - pContextInfo->camera[pContextInfo->currPort].viewPos.y);
 
-	pContextInfo->rotations[pContextInfo->currPort].objectRotation[0] *= (1-cameraSpeed);
-	pContextInfo->rotations[pContextInfo->currPort].worldRotation[0] *= (1-cameraSpeed);
-	updateProjection(pContextInfo);
+		pContextInfo->rotations[pContextInfo->currPort].objectRotation[0] *= (1-cameraSpeed);
+		pContextInfo->rotations[pContextInfo->currPort].worldRotation[0] *= (1-cameraSpeed);
+		updateProjection(pContextInfo);
+	}
+	else {
+		pContextInfo->camera[port].viewDir.x = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.x + cameraSpeed*(x - pContextInfo->camera[port].viewPos.x);
+		pContextInfo->camera[port].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.z + cameraSpeed*(z - pContextInfo->camera[port].viewPos.z);
+		pContextInfo->camera[port].viewDir.y = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.y + cameraSpeed*(y - pContextInfo->camera[port].viewPos.y);
+		
+		pContextInfo->rotations[port].objectRotation[0] *= (1-cameraSpeed);
+		pContextInfo->rotations[port].worldRotation[0] *= (1-cameraSpeed);
+		updateProjection(pContextInfo);
+	}
 }
 
-void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed)
+void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
 {
 	pRecContext pContextInfo = getCurrentContext();
 	if (!pContextInfo)
 		return;
 //	const float cameraSpeed = .1;
-	pContextInfo->camera[pContextInfo->currPort].viewPos.x = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.x + cameraSpeed*x;
-	pContextInfo->camera[pContextInfo->currPort].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.y + cameraSpeed*y;
-	pContextInfo->camera[pContextInfo->currPort].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.z + cameraSpeed*z;
-	updateProjection(pContextInfo);
+	if (port == -1)
+	{
+		pContextInfo->camera[pContextInfo->currPort].viewPos.x = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.x + cameraSpeed*x;
+		pContextInfo->camera[pContextInfo->currPort].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.y + cameraSpeed*y;
+		pContextInfo->camera[pContextInfo->currPort].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.z + cameraSpeed*z;
+		updateProjection(pContextInfo);
+	}
+	else {
+		pContextInfo->camera[port].viewPos.x = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.x + cameraSpeed*x;
+		pContextInfo->camera[port].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.y + cameraSpeed*y;
+		pContextInfo->camera[port].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.z + cameraSpeed*z;
+		updateProjection(pContextInfo);
+	}
 }
 
 void setPortCamera(pRecContext pContextInfo, int currPort)
@@ -543,3 +564,71 @@ void SetActivePort(int windowID, int which)
 		pContextInfo->currPort = which;
 }
 
+
+class bmp_header {
+public:
+	bmp_header()
+	://bfType(19778),
+	zero(0), bfOffBits(sizeof(bmp_header)+2), biSize(40), biPlanes(1),
+	biBitCount(32), biCompression(0), biSizeImage(0), biXPelsPerMeter(2835), biYPelsPerMeter(2835),
+	biClrUsed(0), biClrImportant(0) {}
+	
+//	uint16_t bfType;//	19778
+	uint32_t bfSize; //	??	specifies the size of the file in bytes.
+	uint32_t zero; // 0
+	uint32_t bfOffBits;
+	//	11	4	bfOffBits	1078	specifies the offset from the beginning of the file to the bitmap data.
+	
+	uint32_t biSize; // 40
+	uint32_t biWidth;
+	uint32_t biHeight;
+	uint16_t biPlanes; // 0 (1??)
+	uint16_t biBitCount; // 24
+	uint32_t biCompression; // 0
+	uint32_t biSizeImage; // 0
+	uint32_t biXPelsPerMeter; // 0
+	uint32_t biYPelsPerMeter; // 0
+	uint32_t biClrUsed; // 0
+	uint32_t biClrImportant; // 0
+};
+
+void SaveScreenshot(int windowID, const char *filename)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+
+	char file[strlen(filename)+5];
+	sprintf(file, "%s.bmp", filename);
+	FILE *f = fopen(file, "w+");
+
+	if (f == 0) return;
+	
+//	3	4	bfSize	??	specifies the size of the file in bytes.
+//	19	4	biWidth	100	specifies the width of the image, in pixels.
+//	23	4	biHeight	100	specifies the height of the image, in pixels.
+
+	
+	long width  = pContextInfo->globalCamera.viewWidth;
+	long height  =pContextInfo->globalCamera.viewHeight;
+	long rowBytes = width * 4;
+	long imageSize = rowBytes * height;
+	char image[imageSize];
+	char zero[4] = {0, 0, 0, 0};
+	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &image);//GL_BGRA
+
+	bmp_header h;
+	h.biWidth = width;
+	h.biHeight = height;
+	int buffer = (4-width%4)%4;
+	h.bfSize = sizeof(bmp_header)+2+(width+buffer)*height*4;
+	h.biSizeImage = (width+buffer)*height*4;
+	uint16_t bfType = 19778;
+	fwrite(&bfType, sizeof(bfType), 1, f);
+	fwrite(&h, sizeof(bmp_header), 1, f);
+	for (int x = 0; x < height; x++)
+	{
+		fwrite(&image[x*width*4], sizeof(char), width*4, f);
+		if (0 != width%4)
+			fwrite(&zero, sizeof(char), buffer, f);
+	}
+	fclose(f);
+}

@@ -324,7 +324,7 @@ namespace GraphSearchConstants {
 				{
 					GLdouble xx, yy, zz, rr;
 					m->GetOpenGLCoord(x, y,xx, yy, zz, rr);
-					if (m->GetTerrainType(x, y) == kOutOfBounds)
+					if (m->GetTerrainType(x, y) != kGround)
 						continue;
 					sprintf(name, "(%d, %d)", x, y);
 					currTile.tile1.node = g->AddNode(n = new node(name));
@@ -335,7 +335,7 @@ namespace GraphSearchConstants {
 					n->SetLabelL(kMapY, y);
 				}
 				else {
-					if (m->GetTerrainType(x, y, kLeftEdge) != kOutOfBounds)
+					if (m->GetTerrainType(x, y, kLeftEdge) == kGround)
 					{
 						GLdouble xx, yy, zz, rr;
 						m->GetOpenGLCoord(x, y,xx, yy, zz, rr);
@@ -354,7 +354,7 @@ namespace GraphSearchConstants {
 						//						n->SetLabelL(kFirstData+2, kBottomLeft);
 					}
 					
-					if (m->GetTerrainType(x, y, kRightEdge) != kOutOfBounds)
+					if (m->GetTerrainType(x, y, kRightEdge) == kGround)
 					{
 						GLdouble xx, yy, zz, rr;
 						m->GetOpenGLCoord(x, y,xx, yy, zz, rr);
@@ -806,6 +806,7 @@ void GraphDistanceHeuristic::OpenGLDraw() const
 	if (heuristics.size() == 0)
 		return;
 
+	double approxSize = 2.0/sqrt(g->GetNumNodes());
 	for (unsigned int a = 0; a < locations.size(); a++)
 	{
 		GLdouble x, y, z;
@@ -813,11 +814,37 @@ void GraphDistanceHeuristic::OpenGLDraw() const
 		x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
 		y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
 		z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
-
+		
 		recColor r(1.0, 1.0, 1.0);//getColor((counter+locations[a])%100, 0, 100, 4);
-
-		glColor3f(r.r, r.g, r.b);
-		DrawSphere(x, y, z, 0.05);
+		
+		glColor3f(0.0, 0.0, 1.0);
+		DrawSphere(x, y, z, approxSize);
+	}
+	double maxWeight = 0;
+	for (unsigned int a = 0; a < weight.size(); a++)
+		if (weight[a] > maxWeight)
+			maxWeight = weight[a];
+	
+	double maxSize = 0;
+	for (unsigned int a = 0; a < sizes.size(); a++)
+		if (sizes[a] > maxSize)
+			maxSize = sizes[a];
+	
+	for (unsigned int a = 0; a < weight.size(); a++)
+	{
+		GLdouble x, y, z;
+		node *n = g->GetNode(a);
+		if (n)
+		{
+			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+					
+			glColor3f(0.0, sizes[a]/maxSize, 0.0);
+			if (dist[a] == 0)
+				glColor3f(1, 1, 1);
+			DrawSphere(x, y, z, approxSize);
+		}
 	}
 }
 
@@ -861,12 +888,15 @@ void GraphDistanceHeuristic::ChooseStartGoal(graphState &start, graphState &goal
 
 void GraphDistanceHeuristic::AddHeuristic(node *n)
 {
-	if (smartPlacement)
+	if (placement == kFarPlacement)
 		n = FindFarNode(n);
+	else if (placement == kAvoidPlacement)
+		n = FindAvoidNode(n);
 	else if (n == 0)
 		n = g->GetRandomNode();
 	
 	std::vector<double> values;
+//	std::cout << "Adding differential heuristic based at " << n->GetLabelL(kMapX) << ", " << n->GetLabelL(kMapY) << std::endl;
 	GetOptimalDistances(n, values);
 	AddHeuristic(values, n->GetNum());
 }
@@ -922,6 +952,154 @@ void GraphDistanceHeuristic::GetOptimalDistances(node *n, std::vector<double> &v
 	}
 }
 
+node *GraphDistanceHeuristic::FindAvoidNode(node *n)
+{
+	if (locations.size() == 0)
+		return FindFarNode(0);
+	n = g->GetRandomNode();
+	// 1. Select vertex r
+	if (n == 0)
+	{
+		int bestSum = MAXINT;
+		int bestId = 0;
+		for (unsigned int x = 0; x < heuristics[0].size(); x+=1)
+		//for (unsigned int x = 0; x < 5; x++)
+		{
+			if (heuristics[0][x] == -1)
+				continue;
+			int sum = 0;
+			for (unsigned int y = 0; y < heuristics.size(); y++)
+				sum += heuristics[y][x];
+			int diff = 0;
+			sum /= heuristics.size();
+			for (unsigned int y = 0; y < heuristics.size(); y++)
+				diff = max(diff, fabs(sum-heuristics[y][x]));
+			if (diff < bestSum)
+			{
+				bestId = x;
+				bestSum = diff;
+			}
+		}
+		n = g->GetNode(bestId);
+//		n = g->GetRandomNode(); // could be done better
+//		while (heuristics[0][n->GetNum()] < 1)
+//			n = g->GetRandomNode();
+	}
+//	std::vector<double> dist;
+//	std::vector<double> weight;
+//	std::vector<double> sizes;
+	//printf("Starting from %d\n", n->GetNum());
+
+	// 2. build shortest path tree
+	GetOptimalDistances(n, dist);
+	weight.resize(dist.size());
+	sizes.resize(dist.size());
+	// 3. calculate difference between heuristic and actual distance for each node
+	for (unsigned int x = 0; x < dist.size(); x++)
+	{
+		sizes[x] = -1;
+		if (dist[x] != -1)
+		{
+			weight[x] = fabs(dist[x]-HCost(n->GetNum(), x));
+		}
+		else {
+			weight[x] = -1;
+		}
+	}
+	// 4. compute the size of each node (the sum of weights (#3) in the subtree if no existing landmark)
+	ComputeSizes(n, dist, weight, sizes);
+	// 5. select node, w, with highest weight
+	int best = 0;
+	for (unsigned int x = 1; x < sizes.size(); x++)
+		if (fless(sizes[best], sizes[x]))
+			best = x;
+	// 6. follow the children of w by largest weight until a leaf is reached & return
+	return FindBestChild(best, dist, sizes);
+}
+
+void GraphDistanceHeuristic::ComputeSizes(node *n, std::vector<double> &dist,
+										  std::vector<double> &weight, std::vector<double> &sizes)
+{
+	neighbor_iterator ni = n->getNeighborIter();
+	int nodeSize = -1;
+	for (long tmp = n->nodeNeighborNext(ni); tmp != -1; tmp = n->nodeNeighborNext(ni))
+	{
+		node *nb = g->GetNode(tmp);
+		if (sizes[nb->GetNum()] == -1) // not yet computed
+		{
+			// on shortest path
+			if (fequal(dist[nb->GetNum()] - dist[n->GetNum()], g->FindEdge(n->GetNum(), nb->GetNum())->GetWeight()))
+			{
+				//printf("%d has successor %d\n", n->GetNum(), nb->GetNum());
+				ComputeSizes(nb, dist, weight, sizes);
+				if (sizes[nb->GetNum()] == 0)
+				{
+					nodeSize = 0;
+				}
+				else if (nodeSize == -1)
+				{
+					nodeSize = sizes[nb->GetNum()];
+				}
+				else if (nodeSize != 0) {
+					nodeSize += sizes[nb->GetNum()];
+				}
+			}
+		}
+	}
+
+	if (nodeSize == -1)
+	{
+		sizes[n->GetNum()] = weight[n->GetNum()];
+	}
+	else if (nodeSize != 0) {
+		sizes[n->GetNum()] = nodeSize+weight[n->GetNum()];
+	}
+	else {
+		sizes[n->GetNum()] = 0;
+	}
+			
+	for (unsigned int x = 0; x < locations.size(); x++)
+		if (locations[x] == n->GetNum())
+			sizes[n->GetNum()] = 0;
+	
+	//printf("size at %d is %1.1f\n", n->GetNum(), sizes[n->GetNum()]);
+}
+
+node *GraphDistanceHeuristic::FindBestChild(int best, std::vector<double> &dist,
+										   std::vector<double> &sizes)
+{
+	int nextChild = best;
+	int nextSize = 0;
+	node *n;
+	do {
+//		printf("Child %d has size %1.1f\n", nextChild, nextSize);
+		n = g->GetNode(nextChild);
+		nextChild = -1;
+		nextSize = 0;
+		neighbor_iterator ni = n->getNeighborIter();
+		for (long tmp = n->nodeNeighborNext(ni); tmp != -1; tmp = n->nodeNeighborNext(ni))
+		{
+			node *nb = g->GetNode(tmp);
+			// on shortest path
+			if (fequal(dist[nb->GetNum()] - dist[n->GetNum()], g->FindEdge(n->GetNum(), nb->GetNum())->GetWeight()))
+			{
+				if ((nextChild == -1))
+				{
+					//printf("Next Child %d has size %1.1f\n", nb->GetNum(), sizes[nb->GetNum()]);
+					nextSize = sizes[nb->GetNum()];
+					nextChild = nb->GetNum();
+				}
+				else if ((fless(nextSize, sizes[nb->GetNum()])))
+				{
+					//printf("Next Child %d has size %1.1f\n", nb->GetNum(), sizes[nb->GetNum()]);
+					nextSize = sizes[nb->GetNum()];
+					nextChild = nb->GetNum();
+				}
+			}
+		}
+	} while (nextChild != -1);
+	return n;
+}	
 node *GraphDistanceHeuristic::FindFarNode(node *n)
 {
 	std::vector<double> values;

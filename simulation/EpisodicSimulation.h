@@ -102,6 +102,10 @@ protected:
 		
 		bool trialEnd;
 		
+		for (unsigned int t = 0; t < this->units.size(); t++)
+			if (this->units[t]->agent->Done())
+				this->units[t]->converged = true;
+
 		// Trial end depends on the mode we are in
 		if (!disjunctiveTrialEnd)
 		{
@@ -222,6 +226,12 @@ protected:
 			if (!IsUnitRacing(this->units[t]))
 				continue;
 			
+			this->units[t]->totalThinking = 0;
+			this->units[t]->totalDistance = 0;
+
+			if (this->units[t]->converged) // converged units don't need to reset, except dist travelled
+				continue;
+			
 			// stats.AddStat("distanceMoved", units[t]->agent->GetName(), (double)0);
 //			if (this->units[t]->blocking)
 //			{
@@ -231,9 +241,6 @@ protected:
 			this->units[t]->currentState = this->units[t]->startState;
 			this->units[t]->agent->GetUnitGroup()->UpdateLocation(this->units[t]->agent, this->env, this->units[t]->startState, false, this);
 			this->units[t]->nextTime = this->currTime;
-			this->units[t]->totalThinking = 0;
-			//			units[t]->thinkStates = 0;
-			this->units[t]->totalDistance = 0;
 		}
 		currRound++;
 		// randomize order -- only matters if they are blocking each other

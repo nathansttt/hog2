@@ -15,7 +15,7 @@ class MyDiffHeuristic: public GraphHeuristic {
 		g   = GraphSearchConstants::GetGraph(m);
 		gdh = new GraphDistanceHeuristic( g );
 		gmh = new GraphMapHeuristic( m, g );
-		gdh->UseSmartPlacement(true);
+		gdh->SetPlacement(kFarPlacement);
 		for( unsigned int i = 0; i < number_canonical_states; i++ )
 			gdh->AddHeuristic();
 	};
