@@ -57,7 +57,8 @@ namespace FLRTA {
 	struct dblCmp {
 		bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
 		{
-			return (fgreater(i1.g, i2.g));
+			//return (fgreater(i1.g, i2.g));
+			return (fgreater(i1.g+i1.h, i2.g+i2.h));
 		}
 	};
 	
@@ -140,8 +141,6 @@ namespace FLRTA {
 			//std::cout << "Hashing state:6 " << std::endl << from << std::endl;
 			if (stateData.find(env->GetStateHash(from)) != stateData.end())
 			{
-//				if (IsDead(from))
-//					return DBL_MAX;
 				return stateData[env->GetStateHash(from)].hCost+env->HCost(from, to);
 			}
 			return env->HCost(from, to);
@@ -277,7 +276,7 @@ namespace FLRTA {
 		// in case goal was found in LSS
 		if (thePath.size() != 0)
 			return;
-		uint64_t old = nodesExpanded;
+//		uint64_t old = nodesExpanded;
 		DoHCostLearning(env, from, to);
 //		std::cout << GetName() << " " << nodesExpanded-old << " learning expansions before dead/redundant " << std::endl;
 		MarkDeadRedundant(env, to);
@@ -394,7 +393,7 @@ namespace FLRTA {
 			if (IsDead(aoc.Lookat(next).data) && x != 0)
 			{
 				// dead; ignore(?)
-				x--;
+				//x--;
 				//tempDead.push_back(aoc.Lookat(next).data)
 				if (verbose) std::cout << aoc.Lookat(next).data << " is dead; left on closed (LSS)" << std::endl;
 				continue;
@@ -420,30 +419,12 @@ namespace FLRTA {
 			}
 		}
 		
-		// 4. finish propagation from edge of open list
+//		// 4. finish propagation from edge of open list
 		for (unsigned int x = 0; x < aoc.OpenSize(); x++)
 		{
 			state s = aoc.Lookat(aoc.GetOpenItem(x)).data;
-			gCostQueue.push(borderData<state>(s, GCost(s)));
-		}
-		while (!gCostQueue.empty())
-		{
-			state s = gCostQueue.top().theState;
-			gCostQueue.pop();
-			std::vector<state> neighbors;
-			m_pEnv->GetSuccessors(s, neighbors);
-			nodesExpanded++;
-			for (unsigned int x = 0; x < neighbors.size(); x++)
-			{
-				uint64_t childKey;
-				double edgeCost = m_pEnv->GCost(s, neighbors[x]);
-				if ((GCost(s) != DBL_MAX) && (fless(GCost(s)+edgeCost, GCost(neighbors[x]))))
-				{
-					SetGCost(m_pEnv, neighbors[x], GCost(s)+edgeCost);
-					if (aoc.Lookup(m_pEnv->GetStateHash(neighbors[x]), childKey) != kNotFound)
-						gCostQueue.push(borderData<state>(neighbors[x], GCost(neighbors[x])));
-				}
-			}
+			PropagateGCosts(s, to, false);
+			//gCostQueue.push(borderData<state>(s, GCost(s)));
 		}
 	}
 
@@ -474,9 +455,11 @@ namespace FLRTA {
 			{
 				if (cLoc == kNotFound) // add node even if it is dead!
 				{
-					if (verbose) std::cout << "Adding " << neighbors[x] << " to open" << std::endl;
+					if (verbose) std::cout << "Adding " << neighbors[x] << " to open with f:" << 
+						aoc.Lookat(parentKey).g+edgeCost + HCost(neighbors[x], to) << std::endl;
 					aoc.AddOpenNode(neighbors[x], m_pEnv->GetStateHash(neighbors[x]),
 									aoc.Lookat(parentKey).g+edgeCost, HCost(neighbors[x], to), parentKey);
+					cLoc = kOpenList;
 				}
 				else if (cLoc == kOpenList)
 				{   // these are local g costs
@@ -496,50 +479,43 @@ namespace FLRTA {
 						aoc.Lookup(childKey).parentID = parentKey;
 						aoc.Lookup(childKey).g = aoc.Lookup(parentKey).g+edgeCost;
 						aoc.Reopen(childKey);
+						cLoc = kOpenList; // since we moved it, and this is re-used below
 					}
 				}
 			}
 
 			// shorter g-cost to neighbors[x] from global search perspective
-			if ((GCost(next) != DBL_MAX) && (fless(GCost(next)+edgeCost, GCost(neighbors[x]))))
+			assert(GCost(next) != DBL_MAX);
+			if (fless(GCost(next)+edgeCost, GCost(neighbors[x])))
 			{
-				bool propagate = false;
+				if (verbose) std::cout << "Updating " << neighbors[x] << " from " << GCost(neighbors[x]) <<
+					" to " << GCost(next) << "(" << next << ") + " << edgeCost << " = " << GCost(next)+edgeCost << std::endl;
 				if (IsDead(neighbors[x]) && (cLoc == kClosedList)) // important step in proof!
 				{
+					// node was dead. If this is on the optimal path, it needs to be opened
+					cLoc = kOpenList;
 					aoc.Reopen(childKey);
-					propagate = true;
 					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
-					if (verbose) std::cout << "Updating " << neighbors[x] << " from " << GCost(neighbors[x]) <<
-						" to " << GCost(next) << "(" << next << ") + " << edgeCost << " = " << GCost(next)+edgeCost << std::endl;
-					PropagateGCosts(neighbors[x], to, propagate);
+					PropagateGCosts(neighbors[x], to, true);
 				}
 				else {
 					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
-//					if (cLoc != kNotFound)
-//						PropagateGCosts(neighbors[x], to, propagate);
+					//if (cLoc == kClosedList)
+					if (alsoExpand || (cLoc == kOpenList || cLoc == kClosedList))
+						PropagateGCosts(neighbors[x], to, false);
 				}
-//				else {
-//					if (verbose) std::cout << "Updating " << neighbors[x] << " from " << GCost(neighbors[x]) <<
-//						" to " << GCost(next) << "(" << next << ") + " << edgeCost << " = " << GCost(next)+edgeCost << std::endl;
-//					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
-//
-//					// if it's on the open we'll check later
-//					if (cLoc == kClosedList)
-//						gCostQueue.push(borderData<state>(neighbors[x], -GCost(data.data)));
-//
-//					if (cLoc != kNotFound)
-//					{
-//						// 3. if neighbor is on CLOSED/OPEN and has g-cost reduced, continue the propagation
-//						PropagateGCosts(neighbors[x], to, propagate);
-//					}
-//				}
 			}
-			// shorter g-cost from neighbor to here, reverse search
-			//std::cout << "GCost state:9 " << std::endl << next << neighbors[x] << std::endl;
-//			if (fless(edgeCost+GCost(neighbors[x]), GCost(next)))
-//			{
-//				PropagateGCosts(neighbors[x], to, false);
-//			}
+//			// shorter g-cost from neighbor to here, reverse search
+//			//std::cout << "GCost state:9 " << std::endl << next << neighbors[x] << std::endl;
+			if (fless(edgeCost+GCost(neighbors[x]), GCost(next)))
+			{
+				if (verbose) std::cout << "[Recursing to] Update " << next << " from " << GCost(next) <<
+					" to " << GCost(neighbors[x]) << "(" << neighbors[x] << ") + " << edgeCost << " = " << GCost(neighbors[x])+edgeCost << std::endl;
+				SetGCost(m_pEnv, next, GCost(neighbors[x])+edgeCost);
+				if (cLoc == kOpenList || cLoc == kClosedList)
+					PropagateGCosts(neighbors[x], to, false);
+				if (x != 0) x = -1;
+			}
 		}
 		if (verbose) std::cout << "=Done Propagating from: " << next << std::endl;
 	}

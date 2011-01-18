@@ -305,6 +305,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case ']': stepsPerFrame*=2.0; break; 
 		case '|':
 			unitSims[windowID]->ClearAllUnits();
+			unitSims[windowID]->GetStats()->ClearAllStats();
 			break;
 		case '\t':
 			if (mod != kShiftDown)
@@ -476,7 +477,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 
-	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 15));
+	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 100));
 	f->SetOrderRedundant(true);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
