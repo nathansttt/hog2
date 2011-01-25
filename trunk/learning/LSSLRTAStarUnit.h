@@ -39,7 +39,7 @@ public:
 		}
 		nodesExpanded = 0;
 		nodesTouched = 0;
-//		printf("LSSLRTA*: New trial: %f learned this trial; %f total\n",
+//		printf("LSSLRTA*: New trial: %f learned last trial; %f total\n",
 //			   algorithm->GetAmountLearned()-totalLearned, algorithm->GetAmountLearned());
 		totalLearned = algorithm->GetAmountLearned();
 	}

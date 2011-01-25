@@ -102,12 +102,17 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 	astar.SetHeuristic(this);
 	astar.SetUseBPMX(1);
 	for (int x = 0; x < nodeExpansionLimit; x++)
-		if (astar.DoSingleSearchStep(thePath))
-		{
-			// return reversed path
-			std::reverse(thePath.begin(), thePath.end());
+	{
+		if (astar.CheckNextNode() == to)
 			break;
-		}
+		astar.DoSingleSearchStep(thePath);
+//		if (astar.DoSingleSearchStep(thePath))
+//		{
+//			// return reversed path
+//			std::reverse(thePath.begin(), thePath.end());
+//			break;
+//		}
+	}
 	nodesExpanded = astar.GetNodesExpanded();
 	nodesTouched = astar.GetNodesTouched();
 //	std::cout << GetName() << " " << nodesExpanded << " expanded by A* with expansion limit " << nodeExpansionLimit << std::endl;
@@ -119,16 +124,23 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 	typedef std::priority_queue<borderData<state>,std::vector<borderData<state> >,compareBorderData<state> > pQueue;	
 	pQueue q;
 	
+	double bestF = -1;
+	state first;
+
 	unsigned int openSize = astar.GetNumOpenItems();
 	for (unsigned int x = 0; x < openSize; x++)
 	{
 		const AStarOpenClosedData<state> data = astar.GetOpenItem(x);
+		if ((bestF == -1) || (fless(data.g+data.h, bestF)))
+		{
+			bestF = data.g+data.h;
+			first = data.data;
+		}
 		q.push(borderData<state>(data.data, data.h));
 		if (verbose) std::cout << "Preparing border state: " << data.data << " h: " << data.h << std::endl;
 	}
 	
 	std::vector<state> succ;
-	state first = q.top().theState;
 	ClosedList c;
 	while (q.size() > 0)
 	{
@@ -150,14 +162,15 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 				continue;
 			}
 			double edgeCost = env->GCost(s, succ[x]);
+			if (verbose) std::cout << s << " to " << succ[x] << " " << edgeCost << " ";
 			succHCost = HCost(env, succ[x], to);
 			if (c[env->GetStateHash(succ[x])]) // in closed list, but seen before, update if smaller
 			{
 				if (verbose) std::cout << succ[x] << " updated before ";
 				if (fless(hCost + edgeCost, succHCost))
 				{
-					fAmountLearned -= succHCost-hCost-edgeCost;
-					if (verbose) std::cout << "lowering cost to " << hCost + edgeCost;
+					if (verbose) std::cout << "lowering cost to " << hCost + edgeCost << " from " << succHCost << std::endl;
+					fAmountLearned = fAmountLearned - (succHCost - (hCost+edgeCost));
 					if (verbose) std::cout << " learning now " << fAmountLearned;
 					SetHCost(env, succ[x], to, hCost + edgeCost);
 					q.push(borderData<state>(succ[x], hCost + edgeCost));
@@ -182,6 +195,9 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 		}
 	}
 	//std::cout << GetName() << " " << nodesExpanded-nodeExpansionLimit << " expanded during learning" << std::endl;
+
+//	if (thePath.size() != 0)
+//		return;
 
 	// 3. construct best path
 	astar.ExtractPathToStart(first, thePath);
