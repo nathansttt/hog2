@@ -92,7 +92,10 @@ public:
 
 	double GetTolerance() const { return tolerance; }
 	void GetTipPosition( armAngles &s, double &x, double &y );
-
+	int TipPositionIndex(armAngles &s,
+						 const double minX=-1, const double minY=-1,
+						 const double width=2 );
+	
 	void AddObstacle(line2d obs);
 	void GetSuccessors(const armAngles &nodeID, std::vector<armAngles> &neighbors) const;
 	void GetActions(const armAngles &nodeID, std::vector<armRotations> &actions) const;
@@ -113,6 +116,7 @@ public:
 	virtual double GCost(const armAngles &, const armAngles &) { return 1; }
 	virtual double GCost(const armAngles &, const armRotations &) { return 1; }
 	bool GoalTest(const armAngles &node, const armAngles &goal);
+	void GetStateFromHash(uint64_t hash, armAngles &) const;
 	uint64_t GetStateHash(const armAngles &node) const;
 	uint64_t GetActionHash(armRotations act) const;
 

@@ -114,6 +114,22 @@ void RoboticArm::GetTipPosition( armAngles &s, double &x, double &y )
 	y = a.y;
 }
 
+int RoboticArm::TipPositionIndex(armAngles &s,
+								 const double minX, const double minY,
+								 const double width )
+{
+	int idx;
+	double x, y;
+	GetTipPosition(s, x, y);
+	// if we had a guarantee that width was a multiple of
+	// tolerance, we could do a bunch of simplification
+	idx = (int)floor( ( y - minY ) / GetTolerance() );
+	idx *= (int)floor( width / GetTolerance() );
+	idx += (int)floor( ( x - minX ) / GetTolerance() );
+	
+	return idx;
+}
+
 void RoboticArm::GetSuccessors(const armAngles &nodeID, std::vector<armAngles> &neighbors) const
 {
 	neighbors.resize(0);
@@ -336,9 +352,18 @@ uint64_t RoboticArm::GetStateHash(const armAngles &node) const
 	//return node.angles;
 	uint64_t res = 0;
 	for (int x = 0; x < node.GetNumArms(); x++)
-		res = (res<<9)|(node.GetAngle(x)/2);
-	assert(res < 512*512*512);
+		res = (uint64_t)(res<<9)|((uint64_t)node.GetAngle(x)/2);
+//	assert(res < 512*512*512);
 	return res;
+}
+
+void RoboticArm::GetStateFromHash(uint64_t hash, armAngles &a) const
+{
+	for (int x = a.GetNumArms()-1; x >= 0; x--)
+	{
+		a.SetAngle(x, hash&0x1FF);
+		hash >>= 9;
+	}
 }
 
 uint64_t RoboticArm::GetActionHash(armRotations act) const
@@ -617,8 +642,8 @@ uint64_t ArmToTipHeuristic::ArmAnglesIndex( const armAngles &arm )
 }
 
 int ArmToTipHeuristic::TipPositionIndex( const double x, const double y,
-				  const double minX, const double minY,
-				  const double width )
+										const double minX, const double minY,
+										const double width )
 {
 	int idx;
 
@@ -1139,21 +1164,21 @@ void ArmToTipHeuristic::GenerateTipPositionTables( armAngles &sampleArm )
 		return;
 	}
 
-	tipPositionTables = new std::vector<armAngles>
-	  [ NumTipPositionIndices() ];
+	tipPositionTables = new std::vector<armAngles>[ NumTipPositionIndices() ];
 
 	arm.SetNumArms( numArms );
 
-	for( segment = 0; segment < numArms; ++segment ) {
+	for (segment = 0; segment < numArms; ++segment)
+	{
 		arm.SetAngle( segment, 0 );
 	}
-	while( 1 ) {
-		if( ra->LegalState( arm ) ) {
 
+	while( 1 )
+	{
+		if( ra->LegalState( arm ) )
+		{
 			ra->GetTipPosition( arm, x, y );
-		  tipPositionTables
-		    [ TipPositionIndex( x, y, -1.0, -1.0, 2.0 ) ]
-		    .push_back( arm );
+			tipPositionTables[TipPositionIndex( x, y, -1.0, -1.0, 2.0 )].push_back( arm );
 		}
 
 		// next configuration
@@ -1166,7 +1191,8 @@ void ArmToTipHeuristic::GenerateTipPositionTables( armAngles &sampleArm )
 				break;
 			}
 		} while( ++segment < numArms );
-		if (segment == numArms ) {
+		if (segment == numArms )
+		{
 			// tried all configurations
 			break;
 		}
@@ -1201,7 +1227,7 @@ double ArmToArmHeuristic::HCost(const armAngles &node1, const armAngles &node2)
 	return hval;
 }
 
-int ArmToArmHeuristic::TipPositionIndex( const double x, const double y,
+int ArmToArmHeuristic::TipPositionIndex(const double x, const double y,
 										const double minX, const double minY,
 										const double width )
 {
