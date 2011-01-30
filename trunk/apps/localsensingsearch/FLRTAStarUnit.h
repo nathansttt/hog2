@@ -30,7 +30,16 @@ public:
 	}
 	virtual ~FLRTAStarUnit() { delete algorithm; }
 	const char *GetName() { return algorithm->GetName(); }
-	bool Done() { return (currentLoc==goalLoc) && fequal(algorithm->GetAmountLearned(), totalLearned); }
+	bool Done()
+	{
+		if ((currentLoc==goalLoc) && fequal(algorithm->GetAmountLearned(), totalLearned))
+		{
+			if (algorithm->GetLastTrial())
+				return true;
+			algorithm->SetLastTrial();
+		}
+		return false;
+	}
 	void StartNewTrial(StatCollection *s) {
 		if (s)
 		{
