@@ -482,7 +482,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 
-	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.2));
+	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.0));
 	f->SetOrderRedundant(true);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);

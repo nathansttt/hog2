@@ -22,6 +22,7 @@
 
 namespace FLRTA {
 	static bool verbose = false;
+	static double theWeight = 1.0;
 	
 	template <class state>
 	class borderData {
@@ -58,7 +59,7 @@ namespace FLRTA {
 		bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
 		{
 			//return (fgreater(i1.g, i2.g));
-			return (fgreater(i1.g+i1.h, i2.g+i2.h));
+			return (fgreater(i1.g+theWeight*i1.h, i2.g+theWeight*i2.h));
 		}
 	};
 	
@@ -67,15 +68,24 @@ namespace FLRTA {
 	public:
 		FLRTAStar(int nodeLimit = 8, double weight = 1.5)
 		{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; /*pe = 0;*/ nodeLearningLimit = 1;
-			fWeight = weight; orderRedundant = false;
+			fWeight = weight; orderRedundant = false; lastTrial = false;
 		}
 		virtual ~FLRTAStar(void) { /*delete pe;*/ }
 		
+		bool GetLastTrial() { return lastTrial; }
+		void SetLastTrial() { lastTrial = true; }
+		double GetWeight() { return fWeight; }
+		void SetWeight(double w) { fWeight = w; }
 		void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 		void GetPath(environment *, const state& , const state& , std::vector<action> & ) { assert(false); };
 		virtual const char *GetName() { static char name[255]; sprintf(name, "FLRTAStar(%d,%1.1f,%c)", nodeExpansionLimit, fWeight, orderRedundant?'o':'u'); return name; }
 		void SetOrderRedundant(bool val) { orderRedundant = val; }
 		
+		void LivenState(const state &where)
+		{
+			stateData[m_pEnv->GetStateHash(where)].dead = true;
+		}
+
 		void KillState(const state &where)
 		{
 //			if (stateData.find(m_pEnv->GetStateHash(where)) != stateData.end())
@@ -244,7 +254,7 @@ namespace FLRTA {
 		uint64_t nodesExpanded, nodesTouched;
 		int nodeExpansionLimit, nodeLearningLimit;
 		state theEnd;
-		bool orderRedundant;
+		bool orderRedundant, lastTrial;
 		
 		typedef std::priority_queue<borderData<state>,std::vector<borderData<state> >,compareBorderData<state> > pQueue;	
 		pQueue gCostQueue;
@@ -256,6 +266,7 @@ namespace FLRTA {
 	template <class state, class action, class environment>
 	void FLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 	{
+		//theWeight = fWeight;
 		nodesExpanded = nodesTouched = 0;
 		m_pEnv = env;
 		thePath.resize(0);
@@ -313,6 +324,9 @@ namespace FLRTA {
 			const AStarOpenClosedData<state> data = aoc.Lookat(aoc.GetOpenItem(cnt));
 			if (IsDead(data.data))
 				continue;
+			double tmp = fWeight;
+			if (lastTrial)
+				fWeight = 1;
 			if (fgreater(GCost(best)+fWeight*HCost(best, to),
 						 GCost(data.data)+fWeight*HCost(data.data, to)) &&
 				!(data.data == from))
@@ -325,6 +339,7 @@ namespace FLRTA {
 			{
 				best = data.data;
 			}
+			fWeight = tmp;
 		}
 		// 4. construct best path
 		if (verbose) std::cout << "Moving towards " << best << " cost " << GCost(best) << std::endl;
@@ -455,10 +470,14 @@ namespace FLRTA {
 			{
 				if (cLoc == kNotFound) // add node even if it is dead!
 				{
+					double cost = min(GCost(next)+edgeCost, GCost(neighbors[x]));
+
 					if (verbose) std::cout << "Adding " << neighbors[x] << " to open with f:" << 
 						aoc.Lookat(parentKey).g+edgeCost + HCost(neighbors[x], to) << std::endl;
 					aoc.AddOpenNode(neighbors[x], m_pEnv->GetStateHash(neighbors[x]),
-									aoc.Lookat(parentKey).g+edgeCost, HCost(neighbors[x], to), parentKey);
+									aoc.Lookat(parentKey).g+edgeCost,
+									//cost,
+									HCost(neighbors[x], to), parentKey);
 					cLoc = kOpenList;
 				}
 				else if (cLoc == kOpenList)
@@ -509,6 +528,8 @@ namespace FLRTA {
 //			//std::cout << "GCost state:9 " << std::endl << next << neighbors[x] << std::endl;
 			if (fless(edgeCost+GCost(neighbors[x]), GCost(next)))
 			{
+				//assert(!IsDead(neighbors[x]));
+				//LivenState(neighbors[x]); // would need to put back on open, but happens elsewhere. [simplify later?]
 				if (verbose) std::cout << "[Recursing to] Update " << next << " from " << GCost(next) <<
 					" to " << GCost(neighbors[x]) << "(" << neighbors[x] << ") + " << edgeCost << " = " << GCost(neighbors[x])+edgeCost << std::endl;
 				SetGCost(m_pEnv, next, GCost(neighbors[x])+edgeCost);
