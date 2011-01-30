@@ -39,8 +39,8 @@ private:
 
 template <class state, class action>
 void BFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
-													  state from, state to,
-													  std::vector<state> &thePath)
+								 state from, state to,
+								 std::vector<state> &thePath)
 {
 	nodesExpanded = nodesTouched = 0;
 	
@@ -66,11 +66,11 @@ void BFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
 		}			
 		currDepth = depth.front();
 		depth.pop_front();
-
+		
 		if (mClosed.find(env->GetStateHash(s)) != mClosed.end())
 			continue;
 		mClosed[env->GetStateHash(s)] = true;
-
+		
 		nodesExpanded++;
 		env->GetSuccessors(s, thePath);
 		for (unsigned int x = 0; x < thePath.size(); x++)
@@ -87,8 +87,8 @@ void BFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
 
 template <class state, class action>
 void BFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
-													  state from, state to,
-													  std::vector<action> &thePath)
+								 state from, state to,
+								 std::vector<action> &thePath)
 {
 	assert(!"not defined");
 }
