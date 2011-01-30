@@ -30,6 +30,7 @@
 #include "IDAStar.h"
 #include "TemplateAStar.h"
 #include "RoboticArmTest.h"
+#include "FrontierBFS.h"
 
 #include "RoboticArm.h"
 
@@ -40,7 +41,7 @@
 #define FIXED_RANDOM_NUMBER_SEED 7
 
 
-const int numArms = 3;
+const int numArms = 4;
 RoboticArm *r = 0;
 armAngles config;
 armAngles goal;
@@ -51,6 +52,7 @@ TemplateAStar<armAngles, armRotations, RoboticArm> astar;
 float totalTime;
 ArmToArmHeuristic *aa = 0;
 void TestArms();
+void BuildTipTables();
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -398,7 +400,8 @@ void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
 	
 	if (key == 't')
 	{
-		TestArms();
+		BuildTipTables();
+		//TestArms();
 	}
 	
 	if (key == 'b')
@@ -636,4 +639,52 @@ void TestArms()
 	totalHvalue /= starts.size();
 	printf("time\t%f\tnodes\t%f\n", fTotalTime, totalNodes);
 	exit(0);
+}
+
+void WriteCache(int index, std::vector<armAngles> &values);
+
+void BuildTipTables()
+{
+	FrontierBFS<armAngles, armRotations> fbfs;
+	printf("Performing frontier BFS!\n");
+
+	std::vector<std::vector<armAngles> > cache;
+	
+	armAngles tmp = config;
+	
+	fbfs.InitializeSearch(r, config);
+	while (!fbfs.DoOneIteration(r))
+	{
+		const FrontierBFSClosedList closed = fbfs.GetCurrentClosedList();
+//		printf("Closed list size: %d\n", closed.size());
+		for (FrontierBFSClosedList::const_iterator it = closed.begin(); it != closed.end(); it++)
+		{
+			r->GetStateFromHash((*it).first, tmp);
+			//std::cout << tmp << std::endl;
+			int val = r->TipPositionIndex(tmp);
+			if (cache.size() <= val)
+				cache.resize(val);
+			cache[val].push_back(tmp);
+			if (cache[val].size() > 100)
+				WriteCache(val, cache[val]);
+		}
+	}
+	for (unsigned int x = 0; x < cache.size(); x++)
+		WriteCache(x, cache[x]);
+}
+
+void WriteCache(int index, std::vector<armAngles> &values)
+{
+	char filename[255];
+	sprintf(filename, "%d.tipIndex", index);
+	FILE *f = fopen(filename, "a+");
+	if (!f) assert(!"Couldn't open file!");
+	for (unsigned int x = 0; x < values.size(); x++)
+	{
+		for (unsigned int y = 0; y < values[x].GetNumArms(); y++)
+			fprintf(f, "%d ", values[x].GetAngle(y));
+		fprintf(f, "\n");
+	}
+	fclose(f);
+	values.resize(0);
 }
