@@ -604,7 +604,8 @@ double GraphMapInconsistentHeuristic::HCost(const graphState &state1, const grap
 
 	if (hmode == kIgnore)
 		return val;
-
+//	if (0 != (x1+x2+y1+y2)%16) // TODO: Remove this line
+//		return val;
 	//for (unsigned int x = 0; x < heuristics.size(); x++)
 	if (hmode == kRandom)
 	{
