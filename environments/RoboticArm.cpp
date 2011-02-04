@@ -361,7 +361,7 @@ void RoboticArm::GetStateFromHash(uint64_t hash, armAngles &a) const
 {
 	for (int x = a.GetNumArms()-1; x >= 0; x--)
 	{
-		a.SetAngle(x, hash&0x1FF);
+		a.SetAngle(x, (hash&0x1FF)*2);
 		hash >>= 9;
 	}
 }

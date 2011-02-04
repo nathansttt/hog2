@@ -18,7 +18,7 @@
 #include "UnitSimulation.h"
 #include "ReservationProvider.h"
 #include "ConfigEnvironment.h"
-
+#include "FrontierBFS.h"
 #include <cassert>
 
 //#include "BaseMapOccupancyInterface.h"
@@ -182,6 +182,177 @@ private:
 	std::vector<armAngles> canonicalStates;
 	std::vector<std::vector<armAngles> > tipPositionTables;
 	std::vector<bool> legalStates;
+};
+
+class ArmToArmCompressedHeuristic : public RoboticArmHeuristic {
+public:
+	ArmToArmCompressedHeuristic(RoboticArm *ra, const char *file)
+	{
+		r = ra;
+		Load(file);
+	}
+	ArmToArmCompressedHeuristic(RoboticArm *ra, std::vector<int> reductionPower, std::vector<int> offset)
+	{
+		r = ra;
+		reduction = reductionPower;
+		// we are actually only using 9 of the bits anyway
+		// strip 1, 2, 3, 4 or 5 additional bits
+		uint64_t mask[6] = {0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F }; //{ 0x3FC, 0x3F8, 0x3F0, 0x3E0, 0x3C0 };
+		theMask = theResult = 0;
+		theSize = 1;
+		for (int x = reduction.size()-1; x >= 0 ; x--)
+		{
+			theMask = (theMask<<(10))|(mask[reduction[x]-1]);
+			theResult = (theResult<<(10))|(offset[x]<<1);
+			theSize *= 512/pow(2,reduction[x]-1);
+		}
+		//theSize = (uint32_t)pow(512/reductionPower, numArms);
+		printf("Using mask 0x%llX\n", theMask);
+		printf("Using result 0x%llX\n", theResult);
+		printf("%d entries in table\n", theSize);
+		distances = new uint16_t[theSize];
+		memset ( distances, 0xFFFF, theSize*sizeof(uint16_t) );
+	}
+	ArmToArmCompressedHeuristic(RoboticArm *ra, int numArms, int reductionPower, int offset = 0)
+	{
+		r = ra;
+//		reduction = reductionPower;
+		// we are actually only using 9 of the bits anyway
+		// strip 1, 2, 3, 4 or 5 additional bits
+		uint64_t mask[5] = {0x3, 0x7, 0xF, 0x1F, 0x3F }; //{ 0x3FC, 0x3F8, 0x3F0, 0x3E0, 0x3C0 };
+		theMask = theResult = 0;
+		for (int x = 0; x < numArms; x++)
+		{
+			reduction.push_back(reductionPower);
+			theMask = (theMask<<(10))|(mask[reductionPower-2]);
+			theResult = (theResult<<(10))|(offset<<1);
+		}
+		theSize = (uint32_t)pow(512/reductionPower, numArms);
+		printf("Using mask 0x%llX\n", theMask);
+		printf("Using result 0x%llX\n", theResult);
+		printf("%d entries in table\n", theSize);
+		distances = new uint16_t[theSize];
+	}
+	void BuildHeuristic(armAngles &config)
+	{
+		memset ( distances, 0xFFFF, theSize*sizeof(uint16_t) );
+		
+		FrontierBFS<armAngles, armRotations> fbfs;
+		printf("Performing frontier BFS!\n");
+		std::cout << "Starting from " << config << std::endl;
+		
+		armAngles tmp = config;
+		int depth = 0;
+		fbfs.InitializeSearch(r, config);
+		while (!fbfs.DoOneIteration(r))
+		{
+			const FrontierBFSClosedList closed = fbfs.GetCurrentClosedList();
+			for (FrontierBFSClosedList::const_iterator it = closed.begin(); it != closed.end(); it++)
+			{
+				r->GetStateFromHash((*it).first, tmp);
+				AddState(tmp, depth);
+				assert(r->HCost(tmp, config) <= depth);
+			}
+			depth++;
+		}
+		config = tmp;
+	}
+	void AddState(armAngles &a, int dist)
+	{
+		//printf("Using mask 0x%llX on 0x%llX (0x%llX) (0x%llX)?\n", theMask, a.angles, a.angles&theMask, theResult);
+		if ((a.angles&theMask) != theResult)
+			return;
+		int index = GetIndex(a);
+		assert(distances[index] == 0xFFFF);
+		//std::cout << a << " goes in the table with index " << index << " : " << (a.angles&0xFFFFFFFF) << std::endl;
+		distances[index] = dist;
+	}
+	int GetIndex(const armAngles &a)
+	{
+		//std::cout << "Index of " << a << " : " << (a.angles&0xFFFFFFFF) << " is ";
+		int index = 0;
+		for (int x = 0; x < a.GetNumArms(); x++)
+		{
+			index = (index<<(10-reduction[x]))|(a.GetAngle(x)>>reduction[x]);
+			//std::cout << index << ", ";
+		}
+		//std::cout << std::endl;
+		assert(index < theSize);
+		return index;
+	}
+	double HCost(const armAngles &from, const armAngles &to)
+	{
+		if ((from.angles&theMask) != theResult)
+			return 0;
+		if (!(to == goal))
+			SetupGoal(to);
+		double heuristic = 0;
+		assert(distances[GetIndex(from)]<10000);
+		double baseDist = distances[GetIndex(from)];
+		for (unsigned int x = 0; x < values.size(); x++)
+		{
+			heuristic = max(heuristic, abs(baseDist-values[x])-errors[x]);
+		}
+		return heuristic;
+	}
+	void SetupGoal(const armAngles &referenceState)
+	{
+		values.resize(0);
+		errors.resize(0);
+		FrontierBFS<armAngles, armRotations> fbfs;
+		armAngles tmp = referenceState;
+		goal = referenceState;
+		int depth = 0;
+		fbfs.InitializeSearch(r, tmp);
+		while (!fbfs.DoOneIteration(r))
+		{
+			const FrontierBFSClosedList closed = fbfs.GetCurrentClosedList();
+			for (FrontierBFSClosedList::const_iterator it = closed.begin(); it != closed.end(); it++)
+			{
+				r->GetStateFromHash((*it).first, tmp);
+				if ((tmp.angles&theMask) == theResult)
+				{
+					std::cout << "Found state " << tmp << " distance " << distances[GetIndex(tmp)] << " with error " << depth << std::endl;
+					values.push_back(distances[GetIndex(tmp)]);
+					errors.push_back(depth);
+				}
+			}
+			if (values.size() > 0)
+				return;
+			depth++;
+		}
+	}
+	void Save(const char *file)
+	{
+		FILE *f = fopen(file, "w+");
+		if (f == 0) assert(!"file could not be opened");
+		fprintf(f, "%d %llu %llu %d\n", theSize, theMask, theResult, (int)reduction.size());
+		fwrite(&reduction[0], sizeof(int), reduction.size(), f);
+		fwrite(distances, sizeof(uint16_t), theSize, f);
+		fclose(f);
+	}
+	void Load(const char *file)
+	{
+		int numArms;
+		FILE *f = fopen(file, "r");
+		if (f == 0) assert(!"file could not be opened");
+		fscanf(f, "%d %llu %llu %d\n", &theSize, &theMask, &theResult, &numArms);
+		reduction.resize(numArms);
+		fread(&reduction[0], sizeof(int), reduction.size(), f);
+		distances = new uint16_t[theSize];
+		fread(distances, sizeof(uint16_t), theSize, f);
+		fclose(f);
+	}
+private:
+	int theSize;
+	std::vector<int> reduction;
+	std::vector<int> values;
+	std::vector<int> errors;
+	RoboticArm *r;
+	armAngles goal;
+	uint16_t *distances;
+	uint64_t theMask;
+	uint64_t theResult;
 };
 
 class ArmToTipHeuristic : public RoboticArmHeuristic {

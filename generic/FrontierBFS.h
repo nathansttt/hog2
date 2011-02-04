@@ -34,7 +34,7 @@ public:
 	{
 		if (mOpen1.size() > 0) return mClosed2;
 		if (mOpen2.size() > 0) return mClosed1;
-		assert(!"Open and closed are both null");
+		//assert(!"Open and closed are both null");
 		return mClosed1;
 	}
 	uint64_t GetNodesExpanded() { return nodesExpanded; }
@@ -96,6 +96,8 @@ bool FrontierBFS<state, action>::DoOneIteration(SearchEnvironment<state, action>
 	}
 	printf("Depth %d complete; nodes expanded %lld (%lld new); %d in memory\n", depth, nodesExpanded, nodesExpanded - n,
 		   mOpen1.size()+mOpen2.size()+mClosed1.size()+mClosed2.size());
+	if ((mOpen1.size() == 0) && (mOpen2.size() == 0))
+		return true;
 	return false;
 }
 
@@ -149,9 +151,15 @@ void FrontierBFS<state, action>::ExpandLevel(SearchEnvironment<state, action> *e
 		currentOpenList.pop_front();
 		
 		if (currentClosedList.find(env->GetStateHash(s)) != currentClosedList.end())
+		{
+//			printf("Needed to check against current\n");
 			continue;
-		if (lastClosedList.find(env->GetStateHash(s)) != lastClosedList.end())
-			continue;
+		}
+//		if (lastClosedList.find(env->GetStateHash(s)) != lastClosedList.end())
+//		{
+//			printf("Needed to check against last\n");
+//			continue;
+//		}
 		
 		currentClosedList[env->GetStateHash(s)] = true;
 		

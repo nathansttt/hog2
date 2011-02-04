@@ -260,7 +260,7 @@ void CreateSimulation(int id)
 	if (gDefaultMap[0] != 0)
 	{
 		mp = new Map(gDefaultMap);
-//		mp->Scale(512, 512);
+		mp->Scale(512, 512);
 		grp = GraphSearchConstants::GetGraph(mp);
 		env = new GraphEnvironment(mp, grp, new GraphMapInconsistentHeuristic(mp, grp));
 		
@@ -522,31 +522,53 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
+// 'a'
 void MyRandomUnitKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 
 	GraphMapInconsistentHeuristic diffHeuristic(mp, grp);
 	diffHeuristic.SetPlacement(kAvoidPlacement);
-	for (int x = 0; x < 10; x++)
+	for (int x = 0; x < 1; x++)
 		diffHeuristic.AddHeuristic();
-	diffHeuristic.SetNumUsedHeuristics(10);
+	diffHeuristic.SetNumUsedHeuristics(1);
 	double sum = 0;
-	for (int x = 0; x < 10000; x++)
+	uint64_t s1 = 0, s2 = 0, s3 = 0, s4 = 0;
+	for (int x = 0; x < 100; x++)
 	{
 		graphState n1 = grp->GetRandomNode()->GetNum();
 		graphState n2 = grp->GetRandomNode()->GetNum();
 		
 		double a, b;
 		
-		diffHeuristic.SetMode(kMax);
-		printf("Max: %f\t", a = diffHeuristic.HCost(n1, n2));
+//		diffHeuristic.SetMode(kIgnore);
+//		printf("Max: %f\t", a = diffHeuristic.HCost(n1, n2));
+//		diffHeuristic.SetMode(kCompressed);
+//		printf("Compressed: %f\t", b = diffHeuristic.HCost(n1, n2));
+//		printf("Error: %f\n", a-b);
+//		assert(a >= b);
+//		sum += a-b;
+//		printf("Average error: %f\n", sum/(x+1));
+		GraphEnvironment ge(mp, grp, &diffHeuristic);
+		ge.SetDirected(true);
+		diffHeuristic.SetMode(kIgnore);
+		vis1.GetPath(&ge, n1, n2, gPath);
+		printf("%lld\t%1.1f\t", vis1.GetNodesExpanded(), ge.GetPathLength(gPath));
+		s1+=vis1.GetNodesExpanded();
 		diffHeuristic.SetMode(kCompressed);
-		printf("Compressed: %f\t", b = diffHeuristic.HCost(n1, n2));
-		printf("Error: %f\n", a-b);
-		assert(a >= b);
-		sum += a-b;
-		printf("Average error: %f\n", sum/(x+1));
-	}	
+		vis1.SetUseBPMX(1);
+		vis1.GetPath(&ge, n1, n2, gPath);
+		printf("%lld\t%1.1f\t", vis1.GetNodesExpanded(), ge.GetPathLength(gPath));
+		s2+=vis1.GetNodesExpanded();
+		vis1.SetUseBPMX(2);
+		vis1.GetPath(&ge, n1, n2, gPath);
+		printf("%lld\t%1.1f\t", vis1.GetNodesExpanded(), ge.GetPathLength(gPath));
+		s3+=vis1.GetNodesExpanded();
+		vis1.SetUseBPMX(3);
+		vis1.GetPath(&ge, n1, n2, gPath);
+		printf("%lld\t%1.1f\n", vis1.GetNodesExpanded(), ge.GetPathLength(gPath));
+		s4+=vis1.GetNodesExpanded();
+	}
+	printf("%10lld %10lld %10lld %10lld\n", s1, s2, s3, s4);
 }
 
 // letter d
@@ -554,63 +576,64 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 	//115 maps/bgmaps/AR0011SR.map 512 512 190 61 477 321 462.65
 	
-	graphState s1 = grp->GetRandomNode()->GetNum(); //mp->GetNodeNum(190, 61);
-	graphState g1 = grp->GetRandomNode()->GetNum(); //mp->GetNodeNum(477, 321);
+	graphState s1 = mp->GetNodeNum(190, 61);//grp->GetRandomNode()->GetNum(); //
+	graphState g1 = mp->GetNodeNum(477, 321);//grp->GetRandomNode()->GetNum(); //
 	
 	
 	GraphMapInconsistentHeuristic *diffHeuristic1 = new GraphMapInconsistentHeuristic(mp, grp);
 	diffHeuristic1->SetPlacement(kAvoidPlacement);
-	diffHeuristic1->SetMode(kRandom);
+//	diffHeuristic1->SetMode(kRandom);
 	GraphEnvironment *gEnv1 = new GraphEnvironment(mp, grp, diffHeuristic1);
 	gEnv1->SetDirected(true);
 	for (int x = 0; x < 10; x++)
 		diffHeuristic1->AddHeuristic();
-	diffHeuristic1->SetNumUsedHeuristics(1);
+	diffHeuristic1->SetNumUsedHeuristics(10);
 	diffHeuristic1->SetMode(kMax);
-	vis1.SetUseBPMX(0);
+	vis1.SetUseBPMX(1);
 	
 	GraphMapInconsistentHeuristic *diffHeuristic2 = new GraphMapInconsistentHeuristic(mp, grp);
 	diffHeuristic2->SetPlacement(kAvoidPlacement);
-	diffHeuristic2->SetMode(kRandom);
+//	diffHeuristic2->SetMode(kRandom);
 	GraphEnvironment *gEnv2 = new GraphEnvironment(mp, grp, diffHeuristic2);
 	gEnv2->SetDirected(true);
-	for (int x = 0; x < 10; x++)
+	for (int x = 0; x < 80; x++)
 		diffHeuristic2->AddHeuristic();
-	diffHeuristic2->SetNumUsedHeuristics(10);
+	diffHeuristic2->SetNumUsedHeuristics(8);
 	diffHeuristic2->SetMode(kCompressed);
+	diffHeuristic2->Compress();
 	vis2.SetUseBPMX(1);
 
-	std::vector<double> test;
-	printf("Benchmarking\n", s1, g1);
-	int total = grp->GetNumNodes();
-	if (total > 30000) total = 30000;
-	
-	for (graphState x = 0; x < total; x+=13)
-	{
-		if ((x%10000) == 0)
-			printf("%d ", x);
-		for (graphState y = 0; y < total; y++)
-		{
-			test.push_back(diffHeuristic2->HCost(y, x));
-		}
-		//printf("%f\n", diffHeuristic2->HCost(x, s1));
-	}
-	printf("Compressing\n");
-	diffHeuristic2->Compress();
-	printf("Testing:\n");
-	int cnt = 0;
-	for (graphState x = 0; x < total; x+=13)
-	{
-		if ((x%10000) == 0)
-			printf("%d ", x);
-		for (graphState y = 0; y < total; y++)
-		{
-			assert(test[cnt] == diffHeuristic2->HCost(y, x));
-			cnt++;
-		}
-		//printf("%f\n", diffHeuristic2->HCost(x, s1));
-	}
-	printf("Compression verified on %d problems\n", cnt);
+//	std::vector<double> test;
+//	printf("Benchmarking\n", s1, g1);
+//	int total = grp->GetNumNodes();
+//	if (total > 30000) total = 30000;
+//	
+//	for (graphState x = 0; x < total; x+=13)
+//	{
+//		if ((x%10000) == 0)
+//			printf("%d ", x);
+//		for (graphState y = 0; y < total; y++)
+//		{
+//			test.push_back(diffHeuristic2->HCost(y, x));
+//		}
+//		//printf("%f\n", diffHeuristic2->HCost(x, s1));
+//	}
+//	printf("Compressing\n");
+//	diffHeuristic2->Compress();
+//	printf("Testing:\n");
+//	int cnt = 0;
+//	for (graphState x = 0; x < total; x+=13)
+//	{
+//		if ((x%10000) == 0)
+//			printf("%d ", x);
+//		for (graphState y = 0; y < total; y++)
+//		{
+//			assert(test[cnt] == diffHeuristic2->HCost(y, x));
+//			cnt++;
+//		}
+//		//printf("%f\n", diffHeuristic2->HCost(x, s1));
+//	}
+//	printf("Compression verified on %d problems\n", cnt);
 	
 	vis1.InitializeSearch(gEnv1, s1, g1, gPath);
 	vis2.InitializeSearch(gEnv2, s1, g1, gPath);

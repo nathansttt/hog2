@@ -41,7 +41,7 @@
 #define FIXED_RANDOM_NUMBER_SEED 7
 
 
-const int numArms = 4;
+const int numArms = 3;
 RoboticArm *r = 0;
 armAngles config;
 armAngles goal;
@@ -52,6 +52,7 @@ TemplateAStar<armAngles, armRotations, RoboticArm> astar;
 float totalTime;
 ArmToArmHeuristic *aa = 0;
 void TestArms();
+void TestArms2();
 void BuildTipTables();
 
 bool mouseTracking;
@@ -102,9 +103,13 @@ void CreateSimulation(int)
 #endif
 
 	config.SetNumArms( numArms );
-	config.SetAngle( 0, 512 );
-	config.SetAngle( 1, 512 );
-	config.SetAngle( 2, 512 );
+//	for (int x = 0; x < numArms; x++)
+//		config.SetAngle( x, 512 );
+	//330, 2, 870
+	//694, 1022, 154
+	config.SetAngle(0, 694);
+	config.SetAngle(1, 1022);
+	config.SetAngle(2, 154);
 	//r->GenerateTipPositionTables( config );
 
 //	config.SetAngle( 0, 790 );
@@ -400,8 +405,9 @@ void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
 	
 	if (key == 't')
 	{
-		BuildTipTables();
+		//BuildTipTables();
 		//TestArms();
+		TestArms2();
 	}
 	
 	if (key == 'b')
@@ -641,40 +647,123 @@ void TestArms()
 	exit(0);
 }
 
+void TestArms2()
+{
+	std::vector<armAngles> starts;
+	std::vector<armAngles> goals;
+	std::vector<armAngles> succ;
+
+	for (int x = 0; x < 100; x++)
+	{
+		armAngles a;
+		a.SetNumArms(numArms);
+		for (int y = 0; y < numArms; y++)
+			a.SetAngle( y, 512 );
+		for (int y = 0; y < 50000; y++)
+		{
+			r->GetSuccessors(a, succ);
+			a = succ[random()%succ.size()];
+		}
+		starts.push_back(a);
+	}
+	for (int x = 0; x < 100; x++)
+	{
+		armAngles a;
+		a.SetNumArms(numArms);
+		for (int y = 0; y < numArms; y++)
+			a.SetAngle( y, 512 );
+		for (int y = 0; y < 50000; y++)
+		{
+			r->GetSuccessors(a, succ);
+			a = succ[random()%succ.size()];
+		}
+		goals.push_back(a);
+	}
+	ArmToArmCompressedHeuristic *a1 = new ArmToArmCompressedHeuristic(r, "3-arm_far1.diff");
+	ArmToArmCompressedHeuristic *a2 = new ArmToArmCompressedHeuristic(r, "3-arm_far2.diff");
+	r->AddHeuristic(a1);
+	r->AddHeuristic(a2);
+	astar.SetUseBPMX(1);
+	printf("%d starts; %d goals\n", (int)starts.size(), (int)goals.size());
+	for (unsigned int x = 0; x < starts.size(); x+=1)
+	{
+		config = starts[x];
+		goal = goals[x];
+		std::cout << "Searching " << starts[x] << " to " << goals[x] << std::endl;
+		astar.InitializeSearch(r, starts[x], goals[x], ourPath);
+		
+		Timer t;
+		t.StartTimer();
+		while (!astar.DoSingleSearchStep(ourPath))
+		{}
+		t.EndTimer();
+//		totalHvalue += r->HCost(starts[x], goals[x]);
+//		totalNodes += astar.GetNodesExpanded();
+		printf("%d\t%lld\t%lld\t%f\t%f\t%1.0f\n", x, astar.GetNodesExpanded(), astar.GetUniqueNodesExpanded(),
+			   t.GetElapsedTime(), r->HCost(starts[x], goals[x]), r->GetPathLength(ourPath));
+	}
+	
+}
+
 void WriteCache(int index, std::vector<armAngles> &values);
 
 void BuildTipTables()
 {
+	std::vector<int> reduction, offset1, offset2;
+	reduction.push_back(3);reduction.push_back(2);reduction.push_back(2);
+	offset1.push_back(0);offset1.push_back(0);offset1.push_back(0);
+	offset2.push_back(0);offset2.push_back(0);offset2.push_back(1);
+	ArmToArmCompressedHeuristic *aah = new ArmToArmCompressedHeuristic(r, reduction, offset1);
+	ArmToArmCompressedHeuristic *aah1 = new ArmToArmCompressedHeuristic(r, reduction, offset2);
+	Timer t;
+	t.StartTimer();
+	
 	FrontierBFS<armAngles, armRotations> fbfs;
 	printf("Performing frontier BFS!\n");
-
-	std::vector<std::vector<armAngles> > cache;
+	std::cout << "Starting from " << config << std::endl;
+//	std::vector<std::vector<armAngles> > cache;
 	
 	armAngles tmp = config;
+	std::cout << "Adding heuristic from: " << tmp << std::endl;
+	aah->BuildHeuristic(tmp);
+	std::cout << "Adding heuristic from: " << tmp << std::endl;
+	aah1->BuildHeuristic(tmp);
+	std::cout << "Farthest state: " << tmp << std::endl;
+	aah->BuildHeuristic(tmp);
+	std::cout << "Farthest state: " << tmp << std::endl;
+	aah->Save("3-arm_far2.diff");
+	aah1->Save("3-arm_far1.diff");
 	
-	fbfs.InitializeSearch(r, config);
-	while (!fbfs.DoOneIteration(r))
-	{
-		const FrontierBFSClosedList closed = fbfs.GetCurrentClosedList();
-//		printf("Closed list size: %d\n", closed.size());
-		for (FrontierBFSClosedList::const_iterator it = closed.begin(); it != closed.end(); it++)
-		{
-			r->GetStateFromHash((*it).first, tmp);
-			//std::cout << tmp << std::endl;
-			int val = r->TipPositionIndex(tmp);
-			if (cache.size() <= val)
-				cache.resize(val);
-			cache[val].push_back(tmp);
-			if (cache[val].size() > 100)
-				WriteCache(val, cache[val]);
-		}
-	}
-	for (unsigned int x = 0; x < cache.size(); x++)
-		WriteCache(x, cache[x]);
+	printf("%1.2f seconds elapsed\n", t.EndTimer());
+	goal = config;
+	for (int x = 0; x < numArms; x++)
+		goal.SetAngle( x, 512 );
+	config.SetAngle(0, 360);
+	config.SetAngle(1, 70);
+	config.SetAngle(2, 276);
+//	config.SetAngle(0, 510);
+//  goal.SetAngle(0, 510);
+//	for (int x = 0; x < 1024; x+=2)
+//	{
+//		for (int y = 0; y < 1024; y+=2)
+//		{
+//			goal.SetAngle(1, x);
+//			goal.SetAngle(2, y);
+//			goal.SetAngle(0, 512);
+//			std::cout << "1] " << goal << " to " << config << ": " << aah.HCost(goal, config) << std::endl;
+//			goal.SetAngle(0, 510);
+//			std::cout << "2] " << goal << " to " << config << ": " << aah1.HCost(goal, config) << std::endl;
+//		}
+//	}
+	r->AddHeuristic(aah);
+	r->AddHeuristic(aah1);
+	validSearch = astar.InitializeSearch(r, config, goal, ourPath);
+	astar.SetUseBPMX(1);
 }
 
 void WriteCache(int index, std::vector<armAngles> &values)
 {
+	return;
 	char filename[255];
 	sprintf(filename, "%d.tipIndex", index);
 	FILE *f = fopen(filename, "a+");
