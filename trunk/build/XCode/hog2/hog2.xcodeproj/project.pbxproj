@@ -151,10 +151,6 @@
 		C47A433A12A459EC00FB7B0D /* MountainCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47A433912A459EC00FB7B0D /* MountainCar.cpp */; };
 		C47A433B12A459F900FB7B0D /* MountainCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47A433912A459EC00FB7B0D /* MountainCar.cpp */; };
 		C47E6A9612D673B500452D78 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47E6A9412D673B500452D78 /* Sample.cpp */; };
-		C47E6BE812DFC5C500452D78 /* LocalSensingUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C924A0FE30B2B0063E9B7 /* LocalSensingUnit.cpp */; };
-		C47E6BE912DFC5C600452D78 /* RIBS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A3F2C7104C66F200AB3D8F /* RIBS.cpp */; };
-		C47E6BEA12DFC5C700452D78 /* FLRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F6EBF812417B5100CAC7F0 /* FLRTAStar.cpp */; };
-		C47E6BEB12DFC5C900452D78 /* FLRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F6EBFB12417B7900CAC7F0 /* FLRTAStarUnit.cpp */; };
 		C47E913D0CBC29F200B1AFDA /* IRDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47E913C0CBC29F200B1AFDA /* IRDijkstra.cpp */; };
 		C47E913E0CBC29F200B1AFDA /* IRDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47E913C0CBC29F200B1AFDA /* IRDijkstra.cpp */; };
 		C47E913F0CBC29F200B1AFDA /* IRDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47E913C0CBC29F200B1AFDA /* IRDijkstra.cpp */; };
@@ -462,7 +458,7 @@
 		C4C847500C1F1A5B00AFBF7A /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4C847470C1F1A5B00AFBF7A /* main.nib */; };
 		C4C847510C1F1A5B00AFBF7A /* Inconsistency.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4C847490C1F1A5B00AFBF7A /* Inconsistency.icns */; };
 		C4C99B150EC16EA800C87E6E /* MultiAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C670CFF191F00301281 /* MultiAgent.cpp */; };
-		C4CD56F812E40D0E00E5AE67 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C92430FE303740063E9B7 /* Sample.cpp */; };
+		C4CD5A2612F395BA00E5AE67 /* RoboticArmTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F0110ECFD2C5009D90B3 /* RoboticArmTest.cpp */; };
 		C4D18AD70F183D7D005DEF84 /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
 		C4D3AFBE0BCEE5B800FCD84C /* Sample.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9C0BCEE5B800FCD84C /* Sample.icns */; };
@@ -841,6 +837,7 @@
 		C4C847590C1F1ACF00AFBF7A /* Inconsistency.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Inconsistency.h; sourceTree = "<group>"; };
 		C4CB1AEC10AE60640040B4E3 /* BidirectionalGraphEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BidirectionalGraphEnvironment.h; sourceTree = "<group>"; };
 		C4CB1AED10AE60640040B4E3 /* BidirectionalGraphEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BidirectionalGraphEnvironment.cpp; sourceTree = "<group>"; };
+		C4CD5A2D12F4DF4900E5AE67 /* FrontierBFS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrontierBFS.h; sourceTree = "<group>"; };
 		C4D034410CDB9A0A00921D30 /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C4D034420CDB9A0A00921D30 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		C4D18AD50F183D7D005DEF84 /* ConfigEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigEnvironment.h; sourceTree = "<group>"; };
@@ -1702,6 +1699,7 @@
 				C42E859A10CC61BD00A3E284 /* UnitCostBidirectionalBFS.h */,
 				C433A8440C03ADEB002B8108 /* IDAStar.h */,
 				C4DCBE4B1102718800EBDB3E /* SFIDAStar.h */,
+				C4CD5A2D12F4DF4900E5AE67 /* FrontierBFS.h */,
 				C4945199126910BF00D2CED9 /* BFS.h */,
 				C49452D0126F9ADB00D2CED9 /* DFID.h */,
 				C494525E126F89E900D2CED9 /* DFS.h */,
@@ -3279,11 +3277,7 @@
 				C40D955F11781819006EBEAF /* GraphRefinementEnvironment.cpp in Sources */,
 				C4BCFF5912643781008760EB /* ContractionHierarchy.cpp in Sources */,
 				C47A433B12A459F900FB7B0D /* MountainCar.cpp in Sources */,
-				C47E6BE812DFC5C500452D78 /* LocalSensingUnit.cpp in Sources */,
-				C47E6BE912DFC5C600452D78 /* RIBS.cpp in Sources */,
-				C47E6BEA12DFC5C700452D78 /* FLRTAStar.cpp in Sources */,
-				C47E6BEB12DFC5C900452D78 /* FLRTAStarUnit.cpp in Sources */,
-				C4CD56F812E40D0E00E5AE67 /* Sample.cpp in Sources */,
+				C4CD5A2612F395BA00E5AE67 /* RoboticArmTest.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3963,6 +3957,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5048396D09E3307300765E4B /* hog2Proj.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -3995,10 +3991,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5048396D09E3307300765E4B /* hog2Proj.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;

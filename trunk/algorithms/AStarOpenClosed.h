@@ -228,6 +228,7 @@ uint64_t AStarOpenClosed<state, CmpKey>::Close()
 template<typename state, typename CmpKey>
 void AStarOpenClosed<state, CmpKey>::Reopen(uint64_t objKey)
 {
+	assert(elements[objKey].where == kClosedList);
 	elements[objKey].reopened = true;
 	elements[objKey].where = kOpenList;
 	elements[objKey].openLocation = theHeap.size();
