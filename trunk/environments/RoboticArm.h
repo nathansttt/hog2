@@ -233,17 +233,22 @@ public:
 		printf("%d entries in table\n", theSize);
 		distances = new uint16_t[theSize];
 	}
-	void BuildHeuristic(armAngles &config)
+	~ArmToArmCompressedHeuristic()
+	{
+		delete [] distances;
+	}
+	// takes start state and returns farthest state from it
+	armAngles BuildHeuristic(armAngles &config)
 	{
 		memset ( distances, 0xFFFF, theSize*sizeof(uint16_t) );
-		
+
 		FrontierBFS<armAngles, armRotations> fbfs;
 		printf("Performing frontier BFS!\n");
-		std::cout << "Starting from " << config << std::endl;
-		
-		armAngles tmp = config;
+
+		std::cout << "Using " << config << " as basis for heuristic." << std::endl;
 		int depth = 0;
-		fbfs.InitializeSearch(r, config);
+		armAngles tmp = config;
+		fbfs.InitializeSearch(r, tmp);
 		while (!fbfs.DoOneIteration(r))
 		{
 			const FrontierBFSClosedList closed = fbfs.GetCurrentClosedList();
@@ -251,11 +256,55 @@ public:
 			{
 				r->GetStateFromHash((*it).first, tmp);
 				AddState(tmp, depth);
-				assert(r->HCost(tmp, config) <= depth);
+				//assert(r->HCost(tmp, config) <= depth);
 			}
 			depth++;
 		}
-		config = tmp;
+		return tmp;
+	}
+
+	// takes set of start states, finds farthest to build heuristic from, and returns source of heuristic
+	armAngles BuildHeuristic(std::vector<armAngles> &config)
+	{
+		memset ( distances, 0xFFFF, theSize*sizeof(uint16_t) );
+		
+		FrontierBFS<armAngles, armRotations> fbfs;
+		printf("Performing frontier BFS!\n");
+		//std::cout << "Starting from " << config[0] << std::endl;
+		
+		armAngles tmp = config[0];
+		armAngles source = tmp;
+
+		std::cout << "Finding farthest states from: ";
+		for (unsigned int x = 0; x < config.size(); x++)
+			std::cout << config[x] << " ";
+		std::cout << std::endl;
+		fbfs.InitializeSearch(r, config);
+		while (!fbfs.DoOneIteration(r))
+		{
+			const FrontierBFSClosedList closed = fbfs.GetCurrentClosedList();
+			for (FrontierBFSClosedList::const_iterator it = closed.begin(); it != closed.end(); it++)
+			{
+				r->GetStateFromHash((*it).first, tmp);
+			}
+		}
+
+		std::cout << "Using " << tmp << " as basis for heuristic." << std::endl;
+		int depth = 0;
+		source = tmp;
+		fbfs.InitializeSearch(r, tmp);
+		while (!fbfs.DoOneIteration(r))
+		{
+			const FrontierBFSClosedList closed = fbfs.GetCurrentClosedList();
+			for (FrontierBFSClosedList::const_iterator it = closed.begin(); it != closed.end(); it++)
+			{
+				r->GetStateFromHash((*it).first, tmp);
+				AddState(tmp, depth);
+				//assert(r->HCost(tmp, config) <= depth);
+			}
+			depth++;
+		}
+		return source;
 	}
 	void AddState(armAngles &a, int dist)
 	{
