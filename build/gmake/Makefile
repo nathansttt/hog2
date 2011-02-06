@@ -10,7 +10,7 @@
 
 # All projects to build in this order.
 PROJECTS = \
-  gui/STUB/GL \
+  gui/GL \
   absmapalgorithms \
   abstraction \
   abstractionalgorithms \
