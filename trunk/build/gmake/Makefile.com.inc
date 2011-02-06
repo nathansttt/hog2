@@ -37,7 +37,7 @@ COMMON_CXXFLAGS += -I/System/Library/Frameworks/AGL.framework/Versions/A/Headers
 endif
 
 else # not darwin
-COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lXi -lXmu -lpthread
+COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread # -lXi -lXmu 
 
 ifeq ("$(OPENGL)", "STUB")
 COMMON_CXXFLAGS += -I$(shell pwd | sed "s/hog2.*/hog2/")/gui/ -I$(shell pwd | sed "s/hog2.*/hog2/")/gui/GL/ -DNO_OPENGL
