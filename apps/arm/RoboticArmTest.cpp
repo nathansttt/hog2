@@ -107,9 +107,23 @@ void CreateSimulation(int)
 //		config.SetAngle( x, 512 );
 	//330, 2, 870
 	//694, 1022, 154
-	config.SetAngle(0, 694);
-	config.SetAngle(1, 1022);
-	config.SetAngle(2, 154);
+	//332, 4, 1022
+	//690, 1022, 2
+	if (numArms == 3)
+	{
+		config.SetAngle(0, 332);
+		config.SetAngle(1, 4);
+		config.SetAngle(2, 1022);
+	}
+	else if (numArms == 4)
+	{
+		// 226, 194, 242, 522
+		// 152, 2, 532, 270]
+		config.SetAngle(0, 152);
+		config.SetAngle(1, 2);
+		config.SetAngle(2, 532);
+		config.SetAngle(3, 279);
+	}
 	//r->GenerateTipPositionTables( config );
 
 //	config.SetAngle( 0, 790 );
@@ -330,8 +344,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if (maxNumArgs <= 1)
 		return 0;
-	strncpy(gDefaultMap, argument[1], 1024);
-	return 2;
+	BuildTipTables();
+	exit(0);
+//	strncpy(gDefaultMap, argument[1], 1024);
+//	return 2;
 }
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
@@ -405,9 +421,9 @@ void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
 	
 	if (key == 't')
 	{
-		//BuildTipTables();
+		BuildTipTables();
 		//TestArms();
-		TestArms2();
+		//TestArms2();
 	}
 	
 	if (key == 'b')
@@ -670,23 +686,49 @@ void TestArms2()
 	{
 		armAngles a;
 		a.SetNumArms(numArms);
-		for (int y = 0; y < numArms; y++)
-			a.SetAngle( y, 512 );
-		for (int y = 0; y < 50000; y++)
+
+		if (numArms == 3)
+		{
+			if (x%2)
+			{
+				a.SetAngle(0, 694);
+				a.SetAngle(1, 1022);
+				a.SetAngle(2, 154);
+			}
+			else {
+				a.SetAngle(0, 330);
+				a.SetAngle(1, 2);
+				a.SetAngle(2, 870);
+			}
+		}
+		else {
+			for (int y = 0; y < numArms; y++)
+				a.SetAngle( y, 512 );
+		}
+		for (int y = 0; y < 5000; y++)
 		{
 			r->GetSuccessors(a, succ);
 			a = succ[random()%succ.size()];
 		}
 		goals.push_back(a);
 	}
-	ArmToArmCompressedHeuristic *a1 = new ArmToArmCompressedHeuristic(r, "3-arm_far1.diff");
-	ArmToArmCompressedHeuristic *a2 = new ArmToArmCompressedHeuristic(r, "3-arm_far2.diff");
-	r->AddHeuristic(a1);
-	r->AddHeuristic(a2);
+//	//	ArmToArmCompressedHeuristic *a1 = new ArmToArmCompressedHeuristic(r, "3-arm_far1.diff"); //16V
+//	//	ArmToArmCompressedHeuristic *a2 = new ArmToArmCompressedHeuristic(r, "3-arm_far2.diff");
+//	//	ArmToArmCompressedHeuristic *a1 = new ArmToArmCompressedHeuristic(r, "3-arm_4V_b.diff");
+//	//	ArmToArmCompressedHeuristic *a2 = new ArmToArmCompressedHeuristic(r, "3-arm_4V_a.diff");
+//	ArmToArmCompressedHeuristic *a1 = new ArmToArmCompressedHeuristic(r, "3-arm_8V_a.diff");
+//	ArmToArmCompressedHeuristic *a2 = new ArmToArmCompressedHeuristic(r, "3-arm_8V_b.diff");
+//	ArmToArmCompressedHeuristic *a3 = new ArmToArmCompressedHeuristic(r, "3-arm_8V_c.diff");
+//	ArmToArmCompressedHeuristic *a4 = new ArmToArmCompressedHeuristic(r, "3-arm_8V_d.diff");
+//	r->AddHeuristic(a1);
+//	r->AddHeuristic(a2);
+//	r->AddHeuristic(a3);
+//	r->AddHeuristic(a4);
 	astar.SetUseBPMX(1);
 	printf("%d starts; %d goals\n", (int)starts.size(), (int)goals.size());
 	for (unsigned int x = 0; x < starts.size(); x+=1)
 	{
+		int cnt=0;
 		config = starts[x];
 		goal = goals[x];
 		std::cout << "Searching " << starts[x] << " to " << goals[x] << std::endl;
@@ -695,7 +737,7 @@ void TestArms2()
 		Timer t;
 		t.StartTimer();
 		while (!astar.DoSingleSearchStep(ourPath))
-		{}
+		{ if ((0 == (++cnt)%1000) && (t.EndTimer() > 60)) break; }
 		t.EndTimer();
 //		totalHvalue += r->HCost(starts[x], goals[x]);
 //		totalNodes += astar.GetNodesExpanded();
@@ -706,59 +748,89 @@ void TestArms2()
 }
 
 void WriteCache(int index, std::vector<armAngles> &values);
+void BuildDHTables(std::vector<int> reduction, const char *baseName);
 
 void BuildTipTables()
 {
-	std::vector<int> reduction, offset1, offset2;
+	if (r == 0)
+		CreateSimulation(0);
+	std::vector<int> reduction;
+
+	reduction.clear();
+	reduction.push_back(1);reduction.push_back(1);reduction.push_back(1);
+	BuildDHTables(reduction, "3-arm_1V");
+
+	reduction.clear();
+	reduction.push_back(1);reduction.push_back(1);reduction.push_back(2);
+	BuildDHTables(reduction, "3-arm_2V");
+	
+	reduction.clear();
+	reduction.push_back(1);reduction.push_back(2);reduction.push_back(2);
+	BuildDHTables(reduction, "3-arm_4V");
+
+	reduction.clear();
+	reduction.push_back(2);reduction.push_back(2);reduction.push_back(2);
+	BuildDHTables(reduction, "3-arm_8V");
+
+	reduction.clear();
 	reduction.push_back(3);reduction.push_back(2);reduction.push_back(2);
+	BuildDHTables(reduction, "3-arm_16V");
+
+	reduction.clear();
+	reduction.push_back(3);reduction.push_back(3);reduction.push_back(2);
+	BuildDHTables(reduction, "3-arm_32V");
+
+	reduction.clear();
+	reduction.push_back(3);reduction.push_back(3);reduction.push_back(3);
+	BuildDHTables(reduction, "3-arm_64V");
+}
+
+void BuildDHTables(std::vector<int> reduction, const char *baseName)
+{
+	std::vector<int> offset1, offset2, offset3, offset4;
+	//reduction.push_back(3);reduction.push_back(2);reduction.push_back(2);
 	offset1.push_back(0);offset1.push_back(0);offset1.push_back(0);
 	offset2.push_back(0);offset2.push_back(0);offset2.push_back(1);
+	offset3.push_back(0);offset3.push_back(1);offset3.push_back(0);
+	offset4.push_back(0);offset4.push_back(1);offset4.push_back(1);
+
 	ArmToArmCompressedHeuristic *aah = new ArmToArmCompressedHeuristic(r, reduction, offset1);
 	ArmToArmCompressedHeuristic *aah1 = new ArmToArmCompressedHeuristic(r, reduction, offset2);
+	ArmToArmCompressedHeuristic *aah2 = new ArmToArmCompressedHeuristic(r, reduction, offset3);
+	ArmToArmCompressedHeuristic *aah3 = new ArmToArmCompressedHeuristic(r, reduction, offset4);
 	Timer t;
 	t.StartTimer();
 	
 	FrontierBFS<armAngles, armRotations> fbfs;
-	printf("Performing frontier BFS!\n");
-	std::cout << "Starting from " << config << std::endl;
-//	std::vector<std::vector<armAngles> > cache;
-	
+
+	std::vector<armAngles> init, far;
 	armAngles tmp = config;
-	std::cout << "Adding heuristic from: " << tmp << std::endl;
-	aah->BuildHeuristic(tmp);
-	std::cout << "Adding heuristic from: " << tmp << std::endl;
-	aah1->BuildHeuristic(tmp);
-	std::cout << "Farthest state: " << tmp << std::endl;
-	aah->BuildHeuristic(tmp);
-	std::cout << "Farthest state: " << tmp << std::endl;
-	aah->Save("3-arm_far2.diff");
-	aah1->Save("3-arm_far1.diff");
+	init.push_back(tmp);
+	std::cout << "Building heuristic 1 from: " << std::endl;
+	far.push_back(aah->BuildHeuristic(init)); // initial finding of far state; far[0] = far1
+
+	std::cout << "Building heuristic 2: " << std::endl;
+	far.push_back(aah1->BuildHeuristic(far)); // first real heuristic; far[1] = far2
+
+	std::cout << "Building heuristic 3: " << std::endl;
+	far.push_back(aah2->BuildHeuristic(far)); // first real heuristic; far[1] = far2
 	
-	printf("%1.2f seconds elapsed\n", t.EndTimer());
-	goal = config;
-	for (int x = 0; x < numArms; x++)
-		goal.SetAngle( x, 512 );
-	config.SetAngle(0, 360);
-	config.SetAngle(1, 70);
-	config.SetAngle(2, 276);
-//	config.SetAngle(0, 510);
-//  goal.SetAngle(0, 510);
-//	for (int x = 0; x < 1024; x+=2)
-//	{
-//		for (int y = 0; y < 1024; y+=2)
-//		{
-//			goal.SetAngle(1, x);
-//			goal.SetAngle(2, y);
-//			goal.SetAngle(0, 512);
-//			std::cout << "1] " << goal << " to " << config << ": " << aah.HCost(goal, config) << std::endl;
-//			goal.SetAngle(0, 510);
-//			std::cout << "2] " << goal << " to " << config << ": " << aah1.HCost(goal, config) << std::endl;
-//		}
-//	}
-	r->AddHeuristic(aah);
-	r->AddHeuristic(aah1);
-	validSearch = astar.InitializeSearch(r, config, goal, ourPath);
-	astar.SetUseBPMX(1);
+	std::cout << "Building heuristic 4: " << std::endl;
+	far.push_back(aah3->BuildHeuristic(far)); // first real heuristic; far[1] = far2
+
+	char name[255];
+	sprintf(name, "%s_a.diff", baseName);
+	aah->Save(name);
+	sprintf(name, "%s_b.diff", baseName);
+	aah1->Save(name);
+	sprintf(name, "%s_c.diff", baseName);
+	aah2->Save(name);
+	sprintf(name, "%s_d.diff", baseName);
+	aah3->Save(name);
+	delete aah;
+	delete aah1;
+	delete aah2;
+	delete aah3;
 }
 
 void WriteCache(int index, std::vector<armAngles> &values)

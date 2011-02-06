@@ -22,12 +22,13 @@ class FrontierBFS {
 public:
 	FrontierBFS() { }
 	virtual ~FrontierBFS() {}
-	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
+	void GetPath(SearchEnvironment<state, action> *env, state &from, state &to,
 				 std::vector<state> &thePath);
-	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
+	void GetPath(SearchEnvironment<state, action> *env, state &from, state &to,
 				 std::vector<action> &thePath);
 	
-	void InitializeSearch(SearchEnvironment<state, action> *env, state from);
+	void InitializeSearch(SearchEnvironment<state, action> *env, state &from);
+	void InitializeSearch(SearchEnvironment<state, action> *env, std::vector<state> &from);
 	bool DoOneIteration(SearchEnvironment<state, action> *env);
 	
 	const FrontierBFSClosedList &GetCurrentClosedList()
@@ -60,7 +61,7 @@ private:
 
 template <class state, class action>
 void FrontierBFS<state, action>::InitializeSearch(SearchEnvironment<state, action> *env,
-												  state from)
+												  state &from)
 {
 	nodesExpanded = nodesTouched = 0;
 	
@@ -70,6 +71,22 @@ void FrontierBFS<state, action>::InitializeSearch(SearchEnvironment<state, actio
 	mClosed2.clear();
 	
 	mOpen1.push_back(from);	
+	depth = 0;
+}
+
+template <class state, class action>
+void FrontierBFS<state, action>::InitializeSearch(SearchEnvironment<state, action> *env,
+												  std::vector<state> &from)
+{
+	nodesExpanded = nodesTouched = 0;
+	
+	mOpen1.clear();
+	mOpen2.clear();
+	mClosed1.clear();
+	mClosed2.clear();
+	
+	for (unsigned int x = 0; x < from.size(); x++)
+		mOpen1.push_back(from[x]);
 	depth = 0;
 }
 
@@ -104,7 +121,7 @@ bool FrontierBFS<state, action>::DoOneIteration(SearchEnvironment<state, action>
 
 template <class state, class action>
 void FrontierBFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
-										 state from, state to,
+										 state &from, state &to,
 										 std::vector<state> &thePath)
 {
 	nodesExpanded = nodesTouched = 0;
@@ -179,7 +196,7 @@ void FrontierBFS<state, action>::ExpandLevel(SearchEnvironment<state, action> *e
 
 template <class state, class action>
 void FrontierBFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
-										 state from, state to,
+										 state &from, state &to,
 										 std::vector<action> &thePath)
 {
 	assert(!"not defined");
