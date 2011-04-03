@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include <iostream>
+#include <string.h>
 #include "Map.h"
 #include "MapAbstraction.h"
 #include "SearchEnvironment.h"
@@ -209,7 +210,7 @@ public:
 		//theSize = (uint32_t)pow(512/reductionPower, numArms);
 		printf("Using mask 0x%llX\n", theMask);
 		printf("Using result 0x%llX\n", theResult);
-		printf("%d entries in table\n", theSize);
+		printf("%llu entries in table\n", theSize);
 		distances = new uint16_t[theSize];
 		memset ( distances, 0xFFFF, theSize*sizeof(uint16_t) );
 	}
@@ -311,15 +312,15 @@ public:
 		//printf("Using mask 0x%llX on 0x%llX (0x%llX) (0x%llX)?\n", theMask, a.angles, a.angles&theMask, theResult);
 		if ((a.angles&theMask) != theResult)
 			return;
-		int index = GetIndex(a);
+		uint64_t index = GetIndex(a);
 		assert(distances[index] == 0xFFFF);
 		//std::cout << a << " goes in the table with index " << index << " : " << (a.angles&0xFFFFFFFF) << std::endl;
 		distances[index] = dist;
 	}
-	int GetIndex(const armAngles &a)
+	uint64_t GetIndex(const armAngles &a)
 	{
 		//std::cout << "Index of " << a << " : " << (a.angles&0xFFFFFFFF) << " is ";
-		int index = 0;
+		uint64_t index = 0;
 		for (int x = 0; x < a.GetNumArms(); x++)
 		{
 			index = (index<<(10-reduction[x]))|(a.GetAngle(x)>>reduction[x]);
@@ -375,7 +376,7 @@ public:
 	{
 		FILE *f = fopen(file, "w+");
 		if (f == 0) assert(!"file could not be opened");
-		fprintf(f, "%d %llu %llu %d\n", theSize, theMask, theResult, (int)reduction.size());
+		fprintf(f, "%llu %llu %llu %d\n", theSize, theMask, theResult, (int)reduction.size());
 		fwrite(&reduction[0], sizeof(int), reduction.size(), f);
 		fwrite(distances, sizeof(uint16_t), theSize, f);
 		fclose(f);
@@ -385,7 +386,7 @@ public:
 		int numArms;
 		FILE *f = fopen(file, "r");
 		if (f == 0) assert(!"file could not be opened");
-		fscanf(f, "%d %llu %llu %d\n", &theSize, &theMask, &theResult, &numArms);
+		fscanf(f, "%llu %llu %llu %d\n", &theSize, &theMask, &theResult, &numArms);
 		reduction.resize(numArms);
 		fread(&reduction[0], sizeof(int), reduction.size(), f);
 		distances = new uint16_t[theSize];
@@ -393,7 +394,7 @@ public:
 		fclose(f);
 	}
 private:
-	int theSize;
+	uint64_t theSize;
 	std::vector<int> reduction;
 	std::vector<int> values;
 	std::vector<int> errors;

@@ -643,7 +643,7 @@ void RunScenario(char *name, int which)
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
 		printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
-		if (sl->GetNthExperiment(x).GetBucket() == 127)
+		if (sl->GetNthExperiment(x).GetBucket() == 255)
 			RunSingleTest(es, sl->GetNthExperiment(x), which);
 	}
 	exit(0);
@@ -663,7 +663,8 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 
 //	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
 //	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
-	
+	double weight = 20;
+
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
@@ -673,8 +674,8 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	}
 	else if (which == 1)
 	{
-		printf("Running LRTA*\n");
-		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		printf("Running LSSLRTA*\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
@@ -695,21 +696,21 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	else if (which == 4)
 	{
 		printf("Running FLRTA*(1)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(1, 10.0));
+		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(1, weight));
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
 	else if (which == 5)
 	{
 		printf("Running FLRTA*(10)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, 10.0));
+		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, weight));
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
 	else if (which == 6)
 	{
 		printf("Running FLRTA*(100)\n");
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100, 10.0));
+		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100, weight));
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
@@ -786,6 +787,8 @@ void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which)
 	HeuristicLearningMeasure<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> measured;
 	double requiredLearning = measured.MeasureDifficultly(es->GetEnvironment(), a, b);
 	
+	double weight = 1.5;
+
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
@@ -795,8 +798,8 @@ void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which)
 	}
 	else if (which == 1)
 	{
-		printf("Running LRTA*\n");
-		LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>());
+		printf("Running LSSLRTA*\n");
+		LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
@@ -818,7 +821,7 @@ void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which)
 	{
 		printf("Running FLRTA*(1)\n");
 		FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
-		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1, 10.0));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1, weight));
 		f->SetOrderRedundant(false);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
@@ -827,7 +830,7 @@ void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which)
 	{
 		printf("Running FLRTA*(10)\n");
 		FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
-		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10, 10.0));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10, weight));
 		f->SetOrderRedundant(false);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
@@ -836,7 +839,7 @@ void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which)
 	{
 		printf("Running FLRTA*(100)\n");
 		FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
-		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, 10.0));
+		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, weight));
 		f->SetOrderRedundant(false);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
@@ -927,8 +930,8 @@ void RunBigTest(EpSim *es, const Experiment &e, int which)
 	}
 	else if (which == 1)
 	{
-		printf("Running LRTA*\n");
-		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		printf("Running lSSLRTA*\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
@@ -1016,8 +1019,8 @@ void RunScalingTest(int size, int which, float weight)
 	}
 	else if (which == 1)
 	{
-		printf("Running LRTA*\n");
-		LRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		printf("Running LSSLRTA*\n");
+		LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
@@ -1134,8 +1137,8 @@ void RunTankScalingTest(int size, int which, float weight)
 	}
 	else if (which == 1)
 	{
-		printf("Running LRTA*\n");
-		LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>());
+		printf("Running LSSLRTA*\n");
+		LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u1 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
@@ -1296,7 +1299,7 @@ void RunSTPTest(int which)
 		}
 		else if (which == 1)
 		{
-			LRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle>(s, g, new LRTAStar<MNPuzzleState, slideDir, MNPuzzle>());
+			LSSLRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle> *u1 = new LSSLRTAStarUnit<MNPuzzleState, slideDir, MNPuzzle>(s, g, new LSSLRTAStar<MNPuzzleState, slideDir, MNPuzzle>(1));
 			u1->SetSpeed(1.0);
 			es->AddUnit(u1);
 		}
