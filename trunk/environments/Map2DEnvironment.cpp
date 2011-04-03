@@ -323,6 +323,19 @@ void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) con
 	
 }
 
+void MapEnvironment::GLDrawLine(const xyLoc &a, const xyLoc &b) const
+{
+	GLdouble xx, yy, zz, rad;
+	map->GetOpenGLCoord(a.x, a.y, xx, yy, zz, rad);
+	
+	glColor3f(0.5, 0.5, 0.5);
+	glBegin(GL_LINES);
+	glVertex3f(xx, yy, zz-rad/2);
+	map->GetOpenGLCoord(b.x, b.y, xx, yy, zz, rad);
+	glVertex3f(xx, yy, zz-rad);
+	glEnd();
+}
+
 void MapEnvironment::GLLabelState(const xyLoc &s, const char *str) const
 {
 	glPushMatrix();
