@@ -49,7 +49,7 @@ bool runningSearch1 = false;
 bool runningSearch2 = false;
 int px1, py1, px2, py2;
 int absType = 0;
-int mazeSize = 30;
+int mazeSize = 20;
 
 std::vector<EpisodicSimulation<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *> unitSims;
 TemplateAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> a1;
@@ -402,9 +402,9 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	if (mod == kShiftDown)
 	{
 		x1 = 0; y1 = 0;
-		x2 = 2;//m->GetMapWidth()-1;
+		x2 = m->GetMapWidth()-1;
 //		x2 = 0;//m->GetMapWidth()-1;
-		y2 = 4;//m->GetMapHeight()-1;
+		y2 = m->GetMapHeight()-1;
 	}
 	else {
 		do {
@@ -446,27 +446,27 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	u2->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u2);
 
-//	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u2 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
-//	u2->SetSpeed(0.02);
-//	unitSims[windowID]->AddUnit(u2);
+	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u2 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
+	u2->SetSpeed(0.02);
+	unitSims[windowID]->AddUnit(u2);
 	
-	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u3 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1));
-	u3->SetSpeed(0.02);
-	unitSims[windowID]->AddUnit(u3);
+//	LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u3 = new LSSLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new LSSLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10));
+//	u3->SetSpeed(0.02);
+//	unitSims[windowID]->AddUnit(u3);
 
-//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u4 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, 100));
+//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u4 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10, 1.5));
 //	u4->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u4);
 //
-//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, 1.5));
+//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10, 5.5));
 //	u5->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u5);
 //
-//	FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
-//	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u6 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, 5));
-//	f->SetOrderRedundant(false);
-//	u6->SetSpeed(0.02);
-//	unitSims[windowID]->AddUnit(u6);
+	FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
+	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u6 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10, 10.5));
+	f->SetOrderRedundant(false);
+	u6->SetSpeed(0.02);
+	unitSims[windowID]->AddUnit(u6);
 	
 	unitSims[windowID]->GetStats()->AddFilter("trialDistanceMoved");
 	unitSims[windowID]->GetStats()->AddFilter("TotalLearning");

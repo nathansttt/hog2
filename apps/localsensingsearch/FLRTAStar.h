@@ -17,6 +17,7 @@
 #include <vector>
 #include <ext/hash_map>
 #include "TemplateAStar.h"
+#include "Timer.h"
 #include <queue>
 #include <iostream>
 
@@ -45,13 +46,15 @@ namespace FLRTA {
 	template <class state>
 	class learnedStateData {
 	public:
-		learnedStateData() :theState(), gCost(DBL_MAX), hCost(0), dead(false), redundant(false) {}
+		learnedStateData() :theState(), gCost(DBL_MAX), hCost(0), dead(false), redundant(false), parents(0), children(0) {}
+		~learnedStateData() { delete parents; delete children; }
 		state theState;
 		double gCost;
 		double hCost;
 		bool dead;
 		bool redundant;
-//		std::vector<state> parents;
+		std::vector<state> *parents;
+		std::vector<state> *children;
 	};
 
 	template <class state>
@@ -69,6 +72,7 @@ namespace FLRTA {
 		FLRTAStar(int nodeLimit = 8, double weight = 1.5)
 		{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; /*pe = 0;*/ nodeLearningLimit = 1;
 			fWeight = weight; orderRedundant = false; lastTrial = false;
+			followLocalGCost = false;
 		}
 		virtual ~FLRTAStar(void) { /*delete pe;*/ }
 		
@@ -78,44 +82,209 @@ namespace FLRTA {
 		void SetWeight(double w) { fWeight = w; }
 		void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 		void GetPath(environment *, const state& , const state& , std::vector<action> & ) { assert(false); };
-		virtual const char *GetName() { static char name[255]; sprintf(name, "FLRTAStar(%d,%1.1f,%c)", nodeExpansionLimit, fWeight, orderRedundant?'o':'u'); return name; }
+		virtual const char *GetName()
+		{ static char name[255]; sprintf(name, "FLRTAStar(%d,%1.1f,%c,%c)", nodeExpansionLimit, fWeight, orderRedundant?'o':'u', followLocalGCost?'l':'g'); return name; }
 		void SetOrderRedundant(bool val) { orderRedundant = val; }
+		void SetUseLocalGCost(bool val) { followLocalGCost = val; }
 		
-		void LivenState(const state &where)
+		void VerifyParentChildren()
 		{
-			stateData[m_pEnv->GetStateHash(where)].dead = true;
+			for (typename LearnedStateData::const_iterator it = stateData.begin(); it != stateData.end(); it++)
+			{
+				const learnedStateData<state> *s = &((*it).second);
+				if ((s->dead) && ((s.children->size() > 0) || s.children->size() > 0))
+				{
+					std::cout << s->theState << " is dead but has parents and/or children " << std::endl;
+				}
+				for (unsigned int x = 0; x < s.children->size(); x++)
+				{
+					bool found = false;
+					for (int y = 0; y < stateData[m_pEnv->GetStateHash(s.children->at(x))].parents->size(); y++)
+					{
+						if (stateData[m_pEnv->GetStateHash(s.children->at(x))]->parents[y] == s->theState)
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						std::cout << s->theState << " lists " << s.children->at(x) << " as child, but the child doesn't list the parent" << std::endl;
+					}
+				}
+				
+			}
+			
 		}
+		
+//		void LivenState(const state &where)
+//		{
+//			stateData[m_pEnv->GetStateHash(where)].dead = true;
+//		}
 
 		void KillState(const state &where)
 		{
-//			if (stateData.find(m_pEnv->GetStateHash(where)) != stateData.end())
-//				stateData[m_pEnv->GetStateHash(where)].dead = true;
+			uint64_t hash = m_pEnv->GetStateHash(where);
+			learnedStateData<state> &theState = stateData[hash];
+
+			if (verbose) std::cout << "Killing " << where << std::endl;
+			for (unsigned int x = 0; x < theState.parents->size(); x++)
+			{
+				RemoveChild(theState.parents->at(x), where);
+			}
+			theState.parents->resize(0);
+			for (unsigned int x = 0; x < theState.children->size(); x++)
+			{
+				RemoveParent(where, theState.children->at(x));
+			}
+			theState.children->resize(0);
+			//			if (stateData.find(m_pEnv->GetStateHash(where)) != stateData.end())
+//				theState.dead = true;
 //			else {
 			//std::cout << "Hashing state:1 " << std::endl << where << std::endl;
-			stateData[m_pEnv->GetStateHash(where)].theState = where;
-			stateData[m_pEnv->GetStateHash(where)].dead = true;
+			theState.theState = where;
+			theState.dead = true;
 //			}
 		}
 		
 		bool IsDead(const state &where)
 		{
 			// the default constructor makes dead == false, so we only have to initalize the state
-			//std::cout << "Hashing state:2 " << std::endl << where << std::endl;
-			if (stateData.find(m_pEnv->GetStateHash(where)) == stateData.end())
+			uint64_t hash = m_pEnv->GetStateHash(where);
+			typename LearnedStateData::iterator it = stateData.find(hash);
+			if (it == stateData.end())
+			{
 				return false;
-			stateData[m_pEnv->GetStateHash(where)].theState = where;
-			return stateData[m_pEnv->GetStateHash(where)].dead;
+			}			
+			(*it).second.theState = where;
+			return (*it).second.dead;
+
+//			stateData[m_pEnv->GetStateHash(where)].theState = where;
+//			return stateData[m_pEnv->GetStateHash(where)].dead;
+		}
+		
+		void AddParent(const state &parent, const state &child)
+		{
+			if (verbose)
+			{
+				if (IsDead(child) || IsDead(parent))
+					std::cout << "ABORT! trying to add dead child " << child << " to parent " << parent << std::endl;
+			}
+//			if (stateData[m_pEnv->GetStateHash(child)].parents == 0)
+//				stateData[m_pEnv->GetStateHash(child)].parents = new std::vector<state>();
+
+			uint64_t hash = m_pEnv->GetStateHash(child);
+			learnedStateData<state> &theState = stateData[hash];
+
+			for (unsigned int x = 0; x < theState.parents->size(); x++)
+			{
+				if (theState.parents->at(x) == parent)
+					return;
+			}
+			theState.parents->push_back(parent);
+		}
+		
+		void RemoveParent(const state &parent, const state &child)
+		{
+			uint64_t hash = m_pEnv->GetStateHash(child);
+			learnedStateData<state> &theState = stateData[hash];
+
+			for (unsigned int x = 0; x < theState.parents->size(); x++)
+			{
+				if (theState.parents->at(x) == parent)
+				{
+					if (verbose)
+						std::cout << parent << " was parent of " << child << std::endl;
+					theState.parents->at(x) = theState.parents->back();
+					theState.parents->resize(theState.parents->size()-1);
+					return;
+				}
+			}
+		}
+		
+		void ClearParents(const state &which)
+		{
+			stateData[m_pEnv->GetStateHash(which)].parents->resize(0);
+		}
+		
+		void AddChild(const state &parent, const state &child)
+		{
+//			if (IsDead(child) || IsDead(parent))
+//			{
+//				std::cout << "ABORT! trying to add child " << child << " to parent " << parent << std::endl;
+//				assert(false);
+//			}
+			uint64_t hash = m_pEnv->GetStateHash(parent);
+			learnedStateData<state> &theState = stateData[hash];
+
+//			if (stateData[m_pEnv->GetStateHash(child)].children == 0)
+//				stateData[m_pEnv->GetStateHash(child)].children = new std::vector<state>();
+			for (unsigned int x = 0; x < theState.children->size(); x++)
+			{
+				if (theState.children->at(x) == child)
+					return;
+			}
+			theState.children->push_back(child);
+		}
+
+		void RemoveChild(const state &parent, const state &child)
+		{
+			uint64_t hash = m_pEnv->GetStateHash(parent);
+			learnedStateData<state> &theState = stateData[hash];
+
+			for (unsigned int x = 0; x < theState.children->size(); x++)
+			{
+				if (theState.children->at(x) == child)
+				{
+					if (verbose) std::cout << child << " was child of " << parent << std::endl;
+					theState.children->at(x) = theState.children->back();
+					theState.children->resize(theState.children->size()-1);
+					return;
+				}
+			}
+		}
+		
+		void ClearChildren(const state &which)
+		{
+			stateData[m_pEnv->GetStateHash(which)].children->resize(0);
+		}
+		
+		bool IsOnlyParent(const state &parent, const state &child)
+		{
+			if ((stateData[m_pEnv->GetStateHash(child)].parents->size() == 1) &&
+				(stateData[m_pEnv->GetStateHash(child)].parents->at(0) == parent))
+				return true;
+			return false;
 		}
 		
 		void SetGCost(environment *env, const state &where, double val)
 		{
+			uint64_t hash = env->GetStateHash(where);
+			learnedStateData<state> &theState = stateData[hash];
+			//TODO: reset parent/children
+			if (theState.parents == 0)
+				theState.parents = new std::vector<state>();
+			if (theState.children == 0)
+				theState.children = new std::vector<state>();
+
+			for (unsigned int x = 0; x < theState.parents->size(); x++)
+			{
+				RemoveChild(theState.parents->at(x), where);
+			}
+			theState.parents->resize(0);
+			for (unsigned int x = 0; x < theState.children->size(); x++)
+			{
+				RemoveParent(where, theState.children->at(x));
+			}
+			theState.children->resize(0);
+
 			if (verbose) std::cout << "-->GCost of " << where << " setting to " << val << std::endl;
 			//std::cout << "Hashing state:3 " << std::endl << where << std::endl;
-			fAmountLearned -= stateData[env->GetStateHash(where)].hCost;
-			stateData[env->GetStateHash(where)].hCost = 0;
-			stateData[env->GetStateHash(where)].gCost = val;
-			stateData[env->GetStateHash(where)].theState = where;
-			stateData[env->GetStateHash(where)].dead = false; // updated g-cost, make it alive again
+			fAmountLearned -= theState.hCost;
+			theState.hCost = 0;
+			theState.gCost = val;
+			theState.theState = where;
+			theState.dead = false; // updated g-cost, make it alive again
 		}
 		
 		double FCost(const state &where, const state &goal)
@@ -126,11 +295,13 @@ namespace FLRTA {
 		
 		double GCost(environment *env, const state &where)
 		{
+			uint64_t hash = env->GetStateHash(where);
 			//std::cout << "Hashing state:4 " << std::endl << where << std::endl;
-			if (stateData.find(env->GetStateHash(where)) != stateData.end())
+			typename LearnedStateData::iterator it = stateData.find(hash);
+			if (it != stateData.end())
 			{
-				stateData[env->GetStateHash(where)].theState = where;
-				return stateData[env->GetStateHash(where)].gCost;
+				(*it).second.theState = where;
+				return (*it).second.gCost;
 			}
 			return DBL_MAX; // g-costs can only be lowered, hence the high start
 		}
@@ -158,37 +329,89 @@ namespace FLRTA {
 		double HCost(const state &from, const state &to)
 		{ return HCost(m_pEnv, from, to); }
 		
-		bool IsRedundant(const state &where)
+		void TryToKill(const state &where, const state &goal)
 		{
-//			return false;
-			std::vector<state> succ;
-			m_pEnv->GetSuccessors(where, succ);
-			for (unsigned int x = 0; x < succ.size(); x++)
+			uint64_t hash = m_pEnv->GetStateHash(where);
+			learnedStateData<state> &theState = stateData[hash];
+			//VerifyParentChildren();
+			if (where == goal) return;
+			//if (IsDead(where)) return;
+			if (theState.dead) return;
+			if (verbose) std::cout << "Trying to kill: " << where << std::endl;
+			for (unsigned int x = 0; x < theState.children->size(); x++)
 			{
-				if (IsDead(succ[x]))
-				{
-					if (verbose) std::cout << succ[x] << " is dead" << std::endl;
-					continue;
-				}
-				if (fequal(GCost(succ[x]), DBL_MAX))
-				{
-					if (verbose) std::cout << where << " has child " << succ[x] << " with infinite g-cost. Not redundant!" << std::endl;
-					return false;
-				}
-				//std::cout << "GCost state:1 " << std::endl << succ[x] << where << std::endl;
-				if (fequal(GCost(succ[x]),
-						   GCost(where)+m_pEnv->GCost(where, succ[x])) &&
-					(NumParents(succ[x]) <= 1))
+				if (IsOnlyParent(where, theState.children->at(x)))
 				{
 					if (verbose)
-						std::cout << succ[x] << " relies on " << where << " as its only parent, not redundant" << std::endl;
-					return false;
+					{
+						if (IsDead(theState.children->at(x)))
+							printf("---But the state below is dead!\n");
+						std::cout << " Thwarted by " << theState.children->at(x) << std::endl;
+					}
+					return;
 				}
-				if (verbose) std::cout << DBL_MAX << succ[x] << " has no status -- gcost: " << GCost(succ[x]) << std::endl;
-				if (orderRedundant && IsBestParent(succ[x], where))
+			}
+//			nextToKill = *theState.parents;
+			KillState(where);
+//			for (unsigned int x = 0; x < theState.children->size(); x++)
+//			{
+//				RemoveParent(where, theState.children->at(x));
+//				//x--;
+//			}
+//			ClearChildren(where);
+//			for (unsigned int x = 0; x < theState.parents->size(); x++)
+//			{
+//				RemoveChild(theState.parents->at(x), where);
+//				//x--;
+//			}
+//			ClearParents(where);
+			
+			//VerifyParentChildren();
+			// this isn't agent centric
+//			for (unsigned int x = 0; x < parents.size(); x++)
+//				TryToKill(parents[x], goal);
+//			for (int x = 0; x < theState.parents->size(); x++)
+//				TryToKill(theState.parents->at(x), goal);
+		}
+		
+		bool IsRedundant(const state &where)
+		{
+			if (stateData[m_pEnv->GetStateHash(where)].children->size() == 0)
+				return true;
+			for (int x = 0; x < stateData[m_pEnv->GetStateHash(where)].children->size(); x++)
+			{
+				if (IsOnlyParent(where, stateData[m_pEnv->GetStateHash(where)].children->at(x)))
 					return false;
 			}
 			return true;
+//			std::vector<state> succ;
+//			m_pEnv->GetSuccessors(where, succ);
+//			for (unsigned int x = 0; x < succ.size(); x++)
+//			{
+//				if (IsDead(succ[x]))
+//				{
+//					if (verbose) std::cout << succ[x] << " is dead" << std::endl;
+//					continue;
+//				}
+//				if (fequal(GCost(succ[x]), DBL_MAX))
+//				{
+//					if (verbose) std::cout << where << " has child " << succ[x] << " with infinite g-cost. Not redundant!" << std::endl;
+//					return false;
+//				}
+//				//std::cout << "GCost state:1 " << std::endl << succ[x] << where << std::endl;
+//				if (fequal(GCost(succ[x]),
+//						   GCost(where)+m_pEnv->GCost(where, succ[x])) &&
+//					(NumParents(succ[x]) <= 1))
+//				{
+//					if (verbose)
+//						std::cout << succ[x] << " relies on " << where << " as its only parent, not redundant" << std::endl;
+//					return false;
+//				}
+//				if (verbose) std::cout << DBL_MAX << succ[x] << " has no status -- gcost: " << GCost(succ[x]) << std::endl;
+//				if (orderRedundant && IsBestParent(succ[x], where))
+//					return false;
+//			}
+//			return true;
 		}
 
 		int NumParents(const state &where)
@@ -254,7 +477,7 @@ namespace FLRTA {
 		uint64_t nodesExpanded, nodesTouched;
 		int nodeExpansionLimit, nodeLearningLimit;
 		state theEnd;
-		bool orderRedundant, lastTrial;
+		bool orderRedundant, lastTrial, followLocalGCost;
 		
 		typedef std::priority_queue<borderData<state>,std::vector<borderData<state> >,compareBorderData<state> > pQueue;	
 		pQueue gCostQueue;
@@ -266,6 +489,9 @@ namespace FLRTA {
 	template <class state, class action, class environment>
 	void FLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 	{
+		Timer t;
+		t.StartTimer();
+//		VerifyParentChildren();
 		//theWeight = fWeight;
 		nodesExpanded = nodesTouched = 0;
 		m_pEnv = env;
@@ -290,12 +516,16 @@ namespace FLRTA {
 //		uint64_t old = nodesExpanded;
 		DoHCostLearning(env, from, to);
 //		std::cout << GetName() << " " << nodesExpanded-old << " learning expansions before dead/redundant " << std::endl;
+
+		// folded into HCost learning
 		MarkDeadRedundant(env, to);
 //		std::cout << GetName() << nodesExpanded << " total nodes this step" << std::endl;
 		ExtractBestPath(env, from, to, thePath);
 		
 		
 		if (verbose) std::cout << "FLRTA* heading towards " << thePath[0] << " with h-value " << HCost(env, thePath[0], to) << std::endl;
+		t.EndTimer();
+		//std::cout << GetName() << "\t" << nodesExpanded << "\t" << t.GetElapsedTime() << "\t" << nodesExpanded/t.GetElapsedTime() << std::endl;
 	}
 
 	template <class state, class action, class environment>
@@ -319,6 +549,7 @@ namespace FLRTA {
 			return;
 		}
 		// 3. Find node with highest f-cost / g-cost
+		double bestG = 0;
 		for (; cnt < aoc.OpenSize(); cnt++)
 		{
 			const AStarOpenClosedData<state> data = aoc.Lookat(aoc.GetOpenItem(cnt));
@@ -327,17 +558,36 @@ namespace FLRTA {
 			double tmp = fWeight;
 			if (lastTrial)
 				fWeight = 1;
-			if (fgreater(GCost(best)+fWeight*HCost(best, to),
-						 GCost(data.data)+fWeight*HCost(data.data, to)) &&
-				!(data.data == from))
+			if (followLocalGCost)
 			{
-				best = data.data;
+				if (fgreater(bestG+fWeight*HCost(best, to),
+							 data.g+fWeight*HCost(data.data, to)) &&
+					!(data.data == from))
+				{
+					best = data.data;
+					bestG = data.g;
+				}
+				else if (fequal(bestG+fWeight*HCost(best, to), data.g+fWeight*HCost(data.data, to)) &&
+						 fgreater(data.g, bestG) &&
+						 !(data.data == from))
+				{
+					best = data.data;
+					bestG = data.g;
+				}
 			}
-			else if (fequal(GCost(best)+fWeight*HCost(best, to), GCost(data.data)+fWeight*HCost(data.data, to)) &&
-					 fgreater(GCost(data.data), GCost(best)) &&
-					 !(data.data == from))
-			{
-				best = data.data;
+			else {
+				if (fgreater(GCost(best)+fWeight*HCost(best, to),
+							 GCost(data.data)+fWeight*HCost(data.data, to)) &&
+					!(data.data == from))
+				{
+					best = data.data;
+				}
+				else if (fequal(GCost(best)+fWeight*HCost(best, to), GCost(data.data)+fWeight*HCost(data.data, to)) &&
+						 fgreater(GCost(data.data), GCost(best)) &&
+						 !(data.data == from))
+				{
+					best = data.data;
+				}
 			}
 			fWeight = tmp;
 		}
@@ -405,7 +655,7 @@ namespace FLRTA {
 			if (verbose) std::cout << "Next in LSS: " << aoc.Lookat(next).data << std::endl;
 
 			// 2. propagate g-costs to neighbors and beyond if this node isn't dead
-			if (IsDead(aoc.Lookat(next).data) && x != 0)
+			if (IsDead(aoc.Lookat(next).data))// && x != 0)
 			{
 				// dead; ignore(?)
 				//x--;
@@ -438,7 +688,8 @@ namespace FLRTA {
 		for (unsigned int x = 0; x < aoc.OpenSize(); x++)
 		{
 			state s = aoc.Lookat(aoc.GetOpenItem(x)).data;
-			PropagateGCosts(s, to, false);
+			if (!IsDead(s))
+				PropagateGCosts(s, to, false);
 			//gCostQueue.push(borderData<state>(s, GCost(s)));
 		}
 	}
@@ -502,9 +753,15 @@ namespace FLRTA {
 					}
 				}
 			}
-
+			
 			// shorter g-cost to neighbors[x] from global search perspective
 			assert(GCost(next) != DBL_MAX);
+			// TODO: handle equal case:
+			if (!IsDead(neighbors[x]) && fequal(GCost(next)+edgeCost, GCost(neighbors[x])))
+			{
+				AddParent(next, neighbors[x]);
+				AddChild(next, neighbors[x]);
+			}
 			if (fless(GCost(next)+edgeCost, GCost(neighbors[x])))
 			{
 				if (verbose) std::cout << "Updating " << neighbors[x] << " from " << GCost(neighbors[x]) <<
@@ -515,10 +772,16 @@ namespace FLRTA {
 					cLoc = kOpenList;
 					aoc.Reopen(childKey);
 					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
+					//TODO: 
+					AddParent(next, neighbors[x]);
+					AddChild(next, neighbors[x]);
 					PropagateGCosts(neighbors[x], to, true);
 				}
 				else {
 					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
+					//TODO: 
+					AddParent(next, neighbors[x]);
+					AddChild(next, neighbors[x]);
 					//if (cLoc == kClosedList)
 					if (alsoExpand || (cLoc == kOpenList || cLoc == kClosedList))
 						PropagateGCosts(neighbors[x], to, false);
@@ -533,8 +796,14 @@ namespace FLRTA {
 				if (verbose) std::cout << "[Recursing to] Update " << next << " from " << GCost(next) <<
 					" to " << GCost(neighbors[x]) << "(" << neighbors[x] << ") + " << edgeCost << " = " << GCost(neighbors[x])+edgeCost << std::endl;
 				SetGCost(m_pEnv, next, GCost(neighbors[x])+edgeCost);
-				if (cLoc == kOpenList || cLoc == kClosedList)
-					PropagateGCosts(neighbors[x], to, false);
+				//TODO:
+				if (!IsDead(neighbors[x]))
+				{
+					AddParent(neighbors[x], next);
+					AddChild(neighbors[x], next);
+//					if (cLoc == kOpenList || cLoc == kClosedList)
+//						PropagateGCosts(neighbors[x], to, false);
+				}
 				if (x != 0) x = -1;
 			}
 		}
@@ -544,9 +813,16 @@ namespace FLRTA {
 	template <class state, class action, class environment>
 	void FLRTAStar<state, action, environment>::MarkDeadRedundant(environment *env, const state &goal)
 	{
-		// 1. put all open nodes in pqueue
+//		std::vector<state> othersToKill;
+//		unsigned int openSize = aoc.size();
+//		for (unsigned int x = 0; x < openSize; x++)
+//		{
+//			const AStarOpenClosedData<state> data = aoc.Lookat(x);//astar.GetItem(x);
+//			TryToKill(data.data, goal, othersToKill);
+//		}
+//		// 1. put all open nodes in pqueue
 		pQueue q;
-		
+//		
 		unsigned int openSize = aoc.size();
 		for (unsigned int x = 0; x < openSize; x++)
 		{
@@ -558,41 +834,47 @@ namespace FLRTA {
 			}
 		}
 		
-		std::vector<state> succ;
+//		std::vector<state> succ;
 		state first = q.top().theState;
 		while (q.size() > 0)
 		{
-			//nodesExpanded++;
-			//nodesTouched++;
+//			//nodesExpanded++;
+//			//nodesTouched++;
 			state s = q.top().theState;
-			if (verbose) std::cout << "Doing update from " << s << " g: " << q.top().value << "/" << GCost(s) << std::endl;
+			TryToKill(s, goal);
+//			if (verbose) std::cout << "Doing update from " << s << " g: " << q.top().value << "/" << GCost(s) << std::endl;
 			q.pop();
-
-			if (IsDead(s) || (s == goal))
-				continue;
-			//std::cout << "GCost state:13 " << std::endl << s << goal << std::endl;
 			if (fgreater(GCost(s)+HCost(s, goal), GCost(goal)))
 			{
 				if (verbose) std::cout<<"Marking " << GCost(s) << ":" << HCost(s, goal) << " " << s << " as dead -- too far from goal: " << GCost(goal) << goal << std::endl;
 				KillState(s);
 			}
-			else if (IsRedundant(s)) // catches the dead case too
-			{
-				if (verbose) 
-					std::cout<<"Marking " << s << " as redundant" << std::endl;
-				KillState(s);
-				//put successors back on queue in case they are dead too
-//				nodesExpanded++;
-//				env->GetSuccessors(s, succ);
-//				for (unsigned int x = 0; x < succ.size(); x++)
-//				{
-//					uint64_t tmpKey;
-					//std::cout << "Hashing state:14 " << std::endl << succ[x] << std::endl;
-//					if ((kNotFound != aoc.Lookup(env->GetStateHash(succ[x]), tmpKey)) && (!IsDead(succ[x])))
-//						//if (astar.HaveExpandedState(succ[x]) && !IsDead(succ[x]))
-//						q.push(borderData<state>(succ[x], DBL_MAX));
-//				}
-			}
+			//
+//			if (IsDead(s) || (s == goal))
+//				continue;
+//			//std::cout << "GCost state:13 " << std::endl << s << goal << std::endl;
+//			if (fgreater(GCost(s)+HCost(s, goal), GCost(goal)))
+//			{
+//				if (verbose) std::cout<<"Marking " << GCost(s) << ":" << HCost(s, goal) << " " << s << " as dead -- too far from goal: " << GCost(goal) << goal << std::endl;
+//				KillState(s);
+//			}
+//			else if (IsRedundant(s)) // catches the dead case too
+//			{
+//				if (verbose) 
+//					std::cout<<"Marking " << s << " as redundant" << std::endl;
+//				KillState(s);
+//				//put successors back on queue in case they are dead too
+////				nodesExpanded++;
+////				env->GetSuccessors(s, succ);
+////				for (unsigned int x = 0; x < succ.size(); x++)
+////				{
+////					uint64_t tmpKey;
+//					//std::cout << "Hashing state:14 " << std::endl << succ[x] << std::endl;
+////					if ((kNotFound != aoc.Lookup(env->GetStateHash(succ[x]), tmpKey)) && (!IsDead(succ[x])))
+////						//if (astar.HaveExpandedState(succ[x]) && !IsDead(succ[x]))
+////						q.push(borderData<state>(succ[x], DBL_MAX));
+////				}
+//			}
 		}
 	}
 	
@@ -603,6 +885,8 @@ namespace FLRTA {
 		// 1. put all open nodes in pqueue
 		pQueue q;
 
+		// dead guys
+		std::vector<state> toKill;
 		// for successors
 		std::vector<state> succ;
 		
@@ -633,8 +917,11 @@ namespace FLRTA {
 			nodesExpanded++;
 			nodesTouched++;
 			double hCost = HCost(s, to);
+//			bool shouldKill = true;
 			for (unsigned int x = 0; x < succ.size(); x++)
 			{
+//				if (IsOnlyParent(s, succ[x]))
+//					shouldKill = false;
 				nodesTouched++;
 				double succHCost;
 
@@ -677,8 +964,21 @@ namespace FLRTA {
 					//if (verbose) std::cout << std::endl;
 				}
 			}
+//			if ((shouldKill) && !(s == to))
+//			{
+//				std::cout << "Killing " << s << std::endl;
+//				for (unsigned int x = 0; x < succ.size(); x++)
+//					RemoveParent(s, succ[x]);
+//				ClearParents(s);
+//				toKill.push_back(s);
+//				//KillState(s);
+//			}
 		}
-//		return first;
+//		while (toKill.size() > 0)
+//		{
+//			KillState(toKill.back());
+//			toKill.pop_back();
+//		}
 	}
 	
 	template <class state, class action, class environment>
@@ -701,7 +1001,16 @@ namespace FLRTA {
 			dataLocation loc = (aoc.Lookup(m_pEnv->GetStateHash((*it).second.theState), node));
 			//if (loc != kOpenList) continue;
 
-			//if (loc == kOpenList)
+			for (int x = 0; x < (*it).second.children->size(); x++)
+			{
+				m_pEnv->GLDrawLine((*it).second.theState, (*it).second.children->at(x));
+			}
+			for (int x = 0; x < (*it).second.parents->size(); x++)
+			{
+				m_pEnv->GLDrawLine((*it).second.theState, (*it).second.parents->at(x));
+			}
+			
+			if (loc == kOpenList)
 			{
 				if ((*it).second.dead)
 					sprintf(str, " %1.1f", (*it).second.gCost);
