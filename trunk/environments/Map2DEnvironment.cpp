@@ -8,7 +8,7 @@
  */
 #include "Map2DEnvironment.h"
 #include "FPUtil.h"
-
+#include <cstring>
 
 MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 {

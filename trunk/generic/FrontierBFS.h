@@ -99,10 +99,12 @@ bool FrontierBFS<state, action>::DoOneIteration(SearchEnvironment<state, action>
 		n = nodesExpanded;
 		if (mOpen1.size() == 0)
 		{
+			std::cout << mOpen2.front() << std::endl << mOpen2.back() << std::endl;
 			ExpandLevel(env, mOpen2, mClosed2, mOpen1, mClosed1);
 			mClosed1.clear();
 		}
 		else {
+			std::cout << mOpen1.front() << std::endl << mOpen1.back() << std::endl;
 			ExpandLevel(env, mOpen1, mClosed1, mOpen2, mClosed2);
 			mClosed2.clear();
 		}
