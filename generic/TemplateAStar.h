@@ -229,9 +229,6 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 		return false;
 	}
 	
-	//SearchNode<state> first(env->heuristic(goal, start), 0, start, start);
-	//SearchNode<state> first(start, start, weight*env->HCost(start, goal), 0, env->GetStateHash(start));
-	//openQueue.Add(first);
 	openClosedList.AddOpenNode(start, env->GetStateHash(start), 0, weight*theHeuristic->HCost(start, goal));
 	
 	return true;
@@ -245,8 +242,6 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 template <class state, class action, class environment>
 void TemplateAStar<state,action,environment>::AddAdditionalStartState(state& newState)
 {
-	//	SearchNode<state> first(newState, newState, weight*env->HCost(goal, newState), 0,env->GetStateHash(newState));
-	//	openQueue.Add(first);
 	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), 0, weight*theHeuristic->HCost(start, goal));
 }
 
@@ -340,12 +335,12 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 						openClosedList.Lookup(neighborID[x]).h = bestH-edgeCosts[x]; 
 						if (useBPMX > 1) FullBPMX(neighborID[x], useBPMX-1);
 					}
-				}
-				if (fless(openClosedList.Lookup(nodeid).g+edgeCosts[x], openClosedList.Lookup(neighborID[x]).g))
-				{
-					openClosedList.Lookup(neighborID[x]).parentID = nodeid;
-					openClosedList.Lookup(neighborID[x]).g = openClosedList.Lookup(nodeid).g+edgeCosts[x];
-					openClosedList.Reopen(neighborID[x]);
+					if (fless(openClosedList.Lookup(nodeid).g+edgeCosts[x], openClosedList.Lookup(neighborID[x]).g))
+					{
+						openClosedList.Lookup(neighborID[x]).parentID = nodeid;
+						openClosedList.Lookup(neighborID[x]).g = openClosedList.Lookup(nodeid).g+edgeCosts[x];
+						openClosedList.Reopen(neighborID[x]);
+					}
 				}
 				break;
 			case kOpenList:
@@ -379,11 +374,21 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 				}
 				else { // add node to open list
 					//double edgeCost = env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]);
-					openClosedList.AddOpenNode(neighbors[x],
-											   env->GetStateHash(neighbors[x]),
-											   openClosedList.Lookup(nodeid).g+edgeCosts[x],
-											   std::max(theHeuristic->HCost(neighbors[x], goal), openClosedList.Lookup(nodeid).h-edgeCosts[x]),
-											   nodeid);
+					if (useBPMX)
+					{
+						openClosedList.AddOpenNode(neighbors[x],
+												   env->GetStateHash(neighbors[x]),
+												   openClosedList.Lookup(nodeid).g+edgeCosts[x],
+												   std::max(weight*theHeuristic->HCost(neighbors[x], goal), openClosedList.Lookup(nodeid).h-edgeCosts[x]),
+												   nodeid);
+					}
+					else {
+						openClosedList.AddOpenNode(neighbors[x],
+												   env->GetStateHash(neighbors[x]),
+												   openClosedList.Lookup(nodeid).g+edgeCosts[x],
+												   weight*theHeuristic->HCost(neighbors[x], goal),
+												   nodeid);
+					}
 //					if (loc == -1)
 //					{ // duplicate edges
 //						neighborLoc[x] = kOpenList;
@@ -392,16 +397,7 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 				}
 		}
 	}
-	
-	// should only do this if a "find best path" option is set
-	//	if ((openQueue.size() == 0) && (stopAfterGoal == false))
-	//	{
-	//		ExtractPathToStart(currentOpenNode, thePath);
-	//		// Path is backwards - reverse
-	//		reverse(thePath.begin(), thePath.end()); 
-	//		return true;
-	//	}
-	
+		
 	return false;
 }
 
@@ -471,132 +467,6 @@ void TemplateAStar<state, action,environment>::FullBPMX(uint64_t nodeID, int dis
 }
 
 
-///**
-// * Removes the top node from the open list  
-// * @author Nathan Sturtevant
-// * @date 03/22/06
-// *
-// * @param state will contain the next state in the open list
-// * @return TRUE if next contains a valid state, FALSE if there is no  more states in the
-// * open queue 
-// */
-//template <class state, class action, class environment>
-//bool TemplateAStar<state,action,environment>::GetNextNode(state &next)
-//{
-//	nodesExpanded++;
-//	if(openQueue.Empty())
-//		return false;
-//	SearchNode<state> it = openQueue.Remove();
-//	//if(it == openQueue.end())
-//	//	return false;
-//	next = it.currNode;
-//	//printf("h-cost\t%f\n", it.fCost-it.gCost);
-//	
-//	//	std::cout << "Current open node " << next << " f-cost: " << it.fCost << " g-cost: " << it.gCost <<
-//	//	" h-value: " << env->HCost(next, goal) << "/" << it.fCost-it.gCost << std::endl;
-//	
-//	closedList[env->GetStateHash(next)] = it;
-//	//	std::cout<<"Getting "<<it.gCost<<" ";
-//	return true;
-//}
-
-///**
-// * Check and update the weight of a closed node. 
-// * @author Nathan Sturtevant
-// * @date 11/10/08
-// * 
-// * @param currOpenNode The node that's currently being expanded
-// * @param neighbor The node whose weight will be updated
-// */
-//template <class state, class action, class environment>
-//void TemplateAStar<state,action,environment>::UpdateClosedNode(environment *e, state &currOpenNode, state &neighbor)
-//{
-//	//printf("Found in closed list!\n");
-//	SearchNode<state> prev = closedList[e->GetStateHash(neighbor)];
-//	//openQueue.find(SearchNode<state>(neighbor, e->GetStateHash(neighbor)));
-//	SearchNode<state> alt = closedList[e->GetStateHash(currOpenNode)];
-//	double edgeWeight = e->GCost(currOpenNode, neighbor);
-//	double altCost = alt.gCost+edgeWeight+(prev.fCost-prev.gCost);
-//	if (fgreater(prev.fCost, altCost))
-//	{
-//		//std::cout << "Reopening node " << neighbor << " setting parent to " << currOpenNode << std::endl;
-//		//printf("Reopening node %d setting parent to %d - %f vs. %f\n", neighbor, currOpenNode, prev.fCost, altCost);
-//		prev.fCost = altCost;
-//		prev.gCost = alt.gCost+edgeWeight;
-//	 	prev.prevNode = currOpenNode;
-//		// this is generally unneeded. But, in a search space where two
-//		// nodes may be "equal" but not identical, it is important.
-//		prev.currNode = neighbor;
-//		closedList.erase(e->GetStateHash(neighbor));
-//		assert(closedList.find(e->GetStateHash(neighbor)) == closedList.end());
-//		openQueue.Add(prev);
-//	}
-//}
-
-///**
-// * Update the weight of a node. 
-// * @author Nathan Sturtevant
-// * @date 03/22/06
-// * 
-// * @param currOpenNode The node that's currently being expanded
-// * @param neighbor The node whose weight will be updated
-// */
-//template <class state, class action, class environment>
-//void TemplateAStar<state,action,environment>::UpdateWeight(environment *e, state &currOpenNode, state &neighbor)
-//{
-//	//printf("Found in open list!\n");
-//	SearchNode<state> prev = openQueue.find(SearchNode<state>(neighbor, e->GetStateHash(neighbor)));
-//	SearchNode<state> alt = closedList[e->GetStateHash(currOpenNode)];
-//	double edgeWeight = e->GCost(currOpenNode, neighbor);
-//	double altCost = alt.gCost+edgeWeight+(prev.fCost-prev.gCost);
-//	if (fgreater(prev.fCost, altCost))
-//	{
-//		//		std::cout << "Updating node " << neighbor << " setting parent to " << currOpenNode << std::endl;
-//		//printf("Resetting node %d setting parent to %d\n", neighbor, currOpenNode);
-//		prev.fCost = altCost;
-//		prev.gCost = alt.gCost+edgeWeight;
-//		prev.prevNode = currOpenNode;
-//		// this is generally unneeded. But, in a search space where two
-//		// nodes may be "equal" but not identical, it is important.
-//		prev.currNode = neighbor;
-//		openQueue.DecreaseKey(prev);
-//	}
-//}
-
-///**
-// * Add a node to the open list
-// * @author Nathan Sturtevant
-// * @date 03/22/06
-// * 
-// * @param currOpenNode the state that's currently being expanded
-// * @param neighbor the state to be added to the open list
-// */
-//template <class state, class action,class environment>
-//void TemplateAStar<state, action,environment>::AddToOpenList(environment *e, state &currOpenNode, state &neighbor)
-//{
-//	//printf("Adding node %d setting parent to %d\n", neighbor, currOpenNode);
-//	//	std::cout << "Adding node " << neighbor << " setting parent to " << currOpenNode << std::endl;
-//	double edgeWeight = e->GCost(currOpenNode, neighbor);
-//	
-//	double oldfCost = closedList[e->GetStateHash(currOpenNode)].fCost;
-//	double oldgCost = closedList[e->GetStateHash(currOpenNode)].gCost;
-//	double gCost = oldgCost+edgeWeight;
-//	double fCost = gCost+weight*e->HCost(neighbor, goal);
-//	if (/*(useBPMX) && */(fgreater(oldfCost, fCost))) // pathmax rule
-//	{
-//		//		std::cout << "Adding node: (" << neighbor << ") f-cost from " << fCost << " to " << oldfCost
-//		//		<< " h-cost: " << fCost-gCost << " g-cost: " << gCost << " hash: " << e->GetStateHash(neighbor) << std::endl;
-//		fCost = oldfCost;
-//	}
-//	else {
-//		//		std::cout << "Adding node: (" << neighbor << ") f-cost " << fCost 
-//		//		<< " h-cost: " << fCost-gCost << " g-cost: " << gCost << " hash: " << e->GetStateHash(neighbor) << std::endl;
-//	}
-//	SearchNode<state> n(neighbor, currOpenNode, fCost, gCost, e->GetStateHash(neighbor));
-//	
-//	openQueue.Add(n);	
-//}
-
 /**
  * Get the path from a goal state to the start state 
  * @author Nathan Sturtevant
@@ -614,27 +484,6 @@ void TemplateAStar<state, action,environment>::ExtractPathToStartFromID(uint64_t
 		node = openClosedList.Lookup(node).parentID;
 	} while (openClosedList.Lookup(node).parentID != node);
 	thePath.push_back(openClosedList.Lookup(node).data);
-	//	SearchNode<state> n;
-	//	if (closedList.find(env->GetStateHash(goalNode)) != closedList.end())
-	//	{
-	//		n = closedList[env->GetStateHash(goalNode)];
-	//	}
-	//	else n = openQueue.find(SearchNode<state>(goalNode, env->GetStateHash(goalNode)));
-	//	
-	//	do {
-	//		//std::cout << "Extracting " << n.currNode << " with parent " << n.prevNode << std::endl;
-	//		//printf("Extracting %d with parent %d\n", n.currNode, n.prevNode);
-	//		thePath.push_back(n.currNode);
-	//		if (closedList.find(env->GetStateHash(n.prevNode)) != closedList.end())
-	//		{
-	//			n = closedList[env->GetStateHash(n.prevNode)];
-	//		}
-	//		else {
-	//			printf("No backward path found!\n");
-	//			break;
-	//		}
-	//	} while (!(n.currNode == n.prevNode));
-	//	thePath.push_back(n.currNode);
 }
 
 /**
@@ -663,41 +512,6 @@ int TemplateAStar<state, action,environment>::GetMemoryUsage()
 	return openClosedList.size();
 }
 
-///**
-// * Get an iterator for the closed list
-// * @author Nathan Sturtevant
-// * @date 06/13/07
-// * 
-// * @return An iterator pointing to the first node in the closed list
-// */
-//template <class state, class action,class environment>
-////__gnu_cxx::hash_map<state, TemplateAStarUtil::SearchNode<state> >::const_iterator
-//void TemplateAStar<state, action,environment>::GetClosedListIter(closedList_iterator) //const
-//{
-//	return closedList.begin();
-//}
-//
-///**
-// * Get the next state in the closed list
-// * @author Nathan Sturtevant
-// * @date 06/13/07
-// * 
-// * @param it A closedList_iterator pointing at the current state in the closed 
-// * list
-// * @return The next state in the closed list. Returns UINT_MAX if there's no 
-// * more states
-// */
-//template <class state, class action, class environment>
-//bool TemplateAStar<state, action,environment>::ClosedListIterNext(closedList_iterator& it, state& next) const
-//{
-//	if (it == closedList.end())
-//		return false;
-//	next = (*it).first;
-//	it++;
-//	return true;
-//}
-//
-
 /**
  * Get state from the closed list
  * @author Nathan Sturtevant
@@ -719,12 +533,6 @@ bool TemplateAStar<state, action,environment>::GetClosedListGCost(const state &v
 		return true;
 	}
 	return false;
-//	if (closedList.find(env->GetStateHash(val)) != closedList.end())
-//	{
-//		gCost = closedList.find(env->GetStateHash(val))->second.gCost;
-//		return true;
-//	}
-//	return false;
 }
 
 /**
@@ -761,14 +569,6 @@ void TemplateAStar<state, action,environment>::OpenGLDraw() const
 			env->OpenGLDraw(data.data);
 		}
 	}
-//	int x = 0;
-//	if (env == 0)
-//		return;
-//	//env->SetColor(0.0, 0.0, 0.0, 0.15);
-//	for (closedList_iterator it = closedList.begin(); it != closedList.end(); it++)
-//	{
-//		env->OpenGLDraw((*it).second.currNode);
-//	}
 }
 
 #endif
