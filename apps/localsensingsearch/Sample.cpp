@@ -348,6 +348,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				
 				printf("%s\t%ld\n", unitSims[windowID]->GetUnit(x)->GetName(), v.lval);
 			}
+			printf("First time:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				statValue v;
+				int choice = unitSims[windowID]->GetStats()->FindNextStat("MakeMoveThinkingTime", unitSims[windowID]->GetUnit(x)->GetName(), 0);
+				unitSims[windowID]->GetStats()->LookupStat(choice, v);
+				
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(), v.fval);
+			}
 			printf("First Nodes/travel:\n");
 			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
 			{
@@ -375,6 +384,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(),
 					   SumStatEntries(unitSims[windowID]->GetStats(),
 									  "nodesExpanded",
+									  unitSims[windowID]->GetUnit(x)->GetName()));
+			}
+			printf("Total time:\n");
+			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
+			{
+				printf("%s\t%f\n", unitSims[windowID]->GetUnit(x)->GetName(),
+					   SumStatEntries(unitSims[windowID]->GetStats(),
+									  "MakeMoveThinkingTime",
 									  unitSims[windowID]->GetUnit(x)->GetName()));
 			}
 			printf("Nodes/travel:\n");
@@ -479,12 +496,12 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	unitSims[windowID]->AddUnit(u5);
 
 	FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
-	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 10.5));
+	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.5));
 	f->SetOrderRedundant(true);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 
-	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 10.5));
+	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.5));
 	//f->SetOrderRedundant(true);
 	f->SetUseLocalGCost(true);
 	u6->SetSpeed(0.02);
@@ -503,6 +520,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	unitSims[windowID]->GetStats()->AddFilter("trialDistanceMoved");
 	unitSims[windowID]->GetStats()->AddFilter("TotalLearning");
 	unitSims[windowID]->GetStats()->AddFilter("nodesExpanded");
+	unitSims[windowID]->GetStats()->AddFilter("MakeMoveThinkingTime");
 	unitSims[windowID]->GetStats()->EnablePrintOutput(true);
 	unitSims[windowID]->SetTrialLimit(50000);
 	
@@ -758,6 +776,13 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	{
 		es->GetStats()->LookupStat(choice, v);
 		printf("stepNodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), averageStatEntries(es->GetStats(), "stepNodesExpanded", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MakeMoveThinkingTime", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
 	}
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);

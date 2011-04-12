@@ -232,6 +232,8 @@ protected:
 			if (this->units[t]->converged) // converged units don't need to reset, except dist travelled
 				continue;
 			
+			// this lets each trial have its own time
+			this->stats.AddStat("MakeMoveThinkingTime", this->units[t]->agent->GetName(), (double)0);
 			// stats.AddStat("distanceMoved", units[t]->agent->GetName(), (double)0);
 //			if (this->units[t]->blocking)
 //			{
