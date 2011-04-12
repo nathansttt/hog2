@@ -1623,28 +1623,34 @@ bool Map::CanStep(long x1, long y1, long x2, long y2) const
 {
 	if ((abs(x1-x2) > 1) || (abs(y1-y2) > 1))
 		return false;
-	switch (x1-x2) {
-		case 0: //return true;
-			switch (y1-y2) {
-				case 0: return true;
-				case 1: return AdjacentEdges(x1, y1, kTopEdge);
-				case -1: return AdjacentEdges(x1, y1, kBottomEdge);
-			}
-			break;
-		case 1: //return AdjacentEdges(x1, y1, kLeftEdge);
-			switch (y1-y2) {
-				case 0: return AdjacentEdges(x1, y1, kLeftEdge);
-				case 1: return AdjacentCorners(x1, y1, kTopLeft);
-				case -1: return AdjacentCorners(x1, y1, kBottomLeft);
-			}
-			break;
-		case -1: //return AdjacentEdges(x1, y1, kRightEdge);
-			switch (y1-y2) {
-				case 0: return AdjacentEdges(x1, y1, kRightEdge);
-				case 1: return AdjacentCorners(x1, y1, kTopRight);
-				case -1: return AdjacentCorners(x1, y1, kBottomRight);
-			}
-			break;
+	if (mapType == kOctile)
+	{
+		return ((GetTerrainType(x1, y1)>>terrainBits) == (GetTerrainType(x2, y2)>>terrainBits));
+	}
+	else {
+		switch (x1-x2) {
+			case 0: //return true;
+				switch (y1-y2) {
+					case 0: return true;
+					case 1: return AdjacentEdges(x1, y1, kTopEdge);
+					case -1: return AdjacentEdges(x1, y1, kBottomEdge);
+				}
+				break;
+			case 1: //return AdjacentEdges(x1, y1, kLeftEdge);
+				switch (y1-y2) {
+					case 0: return AdjacentEdges(x1, y1, kLeftEdge);
+					case 1: return AdjacentCorners(x1, y1, kTopLeft);
+					case -1: return AdjacentCorners(x1, y1, kBottomLeft);
+				}
+				break;
+			case -1: //return AdjacentEdges(x1, y1, kRightEdge);
+				switch (y1-y2) {
+					case 0: return AdjacentEdges(x1, y1, kRightEdge);
+					case 1: return AdjacentCorners(x1, y1, kTopRight);
+					case -1: return AdjacentCorners(x1, y1, kBottomRight);
+				}
+				break;
+		}
 	}
 	return false;
 }

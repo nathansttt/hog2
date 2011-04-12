@@ -18,6 +18,7 @@
 #include <ext/hash_map>
 #include "TemplateAStar.h"
 #include "Timer.h"
+#include "vectorCache.h"
 #include <queue>
 #include <iostream>
 
@@ -170,8 +171,6 @@ namespace FLRTA {
 				if (IsDead(child) || IsDead(parent))
 					std::cout << "ABORT! trying to add dead child " << child << " to parent " << parent << std::endl;
 			}
-//			if (stateData[m_pEnv->GetStateHash(child)].parents == 0)
-//				stateData[m_pEnv->GetStateHash(child)].parents = new std::vector<state>();
 
 			uint64_t hash = m_pEnv->GetStateHash(child);
 			learnedStateData<state> &theState = stateData[hash];
@@ -209,16 +208,9 @@ namespace FLRTA {
 		
 		void AddChild(const state &parent, const state &child)
 		{
-//			if (IsDead(child) || IsDead(parent))
-//			{
-//				std::cout << "ABORT! trying to add child " << child << " to parent " << parent << std::endl;
-//				assert(false);
-//			}
 			uint64_t hash = m_pEnv->GetStateHash(parent);
 			learnedStateData<state> &theState = stateData[hash];
 
-//			if (stateData[m_pEnv->GetStateHash(child)].children == 0)
-//				stateData[m_pEnv->GetStateHash(child)].children = new std::vector<state>();
 			for (unsigned int x = 0; x < theState.children->size(); x++)
 			{
 				if (theState.children->at(x) == child)
@@ -300,7 +292,7 @@ namespace FLRTA {
 			typename LearnedStateData::iterator it = stateData.find(hash);
 			if (it != stateData.end())
 			{
-				(*it).second.theState = where;
+				//(*it).second.theState = where;
 				return (*it).second.gCost;
 			}
 			return DBL_MAX; // g-costs can only be lowered, hence the high start
@@ -489,8 +481,8 @@ namespace FLRTA {
 	template <class state, class action, class environment>
 	void FLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 	{
-		Timer t;
-		t.StartTimer();
+//		Timer t;
+//		t.StartTimer();
 //		VerifyParentChildren();
 		//theWeight = fWeight;
 		nodesExpanded = nodesTouched = 0;
@@ -504,6 +496,12 @@ namespace FLRTA {
 		
 		if (GCost(from) == DBL_MAX)
 			SetGCost(env, from, 0);
+
+		if (IsDead(from))
+		{
+			MakeTrappedMove(env, from, thePath);
+			return;
+		}
 
 		ExpandLSS(from, to, thePath);
 //		if (nodesExpanded >= nodeExpansionLimit)
@@ -524,7 +522,7 @@ namespace FLRTA {
 		
 		
 		if (verbose) std::cout << "FLRTA* heading towards " << thePath[0] << " with h-value " << HCost(env, thePath[0], to) << std::endl;
-		t.EndTimer();
+		//t.EndTimer();
 		//std::cout << GetName() << "\t" << nodesExpanded << "\t" << t.GetElapsedTime() << "\t" << nodesExpanded/t.GetElapsedTime() << std::endl;
 	}
 
@@ -700,8 +698,10 @@ namespace FLRTA {
 	{
 		if (verbose) std::cout << "=Propagating from: " << next << (alsoExpand?" and expanding":" not expanding") << std::endl;
 		// decrease g-cost as long as somewhere on aoc / expand if requested
-		std::vector<state> neighbors;
-		m_pEnv->GetSuccessors(next, neighbors);
+		static vectorCache<state> vc;
+		
+		std::vector<state> *neighbors = vc.getItem();;
+		m_pEnv->GetSuccessors(next, *neighbors);
 		nodesExpanded++;
 		uint64_t parentKey;
 		//std::cout << "Hashing state:9 " << std::endl << next << std::endl;
@@ -709,33 +709,33 @@ namespace FLRTA {
 
 		if (verbose) std::cout << GCost(next) << " gcost in " <<
 			((pLoc==kOpenList)?("open"):((pLoc==kClosedList)?"closed":"none")) << std::endl;
-		for (unsigned int x = 0; x < neighbors.size(); x++)
+		for (unsigned int x = 0; x < neighbors->size(); x++)
 		{
 			nodesTouched++;
-			double edgeCost = m_pEnv->GCost(next, neighbors[x]);
+			double edgeCost = m_pEnv->GCost(next, (*neighbors)[x]);
 			uint64_t childKey;
-			//std::cout << "Hashing state:10 " << std::endl << neighbors[x] << std::endl;
-			dataLocation cLoc = aoc.Lookup(m_pEnv->GetStateHash(neighbors[x]), childKey);
+			//std::cout << "Hashing state:10 " << std::endl << (*neighbors)[x] << std::endl;
+			dataLocation cLoc = aoc.Lookup(m_pEnv->GetStateHash((*neighbors)[x]), childKey);
 
 			if (alsoExpand && pLoc != kNotFound)
 			{
 				if (cLoc == kNotFound) // add node even if it is dead!
 				{
-					double cost = min(GCost(next)+edgeCost, GCost(neighbors[x]));
+					double cost = min(GCost(next)+edgeCost, GCost((*neighbors)[x]));
 
-					if (verbose) std::cout << "Adding " << neighbors[x] << " to open with f:" << 
-						aoc.Lookat(parentKey).g+edgeCost + HCost(neighbors[x], to) << std::endl;
-					aoc.AddOpenNode(neighbors[x], m_pEnv->GetStateHash(neighbors[x]),
+					if (verbose) std::cout << "Adding " << (*neighbors)[x] << " to open with f:" << 
+						aoc.Lookat(parentKey).g+edgeCost + HCost((*neighbors)[x], to) << std::endl;
+					aoc.AddOpenNode((*neighbors)[x], m_pEnv->GetStateHash((*neighbors)[x]),
 									aoc.Lookat(parentKey).g+edgeCost,
 									//cost,
-									HCost(neighbors[x], to), parentKey);
+									HCost((*neighbors)[x], to), parentKey);
 					cLoc = kOpenList;
 				}
 				else if (cLoc == kOpenList)
 				{   // these are local g costs
 					if (fless(aoc.Lookup(parentKey).g+edgeCost, aoc.Lookup(childKey).g))
 					{
-						if (verbose) std::cout << "Updating " << neighbors[x] << " on open" << std::endl;
+						if (verbose) std::cout << "Updating " << (*neighbors)[x] << " on open" << std::endl;
 						aoc.Lookup(childKey).parentID = parentKey;
 						aoc.Lookup(childKey).g = aoc.Lookup(parentKey).g+edgeCost;
 						aoc.KeyChanged(childKey);
@@ -745,7 +745,7 @@ namespace FLRTA {
 				{
 					if (fless(aoc.Lookup(parentKey).g+edgeCost, aoc.Lookup(childKey).g))
 					{
-						if (verbose) std::cout << "Reopening " << neighbors[x] << std::endl;
+						if (verbose) std::cout << "Reopening " << (*neighbors)[x] << std::endl;
 						aoc.Lookup(childKey).parentID = parentKey;
 						aoc.Lookup(childKey).g = aoc.Lookup(parentKey).g+edgeCost;
 						aoc.Reopen(childKey);
@@ -754,59 +754,60 @@ namespace FLRTA {
 				}
 			}
 			
-			// shorter g-cost to neighbors[x] from global search perspective
+			// shorter g-cost to (*neighbors)[x] from global search perspective
 			assert(GCost(next) != DBL_MAX);
 			// TODO: handle equal case:
-			if (!IsDead(neighbors[x]) && fequal(GCost(next)+edgeCost, GCost(neighbors[x])))
+			if (!IsDead((*neighbors)[x]) && fequal(GCost(next)+edgeCost, GCost((*neighbors)[x])))
 			{
-				AddParent(next, neighbors[x]);
-				AddChild(next, neighbors[x]);
+				AddParent(next, (*neighbors)[x]);
+				AddChild(next, (*neighbors)[x]);
 			}
-			if (fless(GCost(next)+edgeCost, GCost(neighbors[x])))
+			if (fless(GCost(next)+edgeCost, GCost((*neighbors)[x])))
 			{
-				if (verbose) std::cout << "Updating " << neighbors[x] << " from " << GCost(neighbors[x]) <<
+				if (verbose) std::cout << "Updating " << (*neighbors)[x] << " from " << GCost((*neighbors)[x]) <<
 					" to " << GCost(next) << "(" << next << ") + " << edgeCost << " = " << GCost(next)+edgeCost << std::endl;
-				if (IsDead(neighbors[x]) && (cLoc == kClosedList)) // important step in proof!
+				if (IsDead((*neighbors)[x]) && (cLoc == kClosedList)) // important step in proof!
 				{
 					// node was dead. If this is on the optimal path, it needs to be opened
 					cLoc = kOpenList;
 					aoc.Reopen(childKey);
-					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
+					SetGCost(m_pEnv, (*neighbors)[x], GCost(next)+edgeCost);
 					//TODO: 
-					AddParent(next, neighbors[x]);
-					AddChild(next, neighbors[x]);
-					PropagateGCosts(neighbors[x], to, true);
+					AddParent(next, (*neighbors)[x]);
+					AddChild(next, (*neighbors)[x]);
+					PropagateGCosts((*neighbors)[x], to, true);
 				}
 				else {
-					SetGCost(m_pEnv, neighbors[x], GCost(next)+edgeCost);
+					SetGCost(m_pEnv, (*neighbors)[x], GCost(next)+edgeCost);
 					//TODO: 
-					AddParent(next, neighbors[x]);
-					AddChild(next, neighbors[x]);
+					AddParent(next, (*neighbors)[x]);
+					AddChild(next, (*neighbors)[x]);
 					//if (cLoc == kClosedList)
 					if (alsoExpand || (cLoc == kOpenList || cLoc == kClosedList))
-						PropagateGCosts(neighbors[x], to, false);
+						PropagateGCosts((*neighbors)[x], to, false);
 				}
 			}
 //			// shorter g-cost from neighbor to here, reverse search
 //			//std::cout << "GCost state:9 " << std::endl << next << neighbors[x] << std::endl;
-			if (fless(edgeCost+GCost(neighbors[x]), GCost(next)))
+			if (fless(edgeCost+GCost((*neighbors)[x]), GCost(next)))
 			{
-				//assert(!IsDead(neighbors[x]));
-				//LivenState(neighbors[x]); // would need to put back on open, but happens elsewhere. [simplify later?]
+				//assert(!IsDead((*neighbors)[x]));
+				//LivenState((*neighbors)[x]); // would need to put back on open, but happens elsewhere. [simplify later?]
 				if (verbose) std::cout << "[Recursing to] Update " << next << " from " << GCost(next) <<
-					" to " << GCost(neighbors[x]) << "(" << neighbors[x] << ") + " << edgeCost << " = " << GCost(neighbors[x])+edgeCost << std::endl;
-				SetGCost(m_pEnv, next, GCost(neighbors[x])+edgeCost);
+					" to " << GCost((*neighbors)[x]) << "(" << (*neighbors)[x] << ") + " << edgeCost << " = " << GCost((*neighbors)[x])+edgeCost << std::endl;
+				SetGCost(m_pEnv, next, GCost((*neighbors)[x])+edgeCost);
 				//TODO:
-				if (!IsDead(neighbors[x]))
+				if (!IsDead((*neighbors)[x]))
 				{
-					AddParent(neighbors[x], next);
-					AddChild(neighbors[x], next);
+					AddParent((*neighbors)[x], next);
+					AddChild((*neighbors)[x], next);
 //					if (cLoc == kOpenList || cLoc == kClosedList)
-//						PropagateGCosts(neighbors[x], to, false);
+//						PropagateGCosts((*neighbors)[x], to, false);
 				}
 				if (x != 0) x = -1;
 			}
 		}
+		vc.returnItem(neighbors);
 		if (verbose) std::cout << "=Done Propagating from: " << next << std::endl;
 	}
 	

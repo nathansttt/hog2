@@ -88,7 +88,7 @@ private:
 
 
 template <class state, class action, class environment>
-bool FLRTAStarUnit<state, action, environment>::MakeMove(environment *e, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a)
+bool FLRTAStarUnit<state, action, environment>::MakeMove(environment *e, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *si, action& a)
 {
 	if (currentLoc == goalLoc)
 		return false;
@@ -99,6 +99,7 @@ bool FLRTAStarUnit<state, action, environment>::MakeMove(environment *e, Occupan
 		algorithm->GetPath(e, currentLoc, goalLoc, path);
 		nodesExpanded += algorithm->GetNodesExpanded();
 		nodesTouched += algorithm->GetNodesTouched();
+		si->GetStats()->AddStat("stepNodesExpanded", GetName(), (long)algorithm->GetNodesExpanded());
 		if (path.size() <= 1)
 			return false;
 		//std::reverse(path.begin(), path.end());

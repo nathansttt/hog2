@@ -16,6 +16,7 @@
 #include <vector>
 #include <ext/hash_map>
 #include "TemplateAStar.h"
+#include "Timer.h"
 #include <queue>
 #include <iostream>
 
@@ -49,16 +50,26 @@ template <class state, class action, class environment>
 class LSSLRTAStar : public GenericSearchAlgorithm<state,action,environment>, public Heuristic<state> {
 public:
 	LSSLRTAStar(int nodeLimit = 8)
-	{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; }
+	{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; avoidLearning = false;}
 	virtual ~LSSLRTAStar(void) { }
 	
+	void SetAvoidLearning(bool val) { avoidLearning = val; }
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & ) { assert(false); };
-	virtual const char *GetName() { static char name[255]; sprintf(name, "LSSLRTAStar(%d)", nodeExpansionLimit); return name; }
+	virtual const char *GetName()
+	{ static char name[255];
+		if (avoidLearning) sprintf(name, "aLSSLRTAStar(%d)", nodeExpansionLimit);
+		else sprintf(name, "LSSLRTAStar(%d)", nodeExpansionLimit); return name; }
 	void SetHCost(environment *env, const state &where, const state &to, double val)
 	{
 		heur[env->GetStateHash(where)].theHeuristic = val-env->HCost(where, to);
 		heur[env->GetStateHash(where)].theState = where;
+	}
+	double HCostLearned(const state &from)
+	{
+		if (heur.find(m_pEnv->GetStateHash(from)) != heur.end())
+			return heur[m_pEnv->GetStateHash(from)].theHeuristic;
+		return 0;
 	}
 	double HCost(environment *env, const state &from, const state &to)
 	{
@@ -86,6 +97,7 @@ private:
 	double fAmountLearned;
 	uint64_t nodesExpanded, nodesTouched;
 	int nodeExpansionLimit;
+	bool avoidLearning;
 	TemplateAStar<state, action, environment> astar;
 };
 
@@ -93,6 +105,8 @@ private:
 template <class state, class action, class environment>
 void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 {
+	Timer t;
+	t.StartTimer();
 	m_pEnv = env;
 	thePath.resize(0);
 	if (from==to)
@@ -125,16 +139,32 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 	pQueue q;
 	
 	double bestF = -1;
+	double bestLearning = -1;
 	state first;
 
 	unsigned int openSize = astar.GetNumOpenItems();
 	for (unsigned int x = 0; x < openSize; x++)
 	{
 		const AStarOpenClosedData<state> data = astar.GetOpenItem(x);
-		if ((bestF == -1) || (fless(data.g+data.h, bestF)))
+		double currLearning = HCostLearned(data.data);
+		if (avoidLearning)
 		{
-			bestF = data.g+data.h;
-			first = data.data;
+			if ((bestF == -1) ||
+				(currLearning == 0 && bestLearning != 0) ||
+				(currLearning == 0 && bestLearning == 0 && (fless(data.g+data.h, bestF))) ||
+				(currLearning != 0 && bestLearning != 0 && (fless(data.g+data.h, bestF))))
+			{
+				bestLearning = currLearning;
+				bestF = data.g+data.h;
+				first = data.data;
+			}
+		}
+		else {
+			if ((bestF == -1) || (fless(data.g+data.h, bestF)))
+			{
+				bestF = data.g+data.h;
+				first = data.data;
+			}
 		}
 		q.push(borderData<state>(data.data, data.h));
 		if (verbose) std::cout << "Preparing border state: " << data.data << " h: " << data.h << std::endl;
@@ -202,6 +232,8 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 	// 3. construct best path
 	astar.ExtractPathToStart(first, thePath);
 	if (verbose) std::cout << "LSS-LRTA* heading towards " << thePath[0] << "with h-value " << HCost(env, thePath[0], to) << std::endl;
+	t.EndTimer();
+	//std::cout << GetName() << "\t" << nodesExpanded << "\t" << t.GetElapsedTime() << "\t" << nodesExpanded/t.GetElapsedTime() << std::endl;
 }
 
 template <class state, class action, class environment>
