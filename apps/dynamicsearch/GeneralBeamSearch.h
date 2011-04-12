@@ -8,6 +8,8 @@
 #include "BeamNode.h"
 #include "StringUtils.h"
 #include <assert.h>
+#include <stdio.h>
+
 #define NO_CHILDREN -100
 #define LIM_HIT -200
 

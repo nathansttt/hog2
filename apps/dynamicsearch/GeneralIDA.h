@@ -2,6 +2,7 @@
 #define IDASTAR_H
 
 #include <iostream>
+#include <stdio.h>
 #include "SearchEnvironment.h"
 #include "FPUtil.h"
 #include "GenericStepAlgorithm.h"

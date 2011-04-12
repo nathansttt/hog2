@@ -30,6 +30,8 @@
 #include <cassert>
 #include <vector>
 #include <ext/hash_map>
+#include <stdio.h>
+#include <stdint.h>
 
 /**
 * A simple Heap class.

@@ -36,7 +36,7 @@ public:
 	/**
 	Performs a regular PDB lookup for the given state
 	**/
-	double Regular_PDB_Lookup(const state &state);
+	double Regular_PDB_Lookup(const state &s);
 
 	/**
 	Builds a regular PDB given the file name of the file to write the PDB to, and a list of distinct

@@ -21,6 +21,8 @@
 
 #include <iostream>
 #include <vector>
+#include <stdio.h>
+#include <stdint.h>
 
 #include "GLUtil.h"
 #include "Trackball.h"

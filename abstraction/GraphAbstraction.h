@@ -29,6 +29,7 @@
 #include "Path.h"
 #include "GLUtil.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifndef GRAPHABSTRACTION_H
 #define GRAPHABSTRACTION_H

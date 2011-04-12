@@ -548,18 +548,21 @@ void TestArms2(bool h)
 		a.SetNumArms(numArms);
 		for (int y = 0; y < numArms; y++)
 			a.SetAngle( y, 512 );
-		for (int y = 0; y < 35000; y++)
+		if (numArms == 3)
 		{
-			if (x%2)
+			for (int y = 0; y < 35000; y++)
 			{
-				a.SetAngle(0, 694);
-				a.SetAngle(1, 1022);
-				a.SetAngle(2, 154);
-			}
-			else {
-				a.SetAngle(0, 330);
+				if (x%2)
+				{
+					a.SetAngle(0, 694);
+					a.SetAngle(1, 1022);
+					a.SetAngle(2, 154);
+				}
+				else {
+					a.SetAngle(0, 330);
 				a.SetAngle(1, 2);
 				a.SetAngle(2, 870);
+				}
 			}
 		}
 		else {
@@ -586,7 +589,6 @@ void TestArms2(bool h)
 	printf("%d starts; %d goals\n", (int)starts.size(), (int)goals.size());
 	for (unsigned int x = 0; x < starts.size(); x+=1)
 	{
-		int cnt=0;
 		config = starts[x];
 		goal = goals[x];
 		std::cout << "Searching " << starts[x] << " to " << goals[x] << std::endl;
