@@ -11,6 +11,7 @@
 #include <math.h>
 #include <cstring>
 #include <assert.h>
+#include <stdio.h>
 
 namespace Plotting {
 	

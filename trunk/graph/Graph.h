@@ -27,6 +27,8 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <stdio.h>
+
 //#include <values.h>
 #define MAXINT INT_MAX
 //#define MAXINT (1<<30)

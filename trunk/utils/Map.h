@@ -34,6 +34,7 @@ static const double ONE_OVER_ROOT_TWO = 1.0/ROOT_TWO;//0.707106781f;
 #include <cstdio>
 #include <unistd.h>
 #include <iostream>
+#include <stdint.h>
 
 #include "GLUtil.h"
 #include "Graph.h"

@@ -31,6 +31,7 @@
 #include <cassert>
 #include <vector>
 #include <ext/hash_map>
+#include <stdint.h>
 
 struct AHash64 {
 	size_t operator()(const uint64_t &x) const

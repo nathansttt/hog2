@@ -1181,7 +1181,8 @@ void RunTankScalingTest(int size, int which, float weight)
 		printf("Running FLRTA*(1)\n");
 		FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
 		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(1, weight));
-		f->SetOrderRedundant(false);
+		//f->SetOrderRedundant(false);
+		f->SetUseLocalGCost(true);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
@@ -1190,7 +1191,8 @@ void RunTankScalingTest(int size, int which, float weight)
 		printf("Running FLRTA*(10)\n");
 		FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
 		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10, weight));
-		f->SetOrderRedundant(false);
+		//f->SetOrderRedundant(false);
+		f->SetUseLocalGCost(true);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
@@ -1199,7 +1201,8 @@ void RunTankScalingTest(int size, int which, float weight)
 		printf("Running FLRTA*(100)\n");
 		FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
 		FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u5 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(100, weight));
-		f->SetOrderRedundant(false);
+		//f->SetOrderRedundant(false);
+		f->SetUseLocalGCost(true);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}

@@ -10,6 +10,7 @@
 #include "GLUtil.h"
 #include "SearchEnvironment.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 class ConfigEnvironment : public SearchEnvironment<recVec, line2d>
 {
