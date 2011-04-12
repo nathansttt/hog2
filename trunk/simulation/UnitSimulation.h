@@ -402,7 +402,7 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 		theUnit->lastTime = theUnit->nextTime;
 		theUnit->lastState = theUnit->currentState;
 		if (logStats)
-			stats.AddStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
+			stats.SumStat("MakeMoveThinkingTime", u->GetName(), moveThinking);
 	
 		bool success = MakeUnitMove(theUnit, where, moveTime);
 		//printf("Updating last state\n");
@@ -412,7 +412,7 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 		locThinking = t.EndTimer();
 		theUnit->totalThinking += locThinking;
 		if (logStats)
-			stats.AddStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
+			stats.SumStat("UpdateLocationThinkingTime", u->GetName(), locThinking);
 
 		switch (stepType)
 		{
