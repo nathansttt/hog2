@@ -26,7 +26,8 @@ public:
 
 	virtual unsigned int GetNumUnitGroups() const = 0;
 	virtual unsigned int GetCurrentUnit() const = 0;
-	
+
+	virtual StatCollection *GetStats() = 0;
 //	virtual std::vector<unsigned int> GetUnitGroupMembers( unsigned int unitgroupnum ) {
 //		return unitsingroups[unitgroupnum];
 //	}

@@ -458,7 +458,6 @@
 		C4C847500C1F1A5B00AFBF7A /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = C4C847470C1F1A5B00AFBF7A /* main.nib */; };
 		C4C847510C1F1A5B00AFBF7A /* Inconsistency.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4C847490C1F1A5B00AFBF7A /* Inconsistency.icns */; };
 		C4C99B150EC16EA800C87E6E /* MultiAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4210C670CFF191F00301281 /* MultiAgent.cpp */; };
-		C4CD5A2612F395BA00E5AE67 /* RoboticArmTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A4F0110ECFD2C5009D90B3 /* RoboticArmTest.cpp */; };
 		C4D18AD70F183D7D005DEF84 /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D18AD60F183D7D005DEF84 /* ConfigEnvironment.cpp */; };
 		C4D3AFBA0BCEE5B800FCD84C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF950BCEE5B800FCD84C /* InfoPlist.strings */; };
 		C4D3AFBE0BCEE5B800FCD84C /* Sample.icns in Resources */ = {isa = PBXBuildFile; fileRef = C4D3AF9C0BCEE5B800FCD84C /* Sample.icns */; };
@@ -525,6 +524,11 @@
 		C4D3C41A0BDD3BE600FCD84C /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C4190BDD3BE600FCD84C /* RHRUnit.cpp */; };
 		C4D3C43C0BDD4F4500FCD84C /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C43B0BDD4F4400FCD84C /* MapUnit.cpp */; };
 		C4D3C8360BE2902000FCD84C /* AbsMapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */; };
+		C4D3CBDA1353BD7F00F38AD8 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C92430FE303740063E9B7 /* Sample.cpp */; };
+		C4D3CBDB1353BD8000F38AD8 /* LocalSensingUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47C924A0FE30B2B0063E9B7 /* LocalSensingUnit.cpp */; };
+		C4D3CBDC1353BD8000F38AD8 /* RIBS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A3F2C7104C66F200AB3D8F /* RIBS.cpp */; };
+		C4D3CBDD1353BD8100F38AD8 /* FLRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F6EBF812417B5100CAC7F0 /* FLRTAStar.cpp */; };
+		C4D3CBDE1353BD8200F38AD8 /* FLRTAStarUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F6EBFB12417B7900CAC7F0 /* FLRTAStarUnit.cpp */; };
 		C4D3CE990BE7DBA000FCD84C /* SharedAMapGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B4740BCEE7B200FCD84C /* SharedAMapGroup.cpp */; };
 		C4D3CEE30BE7F40300FCD84C /* AbsMapUnitGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3CEE20BE7F40200FCD84C /* AbsMapUnitGroup.cpp */; };
 		C4D3EFDD1142048200050426 /* Fling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D3EFDC1142048200050426 /* Fling.cpp */; };
@@ -1450,6 +1454,7 @@
 		C4D3C43B0BDD4F4400FCD84C /* MapUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MapUnit.cpp; sourceTree = "<group>"; };
 		C4D3C8340BE2902000FCD84C /* AbsMapUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbsMapUnit.h; sourceTree = "<group>"; };
 		C4D3C8350BE2902000FCD84C /* AbsMapUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AbsMapUnit.cpp; sourceTree = "<group>"; };
+		C4D3CC1113542B7C00F38AD8 /* vectorCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vectorCache.h; sourceTree = "<group>"; };
 		C4D3CEE10BE7F40200FCD84C /* AbsMapUnitGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbsMapUnitGroup.h; sourceTree = "<group>"; };
 		C4D3CEE20BE7F40200FCD84C /* AbsMapUnitGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AbsMapUnitGroup.cpp; sourceTree = "<group>"; };
 		C4D3EFDB1142048200050426 /* Fling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fling.h; sourceTree = "<group>"; };
@@ -2867,6 +2872,7 @@
 		C4D3B4870BCEE7B200FCD84C /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				C4D3CC1113542B7C00F38AD8 /* vectorCache.h */,
 				C4D3F0B21149C78800050426 /* StringUtils.cpp */,
 				C4D3F0B31149C78800050426 /* StringUtils.h */,
 				C4D3F0B41149C78800050426 /* swapendian.cpp */,
@@ -3277,7 +3283,11 @@
 				C40D955F11781819006EBEAF /* GraphRefinementEnvironment.cpp in Sources */,
 				C4BCFF5912643781008760EB /* ContractionHierarchy.cpp in Sources */,
 				C47A433B12A459F900FB7B0D /* MountainCar.cpp in Sources */,
-				C4CD5A2612F395BA00E5AE67 /* RoboticArmTest.cpp in Sources */,
+				C4D3CBDA1353BD7F00F38AD8 /* Sample.cpp in Sources */,
+				C4D3CBDB1353BD8000F38AD8 /* LocalSensingUnit.cpp in Sources */,
+				C4D3CBDC1353BD8000F38AD8 /* RIBS.cpp in Sources */,
+				C4D3CBDD1353BD8100F38AD8 /* FLRTAStar.cpp in Sources */,
+				C4D3CBDE1353BD8200F38AD8 /* FLRTAStarUnit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

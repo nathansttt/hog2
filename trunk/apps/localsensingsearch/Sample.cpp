@@ -664,7 +664,10 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	es->GetStats()->ClearAllStats();
 	es->GetStats()->AddFilter("trialDistanceMoved");
 	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("MakeMoveThinkingTime");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
@@ -750,13 +753,12 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
 		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
 	}
-//	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
-//	if (choice != -1)
-//	{
-//		es->GetStats()->LookupStat(choice, v);
-//		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
-//		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
-//	}
+	choice = es->GetStats()->FindNextStat("stepNodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("stepNodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), averageStatEntries(es->GetStats(), "stepNodesExpanded", es->GetUnit(0)->GetName()));
+	}
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
 	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval+1);
@@ -793,7 +795,9 @@ void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which)
 	es->GetStats()->AddFilter("trialDistanceMoved");
 	es->GetStats()->AddFilter("nodesTouched");
 	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("MakeMoveThinkingTime");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xySpeedHeading a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
@@ -883,12 +887,25 @@ void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which)
 		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
 		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
 	}
+	choice = es->GetStats()->FindNextStat("stepNodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("stepNodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), averageStatEntries(es->GetStats(), "stepNodesExpanded", es->GetUnit(0)->GetName()));
+	}
 	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
 	if (choice != -1)
 	{
 		es->GetStats()->LookupStat(choice, v);
 		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
 		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MakeMoveThinkingTime", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
 	}
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
@@ -930,7 +947,9 @@ void RunBigTest(EpSim *es, const Experiment &e, int which)
 	es->GetStats()->AddFilter("trialDistanceMoved");
 	es->GetStats()->AddFilter("nodesTouched");
 	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("MakeMoveThinkingTime");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(2*e.GetStartX(), 2*e.GetStartY()), b(2*e.GetGoalX(), 2*e.GetGoalY());
@@ -988,12 +1007,25 @@ void RunBigTest(EpSim *es, const Experiment &e, int which)
 		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
 		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
 	}
+	choice = es->GetStats()->FindNextStat("stepNodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("stepNodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), averageStatEntries(es->GetStats(), "stepNodesExpanded", es->GetUnit(0)->GetName()));
+	}
 	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
 	if (choice != -1)
 	{
 		es->GetStats()->LookupStat(choice, v);
 		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
 		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MakeMoveThinkingTime", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
 	}
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
@@ -1019,7 +1051,9 @@ void RunScalingTest(int size, int which, float weight)
 	es->GetStats()->AddFilter("trialDistanceMoved");
 	es->GetStats()->AddFilter("nodesTouched");
 	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("MakeMoveThinkingTime");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(0, 0), b(size-1, size-1);
@@ -1108,12 +1142,25 @@ void RunScalingTest(int size, int which, float weight)
 		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), size, v.lval);
 		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
 	}
+	choice = es->GetStats()->FindNextStat("stepNodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("stepNodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, averageStatEntries(es->GetStats(), "stepNodesExpanded", es->GetUnit(0)->GetName()));
+	}
 	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
 	if (choice != -1)
 	{
 		es->GetStats()->LookupStat(choice, v);
 		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), size, v.lval);
 		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MakeMoveThinkingTime", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, v.fval);
+		printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
 	}
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
@@ -1140,7 +1187,9 @@ void RunTankScalingTest(int size, int which, float weight)
 	es->GetStats()->AddFilter("trialDistanceMoved");
 	es->GetStats()->AddFilter("nodesTouched");
 	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("MakeMoveThinkingTime");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xySpeedHeading a(0, 0), b(size-1, size-1);
@@ -1229,12 +1278,25 @@ void RunTankScalingTest(int size, int which, float weight)
 		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), size, v.lval);
 		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
 	}
+	choice = es->GetStats()->FindNextStat("stepNodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("stepNodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, averageStatEntries(es->GetStats(), "stepNodesExpanded", es->GetUnit(0)->GetName()));
+	}
 	choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
 	if (choice != -1)
 	{
 		es->GetStats()->LookupStat(choice, v);
 		printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), size, v.lval);
 		printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MakeMoveThinkingTime", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, v.fval);
+		printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
 	}
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
@@ -1285,7 +1347,9 @@ void RunSTPTest(int which)
 	es->GetStats()->AddFilter("trialDistanceMoved");
 	es->GetStats()->AddFilter("nodesTouched");
 	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
 	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("MakeMoveThinkingTime");
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	
@@ -1373,12 +1437,25 @@ void RunSTPTest(int which)
 			printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), x, v.lval);
 			printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
 		}
+		choice = es->GetStats()->FindNextStat("stepNodesExpanded", es->GetUnit(0)->GetName(), 0);
+		if (choice != -1)
+		{
+			es->GetStats()->LookupStat(choice, v);
+			printf("stepNodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, averageStatEntries(es->GetStats(), "stepNodesExpanded", es->GetUnit(0)->GetName()));
+		}
 		choice = es->GetStats()->FindNextStat("nodesTouched", es->GetUnit(0)->GetName(), 0);
 		if (choice != -1)
 		{
 			es->GetStats()->LookupStat(choice, v);
 			printf("first-nodesTouched\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), x, v.lval);
 			printf("sum-nodesTouched\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, SumStatEntries(es->GetStats(), "nodesTouched", es->GetUnit(0)->GetName()));
+		}
+		choice = es->GetStats()->FindNextStat("MakeMoveThinkingTime", es->GetUnit(0)->GetName(), 0);
+		if (choice != -1)
+		{
+			es->GetStats()->LookupStat(choice, v);
+			printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, v.fval);
+			printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), x, SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
 		}
 		
 		es->GetStats()->LookupStat("Trial End", "Race Simulation", v);

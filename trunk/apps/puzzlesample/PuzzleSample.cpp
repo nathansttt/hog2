@@ -321,13 +321,16 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 		BFS<MNPuzzleState, slideDir> bfs;
 		DFS<MNPuzzleState, slideDir> dfs;
 		DFID<MNPuzzleState, slideDir> dfid2;
-		MNPuzzle mnae33(3, 3);
-		MNPuzzle mnae34(3, 4);
-		MNPuzzleState mnps33(3, 3);
-		MNPuzzleState mnps34(3, 4);
+		IDAStar<MNPuzzleState, slideDir> ida;
+//		MNPuzzle mnae33(3, 3);
+//		MNPuzzle mnae34(3, 4);
+		MNPuzzle mnae55(5, 5);
+//		MNPuzzleState mnps33(3, 3);
+//		MNPuzzleState mnps34(3, 4);
 		std::vector<MNPuzzleState> s;
 		std::vector<slideDir> s2;
-		dfid2.GetPath(&mnae33, mnps33, mnps33, s2);
+
+		//		dfid2.GetPath(&mnae33, mnps33, mnps33, s2);
 //		dfid2.GetPath(&mnae34, mnps34, mnps34, s2);
 //		bfs.GetPath(&mnae33, mnps33, mnps33, s);
 //		bfs.GetPath(&mnae34, mnps34, mnps34, s);

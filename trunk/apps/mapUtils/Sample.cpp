@@ -45,6 +45,7 @@ int px1, py1, px2, py2;
 int absType = 0;
 int mazeSize = 100;
 int gStepsPerFrame = 4;
+double searchWeight = 0;
 
 std::vector<UnitMapSimulation *> unitSims;
 
@@ -86,7 +87,7 @@ void CreateSimulation(int id)
 	}
 	map->SetTileSet(kWinter);
 	msa = new MapSectorAbstraction(map, 8);
-	msa->ToggleDrawAbstraction(0);
+	//msa->ToggleDrawAbstraction(0);
 	//msa->ToggleDrawAbstraction(2);
 	//msa->ToggleDrawAbstraction(3);
 	unitSims.resize(id+1);
@@ -103,6 +104,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "Change weight", "Change the search weight", kNoModifier, 'w');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
@@ -161,7 +163,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 //	astar.OpenGLDraw();
 	unitSims[windowID]->OpenGLDraw();
-	msa->OpenGLDraw();
+	//msa->OpenGLDraw();
 	
 	if (mouseTracking)
 	{
@@ -181,7 +183,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		ma1->SetColor(0.0, 0.5, 0.0, 0.75);
 //		if (gdh)
 //			gdh->OpenGLDraw();
-		if (runningSearch1)
+		if (runningSearch1 && !unitSims[windowID]->GetPaused())
 		{
 			ma1->SetColor(0.0, 0.0, 1.0, 0.75);
 			for (int x = 0; x < gStepsPerFrame; x++)
@@ -515,6 +517,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case 'w':
+			if (searchWeight == 0)
+				searchWeight = 1.0;
+			else if (searchWeight == 1.0)
+				searchWeight = 10.0;
+			else if (searchWeight == 10.0)
+				searchWeight = 0;
+			break;
 		case '[': if (gStepsPerFrame > 2) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;
 		case '\t':
@@ -655,13 +665,13 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				if (ma1 == 0)
 				{
 					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
-					gdh->SetPlacement(kAvoidPlacement);
-					ma1->SetGraphHeuristic(gdh);
-					for (int x = 0; x < 10; x++)
-						gdh->AddHeuristic();
-					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
-					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
+//					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
+//					gdh->SetPlacement(kAvoidPlacement);
+//					ma1->SetGraphHeuristic(gdh);
+//					for (int x = 0; x < 10; x++)
+//						gdh->AddHeuristic();
+//					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
+//					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
 				}
 				if (ma2 == 0)
 					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
@@ -674,11 +684,12 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				s1.x = px1; s1.y = py1;
 				g1.x = px2; g1.y = py2;
 				
+				a1.SetWeight(searchWeight);
 				a1.InitializeSearch(ma1, s1, g1, path);
-				a2.InitializeSearch(ma2, s1, g1, path);
-				a2.SetUseBPMX(true);
+				//a2.InitializeSearch(ma2, s1, g1, path);
+				a1.SetUseBPMX(0);
 				runningSearch1 = true;
-				runningSearch2 = true;
+				//runningSearch2 = true;
 				
 			}
 				break;
