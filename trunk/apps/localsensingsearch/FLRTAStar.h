@@ -93,16 +93,16 @@ namespace FLRTA {
 			for (typename LearnedStateData::const_iterator it = stateData.begin(); it != stateData.end(); it++)
 			{
 				const learnedStateData<state> *s = &((*it).second);
-				if ((s->dead) && ((s.children->size() > 0) || s.children->size() > 0))
+				if ((s->dead) && ((s->children->size() > 0) || s->children->size() > 0))
 				{
 					std::cout << s->theState << " is dead but has parents and/or children " << std::endl;
 				}
-				for (unsigned int x = 0; x < s.children->size(); x++)
+				for (unsigned int x = 0; x < s->children->size(); x++)
 				{
 					bool found = false;
-					for (int y = 0; y < stateData[m_pEnv->GetStateHash(s.children->at(x))].parents->size(); y++)
+					for (int y = 0; y < stateData[m_pEnv->GetStateHash(s->children->at(x))].parents->size(); y++)
 					{
-						if (stateData[m_pEnv->GetStateHash(s.children->at(x))]->parents[y] == s->theState)
+						if (stateData[m_pEnv->GetStateHash(s->children->at(x))].parents->at(y) == s->theState)
 						{
 							found = true;
 							break;
@@ -110,7 +110,7 @@ namespace FLRTA {
 					}
 					if (!found)
 					{
-						std::cout << s->theState << " lists " << s.children->at(x) << " as child, but the child doesn't list the parent" << std::endl;
+						std::cout << s->theState << " lists " << s->children->at(x) << " as child, but the child doesn't list the parent" << std::endl;
 					}
 				}
 				
@@ -146,6 +146,7 @@ namespace FLRTA {
 			theState.theState = where;
 			theState.dead = true;
 //			}
+//			VerifyParentChildren();
 		}
 		
 		bool IsDead(const state &where)
@@ -712,30 +713,30 @@ namespace FLRTA {
 		for (unsigned int x = 0; x < neighbors->size(); x++)
 		{
 			nodesTouched++;
-			double edgeCost = m_pEnv->GCost(next, (*neighbors)[x]);
+			double edgeCost = m_pEnv->GCost(next, neighbors->at(x));
 			uint64_t childKey;
-			//std::cout << "Hashing state:10 " << std::endl << (*neighbors)[x] << std::endl;
-			dataLocation cLoc = aoc.Lookup(m_pEnv->GetStateHash((*neighbors)[x]), childKey);
+			//std::cout << "Hashing state:10 " << std::endl << neighbors->at(x) << std::endl;
+			dataLocation cLoc = aoc.Lookup(m_pEnv->GetStateHash(neighbors->at(x)), childKey);
 
 			if (alsoExpand && pLoc != kNotFound)
 			{
 				if (cLoc == kNotFound) // add node even if it is dead!
 				{
-					double cost = min(GCost(next)+edgeCost, GCost((*neighbors)[x]));
+					double cost = min(GCost(next)+edgeCost, GCost(neighbors->at(x)));
 
-					if (verbose) std::cout << "Adding " << (*neighbors)[x] << " to open with f:" << 
-						aoc.Lookat(parentKey).g+edgeCost + HCost((*neighbors)[x], to) << std::endl;
-					aoc.AddOpenNode((*neighbors)[x], m_pEnv->GetStateHash((*neighbors)[x]),
+					if (verbose) std::cout << "Adding " << neighbors->at(x) << " to open with f:" << 
+						aoc.Lookat(parentKey).g+edgeCost + HCost(neighbors->at(x), to) << std::endl;
+					aoc.AddOpenNode(neighbors->at(x), m_pEnv->GetStateHash(neighbors->at(x)),
 									aoc.Lookat(parentKey).g+edgeCost,
 									//cost,
-									HCost((*neighbors)[x], to), parentKey);
+									HCost(neighbors->at(x), to), parentKey);
 					cLoc = kOpenList;
 				}
 				else if (cLoc == kOpenList)
 				{   // these are local g costs
 					if (fless(aoc.Lookup(parentKey).g+edgeCost, aoc.Lookup(childKey).g))
 					{
-						if (verbose) std::cout << "Updating " << (*neighbors)[x] << " on open" << std::endl;
+						if (verbose) std::cout << "Updating " << neighbors->at(x) << " on open" << std::endl;
 						aoc.Lookup(childKey).parentID = parentKey;
 						aoc.Lookup(childKey).g = aoc.Lookup(parentKey).g+edgeCost;
 						aoc.KeyChanged(childKey);
@@ -745,7 +746,7 @@ namespace FLRTA {
 				{
 					if (fless(aoc.Lookup(parentKey).g+edgeCost, aoc.Lookup(childKey).g))
 					{
-						if (verbose) std::cout << "Reopening " << (*neighbors)[x] << std::endl;
+						if (verbose) std::cout << "Reopening " << neighbors->at(x) << std::endl;
 						aoc.Lookup(childKey).parentID = parentKey;
 						aoc.Lookup(childKey).g = aoc.Lookup(parentKey).g+edgeCost;
 						aoc.Reopen(childKey);
@@ -754,55 +755,56 @@ namespace FLRTA {
 				}
 			}
 			
-			// shorter g-cost to (*neighbors)[x] from global search perspective
+			// shorter g-cost to neighbors->at(x) from global search perspective
 			assert(GCost(next) != DBL_MAX);
 			// TODO: handle equal case:
-			if (!IsDead((*neighbors)[x]) && fequal(GCost(next)+edgeCost, GCost((*neighbors)[x])))
+			if (!IsDead(neighbors->at(x)) && fequal(GCost(next)+edgeCost, GCost(neighbors->at(x))))
 			{
-				AddParent(next, (*neighbors)[x]);
-				AddChild(next, (*neighbors)[x]);
+				AddParent(next, neighbors->at(x));
+				AddChild(next, neighbors->at(x));
 			}
-			if (fless(GCost(next)+edgeCost, GCost((*neighbors)[x])))
+			if (fless(GCost(next)+edgeCost, GCost(neighbors->at(x))))
 			{
-				if (verbose) std::cout << "Updating " << (*neighbors)[x] << " from " << GCost((*neighbors)[x]) <<
+				if (verbose) std::cout << "Updating " << neighbors->at(x) << " from " << GCost(neighbors->at(x)) <<
 					" to " << GCost(next) << "(" << next << ") + " << edgeCost << " = " << GCost(next)+edgeCost << std::endl;
-				if (IsDead((*neighbors)[x]) && (cLoc == kClosedList)) // important step in proof!
+				if (IsDead(neighbors->at(x)) && (cLoc == kClosedList)) // important step in proof!
 				{
 					// node was dead. If this is on the optimal path, it needs to be opened
 					cLoc = kOpenList;
 					aoc.Reopen(childKey);
-					SetGCost(m_pEnv, (*neighbors)[x], GCost(next)+edgeCost);
+					SetGCost(m_pEnv, neighbors->at(x), GCost(next)+edgeCost);
 					//TODO: 
-					AddParent(next, (*neighbors)[x]);
-					AddChild(next, (*neighbors)[x]);
-					PropagateGCosts((*neighbors)[x], to, true);
+					AddParent(next, neighbors->at(x));
+					AddChild(next, neighbors->at(x));
+					PropagateGCosts(neighbors->at(x), to, true);
 				}
 				else {
-					SetGCost(m_pEnv, (*neighbors)[x], GCost(next)+edgeCost);
+					SetGCost(m_pEnv, neighbors->at(x), GCost(next)+edgeCost);
 					//TODO: 
-					AddParent(next, (*neighbors)[x]);
-					AddChild(next, (*neighbors)[x]);
+					AddParent(next, neighbors->at(x));
+					AddChild(next, neighbors->at(x));
 					//if (cLoc == kClosedList)
 					if (alsoExpand || (cLoc == kOpenList || cLoc == kClosedList))
-						PropagateGCosts((*neighbors)[x], to, false);
+						PropagateGCosts(neighbors->at(x), to, false);
 				}
 			}
 //			// shorter g-cost from neighbor to here, reverse search
 //			//std::cout << "GCost state:9 " << std::endl << next << neighbors[x] << std::endl;
-			if (fless(edgeCost+GCost((*neighbors)[x]), GCost(next)))
+
+			if (fless(edgeCost+GCost(neighbors->at(x)), GCost(next)) && !IsDead(neighbors->at(x)))
 			{
-				//assert(!IsDead((*neighbors)[x]));
-				//LivenState((*neighbors)[x]); // would need to put back on open, but happens elsewhere. [simplify later?]
+				//assert(!IsDead(neighbors->at(x)));
+				//LivenState(neighbors->at(x)); // would need to put back on open, but happens elsewhere. [simplify later?]
 				if (verbose) std::cout << "[Recursing to] Update " << next << " from " << GCost(next) <<
-					" to " << GCost((*neighbors)[x]) << "(" << (*neighbors)[x] << ") + " << edgeCost << " = " << GCost((*neighbors)[x])+edgeCost << std::endl;
-				SetGCost(m_pEnv, next, GCost((*neighbors)[x])+edgeCost);
+					" to " << GCost(neighbors->at(x)) << "(" << neighbors->at(x) << ") + " << edgeCost << " = " << GCost(neighbors->at(x))+edgeCost << std::endl;
+				SetGCost(m_pEnv, next, GCost(neighbors->at(x))+edgeCost);
 				//TODO:
-				if (!IsDead((*neighbors)[x]))
+				if (!IsDead(neighbors->at(x)))
 				{
-					AddParent((*neighbors)[x], next);
-					AddChild((*neighbors)[x], next);
+					AddParent(neighbors->at(x), next);
+					AddChild(neighbors->at(x), next);
 //					if (cLoc == kOpenList || cLoc == kClosedList)
-//						PropagateGCosts((*neighbors)[x], to, false);
+//						PropagateGCosts(neighbors->at(x), to, false);
 				}
 				if (x != 0) x = -1;
 			}
@@ -814,6 +816,7 @@ namespace FLRTA {
 	template <class state, class action, class environment>
 	void FLRTAStar<state, action, environment>::MarkDeadRedundant(environment *env, const state &goal)
 	{
+//		VerifyParentChildren();
 //		std::vector<state> othersToKill;
 //		unsigned int openSize = aoc.size();
 //		for (unsigned int x = 0; x < openSize; x++)
