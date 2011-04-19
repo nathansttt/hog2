@@ -46,6 +46,7 @@ int absType = 0;
 int mazeSize = 100;
 int gStepsPerFrame = 4;
 double searchWeight = 0;
+bool screenShot = false;
 
 std::vector<UnitMapSimulation *> unitSims;
 
@@ -120,6 +121,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
+	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -163,6 +165,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 //	astar.OpenGLDraw();
 	unitSims[windowID]->OpenGLDraw();
+	if (screenShot)
+	{
+		SaveScreenshot(windowID, gDefaultMap);
+		exit(0);
+	}
 	//msa->OpenGLDraw();
 	
 	if (mouseTracking)
@@ -290,8 +297,10 @@ void buildProblemSet()
 		}
 		if (done) break;
 	}
-	for (unsigned int x = 0; x < experiments.size(); x++)
+	for (unsigned int x = 1; x < experiments.size(); x++)
 	{
+		if (experiments[x].size() != 10)
+			break;
 		for (unsigned int y = 0; y < experiments[x].size(); y++)
 			s.AddExperiment(experiments[x][y]);
 	}
@@ -498,6 +507,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		map.Save(argument[4]);
 		exit(0);
 		return 5;
+	}
+	if (strcmp( argument[0], "-screen" ) == 0 )
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		screenShot = true;
+		strncpy(gDefaultMap, argument[1], 1024);
+		return 2;
 	}
 	if (strcmp( argument[0], "-map" ) == 0 )
 	{
