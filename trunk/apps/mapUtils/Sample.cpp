@@ -62,6 +62,8 @@ MapSectorAbstraction *msa;
 
 std::vector<xyLoc> path;
 
+Map *ReduceMap(Map *inputMap);
+
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
@@ -88,7 +90,7 @@ void CreateSimulation(int id)
 	}
 	map->SetTileSet(kWinter);
 	msa = new MapSectorAbstraction(map, 8);
-	//msa->ToggleDrawAbstraction(0);
+	msa->ToggleDrawAbstraction(0);
 	//msa->ToggleDrawAbstraction(2);
 	//msa->ToggleDrawAbstraction(3);
 	unitSims.resize(id+1);
@@ -117,12 +119,15 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 	
 	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Resizes map to specified dimensions and saves");
+	InstallCommandLineHandler(MyCLHandler, "-makeRandom", "-makeRandom x-dim y-dim %%obstacles [0-100] filename", "makes a randomly filled with obstacles");
 	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
+	InstallCommandLineHandler(MyCLHandler, "-reduceMap", "-reduceMap input output", "Find the largest connected component in map and reduce.");
+	
 	
 	InstallWindowHandler(MyWindowHandler);
 	
@@ -157,6 +162,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
+GraphEnvironment *tempGE;
+
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	if (viewport == 0)
@@ -170,7 +177,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		SaveScreenshot(windowID, gDefaultMap);
 		exit(0);
 	}
-	//msa->OpenGLDraw();
+	if (tempGE == 0)
+		tempGE = new GraphEnvironment(GraphSearchConstants::GetGraph(unitSims[windowID]->GetEnvironment()->GetMap()));
+	tempGE->OpenGLDraw();
+
+	//	msa->OpenGLDraw();
 	
 	if (mouseTracking)
 	{
@@ -498,7 +509,28 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		exit(0);
 		return 5;
 	}
-	if (strcmp( argument[0], "-resize" ) == 0 )
+	else if (strcmp( argument[0], "-makeRandom" ) == 0 )
+	{
+		if (maxNumArgs <= 4)
+			return 0;
+		Map map(atoi(argument[1]), atoi(argument[2]));
+		MakeRandomMap(&map, atoi(argument[3]));
+		map.Save(argument[4]);
+		exit(0);
+		return 5;
+	}
+	else if (strcmp( argument[0], "-reduceMap" ) == 0 )
+	{
+		if (maxNumArgs <= 2)
+			return 0;
+		Map map(argument[1]);
+		//map.Scale(512, 512);
+		Map *m = ReduceMap(&map);
+		m->Save(argument[2]);
+		exit(0);
+		return 3;
+	}
+	else if (strcmp( argument[0], "-resize" ) == 0 )
 	{
 		if (maxNumArgs <= 4)
 			return 0;
@@ -733,3 +765,105 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 	}
 	return false;
 }
+
+int LabelConnectedComponents(Graph *g);
+
+Map *ReduceMap(Map *inputMap)
+{
+	Graph *g = GraphSearchConstants::GetGraph(inputMap);
+
+	int biggest = LabelConnectedComponents(g);
+	
+	Map *m = new Map(inputMap->GetMapWidth(), inputMap->GetMapHeight());
+	for (int x = 0; x < inputMap->GetMapWidth(); x++)
+	{
+		for (int y = 0; y < inputMap->GetMapHeight(); y++)
+		{
+			if (inputMap->GetTerrainType(x, y) == kTrees)
+				m->SetTerrainType(x, y, kTrees);
+			else if (inputMap->GetTerrainType(x, y) == kWater)
+				m->SetTerrainType(x, y, kWater);			
+			else m->SetTerrainType(x, y, kOutOfBounds);
+		}
+	}
+	for (int x = 0; x < g->GetNumNodes(); x++)
+	{
+		if (g->GetNode(x)->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest)
+		{
+			int theX, theY;
+			theX = g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapX);
+			theY = g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapY);
+			if (g->GetNode(inputMap->GetNodeNum(theX+1, theY)) &&
+				(g->GetNode(inputMap->GetNodeNum(theX+1, theY))->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest) &&
+				(!g->FindEdge(x, inputMap->GetNodeNum(theX+1, theY))))
+			{
+				m->SetTerrainType(theX, theY, kOutOfBounds);
+			}
+			else if (g->GetNode(inputMap->GetNodeNum(theX, theY+1)) &&
+					 (g->GetNode(inputMap->GetNodeNum(theX, theY+1))->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest) &&
+					 (!g->FindEdge(x, inputMap->GetNodeNum(theX, theY+1))))
+			{
+				m->SetTerrainType(theX, theY, kOutOfBounds);
+			}
+			else if (g->GetNode(inputMap->GetNodeNum(theX+1, theY+1)) &&
+					 (g->GetNode(inputMap->GetNodeNum(theX+1, theY+1))->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest) &&
+					 (!g->FindEdge(x, inputMap->GetNodeNum(theX+1, theY+1))))
+			{
+				m->SetTerrainType(theX, theY, kOutOfBounds);
+			}
+			else {
+				m->SetTerrainType(theX, theY, kGround);
+			}
+		}
+		else if (inputMap->GetTerrainType(g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapX),
+										  g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapY)) == kGround)
+			m->SetTerrainType(g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapX),
+							  g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapY), kTrees);
+	}
+	return m;
+}
+
+int LabelConnectedComponents(Graph *g)
+{
+	for (int x = 0; x < g->GetNumNodes(); x++)
+		g->GetNode(x)->SetLabelL(GraphSearchConstants::kTemporaryLabel, 0);
+	int group = 0;
+	std::vector<int> groupSizes;
+	for (int x = 0; x < g->GetNumNodes(); x++)
+	{
+		if (g->GetNode(x)->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 0)
+		{
+			group++;
+			groupSizes.resize(group+1);
+
+			std::vector<unsigned int> ids;
+			ids.push_back(x);
+			while (ids.size() > 0)
+			{
+				unsigned int next = ids.back();
+				groupSizes[group]++;
+				ids.pop_back();
+				g->GetNode(next)->SetLabelL(GraphSearchConstants::kTemporaryLabel, group);
+				for (int y = 0; y < g->GetNode(next)->GetNumEdges(); y++)
+				{
+					edge *e = g->GetNode(next)->getEdge(y);
+					if (g->GetNode(e->getFrom())->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 0)
+						ids.push_back(e->getFrom());
+					if (g->GetNode(e->getTo())->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 0)
+						ids.push_back(e->getTo());
+				}
+			}
+		}
+	}
+	int best = 0;
+	for (unsigned int x = 1; x < groupSizes.size(); x++)
+	{
+		printf("%d states in group %d\n", groupSizes[x], x);
+		if (groupSizes[x] > groupSizes[best])
+			best = x;
+	}
+	printf("Keeping group %d\n", best);
+	return best;
+	//	kMapX;
+}
+
