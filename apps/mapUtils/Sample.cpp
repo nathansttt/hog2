@@ -257,6 +257,7 @@ void buildProblemSet()
 	GraphEnvironment *ge = new GraphEnvironment(&map, g, &gdh);
 	ge->SetDirected(false);
 	
+	std::vector<std::vector<Experiment> > experiments;
 	for (unsigned int x = 0; x < 100000; x++)
 	{
 		if (0==x%100)
@@ -272,10 +273,27 @@ void buildProblemSet()
 		astar.GetPath(ge, gs1, gs2, thePath);
 //		printf("%d\n", (int)ge->GetPathLength(thePath));
 
-		Experiment e(s1->GetLabelL(GraphSearchConstants::kMapX), s1->GetLabelL(GraphSearchConstants::kMapY),
-					 g1->GetLabelL(GraphSearchConstants::kMapX), g1->GetLabelL(GraphSearchConstants::kMapY),
-					 map.GetMapWidth(), map.GetMapHeight(), ge->GetPathLength(thePath)/4, ge->GetPathLength(thePath), gDefaultMap);
-		s.AddExperiment(e);
+		if (experiments.size() <= ge->GetPathLength(thePath)/4)
+			experiments.resize(ge->GetPathLength(thePath)/4+1);
+		if (experiments[ge->GetPathLength(thePath)/4].size() < 10)
+		{
+			Experiment e(s1->GetLabelL(GraphSearchConstants::kMapX), s1->GetLabelL(GraphSearchConstants::kMapY),
+						 g1->GetLabelL(GraphSearchConstants::kMapX), g1->GetLabelL(GraphSearchConstants::kMapY),
+						 map.GetMapWidth(), map.GetMapHeight(), ge->GetPathLength(thePath)/4, ge->GetPathLength(thePath), gDefaultMap);
+			experiments[ge->GetPathLength(thePath)/4].push_back(e);
+		}
+		bool done = true;
+		for (unsigned int y = 0; y < experiments.size(); y++)
+		{
+			if (experiments[y].size() != 10)
+			{ done = false; break; }
+		}
+		if (done) break;
+	}
+	for (unsigned int x = 0; x < experiments.size(); x++)
+	{
+		for (unsigned int y = 0; y < experiments[x].size(); y++)
+			s.AddExperiment(experiments[x][y]);
 	}
 	printf("\n");
 	char name[255];
