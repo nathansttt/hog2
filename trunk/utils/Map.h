@@ -261,6 +261,7 @@ private:
 
 void MakeMaze(Map *map, int width = 1);
 void MakeMaze(Map *map, int pathSize);
+void MakeRandomMap(Map *map, int obstacles);
 void MakePseudoMaze(Map *map, int pathSize);
 void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability=80);
 
