@@ -1571,16 +1571,18 @@ bool Map::AdjacentEdges(long x, long y, tEdge edge) const
 			if (y == 0)
 				return false;
 			return ((GetCornerHeight(x, y, kTopRight, kTopEdge) == GetCornerHeight(x, y-1, kBottomRight, kBottomEdge)) &&
-							(GetCornerHeight(x, y, kTopLeft, kTopEdge) == GetCornerHeight(x, y-1, kBottomLeft, kBottomEdge)) &&
-							((GetTerrainType(x, y, kTopEdge)>>terrainBits) == (GetTerrainType(x, y-1, kBottomEdge)>>terrainBits)));
+					(GetCornerHeight(x, y, kTopLeft, kTopEdge) == GetCornerHeight(x, y-1, kBottomLeft, kBottomEdge)) &&
+					//(CanPass(GetTerrainType(x, y, kTopEdge), GetTerrainType(x, y-1, kBottomEdge))));
+					((GetTerrainType(x, y, kTopEdge)>>terrainBits) == (GetTerrainType(x, y-1, kBottomEdge)>>terrainBits)));
 			
 			break;
 		case kBottomEdge:
 			if (y+1 >= height)
 				return false;
 			return ((GetCornerHeight(x, y, kBottomRight, kBottomEdge) == GetCornerHeight(x, y+1, kTopRight, kTopEdge)) &&
-							(GetCornerHeight(x, y, kBottomLeft, kBottomEdge) == GetCornerHeight(x, y+1, kTopLeft, kTopEdge)) &&
-							((GetTerrainType(x, y, kBottomEdge)>>terrainBits) == (GetTerrainType(x, y+1, kTopEdge)>>terrainBits)));
+					(GetCornerHeight(x, y, kBottomLeft, kBottomEdge) == GetCornerHeight(x, y+1, kTopLeft, kTopEdge)) &&
+					//(CanPass(GetTerrainType(x, y, kBottomEdge), GetTerrainType(x, y+1, kTopEdge))));
+					((GetTerrainType(x, y, kBottomEdge)>>terrainBits) == (GetTerrainType(x, y+1, kTopEdge)>>terrainBits)));
 			break;
 	}
 	return false;
@@ -2601,4 +2603,21 @@ void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)
             if ((random()%100) < openingProbability) // chance of creating hole
                 map->SetTerrainType(x, y+rand()%roomSize, kGround);
     }
+}
+
+void MakeRandomMap(Map *map, int obstacles)
+{
+	int total = map->GetMapWidth()*map->GetMapHeight()*obstacles/100;
+	for (int x = 0; x < total; x++)
+	{
+		int xloc, yloc;
+		while (1)
+		{
+			xloc = random()%map->GetMapWidth();
+			yloc = random()%map->GetMapHeight();
+			if (map->GetTerrainType(xloc, yloc) == kGround)
+				break;
+		}
+		map->SetTerrainType(xloc, yloc, kOutOfBounds);
+	}
 }
