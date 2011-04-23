@@ -37,6 +37,7 @@
 #include "MapSectorAbstraction.h"
 #include "GraphRefinementEnvironment.h"
 #include "ScenarioLoader.h"
+#include "BFS.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -63,6 +64,10 @@ MapSectorAbstraction *msa;
 std::vector<xyLoc> path;
 
 Map *ReduceMap(Map *inputMap);
+void MeasureHighwayDimension(Map *m, int depth);
+void EstimateDimension(Map *m);
+void EstimateLongPath(Map *m);
+
 
 int main(int argc, char* argv[])
 {
@@ -81,7 +86,7 @@ void CreateSimulation(int id)
 	if (gDefaultMap[0] == 0)
 	{
 		map = new Map(mazeSize, mazeSize);
-		MakeMaze(map, 1);
+		MakeMaze(map, 10);
 //		map->Scale(mazeSize, mazeSize);
 	}
 	else {
@@ -119,6 +124,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 	
 	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Resizes map to specified dimensions and saves");
+	InstallCommandLineHandler(MyCLHandler, "-makeRoom", "-makeRoom x-dim y-dim roomSie filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-makeRandom", "-makeRandom x-dim y-dim %%obstacles [0-100] filename", "makes a randomly filled with obstacles");
 	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
@@ -127,8 +133,10 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallCommandLineHandler(MyCLHandler, "-reduceMap", "-reduceMap input output", "Find the largest connected component in map and reduce.");
-	
-	
+	InstallCommandLineHandler(MyCLHandler, "-highwayDimension", "-highwayDimension map radius", "Measure the highway dimension of a map.");
+	InstallCommandLineHandler(MyCLHandler, "-estimateDimension", "-estimateDimension map", "Estimate the dimension.");
+	InstallCommandLineHandler(MyCLHandler, "-estimateLongPath", "-estimateLongPath map", "Estimate the longest path in the map.");
+
 	InstallWindowHandler(MyWindowHandler);
 	
 	InstallMouseClickHandler(MyClickHandler);
@@ -499,6 +507,16 @@ void runProblemSet(char *problems, int multiplier)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
+	if (strcmp( argument[0], "-makeRoom" ) == 0 )
+	{
+		if (maxNumArgs <= 4)
+			return 0;
+		Map map(atoi(argument[1]), atoi(argument[2]));
+		BuildRandomRoomMap(&map, atoi(argument[3]));
+		map.Save(argument[4]);
+		exit(0);
+		return 5;
+	}
 	if (strcmp( argument[0], "-makeMaze" ) == 0 )
 	{
 		if (maxNumArgs <= 4)
@@ -508,6 +526,33 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		map.Save(argument[4]);
 		exit(0);
 		return 5;
+	}//	
+	else if (strcmp( argument[0], "-estimateLongPath" ) == 0)
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		Map map(argument[1]);
+		EstimateLongPath(&map);
+		exit(0);
+		return 2;
+	}
+	else if (strcmp( argument[0], "-estimateDimension" ) == 0)
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		Map map(argument[1]);
+		EstimateDimension(&map);
+		exit(0);
+		return 2;
+	}
+	else if (strcmp( argument[0], "-highwayDimension" ) == 0)
+	{
+		if (maxNumArgs <= 2)
+			return 0;
+		Map map(argument[1]);
+		MeasureHighwayDimension(&map, atoi(argument[2]));
+		exit(0);
+		return 3;
 	}
 	else if (strcmp( argument[0], "-makeRandom" ) == 0 )
 	{
@@ -515,7 +560,8 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			return 0;
 		Map map(atoi(argument[1]), atoi(argument[2]));
 		MakeRandomMap(&map, atoi(argument[3]));
-		map.Save(argument[4]);
+		Map *f = ReduceMap(&map);
+		f->Save(argument[4]);
 		exit(0);
 		return 5;
 	}
@@ -805,12 +851,12 @@ Map *ReduceMap(Map *inputMap)
 			{
 				m->SetTerrainType(theX, theY, kOutOfBounds);
 			}
-			else if (g->GetNode(inputMap->GetNodeNum(theX+1, theY+1)) &&
-					 (g->GetNode(inputMap->GetNodeNum(theX+1, theY+1))->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest) &&
-					 (!g->FindEdge(x, inputMap->GetNodeNum(theX+1, theY+1))))
-			{
-				m->SetTerrainType(theX, theY, kOutOfBounds);
-			}
+//			else if (g->GetNode(inputMap->GetNodeNum(theX+1, theY+1)) &&
+//					 (g->GetNode(inputMap->GetNodeNum(theX+1, theY+1))->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest) &&
+//					 (!g->FindEdge(x, inputMap->GetNodeNum(theX+1, theY+1))))
+//			{
+//				m->SetTerrainType(theX, theY, kOutOfBounds);
+//			}
 			else {
 				m->SetTerrainType(theX, theY, kGround);
 			}
@@ -841,8 +887,10 @@ int LabelConnectedComponents(Graph *g)
 			while (ids.size() > 0)
 			{
 				unsigned int next = ids.back();
-				groupSizes[group]++;
 				ids.pop_back();
+				if (g->GetNode(next)->GetLabelL(GraphSearchConstants::kTemporaryLabel) != 0)
+					continue;
+				groupSizes[group]++;
 				g->GetNode(next)->SetLabelL(GraphSearchConstants::kTemporaryLabel, group);
 				for (int y = 0; y < g->GetNode(next)->GetNumEdges(); y++)
 				{
@@ -867,3 +915,139 @@ int LabelConnectedComponents(Graph *g)
 	//	kMapX;
 }
 
+void MeasureHighwayDimension(Map *m, int depth)
+{
+	Graph *g = GraphSearchConstants::GetGraph(m);
+	GraphEnvironment ge(g);
+	std::vector<graphState> endPath;
+	
+	for (int x = 0; x < g->GetNumNodes(); x++)
+		g->GetNode(x)->SetLabelL(GraphSearchConstants::kTemporaryLabel, 0);
+	
+	// 1. choose a random point
+	node *n = g->GetRandomNode();
+	
+	// 2. search to depth d (all g-costs >= d)
+	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
+	theSearch.SetStopAfterGoal(false);
+	theSearch.InitializeSearch(&ge, n->GetNum(), n->GetNum(), endPath);
+	while (1)
+	{
+		if (theSearch.DoSingleSearchStep(endPath))
+			break;
+		double gCost;
+		graphState s = theSearch.CheckNextNode();
+		theSearch.GetClosedListGCost(s, gCost);
+		if (gCost > depth)
+			break;
+	}
+	
+	// 3. mark all nodes on OPEN
+	unsigned int radiusCount = theSearch.GetNumOpenItems();
+	for (unsigned int x = 0; x < radiusCount; x++)
+	{
+		g->GetNode(theSearch.GetOpenItem(x).data)->SetLabelL(GraphSearchConstants::kTemporaryLabel, 1);
+	}
+
+	// 4. continue search to depth 4d (all g-costs >= 4d)
+	while (1)
+	{
+		if (theSearch.DoSingleSearchStep(endPath))
+			break;
+		double gCost;
+		graphState s = theSearch.CheckNextNode();
+		theSearch.GetClosedListGCost(s, gCost);
+		if (gCost > 4*depth)
+			break;
+	}
+	
+	// 5. for every state on open, trace back to marked node
+	//    (marking?)
+	radiusCount = theSearch.GetNumOpenItems();
+	for (unsigned int x = 0; x < radiusCount; x++)
+	{
+		graphState theNode = theSearch.GetOpenItem(x).data;
+		theSearch.ExtractPathToStart(theNode, endPath);
+		for (unsigned int y = 0; y < endPath.size(); y++)
+		{
+			if (g->GetNode(endPath[y])->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 1)
+				g->GetNode(endPath[y])->SetLabelL(GraphSearchConstants::kTemporaryLabel, 2);
+		}
+	}
+
+	int dimension = 0;
+	// 6. count marked nodes to see how many were found
+	for (int x = 0; x < g->GetNumNodes(); x++)
+		if (g->GetNode(x)->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 2)
+			dimension++;
+
+	printf("%d states at radius %d; %d states [highway dimension] at radius %d\n", radiusCount, depth, dimension, 4*depth);
+}
+
+void EstimateDimension(Map *m)
+{
+	Graph *g = GraphSearchConstants::GetGraph(m);
+	GraphEnvironment ge(g);
+	std::vector<graphState> endPath;
+	node *n = g->GetRandomNode();
+	graphState start = n->GetNum();
+	BFS<graphState, graphMove> b;
+	b.GetPath(&ge, start, start, endPath);
+}
+
+double FindFarDist(Graph *g, node *n, graphState &from, graphState &to);
+
+void EstimateLongPath(Map *m)
+{
+	Graph *g = GraphSearchConstants::GetGraph(m);
+	GraphMapHeuristic gh(m, g);
+	
+	double heur = 0;
+	double dist = 0;
+	graphState from, to;
+	for (int x = 0; x < 5; x++)
+	{
+		node *n = g->GetRandomNode();
+		double newDist = FindFarDist(g, n, from, to);
+		if (newDist > dist)
+		{
+			dist = newDist;
+			heur = gh.HCost(from, to);
+		}
+	}
+	printf("%f\t%f\t%f\t%f\n", dist, dist/g->GetNumNodes(), heur, dist/heur);
+}
+
+double FindFarDist(Graph *g, node *n, graphState &from, graphState &to)
+{
+	std::vector<graphState> endPath;
+	GraphEnvironment ge(g);
+	
+	// 2. search to depth d (all g-costs >= d)
+	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
+	theSearch.SetStopAfterGoal(false);
+	theSearch.InitializeSearch(&ge, n->GetNum(), n->GetNum(), endPath);
+	double gCost;
+	graphState s;
+	while (1)
+	{
+		if (theSearch.DoSingleSearchStep(endPath))
+			break;
+		s = theSearch.CheckNextNode();
+		theSearch.GetClosedListGCost(s, gCost);
+	}	
+	theSearch.InitializeSearch(&ge, s, s, endPath);
+	from = s;
+	while (1)
+	{
+		if (theSearch.DoSingleSearchStep(endPath))
+			break;
+		s = theSearch.CheckNextNode();
+		to = s;
+		double tmpCost;
+		theSearch.GetClosedListGCost(s, tmpCost);
+		if (tmpCost > gCost)
+			gCost = tmpCost;
+	}	
+	return gCost;
+}
