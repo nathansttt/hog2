@@ -2469,10 +2469,10 @@ void MakeMaze(Map *map, int corridorWidth)
 	std::vector<int> x;
 	std::vector<int> y;
 
-//	x.push_back(width/(2*boxSize));
-//	y.push_back(height/(2*boxSize));
-	x.push_back(0);
-	y.push_back(0);
+	x.push_back(width/(2*boxSize));
+	y.push_back(height/(2*boxSize));
+//	x.push_back(0);
+//	y.push_back(0);
 //	map->SetHeight(0, 0, 1);
 	map->SetTerrainType(x.back()*boxSize+1, y.back()*boxSize+1, kGround);
 
@@ -2482,7 +2482,7 @@ void MakeMaze(Map *map, int corridorWidth)
 //		map->Print();
 		int val;
 		
-		if (lastRandom || (1 == random()%3))
+		if (lastRandom || (1 != random()%10))
 		{
 			val = x.size()-1;
 			if (1 == random()%30)
@@ -2592,7 +2592,7 @@ void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)
         // then punch a bunch of holes in it
         for (int y = 0; y < width; y += roomSize)
             if ((random()%100) < openingProbability) // chance of creating hole
-                map->SetTerrainType(y+rand()%roomSize, x, kGround);
+                map->SetTerrainType(y+1+rand()%(roomSize-1), x, kGround);
     }
     for (int x = 0; x < width; x += roomSize)
     {
@@ -2601,7 +2601,7 @@ void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)
         // then punch a bunch of holes in it
         for (int y = 0; y < height; y += roomSize)
             if ((random()%100) < openingProbability) // chance of creating hole
-                map->SetTerrainType(x, y+rand()%roomSize, kGround);
+                map->SetTerrainType(x, y+1+rand()%(roomSize-1), kGround);
     }
 }
 
