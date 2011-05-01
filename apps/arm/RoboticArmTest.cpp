@@ -186,8 +186,8 @@ void MyFrameHandler(unsigned long , unsigned int , void *)
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	CreateSimulation(0);
-	TestArms2(maxNumArgs==1);
-	//Build4ArmDH();
+	//TestArms2(maxNumArgs==1);
+	Build4ArmDH();
 	//BuildTipTables();
 	exit(0);
 }
@@ -615,7 +615,7 @@ void Build4ArmDH()
 	return;
 
 	std::vector<int> reduction, offset1;
-	reduction.push_back(3);reduction.push_back(2);reduction.push_back(2);reduction.push_back(2);
+	reduction.push_back(3);reduction.push_back(3);reduction.push_back(2);reduction.push_back(2);
 	offset1.push_back(0);offset1.push_back(0);offset1.push_back(0);offset1.push_back(0);
 	//offset2.push_back(0);offset2.push_back(0);offset2.push_back(1);
 	ArmToArmCompressedHeuristic *aah = new ArmToArmCompressedHeuristic(r, reduction, offset1);
