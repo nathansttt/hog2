@@ -324,7 +324,7 @@ namespace GraphSearchConstants {
 				{
 					GLdouble xx, yy, zz, rr;
 					m->GetOpenGLCoord(x, y,xx, yy, zz, rr);
-					if (m->GetTerrainType(x, y) != kGround)
+					if (2 != m->GetTerrainType(x, y)>>terrainBits)
 						continue;
 					sprintf(name, "(%d, %d)", x, y);
 					currTile.tile1.node = g->AddNode(n = new node(name));
@@ -339,7 +339,7 @@ namespace GraphSearchConstants {
 					{
 						GLdouble xx, yy, zz, rr;
 						m->GetOpenGLCoord(x, y,xx, yy, zz, rr);
-						if (m->GetTerrainType(x, y) == kOutOfBounds)
+						if (2 != m->GetTerrainType(x, y)>>terrainBits)
 							continue;
 						sprintf(name, "(%d, %d)", x, y);
 						currTile.tile1.node = g->AddNode(n = new node(name));
