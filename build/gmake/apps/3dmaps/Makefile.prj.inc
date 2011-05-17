@@ -5,7 +5,7 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/apps/nathan/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = map2.5d
+NAME = map3d
 DBG_NAME = $(NAME)
 REL_NAME = $(NAME)
 
