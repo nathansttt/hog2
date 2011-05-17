@@ -38,6 +38,7 @@ PROJECTS = \
   apps/dragonage \
   apps/mapUtils \
   apps/sfbds \
+  apps/3dmaps \
 #	apps/coprobber
 #  apps/lv.pathfinding	
 #  apps/inconsistency \
