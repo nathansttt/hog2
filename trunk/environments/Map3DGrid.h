@@ -164,6 +164,7 @@ public:
 class state3d
 {
 public:
+	state3d() { sector = -1; region = -1; offset = -1; }
 	void Init(int sector, int region, int offset)
 	{ this->sector = sector; this->region = region; this->offset = offset; }
 	int GetSector() const { return sector; }

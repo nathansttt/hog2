@@ -661,13 +661,25 @@ bool Map3DGrid::AddPoint(int x, int y, int z)
 	
 	// connect horizontals
 	if (found[1] != -1)
+	{
+//		printf("Add 4-1\n");
 		AddEdge(neighborhood[4], neighborhood[1]);
+	}
 	if (found[3] != -1)
+	{
+//		printf("Add 4-3 [%d-%d]\n", found[4], found[3]);
 		AddEdge(neighborhood[4], neighborhood[3]);
+	}
 	if (found[5] != -1)
+	{
+//		printf("Add 4-5\n");
 		AddEdge(neighborhood[4], neighborhood[5]);
+	}
 	if (found[7] != -1)
+	{
+//		printf("Add 4-7\n");
 		AddEdge(neighborhood[4], neighborhood[7]);
+	}
 
 	// connect diagonals
 	if ((found[0] != -1) && (found[1] != -1) && (found[3] != -1) &&
@@ -707,6 +719,11 @@ bool Map3DGrid::AddPoint(int x, int y, int z)
 
 void Map3DGrid::AddEdge(int sec1, int reg1, int sec2, int reg2, int weight)
 {
+//	printf("Adding edge between sec/reg %d/%d and %d/%d\n", sec1, reg1, sec2, reg2);
+	assert(sectors.size() > sec1);
+	assert(sectors.size() > sec2);
+	assert(reg1 != -1);
+	assert(reg2 != -1);
 	EdgeData e1(sec1, reg1, weight);
 	EdgeData e2(sec2, reg2, weight);
 	sectors[sec1].regions[reg1].AddEdge(e2);
@@ -715,6 +732,12 @@ void Map3DGrid::AddEdge(int sec1, int reg1, int sec2, int reg2, int weight)
 
 void Map3DGrid::AddEdge(state3d &from, state3d &to)
 {
+	assert(from.GetOffset() != -1);
+	assert(from.GetSector() != -1);
+	assert(from.GetRegion() != -1);
+	assert(to.GetOffset() != -1);
+	assert(to.GetSector() != -1);
+	assert(to.GetRegion() != -1);
 	if ((from.sector == to.sector) && (from.region == to.region))
 	{
 		AddGridEdge(from, to);
@@ -722,10 +745,16 @@ void Map3DGrid::AddEdge(state3d &from, state3d &to)
 	}
 	else if ((from.sector == to.sector)) // but different regions
 	{
+//		printf("Adding between %d/%d/%d and %d/%d/%d\n",
+//			   from.GetSector(), from.GetRegion(), from.GetOffset(),
+//			   to.GetSector(), to.GetRegion(), to.GetOffset());
 		int cnt = AddGridEdge(from, to);
 		AddEdge(from.sector, from.region, to.sector, to.region, cnt);
 	}
 	else {
+//		printf("Adding between %d/%d/%d and %d/%d/%d\n",
+//			   from.GetSector(), from.GetRegion(), from.GetOffset(),
+//			   to.GetSector(), to.GetRegion(), to.GetOffset());
 		int cnt = AddSectorEdge(from, to);
 		AddEdge(from.sector, from.region, to.sector, to.region, cnt);
 	}
@@ -759,6 +788,7 @@ int Map3DGrid::AddGridEdge(state3d &from, state3d &to)
 	if (val ==  -gSectorSize-1)
 		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthEast)+
 		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthWest);
+	return 0;
 }
 
 int Map3DGrid::AddSectorEdge(state3d &from, state3d &to)
@@ -1048,6 +1078,8 @@ int Map3DGrid::RemoveSectorEdge(state3d &from, state3d &to)
 
 int Map3DGrid::FindNearState(int x, int y, int z, state3d &s) const
 {
+	if ((x >= mWidth) || (x < 0) || (y >= mHeight) || (y < 0))
+		return -1;
 	int sect = GetSector(x, y);
 	for (unsigned t = 0; t < sectors[sect].regions.size(); t++)
 	{
