@@ -186,8 +186,8 @@ void MyFrameHandler(unsigned long , unsigned int , void *)
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	CreateSimulation(0);
-	//TestArms2(maxNumArgs==1);
-	Build4ArmDH();
+	TestArms2(maxNumArgs==1);
+	//Build4ArmDH();
 	//BuildTipTables();
 	exit(0);
 }
@@ -508,6 +508,7 @@ void TestArms()
 
 void TestArms2(bool h)
 {
+	if (h) printf("using heuristic\n");
 	std::vector<armAngles> starts;
 	std::vector<armAngles> goals;
 	std::vector<armAngles> succ;
@@ -569,7 +570,7 @@ void TestArms2(bool h)
 			for (int y = 0; y < numArms; y++)
 				a.SetAngle( y, 512 );
 		}
-		for (int y = 0; y < 5000; y++)
+		for (int y = 0; y < 35000; y++)
 		{
 			r->GetSuccessors(a, succ);
 			a = succ[random()%succ.size()];
@@ -579,16 +580,100 @@ void TestArms2(bool h)
 	if (h)
 	{
 		std::cout << "Loading heuristics" << std::endl;
-		ArmToArmCompressedHeuristic *a1 = new ArmToArmCompressedHeuristic(r, "4-arm_far1.diff");
-		ArmToArmCompressedHeuristic *a2 = new ArmToArmCompressedHeuristic(r, "4-arm_far2.diff");
+		ArmToArmCompressedHeuristic *a1 = new ArmToArmCompressedHeuristic(r, "4-arm_far3.diff");
+		//		ArmToArmCompressedHeuristic *a2 = new ArmToArmCompressedHeuristic(r, "4-arm_far2.diff");
 		r->AddHeuristic(a1);
-		r->AddHeuristic(a2);
+		//	r->AddHeuristic(a2);
 	}
+	std::vector<int> use;
+	use.push_back(1);
+	use.push_back(2);
+	use.push_back(3);
+
+	use.push_back(5);
+	use.push_back(6);
+	use.push_back(7);
+	use.push_back(8);
+	use.push_back(9);
+	use.push_back(10);
+	use.push_back(11);
+
+
+	use.push_back(14);
+	use.push_back(15);
+	use.push_back(16);
+	use.push_back(17);
+	use.push_back(18);
+	use.push_back(20);
+	use.push_back(21);
+	use.push_back(22);
+	use.push_back(23);
+	use.push_back(24);
+	use.push_back(25);
+	use.push_back(27);
+	use.push_back(28);
+	use.push_back(29);
+	use.push_back(30);
+	use.push_back(31);
+	use.push_back(32);
+	use.push_back(33);
+	use.push_back(34);
+	use.push_back(36);
+	use.push_back(37);
+	use.push_back(38);
+	use.push_back(39);
+	use.push_back(41);
+	use.push_back(42);
+	use.push_back(43);
+	use.push_back(44);
+	use.push_back(46);
+	use.push_back(48);
+	use.push_back(53);
+	use.push_back(54);
+	use.push_back(55);
+	use.push_back(56);
+	use.push_back(57);
+	use.push_back(58);
+	use.push_back(59);
+	use.push_back(61);
+	use.push_back(62);
+	use.push_back(63);
+	use.push_back(64);
+	use.push_back(65);
+	use.push_back(66);
+	use.push_back(67);
+	use.push_back(70);
+	use.push_back(71);
+	use.push_back(72);
+	use.push_back(73);
+	use.push_back(75);
+	use.push_back(76);
+	use.push_back(77);
+	use.push_back(78);
+	use.push_back(79);
+	use.push_back(81);
+	use.push_back(82);
+	use.push_back(83);
+	use.push_back(86);
+	use.push_back(87);
+	use.push_back(88);
+	use.push_back(89);
+	use.push_back(90);
+	use.push_back(91);
+	use.push_back(92);
+	use.push_back(93);
+	use.push_back(94);
+	use.push_back(95);
+	use.push_back(96);
+	use.push_back(97);
+	use.push_back(99);
+
 
 	astar.SetUseBPMX(1);
 	printf("%d starts; %d goals\n", (int)starts.size(), (int)goals.size());
-	for (unsigned int x = 0; x < starts.size(); x+=1)
+	for (unsigned int t = 0; t < use.size(); t+=1)
 	{
+		int x = use[t];
 		config = starts[x];
 		goal = goals[x];
 		std::cout << "Searching " << starts[x] << " to " << goals[x] << std::endl;
@@ -612,7 +697,7 @@ void TestArms2(bool h)
 
 void Build4ArmDH()
 {
-	return;
+	//	return;
 
 	std::vector<int> reduction, offset1;
 	reduction.push_back(3);reduction.push_back(3);reduction.push_back(2);reduction.push_back(2);
@@ -634,7 +719,7 @@ void Build4ArmDH()
 	tmp.SetAngle(3, 1022);
 	std::cout << "Adding heuristic from: " << tmp << std::endl;
 	aah->BuildHeuristic(tmp);
-	aah->Save("4-arm_far2.diff");
+	aah->Save("4-arm_far3.diff");
 }
 
 void WriteCache(int index, std::vector<armAngles> &values);
