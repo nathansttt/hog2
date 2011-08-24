@@ -66,7 +66,7 @@ struct AStarCompare {
 template <class state, class action, class environment>
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0;}
+	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; }
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	
@@ -104,8 +104,11 @@ public:
 	bool HaveExpandedState(const state &val)
 	{ uint64_t key; return openClosedList.Lookup(env->GetStateHash(val), key) != kNotFound; }
 	
-	void SetUseBPMX(int depth) { useBPMX = depth; }
+	void SetUseBPMX(int depth) { useBPMX = depth; if (depth) reopenNodes = true; }
 	int GetUsingBPMX() { return useBPMX; }
+
+	void SetReopenNodes(bool re) { reopenNodes = re; }
+	bool GetReopenNodes() { return reopenNodes; }
 	
 	void SetHeuristic(Heuristic<state> *h) { theHeuristic = h; }
 	
@@ -129,11 +132,11 @@ public:
 	void SetWeight(double w) {weight = w;}
 private:
 	uint64_t nodesTouched, nodesExpanded;
-	bool GetNextNode(state &next);
-	//state Node();
-	void UpdateClosedNode(environment *env, state& currOpenNode, state& neighbor);
-	void UpdateWeight(environment *env, state& currOpenNode, state& neighbor);
-	void AddToOpenList(environment *env, state& currOpenNode, state& neighbor);
+//	bool GetNextNode(state &next);
+//	//state Node();
+//	void UpdateClosedNode(environment *env, state& currOpenNode, state& neighbor);
+//	void UpdateWeight(environment *env, state& currOpenNode, state& neighbor);
+//	void AddToOpenList(environment *env, state& currOpenNode, state& neighbor);
 	
 	std::vector<state> neighbors;
 	std::vector<uint64_t> neighborID;
@@ -148,6 +151,7 @@ private:
 	bool useOccupancyInfo;// = false;
 	bool useRadius;// = false;
 	int useBPMX;
+	bool reopenNodes;
 	uint64_t uniqueNodesExpanded;
 	environment *radEnv;
 	Heuristic<state> *theHeuristic;
@@ -335,6 +339,9 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 						openClosedList.Lookup(neighborID[x]).h = bestH-edgeCosts[x]; 
 						if (useBPMX > 1) FullBPMX(neighborID[x], useBPMX-1);
 					}
+				}
+				if (reopenNodes)
+				{
 					if (fless(openClosedList.Lookup(nodeid).g+edgeCosts[x], openClosedList.Lookup(neighborID[x]).g))
 					{
 						openClosedList.Lookup(neighborID[x]).parentID = nodeid;
@@ -545,9 +552,19 @@ template <class state, class action, class environment>
 void TemplateAStar<state, action,environment>::OpenGLDraw() const
 {
 	double transparency = 1.0;
+	if (openClosedList.size() == 0)
+		return;
+	uint64_t top = -1;
+	if (openClosedList.OpenSize() > 0)
+		top = openClosedList.Peek();
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
 		const AStarOpenClosedData<state> &data = openClosedList.Lookat(x);
+		if (x == top)
+		{
+			env->SetColor(1.0, 1.0, 0.0, transparency);
+			env->OpenGLDraw(data.data);
+		}
 		if ((data.where == kOpenList) && (data.reopened))
 		{
 			env->SetColor(0.0, 0.5, 0.5, transparency);
