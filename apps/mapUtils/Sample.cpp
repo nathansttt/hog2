@@ -53,11 +53,15 @@ std::vector<UnitMapSimulation *> unitSims;
 
 TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
 
+std::vector<TemplateAStar<graphState, graphMove, GraphEnvironment> > astars;
+
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a2;
 MapEnvironment *ma1 = 0;
 MapEnvironment *ma2 = 0;
 GraphDistanceHeuristic *gdh = 0;
+
+GraphEnvironment *ge = 0;
 
 MapSectorAbstraction *msa;
 
@@ -68,6 +72,7 @@ void MeasureHighwayDimension(Map *m, int depth);
 void EstimateDimension(Map *m);
 void EstimateLongPath(Map *m);
 
+void testHeuristic(char *problems);
 
 int main(int argc, char* argv[])
 {
@@ -85,8 +90,11 @@ void CreateSimulation(int id)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
-		map = new Map(mazeSize, mazeSize);
-		MakeMaze(map, 10);
+		//ht_chantry.arl.map
+		//		map = new Map("/Users/nathanst/hog2/maps/dao/lak503d.map");
+		map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.arl.map");
+		//map = new Map(mazeSize, mazeSize);
+//		MakeMaze(map, 10);
 //		map->Scale(mazeSize, mazeSize);
 	}
 	else {
@@ -95,7 +103,7 @@ void CreateSimulation(int id)
 	}
 	map->SetTileSet(kWinter);
 	msa = new MapSectorAbstraction(map, 8);
-	msa->ToggleDrawAbstraction(0);
+	msa->ToggleDrawAbstraction(1);
 	//msa->ToggleDrawAbstraction(2);
 	//msa->ToggleDrawAbstraction(3);
 	unitSims.resize(id+1);
@@ -113,8 +121,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Change weight", "Change the search weight", kNoModifier, 'w');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
+	InstallKeyboardHandler(MyDisplayHandler, "Rotate Compression", "Rotate Compression being shown in heuristic", kAnyModifier, '}');
+	InstallKeyboardHandler(MyDisplayHandler, "Rotate Displayed Heuristic", "Rotate which heuristic is shown", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	
@@ -136,6 +144,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-highwayDimension", "-highwayDimension map radius", "Measure the highway dimension of a map.");
 	InstallCommandLineHandler(MyCLHandler, "-estimateDimension", "-estimateDimension map", "Estimate the dimension.");
 	InstallCommandLineHandler(MyCLHandler, "-estimateLongPath", "-estimateLongPath map", "Estimate the longest path in the map.");
+	InstallCommandLineHandler(MyCLHandler, "-testHeuristic", "-testHeuristic scenario", "measure the ratio of the heuristic to the optimal dist");
 
 	InstallWindowHandler(MyWindowHandler);
 	
@@ -170,26 +179,34 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-GraphEnvironment *tempGE;
-
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	if (ge)
+	{
+		ge->OpenGLDraw();
+		return;
+	}
 	if (viewport == 0)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
 	}
-//	astar.OpenGLDraw();
+	for (unsigned int x = 0; x < astars.size(); x++)
+		astars[x].OpenGLDraw();
+	//	astar.OpenGLDraw();
 	unitSims[windowID]->OpenGLDraw();
 	if (screenShot)
 	{
 		SaveScreenshot(windowID, gDefaultMap);
 		exit(0);
 	}
-	if (tempGE == 0)
-		tempGE = new GraphEnvironment(GraphSearchConstants::GetGraph(unitSims[windowID]->GetEnvironment()->GetMap()));
-	tempGE->OpenGLDraw();
+//	glTranslatef(0, 0, -0.1);
+//	glLineWidth(6.0);
+//	if (ge == 0)
+//		ge = new GraphEnvironment(GraphSearchConstants::GetGraph(unitSims[windowID]->GetEnvironment()->GetMap()));
+//	ge->OpenGLDraw();
 
-	//	msa->OpenGLDraw();
+	if (astars.size() > 0)
+		msa->OpenGLDraw();
 	
 	if (mouseTracking)
 	{
@@ -204,11 +221,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		glEnd();
 	}
 	
+	if ((gdh) && (!ma1))
+		gdh->OpenGLDraw();
+
 	if ((ma1) && (viewport == 0)) // only do this once...
 	{
 		ma1->SetColor(0.0, 0.5, 0.0, 0.75);
-//		if (gdh)
-//			gdh->OpenGLDraw();
 		if (runningSearch1 && !unitSims[windowID]->GetPaused())
 		{
 			ma1->SetColor(0.0, 0.0, 1.0, 0.75);
@@ -243,6 +261,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			}
 		}
 		a2.OpenGLDraw();
+	}
+	if (runningSearch1)
+	{
+		static int cnt = 0;
+		char fname[255];
+		sprintf(fname, "Movie%d%d%d.bmp", (cnt/100)%10, (cnt/10)%10, cnt%10);
+		SaveScreenshot(windowID, fname);
+		printf("Saved %s\n", fname);
+		cnt++;
 	}
 }
 
@@ -527,6 +554,13 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		exit(0);
 		return 5;
 	}//	
+	else if (strcmp( argument[0], "-testHeuristic" ) == 0)
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		testHeuristic(argument[1]);
+		exit(0);
+	}
 	else if (strcmp( argument[0], "-estimateLongPath" ) == 0)
 	{
 		if (maxNumArgs <= 1)
@@ -570,7 +604,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs <= 2)
 			return 0;
 		Map map(argument[1]);
-		//map.Scale(512, 512);
+		map.Scale(512, 512);
 		Map *m = ReduceMap(&map);
 		m->Save(argument[2]);
 		exit(0);
@@ -599,8 +633,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs <= 1)
 			return 0;
 		strncpy(gDefaultMap, argument[1], 1024);
-		buildProblemSet();
+		Map map(argument[1]);
+		map.Scale(512, 512);
+		map.Save(argument[2]);
+		//buildProblemSet();
 		//doExport();
+		exit(0);
 		return 2;
 	}
 	else if (strcmp( argument[0], "-size" ) == 0 )
@@ -638,8 +676,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			else if (searchWeight == 10.0)
 				searchWeight = 0;
 			break;
-		case '[': if (gStepsPerFrame > 2) gStepsPerFrame /= 2; break;
+		case '[': if (gStepsPerFrame >= 2) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;
+		case '{':
+			if (gdh && ((GraphMapInconsistentHeuristic*)gdh)->GetMode() == kCompressed)
+				((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
+			else
+				((GraphMapInconsistentHeuristic*)gdh)->SetMode(kCompressed);
+			break;
+		case '}':
+			if (gdh)
+				((GraphMapInconsistentHeuristic*)gdh)->IncreaseDisplayHeuristic();
+			break;
 		case '\t':
 			if (mod != kShiftDown)
 				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
@@ -651,6 +699,24 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 		{
+			if (runningSearch1)
+			{
+				if (a1.DoSingleSearchStep(path))
+				{
+					printf("Solution: moves %d, length %f, %lld nodes\n",
+						   (int)path.size(), ma1->GetPathLength(path), a1.GetNodesExpanded());
+					runningSearch1 = false;
+				}
+			}
+			if (runningSearch2)
+			{
+				if (a2.DoSingleSearchStep(path))
+				{
+					printf("Solution: moves %d, length %f, %lld nodes\n",
+						   (int)path.size(), ma1->GetPathLength(path), a2.GetNodesExpanded());
+					runningSearch2 = false;
+				}
+			}
 		}
 			break;
 		default:
@@ -658,18 +724,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
-void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
+void MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)
 {
+	astars.resize(0);
 	static uint64_t average1=0, average2 = 0;
 	static int count = 0;
 	Graph *g = msa->GetAbstractGraph(1);
-	GraphAbstractionHeuristic gah2(msa, 2);
-	GraphAbstractionHeuristic gah1(msa, 1);
+	GraphAbstractionHeuristic *gah2 = new GraphAbstractionHeuristic(msa, 2);
+	GraphAbstractionHeuristic *gah1 = new GraphAbstractionHeuristic(msa, 1);
 
-	GraphRefinementEnvironment env2(msa, 2, &gah2);
-	GraphRefinementEnvironment env1(msa, 1, &gah1);
-	env1.SetDirected(false);
-	env2.SetDirected(false);
+	GraphRefinementEnvironment *env2 = new GraphRefinementEnvironment(msa, 2, gah2, unitSims[w]->GetEnvironment()->GetMap());
+	GraphRefinementEnvironment *env1 = new GraphRefinementEnvironment(msa, 1, gah1, unitSims[w]->GetEnvironment()->GetMap());
+	env1->SetDirected(false);
+	env2->SetDirected(false);
 
 	for (unsigned int x = 0; x < 1; x++)
 	{
@@ -686,28 +753,28 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 		node *g2 = msa->GetParent(g1);
 		uint64_t nodesExpanded = 0;
 		uint64_t nodesTouched = 0;
-		//		printf("Searching from %d to %d in level 1; %d to %d in level 2\n",
-		//			   s1->GetNum(), g1->GetNum(), s2->GetNum(), g2->GetNum());
+		printf("Searching from %d to %d in level 1; %d to %d in level 2\n",
+			   s1->GetNum(), g1->GetNum(), s2->GetNum(), g2->GetNum());
 		graphState gs1, gs2;
 		gs1 = s2->GetNum();
 		gs2 = g2->GetNum();
 		std::vector<graphState> thePath;
 		std::vector<graphState> abstractPath;
-		astar.GetPath(&env2, gs1, gs2, abstractPath);
+		astar.GetPath(env2, gs1, gs2, abstractPath);
 		//printf("Abstract length %d\n", abstractPath.size());
 		//		printf("%d\t", cost);
-		printf("%llu\t%llu\t%1.2f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env2.GetPathLength(abstractPath));
+		printf("%llu\t%llu\t%1.2f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env2->GetPathLength(abstractPath));
 		if (abstractPath.size() == 0)
 			break;
 
 		nodesExpanded += astar.GetNodesExpanded();
 		nodesTouched += astar.GetNodesTouched();
 		
-		env1.SetPlanningCorridor(abstractPath, 2);
+		env1->SetPlanningCorridor(abstractPath, 2);
 		gs1 = s1->GetNum();
 		gs2 = g1->GetNum();
-		astar.GetPath(&env1, gs1, gs2, thePath);
-		printf("Full\t%llu\t%1.2f\t", astar.GetNodesExpanded(), env1.GetPathLength(thePath));
+		astar.GetPath(env1, gs1, gs2, thePath);
+		printf("Full\t%llu\t%1.2f\t", astar.GetNodesExpanded(), env1->GetPathLength(thePath));
 //		for (unsigned int x = 0; x < thePath.size(); x++)
 //			printf("{%d}", thePath[x]);
 		
@@ -716,18 +783,19 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 		double totalLength = 0;
 		int refineAmt = 5;
 		do { // not working yet -- fully check!
-			env1.SetPlanningCorridor(abstractPath, 2, abstractStart);
+			astars.resize(astars.size()+1);
+			env1->SetPlanningCorridor(abstractPath, 2, abstractStart);
 			gs2 = g1->GetNum();
 			if (abstractPath.size()-abstractStart > refineAmt)
 			{
-				env1.SetUseAbstractGoal(true, 2);
+				env1->SetUseAbstractGoal(true, 2);
 				gs2 = abstractPath[abstractStart+refineAmt];
 				//printf("Using abstract goal of %d\n", abstractStart+refineAmt);
 			}
 			else {
-				env1.SetUseAbstractGoal(false, 0);
+				env1->SetUseAbstractGoal(false, 0);
 			}
-			astar.GetPath(&env1, gs1, gs2, thePath);
+			astars.back().GetPath(env1, gs1, gs2, thePath);
 			abstractStart += refineAmt;
 			gs1 = thePath.back();
 			
@@ -736,7 +804,7 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 			
 			nodesExpanded += astar.GetNodesExpanded();
 			nodesTouched += astar.GetNodesTouched();
-			totalLength += env1.GetPathLength(thePath);
+			totalLength += env1->GetPathLength(thePath);
 			if (thePath.back() == gs2)
 				break;
 		} while (thePath.back() != g1->GetNum());
@@ -750,11 +818,101 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
+	Graph *g = new Graph();
+	node *n = new node("");
+	g->AddNode(n);
+	FILE *f = fopen("/Users/nathanst/Downloads/USA-road-d.BAY.co", "r");
+	std::vector<double> xloc, yloc;
+	double minx = DBL_MAX, maxx=-DBL_MAX, miny=DBL_MAX, maxy=-DBL_MAX;
+	while (!feof(f))
+	{
+		char line[255];
+		fgets(line, 255, f);
+		if (line[0] == 'v')
+		{
+			float x1, y1;
+			int id;
+			if (3 != sscanf(line, "v %d %f %f", &id, &x1, &y1))
+				continue;
+			//assert(id == xloc.size()+1);
+			xloc.push_back(x1);
+			yloc.push_back(y1);
+			//printf("%d: (%f, %f) [%f, %f]\n", xloc.size(), x1, y1, minx, maxx);
+			if (x1 > maxx) maxx = x1;
+			if (x1 < minx) minx = x1;
+			if (y1 > maxy) maxy = y1;
+			if (y1 < miny) miny = y1;
+			//if (maxx > -1)
+		}
+	}
+	fclose(f); 
+	printf("x between (%f, %f), y between (%f, %f)\n",
+		   minx, maxx, miny, maxy);
+	for (unsigned int x = 0; x < xloc.size(); x++)
+	{
+		//printf("(%f, %f) -> ", xloc[x], yloc[x]);
+		xloc[x] -= (minx);
+		xloc[x] /= (maxx-minx);
+		xloc[x] = xloc[x]*2-1;
+
+		yloc[x] -= (miny);
+		yloc[x] /= (maxy-miny);
+		yloc[x] = yloc[x]*2-1;
+		
+		node *n = new node("");
+		g->AddNode(n);
+		n->SetLabelF(GraphSearchConstants::kXCoordinate, xloc[x]);
+		n->SetLabelF(GraphSearchConstants::kYCoordinate, yloc[x]);
+		n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+		
+		//printf("(%f, %f)\n", xloc[x], yloc[x]);
+	}
+	//a 1 2 1988
+	f = fopen("/Users/nathanst/Downloads/USA-road-d.BAY.gr", "r");
+	while (!feof(f))
+	{
+		char line[255];
+		fgets(line, 255, f);
+		if (line[0] == 'a')
+		{
+			int x1, y1;
+			sscanf(line, "a %d %d %*d", &x1, &y1);
+			g->AddEdge(new edge(x1, y1, 1.0));
+			//printf("%d to %d\n", x1, y1);
+		}
+	}
+	fclose(f); 
+	ge = new GraphEnvironment(g);
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
+	switch (button)
+	{
+		case kRightButton: printf("Right button\n"); break;
+		case kLeftButton: printf("Left button\n"); break;
+		case kMiddleButton: printf("Middle button\n"); break;
+	}
 	mouseTracking = false;
+	if ((button == kMiddleButton) && (mType == kMouseDown))
+	{
+		unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px1, py1);
+//		delete gdh;
+		if (gdh == 0)
+		{
+			gdh = new GraphMapInconsistentHeuristic(unitSims[windowID]->GetEnvironment()->GetMap(),
+													GraphSearchConstants::GetGraph(unitSims[windowID]->GetEnvironment()->GetMap()));
+		}
+		gdh->SetPlacement(kFarPlacement);
+		node *n = gdh->GetGraph()->GetNode(unitSims[windowID]->GetEnvironment()->GetMap()->GetNodeNum(px1, py1));
+		
+		//for (int x = 0; x < 10; x++)
+		gdh->AddHeuristic(n);
+//		((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
+//		((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
+		printf("Added heuristic at %d, %d\n", px1, px2);
+		return true;
+	}
 	if (button == kRightButton)
 	{
 		switch (mType)
@@ -778,13 +936,19 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				if (ma1 == 0)
 				{
 					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-//					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
-//					gdh->SetPlacement(kAvoidPlacement);
-//					ma1->SetGraphHeuristic(gdh);
-//					for (int x = 0; x < 10; x++)
-//						gdh->AddHeuristic();
-//					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
-//					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
+//					if (gdh == 0)
+//					{
+//						gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
+//						gdh->SetPlacement(kAvoidPlacement);
+					if (gdh != 0)
+					{
+						ma1->SetGraphHeuristic(gdh);
+//						for (int x = 0; x < 10; x++)
+						//							gdh->AddHeuristic();
+						((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(4);
+						((GraphMapInconsistentHeuristic*)gdh)->SetMode(kCompressed);
+					}
+//					}
 				}
 				if (ma2 == 0)
 					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
@@ -800,7 +964,8 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				a1.SetWeight(searchWeight);
 				a1.InitializeSearch(ma1, s1, g1, path);
 				//a2.InitializeSearch(ma2, s1, g1, path);
-				a1.SetUseBPMX(0);
+				a1.SetUseBPMX(1);
+				a1.SetReopenNodes(true);
 				runningSearch1 = true;
 				//runningSearch2 = true;
 				
@@ -858,7 +1023,10 @@ Map *ReduceMap(Map *inputMap)
 //				m->SetTerrainType(theX, theY, kOutOfBounds);
 //			}
 			else {
-				m->SetTerrainType(theX, theY, kGround);
+				if (inputMap->GetTerrainType(theX, theY) == kSwamp)
+					m->SetTerrainType(theX, theY, kSwamp);
+				else
+					m->SetTerrainType(theX, theY, kGround);
 			}
 		}
 		else if (inputMap->GetTerrainType(g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapX),
@@ -986,10 +1154,37 @@ void MeasureHighwayDimension(Map *m, int depth)
 
 void EstimateDimension(Map *m)
 {
+//	Graph *g = GraphSearchConstants::GetGraph(m);
+//	GraphEnvironment ge(g);
+//	std::vector<graphState> endPath;
+//	node *n = g->GetRandomNode();
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	GraphEnvironment ge(g);
 	std::vector<graphState> endPath;
+	
+	// 1. choose a random point
 	node *n = g->GetRandomNode();
+	
+	// 2. search to depth d (all g-costs >= d)
+	double limit = 0;
+	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
+	theSearch.SetStopAfterGoal(false);
+	theSearch.InitializeSearch(&ge, n->GetNum(), n->GetNum(), endPath);
+	while (1)
+	{
+		double gCost;
+		graphState s = theSearch.CheckNextNode();
+		theSearch.GetClosedListGCost(s, gCost);
+		//printf("Expanding g-cost %f next\n", gCost);
+		if (gCost >= limit)
+		{
+			printf("%d\t%d\n", (int)limit, theSearch.GetNodesExpanded());
+			limit++;
+		}
+
+		if (theSearch.DoSingleSearchStep(endPath))
+			break;
+	}	
 	graphState start = n->GetNum();
 	BFS<graphState, graphMove> b;
 	b.GetPath(&ge, start, start, endPath);
@@ -1050,4 +1245,33 @@ double FindFarDist(Graph *g, node *n, graphState &from, graphState &to)
 			gCost = tmpCost;
 	}	
 	return gCost;
+}
+
+
+
+void testHeuristic(char *problems)
+{
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
+	ScenarioLoader s(problems);
+	Map *map = new Map(s.GetNthExperiment(0).GetMapName());
+	map->Scale(s.GetNthExperiment(0).GetXScale(), s.GetNthExperiment(0).GetYScale());
+	MapEnvironment e(map);
+	
+	for (int x = 0; x < s.GetNumExperiments(); x++)
+	{
+		if (s.GetNthExperiment(x).GetBucket() == 127)
+		{
+			xyLoc a, b;
+			a.x = s.GetNthExperiment(x).GetStartX();
+			a.y = s.GetNthExperiment(x).GetStartY();
+			b.x = s.GetNthExperiment(x).GetGoalX();
+			b.y = s.GetNthExperiment(x).GetGoalY();
+			searcher.GetPath(&e, a, b, path);
+			double len = e.GetPathLength(path);
+			printf("Opt: %f (%f) heur: %f ratio: %f nodes: %d\n", s.GetNthExperiment(x).GetDistance(), len, e.HCost(a, b),
+				   e.HCost(a, b)/s.GetNthExperiment(x).GetDistance(), searcher.GetNodesExpanded());
+		}
+	}
+	
+	exit(0);
 }
