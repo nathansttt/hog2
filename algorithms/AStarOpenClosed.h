@@ -74,7 +74,7 @@ public:
 	dataLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
 	inline AStarOpenClosedData<state> &Lookup(uint64_t objKey) { return elements[objKey]; }
 	inline const AStarOpenClosedData<state> &Lookat(uint64_t objKey) const { return elements[objKey]; }
-	uint64_t Peek();
+	uint64_t Peek() const;
 	uint64_t Close();
 	void Reopen(uint64_t objKey);
 
@@ -199,7 +199,7 @@ dataLocation AStarOpenClosed<state, CmpKey>::Lookup(uint64_t hashKey, uint64_t &
  * Peek at the next item to be expanded.
  */
 template<typename state, typename CmpKey>
-uint64_t AStarOpenClosed<state, CmpKey>::Peek()
+uint64_t AStarOpenClosed<state, CmpKey>::Peek() const
 {
 	assert(OpenSize() != 0);
 	
