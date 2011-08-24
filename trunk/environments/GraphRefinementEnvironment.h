@@ -18,7 +18,7 @@
 class GraphRefinementEnvironment : public GraphEnvironment
 {
 public:
-	GraphRefinementEnvironment(GraphAbstraction *ga, int planLevel, GraphHeuristic *gh);
+	GraphRefinementEnvironment(GraphAbstraction *ga, int planLevel, GraphHeuristic *gh, Map *m = 0);
 	~GraphRefinementEnvironment();
 	
 //	void SetPlanningLevel(int planLevel);

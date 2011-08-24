@@ -209,9 +209,9 @@ void GraphEnvironment::OpenGLDraw() const
 		node *n;
 		n = g->GetNode(e->getFrom());
 		
-		glColor3f(1, 0, 0);
+		glColor3f(0, 1, 0);
 		if (e->getMarked())
-			glColor3f(1, 1, 1);
+			glColor3f(1, 0, 0);
 		
 		GLdouble x, y, z;
 		x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
@@ -563,6 +563,7 @@ namespace GraphSearchConstants {
 GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *graph)
 :GraphDistanceHeuristic(graph), m(map)
 {
+	displayHeuristic = 0;
 	compressed = false;
 	SetMode(kMax);
 	SetNumUsedHeuristics(1000);
@@ -593,10 +594,10 @@ GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *gr
 
 double GraphMapInconsistentHeuristic::HCost(const graphState &state1, const graphState &state2)
 {
-	int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
-	int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
-	int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
-	int y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
+	long x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
+	long y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
+	long x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
+	long y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
 	
 	double a = ((x1>x2)?(x1-x2):(x2-x1));
 	double b = ((y1>y2)?(y1-y2):(y2-y1));
@@ -709,6 +710,8 @@ void GraphMapInconsistentHeuristic::FillInCache(std::vector<double> &vals,
 												graphState state2)
 {
 	int unused;
+	if (numHeuristics == 0)
+		numHeuristics = heuristics.size();
 	if (!compressed)
 	{
 		unused = heuristics.size(); // set these values to the uncompressed size
@@ -797,6 +800,68 @@ void GraphMapInconsistentHeuristic::FillInCache(std::vector<double> &vals,
 			}
 		}
 	}	
+}
+
+void GraphMapInconsistentHeuristic::OpenGLDraw() const
+{
+	//static int counter = 50;
+	//counter = (counter+1);
+	if (heuristics.size() == 0)
+	{
+		printf("No heuristics\n");
+		return;
+	}
+
+//	long x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
+//	long y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
+//	long x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
+//	long y2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapY);
+	
+	GraphEnvironment ge(m, g, 0);
+
+	double max = 0;
+	for (unsigned int a = 0; a < heuristics.back().size(); a++)
+	{
+		if (heuristics.back()[a] > max)
+			max = heuristics.back()[a];
+	}
+	
+	for (unsigned int a = 0; a < heuristics.back().size(); a++)
+	{
+//		GLdouble x, y, z;
+		if ((hmode == kCompressed) &&
+			((a%heuristics.size() != displayHeuristic) || (heuristics.size() == displayHeuristic)))
+			continue;
+		node *n = g->GetNode(a);
+		
+		if (n)
+		{
+			if (heuristics.size() == displayHeuristic)
+			{
+				ge.SetColor(heuristics[a%heuristics.size()][a]/max, 0, 1-heuristics[a%heuristics.size()][a]/max, 1);
+				ge.OpenGLDraw(a);
+			}
+			else {
+				if (heuristics[displayHeuristic][a] != 0)
+				{
+					ge.SetColor(heuristics[displayHeuristic][a]/max, 0, 1-heuristics[displayHeuristic][a]/max, 1);
+					ge.OpenGLDraw(a);
+				}
+				else {
+					ge.SetColor(1, 1, 1, 1);
+					ge.OpenGLDraw(a);
+				}
+			}
+//			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+//			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+//			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+//			
+//			glColor3f(0.0, sizes[a]/maxSize, 0.0);
+//			if (dist[a] == 0)
+//				glColor3f(1, 1, 1);
+//			DrawSphere(x, y, z, approxSize);
+		}
+	}
 }
 
 

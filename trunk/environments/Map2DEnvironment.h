@@ -86,6 +86,7 @@ public:
 	void SetGraphHeuristic(GraphHeuristic *h);
 	GraphHeuristic *GetGraphHeuristic();
 	void GetSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
+	void GetSuccessorsWithCost(const xyLoc &nodeID, std::vector<xyLoc> &neighbors, double currHCost, const xyLoc &goal);
 	void GetActions(const xyLoc &nodeID, std::vector<tDirection> &actions) const;
 	tDirection GetAction(const xyLoc &s1, const xyLoc &s2) const;
 	virtual void ApplyAction(xyLoc &s, tDirection dir) const;

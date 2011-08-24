@@ -13,8 +13,8 @@
 //int planLevel, corridorLevel;
 //	CorridorCheck corridorTable;
 
-GraphRefinementEnvironment::GraphRefinementEnvironment(GraphAbstraction *ga, int planLevel, GraphHeuristic *gh)
-:GraphEnvironment(ga->GetAbstractGraph(planLevel), gh)
+GraphRefinementEnvironment::GraphRefinementEnvironment(GraphAbstraction *ga, int planLevel, GraphHeuristic *gh, Map *ma)
+:GraphEnvironment(ma, ga->GetAbstractGraph(planLevel), gh)
 {
 	this->planLevel = planLevel;
 	this->ga = ga;

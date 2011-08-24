@@ -222,7 +222,7 @@ public:
 	void SetPlacement(placementScheme s) { placement = s; }
 	Graph *GetGraph() { return g; }
 	void ChooseStartGoal(graphState &start, graphState &goal);
-	void OpenGLDraw() const;
+	virtual void OpenGLDraw() const;
 protected:
 	void GetOptimalDistances(node *n, std::vector<double> &values);
 	void AddHeuristic(std::vector<double> &values, graphState location);
@@ -260,17 +260,23 @@ public:
 	double HCost(const graphState &state1, const graphState &state2);
 	void SetMode(tHeuristicCombination mode)
 	{ hmode = mode; if (compressed) hmode = kCompressed; }
+	tHeuristicCombination GetMode() { return hmode; }
 	void SetNumUsedHeuristics(int count)
 	{ numHeuristics = count; if (numHeuristics > GetNumHeuristics()) numHeuristics = GetNumHeuristics(); }
 	int GetNumUsedHeuristics()
 	{ return numHeuristics; }	
 	void Compress();
+	virtual void OpenGLDraw() const;
+	
+	void IncreaseDisplayHeuristic()
+	{ displayHeuristic = (displayHeuristic+1)%(heuristics.size()+1); }
 private:
 	void FillInCache(std::vector<double> &vals,
 					 std::vector<double> &errors,
 					 graphState state2);
 	tHeuristicCombination hmode;
 	int numHeuristics;
+	int displayHeuristic;
 	bool compressed;
 	Map *m;
 };
