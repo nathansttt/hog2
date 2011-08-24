@@ -70,6 +70,17 @@ void MapEnvironment::GetSuccessors(const xyLoc &loc, std::vector<xyLoc> &neighbo
 	}
 }
 
+void MapEnvironment::GetSuccessorsWithCost(const xyLoc &nodeID, std::vector<xyLoc> &neighbors,
+										   double currHCost, const xyLoc &goal)
+{
+	assert(false);
+	// 1,2. same y and different x (+/-)
+	// 3,4. same x and different y (+/-)
+	// 5,6,7,8. same x/y difference (+/-) combinations
+	if (nodeID.x == goal.x)
+	{}
+}
+
 void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actions) const
 {
 	bool up=false, down=false;
@@ -169,7 +180,7 @@ double MapEnvironment::HCost(const xyLoc &l1, const xyLoc &l2)
 	double h1, h2;
 	double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));
 	double b = ((l1.y>l2.y)?(l1.y-l2.y):(l2.y-l1.y));
-//	return sqrt(a*a+b*b);
+	//return sqrt(a*a+b*b);
 	h1 = (a>b)?(b*DIAGONAL_COST+a-b):(a*DIAGONAL_COST+b-a);
 
 	if (h == 0)
