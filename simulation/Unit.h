@@ -27,8 +27,6 @@
 #ifndef UNITS_H
 #define UNITS_H
 
-#include "MapAbstraction.h"
-#include "Path.h"
 #include "UnitGroup.h"
 #include "UnitSimulation.h"
 #include "OccupancyInterface.h"
