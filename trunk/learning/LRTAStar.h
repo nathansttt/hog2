@@ -66,7 +66,7 @@ private:
 
 /** The core routine of LRTAStar -- computes at most one-move path */
 template <class state, class action, class environment>
-void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
+void LRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 {
 	goal = to;
 	thePath.resize(0);
@@ -160,7 +160,7 @@ void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>:
 }
 
 template <class state, class action, class environment>
-void LRTAStar<state, action, environment>::LRTAStar<state, action, environment>::OpenGLDraw(const environment *e) const
+void LRTAStar<state, action, environment>::OpenGLDraw(const environment *e) const
 {
 	double learned = 0;
 	for (typename LearnedHeuristic::const_iterator it = heur.begin(); it != heur.end(); it++)

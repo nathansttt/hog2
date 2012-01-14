@@ -37,7 +37,13 @@ COMMON_CXXFLAGS += -I/System/Library/Frameworks/AGL.framework/Versions/A/Headers
 endif
 
 else # not darwin
+
+# if Linux need some other pthread call 
+ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
+COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread # -lXi -lXmu
+else
 COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread # -lXi -lXmu 
+endif
 
 ifeq ("$(OPENGL)", "STUB")
 COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL

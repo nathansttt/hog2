@@ -31,7 +31,6 @@ default : all
 
 SRC_CPP = \
 	simulation/EpisodicSimulation.cpp \
-	simulation/MapEnv.cpp \
 	simulation/ReservationProvider.cpp \
 	simulation/Unit.cpp \
 	simulation/UnitGroup.cpp \

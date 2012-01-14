@@ -42,6 +42,8 @@
 #include "BidirectionalGraphEnvironment.h"
 #include "UnitCostBidirectionalBFS.h"
 
+#include <pthread.h>
+
 using namespace GraphSearchConstants;
 
 void RunBigTest();
