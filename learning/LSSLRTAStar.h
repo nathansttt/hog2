@@ -103,7 +103,7 @@ private:
 
 /** The core routine of LSSLRTAStar -- computes at most one-move path */
 template <class state, class action, class environment>
-void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
+void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 {
 	Timer t;
 	t.StartTimer();
@@ -237,7 +237,7 @@ void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environ
 }
 
 template <class state, class action, class environment>
-void LSSLRTAStar<state, action, environment>::LSSLRTAStar<state, action, environment>::OpenGLDraw(const environment *e) const
+void LSSLRTAStar<state, action, environment>::OpenGLDraw(const environment *e) const
 {
 	astar.OpenGLDraw();
 	
