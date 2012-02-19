@@ -42,6 +42,7 @@
 #include "StatUtil.h"
 #include "HeuristicLearningMeasure.h"
 #include "FLRTAStarUnit.h"
+#include "FLRTAStar2Unit.h"
 #include "Directional2DEnvironment.h"
 
 bool mouseTracking = false;
@@ -220,8 +221,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	
 	if (unitSims[windowID]->GetNumUnits() > 0)
 	{
-		if (!unitSims[windowID]->GetPaused())
-			stepsPerFrame*=1.002;//1.01;//
+//		if (!unitSims[windowID]->GetPaused())
+//			stepsPerFrame*=1.002;//1.01;//
 		if (unitSims[windowID]->Done() && recording)
 		{
 //			recording = false;
@@ -235,6 +236,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->GetEnvironment()->OpenGLDraw();
 		unitSims[windowID]->OpenGLDraw(viewport);
 		//measure.OpenGLDraw(unitSims[windowID]->GetEnvironment());
+
+//		int tmp = GetActivePort(windowID);
+//		SetActivePort(windowID, viewport);
+//		Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
+//		PublicUnitInfo<xyLoc,tDirection,MapEnvironment> pui;
+//		unitSims[windowID]->GetPublicUnitInfo(viewport, pui);
+//		GLdouble a1, b1, c1, r1;
+//		m->GetOpenGLCoord(pui.currentState.x, pui.currentState.y, a1, b1, c1, r1);
+//		cameraMoveTo(a1, b1, c1-600*r1, 0.05);
+//		SetActivePort(windowID, tmp);
 	}
 	else {
 		unitSims[windowID]->GetEnvironment()->OpenGLDraw();
@@ -252,6 +263,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		m->GetOpenGLCoord(px2, py2, x, y, z, r);
 		glVertex3f(x, y, z-3*r);
 		glEnd();
+	}
+	if (runningSearch1)
+	{
+		a1.OpenGLDraw();
+		a1.DoSingleSearchStep(path);
+	}
+	if (runningSearch2)
+	{
+		a2.OpenGLDraw();
+		a2.DoSingleSearchStep(path);
 	}
 }
 
@@ -451,7 +472,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 			y1 = random()%m->GetMapHeight();
 		} while ((m->GetTerrainType(x1, y1) != kGround) || (m->GetTerrainType(x2, y2) != kGround));
 	}
-	
+
 	xyLoc a(x1, y1), b(x2, y2);
 	//xyLoc a(0, 0), b(mazeSize-1, mazeSize-1);
 	//	xyLoc a(0, 0), b(mazeSize-1, 0);
@@ -459,12 +480,12 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	m->GetOpenGLCoord((x1+x2)/2, (y1+y2)/2, a1, b1, c1, r1);
 	
 	for (int x = 0; x < 4; x++)
-	{ break;
+	{ //break;
 		cameraMoveTo(a1, b1, c1-600*r1, 1.0, x);
 		cameraLookAt(a1, b1, c1, 1.0, x);
 	}
 	stepsPerFrame = 1.0/30.0;//1.0/120.0;
-	int lookAheadSize = 20;
+	int lookAheadSize = 10;
 
 //	measure.MeasureDifficultly(unitSims[windowID]->GetEnvironment(), a, b);
 //	measure.ShowHistogram();
@@ -473,11 +494,13 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	u1->SetWeight(1.0);
 //	u1->SetSpeed(0.02);
 //	unitSims[windowID]->AddUnit(u1);
-
+//
 	LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u2 = new LSSLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize));
 	u2->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u2);
-//	
+
+	
+	
 //	for (int x = 0; x < 2; x++)
 //	{
 //		LSSLRTAStar<xyLoc, tDirection, MapEnvironment> *alg;
@@ -496,16 +519,16 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	unitSims[windowID]->AddUnit(u5);
 
 	FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
-	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.5));
-	f->SetOrderRedundant(true);
+	FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 20.5));
+	f->SetUseLocalGCost(false);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 
-	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.5));
-	//f->SetOrderRedundant(true);
-	f->SetUseLocalGCost(true);
-	u6->SetSpeed(0.02);
-	unitSims[windowID]->AddUnit(u6);
+//	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.5));
+//	//f->SetOrderRedundant(true);
+//	f->SetUseLocalGCost(true);
+//	u6->SetSpeed(0.02);
+//	unitSims[windowID]->AddUnit(u6);
 //
 //	u6 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(lookAheadSize, 1.0));
 //	f->SetOrderRedundant(true);
@@ -614,30 +637,18 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
 				
-				if (ma1 == 0)
-				{
-					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-					gdh = new GraphDistanceHeuristic(GraphSearchConstants::GetGraph(ma1->GetMap()));
-					gdh->SetPlacement(kAvoidPlacement);
-					ma1->SetGraphHeuristic(gdh);
-					for (int x = 0; x < 10; x++)
-						gdh->AddHeuristic();
-				}
-				if (ma2 == 0)
-					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-
-				a1.SetStopAfterGoal(true);
-				a2.SetStopAfterGoal(true);
-				xyLoc s1;
-				xyLoc g1;
-				s1.x = px1; s1.y = py1;
-				g1.x = px2; g1.y = py2;
-					   
-				a1.InitializeSearch(ma1, s1, g1, path);
-				a2.InitializeSearch(ma2, s1, g1, path);
-				runningSearch1 = true;
-				runningSearch2 = true;
+				xyLoc a(px1, py1);
+				xyLoc b(px2, py2);
 				
+				FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment> *f;
+				FLRTA2::FLRTAStar2Unit<xyLoc, tDirection, MapEnvironment> *u6 = 
+				new FLRTA2::FLRTAStar2Unit<xyLoc, tDirection, MapEnvironment>(a, b, 
+																			  f = new FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment>(1));
+//				f->SetUseLocalGCost(false);
+				u6->SetSpeed(0.02);
+				unitSims[windowID]->ClearAllUnits();
+				unitSims[windowID]->GetStats()->ClearAllStats();
+				unitSims[windowID]->AddUnit(u6);
 			}
 			break;
 		}

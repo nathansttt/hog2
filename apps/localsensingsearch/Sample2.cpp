@@ -421,7 +421,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 			y1 = random()%m->GetMapHeight();
 		} while ((m->GetTerrainType(x1, y1) != kGround) || (m->GetTerrainType(x2, y2) != kGround));
 	}
-//	x1 = 19; y1 = 10; x2 = 4; y2 = 10;
+	//x1 = 6; y1 = 3; x2 = 15; y2 = 72;
 	xySpeedHeading a(x1, y1), b(x2, y2);
 	//xySpeedHeading a(0, 0), b(mazeSize-1, mazeSize-1);
 	//	xySpeedHeading a(0, 0), b(mazeSize-1, 0);
@@ -430,6 +430,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 	std::cout << "Solving " << a << " to " << b << std::endl;
 	stepsPerFrame = 1.0/120.0;
 //	GLdouble a1, b1, c1, r1;
+	
 //	m->GetOpenGLCoord((x1+x2)/2, (y1+y2)/2, a1, b1, c1, r1);
 //	cameraMoveTo(a1, b1, c1-600*r1, 1.0);
 //	cameraLookAt(a1, b1, c1, 1.0);
@@ -463,8 +464,9 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier mod, char)
 //	unitSims[windowID]->AddUnit(u5);
 //
 	FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *f;
-	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u6 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10, 10.5));
+	FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *u6 = new FLRTAStarUnit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(a, b, f = new FLRTA::FLRTAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment>(10, 1.5));
 	f->SetOrderRedundant(false);
+	f->SetUseLocalGCost(true);
 	u6->SetSpeed(0.02);
 	unitSims[windowID]->AddUnit(u6);
 	
