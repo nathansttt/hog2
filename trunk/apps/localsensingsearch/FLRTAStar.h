@@ -722,7 +722,7 @@ namespace FLRTA {
 			{
 				if (cLoc == kNotFound) // add node even if it is dead!
 				{
-					double cost = min(GCost(next)+edgeCost, GCost(neighbors->at(x)));
+//					double cost = min(GCost(next)+edgeCost, GCost(neighbors->at(x)));
 
 					if (verbose) std::cout << "Adding " << neighbors->at(x) << " to open with f:" << 
 						aoc.Lookat(parentKey).g+edgeCost + HCost(neighbors->at(x), to) << std::endl;
@@ -771,7 +771,7 @@ namespace FLRTA {
 				{
 					// node was dead. If this is on the optimal path, it needs to be opened
 					cLoc = kOpenList;
-					aoc.Reopen(childKey);
+					//aoc.Reopen(childKey);
 					SetGCost(m_pEnv, neighbors->at(x), GCost(next)+edgeCost);
 					//TODO: 
 					AddParent(next, neighbors->at(x));
@@ -817,13 +817,6 @@ namespace FLRTA {
 	void FLRTAStar<state, action, environment>::MarkDeadRedundant(environment *env, const state &goal)
 	{
 //		VerifyParentChildren();
-//		std::vector<state> othersToKill;
-//		unsigned int openSize = aoc.size();
-//		for (unsigned int x = 0; x < openSize; x++)
-//		{
-//			const AStarOpenClosedData<state> data = aoc.Lookat(x);//astar.GetItem(x);
-//			TryToKill(data.data, goal, othersToKill);
-//		}
 //		// 1. put all open nodes in pqueue
 		pQueue q;
 //		
@@ -853,32 +846,6 @@ namespace FLRTA {
 				if (verbose) std::cout<<"Marking " << GCost(s) << ":" << HCost(s, goal) << " " << s << " as dead -- too far from goal: " << GCost(goal) << goal << std::endl;
 				KillState(s);
 			}
-			//
-//			if (IsDead(s) || (s == goal))
-//				continue;
-//			//std::cout << "GCost state:13 " << std::endl << s << goal << std::endl;
-//			if (fgreater(GCost(s)+HCost(s, goal), GCost(goal)))
-//			{
-//				if (verbose) std::cout<<"Marking " << GCost(s) << ":" << HCost(s, goal) << " " << s << " as dead -- too far from goal: " << GCost(goal) << goal << std::endl;
-//				KillState(s);
-//			}
-//			else if (IsRedundant(s)) // catches the dead case too
-//			{
-//				if (verbose) 
-//					std::cout<<"Marking " << s << " as redundant" << std::endl;
-//				KillState(s);
-//				//put successors back on queue in case they are dead too
-////				nodesExpanded++;
-////				env->GetSuccessors(s, succ);
-////				for (unsigned int x = 0; x < succ.size(); x++)
-////				{
-////					uint64_t tmpKey;
-//					//std::cout << "Hashing state:14 " << std::endl << succ[x] << std::endl;
-////					if ((kNotFound != aoc.Lookup(env->GetStateHash(succ[x]), tmpKey)) && (!IsDead(succ[x])))
-////						//if (astar.HaveExpandedState(succ[x]) && !IsDead(succ[x]))
-////						q.push(borderData<state>(succ[x], DBL_MAX));
-////				}
-//			}
 		}
 	}
 	
@@ -968,21 +935,7 @@ namespace FLRTA {
 					//if (verbose) std::cout << std::endl;
 				}
 			}
-//			if ((shouldKill) && !(s == to))
-//			{
-//				std::cout << "Killing " << s << std::endl;
-//				for (unsigned int x = 0; x < succ.size(); x++)
-//					RemoveParent(s, succ[x]);
-//				ClearParents(s);
-//				toKill.push_back(s);
-//				//KillState(s);
-//			}
 		}
-//		while (toKill.size() > 0)
-//		{
-//			KillState(toKill.back());
-//			toKill.pop_back();
-//		}
 	}
 	
 	template <class state, class action, class environment>
@@ -1023,12 +976,14 @@ namespace FLRTA {
 				e->SetColor(0.9, 0.9, 0.9, 1);
 				e->GLLabelState((*it).second.theState, str);
 			}
+
 			if ((*it).second.dead)
 			{
 				e->SetColor(0.0, 0.0+((loc==kOpenList)?0.5:0.0), 0.0, 1);
 				e->OpenGLDraw((*it).second.theState);
 			}
-			else {
+			else
+			{
 				double r = (*it).second.hCost;
 				if (r > 0)
 				{

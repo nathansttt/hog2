@@ -123,7 +123,7 @@ namespace LocalSensing {
 	
 	template <class state, class action, class environment>
 	bool RIBS<state, action, environment>::MakeMove(environment *e, OccupancyInterface<state,action> *,
-																SimulationInfo<state,action,environment> *, action& a)
+																SimulationInfo<state,action,environment> *si, action& a)
 	{
 		env = e;
 		if (currentLoc == goalLoc)
