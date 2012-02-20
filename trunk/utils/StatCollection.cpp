@@ -50,6 +50,7 @@ StatCollection::StatCollection()
 
 StatCollection::~StatCollection()
 {
+	/*
 	for (unsigned int x = 0; x < categories.size(); x++)
 	{
 		delete [] categories[x];
@@ -73,6 +74,7 @@ StatCollection::~StatCollection()
 		delete [] includeFilters[x];
 		includeFilters[x] = 0;
 	}
+	*/
 }
 
 /**
@@ -187,7 +189,7 @@ const stat *StatCollection::GetStatNum(int which) const
  */
 const char *StatCollection::lookupCategoryID(int id) const
 {
-	return categories[id];
+	return categories[id].c_str();
 }
 
 /**
@@ -195,7 +197,7 @@ const char *StatCollection::lookupCategoryID(int id) const
  */
 const char *StatCollection::LookupOwnerID(int id) const
 {
-	return owners[id];
+	return owners[id].c_str();
 }
 
 /**
@@ -210,16 +212,22 @@ void StatCollection::AddFilter(const char *category)
 
 void StatCollection::AddIncludeFilter(const char *category) // include only added categories
 {
+	includeFilters.push_back(category);
+	/*
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);
 	includeFilters.push_back(str);
+	*/
 }
 
 void StatCollection::AddExcludeFilter(const char *category) // exclude only added categories
 {
+	excludeFilters.push_back(category);
+	/*
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);
 	excludeFilters.push_back(str);
+	*/
 }
 
 /**
@@ -227,6 +235,7 @@ void StatCollection::AddExcludeFilter(const char *category) // exclude only adde
  */
 void StatCollection::ClearFilters()
 {
+	/*
 	for (unsigned int x = 0; x < excludeFilters.size(); x++)
 	{
 			delete [] excludeFilters[x];
@@ -237,6 +246,7 @@ void StatCollection::ClearFilters()
 			delete [] includeFilters[x];
 			includeFilters[x] = 0;
 	}
+	*/
 	excludeFilters.resize(0);
 	includeFilters.resize(0);
 }
@@ -247,8 +257,12 @@ void StatCollection::ClearFilters()
 int StatCollection::LookupCategory(const char *category) const
 {
 	for (unsigned int x = 0; x < categories.size(); x++)
-		if (strcmp(category, categories[x]) == 0)
+	{
+		if (categories[x] == category)
 			return x;
+	}
+	//if (strcmp(category, categories[x]) == 0)
+	//return x;
 	return -1;
 }
 
@@ -262,9 +276,12 @@ int StatCollection::addCategory(const char *category)
 	int id = LookupCategory(category);
 	if (id != -1)
 		return id;
+	categories.push_back(category);
+	/*
 	char *str = new char [strlen(category)+1];
 	strcpy(str, category);
 	categories.push_back(str);
+	*/
 	return categories.size()-1;
 }
 
@@ -274,8 +291,10 @@ int StatCollection::addCategory(const char *category)
 int StatCollection::LookupOwner(const char *owner) const
 {
 	for (unsigned int x = 0; x < owners.size(); x++)
-		if (strcmp(owner, owners[x]) == 0)
+		if (owners[x] == owner)
 			return x;
+		//if (strcmp(owner, owners[x]) == 0)
+		//return x;
 	return -1;
 }
 
@@ -288,9 +307,12 @@ int StatCollection::addOwner(const char *owner)
 	int id = LookupOwner(owner);
 	if (id != -1)
 		return id;
+	owners.push_back(owner);
+	/*
 	char *str = new char [strlen(owner)+1];
 	strcpy(str, owner);
 	owners.push_back(str);
+	*/
 	return owners.size()-1;
 }
 
@@ -356,15 +378,21 @@ bool StatCollection::passFilter(const char *category) const
 		return true;
 
 	for (unsigned int x = 0; x < excludeFilters.size(); x++)
-		if (strcmp(excludeFilters[x], category) == 0)
+		if (excludeFilters[x] == category)
 			return false;
+	//if (strcmp(excludeFilters[x], category) == 0)
+	//return false;
 
 	if (includeFilters.size() == 0)
 		return true;
 
 	for (unsigned int x = 0; x < includeFilters.size(); x++)
-		if (strcmp(includeFilters[x], category) == 0)
+	{
+		if (includeFilters[x] == category)
 			return true;
+		//if (strcmp(includeFilters[x], category) == 0)
+		//return true;
+	}
 
 	return false;
 }
