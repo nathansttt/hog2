@@ -96,6 +96,7 @@ void CreateSimulation(int id)
 		map->SetTerrainType(mazeSize-2, 1,
 							mazeSize-2, mazeSize-2, kOutOfBounds);
 //		map->Load("/Users/nathanst/Desktop/100.map");
+		map->Load("/Users/nathanst/hog2/maps/dao/arena2.map");
 //		map->SetRectHeight(0, 0, mazeSize-1, mazeSize-1, 0, kOutOfBounds);
 //		for (int y = 0; y < mazeSize; y+=2)
 //		{
@@ -648,7 +649,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment> *f;
 				FLRTA2::FLRTAStar2Unit<xyLoc, tDirection, MapEnvironment> *u6 = 
 				new FLRTA2::FLRTAStar2Unit<xyLoc, tDirection, MapEnvironment>(a, b, 
-																			  f = new FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment>(1));
+																			  f = new FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment>(10));
 //				f->SetUseLocalGCost(false);
 				u6->SetSpeed(0.02);
 				unitSims[windowID]->ClearAllUnits();

@@ -98,7 +98,7 @@ namespace FLRTA2 {
 		typedef __gnu_cxx::hash_map<uint64_t, bool, Hash64 > ClosedList;
 		
 
-		void ExpandLSS(environment *env, const state &from, const state &to, std::vector<state> &thePath);
+		bool ExpandLSS(environment *env, const state &from, const state &to, std::vector<state> &thePath);
 		void BuildLSSQ(environment *env, pQueue &q, state &best, const state &target);
 		void LearnHeuristic(environment *env, pQueue &q, const state &to);
 		int GetGoalID(const state &which)
@@ -138,19 +138,21 @@ namespace FLRTA2 {
 		if (from==to)
 			return;
 		
-		
 		if (thePath.size() != 0)
 			return;
 		
 		pQueue q1, q2;
 		state first;
-		ExpandLSS(env, from, to, thePath);
+		bool learng = ExpandLSS(env, from, to, thePath);
 		
 		BuildLSSQ(env, q1, first, goals[kTo]);
 		LearnHeuristic(env, q1, goals[kTo]);
 
-		BuildLSSQ(env, q2, first, goals[kFrom]);
-		LearnHeuristic(env, q2, goals[kFrom]);
+		if (learng)
+		{
+			BuildLSSQ(env, q2, first, goals[kFrom]);
+			LearnHeuristic(env, q2, goals[kFrom]);
+		}
 		//std::cout << GetName() << " " << nodesExpanded-nodeExpansionLimit << " expanded during learning" << std::endl;
 		
 		//	if (thePath.size() != 0)
@@ -164,19 +166,23 @@ namespace FLRTA2 {
 	}
 	
 	template <class state, class action, class environment>
-	void FLRTAStar2<state, action, environment>::ExpandLSS(environment *env, const state &from, const state &to, std::vector<state> &thePath)
+	bool FLRTAStar2<state, action, environment>::ExpandLSS(environment *env, const state &from, const state &to, std::vector<state> &thePath)
 	{
+		bool expandedStart = false;
 		astar.InitializeSearch(env, from, to, thePath);
 		astar.SetHeuristic(this);
 		astar.SetUseBPMX(1);
 		for (int x = 0; x < nodeExpansionLimit; x++)
 		{
-			if (astar.CheckNextNode() == to)
+			if (astar.CheckNextNode() == to) // never expand goal
 				break;
+			if (astar.CheckNextNode() == goals[kFrom])
+				expandedStart = true;
 			astar.DoSingleSearchStep(thePath);
 		}
 		nodesExpanded = astar.GetNodesExpanded();
 		nodesTouched = astar.GetNodesTouched();
+		return !expandedStart;
 	}
 	
 	template <class state, class action, class environment>
@@ -197,6 +203,11 @@ namespace FLRTA2 {
 			double h = HCost(env, data.data, target);
 			q.push(borderData<state>(data.data, h));
 			if (verbose) std::cout << "Preparing border state: " << data.data << " h: " << h << std::endl;
+		}
+		double hCost;
+		if (astar.GetClosedListGCost(target, hCost))
+		{
+			q.push(borderData<state>(target, 0));
 		}
 	}
 	
@@ -224,6 +235,7 @@ namespace FLRTA2 {
 					if (verbose) std::cout << succ[x] << " not in closed\n";
 					continue;
 				}
+				
 				double edgeCost = env->GCost(s, succ[x]);
 				if (verbose) std::cout << s << " to " << succ[x] << " " << edgeCost << " ";
 				succHCost = HCost(env, succ[x], to);
@@ -283,7 +295,8 @@ namespace FLRTA2 {
 			if (r > 0 || b > 0)
 			{
 				//e->SetColor(0.5+0.5*r/learned[0], 0, 0.5+0.5*b/learned[1], 0.5+0.25*r/learned[0]+0.25*b/learned[1]);
-				e->SetColor(0.5+0.5*r/learned[0], 0, 0.0+1.0*b/learned[1], 0.2+0.4*r/learned[0]+0.4*b/learned[1]);
+				//e->SetColor(0.5+0.5*r/learned[0], 0, 0.0+1.0*b/learned[1], 0.2+0.4*r/learned[0]+0.4*b/learned[1]);
+				e->SetColor(0.0, 0.0, 0.0+1.0*b/learned[1], 1.0*b/learned[1]);
 				e->OpenGLDraw((*it).second.theState);
 			}
 		}
