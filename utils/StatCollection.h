@@ -26,6 +26,7 @@
  */
 
 #include <vector>
+#include <string>
 
 #ifndef STATCOLLECTION_H
 #define STATCOLLECTION_H
@@ -87,10 +88,10 @@ private:
 	bool passFilter(const char *category) const;
 	statValue *getLastStat(const char *category, const char *owner);
 	
-	std::vector<const char *> categories;
-	std::vector<const char *> owners;
-	std::vector<const char *> includeFilters;
-	std::vector<const char *> excludeFilters;
+	std::vector<std::string> categories;
+	std::vector<std::string> owners;
+	std::vector<std::string> includeFilters;
+	std::vector<std::string> excludeFilters;
 	std::vector<stat> stats;
 	bool printOutput;
 };
