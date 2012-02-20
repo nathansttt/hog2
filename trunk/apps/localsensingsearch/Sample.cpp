@@ -174,6 +174,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-scaleTest", "-scaleTest <size> <which> <weight>", "Run a scaling test with local minima <size>.");
 	InstallCommandLineHandler(MyCLHandler, "-scaleTestTank", "-scaleTestTank <size> <which> <weight>", "Run a scaling test with local minima <size>.");
 	InstallCommandLineHandler(MyCLHandler, "-STPTest", "-STPTest", "Run a STP test.");
+	InstallCommandLineHandler(MyCLHandler, "-flrta2", "-flrta2", "Tests flrta2");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -314,6 +315,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-STPTest") == 0)
 	{
 		RunSTPTest(atoi(argument[1]));
+	}
+	else if (strcmp(argument[0], "-flrta2") == 0)
+	{
+		RunScalingTest(30, 7, 1.0);
 	}
 	return 2; //ignore typos
 }
@@ -737,7 +742,7 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	{
 		printf("Running FLRTA*(1)\n");
 		FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(1, 10.0));
+		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(1, 1.5));
 		f->SetUseLocalGCost(true);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
@@ -746,7 +751,7 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	{
 		printf("Running FLRTA*(10)\n");
 		FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, 10.0));
+		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, 1.5));
 		f->SetUseLocalGCost(true);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
@@ -755,7 +760,7 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	{
 		printf("Running FLRTA*(100)\n");
 		FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
-		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100, 10.0));
+		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100, 1.5));
 		f->SetUseLocalGCost(true);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
@@ -817,7 +822,7 @@ void RunTankScenario(char *name, int which)
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
 		printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
-		if (sl->GetNthExperiment(x).GetBucket() == 20)
+		if (sl->GetNthExperiment(x).GetBucket() == 25)
 			RunSingleTankTest(es, sl->GetNthExperiment(x), which);
 	}
 	exit(0);
@@ -837,7 +842,7 @@ void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which)
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xySpeedHeading a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
-	
+	printf("Solving from (%d, %d) to (%d, %d)\n", e.GetStartX(), e.GetStartY(), e.GetGoalX(), e.GetGoalY());
 	HeuristicLearningMeasure<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> measured;
 	double requiredLearning = measured.MeasureDifficultly(es->GetEnvironment(), a, b);
 	
@@ -1131,7 +1136,7 @@ void RunScalingTest(int size, int which, float weight)
 		FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
 		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(1, weight));
 		//f->SetOrderRedundant(true);
-		f->SetUseLocalGCost(true);
+		f->SetUseLocalGCost(false);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
@@ -1141,7 +1146,7 @@ void RunScalingTest(int size, int which, float weight)
 		FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
 		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10, weight));
 		//f->SetOrderRedundant(true);
-		f->SetUseLocalGCost(true);
+		f->SetUseLocalGCost(false);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
@@ -1151,9 +1156,19 @@ void RunScalingTest(int size, int which, float weight)
 		FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
 		FLRTAStarUnit<xyLoc, tDirection, MapEnvironment> *u5 = new FLRTAStarUnit<xyLoc, tDirection, MapEnvironment>(a, b, f = new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(100, weight));
 		//f->SetOrderRedundant(true);
-		f->SetUseLocalGCost(true);
+		f->SetUseLocalGCost(false);
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
+	}
+	else if (which == 7)
+	{
+		printf("Running FLRTA2*(1)\n");
+		FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment> *f;
+		FLRTA2::FLRTAStar2Unit<xyLoc, tDirection, MapEnvironment> *u6 = 
+		new FLRTA2::FLRTAStar2Unit<xyLoc, tDirection, MapEnvironment>(a, b, 
+																	  f = new FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment>(1));
+		u6->SetSpeed(1.0);
+		es->AddUnit(u6);
 	}
 	fflush(stdout);
 	es->SetTrialLimit(500000);
