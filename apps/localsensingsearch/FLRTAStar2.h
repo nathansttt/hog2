@@ -53,7 +53,7 @@ namespace FLRTA2 {
 	class FLRTAStar2 : public GenericSearchAlgorithm<state,action,environment>, public Heuristic<state> {
 	public:
 		FLRTAStar2(int nodeLimit = 8)
-		{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; }
+		{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; m_pEnv = 0; }
 		virtual ~FLRTAStar2(void) { }
 		
 		void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
@@ -74,11 +74,13 @@ namespace FLRTA2 {
 		{
 			int ID = GetGoalID(to);
 			if (heur.find(env->GetStateHash(from)) != heur.end())
-				return heur[env->GetStateHash(from)].theHeuristic[ID]+env->HCost(from, to);
+				return heur[env->GetStateHash(from)].theHeuristic[ID]+
+				env->HCost(from, to);
 			return env->HCost(from, to);
 		}
 		double HCost(const state &from, const state &to)
 		{
+			assert(m_pEnv != 0);
 			return HCost(m_pEnv, from, to);
 		}
 		
@@ -97,15 +99,14 @@ namespace FLRTA2 {
 		
 
 		void ExpandLSS(environment *env, const state &from, const state &to, std::vector<state> &thePath);
-		void BuildLSSQ(pQueue &q, state &best, const state &target);
+		void BuildLSSQ(environment *env, pQueue &q, state &best, const state &target);
 		void LearnHeuristic(environment *env, pQueue &q, const state &to);
 		int GetGoalID(const state &which)
 		{
 			for (unsigned int x = 0; x < goals.size(); x++)
 				if (goals[x] == which)
 					return x;
-			goals.push_back(which);
-			return goals.size()-1;
+			assert(false);
 		}
 		
 		environment *m_pEnv;
@@ -118,10 +119,18 @@ namespace FLRTA2 {
 		std::vector<state> goals;
 	};
 	
+	const int kFrom = 1;
+	const int kTo = 0;
+
 	/** The core routine of FLRTAStar2 -- computes at most one-move path */
 	template <class state, class action, class environment>
 	void FLRTAStar2<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 	{
+		if (goals.size() == 0)
+		{
+			goals.push_back(to);
+			goals.push_back(from);
+		}
 		Timer t;
 		t.StartTimer();
 		m_pEnv = env;
@@ -137,11 +146,11 @@ namespace FLRTA2 {
 		state first;
 		ExpandLSS(env, from, to, thePath);
 		
-//		BuildLSSQ(q1, first, to);
-//		LearnHeuristic(env, q1, to);
+		BuildLSSQ(env, q1, first, goals[kTo]);
+		LearnHeuristic(env, q1, goals[kTo]);
 
-		BuildLSSQ(q2, first, from);
-		LearnHeuristic(env, q2, from);
+		BuildLSSQ(env, q2, first, goals[kFrom]);
+		LearnHeuristic(env, q2, goals[kFrom]);
 		//std::cout << GetName() << " " << nodesExpanded-nodeExpansionLimit << " expanded during learning" << std::endl;
 		
 		//	if (thePath.size() != 0)
@@ -171,7 +180,7 @@ namespace FLRTA2 {
 	}
 	
 	template <class state, class action, class environment>
-	void FLRTAStar2<state, action, environment>::BuildLSSQ(pQueue &q, state &first, const state &target)
+	void FLRTAStar2<state, action, environment>::BuildLSSQ(environment *env, pQueue &q, state &first, const state &target)
 	{
 		// 1. put all open nodes in pqueue
 		double bestF = -1;
@@ -185,8 +194,9 @@ namespace FLRTA2 {
 				bestF = data.g+data.h;
 				first = data.data;
 			}
-			q.push(borderData<state>(data.data, HCost(data.data, target)));
-			if (verbose) std::cout << "Preparing border state: " << data.data << " h: " << data.h << std::endl;
+			double h = HCost(env, data.data, target);
+			q.push(borderData<state>(data.data, h));
+			if (verbose) std::cout << "Preparing border state: " << data.data << " h: " << h << std::endl;
 		}
 	}
 	
@@ -200,11 +210,11 @@ namespace FLRTA2 {
 			nodesExpanded++;
 			nodesTouched++;
 			state s = q.top().theState;
-			if (verbose) std::cout << "Starting with " << s << " h: " << q.top().heuristic << "/" << HCost(s, to) << std::endl;
+			if (verbose) std::cout << "Starting with " << s << " h: " << q.top().heuristic << "/" << HCost(env, s, to) << std::endl;
 			q.pop();
 			//			std::cout << s << " " << learnData[env->GetStateHash(s)].learnedHeuristic << std::endl;
 			env->GetSuccessors(s, succ);
-			double hCost = HCost(s, to);
+			double hCost = HCost(env, s, to);
 			for (unsigned int x = 0; x < succ.size(); x++)
 			{
 				nodesTouched++;
