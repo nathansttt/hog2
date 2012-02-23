@@ -10,6 +10,7 @@
 #include "Map3DGrid.h"
 
 int gSectorSize = 16;
+//double gInvSectorSize = 1/16;
 
 //	uint8_t points[gSectorSize*gSectorSize];
 // 8 bits - movable directions
@@ -19,19 +20,29 @@ int gSectorSize = 16;
 
 const uint8_t kUnpassableHeight = 0x1F;
 
-int GridData::AddMove(unsigned index, moveDir dir)
+int GridData::AddMove(unsigned index, moveDir dir, bool local)
 {
 	assert(index < gSectorSize*gSectorSize);
 	int cnt = 1;
 	if (points[index]&(((int)dir)<<8))
 		cnt = 0;
 	points[index] |= (((int)dir)<<8);
+	uint32_t val = (((int)dir)<<16);
+	if (local)
+		points[index] |= val;
+	else
+		points[index] &= (~val);
 	return cnt;
 }
 
-void GridData::AddMove(unsigned int x, unsigned int y, moveDir dir)
+void GridData::AddMove(unsigned int x, unsigned int y, moveDir dir, bool local)
 {
 	points[indexFromXY(x, y)] |= (((int)dir)<<8);
+	uint32_t val = (((int)dir)<<16);
+	if (local)
+		points[indexFromXY(x, y)] |= val;
+	else
+		points[indexFromXY(x, y)] &= (~val);
 }
 
 int GridData::ReMove(unsigned index, moveDir dir)
@@ -54,17 +65,28 @@ void GridData::ReMove(unsigned int x, unsigned int y, moveDir dir)
 
 uint8_t GridData::GetMoves(int x, int y) const
 {
-	return points[indexFromXY(x, y)]>>8;
+	return (points[indexFromXY(x, y)]>>8)&0xFF;
 }
 
 uint8_t GridData::GetMoves(int offset) const
 {
-	return points[offset]>>8;
+	return (points[offset]>>8)&0xFF;
 }
+
+uint8_t GridData::GetMoveLocality(int x, int y) const
+{
+	return (points[indexFromXY(x, y)]>>16)&0xFF;
+}
+
+uint8_t GridData::GetMoveLocality(int offset) const
+{
+	return (points[offset]>>16)&0xFF;	
+}
+
 
 void GridData::ClearMoves(int x, int y)
 {
-	points[indexFromXY(x, y)] &= 0xFF;
+	points[indexFromXY(x, y)] &= 0xFFFF00FF;
 }
 
 bool GridData::AddPoint(int x, int y, int height)
@@ -189,7 +211,7 @@ int GridData::BFS(std::vector<int> &labels, int offset, int label)
 				(abs(GetHeightOffset(nextLoc-1)-height) <= 1))
 				q.push_back(nextLoc-1);
 		}
-		if ((nextLoc%gSectorSize) != gSectorSize+1)
+		if ((nextLoc%gSectorSize) != gSectorSize-1)
 		{
 			if ((labels[nextLoc+1] == -1) &&
 				(abs(GetHeightOffset(nextLoc+1)-height) <= 1))
@@ -315,23 +337,42 @@ bool RegionData::AddPoint(int x, int y, int z)
 		centerLocation = y*gSectorSize+x;
 	}
 	else {
-		int newx=0, newy=0, cnt=0;
-		for (int t = 0; t < gSectorSize*gSectorSize; t++)
-		{
-			if (grid.GetHeightOffset(t) != kUnpassableHeight)
-			{
-				int tmpx, tmpy;
-				xyFromIndex(t, tmpx, tmpy);
-				newx += tmpx;
-				newy += tmpy;
-				cnt++;
-			}
-		}
-		centerLocation = indexFromXY(newx/cnt, newy/cnt);
+		RedoCenterLocation();
+		//		int newx=0, newy=0, cnt=0;
+//		for (int t = 0; t < gSectorSize*gSectorSize; t++)
+//		{
+//			if (grid.GetHeightOffset(t) != kUnpassableHeight)
+//			{
+//				int tmpx, tmpy;
+//				xyFromIndex(t, tmpx, tmpy);
+//				newx += tmpx;
+//				newy += tmpy;
+//				cnt++;
+//			}
+//		}
+//		centerLocation = indexFromXY(newx/cnt, newy/cnt);
 	}
 	pointCount++;
 	//int offset = indexFromXY(x, y);
 	return grid.AddPoint(x, y, z-baseHeight);
+}
+
+void RegionData::RedoCenterLocation()
+{
+	int newx=0, newy=0, cnt=0;
+	for (int t = 0; t < gSectorSize*gSectorSize; t++)
+	{
+		if (grid.GetHeightOffset(t) != kUnpassableHeight)
+		{
+			int tmpx, tmpy;
+			xyFromIndex(t, tmpx, tmpy);
+			newx += tmpx;
+			newy += tmpy;
+			cnt++;
+		}
+	}
+	if (cnt != 0)
+		centerLocation = indexFromXY(newx/cnt, newy/cnt);
 }
 
 void RegionData::AddEdge(EdgeData &e)
@@ -399,13 +440,16 @@ bool SectorData::RemovePoint(int x, int y, int z)
 			return true;
 		}
 	}
+	return false;
 }
 
 Map3DGrid::Map3DGrid(Map *map, int theSectorSize)
 {
+	drawGrid = false;
 	mWidth = map->GetMapWidth();
 	mHeight = map->GetMapHeight();
 	gSectorSize = theSectorSize;
+//	gInvSectorSize = 1.0/gSectorSize;
 	mXSectors = ceil((double)mWidth/(double)gSectorSize);
 	mYSectors = ceil((double)mHeight/(double)gSectorSize);
 	sectors.resize(mXSectors*mYSectors);
@@ -415,6 +459,7 @@ Map3DGrid::Map3DGrid(Map *map, int theSectorSize)
 Map3DGrid::Map3DGrid(int width, int height, int theSectorSize)
 :mWidth(width), mHeight(height)
 {
+	drawGrid = false;
 	gSectorSize = theSectorSize;
 	mXSectors = ceil((double)width/(double)gSectorSize);
 	mYSectors = ceil((double)height/(double)gSectorSize);
@@ -485,26 +530,263 @@ void Map3DGrid::AddMapPoints(Map *map, std::vector<bool> &visited, int x, int y,
 
 void Map3DGrid::GetSuccessors(const state3d &nodeID, std::vector<state3d> &neighbors) const
 {
-	if (nodeID.GetOffset() != 0xFFFF) // on the actual grid
+	if (nodeID.GetOffset() != -1) // on the actual grid
 	{
-		static std::vector<action3d> acts;
-		GetActions(nodeID, acts);
+		static const moveDir m[8] = {kWest, kEast, kNorth, kSouth, kNorthEast, kNorthWest, kSouthEast, kSouthWest};
+		moveDir dirs = (moveDir)sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.GetMoves(nodeID.GetOffset());
+		uint8_t local = (moveDir)sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.GetMoveLocality(nodeID.GetOffset());
+		action3d a;
+		state3d s;
+		a.destRegion = 0xFF;
 		neighbors.resize(0);
-		for (unsigned int x = 0; x < acts.size(); x++)
+
+		int x = -1, y, z;
+		
+		for (int t = 0; t < 8; t++)
 		{
-			state3d s = nodeID;
-			ApplyAction(s, acts[x]);
-			neighbors.push_back(s);
+			if (dirs & m[t])
+			{
+				s = nodeID;
+				if ((sectors[nodeID.GetSector()].regions.size() == 1) &&
+					(nodeID.GetOffset() >= gSectorSize) && (nodeID.GetOffset() < gSectorSize*gSectorSize-gSectorSize) &&
+					((nodeID.GetOffset()%gSectorSize) != 0) && (nodeID.GetOffset()%gSectorSize) != gSectorSize-1)
+					//if (0 && local & m[t])// && ((dirs^local) == 0))
+				{
+					switch (m[t])
+					{
+						case kWest:
+						{ s.offset--; break; }
+						case kEast: 
+						{ s.offset++; break; }
+						case kNorth: 
+						{ s.offset-=gSectorSize; break; }
+						case kSouth: 
+						{ s.offset+=gSectorSize; break; }
+						case kNorthEast: 
+						{ s.offset=s.offset-gSectorSize+1; break; }
+						case kNorthWest: 
+						{ s.offset=s.offset-gSectorSize-1; break; }
+						case kSouthEast: 
+						{ s.offset=s.offset+gSectorSize+1; break; }
+						case kSouthWest: 
+						{ s.offset=s.offset+gSectorSize-1; break; }
+					}
+				}
+				else {
+					if (x == -1)
+						GetXYZFromState(nodeID, x, y, z);
+
+					switch (m[t])
+					{
+						case kWest: 
+							GetStateFromXYZ(s, x-1, y, z); break;
+						case kEast: 
+							GetStateFromXYZ(s, x+1, y, z); break;
+						case kNorth: 
+							GetStateFromXYZ(s, x, y-1, z); break;
+						case kSouth: 
+							GetStateFromXYZ(s, x, y+1, z); break;
+						case kNorthEast: 
+							GetStateFromXYZ(s, x+1, y-1, z); break;
+						case kNorthWest: 
+							GetStateFromXYZ(s, x-1, y-1, z); break;
+						case kSouthEast: 
+							GetStateFromXYZ(s, x+1, y+1, z); break;
+						case kSouthWest: 
+							GetStateFromXYZ(s, x-1, y+1, z); break;
+					}
+				}
+				neighbors.push_back(s);
+			}
 		}
+//		static std::vector<action3d> acts;
+//		GetActions(nodeID, acts);
+//		neighbors.resize(0);
+//
+//		if ((nodeID.GetOffset() >= gSectorSize) && (nodeID.GetOffset() < gSectorSize*gSectorSize-gSectorSize) &&
+//			((nodeID.GetOffset()%gSectorSize) != 0) && (nodeID.GetOffset()%gSectorSize) != gSectorSize-1)
+//		{
+//			if (sectors[nodeID.GetSector()].regions.size() == 1)
+//			{
+//				for (unsigned int t = 0; t < acts.size(); t++)
+//				{
+//					state3d s(nodeID);
+//					switch (acts[t].direction)
+//					{
+//						case kWest: 
+//						{ s.offset--; break; }
+//						case kEast: 
+//						{ s.offset++; break; }
+//						case kNorth: 
+//						{ s.offset-=gSectorSize; break; }
+//						case kSouth: 
+//						{ s.offset+=gSectorSize; break; }
+//						case kNorthEast: 
+//						{ s.offset=s.offset-gSectorSize+1; break; }
+//						case kNorthWest: 
+//						{ s.offset=s.offset-gSectorSize-1; break; }
+//						case kSouthEast: 
+//						{ s.offset=s.offset+gSectorSize+1; break; }
+//						case kSouthWest: 
+//						{ s.offset=s.offset+gSectorSize-1; break; }
+//					}
+//					//			state3d s = nodeID;
+//					//			ApplyAction(s, acts[x]);
+//					neighbors.push_back(s);
+//				}
+//			}
+//			else {
+//				// just generate and check if neighbor is on the same grid with an appropriate height
+//				// if so we're done
+//				int h2 = sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.GetHeightOffset(nodeID.GetOffset());
+//				int x = -1, y, z;
+//				for (unsigned int t = 0; t < acts.size(); t++)
+//				{
+//					state3d s(nodeID);
+//					switch (acts[t].direction)
+//					{
+//						case kWest: 
+//						{
+//							int h1 = sectors[s.GetSector()].regions[s.GetRegion()].grid.GetHeightOffset(s.GetOffset()-1);
+//							if (abs(h1-h2)<=1 && (h1 != kUnpassableHeight))
+//							{
+//								s.offset--;
+//							}
+//							else {
+//								if (x == -1)
+//									GetXYZFromState(nodeID, x, y, z);
+//								GetStateFromXYZ(s, x-1, y, z);
+//							}
+//							break;
+//						}
+//						case kEast: 
+//						{
+//							int h1 = sectors[s.GetSector()].regions[s.GetRegion()].grid.GetHeightOffset(s.GetOffset()+1);
+//							if (abs(h1-h2)<=1 && (h1 != kUnpassableHeight))
+//							{
+//								s.offset++;
+//							}
+//							else {
+//								if (x == -1)
+//									GetXYZFromState(nodeID, x, y, z);
+//								GetStateFromXYZ(s, x+1, y, z);
+//							}
+//							break;
+//
+////							s.offset++; break; 
+//						}
+//						case kNorth: 
+//						{
+//							int h1 = sectors[s.GetSector()].regions[s.GetRegion()].grid.GetHeightOffset(s.GetOffset()-gSectorSize);
+//							if (abs(h1-h2)<=1 && (h1 != kUnpassableHeight))
+//							{
+//								s.offset-=gSectorSize;
+//							}
+//							else {
+//								if (x == -1)
+//									GetXYZFromState(nodeID, x, y, z);
+//								GetStateFromXYZ(s, x, y-1, z);
+//							}
+//							break;
+//							//s.offset-=gSectorSize; break;
+//						}
+//						case kSouth: 
+//						{
+//							int h1 = sectors[s.GetSector()].regions[s.GetRegion()].grid.GetHeightOffset(s.GetOffset()+gSectorSize);
+//							if (abs(h1-h2)<=1 && (h1 != kUnpassableHeight))
+//							{
+//								s.offset+=gSectorSize;
+//							}
+//							else {
+//								if (x == -1)
+//									GetXYZFromState(nodeID, x, y, z);
+//								GetStateFromXYZ(s, x, y+1, z);
+//							}
+//							break;
+//							//s.offset+=gSectorSize; break;
+//						}
+//						case kNorthEast: 
+//						{ s.offset=s.offset-gSectorSize+1; break; }
+//						case kNorthWest: 
+//						{ s.offset=s.offset-gSectorSize-1; break; }
+//						case kSouthEast: 
+//						{ s.offset=s.offset+gSectorSize+1; break; }
+//						case kSouthWest: 
+//						{ s.offset=s.offset+gSectorSize-1; break; }
+//					}
+//					//			state3d s = nodeID;
+//					//			ApplyAction(s, acts[x]);
+//					neighbors.push_back(s);
+//				}
+//			}
+//		}
+//		else {
+//			int x, y, z;
+//			GetXYZFromState(nodeID, x, y, z);
+//			for (unsigned int t = 0; t < acts.size(); t++)
+//			{
+//				state3d s(nodeID);
+//				switch (acts[t].direction)
+//				{
+//					case kWest: 
+//	//					if (sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.CanPass(x, y, -1, 0))
+//	//					{ s.offset--; break; }
+//						GetStateFromXYZ(s, x-1, y, z); break;
+//					case kEast: 
+//	//					if (sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.CanPass(x, y, +1, 0))
+//	//					{ s.offset++; break; }
+//						GetStateFromXYZ(s, x+1, y, z); break;
+//					case kNorth: 
+//	//					if (sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.CanPass(x, y, 0, -1))
+//	//					{ s.offset-=gSectorSize; break; }
+//						GetStateFromXYZ(s, x, y-1, z); break;
+//					case kSouth: 
+//	//					if (sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.CanPass(x, y, 0, 1))
+//	//					{ s.offset+=gSectorSize; break; }
+//						GetStateFromXYZ(s, x, y+1, z); break;
+//					case kNorthEast: 
+//	//					if (sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.CanPass(x, y, 1, -1))
+//	//					{ s.offset=s.offset-gSectorSize+1; break; }
+//						GetStateFromXYZ(s, x+1, y-1, z); break;
+//					case kNorthWest: 
+//	//					if (sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.CanPass(x, y, -1, -1))
+//	//					{ s.offset=s.offset-gSectorSize-1; break; }
+//						GetStateFromXYZ(s, x-1, y-1, z); break;
+//					case kSouthEast: 
+//	//					if (sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.CanPass(x, y, 1, 1))
+//	//					{ s.offset=s.offset+gSectorSize+1; break; }
+//						GetStateFromXYZ(s, x+1, y+1, z); break;
+//					case kSouthWest: 
+//	//					if (sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.CanPass(x, y, -1, 1))
+//	//					{ s.offset=s.offset+gSectorSize-1; break; }
+//						GetStateFromXYZ(s, x-1, y+1, z); break;
+//				}
+//				
+//				
+//	//			state3d s = nodeID;
+//	//			ApplyAction(s, acts[x]);
+//				neighbors.push_back(s);
+//			}
+//		}
 		//moveDir = sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.GetMoves(nodeID.GetOffset());
+	}
+	else {
+		neighbors.resize(0);
+		unsigned int cnt = sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].edges.size();
+		for (unsigned int x = 0; x < cnt; x++)
+		{
+			neighbors.push_back(state3d(sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].edges[x].sector,
+										sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].edges[x].region,
+										-1));
+		}
 	}
 }
 
 void Map3DGrid::GetActions(const state3d &nodeID, std::vector<action3d> &actions) const
 {
-	moveDir m[8] = {kWest, kEast, kNorth, kSouth, kNorthEast, kNorthWest, kSouthEast, kSouthWest};
+	static const moveDir m[8] = {kWest, kEast, kNorth, kSouth, kNorthEast, kNorthWest, kSouthEast, kSouthWest};
 	
-	if (nodeID.GetOffset() != 0xFFFF) // on the actual grid
+	if (nodeID.GetOffset() != -1) // on the actual grid
 	{
 		actions.resize(0);
 		moveDir dirs = (moveDir)sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.GetMoves(nodeID.GetOffset());
@@ -523,20 +805,27 @@ void Map3DGrid::GetActions(const state3d &nodeID, std::vector<action3d> &actions
 
 void Map3DGrid::ApplyAction(state3d &s, action3d a) const
 {
-	int x, y, z;
-	GetXYZFromState(s, x, y, z);
-	switch (a.direction)
+	// grid move
+	if (s.GetOffset() != -1)
 	{
-		case kWest: x--; break;
-		case kEast: x++; break;
-		case kNorth: y--; break;
-		case kSouth: y++; break;
-		case kNorthEast: y--; x++; break;
-		case kNorthWest: y--; x--; break;
-		case kSouthEast: y++; x++; break;
-		case kSouthWest: y++; x--; break;
+		int x, y, z;
+		GetXYZFromState(s, x, y, z);
+		switch (a.direction)
+		{
+			case kWest: x--; break;
+			case kEast: x++; break;
+			case kNorth: y--; break;
+			case kSouth: y++; break;
+			case kNorthEast: y--; x++; break;
+			case kNorthWest: y--; x--; break;
+			case kSouthEast: y++; x++; break;
+			case kSouthWest: y++; x--; break;
+		}
+		GetStateFromXYZ(s, x, y, z);
 	}
-	GetStateFromXYZ(s, x, y, z);
+	else { // abstraction move
+		s.Init(a.destSector, a.destRegion, -1);
+	}
 }
 
 double Map3DGrid::HCost(const state3d &node1, const state3d &node2)
@@ -577,6 +866,13 @@ uint64_t Map3DGrid::GetActionHash(action3d act) const
 
 bool Map3DGrid::AddPoint(int x, int y, int z)
 {
+	if (x >= mWidth)
+		return false;
+	if (y >= mHeight)
+		return false;
+	if ((x < 0) || (y < 0))
+		return false;
+		
 	bool result = sectors[GetSector(x, y)].AddPoint(x, y, z);
 
 	state3d neighborhood[9];
@@ -740,7 +1036,7 @@ void Map3DGrid::AddEdge(state3d &from, state3d &to)
 	assert(to.GetRegion() != -1);
 	if ((from.sector == to.sector) && (from.region == to.region))
 	{
-		AddGridEdge(from, to);
+		AddGridEdge(from, to, true);
 		return;
 	}
 	else if ((from.sector == to.sector)) // but different regions
@@ -748,7 +1044,7 @@ void Map3DGrid::AddEdge(state3d &from, state3d &to)
 //		printf("Adding between %d/%d/%d and %d/%d/%d\n",
 //			   from.GetSector(), from.GetRegion(), from.GetOffset(),
 //			   to.GetSector(), to.GetRegion(), to.GetOffset());
-		int cnt = AddGridEdge(from, to);
+		int cnt = AddGridEdge(from, to, false);
 		AddEdge(from.sector, from.region, to.sector, to.region, cnt);
 	}
 	else {
@@ -760,34 +1056,34 @@ void Map3DGrid::AddEdge(state3d &from, state3d &to)
 	}
 }
 
-int Map3DGrid::AddGridEdge(state3d &from, state3d &to)
+int Map3DGrid::AddGridEdge(state3d &from, state3d &to, bool local)
 {
 	int val = from.offset-to.offset;
 	if (val == 1)
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kWest)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kEast);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kWest, local)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kEast, local);
 	if (val ==  -1)
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kEast)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kWest);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kEast, local)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kWest, local);
 	if (val ==  gSectorSize)
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorth)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouth);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorth, local)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouth, local);
 	if (val ==  -gSectorSize)
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouth)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorth);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouth, local)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorth, local);
 	// diagonal moves
 	if (val ==  gSectorSize+1)
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorthWest)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouthEast);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorthWest, local)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouthEast, local);
 	if (val ==  gSectorSize-1)
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorthEast)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouthWest);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorthEast, local)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouthWest, local);
 	if (val ==  -gSectorSize+1)
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthWest)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthEast);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthWest, local)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthEast, local);
 	if (val ==  -gSectorSize-1)
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthEast)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthWest);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthEast, local)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthWest, local);
 	return 0;
 }
 
@@ -800,55 +1096,56 @@ int Map3DGrid::AddSectorEdge(state3d &from, state3d &to)
 	// cardinal moves
 	if (offsetDiff == 1)
 	{
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kWest)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kEast);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kWest, false)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kEast, false);
 	}
 	else if (offsetDiff == -1)
 	{
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kEast)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kWest);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kEast, false)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kWest, false);
 	}
 	else if (offsetDiff == mWidth)
 	{
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorth)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouth);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorth, false)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouth, false);
 	}
 	else if (offsetDiff == -mWidth)
 	{
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouth)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorth);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouth, false)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorth, false);
 	}
 	// diagonal moves
 	else if (offsetDiff == mWidth+1)
 	{
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorthWest)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouthEast);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorthWest, false)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouthEast, false);
 	}
 	else if (offsetDiff == mWidth-1)
 	{
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorthEast)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouthWest);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kNorthEast, false)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kSouthWest, false);
 	}
 	else if (offsetDiff == -mWidth+1)
 	{
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthWest)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthEast);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthWest, false)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthEast, false);
 	}
 	else if (offsetDiff == -mWidth-1)
 	{
-		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthEast)+
-		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthWest);
+		return sectors[from.sector].regions[from.region].grid.AddMove(from.offset, kSouthEast, false)+
+		sectors[to.sector].regions[to.region].grid.AddMove(to.offset, kNorthWest, false);
 	}
 	return 0;
 }
 
-// TODO: Turn into removes
-
-bool Map3DGrid::RemovePoint(int x, int y, int z)
+bool Map3DGrid::RemovePoint(int x, int y, int z, bool split)
 {
 	int theRegion = InternalRemovePoint(x, y, z);
 	if (theRegion == -1)
 		return false;
+	
+	if (!split)
+		return true;
 	
 	// now check if we need to split the sector
 	static std::vector<int> labels;
@@ -857,15 +1154,15 @@ bool Map3DGrid::RemovePoint(int x, int y, int z)
 	int regions = sectors[GetSector(x, y)].regions[theRegion].grid.LabelAreas(labels, counts, heights);
 	if (regions > 1)
 	{
-//		printf("%d regions; split needed\n", regions);
-//		for (int t = 0; t < gSectorSize; t++)
-//		{
-//			for (int u = 0; u < gSectorSize; u++)
-//			{
-//				printf("%2d", labels[t*gSectorSize+u]);
-//			}
-//			printf("\n");
-//		}
+		printf("%d regions; split needed\n", regions);
+		for (int t = 0; t < gSectorSize; t++)
+		{
+			for (int u = 0; u < gSectorSize; u++)
+			{
+				printf("%2d", labels[t*gSectorSize+u]);
+			}
+			printf("\n");
+		}
 		int basex = x-(x%gSectorSize);
 		int basey = y-(y%gSectorSize);
 		while (regions > 1)
@@ -894,6 +1191,7 @@ bool Map3DGrid::RemovePoint(int x, int y, int z)
 			regions--;
 		}
 	}
+	return true;
 }
 
 // returns region of x/y/z point
@@ -966,6 +1264,7 @@ int Map3DGrid::InternalRemovePoint(int x, int y, int z)
 	// actually remove point
 	sectors[GetSector(x, y)].RemovePoint(x, y, z);
 
+	sectors[neighborhood[4].GetSector()].regions[neighborhood[4].GetRegion()].RedoCenterLocation();
 	return neighborhood[4].GetRegion();
 }
 
@@ -1023,6 +1322,9 @@ int Map3DGrid::RemoveGridEdge(state3d &from, state3d &to)
 	if (val == -gSectorSize-1)
 		return sectors[from.sector].regions[from.region].grid.ReMove(from.offset, kSouthEast)+
 		sectors[to.sector].regions[to.region].grid.ReMove(to.offset, kNorthWest);
+	assert(false);
+	return 0;
+
 }
 
 int Map3DGrid::RemoveSectorEdge(state3d &from, state3d &to)
@@ -1073,6 +1375,8 @@ int Map3DGrid::RemoveSectorEdge(state3d &from, state3d &to)
 		return sectors[from.sector].regions[from.region].grid.ReMove(from.offset, kSouthEast)+
 		sectors[to.sector].regions[to.region].grid.ReMove(to.offset, kNorthWest);
 	}
+	assert(false);
+	return 0;
 }
 
 
@@ -1113,9 +1417,27 @@ void Map3DGrid::GetXYZFromState(const state3d &s, int &x, int &y, int &z) const
 
 void Map3DGrid::GetStateFromXYZ(state3d &s, int x, int y, int z) const
 {
+	// TODO: this is only for 2D worlds
+//	s.sector = GetSector(x, y);
+//	s.region = 0;
+//	s.offset = (x%gSectorSize)+(y%gSectorSize)*gSectorSize;
+//	return;
 	int val = FindNearState(x, y, z, s);
 	assert(val != -1);
 }
+
+void Map3DGrid::GetPointFromCoordinate(point3d loc, int &px, int &py, int &pz) const
+{
+	int xOffset = max(mHeight, mWidth)-mWidth;
+	int yOffset = max(mHeight, mWidth)-mHeight;
+	double scale = max(mHeight, mWidth);
+	scale = 1.0/scale;
+
+	px = (loc.x-(-1+scale+xOffset*scale))/(2.0*scale);
+	py = (loc.y-(-1+scale+yOffset*scale))/(2.0*scale);
+	pz = -loc.z/(scale*0.1);
+}
+
 
 void Map3DGrid::OpenGLDraw() const
 {
@@ -1153,6 +1475,14 @@ void Map3DGrid::OpenGLDraw() const
 	glVertex3f(right,  y1-rad, z1);
 	glEnd();
 
+	glColor3f(0, 0, 0);
+	glBegin(GL_QUADS);
+	glVertex3f(-1, -1, 0.01);
+	glVertex3f( 1, -1, 0.01);
+	glVertex3f( 1,  1, 0.01);
+	glVertex3f(-1,  1, 0.01);
+	glEnd();
+	
 	glEnable(GL_LIGHTING);
 	for (unsigned int x = 0; x < sectors.size(); x++)
 	{
@@ -1206,19 +1536,20 @@ void Map3DGrid::OpenGLDraw() const
 				glVertex3f(x1+rad, y1-rad, z1);
 				glEnd();
 				
-				continue;
-				
-				std::vector<state3d> suc;
-				state3d currState;
-				currState.Init(x, y, indexFromXY(xRegLoc, yRegLoc));
-				GetSuccessors(currState, suc);
-				for (unsigned int t = 0; t < suc.size(); t++)
+				if (drawGrid)
 				{
-//					printf("Drawing line between (%d/%d/%d) and (%d/%d/%d)\n", 
-//						   currState.GetSector(), currState.GetRegion(), currState.GetOffset(),
-//						   suc[t].GetSector(), suc[t].GetRegion(), suc[t].GetOffset());
-					SetColor(1, 1, 1, 1);
-					GLDrawLine(currState, suc[t]);
+					std::vector<state3d> suc;
+					state3d currState;
+					currState.Init(x, y, indexFromXY(xRegLoc, yRegLoc));
+					GetSuccessors(currState, suc);
+					for (unsigned int t = 0; t < suc.size(); t++)
+					{
+	//					printf("Drawing line between (%d/%d/%d) and (%d/%d/%d)\n", 
+	//						   currState.GetSector(), currState.GetRegion(), currState.GetOffset(),
+	//						   suc[t].GetSector(), suc[t].GetRegion(), suc[t].GetOffset());
+						SetColor(1, 1, 1, 1);
+						GLDrawLine(currState, suc[t]);
+					}
 				}
 			}
 		}
@@ -1267,7 +1598,7 @@ void Map3DGrid::GetOpenGLCoord(int xLoc, int yLoc, int zLoc,
 	scale = 1.0/scale;
 	x = 2.0*xLoc*scale-1+scale+xOffset*scale;
 	y = 2.0*yLoc*scale-1+scale+yOffset*scale;
-	h = scale*0.1;
+	h = scale*0.2;
 	z = -zLoc*h;
 	r = scale;
 }

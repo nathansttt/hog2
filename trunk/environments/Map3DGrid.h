@@ -48,23 +48,25 @@ class GridData {
 public:
 	GridData()
 	{
-		points = new uint16_t[gSectorSize*gSectorSize];
+		points = new uint32_t[gSectorSize*gSectorSize];
 		for (int x = 0; x < gSectorSize*gSectorSize; x++)
 			points[x] = 0xFF;
 	}
 	GridData(const GridData& copy_from_me)
 	{
-		points = new uint16_t[gSectorSize*gSectorSize];
+		points = new uint32_t[gSectorSize*gSectorSize];
 		for (int x = 0; x < gSectorSize*gSectorSize; x++)
 			points[x] = copy_from_me.points[x];		
 	}
 	~GridData() {delete [] points; }
-	int AddMove(unsigned index, moveDir dir);
-	void AddMove(unsigned int x, unsigned int y, moveDir dir);
+	int AddMove(unsigned index, moveDir dir, bool local);
+	void AddMove(unsigned int x, unsigned int y, moveDir dir, bool local);
 	int ReMove(unsigned index, moveDir dir);
 	void ReMove(unsigned int x, unsigned int y, moveDir dir);
 	uint8_t GetMoves(int x, int y) const;
 	uint8_t GetMoves(int offset) const;
+	uint8_t GetMoveLocality(int x, int y) const;
+	uint8_t GetMoveLocality(int offset) const;
 	void ClearMoves(int x, int y);
 	
 	int GetHeightOffset(unsigned int x, unsigned int y) const;
@@ -84,7 +86,7 @@ private:
 	int BFS(std::vector<int> &labels, int offset, int label);
 	void AddIntraRegionEdges(int xRegLoc, int yRegLoc);
 	void RemoveIntraRegionEdges(int xRegLoc, int yRegLoc);
-	uint16_t *points;//[gSectorSize*gSectorSize];
+	uint32_t *points;//[gSectorSize*gSectorSize];
 };
 
 // at the top of regions we have:
@@ -142,6 +144,7 @@ public:
 	void AddEdge(EdgeData &e);
 	void RemoveEdge(EdgeData &e);
 	bool LowerBase();
+	void RedoCenterLocation();
 //private:
 	uint8_t centerLocation;
 	uint8_t baseHeight;
@@ -165,6 +168,7 @@ class state3d
 {
 public:
 	state3d() { sector = -1; region = -1; offset = -1; }
+	state3d(int s, int r, int o) :sector(s), region(r), offset(o) { }
 	void Init(int sector, int region, int offset)
 	{ this->sector = sector; this->region = region; this->offset = offset; }
 	int GetSector() const { return sector; }
@@ -172,7 +176,8 @@ public:
 	int GetOffset() const { return offset; }
 	void SetOffset(int off) { offset = off; }
 //private:
-	uint16_t sector, region, offset;
+	uint16_t sector;
+	uint8_t region, offset;
 };
 
 static bool operator==(const state3d &l1, const state3d &l2)
@@ -189,6 +194,7 @@ class action3d
 public:
 	uint8_t direction;
 	uint8_t destRegion;
+	uint8_t destSector;
 };
 
 class Map3DGrid : public SearchEnvironment<state3d, action3d> {
@@ -225,10 +231,13 @@ public:
 
 	
 	bool AddPoint(int x, int y, int z);
-	bool RemovePoint(int x, int y, int z);
+	bool RemovePoint(int x, int y, int z, bool split = true);
+	void SetDrawGrid(bool draw) { drawGrid = draw; }
+	bool GetDrawGrid() { return drawGrid; }
+	void GetPointFromCoordinate(point3d loc, int &px, int &py, int &pz) const;
 private:
 	void AddEdge(state3d &from, state3d &to);
-	int AddGridEdge(state3d &from, state3d &to);
+	int AddGridEdge(state3d &from, state3d &to, bool local);
 	int AddSectorEdge(state3d &from, state3d &to);
 	void AddEdge(int sec1, int reg1, int sec2, int reg2, int weight);
 	void AddMapPoints(Map *map, std::vector<bool> &visited, int x, int y, int elevation);
@@ -251,6 +260,7 @@ private:
 	int mWidth, mHeight;
 	int mXSectors, mYSectors;
 	std::vector<SectorData> sectors;
+	bool drawGrid;
 };
 	
 #endif
