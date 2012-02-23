@@ -30,8 +30,5 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-	learning/LRTAStar.cpp \
-	learning/LRTAStarGroup.cpp \
-	learning/LRTAStarUnit.cpp 
 
 
