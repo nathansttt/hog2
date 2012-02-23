@@ -50,18 +50,18 @@ template<typename state>
 class AStarOpenClosedData {
 public:
 	AStarOpenClosedData() {}
-	AStarOpenClosedData(const state &theData, double gCost, double hCost, uint64_t parent, unsigned int openLoc, dataLocation location)
+	AStarOpenClosedData(const state &theData, double gCost, double hCost, uint64_t parent, uint64_t openLoc, dataLocation location)
 	:data(theData), g(gCost), h(hCost), parentID(parent), openLocation(openLoc), where(location) { reopened = false; }
 	state data;
 	double g;
 	double h;
 	uint64_t parentID;
-	unsigned int openLocation;
+	uint64_t openLocation;
 	bool reopened;
 	dataLocation where;
 };
 
-template<typename state, typename CmpKey>
+template<typename state, typename CmpKey, class dataStructure = AStarOpenClosedData<state> >
 class AStarOpenClosed {
 public:
 	AStarOpenClosed();
@@ -72,16 +72,16 @@ public:
 	void KeyChanged(uint64_t objKey);
 	//void IncreaseKey(uint64_t objKey);
 	dataLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
-	inline AStarOpenClosedData<state> &Lookup(uint64_t objKey) { return elements[objKey]; }
-	inline const AStarOpenClosedData<state> &Lookat(uint64_t objKey) const { return elements[objKey]; }
+	inline dataStructure &Lookup(uint64_t objKey) { return elements[objKey]; }
+	inline const dataStructure &Lookat(uint64_t objKey) const { return elements[objKey]; }
 	uint64_t Peek() const;
 	uint64_t Close();
 	void Reopen(uint64_t objKey);
 
-	unsigned int GetOpenItem(unsigned int which) { return theHeap[which]; }
-	unsigned int OpenSize() const { return theHeap.size(); }
-	unsigned int ClosedSize() const { return size()-OpenSize(); }
-	unsigned size() const { return elements.size(); }
+	uint64_t GetOpenItem(unsigned int which) { return theHeap[which]; }
+	size_t OpenSize() const { return theHeap.size(); }
+	size_t ClosedSize() const { return size()-OpenSize(); }
+	size_t size() const { return elements.size(); }
 	//	void verifyData();
 private:
 	bool HeapifyUp(unsigned int index);
@@ -91,25 +91,25 @@ private:
 	// storing the element id; looking up with...hash?
 	typedef __gnu_cxx::hash_map<uint64_t, uint64_t, AHash64> IndexTable;
 	IndexTable table;
-	std::vector<AStarOpenClosedData<state> > elements;
+	std::vector<dataStructure > elements;
 };
 
 
-template<typename state, typename CmpKey>
-AStarOpenClosed<state, CmpKey>::AStarOpenClosed()
+template<typename state, typename CmpKey, class dataStructure>
+AStarOpenClosed<state, CmpKey, dataStructure>::AStarOpenClosed()
 {
 }
 
-template<typename state, typename CmpKey>
-AStarOpenClosed<state, CmpKey>::~AStarOpenClosed()
+template<typename state, typename CmpKey, class dataStructure>
+AStarOpenClosed<state, CmpKey, dataStructure>::~AStarOpenClosed()
 {
 }
 
 /**
  * Remove all objects from queue.
  */
-template<typename state, typename CmpKey>
-void AStarOpenClosed<state, CmpKey>::Reset()
+template<typename state, typename CmpKey, class dataStructure>
+void AStarOpenClosed<state, CmpKey, dataStructure>::Reset()
 {
 	table.clear();
 	elements.clear();
@@ -119,8 +119,8 @@ void AStarOpenClosed<state, CmpKey>::Reset()
 /**
  * Add object into open list.
  */
-template<typename state, typename CmpKey>
-uint64_t AStarOpenClosed<state, CmpKey>::AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent)
+template<typename state, typename CmpKey, class dataStructure>
+uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent)
 {
 	// should do lookup here...
 	if (table.find(hash) != table.end())
@@ -128,7 +128,7 @@ uint64_t AStarOpenClosed<state, CmpKey>::AddOpenNode(const state &val, uint64_t 
 		//return -1; // TODO: find correct id and return
 		assert(false);
 	}
-	elements.push_back(AStarOpenClosedData<state>(val, g, h, parent, theHeap.size(), kOpenList));
+	elements.push_back(dataStructure(val, g, h, parent, theHeap.size(), kOpenList));
 	if (parent == kTAStarNoNode)
 		elements.back().parentID = elements.size()-1;
 	table[hash] = elements.size()-1; // hashing to element list location
@@ -140,12 +140,12 @@ uint64_t AStarOpenClosed<state, CmpKey>::AddOpenNode(const state &val, uint64_t 
 /**
  * Add object into closed list.
  */
-template<typename state, typename CmpKey>
-uint64_t AStarOpenClosed<state, CmpKey>::AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent)
+template<typename state, typename CmpKey, class dataStructure>
+uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent)
 {
 	// should do lookup here...
 	assert(table.find(hash) == table.end());
-	elements.push_back(AStarOpenClosedData<state>(val, g, h, parent, 0, kClosedList));
+	elements.push_back(dataStructure(val, g, h, parent, 0, kClosedList));
 	if (parent == kTAStarNoNode)
 		elements.back().parentID = elements.size()-1;
 	table[hash] = elements.size(); // hashing to element list location
@@ -155,8 +155,8 @@ uint64_t AStarOpenClosed<state, CmpKey>::AddClosedNode(state &val, uint64_t hash
 /**
  * Indicate that the key for a particular object has changed.
  */
-template<typename state, typename CmpKey>
-void AStarOpenClosed<state, CmpKey>::KeyChanged(uint64_t val)
+template<typename state, typename CmpKey, class dataStructure>
+void AStarOpenClosed<state, CmpKey, dataStructure>::KeyChanged(uint64_t val)
 {
 //	EqKey eq;
 //	assert(eq(theHeap[table[val]], val));
@@ -169,8 +169,8 @@ void AStarOpenClosed<state, CmpKey>::KeyChanged(uint64_t val)
 ///**
 // * Indicate that the key for a particular object has increased.
 // */
-//template<typename state, typename CmpKey>
-//void AStarOpenClosed<state, CmpKey>::IncreaseKey(uint64_t val)
+//template<typename state, typename CmpKey, class dataStructure>
+//void AStarOpenClosed<state, CmpKey, dataStructure>::IncreaseKey(uint64_t val)
 //{
 ////	EqKey eq;
 ////	assert(eq(theHeap[table[val]], val));
@@ -181,8 +181,8 @@ void AStarOpenClosed<state, CmpKey>::KeyChanged(uint64_t val)
 /**
  * Returns location of object as well as object key.
  */
-template<typename state, typename CmpKey>
-dataLocation AStarOpenClosed<state, CmpKey>::Lookup(uint64_t hashKey, uint64_t &objKey) const
+template<typename state, typename CmpKey, class dataStructure>
+dataLocation AStarOpenClosed<state, CmpKey, dataStructure>::Lookup(uint64_t hashKey, uint64_t &objKey) const
 {
 	typename IndexTable::const_iterator it;
 	it = table.find(hashKey);
@@ -198,8 +198,8 @@ dataLocation AStarOpenClosed<state, CmpKey>::Lookup(uint64_t hashKey, uint64_t &
 /**
  * Peek at the next item to be expanded.
  */
-template<typename state, typename CmpKey>
-uint64_t AStarOpenClosed<state, CmpKey>::Peek() const
+template<typename state, typename CmpKey, class dataStructure>
+uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Peek() const
 {
 	assert(OpenSize() != 0);
 	
@@ -209,8 +209,8 @@ uint64_t AStarOpenClosed<state, CmpKey>::Peek() const
 /**
  * Move the best item to the closed list and return key.
  */
-template<typename state, typename CmpKey>
-uint64_t AStarOpenClosed<state, CmpKey>::Close()
+template<typename state, typename CmpKey, class dataStructure>
+uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Close()
 {
 	assert(OpenSize() != 0);
 
@@ -226,8 +226,8 @@ uint64_t AStarOpenClosed<state, CmpKey>::Close()
 /**
  * Move item off the closed list and back onto the open list.
  */
-template<typename state, typename CmpKey>
-void AStarOpenClosed<state, CmpKey>::Reopen(uint64_t objKey)
+template<typename state, typename CmpKey, class dataStructure>
+void AStarOpenClosed<state, CmpKey, dataStructure>::Reopen(uint64_t objKey)
 {
 	assert(elements[objKey].where == kClosedList);
 	elements[objKey].reopened = true;
@@ -241,8 +241,8 @@ void AStarOpenClosed<state, CmpKey>::Reopen(uint64_t objKey)
 ///**
 // * find this object in the Heap and return
 // */
-//template<typename state, typename CmpKey>
-//OBJ AStarOpenClosed<state, CmpKey>::find(OBJ val)
+//template<typename state, typename CmpKey, class dataStructure>
+//OBJ AStarOpenClosed<state, CmpKey, dataStructure>::find(OBJ val)
 //{
 //	if (!IsIn(val))
 //		return OBJ();
@@ -252,8 +252,8 @@ void AStarOpenClosed<state, CmpKey>::Reopen(uint64_t objKey)
 ///**
 // * Returns true if no items are in the AStarOpenClosed.
 // */
-//template<typename state, typename CmpKey>
-//bool AStarOpenClosed<state, CmpKey>::Empty()
+//template<typename state, typename CmpKey, class dataStructure>
+//bool AStarOpenClosed<state, CmpKey, dataStructure>::Empty()
 //{
 //	return theHeap.size() == 0;
 //}
@@ -261,8 +261,8 @@ void AStarOpenClosed<state, CmpKey>::Reopen(uint64_t objKey)
 ///**
 //* Verify that the Heap is internally consistent. Fails assertion if not.
 // */
-//template<typename state, typename CmpKey>
-//void AStarOpenClosed<state, CmpKey>::verifyData()
+//template<typename state, typename CmpKey, class dataStructure>
+//void AStarOpenClosed<state, CmpKey, dataStructure>::verifyData()
 //{
 //	assert(theHeap.size() == table.size());
 //	AStarOpenClosed::IndexTable::iterator iter;
@@ -276,8 +276,8 @@ void AStarOpenClosed<state, CmpKey>::Reopen(uint64_t objKey)
 /**
  * Moves a node up the heap. Returns true if the node was moved, false otherwise.
  */
-template<typename state, typename CmpKey>
-bool AStarOpenClosed<state, CmpKey>::HeapifyUp(unsigned int index)
+template<typename state, typename CmpKey, class dataStructure>
+bool AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyUp(unsigned int index)
 {
 	if (index == 0) return false;
 	int parent = (index-1)/2;
@@ -296,8 +296,8 @@ bool AStarOpenClosed<state, CmpKey>::HeapifyUp(unsigned int index)
 	return false;
 }
 
-template<typename state, typename CmpKey>
-void AStarOpenClosed<state, CmpKey>::HeapifyDown(unsigned int index)
+template<typename state, typename CmpKey, class dataStructure>
+void AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyDown(unsigned int index)
 {
 	CmpKey compare;
 	unsigned int child1 = index*2+1;
