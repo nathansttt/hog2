@@ -298,11 +298,11 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-	BFS<MNAgentPuzzleState, MNAgentPuzzleAction> bfs;
+	BFS<MNAgentPuzzleState, tAgentAction> bfs;
 	for (unsigned int x = 1; x < 9; x++)
 	{
 		MNAgentEnvironment mnae;
-		MNAgentPuzzleState mnps(3, 3, x);
+		MNAgentPuzzleState mnps(3, 3);
 		std::cout << mnps << std::endl;
 		std::vector<MNAgentPuzzleState> s;
 //		for (unsigned int y = 0; y < (9-x); y++)
