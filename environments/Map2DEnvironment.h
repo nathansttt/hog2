@@ -86,7 +86,9 @@ public:
 	void SetGraphHeuristic(GraphHeuristic *h);
 	GraphHeuristic *GetGraphHeuristic();
 	void GetSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
-	void GetSuccessorsWithCost(const xyLoc &nodeID, std::vector<xyLoc> &neighbors, double currHCost, const xyLoc &goal);
+	bool GetNextSuccessor(const xyLoc &currOpenNode, const xyLoc &goal, xyLoc &next, double &currHCost, uint64_t &special, bool &validMove);
+	bool GetNext4Successor(const xyLoc &currOpenNode, const xyLoc &goal, xyLoc &next, double &currHCost, uint64_t &special, bool &validMove);
+	bool GetNext8Successor(const xyLoc &currOpenNode, const xyLoc &goal, xyLoc &next, double &currHCost, uint64_t &special, bool &validMove);
 	void GetActions(const xyLoc &nodeID, std::vector<tDirection> &actions) const;
 	tDirection GetAction(const xyLoc &s1, const xyLoc &s2) const;
 	virtual void ApplyAction(xyLoc &s, tDirection dir) const;
@@ -125,7 +127,10 @@ public:
 	bool IsGoalStored() {return false;}
 	void SetDiagonalCost(double val) { DIAGONAL_COST = val; }
 	double GetDiagonalCost() { return DIAGONAL_COST; }
-	
+	bool FourConnected() { return fourConnected; }
+	bool EightConnected() { return !fourConnected; }
+	void SetFourConnected() { fourConnected = true; }
+	void SetEightConnected() { fourConnected = false; }
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Mapenv\n";return oi;}
 	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
 protected:
@@ -133,6 +138,7 @@ protected:
 	Map *map;
 	BaseMapOccupancyInterface *oi;
 	double DIAGONAL_COST;
+	bool fourConnected;
 };
 
 class AbsMapEnvironment : public MapEnvironment

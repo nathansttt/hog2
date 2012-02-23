@@ -937,7 +937,9 @@ int ArmToTipHeuristic::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 {
 	int i, ret;
 	uint16_t *distances, *minTipDistances, *maxTipDistances;
-	armAngles goals[ numHeuristics ], last;
+	armAngles last;
+	armAngles *goals;
+	goals = new armAngles[numHeuristics];
 	double x, y;
 
 	last = sampleArm;
@@ -983,7 +985,7 @@ int ArmToTipHeuristic::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 		maxTipDistancesTables.push_back( maxTipDistances );
 		tablesNumArms.push_back( sampleArm.GetNumArms() );
 	}
-
+	delete []goals;
 	return i;
 }
 
