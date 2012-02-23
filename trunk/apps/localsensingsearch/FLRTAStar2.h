@@ -9,7 +9,7 @@
 #ifndef hog2_glut_FLRTAStar2_h
 #define hog2_glut_FLRTAStar2_h
 
-#include "GenericSearchAlgorithm.h"
+#include "LearningAlgorithm.h"
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
@@ -45,12 +45,14 @@ namespace FLRTA2 {
 	template <class state>
 	struct lssLearnedData {
 		lssLearnedData() { theHeuristic[0] = theHeuristic[1] = 0; }
+#ifndef NO_OPENGL
 		state theState;
+#endif
 		double theHeuristic[2];
 	};
 
 	template <class state, class action, class environment>
-	class FLRTAStar2 : public GenericSearchAlgorithm<state,action,environment>, public Heuristic<state> {
+	class FLRTAStar2 : public LearningAlgorithm<state,action,environment>, public Heuristic<state> {
 	public:
 		FLRTAStar2(int nodeLimit = 8)
 		{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; m_pEnv = 0; }
@@ -68,7 +70,9 @@ namespace FLRTA2 {
 		{
 			int ID = GetGoalID(to);
 			heur[env->GetStateHash(where)].theHeuristic[ID] = val-env->HCost(where, to);
+#ifndef NO_OPENGL
 			heur[env->GetStateHash(where)].theState = where;
+#endif
 		}
 		double HCost(environment *env, const state &from, const state &to)
 		{
@@ -295,9 +299,11 @@ namespace FLRTA2 {
 			if (r > 0 || b > 0)
 			{
 				//e->SetColor(0.5+0.5*r/learned[0], 0, 0.5+0.5*b/learned[1], 0.5+0.25*r/learned[0]+0.25*b/learned[1]);
-				//e->SetColor(0.5+0.5*r/learned[0], 0, 0.0+1.0*b/learned[1], 0.2+0.4*r/learned[0]+0.4*b/learned[1]);
-				e->SetColor(0.0, 0.0, 0.0+1.0*b/learned[1], 1.0*b/learned[1]);
+				e->SetColor(0.5+0.5*r/learned[0], 0, 0.0+1.0*b/learned[1], 0.2+0.4*r/learned[0]+0.4*b/learned[1]);
+				//e->SetColor(0.0, 0.0, 0.0+1.0*b/learned[1], 1.0*b/learned[1]);
+#ifndef NO_OPENGL
 				e->OpenGLDraw((*it).second.theState);
+#endif
 			}
 		}
 	}
