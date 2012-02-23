@@ -3,6 +3,8 @@
 #ifndef GLUT_H
 #define GLUT_H
 
+extern "C" {
+
 #define GLUT_DOUBLE        0
 #define GLUT_RGBA          0
 #define GLUT_DEPTH         0
@@ -52,5 +54,7 @@ int glutBitmapLength(void *font, const unsigned char *string);
 int glutStrokeLength(void *font, const unsigned char *string);
 
 void gluOrtho2D (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top);
+
+}
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef GL_H
 #define GL_H
 
+extern "C" {
+
 typedef unsigned int	GLenum;
 typedef unsigned char	GLboolean;
 typedef unsigned int	GLbitfield;
@@ -636,4 +638,5 @@ void glNormal3d(GLdouble nx, GLdouble ny, GLdouble nz);
 void glVertex2d(GLdouble x, GLdouble y);
 void glOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
 
+}
 #endif
