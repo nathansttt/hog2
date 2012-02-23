@@ -66,7 +66,5 @@ endif
 default : all
 
 SRC_CPP = \
-	apps/localsensingsearch/LocalSensingUnit.cpp \
-	apps/localsensingsearch/RIBS.cpp \
 	apps/localsensingsearch/Sample.cpp
 
