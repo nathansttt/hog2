@@ -10,7 +10,7 @@
 #ifndef FLRTASTAR_H
 #define FLRTASTAR_H
 
-#include "GenericSearchAlgorithm.h"
+#include "LearningAlgorithm.h"
 #include "SearchEnvironment.h"
 #include "FPUtil.h"
 #include <deque>
@@ -68,7 +68,7 @@ namespace FLRTA {
 	};
 	
 	template <class state, class action, class environment>
-	class FLRTAStar : public GenericSearchAlgorithm<state,action,environment>, public Heuristic<state> {
+	class FLRTAStar : public LearningAlgorithm<state,action,environment>, public Heuristic<state> {
 	public:
 		FLRTAStar(int nodeLimit = 8, double weight = 1.5)
 		{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; /*pe = 0;*/ nodeLearningLimit = 1;
