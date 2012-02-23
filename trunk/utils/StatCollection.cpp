@@ -525,9 +525,9 @@ void StatCollection::PrintStatsTable() const
 	
 	for (int x = 0; x < (int)stats.size(); x++)
 		if (stats[x].sType == floatStored)
-			printf("%d \t%s \t%s \t%le\n", x, categories[stats[x].category],
-						 owners[stats[x].owner], stats[x].value.fval);
+			printf("%d \t%s \t%s \t%le\n", x, categories[stats[x].category].c_str(),
+						 owners[stats[x].owner].c_str(), stats[x].value.fval);
 		else
-			printf("%d \t%s \t%s \t%ld\n", x, categories[stats[x].category],
-						 owners[stats[x].owner],stats[x].value.lval);
+			printf("%d \t%s \t%s \t%ld\n", x, categories[stats[x].category].c_str(),
+						 owners[stats[x].owner].c_str(), stats[x].value.lval);
 }
