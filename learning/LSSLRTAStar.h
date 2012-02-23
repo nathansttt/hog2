@@ -10,7 +10,7 @@
 #ifndef LSSLRTASTAR_H
 #define LSSLRTASTAR_H
 
-#include "GenericSearchAlgorithm.h"
+#include "LearningAlgorithm.h"
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
@@ -47,7 +47,7 @@ struct lssLearnedData {
 };
 
 template <class state, class action, class environment>
-class LSSLRTAStar : public GenericSearchAlgorithm<state,action,environment>, public Heuristic<state> {
+class LSSLRTAStar : public LearningAlgorithm<state,action,environment>, public Heuristic<state> {
 public:
 	LSSLRTAStar(int nodeLimit = 8)
 	{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; avoidLearning = false;}

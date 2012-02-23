@@ -10,7 +10,7 @@
 #ifndef LRTASTAR_H
 #define LRTASTAR_H
 
-#include "GenericSearchAlgorithm.h"
+#include "LearningAlgorithm.h"
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
@@ -24,7 +24,7 @@ struct learnedData {
 
 // This class defines the LRTA* algorithm
 template <class state, class action, class environment>
-class LRTAStar : public GenericSearchAlgorithm<state,action,environment> {
+class LRTAStar : public LearningAlgorithm<state,action,environment> {
 public:
 	LRTAStar()
 	{ fAmountLearned = 0.0f; }
