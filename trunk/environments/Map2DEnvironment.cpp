@@ -19,6 +19,7 @@ MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 	else
 		oi = 0;
 	h = 0;
+	fourConnected = false;
 }
 
 MapEnvironment::~MapEnvironment()
@@ -54,31 +55,283 @@ void MapEnvironment::GetSuccessors(const xyLoc &loc, std::vector<xyLoc> &neighbo
 	}
 	if ((map->CanStep(loc.x, loc.y, loc.x-1, loc.y)))
 	{
-		if ((up && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y-1))))
+		if (!fourConnected && (up && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y-1))))
 			neighbors.push_back(xyLoc(loc.x-1, loc.y-1));
-		if ((down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1))))
+		if (!fourConnected && (down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1))))
 			neighbors.push_back(xyLoc(loc.x-1, loc.y+1));
 		neighbors.push_back(xyLoc(loc.x-1, loc.y));
 	}
 	if ((map->CanStep(loc.x, loc.y, loc.x+1, loc.y)))
 	{
-		if ((up && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y-1))))
+		if (!fourConnected && (up && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y-1))))
 			neighbors.push_back(xyLoc(loc.x+1, loc.y-1));
-		if ((down && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y+1))))
+		if (!fourConnected && (down && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y+1))))
 			neighbors.push_back(xyLoc(loc.x+1, loc.y+1));
 		neighbors.push_back(xyLoc(loc.x+1, loc.y));
 	}
 }
 
-void MapEnvironment::GetSuccessorsWithCost(const xyLoc &nodeID, std::vector<xyLoc> &neighbors,
-										   double currHCost, const xyLoc &goal)
+bool MapEnvironment::GetNextSuccessor(const xyLoc &currOpenNode, const xyLoc &goal,
+									  xyLoc &next, double &currHCost, uint64_t &special,
+									  bool &validMove)
 {
-	assert(false);
+	if (fourConnected)
+		return GetNext4Successor(currOpenNode, goal, next, currHCost, special, validMove);
+	return GetNext8Successor(currOpenNode, goal, next, currHCost, special, validMove);
+	
+}
+
+bool MapEnvironment::GetNext4Successor(const xyLoc &currOpenNode, const xyLoc &goal,
+									   xyLoc &next, double &currHCost, uint64_t &special,
+									  bool &validMove)
+{
+	validMove = false;
+	if (special > 3)
+		return false;
+	// pass back next h-cost?
+	// 4 connected:
+	// case 2: above and right: Up, Right, Left, Down
+	// case 3: directly right: Right, Down, Up, Left
+	// case 4: below and right: Right, Down, Up, Left
+	// case 5: directly below: Down, Left, Right, Up
+	// case 6: below and left: Down, Left, Right, Up
+	// case 7: directly left: Left, Up, Down, Right
+	// case 8: above and left: Left, Up, Down, Right
+	
 	// 1,2. same y and different x (+/-)
 	// 3,4. same x and different y (+/-)
 	// 5,6,7,8. same x/y difference (+/-) combinations
-	if (nodeID.x == goal.x)
-	{}
+	int theEntry = 0;
+	const tDirection order[8][8] =
+	{
+		{kN, kE, kW, kS},
+		{kS, kE, kW, kN},
+		{kW, kN, kS, kE},
+		{kE, kN, kS, kW},
+
+		{kN, kW, kE, kS},
+		{kW, kS, kN, kE},
+		{kN, kE, kW, kS},
+		{kS, kE, kW, kN},
+	};
+	const double hIncrease[8][8] = 
+	{
+		{1.0, 0.0, 0.0, 0.0},
+		{1.0, 0.0, 0.0, 0.0},
+		{1.0, 0.0, 0.0, 0.0},
+		{1.0, 0.0, 0.0, 0.0},
+		{0.0, 1.0, 0.0, 0.0},
+		{0.0, 1.0, 0.0, 0.0},
+		{0.0, 1.0, 0.0, 0.0},
+		{0.0, 1.0, 0.0, 0.0},
+	};
+	
+	if      (currOpenNode.x == goal.x && currOpenNode.y > goal.y)
+	{ theEntry = 0; }
+	else if (currOpenNode.x == goal.x && currOpenNode.y < goal.y)
+	{ theEntry = 1; }
+	else if (currOpenNode.x > goal.x && currOpenNode.y == goal.y)
+	{ theEntry = 2; }
+	else if (currOpenNode.x < goal.x && currOpenNode.y == goal.y)
+	{ theEntry = 3; }
+	else if (currOpenNode.x > goal.x && currOpenNode.y > goal.y)
+	{ theEntry = 4; }
+	else if (currOpenNode.x > goal.x && currOpenNode.y < goal.y)
+	{ theEntry = 5; }
+	else if (currOpenNode.x < goal.x && currOpenNode.y > goal.y)
+	{ theEntry = 6; }
+	else if (currOpenNode.x < goal.x && currOpenNode.y < goal.y)
+	{ theEntry = 7; }
+
+//	std::cout << special << " h from " << currHCost << " to "
+//	<< currHCost + hIncrease[theEntry][special] << std::endl;
+	switch (special) {
+		case 0:
+			next = currOpenNode;
+			currHCost += hIncrease[theEntry][special];
+			ApplyAction(next, order[theEntry][special]);
+			special++;
+			if (map->CanStep(currOpenNode.x, currOpenNode.y, next.x, next.y))
+			{
+				//std::cout << "Next successor of " << currOpenNode << " is " << next << std::endl;
+				validMove = true;
+				return true;
+			}
+		case 1:
+			next = currOpenNode;
+			currHCost += hIncrease[theEntry][special];
+			ApplyAction(next, order[theEntry][special]);
+			special++;
+			if (map->CanStep(currOpenNode.x, currOpenNode.y, next.x, next.y))
+			{
+				//std::cout << "Next successor of " << currOpenNode << " is " << next << std::endl;
+				validMove = true;
+				return true;
+			}
+		case 2:
+			next = currOpenNode;
+			currHCost += 1;
+			currHCost += hIncrease[theEntry][special];
+			ApplyAction(next, order[theEntry][special]);
+			special++;
+			if (map->CanStep(currOpenNode.x, currOpenNode.y, next.x, next.y))
+			{
+				//std::cout << "Next successor of " << currOpenNode << " is " << next << std::endl;
+				validMove = true;
+				return true;
+			}
+		case 3:
+			next = currOpenNode;
+			currHCost += hIncrease[theEntry][special];
+			ApplyAction(next, order[theEntry][special]);
+			special++;
+			if (map->CanStep(currOpenNode.x, currOpenNode.y, next.x, next.y))
+			{
+				//std::cout << "Next successor of " << currOpenNode << " is " << next << std::endl;
+				validMove = true;
+				return false;
+			}
+		default:
+			return false;
+	}
+
+	return false;
+}
+
+bool MapEnvironment::GetNext8Successor(const xyLoc &currOpenNode, const xyLoc &goal,
+									   xyLoc &next, double &currHCost, uint64_t &special,
+									   bool &validMove)
+{
+	// in addition to the 16 obvious cases, when diagonal movess cross the 
+	// diagonals we have separate cases. Thus, we don't implement this for now.
+	
+	// Diagonal movement when next to the goal could also be problematic, depending on the
+	// map representation
+	assert(false);
+	
+//	// it must be 1.5 for this code to be correct...
+//	assert(DIAGONAL_COST == 1.5);
+//	validMove = false;
+//	if (special > 7) // moves
+//		return false;
+//	// pass back next h-cost?
+//	// 4 connected:
+//	// case 2: above and right: Up, Right, Left, Down
+//	// case 3: directly right: Right, Down, Up, Left
+//	// case 4: below and right: Right, Down, Up, Left
+//	// case 5: directly below: Down, Left, Right, Up
+//	// case 6: below and left: Down, Left, Right, Up
+//	// case 7: directly left: Left, Up, Down, Right
+//	// case 8: above and left: Left, Up, Down, Right
+//	
+//	// 1,2. same y and different x (+/-)
+//	// 3,4. same x and different y (+/-)
+//	// 5,6,7,8. same x/y difference (+/-) combinations
+//	int theEntry = 0;
+//	const tDirection order[8][8] =
+//	{
+//		// directly above
+//		{kN, kNW, kNE, kE, kW, kS, kSE, kSW},
+//		// more above to the right
+//		{kN, kNE, kE, kNW, kW, kS, kSE, kSW},
+//		// diagonally right
+//		{kNE, kN, kE, kNW, kSE, kS, kW, kSW},
+//		// more right and above
+//		{kE, kNE, kN, kS, kSE, kW, kNW, kSW},
+//
+//		{kE, kN, kS, kW},
+//		
+//		{kN, kW, kE, kS},
+//		{kW, kS, kN, kE},
+//		{kN, kE, kW, kS},
+//		{kS, kE, kW, kN},
+//	};
+//	const double hIncrease[8][8] = 
+//	{
+//		// directly above
+//		{1.0, 0.0, 0.5, 0.0, 0.5, 1.0, 0.0, 0.0},
+//		// more above to the right
+//		{0.0, 0.5, 0.5, 0.5, 0.5, 0.0, 1.0, 0.0},
+//		// diagonally right
+//		{0.5, 0.0, 1.5, 0.0, 0.0, 0.0, 1.0, 0.0},
+//		// more right and above
+//		{0.0, 0.5, 0.5, 0.5, 0.5, 0.0, 1.0, 0.0},
+//		{0.0, 1.0, 0.0, 0.0},
+//		{0.0, 1.0, 0.0, 0.0},
+//		{0.0, 1.0, 0.0, 0.0},
+//		{0.0, 1.0, 0.0, 0.0},
+//	};
+//	
+//	if      (currOpenNode.x == goal.x && currOpenNode.y > goal.y)
+//	{ theEntry = 0; }
+//	else if (currOpenNode.x == goal.x && currOpenNode.y < goal.y)
+//	{ theEntry = 1; }
+//	else if (currOpenNode.x > goal.x && currOpenNode.y == goal.y)
+//	{ theEntry = 2; }
+//	else if (currOpenNode.x < goal.x && currOpenNode.y == goal.y)
+//	{ theEntry = 3; }
+//	else if (currOpenNode.x > goal.x && currOpenNode.y > goal.y)
+//	{ theEntry = 4; }
+//	else if (currOpenNode.x > goal.x && currOpenNode.y < goal.y)
+//	{ theEntry = 5; }
+//	else if (currOpenNode.x < goal.x && currOpenNode.y > goal.y)
+//	{ theEntry = 6; }
+//	else if (currOpenNode.x < goal.x && currOpenNode.y < goal.y)
+//	{ theEntry = 7; }
+//	
+//	//	std::cout << special << " h from " << currHCost << " to "
+//	//	<< currHCost + hIncrease[theEntry][special] << std::endl;
+//	switch (special) {
+//		case 0:
+//			next = currOpenNode;
+//			currHCost += hIncrease[theEntry][special];
+//			ApplyAction(next, order[theEntry][special]);
+//			special++;
+//			if (map->CanStep(currOpenNode.x, currOpenNode.y, next.x, next.y))
+//			{
+//				//std::cout << "Next successor of " << currOpenNode << " is " << next << std::endl;
+//				validMove = true;
+//				return true;
+//			}
+//		case 1:
+//			next = currOpenNode;
+//			currHCost += hIncrease[theEntry][special];
+//			ApplyAction(next, order[theEntry][special]);
+//			special++;
+//			if (map->CanStep(currOpenNode.x, currOpenNode.y, next.x, next.y))
+//			{
+//				//std::cout << "Next successor of " << currOpenNode << " is " << next << std::endl;
+//				validMove = true;
+//				return true;
+//			}
+//		case 2:
+//			next = currOpenNode;
+//			currHCost += 1;
+//			currHCost += hIncrease[theEntry][special];
+//			ApplyAction(next, order[theEntry][special]);
+//			special++;
+//			if (map->CanStep(currOpenNode.x, currOpenNode.y, next.x, next.y))
+//			{
+//				//std::cout << "Next successor of " << currOpenNode << " is " << next << std::endl;
+//				validMove = true;
+//				return true;
+//			}
+//		case 3:
+//			next = currOpenNode;
+//			currHCost += hIncrease[theEntry][special];
+//			ApplyAction(next, order[theEntry][special]);
+//			special++;
+//			if (map->CanStep(currOpenNode.x, currOpenNode.y, next.x, next.y))
+//			{
+//				//std::cout << "Next successor of " << currOpenNode << " is " << next << std::endl;
+//				validMove = true;
+//				return false;
+//			}
+//		default:
+//			return false;
+//	}
+//	
+//	return false;
 }
 
 void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actions) const
@@ -96,18 +349,24 @@ void MapEnvironment::GetActions(const xyLoc &loc, std::vector<tDirection> &actio
 	}
 	if ((map->CanStep(loc.x, loc.y, loc.x-1, loc.y)))
 	{
-		if ((up && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y-1))))
-			actions.push_back(kNW);
-		if ((down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1))))
-			actions.push_back(kSW);
+		if (!fourConnected)
+		{
+			if ((up && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y-1))))
+				actions.push_back(kNW);
+			if ((down && (map->CanStep(loc.x, loc.y, loc.x-1, loc.y+1))))
+				actions.push_back(kSW);
+		}
 		actions.push_back(kW);
 	}
 	if ((map->CanStep(loc.x, loc.y, loc.x+1, loc.y)))
 	{
-		if ((up && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y-1))))
-			actions.push_back(kNE);
-		if ((down && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y+1))))
-			actions.push_back(kSE);
+		if (!fourConnected)
+		{
+			if ((up && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y-1))))
+				actions.push_back(kNE);
+			if ((down && (map->CanStep(loc.x, loc.y, loc.x+1, loc.y+1))))
+				actions.push_back(kSE);
+		}
 		actions.push_back(kE);
 	}
 }
@@ -167,21 +426,27 @@ void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 		case kSE: s.y+=1; s.x+=1; break;
 		default: break;
 	}
-	if (map->CanStep(s.x, s.y, old.x, old.y) &&
-		((!oi) || (oi && !(oi->GetStateOccupied(s)))))
-	{
-		return;
-	}
-	s = old;
+//	if (map->CanStep(s.x, s.y, old.x, old.y) &&
+//		((!oi) || (oi && !(oi->GetStateOccupied(s)))))
+//	{
+//		return;
+//	}
+//	s = old;
 }
 
 double MapEnvironment::HCost(const xyLoc &l1, const xyLoc &l2)
 {
 	double h1, h2;
-	double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));
-	double b = ((l1.y>l2.y)?(l1.y-l2.y):(l2.y-l1.y));
-	//return sqrt(a*a+b*b);
-	h1 = (a>b)?(b*DIAGONAL_COST+a-b):(a*DIAGONAL_COST+b-a);
+	if (fourConnected)
+	{
+		h1 = abs(l1.x-l2.x)+abs(l1.y-l2.y);
+	}
+	else {
+		double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));
+		double b = ((l1.y>l2.y)?(l1.y-l2.y):(l2.y-l1.y));
+		//return sqrt(a*a+b*b);
+		h1 = (a>b)?(b*DIAGONAL_COST+a-b):(a*DIAGONAL_COST+b-a);
+	}
 
 	if (h == 0)
 		return h1;
@@ -199,18 +464,23 @@ double MapEnvironment::HCost(const xyLoc &l1, const xyLoc &l2)
 	return std::max(h1, h2);
 }
 
-double MapEnvironment::GCost(const xyLoc &, const tDirection &act)
+double MapEnvironment::GCost(const xyLoc &l, const tDirection &act)
 {
+	double multiplier = 1.0;
+//	if (map->GetTerrainType(l.x, l.y) == kSwamp)
+//	{
+//		multiplier = 3.0;
+//	}
 	switch (act)
 	{
-		case kN: return 1.0;
-		case kS: return 1.0;
-		case kE: return 1.0;
-		case kW: return 1.0;
-		case kNW: return DIAGONAL_COST;
-		case kSW: return DIAGONAL_COST;
-		case kNE: return DIAGONAL_COST;
-		case kSE: return DIAGONAL_COST;
+		case kN: return 1.0*multiplier;
+		case kS: return 1.0*multiplier;
+		case kE: return 1.0*multiplier;
+		case kW: return 1.0*multiplier;
+		case kNW: return DIAGONAL_COST*multiplier;
+		case kSW: return DIAGONAL_COST*multiplier;
+		case kNE: return DIAGONAL_COST*multiplier;
+		case kSE: return DIAGONAL_COST*multiplier;
 		default: return 0;
 	}
 	return 0;
@@ -218,9 +488,14 @@ double MapEnvironment::GCost(const xyLoc &, const tDirection &act)
 
 double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
 {
-	if (l1.x == l2.x) return 1.0;
-	if (l1.y == l2.y) return 1.0;
-	return DIAGONAL_COST;
+	double multiplier = 1.0;
+//	if (map->GetTerrainType(l1.x, l1.y) == kSwamp)
+//	{
+//		multiplier = 3.0;
+//	}
+	if (l1.x == l2.x) return 1.0*multiplier;
+	if (l1.y == l2.y) return 1.0*multiplier;
+	return DIAGONAL_COST*multiplier;
 //	double h = HCost(l1, l2);
 //	if (fgreater(h, DIAGONAL_COST))
 //		return DBL_MAX;
@@ -248,18 +523,18 @@ void MapEnvironment::OpenGLDraw() const
 	//std::cout<<"drawing\n";
 	map->OpenGLDraw();
 	// Draw occupancy interface - occupied = white
-	for(int i=0; i<map->GetMapWidth(); i++)
-		for(int j=0; j<map->GetMapHeight(); j++)
-		{
-			xyLoc l;
-				l.x = i;
-				l.y = j;
-			if(oi && oi->GetStateOccupied(l))
-			{
-				SetColor(1.0, 1.0, 1.0, 1.0);
-				OpenGLDraw(l);//, 1.0, 1.0, 1.0);
-			}
-		}
+//	for(int i=0; i<map->GetMapWidth(); i++)
+//		for(int j=0; j<map->GetMapHeight(); j++)
+//		{
+//			xyLoc l;
+//			l.x = i;
+//			l.y = j;
+//			if (oi && oi->GetStateOccupied(l))
+//			{
+//				SetColor(1.0, 1.0, 1.0, 1.0);
+//				OpenGLDraw(l);//, 1.0, 1.0, 1.0);
+//			}
+//		}
 }
 	
 
