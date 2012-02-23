@@ -69,7 +69,7 @@ enum tTerrain {
 	kGrass=0x22,
 	kBlight=0x23,
 	kTrees=0x30,
-	kUndefined // mixed type due to split tile
+	kUndefined=0x40 // mixed type due to split tile
 };
 
 inline bool CanPass(long a, long b)

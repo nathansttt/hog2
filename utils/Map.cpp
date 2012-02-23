@@ -296,7 +296,7 @@ void Map::Load(FILE *f)
 	}
 	if (tryDragonAge(f))
 	{
-		Trim();
+		//Trim();
 		return;
 	}
 
@@ -455,8 +455,7 @@ void Map::loadOctileCorner(FILE *f, int high, int wide)
 
 struct header 
 {
-	
-	uint32_t magic;
+     	uint32_t magic;
 	uint32_t version;
 	uint32_t platform;
 	uint32_t filetype;
@@ -491,6 +490,7 @@ bool Map::tryDragonAge(FILE *f)
 	rewind(f);
 	header h;
 	fread(&h, sizeof(header), 1, f);
+	printf("header: %d, struct array: %d, fieldData %d\n", sizeof(header), sizeof(structArray), sizeof(fieldData));
 	printf("MGC: %c%c%c%c\n", h.magic&0xFF, (h.magic>>8)&0xFF,
 		   (h.magic>>16)&0xFF, (h.magic>>24)&0xFF);
 	printf("GFF: %c%c%c%c\n", h.version&0xFF, (h.version>>8)&0xFF,
@@ -567,30 +567,53 @@ bool Map::tryDragonAge(FILE *f)
 		fd[x].fields.resize(fd[x].sa.fieldCnt);
 		fread(&fd[x].fields[0], sizeof(fieldData), fd[x].sa.fieldCnt, f);
 	}
+	height = width = -1;
 	for (unsigned int x = 0; x < h.structcount; x++)
 	{
-//		printf("Struct %d of %d ", x, h.structcount-1);
-//		printf("ID: %c%c%c%c\n", fd[x].sa.id&0xFF, (fd[x].sa.id>>8)&0xFF,
-//			   (fd[x].sa.id>>16)&0xFF, (fd[x].sa.id>>24)&0xFF);
+		printf("Struct %d of %d ", x, h.structcount-1);
+		printf("ID: %c%c%c%c\n", fd[x].sa.id&0xFF, (fd[x].sa.id>>8)&0xFF,
+			   (fd[x].sa.id>>16)&0xFF, (fd[x].sa.id>>24)&0xFF);
 		for (unsigned int y = 0; y < fd[x].sa.fieldCnt; y++)
 		{
-//			printf("Field %d of %d\n", y, fd[x].sa.fieldCnt-1);
-//			printf("LABEL: %d\n", fd[x].fields[y].label);
-//			printf("AT: 0x%X\n", fd[x].fields[y].index);
-			fseek(f, fd[x].fields[y].index+h.dataoffset, SEEK_SET);
-			if ((fd[x].fields[y].label == 3086) ||
+			printf("Field %d of %d\n", y, fd[x].sa.fieldCnt-1);
+			printf("LABEL: %d\n TYPE: %d", fd[x].fields[y].label, fd[x].fields[y].fieldType);
+			printf("(%s %s %s)\n", fd[x].fields[y].fieldType&0x80?"list":"", fd[x].fields[y].fieldType&0x40?"struct":"", fd[x].fields[y].fieldType&0x20?"reference":"");
+			printf("AT: 0x%X (0x%X)\n", fd[x].fields[y].index, fd[x].fields[y].index+h.dataoffset);
+			fseek(f, fd[x].fields[y].index+h.dataoffset+0x10, SEEK_SET);
+			if (fd[x].fields[y].label == 3127)
+			{
+				char str[8];
+				fread(&str, sizeof(char), 8, f);
+				str[7] = 0;
+				printf("name: %s\n", str);
+			}
+			else if ((fd[x].fields[y].label == 3086) ||
 				(fd[x].fields[y].label == 3087) ||
+//				(fd[x].fields[y].label == 3380) ||
+//				(fd[x].fields[y].label == 3381) ||
 				(fd[x].fields[y].label == 3092))
 			{
 				uint32_t loc;
 				fread(&loc, sizeof(loc), 1, f);
 //				printf("VALUE: %d\n", loc);
 				if (fd[x].fields[y].label == 3086)
-				{ width = loc; }
-				if (fd[x].fields[y].label == 3087)
-				{ height = loc; }
-				if (fd[x].fields[y].label == 3092)
+				{ width = loc; printf("**Width: %d\n", width); }
+				else if (fd[x].fields[y].label == 3087)
+				{ height = loc; printf("**Height: %d\n", height); }
+				else if (fd[x].fields[y].label == 3381)
+				{ width = loc; printf("**Width: %d\n", width); }
+				else if (fd[x].fields[y].label == 3380)
+				{ height = loc; printf("**Height: %d\n", height); }
+				else if (fd[x].fields[y].label == 3092)
 				{
+					if ((height == -1) || (width == -1))
+						printf("Read data before height/width\n");
+					if ((height == 0) || (width == 0))
+					{
+						printf("No height/width data\n");
+						height = 500;
+						width = 500;
+					}
 					mapType = kOctile;
 					land = new Tile *[width];
 					for (int x = 0; x < width; x++) land[x] = new Tile [height];
@@ -615,6 +638,20 @@ bool Map::tryDragonAge(FILE *f)
 						
 					}
 //					printf("\n");
+				}
+			}
+			else {
+				if (fd[x].fields[y].fieldType == 5)
+				{
+					uint32_t loc;
+					fread(&loc, sizeof(loc), 1, f);
+					printf("**VALUE: %d\n", loc);
+				}
+				if (fd[x].fields[y].fieldType == 8)
+				{
+					float loc;
+					fread(&loc, sizeof(loc), 1, f);
+					printf("**VALUE: %f\n", loc);
 				}
 			}
 		}
