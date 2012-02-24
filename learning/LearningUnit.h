@@ -101,7 +101,7 @@ void LearningUnit<state, action, environment>::OpenGLDraw(const environment *e, 
 {
 	PublicUnitInfo<state, action, environment> i;
 	si->GetPublicUnitInfo(si->GetCurrentUnit(), i);
-	e->SetColor(0.5, 0.5, 0.5, 1.0);
+	e->SetColor(0.5, 0.25, 0.0, 1.0);
 	if (fgreater(si->GetSimulationTime(), i.nextTime))
 		e->OpenGLDraw(i.currentState);
 	else
