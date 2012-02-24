@@ -22,6 +22,17 @@ MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 	fourConnected = false;
 }
 
+MapEnvironment::MapEnvironment(MapEnvironment *me)
+{
+	map = me->map->Clone();
+	h = 0;
+	if (me->oi)
+		oi = new BaseMapOccupancyInterface(map);
+	else oi = 0;
+	DIAGONAL_COST = me->DIAGONAL_COST;
+	fourConnected = me->fourConnected;
+}
+
 MapEnvironment::~MapEnvironment()
 {
 //	delete map;
