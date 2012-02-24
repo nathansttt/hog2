@@ -89,7 +89,7 @@ bool LearningUnit<state, action, environment>::MakeMove(environment *e, Occupanc
 		nodesTouched += algorithm->GetNodesTouched();
 		if (path.size() <= 1)
 			return false;
-		std::reverse(path.begin(), path.end());
+		//std::reverse(path.begin(), path.end());
 	}
 	a = e->GetAction(path[path.size()-1], path[path.size()-2]);
 	path.pop_back();

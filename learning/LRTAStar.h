@@ -154,8 +154,8 @@ void LRTAStar<state, action, environment>::GetPath(environment *env, const state
 		fAmountLearned += deltaH;
 	
 	// Move -------------------------------------------------------------------------
-	thePath.push_back(from);
 	thePath.push_back(neighbors[minC]);
+	thePath.push_back(from);
 	return;
 }
 
