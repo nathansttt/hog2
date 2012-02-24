@@ -82,6 +82,7 @@ class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 {
 public:
 	MapEnvironment(Map *m, bool useOccupancy = true);
+	MapEnvironment(MapEnvironment *);
 	virtual ~MapEnvironment();
 	void SetGraphHeuristic(GraphHeuristic *h);
 	GraphHeuristic *GetGraphHeuristic();
