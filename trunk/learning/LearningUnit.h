@@ -99,8 +99,6 @@ bool LearningUnit<state, action, environment>::MakeMove(environment *e, Occupanc
 template <class state, class action, class environment>
 void LearningUnit<state, action, environment>::OpenGLDraw(const environment *e, const SimulationInfo<state,action,environment> *si) const
 {
-	algorithm->OpenGLDraw(e);
-	
 	PublicUnitInfo<state, action, environment> i;
 	si->GetPublicUnitInfo(si->GetCurrentUnit(), i);
 	e->SetColor(0.5, 0.5, 0.5, 1.0);
@@ -115,7 +113,9 @@ void LearningUnit<state, action, environment>::OpenGLDraw(const environment *e, 
 	e->OpenGLDraw(goalLoc);
 	e->SetColor(1.0, 1.0, 0.0, 1.0);
 	e->OpenGLDraw(currentLoc);
-	
+
+	algorithm->OpenGLDraw(e);
+
 	
 	//	e->SetColor(0.0, 0.0, 0.5, 0.25);
 	//	for (typename LSStateStorage::const_iterator it = hashTable.begin(); it != hashTable.end(); it++)
