@@ -456,7 +456,20 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	env->ApplyAction(theUnit->currentState, where);
 	OccupancyInterface<state, action> *envInfo = env->GetOccupancyInfo();
 	
-	if ((!envInfo) || (envInfo->CanMove(oldState, theUnit->currentState)))
+	bool legal = false;
+	std::vector<action> succ;
+	env->GetActions(oldState, succ);
+	for (unsigned int x = 0; x < succ.size(); x++)
+	{
+		if (succ[x] == where)
+		{
+			legal = true;
+			break;
+		}
+	}
+	
+	if (legal && 
+		(!envInfo || (envInfo && envInfo->CanMove(oldState, theUnit->currentState))))
 	{	
 		success = true;
 		moveCost = env->GCost(oldState, theUnit->currentState)*theUnit->agent->GetSpeed();
@@ -468,10 +481,10 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 		}
 	}
 	else {
-		if (!envInfo)
-			success = true;
-		else
-			success = false;
+//		if (!envInfo)
+//			success = true;
+//		else
+		success = false;
 			
 		theUnit->currentState = oldState;
 	}

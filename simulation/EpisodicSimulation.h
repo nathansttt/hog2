@@ -240,6 +240,8 @@ protected:
 //				bv->Set(this->units[t]->curry*map_width+units[t]->currx, 0);
 //				bv->Set(this->units[t]->starty*map_width+units[t]->startx, 1);
 //			}
+#pragma mark ---
+			// TODO: if occupancy interface is used we MUST reset the location
 			this->units[t]->currentState = this->units[t]->startState;
 			this->units[t]->agent->GetUnitGroup()->UpdateLocation(this->units[t]->agent, this->env, this->units[t]->startState, false, this);
 			this->units[t]->nextTime = this->currTime;
