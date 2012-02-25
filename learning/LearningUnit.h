@@ -66,7 +66,7 @@ public:
 		s->AddStat("nodesTouched", GetName(), nodesTouched);
 		algorithm->LogFinalStats(s);
 	}
-private:
+protected:
 	long nodesExpanded, nodesTouched;
 	LearningAlgorithm<state, action, environment> *algorithm;			// pointer to the LRTA* algorithm
 	double totalLearned;			// Actual amount learned
