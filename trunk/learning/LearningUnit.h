@@ -28,7 +28,7 @@ public:
 		StartNewTrial(0);
 	}
 	virtual ~LearningUnit() { delete algorithm; }
-	const char *GetName() { return algorithm->GetName(); }
+	virtual const char *GetName() { return algorithm->GetName(); }
 	bool Done() { return (currentLoc==goalLoc) && fequal(algorithm->GetAmountLearned(), totalLearned); }
 	void StartNewTrial(StatCollection *s) {
 		if (s)
@@ -43,11 +43,11 @@ public:
 		totalLearned = algorithm->GetAmountLearned();
 	}
 	
-	bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a);
+	virtual bool MakeMove(environment *, OccupancyInterface<state,action> *, SimulationInfo<state,action,environment> *, action& a);
 	//  virtual void printRoundStats(FILE *f) { fprintf(f,"%8.2f",amountLearned); }
 	
-	void OpenGLDraw(const environment *e, const SimulationInfo<state,action,environment> *) const;
-	void UpdateLocation(environment *, state &s, bool success, SimulationInfo<state,action,environment> *)
+	virtual void OpenGLDraw(const environment *e, const SimulationInfo<state,action,environment> *) const;
+	virtual void UpdateLocation(environment *, state &s, bool success, SimulationInfo<state,action,environment> *)
 	{
 		if (success) 
 		{
