@@ -20,10 +20,8 @@ PROJECTS = \
   graph \
   graphalgorithms \
   gui \
-  learning \
   mapalgorithms \
   shared \
-  simulation \
   utils \
   apps/arm \
   apps/localsensingsearch \
@@ -39,6 +37,8 @@ PROJECTS = \
   apps/mapUtils \
   apps/sfbds \
   apps/3dmaps \
+#  simulation \
+#  learning \
 #	apps/coprobber
 #  apps/lv.pathfinding	
 #  apps/inconsistency \

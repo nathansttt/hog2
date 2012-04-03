@@ -25,8 +25,8 @@ PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
 PROJ_REL_LNFLAGS = -L$(REL_BINDIR)
 
-PROJ_DBG_LIB = -llearning -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
-PROJ_REL_LIB = -llearning -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
+PROJ_DBG_LIB =  -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
+PROJ_REL_LIB =  -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
 
 
 PROJ_DBG_DEP = \
