@@ -39,7 +39,6 @@
 #include "ScenarioLoader.h"
 #include "BFS.h"
 #include "PEAStar.h"
-#include "EPEAStar.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
