@@ -46,6 +46,8 @@
 #include "FLRTAStar.h"
 #include "Directional2DEnvironment.h"
 #include "LearningUnit.h"
+#include "MPLRTAStar.h"
+#include "GridLSSLRTAStar.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -93,12 +95,18 @@ void CreateSimulation(int id)
 	if (gDefaultMap[0] == 0)
 	{
 		map = new Map(mazeSize, mazeSize);
-		map->SetTerrainType(1, mazeSize-2,
-							mazeSize-2, mazeSize-2, kOutOfBounds);
-		map->SetTerrainType(mazeSize-2, 1,
-							mazeSize-2, mazeSize-2, kOutOfBounds);
+		//MakeMaze(map, 4);
+		//MakeMaze(map, 32);
+		//map->SetTileSet(kBitmap);
+//		map->SetTerrainType(1, mazeSize-2,
+//							mazeSize-2, mazeSize-2, kOutOfBounds);
+//		map->SetTerrainType(mazeSize-2, 1,
+//							mazeSize-2, mazeSize-2, kOutOfBounds);
 //		map->Load("/Users/nathanst/Desktop/100.map");
 		map->Load("/Users/nathanst/hog2/maps/dao/arena2.map");
+//		map->Load("/Users/nathanst/hog2/maps/random/random512-40-0.map");
+//		map->Load("/Users/nathanst/hog2/maps/wc3maps512/gnollwood.map");
+		
 //		map->SetRectHeight(0, 0, mazeSize-1, mazeSize-1, 0, kOutOfBounds);
 //		for (int y = 0; y < mazeSize; y+=2)
 //		{
@@ -140,6 +148,7 @@ void CreateSimulation(int id)
 	}
 	else
 		map = new Map(gDefaultMap);
+	//map->SetTileSet(kBitmap);
 	map->SetTileSet(kWinter);
 	MapEnvironment *me;
 	unitSims.resize(id+1);
@@ -359,6 +368,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'd':
 		{
+			printf("===Stats for this run===\n");
 			printf("First travel:\n");
 			for (unsigned int x = 0; x < unitSims[windowID]->GetNumUnits(); x++)
 			{
@@ -648,17 +658,26 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				xyLoc a(px1, py1);
 				xyLoc b(px2, py2);
 				
-				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
 				u6->SetSpeed(0.02);
-//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment>(10));
-//				u6->SetSpeed(0.02);
-//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+
+				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+				u7->SetSpeed(0.02);
+
+//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
+//				u7->SetSpeed(0.02);
+//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new MPLRTA::MPLRTAStar());
 //				u7->SetSpeed(0.02);
 				unitSims[windowID]->ClearAllUnits();
 				unitSims[windowID]->GetStats()->ClearAllStats();
+				unitSims[windowID]->GetStats()->AddFilter("trialDistanceMoved");
+				unitSims[windowID]->GetStats()->AddFilter("nodesExpanded");
+				unitSims[windowID]->GetStats()->AddFilter("TotalLearning");
+				unitSims[windowID]->GetStats()->AddFilter("Trial End");
+
 				unitSims[windowID]->AddUnit(u6);
-//				unitSims[windowID]->AddUnit(u7);
-//				SetNumPorts(windowID, 2);
+				unitSims[windowID]->AddUnit(u7);
+				SetNumPorts(windowID, 2);
 			}
 			break;
 		}
@@ -689,9 +708,11 @@ void RunScenario(char *name, int which)
 
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
-		printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
-		if (sl->GetNthExperiment(x).GetBucket() == 255)
+		if (sl->GetNthExperiment(x).GetBucket() == 127)
+		{
+			printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
 			RunSingleTest(es, sl->GetNthExperiment(x), which);
+		}
 	}
 	exit(0);
 }
@@ -770,7 +791,39 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 		u5->SetSpeed(1.0);
 		es->AddUnit(u5);
 	}
-	
+	else if (which == 8)
+	{
+		printf("Running MPLRTAStar*(1)\n");
+		MPLRTA::MPLRTAStar *f;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u5 = 
+		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, 
+															f = new MPLRTA::MPLRTAStar());
+		u5->SetSpeed(1.0);
+		es->AddUnit(u5);
+	}
+	else if (which == 9)
+	{
+		printf("Running MPLRTAStar*(1)\n");
+		MPLRTA::MPLRTAStar *f;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u5 = 
+		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, 
+															f = new MPLRTA::MPLRTAStar(false));
+		u5->SetSpeed(1.0);
+		es->AddUnit(u5);
+	}
+	else if (which == 10)
+	{
+		printf("Running GridLSSLRTAStar*(10)\n");
+		GridLRTA::GridLRTAStar *f;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = 
+		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, 
+															f = new GridLRTA::GridLRTAStar(10));
+		//		LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
+		
+		u6->SetSpeed(1.0);
+		es->AddUnit(u6);
+	}
+
 	es->SetTrialLimit(500000);
 	while (!es->Done())
 	{
@@ -1172,6 +1225,50 @@ void RunScalingTest(int size, int which, float weight)
 		LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = 
 		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, 
 															f = new FLRTA2::FLRTAStar2<xyLoc, tDirection, MapEnvironment>(1));
+		u6->SetSpeed(1.0);
+		es->AddUnit(u6);
+	}
+	else if (which == 8)
+	{
+		printf("Running MPLRTAStar*(1)\n");
+		MPLRTA::MPLRTAStar *f;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = 
+		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, 
+															f = new MPLRTA::MPLRTAStar());
+		u6->SetSpeed(1.0);
+		es->AddUnit(u6);
+	}
+	else if (which == 9)
+	{
+		printf("Running MPLRTAStar*(1)\n");
+		MPLRTA::MPLRTAStar *f;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u5 = 
+		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, 
+															f = new MPLRTA::MPLRTAStar(false));
+		u5->SetSpeed(1.0);
+		es->AddUnit(u5);
+	}
+	else if (which == 10)
+	{
+		printf("Running GridLSSLRTAStar*(10)\n");
+		GridLRTA::GridLRTAStar *f;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = 
+		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, 
+															f = new GridLRTA::GridLRTAStar(10));
+		//		LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
+		
+		u6->SetSpeed(1.0);
+		es->AddUnit(u6);
+	}
+	else if (which == 11)
+	{
+		printf("Running GridLSSLRTAStar*(100)\n");
+		GridLRTA::GridLRTAStar *f;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = 
+		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, 
+															f = new GridLRTA::GridLRTAStar(100));
+		//		LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
+		
 		u6->SetSpeed(1.0);
 		es->AddUnit(u6);
 	}
