@@ -92,7 +92,9 @@ namespace GridLRTA {
 		void Kill(MapEnvironment *env, const xyLoc &s)
 		{
 			heur[env->GetStateHash(s)].dead = true;
+#ifndef NO_OPENGL
 			heur[env->GetStateHash(s)].theState = s;
+#endif
 		}
 		
 		virtual uint64_t GetNodesExpanded() const { return nodesExpanded; }

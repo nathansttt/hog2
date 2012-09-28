@@ -658,14 +658,14 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				xyLoc a(px1, py1);
 				xyLoc b(px2, py2);
 				
-				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
-				u6->SetSpeed(0.02);
-
-				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
-				u7->SetSpeed(0.02);
-
-//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
+//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+//				u6->SetSpeed(0.02);
+//
+//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
 //				u7->SetSpeed(0.02);
+
+				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
+				u7->SetSpeed(0.02);
 //				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new MPLRTA::MPLRTAStar());
 //				u7->SetSpeed(0.02);
 				unitSims[windowID]->ClearAllUnits();
@@ -675,7 +675,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				unitSims[windowID]->GetStats()->AddFilter("TotalLearning");
 				unitSims[windowID]->GetStats()->AddFilter("Trial End");
 
-				unitSims[windowID]->AddUnit(u6);
+//				unitSims[windowID]->AddUnit(u6);
 				unitSims[windowID]->AddUnit(u7);
 				SetNumPorts(windowID, 2);
 			}
