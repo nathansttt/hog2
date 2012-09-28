@@ -42,7 +42,9 @@ public:
 
 template <class state>
 struct lssLearnedData {
+	lssLearnedData() { dead = false; }
 	state theState;
+	bool dead;
 	double theHeuristic;
 };
 
@@ -225,7 +227,7 @@ void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const st
 		}
 	}
 	//std::cout << GetName() << " " << nodesExpanded-nodeExpansionLimit << " expanded during learning" << std::endl;
-
+	
 //	if (thePath.size() != 0)
 //		return;
 
