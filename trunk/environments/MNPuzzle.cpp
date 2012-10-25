@@ -87,17 +87,22 @@ void MNPuzzle::Change_Op_Order(std::vector<slideDir> op_order)
 	for (unsigned int blank = 0; blank < width*height; blank++) {
 		ops.resize(0);
 
-		for (unsigned int op_num = 0; op_num < 4; op_num++) {
-			if (op_order[op_num] == kUp && blank > width - 1) {
+		for (unsigned int op_num = 0; op_num < 4; op_num++)
+		{
+			if (op_order[op_num] == kUp && blank > width - 1)
+			{
 				ops.push_back(kUp);
 			}
-			if (op_order[op_num] == kLeft && blank % width > 0) {
+			if (op_order[op_num] == kLeft && blank % width > 0)
+			{
 				ops.push_back(kLeft);
 			}
-			if (op_order[op_num] == kRight && blank % width < width - 1) {
+			if (op_order[op_num] == kRight && (blank % width) < width - 1)// && (blank != 0))
+			{
 				ops.push_back(kRight);
 			}
-			if (op_order[op_num] == kDown && blank < width * height - width) {
+			if (op_order[op_num] == kDown && blank < width * height - width)// && (blank != 1))
+			{
 				ops.push_back(kDown);
 			}
 		}
@@ -680,6 +685,20 @@ MNPuzzleState MNPuzzle::Generate_Random_Puzzle(unsigned num_cols, unsigned num_r
 	
 	return new_puzz;
 }
+
+void MNPuzzle::GetStateFromHash(MNPuzzleState &s, uint64_t hash)
+{
+	PermutationPuzzleEnvironment<MNPuzzleState,slideDir>::GetStateFromHash(s, hash);
+	for (unsigned int x = 0; x < s.puzzle.size(); x++)
+	{
+		if (s.puzzle[x] == 0)
+		{
+			s.blank = x;
+			return;
+		}
+	}
+}
+
 
 //	if q is odd, the invariant is the parity (odd or even) of the number of pairs of pieces in reverse order (the parity of the permutation). For the order of the 15 pieces consider line 2 after line 1, etc., like words on a page.
 //	if q is even, the invariant is the parity of the number of pairs of pieces in reverse order plus the row number of the empty square counting from bottom and starting from 0.

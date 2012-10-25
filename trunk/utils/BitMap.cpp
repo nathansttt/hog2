@@ -104,6 +104,7 @@ void BitMapPic::Load(const char *file)
 	width = h.biWidth;
 	image.resize(height*width*4);
 //	printf("char size: %d\n", sizeof(char));
+	fseek(f, h.bfOffBits, SEEK_SET);
 	for (int x = 0; x < height; x++)
 	{
 //		printf("Reading at %d (%d)\n", x*width*4, width*4);

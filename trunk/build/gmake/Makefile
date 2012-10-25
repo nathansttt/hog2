@@ -35,6 +35,7 @@ PROJECTS = \
   apps/directional \
   apps/dragonage \
   apps/mapUtils \
+  apps/prediction \
   apps/sfbds \
   apps/3dmaps \
 #  simulation \
@@ -71,8 +72,10 @@ PROJECTS_ALL = \
   apps/multiagent \
   apps/dynamicsearch \
   apps/directional \
+  apps/mapUtils \
   apps/dragonage \
   apps/sfbds \
+  apps/prediction \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice

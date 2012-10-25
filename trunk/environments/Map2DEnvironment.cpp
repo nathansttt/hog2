@@ -506,6 +506,7 @@ double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
 //	}
 	if (l1.x == l2.x) return 1.0*multiplier;
 	if (l1.y == l2.y) return 1.0*multiplier;
+	if (l1 == l2) return 0.0;
 	return DIAGONAL_COST*multiplier;
 //	double h = HCost(l1, l2);
 //	if (fgreater(h, DIAGONAL_COST))
@@ -625,11 +626,14 @@ void MapEnvironment::GLDrawLine(const xyLoc &a, const xyLoc &b) const
 	GLdouble xx, yy, zz, rad;
 	map->GetOpenGLCoord(a.x, a.y, xx, yy, zz, rad);
 	
-	glColor3f(0.5, 0.5, 0.5);
+	GLfloat rr, gg, bb, t;
+	GetColor(rr, gg, bb, t);
+	glColor4f(rr, gg, bb, t);
+
 	glBegin(GL_LINES);
 	glVertex3f(xx, yy, zz-rad/2);
 	map->GetOpenGLCoord(b.x, b.y, xx, yy, zz, rad);
-	glVertex3f(xx, yy, zz-rad);
+	glVertex3f(xx, yy, zz-rad/2);
 	glEnd();
 }
 

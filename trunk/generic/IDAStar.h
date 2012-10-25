@@ -61,11 +61,13 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	thePath.resize(0);
 	UpdateNextBound(0, env->HCost(from, to));
 	goal = to;
-	while (thePath.size() == 0)
+	thePath.push_back(from);
+	while (true) //thePath.size() == 0)
 	{
 		nodeTable.clear();
-//		printf("Starting iteration with bound %f\n", nextBound);
-		DoIteration(env, from, from, thePath, nextBound, 0, 0);
+		//printf("Starting iteration with bound %f\n", nextBound);
+		if (DoIteration(env, from, from, thePath, nextBound, 0, 0) == 0)
+			break;
 	}
 }
 
@@ -77,6 +79,10 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	nextBound = 0;
 	nodesExpanded = nodesTouched = 0;
 	thePath.resize(0);
+
+	if (env->GoalTest(from, to))
+		return;
+
 	UpdateNextBound(0, env->HCost(from, to));
 	goal = to;
 	std::vector<action> act;

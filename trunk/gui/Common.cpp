@@ -334,7 +334,8 @@ void SetLighting(unsigned int mode)
 	GLfloat mat_shininess[] = {50.0};
 	
 //	GLfloat position[4] = {7.0,-7.0,12.0,0.0};
-	GLfloat position[4] = {-1.0,-3.0,5.0,0.0};
+//	GLfloat position[4] = {-1.0,-3.0,5.0,0.0};
+	GLfloat position[4] = {-1.0,5.0,5.0,0.0};
 	GLfloat ambient[4]  = {0.2, 0.2, 0.2, 1.0};
 	GLfloat diffuse[4]  = {1.0, 1.0, 1.0, 1.0};
 	GLfloat specular[4] = {1.0, 1.0, 1.0, 1.0};
@@ -616,7 +617,7 @@ void SaveScreenshot(int windowID, const char *filename)
 	char image[imageSize];
 	char zero[4] = {0, 0, 0, 0};
 	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &image);//GL_BGRA
-
+	
 	bmp_header h;
 	h.biWidth = width;
 	h.biHeight = height;

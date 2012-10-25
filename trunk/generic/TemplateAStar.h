@@ -94,10 +94,6 @@ public:
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; uniqueNodesExpanded = 0; }
 	int GetMemoryUsage();
 	
-	//closedList_iterator GetClosedListIter() const;
-	//	void GetClosedListIter(closedList_iterator);
-	//	bool ClosedListIterNext(closedList_iterator& it, state& next) const;
-	//bool GetClosedListGCost(state &val, double &gCost) const;
 	bool GetClosedListGCost(const state &val, double &gCost) const;
 	unsigned int GetNumOpenItems() { return openClosedList.OpenSize(); }
 	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return openClosedList.Lookat(openClosedList.GetOpenItem(which)); }
@@ -302,6 +298,9 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	edgeCosts.resize(0);
 	neighborID.resize(0);
 	neighborLoc.resize(0);
+	
+	//std::cout << "Expanding: " << openClosedList.Lookup(nodeid).data << std::endl;
+	
  	env->GetSuccessors(openClosedList.Lookup(nodeid).data, neighbors);
 	double bestH = 0;
 	// 1. load all the children

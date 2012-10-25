@@ -327,6 +327,7 @@ double MapAbstraction::OctileDistance(double x1, double y1, double x2, double y2
  */
 Graph *GetMapGraph(Map *m)
 {
+//	return GraphSearchConstants::GetGraph(m);
 	// printf("Getting Graph representation of world\n");
 	char name[32];
 	Graph *g = new Graph();

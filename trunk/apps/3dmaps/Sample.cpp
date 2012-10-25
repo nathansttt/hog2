@@ -31,7 +31,6 @@
 #include "EpisodicSimulation.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
-#include "AStar.h"
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
 #include "MapSectorAbstraction.h"
@@ -44,12 +43,14 @@
 bool mouseTracking = false;
 bool runningSearch1 = false;
 bool runningSearch2 = false;
-int px1, py1, px2, py2;
+bool gEdit = true;
+int px1, py1, pz1;//, px2, py2;
 int absType = 0;
-int mazeSize = 100;
+int mazeSize = 40;
 int gStepsPerFrame = 4;
 double searchWeight = 0;
 bool screenShot = false;
+bool addPoints = true;
 
 std::vector<UnitMapSimulation *> unitSims;
 
@@ -65,17 +66,26 @@ MapSectorAbstraction *msa;
 
 std::vector<xyLoc> path;
 
-Map *ReduceMap(Map *inputMap);
-void MeasureHighwayDimension(Map *m, int depth);
-void EstimateDimension(Map *m);
-void EstimateLongPath(Map *m);
-
-void testHeuristic(char *problems);
-
 Map3DGrid *m3d = 0;
+#include "BitMap.h"
 
 int main(int argc, char* argv[])
 {
+//	BitMapPic p("/Users/nathanst/Desktop/Untitled.bmp");
+//	for (int x = 0; x < p.GetWidth(); x++)
+//	{
+//		for (int y = 0; y < p.GetHeight(); y++)
+//		{
+//			uint8_t r, g, b, a;
+//			p.GetPixel(x, y, r, g, b, a);
+//			if ((2*g > 3*r) && (2*g > 3*b) && (abs(r-b) < 75))
+//				p.SetPixel(x, y, 255, 255, 255, a);
+//			else
+//				p.SetPixel(x, y, 0, 0, 0, a);
+//		}
+//	}
+//	p.Save("/Users/nathanst/Desktop/New.bmp");
+//	exit(0);
 	InstallHandlers();
 //	int h = 0;
 //	for (int x = 0; x < 20; x++)
@@ -127,6 +137,32 @@ int main(int argc, char* argv[])
 }
 
 
+void MakeStaircase()
+{
+	delete m3d;
+	m3d = new Map3DGrid(10, 10, 8);
+	int height = 0;
+	int dir = 1;
+	for (int x = 0; x < 10; x++)
+		for (int y = 2; y < 10; y++)
+			m3d->AddPoint(x, y, height);
+	
+	for (int t = 0; t < 5; t++)
+	{
+		for (int x = 0; x < 10; x++)
+		{
+			m3d->AddPoint(x, 0, height);
+			m3d->AddPoint(x, 1, height++);
+		}
+		for (int x = 9; x >= 0; x--)
+		{
+			m3d->AddPoint(x, 2, height);
+			m3d->AddPoint(x, 3, height++);
+		}
+	}
+
+}
+
 /**
  * This function is used to allocate the unit simulated that you want to run.
  * Any parameters or other experimental setup can be done at this time.
@@ -144,32 +180,18 @@ void CreateSimulation(int id)
 		map = new Map(gDefaultMap);
 		//map->Scale(512, 512);
 	}
-	if (m3d == 0)
+	
+	if (0 && gDefaultMap[0] == 0)
 	{
-//		m3d = new Map3DGrid(10, 10);
-//		int height = 0;
-//		int dir = 1;
-//		for (int x = 0; x < 10; x++)
-//			for (int y = 2; y < 10; y++)
-//				m3d->AddPoint(x, y, height);
-//		
-//		for (int t = 0; t < 5; t++)
-//		{
-//			for (int x = 0; x < 10; x++)
-//			{
-//				m3d->AddPoint(x, 0, height);
-//				m3d->AddPoint(x, 1, height++);
-//			}
-//			for (int x = 9; x >= 0; x--)
-//			{
-//				m3d->AddPoint(x, 2, height);
-//				m3d->AddPoint(x, 3, height++);
-//			}
-//		}
-		m3d = new Map3DGrid(map, 16);
+		MakeStaircase();
+//		m3d = new Map3DGrid(map, 16);
 		//m3d->AddMap(map, 0);
+		m3d->SetDrawGrid(true);
 		m3d->PrintStats();
 		//m3d->AddMap(map, 50);
+	}
+	else {
+		m3d = new Map3DGrid(map, 16);
 	}
 	map->SetTileSet(kWinter);
 	msa = new MapSectorAbstraction(map, 8);
@@ -179,6 +201,7 @@ void CreateSimulation(int id)
 	unitSims.resize(id+1);
 	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map));
 	unitSims[id]->SetStepType(kMinTime);
+	m3d->SetDrawGrid(true);
 }
 
 /**
@@ -188,6 +211,7 @@ void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+	InstallKeyboardHandler(MyDisplayHandler, "Edit", "Toggle editing", kAnyModifier, 'e');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Change weight", "Change the search weight", kNoModifier, 'w');
@@ -201,21 +225,10 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 	
-	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Resizes map to specified dimensions and saves");
-	InstallCommandLineHandler(MyCLHandler, "-makeRoom", "-makeRoom x-dim y-dim roomSie filename", "Resizes map to specified dimensions and saves");
-	InstallCommandLineHandler(MyCLHandler, "-makeRandom", "-makeRandom x-dim y-dim %%obstacles [0-100] filename", "makes a randomly filled with obstacles");
-	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-memory", "-memory <map> <sectors>", "Measures the memory used by a particular map.");
-	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
-	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
-	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
-	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
-	InstallCommandLineHandler(MyCLHandler, "-reduceMap", "-reduceMap input output", "Find the largest connected component in map and reduce.");
-	InstallCommandLineHandler(MyCLHandler, "-highwayDimension", "-highwayDimension map radius", "Measure the highway dimension of a map.");
-	InstallCommandLineHandler(MyCLHandler, "-estimateDimension", "-estimateDimension map", "Estimate the dimension.");
-	InstallCommandLineHandler(MyCLHandler, "-estimateLongPath", "-estimateLongPath map", "Estimate the longest path in the map.");
-	InstallCommandLineHandler(MyCLHandler, "-testHeuristic", "-testHeuristic scenario", "measure the ratio of the heuristic to the optimal dist");
+	InstallCommandLineHandler(MyCLHandler, "-cut", "-cut <map> <sectors>", "put a 100 cell gash across the middle of the map");
+	InstallCommandLineHandler(MyCLHandler, "-speed", "-speed <map> <sectors>", "Measures the speed of successor generation on a particular map.");
 
 	InstallWindowHandler(MyWindowHandler);
 	
@@ -523,10 +536,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			return 0;
 		strncpy(gDefaultMap, argument[1], 1024);
 		Map map(argument[1]);
-		map.Scale(512, 512);
+//		map.Scale(512, 512);
 		map.Save(argument[2]);
-		//buildProblemSet();
-		//doExport();
+//		//buildProblemSet();
+//		//doExport();
 		exit(0);
 		return 2;
 	}
@@ -534,10 +547,110 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		if (maxNumArgs <= 2) exit(0);
 		Map map(argument[1]);
-		MinimalSectorAbstraction msa(&map, atoi(argument[2]));
+		map.Trim();
+		MinimalSectorAbstraction msabs(&map, atoi(argument[2]));
 		Map3DGrid m3g(&map, atoi(argument[2]));
-		printf("Previously: abstraction: %d map: %d\n", msa.GetAbstractionBytesUsed(), map.GetMapWidth()*map.GetMapHeight());
+		printf("Previously: abstraction: %d map: %d\n", msabs.GetAbstractionBytesUsed(), map.GetMapWidth()*map.GetMapHeight());
 		printf("New: abstraction: %d map: %d\n", m3g.GetAbstractionBytesUsed(), m3g.GetGridBytesUsed());
+		exit(0);
+		return 3;
+	}
+	else if (strcmp(argument[0], "-cut" ) == 0 )
+	{
+		if (maxNumArgs <= 2) exit(0);
+		Map map(argument[1]);
+		Map3DGrid m3g(&map, atoi(argument[2]));
+		Timer t;
+		t.StartTimer();
+		for (int x = 1; x < 100; x++)
+		{
+			bool doRepair = ((map.GetMapWidth()/2-50+x)%gSectorSize)==(gSectorSize-1);
+			m3g.RemovePoint(map.GetMapWidth()/2-50+x, map.GetMapHeight()/2, 0, doRepair);
+		}
+		t.EndTimer();
+		printf("Cut time: %1.6f\n", t.GetElapsedTime());
+		t.StartTimer();
+		m3g.AddPoint(map.GetMapWidth()/2, map.GetMapHeight()/2, 0);
+		for (int x = 1; x < 50; x++)
+		{
+			if ((map.GetMapWidth()/2-x >= 0) && (map.GetMapWidth()/2+x < map.GetMapWidth()))
+			{
+				m3g.AddPoint(map.GetMapWidth()/2-x, map.GetMapHeight()/2, 0);
+				m3g.AddPoint(map.GetMapWidth()/2+x, map.GetMapHeight()/2, 0);
+			}
+		}
+		t.EndTimer();
+		printf("Add time: %1.6f\n", t.GetElapsedTime());
+		exit(0);
+		return 3;
+	}
+	else if (strcmp(argument[0], "-speed" ) == 0 )
+	{
+		Map map(argument[1]);
+		MinimalSectorAbstraction msabs(&map, atoi(argument[2]));
+		Map3DGrid m3g(&map, atoi(argument[2]));
+
+		state3d s;
+		Timer t;
+		double oldTime = 0, newTime = 0;
+		int cnt = 0;
+		std::vector<state3d> n1;
+		srandom(34);
+		for (int x = 0; x < map.GetMapWidth(); x++)
+		{
+			for (int y = 0; y < map.GetMapHeight(); y++)
+			{
+				if (m3g.FindNearState(x, y, 0, s) != -1)
+				{
+					t.StartTimer();
+					m3g.GetSuccessors(s, n1);
+					newTime += t.EndTimer();
+					cnt++;
+//					if (n1.size() == 0)
+//						continue;
+//					for (int x = 0; x < 0; x++)
+//					{
+//						s = n1[random()%n1.size()];
+//						m3g.GetSuccessors(s, n1);
+//						if (n1.size() == 0)
+//						{
+//							assert(!"No successors to state");
+//							break;
+//						}
+//					}
+//					x = map.GetMapWidth();
+//					y = map.GetMapHeight();
+				}
+			}
+		}
+		printf("Time: %d points New: %1.7f time; ", cnt, newTime);
+
+		MapEnvironment me(&map);
+		std::vector<xyLoc> n2;
+		srandom(34);
+		t.StartTimer();
+		for (int x = 0; x < map.GetMapWidth(); x++)
+		{
+			for (int y = 0; y < map.GetMapHeight(); y++)
+			{
+				if (map.GetTerrainType(x, y) != kGround)
+					continue;
+				xyLoc s(x, y);
+				t.StartTimer();
+				me.GetSuccessors(s, n2);
+				oldTime += t.EndTimer();
+
+//				if (n2.size() == 0)
+//					continue;
+//				for (int x = 0; x < 0; x++)
+//				{
+//					me.GetSuccessors(n2[random()%n2.size()], n2);
+//				}
+//				x = map.GetMapWidth();
+//				y = map.GetMapHeight();
+			}
+		}
+		printf("Old: %1.7f time\n", oldTime);
 		exit(0);
 		return 3;
 	}
@@ -558,17 +671,20 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '[': if (gStepsPerFrame > 2) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;
+		case 'e': gEdit = !gEdit; break;
 		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
+			m3d->SetDrawGrid(!m3d->GetDrawGrid());
+//			if (mod != kShiftDown)
+//				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
+//			else
+//			{
+//				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+//			}
 			break;
 		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 		{
+			MakeStaircase();
 		}
 			break;
 		default:
@@ -578,6 +694,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 {
+	addPoints = !addPoints;
+	printf("Set add poitns to: %s\n", addPoints?"true":"false");
+	return;
+	
 	static uint64_t average1=0, average2 = 0;
 	static int count = 0;
 	Graph *g = msa->GetAbstractGraph(1);
@@ -668,7 +788,7 @@ void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-	static int y = 2;
+	static int y = 18;
 	static int x = 0;
 	static bool add = false;
 
@@ -676,75 +796,107 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	{
 		Timer timer;
 		timer.StartTimer();
-		for (int t = 0; t < m3d->GetWidth(); t++)
+		//for (int t = 0; t < m3d->GetWidth(); t++)
 		{
-//			if (add)
-//				m3d->AddPoint(x, 18, 0);
-//			else
-			m3d->RemovePoint(t, y, 0);
-//			x = (x+1)%m3d->GetWidth();
-//			if (x == 0)
-//				add=!add;
+			if (add)
+				m3d->AddPoint(x, 18, 0);
+			else
+				m3d->RemovePoint(x, y, 0);
+			x = (x+1)%m3d->GetWidth();
+			if (x == 0)
+				add=!add;
 		}
 		timer.EndTimer();
-		y+=2;
+//		y+=2;
 		printf("%1.2fµs elapsed\n", 1000000*timer.GetElapsedTime());
 	}
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
+	if (!gEdit)
+		return false;
 	mouseTracking = false;
+	state3d s;
 	if (button == kRightButton)
 	{
 		switch (mType)
 		{
 			case kMouseDown:
-				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px1, py1);
-				//printf("Mouse down at (%d, %d)\n", px1, py1);
+				m3d->GetPointFromCoordinate(loc, px1, py1, pz1);
+				//unitSims[windowID]->GetEnvironment()->GetMap()
+				printf("Mouse down at (%d, %d, %d)\n", px1, py1, pz1);
+				if (addPoints)
+				{
+					if (-1 == m3d->FindNearState(px1, py1, 0, s))
+						m3d->AddPoint(px1, py1, 0);
+				}
+				else {
+					m3d->RemovePoint(px1, py1, 0);
+				}
+
 				break;
 			case kMouseDrag:
-				mouseTracking = true;
-				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
-				//printf("Mouse tracking at (%d, %d)\n", px2, py2);
+				m3d->GetPointFromCoordinate(loc, px1, py1, pz1);
+				//mouseTracking = true;
+				//unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
+				printf("Mouse tracking at (%d, %d, %d)\n", px1, py1, pz1);
+				if (addPoints)
+				{
+					if (-1 == m3d->FindNearState(px1, py1, 0, s))
+						m3d->AddPoint(px1, py1, 0);
+				}
+				else {
+					m3d->RemovePoint(px1, py1, 0);
+				}
 				break;
 			case kMouseUp:
-			{
-				if ((px1 == -1) || (px2 == -1))
-					break;
-				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
-				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
-				
-				if (ma1 == 0)
+				m3d->GetPointFromCoordinate(loc, px1, py1, pz1);
+				printf("Mouse tracking at (%d, %d, %d)\n", px1, py1, pz1);
+				if (addPoints)
 				{
-					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-//					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
-//					gdh->SetPlacement(kAvoidPlacement);
-//					ma1->SetGraphHeuristic(gdh);
-//					for (int x = 0; x < 10; x++)
-//						gdh->AddHeuristic();
-//					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
-//					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
+					if (-1 == m3d->FindNearState(px1, py1, 0, s))
+						m3d->AddPoint(px1, py1, 0);
 				}
-				if (ma2 == 0)
-					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-				
-				a1.SetStopAfterGoal(true);
-				a2.SetStopAfterGoal(true);
-				//a2.SetWeight(1.8);
-				xyLoc s1;
-				xyLoc g1;
-				s1.x = px1; s1.y = py1;
-				g1.x = px2; g1.y = py2;
-				
-				a1.SetWeight(searchWeight);
-				a1.InitializeSearch(ma1, s1, g1, path);
-				//a2.InitializeSearch(ma2, s1, g1, path);
-				a1.SetUseBPMX(0);
-				runningSearch1 = true;
-				//runningSearch2 = true;
-				
-			}
+				else {
+					m3d->RemovePoint(px1, py1, 0);
+				}
+				//			{
+//				if ((px1 == -1) || (px2 == -1))
+//					break;
+//				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
+//				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
+//				
+//				if (ma1 == 0)
+//				{
+//					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
+////					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
+////					gdh->SetPlacement(kAvoidPlacement);
+////					ma1->SetGraphHeuristic(gdh);
+////					for (int x = 0; x < 10; x++)
+////						gdh->AddHeuristic();
+////					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
+////					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
+//				}
+//				if (ma2 == 0)
+//					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
+//				
+//				a1.SetStopAfterGoal(true);
+//				a2.SetStopAfterGoal(true);
+//				//a2.SetWeight(1.8);
+//				xyLoc s1;
+//				xyLoc g1;
+//				s1.x = px1; s1.y = py1;
+//				g1.x = px2; g1.y = py2;
+//				
+//				a1.SetWeight(searchWeight);
+//				a1.InitializeSearch(ma1, s1, g1, path);
+//				//a2.InitializeSearch(ma2, s1, g1, path);
+//				a1.SetUseBPMX(0);
+//				runningSearch1 = true;
+//				//runningSearch2 = true;
+//				
+//			}
 				break;
 		}
 		return true;
@@ -752,301 +904,4 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 	return false;
 }
 
-int LabelConnectedComponents(Graph *g);
 
-Map *ReduceMap(Map *inputMap)
-{
-	Graph *g = GraphSearchConstants::GetGraph(inputMap);
-
-	int biggest = LabelConnectedComponents(g);
-	
-	Map *m = new Map(inputMap->GetMapWidth(), inputMap->GetMapHeight());
-	for (int x = 0; x < inputMap->GetMapWidth(); x++)
-	{
-		for (int y = 0; y < inputMap->GetMapHeight(); y++)
-		{
-			if (inputMap->GetTerrainType(x, y) == kTrees)
-				m->SetTerrainType(x, y, kTrees);
-			else if (inputMap->GetTerrainType(x, y) == kWater)
-				m->SetTerrainType(x, y, kWater);			
-			else m->SetTerrainType(x, y, kOutOfBounds);
-		}
-	}
-	for (int x = 0; x < g->GetNumNodes(); x++)
-	{
-		if (g->GetNode(x)->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest)
-		{
-			int theX, theY;
-			theX = g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapX);
-			theY = g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapY);
-			if (g->GetNode(inputMap->GetNodeNum(theX+1, theY)) &&
-				(g->GetNode(inputMap->GetNodeNum(theX+1, theY))->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest) &&
-				(!g->FindEdge(x, inputMap->GetNodeNum(theX+1, theY))))
-			{
-				m->SetTerrainType(theX, theY, kOutOfBounds);
-			}
-			else if (g->GetNode(inputMap->GetNodeNum(theX, theY+1)) &&
-					 (g->GetNode(inputMap->GetNodeNum(theX, theY+1))->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest) &&
-					 (!g->FindEdge(x, inputMap->GetNodeNum(theX, theY+1))))
-			{
-				m->SetTerrainType(theX, theY, kOutOfBounds);
-			}
-//			else if (g->GetNode(inputMap->GetNodeNum(theX+1, theY+1)) &&
-//					 (g->GetNode(inputMap->GetNodeNum(theX+1, theY+1))->GetLabelL(GraphSearchConstants::kTemporaryLabel) == biggest) &&
-//					 (!g->FindEdge(x, inputMap->GetNodeNum(theX+1, theY+1))))
-//			{
-//				m->SetTerrainType(theX, theY, kOutOfBounds);
-//			}
-			else {
-				if (inputMap->GetTerrainType(theX, theY) == kSwamp)
-					m->SetTerrainType(theX, theY, kSwamp);
-				else
-					m->SetTerrainType(theX, theY, kGround);
-			}
-		}
-		else if (inputMap->GetTerrainType(g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapX),
-										  g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapY)) == kGround)
-			m->SetTerrainType(g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapX),
-							  g->GetNode(x)->GetLabelL(GraphSearchConstants::kMapY), kTrees);
-	}
-	return m;
-}
-
-int LabelConnectedComponents(Graph *g)
-{
-	for (int x = 0; x < g->GetNumNodes(); x++)
-		g->GetNode(x)->SetLabelL(GraphSearchConstants::kTemporaryLabel, 0);
-	int group = 0;
-	std::vector<int> groupSizes;
-	for (int x = 0; x < g->GetNumNodes(); x++)
-	{
-		if (g->GetNode(x)->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 0)
-		{
-			group++;
-			groupSizes.resize(group+1);
-
-			std::vector<unsigned int> ids;
-			ids.push_back(x);
-			while (ids.size() > 0)
-			{
-				unsigned int next = ids.back();
-				ids.pop_back();
-				if (g->GetNode(next)->GetLabelL(GraphSearchConstants::kTemporaryLabel) != 0)
-					continue;
-				groupSizes[group]++;
-				g->GetNode(next)->SetLabelL(GraphSearchConstants::kTemporaryLabel, group);
-				for (int y = 0; y < g->GetNode(next)->GetNumEdges(); y++)
-				{
-					edge *e = g->GetNode(next)->getEdge(y);
-					if (g->GetNode(e->getFrom())->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 0)
-						ids.push_back(e->getFrom());
-					if (g->GetNode(e->getTo())->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 0)
-						ids.push_back(e->getTo());
-				}
-			}
-		}
-	}
-	int best = 0;
-	for (unsigned int x = 1; x < groupSizes.size(); x++)
-	{
-		printf("%d states in group %d\n", groupSizes[x], x);
-		if (groupSizes[x] > groupSizes[best])
-			best = x;
-	}
-	printf("Keeping group %d\n", best);
-	return best;
-	//	kMapX;
-}
-
-void MeasureHighwayDimension(Map *m, int depth)
-{
-	Graph *g = GraphSearchConstants::GetGraph(m);
-	GraphEnvironment ge(g);
-	std::vector<graphState> endPath;
-	
-	for (int x = 0; x < g->GetNumNodes(); x++)
-		g->GetNode(x)->SetLabelL(GraphSearchConstants::kTemporaryLabel, 0);
-	
-	// 1. choose a random point
-	node *n = g->GetRandomNode();
-	
-	// 2. search to depth d (all g-costs >= d)
-	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
-	theSearch.SetStopAfterGoal(false);
-	theSearch.InitializeSearch(&ge, n->GetNum(), n->GetNum(), endPath);
-	while (1)
-	{
-		if (theSearch.DoSingleSearchStep(endPath))
-			break;
-		double gCost;
-		graphState s = theSearch.CheckNextNode();
-		theSearch.GetClosedListGCost(s, gCost);
-		if (gCost > depth)
-			break;
-	}
-	
-	// 3. mark all nodes on OPEN
-	unsigned int radiusCount = theSearch.GetNumOpenItems();
-	for (unsigned int x = 0; x < radiusCount; x++)
-	{
-		g->GetNode(theSearch.GetOpenItem(x).data)->SetLabelL(GraphSearchConstants::kTemporaryLabel, 1);
-	}
-
-	// 4. continue search to depth 4d (all g-costs >= 4d)
-	while (1)
-	{
-		if (theSearch.DoSingleSearchStep(endPath))
-			break;
-		double gCost;
-		graphState s = theSearch.CheckNextNode();
-		theSearch.GetClosedListGCost(s, gCost);
-		if (gCost > 4*depth)
-			break;
-	}
-	
-	// 5. for every state on open, trace back to marked node
-	//    (marking?)
-	radiusCount = theSearch.GetNumOpenItems();
-	for (unsigned int x = 0; x < radiusCount; x++)
-	{
-		graphState theNode = theSearch.GetOpenItem(x).data;
-		theSearch.ExtractPathToStart(theNode, endPath);
-		for (unsigned int y = 0; y < endPath.size(); y++)
-		{
-			if (g->GetNode(endPath[y])->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 1)
-				g->GetNode(endPath[y])->SetLabelL(GraphSearchConstants::kTemporaryLabel, 2);
-		}
-	}
-
-	int dimension = 0;
-	// 6. count marked nodes to see how many were found
-	for (int x = 0; x < g->GetNumNodes(); x++)
-		if (g->GetNode(x)->GetLabelL(GraphSearchConstants::kTemporaryLabel) == 2)
-			dimension++;
-
-	printf("%d states at radius %d; %d states [highway dimension] at radius %d\n", radiusCount, depth, dimension, 4*depth);
-}
-
-void EstimateDimension(Map *m)
-{
-//	Graph *g = GraphSearchConstants::GetGraph(m);
-//	GraphEnvironment ge(g);
-//	std::vector<graphState> endPath;
-//	node *n = g->GetRandomNode();
-	Graph *g = GraphSearchConstants::GetGraph(m);
-	GraphEnvironment ge(g);
-	std::vector<graphState> endPath;
-	
-	// 1. choose a random point
-	node *n = g->GetRandomNode();
-	
-	// 2. search to depth d (all g-costs >= d)
-	double limit = 0;
-	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
-	theSearch.SetStopAfterGoal(false);
-	theSearch.InitializeSearch(&ge, n->GetNum(), n->GetNum(), endPath);
-	while (1)
-	{
-		double gCost;
-		graphState s = theSearch.CheckNextNode();
-		theSearch.GetClosedListGCost(s, gCost);
-		//printf("Expanding g-cost %f next\n", gCost);
-		if (gCost >= limit)
-		{
-			printf("%d\t%d\n", (int)limit, theSearch.GetNodesExpanded());
-			limit++;
-		}
-
-		if (theSearch.DoSingleSearchStep(endPath))
-			break;
-	}	
-	graphState start = n->GetNum();
-	BFS<graphState, graphMove> b;
-	b.GetPath(&ge, start, start, endPath);
-}
-
-double FindFarDist(Graph *g, node *n, graphState &from, graphState &to);
-
-void EstimateLongPath(Map *m)
-{
-	Graph *g = GraphSearchConstants::GetGraph(m);
-	GraphMapHeuristic gh(m, g);
-	
-	double heur = 0;
-	double dist = 0;
-	graphState from, to;
-	for (int x = 0; x < 5; x++)
-	{
-		node *n = g->GetRandomNode();
-		double newDist = FindFarDist(g, n, from, to);
-		if (newDist > dist)
-		{
-			dist = newDist;
-			heur = gh.HCost(from, to);
-		}
-	}
-	printf("%f\t%f\t%f\t%f\n", dist, dist/g->GetNumNodes(), heur, dist/heur);
-}
-
-double FindFarDist(Graph *g, node *n, graphState &from, graphState &to)
-{
-	std::vector<graphState> endPath;
-	GraphEnvironment ge(g);
-	
-	// 2. search to depth d (all g-costs >= d)
-	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
-	theSearch.SetStopAfterGoal(false);
-	theSearch.InitializeSearch(&ge, n->GetNum(), n->GetNum(), endPath);
-	double gCost;
-	graphState s;
-	while (1)
-	{
-		if (theSearch.DoSingleSearchStep(endPath))
-			break;
-		s = theSearch.CheckNextNode();
-		theSearch.GetClosedListGCost(s, gCost);
-	}	
-	theSearch.InitializeSearch(&ge, s, s, endPath);
-	from = s;
-	while (1)
-	{
-		if (theSearch.DoSingleSearchStep(endPath))
-			break;
-		s = theSearch.CheckNextNode();
-		to = s;
-		double tmpCost;
-		theSearch.GetClosedListGCost(s, tmpCost);
-		if (tmpCost > gCost)
-			gCost = tmpCost;
-	}	
-	return gCost;
-}
-
-
-
-void testHeuristic(char *problems)
-{
-	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
-	ScenarioLoader s(problems);
-	Map *map = new Map(s.GetNthExperiment(0).GetMapName());
-	map->Scale(s.GetNthExperiment(0).GetXScale(), s.GetNthExperiment(0).GetYScale());
-	MapEnvironment e(map);
-	
-	for (int x = 0; x < s.GetNumExperiments(); x++)
-	{
-		if (s.GetNthExperiment(x).GetBucket() == 127)
-		{
-			xyLoc a, b;
-			a.x = s.GetNthExperiment(x).GetStartX();
-			a.y = s.GetNthExperiment(x).GetStartY();
-			b.x = s.GetNthExperiment(x).GetGoalX();
-			b.y = s.GetNthExperiment(x).GetGoalY();
-			searcher.GetPath(&e, a, b, path);
-			double len = e.GetPathLength(path);
-			printf("Opt: %f (%f) heur: %f ratio: %f nodes: %d\n", s.GetNthExperiment(x).GetDistance(), len, e.HCost(a, b),
-				   e.HCost(a, b)/s.GetNthExperiment(x).GetDistance(), searcher.GetNodesExpanded());
-		}
-	}
-	
-	exit(0);
-}

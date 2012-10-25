@@ -159,7 +159,9 @@ public:
 	std::vector<slideDir> Get_Op_Order(){return ops_in_order;}
 
 	static MNPuzzleState Generate_Random_Puzzle(unsigned num_cols, unsigned num_rows);
+	virtual void GetStateFromHash(MNPuzzleState &s, uint64_t hash);
 
+	
 	bool State_Check(const MNPuzzleState &to_check);
 
 	unsigned Get_Num_Of_Columns(){return width;}

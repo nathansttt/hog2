@@ -44,7 +44,8 @@ enum tTileset {
 	kFallTile,
 	kWinter,
 	kWinterTile,
-	kFast
+	kFast,
+	kBitmap
 };
 
 enum tDisplay {

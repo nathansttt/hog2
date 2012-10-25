@@ -108,7 +108,7 @@ public:
 
 	virtual std::vector<Unit<state,action,environment> *> GetMembers() {return members;}
 	unsigned int GetNumMembers() { return members.size(); }
-	Unit<state,action,environment> *GetMember(int which) { return members[which]; }
+	Unit<state,action,environment> *GetMember(int which) const { return members[which]; }
 	
 private:
 	std::vector<Unit<state, action, environment> *> members;
