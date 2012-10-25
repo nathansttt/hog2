@@ -93,6 +93,7 @@ public:
 	virtual void OpenGLDraw(const state&, const action&) const = 0;
 	virtual void GLLabelState(const state&, const char *) const {} // draw label over state
 	virtual void GLDrawLine(const state &x, const state &y) const {}
+	virtual void GLDrawPath(const std::vector<state> &x) const;
 	virtual void SetColor(GLfloat rr, GLfloat g, GLfloat b, GLfloat t = 1.0) const { color.r = rr; color.g = g; color.b = b; transparency = t; }
 	virtual void GetColor(GLfloat& rr, GLfloat& g, GLfloat& b, GLfloat &t) const { rr=color.r; g=color.g; b=color.b; t = transparency;}
 protected:
@@ -111,6 +112,15 @@ double SearchEnvironment<state,action>::GetPathLength(std::vector<state> &neighb
 		length += GCost(neighbors[x-1], neighbors[x]);
 	}
 	return length;
+}
+
+template <class state, class action>
+void SearchEnvironment<state,action>::GLDrawPath(const std::vector<state> &path) const
+{
+	for (unsigned int x = 0; x+1 < path.size(); x++)
+	{
+		GLDrawLine(path[x], path[x+1]);
+	}
 }
 
 #endif

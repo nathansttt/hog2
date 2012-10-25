@@ -27,7 +27,7 @@
 
 struct xyLoc {
 public:
-	xyLoc() {}
+	xyLoc() { x = -1; y = -1; }
 	xyLoc(uint16_t _x, uint16_t _y) :x(_x), y(_y) {}
 	uint16_t x;
 	uint16_t y;
@@ -81,12 +81,12 @@ const int kStayIndex = 8; // index of kStay
 class MapEnvironment : public SearchEnvironment<xyLoc, tDirection>
 {
 public:
-	MapEnvironment(Map *m, bool useOccupancy = true);
+	MapEnvironment(Map *m, bool useOccupancy = false);
 	MapEnvironment(MapEnvironment *);
 	virtual ~MapEnvironment();
 	void SetGraphHeuristic(GraphHeuristic *h);
 	GraphHeuristic *GetGraphHeuristic();
-	void GetSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
+	virtual void GetSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
 	bool GetNextSuccessor(const xyLoc &currOpenNode, const xyLoc &goal, xyLoc &next, double &currHCost, uint64_t &special, bool &validMove);
 	bool GetNext4Successor(const xyLoc &currOpenNode, const xyLoc &goal, xyLoc &next, double &currHCost, uint64_t &special, bool &validMove);
 	bool GetNext8Successor(const xyLoc &currOpenNode, const xyLoc &goal, xyLoc &next, double &currHCost, uint64_t &special, bool &validMove);
@@ -97,6 +97,8 @@ public:
 
 	virtual bool InvertAction(tDirection &a) const;
 
+//	bool Contractable(const xyLoc &where);
+	
 	virtual double HCost(const xyLoc &) {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for MapEnvironment\n");
 		exit(1); return -1.0;}

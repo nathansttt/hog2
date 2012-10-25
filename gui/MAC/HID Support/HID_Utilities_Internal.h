@@ -87,10 +87,10 @@ IOReturn HIDCloseReleaseInterface (pRecDevice pDevice);
 // Error Handling
 
 // Error reporter, can be set to report however the application desires
-void HIDReportError (char * strError);
+void HIDReportError (const char * strError);
 
 // Error with numeric code reporter, can be set to report however the application desires
-void HIDReportErrorNum (char * strError, long numError);
+void HIDReportErrorNum (const char * strError, long numError);
 
 #endif // _HID_Utilities_Internal_h_
 

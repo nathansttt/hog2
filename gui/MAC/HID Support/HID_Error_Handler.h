@@ -66,12 +66,12 @@ extern "C" {
 
 
 // public function declarations -------------------------------------
-
-// Error reporter, can be set to report however the application desires
-void HIDReportError (char * strError);
-
-// Error with numeric code reporter, can be set to report however the application desires
-void HIDReportErrorNum (char * strError, long numError);
+//
+//// Error reporter, can be set to report however the application desires
+//void HIDReportError (const char * strError);
+//
+//// Error with numeric code reporter, can be set to report however the application desires
+//void HIDReportErrorNum (const char * strError, long numError);
 
 #ifdef __cplusplus
 }

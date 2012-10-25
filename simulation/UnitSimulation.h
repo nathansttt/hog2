@@ -456,17 +456,19 @@ bool UnitSimulation<state, action, environment>::MakeUnitMove(UnitInfo<state, ac
 	env->ApplyAction(theUnit->currentState, where);
 	OccupancyInterface<state, action> *envInfo = env->GetOccupancyInfo();
 	
-	bool legal = false;
-	std::vector<action> succ;
-	env->GetActions(oldState, succ);
-	for (unsigned int x = 0; x < succ.size(); x++)
-	{
-		if (succ[x] == where)
-		{
-			legal = true;
-			break;
-		}
-	}
+	// TODO: Perhaps we need a legal action test here to handle the
+	//       cases where we can't generate all possible actions.
+	bool legal = true;
+//	std::vector<action> succ;
+//	env->GetActions(oldState, succ);
+//	for (unsigned int x = 0; x < succ.size(); x++)
+//	{
+//		if (succ[x] == where)
+//		{
+//			legal = true;
+//			break;
+//		}
+//	}
 	
 	if (legal && 
 		(!envInfo || (envInfo && envInfo->CanMove(oldState, theUnit->currentState))))

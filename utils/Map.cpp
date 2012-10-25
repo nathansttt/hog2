@@ -23,10 +23,41 @@
 #include "GLUtil.h"
 #include <cstdlib>
 #include <cstring>
+#include "BitMap.h"
+
+GLuint wall = -1;
 
 using namespace std;
 
 static const bool verbose = false; 
+
+void InitTextures()
+{
+	if (wall == -1)
+	{
+		BitMapPic p("/Users/nathanst/hog2/textures/u.bmp");
+		p.Save("/Users/nathanst/hog2/textures/out.bmp");
+		// Use OpenGL ES to generate a name for the texture.
+		glGenTextures(1, &wall);
+		// Bind the texture name. 
+		glBindTexture(GL_TEXTURE_2D, wall);
+		// Set the texture parameters to use a minifying filter and a linear filer (weighted average)
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 	
+		
+		if (p.BytesReversed()) {
+			// Specify a 2D texture image, providing the a pointer to the image data in memory
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.GetWidth(), p.GetHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, p.GetBytes());
+		}
+		else {
+			// Specify a 2D texture image, providing the a pointer to the image data in memory
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.GetWidth(), p.GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, p.GetBytes());
+		}
+	}
+}
 
 /** 
 * Construct a half tile, initializing to flat values.
@@ -1710,6 +1741,8 @@ void Map::SetTileSet(tTileset ts)
 {
 	updated = true; // force the display list to re-draw
 	tileSet = ts;
+	if (ts == kBitmap)
+		InitTextures();
 }
 
 /**
@@ -1870,6 +1903,54 @@ void Map::DrawTile(Tile *t, int x, int y, tDisplay how) const
 	GLdouble xx, yy, zz, rr;
 	GetOpenGLCoord(x,y,xx,yy,zz,rr);
 	
+	if (tileSet == kBitmap)
+	{
+		glNormal3d(0, 0, -1);
+		glColor3f(1, 1, 1);
+
+		float l, r, u, b;
+		switch (t->tile1.type)
+		{
+			case kTrees:
+				l = 0; r = 0.5;
+				u = 0.0; b = 0.5;
+				break;
+			case kGround:
+				l = 0; r = 0.5;
+				u = 0.5; b = 1.0;
+				break;
+			case kWater:
+				glColor3f(0.5, 0.5, 0.5);
+			case kSwamp:
+				l = 0.5; r = 1.0;
+				u = 0; b = 0.5;
+				break;
+
+			default:
+				l = 0.5; r = 1.0;
+				u = 0.5; b = 1.0;
+		}
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, wall);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		glBegin(GL_QUADS);
+
+		glTexCoord2f(l,b);
+		glVertex3f(xx-rr, yy-rr, /*-2*rr*/-rr*t->tile1.corners[0]);
+		glTexCoord2f(l,u);
+		glVertex3f(xx-rr, yy+rr, /*-2*rr*/-rr*t->tile1.corners[1]);
+		glTexCoord2f(r,u);
+		glVertex3f(xx+rr, yy+rr, /*-2*rr*/-rr*t->tile1.corners[2]);
+		glTexCoord2f(r,b);
+		glVertex3f(xx+rr, yy-rr, /*-2*rr*/-rr*t->tile2.corners[0]);
+
+		glEnd();
+		glDisable(GL_TEXTURE_2D);
+		return;
+	}
+	
 	switch (how) {
 		case kPolygons:
 			if (t->split == kNoSplit)
@@ -1905,6 +1986,55 @@ void Map::DrawTile(Tile *t, int x, int y, tDisplay how) const
 				
 				DoVertexColor(t->tile1.type, t->tile2.corners[0], !AdjacentCorners(x, y, kTopRight));
 				glVertex3f(xx+rr, yy-rr, -rr*t->tile2.corners[0]);
+			}
+			else {
+//				if (wall != -1)
+//				{
+				glColor3f(0, 0, 0);
+//				}
+//				else
+//					glColor3f(0.3, 0.3, 0.3);
+				// top
+
+				glNormal3d(0, 0, -1);
+				glTexCoord2f(0.51,1);
+				glVertex3f(xx-rr, yy-rr, /*-2*rr*/-rr*t->tile1.corners[0]);
+				glTexCoord2f(0.51,0.51);
+				glVertex3f(xx-rr, yy+rr, /*-2*rr*/-rr*t->tile1.corners[1]);
+				glTexCoord2f(1,0.51);
+				glVertex3f(xx+rr, yy+rr, /*-2*rr*/-rr*t->tile1.corners[2]);
+				glTexCoord2f(1,1);
+				glVertex3f(xx+rr, yy-rr, /*-2*rr*/-rr*t->tile2.corners[0]);
+
+
+//				glColor3f(1.0, 0.1, 0.1);
+//				// side 1
+//				glVertex3f(xx-rr, yy-rr, -2*rr-rr*t->tile1.corners[0]);
+//				glVertex3f(xx-rr, yy+rr, -2*rr-rr*t->tile1.corners[1]);
+//				glVertex3f(xx-rr, yy+rr, -rr*t->tile1.corners[2]);
+//				glVertex3f(xx-rr, yy-rr, -rr*t->tile2.corners[0]);
+//
+//				glColor3f(1.0, 1.0, 0.1);
+//				// side 2
+//				glVertex3f(xx+rr, yy-rr, -rr*t->tile1.corners[0]);
+//				glVertex3f(xx+rr, yy+rr, -rr*t->tile1.corners[1]);
+//				glVertex3f(xx+rr, yy+rr, -2*rr-rr*t->tile1.corners[2]);
+//				glVertex3f(xx+rr, yy-rr, -2*rr-rr*t->tile2.corners[0]);
+//
+//				glColor3f(0.0, 1.0, 0.1);
+//				// side 3
+//				glVertex3f(xx-rr, yy-rr, -2*rr-rr*t->tile1.corners[0]);
+//				glVertex3f(xx-rr, yy-rr, -rr*t->tile1.corners[1]);
+//				glVertex3f(xx+rr, yy-rr, -rr*t->tile1.corners[2]);
+//				glVertex3f(xx+rr, yy-rr, -2*rr-rr*t->tile2.corners[0]);
+//
+//				glColor3f(0.0, 0.0, 1.0);
+//				// side 4
+//				glVertex3f(xx-rr, yy+rr, -2*rr-rr*t->tile1.corners[0]);
+//				glVertex3f(xx-rr, yy+rr, -rr*t->tile1.corners[1]);
+//				glVertex3f(xx+rr, yy+rr, -rr*t->tile1.corners[2]);
+//				glVertex3f(xx+rr, yy+rr, -2*rr-rr*t->tile2.corners[0]);
+
 			}
 			break;
 		case kForwardSplit:
@@ -1964,6 +2094,7 @@ void Map::DrawTile(Tile *t, int x, int y, tDisplay how) const
 			break;
 	}
 	glEnd();
+	glDisable(GL_TEXTURE_2D);
 }
 
 /**

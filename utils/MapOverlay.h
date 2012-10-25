@@ -18,6 +18,8 @@ class MapOverlay {
 public:
 	MapOverlay(Map *m);
 	Map *GetMap() { return m; }
+	void Clear();
+	
 	void SetOverlayValue(int x, int y, double value);
 	double GetOverlayValue(int x, int y);
 	void OpenGLDraw() const;

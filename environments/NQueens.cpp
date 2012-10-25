@@ -216,5 +216,5 @@ void NQueens::OpenGLDraw(const NQueenState&, const NQueenState&, float) const
 
 void NQueens::OpenGLDraw(const NQueenState&, const NQueenAction&) const
 {
-	return 0;
+	return;
 }

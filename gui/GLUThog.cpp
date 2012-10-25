@@ -19,7 +19,6 @@
  */
 
 
-#include <glut.h>
 #include "Trackball.h"
 #include "Common.h"
 #include "GLUThog.h"
@@ -70,8 +69,8 @@ void RunHOGGUI(int argc, char** argv)
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(700, 700);
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(1000, 1000);
 	glutCreateWindow("Map Abstraction");
 	glutReshapeFunc(resizeWindow);
 	glutDisplayFunc(renderScene);
@@ -407,6 +406,10 @@ void renderScene(void)
 void resizeWindow(int x, int y)
 {
 	CGRect rect;
+	while (0 != x%4)
+		x++;
+	while (0 != y%4)
+		y++;
 	rect.size.width = x;
 	rect.size.height = y;
 	rect.origin.x = 0;

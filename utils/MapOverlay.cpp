@@ -19,6 +19,21 @@ MapOverlay::MapOverlay(Map *_m)
 	displayList = 0;
 }
 
+void MapOverlay::Clear()
+{
+	if (displayList)
+	{
+		glDeleteLists(displayList, 1);
+		displayList = 0;
+	}
+	
+	for (unsigned int x = 0; x < values.size(); x++)
+		values[x] = ignoreVal;
+
+	maxVal = DBL_MIN;
+	minVal = DBL_MAX;
+}
+
 void MapOverlay::resetValues()
 {
 	if (displayList)

@@ -316,25 +316,50 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
-	if (1)
+	uint64_t totNodes = 0;
+	for (int x = 0; x < 362880; x++)
 	{
 		BFS<MNPuzzleState, slideDir> bfs;
 		DFS<MNPuzzleState, slideDir> dfs;
 		DFID<MNPuzzleState, slideDir> dfid2;
 		IDAStar<MNPuzzleState, slideDir> ida;
-//		MNPuzzle mnae33(3, 3);
+		MNPuzzle mnae33(3, 3);
 //		MNPuzzle mnae34(3, 4);
-		MNPuzzle mnae55(5, 5);
-//		MNPuzzleState mnps33(3, 3);
+//		MNPuzzle mnae55(5, 5);
+		MNPuzzleState mnps33(3, 3);
+		MNPuzzleState mnps33g(3, 3);
+//		for (unsigned int x = 0; x < mnps33g.puzzle.size(); x++)
+//			if (mnps33g.puzzle[x] != 0)
+//				mnps33g.puzzle[x] = 1+(14-mnps33g.puzzle[x])%8;
+
+		mnae33.GetStateFromHash(mnps33, x);
+		if (mnae33.GetParity(mnps33) != mnae33.GetParity(mnps33g))
+			continue;
+		
 //		MNPuzzleState mnps34(3, 4);
 		std::vector<MNPuzzleState> s;
 		std::vector<slideDir> s2;
 
-		//		dfid2.GetPath(&mnae33, mnps33, mnps33, s2);
+//		dfid2.GetPath(&mnae33, mnps33, mnps33, s2);
 //		dfid2.GetPath(&mnae34, mnps34, mnps34, s2);
 //		bfs.GetPath(&mnae33, mnps33, mnps33, s);
 //		bfs.GetPath(&mnae34, mnps34, mnps34, s);
+
+		std::cout << mnps33 << " to " << mnps33g << std::endl;
+		ida.GetPath(&mnae33, mnps33, mnps33g, s2);
+		printf("%d: %lld nodes expanded\n", x, ida.GetNodesExpanded());
+		totNodes += ida.GetNodesExpanded();
+//		for (unsigned int x = 0; x < s.size(); x++)
+//			std::cout << s[x] << std::endl;
+		
+//		std::cout << mnps33 << std::endl << mnps33g << std::endl;
+//		ida.GetPath(&mnae33, mnps33g, mnps33, s);
+//		printf("%lld nodes expanded\n", ida.GetNodesExpanded());
+//		for (unsigned int x = 0; x < s.size(); x++)
+//			std::cout << s[x] << std::endl;
 	}
+	printf("%llu total nodes\n", totNodes);
+	exit(0);
 	
 	if (0)
 	{

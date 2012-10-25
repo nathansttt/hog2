@@ -59,6 +59,7 @@
 // project includes ---------------------------------------------------------
 
 #include "HID_Utilities_Internal.h"
+#include "HID_Error_Handler.h"
 
 // globals (internal/private) -----------------------------------------------
 
@@ -73,7 +74,7 @@
 
 // central error reporting
 
-void HIDReportErrorNum (char * strError, long numError)
+void HIDReportErrorNum (const char * strError, long numError)
 {
 	char errMsgCStr [256];
 	
@@ -91,7 +92,7 @@ void HIDReportErrorNum (char * strError, long numError)
 
 // -------------------------------------
 
-void HIDReportError (char * strError)
+void HIDReportError (const char * strError)
 {
 	char errMsgCStr [256];
 
