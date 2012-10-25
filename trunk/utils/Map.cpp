@@ -2628,8 +2628,15 @@ void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)
         map->SetTerrainType(0, x, width-1, x, kOutOfBounds);
         // then punch a bunch of holes in it
         for (int y = 0; y < width; y += roomSize)
-            if ((random()%100) < openingProbability) // chance of creating hole
-                map->SetTerrainType(y+1+rand()%(roomSize-1), x, kGround);
+		{
+			if ((random()%100) < openingProbability) // chance of creating hole
+			{
+				for (int z = 0; z < roomSize/8; z++)
+				{
+					map->SetTerrainType(y+1+random()%(roomSize-1), x, kGround);
+				}
+			}
+		}
     }
     for (int x = 0; x < width; x += roomSize)
     {
@@ -2637,8 +2644,15 @@ void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)
         map->SetTerrainType(x, 0, x, height-1, kOutOfBounds);
         // then punch a bunch of holes in it
         for (int y = 0; y < height; y += roomSize)
-            if ((random()%100) < openingProbability) // chance of creating hole
-                map->SetTerrainType(x, y+1+rand()%(roomSize-1), kGround);
+		{
+			if ((random()%100) < openingProbability) // chance of creating hole
+			{
+				for (int z = 0; z < roomSize/8; z++)
+				{
+					map->SetTerrainType(x, y+1+random()%(roomSize-1), kGround);
+				}
+			}
+		}
     }
 }
 

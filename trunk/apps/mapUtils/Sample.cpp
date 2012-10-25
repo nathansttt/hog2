@@ -324,7 +324,7 @@ void buildProblemSet()
 	ge->SetDirected(true);
 	
 	std::vector<std::vector<Experiment> > experiments;
-	for (unsigned int x = 0; x < 100000; x++)
+	for (unsigned int x = 0; x < 400000; x++)
 	{
 		if (0==x%100)
 		{ printf("\r%d", x); fflush(stdout); }
@@ -358,9 +358,9 @@ void buildProblemSet()
 		}
 		if (done) break;
 	}
-	for (unsigned int x = 1; x < experiments.size(); x++)
+	for (unsigned int x = 0; x < experiments.size(); x++)
 	{
-		if (experiments[x].size() != 10)
+		if (x > experiments.size()/10 && experiments[x].size() != 10)
 			break;
 		for (unsigned int y = 0; y < experiments[x].size(); y++)
 			s.AddExperiment(experiments[x][y]);
@@ -1157,15 +1157,17 @@ int LabelConnectedComponents(Graph *g)
 
 void MeasureHighwayDimension(Map *m, int depth)
 {
+	Timer t;
+	t.StartTimer();
 	srandom(10);
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	GraphEnvironment ge(g);
 	ge.SetDirected(true);
 	std::vector<graphState> endPath;
-	
+	ge.SetDirected(true);
 	for (int x = 0; x < g->GetNumNodes(); x++)
 		g->GetNode(x)->SetLabelL(GraphSearchConstants::kTemporaryLabel, 0);
-	
+	srandom(t.EndTimer()*1000000 + time(0));
 	// 1. choose a random point
 	node *n = g->GetRandomNode();
 	
@@ -1173,7 +1175,7 @@ void MeasureHighwayDimension(Map *m, int depth)
 	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
 	theSearch.SetStopAfterGoal(false);
 	theSearch.InitializeSearch(&ge, n->GetNum(), n->GetNum(), endPath);
-	while (1)
+	while (theSearch.GetNumOpenItems() > 0)
 	{
 		double gCost;
 		graphState s = theSearch.CheckNextNode();
@@ -1192,7 +1194,7 @@ void MeasureHighwayDimension(Map *m, int depth)
 	}
 
 	// 4. continue search to depth 4d (all g-costs >= 4d)
-	while (1)
+	while (theSearch.GetNumOpenItems() > 0)
 	{
 		double gCost;
 		graphState s = theSearch.CheckNextNode();
@@ -1232,9 +1234,13 @@ void EstimateDimension(Map *m)
 //	GraphEnvironment ge(g);
 //	std::vector<graphState> endPath;
 //	node *n = g->GetRandomNode();
+	Timer t;
+	t.StartTimer();
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	GraphEnvironment ge(g);
+	ge.SetDirected(true);
 	std::vector<graphState> endPath;
+	srandom(t.EndTimer()*10000000 + time(0));
 	
 	// 1. choose a random point
 	node *n = g->GetRandomNode();
@@ -1244,10 +1250,13 @@ void EstimateDimension(Map *m)
 	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
 	theSearch.SetStopAfterGoal(false);
 	theSearch.InitializeSearch(&ge, n->GetNum(), n->GetNum(), endPath);
-	while (1)
+	while (theSearch.GetNumOpenItems() > 0)
 	{
-		double gCost;
+		double gCost = -1;
+
 		graphState s = theSearch.CheckNextNode();
+		if (theSearch.DoSingleSearchStep(endPath))
+			break;
 		theSearch.GetClosedListGCost(s, gCost);
 		//printf("Expanding g-cost %f next\n", gCost);
 		if (gCost >= limit)
@@ -1256,8 +1265,7 @@ void EstimateDimension(Map *m)
 			limit++;
 		}
 
-		if (theSearch.DoSingleSearchStep(endPath))
-			break;
+		//printf("%d items on open [%1.1f/%1.1f]\n", theSearch.GetNumOpenItems(), gCost, limit);
 	}	
 	graphState start = n->GetNum();
 	BFS<graphState, graphMove> b;
@@ -1325,8 +1333,6 @@ double FindFarDist(Graph *g, node *n, graphState &from, graphState &to)
 	return gCost;
 }
 
-
-
 void testHeuristic(char *problems)
 {
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
@@ -1346,7 +1352,8 @@ void testHeuristic(char *problems)
 			b.y = s.GetNthExperiment(x).GetGoalY();
 			searcher.GetPath(&e, a, b, path);
 			double len = e.GetPathLength(path);
-			printf("Opt: %f (%f) heur: %f ratio: %f nodes: %d\n", s.GetNthExperiment(x).GetDistance(), len, e.HCost(a, b),
+			printf("%s Opt: %f (%f) heur: %f ratio: %f nodes: %d\n", s.GetNthExperiment(0).GetMapName(),
+				   s.GetNthExperiment(x).GetDistance(), len, e.HCost(a, b),
 				   e.HCost(a, b)/s.GetNthExperiment(x).GetDistance(), searcher.GetNodesExpanded());
 		}
 	}
