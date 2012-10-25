@@ -572,6 +572,23 @@ typedef double		GLclampd;	/* double precision float in [0,1] */
 #define GL_BGR                            0x80E0
 #define GL_BGRA                           0x80E1
 
+	/* texture_edge_clamp */
+#define GL_CLAMP_TO_EDGE                  0x812F
+#define GL_CLAMP_TO_BORDER                0x812D
+
+	/* DataType */
+#define GL_BYTE                           0x1400
+#define GL_UNSIGNED_BYTE                  0x1401
+#define GL_SHORT                          0x1402
+#define GL_UNSIGNED_SHORT                 0x1403
+#define GL_INT                            0x1404
+#define GL_UNSIGNED_INT                   0x1405
+#define GL_FLOAT                          0x1406
+#define GL_2_BYTES                        0x1407
+#define GL_3_BYTES                        0x1408
+#define GL_4_BYTES                        0x1409
+#define GL_DOUBLE                         0x140A
+
 void glBegin ( GLenum mode ) ;
 void glCallList ( GLuint list ) ;
 void glColor4f ( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha ) ;
@@ -637,6 +654,10 @@ void glColor3ub(GLubyte red, GLubyte green, GLubyte blue);
 void glNormal3d(GLdouble nx, GLdouble ny, GLdouble nz);
 void glVertex2d(GLdouble x, GLdouble y);
 void glOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
+
+void glTexImage1D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+void glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+void glTexImage3D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
 
 }
 #endif
