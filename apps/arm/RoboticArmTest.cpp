@@ -679,18 +679,18 @@ void TestArms2(bool h)
 		std::cout << "Searching " << starts[x] << " to " << goals[x] << std::endl;
 		astar.InitializeSearch(r, starts[x], goals[x], ourPath);
 		
-		Timer t;
-		t.StartTimer();
+		Timer tmr;
+		tmr.StartTimer();
 		int cnt = 1;
 		while (!astar.DoSingleSearchStep(ourPath))
 
-		{ if (((++cnt%100) == 0) && (t.EndTimer() > 300)) break; }
+		{ if (((++cnt%100) == 0) && (tmr.EndTimer() > 300)) break; }
 
-		t.EndTimer();
+		tmr.EndTimer();
 //		totalHvalue += r->HCost(starts[x], goals[x]);
 //		totalNodes += astar.GetNodesExpanded();
 		printf("%d\t%lld\t%lld\t%f\t%f\t%1.0f\n", x, astar.GetNodesExpanded(), astar.GetUniqueNodesExpanded(),
-			   t.GetElapsedTime(), r->HCost(starts[x], goals[x]), r->GetPathLength(ourPath));
+			   tmr.GetElapsedTime(), r->HCost(starts[x], goals[x]), r->GetPathLength(ourPath));
 	}
 	
 }

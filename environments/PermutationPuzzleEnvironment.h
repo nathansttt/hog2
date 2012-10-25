@@ -291,7 +291,7 @@ void PermutationPuzzleEnvironment<state, action>::Load_Regular_PDB(const char *f
 			printf("%d:\t%d\n", x, values[x]);
 	}
 
-	StoreGoal(goal);
+	this->StoreGoal(goal);
 }
 
 template <class state, class action>
@@ -352,7 +352,7 @@ void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start
 		state next = q.front();
 		q.pop_front();
 		children.clear();
-		GetSuccessors(next, children);
+		this->GetSuccessors(next, children);
 		for (unsigned int x = 0; x < children.size(); x++)
 		{
 			if (DB[GetPDBHash(children[x], distinct)] == 255)
