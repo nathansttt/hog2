@@ -65,3 +65,7 @@ void glColor3ub(GLubyte red, GLubyte green, GLubyte blue) { }
 void glNormal3d(GLdouble nx, GLdouble ny, GLdouble nz) { }
 void glVertex2d(GLdouble x, GLdouble y) { }
 void glOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar) { }
+
+void glTexImage1D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels) { }
+void glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) { }
+void glTexImage3D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels) { }
