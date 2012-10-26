@@ -167,8 +167,7 @@ int GeneralBulb<state, action, environment>::GetPath(environment *env, state fro
 		beam_position start_position;
 		start_position.beam_num = 0;
 		start_position.beam_pos = 0;
-		//Add_To_Beam_Hash(start_node, start_position, nodes_in_beam);
-		assert(false); // code not working here
+		this->Add_To_Beam_Hash(start_node, start_position, nodes_in_beam);
 	}
 
 	unsigned discrepancies = initial_discrepancies;
@@ -204,8 +203,7 @@ int GeneralBulb<state, action, environment>::GetPath(environment *env, state fro
 	}
 
 	if(status == 1) {
-		//extract_goal(path);
-		assert(false); // code not working here
+		this->extract_goal(path);
 	}
 
 	clear_memory_footprint();
@@ -269,8 +267,7 @@ int GeneralBulb<state, action, environment>::BulbProbe(environment *env, unsigne
 			for(unsigned i = 0; i < slice.size(); i++) {
 				position.beam_num = beams.size();
 				position.beam_pos = i;
-				//Add_To_Beam_Hash(slice[i], position, nodes_in_beam);
-				assert(false); // code not working here
+				this->Add_To_Beam_Hash(slice[i], position, nodes_in_beam);
 			}
 		}
 
