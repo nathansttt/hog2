@@ -746,7 +746,7 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading& l, const deltaSp
 }
 
 
-void Directional2DEnvironment::GetNextState(xySpeedHeading &, deltaSpeedHeading , xySpeedHeading &) const
+void Directional2DEnvironment::GetNextState(const xySpeedHeading &, deltaSpeedHeading , xySpeedHeading &) const
 {
 	assert(false);
 }

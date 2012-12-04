@@ -456,7 +456,7 @@ void RoboticArm::DrawLine(line2d l) const
 	glLineWidth(1);
 }
 
-void RoboticArm::GetNextState(armAngles &currents, armRotations dir, armAngles &news) const
+void RoboticArm::GetNextState(const armAngles &currents, armRotations dir, armAngles &news) const
 {
 	news = currents;
 	ApplyAction(news, dir);

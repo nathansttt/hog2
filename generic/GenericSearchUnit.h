@@ -199,31 +199,43 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *theEnv, 
 }
 
 template <class state, class action, class environment>
-void GenericSearchUnit<state,action,environment>::OpenGLDraw(const environment *theEnv, const SimulationInfo<state,action,environment> *) const
+void GenericSearchUnit<state,action,environment>::OpenGLDraw(const environment *theEnv, const SimulationInfo<state,action,environment> *si) const
 {
 	// Draw current + goal states as states. May need to find something
 	// different for the goal
-		
-	if (loc == goal)
+	//printf("Drawing %p at \n", this);
 	{
-		theEnv->OpenGLDraw(loc/*, 0, 0, 0*/);
-	}
-	else
-	{	
+		PublicUnitInfo<state, action, environment> i;
+		si->GetPublicUnitInfo(si->GetCurrentUnit(), i);
+		
 		GLfloat _r,_g,_b;
 		this->GetColor(_r,_g,_b);
-		//env->OpenGLDraw(lastLoc, loc, _r, _g, _b);	
-		theEnv->OpenGLDraw(goal/*, _r, _g, _b*/);
+		theEnv->SetColor(_r, _g, _b);
+
+		if (fgreater(si->GetSimulationTime(), i.nextTime))
+			theEnv->OpenGLDraw(i.currentState);
+		else
+			theEnv->OpenGLDraw(i.lastState, i.currentState,
+							   (si->GetSimulationTime()-i.lastTime)/(i.nextTime-i.lastTime));
+		theEnv->SetColor(1.0, 0.25, 0.25, 0.25);
+
+		//algorithm->OpenGLDraw();
+
+		theEnv->SetColor(_r, _g, _b, 0.5);
+		theEnv->OpenGLDraw(goal);
 	}
-	state current = loc; 
+
+	state current = loc;
 	state next;
 	
 	// Draw the cached moves
   	for(unsigned int i=0; i<moves.size(); i++)
  	{
- 		theEnv->OpenGLDraw(current, moves[i]/*,1.0,0,0*/); // draw in red
- 		theEnv->GetNextState(current, moves[i], next);
- 		current = next;
+		theEnv->SetColor(1.0, 0.0, 0.0, 0.5);
+ 		theEnv->OpenGLDraw(current);
+ 		//theEnv->OpenGLDraw(current, moves[i]/*,1.0,0,0*/); // draw in red
+ 		//theEnv->GetNextState(current, moves[i], next);
+		theEnv->ApplyAction(current, moves[i]);
  	}
  	
 }

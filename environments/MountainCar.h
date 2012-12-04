@@ -37,7 +37,7 @@ public:
 	virtual MountainCarAction GetAction(const MountainCarState &s1, const MountainCarState &s2) const;
 	virtual void ApplyAction(MountainCarState &s, MountainCarAction a) const;
 	
-	virtual void GetNextState(MountainCarState &, MountainCarAction , MountainCarState &) const;
+	virtual void GetNextState(const MountainCarState &, MountainCarAction , MountainCarState &) const;
 	
 	virtual bool InvertAction(MountainCarAction &a) const;	
 	

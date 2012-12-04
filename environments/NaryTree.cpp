@@ -45,7 +45,7 @@ void NaryTree::ApplyAction(NaryState &s, NaryAction a) const
 	}
 }
 
-void NaryTree::GetNextState(NaryState &s1, NaryAction a, NaryState &s2) const
+void NaryTree::GetNextState(const NaryState &s1, NaryAction a, NaryState &s2) const
 {
 	if (a > 0)
 		s2 = s1*b+a;

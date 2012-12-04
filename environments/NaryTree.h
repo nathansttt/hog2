@@ -27,7 +27,7 @@ public:
 	virtual NaryAction GetAction(const NaryState &s1, const NaryState &s2) const;
 	virtual void ApplyAction(NaryState &s, NaryAction a) const;
 	
-	virtual void GetNextState(NaryState &, NaryAction , NaryState &) const;
+	virtual void GetNextState(const NaryState &, NaryAction , NaryState &) const;
 	
 	virtual bool InvertAction(NaryAction &a) const;	
 	

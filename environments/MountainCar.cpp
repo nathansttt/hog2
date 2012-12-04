@@ -84,7 +84,7 @@ double MountainCarEnvironment::GetSlope(double queryPosition) const
 }
 
 
-void MountainCarEnvironment::GetNextState(MountainCarState &s1, MountainCarAction a, MountainCarState &s2) const
+void MountainCarEnvironment::GetNextState(const MountainCarState &s1, MountainCarAction a, MountainCarState &s2) const
 {
 	s2 = s1;
 	ApplyAction(s2, a);

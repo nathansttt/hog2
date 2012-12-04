@@ -47,7 +47,7 @@ public:
 	virtual void OpenGLDraw(const recVec &, const line2d &) const;
 	virtual void OpenGLDraw(const recVec&, const recVec&, float) const {}
 
-	virtual void GetNextState(recVec &currents, line2d dir, recVec &news) const;
+	virtual void GetNextState(const recVec &currents, line2d dir, recVec &news) const;
 
 	void StoreGoal(recVec &g) { goal = g; goal_stored = true;} // stores the locations for the given goal state
 	void ClearGoal() {goal_stored = false;}

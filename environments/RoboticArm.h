@@ -128,7 +128,7 @@ public:
 //	virtual void OpenGLDraw(const armAngles &, const armRotations &, GLfloat r, GLfloat g, GLfloat b) const;
 //	virtual void OpenGLDraw(const armAngles &l, GLfloat r, GLfloat g, GLfloat b) const;
 
-	virtual void GetNextState(armAngles &currents, armRotations dir, armAngles &news) const;
+	virtual void GetNextState(const armAngles &currents, armRotations dir, armAngles &news) const;
 
 	bool LegalState(armAngles &a) const;
 	bool LegalArmConfig(armAngles &a) const;

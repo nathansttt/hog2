@@ -51,7 +51,7 @@ void SequenceAlignment::ApplyAction(SequenceAlignmentState &s, SequenceAlignment
 }
 
 
-void SequenceAlignment::GetNextState(SequenceAlignmentState &s1, SequenceAlignmentAction a, SequenceAlignmentState &s2) const
+void SequenceAlignment::GetNextState(const SequenceAlignmentState &s1, SequenceAlignmentAction a, SequenceAlignmentState &s2) const
 {
 	s2 = s1;
 	ApplyAction(s2, a);
