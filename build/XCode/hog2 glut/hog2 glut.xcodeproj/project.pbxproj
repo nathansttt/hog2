@@ -1180,7 +1180,7 @@
 		C447F5481467909200D6D581 /* Sample.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C447F5491467909200D6D581 /* Sample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		C447F5C2146790A600D6D581 /* Supervised Learning.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Supervised Learning.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C447F5C4146790A700D6D581 /* MAPF copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "MAPF copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/MAPF copy-Info.plist"; sourceTree = "<absolute>"; };
+		C447F5C4146790A700D6D581 /* MAPF copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MAPF copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C447F5C7146843A600D6D581 /* NN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NN.cpp; path = ../../games/utils/NN.cpp; sourceTree = "<group>"; };
 		C447F5C8146843A600D6D581 /* NN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NN.h; path = ../../games/utils/NN.h; sourceTree = "<group>"; };
 		C454CD7A14FD78BB005DDC8E /* MPLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPLRTAStar.h; sourceTree = "<group>"; };
@@ -1192,7 +1192,7 @@
 		C498D8DC1444F0550053D322 /* BitMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BitMap.cpp; sourceTree = "<group>"; };
 		C498D8DD1444F0550053D322 /* BitMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BitMap.h; sourceTree = "<group>"; };
 		C49A6FE31499BF41007CEDA2 /* fLRTA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fLRTA.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C49A6FE61499BF42007CEDA2 /* mapUtils copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "mapUtils copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/mapUtils copy-Info.plist"; sourceTree = "<absolute>"; };
+		C49A6FE61499BF42007CEDA2 /* mapUtils copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mapUtils copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C49A6FFE1499BFCF007CEDA2 /* LocalSensingUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LocalSensingUnit.cpp; sourceTree = "<group>"; };
 		C49A6FFF1499BFCF007CEDA2 /* LocalSensingUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalSensingUnit.h; sourceTree = "<group>"; };
 		C49A70001499BFCF007CEDA2 /* RIBS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RIBS.cpp; sourceTree = "<group>"; };
@@ -1213,7 +1213,7 @@
 		C4B9740A1426FADE00758D0D /* NQueens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NQueens.cpp; sourceTree = "<group>"; };
 		C4B9740B1426FADE00758D0D /* NQueens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NQueens.h; sourceTree = "<group>"; };
 		C4D60ACB14B22E10007594CD /* puzzleSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = puzzleSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4D60ACE14B22E10007594CD /* mapUtils copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "mapUtils copy2-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/mapUtils copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C4D60ACE14B22E10007594CD /* mapUtils copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mapUtils copy2-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4D60AD014B22E4A007594CD /* PuzzleSample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PuzzleSample.cpp; sourceTree = "<group>"; };
 		C4D60AD114B22E4A007594CD /* PuzzleSample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PuzzleSample.h; sourceTree = "<group>"; };
 		C4E11C2214C5439000028081 /* BucketOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BucketOpenClosed.h; sourceTree = "<group>"; };
@@ -1227,7 +1227,7 @@
 		C4EE61091651BB8300B038E5 /* Sample.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C4EE610A1651BB8300B038E5 /* Sample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		C4EE617B1651BB9A00B038E5 /* emotion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = emotion.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4EE617D1651BB9A00B038E5 /* emotion-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "emotion-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/emotion-Info.plist"; sourceTree = "<absolute>"; };
+		C4EE617D1651BB9A00B038E5 /* emotion-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "emotion-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4F526C014AA79BE00025B71 /* PEAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEAStar.h; sourceTree = "<group>"; };
 		C4F91A3F152F920E007E11DC /* GridLSSLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GridLSSLRTAStar.h; sourceTree = "<group>"; };
 		C4F9F32F13E4FCF70077C5A5 /* 3d maps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "3d maps.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1460,7 +1460,7 @@
 		C4F9F4E013E500100077C5A5 /* SpreadPRAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SpreadPRAStar.cpp; sourceTree = "<group>"; };
 		C4F9F4E113E500100077C5A5 /* SpreadPRAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpreadPRAStar.h; sourceTree = "<group>"; };
 		C4FBC8AA16374C89003C667D /* mapUtils copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "mapUtils copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4FBC8AC16374C8A003C667D /* mapUtils copy3-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "mapUtils copy3-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/mapUtils copy3-Info.plist"; sourceTree = "<absolute>"; };
+		C4FBC8AC16374C8A003C667D /* mapUtils copy3-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mapUtils copy3-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4FBC8AF16375341003C667D /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C4FBC8B016375341003C667D /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
