@@ -40,7 +40,7 @@ void NQueens::ApplyAction(NQueenState &s, NQueenAction a) const
 	s.locs[a.loc] = a.value;
 }
 
-void NQueens::GetNextState(NQueenState &s, NQueenAction a, NQueenState &s2) const
+void NQueens::GetNextState(const NQueenState &s, NQueenAction a, NQueenState &s2) const
 {
 	s2 = s;
 	ApplyAction(s2, a);

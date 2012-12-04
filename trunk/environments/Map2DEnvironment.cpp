@@ -690,7 +690,7 @@ void MapEnvironment::GLLabelState(const xyLoc &s, const char *str) const
 //	glEnd();
 //}
 
-void MapEnvironment::GetNextState(xyLoc &currents, tDirection dir, xyLoc &news) const
+void MapEnvironment::GetNextState(const xyLoc &currents, tDirection dir, xyLoc &news) const
  {
 	news = currents;
  	switch (dir)

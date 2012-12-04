@@ -97,7 +97,7 @@ public:
 	virtual tAgentAction GetAction(const MNAgentPuzzleState &s1, const MNAgentPuzzleState &s2) const;
 	virtual void ApplyAction(MNAgentPuzzleState &s, tAgentAction a) const;
 	
-	virtual void GetNextState(MNAgentPuzzleState &, tAgentAction , MNAgentPuzzleState &) const;
+	virtual void GetNextState(const MNAgentPuzzleState &, tAgentAction , MNAgentPuzzleState &) const;
 	
 	virtual bool InvertAction(tAgentAction &a) const;	
 	

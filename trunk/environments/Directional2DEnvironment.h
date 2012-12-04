@@ -142,7 +142,7 @@ public:
 	virtual void OpenGLDraw(const xySpeedHeading &, const deltaSpeedHeading &) const;
 	Map* GetMap() { return map; }
 	void SetHeuristicType(heuristicType theType) { hType = theType; }
-	virtual void GetNextState(xySpeedHeading &currents, deltaSpeedHeading dir, xySpeedHeading &news) const;	
+	virtual void GetNextState(const xySpeedHeading &currents, deltaSpeedHeading dir, xySpeedHeading &news) const;
 private:
 	bool Legal(const xySpeedHeading &node1, const deltaSpeedHeading &act) const;
 

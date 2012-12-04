@@ -299,7 +299,8 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	neighborID.resize(0);
 	neighborLoc.resize(0);
 	
-	//std::cout << "Expanding: " << openClosedList.Lookup(nodeid).data << std::endl;
+	std::cout << "Expanding: " << openClosedList.Lookup(nodeid).data << " with f:";
+	std::cout << openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h << std::endl;
 	
  	env->GetSuccessors(openClosedList.Lookup(nodeid).data, neighbors);
 	double bestH = 0;

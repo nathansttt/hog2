@@ -89,7 +89,7 @@ void MNAgentEnvironment::ApplyAction(MNAgentPuzzleState &s, tAgentAction a) cons
 	s.currentAgent = (s.currentAgent+1)%s.numAgents;
 }
 
-void MNAgentEnvironment::GetNextState(MNAgentPuzzleState &s1, tAgentAction a, MNAgentPuzzleState &s2) const
+void MNAgentEnvironment::GetNextState(const MNAgentPuzzleState &s1, tAgentAction a, MNAgentPuzzleState &s2) const
 {
 	s2 = s1;
 	ApplyAction(s2, a);

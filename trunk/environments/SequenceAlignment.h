@@ -27,7 +27,7 @@ public:
 	virtual SequenceAlignmentAction GetAction(const SequenceAlignmentState &s1, const SequenceAlignmentState &s2) const;
 	virtual void ApplyAction(SequenceAlignmentState &s, SequenceAlignmentAction a) const;
 	
-	virtual void GetNextState(SequenceAlignmentState &, SequenceAlignmentAction , SequenceAlignmentState &) const;
+	virtual void GetNextState(const SequenceAlignmentState &, SequenceAlignmentAction , SequenceAlignmentState &) const;
 	
 	virtual bool InvertAction(SequenceAlignmentAction &a) const;	
 	

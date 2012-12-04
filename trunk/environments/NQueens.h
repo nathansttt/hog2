@@ -56,7 +56,7 @@ public:
 	virtual NQueenAction GetAction(const NQueenState &s1, const NQueenState &s2) const;
 	virtual void ApplyAction(NQueenState &s, NQueenAction a) const;
 	
-	virtual void GetNextState(NQueenState &, NQueenAction , NQueenState &) const;
+	virtual void GetNextState(const NQueenState &, NQueenAction , NQueenState &) const;
 	
 	virtual bool InvertAction(NQueenAction &a) const { return false; }
 	

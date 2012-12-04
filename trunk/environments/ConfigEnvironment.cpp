@@ -203,7 +203,7 @@ void ConfigEnvironment::OpenGLDraw(const recVec &, const line2d &) const
 //}
 
 
-void ConfigEnvironment::GetNextState(recVec &, line2d dir, recVec &news) const
+void ConfigEnvironment::GetNextState(const recVec &, line2d dir, recVec &news) const
 {
 	news = dir.end;
 }

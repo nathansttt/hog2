@@ -123,7 +123,7 @@ public:
 	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;
 	Map* GetMap() const { return map; }
 
-	virtual void GetNextState(xyLoc &currents, tDirection dir, xyLoc &news) const;
+	virtual void GetNextState(const xyLoc &currents, tDirection dir, xyLoc &news) const;
 
 	void StoreGoal(xyLoc &) {} // stores the locations for the given goal state
 	void ClearGoal() {}
