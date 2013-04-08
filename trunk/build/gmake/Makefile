@@ -36,6 +36,7 @@ PROJECTS = \
   apps/dragonage \
   apps/mapUtils \
   apps/prediction \
+  apps/emotion \
   apps/sfbds \
   apps/3dmaps \
 #  simulation \

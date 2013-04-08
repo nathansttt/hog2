@@ -59,6 +59,11 @@
 			<key>orderHint</key>
 			<integer>8</integer>
 		</dict>
+		<key>rubik.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>11</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
@@ -68,6 +73,11 @@
 			<true/>
 		</dict>
 		<key>C447F54A146790A600D6D581</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C46735741710D9EF00E2A10B</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -35,9 +35,16 @@
 #include "FlipSide.h"
 #include "IDAStar.h"
 #include "Timer.h"
+#include "RubiksCubeEdges.h"
+#include "RubiksCubeCorners.h"
 
 static FlipSideState fss(5);
 static FlipSide fs(5);
+
+RubiksCorner rk_c;
+RubikEdge rk_e;
+RubiksCornerState rk_sc;
+RubikEdgeState rk_se;
 
 bool mouseTracking;
 int px1, py1, px2, py2;
@@ -112,14 +119,19 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		CreateSimulation(windowID);
+		SetNumPorts(windowID, 1);
 	}
 }
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-		if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
-			return;
+	if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
+		return;
 
+	rk_e.OpenGLDraw(rk_se);
+	rk_c.OpenGLDraw(rk_sc);
+	return;
+	
 	if (viewport == 0)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
@@ -139,77 +151,6 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->GetUnit(viewport)->OpenGLDraw(unitSims[windowID]->GetEnvironment(),
 														  unitSims[windowID]->GetSimulationInfo() );
 	}
-	//unitSims[windowID]->OpenGLDraw(windowID);
-	
-//	if (viewport == 0)
-//	{
-//		if (plot)
-//		{
-//			if (distLine && cameraTarget)
-//			{
-//				MapAbstraction *ma = unitSim->GetMapAbstraction();
-//				int x, y;
-//				cameraTarget->getLocation(x, y);
-//				node *n1 = ma->GetNodeFromMap(x, y);
-//				cameraTarget->GetGoal()->getLocation(x, y);
-//				node *n2 = ma->GetNodeFromMap(x, y);
-//				distLine->AddPoint(ma->h(n1, n2));
-//			}
-//			plot->OpenGLDraw();
-//			return;
-//		}
-//	}
-//	
-//	unitSim->OpenGLDraw();
-//	switch (viewport%3)
-//	{
-//		case 0: //unitSim->GetMap()->OpenGLDraw(kLines); break;
-//		case 1: //unitSim->GetMap()->OpenGLDraw(kPoints); break;
-//		case 2: unitSim->GetMap()->OpenGLDraw(kPolygons); break;
-//	}
-//	if ((mouseTracking) && (px1 != -1) && (px2 != -1) && (py1 != -1) && (py2 != -1))
-//	{
-//		glColor3f(1.0, 1.0, 1.0);
-//		GLdouble x1, y1, z1, rad;
-//		glBegin(GL_LINES);
-//		unitSim->GetMap()->GetOpenGLCoord(px1, py1, x1, y1, z1, rad);
-//		glVertex3f(x1, y1, z1-rad);
-//		unitSim->GetMap()->GetOpenGLCoord(px2, py2, x1, y1, z1, rad);
-//		glVertex3f(x1, y1, z1-rad);
-//		glEnd();
-//	}
-//	
-//	if (viewport != 0)
-//		return;
-//	
-//	char tempStr[255];
-//	sprintf(tempStr, "Simulation time elapsed: %1.2f, Display Time: %1.2f",
-//					unitSim->getSimulationTime(), unitSim->getDisplayTime());
-//	submitTextToBuffer(tempStr);
-//	
-//	if (cameraTarget)
-//	{
-//		GLdouble x, y, z, r;
-//		GLdouble xx, yy, zz;
-//		cameraTarget->getOpenGLLocation(unitSim->GetMap(), x, y, z, r);
-//		if (cameraTarget->GetGoal())
-//			cameraTarget->GetGoal()->getOpenGLLocation(unitSim->GetMap(), xx, yy, zz, r);
-//		else {
-//			xx = -x; 
-//			yy = -y;
-//		}
-//		
-//		int oldPort = GetActivePort(windowID);
-//		SetActivePort(windowID, 1);
-//		cameraMoveTo(xx+3*(xx-x), yy+3*(yy-y), z-0.25, 0.05);
-//		cameraLookAt(x, y, z, .2);
-//		SetActivePort(windowID, oldPort);
-//
-////		SetActivePort(windowID, 0);
-////		cameraMoveTo(x, y, z-250*r, 0.05);
-////		cameraLookAt(x, y, z, .2);
-////		SetActivePort(windowID, oldPort);
-//	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -224,6 +165,33 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case '0':
+		{
+			static int x = 0;
+			rk_e.ApplyAction(rk_se, (x/4)%18);
+			rk_c.ApplyAction(rk_sc, (x/4)%18);
+			x++;
+		}
+			break;
+		case '1':
+		{
+			static uint64_t x = 0;
+			rk_c.GetStateFromHash(x, rk_sc);
+			printf("%llu : %llu\n", x, rk_c.GetStateHash(rk_sc));
+			x+=12345;
+		}
+			break;
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			rk_e.ApplyAction(rk_se, key-'0'+9);
+			rk_c.ApplyAction(rk_sc, key-'0'+9);
+			break;
 		case '\t':
 			if (mod != kShiftDown)
 				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
@@ -232,7 +200,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
 			}
 			break;
-		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
+		case 'p':
+			rk_sc.Reset();
+			break;
 		case 'o':
 		{
 			if (!mnp) break;
@@ -298,6 +268,16 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
+	for (uint64_t x = 0; x < 1000000000; x++)
+	{
+		if (0 == x%100000)
+			printf("%d\n", x);
+		rk_e.GetStateFromHash(x, rk_se);
+		assert(x == rk_e.GetStateHash(rk_se));
+	}
+	
+	return;
+	
 	BFS<MNAgentPuzzleState, tAgentAction> bfs;
 	for (unsigned int x = 1; x < 9; x++)
 	{
@@ -316,6 +296,11 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
+	
+	static int t = 0;
+	rk_e.GetStateFromHash(t, rk_se);
+	t++;
+	return;
 	uint64_t totNodes = 0;
 	for (int x = 0; x < 362880; x++)
 	{

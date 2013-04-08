@@ -23,6 +23,7 @@ Map2DHeading::~Map2DHeading()
 
 void Map2DHeading::GetSuccessors(const xyhLoc &nodeID, std::vector<xyhLoc> &neighbors) const
 {
+	neighbors.resize(0);
 	xyhLoc tmp;
 	xyhAct act;
 	act.oldHeading = nodeID.h;
@@ -182,7 +183,7 @@ void Map2DHeading::OpenGLDraw() const
 	if (!drawWeights)
 		return;
 	xyhLoc l;
-	for (typename CostTable::const_iterator it = costs.begin(); it != costs.end(); it++)
+	for (CostTable::const_iterator it = costs.begin(); it != costs.end(); it++)
 	{
 		GetStateFromHash(it->first, l);
 		OpenGLDraw(l);

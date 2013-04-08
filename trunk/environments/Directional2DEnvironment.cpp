@@ -218,6 +218,13 @@ void Directional2DEnvironment::GetActions(const xySpeedHeading &loc, std::vector
 		}
 	}
 	else { assert(false); }
+	if (actions.size() == 0) // always have 1 action(?)
+	{
+		deltaSpeedHeading act;
+		act.speed = -loc.speed;
+		act.turn = 0;
+		actions.push_back(act);
+	}
 }
 
 deltaSpeedHeading Directional2DEnvironment::GetAction(const xySpeedHeading &one, const xySpeedHeading &two) const
