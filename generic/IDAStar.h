@@ -90,7 +90,7 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	while (thePath.size() == 0)
 	{
 		nodeTable.clear();
-//		printf("Starting iteration with bound %f\n", nextBound);
+		printf("Starting iteration with bound %f; %llu expanded\n", nextBound, nodesExpanded);
 		DoIteration(env, act[0], from, thePath, nextBound, 0, 0);
 	}
 }
@@ -181,10 +181,11 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 
 		double edgeCost = env->GCost(currState, actions[x]);
 		env->ApplyAction(currState, actions[x]);
-		env->InvertAction(actions[x]);
-		double childH = DoIteration(env, actions[x], currState, thePath, bound,
+		action a = actions[x];
+		env->InvertAction(a);
+		double childH = DoIteration(env, a, currState, thePath, bound,
 									g+edgeCost, maxH - edgeCost);
-		env->ApplyAction(currState, actions[x]);
+		env->UndoAction(currState, actions[x]);
 		if (fequal(childH, -1)) // found goal
 			return -1;
 

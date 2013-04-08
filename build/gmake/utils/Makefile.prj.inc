@@ -44,5 +44,6 @@ SRC_CPP = \
 	utils/StatUtil.cpp \
 	utils/Timer.cpp \
 	utils/SwapEndian.cpp \
-	utils/StringUtils.cpp
+	utils/StringUtils.cpp \
+	utils/FourBitArray.cpp \
 
