@@ -39,6 +39,7 @@ PROJECTS = \
   apps/emotion \
   apps/sfbds \
   apps/3dmaps \
+  apps/rubik \
 #  simulation \
 #  learning \
 #	apps/coprobber
@@ -77,6 +78,7 @@ PROJECTS_ALL = \
   apps/dragonage \
   apps/sfbds \
   apps/prediction \
+  apps/rubik \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice
