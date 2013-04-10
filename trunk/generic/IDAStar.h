@@ -91,6 +91,7 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	{
 		nodeTable.clear();
 		printf("Starting iteration with bound %f; %llu expanded\n", nextBound, nodesExpanded);
+		fflush(stdout);
 		DoIteration(env, act[0], from, thePath, nextBound, 0, 0);
 	}
 }
