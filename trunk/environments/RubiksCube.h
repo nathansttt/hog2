@@ -15,6 +15,7 @@
 #include "RubiksCubeCorners.h"
 #include "RubiksCubeEdges.h"
 #include "SearchEnvironment.h"
+#include "RubiksCube7Edges.h"
 #include "FourBitArray.h"
 
 class RubiksState
@@ -31,6 +32,7 @@ public:
 	}
 	RubiksCornerState corner;
 	RubikEdgeState edge;
+	Rubik7EdgeState edge7;
 };
 
 static bool operator==(const RubiksState &l1, const RubiksState &l2)
@@ -93,6 +95,7 @@ public:
 	
 	FourBitArray &GetCornerPDB() { return cornerPDB; }
 	FourBitArray &GetEdgePDB() { return edgePDB; }
+	FourBitArray &GetEdge7PDB() { return edge7PDB; }
 
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const RubiksState&) const;
@@ -103,8 +106,10 @@ private:
 	mutable std::vector<RubiksAction> history;
 	RubiksCorner c;
 	RubikEdge e;
+	Rubik7Edge e7;
 	FourBitArray cornerPDB;
 	FourBitArray edgePDB;
+	FourBitArray edge7PDB;
 	bool pruneSuccessors;
 };
 

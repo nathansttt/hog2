@@ -364,6 +364,7 @@
 		C467360B17132F8B00E2A10B /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735FF17132CA600E2A10B /* FourBitArray.cpp */; };
 		C467360C17132F8B00E2A10B /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735FF17132CA600E2A10B /* FourBitArray.cpp */; };
 		C467360D17132F8D00E2A10B /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735FF17132CA600E2A10B /* FourBitArray.cpp */; };
+		C46736101715E96B00E2A10B /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
 		C4843E2316518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
 		C4843E2416518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
 		C4843E2516518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
@@ -1350,6 +1351,8 @@
 		C46735FC171292E600E2A10B /* DiskBitFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiskBitFile.h; sourceTree = "<group>"; };
 		C46735FF17132CA600E2A10B /* FourBitArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FourBitArray.cpp; sourceTree = "<group>"; };
 		C467360017132CA600E2A10B /* FourBitArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FourBitArray.h; sourceTree = "<group>"; };
+		C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RubiksCube7Edges.cpp; sourceTree = "<group>"; };
+		C467360F1715E96B00E2A10B /* RubiksCube7Edges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RubiksCube7Edges.h; sourceTree = "<group>"; };
 		C4843E2116518613006A6861 /* Map2DHeading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map2DHeading.cpp; sourceTree = "<group>"; };
 		C4843E2216518613006A6861 /* Map2DHeading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map2DHeading.h; sourceTree = "<group>"; };
 		C498D8B01432777C0053D322 /* MAPF.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MAPF.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2067,6 +2070,8 @@
 				C4B9740B1426FADE00758D0D /* NQueens.h */,
 				C4843E2116518613006A6861 /* Map2DHeading.cpp */,
 				C4843E2216518613006A6861 /* Map2DHeading.h */,
+				C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */,
+				C467360F1715E96B00E2A10B /* RubiksCube7Edges.h */,
 				C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */,
 				C4C358AE1697ECE1000A2BFA /* RubiksCubeEdges.h */,
 				C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */,
@@ -3054,6 +3059,7 @@
 				C46735FD171292E600E2A10B /* EnvUtil.cpp in Sources */,
 				C46735FE171292E600E2A10B /* DiskBitFile.cpp in Sources */,
 				C467360D17132F8D00E2A10B /* FourBitArray.cpp in Sources */,
+				C46736101715E96B00E2A10B /* RubiksCube7Edges.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
