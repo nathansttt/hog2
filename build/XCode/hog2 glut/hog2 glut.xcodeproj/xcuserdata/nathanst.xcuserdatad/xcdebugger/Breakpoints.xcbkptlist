@@ -281,5 +281,18 @@
          landmarkName = "MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)"
          landmarkType = "7">
       </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../../../environments/RubiksCube7Edges.cpp"
+         timestampString = "387442726.960954"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "225"
+         endingLineNumber = "225"
+         landmarkName = "Rubik7Edge::ApplyAction(Rubik7EdgeState &amp;s, Rubik7EdgeAction a)"
+         landmarkType = "5">
+      </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>

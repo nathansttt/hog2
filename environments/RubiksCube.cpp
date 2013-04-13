@@ -105,12 +105,17 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	{
 		val = cornerPDB.Get(c.GetStateHash(node1.corner));
 	}
-	if (edgePDB.Size() > 0)
+	if (edge7PDB.Size() > 0)
 	{
-		uint64_t index = e.GetStateHash(node1.edge);
-		if (index < edgePDB.Size())
-			val = max(val, edgePDB.Get(index));
+		uint64_t index = e7.GetStateHash(node1.edge7);
+		val = max(val, edge7PDB.Get(index));
 	}
+//	if (edgePDB.Size() > 0)
+//	{
+//		uint64_t index = e.GetStateHash(node1.edge);
+//		if (index < edgePDB.Size())
+//			val = max(val, edgePDB.Get(index));
+//	}
 	return val;
 }
 

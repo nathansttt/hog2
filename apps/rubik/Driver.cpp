@@ -37,10 +37,17 @@
 #include "Timer.h"
 #include "RubiksCube.h"
 #include "DiskBitFile.h"
+#include "RubiksCube7Edges.h"
+#include "BFS.h"
+
 
 RubiksCube c;
 RubiksAction a;
 RubiksState s;
+
+Rubik7Edge e7;
+Rubik7EdgeState e7s;
+Rubik7EdgeAction e7a;
 
 int main(int argc, char* argv[])
 {
@@ -95,13 +102,19 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		//CreateSimulation(windowID);
-		SetNumPorts(windowID, 1);
+		SetNumPorts(windowID, 2);
 	}
 }
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	c.OpenGLDraw(s);
+	if (viewport == 1)
+	{
+		e7.OpenGLDraw(e7s);
+	}
+	else {
+		c.OpenGLDraw(s);
+	}
 }
 
 void RunTest(int billionEntriesToLoad);
@@ -121,7 +134,28 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	switch (key)
 	{
 		case '0':
+		{
+//			BFS<Rubik7EdgeState, Rubik7EdgeAction> b;
+//			std::vector<Rubik7EdgeAction> z;
+//			b.GetPath(&e7, e7s, e7s, z);
+//			Rubik7EdgeState tmp = e7s;
+//			e7.GetStateFromHash(e7.GetStateHash(e7s), e7s);
+//			assert(tmp == e7s);
+//			e7.ApplyAction(e7s, random()%18);
+//			e7.GetStateFromHash(2353, e7s);
+//			e7.GetStateFromHash(409, e7s);
+			e7.GetStateFromHash(39917725, e7s);
+			printf("rank is %llu\n", e7.GetStateHash(e7s));
+//			IDAStar<Rubik7EdgeState, Rubik7EdgeAction> ida;
+//			tmp.Reset();
+//			ida.GetPath(&e7, e7s, tmp, z);
+//			for (unsigned int x = 0; x < z.size(); x++)
+//				printf("%d ", z[x]);
+//			printf("\n");
+		}
+			break;
 		case '1':
+			e7.GetStateFromHash(409, e7s); break;
 		case '2':
 		case '3':
 		case '4':
@@ -130,9 +164,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '7':
 		case '8':
 		case '9':
-			printf("Old hash is %llu. ", c.GetStateHash(s));
+			//e7.GetStateFromHash(e7.GetStateHash(e7s), e7s);
+			//printf("Old hash is %llu. ", c.GetStateHash(s));
 			c.ApplyAction(s, key-'0'+10);
-			printf("New is %llu\n", c.GetStateHash(s));
+			e7.ApplyAction(e7s, key-'0'+10);
+			//printf("New is %llu\n", c.GetStateHash(s));
+			printf("rank is %llu\n", e7.GetStateHash(e7s));
 			break;
 		case '\t':
 			if (mod != kShiftDown)
@@ -240,6 +277,44 @@ void LoadEdgePDB(uint64_t sizeLimit)
 	}
 //	c.SetEdgePDB(mem, totalSize);
 }
+
+void LoadEdge7PDB()
+{
+	if (c.GetEdge7PDB().Size() != 0)
+		return;
+	FourBitArray &b = c.GetEdgePDB();
+	
+	//uint8_t *mem;
+	std::vector<bucketInfo> data;
+	std::vector<bucketData> buckets;
+	
+	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+	int64_t totalSize = 0;
+	//	const int64_t sizeLimit = 1000000000;
+	for (unsigned int x = 0; x < buckets.size(); x++)
+		totalSize += buckets[x].theSize;
+	//mem = new uint8_t[totalSize];
+	b.Resize(totalSize);
+	DiskBitFile f("/Users/nathanst/Development/cc/rubik/pdb/RC");
+	int64_t index = 0;
+	for (unsigned int x = 0; x < data.size(); x++)
+	{
+		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+		{
+			int val = f.ReadFileDepth(data[x].bucketID, y);
+			b.Set(index++, val);
+			//mem[index++] = val;
+			if (index >= totalSize)
+				break;
+		}
+		if (index >= totalSize)
+			break;
+	}
+	//	c.SetEdgePDB(mem, totalSize);
+}
+
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
 	std::vector<RubiksAction> acts;
@@ -262,6 +337,7 @@ void SolveOneProblem(int instance)
 	RubiksState start, goal;
 	goal.Reset();
 	start.Reset();
+	c.SetPruneSuccessors(true); // clears history
 	GetInstance(start, instance);
 	
 	std::vector<RubiksAction> acts;
@@ -288,7 +364,8 @@ void SolveOneProblem(int instance)
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 	LoadCornerPDB();
-	LoadEdgePDB(2000000000);
+	LoadEdge7PDB();
+	//LoadEdgePDB(2000000000);
 
 	for (int x = 3; x < 4; x++)
 	{
@@ -308,7 +385,8 @@ void RunTest(int billionEntriesToLoad)
 	uint64_t numEntries = 1000000000;
 	numEntries *= billionEntriesToLoad;
 	LoadCornerPDB();
-	LoadEdgePDB(numEntries);
+	//LoadEdgePDB(numEntries);
+	LoadEdge7PDB();
 	
 	for (int x = 0; x < 100; x++)
 	{
