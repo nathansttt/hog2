@@ -47,5 +47,6 @@ SRC_CPP = \
 	environments/MinimalSectorAbstraction.cpp \
 	environments/MNAgentPuzzle.cpp \
 	environments/RubiksCubeEdges.cpp \
+	environments/RubiksCube7Edges.cpp \
 	environments/RubiksCubeCorners.cpp \
 	environments/RubiksCube.cpp \
