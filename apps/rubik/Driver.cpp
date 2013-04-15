@@ -134,28 +134,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	switch (key)
 	{
 		case '0':
-		{
-//			BFS<Rubik7EdgeState, Rubik7EdgeAction> b;
-//			std::vector<Rubik7EdgeAction> z;
-//			b.GetPath(&e7, e7s, e7s, z);
-//			Rubik7EdgeState tmp = e7s;
-//			e7.GetStateFromHash(e7.GetStateHash(e7s), e7s);
-//			assert(tmp == e7s);
-//			e7.ApplyAction(e7s, random()%18);
-//			e7.GetStateFromHash(2353, e7s);
-//			e7.GetStateFromHash(409, e7s);
-			e7.GetStateFromHash(39917725, e7s);
-			printf("rank is %llu\n", e7.GetStateHash(e7s));
-//			IDAStar<Rubik7EdgeState, Rubik7EdgeAction> ida;
-//			tmp.Reset();
-//			ida.GetPath(&e7, e7s, tmp, z);
-//			for (unsigned int x = 0; x < z.size(); x++)
-//				printf("%d ", z[x]);
-//			printf("\n");
-		}
-			break;
 		case '1':
-			e7.GetStateFromHash(409, e7s); break;
 		case '2':
 		case '3':
 		case '4':
@@ -163,13 +142,22 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '6':
 		case '7':
 		case '8':
-		case '9':
 			//e7.GetStateFromHash(e7.GetStateHash(e7s), e7s);
 			//printf("Old hash is %llu. ", c.GetStateHash(s));
 			c.ApplyAction(s, key-'0'+10);
 			e7.ApplyAction(e7s, key-'0'+10);
 			//printf("New is %llu\n", c.GetStateHash(s));
 			printf("rank is %llu\n", e7.GetStateHash(e7s));
+			break;
+		case '9':
+		{
+			static int a = 0;
+			e7.GetStateFromHash(a++, e7s);
+//			int a = random()%18;
+//			c.ApplyAction(s, a);
+//			e7.ApplyAction(e7s, a);
+			printf("rank is %llu\n", e7.GetStateHash(e7s));
+		}
 			break;
 		case '\t':
 			if (mod != kShiftDown)
