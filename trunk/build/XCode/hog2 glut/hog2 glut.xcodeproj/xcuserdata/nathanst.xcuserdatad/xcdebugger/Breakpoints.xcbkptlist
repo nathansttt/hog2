@@ -294,5 +294,18 @@
          landmarkName = "Rubik7Edge::ApplyAction(Rubik7EdgeState &amp;s, Rubik7EdgeAction a)"
          landmarkType = "5">
       </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../../../environments/RubiksCube7Edges.cpp"
+         timestampString = "387615329.413164"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "567"
+         endingLineNumber = "567"
+         landmarkName = "Rubik7Edge::GetStateFromHash(uint64_t hash, Rubik7EdgeState &amp;node)"
+         landmarkType = "5">
+      </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>

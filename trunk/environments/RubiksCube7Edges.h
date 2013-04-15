@@ -14,6 +14,8 @@
 #include <vector>
 #include "SearchEnvironment.h"
 
+const int pieces = 9;
+
 class Rubik7EdgeState
 {
 public:
@@ -24,9 +26,9 @@ public:
 	void Reset()
 	{
 		state = 0;
-		for (int x = 0; x < 7; x++)
+		for (int x = 0; x < pieces; x++)
 			SetCubeInLoc(x, x);
-		for (int x = 7; x < 12; x++)
+		for (int x = pieces; x < 12; x++)
 			SetCubeInLoc(x, 0xF);
 	}
 	int GetCubeInLoc(int whichLoc) const
@@ -71,7 +73,7 @@ static bool operator==(const Rubik7EdgeState &l1, const Rubik7EdgeState &l2)
 			return false;
 		if (l1.GetCubeInLoc(x) != 15)
 		{
-			if (l1.GetCubeOrientation(x) != l2.GetCubeOrientation(x))
+			if (l1.GetCubeOrientation(l1.GetCubeInLoc(x)) != l2.GetCubeOrientation(l1.GetCubeInLoc(x)))
 				return false;
 		}
 	}
