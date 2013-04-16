@@ -46,4 +46,6 @@ SRC_CPP = \
 	utils/SwapEndian.cpp \
 	utils/StringUtils.cpp \
 	utils/FourBitArray.cpp \
+	utils/EnvUtil.cpp \
+	utils/DiskBitFile.cpp \
 

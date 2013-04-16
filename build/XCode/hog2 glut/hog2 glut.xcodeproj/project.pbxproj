@@ -365,6 +365,8 @@
 		C467360C17132F8B00E2A10B /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735FF17132CA600E2A10B /* FourBitArray.cpp */; };
 		C467360D17132F8D00E2A10B /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735FF17132CA600E2A10B /* FourBitArray.cpp */; };
 		C46736101715E96B00E2A10B /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
+		C4673654171CED0600E2A10B /* DiskBitFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4673650171CED0600E2A10B /* DiskBitFile.cpp */; };
+		C4673655171CED0600E2A10B /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4673652171CED0600E2A10B /* EnvUtil.cpp */; };
 		C4843E2316518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
 		C4843E2416518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
 		C4843E2516518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
@@ -1353,6 +1355,10 @@
 		C467360017132CA600E2A10B /* FourBitArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FourBitArray.h; sourceTree = "<group>"; };
 		C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RubiksCube7Edges.cpp; sourceTree = "<group>"; };
 		C467360F1715E96B00E2A10B /* RubiksCube7Edges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RubiksCube7Edges.h; sourceTree = "<group>"; };
+		C4673650171CED0600E2A10B /* DiskBitFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DiskBitFile.cpp; sourceTree = "<group>"; };
+		C4673651171CED0600E2A10B /* DiskBitFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiskBitFile.h; sourceTree = "<group>"; };
+		C4673652171CED0600E2A10B /* EnvUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EnvUtil.cpp; sourceTree = "<group>"; };
+		C4673653171CED0600E2A10B /* EnvUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnvUtil.h; sourceTree = "<group>"; };
 		C4843E2116518613006A6861 /* Map2DHeading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map2DHeading.cpp; sourceTree = "<group>"; };
 		C4843E2216518613006A6861 /* Map2DHeading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map2DHeading.h; sourceTree = "<group>"; };
 		C498D8B01432777C0053D322 /* MAPF.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MAPF.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2146,6 +2152,10 @@
 		C4F9F3F313E4FE3F0077C5A5 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				C4673650171CED0600E2A10B /* DiskBitFile.cpp */,
+				C4673651171CED0600E2A10B /* DiskBitFile.h */,
+				C4673652171CED0600E2A10B /* EnvUtil.cpp */,
+				C4673653171CED0600E2A10B /* EnvUtil.h */,
 				C447F5C7146843A600D6D581 /* NN.cpp */,
 				C447F5C8146843A600D6D581 /* NN.h */,
 				C498D8DC1444F0550053D322 /* BitMap.cpp */,
@@ -3060,6 +3070,8 @@
 				C46735FE171292E600E2A10B /* DiskBitFile.cpp in Sources */,
 				C467360D17132F8D00E2A10B /* FourBitArray.cpp in Sources */,
 				C46736101715E96B00E2A10B /* RubiksCube7Edges.cpp in Sources */,
+				C4673654171CED0600E2A10B /* DiskBitFile.cpp in Sources */,
+				C4673655171CED0600E2A10B /* EnvUtil.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
