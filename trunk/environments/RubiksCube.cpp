@@ -114,12 +114,19 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 		float res = edge7PDB.Get(index);
 		val = max(val, res);
 	}
-	if (edgePDB.Size() > 0)
-	{
-		uint64_t index = e.GetStateHash(node1.edge);
-		if (index < edgePDB.Size())
-		  val = max(val, edgePDB.Get(index));
-	}
+	//uint8_t *mem;
+	
+	int64_t r1, r2;
+	e.rankPlayer(node1.edge, 0, r1, r2);
+	double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2); // twoPieceData[x].bucketOffset
+	val = max(val, edge);
+//	if (edgePDB.Size() > 0)
+//	{
+//		uint64_t index = e.GetStateHash(node1.edge);
+//		if (index < edgePDB.Size())
+//			val = max(val, edgePDB.Get(index));
+//	}
+	
 	return val;
 }
 

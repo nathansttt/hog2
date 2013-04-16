@@ -65,6 +65,4 @@ endif
 default : all
 
 SRC_CPP = \
-	apps/rubik/DiskBitFile.cpp   \
-	apps/rubik/Driver.cpp   \
-	apps/rubik/EnvUtil.cpp 
+	apps/rubik/Driver.cpp 

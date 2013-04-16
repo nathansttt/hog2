@@ -13,7 +13,7 @@
 #include <vector>
 #include <cassert>
 #include <stdint.h>
-#include <stdio.h>
+#include <cstdio>
 
 const int openSize = 256;
 const int numBuckets = 2;

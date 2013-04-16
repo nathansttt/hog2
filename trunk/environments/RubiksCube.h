@@ -17,6 +17,8 @@
 #include "SearchEnvironment.h"
 #include "RubiksCube7Edges.h"
 #include "FourBitArray.h"
+#include "DiskBitFile.h"
+#include "EnvUtil.h"
 
 class RubiksState
 {
@@ -54,9 +56,15 @@ class RubiksCube : public SearchEnvironment<RubiksState, RubiksAction>
 {
 public:
 	RubiksCube()
+	:f("/data/cc/rubik/res/RC")
 	{
 		pruneSuccessors = false;
-//		for (int x = 0; x < 18; x++)
+		
+		uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+		InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+		//InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+
+		//		for (int x = 0; x < 18; x++)
 //		{
 //			moves[x].act = x;
 //			if (x != 17)
@@ -110,6 +118,11 @@ private:
 	FourBitArray cornerPDB;
 	FourBitArray edgePDB;
 	FourBitArray edge7PDB;
+
+	DiskBitFile f;
+	std::vector<bucketInfo> data;
+	//std::vector<bucketData> buckets;
+
 	bool pruneSuccessors;
 };
 

@@ -370,7 +370,7 @@ void RunTest(int billionEntriesToLoad)
 	numEntries *= billionEntriesToLoad;
 	LoadCornerPDB();
 	LoadEdgePDB(numEntries);
-	LoadEdge7PDB();
+	//LoadEdge7PDB();
 	
 	for (int x = 0; x < 100; x++)
 	{
