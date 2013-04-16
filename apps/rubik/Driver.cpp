@@ -26,13 +26,9 @@
  */
 
 #include "Common.h"
-#include "PuzzleSample.h"
+#include "Driver.h"
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
-//#include "Plot2D.h"
-//#include "RandomUnit.h"
-//#include "MNPuzzle.h"
-//#include "FlipSide.h"
 #include "IDAStar.h"
 #include "Timer.h"
 #include "RubiksCube.h"
@@ -212,7 +208,7 @@ void LoadCornerPDB()
 		totalSize += buckets[x].theSize;
 	b.Resize(totalSize);
 	//mem = new uint8_t[totalSize];
-	DiskBitFile f("/Users/nathanst/Development/cc/rubik/RC-corner");
+	DiskBitFile f("/home/sturtevant/sturtevant/code/cc/rubik/RC");
 	int64_t index = 0;
 	for (unsigned int x = 0; x < data.size(); x++)
 	{
@@ -248,7 +244,7 @@ void LoadEdgePDB(uint64_t sizeLimit)
 		totalSize = sizeLimit;
 	//mem = new uint8_t[totalSize];
 	b.Resize(totalSize);
-	DiskBitFile f("/Users/nathanst/Development/cc/rubik/pdb/RC");
+	DiskBitFile f("/data/cc/rubik/res/RC");
 	int64_t index = 0;
 	for (unsigned int x = 0; x < data.size(); x++)
 	{
@@ -270,22 +266,22 @@ void LoadEdge7PDB()
 {
 	if (c.GetEdge7PDB().Size() != 0)
 		return;
-	FourBitArray &b = c.GetEdgePDB();
+	FourBitArray &b = c.GetEdge7PDB();
 	
 	//uint8_t *mem;
 	std::vector<bucketInfo> data;
 	std::vector<bucketData> buckets;
 	
-	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
-	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
-	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+	uint64_t maxBuckSize = GetMaxBucketSize<Rubik7Edge, Rubik7EdgeState>(true);
+	InitTwoPieceData<Rubik7Edge, Rubik7EdgeState>(data, maxBuckSize);
+	InitBucketSize<Rubik7Edge, Rubik7EdgeState>(buckets, maxBuckSize);
 	int64_t totalSize = 0;
 	//	const int64_t sizeLimit = 1000000000;
 	for (unsigned int x = 0; x < buckets.size(); x++)
-		totalSize += buckets[x].theSize;
+	  totalSize += buckets[x].theSize;
 	//mem = new uint8_t[totalSize];
 	b.Resize(totalSize);
-	DiskBitFile f("/Users/nathanst/Development/cc/rubik/pdb/RC");
+	DiskBitFile f("/home/sturtevant/sturtevant/code/cc/rubik/RC-7edge");//RC-9edge");
 	int64_t index = 0;
 	for (unsigned int x = 0; x < data.size(); x++)
 	{
@@ -373,7 +369,7 @@ void RunTest(int billionEntriesToLoad)
 	uint64_t numEntries = 1000000000;
 	numEntries *= billionEntriesToLoad;
 	LoadCornerPDB();
-	//LoadEdgePDB(numEntries);
+	LoadEdgePDB(numEntries);
 	LoadEdge7PDB();
 	
 	for (int x = 0; x < 100; x++)

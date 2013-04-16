@@ -12,6 +12,8 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <stdint.h>
+#include <stdio.h>
 
 const int openSize = 256;
 const int numBuckets = 2;

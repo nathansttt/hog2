@@ -12,6 +12,10 @@
 #include "EnvUtil.h"
 #include <iostream>
 #include <cassert>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
 //const int BITS = 4;
 #define BITS 4

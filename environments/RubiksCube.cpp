@@ -8,6 +8,7 @@
 
 #include "RubiksCube.h"
 #include <cassert>
+#include <cstdio>
 
 void RubiksCube::GetSuccessors(const RubiksState &nodeID, std::vector<RubiksState> &neighbors) const
 {
@@ -51,6 +52,7 @@ void RubiksCube::ApplyAction(RubiksState &s, RubiksAction a) const
 {
 	c.ApplyAction(s.corner, a);
 	e.ApplyAction(s.edge, a);
+	e7.ApplyAction(s.edge7, a);
 	if (pruneSuccessors)
 		history.push_back(a);
 }
@@ -65,6 +67,7 @@ void RubiksCube::UndoAction(RubiksState &s, RubiksAction a) const
 	InvertAction(a);
 	c.ApplyAction(s.corner, a);
 	e.ApplyAction(s.edge, a);
+	e7.ApplyAction(s.edge7, a);
 
 }
 
@@ -108,14 +111,15 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	if (edge7PDB.Size() > 0)
 	{
 		uint64_t index = e7.GetStateHash(node1.edge7);
-		val = max(val, edge7PDB.Get(index));
+		float res = edge7PDB.Get(index);
+		val = max(val, res);
 	}
-//	if (edgePDB.Size() > 0)
-//	{
-//		uint64_t index = e.GetStateHash(node1.edge);
-//		if (index < edgePDB.Size())
-//			val = max(val, edgePDB.Get(index));
-//	}
+	if (edgePDB.Size() > 0)
+	{
+		uint64_t index = e.GetStateHash(node1.edge);
+		if (index < edgePDB.Size())
+		  val = max(val, edgePDB.Get(index));
+	}
 	return val;
 }
 
