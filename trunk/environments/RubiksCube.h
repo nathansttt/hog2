@@ -56,7 +56,8 @@ class RubiksCube : public SearchEnvironment<RubiksState, RubiksAction>
 {
 public:
 	RubiksCube()
-	:f("/data/cc/rubik/res/RC")
+	  :f("/store/rubik/RC")
+	  //:f("/data/cc/rubik/res/RC")
 	{
 		pruneSuccessors = false;
 		

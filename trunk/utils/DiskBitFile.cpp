@@ -43,7 +43,7 @@ void DiskBitFile::CloseReadWriteFile()
 	if (outputFile != 0)
 	{
 		fclose(outputFile);
-		printf("Closing file\n");fflush(stdout);
+		//printf("Closing file\n");fflush(stdout);
 		outputFile = 0;
 	}
 	outputBucket = -1;
@@ -69,7 +69,7 @@ void DiskBitFile::WriteFileDepth(int bucket, int64_t offset, uint8_t value)
 	}
 	if (outputFile == 0)
 	{
-		printf("Opening '%s'\n", getBucketFileName(bucket, subBucket)); fflush(stdout);
+	  //printf("Opening '%s'\n", getBucketFileName(bucket, subBucket)); fflush(stdout);
 		outputFile = fopen(getBucketFileName(bucket, subBucket), "r+");
 		if (outputFile == 0) { printf("Unable to open '%s'; aborting\n", getBucketFileName(bucket, subBucket)); exit(0); }
 		outputBucket = bucket;
@@ -128,7 +128,7 @@ int DiskBitFile::ReadFileDepth(int bucket, int64_t offset)
 	}
 	if (outputFile == 0)
 	{
-		printf("Opening '%s'\n", getBucketFileName(bucket, subBucket)); fflush(stdout);
+	  //printf("Opening '%s'\n", getBucketFileName(bucket, subBucket)); fflush(stdout);
 		outputFile = fopen(getBucketFileName(bucket, subBucket), "r+");
 		if (outputFile == 0) { printf("Unable to open '%s'; aborting\n", getBucketFileName(bucket, subBucket)); exit(0); }
 		outputBucket = bucket;
