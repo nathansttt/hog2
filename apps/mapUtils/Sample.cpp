@@ -57,8 +57,8 @@ TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
 
 std::vector<TemplateAStar<graphState, graphMove, GraphEnvironment> > astars;
 
-EPEAStar<xyLoc, tDirection, MapEnvironment> a1;
-//TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
+//EPEAStar<xyLoc, tDirection, MapEnvironment> a1;
+TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a2;
 MapEnvironment *ma1 = 0;
 MapEnvironment *ma2 = 0;
@@ -1029,7 +1029,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				if (ma2 == 0)
 				{
 					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-					ma2->SetFourConnected();
+					ma2->SetEightConnected();
 				}
 				
 				a1.SetStopAfterGoal(true);
@@ -1040,15 +1040,15 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				s1.x = px1; s1.y = py1;
 				g1.x = px2; g1.y = py2;
 				
-				//a1.SetWeight(searchWeight);
-				ma1->SetFourConnected();
+				a1.SetWeight(searchWeight);
+				ma1->SetEightConnected();
 				a1.InitializeSearch(ma1, s1, g1, path);
 				a2.InitializeSearch(ma2, s1, g1, path);
 				//a1.SetUseBPMX(1);
 				//a1.SetReopenNodes(true);
 				runningSearch1 = true;
-				runningSearch2 = true;
-				SetNumPorts(windowID, 2);
+				runningSearch2 = false;
+				SetNumPorts(windowID, 1);
 //				cameraMoveTo((startLoc.x+loc.x)/2, (startLoc.y+loc.y)/2, -4.0, 1.0, 0);
 //				cameraMoveTo((startLoc.x+loc.x)/2, (startLoc.y+loc.y)/2, -4.0, 1.0, 1);
 			}

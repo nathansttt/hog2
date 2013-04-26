@@ -12,6 +12,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <vector>
+#include "SearchEnvironment.h"
 
 class RubikEdgeState
 {
@@ -26,6 +27,7 @@ public:
 		for (int x = 0; x < 12; x++)
 			SetCubeInLoc(x, x);
 	}
+	void GetDual(RubikEdgeState &s) const;
 	int GetCubeInLoc(int whichLoc) const
 	{
 		return (state>>(12+4*whichLoc))&0xF;
@@ -67,7 +69,7 @@ static std::ostream& operator <<(std::ostream & out, const RubikEdgeState &s)
 {
 	for (int x = 0; x < 12; x++)
 	{
-		out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(x)?1:0) << " ";
+		out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(s.GetCubeInLoc(x))?1:0) << " ";
 	}
 	return out;
 }
@@ -82,7 +84,7 @@ public:
 	int length() { if (next == 0) return 1; return 1+next->length(); }
 };
 
-class RubikEdge
+class RubikEdge  : public SearchEnvironment<RubikEdgeState, RubikEdgeAction>
 {
 public:
 	RubikEdge()
@@ -99,7 +101,15 @@ public:
 	virtual void GetActions(const RubikEdgeState &nodeID, std::vector<RubikEdgeAction> &actions) const;
 	virtual RubikEdgeAction GetAction(const RubikEdgeState &s1, const RubikEdgeState &s2) const;
 	virtual void ApplyAction(RubikEdgeState &s, RubikEdgeAction a) const;
+	virtual void UndoAction(RubikEdgeState &s, RubikEdgeAction a) const;
+
 	
+	/** Heuristic value between two arbitrary nodes. **/
+	virtual double HCost(const RubikEdgeState &node1, const RubikEdgeState &node2) { return 1; }
+	virtual double GCost(const RubikEdgeState &node1, const RubikEdgeState &node2) { return 1; }
+	virtual double GCost(const RubikEdgeState &node, const RubikEdgeAction &act) { return 1; }
+	virtual bool GoalTest(const RubikEdgeState &node, const RubikEdgeState &goal) { return (node.state == goal.state); }
+
 	void ApplyMove(RubikEdgeState &s, RubikEdgeMove *a);
 	void UndoMove(RubikEdgeState &s, RubikEdgeMove *a);
 	void unrankPlayer(uint64_t d, RubikEdgeState & s, int who)

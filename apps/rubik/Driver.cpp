@@ -98,12 +98,13 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		//CreateSimulation(windowID);
-		SetNumPorts(windowID, 2);
+		SetNumPorts(windowID, 1);
 	}
 }
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	glClearColor(1.0, 1.0, 1.0, 1.0);
 	if (viewport == 1)
 	{
 		e7.OpenGLDraw(e7s);
@@ -169,6 +170,29 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'o':
 		{
+			RubikEdgeState es, dual;
+			RubikEdge e;
+			static std::vector<RubikEdgeAction> acts;
+			acts.push_back(random()%18);
+			es.Reset();
+			for (unsigned int x = 0; x < acts.size(); x++)
+			{
+				e.ApplyAction(es, acts[x]);
+			}
+			std::cout << es << std::endl;
+			es.GetDual(dual);
+			es.Reset();
+			for (unsigned int x = 0; x < acts.size(); x++)
+			{
+				e.UndoAction(es, acts[acts.size()-x-1]);
+			}
+			std::cout << es << std::endl << dual << std::endl << std::endl;
+			assert(dual == es);
+			for (unsigned int x = 0; x < acts.size(); x++)
+			{
+				e.ApplyAction(es, acts[x]);
+			}
+			std::cout << es << std::endl << std::endl;
 		}
 			break;
 		case ']':
@@ -370,7 +394,7 @@ void RunTest(int billionEntriesToLoad)
 	uint64_t numEntries = 1000000000;
 	numEntries *= billionEntriesToLoad;
 	LoadCornerPDB();
-	//LoadEdgePDB(numEntries);
+	LoadEdgePDB(numEntries);
 	//LoadEdge7PDB();
 	
 	for (int x = 0; x < 100; x++)

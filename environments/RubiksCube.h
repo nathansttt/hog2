@@ -56,7 +56,7 @@ class RubiksCube : public SearchEnvironment<RubiksState, RubiksAction>
 {
 public:
 	RubiksCube()
-	  :f("/store/rubik/RC")
+//	  :f("/store/rubik/RC")
 	  //:f("/data/cc/rubik/res/RC")
 	{
 		pruneSuccessors = false;
@@ -112,15 +112,17 @@ public:
 	virtual void OpenGLDraw(const RubiksState&, const RubiksState&, float) const;
 	virtual void OpenGLDraw(const RubiksState&, const RubiksAction&) const;
 private:
+	void SetFaceColor(int face) const;
 	mutable std::vector<RubiksAction> history;
 	RubiksCorner c;
 	RubikEdge e;
+	RubikEdgeState dual;
 	Rubik7Edge e7;
 	FourBitArray cornerPDB;
 	FourBitArray edgePDB;
 	FourBitArray edge7PDB;
 
-	DiskBitFile f;
+//	DiskBitFile f;
 	std::vector<bucketInfo> data;
 	//std::vector<bucketData> buckets;
 
