@@ -116,16 +116,26 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	}
 	//uint8_t *mem;
 	
-	int64_t r1, r2;
-	e.rankPlayer(node1.edge, 0, r1, r2);
-	double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2); // twoPieceData[x].bucketOffset
-	val = max(val, edge);
-//	if (edgePDB.Size() > 0)
-//	{
-//		uint64_t index = e.GetStateHash(node1.edge);
-//		if (index < edgePDB.Size())
-//			val = max(val, edgePDB.Get(index));
-//	}
+//	int64_t r1, r2;
+//	e.rankPlayer(node1.edge, 0, r1, r2);
+//	double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2); // twoPieceData[x].bucketOffset
+//	val = max(val, edge);
+	if (edgePDB.Size() > 0)
+	{
+		uint64_t index = e.GetStateHash(node1.edge);
+		if (index < edgePDB.Size())
+		{
+			val = max(val, edgePDB.Get(index));
+		}
+		else {
+			node1.edge.GetDual(dual);
+			uint64_t index = e.GetStateHash(dual);
+			if (index < edgePDB.Size())
+			{
+				val = max(val, edgePDB.Get(index));
+			}
+		}
+	}
 	
 	return val;
 }
@@ -171,8 +181,100 @@ void RubiksCube::OpenGLDraw() const
 void RubiksCube::OpenGLDraw(const RubiksState&s) const
 {
 	e.OpenGLDraw(s.edge);
-	c.OpenGLDraw(s.corner);
+//	c.OpenGLDraw(s.corner);
+
+	float scale = 0.3;
+	float offset = 0.95*scale/3.0;
+	glBegin(GL_QUADS);
+
+	SetFaceColor(0);
+	glVertex3f(-offset, -scale, -offset);
+	glVertex3f(offset, -scale, -offset);
+	glVertex3f(offset, -scale, offset);
+	glVertex3f(-offset, -scale, offset);
+	
+	SetFaceColor(5);
+	glVertex3f(-offset, scale, -offset);
+	glVertex3f(offset, scale, -offset);
+	glVertex3f(offset, scale, offset);
+	glVertex3f(-offset, scale, offset);
+
+	SetFaceColor(1);
+	glVertex3f(-scale, -offset, -offset);
+	glVertex3f(-scale, offset, -offset);
+	glVertex3f(-scale, offset, offset);
+	glVertex3f(-scale, -offset, offset);
+
+	SetFaceColor(3);
+	glVertex3f(scale, -offset, -offset);
+	glVertex3f(scale, offset, -offset);
+	glVertex3f(scale, offset, offset);
+	glVertex3f(scale, -offset, offset);
+
+	SetFaceColor(2);
+	glVertex3f(-offset, -offset, -scale);
+	glVertex3f(offset, -offset, -scale);
+	glVertex3f(offset, offset, -scale);
+	glVertex3f(-offset, offset, -scale);
+	
+	SetFaceColor(4);
+	glVertex3f(-offset, -offset, scale);
+	glVertex3f(offset, -offset, scale);
+	glVertex3f(offset, offset, scale);
+	glVertex3f(-offset, offset, scale);
+	
+	glColor3f(0,0,0);
+	offset = scale/3.0;
+	scale*=0.99;
+	glVertex3f(-3.0*offset, -scale, -3.0*offset);
+	glVertex3f(3.0*offset, -scale, -3.0*offset);
+	glVertex3f(3.0*offset, -scale, 3.0*offset);
+	glVertex3f(-3.0*offset, -scale, 3.0*offset);
+	
+	glVertex3f(-3.0*offset, scale, -3.0*offset);
+	glVertex3f(3.0*offset, scale, -3.0*offset);
+	glVertex3f(3.0*offset, scale, 3.0*offset);
+	glVertex3f(-3.0*offset, scale, 3.0*offset);
+	
+	glVertex3f(-scale, -3.0*offset, -3.0*offset);
+	glVertex3f(-scale, 3.0*offset, -3.0*offset);
+	glVertex3f(-scale, 3.0*offset, 3.0*offset);
+	glVertex3f(-scale, -3.0*offset, 3.0*offset);
+	
+//	SetFaceColor(3);
+	glVertex3f(scale, -3.0*offset, -3.0*offset);
+	glVertex3f(scale, 3.0*offset, -3.0*offset);
+	glVertex3f(scale, 3.0*offset, 3.0*offset);
+	glVertex3f(scale, -3.0*offset, 3.0*offset);
+	
+//	SetFaceColor(2);
+	glVertex3f(-3.0*offset, -3.0*offset, -scale);
+	glVertex3f(3.0*offset, -3.0*offset, -scale);
+	glVertex3f(3.0*offset, 3.0*offset, -scale);
+	glVertex3f(-3.0*offset, 3.0*offset, -scale);
+	
+//	SetFaceColor(4);
+	glVertex3f(-3.0*offset, -3.0*offset, scale);
+	glVertex3f(3.0*offset, -3.0*offset, scale);
+	glVertex3f(3.0*offset, 3.0*offset, scale);
+	glVertex3f(-3.0*offset, 3.0*offset, scale);
+glEnd();
 }
+
+void RubiksCube::SetFaceColor(int theColor) const
+{
+	switch (theColor)
+	{
+		case 0: glColor3f(1.0, 0.0, 0.0); break;
+		case 1: glColor3f(0.0, 1.0, 0.0); break;
+		case 2: glColor3f(0.0, 0.0, 1.0); break;
+		case 3: glColor3f(1.0, 1.0, 0.0); break;
+		case 4: glColor3f(1.0, 0.5, 0.0); break;
+		case 5: glColor3f(1.0, 1.0, 1.0); break;
+		default: assert(false);
+	}
+}
+
 
 /** Draw the transition at some percentage 0...1 between two states */
 void RubiksCube::OpenGLDraw(const RubiksState&, const RubiksState&, float) const

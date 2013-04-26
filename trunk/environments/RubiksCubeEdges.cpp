@@ -10,6 +10,15 @@
 #include "GLUtil.h"
 #include <cassert>
 
+void RubikEdgeState::GetDual(RubikEdgeState &s) const
+{
+	for (int x = 0; x < 12; x++)
+	{
+		s.SetCubeInLoc(GetCubeInLoc(x), x);
+		s.SetCubeOrientation(x, GetCubeOrientation(GetCubeInLoc(x)));
+	}
+}
+
 void RubikEdge::GetSuccessors(const RubikEdgeState &nodeID, std::vector<RubikEdgeState> &neighbors) const
 {
 	RubikEdgeState s;
@@ -44,6 +53,20 @@ void RubikEdge::ApplyMove(RubikEdgeState &s, RubikEdgeMove *a)
 void RubikEdge::UndoMove(RubikEdgeState &s, RubikEdgeMove *a)
 {
 	RubikEdgeAction todo = a->act;
+	if (0 == todo%3)
+	{
+		todo += 1;
+	}
+	else if (1 == todo%3)
+	{
+		todo -= 1;
+	}
+	ApplyAction(s, todo);
+}
+
+void RubikEdge::UndoAction(RubikEdgeState &s, RubikEdgeAction a) const
+{
+	RubikEdgeAction todo = a;
 	if (0 == todo%3)
 	{
 		todo += 1;
@@ -642,7 +665,7 @@ void RubikEdge::OpenGLDraw() const
 void RubikEdge::OpenGLDraw(const RubikEdgeState&s) const
 {
 	float scale = 0.3;
-	float offset = 2.0*scale/3.0;
+	float offset = 0.95*2.0*scale/3.0;
 	glBegin(GL_QUADS);
 	// top
 	//// Face 0

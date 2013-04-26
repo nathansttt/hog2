@@ -565,7 +565,7 @@ void RubiksCorner::OpenGLDraw() const
 void RubiksCorner::OpenGLDraw(const RubiksCornerState&s) const
 {
 	float scale = 0.3;
-	float offset = 2.0*scale/3.0;
+	float offset = 0.95*2.0*scale/3.0;
 	glBegin(GL_QUADS);
 	// top
 	//// Face 0
@@ -601,17 +601,17 @@ void RubiksCorner::OpenGLDraw(const RubiksCornerState&s) const
 	//// Face 5
 	// 12 - top
 	SetFaceColor(12, s);
-	glVertex3f(-scale, scale, -offset/2.0);
-	glVertex3f(-scale, scale, -3*offset/2.0);
-	glVertex3f(-scale+offset, scale, -3*offset/2.0);
-	glVertex3f(-scale+offset, scale, -offset/2.0);
+	glVertex3f(-scale, scale, -scale+offset);//-offset/2.0);
+	glVertex3f(-scale, scale, -scale);
+	glVertex3f(-scale+offset, scale, -scale);
+	glVertex3f(-scale+offset, scale, -scale+offset);
 	
 	// 21 - top
 	SetFaceColor(21, s);
-	glVertex3f(-scale, scale, 3*offset/2.0);
-	glVertex3f(-scale, scale, offset/2.0);
-	glVertex3f(-scale+offset, scale, offset/2.0);
-	glVertex3f(-scale+offset, scale, 3*offset/2.0);
+	glVertex3f(-scale, scale, scale);
+	glVertex3f(-scale, scale, scale-offset);
+	glVertex3f(-scale+offset, scale, scale-offset);
+	glVertex3f(-scale+offset, scale, scale);
 	
 	// 15 - top
 	SetFaceColor(15, s);
