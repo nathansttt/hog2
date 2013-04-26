@@ -244,7 +244,8 @@ void LoadEdgePDB(uint64_t sizeLimit)
 		totalSize = sizeLimit;
 	//mem = new uint8_t[totalSize];
 	b.Resize(totalSize);
-	DiskBitFile f("/data/cc/rubik/res/RC");
+	//DiskBitFile f("/data/cc/rubik/res/RC");
+	DiskBitFile f("/store/rubik/RC");
 	int64_t index = 0;
 	for (unsigned int x = 0; x < data.size(); x++)
 	{
@@ -369,7 +370,7 @@ void RunTest(int billionEntriesToLoad)
 	uint64_t numEntries = 1000000000;
 	numEntries *= billionEntriesToLoad;
 	LoadCornerPDB();
-	LoadEdgePDB(numEntries);
+	//LoadEdgePDB(numEntries);
 	//LoadEdge7PDB();
 	
 	for (int x = 0; x < 100; x++)
