@@ -61,8 +61,8 @@ public:
 	{
 		pruneSuccessors = false;
 		
-		uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
-		InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+		//uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+		//InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
 		//InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
 
 		//		for (int x = 0; x < 18; x++)
@@ -111,6 +111,7 @@ public:
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const RubiksState&, const RubiksState&, float) const;
 	virtual void OpenGLDraw(const RubiksState&, const RubiksAction&) const;
+	int64_t percentage;
 private:
 	void SetFaceColor(int face) const;
 	mutable std::vector<RubiksAction> history;
@@ -123,7 +124,7 @@ private:
 	FourBitArray edge7PDB;
 
 //	DiskBitFile f;
-	std::vector<bucketInfo> data;
+	//std::vector<bucketInfo> data;
 	//std::vector<bucketData> buckets;
 
 	bool pruneSuccessors;

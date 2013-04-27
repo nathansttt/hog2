@@ -341,7 +341,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 }
 
 void GetInstance(RubiksState &start, int which);
-void SolveOneProblem(int instance)
+void SolveOneProblem(int instance, int percentage = 100)
 {
 	RubiksState start, goal;
 	goal.Reset();
@@ -351,7 +351,7 @@ void SolveOneProblem(int instance)
 	
 	std::vector<RubiksAction> acts;
 	c.SetPruneSuccessors(true);
-	
+	c.percentage = percentage;
 	s = start;
 	IDAStar<RubiksState, RubiksAction> ida;
 	c.SetPruneSuccessors(true);
@@ -360,7 +360,7 @@ void SolveOneProblem(int instance)
 	ida.SetUseBDPathMax(true);
 	ida.GetPath(&c, start, goal, acts);
 	t.EndTimer();
-	printf("Problem %d - %llu expanded; %1.2f elapsed\n", instance+1, ida.GetNodesExpanded(), t.GetElapsedTime());
+	printf("[%d] Problem %d - %llu expanded; %1.2f elapsed\n", percentage, instance+1, ida.GetNodesExpanded(), t.GetElapsedTime());
 	for (unsigned int x = 0; x < acts.size(); x++)
 	{
 		printf("%d ", acts[x]);
@@ -394,13 +394,16 @@ void RunTest(int billionEntriesToLoad)
 	uint64_t numEntries = 1000000000;
 	numEntries *= billionEntriesToLoad;
 	LoadCornerPDB();
-	LoadEdgePDB(numEntries);
-	//LoadEdge7PDB();
+	//LoadEdgePDB(numEntries);
+	LoadEdge7PDB();
 	
-	for (int x = 0; x < 100; x++)
+	for (int t = 100; t >= 80; t--)
 	{
-		srandom(9283+x*23);
-		SolveOneProblem(x);
+		for (int x = 0; x < 100; x++)
+		{
+			srandom(9283+x*23);
+			SolveOneProblem(x, t);
+		}
 	}
 }
 

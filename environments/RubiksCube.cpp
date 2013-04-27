@@ -110,9 +110,13 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	}
 	if (edge7PDB.Size() > 0)
 	{
+		static int64_t maxVal = e7.getMaxSinglePlayerRank();
 		uint64_t index = e7.GetStateHash(node1.edge7);
-		float res = edge7PDB.Get(index);
-		val = max(val, res);
+		if (index*100 < percentage*maxVal)
+		{
+			float res = edge7PDB.Get(index);
+			val = max(val, res);
+		}
 	}
 	//uint8_t *mem;
 	
