@@ -77,6 +77,8 @@ public:
 	{ return bValidSearchGoal&&(node == searchGoal); }
 
 	virtual uint64_t GetStateHash(const state &node) const = 0;
+	virtual void GetStateFromHash(uint64_t parent, state &s) const { assert(false); }
+
 	virtual uint64_t GetActionHash(action act) const = 0;
 
 	virtual double GetPathLength(std::vector<state> &neighbors);

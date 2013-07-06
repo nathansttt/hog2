@@ -208,11 +208,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "../../../environments/Map2DHeading.cpp"
-         timestampString = "376857294.408381"
+         timestampString = "389694330.445792"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "235"
-         endingLineNumber = "235"
+         startingLineNumber = "280"
+         endingLineNumber = "280"
          landmarkName = "Map2DHeading::OpenGLDraw(const xyhLoc &amp;oldState, const xyhLoc &amp;newState, float perc)"
          landmarkType = "5">
       </FileBreakpoint>
@@ -221,25 +221,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "../../../environments/Map2DHeading.cpp"
-         timestampString = "376857294.408381"
+         timestampString = "389694330.445792"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "316"
-         endingLineNumber = "316"
+         startingLineNumber = "361"
+         endingLineNumber = "361"
          landmarkName = "Map2DHeading::BuildAngleTables()"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "../../../environments/Map2DHeading.cpp"
-         timestampString = "376857294.408381"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "115"
-         endingLineNumber = "115"
-         landmarkName = "Map2DHeading::GCost(const xyhLoc &amp;node1, const xyhLoc &amp;node2)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -306,6 +293,71 @@
          endingLineNumber = "567"
          landmarkName = "Rubik7Edge::GetStateFromHash(uint64_t hash, Rubik7EdgeState &amp;node)"
          landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../../../environments/Map2DHeading.cpp"
+         timestampString = "389686501.748902"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "115"
+         endingLineNumber = "115"
+         landmarkName = "GetCost(const xyhLoc &amp;a, const xyhLoc &amp;b, double P)"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../../../apps/fling/PuzzleSample.cpp"
+         timestampString = "390345682.244459"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "65"
+         endingLineNumber = "65"
+         landmarkName = "CreateSimulation(int id)"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../../../generic/BFS.h"
+         timestampString = "393891163.4013"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "160"
+         endingLineNumber = "160"
+         landmarkName = "GetPath(SearchEnvironment&lt;state, action&gt; *env, state from, state to, std::vector&lt;state&gt; &amp;thePath)"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../../../generic/BFS.h"
+         timestampString = "393885930.583165"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "107"
+         endingLineNumber = "107"
+         landmarkName = "GetPath(SearchEnvironment&lt;state, action&gt; *env, state from, state to, std::vector&lt;state&gt; &amp;thePath)"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../../../generic/BFS.h"
+         timestampString = "393891163.4013"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "155"
+         endingLineNumber = "155"
+         landmarkName = "GetPath(SearchEnvironment&lt;state, action&gt; *env, state from, state to, std::vector&lt;state&gt; &amp;thePath)"
+         landmarkType = "7">
       </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>

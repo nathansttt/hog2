@@ -78,24 +78,24 @@ void Directional2DEnvironment::GetActions(const xySpeedHeading &loc, std::vector
 			sh.speed = 0-loc.speed;
 			sh.turn = 0;
 			actions.push_back(sh);
-
-			// reverse moves
-			sh.speed = -1-loc.speed;
-			sh.turn = 0;
-			if (Legal(loc, sh))
-				actions.push_back(sh);
-			sh.turn = 1;
-			if (Legal(loc, sh))
-				actions.push_back(sh);
-			sh.turn = -1;
-			if (Legal(loc, sh))
-				actions.push_back(sh);
-			sh.turn = 2;
-			if (Legal(loc, sh))
-				actions.push_back(sh);
-			sh.turn = -2;
-			if (Legal(loc, sh))
-				actions.push_back(sh);
+//TODO: Backwards moves disabled!
+//			// reverse moves
+//			sh.speed = -1-loc.speed;
+//			sh.turn = 0;
+//			if (Legal(loc, sh))
+//				actions.push_back(sh);
+//			sh.turn = 1;
+//			if (Legal(loc, sh))
+//				actions.push_back(sh);
+//			sh.turn = -1;
+//			if (Legal(loc, sh))
+//				actions.push_back(sh);
+//			sh.turn = 2;
+//			if (Legal(loc, sh))
+//				actions.push_back(sh);
+//			sh.turn = -2;
+//			if (Legal(loc, sh))
+//				actions.push_back(sh);
 		}
 
 		if (loc.speed >= 1) // medium moves
@@ -752,6 +752,22 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading& l, const deltaSp
 	DrawSphere(xx-rad+l.x, yy-rad+l.y, zz, rad);
 }
 
+
+void Directional2DEnvironment::GLDrawLine(const xySpeedHeading &a, const xySpeedHeading &b) const
+{
+	GLdouble xx, yy, zz, rad;
+	map->GetOpenGLCoord(a.x, a.y, xx, yy, zz, rad);
+	
+	GLfloat rr, gg, bb, t;
+	GetColor(rr, gg, bb, t);
+	glColor4f(rr, gg, bb, t);
+	
+	glBegin(GL_LINES);
+	glVertex3f(xx, yy, zz-rad/2);
+	map->GetOpenGLCoord(b.x, b.y, xx, yy, zz, rad);
+	glVertex3f(xx, yy, zz-rad/2);
+	glEnd();
+}
 
 void Directional2DEnvironment::GetNextState(const xySpeedHeading &, deltaSpeedHeading , xySpeedHeading &) const
 {

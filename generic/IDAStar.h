@@ -65,7 +65,7 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	while (true) //thePath.size() == 0)
 	{
 		nodeTable.clear();
-		//printf("Starting iteration with bound %f\n", nextBound);
+		printf("Starting iteration with bound %f\n", nextBound);
 		if (DoIteration(env, from, from, thePath, nextBound, 0, 0) == 0)
 			break;
 	}
