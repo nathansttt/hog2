@@ -8,6 +8,10 @@
 
 #include "Map2DHeading.h"
 
+//const double P = 1.0;
+using std::cout;
+using std::endl;
+
 Map2DHeading::Map2DHeading(Map *m)
 {
 	map = m;
@@ -102,6 +106,35 @@ double Map2DHeading::HCost(const xyhLoc &l1, const xyhLoc &l2)
 	return h1;
 }
 
+double GetCost(const xyhLoc &a, const xyhLoc &b, double P)
+{
+	if (a.x == b.x && a.y == b.y)
+	{
+		cout << "gcost of " << a << " relative to " << b << " is " << 100.0 << endl;
+		return 100;
+	}
+	float heading = atan2(a.x-b.x, a.y-b.y);
+	int conv = (360.0*heading/(2*3.1415)+180+(b.h+2)*45); // -90 for face left
+	conv = conv%360;
+	if (conv > 180)
+		conv = 360-conv;
+	printf("Relative heading: %d\n", conv);
+	//	for (float P = -1; P <= 1; P += 0.5)
+	//	{
+	//		float cost = (P<0)?((1.0-(float)conv/180.0)*(-P)):(((float)conv/180.0)*(P));
+	//		printf("P : %1.2f   C : %1.2f\n", P, cost);
+	//	}
+	float cost1 = max(-P*cos(1.0*2*3.1415*conv/360.0), 0);
+	//float cost = (P<0)?((1.0-(float)conv/90.0)*(-P)):(((float)conv/90.0-1.0)*(P));
+	//float cost = (P<0)?((1.0-(float)conv/180.0)*(-P)):(((float)conv/180.0)*(P));
+	float dist = sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
+	// target distance is 5
+	float cost2 = min(fabs(2.0-dist)/2.0, 1.0);
+//	dist *= dist;
+	cout << "gcost of " << a << " relative to " << b << " is " << 10*cost1/dist+cost2 << endl;
+	return 10*cost1/dist+cost2;//+((dist<16)?fabs(8.0-dist):0);
+}
+
 double Map2DHeading::GCost(const xyhLoc &node1, const xyhLoc &node2)
 {
 	if (node1.h != node2.h) // turn
@@ -109,12 +142,18 @@ double Map2DHeading::GCost(const xyhLoc &node1, const xyhLoc &node2)
 	
 	double costModifier = 1.0;
 
-	CostTable::iterator iter = costs.find(GetStateHash(node1));
-	if (iter != costs.end())
+	for (CostTable::iterator it = costs.begin(); it != costs.end(); it++)
 	{
-		std::cout << "Found cost " << iter->second << " at state " << node1 << std::endl;
-		costModifier = iter->second;
+		xyhLoc tmp;
+		GetStateFromHash(it->first, tmp);
+		costModifier += GetCost(node1, tmp, it->second);
 	}
+//	CostTable::iterator iter = costs.find(GetStateHash(node1));
+//	if (iter != costs.end())
+//	{
+//		std::cout << "Found cost " << iter->second << " at state " << node1 << std::endl;
+//		costModifier = iter->second;
+//	}
 
 	if (0 == (node1.h%2))
 		return costModifier;
@@ -128,12 +167,18 @@ double Map2DHeading::GCost(const xyhLoc &node1, const xyhAct &act)
 
 	double costModifier = 1.0;
 	
-	CostTable::iterator iter = costs.find(GetStateHash(node1));
-	if (iter != costs.end())
+	for (CostTable::iterator it = costs.begin(); it != costs.end(); it++)
 	{
-		std::cout << "Found cost* " << iter->second << " at state " << node1 << std::endl;
-		costModifier = iter->second;
+		xyhLoc tmp;
+		GetStateFromHash(it->first, tmp);
+		costModifier += GetCost(node1, tmp, it->second);
 	}
+//	CostTable::iterator iter = costs.find(GetStateHash(node1));
+//	if (iter != costs.end())
+//	{
+//		std::cout << "Found cost* " << iter->second << " at state " << node1 << std::endl;
+//		costModifier = iter->second;
+//	}
 	
 	if (0 == act.newHeading%2)
 		return costModifier;

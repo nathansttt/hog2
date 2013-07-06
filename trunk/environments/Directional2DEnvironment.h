@@ -140,6 +140,8 @@ public:
 	virtual void OpenGLDraw(const xySpeedHeading &l) const;
 	virtual void OpenGLDraw(const xySpeedHeading& oldState, const xySpeedHeading &newState, float perc) const;
 	virtual void OpenGLDraw(const xySpeedHeading &, const deltaSpeedHeading &) const;
+	void GLDrawLine(const xySpeedHeading &a, const xySpeedHeading &b) const;
+
 	Map* GetMap() { return map; }
 	void SetHeuristicType(heuristicType theType) { hType = theType; }
 	virtual void GetNextState(const xySpeedHeading &currents, deltaSpeedHeading dir, xySpeedHeading &news) const;

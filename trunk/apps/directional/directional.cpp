@@ -28,7 +28,7 @@
 #include "Common.h"
 #include "directional.h"
 #include "PRAStar.h"
-#include "SearchUnit.h"
+//#include "SearchUnit.h"
 #include "UnitSimulation.h"
 #include "Directional2DEnvironment.h"
 #include "RandomUnit.h"
@@ -44,6 +44,7 @@ bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 int mapSize = 128;
+bool recording = false;
 
 DirectionalPlanner *dp = 0;
 MapSectorAbstraction *quad = 0;
@@ -143,7 +144,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
 		return;
-
+	
 	if (viewport == 0)
 	{
 		unitSims[windowID]->StepTime(1.0/10.0);
@@ -156,18 +157,26 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	unitSims[windowID]->OpenGLDraw();	
 //	if (quad)
 //		quad->OpenGLDraw();
-	if (unitSims[windowID]->GetNumUnits() > 0)
+//	if (unitSims[windowID]->GetNumUnits() > 0)
+//	{
+//		GLdouble xx, yy, zz, rad;
+//		Unit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *ru =
+//		unitSims[windowID]->GetUnit(unitSims[windowID]->GetNumUnits()-1);
+//		xySpeedHeading xys;
+//		ru->GetLocation(xys);
+//		unitSims[windowID]->GetEnvironment()->GetMap()->GetOpenGLCoord(xys.x, xys.y, xx, yy, zz, rad);
+//
+//		
+//		//cameraMoveTo(xx, yy, -1, 0.001);
+//		cameraLookAt(xx, yy, zz, 0.025);
+//	}
+	if (recording)
 	{
-		GLdouble xx, yy, zz, rad;
-		Unit<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> *ru =
-		unitSims[windowID]->GetUnit(unitSims[windowID]->GetNumUnits()-1);
-		xySpeedHeading xys;
-		ru->GetLocation(xys);
-		unitSims[windowID]->GetEnvironment()->GetMap()->GetOpenGLCoord(xys.x, xys.y, xx, yy, zz, rad);
-
-		
-		//cameraMoveTo(xx, yy, -1, 0.001);
-		cameraLookAt(xx, yy, zz, 0.025);
+		static int index = 0;
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/anim-%d%d%d", index/100, (index/10)%10, index%10);
+		SaveScreenshot(windowID, fname);
+		index++;
 	}
 }
 
@@ -301,6 +310,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case '[': recording = true; break;
+		case ']': recording = false; break;
 		case '\t':
 			if (mod != kShiftDown)
 				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
@@ -503,40 +514,42 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 //	}
 }
 
-bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
+bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
-	return false;
-//	mouseTracking = false;
-//	if (button == kRightButton)
-//	{
-//		switch (mType)
-//		{
-//			case kMouseDown:
-//				unitSim->GetMap()->GetPointFromCoordinate(loc, px1, py1);
-//				//printf("Mouse down at (%d, %d)\n", px1, py1);
-//				break;
-//			case kMouseDrag:
-//				mouseTracking = true;
-//				unitSim->GetMap()->GetPointFromCoordinate(loc, px2, py2);
-//				//printf("Mouse tracking at (%d, %d)\n", px2, py2);
-//				break;
-//			case kMouseUp:
-//			{
-//				if ((px1 == -1) || (px2 == -1))
-//					break;
-//				unitSim->GetMap()->GetPointFromCoordinate(loc, px2, py2);
-//				//printf("Mouse up at (%d, %d)\n", px2, py2);
-//				unit *u, *u2 = new unit(px2, py2, 0);
-//				//praStar *pra = new praStar(); pra->setPartialPathLimit(4);
-//				aStar *pra = new aStar();
-//				unitSim->addUnit(u2);
-//				u = new SearchUnit(px1, py1, u2, pra);
-//				unitSim->addUnit(u);
-//				u->setSpeed(0.5); // time to go 1 distance						
-//			}
-//			break;
-//		}
-//		return true;
-//	}
 //	return false;
+	mouseTracking = false;
+	if (button == kRightButton)
+	{
+		switch (mType)
+		{
+			case kMouseDown:
+				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px1, py1);
+				//printf("Mouse down at (%d, %d)\n", px1, py1);
+				break;
+			case kMouseDrag:
+				mouseTracking = true;
+				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
+				//printf("Mouse tracking at (%d, %d)\n", px2, py2);
+				break;
+			case kMouseUp:
+			{
+				if ((px1 == -1) || (px2 == -1))
+					break;
+				xySpeedHeading l1, l2;
+				l1.x = px1;
+				l1.y = py1;
+				l2.x = px2;
+				l2.y = py2;
+				DirPatrolUnit *ru1 = new DirPatrolUnit(l1, dp);
+				ru1->SetNumPatrols(1);
+				ru1->AddPatrolLocation(l2);
+				ru1->AddPatrolLocation(l1);
+				ru1->SetSpeed(2);
+				unitSims[windowID]->AddUnit(ru1);
+			}
+			break;
+		}
+		return true;
+	}
+	return false;
 }

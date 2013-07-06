@@ -50,3 +50,4 @@ SRC_CPP = \
 	environments/RubiksCube7Edges.cpp \
 	environments/RubiksCubeCorners.cpp \
 	environments/RubiksCube.cpp \
+	environments/Fling.cpp \

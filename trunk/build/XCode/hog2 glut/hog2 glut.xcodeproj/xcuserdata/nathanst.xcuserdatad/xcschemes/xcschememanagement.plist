@@ -24,6 +24,11 @@
 			<key>orderHint</key>
 			<integer>6</integer>
 		</dict>
+		<key>directional.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>13</integer>
+		</dict>
 		<key>emotion.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -33,6 +38,11 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>7</integer>
+		</dict>
+		<key>fling.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>12</integer>
 		</dict>
 		<key>flocking.xcscheme</key>
 		<dict>
@@ -82,6 +92,11 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>C47BDBCE17440B5900DD0928</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>C498D8381432777C0053D322</key>
 		<dict>
 			<key>primary</key>
@@ -108,6 +123,11 @@
 			<true/>
 		</dict>
 		<key>C4B973861426FA4F00758D0D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4C9E4C2176A7A160027410C</key>
 		<dict>
 			<key>primary</key>
 			<true/>

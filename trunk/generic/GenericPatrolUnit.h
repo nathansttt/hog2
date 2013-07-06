@@ -244,18 +244,17 @@ void GenericPatrolUnit<state,action,environment>::GoToLoc(environment *theEnv, i
 //	std::cout << "Planning between " << loc << " and " << locs[which] << std::endl;
 	//printf("%s ",GetName());
 	algorithm->GetPath(theEnv, loc, locs[which], path);
-	//	std::cout<<"At ("<<loc.x<<","<<loc.y<<") pathing to ("<<locs[which].x<<","<<locs[which].y<<")"<<std::endl;
 	nodesExpanded += algorithm->GetNodesExpanded();
 	nodesTouched += algorithm->GetNodesTouched();
 //	std::cout << algorithm->GetNodesExpanded() << " nodes expanded\n";
 //	std::cout << "Path length: " << theEnv->GetPathLength(path) << " (" << path.size() << " moves)" << std::endl;
 //	std::cout << "Initial Heuristic: " << theEnv->HCost(loc, locs[which]) << std::endl;
 //	//  	std::cout<<"Path ";
-//	for(int i=0; i<path.size();i++)
-//	{
-//		std::cout<<"{"<< path[i] << "} ";
-//	}
-//	std::cout<<std::endl;
+	for (int i = 0; i < path.size(); i++)
+	{
+		std::cout << path[i] << ", ";
+	}
+	std::cout << std::endl;
 	if (path.size() > 0)
 	{
 		AddPathToCache(theEnv, path);
@@ -272,10 +271,11 @@ void GenericPatrolUnit<state,action,environment>::AddPatrolLocation(state &s)
 template <class state, class action, class environment>
 void GenericPatrolUnit<state,action,environment>::AddPathToCache(environment* theEnv, std::vector<state> &p)
 {
-	for(unsigned int i=0; i<p.size()-1; i++)
+	moves.resize(0);
+	for (unsigned int i=0; i<p.size()-1; i++)
 	{
 		if (trimPath && (theEnv->HCost(p[i+1], loc) > trimWindow))
-		break;
+			break;
 		moves.push_back(theEnv->GetAction(p[i], p[i+1]));
 	}
 }
@@ -299,6 +299,19 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(const environment 
 							(si->GetSimulationTime()-i.lastTime)/(i.nextTime-i.lastTime));
 		theEnv->SetColor(1.0, 0.25, 0.25, 0.25);
 		algorithm->OpenGLDraw();
+
+		// draw path
+		state curr = i.lastState;
+		state next = i.currentState;
+		glLineWidth(4.0);
+		theEnv->GLDrawLine(curr, next);
+		for (unsigned int x = 0; x+1 < moves.size(); x++)
+		{
+			curr = next;
+			theEnv->ApplyAction(next, moves[x]);
+			theEnv->GLDrawLine(curr, next);
+		}
+		glLineWidth(1.0);
 	}
 // 	if ((0)&&(drawUnit))
 //	{
