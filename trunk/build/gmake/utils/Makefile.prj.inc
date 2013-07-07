@@ -47,5 +47,6 @@ SRC_CPP = \
 	utils/StringUtils.cpp \
 	utils/FourBitArray.cpp \
 	utils/EnvUtil.cpp \
+	utils/TextOverlay.cpp \
 	utils/DiskBitFile.cpp \
 
