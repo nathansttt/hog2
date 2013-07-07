@@ -10,6 +10,7 @@
 #include "Fling.h"
 #include <stdint.h>
 #include <string.h>
+#include <algorithm>
 
 void FlingBoard::AddFling(unsigned int x, unsigned int y)
 {
