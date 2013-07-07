@@ -9,9 +9,8 @@
 #include "TextOverlay.h"
 #include "GLUtil.h"
 #include <string.h>
-#ifdef WIN32
-#include "pstdint.h";
-#endif
+#include <stdint.h>
+
 using std::string;
 
 TextOverlay::TextOverlay(int maxLines)
