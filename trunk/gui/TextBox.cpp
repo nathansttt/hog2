@@ -63,7 +63,7 @@ void TextBox::draw()
 {
 	double wide, high, charWidth;
 	wide = br.x-tl.x;
-	high = tl.y-br.y;
+	//high = tl.y-br.y;
 	charWidth = wide/charLine;
 	GLint matrixMode;
 	if (scrolling)

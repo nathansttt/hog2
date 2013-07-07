@@ -13,26 +13,37 @@
 class FlingBoard
 {
 public:
-	FlingBoard(unsigned int len=7, unsigned int high=8) :width(len), height(high) { board.resize(len*high); }
-	void Reset() { board.resize(0); board.resize(width*height); locs.resize(0); }
+	FlingBoard(unsigned int len=7, unsigned int high=8) :width(len), height(high) { board = 0; /*board.resize(len*high);*/ }
+	void Reset() { /*board.resize(0); board.resize(width*height);*/ board = 0; locs.resize(0); }
 	void AddFling(unsigned int x, unsigned int y);
 	void AddFling(unsigned int offset);
 	void RemoveFling(unsigned int x, unsigned int y);
 	void RemoveFling(unsigned int offset);
 	bool CanMove(int which, int x, int y) const;
 	void Move(int which, int x, int y);
+
 	bool HasPiece(int x, int y) const;
+	bool HasPiece(int offset) const;
+	
 	unsigned int width;
 	unsigned int height;
-	std::vector<bool> board;
+	//std::vector<bool> board;
 	std::vector<int> locs;
+	void SetPiece(int which);
+	void ClearPiece(int which);
+private:
+	uint64_t board;
+};
+
+enum tFlingDir {
+	kLeft, kRight, kUp, kDown
 };
 
 class FlingMove
 {
 public:
-	uint8_t which;
-	uint8_t dir;
+	uint8_t startLoc;
+	tFlingDir dir;
 };
 
 static std::ostream& operator <<(std::ostream & out, const FlingBoard &loc)
@@ -41,7 +52,7 @@ static std::ostream& operator <<(std::ostream & out, const FlingBoard &loc)
 	{
 		for (unsigned int x = 0; x < loc.width; x++)
 		{
-			if (loc.board[y*loc.width+x])
+			if (loc.HasPiece(x, y))// board[y*loc.width+x])
 				out << "o";
 			else {
 				out << ".";
@@ -53,11 +64,11 @@ static std::ostream& operator <<(std::ostream & out, const FlingBoard &loc)
 }
 
 static bool operator==(const FlingBoard &l1, const FlingBoard &l2) {
-	return (l1.width == l2.width && l1.height == l2.height && l1.board == l2.board);
+	return (l1.width == l2.width && l1.height == l2.height && l1.locs == l2.locs);
 }
 
 static bool operator!=(const FlingBoard &l1, const FlingBoard &l2) {
-	return !(l1.width == l2.width && l1.height == l2.height && l1.board == l2.board);
+	return !(l1.width == l2.width && l1.height == l2.height && l1.locs == l2.locs);
 }
 
 
@@ -71,7 +82,8 @@ public:
 	virtual FlingMove GetAction(const FlingBoard &s1, const FlingBoard &s2) const { assert(false); }
 	virtual void ApplyAction(FlingBoard &s, FlingMove a) const;
 	virtual void UndoAction(FlingBoard &s, FlingMove a) const;
-	
+	virtual void GetNextState(const FlingBoard &, FlingMove , FlingBoard &) const;
+
 	virtual bool InvertAction(FlingMove &a) const { assert(false); }
 	
 	/** Heuristic value between two arbitrary nodes. **/

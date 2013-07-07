@@ -262,7 +262,7 @@ path *praStar::getAbstractPath(Graph *g, unsigned int source, unsigned int destP
 		p = new path(g->GetNode(current), p);
 		
 		e->setMarked(true);
-		dest = current;
+		//dest = current;
 		
 		if (e->getFrom() == current)
 			current = e->getTo();
