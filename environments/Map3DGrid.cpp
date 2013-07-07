@@ -417,7 +417,7 @@ bool SectorData::AddPoint(int x, int y, int z)
 		{
 			// don't know how to handle failure
 			assert(regions[t].AddPoint(regionX, regionY, z));
-			addedTo = t;
+			//addedTo = t;
 			return true;
 		}
 		else {
@@ -534,7 +534,7 @@ void Map3DGrid::GetSuccessors(const state3d &nodeID, std::vector<state3d> &neigh
 	{
 		static const moveDir m[8] = {kWest, kEast, kNorth, kSouth, kNorthEast, kNorthWest, kSouthEast, kSouthWest};
 		moveDir dirs = (moveDir)sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.GetMoves(nodeID.GetOffset());
-		uint8_t local = (moveDir)sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.GetMoveLocality(nodeID.GetOffset());
+		//uint8_t local = (moveDir)sectors[nodeID.GetSector()].regions[nodeID.GetRegion()].grid.GetMoveLocality(nodeID.GetOffset());
 		action3d a;
 		state3d s;
 		a.destRegion = 0xFF;

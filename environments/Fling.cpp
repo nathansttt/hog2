@@ -12,13 +12,49 @@
 #include <string.h>
 #include <algorithm>
 
+void FlingBoard::SetPiece(int which)
+{
+	uint64_t val = (1ull<<which);
+	board |= val;
+}
+
+void FlingBoard::ClearPiece(int which)
+{
+	uint64_t val = (1ull<<which);
+	board &= (~val);
+}
+
+bool FlingBoard::HasPiece(int offset) const
+{
+	uint64_t val = (1ull<<offset);
+	return (board & val);
+}
+
+bool FlingBoard::HasPiece(int x, int y) const
+{
+	uint64_t val = (1ull<<(y*width+x));
+	return (board & val);
+	
+	//	return TestBit(board, y*width+x);
+	//return (board[y*width+x]);
+}
+
+//
+//inline bool TestBit(uint64_t &board, int bit)
+//{
+//	uint64_t val = (1<<bit);
+//	return (board & val);
+//}
+
 void FlingBoard::AddFling(unsigned int x, unsigned int y)
 {
 	assert(x < width);
 	assert(y < height);
-	if (board[y*width+x] == false)
+	//if (board[y*width+x] == false)
+	if (HasPiece(y*width+x) == false)
 	{
-		board[y*width+x] = true;
+		SetPiece(y*width+x);
+		//board[y*width+x] = true;
 		locs.push_back(y*width+x);
 		
 		std::sort(locs.begin(), locs.end(), std::greater<int>());
@@ -27,9 +63,12 @@ void FlingBoard::AddFling(unsigned int x, unsigned int y)
 
 void FlingBoard::AddFling(unsigned int offset)
 {
-	assert(offset < board.size());
-	assert(board[offset] == false);
-	board[offset] = true;
+	assert(offset < width*height);
+	//assert(offset < board.size());
+	assert(HasPiece(offset) == false);
+	//assert(board[offset] == false);
+	SetPiece(offset);
+	//board[offset] = true;
 	locs.push_back(offset);
 	std::sort(locs.begin(), locs.end(), std::greater<int>());
 }
@@ -43,7 +82,8 @@ void FlingBoard::RemoveFling(unsigned int x, unsigned int y)
 
 void FlingBoard::RemoveFling(unsigned int offset)
 {
-	board[offset] = false;
+	ClearPiece(offset);
+	//board[offset] = false;
 	for (unsigned int x = 0; x < width*height; x++)
 	{
 		if (locs[x] == offset)
@@ -56,11 +96,6 @@ void FlingBoard::RemoveFling(unsigned int offset)
 	}
 }
 
-bool FlingBoard::HasPiece(int x, int y) const
-{
-	return (board[y*width+x]);
-}
-
 bool FlingBoard::CanMove(int which, int x, int y) const
 {
 	int xx = locs[which]%width;
@@ -70,7 +105,8 @@ bool FlingBoard::CanMove(int which, int x, int y) const
 	bool first = true;
 	while ((xx >= 0) && (xx < width) && (yy >= 0) && (yy < height))
 	{
-		if (board[yy*width+xx])
+		//if (board[yy*width+xx])
+		if (HasPiece(yy*width+xx))
 			return !first;
 		first = false;
 		xx+=x; yy += y;
@@ -89,16 +125,20 @@ void FlingBoard::Move(int which, int x, int y)
 	xx+=x; yy += y;
 	while ((xx >= 0) && (xx < width) && (yy >= 0) && (yy < height))
 	{
-		board[lasty*width+lastx] = board[yy*width+xx];
-
+		//board[lasty*width+lastx] = board[yy*width+xx];
+		if (HasPiece(yy*width+xx))
+			SetPiece(lasty*width+lastx);
+		else
+			ClearPiece(lasty*width+lastx);
 		lastx = xx;
 		lasty = yy;
 		xx+=x; yy += y;
 	}
-	board[lasty*width+lastx] = false;
+	ClearPiece(lasty*width+lastx);
+	//board[lasty*width+lastx] = false;
 	locs.resize(0);
-	for (int t = board.size()-1; t >= 0; t--)
-		if (board[t])
+	for (int t = width*height-1; t >= 0; t--)
+		if (HasPiece(t))//[t])
 			locs.push_back(t);
 }
 
@@ -126,16 +166,59 @@ void Fling::GetSuccessors(const FlingBoard &nodeID, std::vector<FlingBoard> &nei
 
 void Fling::GetActions(const FlingBoard &nodeID, std::vector<FlingMove> &actions) const
 {
-	assert(false); 
+	actions.resize(0);
+	FlingMove m;
+	for (unsigned int x = 0; x < nodeID.locs.size(); x++)
+	{
+		if (nodeID.CanMove(x, 1, 0))
+		{
+			m.startLoc = x;
+			m.dir = kRight;
+			actions.push_back(m);
+		}
+		if (nodeID.CanMove(x, -1, 0))
+		{
+			m.startLoc = x;
+			m.dir = kLeft;
+			actions.push_back(m);
+		}
+		if (nodeID.CanMove(x, 0, 1))
+		{
+			m.startLoc = x;
+			m.dir = kDown;
+			actions.push_back(m);
+		}
+		if (nodeID.CanMove(x, 0, -1))
+		{
+			m.startLoc = x;
+			m.dir = kUp;
+			actions.push_back(m);
+		}
+	}
 }
 
 void Fling::ApplyAction(FlingBoard &s, FlingMove a) const
 {
+	switch (a.dir)
+	{
+		case kRight: s.Move(a.startLoc, 1, 0); break;
+		case kLeft: s.Move(a.startLoc, -1, 0); break;
+		case kDown: s.Move(a.startLoc, 0, 1); break;
+		case kUp: s.Move(a.startLoc, 0, -1); break;
+	}
 }
 
 void Fling::UndoAction(FlingBoard &s, FlingMove a) const
 {
+	assert(false);
 }
+
+void Fling::GetNextState(const FlingBoard &f, FlingMove a, FlingBoard &t) const
+{
+	t = f;
+	ApplyAction(t, a);
+}
+
 
 uint64_t Fling::GetStateHash(const FlingBoard &node) const
 {
@@ -359,9 +442,10 @@ bool Fling::unrankPlayer(int64_t theRank, int pieces, FlingBoard &s)
 //	int tag = who + 1;
 	unsigned int ls = NUM_PIECES;
 //	memset(s.board, 0, NUM_SPOTS*sizeof(int));
-	s.board.resize(0);
-	s.board.resize(s.width*s.height);
-	s.locs.resize(0);
+	s.Reset();
+//	s.board.resize(0);
+//	s.board.resize(s.width*s.height);
+//	s.locs.resize(0);
 	s.locs.resize(pieces);
 	for (int i=0; ls > 0; ++i)
 	{
@@ -375,12 +459,14 @@ bool Fling::unrankPlayer(int64_t theRank, int pieces, FlingBoard &s)
 		}
 		if (theRank < value)
 		{
-			s.board[i] = true;
+			s.SetPiece(i);
+			//s.board[i] = true;
 			s.locs[ls-1] = i;
 			ls--;
 		}
 		else {
-			s.board[i] = 0;
+			s.ClearPiece(i);
+			//s.board[i] = 0;
 			theRank -= value;
 		}
 	}

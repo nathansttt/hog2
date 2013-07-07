@@ -408,6 +408,7 @@ uint8_t MinimalSectorAbstraction::GetAbstractLocation(std::vector<int> area, int
             yaverage+=x/sectorSize;
         }
     }
+	assert(count != 0);
     xaverage/=count;
     yaverage/=count;
     int best = sectorSize*sectorSize;

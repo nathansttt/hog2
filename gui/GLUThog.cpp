@@ -192,9 +192,9 @@ void processMenuEvents(int option)
 /**
  * Called when a key is pressed, and no other keys are held down.
  */
-void keyPressed(unsigned char key, int x, int y)
+void keyPressed(unsigned char key, int, int)
 {
-	x+=y;
+	//x+=y;
 	bool shift = (glutGetModifiers() == GLUT_ACTIVE_SHIFT);
 	bool alt = (glutGetModifiers() == GLUT_ACTIVE_ALT);
 	bool cntrl = (glutGetModifiers() == GLUT_ACTIVE_CTRL);

@@ -220,8 +220,8 @@ public:
 	bool CanStep(long x1, long y1, long x2, long y2) const;
 	
 	void OpenGLDraw(tDisplay how = kPolygons) const;
-	void GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
-	void GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
+	bool GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
+	bool GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const;
 	void GetPointFromCoordinate(point3d loc, int &px, int &py) const;
 	double GetCoordinateScale();
 	

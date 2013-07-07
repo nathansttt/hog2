@@ -205,6 +205,7 @@ void LinearRegression::load(FILE *f)
 	{
 		char text[25];
 		res = fscanf(f, "%s\n", text);
+		assert(res == 1);
 		if (strcmp(text, "binary") == 0)
 			useBinary = true;
 		else //if (strcmp(text, "text") == 0)

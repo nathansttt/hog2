@@ -1816,12 +1816,12 @@ void Map::OpenGLDraw(tDisplay how) const
  * that tile along with the radius of the tile square. The map is drawn in the
  * x<->z plane, with the y plane up.
  */
-void Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
+bool Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
 {
-	if (_x >= width) return;
-	if (_y >= height) return;
+	if (_x >= width) return false;
+	if (_y >= height) return false;
 	if ((_x == -1) || (_y == -1))
-		return;
+		return false;
 	double _scale;
 	if (height > width)
 		_scale = 1/(double)height;
@@ -1831,6 +1831,7 @@ void Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, 
 	y = (2*_y-height)*_scale;
 	z = -(double)0.5*(land[_x][_y].tile1.corners[0]+land[_x][_y].tile2.corners[0])*(_scale);//+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
 	radius = _scale;
+	return true;
 }
 
 /**
@@ -1840,7 +1841,7 @@ void Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, 
  * that tile along with the radius of the tile square. The map is drawn in the
  * x<->z plane, with the y plane up.
  */
-void Map::GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
+bool Map::GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
 {
 	int iX = floor(_x);
 	int iY = floor(_y);
@@ -1853,6 +1854,7 @@ void Map::GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble 
 	y = (2*_y-height)*_scale;
 	z = -(double)0.5*(land[iX][iY].tile1.corners[0]+land[iX][iY].tile2.corners[0])*(_scale);//+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
 	radius = _scale;
+	return true;
 }
 
 /**
@@ -1901,7 +1903,8 @@ void Map::GetPointFromCoordinate(point3d loc, int &px, int &py) const
 void Map::DrawTile(Tile *t, int x, int y, tDisplay how) const
 {
 	GLdouble xx, yy, zz, rr;
-	GetOpenGLCoord(x,y,xx,yy,zz,rr);
+	if (GetOpenGLCoord(x,y,xx,yy,zz,rr) == false)
+		return;
 	
 	if (tileSet == kBitmap)
 	{

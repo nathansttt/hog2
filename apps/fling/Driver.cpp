@@ -57,6 +57,9 @@ FlingMove m;
 std::vector<FlingBoard> path;
 int pathLoc = 0;
 
+void ReadData(std::vector<bool> &data, const char *fName);
+void WriteData(std::vector<bool> &data, const char *fName);
+
 void CreateSimulation(int id)
 {
 	for (int x = 0; x < 10; x++)
@@ -252,7 +255,7 @@ void SolveAndSaveInstance(unsigned long , tKeyboardModifier , char)
 	pathLoc = path.size()-1;
 }
 
-const int THREADS = 16;
+const int THREADS = 4;
 
 std::vector<std::vector<bool> > table;
 int currSize = 2;
@@ -263,18 +266,20 @@ void *ThreadedWorker(void *arg)
 {
 	int id = (long)arg;
 	int64_t solved = 0;
-	FlingBoard tmp;
+	FlingBoard currState, tmp;
 	std::vector<FlingBoard> succ;
+	std::vector<FlingMove> acts;
 
 	std::vector<int64_t> buffer;
 	buffer.reserve(4*1024+100);
 	for (int64_t val = id; val < f.getMaxSinglePlayerRank(56, currSize); val+=THREADS)
 	{
-		f.unrankPlayer(val, currSize, tmp);
-		f.GetSuccessors(tmp, succ);
+		f.unrankPlayer(val, currSize, currState);
+		//f.GetSuccessors(currState, succ);
+		f.GetActions(currState, acts);
 		if (currSize == 2)
 		{
-			if (succ.size() > 0)
+			if (acts.size() > 0)
 			{
 				buffer.push_back(val);
 				//table[currSize][val] = true;
@@ -282,9 +287,10 @@ void *ThreadedWorker(void *arg)
 			}
 		}
 		else {
-			for (int x = 0; x < succ.size(); x++)
+			for (int x = 0; x < acts.size(); x++)
 			{
-				if (table[succ[x].locs.size()][f.rankPlayer(succ[x])])
+				f.GetNextState(currState, acts[x], tmp);
+				if (table[tmp.locs.size()][f.rankPlayer(tmp)])
 				{
 					buffer.push_back(val);
 					//table[currSize][val] = true;
@@ -346,6 +352,11 @@ void BuildTables(unsigned long , tKeyboardModifier, char)
 	double perc = solvable;
 	perc /= (double)f.getMaxSinglePlayerRank(56, currSize);
 	printf("%lld are solvable (%3.1f%%)\n%3.2f s elapsed\n", solvable, 100*perc, t.EndTimer());
+	char fname[255];
+	sprintf(fname, "/Users/nathanst/fling-%d.dat", currSize);
+	t.StartTimer();
+	WriteData(table[currSize], fname);
+	printf("%3.2f sec writing data to disk\n", t.EndTimer());
 	//std::cout << solvable << " are solvable " << std::setprecision(3) << perc << std::endl;
 	//std::cout << t.EndTimer() << " elapsed" << std::endl;
 	currSize++;
@@ -362,6 +373,10 @@ void TestRanking(unsigned long , tKeyboardModifier, char)
 	std::vector<FlingBoard> succ;
 	f.GetSuccessors(b, succ);
 	FlingBoard tmp;
+	for (unsigned int x = 0; x < succ.size(); x++)
+	{
+		assert(succ[x].locs.size() == 9);
+	}
 	for (unsigned int x = 0; x < succ.size(); x++)
 	{
 		f.unrankPlayer(f.rankPlayer(succ[x]), succ[x].locs.size(), tmp);
@@ -410,3 +425,54 @@ bool MyClickHandler(unsigned long , int, int, point3d loc, tButtonType button, t
 	return false;
 }
 
+
+void WriteData(std::vector<bool> &data, const char *fName)
+{
+	FILE *f = fopen(fName, "w+");
+	fprintf(f, "%llu\n", (uint64_t)data.size());
+	
+	uint8_t next = 0;
+	for (uint64_t x = 0; x < data.size(); x++)
+	{
+		next = (next<<1)|(data[x]?1:0);
+		if (7 == x%8)
+		{
+			fwrite(&next, sizeof(uint8_t), 1, f);
+			next = 0;
+		}
+	}
+	fwrite(&next, sizeof(uint8_t), 1, f);
+	fclose(f);
+}
+
+void ReadData(std::vector<bool> &data, const char *fName)
+{
+	FILE *f = fopen(fName, "r+");
+	if (f == 0)
+	{
+		printf("Unable to open file: '%s' aborting\n", fName);
+		exit(0);
+	}
+	uint64_t dataSize;
+	fscanf(f, "%llu\n", &dataSize);
+	data.resize(dataSize);
+	
+	uint8_t next = 0;
+	uint64_t x;
+	for (x = 8; x < data.size(); x+=8)
+	{
+		fread(&next, sizeof(uint8_t), 1, f);
+		data[x-8+0] = (next>>7)&0x1;
+		data[x-8+1] = (next>>6)&0x1;
+		data[x-8+2] = (next>>5)&0x1;
+		data[x-8+3] = (next>>4)&0x1;
+		data[x-8+4] = (next>>3)&0x1;
+		data[x-8+5] = (next>>2)&0x1;
+		data[x-8+6] = (next>>1)&0x1;
+		data[x-8+7] = (next>>0)&0x1;
+	}
+	fread(&next, sizeof(uint8_t), 1, f);
+	for (uint64_t y = 0; x-8+y < data.size(); y++)
+		data[x-8+y] = (next>>(7-y))&0x1;
+	fclose(f);
+}
