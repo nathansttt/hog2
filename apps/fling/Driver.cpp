@@ -252,7 +252,7 @@ void SolveAndSaveInstance(unsigned long , tKeyboardModifier , char)
 	pathLoc = path.size()-1;
 }
 
-const int THREADS = 3;
+const int THREADS = 16;
 
 std::vector<std::vector<bool> > table;
 int currSize = 2;
@@ -267,7 +267,7 @@ void *ThreadedWorker(void *arg)
 	std::vector<FlingBoard> succ;
 
 	std::vector<int64_t> buffer;
-
+	buffer.reserve(4*1024+100);
 	for (int64_t val = id; val < f.getMaxSinglePlayerRank(56, currSize); val+=THREADS)
 	{
 		f.unrankPlayer(val, currSize, tmp);
@@ -294,7 +294,7 @@ void *ThreadedWorker(void *arg)
 			}
 		}
 		// flush buffer
-		if (buffer.size() > 1024)
+		if (buffer.size() > 4*1024)
 		{
 			pthread_mutex_lock (&writeLock);
 			while (buffer.size() > 0)
