@@ -217,6 +217,7 @@ uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Close()
 	uint64_t ans = theHeap[0];
 	elements[ans].where = kClosedList;
 	theHeap[0] = theHeap[theHeap.size()-1];
+	elements[theHeap[0]].openLocation = 0;
 	theHeap.pop_back();
 	HeapifyDown(0);
 	
