@@ -16,6 +16,7 @@ class TextOverlay {
 public:
 	TextOverlay(int maxLines = 34);
 	~TextOverlay();
+	void SetBold(bool useBold);
 	void AddLine(const char *);
 	void DeleteChar();
     void AppendToLine(const char *);
@@ -27,6 +28,7 @@ private:
     std::vector<std::string> text;
     int index;
 	int maxNumLines;
+	bool bold;
 };
 
 #endif

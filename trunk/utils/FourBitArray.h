@@ -22,6 +22,8 @@ public:
 	uint64_t Size() const;
 	uint8_t Get(uint64_t index) const;
 	void Set(uint64_t index, uint8_t val);
+	void Write(const char *);
+	void Read(const char *);
 private:
 	uint8_t *mem;
 	uint64_t entries;
