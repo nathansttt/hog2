@@ -41,6 +41,7 @@
 #include "PEAStar.h"
 #include "EPEAStar.h"
 #include "MapOverlay.h"
+#include <tr1/unordered_map>
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -145,22 +146,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 	
-	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Resizes map to specified dimensions and saves");
-	InstallCommandLineHandler(MyCLHandler, "-makeRoom", "-makeRoom x-dim y-dim roomSie filename", "Resizes map to specified dimensions and saves");
-	InstallCommandLineHandler(MyCLHandler, "-makeRandom", "-makeRandom x-dim y-dim %%obstacles [0-100] filename", "makes a randomly filled with obstacles");
-	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
-	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
-	InstallCommandLineHandler(MyCLHandler, "-buildProblemSet", "-buildProblemSet filename", "Build problem set with the given map.");
-	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
-	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
-	InstallCommandLineHandler(MyCLHandler, "-problems3", "-problems3 filename", "Selects the problem set to run.");
-	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
-	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
-	InstallCommandLineHandler(MyCLHandler, "-reduceMap", "-reduceMap input output", "Find the largest connected component in map and reduce.");
-	InstallCommandLineHandler(MyCLHandler, "-highwayDimension", "-highwayDimension map radius", "Measure the highway dimension of a map.");
-	InstallCommandLineHandler(MyCLHandler, "-estimateDimension", "-estimateDimension map", "Estimate the dimension.");
-	InstallCommandLineHandler(MyCLHandler, "-estimateLongPath", "-estimateLongPath map", "Estimate the longest path in the map.");
-	InstallCommandLineHandler(MyCLHandler, "-testHeuristic", "-testHeuristic scenario", "measure the ratio of the heuristic to the optimal dist");
+//	InstallCommandLineHandler(MyCLHandler, "-testHeuristic", "-testHeuristic scenario", "measure the ratio of the heuristic to the optimal dist");
 
 	InstallWindowHandler(MyWindowHandler);
 	
@@ -603,145 +589,6 @@ void runProblemSet(char *problems, int multiplier)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	if (strcmp( argument[0], "-makeRoom" ) == 0 )
-	{
-		if (maxNumArgs <= 4)
-			return 0;
-		Map map(atoi(argument[1]), atoi(argument[2]));
-		BuildRandomRoomMap(&map, atoi(argument[3]));
-		map.Save(argument[4]);
-		exit(0);
-		return 5;
-	}
-	if (strcmp( argument[0], "-makeMaze" ) == 0 )
-	{
-		if (maxNumArgs <= 4)
-			return 0;
-		Map map(atoi(argument[1]), atoi(argument[2]));
-		MakeMaze(&map, atoi(argument[3]));
-		map.Save(argument[4]);
-		exit(0);
-		return 5;
-	}//	
-	else if (strcmp( argument[0], "-testHeuristic" ) == 0)
-	{
-		if (maxNumArgs <= 1)
-			return 0;
-		testHeuristic(argument[1]);
-		exit(0);
-	}
-	else if (strcmp( argument[0], "-estimateLongPath" ) == 0)
-	{
-		if (maxNumArgs <= 1)
-			return 0;
-		Map map(argument[1]);
-		EstimateLongPath(&map);
-		exit(0);
-		return 2;
-	}
-	else if (strcmp( argument[0], "-estimateDimension" ) == 0)
-	{
-		if (maxNumArgs <= 1)
-			return 0;
-		Map map(argument[1]);
-		EstimateDimension(&map);
-		exit(0);
-		return 2;
-	}
-	else if (strcmp( argument[0], "-highwayDimension" ) == 0)
-	{
-		if (maxNumArgs <= 2)
-			return 0;
-		Map map(argument[1]);
-		MeasureHighwayDimension(&map, atoi(argument[2]));
-		exit(0);
-		return 3;
-	}
-	else if (strcmp( argument[0], "-makeRandom" ) == 0 )
-	{
-		if (maxNumArgs <= 4)
-			return 0;
-		Map map(atoi(argument[1]), atoi(argument[2]));
-		MakeRandomMap(&map, atoi(argument[3]));
-		Map *f = ReduceMap(&map);
-		f->Save(argument[4]);
-		exit(0);
-		return 5;
-	}
-	else if (strcmp( argument[0], "-reduceMap" ) == 0 )
-	{
-		if (maxNumArgs <= 2)
-			return 0;
-		Map map(argument[1]);
-		map.Scale(512, 512);
-		Map *m = ReduceMap(&map);
-		m->Save(argument[2]);
-		exit(0);
-		return 3;
-	}
-	else if (strcmp( argument[0], "-resize" ) == 0 )
-	{
-		if (maxNumArgs <= 4)
-			return 0;
-		Map map(argument[1]);
-		map.Scale(atoi(argument[2]), atoi(argument[3]));
-		map.Save(argument[4]);
-		exit(0);
-		return 5;
-	}
-	if (strcmp( argument[0], "-screen" ) == 0 )
-	{
-		if (maxNumArgs <= 1)
-			return 0;
-		screenShot = true;
-		strncpy(gDefaultMap, argument[1], 1024);
-		return 2;
-	}
-	if (strcmp( argument[0], "-map" ) == 0 )
-	{
-		if (maxNumArgs <= 1)
-			return 0;
-		strncpy(gDefaultMap, argument[1], 1024);
-		Map map(argument[1]);
-		map.Scale(512, 512);
-		map.Save(argument[2]);
-		//buildProblemSet();
-		//doExport();
-		exit(0);
-		return 2;
-	}
-	else if (strcmp( argument[0], "-buildProblemSet" ) == 0 )
-	{
-		strncpy(gDefaultMap, argument[1], 1024);
-		buildProblemSet();
-	}
-	else if (strcmp( argument[0], "-size" ) == 0 )
-	{
-		if (maxNumArgs <= 1)
-			return 0;
-		mazeSize = atoi(argument[1]);
-		assert( mazeSize > 0 );
-		return 2;
-	}
-	else if (strcmp(argument[0], "-problems" ) == 0 )
-	{
-		if (maxNumArgs <= 2) exit(0);
-		runProblemSet(argument[1], atoi(argument[2]));
-		return 3;
-	}
-	else if (strcmp(argument[0], "-problems2" ) == 0 )
-	{
-		if (maxNumArgs <= 2) exit(0);
-		runProblemSet2(argument[1], atoi(argument[2]));
-		return 3;
-	}
-	else if (strcmp(argument[0], "-problems3" ) == 0 )
-	{
-		if (maxNumArgs <= 1) exit(0);
-		runProblemSet3(argument[1]);
-		return 2;
-	}
-	return 2; //ignore typos
 }
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
@@ -895,74 +742,93 @@ void MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)
 	}
 }
 
-
+#include "RubiksCubeEdges.h"
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-	Graph *g = new Graph();
-	node *n = new node("");
-	g->AddNode(n);
-	FILE *f = fopen("/Users/nathanst/Downloads/USA-road-d.BAY.co", "r");
-	std::vector<double> xloc, yloc;
-	double minx = DBL_MAX, maxx=-DBL_MAX, miny=DBL_MAX, maxy=-DBL_MAX;
-	while (!feof(f))
+	RubikEdge e;
+	RubikEdgeState es;
+	// get a long sample of states/moves
+	struct history {
+		uint64_t state;
+		int cycle;
+	};
+	std::tr1::unordered_map<uint64_t, int> hist;
+	std::vector<history> path;
+	std::vector<uint64_t> prob_cycle;
+	std::vector<uint64_t> prob_count;
+	// start at root (depth 0)
+	es.Reset();
+	for (int x = 0; x < 1000000; x++)
 	{
-		char line[255];
-		fgets(line, 255, f);
-		if (line[0] == 'v')
+		history h;
+		h.state = e.rankPlayer(es, 0);
+//		printf("Next: %llu\n", h.state);
+		if (hist.find(h.state) != hist.end())
 		{
-			float x1, y1;
-			int id;
-			if (3 != sscanf(line, "v %d %f %f", &id, &x1, &y1))
-				continue;
-			//assert(id == xloc.size()+1);
-			xloc.push_back(x1);
-			yloc.push_back(y1);
-			//printf("%d: (%f, %f) [%f, %f]\n", xloc.size(), x1, y1, minx, maxx);
-			if (x1 > maxx) maxx = x1;
-			if (x1 < minx) minx = x1;
-			if (y1 > maxy) maxy = y1;
-			if (y1 < miny) miny = y1;
-			//if (maxx > -1)
+			h.cycle = hist[h.state];
+//			printf("Found at location %d\n", h.cycle);
+//			if (h.cycle == x-1)
+//				printf("Cycle length 1!\n");
+			hist[h.state] = (int)path.size();
 		}
+		else {
+			hist[h.state] = (int)path.size();
+			h.cycle = -1;
+		}
+		path.push_back(h);
+		e.ApplyAction(es, random()%18);
 	}
-	fclose(f); 
-	printf("x between (%f, %f), y between (%f, %f)\n",
-		   minx, maxx, miny, maxy);
-	for (unsigned int x = 0; x < xloc.size(); x++)
+	prob_cycle.resize(65);
+	prob_count.resize(65);
+	// stop at the end to avoid getting bogus data
+	// or we can use the data if we don't do anything with paths that hit the end
+	for (int x = 0; x < path.size()-65; x++)
 	{
-		//printf("(%f, %f) -> ", xloc[x], yloc[x]);
-		xloc[x] -= (minx);
-		xloc[x] /= (maxx-minx);
-		xloc[x] = xloc[x]*2-1;
-
-		yloc[x] -= (miny);
-		yloc[x] /= (maxy-miny);
-		yloc[x] = yloc[x]*2-1;
-		
-		node *n = new node("");
-		g->AddNode(n);
-		n->SetLabelF(GraphSearchConstants::kXCoordinate, xloc[x]);
-		n->SetLabelF(GraphSearchConstants::kYCoordinate, yloc[x]);
-		n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
-		
-		//printf("(%f, %f)\n", xloc[x], yloc[x]);
-	}
-	//a 1 2 1988
-	f = fopen("/Users/nathanst/Downloads/USA-road-d.BAY.gr", "r");
-	while (!feof(f))
-	{
-		char line[255];
-		fgets(line, 255, f);
-		if (line[0] == 'a')
+		// find longest path without cycle
+		int length = 1;
+		for (int y = x+1; y < path.size() && (y < x + 65); y++)
 		{
-			int x1, y1;
-			sscanf(line, "a %d %d %*d", &x1, &y1);
-			g->AddEdge(new edge(x1, y1, 1.0));
-			//printf("%d to %d\n", x1, y1);
+			if (path[y].cycle < x)
+				length++;
+			else
+				break;
 		}
+		if (length > 64)
+			length = 64;
+		for (int y = 0; y < length; y++)
+			prob_count[y]++;
+		prob_cycle[length]++;
 	}
-	fclose(f); 
-	ge = new GraphEnvironment(g);
+	for (int x = 0; x < prob_count.size(); x++)
+	{
+		printf("[%d] %llu / %llu = %f\n", x, prob_cycle[x], prob_count[x], (double)prob_cycle[x]/(double)prob_count[x]);
+	}
+	uint64_t numStates = 1;
+	for (int x = 0; x < 32; x++)
+	{
+		printf("Depth %d; %llu states. [%llu of %llu are duplicates]\n", x, numStates, prob_cycle[x], prob_count[x]);
+		double prob = 1.0;
+		for (int y = 0; y <= x*2; y+=2)
+		{
+			// I think this is correct, since both contribute to the reduction
+			prob *= 1-((double)prob_cycle[y]/(double)prob_count[y] + (double)prob_cycle[y+1]/(double)prob_count[y+1]);
+//			prob *= 1-((double)prob_cycle[y]/(double)prob_count[y]);
+//			prob *= 1-((double)prob_cycle[y+1]/(double)prob_count[y+1]);
+		}
+		numStates = (numStates*18.0*prob);
+	}
+	exit(0);
+	// how many state are there at depth 1?
+	// (measure branching factor; check the fraction of 1-step cycles)
+	
+	// how many states are tehre at depth 2?
+	// (measure the branching factor; remove the fraction of 2-step cycles and the fraction of 1-step cycles not in 2-step cycles)
+	
+	// how many states are there at depth 3?
+	// (depth 2) * (branching factor) * (percentage of unique 1-step, 2-step & 3-step cycles)
+	
+	// how many states at depth n?
+	// (depth n-1) * branching factor * ∑ (percentage of unique i-step paths without cycles)
 }
 
 void Predict(Map *m, int x1, int y1, int x2, int y2)
