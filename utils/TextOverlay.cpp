@@ -17,6 +17,7 @@ TextOverlay::TextOverlay(int maxLines)
 {
 	maxNumLines = maxLines;
     index = 0;
+	bold = false;
 }
 
 TextOverlay::~TextOverlay()
@@ -26,6 +27,11 @@ TextOverlay::~TextOverlay()
         //delete [] text[x];
         //text[x] = 0;
     }
+}
+
+void TextOverlay::SetBold(bool useBold)
+{
+	bold = useBold;
 }
 
 void TextOverlay::AddLine(const char *line)
@@ -72,7 +78,10 @@ void TextOverlay::OpenGLDraw(int window)
         return;
     
     glDisable(GL_LIGHTING);
-    glLineWidth(1.0);
+	if (bold)
+		glLineWidth(3.0);
+	else
+		glLineWidth(2.0);
     glEnable(GL_LINE_SMOOTH);
     
     GLint matrixMode;
@@ -131,6 +140,7 @@ void TextOverlay::OpenGLDraw(int window)
     glMatrixMode(matrixMode);
     glEnable(GL_DEPTH_TEST);
 	glDisable(GL_LINE_SMOOTH);
+	glLineWidth(1.0);
 
 }
 

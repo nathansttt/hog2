@@ -17,6 +17,7 @@
 
 const int openSize = 256;
 const int numBuckets = 2;
+
 struct bucketInfo {
 	bool unused;
 	int bucketID;

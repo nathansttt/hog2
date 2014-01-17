@@ -55,3 +55,20 @@ void FourBitArray::Set(uint64_t index, uint8_t val)
 		mem[index/2] = (mem[index/2]&0xF0)|val;
 	}
 }
+
+void FourBitArray::Write(const char *file)
+{
+	FILE *f = fopen(file, "w+");
+	fprintf(f, "%llu\n", entries);
+	fwrite(mem, sizeof(uint8_t), (entries+1)/2, f);
+	fclose(f);
+}
+
+void FourBitArray::Read(const char *file)
+{
+	FILE *f = fopen(file, "r");
+	fscanf(f, "%llu\n", &entries);
+	Resize(entries);
+	fread(mem, sizeof(uint8_t), (entries+1)/2, f);
+	fclose(f);
+}

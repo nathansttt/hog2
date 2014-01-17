@@ -521,7 +521,7 @@ bool Map::tryDragonAge(FILE *f)
 	rewind(f);
 	header h;
 	fread(&h, sizeof(header), 1, f);
-	printf("header: %d, struct array: %d, fieldData %d\n", sizeof(header), sizeof(structArray), sizeof(fieldData));
+	printf("header: %ld, struct array: %ld, fieldData %ld\n", sizeof(header), sizeof(structArray), sizeof(fieldData));
 	printf("MGC: %c%c%c%c\n", h.magic&0xFF, (h.magic>>8)&0xFF,
 		   (h.magic>>16)&0xFF, (h.magic>>24)&0xFF);
 	printf("GFF: %c%c%c%c\n", h.version&0xFF, (h.version>>8)&0xFF,
@@ -535,46 +535,46 @@ bool Map::tryDragonAge(FILE *f)
 	printf("STRUCT: %d\n", h.structcount);
 	printf("DATA: 0x%X\n", h.dataoffset);
 	
-	if (('G' != (char)(h.magic&0xFF)) ||
-		('F' != (char)(h.magic>>8)&0xFF) ||
-		('F' != (char)(h.magic>>16)&0xFF) ||
-		(' ' != (char)(h.magic>>24)&0xFF))
+	if (('G' != ((char)(h.magic&0xFF))) ||
+		('F' != ((char)(h.magic>>8)&0xFF)) ||
+		('F' != ((char)(h.magic>>16)&0xFF)) ||
+		(' ' != ((char)(h.magic>>24)&0xFF)))
 	{
-		if ('G' != (char)(h.magic&0xFF)) printf("bad g\n");
-		if ('F' != (char)(h.magic>>8)&0xFF) printf("bad f1\n");
-		if ('F' != (char)(h.magic>>16)&0xFF) printf("bad f2\n");
-		if (' ' != (char)(h.magic>>24)&0xFF) printf("bad <space>\n");
+		if ('G' != ((char)(h.magic&0xFF))) printf("bad g\n");
+		if ('F' != ((char)(h.magic>>8)&0xFF)) printf("bad f1\n");
+		if ('F' != ((char)(h.magic>>16)&0xFF)) printf("bad f2\n");
+		if (' ' != ((char)(h.magic>>24)&0xFF)) printf("bad <space>\n");
 		printf("DAO: bad magic\n");
 		return false;
 	}
-	if (('V' != (char)h.version&0xFF) ||
-		('4' != (char)(h.version>>8)&0xFF) ||
-		('.' != (char)(h.version>>16)&0xFF) ||
-		('0' != (char)(h.version>>24)&0xFF))
+	if (('V' != ((char)h.version&0xFF)) ||
+		('4' != ((char)(h.version>>8)&0xFF)) ||
+		('.' != ((char)(h.version>>16)&0xFF)) ||
+		('0' != ((char)(h.version>>24)&0xFF)))
 	{
 		printf("DAO: bad version\n");
 		return false;
 	}
-	if (('P' != (char)h.platform&0xFF) ||
-		('C' != (char)(h.platform>>8)&0xFF) ||
-		(' ' != (char)(h.platform>>16)&0xFF) ||
-		(' ' != (char)(h.platform>>24)&0xFF))
+	if (('P' != ((char)h.platform&0xFF)) ||
+		('C' != ((char)(h.platform>>8)&0xFF)) ||
+		(' ' != ((char)(h.platform>>16)&0xFF)) ||
+		(' ' != ((char)(h.platform>>24)&0xFF)))
 	{
 		printf("DAO: bad platform\n");
 		return false;
 	}
-	if (('A' != (char)h.filetype&0xFF) ||
-		('R' != (char)(h.filetype>>8)&0xFF) ||
-		('L' != (char)(h.filetype>>16)&0xFF) ||
-		(' ' != (char)(h.filetype>>24)&0xFF))
+	if (('A' != ((char)h.filetype&0xFF)) ||
+		('R' != ((char)(h.filetype>>8)&0xFF)) ||
+		('L' != ((char)(h.filetype>>16)&0xFF)) ||
+		(' ' != ((char)(h.filetype>>24)&0xFF)))
 	{
 		printf("DAO: bad file type\n");
 		return false;
 	}
-	if (('V' != (char)h.fileversion&0xFF) ||
-		('4' != (char)(h.fileversion>>8)&0xFF) ||
-		('.' != (char)(h.fileversion>>16)&0xFF) ||
-		('0' != (char)(h.fileversion>>24)&0xFF))
+	if (('V' != ((char)h.fileversion&0xFF)) ||
+		('4' != ((char)(h.fileversion>>8)&0xFF)) ||
+		('.' != ((char)(h.fileversion>>16)&0xFF)) ||
+		('0' != ((char)(h.fileversion>>24)&0xFF)))
 	{
 		printf("DAO: bad file version\n");
 		return false;
@@ -586,11 +586,11 @@ bool Map::tryDragonAge(FILE *f)
 	for (unsigned int x = 0; x < h.structcount; x++)
 	{
 		fread(&fd[x].sa, sizeof(fd[x].sa), 1, f);
-//		printf("Struct %d of %d\n", x, h.structcount-1);
-//		printf("ID: %c%c%c%c\n", fd[x].sa.id&0xFF, (fd[x].sa.id>>8)&0xFF,
-//			   (fd[x].sa.id>>16)&0xFF, (fd[x].sa.id>>24)&0xFF);
-//		printf("%d fields at 0x%X offset size %d\n",
-//			   fd[x].sa.fieldCnt, fd[x].sa.fieldOffset, fd[x].sa.structSize);
+		//		printf("Struct %d of %d\n", x, h.structcount-1);
+		//		printf("ID: %c%c%c%c\n", fd[x].sa.id&0xFF, (fd[x].sa.id>>8)&0xFF,
+		//			   (fd[x].sa.id>>16)&0xFF, (fd[x].sa.id>>24)&0xFF);
+		//		printf("%d fields at 0x%X offset size %d\n",
+		//			   fd[x].sa.fieldCnt, fd[x].sa.fieldOffset, fd[x].sa.structSize);
 	}
 	
 	for (unsigned int x = 0; x < h.structcount; x++)
@@ -619,14 +619,14 @@ bool Map::tryDragonAge(FILE *f)
 				printf("name: %s\n", str);
 			}
 			else if ((fd[x].fields[y].label == 3086) ||
-				(fd[x].fields[y].label == 3087) ||
-//				(fd[x].fields[y].label == 3380) ||
-//				(fd[x].fields[y].label == 3381) ||
-				(fd[x].fields[y].label == 3092))
+					 (fd[x].fields[y].label == 3087) ||
+					 //				(fd[x].fields[y].label == 3380) ||
+					 //				(fd[x].fields[y].label == 3381) ||
+					 (fd[x].fields[y].label == 3092))
 			{
 				uint32_t loc;
 				fread(&loc, sizeof(loc), 1, f);
-//				printf("VALUE: %d\n", loc);
+				//				printf("VALUE: %d\n", loc);
 				if (fd[x].fields[y].label == 3086)
 				{ width = loc; printf("**Width: %d\n", width); }
 				else if (fd[x].fields[y].label == 3087)
@@ -654,12 +654,12 @@ bool Map::tryDragonAge(FILE *f)
 					
 					fseek(f, h.dataoffset+loc, SEEK_SET);
 					fread(&loc, sizeof(loc), 1, f);
-//					printf("DATA SIZE: %d\n", loc);
+					//					printf("DATA SIZE: %d\n", loc);
 					for (unsigned int z = 0; z < loc; z++)
 					{
 						uint8_t next;
 						fread(&next, sizeof(next), 1, f);
-//						printf("%2x ", next);
+						//						printf("%2x ", next);
 						if (next < 0x9)
 							SetTerrainType(z%width, z/width, kGround);
 						else if (next < 0xa)
@@ -668,7 +668,7 @@ bool Map::tryDragonAge(FILE *f)
 							SetTerrainType(z%width, z/width, kOutOfBounds);
 						
 					}
-//					printf("\n");
+					//					printf("\n");
 				}
 			}
 			else {
@@ -1843,6 +1843,13 @@ bool Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, 
  */
 bool Map::GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble &z, GLdouble &radius) const
 {
+	if (isnan(_x) || isnan(_y))
+	{
+		x = y = z = 0;
+		radius = 0;
+		assert(false);
+		return false;
+	}
 	int iX = floor(_x);
 	int iY = floor(_y);
 	double _scale;
@@ -2353,7 +2360,7 @@ int Map::GetNodeNum(int x, int y, tCorner corner)
 
 extern "C" {
 	
-  float edgewidth[81] = {
+  double edgewidth[81] = {
     TWO,
     ROOT_TWO,
     ONE,

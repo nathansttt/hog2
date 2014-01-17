@@ -23,26 +23,43 @@
 #define _BITVECTOR_
 
 #include <stdint.h>
+#include "MMapUtil.h"
 
 /**
  * An efficient bit-wise vector implementation.
  */
 
+//typedef uint32_t storageElement;
+//const int storageBits = 32;
+//const int storageBitsPower = 5;
+//const int storageMask = 0x1F;
+
+typedef uint8_t storageElement;
+const int storageBits = 8;
+const int storageBitsPower = 3;
+const int storageMask = 0x7;
+
+
 class BitVector {
 public:
-  BitVector(int size);
-  ~BitVector();
-  void clear();
-  BitVector *Clone();
-  int GetSize() { return true_size; }
-  bool Get(int index) const;
-  void Set(int index, bool value);
-  void Merge(BitVector *);
-  bool Equals(BitVector *);
-  int GetNumSetBits();
+	BitVector(int size);
+	BitVector(uint64_t entries, const char *file, bool zero);
+	~BitVector();
+	void clear();
+//	BitVector *Clone();
+	int GetSize() { return true_size; }
+	bool Get(uint64_t index) const;
+	void Set(uint64_t index, bool value);
+//	void Merge(BitVector *);
+	void Save(const char *);
+	void Load(const char *);
+	bool Equals(BitVector *);
+	int GetNumSetBits();
 private:
-  int size, true_size;
-  uint32_t *storage;
+	uint64_t size, true_size;
+	storageElement *storage;
+	bool memmap;
+	int fd;
 };
 
 #endif
