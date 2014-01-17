@@ -14,7 +14,7 @@
 #include <vector>
 #include "SearchEnvironment.h"
 
-const int pieces = 9;
+const int pieces = 7;
 
 class Rubik7EdgeState
 {
@@ -26,11 +26,14 @@ public:
 	void Reset()
 	{
 		state = 0;
-		for (int x = 0; x < pieces; x++)
+		for (int x = 0; x < 12; x++)
 			SetCubeInLoc(x, x);
-		for (int x = pieces; x < 12; x++)
-			SetCubeInLoc(x, 0xF);
+//		for (int x = 0; x < pieces; x++)
+//			SetCubeInLoc(x, x);
+//		for (int x = pieces; x < 12; x++)
+//			SetCubeInLoc(x, 0xF);
 	}
+	void GetDual(Rubik7EdgeState &s) const;
 	int GetCubeInLoc(int whichLoc) const
 	{
 		return (state>>(12+4*whichLoc))&0xF;
@@ -56,8 +59,8 @@ public:
 	}
 	void FlipCubeOrientation(int whichLoc)
 	{
-		if (whichLoc == 0xF)
-			return;
+//		if (whichLoc == 0xF)
+//			return;
 		//		printf("Was: 0x%X [flip %d] -- ", state, whichLoc);
 		state = state^(0x1<<whichLoc);
 		//		printf("Now: 0x%X \n", state);
@@ -71,7 +74,7 @@ static bool operator==(const Rubik7EdgeState &l1, const Rubik7EdgeState &l2)
 	{
 		if (l1.GetCubeInLoc(x) != l2.GetCubeInLoc(x))
 			return false;
-		if (l1.GetCubeInLoc(x) != 15)
+		//if (l1.GetCubeInLoc(x) != 15)
 		{
 			if (l1.GetCubeOrientation(l1.GetCubeInLoc(x)) != l2.GetCubeOrientation(l1.GetCubeInLoc(x)))
 				return false;
@@ -85,7 +88,10 @@ static std::ostream& operator <<(std::ostream & out, const Rubik7EdgeState &s)
 {
 	for (int x = 0; x < 12; x++)
 	{
-		out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(x)?1:0) << " ";
+//		if (s.GetCubeInLoc(x) >= pieces)
+//			out << "*-* ";
+//		else
+			out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(s.GetCubeInLoc(x))?1:0) << " ";
 	}
 	return out;
 }
@@ -172,8 +178,6 @@ public:
 private:
 	void MRUnrank(int n, uint64_t r, uint64_t &perm) const;
 	void MRUnrank2(int n, uint64_t r, uint64_t &perm) const;
-	uint64_t MRRank(int n, uint64_t perm, uint64_t dual) const;
-	uint64_t MRRank2(int n, uint64_t perm, uint64_t dual) const;
 	
 	void SetCubeColor(int which, bool face, const Rubik7EdgeState&) const;
 	Rubik7EdgeMove moves[18];

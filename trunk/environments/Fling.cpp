@@ -88,6 +88,7 @@ void FlingBoard::RemoveFling(unsigned int offset)
 	{
 		if (locs[x] == offset)
 		{
+			// TODO: just use erase here
 			locs[x] = locs.back();
 			locs.pop_back();
 			std::sort(locs.begin(), locs.end(), std::greater<int>());
@@ -98,8 +99,11 @@ void FlingBoard::RemoveFling(unsigned int offset)
 
 bool FlingBoard::CanMove(int which, int x, int y) const
 {
-	int xx = locs[which]%width;
-	int yy = locs[which]/width;
+	int xx = which%width;
+	int yy = which/width;
+//	int xx = locs[which]%width;
+//	int yy = locs[which]/width;
+
 	xx+=x; yy += y;
 	
 	bool first = true;
@@ -117,8 +121,8 @@ bool FlingBoard::CanMove(int which, int x, int y) const
 
 void FlingBoard::Move(int which, int x, int y)
 {
-	int xx = locs[which]%width;
-	int yy = locs[which]/width;
+	int xx = which%width;
+	int yy = which/width;
 
 	int lastx = xx;
 	int lasty = yy;
@@ -153,14 +157,30 @@ void Fling::GetSuccessors(const FlingBoard &nodeID, std::vector<FlingBoard> &nei
 	neighbors.resize(0);
 	for (unsigned int x = 0; x < nodeID.locs.size(); x++)
 	{
-		if (nodeID.CanMove(x, 1, 0))
-		{ FlingBoard b(nodeID); b.Move(x, 1, 0); neighbors.push_back(b); }
-		if (nodeID.CanMove(x, -1, 0))
-		{ FlingBoard b(nodeID); b.Move(x, -1, 0); neighbors.push_back(b); }
-		if (nodeID.CanMove(x, 0, 1))
-		{ FlingBoard b(nodeID); b.Move(x, 0, 1); neighbors.push_back(b); }
-		if (nodeID.CanMove(x, 0, -1))
-		{ FlingBoard b(nodeID); b.Move(x, 0, -1); neighbors.push_back(b); }
+		if (nodeID.CanMove(nodeID.locs[x], 1, 0))
+		{
+			FlingBoard b(nodeID);
+			b.Move(nodeID.locs[x], 1, 0);
+			neighbors.push_back(b);
+		}
+		if (nodeID.CanMove(nodeID.locs[x], -1, 0))
+		{
+			FlingBoard b(nodeID);
+			b.Move(nodeID.locs[x], -1, 0);
+			neighbors.push_back(b);
+		}
+		if (nodeID.CanMove(nodeID.locs[x], 0, 1))
+		{
+			FlingBoard b(nodeID);
+			b.Move(nodeID.locs[x], 0, 1);
+			neighbors.push_back(b);
+		}
+		if (nodeID.CanMove(nodeID.locs[x], 0, -1))
+		{
+			FlingBoard b(nodeID);
+			b.Move(nodeID.locs[x], 0, -1);
+			neighbors.push_back(b);
+		}
 	}
 }
 
@@ -170,31 +190,45 @@ void Fling::GetActions(const FlingBoard &nodeID, std::vector<FlingMove> &actions
 	FlingMove m;
 	for (unsigned int x = 0; x < nodeID.locs.size(); x++)
 	{
-		if (nodeID.CanMove(x, 1, 0))
+		if (nodeID.CanMove(nodeID.locs[x], 1, 0))
 		{
-			m.startLoc = x;
+			m.startLoc = nodeID.locs[x];
 			m.dir = kRight;
 			actions.push_back(m);
 		}
-		if (nodeID.CanMove(x, -1, 0))
+		if (nodeID.CanMove(nodeID.locs[x], -1, 0))
 		{
-			m.startLoc = x;
+			m.startLoc = nodeID.locs[x];
 			m.dir = kLeft;
 			actions.push_back(m);
 		}
-		if (nodeID.CanMove(x, 0, 1))
+		if (nodeID.CanMove(nodeID.locs[x], 0, 1))
 		{
-			m.startLoc = x;
+			m.startLoc = nodeID.locs[x];
 			m.dir = kDown;
 			actions.push_back(m);
 		}
-		if (nodeID.CanMove(x, 0, -1))
+		if (nodeID.CanMove(nodeID.locs[x], 0, -1))
 		{
-			m.startLoc = x;
+			m.startLoc = nodeID.locs[x];
 			m.dir = kUp;
 			actions.push_back(m);
 		}
 	}
+}
+
+bool Fling::LegalMove(const FlingBoard &s, FlingMove a)
+{
+	if (!s.HasPiece(a.startLoc))
+		return false;
+	switch (a.dir)
+	{
+		case kRight: return s.CanMove(a.startLoc, 1, 0); break;
+		case kLeft: return s.CanMove(a.startLoc, -1, 0); break;
+		case kDown: return s.CanMove(a.startLoc, 0, 1); break;
+		case kUp: return s.CanMove(a.startLoc, 0, -1); break;
+	}
+	return false;
 }
 
 void Fling::ApplyAction(FlingBoard &s, FlingMove a) const
@@ -217,6 +251,26 @@ void Fling::GetNextState(const FlingBoard &f, FlingMove a, FlingBoard &t) const
 {
 	t = f;
 	ApplyAction(t, a);
+}
+
+FlingMove Fling::GetAction(const FlingBoard &s1, const FlingBoard &s2) const
+{
+	std::vector<FlingMove> m1;
+	GetActions(s1, m1);
+	FlingMove between;
+	FlingBoard tmp;
+	bool found = false;
+	for (int x = 0; x < m1.size(); x++)
+	{
+		GetNextState(s1, m1[x], tmp);
+		if (tmp == s2)
+		{
+			found = true;
+			between = m1[x];
+			break;
+		}
+	}
+	return between;
 }
 
 
@@ -294,12 +348,93 @@ void Fling::OpenGLDraw(const FlingBoard&b) const
 		for (double y = 0; y < b.height; y++)
 		{
 			yLoc += diameter;
-			recColor r = getColor(x+y*b.width, 0, b.width*b.height, 4);
+			recColor r = getColor(x+y*b.width, 0, b.width*b.height, 9); // 4
 			glColor3f(r.r, r.g, r.b);
 			if (b.HasPiece(x, y))
-				DrawSphere(xLoc, yLoc, 0, radius);
+				DrawSphere(xLoc, yLoc, 0, radius*0.8);
 		}
 	}
+}
+
+void Fling::OpenGLDrawAlternate(const FlingBoard &b) const
+{
+	double radius = 1.0/(1+max(b.width, b.height));
+	double diameter = radius*2;
+	double xLoc = -1+radius;
+	double yLoc = -1+radius;
+	double r = radius*0.80;
+	xLoc = -1+radius;
+
+	glDisable(GL_LIGHTING);
+	glLineWidth(8.0);
+	glColor4f(0.0, 0.5, 0.0, 1.0); // ffd700
+//	glColor4f(0.0, 1.0, 0.0, 0.5); // ffd700
+	for (double x = 0; x < b.width; x++)
+	{
+		xLoc += diameter;
+		yLoc = -1+radius;
+		for (double y = 0; y < b.height; y++)
+		{
+			yLoc += diameter;
+			//recColor r = getColor(x+y*b.width, 0, b.width*b.height, 4);
+
+			if (b.HasPiece(x, y))
+			{
+				glBegin(GL_QUADS);
+				glVertex3f(xLoc-r, yLoc-r, -0.02);
+				glVertex3f(xLoc-r, yLoc+r, -0.02);
+				glVertex3f(xLoc+r, yLoc+r, -0.02);
+				glVertex3f(xLoc+r, yLoc-r, -0.02);
+				glEnd();
+			}
+			//DrawSphere(xLoc, yLoc, 0, radius);
+		}
+	}
+	glLineWidth(1.0);
+	glEnable(GL_LIGHTING);
+}
+
+
+void Fling::OpenGLDraw(const FlingBoard&b, const FlingMove &m) const
+{
+	double radius = 1.0/(1+max(b.width, b.height));
+	double diameter = radius*2;
+	double xLoc = -1+radius+diameter;
+	double yLoc = -1+radius+diameter;
+	
+	glColor3f(1.0, 1.0, 1.0);
+	glLineWidth(10);
+	glBegin(GL_TRIANGLES);
+
+//	int x = b.locs[m.startLoc]%b.width;
+//	int y = b.locs[m.startLoc]/b.width;
+	int x = m.startLoc%b.width;
+	int y = m.startLoc/b.width;
+	switch (m.dir)
+	{
+		case kLeft:
+			glVertex3f(xLoc+x*diameter, yLoc+y*diameter-radius/2, -radius);
+			glVertex3f(xLoc+x*diameter, yLoc+y*diameter+radius/2, -radius);
+			glVertex3f(xLoc+x*diameter-radius, yLoc+y*diameter, -radius);
+			break;
+		case kRight:
+			glVertex3f(xLoc+x*diameter, yLoc+y*diameter+radius/2, -radius);
+			glVertex3f(xLoc+x*diameter, yLoc+y*diameter-radius/2, -radius);
+			glVertex3f(xLoc+x*diameter+radius, yLoc+y*diameter, -radius);
+			break;
+		case kUp:
+			glVertex3f(xLoc+x*diameter+radius/2, yLoc+y*diameter, -radius);
+			glVertex3f(xLoc+x*diameter-radius/2, yLoc+y*diameter, -radius);
+			glVertex3f(xLoc+x*diameter, yLoc+y*diameter-radius, -radius);
+			break;
+		case kDown:
+			glVertex3f(xLoc+x*diameter-radius/2, yLoc+y*diameter, -radius);
+			glVertex3f(xLoc+x*diameter+radius/2, yLoc+y*diameter, -radius);
+			glVertex3f(xLoc+x*diameter, yLoc+y*diameter+radius, -radius);
+			break;
+	}
+	glEnd();
+	glLineWidth(1.0);
 }
 
 bool Fling::GetXYFromPoint(const FlingBoard &b, point3d loc, int &x, int &y) const
@@ -319,8 +454,65 @@ bool Fling::GetXYFromPoint(const FlingBoard &b, point3d loc, int &x, int &y) con
 	return false;
 }
 
+void Fling::GLLabelState(const FlingBoard&b, const char *text) const
+{
+	glDisable(GL_LIGHTING);
+    glEnable(GL_LINE_SMOOTH);
+    glDisable(GL_DEPTH_TEST);
+	glLineWidth(3.0);
 
+	double radius = 1.0/(1+max(b.width, b.height));
+	double diameter = radius*2;
+	double xLoc = -1+radius;
+	double yLoc = -1+radius;
+	
+	xLoc = -1+radius;
+	for (double x = 0; x < b.width; x++)
+	{
+		xLoc += diameter;
+		yLoc = -1+radius;
+		for (double y = 0; y < b.height; y++)
+		{
+			yLoc += diameter;
+			glColor3f(1.0, 1.0, 1.0);
+			if (b.HasPiece(x, y))
+			{
+				const char *p;
+				
+				glPushMatrix();
+				glTranslatef(xLoc-radius+1/152.38, yLoc-radius+8/152.38, 0);
+				glScalef(.05/152.38, -.05/152.38, .05/152.38);
+				glTranslatef(0, 0, -2*radius);
 
+				//glScalef(0.09f, -0.08f, 1.0);
+				//glTranslatef(0, 0, -2*radius);
+				for (p = text; *p; p++)
+				{
+					//printf("%c", *p);
+					glutStrokeCharacter(GLUT_STROKE_ROMAN, *p);
+				}
+				glPopMatrix();
+				//printf("\n");
+				// draw text
+//				const char *c;
+////				glPushMatrix();
+//				glScalef(0.09f, -0.08f, 1.0);
+////				glTranslatef(x, y, 2*radius);
+//				for (c=text; *c != '\0'; c++)
+//				{
+//					glutStrokeCharacter(GLUT_STROKE_ROMAN , *c);
+//				}
+////				glPopMatrix();
+			}
+		}
+	}
+
+    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+    glDisable(GL_LINE_SMOOTH);
+	glLineWidth(1.0);
+
+}
 
 
 int64_t Fling::getMaxSinglePlayerRank(int spots, int numPieces)

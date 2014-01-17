@@ -89,6 +89,7 @@ class RubikEdge  : public SearchEnvironment<RubikEdgeState, RubikEdgeAction>
 public:
 	RubikEdge()
 	{
+		piecesToRank = 12;
 		for (int x = 0; x < 18; x++)
 		{
 			moves[x].act = x;
@@ -144,6 +145,7 @@ public:
 	virtual void OpenGLDraw(const RubikEdgeState&, const RubikEdgeState&, float) const;
 	virtual void OpenGLDraw(const RubikEdgeState&, const RubikEdgeAction&) const;
 private:
+	int piecesToRank;
 	void MRUnrank(int n, uint64_t r, uint64_t &perm) const;
 	void MRUnrank2(int n, uint64_t r, uint64_t &perm) const;
 	uint64_t MRRank(int n, uint64_t perm, uint64_t dual) const;

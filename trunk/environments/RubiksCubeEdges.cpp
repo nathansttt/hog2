@@ -353,7 +353,6 @@ inline uint64_t Factorial(int n)
 
 inline int get(uint64_t state, int whichLoc)
 {
-	//return (state>>(4*whichLoc))&0xF;
 	return (state>>((whichLoc<<2)))&0xF;
 }
 
@@ -390,31 +389,16 @@ int64_t RubikEdge::getMaxSinglePlayerRank() const
 
 int64_t RubikEdge::getMaxSinglePlayerRank2()
 {
-	//	return 12;
-	//	return 16;
-	//	return 64;
 	return 128;
-	//return 4;
 }
 
 int64_t RubikEdge::getMaxSinglePlayerRank2(int64_t firstIndex)
 {
 	return (Factorial(12)*(0x1<<4));
-	//	return (Factorial(12)*(0x1<<7));
-	//	return (Factorial(12)*(0x1<<9));
-	//	return 81749606400ll;
 }
 
 void RubikEdge::rankPlayerFirstTwo(const RubikEdgeState &s, int, int64_t &rank)
 {
-	//	uint64_t hashVal = 0;
-	//	for (int x = 0; x < 2; x++)
-	//	{
-	//		hashVal = (hashVal<<1)+s.GetCubeOrientation(x);
-	//	}
-	//	rank = (s.GetCubeOrientation(11)<<5)|(s.GetCubeOrientation(10)<<4)|
-	//	(s.GetCubeOrientation(9)<<3)|(s.GetCubeOrientation(8)<<2)|
-	//	(s.GetCubeOrientation(7)<<1)|s.GetCubeOrientation(6);
 	rank = (s.GetCubeOrientation(11)<<6)|(s.GetCubeOrientation(10)<<5)|
 	(s.GetCubeOrientation(9)<<4)|(s.GetCubeOrientation(8)<<3)|
 	(s.GetCubeOrientation(7)<<2)|(s.GetCubeOrientation(6)<<1)|
@@ -438,38 +422,6 @@ void RubikEdge::rankPlayerRemaining(const RubikEdgeState &node, int, int64_t &ra
 	}
 	hashVal = hashVal*Factorial(12)+MRRank(12, perm, dual);
 	rank = hashVal;
-	
-	//	static uint64_t Factorial[21] =
-	//	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
-	//		6227020800ll, 87178291200ll, 1307674368000ll, 20922789888000ll, 355687428096000ll,
-	//		6402373705728000ll, 121645100408832000ll, 2432902008176640000ll };
-	//
-	//	int puzzle[11];
-	//	for (int x = 1; x < 12; x++)
-	//	{
-	//		puzzle[x-1] = s.GetCubeInLoc(x);
-	//		if (puzzle[x-1] > s.GetCubeInLoc(0))
-	//			puzzle[x-1]--;
-	//	}
-	//
-	//	rank = 0;
-	//	int numEntriesLeft = 11;
-	//	for (unsigned int x = 0; x < 11; x++)
-	//	{
-	//		rank += puzzle[x]*Factorial[numEntriesLeft-1];
-	//		numEntriesLeft--;
-	//		for (unsigned y = x; y < 11; y++)
-	//		{
-	//			if (puzzle[y] > puzzle[x])
-	//				puzzle[y]--;
-	//		}
-	//	}
-	//
-	//	// orientations
-	//	for (int x = 0; x < 11; x++)
-	//	{
-	//		rank = (rank<<1)+s.GetCubeOrientation(x);
-	//	}
 }
 
 

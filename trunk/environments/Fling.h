@@ -27,11 +27,10 @@ public:
 	
 	unsigned int width;
 	unsigned int height;
-	//std::vector<bool> board;
 	std::vector<int> locs;
 	void SetPiece(int which);
 	void ClearPiece(int which);
-private:
+//private:
 	uint64_t board;
 };
 
@@ -63,12 +62,29 @@ static std::ostream& operator <<(std::ostream & out, const FlingBoard &loc)
 	return out;
 }
 
+static std::ostream& operator <<(std::ostream & out, const FlingMove &loc)
+{
+	out << +loc.startLoc << "->";
+	switch (loc.dir)
+	{
+		case kLeft: out << "Left"; break;
+		case kRight: out << "Right"; break;
+		case kUp: out << "Up"; break;
+		case kDown: out << "Down"; break;
+	}
+	return out;
+}
+
 static bool operator==(const FlingBoard &l1, const FlingBoard &l2) {
-	return (l1.width == l2.width && l1.height == l2.height && l1.locs == l2.locs);
+	return (l1.width == l2.width && l1.height == l2.height && l1.board == l2.board);
 }
 
 static bool operator!=(const FlingBoard &l1, const FlingBoard &l2) {
-	return !(l1.width == l2.width && l1.height == l2.height && l1.locs == l2.locs);
+	return !(l1.width == l2.width && l1.height == l2.height && l1.board == l2.board);
+}
+
+static bool operator==(const FlingMove &l1, const FlingMove &l2) {
+	return (l1.startLoc == l2.startLoc && l1.dir == l2.dir);
 }
 
 
@@ -79,11 +95,11 @@ public:
 	virtual void GetSuccessors(const FlingBoard &nodeID, std::vector<FlingBoard> &neighbors) const;
 	virtual void GetActions(const FlingBoard &nodeID, std::vector<FlingMove> &actions) const;
 	
-	virtual FlingMove GetAction(const FlingBoard &s1, const FlingBoard &s2) const { assert(false); }
+	virtual FlingMove GetAction(const FlingBoard &s1, const FlingBoard &s2) const;
 	virtual void ApplyAction(FlingBoard &s, FlingMove a) const;
 	virtual void UndoAction(FlingBoard &s, FlingMove a) const;
 	virtual void GetNextState(const FlingBoard &, FlingMove , FlingBoard &) const;
-
+	bool LegalMove(const FlingBoard &, FlingMove);
 	virtual bool InvertAction(FlingMove &a) const { assert(false); }
 	
 	/** Heuristic value between two arbitrary nodes. **/
@@ -118,7 +134,9 @@ public:
 	
 	virtual void OpenGLDraw() const {}
 	virtual void OpenGLDraw(const FlingBoard&) const;
-	virtual void OpenGLDraw(const FlingBoard&, const FlingMove&) const {}
+	virtual void OpenGLDrawAlternate(const FlingBoard&) const;
+	virtual void OpenGLDraw(const FlingBoard&, const FlingMove&) const;
+	virtual void GLLabelState(const FlingBoard&, const char *) const;
 
 private:
 	std::vector<int64_t> theSums;
