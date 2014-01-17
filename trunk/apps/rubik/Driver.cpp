@@ -30,10 +30,12 @@
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
 #include "IDAStar.h"
+#include "TemplateAStar.h"
 #include "Timer.h"
 #include "RubiksCube.h"
 #include "DiskBitFile.h"
 #include "RubiksCube7Edges.h"
+#include "RubiksCubeCorners.h"
 #include "BFS.h"
 
 
@@ -80,6 +82,9 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
+	InstallCommandLineHandler(MyCLHandler, "-testCompression", "-testCompression <factor> <type> <edgepdb> <cornerpdb>", "");
+	InstallCommandLineHandler(MyCLHandler, "-compress", "-compress <type [corner,n-edge,edge]> <input> <factor> <output>", "Compress provided pdb by a factor of <factor>");
+	InstallCommandLineHandler(MyCLHandler, "-pdb", "-pdb <edge> <corner>", "Run tests using edge and corner pdbs");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -98,16 +103,25 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		//CreateSimulation(windowID);
-		SetNumPorts(windowID, 1);
+		SetNumPorts(windowID, 4);
 	}
 }
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	glClearColor(1.0, 1.0, 1.0, 1.0);
-	if (viewport == 1)
+	if (viewport == 3)
 	{
-		e7.OpenGLDraw(e7s);
+		c.OpenGLDrawEdgeDual(s);
+	}
+	else if (viewport == 2)
+	{
+		c.OpenGLDrawEdges(s);
+	}
+	else if (viewport == 1)
+	{
+		//e7.OpenGLDraw(e7s);
+		c.OpenGLDrawCorners(s);
 	}
 	else {
 		c.OpenGLDraw(s);
@@ -115,13 +129,41 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 }
 
 void RunTest(int billionEntriesToLoad);
+void Compress(const char *pdbType, const char *theFile, const char *compresType, int ratio, const char *outFile);
+//void RunCompressionTest(int factor, const char *compType, const char *edgePDB, const char *cornerPDB);
+void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB);
+void RunSimpleTest(const char *edgePDB, const char *cornerPDB);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if (maxNumArgs <= 1)
 		return 0;
-	RunTest(atoi(argument[1]));
-	exit(0);
+	if (strcmp(argument[0], "-test") == 0)
+	{
+		RunTest(atoi(argument[1]));
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-pdb") == 0)
+	{
+		RunSimpleTest(argument[1], argument[2]);
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-compress") == 0)
+	{
+		if (maxNumArgs < 5)
+		{
+			printf("Insufficient number of arguments\n");
+			exit(0);
+		}
+		//InstallCommandLineHandler(MyCLHandler, "-compress", "-compress <e> <file> <factor>", "Compress provided pdb by a factor of <factor>");
+		Compress(argument[1], argument[2], argument[3], atoi(argument[4]), argument[5]);
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-testCompression") == 0)
+	{
+		RunCompressionTest(atoi(argument[1]), argument[2], argument[3], argument[4], argument[5]);
+		exit(0);
+	}
 	//	strncpy(gDefaultMap, argument[1], 1024);
 	return 2;
 }
@@ -136,13 +178,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '3':
 		case '4':
 		case '5':
-		case '6':
-		case '7':
-		case '8':
+//		case '6':
+//		case '7':
+//		case '8':
 			//e7.GetStateFromHash(e7.GetStateHash(e7s), e7s);
 			//printf("Old hash is %llu. ", c.GetStateHash(s));
-			c.ApplyAction(s, key-'0'+10);
-			e7.ApplyAction(e7s, key-'0'+10);
+			c.ApplyAction(s, (key-'0')*3);
+			e7.ApplyAction(e7s, (key-'0')*3);
 			//printf("New is %llu\n", c.GetStateHash(s));
 			printf("rank is %llu\n", e7.GetStateHash(e7s));
 			break;
@@ -170,28 +212,57 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'o':
 		{
+			Rubik7EdgeState es7, dual7;
+			Rubik7Edge e7;
+
 			RubikEdgeState es, dual;
 			RubikEdge e;
+
 			static std::vector<RubikEdgeAction> acts;
-			acts.push_back(random()%18);
+			for (int t = 0; t < 5; t++)
+				acts.push_back(random()%18);
+			es7.Reset();
 			es.Reset();
+			e.GetStateFromHash(12345, es);
+			es7.state = es.state;
+			std::cout << "Strt: " << es7 << std::endl;
+			std::cout << "Strt: " << es << std::endl;
+			std::cout << "Acts: ";
 			for (unsigned int x = 0; x < acts.size(); x++)
 			{
+				if (x > 0)
+					std::cout << ", ";
+				e7.ApplyAction(es7, acts[x]);
 				e.ApplyAction(es, acts[x]);
+				std::cout << acts[x];
 			}
-			std::cout << es << std::endl;
+			std::cout << std::endl;;
+			std::cout << "Init: " << es7 << std::endl;
+			std::cout << "Init: " << es << std::endl;
+			es7.GetDual(dual7);
 			es.GetDual(dual);
+			std::cout << "Dual: " << dual7 << std::endl;
+			std::cout << "Dual: " << dual << std::endl;
+			es7.Reset();
 			es.Reset();
+			e.GetStateFromHash(12345, es);
+			es7.state = es.state;
 			for (unsigned int x = 0; x < acts.size(); x++)
 			{
+				e7.UndoAction(es7, acts[acts.size()-x-1]);
 				e.UndoAction(es, acts[acts.size()-x-1]);
 			}
-			std::cout << es << std::endl << dual << std::endl << std::endl;
+			std::cout << "Undo: " << es7 << std::endl;
+			std::cout << "Undo: " << es << std::endl;
+			//std::cout << dual << std::endl << std::endl;
+			assert(dual7 == es7);
 			assert(dual == es);
 			for (unsigned int x = 0; x < acts.size(); x++)
 			{
+				e7.ApplyAction(es7, acts[x]);
 				e.ApplyAction(es, acts[x]);
 			}
+			std::cout << es7 << std::endl << std::endl;
 			std::cout << es << std::endl << std::endl;
 		}
 			break;
@@ -211,6 +282,260 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			//if (unitSim)
 			//	unitSim->GetEnvironment()->GetMapAbstraction()->ToggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
 			break;
+	}
+}
+
+void Compress(const char *pdbType, const char *theFile, const char *compressType, int ratio, const char *outFile)
+{
+	bool minCompression = false;
+	if (strcmp(compressType, "interleave") == 0)
+	{
+		minCompression = false;
+	}
+	else if (strcmp(compressType, "min") == 0)
+	{
+		minCompression = true;
+	}
+	else {
+		printf("Unknown compression '%s'\n", compressType);
+		exit(0);
+	}
+	if (strcmp(pdbType, "corner") == 0)
+	{
+		FourBitArray b;
+		
+		std::vector<bucketInfo> data;
+		std::vector<bucketData> buckets;
+		
+		uint64_t maxBuckSize = GetMaxBucketSize<RubiksCorner, RubiksCornerState>(true);
+		InitTwoPieceData<RubiksCorner, RubiksCornerState>(data, maxBuckSize);
+		InitBucketSize<RubiksCorner, RubiksCornerState>(buckets, maxBuckSize);
+		int64_t totalSize = 0;
+		for (unsigned int x = 0; x < buckets.size(); x++)
+		{
+			totalSize += buckets[x].theSize;
+		}
+		totalSize = (totalSize+ratio-1)/ratio;
+		b.Resize(totalSize);
+		
+		DiskBitFile f(theFile);
+
+		uint64_t avgReg = 0;
+		uint64_t avgComp = 0;
+
+		if (!minCompression)
+		{ // just write first  value
+			printf("Performing interleave compression\n");
+			int64_t index = 0;
+			int64_t realIndex = 0;
+			for (unsigned int x = 0; x < data.size(); x++)
+			{
+				for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+				{
+					int val = f.ReadFileDepth(data[x].bucketID, y);
+					avgReg += val;
+					//mem[index++] = val;
+					assert(realIndex < b.Size());
+					if (0 == index%ratio)
+					{
+						b.Set(realIndex++, val);
+						avgComp += val;
+					}
+					index++;
+				}
+			}
+			b.Write(outFile);
+			printf("%llu entries compressed into %llu\n", index, realIndex);
+			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
+		}
+		else { // write the min of the values
+			printf("Performing min compression\n");
+			int64_t index = 0;
+			int64_t realIndex = 0;
+			int minValue = 0xFF;
+			for (unsigned int x = 0; x < data.size(); x++)
+			{
+				for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+				{
+					int val = f.ReadFileDepth(data[x].bucketID, y);
+					avgReg += val;
+					assert(realIndex < b.Size());
+					index++;
+					minValue = std::min(minValue, val);
+					if (0 == index%ratio)
+					{
+						b.Set(realIndex++, minValue);
+						avgComp += minValue;
+						minValue = 0xFF;
+					}
+				}
+			}
+			if (minValue != 0xFF)
+			{
+				b.Set(realIndex++, minValue);
+			}
+			b.Write(outFile);
+			printf("%llu entries compressed into %llu\n", index, realIndex);
+			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
+		}
+	}
+	if (strcmp(pdbType, "n-edge") == 0)
+	{
+		FourBitArray b;
+		
+		std::vector<bucketInfo> data;
+		std::vector<bucketData> buckets;
+		
+		uint64_t maxBuckSize = GetMaxBucketSize<Rubik7Edge, Rubik7EdgeState>(true);
+		InitTwoPieceData<Rubik7Edge, Rubik7EdgeState>(data, maxBuckSize);
+		InitBucketSize<Rubik7Edge, Rubik7EdgeState>(buckets, maxBuckSize);
+		int64_t totalSize = 0;
+		for (unsigned int x = 0; x < buckets.size(); x++)
+		{
+			totalSize += buckets[x].theSize;
+		}
+		totalSize = (totalSize+ratio-1)/ratio;
+		b.Resize(totalSize);
+		
+		DiskBitFile f(theFile);
+		
+		uint64_t avgReg = 0;
+		uint64_t avgComp = 0;
+		
+		if (!minCompression)
+		{ // just write first  value
+			printf("Performing interleave compression\n");
+			int64_t index = 0;
+			int64_t realIndex = 0;
+			for (unsigned int x = 0; x < data.size(); x++)
+			{
+				for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+				{
+					int val = f.ReadFileDepth(data[x].bucketID, y);
+					avgReg += val;
+					//mem[index++] = val;
+					assert(realIndex < b.Size());
+					if (0 == index%ratio)
+					{
+						b.Set(realIndex++, val);
+						avgComp += val;
+					}
+					index++;
+				}
+			}
+			b.Write(outFile);
+			printf("%llu entries compressed into %llu\n", index, realIndex);
+			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
+		}
+		else { // write the min of the values
+			printf("Performing min compression\n");
+			int64_t index = 0;
+			int64_t realIndex = 0;
+			int minValue = 0xFF;
+			for (unsigned int x = 0; x < data.size(); x++)
+			{
+				for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+				{
+					int val = f.ReadFileDepth(data[x].bucketID, y);
+					avgReg += val;
+					assert(realIndex < b.Size());
+					index++;
+					minValue = std::min(minValue, val);
+					if (0 == index%ratio)
+					{
+						b.Set(realIndex++, minValue);
+						avgComp += minValue;
+						minValue = 0xFF;
+					}
+				}
+			}
+			if (minValue != 0xFF)
+			{
+				b.Set(realIndex++, minValue);
+			}
+			b.Write(outFile);
+			printf("%llu entries compressed into %llu\n", index, realIndex);
+			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
+		}
+	}
+	if (strcmp(pdbType, "edge") == 0)
+	{
+		FourBitArray b;
+		
+		std::vector<bucketInfo> data;
+		std::vector<bucketData> buckets;
+		
+		uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+		InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+		InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+		int64_t totalSize = 0;
+		for (unsigned int x = 0; x < buckets.size(); x++)
+		{
+			totalSize += buckets[x].theSize;
+		}
+		totalSize = (totalSize+ratio-1)/ratio;
+		b.Resize(totalSize);
+		
+		DiskBitFile f(theFile);
+		
+		uint64_t avgReg = 0;
+		uint64_t avgComp = 0;
+		
+		if (!minCompression)
+		{ // just write first  value
+			printf("Performing interleave compression\n");
+			int64_t index = 0;
+			int64_t realIndex = 0;
+			for (unsigned int x = 0; x < data.size(); x++)
+			{
+				for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+				{
+					int val = f.ReadFileDepth(data[x].bucketID, y);
+					avgReg += val;
+					//mem[index++] = val;
+					assert(realIndex < b.Size());
+					if (0 == index%ratio)
+					{
+						b.Set(realIndex++, val);
+						avgComp += val;
+					}
+					index++;
+				}
+			}
+			b.Write(outFile);
+			printf("%llu entries compressed into %llu\n", index, realIndex);
+			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
+		}
+		else { // write the min of the values
+			printf("Performing min compression\n");
+			int64_t index = 0;
+			int64_t realIndex = 0;
+			int minValue = 0xFF;
+			for (unsigned int x = 0; x < data.size(); x++)
+			{
+				for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+				{
+					int val = f.ReadFileDepth(data[x].bucketID, y);
+					avgReg += val;
+					assert(realIndex < b.Size());
+					index++;
+					minValue = std::min(minValue, val);
+					if (0 == index%ratio)
+					{
+						b.Set(realIndex++, minValue);
+						avgComp += minValue;
+						minValue = 0xFF;
+					}
+				}
+			}
+			if (minValue != 0xFF)
+			{
+				b.Set(realIndex++, minValue);
+			}
+			b.Write(outFile);
+			printf("%llu entries compressed into %llu\n", index, realIndex);
+			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
+		}
 	}
 }
 
@@ -289,39 +614,39 @@ void LoadEdgePDB(uint64_t sizeLimit)
 
 void LoadEdge7PDB()
 {
-	if (c.GetEdge7PDB().Size() != 0)
-		return;
-	FourBitArray &b = c.GetEdge7PDB();
-	
-	//uint8_t *mem;
-	std::vector<bucketInfo> data;
-	std::vector<bucketData> buckets;
-	
-	uint64_t maxBuckSize = GetMaxBucketSize<Rubik7Edge, Rubik7EdgeState>(true);
-	InitTwoPieceData<Rubik7Edge, Rubik7EdgeState>(data, maxBuckSize);
-	InitBucketSize<Rubik7Edge, Rubik7EdgeState>(buckets, maxBuckSize);
-	int64_t totalSize = 0;
-	//	const int64_t sizeLimit = 1000000000;
-	for (unsigned int x = 0; x < buckets.size(); x++)
-	  totalSize += buckets[x].theSize;
-	//mem = new uint8_t[totalSize];
-	b.Resize(totalSize);
-	DiskBitFile f("/home/sturtevant/sturtevant/code/cc/rubik/RC-7edge");//RC-9edge");
-	int64_t index = 0;
-	for (unsigned int x = 0; x < data.size(); x++)
-	{
-		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
-		{
-			int val = f.ReadFileDepth(data[x].bucketID, y);
-			b.Set(index++, val);
-			//mem[index++] = val;
-			if (index >= totalSize)
-				break;
-		}
-		if (index >= totalSize)
-			break;
-	}
-	//	c.SetEdgePDB(mem, totalSize);
+//	if (c.GetEdge7PDB().Size() != 0)
+//		return;
+//	FourBitArray &b = c.GetEdge7PDB();
+//	
+//	//uint8_t *mem;
+//	std::vector<bucketInfo> data;
+//	std::vector<bucketData> buckets;
+//	
+//	uint64_t maxBuckSize = GetMaxBucketSize<Rubik7Edge, Rubik7EdgeState>(true);
+//	InitTwoPieceData<Rubik7Edge, Rubik7EdgeState>(data, maxBuckSize);
+//	InitBucketSize<Rubik7Edge, Rubik7EdgeState>(buckets, maxBuckSize);
+//	int64_t totalSize = 0;
+//	//	const int64_t sizeLimit = 1000000000;
+//	for (unsigned int x = 0; x < buckets.size(); x++)
+//	  totalSize += buckets[x].theSize;
+//	//mem = new uint8_t[totalSize];
+//	b.Resize(totalSize);
+//	DiskBitFile f("/home/sturtevant/sturtevant/code/cc/rubik/RC-7edge");//RC-9edge");
+//	int64_t index = 0;
+//	for (unsigned int x = 0; x < data.size(); x++)
+//	{
+//		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+//		{
+//			int val = f.ReadFileDepth(data[x].bucketID, y);
+//			b.Set(index++, val);
+//			//mem[index++] = val;
+//			if (index >= totalSize)
+//				break;
+//		}
+//		if (index >= totalSize)
+//			break;
+//	}
+//	//	c.SetEdgePDB(mem, totalSize);
 }
 
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
@@ -351,7 +676,7 @@ void SolveOneProblem(int instance, int percentage = 100)
 	
 	std::vector<RubiksAction> acts;
 	c.SetPruneSuccessors(true);
-	c.percentage = percentage;
+//	c.percentage = percentage;
 	s = start;
 	IDAStar<RubiksState, RubiksAction> ida;
 	c.SetPruneSuccessors(true);
@@ -370,6 +695,35 @@ void SolveOneProblem(int instance, int percentage = 100)
 	fflush(stdout);
 }
 
+void SolveOneProblemAStar(int instance)
+{
+	RubiksState start, goal;
+	goal.Reset();
+	start.Reset();
+	c.SetPruneSuccessors(false); // clears history
+	GetInstance(start, instance);
+	
+	std::vector<RubiksState> acts;
+	c.SetPruneSuccessors(true);
+	//	c.percentage = percentage;
+	s = start;
+	TemplateAStar<RubiksState, RubiksAction, RubiksCube> astar;
+	Timer t;
+	t.StartTimer();
+	astar.SetUseBPMX(1);
+	astar.GetPath(&c, start, goal, acts);
+	t.EndTimer();
+	printf("Problem %d - %llu expanded; %1.2f elapsed\n", instance+1, astar.GetNodesExpanded(), t.GetElapsedTime());
+	for (unsigned int x = 0; x < acts.size()-1; x++)
+	{
+		printf("%d ", c.GetAction(acts[x], acts[x+1]));
+//		c.ApplyAction(s, acts[x]);
+	}
+	printf("\n");
+	fflush(stdout);
+}
+
+
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 	LoadCornerPDB();
@@ -387,6 +741,52 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 //	c.GetStateFromHash(t, s);
 //	t++;
 //	return;
+}
+
+void RunSimpleTest(const char *edgePDB, const char *cornerPDB)
+{
+	FourBitArray &corner = c.GetCornerPDB();
+	corner.Read(cornerPDB);
+	FourBitArray &edge = c.GetEdgePDB();
+	edge.Read(edgePDB);
+	c.compressionFactor = 2;
+	for (int x = 0; x < 100; x++)
+	{
+		srandom(9283+x*23);
+		SolveOneProblem(x);
+		//		SolveOneProblemAStar(x);
+	}
+}
+
+void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB)
+{
+	FourBitArray &corner = c.GetCornerPDB();
+	corner.Read(cornerPDB);
+	FourBitArray &edgemin = c.GetEdge7PDB(true);
+	edgemin.Read(edgePDBmin);
+	FourBitArray &edgeint = c.GetEdge7PDB(false);
+	edgeint.Read(edgePDBint);
+
+	c.compressionFactor = factor;
+	if (strcmp(compType, "min") == 0)
+		c.minCompression = true;
+	else
+		c.minCompression = false;
+
+	for (int x = 0; x < 100; x++)
+	{
+		srandom(9283+x*23);
+		SolveOneProblem(x);
+//		SolveOneProblemAStar(x);
+	}
+//	for (int x = 0; x < c.edgeDist.size(); x++)
+//	{
+//		printf("edgeDist[%3d] = %llu\n", x, c.edgeDist[x]);
+//	}
+//	for (int x = 0; x < c.cornDist.size(); x++)
+//	{
+//		printf("cornDist[%3d] = %llu\n", x, c.cornDist[x]);
+//	}
 }
 
 void RunTest(int billionEntriesToLoad)
