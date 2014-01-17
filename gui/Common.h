@@ -109,7 +109,8 @@ struct recContext
 	recFrustum frust[MAXPORTS];
 	int numPorts, currPort;
 	GLfloat shapeSize;
-
+	bool moveAllPortsTogether;
+	
 	char message[256]; // buffer for message output
 	float msgTime; // message posting time for expiration
 	

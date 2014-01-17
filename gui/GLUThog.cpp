@@ -273,7 +273,16 @@ void mousePressedButton(int button, int state, int x, int y)
 			{ // if we are currently tracking, end trackball
 				gTrackball = GL_FALSE;
 				if (gTrackBallRotation[0] != 0.0)
-					addToRotationTrackball(gTrackBallRotation, pContextInfo->rotations[pContextInfo->currPort].worldRotation);
+				{
+					if (pContextInfo->moveAllPortsTogether)
+					{
+						for (int x = 0; x < pContextInfo->numPorts; x++)
+							addToRotationTrackball(gTrackBallRotation, pContextInfo->rotations[x].worldRotation);
+					}
+					else {
+						addToRotationTrackball(gTrackBallRotation, pContextInfo->rotations[pContextInfo->currPort].worldRotation);
+					}
+				}
 				gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
 			}
 			else if (gDolly)
@@ -291,7 +300,16 @@ void mousePressedButton(int button, int state, int x, int y)
 			{ // if we are currently tracking, end trackball
 				gTrackball = GL_FALSE;
 				if (gTrackBallRotation[0] != 0.0)
-					addToRotationTrackball (gTrackBallRotation, pContextInfo->rotations[pContextInfo->currPort].worldRotation);
+				{
+					if (pContextInfo->moveAllPortsTogether)
+					{
+						for (int x = 0; x < pContextInfo->numPorts; x++)
+							addToRotationTrackball(gTrackBallRotation, pContextInfo->rotations[x].worldRotation);
+					}
+					else {
+						addToRotationTrackball(gTrackBallRotation, pContextInfo->rotations[pContextInfo->currPort].worldRotation);
+					}
+				}
 				gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
 			}
 			else if (gPan)
@@ -346,7 +364,17 @@ void mousePressedButton(int button, int state, int x, int y)
 		else if (gTrackball) { // end trackball
 			gTrackball = GL_FALSE;
 			if (gTrackBallRotation[0] != 0.0)
-				addToRotationTrackball (gTrackBallRotation, pContextInfo->rotations[pContextInfo->currPort].worldRotation);
+			{
+				if (pContextInfo->moveAllPortsTogether)
+				{
+					for (int x = 0; x < pContextInfo->numPorts; x++)
+						addToRotationTrackball(gTrackBallRotation, pContextInfo->rotations[x].worldRotation);
+				}
+				else {
+					addToRotationTrackball(gTrackBallRotation, pContextInfo->rotations[pContextInfo->currPort].worldRotation);
+				}
+				//addToRotationTrackball (gTrackBallRotation, pContextInfo->rotations[pContextInfo->currPort].worldRotation);
+			}
 			gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
 		} 
 		gTrackingContextInfo = NULL;
@@ -359,8 +387,18 @@ static void mousePan (int x, int y, pRecContext pContextInfo)
 {
 	GLfloat panX = (gDollyPanStartPoint[0] - x) / (900.0f / -pContextInfo->camera[pContextInfo->currPort].viewPos.z);
 	GLfloat panY = (gDollyPanStartPoint[1] - y) / (900.0f / -pContextInfo->camera[pContextInfo->currPort].viewPos.z);
-	pContextInfo->camera[pContextInfo->currPort].viewPos.x += panX;
-	pContextInfo->camera[pContextInfo->currPort].viewPos.y += panY;
+	if (pContextInfo->moveAllPortsTogether)
+	{
+		for (int x = 0; x < pContextInfo->numPorts; x++)
+		{
+			pContextInfo->camera[x].viewPos.x += panX;
+			pContextInfo->camera[x].viewPos.y += panY;
+		}
+	}
+	else {
+		pContextInfo->camera[pContextInfo->currPort].viewPos.x += panX;
+		pContextInfo->camera[pContextInfo->currPort].viewPos.y += panY;
+	}
 	gDollyPanStartPoint[0] = (long) x;
 	gDollyPanStartPoint[1] = (long) y;
 }
@@ -370,10 +408,23 @@ static void mousePan (int x, int y, pRecContext pContextInfo)
 static void mouseDolly (int x, int y, pRecContext pContextInfo)
 {
 	GLfloat dolly = (gDollyPanStartPoint[1] - y) * -pContextInfo->camera[pContextInfo->currPort].viewPos.z / 300.0f;
-	pContextInfo->camera[pContextInfo->currPort].viewPos.z += dolly;
-	if (pContextInfo->camera[pContextInfo->currPort].viewPos.z == 0.0) // do not let z = 0.0
-		pContextInfo->camera[pContextInfo->currPort].viewPos.z = 0.0001;
-	updateProjection(pContextInfo, pContextInfo->currPort);  // update projection matrix
+
+	if (pContextInfo->moveAllPortsTogether)
+	{
+		for (int x = 0; x < pContextInfo->numPorts; x++)
+		{
+			pContextInfo->camera[x].viewPos.z += dolly;
+			if (pContextInfo->camera[x].viewPos.z == 0.0) // do not let z = 0.0
+				pContextInfo->camera[x].viewPos.z = 0.0001;
+			updateProjection(pContextInfo, x);  // update projection matrix
+		}
+	}
+	else {
+		pContextInfo->camera[pContextInfo->currPort].viewPos.z += dolly;
+		if (pContextInfo->camera[pContextInfo->currPort].viewPos.z == 0.0) // do not let z = 0.0
+			pContextInfo->camera[pContextInfo->currPort].viewPos.z = 0.0001;
+		updateProjection(pContextInfo, pContextInfo->currPort);  // update projection matrix
+	}
 	gDollyPanStartPoint[0] = (long) x;
 	gDollyPanStartPoint[1] = (long) y;
 }
@@ -509,7 +560,7 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	
 	if ((gTrackingContextInfo == pContextInfo) && gTrackBallRotation[0] != 0.0f) // if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
 	{
-		if (pContextInfo->currPort == currPort)
+		if (pContextInfo->currPort == currPort || pContextInfo->moveAllPortsTogether)
 			glRotatef (gTrackBallRotation[0], gTrackBallRotation[1], gTrackBallRotation[2], gTrackBallRotation[3]);
 	}
 	else {

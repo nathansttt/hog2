@@ -195,6 +195,11 @@ void PrintCommandLineArguments()
 // Process command line arguments
 void ProcessCommandLineArgs(int argc, char *argv[])
 {
+	for (int x = 0; x < argc; x++)
+	{
+		printf("%s ", argv[x]);
+	}
+	printf("\n");
 	//initializeCommandLineHandlers();
 	// printCommandLineArguments();
 
@@ -282,6 +287,7 @@ void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType e)
 // intializes context conditions
 void initialConditions(pRecContext pContextInfo)
 {
+	pContextInfo->moveAllPortsTogether = true;
 	pContextInfo->info = kInfoState;
 	pContextInfo->animate = kAnimateState;
 	pContextInfo->drawCaps = 0;
