@@ -61,6 +61,9 @@ public:
 	{
 		pruneSuccessors = false;
 		
+		edgeDist.resize(16);
+		cornDist.resize(16);
+
 		//uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
 		//InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
 		//InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
@@ -104,24 +107,34 @@ public:
 	
 	FourBitArray &GetCornerPDB() { return cornerPDB; }
 	FourBitArray &GetEdgePDB() { return edgePDB; }
-	FourBitArray &GetEdge7PDB() { return edge7PDB; }
+	FourBitArray &GetEdge7PDB(bool min) { if (min) return edge7PDBmin; return edge7PDBint; }
 
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const RubiksState&) const;
+	virtual void OpenGLDrawCorners(const RubiksState&) const;
+	virtual void OpenGLDrawEdges(const RubiksState&) const;
+	virtual void OpenGLDrawEdgeDual(const RubiksState&) const;
+	virtual void OpenGLDrawCenters() const;
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const RubiksState&, const RubiksState&, float) const;
 	virtual void OpenGLDraw(const RubiksState&, const RubiksAction&) const;
-	int64_t percentage;
+	//int64_t percentage;
+	int compressionFactor;
+	bool minCompression;
+	std::vector<uint64_t> edgeDist;
+	std::vector<uint64_t> cornDist;
 private:
 	void SetFaceColor(int face) const;
 	mutable std::vector<RubiksAction> history;
 	RubiksCorner c;
 	RubikEdge e;
-	RubikEdgeState dual;
+	mutable RubikEdgeState dual;
+	mutable Rubik7EdgeState e7dual;
 	Rubik7Edge e7;
 	FourBitArray cornerPDB;
 	FourBitArray edgePDB;
-	FourBitArray edge7PDB;
+	FourBitArray edge7PDBmin;
+	FourBitArray edge7PDBint;
 
 //	DiskBitFile f;
 	//std::vector<bucketInfo> data;

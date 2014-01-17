@@ -735,12 +735,12 @@ BaseMapOccupancyInterface::BaseMapOccupancyInterface(Map* m)
 {
  	mapWidth = m->GetMapWidth();
  	mapHeight = m->GetMapHeight();
-	bitvec = new BitVector(mapWidth * mapHeight);
+	bitvec.resize(mapWidth*mapHeight);// = new BitVector(mapWidth * mapHeight);
 	
 	//initialize the bitvector
-	for(int i=0; i<m->GetMapWidth(); i++)
-		for(int j=0; j<m->GetMapHeight(); j++)
-			bitvec->Set(CalculateIndex(i,j), false);
+//	for(int i=0; i<m->GetMapWidth(); i++)
+//		for(int j=0; j<m->GetMapHeight(); j++)
+//			bitvec->Set(CalculateIndex(i,j), false);
 }
 
 
@@ -752,8 +752,8 @@ BaseMapOccupancyInterface::BaseMapOccupancyInterface(Map* m)
 */
 BaseMapOccupancyInterface::~BaseMapOccupancyInterface()
 {
-	delete bitvec;
-	bitvec = 0;
+//	delete bitvec;
+//	bitvec = 0;
 }
 
 /** Sets the occupancy of a state.
@@ -769,7 +769,8 @@ void BaseMapOccupancyInterface::SetStateOccupied(const xyLoc &s, bool occupied)
 	// Make sure the location is valid
 	// unsigned, so must be greater than 0
 	assert(/*(s.x>=0) &&*/ (s.x<mapWidth)/* && (s.y>=0)*/ && (s.y<mapHeight));
-	bitvec->Set(CalculateIndex(s.x,s.y), occupied);
+//	bitvec->Set(CalculateIndex(s.x,s.y), occupied);
+	bitvec[CalculateIndex(s.x,s.y)] = occupied;
 }
 
 /** Returns the occupancy of a state.
@@ -784,7 +785,8 @@ bool BaseMapOccupancyInterface::GetStateOccupied(const xyLoc &s)
 {
 	// unsigned, so must be greater than 0
 	assert(/*s.x>=0 &&*/ s.x<=mapWidth && /*s.y>=0 && */s.y<=mapHeight);
-	return bitvec->Get(CalculateIndex(s.x,s.y));
+	//return bitvec->Get(CalculateIndex(s.x,s.y));
+	return bitvec[CalculateIndex(s.x,s.y)];
 }
 
 /** Gets the index into the bitvector. 

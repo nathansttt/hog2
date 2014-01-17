@@ -59,7 +59,8 @@ public:
 	virtual void MoveUnitOccupancy(const xyLoc &, const xyLoc&);
 
 private:
-	BitVector *bitvec; /// For each map position, set if occupied
+	//BitVector *bitvec; /// For each map position, set if occupied
+	std::vector<bool> bitvec;
 	long mapWidth; /// Used to compute index into bitvector
 	long mapHeight; /// used to compute index into bitvector
 

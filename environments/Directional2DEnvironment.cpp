@@ -649,20 +649,8 @@ void Directional2DEnvironment::OpenGLDraw(const xySpeedHeading& oldState, const 
 		DEG = 24;
 	GLfloat r, g, b, t;
 	GetColor(r, g, b, t);
-	//printf("Drawing %f percent\n", perc);
-//	std::cout << oldState << std::endl;
-//	std::cout << newState << std::endl;
 
 	GLdouble xx, yy, zz, rad;
-
-//	glBegin(GL_LINES);
-//	glColor3f(0, 0, 1.0);
-//	map->GetOpenGLCoord(oldState.x, oldState.y, xx, yy, zz, rad);
-//	glVertex3f(xx-rad, yy-rad, zz-rad);
-//	map->GetOpenGLCoord(newState.x, newState.y, xx, yy, zz, rad);
-//	glVertex3f(xx-rad, yy-rad, zz-rad);
-//	glEnd();	
-	
 	map->GetOpenGLCoord(perc*newState.x + (1-perc)*oldState.x, perc*newState.y + (1-perc)*oldState.y, xx, yy, zz, rad);
 	
 	float rot = (1-perc)*oldState.rotation+perc*newState.rotation;

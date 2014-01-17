@@ -95,7 +95,7 @@ public:
 	void SetFourConnected() { fourConnected = true; }
 	void SetEightConnected() { fourConnected = false; }
 	
-	void SetCost(const xyhLoc &, double cost);
+	void SetCost(const xyhLoc &, double seen, double dist);
 	void ClearCost(const xyhLoc &);
 	void ClearAllCosts();
 	bool drawWeights;
@@ -106,7 +106,11 @@ protected:
 	std::vector<float> cosTable;
 	std::vector<float> sinTable;
 
-	typedef __gnu_cxx::hash_map<uint64_t, double, Hash64> CostTable;
+	// P is visibility setting
+	double GetCost(const xyhLoc &a, const xyhLoc &b, double P, double d);
+
+	struct hdData { double seen; double dist; };
+	typedef __gnu_cxx::hash_map<uint64_t, hdData, Hash64> CostTable;
 	CostTable costs;
 	bool LegalState(const xyhLoc &s);
 	void BuildAngleTables();

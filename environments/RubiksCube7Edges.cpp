@@ -10,6 +10,20 @@
 #include "GLUtil.h"
 #include <cassert>
 
+void Rubik7EdgeState::GetDual(Rubik7EdgeState &s) const
+{
+//	for (int x = 0; x < 12; x++)
+//	{
+//		s.SetCubeInLoc(0, 0xF);
+//		s.SetCubeOrientation(x, 0);
+//	}
+	for (int x = 0; x < 12; x++)
+	{
+		s.SetCubeInLoc(GetCubeInLoc(x), x);
+		s.SetCubeOrientation(x, GetCubeOrientation(GetCubeInLoc(x)));
+	}
+}
+
 void Rubik7Edge::GetSuccessors(const Rubik7EdgeState &nodeID, std::vector<Rubik7EdgeState> &neighbors) const
 {
 	Rubik7EdgeState s;
@@ -385,14 +399,14 @@ int64_t Rubik7Edge::getMaxSinglePlayerRank2(int64_t firstIndex)
 void Rubik7Edge::rankPlayerFirstTwo(const Rubik7EdgeState &node, int, int64_t &rank)
 {
 	uint64_t hash1 = 0;
-	int locs[pieces];
-	for (int x = 0; x < 12; x++)
-	{
-		if (node.GetCubeInLoc(x) < pieces)
-		{
-			locs[node.GetCubeInLoc(x)] = x;
-		}
-	}
+//	int locs[pieces];
+//	for (int x = 0; x < 12; x++)
+//	{
+//		if (node.GetCubeInLoc(x) < pieces)
+//		{
+//			locs[node.GetCubeInLoc(x)] = x;
+//		}
+//	}
 	for (unsigned int x = 0; x < pieces; x++)
 	{
 		//hash1 = (hash1<<1)+node.GetCubeOrientation(locs[x]);
@@ -457,23 +471,6 @@ void Rubik7Edge::rankPlayerRemaining(const Rubik7EdgeState &node, int, int64_t &
 
 uint64_t Rubik7Edge::GetStateHash(const Rubik7EdgeState &node) const
 {
-//	uint64_t perm = 0, dual = 0;
-//	for (int x = 0; x < 12; x++)
-//	{
-//		int val = node.GetCubeInLoc(x);
-//		set(perm, x, val);
-//		set(dual, val, x);
-//	}
-//	
-//	uint64_t hashVal = 0;
-//	for (int x = 0; x < 11; x++)
-//	{
-//		hashVal = (hashVal<<1)+node.GetCubeOrientation(11-x);
-//	}
-//	//	return (MRRank(12, perm, dual)<<11)|hashVal;
-//	hashVal = hashVal*Factorial(12)+MRRank(12, perm, dual);
-//	return hashVal;
-//	std::cout << node << std::endl;
 	uint64_t hash1 = 0;
 	int locs[pieces];
 	for (int x = 0; x < 12; x++)
@@ -512,54 +509,6 @@ uint64_t Rubik7Edge::GetStateHash(const Rubik7EdgeState &node) const
 	}
 	//printf("bits: %llu perm: %llu\n", hash1, hash2);
 	return hash1*Factorial(12)/Factorial(12-pieces)+hash2;
-}
-
-// 38.522
-uint64_t Rubik7Edge::MRRank(int n, uint64_t perm, uint64_t dual) const
-{
-	int ss[12];
-	int ssLoc = 0;
-	//	static std::vector<int> ss;
-	//	ss.resize(0);
-	int s;
-	for (int i = n; i > 1; i--)
-	{
-		s = get(perm, i-1);
-		ss[ssLoc] = s;
-		ssLoc++;
-		//		ss.push_back(s);
-		swap(perm, i-1, get(dual, i-1));
-		swap(dual, s, i-1);
-	}
-	uint64_t result = 0;
-	int cnt = 2;
-	//	printf("0");
-	for (int i = (int)ssLoc-1; i >= 0; i--)
-	{
-		//		printf(")*%d + %d ", cnt, ss[i]);
-		result *= cnt;
-		result += ss[i];
-		cnt++;
-	}
-	//	printf("\n");
-	return result;
-	//	if (n == 1)
-	//		return 0;
-	//	int s = get(perm, n-1);
-	//	swap(perm, n-1, get(dual, n-1));
-	//	swap(dual, s, n-1);
-	//	return s+n*MRRank(n-1, perm, dual);
-}
-
-// 53.5% time
-uint64_t Rubik7Edge::MRRank2(int n, uint64_t perm, uint64_t dual) const
-{
-	if (n == 1)
-		return 0;
-	int s = get(perm, n-1);
-	swap(perm, n-1, get(dual, n-1));
-	swap(dual, s, n-1);
-	return s+n*MRRank2(n-1, perm, dual);
 }
 
 void Rubik7Edge::GetStateFromHash(uint64_t hash, Rubik7EdgeState &node) const
@@ -613,102 +562,15 @@ void Rubik7Edge::GetStateFromHash(uint64_t hash, Rubik7EdgeState &node) const
 		node.SetCubeOrientation(x, bits&1);
 		bits = bits>>1;
 	}
-//	std::cout << node << std::endl;
-//	for (unsigned int x = 0; x < pieces; x++)
-//	{
-//		hash1 = (hash1<<1)+node.GetCubeOrientation(locs[x]);
-//	}
-}
-
-// 38.982 sec elapsed
-// 3.5 % of time in function
-// Overall locality: 936842 / 1800000 = 0.520468
-void Rubik7Edge::MRUnrank(int n, uint64_t r, uint64_t &perm) const
-{
-	if (n > 0)
+	int next = pieces;
+	for (int x = 0; x < 12; x++)
 	{
-		//		printf("Swap %d %llu\n", n-1, r%n);
-		swap(perm, n-1, r%n);
-		MRUnrank(n-1, r/n, perm);
+		if (node.GetCubeInLoc(x) == 0xF)
+			node.SetCubeInLoc(x, next++);
+		//node.SetCubeOrientation(x, 0);
 	}
+
 }
-
-//38.152 sec elapsed
-void Rubik7Edge::MRUnrank2(int n, uint64_t r, uint64_t &perm) const
-{
-	for (int i = n; i > 0; i--)
-	{
-		//		printf("Swap %d %llu\n", i-1, r%i);
-		swap(perm, i-1, r%i);
-		r = r/i;
-	}
-}
-
-
-// 50.970 sec elapsed
-// 73.9% of time inside this function
-// Overall locality: 1044342 / 1800000 = 0.580190
-//uint64_t Rubik7Edge::GetStateHash(const Rubik7EdgeState &node) const
-//{
-//	static uint64_t Factorial[21] =
-//	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
-//		6227020800ll, 87178291200ll, 1307674368000ll, 20922789888000ll, 355687428096000ll,
-//		6402373705728000ll, 121645100408832000ll, 2432902008176640000ll };
-//
-//	int puzzle[12];
-//	for (int x = 0; x < 12; x++)
-//		puzzle[x] = node.GetCubeInLoc(x);
-//
-//	uint64_t hashVal = 0;
-//	int numEntriesLeft = 12;
-//	for (unsigned int x = 0; x < 12; x++)
-//	{
-//		hashVal += puzzle[x]*Factorial[numEntriesLeft-1];
-//		numEntriesLeft--;
-//		for (unsigned y = x; y < 12; y++)
-//		{
-//			if (puzzle[y] > puzzle[x])
-//				puzzle[y]--;
-//		}
-//	}
-//	for (int x = 0; x < 11; x++)
-//	{
-//		hashVal = (hashVal<<1)+node.GetCubeOrientation(x);
-//	}
-//	return hashVal;
-//}
-//
-//void Rubik7Edge::GetStateFromHash(uint64_t hash, Rubik7EdgeState &node) const
-//{
-//	int puzzle[12];
-//	uint64_t hashVal = hash;
-//
-//	int cnt = 0;
-//	for (int x = 10; x >= 0; x--)
-//	{
-//		node.SetCubeOrientation(x, hashVal&0x1);
-//		cnt += hashVal & 0x1;
-//		hashVal >>= 1;
-//	}
-//	if (1 == cnt%2)
-//	{
-//		node.SetCubeOrientation(11, true);
-//	}
-//	int numEntriesLeft = 1;
-//	for (int x = 12-1; x >= 0; x--)
-//	{
-//		puzzle[x] = hashVal%numEntriesLeft;
-//		hashVal /= numEntriesLeft;
-//		numEntriesLeft++;
-//		for (int y = x+1; y < 12; y++)
-//		{
-//			if (puzzle[y] >= puzzle[x])
-//				puzzle[y]++;
-//		}
-//	}
-//	for (int x = 0; x < 12; x++)
-//		node.SetCubeInLoc(x, puzzle[x]);
-//}
 
 void Rubik7Edge::OpenGLDraw() const
 {

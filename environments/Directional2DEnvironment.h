@@ -16,7 +16,7 @@
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "ReservationProvider.h"
-#include "BitVector.h"
+//#include "BitVector.h"
 
 #include <cassert>
 

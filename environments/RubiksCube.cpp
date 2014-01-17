@@ -9,10 +9,15 @@
 #include "RubiksCube.h"
 #include <cassert>
 #include <cstdio>
+#include <algorithm>
 
 void RubiksCube::GetSuccessors(const RubiksState &nodeID, std::vector<RubiksState> &neighbors) const
 {
-	assert(false);
+	neighbors.resize(18);
+	for (int x = 0; x < 18; x++)
+	{
+		GetNextState(nodeID, x, neighbors[x]);
+	}
 }
 
 void RubiksCube::GetActions(const RubiksState &nodeID, std::vector<RubiksAction> &actions) const
@@ -40,10 +45,20 @@ void RubiksCube::GetActions(const RubiksState &nodeID, std::vector<RubiksAction>
 			actions.push_back(x);
 		}
 	}
+//	std::random_shuffle(actions.begin(), actions.end());
 }
 
 RubiksAction RubiksCube::GetAction(const RubiksState &s1, const RubiksState &s2) const
 {
+	//std::vector<RubiksAction> succ;
+	//GetActions(s1, succ);
+	RubiksState tmp;
+	for (int x = 0; x < 18; x++)
+	{
+		GetNextState(s1, x, tmp);
+		if (tmp == s2)
+			return x;
+	}
 	assert(false);
 	return 0;
 }
@@ -71,16 +86,6 @@ void RubiksCube::UndoAction(RubiksState &s, RubiksAction a) const
 
 }
 
-//void ApplyMove(RubiksState &s, RubikCornerMove *a)
-//{
-//	
-//}
-//
-//void UndoMove(RubiksState &s, RubikCornerMove *a)
-//{
-//	
-//}
-
 void RubiksCube::GetNextState(const RubiksState &s1, RubiksAction a, RubiksState &s2) const
 {
 	s2 = s1;
@@ -104,43 +109,43 @@ bool RubiksCube::InvertAction(RubiksAction &a) const
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 {
 	double val = 0;
-	if (cornerPDB.Size() > 0)
-	{
-		val = cornerPDB.Get(c.GetStateHash(node1.corner));
-	}
-	if (edge7PDB.Size() > 0)
-	{
-		static int64_t maxVal = e7.getMaxSinglePlayerRank();
-		uint64_t index = e7.GetStateHash(node1.edge7);
-		if (index*100 < percentage*maxVal)
-		{
-			float res = edge7PDB.Get(index);
-			val = max(val, res);
-		}
-	}
-	//uint8_t *mem;
 	
-//	int64_t r1, r2;
-//	e.rankPlayer(node1.edge, 0, r1, r2);
-//	double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2); // twoPieceData[x].bucketOffset
-//	val = max(val, edge);
-	if (edgePDB.Size() > 0)
+		// corner PDB
+	uint64_t hash = c.GetStateHash(node1.corner);
+	val = cornerPDB.Get(hash);
+
+	// edge PDB
+	hash = e7.GetStateHash(node1.edge7);
+
+	//	// edge PDB
+	if (0 == hash%compressionFactor)
 	{
-		uint64_t index = e.GetStateHash(node1.edge);
-		if (index < edgePDB.Size())
-		{
-			val = max(val, edgePDB.Get(index));
-		}
-		else {
-			node1.edge.GetDual(dual);
-			uint64_t index = e.GetStateHash(dual);
-			if (index < edgePDB.Size())
-			{
-				val = max(val, edgePDB.Get(index));
-			}
-		}
+		double val2 = edge7PDBint.Get(hash/compressionFactor);
+		if (val2 > 8)
+			val2 = 8;
+		val = max(val, val2);
+	}
+	node1.edge7.GetDual(e7dual);
+	hash = e7.GetStateHash(e7dual);
+
+	if (0 == hash%compressionFactor)
+	{
+		double val2 = edge7PDBint.Get(hash/compressionFactor);
+		if (val2 > 8)
+			val2 = 8;
+		val = max(val, val2);
 	}
 	
+	return val;
+
+	// load PDB values directly from disk!
+	// make sure that "data" is initialized with the right constructor calls for the data
+//    int64_t r1, r2;
+//    e.rankPlayer(node1.edge, 0, r1, r2);
+//    double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2);
+//    if (edge > 10)
+//        edge = 10;
+//    val = max(val, edge);
 	return val;
 }
 
@@ -185,12 +190,39 @@ void RubiksCube::OpenGLDraw() const
 void RubiksCube::OpenGLDraw(const RubiksState&s) const
 {
 	e.OpenGLDraw(s.edge);
-//	c.OpenGLDraw(s.corner);
+	c.OpenGLDraw(s.corner);
+	OpenGLDrawCenters();
+}
 
+void RubiksCube::OpenGLDrawCorners(const RubiksState&s) const
+{
+	c.OpenGLDraw(s.corner);
+	OpenGLDrawCenters();
+}
+
+void RubiksCube::OpenGLDrawEdges(const RubiksState&s) const
+{
+	Rubik7EdgeState e7tmp;
+	s.edge7.GetDual(e7tmp);
+	e7.OpenGLDraw(e7tmp);
+	OpenGLDrawCenters();
+}
+
+void RubiksCube::OpenGLDrawEdgeDual(const RubiksState&s) const
+{
+	s.edge.GetDual(dual);
+	e.OpenGLDraw(dual);
+	OpenGLDrawCenters();
+}
+
+
+void RubiksCube::OpenGLDrawCenters() const
+{
+	
 	float scale = 0.3;
 	float offset = 0.95*scale/3.0;
 	glBegin(GL_QUADS);
-
+	
 	SetFaceColor(0);
 	glVertex3f(-offset, -scale, -offset);
 	glVertex3f(offset, -scale, -offset);
@@ -202,19 +234,19 @@ void RubiksCube::OpenGLDraw(const RubiksState&s) const
 	glVertex3f(offset, scale, -offset);
 	glVertex3f(offset, scale, offset);
 	glVertex3f(-offset, scale, offset);
-
+	
 	SetFaceColor(1);
 	glVertex3f(-scale, -offset, -offset);
 	glVertex3f(-scale, offset, -offset);
 	glVertex3f(-scale, offset, offset);
 	glVertex3f(-scale, -offset, offset);
-
+	
 	SetFaceColor(3);
 	glVertex3f(scale, -offset, -offset);
 	glVertex3f(scale, offset, -offset);
 	glVertex3f(scale, offset, offset);
 	glVertex3f(scale, -offset, offset);
-
+	
 	SetFaceColor(2);
 	glVertex3f(-offset, -offset, -scale);
 	glVertex3f(offset, -offset, -scale);
@@ -245,24 +277,24 @@ void RubiksCube::OpenGLDraw(const RubiksState&s) const
 	glVertex3f(-scale, 3.0*offset, 3.0*offset);
 	glVertex3f(-scale, -3.0*offset, 3.0*offset);
 	
-//	SetFaceColor(3);
+	//	SetFaceColor(3);
 	glVertex3f(scale, -3.0*offset, -3.0*offset);
 	glVertex3f(scale, 3.0*offset, -3.0*offset);
 	glVertex3f(scale, 3.0*offset, 3.0*offset);
 	glVertex3f(scale, -3.0*offset, 3.0*offset);
 	
-//	SetFaceColor(2);
+	//	SetFaceColor(2);
 	glVertex3f(-3.0*offset, -3.0*offset, -scale);
 	glVertex3f(3.0*offset, -3.0*offset, -scale);
 	glVertex3f(3.0*offset, 3.0*offset, -scale);
 	glVertex3f(-3.0*offset, 3.0*offset, -scale);
 	
-//	SetFaceColor(4);
+	//	SetFaceColor(4);
 	glVertex3f(-3.0*offset, -3.0*offset, scale);
 	glVertex3f(3.0*offset, -3.0*offset, scale);
 	glVertex3f(3.0*offset, 3.0*offset, scale);
 	glVertex3f(-3.0*offset, 3.0*offset, scale);
-glEnd();
+	glEnd();
 }
 
 void RubiksCube::SetFaceColor(int theColor) const

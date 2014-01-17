@@ -106,11 +106,11 @@ double Map2DHeading::HCost(const xyhLoc &l1, const xyhLoc &l2)
 	return h1;
 }
 
-double GetCost(const xyhLoc &a, const xyhLoc &b, double P)
+double Map2DHeading::GetCost(const xyhLoc &a, const xyhLoc &b, double P, double D)
 {
 	if (a.x == b.x && a.y == b.y)
 	{
-		cout << "gcost of " << a << " relative to " << b << " is " << 100.0 << endl;
+		//cout << "gcost of " << a << " relative to " << b << " is " << 100.0 << endl;
 		return 100;
 	}
 	float heading = atan2(a.x-b.x, a.y-b.y);
@@ -118,7 +118,9 @@ double GetCost(const xyhLoc &a, const xyhLoc &b, double P)
 	conv = conv%360;
 	if (conv > 180)
 		conv = 360-conv;
-	printf("Relative heading: %d\n", conv);
+	//printf("Relative heading: %d\n", conv);
+	
+	
 	//	for (float P = -1; P <= 1; P += 0.5)
 	//	{
 	//		float cost = (P<0)?((1.0-(float)conv/180.0)*(-P)):(((float)conv/180.0)*(P));
@@ -128,10 +130,10 @@ double GetCost(const xyhLoc &a, const xyhLoc &b, double P)
 	//float cost = (P<0)?((1.0-(float)conv/90.0)*(-P)):(((float)conv/90.0-1.0)*(P));
 	//float cost = (P<0)?((1.0-(float)conv/180.0)*(-P)):(((float)conv/180.0)*(P));
 	float dist = sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
-	// target distance is 5
-	float cost2 = min(fabs(2.0-dist)/2.0, 1.0);
+	// target distance is 2.0
+	float cost2 = min(fabs(D-dist)/D, 1.0);
 //	dist *= dist;
-	cout << "gcost of " << a << " relative to " << b << " is " << 10*cost1/dist+cost2 << endl;
+	//cout << "gcost of " << a << " relative to " << b << " is " << 10*cost1/dist+cost2 << endl;
 	return 10*cost1/dist+cost2;//+((dist<16)?fabs(8.0-dist):0);
 }
 
@@ -146,7 +148,7 @@ double Map2DHeading::GCost(const xyhLoc &node1, const xyhLoc &node2)
 	{
 		xyhLoc tmp;
 		GetStateFromHash(it->first, tmp);
-		costModifier += GetCost(node1, tmp, it->second);
+		costModifier += GetCost(node1, tmp, it->second.seen, it->second.dist);
 	}
 //	CostTable::iterator iter = costs.find(GetStateHash(node1));
 //	if (iter != costs.end())
@@ -171,7 +173,7 @@ double Map2DHeading::GCost(const xyhLoc &node1, const xyhAct &act)
 	{
 		xyhLoc tmp;
 		GetStateFromHash(it->first, tmp);
-		costModifier += GetCost(node1, tmp, it->second);
+		costModifier += GetCost(node1, tmp, it->second.seen, it->second.dist);
 	}
 //	CostTable::iterator iter = costs.find(GetStateHash(node1));
 //	if (iter != costs.end())
@@ -378,9 +380,10 @@ float Map2DHeading::myCos(int dir) const
 	return cosTable[dir];
 }
 
-void Map2DHeading::SetCost(const xyhLoc &l, double cost)
+void Map2DHeading::SetCost(const xyhLoc &l, double seen, double dist)
 {
-	costs[GetStateHash(l)] = cost;
+	hdData d = {seen, dist};
+	costs[GetStateHash(l)] = d;
 }
 
 void Map2DHeading::ClearCost(const xyhLoc &l)
