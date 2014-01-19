@@ -666,7 +666,7 @@ void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 }
 
 void GetInstance(RubiksState &start, int which);
-void SolveOneProblem(int instance, int percentage = 100)
+void SolveOneProblem(int instance, const char *txt)
 {
 	RubiksState start, goal;
 	goal.Reset();
@@ -685,7 +685,7 @@ void SolveOneProblem(int instance, int percentage = 100)
 	ida.SetUseBDPathMax(true);
 	ida.GetPath(&c, start, goal, acts);
 	t.EndTimer();
-	printf("[%d] Problem %d - %llu expanded; %1.2f elapsed\n", percentage, instance+1, ida.GetNodesExpanded(), t.GetElapsedTime());
+	printf("[%s] Problem %d - %llu expanded; %1.2f elapsed\n", txt, instance+1, ida.GetNodesExpanded(), t.GetElapsedTime());
 	for (unsigned int x = 0; x < acts.size(); x++)
 	{
 		printf("%d ", acts[x]);
@@ -713,7 +713,7 @@ void SolveOneProblemAStar(int instance)
 	astar.SetUseBPMX(1);
 	astar.GetPath(&c, start, goal, acts);
 	t.EndTimer();
-	printf("Problem %d - %llu expanded; %1.2f elapsed\n", instance+1, astar.GetNodesExpanded(), t.GetElapsedTime());
+	printf("[AStar] Problem %d - %llu expanded; %1.2f elapsed\n", instance+1, astar.GetNodesExpanded(), t.GetElapsedTime());
 	for (unsigned int x = 0; x < acts.size()-1; x++)
 	{
 		printf("%d ", c.GetAction(acts[x], acts[x+1]));
@@ -733,7 +733,7 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 	for (int x = 3; x < 4; x++)
 	{
 		srandom(9283+x*23);
-		SolveOneProblem(x);
+		SolveOneProblem(x, "online");
 	}
 	
 //	LoadCornerPDB();
@@ -753,7 +753,7 @@ void RunSimpleTest(const char *edgePDB, const char *cornerPDB)
 	for (int x = 0; x < 100; x++)
 	{
 		srandom(9283+x*23);
-		SolveOneProblem(x);
+		SolveOneProblem(x, "2x");
 		//		SolveOneProblemAStar(x);
 	}
 }
@@ -761,23 +761,45 @@ void RunSimpleTest(const char *edgePDB, const char *cornerPDB)
 void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB)
 {
 	FourBitArray &corner = c.GetCornerPDB();
+	printf("Loading corner pdb: %s\n", cornerPDB);
 	corner.Read(cornerPDB);
 	FourBitArray &edgemin = c.GetEdge7PDB(true);
+	printf("Loading edge min pdb: %s\n", edgePDBmin);
 	edgemin.Read(edgePDBmin);
 	FourBitArray &edgeint = c.GetEdge7PDB(false);
+	printf("Loading edge interleave pdb: %s\n", edgePDBint);
 	edgeint.Read(edgePDBint);
 
 	c.compressionFactor = factor;
 	if (strcmp(compType, "min") == 0)
+	{
+		printf("Using min compression\n");
 		c.minCompression = true;
-	else
+	}
+	else {
+		printf("Using interleave compression\n");
 		c.minCompression = false;
+	}
 
 	for (int x = 0; x < 100; x++)
 	{
-		srandom(9283+x*23);
-		SolveOneProblem(x);
-//		SolveOneProblemAStar(x);
+		for (int t = 0; t <= 1; t++)
+		{
+			if (t == 0)
+			{
+				printf("Solving with min compression\n");
+				c.minCompression = true;
+			}
+			else {
+				printf("Solving with interleave compression\n");
+				c.minCompression = false;
+			}
+			{
+				srandom(9283+x*23);
+				SolveOneProblem(x, (t==0)?"min":"int");
+				//SolveOneProblemAStar(x);
+			}
+		}
 	}
 //	for (int x = 0; x < c.edgeDist.size(); x++)
 //	{
@@ -791,20 +813,20 @@ void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin
 
 void RunTest(int billionEntriesToLoad)
 {
-	uint64_t numEntries = 1000000000;
-	numEntries *= billionEntriesToLoad;
-	LoadCornerPDB();
-	//LoadEdgePDB(numEntries);
-	LoadEdge7PDB();
-	
-	for (int t = 100; t >= 80; t--)
-	{
-		for (int x = 0; x < 100; x++)
-		{
-			srandom(9283+x*23);
-			SolveOneProblem(x, t);
-		}
-	}
+//	uint64_t numEntries = 1000000000;
+//	numEntries *= billionEntriesToLoad;
+//	LoadCornerPDB();
+//	//LoadEdgePDB(numEntries);
+//	LoadEdge7PDB();
+//	
+//	for (int t = 100; t >= 80; t--)
+//	{
+//		for (int x = 0; x < 100; x++)
+//		{
+//			srandom(9283+x*23);
+//			SolveOneProblem(x, t);
+//		}
+//	}
 }
 
 bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
