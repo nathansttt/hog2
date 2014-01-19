@@ -114,28 +114,41 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	uint64_t hash = c.GetStateHash(node1.corner);
 	val = cornerPDB.Get(hash);
 
-	// edge PDB
-	hash = e7.GetStateHash(node1.edge7);
-
-	//	// edge PDB
-	if (0 == hash%compressionFactor)
+	if (minCompression)
 	{
-		double val2 = edge7PDBint.Get(hash/compressionFactor);
-		if (val2 > 8)
-			val2 = 8;
+		// edge PDB
+		hash = e7.GetStateHash(node1.edge7);
+
+		//	// edge PDB
+		double val2 = edge7PDBmin.Get(hash/compressionFactor);
+		val = max(val, val2);
+		
+		node1.edge7.GetDual(e7dual);
+		hash = e7.GetStateHash(e7dual);
+
+		val2 = edge7PDBmin.Get(hash/compressionFactor);
 		val = max(val, val2);
 	}
-	node1.edge7.GetDual(e7dual);
-	hash = e7.GetStateHash(e7dual);
-
-	if (0 == hash%compressionFactor)
+	else if (!minCompression) // interleave
 	{
-		double val2 = edge7PDBint.Get(hash/compressionFactor);
-		if (val2 > 8)
-			val2 = 8;
-		val = max(val, val2);
+		// edge PDB
+		hash = e7.GetStateHash(node1.edge7);
+		
+		//	// edge PDB
+		if (0 == hash%compressionFactor)
+		{
+			double val2 = edge7PDBint.Get(hash/compressionFactor);
+			val = max(val, val2);
+		}
+		node1.edge7.GetDual(e7dual);
+		hash = e7.GetStateHash(e7dual);
+		
+		if (0 == hash%compressionFactor)
+		{
+			double val2 = edge7PDBint.Get(hash/compressionFactor);
+			val = max(val, val2);
+		}
 	}
-	
 	return val;
 
 	// load PDB values directly from disk!
