@@ -83,6 +83,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
+	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <cornerpdb> <depthdata>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract <file>", "Extract levels from <file>");
 	InstallCommandLineHandler(MyCLHandler, "-testBloom", "-testBloom <entires> <accuracy>", "Test bloom filter with <entries> total and given <accuracy>");
@@ -140,6 +141,7 @@ void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin
 void RunSimpleTest(const char *edgePDB, const char *cornerPDB);
 void TestBloom(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
+void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -162,6 +164,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-testBloom") == 0)
 	{
 		TestBloom(atoi(argument[1]), atof(argument[2]));
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-bloomSearch") == 0)
+	{
+		RunBloomFilterTest(argument[1], argument[2]);
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-pdb") == 0)
@@ -825,6 +832,93 @@ void RunSimpleTest(const char *edgePDB, const char *cornerPDB)
 	}
 }
 
+void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
+{
+	// setup corner pdb
+	{
+		FourBitArray &corner = c.GetCornerPDB();
+		printf("Loading corner pdb: %s\n", cornerPDB);
+		corner.Read(cornerPDB);
+	}
+
+	// setup bloom filters
+	{
+		uint64_t depth8states = 1050559626ull;
+		uint64_t depth9states = 11588911021ull;
+		
+		bloom_parameters parameters;
+		parameters.projected_element_count = depth8states;//1000;
+		parameters.false_positive_probability = 1.0/100.0; // 1% false positives
+		if (!parameters)
+		{
+			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
+			exit(0);
+		}
+		parameters.compute_optimal_parameters();
+		c.depth8 = new bloom_filter(parameters);
+		parameters.projected_element_count = depth9states;//1000;
+		if (!parameters)
+		{
+			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
+			exit(0);
+		}
+		parameters.compute_optimal_parameters();
+		c.depth9 = new bloom_filter(parameters);
+		c.bloomFilter = true;
+	}
+	
+	// load hash table / bloom filter data
+	{
+		RubikEdge e;
+		RubikEdgeState es;
+		for (int x = 0; x < 10; x++)
+		{
+			char name[255];
+			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
+			FILE *f = fopen(name, "w+");
+			if (f == 0)
+			{
+				printf("Error opening %s; aborting!\n", name);
+				exit(0);
+			}
+			
+			uint64_t nextItem;
+			uint64_t count = 0;
+			while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
+			{
+				count++;
+				e.unrankPlayer(nextItem, es, 0);
+				if (x < 8)
+				{
+					c.depthTable[es.state] = x;
+				}
+				else if (x == 8)
+				{
+					c.depth8->insert(es.state);
+				}
+				else if (x == 9)
+				{
+					c.depth9->insert(es.state);
+				}
+			}
+			printf("%llu items read at depth %d\n", count, x);
+			fclose(f);
+		}
+
+	}
+	
+	for (int x = 0; x < 100; x++)
+	{
+		srandom(9283+x*23);
+		SolveOneProblem(x, "bloom89");
+		//		SolveOneProblemAStar(x);
+	}
+
+//	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
+//	bloom_filter *depth8, *depth9;
+
+}
+
 void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB)
 {
 	FourBitArray &corner = c.GetCornerPDB();
@@ -1110,7 +1204,10 @@ void MeasurePDBCompression(int itemsCompressed)
 void ExtractStatesAtDepth(const char *theFile)
 {
 	std::vector<std::vector<uint64_t> > vals;
+	std::vector<FILE *> files;
+	std::vector<long> counts;
 	vals.resize(10); // 0...9
+	counts.resize(10);
 	std::vector<bucketInfo> data;
 	std::vector<bucketData> buckets;
 	
@@ -1121,6 +1218,18 @@ void ExtractStatesAtDepth(const char *theFile)
 	DiskBitFile f(theFile);
 	
 	uint64_t entry = 0;
+	for (int x = 0; x < 10; x++)
+	{
+		char name[255];
+		sprintf(name, "12edge-depth-%d.dat", x);
+		FILE *f = fopen(name, "w+");
+		if (f == 0)
+		{
+			printf("Error opening %s; aborting!\n", name);
+			exit(0);
+		}
+		files.push_back(f);
+	}
 	for (unsigned int x = 0; x < data.size(); x++)
 	{
 		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
@@ -1129,29 +1238,38 @@ void ExtractStatesAtDepth(const char *theFile)
 			if (val < 10)
 			{
 				vals[val].push_back(entry);
+				counts[val]++;
 			}
 			entry++;
-		}
-		if (0 == entry%100000000)
-		{
-			printf("Processing entry %llu\n", entry);
+			if (0 == entry%10000000)
+			{
+				printf("Processing entry %llu\n", entry);
+				fflush(stdout);
+				printf("Flushing files:\n"); fflush(stdout);
+				for (int x = 0; x < 10; x++)
+				{
+					printf("File %d, %ld entries\n", x, vals[x].size()); fflush(stdout);
+					fwrite(&(vals[x][0]), sizeof(uint64_t), vals[x].size(), files[x]);
+					vals[x].resize(0);
+				}
+			}
 		}
 	}
 	printf("%llu entries read total\n", entry);
+	{
+		printf("Processing entry %llu\n", entry); fflush(stdout);
+		printf("Flushing files:\n"); fflush(stdout);
+		for (int x = 0; x < 10; x++)
+		{
+			printf("File %d, %ld entries\n", x, vals[x].size()); fflush(stdout);
+			fwrite(&(vals[x][0]), sizeof(uint64_t), vals[x].size(), files[x]);
+			vals[x].resize(0);
+		}
+	}
 	for (int x = 0; x < 10; x++)
 	{
-		char name[255];
-		sprintf(name, "12edge-depth-%d.dat", x);
-		FILE *f = fopen(name, "w+");
-		if (f)
-		{
-			fwrite(&(vals[x][0]), sizeof(uint64_t), vals[x].size(), f);
-			fclose(f);
-			printf("Wrote %lu entries to '%s'\n", vals[x].size(), name);
-		}
-		else {
-			printf("Error opening '%s'\n", name);
-		}
+		printf("Total entries for file %d: %lu", x, counts[x]);
+		fclose(files[x]);
 	}
 }
 
