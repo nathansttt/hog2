@@ -37,7 +37,8 @@
 #include "RubiksCube7Edges.h"
 #include "RubiksCubeCorners.h"
 #include "BFS.h"
-
+#include "BloomFilter.h"
+#include <string>
 
 RubiksCube c;
 RubiksAction a;
@@ -82,6 +83,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
+	InstallCommandLineHandler(MyCLHandler, "-testBloom", "-testBloom <entires> <accuracy>", "Test bloom filter with <entries> total and given <accuracy>");
 	InstallCommandLineHandler(MyCLHandler, "-testCompression", "-testCompression <factor> <type> <edgepdb> <cornerpdb>", "");
 	InstallCommandLineHandler(MyCLHandler, "-compress", "-compress <type [corner,n-edge,edge]> <input> <factor> <output>", "Compress provided pdb by a factor of <factor>");
 	InstallCommandLineHandler(MyCLHandler, "-pdb", "-pdb <edge> <corner>", "Run tests using edge and corner pdbs");
@@ -133,6 +135,7 @@ void Compress(const char *pdbType, const char *theFile, const char *compresType,
 //void RunCompressionTest(int factor, const char *compType, const char *edgePDB, const char *cornerPDB);
 void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB);
 void RunSimpleTest(const char *edgePDB, const char *cornerPDB);
+void TestBloom(int entries, double accuracy);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -141,6 +144,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	if (strcmp(argument[0], "-test") == 0)
 	{
 		RunTest(atoi(argument[1]));
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-testBloom") == 0)
+	{
+		TestBloom(atoi(argument[1]), atof(argument[2]));
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-pdb") == 0)
@@ -477,7 +485,7 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 		b.Resize(totalSize);
 		
 		DiskBitFile f(theFile);
-		
+
 		uint64_t avgReg = 0;
 		uint64_t avgComp = 0;
 		
@@ -558,6 +566,7 @@ void LoadCornerPDB()
 	b.Resize(totalSize);
 	//mem = new uint8_t[totalSize];
 	DiskBitFile f("/home/sturtevant/sturtevant/code/cc/rubik/RC");
+	
 	int64_t index = 0;
 	for (unsigned int x = 0; x < data.size(); x++)
 	{
@@ -773,11 +782,11 @@ void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin
 	c.compressionFactor = factor;
 	if (strcmp(compType, "min") == 0)
 	{
-		printf("Using min compression\n");
+		printf("Using min compression (%dx)\n", factor);
 		c.minCompression = true;
 	}
 	else {
-		printf("Using interleave compression\n");
+		printf("Using interleave compression (%dx)\n", factor);
 		c.minCompression = false;
 	}
 
@@ -947,3 +956,126 @@ void GetInstance(RubiksState &start, int which)
 	}
 	printf("\n");
 }
+
+void ExtractStatesAtDepth(const char *theFile)
+{
+	std::vector<std::vector<uint64_t> > vals;
+	vals.resize(10); // 0...9
+	std::vector<bucketInfo> data;
+	std::vector<bucketData> buckets;
+	
+	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+	
+	DiskBitFile f(theFile);
+	
+	uint64_t entry = 0;
+	for (unsigned int x = 0; x < data.size(); x++)
+	{
+		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+		{
+			int val = f.ReadFileDepth(data[x].bucketID, y);
+			if (val < 10)
+			{
+				vals[val].push_back(entry);
+			}
+			entry++;
+		}
+		if (0 == entry%100000000)
+		{
+			printf("Processing entry %llu\n", entry);
+		}
+	}
+	printf("%llu entries read total\n", entry);
+	for (int x = 0; x < 10; x++)
+	{
+		char name[255];
+		sprintf(name, "12edge-depth-%d.dat", x);
+		FILE *f = fopen(name, "w+");
+		if (f)
+		{
+			fwrite(&(vals[x][0]), sizeof(uint64_t), vals[x].size(), f);
+			fclose(f);
+			printf("Wrote %lu entries to '%s'\n", vals[x].size(), name);
+		}
+		else {
+			printf("Error opening '%s'\n", name);
+		}
+	}
+}
+
+void TestBloom(int entries, double accuracy)
+{
+	bloom_parameters parameters;
+	
+	// How many elements roughly do we expect to insert?
+	parameters.projected_element_count = entries;//1000;
+	
+	// Maximum tolerable false positive probability? (0,1)
+	parameters.false_positive_probability = accuracy/100.0;//0.0001; // 1 in 10000
+	
+	// Simple randomizer (optional)
+	parameters.random_seed = 0xA5A5A5A5;
+	
+	if (!parameters)
+	{
+		std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
+		return;
+	}
+	
+	parameters.compute_optimal_parameters();
+	
+	//Instantiate Bloom Filter
+	bloom_filter filter(parameters);
+	
+	printf("Approximate storage: %lld bits (%1.2f MB / %1.2f GB)\n", parameters.optimal_parameters.table_size,
+		   parameters.optimal_parameters.table_size/8.0/1024.0/1024.0,
+		   parameters.optimal_parameters.table_size/8.0/1024.0/1024.0/1024.0);
+
+	Timer t;
+	t.StartTimer();
+	// Insert into Bloom Filter
+	{
+		// Insert some numbers
+		for (std::size_t i = 0; i < entries; ++i)
+		{
+			filter.insert(i);
+		}
+	}
+	t.EndTimer();
+	printf("%1.6f spend adding entries (%lu bytes each)\n", t.GetElapsedTime(), sizeof(std::size_t));
+	
+	// Query Bloom Filter
+	{
+		t.StartTimer();
+		int correct = 0;
+		int incorrect = 0;
+		// Query the existence of numbers
+		for (std::size_t i = 0; i < entries; ++i)
+		{
+			if (filter.contains(i))
+			{
+				//std::cout << "BF contains: " << i << std::endl;
+				correct++;
+			}
+		}
+		
+		// Query the existence of invalid numbers
+		for (int i = entries; i < 10*entries; ++i)
+		{
+			if (filter.contains(i))
+			{
+				//std::cout << "BF falsely contains: " << i << std::endl;
+				incorrect++;
+			}
+		}
+		t.EndTimer();
+		printf("%1.6f spend querying %d entries\n", t.GetElapsedTime(), entries*11);
+		printf("%d of %d items (%5.2f%%) correctly stored. %d of %d items (%5.2f%%) incorrectly detected\n",
+			   correct, entries, (100.0*correct/entries), incorrect, entries*10, incorrect*100.0/(entries*10.0));
+	}
+	return;
+
+}
+
