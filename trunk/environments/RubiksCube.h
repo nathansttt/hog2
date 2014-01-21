@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <stdint.h>
+#include <tr1/unordered_map>
 #include <vector>
 #include "RubiksCubeCorners.h"
 #include "RubiksCubeEdges.h"
@@ -19,6 +20,7 @@
 #include "FourBitArray.h"
 #include "DiskBitFile.h"
 #include "EnvUtil.h"
+#include "BloomFilter.h"
 
 class RubiksState
 {
@@ -60,7 +62,8 @@ public:
 	  //:f("/data/cc/rubik/res/RC")
 	{
 		pruneSuccessors = false;
-		
+		minCompression = true;
+		bloomFilter = false;
 		edgeDist.resize(16);
 		cornDist.resize(16);
 
@@ -121,8 +124,12 @@ public:
 	//int64_t percentage;
 	int compressionFactor;
 	bool minCompression;
+	bool bloomFilter;
 	std::vector<uint64_t> edgeDist;
 	std::vector<uint64_t> cornDist;
+
+	::std::tr1::unordered_map<uint64_t, uint8_t> depthTable;
+	bloom_filter *depth8, *depth9;
 private:
 	void SetFaceColor(int face) const;
 	mutable std::vector<RubiksAction> history;
@@ -135,7 +142,8 @@ private:
 	FourBitArray edgePDB;
 	FourBitArray edge7PDBmin;
 	FourBitArray edge7PDBint;
-
+	
+	
 //	DiskBitFile f;
 	//std::vector<bucketInfo> data;
 	//std::vector<bucketData> buckets;
