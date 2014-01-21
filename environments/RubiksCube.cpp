@@ -114,6 +114,29 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	uint64_t hash = c.GetStateHash(node1.corner);
 	val = cornerPDB.Get(hash);
 
+	if (bloomFilter)
+	{
+		auto depthLoc = depthTable.find(node1.edge.state);
+		if (depthLoc != depthTable.end())
+		{
+			val = max(val, depthLoc->second);
+		}
+		else {
+			if (depth8->contains(node1.edge.state))
+			{
+				val = max(val, 8);
+			}
+			else if (depth8->contains(node1.edge.state))
+			{
+				val = max(val, 9);
+			}
+			else {
+				val = max(val, 10);
+			}
+		}
+		return val;
+	}
+	
 	if (minCompression)
 	{
 		// edge PDB
