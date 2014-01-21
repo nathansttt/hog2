@@ -83,6 +83,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
+	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
+	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract <file>", "Extract levels from <file>");
 	InstallCommandLineHandler(MyCLHandler, "-testBloom", "-testBloom <entires> <accuracy>", "Test bloom filter with <entries> total and given <accuracy>");
 	InstallCommandLineHandler(MyCLHandler, "-testCompression", "-testCompression <factor> <type> <edgepdb> <cornerpdb>", "");
 	InstallCommandLineHandler(MyCLHandler, "-compress", "-compress <type [corner,n-edge,edge]> <input> <factor> <output>", "Compress provided pdb by a factor of <factor>");
@@ -131,20 +133,31 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 }
 
 void RunTest(int billionEntriesToLoad);
+void MeasurePDBCompression(int itemsCompressed);
 void Compress(const char *pdbType, const char *theFile, const char *compresType, int ratio, const char *outFile);
 //void RunCompressionTest(int factor, const char *compType, const char *edgePDB, const char *cornerPDB);
 void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB);
 void RunSimpleTest(const char *edgePDB, const char *cornerPDB);
 void TestBloom(int entries, double accuracy);
+void ExtractStatesAtDepth(const char *theFile);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if (maxNumArgs <= 1)
 		return 0;
+
 	if (strcmp(argument[0], "-test") == 0)
 	{
 		RunTest(atoi(argument[1]));
+	}
+	else if (strcmp(argument[0], "-extract") == 0)
+	{
+		ExtractStatesAtDepth(argument[1]);
 		exit(0);
+	}
+	else if (strcmp(argument[0], "-measure") == 0)
+	{
+		MeasurePDBCompression(atoi(argument[1]));
 	}
 	else if (strcmp(argument[0], "-testBloom") == 0)
 	{
@@ -489,6 +502,7 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 		uint64_t avgReg = 0;
 		uint64_t avgComp = 0;
 		
+		float currPerc = 1;
 		if (!minCompression)
 		{ // just write first  value
 			printf("Performing interleave compression\n");
@@ -508,8 +522,14 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 						avgComp += val;
 					}
 					index++;
+					if (float(realIndex)/float(totalSize) > currPerc)
+					{
+						printf("%1.0f%% ", currPerc);
+						currPerc++;
+					}
 				}
 			}
+			printf("\n");
 			b.Write(outFile);
 			printf("%llu entries compressed into %llu\n", index, realIndex);
 			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
@@ -582,6 +602,41 @@ void LoadCornerPDB()
 
 void LoadEdgePDB(uint64_t sizeLimit)
 {
+	if (c.GetEdgePDB().Size() != 0)
+		return;
+	FourBitArray &b = c.GetEdgePDB();
+
+	//uint8_t *mem;
+	std::vector<bucketInfo> data;
+	std::vector<bucketData> buckets;
+	
+	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+	int64_t totalSize = 0;
+	for (unsigned int x = 0; x < buckets.size(); x++)
+		totalSize += buckets[x].theSize;
+
+	b.Resize((totalSize+sizeLimit-1)/sizeLimit);
+	//DiskBitFile f("/data/cc/rubik/final/RC");
+	DiskBitFile f("/store/rubik/RC");
+	int64_t index = 0;
+	for (unsigned int x = 0; x < data.size(); x++)
+	{
+		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+		{
+		  if (0 == y%sizeLimit)
+		    {
+		      int val = f.ReadFileDepth(data[x].bucketID, y);
+		      b.Set(index++, val);
+		    }
+		}
+	}
+//	c.SetEdgePDB(mem, totalSize);
+}
+
+void LoadEdgePDBOLD(uint64_t sizeLimit)
+{
 	//
 	if (c.GetEdgePDB().Size() != 0)
 		return;
@@ -602,8 +657,8 @@ void LoadEdgePDB(uint64_t sizeLimit)
 		totalSize = sizeLimit;
 	//mem = new uint8_t[totalSize];
 	b.Resize(totalSize);
-	//DiskBitFile f("/data/cc/rubik/res/RC");
-	DiskBitFile f("/store/rubik/RC");
+	DiskBitFile f("/data/cc/rubik/final/RC");
+	//DiskBitFile f("/store/rubik/RC");
 	int64_t index = 0;
 	for (unsigned int x = 0; x < data.size(); x++)
 	{
@@ -621,7 +676,9 @@ void LoadEdgePDB(uint64_t sizeLimit)
 //	c.SetEdgePDB(mem, totalSize);
 }
 
-void LoadEdge7PDB()
+void LoadEdge7PDB(uint64_t sizeLimit = 0x7FFFFFFFFFFFFFFFull);
+
+void LoadEdge7PDB(uint64_t sizeLimit)
 {
 //	if (c.GetEdge7PDB().Size() != 0)
 //		return;
@@ -736,8 +793,9 @@ void SolveOneProblemAStar(int instance)
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
 	LoadCornerPDB();
-	LoadEdge7PDB();
-	//LoadEdgePDB(2000000000);
+	//LoadEdge7PDB();
+	LoadEdgePDB(10);
+	//LoadEdgePDBOLD(2000000000);
 
 	for (int x = 3; x < 4; x++)
 	{
@@ -772,12 +830,12 @@ void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin
 	FourBitArray &corner = c.GetCornerPDB();
 	printf("Loading corner pdb: %s\n", cornerPDB);
 	corner.Read(cornerPDB);
-	FourBitArray &edgemin = c.GetEdge7PDB(true);
+	FourBitArray &edgemin = c.GetEdgePDB();
 	printf("Loading edge min pdb: %s\n", edgePDBmin);
 	edgemin.Read(edgePDBmin);
 	FourBitArray &edgeint = c.GetEdge7PDB(false);
-	printf("Loading edge interleave pdb: %s\n", edgePDBint);
-	edgeint.Read(edgePDBint);
+	//printf("Loading edge interleave pdb: %s\n", edgePDBint);
+	//edgeint.Read(edgePDBint);
 
 	c.compressionFactor = factor;
 	if (strcmp(compType, "min") == 0)
@@ -792,7 +850,7 @@ void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin
 
 	for (int x = 0; x < 100; x++)
 	{
-		for (int t = 0; t <= 1; t++)
+		for (int t = 0; t <= 0; t++)
 		{
 			if (t == 0)
 			{
@@ -957,6 +1015,98 @@ void GetInstance(RubiksState &start, int which)
 	printf("\n");
 }
 
+void MeasurePDBCompression(int itemsCompressed)
+{
+	std::vector<bucketInfo> data;
+	std::vector<bucketData> buckets;
+	
+	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+	int64_t totalSize = 0;
+
+	//DiskBitFile f("/data/cc/rubik/final/RC");
+	DiskBitFile f("/store/rubik/RC");
+	int64_t index = 0;
+	int64_t records[20];
+	int64_t averageFirst[20];
+	int64_t averageMin[20];
+	int64_t averageMax[20];
+	int64_t averageValue[20];
+
+	int tempSum[20];
+	int firstVal[20];
+	int minVal[20];
+	int maxVal[20];
+	for (int x = 0; x < 20; x++)
+	{
+		records[x] = 0;
+		averageFirst[x] = 0;
+		averageMin[x] = 0;
+		averageMax[x] = 0;
+		averageValue[x] = 0;
+
+		tempSum[x] = 0;
+		firstVal[x] = 0;
+		minVal[x] = 0;
+		maxVal[x] = 0;
+	}
+	printf("Measuring PDB compression stats!\n");
+	fflush(stdout);
+	for (unsigned int x = 0; x < data.size(); x++)
+    {
+		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+		{
+			int val = f.ReadFileDepth(data[x].bucketID, y);
+
+			for (int i = 0; i < 20; i++)
+			{
+				// reset computation
+				if (0 == index%(i+1))
+				{
+					// record results
+					if (x != 0 || y != 0)
+					{
+						records[i]++;
+						averageFirst[i] += firstVal[i];
+						averageMin[i] += minVal[i];
+						averageMax[i] += maxVal[i];
+						averageValue[i] += tempSum[i];
+					}
+					
+					tempSum[i] = val;
+					firstVal[i] = val;
+					minVal[i] = val;
+					maxVal[i] = val;
+				}
+				else {
+					tempSum[i] += val;
+					if (val < minVal[i])
+						minVal[i] = val;
+					if (val > maxVal[i])
+						maxVal[i] = val;
+				}
+			}
+
+			index++;
+			if (0 == index%100000000)
+			{
+				for (int i = 0; i < 20; i++)
+				{
+					printf("---- %d ---\n", i+1);
+					printf("%lld processed (%1.2fGB); %lld records total:\n", index, index/1024.0/1024.0/1024.0/2.0, records[i]);
+					printf(": Average first: %1.4f\n", (float)averageFirst[i]/records[i]);
+					printf(": Average min: %1.4f\n", (float)averageMin[i]/records[i]);
+					printf(": Average max: %1.4f\n", (float)averageMax[i]/records[i]);
+					printf(": Average value: %1.4f\n", (float)averageValue[i]/records[i]/(i+1));
+				}
+				fflush(stdout);
+			}
+		}
+    }
+
+}
+
 void ExtractStatesAtDepth(const char *theFile)
 {
 	std::vector<std::vector<uint64_t> > vals;
@@ -1078,4 +1228,5 @@ void TestBloom(int entries, double accuracy)
 	return;
 
 }
+
 
