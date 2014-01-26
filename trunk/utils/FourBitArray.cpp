@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 University of Denver. All rights reserved.
 //
 
+#include <stdio.h>
 #include "FourBitArray.h"
 
 //	uint8_t *mem;

@@ -832,6 +832,18 @@ void RunSimpleTest(const char *edgePDB, const char *cornerPDB)
 	}
 }
 
+int countBits(int64_t val)
+{
+	int count = 0;
+	while (val)
+	{
+		if (val&1)
+			count++;
+		val >>= 1;
+	}
+	return count;
+}
+
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 {
 	// setup corner pdb
@@ -839,69 +851,100 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 		FourBitArray &corner = c.GetCornerPDB();
 		printf("Loading corner pdb: %s\n", cornerPDB);
 		corner.Read(cornerPDB);
+		printf("Done.\n");
 	}
 
 	// setup bloom filters
 	{
+		printf("Creating bloom filters.\n");fflush(stdout);
 		uint64_t depth8states = 1050559626ull;
 		uint64_t depth9states = 11588911021ull;
 		
-		bloom_parameters parameters;
-		parameters.projected_element_count = depth8states;//1000;
-		parameters.false_positive_probability = 1.0/100.0; // 1% false positives
-		if (!parameters)
+		bloom_parameters parameters8;
+		parameters8.projected_element_count = depth8states;//1000;
+		parameters8.false_positive_probability = 1.0/100.0; // 1% false positives
+		if (!parameters8)
 		{
 			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
 			exit(0);
 		}
-		parameters.compute_optimal_parameters();
-		c.depth8 = new bloom_filter(parameters);
-		parameters.projected_element_count = depth9states;//1000;
-		if (!parameters)
+		parameters8.compute_optimal_parameters();
+		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", parameters8.optimal_parameters.table_size,
+			   parameters8.optimal_parameters.table_size/8.0/1024.0/1024.0,
+			   parameters8.optimal_parameters.table_size/8.0/1024.0/1024.0/1024.0);
+		printf("%d hashes being used\n", parameters8.optimal_parameters.number_of_hashes);
+		c.depth8 = new bloom_filter(parameters8);
+
+		bloom_parameters parameters9;
+		parameters9.projected_element_count = depth9states;//1000;
+        parameters9.false_positive_probability = 1.0/100.0; // 1% false positives  
+		if (!parameters9)
 		{
 			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
 			exit(0);
 		}
-		parameters.compute_optimal_parameters();
-		c.depth9 = new bloom_filter(parameters);
+		parameters9.compute_optimal_parameters();
+		printf("Approximate storage (9): %llu bits (%1.2f MB / %1.2f GB)\n", parameters9.optimal_parameters.table_size,
+			   parameters9.optimal_parameters.table_size/8.0/1024.0/1024.0,
+			   parameters9.optimal_parameters.table_size/8.0/1024.0/1024.0/1024.0);
+		printf("%d hashes being used\n", parameters9.optimal_parameters.number_of_hashes); fflush(stdout);
+		c.depth9 = new bloom_filter(parameters9);
 		c.bloomFilter = true;
+		printf("Done.\n");fflush(stdout);
 	}
 	
 	// load hash table / bloom filter data
 	{
+		printf("Building hash table/bloom filter\n"); fflush(stdout);
 		RubikEdge e;
 		RubikEdgeState es;
 		for (int x = 0; x < 10; x++)
 		{
 			char name[255];
 			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
-			FILE *f = fopen(name, "w+");
+			FILE *f = fopen(name, "r");
 			if (f == 0)
 			{
 				printf("Error opening %s; aborting!\n", name);
 				exit(0);
 			}
-			
+			printf("Reading from '%s'\n", name);
+			fflush(stdout);
+
 			uint64_t nextItem;
 			uint64_t count = 0;
 			while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
 			{
-				count++;
-				e.unrankPlayer(nextItem, es, 0);
+				if (0 != countBits(nextItem&0xFFF)%2)
+					nextItem ^= 1;
+				es.state = nextItem;
+				nextItem = e.GetStateHash(es);
 				if (x < 8)
 				{
-					c.depthTable[es.state] = x;
+					count++;
+					c.depthTable[nextItem] = x;
+					//if (x < 2)
+					//{
+					//	std::cout << es << " " << std::hex << es.state << std::endl;
+					//}
 				}
 				else if (x == 8)
 				{
-					c.depth8->insert(es.state);
+					count++;
+					c.depth8->insert(nextItem);
 				}
 				else if (x == 9)
 				{
-					c.depth9->insert(es.state);
+					count++;
+					c.depth9->insert(nextItem);
+				}
+				if (0 == count%100000000ull)
+				{
+					printf("%llu added to table\n", count);
+					fflush(stdout);
 				}
 			}
-			printf("%llu items read at depth %d\n", count, x);
+			printf("%llu items read at depth %d\n", count, x);fflush(stdout);
 			fclose(f);
 		}
 
@@ -910,10 +953,14 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 	for (int x = 0; x < 100; x++)
 	{
 		srandom(9283+x*23);
-		SolveOneProblem(x, "bloom89");
+		SolveOneProblem(x, "hash7bloom8");
 		//		SolveOneProblemAStar(x);
 	}
-
+	printf("Edge heuristic distribution\n");
+	for (int x = 0; x < c.edgeDist.size(); x++)
+	{
+		printf("%d : %llu\n", x, c.edgeDist[x]);
+	}
 //	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
 //	bloom_filter *depth8, *depth9;
 
@@ -1203,6 +1250,9 @@ void MeasurePDBCompression(int itemsCompressed)
 
 void ExtractStatesAtDepth(const char *theFile)
 {
+	RubikEdge e;
+	RubikEdgeState es;
+
 	std::vector<std::vector<uint64_t> > vals;
 	std::vector<FILE *> files;
 	std::vector<long> counts;
@@ -1234,23 +1284,32 @@ void ExtractStatesAtDepth(const char *theFile)
 	{
 		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
 		{
+			bool debug = false;
 			int val = f.ReadFileDepth(data[x].bucketID, y);
 			if (val < 10)
 			{
-				vals[val].push_back(entry);
+				int64_t r1, r2;
+				e.unrankPlayer(entry, es, 0);
+				e.rankPlayer(es, 0, r1, r2);
+				if (r1 != x || r2 != y-data[x].bucketOffset)
+				{
+					printf("Error: entry is %llu, which should map to x: %llu y: %llu. Instead we got r1: %llu, r2: %llu\n", entry, x, y-data[x].bucketOffset, r1, r2);
+					exit(0);
+				}
+				vals[val].push_back(es.state);
 				counts[val]++;
 			}
 			entry++;
-			if (0 == entry%10000000)
+			if (0 == entry%1000000000)
 			{
 				printf("Processing entry %llu\n", entry);
 				fflush(stdout);
 				printf("Flushing files:\n"); fflush(stdout);
-				for (int x = 0; x < 10; x++)
+				for (int t = 0; t < 10; t++)
 				{
-					printf("File %d, %ld entries\n", x, vals[x].size()); fflush(stdout);
-					fwrite(&(vals[x][0]), sizeof(uint64_t), vals[x].size(), files[x]);
-					vals[x].resize(0);
+					printf("File %d, %ld entries\n", t, vals[t].size()); fflush(stdout);
+					fwrite(&(vals[t][0]), sizeof(uint64_t), vals[t].size(), files[t]);
+					vals[t].resize(0);
 				}
 			}
 		}
@@ -1268,7 +1327,7 @@ void ExtractStatesAtDepth(const char *theFile)
 	}
 	for (int x = 0; x < 10; x++)
 	{
-		printf("Total entries for file %d: %lu", x, counts[x]);
+		printf("Total entries for file %d: %lu\n", x, counts[x]);
 		fclose(files[x]);
 	}
 }

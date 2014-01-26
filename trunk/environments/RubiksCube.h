@@ -58,18 +58,20 @@ class RubiksCube : public SearchEnvironment<RubiksState, RubiksAction>
 {
 public:
 	RubiksCube()
-//	  :f("/store/rubik/RC")
-	  //:f("/data/cc/rubik/res/RC")
+//:f("/home/sturtevant/sturtevant/code/cc/rubik/RC-10edge")
+//:f("/data/cc/rubik/10/RC-10edge")
+//:f("/store/rubik/RC")
+	:f("/data/cc/rubik/res/RC")
 	{
 		pruneSuccessors = false;
 		minCompression = true;
 		bloomFilter = false;
+		uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+		InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+		InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+
 		edgeDist.resize(16);
 		cornDist.resize(16);
-
-		//uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
-		//InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
-		//InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
 
 		//		for (int x = 0; x < 18; x++)
 //		{
@@ -127,7 +129,6 @@ public:
 	bool bloomFilter;
 	std::vector<uint64_t> edgeDist;
 	std::vector<uint64_t> cornDist;
-
 	::std::tr1::unordered_map<uint64_t, uint8_t> depthTable;
 	bloom_filter *depth8, *depth9;
 private:
@@ -144,9 +145,9 @@ private:
 	FourBitArray edge7PDBint;
 	
 	
-//	DiskBitFile f;
-	//std::vector<bucketInfo> data;
-	//std::vector<bucketData> buckets;
+	DiskBitFile f;
+	std::vector<bucketInfo> data;
+	std::vector<bucketData> buckets;
 
 	bool pruneSuccessors;
 };

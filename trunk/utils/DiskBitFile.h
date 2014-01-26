@@ -55,7 +55,7 @@ private:
 	int64_t currSubBucket;
 
 	const static int subBucketBits = 30;
-	const static int64_t cacheSize = 4096;//1024*512; // no problem(?)
+	const static int64_t cacheSize = 1ull<<22;//4096;//1024*512; // no problem(?) // 4 MB!
 	int64_t theCacheSize;      // valid bytes in the cache
 	int64_t cacheFilePosition; // current offset in file (bytes)
 	bool cacheChanged;

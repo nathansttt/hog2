@@ -508,6 +508,9 @@ void RubikEdge::GetStateFromHash(uint64_t hash, RubikEdgeState &node) const
 	{
 		node.SetCubeOrientation(11-11, true);
 	}
+	else {
+		node.SetCubeOrientation(11-11, false);
+	}
 	
 	uint64_t val = 0;
 	for (int x = 0; x < 12; x++)
