@@ -20,7 +20,7 @@
 #include "FourBitArray.h"
 #include "DiskBitFile.h"
 #include "EnvUtil.h"
-#include "BloomFilter.h"
+#include "Bloom.h"
 
 class RubiksState
 {
@@ -130,7 +130,7 @@ public:
 	std::vector<uint64_t> edgeDist;
 	std::vector<uint64_t> cornDist;
 	::std::tr1::unordered_map<uint64_t, uint8_t> depthTable;
-	bloom_filter *depth8, *depth9;
+	BloomFilter *depth8, *depth9;
 private:
 	void SetFaceColor(int face) const;
 	mutable std::vector<RubiksAction> history;
