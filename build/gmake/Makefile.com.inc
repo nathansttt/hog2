@@ -6,14 +6,14 @@
 #-----------------------------------------------------------------------------
 
 CXX = g++
-COMMON_CXXFLAGS += -Wall -std=c++11
+COMMON_CXXFLAGS += -Wall -std=c++11 --stdlib=libstdc++
 #COMMON_CXXFLAGS += -ansi -pedantic
 
 CC = gcc
 COMMON_CFLAGS += -Wall
 
 LN = $(CXX)
-COMMON_LNFLAGS += 
+COMMON_LNFLAGS += --stdlib=libstdc++
 
 AR = ar
 
@@ -40,9 +40,9 @@ else # not darwin
 
 # if Linux need some other pthread call 
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
-COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread # -lXi -lXmu
+COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread --stdlib=libstdc++ # -lXi -lXmu
 else
-COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread # -lXi -lXmu 
+COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread --stdlib=libstdc++ # -lXi -lXmu 
 endif
 
 ifeq ("$(OPENGL)", "STUB")
