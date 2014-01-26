@@ -6,7 +6,7 @@
 #-----------------------------------------------------------------------------
 
 CXX = g++
-COMMON_CXXFLAGS += -Wall
+COMMON_CXXFLAGS += -Wall -std=c++11
 #COMMON_CXXFLAGS += -ansi -pedantic
 
 CC = gcc

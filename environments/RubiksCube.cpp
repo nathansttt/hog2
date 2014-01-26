@@ -114,25 +114,46 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	uint64_t hash = c.GetStateHash(node1.corner);
 	val = cornerPDB.Get(hash);
 
+	// load PDB values directly from disk!
+	// make sure that "data" is initialized with the right constructor calls for the data
+//    int64_t r1, r2;
+//    e.rankPlayer(node1.edge, 0, r1, r2);
+//    double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2);
+//	edgeDist[edge]++;
+//    if (edge > 10)
+//        edge = 10;
+//    val = max(val, edge);
+//	return val;
+
 	if (bloomFilter)
 	{
-		auto depthLoc = depthTable.find(node1.edge.state);
+		/*  if (edge != depthLoc->second)
+		  {
+		  printf("Error - table doesn't match loaded PDB. table: %1.0f pdb: %1.0f\n", depthLoc->second, edge);
+		  exit(0);
+		  }*/
+
+		hash = e.GetStateHash(node1.edge);
+
+		auto depthLoc = depthTable.find(hash);
 		if (depthLoc != depthTable.end())
 		{
 			val = max(val, depthLoc->second);
+			edgeDist[depthLoc->second]++;
+		}
+		else if (depth8->contains(hash))
+		{
+			val = max(val, 8);
+			edgeDist[8]++;
+		}
+		else if (depth9->contains(hash))
+		{
+			val = max(val, 9);
+			edgeDist[9]++;
 		}
 		else {
-			if (depth8->contains(node1.edge.state))
-			{
-				val = max(val, 8);
-			}
-			else if (depth8->contains(node1.edge.state))
-			{
-				val = max(val, 9);
-			}
-			else {
-				val = max(val, 10);
-			}
+			val = max(val, 10);
+			edgeDist[10]++;
 		}
 		return val;
 	}
@@ -140,16 +161,16 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	if (minCompression)
 	{
 		// edge PDB
-		hash = e7.GetStateHash(node1.edge7);
+		hash = e.GetStateHash(node1.edge);
 
 		//	// edge PDB
-		double val2 = edge7PDBmin.Get(hash/compressionFactor);
+		double val2 = edgePDB.Get(hash/compressionFactor);
 		val = max(val, val2);
 		
-		node1.edge7.GetDual(e7dual);
-		hash = e7.GetStateHash(e7dual);
+		node1.edge.GetDual(dual);
+		hash = e.GetStateHash(dual);
 
-		val2 = edge7PDBmin.Get(hash/compressionFactor);
+		val2 = edgePDB.Get(hash/compressionFactor);
 		val = max(val, val2);
 	}
 	else if (!minCompression) // interleave
@@ -172,16 +193,6 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 			val = max(val, val2);
 		}
 	}
-	return val;
-
-	// load PDB values directly from disk!
-	// make sure that "data" is initialized with the right constructor calls for the data
-//    int64_t r1, r2;
-//    e.rankPlayer(node1.edge, 0, r1, r2);
-//    double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2);
-//    if (edge > 10)
-//        edge = 10;
-//    val = max(val, edge);
 	return val;
 }
 

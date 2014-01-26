@@ -163,7 +163,7 @@ public:
 	{ return GetStateHash(s); }
 	void rankPlayerFirstTwo(const Rubik7EdgeState &s, int who, int64_t &rank);
 	void rankPlayerRemaining(const Rubik7EdgeState &s, int who, int64_t &rank);
-	void rankPlayer(Rubik7EdgeState &s, int who, int64_t &index1, int64_t &index2)
+	void rankPlayer(const Rubik7EdgeState &s, int who, int64_t &index1, int64_t &index2)
 	{ rankPlayerFirstTwo(s, 0, index1); rankPlayerRemaining(s, 0, index2); }
 	
 	virtual uint64_t GetStateHash(const Rubik7EdgeState &node) const;
