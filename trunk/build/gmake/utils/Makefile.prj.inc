@@ -50,4 +50,6 @@ SRC_CPP = \
 	utils/TextOverlay.cpp \
 	utils/MMapUtil.cpp \
 	utils/DiskBitFile.cpp \
+	utils/Bloom.cpp \
+	utils/MMapUtil.cpp \
 
