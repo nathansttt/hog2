@@ -140,6 +140,7 @@ void Compress(const char *pdbType, const char *theFile, const char *compresType,
 void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB);
 void RunSimpleTest(const char *edgePDB, const char *cornerPDB);
 void TestBloom(int entries, double accuracy);
+void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix);
 
@@ -164,6 +165,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-testBloom") == 0)
 	{
 		TestBloom(atoi(argument[1]), atof(argument[2]));
+		TestBloom2(atoi(argument[1]), atof(argument[2]));
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
@@ -860,35 +862,36 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 		uint64_t depth8states = 1050559626ull;
 		uint64_t depth9states = 11588911021ull;
 		
-		bloom_parameters parameters8;
-		parameters8.projected_element_count = depth8states;//1000;
-		parameters8.false_positive_probability = 1.0/100.0; // 1% false positives
-		if (!parameters8)
-		{
-			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
-			exit(0);
-		}
-		parameters8.compute_optimal_parameters();
-		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", parameters8.optimal_parameters.table_size,
-			   parameters8.optimal_parameters.table_size/8.0/1024.0/1024.0,
-			   parameters8.optimal_parameters.table_size/8.0/1024.0/1024.0/1024.0);
-		printf("%d hashes being used\n", parameters8.optimal_parameters.number_of_hashes);
-		c.depth8 = new bloom_filter(parameters8);
+//		bloom_parameters parameters8;
+//		parameters8.projected_element_count = depth8states;//1000;
+//		parameters8.false_positive_probability = 1.0/100.0; // 1% false positives
+//		if (!parameters8)
+//		{
+//			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
+//			exit(0);
+//		}
+//		parameters8.compute_optimal_parameters();
+		c.depth8 = new BloomFilter(depth8states, 0.01, true, true);
+		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth8->GetStorage(),
+			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
+			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
+		printf("%d hashes being used\n", c.depth8->GetNumHash());
+//		c.depth8 = new bloom_filter(parameters8);
 
-		bloom_parameters parameters9;
-		parameters9.projected_element_count = depth9states;//1000;
-        parameters9.false_positive_probability = 1.0/100.0; // 1% false positives  
-		if (!parameters9)
-		{
-			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
-			exit(0);
-		}
-		parameters9.compute_optimal_parameters();
-		printf("Approximate storage (9): %llu bits (%1.2f MB / %1.2f GB)\n", parameters9.optimal_parameters.table_size,
-			   parameters9.optimal_parameters.table_size/8.0/1024.0/1024.0,
-			   parameters9.optimal_parameters.table_size/8.0/1024.0/1024.0/1024.0);
-		printf("%d hashes being used\n", parameters9.optimal_parameters.number_of_hashes); fflush(stdout);
-		c.depth9 = new bloom_filter(parameters9);
+//		bloom_parameters parameters9;
+//		parameters9.projected_element_count = depth9states;//1000;
+//        parameters9.false_positive_probability = 1.0/100.0; // 1% false positives  
+//		if (!parameters9)
+//		{
+//			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
+//			exit(0);
+//		}
+//		parameters9.compute_optimal_parameters();
+		c.depth9 = new BloomFilter(depth9states, 0.01, true, true);
+		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth9->GetStorage(),
+			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
+			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
+		printf("%d hashes being used\n", c.depth9->GetNumHash());
 		c.bloomFilter = true;
 		printf("Done.\n");fflush(stdout);
 	}
@@ -931,12 +934,12 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 				else if (x == 8)
 				{
 					count++;
-					c.depth8->insert(nextItem);
+					c.depth8->Insert(nextItem);
 				}
 				else if (x == 9)
 				{
 					count++;
-					c.depth9->insert(nextItem);
+					c.depth9->Insert(nextItem);
 				}
 				if (0 == count%100000000ull)
 				{
@@ -1363,11 +1366,14 @@ void TestBloom(int entries, double accuracy)
 	Timer t;
 	t.StartTimer();
 	// Insert into Bloom Filter
+	RubikEdge e;
+	RubikEdgeState s;
 	{
 		// Insert some numbers
 		for (std::size_t i = 0; i < entries; ++i)
 		{
-			filter.insert(i);
+			e.unrankPlayer(i, s, 0);
+			filter.insert(s.state);
 		}
 	}
 	t.EndTimer();
@@ -1381,17 +1387,20 @@ void TestBloom(int entries, double accuracy)
 		// Query the existence of numbers
 		for (std::size_t i = 0; i < entries; ++i)
 		{
-			if (filter.contains(i))
+			e.unrankPlayer(i, s, 0);
+			if (filter.contains(s.state))
 			{
 				//std::cout << "BF contains: " << i << std::endl;
 				correct++;
 			}
 		}
 		
+		srandom(12345);
 		// Query the existence of invalid numbers
 		for (int i = entries; i < 10*entries; ++i)
 		{
-			if (filter.contains(i))
+			e.unrankPlayer(random()%e.getMaxSinglePlayerRank(), s, 0);
+			if (filter.contains(s.state))
 			{
 				//std::cout << "BF falsely contains: " << i << std::endl;
 				incorrect++;
@@ -1405,5 +1414,65 @@ void TestBloom(int entries, double accuracy)
 	return;
 
 }
+#include "Bloom.h"
 
+void TestBloom2(int entries, double accuracy)
+{
+	BloomFilter filter(entries, accuracy/100.0, false);
+	
+	printf("Approximate storage: %lld bits (%1.2f MB / %1.2f GB)\n", filter.GetStorage(),
+		   filter.GetStorage()/8.0/1024.0/1024.0,
+		   filter.GetStorage()/8.0/1024.0/1024.0/1024.0);
+	
+	Timer t;
+	t.StartTimer();
+	// Insert into Bloom Filter
+	RubikEdge e;
+	RubikEdgeState s;
+	{
+		// Insert some numbers
+		for (std::size_t i = 0; i < entries; ++i)
+		{
+			e.unrankPlayer(i, s, 0);
+			filter.Insert(s.state);
+		}
+	}
+	t.EndTimer();
+	printf("%1.6f spend adding entries (%lu bytes each)\n", t.GetElapsedTime(), sizeof(std::size_t));
+	
+	// Query Bloom Filter
+	{
+		t.StartTimer();
+		int correct = 0;
+		int incorrect = 0;
+		// Query the existence of numbers
+		for (std::size_t i = 0; i < entries; ++i)
+		{
+			e.unrankPlayer(i, s, 0);
+			if (filter.Contains(s.state))
+			{
+				//std::cout << "BF contains: " << i << std::endl;
+				correct++;
+			}
+		}
+		
+		srandom(12345);
+		// Query the existence of invalid numbers
+		for (int i = entries; i < 10*entries; ++i)
+		{
+			e.unrankPlayer(random()%e.getMaxSinglePlayerRank(), s, 0);
+			if (filter.Contains(s.state))
+			{
+				//std::cout << "BF falsely contains: " << i << std::endl;
+				incorrect++;
+			}
+		}
+		t.EndTimer();
+		printf("%1.6f spend querying %d entries\n", t.GetElapsedTime(), entries*11);
+		printf("%d of %d items (%5.2f%%) correctly stored. %d of %d items (%5.2f%%) incorrectly detected\n",
+			   correct, entries, (100.0*correct/entries), incorrect, entries*10, incorrect*100.0/(entries*10.0));
+	}
+	return;
+	
+}
 
