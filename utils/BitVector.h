@@ -42,7 +42,7 @@ const int storageMask = 0x7;
 
 class BitVector {
 public:
-	BitVector(int size);
+	BitVector(uint64_t size);
 	BitVector(uint64_t entries, const char *file, bool zero);
 	~BitVector();
 	void clear();

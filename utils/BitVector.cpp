@@ -25,7 +25,7 @@
 
 
 
-BitVector::BitVector(int _size)
+BitVector::BitVector(uint64_t _size)
 {
 	true_size = _size;
 	size = (_size>>storageBitsPower)+1;
