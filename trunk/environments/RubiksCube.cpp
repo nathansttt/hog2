@@ -141,12 +141,12 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 			val = max(val, depthLoc->second);
 			edgeDist[depthLoc->second]++;
 		}
-		else if (depth8->contains(hash))
+		else if (depth8->Contains(hash))
 		{
 			val = max(val, 8);
 			edgeDist[8]++;
 		}
-		else if (depth9->contains(hash))
+		else if (depth9->Contains(hash))
 		{
 			val = max(val, 9);
 			edgeDist[9]++;
