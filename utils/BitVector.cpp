@@ -122,15 +122,6 @@ void BitVector::clear()
 //  return bv;
 //}
 
-bool BitVector::Get(uint64_t index) const
-{
-  if ((index>>storageBitsPower) > size) {
-    printf("GET %llu OUT OF RANGE\n", index);
-    exit(0);
-  }
-  return (((storage[index>>storageBitsPower])>>(index&storageMask))&0x1);
-}
-
 void BitVector::Set(uint64_t index, bool value)
 {
   if ((index>>storageBitsPower) > size) {
@@ -142,6 +133,7 @@ void BitVector::Set(uint64_t index, bool value)
   else
     storage[index>>storageBitsPower] = storage[index>>storageBitsPower]&(~(1<<(index&storageMask)));
 }
+
 
 //void BitVector::Merge(BitVector *bv)
 //{

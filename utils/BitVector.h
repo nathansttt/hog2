@@ -47,9 +47,10 @@ public:
 	~BitVector();
 	void clear();
 //	BitVector *Clone();
-	int GetSize() { return true_size; }
+	uint64_t GetSize() { return true_size; }
 	bool Get(uint64_t index) const;
 	void Set(uint64_t index, bool value);
+	void SetTrue(uint64_t index);
 //	void Merge(BitVector *);
 	void Save(const char *);
 	void Load(const char *);
@@ -61,5 +62,15 @@ private:
 	bool memmap;
 	int fd;
 };
+
+inline bool BitVector::Get(uint64_t index) const
+{
+	return (((storage[index>>storageBitsPower])>>(index&storageMask))&0x1);
+}
+
+inline void BitVector::SetTrue(uint64_t index)
+{
+	storage[index>>storageBitsPower] = storage[index>>storageBitsPower]|(1<<(index&storageMask));
+}
 
 #endif
