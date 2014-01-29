@@ -22,7 +22,7 @@
 #include <cstdio>
 #include "BitVector.h"
 #include "MMapUtil.h"
-
+#include <sys/mman.h>
 
 
 BitVector::BitVector(uint64_t _size)
@@ -56,6 +56,7 @@ BitVector::~BitVector()
 		delete [] storage;
 	}
 	else {
+		printf("Closing mmap\n");
 		// close memmap
 		CloseMMap((uint8_t*)storage, true_size/8, fd);
 	}
@@ -63,11 +64,6 @@ BitVector::~BitVector()
 
 void BitVector::Save(const char *file)
 {
-	if (memmap)
-	{
-		printf("BitVector is memmapped; not saving\n");
-		return;
-	}
 	FILE *f = fopen(file, "w+");
 	if (f == 0)
 	{
@@ -101,8 +97,8 @@ void BitVector::Load(const char *file)
 	size = (true_size>>storageBitsPower)+1;
 
 	storage = new storageElement[size];
-	for (int x = 0; x < size; x++)
-		storage[x] = 0;
+	//	for (int x = 0; x < size; x++)
+	//		storage[x] = 0;
 
 	// TODO:
 	fread(storage, sizeof(storageElement), size, f);

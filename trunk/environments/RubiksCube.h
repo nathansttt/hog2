@@ -72,7 +72,8 @@ public:
 
 		edgeDist.resize(16);
 		cornDist.resize(16);
-
+		depth8 = 0;
+		depth9 = 0;
 		//		for (int x = 0; x < 18; x++)
 //		{
 //			moves[x].act = x;
@@ -80,7 +81,7 @@ public:
 //				moves[x].next = &moves[x+1];
 //		} moves[17].next = 0;
 	}
-	~RubiksCube() {}
+	~RubiksCube() { delete depth8; delete depth9; }
 	void SetPruneSuccessors(bool val) { pruneSuccessors = val; history.resize(0); }
 	virtual void GetSuccessors(const RubiksState &nodeID, std::vector<RubiksState> &neighbors) const;
 	virtual void GetActions(const RubiksState &nodeID, std::vector<RubiksAction> &actions) const;
