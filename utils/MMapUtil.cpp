@@ -72,7 +72,7 @@ uint8_t *GetMMAP(const char *filename, uint64_t mapSize, int &fd, bool zero)
 	printf("Size: %llu \n",(uint64_t)sb.st_size);
 	assert(sb.st_size >= mapSize);
 	
-	memblock = (uint8_t *)mmap(NULL, sb.st_size, PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_POPULATE, fd, 0);
+	memblock = (uint8_t *)mmap(NULL, sb.st_size, PROT_WRITE|PROT_READ, /*MAP_PRIVATE|MAP_POPULATE*/MAP_SHARED, fd, 0);
 	//madvise(memblock, sb.st_size, MADV_RANDOM|MADV_WILLNEED);
 	if (memblock == MAP_FAILED)
 	{

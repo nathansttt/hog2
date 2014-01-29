@@ -192,7 +192,11 @@ void TemplateAStar<state,action,environment>::GetPath(environment *_env, const s
   	{	
   		return;
   	}
-  	while (!DoSingleSearchStep(thePath)) {}
+  	while (!DoSingleSearchStep(thePath))
+	{
+//		if (0 == nodesExpanded%100000)
+//			printf("%llu nodes expanded\n", nodesExpanded);
+	}
 }
 
 /**

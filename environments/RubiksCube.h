@@ -95,7 +95,8 @@ public:
 	
 	/** Heuristic value between two arbitrary nodes. **/
 	virtual double HCost(const RubiksState &node1, const RubiksState &node2);
-	
+	virtual double HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost);
+
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
 	virtual double HCost(const RubiksState &node);

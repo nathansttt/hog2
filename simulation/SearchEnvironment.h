@@ -62,7 +62,8 @@ public:
 
 	/** Heuristic value between two arbitrary nodes. **/
 	virtual double HCost(const state &node1, const state &node2) = 0;
-
+	virtual double HCost(const state &node1, const state &node2, double parentHCost)
+	{ return HCost(node1, node2); }
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
 	virtual double HCost(const state &node)

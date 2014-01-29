@@ -1362,8 +1362,8 @@ void TestBloom(int entries, double accuracy)
 		// Insert some numbers
 		for (std::size_t i = 0; i < entries; ++i)
 		{
-			e.unrankPlayer(i, s, 0);
-			filter.insert(s.state);
+			//e.unrankPlayer(i, s, 0);
+			filter.insert(i); // s.state
 		}
 	}
 	t.EndTimer();
@@ -1377,8 +1377,8 @@ void TestBloom(int entries, double accuracy)
 		// Query the existence of numbers
 		for (std::size_t i = 0; i < entries; ++i)
 		{
-			e.unrankPlayer(i, s, 0);
-			if (filter.contains(s.state))
+			//e.unrankPlayer(i, s, 0);
+			if (filter.contains(i)) //s.state
 			{
 				//std::cout << "BF contains: " << i << std::endl;
 				correct++;
@@ -1389,8 +1389,12 @@ void TestBloom(int entries, double accuracy)
 		// Query the existence of invalid numbers
 		for (int i = entries; i < 10*entries; ++i)
 		{
-			e.unrankPlayer(random()%e.getMaxSinglePlayerRank(), s, 0);
-			if (filter.contains(s.state))
+			uint64_t next;
+			do {
+				next = random()%e.getMaxSinglePlayerRank();
+			} while (next < entries);
+			//e.unrankPlayer(next, s, 0);
+			if (filter.contains(next)) // s.state
 			{
 				//std::cout << "BF falsely contains: " << i << std::endl;
 				incorrect++;
@@ -1423,8 +1427,8 @@ void TestBloom2(int entries, double accuracy)
 		// Insert some numbers
 		for (std::size_t i = 0; i < entries; ++i)
 		{
-			e.unrankPlayer(i, s, 0);
-			filter.Insert(s.state);
+			//e.unrankPlayer(i, s, 0);
+			filter.Insert(i);
 		}
 	}
 	t.EndTimer();
@@ -1438,8 +1442,8 @@ void TestBloom2(int entries, double accuracy)
 		// Query the existence of numbers
 		for (std::size_t i = 0; i < entries; ++i)
 		{
-			e.unrankPlayer(i, s, 0);
-			if (filter.Contains(s.state))
+			//e.unrankPlayer(i, s, 0);
+			if (filter.Contains(i))
 			{
 				//std::cout << "BF contains: " << i << std::endl;
 				correct++;
@@ -1450,8 +1454,12 @@ void TestBloom2(int entries, double accuracy)
 		// Query the existence of invalid numbers
 		for (int i = entries; i < 10*entries; ++i)
 		{
-			e.unrankPlayer(random()%e.getMaxSinglePlayerRank(), s, 0);
-			if (filter.Contains(s.state))
+			uint64_t next;
+			do {
+				next = random()%e.getMaxSinglePlayerRank();
+			} while (next < entries);
+			//e.unrankPlayer(next, s, 0);
+			if (filter.Contains(next))
 			{
 				//std::cout << "BF falsely contains: " << i << std::endl;
 				incorrect++;
