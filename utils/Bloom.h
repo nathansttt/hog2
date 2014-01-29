@@ -21,9 +21,11 @@ public:
 	bool Contains(uint64_t item);
 	uint64_t GetStorage() { return filterSize; }
 	int GetNumHash() { return numHash; }
+	void Load();
 private:
 	uint64_t Hash(uint64_t value, int which);
 	int numHash;
+	bool saveAtExit;
 	uint64_t filterSize;
 	BitVector *bits;
 };

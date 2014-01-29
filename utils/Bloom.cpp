@@ -7,6 +7,7 @@
 //
 
 #include <cmath>
+#include <limits>
 #include "Bloom.h"
 
 //int numHash;
@@ -157,10 +158,11 @@ BloomFilter::BloomFilter(uint64_t numItems, double targetFalseRate, bool save, b
 	}
 	numHash = static_cast<unsigned int>(min_k);
 	filterSize = static_cast<unsigned long long int>(min_m);
-	if (save)
+	saveAtExit = save;
+	if (0)
 	{
 		char name[127];
-		sprintf(name, "bloom-%llu-%d.dat", filterSize, numHash);
+		sprintf(name, "/tmp/bloom-%llu-%d.dat", filterSize, numHash);
 		bits = new BitVector(filterSize, name, zero);
 	}
 	else {
@@ -170,8 +172,22 @@ BloomFilter::BloomFilter(uint64_t numItems, double targetFalseRate, bool save, b
 
 BloomFilter::~BloomFilter()
 {
+	if (saveAtExit)
+	{
+		char name[127];
+		sprintf(name, "bloom-%llu-%d.dat", filterSize, numHash);
+		bits->Save(name);
+	}
 	delete bits;
 	bits = 0;
+}
+
+void BloomFilter::Load()
+{
+	saveAtExit = false;
+	char name[127];
+	sprintf(name, "bloom-%llu-%d.dat", filterSize, numHash);
+	bits->Load(name);
 }
 
 void BloomFilter::Insert(uint64_t item)

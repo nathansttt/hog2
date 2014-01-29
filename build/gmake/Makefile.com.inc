@@ -5,7 +5,7 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/Makefile.com.inc,v $
 #-----------------------------------------------------------------------------
 
-CXX = g++
+CXX = clang++ # g++
 COMMON_CXXFLAGS += -Wall -std=c++11 --stdlib=libstdc++
 #COMMON_CXXFLAGS += -ansi -pedantic
 

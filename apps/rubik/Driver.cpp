@@ -25,6 +25,7 @@
  *
  */
 
+#include <cassert>
 #include "Common.h"
 #include "Driver.h"
 #include "UnitSimulation.h"
@@ -39,6 +40,7 @@
 #include "BFS.h"
 #include "BloomFilter.h"
 #include <string>
+#include "BitVector.h"
 
 RubiksCube c;
 RubiksAction a;
@@ -856,52 +858,39 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 		printf("Done.\n");
 	}
 
+	bool zero = false;
+
 	// setup bloom filters
 	{
 		printf("Creating bloom filters.\n");fflush(stdout);
 		uint64_t depth8states = 1050559626ull;
 		uint64_t depth9states = 11588911021ull;
 		
-//		bloom_parameters parameters8;
-//		parameters8.projected_element_count = depth8states;//1000;
-//		parameters8.false_positive_probability = 1.0/100.0; // 1% false positives
-//		if (!parameters8)
-//		{
-//			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
-//			exit(0);
-//		}
-//		parameters8.compute_optimal_parameters();
-		c.depth8 = new BloomFilter(depth8states, 0.01, true, true);
+		c.depth8 = new BloomFilter(depth8states, 0.01, true, zero);
+		c.depth8->Load();
 		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth8->GetStorage(),
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
 		printf("%d hashes being used\n", c.depth8->GetNumHash());
-//		c.depth8 = new bloom_filter(parameters8);
 
-//		bloom_parameters parameters9;
-//		parameters9.projected_element_count = depth9states;//1000;
-//        parameters9.false_positive_probability = 1.0/100.0; // 1% false positives  
-//		if (!parameters9)
-//		{
-//			std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
-//			exit(0);
-//		}
-//		parameters9.compute_optimal_parameters();
-		c.depth9 = new BloomFilter(depth9states, 0.01, true, true);
+		c.depth9 = new BloomFilter(depth9states, 0.01, true, zero);
+		c.depth9->Load();
 		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth9->GetStorage(),
 			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
 			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
 		printf("%d hashes being used\n", c.depth9->GetNumHash());
+
 		c.bloomFilter = true;
 		printf("Done.\n");fflush(stdout);
 	}
 	
 	// load hash table / bloom filter data
+	if (1)
 	{
 		printf("Building hash table/bloom filter\n"); fflush(stdout);
 		RubikEdge e;
 		RubikEdgeState es;
-		for (int x = 0; x < 10; x++)
+		for (int x = 0; x < 8; x++)
 		{
 			char name[255];
 			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
@@ -920,8 +909,8 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 			{
 				if (0 != countBits(nextItem&0xFFF)%2)
 					nextItem ^= 1;
-				es.state = nextItem;
-				nextItem = e.GetStateHash(es);
+				//es.state = nextItem;
+				//nextItem = e.GetStateHash(es);
 				if (x < 8)
 				{
 					count++;
@@ -942,6 +931,7 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 					c.depth9->Insert(nextItem);
 				}
 				if (0 == count%100000000ull)
+				 //if (0 == count%100000ull)
 				{
 					printf("%llu added to table\n", count);
 					fflush(stdout);
@@ -956,7 +946,7 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 	for (int x = 0; x < 100; x++)
 	{
 		srandom(9283+x*23);
-		SolveOneProblem(x, "hash7bloom8");
+		SolveOneProblem(x, "hash7bloom89");
 		//		SolveOneProblemAStar(x);
 	}
 	printf("Edge heuristic distribution\n");

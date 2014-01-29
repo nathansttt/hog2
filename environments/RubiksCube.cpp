@@ -116,14 +116,14 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 
 	// load PDB values directly from disk!
 	// make sure that "data" is initialized with the right constructor calls for the data
-//    int64_t r1, r2;
-//    e.rankPlayer(node1.edge, 0, r1, r2);
-//    double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2);
-//	edgeDist[edge]++;
+    //int64_t r1, r2;
+    //e.rankPlayer(node1.edge, 0, r1, r2);
+    //double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2);
+	//edgeDist[edge]++;
 //    if (edge > 10)
 //        edge = 10;
-//    val = max(val, edge);
-//	return val;
+    //val = max(val, edge);
+	//return val;
 
 	if (bloomFilter)
 	{
@@ -133,7 +133,7 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 		  exit(0);
 		  }*/
 
-		hash = e.GetStateHash(node1.edge);
+		hash = node1.edge.state;//e.GetStateHash(node1.edge);
 
 		auto depthLoc = depthTable.find(hash);
 		if (depthLoc != depthTable.end())
