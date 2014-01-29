@@ -32,7 +32,7 @@ public:
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	void SetUseBDPathMax(bool val) { usePathMax = val; }
 private:
-	unsigned long nodesExpanded, nodesTouched;
+	unsigned long long nodesExpanded, nodesTouched;
 	
 	double DoIteration(SearchEnvironment<state, action> *env,
 					   state parent, state currState,
@@ -41,7 +41,7 @@ private:
 	double DoIteration(SearchEnvironment<state, action> *env,
 					   action forbiddenAction, state &currState,
 					   std::vector<action> &thePath, double bound, double g,
-					   double maxH);
+					   double maxH, double parentH);
 	
 	void UpdateNextBound(double currBound, double fCost);
 	state goal;
@@ -83,7 +83,8 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	if (env->GoalTest(from, to))
 		return;
 
-	UpdateNextBound(0, env->HCost(from, to));
+	double rootH = env->HCost(from, to);
+	UpdateNextBound(0, rootH);
 	goal = to;
 	std::vector<action> act;
 	env->GetActions(from, act);
@@ -92,7 +93,7 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 		nodeTable.clear();
 		printf("Starting iteration with bound %f; %llu expanded\n", nextBound, nodesExpanded);
 		fflush(stdout);
-		DoIteration(env, act[0], from, thePath, nextBound, 0, 0);
+		DoIteration(env, act[0], from, thePath, nextBound, 0, 0, rootH);
 	}
 }
 
@@ -151,11 +152,11 @@ template <class state, class action>
 double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env,
 										   action forbiddenAction, state &currState,
 										   std::vector<action> &thePath, double bound, double g,
-										   double maxH)
+										   double maxH, double parentH)
 {
 	nodesExpanded++;
-	double h = env->HCost(currState, goal);
-	
+	double h = env->HCost(currState, goal, parentH);
+	parentH = h;
 	// path max
 	if (usePathMax && fless(h, maxH))
 		h = maxH;
@@ -165,6 +166,7 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 		//printf("Stopping at (%d, %d). g=%f h=%f\n", currState>>16, currState&0xFFFF, g, h);
 		return h;
 	}
+	// must do this after we check the f-cost bound
 	if (env->GoalTest(currState, goal))
 		return -1; // found goal
 	
@@ -185,7 +187,7 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 		action a = actions[x];
 		env->InvertAction(a);
 		double childH = DoIteration(env, a, currState, thePath, bound,
-									g+edgeCost, maxH - edgeCost);
+									g+edgeCost, maxH - edgeCost, parentH);
 		env->UndoAction(currState, actions[x]);
 		if (fequal(childH, -1)) // found goal
 			return -1;

@@ -105,6 +105,114 @@ bool RubiksCube::InvertAction(RubiksAction &a) const
 	return true;
 }
 
+double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost)
+{
+	double val = 0;
+	
+	// corner PDB
+	uint64_t hash = c.GetStateHash(node1.corner);
+	val = cornerPDB.Get(hash);
+	if (!fless(hash, parentHCost))
+		return val;
+
+	if (bloomFilter)
+	{
+		hash = node1.edge.state;//e.GetStateHash(node1.edge);
+
+		if (parentHCost >= 10)
+		{
+			if (depth9->Contains(hash))
+			{
+				val = max(val, 9);
+				edgeDist[9]++;
+			}
+			else {
+				val = max(val, 10);
+				edgeDist[10]++;
+			}
+			return val;
+		}
+		else if (parentHCost == 9)
+		{
+			if (depth8->Contains(hash))
+			{
+				val = max(val, 8);
+				edgeDist[8]++;
+			}
+			else if (depth9->Contains(hash))
+			{
+				// TODO: run with this on
+				//printf("It is possible!");
+				val = max(val, 9);
+				edgeDist[9]++;
+			}
+			else {
+				val = max(val, 10);
+				edgeDist[10]++;
+			}
+			return val;
+		}
+		auto depthLoc = depthTable.find(hash);
+		if (depthLoc != depthTable.end())
+		{
+			val = max(val, depthLoc->second);
+			edgeDist[depthLoc->second]++;
+		}
+		else if (depth8->Contains(hash))
+		{
+			val = max(val, 8);
+			edgeDist[8]++;
+		}
+		else if (depth9->Contains(hash))
+		{
+			val = max(val, 9);
+			edgeDist[9]++;
+		}
+		else {
+			val = max(val, 10);
+			edgeDist[10]++;
+		}
+		return val;
+	}
+	if (minCompression)
+	{
+		// edge PDB
+		hash = e.GetStateHash(node1.edge);
+		
+		//	// edge PDB
+		double val2 = edgePDB.Get(hash/compressionFactor);
+		val = max(val, val2);
+		
+		node1.edge.GetDual(dual);
+		hash = e.GetStateHash(dual);
+		
+		val2 = edgePDB.Get(hash/compressionFactor);
+		val = max(val, val2);
+	}
+	else if (!minCompression) // interleave
+	{
+		// edge PDB
+		hash = e7.GetStateHash(node1.edge7);
+		
+		//	// edge PDB
+		if (0 == hash%compressionFactor)
+		{
+			double val2 = edge7PDBint.Get(hash/compressionFactor);
+			val = max(val, val2);
+		}
+		node1.edge7.GetDual(e7dual);
+		hash = e7.GetStateHash(e7dual);
+		
+		if (0 == hash%compressionFactor)
+		{
+			double val2 = edge7PDBint.Get(hash/compressionFactor);
+			val = max(val, val2);
+		}
+	}
+	
+	return val;
+}
+
 /** Heuristic value between two arbitrary nodes. **/
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 {

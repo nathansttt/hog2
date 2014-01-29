@@ -170,6 +170,7 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *theEnv, 
 	{
 		//dir = moves.back();
 		//moves.pop_back();
+		std::cout << "Action: " << dir << std::endl;
 		dir = moves.front();
 		moves.erase(moves.begin());
 		return true;
@@ -178,7 +179,7 @@ bool GenericPatrolUnit<state,action,environment>::MakeMove(environment *theEnv, 
 	if (currTarget != -1)
 	{
 		// update current target and patrol counter if we're at our target location
-		if (loc == locs[currTarget])
+		if (theEnv->GoalTest(loc, locs[currTarget]))
 		{
 			currTarget = (currTarget+1)%locs.size();
 			if((numPatrols != -1)&&(currTarget == 1))
@@ -297,8 +298,8 @@ void GenericPatrolUnit<state,action, environment>::OpenGLDraw(const environment 
 		else
 			theEnv->OpenGLDraw(i.lastState, i.currentState,
 							(si->GetSimulationTime()-i.lastTime)/(i.nextTime-i.lastTime));
-		theEnv->SetColor(1.0, 0.25, 0.25, 0.25);
-		algorithm->OpenGLDraw();
+//		theEnv->SetColor(1.0, 0.25, 0.25, 0.25);
+//		algorithm->OpenGLDraw();
 
 		// draw path
 		state curr = i.lastState;
