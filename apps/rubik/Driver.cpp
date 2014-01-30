@@ -145,6 +145,7 @@ void TestBloom(int entries, double accuracy);
 void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix);
+void ManyCompression();
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -182,6 +183,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-compress") == 0)
 	{
+		ManyCompression(); exit(0);
 		if (maxNumArgs < 5)
 		{
 			printf("Insufficient number of arguments\n");
@@ -576,6 +578,78 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
 		}
 	}
+}
+
+void ManyCompression()
+{
+	const int toCompress = 5;
+	FourBitArray b[toCompress];
+	int factor[toCompress] = { 30, 35, 40, 45, 50 }; //10, 15, 20, 25,
+	std::vector<bucketInfo> data;
+	std::vector<bucketData> buckets;
+	
+	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+	int64_t totalSize = 0;
+	for (unsigned int x = 0; x < buckets.size(); x++)
+	{
+		totalSize += buckets[x].theSize;
+	}
+	//totalSize = (totalSize+ratio-1)/ratio;
+	for (int x = 0; x < toCompress; x++)
+	{
+		b[x].Resize((totalSize+factor[x]-1)/factor[x]);
+	}
+	//b.Resize(totalSize);
+	
+	DiskBitFile f("/data/cc/rubik/res/RC");
+
+	
+	printf("Performing min compression\n");
+	uint64_t avgReg = 0;
+	uint64_t avgComp[toCompress];//(0);// = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int64_t realIndex[toCompress];// = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int64_t index = 0;
+	int minValue[toCompress];// = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+	for (int x = 0; x < toCompress; x++)
+	{
+		avgComp[x] = 0; realIndex[x] = 0;
+		minValue[x] = 0xFF;
+	}
+	for (unsigned int x = 0; x < data.size(); x++)
+	{
+		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+		{
+			int val = f.ReadFileDepth(data[x].bucketID, y);
+			avgReg += val;
+			index++;
+			for (int r = 0; r < toCompress; r++)
+			{
+				minValue[r] = std::min(minValue[r], val);
+				if (0 == index%factor[r])
+				{
+					b[r].Set(realIndex[r]++, minValue[r]);
+					avgComp[r] += minValue[r];
+					minValue[r] = 0xFF;
+				}
+			}
+		}
+	}
+	for (int r = 0; r < toCompress; r++)
+	{
+		if (minValue[r] != 0xFF)
+		{
+			b[r].Set(realIndex[r]++, minValue[r]);
+		}
+		char name[255];
+		sprintf(name, "edge-min-%dx.pdb", factor[r]);
+		b[r].Write(name);
+		printf("%dx compression:\n", factor[r]);
+		printf("%llu entries compressed into %llu\n", index, realIndex[r]);
+		printf("Original average: %f; Compressed average: %f\n\n", (float)avgReg/index, (float)avgComp[r]/realIndex[r]);
+	}
+
 }
 
 void LoadCornerPDB()
