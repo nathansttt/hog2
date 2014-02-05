@@ -40,6 +40,7 @@
 #include "BFS.h"
 #include "PEAStar.h"
 #include "EPEAStar.h"
+#include "MapGenerators.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;

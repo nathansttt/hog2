@@ -41,6 +41,7 @@
 #include "FloydWarshall.h"
 #include "BidirectionalGraphEnvironment.h"
 #include "UnitCostBidirectionalBFS.h"
+#include "MapGenerators.h"
 
 #include <pthread.h>
 

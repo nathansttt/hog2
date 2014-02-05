@@ -36,6 +36,7 @@
 #include "GraphEnvironment.h"
 #include "MapSectorAbstraction.h"
 //#include "ContractionHierarchy.h"
+#include "MapGenerators.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
