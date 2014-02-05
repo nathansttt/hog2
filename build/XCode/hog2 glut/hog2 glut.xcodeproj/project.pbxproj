@@ -1393,6 +1393,21 @@
 		C4D60AC614B22E10007594CD /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34213E4FCF70077C5A5 /* Credits.rtf */; };
 		C4D60AC714B22E10007594CD /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
 		C4D60AD214B22E4A007594CD /* PuzzleSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D60AD014B22E4A007594CD /* PuzzleSample.cpp */; };
+		C4D83EC018A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC118A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC218A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC318A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC418A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC518A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC618A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC718A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC818A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83EC918A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83ECA18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83ECB18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83ECC18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83ECD18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4D83ECE18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
 		C4EABCDE13E66D14002D87CE /* SimpleHierarchicalAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4DC13E500100077C5A5 /* SimpleHierarchicalAStar.cpp */; };
 		C4EE610E1651BB9A00B038E5 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C4EE610F1651BB9A00B038E5 /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
@@ -1798,6 +1813,8 @@
 		C4D60ACE14B22E10007594CD /* mapUtils copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mapUtils copy2-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4D60AD014B22E4A007594CD /* PuzzleSample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PuzzleSample.cpp; sourceTree = "<group>"; };
 		C4D60AD114B22E4A007594CD /* PuzzleSample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PuzzleSample.h; sourceTree = "<group>"; };
+		C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MapGenerators.cpp; sourceTree = "<group>"; };
+		C4D83EBF18A29E7500F1A4D0 /* MapGenerators.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapGenerators.h; sourceTree = "<group>"; };
 		C4E11C2214C5439000028081 /* BucketOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BucketOpenClosed.h; sourceTree = "<group>"; };
 		C4E11C2414C7DC5700028081 /* EPEAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EPEAStar.h; sourceTree = "<group>"; };
 		C4EAF19814F6F9D600BCBD57 /* LearningUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LearningUnit.h; sourceTree = "<group>"; };
@@ -2670,6 +2687,8 @@
 				C48192B1188DE8440039D435 /* BloomFilter.h */,
 				C48192EC1894CB1E0039D435 /* Bloom.cpp */,
 				C48192ED1894CB1E0039D435 /* Bloom.h */,
+				C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */,
+				C4D83EBF18A29E7500F1A4D0 /* MapGenerators.h */,
 			);
 			name = utils;
 			path = ../../../../utils;
@@ -3359,6 +3378,7 @@
 				C4146D971830F66100745331 /* ClusterAbstraction.cpp in Sources */,
 				C4146D981830F66100745331 /* GraphAbstraction.cpp in Sources */,
 				C4146D991830F66100745331 /* LoadedBBAbstraction.cpp in Sources */,
+				C4D83ECE18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4146D9A1830F66100745331 /* LoadedCliqueAbstraction.cpp in Sources */,
 				C4146D9B1830F66100745331 /* MapAbstraction.cpp in Sources */,
 				C4146D9C1830F66100745331 /* MapCliqueAbstraction.cpp in Sources */,
@@ -3518,6 +3538,7 @@
 				C438177A140C39AE007BA75B /* SeekUnit.cpp in Sources */,
 				C438177B140C39AE007BA75B /* SteeringUnit.cpp in Sources */,
 				C4B9740F1426FADE00758D0D /* NQueens.cpp in Sources */,
+				C4D83EC318A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C454CDC31506013D005DDC8E /* BitMap.cpp in Sources */,
 				C402EDA115CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp in Sources */,
 				C4843E2616518613006A6861 /* Map2DHeading.cpp in Sources */,
@@ -3590,6 +3611,7 @@
 				C447F585146790A600D6D581 /* ClusterAbstraction.cpp in Sources */,
 				C447F586146790A600D6D581 /* GraphAbstraction.cpp in Sources */,
 				C447F587146790A600D6D581 /* LoadedBBAbstraction.cpp in Sources */,
+				C4D83EC618A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C447F588146790A600D6D581 /* LoadedCliqueAbstraction.cpp in Sources */,
 				C447F589146790A600D6D581 /* MapAbstraction.cpp in Sources */,
 				C447F58A146790A600D6D581 /* MapCliqueAbstraction.cpp in Sources */,
@@ -3704,6 +3726,7 @@
 				C46735A81710D9EF00E2A10B /* OpenListB.cpp in Sources */,
 				C46735A91710D9EF00E2A10B /* ClusterAbstraction.cpp in Sources */,
 				C46735AA1710D9EF00E2A10B /* GraphAbstraction.cpp in Sources */,
+				C4D83ECB18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C46735AB1710D9EF00E2A10B /* LoadedBBAbstraction.cpp in Sources */,
 				C46735AC1710D9EF00E2A10B /* LoadedCliqueAbstraction.cpp in Sources */,
 				C46735AD1710D9EF00E2A10B /* MapAbstraction.cpp in Sources */,
@@ -3818,6 +3841,7 @@
 				C47BDC0317440B5900DD0928 /* ClusterAbstraction.cpp in Sources */,
 				C47BDC0417440B5900DD0928 /* GraphAbstraction.cpp in Sources */,
 				C47BDC0517440B5900DD0928 /* LoadedBBAbstraction.cpp in Sources */,
+				C4D83ECC18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C47BDC0617440B5900DD0928 /* LoadedCliqueAbstraction.cpp in Sources */,
 				C47BDC0717440B5900DD0928 /* MapAbstraction.cpp in Sources */,
 				C47BDC0817440B5900DD0928 /* MapCliqueAbstraction.cpp in Sources */,
@@ -3932,6 +3956,7 @@
 				C498D8731432777C0053D322 /* ClusterAbstraction.cpp in Sources */,
 				C498D8741432777C0053D322 /* GraphAbstraction.cpp in Sources */,
 				C498D8751432777C0053D322 /* LoadedBBAbstraction.cpp in Sources */,
+				C4D83EC518A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C498D8761432777C0053D322 /* LoadedCliqueAbstraction.cpp in Sources */,
 				C498D8771432777C0053D322 /* MapAbstraction.cpp in Sources */,
 				C498D8781432777C0053D322 /* MapCliqueAbstraction.cpp in Sources */,
@@ -4019,6 +4044,7 @@
 				C49A6F851499BF41007CEDA2 /* TopSpin.cpp in Sources */,
 				C49A6F861499BF41007CEDA2 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C49A6F871499BF41007CEDA2 /* GraphCheck.cpp in Sources */,
+				C4D83EC718A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C49A6F881499BF41007CEDA2 /* IDAStar.cpp in Sources */,
 				C49A6F891499BF41007CEDA2 /* RandomUnit.cpp in Sources */,
 				C49A6F8A1499BF41007CEDA2 /* ContractionHierarchy.cpp in Sources */,
@@ -4197,6 +4223,7 @@
 				C4A79E5F13F03A580064AC6A /* PRAStar.cpp in Sources */,
 				C4A79E6013F03A580064AC6A /* PRAStar2.cpp in Sources */,
 				C4A79E6113F03A580064AC6A /* SearchAlgorithm.cpp in Sources */,
+				C4D83EC118A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4A79E6213F03A580064AC6A /* SpreadExecSearchAlgorithm.cpp in Sources */,
 				C4A79E6313F03A580064AC6A /* SpreadPRAStar.cpp in Sources */,
 				C4A79E6413F03A580064AC6A /* SimpleHierarchicalAStar.cpp in Sources */,
@@ -4310,6 +4337,7 @@
 				C4A79EE613F256DF0064AC6A /* PRAStar.cpp in Sources */,
 				C4A79EE713F256DF0064AC6A /* PRAStar2.cpp in Sources */,
 				C4A79EE813F256DF0064AC6A /* SearchAlgorithm.cpp in Sources */,
+				C4D83EC218A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4A79EE913F256DF0064AC6A /* SpreadExecSearchAlgorithm.cpp in Sources */,
 				C4A79EEA13F256DF0064AC6A /* SpreadPRAStar.cpp in Sources */,
 				C4A79EEB13F256DF0064AC6A /* SimpleHierarchicalAStar.cpp in Sources */,
@@ -4423,6 +4451,7 @@
 				C4B973EC1426FA4F00758D0D /* PRAStar.cpp in Sources */,
 				C4B973ED1426FA4F00758D0D /* PRAStar2.cpp in Sources */,
 				C4B973EE1426FA4F00758D0D /* SearchAlgorithm.cpp in Sources */,
+				C4D83EC418A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4B973EF1426FA4F00758D0D /* SpreadExecSearchAlgorithm.cpp in Sources */,
 				C4B973F01426FA4F00758D0D /* SpreadPRAStar.cpp in Sources */,
 				C4B973F11426FA4F00758D0D /* SimpleHierarchicalAStar.cpp in Sources */,
@@ -4473,6 +4502,7 @@
 				C4C9E4DC176A7A160027410C /* TopSpin.cpp in Sources */,
 				C4C9E4DD176A7A160027410C /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4C9E4DE176A7A160027410C /* GraphCheck.cpp in Sources */,
+				C4D83ECD18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4C9E4DF176A7A160027410C /* IDAStar.cpp in Sources */,
 				C4C9E4E0176A7A160027410C /* RandomUnit.cpp in Sources */,
 				C4C9E4E1176A7A160027410C /* ContractionHierarchy.cpp in Sources */,
@@ -4651,6 +4681,7 @@
 				C4D60AB814B22E10007594CD /* PRAStar.cpp in Sources */,
 				C4D60AB914B22E10007594CD /* PRAStar2.cpp in Sources */,
 				C4D60ABA14B22E10007594CD /* SearchAlgorithm.cpp in Sources */,
+				C4D83EC818A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4D60ABB14B22E10007594CD /* SpreadExecSearchAlgorithm.cpp in Sources */,
 				C4D60ABC14B22E10007594CD /* SpreadPRAStar.cpp in Sources */,
 				C4D60ABD14B22E10007594CD /* SimpleHierarchicalAStar.cpp in Sources */,
@@ -4764,6 +4795,7 @@
 				C4EE61651651BB9A00B038E5 /* PRAStar.cpp in Sources */,
 				C4EE61661651BB9A00B038E5 /* PRAStar2.cpp in Sources */,
 				C4EE61671651BB9A00B038E5 /* SearchAlgorithm.cpp in Sources */,
+				C4D83ECA18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4EE61681651BB9A00B038E5 /* SpreadExecSearchAlgorithm.cpp in Sources */,
 				C4EE61691651BB9A00B038E5 /* SpreadPRAStar.cpp in Sources */,
 				C4EE616A1651BB9A00B038E5 /* SimpleHierarchicalAStar.cpp in Sources */,
@@ -4877,6 +4909,7 @@
 				C4F9F4EE13E500100077C5A5 /* IRDijkstra.cpp in Sources */,
 				C4F9F4EF13E500100077C5A5 /* PRAStar.cpp in Sources */,
 				C4F9F4F013E500100077C5A5 /* PRAStar2.cpp in Sources */,
+				C4D83EC018A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4F9F4F113E500100077C5A5 /* SearchAlgorithm.cpp in Sources */,
 				C4F9F4F313E500100077C5A5 /* SpreadExecSearchAlgorithm.cpp in Sources */,
 				C4F9F4F413E500100077C5A5 /* SpreadPRAStar.cpp in Sources */,
@@ -4990,6 +5023,7 @@
 				C4FBC89516374C89003C667D /* PRAStar.cpp in Sources */,
 				C4FBC89616374C89003C667D /* PRAStar2.cpp in Sources */,
 				C4FBC89716374C89003C667D /* SearchAlgorithm.cpp in Sources */,
+				C4D83EC918A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4FBC89816374C89003C667D /* SpreadExecSearchAlgorithm.cpp in Sources */,
 				C4FBC89916374C89003C667D /* SpreadPRAStar.cpp in Sources */,
 				C4FBC89A16374C89003C667D /* SimpleHierarchicalAStar.cpp in Sources */,
