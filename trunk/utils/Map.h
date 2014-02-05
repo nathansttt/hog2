@@ -37,7 +37,7 @@ static const double ONE_OVER_ROOT_TWO = 1.0/ROOT_TWO;//0.707106781f;
 #include <stdint.h>
 
 #include "GLUtil.h"
-#include "Graph.h"
+//#include "Graph.h"
 
 enum tTileset {
 	kFall,
