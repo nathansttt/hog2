@@ -39,6 +39,7 @@
 #include "BFS.h"
 #include "Map3DGrid.h"
 #include "MinimalSectorAbstraction.h"
+#include "MapGenerators.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;

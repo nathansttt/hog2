@@ -42,6 +42,7 @@
 #include "EPEAStar.h"
 #include "MapOverlay.h"
 #include <tr1/unordered_map>
+#include "MapGenerators.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
