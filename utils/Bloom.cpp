@@ -169,9 +169,9 @@ BloomFilter::BloomFilter(uint64_t numItems, double targetFalseRate, bool save, b
 	saveAtExit = save;
 	if (0)
 	{
-		char name[127];
-		sprintf(name, "/tmp/bloom-%llu-%d.dat", filterSize, numHash);
-		bits = new BitVector(filterSize, name, zero);
+//		char name[127];
+//		sprintf(name, "/tmp/bloom-%llu-%d.dat", filterSize, numHash);
+//		bits = new BitVector(filterSize, name, zero);
 	}
 	else {
 		bits = new BitVector(filterSize);
