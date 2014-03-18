@@ -178,6 +178,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-buildBloom9") == 0)
 	{
 		BuildDepth9BloomFilter(atoi(argument[1]), atoi(argument[2]), argument[3]);
+		exit(0);
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
 	{
