@@ -967,27 +967,11 @@ void BuildDepth9BloomFilter(uint64_t space, int numHash, const char *dataLoc)
 			nextItem ^= 1;
 		//es.state = nextItem;
 		//nextItem = e.GetStateHash(es);
-		if (x < 8)
-		{
-			count++;
-			c.depthTable[nextItem] = x;
-			//if (x < 2)
-			//{
-			//	std::cout << es << " " << std::hex << es.state << std::endl;
-			//}
-		}
-		else if (x == 8)
-		{
-			count++;
-			c.depth8->Insert(nextItem);
-		}
-		else if (x == 9)
-		{
-			count++;
-			c.depth9->Insert(nextItem);
-		}
+
+		count++;
+		bf->Insert(nextItem);
+
 		if (0 == count%100000000ull)
-			//if (0 == count%100000ull)
 		{
 			printf("%llu added to table\n", count);
 			fflush(stdout);
