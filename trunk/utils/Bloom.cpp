@@ -137,6 +137,14 @@ uint64_t zobrist[8][256] = {
 
 
 
+BloomFilter::BloomFilter(uint64_t filterSize, int numHash, bool save, bool zero)
+{
+	this->filterSize = filterSize;
+	this->numHash = numHash;
+    saveAtExit = save;
+	bits = new BitVector(filterSize);
+}
+
 BloomFilter::BloomFilter(uint64_t numItems, double targetFalseRate, bool save, bool zero)
 {
 	double min_m = std::numeric_limits<double>::infinity();
@@ -144,7 +152,7 @@ BloomFilter::BloomFilter(uint64_t numItems, double targetFalseRate, bool save, b
 	double curr_m = 0.0;
 	double k = 1.0;
 	
-	while (k < 9)
+	while (k < 5) // limit to 4 hash functions
 	{
 		double numerator   = (- k * numItems);
 		double denominator = std::log(1.0 - std::pow(targetFalseRate, 1.0 / k));

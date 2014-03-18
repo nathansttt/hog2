@@ -149,7 +149,7 @@ void ManyCompression();
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	if (maxNumArgs <= 1)
+	if (maxNumArgs < 1)
 		return 0;
 
 	if (strcmp(argument[0], "-test") == 0)
@@ -582,9 +582,9 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 
 void ManyCompression()
 {
-	const int toCompress = 5;
+	const int toCompress = 3;
 	FourBitArray b[toCompress];
-	int factor[toCompress] = { 30, 35, 40, 45, 50 }; //10, 15, 20, 25,
+	int factor[toCompress] = {15, 20, 25};//{ 30, 35, 40, 45, 50 }; //10, 15, 20, 25,
 	std::vector<bucketInfo> data;
 	std::vector<bucketData> buckets;
 	
@@ -606,7 +606,7 @@ void ManyCompression()
 	DiskBitFile f("/data/cc/rubik/res/RC");
 
 	
-	printf("Performing min compression\n");
+	printf("Performing min compression\n"); fflush(stdout);
 	uint64_t avgReg = 0;
 	uint64_t avgComp[toCompress];//(0);// = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 	int64_t realIndex[toCompress];// = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -941,14 +941,16 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 		uint64_t depth9states = 11588911021ull;
 		
 		c.depth8 = new BloomFilter(depth8states, 0.01, true, zero);
-		c.depth8->Load();
+		//c.depth8 = new BloomFilter(10*depth8states, numHash, true, zero);
+		//c.depth8->Load();
 		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth8->GetStorage(),
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
 		printf("%d hashes being used\n", c.depth8->GetNumHash());
 
 		c.depth9 = new BloomFilter(depth9states, 0.01, true, zero);
-		c.depth9->Load();
+		//c.depth9 = new BloomFilter(10*depth9states, numHash, true, zero);
+		//c.depth9->Load();
 		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth9->GetStorage(),
 			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
 			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
@@ -964,7 +966,7 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 		printf("Building hash table/bloom filter\n"); fflush(stdout);
 		RubikEdge e;
 		RubikEdgeState es;
-		for (int x = 0; x < 8; x++)
+		for (int x = 0; x < 10; x++)
 		{
 			char name[255];
 			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);

@@ -107,42 +107,82 @@ bool RubiksCube::InvertAction(RubiksAction &a) const
 
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost)
 {
+	return HCost(node1, node2);
 	double val = 0;
 	
 	// corner PDB
 	uint64_t hash = c.GetStateHash(node1.corner);
 	val = cornerPDB.Get(hash);
-	if (!fless(hash, parentHCost))
+	if (val > parentHCost)
+	{
 		return val;
+	}
 
 	if (bloomFilter)
 	{
 		hash = node1.edge.state;//e.GetStateHash(node1.edge);
 
-		if (parentHCost >= 10)
+		// our maximum is 10
+		if (val >= 10)
 		{
-			if (depth9->Contains(hash))
-			{
-				val = max(val, 9);
-				edgeDist[9]++;
-			}
-			else {
-				val = max(val, 10);
-				edgeDist[10]++;
-			}
+			//if (val != HCost(node1, node2))
+			//{ printf("Error! (1.5) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
 			return val;
 		}
-		else if (parentHCost == 9)
+		if (val < parentHCost-1) // we determined the heuristic
 		{
-			if (depth8->Contains(hash))
+			if (parentHCost >= 10)
+			{
+				if (depth9->Contains(hash))
+				{
+					val = max(val, 9);
+					edgeDist[9]++;
+				}
+				else {
+					val = max(val, 10);
+					edgeDist[10]++;
+				}
+				// not an error - might be a 'faulty' bloom filter!
+				//if (val != HCost(node1, node2))
+				//{ printf("Error! (2) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
+				return val;
+			}	
+			else if (parentHCost == 9)
+			{
+				if (depth8->Contains(hash))
+				{
+					val = max(val, 8);
+					edgeDist[8]++;
+				}
+				else if (depth9->Contains(hash))
+				{
+					val = max(val, 9);
+					edgeDist[9]++;
+				}
+				else {
+					val = max(val, 10);
+					edgeDist[10]++;
+				}
+				//if (val != HCost(node1, node2))
+				//{ printf("Error! (3) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
+				return val;
+			}
+
+		}
+
+			auto depthLoc = depthTable.find(hash);
+			if (depthLoc != depthTable.end())
+			{
+				val = max(val, depthLoc->second);
+				edgeDist[depthLoc->second]++;
+			}
+			else if (depth8->Contains(hash))
 			{
 				val = max(val, 8);
 				edgeDist[8]++;
 			}
 			else if (depth9->Contains(hash))
 			{
-				// TODO: run with this on
-				//printf("It is possible!");
 				val = max(val, 9);
 				edgeDist[9]++;
 			}
@@ -150,29 +190,9 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, dou
 				val = max(val, 10);
 				edgeDist[10]++;
 			}
+			//if (val != HCost(node1, node2))
+			//{ printf("Error! (4) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
 			return val;
-		}
-		auto depthLoc = depthTable.find(hash);
-		if (depthLoc != depthTable.end())
-		{
-			val = max(val, depthLoc->second);
-			edgeDist[depthLoc->second]++;
-		}
-		else if (depth8->Contains(hash))
-		{
-			val = max(val, 8);
-			edgeDist[8]++;
-		}
-		else if (depth9->Contains(hash))
-		{
-			val = max(val, 9);
-			edgeDist[9]++;
-		}
-		else {
-			val = max(val, 10);
-			edgeDist[10]++;
-		}
-		return val;
 	}
 	if (minCompression)
 	{
@@ -274,12 +294,14 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 		//	// edge PDB
 		double val2 = edgePDB.Get(hash/compressionFactor);
 		val = max(val, val2);
-		
-		node1.edge.GetDual(dual);
-		hash = e.GetStateHash(dual);
-
-		val2 = edgePDB.Get(hash/compressionFactor);
-		val = max(val, val2);
+		if (0)
+		{
+			node1.edge.GetDual(dual);
+			hash = e.GetStateHash(dual);
+			
+			val2 = edgePDB.Get(hash/compressionFactor);
+			val = max(val, val2);
+		}
 	}
 	else if (!minCompression) // interleave
 	{
