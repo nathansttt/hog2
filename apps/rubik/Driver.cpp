@@ -149,6 +149,7 @@ void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix);
 void ManyCompression();
+void BuildDepth9BloomFilter(uint64_t space, int numHash, const char *dataLoc);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
