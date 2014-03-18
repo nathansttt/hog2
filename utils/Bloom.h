@@ -16,6 +16,7 @@
 class BloomFilter {
 public:
 	BloomFilter(uint64_t numItems, double targetHitRate, bool save, bool zero=true);
+	BloomFilter(uint64_t filterSize, int numHash, bool save, bool zero=true);
 	~BloomFilter();
 	void Insert(uint64_t item);
 	bool Contains(uint64_t item);
