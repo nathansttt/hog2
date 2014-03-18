@@ -85,6 +85,9 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
+
+	InstallCommandLineHandler(MyCLHandler, "-buildBloom9", "-buildBloom9 <#GB> <#hash> <dataloc>", "Build a bloom filter using a size/hash combo.");
+
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <cornerpdb> <depthdata>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract <file>", "Extract levels from <file>");
@@ -170,6 +173,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		TestBloom(atoi(argument[1]), atof(argument[2]));
 		TestBloom2(atoi(argument[1]), atof(argument[2]));
 		exit(0);
+	}
+	else if (strcmp(argument[0], "-buildBloom9") == 0)
+	{
+		BuildDepth9BloomFilter(atoi(argument[1]), atoi(argument[2]), argument[3]);
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
 	{
@@ -920,6 +927,75 @@ int countBits(int64_t val)
 		val >>= 1;
 	}
 	return count;
+}
+
+void BuildDepth9BloomFilter(uint64_t space, int numHash, const char *dataLoc)
+{
+	printf("Creating bloom filter using %llu GB of mem.\n", space);fflush(stdout);
+	space = space*1024*1024*1024;
+	uint64_t depth9states = 11588911021ull;
+				
+	BloomFilter *bf = new BloomFilter(space, numHash, true, true);
+	printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", bf->GetStorage(),
+		   bf->GetStorage()/8.0/1024.0/1024.0,
+		   bf->GetStorage()/8.0/1024.0/1024.0/1024.0);
+	printf("%d hashes being used\n", bf->GetNumHash());
+		
+	printf("Building hash table/bloom filter\n"); fflush(stdout);
+	RubikEdge e;
+	RubikEdgeState es;
+	
+	int x = 9;
+	
+	char name[255];
+	sprintf(name, "%s12edge-depth-%d.dat", dataLoc, x);
+	FILE *f = fopen(name, "r");
+	if (f == 0)
+	{
+		printf("Error opening %s; aborting!\n", name);
+		exit(0);
+	}
+	printf("Reading from '%s'\n", name);
+	fflush(stdout);
+	
+	uint64_t nextItem;
+	uint64_t count = 0;
+	while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
+	{
+		if (0 != countBits(nextItem&0xFFF)%2)
+			nextItem ^= 1;
+		//es.state = nextItem;
+		//nextItem = e.GetStateHash(es);
+		if (x < 8)
+		{
+			count++;
+			c.depthTable[nextItem] = x;
+			//if (x < 2)
+			//{
+			//	std::cout << es << " " << std::hex << es.state << std::endl;
+			//}
+		}
+		else if (x == 8)
+		{
+			count++;
+			c.depth8->Insert(nextItem);
+		}
+		else if (x == 9)
+		{
+			count++;
+			c.depth9->Insert(nextItem);
+		}
+		if (0 == count%100000000ull)
+			//if (0 == count%100000ull)
+		{
+			printf("%llu added to table\n", count);
+			fflush(stdout);
+		}
+	}
+	printf("%llu items read at depth %d\n", count, x);fflush(stdout);
+	fclose(f);
+	
+	delete bf;
 }
 
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
