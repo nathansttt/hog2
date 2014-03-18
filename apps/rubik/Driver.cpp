@@ -934,7 +934,7 @@ int countBits(int64_t val)
 void BuildDepth9BloomFilter(uint64_t space, int numHash, const char *dataLoc)
 {
 	printf("Creating bloom filter using %llu GB of mem.\n", space);fflush(stdout);
-	space = space*1024*1024*1024;
+	space = space*8*1024*1024*1024;
 	uint64_t depth9states = 11588911021ull;
 				
 	BloomFilter *bf = new BloomFilter(space, numHash, true, true);
