@@ -86,7 +86,7 @@ void InstallHandlers()
 
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
 
-	InstallCommandLineHandler(MyCLHandler, "-buildBloom9", "-buildBloom9 <#GB> <#hash> <dataloc>", "Build a bloom filter using a size/hash combo.");
+	InstallCommandLineHandler(MyCLHandler, "-buildBloom", "-buildBloom <size> <#GB> <#hash> <dataloc>", "Build a bloom filter using a size/hash combo.");
 
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <cornerpdb> <depthdata>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
@@ -149,7 +149,7 @@ void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix);
 void ManyCompression();
-void BuildDepth9BloomFilter(uint64_t space, int numHash, const char *dataLoc);
+void BuildDepthBloomFilter(int size, uint64_t space, int numHash, const char *dataLoc);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -175,9 +175,9 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		TestBloom2(atoi(argument[1]), atof(argument[2]));
 		exit(0);
 	}
-	else if (strcmp(argument[0], "-buildBloom9") == 0)
+	else if (strcmp(argument[0], "-buildBloom") == 0)
 	{
-		BuildDepth9BloomFilter(atoi(argument[1]), atoi(argument[2]), argument[3]);
+		BuildDepthBloomFilter(atoi(argument[1]), atoi(argument[2]), atoi(argument[3]), argument[4]);
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
@@ -931,7 +931,7 @@ int countBits(int64_t val)
 	return count;
 }
 
-void BuildDepth9BloomFilter(uint64_t space, int numHash, const char *dataLoc)
+void BuildDepthBloomFilter(int size, uint64_t space, int numHash, const char *dataLoc)
 {
 	printf("Creating bloom filter using %llu GB of mem.\n", space);fflush(stdout);
 	space = space*8*1024*1024*1024;
@@ -942,12 +942,12 @@ void BuildDepth9BloomFilter(uint64_t space, int numHash, const char *dataLoc)
 		   bf->GetStorage()/8.0/1024.0/1024.0,
 		   bf->GetStorage()/8.0/1024.0/1024.0/1024.0);
 	printf("%d hashes being used\n", bf->GetNumHash());
-		
+
 	printf("Building hash table/bloom filter\n"); fflush(stdout);
 	RubikEdge e;
 	RubikEdgeState es;
 	
-	int x = 9;
+	int x = size;
 	
 	char name[255];
 	sprintf(name, "%s12edge-depth-%d.dat", dataLoc, x);
