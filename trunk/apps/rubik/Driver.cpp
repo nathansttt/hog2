@@ -999,8 +999,8 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size
 	// setup bloom filters
 	{
 		printf("Loading bloom filters.\n");fflush(stdout);
-		uint64_t depth8states = 1050559626ull;
-		uint64_t depth9states = 11588911021ull;
+		//uint64_t depth8states = 1050559626ull;
+		//uint64_t depth9states = 11588911021ull;
 		
 		uint64_t size8filter = size8*1024*1024*1024*8ull;
 		uint64_t size9filter = size9*1024*1024*1024*8ull;
@@ -1011,7 +1011,7 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
 		printf("%d hashes being used\n", c.depth8->GetNumHash());
 
-		c.depth9 = new BloomFilter(depth9states, hash9, depthPrefix);
+		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
 		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth9->GetStorage(),
 			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
 			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
