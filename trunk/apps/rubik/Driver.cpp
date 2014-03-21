@@ -984,7 +984,7 @@ void BuildDepthBloomFilter(int size, uint64_t space, int numHash, const char *da
 	delete bf;
 }
 
-void RunBloomFilterTest(const char *cornerPrefix, const char *depthPrefix, int size8, int hash8, int size9, int hash9)
+void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size8, int hash8, int size9, int hash9)
 {
 	// setup corner pdb
 	{
