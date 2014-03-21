@@ -88,7 +88,7 @@ void InstallHandlers()
 
 	InstallCommandLineHandler(MyCLHandler, "-buildBloom", "-buildBloom <size> <#GB> <#hash> <dataloc>", "Build a bloom filter using a size/hash combo.");
 
-	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <cornerpdb> <depthdata>", "Use bloom filter + corner pdb. Pass data locations");
+	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract <file>", "Extract levels from <file>");
 	InstallCommandLineHandler(MyCLHandler, "-testBloom", "-testBloom <entires> <accuracy>", "Test bloom filter with <entries> total and given <accuracy>");
@@ -147,7 +147,7 @@ void RunSimpleTest(const char *edgePDB, const char *cornerPDB);
 void TestBloom(int entries, double accuracy);
 void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
-void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix);
+void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size8, int hash8, int size9, int hash9);
 void ManyCompression();
 void BuildDepthBloomFilter(int size, uint64_t space, int numHash, const char *dataLoc);
 
@@ -182,7 +182,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
 	{
-		RunBloomFilterTest(argument[1], argument[2]);
+		RunBloomFilterTest(argument[1], argument[2], atoi(argument[3]), atoi(argument[4]), atoi(argument[5]), atoi(argument[6]));
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-pdb") == 0)
@@ -984,7 +984,7 @@ void BuildDepthBloomFilter(int size, uint64_t space, int numHash, const char *da
 	delete bf;
 }
 
-void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
+void RunBloomFilterTest(const char *cornerPrefix, const char *depthPrefix, int size8, int hash8, int size9, int hash9)
 {
 	// setup corner pdb
 	{
@@ -998,21 +998,20 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 
 	// setup bloom filters
 	{
-		printf("Creating bloom filters.\n");fflush(stdout);
+		printf("Loading bloom filters.\n");fflush(stdout);
 		uint64_t depth8states = 1050559626ull;
 		uint64_t depth9states = 11588911021ull;
 		
-		c.depth8 = new BloomFilter(depth8states, 0.01, true, zero);
-		//c.depth8 = new BloomFilter(10*depth8states, numHash, true, zero);
-		//c.depth8->Load();
+		uint64_t size8filter = size8*1024*1024*1024*8ull;
+		uint64_t size9filter = size9*1024*1024*1024*8ull;
+
+		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
 		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth8->GetStorage(),
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
 		printf("%d hashes being used\n", c.depth8->GetNumHash());
 
-		c.depth9 = new BloomFilter(depth9states, 0.01, true, zero);
-		//c.depth9 = new BloomFilter(10*depth9states, numHash, true, zero);
-		//c.depth9->Load();
+		c.depth9 = new BloomFilter(depth9states, hash9, depthPrefix);
 		printf("Approximate storage (8): %llu bits (%1.2f MB / %1.2f GB)\n", c.depth9->GetStorage(),
 			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
 			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
@@ -1028,7 +1027,7 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 		printf("Building hash table/bloom filter\n"); fflush(stdout);
 		RubikEdge e;
 		RubikEdgeState es;
-		for (int x = 0; x < 10; x++)
+		for (int x = 0; x < 8; x++)
 		{
 			char name[255];
 			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
@@ -1047,32 +1046,13 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix)
 			{
 				if (0 != countBits(nextItem&0xFFF)%2)
 					nextItem ^= 1;
-				//es.state = nextItem;
-				//nextItem = e.GetStateHash(es);
 				if (x < 8)
 				{
 					count++;
 					c.depthTable[nextItem] = x;
-					//if (x < 2)
-					//{
-					//	std::cout << es << " " << std::hex << es.state << std::endl;
-					//}
 				}
-				else if (x == 8)
-				{
-					count++;
-					c.depth8->Insert(nextItem);
-				}
-				else if (x == 9)
-				{
-					count++;
-					c.depth9->Insert(nextItem);
-				}
-				if (0 == count%100000000ull)
-				 //if (0 == count%100000ull)
-				{
-					printf("%llu added to table\n", count);
-					fflush(stdout);
+				else {
+					printf("Error; hit depth %d\n", x);
 				}
 			}
 			printf("%llu items read at depth %d\n", count, x);fflush(stdout);
