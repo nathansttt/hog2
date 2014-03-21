@@ -153,6 +153,7 @@ BloomFilter::BloomFilter(uint64_t filterSize, int numHash, const char *loadPrefi
 
 	char name[127];
 	sprintf(name, "%sbloom-%llu-%d.dat", loadPrefix, filterSize, numHash);
+	printf("Loading '%s'\n", name);
 	bits->Load(name);
 }
 

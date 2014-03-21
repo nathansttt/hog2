@@ -1003,8 +1003,9 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size
 		//uint64_t depth9states = 11588911021ull;
 		
 		uint64_t size8filter = size8*1024*1024*1024*8ull;
-		uint64_t size9filter = size9*1024*1024*1024*8ull;
+		uint64_t size9filter = size9*1024ull*1024ull*1024ull*8ull;
 
+		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", size8, size8filter, hash8);
 		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
 		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
 			   8, c.depth8->GetStorage(),
@@ -1012,6 +1013,7 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
 		printf("%d hashes being used\n", c.depth8->GetNumHash());
 
+		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", size9, size9filter, hash9);
 		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
 		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
 			   9, c.depth9->GetStorage(),
