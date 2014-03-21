@@ -67,7 +67,7 @@ void BitVector::Save(const char *file)
 	FILE *f = fopen(file, "w+");
 	if (f == 0)
 	{
-		printf("File write error\n");
+		printf("File write error (%s)\n", file);
 		exit(0);
 	}
 	fwrite(&true_size, sizeof(true_size), 1, f);
@@ -87,7 +87,7 @@ void BitVector::Load(const char *file)
 	FILE *f = fopen(file, "r");
 	if (f == 0)
 	{
-		printf("File write error\n");
+		printf("File read error (%s)\n", file);
 		exit(0);
 	}
 	//fread(&size, sizeof(size), 1, f);
