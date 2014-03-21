@@ -135,14 +135,25 @@ uint64_t zobrist[8][256] = {
 //};
 
 
-
-
 BloomFilter::BloomFilter(uint64_t filterSize, int numHash, bool save, bool zero)
 {
 	this->filterSize = filterSize;
 	this->numHash = numHash;
     saveAtExit = save;
 	bits = new BitVector(filterSize);
+}
+
+BloomFilter::BloomFilter(uint64_t filterSize, int numHash, const char *loadPrefix)
+{
+	this->filterSize = filterSize;
+	this->numHash = numHash;
+    saveAtExit = false;
+	bits = new BitVector(filterSize);
+	saveAtExit = false;
+
+	char name[127];
+	sprintf(name, "%sbloom-%llu-%d.dat", loadPrefix, filterSize, numHash);
+	bits->Load(name);
 }
 
 BloomFilter::BloomFilter(uint64_t numItems, double targetFalseRate, bool save, bool zero)
