@@ -107,7 +107,6 @@ bool RubiksCube::InvertAction(RubiksAction &a) const
 
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost)
 {
-	return HCost(node1, node2);
 	double val = 0;
 	
 	// corner PDB
