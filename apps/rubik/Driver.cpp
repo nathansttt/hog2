@@ -147,7 +147,7 @@ void RunSimpleTest(const char *edgePDB, const char *cornerPDB);
 void TestBloom(int entries, double accuracy);
 void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
-void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size8, int hash8, int size9, int hash9);
+void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9);
 void ManyCompression();
 void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataLoc);
 
@@ -182,7 +182,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
 	{
-		RunBloomFilterTest(argument[1], argument[2], atoi(argument[3]), atoi(argument[4]), atoi(argument[5]), atoi(argument[6]));
+		RunBloomFilterTest(argument[1], argument[2], atof(argument[3]), atoi(argument[4]), atof(argument[5]), atoi(argument[6]));
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-pdb") == 0)
@@ -984,7 +984,7 @@ void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataL
 	delete bf;
 }
 
-void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size8, int hash8, int size9, int hash9)
+void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9)
 {
 	// setup corner pdb
 	{
