@@ -149,7 +149,7 @@ void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, int size8, int hash8, int size9, int hash9);
 void ManyCompression();
-void BuildDepthBloomFilter(int size, uint64_t space, int numHash, const char *dataLoc);
+void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataLoc);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -177,7 +177,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-buildBloom") == 0)
 	{
-		BuildDepthBloomFilter(atoi(argument[1]), atoi(argument[2]), atoi(argument[3]), argument[4]);
+		BuildDepthBloomFilter(atoi(argument[1]), atof(argument[2]), atoi(argument[3]), argument[4]);
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
@@ -931,9 +931,9 @@ int countBits(int64_t val)
 	return count;
 }
 
-void BuildDepthBloomFilter(int size, uint64_t space, int numHash, const char *dataLoc)
+void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataLoc)
 {
-	printf("Creating bloom filter using %llu GB of mem.\n", space);fflush(stdout);
+	printf("Creating bloom filter using %2.1f GB of mem.\n", space);fflush(stdout);
 	space = space*8*1024*1024*1024;
 	uint64_t depth9states = 11588911021ull;
 				
