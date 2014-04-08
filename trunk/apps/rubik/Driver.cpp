@@ -26,6 +26,9 @@
  */
 
 #include <cassert>
+#include <stdlib.h>
+#include <limits.h>
+#include <xlocale.h>
 #include "Common.h"
 #include "Driver.h"
 #include "UnitSimulation.h"
@@ -87,7 +90,8 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
 
 	InstallCommandLineHandler(MyCLHandler, "-buildBloom", "-buildBloom <size> <#GB> <#hash> <dataloc>", "Build a bloom filter using a size/hash combo.");
-
+	InstallCommandLineHandler(MyCLHandler, "-showStats", "-showStats <size> <#hash> <prefix>", "Print out bloom filter stats.");
+	
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract <file>", "Extract levels from <file>");
@@ -150,6 +154,7 @@ void ExtractStatesAtDepth(const char *theFile);
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9);
 void ManyCompression();
 void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataLoc);
+void GetBloomStats(uint64_t size, int hash, const char *prefix);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -206,6 +211,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		RunCompressionTest(atoi(argument[1]), argument[2], argument[3], argument[4], argument[5]);
 		exit(0);
+	}
+	else if (strcmp(argument[0], "-showStats"))
+	{
+		GetBloomStats(strtoull(argument[1], 0, 10), strtol(argument[2], 0, 10), argument[3]);
 	}
 	//	strncpy(gDefaultMap, argument[1], 1024);
 	return 2;
@@ -980,7 +989,7 @@ void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataL
 	}
 	printf("%llu items read at depth %d\n", count, x);fflush(stdout);
 	fclose(f);
-	
+	bf->Analyze();
 	delete bf;
 }
 
@@ -1596,3 +1605,9 @@ void TestBloom2(int entries, double accuracy)
 	
 }
 
+void GetBloomStats(uint64_t size, int hash, const char *prefix)
+{
+	BloomFilter bf(size, hash, prefix);
+	bf.Analyze();
+	exit(0);
+}
