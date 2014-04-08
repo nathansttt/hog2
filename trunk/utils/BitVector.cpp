@@ -7,16 +7,16 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * HOG is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with HOG; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ */
 
 #include <cstdlib>
 #include <cstdio>
@@ -95,11 +95,11 @@ void BitVector::Load(const char *file)
 	printf("Loading %llu entries\n", true_size);
 	// allocate storage
 	size = (true_size>>storageBitsPower)+1;
-
+	
 	storage = new storageElement[size];
 	//	for (int x = 0; x < size; x++)
 	//		storage[x] = 0;
-
+	
 	// TODO:
 	fread(storage, sizeof(storageElement), size, f);
 	fclose(f);
@@ -107,8 +107,8 @@ void BitVector::Load(const char *file)
 
 void BitVector::clear()
 {
-  for (int x = 0; x < size; x++)
-	  storage[x] = 0;
+	for (int x = 0; x < size; x++)
+		storage[x] = 0;
 }
 
 //BitVector *BitVector::Clone()
@@ -120,14 +120,14 @@ void BitVector::clear()
 
 void BitVector::Set(uint64_t index, bool value)
 {
-  if ((index>>storageBitsPower) > size) {
-    printf("SET %llu OUT OF RANGE\n", index);
-    exit(0);
-  }
-  if (value)
-    storage[index>>storageBitsPower] = storage[index>>storageBitsPower]|(1<<(index&storageMask));
-  else
-    storage[index>>storageBitsPower] = storage[index>>storageBitsPower]&(~(1<<(index&storageMask)));
+	if ((index>>storageBitsPower) > size) {
+		printf("SET %llu OUT OF RANGE\n", index);
+		exit(0);
+	}
+	if (value)
+		storage[index>>storageBitsPower] = storage[index>>storageBitsPower]|(1<<(index&storageMask));
+	else
+		storage[index>>storageBitsPower] = storage[index>>storageBitsPower]&(~(1<<(index&storageMask)));
 }
 
 
@@ -143,22 +143,23 @@ void BitVector::Set(uint64_t index, bool value)
 
 bool BitVector::Equals(BitVector *bv)
 {
-  if (bv->size != size) return false;
-  for (int x = 0; x < size; x++)
-    if (storage[x] != bv->storage[x])
-      return false;
-  return true;
+	if (bv->size != size) return false;
+	for (int x = 0; x < size; x++)
+		if (storage[x] != bv->storage[x])
+			return false;
+	return true;
 }
 
-int BitVector::GetNumSetBits()
+uint64_t BitVector::GetNumSetBits()
 {
-  int sum = 0;
-  for (int x = 0; x < size; x++) {
-    storageElement iter = storage[x];
-    while (iter) {
-      if (iter&1) sum++;
-      iter = iter>>1;
-    }
-  }
-  return sum;
+	uint64_t sum = 0;
+	for (int x = 0; x < size; x++)
+	{
+		storageElement iter = storage[x];
+		while (iter) {
+			sum++;
+			iter &= (iter-1);
+		}
+	}
+	return sum;
 }

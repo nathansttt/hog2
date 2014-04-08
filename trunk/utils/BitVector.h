@@ -46,16 +46,14 @@ public:
 	BitVector(uint64_t entries, const char *file, bool zero);
 	~BitVector();
 	void clear();
-//	BitVector *Clone();
 	uint64_t GetSize() { return true_size; }
 	bool Get(uint64_t index) const;
 	void Set(uint64_t index, bool value);
 	void SetTrue(uint64_t index);
-//	void Merge(BitVector *);
 	void Save(const char *);
 	void Load(const char *);
 	bool Equals(BitVector *);
-	int GetNumSetBits();
+	uint64_t GetNumSetBits();
 private:
 	uint64_t size, true_size;
 	storageElement *storage;
