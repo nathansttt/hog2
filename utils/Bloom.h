@@ -19,6 +19,7 @@ public:
 	BloomFilter(uint64_t filterSize, int numHash, bool save, bool zero=true);
 	BloomFilter(uint64_t filterSize, int numHash, const char *loadPrefix);
 	~BloomFilter();
+	void Analyze();
 	void Insert(uint64_t item);
 	bool Contains(uint64_t item);
 	uint64_t GetStorage() { return filterSize; }

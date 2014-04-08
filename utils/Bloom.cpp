@@ -196,10 +196,18 @@ BloomFilter::~BloomFilter()
 	{
 		char name[127];
 		sprintf(name, "bloom-%llu-%d.dat", filterSize, numHash);
+		printf("Writing to '%s'\n", name);
 		bits->Save(name);
 	}
 	delete bits;
 	bits = 0;
+}
+
+void BloomFilter::Analyze()
+{
+	uint64_t entries = bits->GetSize();
+	uint64_t setEntries = bits->GetNumSetBits();
+	printf("%llu of %llu entries set. (%1.2f%%)\n", entries, setEntries, double(setEntries)/double(entries));
 }
 
 void BloomFilter::Load()
