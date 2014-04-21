@@ -52,7 +52,14 @@ template <class state, class action, class environment>
 class LSSLRTAStar : public LearningAlgorithm<state,action,environment>, public Heuristic<state> {
 public:
 	LSSLRTAStar(int nodeLimit = 8)
-	{ fAmountLearned = 0.0f; nodeExpansionLimit = nodeLimit; avoidLearning = false;}
+	{
+		fAmountLearned = 0.0f;
+		nodeExpansionLimit = nodeLimit;
+		avoidLearning = false;
+		minInitialHeuristic = DBL_MAX;
+		maxLaterHeuristic = 0;
+		initialHeuristic = true;
+	}
 	virtual ~LSSLRTAStar(void) { }
 	
 	void SetAvoidLearning(bool val) { avoidLearning = val; }
@@ -85,7 +92,11 @@ public:
 	virtual uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	virtual uint64_t GetNodesTouched() const { return nodesTouched; }
 	virtual void LogFinalStats(StatCollection *s)
-	{ s->AddStat("TotalLearning", GetName(),fAmountLearned); }
+	{
+		s->AddStat("TotalLearning", GetName(),fAmountLearned);
+		s->AddStat("MinInitial", GetName(),minInitialHeuristic);
+		s->AddStat("MaxLater", GetName(),maxLaterHeuristic);
+	}
 	
 	double GetAmountLearned() { return fAmountLearned; }
 	void OpenGLDraw() const {}
@@ -101,12 +112,31 @@ private:
 	int nodeExpansionLimit;
 	bool avoidLearning;
 	TemplateAStar<state, action, environment> astar;
+
+	bool initialHeuristic;
+	double minInitialHeuristic;
+	double maxLaterHeuristic;
 };
 
 /** The core routine of LSSLRTAStar -- computes at most one-move path */
 template <class state, class action, class environment>
 void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 {
+	if (initialHeuristic)
+	{
+		double tmp;
+		if ((tmp = env->HCost(from, to)) > minInitialHeuristic)
+		{
+			initialHeuristic = false;
+			maxLaterHeuristic = tmp;
+		}
+		else {
+			minInitialHeuristic = tmp;
+		}
+	}
+	else {
+		maxLaterHeuristic = std::max(env->HCost(from, to), maxLaterHeuristic);
+	}
 	Timer t;
 	t.StartTimer();
 	m_pEnv = env;
