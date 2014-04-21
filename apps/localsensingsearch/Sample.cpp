@@ -708,7 +708,8 @@ void RunScenario(char *name, int which)
 
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
-		if (sl->GetNthExperiment(x).GetBucket() == 127)
+		if (sl->GetNthExperiment(x).GetBucket() >= 100 &&
+			sl->GetNthExperiment(x).GetBucket() <  150)
 		{
 			printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
 			RunSingleTest(es, sl->GetNthExperiment(x), which);
@@ -729,6 +730,8 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	es->GetStats()->AddFilter("TotalLearning");
 	es->GetStats()->AddFilter("MakeMoveThinkingTime");
 	es->GetStats()->AddFilter("Trial End");
+	es->GetStats()->AddFilter("MinInitial");
+	es->GetStats()->AddFilter("MaxLater");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
 
@@ -824,7 +827,7 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 		es->AddUnit(u6);
 	}
 
-	es->SetTrialLimit(500000);
+	es->SetTrialLimit(0);
 	while (!es->Done())
 	{
 		es->StepTime(10.0);
@@ -858,6 +861,21 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 		printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
 		printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
 	}
+	choice = es->GetStats()->FindNextStat("MinInitial", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("MinInitial\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MinInitial\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MinInitial", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MaxLater", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MaxLater\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MaxLater\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MaxLater", es->GetUnit(0)->GetName()));
+	}
+
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
 	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval+1);
