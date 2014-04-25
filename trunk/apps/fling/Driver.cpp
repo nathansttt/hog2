@@ -113,7 +113,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Reset Board", "Reset board on the screen", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "History", "Move ?? in history", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "History", "Move ?? in history", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Load Preset", "Load Preset State", kAnyModifier, '1', '5');
+	InstallKeyboardHandler(MyDisplayHandler, "Load Preset", "Load Preset State", kAnyModifier, '1', '9');
 
 	InstallKeyboardHandler(SolveAndSaveInstance, "Solve & Save", "Solve and save the current instance", kNoModifier, 's');
 	InstallKeyboardHandler(SolveRandomFlingInstance, "Solve Random Instance", "Generates a random instance and uses a BFS to solve it", kNoModifier, '0');
@@ -198,7 +198,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		int cnt = atoi(argument[1]);
 		for (int x = 2; x <= cnt; x++)
 		{
-			BuildTables(0, kNoModifier, 'b');
+			BuildTables(0, kNoModifier, 'e');
 		}
 	}
 	else if (strcmp(argument[0], "-bfs") == 0)
@@ -316,6 +316,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '5':
 			f.GetStateFromHash(18157695840586785ull, b);
+			break;
+		case '6':
+			f.GetStateFromHash(37154696925872128ull, b);
 			break;
 		default:
 			break;
@@ -452,21 +455,26 @@ void SolveAndSaveInstance(unsigned long , tKeyboardModifier , char)
 const int THREADS = 4;
 #include "BitVector.h"
 std::vector<BitVector*> table;
+std::vector<BitVector*> unique;
 //std::vector<std::vector<BitVector*> > table;
 int currSize = 2;
 pthread_mutex_t writeLock = PTHREAD_MUTEX_INITIALIZER;
 int64_t solvable;
+int64_t uniqueSolvable;
 
 void *ThreadedWorker(void *arg)
 {
 	int id = (long)arg;
 	int64_t solved = 0;
+	int64_t uniqueSolved = 0;
 	FlingBoard currState, tmp;
 	std::vector<FlingBoard> succ;
 	std::vector<FlingMove> acts;
 
 	std::vector<int64_t> buffer;
+	std::vector<int64_t> uniqueBuffer;
 	buffer.reserve(4*1024+100);
+	uniqueBuffer.reserve(4*1024+100);
 	for (int64_t val = id; val < f.getMaxSinglePlayerRank(56, currSize); val+=THREADS)
 	{
 		f.unrankPlayer(val, currSize, currState);
@@ -477,26 +485,42 @@ void *ThreadedWorker(void *arg)
 			if (acts.size() > 0)
 			{
 				buffer.push_back(val);
+				uniqueBuffer.push_back(val);
 				//table[currSize][val] = true;
 				solved++;
+				uniqueSolved++;
 			}
 		}
 		else {
-			// TODO: flag for finding all solvable vs single solution
-
 			int cnt = 0;
+			int uniqueCnt = 0;
 			for (int x = 0; x < acts.size(); x++)
 			{
 				f.GetNextState(currState, acts[x], tmp);
-				if (table[tmp.locs.size()]->Get(f.rankPlayer(tmp)))
+				uint64_t rank = f.rankPlayer(tmp);
+				if (table[tmp.locs.size()]->Get(rank))
 				{
 					cnt++;
 				}
+				if (unique[tmp.locs.size()]->Get(rank))
+				{
+					uniqueCnt++;
+				}
 			}
-			if (cnt == 1)
-			{
+			if (cnt > 0) {
 				buffer.push_back(val);
 				solved++;
+			}
+			if (cnt == 1 && uniqueCnt == 1)
+			{
+				uniqueBuffer.push_back(val);
+				uniqueSolved++;
+//				pthread_mutex_lock (&writeLock);
+//				std::cout << currState << std::endl;
+//				std::cout << acts.size() << " moves; ";
+//				std::cout << cnt << " lead to solvable states; ";
+//				std::cout << uniqueCnt << " of these are unique\n";
+//				pthread_mutex_unlock(&writeLock);
 			}
 		}
 		// flush buffer
@@ -508,6 +532,11 @@ void *ThreadedWorker(void *arg)
 				table[currSize]->Set(buffer.back(), true);// = true;
 				buffer.pop_back();
 			}
+			while (uniqueBuffer.size() > 0)
+			{
+				unique[currSize]->Set(uniqueBuffer.back(), true);// = true;
+				uniqueBuffer.pop_back();
+			}
 			pthread_mutex_unlock(&writeLock);
 		}
 	}
@@ -518,7 +547,17 @@ void *ThreadedWorker(void *arg)
 		table[currSize]->Set(buffer.back(), true);
 		buffer.pop_back();
 	}
+	while (uniqueBuffer.size() > 0)
+	{
+		unique[currSize]->Set(uniqueBuffer.back(), true);// = true;
+		if (uniqueBuffer.size() == 1)
+		{
+			f.unrankPlayer(uniqueBuffer.back(), currSize, b);
+		}
+		uniqueBuffer.pop_back();
+	}
 	solvable += solved;
+	uniqueSolvable += uniqueSolved;
 	pthread_mutex_unlock(&writeLock);
 
 	pthread_exit(NULL);
@@ -528,16 +567,19 @@ void *ThreadedWorker(void *arg)
 void BuildTables(unsigned long , tKeyboardModifier, char)
 {
 	table.resize(currSize+1);
+	unique.resize(currSize+1);
 	std::cout << "Starting work on board with " << currSize << " pieces. ";
 	std::cout << f.getMaxSinglePlayerRank(56, currSize) << " entries." << std::endl;
 
 	char fname[255];
 	sprintf(fname, "/Users/nathanst/hog2/apps/fling/fling-%d.dat", currSize);
 	table[currSize] = new BitVector(f.getMaxSinglePlayerRank(56, currSize), fname, true);
+	sprintf(fname, "/Users/nathanst/hog2/apps/fling/fling-unique-%d.dat", currSize);
+	unique[currSize] = new BitVector(f.getMaxSinglePlayerRank(56, currSize), fname, true);
 	//table[currSize].resize(f.getMaxSinglePlayerRank(56, currSize));
 
 	solvable = 0;
-
+	uniqueSolvable = 0;
 	Timer t;
 	t.StartTimer();
 	std::vector<pthread_t> threads(THREADS);
@@ -555,7 +597,12 @@ void BuildTables(unsigned long , tKeyboardModifier, char)
 	}
 	double perc = solvable;
 	perc /= (double)f.getMaxSinglePlayerRank(56, currSize);
-	printf("%lld are solvable (%3.1f%%)\n%3.2f sec elapsed\n", solvable, 100*perc, t.EndTimer());
+	printf("%lld are solvable (%3.1f%%)\n", solvable, 100*perc);
+
+	perc = uniqueSolvable;
+	perc /= (double)f.getMaxSinglePlayerRank(56, currSize);
+	printf("%lld are uniquely solvable (%3.1f%%)\n%3.2f sec elapsed\n", uniqueSolvable, 100*perc, t.EndTimer());
+	
 //	char fname[255];
 //	sprintf(fname, "/Users/nathanst/fling-%d.dat", currSize);
 	//t.StartTimer();
@@ -593,7 +640,7 @@ void ReadTables(unsigned long , tKeyboardModifier, char)
 }
 
 std::tr1::unordered_map<uint64_t,bool> visitedStates;
-bool useTable = false;
+bool useTable = true;
 
 bool IsSolvable(FlingBoard &theState)
 {
@@ -603,7 +650,12 @@ bool IsSolvable(FlingBoard &theState)
 	{
 		// lookup
 		//return (table[theState.locs.size()][f.rankPlayer(theState)]);
-		return (table[theState.locs.size()]->Get(f.rankPlayer(theState)));
+		if (table[theState.locs.size()] != 0)
+			return (table[theState.locs.size()]->Get(f.rankPlayer(theState)));
+		else {
+			printf("Table size %d is null\n", theState.locs.size());
+			return true;
+		}
 	}
 	// in hash table
 	if (visitedStates.find(f.rankPlayer(theState)) != visitedStates.end())
@@ -668,7 +720,7 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 		depth.pop_front();
 		
 		nodesExpanded++;
-		weightedNodes += (weight-currDepth);
+		//weightedNodes += (weight-currDepth);
 		if (mClosed.find(env->GetStateHash(s)) != mClosed.end())
 		{
 			moves.resize(0);
@@ -710,8 +762,8 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 		//		std::cout << s << std::endl;
 	} while (parent != lastParent);
 	printf("Final depth: %d, Nodes Expanded %llu, Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
-//	return nodesExpanded;
-	return weightedNodes;
+	return nodesExpanded;
+//	return weightedNodes;
 }
 
 uint64_t DoLimitedBFS(FlingBoard b, std::vector<FlingBoard> &path)
@@ -721,15 +773,18 @@ uint64_t DoLimitedBFS(FlingBoard b, std::vector<FlingBoard> &path)
 
 void BFSearch(unsigned long windowID, tKeyboardModifier mod, char key)
 {
+	text.Clear();
 	Timer t;
 	t.StartTimer();
 	uint64_t nodesExpanded;
 	// do limited search
 	if (mod == kShiftDown || key == 'B')
 	{
+		text.AddLine("Limited search");
 		nodesExpanded = DoLimitedBFS(b, path);
 	}
 	else {
+		text.AddLine("Full search");
 		BFS<FlingBoard, FlingMove> bfs;
 		bfs.GetPath(&f, b, g, path);
 		pathLoc = path.size()-1;
@@ -737,7 +792,6 @@ void BFSearch(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 	t.EndTimer();
 	
-	text.Clear();
 	char line[255];
 	sprintf(line, "%llu total nodes", nodesExpanded);
 	text.AddLine(line);
@@ -772,6 +826,8 @@ void CaptureScreen(unsigned long windowID, tKeyboardModifier mod, char c)
 	cnt++;
 }
 
+// 1. count size of tree
+// (store full and logically reduced size)
 
 void GetWinningMoves(const FlingBoard &b, std::vector<FlingMove> &w)
 {
