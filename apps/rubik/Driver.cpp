@@ -44,6 +44,7 @@
 #include "BloomFilter.h"
 #include <string>
 #include "BitVector.h"
+#include "MinBloom.h"
 
 RubiksCube c;
 RubiksAction a;
@@ -53,10 +54,12 @@ Rubik7Edge e7;
 Rubik7EdgeState e7s;
 Rubik7EdgeAction e7a;
 
+void TestMinBloom();
+
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	RunHOGGUI(argc, argv);
+	RunHOGGUI(argc, argv, 300);
 }
 
 
@@ -90,6 +93,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
 
 	InstallCommandLineHandler(MyCLHandler, "-buildBloom", "-buildBloom <size> <#GB> <#hash> <dataloc>", "Build a bloom filter using a size/hash combo.");
+	InstallCommandLineHandler(MyCLHandler, "-buildMinBloom", "-buildMinBloom <#GB> <#hash> <maxDepth> <dataloc>", "Build a bloom filter using a size/hash combo.");
 	InstallCommandLineHandler(MyCLHandler, "-showStats", "-showStats <size> <#hash> <prefix>", "Print out bloom filter stats.");
 	
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
@@ -155,6 +159,7 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float si
 void ManyCompression();
 void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataLoc);
 void GetBloomStats(uint64_t size, int hash, const char *prefix);
+void BuildMinBloomFilter(float space, int numHash, int finalDepth, const char *dataLoc);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -183,6 +188,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-buildBloom") == 0)
 	{
 		BuildDepthBloomFilter(atoi(argument[1]), atof(argument[2]), atoi(argument[3]), argument[4]);
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-buildMinBloom") == 0)
+	{
+		BuildMinBloomFilter(atof(argument[1]), atoi(argument[2]), atoi(argument[3]), argument[4]);
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
@@ -895,17 +905,18 @@ void SolveOneProblemAStar(int instance)
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
-	LoadCornerPDB();
-	//LoadEdge7PDB();
-	LoadEdgePDB(10);
-	//LoadEdgePDBOLD(2000000000);
-
-	for (int x = 3; x < 4; x++)
-	{
-		srandom(9283+x*23);
-		SolveOneProblem(x, "online");
-	}
-	
+	TestMinBloom();
+	//	LoadCornerPDB();
+//	//LoadEdge7PDB();
+//	LoadEdgePDB(10);
+//	//LoadEdgePDBOLD(2000000000);
+//
+//	for (int x = 3; x < 4; x++)
+//	{
+//		srandom(9283+x*23);
+//		SolveOneProblem(x, "online");
+//	}
+//	
 //	LoadCornerPDB();
 	//	static int t = 0;
 //	c.GetStateFromHash(t, s);
@@ -945,13 +956,13 @@ void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataL
 	printf("Creating bloom filter using %2.1f GB of mem.\n", space);fflush(stdout);
 	space = space*8*1024*1024*1024;
 	uint64_t depth9states = 11588911021ull;
-				
+	
 	BloomFilter *bf = new BloomFilter(space, numHash, true, true);
 	printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n", size, bf->GetStorage(),
 		   bf->GetStorage()/8.0/1024.0/1024.0,
 		   bf->GetStorage()/8.0/1024.0/1024.0/1024.0);
 	printf("%d hashes being used\n", bf->GetNumHash());
-
+	
 	printf("Building hash table/bloom filter\n"); fflush(stdout);
 	RubikEdge e;
 	RubikEdgeState es;
@@ -977,10 +988,10 @@ void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataL
 			nextItem ^= 1;
 		//es.state = nextItem;
 		//nextItem = e.GetStateHash(es);
-
+		
 		count++;
 		bf->Insert(nextItem);
-
+		
 		if (0 == count%100000000ull)
 		{
 			printf("%llu added to table\n", count);
@@ -989,6 +1000,59 @@ void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataL
 	}
 	printf("%llu items read at depth %d\n", count, x);fflush(stdout);
 	fclose(f);
+	bf->Analyze();
+	delete bf;
+}
+
+void BuildMinBloomFilter(float space, int numHash, int finalDepth, const char *dataLoc)
+{
+	printf("Creating bloom filter using %2.1f GB of mem.\n", space);fflush(stdout);
+	space = space*8*1024*1024*1024;
+				
+	MinBloomFilter *bf = new MinBloomFilter(space, numHash, true, true);
+	printf("Approximate storage: %llu bits (%1.2f MB / %1.2f GB)\n", bf->GetStorage(),
+		   bf->GetStorage()*4.0/8.0/1024.0/1024.0,
+		   bf->GetStorage()*4.0/8.0/1024.0/1024.0/1024.0);
+	printf("%d hashes being used\n", bf->GetNumHash());
+
+	printf("Building hash table/bloom filter\n"); fflush(stdout);
+	RubikEdge e;
+	RubikEdgeState es;
+	
+	for (int x = 0; x < finalDepth; x++)
+	{
+		char name[255];
+		sprintf(name, "%s12edge-depth-%d.dat", dataLoc, x);
+		FILE *f = fopen(name, "r");
+		if (f == 0)
+		{
+			printf("Error opening %s; aborting!\n", name);
+			exit(0);
+		}
+		printf("Reading from '%s'\n", name);
+		fflush(stdout);
+		
+		uint64_t nextItem;
+		uint64_t count = 0;
+		while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
+		{
+			if (0 != countBits(nextItem&0xFFF)%2)
+				nextItem ^= 1;
+			//es.state = nextItem;
+			//nextItem = e.GetStateHash(es);
+			
+			count++;
+			bf->Insert(nextItem, x);
+			
+			if (0 == count%100000000ull)
+			{
+				printf("%llu added to table\n", count);
+				fflush(stdout);
+			}
+		}
+		printf("%llu items read at depth %d\n", count, x);fflush(stdout);
+		fclose(f);
+	}
 	bf->Analyze();
 	delete bf;
 }
@@ -1611,3 +1675,58 @@ void GetBloomStats(uint64_t size, int hash, const char *prefix)
 	bf.Analyze();
 	exit(0);
 }
+
+void TestMinBloom()
+{
+	int entries = 10000;
+	int totalSpace = entries*80/4;
+	{
+		MinBloomFilter f4(totalSpace, 6, true);
+		
+		for (int x = 0; x < entries; x++)
+			f4.Insert(x, x%15);
+		
+		printf("Testing correctness\n");
+		for (int x = 0; x < entries; x++)
+		{
+			if (f4.Contains(x) != (x%15))
+			{
+				printf("For an insertion of %d, we got %d out instead of %d\n",
+					   x, f4.Contains(x), (x%15));
+			}
+		}
+		printf("Done!\n");
+	
+		int hits = 0;
+		int total = 0;
+		for (int x = entries+1; x < entries*1000; x++)
+		{
+			total++;
+			if (f4.Contains(x) != 0xF)
+			{
+//				printf("For a false lookup of %d, we got out %d\n",
+//					   x, f4.Contains(x));
+				hits++;
+			}
+		}
+		printf("%d bytes for %d entries. (%1.1fbits/entry)\n%d of %d hit; fp rate = %1.6f%%\n",
+			   totalSpace/2, entries, float(8*totalSpace/2)/float(entries),
+			   hits, total, 100*float(hits)/float(total));
+	}
+	
+	{
+		MinBloomFilter t4(totalSpace, 6, "");
+		printf("Testing correctness\n");
+		for (int x = 0; x < entries; x++)
+		{
+			if (t4.Contains(x) != (x%15))
+			{
+				printf("For an insertion of %d, we got %d out instead of %d\n",
+					   x, t4.Contains(x), (x%15));
+			}
+		}
+		printf("Done!\n");
+	}
+	
+}
+
