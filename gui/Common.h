@@ -306,7 +306,7 @@ void PrintCommandLineArguments();
 
 void ProcessCommandLineArgs(int argc, char *argv[]);
 
-void RunHOGGUI(int argc, char* argv[]);
+void RunHOGGUI(int argc, char* argv[], int windowDimension = 1000);
 void SaveScreenshot(int windowID, const char *filename);
 
 void submitTextToBuffer(const char *val);

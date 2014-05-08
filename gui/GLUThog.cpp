@@ -53,7 +53,7 @@ pRecContext getCurrentContext()
 	return pContextInfo;
 }
 
-void RunHOGGUI(int argc, char** argv)
+void RunHOGGUI(int argc, char** argv, int windowDimension)
 {
   // Init traj global
   startTrajRecap = false;
@@ -70,7 +70,7 @@ void RunHOGGUI(int argc, char** argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(1000, 1000);
+	glutInitWindowSize(windowDimension, windowDimension);
 	glutCreateWindow("Map Abstraction");
 	glutReshapeFunc(resizeWindow);
 	glutDisplayFunc(renderScene);
