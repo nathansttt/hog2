@@ -18,6 +18,7 @@ class FourBitArray
 public:
 	FourBitArray(uint64_t numEntries = 0);
 	~FourBitArray();
+	void FillMax();
 	void Resize(uint64_t newMaxEntries);
 	uint64_t Size() const;
 	uint8_t Get(uint64_t index) const;

@@ -23,6 +23,11 @@ FourBitArray::~FourBitArray()
 	delete [] mem;
 }
 
+void FourBitArray::FillMax()
+{
+	memset(mem, 0xFF, (entries+1)/2);
+}
+
 void FourBitArray::Resize(uint64_t newMaxEntries)
 {
 	entries = newMaxEntries; // 4 bit entries
