@@ -51,6 +51,7 @@ SRC_CPP = \
 	utils/MMapUtil.cpp \
 	utils/DiskBitFile.cpp \
 	utils/Bloom.cpp \
+	utils/MinBloom.cpp \
 	utils/MapGenerators.cpp \
 	utils/MMapUtil.cpp \
 
