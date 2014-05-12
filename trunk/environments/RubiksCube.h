@@ -21,6 +21,7 @@
 #include "DiskBitFile.h"
 #include "EnvUtil.h"
 #include "Bloom.h"
+#include "MinBloom.h"
 
 class RubiksState
 {
@@ -129,10 +130,12 @@ public:
 	int compressionFactor;
 	bool minCompression;
 	bool bloomFilter;
+	bool minBloomFilter;
 	std::vector<uint64_t> edgeDist;
 	std::vector<uint64_t> cornDist;
 	::std::tr1::unordered_map<uint64_t, uint8_t> depthTable;
 	BloomFilter *depth8, *depth9;
+	MinBloomFilter *minBloom;
 private:
 	void SetFaceColor(int face) const;
 	mutable std::vector<RubiksAction> history;
