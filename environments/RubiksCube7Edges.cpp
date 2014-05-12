@@ -399,14 +399,6 @@ int64_t Rubik7Edge::getMaxSinglePlayerRank2(int64_t firstIndex)
 void Rubik7Edge::rankPlayerFirstTwo(const Rubik7EdgeState &node, int, int64_t &rank)
 {
 	uint64_t hash1 = 0;
-//	int locs[pieces];
-//	for (int x = 0; x < 12; x++)
-//	{
-//		if (node.GetCubeInLoc(x) < pieces)
-//		{
-//			locs[node.GetCubeInLoc(x)] = x;
-//		}
-//	}
 	for (unsigned int x = 0; x < pieces; x++)
 	{
 		//hash1 = (hash1<<1)+node.GetCubeOrientation(locs[x]);
@@ -427,45 +419,19 @@ void Rubik7Edge::rankPlayerRemaining(const Rubik7EdgeState &node, int, int64_t &
 		}
 	}
 	
-	//	printf("Locs: ");
-	//	for (int x = 0; x < pieces; x++)
-	//	{
-	//		printf("%d ", locs[x]);
-	//	}
-	//	printf("\n");
 	uint64_t hash2 = 0;
 	int numEntriesLeft = 12;
 	for (unsigned int x = 0; x < pieces; x++)
 	{
 		hash2 += locs[x]*Factorial(numEntriesLeft-1)/Factorial(12-pieces);
 		numEntriesLeft--;
-		//printf("Converting: ");
 		for (unsigned y = x+1; y < pieces; y++)
 		{
 			if (locs[y] > locs[x])
 				locs[y]--;
-			//printf("%d ", locs[y]);
 		}
-		//printf("\n");
 	}
-	//printf("bits: %llu perm: %llu\n", hash1, hash2);
 	rank = hash2;
-	
-	//	uint64_t perm = 0, dual = 0;
-//	for (int x = 0; x < 12; x++)
-//	{
-//		set(perm, x, node.GetCubeInLoc(x));
-//		set(dual, node.GetCubeInLoc(x), x);
-//	}
-//	
-//	uint64_t hashVal = 0;
-//	for (int x = pieces; x < 11; x++)
-//	{
-//		hashVal = (hashVal<<1)+node.GetCubeOrientation(11-x);
-//	}
-//	hashVal = hashVal*Factorial(12)+MRRank(12, perm, dual);
-//	rank = hashVal;
-	
 }
 
 
@@ -482,32 +448,21 @@ uint64_t Rubik7Edge::GetStateHash(const Rubik7EdgeState &node) const
 	}
 	for (unsigned int x = 0; x < pieces; x++)
 	{
-		//hash1 = (hash1<<1)+node.GetCubeOrientation(locs[x]);
 		hash1 = (hash1<<1)+node.GetCubeOrientation(x);
 	}
 
-//	printf("Locs: ");
-//	for (int x = 0; x < pieces; x++)
-//	{
-//		printf("%d ", locs[x]);
-//	}
-//	printf("\n");
 	uint64_t hash2 = 0;
 	int numEntriesLeft = 12;
 	for (unsigned int x = 0; x < pieces; x++)
 	{
 		hash2 += locs[x]*Factorial(numEntriesLeft-1)/Factorial(12-pieces);
 		numEntriesLeft--;
-		//printf("Converting: ");
 		for (unsigned y = x+1; y < pieces; y++)
 		{
 			if (locs[y] > locs[x])
 				locs[y]--;
-			//printf("%d ", locs[y]);
 		}
-		//printf("\n");
 	}
-	//printf("bits: %llu perm: %llu\n", hash1, hash2);
 	return hash1*Factorial(12)/Factorial(12-pieces)+hash2;
 }
 

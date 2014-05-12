@@ -19,10 +19,8 @@ public:
 	NQueenState(int numQueens = 8)
 	{
 		locs.resize(numQueens);
-		for (unsigned int x = 0; x < numQueens; x++)
-		{
-			locs[x] = -1;
-		}
+		for (int x = 0; x < numQueens; x++)
+			locs[x] = random()%numQueens;
 	}
 	std::vector<int> locs;
 };
@@ -44,6 +42,12 @@ class NQueenAction
 public:
 	int loc, value;
 };
+
+static std::ostream &operator<<(std::ostream &out, const NQueenAction &a)
+{
+	out << "(" << a.loc << ": " << a.value << ")";
+	return out;
+}
 
 class NQueens : public SearchEnvironment<NQueenState, NQueenAction>
 {
@@ -79,6 +83,8 @@ public:
 	virtual uint64_t GetActionHash(NQueenAction act) const { return 0; }
 	
 	int NumCollisions(const NQueenState &node) const;
+	int NumCollisions(const NQueenState &node, int row) const;
+	int NumCollisions(const NQueenState &node, int row, int column) const;
 
 	//virtual double GetPathLength(std::vector<NQueenState> &neighbors);
 	
@@ -87,6 +93,12 @@ public:
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const NQueenState&, const NQueenState&, float) const;
 	virtual void OpenGLDraw(const NQueenState&, const NQueenAction&) const;
+	void GLLabelState(const NQueenState &s, int x, int y, int number) const;
+
+	void OpenGLDrawBackground(float r, float g, float b);
+	void OpenGLDrawBackground(const NQueenState&, float r, float g, float b, int firstRow, int lastRow);
+	void OpenGLDrawConflicts(const NQueenState&s) const;
+
 private:
 };
 

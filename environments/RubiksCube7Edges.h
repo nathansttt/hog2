@@ -28,10 +28,6 @@ public:
 		state = 0;
 		for (int x = 0; x < 12; x++)
 			SetCubeInLoc(x, x);
-//		for (int x = 0; x < pieces; x++)
-//			SetCubeInLoc(x, x);
-//		for (int x = pieces; x < 12; x++)
-//			SetCubeInLoc(x, 0xF);
 	}
 	void GetDual(Rubik7EdgeState &s) const;
 	int GetCubeInLoc(int whichLoc) const
@@ -88,10 +84,7 @@ static std::ostream& operator <<(std::ostream & out, const Rubik7EdgeState &s)
 {
 	for (int x = 0; x < 12; x++)
 	{
-//		if (s.GetCubeInLoc(x) >= pieces)
-//			out << "*-* ";
-//		else
-			out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(s.GetCubeInLoc(x))?1:0) << " ";
+		out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(s.GetCubeInLoc(x))?1:0) << " ";
 	}
 	return out;
 }
