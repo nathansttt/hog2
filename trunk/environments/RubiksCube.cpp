@@ -116,7 +116,14 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, dou
 	{
 		return val;
 	}
-
+	
+	if (minBloomFilter)
+	{
+		int bloom = minBloom->Contains(node1.edge.state);
+		if (bloom == 0xF) // not found
+			bloom = 10;
+		return max(val, double(bloom));
+	}
 	if (bloomFilter)
 	{
 		hash = node1.edge.state;//e.GetStateHash(node1.edge);
