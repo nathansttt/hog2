@@ -97,6 +97,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-showStats", "-showStats <size> <#hash> <prefix>", "Print out bloom filter stats.");
 	
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
+	InstallCommandLineHandler(MyCLHandler, "-minBloomSearch", "-minBloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract <file>", "Extract levels from <file>");
 	InstallCommandLineHandler(MyCLHandler, "-testBloom", "-testBloom <entires> <accuracy>", "Test bloom filter with <entries> total and given <accuracy>");
@@ -156,6 +157,7 @@ void TestBloom(int entries, double accuracy);
 void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9);
+void RunMinBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float space, int numHash);
 void ManyCompression();
 void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataLoc);
 void GetBloomStats(uint64_t size, int hash, const char *prefix);
@@ -198,6 +200,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
 	{
 		RunBloomFilterTest(argument[1], argument[2], atof(argument[3]), atoi(argument[4]), atof(argument[5]), atoi(argument[6]));
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-minBloomSearch") == 0)
+	{
+		RunMinBloomFilterTest(argument[1], argument[2], atof(argument[3]), atoi(argument[4]));
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-pdb") == 0)
@@ -1153,6 +1160,51 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float si
 //	bloom_filter *depth8, *depth9;
 
 }
+
+void RunMinBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float space, int numHash)
+{
+	// setup corner pdb
+	{
+		FourBitArray &corner = c.GetCornerPDB();
+		printf("Loading corner pdb: %s\n", cornerPDB);
+		corner.Read(cornerPDB);
+		printf("Done.\n");
+	}
+	
+	bool zero = false;
+	
+	// setup bloom filters
+	{
+		printf("Loading min bloom filters.\n");fflush(stdout);
+		
+		printf("Creating bloom filter using %2.1f GB of mem.\n", space);fflush(stdout);
+		space = space*8*1024*1024*1024;
+		
+		MinBloomFilter *bf = new MinBloomFilter(space, numHash, depthPrefix);
+		printf("Approximate storage: %llu bits (%1.2f MB / %1.2f GB)\n", bf->GetStorage(),
+			   bf->GetStorage()*4.0/8.0/1024.0/1024.0,
+			   bf->GetStorage()*4.0/8.0/1024.0/1024.0/1024.0);
+		printf("%d hashes being used\n", bf->GetNumHash());
+		c.minBloom = bf;
+		c.minBloomFilter = true;
+	}
+	
+	for (int x = 0; x < 100; x++)
+	{
+		srandom(9283+x*23);
+		SolveOneProblem(x, "hash7bloom89");
+		//		SolveOneProblemAStar(x);
+	}
+	printf("Edge heuristic distribution\n");
+	for (int x = 0; x < c.edgeDist.size(); x++)
+	{
+		printf("%d : %llu\n", x, c.edgeDist[x]);
+	}
+	//	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
+	//	bloom_filter *depth8, *depth9;
+	
+}
+
 
 void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB)
 {
