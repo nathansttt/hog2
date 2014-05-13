@@ -739,7 +739,24 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 //	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
 	double weight = 20;
 
-	if (which == 0)
+	if (which == -1)
+	{
+		double maxError = 0;
+		std::vector<xyLoc> thePath;
+		// Run A* and measure maximum heuristic error
+		a1.GetPath(es->GetEnvironment(), a, b, thePath);
+		double pathCost = 0;
+		for (int x = 0; x < thePath.size()-2; x++)
+		{
+			pathCost += es->GetEnvironment()->GCost(thePath[thePath.size()-2-x], thePath[thePath.size()-1-x]);
+			double diff = pathCost - es->GetEnvironment()->HCost(thePath[thePath.size()-2-x], thePath[thePath.size()-1]);
+			if (diff > maxError)
+				maxError = diff;
+		}
+		printf("Maximum error on optimal path: %1.2f\n", maxError);
+		return;
+	}
+	else if (which == 0)
 	{
 		printf("Running RIBS\n");
 		LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
