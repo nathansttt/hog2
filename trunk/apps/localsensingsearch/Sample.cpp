@@ -709,7 +709,7 @@ void RunScenario(char *name, int which)
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
 		if (sl->GetNthExperiment(x).GetBucket() >= 100 &&
-			sl->GetNthExperiment(x).GetBucket() <  150)
+			sl->GetNthExperiment(x).GetBucket() <  101)
 		{
 			printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
 			RunSingleTest(es, sl->GetNthExperiment(x), which);
@@ -732,6 +732,7 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->AddFilter("MinInitial");
 	es->GetStats()->AddFilter("MaxLater");
+	es->GetStats()->AddFilter("MaxStateLearning");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
 
@@ -891,6 +892,13 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 		es->GetStats()->LookupStat(choice, v);
 		printf("first-MaxLater\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
 		printf("sum-MaxLater\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MaxLater", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MaxStateLearning", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MaxLearn\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MaxLearn\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MaxStateLearning", es->GetUnit(0)->GetName()));
 	}
 
 	
