@@ -28,10 +28,8 @@
 #include "Common.h"
 #include "Sample.h"
 #include "NQueens.h"
-#include <iostream>
 
 NQueenState q(8); // 30
-bool run = false;
 
 int main(int argc, char* argv[])
 {
@@ -53,10 +51,15 @@ void CreateSimulation(int id)
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Size", "Change the size of the board to 6*(x+2)", kAnyModifier, '0', '9');
-	InstallKeyboardHandler(MyDisplayHandler, "Pause/Run Simulation", "Pause/run simulation execution.", kNoModifier, 'p');
+	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
+	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset to random state", kNoModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Step", "Take one greedy step", kNoModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
+	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
+	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -82,16 +85,21 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	NQueens env;
 	env.OpenGLDraw(q);
-	env.OpenGLDrawConflicts(q);
-	if (run)
-	{
-		MyDisplayHandler(windowID, kNoModifier, 'o');
-	}
+//	MyDisplayHandler(windowID, kNoModifier, 'o');
+
 }
 
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
+	if (strcmp(argument[0], "-map") == 0)
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		strncpy(gDefaultMap, argument[1], 1024);
+
+		return 2;
+	}
 	return 0;
 }
 
@@ -99,8 +107,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
-			q = NQueenState(6*(key-'0'+1));
+		case '[': break;
+		case ']':  break;
+		case '\t':
+			if (mod != kShiftDown)
+				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
+			else
+			{
+				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+			}
 			break;
 		case 'r':
 		{
@@ -108,7 +123,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				q.locs[x] = random()%q.locs.size();
 		}
 			break;
-		case 'p': run = !run; break;
+		case 'p': break;
 		case 'o':
 		{
 			std::vector<NQueenAction> acts;
@@ -116,10 +131,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			NQueenState s2;
 			env.GetActions(q, acts);
 			int best = -1;
-			int ties = 1;
+			int ties = 2;
 			int bestCnt = env.NumCollisions(q);
-			if (bestCnt == 0)
-				break;
 			for (unsigned int x = 0; x < acts.size(); x++)
 			{
 				env.GetNextState(q, acts[x], s2);
@@ -139,10 +152,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			if (best != -1)
 			{
 				env.ApplyAction(q, acts[best]);
-				//std::cout << acts[best] << std::endl;
-			}
-			else {
-				printf("No move\n");
 			}
 		}
 			break;

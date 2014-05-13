@@ -96,9 +96,9 @@ void CreateSimulation(int id)
 	{
 		//ht_chantry.arl.map
 		//		map = new Map("/Users/nathanst/hog2/maps/dao/lak503d.map");
-		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.arl.map");
+		map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
 		
-		map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
+		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
 		//map = new Map("/Users/nathanst/hog2/maps/rooms/8room_000.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-16-0.map");
 		
@@ -279,11 +279,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 		a2.OpenGLDraw();
 	}
-	if (0&&(runningSearch1 || runningSearch2 || mouseTracking) && viewport == GetNumPorts(windowID)-1)
+	if ((runningSearch1 || runningSearch2 || mouseTracking) && viewport == GetNumPorts(windowID)-1)
 	{
 		static int cnt = 0;
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/epea/EPEA%d%d%d", (cnt/100)%10, (cnt/10)%10, cnt%10);
+		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d", (cnt/100)%10, (cnt/10)%10, cnt%10);
 		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
@@ -743,7 +743,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				searchWeight = 1.0;
 			else if (searchWeight == 1.0)
 				searchWeight = 10.0;
-			else if (searchWeight == 10.0)
+			else if (searchWeight == 1000.0)
 				searchWeight = 0;
 			break;
 		case '[': if (gStepsPerFrame >= 2) gStepsPerFrame /= 2; break;
