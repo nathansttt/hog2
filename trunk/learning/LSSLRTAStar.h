@@ -89,6 +89,18 @@ public:
 	double HCost(const state &from, const state &to)
 	{ return HCost(m_pEnv, from, to); }
 	
+	double GetMaxStateLearning()
+	{
+		double learned = 0;
+		for (typename LearnedHeuristic::const_iterator it = heur.begin(); it != heur.end(); it++)
+		{
+			double thisState = (*it).second.theHeuristic;
+			if (learned < thisState)
+				learned = thisState;
+		}
+		return learned;
+	}
+	
 	virtual uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	virtual uint64_t GetNodesTouched() const { return nodesTouched; }
 	virtual void LogFinalStats(StatCollection *s)
@@ -96,6 +108,7 @@ public:
 		s->AddStat("TotalLearning", GetName(),fAmountLearned);
 		s->AddStat("MinInitial", GetName(),minInitialHeuristic);
 		s->AddStat("MaxLater", GetName(),maxLaterHeuristic);
+		s->AddStat("MaxStateLearning", GetName(), GetMaxStateLearning());
 	}
 	
 	double GetAmountLearned() { return fAmountLearned; }
