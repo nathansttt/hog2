@@ -49,6 +49,11 @@
 			<key>orderHint</key>
 			<integer>3</integer>
 		</dict>
+		<key>ga.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>15</integer>
+		</dict>
 		<key>localsearch.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -133,6 +138,11 @@
 			<true/>
 		</dict>
 		<key>C4B973861426FA4F00758D0D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4C5C37D18EC7C9D00915B3D</key>
 		<dict>
 			<key>primary</key>
 			<true/>
