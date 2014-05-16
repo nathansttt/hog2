@@ -123,9 +123,11 @@ public:
 	virtual void OpenGLDrawEdges(const RubiksState&) const;
 	virtual void OpenGLDrawEdgeDual(const RubiksState&) const;
 	virtual void OpenGLDrawCenters() const;
+	virtual void OpenGLDrawCubeBackground() const;
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const RubiksState&, const RubiksState&, float) const;
 	virtual void OpenGLDraw(const RubiksState&, const RubiksAction&) const;
+	
 	//int64_t percentage;
 	int compressionFactor;
 	bool minCompression;
