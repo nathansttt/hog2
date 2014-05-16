@@ -96,6 +96,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-buildMinBloom", "-buildMinBloom <#GB> <#hash> <maxDepth> <dataloc>", "Build a bloom filter using a size/hash combo.");
 	InstallCommandLineHandler(MyCLHandler, "-showStats", "-showStats <size> <#hash> <prefix>", "Print out bloom filter stats.");
 	
+	InstallCommandLineHandler(MyCLHandler, "-bloomSample", "-bloomSample <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-minBloomSearch", "-minBloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
@@ -156,6 +157,7 @@ void RunSimpleTest(const char *edgePDB, const char *cornerPDB);
 void TestBloom(int entries, double accuracy);
 void TestBloom2(int entries, double accuracy);
 void ExtractStatesAtDepth(const char *theFile);
+void SampleBloomHeuristics(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9);
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9);
 void RunMinBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float space, int numHash);
 void ManyCompression();
@@ -200,6 +202,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
 	{
 		RunBloomFilterTest(argument[1], argument[2], atof(argument[3]), atoi(argument[4]), atof(argument[5]), atoi(argument[6]));
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-bloomSample") == 0)
+	{
+		SampleBloomHeuristics(argument[1], argument[2], atof(argument[3]), atoi(argument[4]), atof(argument[5]), atoi(argument[6]));
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-minBloomSearch") == 0)
@@ -1062,6 +1069,115 @@ void BuildMinBloomFilter(float space, int numHash, int finalDepth, const char *d
 	}
 	bf->Analyze();
 	delete bf;
+}
+
+void SampleBloomHeuristics(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9)
+{
+	// setup corner pdb
+	{
+		FourBitArray &corner = c.GetCornerPDB();
+		printf("Loading corner pdb: %s\n", cornerPDB);
+		corner.Read(cornerPDB);
+		printf("Done.\n");
+	}
+	
+	bool zero = false;
+	
+	// setup bloom filters
+	{
+		printf("Loading bloom filters.\n");fflush(stdout);
+		//uint64_t depth8states = 1050559626ull;
+		//uint64_t depth9states = 11588911021ull;
+		
+		uint64_t size8filter = size8*1024*1024*1024*8ull;
+		uint64_t size9filter = size9*1024ull*1024ull*1024ull*8ull;
+		
+		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", size8, size8filter, hash8);
+		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
+		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
+			   8, c.depth8->GetStorage(),
+			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
+			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
+		printf("%d hashes being used\n", c.depth8->GetNumHash());
+		
+		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", size9, size9filter, hash9);
+		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
+		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
+			   9, c.depth9->GetStorage(),
+			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
+			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
+		printf("%d hashes being used\n", c.depth9->GetNumHash());
+		
+		c.bloomFilter = true;
+		printf("Done.\n");fflush(stdout);
+	}
+	
+	// load hash table / bloom filter data
+	if (1)
+	{
+		printf("Building hash table/bloom filter\n"); fflush(stdout);
+		RubikEdge e;
+		RubikEdgeState es;
+		for (int x = 0; x < 8; x++)
+		{
+			char name[255];
+			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
+			FILE *f = fopen(name, "r");
+			if (f == 0)
+			{
+				printf("Error opening %s; aborting!\n", name);
+				exit(0);
+			}
+			printf("Reading from '%s'\n", name);
+			fflush(stdout);
+			
+			uint64_t nextItem;
+			uint64_t count = 0;
+			while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
+			{
+				if (0 != countBits(nextItem&0xFFF)%2)
+					nextItem ^= 1;
+				if (x < 8)
+				{
+					count++;
+					c.depthTable[nextItem] = x;
+				}
+				else {
+					printf("Error; hit depth %d\n", x);
+				}
+			}
+			printf("%llu items read at depth %d\n", count, x);fflush(stdout);
+			fclose(f);
+		}
+		
+	}
+	
+	RubiksState start;
+	start.Reset();
+	RubikEdge edge;
+	uint64_t max = edge.getMaxSinglePlayerRank();
+	double val = 0;
+	int cnt = 100000;
+	for (int x = 0; x < cnt; x++)
+	{
+		uint64_t r1 = random(), r2 = random();
+		r1 = (r1<<32)|(r2);
+		r1 = r1%max;
+		edge.GetStateFromHash(r1, start.edge);
+		val += c.HCost(start, start);
+//		srandom(9283+x*23);
+//		SolveOneProblem(x, "hash7bloom89");
+//		//		SolveOneProblemAStar(x);
+	}
+	printf("Edge heuristic distribution\n");
+	for (int x = 0; x < c.edgeDist.size(); x++)
+	{
+		printf("%d : %llu\n", x, c.edgeDist[x]);
+	}
+	printf("Average: %1.4f\n", val/cnt);
+	//	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
+	//	bloom_filter *depth8, *depth9;
+	
 }
 
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9)
