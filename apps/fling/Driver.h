@@ -32,6 +32,7 @@ void SolveAndSaveInstance(unsigned long windowID, tKeyboardModifier, char key);
 void SolveRandomFlingInstance(unsigned long windowID, tKeyboardModifier, char key);
 void TestRanking(unsigned long windowID, tKeyboardModifier, char key);
 void BuildTables(unsigned long windowID, tKeyboardModifier, char key);
+void ExtractUniqueStates(int depth);
 void ReadTables(unsigned long windowID, tKeyboardModifier, char key);
 void AnalyzeBoard(unsigned long windowID, tKeyboardModifier, char key);
 void DeepAnalyzeBoard(unsigned long windowID, tKeyboardModifier, char key);
