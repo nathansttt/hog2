@@ -130,6 +130,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(CaptureScreen, "Capture Screen", "Capture Screen Shot", kNoModifier, 'c');
 
 	InstallCommandLineHandler(MyCLHandler, "-generate", "-generate n", "Generate a problem with n tiles and run a BFS.");
+	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract n", "Extract unique boards at level n.");
 	InstallCommandLineHandler(MyCLHandler, "-solve", "-solve n", "Solve all boards up to size n.");
 	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs theState", "Perform a BFS on theState");
 	InstallCommandLineHandler(MyCLHandler, "-analyze", "-analyze theState", "Perform a move analysis on theState");
@@ -192,6 +193,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	if (strcmp(argument[0], "-generate") == 0)
 	{
 		SolveRandomFlingInstance(0, kNoModifier, '0');
+	}
+	else if (strcmp(argument[0], "-extract") == 0)
+	{
+		int cnt = atoi(argument[1]);
+		ExtractUniqueStates(cnt);
 	}
 	else if (strcmp(argument[0], "-solve") == 0)
 	{
@@ -563,6 +569,46 @@ void *ThreadedWorker(void *arg)
 	pthread_exit(NULL);
 }
 
+void ExtractUniqueStates(int depth)
+{
+	char fname[255];
+	sprintf(fname, "/Users/nathanst/hog2/apps/fling/fling-unique-%d.dat", depth);
+	printf("Reading from '%s'\n", fname);
+	BitVector *b = new BitVector(f.getMaxSinglePlayerRank(56, depth), fname, false);
+	uint64_t maxVal = f.getMaxSinglePlayerRank(56, depth);
+	FlingBoard board;
+	for (uint64_t t = 0; t < maxVal; t++)
+	{
+		if (b->Get(t))
+		{
+			f.unrankPlayer(t, depth, board);
+			bool ok = false;
+			for (int x = 0; x < board.width; x++)
+			{
+				if (board.HasPiece(x, 0))
+				{
+					ok = true;
+					break;
+				}
+			}
+			if (ok == false)
+				continue;
+			ok = false;
+			for (int y = 0; y < board.height; y++)
+			{
+				if (board.HasPiece(0, y))
+				{
+					ok = true;
+					break;
+				}
+			}
+			if (ok == false)
+				continue;
+			printf("Rank: %llu\n", t);
+			printf("Board: %llu\n", board.board);
+		}
+	}
+}
 
 void BuildTables(unsigned long , tKeyboardModifier, char)
 {
