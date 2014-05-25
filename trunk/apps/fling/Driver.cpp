@@ -606,6 +606,17 @@ void ExtractUniqueStates(int depth)
 				continue;
 			printf("Rank: %llu\n", t);
 			printf("Board: %llu\n", board.board);
+
+			//if (depth < 5)
+			{
+				BFS<FlingBoard, FlingMove> bfs;
+				bfs.GetPath(&f, board, g, path);
+				//printf("%llu total nodes expanded in pure bfs\n", bfs.GetNodesExpanded());
+				uint64_t nodesExpanded = DoLimitedBFS(board, path);
+				//printf("%llu total nodes expanded in logically limited bfs\n", nodesExpanded);
+				printf("Board: %llu Full: %llu Reduced: %llu Ratio: %1.4f\n", board.board, bfs.GetNodesExpanded(), nodesExpanded, float(bfs.GetNodesExpanded())/float(nodesExpanded));
+//				std::cout << board << std::endl;
+			}
 		}
 	}
 }
@@ -758,7 +769,7 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 		mOpen.pop_front();
 		if (depth.front() != currDepth)
 		{
-			printf("%d tot %llu inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
+//			printf("%d tot %llu inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
 			lastIter = nodesExpanded-lastNodes;
 			lastNodes = nodesExpanded;
 		}
@@ -794,8 +805,8 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 			}
 		}
 	}
-	printf("%d tot %llu inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
-	std::cout << "Final state:\n" << s << std::endl;
+//	printf("%d tot %llu inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
+//	std::cout << "Final state:\n" << s << std::endl;
 	
 	thePath.resize(0);
 	uint64_t parent, lastParent;
@@ -807,7 +818,7 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 		env->GetStateFromHash(parent, s);
 		//		std::cout << s << std::endl;
 	} while (parent != lastParent);
-	printf("Final depth: %d, Nodes Expanded %llu, Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
+//	printf("Final depth: %d, Nodes Expanded %llu, Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
 	return nodesExpanded;
 //	return weightedNodes;
 }
