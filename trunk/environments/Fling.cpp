@@ -146,6 +146,111 @@ void FlingBoard::Move(int which, int x, int y)
 			locs.push_back(t);
 }
 
+void GetMirror(const FlingBoard &in, FlingBoard &out, bool h, bool v)
+{
+	out = in;
+	out.Reset();
+	for (int x = 0; x < in.width; x++)
+	{
+		for (int y = 0; y < in.height; y++)
+		{
+			if (in.HasPiece(x, y))
+			{
+				int newx = x;
+				int newy = y;
+				if (h)
+					newx = in.width-x-1;
+				if (v)
+					newy = in.height-y-1;
+				out.AddFling(newx, newy);
+			}
+		}
+	}
+}
+
+void ShiftToCorner(FlingBoard &in)
+{
+	bool done = false;
+	while (1)
+	{
+		for (int x = 0; x < in.width; x++)
+		{
+			if (in.HasPiece(x, 0))
+			{
+				done = true;
+				break;
+			}
+		}
+		
+		if (done) break;
+
+		for (int y = 1; y < in.height; y++)
+		{
+			for (int x = 0; x < in.width; x++)
+			{
+				if (in.HasPiece(x, y))
+				{
+					in.AddFling(x, y-1);
+					in.RemoveFling(x, y);
+				}
+			}
+		}
+	}
+	done = false;
+	while (1)
+	{
+		for (int y = 0; y < in.height; y++)
+		{
+			if (in.HasPiece(0, y))
+			{
+				done = true;
+				return;
+			}
+		}
+		
+		for (int x = 1; x < in.width; x++)
+		{
+			for (int y = 0; y < in.width; y++)
+			{
+				if (in.HasPiece(x, y))
+				{
+					in.AddFling(x-1, y);
+					in.RemoveFling(x, y);
+				}
+			}
+		}
+	}
+
+}
+
+uint64_t GetCanonicalHash(uint64_t which)
+{
+	Fling f;
+	FlingBoard b;
+	f.GetStateFromHash(which, b);
+	ShiftToCorner(b);
+	which = f.GetStateHash(b);
+
+	FlingBoard flip;
+	GetMirror(b, flip, true, true);
+	ShiftToCorner(flip);
+	
+	if (f.GetStateHash(flip) < which)
+		which = f.GetStateHash(flip);
+
+	GetMirror(b, flip, true, false);
+	ShiftToCorner(flip);
+	if (f.GetStateHash(flip) < which)
+		which = f.GetStateHash(flip);
+
+	GetMirror(b, flip, false, true);
+	ShiftToCorner(flip);
+	if (f.GetStateHash(flip) < which)
+		which = f.GetStateHash(flip);
+
+	return which;
+}
+
 Fling::Fling()
 {
 	initBinomial();
