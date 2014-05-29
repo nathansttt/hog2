@@ -62,7 +62,7 @@ void BFS<state, action>::DoBFS(SearchEnvironment<state, action> *env, state from
 		mOpen.pop_front();
 		if (depth.front() != currDepth)
 		{
-			printf("%ld tot %d inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
+//			printf("%ld tot %d inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
 			lastIter = nodesExpanded-lastNodes;
 			lastNodes = nodesExpanded;
 		}
@@ -71,10 +71,10 @@ void BFS<state, action>::DoBFS(SearchEnvironment<state, action> *env, state from
 		
 		if (mClosed.find(env->GetStateHash(s)) != mClosed.end())
 		{
-			if (mOpen.size() == 0)
-			{
-				std::cout << "Final state:\n" << s << std::endl;
-			}
+//			if (mOpen.size() == 0)
+//			{
+//				std::cout << "Final state:\n" << s << std::endl;
+//			}
 			continue;
 		}
 		mClosed[env->GetStateHash(s)] = true;
@@ -89,12 +89,12 @@ void BFS<state, action>::DoBFS(SearchEnvironment<state, action> *env, state from
 				depth.push_back(currDepth+1);
 			}
 		}
-		if (mOpen.size() == 0)
-		{
-			std::cout << "Final state:\n" << s << std::endl;
-		}
+//		if (mOpen.size() == 0)
+//		{
+//			std::cout << "Final state:\n" << s << std::endl;
+//		}
 	}
-	printf("Final depth: %d, Nodes Expanded %lu, Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
+//	printf("Final depth: %d, Nodes Expanded %lu, Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
 }
 
 // Richer BFS which saves information to allow the best path to be reconstructured.
@@ -131,7 +131,7 @@ void BFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
 		mOpen.pop_front();
 		if (depth.front() != currDepth)
 		{
-			printf("%ld tot %d inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
+//			printf("%ld tot %d inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
 			lastIter = nodesExpanded-lastNodes;
 			lastNodes = nodesExpanded;
 		}			
@@ -152,8 +152,8 @@ void BFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
 			}
 		}
 	}
-	printf("%d tot %d inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
-	std::cout << "Final state:\n" << s << std::endl;
+//	printf("%d tot %d inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
+//	std::cout << "Final state:\n" << s << std::endl;
 
 	thePath.resize(0);
 	uint64_t parent, lastParent;
@@ -165,7 +165,7 @@ void BFS<state, action>::GetPath(SearchEnvironment<state, action> *env,
 		env->GetStateFromHash(parent, s);
 //		std::cout << s << std::endl;
 	} while (parent != lastParent);
-	printf("Final depth: %d, Nodes Expanded %llu, Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
+//	printf("Final depth: %d, Nodes Expanded %llu, Exponential BF: %f\n", currDepth, nodesExpanded, pow(nodesExpanded, (double)1.0/currDepth));
 }
 
 //template <class state, class action>
