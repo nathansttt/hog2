@@ -133,6 +133,8 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract n", "Extract unique boards at level n.");
 	InstallCommandLineHandler(MyCLHandler, "-solve", "-solve n", "Solve all boards up to size n.");
 	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs theState", "Perform a BFS on theState");
+	InstallCommandLineHandler(MyCLHandler, "-getCanonical", "-getCanonical theState", "Get canonical version of theState");
+	InstallCommandLineHandler(MyCLHandler, "-removeDups", "-removeDups", "Read states from stdin and remove similar states");
 	InstallCommandLineHandler(MyCLHandler, "-analyze", "-analyze theState", "Perform a move analysis on theState");
 	InstallCommandLineHandler(MyCLHandler, "-fix", "-fix file", "fix the file format");
 	
@@ -182,13 +184,24 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	text.OpenGLDraw(windowID);
 }
 
+int BitCount(uint64_t value)
+{
+	int count = 0;
+	while (value != 0)
+	{
+		value &= (value-1);
+		count++;
+	}
+	return count;
+}
+
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	if (maxNumArgs <= 1)
-	{
-		printf("Insufficient arguments\n");
-		return 0;
-	}
+//	if (maxNumArgs <= 1)
+//	{
+//		printf("Insufficient arguments\n");
+//		return 0;
+//	}
 	//strncpy(gDefaultMap, argument[1], 1024);
 	if (strcmp(argument[0], "-generate") == 0)
 	{
@@ -221,6 +234,49 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		printf("%llu total nodes expanded in pure bfs\n", bfs.GetNodesExpanded());
 		uint64_t nodesExpanded = DoLimitedBFS(b, path);
 		printf("%llu total nodes expanded in logically limited bfs\n", nodesExpanded);
+	}
+	else if (strcmp(argument[0], "-getCanonical") == 0)
+	{
+		unsigned long long which = strtoull(argument[1], 0, 10);
+		std::cout << "Hash: " << which << std::endl;
+		f.GetStateFromHash(which, b);
+		which = GetCanonicalHash(which);
+		std::cout << "Original:\n" << b << std::endl;
+		f.GetStateFromHash(which, b);
+		std::cout << "Canonical:\n" << b << std::endl;
+		printf("%llu\n", which);
+	}
+	else if (strcmp(argument[0], "-removeDups") == 0)
+	{
+		std::vector<uint64_t> values;
+		while (true)
+		{
+			uint64_t value;
+			int res = scanf("%llu", &value);
+			if (res == EOF || res == 0)
+				break;
+			values.push_back(GetCanonicalHash(value));
+		}
+		for (int x = 0; x < values.size(); x++)
+		{
+			bool dup = false;
+			int y;
+			for (y = x+1; y < values.size(); y++)
+			{
+				if (BitCount(values[x]^values[y]) <= 4)
+				{
+					dup = true;
+					break;
+				}
+			}
+			if (!dup)
+			{
+				printf("%llu\n", values[x]);
+			}
+			else {
+				printf("dup: %llu %llu\n", values[x], values[y]);
+			}
+		}
 	}
 	else if (strcmp(argument[0], "-analyze") == 0)
 	{
