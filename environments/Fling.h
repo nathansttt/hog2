@@ -34,6 +34,10 @@ public:
 	uint64_t board;
 };
 
+void GetMirror(const FlingBoard &in, FlingBoard &out, bool horiz, bool vert);
+void ShiftToCorner(FlingBoard &in);
+uint64_t GetCanonicalHash(uint64_t which);
+
 enum tFlingDir {
 	kLeft, kRight, kUp, kDown
 };
