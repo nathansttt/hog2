@@ -139,6 +139,8 @@ public:
 	virtual void OpenGLDraw() const {}
 	virtual void OpenGLDraw(const FlingBoard&) const;
 	virtual void OpenGLDrawAlternate(const FlingBoard&) const;
+	virtual void OpenGLDrawPlain(const FlingBoard&b) const;
+
 	virtual void OpenGLDraw(const FlingBoard&, const FlingMove&) const;
 	virtual void GLLabelState(const FlingBoard&, const char *) const;
 
