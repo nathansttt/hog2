@@ -64,11 +64,16 @@ FlingBoard win;
 FlingBoard valid;
 int pathLoc = 0;
 
+bool screenShot = false;
+char screenShotFile[255];
+
 //bool ReadData(std::vector<bool> &data, const char *fName);
 //void WriteData(BitVector *data, const char *fName);
 
 void CreateSimulation(int id)
 {
+	if (screenShot)
+		return;
 	for (int x = 0; x < 10; x++)
 	{
 		int x1 = random()%b.width;
@@ -133,6 +138,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract n", "Extract unique boards at level n.");
 	InstallCommandLineHandler(MyCLHandler, "-solve", "-solve n", "Solve all boards up to size n.");
 	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs theState", "Perform a BFS on theState");
+	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen theState file", "Capture a shot of theState in <file>");
 	InstallCommandLineHandler(MyCLHandler, "-getCanonical", "-getCanonical theState", "Get canonical version of theState");
 	InstallCommandLineHandler(MyCLHandler, "-removeDups", "-removeDups", "Read states from stdin and remove similar states");
 	InstallCommandLineHandler(MyCLHandler, "-analyze", "-analyze theState", "Perform a move analysis on theState");
@@ -164,6 +170,12 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	if (screenShot)
+	{
+		f.OpenGLDrawPlain(b);
+		SaveScreenshot(windowID, screenShotFile);
+		exit(0);
+	}
 	f.OpenGLDraw(b);
 	for (int x = 0; x < wins.size(); x++)
 		f.OpenGLDraw(win, wins[x]);
@@ -220,6 +232,16 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			BuildTables(0, kNoModifier, 'e');
 		}
 	}
+	else if (strcmp(argument[0], "-screen") == 0)
+	{
+		unsigned long long which = strtoull(argument[1], 0, 10);
+		std::cout << "Hash: " << which << std::endl;
+		//std::cout << "Pieces: " << atoi(argument[1]) << std::endl;
+		f.GetStateFromHash(which, b);
+		screenShot = true;
+		strncpy(screenShotFile, argument[2], 255);
+		return 3;
+	}
 	else if (strcmp(argument[0], "-bfs") == 0)
 	{
 		unsigned long long which = strtoull(argument[1], 0, 10);
@@ -234,6 +256,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		printf("%llu total nodes expanded in pure bfs\n", bfs.GetNodesExpanded());
 		uint64_t nodesExpanded = DoLimitedBFS(b, path);
 		printf("%llu total nodes expanded in logically limited bfs\n", nodesExpanded);
+		printf("Ratio: %llu %llu %1.1f\n", bfs.GetNodesExpanded(), nodesExpanded, double(bfs.GetNodesExpanded())/double(nodesExpanded));
 	}
 	else if (strcmp(argument[0], "-getCanonical") == 0)
 	{
@@ -1171,9 +1194,11 @@ bool MyClickHandler(unsigned long , int, int, point3d loc, tButtonType button, t
 			if (b.HasPiece(x, y))
 			{
 				b.RemoveFling(x, y);
+				printf("State %llu\n", f.GetStateHash(b));
 			}
 			else {
 				b.AddFling(x, y);
+				printf("State %llu\n", f.GetStateHash(b));
 			}
 		}
 		return true;
