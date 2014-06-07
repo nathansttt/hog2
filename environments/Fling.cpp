@@ -210,7 +210,7 @@ void ShiftToCorner(FlingBoard &in)
 		
 		for (int x = 1; x < in.width; x++)
 		{
-			for (int y = 0; y < in.width; y++)
+			for (int y = 0; y < in.height; y++)
 			{
 				if (in.HasPiece(x, y))
 				{
@@ -460,6 +460,71 @@ void Fling::OpenGLDraw(const FlingBoard&b) const
 		}
 	}
 }
+
+void Fling::OpenGLDrawPlain(const FlingBoard&b) const
+{
+	double radius = 1.0/(1+max(b.width, b.height));
+	double diameter = radius*2;
+	double xLoc = -1+radius;
+	double yLoc = -1+radius;
+	double r = radius*0.85;
+
+	glColor3f(1.0, 1.0, 1.0); //
+	glBegin(GL_QUADS);
+	glVertex3f(-2, -2, 0);
+	glVertex3f(-2, +2, 0);
+	glVertex3f(+2, +2, 0);
+	glVertex3f(+2, -2, 0);
+	glEnd();
+	
+//	glLineWidth(2.0);
+//	glColor3f(1.0, 1.0, 1.0); // white
+//	glBegin(GL_LINES);
+//	for (double x = 0; x <= b.width; x++)
+//	{
+//		glVertex3f(-1+(x+1)*diameter, -1+diameter, 0);
+//		glVertex3f(-1+(x+1)*diameter, -1+diameter*b.height+diameter, -0.01);
+//		xLoc += diameter;
+//	}
+//	for (double y = 0; y <= b.height; y++)
+//	{
+//		yLoc += diameter;
+//		glVertex3f(-1+diameter, -1+(y+1)*diameter, 0);
+//		glVertex3f(-1+diameter*b.width+diameter, -1+(y+1)*diameter, -0.01);
+//	}
+//	glEnd();
+	glLineWidth(1.0);
+	
+	xLoc = -1+radius;
+	glDisable(GL_LIGHTING);
+	glLineWidth(8.0);
+	glColor4f(0.0, 0.0, 0.0, 1.0); // ffd700
+	//	glColor4f(0.0, 1.0, 0.0, 0.5); // ffd700
+	for (double x = 0; x < b.width; x++)
+	{
+		xLoc += diameter;
+		yLoc = -1+radius;
+		for (double y = 0; y < b.height; y++)
+		{
+			yLoc += diameter;
+			//recColor r = getColor(x+y*b.width, 0, b.width*b.height, 4);
+			
+			if (b.HasPiece(x, y))
+			{
+				glBegin(GL_QUADS);
+				glVertex3f(xLoc-r, yLoc-r, -0.02);
+				glVertex3f(xLoc-r, yLoc+r, -0.02);
+				glVertex3f(xLoc+r, yLoc+r, -0.02);
+				glVertex3f(xLoc+r, yLoc-r, -0.02);
+				glEnd();
+			}
+			//DrawSphere(xLoc, yLoc, 0, radius);
+		}
+	}
+	glLineWidth(1.0);
+	glEnable(GL_LIGHTING);
+}
+
 
 void Fling::OpenGLDrawAlternate(const FlingBoard &b) const
 {
