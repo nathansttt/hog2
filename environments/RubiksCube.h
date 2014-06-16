@@ -34,6 +34,7 @@ public:
 	{
 		corner.Reset();
 		edge.Reset();
+		edge7.Reset();
 	}
 	RubiksCornerState corner;
 	RubikEdgeState edge;

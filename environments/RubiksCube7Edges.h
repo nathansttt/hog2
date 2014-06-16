@@ -14,7 +14,7 @@
 #include <vector>
 #include "SearchEnvironment.h"
 
-const int pieces = 7;
+const int pieces = 10;
 
 class Rubik7EdgeState
 {
