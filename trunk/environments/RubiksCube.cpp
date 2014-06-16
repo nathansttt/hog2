@@ -387,9 +387,9 @@ void RubiksCube::OpenGLDrawCorners(const RubiksState&s) const
 
 void RubiksCube::OpenGLDrawEdges(const RubiksState&s) const
 {
-	Rubik7EdgeState e7tmp;
-	s.edge7.GetDual(e7tmp);
-	e7.OpenGLDraw(e7tmp);
+//	Rubik7EdgeState e7tmp;
+//	s.edge7.GetDual(e7tmp);
+	e7.OpenGLDraw(s.edge7);
 //	OpenGLDrawCenters();
 	OpenGLDrawCubeBackground();
 }
