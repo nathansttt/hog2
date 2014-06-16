@@ -55,6 +55,9 @@ Rubik7EdgeState e7s;
 Rubik7EdgeAction e7a;
 
 void TestMinBloom();
+void GetInstanceFromStdin(RubiksState &start);
+
+bool readFromStdin = false;
 
 int main(int argc, char* argv[])
 {
@@ -865,7 +868,14 @@ void SolveOneProblem(int instance, const char *txt)
 	goal.Reset();
 	start.Reset();
 	c.SetPruneSuccessors(true); // clears history
-	GetInstance(start, instance);
+
+	if (readFromStdin)
+	{
+		GetInstanceFromStdin(start);
+	}
+	else {
+		GetInstance(start, instance);
+	}
 	
 	std::vector<RubiksAction> acts;
 	c.SetPruneSuccessors(true);
@@ -894,7 +904,14 @@ void SolveOneProblemAStar(int instance)
 	goal.Reset();
 	start.Reset();
 	c.SetPruneSuccessors(false); // clears history
-	GetInstance(start, instance);
+
+	if (readFromStdin)
+	{
+		GetInstanceFromStdin(start);
+	}
+	else {
+		GetInstance(start, instance);
+	}
 	
 	std::vector<RubiksState> acts;
 	c.SetPruneSuccessors(true);
@@ -919,7 +936,9 @@ void SolveOneProblemAStar(int instance)
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
-	TestMinBloom();
+	s.Reset();
+	GetInstanceFromStdin(s);
+	//TestMinBloom();
 	//	LoadCornerPDB();
 //	//LoadEdge7PDB();
 //	LoadEdgePDB(10);
@@ -1398,6 +1417,90 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 	return false;
 }
 
+int GetNextMove(char *input, int &base)
+{
+	int used = 0;
+	switch (input[0])
+	{
+		case 'F': used = 1; base = 2*3; break;
+		case 'B': used = 1; base = 3*3; break;
+		case 'L': used = 1; base = 4*3; break;
+		case 'R': used = 1; base = 5*3; break;
+		case 'U': used = 1; base = 0*3; break;
+		case 'D': used = 1; base = 1*3; break;
+		default: break;
+	}
+	if (used == 0)
+		return 0;
+	if (input[0] != 'U')
+	{
+		bool stillGoing = true;
+		int offset = 1;
+		while (stillGoing)
+		{
+			switch (input[offset++])
+			{
+				case ' ': used++; break;
+				case '\n': stillGoing = false; break;
+				case '2': base += 2; used++; break;
+				case '-': base += 1; used++; break;
+				default: stillGoing = false; break;
+			}
+		}
+	}
+	else {
+		base++;
+		bool stillGoing = true;
+		int offset = 1;
+		while (stillGoing)
+		{
+			switch (input[offset++])
+			{
+				case ' ': used++; break;
+				case '\n': stillGoing = false; break;
+				case '2': base += 1; used++; break;
+				case '-': base -= 1; used++; break;
+				default: stillGoing = false; break;
+			}
+		}
+	}
+	return used;
+}
+
+void GetInstanceFromStdin(RubiksState &start)
+{
+	const int maxStrLength = 1024;
+	char string[maxStrLength];
+	char *result = fgets(string, maxStrLength, stdin);
+
+	start.Reset();
+	
+	if (result == 0)
+	{
+		printf("No more entries found; exiting.\n");
+		exit(0);
+	}
+	int index = 0;
+	string[maxStrLength-1] = 0;
+	if (strlen(string) == maxStrLength-1)
+	{
+		printf("Warning: input hit maximum string length!\n");
+		exit(0);
+	}
+	while (true)
+	{
+		int act;
+		int cnt = GetNextMove(&string[index], act);
+		if (cnt == 0)
+		{
+			break;
+		}
+		else {
+			index += cnt;
+		}
+		c.ApplyAction(s, act);
+	}
+}
 
 void GetInstance(RubiksState &start, int which)
 {
