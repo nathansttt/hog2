@@ -101,6 +101,8 @@ void InstallHandlers()
 	
 	InstallCommandLineHandler(MyCLHandler, "-bloomSample", "-bloomSample <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
+	InstallCommandLineHandler(MyCLHandler, "-bloomSearchStdin", "-bloomSearchStdin <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations. Problems from stdin.");
+
 	InstallCommandLineHandler(MyCLHandler, "-minBloomSearch", "-minBloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract <file>", "Extract levels from <file>");
@@ -204,6 +206,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-bloomSearch") == 0)
 	{
+		RunBloomFilterTest(argument[1], argument[2], atof(argument[3]), atoi(argument[4]), atof(argument[5]), atoi(argument[6]));
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-bloomSearchStdin") == 0)
+	{
+		readFromStdin = true;
 		RunBloomFilterTest(argument[1], argument[2], atof(argument[3]), atoi(argument[4]), atof(argument[5]), atoi(argument[6]));
 		exit(0);
 	}
