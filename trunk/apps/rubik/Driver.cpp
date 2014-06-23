@@ -604,6 +604,7 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 			printf("Performing min compression\n");
 			int64_t index = 0;
 			int64_t realIndex = 0;
+			int64_t written = 0;
 			int minValue = 0xFF;
 			for (unsigned int x = 0; x < data.size(); x++)
 			{
@@ -613,11 +614,18 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 					avgReg += val;
 					assert(realIndex < b.Size());
 					index++;
-					minValue = std::min(minValue, val);
+					if (minValue >= 8)
+					{
+						minValue = std::min(minValue, val);
+					}
 					if (0 == index%ratio)
 					{
 						b.Set(realIndex++, minValue);
-						avgComp += minValue;
+						if (minValue != 0xFF)
+						{
+							avgComp += minValue;
+							written++;
+						}
 						minValue = 0xFF;
 					}
 				}
@@ -625,10 +633,16 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 			if (minValue != 0xFF)
 			{
 				b.Set(realIndex++, minValue);
+				if (minValue != 0xFF)
+				{
+					avgComp += minValue;
+					written++;
+				}
 			}
 			b.Write(outFile);
 			printf("%llu entries compressed into %llu\n", index, realIndex);
-			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
+			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/written);
+			printf("%llu entries didn't compress to a value\n", realIndex-written);
 		}
 	}
 }
@@ -1506,7 +1520,7 @@ void GetInstanceFromStdin(RubiksState &start)
 		else {
 			index += cnt;
 		}
-		c.ApplyAction(s, act);
+		c.ApplyAction(start, act);
 	}
 }
 
