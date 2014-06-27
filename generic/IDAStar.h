@@ -14,8 +14,10 @@
 #include "SearchEnvironment.h"
 #include <ext/hash_map>
 #include "FPUtil.h"
+#include "vectorCache.h"
 
 typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
+
 
 template <class state, class action>
 class IDAStar {
@@ -49,7 +51,8 @@ private:
 	NodeHashTable nodeTable;
 	bool usePathMax;
 	bool useHashTable;
-};	
+	vectorCache<action> actCache;
+};
 
 template <class state, class action>
 void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
@@ -170,7 +173,7 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 	if (env->GoalTest(currState, goal))
 		return -1; // found goal
 	
-	std::vector<action> actions;
+	std::vector<action> &actions = *actCache.getItem();
 	env->GetActions(currState, actions);
 	nodesTouched += actions.size();
 	int depth = thePath.size();
@@ -190,7 +193,10 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 									g+edgeCost, maxH - edgeCost, parentH);
 		env->UndoAction(currState, actions[x]);
 		if (fequal(childH, -1)) // found goal
+		{
+			actCache.returnItem(&actions);
 			return -1;
+		}
 
 		thePath.pop_back();
 
@@ -202,10 +208,12 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 			if (fgreater(g+h, bound))
 			{
 				UpdateNextBound(bound, g+h);
+				actCache.returnItem(&actions);
 				return h;
 			}
 		}
 	}
+	actCache.returnItem(&actions);
 	return h;
 }
 
