@@ -641,3 +641,26 @@ void SaveScreenshot(int windowID, const char *filename)
 	}
 	fclose(f);
 }
+
+void SetZoom(int windowID, float amount)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+
+	if (pContextInfo->moveAllPortsTogether)
+	{
+		for (int x = 0; x < pContextInfo->numPorts; x++)
+		{
+			pContextInfo->camera[x].viewPos.z = -12.5+amount;
+			if (pContextInfo->camera[x].viewPos.z == 0.0) // do not let z = 0.0
+				pContextInfo->camera[x].viewPos.z = 0.0001;
+			updateProjection(pContextInfo, x);  // update projection matrix
+		}
+	}
+	else {
+		pContextInfo->camera[pContextInfo->currPort].viewPos.z = -12.5+amount;
+		if (pContextInfo->camera[pContextInfo->currPort].viewPos.z == 0.0) // do not let z = 0.0
+			pContextInfo->camera[pContextInfo->currPort].viewPos.z = 0.0001;
+		updateProjection(pContextInfo, pContextInfo->currPort);  // update projection matrix
+	}
+}
+
