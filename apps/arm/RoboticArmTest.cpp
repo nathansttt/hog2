@@ -41,7 +41,7 @@
 #define FIXED_RANDOM_NUMBER_SEED 7
 
 
-const int numArms = 4;
+const int numArms = 2;
 RoboticArm *r = 0;
 armAngles config;
 armAngles goal;
@@ -60,13 +60,18 @@ bool mouseTracking;
 int px1, py1, px2, py2;
 int absType = 0;
 
+std::vector<std::vector<bool> > configSpace;
+void BuildConfigSpace();
+
+bool recording = false;
+
 //std::vector<PuzzleSimulation *> unitSims;
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	setlinebuf( stdout );
-	RunHOGGUI(argc, argv);
+	RunHOGGUI(argc, argv, 1024, 512);
 }
 
 
@@ -80,11 +85,11 @@ void CreateSimulation(int)
 		delete r;
 	r = new RoboticArm(numArms, 1.0/(double)numArms);
 
-	r->AddObstacle(line2d(recVec(-0.32, -0.30, 0), recVec(0.32, -0.30, 0)));
-	r->AddObstacle(line2d(recVec(0.30, 0.32, 0), recVec(0.30, -0.32, 0)));
-	r->AddObstacle(line2d(recVec(0.28, 0.30, 0), recVec(0.32, 0.30, 0)));
-	r->AddObstacle(line2d(recVec(-0.30, -0.32, 0), recVec(-0.30, 0.32, 0)));
-	r->AddObstacle(line2d(recVec(-0.28, 0.30, 0), recVec(-0.32, 0.30, 0)));
+//	r->AddObstacle(line2d(recVec(-0.32, -0.30, 0), recVec(0.32, -0.30, 0)));
+//	r->AddObstacle(line2d(recVec(0.30, 0.32, 0), recVec(0.30, -0.32, 0)));
+//	r->AddObstacle(line2d(recVec(0.28, 0.30, 0), recVec(0.32, 0.30, 0)));
+//	r->AddObstacle(line2d(recVec(-0.30, -0.32, 0), recVec(-0.30, 0.32, 0)));
+//	r->AddObstacle(line2d(recVec(-0.28, 0.30, 0), recVec(-0.32, 0.30, 0)));
 
 #if 0
 	r->AddObstacle(line2d(recVec(0.50, 0, 0), recVec(0.52, 0.02, 0)));
@@ -112,6 +117,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	
+	InstallKeyboardHandler(MyKeyHandler, "Config", "Build Configuration Space", kNoModifier, 'c');
+	InstallKeyboardHandler(MyKeyHandler, "Record", "Start recording frames to a file", kNoModifier, 'r');
 	InstallKeyboardHandler(MyKeyHandler, "0-9", "select segment", kNoModifier, '0', '9');
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CW", kNoModifier, 'a');
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CCW", kNoModifier, 's');
@@ -141,46 +148,115 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-void MyFrameHandler(unsigned long , unsigned int , void *)
+void MyFrameHandler(unsigned long id, unsigned int viewport, void *)
 {
-	static int currFrame = 0;
-	currFrame++;
-
-	r->OpenGLDraw();
-	if (!validSearch)
+	if (viewport == 0)
 	{
-		if (ourPath.size() == 0)
-			r->OpenGLDraw(config);
-		else
-			r->OpenGLDraw(ourPath[(pathLoc++)%ourPath.size()]);
-	}
-	else {
-		Timer t;
-		t.StartTimer();
-		for (int x = 0; x < 1000; x++)
+		static int currFrame = 0;
+		currFrame++;
+
+		r->OpenGLDraw();
+		if (!validSearch)
 		{
-			if (astar.DoSingleSearchStep(ourPath))
+			if (ourPath.size() == 0)
+				r->OpenGLDraw(config);
+			else
+				r->OpenGLDraw(ourPath[(pathLoc++)%ourPath.size()]);
+		}
+		else {
+			Timer t;
+			t.StartTimer();
+			for (int x = 0; x < 100; x++)
 			{
-				validSearch = false;
-				if (ourPath.size() > 0)
+				if (astar.DoSingleSearchStep(ourPath))
 				{
-					totalTime += t.EndTimer();
-					printf("Done! %lld nodes expanded; %1.1f nodes/sec\n",
-						   astar.GetNodesExpanded(), (double)astar.GetNodesExpanded()/totalTime);
-					config = ourPath.back();
-					pathLoc = 0;
-					break;
+					validSearch = false;
+					if (ourPath.size() > 0)
+					{
+						totalTime += t.EndTimer();
+						printf("Done! %lld nodes expanded; %1.1f nodes/sec\n",
+							   astar.GetNodesExpanded(), (double)astar.GetNodesExpanded()/totalTime);
+						config = ourPath.back();
+						pathLoc = 0;
+						break;
+					}
 				}
 			}
+			totalTime += t.EndTimer();
+			if ((currFrame%500) == 499)
+				printf("Currently generating %1.1f nodes/sec\n", (double)astar.GetNodesExpanded()/totalTime);
+			if (astar.GetNumOpenItems() == 0)
+			{
+				validSearch = false;
+			}
+			if (validSearch)
+			{
+				armAngles next = astar.CheckNextNode();
+				r->OpenGLDraw(next);
+				r->OpenGLDraw(goal);
+			}
+			//astar.GetPath(r, config, goal, ourPath);
 		}
-		totalTime += t.EndTimer();
-		if ((currFrame%500) == 499)
-			printf("Currently generating %1.1f nodes/sec\n", (double)astar.GetNodesExpanded()/totalTime);
-		armAngles next = astar.CheckNextNode();
-		r->OpenGLDraw(next);
-		r->OpenGLDraw(goal);
-		//astar.GetPath(r, config, goal, ourPath);
 	}
+	if (viewport == 1)
+	{
+		float ratio = 2.0/512.0;
+		float size = 2.0/512.0;
+		if (configSpace.size() == 512)
+		{
+			for (int x = 0; x < 512; x++)
+			{
+				glBegin(GL_QUADS);
+				for (int y = 0; y < 512; y++)
+				{
+					bool draw = false;
+					bool big = false;
+					if (!validSearch && ourPath.size() == 0 && config.GetAngle(0) == x*2 && config.GetAngle(1) == y*2)
+					{
+						glColor3f(1, 1, 1);
+						draw = true;
+						big = true;
+					}
+					if (!validSearch && ourPath.size() != 0 && ourPath[(pathLoc)%ourPath.size()].GetAngle(0) == x*2 && ourPath[(pathLoc)%ourPath.size()].GetAngle(1) == y*2)
+					{
+						glColor3f(1, 1, 1);
+						draw = true;
+						big = true;
+					}
+					if (validSearch && astar.CheckNextNode().GetAngle(0) == x*2 && astar.CheckNextNode().GetAngle(1) == y*2)
+					{
+						glColor3f(0, 1, 0);
+						draw = true;
+						big = true;
+					}
+					else if (!configSpace[x][y])
+					{
+						glColor3f(1, 0, 0);
+						draw = true;
+					}
+					if (draw)
+					{
+						float currSize = size;
+						if (big) currSize*=4;
+						glVertex3f(-1+float(x)*ratio, -1+float(y)*ratio, big?-0.01:0);
+						glVertex3f(-1+float(x)*ratio+currSize, -1+float(y)*ratio, big?-0.01:0);
+						glVertex3f(-1+float(x)*ratio+currSize, -1+float(y)*ratio+currSize, big?-0.01:0);
+						glVertex3f(-1+float(x)*ratio, -1+float(y)*ratio+currSize, big?-0.01:0);
+					}
+				}
+				glEnd();
+			}
+		}
+	}
+	if (recording && viewport == GetNumPorts((int)id)-1)
+	{
+		static int index = 0;
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/robot-%d%d%d%d", index/1000, (index/100)%10, (index/10)%10, index%10);
+		SaveScreenshot((int)id, fname);
+		index++;
+	}
+
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -222,8 +298,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
-
-void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
+void MyKeyHandler(unsigned long wid, tKeyboardModifier, char key)
 {
 	static int which = 0;
 	if ((key >= '0') && (key <= '9'))
@@ -231,7 +306,16 @@ void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
 		which = key-'0';
 		return;
 	}
-	
+	if (key == 'c')
+	{
+		SetNumPorts((int)wid, 2);
+		BuildConfigSpace();
+		
+	}
+	if (key == 'r')
+	{
+		recording = !recording;
+	}
 	if (key == 'a')
 	{
 		std::vector<armRotations> actions;
@@ -240,11 +324,15 @@ void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
 		rot.SetRotation(which, kRotateCW);
 		r->GetActions(config, actions);
 		for (unsigned int x = 0; x < actions.size(); x++)
+		{
 			if (rot == actions[x])
 			{
 				r->ApplyAction(config, rot);
 				ourPath.resize(0);
 			}
+			printf(" %d:%d", x, config.GetAngle(x));
+		}
+		printf("\n");
 	}
 	if (key == 's')
 	{
@@ -254,11 +342,16 @@ void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
 		rot.SetRotation(which, kRotateCCW);
 		r->GetActions(config, actions);
 		for (unsigned int x = 0; x < actions.size(); x++)
+		{
 			if (rot == actions[x])
 			{
 				r->ApplyAction(config, rot);
 				ourPath.resize(0);
 			}
+		}
+		for (int x = 0; x < numArms; x++)
+			printf(" %d:%d", x, config.GetAngle(x));
+		printf("\n");
 	}
 	
 	if (key == 't')
@@ -281,33 +374,75 @@ void MyKeyHandler(unsigned long, tKeyboardModifier, char key)
 	}
 }
 
+bool drag = false;
+recVec s, e;
+
 bool MyClickHandler(unsigned long , int x, int y, point3d loc, tButtonType whichButton, tMouseEventType mouseEvent)
 {
 	printf("Hit %d/%d (%f, %f)\n", x, y, loc.x, loc.y);
-	if ((mouseEvent != kMouseDown) || (whichButton != kRightButton))
-		return false;
-	goal.SetGoal(loc.x, loc.y);
-	if (aa)
+	if ((mouseEvent == kMouseDown) && (whichButton == kLeftButton))
 	{
-		const std::vector<armAngles> &pos = aa->GetTipPositions(loc.x, loc.y);
-		if (pos.size() > 0)
+		validSearch = false;
+		s.x = loc.x;
+		s.y = loc.y;
+		s.z = 0;
+		e = s;
+		drag = true;
+		line2d l(s, e);
+		r->AddObstacle(l);
+		BuildConfigSpace();
+	}
+	if ((mouseEvent == kMouseDrag) && (whichButton == kLeftButton) && drag)
+	{
+		r->PopObstacle();
+		e.x = loc.x;
+		e.y = loc.y;
+		e.z = 0;
+		line2d l(s, e);
+		r->AddObstacle(l);
+		BuildConfigSpace();
+	}
+	if ((mouseEvent == kMouseUp) && (whichButton == kLeftButton) && drag)
+	{
+		r->PopObstacle();
+		e.x = loc.x;
+		e.y = loc.y;
+		e.z = 0;
+		line2d l(s, e);
+		if (!(fequal(s.x, e.x) && fequal(s.y, e.y)))
 		{
-			goal = pos[0];
-			validSearch = astar.InitializeSearch(r, goal, config, ourPath);
-			for (unsigned int t = 1; t < pos.size(); t++)
+			printf("Adding obstacle\n");
+			r->AddObstacle(l);
+		}
+		BuildConfigSpace();
+	}
+	if ((mouseEvent == kMouseDown) && (whichButton == kRightButton))
+	{
+		
+		goal.SetGoal(loc.x, loc.y);
+		if (aa)
+		{
+			const std::vector<armAngles> &pos = aa->GetTipPositions(loc.x, loc.y);
+			if (pos.size() > 0)
 			{
-				goal = pos[t];
-				astar.AddAdditionalStartState(goal);
+				goal = pos[0];
+				validSearch = astar.InitializeSearch(r, goal, config, ourPath);
+				for (unsigned int t = 1; t < pos.size(); t++)
+				{
+					goal = pos[t];
+					astar.AddAdditionalStartState(goal);
+				}
 			}
 		}
-	}
-	else
-		validSearch = astar.InitializeSearch(r, config, goal, ourPath);
-
-	if (validSearch)
-	{
-		std::cout << "Starting search between: " << config << " and " << goal << std::endl;
-		totalTime = 0;
+		else {
+			validSearch = astar.InitializeSearch(r, config, goal, ourPath);
+		}
+		
+		if (validSearch)
+		{
+			std::cout << "Starting search between: " << config << " and " << goal << std::endl;
+			totalTime = 0;
+		}
 	}
 //	static point3d oldloc(0, 0, 0);
 //
@@ -322,6 +457,27 @@ bool MyClickHandler(unsigned long , int x, int y, point3d loc, tButtonType which
 
 	return true;
 }
+
+void BuildConfigSpace()
+{
+	configSpace.resize(0);
+	configSpace.resize(512);
+	for (int x = 0; x < 512; x++)
+		configSpace[x].resize(512);
+
+	armAngles a;
+	a.SetNumArms(2);
+	for (int x = 0; x < 512; x++)
+	{
+		a.SetAngle(0, x*2);
+		for (int y = 0; y < 512; y++)
+		{
+			a.SetAngle(1, y*2);
+			configSpace[x][y] = r->LegalState(a);
+		}
+	}
+}
+
 
 #if 0
 void AddToMinHeap( std::vector<armAngles> &heap, armAngles &arm,
