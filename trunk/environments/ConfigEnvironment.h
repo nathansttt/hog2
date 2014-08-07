@@ -19,6 +19,7 @@ public:
 	virtual ~ConfigEnvironment();
 
 	void AddObstacle(line2d obs) { obstacles.push_back(obs); }
+	void PopObstacle() { obstacles.pop_back(); }
 	void GetSuccessors(const recVec &nodeID, std::vector<recVec> &neighbors) const;
 	void GetActions(const recVec &nodeID, std::vector<line2d> &actions) const;
 	line2d GetAction(const recVec &s1, const recVec &s2) const;

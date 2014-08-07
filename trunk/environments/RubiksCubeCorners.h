@@ -145,6 +145,7 @@ public:
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const RubiksCornerState&, const RubiksCornerState&, float) const;
 	virtual void OpenGLDraw(const RubiksCornerState&, const RubiksCornersAction&) const;
+	void OpenGLDrawCube(const RubiksCornerState &s, int cube) const;
 private:
 	void SetFaceColor(int face, const RubiksCornerState&) const;
 	//	void SetFaceColor(int face, const RubiksCornerState&) const;

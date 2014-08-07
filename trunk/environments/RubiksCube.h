@@ -140,6 +140,7 @@ public:
 	BloomFilter *depth8, *depth9;
 	MinBloomFilter *minBloom;
 private:
+	void OpenGLDrawCube(int cube) const;
 	void SetFaceColor(int face) const;
 	mutable std::vector<RubiksAction> history;
 	RubiksCorner c;
