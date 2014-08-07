@@ -104,7 +104,7 @@ void MinBloomFilter::Analyze()
 		if (bits->Get(x) != 0xF)
 			setEntries++;
 	}
-	printf("%llu of %llu entries set. (%1.2f%%)\n", entries, setEntries, double(setEntries)/double(entries));
+	printf("%llu of %llu entries set. (%1.2f%%)\n", setEntries, entries, 100.0*double(setEntries)/double(entries));
 }
 
 void MinBloomFilter::Load()
