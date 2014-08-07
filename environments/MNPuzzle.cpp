@@ -313,38 +313,44 @@ slideDir MNPuzzle::GetAction(const MNPuzzleState &a, const MNPuzzleState &b) con
 
 void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a) const
 {
+	// we actually do the swap to maintain consistency when using abstract states
+	// (these contain -1 in some positions, including possibly the blank position.)
 	switch (a)
 	{
 		case kUp:
 			if (s.blank >= s.width)
 			{
+				int tmp = s.puzzle[s.blank];
 				s.puzzle[s.blank] = s.puzzle[s.blank-s.width];
 				s.blank -= s.width;
-				s.puzzle[s.blank] = 0;
+				s.puzzle[s.blank] = tmp;
 			}
 			break;
 		case kDown:
 			if (s.blank < s.puzzle.size() - s.width)
 			{
+				int tmp = s.puzzle[s.blank];
 				s.puzzle[s.blank] = s.puzzle[s.blank+s.width];
 				s.blank += s.width;
-				s.puzzle[s.blank] = 0;
+				s.puzzle[s.blank] = tmp;
 			}
 			break;
 		case kRight:
 			if ((s.blank%s.width) < s.width-1)
 			{
+				int tmp = s.puzzle[s.blank];
 				s.puzzle[s.blank] = s.puzzle[s.blank+1];
 				s.blank += 1;
-				s.puzzle[s.blank] = 0;
+				s.puzzle[s.blank] = tmp;
 			}
 			break;
 		case kLeft:
 			if ((s.blank%s.width) > 0)
 			{
+				int tmp = s.puzzle[s.blank];
 				s.puzzle[s.blank] = s.puzzle[s.blank-1];
 				s.blank -= 1;
-				s.puzzle[s.blank] = 0;
+				s.puzzle[s.blank] = tmp;
 			}
 			break;
 	}
@@ -387,7 +393,7 @@ double MNPuzzle::HCost(const MNPuzzleState &state)
 		// this calculates the Manhattan distance
 		for (unsigned loc = 0; loc < width*height; loc++)
 		{
-			if (state.puzzle[loc] != 0)
+			if (state.puzzle[loc] > 0)
 				man_dist += h_increment[state.puzzle[loc]][loc];
 		}
 		hval = std::max(hval, man_dist);
@@ -487,97 +493,111 @@ void MNPuzzle::OpenGLDraw() const
 {
 }
 
+void DrawTile(float x, float y, char c1, char c2, int w, int h)
+{
+	glLineWidth(10.0);
+	int textWidth = 0;
+	if (c1 != 0)
+		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c1);
+	if (c2 != 0)
+		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c2);
+	if (textWidth == 0)
+		return;
+	//printf("%d\n", textWidth);
+	glPushMatrix();
+	glColor3f(0.0, 0.0, 1.0);
+	glTranslatef(x*2.0/w-1.0, (1+y)*2.0/h-1.0-0.15, -0.001);
+	glScalef(1.0/(w*120.0), 1.0/(h*120.0), 1);
+	glRotatef(180, 0.0, 0.0, 1.0);
+	glRotatef(180, 0.0, 1.0, 0.0);
+	glTranslatef(120-textWidth/2, 0, 0);
+	if (c1 != 0)
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, c1);
+	if (c2 != 0)
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, c2);
+	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
+	glPopMatrix();
+	
+	glLineWidth(1.0);
+	glColor3f(1, 1, 1);
+	glBegin(GL_QUADS);
+	glVertex3f(x*2.0/w-1+.05/w, (y)*2.0/h-1+.05/h, 0.002);
+	glVertex3f((x+1)*2.0/w-1-.05/w, (y)*2.0/h-1+.05/h, 0.002);
+	glVertex3f((x+1)*2.0/w-1-.05/w, (y+1)*2.0/h-1-.05/h, 0.002);
+	glVertex3f(x*2.0/w-1+.05/w, (y+1)*2.0/h-1-.05/h, 0.002);
+	glEnd();
+}
+
+void DrawFrame(int w, int h)
+{
+	// frame
+	glLineWidth(3.0);
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(-1-.05/w, -1-.05/h, 0.002);
+	glVertex3f(1+.05/w, -1-.05/h, 0.002);
+	glVertex3f(1+.05/w, 1+.05/h, 0.002);
+	glVertex3f(-1-.05/w, 1+.05/h, 0.002);
+	glEnd();
+	
+	glColor3f(0.25, 0.25, 0.25);
+	glBegin(GL_QUADS);
+	glVertex3f(-1-.05/w, -1-.05/h, 0.003);
+	glVertex3f(1+.05/w, -1-.05/h, 0.003);
+	glVertex3f(1+.05/w, 1+.05/h, 0.003);
+	glVertex3f(-1-.05/w, 1+.05/h, 0.003);
+	glEnd();
+	glLineWidth(1.0);
+}
 
 void MNPuzzle::OpenGLDraw(const MNPuzzleState &s) const
 {
-	glLineWidth(1.0);
 	glEnable(GL_LINE_SMOOTH);
-	
-	float w = width;
-	float h = height;
-	
 	for (unsigned int y = 0; y < height; y++)
 	{
 		for (unsigned int x = 0; x < width; x++)
 		{
-			glPushMatrix();
-			glColor3f(0.0, 1.0, 0.0);
-			glTranslatef(x*2.0/w-1.0, (1+y)*2.0/h-1.0, -0.001);
-			glScalef(1.0/(w*120.0), 1.0/(h*120.0), 1);
-			glRotatef(180, 0.0, 0.0, 1.0);
-			glRotatef(180, 0.0, 1.0, 0.0);
-			//glTranslatef((float)x/width-0.5, (float)y/height-0.5, 0);
+			char c1=0, c2=0;
 			if (s.puzzle[x+y*width] > 9)
-				glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+(((s.puzzle[x+y*width])/10)%10));
+				c1 = '0'+(((s.puzzle[x+y*width])/10)%10);
 			if (s.puzzle[x+y*width] > 0)
-				glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+((s.puzzle[x+y*width])%10));
-			//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
-			glPopMatrix();
+				c2 = '0'+((s.puzzle[x+y*width])%10);
+			DrawTile(x, y, c1, c2, width, height);
 		}
 	}
-	
-	glBegin(GL_LINES);
-	for (unsigned int y = 0; y <= height; y++)
-	{
-		for (unsigned int x = 0; x <= width; x++)
-		{
-			glVertex3f(x*2.0/w-1.0, -1, -0.001);
-			glVertex3f(x*2.0/w-1.0, 1, -0.001);
-			glVertex3f(-1, (y)*2.0/h-1.0, -0.001);
-			glVertex3f(1, (y)*2.0/h-1.0, -0.001);
-		}
-	}
-	glEnd();
-	
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glEnable(GL_BLEND);
-	//glEnable(GL_LINE_SMOOTH);
-	//output(200, 225, "This is antialiased.");
-	
-	//int width, height;
-	//std::vector<int> puzzle;
+	DrawFrame(width, height);
 }
 
-void MNPuzzle::OpenGLDraw(const MNPuzzleState &s, const MNPuzzleState &, float /* v */ ) const
+void MNPuzzle::OpenGLDraw(const MNPuzzleState &s1, const MNPuzzleState &s2, float v) const
 {
-	glLineWidth(1.0);
 	glEnable(GL_LINE_SMOOTH);
-	
-	float w = width;
-	float h = height;
-	
 	for (unsigned int y = 0; y < height; y++)
 	{
 		for (unsigned int x = 0; x < width; x++)
 		{
-			glPushMatrix();
-			glColor3f(0.0, 1.0, 0.0);
-			glTranslatef(x*2.0/w-1.0, (1+y)*2.0/h-1.0, -0.001);
-			glScalef(1.0/(w*120.0), 1.0/(h*120.0), 1);
-			glRotatef(180, 0.0, 0.0, 1.0);
-			glRotatef(180, 0.0, 1.0, 0.0);
-			//glTranslatef((float)x/width-0.5, (float)y/height-0.5, 0);
-			if (s.puzzle[x+y*width] > 9)
-				glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+(((s.puzzle[x+y*width])/10)%10));
-			if (s.puzzle[x+y*width] > 0)
-				glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+((s.puzzle[x+y*width])%10));
-			//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
-			glPopMatrix();
+			char c1=0, c2=0;
+			if (s2.puzzle[x+y*width] > 9)
+				c1 = '0'+(((s2.puzzle[x+y*width])/10)%10);
+			if (s2.puzzle[x+y*width] > 0)
+				c2 = '0'+((s2.puzzle[x+y*width])%10);
+
+			if (s1.puzzle[x+y*width] == s2.puzzle[x+y*width])
+			{
+				DrawTile(x, y, c1, c2, width, height);
+			}
+			else {
+				switch (GetAction(s1, s2))
+				{
+					case kUp: DrawTile(x, (y-1)*v + (y)*(1-v), c1, c2, width, height); break;
+					case kDown: DrawTile(x, (y+1)*v + (y)*(1-v), c1, c2, width, height); break;
+					case kLeft: DrawTile((x)*(1-v)+(x-1)*v, y, c1, c2, width, height); break;
+					case kRight: DrawTile((x+1)*v+(x)*(1-v), y, c1, c2, width, height); break;
+					default: assert(!"action not found");
+				}
+			}
 		}
 	}
-	
-	glBegin(GL_LINES);
-	for (unsigned int y = 0; y <= height; y++)
-	{
-		for (unsigned int x = 0; x <= width; x++)
-		{
-			glVertex3f(x*2.0/w-1.0, -1, -0.001);
-			glVertex3f(x*2.0/w-1.0, 1, -0.001);
-			glVertex3f(-1, (y)*2.0/h-1.0, -0.001);
-			glVertex3f(1, (y)*2.0/h-1.0, -0.001);
-		}
-	}
-	glEnd();
+	DrawFrame(width, height);
 }
 
 double MNPuzzle::DoPDBLookup(const MNPuzzleState &state)

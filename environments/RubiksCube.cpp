@@ -67,7 +67,7 @@ void RubiksCube::ApplyAction(RubiksState &s, RubiksAction a) const
 {
 	c.ApplyAction(s.corner, a);
 	e.ApplyAction(s.edge, a);
-	e7.ApplyAction(s.edge7, a);
+	//e7.ApplyAction(s.edge7, a);
 	if (pruneSuccessors)
 		history.push_back(a);
 }
@@ -82,7 +82,7 @@ void RubiksCube::UndoAction(RubiksState &s, RubiksAction a) const
 	InvertAction(a);
 	c.ApplyAction(s.corner, a);
 	e.ApplyAction(s.edge, a);
-	e7.ApplyAction(s.edge7, a);
+	//e7.ApplyAction(s.edge7, a);
 
 }
 
@@ -94,6 +94,30 @@ void RubiksCube::GetNextState(const RubiksState &s1, RubiksAction a, RubiksState
 
 bool RubiksCube::InvertAction(RubiksAction &a) const
 {
+	// This code was tested for speed but not correctness.
+	// It didn't speed things up, so it's commented out for now.
+//	switch (a)
+//	{
+//		case 0: a = 1; return true;
+//		case 1: a = 0; return true;
+//		case 2: return true;
+//		case 3: a = 4; return true;
+//		case 4: a = 3; return true;
+//		case 5: return true;
+//		case 6: a = 7; return true;
+//		case 7: a = 6; return true;
+//		case 8: return true;
+//		case 9: a = 10; return true;
+//		case 10: a = 9; return true;
+//		case 11: return true;
+//		case 12: a = 13; return true;
+//		case 13: a = 12; return true;
+//		case 14: return true;
+//		case 15: a = 16; return true;
+//		case 16: a = 15; return true;
+//		case 17: return true;
+//		default: return false;
+//	}
 	if (2 == a%3)
 		return true;
 	if (1 == a%3)
@@ -103,6 +127,7 @@ bool RubiksCube::InvertAction(RubiksAction &a) const
 	}
 	a += 1;
 	return true;
+	return false;
 }
 
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost)
@@ -243,8 +268,8 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, dou
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 {
 	double val = 0;
-	
-		// corner PDB
+
+	// corner PDB
 	uint64_t hash = c.GetStateHash(node1.corner);
 	val = cornerPDB.Get(hash);
 
@@ -374,7 +399,7 @@ void RubiksCube::OpenGLDraw(const RubiksState&s) const
 {
 	e.OpenGLDraw(s.edge);
 	c.OpenGLDraw(s.corner);
-	OpenGLDrawCubeBackground();
+//	OpenGLDrawCubeBackground();
 	OpenGLDrawCenters();
 }
 
@@ -382,7 +407,7 @@ void RubiksCube::OpenGLDrawCorners(const RubiksState&s) const
 {
 	c.OpenGLDraw(s.corner);
 //	OpenGLDrawCenters();
-	OpenGLDrawCubeBackground();
+//	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawEdges(const RubiksState&s) const
@@ -391,7 +416,7 @@ void RubiksCube::OpenGLDrawEdges(const RubiksState&s) const
 //	s.edge7.GetDual(e7tmp);
 	e7.OpenGLDraw(s.edge7);
 //	OpenGLDrawCenters();
-	OpenGLDrawCubeBackground();
+//	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawEdgeDual(const RubiksState&s) const
@@ -399,11 +424,13 @@ void RubiksCube::OpenGLDrawEdgeDual(const RubiksState&s) const
 	s.edge.GetDual(dual);
 	e.OpenGLDraw(dual);
 //	OpenGLDrawCenters();
-	OpenGLDrawCubeBackground();
+//	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawCubeBackground() const
 {
+	return;
+	
 	float scale = 0.3;
 	float offset = 0.95*scale/3.0;
 	glBegin(GL_QUADS);
@@ -448,94 +475,125 @@ void RubiksCube::OpenGLDrawCubeBackground() const
 
 void RubiksCube::OpenGLDrawCenters() const
 {
-	
+	glBegin(GL_QUADS);
+	OpenGLDrawCube(4);
+	OpenGLDrawCube(10);
+	OpenGLDrawCube(12);
+	OpenGLDrawCube(14);
+	OpenGLDrawCube(16);
+	OpenGLDrawCube(22);
+	glEnd();
+}
+
+void RubiksCube::OpenGLDrawCube(int cube) const
+{
 	float scale = 0.3;
 	float offset = 0.95*scale/3.0;
-	glBegin(GL_QUADS);
+	const float offset2 = scale/3.0;
+	const float epsilon = 0.0001;
 	
-	SetFaceColor(0);
-	glVertex3f(-offset, -scale, -offset);
-	glVertex3f(offset, -scale, -offset);
-	glVertex3f(offset, -scale, offset);
-	glVertex3f(-offset, -scale, offset);
-	
-	SetFaceColor(5);
-	glVertex3f(-offset, scale, -offset);
-	glVertex3f(offset, scale, -offset);
-	glVertex3f(offset, scale, offset);
-	glVertex3f(-offset, scale, offset);
-	
-	SetFaceColor(1);
-	glVertex3f(-scale, -offset, -offset);
-	glVertex3f(-scale, offset, -offset);
-	glVertex3f(-scale, offset, offset);
-	glVertex3f(-scale, -offset, offset);
-	
-	SetFaceColor(3);
-	glVertex3f(scale, -offset, -offset);
-	glVertex3f(scale, offset, -offset);
-	glVertex3f(scale, offset, offset);
-	glVertex3f(scale, -offset, offset);
-	
-	SetFaceColor(2);
-	glVertex3f(-offset, -offset, -scale);
-	glVertex3f(offset, -offset, -scale);
-	glVertex3f(offset, offset, -scale);
-	glVertex3f(-offset, offset, -scale);
-	
-	SetFaceColor(4);
-	glVertex3f(-offset, -offset, scale);
-	glVertex3f(offset, -offset, scale);
-	glVertex3f(offset, offset, scale);
-	glVertex3f(-offset, offset, scale);
-	
-//	glColor3f(0,0,0);
-//	offset = scale/3.0;
-//	scale*=0.99;
-//	glVertex3f(-3.0*offset, -scale, -3.0*offset);
-//	glVertex3f(3.0*offset, -scale, -3.0*offset);
-//	glVertex3f(3.0*offset, -scale, 3.0*offset);
-//	glVertex3f(-3.0*offset, -scale, 3.0*offset);
-//	
-//	glVertex3f(-3.0*offset, scale, -3.0*offset);
-//	glVertex3f(3.0*offset, scale, -3.0*offset);
-//	glVertex3f(3.0*offset, scale, 3.0*offset);
-//	glVertex3f(-3.0*offset, scale, 3.0*offset);
-//	
-//	glVertex3f(-scale, -3.0*offset, -3.0*offset);
-//	glVertex3f(-scale, 3.0*offset, -3.0*offset);
-//	glVertex3f(-scale, 3.0*offset, 3.0*offset);
-//	glVertex3f(-scale, -3.0*offset, 3.0*offset);
-//	
-//	//	SetFaceColor(3);
-//	glVertex3f(scale, -3.0*offset, -3.0*offset);
-//	glVertex3f(scale, 3.0*offset, -3.0*offset);
-//	glVertex3f(scale, 3.0*offset, 3.0*offset);
-//	glVertex3f(scale, -3.0*offset, 3.0*offset);
-//	
-//	//	SetFaceColor(2);
-//	glVertex3f(-3.0*offset, -3.0*offset, -scale);
-//	glVertex3f(3.0*offset, -3.0*offset, -scale);
-//	glVertex3f(3.0*offset, 3.0*offset, -scale);
-//	glVertex3f(-3.0*offset, 3.0*offset, -scale);
-//	
-//	//	SetFaceColor(4);
-//	glVertex3f(-3.0*offset, -3.0*offset, scale);
-//	glVertex3f(3.0*offset, -3.0*offset, scale);
-//	glVertex3f(3.0*offset, 3.0*offset, scale);
-//	glVertex3f(-3.0*offset, 3.0*offset, scale);
-	glEnd();
+	switch (cube)
+	{
+		case 4:
+		{
+			SetFaceColor(0);
+			glVertex3f(-offset, -scale, -offset);
+			glVertex3f(offset, -scale, -offset);
+			glVertex3f(offset, -scale, offset);
+			glVertex3f(-offset, -scale, offset);
+
+			SetFaceColor(-1);
+			glVertex3f(-offset2, -scale+epsilon, -offset2);
+			glVertex3f(offset2, -scale+epsilon, -offset2);
+			glVertex3f(offset2, -scale+epsilon, offset2);
+			glVertex3f(-offset2, -scale+epsilon, offset2);
+
+		} break;
+		case 22:
+		{
+			SetFaceColor(5);
+			glVertex3f(-offset, scale, -offset);
+			glVertex3f(offset, scale, -offset);
+			glVertex3f(offset, scale, offset);
+			glVertex3f(-offset, scale, offset);
+
+			SetFaceColor(-1);
+			glVertex3f(-offset2, scale-epsilon, -offset2);
+			glVertex3f(offset2, scale-epsilon, -offset2);
+			glVertex3f(offset2, scale-epsilon, offset2);
+			glVertex3f(-offset2, scale-epsilon, offset2);
+		} break;
+		case 12:
+		{
+			SetFaceColor(1);
+			glVertex3f(-scale, -offset, -offset);
+			glVertex3f(-scale, offset, -offset);
+			glVertex3f(-scale, offset, offset);
+			glVertex3f(-scale, -offset, offset);
+
+			SetFaceColor(-1);
+			glVertex3f(-scale+epsilon, -offset2, -offset2);
+			glVertex3f(-scale+epsilon, offset2, -offset2);
+			glVertex3f(-scale+epsilon, offset2, offset2);
+			glVertex3f(-scale+epsilon, -offset2, offset2);
+
+		} break;
+		case 16:
+		{
+			SetFaceColor(4);
+			glVertex3f(-offset, -offset, scale);
+			glVertex3f(offset, -offset, scale);
+			glVertex3f(offset, offset, scale);
+			glVertex3f(-offset, offset, scale);
+			
+			SetFaceColor(-1);
+			glVertex3f(-offset2, -offset2, scale-epsilon);
+			glVertex3f(offset2, -offset2, scale-epsilon);
+			glVertex3f(offset2, offset2, scale-epsilon);
+			glVertex3f(-offset2, offset2, scale-epsilon);
+
+		} break;
+		case 10:
+		{
+			SetFaceColor(2);
+			glVertex3f(-offset, -offset, -scale);
+			glVertex3f(offset, -offset, -scale);
+			glVertex3f(offset, offset, -scale);
+			glVertex3f(-offset, offset, -scale);
+
+			SetFaceColor(-1);
+			glVertex3f(-offset2, -offset2, -scale+epsilon);
+			glVertex3f(offset2, -offset2, -scale+epsilon);
+			glVertex3f(offset2, offset2, -scale+epsilon);
+			glVertex3f(-offset2, offset2, -scale+epsilon);
+		} break;
+		case 14:
+		{
+			SetFaceColor(3);
+			glVertex3f(scale, -offset, -offset);
+			glVertex3f(scale, offset, -offset);
+			glVertex3f(scale, offset, offset);
+			glVertex3f(scale, -offset, offset);
+			
+			SetFaceColor(-1);
+			glVertex3f(scale-epsilon, -offset2, -offset2);
+			glVertex3f(scale-epsilon, offset2, -offset2);
+			glVertex3f(scale-epsilon, offset2, offset2);
+			glVertex3f(scale-epsilon, -offset2, offset2);
+		} break;
+	}
 }
 
 void RubiksCube::SetFaceColor(int theColor) const
 {
 	switch (theColor)
 	{
+		case -1: glColor3f(0.0, 0.0, 0.0); break;
 		case 0: glColor3f(1.0, 0.0, 0.0); break;
 		case 1: glColor3f(0.0, 1.0, 0.0); break;
 		case 2: glColor3f(0.0, 0.0, 1.0); break;
 		case 3: glColor3f(1.0, 1.0, 0.0); break;
-		case 4: glColor3f(1.0, 0.5, 0.0); break;
+		case 4: glColor3f(1.0, 0.75, 0.0); break;
 		case 5: glColor3f(1.0, 1.0, 1.0); break;
 		default: assert(false);
 	}
@@ -543,9 +601,162 @@ void RubiksCube::SetFaceColor(int theColor) const
 
 
 /** Draw the transition at some percentage 0...1 between two states */
-void RubiksCube::OpenGLDraw(const RubiksState&, const RubiksState&, float) const
+void RubiksCube::OpenGLDraw(const RubiksState &s1, const RubiksState &s2, float t) const
 {
-	
+//	glEnable( GL_POLYGON_SMOOTH );
+//	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+	int vals[3] = {-90, 90, 180};
+	RubiksAction a = GetAction(s1, s2);
+	switch (a/3)
+	{
+		case 0: // 0
+		{
+			glPushMatrix();
+			glRotatef(vals[a%3]*t, 0, 1, 0); // parameterize
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 9; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, x);
+				c.OpenGLDrawCube(s1.corner, x);
+				OpenGLDrawCube(x);
+			}
+			glEnd();
+			glPopMatrix();
+			
+			glBegin(GL_QUADS);
+			for (int x = 9; x < 27; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, x);
+				c.OpenGLDrawCube(s1.corner, x);
+				OpenGLDrawCube(x);
+			}
+			glEnd();
+		} break;
+		case 1: // 5
+		{
+			glPushMatrix();
+			glRotatef(vals[a%3]*t, 0, 1, 0); // parameterize
+			glBegin(GL_QUADS);
+			for (int x = 18; x < 27; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, x);
+				c.OpenGLDrawCube(s1.corner, x);
+				OpenGLDrawCube(x);
+			}
+			glEnd();
+			glPopMatrix();
+			
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 18; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, x);
+				c.OpenGLDrawCube(s1.corner, x);
+				OpenGLDrawCube(x);
+			}
+			glEnd();
+		} break;
+		case 2: // 2
+		{
+			int which[9] = {0, 1, 2, 9, 10, 11, 18, 19, 20};
+			int others[18] = {3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26};
+			glPushMatrix();
+			glRotatef(vals[a%3]*t, 0, 0, -1); // parameterize
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 9; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, which[x]);
+				c.OpenGLDrawCube(s1.corner, which[x]);
+				OpenGLDrawCube(which[x]);
+			}
+			glEnd();
+			glPopMatrix();
+			
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 18; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, others[x]);
+				c.OpenGLDrawCube(s1.corner, others[x]);
+				OpenGLDrawCube(others[x]);
+			}
+			glEnd();
+		} break;
+		case 3: // 4
+		{
+			int which[9] = {6, 7, 8, 15, 16, 17, 24, 25, 26};
+			int others[18] = {3, 4, 5, 0, 1, 2, 12, 13, 14, 9, 10, 11, 21, 22, 23, 18, 19, 20};
+			glPushMatrix();
+			glRotatef(vals[a%3]*t, 0, 0, 1); // parameterize
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 9; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, which[x]);
+				c.OpenGLDrawCube(s1.corner, which[x]);
+				OpenGLDrawCube(which[x]);
+			}
+			glEnd();
+			glPopMatrix();
+			
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 18; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, others[x]);
+				c.OpenGLDrawCube(s1.corner, others[x]);
+				OpenGLDrawCube(others[x]);
+			}
+			glEnd();
+		} break;
+		case 4: // 1
+		{
+			int which[9] = {0, 3, 6, 9, 12, 15, 18, 21, 24};
+			int others[18] = {1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26};
+			glPushMatrix();
+			glRotatef(vals[a%3]*t, -1, 0, 0); // parameterize
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 9; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, which[x]);
+				c.OpenGLDrawCube(s1.corner, which[x]);
+				OpenGLDrawCube(which[x]);
+			}
+			glEnd();
+			glPopMatrix();
+			
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 18; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, others[x]);
+				c.OpenGLDrawCube(s1.corner, others[x]);
+				OpenGLDrawCube(others[x]);
+			}
+			glEnd();
+			
+		} break;
+		case 5: // 3
+		{
+			int which[9] = {2, 5, 8, 11, 14, 17, 20, 23, 26};
+			int others[18] = {0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19, 21, 22, 24, 25};
+			glPushMatrix();
+			glRotatef(vals[a%3]*t, 1, 0, 0); // parameterize
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 9; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, which[x]);
+				c.OpenGLDrawCube(s1.corner, which[x]);
+				OpenGLDrawCube(which[x]);
+			}
+			glEnd();
+			glPopMatrix();
+			
+			glBegin(GL_QUADS);
+			for (int x = 0; x < 18; x++)
+			{
+				e.OpenGLDrawCube(s1.edge, others[x]);
+				c.OpenGLDrawCube(s1.corner, others[x]);
+				OpenGLDrawCube(others[x]);
+			}
+			glEnd();
+		} break;
+	}
 }
 
 void RubiksCube::OpenGLDraw(const RubiksState&, const RubiksAction&) const

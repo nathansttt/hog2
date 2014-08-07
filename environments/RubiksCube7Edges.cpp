@@ -753,7 +753,7 @@ void Rubik7Edge::SetCubeColor(int which, bool face, const Rubik7EdgeState &s) co
 		case 1: glColor3f(0.0, 1.0, 0.0); break;
 		case 2: glColor3f(0.0, 0.0, 1.0); break;
 		case 3: glColor3f(1.0, 1.0, 0.0); break;
-		case 4: glColor3f(1.0, 0.5, 0.0); break;
+		case 4: glColor3f(1.0, 0.75, 0.0); break;
 		case 5: glColor3f(1.0, 1.0, 1.0); break;
 		default: assert(false);
 	}

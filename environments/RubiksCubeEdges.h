@@ -144,6 +144,7 @@ public:
 	/** Draw the transition at some percentage 0...1 between two states */
 	virtual void OpenGLDraw(const RubikEdgeState&, const RubikEdgeState&, float) const;
 	virtual void OpenGLDraw(const RubikEdgeState&, const RubikEdgeAction&) const;
+	void OpenGLDrawCube(const RubikEdgeState &s, int cube) const;
 private:
 	int piecesToRank;
 	void MRUnrank(int n, uint64_t r, uint64_t &perm) const;

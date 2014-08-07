@@ -98,6 +98,7 @@ public:
 						 const double width=2 );
 	
 	void AddObstacle(line2d obs);
+	void PopObstacle();
 	void GetSuccessors(const armAngles &nodeID, std::vector<armAngles> &neighbors) const;
 	void GetActions(const armAngles &nodeID, std::vector<armRotations> &actions) const;
 	armRotations GetAction(const armAngles &s1, const armAngles &s2) const;

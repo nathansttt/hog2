@@ -230,6 +230,11 @@ void RoboticArm::AddObstacle(line2d obs)
 //		   states.size(), ce->GetPathLength(states), astar.GetNodesExpanded());
 }
 
+void RoboticArm::PopObstacle()
+{
+	obstacles.pop_back();
+	ce->PopObstacle();
+}
 
 armAngles RoboticArm::GetRandomState()
 {

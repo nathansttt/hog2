@@ -72,8 +72,11 @@ static bool operator==(const MNPuzzleState &l1, const MNPuzzleState &l2)
 	if (l1.height != l2.height)
 		return false;
 	for (unsigned int x = 0; x < l1.puzzle.size(); x++)
-		if (l1.puzzle[x] != l2.puzzle[x])
-			return false;
+	{
+		if (l1.puzzle[x] > 0 || l2.puzzle[x] > 0) // don't have to check the blank
+			if (l1.puzzle[x] != l2.puzzle[x])
+				return false;
+	}
 	return true;
 }
 
