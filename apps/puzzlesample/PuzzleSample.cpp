@@ -56,11 +56,12 @@ MNPuzzle *mnp = 0;
 
 Plotting::Plot2D *plot = 0;
 Plotting::Line *distLine = 0;
+bool recording = false;
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	RunHOGGUI(argc, argv);
+	RunHOGGUI(argc, argv, 640, 640);
 }
 
 
@@ -70,11 +71,11 @@ int main(int argc, char* argv[])
  */
 void CreateSimulation(int id)
 {
-	Map *map;
-	if (gDefaultMap[0] == 0)
-		map = new Map(60, 60);
-	else
-		map = new Map(gDefaultMap);
+//	Map *map;
+//	if (gDefaultMap[0] == 0)
+//		map = new Map(60, 60);
+//	else
+//		map = new Map(gDefaultMap);
 
 	unitSims.resize(id+1);
 	unitSims[id] = new PuzzleSimulation(mnp = new MNPuzzle(4, 4));
@@ -86,6 +87,7 @@ void CreateSimulation(int id)
  */
 void InstallHandlers()
 {
+	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
@@ -123,14 +125,45 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
+MNPuzzleState s(4,4), t(4, 4);
+std::vector<slideDir> moves;
+double v = 1;
+slideDir lastMove = kUp;
+
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
 		return;
 
-	rk_e.OpenGLDraw(rk_se);
-	rk_c.OpenGLDraw(rk_sc);
+	v += 0.1;
+	if (v > 1)
+	{
+		s = t;
+		mnp->GetActions(t, moves);
+		slideDir tmp = kUp;
+		do {
+			tmp = moves[random()%moves.size()];
+		} while (tmp == lastMove);
+		mnp->ApplyAction(t, tmp);
+		lastMove = tmp;
+		mnp->InvertAction(lastMove);
+		v = 0;
+	}
+	mnp->OpenGLDraw(t, s, v);
+
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		static int cnt = 999;
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		SaveScreenshot(windowID, fname);
+		printf("Saved %s\n", fname);
+		cnt--;
+	}
 	return;
+//	rk_e.OpenGLDraw(rk_se);
+//	rk_c.OpenGLDraw(rk_sc);
+//	return;
 	
 	if (viewport == 0)
 	{
@@ -165,6 +198,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case 'r': recording = !recording; break;
 		case '0':
 		{
 			static int x = 0;
@@ -268,30 +302,24 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-	for (uint64_t x = 0; x < 1000000000; x++)
-	{
-		if (0 == x%100000)
-			printf("%d\n", x);
-		rk_e.GetStateFromHash(x, rk_se);
-		assert(x == rk_e.GetStateHash(rk_se));
-	}
+	MNPuzzleState tmp(4, 4);
+	mnp->StoreGoal(tmp);
+	std::vector<int> tiles;
+	for (int x = 1; x <= 7; x++)
+		tiles.push_back(x);
+//	tiles.push_back(0);
+//	tiles.push_back(3);
+//	tiles.push_back(7);
+//	tiles.push_back(11);
+//	tiles.push_back(12);
+//	tiles.push_back(13);
+//	tiles.push_back(14);
+//	tiles.push_back(15);
 	
-	return;
 	
-	BFS<MNAgentPuzzleState, tAgentAction> bfs;
-	for (unsigned int x = 1; x < 9; x++)
-	{
-		MNAgentEnvironment mnae;
-		MNAgentPuzzleState mnps(3, 3);
-		std::cout << mnps << std::endl;
-		std::vector<MNAgentPuzzleState> s;
-//		for (unsigned int y = 0; y < (9-x); y++)
-//		{
-//			std::cout << (9-x) << " agents, domain abstraction of " << y << " tiles." << std::endl;
-			mnae.SetDomainAbstractionSize(3);
-			bfs.GetPath(&mnae, mnps, mnps, s);
-//		}
-	}
+	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7_add.pdb", true);
+	//mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_8-15_add.pdb", true);
+	//mnp->Build_Regular_PDB(tmp, tiles, "/Users/nathanst/Desktop/pdb7-nosub-fringe.bin");
 }
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
