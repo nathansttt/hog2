@@ -48,9 +48,11 @@ bool runningSearch2 = false;
 int px1 = 0, py1 = 0, px2 = 0, py2 = 0;
 int absType = 0;
 int mazeSize = 20;
-int gStepsPerFrame = 2;
+int gStepsPerFrame = 1;
 double searchWeight = 0;
+bool reopenNodes = false;
 bool screenShot = false;
+bool recording = false;
 
 std::vector<UnitMapSimulation *> unitSims;
 
@@ -81,7 +83,7 @@ void testHeuristic(char *problems);
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	RunHOGGUI(argc, argv);
+	RunHOGGUI(argc, argv, 1024, 768);
 }
 
 
@@ -94,11 +96,15 @@ void CreateSimulation(int id)
 	Map *map;
 	if (gDefaultMap[0] == 0)
 	{
-		//ht_chantry.arl.map
-		//		map = new Map("/Users/nathanst/hog2/maps/dao/lak503d.map");
+		//ht_chantry.arl.map // den012d
+		//map = new Map("/Users/nathanst/hog2/maps/dao/orz101d.map");
+		//map = new Map("/Users/nathanst/hog2/maps/dao/lak503d.map");
 		map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
+		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
+		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
+		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 		//map = new Map("/Users/nathanst/hog2/maps/rooms/8room_000.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-16-0.map");
 		
@@ -113,8 +119,8 @@ void CreateSimulation(int id)
 		//map->Scale(512, 512);
 	}
 	map->SetTileSet(kWinter);
-	msa = new MapSectorAbstraction(map, 8);
-	msa->ToggleDrawAbstraction(1);
+	msa = new MapSectorAbstraction(map, 2);
+	//msa->ToggleDrawAbstraction(1);
 	//msa->ToggleDrawAbstraction(2);
 	// ->ToggleDrawAbstraction(3);
 	unitSims.resize(id+1);
@@ -130,11 +136,14 @@ void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record the screen.", kNoModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Change weight", "Change the search weight", kNoModifier, 'w');
+	InstallKeyboardHandler(MyDisplayHandler, "Reopen", "Toggle re-opening policy.", kNoModifier, 't');
 	InstallKeyboardHandler(MyDisplayHandler, "Rotate Compression", "Rotate Compression being shown in heuristic", kAnyModifier, '}');
 	InstallKeyboardHandler(MyDisplayHandler, "Rotate Displayed Heuristic", "Rotate which heuristic is shown", kAnyModifier, '{');
+	InstallKeyboardHandler(MyDisplayHandler, "Reset Rotations", "Reset the current rotation/translation of the map.", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	
@@ -152,6 +161,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems3", "-problems3 filename", "Selects the problem set to run.");
+	InstallCommandLineHandler(MyCLHandler, "-problems4", "-problems4 filename", "Selects the problem set to run comparing weighted A* with and without re-openings.");
 	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallCommandLineHandler(MyCLHandler, "-reduceMap", "-reduceMap input output", "Find the largest connected component in map and reduce.");
@@ -191,7 +201,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		CreateSimulation(windowID);
 		SetNumPorts(windowID, 1);
 	}
+
 }
+
+// 1. resize window to 1024x768 
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
@@ -221,8 +234,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //		ge = new GraphEnvironment(GraphSearchConstants::GetGraph(unitSims[windowID]->GetEnvironment()->GetMap()));
 //	ge->OpenGLDraw();
 
-	if (astars.size() > 0)
-		msa->OpenGLDraw();
+	//if (astars.size() > 0)
+	msa->OpenGLDraw();
 	
 	if (mouseTracking)
 	{
@@ -246,7 +259,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (runningSearch1 && !unitSims[windowID]->GetPaused())
 		{
 			ma1->SetColor(0.0, 0.0, 1.0, 0.75);
-			for (int x = 0; x < gStepsPerFrame*4; x++)
+			for (int x = 0; x < gStepsPerFrame; x++)
 			{
 				if (a1.DoSingleSearchStep(path))
 				{
@@ -279,11 +292,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 		a2.OpenGLDraw();
 	}
-	if ((runningSearch1 || runningSearch2 || mouseTracking) && viewport == GetNumPorts(windowID)-1)
+	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
 		static int cnt = 0;
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d", (cnt/100)%10, (cnt/10)%10, cnt%10);
+		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
 		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
@@ -413,6 +426,57 @@ void runProblemSet3(char *scenario)
 		printf("\tastar\t%ld\t%1.6f\t%llu\t%u\n", thePath.size(), t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNumOpenItems());
 	}
 
+	exit(0);
+}
+
+void runProblemSet4(char *scenario)
+{
+	printf("Loading scenario %s\n", scenario);
+	ScenarioLoader sl(scenario);
+	
+	printf("Loading map %s\n", sl.GetNthExperiment(0).GetMapName());
+	Map *map = new Map(sl.GetNthExperiment(0).GetMapName());
+	map->Scale(sl.GetNthExperiment(0).GetXScale(),
+			   sl.GetNthExperiment(0).GetYScale());
+	
+	std::vector<xyLoc> thePath;
+	MapEnvironment ma(map);
+	ma.SetEightConnected();
+	//ma.SetFourConnected();
+	
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+	astar.SetWeight(10.0);
+	astar.SetReopenNodes(false);
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar2;
+	astar2.SetWeight(10.0);
+	astar2.SetReopenNodes(true);
+	
+	for (int x = 0; x < sl.GetNumExperiments(); x++)
+	{
+		if (sl.GetNthExperiment(x).GetBucket() != 32)
+			continue;
+		xyLoc from, to;
+		printf("%d\t", sl.GetNthExperiment(x).GetBucket());
+		from.x = sl.GetNthExperiment(x).GetStartX();
+		from.y = sl.GetNthExperiment(x).GetStartY();
+		to.x = sl.GetNthExperiment(x).GetGoalX();
+		to.y = sl.GetNthExperiment(x).GetGoalY();
+		printf("(%d, %d) (%d, %d)\t", from.x, from.y, to.x, to.y);
+		Timer t;
+		
+		t.StartTimer();
+		astar.GetPath(&ma, from, to, thePath);
+		t.EndTimer();
+		
+		printf("astar-no\t%1.2f\t%1.6f\t%llu\t%u", ma.GetPathLength(thePath), t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNumOpenItems());
+
+		t.StartTimer();
+		astar2.GetPath(&ma, from, to, thePath);
+		t.EndTimer();
+		
+		printf("\tastar-yes\t%1.2f\t%1.6f\t%llu\t%u\n", ma.GetPathLength(thePath), t.GetElapsedTime(), astar2.GetNodesExpanded(), astar2.GetNumOpenItems());
+	}
+	
 	exit(0);
 }
 
@@ -731,6 +795,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		runProblemSet3(argument[1]);
 		return 2;
 	}
+	else if (strcmp(argument[0], "-problems4" ) == 0 )
+	{
+		if (maxNumArgs <= 1) exit(0);
+		runProblemSet4(argument[1]);
+		return 2;
+	}
 	return 2; //ignore typos
 }
 
@@ -738,13 +808,33 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case '|': resetCamera(); break;
+		case 'r': recording = !recording; break;
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			msa->ToggleDrawAbstraction(key-'0');
+			break;
+		case 't':
+			reopenNodes = !reopenNodes;
+			if (reopenNodes) printf("Will re-open nodes\n");
+			if (!reopenNodes) printf("Will not re-open nodes\n");
+			break;
 		case 'w':
 			if (searchWeight == 0)
 				searchWeight = 1.0;
 			else if (searchWeight == 1.0)
 				searchWeight = 10.0;
-			else if (searchWeight == 1000.0)
+			else if (searchWeight == 10.0)
 				searchWeight = 0;
+			printf("Search weight is %1.2f\n", searchWeight);
 			break;
 		case '[': if (gStepsPerFrame >= 2) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;
@@ -959,11 +1049,14 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 {
 //	return false;
 	static point3d startLoc;
-	switch (button)
+	if (mType == kMouseDown)
 	{
-		case kRightButton: printf("Right button\n"); break;
-		case kLeftButton: printf("Left button\n"); break;
-		case kMiddleButton: printf("Middle button\n"); break;
+		switch (button)
+		{
+			case kRightButton: printf("Right button\n"); break;
+			case kLeftButton: printf("Left button\n"); break;
+			case kMiddleButton: printf("Middle button\n"); break;
+		}
 	}
 	mouseTracking = false;
 	if ((button == kMiddleButton) && (mType == kMouseDown))
@@ -1008,6 +1101,11 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					break;
 				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 				//px1 = 128; py1 = 181; px2 = 430; py2 = 364; //128 181 430 364
+				//(31, 3) (30, 113)
+				//(63, 395) (129, 460)
+				//px1 = 63; py1 = 395; px2 = 129; py2 = 460; //128 181 430 364
+				//px1 = 129-22; py1 = 460-25; px2 = 129; py2 = 460; //128 181 430 364
+
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
 				
 				if (ma1 == 0)
@@ -1040,13 +1138,13 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				xyLoc g1;
 				s1.x = px1; s1.y = py1;
 				g1.x = px2; g1.y = py2;
-				
+								
 				a1.SetWeight(searchWeight);
 				ma1->SetEightConnected();
 				a1.InitializeSearch(ma1, s1, g1, path);
 				a2.InitializeSearch(ma2, s1, g1, path);
 				//a1.SetUseBPMX(1);
-				//a1.SetReopenNodes(true);
+				a1.SetReopenNodes(reopenNodes);
 				runningSearch1 = true;
 				runningSearch2 = false;
 				SetNumPorts(windowID, 1);
