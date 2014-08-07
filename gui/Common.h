@@ -307,7 +307,9 @@ void PrintCommandLineArguments();
 void ProcessCommandLineArgs(int argc, char *argv[]);
 
 void RunHOGGUI(int argc, char* argv[], int windowDimension = 1000);
+void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension);
 void SaveScreenshot(int windowID, const char *filename);
+void SetZoom(int windowID, float amount);
 
 void submitTextToBuffer(const char *val);
 void appendTextToBuffer(char *);

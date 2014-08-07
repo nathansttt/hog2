@@ -55,6 +55,11 @@ pRecContext getCurrentContext()
 
 void RunHOGGUI(int argc, char** argv, int windowDimension)
 {
+	RunHOGGUI(argc, argv, windowDimension, windowDimension);
+}
+
+void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
+{
   // Init traj global
   startTrajRecap = false;
 
@@ -70,7 +75,7 @@ void RunHOGGUI(int argc, char** argv, int windowDimension)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(windowDimension, windowDimension);
+	glutInitWindowSize(xDimension, yDimension);
 	glutCreateWindow("Map Abstraction");
 	glutReshapeFunc(resizeWindow);
 	glutDisplayFunc(renderScene);
@@ -428,7 +433,6 @@ static void mouseDolly (int x, int y, pRecContext pContextInfo)
 	gDollyPanStartPoint[0] = (long) x;
 	gDollyPanStartPoint[1] = (long) y;
 }
-
 
 /**
  * Renders the scene.  Used by GLUT for it's display function.
