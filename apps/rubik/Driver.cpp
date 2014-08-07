@@ -45,6 +45,7 @@
 #include <string>
 #include "BitVector.h"
 #include "MinBloom.h"
+#include <deque>
 
 RubiksCube c;
 RubiksAction a;
@@ -58,21 +59,16 @@ void TestMinBloom();
 void GetInstanceFromStdin(RubiksState &start);
 
 bool readFromStdin = false;
+bool recording = false;
+
+std::deque<RubiksAction> animateActions;
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	RunHOGGUI(argc, argv, 300);
+	RunHOGGUI(argc, argv, 600);
 }
 
-
-/**
- * This function is used to allocate the unit simulated that you want to run.
- * Any parameters or other experimental setup can be done at this time.
- */
-void CreateSimulation(int id)
-{
-}
 
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
@@ -83,8 +79,6 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 
@@ -94,6 +88,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
 
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test entries", "Test using 'entries' billion entries from edge pdb");
+	InstallCommandLineHandler(MyCLHandler, "-animate", "-animate <apply|reverse>", "Read a sequence of actions from stdin and output animated sequence");
 
 	InstallCommandLineHandler(MyCLHandler, "-buildBloom", "-buildBloom <size> <#GB> <#hash> <dataloc>", "Build a bloom filter using a size/hash combo.");
 	InstallCommandLineHandler(MyCLHandler, "-buildMinBloom", "-buildMinBloom <#GB> <#hash> <maxDepth> <dataloc>", "Build a bloom filter using a size/hash combo.");
@@ -127,14 +122,23 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	{
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
-		//CreateSimulation(windowID);
-		SetNumPorts(windowID, 4);
+
+		glClearColor(0.8, 0.8, 0.8, 1.0);
+		if (animateActions.size() > 0)
+		{
+			SetNumPorts(windowID, 1);
+			SetZoom(windowID, 6);
+		}
+		else {
+			SetNumPorts(windowID, 4);
+		}
+		
 	}
 }
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+	bool endRecording = false;
 	if (viewport == 3)
 	{
 		c.OpenGLDrawEdgeDual(s);
@@ -145,12 +149,43 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	else if (viewport == 1)
 	{
-		//e7.OpenGLDraw(e7s);
 		c.OpenGLDrawCorners(s);
 	}
 	else {
-		c.OpenGLDraw(s);
+//		glRotatef(25, 1, 0, 0);
+//		glRotatef(-45, 0, 1, 0);
+
+		if (animateActions.size() == 0)
+		{
+			c.OpenGLDraw(s);
+		}
+		else {
+			static float t = 0.0;
+			RubiksState s2 = s;
+			c.ApplyAction(s2, animateActions.front());
+			c.OpenGLDraw(s, s2, t);
+			t+=0.02;
+			if (t >= 1)
+			{
+				s = s2;
+				animateActions.pop_front();
+				t = 0;
+			}
+			if (animateActions.size() == 0)
+				endRecording = true;
+		}
 	}
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		static int cnt = 0;
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		SaveScreenshot(windowID, fname);
+		printf("Saved %s\n", fname);
+		cnt++;
+	}
+	if (endRecording)
+		recording = false;
 }
 
 void RunTest(int billionEntriesToLoad);
@@ -169,6 +204,7 @@ void ManyCompression();
 void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataLoc);
 void GetBloomStats(uint64_t size, int hash, const char *prefix);
 void BuildMinBloomFilter(float space, int numHash, int finalDepth, const char *dataLoc);
+void GetActionsFromStdin(std::vector<RubiksAction> &acts);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -183,6 +219,33 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		ExtractStatesAtDepth(argument[1]);
 		exit(0);
+	}
+	else if (strcmp(argument[0], "-animate") == 0)
+	{		
+		animateActions.resize(0);
+		recording = true;
+		std::vector<RubiksAction> acts;
+		GetActionsFromStdin(acts);
+		
+		if (strcmp(argument[1], "apply") == 0)
+		{
+			for (int x = 0; x < acts.size(); x++)
+			{
+				animateActions.push_back(acts[x]);
+			}
+		}
+		if (strcmp(argument[1], "reverse") == 0)
+		{
+			s.Reset();
+			for (int x = acts.size()-1; x >= 0; x--)
+			{
+				RubiksAction a = acts[x];
+				c.InvertAction(a);
+				c.ApplyAction(s, a);
+				animateActions.push_front(acts[x]);
+			}
+		}
+		return 2;
 	}
 	else if (strcmp(argument[0], "-measure") == 0)
 	{
@@ -294,7 +357,17 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'p':
+			SetNumPorts(windowID, 1);
+			SetZoom(windowID, 6);
 			s.Reset();
+			animateActions.push_back(0);
+			animateActions.push_back(3);
+			animateActions.push_back(7);
+			animateActions.push_back(9);
+			animateActions.push_back(12);
+			animateActions.push_back(16);
+			animateActions.push_back(0);
+			animateActions.push_back(3);
 			printf("Resetting state\n");
 			break;
 		case 'o':
@@ -363,8 +436,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			for (int x = 4; x >= 0; x--)
 				c.ApplyAction(s, x);
 			break;
-//		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
-//		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
 			//if (unitSim)
 			//	unitSim->GetEnvironment()->GetMapAbstraction()->ToggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
@@ -958,8 +1029,10 @@ void SolveOneProblemAStar(int instance)
 
 void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 {
+	readFromStdin = true;
 	s.Reset();
-	GetInstanceFromStdin(s);
+	//GetInstanceFromStdin(s);
+	SolveOneProblem(0, "online");
 	//TestMinBloom();
 	//	LoadCornerPDB();
 //	//LoadEdge7PDB();
@@ -1442,6 +1515,22 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 int GetNextMove(char *input, int &base)
 {
 	int used = 0;
+	if (isdigit(input[0])) // this is our move notation - numeric
+	{
+		int curr = 0;
+		base = input[curr]-'0';
+		curr++;
+		if (isdigit(input[curr]))
+		{
+			base = base*10+input[curr]-'0';
+			curr++;
+		}
+		while (!isdigit(input[curr]) && input[curr] != '\n' && input[curr] != 0)
+		{
+			curr++;
+		}
+		return curr;
+	}
 	switch (input[0])
 	{
 		case 'F': used = 1; base = 2*3; break;
@@ -1487,6 +1576,38 @@ int GetNextMove(char *input, int &base)
 		}
 	}
 	return used;
+}
+
+void GetActionsFromStdin(std::vector<RubiksAction> &acts)
+{
+	const int maxStrLength = 1024;
+	char string[maxStrLength];
+	char *result = fgets(string, maxStrLength, stdin);
+	if (result == 0)
+	{
+		printf("No entries found; exiting.\n");
+		exit(0);
+	}
+	int index = 0;
+	string[maxStrLength-1] = 0;
+	if (strlen(string) == maxStrLength-1)
+	{
+		printf("Warning: input hit maximum string length!\n");
+		exit(0);
+	}
+	while (true)
+	{
+		int act;
+		int cnt = GetNextMove(&string[index], act);
+		if (cnt == 0)
+		{
+			break;
+		}
+		else {
+			index += cnt;
+		}
+		acts.push_back(act);
+	}
 }
 
 void GetInstanceFromStdin(RubiksState &start)
