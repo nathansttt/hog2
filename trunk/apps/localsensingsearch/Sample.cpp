@@ -48,6 +48,7 @@
 #include "LearningUnit.h"
 #include "MPLRTAStar.h"
 #include "GridLSSLRTAStar.h"
+#include "daLRTAStar.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -844,7 +845,25 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 		u6->SetSpeed(1.0);
 		es->AddUnit(u6);
 	}
+	else if (which == 11)
+	{
+		printf("Running daLRTA*(10)\n");
+		DALRTA::daLRTAStar<xyLoc, tDirection, MapEnvironment> *f;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 =
+		new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b,
+															f = new DALRTA::daLRTAStar<xyLoc, tDirection, MapEnvironment>(10));		
+		u6->SetSpeed(1.0);
+		es->AddUnit(u6);
+	}
+	else if (which == 12)
+	{
+		printf("Running LSSLRTA*\n");
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LRTAStar<xyLoc, tDirection, MapEnvironment>());
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
 
+	
 	es->SetTrialLimit(0);
 	while (!es->Done())
 	{
@@ -1187,7 +1206,7 @@ void RunScalingTest(int size, int which, float weight)
 	me->SetDiagonalCost(1.5);
 	es->SetStepType(kRealTime);
 	es->SetThinkingPenalty(0);
-	
+
 	es->ClearAllUnits();
 	// add units
 	es->GetStats()->AddFilter("trialDistanceMoved");
@@ -1199,10 +1218,11 @@ void RunScalingTest(int size, int which, float weight)
 	es->GetStats()->AddFilter("Trial End");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(0, 0), b(size-1, size-1);
+	xyLoc c(size-3, size-3);
 	
 	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
 	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
-
+	LSSLRTAStar<xyLoc, tDirection, MapEnvironment> *agent = 0;
 	if (which == 0)
 	{
 		printf("Running RIBS\n");
@@ -1213,21 +1233,21 @@ void RunScalingTest(int size, int which, float weight)
 	else if (which == 1)
 	{
 		printf("Running LSSLRTA*\n");
-		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, agent = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 2)
 	{
 		printf("Running LSS-LRTA*(10)\n");
-		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, agent = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 3)
 	{
 		printf("Running LSS-LRTA*(100)\n");
-		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, agent = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
@@ -1316,13 +1336,18 @@ void RunScalingTest(int size, int which, float weight)
 		es->AddUnit(u6);
 	}
 	fflush(stdout);
-	es->SetTrialLimit(500000);
+	es->SetTrialLimit(0);
+	//es->SetTrialLimit(500000);
 	while (!es->Done())
 	{
 		es->StepTime(10.0);
 	}
 	statValue v;
 	printf("Done\n");
+	if (agent)
+	{
+		printf("Final heuristic value: %1.5f on map size %d\n", agent->HCost(c, b), size);
+	}
 	int choice = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
 	es->GetStats()->LookupStat(choice, v);
 	printf("dist-first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, v.fval);
