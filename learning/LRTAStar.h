@@ -79,9 +79,10 @@ void LRTAStar<state, action, environment>::GetPath(environment *env, const state
 	
 	// Initialize the variables
 	double minF = DBL_MAX;
+	double minF_D = DBL_MAX;
 	double minG = 0;
 	int minC = -1; 
-	
+	int minD = -1; // depression avoidance
 	nodesExpanded = 0;
 	nodesTouched = 0;
 	nodesTouched++;
@@ -122,6 +123,16 @@ void LRTAStar<state, action, environment>::GetPath(environment *env, const state
 			minG = g;
 			minC = (int)x;
 		}
+		if (1)// da
+		{
+			if (fless((h-env->HCost(neighbors[x], to))*10
+					  +g+h, minF_D))
+			{
+				minF_D = (h-env->HCost(neighbors[x], to))*10+g+h;
+				minD = (int)x;
+			}
+			//[h(s')-h0(s')]*LARGE + [cost(s,s')+h(s')]
+		}
 	}
 	
 	// If there were no legitimate children (e.g., we are blocked out)
@@ -154,7 +165,10 @@ void LRTAStar<state, action, environment>::GetPath(environment *env, const state
 		fAmountLearned += deltaH;
 	
 	// Move -------------------------------------------------------------------------
-	thePath.push_back(neighbors[minC]);
+	if (1) // daLRTA*
+		thePath.push_back(neighbors[minD]);
+	else
+		thePath.push_back(neighbors[minC]);
 	thePath.push_back(from);
 	return;
 }

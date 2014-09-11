@@ -39,7 +39,7 @@ public:
 	virtual int GetNumSuccessors(const state &stateID) const
 	{ std::vector<state> neighbors; GetSuccessors(stateID, neighbors); return neighbors.size(); }
 
-	virtual action GetAction(const state &s1, const state &s2) const = 0;
+	virtual action GetAction(const state &s1, const state &s2) const;
 	virtual void ApplyAction(state &s, action a) const = 0;
 	virtual void UndoAction(state &s, action a) const
 	{ assert(InvertAction(a)); ApplyAction(s, a); }
@@ -105,6 +105,26 @@ protected:
 	mutable recColor color;
 	mutable GLfloat transparency;
 };
+
+
+template <class state, class action>
+action SearchEnvironment<state,action>::GetAction(const state &s1, const state &s2) const
+{
+	std::vector<action> a;
+	GetActions(s1, a);
+	for (int x = 0; x < a.size(); x++)
+	{
+		state s = s1;
+		ApplyAction(s, a[x]);
+		if (s == s2)
+		{
+			return a[x];
+		}
+	}
+	assert(!"No legal move found.");
+	action act;
+	return act;
+}
 
 template <class state, class action>
 double SearchEnvironment<state,action>::GetPathLength(std::vector<state> &neighbors)

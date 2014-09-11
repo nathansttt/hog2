@@ -154,7 +154,7 @@ double PancakePuzzle::HCost(const PancakePuzzleState &state) {
 			fprintf(stderr, "ERROR: HCost called with a single state, no use of memory free heuristic, and invalid setup of pattern databases.\n");
 			exit(1);
 		}
-		h_cost = std::max(Regular_PDB_Lookup(state), h_cost);
+		h_cost = std::max(PDB_Lookup(state), h_cost);
 	}
 
 	// use memory-free heuristic
@@ -201,7 +201,7 @@ double PancakePuzzle::HCost(const PancakePuzzleState &state, const PancakePuzzle
 		for( unsigned int i = 0; i < size; i++ )
 			t.puzzle[i] = beta[state.puzzle[i]];
 
-		return Regular_PDB_Lookup( t );
+		return PDB_Lookup( t );
 	}
 
 	if(use_memory_free) {

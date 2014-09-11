@@ -59,6 +59,7 @@ public:
 		minInitialHeuristic = DBL_MAX;
 		maxLaterHeuristic = 0;
 		initialHeuristic = true;
+		randomizeMoves = true;
 	}
 	virtual ~LSSLRTAStar(void) { }
 	
@@ -126,6 +127,7 @@ private:
 	bool avoidLearning;
 	TemplateAStar<state, action, environment> astar;
 
+	bool randomizeMoves;
 	bool initialHeuristic;
 	double minInitialHeuristic;
 	double maxLaterHeuristic;
@@ -188,6 +190,7 @@ void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const st
 	state first;
 
 	unsigned int openSize = astar.GetNumOpenItems();
+	int randCount = 1;
 	for (unsigned int x = 0; x < openSize; x++)
 	{
 		const AStarOpenClosedData<state> data = astar.GetOpenItem(x);
@@ -209,6 +212,15 @@ void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const st
 			{
 				bestF = data.g+data.h;
 				first = data.data;
+				randCount = 1;
+			}
+			if (randomizeMoves && fequal(data.g+data.h, bestF))
+			{
+				randCount++;
+				if (0 == random()%randCount)
+				{
+					first = data.data;
+				}
 			}
 		}
 		q.push(borderData<state>(data.data, data.h));

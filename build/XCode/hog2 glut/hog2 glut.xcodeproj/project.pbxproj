@@ -56,12 +56,11 @@
 		C4146D791830F66100745331 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4146D7A1830F66100745331 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4146D7B1830F66100745331 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4146D7C1830F66100745331 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4146D7C1830F66100745331 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4146D7D1830F66100745331 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4146D7E1830F66100745331 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4146D7F1830F66100745331 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4146D801830F66100745331 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4146D811830F66100745331 /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4146D821830F66100745331 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4146D831830F66100745331 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4146D841830F66100745331 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -145,6 +144,135 @@
 		C4146DD61830F66100745331 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34213E4FCF70077C5A5 /* Credits.rtf */; };
 		C4146DD71830F66100745331 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
 		C4146DE11830F6FE00745331 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4146DDE1830F6F700745331 /* Driver.cpp */; };
+		C419EDC519B923C200AD9D5E /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C419EDC219B9225700AD9D5E /* TopSpin.cpp */; };
+		C419EDC819B9863700AD9D5E /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
+		C419EDC919B9863700AD9D5E /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C419EDCA19B9863700AD9D5E /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
+		C419EDCB19B9863700AD9D5E /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F37413E4FDBB0077C5A5 /* TextBox.cpp */; };
+		C419EDCC19B9863700AD9D5E /* Trackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F37613E4FDBB0077C5A5 /* Trackball.cpp */; };
+		C419EDCD19B9863700AD9D5E /* BurnedPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F38B13E4FE3E0077C5A5 /* BurnedPancakePuzzle.cpp */; };
+		C419EDCE19B9863700AD9D5E /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F38D13E4FE3E0077C5A5 /* ConfigEnvironment.cpp */; };
+		C419EDCF19B9863700AD9D5E /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F38F13E4FE3E0077C5A5 /* Directional2DEnvironment.cpp */; };
+		C419EDD019B9863700AD9D5E /* Fling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39113E4FE3E0077C5A5 /* Fling.cpp */; };
+		C419EDD119B9863700AD9D5E /* FlipSide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39313E4FE3E0077C5A5 /* FlipSide.cpp */; };
+		C419EDD219B9863700AD9D5E /* GraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39513E4FE3E0077C5A5 /* GraphEnvironment.cpp */; };
+		C419EDD319B9863700AD9D5E /* GraphRefinementEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39713E4FE3E0077C5A5 /* GraphRefinementEnvironment.cpp */; };
+		C419EDD419B9863700AD9D5E /* Map2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39913E4FE3E0077C5A5 /* Map2DEnvironment.cpp */; };
+		C419EDD519B9863700AD9D5E /* Map3DGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39B13E4FE3E0077C5A5 /* Map3DGrid.cpp */; };
+		C419EDD619B9863700AD9D5E /* MinimalSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39D13E4FE3E0077C5A5 /* MinimalSectorAbstraction.cpp */; };
+		C419EDD719B9863700AD9D5E /* MNAgentPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39F13E4FE3E0077C5A5 /* MNAgentPuzzle.cpp */; };
+		C419EDD819B9863700AD9D5E /* MNPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A113E4FE3E0077C5A5 /* MNPuzzle.cpp */; };
+		C419EDD919B9863700AD9D5E /* MountainCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A313E4FE3E0077C5A5 /* MountainCar.cpp */; };
+		C419EDDA19B9863700AD9D5E /* NaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A513E4FE3E0077C5A5 /* NaryTree.cpp */; };
+		C419EDDB19B9863700AD9D5E /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A713E4FE3E0077C5A5 /* PancakePuzzle.cpp */; };
+		C419EDDC19B9863700AD9D5E /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A913E4FE3E0077C5A5 /* PermutationPuzzleEnvironment.cpp */; };
+		C419EDDD19B9863700AD9D5E /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AB13E4FE3E0077C5A5 /* RoboticArm.cpp */; };
+		C419EDDE19B9863700AD9D5E /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
+		C419EDDF19B9863700AD9D5E /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
+		C419EDE019B9863700AD9D5E /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
+		C419EDE119B9863700AD9D5E /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
+		C419EDE219B9863700AD9D5E /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
+		C419EDE319B9863700AD9D5E /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
+		C419EDE419B9863700AD9D5E /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
+		C419EDE519B9863700AD9D5E /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
+		C419EDE619B9863700AD9D5E /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
+		C419EDE719B9863700AD9D5E /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
+		C419EDE819B9863700AD9D5E /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
+		C419EDE919B9863700AD9D5E /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F813E4FE400077C5A5 /* FunctionApproximator.cpp */; };
+		C419EDEA19B9863700AD9D5E /* GLUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FA13E4FE400077C5A5 /* GLUtil.cpp */; };
+		C419EDEB19B9863700AD9D5E /* LinearRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FC13E4FE400077C5A5 /* LinearRegression.cpp */; };
+		C419EDEC19B9863700AD9D5E /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FE13E4FE400077C5A5 /* Map.cpp */; };
+		C419EDED19B9863700AD9D5E /* MapOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40013E4FE400077C5A5 /* MapOverlay.cpp */; };
+		C419EDEE19B9863700AD9D5E /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40213E4FE400077C5A5 /* Plot2D.cpp */; };
+		C419EDEF19B9863700AD9D5E /* ScenarioLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40413E4FE400077C5A5 /* ScenarioLoader.cpp */; };
+		C419EDF019B9863700AD9D5E /* StatCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40613E4FE400077C5A5 /* StatCollection.cpp */; };
+		C419EDF119B9863700AD9D5E /* StatUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40813E4FE400077C5A5 /* StatUtil.cpp */; };
+		C419EDF219B9863700AD9D5E /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40A13E4FE400077C5A5 /* StringUtils.cpp */; };
+		C419EDF319B9863700AD9D5E /* SwapEndian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40C13E4FE400077C5A5 /* SwapEndian.cpp */; };
+		C419EDF419B9863700AD9D5E /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40E13E4FE400077C5A5 /* Timer.cpp */; };
+		C419EDF519B9863700AD9D5E /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44913E4FE590077C5A5 /* AStarOpenClosed.cpp */; };
+		C419EDF619B9863700AD9D5E /* GenericAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44C13E4FE590077C5A5 /* GenericAStar.cpp */; };
+		C419EDF719B9863700AD9D5E /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44E13E4FE590077C5A5 /* GenericIDAStar.cpp */; };
+		C419EDF819B9863700AD9D5E /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45013E4FE590077C5A5 /* OldSearchEnvironment.cpp */; };
+		C419EDF919B9863700AD9D5E /* OpenClosedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45213E4FE590077C5A5 /* OpenClosedList.cpp */; };
+		C419EDFA19B9863700AD9D5E /* OpenListB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45413E4FE590077C5A5 /* OpenListB.cpp */; };
+		C419EDFB19B9863700AD9D5E /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C419EDFC19B9863700AD9D5E /* ClusterAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45F13E4FF250077C5A5 /* ClusterAbstraction.cpp */; };
+		C419EDFD19B9863700AD9D5E /* GraphAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46113E4FF250077C5A5 /* GraphAbstraction.cpp */; };
+		C419EDFE19B9863700AD9D5E /* LoadedBBAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46313E4FF250077C5A5 /* LoadedBBAbstraction.cpp */; };
+		C419EDFF19B9863700AD9D5E /* LoadedCliqueAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46513E4FF250077C5A5 /* LoadedCliqueAbstraction.cpp */; };
+		C419EE0019B9863700AD9D5E /* MapAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46713E4FF250077C5A5 /* MapAbstraction.cpp */; };
+		C419EE0119B9863700AD9D5E /* MapCliqueAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46913E4FF250077C5A5 /* MapCliqueAbstraction.cpp */; };
+		C419EE0219B9863700AD9D5E /* MapFlatAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46B13E4FF250077C5A5 /* MapFlatAbstraction.cpp */; };
+		C419EE0319B9863700AD9D5E /* MapLineAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46D13E4FF250077C5A5 /* MapLineAbstraction.cpp */; };
+		C419EE0419B9863700AD9D5E /* MapProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46F13E4FF250077C5A5 /* MapProvider.cpp */; };
+		C419EE0519B9863700AD9D5E /* MapSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F47113E4FF250077C5A5 /* MapSectorAbstraction.cpp */; };
+		C419EE0619B9863700AD9D5E /* NodeLimitAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F47313E4FF250077C5A5 /* NodeLimitAbstraction.cpp */; };
+		C419EE0719B9863700AD9D5E /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F47513E4FF250077C5A5 /* RadiusAbstraction.cpp */; };
+		C419EE0819B9863700AD9D5E /* Width.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F47713E4FF250077C5A5 /* Width.cpp */; };
+		C419EE0919B9863700AD9D5E /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48813E4FF610077C5A5 /* AStarDelay.cpp */; };
+		C419EE0A19B9863700AD9D5E /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48A13E4FF610077C5A5 /* FloydWarshall.cpp */; };
+		C419EE0B19B9863700AD9D5E /* GraphAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48C13E4FF610077C5A5 /* GraphAlgorithm.cpp */; };
+		C419EE0C19B9863700AD9D5E /* Heap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48E13E4FF610077C5A5 /* Heap.cpp */; };
+		C419EE0D19B9863700AD9D5E /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49013E4FF610077C5A5 /* MeroB.cpp */; };
+		C419EE0E19B9863700AD9D5E /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49213E4FF610077C5A5 /* Path.cpp */; };
+		C419EE0F19B9863700AD9D5E /* Propagation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49413E4FF610077C5A5 /* Propagation.cpp */; };
+		C419EE1019B9863700AD9D5E /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4AB13E4FF940077C5A5 /* MapUnit.cpp */; };
+		C419EE1119B9863700AD9D5E /* RandomUnits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4AD13E4FF940077C5A5 /* RandomUnits.cpp */; };
+		C419EE1219B9863700AD9D5E /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4AF13E4FF940077C5A5 /* RHRUnit.cpp */; };
+		C419EE1319B9863700AD9D5E /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4BB13E500100077C5A5 /* AbsMapPatrolUnit.cpp */; };
+		C419EE1419B9863700AD9D5E /* AbsMapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4BD13E500100077C5A5 /* AbsMapUnit.cpp */; };
+		C419EE1519B9863700AD9D5E /* AbsMapUnitGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4BF13E500100077C5A5 /* AbsMapUnitGroup.cpp */; };
+		C419EE1619B9863700AD9D5E /* AStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4C213E500100077C5A5 /* AStar.cpp */; };
+		C419EE1719B9863700AD9D5E /* AStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4C413E500100077C5A5 /* AStar2.cpp */; };
+		C419EE1819B9863700AD9D5E /* AStar3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4C613E500100077C5A5 /* AStar3.cpp */; };
+		C419EE1919B9863700AD9D5E /* CFOptimalRefinement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4C813E500100077C5A5 /* CFOptimalRefinement.cpp */; };
+		C419EE1A19B9863700AD9D5E /* CorridorAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4CA13E500100077C5A5 /* CorridorAStar.cpp */; };
+		C419EE1B19B9863700AD9D5E /* CRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4CC13E500100077C5A5 /* CRAStar.cpp */; };
+		C419EE1C19B9863700AD9D5E /* FringeSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4CE13E500100077C5A5 /* FringeSearch.cpp */; };
+		C419EE1D19B9863700AD9D5E /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C419EDC219B9225700AD9D5E /* TopSpin.cpp */; };
+		C419EE1E19B9863700AD9D5E /* HPAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D013E500100077C5A5 /* HPAStar.cpp */; };
+		C419EE1F19B9863700AD9D5E /* IRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D213E500100077C5A5 /* IRAStar.cpp */; };
+		C419EE2019B9863700AD9D5E /* IRDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D413E500100077C5A5 /* IRDijkstra.cpp */; };
+		C419EE2119B9863700AD9D5E /* PRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D613E500100077C5A5 /* PRAStar.cpp */; };
+		C419EE2219B9863700AD9D5E /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D813E500100077C5A5 /* PRAStar2.cpp */; };
+		C419EE2319B9863700AD9D5E /* SearchAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4DA13E500100077C5A5 /* SearchAlgorithm.cpp */; };
+		C419EE2419B9863700AD9D5E /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C419EE2519B9863700AD9D5E /* SpreadExecSearchAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4DE13E500100077C5A5 /* SpreadExecSearchAlgorithm.cpp */; };
+		C419EE2619B9863700AD9D5E /* SpreadPRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4E013E500100077C5A5 /* SpreadPRAStar.cpp */; };
+		C419EE2719B9863700AD9D5E /* SimpleHierarchicalAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4DC13E500100077C5A5 /* SimpleHierarchicalAStar.cpp */; };
+		C419EE2819B9863700AD9D5E /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B9740A1426FADE00758D0D /* NQueens.cpp */; };
+		C419EE2A19B9863700AD9D5E /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4764035191751EC0052CBE7 /* MinBloom.cpp */; };
+		C419EE2B19B9863700AD9D5E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
+		C419EE2C19B9863700AD9D5E /* Map2DConstrainedEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C402ED9C15CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp */; };
+		C419EE2D19B9863700AD9D5E /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
+		C419EE2E19B9863700AD9D5E /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */; };
+		C419EE2F19B9863700AD9D5E /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; };
+		C419EE3019B9863700AD9D5E /* RubiksCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735E8171135E900E2A10B /* RubiksCube.cpp */; };
+		C419EE3119B9863700AD9D5E /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735FF17132CA600E2A10B /* FourBitArray.cpp */; };
+		C419EE3219B9863700AD9D5E /* DiskBitFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4673650171CED0600E2A10B /* DiskBitFile.cpp */; };
+		C419EE3319B9863700AD9D5E /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4673652171CED0600E2A10B /* EnvUtil.cpp */; };
+		C419EE3419B9863700AD9D5E /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
+		C419EE3519B9863700AD9D5E /* MMapUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40EB696180CC661001E1E25 /* MMapUtil.cpp */; };
+		C419EE3719B9863700AD9D5E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F9F33313E4FCF70077C5A5 /* Cocoa.framework */; };
+		C419EE3819B9863700AD9D5E /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F9F34E13E4FD360077C5A5 /* GLUT.framework */; };
+		C419EE3919B9863700AD9D5E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F9F34F13E4FD360077C5A5 /* OpenGL.framework */; };
+		C419EE3B19B9863700AD9D5E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F33C13E4FCF70077C5A5 /* InfoPlist.strings */; };
+		C419EE3C19B9863700AD9D5E /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34213E4FCF70077C5A5 /* Credits.rtf */; };
+		C419EE3D19B9863700AD9D5E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
+		C419EE4619B9868E00AD9D5E /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C419EE4419B9868E00AD9D5E /* Driver.cpp */; };
+		C431A18919212B5D00D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A18A19212B5E00D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A18B19212B5F00D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A18C19212B5F00D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A18D19212B6000D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A18E19212B6000D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A18F19212B6100D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A19119212B6200D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A19219212B6200D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A19319212B6300D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A19519212B6400D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C431A19619212B6400D3CC38 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C43816F3140C395B007BA75B /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C43816F4140C395B007BA75B /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
 		C43816F5140C395B007BA75B /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F37413E4FDBB0077C5A5 /* TextBox.cpp */; };
@@ -169,12 +297,11 @@
 		C4381708140C395B007BA75B /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4381709140C395B007BA75B /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C438170A140C395B007BA75B /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C438170B140C395B007BA75B /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C438170B140C395B007BA75B /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C438170C140C395B007BA75B /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C438170D140C395B007BA75B /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C438170E140C395B007BA75B /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C438170F140C395B007BA75B /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4381710140C395B007BA75B /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4381711140C395B007BA75B /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4381719140C395B007BA75B /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C438171A140C395B007BA75B /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -273,12 +400,11 @@
 		C447F561146790A600D6D581 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C447F562146790A600D6D581 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C447F563146790A600D6D581 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C447F564146790A600D6D581 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C447F564146790A600D6D581 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C447F565146790A600D6D581 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C447F566146790A600D6D581 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C447F567146790A600D6D581 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C447F568146790A600D6D581 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C447F569146790A600D6D581 /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C447F56A146790A600D6D581 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C447F571146790A600D6D581 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C447F572146790A600D6D581 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -352,7 +478,6 @@
 		C447F5C5146790FC00D6D581 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8B3143277BB0053D322 /* Sample.cpp */; };
 		C447F5C61467910100D6D581 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C447F5481467909200D6D581 /* Sample.cpp */; };
 		C447F5CA146843F200D6D581 /* NN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C447F5C7146843A600D6D581 /* NN.cpp */; };
-		C4532CAA18D81C33001899B8 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C454CDBE15060139005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C454CDBF1506013A005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C454CDC01506013B005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
@@ -386,12 +511,11 @@
 		C467358B1710D9EF00E2A10B /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C467358C1710D9EF00E2A10B /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C467358D1710D9EF00E2A10B /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C467358E1710D9EF00E2A10B /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C467358E1710D9EF00E2A10B /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C467358F1710D9EF00E2A10B /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C46735901710D9EF00E2A10B /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C46735911710D9EF00E2A10B /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C46735921710D9EF00E2A10B /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C46735931710D9EF00E2A10B /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C46735941710D9EF00E2A10B /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C46735951710D9EF00E2A10B /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C46735961710D9EF00E2A10B /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -568,12 +692,11 @@
 		C47BDBE517440B5900DD0928 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C47BDBE617440B5900DD0928 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C47BDBE717440B5900DD0928 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C47BDBE817440B5900DD0928 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C47BDBE817440B5900DD0928 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C47BDBE917440B5900DD0928 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C47BDBEA17440B5900DD0928 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C47BDBEB17440B5900DD0928 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C47BDBEC17440B5900DD0928 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C47BDBED17440B5900DD0928 /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C47BDBEE17440B5900DD0928 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C47BDBEF17440B5900DD0928 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C47BDBF017440B5900DD0928 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -690,12 +813,11 @@
 		C498D84F1432777C0053D322 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C498D8501432777C0053D322 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C498D8511432777C0053D322 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C498D8521432777C0053D322 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C498D8521432777C0053D322 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C498D8531432777C0053D322 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C498D8541432777C0053D322 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C498D8551432777C0053D322 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C498D8561432777C0053D322 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C498D8571432777C0053D322 /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C498D8581432777C0053D322 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C498D85F1432777C0053D322 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C498D8601432777C0053D322 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -791,12 +913,11 @@
 		C49A6F821499BF41007CEDA2 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C49A6F831499BF41007CEDA2 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C49A6F841499BF41007CEDA2 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C49A6F851499BF41007CEDA2 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C49A6F851499BF41007CEDA2 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C49A6F861499BF41007CEDA2 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C49A6F871499BF41007CEDA2 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C49A6F881499BF41007CEDA2 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C49A6F891499BF41007CEDA2 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C49A6F8A1499BF41007CEDA2 /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C49A6F8B1499BF41007CEDA2 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C49A6F921499BF41007CEDA2 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C49A6F931499BF41007CEDA2 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -894,12 +1015,11 @@
 		C4A79E1013F03A580064AC6A /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4A79E1113F03A580064AC6A /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4A79E1213F03A580064AC6A /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4A79E1313F03A580064AC6A /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4A79E1313F03A580064AC6A /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4A79E1413F03A580064AC6A /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4A79E1513F03A580064AC6A /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4A79E1613F03A580064AC6A /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4A79E1713F03A580064AC6A /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4A79E1813F03A580064AC6A /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4A79E1913F03A580064AC6A /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4A79E2113F03A580064AC6A /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4A79E2213F03A580064AC6A /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -994,12 +1114,11 @@
 		C4A79E9713F256DF0064AC6A /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4A79E9813F256DF0064AC6A /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4A79E9913F256DF0064AC6A /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4A79E9A13F256DF0064AC6A /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4A79E9A13F256DF0064AC6A /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4A79E9B13F256DF0064AC6A /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4A79E9C13F256DF0064AC6A /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4A79E9D13F256DF0064AC6A /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4A79E9E13F256DF0064AC6A /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4A79E9F13F256DF0064AC6A /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4A79EA013F256DF0064AC6A /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4A79EA813F256DF0064AC6A /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4A79EA913F256DF0064AC6A /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -1070,6 +1189,22 @@
 		C4A79EF213F256DF0064AC6A /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34213E4FCF70077C5A5 /* Credits.rtf */; };
 		C4A79EF313F256DF0064AC6A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
 		C4A79EFC13F257370064AC6A /* RoboticArmTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A79EFA13F257370064AC6A /* RoboticArmTest.cpp */; };
+		C4B1DD4B192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD4C192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD4D192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD4E192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD4F192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD50192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD52192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD53192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD54192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD55192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD56192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD58192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD59192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD5A192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD5B19359BB60039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B1DD5C19359BB80039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
 		C4B973881426FA4F00758D0D /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C4B973891426FA4F00758D0D /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
 		C4B9738A1426FA4F00758D0D /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F37413E4FDBB0077C5A5 /* TextBox.cpp */; };
@@ -1094,12 +1229,11 @@
 		C4B9739D1426FA4F00758D0D /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4B9739E1426FA4F00758D0D /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4B9739F1426FA4F00758D0D /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4B973A01426FA4F00758D0D /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4B973A01426FA4F00758D0D /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4B973A11426FA4F00758D0D /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4B973A21426FA4F00758D0D /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4B973A31426FA4F00758D0D /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4B973A41426FA4F00758D0D /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4B973A51426FA4F00758D0D /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4B973A61426FA4F00758D0D /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4B973AE1426FA4F00758D0D /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4B973AF1426FA4F00758D0D /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -1200,14 +1334,11 @@
 		C4C5C37118E9439200915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37218E9439200915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37318E9439300915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
-		C4C5C37418E9439300915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37518E9439400915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
-		C4C5C37618E9439400915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37718E9439500915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37818E9439600915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37918E9439700915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37A18E9439700915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
-		C4C5C37B18E9439800915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37C18E9439800915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37F18EC7C9D00915B3D /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C4C5C38018EC7C9D00915B3D /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
@@ -1233,7 +1364,7 @@
 		C4C5C39418EC7C9D00915B3D /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4C5C39518EC7C9D00915B3D /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4C5C39618EC7C9D00915B3D /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4C5C39718EC7C9D00915B3D /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4C5C39718EC7C9D00915B3D /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4C5C39818EC7C9D00915B3D /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4C5C39918EC7C9D00915B3D /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4C5C39A18EC7C9D00915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
@@ -1348,12 +1479,11 @@
 		C4C9E4D9176A7A160027410C /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4C9E4DA176A7A160027410C /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4C9E4DB176A7A160027410C /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4C9E4DC176A7A160027410C /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4C9E4DC176A7A160027410C /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4C9E4DD176A7A160027410C /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4C9E4DE176A7A160027410C /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4C9E4DF176A7A160027410C /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4C9E4E0176A7A160027410C /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4C9E4E1176A7A160027410C /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4C9E4E2176A7A160027410C /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4C9E4E3176A7A160027410C /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4C9E4E4176A7A160027410C /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -1460,12 +1590,11 @@
 		C4D60A6A14B22E10007594CD /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4D60A6B14B22E10007594CD /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4D60A6C14B22E10007594CD /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4D60A6D14B22E10007594CD /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4D60A6D14B22E10007594CD /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4D60A6E14B22E10007594CD /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4D60A6F14B22E10007594CD /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4D60A7014B22E10007594CD /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4D60A7114B22E10007594CD /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4D60A7214B22E10007594CD /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4D60A7314B22E10007594CD /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4D60A7A14B22E10007594CD /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4D60A7B14B22E10007594CD /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -1577,12 +1706,11 @@
 		C4EE61231651BB9A00B038E5 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4EE61241651BB9A00B038E5 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4EE61251651BB9A00B038E5 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4EE61261651BB9A00B038E5 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4EE61261651BB9A00B038E5 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4EE61271651BB9A00B038E5 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4EE61281651BB9A00B038E5 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4EE61291651BB9A00B038E5 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4EE612A1651BB9A00B038E5 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4EE612B1651BB9A00B038E5 /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4EE612C1651BB9A00B038E5 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4EE612D1651BB9A00B038E5 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4EE612E1651BB9A00B038E5 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -1688,12 +1816,11 @@
 		C4F9F42213E4FE400077C5A5 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4F9F42313E4FE400077C5A5 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4F9F42413E4FE400077C5A5 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4F9F42513E4FE400077C5A5 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4F9F42513E4FE400077C5A5 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4F9F42613E4FE400077C5A5 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4F9F42713E4FE400077C5A5 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4F9F42813E4FE400077C5A5 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4F9F42913E4FE400077C5A5 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4F9F42A13E4FE400077C5A5 /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4F9F42B13E4FE400077C5A5 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4F9F43A13E4FE400077C5A5 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4F9F43B13E4FE400077C5A5 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -1780,12 +1907,11 @@
 		C4FBC85316374C89003C667D /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
 		C4FBC85416374C89003C667D /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
 		C4FBC85516374C89003C667D /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
-		C4FBC85616374C89003C667D /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */; };
+		C4FBC85616374C89003C667D /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
 		C4FBC85716374C89003C667D /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
 		C4FBC85816374C89003C667D /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
 		C4FBC85916374C89003C667D /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
 		C4FBC85A16374C89003C667D /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
-		C4FBC85B16374C89003C667D /* ContractionHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3CE13E4FE3F0077C5A5 /* ContractionHierarchy.cpp */; };
 		C4FBC85C16374C89003C667D /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
 		C4FBC85D16374C89003C667D /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C4FBC85E16374C89003C667D /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
@@ -1874,6 +2000,12 @@
 		C4146DDC1830F66200745331 /* mc-movement-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "mc-movement-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/mc-movement-Info.plist"; sourceTree = "<absolute>"; };
 		C4146DDE1830F6F700745331 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4146DDF1830F6F700745331 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
+		C419EDC219B9225700AD9D5E /* TopSpin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TopSpin.cpp; sourceTree = "<group>"; };
+		C419EDC319B9225700AD9D5E /* TopSpin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopSpin.h; sourceTree = "<group>"; };
+		C419EE4119B9863700AD9D5E /* puzzleSample copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "puzzleSample copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C419EE4219B9863900AD9D5E /* puzzleSample copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "puzzleSample copy2-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/puzzleSample copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C419EE4419B9868E00AD9D5E /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
+		C419EE4519B9868E00AD9D5E /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4381769140C395B007BA75B /* flocking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = flocking.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C438176D140C39AE007BA75B /* AlignUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AlignUnit.cpp; sourceTree = "<group>"; };
 		C438176E140C39AE007BA75B /* AlignUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlignUnit.h; sourceTree = "<group>"; };
@@ -1889,8 +2021,8 @@
 		C447F5491467909200D6D581 /* Sample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		C447F5C2146790A600D6D581 /* Supervised Learning.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Supervised Learning.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C447F5C4146790A700D6D581 /* MAPF copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MAPF copy-Info.plist"; sourceTree = SOURCE_ROOT; };
-		C447F5C7146843A600D6D581 /* NN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NN.cpp; path = ../../games/utils/NN.cpp; sourceTree = "<group>"; };
-		C447F5C8146843A600D6D581 /* NN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NN.h; path = ../../games/utils/NN.h; sourceTree = "<group>"; };
+		C447F5C7146843A600D6D581 /* NN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NN.cpp; sourceTree = "<group>"; };
+		C447F5C8146843A600D6D581 /* NN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NN.h; sourceTree = "<group>"; };
 		C454CD7A14FD78BB005DDC8E /* MPLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPLRTAStar.h; sourceTree = "<group>"; };
 		C4625E76177B5CE200D1C8F7 /* TextOverlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextOverlay.cpp; sourceTree = "<group>"; };
 		C4625E77177B5CE200D1C8F7 /* TextOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextOverlay.h; sourceTree = "<group>"; };
@@ -1940,6 +2072,8 @@
 		C4A79EF713F256DF0064AC6A /* Robotic Arm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Robotic Arm.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4A79EFA13F257370064AC6A /* RoboticArmTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RoboticArmTest.cpp; sourceTree = "<group>"; };
 		C4A79EFB13F257370064AC6A /* RoboticArmTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoboticArmTest.h; sourceTree = "<group>"; };
+		C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LogisticRegression.cpp; sourceTree = "<group>"; };
+		C4B1DD4A192A75710039A6DF /* LogisticRegression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogisticRegression.h; sourceTree = "<group>"; };
 		C4B974021426FA4F00758D0D /* localsearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = localsearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4B974061426FA9C00758D0D /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C4B974071426FA9C00758D0D /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
@@ -2041,8 +2175,8 @@
 		C4F9F3B013E4FE3E0077C5A5 /* SFBDPancakePuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFBDPancakePuzzle.h; sourceTree = "<group>"; };
 		C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SteeringEnvironment.cpp; sourceTree = "<group>"; };
 		C4F9F3B213E4FE3E0077C5A5 /* SteeringEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SteeringEnvironment.h; sourceTree = "<group>"; };
-		C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TopSpin.cpp; sourceTree = "<group>"; };
-		C4F9F3B413E4FE3E0077C5A5 /* TopSpin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopSpin.h; sourceTree = "<group>"; };
+		C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TopSpinGraph.cpp; sourceTree = "<group>"; };
+		C4F9F3B413E4FE3E0077C5A5 /* TopSpinGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopSpinGraph.h; sourceTree = "<group>"; };
 		C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WeightedMap2DEnvironment.cpp; sourceTree = "<group>"; };
 		C4F9F3B613E4FE3E0077C5A5 /* WeightedMap2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeightedMap2DEnvironment.h; sourceTree = "<group>"; };
 		C4F9F3B813E4FE3E0077C5A5 /* AbstractWeightedSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractWeightedSearchAlgorithm.h; sourceTree = "<group>"; };
@@ -2225,6 +2359,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C419EE3619B9863700AD9D5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C419EE3719B9863700AD9D5E /* Cocoa.framework in Frameworks */,
+				C419EE3819B9863700AD9D5E /* GLUT.framework in Frameworks */,
+				C419EE3919B9863700AD9D5E /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C438175E140C395B007BA75B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -2388,6 +2532,16 @@
 			path = "../mc-movement";
 			sourceTree = "<group>";
 		};
+		C419EE4319B9868E00AD9D5E /* topspin */ = {
+			isa = PBXGroup;
+			children = (
+				C419EE4419B9868E00AD9D5E /* Driver.cpp */,
+				C419EE4519B9868E00AD9D5E /* Driver.h */,
+			);
+			name = topspin;
+			path = ../topspin;
+			sourceTree = "<group>";
+		};
 		C438176C140C39AE007BA75B /* simpleMovement */ = {
 			isa = PBXGroup;
 			children = (
@@ -2439,6 +2593,7 @@
 		C498D837143276E50053D322 /* apps */ = {
 			isa = PBXGroup;
 			children = (
+				C419EE4319B9868E00AD9D5E /* topspin */,
 				C4146DDD1830F6F700745331 /* mc-movement */,
 				C4C9E53A176A7AB20027410C /* directional */,
 				C47BDC4617440BBF00DD0928 /* fling */,
@@ -2576,6 +2731,7 @@
 				C4C9E539176A7A180027410C /* directional-Info.plist */,
 				C4146DDC1830F66200745331 /* mc-movement-Info.plist */,
 				C4C5C3F718EC7CA000915B3D /* localsearch copy-Info.plist */,
+				C419EE4219B9863900AD9D5E /* puzzleSample copy2-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2598,6 +2754,7 @@
 				C4C9E538176A7A160027410C /* directional.app */,
 				C4146DDB1830F66100745331 /* mc-movement.app */,
 				C4C5C3F618EC7C9D00915B3D /* ga.app */,
+				C419EE4119B9863700AD9D5E /* puzzleSample copy.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2728,8 +2885,10 @@
 				C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */,
 				C4F9F3B213E4FE3E0077C5A5 /* SteeringEnvironment.h */,
 				C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */,
-				C4F9F3B313E4FE3E0077C5A5 /* TopSpin.cpp */,
-				C4F9F3B413E4FE3E0077C5A5 /* TopSpin.h */,
+				C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */,
+				C4F9F3B413E4FE3E0077C5A5 /* TopSpinGraph.h */,
+				C419EDC219B9225700AD9D5E /* TopSpin.cpp */,
+				C419EDC319B9225700AD9D5E /* TopSpin.h */,
 				C4F9F3B613E4FE3E0077C5A5 /* WeightedMap2DEnvironment.h */,
 				C4B9740A1426FADE00758D0D /* NQueens.cpp */,
 				C4B9740B1426FADE00758D0D /* NQueens.h */,
@@ -2819,6 +2978,8 @@
 				C4673653171CED0600E2A10B /* EnvUtil.h */,
 				C447F5C7146843A600D6D581 /* NN.cpp */,
 				C447F5C8146843A600D6D581 /* NN.h */,
+				C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */,
+				C4B1DD4A192A75710039A6DF /* LogisticRegression.h */,
 				C498D8DC1444F0550053D322 /* BitMap.cpp */,
 				C498D8DD1444F0550053D322 /* BitMap.h */,
 				C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */,
@@ -3060,6 +3221,23 @@
 			name = "mc-movement";
 			productName = "3d maps";
 			productReference = C4146DDB1830F66100745331 /* mc-movement.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C419EDC619B9863700AD9D5E /* TopSpin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C419EE3E19B9863700AD9D5E /* Build configuration list for PBXNativeTarget "TopSpin" */;
+			buildPhases = (
+				C419EDC719B9863700AD9D5E /* Sources */,
+				C419EE3619B9863700AD9D5E /* Frameworks */,
+				C419EE3A19B9863700AD9D5E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TopSpin;
+			productName = "3d maps";
+			productReference = C419EE4119B9863700AD9D5E /* puzzleSample copy.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C43816F1140C395B007BA75B /* flocking */ = {
@@ -3354,6 +3532,7 @@
 				C4C9E4C2176A7A160027410C /* directional movement */,
 				C4146D621830F66100745331 /* mc-movement */,
 				C4C5C37D18EC7C9D00915B3D /* ga */,
+				C419EDC619B9863700AD9D5E /* TopSpin */,
 			);
 		};
 /* End PBXProject section */
@@ -3366,6 +3545,16 @@
 				C4146DD51830F66100745331 /* InfoPlist.strings in Resources */,
 				C4146DD61830F66100745331 /* Credits.rtf in Resources */,
 				C4146DD71830F66100745331 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C419EE3A19B9863700AD9D5E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C419EE3B19B9863700AD9D5E /* InfoPlist.strings in Resources */,
+				C419EE3C19B9863700AD9D5E /* Credits.rtf in Resources */,
+				C419EE3D19B9863700AD9D5E /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3550,13 +3739,14 @@
 				C4146D791830F66100745331 /* SequenceAlignment.cpp in Sources */,
 				C4146D7A1830F66100745331 /* SFBDPancakePuzzle.cpp in Sources */,
 				C4146D7B1830F66100745331 /* SteeringEnvironment.cpp in Sources */,
-				C4146D7C1830F66100745331 /* TopSpin.cpp in Sources */,
+				C4146D7C1830F66100745331 /* TopSpinGraph.cpp in Sources */,
 				C4146D7D1830F66100745331 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4146D7E1830F66100745331 /* GraphCheck.cpp in Sources */,
+				C431A18A19212B5E00D3CC38 /* Bloom.cpp in Sources */,
 				C4146D7F1830F66100745331 /* IDAStar.cpp in Sources */,
 				C4146D801830F66100745331 /* RandomUnit.cpp in Sources */,
-				C4146D811830F66100745331 /* ContractionHierarchy.cpp in Sources */,
 				C4146D821830F66100745331 /* Graph.cpp in Sources */,
+				C4B1DD59192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4146D831830F66100745331 /* BitVector.cpp in Sources */,
 				C4146D841830F66100745331 /* FPUtil.cpp in Sources */,
 				C4146D851830F66100745331 /* FunctionApproximator.cpp in Sources */,
@@ -3639,6 +3829,123 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C419EDC719B9863700AD9D5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C419EDC819B9863700AD9D5E /* Common.cpp in Sources */,
+				C419EDC919B9863700AD9D5E /* Bloom.cpp in Sources */,
+				C419EDCA19B9863700AD9D5E /* GLUThog.cpp in Sources */,
+				C419EDCB19B9863700AD9D5E /* TextBox.cpp in Sources */,
+				C419EDCC19B9863700AD9D5E /* Trackball.cpp in Sources */,
+				C419EDCD19B9863700AD9D5E /* BurnedPancakePuzzle.cpp in Sources */,
+				C419EDCE19B9863700AD9D5E /* ConfigEnvironment.cpp in Sources */,
+				C419EDCF19B9863700AD9D5E /* Directional2DEnvironment.cpp in Sources */,
+				C419EDD019B9863700AD9D5E /* Fling.cpp in Sources */,
+				C419EDD119B9863700AD9D5E /* FlipSide.cpp in Sources */,
+				C419EDD219B9863700AD9D5E /* GraphEnvironment.cpp in Sources */,
+				C419EDD319B9863700AD9D5E /* GraphRefinementEnvironment.cpp in Sources */,
+				C419EDD419B9863700AD9D5E /* Map2DEnvironment.cpp in Sources */,
+				C419EDD519B9863700AD9D5E /* Map3DGrid.cpp in Sources */,
+				C419EDD619B9863700AD9D5E /* MinimalSectorAbstraction.cpp in Sources */,
+				C419EDD719B9863700AD9D5E /* MNAgentPuzzle.cpp in Sources */,
+				C419EDD819B9863700AD9D5E /* MNPuzzle.cpp in Sources */,
+				C419EDD919B9863700AD9D5E /* MountainCar.cpp in Sources */,
+				C419EDDA19B9863700AD9D5E /* NaryTree.cpp in Sources */,
+				C419EDDB19B9863700AD9D5E /* PancakePuzzle.cpp in Sources */,
+				C419EDDC19B9863700AD9D5E /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C419EDDD19B9863700AD9D5E /* RoboticArm.cpp in Sources */,
+				C419EDDE19B9863700AD9D5E /* SequenceAlignment.cpp in Sources */,
+				C419EDDF19B9863700AD9D5E /* SFBDPancakePuzzle.cpp in Sources */,
+				C419EDE019B9863700AD9D5E /* SteeringEnvironment.cpp in Sources */,
+				C419EDE119B9863700AD9D5E /* TopSpinGraph.cpp in Sources */,
+				C419EDE219B9863700AD9D5E /* WeightedMap2DEnvironment.cpp in Sources */,
+				C419EDE319B9863700AD9D5E /* GraphCheck.cpp in Sources */,
+				C419EDE419B9863700AD9D5E /* IDAStar.cpp in Sources */,
+				C419EDE519B9863700AD9D5E /* RandomUnit.cpp in Sources */,
+				C419EDE619B9863700AD9D5E /* Graph.cpp in Sources */,
+				C419EDE719B9863700AD9D5E /* BitVector.cpp in Sources */,
+				C419EDE819B9863700AD9D5E /* FPUtil.cpp in Sources */,
+				C419EDE919B9863700AD9D5E /* FunctionApproximator.cpp in Sources */,
+				C419EDEA19B9863700AD9D5E /* GLUtil.cpp in Sources */,
+				C419EDEB19B9863700AD9D5E /* LinearRegression.cpp in Sources */,
+				C419EDEC19B9863700AD9D5E /* Map.cpp in Sources */,
+				C419EDED19B9863700AD9D5E /* MapOverlay.cpp in Sources */,
+				C419EDEE19B9863700AD9D5E /* Plot2D.cpp in Sources */,
+				C419EDEF19B9863700AD9D5E /* ScenarioLoader.cpp in Sources */,
+				C419EDF019B9863700AD9D5E /* StatCollection.cpp in Sources */,
+				C419EDF119B9863700AD9D5E /* StatUtil.cpp in Sources */,
+				C419EDF219B9863700AD9D5E /* StringUtils.cpp in Sources */,
+				C419EDF319B9863700AD9D5E /* SwapEndian.cpp in Sources */,
+				C419EDF419B9863700AD9D5E /* Timer.cpp in Sources */,
+				C419EDF519B9863700AD9D5E /* AStarOpenClosed.cpp in Sources */,
+				C419EDF619B9863700AD9D5E /* GenericAStar.cpp in Sources */,
+				C419EDF719B9863700AD9D5E /* GenericIDAStar.cpp in Sources */,
+				C419EDF819B9863700AD9D5E /* OldSearchEnvironment.cpp in Sources */,
+				C419EDF919B9863700AD9D5E /* OpenClosedList.cpp in Sources */,
+				C419EDFA19B9863700AD9D5E /* OpenListB.cpp in Sources */,
+				C419EDFB19B9863700AD9D5E /* LogisticRegression.cpp in Sources */,
+				C419EDFC19B9863700AD9D5E /* ClusterAbstraction.cpp in Sources */,
+				C419EDFD19B9863700AD9D5E /* GraphAbstraction.cpp in Sources */,
+				C419EE4619B9868E00AD9D5E /* Driver.cpp in Sources */,
+				C419EDFE19B9863700AD9D5E /* LoadedBBAbstraction.cpp in Sources */,
+				C419EDFF19B9863700AD9D5E /* LoadedCliqueAbstraction.cpp in Sources */,
+				C419EE0019B9863700AD9D5E /* MapAbstraction.cpp in Sources */,
+				C419EE0119B9863700AD9D5E /* MapCliqueAbstraction.cpp in Sources */,
+				C419EE0219B9863700AD9D5E /* MapFlatAbstraction.cpp in Sources */,
+				C419EE0319B9863700AD9D5E /* MapLineAbstraction.cpp in Sources */,
+				C419EE0419B9863700AD9D5E /* MapProvider.cpp in Sources */,
+				C419EE0519B9863700AD9D5E /* MapSectorAbstraction.cpp in Sources */,
+				C419EE0619B9863700AD9D5E /* NodeLimitAbstraction.cpp in Sources */,
+				C419EE0719B9863700AD9D5E /* RadiusAbstraction.cpp in Sources */,
+				C419EE0819B9863700AD9D5E /* Width.cpp in Sources */,
+				C419EE0919B9863700AD9D5E /* AStarDelay.cpp in Sources */,
+				C419EE0A19B9863700AD9D5E /* FloydWarshall.cpp in Sources */,
+				C419EE0B19B9863700AD9D5E /* GraphAlgorithm.cpp in Sources */,
+				C419EE0C19B9863700AD9D5E /* Heap.cpp in Sources */,
+				C419EE0D19B9863700AD9D5E /* MeroB.cpp in Sources */,
+				C419EE0E19B9863700AD9D5E /* Path.cpp in Sources */,
+				C419EE0F19B9863700AD9D5E /* Propagation.cpp in Sources */,
+				C419EE1019B9863700AD9D5E /* MapUnit.cpp in Sources */,
+				C419EE1119B9863700AD9D5E /* RandomUnits.cpp in Sources */,
+				C419EE1219B9863700AD9D5E /* RHRUnit.cpp in Sources */,
+				C419EE1319B9863700AD9D5E /* AbsMapPatrolUnit.cpp in Sources */,
+				C419EE1419B9863700AD9D5E /* AbsMapUnit.cpp in Sources */,
+				C419EE1519B9863700AD9D5E /* AbsMapUnitGroup.cpp in Sources */,
+				C419EE1619B9863700AD9D5E /* AStar.cpp in Sources */,
+				C419EE1719B9863700AD9D5E /* AStar2.cpp in Sources */,
+				C419EE1819B9863700AD9D5E /* AStar3.cpp in Sources */,
+				C419EE1919B9863700AD9D5E /* CFOptimalRefinement.cpp in Sources */,
+				C419EE1A19B9863700AD9D5E /* CorridorAStar.cpp in Sources */,
+				C419EE1B19B9863700AD9D5E /* CRAStar.cpp in Sources */,
+				C419EE1C19B9863700AD9D5E /* FringeSearch.cpp in Sources */,
+				C419EE1D19B9863700AD9D5E /* TopSpin.cpp in Sources */,
+				C419EE1E19B9863700AD9D5E /* HPAStar.cpp in Sources */,
+				C419EE1F19B9863700AD9D5E /* IRAStar.cpp in Sources */,
+				C419EE2019B9863700AD9D5E /* IRDijkstra.cpp in Sources */,
+				C419EE2119B9863700AD9D5E /* PRAStar.cpp in Sources */,
+				C419EE2219B9863700AD9D5E /* PRAStar2.cpp in Sources */,
+				C419EE2319B9863700AD9D5E /* SearchAlgorithm.cpp in Sources */,
+				C419EE2419B9863700AD9D5E /* MapGenerators.cpp in Sources */,
+				C419EE2519B9863700AD9D5E /* SpreadExecSearchAlgorithm.cpp in Sources */,
+				C419EE2619B9863700AD9D5E /* SpreadPRAStar.cpp in Sources */,
+				C419EE2719B9863700AD9D5E /* SimpleHierarchicalAStar.cpp in Sources */,
+				C419EE2819B9863700AD9D5E /* NQueens.cpp in Sources */,
+				C419EE2A19B9863700AD9D5E /* MinBloom.cpp in Sources */,
+				C419EE2B19B9863700AD9D5E /* BitMap.cpp in Sources */,
+				C419EE2C19B9863700AD9D5E /* Map2DConstrainedEnvironment.cpp in Sources */,
+				C419EE2D19B9863700AD9D5E /* Map2DHeading.cpp in Sources */,
+				C419EE2E19B9863700AD9D5E /* RubiksCubeEdges.cpp in Sources */,
+				C419EE2F19B9863700AD9D5E /* RubiksCubeCorners.cpp in Sources */,
+				C419EE3019B9863700AD9D5E /* RubiksCube.cpp in Sources */,
+				C419EE3119B9863700AD9D5E /* FourBitArray.cpp in Sources */,
+				C419EE3219B9863700AD9D5E /* DiskBitFile.cpp in Sources */,
+				C419EE3319B9863700AD9D5E /* EnvUtil.cpp in Sources */,
+				C419EE3419B9863700AD9D5E /* RubiksCube7Edges.cpp in Sources */,
+				C419EE3519B9863700AD9D5E /* MMapUtil.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C43816F2140C395B007BA75B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -3667,12 +3974,12 @@
 				C4381708140C395B007BA75B /* SequenceAlignment.cpp in Sources */,
 				C4381709140C395B007BA75B /* SFBDPancakePuzzle.cpp in Sources */,
 				C438170A140C395B007BA75B /* SteeringEnvironment.cpp in Sources */,
-				C438170B140C395B007BA75B /* TopSpin.cpp in Sources */,
+				C438170B140C395B007BA75B /* TopSpinGraph.cpp in Sources */,
 				C438170C140C395B007BA75B /* WeightedMap2DEnvironment.cpp in Sources */,
 				C438170D140C395B007BA75B /* GraphCheck.cpp in Sources */,
+				C431A19319212B6300D3CC38 /* Bloom.cpp in Sources */,
 				C438170E140C395B007BA75B /* IDAStar.cpp in Sources */,
 				C438170F140C395B007BA75B /* RandomUnit.cpp in Sources */,
-				C4381710140C395B007BA75B /* ContractionHierarchy.cpp in Sources */,
 				C4381711140C395B007BA75B /* Graph.cpp in Sources */,
 				C4381719140C395B007BA75B /* BitVector.cpp in Sources */,
 				C438171A140C395B007BA75B /* FPUtil.cpp in Sources */,
@@ -3755,6 +4062,7 @@
 				C4673659171DC55E00E2A10B /* DiskBitFile.cpp in Sources */,
 				C4673668171DC56C00E2A10B /* EnvUtil.cpp in Sources */,
 				C4673673171DC59800E2A10B /* RubiksCube7Edges.cpp in Sources */,
+				C4B1DD4E192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C40EB69A180CC661001E1E25 /* MMapUtil.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3787,12 +4095,12 @@
 				C447F561146790A600D6D581 /* SequenceAlignment.cpp in Sources */,
 				C447F562146790A600D6D581 /* SFBDPancakePuzzle.cpp in Sources */,
 				C447F563146790A600D6D581 /* SteeringEnvironment.cpp in Sources */,
-				C447F564146790A600D6D581 /* TopSpin.cpp in Sources */,
+				C447F564146790A600D6D581 /* TopSpinGraph.cpp in Sources */,
 				C447F565146790A600D6D581 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C447F566146790A600D6D581 /* GraphCheck.cpp in Sources */,
+				C431A18919212B5D00D3CC38 /* Bloom.cpp in Sources */,
 				C447F567146790A600D6D581 /* IDAStar.cpp in Sources */,
 				C447F568146790A600D6D581 /* RandomUnit.cpp in Sources */,
-				C447F569146790A600D6D581 /* ContractionHierarchy.cpp in Sources */,
 				C447F56A146790A600D6D581 /* Graph.cpp in Sources */,
 				C447F571146790A600D6D581 /* BitVector.cpp in Sources */,
 				C447F572146790A600D6D581 /* FPUtil.cpp in Sources */,
@@ -3815,6 +4123,7 @@
 				C447F583146790A600D6D581 /* OpenClosedList.cpp in Sources */,
 				C447F584146790A600D6D581 /* OpenListB.cpp in Sources */,
 				C447F585146790A600D6D581 /* ClusterAbstraction.cpp in Sources */,
+				C4B1DD5B19359BB60039A6DF /* LogisticRegression.cpp in Sources */,
 				C447F586146790A600D6D581 /* GraphAbstraction.cpp in Sources */,
 				C447F587146790A600D6D581 /* LoadedBBAbstraction.cpp in Sources */,
 				C4D83EC618A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
@@ -3844,7 +4153,6 @@
 				C447F5A4146790A600D6D581 /* AbsMapUnitGroup.cpp in Sources */,
 				C447F5A5146790A600D6D581 /* AStar.cpp in Sources */,
 				C447F5A6146790A600D6D581 /* AStar2.cpp in Sources */,
-				C4C5C37618E9439400915B3D /* Bloom.cpp in Sources */,
 				C447F5A7146790A600D6D581 /* AStar3.cpp in Sources */,
 				C447F5A8146790A600D6D581 /* CFOptimalRefinement.cpp in Sources */,
 				C447F5A9146790A600D6D581 /* CorridorAStar.cpp in Sources */,
@@ -3905,12 +4213,11 @@
 				C467358B1710D9EF00E2A10B /* SequenceAlignment.cpp in Sources */,
 				C467358C1710D9EF00E2A10B /* SFBDPancakePuzzle.cpp in Sources */,
 				C467358D1710D9EF00E2A10B /* SteeringEnvironment.cpp in Sources */,
-				C467358E1710D9EF00E2A10B /* TopSpin.cpp in Sources */,
+				C467358E1710D9EF00E2A10B /* TopSpinGraph.cpp in Sources */,
 				C467358F1710D9EF00E2A10B /* WeightedMap2DEnvironment.cpp in Sources */,
 				C46735901710D9EF00E2A10B /* GraphCheck.cpp in Sources */,
 				C46735911710D9EF00E2A10B /* IDAStar.cpp in Sources */,
 				C46735921710D9EF00E2A10B /* RandomUnit.cpp in Sources */,
-				C46735931710D9EF00E2A10B /* ContractionHierarchy.cpp in Sources */,
 				C46735941710D9EF00E2A10B /* Graph.cpp in Sources */,
 				C46735951710D9EF00E2A10B /* BitVector.cpp in Sources */,
 				C46735961710D9EF00E2A10B /* FPUtil.cpp in Sources */,
@@ -3961,6 +4268,7 @@
 				C46735C21710D9EF00E2A10B /* AbsMapUnitGroup.cpp in Sources */,
 				C46735C31710D9EF00E2A10B /* AStar.cpp in Sources */,
 				C46735C41710D9EF00E2A10B /* AStar2.cpp in Sources */,
+				C4B1DD56192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C46735C51710D9EF00E2A10B /* AStar3.cpp in Sources */,
 				C46735C61710D9EF00E2A10B /* CFOptimalRefinement.cpp in Sources */,
 				C46735C71710D9EF00E2A10B /* CorridorAStar.cpp in Sources */,
@@ -4020,12 +4328,12 @@
 				C47BDBE517440B5900DD0928 /* SequenceAlignment.cpp in Sources */,
 				C47BDBE617440B5900DD0928 /* SFBDPancakePuzzle.cpp in Sources */,
 				C47BDBE717440B5900DD0928 /* SteeringEnvironment.cpp in Sources */,
-				C47BDBE817440B5900DD0928 /* TopSpin.cpp in Sources */,
+				C47BDBE817440B5900DD0928 /* TopSpinGraph.cpp in Sources */,
 				C47BDBE917440B5900DD0928 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C47BDBEA17440B5900DD0928 /* GraphCheck.cpp in Sources */,
+				C431A18C19212B5F00D3CC38 /* Bloom.cpp in Sources */,
 				C47BDBEB17440B5900DD0928 /* IDAStar.cpp in Sources */,
 				C47BDBEC17440B5900DD0928 /* RandomUnit.cpp in Sources */,
-				C47BDBED17440B5900DD0928 /* ContractionHierarchy.cpp in Sources */,
 				C47BDBEE17440B5900DD0928 /* Graph.cpp in Sources */,
 				C47BDBEF17440B5900DD0928 /* BitVector.cpp in Sources */,
 				C47BDBF017440B5900DD0928 /* FPUtil.cpp in Sources */,
@@ -4048,6 +4356,7 @@
 				C47BDC0117440B5900DD0928 /* OpenClosedList.cpp in Sources */,
 				C47BDC0217440B5900DD0928 /* OpenListB.cpp in Sources */,
 				C47BDC0317440B5900DD0928 /* ClusterAbstraction.cpp in Sources */,
+				C4B1DD5C19359BB80039A6DF /* LogisticRegression.cpp in Sources */,
 				C47BDC0417440B5900DD0928 /* GraphAbstraction.cpp in Sources */,
 				C47BDC0517440B5900DD0928 /* LoadedBBAbstraction.cpp in Sources */,
 				C4D83ECC18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
@@ -4077,7 +4386,6 @@
 				C47BDC1C17440B5900DD0928 /* AbsMapUnitGroup.cpp in Sources */,
 				C47BDC1D17440B5900DD0928 /* AStar.cpp in Sources */,
 				C47BDC1E17440B5900DD0928 /* AStar2.cpp in Sources */,
-				C4532CAA18D81C33001899B8 /* Bloom.cpp in Sources */,
 				C47BDC1F17440B5900DD0928 /* AStar3.cpp in Sources */,
 				C47BDC2017440B5900DD0928 /* CFOptimalRefinement.cpp in Sources */,
 				C47BDC2117440B5900DD0928 /* CorridorAStar.cpp in Sources */,
@@ -4137,13 +4445,14 @@
 				C498D84F1432777C0053D322 /* SequenceAlignment.cpp in Sources */,
 				C498D8501432777C0053D322 /* SFBDPancakePuzzle.cpp in Sources */,
 				C498D8511432777C0053D322 /* SteeringEnvironment.cpp in Sources */,
-				C498D8521432777C0053D322 /* TopSpin.cpp in Sources */,
+				C498D8521432777C0053D322 /* TopSpinGraph.cpp in Sources */,
 				C498D8531432777C0053D322 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C498D8541432777C0053D322 /* GraphCheck.cpp in Sources */,
+				C431A19119212B6200D3CC38 /* Bloom.cpp in Sources */,
 				C498D8551432777C0053D322 /* IDAStar.cpp in Sources */,
 				C498D8561432777C0053D322 /* RandomUnit.cpp in Sources */,
-				C498D8571432777C0053D322 /* ContractionHierarchy.cpp in Sources */,
 				C498D8581432777C0053D322 /* Graph.cpp in Sources */,
+				C4B1DD50192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C498D85F1432777C0053D322 /* BitVector.cpp in Sources */,
 				C498D8601432777C0053D322 /* FPUtil.cpp in Sources */,
 				C498D8611432777C0053D322 /* FunctionApproximator.cpp in Sources */,
@@ -4254,13 +4563,12 @@
 				C49A6F821499BF41007CEDA2 /* SequenceAlignment.cpp in Sources */,
 				C49A6F831499BF41007CEDA2 /* SFBDPancakePuzzle.cpp in Sources */,
 				C49A6F841499BF41007CEDA2 /* SteeringEnvironment.cpp in Sources */,
-				C49A6F851499BF41007CEDA2 /* TopSpin.cpp in Sources */,
+				C49A6F851499BF41007CEDA2 /* TopSpinGraph.cpp in Sources */,
 				C49A6F861499BF41007CEDA2 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C49A6F871499BF41007CEDA2 /* GraphCheck.cpp in Sources */,
 				C4D83EC718A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C49A6F881499BF41007CEDA2 /* IDAStar.cpp in Sources */,
 				C49A6F891499BF41007CEDA2 /* RandomUnit.cpp in Sources */,
-				C49A6F8A1499BF41007CEDA2 /* ContractionHierarchy.cpp in Sources */,
 				C49A6F8B1499BF41007CEDA2 /* Graph.cpp in Sources */,
 				C49A6F921499BF41007CEDA2 /* BitVector.cpp in Sources */,
 				C49A6F931499BF41007CEDA2 /* FPUtil.cpp in Sources */,
@@ -4269,6 +4577,7 @@
 				C49A6F961499BF41007CEDA2 /* LinearRegression.cpp in Sources */,
 				C49A6F971499BF41007CEDA2 /* Map.cpp in Sources */,
 				C49A6F981499BF41007CEDA2 /* MapOverlay.cpp in Sources */,
+				C4B1DD52192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C49A6F991499BF41007CEDA2 /* Plot2D.cpp in Sources */,
 				C49A6F9A1499BF41007CEDA2 /* ScenarioLoader.cpp in Sources */,
 				C49A6F9B1499BF41007CEDA2 /* StatCollection.cpp in Sources */,
@@ -4349,6 +4658,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4A79DFA13F03A580064AC6A /* Common.cpp in Sources */,
+				C431A19519212B6400D3CC38 /* Bloom.cpp in Sources */,
 				C4A79DFB13F03A580064AC6A /* GLUThog.cpp in Sources */,
 				C4A79DFC13F03A580064AC6A /* TextBox.cpp in Sources */,
 				C4A79DFD13F03A580064AC6A /* Trackball.cpp in Sources */,
@@ -4372,13 +4682,11 @@
 				C4A79E1013F03A580064AC6A /* SequenceAlignment.cpp in Sources */,
 				C4A79E1113F03A580064AC6A /* SFBDPancakePuzzle.cpp in Sources */,
 				C4A79E1213F03A580064AC6A /* SteeringEnvironment.cpp in Sources */,
-				C4A79E1313F03A580064AC6A /* TopSpin.cpp in Sources */,
+				C4A79E1313F03A580064AC6A /* TopSpinGraph.cpp in Sources */,
 				C4A79E1413F03A580064AC6A /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4A79E1513F03A580064AC6A /* GraphCheck.cpp in Sources */,
-				C4C5C37B18E9439800915B3D /* Bloom.cpp in Sources */,
 				C4A79E1613F03A580064AC6A /* IDAStar.cpp in Sources */,
 				C4A79E1713F03A580064AC6A /* RandomUnit.cpp in Sources */,
-				C4A79E1813F03A580064AC6A /* ContractionHierarchy.cpp in Sources */,
 				C4A79E1913F03A580064AC6A /* Graph.cpp in Sources */,
 				C4A79E2113F03A580064AC6A /* BitVector.cpp in Sources */,
 				C4A79E2213F03A580064AC6A /* FPUtil.cpp in Sources */,
@@ -4400,6 +4708,7 @@
 				C4A79E3213F03A580064AC6A /* OldSearchEnvironment.cpp in Sources */,
 				C4A79E3313F03A580064AC6A /* OpenClosedList.cpp in Sources */,
 				C4A79E3413F03A580064AC6A /* OpenListB.cpp in Sources */,
+				C4B1DD4C192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4A79E3513F03A580064AC6A /* ClusterAbstraction.cpp in Sources */,
 				C4A79E3613F03A580064AC6A /* GraphAbstraction.cpp in Sources */,
 				C4A79E3713F03A580064AC6A /* LoadedBBAbstraction.cpp in Sources */,
@@ -4488,13 +4797,12 @@
 				C4A79E9713F256DF0064AC6A /* SequenceAlignment.cpp in Sources */,
 				C4A79E9813F256DF0064AC6A /* SFBDPancakePuzzle.cpp in Sources */,
 				C4A79E9913F256DF0064AC6A /* SteeringEnvironment.cpp in Sources */,
-				C4A79E9A13F256DF0064AC6A /* TopSpin.cpp in Sources */,
+				C4A79E9A13F256DF0064AC6A /* TopSpinGraph.cpp in Sources */,
 				C4A79E9B13F256DF0064AC6A /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4A79E9C13F256DF0064AC6A /* GraphCheck.cpp in Sources */,
 				C4C5C37A18E9439700915B3D /* Bloom.cpp in Sources */,
 				C4A79E9D13F256DF0064AC6A /* IDAStar.cpp in Sources */,
 				C4A79E9E13F256DF0064AC6A /* RandomUnit.cpp in Sources */,
-				C4A79E9F13F256DF0064AC6A /* ContractionHierarchy.cpp in Sources */,
 				C4A79EA013F256DF0064AC6A /* Graph.cpp in Sources */,
 				C4A79EA813F256DF0064AC6A /* BitVector.cpp in Sources */,
 				C4A79EA913F256DF0064AC6A /* FPUtil.cpp in Sources */,
@@ -4516,6 +4824,7 @@
 				C4A79EB913F256DF0064AC6A /* OldSearchEnvironment.cpp in Sources */,
 				C4A79EBA13F256DF0064AC6A /* OpenClosedList.cpp in Sources */,
 				C4A79EBB13F256DF0064AC6A /* OpenListB.cpp in Sources */,
+				C4B1DD4D192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4A79EBC13F256DF0064AC6A /* ClusterAbstraction.cpp in Sources */,
 				C4A79EBD13F256DF0064AC6A /* GraphAbstraction.cpp in Sources */,
 				C4A79EBE13F256DF0064AC6A /* LoadedBBAbstraction.cpp in Sources */,
@@ -4581,6 +4890,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4B973881426FA4F00758D0D /* Common.cpp in Sources */,
+				C431A19219212B6200D3CC38 /* Bloom.cpp in Sources */,
 				C4B973891426FA4F00758D0D /* GLUThog.cpp in Sources */,
 				C4B9738A1426FA4F00758D0D /* TextBox.cpp in Sources */,
 				C4B9738B1426FA4F00758D0D /* Trackball.cpp in Sources */,
@@ -4604,13 +4914,12 @@
 				C4B9739D1426FA4F00758D0D /* SequenceAlignment.cpp in Sources */,
 				C4B9739E1426FA4F00758D0D /* SFBDPancakePuzzle.cpp in Sources */,
 				C4B9739F1426FA4F00758D0D /* SteeringEnvironment.cpp in Sources */,
-				C4B973A01426FA4F00758D0D /* TopSpin.cpp in Sources */,
+				C4B973A01426FA4F00758D0D /* TopSpinGraph.cpp in Sources */,
 				C4B973A11426FA4F00758D0D /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4B973A21426FA4F00758D0D /* GraphCheck.cpp in Sources */,
 				C4C5C37818E9439600915B3D /* Bloom.cpp in Sources */,
 				C4B973A31426FA4F00758D0D /* IDAStar.cpp in Sources */,
 				C4B973A41426FA4F00758D0D /* RandomUnit.cpp in Sources */,
-				C4B973A51426FA4F00758D0D /* ContractionHierarchy.cpp in Sources */,
 				C4B973A61426FA4F00758D0D /* Graph.cpp in Sources */,
 				C4B973AE1426FA4F00758D0D /* BitVector.cpp in Sources */,
 				C4B973AF1426FA4F00758D0D /* FPUtil.cpp in Sources */,
@@ -4632,6 +4941,7 @@
 				C4B973BF1426FA4F00758D0D /* OldSearchEnvironment.cpp in Sources */,
 				C4B973C01426FA4F00758D0D /* OpenClosedList.cpp in Sources */,
 				C4B973C11426FA4F00758D0D /* OpenListB.cpp in Sources */,
+				C4B1DD4F192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4B973C21426FA4F00758D0D /* ClusterAbstraction.cpp in Sources */,
 				C4B973C31426FA4F00758D0D /* GraphAbstraction.cpp in Sources */,
 				C4B973C41426FA4F00758D0D /* LoadedBBAbstraction.cpp in Sources */,
@@ -4720,7 +5030,7 @@
 				C4C5C39418EC7C9D00915B3D /* SequenceAlignment.cpp in Sources */,
 				C4C5C39518EC7C9D00915B3D /* SFBDPancakePuzzle.cpp in Sources */,
 				C4C5C39618EC7C9D00915B3D /* SteeringEnvironment.cpp in Sources */,
-				C4C5C39718EC7C9D00915B3D /* TopSpin.cpp in Sources */,
+				C4C5C39718EC7C9D00915B3D /* TopSpinGraph.cpp in Sources */,
 				C4C5C39818EC7C9D00915B3D /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4C5C39918EC7C9D00915B3D /* GraphCheck.cpp in Sources */,
 				C4C5C39A18EC7C9D00915B3D /* Bloom.cpp in Sources */,
@@ -4748,6 +5058,7 @@
 				C4C5C3B018EC7C9D00915B3D /* OldSearchEnvironment.cpp in Sources */,
 				C4C5C3B118EC7C9D00915B3D /* OpenClosedList.cpp in Sources */,
 				C4C5C3B218EC7C9D00915B3D /* OpenListB.cpp in Sources */,
+				C4B1DD5A192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4C5C3B318EC7C9D00915B3D /* ClusterAbstraction.cpp in Sources */,
 				C4C5C3B418EC7C9D00915B3D /* GraphAbstraction.cpp in Sources */,
 				C4C5C3B518EC7C9D00915B3D /* LoadedBBAbstraction.cpp in Sources */,
@@ -4836,13 +5147,12 @@
 				C4C9E4D9176A7A160027410C /* SequenceAlignment.cpp in Sources */,
 				C4C9E4DA176A7A160027410C /* SFBDPancakePuzzle.cpp in Sources */,
 				C4C9E4DB176A7A160027410C /* SteeringEnvironment.cpp in Sources */,
-				C4C9E4DC176A7A160027410C /* TopSpin.cpp in Sources */,
+				C4C9E4DC176A7A160027410C /* TopSpinGraph.cpp in Sources */,
 				C4C9E4DD176A7A160027410C /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4C9E4DE176A7A160027410C /* GraphCheck.cpp in Sources */,
 				C4D83ECD18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C4C9E4DF176A7A160027410C /* IDAStar.cpp in Sources */,
 				C4C9E4E0176A7A160027410C /* RandomUnit.cpp in Sources */,
-				C4C9E4E1176A7A160027410C /* ContractionHierarchy.cpp in Sources */,
 				C4C9E4E2176A7A160027410C /* Graph.cpp in Sources */,
 				C4C9E4E3176A7A160027410C /* BitVector.cpp in Sources */,
 				C4C9E4E4176A7A160027410C /* FPUtil.cpp in Sources */,
@@ -4851,6 +5161,7 @@
 				C4C9E4E7176A7A160027410C /* LinearRegression.cpp in Sources */,
 				C4C9E4E8176A7A160027410C /* Map.cpp in Sources */,
 				C4C9E4E9176A7A160027410C /* MapOverlay.cpp in Sources */,
+				C4B1DD58192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4C9E4EA176A7A160027410C /* Plot2D.cpp in Sources */,
 				C4C9E4EB176A7A160027410C /* ScenarioLoader.cpp in Sources */,
 				C4C9E4EC176A7A160027410C /* StatCollection.cpp in Sources */,
@@ -4895,6 +5206,7 @@
 				C4C9E511176A7A160027410C /* AStar.cpp in Sources */,
 				C4C9E512176A7A160027410C /* AStar2.cpp in Sources */,
 				C4146D61182EB9B300745331 /* MotionCaptureMovement.cpp in Sources */,
+				C431A18B19212B5F00D3CC38 /* Bloom.cpp in Sources */,
 				C4C9E513176A7A160027410C /* AStar3.cpp in Sources */,
 				C4C9E514176A7A160027410C /* CFOptimalRefinement.cpp in Sources */,
 				C4C9E515176A7A160027410C /* CorridorAStar.cpp in Sources */,
@@ -4931,6 +5243,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4D60A5514B22E10007594CD /* Common.cpp in Sources */,
+				C431A18F19212B6100D3CC38 /* Bloom.cpp in Sources */,
 				C4D60A5614B22E10007594CD /* GLUThog.cpp in Sources */,
 				C4D60A5714B22E10007594CD /* TextBox.cpp in Sources */,
 				C4D60A5814B22E10007594CD /* Trackball.cpp in Sources */,
@@ -4954,13 +5267,11 @@
 				C4D60A6A14B22E10007594CD /* SequenceAlignment.cpp in Sources */,
 				C4D60A6B14B22E10007594CD /* SFBDPancakePuzzle.cpp in Sources */,
 				C4D60A6C14B22E10007594CD /* SteeringEnvironment.cpp in Sources */,
-				C4D60A6D14B22E10007594CD /* TopSpin.cpp in Sources */,
+				C4D60A6D14B22E10007594CD /* TopSpinGraph.cpp in Sources */,
 				C4D60A6E14B22E10007594CD /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4D60A6F14B22E10007594CD /* GraphCheck.cpp in Sources */,
-				C4C5C37418E9439300915B3D /* Bloom.cpp in Sources */,
 				C4D60A7014B22E10007594CD /* IDAStar.cpp in Sources */,
 				C4D60A7114B22E10007594CD /* RandomUnit.cpp in Sources */,
-				C4D60A7214B22E10007594CD /* ContractionHierarchy.cpp in Sources */,
 				C4D60A7314B22E10007594CD /* Graph.cpp in Sources */,
 				C4D60A7A14B22E10007594CD /* BitVector.cpp in Sources */,
 				C4D60A7B14B22E10007594CD /* FPUtil.cpp in Sources */,
@@ -4982,6 +5293,7 @@
 				C4D60A8B14B22E10007594CD /* OldSearchEnvironment.cpp in Sources */,
 				C4D60A8C14B22E10007594CD /* OpenClosedList.cpp in Sources */,
 				C4D60A8D14B22E10007594CD /* OpenListB.cpp in Sources */,
+				C4B1DD53192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4D60A8E14B22E10007594CD /* ClusterAbstraction.cpp in Sources */,
 				C4D60A8F14B22E10007594CD /* GraphAbstraction.cpp in Sources */,
 				C4D60A9014B22E10007594CD /* LoadedBBAbstraction.cpp in Sources */,
@@ -5015,6 +5327,7 @@
 				C4D60AB214B22E10007594CD /* CorridorAStar.cpp in Sources */,
 				C4D60AB314B22E10007594CD /* CRAStar.cpp in Sources */,
 				C4D60AB414B22E10007594CD /* FringeSearch.cpp in Sources */,
+				C419EDC519B923C200AD9D5E /* TopSpin.cpp in Sources */,
 				C4D60AB514B22E10007594CD /* HPAStar.cpp in Sources */,
 				C4D60AB614B22E10007594CD /* IRAStar.cpp in Sources */,
 				C4D60AB714B22E10007594CD /* IRDijkstra.cpp in Sources */,
@@ -5047,6 +5360,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4EE610E1651BB9A00B038E5 /* Common.cpp in Sources */,
+				C431A18D19212B6000D3CC38 /* Bloom.cpp in Sources */,
 				C4EE610F1651BB9A00B038E5 /* GLUThog.cpp in Sources */,
 				C4EE61101651BB9A00B038E5 /* TextBox.cpp in Sources */,
 				C4EE61111651BB9A00B038E5 /* Trackball.cpp in Sources */,
@@ -5070,13 +5384,12 @@
 				C4EE61231651BB9A00B038E5 /* SequenceAlignment.cpp in Sources */,
 				C4EE61241651BB9A00B038E5 /* SFBDPancakePuzzle.cpp in Sources */,
 				C4EE61251651BB9A00B038E5 /* SteeringEnvironment.cpp in Sources */,
-				C4EE61261651BB9A00B038E5 /* TopSpin.cpp in Sources */,
+				C4EE61261651BB9A00B038E5 /* TopSpinGraph.cpp in Sources */,
 				C4EE61271651BB9A00B038E5 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4EE61281651BB9A00B038E5 /* GraphCheck.cpp in Sources */,
 				C4C5C37218E9439200915B3D /* Bloom.cpp in Sources */,
 				C4EE61291651BB9A00B038E5 /* IDAStar.cpp in Sources */,
 				C4EE612A1651BB9A00B038E5 /* RandomUnit.cpp in Sources */,
-				C4EE612B1651BB9A00B038E5 /* ContractionHierarchy.cpp in Sources */,
 				C4EE612C1651BB9A00B038E5 /* Graph.cpp in Sources */,
 				C4EE612D1651BB9A00B038E5 /* BitVector.cpp in Sources */,
 				C4EE612E1651BB9A00B038E5 /* FPUtil.cpp in Sources */,
@@ -5098,6 +5411,7 @@
 				C4EE613E1651BB9A00B038E5 /* OldSearchEnvironment.cpp in Sources */,
 				C4EE613F1651BB9A00B038E5 /* OpenClosedList.cpp in Sources */,
 				C4EE61401651BB9A00B038E5 /* OpenListB.cpp in Sources */,
+				C4B1DD55192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4EE61411651BB9A00B038E5 /* ClusterAbstraction.cpp in Sources */,
 				C4EE61421651BB9A00B038E5 /* GraphAbstraction.cpp in Sources */,
 				C4EE61431651BB9A00B038E5 /* LoadedBBAbstraction.cpp in Sources */,
@@ -5163,6 +5477,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4F9F37813E4FDBB0077C5A5 /* Common.cpp in Sources */,
+				C431A19619212B6400D3CC38 /* Bloom.cpp in Sources */,
 				C4F9F37B13E4FDBB0077C5A5 /* GLUThog.cpp in Sources */,
 				C4F9F38413E4FDBB0077C5A5 /* TextBox.cpp in Sources */,
 				C4F9F38513E4FDBB0077C5A5 /* Trackball.cpp in Sources */,
@@ -5187,13 +5502,12 @@
 				C4F9F42213E4FE400077C5A5 /* SequenceAlignment.cpp in Sources */,
 				C4F9F42313E4FE400077C5A5 /* SFBDPancakePuzzle.cpp in Sources */,
 				C4F9F42413E4FE400077C5A5 /* SteeringEnvironment.cpp in Sources */,
-				C4F9F42513E4FE400077C5A5 /* TopSpin.cpp in Sources */,
+				C4F9F42513E4FE400077C5A5 /* TopSpinGraph.cpp in Sources */,
 				C4F9F42613E4FE400077C5A5 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4C5C37C18E9439800915B3D /* Bloom.cpp in Sources */,
 				C4F9F42713E4FE400077C5A5 /* GraphCheck.cpp in Sources */,
 				C4F9F42813E4FE400077C5A5 /* IDAStar.cpp in Sources */,
 				C4F9F42913E4FE400077C5A5 /* RandomUnit.cpp in Sources */,
-				C4F9F42A13E4FE400077C5A5 /* ContractionHierarchy.cpp in Sources */,
 				C4F9F42B13E4FE400077C5A5 /* Graph.cpp in Sources */,
 				C4F9F43A13E4FE400077C5A5 /* BitVector.cpp in Sources */,
 				C4F9F43B13E4FE400077C5A5 /* FPUtil.cpp in Sources */,
@@ -5214,6 +5528,7 @@
 				C4F9F45813E4FE590077C5A5 /* GenericIDAStar.cpp in Sources */,
 				C4F9F45913E4FE590077C5A5 /* OldSearchEnvironment.cpp in Sources */,
 				C4F9F45A13E4FE590077C5A5 /* OpenClosedList.cpp in Sources */,
+				C4B1DD4B192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4F9F45B13E4FE590077C5A5 /* OpenListB.cpp in Sources */,
 				C4F9F47A13E4FF250077C5A5 /* ClusterAbstraction.cpp in Sources */,
 				C4F9F47B13E4FF250077C5A5 /* GraphAbstraction.cpp in Sources */,
@@ -5279,6 +5594,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4FBC83E16374C89003C667D /* Common.cpp in Sources */,
+				C431A18E19212B6000D3CC38 /* Bloom.cpp in Sources */,
 				C4FBC83F16374C89003C667D /* GLUThog.cpp in Sources */,
 				C4FBC84016374C89003C667D /* TextBox.cpp in Sources */,
 				C4FBC84116374C89003C667D /* Trackball.cpp in Sources */,
@@ -5302,13 +5618,12 @@
 				C4FBC85316374C89003C667D /* SequenceAlignment.cpp in Sources */,
 				C4FBC85416374C89003C667D /* SFBDPancakePuzzle.cpp in Sources */,
 				C4FBC85516374C89003C667D /* SteeringEnvironment.cpp in Sources */,
-				C4FBC85616374C89003C667D /* TopSpin.cpp in Sources */,
+				C4FBC85616374C89003C667D /* TopSpinGraph.cpp in Sources */,
 				C4FBC85716374C89003C667D /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4FBC85816374C89003C667D /* GraphCheck.cpp in Sources */,
 				C4C5C37318E9439300915B3D /* Bloom.cpp in Sources */,
 				C4FBC85916374C89003C667D /* IDAStar.cpp in Sources */,
 				C4FBC85A16374C89003C667D /* RandomUnit.cpp in Sources */,
-				C4FBC85B16374C89003C667D /* ContractionHierarchy.cpp in Sources */,
 				C4FBC85C16374C89003C667D /* Graph.cpp in Sources */,
 				C4FBC85D16374C89003C667D /* BitVector.cpp in Sources */,
 				C4FBC85E16374C89003C667D /* FPUtil.cpp in Sources */,
@@ -5330,6 +5645,7 @@
 				C4FBC86E16374C89003C667D /* OldSearchEnvironment.cpp in Sources */,
 				C4FBC86F16374C89003C667D /* OpenClosedList.cpp in Sources */,
 				C4FBC87016374C89003C667D /* OpenListB.cpp in Sources */,
+				C4B1DD54192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4FBC87116374C89003C667D /* ClusterAbstraction.cpp in Sources */,
 				C4FBC87216374C89003C667D /* GraphAbstraction.cpp in Sources */,
 				C4FBC87316374C89003C667D /* LoadedBBAbstraction.cpp in Sources */,
@@ -5425,6 +5741,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5440,7 +5758,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "mc-movement-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "mc-movement";
 				SDKROOT = macosx;
@@ -5453,6 +5771,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5465,8 +5785,64 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "mc-movement-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "mc-movement";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		C419EE3F19B9863700AD9D5E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "3d maps/3d maps-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = OS_MAC;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "puzzleSample copy2-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "puzzleSample copy";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		C419EE4019B9863700AD9D5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "3d maps/3d maps-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = OS_MAC;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "puzzleSample copy2-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "puzzleSample copy";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
@@ -5477,6 +5853,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5492,7 +5870,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = flocking;
 				SDKROOT = macosx;
@@ -5505,6 +5883,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5517,7 +5897,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = flocking;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5529,6 +5909,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5544,7 +5926,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "MAPF copy-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "Supervised Learning";
 				SDKROOT = macosx;
@@ -5557,6 +5939,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5569,7 +5953,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "MAPF copy-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "Supervised Learning";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5581,7 +5965,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5597,7 +5982,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "puzzleSample copy-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = rubik;
 				SDKROOT = macosx;
@@ -5610,7 +5995,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5624,7 +6010,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "puzzleSample copy-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = rubik;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5636,6 +6022,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5651,7 +6039,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "fling-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = fling;
 				SDKROOT = macosx;
@@ -5664,6 +6052,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5676,7 +6066,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "fling-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = fling;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5688,6 +6078,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5703,7 +6095,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = MAPF;
 				SDKROOT = macosx;
@@ -5716,6 +6108,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5728,7 +6122,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = MAPF;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5740,6 +6134,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5755,7 +6151,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "mapUtils copy-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = fLRTA;
 				SDKROOT = macosx;
@@ -5768,6 +6164,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5780,7 +6178,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "mapUtils copy-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = fLRTA;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5792,6 +6190,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5807,7 +6207,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = mapUtils;
 				SDKROOT = macosx;
@@ -5820,6 +6220,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5832,7 +6234,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = mapUtils;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5844,6 +6246,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5859,7 +6263,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "Robotic Arm";
 				SDKROOT = macosx;
@@ -5872,6 +6276,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5884,7 +6290,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "Robotic Arm";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5896,6 +6302,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5911,7 +6319,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = localsearch;
 				SDKROOT = macosx;
@@ -5924,6 +6332,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5936,7 +6346,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = localsearch;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -5948,6 +6358,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5963,7 +6375,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "ga-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = ga;
 				SDKROOT = macosx;
@@ -5976,6 +6388,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5988,7 +6402,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "ga-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = ga;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -6000,6 +6414,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -6015,7 +6431,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "directional-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = directional;
 				SDKROOT = macosx;
@@ -6028,6 +6444,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -6040,7 +6458,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "directional-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = directional;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -6052,6 +6470,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -6067,7 +6487,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "mapUtils copy2-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = puzzleSample;
 				SDKROOT = macosx;
@@ -6080,6 +6500,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -6092,7 +6514,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "mapUtils copy2-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = puzzleSample;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -6104,6 +6526,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -6119,7 +6543,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "emotion-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = emotion;
 				SDKROOT = macosx;
@@ -6132,6 +6556,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -6144,7 +6570,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "emotion-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = emotion;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -6168,6 +6594,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -6183,7 +6611,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -6196,6 +6624,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -6208,7 +6638,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "3d maps/3d maps-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -6220,6 +6650,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -6235,7 +6667,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "mapUtils copy3-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "mapUtils copy";
 				SDKROOT = macosx;
@@ -6248,6 +6680,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -6260,7 +6694,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "mapUtils copy3-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "mapUtils copy";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -6275,6 +6709,15 @@
 			buildConfigurations = (
 				C4146DD91830F66100745331 /* Debug */,
 				C4146DDA1830F66100745331 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C419EE3E19B9863700AD9D5E /* Build configuration list for PBXNativeTarget "TopSpin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C419EE3F19B9863700AD9D5E /* Debug */,
+				C419EE4019B9863700AD9D5E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

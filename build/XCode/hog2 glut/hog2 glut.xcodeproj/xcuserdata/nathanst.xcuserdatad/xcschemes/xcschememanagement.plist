@@ -24,6 +24,11 @@
 			<key>orderHint</key>
 			<integer>6</integer>
 		</dict>
+		<key>TopSpin.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>16</integer>
+		</dict>
 		<key>directional.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -88,6 +93,11 @@
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>C4146D621830F66100745331</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C419EDC619B9863700AD9D5E</key>
 		<dict>
 			<key>primary</key>
 			<true/>

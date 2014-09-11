@@ -561,8 +561,20 @@ void TemplateAStar<state, action,environment>::OpenGLDraw() const
 	if (openClosedList.size() == 0)
 		return;
 	uint64_t top = -1;
+//	double minf = 1e9, maxf = 0;
 	if (openClosedList.OpenSize() > 0)
+	{
 		top = openClosedList.Peek();
+	}
+//	for (unsigned int x = 0; x < openClosedList.size(); x++)
+//	{
+//		const AStarOpenClosedData<state> &data = openClosedList.Lookat(x);
+//		double f = data.g+data.h;
+//		if (f > maxf)
+//			maxf = f;
+//		if (f < minf)
+//			minf = f;
+//	}
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
 		const AStarOpenClosedData<state> &data = openClosedList.Lookat(x);
@@ -588,7 +600,13 @@ void TemplateAStar<state, action,environment>::OpenGLDraw() const
 		}
 		else if (data.where == kClosedList)
 		{
+//			if (top != -1)
+//			{
+//				env->SetColor((data.g+data.h-minf)/(maxf-minf), 0.0, 0.0, transparency);
+//			}
+//			else {
 			env->SetColor(1.0, 0.0, 0.0, transparency);
+//			}
 			env->OpenGLDraw(data.data);
 		}
 	}

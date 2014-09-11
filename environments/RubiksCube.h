@@ -11,7 +11,7 @@
 
 #include <iostream>
 #include <stdint.h>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <vector>
 #include "RubiksCubeCorners.h"
 #include "RubiksCubeEdges.h"
@@ -136,7 +136,7 @@ public:
 	bool minBloomFilter;
 	std::vector<uint64_t> edgeDist;
 	std::vector<uint64_t> cornDist;
-	::std::tr1::unordered_map<uint64_t, uint8_t> depthTable;
+	::std::unordered_map<uint64_t, uint8_t> depthTable;
 	BloomFilter *depth8, *depth9;
 	MinBloomFilter *minBloom;
 private:

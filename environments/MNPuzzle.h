@@ -30,6 +30,12 @@ public:
 			puzzle[x] = x;
 		blank = 0;
 	}
+	void Reset()
+	{
+		for (unsigned int x = 0; x < puzzle.size(); x++)
+			puzzle[x] = x;
+		blank = 0;
+	}
 	unsigned int width, height;
 	unsigned int blank;
 	std::vector<int> puzzle;
@@ -103,7 +109,7 @@ public:
 
 	bool GoalTest(const MNPuzzleState &s);
 
-	void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
+	//void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 
 	uint64_t GetActionHash(slideDir act) const;
 	void OpenGLDraw() const;
@@ -172,11 +178,29 @@ public:
 
 	void Set_Use_Manhattan_Heuristic(bool to_use){use_manhattan = to_use;}
 
-
+	void PrintHStats()
+	{
+		printf("-\t");
+		for (int x = 0; x < hDist.size(); x++)
+			printf("%d\t", x);
+		printf("\n");
+		for (int y = 0; y <= 12; y++)
+		{
+			printf("%d\t", y);
+			for (int x = 0; x < hDist.size(); x++)
+			{
+				if (y >= hDist[x].size())
+					printf("0\t");
+				else
+					printf("%d\t", hDist[x][y]);
+			}
+			printf("\n");
+		}
+	}
 private:
-	double DoPDBLookup(const MNPuzzleState &state);
-	std::vector<std::vector<uint8_t> > PDB;
-	std::vector<std::vector<int> > PDBkey;
+//	double DoPDBLookup(const MNPuzzleState &state);
+//	std::vector<std::vector<uint8_t> > PDB;
+//	std::vector<std::vector<int> > PDBkey;
 	unsigned int width, height;
 	std::vector<std::vector<slideDir> > operators; // stores the operators applicable at each blank position
 	std::vector<slideDir> ops_in_order;
@@ -186,6 +210,7 @@ private:
 	// stores the heuristic value of each tile-position pair indexed by the tile value (0th index is empty)
 	unsigned **h_increment;
 	MNPuzzleState goal;
+	std::vector<std::vector<int> > hDist;
 };
 
 class GraphPuzzleDistanceHeuristic : public GraphDistanceHeuristic {

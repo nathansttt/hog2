@@ -64,7 +64,7 @@ MapEnvironment *ma1 = 0;
 MapEnvironment *ma2 = 0;
 GraphDistanceHeuristic *gdh = 0;
 std::vector<xyLoc> path;
-double stepsPerFrame = 1.0/30.0;
+double stepsPerFrame = 1.0/100.0;
 
 HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
 
@@ -222,8 +222,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 }
 
-void startRecording();
-void stopRecording();
 static bool recording = false;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
@@ -239,8 +237,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //			stepsPerFrame*=1.002;//1.01;//
 		if (unitSims[windowID]->Done() && recording)
 		{
-//			recording = false;
-//			stopRecording();
+			recording = false;
 		}
 
 	}
@@ -287,6 +284,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		a2.OpenGLDraw();
 		a2.DoSingleSearchStep(path);
+	}
+	
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		static int cnt = 0;
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		SaveScreenshot(windowID, fname);
+		cnt++;
 	}
 }
 
@@ -656,17 +662,19 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
 				
+				recording = true;
+				
 				xyLoc a(px1, py1);
 				xyLoc b(px2, py2);
 				
-//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
-//				u6->SetSpeed(0.02);
+				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(20));
+				u6->SetSpeed(0.02);
 //
 //				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
 //				u7->SetSpeed(0.02);
 
-				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
-				u7->SetSpeed(0.02);
+//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
+//				u7->SetSpeed(0.02);
 //				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new MPLRTA::MPLRTAStar());
 //				u7->SetSpeed(0.02);
 				unitSims[windowID]->ClearAllUnits();
@@ -676,9 +684,9 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				unitSims[windowID]->GetStats()->AddFilter("TotalLearning");
 				unitSims[windowID]->GetStats()->AddFilter("Trial End");
 
-//				unitSims[windowID]->AddUnit(u6);
-				unitSims[windowID]->AddUnit(u7);
-				SetNumPorts(windowID, 2);
+				unitSims[windowID]->AddUnit(u6);
+//				unitSims[windowID]->AddUnit(u7);
+				SetNumPorts(windowID, 1);
 			}
 			break;
 		}

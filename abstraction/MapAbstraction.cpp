@@ -131,7 +131,7 @@ void MapAbstraction::DrawGraph(Graph *g, bool drawLevel) const
 		else if (e->getMarked())                  glColor4f(1, 1, 1, 1);
 		else if (abLevel%2)
 			glColor4f(1-((GLfloat)(abLevel%15)/15.0), ((GLfloat)(abLevel%15)/15.0), 0, 1);
-		else glColor4f(((GLfloat)(abLevel%15)/15.0), 1-((GLfloat)(abLevel%15)/15.0), 0, 1);
+		else glColor4f(1-((GLfloat)(abLevel%15)/15.0), ((GLfloat)(abLevel%15)/15.0), 0, 1);
 		//glColor4f(1-((GLfloat)(abLevel%15)/15.0), ((GLfloat)(abLevel%15)/15.0), .5+((GLfloat)(abLevel%15-8)/30.0), 1);
 		
 		// Color the edge widths

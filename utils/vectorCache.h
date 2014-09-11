@@ -39,7 +39,7 @@ std::vector<storage> *vectorCache<storage>::getItem()
 		return theItem;
 	}
 	else {
-		printf("%d items allocated\n", ++count);
+//		printf("%d items allocated\n", ++count);
 		std::vector<storage> *newItem = new std::vector<storage>();
 //		printf("CACHE: ALLOC: %p\n", newItem);
 		return newItem;
