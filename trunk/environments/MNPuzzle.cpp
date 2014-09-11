@@ -382,9 +382,45 @@ double MNPuzzle::HCost(const MNPuzzleState &state)
 	}
 	
 	double hval = 0;
-	
-	if (PDB.size() != 0) // select between PDB and Manhattan distance if given the chance
-		hval = std::max(hval, DoPDBLookup(state));
+
+//	if (PDB.size() != 0) // select between PDB and Manhattan distance if given the chance
+//		hval = std::max(hval, DoPDBLookup(state));
+
+	if (additive && PDB.size() != 0)
+	{
+		int val = 0;
+
+		for (unsigned loc = 0; loc < width*height; loc++)
+		{
+			if (state.puzzle[loc] > 0)
+				val += h_increment[state.puzzle[loc]][loc];
+		}
+		if (val >= hDist.size())
+			hDist.resize(val+1);
+		
+		uint8_t tmp;
+		uint8_t total = 0;
+		for (unsigned int x = 0; x < PDB.size(); x++)
+		{
+			uint64_t index = GetPDBHash(state, PDB_distincts[x]);
+			histogram[PDB[x][index]]++;
+			tmp = PDB[x][index];
+			if (tmp >= hDist[val].size())
+				hDist[val].resize(tmp+1);
+			hDist[val][tmp]++;
+			if (tmp > 4) tmp = 4;
+			total += (double)tmp;
+		}
+		return val+total;
+
+//		hval = PDB_Lookup(state);
+//		for (unsigned loc = 0; loc < width*height; loc++)
+//		{
+//			if (state.puzzle[loc] > 0)
+//				hval += h_increment[state.puzzle[loc]][loc];
+//		}
+//		return hval;
+	}
 	
 	if (use_manhattan)
 	{
@@ -413,6 +449,8 @@ double MNPuzzle::HCost(const MNPuzzleState &state)
 // TODO Remove PDB heuristic from this heuristic evaluator.
 double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2)
 {
+	if (goal_stored)
+		return HCost(state1);
 	if (state1.height != height || state1.width != width)
 	{
 		fprintf(stderr, "ERROR: HCost called with a state with wrong size.\n");
@@ -423,10 +461,10 @@ double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2)
 		fprintf(stderr, "ERROR: HCost called with a state with wrong size.\n");
 		exit(1);
 	}
-	
+		
 	double hval = 0;
 	if (PDB.size() != 0)
-		hval = std::max(hval, DoPDBLookup(state1));
+		hval = std::max(hval, PDB_Lookup(state1));
 	
 	if (use_manhattan)
 	{
@@ -600,20 +638,20 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s1, const MNPuzzleState &s2, floa
 	DrawFrame(width, height);
 }
 
-double MNPuzzle::DoPDBLookup(const MNPuzzleState &state)
-{
-	double val = 0;
-	for (unsigned int x = 0; x < PDB.size(); x++)
-	{
-		uint64_t index = GetPDBHash(state, PDBkey[x]);
-		val = std::max(val, (double)PDB[x][index]);
-		//val += (double)PDB[x][index];
-	}
-	if (width == height) // symmetry
-	{
-	}
-	return val;
-}
+//double MNPuzzle::DoPDBLookup(const MNPuzzleState &state)
+//{
+//	double val = 0;
+//	for (unsigned int x = 0; x < PDB.size(); x++)
+//	{
+//		uint64_t index = GetPDBHash(state, PDBkey[x]);
+//		val = std::max(val, (double)PDB[x][index]);
+//		//val += (double)PDB[x][index];
+//	}
+//	if (width == height) // symmetry
+//	{
+//	}
+//	return val;
+//}
 
 /**
  Reads in MNPuzzle states from the given filename. Each line of the

@@ -7,9 +7,42 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <cstdio>
+#include "Timer.h"
+#include <pthread.h>
 
 #ifndef PERMPUZZ_H
 #define PERMPUZZ_H
+
+template <class state, class action>
+class PermutationPuzzleEnvironment;
+
+enum PDBTreeNodeType {
+	kMaxNode,
+	kAddNode,
+	kLeafNode
+};
+
+struct PDBTreeNode
+{
+	PDBTreeNodeType t;
+	uint8_t numChildren;
+	uint8_t firstChildID;
+	uint8_t PDBID;
+};
+
+const uint64_t kDone = -1;
+
+template <class state, class action>
+struct ThreadData
+{
+	// initialize data structure with (1) database pointer (2) depth (3) pointer to queue
+	std::vector<uint64_t> &DB;
+	int depth;
+	std::vector<uint64_t> &workQueue;
+	pthread_mutex_t &queueLock;
+	pthread_mutex_t &writeLock;
+	PermutationPuzzleEnvironment<state, action> *env;
+};
 
 /**
  Note, assumes that state has a public vector<int> called puzzle in which the
@@ -19,11 +52,17 @@ template <class state, class action>
 class PermutationPuzzleEnvironment : public SearchEnvironment<state, action>
 {
 public:
+	PermutationPuzzleEnvironment():maxItem(0), maxPattern(0) {}
 	/**
 	 Returns the value of n! / k!
 	 **/
 	uint64_t nUpperk(int n, int k) const;
 	
+	/**
+	 Builds caches for nUpperk
+	 **/
+	void buildCaches() const;
+
 	/**
 	 Returns the Hash Value of the given state using the given set of distinct items
 	 **/
@@ -35,22 +74,32 @@ public:
 	void Load_Regular_PDB(const char *fname, state &goal, bool print_histogram);
 	
 	/**
-	 Performs a regular PDB lookup for the given state
+	 Performs a PDB lookup for the given state (additive or max is automatic)
 	 **/
-	double Regular_PDB_Lookup(const state &s);
+	double PDB_Lookup(const state &s);
+
+	/**
+	 Builds a regular PDB given the file name of the file to write the PDB to, and a list of distinct tiles
+	 **/
+	void Build_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename, bool additive);
+
 	
 	/**
-	 Builds a regular PDB given the file name of the file to write the PDB to, and a list of distinct
-	 tiles
+	 Builds a regular PDB given the file name of the file to write the PDB to, and a list of distinct tiles
 	 **/
 	void Build_Regular_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename);
 	
 	/**
-	 Builds a regular PDB given the file name of the file to write the PDB to, and a list of distinct
-	 tiles
+	 Builds a regular PDB given the file name of the file to write the PDB to, and a list of distinct tiles
 	 **/
 	void Build_Additive_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename, bool blank = false);
 
+	/**
+	 Loads a regular PDB given the file name of the file to read the PDB from, and a list of distinct tiles
+	 **/
+	void Load_Additive_PDB(const state &goal, const char *pdb_filename);
+
+	
 	/**
 	 Returns a hash value for a permutation puzzle
 	 **/
@@ -72,6 +121,10 @@ public:
 	 **/
 	static std::vector<int> Get_Random_Permutation(unsigned size);
 	
+	double HCost(const state &s);
+private:
+	double HCost(const state &s, int treeNode);
+public:
 	/**
 	 Checks that the given state is a valid state for this domain. Note, is
 	 not a check of solvability, just legality (ie. has the right size, dimensions).
@@ -111,11 +164,25 @@ public:
 	
 	static bool Read_In_Permutations(const char *filename, unsigned size, unsigned max_puzzles, std::vector<std::vector<int> > &permutations, bool puzz_num_start);
 	
+	void CreateThreads(int count, int depth);
+	void SendWorkToThread(uint64_t index);
+	void DoneWithThreads();
+	void WaitForThreads();
+
+	bool additive;
+	int maxItem, maxPattern;
 	// holds a set of Pattern Databases which can be maxed over later
 	std::vector<std::vector<uint8_t> > PDB;
 	// holds the set of distinct items used to build the associated PDB (and therefore needed for hashing)
 	std::vector<std::vector<int> > PDB_distincts;
-	
+	std::vector<PDBTreeNode> lookups;
+	std::vector<int> histogram;
+
+	std::vector<pthread_t> threads;
+	pthread_mutex_t queueLock;
+	pthread_mutex_t writeLock;
+	std::vector<uint64_t> workQueue;
+	mutable std::vector<std::vector<uint64_t> > factorialCache;
 };
 
 template <class state, class action>
@@ -196,34 +263,71 @@ uint64_t PermutationPuzzleEnvironment<state, action>::Factorial(int val) const
 }
 
 template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::buildCaches() const
+{
+	factorialCache.resize(maxItem+1);
+	for (int n = 0; n < factorialCache.size(); n++)
+	{
+		factorialCache[n].resize(maxItem-maxPattern+1);
+		for (int k = 0; k < factorialCache[n].size(); k++)
+		{
+			uint64_t value = 1;
+			for (int i = n; i > k; i--)
+			{
+				value *= i;
+			}
+			factorialCache[n][k] = value;
+
+		}
+	}
+}
+
+
+template <class state, class action>
 uint64_t PermutationPuzzleEnvironment<state, action>::nUpperk(int n, int k) const
 {
-	uint64_t value = 1;
-	assert(n >= 0 && k >= 0);
-	
-	for (int i = n; i > k; i--)
-	{
-		value *= i;
-	}
-	
-	return value;
+	assert(factorialCache.size() > n);
+	assert(factorialCache[n].size() > k);
+	return factorialCache[n][k];
+
+//	static std::vector<std::vector<uint64_t> > cache;
+//	if (n >= cache.size())
+//		cache.resize(n+1);
+//	if (k >= cache[n].size())
+//		cache[n].resize(k+1);
+//	if (cache[n][k] == 0)
+//	{
+//		uint64_t value = 1;
+//		assert(n >= 0 && k >= 0);
+//		
+//		for (int i = n; i > k; i--)
+//		{
+//			value *= i;
+//		}
+//	
+//		cache[n][k] = value;
+//		return value;
+//	}
+//	return cache[n][k];
 }
 
 // TODO Change to Myrvold and Ruskey ranking function
 template <class state, class action>
 uint64_t PermutationPuzzleEnvironment<state, action>::GetPDBHash(const state &s, const std::vector<int> &distinct) const
 {
-	std::vector<int> locs;
+	static std::vector<int> locs;
+	static std::vector<int> dual;
 	locs.resize(distinct.size()); // vector for distinct item locations
+	dual.resize(s.puzzle.size()); // vector for distinct item locations
 	
 	// find item locations
 	for (unsigned int x = 0; x < s.puzzle.size(); x++)
 	{
-		for (unsigned int y = 0; y < distinct.size(); y++)
-		{
-			if (s.puzzle[x] == distinct[y])
-				locs[y] = x;
-		}
+		dual[s.puzzle[x]] = x;
+	}
+	for (int x = 0; x < distinct.size(); x++)
+	{
+		locs[x] = dual[distinct[x]];
 	}
 	
 	uint64_t hashVal = 0;
@@ -247,96 +351,284 @@ uint64_t PermutationPuzzleEnvironment<state, action>::GetPDBHash(const state &s,
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Load_Regular_PDB(const char *fname, state &goal, bool print_histogram)
 {
-	std::vector<int> values(256); // number of abstract states with that heuristic value
-	
-	// number of abstract states
-	uint64_t COUNT;
-	
+	additive = false;
 	PDB.resize(PDB.size()+1); // increase the number of regular PDBs being stored
-	
+	printf("Loading PDB '%s'\n", fname);
 	std::vector<int> distinct;
 	
-	std::ifstream ifs(fname, std::ios::in);
-	
-	if (ifs.fail())
+	FILE *f;
+	f = fopen(fname, "r");
+	if (f == 0)
 	{
-		fprintf(stderr, "File Reading Failed\n");
-		exit(1);
+		printf("Failed to open pdb '%s'\n", fname);
+		exit(0);
 	}
 	
-	if (ifs.eof())
-	{
-		fprintf(stderr, "File Reading Failed\n");
-		exit(1);
-	}
+	int num_distinct;
+	assert(fread(&num_distinct, sizeof(num_distinct), 1, f) == 1);
+	distinct.resize(num_distinct);
+	assert(fread(&distinct[0], sizeof(distinct[0]), distinct.size(), f) == distinct.size());
 	
-	std::string s;
-	getline(ifs, s);
-	unsigned num_distinct = atoi(s.c_str());
+	maxItem = max(maxItem,goal.puzzle.size());
+	maxPattern = max(maxPattern, distinct.size());
+	buildCaches();
 	
-	for (unsigned i = 0; i < num_distinct; i++)
-	{
-		if (ifs.eof())
-		{
-			fprintf(stderr, "File Reading Failed\n");
-			exit(1);
-		}
-		getline(ifs, s);
-		distinct.push_back(atoi(s.c_str()));
-	}
-	
-	COUNT = nUpperk(goal.puzzle.size(), goal.puzzle.size() - distinct.size());
+	uint64_t COUNT = nUpperk(goal.puzzle.size(), goal.puzzle.size() - distinct.size());
 	PDB.back().resize(COUNT);
-	uint64_t index = 0;
-	while(index < COUNT && !ifs.eof())
-	{
-		getline(ifs, s);
-		PDB.back()[index] = atoi(s.c_str());
-		index++;
-	}
 	
-	if (index < COUNT)
+	size_t index;
+	if ((index = fread(&PDB.back()[0], sizeof(uint8_t), COUNT, f)) != COUNT)
 	{
-		fprintf(stderr, "File Is Not Proper PDB\n");
-		exit(1);
+		printf("Error; did not correctly read %lu entries from PDB (%lu instead)\n", COUNT, index);
+		exit(0);
 	}
+	fclose(f);
+	
 	PDB_distincts.push_back(distinct); // stores distinct
 	
-	if (print_histogram)
+	if (1)//print_histogram)
 	{
+		uint8_t maxval = 0;
+		std::vector<int> values(256);
 		// performs histogram count
 		for (unsigned int x = 0; x < COUNT; x++)
 		{
 			values[(PDB.back()[x])]++;
+			maxval = max(maxval, PDB.back()[x]);
 		}
 		// outputs histogram of heuristic value counts
-		for (int x = 0; x < 256; x++)
+		histogram.resize(max(histogram.size(),maxval+1));
+		for (int x = 0; x <= maxval; x++)
 		{
 			printf("%d:\t%d\n", x, values[x]);
 		}
 	}
-	
-	this->StoreGoal(goal);
+}
+
+
+template <class state, class action>
+double PermutationPuzzleEnvironment<state, action>::PDB_Lookup(const state &s)
+{
+	if (!additive)
+	{
+		double val = 0;
+		for (unsigned int x = 0; x < PDB.size(); x++)
+		{
+			uint64_t index = GetPDBHash(s, PDB_distincts[x]);
+			histogram[PDB[x][index]]++;
+			val = std::max(val, (double)PDB[x][index]);
+		}
+		return val;
+	}
+	else {
+		double val = 0;
+		uint8_t tmp;
+		for (unsigned int x = 0; x < PDB.size(); x++)
+		{
+			uint64_t index = GetPDBHash(s, PDB_distincts[x]);
+			histogram[PDB[x][index]]++;
+			tmp = PDB[x][index];
+			if (tmp > 4) tmp = 4;
+			val += (double)tmp;
+		}
+		return val;
+	}
 }
 
 template <class state, class action>
-double PermutationPuzzleEnvironment<state, action>::Regular_PDB_Lookup(const state &s)
+void *ThreadedWorker(void *arg)
 {
-	double val = 0;
-	for (unsigned int x = 0; x < PDB.size(); x++)
+//	ThreadData<state, action> *d = (ThreadData<state, action>*)arg;
+//	std::vector<uint64_t> myQueue;
+//	state s;
+//	std::vector<state> children;
+//	while (true)
+//	{
+//		pthread_mutex_lock(&d->queueLock);
+//		for (int x = 0; x < 10 && d->workQueue.size() > 0; x++)
+//		{
+//			myQueue.push_back(d->workQueue.back());
+//			d->workQueue.pop_back();
+//		}
+//		pthread_mutex_unlock(&d->queueLock);
+//
+//		while (myQueue.size() > 0)
+//		{
+//			// expand all states
+//			uint64_t next = myQueue.back();
+//			myQueue.pop_back();
+//			
+//			d->env->GetStateFromHash(s, next);
+//			for (unsigned int x = 0; x < children.size(); x++)
+//			{
+//				if (DB[GetPDBHash(children[x], distinct)] == 255)
+//				{
+//					int hval = depth-this->HCost(children[x]);
+//					assert(hval >= 0);
+//					DB[GetPDBHash(children[x], distinct)] = hval;
+//
+//					q_next.push_back(children[x]);
+//					entries++;
+//					if ((entries % 100000) == 0)
+//					{
+//						std::cout << entries << std::endl;
+//					}
+//				}
+//			}
+//
+//			// store neighbors
+//			
+//			// write all neighbors & update coarse open next
+//			
+//		}
+//	}
+}
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::CreateThreads(int count, int depth)
+{
+//	queueLock = PTHREAD_MUTEX_INITIALIZER;
+//	writeLock = PTHREAD_MUTEX_INITIALIZER;
+//
+//	// initialize data structure with (1) database pointer (2) depth (3) pointer to queue
+//	for (int x = 0; x < count; x++)
+//	{
+//		pthread_create(&threads[x], NULL, ThreadedWorker<state, action>, (void *)x);
+//	}
+//
+}
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::SendWorkToThread(uint64_t index)
+{
+	pthread_mutex_lock(&queueLock);
+	workQueue.push_back(index);
+	pthread_mutex_unlock(&queueLock);
+}
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::DoneWithThreads()
+{
+//	pthread_mutex_lock(&queueLock);
+//	for (int x = 0; x < numThreads; x++)
+//		workQueue.push_back(kDone);
+//	pthread_mutex_unlock(&queueLock);
+}
+
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::WaitForThreads()
+{
+	for (int x = 0; x < threads.size(); x++)
 	{
-		uint64_t index = GetPDBHash(s, PDB_distincts[x]);
-		val = std::max(val, (double)PDB[x][index]);
+		int result = pthread_join(threads[x], NULL);
+		if (result != 0)
+		{
+			printf("Unknown error joining with thread %d\n", x);
+		}
 	}
-	return val;
+}
+
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Build_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename, bool additive)
+{
+//	maxItem = max(maxItem,start.puzzle.size());
+//	maxPattern = max(maxPattern, distinct.size());
+//	buildCaches();
+//	
+//	uint64_t COUNT = nUpperk(start.puzzle.size(), start.puzzle.size() - distinct.size());
+//	std::vector<uint8_t> DB(COUNT);
+//	
+//	for (unsigned int x = 0; x < DB.size(); x++)
+//		DB[x] = 255;
+//	
+//	std::vector<bool> coarseOpenCurr((COUNT+1023)/1024);
+//	std::vector<bool> coarseOpenNext((COUNT+1023)/1024);
+//	
+//	uint64_t entries = 0;
+//	std::cout << "Num Entries: " << COUNT << std::endl;
+//	std::cout << "Goal State: " << start << std::endl;
+//	std::cout << "State Hash of Goal: " << GetStateHash(start) << std::endl;
+//	std::cout << "PDB Hash of Goal: " << GetPDBHash(start, distinct) << std::endl;
+//	
+//	std::deque<state> q_curr, q_next;
+//	std::vector<state> children;
+//	
+//	for (unsigned i = 0; i < start.puzzle.size(); i++)
+//	{
+//		bool is_distinct = false;
+//		for (unsigned j = 0; j < distinct.size(); j++)
+//		{
+//			if (start.puzzle[i] == distinct[j])
+//			{
+//				is_distinct = true;
+//				break;
+//			}
+//		}
+//		
+//		if (!is_distinct)
+//		{
+//			start.puzzle[i] = -1;
+//		}
+//	}
+//	
+//	std::cout << "Abstract Goal State: " << start << std::endl;
+//	std::cout << "Abstract PDB Hash of Goal: " << GetPDBHash(start, distinct) << std::endl;
+//	Timer t;
+//	t.StartTimer();
+//	q_curr.push_back(start);
+//	DB[GetPDBHash(start, distinct)] = 0;
+//	coarseOpenCurr[GetPDBHash(start, distinct)/1024] = 1;
+//	entries++;
+//	int depth = 0;
+//	do {
+//		CreateThreads(count, depth+1);
+//		for (uint64_t x = 0; x < COUNT; x++)
+//		{
+//			if (coarseOpenCurr[x/1024] == false)
+//			{
+//				x += 1023;
+//				continue;
+//			}
+//			if (DB[x] == depth)
+//				SendWorkToThread(x);
+//		}
+//		DoneWithThreads();
+//		WaitForThreads();
+//		coarseOpenCurr.swap(coarseOpenNext);
+//		depth++;
+//	} while (newEntries > 0);
+//	
+//	printf("%1.2fs elapsed\n", t.EndTimer());
+//	if (entries != COUNT)
+//	{
+//		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+//		assert(entries == COUNT);
+//	}
+//	
+//	//TODO fix the output of PDBs
+//	FILE *f = fopen(pdb_filename, "w");
+//	int num = distinct.size();
+//	assert(fwrite(&num, sizeof(num), 1, f) == 1);
+//	assert(fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f) == distinct.size());
+//	assert(fwrite(&DB[0], sizeof(uint8_t), COUNT, f) == COUNT);
+//	fclose(f);
+//
+//	PDB.push_back(DB); // increase the number of regular PDBs being stored
+//	PDB_distincts.push_back(distinct); // stores distinct
 }
 
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename)
 {
+	maxItem = max(maxItem,start.puzzle.size());
+	maxPattern = max(maxPattern, distinct.size());
+	buildCaches();
+
 	uint64_t COUNT = nUpperk(start.puzzle.size(), start.puzzle.size() - distinct.size());
 	std::vector<uint8_t> DB(COUNT);
-	
+
 	for (unsigned int x = 0; x < DB.size(); x++)
 		DB[x] = 255;
 	
@@ -369,7 +661,8 @@ void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start
 	
 	std::cout << "Abstract Goal State: " << start << std::endl;
 	std::cout << "Abstract PDB Hash of Goal: " << GetPDBHash(start, distinct) << std::endl;
-	
+	Timer t;
+	t.StartTimer();
 	q_curr.push_back(start);
 	DB[GetPDBHash(start, distinct)] = 0;
 	entries++;
@@ -378,11 +671,6 @@ void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start
 	do {
 		while (!q_curr.empty())
 		{
-			// updates on how much built
-			if ((entries % 10000) == 0)
-			{
-				std::cout << entries << std::endl;
-			}
 			state next = q_curr.front();
 			q_curr.pop_front();
 			children.clear();
@@ -391,14 +679,18 @@ void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start
 			{
 				if (DB[GetPDBHash(children[x], distinct)] == 255)
 				{
-					int hval = depth;//-this->HCost(children[x]);
+					int hval = depth-this->HCost(children[x]);
 					assert(hval >= 0);
 					DB[GetPDBHash(children[x], distinct)] = hval;
 					depths[hval]++;
 
 					q_next.push_back(children[x]);
 					entries++;
-					
+					if ((entries % 100000) == 0)
+					{
+						std::cout << entries << std::endl;
+					}
+//					std::cout << children[x] << std::endl;
 					/* For Debugging
 					 if (entries < 20)
 					 {
@@ -412,30 +704,47 @@ void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start
 		q_curr.swap(q_next);
 	} while (!q_curr.empty());
 	
-	assert(entries == COUNT);
+	printf("%1.2fs elapsed\n", t.EndTimer());
+	if (entries != COUNT)
+	{
+		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		assert(entries == COUNT);
+	}
 	
 	//TODO fix the output of PDBs
 	FILE *f = fopen(pdb_filename, "w");
-	fprintf(f, "%ld\n", distinct.size()); // first element is the number of distinct pieces
-	for (unsigned i = 0; i < distinct.size(); i++)
-	{
-		fprintf(f, "%d\n", distinct[i]); //first few lines are these distinct elements
-	}
-	for (unsigned i = 0; i < COUNT; i++)
-	{
-		fprintf(f, "%d\n", DB[i]);
-	}
+	int num = distinct.size();
+	assert(fwrite(&num, sizeof(num), 1, f) == 1);
+	assert(fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f) == distinct.size());
+	assert(fwrite(&DB[0], sizeof(uint8_t), COUNT, f) == COUNT);
+	//fprintf(f, "%ld\n", distinct.size()); // first element is the number of distinct pieces
+//	for (unsigned i = 0; i < distinct.size(); i++)
+//	{
+//		fprintf(f, "%d\n", distinct[i]); //first few lines are these distinct elements
+//	}
+//	for (unsigned i = 0; i < COUNT; i++)
+//	{
+//		fprintf(f, "%d\n", DB[i]);
+//	}
 	
 	fclose(f);
-	printf("%lld entries\n", entries);
+	
+	printf("Wrote %lld entries to '%s'\n", entries, pdb_filename);
 	for (int x = 0; x < depths.size(); x++)
 		printf("%d %lld\n", x, depths[x]);
+	
+	PDB.push_back(DB); // increase the number of regular PDBs being stored
+	PDB_distincts.push_back(distinct); // stores distinct
 }
 
 // The distinct states should not include blanks
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Build_Additive_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename, bool blank)
 {
+	maxItem = max(maxItem,start.puzzle.size());
+	maxPattern = max(maxPattern, distinct.size());
+	buildCaches();
+
 	uint64_t COUNT = nUpperk(start.puzzle.size(), start.puzzle.size() - distinct.size());
 	uint64_t closedSize = nUpperk(start.puzzle.size(), start.puzzle.size() - distinct.size() - 1);
 	std::vector<int> closedPattern(distinct);
@@ -485,6 +794,7 @@ void PermutationPuzzleEnvironment<state, action>::Build_Additive_PDB(state &star
 	entries++;
 	int depth = 1;
 	std::vector<uint64_t> depths(2);
+	depths[0]++;
 	do {
 		while (!q_curr.empty())
 		{
@@ -503,7 +813,7 @@ void PermutationPuzzleEnvironment<state, action>::Build_Additive_PDB(state &star
 				closed[closedHash] = true;
 			}
 			
-			children.clear();
+			children.resize(0);
 			this->GetSuccessors(next, children);
 			
 			for (unsigned int x = 0; x < children.size(); x++)
@@ -519,14 +829,25 @@ void PermutationPuzzleEnvironment<state, action>::Build_Additive_PDB(state &star
 					uint64_t pdbHash = GetPDBHash(children[x], distinct);
 					if (DB[pdbHash] == 255)
 					{
-						int hval = depth-this->HCost(children[x]);
+						int hval = 0;//this->HCost(children[x]);//*2-40;
+//						if (0 == hval%2) // even
+//						{
+//							hval=hval*2-40;
+//						}
+//						else {
+//							hval=hval*2-41;
+//						}
+						//if (hval > 12) hval = 12;
+						hval = depth-hval;
 						assert(hval >= 0);
 						DB[pdbHash] = hval;
+						if (hval >= depths.size())
+							depths.resize(hval+1);
 						depths[hval]++;
 						entries++;
 
 						// updates on how much built
-						if ((entries % 10000) == 0)
+						if ((entries % 100000) == 0)
 						{
 							std::cout << entries << std::endl;
 						}
@@ -539,7 +860,7 @@ void PermutationPuzzleEnvironment<state, action>::Build_Additive_PDB(state &star
 			}
 		}
 		depth++;
-		depths.resize(depth+1);
+		//depths.resize(depth+1);
 		q_curr.swap(q_next);
 	} while (!q_curr.empty());
 	
@@ -552,7 +873,7 @@ void PermutationPuzzleEnvironment<state, action>::Build_Additive_PDB(state &star
 	{
 		fprintf(f, "%d\n", distinct[i]); //first few lines are these distinct elements
 	}
-	fwrite(&DB[0], sizeof(uint8_t), COUNT, f);
+	assert(fwrite(&DB[0], sizeof(uint8_t), COUNT, f) == COUNT);
 //	for (unsigned i = 0; i < COUNT; i++)
 //	{
 //		fprintf(f, "%d\n", DB[i]);
@@ -564,6 +885,116 @@ void PermutationPuzzleEnvironment<state, action>::Build_Additive_PDB(state &star
 		printf("%d %lld\n", x, depths[x]);
 }
 
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Load_Additive_PDB(const state &goal, const char *pdb_filename)
+{
+	additive = true;
+	
+	PDB.resize(PDB.size()+1); // increase the number of regular PDBs being stored
+	
+	std::vector<int> distinct;
+	
+	FILE *f;
+	f = fopen(pdb_filename, "r");
+	if (f == 0)
+	{
+		printf("Failed to open pdb '%s'\n", pdb_filename);
+		exit(0);
+	}
+	
+	unsigned num_distinct;
+	if (fscanf(f, "%d\n", &num_distinct) != 1)
+	{
+		printf("Failure reading tile count from PDB\n");
+		exit(0);
+	}
+	
+	for (unsigned i = 0; i < num_distinct; i++)
+	{
+		int tmp;
+		if (fscanf(f, "%d\n", &tmp) != 1)
+		{
+			printf("Failure reading tile from PDB\n");
+			exit(0);
+		}
+
+		distinct.push_back(tmp);
+	}
+	
+	maxItem = max(maxItem,goal.puzzle.size());
+	maxPattern = max(maxPattern, distinct.size());
+	buildCaches();
+
+	uint64_t COUNT = nUpperk(goal.puzzle.size(), goal.puzzle.size() - distinct.size());
+	PDB.back().resize(COUNT);
+
+	size_t index;
+	if ((index = fread(&PDB.back()[0], sizeof(uint8_t), COUNT, f)) != COUNT)
+	{
+		printf("Error; did not correctly read %lu entries from PDB (%lu instead)\n", COUNT, index);
+		exit(0);
+	}
+	fclose(f);
+
+	PDB_distincts.push_back(distinct); // stores distinct
+	
+	if (1)//print_histogram)
+	{
+		uint8_t maxval = 0;
+		std::vector<int> values(256);
+		// performs histogram count
+		for (unsigned int x = 0; x < COUNT; x++)
+		{
+			values[(PDB.back()[x])]++;
+			maxval = max(maxval, PDB.back()[x]);
+		}
+		// outputs histogram of heuristic value counts
+		histogram.resize(max(histogram.size(),maxval+1));
+		for (int x = 0; x <= maxval; x++)
+		{
+			printf("%d:\t%d\n", x, values[x]);
+		}
+	}
+
+}
+
+template <class state, class action>
+double PermutationPuzzleEnvironment<state, action>::HCost(const state &s)
+{
+	if (lookups.size() == 0)
+		return 0;
+	return HCost(s, 0);
+}
+
+template <class state, class action>
+double PermutationPuzzleEnvironment<state, action>::HCost(const state &s, int treeNode)
+{
+	double hval = 0;
+	switch (lookups[treeNode].t)
+	{
+		case kMaxNode:
+		{
+			for (int x = 0; x < lookups[treeNode].numChildren; x++)
+			{
+				hval = max(hval, HCost(s, lookups[treeNode].firstChildID+x));
+			}
+		} break;
+		case kAddNode:
+		{
+			for (int x = 0; x < lookups[treeNode].numChildren; x++)
+			{
+				hval += HCost(s, lookups[treeNode].firstChildID+x);
+			}
+		} break;
+		default:
+		{
+			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID]);
+			hval = PDB[lookups[treeNode].PDBID][index];
+		} break;
+			
+	}
+	return hval;
+}
 
 template <class state, class action>
 bool PermutationPuzzleEnvironment<state, action>::Check_Permutation(const std::vector<int> &to_check)

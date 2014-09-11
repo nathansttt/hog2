@@ -38,48 +38,17 @@
 #include "RubiksCubeEdges.h"
 #include "RubiksCubeCorners.h"
 
-static FlipSideState fss(5);
-static FlipSide fs(5);
+void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char);
+void STPTest(unsigned long , tKeyboardModifier , char);
 
-RubiksCorner rk_c;
-RubikEdge rk_e;
-RubiksCornerState rk_sc;
-RubikEdgeState rk_se;
-
-bool mouseTracking;
-int px1, py1, px2, py2;
-int absType = 0;
-
-std::vector<PuzzleSimulation *> unitSims;
 MNPuzzle *mnp = 0;
-//unit *cameraTarget = 0;
 
-Plotting::Plot2D *plot = 0;
-Plotting::Line *distLine = 0;
 bool recording = false;
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 640, 640);
-}
-
-
-/**
- * This function is used to allocate the unit simulated that you want to run.
- * Any parameters or other experimental setup can be done at this time.
- */
-void CreateSimulation(int id)
-{
-//	Map *map;
-//	if (gDefaultMap[0] == 0)
-//		map = new Map(60, 60);
-//	else
-//		map = new Map(gDefaultMap);
-
-	unitSims.resize(id+1);
-	unitSims[id] = new PuzzleSimulation(mnp = new MNPuzzle(4, 4));
-	unitSims[id]->SetStepType(kMinTime);
 }
 
 /**
@@ -97,10 +66,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 
-	InstallKeyboardHandler(MyPathfindingKeyHandler, "Mapbuilding Unit", "Deploy unit that paths to a target, building a map as it travels", kNoModifier, 'd');
-	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add A* Unit", "Deploys a simple a* unit", kNoModifier, 'a');
-	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
-	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, 1);
+	InstallKeyboardHandler(STPTest, "STP Test", "Test the STP PDBs", kNoModifier, 'd');
+	InstallKeyboardHandler(BuildSTP_PDB, "Build STP PDBs", "Build PDBs for the STP", kNoModifier, 'a');
 
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -120,8 +87,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	{
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
-		CreateSimulation(windowID);
 		SetNumPorts(windowID, 1);
+		if (mnp == 0)
+			mnp = new MNPuzzle(4, 4);
 	}
 }
 
@@ -132,9 +100,6 @@ slideDir lastMove = kUp;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	if ((windowID < unitSims.size()) && (unitSims[windowID] == 0))
-		return;
-
 	v += 0.1;
 	if (v > 1)
 	{
@@ -161,29 +126,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		cnt--;
 	}
 	return;
-//	rk_e.OpenGLDraw(rk_se);
-//	rk_c.OpenGLDraw(rk_sc);
-//	return;
 	
-	if (viewport == 0)
-	{
-		unitSims[windowID]->StepTime(1.0/30.0);
-	}
-	if (viewport == 3)
-	{
-		fs.OpenGLDraw(fss);
-		return;
-	}
-	if (unitSims[windowID]->GetUnit(viewport))
-	{
-		//printf("Drawing unit %d\n", viewport);
-		MNPuzzleState s;
-		unitSims[windowID]->GetUnit(viewport)->GetLocation(s);
-		MNPuzzleState g(s.width, s.height);
-		//printf("Distance: %f\n", unitSims[windowID]->GetEnvironment()->HCost(s, g));
-		unitSims[windowID]->GetUnit(viewport)->OpenGLDraw(unitSims[windowID]->GetEnvironment(),
-														  unitSims[windowID]->GetSimulationInfo() );
-	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -201,18 +144,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'r': recording = !recording; break;
 		case '0':
 		{
-			static int x = 0;
-			rk_e.ApplyAction(rk_se, (x/4)%18);
-			rk_c.ApplyAction(rk_sc, (x/4)%18);
-			x++;
 		}
 			break;
 		case '1':
 		{
-			static uint64_t x = 0;
-			rk_c.GetStateFromHash(x, rk_sc);
-			printf("%llu : %llu\n", x, rk_c.GetStateHash(rk_sc));
-			x+=12345;
 		}
 			break;
 		case '2':
@@ -223,8 +158,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '7':
 		case '8':
 		case '9':
-			rk_e.ApplyAction(rk_se, key-'0'+9);
-			rk_c.ApplyAction(rk_sc, key-'0'+9);
 			break;
 		case '\t':
 			if (mod != kShiftDown)
@@ -235,7 +168,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'p':
-			rk_sc.Reset();
 			break;
 		case 'o':
 		{
@@ -266,29 +198,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //				for (unsigned int x = 0; x < path1.size(); x++)
 //					std::cout << path1[x] << std::endl;
 			}
-			else {
-//				std::vector<flipMove> acts;
-//				fs.GetActions(fss, acts);
-//				fs.ApplyAction(fss, acts[random()%acts.size()]);
-//				FlipSideState fg(5);
-//				printf("Distance: %f\n", fs.HCost(fss, fg));
-			}
-			
-			if (unitSims[windowID]->GetPaused())
-			{
-				unitSims[windowID]->SetPaused(false);
-				unitSims[windowID]->StepTime(1.0/30.0);
-				unitSims[windowID]->SetPaused(true);
-			}
 		}
 			break;
-		case ']': absType = (absType+1)%3; break;
-		case '[': absType = (absType+4)%3; break;
-//		case '{': unitSim->setPaused(true); unitSim->offsetDisplayTime(-0.5); break;
-//		case '}': unitSim->offsetDisplayTime(0.5); break;
 		default:
-			//if (unitSim)
-			//	unitSim->GetEnvironment()->GetMapAbstraction()->ToggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
 			break;
 	}
 }
@@ -300,129 +212,245 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 #include "DFS.h"
 #include "NaryTree.h"
 
-void MyRandomUnitKeyHandler(unsigned long windowID, tKeyboardModifier , char)
+void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char)
 {
 	MNPuzzleState tmp(4, 4);
 	mnp->StoreGoal(tmp);
+
 	std::vector<int> tiles;
+
+	tmp.Reset();
+	tiles.resize(0);
+	tiles.push_back(1);
+	tiles.push_back(4);
+	tiles.push_back(5);
+	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_145_add.pdb", true);
+
+	tmp.Reset();
+	tiles.resize(0);
+	tiles.push_back(2);
+	tiles.push_back(3);
+	tiles.push_back(6);
+	tiles.push_back(7);
+	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_2367_add.pdb", true);
+
+	tmp.Reset();
+	tiles.resize(0);
 	for (int x = 1; x <= 7; x++)
 		tiles.push_back(x);
 //	tiles.push_back(0);
-//	tiles.push_back(3);
-//	tiles.push_back(7);
+//	tiles.push_back(10);
 //	tiles.push_back(11);
-//	tiles.push_back(12);
+//	tiles.push_back(14);
+//	tiles.push_back(15);
+//	tiles.push_back(7);
 //	tiles.push_back(13);
 //	tiles.push_back(14);
 //	tiles.push_back(15);
 	
 	
-	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7_add.pdb", true);
+	//mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7_add.pdb", true);
+	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7+145+2367_add.pdb", true);
 	//mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_8-15_add.pdb", true);
 	//mnp->Build_Regular_PDB(tmp, tiles, "/Users/nathanst/Desktop/pdb7-nosub-fringe.bin");
 }
 
-void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
+void STPTest(unsigned long , tKeyboardModifier , char)
 {
-	
-	static int t = 0;
-	rk_e.GetStateFromHash(t, rk_se);
-	t++;
-	return;
-	uint64_t totNodes = 0;
-	for (int x = 0; x < 362880; x++)
-	{
-		BFS<MNPuzzleState, slideDir> bfs;
-		DFS<MNPuzzleState, slideDir> dfs;
-		DFID<MNPuzzleState, slideDir> dfid2;
-		IDAStar<MNPuzzleState, slideDir> ida;
-		MNPuzzle mnae33(3, 3);
-//		MNPuzzle mnae34(3, 4);
-//		MNPuzzle mnae55(5, 5);
-		MNPuzzleState mnps33(3, 3);
-		MNPuzzleState mnps33g(3, 3);
-//		for (unsigned int x = 0; x < mnps33g.puzzle.size(); x++)
-//			if (mnps33g.puzzle[x] != 0)
-//				mnps33g.puzzle[x] = 1+(14-mnps33g.puzzle[x])%8;
+	MNPuzzleState tmp(4, 4);
+	mnp->StoreGoal(tmp);
 
-		mnae33.GetStateFromHash(mnps33, x);
-		if (mnae33.GetParity(mnps33) != mnae33.GetParity(mnps33g))
-			continue;
+	std::vector<int> tiles;
+
+	if (mnp->PDB.size() == 0)
+	{
+		tiles.resize(0);
+		tiles.push_back(1);
+		tiles.push_back(2);
+		tiles.push_back(3);
+		tiles.push_back(4);
+		tiles.push_back(5);
+		tiles.push_back(6);
+		tiles.push_back(7);
+//		mnp->Load_Additive_PDB(tmp, "/Users/nathanst/Desktop/STP_1-7_add.pdb");
+		mnp->Load_Additive_PDB(tmp, "/Users/nathanst/Desktop/STP_1-7+145+2367_add.pdb");
 		
-//		MNPuzzleState mnps34(3, 4);
-		std::vector<MNPuzzleState> s;
-		std::vector<slideDir> s2;
-
-//		dfid2.GetPath(&mnae33, mnps33, mnps33, s2);
-//		dfid2.GetPath(&mnae34, mnps34, mnps34, s2);
-//		bfs.GetPath(&mnae33, mnps33, mnps33, s);
-//		bfs.GetPath(&mnae34, mnps34, mnps34, s);
-
-		std::cout << mnps33 << " to " << mnps33g << std::endl;
-		ida.GetPath(&mnae33, mnps33, mnps33g, s2);
-		printf("%d: %lld nodes expanded\n", x, ida.GetNodesExpanded());
-		totNodes += ida.GetNodesExpanded();
-//		for (unsigned int x = 0; x < s.size(); x++)
-//			std::cout << s[x] << std::endl;
+		tiles.resize(0);
+		tiles.push_back(1);
+		tiles.push_back(4);
+		tiles.push_back(5);
+		mnp->Load_Additive_PDB(tmp, "/Users/nathanst/Desktop/STP_145_add.pdb");
 		
-//		std::cout << mnps33 << std::endl << mnps33g << std::endl;
-//		ida.GetPath(&mnae33, mnps33g, mnps33, s);
-//		printf("%lld nodes expanded\n", ida.GetNodesExpanded());
-//		for (unsigned int x = 0; x < s.size(); x++)
-//			std::cout << s[x] << std::endl;
+		tiles.resize(0);
+		tiles.push_back(2);
+		tiles.push_back(3);
+		tiles.push_back(6);
+		tiles.push_back(7);
+		mnp->Load_Additive_PDB(tmp, "/Users/nathanst/Desktop/STP_2367_add.pdb");
+
+
+		tiles.resize(0);
+		tiles.push_back(8);
+		tiles.push_back(9);
+		tiles.push_back(12);
+		tiles.push_back(13);
+		mnp->Load_Additive_PDB(tmp, "/Users/nathanst/Desktop/STP_891213_add.pdb");
+
+		tiles.resize(0);
+		tiles.push_back(10);
+		tiles.push_back(11);
+		tiles.push_back(14);
+		tiles.push_back(15);
+		mnp->Load_Additive_PDB(tmp, "/Users/nathanst/Desktop/STP_10111415_add.pdb");
 	}
-	printf("%llu total nodes\n", totNodes);
-	exit(0);
 	
-	if (0)
-	{
-		std::vector<NaryState> narypath;
-		DFS<NaryState, NaryAction> dfs1;
-		DFID<NaryState, NaryAction> dfid;
-		NaryTree t1(2, 10);
-		NaryTree t2(3, 10);
-		NaryTree t3(4, 10);
-		NaryState s1 = 0, g1;
-		dfs1.GetPath(&t1, s1, s1, narypath);
-		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
-		dfs1.GetPath(&t2, s1, s1, narypath);
-		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
-		dfs1.GetPath(&t3, s1, s1, narypath);
-		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
+	IDAStar<MNPuzzleState, slideDir> ida;
+	std::vector<slideDir> path1;
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 
-		g1 = 2048-2;
-		dfid.GetPath(&t1, s1, g1, narypath);
-		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
-		g1 = 88573-2;
-		dfid.GetPath(&t2, s1, g1, narypath);
-		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
-		g1 = 1398101-2;
-		dfid.GetPath(&t3, s1, g1, narypath);
-		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
+	//15 2 12 11 14 13 9 5 1 3 8 7 0 10 6 4
+	s.puzzle[0] = 15;
+	s.puzzle[1] = 2;
+	s.puzzle[2] = 12;
+	s.puzzle[3] = 11;
+	s.puzzle[4] = 14;
+	s.puzzle[5] = 13;
+	s.puzzle[6] = 9;
+	s.puzzle[7] = 5;
+	s.puzzle[8] = 1;
+	s.puzzle[9] = 3;
+	s.puzzle[10] = 8;
+	s.puzzle[11] = 7;
+	s.puzzle[12] = 0;
+	s.puzzle[13] = 10;
+	s.puzzle[14] = 6;
+	s.puzzle[15] = 4;
+	s.blank = 12;
+	
+//	srandom(81);
+//	static int rand = 83;
+//	srandom(rand++);
+//	printf("Seed: %d\n", rand);
+//	for (unsigned int x = 0; x < 500; x++)
+//	{
+//		std::vector<slideDir> acts;
+//		mnp->GetActions(s, acts);
+//		mnp->ApplyAction(s, acts[random()%acts.size()]);
+//	}
+	std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
+	Timer t;
+	t.StartTimer();
+	ida.GetPath(mnp, s, g, path1);
+	t.EndTimer();
+	std::cout << "Path found, length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
+
+	for (int x = 0; x < mnp->histogram.size(); x++)
+	{
+		printf("%2d  %d\n", x, mnp->histogram[x]);
 	}
 
-	if (0)
-	{
-		std::vector<SequenceAlignmentState> statePath;
-		BFS<SequenceAlignmentState, SequenceAlignmentAction> bfs;
-		DFS<SequenceAlignmentState, SequenceAlignmentAction> dfs;
-		DFID<SequenceAlignmentState, SequenceAlignmentAction> dfid;
-
-		for (unsigned int x = 1; x < 13; x++)
-		{
-			SequenceAlignment sa10(x);
-			SequenceAlignmentState s1 = 0, g1 = -1;
-
-			bfs.GetPath(&sa10, s1, s1, statePath);
-			std::cout << bfs.GetNodesExpanded() << " total BFS nodes expanded" << std::endl;
-			
-			dfs.GetPath(&sa10, s1, s1, statePath);
-			std::cout << dfs.GetNodesExpanded() << " total DFS nodes expanded" << std::endl;
-			
-			dfid.GetPath(&sa10, s1, g1, statePath);
-			std::cout << dfid.GetNodesExpanded() << " total DFID nodes expanded" << std::endl;
-		}
-	}
+	mnp->PrintHStats();
+	
+	
+//	static int t = 0;
+//	rk_e.GetStateFromHash(t, rk_se);
+//	t++;
+//	return;
+//	uint64_t totNodes = 0;
+//	for (int x = 0; x < 362880; x++)
+//	{
+//		BFS<MNPuzzleState, slideDir> bfs;
+//		DFS<MNPuzzleState, slideDir> dfs;
+//		DFID<MNPuzzleState, slideDir> dfid2;
+//		IDAStar<MNPuzzleState, slideDir> ida;
+//		MNPuzzle mnae33(3, 3);
+////		MNPuzzle mnae34(3, 4);
+////		MNPuzzle mnae55(5, 5);
+//		MNPuzzleState mnps33(3, 3);
+//		MNPuzzleState mnps33g(3, 3);
+////		for (unsigned int x = 0; x < mnps33g.puzzle.size(); x++)
+////			if (mnps33g.puzzle[x] != 0)
+////				mnps33g.puzzle[x] = 1+(14-mnps33g.puzzle[x])%8;
+//
+//		mnae33.GetStateFromHash(mnps33, x);
+//		if (mnae33.GetParity(mnps33) != mnae33.GetParity(mnps33g))
+//			continue;
+//		
+////		MNPuzzleState mnps34(3, 4);
+//		std::vector<MNPuzzleState> s;
+//		std::vector<slideDir> s2;
+//
+////		dfid2.GetPath(&mnae33, mnps33, mnps33, s2);
+////		dfid2.GetPath(&mnae34, mnps34, mnps34, s2);
+////		bfs.GetPath(&mnae33, mnps33, mnps33, s);
+////		bfs.GetPath(&mnae34, mnps34, mnps34, s);
+//
+//		std::cout << mnps33 << " to " << mnps33g << std::endl;
+//		ida.GetPath(&mnae33, mnps33, mnps33g, s2);
+//		printf("%d: %lld nodes expanded\n", x, ida.GetNodesExpanded());
+//		totNodes += ida.GetNodesExpanded();
+////		for (unsigned int x = 0; x < s.size(); x++)
+////			std::cout << s[x] << std::endl;
+//		
+////		std::cout << mnps33 << std::endl << mnps33g << std::endl;
+////		ida.GetPath(&mnae33, mnps33g, mnps33, s);
+////		printf("%lld nodes expanded\n", ida.GetNodesExpanded());
+////		for (unsigned int x = 0; x < s.size(); x++)
+////			std::cout << s[x] << std::endl;
+//	}
+//	printf("%llu total nodes\n", totNodes);
+//	exit(0);
+//	
+//	if (0)
+//	{
+//		std::vector<NaryState> narypath;
+//		DFS<NaryState, NaryAction> dfs1;
+//		DFID<NaryState, NaryAction> dfid;
+//		NaryTree t1(2, 10);
+//		NaryTree t2(3, 10);
+//		NaryTree t3(4, 10);
+//		NaryState s1 = 0, g1;
+//		dfs1.GetPath(&t1, s1, s1, narypath);
+//		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
+//		dfs1.GetPath(&t2, s1, s1, narypath);
+//		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
+//		dfs1.GetPath(&t3, s1, s1, narypath);
+//		std::cout << dfs1.GetNodesExpanded() << " total nodes expanded" << std::endl;
+//
+//		g1 = 2048-2;
+//		dfid.GetPath(&t1, s1, g1, narypath);
+//		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
+//		g1 = 88573-2;
+//		dfid.GetPath(&t2, s1, g1, narypath);
+//		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
+//		g1 = 1398101-2;
+//		dfid.GetPath(&t3, s1, g1, narypath);
+//		std::cout << dfid.GetNodesExpanded() << " total nodes expanded" << std::endl;
+//	}
+//
+//	if (0)
+//	{
+//		std::vector<SequenceAlignmentState> statePath;
+//		BFS<SequenceAlignmentState, SequenceAlignmentAction> bfs;
+//		DFS<SequenceAlignmentState, SequenceAlignmentAction> dfs;
+//		DFID<SequenceAlignmentState, SequenceAlignmentAction> dfid;
+//
+//		for (unsigned int x = 1; x < 13; x++)
+//		{
+//			SequenceAlignment sa10(x);
+//			SequenceAlignmentState s1 = 0, g1 = -1;
+//
+//			bfs.GetPath(&sa10, s1, s1, statePath);
+//			std::cout << bfs.GetNodesExpanded() << " total BFS nodes expanded" << std::endl;
+//			
+//			dfs.GetPath(&sa10, s1, s1, statePath);
+//			std::cout << dfs.GetNodesExpanded() << " total DFS nodes expanded" << std::endl;
+//			
+//			dfid.GetPath(&sa10, s1, g1, statePath);
+//			std::cout << dfid.GetNodesExpanded() << " total DFID nodes expanded" << std::endl;
+//		}
+//	}
 }
 
 bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )

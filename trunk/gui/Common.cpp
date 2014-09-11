@@ -537,7 +537,7 @@ point3d GetOGLPos(pRecContext pContextInfo, int x, int y)
 	return point3d(posX, posY, posZ);
 }
 
-void SetNumPorts(int windowID, int count)
+void SetNumPorts(unsigned long windowID, int count)
 {
 	pRecContext pContextInfo = GetContext(windowID);
 	if ((count <= MAXPORTS) && (count > 0))
@@ -554,19 +554,19 @@ void SetNumPorts(int windowID, int count)
 	}
 }
 
-int GetNumPorts(int windowID)
+int GetNumPorts(unsigned long windowID)
 {
 	pRecContext pContextInfo = GetContext(windowID);
 	return pContextInfo->numPorts;
 }
 
-int GetActivePort(int windowID)
+int GetActivePort(unsigned long windowID)
 {
 	pRecContext pContextInfo = GetContext(windowID);
 	return pContextInfo->currPort;
 }
 
-void SetActivePort(int windowID, int which)
+void SetActivePort(unsigned long windowID, int which)
 {
 	pRecContext pContextInfo = GetContext(windowID);
 	if ((which >= 0) && (which < pContextInfo->numPorts))

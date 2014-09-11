@@ -146,10 +146,10 @@ void ProcessCommandLineArgs(int argc, char *argv[]);
 
 extern char gDefaultMap[1024];
 
-void SetNumPorts(int windowID, int count);
-int GetNumPorts(int windowID);
-void SetActivePort(int windowID, int which);
-int GetActivePort(int windowID);
+void SetNumPorts(unsigned long windowID, int count);
+int GetNumPorts(unsigned long windowID);
+void SetActivePort(unsigned long windowID, int which);
+int GetActivePort(unsigned long windowID);
 
 enum tKeyboardModifier {
 	kNoModifier,

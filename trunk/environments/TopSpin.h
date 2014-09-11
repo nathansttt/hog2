@@ -2,75 +2,147 @@
  *  TopSpin.h
  *  hog2
  *
- *  Created by Nathan Sturtevant on 4/1/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Created by Nathan Sturtevant on 9/4/14.
+ *  Copyright 2014 Nathan Sturtevant, University of Denver. All rights reserved.
  *
  */
 
-//#include <ext/hash_map>
+#ifndef TopSpin_H
+#define TopSpin_H
+
+#include <stdint.h>
+#include <iostream>
+#include "SearchEnvironment.h"
+#include "PermutationPuzzleEnvironment.h"
+#include "UnitSimulation.h"
 #include "GraphEnvironment.h"
+#include "Graph.h"
+#include <sstream>
+#include <unordered_map>
 
-//#include "ts.h"
-#ifndef TOPSPIN_H
-#define TOPSPIN_H
-
-class TopSpin;
-
-class TopSpinGraphHeuristic : public GraphHeuristic {
+class TopSpinState {
 public:
-	TopSpinGraphHeuristic(int psize, int spin, int pdb);
-	TopSpinGraphHeuristic();
-	Graph *GetGraph() { return 0; }
-	void SetState(TopSpin *tss) { ts = tss; }
-	virtual ~TopSpinGraphHeuristic() { }
-	virtual double HCost(const graphState &state1, const graphState &state2);
-
-	static int THmode;
-private:
-	TopSpin *ts;
-	int pdb;
-	std::vector<uint8_t> DB;
+	TopSpinState(int N = 20, int k = 4)
+	{
+		puzzle.resize(N);
+		for (unsigned int x = 0; x < puzzle.size(); x++)
+			puzzle[x] = x;
+	}
+	void Reset()
+	{
+		for (unsigned int x = 0; x < puzzle.size(); x++)
+			puzzle[x] = x;
+	}
+	std::vector<int> puzzle;
 };
 
-class TopSpinGraphData {
-public:
-	bool expanded;
-	unsigned long hashKey;
-	std::vector<int> config;
-	//int zeroLoc; // get rid of this & just normalize
-};
+/**
+ * Actions are the first tile that gets swapped.
+ */
+typedef int TopSpinAction;
 
-class TopSpin : public GraphEnvironment {
+static std::ostream& operator <<(std::ostream & out, const TopSpinState &loc)
+{
+	for (unsigned int x = 0; x < loc.puzzle.size(); x++)
+		out << loc.puzzle[x] << " ";
+	return out;
+}
+
+static bool operator==(const TopSpinState &l1, const TopSpinState &l2)
+{
+	if (l1.puzzle.size() != l2.puzzle.size())
+		return false;
+	for (unsigned int x = 0; x < l1.puzzle.size(); x++)
+	{
+		if (l1.puzzle[x] != l2.puzzle[x])
+			return false;
+	}
+	return true;
+}
+
+class TopSpin : public PermutationPuzzleEnvironment<TopSpinState, TopSpinAction> {
 public:
-	TopSpin(int m, int k, TopSpinGraphHeuristic *tsh);
-	TopSpin(int m, int k);
+	TopSpin(unsigned int N = 20, unsigned int k = 4);
 	~TopSpin();
-	void GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const;
-	void GetActions(const graphState &stateID, std::vector<graphMove> &actions) const;
-	bool GoalTest(const graphState &state, const graphState &goal);
-	virtual bool GoalTest(graphState &) { assert(false); return false; }
-	
-	graphState Dual(graphState s);
-	graphState GetState(const std::vector<int> &configuration) const;
-	graphState GetState(const std::vector<int> &configuration, int zeroLoc) const;
-	std::vector<int> &GetState(graphState g) const;
-	
-	uint64_t GetStateHash(const graphState &state) const;
-	uint64_t GetStateHash(const std::vector<int> &config) const;
-	uint64_t GetStateHash(const int *config, int config_size) const;
-	uint64_t GetPDBHash(const std::vector<int> &config, int pdb_size) const;
-	uint64_t GetPDBHash(const graphState &state, int pdb_size) const;
-	uint64_t GetPDBSize(int puzzle_size, int pdb_size) const;
-private:
-	typedef __gnu_cxx::hash_map<uint64_t, unsigned long, Hash64> TopSpinHashTable;
+	void SetPruneSuccessors(bool val)
+	{ if (val) ComputeMovePruning(); pruneSuccessors = val; history.resize(0); }
+	void GetSuccessors(const TopSpinState &stateID, std::vector<TopSpinState> &neighbors) const;
+	void GetActions(const TopSpinState &stateID, std::vector<TopSpinAction> &actions) const;
+	void ApplyAction(TopSpinState &s, TopSpinAction a) const;
+	void UndoAction(TopSpinState &s, TopSpinAction a) const;
+	bool InvertAction(TopSpinAction &a) const;
+	static unsigned GetParity(TopSpinState &state);
 
-	void ExpandNode(const graphState &stateID) const;
-	void Flip(std::vector<int> &arrangement, int index, int radius) const;
-	// these store the actual graph of the state space
-	mutable Graph *g2;
-	mutable TopSpinHashTable hashTable;
-	mutable std::vector<TopSpinGraphData> data;
-	int length, flipSize;
+	OccupancyInterface<TopSpinState, TopSpinAction> *GetOccupancyInfo() { return 0; }
+	double HCost(const TopSpinState &state1, const TopSpinState &state2);
+//	double HCost(const TopSpinState &state1);
+
+	double GCost(const TopSpinState &state1, const TopSpinState &state2);
+	double GCost(const TopSpinState &, const TopSpinAction &) { return 1.0; }
+	bool GoalTest(const TopSpinState &state, const TopSpinState &goal);
+
+	bool GoalTest(const TopSpinState &s);
+
+	//void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
+
+	uint64_t GetActionHash(TopSpinAction act) const;
+	void OpenGLDraw() const;
+	void OpenGLDraw(const TopSpinState &s) const;
+	void OpenGLDraw(const TopSpinState &l1, const TopSpinState &l2, float v) const;
+	void OpenGLDraw(const TopSpinState &, const TopSpinAction &) const { /* currently not drawing moves */ }
+	void StoreGoal(TopSpinState &); // stores the locations for the given goal state
+
+	/** Returns stored goal state if it is stored.**/
+	TopSpinState Get_Goal(){
+		return goal;
+	}
+
+	virtual const std::string GetName();
+
+	void ClearGoal() { } // clears the current stored information of the goal
+
+	bool IsGoalStored(){return true;} // returns if a goal is stored or not
+
+	bool State_Check(const TopSpinState &to_check) { return true; }
+
+	void PrintHStats()
+	{
+		printf("-\t");
+		for (int x = 0; x < hDist.size(); x++)
+			printf("%d\t", x);
+		printf("\n");
+		for (int y = 0; y <= 12; y++)
+		{
+			printf("%d\t", y);
+			for (int x = 0; x < hDist.size(); x++)
+			{
+				if (y >= hDist[x].size())
+					printf("0\t");
+				else
+					printf("%d\t", hDist[x][y]);
+			}
+			printf("\n");
+		}
+	}
+private:
+	void ComputeMovePruning();
+	void RecursiveMovePruning(int depth, TopSpinState &state);
+
+	std::unordered_map<uint64_t,bool> pruningMap;
+	
+	unsigned int numTiles, swapDiameter;
+	std::vector<TopSpinAction> operators;
+	std::vector<bool> movePrune;
+	
+	// stores the heuristic value of each tile-position pair indexed by the tile value (0th index is empty)
+	unsigned **h_increment;
+	TopSpinState goal;
+	std::vector<std::vector<int> > hDist;
+
+	mutable std::vector<TopSpinAction> history;
+	bool pruneSuccessors;
 };
+
+typedef UnitSimulation<TopSpinState, TopSpinAction, TopSpin> TopSpinSimulation;
 
 #endif
