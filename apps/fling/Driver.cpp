@@ -1324,6 +1324,8 @@ void RemoveDups()
 			{
 				for (int x = 0; x < 4; x++)
 				{
+					if (acts[x] == -1)
+						continue;
 					for (int y = x+1; y < 4; y++)
 					{
 						if (acts[x] == acts[y])
