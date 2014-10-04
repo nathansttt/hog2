@@ -1246,6 +1246,30 @@ bool MyClickHandler(unsigned long , int, int, point3d loc, tButtonType button, t
 //...o...
 //o......
 
+// These have the same solution, but should be different
+// The issue is that the piece moved changes in one but not the other
+//0
+//...o...
+//o......
+//.......
+//.......
+//.......
+//..o..o.
+//.o.....
+//.......
+//
+//
+//5
+//o...o..
+//......o
+//.......
+//.oo....
+//.......
+//.......
+//.......
+//.......
+//
+
 
 void RemoveDups()
 {
@@ -1390,7 +1414,44 @@ void RemoveDups()
 				if (!match)
 					printf("Failed identical action test\n");
 			}
-			
+			if (match)
+			{
+				FlingBoard s1a, s2a;
+				FlingBoard s1b, s2b;
+				f.GetStateFromHash(values[x], s1a);
+				f.GetStateFromHash(values[y], s2a);
+				
+				f.GetStateFromHash(values[x], s1b);
+				f.GetStateFromHash(values[y], s2b);
+				f.ApplyAction(s1b, stateActs[x].back());
+				f.ApplyAction(s2b, stateActs[y].back());
+				
+				for (int t = stateActs[x].size()-1; t > 1; t--)
+				{
+					bool same1 = ((s1a.board^s1b.board)&(1ull<<stateActs[x][t-1].startLoc)); // same piece moved
+					bool same2 = ((s2a.board^s2b.board)&(1ull<<stateActs[y][t-1].startLoc)); // same piece moved
+					if (same1 != same2)
+					{
+						std::cout << s1a << "\n" << s1b << "\n";
+						std::cout << (same1?"moved same\n":"same not moved\n");
+						std::cout << stateActs[x][t-1] << std::endl;
+						std::cout << s2a << "\n" << s2b << "\n";
+						std::cout << (same2?"moved same\n":"same not moved\n");
+						std::cout << stateActs[y][t-1] << std::endl;
+						match = false;
+						break;
+					}
+					
+					f.ApplyAction(s1a, stateActs[x][t]);
+					f.ApplyAction(s2a, stateActs[y][t]);
+					
+					f.ApplyAction(s1b, stateActs[x][t-1]);
+					f.ApplyAction(s2b, stateActs[y][t-1]);
+				}
+				
+				if (!match)
+					printf("Failed identical piece move test\n");
+			}
 			if (match)
 			{
 				std::cout << "->Match!" << std::endl;
