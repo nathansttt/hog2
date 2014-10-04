@@ -39,7 +39,7 @@ void ShiftToCorner(FlingBoard &in);
 uint64_t GetCanonicalHash(uint64_t which);
 
 enum tFlingDir {
-	kLeft, kRight, kUp, kDown
+	kLeft = 0, kUp = 1, kRight = 2,kDown = 3
 };
 
 class FlingMove

@@ -38,9 +38,10 @@
 #include <iomanip>
 #include "TextOverlay.h"
 #include <pthread.h>
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 uint64_t DoLimitedBFS(FlingBoard b, std::vector<FlingBoard> &path);
+void RemoveDups();
 
 int main(int argc, char* argv[])
 {
@@ -99,15 +100,31 @@ void CreateSimulation(int id)
 	text.SetBold(true);
 	
 //	std::vector<FlingBoard> path;
-//	BFS<FlingBoard, FlingMove> bfs;
-//	bfs.GetPath(&f, b, g, path);
+	BFS<FlingBoard, FlingMove> bfs;
+	bfs.GetPath(&f, b, g, path);
 //	IDAStar<FlingBoard, FlingMove> ida;
 //	ida.GetPath(&f, b, g, path);
 //	std::cout << ida.GetNodesExpanded() << " nodes expanded" << std::endl;
-//	for (int x = 0; x < path.size(); x++)
-//	{
-//		std::cout << x << std::endl << path[x] << std::endl;
-//	}
+	for (int x = 0; x < path.size(); x++)
+	{
+		if (x > 0)
+		{
+			std::cout << "Action: " << f.GetAction(path[x], path[x-1]) << std::endl;
+		}
+		std::cout << x << std::endl << path[x] << std::endl;
+	}
+}
+
+void GetSolveActions(FlingBoard &solve, std::vector<FlingMove> &acts)
+{
+	acts.resize(0);
+	BFS<FlingBoard, FlingMove> bfs;
+	bfs.GetPath(&f, solve, g, path);
+	for (int x = 1; x < path.size(); x++)
+	{
+		acts.push_back(f.GetAction(path[x], path[x-1]));
+	}
+	printf("Got path length %ld; returning %d actions\n", path.size(), acts.size());
 }
 
 /**
@@ -133,6 +150,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(BFSearch, "Do BFS", "Analyze board with BFS", kAnyModifier, 'b');
 	InstallKeyboardHandler(MassAnalysis, "Mass Analysis", "Analyze 100 boards", kNoModifier, 'm');
 	InstallKeyboardHandler(CaptureScreen, "Capture Screen", "Capture Screen Shot", kNoModifier, 'c');
+	InstallKeyboardHandler(RemoveDuplicates, "Remove duplicates", "Analyze states passed in and remove dups", kNoModifier, 'o');
 
 	InstallCommandLineHandler(MyCLHandler, "-generate", "-generate n", "Generate a problem with n tiles and run a BFS.");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract n", "Extract unique boards at level n.");
@@ -271,35 +289,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-removeDups") == 0)
 	{
-		std::vector<uint64_t> values;
-		while (true)
-		{
-			uint64_t value;
-			int res = scanf("%llu", &value);
-			if (res == EOF || res == 0)
-				break;
-			values.push_back(GetCanonicalHash(value));
-		}
-		for (int x = 0; x < values.size(); x++)
-		{
-			bool dup = false;
-			int y;
-			for (y = x+1; y < values.size(); y++)
-			{
-				if (BitCount(values[x]^values[y]) <= 4)
-				{
-					dup = true;
-					break;
-				}
-			}
-			if (!dup)
-			{
-				printf("%llu\n", values[x]);
-			}
-			else {
-				printf("dup: %llu %llu\n", values[x], values[y]);
-			}
-		}
+		RemoveDups();
 	}
 	else if (strcmp(argument[0], "-analyze") == 0)
 	{
@@ -775,7 +765,7 @@ void ReadTables(unsigned long , tKeyboardModifier, char)
 	}
 }
 
-std::tr1::unordered_map<uint64_t,bool> visitedStates;
+std::unordered_map<uint64_t,bool> visitedStates;
 bool useTable = true;
 
 bool IsSolvable(FlingBoard &theState)
@@ -950,6 +940,11 @@ void MassAnalysis(unsigned long w, tKeyboardModifier mod, char c)
 		AnalyzeBoard(w, kNoModifier, 'a');
 		AnalyzeBoard(w, kNoModifier, 'A');
 	}
+}
+
+void RemoveDuplicates(unsigned long , tKeyboardModifier , char )
+{
+	RemoveDups();
 }
 
 void CaptureScreen(unsigned long windowID, tKeyboardModifier mod, char c)
@@ -1204,6 +1199,216 @@ bool MyClickHandler(unsigned long , int, int, point3d loc, tButtonType button, t
 		return true;
 	}
 	return false;
+}
+
+// these two states have the same solution actions (if 0 is flipped both directions)
+// but they are different states because the pieces moved are different
+//0
+//..o..oo
+//o......
+//.......
+//o......
+//......o
+//.......
+//.......
+//o......
+//
+//
+//17
+//.o.....
+//......o
+//.....o.
+//.......
+//o......
+//.......
+//.o...o.
+//o......
+
+// Do you consider these to be identical? They are pretty close...
+//2
+//o......
+//.....o.
+//.......
+//...o.o.
+//o......
+//.......
+//...o...
+//o......
+//
+//
+//8
+//o......
+//......o
+//.......
+//o......
+//...o..o
+//.......
+//...o...
+//o......
+
+
+void RemoveDups()
+{
+	std::vector<uint64_t> values;
+	std::vector<std::vector<FlingMove> > stateActs;
+	while (true)
+	{
+		uint64_t value;
+		int res = scanf("%llu", &value);
+		if (res == EOF || res == 0 || value == 0)
+			break;
+		values.push_back(GetCanonicalHash(value));
+	}
+	for (int x = 0; x < values.size(); x++)
+	{
+		for (int y = x+1; y < values.size(); y++)
+		{
+			while (y < values.size() && values[x] == values[y])
+				//if (BitCount(values[x]^values[y]) <= 4)
+			{
+				values.erase(values.begin()+y);
+			}
+		}
+	}
+	stateActs.resize(values.size());
+	for (int x = 0; x < values.size(); x++)
+	{
+		f.GetStateFromHash(values[x], b);
+		GetSolveActions(b, stateActs[x]);
+		for (int t = 0; t < stateActs[x].size(); t++)
+			std::cout << stateActs[x][t].dir << " ";
+		printf("(%d)\n", x);
+	}
+	// find exact correlation between moves
+	for (int x = 0; x < values.size(); x++)
+	{
+		for (int y = x+1; y < values.size(); y++)
+		{
+			f.GetStateFromHash(values[x], b);
+			std::cout << x << "\n" << b << "\n\n";
+			f.GetStateFromHash(values[y], b);
+			std::cout << y << "\n" << b << "\n\n";
+			printf("->Comparing board %d to board %d<-\n", x, y);
+			int acts[4] = {-1, -1, -1, -1};
+			bool match = true;
+			// skip the first move, because the last one could go right OR left / down OR up
+			for (int t = 0; t < stateActs[x].size(); t++)
+				std::cout << stateActs[x][t].dir << " ";
+			printf("(%d)\n", x);
+			for (int t = 0; t < stateActs[y].size(); t++)
+				std::cout << stateActs[y][t].dir << " ";
+			printf("(%d)\n", y);
+
+			// 1. need constant mapping between actions
+			for (int t = 1; t < stateActs[x].size(); t++)
+			{
+				std::cout << "Comparing [" << t << "] " << stateActs[x][t].dir << " to " << stateActs[y][t].dir << "\n";
+				if (acts[stateActs[x][t].dir] == -1)
+				{
+					std::cout << "-->Assigning " << stateActs[x][t].dir << " to " << stateActs[y][t].dir << std::endl;
+					acts[stateActs[x][t].dir] = stateActs[y][t].dir;
+				}
+				else if (acts[stateActs[x][t].dir] != stateActs[y][t].dir)
+				{
+					match = false;
+					break;
+				}
+				else {
+					std::cout << "-->Matched " << stateActs[x][t].dir << " to " << stateActs[y][t].dir << std::endl;
+				}
+				printf("(%d : %d); (%d : %d); (%d : %d); (%d : %d)\n", 0, acts[0], 1, acts[1], 2, acts[2], 3, acts[3]);
+			}
+			if (!match)
+				printf("Failed consistent map test\n");
+			if (match)
+			{
+				for (int x = 0; x < 4; x++)
+				{
+					for (int y = x+1; y < 4; y++)
+					{
+						if (acts[x] == acts[y])
+						{
+							match = false;
+						}
+					}
+				}
+				if (!match)
+					printf("Failed unique map test\n");
+			}
+			
+			if (match)
+			{
+				// 2. also need constant relative flipping
+				int diff = (abs(stateActs[x][1].dir - stateActs[y][1].dir)+2)%2;
+				printf("Looking for offset of %d\n", diff);
+				for (int t = 1; t < stateActs[x].size(); t++)
+				{
+					printf("Offset between %d and %d is %d\n", stateActs[x][t].dir, stateActs[y][t].dir,
+						   (2+abs(stateActs[x][t].dir - stateActs[y][t].dir))%2);
+					if (((2+abs(stateActs[x][t].dir - stateActs[y][t].dir))%2) != diff)
+					{
+						match = false;
+						break;
+					}
+				}
+				if (!match)
+					printf("Failed symmetric flip test\n");
+			}
+
+			if (match)
+			{
+				// 3. also needs actions to move the same number of pieces
+				FlingBoard s1a, s2a;
+				FlingBoard s1b, s2b;
+				f.GetStateFromHash(values[x], s1a);
+				f.GetStateFromHash(values[y], s2a);
+				
+				f.GetStateFromHash(values[x], s1b);
+				f.GetStateFromHash(values[y], s2b);
+				f.ApplyAction(s1b, stateActs[x].back());
+				f.ApplyAction(s2b, stateActs[y].back());
+
+				for (int t = stateActs[x].size()-1; t > 0; t--)
+				{
+					if (BitCount(s1a.board^s1b.board) != BitCount(s2a.board^s2b.board))
+					{
+						std::cout << s1a << "\n" << s1b << "\n";
+						printf("%d bits\n", BitCount(s1a.board^s1b.board));
+						std::cout << s2a << "\n" << s2b << "\n";
+						printf("%d bits\n", BitCount(s2a.board^s2b.board));
+						match = false;
+						break;
+					}
+					f.ApplyAction(s1a, stateActs[x][t]);
+					f.ApplyAction(s2a, stateActs[y][t]);
+
+					f.ApplyAction(s1b, stateActs[x][t-1]);
+					f.ApplyAction(s2b, stateActs[y][t-1]);
+				}
+				if (!match)
+					printf("Failed identical action test\n");
+			}
+			
+			if (match)
+			{
+				std::cout << "->Match!" << std::endl;
+				stateActs.erase(stateActs.begin()+y);
+				values.erase(values.begin()+y);
+				y--;
+			}
+			else {
+				std::cout << "->No Match!" << std::endl;
+			}
+
+		}
+	}
+	printf("Final states:\n");
+	for (int x = 0; x < values.size(); x++)
+	{
+		f.GetStateFromHash(values[x], b);
+		std::cout << x << "\n" << b << "\n\n";
+		std::cout << "hash:" << values[x] << "\n";
+	}
 }
 
 

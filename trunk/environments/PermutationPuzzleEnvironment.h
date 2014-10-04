@@ -323,7 +323,8 @@ uint64_t PermutationPuzzleEnvironment<state, action>::GetPDBHash(const state &s,
 	// find item locations
 	for (unsigned int x = 0; x < s.puzzle.size(); x++)
 	{
-		dual[s.puzzle[x]] = x;
+		if (s.puzzle[x] != -1)
+			dual[s.puzzle[x]] = x;
 	}
 	for (int x = 0; x < distinct.size(); x++)
 	{
@@ -829,7 +830,7 @@ void PermutationPuzzleEnvironment<state, action>::Build_Additive_PDB(state &star
 					uint64_t pdbHash = GetPDBHash(children[x], distinct);
 					if (DB[pdbHash] == 255)
 					{
-						int hval = 0;//this->HCost(children[x]);//*2-40;
+						int hval = this->HCost(children[x]);//*2-40;
 //						if (0 == hval%2) // even
 //						{
 //							hval=hval*2-40;
