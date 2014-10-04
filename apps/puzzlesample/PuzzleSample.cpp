@@ -224,7 +224,7 @@ void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char)
 	tiles.push_back(1);
 	tiles.push_back(4);
 	tiles.push_back(5);
-	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_145_add.pdb", true);
+//	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_145_add.pdb", true);
 
 	tmp.Reset();
 	tiles.resize(0);
@@ -232,11 +232,11 @@ void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char)
 	tiles.push_back(3);
 	tiles.push_back(6);
 	tiles.push_back(7);
-	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_2367_add.pdb", true);
+//	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_2367_add.pdb", true);
 
 	tmp.Reset();
 	tiles.resize(0);
-	for (int x = 1; x <= 7; x++)
+	for (int x = 8; x <= 15; x++)
 		tiles.push_back(x);
 //	tiles.push_back(0);
 //	tiles.push_back(10);
@@ -250,8 +250,8 @@ void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char)
 	
 	
 	//mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7_add.pdb", true);
-	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7+145+2367_add.pdb", true);
-	//mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_8-15_add.pdb", true);
+	//mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7+145+2367_add.pdb", true);
+	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_8-15_add.pdb", true);
 	//mnp->Build_Regular_PDB(tmp, tiles, "/Users/nathanst/Desktop/pdb7-nosub-fringe.bin");
 }
 

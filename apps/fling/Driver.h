@@ -40,6 +40,7 @@ void BFSearch(unsigned long windowID, tKeyboardModifier, char key);
 void MassAnalysis(unsigned long , tKeyboardModifier mod, char c);
 void CaptureScreen(unsigned long , tKeyboardModifier mod, char c);
 void FindLogicalMoves(unsigned long , tKeyboardModifier , char);
+void RemoveDuplicates(unsigned long , tKeyboardModifier , char );
 
 int MyCLHandler(char *argument[], int maxNumArgs);
 bool MyClickHandler(unsigned long windowID, int x, int y, point3d loc, tButtonType, tMouseEventType);
