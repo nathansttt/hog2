@@ -179,7 +179,7 @@ int StatCollection::GetNumStats() const
 /**
 * Return the nth stat which has been collected.
  */
-const stat *StatCollection::GetStatNum(int which) const
+const statistics *StatCollection::GetStatNum(int which) const
 {
 	return &stats[which];
 }
