@@ -55,13 +55,13 @@ void measureAverageRatio(StatCollection *stats)
 //	stats->PrintStatsTable();
 	
 	int stat1Type = -1, stat2Type = -1;
-	std::vector<const stat *> stat1;
-	std::vector<const stat *> stat2;
+	std::vector<const statistics *> stat1;
+	std::vector<const statistics *> stat2;
 	int currOwner = -1;
 	
 	for (int x = 0; x < stats->GetNumStats(); x++)
 	{
-		const stat *s = stats->GetStatNum(x);
+		const statistics *s = stats->GetStatNum(x);
 		if (s->owner == stats->LookupOwner("unitSimulation"))
 		{
 			while (stat1.size() > stat2.size())

@@ -33,7 +33,8 @@
 
 typedef union { double fval; long lval; } statValue;
 enum storedType { floatStored, longStored };
-class stat {
+// renamed from "stat" due to conflict with c file stat
+class statistics {
 public:
 	int category, owner;
 	statValue value;
@@ -60,7 +61,7 @@ public:
 	//	void clearCategoryStats(const char *category);
 	
 	int GetNumStats() const;
-	const stat *GetStatNum(int which) const;
+	const statistics *GetStatNum(int which) const;
 	
 	int LookupCategory(const char *category) const;
 	int LookupOwner(const char *owner) const;
@@ -92,7 +93,7 @@ private:
 	std::vector<std::string> owners;
 	std::vector<std::string> includeFilters;
 	std::vector<std::string> excludeFilters;
-	std::vector<stat> stats;
+	std::vector<statistics> stats;
 	bool printOutput;
 };
 
