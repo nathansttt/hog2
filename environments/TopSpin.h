@@ -78,7 +78,7 @@ public:
 //	double HCost(const TopSpinState &state1);
 
 	double GCost(const TopSpinState &state1, const TopSpinState &state2);
-	double GCost(const TopSpinState &, const TopSpinAction &) { return 1.0; }
+	double GCost(const TopSpinState &, const TopSpinAction &);
 	bool GoalTest(const TopSpinState &state, const TopSpinState &goal);
 
 	bool GoalTest(const TopSpinState &s);

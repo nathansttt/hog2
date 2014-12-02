@@ -10,6 +10,8 @@
 #include <iostream>
 #include "SearchEnvironment.h"
 
+class FlingMove;
+
 class FlingBoard
 {
 public:
@@ -21,7 +23,8 @@ public:
 	void RemoveFling(unsigned int offset);
 	bool CanMove(int which, int x, int y) const;
 	void Move(int which, int x, int y);
-
+	int LocationAfterAction(FlingMove m);
+	
 	bool HasPiece(int x, int y) const;
 	bool HasPiece(int offset) const;
 	

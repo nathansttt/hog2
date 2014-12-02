@@ -1336,7 +1336,6 @@
 		C4C5C37318E9439300915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37518E9439400915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37718E9439500915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
-		C4C5C37818E9439600915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37918E9439700915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37A18E9439700915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37C18E9439800915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
@@ -2017,6 +2016,7 @@
 		C4381774140C39AE007BA75B /* SeekUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SeekUnit.h; sourceTree = "<group>"; };
 		C4381775140C39AE007BA75B /* SteeringUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SteeringUnit.cpp; sourceTree = "<group>"; };
 		C4381776140C39AE007BA75B /* SteeringUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SteeringUnit.h; sourceTree = "<group>"; };
+		C441A3C21A0853030070DC06 /* SharedQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SharedQueue.h; sourceTree = "<group>"; };
 		C447F5481467909200D6D581 /* Sample.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C447F5491467909200D6D581 /* Sample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		C447F5C2146790A600D6D581 /* Supervised Learning.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Supervised Learning.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2972,6 +2972,7 @@
 		C4F9F3F313E4FE3F0077C5A5 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				C441A3C21A0853030070DC06 /* SharedQueue.h */,
 				C4673650171CED0600E2A10B /* DiskBitFile.cpp */,
 				C4673651171CED0600E2A10B /* DiskBitFile.h */,
 				C4673652171CED0600E2A10B /* EnvUtil.cpp */,
@@ -4917,7 +4918,6 @@
 				C4B973A01426FA4F00758D0D /* TopSpinGraph.cpp in Sources */,
 				C4B973A11426FA4F00758D0D /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4B973A21426FA4F00758D0D /* GraphCheck.cpp in Sources */,
-				C4C5C37818E9439600915B3D /* Bloom.cpp in Sources */,
 				C4B973A31426FA4F00758D0D /* IDAStar.cpp in Sources */,
 				C4B973A41426FA4F00758D0D /* RandomUnit.cpp in Sources */,
 				C4B973A61426FA4F00758D0D /* Graph.cpp in Sources */,

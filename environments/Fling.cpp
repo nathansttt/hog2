@@ -146,6 +146,39 @@ void FlingBoard::Move(int which, int x, int y)
 			locs.push_back(t);
 }
 
+int FlingBoard::LocationAfterAction(FlingMove m)
+{
+	int xx = m.startLoc%width;
+	int yy = m.startLoc/width;
+	int x, y;
+
+	switch (m.dir)
+	{
+		case kRight: x = 1;  y = 0;  break;
+		case kLeft:  x = -1; y = 0;  break;
+		case kUp:    x = 0;  y = -1; break;
+		case kDown:  x = 0;  y = 1;  break;
+	}
+	
+	int lastx = xx;
+	int lasty = yy;
+	xx+=x; yy += y;
+	while ((xx >= 0) && (xx < width) && (yy >= 0) && (yy < height))
+	{
+		//board[lasty*width+lastx] = board[yy*width+xx];
+		if (HasPiece(yy*width+xx))
+		{
+			return lasty*width+lastx;
+		}
+		lastx = xx;
+		lasty = yy;
+		xx+=x; yy += y;
+	}
+	assert(!"No collision found for piece");
+	return -1;
+}
+
+
 void GetMirror(const FlingBoard &in, FlingBoard &out, bool h, bool v)
 {
 	out = in;
@@ -512,10 +545,10 @@ void Fling::OpenGLDrawPlain(const FlingBoard&b) const
 			if (b.HasPiece(x, y))
 			{
 				glBegin(GL_QUADS);
-				glVertex3f(xLoc-r, yLoc-r, -0.02);
-				glVertex3f(xLoc-r, yLoc+r, -0.02);
-				glVertex3f(xLoc+r, yLoc+r, -0.02);
-				glVertex3f(xLoc+r, yLoc-r, -0.02);
+				glVertex3f(xLoc-r, yLoc-r-r, -0.02);
+				glVertex3f(xLoc-r, yLoc+r-r, -0.02);
+				glVertex3f(xLoc+r, yLoc+r-r, -0.02);
+				glVertex3f(xLoc+r, yLoc-r-r, -0.02);
 				glEnd();
 			}
 			//DrawSphere(xLoc, yLoc, 0, radius);

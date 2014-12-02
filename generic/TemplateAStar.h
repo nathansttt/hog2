@@ -67,7 +67,7 @@ struct AStarCompare {
 template <class state, class action, class environment>
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; }
+	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; theHeuristic = 0; }
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	
@@ -214,7 +214,8 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 {
 	lastF = 0;
 	
-	theHeuristic = _env;
+	if (theHeuristic == 0)
+		theHeuristic = _env;
 	thePath.resize(0);
 	//if(useRadius)
 	//std::cout<<"Using radius\n";
