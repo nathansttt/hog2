@@ -101,14 +101,19 @@ public:
 
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
 	double HCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
-	double HCost(const MNPuzzleState &state1);
+	double HCost(const MNPuzzleState &state1)
+	{ return PermutationPuzzleEnvironment<MNPuzzleState, slideDir>::HCost(state1); }
+	double DefaultH(const MNPuzzleState &s) const;
 
 	double GCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
-	double GCost(const MNPuzzleState &, const slideDir &) { return 1.0; }
+	double GCost(const MNPuzzleState &, const slideDir &);
 	bool GoalTest(const MNPuzzleState &state, const MNPuzzleState &goal);
 
 	bool GoalTest(const MNPuzzleState &s);
 
+	void GetStateFromPDBHash(uint64_t hash, MNPuzzleState &s,
+							 int count, const std::vector<int> &pattern,
+							 std::vector<int> &dual);
 	//void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 
 	uint64_t GetActionHash(slideDir act) const;

@@ -69,6 +69,7 @@ double stepsPerFrame = 1.0/100.0;
 HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
 
 void RunScenario(char *name, int which);
+void RunWeightedHeuristicScenario(char *name, int lookahead, double heuristicWeight);
 void RunTankScenario(char *name, int which);
 void RunScalingTest(int size, int which, float weight);
 void RunTankScalingTest(int size, int which, float weight);
@@ -104,7 +105,7 @@ void CreateSimulation(int id)
 //		map->SetTerrainType(mazeSize-2, 1,
 //							mazeSize-2, mazeSize-2, kOutOfBounds);
 //		map->Load("/Users/nathanst/Desktop/100.map");
-		map->Load("/Users/nathanst/hog2/maps/dao/arena2.map");
+//		map->Load("/Users/nathanst/hog2/maps/dao/arena2.map");
 //		map->Load("/Users/nathanst/hog2/maps/random/random512-40-0.map");
 //		map->Load("/Users/nathanst/hog2/maps/wc3maps512/gnollwood.map");
 		
@@ -124,23 +125,23 @@ void CreateSimulation(int id)
 //			}
 //		}
 		
-//		map = new Map(mazeSize, mazeSize*2);
-//		map->SetRectHeight(0, 0, mazeSize-1, 2*mazeSize-1, 0, kOutOfBounds);
-//		for (int x = 0; x < mazeSize; x++)
-//		{
-//			map->SetTerrainType(x, x,
-//								x, x+3, kGround);
-//			if (1 == x%2)
-//				map->SetTerrainType(x, x,
-//									x, x+20, kGround);
-//			map->SetTerrainType(x, x+20,
-//								x, x+21, kGround);
-//		}
-//		map->SetRectHeight(mazeSize-5*sqrt(mazeSize), 20+mazeSize, mazeSize-1, 20+mazeSize+5*sqrt(mazeSize), 0, kGround);
-//		map->SetTerrainType(0, 20+mazeSize,
-//							mazeSize-1, 20+mazeSize, kGround);
-//		map->SetTerrainType(0, 20+mazeSize,
-//							0, 2*mazeSize-1, kGround);
+		map = new Map(mazeSize, mazeSize*2);
+		map->SetRectHeight(0, 0, mazeSize-1, 2*mazeSize-1, 0, kOutOfBounds);
+		for (int x = 0; x < mazeSize; x++)
+		{
+			map->SetTerrainType(x, x,
+								x, x+3, kGround);
+			if (1 == x%2)
+				map->SetTerrainType(x, x,
+									x, x+20, kGround);
+			map->SetTerrainType(x, x+20,
+								x, x+21, kGround);
+		}
+		map->SetRectHeight(mazeSize-5*sqrt(mazeSize), 20+mazeSize, mazeSize-1, 20+mazeSize+5*sqrt(mazeSize), 0, kGround);
+		map->SetTerrainType(0, 20+mazeSize,
+							mazeSize-1, 20+mazeSize, kGround);
+		map->SetTerrainType(0, 20+mazeSize,
+							0, 2*mazeSize-1, kGround);
 		
 		
 		//MakeMaze(map, 1);
@@ -183,6 +184,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-size <integer>", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallCommandLineHandler(MyCLHandler, "-scenario", "-scenario <file> <algorithm>", "Load and run a scenario offline.");
+	InstallCommandLineHandler(MyCLHandler, "-weightedHeuristicScenario", "-weightedHeuristicScenario <file> <lookahead> <weight>", "run lss-lrta* with weighted initial heuristic on scenario");
 	InstallCommandLineHandler(MyCLHandler, "-scenarioTank", "-scenarioTank <file> <algorithm>", "Load and run a scenario offline.");
 	InstallCommandLineHandler(MyCLHandler, "-scaleTest", "-scaleTest <size> <which> <weight>", "Run a scaling test with local minima <size>.");
 	InstallCommandLineHandler(MyCLHandler, "-scaleTestTank", "-scaleTestTank <size> <which> <weight>", "Run a scaling test with local minima <size>.");
@@ -316,6 +318,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-scenario") == 0)
 	{
 		RunScenario(argument[1], atoi(argument[2]));
+		//RunBigScenario(argument[1], atoi(argument[2]));
+	}
+	else if (strcmp(argument[0], "-weightedHeuristicScenario") == 0)
+	{
+		RunWeightedHeuristicScenario(argument[1], atoi(argument[2]), atoi(argument[3]));
 		//RunBigScenario(argument[1], atoi(argument[2]));
 	}
 	else if (strcmp(argument[0], "-scenarioTank") == 0)
@@ -667,7 +674,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				xyLoc a(px1, py1);
 				xyLoc b(px2, py2);
 				
-				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(20));
+				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
 				u6->SetSpeed(0.02);
 //
 //				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
@@ -700,6 +707,120 @@ typedef EpisodicSimulation<xyLoc, tDirection, MapEnvironment> EpSim;
 typedef EpisodicSimulation<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> EpSimTank;
 void RunSingleTest(EpSim *es, const Experiment &e, int which);
 void RunSingleTankTest(EpSimTank *es, const Experiment &e, int which);
+
+void RunSingleWeightedTest(EpSim *es, const Experiment &e, int lookahead, double weight)
+{
+	es->ClearAllUnits();
+	// add units
+	es->GetStats()->ClearAllStats();
+	es->GetStats()->AddFilter("trialDistanceMoved");
+	es->GetStats()->AddFilter("nodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
+	es->GetStats()->AddFilter("stepNodesExpanded");
+	es->GetStats()->AddFilter("TotalLearning");
+	es->GetStats()->AddFilter("MakeMoveThinkingTime");
+	es->GetStats()->AddFilter("Trial End");
+	es->GetStats()->AddFilter("MinInitial");
+	es->GetStats()->AddFilter("MaxLater");
+	es->GetStats()->AddFilter("MaxStateLearning");
+	es->GetStats()->EnablePrintOutput(false);
+	xyLoc a(e.GetStartX(), e.GetStartY()), b(e.GetGoalX(), e.GetGoalY());
+	
+	printf("Running LSSLRTA*\n");
+	LSSLRTAStar<xyLoc, tDirection, MapEnvironment> *alg;
+	LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, alg = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(lookahead));
+	alg->SetInititialHeuristicWeight(weight);
+	u1->SetSpeed(1.0);
+	es->AddUnit(u1);
+	
+	
+	es->SetTrialLimit(0);
+	while (!es->Done())
+	{
+		es->StepTime(10.0);
+	}
+	statValue v;
+	printf("Done\n");
+	int choice = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
+	es->GetStats()->LookupStat(choice, v);
+	printf("dist-first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+	printf("dist-sum\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "trialDistanceMoved", es->GetUnit(0)->GetName()));
+	es->GetStats()->LookupStat("TotalLearning", es->GetUnit(0)->GetName(), v);
+	//	printf("learning\t%s\t%f\t%f\t%f\n", es->GetUnit(0)->GetName(), v.fval, requiredLearning, v.fval/requiredLearning);
+	
+	choice = es->GetStats()->FindNextStat("nodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-nodesExpanded\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval);
+		printf("sum-nodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "nodesExpanded", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("stepNodesExpanded", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("stepNodesExpanded\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), averageStatEntries(es->GetStats(), "stepNodesExpanded", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MakeMoveThinkingTime", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MinInitial", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("MinInitial\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MinInitial\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MinInitial", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MaxLater", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MaxLater\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MaxLater\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MaxLater", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MaxStateLearning", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MaxLearn\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
+		printf("sum-MaxLearn\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), SumStatEntries(es->GetStats(), "MaxStateLearning", es->GetUnit(0)->GetName()));
+	}
+	
+	
+	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
+	printf("trials\t%s\t%d\t%ld\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.lval+1);
+}
+
+void RunWeightedHeuristicScenario(char *name, int lookahead, double heuristicWeight)
+{
+	ScenarioLoader *sl = new ScenarioLoader(name);
+	printf("Loading map: %s\n", sl->GetNthExperiment(0).GetMapName());
+	
+	Map *map = new Map(sl->GetNthExperiment(0).GetMapName());
+	map->Scale(sl->GetNthExperiment(0).GetXScale(),
+			   sl->GetNthExperiment(0).GetYScale());
+	MapEnvironment *me;
+	EpSim *es = new EpSim(me = new MapEnvironment(map, false));
+	me->SetDiagonalCost(1.5);
+	es->SetStepType(kRealTime);
+	es->SetThinkingPenalty(0);
+	
+	for (int x = 0; x < sl->GetNumExperiments(); x++)
+	{
+		if (sl->GetNthExperiment(x).GetBucket() >= 95 &&
+			sl->GetNthExperiment(x).GetBucket() <  105)
+		{
+			printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
+			RunSingleWeightedTest(es, sl->GetNthExperiment(x), lookahead, heuristicWeight);
+		}
+	}
+	exit(0);
+
+}
 
 void RunScenario(char *name, int which)
 {

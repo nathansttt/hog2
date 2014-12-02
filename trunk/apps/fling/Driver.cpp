@@ -46,7 +46,7 @@ void RemoveDups();
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	RunHOGGUI(argc, argv);
+	RunHOGGUI(argc, argv, 620, 700);
 }
 
 
@@ -74,7 +74,10 @@ char screenShotFile[255];
 void CreateSimulation(int id)
 {
 	if (screenShot)
+	{
+		SetZoom(id, 3.0);
 		return;
+	}
 	for (int x = 0; x < 10; x++)
 	{
 		int x1 = random()%b.width;
@@ -124,7 +127,7 @@ void GetSolveActions(FlingBoard &solve, std::vector<FlingMove> &acts)
 	{
 		acts.push_back(f.GetAction(path[x], path[x-1]));
 	}
-	printf("Got path length %ld; returning %d actions\n", path.size(), acts.size());
+	//printf("Got path length %ld; returning %d actions\n", path.size(), acts.size());
 }
 
 /**
@@ -161,6 +164,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-removeDups", "-removeDups", "Read states from stdin and remove similar states");
 	InstallCommandLineHandler(MyCLHandler, "-analyze", "-analyze theState", "Perform a move analysis on theState");
 	InstallCommandLineHandler(MyCLHandler, "-fix", "-fix file", "fix the file format");
+	InstallCommandLineHandler(MyCLHandler, "-measureSolutionSimilarity", "-measureSolutionSimilarity <state>", "Measure how many times the solution changes pieces");
 	
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -274,7 +278,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		printf("%llu total nodes expanded in pure bfs\n", bfs.GetNodesExpanded());
 		uint64_t nodesExpanded = DoLimitedBFS(b, path);
 		printf("%llu total nodes expanded in logically limited bfs\n", nodesExpanded);
-		printf("Ratio: %llu %llu %1.1f\n", bfs.GetNodesExpanded(), nodesExpanded, double(bfs.GetNodesExpanded())/double(nodesExpanded));
+		printf("Ratio: %llu %llu %1.4f\n", bfs.GetNodesExpanded(), nodesExpanded, double(bfs.GetNodesExpanded())/double(nodesExpanded));
 	}
 	else if (strcmp(argument[0], "-getCanonical") == 0)
 	{
@@ -332,6 +336,32 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			}
 		} while (next != EOF);
 	}
+	else if (strcmp(argument[0], "-measureSolutionSimilarity") == 0)
+	{
+		std::vector<FlingMove> stateActs;
+		unsigned long long which = strtoull(argument[1], 0, 10);
+		f.GetStateFromHash(which, b);
+		GetSolveActions(b, stateActs);
+		//printf("%d actions to solve\n", stateActs.size());
+		for (int t = stateActs.size()-1; t > 1; t--)
+		{
+//			std::cout << b << "\n" << stateActs[t] << std::endl;
+//			printf("Moves %d to %d (next move originates %d)\n",
+//				   stateActs[t].startLoc,
+//				   b.LocationAfterAction(stateActs[t]),
+//				   stateActs[t-1].startLoc);
+			if (b.LocationAfterAction(stateActs[t]) == stateActs[t-1].startLoc)
+			{
+				printf("1");
+			}
+			else {
+				printf("0");
+			}
+			f.ApplyAction(b, stateActs[t]);
+		}
+
+	}
+	printf("\n");
 	exit(0);
 	return 2;
 }
@@ -1283,6 +1313,8 @@ void RemoveDups()
 			break;
 		values.push_back(GetCanonicalHash(value));
 	}
+	std::reverse(values.begin(), values.end());
+
 	for (int x = 0; x < values.size(); x++)
 	{
 		for (int y = x+1; y < values.size(); y++)

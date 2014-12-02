@@ -60,6 +60,7 @@ public:
 		maxLaterHeuristic = 0;
 		initialHeuristic = true;
 		randomizeMoves = true;
+		initialHeuristicWeight = 1.0;
 	}
 	virtual ~LSSLRTAStar(void) { }
 	
@@ -72,7 +73,7 @@ public:
 		else sprintf(name, "LSSLRTAStar(%d)", nodeExpansionLimit); return name; }
 	void SetHCost(environment *env, const state &where, const state &to, double val)
 	{
-		heur[env->GetStateHash(where)].theHeuristic = val-env->HCost(where, to);
+		heur[env->GetStateHash(where)].theHeuristic = val-BaseHCost(env, where, to);
 		heur[env->GetStateHash(where)].theState = where;
 	}
 	double HCostLearned(const state &from)
@@ -84,8 +85,11 @@ public:
 	double HCost(environment *env, const state &from, const state &to)
 	{
 		if (heur.find(env->GetStateHash(from)) != heur.end())
-			return heur[env->GetStateHash(from)].theHeuristic+env->HCost(from, to);
-		return env->HCost(from, to);
+			return heur[env->GetStateHash(from)].theHeuristic+BaseHCost(env, from, to);
+		return BaseHCost(env, from, to);
+	}
+	double BaseHCost(environment *env, const state &from, const state &to) const
+	{ return initialHeuristicWeight*env->HCost(from, to);
 	}
 	double HCost(const state &from, const state &to)
 	{ return HCost(m_pEnv, from, to); }
@@ -101,6 +105,8 @@ public:
 		}
 		return learned;
 	}
+	void SetInititialHeuristicWeight(double val)
+	{ initialHeuristicWeight = val; }
 	
 	virtual uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	virtual uint64_t GetNodesTouched() const { return nodesTouched; }
@@ -122,6 +128,7 @@ private:
 	environment *m_pEnv;
 	LearnedHeuristic heur;
 	double fAmountLearned;
+	double initialHeuristicWeight;
 	uint64_t nodesExpanded, nodesTouched;
 	int nodeExpansionLimit;
 	bool avoidLearning;
@@ -137,10 +144,11 @@ private:
 template <class state, class action, class environment>
 void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 {
+	// This code measures the size of the first heuristic minima that the agent passes over
 	if (initialHeuristic)
 	{
 		double tmp;
-		if ((tmp = env->HCost(from, to)) > minInitialHeuristic)
+		if ((tmp = BaseHCost(env, from, to)) > minInitialHeuristic)
 		{
 			initialHeuristic = false;
 			maxLaterHeuristic = tmp;
@@ -150,8 +158,10 @@ void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const st
 		}
 	}
 	else {
-		maxLaterHeuristic = std::max(env->HCost(from, to), maxLaterHeuristic);
+		maxLaterHeuristic = std::max(BaseHCost(env, from, to), maxLaterHeuristic);
 	}
+	// Done measurement
+	
 	Timer t;
 	t.StartTimer();
 	m_pEnv = env;
@@ -159,8 +169,8 @@ void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const st
 	if (from==to)
 		return;
 	
-	astar.InitializeSearch(env, from, to, thePath);
 	astar.SetHeuristic(this);
+	astar.InitializeSearch(env, from, to, thePath);
 	astar.SetUseBPMX(1);
 	for (int x = 0; x < nodeExpansionLimit; x++)
 	{

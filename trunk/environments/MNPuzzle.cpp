@@ -368,89 +368,89 @@ bool MNPuzzle::InvertAction(slideDir &a) const
 	return true;
 }
 
-double MNPuzzle::HCost(const MNPuzzleState &state)
-{
-	if (!goal_stored)
-	{
-		fprintf(stderr, "ERROR: HCost called with a single state and goal is not stored.\n");
-		exit(1);
-	}
-	if (state.height != height || state.width != width)
-	{
-		fprintf(stderr, "ERROR: HCost called with a single state with wrong size.\n");
-		exit(1);
-	}
-	
-	double hval = 0;
-
-//	if (PDB.size() != 0) // select between PDB and Manhattan distance if given the chance
-//		hval = std::max(hval, DoPDBLookup(state));
-
-	if (additive && PDB.size() != 0)
-	{
-		int val = 0;
-
-		for (unsigned loc = 0; loc < width*height; loc++)
-		{
-			if (state.puzzle[loc] > 0)
-				val += h_increment[state.puzzle[loc]][loc];
-		}
-		if (val >= hDist.size())
-			hDist.resize(val+1);
-		
-		uint8_t tmp;
-		uint8_t total = 0;
-		for (unsigned int x = 0; x < PDB.size(); x++)
-		{
-			uint64_t index = GetPDBHash(state, PDB_distincts[x]);
-			histogram[PDB[x][index]]++;
-			tmp = PDB[x][index];
-			if (tmp >= hDist[val].size())
-				hDist[val].resize(tmp+1);
-			hDist[val][tmp]++;
-			if (tmp > 4) tmp = 4;
-			total += (double)tmp;
-		}
-		return val+total;
-
-//		hval = PDB_Lookup(state);
+//double MNPuzzle::HCost(const MNPuzzleState &state)
+//{
+//	if (!goal_stored)
+//	{
+//		fprintf(stderr, "ERROR: HCost called with a single state and goal is not stored.\n");
+//		exit(1);
+//	}
+//	if (state.height != height || state.width != width)
+//	{
+//		fprintf(stderr, "ERROR: HCost called with a single state with wrong size.\n");
+//		exit(1);
+//	}
+//	
+//	double hval = 0;
+//
+////	if (PDB.size() != 0) // select between PDB and Manhattan distance if given the chance
+////		hval = std::max(hval, DoPDBLookup(state));
+//
+//	if (additive && PDB.size() != 0)
+//	{
+//		int val = 0;
+//
 //		for (unsigned loc = 0; loc < width*height; loc++)
 //		{
 //			if (state.puzzle[loc] > 0)
-//				hval += h_increment[state.puzzle[loc]][loc];
+//				val += h_increment[state.puzzle[loc]][loc];
 //		}
-//		return hval;
-	}
-	
-	if (use_manhattan)
-	{
-		double man_dist = 0;
-		// increments amound for each tile location
-		// this calculates the Manhattan distance
-		for (unsigned loc = 0; loc < width*height; loc++)
-		{
-			if (state.puzzle[loc] > 0)
-				man_dist += h_increment[state.puzzle[loc]][loc];
-		}
-		hval = std::max(hval, man_dist);
-	}
-	// if no heuristic
-	else if (PDB.size()==0)
-	{
-		if (goal == state)
-			return 0;
-		else
-			return 1;
-	}
-	
-	return hval;
-}
-
+//		if (val >= hDist.size())
+//			hDist.resize(val+1);
+//		
+//		uint8_t tmp;
+//		uint8_t total = 0;
+//		for (unsigned int x = 0; x < PDB.size(); x++)
+//		{
+//			uint64_t index = GetPDBHash(state, PDB_distincts[x]);
+//			histogram[PDB[x][index]]++;
+//			tmp = PDB[x][index];
+//			if (tmp >= hDist[val].size())
+//				hDist[val].resize(tmp+1);
+//			hDist[val][tmp]++;
+//			if (tmp > 4) tmp = 4;
+//			total += (double)tmp;
+//		}
+//		return val+total;
+//
+////		hval = PDB_Lookup(state);
+////		for (unsigned loc = 0; loc < width*height; loc++)
+////		{
+////			if (state.puzzle[loc] > 0)
+////				hval += h_increment[state.puzzle[loc]][loc];
+////		}
+////		return hval;
+//	}
+//	
+//	if (use_manhattan)
+//	{
+//		double man_dist = 0;
+//		// increments amound for each tile location
+//		// this calculates the Manhattan distance
+//		for (unsigned loc = 0; loc < width*height; loc++)
+//		{
+//			if (state.puzzle[loc] > 0)
+//				man_dist += h_increment[state.puzzle[loc]][loc];
+//		}
+//		hval = std::max(hval, man_dist);
+//	}
+//	// if no heuristic
+//	else if (PDB.size()==0)
+//	{
+//		if (goal == state)
+//			return 0;
+//		else
+//			return 1;
+//	}
+//	
+//	return hval;
+//}
+//
 // TODO Remove PDB heuristic from this heuristic evaluator.
 double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2)
 {
 	if (goal_stored)
-		return HCost(state1);
+		return PermutationPuzzleEnvironment<MNPuzzleState, slideDir>::HCost(state1);
 	if (state1.height != height || state1.width != width)
 	{
 		fprintf(stderr, "ERROR: HCost called with a state with wrong size.\n");
@@ -505,10 +505,43 @@ double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2)
 	return hval;
 }
 
-double MNPuzzle::GCost(const MNPuzzleState &, const MNPuzzleState &)
+double MNPuzzle::DefaultH(const MNPuzzleState &state) const
 {
+	double man_dist = 0;
+	// increments amound for each tile location
+	// this calculates the Manhattan distance
+	for (unsigned loc = 0; loc < width*height; loc++)
+	{
+		if (state.puzzle[loc] > 0)
+			man_dist += h_increment[state.puzzle[loc]][loc];
+	}
+	return man_dist;
+}
+
+
+double MNPuzzle::GCost(const MNPuzzleState &a, const MNPuzzleState &b)
+{
+//	int diff = a.blank - b.blank;
+//	
 	return 1;
 }
+
+double MNPuzzle::GCost(const MNPuzzleState &s, const slideDir &d)
+{
+//	double cost;
+//	switch (d)
+//	{
+//		case kLeft: cost = s.puzzle[s.blank-1]; break;
+//		case kUp: cost = s.puzzle[s.blank-s.height]; break;
+//		case kDown: cost = s.puzzle[s.blank+s.height]; break;
+//		case kRight: cost = s.puzzle[s.blank+1]; break;
+//	}
+//	if (cost < 1) // in PDB might have negative costs
+//		cost = 1;
+//	return cost;
+	return 1;
+}
+
 
 bool MNPuzzle::GoalTest(const MNPuzzleState &state, const MNPuzzleState &theGoal)
 {
@@ -526,6 +559,38 @@ uint64_t MNPuzzle::GetActionHash(slideDir act) const
 	}
 	return 4;
 }
+
+void MNPuzzle::GetStateFromPDBHash(uint64_t hash, MNPuzzleState &s,
+								   int count, const std::vector<int> &pattern,
+								   std::vector<int> &dual)
+{
+	uint64_t hashVal = hash;
+	dual.resize(pattern.size());
+	
+	int numEntriesLeft = count-pattern.size()+1;
+	for (int x = pattern.size()-1; x >= 0; x--)
+	{
+		dual[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < pattern.size(); y++)
+		{
+			if (dual[y] >= dual[x])
+				dual[y]++;
+		}
+	}
+	s.puzzle.resize(count);
+	std::fill(s.puzzle.begin(), s.puzzle.end(), -1);
+	for (int x = 0; x < dual.size(); x++)
+	{
+		s.puzzle[dual[x]] = pattern[x];
+		if (pattern[x] == 0)
+			s.blank = dual[x];
+	}
+	s.width = width;
+	s.height = height;
+}
+
 
 void MNPuzzle::OpenGLDraw() const
 {
