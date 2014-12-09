@@ -5,15 +5,15 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/Makefile.com.inc,v $
 #-----------------------------------------------------------------------------
 
-CXX = clang++ # g++
-COMMON_CXXFLAGS += -Wall -std=c++11 -stdlib=libc++
+CXX = g++ # clang++
+COMMON_CXXFLAGS += -Wall -std=c++11 # -stdlib=libc++
 #COMMON_CXXFLAGS += -ansi -pedantic
 
 CC = gcc
 COMMON_CFLAGS += -Wall 
 
 LN = $(CXX)
-COMMON_LNFLAGS += -stdlib=libc++
+#COMMON_LNFLAGS += -stdlib=libc++
 
 AR = ar
 
@@ -40,9 +40,9 @@ else # not darwin
 
 # if Linux need some other pthread call 
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
-COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread --stdlib=libstdc++ # -lXi -lXmu
+COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread #--stdlib=libstdc++ # -lXi -lXmu
 else
-COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread --stdlib=libstdc++ # -lXi -lXmu 
+COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread #--stdlib=libstdc++ # -lXi -lXmu 
 endif
 
 ifeq ("$(OPENGL)", "STUB")
