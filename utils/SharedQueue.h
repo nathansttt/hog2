@@ -25,7 +25,7 @@ public:
 	size_t size();
 private:
 	std::deque<T> queue;
-	std::mutex lock;
+	mutable std::mutex lock;
 };
 
 template <typename T>
