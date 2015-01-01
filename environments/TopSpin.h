@@ -129,6 +129,7 @@ private:
 	void RecursiveMovePruning(int depth, TopSpinState &state);
 
 	std::unordered_map<uint64_t,bool> pruningMap;
+	std::unordered_map<uint64_t,int> pruningCostMap;
 	
 	unsigned int numTiles, swapDiameter;
 	std::vector<TopSpinAction> operators;
