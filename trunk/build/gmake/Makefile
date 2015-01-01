@@ -41,6 +41,7 @@ PROJECTS = \
   apps/3dmaps \
   apps/rubik \
   apps/fling \
+  apps/topspin \
 #  simulation \
 #  learning \
 #	apps/coprobber
@@ -81,6 +82,7 @@ PROJECTS_ALL = \
   apps/prediction \
   apps/rubik \
   apps/fling \
+  apps/topspin \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice

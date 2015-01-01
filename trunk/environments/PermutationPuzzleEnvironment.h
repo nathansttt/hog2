@@ -22,7 +22,10 @@ enum PDBTreeNodeType {
 	kAddNode,
 	kLeafNode,
 	kLeafMinCompress,
+	kLeafFractionalCompress,
+	kLeafModCompress,
 	kLeafValueCompress,
+	kLeafDivPlusDeltaCompress, // two lookups with the same index, one is div, one is delta
 	kLeafDefaultHeuristic
 };
 
@@ -94,7 +97,28 @@ public:
 	 Compress PDB in memory by reducing range of values
 	 **/
 	void Value_Compress_PDB(int whichPDB, int maxValue, bool print_histogram);
+	void Value_Compress_PDB(int whichPDB, std::vector<int> cutoffs, bool print_histogram);
 
+	/**
+	 Re-compute PDB as delta over current heuristic value.
+	 **/
+	void Delta_Compress_PDB(state goal, int whichPDB, bool print_histogram);
+
+	/**
+	 Only retain count values from PDB
+	 **/
+	void Fractional_Compress_PDB(int whichPDB, uint64_t count, bool print_histogram);
+	
+	/**
+	 Compress PDB in memory by reducing range of values
+	 **/
+	void Mod_Compress_PDB(int whichPDB, uint64_t newEntries, bool print_histogram);
+
+	/**
+	 Compress PDB in memory by taking min of entries
+	 **/
+	void Min_Compress_PDB(int whichPDB, int factor, bool print_histogram);
+	
 	/**
 	 Loads the Regular PDB into memory
 	 **/
@@ -110,6 +134,11 @@ public:
 	 **/
 	double PDB_Lookup(const state &s);
 
+	/**
+	 Compute the size of a PDB using a given state & set of tiles
+	 **/
+	uint64_t Get_PDB_Size(state &start, int pdbEntries);
+	
 	/**
 	 Builds a regular PDB given the file name of the file to write the PDB to, and a list of distinct tiles
 	 **/
@@ -451,14 +480,78 @@ void PermutationPuzzleEnvironment<state, action>::GetStateFromPDBHash(uint64_t h
 }
 
 template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Min_Compress_PDB(int whichPDB, int factor, bool print_histogram)
+{
+	printf("Performing min compression, reducing from %llu entries to %llu entries\n",
+		   PDB[whichPDB].size(), (PDB[whichPDB].size()+factor-1)/factor);
+	std::vector<uint8_t> newPDB((PDB[whichPDB].size()+factor-1)/factor);
+	for (uint64_t x = 0; x < PDB[whichPDB].size(); x+=factor)
+	{
+		int minVal = PDB[whichPDB][x];
+		for (uint64_t y = 1; y < factor; y++)
+		{
+			if (x+y < PDB[whichPDB].size())
+				minVal = min(minVal, PDB[whichPDB][x+y]);
+		}
+		newPDB[x/factor] = minVal;
+	}
+	PDB[whichPDB].swap(newPDB);
+	if (print_histogram)
+		PrintPDBHistogram(whichPDB);
+}
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Fractional_Compress_PDB(int whichPDB, uint64_t count, bool print_histogram)
+{
+	PDB[whichPDB].resize(count);
+}
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Mod_Compress_PDB(int whichPDB, uint64_t newEntries, bool print_histogram)
+{
+	printf("Performing mod compression, reducing from %llu entries to %llu entries\n", PDB[whichPDB].size(), newEntries);
+	std::vector<uint8_t> newPDB(newEntries);
+	for (uint64_t x = 0; x < newEntries; x++)
+		newPDB[x] = PDB[whichPDB][x];
+	for (uint64_t x = newEntries; x < PDB[whichPDB].size(); x++)
+		newPDB[x%newEntries] = min(newPDB[x%newEntries], PDB[whichPDB][x]);
+	PDB[whichPDB].swap(newPDB);
+	if (print_histogram)
+		PrintPDBHistogram(whichPDB);
+}
+
+
+template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Value_Compress_PDB(int whichPDB, int maxValue, bool print_histogram)
 {
 	for (uint64_t x = 0; x < PDB[whichPDB].size(); x++)
 		if (PDB[whichPDB][x] > maxValue)
 			PDB[whichPDB][x] = maxValue;
 	
-	PrintPDBHistogram(PDB.size()-1);
+	if (print_histogram)
+		PrintPDBHistogram(whichPDB);
 }
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Value_Compress_PDB(int whichPDB, std::vector<int> cutoffs, bool print_histogram)
+{
+	for (uint64_t x = 0; x < PDB[whichPDB].size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB[whichPDB][x] >= cutoffs[y] && PDB[whichPDB][x] < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				PDB[whichPDB][x] = cutoffs[y];
+				break;
+			}
+		}
+	}
+	
+	if (print_histogram)
+		PrintPDBHistogram(whichPDB);
+}
+
 
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Load_Regular_PDB(const char *fname, state &goal, bool print_histogram)
@@ -498,7 +591,8 @@ void PermutationPuzzleEnvironment<state, action>::Load_Regular_PDB(const char *f
 	
 	PDB_distincts.push_back(distinct); // stores distinct
 	
-	PrintPDBHistogram(PDB.size()-1);
+	if (print_histogram)
+		PrintPDBHistogram(PDB.size()-1);
 }
 
 template <class state, class action>
@@ -543,6 +637,51 @@ void PermutationPuzzleEnvironment<state, action>::PrintPDBHistogram(int which)
 		average += x*values[x];
 	}
 	printf("Average value: %1.4f\n", average/PDB[which].size());
+}
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Delta_Compress_PDB(state goal, int whichPDB, bool print_histogram)
+{
+	Timer t;
+	t.StartTimer();
+	uint64_t COUNT = PDB[whichPDB].size();
+	if (1) // use threads
+	{
+		printf("Starting threaded delta computation (%llu entries)\n", COUNT);
+		int numThreads = std::thread::hardware_concurrency();
+		std::vector<std::thread*> threads(numThreads);
+		uint64_t workSize = COUNT/numThreads+1;
+		uint64_t start = 0;
+		for (int x = 0; x < numThreads; x++)
+		{
+			threads[x] = new std::thread(&PermutationPuzzleEnvironment<state, action>::DeltaWorker, this,
+										 &PDB[whichPDB], &PDB_distincts[whichPDB], goal.puzzle.size(), start, min(start+workSize, COUNT));
+			start += workSize;
+		}
+		for (int x = 0; x < numThreads; x++)
+		{
+			threads[x]->join();
+			delete threads[x];
+			threads[x] = 0;
+		}
+	}
+	else {
+		printf("Starting sequential delta computation\n");
+		state tmp;
+		for (uint64_t x = 0; x < COUNT; x++)
+		{
+			GetStateFromPDBHash(x, tmp, goal.puzzle.size(), PDB_distincts[whichPDB]);
+			int h1 = HCost(tmp);
+			int h2 = PDB.back()[x];
+			//		if ((h1%2)||(h2%2))
+			//			printf("%d - %d = %d\n", h2, h1, h2-h1);
+			PDB.back()[x] = h2 - h1;
+		}
+	}
+	printf("%1.2fs doing delta conversion\n", t.EndTimer());
+	
+	if (print_histogram)
+		PrintPDBHistogram(whichPDB);
 }
 
 template <class state, class action>
@@ -957,6 +1096,16 @@ void PermutationPuzzleEnvironment<state, action>::Build_PDB(state &start, const 
 }
 
 template <class state, class action>
+uint64_t PermutationPuzzleEnvironment<state, action>::Get_PDB_Size(state &start, int pdbEntries)
+{
+	maxItem = max(maxItem,start.puzzle.size());
+	minPattern = min(minPattern, pdbEntries);
+	buildCaches();
+	return nUpperk(start.puzzle.size(), start.puzzle.size()-pdbEntries);
+}
+
+
+template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Build_Regular_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename)
 {
 	maxItem = max(maxItem,start.puzzle.size());
@@ -1313,6 +1462,19 @@ double PermutationPuzzleEnvironment<state, action>::HCost(const state &s, int tr
 			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID], c1, c2);
 			hval = PDB[lookups[treeNode].PDBID][index];
 		} break;
+		case kLeafFractionalCompress:
+		{
+			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID], c1, c2);
+			if (index < PDB[lookups[treeNode].PDBID].size())
+				hval = PDB[lookups[treeNode].PDBID][index];
+			else
+				hval = 0;
+		} break;
+		case kLeafModCompress:
+		{
+			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID], c1, c2);
+			hval = PDB[lookups[treeNode].PDBID][index%PDB[lookups[treeNode].PDBID].size()];
+		} break;
 		case kLeafMinCompress:
 		{
 			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID], c1, c2)/lookups[treeNode].numChildren;
@@ -1324,6 +1486,12 @@ double PermutationPuzzleEnvironment<state, action>::HCost(const state &s, int tr
 			hval = PDB[lookups[treeNode].PDBID][index];
 			if (hval > lookups[treeNode].numChildren)
 				hval = lookups[treeNode].numChildren;
+		} break;
+		case kLeafDivPlusDeltaCompress:
+		{
+			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID], c1, c2);
+			hval = PDB[lookups[treeNode].PDBID][index/lookups[treeNode].numChildren];
+			hval += PDB[lookups[treeNode].firstChildID];
 		}
 		case kLeafDefaultHeuristic:
 		{
