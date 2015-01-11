@@ -14,7 +14,7 @@ PancakePuzzle::PancakePuzzle(unsigned s) {
 	use_dual_lookup = true;
 }
 
-PancakePuzzle::PancakePuzzle(unsigned s, const std::vector<unsigned> op_order) {
+PancakePuzzle::PancakePuzzle(unsigned s, const std::vector<PancakePuzzleAction> op_order) {
 	size = s;
 
 	Change_Op_Order(op_order);
@@ -77,7 +77,7 @@ void PancakePuzzle::GetSuccessors(const PancakePuzzleState &parent,
 	}
 }
 
-void PancakePuzzle::GetActions(const PancakePuzzleState &, std::vector<unsigned> &actions) const
+void PancakePuzzle::GetActions(const PancakePuzzleState &, std::vector<PancakePuzzleAction> &actions) const
 {
 	actions.resize(0);
 
@@ -88,9 +88,9 @@ void PancakePuzzle::GetActions(const PancakePuzzleState &, std::vector<unsigned>
 	}
 }
 
-unsigned PancakePuzzle::GetAction(const PancakePuzzleState &parent, const PancakePuzzleState &child) const
+PancakePuzzleAction PancakePuzzle::GetAction(const PancakePuzzleState &parent, const PancakePuzzleState &child) const
 {
-	unsigned current_action;
+	PancakePuzzleAction current_action;
 	bool are_equal = false;
 
 	assert(child.puzzle.size() == size);
@@ -112,7 +112,7 @@ unsigned PancakePuzzle::GetAction(const PancakePuzzleState &parent, const Pancak
 	return 0;
 }
 
-void PancakePuzzle::ApplyAction(PancakePuzzleState &s, unsigned action) const
+void PancakePuzzle::ApplyAction(PancakePuzzleState &s, PancakePuzzleAction action) const
 {
 	assert(s.puzzle.size() == size);
 	assert(action > 1 && action <= size);
@@ -130,7 +130,7 @@ void PancakePuzzle::ApplyAction(PancakePuzzleState &s, unsigned action) const
 	}
 }
 
-bool PancakePuzzle::InvertAction(unsigned &a) const
+bool PancakePuzzle::InvertAction(PancakePuzzleAction &a) const
 {
 	// ever action is self-inverse
 	assert(a > 1 && a <= size);
@@ -254,7 +254,7 @@ bool PancakePuzzle::GoalTest(const PancakePuzzleState &s) {
 	return (s == goal);
 }
 
-uint64_t PancakePuzzle::GetActionHash(unsigned act) const
+uint64_t PancakePuzzle::GetActionHash(PancakePuzzleAction act) const
 {
 	return (uint64_t) act;
 }
@@ -271,7 +271,7 @@ void PancakePuzzle::StoreGoal(PancakePuzzleState &g) {
 	}
 }
 
-void PancakePuzzle::Change_Op_Order(const std::vector<unsigned> op_order) {
+void PancakePuzzle::Change_Op_Order(const std::vector<PancakePuzzleAction> op_order) {
 	operators.clear();
 
 	if(op_order.size() != size - 1) {
@@ -355,7 +355,7 @@ int PancakePuzzle::read_in_pancake_puzzles(const char *filename, bool puzz_num_s
 	return 0;
 }
 
-bool PancakePuzzle::Path_Check(PancakePuzzleState start, PancakePuzzleState theGoal, std::vector<unsigned> &actions) {
+bool PancakePuzzle::Path_Check(PancakePuzzleState start, PancakePuzzleState theGoal, std::vector<PancakePuzzleAction> &actions) {
 
 	if(start.puzzle.size() != size || theGoal.puzzle.size() != size)
 		return false;
@@ -409,3 +409,21 @@ std::vector<unsigned> PancakePuzzle::Get_Puzzle_Order(int64_t order_num, unsigne
 	}
 	return ops;
 }
+
+void PancakePuzzle::OpenGLDraw(const PancakePuzzleState &pps) const
+{
+	double count = pps.puzzle.size();
+	double widthUnit = 1.5/count;
+
+	for (int y = 0; y < pps.puzzle.size(); y++)
+	{
+		for (int x = 0; x <= pps.puzzle[y]; x++)
+		{
+			glColor3f(pps.puzzle[y]/count, 0, 1-pps.puzzle[y]/count);
+			DrawBox(-pps.puzzle[y]*widthUnit/4+x*widthUnit/2,
+					-1+widthUnit*y+widthUnit/2, 0,
+					widthUnit/2);
+		}
+	}
+}
+

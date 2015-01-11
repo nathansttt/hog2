@@ -7,12 +7,18 @@
 #include "PermutationPuzzleEnvironment.h"
 #include <sstream>
 
+typedef unsigned PancakePuzzleAction;
+
 class PancakePuzzleState {
 public:
 	PancakePuzzleState() { puzzle.clear(); }
 
 	PancakePuzzleState(unsigned int puzzle_size) {
 		puzzle.resize(puzzle_size);
+		Reset();
+	}
+	void Reset()
+	{
 		for (unsigned int x = 0; x < puzzle.size(); x++)
 			puzzle[x] = x;
 	}
@@ -37,7 +43,7 @@ static bool operator==(const PancakePuzzleState &l1, const PancakePuzzleState &l
 	return true;
 }
 
-class PancakePuzzle : public PermutationPuzzleEnvironment<PancakePuzzleState, unsigned> {
+class PancakePuzzle : public PermutationPuzzleEnvironment<PancakePuzzleState, PancakePuzzleAction> {
 public:
 	PancakePuzzle(unsigned s);
 	PancakePuzzle(unsigned size, const std::vector<unsigned> op_order); // used to set action order
@@ -45,26 +51,26 @@ public:
 	~PancakePuzzle();
 	void GetSuccessors(const PancakePuzzleState &state, std::vector<PancakePuzzleState> &neighbors) const;
 	void GetActions(const PancakePuzzleState &state, std::vector<unsigned> &actions) const;
-	unsigned GetAction(const PancakePuzzleState &s1, const PancakePuzzleState &s2) const;
-	void ApplyAction(PancakePuzzleState &s, unsigned a) const;
-	bool InvertAction(unsigned &a) const;
+	PancakePuzzleAction GetAction(const PancakePuzzleState &s1, const PancakePuzzleState &s2) const;
+	void ApplyAction(PancakePuzzleState &s, PancakePuzzleAction a) const;
+	bool InvertAction(PancakePuzzleAction &a) const;
 
 	double HCost(const PancakePuzzleState &state1, const PancakePuzzleState &state2);
 	double Memory_Free_HCost(const PancakePuzzleState &state1, std::vector<int> &goal_locs);
 	double HCost(const PancakePuzzleState &state1);
 
 	double GCost(const PancakePuzzleState &, const PancakePuzzleState &) {return 1.0;}
-	double GCost(const PancakePuzzleState &, const unsigned &) { return 1.0; }
+	double GCost(const PancakePuzzleState &, const PancakePuzzleAction &) { return 1.0; }
 
 	bool GoalTest(const PancakePuzzleState &state, const PancakePuzzleState &goal);
 
 	bool GoalTest(const PancakePuzzleState &s);
 
-	uint64_t GetActionHash(unsigned act) const;
+	uint64_t GetActionHash(PancakePuzzleAction act) const;
 	void StoreGoal(PancakePuzzleState &); // stores the locations for the given goal state
 
 	virtual const std::string GetName();
-	std::vector<unsigned> Get_Op_Order(){return operators;}
+	std::vector<PancakePuzzleAction> Get_Op_Order(){return operators;}
 
 	/** Returns stored goal state if it is stored.**/
 	PancakePuzzleState Get_Goal(){
@@ -82,12 +88,12 @@ public:
 	/**
 	Changes the ordering of operators to the new inputted order
 	**/
-	void Change_Op_Order(const std::vector<unsigned> op_order);
+	void Change_Op_Order(const std::vector<PancakePuzzleAction> op_order);
 
 	// currently not drawing anything
 	void OpenGLDraw() const{}
-	void OpenGLDraw(const PancakePuzzleState &) const {}
-	void OpenGLDraw(const PancakePuzzleState &, const unsigned &) const {}
+	void OpenGLDraw(const PancakePuzzleState &) const;
+	void OpenGLDraw(const PancakePuzzleState &, const PancakePuzzleAction &) const {}
 	void OpenGLDraw(const PancakePuzzleState&, const PancakePuzzleState&, float) const {}
 
 	/**
@@ -103,7 +109,7 @@ public:
 		return true;
 	}
 
-	bool Path_Check(PancakePuzzleState start, PancakePuzzleState goal, std::vector<unsigned> &actions);
+	bool Path_Check(PancakePuzzleState start, PancakePuzzleState goal, std::vector<PancakePuzzleAction> &actions);
 
 	/**
 	Returns a possible ordering of the operators. The orders are in a "lexicographic"
@@ -112,14 +118,14 @@ public:
 	environment is created is num_pancakes, ..., 2 which is returned with a call of
 	num_pancakes! -1.
 	**/
-	static std::vector<unsigned> Get_Puzzle_Order(int64_t order_num, unsigned num_pancakes);
+	static std::vector<PancakePuzzleAction> Get_Puzzle_Order(int64_t order_num, unsigned num_pancakes);
 
 	void Set_Use_Memory_Free_Heuristic(bool to_use){use_memory_free = to_use;}
 	void Set_Use_Dual_Lookup( bool to_use ) { use_dual_lookup = to_use; };
 
 private:
 
-	std::vector<unsigned> operators;
+	std::vector<PancakePuzzleAction> operators;
 	bool goal_stored; // whether a goal is stored or not
 	bool use_memory_free;
 	bool use_dual_lookup;

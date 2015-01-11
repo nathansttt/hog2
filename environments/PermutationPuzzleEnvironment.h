@@ -1491,7 +1491,7 @@ double PermutationPuzzleEnvironment<state, action>::HCost(const state &s, int tr
 		{
 			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID], c1, c2);
 			hval = PDB[lookups[treeNode].PDBID][index/lookups[treeNode].numChildren];
-			hval += PDB[lookups[treeNode].firstChildID];
+			hval += PDB[lookups[treeNode].firstChildID][index];
 		}
 		case kLeafDefaultHeuristic:
 		{
