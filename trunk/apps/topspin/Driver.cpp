@@ -449,6 +449,7 @@ void ModValueCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -460,7 +461,7 @@ void ModValueCompressionTest(bool weighted)
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
-		printf("==>Compressing by factor of %d\n", x);
+		printf("==>Compressing (mod) by factor of %d\n", x);
 		tse.ClearPDBs();
 		//tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
@@ -477,6 +478,7 @@ void ModValueDeltaCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -488,7 +490,7 @@ void ModValueDeltaCompressionTest(bool weighted)
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
-		printf("==>MOD Compressing by factor of %d\n", x);
+		printf("==>Compressing (mod-delta) by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
 		tse.lookups.push_back({kLeafNode, -0, -0, 0});
@@ -508,6 +510,7 @@ void DivValueCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -541,7 +544,7 @@ void DivValueCompressionTest(bool weighted)
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
-		printf("==>Compressing by factor of %d\n", x);
+		printf("==>Compressing (div) by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Min_Compress_PDB(0, x, true);
@@ -555,6 +558,7 @@ void DivDeltaValueCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -588,7 +592,7 @@ void DivDeltaValueCompressionTest(bool weighted)
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
-		printf("==>Compressing by factor of %d\n", x);
+		printf("==>Compressing (div delta) by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
 		tse.lookups.push_back({kLeafNode, -0, -0, 0});
@@ -605,6 +609,7 @@ void BitDeltaValueCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -616,7 +621,7 @@ void BitDeltaValueCompressionTest(bool weighted)
 	for (int x = 1; x <= 4; x*=2)
 	{
 		g.Reset();
-		printf("==>Compressing to %d bits\n", x);
+		printf("==>Compressing (value-range-delta) to %d bits\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
 		tse.lookups.push_back({kLeafNode, -0, -0, 0});
@@ -638,6 +643,7 @@ void FractionalNodesCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -712,6 +718,7 @@ void ModNodesCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -723,7 +730,7 @@ void ModNodesCompressionTest(bool weighted)
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
-		printf("==>Compressing by factor of %d\n", x);
+		printf("==>Compressing (mod) by factor of %d\n", x);
 		tse.ClearPDBs();
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
@@ -777,6 +784,7 @@ void DivNodesCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -788,7 +796,7 @@ void DivNodesCompressionTest(bool weighted)
 	for (int x = 1; x <= 10; x++)
 	{
 		g.Reset();
-		printf("==>Compressing by factor of %d\n", x);
+		printf("==>Compressing (div) by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Min_Compress_PDB(0, x, true);
@@ -840,6 +848,7 @@ void BitDeltaNodesCompressionTest(bool weighted)
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
@@ -1038,7 +1047,7 @@ TopSpinState GetInstance(int which, bool weighted)
 	s.Reset();
 	int length = 10000;
 	if (weighted)
-		length = 5000;
+		length = 1000;
 	for (int x = 0; x < length; x++)
 	{
 		tse.ApplyAction(s, random()%16);
