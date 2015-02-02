@@ -14,6 +14,11 @@
 			<key>orderHint</key>
 			<integer>5</integer>
 		</dict>
+		<key>Pancake.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>17</integer>
+		</dict>
 		<key>Robotic Arm.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -118,6 +123,11 @@
 			<true/>
 		</dict>
 		<key>C47BDBCE17440B5900DD0928</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C47DFC891A5FACCD00C3961B</key>
 		<dict>
 			<key>primary</key>
 			<true/>

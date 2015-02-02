@@ -182,7 +182,7 @@ double TopSpin::HCost(const TopSpinState &state1, const TopSpinState &state2)
 int costs[16] = {16,1,8,15,22,29,17,14,9,20,26,28,3,16,12,18}; // 1...29
 double TopSpin::GCost(const TopSpinState &node, const TopSpinAction &act)
 {
-	return 1;
+	//return 1;
 	assert(numTiles <= 16);
 	return costs[act];
 }

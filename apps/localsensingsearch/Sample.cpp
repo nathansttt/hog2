@@ -811,8 +811,8 @@ void RunWeightedHeuristicScenario(char *name, int lookahead, double heuristicWei
 	
 	for (int x = 0; x < sl->GetNumExperiments(); x++)
 	{
-		if (sl->GetNthExperiment(x).GetBucket() >= 95 &&
-			sl->GetNthExperiment(x).GetBucket() <  105)
+		if (sl->GetNthExperiment(x).GetBucket() >= 100 &&
+			sl->GetNthExperiment(x).GetBucket() <  101)
 		{
 			printf("Experiment %d of %d\n", x+1, sl->GetNumExperiments());
 			RunSingleWeightedTest(es, sl->GetNthExperiment(x), lookahead, heuristicWeight);
