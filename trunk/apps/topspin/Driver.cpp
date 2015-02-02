@@ -40,32 +40,25 @@ void CompareToSmallerPDB();
 
 void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char);
 void TSTest(unsigned long , tKeyboardModifier , char);
-TopSpinState GetInstance(int which);
-void Test(TopSpin &tse);
-void BaselineTest();
-void BaselineTest2();
-void LosslessTest();
+TopSpinState GetInstance(int which, bool weighted);
+void Test(TopSpin &tse, const char *prefix);
 void MinCompressionTest();
-void Delta6CompressionTest();
-void Delta7CompressionTest();
-void Delta7ValueCompressionTest();
-void DeltaMinCompressionTest();
 void MeasureIR(TopSpin &tse);
 void GetBitValueCutoffs(std::vector<int> &cutoffs, int bits);
 
-void BitDeltaValueCompressionTest();
-void ModValueCompressionTest();
-void ModValueDeltaCompressionTest();
-void DivValueCompressionTest();
-void DivDeltaValueCompressionTest();
+void BitDeltaValueCompressionTest(bool weighted);
+void ModValueCompressionTest(bool weighted);
+void ModValueDeltaCompressionTest(bool weighted);
+void DivValueCompressionTest(bool weighted);
+void DivDeltaValueCompressionTest(bool weighted);
 
-void FractionalNodesCompressionTest();
-void FractionalModNodesCompressionTest();
-void BitDeltaNodesCompressionTest();
-void ModNodesCompressionTest();
-void ModNodesDeltaCompressionTest();
-void DivNodesCompressionTest();
-void DivDeltaNodesCompressionTest();
+void FractionalNodesCompressionTest(bool weighted);
+void FractionalModNodesCompressionTest(bool weighted);
+void BitDeltaNodesCompressionTest(bool weighted);
+void ModNodesCompressionTest(bool weighted);
+void ModNodesDeltaCompressionTest(bool weighted);
+void DivNodesCompressionTest(bool weighted);
+void DivDeltaNodesCompressionTest(bool weighted);
 
 TopSpin *ts = 0;
 
@@ -246,62 +239,15 @@ void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 //	DivValueCompressionTest();
 //	BitDeltaValueCompressionTest();
 
-	FractionalModNodesCompressionTest();
-	FractionalNodesCompressionTest();
-//BitDeltaNodesCompressionTest();
-//	DivNodesCompressionTest();
-//	ModNodesCompressionTest();
+	bool weighted = true;
+
+	FractionalModNodesCompressionTest(weighted);
+	FractionalNodesCompressionTest(weighted);
+	BitDeltaNodesCompressionTest(weighted);
+	DivNodesCompressionTest(weighted);
+	ModNodesCompressionTest(weighted);
 
 	exit(0);
-	
-	int N = 16, k = 4;
-	TopSpinState start(N, k);
-	std::vector<int> tiles;
-
-	{
-		TopSpin tse(N, k);
-
-		tiles.resize(0);
-		start.Reset();
-		for (int x = 0; x < 4; x++)
-			tiles.push_back(x);
-		
-		tse.Build_Regular_PDB(start, tiles, "/Users/nathanst/Desktop/TS_0-3.pdb");
-		tse.lookups.push_back({kLeafNode, 0, 0, 0});
-
-		tiles.resize(0);
-		start.Reset();
-		for (int x = 0; x < 6; x++)
-			tiles.push_back(x);
-		tse.Build_Regular_PDB(start, tiles, "/Users/nathanst/Desktop/TS_0-5+.pdb");
-	}
-
-	{
-		TopSpin tse(N, k);
-		
-		tiles.resize(0);
-		start.Reset();
-		for (int x = 6; x < 10; x++)
-			tiles.push_back(x);
-		
-		tse.Build_Regular_PDB(start, tiles, "/Users/nathanst/Desktop/TS_6-9.pdb");
-		tse.lookups.push_back({kLeafNode, 0, 0, 0});
-		
-		tiles.resize(0);
-		start.Reset();
-		for (int x = 6; x < 12; x++)
-			tiles.push_back(x);
-		tse.Build_Regular_PDB(start, tiles, "/Users/nathanst/Desktop/TS_6-11+.pdb");
-	}
-
-	{
-		tiles.resize(0);
-		start.Reset();
-		for (int x = 12; x < 16; x++)
-			tiles.push_back(x);
-		TopSpin tse(N, k);
-		tse.Build_Regular_PDB(start, tiles, "/Users/nathanst/Desktop/TS_12-15.pdb");
-	}
 }
 
 void TSTest(unsigned long , tKeyboardModifier , char)
@@ -380,16 +326,55 @@ bool fileExists(const char *name)
 }
 
 #pragma mark pdb building code
+#include <string>
 const int N = 16, k = 4;
-const char *pdb7a = "/Users/nathanst/Desktop/TS-0-6.pdb";
-const char *pdb8a = "/Users/nathanst/Desktop/TS-0-7.pdb";
+const char *prefix = "/Users/nathanst/Desktop/";
+const char *getPDB7a(bool weighted)
+{
+	static std::string s;
+	s = prefix;
+	if (!weighted)
+		s += "TS-0-6.pdb";
+	else
+		s += "wTS-0-6.pdb";
+	return s.c_str();
+}
 
-const char *pdb7b = "/Users/nathanst/Desktop/TS-8-14.pdb";
-const char *pdb8b = "/Users/nathanst/Desktop/TS-8-15.pdb";
+const char *getPDB8a(bool weighted)
+{
+	static std::string s;
+	s = prefix;
+	if (!weighted)
+		s += "TS-0-7.pdb";
+	else
+		s += "wTS-0-7.pdb";
+	return s.c_str();
+}
 
-void BuildPDBs(bool aPDBs, bool bPDBs)
+const char *getPDB7b(bool weighted)
+{
+	static std::string s;
+	s = prefix;
+	if (!weighted)
+		s += "TS-8-14.pdb";
+	else
+		s += "wTS-8-14.pdb";
+	return s.c_str();
+}
+const char *getPDB8b(bool weighted)
+{
+	static std::string s;
+	s = prefix;
+	if (!weighted)
+		s += "TS-8-15.pdb";
+	else
+		s += "wTS-8-15.pdb";
+	return s.c_str();
+}
+void BuildPDBs(bool aPDBs, bool bPDBs, bool weighted)
 {
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	std::vector<int> tiles;
 	
 	TopSpinState s(N, k);
@@ -400,7 +385,7 @@ void BuildPDBs(bool aPDBs, bool bPDBs)
 
 	if (aPDBs)
 	{
-		if (!fileExists(pdb7a))
+		if (!fileExists(getPDB7a(weighted)))
 		{
 			g.Reset();
 			tiles.resize(0);
@@ -408,12 +393,12 @@ void BuildPDBs(bool aPDBs, bool bPDBs)
 			for (int x = 0; x <= 6; x++)
 				tiles.push_back(x);
 			
-			tse.Build_PDB(g, tiles, pdb7a,
+			tse.Build_PDB(g, tiles, getPDB7a(weighted),
 						  std::thread::hardware_concurrency(), false);
 			tse.ClearPDBs();
 		}
 		
-		if (!fileExists(pdb8a))
+		if (!fileExists(getPDB8a(weighted)))
 		{
 			g.Reset();
 			tiles.resize(0);
@@ -421,7 +406,7 @@ void BuildPDBs(bool aPDBs, bool bPDBs)
 			for (int x = 0; x <= 7; x++)
 				tiles.push_back(x);
 			
-			tse.Build_PDB(g, tiles, pdb8a,
+			tse.Build_PDB(g, tiles, getPDB8a(weighted),
 						  std::thread::hardware_concurrency(), false);
 			tse.ClearPDBs();
 		}
@@ -429,7 +414,7 @@ void BuildPDBs(bool aPDBs, bool bPDBs)
 	
 	if (bPDBs)
 	{
-		if (!fileExists(pdb7b))
+		if (!fileExists(getPDB7b(weighted)))
 		{
 			g.Reset();
 			tiles.resize(0);
@@ -437,12 +422,12 @@ void BuildPDBs(bool aPDBs, bool bPDBs)
 				//for (int x = 1; x <= 14; x+=2)
 				tiles.push_back(x);
 			
-			tse.Build_PDB(g, tiles, pdb7b,
+			tse.Build_PDB(g, tiles, getPDB7b(weighted),
 						  std::thread::hardware_concurrency(), false);
 			tse.ClearPDBs();
 		}
 		
-		if (!fileExists(pdb8b))
+		if (!fileExists(getPDB8b(weighted)))
 		{
 			g.Reset();
 			tiles.resize(0);
@@ -450,7 +435,7 @@ void BuildPDBs(bool aPDBs, bool bPDBs)
 			//for (int x = 1; x <= 15; x+=2)
 				tiles.push_back(x);
 			
-			tse.Build_PDB(g, tiles, pdb8b,
+			tse.Build_PDB(g, tiles, getPDB8b(weighted),
 						  std::thread::hardware_concurrency(), false);
 			tse.ClearPDBs();
 		}
@@ -459,7 +444,7 @@ void BuildPDBs(bool aPDBs, bool bPDBs)
 
 #pragma mark heuristic value tests
 
-void ModValueCompressionTest()
+void ModValueCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -470,24 +455,24 @@ void ModValueCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	BuildPDBs(true, false);
+	BuildPDBs(true, false, weighted);
 	
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
 		printf("==>Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
-		//tse.Load_Regular_PDB(pdb7a, g, true);
+		//tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
-		tse.Load_Regular_PDB(pdb8a, g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Mod_Compress_PDB(0, newSize, true);
 		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
 		MeasureIR(tse);
 	}
 }
 
-void ModValueDeltaCompressionTest()
+void ModValueDeltaCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -498,19 +483,19 @@ void ModValueDeltaCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	BuildPDBs(true, false);
+	BuildPDBs(true, false, weighted);
 	
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
 		printf("==>MOD Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb7a, g, true);
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
 		tse.lookups.push_back({kLeafNode, -0, -0, 0});
 
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
-		tse.Load_Regular_PDB(pdb8a, g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Delta_Compress_PDB(g, 1, true);
 		tse.Mod_Compress_PDB(1, newSize, true);
 //		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
@@ -518,7 +503,7 @@ void ModValueDeltaCompressionTest()
 	}
 }
 
-void DivValueCompressionTest()
+void DivValueCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -529,26 +514,26 @@ void DivValueCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	if (!fileExists(pdb7a))
+	if (!fileExists(getPDB7a(weighted)))
 	{
 		g.Reset();
 		tiles.resize(0);
 		for (int x = 0; x <= 6; x++)
 			tiles.push_back(x);
 		
-		tse.Build_PDB(g, tiles, pdb7a,
+		tse.Build_PDB(g, tiles, getPDB7a(weighted),
 					  std::thread::hardware_concurrency(), false);
 		tse.ClearPDBs();
 	}
 	
-	if (!fileExists(pdb8a))
+	if (!fileExists(getPDB8a(weighted)))
 	{
 		g.Reset();
 		tiles.resize(0);
 		for (int x = 0; x < 8; x++)
 			tiles.push_back(x);
 		
-		tse.Build_PDB(g, tiles, pdb8a,
+		tse.Build_PDB(g, tiles, getPDB8a(weighted),
 					  std::thread::hardware_concurrency(), false);
 		tse.ClearPDBs();
 	}
@@ -558,14 +543,14 @@ void DivValueCompressionTest()
 		g.Reset();
 		printf("==>Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb8a, g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Min_Compress_PDB(0, x, true);
 		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
 		MeasureIR(tse);
 	}
 }
 
-void DivDeltaValueCompressionTest()
+void DivDeltaValueCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -576,26 +561,26 @@ void DivDeltaValueCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	if (!fileExists(pdb7a))
+	if (!fileExists(getPDB7a(weighted)))
 	{
 		g.Reset();
 		tiles.resize(0);
 		for (int x = 0; x <= 6; x++)
 			tiles.push_back(x);
 		
-		tse.Build_PDB(g, tiles, pdb7a,
+		tse.Build_PDB(g, tiles, getPDB7a(weighted),
 					  std::thread::hardware_concurrency(), false);
 		tse.ClearPDBs();
 	}
 	
-	if (!fileExists(pdb8a))
+	if (!fileExists(getPDB8a(weighted)))
 	{
 		g.Reset();
 		tiles.resize(0);
 		for (int x = 0; x < 8; x++)
 			tiles.push_back(x);
 		
-		tse.Build_PDB(g, tiles, pdb8a,
+		tse.Build_PDB(g, tiles, getPDB8a(weighted),
 					  std::thread::hardware_concurrency(), false);
 		tse.ClearPDBs();
 	}
@@ -605,17 +590,17 @@ void DivDeltaValueCompressionTest()
 		g.Reset();
 		printf("==>Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb7a, g, false);
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
 		tse.lookups.push_back({kLeafNode, -0, -0, 0});
 
-		tse.Load_Regular_PDB(pdb8a, g, false);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, false);
 		tse.Delta_Compress_PDB(g, 1, true);
 		tse.Min_Compress_PDB(1, x, true);
 		//MeasureIR(tse);
 	}
 }
 
-void BitDeltaValueCompressionTest()
+void BitDeltaValueCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -626,17 +611,17 @@ void BitDeltaValueCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	BuildPDBs(true, false);
+	BuildPDBs(true, false, weighted);
 	
 	for (int x = 1; x <= 4; x*=2)
 	{
 		g.Reset();
 		printf("==>Compressing to %d bits\n", x);
 		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb7a, g, false);
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
 		tse.lookups.push_back({kLeafNode, -0, -0, 0});
 		
-		tse.Load_Regular_PDB(pdb8a, g, false);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, false);
 		tse.Delta_Compress_PDB(g, 1, true);
 		std::vector<int> cutoffs;
 		GetBitValueCutoffs(cutoffs, x);
@@ -648,7 +633,7 @@ void BitDeltaValueCompressionTest()
 #pragma mark node expansion tests
 
 //Fractional_Mod_Compress_PDB
-void FractionalNodesCompressionTest()
+void FractionalNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -659,7 +644,7 @@ void FractionalNodesCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	BuildPDBs(true, true);
+	BuildPDBs(true, true, weighted);
 	
 	for (int x = 2; x <= 10; x++)
 	{
@@ -668,10 +653,10 @@ void FractionalNodesCompressionTest()
 		tse.ClearPDBs();
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
-		tse.Load_Regular_PDB(pdb7a, g, true);
-		tse.Load_Regular_PDB(pdb8a, g, true);
-		tse.Load_Regular_PDB(pdb7b, g, true);
-		tse.Load_Regular_PDB(pdb8b, g, true);
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB7b(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		tse.Fractional_Compress_PDB(1, newSize, true);
 		tse.Fractional_Compress_PDB(3, newSize, true);
 		tse.lookups.push_back({kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
@@ -679,33 +664,35 @@ void FractionalNodesCompressionTest()
 		tse.lookups.push_back({kLeafFractionalCompress, -0, -0, 1});
 		tse.lookups.push_back({kLeafNode, -0, -0, 2});
 		tse.lookups.push_back({kLeafFractionalCompress, -0, -0, 3});
-		Test(tse);
-		return;
+		std::string desc = "FCT-C-";
+		desc += ('0'+x);
+		Test(tse, desc.c_str());
 	}
 }
 
-void FractionalModNodesCompressionTest()
+void FractionalModNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
 	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
 	TopSpinState s(N, k);
 	TopSpinState g(N, k);
 	
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	BuildPDBs(true, true);
+	BuildPDBs(true, true, weighted);
 	
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
 		printf("==>Fractional MOD: Reducing by factor of %d\n", x);
 		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb7a, g, true);
-		tse.Load_Regular_PDB(pdb8a, g, true);
-		tse.Load_Regular_PDB(pdb7b, g, true);
-		tse.Load_Regular_PDB(pdb8b, g, true);
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB7b(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		tse.Fractional_Mod_Compress_PDB(1, x, true);
 		tse.Fractional_Mod_Compress_PDB(3, x, true);
 		tse.lookups.push_back({kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
@@ -713,12 +700,14 @@ void FractionalModNodesCompressionTest()
 		tse.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 1}); // factor, -- , id
 		tse.lookups.push_back({kLeafNode, -0, -0, 2});
 		tse.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 3});
-		Test(tse);
+		std::string desc = "FCT-M-";
+		desc += ('0'+x);
+		Test(tse, desc.c_str());
 	}
 }
 
 
-void ModNodesCompressionTest()
+void ModNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -729,7 +718,7 @@ void ModNodesCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	BuildPDBs(true, true);
+	BuildPDBs(true, true, weighted);
 	
 	for (int x = 2; x <= 10; x++)
 	{
@@ -738,18 +727,52 @@ void ModNodesCompressionTest()
 		tse.ClearPDBs();
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
-		tse.Load_Regular_PDB(pdb8a, g, true);
-		tse.Load_Regular_PDB(pdb8b, g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		tse.Mod_Compress_PDB(0, newSize, true);
 		tse.Mod_Compress_PDB(1, newSize, true);
 		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
 		tse.lookups.push_back({kLeafModCompress, -0, -0, 0});
 		tse.lookups.push_back({kLeafModCompress, -0, -0, 1});
-		Test(tse);
+
+		std::string desc = "MOD-";
+		desc += ('0'+x);
+		Test(tse, desc.c_str());
 	}
 }
 
-void ModNodesDeltaCompressionTest()
+void ModNodesDeltaCompressionTest(bool weighted)
+{
+//	std::vector<int> tiles;
+//	
+//	TopSpin tse(N, k);
+//	TopSpinState s(N, k);
+//	TopSpinState g(N, k);
+//	
+//	tse.StoreGoal(g);
+//	tse.ClearPDBs();
+//	
+//	BuildPDBs(true, true, weighted);
+//	
+//	for (int x = 2; x <= 10; x++)
+//	{
+//		g.Reset();
+//		printf("==>MOD Compressing by factor of %d\n", x);
+//		tse.ClearPDBs();
+//		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
+//		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+//		
+//		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
+//		uint64_t newSize = oldSize / x;
+//		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
+//		tse.Delta_Compress_PDB(g, 1, true);
+//		tse.Mod_Compress_PDB(1, newSize, true);
+//		//		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
+//		//		MeasureIR(tse);
+//	}
+}
+
+void DivNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -760,59 +783,59 @@ void ModNodesDeltaCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	BuildPDBs(true, true);
-	
-	for (int x = 2; x <= 10; x++)
-	{
-		g.Reset();
-		printf("==>MOD Compressing by factor of %d\n", x);
-		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb7a, g, true);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		
-		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
-		uint64_t newSize = oldSize / x;
-		tse.Load_Regular_PDB(pdb8a, g, true);
-		tse.Delta_Compress_PDB(g, 1, true);
-		tse.Mod_Compress_PDB(1, newSize, true);
-		//		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
-		//		MeasureIR(tse);
-	}
-}
-
-void DivNodesCompressionTest()
-{
-	std::vector<int> tiles;
-	
-	TopSpin tse(N, k);
-	TopSpinState s(N, k);
-	TopSpinState g(N, k);
-	
-	tse.StoreGoal(g);
-	tse.ClearPDBs();
-	
-	BuildPDBs(true, true);
+	BuildPDBs(true, true, weighted);
 	
 	for (int x = 1; x <= 10; x++)
 	{
 		g.Reset();
 		printf("==>Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb8a, g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Min_Compress_PDB(0, x, true);
-		tse.Load_Regular_PDB(pdb8b, g, true);
+		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		tse.Min_Compress_PDB(1, x, true);
 
 		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
 		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
 		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
 
-		Test(tse);
+		std::string desc = "DIV-";
+		desc += ('0'+x);
+		Test(tse, desc.c_str());
 		//MeasureIR(tse);
 	}
 }
 
-void DivDeltaNodesCompressionTest()
+void DivDeltaNodesCompressionTest(bool weighted)
+{
+//	std::vector<int> tiles;
+//	
+//	TopSpin tse(N, k);
+//	TopSpinState s(N, k);
+//	TopSpinState g(N, k);
+//	
+//	tse.StoreGoal(g);
+//	tse.ClearPDBs();
+//	
+//	BuildPDBs(true, true, weighted);
+//	
+//	for (int x = 2; x <= 10; x++)
+//	{
+//		g.Reset();
+//		printf("==>Compressing by factor of %d\n", x);
+//		tse.ClearPDBs();
+//		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
+//		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+//		
+//		tse.Load_Regular_PDB(getPDB8a(weighted), g, false);
+//		tse.Delta_Compress_PDB(g, 1, true);
+//		tse.Min_Compress_PDB(1, x, true);
+//		//MeasureIR(tse);
+//	}
+}
+
+
+void BitDeltaNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
@@ -823,36 +846,7 @@ void DivDeltaNodesCompressionTest()
 	tse.StoreGoal(g);
 	tse.ClearPDBs();
 	
-	BuildPDBs(true, true);
-	
-	for (int x = 2; x <= 10; x++)
-	{
-		g.Reset();
-		printf("==>Compressing by factor of %d\n", x);
-		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb7a, g, false);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		
-		tse.Load_Regular_PDB(pdb8a, g, false);
-		tse.Delta_Compress_PDB(g, 1, true);
-		tse.Min_Compress_PDB(1, x, true);
-		//MeasureIR(tse);
-	}
-}
-
-
-void BitDeltaNodesCompressionTest()
-{
-	std::vector<int> tiles;
-	
-	TopSpin tse(N, k);
-	TopSpinState s(N, k);
-	TopSpinState g(N, k);
-	
-	tse.StoreGoal(g);
-	tse.ClearPDBs();
-	
-	BuildPDBs(true, true);
+	BuildPDBs(true, true, weighted);
 	
 	for (int x = 1; x <= 4; x*=2)
 	{
@@ -862,14 +856,14 @@ void BitDeltaNodesCompressionTest()
 		g.Reset();
 		printf("==>Compressing to %d bits\n", x);
 		tse.ClearPDBs();
-		tse.Load_Regular_PDB(pdb7a, g, false); // PDB 0
-		tse.Load_Regular_PDB(pdb8a, g, false); // PDB 1
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, false); // PDB 0
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, false); // PDB 1
 		tse.lookups.push_back({kLeafNode, -0, -0, 0});
 		tse.Delta_Compress_PDB(g, 1, true);
 		tse.Value_Compress_PDB(1, cutoffs, true);
 		
-		tse.Load_Regular_PDB(pdb7b, g, false); // PDB 2
-		tse.Load_Regular_PDB(pdb8b, g, false); // PDB 3
+		tse.Load_Regular_PDB(getPDB7b(weighted), g, false); // PDB 2
+		tse.Load_Regular_PDB(getPDB8b(weighted), g, false); // PDB 3
 		tse.lookups.back().PDBID = 2;
 		tse.Delta_Compress_PDB(g, 3, true);
 		tse.Value_Compress_PDB(3, cutoffs, true);
@@ -884,7 +878,9 @@ void BitDeltaNodesCompressionTest()
 		tse.lookups.push_back({kLeafNode, -0, -0, 2});
 		tse.lookups.push_back({kLeafNode, -0, -0, 3});
 
-		Test(tse);
+		std::string desc = "VALRNG-";
+		desc += ('0'+x);
+		Test(tse, desc.c_str());
 	}
 }
 
@@ -1000,7 +996,7 @@ void MeasureIR(TopSpin &tse)
 }
 
 
-void Test(TopSpin &tse)
+void Test(TopSpin &tse, const char *prefix)
 {
 	TopSpinState s(16, 4);
 	TopSpinState g(16, 4);
@@ -1018,7 +1014,7 @@ void Test(TopSpin &tse)
 	double totaltime = 0;
 	for (int x = 0; x < 100; x++)
 	{
-		s = GetInstance(x);
+		s = GetInstance(x, tse.GetWeighted());
 		g.Reset();
 		printf("Problem %d of %d\n", x+1, 100);
 		std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
@@ -1030,787 +1026,23 @@ void Test(TopSpin &tse)
 		std::cout << "Path found, length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
 		nodes += ida.GetNodesExpanded();
 	}
-	printf("%1.2fs elapsed; %llu nodes expanded\n", t1.EndTimer(), nodes);
+	printf("%s: %1.2fs elapsed; %llu nodes expanded\n", prefix, t1.EndTimer(), nodes);
 }
 
 
-TopSpinState GetInstance(int which)
+TopSpinState GetInstance(int which, bool weighted)
 {
 	srandom(which*101+11);
 	TopSpin tse(16, 4);
 	TopSpinState s(16,4);
 	s.Reset();
-	for (int x = 0; x < 10000; x++)
+	int length = 10000;
+	if (weighted)
+		length = 5000;
+	for (int x = 0; x < length; x++)
 	{
 		tse.ApplyAction(s, random()%16);
 	}
 	return s;
 }
 
-#pragma mark old code here
-
-//void Delta7CompressionTest2()
-//{
-//	const int factor = 3;
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb7a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x <= 6; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb7a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-9-15.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 9; x <= 15; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-9-15.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8b))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 8; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8b,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	g.Reset();
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB(pdb7a, g, true);
-//	tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//	tse.Load_Regular_PDB_as_Delta_and_Min(pdb8a, g, factor, true);
-//
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-9-15.pdb", g, true);
-//	tse.lookups.push_back({kLeafNode, -0, -0, 2});
-//	tse.Load_Regular_PDB_as_Delta_and_Min(pdb8b, g, factor, true);
-//
-//	tse.lookups.resize(0);
-//	tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 3, -0}); // sum of 2 children starting at 3 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 5, -0}); // sum of 2 children starting at 5 in the tree
-//	tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//	tse.lookups.push_back({kLeafMinCompress, factor, -0, 1});
-//	tse.lookups.push_back({kLeafNode, -0, -0, 2});
-//	tse.lookups.push_back({kLeafMinCompress, factor, -0, 3});
-//	Test(tse);
-//	exit(0);
-//}
-//
-//void Delta7ValueCompressionTest()
-//{
-//	const int factor = 3;
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb7a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x <= 6; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb7a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	for (int x = 1; x <= 16; x*=2)
-//	{
-//		printf("==>Compressing by factor of %d\n", x);
-//		tse.ClearPDBs();
-//		tse.Load_Regular_PDB(pdb7a, g, true);
-//		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//		tse.Load_Regular_PDB_as_Delta(pdb8a, g, true);
-//		tse.Value_Compress_PDB(1, x, true);
-//	}
-//}
-//
-//void Delta7ValueCompressionTest2()
-//{
-//	const int maxValue = 1;
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb7a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x <= 6; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb7a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-9-15.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 9; x <= 15; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-9-15.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8b))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 8; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8b,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	g.Reset();
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB(pdb7a, g, true);
-//	tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//	tse.Load_Regular_PDB_as_Delta(pdb8a, g, true);
-//	tse.Value_Compress_PDB(1, maxValue, true);
-//
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-9-15.pdb", g, true);
-//	tse.lookups.push_back({kLeafNode, -0, -0, 2});
-//	tse.Load_Regular_PDB_as_Delta(pdb8b, g, true);
-//	tse.Value_Compress_PDB(3, maxValue, true);
-//
-//	tse.lookups.resize(0);
-//	tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 3, -0}); // sum of 2 children starting at 3 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 5, -0}); // sum of 2 children starting at 5 in the tree
-//	tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//	//tse.lookups.push_back({kLeafValueCompress, maxValue, -0, 1});
-//	tse.lookups.push_back({kLeafNode, -0, -0, 1});
-//	tse.lookups.push_back({kLeafNode, -0, -0, 2});
-//	//tse.lookups.push_back({kLeafValueCompress, maxValue, -0, 3});
-//	tse.lookups.push_back({kLeafNode, -0, -0, 3});
-//	Test(tse);
-//	exit(0);
-//}
-//
-//void DeltaMinCompressionTest()
-//{
-//	const int factor = 20;
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8b))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 8; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8b,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	g.Reset();
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB_Min_Compressed(pdb8a, g, factor, true);
-//	tse.lookups.push_back({kLeafMinCompress, factor, -0, 0});
-//	tse.Load_Regular_PDB_as_Delta_and_Min(pdb8a, g, factor/2, true);
-//
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB_Min_Compressed(pdb8b, g, factor, true);
-//	tse.lookups.push_back({kLeafMinCompress, factor, -0, 2});
-//	tse.Load_Regular_PDB_as_Delta_and_Min(pdb8b, g, factor/2, true);
-//
-//	tse.lookups.resize(0);
-//	tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 3, -0}); // sum of 2 children starting at 3 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 5, -0}); // sum of 2 children starting at 5 in the tree
-//	tse.lookups.push_back({kLeafMinCompress, factor, -0, 0});
-//	tse.lookups.push_back({kLeafMinCompress, factor/2, -0, 1});
-//	tse.lookups.push_back({kLeafMinCompress, factor, -0, 2});
-//	tse.lookups.push_back({kLeafMinCompress, factor/2, -0, 3});
-//	Test(tse);
-//	exit(0);
-//}
-//
-//void MinCompressionTest()
-//{
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8b))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 8; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8b,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	g.Reset();
-//	tse.Load_Regular_PDB_Min_Compressed(pdb8a, g, 10, true);
-//	tse.Load_Regular_PDB_Min_Compressed(pdb8b, g, 10, true);
-//
-//	tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-//	tse.lookups.push_back({kLeafMinCompress, 10, -0, 0});
-//	tse.lookups.push_back({kLeafMinCompress, 10, -0, 1});
-//	Test(tse);
-//	exit(0);
-//}
-
-//void CompareToMinCompression()
-//{
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (fileExists(pdb8a))
-//	{
-//		//PDBTreeNodeType t;
-//		//uint8_t numChildren;
-//		//uint8_t firstChildID;
-//		//uint8_t PDBID;
-//
-//		g.Reset();
-//		const int factor = 1;
-//		tse.Load_Regular_PDB_Min_Compressed(pdb8a, g, factor, true);
-//		//mnp->Load_Regular_PDB("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb", tmp, true);
-//
-//		g.Reset();
-////		tse.lookups.push_back({kLeafMinCompress, factor, 0, 0});
-////		tse.Load_Regular_PDB_as_Delta(pdb8a, g, true);
-//		exit(0);
-//	}
-//
-//}
-//
-//void CompareToSmallerPDB()
-//{
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb7a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x <= 6; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb7a,
-//					  std::thread::hardware_concurrency(), false);
-//	}
-//	else {
-//		tse.Load_Regular_PDB(pdb7a, g, true);
-//	}
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-1-7.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 1; x <= 7; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-1-7.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//	}
-//	else {
-//		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-1-7.pdb", g, true);
-//	}
-//
-//	if (fileExists(pdb8a))
-//	{
-////		tse.lookups.push_back({kMaxNode, 2, 1, 0});
-//		tse.lookups.push_back({kLeafNode, 2, 0, 0});
-////		tse.lookups.push_back({kLeafNode, 2, 0, 1});
-//		tse.Load_Regular_PDB_as_Delta(pdb8a, g, true);
-//	}
-//	exit(0);
-//}
-
-//void BaselineTest()
-//{
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//	}
-//	else {
-//		g.Reset();
-//		tse.Load_Regular_PDB(pdb8a, g, true);
-//	}
-//
-//	if (!fileExists(pdb8b))
-//	{
-//		tiles.resize(0);
-//		for (int x = 8; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8b,
-//					  std::thread::hardware_concurrency(), false);
-//	}
-//	else {
-//		g.Reset();
-//		tse.Load_Regular_PDB(pdb8b, g, true);
-//	}
-//
-//	if (fileExists(pdb8a) &&
-//		fileExists(pdb8b))
-//	{
-//		tse.lookups.push_back({kMaxNode, 2, 1, 0});
-//		tse.lookups.push_back({kLeafNode, 2, 0, 0});
-//		tse.lookups.push_back({kLeafNode, 2, 0, 1});
-//		Test(tse);
-//	}
-//	exit(0);
-//}
-//
-//void BaselineTest2()
-//{
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb7a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x <= 6; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb7a,
-//					  std::thread::hardware_concurrency(), false);
-//	}
-//	else {
-//		g.Reset();
-//		tse.Load_Regular_PDB(pdb7a, g, true);
-//	}
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-7-13.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 7; x <= 13; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-7-13.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//	}
-//	else {
-//		g.Reset();
-//		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-7-13.pdb", g, true);
-//	}
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-14-15.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 14; x <= 15; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-14-15.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//	}
-//	else {
-//		g.Reset();
-//		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-14-15.pdb", g, true);
-//	}
-//
-//	if (fileExists(pdb7a) &&
-//		fileExists("/Users/nathanst/Desktop/TS-7-13.pdb") &&
-//		fileExists("/Users/nathanst/Desktop/TS-14-15.pdb"))
-//	{
-//		tse.lookups.push_back({kMaxNode, 3, 1, -0});
-//		tse.lookups.push_back({kLeafNode,-0,-0, 0});
-//		tse.lookups.push_back({kLeafNode,-0,-0, 1});
-//		tse.lookups.push_back({kLeafNode,-0,-0, 2});
-//		Test(tse);
-//	}
-//	exit(0);
-//}
-//
-//void LosslessTest()
-//{
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-0-5.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 6; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-0-5.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-10-15.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 10; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-10-15.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8b))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 8; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8b,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	g.Reset();
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-0-5.pdb", g, true);
-//	tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//	tse.Load_Regular_PDB_as_Delta(pdb8a, g, true);
-//
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-10-15.pdb", g, true);
-//	tse.lookups.push_back({kLeafNode, -0, -0, 2});
-//	tse.Load_Regular_PDB_as_Delta(pdb8b, g, true);
-//
-//	tse.lookups.resize(0);
-//	tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 3, -0}); // sum of 2 children starting at 3 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 5, -0}); // sum of 2 children starting at 5 in the tree
-//	tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//	tse.lookups.push_back({kLeafNode, -0, -0, 1});
-//	tse.lookups.push_back({kLeafNode, -0, -0, 2});
-//	tse.lookups.push_back({kLeafNode, -0, -0, 3});
-//	Test(tse);
-//	exit(0);
-//}
-//
-//void Delta6CompressionTest()
-//{
-//	const int factor = 10;
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-0-5.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 6; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-0-5.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists("/Users/nathanst/Desktop/TS-10-15.pdb"))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 10; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, "/Users/nathanst/Desktop/TS-10-15.pdb",
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8b))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 8; x < 16; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8b,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	g.Reset();
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-0-5.pdb", g, true);
-//	tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//	tse.Load_Regular_PDB_as_Delta_and_Min(pdb8a, g, factor, true);
-//
-//	tse.lookups.resize(0);
-//	tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS-10-15.pdb", g, true);
-//	tse.lookups.push_back({kLeafNode, -0, -0, 2});
-//	tse.Load_Regular_PDB_as_Delta_and_Min(pdb8b, g, factor, true);
-//
-//	tse.lookups.resize(0);
-//	tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 3, -0}); // sum of 2 children starting at 3 in the tree
-//	tse.lookups.push_back({kAddNode, 2, 5, -0}); // sum of 2 children starting at 5 in the tree
-//	tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//	tse.lookups.push_back({kLeafMinCompress, factor, -0, 1});
-//	tse.lookups.push_back({kLeafNode, -0, -0, 2});
-//	tse.lookups.push_back({kLeafMinCompress, factor, -0, 3});
-//	Test(tse);
-//	exit(0);
-//}
-//
-//void Delta7CompressionTest()
-//{
-//	const int factor = 3;
-//	int N = 16, k = 4;
-//	std::vector<int> tiles;
-//
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//
-//	if (!fileExists(pdb7a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x <= 6; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb7a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	if (!fileExists(pdb8a))
-//	{
-//		g.Reset();
-//		tiles.resize(0);
-//		for (int x = 0; x < 8; x++)
-//			tiles.push_back(x);
-//
-//		tse.Build_PDB(g, tiles, pdb8a,
-//					  std::thread::hardware_concurrency(), false);
-//		tse.ClearPDBs();
-//	}
-//
-//	for (int x = 1; x <= 10; x++)
-//	{
-//		printf("==>Compressing by factor of %d\n", x);
-//		tse.ClearPDBs();
-//		tse.Load_Regular_PDB(pdb7a, g, true);
-//		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//		tse.Load_Regular_PDB_as_Delta_and_Min(pdb8a, g, x, true);
-//	}
-//}

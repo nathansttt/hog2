@@ -64,6 +64,8 @@ class TopSpin : public PermutationPuzzleEnvironment<TopSpinState, TopSpinAction>
 public:
 	TopSpin(unsigned int N = 20, unsigned int k = 4);
 	~TopSpin();
+	void SetWeighted(bool w) { weighted = w; }
+	bool GetWeighted() { return weighted; }
 	void SetPruneSuccessors(bool val)
 	{ if (val) ComputeMovePruning(); pruneSuccessors = val; history.resize(0); }
 	void GetSuccessors(const TopSpinState &stateID, std::vector<TopSpinState> &neighbors) const;
@@ -142,6 +144,7 @@ private:
 
 	mutable std::vector<TopSpinAction> history;
 	bool pruneSuccessors;
+	bool weighted;
 };
 
 typedef UnitSimulation<TopSpinState, TopSpinAction, TopSpin> TopSpinSimulation;

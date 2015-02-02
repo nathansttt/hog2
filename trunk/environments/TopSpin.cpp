@@ -15,6 +15,7 @@
 TopSpin::TopSpin(unsigned int N, unsigned int k)
 :PermutationPuzzleEnvironment<TopSpinState, TopSpinAction>(), goal(N, k)
 {
+	weighted = false;
 	pruneSuccessors = false;
 	numTiles = N;
 	swapDiameter = k;
@@ -182,9 +183,14 @@ double TopSpin::HCost(const TopSpinState &state1, const TopSpinState &state2)
 int costs[16] = {16,1,8,15,22,29,17,14,9,20,26,28,3,16,12,18}; // 1...29
 double TopSpin::GCost(const TopSpinState &node, const TopSpinAction &act)
 {
-	//return 1;
-	assert(numTiles <= 16);
-	return costs[act];
+	if (!weighted)
+	{
+		return 1;
+	}
+	else {
+		assert(numTiles <= 16);
+		return costs[act];
+	}
 }
 
 double TopSpin::GCost(const TopSpinState &s1, const TopSpinState &s2)
