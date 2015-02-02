@@ -23,6 +23,7 @@ enum PDBTreeNodeType {
 	kLeafNode,
 	kLeafMinCompress,
 	kLeafFractionalCompress,
+	kLeafFractionalModCompress,
 	kLeafModCompress,
 	kLeafValueCompress,
 	kLeafDivPlusDeltaCompress, // two lookups with the same index, one is div, one is delta
@@ -108,6 +109,12 @@ public:
 	 Only retain count values from PDB
 	 **/
 	void Fractional_Compress_PDB(int whichPDB, uint64_t count, bool print_histogram);
+
+	/**
+	 Compresses the PDB by ony keeping one out of factor entries
+	 **/
+	void Fractional_Mod_Compress_PDB(int whichPDB, uint64_t factor, bool print_histogram);
+
 	
 	/**
 	 Compress PDB in memory by reducing range of values
@@ -505,6 +512,21 @@ void PermutationPuzzleEnvironment<state, action>::Fractional_Compress_PDB(int wh
 {
 	PDB[whichPDB].resize(count);
 }
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Fractional_Mod_Compress_PDB(int whichPDB, uint64_t factor,
+																			  bool print_histogram)
+{
+	std::vector<uint8_t> newPDB(PDB[whichPDB].size()/factor);
+	for (int x = 0; x < PDB[whichPDB].size(); x+= factor)
+	{
+		newPDB[x/factor] = PDB[whichPDB][x];
+	}
+	PDB[whichPDB].swap(newPDB);
+	if (print_histogram)
+		PrintPDBHistogram(whichPDB);
+}
+
 
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Mod_Compress_PDB(int whichPDB, uint64_t newEntries, bool print_histogram)
@@ -1467,6 +1489,14 @@ double PermutationPuzzleEnvironment<state, action>::HCost(const state &s, int tr
 			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID], c1, c2);
 			if (index < PDB[lookups[treeNode].PDBID].size())
 				hval = PDB[lookups[treeNode].PDBID][index];
+			else
+				hval = 0;
+		} break;
+		case kLeafFractionalModCompress: // num children is the compression factor
+		{
+			uint64_t index = GetPDBHash(s, PDB_distincts[lookups[treeNode].PDBID], c1, c2);
+			if (0 == index%lookups[treeNode].numChildren)
+				hval = PDB[lookups[treeNode].PDBID][index/lookups[treeNode].numChildren];
 			else
 				hval = 0;
 		} break;

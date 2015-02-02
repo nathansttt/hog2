@@ -60,6 +60,7 @@ void DivValueCompressionTest();
 void DivDeltaValueCompressionTest();
 
 void FractionalNodesCompressionTest();
+void FractionalModNodesCompressionTest();
 void BitDeltaNodesCompressionTest();
 void ModNodesCompressionTest();
 void ModNodesDeltaCompressionTest();
@@ -245,10 +246,11 @@ void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 //	DivValueCompressionTest();
 //	BitDeltaValueCompressionTest();
 
+	FractionalModNodesCompressionTest();
 	FractionalNodesCompressionTest();
-	BitDeltaNodesCompressionTest();
-	DivNodesCompressionTest();
-	ModNodesCompressionTest();
+//BitDeltaNodesCompressionTest();
+//	DivNodesCompressionTest();
+//	ModNodesCompressionTest();
 
 	exit(0);
 	
@@ -645,6 +647,7 @@ void BitDeltaValueCompressionTest()
 
 #pragma mark node expansion tests
 
+//Fractional_Mod_Compress_PDB
 void FractionalNodesCompressionTest()
 {
 	std::vector<int> tiles;
@@ -661,7 +664,7 @@ void FractionalNodesCompressionTest()
 	for (int x = 2; x <= 10; x++)
 	{
 		g.Reset();
-		printf("==>Reducing by factor of %d\n", x);
+		printf("==>Fractional (contiguous): Reducing by factor of %d\n", x);
 		tse.ClearPDBs();
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
@@ -677,8 +680,43 @@ void FractionalNodesCompressionTest()
 		tse.lookups.push_back({kLeafNode, -0, -0, 2});
 		tse.lookups.push_back({kLeafFractionalCompress, -0, -0, 3});
 		Test(tse);
+		return;
 	}
 }
+
+void FractionalModNodesCompressionTest()
+{
+	std::vector<int> tiles;
+	
+	TopSpin tse(N, k);
+	TopSpinState s(N, k);
+	TopSpinState g(N, k);
+	
+	tse.StoreGoal(g);
+	tse.ClearPDBs();
+	
+	BuildPDBs(true, true);
+	
+	for (int x = 2; x <= 10; x++)
+	{
+		g.Reset();
+		printf("==>Fractional MOD: Reducing by factor of %d\n", x);
+		tse.ClearPDBs();
+		tse.Load_Regular_PDB(pdb7a, g, true);
+		tse.Load_Regular_PDB(pdb8a, g, true);
+		tse.Load_Regular_PDB(pdb7b, g, true);
+		tse.Load_Regular_PDB(pdb8b, g, true);
+		tse.Fractional_Mod_Compress_PDB(1, x, true);
+		tse.Fractional_Mod_Compress_PDB(3, x, true);
+		tse.lookups.push_back({kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 1}); // factor, -- , id
+		tse.lookups.push_back({kLeafNode, -0, -0, 2});
+		tse.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 3});
+		Test(tse);
+	}
+}
+
 
 void ModNodesCompressionTest()
 {
@@ -872,15 +910,20 @@ void GetBitValueCutoffs(std::vector<int> &cutoffs, int bits)
 			case 1:
 			{
 				cutoffs.push_back(0);
-				cutoffs.push_back(14);
+				cutoffs.push_back(13);
+				//cutoffs.push_back(14);
 				cutoffs.push_back(1000); // higher than max value
 			} break;
 			case 2:
 			{
 				cutoffs.push_back(0);
-				cutoffs.push_back(10);
-				cutoffs.push_back(17);
-				cutoffs.push_back(23);
+				cutoffs.push_back(9);
+				cutoffs.push_back(16);
+				cutoffs.push_back(22);
+//				cutoffs.push_back(0);
+//				cutoffs.push_back(10);
+//				cutoffs.push_back(17);
+//				cutoffs.push_back(23);
 				cutoffs.push_back(1000); // higher than max value
 			} break;
 			case 4:
