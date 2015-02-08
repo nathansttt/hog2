@@ -54,4 +54,5 @@ SRC_CPP = \
 	utils/MinBloom.cpp \
 	utils/MapGenerators.cpp \
 	utils/MMapUtil.cpp \
+	utils/RangeCompression.cpp \
 
