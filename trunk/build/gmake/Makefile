@@ -42,6 +42,7 @@ PROJECTS = \
   apps/rubik \
   apps/fling \
   apps/topspin \
+  apps/stp \
   apps/pancake \
 #  simulation \
 #  learning \
@@ -84,6 +85,7 @@ PROJECTS_ALL = \
   apps/rubik \
   apps/fling \
   apps/topspin \
+  apps/stp \
   apps/pancake \
 #	apps/coprobber
 
