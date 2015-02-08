@@ -15,6 +15,7 @@
 MNPuzzle::MNPuzzle(unsigned int _width, unsigned int _height)
 : width(_width), height(_height)
 {
+	weighted = false;
 	// stores applicable operators at each of the width*height positions
 	Change_Op_Order(Get_Op_Order_From_Hash(15)); // Right, Left, Down, Up is default operator ordering
 	goal_stored = false;
@@ -28,6 +29,7 @@ width(_width), height(_height)
 	Change_Op_Order(op_order);
 	goal_stored = false;
 	use_manhattan = true;
+	weighted = false;
 }
 
 MNPuzzle::~MNPuzzle()
@@ -523,6 +525,8 @@ double MNPuzzle::GCost(const MNPuzzleState &a, const MNPuzzleState &b)
 {
 //	int diff = a.blank - b.blank;
 //	
+	if (weighted)
+		return a.blank;
 	return 1;
 }
 
@@ -539,6 +543,8 @@ double MNPuzzle::GCost(const MNPuzzleState &s, const slideDir &d)
 //	if (cost < 1) // in PDB might have negative costs
 //		cost = 1;
 //	return cost;
+	if (weighted)
+		return s.blank;
 	return 1;
 }
 

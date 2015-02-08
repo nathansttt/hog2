@@ -340,7 +340,10 @@ void BurnedPancakePuzzle::Change_Op_Order(const std::vector<unsigned> op_order)
 
 	for (unsigned i = 0; i < op_order.size(); i++)
 	{
-		if (!all_ops[i])
+		assert(false);
+		// code here was originally problematic
+		// (!all_ops[i])
+		if (all_ops[i] == false)
 		{
 			fprintf(stderr, "ERROR: Missing operator %u in construction of BurnedPancakePuzzle\n", i+2);
 			exit(1);

@@ -58,14 +58,12 @@ namespace Plotting {
 	double Line::DistanceToLine(double xp, double yp)
 	{
 		double bestDist = (y[0]-yp)*(y[0]-yp)+(x[0]-xp)*(x[0]-xp);
-		int bestIndex = 0;
 		// Linear search? - can be sped up with binary search if needed
 		for (unsigned int m = 1; m < x.size()-1; m++)
 		{
 			if (fless((y[m]-yp)*(y[m]-yp)+(x[m]-xp)*(x[m]-xp), bestDist))
 			{
 				bestDist = (y[m]-yp)*(y[m]-yp)+(x[m]-xp)*(x[m]-xp);
-				bestIndex = m;
 			}
 		}
 		return sqrt(bestDist);

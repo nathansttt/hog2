@@ -90,8 +90,9 @@ class MNPuzzle : public PermutationPuzzleEnvironment<MNPuzzleState, slideDir> {
 public:
 	MNPuzzle(unsigned int width, unsigned int height);
 	MNPuzzle(unsigned int width, unsigned int height, const std::vector<slideDir> op_order); // used to set action order
-
 	~MNPuzzle();
+	void SetWeighted(bool w) { weighted = w; }
+	bool GetWeighted() const { return weighted; }
 	void GetSuccessors(const MNPuzzleState &stateID, std::vector<MNPuzzleState> &neighbors) const;
 	void GetActions(const MNPuzzleState &stateID, std::vector<slideDir> &actions) const;
 	slideDir GetAction(const MNPuzzleState &s1, const MNPuzzleState &s2) const;
@@ -211,7 +212,8 @@ private:
 	std::vector<slideDir> ops_in_order;
 	bool goal_stored; // whether a goal is stored or not
 	bool use_manhattan;
-
+	bool weighted;
+	
 	// stores the heuristic value of each tile-position pair indexed by the tile value (0th index is empty)
 	unsigned **h_increment;
 	MNPuzzleState goal;

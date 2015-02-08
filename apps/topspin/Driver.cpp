@@ -52,6 +52,7 @@ void ModValueDeltaCompressionTest(bool weighted);
 void DivValueCompressionTest(bool weighted);
 void DivDeltaValueCompressionTest(bool weighted);
 
+void BaseHeuristicTest(bool weighted);
 void FractionalNodesCompressionTest(bool weighted);
 void FractionalModNodesCompressionTest(bool weighted);
 void BitDeltaNodesCompressionTest(bool weighted);
@@ -233,6 +234,32 @@ void GetTSInstance(const TopSpin &ts, TopSpinState &theState, int which)
 
 void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 {
+//	TopSpin tse(16, 4);
+//	TopSpinState s1(16, 4);
+//	tse.Get_PDB_Size(s1, 1);
+//	tse.Get_PDB_Size(s1, 15);
+//	std::vector<int> distinct1 = {1, 2, 3};
+//	std::vector<int> distinct2 = {0, 1, 2, 3};
+//	std::vector<int> distinct3 = {0, 1, 2};
+//	std::vector<int> distinct4 = {0};
+//	std::vector<int> distinct5 = {3};
+//	s1.Reset();
+//	tse.ApplyAction(s1, 2);
+//	std::cout << s1 << "\n";
+//	std::cout << "Hash of 1,2,3 = " << tse.GetPDBHash(s1, distinct1) << "\n";
+//	std::cout << "Hash of 0,1,2,3 = " << tse.GetPDBHash(s1, distinct2) << "\n";
+//	std::cout << "Hash of 0,1,2 = " << tse.GetPDBHash(s1, distinct3) << "\n";
+//	std::cout << "Hash of 0 = " << tse.GetPDBHash(s1, distinct4) << "\n";
+//	std::cout << "Hash of 3 = " << tse.GetPDBHash(s1, distinct5) << "\n";
+//	tse.ApplyAction(s1, 3);
+//	std::cout << s1 << "\n";
+//	std::cout << "Hash of 1,2,3 = " << tse.GetPDBHash(s1, distinct1) << "\n";
+//	std::cout << "Hash of 0,1,2,3 = " << tse.GetPDBHash(s1, distinct2) << "\n";
+//	std::cout << "Hash of 0,1,2 = " << tse.GetPDBHash(s1, distinct3) << "\n";
+//	std::cout << "Hash of 0 = " << tse.GetPDBHash(s1, distinct4) << "\n";
+//	std::cout << "Hash of 3 = " << tse.GetPDBHash(s1, distinct5) << "\n";
+//	exit(0);
+
 //	ModValueDeltaCompressionTest();
 //	DivDeltaValueCompressionTest();
 //	ModValueCompressionTest();
@@ -241,11 +268,12 @@ void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 
 	bool weighted = true;
 
-	FractionalModNodesCompressionTest(weighted);
-	FractionalNodesCompressionTest(weighted);
+//	BaseHeuristicTest(weighted);
+//	FractionalModNodesCompressionTest(weighted);
+//	FractionalNodesCompressionTest(weighted);
 	BitDeltaNodesCompressionTest(weighted);
-	DivNodesCompressionTest(weighted);
-	ModNodesCompressionTest(weighted);
+//	DivNodesCompressionTest(weighted);
+//	ModNodesCompressionTest(weighted);
 
 	exit(0);
 }
@@ -637,6 +665,43 @@ void BitDeltaValueCompressionTest(bool weighted)
 
 #pragma mark node expansion tests
 
+void BaseHeuristicTest(bool weighted)
+{
+	std::vector<int> tiles;
+	
+	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
+	TopSpinState s(N, k);
+	TopSpinState g(N, k);
+	
+	tse.StoreGoal(g);
+	
+	tse.ClearPDBs();
+	BuildPDBs(true, true, weighted);
+	
+	{
+		tse.ClearPDBs();
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB7b(weighted), g, true);
+		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({kLeafNode, -0, -0, 1});
+		std::string desc = "BASE7-";
+		Test(tse, desc.c_str());
+	}
+	
+	{
+		tse.ClearPDBs();
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
+		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({kLeafNode, -0, -0, 1});
+		std::string desc = "BASE8-";
+		Test(tse, desc.c_str());
+	}
+}
+
 //Fractional_Mod_Compress_PDB
 void FractionalNodesCompressionTest(bool weighted)
 {
@@ -869,13 +934,13 @@ void BitDeltaNodesCompressionTest(bool weighted)
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, false); // PDB 1
 		tse.lookups.push_back({kLeafNode, -0, -0, 0});
 		tse.Delta_Compress_PDB(g, 1, true);
-		tse.Value_Compress_PDB(1, cutoffs, true);
-		
+		tse.Value_Range_Compress_PDB(1, x, true);
 		tse.Load_Regular_PDB(getPDB7b(weighted), g, false); // PDB 2
 		tse.Load_Regular_PDB(getPDB8b(weighted), g, false); // PDB 3
 		tse.lookups.back().PDBID = 2;
 		tse.Delta_Compress_PDB(g, 3, true);
-		tse.Value_Compress_PDB(3, cutoffs, true);
+		//tse.Value_Compress_PDB(3, cutoffs, true);
+		tse.Value_Range_Compress_PDB(3, x, true);
 
 
 		tse.lookups.resize(0);
@@ -983,7 +1048,6 @@ void MeasureIR(TopSpin &tse)
 	TopSpinState start;
 	Timer t;
 	t.StartTimer();
-	uint64_t nodes = 0;
 
 	uint64_t count = tse.Get_PDB_Size(s, 16);
 	double sumg = 0, sumh = 0;
@@ -1046,8 +1110,6 @@ TopSpinState GetInstance(int which, bool weighted)
 	TopSpinState s(16,4);
 	s.Reset();
 	int length = 10000;
-	if (weighted)
-		length = 1000;
 	for (int x = 0; x < length; x++)
 	{
 		tse.ApplyAction(s, random()%16);

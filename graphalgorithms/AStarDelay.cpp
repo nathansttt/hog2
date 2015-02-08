@@ -244,9 +244,9 @@ _BPMX:
 			if (fless(cost, minCost))
 				minCost = cost;
 		}
-
-		else
-			cost = HandleNeighbor(neighbors[x], topNode);
+		else {
+			HandleNeighbor(neighbors[x], topNode);
+		}
 	}
 
 	//if(topNode.rxp) {

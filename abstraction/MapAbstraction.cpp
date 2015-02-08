@@ -193,7 +193,7 @@ void MapAbstraction::GetTileUnderLoc(int &x, int &y, const recVec &v)
 	double width = (GetMap()->GetMapWidth()+1)/2.0;
 	double height = (GetMap()->GetMapHeight()+1)/2.0;
 	double offsetx, offsety;
-	offsetx = offsety = .5;
+	//offsetx = offsety = .5;
 	x = (int)(width*(v.x+1.0));
 	y = (int)(height*(v.y+1.0));
 	//	printf("(%1.2f, %1.2f) in openGL converted to (%d, %d) in x/y\n",

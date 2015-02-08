@@ -10,6 +10,7 @@
 #include "Timer.h"
 #include <thread>
 #include "SharedQueue.h"
+#include "RangeCompression.h"
 
 #ifndef PERMPUZZ_H
 #define PERMPUZZ_H
@@ -99,6 +100,7 @@ public:
 	 **/
 	void Value_Compress_PDB(int whichPDB, int maxValue, bool print_histogram);
 	void Value_Compress_PDB(int whichPDB, std::vector<int> cutoffs, bool print_histogram);
+	void Value_Range_Compress_PDB(int whichPDB, int numBits, bool print_histogram);
 
 	/**
 	 Re-compute PDB as delta over current heuristic value.
@@ -194,8 +196,11 @@ public:
 	/**
 	 * Show the distribution and average value of a PDB.
 	 */
-	void PrintPDBHistogram(int which);
-
+	void PrintPDBHistogram(int which) const;
+	/**
+	 * Return the distribution of values in a PDB.
+	 */
+	void GetPDBHistogram(int which, std::vector<int> &values) const;
 	
 	double HCost(const state &s);
 	virtual double DefaultH(const state &s) const { return 0; }
@@ -248,7 +253,8 @@ public:
 					  const std::vector<int> *distinct,
 					  SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 					  SharedQueue<uint64_t> *results,
-					  std::mutex *lock);
+					  std::mutex *lock,
+					  bool additive);
 	uint64_t SendWorkToThread(uint64_t start, uint64_t end,
 							  int depth, int totalTiles,
 							  std::vector<uint8_t> &DB,
@@ -408,7 +414,7 @@ uint64_t PermutationPuzzleEnvironment<state, action>::GetPDBHash(const state &s,
 {
 	static std::vector<int> locs;
 	static std::vector<int> dual;
-	GetPDBHash(s, distinct, locs, dual);
+	return GetPDBHash(s, distinct, locs, dual);
 }
 
 // TODO Change to Myrvold and Ruskey ranking function
@@ -531,6 +537,11 @@ void PermutationPuzzleEnvironment<state, action>::Fractional_Mod_Compress_PDB(in
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Mod_Compress_PDB(int whichPDB, uint64_t newEntries, bool print_histogram)
 {
+	if (newEntries == 0)
+	{
+		printf("Error -- cannot reduce to 0 entries\n");
+		return;
+	}
 	printf("Performing mod compression, reducing from %llu entries to %llu entries\n", PDB[whichPDB].size(), newEntries);
 	std::vector<uint8_t> newPDB(newEntries);
 	for (uint64_t x = 0; x < newEntries; x++)
@@ -555,8 +566,39 @@ void PermutationPuzzleEnvironment<state, action>::Value_Compress_PDB(int whichPD
 }
 
 template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::Value_Range_Compress_PDB(int whichPDB, int numBits, bool print_histogram)
+{
+	std::vector<int> dist;
+	std::vector<int> cutoffs;
+	GetPDBHistogram(whichPDB, dist);
+	GetOptimizedBoundaries(dist, 1<<numBits, cutoffs);
+	printf("Setting boundaries [%d values]: ", (1<<numBits));
+	for (int x = 0; x < cutoffs.size(); x++)
+		printf("%d ", cutoffs[x]);
+	printf("\n");
+	cutoffs.push_back(256);
+
+	for (uint64_t x = 0; x < PDB[whichPDB].size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB[whichPDB][x] >= cutoffs[y] && PDB[whichPDB][x] < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				PDB[whichPDB][x] = cutoffs[y];
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		PrintPDBHistogram(whichPDB);
+}
+
+
+template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Value_Compress_PDB(int whichPDB, std::vector<int> cutoffs, bool print_histogram)
 {
+
 	for (uint64_t x = 0; x < PDB[whichPDB].size(); x++)
 	{
 		for (int y = 0; y < cutoffs.size(); y++)
@@ -641,7 +683,7 @@ void PermutationPuzzleEnvironment<state, action>::Load_Regular_PDB_as_Delta_and_
 }
 
 template <class state, class action>
-void PermutationPuzzleEnvironment<state, action>::PrintPDBHistogram(int which)
+void PermutationPuzzleEnvironment<state, action>::PrintPDBHistogram(int which) const
 {
 	double average = 0;
 	uint8_t maxval = 0;
@@ -660,6 +702,22 @@ void PermutationPuzzleEnvironment<state, action>::PrintPDBHistogram(int which)
 	}
 	printf("Average value: %1.4f\n", average/PDB[which].size());
 }
+
+template <class state, class action>
+void PermutationPuzzleEnvironment<state, action>::GetPDBHistogram(int which, std::vector<int> &values) const
+{
+	uint8_t maxval = 0;
+	values.resize(0);
+	values.resize(256);
+	// performs histogram count
+	for (uint64_t x = 0; x < PDB[which].size(); x++)
+	{
+		values[(PDB[which][x])]++;
+		maxval = max(maxval, PDB[which][x]);
+	}
+	values.resize(maxval+1);
+}
+
 
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Delta_Compress_PDB(state goal, int whichPDB, bool print_histogram)
@@ -893,9 +951,11 @@ void PermutationPuzzleEnvironment<state, action>::ThreadWorker(int depth, int to
 															   const std::vector<int> *distinct,
 															   SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 															   SharedQueue<uint64_t> *results,
-															   std::mutex *lock)
+															   std::mutex *lock,
+															   bool additive)
 {
 	std::pair<uint64_t, uint64_t> p;
+	std::vector<uint64_t> additiveQueue;
 	std::vector<int> cache1;
 	std::vector<int> cache2;
 	uint64_t start, end;
@@ -942,6 +1002,7 @@ void PermutationPuzzleEnvironment<state, action>::ThreadWorker(int depth, int to
 
 					uint64_t nextRank = GetPDBHash(t, *distinct, cache1, cache2);
 					int newCost = stateDepth+this->GCost(t, acts[y]);
+					if (newCost == stateDepth)
 					cache.push_back({nextRank, newCost});
 				}
 			}
@@ -1052,7 +1113,7 @@ void PermutationPuzzleEnvironment<state, action>::Build_PDB(state &start, const 
 		{
 			threads[x] = new std::thread(&PermutationPuzzleEnvironment<state, action>::ThreadWorker, this,
 										 depth, start.puzzle.size(), &DB, &coarseOpen, &distinct,
-										 &workQueue, &resultQueue, &lock);
+										 &workQueue, &resultQueue, &lock, additive);
 		}
 		
 		for (uint64_t x = 0; x < COUNT; x+=coarseSize)

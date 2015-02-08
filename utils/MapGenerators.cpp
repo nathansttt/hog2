@@ -126,13 +126,13 @@ void MakeMaze(Map *map, int corridorWidth)
 		if (lastRandom || (1 != random()%10))
 		{
 			val = x.size()-1;
-			if (1 == random()%30)
-				lastRandom = false;
+//			if (1 == random()%30)
+//				lastRandom = false;
 		}
 		else {
 			// bias towards end of array
 			val = ((random()%(3*x.size()/2))+x.size()/2)%x.size();
-			lastRandom = true;
+//			lastRandom = true;
 		}
 		
 		//printf("Trying to extend (%d, %d)\n", x[val], y[val]);

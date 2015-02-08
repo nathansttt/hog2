@@ -219,7 +219,7 @@ void Map2DHeading::GetStateFromHash(uint64_t hash, xyhLoc &node) const
 
 uint64_t Map2DHeading::GetActionHash(xyhAct act) const
 {
-	return act.newHeading<<8+act.oldHeading;
+	return (act.newHeading<<8)+act.oldHeading;
 }
 
 void Map2DHeading::OpenGLDraw() const
