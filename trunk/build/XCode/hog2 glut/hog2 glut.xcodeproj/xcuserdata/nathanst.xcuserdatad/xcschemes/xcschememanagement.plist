@@ -24,6 +24,11 @@
 			<key>orderHint</key>
 			<integer>2</integer>
 		</dict>
+		<key>Sliding Tile Puzzle.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>18</integer>
+		</dict>
 		<key>Supervised Learning.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -168,6 +173,11 @@
 			<true/>
 		</dict>
 		<key>C4C9E4C2176A7A160027410C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4D074491A83F32E00DAFFCD</key>
 		<dict>
 			<key>primary</key>
 			<true/>

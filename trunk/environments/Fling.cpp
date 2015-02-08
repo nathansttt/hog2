@@ -206,6 +206,7 @@ void ShiftToCorner(FlingBoard &in)
 	bool done = false;
 	while (1)
 	{
+		// find piece
 		for (int x = 0; x < in.width; x++)
 		{
 			if (in.HasPiece(x, 0))
@@ -216,7 +217,7 @@ void ShiftToCorner(FlingBoard &in)
 		}
 		
 		if (done) break;
-
+		// move over
 		for (int y = 1; y < in.height; y++)
 		{
 			for (int x = 0; x < in.width; x++)
@@ -229,14 +230,12 @@ void ShiftToCorner(FlingBoard &in)
 			}
 		}
 	}
-	done = false;
 	while (1)
 	{
 		for (int y = 0; y < in.height; y++)
 		{
 			if (in.HasPiece(0, y))
 			{
-				done = true;
 				return;
 			}
 		}
@@ -498,8 +497,8 @@ void Fling::OpenGLDrawPlain(const FlingBoard&b) const
 {
 	double radius = 1.0/(1+max(b.width, b.height));
 	double diameter = radius*2;
-	double xLoc = -1+radius;
-	double yLoc = -1+radius;
+	double xLoc;
+	double yLoc;
 	double r = radius*0.85;
 
 	glColor3f(1.0, 1.0, 1.0); //
@@ -564,9 +563,8 @@ void Fling::OpenGLDrawAlternate(const FlingBoard &b) const
 	double radius = 1.0/(1+max(b.width, b.height));
 	double diameter = radius*2;
 	double xLoc = -1+radius;
-	double yLoc = -1+radius;
+	double yLoc;
 	double r = radius*0.80;
-	xLoc = -1+radius;
 
 	glDisable(GL_LIGHTING);
 	glLineWidth(8.0);
@@ -667,9 +665,8 @@ void Fling::GLLabelState(const FlingBoard&b, const char *text) const
 	double radius = 1.0/(1+max(b.width, b.height));
 	double diameter = radius*2;
 	double xLoc = -1+radius;
-	double yLoc = -1+radius;
+	double yLoc;
 	
-	xLoc = -1+radius;
 	for (double x = 0; x < b.width; x++)
 	{
 		xLoc += diameter;

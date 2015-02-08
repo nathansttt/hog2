@@ -361,7 +361,7 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
  goal is stored **/
 double RubiksCube::HCost(const RubiksState &node)
 {
-	HCost(node, node);
+	return HCost(node, node);
 }
 
 bool RubiksCube::GoalTest(const RubiksState &node, const RubiksState &goal)
