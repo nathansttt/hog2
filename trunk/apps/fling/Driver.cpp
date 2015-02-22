@@ -39,9 +39,14 @@
 #include "TextOverlay.h"
 #include <pthread.h>
 #include <unordered_map>
+#include <thread>
 
 uint64_t DoLimitedBFS(FlingBoard b, std::vector<FlingBoard> &path);
 void RemoveDups();
+bool UniquelySolvable(FlingBoard &b, int &solutions, int *goalLocations);
+bool UniquelySolvable(FlingBoard &b, int &solutions);
+void AnalyzeHoles(int level);
+void ThreadedAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock);
 
 int main(int argc, char* argv[])
 {
@@ -82,7 +87,7 @@ void CreateSimulation(int id)
 	{
 		int x1 = random()%b.width;
 		int y1 = random()%b.height;
-		if (!b.HasPiece(x1, y1))
+		if (!b.HasPiece(x1, y1) && !b.HasHole(x1, y1))
 			b.AddFling(x1, y1);
 	}
 	std::cout << b << std::endl;
@@ -164,6 +169,10 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-removeDups", "-removeDups", "Read states from stdin and remove similar states");
 	InstallCommandLineHandler(MyCLHandler, "-analyze", "-analyze theState", "Perform a move analysis on theState");
 	InstallCommandLineHandler(MyCLHandler, "-fix", "-fix file", "fix the file format");
+	InstallCommandLineHandler(MyCLHandler, "-solveState", "-solveState <state>", "solve state");
+	InstallCommandLineHandler(MyCLHandler, "-analyzeHoles", "-analyzeHoles <level>", "compare the non-hole states to the hole states");
+
+	InstallCommandLineHandler(MyCLHandler, "-uniqueSolution", "-uniqueSolution <state>", "Determine if a state has a unique solution");
 	InstallCommandLineHandler(MyCLHandler, "-measureSolutionSimilarity", "-measureSolutionSimilarity <state>", "Measure how many times the solution changes pieces");
 	
 	
@@ -336,6 +345,33 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			}
 		} while (next != EOF);
 	}
+	else if (strcmp(argument[0], "-solveState") == 0)
+	{
+		std::vector<FlingMove> stateActs;
+		unsigned long long which = strtoull(argument[1], 0, 10);
+		f.GetStateFromHash(which, b);
+		GetSolveActions(b, stateActs);
+		std::cout << b << "\n";
+		for (int x = 0; x < stateActs.size(); x++)
+		{
+			std::cout << stateActs[stateActs.size()-1-x] << " ";
+		}
+	}
+	else if (strcmp(argument[0], "-uniqueSolution") == 0)
+	{
+		std::vector<FlingMove> stateActs;
+		unsigned long long which = strtoull(argument[1], 0, 10);
+		f.GetStateFromHash(which, b);
+		int sol;
+		
+		UniquelySolvable(b, sol);
+		std::cout << b << std::endl;
+		std::cout << sol << " solutions found.\n";
+	}
+	else if (strcmp(argument[0], "-analyzeHoles") == 0)
+	{
+		AnalyzeHoles(atoi(argument[1]));
+	}
 	else if (strcmp(argument[0], "-measureSolutionSimilarity") == 0)
 	{
 		std::vector<FlingMove> stateActs;
@@ -343,13 +379,9 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		f.GetStateFromHash(which, b);
 		GetSolveActions(b, stateActs);
 		//printf("%d actions to solve\n", stateActs.size());
+
 		for (int t = stateActs.size()-1; t > 1; t--)
 		{
-//			std::cout << b << "\n" << stateActs[t] << std::endl;
-//			printf("Moves %d to %d (next move originates %d)\n",
-//				   stateActs[t].startLoc,
-//				   b.LocationAfterAction(stateActs[t]),
-//				   stateActs[t-1].startLoc);
 			if (b.LocationAfterAction(stateActs[t]) == stateActs[t-1].startLoc)
 			{
 				printf("1");
@@ -467,7 +499,7 @@ void GetReducedMoves(FlingBoard s1, FlingBoard s2, std::vector<FlingMove> &moves
 			if (f.LegalMove(s2, commonMoves[x]))
 			{
 				f.GetNextState(s2, commonMoves[x], t2);
-				if (t1.board != t2.board)
+				if (t1.GetRawBoard() != t2.GetRawBoard())
 				{
 //					std::cout << commonMoves[x] << " and " << between <<
 //					" in different orders result in different states" << std::endl;
@@ -704,7 +736,7 @@ void ExtractUniqueStates(int depth)
 			if (ok == false)
 				continue;
 			printf("Rank: %llu\n", t);
-			printf("Board: %llu\n", board.board);
+			printf("Board: %llu\n", board.GetRawBoard());
 
 			//if (depth < 5)
 			{
@@ -713,7 +745,7 @@ void ExtractUniqueStates(int depth)
 				//printf("%llu total nodes expanded in pure bfs\n", bfs.GetNodesExpanded());
 				uint64_t nodesExpanded = DoLimitedBFS(board, path);
 				//printf("%llu total nodes expanded in logically limited bfs\n", nodesExpanded);
-				printf("Board: %llu Full: %llu Reduced: %llu Ratio: %1.4f\n", board.board, bfs.GetNodesExpanded(), nodesExpanded, float(bfs.GetNodesExpanded())/float(nodesExpanded));
+				printf("Board: %llu Full: %llu Reduced: %llu Ratio: %1.4f\n", board.GetRawBoard(), bfs.GetNodesExpanded(), nodesExpanded, float(bfs.GetNodesExpanded())/float(nodesExpanded));
 //				std::cout << board << std::endl;
 			}
 		}
@@ -1120,28 +1152,21 @@ void DeepAnalyzeBoard(unsigned long , tKeyboardModifier mod, char c)
 
 void TestRanking(unsigned long , tKeyboardModifier, char)
 {
-	static int64_t currValue = 0;
-	f.unrankPlayer(currValue, 10, b);
-	int64_t res = f.rankPlayer(b);
-	assert(res == currValue);
-	printf("Ranking: %lld; unranked: %lld\n", currValue, res);
-
-	std::vector<FlingBoard> succ;
-	f.GetSuccessors(b, succ);
-	FlingBoard tmp;
-	for (unsigned int x = 0; x < succ.size(); x++)
+	int cnt1;
+	int board[56];
+	for (int x = 0; x < 56; x++)
+		board[x] = 0;
+	UniquelySolvable(b, cnt1, board);
+	for (int y = 0; y < 8; y++)
 	{
-		assert(succ[x].locs.size() == 9);
+		for (int x = 0; x < 7; x++)
+		{
+			std::cout << std::setw(4);
+			std::cout << board[y*7+x];
+		}
+		std::cout << "\n";
 	}
-	for (unsigned int x = 0; x < succ.size(); x++)
-	{
-		f.unrankPlayer(f.rankPlayer(succ[x]), succ[x].locs.size(), tmp);
-		assert(tmp == succ[x]);
-	}
-	
-	currValue+=92837537;
-	if (currValue > f.getMaxSinglePlayerRank(56, 10))
-		currValue = 0;
+	std::cout << b.GetRawBoard() << " " << cnt1 << "\n";
 }
 
 bool MyClickHandler(unsigned long , int, int, point3d loc, tButtonType button, tMouseEventType event)
@@ -1198,6 +1223,7 @@ bool MyClickHandler(unsigned long , int, int, point3d loc, tButtonType button, t
 					{
 						if (acts[x].dir == d && b.locs[acts[x].startLoc] == lasty*b.width+lastx)
 						{
+							printf("Applying action\n");
 							f.ApplyAction(b, acts[x]);
 							break;
 						}
@@ -1299,12 +1325,10 @@ bool MyClickHandler(unsigned long , int, int, point3d loc, tButtonType button, t
 //.......
 //.......
 //
-
-
+void RemoveDups(std::vector<uint64_t> &values);
 void RemoveDups()
 {
 	std::vector<uint64_t> values;
-	std::vector<std::vector<FlingMove> > stateActs;
 	while (true)
 	{
 		uint64_t value;
@@ -1314,6 +1338,12 @@ void RemoveDups()
 		values.push_back(GetCanonicalHash(value));
 	}
 	std::reverse(values.begin(), values.end());
+	RemoveDups(values);
+}
+
+void RemoveDups(std::vector<uint64_t> &values)
+{
+	std::vector<std::vector<FlingMove> > stateActs;
 
 	for (int x = 0; x < values.size(); x++)
 	{
@@ -1428,12 +1458,12 @@ void RemoveDups()
 
 				for (int t = stateActs[x].size()-1; t > 0; t--)
 				{
-					if (BitCount(s1a.board^s1b.board) != BitCount(s2a.board^s2b.board))
+					if (BitCount(s1a.GetRawBoard()^s1b.GetRawBoard()) != BitCount(s2a.GetRawBoard()^s2b.GetRawBoard()))
 					{
 						std::cout << s1a << "\n" << s1b << "\n";
-						printf("%d bits\n", BitCount(s1a.board^s1b.board));
+						printf("%d bits\n", BitCount(s1a.GetRawBoard()^s1b.GetRawBoard()));
 						std::cout << s2a << "\n" << s2b << "\n";
-						printf("%d bits\n", BitCount(s2a.board^s2b.board));
+						printf("%d bits\n", BitCount(s2a.GetRawBoard()^s2b.GetRawBoard()));
 						match = false;
 						break;
 					}
@@ -1460,8 +1490,8 @@ void RemoveDups()
 				
 				for (int t = stateActs[x].size()-1; t > 1; t--)
 				{
-					bool same1 = ((s1a.board^s1b.board)&(1ull<<stateActs[x][t-1].startLoc)); // same piece moved
-					bool same2 = ((s2a.board^s2b.board)&(1ull<<stateActs[y][t-1].startLoc)); // same piece moved
+					bool same1 = ((s1a.GetRawBoard()^s1b.GetRawBoard())&(1ull<<stateActs[x][t-1].startLoc)); // same piece moved
+					bool same2 = ((s2a.GetRawBoard()^s2b.GetRawBoard())&(1ull<<stateActs[y][t-1].startLoc)); // same piece moved
 					if (same1 != same2)
 					{
 						std::cout << s1a << "\n" << s1b << "\n";
@@ -1506,63 +1536,126 @@ void RemoveDups()
 	}
 }
 
+#include <unordered_map>
+int DFS(Fling &f, FlingBoard &b, std::unordered_map<uint64_t, int> &dd,
+		int *goalLocations, bool includedups)
+{
+	int count = 0;
+	if (b.NumPieces() == 1)
+	{
+		goalLocations[b.GetPieceLocation(0)]++;
+		return 1;
+	}
+	if (!includedups)
+	{
+		auto val = dd.find(b.GetRawBoard());
+		if (val != dd.end())
+		{
+			return val->second;
+		}
+	}
+	std::vector<FlingBoard> moves;
+	f.GetSuccessors(b, moves);
+	for (int x = 0; x < moves.size(); x++)
+	{
+		count += DFS(f, moves[x], dd, goalLocations, includedups);
+	}
+	dd[b.GetRawBoard()] = count;
+	return count;
+}
 
-//void WriteData(BitVector *data, const char *fName)
-//{
-//	FILE *f = fopen(fName, "w+");
-//	fprintf(f, "%llu\n", (uint64_t)data.size());
-//	
-//	uint8_t next = 0;
-//	for (uint64_t x = 0; x < data.size(); x++)
-//	{
-//		next = (next<<1)|(data[x]?1:0);
-//		if (7 == x%8)
-//		{
-//			fwrite(&next, sizeof(uint8_t), 1, f);
-//			next = 0;
-//		}
-//	}
-//	fwrite(&next, sizeof(uint8_t), 1, f);
-//	fclose(f);
-//}
+bool UniquelySolvable(FlingBoard &b, int &solutions)
+{
+	std::unordered_map<uint64_t, int> dd;
+	int goalLocations[56];
+	Fling f;
+	solutions = DFS(f, b, dd, goalLocations, false);
+	return solutions == 2;
+}
 
-//bool ReadData(std::vector<bool> &data, const char *fName)
-//{
-//	FILE *f = fopen(fName, "r+");
-//	if (f == 0)
-//	{
-//		printf("Unable to open file: '%s' aborting\n", fName);
-//		//exit(0);
-//		return false;
-//	}
-//	uint64_t dataSize;
-//	if (fscanf(f, "%llu\n", &dataSize) == 0)
-//	{
-//		printf("Error reading array size from file\n");
-//		fclose(f);
-//		return false;
-//	}
-//	printf("%llu entries in file\n", dataSize);
-//	data.resize(dataSize);
-//	
-//	uint8_t next = 0;
-//	uint64_t x;
-//	for (x = 8; x < data.size(); x+=8)
-//	{
-//		fread(&next, sizeof(uint8_t), 1, f);
-//		data[x-8+0] = (next>>7)&0x1;
-//		data[x-8+1] = (next>>6)&0x1;
-//		data[x-8+2] = (next>>5)&0x1;
-//		data[x-8+3] = (next>>4)&0x1;
-//		data[x-8+4] = (next>>3)&0x1;
-//		data[x-8+5] = (next>>2)&0x1;
-//		data[x-8+6] = (next>>1)&0x1;
-//		data[x-8+7] = (next>>0)&0x1;
-//	}
-//	fread(&next, sizeof(uint8_t), 1, f);
-//	for (uint64_t y = 0; x-8+y < data.size(); y++)
-//		data[x-8+y] = (next>>(7-y))&0x1;
-//	fclose(f);
-//
-//	return true;
-//}
+bool UniquelySolvable(FlingBoard &b, int &solutions, int *goalLocations)
+{
+	std::unordered_map<uint64_t, int> dd;
+	Fling f;
+	solutions = DFS(f, b, dd, goalLocations, true);
+	return solutions == 2;
+}
+
+void ThreadedAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock)
+{
+	Fling fling;
+	uint64_t maxVal = fling.getMaxSinglePlayerRank(56, level);
+	FlingBoard theBoard;
+	for (uint64_t t = start; t < end; t++)
+	{
+		if (0 == t%1000000)
+		{
+			lock->lock();
+			std::cout << t << " of " << maxVal << "\n";
+			lock->unlock();
+		}
+		fling.unrankPlayer(t, level, theBoard);
+		int cnt;
+		int locs[56];
+		for (int x = 0; x < 56; x++)
+			locs[x] = 0;
+
+		UniquelySolvable(theBoard, cnt, locs);
+		int oneCnt = 0;
+		int last1 = 0;
+		int otherCnt = 0;
+		int otherSum = 0;
+		for (int x = 0; x < 56; x++)
+		{
+			if (locs[x] == 1)
+			{
+				oneCnt++;
+				last1 = x;
+			}
+			else if (locs[x] > 0)
+			{
+				otherCnt++;
+				otherSum+= locs[x];
+			}
+		}
+		if (oneCnt == 1 && otherCnt > 0)
+		{
+			lock->lock();
+			std::cout << "--=-=-=--\n";
+			std::cout << theBoard << "\n";
+			for (int y = 0; y < 8; y++)
+			{
+				for (int x = 0; x < 7; x++)
+				{
+					std::cout << std::setw(3) << locs[y*7+x];
+				}
+				std::cout << "\n";
+			}
+			std::cout << "A: ";
+			std::cout << theBoard.GetRawBoard() << " " << last1 << " ";
+			std::cout << cnt << " " << otherCnt << " " << otherSum << "\n";
+			lock->unlock();
+		}
+	}
+}
+
+void AnalyzeHoles(int level)
+{
+	uint64_t maxVal = f.getMaxSinglePlayerRank(56, level);
+	int numThreads = std::thread::hardware_concurrency();
+	std::cout << "Running with " << numThreads << " threads\n";
+	
+	uint64_t perThread = maxVal/numThreads;
+	std::vector<std::thread*> threads;
+	std::mutex lock;
+	for (int x = 0; x < numThreads; x++)
+	{
+		threads.push_back(new std::thread(ThreadedAnalyze, level, x*perThread, (x+1)*perThread, &lock));
+	}
+	for (int x = 0; x < threads.size(); x++)
+	{
+		threads[x]->join();
+		delete threads[x];
+	}
+}
+

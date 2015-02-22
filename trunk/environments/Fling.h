@@ -15,8 +15,13 @@ class FlingMove;
 class FlingBoard
 {
 public:
-	FlingBoard(unsigned int len=7, unsigned int high=8) :width(len), height(high) { board = 0; /*board.resize(len*high);*/ }
-	void Reset() { /*board.resize(0); board.resize(width*height);*/ board = 0; locs.resize(0); }
+	FlingBoard(unsigned int len=7, unsigned int high=8) :width(len), height(high)
+	{ board = 0; obstacles = 0; holes = 0; /*board.resize(len*high);*/ }
+	void Reset()
+	{
+		board = 0; locs.resize(0);
+		holes = 0; obstacles = 0;
+	}
 	void AddFling(unsigned int x, unsigned int y);
 	void AddFling(unsigned int offset);
 	void RemoveFling(unsigned int x, unsigned int y);
@@ -24,17 +29,31 @@ public:
 	bool CanMove(int which, int x, int y) const;
 	void Move(int which, int x, int y);
 	int LocationAfterAction(FlingMove m);
-	
+	int NumPieces() const { return locs.size(); }
+	int GetPieceLocation(int which) const { return locs[which]; }
 	bool HasPiece(int x, int y) const;
 	bool HasPiece(int offset) const;
+	bool HasHole(int x, int y) const;
+	bool HasHole(int offset) const;
+	bool HasObstacle(int x, int y) const;
+	bool HasObstacle(int offset) const;
 	
 	unsigned int width;
 	unsigned int height;
 	std::vector<int> locs;
 	void SetPiece(int which);
 	void ClearPiece(int which);
-//private:
+	void SetHole(int which);
+	void ClearHole(int which);
+	void SetObstacle(int which);
+	void ClearObstacle(int which);
+	uint64_t GetRawBoard() const { return board; }
+	uint64_t GetRawObstacles() const { return obstacles; }
+	uint64_t GetRawHoles() const { return holes; }
+private:
 	uint64_t board;
+	uint64_t obstacles;
+	uint64_t holes;
 };
 
 void GetMirror(const FlingBoard &in, FlingBoard &out, bool horiz, bool vert);
@@ -59,7 +78,17 @@ static std::ostream& operator <<(std::ostream & out, const FlingBoard &loc)
 		for (unsigned int x = 0; x < loc.width; x++)
 		{
 			if (loc.HasPiece(x, y))// board[y*loc.width+x])
+			{
 				out << "o";
+			}
+			else if (loc.HasHole(x, y))
+			{
+				out << " ";
+			}
+			else if (loc.HasObstacle(x, y))
+			{
+				out << "x";
+			}
 			else {
 				out << ".";
 			}
@@ -83,11 +112,11 @@ static std::ostream& operator <<(std::ostream & out, const FlingMove &loc)
 }
 
 static bool operator==(const FlingBoard &l1, const FlingBoard &l2) {
-	return (l1.width == l2.width && l1.height == l2.height && l1.board == l2.board);
+	return (l1.width == l2.width && l1.height == l2.height && l1.GetRawBoard() == l2.GetRawBoard());
 }
 
 static bool operator!=(const FlingBoard &l1, const FlingBoard &l2) {
-	return !(l1.width == l2.width && l1.height == l2.height && l1.board == l2.board);
+	return !(l1.width == l2.width && l1.height == l2.height && l1.GetRawBoard() == l2.GetRawBoard());
 }
 
 static bool operator==(const FlingMove &l1, const FlingMove &l2) {
