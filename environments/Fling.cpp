@@ -24,6 +24,30 @@ void FlingBoard::ClearPiece(int which)
 	board &= (~val);
 }
 
+void FlingBoard::SetHole(int which)
+{
+	uint64_t val = (1ull<<which);
+	holes |= val;
+}
+
+void FlingBoard::ClearHole(int which)
+{
+	uint64_t val = (1ull<<which);
+	holes &= (~val);
+}
+
+void FlingBoard::SetObstacle(int which)
+{
+	uint64_t val = (1ull<<which);
+	obstacles |= val;
+}
+
+void FlingBoard::ClearObstacle(int which)
+{
+	uint64_t val = (1ull<<which);
+	obstacles &= (~val);
+}
+
 bool FlingBoard::HasPiece(int offset) const
 {
 	uint64_t val = (1ull<<offset);
@@ -34,17 +58,31 @@ bool FlingBoard::HasPiece(int x, int y) const
 {
 	uint64_t val = (1ull<<(y*width+x));
 	return (board & val);
-	
-	//	return TestBit(board, y*width+x);
-	//return (board[y*width+x]);
 }
 
-//
-//inline bool TestBit(uint64_t &board, int bit)
-//{
-//	uint64_t val = (1<<bit);
-//	return (board & val);
-//}
+bool FlingBoard::HasHole(int offset) const
+{
+	uint64_t val = (1ull<<offset);
+	return (holes & val);
+}
+
+bool FlingBoard::HasHole(int x, int y) const
+{
+	uint64_t val = (1ull<<(y*width+x));
+	return (holes & val);
+}
+
+bool FlingBoard::HasObstacle(int offset) const
+{
+	uint64_t val = (1ull<<offset);
+	return (obstacles & val);
+}
+
+bool FlingBoard::HasObstacle(int x, int y) const
+{
+	uint64_t val = (1ull<<(y*width+x));
+	return (obstacles & val);
+}
 
 void FlingBoard::AddFling(unsigned int x, unsigned int y)
 {
@@ -101,8 +139,6 @@ bool FlingBoard::CanMove(int which, int x, int y) const
 {
 	int xx = which%width;
 	int yy = which/width;
-//	int xx = locs[which]%width;
-//	int yy = locs[which]/width;
 
 	xx+=x; yy += y;
 	
@@ -110,8 +146,10 @@ bool FlingBoard::CanMove(int which, int x, int y) const
 	while ((xx >= 0) && (xx < width) && (yy >= 0) && (yy < height))
 	{
 		//if (board[yy*width+xx])
-		if (HasPiece(yy*width+xx))
+		if (HasPiece(yy*width+xx) || (HasObstacle(yy*width+xx) && x == 1))
 			return !first;
+		if (HasHole(yy*width+xx))
+			return false;
 		first = false;
 		xx+=x; yy += y;
 	}
@@ -131,9 +169,23 @@ void FlingBoard::Move(int which, int x, int y)
 	{
 		//board[lasty*width+lastx] = board[yy*width+xx];
 		if (HasPiece(yy*width+xx))
+		{
 			SetPiece(lasty*width+lastx);
-		else
+		}
+		else if (HasObstacle(yy*width+xx) && x == 1)
+		{
+			SetPiece(lasty*width+lastx);
+			// no piece can be on the obstacle, so we
+			// let that location be cleared
+			locs.resize(0);
+			for (int t = width*height-1; t >= 0; t--)
+				if (HasPiece(t))//[t])
+					locs.push_back(t);
+			return;
+		}
+		else {
 			ClearPiece(lasty*width+lastx);
+		}
 		lastx = xx;
 		lasty = yy;
 		xx+=x; yy += y;
@@ -166,7 +218,7 @@ int FlingBoard::LocationAfterAction(FlingMove m)
 	while ((xx >= 0) && (xx < width) && (yy >= 0) && (yy < height))
 	{
 		//board[lasty*width+lastx] = board[yy*width+xx];
-		if (HasPiece(yy*width+xx))
+		if (HasPiece(yy*width+xx) || HasObstacle(yy*width+xx))
 		{
 			return lasty*width+lastx;
 		}
@@ -489,6 +541,16 @@ void Fling::OpenGLDraw(const FlingBoard&b) const
 			glColor3f(r.r, r.g, r.b);
 			if (b.HasPiece(x, y))
 				DrawSphere(xLoc, yLoc, 0, radius*0.8);
+			if (b.HasHole(x, y))
+			{
+				glColor3f(0, 0, 0);
+				DrawBox(xLoc, yLoc, 0, radius);
+			}
+			else if (b.HasObstacle(x, y))
+			{
+				glColor3f(1, 1, 1);
+				DrawBox(xLoc, yLoc, 0, radius);
+			}
 		}
 	}
 }
