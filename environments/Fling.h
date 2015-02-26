@@ -143,7 +143,10 @@ public:
 	
 	virtual double GCost(const FlingBoard &node1, const FlingBoard &node2) { return 1; }
 	virtual double GCost(const FlingBoard &node, const FlingMove &act) { return 1; }
-	virtual bool GoalTest(const FlingBoard &node, const FlingBoard &goal) { return (node.locs.size() == 1); }
+	
+	void SetGoalLoc(int val);
+	void ClearGoalLoc();
+	virtual bool GoalTest(const FlingBoard &node, const FlingBoard &goal);
 	
 	virtual uint64_t GetStateHash(const FlingBoard &node) const;
 	virtual void GetStateFromHash(uint64_t parent, FlingBoard &s) const;
@@ -177,6 +180,8 @@ public:
 	virtual void GLLabelState(const FlingBoard&, const char *) const;
 
 private:
+	bool specificGoalLoc;
+	int goalLoc;
 	std::vector<int64_t> theSums;
 	std::vector<int64_t> binomials;
 
