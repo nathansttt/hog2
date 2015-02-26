@@ -45,8 +45,9 @@ uint64_t DoLimitedBFS(FlingBoard b, std::vector<FlingBoard> &path);
 void RemoveDups();
 bool UniquelySolvable(FlingBoard &b, int &solutions, int *goalLocations);
 bool UniquelySolvable(FlingBoard &b, int &solutions);
-void AnalyzeHoles(int level);
-void ThreadedAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock);
+void AnalyzeEndLocs(int level);
+void ThreadedEndLocAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock);
+void AnalyzeRocks(int level);
 
 int main(int argc, char* argv[])
 {
@@ -106,21 +107,23 @@ void CreateSimulation(int id)
 		exit(0);
 	}
 	text.SetBold(true);
+	b.SetObstacle(24);
+	b.SetObstacle(31);
 	
 //	std::vector<FlingBoard> path;
-	BFS<FlingBoard, FlingMove> bfs;
-	bfs.GetPath(&f, b, g, path);
+//	BFS<FlingBoard, FlingMove> bfs;
+//	bfs.GetPath(&f, b, g, path);
 //	IDAStar<FlingBoard, FlingMove> ida;
 //	ida.GetPath(&f, b, g, path);
 //	std::cout << ida.GetNodesExpanded() << " nodes expanded" << std::endl;
-	for (int x = 0; x < path.size(); x++)
-	{
-		if (x > 0)
-		{
-			std::cout << "Action: " << f.GetAction(path[x], path[x-1]) << std::endl;
-		}
-		std::cout << x << std::endl << path[x] << std::endl;
-	}
+//	for (int x = 0; x < path.size(); x++)
+//	{
+//		if (x > 0)
+//		{
+//			std::cout << "Action: " << f.GetAction(path[x], path[x-1]) << std::endl;
+//		}
+//		std::cout << x << std::endl << path[x] << std::endl;
+//	}
 }
 
 void GetSolveActions(FlingBoard &solve, std::vector<FlingMove> &acts)
@@ -163,16 +166,18 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-generate", "-generate n", "Generate a problem with n tiles and run a BFS.");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract n", "Extract unique boards at level n.");
 	InstallCommandLineHandler(MyCLHandler, "-solve", "-solve n", "Solve all boards up to size n.");
-	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs theState", "Perform a BFS on theState");
+	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs theState <goal loc>", "Perform a BFS on theState; goal loc is optional");
 	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen theState file", "Capture a shot of theState in <file>");
 	InstallCommandLineHandler(MyCLHandler, "-getCanonical", "-getCanonical theState", "Get canonical version of theState");
 	InstallCommandLineHandler(MyCLHandler, "-removeDups", "-removeDups", "Read states from stdin and remove similar states");
 	InstallCommandLineHandler(MyCLHandler, "-analyze", "-analyze theState", "Perform a move analysis on theState");
 	InstallCommandLineHandler(MyCLHandler, "-fix", "-fix file", "fix the file format");
-	InstallCommandLineHandler(MyCLHandler, "-solveState", "-solveState <state>", "solve state");
-	InstallCommandLineHandler(MyCLHandler, "-analyzeHoles", "-analyzeHoles <level>", "compare the non-hole states to the hole states");
+	InstallCommandLineHandler(MyCLHandler, "-solveState", "-solveState <state> <goal loc>", "solve state; goal loc is optional");
+	InstallCommandLineHandler(MyCLHandler, "-analyzeEndLocs", "-analyzeEndLocs <level>", "find states with a single way to end with a piece in a square");
+	InstallCommandLineHandler(MyCLHandler, "-analyzeRocks", "-analyzeRocks <level>", "find states with rocks in the middle that have unique solutions");
 
 	InstallCommandLineHandler(MyCLHandler, "-uniqueSolution", "-uniqueSolution <state>", "Determine if a state has a unique solution");
+	InstallCommandLineHandler(MyCLHandler, "-showSolutionLocs", "-showSolutionLocs <state>", "Show all locations that can be reached at the end.");
 	InstallCommandLineHandler(MyCLHandler, "-measureSolutionSimilarity", "-measureSolutionSimilarity <state>", "Measure how many times the solution changes pieces");
 	
 	
@@ -282,12 +287,19 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		//f.unrankPlayer(which, atoi(argument[1]), b);
 		std::cout << b << std::endl;
 
+		if (maxNumArgs > 2) // also read goal location
+		{
+			printf("Using goal %d\n", atoi(argument[2]));
+			f.SetGoalLoc(atoi(argument[2]));
+		}
+		
 		BFS<FlingBoard, FlingMove> bfs;
 		bfs.GetPath(&f, b, g, path);
 		printf("%llu total nodes expanded in pure bfs\n", bfs.GetNodesExpanded());
 		uint64_t nodesExpanded = DoLimitedBFS(b, path);
 		printf("%llu total nodes expanded in logically limited bfs\n", nodesExpanded);
 		printf("Ratio: %llu %llu %1.4f\n", bfs.GetNodesExpanded(), nodesExpanded, double(bfs.GetNodesExpanded())/double(nodesExpanded));
+		f.ClearGoalLoc();
 	}
 	else if (strcmp(argument[0], "-getCanonical") == 0)
 	{
@@ -350,6 +362,13 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		std::vector<FlingMove> stateActs;
 		unsigned long long which = strtoull(argument[1], 0, 10);
 		f.GetStateFromHash(which, b);
+
+		if (maxNumArgs > 2) // also read goal location
+		{
+			printf("Using goal %d\n", atoi(argument[2]));
+			f.SetGoalLoc(atoi(argument[2]));
+		}
+
 		GetSolveActions(b, stateActs);
 		std::cout << b << "\n";
 		for (int x = 0; x < stateActs.size(); x++)
@@ -368,9 +387,21 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		std::cout << b << std::endl;
 		std::cout << sol << " solutions found.\n";
 	}
-	else if (strcmp(argument[0], "-analyzeHoles") == 0)
+	else if (strcmp(argument[0], "-showSolutionLocs") == 0)
 	{
-		AnalyzeHoles(atoi(argument[1]));
+		unsigned long long which = strtoull(argument[1], 0, 10);
+		f.GetStateFromHash(which, b);
+		uint64_t r = f.rankPlayer(b);
+		std::mutex l;
+		ThreadedEndLocAnalyze(b.NumPieces(), r, r+1, &l);
+	}
+	else if (strcmp(argument[0], "-analyzeEndLocs") == 0)
+	{
+		AnalyzeEndLocs(atoi(argument[1]));
+	}
+	else if (strcmp(argument[0], "-analyzeRocks") == 0)
+	{
+		AnalyzeRocks(atoi(argument[1]));
 	}
 	else if (strcmp(argument[0], "-measureSolutionSimilarity") == 0)
 	{
@@ -1581,7 +1612,7 @@ bool UniquelySolvable(FlingBoard &b, int &solutions, int *goalLocations)
 	return solutions == 2;
 }
 
-void ThreadedAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock)
+void ThreadedEndLocAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock)
 {
 	Fling fling;
 	uint64_t maxVal = fling.getMaxSinglePlayerRank(56, level);
@@ -1639,7 +1670,11 @@ void ThreadedAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock)
 	}
 }
 
-void AnalyzeHoles(int level)
+// This code is inefficient. It is more efficient to build up the solution
+// from smaller boards upwards, but this was written quickly as test code
+// and serves it purpose. It just won't be as great for analyzing really
+// large boards.
+void AnalyzeEndLocs(int level)
 {
 	uint64_t maxVal = f.getMaxSinglePlayerRank(56, level);
 	int numThreads = std::thread::hardware_concurrency();
@@ -1650,7 +1685,7 @@ void AnalyzeHoles(int level)
 	std::mutex lock;
 	for (int x = 0; x < numThreads; x++)
 	{
-		threads.push_back(new std::thread(ThreadedAnalyze, level, x*perThread, (x+1)*perThread, &lock));
+		threads.push_back(new std::thread(ThreadedEndLocAnalyze, level, x*perThread, (x+1)*perThread, &lock));
 	}
 	for (int x = 0; x < threads.size(); x++)
 	{
@@ -1659,3 +1694,61 @@ void AnalyzeHoles(int level)
 	}
 }
 
+void ThreadedRockAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock)
+{
+	Fling fling;
+	uint64_t maxVal = fling.getMaxSinglePlayerRank(56, level);
+	FlingBoard theBoard, g;
+	theBoard.SetObstacle(24);
+	theBoard.SetObstacle(31);
+	std::vector<FlingBoard> path;
+	BFS<FlingBoard, FlingMove> bfs;
+
+	for (uint64_t t = start; t < end; t++)
+	{
+		if (0 == t%1000000)
+		{
+			lock->lock();
+			std::cout << t << " of " << maxVal << "\n";
+			lock->unlock();
+		}
+		fling.unrankPlayer(t, level, theBoard);
+		if (theBoard.HasPiece(24) || theBoard.HasPiece(31))
+			continue;
+		theBoard.SetObstacle(24);
+		theBoard.SetObstacle(31);
+
+		bfs.GetPath(&fling, theBoard, g, path);
+		int tmp;
+		if (path.size() > level && UniquelySolvable(theBoard, tmp))
+		{
+			lock->lock();
+			std::cout << "--=-=-=--\n";
+			std::cout << theBoard << "\n";
+			std::cout << "A: ";
+			std::cout << theBoard.GetRawBoard() << " " << path.size() << "\n";
+			lock->unlock();
+		}
+	}
+}
+
+// This code is also inefficient for the same reasons as above
+void AnalyzeRocks(int level)
+{
+	uint64_t maxVal = f.getMaxSinglePlayerRank(56, level);
+	int numThreads = std::thread::hardware_concurrency();
+	std::cout << "Running with " << numThreads << " threads\n";
+	
+	uint64_t perThread = maxVal/numThreads;
+	std::vector<std::thread*> threads;
+	std::mutex lock;
+	for (int x = 0; x < numThreads; x++)
+	{
+		threads.push_back(new std::thread(ThreadedRockAnalyze, level, x*perThread, (x+1)*perThread, &lock));
+	}
+	for (int x = 0; x < threads.size(); x++)
+	{
+		threads[x]->join();
+		delete threads[x];
+	}
+}

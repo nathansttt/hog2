@@ -146,7 +146,7 @@ bool FlingBoard::CanMove(int which, int x, int y) const
 	while ((xx >= 0) && (xx < width) && (yy >= 0) && (yy < height))
 	{
 		//if (board[yy*width+xx])
-		if (HasPiece(yy*width+xx) || (HasObstacle(yy*width+xx) && x == 1))
+		if (HasPiece(yy*width+xx) || (HasObstacle(yy*width+xx)))
 			return !first;
 		if (HasHole(yy*width+xx))
 			return false;
@@ -172,7 +172,7 @@ void FlingBoard::Move(int which, int x, int y)
 		{
 			SetPiece(lasty*width+lastx);
 		}
-		else if (HasObstacle(yy*width+xx) && x == 1)
+		else if (HasObstacle(yy*width+xx))
 		{
 			SetPiece(lasty*width+lastx);
 			// no piece can be on the obstacle, so we
@@ -337,9 +337,29 @@ uint64_t GetCanonicalHash(uint64_t which)
 
 Fling::Fling()
 {
+	specificGoalLoc = false;
 	initBinomial();
 	//		initBinomialSums();
 }
+
+void Fling::SetGoalLoc(int val)
+{
+	specificGoalLoc = true;
+	goalLoc = val;
+}
+
+void Fling::ClearGoalLoc()
+{
+	specificGoalLoc = false;
+}
+
+bool Fling::GoalTest(const FlingBoard &node, const FlingBoard &goal)
+{
+	if (specificGoalLoc)
+		return (node.locs.size() == 1 && node.locs[0] == goalLoc);
+	return (node.locs.size() == 1);
+}
+
 
 void Fling::GetSuccessors(const FlingBoard &nodeID, std::vector<FlingBoard> &neighbors) const
 {
