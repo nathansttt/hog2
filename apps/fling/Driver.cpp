@@ -131,6 +131,8 @@ void GetSolveActions(FlingBoard &solve, std::vector<FlingMove> &acts)
 	acts.resize(0);
 	BFS<FlingBoard, FlingMove> bfs;
 	bfs.GetPath(&f, solve, g, path);
+	for (int x = 0; x < path.size(); x++)
+		path[x].SetObstacles(solve.GetObstacles());
 	for (int x = 1; x < path.size(); x++)
 	{
 		acts.push_back(f.GetAction(path[x], path[x-1]));
@@ -172,7 +174,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-removeDups", "-removeDups", "Read states from stdin and remove similar states");
 	InstallCommandLineHandler(MyCLHandler, "-analyze", "-analyze theState", "Perform a move analysis on theState");
 	InstallCommandLineHandler(MyCLHandler, "-fix", "-fix file", "fix the file format");
-	InstallCommandLineHandler(MyCLHandler, "-solveState", "-solveState <state> <goal loc>", "solve state; goal loc is optional");
+	InstallCommandLineHandler(MyCLHandler, "-solveState", "-solveState <state> <goal loc>", "solve state; goal loc is optional - or rocks puts rocks into the board");
 	InstallCommandLineHandler(MyCLHandler, "-analyzeEndLocs", "-analyzeEndLocs <level>", "find states with a single way to end with a piece in a square");
 	InstallCommandLineHandler(MyCLHandler, "-analyzeRocks", "-analyzeRocks <level>", "find states with rocks in the middle that have unique solutions");
 
@@ -285,13 +287,20 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		//std::cout << "Pieces: " << atoi(argument[1]) << std::endl;
 		f.GetStateFromHash(which, b);
 		//f.unrankPlayer(which, atoi(argument[1]), b);
-		std::cout << b << std::endl;
 
 		if (maxNumArgs > 2) // also read goal location
 		{
-			printf("Using goal %d\n", atoi(argument[2]));
-			f.SetGoalLoc(atoi(argument[2]));
+			if (strcmp(argument[2], "rocks") == 0)
+			{
+				b.SetObstacle(24);
+				b.SetObstacle(31);
+			}
+			else {
+				printf("Using goal %d\n", atoi(argument[2]));
+				f.SetGoalLoc(atoi(argument[2]));
+			}
 		}
+		std::cout << b << std::endl;
 		
 		BFS<FlingBoard, FlingMove> bfs;
 		bfs.GetPath(&f, b, g, path);
@@ -365,8 +374,15 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 
 		if (maxNumArgs > 2) // also read goal location
 		{
-			printf("Using goal %d\n", atoi(argument[2]));
-			f.SetGoalLoc(atoi(argument[2]));
+			if (strcmp(argument[2], "rocks") == 0)
+			{
+				b.SetObstacle(24);
+				b.SetObstacle(31);
+			}
+			else {
+				printf("Using goal %d\n", atoi(argument[2]));
+				f.SetGoalLoc(atoi(argument[2]));
+			}
 		}
 
 		GetSolveActions(b, stateActs);
@@ -375,6 +391,19 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		{
 			std::cout << stateActs[stateActs.size()-1-x] << " ";
 		}
+		std::cout << "\nS: ";
+		for (int t = stateActs.size()-1; t > 1; t--)
+		{
+			if (b.LocationAfterAction(stateActs[t]) == stateActs[t-1].startLoc)
+			{
+				printf("1");
+			}
+			else {
+				printf("0");
+			}
+			f.ApplyAction(b, stateActs[t]);
+		}
+		std::cout << "\n";
 	}
 	else if (strcmp(argument[0], "-uniqueSolution") == 0)
 	{
@@ -497,6 +526,13 @@ void GetReducedMoves(FlingBoard s1, FlingBoard s2, std::vector<FlingMove> &moves
 {
 	std::vector<FlingMove> m1, m2;
 	FlingMove between;
+	
+	/**
+	 * Note:
+	 * Sometimes there are 2 different moves that can be the between action. In this
+	 * case, one might lead to pruning and the other not. Thus, there can be different
+	 * #'s of moves in the BFS depending on how moves are generated.
+	 */
 	between = f.GetAction(s1, s2);
 	
 	f.GetActions(s1, m1);
@@ -519,6 +555,8 @@ void GetReducedMoves(FlingBoard s1, FlingBoard s2, std::vector<FlingMove> &moves
 	}
 	
 	FlingBoard t1, t2;
+	t1.SetObstacles(s1.GetObstacles());
+	t2.SetObstacles(s2.GetObstacles());
 	moves.resize(0);
 	// apply common moves (besides between) to s1
 	for (int x = 0; x < commonMoves.size(); x++)
@@ -924,6 +962,8 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 	int currDepth = 0;
 	uint64_t lastNodes = 0, lastIter = 0;
 	FlingBoard s, tmp;
+	s.SetObstacles(from.GetObstacles());
+	tmp.SetObstacles(from.GetObstacles());
 	while (mOpen.size() > 0)
 	{
 		assert(mOpen.size() == depth.size());
@@ -944,7 +984,19 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 		{
 			moves.resize(0);
 			env->GetStateFromHash(mClosed[env->GetStateHash(s)], parentState);
-			GetReducedMoves(parentState, s, moves);
+			parentState.SetObstacles(from.GetObstacles());
+			if (currDepth > 0)
+			{
+				GetReducedMoves(parentState, s, moves);
+
+//				std::cout << "From:\n" << parentState << "To:\n" << s << "Moves:";
+//				for (auto &x : moves)
+//					std::cout << x << " ";
+//				std::cout << "\n";
+			}
+			else {
+				env->GetActions(s, moves);
+			}
 			for (int x = 0; x < moves.size(); x++)
 			{
 				env->GetNextState(s, moves[x], tmp);
@@ -954,7 +1006,8 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 		else {
 			env->GetSuccessors(s, thePath);
 		}
-		
+
+		// TODO: print state and generated actions
 		for (unsigned int x = 0; x < thePath.size(); x++)
 		{
 			if (mClosed.find(env->GetStateHash(thePath[x])) == mClosed.end())
@@ -964,6 +1017,10 @@ uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *
 				//				printf("Setting parent of %llu to be %llu\n", env->GetStateHash(thePath[x]),
 				//					   env->GetStateHash(s));
 				mClosed[env->GetStateHash(thePath[x])] = env->GetStateHash(s);
+//				FlingBoard tmpb;
+//				GetMirror(thePath[x], tmpb, true, false);
+//				std::cout << thePath[x].GetRawBoard() << "\n";
+//				std::cout << tmpb.GetRawBoard() << "\n";
 			}
 		}
 	}

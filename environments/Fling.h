@@ -47,9 +47,12 @@ public:
 	void ClearHole(int which);
 	void SetObstacle(int which);
 	void ClearObstacle(int which);
+	uint64_t GetObstacles() { return obstacles; }
+	void SetObstacles(uint64_t o) { obstacles = o; }
 	uint64_t GetRawBoard() const { return board; }
 	uint64_t GetRawObstacles() const { return obstacles; }
 	uint64_t GetRawHoles() const { return holes; }
+
 private:
 	uint64_t board;
 	uint64_t obstacles;
