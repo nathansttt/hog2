@@ -466,7 +466,7 @@ FlingMove Fling::GetAction(const FlingBoard &s1, const FlingBoard &s2) const
 {
 	std::vector<FlingMove> m1;
 	GetActions(s1, m1);
-	FlingMove between;
+	FlingMove between = {0, kUp};
 	FlingBoard tmp;
 	bool found = false;
 	for (int x = 0; x < m1.size(); x++)
@@ -479,6 +479,7 @@ FlingMove Fling::GetAction(const FlingBoard &s1, const FlingBoard &s2) const
 			break;
 		}
 	}
+	assert(found == true);
 	return between;
 }
 
