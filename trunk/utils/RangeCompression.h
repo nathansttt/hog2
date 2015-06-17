@@ -21,12 +21,12 @@
   order. It will return fewer values if `distribution` contains
   fewer than `num_values` non-zero entries.
 */
-void GetOptimizedBoundaries(const std::vector<int> &distribution,
+void GetOptimizedBoundaries(const std::vector<uint64_t> &distribution,
                             int numValues, std::vector<int> &result);
 
 
 // Debugging function.
-void DumpOptimizedBoundaries(const std::vector<int> &distribution,
+void DumpOptimizedBoundaries(const std::vector<uint64_t> &distribution,
                              int numValues);
 
 #endif

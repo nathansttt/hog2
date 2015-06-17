@@ -55,9 +55,9 @@ class HeuristicTable {
     vector<HeuristicTableEntry> entries;
 
 public:
-    explicit HeuristicTable(const vector<int> &histogram) {
+    explicit HeuristicTable(const vector<uint64_t> &histogram) {
         for (size_t h = 0; h < histogram.size(); ++h) {
-            int numStates = histogram[h];
+            uint64_t numStates = histogram[h];
             assert(numStates >= 0);
             if (numStates) {
                 HeuristicTableEntry entry(entries.size(), h, numStates);
@@ -133,13 +133,13 @@ public:
         return result;
     }
 
-    double GetAverageH(const vector<int> &histogram) const {
+    double GetAverageH(const vector<uint64_t> &histogram) const {
         // This method is only used for statistics in the test code.
         double weightedH = 0.0;
         double totalStates = 0.0;
         const Solution *currentSolution = this;
         for (size_t h = 0; h < histogram.size(); ++h) {
-            int numStates = histogram[h];
+            uint64_t numStates = histogram[h];
             while (currentSolution->GetNextH() <= static_cast<int>(h))
                 currentSolution = currentSolution->subsolution.get();
             weightedH += currentSolution->GetFirstH() * numStates;
@@ -151,7 +151,7 @@ public:
 
 
 static void DumpSolution(const Solution &solution,
-                         const vector<int> &histogram) {
+                         const vector<uint64_t> &histogram) {
     auto hValues = solution.GetHValues();
     cout << "[";
     for (size_t i = 0; i < hValues.size(); ++i) {
@@ -165,7 +165,7 @@ static void DumpSolution(const Solution &solution,
 }
 
 
-static vector<int> Optimize(const vector<int> &histogram, int numValues,
+static vector<int> Optimize(const vector<uint64_t> &histogram, int numValues,
                             bool dumpResult = false) {
     assert(numValues >= 1);
 
@@ -211,12 +211,12 @@ static vector<int> Optimize(const vector<int> &histogram, int numValues,
 }
 
 
-void GetOptimizedBoundaries(const vector<int> &distribution,
+void GetOptimizedBoundaries(const vector<uint64_t> &distribution,
                             int numValues, vector<int> &result) {
     result = Optimize(distribution, numValues, false);
 }
 
 
-void DumpOptimizedBoundaries(const vector<int> &distribution, int numValues) {
+void DumpOptimizedBoundaries(const vector<uint64_t> &distribution, int numValues) {
     Optimize(distribution, numValues, true);
 }

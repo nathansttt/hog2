@@ -108,6 +108,7 @@ public:
 
 	double GCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
 	double GCost(const MNPuzzleState &, const slideDir &);
+	double AdditiveGCost(const MNPuzzleState &, const slideDir &);
 	bool GoalTest(const MNPuzzleState &state, const MNPuzzleState &goal);
 
 	bool GoalTest(const MNPuzzleState &s);

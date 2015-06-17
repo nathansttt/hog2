@@ -63,12 +63,12 @@ public:
 //:f("/home/sturtevant/sturtevant/code/cc/rubik/RC-10edge")
 //:f("/data/cc/rubik/10/RC-10edge")
 //:f("/store/rubik/RC")
-	:f("/data/cc/rubik/res/RC")
+//	:f("/data/cc/rubik/res/RC")
 	{
 		pruneSuccessors = false;
 		minCompression = true;
 		bloomFilter = false;
-		uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+		uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(false);
 		InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
 		InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
 
@@ -111,8 +111,12 @@ public:
 	virtual bool GoalTest(const RubiksState &node);
 	
 	virtual uint64_t GetStateHash(const RubiksState &node) const;
+	virtual uint64_t GetCornerHash(const RubiksState &node) const;
+	virtual uint64_t GetEdgeHash(const RubiksState &node) const;
+
 	virtual uint64_t GetActionHash(RubiksAction act) const { return act; }
 	virtual void GetStateFromHash(uint64_t hash, RubiksState &node) const;
+	virtual void GetStateFromHash(uint64_t cornerHash, uint64_t edgeHash, RubiksState &node) const;
 	
 	FourBitArray &GetCornerPDB() { return cornerPDB; }
 	FourBitArray &GetEdgePDB() { return edgePDB; }
@@ -154,7 +158,7 @@ private:
 	FourBitArray edge7PDBint;
 	
 	
-	DiskBitFile f;
+//	DiskBitFile f;
 	std::vector<bucketInfo> data;
 	std::vector<bucketData> buckets;
 

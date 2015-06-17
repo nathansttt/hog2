@@ -385,6 +385,22 @@ uint64_t RubiksCube::GetStateHash(const RubiksState &node) const
 	return hash;
 }
 
+uint64_t RubiksCube::GetCornerHash(const RubiksState &node) const
+{
+	return c.GetStateHash(node.corner);
+}
+
+uint64_t RubiksCube::GetEdgeHash(const RubiksState &node) const
+{
+	return e.GetStateHash(node.edge);
+}
+
+void RubiksCube::GetStateFromHash(uint64_t cornerHash, uint64_t edgeHash, RubiksState &node) const
+{
+	c.GetStateFromHash(cornerHash, node.corner);
+	e.GetStateFromHash(edgeHash, node.edge);
+}
+
 void RubiksCube::GetStateFromHash(uint64_t hash, RubiksState &node) const
 {
 	e.GetStateFromHash(hash%e.getMaxSinglePlayerRank(), node.edge);

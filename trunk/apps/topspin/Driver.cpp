@@ -266,12 +266,17 @@ void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 //	DivValueCompressionTest();
 //	BitDeltaValueCompressionTest();
 
-	bool weighted = true;
+	bool weighted = false;
+//	DivDeltaNodesCompressionTest(weighted);
+//	ModNodesDeltaCompressionTest(weighted);
 
+	weighted = true;
+//	DivDeltaNodesCompressionTest(weighted);
+	ModNodesDeltaCompressionTest(weighted);
 //	BaseHeuristicTest(weighted);
 //	FractionalModNodesCompressionTest(weighted);
 //	FractionalNodesCompressionTest(weighted);
-	BitDeltaNodesCompressionTest(weighted);
+//	BitDeltaNodesCompressionTest(weighted);
 //	DivNodesCompressionTest(weighted);
 //	ModNodesCompressionTest(weighted);
 
@@ -736,7 +741,8 @@ void FractionalNodesCompressionTest(bool weighted)
 		tse.lookups.push_back({kLeafNode, -0, -0, 2});
 		tse.lookups.push_back({kLeafFractionalCompress, -0, -0, 3});
 		std::string desc = "FCT-C-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(tse, desc.c_str());
 	}
 }
@@ -772,7 +778,8 @@ void FractionalModNodesCompressionTest(bool weighted)
 		tse.lookups.push_back({kLeafNode, -0, -0, 2});
 		tse.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 3});
 		std::string desc = "FCT-M-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(tse, desc.c_str());
 	}
 }
@@ -808,40 +815,61 @@ void ModNodesCompressionTest(bool weighted)
 		tse.lookups.push_back({kLeafModCompress, -0, -0, 1});
 
 		std::string desc = "MOD-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(tse, desc.c_str());
 	}
 }
 
 void ModNodesDeltaCompressionTest(bool weighted)
 {
-//	std::vector<int> tiles;
-//	
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//	
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//	
-//	BuildPDBs(true, true, weighted);
-//	
-//	for (int x = 2; x <= 10; x++)
-//	{
-//		g.Reset();
-//		printf("==>MOD Compressing by factor of %d\n", x);
-//		tse.ClearPDBs();
-//		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
-//		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//		
-//		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
-//		uint64_t newSize = oldSize / x;
-//		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
-//		tse.Delta_Compress_PDB(g, 1, true);
-//		tse.Mod_Compress_PDB(1, newSize, true);
-//		//		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
-//		//		MeasureIR(tse);
-//	}
+	std::vector<int> tiles;
+	
+	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
+	TopSpinState s(N, k);
+	TopSpinState g(N, k);
+	
+	tse.StoreGoal(g);
+	tse.ClearPDBs();
+	
+	BuildPDBs(true, true, weighted);
+	
+	for (int x = 2; x <= 10; x++)
+	{
+		g.Reset();
+		printf("==>Compressing (mod-delta by factor of %d\n", x);
+		tse.ClearPDBs();
+		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
+		uint64_t newSize = oldSize / x;
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB7b(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
+		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.Delta_Compress_PDB(g, 2, true);
+		tse.lookups.back().PDBID = 1;
+		tse.Delta_Compress_PDB(g, 3, true);
+		tse.lookups.resize(0);
+		
+		tse.Mod_Compress_PDB(2, newSize, true);
+		tse.Mod_Compress_PDB(3, newSize, true);
+
+		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({kAddNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
+		
+		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({kLeafModCompress, -0, -0, 2});
+
+		tse.lookups.push_back({kLeafNode, -0, -0, 1});
+		tse.lookups.push_back({kLeafModCompress, -0, -0, 3});
+		
+		std::string desc = "MOD-D-";
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
+		Test(tse, desc.c_str());
+	}
 }
 
 void DivNodesCompressionTest(bool weighted)
@@ -873,7 +901,8 @@ void DivNodesCompressionTest(bool weighted)
 		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
 
 		std::string desc = "DIV-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(tse, desc.c_str());
 		//MeasureIR(tse);
 	}
@@ -881,30 +910,51 @@ void DivNodesCompressionTest(bool weighted)
 
 void DivDeltaNodesCompressionTest(bool weighted)
 {
-//	std::vector<int> tiles;
-//	
-//	TopSpin tse(N, k);
-//	TopSpinState s(N, k);
-//	TopSpinState g(N, k);
-//	
-//	tse.StoreGoal(g);
-//	tse.ClearPDBs();
-//	
-//	BuildPDBs(true, true, weighted);
-//	
-//	for (int x = 2; x <= 10; x++)
-//	{
-//		g.Reset();
-//		printf("==>Compressing by factor of %d\n", x);
-//		tse.ClearPDBs();
-//		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
-//		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-//		
-//		tse.Load_Regular_PDB(getPDB8a(weighted), g, false);
-//		tse.Delta_Compress_PDB(g, 1, true);
-//		tse.Min_Compress_PDB(1, x, true);
-//		//MeasureIR(tse);
-//	}
+	std::vector<int> tiles;
+	
+	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
+	TopSpinState s(N, k);
+	TopSpinState g(N, k);
+	
+	tse.StoreGoal(g);
+	tse.ClearPDBs();
+	
+	BuildPDBs(true, true, weighted);
+	
+	for (int x = 2; x <= 10; x++)
+	{
+		g.Reset();
+		printf("==>Compressing (div-delta) by factor of %d\n", x);
+		tse.ClearPDBs();
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB7b(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
+		
+		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.Delta_Compress_PDB(g, 2, true);
+		tse.lookups.back().PDBID = 1;
+		tse.Delta_Compress_PDB(g, 3, true);
+		tse.lookups.resize(0);
+
+		tse.Min_Compress_PDB(2, x, true);
+		tse.Min_Compress_PDB(3, x, true);
+		
+		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({kAddNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
+
+		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 2});
+		tse.lookups.push_back({kLeafNode, -0, -0, 1});
+		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 3});
+		
+		std::string desc = "DIV-D-";
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
+		Test(tse, desc.c_str());
+	}
 }
 
 
@@ -922,7 +972,7 @@ void BitDeltaNodesCompressionTest(bool weighted)
 	
 	BuildPDBs(true, true, weighted);
 	
-	for (int x = 1; x <= 4; x*=2)
+	for (int x = 2; x <= 4; x*=2)
 	{
 		std::vector<int> cutoffs;
 		GetBitValueCutoffs(cutoffs, x);
@@ -953,7 +1003,8 @@ void BitDeltaNodesCompressionTest(bool weighted)
 		tse.lookups.push_back({kLeafNode, -0, -0, 3});
 
 		std::string desc = "VALRNG-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(tse, desc.c_str());
 	}
 }

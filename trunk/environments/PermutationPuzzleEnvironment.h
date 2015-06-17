@@ -1,6 +1,5 @@
 #include "SearchEnvironment.h"
 #include <assert.h>
-#include <deque>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -9,6 +8,7 @@
 #include <cstdio>
 #include "Timer.h"
 #include <thread>
+#include <deque>
 #include "SharedQueue.h"
 #include "RangeCompression.h"
 
@@ -200,10 +200,13 @@ public:
 	/**
 	 * Return the distribution of values in a PDB.
 	 */
-	void GetPDBHistogram(int which, std::vector<int> &values) const;
+	void GetPDBHistogram(int which, std::vector<uint64_t> &values) const;
 	
 	double HCost(const state &s);
 	virtual double DefaultH(const state &s) const { return 0; }
+
+	virtual double AdditiveGCost(const state &s, const action &d)
+	{ assert(!"Additive Gost used but not defined for this class\n"); }
 private:
 	double HCost(const state &s, int treeNode, std::vector<int> &c1, std::vector<int> &c2);
 public:
@@ -249,17 +252,12 @@ public:
 	void CreateThreads(int count, int depth);
 	void ThreadWorker(int depth, int totalTiles,
 					  std::vector<uint8_t> *DB,
-					  std::vector<uint8_t> *coarseOpen,
+					  //std::vector<uint8_t> *coarseOpen,
 					  const std::vector<int> *distinct,
 					  SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 					  SharedQueue<uint64_t> *results,
 					  std::mutex *lock,
 					  bool additive);
-	uint64_t SendWorkToThread(uint64_t start, uint64_t end,
-							  int depth, int totalTiles,
-							  std::vector<uint8_t> &DB,
-							  std::vector<uint8_t> &coarseOpen,
-							  const std::vector<int> &distinct);
 
 	void DeltaWorker(std::vector<uint8_t> *array,
 					 std::vector<int> *distinct,
@@ -568,7 +566,7 @@ void PermutationPuzzleEnvironment<state, action>::Value_Compress_PDB(int whichPD
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Value_Range_Compress_PDB(int whichPDB, int numBits, bool print_histogram)
 {
-	std::vector<int> dist;
+	std::vector<uint64_t> dist;
 	std::vector<int> cutoffs;
 	GetPDBHistogram(whichPDB, dist);
 	GetOptimizedBoundaries(dist, 1<<numBits, cutoffs);
@@ -687,7 +685,7 @@ void PermutationPuzzleEnvironment<state, action>::PrintPDBHistogram(int which) c
 {
 	double average = 0;
 	uint8_t maxval = 0;
-	std::vector<int> values(256);
+	std::vector<uint64_t> values(256);
 	// performs histogram count
 	for (uint64_t x = 0; x < PDB[which].size(); x++)
 	{
@@ -697,14 +695,14 @@ void PermutationPuzzleEnvironment<state, action>::PrintPDBHistogram(int which) c
 	// outputs histogram of heuristic value counts
 	for (uint64_t x = 0; x <= maxval; x++)
 	{
-		printf("%d:\t%d\n", x, values[x]);
+		printf("%lld:\t%d\n", x, values[x]);
 		average += x*values[x];
 	}
 	printf("Average value: %1.4f\n", average/PDB[which].size());
 }
 
 template <class state, class action>
-void PermutationPuzzleEnvironment<state, action>::GetPDBHistogram(int which, std::vector<int> &values) const
+void PermutationPuzzleEnvironment<state, action>::GetPDBHistogram(int which, std::vector<uint64_t> &values) const
 {
 	uint8_t maxval = 0;
 	values.resize(0);
@@ -947,7 +945,7 @@ const int coarseSize = 1024;
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::ThreadWorker(int depth, int totalTiles,
 															   std::vector<uint8_t> *DB,
-															   std::vector<uint8_t> *coarseOpen,
+															   //std::vector<uint8_t> *coarseOpen,
 															   const std::vector<int> *distinct,
 															   SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 															   SharedQueue<uint64_t> *results,
@@ -985,14 +983,11 @@ void PermutationPuzzleEnvironment<state, action>::ThreadWorker(int depth, int to
 		for (uint64_t x = start; x < end; x++)
 		{
 			int stateDepth = (*DB)[x];
-//			if (stateDepth > depth)
-//			{
-//				nextDepth = min(nextDepth, stateDepth);
-//			}
 			if (stateDepth == depth)
 			{
 				count++;
 				GetStateFromPDBHash(x, s, totalTiles, *distinct, cache1);
+				//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 				this->GetActions(s, acts);
 				for (int y = 0; y < acts.size(); y++)
 				{
@@ -1001,45 +996,52 @@ void PermutationPuzzleEnvironment<state, action>::ThreadWorker(int depth, int to
 					//virtual bool InvertAction(action &a) const = 0;
 
 					uint64_t nextRank = GetPDBHash(t, *distinct, cache1, cache2);
-					int newCost = stateDepth+this->GCost(t, acts[y]);
-					if (newCost == stateDepth)
+					int newCost = stateDepth+(additive?this->AdditiveGCost(t, acts[y]):this->GCost(t, acts[y]));
 					cache.push_back({nextRank, newCost});
 				}
 			}
 		}
-		lock->lock();
-		for (auto d : cache)
-		{
-			if (d.newGCost < (*DB)[d.rank]) // shorter path
+		do {
+			// write out everything
+			lock->lock();
+			for (auto d : cache)
 			{
-				(*DB)[d.rank] = d.newGCost;
-				(*coarseOpen)[d.rank/coarseSize] = min((*coarseOpen)[d.rank/coarseSize], d.newGCost);
+				if (d.newGCost < (*DB)[d.rank]) // shorter path
+				{
+					(*DB)[d.rank] = d.newGCost;
+					if (d.newGCost == depth) // 0-cost action; will expand immediately
+					{
+						additiveQueue.push_back(d.rank);
+					}
+				}
 			}
-		}
-		// it's possible that our nextDepth computation could be too high based on a change
-		// that occured when going through this sector, thus we need to scan here when it is
-		// locked to be sure we get the right answer
+			lock->unlock();
+			cache.resize(0);
+			
+			while (additiveQueue.size() > 0)
+			{
+				uint64_t x = additiveQueue.back();
+				additiveQueue.pop_back();
+				int stateDepth = (*DB)[x];
+				assert(stateDepth == depth);
 
-		int nextDepth = 255;
-		for (uint64_t x = start; x < end; x++)
-		{
-			int stateDepth = (*DB)[x];
-			if (stateDepth > depth)
-			{
-				nextDepth = min(nextDepth, stateDepth);
+				count++;
+				GetStateFromPDBHash(x, s, totalTiles, *distinct, cache1);
+				//std::cout << "Expanding[a][" << stateDepth << "]: " << s << std::endl;
+				this->GetActions(s, acts);
+				for (int y = 0; y < acts.size(); y++)
+				{
+					this->GetNextState(s, acts[y], t);
+					assert(this->InvertAction(acts[y]) == true);
+					//virtual bool InvertAction(action &a) const = 0;
+					
+					uint64_t nextRank = GetPDBHash(t, *distinct, cache1, cache2);
+					int newCost = stateDepth+(additive?this->AdditiveGCost(t, acts[y]):this->GCost(t, acts[y]));
+					cache.push_back({nextRank, newCost});
+				}
 			}
-		}
-		(*coarseOpen)[start/coarseSize] = nextDepth;
-//		if ((*coarseOpen)[start/coarseSize] > depth)
-//		{
-//			(*coarseOpen)[start/coarseSize] = min(nextDepth, (*coarseOpen)[start/coarseSize]);
-//			//printf("Avoided coarse open bug\n");
-//		}
-//		else {
-//			(*coarseOpen)[start/coarseSize] = nextDepth;
-//		}
-		lock->unlock();
-		cache.resize(0);
+			
+		} while (cache.size() != 0);
 	}
 	results->Add(count);
 }
@@ -1112,13 +1114,23 @@ void PermutationPuzzleEnvironment<state, action>::Build_PDB(state &start, const 
 		for (int x = 0; x < numThreads; x++)
 		{
 			threads[x] = new std::thread(&PermutationPuzzleEnvironment<state, action>::ThreadWorker, this,
-										 depth, start.puzzle.size(), &DB, &coarseOpen, &distinct,
+										 depth, start.puzzle.size(), &DB,// &coarseOpen,
+										 &distinct,
 										 &workQueue, &resultQueue, &lock, additive);
 		}
 		
 		for (uint64_t x = 0; x < COUNT; x+=coarseSize)
 		{
-			if (coarseOpen[x/coarseSize] == depth)
+			bool submit = false;
+			for (uint64_t t = x; t < min(COUNT, x+coarseSize); t++)
+			{
+				if (DB[t] == depth)
+				{
+					submit = true;
+					//newEntries++;
+				}
+			}
+			if (submit)
 			{
 				while (workQueue.size() > 10*numThreads)
 				{ std::this_thread::sleep_for(std::chrono::microseconds(10)); }
@@ -1141,22 +1153,31 @@ void PermutationPuzzleEnvironment<state, action>::Build_PDB(state &start, const 
 			uint64_t val;
 			if (resultQueue.Remove(val))
 			{
-				newEntries+=val;
+				//newEntries+=val;
 			}
 			else {
 				break;
 			}
 		}
 		
+		newEntries = 0;
+		for (uint64_t x = 0; x < COUNT; x++)
+		{
+			if (DB[x] == depth)
+			{
+				newEntries++;
+			}
+		}
 		entries += newEntries;
 		printf("Depth %d complete; %1.2fs elapsed. %llu new states seen; %llu of %llu total\n",
 			   depth, s.EndTimer(), newEntries, entries, COUNT);
-		depth = coarseOpen[0];
-		for (int x = 1; x < coarseOpen.size(); x++)
-			depth = min(depth, coarseOpen[x]);
-		if (depth == 255) // no new entries!
-			break;
-	} while (newEntries > 0);
+		depth++;
+//		depth = coarseOpen[0];
+//		for (int x = 1; x < coarseOpen.size(); x++)
+//			depth = min(depth, coarseOpen[x]);
+//		if (depth == 255) // no new entries!
+//			break;
+	} while (entries != COUNT);
 	
 	printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)

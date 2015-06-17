@@ -82,7 +82,13 @@ public:
 	recVec() {}
 	recVec(GLdouble x_i, GLdouble y_i, GLdouble z_i) :x(x_i), y(y_i), z(z_i) {}
 	void normalise();
-  GLdouble x,y,z;
+	GLdouble x,y,z;
+	recVec &operator+=(const recVec &v)
+	{ x += v.x; y += v.y; z += v.z; return *this; }
+	recVec &operator-=(const recVec &v)
+	{ x -= v.x; y -= v.y; z -= v.z; return *this; }
+	recVec &operator*=(GLdouble val)
+	{ x *= val; y *= val; z *= val; return *this; }
 };
 
 bool operator==(const recVec &l1, const recVec &l2);
@@ -129,6 +135,7 @@ recColor getColor(GLfloat v, GLfloat vmin, GLfloat vmax, int type);
 */
 void DrawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width);
 void DrawBox(GLfloat x, GLfloat y, GLfloat z, GLfloat radius);
+void DrawBoxFrame(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad);
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
 
 //class OpenGLDrawable {

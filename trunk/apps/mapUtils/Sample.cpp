@@ -41,6 +41,7 @@
 #include "PEAStar.h"
 #include "EPEAStar.h"
 #include "MapGenerators.h"
+#include "FPUtil.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -73,6 +74,9 @@ MapSectorAbstraction *msa;
 
 std::vector<xyLoc> path;
 
+std::vector<xyLoc> subgoals;
+std::vector<std::pair<xyLoc, xyLoc>> subgoalEdges;
+
 Map *ReduceMap(Map *inputMap);
 void MeasureHighwayDimension(Map *m, int depth);
 void EstimateDimension(Map *m);
@@ -83,7 +87,7 @@ void testHeuristic(char *problems);
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	RunHOGGUI(argc, argv, 1024, 768);
+	RunHOGGUI(argc, argv, 1000, 1000);
 }
 
 
@@ -98,8 +102,9 @@ void CreateSimulation(int id)
 	{
 		//ht_chantry.arl.map // den012d
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz101d.map");
-		//map = new Map("/Users/nathanst/hog2/maps/dao/lak503d.map");
-		map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
+		map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
+		//map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
+		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
 		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		
@@ -151,6 +156,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add A* Unit", "Deploys a simple a* unit", kNoModifier, 'a');
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
+	InstallKeyboardHandler(MySubgoalHandler, "Setup Subgoals", "Set up and display subgoal information", kNoModifier, 's');
+	
 	
 	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-makeRoom", "-makeRoom x-dim y-dim roomSie filename", "Resizes map to specified dimensions and saves");
@@ -200,6 +207,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		CreateSimulation(windowID);
 		SetNumPorts(windowID, 1);
+		SetZoom(windowID, 10);
 	}
 
 }
@@ -217,7 +225,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
 	}
-//	for (unsigned int x = 0; x < astars.size(); x++)
+
+	
+	//	for (unsigned int x = 0; x < astars.size(); x++)
 //		astars[x].OpenGLDraw();
 	//	astar.OpenGLDraw();	
 	unitSims[windowID]->OpenGLDraw();
@@ -292,6 +302,52 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 		a2.OpenGLDraw();
 	}
+
+	
+	if (subgoals.size() > 0)
+	{
+		printf("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
+
+		Map *m = unitSims[windowID]->GetEnvironment()->GetMap();
+		printf("<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.0\" id=\"svg2\" height=\"%ld\" width=\"%ld\">\n",
+			   m->GetMapHeight()*10,
+			   m->GetMapWidth()*10);
+	
+//		for (int x = 0; x < m->GetMapWidth(); x++)
+//		{
+//			for (int y = 0; y < m->GetMapHeight(); y++)
+//			{
+//				printf("<rect x = \"%d\" y=\"%d\" width=\"10\" height=\"10\" style=\"fill:rgb(255,255,255);stroke-width:3;stroke:rgb(255,255,255)\" />\n", x*10, y*10);
+//			}
+//		}
+
+	}
+	unitSims[windowID]->GetEnvironment()->SetColor(0.0, 0.0, 1.0);
+	//glLineWidth(2.0);
+	for (auto &x : subgoalEdges)
+	{
+		unitSims[windowID]->GetEnvironment()->GLDrawLine(x.first, x.second);
+		printf("<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" style=\"stroke:rgb(0,0,0);stroke-width:1\" />\n",
+			   10*x.first.x,
+			   10*x.first.y,
+			   10*x.second.x,
+			   10*x.second.y);
+	}
+
+	unitSims[windowID]->GetEnvironment()->SetColor(1.0, 0.0, 0.0);
+	for (const xyLoc &x : subgoals)
+	{
+		unitSims[windowID]->GetEnvironment()->OpenGLDraw(x);
+		
+		printf("<circle cx=\"%d\" cy=\"%d\" r=\"5\" stroke=\"black\" stroke-width=\"0.25\" fill=\"red\" />\n", 10*x.x, 10*x.y);
+	}
+
+	if (subgoals.size() > 0)
+	{
+		printf("</svg>\n");
+		exit(0);
+	}
+	
 	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
 		static int cnt = 0;
@@ -756,12 +812,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs <= 1)
 			return 0;
 		strncpy(gDefaultMap, argument[1], 1024);
-		Map map(argument[1]);
-		map.Scale(512, 512);
-		map.Save(argument[2]);
+//		Map map(argument[1]);
+//		map.Scale(512, 512);
+//		map.Save(argument[2]);
 		//buildProblemSet();
 		//doExport();
-		exit(0);
+//		exit(0);
 		return 2;
 	}
 	else if (strcmp( argument[0], "-buildProblemSet" ) == 0 )
@@ -882,6 +938,117 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		default:
 			break;
 	}
+}
+
+bool IsDirectHReachable(xyLoc a, xyLoc b, std::vector<std::vector<uint8_t> > &world)
+{
+	MapEnvironment *env = unitSims[0]->GetEnvironment();
+	double h = env->HCost(a, b);
+	int minx = std::min(a.x, b.x);
+	int maxx = std::max(a.x, b.x);
+	int miny = std::min(a.y, b.y);
+	int maxy = std::max(a.y, b.y);
+	for (int x = minx; x <= maxx; x++)
+	{
+		for (int y = miny; y <= maxy; y++)
+		{
+			xyLoc tmp(x, y);
+			// Are we inside the shortest-path region
+			if (fequal(env->HCost(a, tmp)+env->HCost(tmp, b), h))
+			{
+				if (tmp == a || tmp == b)
+					continue;
+				if (world[x][y] != 0) // == 1 (obstacles)
+					return false;
+			}
+		}
+	}
+	return true;
+}
+
+void MySubgoalHandler(unsigned long windowID, tKeyboardModifier, char key)
+{
+	std::vector<std::vector<uint8_t> > world;
+	//	std::vector<xyLoc> subgoals;
+//	std::vector<std::pair<xyLoc, xyLoc>> subgoalEdges;
+	Map *map = unitSims[windowID]->GetEnvironment()->GetMap();
+	world.resize(map->GetMapWidth());
+	for (int x = 0; x < world.size(); x++)
+	{
+		world[x].resize(map->GetMapHeight());
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			if (map->GetTerrainType(x, y) != kGround)
+				world[x][y] = 1;
+		}
+	}
+	for (int x = 0; x < map->GetMapWidth(); x++)
+	{
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			// x y is a corner and x-1, y-1 is a subgoal
+			if (!map->CanStep(x, y, x-1, y) && !map->CanStep(x, y, x-1, y-1) && !map->CanStep(x, y, x, y-1) &&
+				map->CanStep(x-1, y, x-1, y-1) && map->CanStep(x-1, y-1, x, y-1) &&
+				map->GetTerrainType(x-1, y-1) == kGround)
+			{
+				xyLoc next(x-1, y-1);
+				if (std::find(subgoals.begin(), subgoals.end(), next) == subgoals.end())
+				{
+					subgoals.push_back(next);
+					world[next.x][next.y] = 2;
+				}
+			}
+
+			if (!map->CanStep(x, y, x+1, y) && !map->CanStep(x, y, x+1, y+1) && !map->CanStep(x, y, x, y+1) &&
+				map->CanStep(x+1, y, x+1, y+1) && map->CanStep(x+1, y+1, x, y+1) &&
+				map->GetTerrainType(x+1, y+1) == kGround)
+			{
+				xyLoc next(x+1, y+1);
+				if (std::find(subgoals.begin(), subgoals.end(), next) == subgoals.end())
+				{
+					subgoals.push_back(next);
+					world[next.x][next.y] = 2;
+				}
+			}
+
+			if (!map->CanStep(x, y, x-1, y) && !map->CanStep(x, y, x-1, y+1) && !map->CanStep(x, y, x, y+1) &&
+				map->CanStep(x-1, y, x-1, y+1) && map->CanStep(x-1, y+1, x, y+1) &&
+				map->GetTerrainType(x-1, y+1) == kGround)
+			{
+				xyLoc next(x-1, y+1);
+				if (std::find(subgoals.begin(), subgoals.end(), next) == subgoals.end())
+				{
+					subgoals.push_back(next);
+					world[next.x][next.y] = 2;
+				}
+			}
+
+			if (!map->CanStep(x, y, x+1, y) && !map->CanStep(x, y, x+1, y-1) && !map->CanStep(x, y, x, y-1) &&
+				map->CanStep(x+1, y, x+1, y-1) && map->CanStep(x+1, y-1, x, y-1) &&
+				map->GetTerrainType(x+1, y-1) == kGround)
+
+			{
+				xyLoc next(x+1, y-1);
+				if (std::find(subgoals.begin(), subgoals.end(), next) == subgoals.end())
+				{
+					subgoals.push_back(next);
+					world[next.x][next.y] = 2;
+				}
+			}
+		}
+	}
+	
+	for (int x = 0; x < subgoals.size(); x++)
+	{
+		for (int y = x+1; y < subgoals.size(); y++)
+		{
+			if (IsDirectHReachable(subgoals[x], subgoals[y], world))
+			{
+				subgoalEdges.push_back(std::pair<xyLoc, xyLoc>(subgoals[x], subgoals[y]));
+			}
+		}
+	}
+
 }
 
 void MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)
