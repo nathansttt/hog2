@@ -589,10 +589,20 @@ typedef double		GLclampd;	/* double precision float in [0,1] */
 #define GL_4_BYTES                        0x1409
 #define GL_DOUBLE                         0x140A
 
+	/* vertex_array */
+#define GL_VERTEX_ARRAY                   0x8074
+#define GL_NORMAL_ARRAY                   0x8075
+#define GL_COLOR_ARRAY                    0x8076
+#define GL_INDEX_ARRAY                    0x8077
+#define GL_TEXTURE_COORD_ARRAY            0x8078
+
 void glBegin ( GLenum mode ) ;
 void glCallList ( GLuint list ) ;
 void glColor4f ( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha ) ;
 void glDeleteLists ( GLuint list, GLsizei range ) ;
+void glDisableClientState (GLenum array);
+void glVertexPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
+void glEnableClientState (GLenum array);
 void glEnd () ;
 void glEndList () ; 
 GLuint glGenLists ( GLsizei range ) ;
@@ -658,6 +668,10 @@ void glOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdou
 void glTexImage1D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
 void glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
 void glTexImage3D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+
+void glDrawArrays (GLenum mode, GLint first, GLsizei count);
+void glNormalPointer (GLenum type, GLsizei stride, const GLvoid *pointer);
+void glDrawElements (GLenum mode, GLsizei count, GLenum type, const GLvoid *indices);
 
 }
 #endif

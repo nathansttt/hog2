@@ -69,3 +69,11 @@ void glOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdou
 void glTexImage1D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels) { }
 void glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) { }
 void glTexImage3D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels) { }
+
+void glDisableClientState (GLenum array) { }
+void glVertexPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) { }
+void glEnableClientState (GLenum array) { }
+
+void glDrawArrays (GLenum mode, GLint first, GLsizei count) { }
+void glNormalPointer (GLenum type, GLsizei stride, const GLvoid *pointer) { }
+void glDrawElements (GLenum mode, GLsizei count, GLenum type, const GLvoid *indices) { }
