@@ -7,6 +7,7 @@
 
 CXX = g++ # clang++
 COMMON_CXXFLAGS += -Wall -std=c++11 # -stdlib=libc++
+
 #COMMON_CXXFLAGS += -ansi -pedantic
 
 CC = gcc
