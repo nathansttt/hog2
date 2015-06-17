@@ -623,18 +623,39 @@ void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir) con
 
 void MapEnvironment::GLDrawLine(const xyLoc &a, const xyLoc &b) const
 {
-	GLdouble xx, yy, zz, rad;
-	map->GetOpenGLCoord(a.x, a.y, xx, yy, zz, rad);
+	GLdouble xx1, yy1, zz1, rad;
+	GLdouble xx2, yy2, zz2;
+	map->GetOpenGLCoord(a.x, a.y, xx1, yy1, zz1, rad);
+	map->GetOpenGLCoord(b.x, b.y, xx2, yy2, zz2, rad);
+	
+	double angle = atan2(yy1-yy2, xx1-xx2);
+	double xoff = sin(2*PI-angle)*rad*0.1;
+	double yoff = cos(2*PI-angle)*rad*0.1;
+
+	
 	
 	GLfloat rr, gg, bb, t;
 	GetColor(rr, gg, bb, t);
 	glColor4f(rr, gg, bb, t);
 
-	glBegin(GL_LINES);
-	glVertex3f(xx, yy, zz-rad/2);
-	map->GetOpenGLCoord(b.x, b.y, xx, yy, zz, rad);
-	glVertex3f(xx, yy, zz-rad/2);
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+	//glEnable(GL_POLYGON_SMOOTH);
+	glBegin(GL_TRIANGLE_STRIP);
+
+	//glBegin(GL_QUADS);
+	glVertex3f(xx1+xoff, yy1+yoff, zz1-rad/2);
+	glVertex3f(xx2+xoff, yy2+yoff, zz2-rad/2);
+	glVertex3f(xx1-xoff, yy1-yoff, zz1-rad/2);
+	glVertex3f(xx2-xoff, yy2-yoff, zz2-rad/2);
 	glEnd();
+//	glDisable(GL_POLYGON_SMOOTH);
+	//
+//	glBegin(GL_LINES);
+//	glVertex3f(xx, yy, zz-rad/2);
+//	map->GetOpenGLCoord(b.x, b.y, xx, yy, zz, rad);
+//	glVertex3f(xx, yy, zz-rad/2);
+//	glEnd();
 }
 
 void MapEnvironment::GLLabelState(const xyLoc &s, const char *str) const

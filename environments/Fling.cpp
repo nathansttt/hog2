@@ -93,9 +93,9 @@ void FlingBoard::AddFling(unsigned int x, unsigned int y)
 	{
 		SetPiece(y*width+x);
 		//board[y*width+x] = true;
-		locs.push_back(y*width+x);
+		locs.push_back({y*width+x, currId++});
 		
-		std::sort(locs.begin(), locs.end(), std::greater<int>());
+		std::sort(locs.begin(), locs.end(), std::greater<std::pair<int,int>>());
 	}
 }
 
@@ -107,8 +107,8 @@ void FlingBoard::AddFling(unsigned int offset)
 	//assert(board[offset] == false);
 	SetPiece(offset);
 	//board[offset] = true;
-	locs.push_back(offset);
-	std::sort(locs.begin(), locs.end(), std::greater<int>());
+	locs.push_back({offset, currId++});
+	std::sort(locs.begin(), locs.end(), std::greater<std::pair<int,int>>());
 }
 
 void FlingBoard::RemoveFling(unsigned int x, unsigned int y)
@@ -124,12 +124,12 @@ void FlingBoard::RemoveFling(unsigned int offset)
 	//board[offset] = false;
 	for (unsigned int x = 0; x < width*height; x++)
 	{
-		if (locs[x] == offset)
+		if (locs[x].first == offset)
 		{
 			// TODO: just use erase here
 			locs[x] = locs.back();
 			locs.pop_back();
-			std::sort(locs.begin(), locs.end(), std::greater<int>());
+			std::sort(locs.begin(), locs.end(), std::greater<std::pair<int,int>>());
 			return;
 		}
 	}
@@ -157,11 +157,32 @@ bool FlingBoard::CanMove(int which, int x, int y) const
 
 }
 
+int FlingBoard::GetIndexInLocs(int offset) const
+{
+	// could do a binary search; TODO: profile to see if necessary
+	for (int i = 0; i < locs.size(); i++)
+	{
+		if (locs[i].first == offset)
+		{
+			return i;
+		}
+	}
+	assert(!"Didn't find index of location!");
+	return -1;
+}
+
+int FlingBoard::GetIndexInLocs(int x, int y) const
+{
+	return GetIndexInLocs(y*width+x);
+}
+
 void FlingBoard::Move(int which, int x, int y)
 {
 	int xx = which%width;
 	int yy = which/width;
 
+	int index = GetIndexInLocs(xx, yy);
+	
 	int lastx = xx;
 	int lasty = yy;
 	xx+=x; yy += y;
@@ -171,16 +192,20 @@ void FlingBoard::Move(int which, int x, int y)
 		if (HasPiece(yy*width+xx))
 		{
 			SetPiece(lasty*width+lastx);
+			locs[index].first = lasty*width+lastx;
+			index = GetIndexInLocs(xx, yy);
 		}
 		else if (HasObstacle(yy*width+xx))
 		{
 			SetPiece(lasty*width+lastx);
+			locs[index].first = lasty*width+lastx;
 			// no piece can be on the obstacle, so we
 			// let that location be cleared
-			locs.resize(0);
-			for (int t = width*height-1; t >= 0; t--)
-				if (HasPiece(t))//[t])
-					locs.push_back(t);
+			std::sort(locs.begin(), locs.end(), std::greater<std::pair<int,int>>());
+//			locs.resize(0);
+//			for (int t = width*height-1; t >= 0; t--)
+//				if (HasPiece(t))//[t])
+//					locs.push_back(t);
 			return;
 		}
 		else {
@@ -191,11 +216,13 @@ void FlingBoard::Move(int which, int x, int y)
 		xx+=x; yy += y;
 	}
 	ClearPiece(lasty*width+lastx);
+	locs.erase(locs.begin()+index);
+	std::sort(locs.begin(), locs.end(), std::greater<std::pair<int,int>>());
 	//board[lasty*width+lastx] = false;
-	locs.resize(0);
-	for (int t = width*height-1; t >= 0; t--)
-		if (HasPiece(t))//[t])
-			locs.push_back(t);
+//	locs.resize(0);
+//	for (int t = width*height-1; t >= 0; t--)
+//		if (HasPiece(t))//[t])
+//			locs.push_back(t);
 }
 
 int FlingBoard::LocationAfterAction(FlingMove m)
@@ -338,8 +365,20 @@ uint64_t GetCanonicalHash(uint64_t which)
 Fling::Fling()
 {
 	specificGoalLoc = false;
+	specificGoalPanda = false;
 	initBinomial();
 	//		initBinomialSums();
+}
+
+void Fling::SetGoalPanda(int which)
+{
+	specificGoalPanda = true;
+	goalLoc = which;
+}
+
+void Fling::ClearGoalPanda()
+{
+	specificGoalPanda = false;
 }
 
 void Fling::SetGoalLoc(int val)
@@ -356,7 +395,11 @@ void Fling::ClearGoalLoc()
 bool Fling::GoalTest(const FlingBoard &node, const FlingBoard &goal)
 {
 	if (specificGoalLoc)
-		return (node.locs.size() == 1 && node.locs[0] == goalLoc);
+		return (node.locs.size() == 1 && node.locs[0].first == goalLoc);
+	if (specificGoalPanda)
+	{
+		return (node.locs.size() == 1 && node.locs[0].second == goalLoc);
+	}
 	return (node.locs.size() == 1);
 }
 
@@ -366,28 +409,28 @@ void Fling::GetSuccessors(const FlingBoard &nodeID, std::vector<FlingBoard> &nei
 	neighbors.resize(0);
 	for (unsigned int x = 0; x < nodeID.locs.size(); x++)
 	{
-		if (nodeID.CanMove(nodeID.locs[x], 1, 0))
+		if (nodeID.CanMove(nodeID.locs[x].first, 1, 0))
 		{
 			FlingBoard b(nodeID);
-			b.Move(nodeID.locs[x], 1, 0);
+			b.Move(nodeID.locs[x].first, 1, 0);
 			neighbors.push_back(b);
 		}
-		if (nodeID.CanMove(nodeID.locs[x], -1, 0))
+		if (nodeID.CanMove(nodeID.locs[x].first, -1, 0))
 		{
 			FlingBoard b(nodeID);
-			b.Move(nodeID.locs[x], -1, 0);
+			b.Move(nodeID.locs[x].first, -1, 0);
 			neighbors.push_back(b);
 		}
-		if (nodeID.CanMove(nodeID.locs[x], 0, 1))
+		if (nodeID.CanMove(nodeID.locs[x].first, 0, 1))
 		{
 			FlingBoard b(nodeID);
-			b.Move(nodeID.locs[x], 0, 1);
+			b.Move(nodeID.locs[x].first, 0, 1);
 			neighbors.push_back(b);
 		}
-		if (nodeID.CanMove(nodeID.locs[x], 0, -1))
+		if (nodeID.CanMove(nodeID.locs[x].first, 0, -1))
 		{
 			FlingBoard b(nodeID);
-			b.Move(nodeID.locs[x], 0, -1);
+			b.Move(nodeID.locs[x].first, 0, -1);
 			neighbors.push_back(b);
 		}
 	}
@@ -399,27 +442,27 @@ void Fling::GetActions(const FlingBoard &nodeID, std::vector<FlingMove> &actions
 	FlingMove m;
 	for (unsigned int x = 0; x < nodeID.locs.size(); x++)
 	{
-		if (nodeID.CanMove(nodeID.locs[x], 1, 0))
+		if (nodeID.CanMove(nodeID.locs[x].first, 1, 0))
 		{
-			m.startLoc = nodeID.locs[x];
+			m.startLoc = nodeID.locs[x].first;
 			m.dir = kRight;
 			actions.push_back(m);
 		}
-		if (nodeID.CanMove(nodeID.locs[x], -1, 0))
+		if (nodeID.CanMove(nodeID.locs[x].first, -1, 0))
 		{
-			m.startLoc = nodeID.locs[x];
+			m.startLoc = nodeID.locs[x].first;
 			m.dir = kLeft;
 			actions.push_back(m);
 		}
-		if (nodeID.CanMove(nodeID.locs[x], 0, 1))
+		if (nodeID.CanMove(nodeID.locs[x].first, 0, 1))
 		{
-			m.startLoc = nodeID.locs[x];
+			m.startLoc = nodeID.locs[x].first;
 			m.dir = kDown;
 			actions.push_back(m);
 		}
-		if (nodeID.CanMove(nodeID.locs[x], 0, -1))
+		if (nodeID.CanMove(nodeID.locs[x].first, 0, -1))
 		{
-			m.startLoc = nodeID.locs[x];
+			m.startLoc = nodeID.locs[x].first;
 			m.dir = kUp;
 			actions.push_back(m);
 		}
@@ -487,13 +530,18 @@ FlingMove Fling::GetAction(const FlingBoard &s1, const FlingBoard &s2) const
 uint64_t Fling::GetStateHash(const FlingBoard &node) const
 {
 	uint64_t hash = 0;
+	bool onBoard = false;
 	for (unsigned int x = 0; x < node.locs.size(); x++)
 	{
-		hash |= (1ull<<node.locs[x]);
+		hash |= (1ull<<node.locs[x].first);
+		if (node.locs[x].second == goalLoc)
+			onBoard = true;
 //		std::cout << "Storing piece at " << node.locs[x] << std::endl;
 //		printf("0x%llX (out:%d)\n", hash, x);
 	}
-//	printf("0x%llX (out)\n", hash);
+	if (specificGoalPanda && onBoard)
+		hash |= (1ull<<63);
+	//	printf("0x%llX (out)\n", hash);
 	return hash;
 //	return 0;
 }
@@ -558,11 +606,13 @@ void Fling::OpenGLDraw(const FlingBoard&b) const
 		for (double y = 0; y < b.height; y++)
 		{
 			yLoc += diameter;
-			recColor r = getColor(x+y*b.width, 0, b.width*b.height, 9); // 4
-			glColor3f(r.r, r.g, r.b);
 			if (b.HasPiece(x, y))
+			{
+				recColor r = getColor(b.locs[b.GetIndexInLocs(x, y)].second, 0, b.currId, 9); // 4
+				glColor3f(r.r, r.g, r.b);
 				DrawSphere(xLoc, yLoc, 0, radius*0.8);
-			if (b.HasHole(x, y))
+			}
+			else if (b.HasHole(x, y))
 			{
 				glColor3f(0, 0, 0);
 				DrawBox(xLoc, yLoc, 0, radius);
@@ -838,15 +888,15 @@ int64_t Fling::getMaxSinglePlayerRank2(int spots, int numPieces, int64_t firstIn
 int64_t Fling::rankPlayer(FlingBoard &s)
 {
 	int NUM_SPOTS = s.width*s.height;
-	int NUM_PIECES = s.locs.size();
+	int NUM_PIECES = (int)s.locs.size();
 
 	int64_t r2 = 0;
 	int last = NUM_SPOTS-1;
 	for (int x = 0; x < NUM_PIECES; x++)
 	{
-		int64_t tmp = binomialSum(last, NUM_SPOTS-s.locs[NUM_PIECES-1-x]-1, NUM_PIECES-1-x);
+		int64_t tmp = binomialSum(last, NUM_SPOTS-s.locs[NUM_PIECES-1-x].first-1, NUM_PIECES-1-x);
 		r2 += tmp;
-		last = NUM_SPOTS-s.locs[NUM_PIECES-1-x]-1-1;
+		last = NUM_SPOTS-s.locs[NUM_PIECES-1-x].first-1-1;
 	}
 	return r2;
 }
@@ -854,56 +904,56 @@ int64_t Fling::rankPlayer(FlingBoard &s)
 void Fling::rankPlayer(FlingBoard &s, int64_t &index1, int64_t &index2)
 {
 	int NUM_SPOTS = s.width*s.height;
-	int NUM_PIECES = s.locs.size();
+	int NUM_PIECES = (int)s.locs.size();
 	index1 = 0;
 	int tot = NUM_SPOTS-1-(NUM_PIECES-2);
 	int last = tot;
 	for (int x = 0; x < 2; x++)
 	{
-		int64_t tmp = binomialSum(last, tot-s.locs[NUM_PIECES-1-x], (2)-1-x);
+		int64_t tmp = binomialSum(last, tot-s.locs[NUM_PIECES-1-x].first, (2)-1-x);
 		index1 += tmp;
-		last = tot-s.locs[NUM_PIECES-1-x]-1;
+		last = tot-s.locs[NUM_PIECES-1-x].first-1;
 	}
 	
 	index2 = 0;
-	last = NUM_SPOTS-s.locs[NUM_PIECES-1-1]-1-1;
+	last = NUM_SPOTS-s.locs[NUM_PIECES-1-1].first-1-1;
 	for (int x = 2; x < NUM_PIECES; x++)
 	{
-		int64_t tmp = binomialSum(last, NUM_SPOTS-s.locs[NUM_PIECES-1-x]-1, NUM_PIECES-1-x);
+		int64_t tmp = binomialSum(last, NUM_SPOTS-s.locs[NUM_PIECES-1-x].first-1, NUM_PIECES-1-x);
 		index2 += tmp;
-		last = NUM_SPOTS-s.locs[NUM_PIECES-1-x]-1-1;
+		last = NUM_SPOTS-s.locs[NUM_PIECES-1-x].first-1-1;
 	}
 }
 
 void Fling::rankPlayerFirstTwo(FlingBoard &s, int64_t &index1)
 {
 	int NUM_SPOTS = s.width*s.height;
-	int NUM_PIECES = s.locs.size();
+	int NUM_PIECES = (int)s.locs.size();
 
 	index1 = 0;
 	int tot = NUM_SPOTS-1-(NUM_PIECES-2);
 	int last = tot;
 	for (int x = 0; x < 2; x++)
 	{
-		int64_t tmp = binomialSum(last, tot-s.locs[NUM_PIECES-1-x], (2)-1-x);
+		int64_t tmp = binomialSum(last, tot-s.locs[NUM_PIECES-1-x].first, (2)-1-x);
 		index1 += tmp;
-		last = tot-s.locs[NUM_PIECES-1-x]-1;
+		last = tot-s.locs[NUM_PIECES-1-x].first-1;
 	}
 }
 
 void Fling::rankPlayerRemaining(FlingBoard &s, int64_t &index2)
 {
 	int NUM_SPOTS = s.width*s.height;
-	int NUM_PIECES = s.locs.size();
+	int NUM_PIECES = (int)s.locs.size();
 
 	int last;
 	index2 = 0;
-	last = NUM_SPOTS-s.locs[NUM_PIECES-1-1]-1-1;
+	last = NUM_SPOTS-s.locs[NUM_PIECES-1-1].first-1-1;
 	for (int x = 2; x < NUM_PIECES; x++)
 	{
-		int64_t tmp = binomialSum(last, NUM_SPOTS-s.locs[NUM_PIECES-1-x]-1, NUM_PIECES-1-x);
+		int64_t tmp = binomialSum(last, NUM_SPOTS-s.locs[NUM_PIECES-1-x].first-1, NUM_PIECES-1-x);
 		index2 += tmp;
-		last = NUM_SPOTS-s.locs[NUM_PIECES-1-x]-1-1;
+		last = NUM_SPOTS-s.locs[NUM_PIECES-1-x].first-1-1;
 	}
 }
 
@@ -936,7 +986,8 @@ bool Fling::unrankPlayer(int64_t theRank, int pieces, FlingBoard &s)
 		{
 			s.SetPiece(i);
 			//s.board[i] = true;
-			s.locs[ls-1] = i;
+			s.locs[ls-1].first = i;
+			s.locs[ls-1].second = ls-1;
 			ls--;
 		}
 		else {

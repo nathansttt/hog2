@@ -317,11 +317,13 @@ pRecContext getCurrentContext();
 pRecContext GetContext(unsigned int windowID);
 void updateModelView(pRecContext pContextInfo, int currPort);
 void cameraLookAt(GLfloat, GLfloat, GLfloat, float cameraSpeed = 0.1, int port = -1);
+recVec cameraLookingAt(int port = -1);
 void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1, int port = -1);
 void resetCamera();
 point3d GetOGLPos(pRecContext pContextInfo, int x, int y);
 
 void setPortCamera(pRecContext pContextInfo, int currPort);
 void setViewport(pRecContext pContextInfo, int currPort);
+void rotateObject();
 
 #endif

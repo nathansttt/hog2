@@ -557,10 +557,10 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt (pContextInfo->camera[currPort].viewPos.x, pContextInfo->camera[currPort].viewPos.y, pContextInfo->camera[currPort].viewPos.z,
-						 pContextInfo->camera[currPort].viewPos.x + pContextInfo->camera[currPort].viewDir.x,
-						 pContextInfo->camera[currPort].viewPos.y + pContextInfo->camera[currPort].viewDir.y,
-						 pContextInfo->camera[currPort].viewPos.z + pContextInfo->camera[currPort].viewDir.z,
-						 pContextInfo->camera[currPort].viewUp.x, pContextInfo->camera[currPort].viewUp.y ,pContextInfo->camera[currPort].viewUp.z);
+			   pContextInfo->camera[currPort].viewPos.x + pContextInfo->camera[currPort].viewDir.x,
+			   pContextInfo->camera[currPort].viewPos.y + pContextInfo->camera[currPort].viewDir.y,
+			   pContextInfo->camera[currPort].viewPos.z + pContextInfo->camera[currPort].viewDir.z,
+			   pContextInfo->camera[currPort].viewUp.x, pContextInfo->camera[currPort].viewUp.y ,pContextInfo->camera[currPort].viewUp.z);
 	
 	if ((gTrackingContextInfo == pContextInfo) && gTrackBallRotation[0] != 0.0f) // if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
 	{
@@ -571,9 +571,9 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	}
 	// accumlated world rotation via trackball
 	glRotatef (pContextInfo->rotations[currPort].worldRotation[0],
-						 pContextInfo->rotations[currPort].worldRotation[1],
-						 pContextInfo->rotations[currPort].worldRotation[2],
-						 pContextInfo->rotations[currPort].worldRotation[3]);
+			   pContextInfo->rotations[currPort].worldRotation[1],
+			   pContextInfo->rotations[currPort].worldRotation[2],
+			   pContextInfo->rotations[currPort].worldRotation[3]);
 	// object itself rotating applied after camera rotation
 	glRotatef (pContextInfo->rotations[currPort].objectRotation[0],
 						 pContextInfo->rotations[currPort].objectRotation[1],
@@ -619,193 +619,14 @@ void submitTextToBuffer(const char *val)
 	myTextBox->setColor(rc);
 }
 
-/**
- * Displays the info on the screen.
- */
-//static void drawInfo(pRecContext /*pContextInfo*/)
-//{
-//	if (myTextBox)
-//	{
-//		myTextBox->draw();
-//	}
-//
-////#ifdef OS_MAC
-////	//static float msgPresistance = 10.0f;
-////	char cstr [256];
-////	GLint matrixMode, line = 1;
-////	GLboolean depthTest = glIsEnabled (GL_DEPTH_TEST);
-////	GLfloat height, width;
-////	
-////	if (!pContextInfo)
-////		return;
-////	
-////	height = pContextInfo->camera.viewHeight;
-////	width = pContextInfo->camera.viewWidth;
-////
-////	glDisable (GL_DEPTH_TEST); // ensure text is not remove by deoth buffer test.
-////	glEnable (GL_BLEND); // for text fading
-////	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // ditto
-////	
-////	// set orthograhic 1:1  pixel transform in local view coords
-////	glGetIntegerv (GL_MATRIX_MODE, &matrixMode);
-////	glMatrixMode (GL_PROJECTION);
-////	glPushMatrix();
-////	glLoadIdentity ();
-////	glMatrixMode (GL_MODELVIEW);
-////	glPushMatrix();
-////	glLoadIdentity ();
-////	glScalef (2.0 / width, -2.0 /  height, 1.0);
-////	glTranslatef (-width / 2.0, -height / 2.0, 0.0);
-////	// output strings
-////	glColor3f (1.0, 1.0, 1.0);
-////	sprintf (cstr, "Camera at (%0.1f, %0.1f, %0.1f) looking at (%0.1f, %0.1f, %0.1f) with %0.1f aperture", 
-////					 pContextInfo->camera.viewPos.x, pContextInfo->camera.viewPos.y, pContextInfo->camera.viewPos.z,
-////					 pContextInfo->camera.viewDir.x, pContextInfo->camera.viewDir.y, pContextInfo->camera.viewDir.z,
-////					 pContextInfo->camera.aperture);
-////	glRasterPos3d (10, line++ * 12, 0); 
-////	drawCStringGL (cstr, pContextInfo->boldFontList);
-////	//sprintf (cstr, "Trackball Rotation: (%0.1f, %0.2f, %0.2f, %0.2f)", gTrackBallRotation[0], gTrackBallRotation[1], gTrackBallRotation[2], gTrackBallRotation[3]);
-////	glRasterPos3d (10, line++ * 12, 0); 
-////	drawCStringGL (cstr, pContextInfo->regFontList);
-////	sprintf (cstr, "World Rotation: (%0.1f, %0.2f, %0.2f, %0.2f)", pContextInfo->worldRotation[0], pContextInfo->worldRotation[1], pContextInfo->worldRotation[2], pContextInfo->worldRotation[3]);
-////	glRasterPos3d (10, line++ * 12, 0); 
-////	drawCStringGL (cstr, pContextInfo->regFontList);
-////	sprintf (cstr, "Vertices: %ld, Color Scheme: %ld", pContextInfo->subdivisions * pContextInfo->xyRatio * pContextInfo->subdivisions, pContextInfo->colorScheme);
-////	glRasterPos3d (10, line++ * 12, 0); 
-////	drawCStringGL (cstr, pContextInfo->regFontList);
-////	{
-////		GLboolean twoSidedLighting, localViewer;
-////		glGetBooleanv (GL_LIGHT_MODEL_LOCAL_VIEWER, &localViewer);
-////		glGetBooleanv (GL_LIGHT_MODEL_TWO_SIDE, &twoSidedLighting);
-////		if (!pContextInfo->lighting) {
-////			sprintf (cstr, "-- Lighting off");
-////		} else {
-////			if (!twoSidedLighting)
-////				sprintf (cstr, "-- Single Sided Lighting");
-////			else
-////				sprintf (cstr, "-- Two Sided Lighting");
-////			if (localViewer)
-////				sprintf (cstr, "%s: Local Viewer", cstr);
-////		}	
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (cstr, pContextInfo->regFontList);
-////	}
-////
-////	glRasterPos3d (10, line++ * 12, 0); 
-////#ifndef kUseMultiSample
-////	sprintf (cstr, "-- FSAA: Off");
-////#else
-////	switch (pContextInfo->modeFSAA) {
-////	case kFSAAOff:
-////		sprintf (cstr, "-- %d x FSAA: Disabled", kSamples);
-////		break;
-////	case kFSAAFast:
-////		sprintf (cstr, "-- %d x FSAA: Fastest hint", kSamples);
-////		break;
-////	case kFSAANice:
-////		sprintf (cstr, "-- %d x FSAA: Nicest hint", kSamples);
-////		break;
-////	}
-////#endif
-////	drawCStringGL (cstr, pContextInfo->regFontList);
-////
-////	// message string
-////	/*if (pContextInfo->message[0]) {
-////		float currDelta = GetElapsedTime () - pContextInfo->msgTime;
-////		glColor4f (1.0, 1.0, 1.0, (msgPresistance - currDelta) * 0.1);
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (pContextInfo->message, pContextInfo->boldFontList);
-////		if (currDelta > msgPresistance)
-////		pContextInfo->message[0] = 0;
-////		}*/
-////	// global error message
-////	/*if (gErrorMessage[0]) {
-////		float currDelta = GetElapsedTime () - gErrorTime;
-////		glColor4f (1.0, 0.2, 0.2, (msgPresistance - currDelta) * 0.1);
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (gErrorMessage, pContextInfo->boldFontList);
-////		if (currDelta > msgPresistance)
-////		gErrorMessage[0] = 0;
-////		}*/
-////	if (pContextInfo->showCredits) {
-////		char *strName=0, *strAuthor=0, *strX=0, *strY=0, *strZ=0, *strRange=0;
-////		//GetStrings(pContextInfo->surface, &strName, &strAuthor, &strX, &strY, &strZ, &strRange);
-////		line = 10;
-////		glColor3f (1.0f, 1.0f, 0.0f);
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (strName, pContextInfo->boldFontList);
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (strAuthor, pContextInfo->regFontList);
-////		glColor3f (0.7f, 0.7f, 0.0f);
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (strX, pContextInfo->regFontList);
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (strY, pContextInfo->regFontList);
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (strZ, pContextInfo->regFontList);
-////		glRasterPos3d (10, line++ * 12, 0); 
-////		drawCStringGL (strRange, pContextInfo->regFontList);
-////	}
-////	if (pContextInfo->drawHelp) {
-////		line = 4;
-////		glColor3f (0.8f, 0.8f, 0.8f);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("\\: cycle surface type", pContextInfo->regFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("; & ': decrease/increase subdivisions", pContextInfo->regFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("[ & ]: cycle color scheme", pContextInfo->regFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("'l': cycle lighting  'm': cycle full scene anti-aliasing", pContextInfo->regFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("'p': toggle points   'w': toggle wireframe   'f': toggle fill", pContextInfo->regFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("'q': toggle credits  'c': toggle OpenGL caps", pContextInfo->regFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("Cmd-A: animate       Cmd-I: show info", pContextInfo->regFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("Wheel: zoom camera", pContextInfo->boldFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("Middle Button Drag: dolly object", pContextInfo->boldFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("Right Button Drag: pan object", pContextInfo->boldFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("Left Button Drag: rotate object", pContextInfo->boldFontList);
-////		glRasterPos3d (10, height - line++ * 12, 0); 
-////		drawCStringGL ("-- Help ('h') --", pContextInfo->boldFontList);
-////	}
-////
-////	glColor3f (1.0, 1.0, 1.0);
-////	glRasterPos3d (10, height - 27, 0); 
-////	sprintf (cstr, "(%0.0f x %0.0f)", width, height);
-////	drawCStringGL (cstr, pContextInfo->boldFontList);
-////	// render and vendor info
-////	glRasterPos3d (10, height - 15, 0); 
-////	drawCStringGL ((char*) glGetString (GL_RENDERER), pContextInfo->boldFontList);
-////	glRasterPos3d (10, height - 3, 0); 
-////	drawCStringGL ((char*) glGetString (GL_VERSION), pContextInfo->regFontList);
-////	/*if (pContextInfo->drawCaps) {
-////		drawCaps (pContextInfo);
-////		}*/
-////	// reset orginal martices
-////	glPopMatrix(); // GL_MODELVIEW
-////	glMatrixMode (GL_PROJECTION);
-////	glPopMatrix();
-////	glMatrixMode (matrixMode);
-////	if (depthTest)
-////		glEnable (GL_DEPTH_TEST);
-////	//glReportError ();
-////#endif
-//}
-
 
 /**
  * Main OpenGL drawing function.
  */
 void drawGL (pRecContext pContextInfo)
 {
- if (!pContextInfo)
-        return;
+	if (!pContextInfo)
+	 return;
 
 	// clear our drawable
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -923,7 +744,7 @@ void buildGL(void)
 			#endif
 			break;
 	}
-		
+
 	// init GL stuff here
 	glEnable(GL_DEPTH_TEST);
 

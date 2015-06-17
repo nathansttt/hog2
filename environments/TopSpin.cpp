@@ -180,7 +180,7 @@ double TopSpin::HCost(const TopSpinState &state1, const TopSpinState &state2)
 //	{7,2,2,1,5,2,4,9,9,4,8,9,9,6,8,6},
 //	{7,10,7,3,1,5,10,1,8,8,8,2,7,8,5,8}};
 //int costs[16] = {5,4,3,3,10,2,6,8,4,8,6,2,10,6,5,1}; // 1...10
-int costs[16] = {16,1,8,15,22,29,17,14,9,20,26,28,3,16,12,18}; // 1...29
+static int costs[16] = {16,1,8,15,22,29,17,14,9,20,26,28,3,16,12,18}; // 1...29
 double TopSpin::GCost(const TopSpinState &node, const TopSpinAction &act)
 {
 	if (!weighted)

@@ -43,6 +43,11 @@ static bool operator==(const xyLoc &l1, const xyLoc &l2) {
 	return (l1.x == l2.x) && (l1.y == l2.y);
 }
 
+static bool operator!=(const xyLoc &l1, const xyLoc &l2) {
+	return (l1.x != l2.x) || (l1.y != l2.y);
+}
+
+
 enum tDirection {
 	kN=0x8, kS=0x4, kE=0x2, kW=0x1, kNW=kN|kW, kNE=kN|kE,
 	kSE=kS|kE, kSW=kS|kW, kStay=0, kTeleport=kSW|kNE

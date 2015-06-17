@@ -520,13 +520,34 @@ double MNPuzzle::DefaultH(const MNPuzzleState &state) const
 	return man_dist;
 }
 
+static int costs[25] =
+{
+	3, 5, 4, 7, 10, 5, 3, 3, 8, 9, 2, 10, 10, 1, 2, 1, 1, 4, 7, 9, 6, 10, 2, 8, 8
+};
+
+double MNPuzzle::AdditiveGCost(const MNPuzzleState &s, const slideDir &d)
+{
+	int tile;
+	switch (d)
+	{
+		case kLeft: tile = s.puzzle[s.blank-1]; break;
+		case kUp: tile = s.puzzle[s.blank-s.height]; break;
+		case kDown: tile = s.puzzle[s.blank+s.height]; break;
+		case kRight: tile = s.puzzle[s.blank+1]; break;
+	}
+	if (tile == -1)
+		return 0;
+	if (weighted)
+		return costs[s.blank];
+	return 1;
+}
 
 double MNPuzzle::GCost(const MNPuzzleState &a, const MNPuzzleState &b)
 {
 //	int diff = a.blank - b.blank;
 //	
 	if (weighted)
-		return a.blank;
+		return costs[a.blank];
 	return 1;
 }
 
@@ -544,7 +565,7 @@ double MNPuzzle::GCost(const MNPuzzleState &s, const slideDir &d)
 //		cost = 1;
 //	return cost;
 	if (weighted)
-		return s.blank;
+		return costs[s.blank];
 	return 1;
 }
 

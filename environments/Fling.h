@@ -16,9 +16,10 @@ class FlingBoard
 {
 public:
 	FlingBoard(unsigned int len=7, unsigned int high=8) :width(len), height(high)
-	{ board = 0; obstacles = 0; holes = 0; /*board.resize(len*high);*/ }
+	{ board = 0; obstacles = 0; holes = 0; /*board.resize(len*high);*/ currId = 0;}
 	void Reset()
 	{
+		currId = 0;
 		board = 0; locs.resize(0);
 		holes = 0; obstacles = 0;
 	}
@@ -30,17 +31,20 @@ public:
 	void Move(int which, int x, int y);
 	int LocationAfterAction(FlingMove m);
 	int NumPieces() const { return locs.size(); }
-	int GetPieceLocation(int which) const { return locs[which]; }
+	int GetPieceLocation(int which) const { return locs[which].first; }
 	bool HasPiece(int x, int y) const;
 	bool HasPiece(int offset) const;
 	bool HasHole(int x, int y) const;
 	bool HasHole(int offset) const;
 	bool HasObstacle(int x, int y) const;
 	bool HasObstacle(int offset) const;
-	
+	int GetIndexInLocs(int x, int y) const;
+	int GetIndexInLocs(int offset) const;
 	unsigned int width;
 	unsigned int height;
-	std::vector<int> locs;
+	
+	std::vector<std::pair<int, int>> locs;
+	
 	void SetPiece(int which);
 	void ClearPiece(int which);
 	void SetHole(int which);
@@ -53,12 +57,15 @@ public:
 	uint64_t GetRawObstacles() const { return obstacles; }
 	uint64_t GetRawHoles() const { return holes; }
 
+	int currId;
 private:
 	uint64_t board;
 	uint64_t obstacles;
 	uint64_t holes;
 };
 
+inline int GetX(int loc) { return loc%7; }
+inline int GetY(int loc) { return loc/7; }
 void GetMirror(const FlingBoard &in, FlingBoard &out, bool horiz, bool vert);
 void ShiftToCorner(FlingBoard &in);
 uint64_t GetCanonicalHash(uint64_t which);
@@ -147,6 +154,8 @@ public:
 	virtual double GCost(const FlingBoard &node1, const FlingBoard &node2) { return 1; }
 	virtual double GCost(const FlingBoard &node, const FlingMove &act) { return 1; }
 	
+	void SetGoalPanda(int which);
+	void ClearGoalPanda();
 	void SetGoalLoc(int val);
 	void ClearGoalLoc();
 	virtual bool GoalTest(const FlingBoard &node, const FlingBoard &goal);
@@ -184,6 +193,7 @@ public:
 
 private:
 	bool specificGoalLoc;
+	bool specificGoalPanda;
 	int goalLoc;
 	std::vector<int64_t> theSums;
 	std::vector<int64_t> binomials;

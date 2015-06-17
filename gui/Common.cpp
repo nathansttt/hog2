@@ -380,6 +380,17 @@ void SetLighting(unsigned int mode)
 	glEnable(GL_LIGHT0);
 }
 
+void rotateObject()
+{
+	pRecContext pContextInfo = getCurrentContext();
+	if (!pContextInfo)
+		return;
+	pContextInfo->rotations[pContextInfo->currPort].objectRotation[0] += 1;
+	pContextInfo->rotations[pContextInfo->currPort].objectRotation[1] = 0;
+	pContextInfo->rotations[pContextInfo->currPort].objectRotation[2] = 1;
+	pContextInfo->rotations[pContextInfo->currPort].objectRotation[3] = 0;
+}
+
 void resetCamera()
 {
 	pRecContext pContextInfo = getCurrentContext();
@@ -421,6 +432,14 @@ void resetCamera(recCamera * pCamera)
 	pCamera->viewUp.z = -1;
 }
 
+recVec cameraLookingAt(int port)
+{
+	pRecContext pContextInfo = getCurrentContext();
+	if (port == -1)
+		port = pContextInfo->currPort;
+	return pContextInfo->camera[port].viewDir;
+}
+
 
 void cameraLookAt(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
 {
@@ -429,24 +448,15 @@ void cameraLookAt(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
 		return; 
 //	const float cameraSpeed = .1;
 	if (port == -1)
-	{
-		pContextInfo->camera[pContextInfo->currPort].viewDir.x = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.x + cameraSpeed*(x - pContextInfo->camera[pContextInfo->currPort].viewPos.x);
-		pContextInfo->camera[pContextInfo->currPort].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.z + cameraSpeed*(z - pContextInfo->camera[pContextInfo->currPort].viewPos.z);
-		pContextInfo->camera[pContextInfo->currPort].viewDir.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewDir.y + cameraSpeed*(y - pContextInfo->camera[pContextInfo->currPort].viewPos.y);
-
-		pContextInfo->rotations[pContextInfo->currPort].objectRotation[0] *= (1-cameraSpeed);
-		pContextInfo->rotations[pContextInfo->currPort].worldRotation[0] *= (1-cameraSpeed);
-		updateProjection(pContextInfo);
-	}
-	else {
-		pContextInfo->camera[port].viewDir.x = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.x + cameraSpeed*(x - pContextInfo->camera[port].viewPos.x);
-		pContextInfo->camera[port].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.z + cameraSpeed*(z - pContextInfo->camera[port].viewPos.z);
-		pContextInfo->camera[port].viewDir.y = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.y + cameraSpeed*(y - pContextInfo->camera[port].viewPos.y);
-		
-		pContextInfo->rotations[port].objectRotation[0] *= (1-cameraSpeed);
-		pContextInfo->rotations[port].worldRotation[0] *= (1-cameraSpeed);
-		updateProjection(pContextInfo);
-	}
+		port = pContextInfo->currPort;
+	
+	pContextInfo->camera[port].viewDir.x = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.x + cameraSpeed*(x - pContextInfo->camera[port].viewPos.x);
+	pContextInfo->camera[port].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.z + cameraSpeed*(z - pContextInfo->camera[port].viewPos.z);
+	pContextInfo->camera[port].viewDir.y = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.y + cameraSpeed*(y - pContextInfo->camera[port].viewPos.y);
+	
+//	pContextInfo->rotations[port].objectRotation[0] *= (1-cameraSpeed);
+//	pContextInfo->rotations[port].worldRotation[0] *= (1-cameraSpeed);
+	updateProjection(pContextInfo);
 }
 
 void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
@@ -457,17 +467,12 @@ void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
 //	const float cameraSpeed = .1;
 	if (port == -1)
 	{
-		pContextInfo->camera[pContextInfo->currPort].viewPos.x = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.x + cameraSpeed*x;
-		pContextInfo->camera[pContextInfo->currPort].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.y + cameraSpeed*y;
-		pContextInfo->camera[pContextInfo->currPort].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[pContextInfo->currPort].viewPos.z + cameraSpeed*z;
-		updateProjection(pContextInfo);
+		port = pContextInfo->currPort;
 	}
-	else {
-		pContextInfo->camera[port].viewPos.x = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.x + cameraSpeed*x;
-		pContextInfo->camera[port].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.y + cameraSpeed*y;
-		pContextInfo->camera[port].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.z + cameraSpeed*z;
-		updateProjection(pContextInfo);
-	}
+	pContextInfo->camera[port].viewPos.x = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.x + cameraSpeed*x;
+	pContextInfo->camera[port].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.y + cameraSpeed*y;
+	pContextInfo->camera[port].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.z + cameraSpeed*z;
+	updateProjection(pContextInfo);
 }
 
 void setPortCamera(pRecContext pContextInfo, int currPort)

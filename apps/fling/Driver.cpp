@@ -48,6 +48,7 @@ bool UniquelySolvable(FlingBoard &b, int &solutions);
 void AnalyzeEndLocs(int level);
 void ThreadedEndLocAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock);
 void AnalyzeRocks(int level);
+void AnalyzeFinalPieces(int level);
 
 int main(int argc, char* argv[])
 {
@@ -174,9 +175,12 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-removeDups", "-removeDups", "Read states from stdin and remove similar states");
 	InstallCommandLineHandler(MyCLHandler, "-analyze", "-analyze theState", "Perform a move analysis on theState");
 	InstallCommandLineHandler(MyCLHandler, "-fix", "-fix file", "fix the file format");
-	InstallCommandLineHandler(MyCLHandler, "-solveState", "-solveState <state> <goal loc>", "solve state; goal loc is optional - or rocks puts rocks into the board");
+	InstallCommandLineHandler(MyCLHandler, "-solveState", "-solveState <state> <type> <goal loc>", "solve state; type=rocks,panda,final goal loc is only required for panda or final");
+
+	InstallCommandLineHandler(MyCLHandler, "-interSolutionDistance", "-interSolutionDistance <state> <goal loc>", "Measure difficulty of solving a problem");
 	InstallCommandLineHandler(MyCLHandler, "-analyzeEndLocs", "-analyzeEndLocs <level>", "find states with a single way to end with a piece in a square");
 	InstallCommandLineHandler(MyCLHandler, "-analyzeRocks", "-analyzeRocks <level>", "find states with rocks in the middle that have unique solutions");
+	InstallCommandLineHandler(MyCLHandler, "-analyzeFinalPieces", "-analyzeFinalPieces <level>", "Find states with unique locations for final pieces");
 
 	InstallCommandLineHandler(MyCLHandler, "-uniqueSolution", "-uniqueSolution <state>", "Determine if a state has a unique solution");
 	InstallCommandLineHandler(MyCLHandler, "-showSolutionLocs", "-showSolutionLocs <state>", "Show all locations that can be reached at the end.");
@@ -243,6 +247,15 @@ int BitCount(uint64_t value)
 		count++;
 	}
 	return count;
+}
+
+int dist(int loc1, int loc2)
+{
+	int x1 = loc1%7;
+	int y1 = loc1/7;
+	int x2 = loc2%7;
+	int y2 = loc2/7;
+	return abs(x1-x2)+abs(y1-y2);
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -372,6 +385,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		unsigned long long which = strtoull(argument[1], 0, 10);
 		f.GetStateFromHash(which, b);
 
+		std::cout << b << "\n";
 		if (maxNumArgs > 2) // also read goal location
 		{
 			if (strcmp(argument[2], "rocks") == 0)
@@ -379,14 +393,20 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 				b.SetObstacle(24);
 				b.SetObstacle(31);
 			}
-			else {
-				printf("Using goal %d\n", atoi(argument[2]));
-				f.SetGoalLoc(atoi(argument[2]));
+			else if (strcmp(argument[2], "final") == 0)
+			{
+				printf("Using goal %d\n", atoi(argument[3]));
+				f.SetGoalLoc(atoi(argument[3]));
+			}
+			else if (strcmp(argument[2], "panda") == 0)
+			{
+				int which = b.GetIndexInLocs(atoi(argument[3]));
+				printf("Using panda %d - id %d\n", b.locs[which].first, b.locs[which].second);
+				f.SetGoalPanda(b.locs[which].second);
 			}
 		}
 
 		GetSolveActions(b, stateActs);
-		std::cout << b << "\n";
 		for (int x = 0; x < stateActs.size(); x++)
 		{
 			std::cout << stateActs[stateActs.size()-1-x] << " ";
@@ -403,6 +423,140 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			}
 			f.ApplyAction(b, stateActs[t]);
 		}
+		std::cout << "\n";
+		f.GetStateFromHash(which, b);
+		for (int x = 0; x < stateActs.size(); x++)
+		{
+			std::cout << stateActs[stateActs.size()-1-x] << "\n";
+			f.ApplyAction(b, stateActs[stateActs.size()-1-x]);
+			std::cout << b << "\n";
+		}
+	}
+	else if (strcmp(argument[0], "-interSolutionDistance") == 0)
+	{
+		std::vector<FlingMove> stateActs;
+		unsigned long long which = strtoull(argument[1], 0, 10);
+		f.GetStateFromHash(which, b);
+		
+		if (maxNumArgs > 2) // also read goal location
+		{
+			if (strcmp(argument[2], "rocks") == 0)
+			{
+				b.SetObstacle(24);
+				b.SetObstacle(31);
+			}
+			else {
+				printf("Using goal %d\n", atoi(argument[2]));
+				f.SetGoalLoc(atoi(argument[2]));
+			}
+		}
+		
+		GetSolveActions(b, stateActs);
+		std::cout << b << "\n";
+		for (int x = 0; x < stateActs.size(); x++)
+		{
+			std::cout << stateActs[stateActs.size()-1-x] << " ";
+		}
+		std::cout << "\nDIST: ";
+		double sum = 0;
+		double w1 = 5, w2 = 3, w3 = 1, w4 = 1;
+		FlingBoard bNext;
+		for (int t = stateActs.size()-1; t > 1; t--)
+		{
+			f.GetNextState(b, stateActs[t], bNext);
+			// Take the min of:
+			// w1. Distance from end of one move to the start of the next[!]
+			// w2. Distance from end of one move to the end of the next
+			// w3. Distance from the start of one move to the start of the next
+			// w4. Distance from the start of one move to the end of the next
+
+			// opposite direction moves
+			if ((stateActs[t].dir%2) != (stateActs[t-1].dir%2))
+			{
+				int x1, x2, y1, y2, t1, t2;
+				// second move is in the y-axis
+				if (GetX(stateActs[t-1].startLoc) == GetX(bNext.LocationAfterAction(stateActs[t-1])))
+				{
+					x1 = GetX(stateActs[t].startLoc);
+					x2 = GetX(b.LocationAfterAction(stateActs[t]));
+					y1 = GetY(stateActs[t-1].startLoc);
+					y2 = GetY(bNext.LocationAfterAction(stateActs[t-1]));
+					
+					
+					// bounds of first move (x-axis) are outside the second move
+					if (GetX(stateActs[t-1].startLoc) < max(x1, x2) &&
+						GetX(stateActs[t-1].startLoc) > min(x1, x2))
+					{
+						// Need to compare the tree of wrong moves to the
+						// tree of right moves.
+						sum += 8;
+					}
+				}
+				else {
+					x1 = GetX(stateActs[t-1].startLoc);
+					x2 = GetX(bNext.LocationAfterAction(stateActs[t-1]));
+					y1 = GetY(stateActs[t].startLoc);
+					y2 = GetY(b.LocationAfterAction(stateActs[t]));
+					
+					// bounds of first move (y-axis) are outside the second move
+					if (GetY(stateActs[t].startLoc) < max(y1, y2) &&
+						GetY(stateActs[t].startLoc) > min(y1, y2))
+					{
+						// Need to compare the tree of wrong moves to the
+						// tree of right moves.
+						sum += 8;
+					}
+				}
+
+	
+//				if (((min(x1, x2) < GetX(stateActs[t1].startLoc) && max(x1, x2) == GetX(stateActs[t1].startLoc)) ||
+//					 (min(x1, x2) == GetX(stateActs[t1].startLoc) && max(x1, x2) > GetX(stateActs[t1].startLoc)))
+//					&&
+//					((min(y1, y2) < GetY(stateActs[t1].startLoc) && max(y1, y2) == GetY(stateActs[t1].startLoc)) ||
+//					 (min(y1, y2) == GetY(stateActs[t1].startLoc) && max(y1, y2) > GetY(stateActs[t1].startLoc))))
+//				{
+//					sum += 8;
+//				}
+//					min(y1, y2) < GetY(stateActs[t2].startLoc) &&
+//					max(y1, y2) > GetY(stateActs[t2].startLoc))
+
+			}
+//			// I really want to know if the next move interacts piece-wise with no other piece.
+//			// That's a huge penalty.
+//			if ((dist(b.LocationAfterAction(stateActs[t]), stateActs[t-1].startLoc) > 3) &&
+//				(dist(b.LocationAfterAction(stateActs[t]), bNext.LocationAfterAction(stateActs[t-1])) > 3) &&
+//				(dist(stateActs[t].startLoc, stateActs[t-1].startLoc) > 3) &&
+//				(dist(stateActs[t].startLoc, bNext.LocationAfterAction(stateActs[t-1])) > 3))
+//			{
+//				sum += 8;
+//			}
+			
+//			// same piece
+//			if (b.LocationAfterAction(stateActs[t]) == stateActs[t-1].startLoc)
+//			{
+//				sum += 0;
+//			}
+//			// nearby piece
+//			else if (dist(b.LocationAfterAction(stateActs[t]), stateActs[t-1].startLoc) <= 2)
+//			{
+//				sum += 0;
+//			}
+//			else if (dist(b.LocationAfterAction(stateActs[t]), bNext.LocationAfterAction(stateActs[t-1])) <= 2)
+//			{
+//				sum += 0;
+//			}
+//			else {
+//				sum += 4;
+//			}
+			
+			
+//			sum += w1*dist(b.LocationAfterAction(stateActs[t]), stateActs[t-1].startLoc);
+//			sum += w2*dist(b.LocationAfterAction(stateActs[t]), bNext.LocationAfterAction(stateActs[t-1]));
+//			sum += w3*dist(stateActs[t].startLoc, stateActs[t-1].startLoc);
+//			sum += w4*dist(stateActs[t].startLoc, bNext.LocationAfterAction(stateActs[t-1]));
+			f.ApplyAction(b, stateActs[t]);
+		}
+		std::cout << std::setw(2) << sum;
 		std::cout << "\n";
 	}
 	else if (strcmp(argument[0], "-uniqueSolution") == 0)
@@ -431,6 +585,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-analyzeRocks") == 0)
 	{
 		AnalyzeRocks(atoi(argument[1]));
+	}
+	else if (strcmp(argument[0], "-analyzeFinalPieces") == 0)
+	{
+		AnalyzeFinalPieces(atoi(argument[1]));
 	}
 	else if (strcmp(argument[0], "-measureSolutionSimilarity") == 0)
 	{
@@ -1309,11 +1467,16 @@ bool MyClickHandler(unsigned long , int, int, point3d loc, tButtonType button, t
 					}
 					for (unsigned int x = 0; x < acts.size(); x++)
 					{
-						if (acts[x].dir == d && b.locs[acts[x].startLoc] == lasty*b.width+lastx)
+						for (int y = 0; y < b.locs.size(); y++)
 						{
-							printf("Applying action\n");
-							f.ApplyAction(b, acts[x]);
-							break;
+							if (acts[x].dir == d &&
+								b.locs[y].first == acts[x].startLoc &&
+								b.locs[y].first == lasty*b.width+lastx)
+							{
+								printf("Applying action\n");
+								f.ApplyAction(b, acts[x]);
+								return true;
+							}
 						}
 					}
 				}
@@ -1625,13 +1788,15 @@ void RemoveDups(std::vector<uint64_t> &values)
 }
 
 #include <unordered_map>
+template <typename Func>
 int DFS(Fling &f, FlingBoard &b, std::unordered_map<uint64_t, int> &dd,
-		int *goalLocations, bool includedups)
+		Func func, bool includedups)
 {
 	int count = 0;
 	if (b.NumPieces() == 1)
 	{
-		goalLocations[b.GetPieceLocation(0)]++;
+		func(b);
+		//goalLocations[b.GetPieceLocation(0)]++;
 		return 1;
 	}
 	if (!includedups)
@@ -1646,7 +1811,7 @@ int DFS(Fling &f, FlingBoard &b, std::unordered_map<uint64_t, int> &dd,
 	f.GetSuccessors(b, moves);
 	for (int x = 0; x < moves.size(); x++)
 	{
-		count += DFS(f, moves[x], dd, goalLocations, includedups);
+		count += DFS(f, moves[x], dd, func, includedups);
 	}
 	dd[b.GetRawBoard()] = count;
 	return count;
@@ -1657,7 +1822,7 @@ bool UniquelySolvable(FlingBoard &b, int &solutions)
 	std::unordered_map<uint64_t, int> dd;
 	int goalLocations[56];
 	Fling f;
-	solutions = DFS(f, b, dd, goalLocations, false);
+	solutions = DFS(f, b, dd, [&] (const FlingBoard &b) { goalLocations[b.GetPieceLocation(0)]++; }, false);
 	return solutions == 2;
 }
 
@@ -1665,7 +1830,7 @@ bool UniquelySolvable(FlingBoard &b, int &solutions, int *goalLocations)
 {
 	std::unordered_map<uint64_t, int> dd;
 	Fling f;
-	solutions = DFS(f, b, dd, goalLocations, true);
+	solutions = DFS(f, b, dd, [&] (const FlingBoard &b) { goalLocations[b.GetPieceLocation(0)]++; }, true);
 	return solutions == 2;
 }
 
@@ -1802,6 +1967,86 @@ void AnalyzeRocks(int level)
 	for (int x = 0; x < numThreads; x++)
 	{
 		threads.push_back(new std::thread(ThreadedRockAnalyze, level, x*perThread, (x+1)*perThread, &lock));
+	}
+	for (int x = 0; x < threads.size(); x++)
+	{
+		threads[x]->join();
+		delete threads[x];
+	}
+}
+
+void ThreadedFinalPieceAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lock)
+{
+	Fling fling;
+	uint64_t maxVal = fling.getMaxSinglePlayerRank(56, level);
+	FlingBoard theBoard, g;
+	std::vector<FlingBoard> path;
+	BFS<FlingBoard, FlingMove> bfs;
+	
+	for (uint64_t t = start; t < end; t++)
+	{
+		if (0 == t%1000000)
+		{
+			lock->lock();
+			std::cout << t << " of " << maxVal << "\n";
+			lock->unlock();
+		}
+		fling.unrankPlayer(t, level, theBoard);
+		
+		std::unordered_map<uint64_t, int> dd;
+		int finalPiece[14] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		Fling f;
+		int solutions = DFS(f, theBoard, dd, [&] (const FlingBoard &fb) { finalPiece[fb.locs[0].second]++; }, true);
+
+		// don't show solutions which qualify under regular 1-solution rule
+		// [[But, perhaps we could give the winning panda/final space as a clue?]]
+		if (solutions <= 2)
+			continue;
+		int valid = 0;
+		for (int x = 0; x < 14; x++)
+		{
+			if (finalPiece[x] == 1)
+			{
+				valid++;
+			}
+		}
+		if (valid)
+		{
+			lock->lock();
+			if (valid == level)
+			{ std::cout << "AMAZING\n"; }
+			std::cout << "--=-=-=--\n";
+			std::cout << theBoard << "\n";
+			std::cout << "A: ";
+			std::cout << theBoard.GetRawBoard() << " " << path.size();
+
+			BFS<FlingBoard, FlingMove> bfs;
+			bfs.GetPath(&f, theBoard, g, path);
+			uint64_t nodesExpanded = DoLimitedBFS(theBoard, path);
+			printf(" Ratio: %llu %llu %1.4f\n", bfs.GetNodesExpanded(), nodesExpanded, double(bfs.GetNodesExpanded())/double(nodesExpanded));
+
+			
+			for (const auto &x : theBoard.locs)
+			{
+				std::cout << x.first << " " << x.second << " " << finalPiece[x.second] << "\n";
+			}
+			lock->unlock();
+		}
+	}
+}
+
+void AnalyzeFinalPieces(int level)
+{
+	uint64_t maxVal = f.getMaxSinglePlayerRank(56, level);
+	int numThreads = std::thread::hardware_concurrency();
+	std::cout << "Running with " << numThreads << " threads\n";
+	
+	uint64_t perThread = maxVal/numThreads;
+	std::vector<std::thread*> threads;
+	std::mutex lock;
+	for (int x = 0; x < numThreads; x++)
+	{
+		threads.push_back(new std::thread(ThreadedFinalPieceAnalyze, level, x*perThread, (x+1)*perThread, &lock));
 	}
 	for (int x = 0; x < threads.size(); x++)
 	{

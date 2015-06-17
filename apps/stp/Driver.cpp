@@ -59,7 +59,7 @@ void BitDeltaNodesCompressionTest(bool weighted);
 void ModNodesCompressionTest(bool weighted);
 void ModNodesDeltaCompressionTest(bool weighted);
 void DivNodesCompressionTest(bool weighted);
-void DivDeltaNodesCompressionTest(bool weighted);
+void DivNodesDeltaCompressionTest(bool weighted);
 
 MNPuzzle *ts = 0;
 
@@ -96,6 +96,10 @@ void InstallHandlers()
 	InstallMouseClickHandler(MyClickHandler);
 }
 
+MNPuzzleState s(4,3), t(4, 3);
+std::vector<slideDir> moves;
+double v = 1;
+
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 {
 	if (eType == kWindowDestroyed)
@@ -108,42 +112,56 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-		ts = new MNPuzzle(5, 4);
+		ts = new MNPuzzle(4, 3);
+
+		IDAStar<MNPuzzleState, slideDir> ida;
+		for (unsigned int x = 0; x < 500; x++)
+		{
+			std::vector<slideDir> acts;
+			ts->GetActions(s, acts);
+			ts->ApplyAction(s, acts[random()%acts.size()]);
+		}
+		ida.GetPath(ts, s, t, moves);
+		v = 5;
+		std::cout << s << std::endl;
+		for (int x = 0; x < moves.size(); x++)
+		{
+			std::cout << moves[x] << " ";
+		}
+		std::cout << std::endl;
+		t = s;
+		recording = true;
 	}
 }
 
-MNPuzzleState s(5,4), t(5, 4);
-std::vector<slideDir> moves;
-double v = 1;
-slideDir lastMove = kUp;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	ts->OpenGLDraw(s);
-//	v += 0.1;
-//	if (v > 1)
-//	{
-//		s = t;
-//		ts->GetActions(t, moves);
-//		slideDir tmp = 0;
-//		do {
-//			tmp = moves[random()%moves.size()];
-//		} while (tmp == lastMove);
-//		ts->ApplyAction(t, tmp);
-//		lastMove = tmp;
-//		ts->InvertAction(lastMove);
-//		v = 0;
-//	}
-//	ts->OpenGLDraw(t, s, v);
+	//ts->OpenGLDraw(s);
+
+	v += 0.1;
+	if (v > 1 && moves.size() > 0)
+	{
+		t = s;
+		ts->ApplyAction(s, moves[0]);
+		v = 0;
+		moves.erase(moves.begin());
+	}
+	if (v > 1 && moves.size() == 0)
+	{
+		v = 1;
+		recording = false;
+	}
+	ts->OpenGLDraw(s, t, v);
 
 	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
-		static int cnt = 999;
+		static int cnt = 0;
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
 		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
-		cnt--;
+		cnt++;
 	}
 	return;
 	
@@ -233,8 +251,8 @@ void GetSTPInstance(const MNPuzzle &ts, MNPuzzleState &theState, int which)
 
 void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char)
 {
-//	MNPuzzle mnp(16, 4);
-//	MNPuzzleState s1(16, 4);
+//	MNPuzzle mnp(4, 4);
+//	MNPuzzleState s1(4, 4);
 //	mnp.Get_PDB_Size(s1, 1);
 //	mnp.Get_PDB_Size(s1, 15);
 //	std::vector<int> distinct1 = {1, 2, 3};
@@ -265,26 +283,28 @@ void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char)
 //	DivValueCompressionTest();
 //	BitDeltaValueCompressionTest();
 
-	bool weighted = true;
+	bool weighted = false;
 
-	BaseHeuristicTest(weighted);
+//	BaseHeuristicTest(weighted);
 //	FractionalModNodesCompressionTest(weighted);
-//	FractionalNodesCompressionTest(weighted);
+	FractionalNodesCompressionTest(weighted);
 //	BitDeltaNodesCompressionTest(weighted);
 //	DivNodesCompressionTest(weighted);
+//	DivNodesDeltaCompressionTest(weighted);
 //	ModNodesCompressionTest(weighted);
+//	ModNodesDeltaCompressionTest(weighted);
 
 	exit(0);
 }
 
 void STPTest(unsigned long , tKeyboardModifier , char)
 {
-	int N = 16, k = 4;
+	int N = 4, k = 4;
 	std::vector<int> tiles;
 
-	MNPuzzle mnp(N, k);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzle mnp(4, 4);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 
 //	if (ts->PDB.size() == 0)
 //	{
@@ -354,18 +374,19 @@ bool fileExists(const char *name)
 
 #pragma mark pdb building code
 #include <string>
-const int N = 16, k = 4;
+const int N = 4, k = 4;
 const char *prefix = "/Users/nathanst/Desktop/";
-const char *getPDB7a(bool weighted)
-{
-	static std::string s;
-	s = prefix;
-	if (!weighted)
-		s += "STP-0-6.pdb";
-	else
-		s += "wSTP-0-6.pdb";
-	return s.c_str();
-}
+
+//const char *getPDB7a(bool weighted)
+//{
+//	static std::string s;
+//	s = prefix;
+//	if (!weighted)
+//		s += "STP-0-6.pdb";
+//	else
+//		s += "wSTP-0-6.pdb";
+//	return s.c_str();
+//}
 
 const char *getPDB8a(bool weighted)
 {
@@ -378,53 +399,52 @@ const char *getPDB8a(bool weighted)
 	return s.c_str();
 }
 
-const char *getPDB7b(bool weighted)
-{
-	static std::string s;
-	s = prefix;
-	if (!weighted)
-		s += "STP-8-14.pdb";
-	else
-		s += "wSTP-8-14.pdb";
-	return s.c_str();
-}
 const char *getPDB8b(bool weighted)
 {
 	static std::string s;
 	s = prefix;
 	if (!weighted)
-		s += "STP-8-15.pdb";
+		s += "STP-0+8-14.pdb";
 	else
-		s += "wSTP-8-15.pdb";
+		s += "wSTP-0+8-14.pdb";
 	return s.c_str();
 }
+const char *getPDB1b(bool weighted)
+{
+	static std::string s;
+	s = prefix;
+	if (!weighted)
+		s += "STP-0+15.pdb";
+	else
+		s += "wSTP-0+15.pdb";
+	return s.c_str();
+}
+
+const char *getPDB9b(bool weighted)
+{
+	static std::string s;
+	s = prefix;
+	if (!weighted)
+		s += "STP-0+8-15.pdb";
+	else
+		s += "wSTP-0+8-15.pdb";
+	return s.c_str();
+}
+
 void BuildPDBs(bool aPDBs, bool bPDBs, bool weighted)
 {
-	MNPuzzle mnp(N, k);
+	MNPuzzle mnp(4, 4);
 	mnp.SetWeighted(weighted);
 	std::vector<int> tiles;
 	
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	
 	mnp.StoreGoal(g);
 	mnp.ClearPDBs();
 
 	if (aPDBs)
 	{
-		if (!fileExists(getPDB7a(weighted)))
-		{
-			g.Reset();
-			tiles.resize(0);
-			//for (int x = 0; x <= 12; x+=2)
-			for (int x = 0; x <= 6; x++)
-				tiles.push_back(x);
-			
-			mnp.Build_PDB(g, tiles, getPDB7a(weighted),
-						  std::thread::hardware_concurrency(), false);
-			mnp.ClearPDBs();
-		}
-		
 		if (!fileExists(getPDB8a(weighted)))
 		{
 			g.Reset();
@@ -434,36 +454,50 @@ void BuildPDBs(bool aPDBs, bool bPDBs, bool weighted)
 				tiles.push_back(x);
 			
 			mnp.Build_PDB(g, tiles, getPDB8a(weighted),
-						  std::thread::hardware_concurrency(), false);
+						  std::thread::hardware_concurrency(), true);
 			mnp.ClearPDBs();
 		}
 	}
 	
 	if (bPDBs)
 	{
-		if (!fileExists(getPDB7b(weighted)))
-		{
-			g.Reset();
-			tiles.resize(0);
-			for (int x = 8; x <= 14; x++)
-				//for (int x = 1; x <= 14; x+=2)
-				tiles.push_back(x);
-			
-			mnp.Build_PDB(g, tiles, getPDB7b(weighted),
-						  std::thread::hardware_concurrency(), false);
-			mnp.ClearPDBs();
-		}
-		
 		if (!fileExists(getPDB8b(weighted)))
 		{
 			g.Reset();
 			tiles.resize(0);
+			tiles.push_back(0);
+			for (int x = 8; x <= 14; x++)
+				//for (int x = 1; x <= 14; x+=2)
+				tiles.push_back(x);
+			
+			mnp.Build_PDB(g, tiles, getPDB8b(weighted),
+						  std::thread::hardware_concurrency(), true);
+			mnp.ClearPDBs();
+		}
+
+		if (!fileExists(getPDB1b(weighted)))
+		{
+			g.Reset();
+			tiles.resize(0);
+			tiles.push_back(0);
+			tiles.push_back(15);
+			
+			mnp.Build_PDB(g, tiles, getPDB1b(weighted),
+						  std::thread::hardware_concurrency(), true);
+			mnp.ClearPDBs();
+		}
+
+		if (!fileExists(getPDB9b(weighted)))
+		{
+			g.Reset();
+			tiles.resize(0);
+			tiles.push_back(0);
 			for (int x = 8; x <= 15; x++)
 			//for (int x = 1; x <= 15; x+=2)
 				tiles.push_back(x);
 			
-			mnp.Build_PDB(g, tiles, getPDB8b(weighted),
-						  std::thread::hardware_concurrency(), false);
+			mnp.Build_PDB(g, tiles, getPDB9b(weighted),
+						  std::thread::hardware_concurrency(), true);
 			mnp.ClearPDBs();
 		}
 	}
@@ -475,10 +509,10 @@ void ModValueCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
-	MNPuzzle mnp(N, k);
+	MNPuzzle mnp(4, 4);
 	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	
 	mnp.StoreGoal(g);
 	mnp.ClearPDBs();
@@ -502,164 +536,164 @@ void ModValueCompressionTest(bool weighted)
 
 void ModValueDeltaCompressionTest(bool weighted)
 {
-	std::vector<int> tiles;
-	
-	MNPuzzle mnp(N, k);
-	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
-	
-	mnp.StoreGoal(g);
-	mnp.ClearPDBs();
-	
-	BuildPDBs(true, false, weighted);
-	
-	for (int x = 2; x <= 10; x++)
-	{
-		g.Reset();
-		printf("==>Compressing (mod-delta) by factor of %d\n", x);
-		mnp.ClearPDBs();
-		mnp.Load_Regular_PDB(getPDB7a(weighted), g, true);
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-
-		uint64_t oldSize = mnp.Get_PDB_Size(g, 8);
-		uint64_t newSize = oldSize / x;
-		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
-		mnp.Delta_Compress_PDB(g, 1, true);
-		mnp.Mod_Compress_PDB(1, newSize, true);
-//		mnp.lookups.push_back({kLeafModCompress, -0, -0, -0});
-//		MeasureIR(mnp);
-	}
+//	std::vector<int> tiles;
+//	
+//	MNPuzzle mnp(4, 4);
+//	mnp.SetWeighted(weighted);
+//	MNPuzzleState s(4, 4);
+//	MNPuzzleState g(4, 4);
+//	
+//	mnp.StoreGoal(g);
+//	mnp.ClearPDBs();
+//	
+//	BuildPDBs(true, false, weighted);
+//	
+//	for (int x = 2; x <= 10; x++)
+//	{
+//		g.Reset();
+//		printf("==>Compressing (mod-delta) by factor of %d\n", x);
+//		mnp.ClearPDBs();
+//		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
+//		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+//
+//		uint64_t oldSize = mnp.Get_PDB_Size(g, 9);
+//		uint64_t newSize = oldSize / x;
+//		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
+//		mnp.Delta_Compress_PDB(g, 1, true);
+//		mnp.Mod_Compress_PDB(1, newSize, true);
+////		mnp.lookups.push_back({kLeafModCompress, -0, -0, -0});
+////		MeasureIR(mnp);
+//	}
 }
 
 void DivValueCompressionTest(bool weighted)
 {
-	std::vector<int> tiles;
-	
-	MNPuzzle mnp(N, k);
-	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
-	
-	mnp.StoreGoal(g);
-	mnp.ClearPDBs();
-	
-	if (!fileExists(getPDB7a(weighted)))
-	{
-		g.Reset();
-		tiles.resize(0);
-		for (int x = 0; x <= 6; x++)
-			tiles.push_back(x);
-		
-		mnp.Build_PDB(g, tiles, getPDB7a(weighted),
-					  std::thread::hardware_concurrency(), false);
-		mnp.ClearPDBs();
-	}
-	
-	if (!fileExists(getPDB8a(weighted)))
-	{
-		g.Reset();
-		tiles.resize(0);
-		for (int x = 0; x < 8; x++)
-			tiles.push_back(x);
-		
-		mnp.Build_PDB(g, tiles, getPDB8a(weighted),
-					  std::thread::hardware_concurrency(), false);
-		mnp.ClearPDBs();
-	}
-	
-	for (int x = 2; x <= 10; x++)
-	{
-		g.Reset();
-		printf("==>Compressing (div) by factor of %d\n", x);
-		mnp.ClearPDBs();
-		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
-		mnp.Min_Compress_PDB(0, x, true);
-		mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
-		MeasureIR(mnp);
-	}
+//	std::vector<int> tiles;
+//	
+//	MNPuzzle mnp(4, 4);
+//	mnp.SetWeighted(weighted);
+//	MNPuzzleState s(4, 4);
+//	MNPuzzleState g(4, 4);
+//	
+//	mnp.StoreGoal(g);
+//	mnp.ClearPDBs();
+//	
+//	if (!fileExists(getPDB7a(weighted)))
+//	{
+//		g.Reset();
+//		tiles.resize(0);
+//		for (int x = 0; x <= 6; x++)
+//			tiles.push_back(x);
+//		
+//		mnp.Build_PDB(g, tiles, getPDB7a(weighted),
+//					  std::thread::hardware_concurrency(), false);
+//		mnp.ClearPDBs();
+//	}
+//	
+//	if (!fileExists(getPDB8a(weighted)))
+//	{
+//		g.Reset();
+//		tiles.resize(0);
+//		for (int x = 0; x < 8; x++)
+//			tiles.push_back(x);
+//		
+//		mnp.Build_PDB(g, tiles, getPDB8a(weighted),
+//					  std::thread::hardware_concurrency(), false);
+//		mnp.ClearPDBs();
+//	}
+//	
+//	for (int x = 2; x <= 10; x++)
+//	{
+//		g.Reset();
+//		printf("==>Compressing (div) by factor of %d\n", x);
+//		mnp.ClearPDBs();
+//		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
+//		mnp.Min_Compress_PDB(0, x, true);
+//		mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
+//		MeasureIR(mnp);
+//	}
 }
 
 void DivDeltaValueCompressionTest(bool weighted)
 {
-	std::vector<int> tiles;
-	
-	MNPuzzle mnp(N, k);
-	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
-	
-	mnp.StoreGoal(g);
-	mnp.ClearPDBs();
-	
-	if (!fileExists(getPDB7a(weighted)))
-	{
-		g.Reset();
-		tiles.resize(0);
-		for (int x = 0; x <= 6; x++)
-			tiles.push_back(x);
-		
-		mnp.Build_PDB(g, tiles, getPDB7a(weighted),
-					  std::thread::hardware_concurrency(), false);
-		mnp.ClearPDBs();
-	}
-	
-	if (!fileExists(getPDB8a(weighted)))
-	{
-		g.Reset();
-		tiles.resize(0);
-		for (int x = 0; x < 8; x++)
-			tiles.push_back(x);
-		
-		mnp.Build_PDB(g, tiles, getPDB8a(weighted),
-					  std::thread::hardware_concurrency(), false);
-		mnp.ClearPDBs();
-	}
-	
-	for (int x = 2; x <= 10; x++)
-	{
-		g.Reset();
-		printf("==>Compressing (div delta) by factor of %d\n", x);
-		mnp.ClearPDBs();
-		mnp.Load_Regular_PDB(getPDB7a(weighted), g, false);
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-
-		mnp.Load_Regular_PDB(getPDB8a(weighted), g, false);
-		mnp.Delta_Compress_PDB(g, 1, true);
-		mnp.Min_Compress_PDB(1, x, true);
-		//MeasureIR(mnp);
-	}
+//	std::vector<int> tiles;
+//	
+//	MNPuzzle mnp(4, 4);
+//	mnp.SetWeighted(weighted);
+//	MNPuzzleState s(4, 4);
+//	MNPuzzleState g(4, 4);
+//	
+//	mnp.StoreGoal(g);
+//	mnp.ClearPDBs();
+//	
+//	if (!fileExists(getPDB7a(weighted)))
+//	{
+//		g.Reset();
+//		tiles.resize(0);
+//		for (int x = 0; x <= 6; x++)
+//			tiles.push_back(x);
+//		
+//		mnp.Build_PDB(g, tiles, getPDB7a(weighted),
+//					  std::thread::hardware_concurrency(), false);
+//		mnp.ClearPDBs();
+//	}
+//	
+//	if (!fileExists(getPDB8a(weighted)))
+//	{
+//		g.Reset();
+//		tiles.resize(0);
+//		for (int x = 0; x < 8; x++)
+//			tiles.push_back(x);
+//		
+//		mnp.Build_PDB(g, tiles, getPDB8a(weighted),
+//					  std::thread::hardware_concurrency(), false);
+//		mnp.ClearPDBs();
+//	}
+//	
+//	for (int x = 2; x <= 10; x++)
+//	{
+//		g.Reset();
+//		printf("==>Compressing (div delta) by factor of %d\n", x);
+//		mnp.ClearPDBs();
+//		mnp.Load_Regular_PDB(getPDB7a(weighted), g, false);
+//		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+//
+//		mnp.Load_Regular_PDB(getPDB8a(weighted), g, false);
+//		mnp.Delta_Compress_PDB(g, 1, true);
+//		mnp.Min_Compress_PDB(1, x, true);
+//		//MeasureIR(mnp);
+//	}
 }
 
 void BitDeltaValueCompressionTest(bool weighted)
 {
-	std::vector<int> tiles;
-	
-	MNPuzzle mnp(N, k);
-	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
-	
-	mnp.StoreGoal(g);
-	mnp.ClearPDBs();
-	
-	BuildPDBs(true, false, weighted);
-	
-	for (int x = 1; x <= 4; x*=2)
-	{
-		g.Reset();
-		printf("==>Compressing (value-range-delta) to %d bits\n", x);
-		mnp.ClearPDBs();
-		mnp.Load_Regular_PDB(getPDB7a(weighted), g, false);
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		
-		mnp.Load_Regular_PDB(getPDB8a(weighted), g, false);
-		mnp.Delta_Compress_PDB(g, 1, true);
-		std::vector<int> cutoffs;
-		GetBitValueCutoffs(cutoffs, x);
-		mnp.Value_Compress_PDB(1, cutoffs, true);
-		//MeasureIR(mnp);
-	}
+//	std::vector<int> tiles;
+//	
+//	MNPuzzle mnp(4, 4);
+//	mnp.SetWeighted(weighted);
+//	MNPuzzleState s(4, 4);
+//	MNPuzzleState g(4, 4);
+//	
+//	mnp.StoreGoal(g);
+//	mnp.ClearPDBs();
+//	
+//	BuildPDBs(true, false, weighted);
+//	
+//	for (int x = 1; x <= 4; x*=2)
+//	{
+//		g.Reset();
+//		printf("==>Compressing (value-range-delta) to %d bits\n", x);
+//		mnp.ClearPDBs();
+//		mnp.Load_Regular_PDB(getPDB7a(weighted), g, false);
+//		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+//		
+//		mnp.Load_Regular_PDB(getPDB8a(weighted), g, false);
+//		mnp.Delta_Compress_PDB(g, 1, true);
+//		std::vector<int> cutoffs;
+//		GetBitValueCutoffs(cutoffs, x);
+//		mnp.Value_Compress_PDB(1, cutoffs, true);
+//		//MeasureIR(mnp);
+//	}
 }
 
 #pragma mark node expansion tests
@@ -668,35 +702,49 @@ void BaseHeuristicTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
-	MNPuzzle mnp(N, k);
+	MNPuzzle mnp(4, 4);
 	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	
 	mnp.StoreGoal(g);
 	
 	mnp.ClearPDBs();
 	BuildPDBs(true, true, weighted);
-	
+
+	if (0)
 	{
+		printf("==>Solving with MD\n");
 		mnp.ClearPDBs();
-		mnp.Load_Regular_PDB(getPDB7a(weighted), g, true);
-		mnp.Load_Regular_PDB(getPDB7b(weighted), g, true);
-		mnp.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
-		std::string desc = "BASE7-";
+		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		std::string desc = "MD-";
 		Test(mnp, desc.c_str());
 	}
-	
+
 	{
+		printf("==>Solving with 8-piece additive PDBs\n");
 		mnp.ClearPDBs();
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
-		mnp.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.Load_Regular_PDB(getPDB1b(weighted), g, true);
+		mnp.lookups.push_back({kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
 		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
 		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
 		std::string desc = "BASE8-";
+		Test(mnp, desc.c_str());
+	}
+	
+	if (0)
+	{
+		printf("==>Solving with 8+9-piece additive PDBs\n");
+		mnp.ClearPDBs();
+		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
+		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		std::string desc = "BASE9-";
 		Test(mnp, desc.c_str());
 	}
 }
@@ -706,10 +754,10 @@ void FractionalNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
-	MNPuzzle mnp(N, k);
+	MNPuzzle mnp(4, 4);
 	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	
 	mnp.StoreGoal(g);
 	mnp.ClearPDBs();
@@ -721,33 +769,61 @@ void FractionalNodesCompressionTest(bool weighted)
 		g.Reset();
 		printf("==>Fractional (contiguous): Reducing by factor of %d\n", x);
 		mnp.ClearPDBs();
-		uint64_t oldSize = mnp.Get_PDB_Size(g, 8);
+		uint64_t oldSize = mnp.Get_PDB_Size(g, 9);
 		uint64_t newSize = oldSize / x;
-		mnp.Load_Regular_PDB(getPDB7a(weighted), g, true);
-		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
-		mnp.Load_Regular_PDB(getPDB7b(weighted), g, true);
-		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
-		mnp.Fractional_Compress_PDB(1, newSize, true);
+		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true); // pdb 0
+		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true); // pdb 1
+		mnp.Load_Regular_PDB(getPDB1b(weighted), g, true); // pdb 2
+		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true); // pdb 3
 		mnp.Fractional_Compress_PDB(3, newSize, true);
-		mnp.lookups.push_back({kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kMaxNode, 2, 3, -0}); // max of 2 children starting at 3 in the tree
 		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafFractionalCompress, -0, -0, 1});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
+		mnp.lookups.push_back({kAddNode, 2, 5, -0});
 		mnp.lookups.push_back({kLeafFractionalCompress, -0, -0, 3});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
 		std::string desc = "FCT-C-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(mnp, desc.c_str());
 	}
+
+//	for (int x = 2; x <= 10; x++)
+//	{
+//		g.Reset();
+//		printf("==>Fractional (contiguous over MD): Reducing by factor of %d\n", x);
+//		mnp.ClearPDBs();
+//		uint64_t oldSize = mnp.Get_PDB_Size(g, 9);
+//		uint64_t newSize = oldSize / x;
+//		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+//
+//		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true); // pdb 0
+//		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true); // pdb 1
+//		mnp.Delta_Compress_PDB(g, 0, true);
+//		mnp.Delta_Compress_PDB(g, 1, true);
+//		mnp.Fractional_Compress_PDB(1, newSize, true);
+//		
+//		mnp.lookups.resize(0);
+//		mnp.lookups.push_back({kAddNode, 3, 1, -0}); // max of 3 children starting at 1 in the tree
+//		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+//		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+//		mnp.lookups.push_back({kLeafFractionalCompress, -0, -0, 1});
+//		std::string desc = "FCT-MD-C-";
+//		desc += ('0'+x/10);
+//		desc += ('0'+x%10);
+//		Test(mnp, desc.c_str());
+//	}
 }
 
 void FractionalModNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
-	MNPuzzle mnp(N, k);
+	MNPuzzle mnp(4, 4);
 	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	
 	mnp.StoreGoal(g);
 	mnp.ClearPDBs();
@@ -759,21 +835,52 @@ void FractionalModNodesCompressionTest(bool weighted)
 		g.Reset();
 		printf("==>Fractional MOD: Reducing by factor of %d\n", x);
 		mnp.ClearPDBs();
-		mnp.Load_Regular_PDB(getPDB7a(weighted), g, true);
-		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
-		mnp.Load_Regular_PDB(getPDB7b(weighted), g, true);
-		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
-		mnp.Fractional_Mod_Compress_PDB(1, x, true);
+		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true); // pdb 0
+		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true); // pdb 1
+		mnp.Load_Regular_PDB(getPDB1b(weighted), g, true); // pdb 2
+		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true); // pdb 3
 		mnp.Fractional_Mod_Compress_PDB(3, x, true);
-		mnp.lookups.push_back({kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kMaxNode, 2, 3, -0}); // max of 2 children starting at 3 in the tree
 		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 1}); // factor, -- , id
-		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
+		mnp.lookups.push_back({kAddNode, 2, 5, -0});
 		mnp.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 3});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
+		
 		std::string desc = "FCT-M-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(mnp, desc.c_str());
 	}
+
+
+//  over MD ineffective
+//	for (int x = 2; x <= 10; x++)
+//	{
+//		g.Reset();
+//		printf("==>Fractional MOD over MD: Reducing by factor of %d\n", x);
+//		mnp.ClearPDBs();
+//		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+//		
+//		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true); // pdb 0
+//		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true); // pdb 1
+//		mnp.Delta_Compress_PDB(g, 0, true);
+//		mnp.Delta_Compress_PDB(g, 1, true);
+//		mnp.Fractional_Mod_Compress_PDB(1, x, true);
+//		
+//		mnp.lookups.resize(0);
+//		mnp.lookups.push_back({kAddNode, 2, 1, -0});
+//		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+//		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+//		mnp.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 1});
+//		
+//		std::string desc = "FCT-MD-M-";
+//		desc += ('0'+x/10);
+//		desc += ('0'+x%10);
+//		Test(mnp, desc.c_str());
+//	}
+
 }
 
 
@@ -781,10 +888,10 @@ void ModNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
-	MNPuzzle mnp(N, k);
+	MNPuzzle mnp(4, 4);
 	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	
 	mnp.StoreGoal(g);
 	mnp.ClearPDBs();
@@ -799,58 +906,67 @@ void ModNodesCompressionTest(bool weighted)
 		uint64_t oldSize = mnp.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
-		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
-		mnp.Mod_Compress_PDB(0, newSize, true);
+		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
 		mnp.Mod_Compress_PDB(1, newSize, true);
-		mnp.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafModCompress, -0, -0, 0});
+		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
 		mnp.lookups.push_back({kLeafModCompress, -0, -0, 1});
 
 		std::string desc = "MOD-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(mnp, desc.c_str());
 	}
 }
 
 void ModNodesDeltaCompressionTest(bool weighted)
 {
-//	std::vector<int> tiles;
-//	
-//	MNPuzzle mnp(N, k);
-//	MNPuzzleState s(N, k);
-//	MNPuzzleState g(N, k);
-//	
-//	mnp.StoreGoal(g);
-//	mnp.ClearPDBs();
-//	
-//	BuildPDBs(true, true, weighted);
-//	
-//	for (int x = 2; x <= 10; x++)
-//	{
-//		g.Reset();
-//		printf("==>MOD Compressing by factor of %d\n", x);
-//		mnp.ClearPDBs();
-//		mnp.Load_Regular_PDB(getPDB7a(weighted), g, true);
-//		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-//		
-//		uint64_t oldSize = mnp.Get_PDB_Size(g, 8);
-//		uint64_t newSize = oldSize / x;
-//		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
-//		mnp.Delta_Compress_PDB(g, 1, true);
-//		mnp.Mod_Compress_PDB(1, newSize, true);
-//		//		mnp.lookups.push_back({kLeafModCompress, -0, -0, -0});
-//		//		MeasureIR(mnp);
-//	}
+	std::vector<int> tiles;
+	
+	MNPuzzle mnp(4, 4);
+	mnp.SetWeighted(weighted);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
+	
+	mnp.StoreGoal(g);
+	mnp.ClearPDBs();
+	
+	BuildPDBs(true, true, weighted);
+	
+	for (int x = 2; x <= 10; x++)
+	{
+		g.Reset();
+		printf("==>Compressing (mod+delta) by factor of %d\n", x);
+		mnp.ClearPDBs();
+		uint64_t oldSize = mnp.Get_PDB_Size(g, 8);
+		uint64_t newSize = oldSize / x;
+		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
+		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.Delta_Compress_PDB(g, 0, true);
+		mnp.Delta_Compress_PDB(g, 1, true);
+		mnp.Mod_Compress_PDB(1, newSize, true);
+		mnp.lookups.clear();
+		mnp.lookups.push_back({kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({kLeafModCompress, -0, -0, 1});
+		
+		std::string desc = "MOD-D-";
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
+		Test(mnp, desc.c_str());
+	}
 }
 
 void DivNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
-	MNPuzzle mnp(N, k);
+	MNPuzzle mnp(4, 4);
 	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	
 	mnp.StoreGoal(g);
 	mnp.ClearPDBs();
@@ -863,47 +979,90 @@ void DivNodesCompressionTest(bool weighted)
 		printf("==>Compressing (div) by factor of %d\n", x);
 		mnp.ClearPDBs();
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
-		mnp.Min_Compress_PDB(0, x, true);
-		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
+		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
 		mnp.Min_Compress_PDB(1, x, true);
 
-		mnp.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
+		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
 		mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
 
 		std::string desc = "DIV-";
-		desc += ('0'+x);
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(mnp, desc.c_str());
 		//MeasureIR(mnp);
 	}
 }
 
-void DivDeltaNodesCompressionTest(bool weighted)
+void DivNodesDeltaCompressionTest(bool weighted)
 {
-//	std::vector<int> tiles;
-//	
-//	MNPuzzle mnp(N, k);
-//	MNPuzzleState s(N, k);
-//	MNPuzzleState g(N, k);
-//	
-//	mnp.StoreGoal(g);
-//	mnp.ClearPDBs();
-//	
-//	BuildPDBs(true, true, weighted);
-//	
-//	for (int x = 2; x <= 10; x++)
-//	{
-//		g.Reset();
-//		printf("==>Compressing by factor of %d\n", x);
-//		mnp.ClearPDBs();
-//		mnp.Load_Regular_PDB(getPDB7a(weighted), g, false);
-//		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-//		
-//		mnp.Load_Regular_PDB(getPDB8a(weighted), g, false);
-//		mnp.Delta_Compress_PDB(g, 1, true);
-//		mnp.Min_Compress_PDB(1, x, true);
-//		//MeasureIR(mnp);
-//	}
+	std::vector<int> tiles;
+	
+	MNPuzzle mnp(4, 4);
+	mnp.SetWeighted(weighted);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
+	
+	mnp.StoreGoal(g);
+	mnp.ClearPDBs();
+	
+	BuildPDBs(true, true, weighted);
+
+	if (0)
+	{
+		for (int x = 2; x <= 10; x++)
+		{
+			g.Reset();
+			printf("==>Compressing (div+delta) by factor of %d\n", x);
+			mnp.ClearPDBs();
+			mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
+			mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
+			mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+			mnp.Delta_Compress_PDB(g, 0, true);
+			mnp.Delta_Compress_PDB(g, 1, true);
+			mnp.Min_Compress_PDB(1, x, true);
+			mnp.lookups.clear();
+			mnp.lookups.push_back({kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
+			mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+			mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+			mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
+			
+			std::string desc = "MIN-D-";
+			desc += ('0'+x/10);
+			desc += ('0'+x%10);
+			Test(mnp, desc.c_str());
+		}
+	}
+	
+	for (int x = 2; x <= 10; x++)
+	{
+		g.Reset();
+		printf("==>Compressing (div+delta) by factor of %d\n", x);
+		mnp.ClearPDBs();
+		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
+		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
+		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
+		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.Delta_Compress_PDB(g, 0, true);
+		mnp.Delta_Compress_PDB(g, 1, true);
+		mnp.Delta_Compress_PDB(g, 2, true);
+		mnp.lookups.clear();
+		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.Delta_Compress_PDB(g, 2, true);
+		mnp.Min_Compress_PDB(2, x, true);
+
+		mnp.lookups.clear();
+		mnp.lookups.push_back({kAddNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 2});
+		
+		std::string desc = "MIN-D8-";
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
+		Test(mnp, desc.c_str());
+	}
 }
 
 
@@ -911,58 +1070,96 @@ void BitDeltaNodesCompressionTest(bool weighted)
 {
 	std::vector<int> tiles;
 	
-	MNPuzzle mnp(N, k);
+	MNPuzzle mnp(4, 4);
 	mnp.SetWeighted(weighted);
-	MNPuzzleState s(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	
 	mnp.StoreGoal(g);
 	mnp.ClearPDBs();
 	
 	BuildPDBs(true, true, weighted);
 	
-	for (int x = 1; x <= 4; x*=2)
+	if (0)
+	{
+		for (int x = 1; x <= 4; x*=2)
+		{
+			std::vector<int> cutoffs;
+			GetBitValueCutoffs(cutoffs, x);
+			
+			g.Reset();
+			printf("==>Compressing to %d bits\n", x);
+			mnp.ClearPDBs();
+			mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+			
+			mnp.Load_Regular_PDB(getPDB8a(weighted), g, false); // PDB 0
+			mnp.Delta_Compress_PDB(g, 0, true);
+			
+			mnp.Load_Regular_PDB(getPDB9b(weighted), g, false); // PDB 1
+			mnp.Delta_Compress_PDB(g, 1, true);
+			mnp.Value_Range_Compress_PDB(1, x, true);
+			
+			
+			mnp.lookups.resize(0);
+			mnp.lookups.push_back({kAddNode, 3, 1, -0});
+			mnp.lookups.push_back({kLeafNode, -0, -0, 0});
+			mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+			mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+			
+			std::string desc = "VALRNG-DMD-";
+			desc += ('0'+x/10);
+			desc += ('0'+x%10);
+			Test(mnp, desc.c_str());
+		}
+	}
+
+	for (int x = 1; x <= 2; x*=2)
 	{
 		std::vector<int> cutoffs;
 		GetBitValueCutoffs(cutoffs, x);
-
+		
 		g.Reset();
 		printf("==>Compressing to %d bits\n", x);
 		mnp.ClearPDBs();
-		mnp.Load_Regular_PDB(getPDB7a(weighted), g, false); // PDB 0
-		mnp.Load_Regular_PDB(getPDB8a(weighted), g, false); // PDB 1
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.Delta_Compress_PDB(g, 1, true);
-		mnp.Value_Compress_PDB(1, cutoffs, true);
+		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
 		
-		mnp.Load_Regular_PDB(getPDB7b(weighted), g, false); // PDB 2
-		mnp.Load_Regular_PDB(getPDB8b(weighted), g, false); // PDB 3
-		mnp.lookups.back().PDBID = 2;
-		mnp.Delta_Compress_PDB(g, 3, true);
-		mnp.Value_Compress_PDB(3, cutoffs, true);
+		mnp.Load_Regular_PDB(getPDB8a(weighted), g, false); // PDB 0
+		mnp.Delta_Compress_PDB(g, 0, true);
 
+		mnp.Load_Regular_PDB(getPDB8b(weighted), g, false); // PDB 1
+		mnp.Delta_Compress_PDB(g, 1, true);
+		
+		mnp.Load_Regular_PDB(getPDB9b(weighted), g, false); // PDB 2
+		mnp.Delta_Compress_PDB(g, 2, true);
 
+		mnp.lookups.clear();
+		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.Delta_Compress_PDB(g, 2, true);
+
+		mnp.Value_Range_Compress_PDB(2, x, true);
+		
+		
 		mnp.lookups.resize(0);
-		mnp.lookups.push_back({kMaxNode, 2, 1, -0});
-		mnp.lookups.push_back({kAddNode, 2, 3, -0});
-		mnp.lookups.push_back({kAddNode, 2, 5, -0});
+		mnp.lookups.push_back({kAddNode, 4, 1, -0});
 		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
 		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
 		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 3});
-
-		std::string desc = "VALRNG-";
-		desc += ('0'+x);
+		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		
+		std::string desc = "VALRNG-D8-";
+		desc += ('0'+x/10);
+		desc += ('0'+x%10);
 		Test(mnp, desc.c_str());
 	}
+
 }
 
 #pragma mark other utilities
 
 void GetBitValueCutoffs(std::vector<int> &cutoffs, int bits)
 {
-	MNPuzzle mnp(N, k);
-	MNPuzzleState g(N, k);
+	MNPuzzle mnp(4, 4);
+	MNPuzzleState g(4, 4);
 	g.Reset();
 	
 	if (mnp.GetWeighted()) // non-uniform costs
@@ -1029,8 +1226,8 @@ uint64_t random64()
 void MeasureIR(MNPuzzle &mnp)
 {
 	srandom(1234);
-	MNPuzzleState s(16, 4);
-	MNPuzzleState g(16, 4);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	g.Reset();
 	mnp.StoreGoal(g);
 	//mnp.SetPruneSuccessors(true);
@@ -1065,8 +1262,8 @@ void MeasureIR(MNPuzzle &mnp)
 
 void Test(MNPuzzle &mnp, const char *prefix)
 {
-	MNPuzzleState s(16, 4);
-	MNPuzzleState g(16, 4);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
 	g.Reset();
 	mnp.StoreGoal(g);
 	
@@ -1102,8 +1299,8 @@ MNPuzzleState GetInstance(int which, bool weighted)
 {
 	return GetKorfInstance(which);
 //	srandom(which*101+11);
-//	MNPuzzle mnp(16, 4);
-//	MNPuzzleState s(16,4);
+//	MNPuzzle mnp(4, 4);
+//	MNPuzzleState s(4, 4);
 //	s.Reset();
 //	int length = 10000;
 //	for (int x = 0; x < length; x++)

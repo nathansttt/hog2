@@ -32,7 +32,7 @@
 #include "NN.h"
 
 bool CLASSIFIER = 0;
-bool NN = false;
+bool NN = true;
 //#define KERNEL
 const double scale = 2.0;
 
@@ -212,10 +212,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				l = new LinearRegression(2, 1, 0.01);
 			}
 			else {
-//				cl = new class NN(2, 10, 1, 0.01);
-//				l = new class NN(1, 10, 1, 0.01);
-				cl = new LogisticRegression(3, 1, 0.01);
-				l = new LogisticRegression(2, 1, 0.01);
+				cl = new class NN(2, 10, 1, 0.01);
+				l = new class NN(1, 10, 1, 0.01);
+//				cl = new LogisticRegression(3, 1, 0.01);
+//				l = new LogisticRegression(2, 1, 0.01);
 			}
 			break;
 		}
@@ -261,7 +261,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'o':
 		{
-			for (int z = 0; z < 100; z++)
+			for (int z = 0; z < 1000; z++)
 			for (unsigned int x = 0; x < points.size(); x++)
 			{
 				std::vector<double> in(2);
