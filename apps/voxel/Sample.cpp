@@ -28,6 +28,8 @@
 #include "Common.h"
 #include "Sample.h"
 #include "ScenarioLoader.h"
+#include <stdint.h>
+#include <assert.h>
 
 struct voxelWorld {
 	uint32_t header;
@@ -201,7 +203,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 }
 
 // "Insert" two 0 bits after each of the 10 low bits of x
-uint32 Part1By2(uint32 x)
+uint32_t Part1By2(uint32_t x)
 {
 	x &= 0x000003ff;                  // x = ---- ---- ---- ---- ---- --98 7654 3210
 	x = (x ^ (x << 16)) & 0xff0000ff; // x = ---- --98 ---- ---- ---- ---- 7654 3210
@@ -211,13 +213,13 @@ uint32 Part1By2(uint32 x)
 	return x;
 }
 
-uint32 EncodeMorton3(uint32 x, uint32 y, uint32 z)
+uint32_t EncodeMorton3(uint32_t x, uint32_t y, uint32_t z)
 {
 	return (Part1By2(z) << 2) + (Part1By2(y) << 1) + Part1By2(x);
 }
 
 // Inverse of Part1By2 - "delete" all bits not at positions divisible by 3
-uint32 Compact1By2(uint32 x)
+uint32_t Compact1By2(uint32_t x)
 {
 	x &= 0x09249249;                  // x = ---- 9--8 --7- -6-- 5--4 --3- -2-- 1--0
 	x = (x ^ (x >>  2)) & 0x030c30c3; // x = ---- --98 ---- 76-- --54 ---- 32-- --10
@@ -227,17 +229,17 @@ uint32 Compact1By2(uint32 x)
 	return x;
 }
 
-uint32 DecodeMorton3X(uint32 code)
+uint32_t DecodeMorton3X(uint32_t code)
 {
 	return Compact1By2(code >> 0);
 }
 
-uint32 DecodeMorton3Y(uint32 code)
+uint32_t DecodeMorton3Y(uint32_t code)
 {
 	return Compact1By2(code >> 1);
 }
 
-uint32 DecodeMorton3Z(uint32 code)
+uint32_t DecodeMorton3Z(uint32_t code)
 {
 	return Compact1By2(code >> 2);
 }
