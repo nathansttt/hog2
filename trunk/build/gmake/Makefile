@@ -40,6 +40,8 @@ PROJECTS = \
   apps/sfbds \
   apps/3dmaps \
   apps/rubik \
+  apps/bidirectional \
+  apps/voxel \
   apps/fling \
   apps/topspin \
   apps/stp \
@@ -84,6 +86,8 @@ PROJECTS_ALL = \
   apps/prediction \
   apps/rubik \
   apps/fling \
+  apps/bidirectional \
+  apps/voxel \
   apps/topspin \
   apps/stp \
   apps/pancake \
