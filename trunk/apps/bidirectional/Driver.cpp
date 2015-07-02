@@ -82,7 +82,8 @@ int main(int argc, char* argv[])
 	RubiksCube c;
 	RubiksState s;
 	//uint64_t start1 = strtoll(argv[0], 0, 10);
-	GetInstanceFromStdin(s);
+	//GetInstanceFromStdin(s);
+	GetSuperFlip(s);
 	hash128 start;
 	start.edgeHash = c.GetEdgeHash(s);
 	start.cornerHash = c.GetCornerHash(s);
@@ -422,6 +423,34 @@ int GetNextMove(char *input, int &base)
 		}
 	}
 	return used;
+}
+
+voi GetSuperFlip(RubiksState &start)
+{
+	char string[maxStrLength] = "U R2 F B R B2 R U2 L B2 R U- D- R2 F R- L B2 U2 F2";
+
+	start.Reset();
+	
+	int index = 0;
+	string[maxStrLength-1] = 0;
+	if (strlen(string) == maxStrLength-1)
+	{
+		printf("Warning: input hit maximum string length!\n");
+		exit(0);
+	}
+	while (true)
+	{
+		int act;
+		int cnt = GetNextMove(&string[index], act);
+		if (cnt == 0)
+		{
+			break;
+		}
+		else {
+			index += cnt;
+		}
+		c.ApplyAction(start, act);
+	}
 }
 
 void GetInstanceFromStdin(RubiksState &start)
