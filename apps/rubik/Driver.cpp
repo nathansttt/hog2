@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
 	RunHOGGUI(argc, argv, 600);
 }
 
+void GetSuperFlip(RubiksState &start);
 
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
@@ -132,7 +133,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		else {
 			SetNumPorts(windowID, 4);
 		}
-		
+		GetSuperFlip(s);
 	}
 }
 
@@ -2144,3 +2145,31 @@ void TestMinBloom()
 	
 }
 
+const int maxStrLength = 4024;
+void GetSuperFlip(RubiksState &start)
+{
+	char string[maxStrLength] = "U R2 F B R B2 R U2 L B2 R U- D- R2 F R- L B2 U2 F2";
+	
+	start.Reset();
+	
+	int index = 0;
+	string[maxStrLength-1] = 0;
+	if (strlen(string) == maxStrLength-1)
+	{
+		printf("Warning: input hit maximum string length!\n");
+		exit(0);
+	}
+	while (true)
+	{
+		int act;
+		int cnt = GetNextMove(&string[index], act);
+		if (cnt == 0)
+		{
+			break;
+		}
+		else {
+			index += cnt;
+		}
+		c.ApplyAction(start, act);
+	}
+}

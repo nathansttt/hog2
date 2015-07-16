@@ -779,3 +779,13 @@ void RubiksCube::OpenGLDraw(const RubiksState&, const RubiksAction&) const
 {
 	
 }
+
+int RubiksCube::Edge12PDBDist(const RubiksState &s)
+{
+	if (f == 0)
+		f = new DiskBitFile("/data/rubik/res/RC");
+	int64_t bucket;
+	int64_t offset;
+	e.rankPlayer(s.edge, 0, bucket, offset);
+	return f->ReadFileDepth(bucket, offset);
+}
