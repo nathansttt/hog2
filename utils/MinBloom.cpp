@@ -10,7 +10,8 @@
 
 #include <cmath>
 #include <limits>
-#include "Bloom.h"
+#include "MinBloom.h"
+#include <string.h>
 
 // [8 possible hashes][16x 4-bit segments][16 values for 4 bits]
 static uint64_t salt[8] = {0x6B8B4567327B23C6ull, 0x643C986966334873ull, 0x74B0DC5119495CFFull, 0x2AE8944A625558ECull, 0x238E1F2946E87CCDull, 0x3D1B58BA507ED7ABull, 0x2EB141F241B71EFBull, 0x79E2A9E37545E146ull};
@@ -130,7 +131,10 @@ int MinBloomFilter::Contains(uint64_t item)
 	uint8_t max = 0;
 	for (int x = 0; x < numHash; x++)
 	{
-		max = std::max(max, bits->Get(Hash(item, x)%filterSize));
+		uint8_t next = bits->Get(Hash(item, x)%filterSize);
+		if (next == 0xF)
+			return next;
+		max = std::max(max, next);
 	}
 	return max;
 }

@@ -207,7 +207,7 @@ void BloomFilter::Analyze()
 {
 	uint64_t entries = bits->GetSize();
 	uint64_t setEntries = bits->GetNumSetBits();
-	printf("%llu of %llu entries set. (%1.2f%%)\n", setEntries, entries, 100.0*double(setEntries)/double(entries));
+	printf("%llu of %llu entries set. (%4.2f%%)\n", setEntries, entries, 100*double(setEntries)/double(entries));
 }
 
 void BloomFilter::Load()

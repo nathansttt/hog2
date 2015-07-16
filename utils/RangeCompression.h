@@ -2,6 +2,7 @@
 #define RANGE_COMPRESSION_H
 
 #include <vector>
+#include <stdint.h>
 
 /*
   Code by Malte Helmert
