@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "FourBitArray.h"
+#include <string.h>
 
 //	uint8_t *mem;
 //	uint64_t entries;
