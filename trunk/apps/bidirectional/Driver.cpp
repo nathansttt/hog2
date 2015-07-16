@@ -72,9 +72,24 @@ void WriteStatesToDisk(std::vector<hash128> &states, int depth);
 void ExpandLayer(int depth);
 bool DuplicateDetectLayer(int depthToRemove);
 void ClearFiles();
+void TestPruning(int depth, int bucket);
 const int kNumBuckets = 512;
+void BFS();
 
 int main(int argc, char* argv[])
+{
+	if (argc > 1 && strcmp(argv[1], "-bfs") == 0)
+	{
+		BFS();
+	}
+	if (argc > 3 && strcmp(argv[1], "-testPruning") == 0)
+	{
+		TestPruning(atoi(argv[2]), atoi(argv[3]));
+	}
+}
+
+
+void BFS()
 {
 	Timer t;
 	t.StartTimer();
@@ -82,8 +97,8 @@ int main(int argc, char* argv[])
 	RubiksCube c;
 	RubiksState s;
 	//uint64_t start1 = strtoll(argv[0], 0, 10);
-	//GetInstanceFromStdin(s);
-	GetSuperFlip(s);
+	GetInstanceFromStdin(s);
+	//GetSuperFlip(s);
 	hash128 start;
 	start.edgeHash = c.GetEdgeHash(s);
 	start.cornerHash = c.GetCornerHash(s);
@@ -425,8 +440,10 @@ int GetNextMove(char *input, int &base)
 	return used;
 }
 
-voi GetSuperFlip(RubiksState &start)
+void GetSuperFlip(RubiksState &start)
 {
+	RubiksCube c;
+	const int maxStrLength = 1024;
 	char string[maxStrLength] = "U R2 F B R B2 R U2 L B2 R U- D- R2 F R- L B2 U2 F2";
 
 	start.Reset();
@@ -494,5 +511,39 @@ void GetInstanceFromStdin(RubiksState &start)
 			index += cnt;
 		}
 		c.ApplyAction(start, act);
+	}
+}
+
+
+void TestPruning(int depth, int bucket)
+{
+	RubikEdge e;
+	RubiksCube c;
+	RubiksState s;
+	std::vector<uint64_t> depths(17);
+	for (int x = 0; x < kNumBuckets; x++)
+	{
+		FILE *f = fopen(GetFileName(depth, x), "r");
+		if (f == 0)
+			continue;
+		//printf("-Expanding depth %d bucket %d [%s]\n", depth, x, GetFileName(depth, x));
+		uint64_t next;
+		while (fread(&next, sizeof(uint64_t), 1, f) == 1)
+		{
+			uint64_t cornerRank;
+			uint64_t edgeRank = next%e.getMaxSinglePlayerRank();
+			cornerRank = next/e.getMaxSinglePlayerRank();
+			cornerRank = cornerRank*kNumBuckets + x;
+			//printf("%2d): Expanding %llu %llu\n", depth, x, next);
+			c.GetStateFromHash(cornerRank, edgeRank, s);
+			
+			depths[c.Edge12PDBDist(s)]++;
+		}
+		fclose(f);
+		//printf("-Read %llu states from depth %d bucket %d\n", count, depth, x);
+	}
+	for (int x = 0; x < depths.size(); x++)
+	{
+		printf("%d\t%llu\n", x, depths[x]);
 	}
 }

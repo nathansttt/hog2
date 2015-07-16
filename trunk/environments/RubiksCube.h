@@ -63,8 +63,8 @@ public:
 //:f("/home/sturtevant/sturtevant/code/cc/rubik/RC-10edge")
 //:f("/data/cc/rubik/10/RC-10edge")
 //:f("/store/rubik/RC")
-//	:f("/data/cc/rubik/res/RC")
 	{
+		f = 0;
 		pruneSuccessors = false;
 		minCompression = true;
 		bloomFilter = false;
@@ -98,7 +98,8 @@ public:
 	/** Heuristic value between two arbitrary nodes. **/
 	virtual double HCost(const RubiksState &node1, const RubiksState &node2);
 	virtual double HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost);
-
+	int Edge12PDBDist(const RubiksState &s);
+	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
 	virtual double HCost(const RubiksState &node);
@@ -140,7 +141,7 @@ public:
 	bool minBloomFilter;
 	std::vector<uint64_t> edgeDist;
 	std::vector<uint64_t> cornDist;
-	::std::unordered_map<uint64_t, uint8_t> depthTable;
+	std::unordered_map<uint64_t, uint8_t> depthTable;
 	BloomFilter *depth8, *depth9;
 	MinBloomFilter *minBloom;
 private:
@@ -158,7 +159,7 @@ private:
 	FourBitArray edge7PDBint;
 	
 	
-//	DiskBitFile f;
+	DiskBitFile *f;
 	std::vector<bucketInfo> data;
 	std::vector<bucketData> buckets;
 
