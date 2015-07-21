@@ -38,7 +38,8 @@
 
 struct hash128
 {
-	uint64_t cornerHash;
+	uint32_t parent;
+	uint32_t cornerHash;
 	uint64_t edgeHash;
 };
 
@@ -60,8 +61,7 @@ namespace std {
 	{
 		size_t operator()(const hash128 & x) const
 		{
-			return x.edgeHash^(x.cornerHash<<40);
-			/* your code here, e.g. "return hash<int>()(x.value);" */
+			return x.edgeHash^(uint64_t(x.cornerHash)<<40);
 		}
 	};
 }
@@ -100,6 +100,7 @@ void BFS()
 	GetInstanceFromStdin(s);
 	//GetSuperFlip(s);
 	hash128 start;
+	start.parent = -1;
 	start.edgeHash = c.GetEdgeHash(s);
 	start.cornerHash = c.GetCornerHash(s);
 	std::vector<hash128> states;
@@ -149,6 +150,25 @@ void ClearFiles()
 	}
 }
 
+void ConvertToBucketHash(const hash128 &s, uint64_t &bucket, uint64_t &hash)
+{
+	static uint64_t maxEdgeRank = RubikEdge().getMaxSinglePlayerRank();
+	bucket = s.cornerHash%kNumBuckets;
+	hash   = (((s.cornerHash/kNumBuckets)*maxEdgeRank + s.edgeHash)<<5) + s.parent;
+}
+
+void ConvertBucketHashToState(uint64_t bucket, uint64_t hash, hash128 &s)
+{
+	static uint64_t maxEdgeRank = RubikEdge().getMaxSinglePlayerRank();
+	
+	s.parent = hash&0x1F;
+	hash >>= 5;
+	s.edgeHash = hash%maxEdgeRank;
+	s.cornerHash = uint32_t(hash/maxEdgeRank);
+	s.cornerHash = s.cornerHash*kNumBuckets + uint32_t(bucket);
+
+}
+
 void WriteStatesToDisk(std::vector<hash128> &states, int depth)
 {
 	RubiksCorner c;
@@ -159,10 +179,18 @@ void WriteStatesToDisk(std::vector<hash128> &states, int depth)
 	std::vector<uint64_t> counts;
 	counts.resize(kNumBuckets);
 	
+	// 40 bits for edges
+	// 27 bits for corners
+	// 67 bits
+	// 512 buckets (9 bits)
+	// 58 bits total
+	// 6 bits for extra information (parent)
 	for (auto &s : states)
 	{
-		uint64_t bucket = s.cornerHash%kNumBuckets;
-		uint64_t hash   = (s.cornerHash/kNumBuckets)*e.getMaxSinglePlayerRank() + s.edgeHash;
+		uint64_t bucket, hash;
+		ConvertToBucketHash(s, bucket, hash);
+//		uint64_t bucket = s.cornerHash%kNumBuckets;
+//		uint64_t hash   = (s.cornerHash/kNumBuckets)*e.getMaxSinglePlayerRank() + s.edgeHash;
 		if (files[bucket] == 0)
 		{
 			files[bucket] = fopen(GetFileName(depth, (int)bucket), "a");
@@ -208,12 +236,13 @@ void ExpandLayer(int depth)
 		{
 			total++;
 			count++;
-			uint64_t cornerRank;
-			uint64_t edgeRank = next%e.getMaxSinglePlayerRank();
-			cornerRank = next/e.getMaxSinglePlayerRank();
-			cornerRank = cornerRank*kNumBuckets + x;
+			ConvertBucketHashToState(x, next, hash);
+//			uint64_t cornerRank;
+//			uint64_t edgeRank = next%e.getMaxSinglePlayerRank();
+//			cornerRank = next/e.getMaxSinglePlayerRank();
+//			cornerRank = cornerRank*kNumBuckets + x;
 			//printf("%2d): Expanding %llu %llu\n", depth, x, next);
-			c.GetStateFromHash(cornerRank, edgeRank, s);
+			c.GetStateFromHash(hash.cornerHash, hash.edgeHash, s);
 			c.GetActions(s, acts);
 			for (int a = 0; a < acts.size(); a++)
 			{
