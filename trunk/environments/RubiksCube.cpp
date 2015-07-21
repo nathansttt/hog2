@@ -787,5 +787,6 @@ int RubiksCube::Edge12PDBDist(const RubiksState &s)
 	int64_t bucket;
 	int64_t offset;
 	e.rankPlayer(s.edge, 0, bucket, offset);
-	return f->ReadFileDepth(bucket, offset);
+	
+	return f->ReadFileDepth(data[bucket].bucketID, data[bucket].bucketOffset+offset);
 }
