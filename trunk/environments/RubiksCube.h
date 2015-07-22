@@ -87,6 +87,7 @@ public:
 	void SetPruneSuccessors(bool val) { pruneSuccessors = val; history.resize(0); }
 	virtual void GetSuccessors(const RubiksState &nodeID, std::vector<RubiksState> &neighbors) const;
 	virtual void GetActions(const RubiksState &nodeID, std::vector<RubiksAction> &actions) const;
+	virtual void GetPrunedActions(const RubiksState &nodeID, RubiksAction lastAction, std::vector<RubiksAction> &actions) const;
 	virtual RubiksAction GetAction(const RubiksState &s1, const RubiksState &s2) const;
 	virtual void ApplyAction(RubiksState &s, RubiksAction a) const;
 	virtual void UndoAction(RubiksState &s, RubiksAction a) const;
