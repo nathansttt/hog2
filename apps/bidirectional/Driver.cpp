@@ -244,15 +244,16 @@ void ExpandLayer(int depth)
 //			cornerRank = cornerRank*kNumBuckets + x;
 			//printf("%2d): Expanding %llu %llu\n", depth, x, next);
 			c.GetStateFromHash(parent.cornerHash, parent.edgeHash, s);
-			c.GetActions(s, acts);
+			c.GetPrunedActions(s, parent.parent, acts);
+			//c.GetActions(s, acts);
 			for (int a = 0; a < acts.size(); a++)
 			{
 				if (acts[a] == parent.parent)
 					continue;
 				c.ApplyAction(s, acts[a]);
-				int toParent = acts[a];
-				c.InvertAction(toParent);
-				child.parent = toParent;
+//				int toParent = acts[a];
+//				c.InvertAction(toParent);
+				child.parent = acts[a];
 				child.edgeHash = c.GetEdgeHash(s);
 				child.cornerHash = c.GetCornerHash(s);
 				c.UndoAction(s, acts[a]);
