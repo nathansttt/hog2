@@ -100,7 +100,7 @@ void BFS()
 	GetInstanceFromStdin(s);
 	//GetSuperFlip(s);
 	hash128 start;
-	start.parent = -1;
+	start.parent = 20;
 	start.edgeHash = c.GetEdgeHash(s);
 	start.cornerHash = c.GetCornerHash(s);
 	std::vector<hash128> states;
@@ -109,6 +109,7 @@ void BFS()
 
 	// write goal to disk
 	s.Reset();
+	start.parent = 20;
 	start.edgeHash = c.GetEdgeHash(s);
 	start.cornerHash = c.GetCornerHash(s);
 	states.clear();
@@ -222,7 +223,7 @@ void ExpandLayer(int depth)
 	RubiksState s;
 	std::vector<RubiksAction> acts;
 	std::vector<hash128> nextLevel;
-	hash128 hash;
+	hash128 parent, child;
 	uint64_t total = 0;
 	for (int x = 0; x < kNumBuckets; x++)
 	{
@@ -236,21 +237,26 @@ void ExpandLayer(int depth)
 		{
 			total++;
 			count++;
-			ConvertBucketHashToState(x, next, hash);
+			ConvertBucketHashToState(x, next, parent);
 //			uint64_t cornerRank;
 //			uint64_t edgeRank = next%e.getMaxSinglePlayerRank();
 //			cornerRank = next/e.getMaxSinglePlayerRank();
 //			cornerRank = cornerRank*kNumBuckets + x;
 			//printf("%2d): Expanding %llu %llu\n", depth, x, next);
-			c.GetStateFromHash(hash.cornerHash, hash.edgeHash, s);
+			c.GetStateFromHash(parent.cornerHash, parent.edgeHash, s);
 			c.GetActions(s, acts);
 			for (int a = 0; a < acts.size(); a++)
 			{
+				if (acts[a] == parent.parent)
+					continue;
 				c.ApplyAction(s, acts[a]);
-				hash.edgeHash = c.GetEdgeHash(s);
-				hash.cornerHash = c.GetCornerHash(s);
+				int toParent = acts[a];
+				c.InvertAction(toParent);
+				child.parent = toParent;
+				child.edgeHash = c.GetEdgeHash(s);
+				child.cornerHash = c.GetCornerHash(s);
 				c.UndoAction(s, acts[a]);
-				nextLevel.push_back(hash);
+				nextLevel.push_back(child);
 			}
 		}
 		fclose(f);
@@ -275,7 +281,7 @@ bool DuplicateDetectLayer(int depth)
 	Timer t;
 	uint64_t count = 0;
 	bool dups = false;
-	std::unordered_map<uint64_t, bool> map;
+	std::unordered_map<uint64_t, uint8_t> map;
 	for (int x = 0; x < kNumBuckets; x++)
 	{
 		t.StartTimer();
@@ -289,7 +295,7 @@ bool DuplicateDetectLayer(int depth)
 		while ((numRead = fread(&values[0], sizeof(uint64_t), bufferSize, f)) > 0)
 		{
 			for (int x = 0; x < numRead; x++)
-				map[values[x]] = true;
+				map[values[x]>>5] = values[x]&0x1F;
 			count++;
 		}
 		fclose(f);
@@ -305,7 +311,7 @@ bool DuplicateDetectLayer(int depth)
 				for (int x = 0; x < numRead; x++)
 				{
 					//printf("Looking for duplicate %d %llu\n", x, next);
-					auto loc = map.find(values[x]);
+					auto loc = map.find(values[x]>>5);
 					if (loc != map.end())
 					{
 						//printf("Removing duplicate %d %llu\n", x, loc->first);
@@ -325,7 +331,7 @@ bool DuplicateDetectLayer(int depth)
 			{
 				for (int x = 0; x < numRead; x++)
 				{
-					auto loc = map.find(values[x]);
+					auto loc = map.find(values[x]>>5);
 					if (loc != map.end())
 					{
 						map.erase(loc);
@@ -344,7 +350,7 @@ bool DuplicateDetectLayer(int depth)
 			{
 				for (int x = 0; x < numRead; x++)
 				{
-					auto loc = map.find(values[x]);
+					auto loc = map.find(values[x]>>5);
 					if (loc != map.end())
 					{
 						//printf("Found duplicate!\n");
@@ -367,9 +373,9 @@ bool DuplicateDetectLayer(int depth)
 		values.resize(0);
 		for (auto val : map)
 		{
-			if (val.second)
+			//if (val.second)
 			{
-				values.push_back(val.first);
+				values.push_back((val.first<<5)|(val.second));
 				count++;
 				//printf("%2d): Writing %llu %llu\n", depth, x, val.first);
 				
