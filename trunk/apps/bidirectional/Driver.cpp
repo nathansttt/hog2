@@ -248,8 +248,8 @@ void ExpandLayer(int depth)
 			//c.GetActions(s, acts);
 			for (int a = 0; a < acts.size(); a++)
 			{
-				if (acts[a] == parent.parent)
-					continue;
+//				if (acts[a] == parent.parent)
+//					continue;
 				c.ApplyAction(s, acts[a]);
 //				int toParent = acts[a];
 //				c.InvertAction(toParent);

@@ -22,6 +22,7 @@ void RubiksCube::GetSuccessors(const RubiksState &nodeID, std::vector<RubiksStat
 
 void RubiksCube::GetPrunedActions(const RubiksState &nodeID, RubiksAction lastAction, std::vector<RubiksAction> &actions) const
 {
+	actions.resize(0);
 	for (int x = 0; x < 18; x++)
 	{
 		// 1. after any face you can't turn the same face again
