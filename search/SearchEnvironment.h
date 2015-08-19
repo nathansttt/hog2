@@ -37,7 +37,7 @@ public:
 	virtual void GetSuccessors(const state &nodeID, std::vector<state> &neighbors) const = 0;
 	virtual void GetActions(const state &nodeID, std::vector<action> &actions) const = 0;
 	virtual int GetNumSuccessors(const state &stateID) const
-	{ std::vector<state> neighbors; GetSuccessors(stateID, neighbors); return neighbors.size(); }
+	{ std::vector<state> neighbors; GetSuccessors(stateID, neighbors); return (int)neighbors.size(); }
 
 	virtual action GetAction(const state &s1, const state &s2) const;
 	virtual void ApplyAction(state &s, action a) const = 0;
