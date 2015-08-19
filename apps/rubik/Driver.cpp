@@ -296,13 +296,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-compress") == 0)
 	{
-		ManyCompression(); exit(0);
+		//		ManyCompression(); exit(0);
 		if (maxNumArgs < 5)
 		{
 			printf("Insufficient number of arguments\n");
 			exit(0);
 		}
 		//InstallCommandLineHandler(MyCLHandler, "-compress", "-compress <e> <file> <factor>", "Compress provided pdb by a factor of <factor>");
+		printf("Calling compress (%d args available)\n", maxNumArgs); fflush(stdout);
 		Compress(argument[1], argument[2], argument[3], atoi(argument[4]), argument[5]);
 		exit(0);
 	}
@@ -311,9 +312,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		RunCompressionTest(atoi(argument[1]), argument[2], argument[3], argument[4], argument[5]);
 		exit(0);
 	}
-	else if (strcmp(argument[0], "-showStats"))
+	else if (strcmp(argument[0], "-showStats") == 0)
 	{
 		GetBloomStats(strtoull(argument[1], 0, 10), strtol(argument[2], 0, 10), argument[3]);
+		exit(0);
 	}
 	//	strncpy(gDefaultMap, argument[1], 1024);
 	return 2;
@@ -446,7 +448,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void Compress(const char *pdbType, const char *theFile, const char *compressType, int ratio, const char *outFile)
 {
-	bool minCompression = false;
+	printf("Inside compress\n"); fflush(stdout);
+	bool minCompression = true;
+
 	if (strcmp(compressType, "interleave") == 0)
 	{
 		minCompression = false;
@@ -459,8 +463,10 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 		printf("Unknown compression '%s'\n", compressType);
 		exit(0);
 	}
+	printf("Done setting compression type\n"); fflush(stdout);
 	if (strcmp(pdbType, "corner") == 0)
 	{
+		printf("Done test a\n"); return;
 		FourBitArray b;
 		
 		std::vector<bucketInfo> data;
@@ -540,6 +546,7 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 	}
 	if (strcmp(pdbType, "n-edge") == 0)
 	{
+		printf("Done test b\n"); return;
 		FourBitArray b;
 		
 		std::vector<bucketInfo> data;
@@ -587,7 +594,7 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
 		}
 		else { // write the min of the values
-			printf("Performing min compression\n");
+			printf("Performing min compression\n"); fflush(stdout);
 			int64_t index = 0;
 			int64_t realIndex = 0;
 			int minValue = 0xFF;
@@ -616,15 +623,16 @@ void Compress(const char *pdbType, const char *theFile, const char *compressType
 			printf("%llu entries compressed into %llu\n", index, realIndex);
 			printf("Original average: %f; Compressed average: %f\n", (float)avgReg/index, (float)avgComp/realIndex);
 		}
-	}
+	}		
 	if (strcmp(pdbType, "edge") == 0)
 	{
 		FourBitArray b;
 		
 		std::vector<bucketInfo> data;
 		std::vector<bucketData> buckets;
-		
+
 		uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+
 		InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
 		InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
 		int64_t totalSize = 0;
@@ -1136,7 +1144,7 @@ void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataL
 void BuildMinBloomFilter(float space, int numHash, int finalDepth, const char *dataLoc)
 {
 	printf("Creating bloom filter using %2.1f GB of mem.\n", space);fflush(stdout);
-	space = space*8*1024*1024*1024;
+	space = space*2*1024*1024*1024;
 				
 	MinBloomFilter *bf = new MinBloomFilter(space, numHash, true, true);
 	printf("Approximate storage: %llu bits (%1.2f MB / %1.2f GB)\n", bf->GetStorage(),
@@ -1148,7 +1156,7 @@ void BuildMinBloomFilter(float space, int numHash, int finalDepth, const char *d
 	RubikEdge e;
 	RubikEdgeState es;
 	
-	for (int x = 0; x < finalDepth; x++)
+	for (int x = 0; x <= finalDepth; x++)
 	{
 		char name[255];
 		sprintf(name, "%s12edge-depth-%d.dat", dataLoc, x);
@@ -1316,7 +1324,11 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float si
 		uint64_t size8filter = size8*1024*1024*1024*8ull;
 		uint64_t size9filter = size9*1024ull*1024ull*1024ull*8ull;
 
-		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", size8, size8filter, hash8);
+		//size8filter = 11054728626ull;
+		//size9filter = 121946687506ull;
+		//hash8 = hash9 = 4;
+
+		printf("Loading filter with %1.1f GB of entries (%llu) and %d hashes\n", size8, size8filter, hash8);
 		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
 		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
 			   8, c.depth8->GetStorage(),
@@ -1324,7 +1336,7 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float si
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
 		printf("%d hashes being used\n", c.depth8->GetNumHash());
 
-		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", size9, size9filter, hash9);
+		printf("Loading filter with %1.1f GB of entries (%llu) and %d hashes\n", size9, size9filter, hash9);
 		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
 		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
 			   9, c.depth9->GetStorage(),
@@ -1409,7 +1421,7 @@ void RunMinBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float
 		printf("Loading min bloom filters.\n");fflush(stdout);
 		
 		printf("Creating bloom filter using %2.1f GB of mem.\n", space);fflush(stdout);
-		space = space*8*1024*1024*1024;
+		space = space*2*1024*1024*1024;
 		
 		MinBloomFilter *bf = new MinBloomFilter(space, numHash, depthPrefix);
 		printf("Approximate storage: %llu bits (%1.2f MB / %1.2f GB)\n", bf->GetStorage(),
@@ -1423,7 +1435,7 @@ void RunMinBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float
 	for (int x = 0; x < 100; x++)
 	{
 		srandom(9283+x*23);
-		SolveOneProblem(x, "hash7bloom89");
+		SolveOneProblem(x, "minBloom0-9");
 		//		SolveOneProblemAStar(x);
 	}
 	printf("Edge heuristic distribution\n");
