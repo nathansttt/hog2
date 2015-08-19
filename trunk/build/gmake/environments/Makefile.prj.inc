@@ -50,4 +50,5 @@ SRC_CPP = \
 	environments/RubiksCube7Edges.cpp \
 	environments/RubiksCubeCorners.cpp \
 	environments/RubiksCube.cpp \
+	environments/CanonicalGrid.cpp \
 	environments/Fling.cpp \

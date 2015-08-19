@@ -46,6 +46,7 @@ PROJECTS = \
   apps/topspin \
   apps/stp \
   apps/pancake \
+  apps/canonicalGrids \
 #  simulation \
 #  learning \
 #	apps/coprobber
