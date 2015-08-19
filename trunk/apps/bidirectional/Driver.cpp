@@ -33,6 +33,7 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
+#include "GUICode.h"
 #include "Timer.h"
 #include "RubiksCube.h"
 
@@ -78,13 +79,18 @@ void BFS();
 
 int main(int argc, char* argv[])
 {
+	// technically we could/should install a command-line handler and handle these there
 	if (argc > 1 && strcmp(argv[1], "-bfs") == 0)
 	{
 		BFS();
 	}
-	if (argc > 3 && strcmp(argv[1], "-testPruning") == 0)
+	else if (argc > 3 && strcmp(argv[1], "-testPruning") == 0)
 	{
 		TestPruning(atoi(argv[2]), atoi(argv[3]));
+	}
+	else {
+		InstallHandlers();
+		RunHOGGUI(argc, argv);
 	}
 }
 

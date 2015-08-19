@@ -1449,7 +1449,7 @@ void Map3DGrid::OpenGLDraw() const
 //	glVertex3f( 1, -1, 0);
 //	glEnd();
 	GLdouble x1, y1, z1, rad, h;
-	GLdouble x2, y2, z2, rad2, h2;
+//	GLdouble x2, y2, z2, rad2, h2;
 	GLdouble left, right, top, bottom;
 	GetOpenGLCoord(0, 0, 0, left, top, z1, rad, h);
 	GetOpenGLCoord(mWidth, mHeight, 0, right, bottom, z1, rad, h);

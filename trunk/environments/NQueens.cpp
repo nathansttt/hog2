@@ -367,7 +367,6 @@ void NQueens::GLLabelState(const NQueenState &s, int x, int y, int number) const
 	glEnable(GL_LIGHTING);
     glDisable(GL_LINE_SMOOTH);
 	glLineWidth(1.0);
-	
 }
 
 /** Draw the transition at some percentage 0...1 between two states */

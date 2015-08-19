@@ -11,12 +11,15 @@
 #include "FPUtil.h"
 #include "GLUtil.h"
 
+const double stripResolution = 20;
+
 MapOverlay::MapOverlay(Map *_m)
 :m(_m), maxVal(0), minVal(0.0)
 {
 	values.resize(m->GetMapWidth()*m->GetMapHeight());
 	colorMap = 4;
 	displayList = 0;
+	drawBorders = true;
 }
 
 void MapOverlay::Clear()
@@ -80,6 +83,11 @@ double MapOverlay::GetOverlayValue(int x, int y)
 	return values[y*m->GetMapWidth()+x];
 }
 
+recColor MapOverlay::GetValueColor(double value)
+{
+	return getColor(value, minVal, maxVal, colorMap);
+}
+
 void MapOverlay::OpenGLDraw() const
 {
 	if (displayList)
@@ -112,15 +120,45 @@ void MapOverlay::OpenGLDraw() const
 			GLdouble coverage = 1.0;
 			GLdouble a, b, c, radius;
 			m->GetOpenGLCoord((int)(t%(m->GetMapWidth())), (int)(t/m->GetMapWidth()), a, b, c, radius);
-			glVertex3f(a-coverage*radius, b+coverage*radius, c-4*radius);
-			glVertex3f(a-coverage*radius, b-coverage*radius, c-4*radius);
+			glVertex3f(a-coverage*radius, b+coverage*radius, c-1.01*radius);
+			glVertex3f(a-coverage*radius, b-coverage*radius, c-1.01*radius);
 			m->GetOpenGLCoord((int)(last%(m->GetMapWidth())), (int)(last/m->GetMapWidth()), a, b, c, radius);
-			glVertex3f(a+coverage*radius, b-coverage*radius, c-4*radius);
-			glVertex3f(a+coverage*radius, b+coverage*radius, c-4*radius);
+			glVertex3f(a+coverage*radius, b-coverage*radius, c-1.01*radius);
+			glVertex3f(a+coverage*radius, b+coverage*radius, c-1.01*radius);
 			t = last;
 		}
 		glEnd();
 
+		// borders between regions
+		if (drawBorders)
+		{
+			glLineWidth(2.0);
+			glColor3f(0.0, 0.0, 0.0);
+			glBegin(GL_LINES);
+			for (int x = 0; x < m->GetMapWidth()-1; x++)
+			{
+				for (int y = 0; y < m->GetMapHeight()-1; y++)
+				{
+					int index = x+y*m->GetMapWidth();
+					if (values[index] != values[index+1])
+					{
+						GLdouble a, b, c, r;
+						m->GetOpenGLCoord(x, y, a, b, c, r);
+						glVertex3f(a+r, b+r, c-1.12*r);
+						glVertex3f(a+r, b-r, c-1.12*r);
+					}
+					if (values[index] != values[index+m->GetMapWidth()])
+					{
+						GLdouble a, b, c, r;
+						m->GetOpenGLCoord(x, y, a, b, c, r);
+						glVertex3f(a-r, b+r, c-1.12*r);
+						glVertex3f(a+r, b+r, c-1.12*r);
+					}
+				}
+			}
+			glEnd();
+		}
+		
 		// black background
 		glBegin(GL_QUADS);
 		glNormal3f(0, 0, -1);
@@ -147,7 +185,6 @@ void MapOverlay::OpenGLDraw() const
 		glBegin(GL_QUAD_STRIP);
 		glNormal3f(0, 0, -1);
 		m->GetOpenGLCoord(0, 0, a, b, c, radius);
-		const int stripResolution = 20;
 		for (int x = 0; x <= stripResolution; x++)
 		{
 			recColor r = getColor(minVal + (maxVal-minVal)*((double)x/stripResolution),

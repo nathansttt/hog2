@@ -361,14 +361,19 @@ void CompareToMinCompression()
 		mnp->Build_PDB(tmp, tiles, PDB1, std::thread::hardware_concurrency(), false);
 	}
 	else {
+		mnp->ClearPDBs();
 		tmp.Reset();
 		const int factor = 10;
-		mnp->Load_Regular_PDB_Min_Compressed(PDB1, tmp, factor, true);
+		mnp->Load_Regular_PDB(PDB1, tmp, true);
+		mnp->Min_Compress_PDB(0, factor, true);
+		//mnp->Load_Regular_PDB_Min_Compressed(PDB1, tmp, factor, true);
 		//mnp->Load_Regular_PDB("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb", tmp, true);
 
+		mnp->ClearPDBs();
 		tmp.Reset();
+		mnp->Load_Regular_PDB(PDB1, tmp, true);
 		mnp->lookups.push_back({kLeafMinCompress, factor, 0, 0});
-		mnp->Load_Regular_PDB_as_Delta(PDB1, tmp, true);
+		mnp->Delta_Compress_PDB(tmp, 1, true);
 		exit(0);
 	}
 	
@@ -513,7 +518,8 @@ void RunCompressedTest()
 		mnp->lookups.push_back({kMaxNode, 2, 1, 0});
 		mnp->lookups.push_back({kLeafNode, 2, 0, 0});
 		mnp->lookups.push_back({kLeafNode, 2, 0, 1});
-		mnp->Load_Regular_PDB_as_Delta(PDB2, tmp, true);
+		//mnp->Load_Regular_PDB_as_Delta(PDB2, tmp, true);
+		assert(!"Need to update code to use new functions");
 	}
 
 	const char *PDB1 = "/Users/nathanst/Desktop/STP_0-1-2-3-4-5-6-7.pdb";
@@ -614,7 +620,8 @@ void CompareToSmallerPDB()
 		mnp->lookups.push_back({kMaxNode, 2, 1, 0});
 		mnp->lookups.push_back({kLeafNode, 2, 0, 0});
 		mnp->lookups.push_back({kLeafNode, 2, 0, 1});
-		mnp->Load_Regular_PDB_as_Delta("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb", tmp, true);
+		//mnp->Load_Regular_PDB_as_Delta("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb", tmp, true);
+		assert(!"Need to update code to use new functions");
 	}
 	exit(0);
 }

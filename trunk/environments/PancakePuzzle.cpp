@@ -159,7 +159,7 @@ double PancakePuzzle::HCost(const PancakePuzzleState &state) {
 
 	// use memory-free heuristic
 	if(use_memory_free) {
-		h_cost =  std::max(Memory_Free_HCost(state, goal_locations), h_cost);
+		h_cost =  std::max(DefaultH(state, goal_locations), h_cost);
 	}
 	// if no heuristic
 	else if(PDB.size()==0) {
@@ -209,7 +209,7 @@ double PancakePuzzle::HCost(const PancakePuzzleState &state, const PancakePuzzle
 		for(unsigned i = 0; i < size; i++) {
 			goal_locs[goal_state.puzzle[i]] = i;
 		}
-		return Memory_Free_HCost(state, goal_locs);
+		return DefaultH(state, goal_locs);
 	}
 
 	if(state == goal_state)
@@ -217,7 +217,12 @@ double PancakePuzzle::HCost(const PancakePuzzleState &state, const PancakePuzzle
 	return 1.0;
 }
 
-double PancakePuzzle::Memory_Free_HCost(const PancakePuzzleState &state, std::vector<int> &goal_locs)
+double PancakePuzzle::DefaultH(const PancakePuzzleState &state)
+{
+	return DefaultH(state, goal_locations);
+}
+
+double PancakePuzzle::DefaultH(const PancakePuzzleState &state, std::vector<int> &goal_locs)
 {
 	if(state.puzzle.size() != size) {
 		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");

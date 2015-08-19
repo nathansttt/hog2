@@ -138,6 +138,8 @@ void DrawBox(GLfloat x, GLfloat y, GLfloat z, GLfloat radius);
 void DrawBoxFrame(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad);
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
 
+void DrawText(double x, double y, double z, double scale, const char *res);
+
 //class OpenGLDrawable {
 //public:
 //	virtual ~OpenGLDrawable() {}

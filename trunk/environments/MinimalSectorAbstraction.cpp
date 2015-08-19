@@ -894,7 +894,7 @@ bool MinimalSectorAbstraction::PerformOneOptimizationStep()
 //    }
 //    
 //    optimizationIndex++;
-//    return false;
+    return false;
 }
 
 /**
