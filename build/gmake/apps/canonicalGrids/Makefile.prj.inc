@@ -5,7 +5,7 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/apps/nathan/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = bidirectional
+NAME = canonicalGrids
 DBG_NAME = $(NAME)
 REL_NAME = $(NAME)
 
@@ -67,5 +67,4 @@ endif
 default : all
 
 SRC_CPP = \
-	apps/bidirectional/GUICode.cpp \
-	apps/bidirectional/Driver.cpp \
+	apps/canonicalGrids/Sample.cpp \
