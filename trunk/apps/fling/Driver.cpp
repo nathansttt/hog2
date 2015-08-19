@@ -40,7 +40,7 @@
 #include <pthread.h>
 #include <unordered_map>
 #include <thread>
-
+#include <mutex>
 uint64_t DoLimitedBFS(FlingBoard b, std::vector<FlingBoard> &path);
 void RemoveDups();
 bool UniquelySolvable(FlingBoard &b, int &solutions, int *goalLocations);
@@ -816,7 +816,7 @@ void SolveAndSaveInstance(unsigned long , tKeyboardModifier , char)
 	pathLoc = path.size()-1;
 }
 
-const int THREADS = 4;
+const int THREADS = 16;
 #include "BitVector.h"
 std::vector<BitVector*> table;
 std::vector<BitVector*> unique;
@@ -930,7 +930,7 @@ void *ThreadedWorker(void *arg)
 void ExtractUniqueStates(int depth)
 {
 	char fname[255];
-	sprintf(fname, "/Users/nathanst/hog2/apps/fling/fling-unique-%d.dat", depth);
+	sprintf(fname, "fling-unique-%d.dat", depth);
 	printf("Reading from '%s'\n", fname);
 	BitVector *b = new BitVector(f.getMaxSinglePlayerRank(56, depth), fname, false);
 	uint64_t maxVal = f.getMaxSinglePlayerRank(56, depth);
@@ -987,9 +987,9 @@ void BuildTables(unsigned long , tKeyboardModifier, char)
 	std::cout << f.getMaxSinglePlayerRank(56, currSize) << " entries." << std::endl;
 
 	char fname[255];
-	sprintf(fname, "/Users/nathanst/hog2/apps/fling/fling-%d.dat", currSize);
+	sprintf(fname, "fling-%d.dat", currSize);
 	table[currSize] = new BitVector(f.getMaxSinglePlayerRank(56, currSize), fname, true);
-	sprintf(fname, "/Users/nathanst/hog2/apps/fling/fling-unique-%d.dat", currSize);
+	sprintf(fname, "fling-unique-%d.dat", currSize);
 	unique[currSize] = new BitVector(f.getMaxSinglePlayerRank(56, currSize), fname, true);
 	//table[currSize].resize(f.getMaxSinglePlayerRank(56, currSize));
 
@@ -1017,7 +1017,7 @@ void BuildTables(unsigned long , tKeyboardModifier, char)
 	perc = uniqueSolvable;
 	perc /= (double)f.getMaxSinglePlayerRank(56, currSize);
 	printf("%lld are uniquely solvable (%3.1f%%)\n%3.2f sec elapsed\n", uniqueSolvable, 100*perc, t.EndTimer());
-	
+	fflush(stdout);
 //	char fname[255];
 //	sprintf(fname, "/Users/nathanst/fling-%d.dat", currSize);
 	//t.StartTimer();
