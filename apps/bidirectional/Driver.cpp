@@ -129,16 +129,16 @@ void BFS()
 		Timer t2, t3;
 		t2.StartTimer();
 		t3.StartTimer();
-		printf("***Starting layer: %d\n", depth);
+		printf("***Starting layer: %d\n", depth); fflush(stdout);
 		ExpandLayer(depth-2);
-		printf("%1.2fs expanding\n", t2.EndTimer());
+		printf("%1.2fs expanding\n", t2.EndTimer());  fflush(stdout);
 		t2.StartTimer();
 		done = DuplicateDetectLayer(depth);
 		printf("%1.2fs dd\n", t2.EndTimer());
-		printf("%1.2fs total elapsed at depth %d\n", t3.EndTimer(), depth);
+		printf("%1.2fs total elapsed at depth %d\n", t3.EndTimer(), depth);  fflush(stdout);
 		depth++;
 	}
-	printf("%1.2fs elapsed; found solution at depth %d (cost %d)\n", t.EndTimer(), depth-1, depth-2);
+	printf("%1.2fs elapsed; found solution at depth %d (cost %d)\n", t.EndTimer(), depth-1, depth-2);  fflush(stdout);
 }
 
 const char *GetFileName(int depth, int bucket)
@@ -250,12 +250,12 @@ void ExpandLayer(int depth)
 //			cornerRank = cornerRank*kNumBuckets + x;
 			//printf("%2d): Expanding %llu %llu\n", depth, x, next);
 			c.GetStateFromHash(parent.cornerHash, parent.edgeHash, s);
-			c.GetPrunedActions(s, parent.parent, acts);
-			//c.GetActions(s, acts);
+			if (parent.parent < 20)
+				c.GetPrunedActions(s, parent.parent, acts);
+			else
+				c.GetActions(s, acts);
 			for (int a = 0; a < acts.size(); a++)
 			{
-//				if (acts[a] == parent.parent)
-//					continue;
 				c.ApplyAction(s, acts[a]);
 //				int toParent = acts[a];
 //				c.InvertAction(toParent);
@@ -289,6 +289,7 @@ bool DuplicateDetectLayer(int depth)
 	uint64_t count = 0;
 	bool dups = false;
 	std::unordered_map<uint64_t, uint8_t> map;
+	uint64_t removed0 = 0, removed2 = 0;
 	for (int x = 0; x < kNumBuckets; x++)
 	{
 		t.StartTimer();
@@ -322,6 +323,7 @@ bool DuplicateDetectLayer(int depth)
 					if (loc != map.end())
 					{
 						//printf("Removing duplicate %d %llu\n", x, loc->first);
+						removed0++;
 						map.erase(loc);
 					}
 				}
@@ -341,6 +343,7 @@ bool DuplicateDetectLayer(int depth)
 					auto loc = map.find(values[x]>>5);
 					if (loc != map.end())
 					{
+						removed2++;
 						map.erase(loc);
 					}
 				}
@@ -399,8 +402,8 @@ bool DuplicateDetectLayer(int depth)
 		fclose(f);
 		writeTime += t.EndTimer();
 	}
-	printf("%1.2f dup vs 0, %1.2f dup vs -2, %1.2f dup vs -4, %1.2f dup vs other frontier, %1.2f write\n",
-		   m0Dups, m2Dups, m4Dups, fDups, writeTime);
+	printf("%1.2f dup vs 0, %1.2f dup vs -2, %1.2f dup vs -4, %1.2f dup vs other frontier, %1.2f write; %llu dups at -2, %llu at -4\n",
+		   m0Dups, m2Dups, m4Dups, fDups, writeTime, removed0, removed2);
 	return dups;
 }
 
@@ -521,10 +524,10 @@ void GetInstanceFromStdin(RubiksState &start)
 //	"L2 B  D- L- F- B R- F- B R-";
 //	char string[maxStrLength] =
 //	"L2 B  D- L- F- B  R2 F  B  R- F- R2 B- L2 D2 L2 D2 L2 U2 L2 F- D  L- D2 L- F2 B2 L  U- D- L  B  D2 F  D- F- U- B  L2 D2 L2 R2";
-	char string[maxStrLength] =
-	"B2 D- B- U- R- D- B- U2 L- R- B2 U2 B2 L- U  B- D  F  L2 F2 D  F- L- D- B2 L- U2 F  B2 R2 D  L- U  D2 F  B- L2 B  R- U B- L  B2 D  F  R  U- D- F  R2 U2 L- B2 L- R- D- L2 R- F2 D L- D  B2 D  L  B- R- D  B- L2 B2 D2 F  B2 U2 R- D- L- B2 R- D- L2 F- D- R  U  F  L2 D- R- U- L2 B  U- F2 U  B- D  F2 D2";
-//	char string[maxStrLength] =
-//	"L2 B  D- L- F- B  R2 F  B  R- F- R2 B- L2 D2 L2 D2 L2 U2 L2 F- D  L- D2 L- F2 B2 L  U- D- L  B  D2 F  D- F- U- B  L2 D2 L2 R2 B- U  R- D2 F  R- B  L R  U- B- R2 F- L2 R  F  R2 B L- F- D- F2 U2 R  U- L  D  F2 B- R- D- L2 B- L- B2 L- D2 B2 D- B  D  R- B  D  L- B- R  F- L- F- R2 D2 L2 B- L2 B2 U  L2";
+//	char string[maxStrLength] = // length 18
+//	"B2 D- B- U- R- D- B- U2 L- R- B2 U2 B2 L- U  B- D  F  L2 F2 D  F- L- D- B2 L- U2 F  B2 R2 D  L- U  D2 F  B- L2 B  R- U B- L  B2 D  F  R  U- D- F  R2 U2 L- B2 L- R- D- L2 R- F2 D L- D  B2 D  L  B- R- D  B- L2 B2 D2 F  B2 U2 R- D- L- B2 R- D- L2 F- D- R  U  F  L2 D- R- U- L2 B  U- F2 U  B- D  F2 D2";
+	char string[maxStrLength] = // length 16
+	"L2 B  D- L- F- B  R2 F  B  R- F- R2 B- L2 D2 L2 D2 L2 U2 L2 F- D  L- D2 L- F2 B2 L  U- D- L  B  D2 F  D- F- U- B  L2 D2 L2 R2 B- U  R- D2 F  R- B  L R  U- B- R2 F- L2 R  F  R2 B L- F- D- F2 U2 R  U- L  D  F2 B- R- D- L2 B- L- B2 L- D2 B2 D- B  D  R- B  D  L- B- R  F- L- F- R2 D2 L2 B- L2 B2 U  L2";
 	// 	const char *result = fgets(string, maxStrLength, stdin);
 
 	start.Reset();
@@ -563,27 +566,32 @@ void TestPruning(int depth, int bucket)
 	RubiksCube c;
 	RubiksState s;
 	std::vector<uint64_t> depths(17);
-	for (int x = 0; x < kNumBuckets; x++)
+	int count = 0;
+	FILE *f = fopen(GetFileName(depth, bucket), "r");
+	if (f == 0)
 	{
-		FILE *f = fopen(GetFileName(depth, x), "r");
-		if (f == 0)
-			continue;
-		//printf("-Expanding depth %d bucket %d [%s]\n", depth, x, GetFileName(depth, x));
-		uint64_t next;
-		while (fread(&next, sizeof(uint64_t), 1, f) == 1)
-		{
-			uint64_t cornerRank;
-			uint64_t edgeRank = next%e.getMaxSinglePlayerRank();
-			cornerRank = next/e.getMaxSinglePlayerRank();
-			cornerRank = cornerRank*kNumBuckets + x;
-			//printf("%2d): Expanding %llu %llu\n", depth, x, next);
-			c.GetStateFromHash(cornerRank, edgeRank, s);
-			
-			depths[c.Edge12PDBDist(s)]++;
-		}
-		fclose(f);
-		//printf("-Read %llu states from depth %d bucket %d\n", count, depth, x);
+		printf("Unable to open '%s'; aborting!\n", GetFileName(depth, bucket));
+		return;
 	}
+	uint64_t next;
+	while (fread(&next, sizeof(uint64_t), 1, f) == 1)
+	{
+		if (++count > 1000)
+		{
+			break;
+		}
+		printf("%d\r", count); fflush(stdout);
+		uint64_t cornerRank;
+		uint64_t edgeRank = next%e.getMaxSinglePlayerRank();
+		cornerRank = next/e.getMaxSinglePlayerRank();
+		cornerRank = cornerRank*kNumBuckets + bucket;
+		//printf("%2d): Expanding %llu %llu\n", depth, x, next);
+		c.GetStateFromHash(cornerRank, edgeRank, s);
+		
+		depths[c.Edge12PDBDist(s)]++;
+	}
+	fclose(f);
+	printf("\n\n");
 	for (int x = 0; x < depths.size(); x++)
 	{
 		printf("%d\t%llu\n", x, depths[x]);
