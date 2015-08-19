@@ -24,6 +24,7 @@ public:
 	double GetOverlayValue(int x, int y);
 	void OpenGLDraw() const;
 	void SetTransparentValue(double v) { ignoreVal = v; }
+	recColor GetValueColor(double value);
 	void SetColorMap(int val) { colorMap = val; }
 	int GetColorMap() { return colorMap; }
 	void IncreaseColorMap() { colorMap++; }
@@ -37,6 +38,7 @@ private:
 	double maxVal, minVal;
 	double ignoreVal;
 	int colorMap;
+	bool drawBorders;
 	mutable GLuint displayList;
 };
 

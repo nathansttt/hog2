@@ -40,6 +40,7 @@ void CompareToSmallerPDB();
 
 void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char);
 void TSTest(unsigned long , tKeyboardModifier , char);
+void ValidateCompressionIdeas(unsigned long , tKeyboardModifier , char);
 TopSpinState GetInstance(int which, bool weighted);
 void Test(TopSpin &tse, const char *prefix);
 void MinCompressionTest();
@@ -61,12 +62,18 @@ void ModNodesDeltaCompressionTest(bool weighted);
 void DivNodesCompressionTest(bool weighted);
 void DivDeltaNodesCompressionTest(bool weighted);
 
+void MeasureRLE(bool weighted);
+void ExtractPatterns(bool weighted);
+
 TopSpin *ts = 0;
 
 bool recording = false;
 
 int main(int argc, char* argv[])
 {
+//	ExtractPatterns(false);
+//	//MeasureRLE(false);
+//	exit(0);
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 640, 640);
 }
@@ -88,6 +95,7 @@ void InstallHandlers()
 
 	InstallKeyboardHandler(TSTest, "TS Test", "Test the TS PDBs", kNoModifier, 'd');
 	InstallKeyboardHandler(BuildTS_PDB, "Build TS PDBs", "Build PDBs for the TS", kNoModifier, 'a');
+	InstallKeyboardHandler(ValidateCompressionIdeas, "Validate", "Run experiment to validate compression ideas", kNoModifier, 'v');
 
 	InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
 	
@@ -361,7 +369,19 @@ bool fileExists(const char *name)
 #pragma mark pdb building code
 #include <string>
 const int N = 16, k = 4;
-const char *prefix = "/Users/nathanst/Desktop/";
+const char *prefix = "/Users/nathanst/hog2/pdbs/";
+
+const char *getPDB6a(bool weighted)
+{
+	static std::string s;
+	s = prefix;
+	if (!weighted)
+		s += "TS-0-5.pdb";
+	else
+		s += "wTS-0-5.pdb";
+	return s.c_str();
+}
+
 const char *getPDB7a(bool weighted)
 {
 	static std::string s;
@@ -381,6 +401,17 @@ const char *getPDB8a(bool weighted)
 		s += "TS-0-7.pdb";
 	else
 		s += "wTS-0-7.pdb";
+	return s.c_str();
+}
+
+const char *getPDB6b(bool weighted)
+{
+	static std::string s;
+	s = prefix;
+	if (!weighted)
+		s += "TS-8-13.pdb";
+	else
+		s += "wTS-8-13.pdb";
 	return s.c_str();
 }
 
@@ -418,6 +449,19 @@ void BuildPDBs(bool aPDBs, bool bPDBs, bool weighted)
 
 	if (aPDBs)
 	{
+		if (!fileExists(getPDB6a(weighted)))
+		{
+			g.Reset();
+			tiles.resize(0);
+			//for (int x = 0; x <= 12; x+=2)
+			for (int x = 0; x <= 5; x++)
+				tiles.push_back(x);
+			
+			tse.Build_PDB(g, tiles, getPDB6a(weighted),
+						  std::thread::hardware_concurrency(), false);
+			tse.ClearPDBs();
+		}
+
 		if (!fileExists(getPDB7a(weighted)))
 		{
 			g.Reset();
@@ -447,6 +491,19 @@ void BuildPDBs(bool aPDBs, bool bPDBs, bool weighted)
 	
 	if (bPDBs)
 	{
+		if (!fileExists(getPDB6b(weighted)))
+		{
+			g.Reset();
+			tiles.resize(0);
+			for (int x = 8; x <= 13; x++)
+				//for (int x = 1; x <= 14; x+=2)
+				tiles.push_back(x);
+			
+			tse.Build_PDB(g, tiles, getPDB6b(weighted),
+						  std::thread::hardware_concurrency(), false);
+			tse.ClearPDBs();
+		}
+
 		if (!fileExists(getPDB7b(weighted)))
 		{
 			g.Reset();
@@ -665,6 +722,92 @@ void BitDeltaValueCompressionTest(bool weighted)
 		GetBitValueCutoffs(cutoffs, x);
 		tse.Value_Compress_PDB(1, cutoffs, true);
 		//MeasureIR(tse);
+	}
+}
+
+void MeasureRLE(bool weighted)
+{
+	std::vector<int> tiles;
+	
+	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
+	TopSpinState s(N, k);
+	TopSpinState g(N, k);
+	
+	tse.StoreGoal(g);
+	tse.ClearPDBs();
+	
+	BuildPDBs(true, false, weighted);
+	
+	for (int x = 1; x <= 1; x*=2)
+	{
+		g.Reset();
+		printf("==>Compressing (value-range-delta) to %d bits\n", x);
+		tse.ClearPDBs();
+		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
+		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		
+		tse.Load_Regular_PDB(getPDB8a(weighted), g, false);
+		tse.Delta_Compress_PDB(g, 1, true);
+		std::vector<int> cutoffs;
+		GetBitValueCutoffs(cutoffs, x);
+		tse.Value_Compress_PDB(1, cutoffs, true);
+
+		int last = -1;
+		int len = 0;
+		std::vector<int> lengths(9);
+		for (int x = 0; x < tse.PDB[1].size(); x++)
+		{
+			if (tse.PDB[1][x] == last && len < 8)
+			{
+				len++;
+			}
+			else {
+				lengths[len]++;
+				last = tse.PDB[1][x];
+				len = 1;
+			}
+		}
+		lengths[len]++;
+		for (int x = 1; x < lengths.size(); x++)
+		{
+			if (lengths[x] != 0)
+				printf("%d\t%d\n", x, lengths[x]);
+		}
+		//printf("%d ", tse.PDB[1][x]);
+		//MeasureIR(tse);
+	}
+}
+
+void ExtractPatterns(bool weighted)
+{
+	std::vector<int> tiles;
+	
+	TopSpin tse(N, k);
+	tse.SetWeighted(weighted);
+	TopSpinState s(N, k);
+	TopSpinState g(N, k);
+	
+	tse.StoreGoal(g);
+	tse.ClearPDBs();
+	
+	BuildPDBs(true, false, weighted);
+
+	tse.ClearPDBs();
+	tse.Load_Regular_PDB(getPDB6a(weighted), g, false);
+	tse.lookups.push_back({kLeafNode, -0, -0, 0});
+	
+	tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
+	tse.Delta_Compress_PDB(g, 1, true);
+	std::vector<int> cutoffs;
+	GetBitValueCutoffs(cutoffs, 1);
+	tse.Value_Compress_PDB(1, cutoffs, true);
+	for (unsigned int x = 0; x < tse.PDB[1].size(); x++)
+	{
+		tse.GetStateFromPDBHash(x, s, N, tse.PDB_distincts[1]);
+		for (int y = 0; y < N; y++)
+			printf(" %d", s.puzzle[y]);
+		printf(": %d\n", tse.PDB[1][x]);
 	}
 }
 
@@ -1166,5 +1309,36 @@ TopSpinState GetInstance(int which, bool weighted)
 		tse.ApplyAction(s, random()%16);
 	}
 	return s;
+}
+
+#include "MNPuzzle.h"
+
+void ValidateCompressionIdeas(unsigned long , tKeyboardModifier , char)
+{
+//	const int tiles = 10;
+	MNPuzzle tse(3, 3);
+	MNPuzzleState s(3, 3), g(3, 3);
+//	TopSpin tse(tiles, k);
+//	TopSpinState s(tiles, k);
+//	TopSpinState g(tiles, k);
+//	const int entriesLarge = 4;
+//	const int entriesSmall = 3;
+	std::vector<int> patternLarge = {1, 2, 3, 4, 5, 6, 7};
+	std::vector<int> patternSmall = {1, 2, 3, 4};
+	tse.StoreGoal(g);
+	tse.ClearPDBs();
+	
+	tse.Build_PDB(s, patternLarge, "tmp", std::thread::hardware_concurrency(), false);
+	tse.Build_PDB(s, patternSmall, "tmp", std::thread::hardware_concurrency(), false);
+	tse.Min_Compress_PDB(0, 60, true);
+	
+//	uint64_t count = tse.Get_PDB_Size(s, entriesLarge);
+//	for (int x = 0; x < count; x++)
+//	{
+//		tse.GetStateFromPDBHash(x, s, tiles, patternLarge);
+//		uint64_t big = tse.GetPDBHash(s, patternLarge);
+//		uint64_t small = tse.GetPDBHash(s, patternSmall);
+//		printf("HASH: large: %llu, small: %llu\n", big, small);
+//	}
 }
 

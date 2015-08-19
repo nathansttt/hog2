@@ -56,7 +56,8 @@ public:
 	bool InvertAction(PancakePuzzleAction &a) const;
 
 	double HCost(const PancakePuzzleState &state1, const PancakePuzzleState &state2);
-	double Memory_Free_HCost(const PancakePuzzleState &state1, std::vector<int> &goal_locs);
+	double DefaultH(const PancakePuzzleState &state1);
+	double DefaultH(const PancakePuzzleState &state1, std::vector<int> &goal_locs);
 	double HCost(const PancakePuzzleState &state1);
 
 	double GCost(const PancakePuzzleState &, const PancakePuzzleState &) {return 1.0;}

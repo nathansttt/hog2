@@ -124,6 +124,7 @@ public:
 	virtual void OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const;
 	virtual void OpenGLDraw(const xyLoc &, const tDirection &) const;
 	virtual void GLLabelState(const xyLoc &, const char *) const;
+	virtual void GLLabelState(const xyLoc &s, const char *str, double scale) const;
 	virtual void GLDrawLine(const xyLoc &x, const xyLoc &y) const;
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;
 	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;

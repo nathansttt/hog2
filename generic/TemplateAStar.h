@@ -37,6 +37,8 @@
 #define UINT32_MAX        4294967295U
 #endif
 
+
+
 #include "FPUtil.h"
 #include <ext/hash_map>
 #include "AStarOpenClosed.h"
@@ -304,8 +306,8 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	neighborID.resize(0);
 	neighborLoc.resize(0);
 	
-	//std::cout << "Expanding: " << openClosedList.Lookup(nodeid).data << " with f:";
-	//std::cout << openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h << std::endl;
+//	std::cout << "Expanding: " << openClosedList.Lookup(nodeid).data << " with f:";
+//	std::cout << openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h << std::endl;
 	
  	env->GetSuccessors(openClosedList.Lookup(nodeid).data, neighbors);
 	double bestH = 0;
@@ -333,12 +335,13 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 	{
 		nodesTouched++;
 		//double edgeCost;
-		
+//		std::cout << "Checking neighbor: " << neighbors[x];
+
 		switch (neighborLoc[x])
 		{
 			case kClosedList:
 				//edgeCost = env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]);
-				
+//				std::cout << "Already closed\n";
 				if (useBPMX) // propagate best child to parent - do this before potentially re-opening
 				{
 					if (fless(openClosedList.Lookup(neighborID[x]).h, bestH-edgeCosts[x]))
@@ -354,6 +357,10 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 						openClosedList.Lookup(neighborID[x]).parentID = nodeid;
 						openClosedList.Lookup(neighborID[x]).g = openClosedList.Lookup(nodeid).g+edgeCosts[x];
 						openClosedList.Reopen(neighborID[x]);
+						// This line isn't normally needed, but in some state spaces we might have
+						// equality but different meta information, so we need to make sure that the
+						// meta information is also copied, since this is the most generic A* implementation
+						openClosedList.Lookup(neighborID[x]).data = neighbors[x];
 					}
 				}
 				break;
@@ -363,8 +370,16 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 				{
 					openClosedList.Lookup(neighborID[x]).parentID = nodeid;
 					openClosedList.Lookup(neighborID[x]).g = openClosedList.Lookup(nodeid).g+edgeCosts[x];
+					// This line isn't normally needed, but in some state spaces we might have
+					// equality but different meta information, so we need to make sure that the
+					// meta information is also copied, since this is the most generic A* implementation
+					openClosedList.Lookup(neighborID[x]).data = neighbors[x];
 					openClosedList.KeyChanged(neighborID[x]);
+//					std::cout << " Reducing cost to " << openClosedList.Lookup(nodeid).g+edgeCosts[x] << "\n";
 					// TODO: unify the KeyChanged calls.
+				}
+				else {
+//					std::cout << " no cheaper \n";
 				}
 				if (useBPMX) // propagate best child to parent
 				{
@@ -388,6 +403,9 @@ bool TemplateAStar<state,action,environment>::DoSingleSearchStep(std::vector<sta
 				}
 				else { // add node to open list
 					//double edgeCost = env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]);
+//					std::cout << " adding to open ";
+//					std::cout << double(theHeuristic->HCost(neighbors[x], goal)+openClosedList.Lookup(nodeid).g+edgeCosts[x]);
+//					std::cout << " \n";
 					if (useBPMX)
 					{
 						openClosedList.AddOpenNode(neighbors[x],

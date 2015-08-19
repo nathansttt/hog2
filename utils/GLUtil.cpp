@@ -718,3 +718,19 @@ void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 	}
 	glTranslatef(-_x, -_y, -_z);
 }	
+
+void DrawText(double x, double y, double z, double scale, const char *str)
+{
+	glPushMatrix();
+	
+	glTranslatef(x, y, z);
+	glScalef(scale/300, scale/300.0, 1);
+	glRotatef(180, 0.0, 0.0, 1.0);
+	glRotatef(180, 0.0, 1.0, 0.0);
+	glDisable(GL_LIGHTING);
+	for (int which = 0; which < strlen(str); which++)
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
+	glEnable(GL_LIGHTING);
+	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
+	glPopMatrix();
+}
