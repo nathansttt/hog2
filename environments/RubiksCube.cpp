@@ -151,6 +151,7 @@ bool RubiksCube::InvertAction(RubiksAction &a) const
 
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost)
 {
+	//return HCost(node1, node2);
 	double val = 0;
 	
 	// corner PDB
@@ -166,6 +167,7 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, dou
 		int bloom = minBloom->Contains(node1.edge.state);
 		if (bloom == 0xF) // not found
 			bloom = 10;
+		edgeDist[bloom]++;
 		return max(val, double(bloom));
 	}
 	if (bloomFilter)
@@ -303,6 +305,13 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
     //val = max(val, edge);
 	//return val;
 
+	if (minBloomFilter)
+	{
+		int bloom = minBloom->Contains(node1.edge.state);
+		if (bloom == 0xF) // not found
+			bloom = 10;
+		return max(val, double(bloom));
+	}
 	if (bloomFilter)
 	{
 		/*  if (edge != depthLoc->second)
@@ -806,6 +815,6 @@ int RubiksCube::Edge12PDBDist(const RubiksState &s)
 	int64_t bucket;
 	int64_t offset;
 	e.rankPlayer(s.edge, 0, bucket, offset);
-	
 	return f->ReadFileDepth(data[bucket].bucketID, data[bucket].bucketOffset+offset);
 }
+
