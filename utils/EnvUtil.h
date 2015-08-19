@@ -208,7 +208,7 @@ uint64_t GetMaxBucketSize(bool print)
 	State s;
 	Environment cc;
 	int64_t maxRank = cc.getMaxSinglePlayerRank();
-	int64_t maxVal2 = cc.getMaxSinglePlayerRank2();
+	//int64_t maxVal2 = cc.getMaxSinglePlayerRank2();
 	uint64_t statesLeft = 0;
 	
 	// count total states left to solve

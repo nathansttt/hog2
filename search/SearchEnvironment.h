@@ -14,6 +14,7 @@
 #include <vector>
 //#include "ReservationProvider.h"
 #include <assert.h>
+#include "Heuristic.h"
 #include "OccupancyInterface.h"
 #include "GLUtil.h"
 
@@ -23,12 +24,6 @@ struct Hash64 {
 		{ return (size_t)(x); }
 };
 
-template <class state>
-class Heuristic {
-public:
-	virtual ~Heuristic() {}
-	virtual double HCost(const state &a, const state &b) = 0;
-};
 
 template <class state, class action>
 class SearchEnvironment : public Heuristic<state> {

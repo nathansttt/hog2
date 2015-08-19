@@ -410,7 +410,7 @@ bool SectorData::AddPoint(int x, int y, int z)
 {
 	int regionX = x%gSectorSize;
 	int regionY = y%gSectorSize;
-	int addedTo = -1;
+	//int addedTo = -1;
 	for (unsigned int t = 0; t < regions.size(); t++)
 	{
 		if (regions[t].CanAddPoint(regionX, regionY, z))
@@ -1607,7 +1607,7 @@ void Map3DGrid::PrintStats()
 {
 	std::vector<int> regCnt;
 	int regions = 0;
-	printf("%d sectors\n", sectors.size());
+	printf("%lu sectors\n", sectors.size());
 	for (unsigned int x = 0; x < sectors.size(); x++)
 	{
 		if (sectors[x].regions.size() >= regCnt.size())

@@ -43,7 +43,7 @@ int gCurrButton = -1;
 pRecContext backup;
 double fps = 30.0;
 
-pRecContext GetContext(unsigned int windowID)
+pRecContext GetContext(unsigned long windowID)
 {
 	return pContextInfo;
 }
@@ -63,7 +63,7 @@ void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
   // Init traj global
   startTrajRecap = false;
 
-	srandom(time(0));
+	srandom(unsigned(time(0)));
 	
 //	InstallCommandLineHandler(processFramesPerSecond, "-fps", "-fps <int>", "[System Option] Specifies the maximum frames per second.");
 	//initializeHandlers();
@@ -321,8 +321,8 @@ void mousePressedButton(int button, int state, int x, int y)
 			{ // if we are currently panning, end pan
 				gPan = GL_FALSE;
 			}
-			gDollyPanStartPoint[0] = (long)x;
-			gDollyPanStartPoint[1] = (long)y;
+			gDollyPanStartPoint[0] = (GLint)x;
+			gDollyPanStartPoint[1] = (GLint)y;
 			gDolly = GL_TRUE;
 			gTrackingContextInfo = pContextInfo;
 		}
@@ -404,8 +404,8 @@ static void mousePan (int x, int y, pRecContext pContextInfo)
 		pContextInfo->camera[pContextInfo->currPort].viewPos.x += panX;
 		pContextInfo->camera[pContextInfo->currPort].viewPos.y += panY;
 	}
-	gDollyPanStartPoint[0] = (long) x;
-	gDollyPanStartPoint[1] = (long) y;
+	gDollyPanStartPoint[0] = (GLint) x;
+	gDollyPanStartPoint[1] = (GLint) y;
 }
 
 
@@ -430,8 +430,8 @@ static void mouseDolly (int x, int y, pRecContext pContextInfo)
 			pContextInfo->camera[pContextInfo->currPort].viewPos.z = 0.0001;
 		updateProjection(pContextInfo, pContextInfo->currPort);  // update projection matrix
 	}
-	gDollyPanStartPoint[0] = (long) x;
-	gDollyPanStartPoint[1] = (long) y;
+	gDollyPanStartPoint[0] = (GLint) x;
+	gDollyPanStartPoint[1] = (GLint) y;
 }
 
 /**
@@ -598,7 +598,7 @@ TextBox *myTextBox = 0;
 
 void appendTextToBuffer(char *tempStr)
 {
-	int ind = strlen(pContextInfo->message);
+	int ind = int(strlen(pContextInfo->message));
 	pContextInfo->message[ind] = ' ';
 	sprintf(&pContextInfo->message[ind+1], "%s", tempStr);
 

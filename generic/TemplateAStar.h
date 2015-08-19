@@ -219,10 +219,10 @@ bool TemplateAStar<state,action,environment>::InitializeSearch(environment *_env
 	if (theHeuristic == 0)
 		theHeuristic = _env;
 	thePath.resize(0);
-	//if(useRadius)
+	//if (useRadius)
 	//std::cout<<"Using radius\n";
 	env = _env;
-	if(!radEnv)
+	if (!radEnv)
 		radEnv = _env;
 	//	closedList.clear();
 	//	openQueue.reset();

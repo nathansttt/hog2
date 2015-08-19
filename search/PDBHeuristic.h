@@ -9,5 +9,12 @@
 #ifndef hog2_glut_PDBHeuristic_h
 #define hog2_glut_PDBHeuristic_h
 
+template <class state>
+class PDBHeuristic : public Heuristic<state> {
+public:
+	virtual ~Heuristic() {}
+	virtual double HCost(const state &a, const state &b) = 0;
+};
+
 
 #endif

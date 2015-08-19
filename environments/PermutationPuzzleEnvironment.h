@@ -154,7 +154,7 @@ public:
 template <class state, class action>
 void PermutationPuzzleEnvironment<state, action>::Min_Compress_PDB(int whichPDB, int factor, bool print_histogram)
 {
-	printf("Performing min compression, reducing from %llu entries to %llu entries\n",
+	printf("Performing min compression, reducing from %lu entries to %lu entries\n",
 		   PDB[whichPDB].size(), (PDB[whichPDB].size()+factor-1)/factor);
 	std::vector<uint8_t> newPDB((PDB[whichPDB].size()+factor-1)/factor);
 	for (uint64_t x = 0; x < PDB[whichPDB].size(); x+=factor)
@@ -908,7 +908,7 @@ void PermutationPuzzleEnvironment<state, action>::Load_Regular_PDB(const char *f
 	size_t index;
 	if ((index = fread(&PDB.back()[0], sizeof(uint8_t), COUNT, f)) != COUNT)
 	{
-		printf("Error; did not correctly read %lu entries from PDB (%lu instead)\n", COUNT, index);
+		printf("Error; did not correctly read %llu entries from PDB (%lu instead)\n", COUNT, index);
 		exit(0);
 	}
 	fclose(f);
@@ -1334,7 +1334,7 @@ void PermutationPuzzleEnvironment<state, action>::PrintPDBHistogram(int which) c
 	// outputs histogram of heuristic value counts
 	for (uint64_t x = 0; x <= maxval; x++)
 	{
-		printf("%lld:\t%d\n", x, values[x]);
+		printf("%lld:\t%llu\n", x, values[x]);
 		average += x*values[x];
 	}
 	printf("Average value: %1.4f\n", average/PDB[which].size());

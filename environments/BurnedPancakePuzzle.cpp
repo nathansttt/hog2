@@ -474,7 +474,7 @@ uint64_t BurnedPancakePuzzle::GetStateHash(const BurnedPancakePuzzleState &s) co
 {
 	std::vector<int> puzzle = s.puzzle;
 	uint64_t hashVal = 0;
-	int numEntriesLeft = s.puzzle.size();
+	int numEntriesLeft = (int)s.puzzle.size();
 	for (unsigned int x = 0; x < s.puzzle.size(); x++)
 	{
 		hashVal += puzzle[x]*Factorial(numEntriesLeft-1);

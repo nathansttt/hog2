@@ -72,9 +72,9 @@ namespace AStarDelayUtil
 		{
 			if (fequal(i1.fCost, i2.fCost))
 			{
-				if(i2.isGoal) // always prefer a goal node in tie
+				if (i2.isGoal) // always prefer a goal node in tie
 					return true;
-				if(i1.isGoal)
+				if (i1.isGoal)
 					return false;
 				return (fless(i1.gCost, i2.gCost));
 			}
@@ -85,10 +85,10 @@ namespace AStarDelayUtil
 	struct GGreater {
 		bool operator()(const SearchNode &i1, const SearchNode &i2) const
 	  {
-			if(fequal(i1.gCost,i2.gCost)) {
-				//if(i2.isGoal) // always prefer a goal node in tie
+			if (fequal(i1.gCost,i2.gCost)) {
+				//if (i2.isGoal) // always prefer a goal node in tie
 				//	return true;
-				//if(i1.isGoal)
+				//if (i1.isGoal)
 				//	return false;
 
 				return fgreater(i1.fCost,i2.fCost);

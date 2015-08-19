@@ -148,11 +148,11 @@ uint64_t TopSpinGraph::GetStateHash(const graphState &state) const
 
 graphState TopSpinGraph::Dual(graphState s)
 {
-	if( s == 0) return 0;
+	if ( s == 0) return 0;
 
 	std::vector<int> cfg = data[s].config;
 	std::vector<int> dualCfg = cfg;
-	for(unsigned int x=0;x<cfg.size();x++) {
+	for (unsigned int x=0;x<cfg.size();x++) {
 		dualCfg[cfg[x]] = x;
 	}
 
@@ -242,7 +242,7 @@ uint64_t TopSpinGraph::GetPDBSize(int puzzleSize, int pdb_size) const
 	int i;
 	
 	size = 1;
-	for( i = puzzleSize - pdb_size; i < puzzleSize; i++ ) {
+	for ( i = puzzleSize - pdb_size; i < puzzleSize; i++ ) {
 		size *= i;
 	}
 	return size;
@@ -285,7 +285,7 @@ double TopSpinGraphHeuristic::HCost(const graphState &s1, const graphState &s2)
 	if (s1 == 0)
 	{
 		//return DB[ts->GetPDBHash(s2, pdb)];
-		if(THmode == 0)
+		if (THmode == 0)
 			sd = s2;
 		else
 			sd = ts->Dual(s2);
@@ -295,7 +295,7 @@ double TopSpinGraphHeuristic::HCost(const graphState &s1, const graphState &s2)
 	}
 	//	printf("Returning heur value!: %d\n", DB[ts->GetPDBHash(s1, pdb)]);
 	//return DB[ts->GetPDBHash(s1, pdb)];
-	if(THmode == 0)
+	if (THmode == 0)
 		sd = s1;
 	else
 		sd = ts->Dual(s1);
@@ -310,7 +310,7 @@ double TopSpinGraphHeuristic::HCost(const graphState &s1, const graphState &s2)
 //	int i;
 //	int8_t t;
 //	
-//	for( i = 0; i != game->num_tiles; i++ ) {
+//	for ( i = 0; i != game->num_tiles; i++ ) {
 //		t = state[ i ];
 //		state[ i ] = state[ i + game->num_tiles ];
 //		state[ i + game->num_tiles ] = t;

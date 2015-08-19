@@ -245,11 +245,11 @@ template <class state, class action, class environment>
 bool OldTemplateAStar<state,action,environment>::InitializeSearch(environment *_env, state& from, state& to, std::vector<state> &thePath)
 {
 	thePath.resize(0);
-	//if(useRadius)
+	//if (useRadius)
 	//std::cout<<"Using radius\n";
 	firstRound = true;
 	env = _env;
-	if(!radEnv)
+	if (!radEnv)
 		radEnv = _env;
 	closedList.clear();
 	openQueue.reset();
@@ -405,10 +405,10 @@ template <class state, class action, class environment>
 bool OldTemplateAStar<state,action,environment>::GetNextNode(state &next)
 {
 	nodesExpanded++;
-	if(openQueue.Empty())
+	if (openQueue.Empty())
 		return false;
 	SearchNode<state> it = openQueue.Remove();
-	//if(it == openQueue.end())
+	//if (it == openQueue.end())
 	//	return false;
 	next = it.currNode;
 	//printf("h-cost\t%f\n", it.fCost-it.gCost);

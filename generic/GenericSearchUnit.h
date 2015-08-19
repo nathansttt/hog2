@@ -140,7 +140,7 @@ bool GenericSearchUnit<state,action,environment>::MakeMove(environment *theEnv, 
 		// check if target has moved from goal state - update goal if necessary
 		state targpos;
 		target->GetLocation(targpos);
-		if(~(targpos == goal))
+		if (~(targpos == goal))
 			goal = targpos;
 	}
 	
@@ -229,7 +229,7 @@ void GenericSearchUnit<state,action,environment>::OpenGLDraw(const environment *
 	state next;
 	
 	// Draw the cached moves
-  	for(unsigned int i=0; i<moves.size(); i++)
+  	for (unsigned int i=0; i<moves.size(); i++)
  	{
 		theEnv->SetColor(1.0, 0.0, 0.0, 0.5);
  		theEnv->OpenGLDraw(current);
@@ -270,7 +270,7 @@ void GenericSearchUnit<state,action,environment>::LogFinalStats(StatCollection *
 template<class state, class action, class environment>
 void GenericSearchUnit<state,action,environment>::AddPathToCache(environment *theEnv, std::vector<state> &path)
 {
- 	for(unsigned int i=0; i<path.size()-1; i++)
+ 	for (unsigned int i=0; i<path.size()-1; i++)
  	{
  		moves.push_back(theEnv->GetAction(path[i], path[i+1]));
  	}

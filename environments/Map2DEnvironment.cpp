@@ -424,7 +424,7 @@ bool MapEnvironment::InvertAction(tDirection &a) const
 
 void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 {
-	xyLoc old = s;
+	//xyLoc old = s;
 	switch (dir)
 	{
 		case kN: s.y-=1; break;
@@ -535,8 +535,8 @@ void MapEnvironment::OpenGLDraw() const
 	//std::cout<<"drawing\n";
 	map->OpenGLDraw();
 	// Draw occupancy interface - occupied = white
-//	for(int i=0; i<map->GetMapWidth(); i++)
-//		for(int j=0; j<map->GetMapHeight(); j++)
+//	for (int i=0; i<map->GetMapWidth(); i++)
+//		for (int j=0; j<map->GetMapHeight(); j++)
 //		{
 //			xyLoc l;
 //			l.x = i;
@@ -782,8 +782,8 @@ BaseMapOccupancyInterface::BaseMapOccupancyInterface(Map* m)
 	bitvec.resize(mapWidth*mapHeight);// = new BitVector(mapWidth * mapHeight);
 	
 	//initialize the bitvector
-//	for(int i=0; i<m->GetMapWidth(); i++)
-//		for(int j=0; j<m->GetMapHeight(); j++)
+//	for (int i=0; i<m->GetMapWidth(); i++)
+//		for (int j=0; j<m->GetMapHeight(); j++)
 //			bitvec->Set(CalculateIndex(i,j), false);
 }
 
@@ -869,7 +869,7 @@ void BaseMapOccupancyInterface::MoveUnitOccupancy(const xyLoc &oldState, const x
 
 bool BaseMapOccupancyInterface::CanMove(const xyLoc &, const xyLoc &l2)
 {
-	if(!(GetStateOccupied(l2)))
+	if (!(GetStateOccupied(l2)))
 	{
 		return true;
 	}

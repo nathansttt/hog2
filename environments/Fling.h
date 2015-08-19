@@ -30,7 +30,7 @@ public:
 	bool CanMove(int which, int x, int y) const;
 	void Move(int which, int x, int y);
 	int LocationAfterAction(FlingMove m);
-	int NumPieces() const { return locs.size(); }
+	int NumPieces() const { return int(locs.size()); }
 	int GetPieceLocation(int which) const { return locs[which].first; }
 	bool HasPiece(int x, int y) const;
 	bool HasPiece(int offset) const;

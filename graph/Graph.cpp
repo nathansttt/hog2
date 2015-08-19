@@ -151,15 +151,15 @@ int Graph::AddNode(node *n)
 	return -1;
 }
 
-node *Graph::GetNode(unsigned int num)
+node *Graph::GetNode(unsigned long num)
 {
-	if (num >=0 && num < _nodes.size()) return _nodes[num];
+	if (num < _nodes.size()) return _nodes[num];
 	return 0;
 }
 
-edge *Graph::GetEdge(unsigned int num)
+edge *Graph::GetEdge(unsigned long num)
 {
-	if (num >=0 && num < _edges.size()) return _edges[num];
+	if (num < _edges.size()) return _edges[num];
 	return 0;
 }
 

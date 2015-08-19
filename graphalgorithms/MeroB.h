@@ -115,7 +115,7 @@ namespace MeroBUtil
 
 			// add nodes
 			
-			for(unsigned int nodeID = 0; nodeID <= N; nodeID++)
+			for (unsigned int nodeID = 0; nodeID <= N; nodeID++)
 			{
 				node *n = new node("");
 				if (nodeID == 0 || nodeID == 1)
@@ -133,7 +133,7 @@ namespace MeroBUtil
 				}
 				g->AddNode(n); // the real nodeID is assigned here
 
-				if(nodeID == 0)
+				if (nodeID == 0)
 				{
 					SetLoc(n,-1,-1,0);
 				}

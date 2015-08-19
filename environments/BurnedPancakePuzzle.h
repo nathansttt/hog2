@@ -71,7 +71,7 @@ public:
 
 	/** Returns stored goal state if it is stored.**/
 	BurnedPancakePuzzleState Get_Goal(){
-		if(!goal_stored) {
+		if (!goal_stored) {
 			fprintf(stderr, "ERROR: Call to Get_Goal when no goal stored\n");
 			exit(1);
 		}
@@ -100,7 +100,7 @@ public:
 //	static int read_in_pancake_puzzles(const char *filename, bool first_counter, unsigned size, unsigned max_puzzles, std::vector<BurnedPancakePuzzleState> &puzzle_vector);
 //
 //	bool State_Check(const BurnedPancakePuzzleState &to_check) {
-//		if(to_check.puzzle.size() != size)
+//		if (to_check.puzzle.size() != size)
 //			return false;
 //
 //		return true;

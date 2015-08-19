@@ -69,13 +69,13 @@ public:
 			UnitGroup<state, action, environment> *tmp = group;
 			
 			group = 0; 
-			if(tmp)
+			if (tmp)
 				tmp->RemoveUnit(this);
 			
 			// Set the back pointer
 			group = _group;
 			
-			if(_group != 0)
+			if (_group != 0)
 				_group->AddUnit(this);
 			
 			// OLD CODE

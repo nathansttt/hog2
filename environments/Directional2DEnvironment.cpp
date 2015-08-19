@@ -558,7 +558,7 @@ double Directional2DEnvironment::GCost(const xySpeedHeading &a, const deltaSpeed
 	
 	if (fequal(a.speed+b.speed, 0))
 		return 1.0;
-	return 1.4/fabs(a.speed+b.speed);
+	return 1.4/std::abs(a.speed+b.speed);
 //	return 1.0/fabs(val);
 }
 

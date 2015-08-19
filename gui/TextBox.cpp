@@ -61,7 +61,7 @@ void TextBox::stepTime(double amount)
 
 void TextBox::draw()
 {
-	double wide, high, charWidth;
+	double wide, charWidth;
 	wide = br.x-tl.x;
 	//high = tl.y-br.y;
 	charWidth = wide/charLine;

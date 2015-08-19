@@ -107,7 +107,7 @@ bool MeroB::DoSingleStepA(std::vector<graphState> &thePath)
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 	
-	for(unsigned int x = 0; x<neighbors.size(); x++)
+	for (unsigned int x = 0; x<neighbors.size(); x++)
 	{
 		nodesTouched++;
 		
@@ -215,7 +215,7 @@ bool MeroB::DoSingleStepB(std::vector<graphState> &thePath)
 	{
 		topNode = openQueue.Remove();
 		
-		if(fgreater(topNode.fCost,F)) 
+		if (fgreater(topNode.fCost,F)) 
 		  {
 		    F = topNode.fCost; // update F
 		    if (verbose) 
@@ -257,7 +257,7 @@ bool MeroB::DoSingleStepB(std::vector<graphState> &thePath)
 	neighbors.resize(0);
 	env->GetSuccessors(topNodeID, neighbors);
 	
-	for(unsigned int x = 0; x<neighbors.size(); x++)
+	for (unsigned int x = 0; x<neighbors.size(); x++)
 	{
 		nodesTouched++;
 		
@@ -365,7 +365,7 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 	{
 		topNode = openQueue.Remove();
 		
-		if(fgreater(topNode.fCost,F)) 
+		if (fgreater(topNode.fCost,F)) 
 		{
 		  F = topNode.fCost; // update F
 		  if (verbose) 
@@ -409,7 +409,7 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 	double hTop = topNode.fCost - topNode.gCost;
 	double minH2 = DBL_MAX; // min ( edgeWeight(i) + h(neighbor(i)) )
 	
-	for(unsigned int x = 0; x<neighbors.size(); x++) 
+	for (unsigned int x = 0; x<neighbors.size(); x++) 
 	{
 		nodesTouched++;
 		
@@ -580,7 +580,7 @@ void MeroB::OpenGLDraw() const
 //
 //	// draw nodes
 //	node_iterator ni = g->getNodeIter();
-//	for(node* n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
+//	for (node* n = g->nodeIterNext(ni); n; n = g->nodeIterNext(ni))
 //	{
 //		MeroBUtil::graphGenerator::GetLoc(n,x,y,z);
 //
@@ -615,7 +615,7 @@ void MeroB::OpenGLDraw() const
 //					break;
 //			}
 //
-//			if(FCache.size() > 0)
+//			if (FCache.size() > 0)
 //			{
 //				topn = FCache.top();
 //			}
@@ -630,7 +630,7 @@ void MeroB::OpenGLDraw() const
 //			}
 //
 //			// if on top, blue
-//			if(topn.currNode == sn.currNode)
+//			if (topn.currNode == sn.currNode)
 //			{
 //				glColor3f(0,0,1);
 //				DrawSphere(x,y,z,0.025);
@@ -662,7 +662,7 @@ void MeroB::OpenGLDraw() const
 //
 //	// draw edges
 //	edge_iterator ei = g->getEdgeIter();
-//	for(edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+//	for (edge* e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 //	{
 //		DrawEdge(e->getFrom(), e->getTo(), e->GetWeight());
 //	}

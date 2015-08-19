@@ -246,7 +246,7 @@ static void DrawTile(float x, float y, char c1, char c2, int w, int h)
 {
 	glLineWidth(1.0);
 	int textWidth = 0;
-	int textHeight = 0;
+	//int textHeight = 0;
 	if (c1 != 0)
 		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c1);
 	//if (c2 != 0)

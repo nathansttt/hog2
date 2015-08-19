@@ -314,7 +314,7 @@ void SetZoom(int windowID, float amount);
 void submitTextToBuffer(const char *val);
 void appendTextToBuffer(char *);
 pRecContext getCurrentContext();
-pRecContext GetContext(unsigned int windowID);
+pRecContext GetContext(unsigned long windowID);
 void updateModelView(pRecContext pContextInfo, int currPort);
 void cameraLookAt(GLfloat, GLfloat, GLfloat, float cameraSpeed = 0.1, int port = -1);
 recVec cameraLookingAt(int port = -1);

@@ -80,7 +80,7 @@ class Vector2D {
 		
 		void Normalize()
 		{
-			if((x==0)&&(y==0))
+			if ((x==0)&&(y==0))
 				return;
 			float magnitude = sqrt(x*x + y*y);
 			x /= magnitude;

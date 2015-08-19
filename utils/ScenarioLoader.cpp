@@ -26,7 +26,7 @@ ScenarioLoader::ScenarioLoader(const char* fname)
   sfile>>first;
 
   // Check if a version number is given
-  if(first != "version"){
+  if (first != "version"){
     ver = 0.0;
     sfile.seekg(0,std::ios::beg);
   }
@@ -47,7 +47,7 @@ ScenarioLoader::ScenarioLoader(const char* fname)
       experiments.push_back(exp);
     }
   }
-  else if(ver==1.0){
+  else if (ver==1.0){
     while(sfile>>bucket>>map>>sizeX>>sizeY>>xs>>ys>>xg>>yg>>dist){
       Experiment exp(xs,ys,xg,yg,sizeX,sizeY,bucket,dist,map);
       experiments.push_back(exp);

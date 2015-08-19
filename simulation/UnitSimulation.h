@@ -285,9 +285,9 @@ template<class state, class action, class environment>
 bool UnitSimulation<state,action,environment>::Done()
 {
 	// assumes that all units belong to a unit group
-	for(unsigned int i=0; i<unitGroups.size(); i++)
+	for (unsigned int i=0; i<unitGroups.size(); i++)
 	{
-		if(!unitGroups[i]->Done())
+		if (!unitGroups[i]->Done())
 			return false;
 	}
 	return true;
@@ -320,11 +320,11 @@ template<class state, class action, class environment>
 double UnitSimulation<state,action,environment>::GetTimeToNextStep() const {
 	double minimum = DBL_MAX;
 
-	for( unsigned int i = 0; i < units.size(); i++ ) {
-		if( minimum > units[i]->nextTime - currTime )
+	for ( unsigned int i = 0; i < units.size(); i++ ) {
+		if ( minimum > units[i]->nextTime - currTime )
 			minimum = units[i]->nextTime - currTime;
 	}
-	if( minimum < 1./30. )
+	if ( minimum < 1./30. )
 		fprintf( stderr, "Warning: GetTimeToNextStep sank under 1./30. (%g).\n", minimum );
 	return minimum;
 }
@@ -346,7 +346,7 @@ void UnitSimulation<state, action, environment>::StepTime(double timeStep)
 	DoPostTimestepCalc();
 	
 	//std::cout<<"currTime "<<currTime<<std::endl;
-	//if(Done()) std::cout<<"DONE!!!\n";
+	//if (Done()) std::cout<<"DONE!!!\n";
 }
 
 template<class state, class action, class environment>
@@ -438,7 +438,7 @@ void UnitSimulation<state, action, environment>::StepUnitTime(UnitInfo<state, ac
 		theUnit->lastTime = theUnit->nextTime;
 		theUnit->lastState = theUnit->currentState;
 		
-		if( stepType == kUniTime )
+		if ( stepType == kUniTime )
 			theUnit->nextTime = currTime + 1.;
 		else
 			theUnit->nextTime += theUnit->agent->GetSpeed();

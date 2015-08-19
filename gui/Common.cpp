@@ -29,7 +29,7 @@
 #include "Common.h"
 
 // For printing debug info
-static bool const verbose = false;
+//static bool const verbose = false;
 
 static unsigned long gNextWindowID = 0;
 char gDefaultMap[1024] = "";
@@ -621,13 +621,13 @@ void SaveScreenshot(int windowID, const char *filename)
 //	23	4	biHeight	100	specifies the height of the image, in pixels.
 
 	
-	long width  = pContextInfo->globalCamera.viewWidth;
-	long height  =pContextInfo->globalCamera.viewHeight;
+	uint32_t width  = pContextInfo->globalCamera.viewWidth;
+	uint32_t height  =pContextInfo->globalCamera.viewHeight;
 	long rowBytes = width * 4;
 	long imageSize = rowBytes * height;
 	char image[imageSize];
 	char zero[4] = {0, 0, 0, 0};
-	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &image);//GL_BGRA
+	glReadPixels(0, 0, GLsizei(width), GLsizei(height), GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &image);//GL_BGRA
 	
 	bmp_header h;
 	h.biWidth = width;

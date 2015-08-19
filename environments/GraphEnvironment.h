@@ -164,7 +164,7 @@ public:
 	double HCost(const graphState &state1, const graphState &state2)
 	{ // warning: in this implementation HCost(s1,s2) != HCost(s2,s1)
 
-		if(probTable[int(state1)]) {
+		if (probTable[int(state1)]) {
 			int x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
 			int y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
 			int x2 = g->GetNode(state2)->GetLabelL(GraphSearchConstants::kMapX);
@@ -185,7 +185,7 @@ private:
 		dx = fabs(dx);
 		dy = fabs(dy);
 
-		if(dx > dy)
+		if (dx > dy)
 			return dx-dy + sqrt(2)*dy;
 		else
 			return dy-dx + sqrt(2)*dx;
@@ -194,8 +194,8 @@ private:
 	{
 		int size = m->GetMapWidth() * m->GetMapHeight();
 		probTable = (bool*)malloc( size );
-		for(int i=0;i<size;i++) {
-			if(drand48() < prob)
+		for (int i=0;i<size;i++) {
+			if (drand48() < prob)
 				probTable[i] = 1;
 			else
 				probTable[i] = 0;

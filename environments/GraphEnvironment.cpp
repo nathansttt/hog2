@@ -115,7 +115,7 @@ void GraphEnvironment::GetActions(const graphState &stateID, std::vector<graphMo
 		edge_iterator ei = n->getEdgeIter();
 		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
 		{
-			if(stateID != e->getTo())
+			if (stateID != e->getTo())
 				actions.push_back(graphMove(e->getFrom(),e->getTo()));
 			else
 				actions.push_back(graphMove(e->getTo(),e->getFrom()));
@@ -1263,11 +1263,11 @@ node *GraphDistanceHeuristic::FindFarNode(node *n)
 //	double b = ((y1>y2)?(y1-y2):(y2-y1));
 //	double val = (a>b)?(b*ROOT_TWO+a-b):(a*ROOT_TWO+b-a);
 //
-//	if(hmode == 0)
+//	if (hmode == 0)
 //		return val;
 //
 //	//for (unsigned int x = 0; x < heuristics.size(); x++)
-//	if(hmode == 1) {
+//	if (hmode == 1) {
 //		int x = (x1+x2+y1+y2)%heuristics.size();
 //		{
 //			double hval = heuristics[x][state1]-heuristics[x][state2];
@@ -1276,22 +1276,22 @@ node *GraphDistanceHeuristic::FindFarNode(node *n)
 //				val = hval;
 //		}
 //	}
-//	else if(hmode == 2) { // hmode == 2, taking the max
-//		for(unsigned int i=0;i<heuristics.size();i++) {
+//	else if (hmode == 2) { // hmode == 2, taking the max
+//		for (unsigned int i=0;i<heuristics.size();i++) {
 //			double hval = heuristics[i][state1]-heuristics[i][state2];
-//			if(hval < 0)
+//			if (hval < 0)
 //				hval = -hval;
-//			if(fgreater(hval,val))
+//			if (fgreater(hval,val))
 //				val = hval;
 //		}
 //	}
 //	else {  // hmode == 3, return max at grid points, otherwise 0
-//		if( (x1+x2) % 4 == 0 && (y1+y2) % 4 == 0) {
-//			for(unsigned int i=0;i<heuristics.size();i++) {
+//		if ( (x1+x2) % 4 == 0 && (y1+y2) % 4 == 0) {
+//			for (unsigned int i=0;i<heuristics.size();i++) {
 //				double hval = heuristics[i][state1]-heuristics[i][state2];
-//				if(hval < 0)
+//				if (hval < 0)
 //					hval = -hval;
-//				if(fgreater(hval,val))
+//				if (fgreater(hval,val))
 //					val = hval;
 //			}
 //		}
@@ -1369,19 +1369,19 @@ AbstractionGraphEnvironment::AbstractionGraphEnvironment( GraphAbstraction *_gab
 		double x = n->GetLabelF(GraphAbstractionConstants::kXCoordinate);
 		double y = n->GetLabelF(GraphAbstractionConstants::kYCoordinate);
 		double z = n->GetLabelF(GraphAbstractionConstants::kZCoordinate);
-		if( x < min_x ) min_x = x;
-		if( x > max_x ) max_x = x;
-		if( y < min_y ) min_y = y;
-		if( y > max_y ) max_y = y;
-		if( z < min_z ) min_z = z;
-		if( z > max_z ) max_z = z;
+		if ( x < min_x ) min_x = x;
+		if ( x > max_x ) max_x = x;
+		if ( y < min_y ) min_y = y;
+		if ( y > max_y ) max_y = y;
+		if ( z < min_z ) min_z = z;
+		if ( z > max_z ) max_z = z;
 		n = g->nodeIterNext( ni );
 	}
 	graphscale = 0.;
 	int count = 0;
-	if( fgreater(max_x, min_x) ) { graphscale += max_x-min_x; count++; }
-	if( fgreater(max_y, min_y) ) { graphscale += max_y-min_y; count++; }
-	if( fgreater(max_z, min_z) ) { graphscale += max_z-min_z; count++; }
+	if ( fgreater(max_x, min_x) ) { graphscale += max_x-min_x; count++; }
+	if ( fgreater(max_y, min_y) ) { graphscale += max_y-min_y; count++; }
+	if ( fgreater(max_z, min_z) ) { graphscale += max_z-min_z; count++; }
 	// average over all the dimensions and divide by root(nodecount,dimensions)
 	graphscale /= count * pow( (double)g->GetNumNodes(), 1./(double)count );
 };

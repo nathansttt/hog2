@@ -113,7 +113,7 @@ bool FrontierBFS<state, action>::DoOneIteration(SearchEnvironment<state, action>
 	else {
 		return true;
 	}
-	printf("Depth %d complete; nodes expanded %lld (%lld new); %d in memory\n", depth, nodesExpanded, nodesExpanded - n,
+	printf("Depth %d complete; nodes expanded %lld (%lld new); %lu in memory\n", depth, nodesExpanded, nodesExpanded - n,
 		   mOpen1.size()+mOpen2.size()+mClosed1.size()+mClosed2.size());
 	if ((mOpen1.size() == 0) && (mOpen2.size() == 0))
 		return true;

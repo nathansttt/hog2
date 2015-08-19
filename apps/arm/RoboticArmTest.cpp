@@ -488,8 +488,8 @@ void AddToMinHeap( std::vector<armAngles> &heap, armAngles &arm,
 	// need to increase size, although we don't actually care
 	// about the new content yet
 	heap.push_back( arm );
-	for( i = heap.size(); i > 1; i >>= 1 ) {
-		if( ArmDistance( arm, distances )
+	for ( i = heap.size(); i > 1; i >>= 1 ) {
+		if ( ArmDistance( arm, distances )
 		    >= ArmDistance( heap[ ( i >> 1 ) - 1 ], distances ) ) {
 			break;
 		}
@@ -509,13 +509,13 @@ armAngles GetFromMinHeap( std::vector<armAngles> &heap, float *distances )
 	// must be pushed down if it is too large
 	c = 1 << 1;
 	while( c <= heap.size() - 1 ) {
-		if( c + 1 <= heap.size() - 1
+		if ( c + 1 <= heap.size() - 1
 		    && ArmDistance( heap[ c - 1 ], distances )
 		    > ArmDistance( heap[ c + 1 - 1 ], distances ) ) {
 			// child c is bigger than child c+1, so use c+1
 			++c;
 		}
-		if( ArmDistance( heap[ heap.size() - 1 ], distances )
+		if ( ArmDistance( heap[ heap.size() - 1 ], distances )
 		    <= ArmDistance( heap[ c - 1 ], distances ) ) {
 			// new root <= than child, so it stops moving down
 			break;

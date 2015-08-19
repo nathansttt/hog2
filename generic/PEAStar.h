@@ -187,7 +187,7 @@ bool PEAStar<state,action,environment>::InitializeSearch(environment *_env, cons
 {
 	theHeuristic = _env;
 	thePath.resize(0);
-	//if(useRadius)
+	//if (useRadius)
 	//std::cout<<"Using radius\n";
 	env = _env;
 	//	closedList.clear();

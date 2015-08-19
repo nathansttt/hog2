@@ -232,7 +232,7 @@ public:
 		theSize = (uint32_t)pow(512/reductionPower, numArms);
 		printf("Using mask 0x%llX\n", theMask);
 		printf("Using result 0x%llX\n", theResult);
-		printf("%d entries in table\n", theSize);
+		printf("%llu entries in table\n", theSize);
 		distances = new uint16_t[theSize];
 	}
 	~ArmToArmCompressedHeuristic()

@@ -235,7 +235,7 @@ namespace CanonicalGrid {
 	
 	void CanonicalGrid::ApplyAction(xyLoc &s, tDirection dir) const
 	{
-		xyLoc old = s;
+		//xyLoc old = s;
 		switch (dir)
 		{
 			case kN: s.y-=1; break;
@@ -252,7 +252,7 @@ namespace CanonicalGrid {
 	
 	double CanonicalGrid::HCost(const xyLoc &l1, const xyLoc &l2)
 	{
-		double h1, h2;
+		double h1;//, h2;
 		if (fourConnected)
 		{
 			h1 = abs(l1.x-l2.x)+abs(l1.y-l2.y);

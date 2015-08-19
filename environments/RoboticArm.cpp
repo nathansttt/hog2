@@ -42,7 +42,7 @@ int armAngles::GetAngle(int which) const
 
 void armAngles::SetAngle(int which, int value)
 {
-	value %= 1024; if( value < 0 ) { value += 1024; }
+	value %= 1024; if ( value < 0 ) { value += 1024; }
 	value -= value & 1;
 	uint64_t mask = 1023ll<<(10*which);
 	uint64_t val = ((uint64_t)value)<<(10*which);
@@ -469,11 +469,11 @@ void RoboticArm::GetNextState(const armAngles &currents, armRotations dir, armAn
 
 bool RoboticArm::LegalState(armAngles &a) const
 {
-//	if( legalStateTable != NULL ) {
+//	if ( legalStateTable != NULL ) {
 //		uint64_t idx;
 //
 //		idx = ArmAnglesIndex( a );
-//		if( legalStateTable[ idx >> 3 ]  & ( 1 << ( idx & 7 ) ) ) {
+//		if ( legalStateTable[ idx >> 3 ]  & ( 1 << ( idx & 7 ) ) ) {
 //			return true;
 //		}
 //		return false;
@@ -638,7 +638,7 @@ uint64_t ArmToTipHeuristic::ArmAnglesIndex( const armAngles &arm )
 	int s;
 
 	idx = 0;
-	for( s = 0; s < arm.GetNumArms(); ++s ) {
+	for ( s = 0; s < arm.GetNumArms(); ++s ) {
 		idx <<= 9;
 		idx |= arm.GetAngle( s ) >> 1;
 	}
@@ -668,12 +668,12 @@ int ArmToTipHeuristic::WriteArmAngles(FILE *file, armAngles &a)
 	int16_t v;
 
 	v = a.GetNumArms();
-	if( fwrite( &v, sizeof( v ), 1, file ) < 1 ) {
+	if ( fwrite( &v, sizeof( v ), 1, file ) < 1 ) {
 		return 0;
 	}
-	for( s = 0; s < a.GetNumArms(); ++s ) {
+	for ( s = 0; s < a.GetNumArms(); ++s ) {
 		v = a.GetAngle( s );
-		if( fwrite( &v, sizeof( v ), 1, file ) < 1 ) {
+		if ( fwrite( &v, sizeof( v ), 1, file ) < 1 ) {
 			return 0;
 		}
 	}
@@ -686,12 +686,12 @@ int ArmToTipHeuristic::ReadArmAngles(FILE *file, armAngles &a)
 	int s;
 	int16_t v;
 
-	if( fread( &v, sizeof( v ), 1, file ) < 1 ) {
+	if ( fread( &v, sizeof( v ), 1, file ) < 1 ) {
 		return 0;
 	}
 	angles.SetNumArms( v );
-	for( s = 0; s < angles.GetNumArms(); ++s ) {
-		if( fread( &v, sizeof( v ), 1, file ) < 1 ) {
+	for ( s = 0; s < angles.GetNumArms(); ++s ) {
+		if ( fread( &v, sizeof( v ), 1, file ) < 1 ) {
 			return 0;
 		}
 		angles.SetAngle( s, v );
@@ -710,10 +710,10 @@ void ArmToTipHeuristic::UpdateTipDistances( armAngles &arm, uint16_t distance,
 
 	ra->GetTipPosition( arm, x, y );
 	idx = TipPositionIndex( x, y, -1.0, -1.0, 2.0 );
-	if( distance < minTipDistances[ idx ] ) {
+	if ( distance < minTipDistances[ idx ] ) {
 	  minTipDistances[ idx ] = distance;
 	}
-	if( distance > maxTipDistances[ idx ] ) {
+	if ( distance > maxTipDistances[ idx ] ) {
 	  maxTipDistances[ idx ] = distance;
 	}
 }
@@ -738,18 +738,18 @@ uint64_t ArmToTipHeuristic::GenerateNextDepth( FILE *curFile, FILE *nextFile,
 
 	while( ReadArmAngles( curFile, arm ) ) {
 		ra->GetActions( arm, actions );
-		for( i = 0; i < actions.size(); ++i ) {
+		for ( i = 0; i < actions.size(); ++i ) {
 			armAngles child = arm;
 			ra->ApplyAction( child, actions[ i ] );
 
 			idx = ArmAnglesIndex( child );
-			if( distances[ idx ]
+			if ( distances[ idx ]
 			    > curDistance + 1 ) {
 				// new arm configuration
 
 				distances[ idx ] = curDistance + 1;
 				WriteArmAngles( nextFile, child );
-				if( minTipDistances ) {
+				if ( minTipDistances ) {
 				  UpdateTipDistances( child, curDistance + 1,
 						      minTipDistances,
 						      maxTipDistances );
@@ -783,13 +783,13 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 	arm.SetNumArms( numArms );
 
 	count = NumArmAnglesIndices( arm );
-	for( i = 0; i < count; ++i ) {
+	for ( i = 0; i < count; ++i ) {
 		distances[ i ] = 65535;
 	}
 
-	if( minTipDistances ) {
+	if ( minTipDistances ) {
 		count = NumTipPositionIndices();
-		for( i = 0; i < count; ++i ) {
+		for ( i = 0; i < count; ++i ) {
 			minTipDistances[ i ] = 65535;
 			maxTipDistances[ i ] = 0;
 		}
@@ -801,18 +801,18 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 	count = 0;
 	total = 0;
 
-	if( !quiet ) {
+	if ( !quiet ) {
 		printf( "populating depth 0\n" );
 	}
-	for( segment = 0; segment < numArms; ++segment ) {
+	for ( segment = 0; segment < numArms; ++segment ) {
 		arm.SetAngle( segment, 0 );
 	}
 	while( 1 ) {
-		if( ra->LegalState( arm ) ) {
+		if ( ra->LegalState( arm ) ) {
 		  ++total;
 
-		  for( g = 0; g < numGoals; ++g ) {
-		    if( ra->GoalTest( arm, goals[ g ] ) ) {
+		  for ( g = 0; g < numGoals; ++g ) {
+		    if ( ra->GoalTest( arm, goals[ g ] ) ) {
 		      // new distance 0 (goal) arm configuration
 
 		      distances[ ArmAnglesIndex( arm ) ] = 0;
@@ -831,11 +831,11 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 			armRotations action;
 			action.SetRotation( segment, kRotateCW );
 			ra->ApplyAction( arm, action );
-			if( arm.GetAngle( segment ) != 0 ) {
+			if ( arm.GetAngle( segment ) != 0 ) {
 				break;
 			}
 		} while( ++segment < numArms );
-		if( segment == numArms ) {
+		if ( segment == numArms ) {
 			// tried all configurations
 			break;
 		}
@@ -843,7 +843,7 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 
 	printf( "%llu legal states\n", total );
 
-	if( !count ) {
+	if ( !count ) {
 	  fclose( nextFile );
 	  return 0;
 	}
@@ -852,7 +852,7 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 	total = 0;
 	do {
 		total += count;
-		if( !quiet ) {
+		if ( !quiet ) {
 			printf( "%llu states at distance %u\n",
 				count, distance );
 		}
@@ -869,13 +869,13 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 	} while( count );
 	fclose( nextFile );
 
-	if( !quiet ) {
+	if ( !quiet ) {
 		printf( "%llu total states\n", total );
 	}
 
 	// there are a number of small disconnected subspaces,
 	// so make sure goal doesn't correspond to this subspace!
-	if( distances[ ArmAnglesIndex( sampleArm ) ] == 65535 ) {
+	if ( distances[ ArmAnglesIndex( sampleArm ) ] == 65535 ) {
 		// sample arm not reachable!
 		return 0;
 	}
@@ -919,7 +919,7 @@ int ArmToTipHeuristic::GenerateHeuristic( const armAngles &sampleArm,
 	minTipDistances = new uint16_t[ NumTipPositionIndices() ];
 	maxTipDistances = new uint16_t[ NumTipPositionIndices() ];
 
-	if( !GenerateHeuristicSub( sampleArm, false, &goal, 1, distances,
+	if ( !GenerateHeuristicSub( sampleArm, false, &goal, 1, distances,
 				   minTipDistances, maxTipDistances, last ) ) {
 		delete[] maxTipDistances;
 		delete[] minTipDistances;
@@ -950,13 +950,13 @@ int ArmToTipHeuristic::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 	last = sampleArm;
 	ra->GetTipPosition( last, x, y );
 	last.SetGoal( x, y );
-	for( i = 0; i < numHeuristics; ++i ) {
+	for ( i = 0; i < numHeuristics; ++i ) {
 		distances = new uint16_t[ NumArmAnglesIndices( sampleArm ) ];
 		minTipDistances = new uint16_t[ NumTipPositionIndices() ];
 		maxTipDistances = new uint16_t[ NumTipPositionIndices() ];
 
 		printf( "generating next goal position\n" );
-		if( i ) {
+		if ( i ) {
 		  ret = GenerateHeuristicSub( sampleArm, true, goals, i,
 					      distances, minTipDistances,
 					      maxTipDistances, goals[ i ] );
@@ -965,7 +965,7 @@ int ArmToTipHeuristic::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 					      distances, minTipDistances,
 					      maxTipDistances, goals[ i ] );
 		}
-		if( !ret ) {
+		if ( !ret ) {
 			delete[] maxTipDistances;
 			delete[] minTipDistances;
 			delete[] distances;
@@ -976,7 +976,7 @@ int ArmToTipHeuristic::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 		goals[ i ].SetGoal( x, y );
 
 
-		if( !GenerateHeuristicSub( sampleArm, false, &goals[ i ], 1,
+		if ( !GenerateHeuristicSub( sampleArm, false, &goals[ i ], 1,
 					   distances, minTipDistances,
 					   maxTipDistances, last ) ) {
 			delete[] maxTipDistances;
@@ -1001,7 +1001,7 @@ uint16_t ArmToTipHeuristic::UseHeuristic(const armAngles &s, armAngles &g,
 
 	d_s = distances[ ArmAnglesIndex( s ) ];
 	d_g = distances[ ArmAnglesIndex( g ) ];
-	if( d_s < d_g ) {
+	if ( d_s < d_g ) {
 	  return d_g - d_s;
 	}
 	return d_s - d_g;
@@ -1019,13 +1019,13 @@ uint16_t ArmToTipHeuristic::UseHeuristic(const armAngles &arm,
 
 	mind = 65535;
 	maxd = 0;
-	for( y = goalY - ra->GetTolerance(), i = 0; i < 3; y += ra->GetTolerance(), ++i ) {
-	  for( x = goalX - ra->GetTolerance(), j = 0; j < 3; x += ra->GetTolerance(), ++j ) {
+	for ( y = goalY - ra->GetTolerance(), i = 0; i < 3; y += ra->GetTolerance(), ++i ) {
+	  for ( x = goalX - ra->GetTolerance(), j = 0; j < 3; x += ra->GetTolerance(), ++j ) {
 	    index =  TipPositionIndex( x, y, -1.0, -1.0, 2.0 );
-	    if( minTipDistances[ index ] < mind ) {
+	    if ( minTipDistances[ index ] < mind ) {
 	      mind = minTipDistances[ index ];
 	    }
-	    if( maxTipDistances[ index ] > maxd ) {
+	    if ( maxTipDistances[ index ] > maxd ) {
 	      maxd = maxTipDistances[ index ];
 	    }
 	  }
@@ -1036,14 +1036,14 @@ uint16_t ArmToTipHeuristic::UseHeuristic(const armAngles &arm,
 //printf( "min(dist(c->g))=%u - dist(s->g)=%u\n", (unsigned)mind, (unsigned)t );
 	maxd = t - maxd;
 	mind = mind - t;
-	if( mind > maxd ) {
+	if ( mind > maxd ) {
 	  maxd = mind;
 	}
-	if( maxd < 0 ) {
+	if ( maxd < 0 ) {
 	  maxd = 0;
 	}
 
-//if( maxd > 0 ) printf( "%u\n", (unsigned)maxd );
+//if ( maxd > 0 ) printf( "%u\n", (unsigned)maxd );
 
 	return maxd;
 }
@@ -1053,28 +1053,28 @@ bool ArmToTipHeuristic::ValidGoalPosition( double goalX, double goalY )
 	int i, j, index;
 	double x, y, tx, ty;
 
-	if( legalGoalTable == NULL ) {
+	if ( legalGoalTable == NULL ) {
 		// no table to use, can't prove anything
 		return false;
 	}
 
-	for( y = goalY - ra->GetTolerance(), i = 0; i < 3; y += ra->GetTolerance(), ++i ) {
-	  for( x = goalX - ra->GetTolerance(), j = 0; j < 3; x += ra->GetTolerance(), ++j ) {
+	for ( y = goalY - ra->GetTolerance(), i = 0; i < 3; y += ra->GetTolerance(), ++i ) {
+	  for ( x = goalX - ra->GetTolerance(), j = 0; j < 3; x += ra->GetTolerance(), ++j ) {
 	    tx = x;
-	    if( tx < -1.0 ) {
+	    if ( tx < -1.0 ) {
 	      tx = -1.0;
-	    } else if( tx >= 1.0 ) {
+	    } else if ( tx >= 1.0 ) {
 	      tx = 0.999999;
 	    }
 	    ty = y;
-	    if( ty < -1.0 ) {
+	    if ( ty < -1.0 ) {
 	      ty = -1.0;
-	    } else if( ty >= 1.0 ) {
+	    } else if ( ty >= 1.0 ) {
 	      ty = 0.999999;
 	    }
 
 	    index =  TipPositionIndex( tx, ty, -1.0, -1.0, 2.0 );
-	    if( !( legalGoalTable[ index >> 3 ] & ( 1 << ( index & 7 ) ) ) ) {
+	    if ( !( legalGoalTable[ index >> 3 ] & ( 1 << ( index & 7 ) ) ) ) {
 	      // given one unreachable square, there's a possibility
 	      // that even if the rest are reachable, they're
 	      // only reachable because of states that are
@@ -1105,12 +1105,12 @@ void ArmToTipHeuristic::GenerateLegalStateTable( armAngles &legalArm )
 	lgt = new uint8_t[ ( numTip + 7 ) >> 3 ];
 	memset( lgt, 0, ( numTip + 7 ) >> 3 );
 	distances = new uint16_t[ numStates ];
-	for( i = 0; i < numStates; ++i ) {
+	for ( i = 0; i < numStates; ++i ) {
 		distances[ i ] = 65535;
 	}
 	minTipDistances = new uint16_t[ numTip ];
 	maxTipDistances = new uint16_t[ numTip ];
-	for( i = 0; i < numTip; ++i ) {
+	for ( i = 0; i < numTip; ++i ) {
 		minTipDistances[ i ] = 65535;
 		maxTipDistances[ i ] = 0;
 	}
@@ -1139,14 +1139,14 @@ void ArmToTipHeuristic::GenerateLegalStateTable( armAngles &legalArm )
 	printf( "done: maximum distance of %d from chosen state\n",
 		(int)distance );
 
-	for( i = 0; i < numStates; ++i ) {
-		if( distances[ i ] < 65535 ) {
+	for ( i = 0; i < numStates; ++i ) {
+		if ( distances[ i ] < 65535 ) {
 			lst[ i >> 3 ] |= 1 << ( i & 7 );
 		}
 	}
 
-	for( i = 0; i < numTip; ++i ) {
-		if( minTipDistances[ i ]
+	for ( i = 0; i < numTip; ++i ) {
+		if ( minTipDistances[ i ]
 		    <= maxTipDistances[ i ] ) {
 			lgt[ i >> 3 ] |= 1 << ( i & 7 );
 		}
@@ -1167,7 +1167,7 @@ void ArmToTipHeuristic::GenerateTipPositionTables( armAngles &sampleArm )
 
 	printf( "generating tip position table\n" );
 
-	if( tipPositionTables != NULL ) {
+	if ( tipPositionTables != NULL ) {
 		return;
 	}
 
@@ -1182,7 +1182,7 @@ void ArmToTipHeuristic::GenerateTipPositionTables( armAngles &sampleArm )
 
 	while( 1 )
 	{
-		if( ra->LegalState( arm ) )
+		if ( ra->LegalState( arm ) )
 		{
 			ra->GetTipPosition( arm, x, y );
 			tipPositionTables[TipPositionIndex( x, y, -1.0, -1.0, 2.0 )].push_back( arm );
@@ -1194,7 +1194,7 @@ void ArmToTipHeuristic::GenerateTipPositionTables( armAngles &sampleArm )
 			armRotations action;
 			action.SetRotation( segment, kRotateCW );
 			ra->ApplyAction( arm, action );
-			if( arm.GetAngle( segment ) != 0 ) {
+			if ( arm.GetAngle( segment ) != 0 ) {
 				break;
 			}
 		} while( ++segment < numArms );

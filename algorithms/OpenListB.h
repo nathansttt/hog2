@@ -257,7 +257,7 @@ OBJ OpenListB<OBJ, HashKey, EqKey, CmpKey, SpecialKey, CmpKeyStrictExtract>::Fin
 	CmpKeyStrictExtract extractor;
 	SpecialKey spk;
 
-	if(!fless(extractor(_elts[0]), F))
+	if (!fless(extractor(_elts[0]), F))
 		return OBJ();
 
 	unsigned int resultIndex = 0;
@@ -268,7 +268,7 @@ OBJ OpenListB<OBJ, HashKey, EqKey, CmpKey, SpecialKey, CmpKeyStrictExtract>::Fin
 		unsigned int current = candidates.front();
 		candidates.pop_front();
 
-		if(spk(_elts[resultIndex],_elts[current])) 
+		if (spk(_elts[resultIndex],_elts[current])) 
 		{
 			resultIndex = current;
 		}
@@ -278,12 +278,12 @@ OBJ OpenListB<OBJ, HashKey, EqKey, CmpKey, SpecialKey, CmpKeyStrictExtract>::Fin
 		unsigned int child1 = current*2+1;
 		unsigned int child2 = current*2+2;
 		
-		if(child1 < count && fless(extractor(_elts[child1]),F))
+		if (child1 < count && fless(extractor(_elts[child1]),F))
 		{
 			candidates.push_back(child1);
 		}
 
-		if(child2 < count && fless(extractor(_elts[child2]),F))
+		if (child2 < count && fless(extractor(_elts[child2]),F))
 		{
 			candidates.push_back(child2);
 		}
@@ -300,7 +300,7 @@ OBJ OpenListB<OBJ, HashKey, EqKey, CmpKey, SpecialKey, CmpKeyStrictExtract>::Fin
 	CmpKeyStrictExtract extractor;
 	SpecialKey spk;
 
-	if(!fequal(extractor(_elts[0]), F))
+	if (!fequal(extractor(_elts[0]), F))
 		return OBJ();
 
 	unsigned int resultIndex = 0;
@@ -311,7 +311,7 @@ OBJ OpenListB<OBJ, HashKey, EqKey, CmpKey, SpecialKey, CmpKeyStrictExtract>::Fin
 		unsigned int current = candidates.front();
 		candidates.pop_front();
 
-		if(spk(_elts[resultIndex],_elts[current])) 
+		if (spk(_elts[resultIndex],_elts[current])) 
 		{
 			resultIndex = current;
 		}
@@ -321,12 +321,12 @@ OBJ OpenListB<OBJ, HashKey, EqKey, CmpKey, SpecialKey, CmpKeyStrictExtract>::Fin
 		unsigned int child1 = current*2+1;
 		unsigned int child2 = current*2+2;
 		
-		if(child1 < count && fequal(extractor(_elts[child1]),F))
+		if (child1 < count && fequal(extractor(_elts[child1]),F))
 		{
 			candidates.push_back(child1);
 		}
 
-		if(child2 < count && fequal(extractor(_elts[child2]),F))
+		if (child2 < count && fequal(extractor(_elts[child2]),F))
 		{
 			candidates.push_back(child2);
 		}

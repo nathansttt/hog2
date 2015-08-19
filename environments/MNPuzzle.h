@@ -127,7 +127,7 @@ public:
 
 	/** Returns stored goal state if it is stored.**/
 	MNPuzzleState Get_Goal(){
-		if(!goal_stored) {
+		if (!goal_stored) {
 			fprintf(stderr, "ERROR: Call to Get_Goal when no goal stored\n");
 			exit(1);
 		}

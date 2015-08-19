@@ -9,5 +9,11 @@
 #ifndef hog2_glut_Heuristic_h
 #define hog2_glut_Heuristic_h
 
+template <class state>
+class Heuristic {
+public:
+	virtual ~Heuristic() {}
+	virtual double HCost(const state &a, const state &b) = 0;
+};
 
 #endif

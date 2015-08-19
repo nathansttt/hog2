@@ -1031,6 +1031,8 @@ double MinimalSectorAbstraction::GetRegionError(int fromSector, int fromRegion,
 //            return regionError[fromSector][fromRegion];
 //    }
 //    return regionError[fromSector][fromRegion];
+	assert(!"Commented out code here.");
+	return 0;
 }
 
 /**
