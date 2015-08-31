@@ -324,14 +324,14 @@ void STPTest(unsigned long , tKeyboardModifier , char)
 		mnp.Load_Regular_PDB("/Users/nathanst/Desktop/STP_6-9.pdb", g, true);
 		mnp.Load_Regular_PDB("/Users/nathanst/Desktop/STP_6-11+.pdb", g, true);
 		mnp.Load_Regular_PDB("/Users/nathanst/Desktop/STP_12-15.pdb", g, true);
-		mnp.lookups.push_back({kMaxNode, 3, 1, 0});
-		mnp.lookups.push_back({kAddNode, 2, 4, 0});
-		mnp.lookups.push_back({kAddNode, 2, 6, 0});
-		mnp.lookups.push_back({kLeafNode, 0, 0, 4});
-		mnp.lookups.push_back({kLeafNode, 0, 0, 0});
-		mnp.lookups.push_back({kLeafNode, 0, 0, 1});
-		mnp.lookups.push_back({kLeafNode, 0, 0, 2});
-		mnp.lookups.push_back({kLeafNode, 0, 0, 3});
+		mnp.lookups.push_back({PermutationPuzzle::kMaxNode, 3, 1, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 4, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 6, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 4});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 2});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 3});
 	}
 
 	
@@ -529,7 +529,7 @@ void ModValueCompressionTest(bool weighted)
 		uint64_t newSize = oldSize / x;
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		mnp.Mod_Compress_PDB(0, newSize, true);
-		mnp.lookups.push_back({kLeafModCompress, -0, -0, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, -0});
 		MeasureIR(mnp);
 	}
 }
@@ -716,7 +716,7 @@ void BaseHeuristicTest(bool weighted)
 	{
 		printf("==>Solving with MD\n");
 		mnp.ClearPDBs();
-		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
 		std::string desc = "MD-";
 		Test(mnp, desc.c_str());
 	}
@@ -727,10 +727,10 @@ void BaseHeuristicTest(bool weighted)
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		mnp.Load_Regular_PDB(getPDB1b(weighted), g, true);
-		mnp.lookups.push_back({kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
 		std::string desc = "BASE8-";
 		Test(mnp, desc.c_str());
 	}
@@ -741,9 +741,9 @@ void BaseHeuristicTest(bool weighted)
 		mnp.ClearPDBs();
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
-		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
 		std::string desc = "BASE9-";
 		Test(mnp, desc.c_str());
 	}
@@ -776,13 +776,13 @@ void FractionalNodesCompressionTest(bool weighted)
 		mnp.Load_Regular_PDB(getPDB1b(weighted), g, true); // pdb 2
 		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true); // pdb 3
 		mnp.Fractional_Compress_PDB(3, newSize, true);
-		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kMaxNode, 2, 3, -0}); // max of 2 children starting at 3 in the tree
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kAddNode, 2, 5, -0});
-		mnp.lookups.push_back({kLeafFractionalCompress, -0, -0, 3});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 3, -0}); // max of 2 children starting at 3 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 5, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafFractionalCompress, -0, -0, 3});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
 		std::string desc = "FCT-C-";
 		desc += ('0'+x/10);
 		desc += ('0'+x%10);
@@ -840,13 +840,13 @@ void FractionalModNodesCompressionTest(bool weighted)
 		mnp.Load_Regular_PDB(getPDB1b(weighted), g, true); // pdb 2
 		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true); // pdb 3
 		mnp.Fractional_Mod_Compress_PDB(3, x, true);
-		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kMaxNode, 2, 3, -0}); // max of 2 children starting at 3 in the tree
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kAddNode, 2, 5, -0});
-		mnp.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 3});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 3, -0}); // max of 2 children starting at 3 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 5, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 3});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
 		
 		std::string desc = "FCT-M-";
 		desc += ('0'+x/10);
@@ -908,9 +908,9 @@ void ModNodesCompressionTest(bool weighted)
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
 		mnp.Mod_Compress_PDB(1, newSize, true);
-		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafModCompress, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, 1});
 
 		std::string desc = "MOD-";
 		desc += ('0'+x/10);
@@ -942,15 +942,15 @@ void ModNodesDeltaCompressionTest(bool weighted)
 		uint64_t newSize = oldSize / x;
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
-		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
 		mnp.Delta_Compress_PDB(g, 0, true);
 		mnp.Delta_Compress_PDB(g, 1, true);
 		mnp.Mod_Compress_PDB(1, newSize, true);
 		mnp.lookups.clear();
-		mnp.lookups.push_back({kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafModCompress, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, 1});
 		
 		std::string desc = "MOD-D-";
 		desc += ('0'+x/10);
@@ -982,9 +982,9 @@ void DivNodesCompressionTest(bool weighted)
 		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
 		mnp.Min_Compress_PDB(1, x, true);
 
-		mnp.lookups.push_back({kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
 
 		std::string desc = "DIV-";
 		desc += ('0'+x/10);
@@ -1017,15 +1017,15 @@ void DivNodesDeltaCompressionTest(bool weighted)
 			mnp.ClearPDBs();
 			mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
 			mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
-			mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+			mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
 			mnp.Delta_Compress_PDB(g, 0, true);
 			mnp.Delta_Compress_PDB(g, 1, true);
 			mnp.Min_Compress_PDB(1, x, true);
 			mnp.lookups.clear();
-			mnp.lookups.push_back({kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
-			mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
-			mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-			mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
+			mnp.lookups.push_back({PermutationPuzzle::kAddNode, 3, 1, -0}); // max of 2 children starting at 1 in the tree
+			mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
+			mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+			mnp.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
 			
 			std::string desc = "MIN-D-";
 			desc += ('0'+x/10);
@@ -1042,21 +1042,21 @@ void DivNodesDeltaCompressionTest(bool weighted)
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		mnp.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		mnp.Load_Regular_PDB(getPDB9b(weighted), g, true);
-		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
 		mnp.Delta_Compress_PDB(g, 0, true);
 		mnp.Delta_Compress_PDB(g, 1, true);
 		mnp.Delta_Compress_PDB(g, 2, true);
 		mnp.lookups.clear();
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
 		mnp.Delta_Compress_PDB(g, 2, true);
 		mnp.Min_Compress_PDB(2, x, true);
 
 		mnp.lookups.clear();
-		mnp.lookups.push_back({kAddNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
-		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
-		mnp.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 2});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
+		mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 2});
 		
 		std::string desc = "MIN-D8-";
 		desc += ('0'+x/10);
@@ -1090,7 +1090,7 @@ void BitDeltaNodesCompressionTest(bool weighted)
 			g.Reset();
 			printf("==>Compressing to %d bits\n", x);
 			mnp.ClearPDBs();
-			mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+			mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
 			
 			mnp.Load_Regular_PDB(getPDB8a(weighted), g, false); // PDB 0
 			mnp.Delta_Compress_PDB(g, 0, true);
@@ -1101,10 +1101,10 @@ void BitDeltaNodesCompressionTest(bool weighted)
 			
 			
 			mnp.lookups.resize(0);
-			mnp.lookups.push_back({kAddNode, 3, 1, -0});
-			mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-			mnp.lookups.push_back({kLeafNode, -0, -0, 1});
-			mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+			mnp.lookups.push_back({PermutationPuzzle::kAddNode, 3, 1, -0});
+			mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+			mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+			mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
 			
 			std::string desc = "VALRNG-DMD-";
 			desc += ('0'+x/10);
@@ -1121,7 +1121,7 @@ void BitDeltaNodesCompressionTest(bool weighted)
 		g.Reset();
 		printf("==>Compressing to %d bits\n", x);
 		mnp.ClearPDBs();
-		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
 		
 		mnp.Load_Regular_PDB(getPDB8a(weighted), g, false); // PDB 0
 		mnp.Delta_Compress_PDB(g, 0, true);
@@ -1133,18 +1133,18 @@ void BitDeltaNodesCompressionTest(bool weighted)
 		mnp.Delta_Compress_PDB(g, 2, true);
 
 		mnp.lookups.clear();
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
 		mnp.Delta_Compress_PDB(g, 2, true);
 
 		mnp.Value_Range_Compress_PDB(2, x, true);
 		
 		
 		mnp.lookups.resize(0);
-		mnp.lookups.push_back({kAddNode, 4, 1, -0});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 0});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 1});
-		mnp.lookups.push_back({kLeafNode, -0, -0, 2});
-		mnp.lookups.push_back({kLeafDefaultHeuristic, -0, -0, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kAddNode, 4, 1, -0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
+		mnp.lookups.push_back({PermutationPuzzle::kLeafDefaultHeuristic, -0, -0, -0});
 		
 		std::string desc = "VALRNG-D8-";
 		desc += ('0'+x/10);

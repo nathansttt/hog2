@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/graphalgorithms -I$(ROOT)/algorithms -I$(ROOT)/graph -I$(ROOT)/utils -I$(ROOT)/abstraction -I$(ROOT)/simulation
+PROJ_CXXFLAGS = -I$(ROOT)/graphalgorithms -I$(ROOT)/algorithms -I$(ROOT)/graph -I$(ROOT)/utils -I$(ROOT)/abstraction -I$(ROOT)/simulation -I$(ROOT)/search
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 

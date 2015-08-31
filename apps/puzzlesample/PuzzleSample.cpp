@@ -372,7 +372,7 @@ void CompareToMinCompression()
 		mnp->ClearPDBs();
 		tmp.Reset();
 		mnp->Load_Regular_PDB(PDB1, tmp, true);
-		mnp->lookups.push_back({kLeafMinCompress, factor, 0, 0});
+		mnp->lookups.push_back({PermutationPuzzle::kLeafMinCompress, factor, 0, 0});
 		mnp->Delta_Compress_PDB(tmp, 1, true);
 		exit(0);
 	}
@@ -445,9 +445,9 @@ void RunStandardTest()
 		tmp.Reset();
 		mnp->Load_Regular_PDB(PDB2, tmp, true);
 	}
-	mnp->lookups.push_back({kMaxNode, 2, 1, 0});
-	mnp->lookups.push_back({kLeafNode, 2, 0, 0});
-	mnp->lookups.push_back({kLeafNode, 2, 0, 1});
+	mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, 0});
+	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 0});
+	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 1});
 
 	STPTest(0, kNoModifier, 't');
 }
@@ -515,9 +515,9 @@ void RunCompressedTest()
 	if (fileExists(PDB2))
 	{
 		tmp.Reset();
-		mnp->lookups.push_back({kMaxNode, 2, 1, 0});
-		mnp->lookups.push_back({kLeafNode, 2, 0, 0});
-		mnp->lookups.push_back({kLeafNode, 2, 0, 1});
+		mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, 0});
+		mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 0});
+		mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 1});
 		//mnp->Load_Regular_PDB_as_Delta(PDB2, tmp, true);
 		assert(!"Need to update code to use new functions");
 	}
@@ -544,13 +544,13 @@ void RunCompressedTest()
 
 	mnp->lookups.resize(0);
 	// max (2 + max of (0, 1) , 3)
-	mnp->lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-	mnp->lookups.push_back({kLeafNode, -0, -0, 3});
-	mnp->lookups.push_back({kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
-	mnp->lookups.push_back({kMaxNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
-	mnp->lookups.push_back({kLeafNode, -0, -0, 2});
-	mnp->lookups.push_back({kLeafNode, -0, -0, 0});
-	mnp->lookups.push_back({kLeafNode, -0, -0, 1});
+	mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 3});
+	mnp->lookups.push_back({PermutationPuzzle::kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
+	mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
+	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
+	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
 	
 	STPTest(0, kNoModifier, 't');
 }
@@ -617,9 +617,9 @@ void CompareToSmallerPDB()
 	{
 		tmp.Reset();
 //		mnp->lookups.push_back({kLeafDefaultHeuristic, 0, 0, 0});
-		mnp->lookups.push_back({kMaxNode, 2, 1, 0});
-		mnp->lookups.push_back({kLeafNode, 2, 0, 0});
-		mnp->lookups.push_back({kLeafNode, 2, 0, 1});
+		mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, 0});
+		mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 0});
+		mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 1});
 		//mnp->Load_Regular_PDB_as_Delta("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb", tmp, true);
 		assert(!"Need to update code to use new functions");
 	}

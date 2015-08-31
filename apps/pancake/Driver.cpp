@@ -250,7 +250,7 @@ void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 			tiles.push_back(x);
 		
 		tse.Build_Regular_PDB(start, tiles, "/Users/nathanst/Desktop/TS_0-3.pdb");
-		tse.lookups.push_back({kLeafNode, 0, 0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 0});
 
 		tiles.resize(0);
 		start.Reset();
@@ -268,7 +268,7 @@ void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 			tiles.push_back(x);
 		
 		tse.Build_Regular_PDB(start, tiles, "/Users/nathanst/Desktop/TS_6-9.pdb");
-		tse.lookups.push_back({kLeafNode, 0, 0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 0});
 		
 		tiles.resize(0);
 		start.Reset();
@@ -301,10 +301,10 @@ void TSTest(unsigned long , tKeyboardModifier , char)
 //		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_0-5.pdb", g, true);
 //		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_12-15.pdb", g, true);
 //		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_6-11.pdb", g, true);
-//		tse.lookups.push_back({kMaxNode, 3, 1, 0});
-//		tse.lookups.push_back({kLeafNode, 0, 0, 0});
-//		tse.lookups.push_back({kLeafNode, 0, 0, 1});
-//		tse.lookups.push_back({kLeafNode, 0, 0, 2});
+//		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 3, 1, 0});
+//		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 0});
+//		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 1});
+//		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 2});
 //	}
 
 	if (ts->PDB.size() == 0)
@@ -314,14 +314,14 @@ void TSTest(unsigned long , tKeyboardModifier , char)
 		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_6-9.pdb", g, true);
 		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_6-11+.pdb", g, true);
 		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_12-15.pdb", g, true);
-		tse.lookups.push_back({kMaxNode, 3, 1, 0});
-		tse.lookups.push_back({kAddNode, 2, 4, 0});
-		tse.lookups.push_back({kAddNode, 2, 6, 0});
-		tse.lookups.push_back({kLeafNode, 0, 0, 4});
-		tse.lookups.push_back({kLeafNode, 0, 0, 0});
-		tse.lookups.push_back({kLeafNode, 0, 0, 1});
-		tse.lookups.push_back({kLeafNode, 0, 0, 2});
-		tse.lookups.push_back({kLeafNode, 0, 0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 3, 1, 0});
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 4, 0});
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 6, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 4});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 3});
 	}
 
 	
@@ -465,7 +465,7 @@ void ModValueCompressionTest()
 		uint64_t newSize = oldSize / x;
 		tse.Load_Regular_PDB(pdb8a, g, true);
 		tse.Mod_Compress_PDB(0, newSize, true);
-		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, -0});
 		MeasureIR(tse);
 	}
 }
@@ -489,14 +489,14 @@ void ModValueDeltaCompressionTest()
 		printf("==>MOD Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(pdb7a, g, true);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
 		tse.Load_Regular_PDB(pdb8a, g, true);
 		tse.Delta_Compress_PDB(g, 1, true);
 		tse.Mod_Compress_PDB(1, newSize, true);
-//		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
+//		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, -0});
 //		MeasureIR(tse);
 	}
 }
@@ -543,7 +543,7 @@ void DivValueCompressionTest()
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(pdb8a, g, true);
 		tse.Min_Compress_PDB(0, x, true);
-		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
 		MeasureIR(tse);
 	}
 }
@@ -589,7 +589,7 @@ void DivDeltaValueCompressionTest()
 		printf("==>Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(pdb7a, g, false);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 
 		tse.Load_Regular_PDB(pdb8a, g, false);
 		tse.Delta_Compress_PDB(g, 1, true);
@@ -617,7 +617,7 @@ void BitDeltaValueCompressionTest()
 		printf("==>Compressing to %d bits\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(pdb7a, g, false);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		
 		tse.Load_Regular_PDB(pdb8a, g, false);
 		tse.Delta_Compress_PDB(g, 1, true);
@@ -656,11 +656,11 @@ void FractionalNodesCompressionTest()
 		tse.Load_Regular_PDB(pdb8b, g, true);
 		tse.Fractional_Compress_PDB(1, newSize, true);
 		tse.Fractional_Compress_PDB(3, newSize, true);
-		tse.lookups.push_back({kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafFractionalCompress, -0, -0, 1});
-		tse.lookups.push_back({kLeafNode, -0, -0, 2});
-		tse.lookups.push_back({kLeafFractionalCompress, -0, -0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafFractionalCompress, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafFractionalCompress, -0, -0, 3});
 		Test(tse);
 	}
 }
@@ -689,9 +689,9 @@ void ModNodesCompressionTest()
 		tse.Load_Regular_PDB(pdb8b, g, true);
 		tse.Mod_Compress_PDB(0, newSize, true);
 		tse.Mod_Compress_PDB(1, newSize, true);
-		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafModCompress, -0, -0, 0});
-		tse.lookups.push_back({kLeafModCompress, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, 1});
 		Test(tse);
 	}
 }
@@ -715,7 +715,7 @@ void ModNodesDeltaCompressionTest()
 		printf("==>MOD Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(pdb7a, g, true);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
@@ -750,9 +750,9 @@ void DivNodesCompressionTest()
 		tse.Load_Regular_PDB(pdb8b, g, true);
 		tse.Min_Compress_PDB(1, x, true);
 
-		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
-		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
 
 		Test(tse);
 		//MeasureIR(tse);
@@ -778,7 +778,7 @@ void DivDeltaNodesCompressionTest()
 		printf("==>Compressing by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(pdb7a, g, false);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		
 		tse.Load_Regular_PDB(pdb8a, g, false);
 		tse.Delta_Compress_PDB(g, 1, true);
@@ -811,7 +811,7 @@ void BitDeltaNodesCompressionTest()
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(pdb7a, g, false); // PDB 0
 		tse.Load_Regular_PDB(pdb8a, g, false); // PDB 1
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		tse.Delta_Compress_PDB(g, 1, true);
 		tse.Value_Compress_PDB(1, cutoffs, true);
 		
@@ -823,13 +823,13 @@ void BitDeltaNodesCompressionTest()
 
 
 		tse.lookups.resize(0);
-		tse.lookups.push_back({kMaxNode, 2, 1, -0});
-		tse.lookups.push_back({kAddNode, 2, 3, -0});
-		tse.lookups.push_back({kAddNode, 2, 5, -0});
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafNode, -0, -0, 1});
-		tse.lookups.push_back({kLeafNode, -0, -0, 2});
-		tse.lookups.push_back({kLeafNode, -0, -0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0});
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 3, -0});
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 5, -0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 3});
 
 		Test(tse);
 	}
