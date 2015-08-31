@@ -34,6 +34,7 @@
 #include "TopSpin.h"
 #include "IDAStar.h"
 #include "Timer.h"
+#include "PermutationPDB.h"
 
 void CompareToMinCompression();
 void CompareToSmallerPDB();
@@ -242,45 +243,29 @@ void GetTSInstance(const TopSpin &ts, TopSpinState &theState, int which)
 
 void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 {
-//	TopSpin tse(16, 4);
-//	TopSpinState s1(16, 4);
-//	tse.Get_PDB_Size(s1, 1);
-//	tse.Get_PDB_Size(s1, 15);
-//	std::vector<int> distinct1 = {1, 2, 3};
-//	std::vector<int> distinct2 = {0, 1, 2, 3};
-//	std::vector<int> distinct3 = {0, 1, 2};
-//	std::vector<int> distinct4 = {0};
-//	std::vector<int> distinct5 = {3};
-//	s1.Reset();
-//	tse.ApplyAction(s1, 2);
-//	std::cout << s1 << "\n";
-//	std::cout << "Hash of 1,2,3 = " << tse.GetPDBHash(s1, distinct1) << "\n";
-//	std::cout << "Hash of 0,1,2,3 = " << tse.GetPDBHash(s1, distinct2) << "\n";
-//	std::cout << "Hash of 0,1,2 = " << tse.GetPDBHash(s1, distinct3) << "\n";
-//	std::cout << "Hash of 0 = " << tse.GetPDBHash(s1, distinct4) << "\n";
-//	std::cout << "Hash of 3 = " << tse.GetPDBHash(s1, distinct5) << "\n";
-//	tse.ApplyAction(s1, 3);
-//	std::cout << s1 << "\n";
-//	std::cout << "Hash of 1,2,3 = " << tse.GetPDBHash(s1, distinct1) << "\n";
-//	std::cout << "Hash of 0,1,2,3 = " << tse.GetPDBHash(s1, distinct2) << "\n";
-//	std::cout << "Hash of 0,1,2 = " << tse.GetPDBHash(s1, distinct3) << "\n";
-//	std::cout << "Hash of 0 = " << tse.GetPDBHash(s1, distinct4) << "\n";
-//	std::cout << "Hash of 3 = " << tse.GetPDBHash(s1, distinct5) << "\n";
-//	exit(0);
-
-//	ModValueDeltaCompressionTest();
-//	DivDeltaValueCompressionTest();
-//	ModValueCompressionTest();
-//	DivValueCompressionTest();
-//	BitDeltaValueCompressionTest();
-
-	bool weighted = false;
+	TopSpin env;
+	TopSpinState s;
+	s.Reset();
+	std::vector<int> pattern = {0, 1, 2, 3, 4};
+	PermutationPDB<TopSpinState, TopSpinAction, TopSpin> pdb(&env, s, pattern);
+	
+//	for (uint64_t x = 0; x < pdb.GetPDBSize(); x++)
+//	{
+//		pdb.GetStateFromPDBHash(x, s);
+//		std::cout << s << std::endl;
+//	}
+	
+	pdb.BuildPDB(s, "/Users/nathanst/test.pdb", std::thread::hardware_concurrency());
+	
+	env.Build_PDB(s, pattern, "/Users/nathanst/test2.pdb", std::thread::hardware_concurrency(), false);
+	
+//	bool weighted = false;
 //	DivDeltaNodesCompressionTest(weighted);
 //	ModNodesDeltaCompressionTest(weighted);
-
-	weighted = true;
+//
+//	weighted = true;
 //	DivDeltaNodesCompressionTest(weighted);
-	ModNodesDeltaCompressionTest(weighted);
+//	ModNodesDeltaCompressionTest(weighted);
 //	BaseHeuristicTest(weighted);
 //	FractionalModNodesCompressionTest(weighted);
 //	FractionalNodesCompressionTest(weighted);
@@ -318,14 +303,14 @@ void TSTest(unsigned long , tKeyboardModifier , char)
 		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_6-9.pdb", g, true);
 		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_6-11+.pdb", g, true);
 		tse.Load_Regular_PDB("/Users/nathanst/Desktop/TS_12-15.pdb", g, true);
-		tse.lookups.push_back({kMaxNode, 3, 1, 0});
-		tse.lookups.push_back({kAddNode, 2, 4, 0});
-		tse.lookups.push_back({kAddNode, 2, 6, 0});
-		tse.lookups.push_back({kLeafNode, 0, 0, 4});
-		tse.lookups.push_back({kLeafNode, 0, 0, 0});
-		tse.lookups.push_back({kLeafNode, 0, 0, 1});
-		tse.lookups.push_back({kLeafNode, 0, 0, 2});
-		tse.lookups.push_back({kLeafNode, 0, 0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 3, 1, 0});
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 4, 0});
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 6, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 4});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, 0, 0, 3});
 	}
 
 	
@@ -558,7 +543,7 @@ void ModValueCompressionTest(bool weighted)
 		uint64_t newSize = oldSize / x;
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Mod_Compress_PDB(0, newSize, true);
-		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, -0});
 		MeasureIR(tse);
 	}
 }
@@ -583,14 +568,14 @@ void ModValueDeltaCompressionTest(bool weighted)
 		printf("==>Compressing (mod-delta) by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 
 		uint64_t oldSize = tse.Get_PDB_Size(g, 8);
 		uint64_t newSize = oldSize / x;
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Delta_Compress_PDB(g, 1, true);
 		tse.Mod_Compress_PDB(1, newSize, true);
-//		tse.lookups.push_back({kLeafModCompress, -0, -0, -0});
+//		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, -0});
 //		MeasureIR(tse);
 	}
 }
@@ -638,7 +623,7 @@ void DivValueCompressionTest(bool weighted)
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Min_Compress_PDB(0, x, true);
-		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
 		MeasureIR(tse);
 	}
 }
@@ -685,7 +670,7 @@ void DivDeltaValueCompressionTest(bool weighted)
 		printf("==>Compressing (div delta) by factor of %d\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, false);
 		tse.Delta_Compress_PDB(g, 1, true);
@@ -714,7 +699,7 @@ void BitDeltaValueCompressionTest(bool weighted)
 		printf("==>Compressing (value-range-delta) to %d bits\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, false);
 		tse.Delta_Compress_PDB(g, 1, true);
@@ -745,7 +730,7 @@ void MeasureRLE(bool weighted)
 		printf("==>Compressing (value-range-delta) to %d bits\n", x);
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, false);
 		tse.Delta_Compress_PDB(g, 1, true);
@@ -795,7 +780,7 @@ void ExtractPatterns(bool weighted)
 
 	tse.ClearPDBs();
 	tse.Load_Regular_PDB(getPDB6a(weighted), g, false);
-	tse.lookups.push_back({kLeafNode, -0, -0, 0});
+	tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 	
 	tse.Load_Regular_PDB(getPDB7a(weighted), g, false);
 	tse.Delta_Compress_PDB(g, 1, true);
@@ -831,9 +816,9 @@ void BaseHeuristicTest(bool weighted)
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, true);
 		tse.Load_Regular_PDB(getPDB7b(weighted), g, true);
-		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafNode, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
 		std::string desc = "BASE7-";
 		Test(tse, desc.c_str());
 	}
@@ -842,9 +827,9 @@ void BaseHeuristicTest(bool weighted)
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
-		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafNode, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
 		std::string desc = "BASE8-";
 		Test(tse, desc.c_str());
 	}
@@ -878,11 +863,11 @@ void FractionalNodesCompressionTest(bool weighted)
 		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		tse.Fractional_Compress_PDB(1, newSize, true);
 		tse.Fractional_Compress_PDB(3, newSize, true);
-		tse.lookups.push_back({kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafFractionalCompress, -0, -0, 1});
-		tse.lookups.push_back({kLeafNode, -0, -0, 2});
-		tse.lookups.push_back({kLeafFractionalCompress, -0, -0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafFractionalCompress, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafFractionalCompress, -0, -0, 3});
 		std::string desc = "FCT-C-";
 		desc += ('0'+x/10);
 		desc += ('0'+x%10);
@@ -915,11 +900,11 @@ void FractionalModNodesCompressionTest(bool weighted)
 		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		tse.Fractional_Mod_Compress_PDB(1, x, true);
 		tse.Fractional_Mod_Compress_PDB(3, x, true);
-		tse.lookups.push_back({kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 1}); // factor, -- , id
-		tse.lookups.push_back({kLeafNode, -0, -0, 2});
-		tse.lookups.push_back({kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 4, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 1}); // factor, -- , id
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafFractionalModCompress, static_cast<uint8_t>(x), -0, 3});
 		std::string desc = "FCT-M-";
 		desc += ('0'+x/10);
 		desc += ('0'+x%10);
@@ -953,9 +938,9 @@ void ModNodesCompressionTest(bool weighted)
 		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		tse.Mod_Compress_PDB(0, newSize, true);
 		tse.Mod_Compress_PDB(1, newSize, true);
-		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafModCompress, -0, -0, 0});
-		tse.lookups.push_back({kLeafModCompress, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, 1});
 
 		std::string desc = "MOD-";
 		desc += ('0'+x/10);
@@ -989,7 +974,7 @@ void ModNodesDeltaCompressionTest(bool weighted)
 		tse.Load_Regular_PDB(getPDB7b(weighted), g, true);
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		tse.Delta_Compress_PDB(g, 2, true);
 		tse.lookups.back().PDBID = 1;
 		tse.Delta_Compress_PDB(g, 3, true);
@@ -998,15 +983,15 @@ void ModNodesDeltaCompressionTest(bool weighted)
 		tse.Mod_Compress_PDB(2, newSize, true);
 		tse.Mod_Compress_PDB(3, newSize, true);
 
-		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kAddNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
 		
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafModCompress, -0, -0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, 2});
 
-		tse.lookups.push_back({kLeafNode, -0, -0, 1});
-		tse.lookups.push_back({kLeafModCompress, -0, -0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kLeafModCompress, -0, -0, 3});
 		
 		std::string desc = "MOD-D-";
 		desc += ('0'+x/10);
@@ -1039,9 +1024,9 @@ void DivNodesCompressionTest(bool weighted)
 		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		tse.Min_Compress_PDB(1, x, true);
 
-		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
-		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 1});
 
 		std::string desc = "DIV-";
 		desc += ('0'+x/10);
@@ -1075,7 +1060,7 @@ void DivDeltaNodesCompressionTest(bool weighted)
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, true);
 		tse.Load_Regular_PDB(getPDB8b(weighted), g, true);
 		
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		tse.Delta_Compress_PDB(g, 2, true);
 		tse.lookups.back().PDBID = 1;
 		tse.Delta_Compress_PDB(g, 3, true);
@@ -1084,14 +1069,14 @@ void DivDeltaNodesCompressionTest(bool weighted)
 		tse.Min_Compress_PDB(2, x, true);
 		tse.Min_Compress_PDB(3, x, true);
 		
-		tse.lookups.push_back({kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
-		tse.lookups.push_back({kAddNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
 
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 2});
-		tse.lookups.push_back({kLeafNode, -0, -0, 1});
-		tse.lookups.push_back({kLeafMinCompress, static_cast<uint8_t>(x), -0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kLeafMinCompress, static_cast<uint8_t>(x), -0, 3});
 		
 		std::string desc = "DIV-D-";
 		desc += ('0'+x/10);
@@ -1125,7 +1110,7 @@ void BitDeltaNodesCompressionTest(bool weighted)
 		tse.ClearPDBs();
 		tse.Load_Regular_PDB(getPDB7a(weighted), g, false); // PDB 0
 		tse.Load_Regular_PDB(getPDB8a(weighted), g, false); // PDB 1
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
 		tse.Delta_Compress_PDB(g, 1, true);
 		tse.Value_Range_Compress_PDB(1, x, true);
 		tse.Load_Regular_PDB(getPDB7b(weighted), g, false); // PDB 2
@@ -1137,13 +1122,13 @@ void BitDeltaNodesCompressionTest(bool weighted)
 
 
 		tse.lookups.resize(0);
-		tse.lookups.push_back({kMaxNode, 2, 1, -0});
-		tse.lookups.push_back({kAddNode, 2, 3, -0});
-		tse.lookups.push_back({kAddNode, 2, 5, -0});
-		tse.lookups.push_back({kLeafNode, -0, -0, 0});
-		tse.lookups.push_back({kLeafNode, -0, -0, 1});
-		tse.lookups.push_back({kLeafNode, -0, -0, 2});
-		tse.lookups.push_back({kLeafNode, -0, -0, 3});
+		tse.lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0});
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 3, -0});
+		tse.lookups.push_back({PermutationPuzzle::kAddNode, 2, 5, -0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
+		tse.lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 3});
 
 		std::string desc = "VALRNG-";
 		desc += ('0'+x/10);

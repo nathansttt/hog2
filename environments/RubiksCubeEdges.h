@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <vector>
 #include "SearchEnvironment.h"
+#include "PDBHeuristic.h"
 
 class RubikEdgeState
 {
@@ -34,6 +35,8 @@ public:
 	}
 	void SetCubeInLoc(int whichLoc, int cube)
 	{
+		if (whichLoc >= 12)
+			return;
 		uint64_t blank = 0xF;
 		uint64_t value = cube&0xF;
 		state = state&(~(blank<<(12+4*whichLoc)));
@@ -45,6 +48,8 @@ public:
 	}
 	void SetCubeOrientation(int whichLoc, bool flip)
 	{
+		if (whichLoc >= 12)
+			return;
 		uint64_t blank = 0x1;
 		if (flip)
 			state |= (0x1<<whichLoc);
@@ -53,6 +58,8 @@ public:
 	}
 	void FlipCubeOrientation(int whichLoc)
 	{
+		if (whichLoc >= 12)
+			return;
 		//		printf("Was: 0x%X [flip %d] -- ", state, whichLoc);
 		state = state^(0x1<<whichLoc);
 		//		printf("Now: 0x%X \n", state);
@@ -69,7 +76,8 @@ static std::ostream& operator <<(std::ostream & out, const RubikEdgeState &s)
 {
 	for (int x = 0; x < 12; x++)
 	{
-		out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(s.GetCubeInLoc(x))?1:0) << " ";
+		out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(x) << "] ";
+		//out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(s.GetCubeInLoc(x))?1:0) << " ";
 	}
 	return out;
 }
@@ -126,7 +134,7 @@ public:
 	void freeMove(RubikEdgeMove *m) {}
 	virtual void GetNextState(const RubikEdgeState &, RubikEdgeAction , RubikEdgeState &) const;
 	
-	virtual bool InvertAction(RubikEdgeAction &a) const { return false; }
+	virtual bool InvertAction(RubikEdgeAction &a) const;
 	
 	int64_t rankPlayer(RubikEdgeState &s, int who)
 	{ return GetStateHash(s); }
@@ -155,5 +163,30 @@ private:
 	void SetCubeColor(int which, bool face, const RubikEdgeState&) const;
 	RubikEdgeMove moves[18];
 };
+
+class RubikEdgePDB : public PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge> {
+public:
+	RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges);
+	uint64_t GetStateHash(const RubikEdgeState &s) const;
+	void GetStateFromHash(RubikEdgeState &s, uint64_t hash) const;
+	uint64_t GetPDBSize() const;
+	uint64_t GetPDBHash(const RubikEdgeState &s, int threadID = 0) const;
+	void GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int threadID = 0) const;
+	
+	const char *GetName();
+	void WritePDBHeader(FILE *f) const;
+	void ReadPDBHeader(FILE *f) const;
+private:
+	uint64_t Factorial(int val) const;
+	uint64_t FactorialUpperK(int n, int k) const;
+	std::vector<int> edges;
+	size_t puzzleSize;
+	uint64_t pdbSize;
+	
+	// cache for computing ranking/unranking
+	mutable std::vector<std::vector<int> > dual;
+	mutable std::vector<std::vector<int> > locs;
+};
+
 
 #endif /* defined(__hog2_glut__RubikEdge__) */

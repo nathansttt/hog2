@@ -60,7 +60,7 @@ static bool operator==(const TopSpinState &l1, const TopSpinState &l2)
 	return true;
 }
 
-class TopSpin : public PermutationPuzzleEnvironment<TopSpinState, TopSpinAction> {
+class TopSpin : public PermutationPuzzle::PermutationPuzzleEnvironment<TopSpinState, TopSpinAction> {
 public:
 	TopSpin(unsigned int N = 20, unsigned int k = 4);
 	~TopSpin();

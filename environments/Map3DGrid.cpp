@@ -1039,7 +1039,7 @@ void Map3DGrid::AddEdge(state3d &from, state3d &to)
 		AddGridEdge(from, to, true);
 		return;
 	}
-	else if ((from.sector == to.sector)) // but different regions
+	else if (from.sector == to.sector) // but different regions
 	{
 //		printf("Adding between %d/%d/%d and %d/%d/%d\n",
 //			   from.GetSector(), from.GetRegion(), from.GetOffset(),
@@ -1283,7 +1283,7 @@ void Map3DGrid::RemoveEdge(state3d &from, state3d &to)
 		RemoveGridEdge(from, to);
 		return;
 	}
-	else if ((from.sector == to.sector)) // but different regions
+	else if (from.sector == to.sector) // but different regions
 	{
 		int cnt = RemoveGridEdge(from, to);
 		RemoveEdge(from.sector, from.region, to.sector, to.region, cnt);

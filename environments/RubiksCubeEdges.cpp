@@ -9,7 +9,36 @@
 #include "RubiksCubeEdges.h"
 #include "GLUtil.h"
 #include <cassert>
+#include <string>
 
+/**
+ *
+ * Implementation details:
+ *
+ * This just implements the 12 Edges. Corners are labeled from 0...11 as follows
+ *
+ *
+ *  +---6---+
+ *  |\       \
+ *  | 0       4
+ *  7  \___2___\
+ *  |  |       |
+ *  \  1       3
+ *   8 |       |
+ *    \|___9___|
+ *
+ *
+ *  +---6---+
+ *  |       |\
+ *  |       | 4
+ *  7       5  \
+ *  |___11__|  |
+ *  \       \  3
+ *   8      10 |
+ *    \___9___\|
+ *
+ */
+ 
 void RubikEdgeState::GetDual(RubikEdgeState &s) const
 {
 	for (int x = 0; x < 12; x++)
@@ -340,6 +369,21 @@ void RubikEdge::GetNextState(const RubikEdgeState &s0, RubikEdgeAction a, RubikE
 	s1 = s0;
 	ApplyAction(s1, a);
 }
+
+bool RubikEdge::InvertAction(RubikEdgeAction &a) const
+{
+	if (2 == a%3)
+		return true;
+	if (1 == a%3)
+	{
+		a -= 1;
+		return true;
+	}
+	a += 1;
+	return true;
+
+}
+
 
 inline uint64_t Factorial(int n)
 {
@@ -1032,4 +1076,172 @@ void RubikEdge::SetCubeColor(int which, bool face, const RubikEdgeState &s) cons
 		case 5: glColor3f(1.0, 1.0, 1.0); break;
 		default: assert(false);
 	}
+}
+
+
+RubikEdgePDB::RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges)
+:PDBHeuristic(e), edges(distinctEdges)
+{
+	
+}
+
+uint64_t RubikEdgePDB::GetStateHash(const RubikEdgeState &s) const
+{
+	return 0;
+}
+
+void RubikEdgePDB::GetStateFromHash(RubikEdgeState &s, uint64_t hash) const
+{
+}
+
+uint64_t RubikEdgePDB::GetPDBSize() const
+{
+	// last tile is symmetric
+	uint64_t power2[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 2048};
+	int elts = (int)edges.size();
+	return FactorialUpperK(12, 12-elts)*power2[elts];
+}
+
+uint64_t RubikEdgePDB::GetPDBHash(const RubikEdgeState &s, int threadID ) const
+{
+	int puzzle[12];
+	int dual[16]; // seamlessly handle 0xF entries (no cube)
+	int lastPiece = 12-(int)edges.size();
+	//std::cout << "!" << s << "\n";
+	for (int x = 0; x < 12; x++)
+		dual[s.GetCubeInLoc(x)] = x;
+	for (int x = 0; x < edges.size(); x++)
+		puzzle[x] = dual[edges[x]];
+	
+	uint64_t hashVal = 0;
+	uint64_t part2 = 0;
+	int numEntriesLeft = 12;
+	for (unsigned int x = 0; x < edges.size(); x++)
+	{
+		hashVal += puzzle[x]*FactorialUpperK(numEntriesLeft-1, lastPiece);
+		
+		numEntriesLeft--;
+		for (unsigned y = x; y < edges.size(); y++)
+		{
+			if (puzzle[y] > puzzle[x])
+				puzzle[y]--;
+		}
+	}
+	int limit = std::min((int)edges.size(), 11);
+	for (int x = 0; x < limit; x++)
+	{
+		part2 = part2*2+(s.GetCubeOrientation(edges[x])?1:0);
+		//part2 = part2*3+s.GetCubeOrientation(dual[corners[x]]);
+	}
+	return part2*FactorialUpperK(12, lastPiece)+hashVal;
+}
+
+void RubikEdgePDB::GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int threadID) const
+{
+	int lastPiece = 12-(int)edges.size();
+	int puzzle[12];
+	int dual[16];
+	uint64_t hashVal = hash;
+	hash /= FactorialUpperK(12, lastPiece); // for rotations
+	hashVal = hashVal%FactorialUpperK(12, lastPiece); // for pieces
+	
+	int numEntriesLeft = lastPiece+1;
+	for (int x = edges.size()-1; x >= 0; x--)
+	{
+		puzzle[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < edges.size(); y++)
+		{
+			if (puzzle[y] >= puzzle[x])
+				puzzle[y]++;
+		}
+	}
+	for (int x = 0; x < 12; x++)
+	{
+		s.SetCubeInLoc(x, 0xF);
+		s.SetCubeOrientation(x, 0);
+	}
+	
+	for (int x = 0; x < edges.size(); x++)
+	{
+		s.SetCubeInLoc(puzzle[x], edges[x]);
+		dual[edges[x]] = puzzle[x];
+	}
+	
+	int cnt = 0;
+	int limit = std::min((int)edges.size(), 11);
+	for (int x = limit-1; x >= 0; x--)
+	{
+		s.SetCubeOrientation(edges[x], hash%2);
+		//s.SetCubeOrientation(dual[corners[x]], hash%3);
+		cnt += hash%2;
+		hash/=2;
+	}
+	if (edges.size() == 12)
+		s.SetCubeOrientation(edges[7], cnt%2);
+
+}
+
+const char *RubikEdgePDB::GetName()
+{
+	static std::string s = "rce-";
+	for (int x = 0; x < edges.size(); x++)
+	{
+		if (x != 0)
+			s+="+";
+		s+=std::to_string(edges[x]);
+	}
+	return s.c_str();
+}
+
+
+void RubikEdgePDB::WritePDBHeader(FILE *f) const
+{
+	
+}
+
+void RubikEdgePDB::ReadPDBHeader(FILE *f) const
+{
+	
+}
+
+uint64_t RubikEdgePDB::Factorial(int val) const
+{
+	static uint64_t table[21] =
+	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
+		6227020800ll, 87178291200ll, 1307674368000ll, 20922789888000ll, 355687428096000ll,
+		6402373705728000ll, 121645100408832000ll, 2432902008176640000ll };
+	if (val > 20)
+		return (uint64_t)-1;
+	return table[val];
+}
+
+uint64_t RubikEdgePDB::FactorialUpperK(int n, int k) const
+{
+	const uint64_t result[13][13] = {
+		{1}, // n = 0
+		{1, 1}, // n = 1
+		{2, 2, 1}, // n = 2
+		{6, 6, 3, 1}, // n = 3
+		{24, 24, 12, 4, 1}, // n = 4
+		{120, 120, 60, 20, 5, 1}, // n = 5
+		{720, 720, 360, 120, 30, 6, 1}, // n = 6
+		{5040, 5040, 2520, 840, 210, 42, 7, 1}, // n = 7
+		{40320, 40320, 20160, 6720, 1680, 336, 56, 8, 1}, // n = 8
+		{362880, 362880, 181440, 60480, 15120, 3024, 504, 72, 9, 1}, // n = 9
+		{3628800, 3628800, 1814400, 604800, 151200, 30240, 5040, 720, 90, 10, 1}, // n = 10
+		{39916800, 39916800, 19958400, 6652800, 1663200, 332640, 55440, 7920, 990, 110, 11, 1}, // n = 11
+		{479001600, 479001600, 239500800, 79833600, 19958400, 3991680, 665280, 95040, 11880, 1320, 132, 12, 1} // n = 12
+	};
+	return result[n][k];
+//	uint64_t value = 1;
+//	assert(n >= 0 && k >= 0);
+//	
+//	for (int i = n; i > k; i--)
+//	{
+//		value *= i;
+//	}
+//	
+//	return value;
 }

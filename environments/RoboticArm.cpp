@@ -32,7 +32,7 @@ void armRotations::SetRotation(int which, tRotation dir)
 		case kRotateCCW: value = 1; break;
 		case kNoRotation: value = 0; break;
 	}
-	rotations = rotations&((~0x3)<<(2*which))|(value<<2*which);
+	rotations = (rotations&((~0x3)<<(2*which)))|(value<<2*which);
 }
 
 int armAngles::GetAngle(int which) const

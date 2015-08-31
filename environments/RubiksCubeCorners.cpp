@@ -253,19 +253,29 @@ void RubiksCorner::ApplyAction(RubiksCornerState &s, RubiksCornersAction a) cons
 		case 9: // face 4
 		{
 			s.Rotate(2, 3, 7, 6);
+			//std::cout << "^" << s << "\n";
 			s.SetCubeOrientation(s.GetCubeInLoc(3), (s.GetCubeOrientation(s.GetCubeInLoc(3))+2)%3);
+			//std::cout << "^" << s << "\n";
 			s.SetCubeOrientation(s.GetCubeInLoc(2), (s.GetCubeOrientation(s.GetCubeInLoc(2))+1)%3);
+			//std::cout << "^" << s << "\n";
 			s.SetCubeOrientation(s.GetCubeInLoc(6), (s.GetCubeOrientation(s.GetCubeInLoc(6))+2)%3);
+			//std::cout << "^" << s << "\n";
 			s.SetCubeOrientation(s.GetCubeInLoc(7), (s.GetCubeOrientation(s.GetCubeInLoc(7))+1)%3);
+			//std::cout << "^" << s << "\n";
 		}
 			break;
 		case 10:
 		{
 			s.Rotate(6, 7, 3, 2);
+			//std::cout << "*" << s << "\n";
 			s.SetCubeOrientation(s.GetCubeInLoc(3), (s.GetCubeOrientation(s.GetCubeInLoc(3))+2)%3);
+			//std::cout << "*" << s << "\n";
 			s.SetCubeOrientation(s.GetCubeInLoc(2), (s.GetCubeOrientation(s.GetCubeInLoc(2))+1)%3);
+			//std::cout << "*" << s << "\n";
 			s.SetCubeOrientation(s.GetCubeInLoc(6), (s.GetCubeOrientation(s.GetCubeInLoc(6))+2)%3);
+			//std::cout << "*" << s << "\n";
 			s.SetCubeOrientation(s.GetCubeInLoc(7), (s.GetCubeOrientation(s.GetCubeInLoc(7))+1)%3);
+			//std::cout << "*" << s << "\n";
 		}
 			break;
 		case 11:
@@ -332,6 +342,19 @@ void RubiksCorner::GetNextState(const RubiksCornerState &s0, RubiksCornersAction
 	ApplyAction(s1, a);
 }
 
+
+bool RubiksCorner::InvertAction(RubiksCornersAction &a) const
+{
+	if (2 == a%3)
+		return true;
+	if (1 == a%3)
+	{
+		a -= 1;
+		return true;
+	}
+	a += 1;
+	return true;
+}
 
 /** Goal Test if the goal is stored **/
 bool RubiksCorner::GoalTest(const RubiksCornerState &node)
@@ -535,7 +558,7 @@ void RubiksCorner::GetStateFromHash(uint64_t hash, RubiksCornerState &node) cons
 		cnt += hash%3;
 		hash/=3;
 	}
-	node.SetCubeOrientation(7, 2-(cnt%3));
+	node.SetCubeOrientation(7, (3-(cnt%3))%3);
 	
 	int numEntriesLeft = 1;
 	for (int x = 8-1; x >= 0; x--)
@@ -563,7 +586,7 @@ void RubiksCorner::GetStateFromHash(uint64_t hash, RubiksCornerState &node) cons
 		cnt += bits%3;
 		bits/=3;
 	}
-	node.SetCubeOrientation(7, 2-(cnt%3));
+	node.SetCubeOrientation(7, (3-(cnt%3))%3);
 	
 	uint64_t val = 0;
 	for (int x = 0; x < 8; x++)
@@ -1024,4 +1047,170 @@ void RubiksCorner::SetFaceColor(int face, const RubiksCornerState &s) const
 		case 5: glColor3f(1.0, 1.0, 1.0); break;
 		default: glColor3f(0.0, 0.0, 0.0); break;
 	}
+}
+
+
+
+RubikCornerPDB::RubikCornerPDB(RubiksCorner *e, const RubiksCornerState &s, std::vector<int> &distinctCorners)
+:PDBHeuristic(e), corners(distinctCorners)
+{
+	
+}
+
+uint64_t RubikCornerPDB::GetStateHash(const RubiksCornerState &s) const
+{
+	//assert(false);
+	return 0;
+}
+
+void RubikCornerPDB::GetStateFromHash(RubiksCornerState &s, uint64_t hash) const
+{
+	//assert(false);
+}
+
+uint64_t RubikCornerPDB::GetPDBSize() const
+{
+	uint64_t power3[] = {1, 3, 9, 27, 81, 243, 729, 2187, 2187}; // last tile is symmetric
+	int elts = (int)corners.size();
+	return FactorialUpperK(8, 8-elts)*power3[elts];
+}
+
+uint64_t RubikCornerPDB::GetPDBHash(const RubiksCornerState &s, int threadID) const
+{
+	// TODO: handle fewer according to pattern
+	int puzzle[8];
+	int dual[16]; // seamlessly handle 0xF entries (no cube)
+	int lastPiece = 8-(int)corners.size();
+	for (int x = 0; x < 8; x++)
+		dual[s.GetCubeInLoc(x)] = x;
+	for (int x = 0; x < corners.size(); x++)
+		puzzle[x] = dual[corners[x]];
+	
+	uint64_t hashVal = 0;
+	uint64_t part2 = 0;
+	int numEntriesLeft = 8;
+	for (unsigned int x = 0; x < corners.size(); x++)
+	{
+		hashVal += puzzle[x]*FactorialUpperK(numEntriesLeft-1, lastPiece);
+
+		numEntriesLeft--;
+		for (unsigned y = x; y < corners.size(); y++)
+		{
+			if (puzzle[y] > puzzle[x])
+				puzzle[y]--;
+		}
+	}
+	int limit = std::min((int)corners.size(), 7);
+	for (int x = 0; x < limit; x++)
+	{
+		part2 = part2*3+s.GetCubeOrientation(corners[x]);
+		//part2 = part2*3+s.GetCubeOrientation(dual[corners[x]]);
+	}
+	return part2*FactorialUpperK(8, lastPiece)+hashVal;
+}
+
+void RubikCornerPDB::GetStateFromPDBHash(uint64_t hash, RubiksCornerState &s, int threadID) const
+{
+	int lastPiece = 8-(int)corners.size();
+	int puzzle[12];
+	int dual[16];
+	uint64_t hashVal = hash;
+	hash /= FactorialUpperK(8, lastPiece); // for rotations
+	hashVal = hashVal%FactorialUpperK(8, lastPiece); // for pieces
+	
+	int numEntriesLeft = lastPiece+1;
+	for (int x = corners.size()-1; x >= 0; x--)
+	{
+		puzzle[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < corners.size(); y++)
+		{
+			if (puzzle[y] >= puzzle[x])
+				puzzle[y]++;
+		}
+	}
+	for (int x = 0; x < 8; x++)
+	{
+		s.SetCubeInLoc(x, 0xF);
+		s.SetCubeOrientation(x, 0);
+	}
+	
+	for (int x = 0; x < corners.size(); x++)
+	{
+		s.SetCubeInLoc(puzzle[x], corners[x]);
+		dual[corners[x]] = puzzle[x];
+	}
+	
+	int cnt = 0;
+	int limit = std::min((int)corners.size(), 7);
+	for (int x = limit-1; x >= 0; x--)
+	{
+		s.SetCubeOrientation(corners[x], hash%3);
+		//s.SetCubeOrientation(dual[corners[x]], hash%3);
+		cnt += hash%3;
+		hash/=3;
+	}
+	if (corners.size() == 8)
+		//s.SetCubeOrientation(corners[7], 2-(cnt%3)); // 0->0 2->1 1->2
+		s.SetCubeOrientation(corners[7], (3-(cnt%3))%3); // 0->0 2->1 1->2
+}
+
+const char *RubikCornerPDB::GetName()
+{
+	static std::string s = "rcc-";
+	for (int x = 0; x < corners.size(); x++)
+	{
+		if (x != 0)
+			s+="+";
+		s+=std::to_string(corners[x]);
+	}
+	return s.c_str();
+}
+
+
+void RubikCornerPDB::WritePDBHeader(FILE *f) const
+{
+	
+}
+
+void RubikCornerPDB::ReadPDBHeader(FILE *f) const
+{
+	
+}
+
+uint64_t RubikCornerPDB::Factorial(int val) const
+{
+	static uint64_t table[21] =
+	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
+		6227020800ll, 87178291200ll, 1307674368000ll, 20922789888000ll, 355687428096000ll,
+		6402373705728000ll, 121645100408832000ll, 2432902008176640000ll };
+	if (val > 20)
+		return (uint64_t)-1;
+	return table[val];
+}
+
+uint64_t RubikCornerPDB::FactorialUpperK(int n, int k) const
+{
+	const uint64_t result[9][9] = {
+		{1}, // n = 0
+		{1, 1}, // n = 1
+		{2, 2, 1}, // n = 2
+		{6, 6, 3, 1}, // n = 3
+		{24, 24, 12, 4, 1}, // n = 4
+		{120, 120, 60, 20, 5, 1}, // n = 5
+		{720, 720, 360, 120, 30, 6, 1}, // n = 6
+		{5040, 5040, 2520, 840, 210, 42, 7, 1}, // n = 7
+		{40320, 40320, 20160, 6720, 1680, 336, 56, 8, 1}, // n = 8
+	};
+	return result[n][k];
+//	uint64_t value = 1;
+//	assert(n >= 0 && k >= 0);
+//	
+//	for (int i = n; i > k; i--)
+//	{
+//		value *= i;
+//	}
+//	
+//	return value;
 }

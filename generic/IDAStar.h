@@ -18,11 +18,10 @@
 
 typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
 
-
 template <class state, class action>
 class IDAStar {
 public:
-	IDAStar() { useHashTable = usePathMax = false; }
+	IDAStar() { useHashTable = usePathMax = false; storedHeuristic = false;}
 	virtual ~IDAStar() {}
 	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
 							 std::vector<state> &thePath);
@@ -33,6 +32,7 @@ public:
 	uint64_t GetNodesTouched() { return nodesTouched; }
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	void SetUseBDPathMax(bool val) { usePathMax = val; }
+	void SetHeuristic(Heuristic<state> *heur) { heuristic = heur; if (heur != 0) storedHeuristic = true;}
 private:
 	unsigned long long nodesExpanded, nodesTouched;
 	
@@ -44,14 +44,23 @@ private:
 					   action forbiddenAction, state &currState,
 					   std::vector<action> &thePath, double bound, double g,
 					   double maxH, double parentH);
-	
+	void PrintGHistogram()
+	{
+		for (int x = 0; x < gCostHistogram.size(); x++)
+		{
+			printf("%d\t%llu\n", x, gCostHistogram[x]);
+		}
+	}
 	void UpdateNextBound(double currBound, double fCost);
 	state goal;
 	double nextBound;
-	NodeHashTable nodeTable;
+	//NodeHashTable nodeTable;
 	bool usePathMax;
 	bool useHashTable;
 	vectorCache<action> actCache;
+	bool storedHeuristic;
+	Heuristic<state> *heuristic;
+	std::vector<uint64_t> gCostHistogram;
 };
 
 template <class state, class action>
@@ -59,19 +68,25 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 									 state from, state to,
 									 std::vector<state> &thePath)
 {
+	if (!storedHeuristic)
+		heuristic = env;
 	nextBound = 0;
 	nodesExpanded = nodesTouched = 0;
 	thePath.resize(0);
-	UpdateNextBound(0, env->HCost(from, to));
+	UpdateNextBound(0, heuristic->HCost(from, to));
 	goal = to;
 	thePath.push_back(from);
 	while (true) //thePath.size() == 0)
 	{
-		nodeTable.clear();
+		//nodeTable.clear();
+		gCostHistogram.clear();
+		gCostHistogram.resize(nextBound+1);
 		printf("Starting iteration with bound %f\n", nextBound);
 		if (DoIteration(env, from, from, thePath, nextBound, 0, 0) == 0)
 			break;
+		PrintGHistogram();
 	}
+	PrintGHistogram();
 }
 
 template <class state, class action>
@@ -79,6 +94,8 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 									 state from, state to,
 									 std::vector<action> &thePath)
 {
+	if (!storedHeuristic)
+		heuristic = env;
 	nextBound = 0;
 	nodesExpanded = nodesTouched = 0;
 	thePath.resize(0);
@@ -86,17 +103,20 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	if (env->GoalTest(from, to))
 		return;
 
-	double rootH = env->HCost(from, to);
+	double rootH = heuristic->HCost(from, to);
 	UpdateNextBound(0, rootH);
 	goal = to;
 	std::vector<action> act;
 	env->GetActions(from, act);
 	while (thePath.size() == 0)
 	{
-		nodeTable.clear();
-		printf("Starting iteration with bound %f; %llu expanded\n", nextBound, nodesExpanded);
+		//nodeTable.clear();
+		gCostHistogram.clear();
+		gCostHistogram.resize(nextBound+1);
+		printf("Starting iteration with bound %f; %llu expanded, %llu generated\n", nextBound, nodesExpanded, nodesTouched);
 		fflush(stdout);
 		DoIteration(env, act[0], from, thePath, nextBound, 0, 0, rootH);
+		PrintGHistogram();
 	}
 }
 
@@ -106,9 +126,7 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 										   std::vector<state> &thePath, double bound, double g,
 										   double maxH)
 {
-	nodesExpanded++;
-	double h = env->HCost(currState, goal);
-	
+	double h = heuristic->HCost(currState, goal);
 	// path max
 	if (usePathMax && fless(h, maxH))
 		h = maxH;
@@ -124,7 +142,9 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 	std::vector<state> neighbors;
 	env->GetSuccessors(currState, neighbors);
 	nodesTouched += neighbors.size();
-	
+	nodesExpanded++;
+	gCostHistogram[g]++;
+
 	for (unsigned int x = 0; x < neighbors.size(); x++)
 	{
 		if (neighbors[x] == parent)
@@ -157,8 +177,7 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 										   std::vector<action> &thePath, double bound, double g,
 										   double maxH, double parentH)
 {
-	nodesExpanded++;
-	double h = env->HCost(currState, goal, parentH);
+	double h = heuristic->HCost(currState, goal);//, parentH); // TODO: restore code that uses parent h-cost
 	parentH = h;
 	// path max
 	if (usePathMax && fless(h, maxH))
@@ -176,7 +195,9 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 	std::vector<action> &actions = *actCache.getItem();
 	env->GetActions(currState, actions);
 	nodesTouched += actions.size();
-	int depth = thePath.size();
+	nodesExpanded++;
+	gCostHistogram[g]++;
+	int depth = (int)thePath.size();
 	
 	for (unsigned int x = 0; x < actions.size(); x++)
 	{

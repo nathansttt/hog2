@@ -43,7 +43,7 @@ static bool operator==(const PancakePuzzleState &l1, const PancakePuzzleState &l
 	return true;
 }
 
-class PancakePuzzle : public PermutationPuzzleEnvironment<PancakePuzzleState, PancakePuzzleAction> {
+class PancakePuzzle : public PermutationPuzzle::PermutationPuzzleEnvironment<PancakePuzzleState, PancakePuzzleAction> {
 public:
 	PancakePuzzle(unsigned s);
 	PancakePuzzle(unsigned size, const std::vector<unsigned> op_order); // used to set action order

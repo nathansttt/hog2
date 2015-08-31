@@ -22,6 +22,7 @@
 #include "EnvUtil.h"
 #include "Bloom.h"
 #include "MinBloom.h"
+#include "PDBHeuristic.h"
 
 class RubiksState
 {
@@ -34,11 +35,11 @@ public:
 	{
 		corner.Reset();
 		edge.Reset();
-		edge7.Reset();
+		//edge7.Reset();
 	}
 	RubiksCornerState corner;
 	RubikEdgeState edge;
-	Rubik7EdgeState edge7;
+//	Rubik7EdgeState edge7;
 };
 
 static bool operator==(const RubiksState &l1, const RubiksState &l2)
@@ -46,6 +47,11 @@ static bool operator==(const RubiksState &l1, const RubiksState &l2)
 	return l1.corner == l2.corner && l1.edge == l2.edge;
 }
 
+static std::ostream &operator<<(std::ostream &out, const RubiksState &s)
+{
+	out << "{" << s.edge << ", " << s.corner << "}";
+	return out;
+}
 
 typedef int RubiksAction;
 
@@ -122,7 +128,7 @@ public:
 	
 	FourBitArray &GetCornerPDB() { return cornerPDB; }
 	FourBitArray &GetEdgePDB() { return edgePDB; }
-	FourBitArray &GetEdge7PDB(bool min) { if (min) return edge7PDBmin; return edge7PDBint; }
+	//FourBitArray &GetEdge7PDB(bool min) { if (min) return edge7PDBmin; return edge7PDBint; }
 
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const RubiksState&) const;
@@ -145,7 +151,7 @@ public:
 	std::unordered_map<uint64_t, uint8_t> depthTable;
 	BloomFilter *depth8, *depth9;
 	MinBloomFilter *minBloom;
-private:
+//private:
 	void OpenGLDrawCube(int cube) const;
 	void SetFaceColor(int face) const;
 	mutable std::vector<RubiksAction> history;
@@ -156,8 +162,8 @@ private:
 	Rubik7Edge e7;
 	FourBitArray cornerPDB;
 	FourBitArray edgePDB;
-	FourBitArray edge7PDBmin;
-	FourBitArray edge7PDBint;
+	//FourBitArray edge7PDBmin;
+	//FourBitArray edge7PDBint;
 	
 	
 	DiskBitFile *f;
@@ -167,5 +173,21 @@ private:
 	bool pruneSuccessors;
 };
 
+
+class RubikPDB : public PDBHeuristic<RubiksState, RubiksAction, RubiksCube> {
+public:
+	RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners);
+	uint64_t GetStateHash(const RubiksState &s) const;
+	void GetStateFromHash(RubiksState &s, uint64_t hash) const;
+	uint64_t GetPDBSize() const;
+	uint64_t GetPDBHash(const RubiksState &s, int threadID = 0) const;
+	void GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID = 0) const;
+	const char *GetName();
+	void WritePDBHeader(FILE *f) const;
+	void ReadPDBHeader(FILE *f) const;
+private:
+	RubikEdgePDB ePDB;
+	RubikCornerPDB cPDB;
+};
 
 #endif /* defined(__hog2_glut__RubiksCube__) */

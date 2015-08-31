@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cstdio>
 #include <algorithm>
+#include <string>
 
 void RubiksCube::GetSuccessors(const RubiksState &nodeID, std::vector<RubiksState> &neighbors) const
 {
@@ -263,23 +264,23 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, dou
 	}
 	else if (!minCompression) // interleave
 	{
-		// edge PDB
-		hash = e7.GetStateHash(node1.edge7);
-		
-		//	// edge PDB
-		if (0 == hash%compressionFactor)
-		{
-			double val2 = edge7PDBint.Get(hash/compressionFactor);
-			val = max(val, val2);
-		}
-		node1.edge7.GetDual(e7dual);
-		hash = e7.GetStateHash(e7dual);
-		
-		if (0 == hash%compressionFactor)
-		{
-			double val2 = edge7PDBint.Get(hash/compressionFactor);
-			val = max(val, val2);
-		}
+//		// edge PDB
+//		hash = e7.GetStateHash(node1.edge7);
+//		
+//		//	// edge PDB
+//		if (0 == hash%compressionFactor)
+//		{
+//			double val2 = edge7PDBint.Get(hash/compressionFactor);
+//			val = max(val, val2);
+//		}
+//		node1.edge7.GetDual(e7dual);
+//		hash = e7.GetStateHash(e7dual);
+//		
+//		if (0 == hash%compressionFactor)
+//		{
+//			double val2 = edge7PDBint.Get(hash/compressionFactor);
+//			val = max(val, val2);
+//		}
 	}
 	
 	return val;
@@ -364,23 +365,23 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 	}
 	else if (!minCompression) // interleave
 	{
-		// edge PDB
-		hash = e7.GetStateHash(node1.edge7);
-		
-		//	// edge PDB
-		if (0 == hash%compressionFactor)
-		{
-			double val2 = edge7PDBint.Get(hash/compressionFactor);
-			val = max(val, val2);
-		}
-		node1.edge7.GetDual(e7dual);
-		hash = e7.GetStateHash(e7dual);
-		
-		if (0 == hash%compressionFactor)
-		{
-			double val2 = edge7PDBint.Get(hash/compressionFactor);
-			val = max(val, val2);
-		}
+//		// edge PDB
+//		hash = e7.GetStateHash(node1.edge7);
+//		
+//		//	// edge PDB
+//		if (0 == hash%compressionFactor)
+//		{
+//			double val2 = edge7PDBint.Get(hash/compressionFactor);
+//			val = max(val, val2);
+//		}
+//		node1.edge7.GetDual(e7dual);
+//		hash = e7.GetStateHash(e7dual);
+//		
+//		if (0 == hash%compressionFactor)
+//		{
+//			double val2 = edge7PDBint.Get(hash/compressionFactor);
+//			val = max(val, val2);
+//		}
 	}
 	return val;
 }
@@ -458,7 +459,7 @@ void RubiksCube::OpenGLDrawEdges(const RubiksState&s) const
 {
 //	Rubik7EdgeState e7tmp;
 //	s.edge7.GetDual(e7tmp);
-	e7.OpenGLDraw(s.edge7);
+	e.OpenGLDraw(s.edge);
 //	OpenGLDrawCenters();
 //	OpenGLDrawCubeBackground();
 }
@@ -818,3 +819,57 @@ int RubiksCube::Edge12PDBDist(const RubiksState &s)
 	return f->ReadFileDepth(data[bucket].bucketID, data[bucket].bucketOffset+offset);
 }
 
+
+RubikPDB::RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners)
+:PDBHeuristic(e), ePDB(&e->e, s.edge, distinctEdges), cPDB(&e->c, s.corner, distinctCorners)
+{
+	
+}
+
+uint64_t RubikPDB::GetStateHash(const RubiksState &s) const
+{
+	//assert(!"Not implemented - need 66 bits!");
+	return 0;
+}
+
+void RubikPDB::GetStateFromHash(RubiksState &s, uint64_t hash) const
+{
+	//assert(!"Not implemented - need 66 bits!");
+}
+
+uint64_t RubikPDB::GetPDBSize() const
+{
+	return ePDB.GetPDBSize()*cPDB.GetPDBSize();
+}
+
+uint64_t RubikPDB::GetPDBHash(const RubiksState &s, int threadID) const
+{
+	return ePDB.GetPDBHash(s.edge)*cPDB.GetPDBSize()+cPDB.GetPDBHash(s.corner);
+}
+
+void RubikPDB::GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID) const
+{
+	uint64_t cornerHash = hash%cPDB.GetPDBSize();
+	uint64_t edgeHash = hash/cPDB.GetPDBSize();
+	ePDB.GetStateFromPDBHash(edgeHash, s.edge);
+	cPDB.GetStateFromPDBHash(cornerHash, s.corner);
+}
+
+const char *RubikPDB::GetName()
+{
+	static std::string s = "";
+	s += ePDB.GetName();
+	s += cPDB.GetName();
+	s += ".pdb";
+	return s.c_str();
+}
+
+void RubikPDB::WritePDBHeader(FILE *f) const
+{
+	
+}
+
+void RubikPDB::ReadPDBHeader(FILE *f) const
+{
+	
+}

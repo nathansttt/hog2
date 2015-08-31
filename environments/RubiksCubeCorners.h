@@ -12,6 +12,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <vector>
+#include "PDBHeuristic.h"
 
 class RubiksCornerState
 {
@@ -45,6 +46,8 @@ public:
 	}
 	void SetCubeOrientation(int whichLoc, int orient) // orientation is the offset of the 0(low) side
 	{
+		if (whichLoc > 7)
+			return;
 		uint64_t blank = 0x3;
 		uint64_t value = orient&0x3;
 		state = state&(~(blank<<(2*whichLoc)));
@@ -64,6 +67,13 @@ public:
 static bool operator==(const RubiksCornerState &l1, const RubiksCornerState &l2)
 {
 	return l1.state == l2.state;
+}
+
+static std::ostream &operator<<(std::ostream &out, const RubiksCornerState &s)
+{
+	for (int x = 0; x < 8; x++)
+		out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(x) << "] ";
+	return out;
 }
 
 
@@ -119,7 +129,7 @@ public:
 	
 	virtual void GetNextState(const RubiksCornerState &, RubiksCornersAction , RubiksCornerState &) const;
 	
-	virtual bool InvertAction(RubiksCornersAction &a) const { return false; }
+	virtual bool InvertAction(RubiksCornersAction &a) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
 	virtual double HCost(const RubiksCornerState &node1, const RubiksCornerState &node2) { return 0; }
@@ -153,6 +163,31 @@ private:
 	void MRUnrank2(int n, uint64_t r, uint64_t &perm) const;
 	RubikCornerMove moves[18];
 };
+
+class RubikCornerPDB : public PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner> {
+public:
+	RubikCornerPDB(RubiksCorner *e, const RubiksCornerState &s, std::vector<int> &distinctCorners);
+	uint64_t GetStateHash(const RubiksCornerState &s) const;
+	void GetStateFromHash(RubiksCornerState &s, uint64_t hash) const;
+	uint64_t GetPDBSize() const;
+	uint64_t GetPDBHash(const RubiksCornerState &s, int threadID = 0) const;
+	void GetStateFromPDBHash(uint64_t hash, RubiksCornerState &s, int threadID = 0) const;
+	
+	const char *GetName();
+	void WritePDBHeader(FILE *f) const;
+	void ReadPDBHeader(FILE *f) const;
+private:
+	uint64_t Factorial(int val) const;
+	uint64_t FactorialUpperK(int n, int k) const;
+	std::vector<int> corners;
+	size_t puzzleSize;
+	uint64_t pdbSize;
+	
+	// cache for computing ranking/unranking
+	mutable std::vector<std::vector<int> > dual;
+	mutable std::vector<std::vector<int> > locs;
+};
+
 
 #define Rubik RubiksCorner
 #define RubikState RubiksCornerState

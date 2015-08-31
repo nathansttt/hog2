@@ -63,11 +63,22 @@ bool recording = false;
 
 std::deque<RubiksAction> animateActions;
 
+void TestCornerRanking();
+void TestEdgeRanking();
+void GetKorfInstance(RubiksState &start, int which);
+void KorfTest(int which);
+void PDBFaceTest();
+
 int main(int argc, char* argv[])
 {
+	//PDBFaceTest();
+	//KorfTest(0);
+	//TestCornerRanking();
+	//TestEdgeRanking();
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 600);
 }
+
 
 void GetSuperFlip(RubiksState &start);
 
@@ -99,6 +110,8 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearch", "-bloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearchStdin", "-bloomSearchStdin <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations. Problems from stdin.");
 
+	InstallCommandLineHandler(MyCLHandler, "-korf", "-korf <instance>", "Run the nth Korf instance from his 1997 RC paper using the same PDBs.");
+
 	InstallCommandLineHandler(MyCLHandler, "-minBloomSearch", "-minBloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract <file>", "Extract levels from <file>");
@@ -123,7 +136,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	{
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
-
+//		s.corner.Reset();
+//		std::cout << "Base hash: " << c.c.GetStateHash(s.corner) << "\n";
+//		c.c.GetStateFromHash(c.c.GetStateHash(s.corner), s.corner);
+//		s.edge.Reset();
 		glClearColor(0.8, 0.8, 0.8, 1.0);
 		if (animateActions.size() > 0)
 		{
@@ -133,7 +149,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		else {
 			SetNumPorts(windowID, 4);
 		}
-		GetSuperFlip(s);
+		//GetSuperFlip(s);
 	}
 }
 
@@ -219,6 +235,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-extract") == 0)
 	{
 		ExtractStatesAtDepth(argument[1]);
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-korf") == 0)
+	{
+		KorfTest(atoi(argument[1]));
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-animate") == 0)
@@ -1215,7 +1236,7 @@ void SampleBloomHeuristics(const char *cornerPDB, const char *depthPrefix, float
 		uint64_t size8filter = size8*1024*1024*1024*8ull;
 		uint64_t size9filter = size9*1024ull*1024ull*1024ull*8ull;
 		
-		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", size8, size8filter, hash8);
+		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", (int)size8, size8filter, hash8);
 		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
 		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
 			   8, c.depth8->GetStorage(),
@@ -1223,7 +1244,7 @@ void SampleBloomHeuristics(const char *cornerPDB, const char *depthPrefix, float
 			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
 		printf("%d hashes being used\n", c.depth8->GetNumHash());
 		
-		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", size9, size9filter, hash9);
+		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", (int)size9, size9filter, hash9);
 		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
 		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
 			   9, c.depth9->GetStorage(),
@@ -1457,7 +1478,7 @@ void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin
 	FourBitArray &edgemin = c.GetEdgePDB();
 	printf("Loading edge min pdb: %s\n", edgePDBmin);
 	edgemin.Read(edgePDBmin);
-	FourBitArray &edgeint = c.GetEdge7PDB(false);
+	//FourBitArray &edgeint = c.GetEdge7PDB(false);
 	//printf("Loading edge interleave pdb: %s\n", edgePDBint);
 	//edgeint.Read(edgePDBint);
 
@@ -1502,6 +1523,163 @@ void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin
 //	}
 }
 
+#pragma mark -
+
+void TestCornerRanking()
+{
+	RubiksCorner corner;
+	RubiksCornerState cornerState, correct;
+	//std::vector<int> distinctCorners = {3, 1, 6, 4};
+	std::vector<int> distinctCorners = {0, 1, 2, 3, 4, 5, 6, 7};
+	RubikCornerPDB pdb(&corner, cornerState, distinctCorners);
+	//	correct.Reset();
+	//	std::cout << correct << "!\n";
+	//	corner.GetStateFromHash(40319, correct);
+	//	std::cout << correct << "!!\n";
+	for (uint64_t x = 0; x < pdb.GetPDBSize(); x++)
+	{
+		pdb.GetStateFromPDBHash(x, cornerState);
+		uint64_t hash = pdb.GetPDBHash(cornerState);
+		assert(hash == x);
+		if (0 == x%100000)
+		{
+			std::cout << x << " " << pdb.GetPDBHash(cornerState) << " : " << cornerState << "\n";
+		}
+		for (int y = 0; y < 18; y++)
+		{
+			//corner.ApplyAction(correct, y);
+			corner.ApplyAction(cornerState, y);
+			corner.InvertAction(y);
+			assert(pdb.GetPDBHash(cornerState) < pdb.GetPDBSize());
+			//std::cout << x << " " << pdb.GetPDBHash(cornerState) << " : " << cornerState << "\n";
+			//corner.ApplyAction(correct, y);
+			corner.ApplyAction(cornerState, y);
+			corner.InvertAction(y);
+			//std::cout << x << " " << pdb.GetPDBHash(cornerState) << " : " << cornerState << "\n";
+			assert(pdb.GetPDBHash(cornerState) == x);
+		}
+	}
+	cornerState.Reset();
+	pdb.BuildPDB(cornerState, "/Users/nathanst/corner.pdb", std::thread::hardware_concurrency());
+	exit(0);
+}
+
+void TestEdgeRanking()
+{
+	RubikEdge edge;
+	RubikEdgeState edgeState, correct;
+	//std::vector<int> distinctCorners = {3, 1, 6, 4};
+	//std::vector<int> distinctEdges = {0, 2, 4, 5, 6, 7};
+	std::vector<int> distinctEdges = {1, 3, 8, 9, 10, 11};
+	RubikEdgePDB pdb(&edge, edgeState, distinctEdges);
+	//	correct.Reset();
+	//	std::cout << correct << "!\n";
+	//	corner.GetStateFromHash(40319, correct);
+	//	std::cout << correct << "!!\n";
+	for (uint64_t x = 0; x < pdb.GetPDBSize(); x+=100)
+	{
+		pdb.GetStateFromPDBHash(x, edgeState);
+		uint64_t hash = pdb.GetPDBHash(edgeState);
+		assert(hash == x);
+		if (0 == x%100000)
+		{
+			std::cout << x << " " << pdb.GetPDBHash(edgeState) << " : " << edgeState << "\n";
+		}
+		for (int y = 0; y < 18; y++)
+		{
+			//edge.ApplyAction(correct, y);
+			edge.ApplyAction(edgeState, y);
+			edge.InvertAction(y);
+			assert(pdb.GetPDBHash(edgeState) < pdb.GetPDBSize());
+			//std::cout << x << " " << pdb.GetPDBHash(edgeState) << " : " << edgeState << "\n";
+			//edge.ApplyAction(correct, y);
+			edge.ApplyAction(edgeState, y);
+			edge.InvertAction(y);
+			//std::cout << x << " " << pdb.GetPDBHash(edgeState) << " : " << edgeState << "\n";
+			assert(pdb.GetPDBHash(edgeState) == x);
+		}
+	}
+	edgeState.Reset();
+	pdb.BuildPDB(edgeState, "/Users/nathanst/edge.pdb", std::thread::hardware_concurrency());
+	exit(0);
+}
+
+void PDBFaceTest()
+{
+	RubiksCube cube;
+	RubiksState goal;
+	RubiksState start;
+	GetKorfInstance(start, 0);
+	std::vector<int> edges = {0, 1, 2, 3, 4, 5, 6, 7};
+	std::vector<int> corners = {};//{0, 1, 2};
+	RubikPDB pdb1(&cube, goal, edges, corners);
+	goal.Reset();
+	pdb1.BuildPDB(goal, "/Users/nathanst/rc_f1", std::thread::hardware_concurrency());
+//	Heuristic<RubiksState> h;
+//	h.lookups.push_back({kLeafNode, 0, 0});
+//	h.lookups.push_back({kLeafNode, 1, 0});
+//	h.lookups.push_back({kLeafNode, 2, 0});
+//	h.heuristics.push_back(&pdb1);
+//	h.heuristics.push_back(&pdb2);
+//	h.heuristics.push_back(&pdb3);
+//	
+//	cube.SetPruneSuccessors(true);
+//	Timer t;
+//	t.StartTimer();
+//	std::vector<RubiksAction> path;
+//	IDAStar<RubiksState, RubiksAction> ida;
+//	ida.SetHeuristic(&h);
+//	ida.GetPath(&cube, start, goal, path);
+//	t.EndTimer();
+//	printf("%1.5fs elapsed\n", t.GetElapsedTime());
+//	printf("%llu nodes expanded %llu touched (%1.3f nodes/sec)\n", ida.GetNodesExpanded(), ida.GetNodesTouched(),
+//		   ida.GetNodesExpanded()/t.GetElapsedTime());
+}
+
+void KorfTest(int which)
+{
+	RubiksCube cube;
+	RubiksState goal;
+	RubiksState start;
+	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
+	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
+	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+	std::vector<int> blank;
+	RubikPDB pdb1(&cube, goal, edges1, blank);
+	RubikPDB pdb2(&cube, goal, edges2, blank);
+	RubikPDB pdb3(&cube, goal, blank, corners);
+	goal.Reset();
+	pdb1.BuildPDB(goal, "rc_e1", std::thread::hardware_concurrency());
+	goal.Reset();
+	pdb2.BuildPDB(goal, "rc_e2", std::thread::hardware_concurrency());
+	goal.Reset();
+	pdb3.BuildPDB(goal, "rc_c1", std::thread::hardware_concurrency());
+	Heuristic<RubiksState> h;
+	h.lookups.push_back({kMaxNode, 1, 3});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 0});
+	h.lookups.push_back({kLeafNode, 2, 0});
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb2);
+	h.heuristics.push_back(&pdb3);
+
+	cube.SetPruneSuccessors(true);
+	Timer t;
+	t.StartTimer();
+	GetKorfInstance(start, which);
+	goal.Reset();
+	std::vector<RubiksAction> path;
+	IDAStar<RubiksState, RubiksAction> ida;
+	ida.SetHeuristic(&h);
+	ida.GetPath(&cube, start, goal, path);
+	t.EndTimer();
+	printf("%1.5fs elapsed\n", t.GetElapsedTime());
+	printf("%llu nodes expanded (%1.3f nodes/sec)\n", ida.GetNodesExpanded(),
+		   ida.GetNodesExpanded()/t.GetElapsedTime());
+	printf("%llu nodes generated (%1.3f nodes/sec)\n", ida.GetNodesTouched(),
+		   ida.GetNodesTouched()/t.GetElapsedTime());
+}
+
 void RunTest(int billionEntriesToLoad)
 {
 //	uint64_t numEntries = 1000000000;
@@ -1525,7 +1703,7 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 	return false;
 }
 
-int GetNextMove(char *input, int &base)
+int GetNextMove(const char *input, int &base)
 {
 	int used = 0;
 	if (isdigit(input[0])) // this is our move notation - numeric
@@ -1622,6 +1800,56 @@ void GetActionsFromStdin(std::vector<RubiksAction> &acts)
 		acts.push_back(act);
 	}
 }
+
+void GetKorfInstance(RubiksState &start, int which)
+{
+	const int maxStrLength = 1024;
+	assert(which >= 0 && which < 10);
+	RubiksCube c;
+	char instances[10][maxStrLength] =
+	{
+		"L2 B  D- L- F- B  R2 F  B  R- F- R2 B- L2 D2 L2 D2 L2 U2 L2 F- D  L- D2 L- F2 B2 L  U- D- L  B  D2 F  D- F- U- B  L2 D2 L2 R2 B- U  R- D2 F  R- B  L R  U- B- R2 F- L2 R  F  R2 B L- F- D- F2 U2 R  U- L  D  F2 B- R- D- L2 B- L- B2 L- D2 B2 D- B  D  R- B  D  L- B- R  F- L- F- R2 D2 L2 B- L2 B2 U  L2",
+		"B- R2 B  D  B- L  B  L2 F2 R F2 D- L2 U2 L- U  L- U2 B- L- R- U  D  L- B2 D  R- U  F  D2 F  B  U  B2 L2 D2 R- B2 L- R2 U2 D2 F2 D  R2 D2 B- U- D  F- R  B2 D  R2 F  L- B  L2 R- U2 L  F2 B- D- F- B- L2 D  B2 U- D  F2 U  L2 D  L- D- R2 D- B2 U- L2 U  B- L- U- F- L- R- B- U- R  B2 U2 B  R- B- R2 F  R-",
+		"L- R  F- L  R2 F2 D- L2 D  B2 R2 D- F- L- F  R  F2 U  L- B2 D- R- U- R  D  F  R  D  B2 U- F- L2 F- B  U- R  F- U  F  D- L2 R- F- B  L2 B2 D- R- B  L B  D- R  U- R2 D2 F  R  U2 B2 D2 B  R- F- L2 D2 L2 R  D  L- B2 U  F2 R  F  L  U  D  L- B2 L2 B2 D- L  D2 B- U- B- U2 B L  D  B- L- U2 L- R  D- R  B2",
+		"L- B2 U2 R- D  F  U  F2 D- F U  D- R- B  R  U- R2 B  R  F D  R2 F- R- B2 R- D- R2 U- F- R  D  F- R  U- F  B  U- D2 B- L  D2 L2 B- U2 L2 F2 L  D2 B D- L  R2 B2 U2 F2 B- U2 F  D2 L2 U2 F2 L  R- U- R- D  F  L2 F2 L- R  U- L2 U  R  D  F  R- F- D- L- R2 U2 F  R- B2 D  B2 D2 B2 R  F- L- D  B- U  L2 B-",
+		"B2 L- F- U2 R2 D  R2 B  U2 R B- L  R  F  R- D- R- D2 F2 R2 B  L2 D- B2 D2 L  F- R  B- R2 B2 D  B- U  R- D- L2 B2 L2 R2 B- U2 D- R2 B  U- B- R- D  L B- L  R2 D- B  L2 D2 F2 B- U2 B  D- F- B  L2 U  F- U  F- L U  R  U2 D- B- U2 D  F- L  F2 B2 L  U  B- D2 B2 L- D- L2 B- D2 F  U2 R  D2 L2 D  B- L2 R-",
+		"B- R2 B  R  U- D- R2 D  B  L2 B2 U- F- B  D2 R- U  F  L  F U2 B  L  D- L- R2 B  D  R- F- B- D  L- B- L2 R- U2 D  B  R- D2 B- U2 B- L- R2 F  L  U  L- R  B- R2 D2 R2 B- U2 F- U  L D- F  B- R2 D2 L  B  L  U2 B2 R  D- B- R2 B2 U  F2 R2 U- B- R2 F2 U2 F2 B- D  F  U- F2 B R  D  R- U- L- R  U2 D- R2 F",
+		"L- R- B  L- D- L  U2 B2 D- F2 D  B2 R- F- R  U2 B2 D2 L- B- D  R2 D2 R  D- R2 F- R  U  B- U2 B2 D- R- D2 F  U  D- F- U2 L2 U  F2 R- B- U- L  B- R- U- L- U2 B2 D  B- R  B  D  B2 R- U2 D- R- F  L- F- D- B  L2 R- B  R- B- D  R  U- R2 B- D2 F- R  F  L- U  L2 B2 R2 F- U- F D  B- L- F2 B  L2 U2 D- L2 B2",
+		"U  F  B2 L  F2 L- D2 B2 L2 U- R  D2 L2 U- D  F  U2 L2 B- U- B- R2 B2 R  U  R2 D- B2 R  B2 L2 U- R  D  L- R2 U2 R- D  B L2 R- B2 U2 L  U2 R  F2 U  B2 L2 R2 D- F  R2 D- L2 U- R  B2 D2 R- U2 L- B- L- F- L  R  F L- B- D  L- R2 F2 U- F  L- U2 B  U  R2 F  U  R- B  D  B  R- B- L- B2 R- F  L- B2 L- F2 D2",
+		"L  F2 L2 B2 D  B  R  D- R- F2 U2 D2 F2 B- U- L- R2 B  U2 R F- D2 B2 U- R- F  L- U2 R- B L2 R2 B2 L2 R- B- D  F2 L  U2 D  L- B2 L  D- R2 D  B2 U  R- F2 U- R  F2 R2 B  U2 D2 R- U2 L2 R- D2 F2 R2 B- U  B  U  F D- F  D2 R- B- U2 B2 L  D  B- L- B2 D  B2 D- B  D- F- B- L- U  B2 D2 B- D- F  D- L  F  R",
+		"B2 D- B- U- R- D- B- U2 L- R- B2 U2 B2 L- U  B- D  F  L2 F2 D  F- L- D- B2 L- U2 F  B2 R2 D  L- U  D2 F  B- L2 B  R- U B- L  B2 D  F  R  U- D- F  R2 U2 L- B2 L- R- D- L2 R- F2 D L- D  B2 D  L  B- R- D  B- L2 B2 D2 F  B2 U2 R- D- L- B2 R- D- L2 F- D- R  U  F  L2 D- R- U- L2 B  U- F2 U  B- D  F2 D2"
+	};
+	
+	char *string = instances[which];
+	start.Reset();
+	
+	//	if (result == 0)
+	//	{
+	//		printf("No more entries found; exiting.\n");
+	//		exit(0);
+	//	}
+	int index = 0;
+	string[maxStrLength-1] = 0;
+	if (strlen(string) == maxStrLength-1)
+	{
+		printf("Warning: input hit maximum string length!\n");
+		exit(0);
+	}
+	while (true)
+	{
+		int act;
+		int cnt = GetNextMove(&string[index], act);
+		if (cnt == 0)
+		{
+			break;
+		}
+		else {
+			index += cnt;
+		}
+		c.ApplyAction(start, act);
+	}
+}
+
 
 void GetInstanceFromStdin(RubiksState &start)
 {

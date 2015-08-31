@@ -572,7 +572,7 @@ double Directional2DEnvironment::GCost(const xySpeedHeading &a, const xySpeedHea
 	//	float dist[4] = {1.0f, 2.24f, 1.42f, 2.24f};
 		double dist[4] = {1.0, 2.24, 1.42, 2.24};
 	//	double dist[4] = {1.0, 1.5, 1.42, 1.5};
-		double ret = dist[(b.rotation)%4]/fabs(b.speed);
+		double ret = dist[(b.rotation)%4]/std::abs(b.speed);
 	//	printf("rot: %d; speed: %d; val: %f\n", b.rotation, b.speed, ret);
 		return ret;
 	}
@@ -584,7 +584,7 @@ double Directional2DEnvironment::GCost(const xySpeedHeading &a, const xySpeedHea
 		double dist[6] = {1.0, 3.16, 3.61, 1.42, 3.61, 3.16};
 		double ret;
 		//		if (b.speed > 0)
-		ret = dist[(b.rotation)%6]/fabs(b.speed);
+		ret = dist[(b.rotation)%6]/std::abs(b.speed);
 		//		else
 		//			ret = dist[(b.rotation)%6]/(fabs(b.speed)*0.9);
 		//	printf("rot: %d; speed: %d; val: %f\n", b.rotation, b.speed, ret);

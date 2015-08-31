@@ -2727,6 +2727,7 @@
 		C4E487D61B853FD5002753C8 /* SearchEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEnvironment.h; sourceTree = "<group>"; };
 		C4E487D71B853FFE002753C8 /* Heuristic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Heuristic.h; sourceTree = "<group>"; };
 		C4E487D81B854072002753C8 /* PDBHeuristic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PDBHeuristic.h; sourceTree = "<group>"; };
+		C4E487D91B8F96D4002753C8 /* PermutationPDB.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PermutationPDB.h; sourceTree = "<group>"; };
 		C4EAF19814F6F9D600BCBD57 /* LearningUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LearningUnit.h; sourceTree = "<group>"; };
 		C4EAF19A14F6FB1600BCBD57 /* LearningAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LearningAlgorithm.h; sourceTree = "<group>"; };
 		C4EAF19B14F72B7200BCBD57 /* FLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLRTAStar.h; sourceTree = "<group>"; };
@@ -2833,7 +2834,6 @@
 		C4F9F3E313E4FE3F0077C5A5 /* EpisodicSimulation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EpisodicSimulation.h; sourceTree = "<group>"; };
 		C4F9F3E613E4FE3F0077C5A5 /* OccupancyInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OccupancyInterface.h; sourceTree = "<group>"; };
 		C4F9F3E813E4FE3F0077C5A5 /* ReservationProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReservationProvider.h; sourceTree = "<group>"; };
-		C4F9F3EA13E4FE3F0077C5A5 /* SearchEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEnvironment.h; sourceTree = "<group>"; };
 		C4F9F3EB13E4FE3F0077C5A5 /* SimulationInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimulationInfo.h; sourceTree = "<group>"; };
 		C4F9F3ED13E4FE3F0077C5A5 /* Unit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Unit.h; sourceTree = "<group>"; };
 		C4F9F3EF13E4FE3F0077C5A5 /* UnitGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitGroup.h; sourceTree = "<group>"; };
@@ -3445,6 +3445,7 @@
 				C4E487D61B853FD5002753C8 /* SearchEnvironment.h */,
 				C4E487D71B853FFE002753C8 /* Heuristic.h */,
 				C4E487D81B854072002753C8 /* PDBHeuristic.h */,
+				C4E487D91B8F96D4002753C8 /* PermutationPDB.h */,
 			);
 			name = search;
 			path = ../../../../search;
@@ -3717,7 +3718,6 @@
 				C4F9F3E313E4FE3F0077C5A5 /* EpisodicSimulation.h */,
 				C4F9F3E613E4FE3F0077C5A5 /* OccupancyInterface.h */,
 				C4F9F3E813E4FE3F0077C5A5 /* ReservationProvider.h */,
-				C4F9F3EA13E4FE3F0077C5A5 /* SearchEnvironment.h */,
 				C4F9F3EB13E4FE3F0077C5A5 /* SimulationInfo.h */,
 				C4F9F3ED13E4FE3F0077C5A5 /* Unit.h */,
 				C4F9F3EF13E4FE3F0077C5A5 /* UnitGroup.h */,

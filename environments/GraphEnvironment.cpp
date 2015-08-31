@@ -1149,7 +1149,7 @@ node *GraphDistanceHeuristic::FindBestChild(int best, std::vector<double> &dist,
 			// on shortest path
 			if (fequal(dist[nb->GetNum()] - dist[n->GetNum()], g->FindEdge(n->GetNum(), nb->GetNum())->GetWeight()))
 			{
-				if ((nextChild == -1))
+				if (nextChild == -1)
 				{
 					//printf("Next Child %d has size %1.1f\n", nb->GetNum(), sizes[nb->GetNum()]);
 					nextSize = sizes[nb->GetNum()];

@@ -1929,7 +1929,7 @@ bool Prop::DoSingleStepDPDLMX(std::vector<graphState> &thePath)
 	}
 	else if (delayCache.size() > 0) 
 	{
-		if (openQueue.size() ==0 || reopenings < fDelay(nodesExpanded-NodesReopened) && delayCache.top().gCost < openQueue.top().fCost) {
+		if (openQueue.size() ==0 || (reopenings < fDelay(nodesExpanded-NodesReopened) && delayCache.top().gCost < openQueue.top().fCost)) {
 			topNode = delayCache.Remove();
 			reopenings++;
 		}

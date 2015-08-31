@@ -342,7 +342,7 @@ public:
 		double baseDist = distances[GetIndex(from)];
 		for (unsigned int x = 0; x < values.size(); x++)
 		{
-			heuristic = max(heuristic, abs(baseDist-values[x])-errors[x]);
+			heuristic = max(heuristic, std::abs(baseDist-values[x])-errors[x]);
 		}
 		return heuristic;
 	}

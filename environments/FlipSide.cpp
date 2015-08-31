@@ -84,18 +84,18 @@ double FlipSide::HCost(const FlipSideState &state1, const FlipSideState &state2)
 			}
 			else if (yloc[state1.puzzle[x + y*state1.width]] == y)
 			{
-				int tmp = abs(xloc[state1.puzzle[x + y*state1.width]] - x)/4;
+				int tmp = (xloc[state1.puzzle[x + y*state1.width]] - x)/4;
 				hval += (1+tmp)*2;
 			}
 			else {
-				int tmp = (abs(xloc[state1.puzzle[x + y*state1.width]] - x)+1)/4;
+				int tmp = ((xloc[state1.puzzle[x + y*state1.width]] - x)+1)/4;
 				hval += 1+tmp*2;
 			}
 
-			int tmp = abs(xloc[state1.puzzle[x + y*state1.width]] - x)/2;
+			int tmp = (xloc[state1.puzzle[x + y*state1.width]] - x)/2;
 			if (xloc[state1.puzzle[x + y*state1.width]] != x)
 			{
-				if ((tmp%2) != abs(yloc[state1.puzzle[x + y*state1.width]] - y))
+				if ((tmp%2) != (yloc[state1.puzzle[x + y*state1.width]] - y))
 					tmp+=1;
 				else if (tmp == 0)
 					tmp += 2;
