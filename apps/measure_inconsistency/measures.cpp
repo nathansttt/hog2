@@ -5,6 +5,7 @@
 #include <ext/hash_map>
 #include <math.h>
 #include "FPUtil.h"
+#include "UnitSimulation.h"
 #include "GraphEnvironment.h"
 #include "MapAbstraction.h"
 #include "Propagation.h"

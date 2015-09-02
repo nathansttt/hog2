@@ -7,6 +7,7 @@
 //
 
 #include "CanonicalGrid.h"
+#include <string.h>
 
 namespace CanonicalGrid {
 	

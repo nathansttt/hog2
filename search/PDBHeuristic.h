@@ -130,7 +130,7 @@ void PDBHeuristic<state, action, environment>::BuildPDB(state &goal, const char 
 		for (uint64_t x = 0; x < COUNT; x+=coarseSize)
 		{
 			bool submit = false;
-			for (uint64_t t = x; t < min(COUNT, x+coarseSize); t++)
+			for (uint64_t t = x; t < std::min(COUNT, x+coarseSize); t++)
 			{
 				if (DB[t] == depth)
 				{
@@ -142,7 +142,7 @@ void PDBHeuristic<state, action, environment>::BuildPDB(state &goal, const char 
 			{
 				while (workQueue.size() > 10*numThreads)
 				{ std::this_thread::sleep_for(std::chrono::microseconds(10)); }
-				workQueue.Add({x, min(COUNT, x+coarseSize)});
+				workQueue.Add({x, std::min(COUNT, x+coarseSize)});
 			}
 		}
 		for (int x = 0; x < numThreads; x++)

@@ -30,7 +30,6 @@ PROJECTS = \
   apps/puzzlesample \
   apps/multiagent \
   apps/inconsistency \
-  apps/measure_inconsistency \
   apps/dynamicsearch \
   apps/directional \
   apps/dragonage \
@@ -47,6 +46,7 @@ PROJECTS = \
   apps/stp \
   apps/pancake \
   apps/canonicalGrids \
+#  apps/measure_inconsistency 
 #  simulation \
 #  learning \
 #	apps/coprobber
