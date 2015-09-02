@@ -488,8 +488,8 @@ double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2)
 			{
 				if (state1.puzzle[x + y*state1.width] != 0)
 				{
-					man_dist += (abs(xloc[state1.puzzle[x + y*state1.width]] - x)
-								 + abs(yloc[state1.puzzle[x + y*state1.width]] - y));
+					man_dist += (abs((int)(xloc[state1.puzzle[x + y*state1.width]] - x))
+								 + abs((int)(yloc[state1.puzzle[x + y*state1.width]] - y)));
 				}
 			}
 		}

@@ -739,6 +739,7 @@
 		C454CDC31506013D005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C454CDC41506013E005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C454CDC51506013F005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
+		C45EEEDA1B95760500D87F30 /* MM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45EEED81B95760500D87F30 /* MM.cpp */; };
 		C4625E78177B5CE200D1C8F7 /* TextOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4625E76177B5CE200D1C8F7 /* TextOverlay.cpp */; };
 		C46735761710D9EF00E2A10B /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C46735771710D9EF00E2A10B /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
@@ -2633,6 +2634,8 @@
 		C447F5C7146843A600D6D581 /* NN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NN.cpp; sourceTree = "<group>"; };
 		C447F5C8146843A600D6D581 /* NN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NN.h; sourceTree = "<group>"; };
 		C454CD7A14FD78BB005DDC8E /* MPLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPLRTAStar.h; sourceTree = "<group>"; };
+		C45EEED81B95760500D87F30 /* MM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MM.cpp; sourceTree = "<group>"; };
+		C45EEED91B95760500D87F30 /* MM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MM.h; sourceTree = "<group>"; };
 		C4625E76177B5CE200D1C8F7 /* TextOverlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextOverlay.cpp; sourceTree = "<group>"; };
 		C4625E77177B5CE200D1C8F7 /* TextOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextOverlay.h; sourceTree = "<group>"; };
 		C46735721710D96000E2A10B /* Driver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
@@ -3234,6 +3237,8 @@
 				C430D1861B2EFD1500220AEE /* Driver.cpp */,
 				C430D1871B2EFD1500220AEE /* Driver.h */,
 				C430D1881B2EFD1500220AEE /* korf10.txt */,
+				C45EEED81B95760500D87F30 /* MM.cpp */,
+				C45EEED91B95760500D87F30 /* MM.h */,
 				C413C13F1B6911E9006A0331 /* GUICode.cpp */,
 				C413C1401B6911E9006A0331 /* GUICode.h */,
 			);
@@ -5036,6 +5041,7 @@
 				C430D1C71B2EFF8B00220AEE /* MapProvider.cpp in Sources */,
 				C430D1C81B2EFF8B00220AEE /* MapSectorAbstraction.cpp in Sources */,
 				C430D1C91B2EFF8B00220AEE /* NodeLimitAbstraction.cpp in Sources */,
+				C45EEEDA1B95760500D87F30 /* MM.cpp in Sources */,
 				C430D1CA1B2EFF8B00220AEE /* RadiusAbstraction.cpp in Sources */,
 				C430D1CB1B2EFF8B00220AEE /* Width.cpp in Sources */,
 				C430D1CC1B2EFF8B00220AEE /* AStarDelay.cpp in Sources */,

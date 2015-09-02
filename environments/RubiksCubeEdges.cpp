@@ -490,7 +490,7 @@ uint64_t RubikEdge::GetStateHash(const RubikEdgeState &node) const
 }
 
 // 38.522
-uint64_t RubikEdge::MRRank(int n, uint64_t perm, uint64_t dual) const
+uint64_t RubikEdge::MRRank(int n, uint64_t perm, uint64_t dual)
 {
 	int ss[12];
 	int ssLoc = 0;
@@ -527,7 +527,7 @@ uint64_t RubikEdge::MRRank(int n, uint64_t perm, uint64_t dual) const
 }
 
 // 53.5% time
-uint64_t RubikEdge::MRRank2(int n, uint64_t perm, uint64_t dual) const
+uint64_t RubikEdge::MRRank2(int n, uint64_t perm, uint64_t dual)
 {
 	if (n == 1)
 		return 0;
@@ -569,7 +569,7 @@ void RubikEdge::GetStateFromHash(uint64_t hash, RubikEdgeState &node) const
 // 38.982 sec elapsed
 // 3.5 % of time in function
 // Overall locality: 936842 / 1800000 = 0.520468
-void RubikEdge::MRUnrank(int n, uint64_t r, uint64_t &perm) const
+void RubikEdge::MRUnrank(int n, uint64_t r, uint64_t &perm)
 {
 	if (n > 0)
 	{
@@ -580,7 +580,7 @@ void RubikEdge::MRUnrank(int n, uint64_t r, uint64_t &perm) const
 }
 
 //38.152 sec elapsed
-void RubikEdge::MRUnrank2(int n, uint64_t r, uint64_t &perm) const
+void RubikEdge::MRUnrank2(int n, uint64_t r, uint64_t &perm)
 {
 	for (int i = n; i > 0; i--)
 	{
@@ -1085,13 +1085,57 @@ RubikEdgePDB::RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<in
 	
 }
 
-uint64_t RubikEdgePDB::GetStateHash(const RubikEdgeState &s) const
+uint64_t RubikEdgePDB::GetStateSpaceSize()
 {
-	return 0;
+	return 479001600ll*2048ll;
 }
 
-void RubikEdgePDB::GetStateFromHash(RubikEdgeState &s, uint64_t hash) const
+uint64_t RubikEdgePDB::GetStateHash(const RubikEdgeState &s)
 {
+	uint64_t perm = 0, dual = 0;
+	for (int x = 0; x < 12; x++)
+	{
+		int val = s.GetCubeInLoc(x);
+		set(perm, x, val);
+		set(dual, val, x);
+	}
+	
+	uint64_t hashVal = 0;
+	for (int x = 0; x < 11; x++)
+	{
+		hashVal = (hashVal<<1)+s.GetCubeOrientation(11-x);
+	}
+	hashVal = hashVal*Factorial(12)+RubikEdge::MRRank(12, perm, dual);
+	return hashVal;
+}
+
+void RubikEdgePDB::GetStateFromHash(RubikEdgeState &s, uint64_t hash)
+{
+	int cnt = 0;
+	uint64_t bits = hash/Factorial(12);
+	uint64_t hVal = hash%Factorial(12);
+	for (int x = 10; x >= 0; x--)
+	{
+		s.SetCubeOrientation(11-x, bits&0x1);
+		cnt += bits & 0x1;
+		bits >>= 1;
+	}
+	if (1 == cnt%2)
+	{
+		s.SetCubeOrientation(11-11, true);
+	}
+	else {
+		s.SetCubeOrientation(11-11, false);
+	}
+	
+	uint64_t val = 0;
+	for (int x = 0; x < 12; x++)
+		set(val, x, x);
+	RubikEdge::MRUnrank2(12, hVal, val);
+	for (int x = 0; x < 12; x++)
+	{
+		s.SetCubeInLoc(x, get(val, x));
+	}
 }
 
 uint64_t RubikEdgePDB::GetPDBSize() const
@@ -1206,7 +1250,7 @@ void RubikEdgePDB::ReadPDBHeader(FILE *f) const
 	
 }
 
-uint64_t RubikEdgePDB::Factorial(int val) const
+uint64_t RubikEdgePDB::Factorial(int val)
 {
 	static uint64_t table[21] =
 	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
@@ -1217,7 +1261,7 @@ uint64_t RubikEdgePDB::Factorial(int val) const
 	return table[val];
 }
 
-uint64_t RubikEdgePDB::FactorialUpperK(int n, int k) const
+uint64_t RubikEdgePDB::FactorialUpperK(int n, int k)
 {
 	const uint64_t result[13][13] = {
 		{1}, // n = 0

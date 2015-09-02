@@ -33,8 +33,8 @@ public:
 	virtual ~PDBHeuristic() {}
 	virtual double HCost(const state &a, const state &b) const;
 
-	virtual uint64_t GetStateHash(const state &s) const = 0;
-	virtual void GetStateFromHash(state &s, uint64_t hash) const = 0;
+//	virtual uint64_t GetStateHash(const state &s) const = 0;
+//	virtual void GetStateFromHash(state &s, uint64_t hash) const = 0;
 	virtual uint64_t GetPDBSize() const = 0;
 	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const = 0;
 	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const = 0;
@@ -42,7 +42,7 @@ public:
 	virtual void WritePDBHeader(FILE *f) const = 0;
 	virtual void ReadPDBHeader(FILE *f) const = 0;
 	
-	void BuildPDB(state &goal, const char *pdb_filename, int numThreads);
+	void BuildPDB(const state &goal, const char *pdb_filename, int numThreads);
 	void BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads);
 
 	void DivCompress(int factor, bool print_histogram);
@@ -79,7 +79,7 @@ double PDBHeuristic<state, action, environment>::HCost(const state &a, const sta
 }
 
 template <class state, class action, class environment>
-void PDBHeuristic<state, action, environment>::BuildPDB(state &goal, const char *pdb_filename, int numThreads)
+void PDBHeuristic<state, action, environment>::BuildPDB(const state &goal, const char *pdb_filename, int numThreads)
 {
 	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue;
 	SharedQueue<uint64_t> resultQueue;
@@ -99,7 +99,7 @@ void PDBHeuristic<state, action, environment>::BuildPDB(state &goal, const char 
 	uint64_t entries = 0;
 	std::cout << "Num Entries: " << COUNT << std::endl;
 	std::cout << "Goal State: " << goal << std::endl;
-	std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
+	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
 	std::cout << "PDB Hash of Goal: " << GetPDBHash(goal) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
@@ -194,14 +194,17 @@ void PDBHeuristic<state, action, environment>::BuildPDB(state &goal, const char 
 		assert(entries == COUNT);
 	}
 	
-	//TODO fix the output of PDBs
-	FILE *f = fopen(pdb_filename, "w");
-//	int num = distinct.size();
-	WritePDBHeader(f);
-//	assert(fwrite(&num, sizeof(num), 1, f) == 1);
-//	assert(fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f) == distinct.size());
-	assert(fwrite(&DB[0], sizeof(uint8_t), COUNT, f) == COUNT);
-	fclose(f);
+	if (pdb_filename != 0)
+	{
+		//TODO fix the output of PDBs
+		FILE *f = fopen(pdb_filename, "w");
+		//	int num = distinct.size();
+		WritePDBHeader(f);
+		//	assert(fwrite(&num, sizeof(num), 1, f) == 1);
+		//	assert(fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f) == distinct.size());
+		assert(fwrite(&DB[0], sizeof(uint8_t), COUNT, f) == COUNT);
+		fclose(f);
+	}
 	
 //	PDB.push_back(DB); // increase the number of regular PDBs being stored
 //	PDB_distincts.push_back(distinct); // stores distinct

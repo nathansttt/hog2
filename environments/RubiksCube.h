@@ -42,6 +42,16 @@ public:
 //	Rubik7EdgeState edge7;
 };
 
+namespace std {
+	template <> struct hash<RubiksState>
+	{
+		size_t operator()(const RubiksState & x) const
+		{
+			return x.edge.state^((x.corner.state)<<11);
+		}
+	};
+}
+
 static bool operator==(const RubiksState &l1, const RubiksState &l2)
 {
 	return l1.corner == l2.corner && l1.edge == l2.edge;
