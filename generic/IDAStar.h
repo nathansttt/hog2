@@ -46,10 +46,19 @@ private:
 					   double maxH, double parentH);
 	void PrintGHistogram()
 	{
+		uint64_t early = 0, late = 0;
 		for (int x = 0; x < gCostHistogram.size(); x++)
 		{
 			printf("%d\t%llu\n", x, gCostHistogram[x]);
+			if (x*2 > gCostHistogram.size()-1)
+				late += gCostHistogram[x];
+			else
+				early += gCostHistogram[x];
 		}
+		if (late < early)
+			printf("Strong heuristic - Expect MM > A*\n");
+		else
+			printf("Weak heuristic - Expect MM >= MM0.\n");
 	}
 	void UpdateNextBound(double currBound, double fCost);
 	state goal;

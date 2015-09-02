@@ -64,6 +64,9 @@ public:
 		state = state^(0x1<<whichLoc);
 		//		printf("Now: 0x%X \n", state);
 	}
+	// 60 bits
+	// 12 bits of flips
+	// 48 bits of pieces
 	uint64_t state;
 };
 
@@ -153,12 +156,13 @@ public:
 	virtual void OpenGLDraw(const RubikEdgeState&, const RubikEdgeState&, float) const;
 	virtual void OpenGLDraw(const RubikEdgeState&, const RubikEdgeAction&) const;
 	void OpenGLDrawCube(const RubikEdgeState &s, int cube) const;
+	static void MRUnrank(int n, uint64_t r, uint64_t &perm);
+	static void MRUnrank2(int n, uint64_t r, uint64_t &perm);
+	static uint64_t MRRank(int n, uint64_t perm, uint64_t dual);
+	static uint64_t MRRank2(int n, uint64_t perm, uint64_t dual);
+
 private:
 	int piecesToRank;
-	void MRUnrank(int n, uint64_t r, uint64_t &perm) const;
-	void MRUnrank2(int n, uint64_t r, uint64_t &perm) const;
-	uint64_t MRRank(int n, uint64_t perm, uint64_t dual) const;
-	uint64_t MRRank2(int n, uint64_t perm, uint64_t dual) const;
 	
 	void SetCubeColor(int which, bool face, const RubikEdgeState&) const;
 	RubikEdgeMove moves[18];
@@ -167,8 +171,9 @@ private:
 class RubikEdgePDB : public PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge> {
 public:
 	RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges);
-	uint64_t GetStateHash(const RubikEdgeState &s) const;
-	void GetStateFromHash(RubikEdgeState &s, uint64_t hash) const;
+	static uint64_t GetStateSpaceSize();
+	static uint64_t GetStateHash(const RubikEdgeState &s);
+	static void GetStateFromHash(RubikEdgeState &s, uint64_t hash);
 	uint64_t GetPDBSize() const;
 	uint64_t GetPDBHash(const RubikEdgeState &s, int threadID = 0) const;
 	void GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int threadID = 0) const;
@@ -177,8 +182,8 @@ public:
 	void WritePDBHeader(FILE *f) const;
 	void ReadPDBHeader(FILE *f) const;
 private:
-	uint64_t Factorial(int val) const;
-	uint64_t FactorialUpperK(int n, int k) const;
+	static uint64_t Factorial(int val);
+	static uint64_t FactorialUpperK(int n, int k);
 	std::vector<int> edges;
 	size_t puzzleSize;
 	uint64_t pdbSize;

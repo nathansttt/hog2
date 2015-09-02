@@ -69,3 +69,4 @@ default : all
 SRC_CPP = \
 	apps/bidirectional/GUICode.cpp \
 	apps/bidirectional/Driver.cpp \
+	apps/bidirectional/MM.cpp \

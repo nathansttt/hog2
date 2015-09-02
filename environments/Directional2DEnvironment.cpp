@@ -13,7 +13,7 @@
 
 #define TABLE_SIZE 15
 #define ROW_SIZE (2*TABLE_SIZE+1)
-
+#warning ABS functions might have been removed; need to verify to make sure they weren't needed
 Directional2DEnvironment::Directional2DEnvironment(Map *_m, model envType, heuristicType heuristic)
 {
 	motionModel = envType;//kHumanoid;

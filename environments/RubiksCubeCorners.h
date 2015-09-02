@@ -61,6 +61,9 @@ public:
 	}
 	void Rotate(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
 	void Swap(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
+	// 48 bits
+	// 16 bits of rotations
+	// 32 bits of pieces
 	uint64_t state;
 };
 
@@ -146,9 +149,9 @@ public:
 	/** Goal Test if the goal is stored **/
 	virtual bool GoalTest(const RubiksCornerState &node);
 	
-	virtual uint64_t GetStateHash(const RubiksCornerState &node) const;
+	static uint64_t GetStateHash(const RubiksCornerState &node);
+	static void GetStateFromHash(uint64_t hash, RubiksCornerState &node);
 	virtual uint64_t GetActionHash(RubiksCornersAction act) const { return 0; }
-	virtual void GetStateFromHash(uint64_t hash, RubiksCornerState &node) const;
 	
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const RubiksCornerState&) const;
@@ -159,16 +162,17 @@ public:
 private:
 	void SetFaceColor(int face, const RubiksCornerState&) const;
 	//	void SetFaceColor(int face, const RubiksCornerState&) const;
-	uint64_t MRRank(int n, uint64_t perm, uint64_t dual) const;
-	void MRUnrank2(int n, uint64_t r, uint64_t &perm) const;
+	static uint64_t MRRank(int n, uint64_t perm, uint64_t dual);
+	static void MRUnrank2(int n, uint64_t r, uint64_t &perm);
 	RubikCornerMove moves[18];
 };
 
 class RubikCornerPDB : public PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner> {
 public:
 	RubikCornerPDB(RubiksCorner *e, const RubiksCornerState &s, std::vector<int> &distinctCorners);
-	uint64_t GetStateHash(const RubiksCornerState &s) const;
-	void GetStateFromHash(RubiksCornerState &s, uint64_t hash) const;
+	static uint64_t GetStateSpaceSize();
+	static uint64_t GetStateHash(const RubiksCornerState &s);
+	static void GetStateFromHash(RubiksCornerState &s, uint64_t hash);
 	uint64_t GetPDBSize() const;
 	uint64_t GetPDBHash(const RubiksCornerState &s, int threadID = 0) const;
 	void GetStateFromPDBHash(uint64_t hash, RubiksCornerState &s, int threadID = 0) const;

@@ -454,7 +454,7 @@ void RubiksCorner::rankPlayerRemaining(const RubiksCornerState &node, int who, i
 }
 
 
-uint64_t RubiksCorner::GetStateHash(const RubiksCornerState &node) const
+uint64_t RubiksCorner::GetStateHash(const RubiksCornerState &node)
 {
 	static uint64_t Factorial[21] =
 	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
@@ -508,7 +508,7 @@ uint64_t RubiksCorner::GetStateHash(const RubiksCornerState &node) const
 
 /////
 
-uint64_t RubiksCorner::MRRank(int n, uint64_t perm, uint64_t dual) const
+uint64_t RubiksCorner::MRRank(int n, uint64_t perm, uint64_t dual)
 {
 	int ss[12];
 	int ssLoc = 0;
@@ -538,7 +538,7 @@ uint64_t RubiksCorner::MRRank(int n, uint64_t perm, uint64_t dual) const
 /////
 
 
-void RubiksCorner::GetStateFromHash(uint64_t hash, RubiksCornerState &node) const
+void RubiksCorner::GetStateFromHash(uint64_t hash, RubiksCornerState &node)
 {
 	static uint64_t Factorial[21] =
 	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
@@ -599,7 +599,7 @@ void RubiksCorner::GetStateFromHash(uint64_t hash, RubiksCornerState &node) cons
 #endif
 }
 
-void RubiksCorner::MRUnrank2(int n, uint64_t r, uint64_t &perm) const
+void RubiksCorner::MRUnrank2(int n, uint64_t r, uint64_t &perm)
 {
 	for (int i = n; i > 0; i--)
 	{
@@ -1057,15 +1057,19 @@ RubikCornerPDB::RubikCornerPDB(RubiksCorner *e, const RubiksCornerState &s, std:
 	
 }
 
-uint64_t RubikCornerPDB::GetStateHash(const RubiksCornerState &s) const
+uint64_t RubikCornerPDB::GetStateSpaceSize()
 {
-	//assert(false);
-	return 0;
+	return 40320ll*2187ll;
 }
 
-void RubikCornerPDB::GetStateFromHash(RubiksCornerState &s, uint64_t hash) const
+uint64_t RubikCornerPDB::GetStateHash(const RubiksCornerState &s)
 {
-	//assert(false);
+	return RubiksCorner::GetStateHash(s);
+}
+
+void RubikCornerPDB::GetStateFromHash(RubiksCornerState &s, uint64_t hash)
+{
+	RubiksCorner::GetStateFromHash(hash, s);
 }
 
 uint64_t RubikCornerPDB::GetPDBSize() const

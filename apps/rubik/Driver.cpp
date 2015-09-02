@@ -72,7 +72,7 @@ void PDBFaceTest();
 int main(int argc, char* argv[])
 {
 	//PDBFaceTest();
-	//KorfTest(0);
+	KorfTest(0);
 	//TestCornerRanking();
 	//TestEdgeRanking();
 	InstallHandlers();
@@ -1666,6 +1666,7 @@ void KorfTest(int which)
 	cube.SetPruneSuccessors(true);
 	Timer t;
 	t.StartTimer();
+	//GetInstance(start, which);
 	GetKorfInstance(start, which);
 	goal.Reset();
 	std::vector<RubiksAction> path;

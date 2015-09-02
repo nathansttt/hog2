@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "462523556.062387"
+            timestampString = "462903113.16573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "259"
-            endingLineNumber = "259"
+            startingLineNumber = "262"
+            endingLineNumber = "262"
             landmarkName = "ThreadWorker(int threadNum, int depth, std::vector&lt;uint8_t&gt; &amp;DB, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
             landmarkType = "7">
          </BreakpointContent>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeCorners.cpp"
-            timestampString = "462606604.303832"
+            timestampString = "462903113.16573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1114"
-            endingLineNumber = "1114"
+            startingLineNumber = "1118"
+            endingLineNumber = "1118"
             landmarkName = "RubikCornerPDB::GetStateFromPDBHash(uint64_t hash, RubiksCornerState &amp;s, int threadID)"
             landmarkType = "5">
          </BreakpointContent>
@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeCorners.cpp"
-            timestampString = "462606178.916751"
+            timestampString = "462903113.16573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1081"
-            endingLineNumber = "1081"
+            startingLineNumber = "1085"
+            endingLineNumber = "1085"
             landmarkName = "RubikCornerPDB::GetPDBHash(const RubiksCornerState &amp;s, int threadID)"
             landmarkType = "5">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeEdges.cpp"
-            timestampString = "462729504.589724"
+            timestampString = "462903113.16573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1121"
-            endingLineNumber = "1121"
+            startingLineNumber = "1165"
+            endingLineNumber = "1165"
             landmarkName = "RubikEdgePDB::GetPDBHash(const RubikEdgeState &amp;s, int threadID )"
             landmarkType = "5">
          </BreakpointContent>
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeEdges.cpp"
-            timestampString = "462729504.589724"
+            timestampString = "462903113.16573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1131"
-            endingLineNumber = "1131"
+            startingLineNumber = "1175"
+            endingLineNumber = "1175"
             landmarkName = "RubikEdgePDB::GetPDBHash(const RubikEdgeState &amp;s, int threadID )"
             landmarkType = "5">
          </BreakpointContent>
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeEdges.cpp"
-            timestampString = "462729504.589724"
+            timestampString = "462903113.16573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1181"
-            endingLineNumber = "1181"
+            startingLineNumber = "1225"
+            endingLineNumber = "1225"
             landmarkName = "RubikEdgePDB::GetStateFromPDBHash(uint64_t hash, RubikEdgeState &amp;s, int threadID)"
             landmarkType = "5">
          </BreakpointContent>
@@ -106,13 +106,29 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeEdges.cpp"
-            timestampString = "462729504.589724"
+            timestampString = "462903113.16573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1166"
-            endingLineNumber = "1166"
+            startingLineNumber = "1210"
+            endingLineNumber = "1210"
             landmarkName = "RubikEdgePDB::GetStateFromPDBHash(uint64_t hash, RubikEdgeState &amp;s, int threadID)"
             landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/MM.cpp"
+            timestampString = "462914509.960919"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "209"
+            endingLineNumber = "209"
+            landmarkName = "ExpandNextFile()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
