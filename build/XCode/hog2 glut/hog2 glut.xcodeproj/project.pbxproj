@@ -2636,6 +2636,7 @@
 		C454CD7A14FD78BB005DDC8E /* MPLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPLRTAStar.h; sourceTree = "<group>"; };
 		C45EEED81B95760500D87F30 /* MM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MM.cpp; sourceTree = "<group>"; };
 		C45EEED91B95760500D87F30 /* MM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MM.h; sourceTree = "<group>"; };
+		C45EEEDB1B97EEE600D87F30 /* ParallelIDAStar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParallelIDAStar.h; sourceTree = "<group>"; };
 		C4625E76177B5CE200D1C8F7 /* TextOverlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextOverlay.cpp; sourceTree = "<group>"; };
 		C4625E77177B5CE200D1C8F7 /* TextOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextOverlay.h; sourceTree = "<group>"; };
 		C46735721710D96000E2A10B /* Driver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
@@ -3690,6 +3691,7 @@
 				C4F9F3C213E4FE3E0077C5A5 /* GreedyDMUnit.h */,
 				C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */,
 				C4F9F3C413E4FE3E0077C5A5 /* IDAStar.h */,
+				C45EEEDB1B97EEE600D87F30 /* ParallelIDAStar.h */,
 				C4F9F3C513E4FE3E0077C5A5 /* IGAStar.h */,
 				C4F9F3C613E4FE3E0077C5A5 /* OldTemplateAStar.h */,
 				C4F526C014AA79BE00025B71 /* PEAStar.h */,

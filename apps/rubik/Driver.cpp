@@ -34,6 +34,7 @@
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
 #include "IDAStar.h"
+#include "ParallelIDAStar.h"
 #include "TemplateAStar.h"
 #include "Timer.h"
 #include "RubiksCube.h"
@@ -822,111 +823,111 @@ void ManyCompression()
 
 void LoadCornerPDB()
 {
-	if (c.GetCornerPDB().Size() != 0)
-		return;
-	FourBitArray &b = c.GetCornerPDB();
-	
-	//uint8_t *mem;
-	std::vector<bucketInfo> data;
-	std::vector<bucketData> buckets;
-	
-	uint64_t maxBuckSize = GetMaxBucketSize<RubiksCorner, RubiksCornerState>(true);
-	InitTwoPieceData<RubiksCorner, RubiksCornerState>(data, maxBuckSize);
-	InitBucketSize<RubiksCorner, RubiksCornerState>(buckets, maxBuckSize);
-	int64_t totalSize = 0;
-	for (unsigned int x = 0; x < buckets.size(); x++)
-		totalSize += buckets[x].theSize;
-	b.Resize(totalSize);
-	//mem = new uint8_t[totalSize];
-	DiskBitFile f("/home/sturtevant/sturtevant/code/cc/rubik/RC");
-	
-	int64_t index = 0;
-	for (unsigned int x = 0; x < data.size(); x++)
-	{
-		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
-		{
-			int val = f.ReadFileDepth(data[x].bucketID, y);
-			//mem[index++] = val;
-			b.Set(index++, val);
-		}
-	}
-	//c.SetCornerPDB(mem);
+//	if (c.GetCornerPDB().Size() != 0)
+//		return;
+//	FourBitArray &b = c.GetCornerPDB();
+//	
+//	//uint8_t *mem;
+//	std::vector<bucketInfo> data;
+//	std::vector<bucketData> buckets;
+//	
+//	uint64_t maxBuckSize = GetMaxBucketSize<RubiksCorner, RubiksCornerState>(true);
+//	InitTwoPieceData<RubiksCorner, RubiksCornerState>(data, maxBuckSize);
+//	InitBucketSize<RubiksCorner, RubiksCornerState>(buckets, maxBuckSize);
+//	int64_t totalSize = 0;
+//	for (unsigned int x = 0; x < buckets.size(); x++)
+//		totalSize += buckets[x].theSize;
+//	b.Resize(totalSize);
+//	//mem = new uint8_t[totalSize];
+//	DiskBitFile f("/home/sturtevant/sturtevant/code/cc/rubik/RC");
+//	
+//	int64_t index = 0;
+//	for (unsigned int x = 0; x < data.size(); x++)
+//	{
+//		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+//		{
+//			int val = f.ReadFileDepth(data[x].bucketID, y);
+//			//mem[index++] = val;
+//			b.Set(index++, val);
+//		}
+//	}
+//	//c.SetCornerPDB(mem);
 }
 
 void LoadEdgePDB(uint64_t sizeLimit)
 {
-	if (c.GetEdgePDB().Size() != 0)
-		return;
-	FourBitArray &b = c.GetEdgePDB();
-
-	//uint8_t *mem;
-	std::vector<bucketInfo> data;
-	std::vector<bucketData> buckets;
-	
-	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
-	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
-	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
-	int64_t totalSize = 0;
-	for (unsigned int x = 0; x < buckets.size(); x++)
-		totalSize += buckets[x].theSize;
-
-	b.Resize((totalSize+sizeLimit-1)/sizeLimit);
-	//DiskBitFile f("/data/cc/rubik/final/RC");
-	DiskBitFile f("/store/rubik/RC");
-	int64_t index = 0;
-	for (unsigned int x = 0; x < data.size(); x++)
-	{
-		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
-		{
-		  if (0 == y%sizeLimit)
-		    {
-		      int val = f.ReadFileDepth(data[x].bucketID, y);
-		      b.Set(index++, val);
-		    }
-		}
-	}
-//	c.SetEdgePDB(mem, totalSize);
+//	if (c.GetEdgePDB().Size() != 0)
+//		return;
+//	FourBitArray &b = c.GetEdgePDB();
+//
+//	//uint8_t *mem;
+//	std::vector<bucketInfo> data;
+//	std::vector<bucketData> buckets;
+//	
+//	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+//	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+//	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+//	int64_t totalSize = 0;
+//	for (unsigned int x = 0; x < buckets.size(); x++)
+//		totalSize += buckets[x].theSize;
+//
+//	b.Resize((totalSize+sizeLimit-1)/sizeLimit);
+//	//DiskBitFile f("/data/cc/rubik/final/RC");
+//	DiskBitFile f("/store/rubik/RC");
+//	int64_t index = 0;
+//	for (unsigned int x = 0; x < data.size(); x++)
+//	{
+//		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+//		{
+//		  if (0 == y%sizeLimit)
+//		    {
+//		      int val = f.ReadFileDepth(data[x].bucketID, y);
+//		      b.Set(index++, val);
+//		    }
+//		}
+//	}
+////	c.SetEdgePDB(mem, totalSize);
 }
 
 void LoadEdgePDBOLD(uint64_t sizeLimit)
 {
-	//
-	if (c.GetEdgePDB().Size() != 0)
-		return;
-	FourBitArray &b = c.GetEdgePDB();
-
-	//uint8_t *mem;
-	std::vector<bucketInfo> data;
-	std::vector<bucketData> buckets;
-	
-	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
-	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
-	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
-	int64_t totalSize = 0;
-//	const int64_t sizeLimit = 1000000000;
-	for (unsigned int x = 0; x < buckets.size(); x++)
-		totalSize += buckets[x].theSize;
-	if (totalSize > sizeLimit)
-		totalSize = sizeLimit;
-	//mem = new uint8_t[totalSize];
-	b.Resize(totalSize);
-	DiskBitFile f("/data/cc/rubik/final/RC");
-	//DiskBitFile f("/store/rubik/RC");
-	int64_t index = 0;
-	for (unsigned int x = 0; x < data.size(); x++)
-	{
-		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
-		{
-			int val = f.ReadFileDepth(data[x].bucketID, y);
-			b.Set(index++, val);
-			//mem[index++] = val;
-			if (index >= totalSize)
-				break;
-		}
-		if (index >= totalSize)
-			break;
-	}
-//	c.SetEdgePDB(mem, totalSize);
+//	//
+//	if (c.GetEdgePDB().Size() != 0)
+//		return;
+//	FourBitArray &b = c.GetEdgePDB();
+//
+//	//uint8_t *mem;
+//	std::vector<bucketInfo> data;
+//	std::vector<bucketData> buckets;
+//	
+//	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+//	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+//	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+//	int64_t totalSize = 0;
+////	const int64_t sizeLimit = 1000000000;
+//	for (unsigned int x = 0; x < buckets.size(); x++)
+//		totalSize += buckets[x].theSize;
+//	if (totalSize > sizeLimit)
+//		totalSize = sizeLimit;
+//	//mem = new uint8_t[totalSize];
+//	b.Resize(totalSize);
+//	DiskBitFile f("/data/cc/rubik/final/RC");
+//	//DiskBitFile f("/store/rubik/RC");
+//	int64_t index = 0;
+//	for (unsigned int x = 0; x < data.size(); x++)
+//	{
+//		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+//		{
+//			int val = f.ReadFileDepth(data[x].bucketID, y);
+//			b.Set(index++, val);
+//			//mem[index++] = val;
+//			if (index >= totalSize)
+//				break;
+//		}
+//		if (index >= totalSize)
+//			break;
+//	}
+////	c.SetEdgePDB(mem, totalSize);
 }
 
 void LoadEdge7PDB(uint64_t sizeLimit = 0x7FFFFFFFFFFFFFFFull);
@@ -1084,17 +1085,17 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 
 void RunSimpleTest(const char *edgePDB, const char *cornerPDB)
 {
-	FourBitArray &corner = c.GetCornerPDB();
-	corner.Read(cornerPDB);
-	FourBitArray &edge = c.GetEdgePDB();
-	edge.Read(edgePDB);
-	c.compressionFactor = 2;
-	for (int x = 0; x < 100; x++)
-	{
-		srandom(9283+x*23);
-		SolveOneProblem(x, "2x");
-		//		SolveOneProblemAStar(x);
-	}
+//	FourBitArray &corner = c.GetCornerPDB();
+//	corner.Read(cornerPDB);
+//	FourBitArray &edge = c.GetEdgePDB();
+//	edge.Read(edgePDB);
+//	c.compressionFactor = 2;
+//	for (int x = 0; x < 100; x++)
+//	{
+//		srandom(9283+x*23);
+//		SolveOneProblem(x, "2x");
+//		//		SolveOneProblemAStar(x);
+//	}
 }
 
 int countBits(int64_t val)
@@ -1217,209 +1218,209 @@ void BuildMinBloomFilter(float space, int numHash, int finalDepth, const char *d
 
 void SampleBloomHeuristics(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9)
 {
-	// setup corner pdb
-	{
-		FourBitArray &corner = c.GetCornerPDB();
-		printf("Loading corner pdb: %s\n", cornerPDB);
-		corner.Read(cornerPDB);
-		printf("Done.\n");
-	}
-	
-	bool zero = false;
-	
-	// setup bloom filters
-	{
-		printf("Loading bloom filters.\n");fflush(stdout);
-		//uint64_t depth8states = 1050559626ull;
-		//uint64_t depth9states = 11588911021ull;
-		
-		uint64_t size8filter = size8*1024*1024*1024*8ull;
-		uint64_t size9filter = size9*1024ull*1024ull*1024ull*8ull;
-		
-		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", (int)size8, size8filter, hash8);
-		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
-		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
-			   8, c.depth8->GetStorage(),
-			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
-			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
-		printf("%d hashes being used\n", c.depth8->GetNumHash());
-		
-		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", (int)size9, size9filter, hash9);
-		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
-		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
-			   9, c.depth9->GetStorage(),
-			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
-			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
-		printf("%d hashes being used\n", c.depth9->GetNumHash());
-		
-		c.bloomFilter = true;
-		printf("Done.\n");fflush(stdout);
-	}
-	
-	// load hash table / bloom filter data
-	if (1)
-	{
-		printf("Building hash table/bloom filter\n"); fflush(stdout);
-		RubikEdge e;
-		RubikEdgeState es;
-		for (int x = 0; x < 8; x++)
-		{
-			char name[255];
-			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
-			FILE *f = fopen(name, "r");
-			if (f == 0)
-			{
-				printf("Error opening %s; aborting!\n", name);
-				exit(0);
-			}
-			printf("Reading from '%s'\n", name);
-			fflush(stdout);
-			
-			uint64_t nextItem;
-			uint64_t count = 0;
-			while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
-			{
-				if (0 != countBits(nextItem&0xFFF)%2)
-					nextItem ^= 1;
-				if (x < 8)
-				{
-					count++;
-					c.depthTable[nextItem] = x;
-				}
-				else {
-					printf("Error; hit depth %d\n", x);
-				}
-			}
-			printf("%llu items read at depth %d\n", count, x);fflush(stdout);
-			fclose(f);
-		}
-		
-	}
-	
-	RubiksState start;
-	start.Reset();
-	RubikEdge edge;
-	uint64_t max = edge.getMaxSinglePlayerRank();
-	double val = 0;
-	int cnt = 100000;
-	for (int x = 0; x < cnt; x++)
-	{
-		uint64_t r1 = random(), r2 = random();
-		r1 = (r1<<32)|(r2);
-		r1 = r1%max;
-		edge.GetStateFromHash(r1, start.edge);
-		val += c.HCost(start, start);
-//		srandom(9283+x*23);
-//		SolveOneProblem(x, "hash7bloom89");
-//		//		SolveOneProblemAStar(x);
-	}
-	printf("Edge heuristic distribution\n");
-	for (int x = 0; x < c.edgeDist.size(); x++)
-	{
-		printf("%d : %llu\n", x, c.edgeDist[x]);
-	}
-	printf("Average: %1.4f\n", val/cnt);
-	//	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
-	//	bloom_filter *depth8, *depth9;
-	
+//	// setup corner pdb
+//	{
+//		FourBitArray &corner = c.GetCornerPDB();
+//		printf("Loading corner pdb: %s\n", cornerPDB);
+//		corner.Read(cornerPDB);
+//		printf("Done.\n");
+//	}
+//	
+//	bool zero = false;
+//	
+//	// setup bloom filters
+//	{
+//		printf("Loading bloom filters.\n");fflush(stdout);
+//		//uint64_t depth8states = 1050559626ull;
+//		//uint64_t depth9states = 11588911021ull;
+//		
+//		uint64_t size8filter = size8*1024*1024*1024*8ull;
+//		uint64_t size9filter = size9*1024ull*1024ull*1024ull*8ull;
+//		
+//		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", (int)size8, size8filter, hash8);
+//		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
+//		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
+//			   8, c.depth8->GetStorage(),
+//			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
+//			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
+//		printf("%d hashes being used\n", c.depth8->GetNumHash());
+//		
+//		printf("Loading filter with %d GB of entries (%llu) and %d hashes\n", (int)size9, size9filter, hash9);
+//		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
+//		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
+//			   9, c.depth9->GetStorage(),
+//			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
+//			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
+//		printf("%d hashes being used\n", c.depth9->GetNumHash());
+//		
+//		c.bloomFilter = true;
+//		printf("Done.\n");fflush(stdout);
+//	}
+//	
+//	// load hash table / bloom filter data
+//	if (1)
+//	{
+//		printf("Building hash table/bloom filter\n"); fflush(stdout);
+//		RubikEdge e;
+//		RubikEdgeState es;
+//		for (int x = 0; x < 8; x++)
+//		{
+//			char name[255];
+//			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
+//			FILE *f = fopen(name, "r");
+//			if (f == 0)
+//			{
+//				printf("Error opening %s; aborting!\n", name);
+//				exit(0);
+//			}
+//			printf("Reading from '%s'\n", name);
+//			fflush(stdout);
+//			
+//			uint64_t nextItem;
+//			uint64_t count = 0;
+//			while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
+//			{
+//				if (0 != countBits(nextItem&0xFFF)%2)
+//					nextItem ^= 1;
+//				if (x < 8)
+//				{
+//					count++;
+//					c.depthTable[nextItem] = x;
+//				}
+//				else {
+//					printf("Error; hit depth %d\n", x);
+//				}
+//			}
+//			printf("%llu items read at depth %d\n", count, x);fflush(stdout);
+//			fclose(f);
+//		}
+//		
+//	}
+//	
+//	RubiksState start;
+//	start.Reset();
+//	RubikEdge edge;
+//	uint64_t max = edge.getMaxSinglePlayerRank();
+//	double val = 0;
+//	int cnt = 100000;
+//	for (int x = 0; x < cnt; x++)
+//	{
+//		uint64_t r1 = random(), r2 = random();
+//		r1 = (r1<<32)|(r2);
+//		r1 = r1%max;
+//		edge.GetStateFromHash(r1, start.edge);
+//		val += c.HCost(start, start);
+////		srandom(9283+x*23);
+////		SolveOneProblem(x, "hash7bloom89");
+////		//		SolveOneProblemAStar(x);
+//	}
+//	printf("Edge heuristic distribution\n");
+//	for (int x = 0; x < c.edgeDist.size(); x++)
+//	{
+//		printf("%d : %llu\n", x, c.edgeDist[x]);
+//	}
+//	printf("Average: %1.4f\n", val/cnt);
+//	//	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
+//	//	bloom_filter *depth8, *depth9;
+//	
 }
 
 void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float size8, int hash8, float size9, int hash9)
 {
-	// setup corner pdb
-	{
-		FourBitArray &corner = c.GetCornerPDB();
-		printf("Loading corner pdb: %s\n", cornerPDB);
-		corner.Read(cornerPDB);
-		printf("Done.\n");
-	}
-
-	bool zero = false;
-
-	// setup bloom filters
-	{
-		printf("Loading bloom filters.\n");fflush(stdout);
-		//uint64_t depth8states = 1050559626ull;
-		//uint64_t depth9states = 11588911021ull;
-		
-		uint64_t size8filter = size8*1024*1024*1024*8ull;
-		uint64_t size9filter = size9*1024ull*1024ull*1024ull*8ull;
-
-		//size8filter = 11054728626ull;
-		//size9filter = 121946687506ull;
-		//hash8 = hash9 = 4;
-
-		printf("Loading filter with %1.1f GB of entries (%llu) and %d hashes\n", size8, size8filter, hash8);
-		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
-		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
-			   8, c.depth8->GetStorage(),
-			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
-			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
-		printf("%d hashes being used\n", c.depth8->GetNumHash());
-
-		printf("Loading filter with %1.1f GB of entries (%llu) and %d hashes\n", size9, size9filter, hash9);
-		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
-		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
-			   9, c.depth9->GetStorage(),
-			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
-			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
-		printf("%d hashes being used\n", c.depth9->GetNumHash());
-
-		c.bloomFilter = true;
-		printf("Done.\n");fflush(stdout);
-	}
-	
-	// load hash table / bloom filter data
-	if (1)
-	{
-		printf("Building hash table/bloom filter\n"); fflush(stdout);
-		RubikEdge e;
-		RubikEdgeState es;
-		for (int x = 0; x < 8; x++)
-		{
-			char name[255];
-			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
-			FILE *f = fopen(name, "r");
-			if (f == 0)
-			{
-				printf("Error opening %s; aborting!\n", name);
-				exit(0);
-			}
-			printf("Reading from '%s'\n", name);
-			fflush(stdout);
-
-			uint64_t nextItem;
-			uint64_t count = 0;
-			while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
-			{
-				if (0 != countBits(nextItem&0xFFF)%2)
-					nextItem ^= 1;
-				if (x < 8)
-				{
-					count++;
-					c.depthTable[nextItem] = x;
-				}
-				else {
-					printf("Error; hit depth %d\n", x);
-				}
-			}
-			printf("%llu items read at depth %d\n", count, x);fflush(stdout);
-			fclose(f);
-		}
-
-	}
-	
-	for (int x = 0; x < 100; x++)
-	{
-		srandom(9283+x*23);
-		SolveOneProblem(x, "hash7bloom89");
-		//		SolveOneProblemAStar(x);
-	}
-	printf("Edge heuristic distribution\n");
-	for (int x = 0; x < c.edgeDist.size(); x++)
-	{
-		printf("%d : %llu\n", x, c.edgeDist[x]);
-	}
+//	// setup corner pdb
+//	{
+//		FourBitArray &corner = c.GetCornerPDB();
+//		printf("Loading corner pdb: %s\n", cornerPDB);
+//		corner.Read(cornerPDB);
+//		printf("Done.\n");
+//	}
+//
+//	bool zero = false;
+//
+//	// setup bloom filters
+//	{
+//		printf("Loading bloom filters.\n");fflush(stdout);
+//		//uint64_t depth8states = 1050559626ull;
+//		//uint64_t depth9states = 11588911021ull;
+//		
+//		uint64_t size8filter = size8*1024*1024*1024*8ull;
+//		uint64_t size9filter = size9*1024ull*1024ull*1024ull*8ull;
+//
+//		//size8filter = 11054728626ull;
+//		//size9filter = 121946687506ull;
+//		//hash8 = hash9 = 4;
+//
+//		printf("Loading filter with %1.1f GB of entries (%llu) and %d hashes\n", size8, size8filter, hash8);
+//		c.depth8 = new BloomFilter(size8filter, hash8, depthPrefix);
+//		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
+//			   8, c.depth8->GetStorage(),
+//			   c.depth8->GetStorage()/8.0/1024.0/1024.0,
+//			   c.depth8->GetStorage()/8.0/1024.0/1024.0/1024.0);
+//		printf("%d hashes being used\n", c.depth8->GetNumHash());
+//
+//		printf("Loading filter with %1.1f GB of entries (%llu) and %d hashes\n", size9, size9filter, hash9);
+//		c.depth9 = new BloomFilter(size9filter, hash9, depthPrefix);
+//		printf("Approximate storage (%d): %llu bits (%1.2f MB / %1.2f GB)\n",
+//			   9, c.depth9->GetStorage(),
+//			   c.depth9->GetStorage()/8.0/1024.0/1024.0,
+//			   c.depth9->GetStorage()/8.0/1024.0/1024.0/1024.0);
+//		printf("%d hashes being used\n", c.depth9->GetNumHash());
+//
+//		c.bloomFilter = true;
+//		printf("Done.\n");fflush(stdout);
+//	}
+//	
+//	// load hash table / bloom filter data
+//	if (1)
+//	{
+//		printf("Building hash table/bloom filter\n"); fflush(stdout);
+//		RubikEdge e;
+//		RubikEdgeState es;
+//		for (int x = 0; x < 8; x++)
+//		{
+//			char name[255];
+//			sprintf(name, "%s12edge-depth-%d.dat", depthPrefix, x);
+//			FILE *f = fopen(name, "r");
+//			if (f == 0)
+//			{
+//				printf("Error opening %s; aborting!\n", name);
+//				exit(0);
+//			}
+//			printf("Reading from '%s'\n", name);
+//			fflush(stdout);
+//
+//			uint64_t nextItem;
+//			uint64_t count = 0;
+//			while (fread(&nextItem, sizeof(uint64_t), 1, f) == 1)
+//			{
+//				if (0 != countBits(nextItem&0xFFF)%2)
+//					nextItem ^= 1;
+//				if (x < 8)
+//				{
+//					count++;
+//					c.depthTable[nextItem] = x;
+//				}
+//				else {
+//					printf("Error; hit depth %d\n", x);
+//				}
+//			}
+//			printf("%llu items read at depth %d\n", count, x);fflush(stdout);
+//			fclose(f);
+//		}
+//
+//	}
+//	
+//	for (int x = 0; x < 100; x++)
+//	{
+//		srandom(9283+x*23);
+//		SolveOneProblem(x, "hash7bloom89");
+//		//		SolveOneProblemAStar(x);
+//	}
+//	printf("Edge heuristic distribution\n");
+//	for (int x = 0; x < c.edgeDist.size(); x++)
+//	{
+//		printf("%d : %llu\n", x, c.edgeDist[x]);
+//	}
 //	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
 //	bloom_filter *depth8, *depth9;
 
@@ -1427,100 +1428,100 @@ void RunBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float si
 
 void RunMinBloomFilterTest(const char *cornerPDB, const char *depthPrefix, float space, int numHash)
 {
-	// setup corner pdb
-	{
-		FourBitArray &corner = c.GetCornerPDB();
-		printf("Loading corner pdb: %s\n", cornerPDB);
-		corner.Read(cornerPDB);
-		printf("Done.\n");
-	}
-	
-	bool zero = false;
-	
-	// setup bloom filters
-	{
-		printf("Loading min bloom filters.\n");fflush(stdout);
-		
-		printf("Creating bloom filter using %2.1f GB of mem.\n", space);fflush(stdout);
-		space = space*2*1024*1024*1024;
-		
-		MinBloomFilter *bf = new MinBloomFilter(space, numHash, depthPrefix);
-		printf("Approximate storage: %llu bits (%1.2f MB / %1.2f GB)\n", bf->GetStorage(),
-			   bf->GetStorage()*4.0/8.0/1024.0/1024.0,
-			   bf->GetStorage()*4.0/8.0/1024.0/1024.0/1024.0);
-		printf("%d hashes being used\n", bf->GetNumHash());
-		c.minBloom = bf;
-		c.minBloomFilter = true;
-	}
-	
-	for (int x = 0; x < 100; x++)
-	{
-		srandom(9283+x*23);
-		SolveOneProblem(x, "minBloom0-9");
-		//		SolveOneProblemAStar(x);
-	}
-	printf("Edge heuristic distribution\n");
-	for (int x = 0; x < c.edgeDist.size(); x++)
-	{
-		printf("%d : %llu\n", x, c.edgeDist[x]);
-	}
-	//	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
-	//	bloom_filter *depth8, *depth9;
-	
+//	// setup corner pdb
+//	{
+//		FourBitArray &corner = c.GetCornerPDB();
+//		printf("Loading corner pdb: %s\n", cornerPDB);
+//		corner.Read(cornerPDB);
+//		printf("Done.\n");
+//	}
+//	
+//	bool zero = false;
+//	
+//	// setup bloom filters
+//	{
+//		printf("Loading min bloom filters.\n");fflush(stdout);
+//		
+//		printf("Creating bloom filter using %2.1f GB of mem.\n", space);fflush(stdout);
+//		space = space*2*1024*1024*1024;
+//		
+//		MinBloomFilter *bf = new MinBloomFilter(space, numHash, depthPrefix);
+//		printf("Approximate storage: %llu bits (%1.2f MB / %1.2f GB)\n", bf->GetStorage(),
+//			   bf->GetStorage()*4.0/8.0/1024.0/1024.0,
+//			   bf->GetStorage()*4.0/8.0/1024.0/1024.0/1024.0);
+//		printf("%d hashes being used\n", bf->GetNumHash());
+//		c.minBloom = bf;
+//		c.minBloomFilter = true;
+//	}
+//	
+//	for (int x = 0; x < 100; x++)
+//	{
+//		srandom(9283+x*23);
+//		SolveOneProblem(x, "minBloom0-9");
+//		//		SolveOneProblemAStar(x);
+//	}
+//	printf("Edge heuristic distribution\n");
+//	for (int x = 0; x < c.edgeDist.size(); x++)
+//	{
+//		printf("%d : %llu\n", x, c.edgeDist[x]);
+//	}
+//	//	::std::tr1::unordered_map<uint64_t, uint8_t> hash;
+//	//	bloom_filter *depth8, *depth9;
+//	
 }
 
 
 void RunCompressionTest(int factor, const char *compType, const char *edgePDBmin, const char *edgePDBint, const char *cornerPDB)
 {
-	FourBitArray &corner = c.GetCornerPDB();
-	printf("Loading corner pdb: %s\n", cornerPDB);
-	corner.Read(cornerPDB);
-	FourBitArray &edgemin = c.GetEdgePDB();
-	printf("Loading edge min pdb: %s\n", edgePDBmin);
-	edgemin.Read(edgePDBmin);
-	//FourBitArray &edgeint = c.GetEdge7PDB(false);
-	//printf("Loading edge interleave pdb: %s\n", edgePDBint);
-	//edgeint.Read(edgePDBint);
-
-	c.compressionFactor = factor;
-	if (strcmp(compType, "min") == 0)
-	{
-		printf("Using min compression (%dx)\n", factor);
-		c.minCompression = true;
-	}
-	else {
-		printf("Using interleave compression (%dx)\n", factor);
-		c.minCompression = false;
-	}
-
-	for (int x = 0; x < 100; x++)
-	{
-		for (int t = 0; t <= 0; t++)
-		{
-			if (t == 0)
-			{
-				printf("Solving with min compression\n");
-				c.minCompression = true;
-			}
-			else {
-				printf("Solving with interleave compression\n");
-				c.minCompression = false;
-			}
-			{
-				srandom(9283+x*23);
-				SolveOneProblem(x, (t==0)?"min":"int");
-				//SolveOneProblemAStar(x);
-			}
-		}
-	}
-//	for (int x = 0; x < c.edgeDist.size(); x++)
+//	FourBitArray &corner = c.GetCornerPDB();
+//	printf("Loading corner pdb: %s\n", cornerPDB);
+//	corner.Read(cornerPDB);
+//	FourBitArray &edgemin = c.GetEdgePDB();
+//	printf("Loading edge min pdb: %s\n", edgePDBmin);
+//	edgemin.Read(edgePDBmin);
+//	//FourBitArray &edgeint = c.GetEdge7PDB(false);
+//	//printf("Loading edge interleave pdb: %s\n", edgePDBint);
+//	//edgeint.Read(edgePDBint);
+//
+//	c.compressionFactor = factor;
+//	if (strcmp(compType, "min") == 0)
 //	{
-//		printf("edgeDist[%3d] = %llu\n", x, c.edgeDist[x]);
+//		printf("Using min compression (%dx)\n", factor);
+//		c.minCompression = true;
 //	}
-//	for (int x = 0; x < c.cornDist.size(); x++)
+//	else {
+//		printf("Using interleave compression (%dx)\n", factor);
+//		c.minCompression = false;
+//	}
+//
+//	for (int x = 0; x < 100; x++)
 //	{
-//		printf("cornDist[%3d] = %llu\n", x, c.cornDist[x]);
+//		for (int t = 0; t <= 0; t++)
+//		{
+//			if (t == 0)
+//			{
+//				printf("Solving with min compression\n");
+//				c.minCompression = true;
+//			}
+//			else {
+//				printf("Solving with interleave compression\n");
+//				c.minCompression = false;
+//			}
+//			{
+//				srandom(9283+x*23);
+//				SolveOneProblem(x, (t==0)?"min":"int");
+//				//SolveOneProblemAStar(x);
+//			}
+//		}
 //	}
+////	for (int x = 0; x < c.edgeDist.size(); x++)
+////	{
+////		printf("edgeDist[%3d] = %llu\n", x, c.edgeDist[x]);
+////	}
+////	for (int x = 0; x < c.cornDist.size(); x++)
+////	{
+////		printf("cornDist[%3d] = %llu\n", x, c.cornDist[x]);
+////	}
 }
 
 #pragma mark -
@@ -1672,13 +1673,34 @@ void KorfTest(int which)
 	std::vector<RubiksAction> path;
 	IDAStar<RubiksState, RubiksAction> ida;
 	ida.SetHeuristic(&h);
-	ida.GetPath(&cube, start, goal, path);
+	//ida.GetPath(&cube, start, goal, path);
 	t.EndTimer();
 	printf("%1.5fs elapsed\n", t.GetElapsedTime());
 	printf("%llu nodes expanded (%1.3f nodes/sec)\n", ida.GetNodesExpanded(),
 		   ida.GetNodesExpanded()/t.GetElapsedTime());
 	printf("%llu nodes generated (%1.3f nodes/sec)\n", ida.GetNodesTouched(),
 		   ida.GetNodesTouched()/t.GetElapsedTime());
+
+
+	t.StartTimer();
+
+//	GetInstance(start, which);
+//	cube.ApplyAction(start, 7);
+//	cube.ApplyAction(start, 2);
+//	printf("After applying actions 7, 2, heuristic is %1.2f\n", h.HCost(start, goal));
+	
+	//GetInstance(start, which);
+	GetKorfInstance(start, which);
+	goal.Reset();
+	ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> pida;
+	pida.SetHeuristic(&h);
+	pida.GetPath(&cube, start, goal, path);
+	t.EndTimer();
+	printf("%1.5fs elapsed\n", t.GetElapsedTime());
+	printf("%llu nodes expanded (%1.3f nodes/sec)\n", pida.GetNodesExpanded(),
+		   pida.GetNodesExpanded()/t.GetElapsedTime());
+	printf("%llu nodes generated (%1.3f nodes/sec)\n", pida.GetNodesTouched(),
+		   pida.GetNodesTouched()/t.GetElapsedTime());
 }
 
 void RunTest(int billionEntriesToLoad)
@@ -1992,6 +2014,7 @@ void GetInstance(RubiksState &start, int which)
 	{4, 17, 9, 1, 12, 5, 17, 8, 11, 13, 15, 6, 12, 4}
 	};
 
+	start.Reset();
 	for (int x = 13; x >= 0; x--)
 	{
 		c.UndoAction(start, instances[which][x]);

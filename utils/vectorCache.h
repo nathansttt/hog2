@@ -7,6 +7,9 @@
  *
  */
 
+#ifndef VECTORCACHE_H
+#define VECTORCACHE_H
+
 template<class storage>
 class vectorCache {
 public:
@@ -59,3 +62,4 @@ void vectorCache<storage>::returnItem(std::vector<storage> *item)
 	freeList.push_back(item);
 }
 
+#endif
