@@ -48,7 +48,7 @@ private:
 	void DoIteration(environment *env,
 					 action forbiddenAction, state &currState,
 					 std::vector<action> &thePath, double bound, double g,
-					 workUnit<action> &w);
+					 workUnit<action> &w, vectorCache<action> &cache);
 	void GenerateWork(environment *env,
 					  action forbiddenAction, state &currState,
 					  std::vector<action> &thePath);
@@ -72,7 +72,7 @@ private:
 	void UpdateNextBound(double currBound, double fCost);
 	state goal;
 	double nextBound;
-	vectorCache<action> actCache;
+	//vectorCache<action> actCache;
 	bool storedHeuristic;
 	Heuristic<state> *heuristic;
 	std::vector<uint64_t> gCostHistogram;
@@ -207,6 +207,7 @@ void ParallelIDAStar<environment, state, action>::GenerateWork(environment *env,
 template <class environment, class state, class action>
 void ParallelIDAStar<environment, state, action>::StartThreadedIteration(environment env, state startState, double bound)
 {
+	vectorCache<action> actCache;
 	std::vector<action> thePath;
 	while (true)
 	{
@@ -235,7 +236,7 @@ void ParallelIDAStar<environment, state, action>::StartThreadedIteration(environ
 			work[nextValue].nextBound = g+heuristic->HCost(startState, goal);
 		}
 		else {
-			DoIteration(&env, last, startState, thePath, bound, g, work[nextValue]);
+			DoIteration(&env, last, startState, thePath, bound, g, work[nextValue], actCache);
 		}
 		
 		for (int x = workDepth-1; x >= 0; x--)
@@ -251,7 +252,7 @@ template <class environment, class state, class action>
 void ParallelIDAStar<environment, state, action>::DoIteration(environment *env,
 															  action forbiddenAction, state &currState,
 															  std::vector<action> &thePath, double bound, double g,
-															  workUnit<action> &w)
+															  workUnit<action> &w, vectorCache<action> &cache)
 {
 	double h = heuristic->HCost(currState, goal);//, parentH); // TODO: restore code that uses parent h-cost
 	
@@ -270,7 +271,7 @@ void ParallelIDAStar<environment, state, action>::DoIteration(environment *env,
 		return;
 	}
 	
-	std::vector<action> actions;// = *actCache.getItem();
+	std::vector<action> &actions = *cache.getItem();
 	env->GetActions(currState, actions);
 	nodesTouched += actions.size();
 	nodesExpanded++;
@@ -287,12 +288,13 @@ void ParallelIDAStar<environment, state, action>::DoIteration(environment *env,
 		env->ApplyAction(currState, actions[x]);
 		action a = actions[x];
 		env->InvertAction(a);
-		DoIteration(env, a, currState, thePath, bound, g+edgeCost, w);
+		DoIteration(env, a, currState, thePath, bound, g+edgeCost, w, cache);
 		env->UndoAction(currState, actions[x]);
 		thePath.pop_back();
 		if (foundSolution)
 			break;
 	}
+	cache.returnItem(&actions);
 }
 
 
