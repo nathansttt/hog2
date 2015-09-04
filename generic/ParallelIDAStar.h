@@ -24,7 +24,10 @@ struct workUnit {
 	action pre[workDepth];
 	std::vector<action> solution;
 	std::vector<int> gHistogram;
+	std::vector<int> fHistogram;
 	double nextBound;
+	uint64_t expanded, touched;
+	int unitNumber;
 };
 
 template <class environment, class state, class action>
@@ -56,18 +59,28 @@ private:
 	void PrintGHistogram()
 	{
 		uint64_t early = 0, late = 0;
+		printf("G-cost distribution\n");
 		for (int x = 0; x < gCostHistogram.size(); x++)
 		{
-			printf("%d\t%llu\n", x, gCostHistogram[x]);
+			if (gCostHistogram[x] != 0)
+				printf("%d\t%llu\n", x, gCostHistogram[x]);
 			if (x*2 > gCostHistogram.size()-1)
 				late += gCostHistogram[x];
 			else
 				early += gCostHistogram[x];
 		}
 		if (late < early)
-			printf("Strong heuristic - Expect MM > A*\n");
+			printf("--Strong heuristic - Expect MM > A*\n");
 		else
-			printf("Weak heuristic - Expect MM >= MM0.\n");
+			printf("--Weak heuristic - Expect MM >= MM0.\n");
+		printf("\n");
+		printf("F-cost distribution\n");
+		for (int x = 0; x < fCostHistogram.size(); x++)
+		{
+			if (fCostHistogram[x] != 0)
+				printf("%d\t%llu\n", x, fCostHistogram[x]);
+		}
+		printf("\n");
 	}
 	void UpdateNextBound(double currBound, double fCost);
 	state goal;
@@ -76,10 +89,11 @@ private:
 	bool storedHeuristic;
 	Heuristic<state> *heuristic;
 	std::vector<uint64_t> gCostHistogram;
+	std::vector<uint64_t> fCostHistogram;
 	std::vector<workUnit<action>> work;
 	std::vector<std::thread*> threads;
 	SharedQueue<int> q;
-	bool foundSolution;
+	int foundSolution;
 };
 
 //template <class state, class action>
@@ -100,7 +114,6 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 		heuristic = env;
 	nextBound = 0;
 	nodesExpanded = nodesTouched = 0;
-	foundSolution = false;
 	thePath.resize(0);
 
 	// Set class member
@@ -118,12 +131,17 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 	// builds a list of all states at a fixed depth
 	// we will then search them in parallel
 	GenerateWork(env, act[0], from, thePath);
+	for (int x = 0; x < work.size(); x++)
+		work[x].unitNumber = x;
 	printf("%lu pieces of work generated\n", work.size());
+	foundSolution = work.size() + 1;
 	
-	while (!foundSolution)
+	while (foundSolution > work.size())
 	{
 		gCostHistogram.clear();
 		gCostHistogram.resize(nextBound+1);
+		fCostHistogram.clear();
+		fCostHistogram.resize(nextBound+1);
 		threads.resize(0);
 		
 		printf("Starting iteration with bound %f; %llu expanded, %llu generated\n", nextBound, nodesExpanded, nodesTouched);
@@ -150,16 +168,24 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 			for (int y = 0; y < work[x].gHistogram.size(); y++)
 			{
 				gCostHistogram[y] += work[x].gHistogram[y];
-			}
-			if (work[x].solution.size() != 0)
-			{
-				thePath = work[x].solution;
+				fCostHistogram[y] += work[x].fHistogram[y];
 			}
 			if (work[x].nextBound > nextBound && work[x].nextBound < bestBound)
 				bestBound = work[x].nextBound;
+			nodesExpanded += work[x].expanded;
+			nodesTouched += work[x].touched;
+			if (work[x].solution.size() != 0)
+			{
+				printf(">>Solution histogram>>\n");
+				PrintGHistogram();
+				printf("<<Solution histogram<<\n");
+				thePath = work[x].solution;
+			}
 		}
 		nextBound = bestBound;
+		printf(">>Full histogram>>\n");
 		PrintGHistogram();
+		printf("<<Full histogram<<\n");
 		if (thePath.size() != 0)
 			return;
 	}
@@ -218,32 +244,38 @@ void ParallelIDAStar<environment, state, action>::StartThreadedIteration(environ
 		
 		thePath.resize(0);
 		double g = 0;
-		work[nextValue].solution.resize(0);
-		work[nextValue].gHistogram.clear();
-		work[nextValue].gHistogram.resize(bound+1);
-		work[nextValue].nextBound = 10*bound;//FIXME: Better ways to do this
+		workUnit<action> localWork = work[nextValue];
+		localWork.solution.resize(0);
+		localWork.gHistogram.clear();
+		localWork.gHistogram.resize(bound+1);
+		localWork.fHistogram.clear();
+		localWork.fHistogram.resize(bound+1);
+		localWork.nextBound = 10*bound;//FIXME: Better ways to do this
+		localWork.expanded = 0;
+		localWork.touched = 0;
 		for (int x = 0; x < workDepth; x++)
 		{
-			g += env.GCost(startState, work[nextValue].pre[x]);
-			env.ApplyAction(startState, work[nextValue].pre[x]);
-			thePath.push_back(work[nextValue].pre[x]);
+			g += env.GCost(startState, localWork.pre[x]);
+			env.ApplyAction(startState, localWork.pre[x]);
+			thePath.push_back(localWork.pre[x]);
 		}
-		action last = work[nextValue].pre[workDepth-1];
+		action last = localWork.pre[workDepth-1];
 		env.InvertAction(last);
 		
 		if (fgreater(g+heuristic->HCost(startState, goal), bound))
 		{
-			work[nextValue].nextBound = g+heuristic->HCost(startState, goal);
+			localWork.nextBound = g+heuristic->HCost(startState, goal);
 		}
 		else {
-			DoIteration(&env, last, startState, thePath, bound, g, work[nextValue], actCache);
+			DoIteration(&env, last, startState, thePath, bound, g, localWork, actCache);
 		}
 		
 		for (int x = workDepth-1; x >= 0; x--)
 		{
-			env.UndoAction(startState, work[nextValue].pre[x]);
-			g -= env.GCost(startState, work[nextValue].pre[x]);
+			env.UndoAction(startState, localWork.pre[x]);
+			g -= env.GCost(startState, localWork.pre[x]);
 		}
+		work[nextValue] = localWork;
 	}
 }
 
@@ -267,15 +299,16 @@ void ParallelIDAStar<environment, state, action>::DoIteration(environment *env,
 	if (env->GoalTest(currState, goal))
 	{
 		w.solution = thePath;
-		foundSolution = true;
+		foundSolution = std::min(foundSolution,w.unitNumber);
 		return;
 	}
 	
 	std::vector<action> &actions = *cache.getItem();
 	env->GetActions(currState, actions);
-	nodesTouched += actions.size();
-	nodesExpanded++;
+	w.touched += actions.size();
+	w.expanded++;
 	w.gHistogram[g]++;
+	w.fHistogram[g+h]++;
 
 	for (unsigned int x = 0; x < actions.size(); x++)
 	{
@@ -291,7 +324,7 @@ void ParallelIDAStar<environment, state, action>::DoIteration(environment *env,
 		DoIteration(env, a, currState, thePath, bound, g+edgeCost, w, cache);
 		env->UndoAction(currState, actions[x]);
 		thePath.pop_back();
-		if (foundSolution)
+		if (foundSolution <= w.unitNumber)
 			break;
 	}
 	cache.returnItem(&actions);

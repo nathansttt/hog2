@@ -15,7 +15,9 @@ NAMESPACE_OPEN(MM)
 
 //const int fileBuckets = 8; // must be at least 8
 const uint64_t bucketBits = 3;
-const int bucketMask = 0x7;
+const int bucketMask = 0x7;//0x7;
+
+bool finished = false;
 
 int bestSolution;
 int currentC;
@@ -144,16 +146,19 @@ void AddStateToQueue(const RubiksState &start, tSearchDirection dir, int cost)
 	d.priority = std::max(d.gcost+d.hcost, d.gcost*2);
 
 	// Add to open list
-	open[d].states[start] = true;
-
-	// Check for reversed duplicates
-	for (const auto &d : open)
+	if (open[d].states.find(start) == open[d].states.end())
 	{
-		if (d.first.dir != dir && d.second.states.find(start) != d.second.states.end())
+		open[d].states[start] = true;
+
+		// Check for reversed duplicates
+		for (const auto &s : open)
 		{
-			printf("Found solution cost %d+%d=%d\n", cost, d.first.gcost, cost + d.first.gcost);
-			bestSolution = std::min(cost + d.first.gcost, bestSolution);
-			printf("Current best solution: %d\n", bestSolution);
+			if (s.first.dir != dir && s.first.bucket == d.bucket && s.second.states.find(start) != s.second.states.end())
+			{
+				printf("Found solution cost %d+%d=%d\n", cost, s.first.gcost, cost + s.first.gcost);
+				bestSolution = std::min(cost + s.first.gcost, bestSolution);
+				printf("Current best solution: %d\n", bestSolution);
+			}
 		}
 	}
 	
@@ -202,7 +207,8 @@ void ExpandNextFile()
 		for (int x = 0; x < gDistBackward.size(); x++)
 			if (gDistBackward[x] != 0)
 				printf("%d\t%llu\n", x, gDistBackward[x]);
-		exit(0);
+		finished = true;
+		return;
 	}
 	
 	// 3. expand all states & write out successors
@@ -302,14 +308,17 @@ void MM(RubiksState &start, RubiksState &goal)
 //	cube.SetPruneSuccessors(false);
 //	printf("Solution cost: %d\n", path.size());
 	
+	Timer t;
+	t.StartTimer();
 	printf("---MM*---\n");
 	AddStateToQueue(start, kForward, 0);
 	AddStateToQueue(goal, kBackward, 0);
-	
-	while (!open.empty())
+	while (!open.empty() && !finished)
 	{
 		ExpandNextFile();
 	}
+	t.EndTimer();
+	printf("%1.2fs elapsed\n", t.GetElapsedTime());
 }
 
 NAMESPACE_CLOSE(MM)
