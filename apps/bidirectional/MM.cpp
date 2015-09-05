@@ -10,12 +10,15 @@
 #include "IDAStar.h"
 #include "Timer.h"
 #include <string>
+#include <unordered_set>
 
 NAMESPACE_OPEN(MM)
 
-//const int fileBuckets = 8; // must be at least 8
+const int fileBuckets = 8; // must be at least 8
 const uint64_t bucketBits = 3;
-const int bucketMask = 0x7;
+const int bucketMask = 0x7;//0x7;
+
+bool finished = false;
 
 int bestSolution;
 int currentC;
@@ -72,11 +75,12 @@ struct openDataHash
 };
 
 struct openList {
-	//openData data;
-	std::unordered_map<RubiksState, bool> states;
+	openList():dirty(false){}
+	bool dirty;
+	std::unordered_set<uint64_t> states;
 };
 
-std::unordered_map<RubiksState, bool> closed;
+std::vector<std::unordered_set<uint64_t>> closed(fileBuckets);
 std::unordered_map<openData, openList, openDataHash> open;
 
 std::string GetOpenName(const openData &d)
@@ -144,16 +148,23 @@ void AddStateToQueue(const RubiksState &start, tSearchDirection dir, int cost)
 	d.priority = std::max(d.gcost+d.hcost, d.gcost*2);
 
 	// Add to open list
-	open[d].states[start] = true;
-
-	// Check for reversed duplicates
-	for (const auto &d : open)
+	if (open[d].states.find(data) == open[d].states.end())
 	{
-		if (d.first.dir != dir && d.second.states.find(start) != d.second.states.end())
+		open[d].states.insert(data);
+
+		// Check for reversed duplicates
+		for (const auto &s : open)
 		{
-			printf("Found solution cost %d+%d=%d\n", cost, d.first.gcost, cost + d.first.gcost);
-			bestSolution = std::min(cost + d.first.gcost, bestSolution);
-			printf("Current best solution: %d\n", bestSolution);
+			// Same direction, same bucket
+			// AND could be a solution (g+g >= C)
+			if (s.first.dir != dir && s.first.bucket == d.bucket &&
+				d.gcost + s.first.gcost >= currentC &&
+				s.second.states.find(data) != s.second.states.end())
+			{
+				printf("Found solution cost %d+%d=%d\n", cost, s.first.gcost, cost + s.first.gcost);
+				bestSolution = std::min(cost + s.first.gcost, bestSolution);
+				printf("Current best solution: %d\n", bestSolution);
+			}
 		}
 	}
 	
@@ -183,14 +194,10 @@ void ReadFile(const openData &d, std::unordered_map<RubiksState, bool> &map)
 	//remove(GetOpenName(d).c_str());
 }
 
-void ExpandNextFile()
+bool CheckForSolution()
 {
-	// 1. Get next expansion target
-	openData d = GetBestFile();
-	std::cout << "Next: " << d << "\n";
-	currentC = d.priority;
-	
-	if (bestSolution <= std::max(currentC, std::max(minFForward, std::max(minFBackward, minGBackward+minGForward+1))))
+	int val;
+	if (bestSolution <= (val = std::max(currentC, std::max(minFForward, std::max(minFBackward, minGBackward+minGForward+1)))))
 	{
 		printf("Done!\n");
 		printf("%llu nodes expanded\n", expanded);
@@ -202,10 +209,32 @@ void ExpandNextFile()
 		for (int x = 0; x < gDistBackward.size(); x++)
 			if (gDistBackward[x] != 0)
 				printf("%d\t%llu\n", x, gDistBackward[x]);
-		exit(0);
+		finished = true;
+		if (val == currentC)
+			printf("-Triggered by current priority\n");
+		if (val == minFForward)
+			printf("-Triggered by f in the forward direction\n");
+		if (val == minFBackward)
+			printf("-Triggered by f in the backward direction\n");
+		if (val == minGBackward+minGForward+1)
+			printf("-Triggered by gforward+gbackward+1\n");
+		return true;
 	}
+	return false;
+}
+
+void ExpandNextFile()
+{
+	// 1. Get next expansion target
+	openData d = GetBestFile();
+	std::cout << "Next: " << d << "\n";
+	currentC = d.priority;
 	
-	// 3. expand all states & write out successors
+	// 2. Check for solution
+	if (CheckForSolution())
+		return;
+	
+	// 3. expand all states in current bucket & write out successors
 	RubiksState tmp;
 	for (auto &values : open[d].states)
 	{
@@ -216,25 +245,29 @@ void ExpandNextFile()
 			gDistBackward[d.gcost]++;
 		for (int x = 0; x < 18; x++)
 		{
+			GetState(tmp, d.bucket, values);
 			// copying 2 64-bit values is faster than undoing a move
-			tmp = values.first;
 			cube.ApplyAction(tmp, x);
-			if (closed.find(tmp) == closed.end())
+			uint64_t data;
+			int bucket;
+			GetBucketAndData(tmp, bucket, data);
+			if (closed[bucket].find(data) == closed[bucket].end())
 			{
 				AddStateToQueue(tmp, d.dir, d.gcost+1);
 			}
 		}
-
-		// 4. do possible check for solution
-		closed[values.first] = true;
+		closed[d.bucket].insert(values);
 	}
 	open.erase(open.find(d));
-	
 }
 
 void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result)
 {
 	RubiksCube cube;
+//	std::vector<int> edges1 = {1, 3, 8, 9};//, 10, 11}; // first 4
+//	std::vector<int> edges2 = {0, 2, 4, 5};//, 6, 7}; // first 4
+//	std::vector<int> corners = {0, 1, 2, 3};//, 4, 5, 6, 7}; // first 4
+
 	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11}; // first 4
 	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7}; // first 4
 	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
@@ -302,14 +335,17 @@ void MM(RubiksState &start, RubiksState &goal)
 //	cube.SetPruneSuccessors(false);
 //	printf("Solution cost: %d\n", path.size());
 	
+	Timer t;
+	t.StartTimer();
 	printf("---MM*---\n");
 	AddStateToQueue(start, kForward, 0);
 	AddStateToQueue(goal, kBackward, 0);
-	
-	while (!open.empty())
+	while (!open.empty() && !finished)
 	{
 		ExpandNextFile();
 	}
+	t.EndTimer();
+	printf("%1.2fs elapsed\n", t.GetElapsedTime());
 }
 
 NAMESPACE_CLOSE(MM)

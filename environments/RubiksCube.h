@@ -99,7 +99,7 @@ public:
 //				moves[x].next = &moves[x+1];
 //		} moves[17].next = 0;
 	}
-	~RubiksCube() { delete depth8; delete depth9; }
+	~RubiksCube() { /*delete depth8; delete depth9;*/ }
 	void SetPruneSuccessors(bool val) { pruneSuccessors = val; history.resize(0); }
 	virtual void GetSuccessors(const RubiksState &nodeID, std::vector<RubiksState> &neighbors) const;
 	virtual void GetActions(const RubiksState &nodeID, std::vector<RubiksAction> &actions) const;
@@ -136,8 +136,8 @@ public:
 	virtual void GetStateFromHash(uint64_t hash, RubiksState &node) const;
 	virtual void GetStateFromHash(uint64_t cornerHash, uint64_t edgeHash, RubiksState &node) const;
 	
-	FourBitArray &GetCornerPDB() { return cornerPDB; }
-	FourBitArray &GetEdgePDB() { return edgePDB; }
+//	FourBitArray &GetCornerPDB() { return cornerPDB; }
+//	FourBitArray &GetEdgePDB() { return edgePDB; }
 	//FourBitArray &GetEdge7PDB(bool min) { if (min) return edge7PDBmin; return edge7PDBint; }
 
 	virtual void OpenGLDraw() const;
@@ -170,8 +170,8 @@ public:
 	mutable RubikEdgeState dual;
 	mutable Rubik7EdgeState e7dual;
 	Rubik7Edge e7;
-	FourBitArray cornerPDB;
-	FourBitArray edgePDB;
+//	FourBitArray cornerPDB;
+//	FourBitArray edgePDB;
 	//FourBitArray edge7PDBmin;
 	//FourBitArray edge7PDBint;
 	

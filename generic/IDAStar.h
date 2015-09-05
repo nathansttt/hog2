@@ -179,6 +179,7 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 	}
 	return h;
 }
+#include "RubiksCube.h"
 
 template <class state, class action>
 double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env,
@@ -214,11 +215,11 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 			continue;
 
 		thePath.push_back(actions[x]);
-
 		double edgeCost = env->GCost(currState, actions[x]);
 		env->ApplyAction(currState, actions[x]);
 		action a = actions[x];
 		env->InvertAction(a);
+
 		double childH = DoIteration(env, a, currState, thePath, bound,
 									g+edgeCost, maxH - edgeCost, parentH);
 		env->UndoAction(currState, actions[x]);

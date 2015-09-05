@@ -152,238 +152,239 @@ bool RubiksCube::InvertAction(RubiksAction &a) const
 
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost)
 {
-	//return HCost(node1, node2);
-	double val = 0;
-	
-	// corner PDB
-	uint64_t hash = c.GetStateHash(node1.corner);
-	val = cornerPDB.Get(hash);
-	if (val > parentHCost)
-	{
-		return val;
-	}
-	
-	if (minBloomFilter)
-	{
-		int bloom = minBloom->Contains(node1.edge.state);
-		if (bloom == 0xF) // not found
-			bloom = 10;
-		edgeDist[bloom]++;
-		return max(val, double(bloom));
-	}
-	if (bloomFilter)
-	{
-		hash = node1.edge.state;//e.GetStateHash(node1.edge);
-
-		// our maximum is 10
-		if (val >= 10)
-		{
-			//if (val != HCost(node1, node2))
-			//{ printf("Error! (1.5) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
-			return val;
-		}
-		if (val < parentHCost-1) // we determined the heuristic
-		{
-			if (parentHCost >= 10)
-			{
-				if (depth9->Contains(hash))
-				{
-					val = max(val, 9);
-					edgeDist[9]++;
-				}
-				else {
-					val = max(val, 10);
-					edgeDist[10]++;
-				}
-				// not an error - might be a 'faulty' bloom filter!
-				//if (val != HCost(node1, node2))
-				//{ printf("Error! (2) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
-				return val;
-			}	
-			else if (parentHCost == 9)
-			{
-				if (depth8->Contains(hash))
-				{
-					val = max(val, 8);
-					edgeDist[8]++;
-				}
-				else if (depth9->Contains(hash))
-				{
-					val = max(val, 9);
-					edgeDist[9]++;
-				}
-				else {
-					val = max(val, 10);
-					edgeDist[10]++;
-				}
-				//if (val != HCost(node1, node2))
-				//{ printf("Error! (3) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
-				return val;
-			}
-
-		}
-
-			auto depthLoc = depthTable.find(hash);
-			if (depthLoc != depthTable.end())
-			{
-				val = max(val, depthLoc->second);
-				edgeDist[depthLoc->second]++;
-			}
-			else if (depth8->Contains(hash))
-			{
-				val = max(val, 8);
-				edgeDist[8]++;
-			}
-			else if (depth9->Contains(hash))
-			{
-				val = max(val, 9);
-				edgeDist[9]++;
-			}
-			else {
-				val = max(val, 10);
-				edgeDist[10]++;
-			}
-			//if (val != HCost(node1, node2))
-			//{ printf("Error! (4) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
-			return val;
-	}
-	if (minCompression)
-	{
-		// edge PDB
-		hash = e.GetStateHash(node1.edge);
-		
-		//	// edge PDB
-		double val2 = edgePDB.Get(hash/compressionFactor);
-		val = max(val, val2);
-		
-		node1.edge.GetDual(dual);
-		hash = e.GetStateHash(dual);
-		
-		val2 = edgePDB.Get(hash/compressionFactor);
-		val = max(val, val2);
-	}
-	else if (!minCompression) // interleave
-	{
+	return HCost(node1, node2);
+//	double val = 0;
+//	
+//	// corner PDB
+//	uint64_t hash = c.GetStateHash(node1.corner);
+//	val = cornerPDB.Get(hash);
+//	if (val > parentHCost)
+//	{
+//		return val;
+//	}
+//	
+//	if (minBloomFilter)
+//	{
+//		int bloom = minBloom->Contains(node1.edge.state);
+//		if (bloom == 0xF) // not found
+//			bloom = 10;
+//		edgeDist[bloom]++;
+//		return max(val, double(bloom));
+//	}
+//	if (bloomFilter)
+//	{
+//		hash = node1.edge.state;//e.GetStateHash(node1.edge);
+//
+//		// our maximum is 10
+//		if (val >= 10)
+//		{
+//			//if (val != HCost(node1, node2))
+//			//{ printf("Error! (1.5) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
+//			return val;
+//		}
+//		if (val < parentHCost-1) // we determined the heuristic
+//		{
+//			if (parentHCost >= 10)
+//			{
+//				if (depth9->Contains(hash))
+//				{
+//					val = max(val, 9);
+//					edgeDist[9]++;
+//				}
+//				else {
+//					val = max(val, 10);
+//					edgeDist[10]++;
+//				}
+//				// not an error - might be a 'faulty' bloom filter!
+//				//if (val != HCost(node1, node2))
+//				//{ printf("Error! (2) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
+//				return val;
+//			}	
+//			else if (parentHCost == 9)
+//			{
+//				if (depth8->Contains(hash))
+//				{
+//					val = max(val, 8);
+//					edgeDist[8]++;
+//				}
+//				else if (depth9->Contains(hash))
+//				{
+//					val = max(val, 9);
+//					edgeDist[9]++;
+//				}
+//				else {
+//					val = max(val, 10);
+//					edgeDist[10]++;
+//				}
+//				//if (val != HCost(node1, node2))
+//				//{ printf("Error! (3) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
+//				return val;
+//			}
+//
+//		}
+//
+//			auto depthLoc = depthTable.find(hash);
+//			if (depthLoc != depthTable.end())
+//			{
+//				val = max(val, depthLoc->second);
+//				edgeDist[depthLoc->second]++;
+//			}
+//			else if (depth8->Contains(hash))
+//			{
+//				val = max(val, 8);
+//				edgeDist[8]++;
+//			}
+//			else if (depth9->Contains(hash))
+//			{
+//				val = max(val, 9);
+//				edgeDist[9]++;
+//			}
+//			else {
+//				val = max(val, 10);
+//				edgeDist[10]++;
+//			}
+//			//if (val != HCost(node1, node2))
+//			//{ printf("Error! (4) [%f vs %f (%f)]\n", val, HCost(node1, node2), parentHCost); exit(0); }
+//			return val;
+//	}
+//	if (minCompression)
+//	{
 //		// edge PDB
-//		hash = e7.GetStateHash(node1.edge7);
+//		hash = e.GetStateHash(node1.edge);
 //		
 //		//	// edge PDB
-//		if (0 == hash%compressionFactor)
-//		{
-//			double val2 = edge7PDBint.Get(hash/compressionFactor);
-//			val = max(val, val2);
-//		}
-//		node1.edge7.GetDual(e7dual);
-//		hash = e7.GetStateHash(e7dual);
+//		double val2 = edgePDB.Get(hash/compressionFactor);
+//		val = max(val, val2);
 //		
-//		if (0 == hash%compressionFactor)
-//		{
-//			double val2 = edge7PDBint.Get(hash/compressionFactor);
-//			val = max(val, val2);
-//		}
-	}
-	
-	return val;
+//		node1.edge.GetDual(dual);
+//		hash = e.GetStateHash(dual);
+//		
+//		val2 = edgePDB.Get(hash/compressionFactor);
+//		val = max(val, val2);
+//	}
+//	else if (!minCompression) // interleave
+//	{
+////		// edge PDB
+////		hash = e7.GetStateHash(node1.edge7);
+////		
+////		//	// edge PDB
+////		if (0 == hash%compressionFactor)
+////		{
+////			double val2 = edge7PDBint.Get(hash/compressionFactor);
+////			val = max(val, val2);
+////		}
+////		node1.edge7.GetDual(e7dual);
+////		hash = e7.GetStateHash(e7dual);
+////		
+////		if (0 == hash%compressionFactor)
+////		{
+////			double val2 = edge7PDBint.Get(hash/compressionFactor);
+////			val = max(val, val2);
+////		}
+//	}
+//	
+//	return val;
 }
 
 /** Heuristic value between two arbitrary nodes. **/
 double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 {
-	double val = 0;
-
-	// corner PDB
-	uint64_t hash = c.GetStateHash(node1.corner);
-	val = cornerPDB.Get(hash);
-
-	// load PDB values directly from disk!
-	// make sure that "data" is initialized with the right constructor calls for the data
-    //int64_t r1, r2;
-    //e.rankPlayer(node1.edge, 0, r1, r2);
-    //double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2);
-	//edgeDist[edge]++;
-//    if (edge > 10)
-//        edge = 10;
-    //val = max(val, edge);
-	//return val;
-
-	if (minBloomFilter)
-	{
-		int bloom = minBloom->Contains(node1.edge.state);
-		if (bloom == 0xF) // not found
-			bloom = 10;
-		return max(val, double(bloom));
-	}
-	if (bloomFilter)
-	{
-		/*  if (edge != depthLoc->second)
-		  {
-		  printf("Error - table doesn't match loaded PDB. table: %1.0f pdb: %1.0f\n", depthLoc->second, edge);
-		  exit(0);
-		  }*/
-
-		hash = node1.edge.state;//e.GetStateHash(node1.edge);
-
-		auto depthLoc = depthTable.find(hash);
-		if (depthLoc != depthTable.end())
-		{
-			val = max(val, depthLoc->second);
-			edgeDist[depthLoc->second]++;
-		}
-		else if (depth8->Contains(hash))
-		{
-			val = max(val, 8);
-			edgeDist[8]++;
-		}
-		else if (depth9->Contains(hash))
-		{
-			val = max(val, 9);
-			edgeDist[9]++;
-		}
-		else {
-			val = max(val, 10);
-			edgeDist[10]++;
-		}
-		return val;
-	}
-	
-	if (minCompression)
-	{
-		// edge PDB
-		hash = e.GetStateHash(node1.edge);
-
-		//	// edge PDB
-		double val2 = edgePDB.Get(hash/compressionFactor);
-		val = max(val, val2);
-		if (0)
-		{
-			node1.edge.GetDual(dual);
-			hash = e.GetStateHash(dual);
-			
-			val2 = edgePDB.Get(hash/compressionFactor);
-			val = max(val, val2);
-		}
-	}
-	else if (!minCompression) // interleave
-	{
+	return 0;
+//	double val = 0;
+//
+//	// corner PDB
+//	uint64_t hash = c.GetStateHash(node1.corner);
+//	val = cornerPDB.Get(hash);
+//
+//	// load PDB values directly from disk!
+//	// make sure that "data" is initialized with the right constructor calls for the data
+//    //int64_t r1, r2;
+//    //e.rankPlayer(node1.edge, 0, r1, r2);
+//    //double edge = f.ReadFileDepth(data[r1].bucketID, data[r1].bucketOffset+r2);
+//	//edgeDist[edge]++;
+////    if (edge > 10)
+////        edge = 10;
+//    //val = max(val, edge);
+//	//return val;
+//
+//	if (minBloomFilter)
+//	{
+//		int bloom = minBloom->Contains(node1.edge.state);
+//		if (bloom == 0xF) // not found
+//			bloom = 10;
+//		return max(val, double(bloom));
+//	}
+//	if (bloomFilter)
+//	{
+//		/*  if (edge != depthLoc->second)
+//		  {
+//		  printf("Error - table doesn't match loaded PDB. table: %1.0f pdb: %1.0f\n", depthLoc->second, edge);
+//		  exit(0);
+//		  }*/
+//
+//		hash = node1.edge.state;//e.GetStateHash(node1.edge);
+//
+//		auto depthLoc = depthTable.find(hash);
+//		if (depthLoc != depthTable.end())
+//		{
+//			val = max(val, depthLoc->second);
+//			edgeDist[depthLoc->second]++;
+//		}
+//		else if (depth8->Contains(hash))
+//		{
+//			val = max(val, 8);
+//			edgeDist[8]++;
+//		}
+//		else if (depth9->Contains(hash))
+//		{
+//			val = max(val, 9);
+//			edgeDist[9]++;
+//		}
+//		else {
+//			val = max(val, 10);
+//			edgeDist[10]++;
+//		}
+//		return val;
+//	}
+//	
+//	if (minCompression)
+//	{
 //		// edge PDB
-//		hash = e7.GetStateHash(node1.edge7);
-//		
+//		hash = e.GetStateHash(node1.edge);
+//
 //		//	// edge PDB
-//		if (0 == hash%compressionFactor)
+//		double val2 = edgePDB.Get(hash/compressionFactor);
+//		val = max(val, val2);
+//		if (0)
 //		{
-//			double val2 = edge7PDBint.Get(hash/compressionFactor);
+//			node1.edge.GetDual(dual);
+//			hash = e.GetStateHash(dual);
+//			
+//			val2 = edgePDB.Get(hash/compressionFactor);
 //			val = max(val, val2);
 //		}
-//		node1.edge7.GetDual(e7dual);
-//		hash = e7.GetStateHash(e7dual);
-//		
-//		if (0 == hash%compressionFactor)
-//		{
-//			double val2 = edge7PDBint.Get(hash/compressionFactor);
-//			val = max(val, val2);
-//		}
-	}
-	return val;
+//	}
+//	else if (!minCompression) // interleave
+//	{
+////		// edge PDB
+////		hash = e7.GetStateHash(node1.edge7);
+////		
+////		//	// edge PDB
+////		if (0 == hash%compressionFactor)
+////		{
+////			double val2 = edge7PDBint.Get(hash/compressionFactor);
+////			val = max(val, val2);
+////		}
+////		node1.edge7.GetDual(e7dual);
+////		hash = e7.GetStateHash(e7dual);
+////		
+////		if (0 == hash%compressionFactor)
+////		{
+////			double val2 = edge7PDBint.Get(hash/compressionFactor);
+////			val = max(val, val2);
+////		}
+//	}
+//	return val;
 }
 
 /** Heuristic value between node and the stored goal. Asserts that the
