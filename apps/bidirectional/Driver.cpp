@@ -107,6 +107,7 @@ int main(int argc, char* argv[])
 //		c.ApplyAction(a, 2*3);
 //		c.ApplyAction(a, 3*3);
 //		c.ApplyAction(a, 4*3);
+
 		GetKorfInstance(a, 0);
 		MM::MM(a, b);
 	}
