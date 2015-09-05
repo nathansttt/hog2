@@ -71,6 +71,7 @@ void PDBFaceTest();
 
 int main(int argc, char* argv[])
 {
+	setvbuf(stdout, NULL, _IONBF, 0);
 	//PDBFaceTest();
 	KorfTest(0);
 	//TestCornerRanking();
