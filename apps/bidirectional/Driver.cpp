@@ -81,6 +81,7 @@ void GetKorfInstance(RubiksState &start, int which);
 
 int main(int argc, char* argv[])
 {
+	setvbuf(stdout, NULL, _IONBF, 0);
 	// technically we could/should install a command-line handler and handle these there
 	if (argc > 1 && strcmp(argv[1], "-bfs") == 0)
 	{
