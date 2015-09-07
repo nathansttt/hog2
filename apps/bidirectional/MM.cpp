@@ -196,16 +196,15 @@ void GetOpenData(const RubiksState &start, tSearchDirection dir, int cost,
 
 void AddStatesToQueue(const openData &d, uint64_t *data, size_t count)
 {
+	openLock.lock();
 	if (open.find(d) == open.end())
 	{
-		openLock.lock();
 		open[d].f = fopen(GetOpenName(d).c_str(), "w+b");
 		if (open[d].f == 0)
 		{
 			printf("Error opening %s; Aborting!\n", GetOpenName(d).c_str());
 			exit(0);
 		}
-		openLock.unlock();
 	}
 	if (open[d].f == 0)
 	{
@@ -213,6 +212,7 @@ void AddStatesToQueue(const openData &d, uint64_t *data, size_t count)
 		exit(0);
 	}
 	fwrite(data, sizeof(uint64_t), count, open[d].f);
+	openLock.unlock();
 }
 
 void AddStateToQueue(openData &d, uint64_t data)
@@ -472,7 +472,9 @@ void ExpandNextFile()
 
 	timer.StartTimer();
 	// Read in opposite buckets to check for solutions in parallel to expanding this bucket
+	openLock.lock();
 	std::thread t(CheckSolution, open, d, std::ref(states));
+	openLock.unlock();
 	
 	// 3. expand all states in current bucket & write out successors
 	const int numThreads = std::thread::hardware_concurrency();
@@ -549,6 +551,7 @@ void MM(RubiksState &start, RubiksState &goal)
 	BuildHeuristics(start, goal, forward);
 	BuildHeuristics(goal, start, reverse);
 
+	std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
 	std::cout << std::setprecision(2);
 	
 //	printf("---IDA*---\n");
