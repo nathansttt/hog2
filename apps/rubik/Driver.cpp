@@ -69,12 +69,13 @@ void TestEdgeRanking();
 void GetKorfInstance(RubiksState &start, int which);
 void KorfTest(int which);
 void PDBFaceTest();
+void KorfAll();
 
 int main(int argc, char* argv[])
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	//PDBFaceTest();
-	KorfTest(0);
+	KorfAll();
 	//TestCornerRanking();
 	//TestEdgeRanking();
 	InstallHandlers();
@@ -1702,6 +1703,76 @@ void KorfTest(int which)
 		   pida.GetNodesExpanded()/t.GetElapsedTime());
 	printf("%llu nodes generated (%1.3f nodes/sec)\n", pida.GetNodesTouched(),
 		   pida.GetNodesTouched()/t.GetElapsedTime());
+}
+
+void KorfAll()
+{
+	RubiksCube cube;
+	RubiksState goal;
+	RubiksState start;
+	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7};//{1, 3, 8, 9, 10, 11};
+	std::vector<int> edges2 = {1, 3, 5, 7, 8, 9, 10, 11};
+	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+	std::vector<int> blank;
+	RubikPDB pdb1(&cube, goal, edges1, blank);
+	RubikPDB pdb2(&cube, goal, edges2, blank);
+	RubikPDB pdb3(&cube, goal, blank, corners);
+	goal.Reset();
+	pdb1.BuildPDB(goal, "rc_e1", std::thread::hardware_concurrency());
+	goal.Reset();
+	pdb2.BuildPDB(goal, "rc_e2", std::thread::hardware_concurrency());
+	goal.Reset();
+	pdb3.BuildPDB(goal, "rc_c1", std::thread::hardware_concurrency());
+	Heuristic<RubiksState> h;
+	h.lookups.push_back({kMaxNode, 1, 3});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 0});
+	h.lookups.push_back({kLeafNode, 2, 0});
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb2);
+	h.heuristics.push_back(&pdb3);
+	
+	for (int which = 9; which < 10; which++)
+	{
+		printf("Korf instance %d\n", which+1);
+		cube.SetPruneSuccessors(true);
+		Timer t;
+		t.StartTimer();
+		//GetInstance(start, which);
+		GetKorfInstance(start, which);
+		goal.Reset();
+		std::vector<RubiksAction> path;
+//		IDAStar<RubiksState, RubiksAction> ida;
+//		ida.SetHeuristic(&h);
+//		//ida.GetPath(&cube, start, goal, path);
+//		t.EndTimer();
+//		printf("%1.5fs elapsed\n", t.GetElapsedTime());
+//		printf("%llu nodes expanded (%1.3f nodes/sec)\n", ida.GetNodesExpanded(),
+//			   ida.GetNodesExpanded()/t.GetElapsedTime());
+//		printf("%llu nodes generated (%1.3f nodes/sec)\n", ida.GetNodesTouched(),
+//			   ida.GetNodesTouched()/t.GetElapsedTime());
+		
+		
+		t.StartTimer();
+		
+		//	GetInstance(start, which);
+		//	cube.ApplyAction(start, 7);
+		//	cube.ApplyAction(start, 2);
+		//	printf("After applying actions 7, 2, heuristic is %1.2f\n", h.HCost(start, goal));
+		
+		//GetInstance(start, which);
+		GetKorfInstance(start, which);
+		goal.Reset();
+		ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> pida;
+		pida.SetHeuristic(&h);
+		pida.GetPath(&cube, start, goal, path);
+		t.EndTimer();
+		printf("%1.5fs elapsed\n", t.GetElapsedTime());
+		printf("%llu nodes expanded (%1.3f nodes/sec)\n", pida.GetNodesExpanded(),
+			   pida.GetNodesExpanded()/t.GetElapsedTime());
+		printf("%llu nodes generated (%1.3f nodes/sec)\n", pida.GetNodesTouched(),
+			   pida.GetNodesTouched()/t.GetElapsedTime());
+	}
 }
 
 void RunTest(int billionEntriesToLoad)

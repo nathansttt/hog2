@@ -15,9 +15,15 @@
 
 NAMESPACE_OPEN(MM)
 
-const int fileBuckets = 8; // must be at least 8
-const uint64_t bucketBits = 3;
-const int bucketMask = 0x7;//0x7;
+//const int fileBuckets = 8; // must be at least 8
+//const uint64_t bucketBits = 3;
+//const int bucketMask = 0x7;
+const int fileBuckets = 32; // must be at least 8
+const uint64_t bucketBits = 5;
+const int bucketMask = 0x1F;
+
+const char *prefix1;
+const char *prefix2;
 
 bool finished = false;
 
@@ -55,6 +61,7 @@ struct openData {
 	uint8_t priority;      // at most 6 bits
 	uint8_t gcost;         // at most 4 bits
 	uint8_t hcost;         // at most 4 bits
+//	uint8_t hcost2;         // at most 4 bits
 	uint8_t bucket;        // at most (3) bits
 };
 
@@ -74,7 +81,7 @@ struct openDataHash
 {
 	std::size_t operator()(const openData & x) const
 	{
-		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.hcost<<12)|(x.bucket<<16);
+		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.hcost<<12)|(x.hcost<<16)|(x.bucket<<20);
 	}
 };
 
@@ -116,9 +123,14 @@ std::string GetClosedName(closedData d)
 {
 	std::string s;
 	if (d.dir == kForward)
+	{
+		s += prefix1;
 		s += "forward-";
-	else
+	}
+	else {
+		s += prefix2;
 		s += "backward-";
+	}
 	s += std::to_string(d.bucket);
 	s += "-";
 	s += std::to_string(d.depth);
@@ -130,9 +142,14 @@ std::string GetOpenName(const openData &d)
 {
 	std::string s;
 	if (d.dir == kForward)
+	{
+		s += prefix1;
 		s += "forward-";
-	else
+	}
+	else {
+		s += prefix2;
 		s += "backward-";
+	}
 	s += std::to_string(d.priority);
 	s += "-";
 	s += std::to_string(d.gcost);
@@ -166,13 +183,23 @@ openData GetBestFile()
 			minFBackward = s.first.gcost+s.first.hcost;
 
 		if (s.first.priority < best.priority)
+		{
 			best = s.first;
+		}
 		else if (s.first.priority == best.priority)
 		{
 			if (s.first.gcost < best.gcost)
 				best = s.first;
-			else if (s.first.gcost == best.gcost && s.first.dir == kForward)
-				best = s.first;
+			else if (s.first.gcost == best.gcost)
+			{
+				if (s.first.dir == best.dir)
+				{
+					if (best.bucket > s.first.bucket)
+						best = s.first;
+				}
+				else if (s.first.dir == kForward)
+					best = s.first;
+			}
 		}
 	}
 	return best;
@@ -192,7 +219,6 @@ void GetOpenData(const RubiksState &start, tSearchDirection dir, int cost,
 	//d.priority = d.gcost+d.hcost;
 	d.priority = std::max(d.gcost+d.hcost, d.gcost*2);
 }
-
 
 void AddStatesToQueue(const openData &d, uint64_t *data, size_t count)
 {
@@ -343,6 +369,7 @@ void ReadBucket(std::unordered_set<uint64_t> &states, openData d)
 			states.insert(buffer[x]);
 	} while (numRead == bufferSize);
 	fclose(open[d].f);
+	remove(GetOpenName(d).c_str());
 	open[d].f = 0;
 }
 
@@ -360,7 +387,7 @@ void RemoveDuplicates(std::unordered_set<uint64_t> &states, openData d)
 			continue;
 		rewind(cd.f);
 		
-		const size_t bufferSize = 128;
+		const size_t bufferSize = 1024;
 		uint64_t buffer[bufferSize];
 		rewind(cd.f);
 		size_t numRead;
@@ -487,24 +514,31 @@ void ExpandNextFile()
 		delete threads[x];
 	}
 	open.erase(open.find(d));
-	t.join();
 	timer.EndTimer();
 	printLock.lock();
-	std::cout << "[" << timer.GetElapsedTime() << " expanding]\n";
+	std::cout << "[" << timer.GetElapsedTime() << "s expanding]+";
+	timer.StartTimer();
+	printLock.unlock();
+	t.join();
+	printLock.lock();
+	timer.EndTimer();
+	std::cout << "[" << timer.GetElapsedTime() << "s]\n";
 	printLock.unlock();
 }
+
+#define KORF97
+//#define MASSIVE
+//#define SMALL
+//#define TINY
 
 void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result)
 {
 	RubiksCube cube;
-//	std::vector<int> edges1 = {1, 3, 8, 9};//, 10, 11}; // first 4
-//	std::vector<int> edges2 = {0, 2, 4, 5};//, 6, 7}; // first 4
-//	std::vector<int> corners = {0, 1, 2, 3};//, 4, 5, 6, 7}; // first 4
-
-	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11}; // first 4
-	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7}; // first 4
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
 	std::vector<int> blank;
+#ifdef TINY
+	std::vector<int> edges1 = {1, 3, 8, 9}; // first 4
+	std::vector<int> edges2 = {0, 2, 4, 5}; // first 4
+	std::vector<int> corners = {0, 1, 2, 3}; // first 4
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
@@ -518,6 +552,76 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	result.heuristics.push_back(pdb1);
 	result.heuristics.push_back(pdb2);
 	result.heuristics.push_back(pdb3);
+#endif
+
+
+#ifdef SMALL
+	std::vector<int> edges1 = {0, 1, 2, 4, 6};
+	std::vector<int> edges2 = {3, 5};
+	std::vector<int> edges3 = {7, 8, 9, 10, 11};
+	std::vector<int> corners1 = {0, 1, 2, 3, 4, 5};
+	std::vector<int> corners2 = {2, 3, 4, 5, 6, 7};
+	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+	RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges3, blank);
+	RubikPDB *pdb4 = new RubikPDB(&cube, goal, blank, corners1);
+	RubikPDB *pdb5 = new RubikPDB(&cube, goal, blank, corners2);
+	pdb1->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb2->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb3->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb4->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb5->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	result.lookups.push_back({kMaxNode, 1, 5});
+	result.lookups.push_back({kLeafNode, 0, 0});
+	result.lookups.push_back({kLeafNode, 1, 0});
+	result.lookups.push_back({kLeafNode, 2, 0});
+	result.lookups.push_back({kLeafNode, 3, 0});
+	result.lookups.push_back({kLeafNode, 4, 0});
+	result.heuristics.push_back(pdb1);
+	result.heuristics.push_back(pdb2);
+	result.heuristics.push_back(pdb3);
+	result.heuristics.push_back(pdb4);
+	result.heuristics.push_back(pdb5);
+#endif
+	
+#ifdef KORF97
+	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11}; // first 4
+	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7}; // first 4
+	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
+	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+	pdb1->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb2->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb3->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	result.lookups.push_back({kMaxNode, 1, 3});
+	result.lookups.push_back({kLeafNode, 0, 0});
+	result.lookups.push_back({kLeafNode, 1, 0});
+	result.lookups.push_back({kLeafNode, 2, 0});
+	result.heuristics.push_back(pdb1);
+	result.heuristics.push_back(pdb2);
+	result.heuristics.push_back(pdb3);
+#endif
+
+#ifdef MASSIVE
+	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7};
+	std::vector<int> edges2 = {1, 3, 5, 7, 8, 9, 10, 11};
+	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
+	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+	pdb1->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb2->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb3->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	result.lookups.push_back({kMaxNode, 1, 3});
+	result.lookups.push_back({kLeafNode, 0, 0});
+	result.lookups.push_back({kLeafNode, 1, 0});
+	result.lookups.push_back({kLeafNode, 2, 0});
+	result.heuristics.push_back(pdb1);
+	result.heuristics.push_back(pdb2);
+	result.heuristics.push_back(pdb3);
+#endif
+
 }
 
 int GetBucket(const RubiksState &s)
@@ -542,8 +646,11 @@ void GetState(RubiksState &s, int bucket, uint64_t data)
 
 #pragma mark Main Code
 
-void MM(RubiksState &start, RubiksState &goal)
+void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2)
 {
+	prefix1 = p1;
+	prefix2 = p2;
+	
 	bestSolution = 100;
 	gDistBackward.resize(12);
 	gDistForward.resize(12);

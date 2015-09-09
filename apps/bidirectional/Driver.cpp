@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 	{
 		BFS();
 	}
-	else if (argc > 1 && strcmp(argv[1], "-mm") == 0)
+	else if (argc >= 5 && strcmp(argv[1], "-mm") == 0)
 	{
 		RubiksState a, b;
 		RubiksCube c;
@@ -109,8 +109,10 @@ int main(int argc, char* argv[])
 //		c.ApplyAction(a, 3*3);
 //		c.ApplyAction(a, 4*3);
 
-		GetKorfInstance(a, 0);
-		MM::MM(a, b);
+		int which = 0;
+		which = atoi(argv[2]);
+		GetKorfInstance(a, which);
+		MM::MM(a, b, argv[3], argv[4]);
 	}
 	else if (argc > 3 && strcmp(argv[1], "-testPruning") == 0)
 	{

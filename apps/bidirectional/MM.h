@@ -16,7 +16,7 @@
 #define NAMESPACE_CLOSE(_name) }
 
 namespace MM {
-	void MM(RubiksState &start, RubiksState &goal);
+	void MM(RubiksState &start, RubiksState &goal, const char *prefix1, const char *prefix2);
 }
 
 #endif /* defined(__hog2_glut__MM__) */
