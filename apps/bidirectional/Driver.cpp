@@ -37,6 +37,7 @@
 #include "Timer.h"
 #include "RubiksCube.h"
 #include "MM.h"
+#include "MMPancake.h"
 
 struct hash128
 {
@@ -86,6 +87,10 @@ int main(int argc, char* argv[])
 	if (argc > 1 && strcmp(argv[1], "-bfs") == 0)
 	{
 		BFS();
+	}
+	else if (argc > 1 && strcmp(argv[1], "-pancake") == 0)
+	{
+		MMPancake::MM();
 	}
 	else if (argc >= 5 && strcmp(argv[1], "-mm") == 0)
 	{

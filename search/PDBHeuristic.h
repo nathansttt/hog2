@@ -13,6 +13,7 @@
 #include <thread>
 #include "Heuristic.h"
 #include "SharedQueue.h"
+#include "FourBitArray.h"
 #include "Timer.h"
 
 enum PDBLookupType {
@@ -55,13 +56,15 @@ public:
 	void DeltaCompress(Heuristic<state> *h, state goal, bool print_histogram);
 protected:
 	// holds a Pattern Databases
-	std::vector<uint8_t> PDB;
+	FourBitArray PDB;
+	//std::vector<uint8_t> PDB;
 	PDBLookupType type;
 	const int coarseSize = 1024;
 private:
 	environment *env;
 	void ThreadWorker(int threadNum, int depth,
-					  std::vector<uint8_t> &DB,
+					  FourBitArray &DB,
+					  //std::vector<uint8_t> &DB,
 					  SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 					  SharedQueue<uint64_t> *results,
 					  std::mutex *lock);
@@ -72,7 +75,7 @@ double PDBHeuristic<state, action, environment>::HCost(const state &a, const sta
 {
 	switch (type)
 	{
-		case kPlain: return PDB[GetPDBHash(a)];
+		case kPlain: return PDB.Get(GetPDBHash(a)); //PDB[GetPDBHash(a)];
 		default:
 			assert(!"Not implemented");
 	}
@@ -86,10 +89,10 @@ void PDBHeuristic<state, action, environment>::BuildPDB(const state &goal, const
 	std::mutex lock;
 	
 	uint64_t COUNT = GetPDBSize();//nUpperk(start.puzzle.size(), start.puzzle.size() - distinct.size());
-	std::vector<uint8_t> &DB = PDB;
-	DB.resize(COUNT);
-	
-	std::fill(DB.begin(), DB.end(), 255);
+	//std::vector<uint8_t> &DB = PDB;
+	PDB.Resize(COUNT);
+	PDB.FillMax();
+	//std::fill(DB.begin(), DB.end(), 255);
 	
 	// with weights we have to store the lowest weight stored to make sure
 	// we don't skip regions
@@ -110,7 +113,9 @@ void PDBHeuristic<state, action, environment>::BuildPDB(const state &goal, const
 	Timer t;
 	t.StartTimer();
 	//	q_curr.push_back(goal);
-	DB[GetPDBHash(goal)] = 0;
+	//DB[GetPDBHash(goal)] = 0;
+	PDB.Set(GetPDBHash(goal), 0);
+
 	coarseOpen[GetPDBHash(goal)/coarseSize] = 0;
 	int depth = 0;
 	uint64_t newEntries;
@@ -123,7 +128,7 @@ void PDBHeuristic<state, action, environment>::BuildPDB(const state &goal, const
 		for (int x = 0; x < numThreads; x++)
 		{
 			threads[x] = new std::thread(&PDBHeuristic<state, action, environment>::ThreadWorker, this,
-										 x, depth, std::ref(DB),// &coarseOpen,
+										 x, depth, std::ref(PDB),// &coarseOpen,
 										 &workQueue, &resultQueue, &lock);
 		}
 		
@@ -132,7 +137,7 @@ void PDBHeuristic<state, action, environment>::BuildPDB(const state &goal, const
 			bool submit = false;
 			for (uint64_t t = x; t < std::min(COUNT, x+coarseSize); t++)
 			{
-				if (DB[t] == depth)
+				if (PDB.Get(t) == depth)
 				{
 					submit = true;
 					//newEntries++;
@@ -171,7 +176,7 @@ void PDBHeuristic<state, action, environment>::BuildPDB(const state &goal, const
 		newEntries = 0;
 		for (uint64_t x = 0; x < COUNT; x++)
 		{
-			if (DB[x] == depth)
+			if (PDB.Get(x) == depth)
 			{
 				newEntries++;
 			}
@@ -197,13 +202,14 @@ void PDBHeuristic<state, action, environment>::BuildPDB(const state &goal, const
 	if (pdb_filename != 0)
 	{
 		//TODO fix the output of PDBs
-		FILE *f = fopen(pdb_filename, "w");
+//		FILE *f = fopen(pdb_filename, "w");
 		//	int num = distinct.size();
-		WritePDBHeader(f);
+//		WritePDBHeader(f);
 		//	assert(fwrite(&num, sizeof(num), 1, f) == 1);
 		//	assert(fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f) == distinct.size());
-		assert(fwrite(&DB[0], sizeof(uint8_t), COUNT, f) == COUNT);
-		fclose(f);
+		PDB.Write(pdb_filename);
+//		assert(fwrite(&DB[0], sizeof(uint8_t), COUNT, f) == COUNT);
+//		fclose(f);
 	}
 	
 //	PDB.push_back(DB); // increase the number of regular PDBs being stored
@@ -214,7 +220,8 @@ void PDBHeuristic<state, action, environment>::BuildPDB(const state &goal, const
 
 template <class state, class action, class environment>
 void PDBHeuristic<state, action, environment>::ThreadWorker(int threadNum, int depth,
-															std::vector<uint8_t> &DB,
+															FourBitArray &DB,
+															//std::vector<uint8_t> &DB,
 															SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 															SharedQueue<uint64_t> *results,
 															std::mutex *lock)
@@ -246,7 +253,7 @@ void PDBHeuristic<state, action, environment>::ThreadWorker(int threadNum, int d
 		//int nextDepth = 255;
 		for (uint64_t x = start; x < end; x++)
 		{
-			int stateDepth = DB[x];
+			int stateDepth = DB.Get(x);
 			if (stateDepth == depth)
 			{
 				count++;
@@ -270,9 +277,10 @@ void PDBHeuristic<state, action, environment>::ThreadWorker(int threadNum, int d
 			lock->lock();
 			for (auto d : cache)
 			{
-				if (d.newGCost < DB[d.rank]) // shorter path
+				if (d.newGCost < DB.Get(d.rank)) // shorter path
 				{
-					DB[d.rank] = d.newGCost;
+					//DB[d.rank] = d.newGCost;
+					DB.Set(d.rank, d.newGCost);
 				}
 			}
 			lock->unlock();

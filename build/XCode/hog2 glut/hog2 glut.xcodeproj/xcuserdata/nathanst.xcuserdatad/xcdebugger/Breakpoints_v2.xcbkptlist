@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "462903113.16573"
+            timestampString = "463990789.399777"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "262"
-            endingLineNumber = "262"
-            landmarkName = "ThreadWorker(int threadNum, int depth, std::vector&lt;uint8_t&gt; &amp;DB, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
+            startingLineNumber = "269"
+            endingLineNumber = "269"
+            landmarkName = "ThreadWorker(int threadNum, int depth, FourBitArray &amp;DB, //std::vector&lt;uint8_t&gt; &amp;DB, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -144,6 +144,54 @@
             startingLineNumber = "141"
             endingLineNumber = "141"
             landmarkName = "GetPath(environment *env, state from, state to, std::vector&lt;action&gt; &amp;thePath)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/MMPancale.cpp"
+            timestampString = "463961799.896037"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "843"
+            endingLineNumber = "843"
+            landmarkName = "MM()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/MMPancale.cpp"
+            timestampString = "463961799.896037"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "863"
+            endingLineNumber = "863"
+            landmarkName = "MM()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/MMPancale.cpp"
+            timestampString = "463961799.896037"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "893"
+            endingLineNumber = "893"
+            landmarkName = "MM()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

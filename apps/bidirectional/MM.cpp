@@ -61,7 +61,6 @@ struct openData {
 	uint8_t priority;      // at most 6 bits
 	uint8_t gcost;         // at most 4 bits
 	uint8_t hcost;         // at most 4 bits
-//	uint8_t hcost2;         // at most 4 bits
 	uint8_t bucket;        // at most (3) bits
 };
 
@@ -81,7 +80,7 @@ struct openDataHash
 {
 	std::size_t operator()(const openData & x) const
 	{
-		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.hcost<<12)|(x.hcost<<16)|(x.bucket<<20);
+		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.hcost<<12)|(x.bucket<<20);
 	}
 };
 
@@ -155,6 +154,8 @@ std::string GetOpenName(const openData &d)
 	s += std::to_string(d.gcost);
 	s += "-";
 	s += std::to_string(d.hcost);
+//	s += "-";
+//	s += std::to_string(d.hcost2);
 	s += "-";
 	s += std::to_string(d.bucket);
 	s += ".open";
@@ -215,6 +216,7 @@ void GetOpenData(const RubiksState &start, tSearchDirection dir, int cost,
 	d.dir = dir;
 	d.gcost = cost;
 	d.hcost = (dir==kForward)?forward.HCost(start, start):reverse.HCost(start, start);
+	//d.hcost2 = (dir==kForward)?reverse.HCost(start, start):forward.HCost(start, start);
 	d.bucket = bucket;
 	//d.priority = d.gcost+d.hcost;
 	d.priority = std::max(d.gcost+d.hcost, d.gcost*2);
@@ -324,7 +326,7 @@ void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentO
 	{
 		// Opposite direction, same bucket AND could be a solution (g+g >= C)
 		if (s.first.dir != d.dir && s.first.bucket == d.bucket &&
-			d.gcost + s.first.gcost >= currentC)
+			d.gcost + s.first.gcost >= currentC)// && d.hcost2 == s.first.hcost)
 		{
 			const size_t bufferSize = 128;
 			uint64_t buffer[bufferSize];
@@ -424,11 +426,6 @@ void WriteToClosed(std::unordered_set<uint64_t> &states, openData d)
 void ParallelExpandBucket(openData d, const std::unordered_set<uint64_t> &states, int myThread, int totalThreads)
 {
 	const int cacheSize = 1024;
-//	uint64_t cache1[fileBuckets][cacheSize];
-//	openData cache2[fileBuckets][cacheSize];
-//	int cacheUsage[fileBuckets];
-//	for (int x = 0; x < fileBuckets; x++)
-//		cacheUsage[x] = 0;
 	std::unordered_map<openData, std::vector<uint64_t>, openDataHash> cache;
 	RubiksState tmp;
 	uint64_t localExpanded = 0;
@@ -507,7 +504,7 @@ void ExpandNextFile()
 	const int numThreads = std::thread::hardware_concurrency();
 	std::vector<std::thread *> threads;
 	for (int x = 0; x < numThreads; x++)
-		threads.push_back(new std::thread(ParallelExpandBucket, d, states, x, numThreads));
+		threads.push_back(new std::thread(ParallelExpandBucket, d, std::ref(states), x, numThreads));
 	for (int x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();

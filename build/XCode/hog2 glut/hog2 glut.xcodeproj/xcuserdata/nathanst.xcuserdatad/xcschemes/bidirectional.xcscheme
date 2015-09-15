@@ -67,6 +67,10 @@
             argument = "-mm 0 /Users/nathanst/Desktop/pdb1/ /Users/nathanst/Desktop/pdb2/"
             isEnabled = "YES">
          </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-pancake"
+            isEnabled = "NO">
+         </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
