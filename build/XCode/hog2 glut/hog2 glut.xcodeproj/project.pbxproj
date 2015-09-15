@@ -1677,7 +1677,7 @@
 		C4B9740E1426FADE00758D0D /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B9740A1426FADE00758D0D /* NQueens.cpp */; };
 		C4B9740F1426FADE00758D0D /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B9740A1426FADE00758D0D /* NQueens.cpp */; };
 		C4B974101426FADE00758D0D /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B9740A1426FADE00758D0D /* NQueens.cpp */; };
-		C4BD1F741BA76F2E00AABDEE /* MMPancale.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BD1F731BA76F2E00AABDEE /* MMPancale.cpp */; };
+		C4BD1F741BA76F2E00AABDEE /* MMPancake.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BD1F731BA76F2E00AABDEE /* MMPancake.cpp */; };
 		C4C358AF1697ECE1000A2BFA /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */; };
 		C4C358B01697ECE2000A2BFA /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */; };
 		C4C358B11697ECE2000A2BFA /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */; };
@@ -2698,7 +2698,7 @@
 		C4B9740A1426FADE00758D0D /* NQueens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NQueens.cpp; sourceTree = "<group>"; };
 		C4B9740B1426FADE00758D0D /* NQueens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NQueens.h; sourceTree = "<group>"; };
 		C4BD1F721BA76F2E00AABDEE /* MMPancake.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMPancake.h; sourceTree = "<group>"; };
-		C4BD1F731BA76F2E00AABDEE /* MMPancale.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MMPancale.cpp; sourceTree = "<group>"; };
+		C4BD1F731BA76F2E00AABDEE /* MMPancake.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MMPancake.cpp; sourceTree = "<group>"; };
 		C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RubiksCubeEdges.cpp; sourceTree = "<group>"; };
 		C4C358AE1697ECE1000A2BFA /* RubiksCubeEdges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RubiksCubeEdges.h; sourceTree = "<group>"; };
 		C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RubiksCubeCorners.cpp; sourceTree = "<group>"; };
@@ -3242,7 +3242,7 @@
 				C430D1871B2EFD1500220AEE /* Driver.h */,
 				C430D1881B2EFD1500220AEE /* korf10.txt */,
 				C4BD1F721BA76F2E00AABDEE /* MMPancake.h */,
-				C4BD1F731BA76F2E00AABDEE /* MMPancale.cpp */,
+				C4BD1F731BA76F2E00AABDEE /* MMPancake.cpp */,
 				C45EEED81B95760500D87F30 /* MM.cpp */,
 				C45EEED91B95760500D87F30 /* MM.h */,
 				C413C13F1B6911E9006A0331 /* GUICode.cpp */,
@@ -5017,7 +5017,7 @@
 				C430D1A91B2EFF8B00220AEE /* Graph.cpp in Sources */,
 				C430D1AA1B2EFF8B00220AEE /* BitVector.cpp in Sources */,
 				C430D1AB1B2EFF8B00220AEE /* FPUtil.cpp in Sources */,
-				C4BD1F741BA76F2E00AABDEE /* MMPancale.cpp in Sources */,
+				C4BD1F741BA76F2E00AABDEE /* MMPancake.cpp in Sources */,
 				C430D1AC1B2EFF8B00220AEE /* FunctionApproximator.cpp in Sources */,
 				C430D1AD1B2EFF8B00220AEE /* GLUtil.cpp in Sources */,
 				C430D1AE1B2EFF8B00220AEE /* LinearRegression.cpp in Sources */,
