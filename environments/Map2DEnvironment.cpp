@@ -445,7 +445,7 @@ void MapEnvironment::ApplyAction(xyLoc &s, tDirection dir) const
 //	s = old;
 }
 
-double MapEnvironment::HCost(const xyLoc &l1, const xyLoc &l2)
+double MapEnvironment::HCost(const xyLoc &l1, const xyLoc &l2) const
 {
 	double h1, h2;
 	if (fourConnected)

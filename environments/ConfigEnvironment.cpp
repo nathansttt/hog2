@@ -130,7 +130,7 @@ bool ConfigEnvironment::InvertAction(line2d &a) const
 }
 
 
-double ConfigEnvironment::HCost(const recVec &node1, const recVec &node2)
+double ConfigEnvironment::HCost(const recVec &node1, const recVec &node2) const
 {
 	return sqrt((node1.x-node2.x)*(node1.x-node2.x) +
 				(node1.y-node2.y)*(node1.y-node2.y) +

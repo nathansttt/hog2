@@ -137,12 +137,15 @@ bool PancakePuzzle::InvertAction(PancakePuzzleAction &a) const
 	return true;
 }
 
-double PancakePuzzle::HCost(const PancakePuzzleState &state) {
-	if (!goal_stored) {
+double PancakePuzzle::HCost(const PancakePuzzleState &state) const
+{
+	if (!goal_stored)
+	{
 		fprintf(stderr, "ERROR: HCost called with a single state and goal is not stored.\n");
 		exit(1);
 	}
-	if (state.puzzle.size() != size) {
+	if (state.puzzle.size() != size)
+	{
 		fprintf(stderr, "ERROR: HCost called with a single state with wrong size.\n");
 		exit(1);
 	}
@@ -172,7 +175,7 @@ double PancakePuzzle::HCost(const PancakePuzzleState &state) {
 	return h_cost;
 }
 
-double PancakePuzzle::HCost(const PancakePuzzleState &state, const PancakePuzzleState &goal_state)
+double PancakePuzzle::HCost(const PancakePuzzleState &state, const PancakePuzzleState &goal_state) const
 {
 	if (state.puzzle.size() != size) {
 		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");
@@ -217,12 +220,12 @@ double PancakePuzzle::HCost(const PancakePuzzleState &state, const PancakePuzzle
 	return 1.0;
 }
 
-double PancakePuzzle::DefaultH(const PancakePuzzleState &state)
+double PancakePuzzle::DefaultH(const PancakePuzzleState &state) const
 {
 	return DefaultH(state, goal_locations);
 }
 
-double PancakePuzzle::DefaultH(const PancakePuzzleState &state, std::vector<int> &goal_locs)
+double PancakePuzzle::DefaultH(const PancakePuzzleState &state, const std::vector<int> &goal_locs) const
 {
 	if (state.puzzle.size() != size) {
 		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");

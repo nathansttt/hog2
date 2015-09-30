@@ -828,7 +828,7 @@ void Map3DGrid::ApplyAction(state3d &s, action3d a) const
 	}
 }
 
-double Map3DGrid::HCost(const state3d &node1, const state3d &node2)
+double Map3DGrid::HCost(const state3d &node1, const state3d &node2) const
 {
 	assert(false);
 	return 1;

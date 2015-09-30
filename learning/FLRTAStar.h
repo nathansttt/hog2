@@ -310,7 +310,7 @@ namespace FLRTA {
 			stateData[env->GetStateHash(where)].hCost = tmp;
 			stateData[env->GetStateHash(where)].theState = where;
 		}
-		double HCost(environment *env, const state &from, const state &to)
+		double HCost(environment *env, const state &from, const state &to) const
 		{
 			//std::cout << "Hashing state:6 " << std::endl << from << std::endl;
 			if (stateData.find(env->GetStateHash(from)) != stateData.end())
@@ -319,7 +319,7 @@ namespace FLRTA {
 			}
 			return env->HCost(from, to);
 		}
-		double HCost(const state &from, const state &to)
+		double HCost(const state &from, const state &to) const
 		{ return HCost(m_pEnv, from, to); }
 		
 		void TryToKill(const state &where, const state &goal)

@@ -245,7 +245,7 @@ armAngles RoboticArm::GetRandomState()
 	return ar;
 }
 
-double RoboticArm::HCost(const armAngles &node1, const armAngles &node2)
+double RoboticArm::HCost(const armAngles &node1, const armAngles &node2) const
 {
 	double h;
 	if (!node1.IsGoalState() && !node2.IsGoalState())
@@ -582,7 +582,7 @@ ArmToTipHeuristic::ArmToTipHeuristic(RoboticArm *r)
 	GenerateCPDB();
 }
 
-double ArmToTipHeuristic::HCost(const armAngles &node1, const armAngles &node2)
+double ArmToTipHeuristic::HCost(const armAngles &node1, const armAngles &node2) const
 {
 	double x, y;
 	node2.GetGoal(x, y);
@@ -632,7 +632,7 @@ void ArmToTipHeuristic::GenerateCPDB()
 }
 
 
-uint64_t ArmToTipHeuristic::ArmAnglesIndex( const armAngles &arm )
+uint64_t ArmToTipHeuristic::ArmAnglesIndex( const armAngles &arm ) const
 {
 	uint64_t idx;
 	int s;
@@ -648,7 +648,7 @@ uint64_t ArmToTipHeuristic::ArmAnglesIndex( const armAngles &arm )
 
 int ArmToTipHeuristic::TipPositionIndex( const double x, const double y,
 										const double minX, const double minY,
-										const double width )
+										const double width ) const
 {
 	int idx;
 
@@ -995,7 +995,7 @@ int ArmToTipHeuristic::GenerateMaxDistHeuristics( const armAngles &sampleArm,
 }
 
 uint16_t ArmToTipHeuristic::UseHeuristic(const armAngles &s, armAngles &g,
-				   uint16_t *distances )
+				   uint16_t *distances ) const
 {
 	uint16_t d_s, d_g;
 
@@ -1011,7 +1011,7 @@ uint16_t ArmToTipHeuristic::UseHeuristic(const armAngles &arm,
 				   double goalX, double goalY,
 				   uint16_t *distances,
 				   uint16_t *minTipDistances,
-				   uint16_t *maxTipDistances )
+				   uint16_t *maxTipDistances ) const
 {
 	int32_t mind, maxd, t;	// 32 bits because of the subtraction below
 	int i, j, index;
@@ -1214,7 +1214,7 @@ ArmToArmHeuristic::ArmToArmHeuristic(RoboticArm *r, armAngles &initial, bool opt
 	GenerateLegalStates(initial);
 }
 
-double ArmToArmHeuristic::HCost(const armAngles &node1, const armAngles &node2)
+double ArmToArmHeuristic::HCost(const armAngles &node1, const armAngles &node2) const
 {
 	if (node1.IsGoalState() || node2.IsGoalState())
 	{

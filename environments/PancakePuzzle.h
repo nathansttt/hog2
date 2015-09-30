@@ -55,10 +55,10 @@ public:
 	void ApplyAction(PancakePuzzleState &s, PancakePuzzleAction a) const;
 	bool InvertAction(PancakePuzzleAction &a) const;
 
-	double HCost(const PancakePuzzleState &state1, const PancakePuzzleState &state2);
-	double DefaultH(const PancakePuzzleState &state1);
-	double DefaultH(const PancakePuzzleState &state1, std::vector<int> &goal_locs);
-	double HCost(const PancakePuzzleState &state1);
+	double HCost(const PancakePuzzleState &state1, const PancakePuzzleState &state2) const;
+	double DefaultH(const PancakePuzzleState &state1) const;
+	double DefaultH(const PancakePuzzleState &state1, const std::vector<int> &goal_locs) const;
+	double HCost(const PancakePuzzleState &state1) const;
 
 	double GCost(const PancakePuzzleState &, const PancakePuzzleState &) {return 1.0;}
 	double GCost(const PancakePuzzleState &, const PancakePuzzleAction &) { return 1.0; }
@@ -84,7 +84,7 @@ public:
 
 	void ClearGoal(){} // clears the current stored information of the goal
 
-	bool IsGoalStored(){return goal_stored;} // returns if a goal is stored or not
+	bool IsGoalStored()const {return goal_stored;} // returns if a goal is stored or not
 
 	/**
 	Changes the ordering of operators to the new inputted order

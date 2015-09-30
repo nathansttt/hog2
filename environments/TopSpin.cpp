@@ -157,7 +157,7 @@ bool TopSpin::InvertAction(TopSpinAction &a) const
 //}
 
 // TODO Remove PDB heuristic from this heuristic evaluator.
-double TopSpin::HCost(const TopSpinState &state1, const TopSpinState &state2)
+double TopSpin::HCost(const TopSpinState &state1, const TopSpinState &state2) const
 {
 	return PermutationPuzzleEnvironment<TopSpinState, TopSpinAction>::HCost(state1);
 }

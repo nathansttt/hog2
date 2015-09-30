@@ -155,7 +155,7 @@ bool SFBDPancakeEnvironment::InvertAction(pancakeMovePair &) const
 	return true;
 }
 
-double SFBDPancakeEnvironment::HCost(const pancakeStatePair &state1, const pancakeStatePair &)
+double SFBDPancakeEnvironment::HCost(const pancakeStatePair &state1, const pancakeStatePair &) const
 {
 	return pan->HCost(state1.start, state1.goal);
 }

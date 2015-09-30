@@ -214,7 +214,7 @@ public:
 	bool InvertAction(action3d &a) const { return false; }
 	action3d GetAction(const state3d &s1, const state3d &s2) const { return action3d(); }
 	/** Heuristic value between two arbitrary nodes. **/
-	double HCost(const state3d &node1, const state3d &node2);
+	double HCost(const state3d &node1, const state3d &node2) const;
 	double GCost(const state3d &node1, const state3d &node2);
 	double GCost(const state3d &node, const action3d &act);
 	bool GoalTest(const state3d &node, const state3d &goal);

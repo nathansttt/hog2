@@ -105,10 +105,10 @@ public:
 
 //	bool Contractable(const xyLoc &where);
 	
-	virtual double HCost(const xyLoc &) {
+	virtual double HCost(const xyLoc &) const {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for MapEnvironment\n");
 		exit(1); return -1.0;}
-	virtual double HCost(const xyLoc &node1, const xyLoc &node2);
+	virtual double HCost(const xyLoc &node1, const xyLoc &node2) const;
 	virtual double GCost(const xyLoc &node1, const xyLoc &node2);
 	virtual double GCost(const xyLoc &node1, const tDirection &act);
 	bool GoalTest(const xyLoc &node, const xyLoc &goal);
@@ -134,7 +134,7 @@ public:
 
 	void StoreGoal(xyLoc &) {} // stores the locations for the given goal state
 	void ClearGoal() {}
-	bool IsGoalStored() {return false;}
+	bool IsGoalStored() const {return false;}
 	void SetDiagonalCost(double val) { DIAGONAL_COST = val; }
 	double GetDiagonalCost() { return DIAGONAL_COST; }
 	bool FourConnected() { return fourConnected; }

@@ -75,10 +75,10 @@ public:
 
 	//OccupancyInterface<FlipSideState, flipMove> *GetOccupancyInfo() { return 0; }
 
-	double HCost(const FlipSideState &){
+	double HCost(const FlipSideState &) const {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for FlipSide\n");
 		exit(1); return -1.0;}
-	double HCost(const FlipSideState &state1, const FlipSideState &state2);
+	double HCost(const FlipSideState &state1, const FlipSideState &state2) const;
 	double GCost(const FlipSideState &state1, const FlipSideState &state2);
 	double GCost(const FlipSideState &, const flipMove &) { return 1.0; }
 	bool GoalTest(const FlipSideState &state, const FlipSideState &goal);
@@ -96,7 +96,7 @@ public:
 
 	void StoreGoal(FlipSideState &){}
 	void ClearGoal(){}
-	bool IsGoalStored(){return false;}
+	bool IsGoalStored() const {return false;}
 private:
 		int width;
 };

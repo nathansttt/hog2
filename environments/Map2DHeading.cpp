@@ -94,7 +94,7 @@ bool Map2DHeading::InvertAction(xyhAct &a) const
 	return false;
 }
 
-double Map2DHeading::HCost(const xyhLoc &l1, const xyhLoc &l2)
+double Map2DHeading::HCost(const xyhLoc &l1, const xyhLoc &l2) const
 {
 	double h1;
 	double a = ((l1.x>l2.x)?(l1.x-l2.x):(l2.x-l1.x));

@@ -140,7 +140,7 @@ bool MCEnvironment::InvertAction(mcMovementAction &a) const
 }
 
 /** Heuristic value between two arbitrary nodes. **/
-double MCEnvironment::HCost(const mcMovementState &node1, const mcMovementState &node2)
+double MCEnvironment::HCost(const mcMovementState &node1, const mcMovementState &node2) const
 {
 	return distance(node1, node2);
 }

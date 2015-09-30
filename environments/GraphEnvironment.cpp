@@ -145,7 +145,7 @@ bool GraphEnvironment::InvertAction(graphMove &a) const
 	return false;
 }
 
-double GraphEnvironment::HCost(const graphState &state1, const graphState &state2)
+double GraphEnvironment::HCost(const graphState &state1, const graphState &state2) const
 {
 	if (h)
 		return h->HCost(state1, state2);
@@ -592,7 +592,7 @@ GraphMapInconsistentHeuristic::GraphMapInconsistentHeuristic(Map *map, Graph *gr
 //	}
 } 
 
-double GraphMapInconsistentHeuristic::HCost(const graphState &state1, const graphState &state2)
+double GraphMapInconsistentHeuristic::HCost(const graphState &state1, const graphState &state2) const
 {
 	long x1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapX);
 	long y1 = g->GetNode(state1)->GetLabelL(GraphSearchConstants::kMapY);
@@ -707,11 +707,16 @@ void GraphMapInconsistentHeuristic::Compress()
 
 void GraphMapInconsistentHeuristic::FillInCache(std::vector<double> &vals,
 												std::vector<double> &errors,
-												graphState state2)
+												graphState state2) const
 {
 	int unused;
 	if (numHeuristics == 0)
-		numHeuristics = heuristics.size();
+	{
+		assert(!"No heuristics being used");
+		// Note: This would fix it, but breaks const correctness
+		// This is old code, so need to re-analyze if we use again
+		//numHeuristics = heuristics.size();
+	}
 	if (!compressed)
 	{
 		unused = heuristics.size(); // set these values to the uncompressed size
@@ -914,7 +919,7 @@ void GraphDistanceHeuristic::OpenGLDraw() const
 	}
 }
 
-double GraphDistanceHeuristic::HCost(const graphState &state1, const graphState &state2)
+double GraphDistanceHeuristic::HCost(const graphState &state1, const graphState &state2) const
 {
 	double val = 0;
 	for (unsigned int i = 0; i < heuristics.size(); i++)

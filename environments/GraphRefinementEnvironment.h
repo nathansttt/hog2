@@ -31,8 +31,8 @@ public:
 	virtual void SetUseAbstractGoal(bool use, int level) { useAbstractGoal = use; abstractGoalLevel = level; }
 	//void SetPlanningCorridor(std::vector<graphState> &corridor, int level);
 	void SetPlanningCorridor(std::vector<graphState> &corridor, int level, int start = 0);
-	double HCost(const graphState &state1, const graphState &state2);
-	double HCost(const graphState &) { assert(false); return false; }
+	double HCost(const graphState &state1, const graphState &state2) const;
+	double HCost(const graphState &) const { assert(false); return false; }
 private:
 	GraphAbstraction *ga;
 	typedef __gnu_cxx::hash_map<graphState, bool> CorridorCheck;

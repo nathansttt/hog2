@@ -73,7 +73,7 @@ namespace DALRTA {
 			heur[env->GetStateHash(where)].theState = where;
 #endif
 		}
-		double HCost(environment *env, const state &from, const state &to)
+		double HCost(environment *env, const state &from, const state &to) const
 		{
 			if (heur.find(env->GetStateHash(from)) != heur.end())
 				return heur[env->GetStateHash(from)].theHeuristic+
@@ -86,7 +86,7 @@ namespace DALRTA {
 				return heur[env->GetStateHash(from)].theHeuristic;
 			return 0;
 		}
-		double HCost(const state &from, const state &to)
+		double HCost(const state &from, const state &to) const
 		{
 			assert(m_pEnv != 0);
 			return HCost(m_pEnv, from, to);

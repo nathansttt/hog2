@@ -23,7 +23,7 @@ public:
 	Graph *GetGraph() { return 0; }
 	void SetState(TopSpinGraph *tss) { ts = tss; }
 	virtual ~TopSpinGraphHeuristic() { }
-	virtual double HCost(const graphState &state1, const graphState &state2);
+	virtual double HCost(const graphState &state1, const graphState &state2) const;
 
 	static int THmode;
 private:

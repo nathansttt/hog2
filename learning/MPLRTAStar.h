@@ -40,7 +40,7 @@ namespace MPLRTA {
 			heur[env->GetStateHash(where)].theHeuristic = val-env->HCost(where, to);
 			heur[env->GetStateHash(where)].theState = where;
 		}
-		double HCost(MapEnvironment *env, const xyLoc &from, const xyLoc &to)
+		double HCost(MapEnvironment *env, const xyLoc &from, const xyLoc &to) const
 		{
 			if (heur.find(env->GetStateHash(from)) != heur.end())
 				return heur[env->GetStateHash(from)].theHeuristic+env->HCost(from, to);

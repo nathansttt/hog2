@@ -231,6 +231,7 @@ void AddStatesToQueue(const openData &d, uint64_t *data, size_t count)
 		if (open[d].f == 0)
 		{
 			printf("Error opening %s; Aborting!\n", GetOpenName(d).c_str());
+			perror("Reason: ");
 			exit(0);
 		}
 	}
@@ -440,7 +441,7 @@ void ParallelExpandBucket(openData d, const std::unordered_set<uint64_t> &states
 			continue;
 		
 		localExpanded++;
-		for (int x = 0; x < 18; x++)
+		for (int x = 0; x < 18; x++) // TODO: use getactions
 		{
 			GetState(tmp, d.bucket, values);
 			// copying 2 64-bit values is faster than undoing a move
@@ -487,7 +488,7 @@ void ExpandNextFile()
 	std::unordered_set<uint64_t> states;
 	ReadBucket(states, d);
 	RemoveDuplicates(states, d);
-	WriteToClosed(states, d);
+	WriteToClosed(states, d); // this could run in parallel!
 	timer.EndTimer();
 	
 	printLock.lock();
@@ -523,8 +524,8 @@ void ExpandNextFile()
 	printLock.unlock();
 }
 
-#define KORF97
-//#define MASSIVE
+//#define KORF97
+#define MASSIVE
 //#define SMALL
 //#define TINY
 
@@ -582,9 +583,9 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 #endif
 	
 #ifdef KORF97
-	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11}; // first 4
-	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7}; // first 4
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
+	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
+	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
+	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);

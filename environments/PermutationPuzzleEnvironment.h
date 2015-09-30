@@ -76,8 +76,8 @@ namespace PermutationPuzzle {
 		void Load_Additive_PDB(const state &goal, const char *pdb_filename);
 		void ClearPDBs()
 		{       PDB.resize(0); PDB_distincts.resize(0); lookups.resize(0); }
-		double PDB_Lookup(const state &s);
-		double HCost(const state &s);
+		double PDB_Lookup(const state &s) const;
+		double HCost(const state &s) const;
 		virtual double AdditiveGCost(const state &s, const action &d)
 		{ assert(!"Additive Gost used but not defined for this class\n"); }
 		
@@ -94,7 +94,7 @@ namespace PermutationPuzzle {
 		void GetStateFromPDBHash(uint64_t hash, state &s, int count,
 								 const std::vector<int> &pattern,
 								 std::vector<int> &dual);
-		void GetStateFromHash(state &s, uint64_t hash);
+		void GetStateFromHash(state &s, uint64_t hash) const;
 		uint64_t GetStateHash(const state &s) const;
 		void PrintPDBHistogram(int which) const;
 		void GetPDBHistogram(int which, std::vector<uint64_t> &values) const;
@@ -120,8 +120,8 @@ namespace PermutationPuzzle {
 						  std::mutex *lock,
 						  bool additive);
 		double HCost(const state &s, int treeNode,
-					 std::vector<int> &c1, std::vector<int> &c2);
-		virtual double DefaultH(const state &s) { return 0; }
+					 std::vector<int> &c1, std::vector<int> &c2) const;
+		virtual double DefaultH(const state &s) const { return 0; }
 		uint64_t Factorial(int val) const;
 		void buildCaches() const;
 		
@@ -986,7 +986,7 @@ namespace PermutationPuzzle {
 	 * Deprecated: this code should no longer be used.
 	 */
 	template <class state, class action>
-	double PermutationPuzzleEnvironment<state, action>::PDB_Lookup(const state &s)
+	double PermutationPuzzleEnvironment<state, action>::PDB_Lookup(const state &s) const
 	{
 		if (true)//!additive)
 		{
@@ -1015,7 +1015,7 @@ namespace PermutationPuzzle {
 	}
 	
 	template <class state, class action>
-	double PermutationPuzzleEnvironment<state, action>::HCost(const state &s)
+	double PermutationPuzzleEnvironment<state, action>::HCost(const state &s) const
 	{
 		if (lookups.size() == 0)
 			return 0;
@@ -1025,7 +1025,7 @@ namespace PermutationPuzzle {
 	
 	template <class state, class action>
 	double PermutationPuzzleEnvironment<state, action>::HCost(const state &s, int treeNode,
-															  std::vector<int> &c1, std::vector<int> &c2)
+															  std::vector<int> &c1, std::vector<int> &c2) const
 	{
 		double hval = 0;
 		switch (lookups[treeNode].t)
@@ -1277,7 +1277,7 @@ namespace PermutationPuzzle {
 	}
 	
 	template <class state, class action>
-	void PermutationPuzzleEnvironment<state, action>::GetStateFromHash(state &s, uint64_t hash)
+	void PermutationPuzzleEnvironment<state, action>::GetStateFromHash(state &s, uint64_t hash) const
 	{
 		std::vector<int> puzzle = s.puzzle;
 		uint64_t hashVal = hash;

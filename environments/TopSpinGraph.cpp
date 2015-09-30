@@ -271,7 +271,7 @@ TopSpinGraphHeuristic::TopSpinGraphHeuristic(int psize, int spin, int pdbStates)
 }
 
 
-double TopSpinGraphHeuristic::HCost(const graphState &s1, const graphState &s2)
+double TopSpinGraphHeuristic::HCost(const graphState &s1, const graphState &s2) const
 {
 	graphState sd;
 

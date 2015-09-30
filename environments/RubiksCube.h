@@ -113,13 +113,13 @@ public:
 	virtual bool InvertAction(RubiksAction &a) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const RubiksState &node1, const RubiksState &node2);
-	virtual double HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost);
+	virtual double HCost(const RubiksState &node1, const RubiksState &node2) const;
+	virtual double HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost) const;
 	int Edge12PDBDist(const RubiksState &s);
 	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const RubiksState &node);
+	virtual double HCost(const RubiksState &node) const;
 	
 	virtual double GCost(const RubiksState &node1, const RubiksState &node2) { return 1.0; }
 	virtual double GCost(const RubiksState &node, const RubiksAction &act) { return 1.0; }

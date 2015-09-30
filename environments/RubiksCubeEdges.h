@@ -117,7 +117,7 @@ public:
 
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const RubikEdgeState &node1, const RubikEdgeState &node2) { return 1; }
+	virtual double HCost(const RubikEdgeState &node1, const RubikEdgeState &node2) const { return 1; }
 	virtual double GCost(const RubikEdgeState &node1, const RubikEdgeState &node2) { return 1; }
 	virtual double GCost(const RubikEdgeState &node, const RubikEdgeAction &act) { return 1; }
 	virtual bool GoalTest(const RubikEdgeState &node, const RubikEdgeState &goal) { return (node.state == goal.state); }

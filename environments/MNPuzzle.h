@@ -101,8 +101,8 @@ public:
 	static unsigned GetParity(MNPuzzleState &state);
 
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
-	double HCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
-	double HCost(const MNPuzzleState &state1)
+	double HCost(const MNPuzzleState &state1, const MNPuzzleState &state2) const;
+	double HCost(const MNPuzzleState &state1) const
 	{ return PermutationPuzzleEnvironment<MNPuzzleState, slideDir>::HCost(state1); }
 	double DefaultH(const MNPuzzleState &s) const;
 
@@ -138,7 +138,7 @@ public:
 
 	void ClearGoal(); // clears the current stored information of the goal
 
-	bool IsGoalStored(){return goal_stored;} // returns if a goal is stored or not
+	bool IsGoalStored() const {return goal_stored;} // returns if a goal is stored or not
 	Graph *GetGraph();
 
 	/**
@@ -175,7 +175,7 @@ public:
 	std::vector<slideDir> Get_Op_Order(){return ops_in_order;}
 
 	static MNPuzzleState Generate_Random_Puzzle(unsigned num_cols, unsigned num_rows);
-	virtual void GetStateFromHash(MNPuzzleState &s, uint64_t hash);
+	virtual void GetStateFromHash(MNPuzzleState &s, uint64_t hash) const;
 
 	
 	bool State_Check(const MNPuzzleState &to_check);
@@ -224,7 +224,7 @@ private:
 class GraphPuzzleDistanceHeuristic : public GraphDistanceHeuristic {
 public:
 	GraphPuzzleDistanceHeuristic(MNPuzzle &mnp, Graph *graph, int count);
-	double HCost(const graphState &state1, const graphState &state2);
+	double HCost(const graphState &state1, const graphState &state2) const;
 private:
 	MNPuzzle puzzle;
 };

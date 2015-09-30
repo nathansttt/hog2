@@ -52,7 +52,7 @@ public:
 	virtual bool InvertAction(tDirection &a) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const xytLoc &node1, const xytLoc &node2);
+	virtual double HCost(const xytLoc &node1, const xytLoc &node2) const;
 	virtual double GCost(const xytLoc &node1, const xytLoc &node2) { return 1; }
 	virtual double GCost(const xytLoc &node, const tDirection &act) { return 1; }
 	virtual bool GoalTest(const xytLoc &node, const xytLoc &goal);

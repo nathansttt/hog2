@@ -82,7 +82,7 @@ static bool operator==(const armRotations &l1, const armRotations &l2) {
 class RoboticArmHeuristic {
 public:
 	virtual ~RoboticArmHeuristic() {}
-	virtual double HCost(const armAngles &node1, const armAngles &node2) = 0;
+	virtual double HCost(const armAngles &node1, const armAngles &node2) const = 0;
 };
 
 class RoboticArm : public SearchEnvironment<armAngles, armRotations>
@@ -109,11 +109,11 @@ public:
 
 	void AddHeuristic(RoboticArmHeuristic *h) { heuristics.push_back(h); }
 
-	virtual double HCost(const armAngles &){
+	virtual double HCost(const armAngles &) const {
 		printf("Single State HCost Failure: method not implemented for RoboticArm\n");
 		exit(0); return -1.0;}
 
-	virtual double HCost(const armAngles &node1, const armAngles &node2);
+	virtual double HCost(const armAngles &node1, const armAngles &node2) const;
 
 	virtual double GCost(const armAngles &, const armAngles &) { return 1; }
 	virtual double GCost(const armAngles &, const armRotations &) { return 1; }
@@ -136,7 +136,7 @@ public:
 
 	void StoreGoal(armAngles &) {}
 	void ClearGoal(){}
-	bool IsGoalStored(){return false;}
+	bool IsGoalStored()const {return false;}
 	virtual bool GoalTest(const armAngles &){
 		printf("Single State Goal Test Failure: method not implemented for RoboticArm\n");
 		exit(0); return false;}
@@ -157,7 +157,7 @@ private:
 	std::vector<line2d> obstacles;
 	mutable std::vector<line2d> armSegments;
 
-	std::vector<recVec> states;
+	mutable std::vector<recVec> states;
 
 	std::vector<RoboticArmHeuristic *> heuristics;
 	ConfigEnvironment *ce;
@@ -167,7 +167,7 @@ class ArmToArmHeuristic : public RoboticArmHeuristic {
 public:
 	ArmToArmHeuristic(RoboticArm *r, armAngles &initial, bool optimize = false);
 	virtual ~ArmToArmHeuristic() {}
-	double HCost(const armAngles &node1, const armAngles &node2);
+	double HCost(const armAngles &node1, const armAngles &node2) const;
 	void AddDiffTable();
 	bool IsLegalState(armAngles &arm);
 	const std::vector<armAngles> &GetTipPositions(double x, double y)
@@ -318,7 +318,7 @@ public:
 		//std::cout << a << " goes in the table with index " << index << " : " << (a.angles&0xFFFFFFFF) << std::endl;
 		distances[index] = dist;
 	}
-	uint64_t GetIndex(const armAngles &a)
+	uint64_t GetIndex(const armAngles &a) const
 	{
 		//std::cout << "Index of " << a << " : " << (a.angles&0xFFFFFFFF) << " is ";
 		uint64_t index = 0;
@@ -331,7 +331,8 @@ public:
 		assert(index < theSize);
 		return index;
 	}
-	double HCost(const armAngles &from, const armAngles &to)
+	
+	double HCost(const armAngles &from, const armAngles &to) const
 	{
 		if ((from.angles&theMask) != theResult)
 			return 0;
@@ -346,7 +347,8 @@ public:
 		}
 		return heuristic;
 	}
-	void SetupGoal(const armAngles &referenceState)
+	
+	void SetupGoal(const armAngles &referenceState) const
 	{
 		values.resize(0);
 		errors.resize(0);
@@ -373,6 +375,7 @@ public:
 			depth++;
 		}
 	}
+	
 	void Save(const char *file)
 	{
 		FILE *f = fopen(file, "w+");
@@ -397,10 +400,12 @@ public:
 private:
 	uint64_t theSize;
 	std::vector<int> reduction;
-	std::vector<int> values;
-	std::vector<int> errors;
+
+	// caching for each goal state
+	mutable std::vector<int> values;
+	mutable std::vector<int> errors;
+	mutable armAngles goal;
 	RoboticArm *r;
-	armAngles goal;
 	uint16_t *distances;
 	uint64_t theMask;
 	uint64_t theResult;
@@ -410,7 +415,7 @@ class ArmToTipHeuristic : public RoboticArmHeuristic {
 public:
 	ArmToTipHeuristic(RoboticArm *r);
 	virtual ~ArmToTipHeuristic() {}
-	double HCost(const armAngles &node1, const armAngles &node2);
+	double HCost(const armAngles &node1, const armAngles &node2) const;
 
 	void GenerateLegalStateTable( armAngles &legalArm );
 	void GenerateTipPositionTables( armAngles &sampleArm );
@@ -442,7 +447,7 @@ private:
 
 
 	// convert an arm configuration into an index
-	uint64_t ArmAnglesIndex( const armAngles &arm );
+	uint64_t ArmAnglesIndex( const armAngles &arm ) const;
 	uint64_t NumArmAnglesIndices( const armAngles &arm ) const {
 		return 1 << ( 9 * arm.GetNumArms() );
 	}
@@ -450,7 +455,7 @@ private:
 	// convert a tip position into an index
 	int TipPositionIndex( const double x, const double y,
 						 const double minX, const double minY,
-						 const double width );
+						 const double width ) const;
 	int NumTipPositionIndices() const {
 		int count = (int)ceil( 2.0 / ra->GetTolerance() );
 		return count * count;
@@ -488,10 +493,10 @@ private:
 
 	// use a heuristic table
 	uint16_t UseHeuristic(const armAngles &s, armAngles &g,
-						  uint16_t *distances );
+						  uint16_t *distances ) const;
 	uint16_t UseHeuristic(const armAngles &arm, double goalX, double goalY,
 						  uint16_t *distances, uint16_t *minTipDistances,
-						  uint16_t *maxTipDistances );
+						  uint16_t *maxTipDistances ) const;
 };
 
 //typedef UnitSimulation<armAngles, armRotations, MapEnvironment> UnitMapSimulation;

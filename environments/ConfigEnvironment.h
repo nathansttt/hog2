@@ -27,11 +27,11 @@ public:
 
 	virtual bool InvertAction(line2d &a) const;
 
-	virtual double HCost(const recVec &){
+	virtual double HCost(const recVec &) const {
 		printf("Single State HCost Failure: method not implemented for ConfigEnvironment\n");
 		exit(0); return -1.0;}
 
-	virtual double HCost(const recVec &node1, const recVec &node2);
+	virtual double HCost(const recVec &node1, const recVec &node2) const;
 	virtual double GCost(const recVec &node1, const recVec &node2);
 	virtual double GCost(const recVec &node1, const line2d &act);
 	bool GoalTest(const recVec &node, const recVec &goal);
@@ -52,7 +52,7 @@ public:
 
 	void StoreGoal(recVec &g) { goal = g; goal_stored = true;} // stores the locations for the given goal state
 	void ClearGoal() {goal_stored = false;}
-	bool IsGoalStored() {return false;}
+	bool IsGoalStored() const {return false;}
 
 
 //	bool LegalState(line2d &a);

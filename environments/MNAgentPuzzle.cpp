@@ -101,7 +101,7 @@ bool MNAgentEnvironment::InvertAction(tAgentAction &a) const
 }
 
 /** Heuristic value between two arbitrary nodes. **/
-double MNAgentEnvironment::HCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2)
+double MNAgentEnvironment::HCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2) const
 {
 	// for now we don't need this
 	return 1;

@@ -127,7 +127,7 @@ public:
 		return false;
 	}
 
-	double HCost(const graphState &state1, const graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2) const
 	{
 		if (h)
 		{
@@ -230,9 +230,9 @@ public:
 
 	virtual void StoreGoal(graphState &) {}
 	virtual void ClearGoal() {}
-	virtual bool IsGoalStored() {return false;}
+	virtual bool IsGoalStored() const {return false;}
 
-	virtual double HCost(const graphState &) {
+	virtual double HCost(const graphState &) const {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for AbsGraphEnvironment\n");
 		exit(1); return -1.0;}
 
@@ -256,7 +256,7 @@ public:
 	GraphStraightLineHeuristic(Map *map, Graph *graph, Graph *mg)
 	:m(map), g(graph), mapgraph(mg) {}
 	Graph *GetGraph() { return g; }
-	double HCost(const graphState &state1, const graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2) const
 	{
 	//std::cout<<"state1 "<<state1<<" state2 "<<state2<<std::endl;
 	//modified for abstract nodes
@@ -294,7 +294,7 @@ public:
 	OctileHeuristic(Map *map, Graph *graph)
 	:m(map), g(graph) {}
 	Graph *GetGraph() { return g; }
-	double HCost(const graphState &state1, const graphState &state2)
+	double HCost(const graphState &state1, const graphState &state2) const
 	{
 		int x1 = g->GetNode(state1)->GetLabelL(GraphAbstractionConstants::kFirstData);
 		int y1 = g->GetNode(state1)->GetLabelL(GraphAbstractionConstants::kFirstData+1);

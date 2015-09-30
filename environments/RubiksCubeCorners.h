@@ -135,11 +135,11 @@ public:
 	virtual bool InvertAction(RubiksCornersAction &a) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const RubiksCornerState &node1, const RubiksCornerState &node2) { return 0; }
+	virtual double HCost(const RubiksCornerState &node1, const RubiksCornerState &node2) const { return 0; }
 	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const RubiksCornerState &node)
+	virtual double HCost(const RubiksCornerState &node) const
 	{ return 0; }
 	
 	virtual double GCost(const RubiksCornerState &node1, const RubiksCornerState &node2) { return 1.0; }

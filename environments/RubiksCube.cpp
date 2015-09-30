@@ -150,7 +150,7 @@ bool RubiksCube::InvertAction(RubiksAction &a) const
 	return false;
 }
 
-double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost)
+double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, double parentHCost) const
 {
 	return HCost(node1, node2);
 //	double val = 0;
@@ -287,7 +287,7 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2, dou
 }
 
 /** Heuristic value between two arbitrary nodes. **/
-double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
+double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2) const
 {
 	return 0;
 //	double val = 0;
@@ -389,7 +389,7 @@ double RubiksCube::HCost(const RubiksState &node1, const RubiksState &node2)
 
 /** Heuristic value between node and the stored goal. Asserts that the
  goal is stored **/
-double RubiksCube::HCost(const RubiksState &node)
+double RubiksCube::HCost(const RubiksState &node) const
 {
 	return HCost(node, node);
 }

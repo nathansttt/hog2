@@ -56,16 +56,16 @@ public:
 	{ bValidSearchGoal = false; }
 
 	/** Returns true if the goal is stored and false otherwise. **/
-	virtual bool IsGoalStored()
+	virtual bool IsGoalStored() const
 	{ return bValidSearchGoal; }
 
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const state &node1, const state &node2) = 0;
-	virtual double HCost(const state &node1, const state &node2, double parentHCost)
+	virtual double HCost(const state &node1, const state &node2) const = 0;
+	virtual double HCost(const state &node1, const state &node2, double parentHCost) const
 	{ return HCost(node1, node2); }
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const state &node)
+	virtual double HCost(const state &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 
 	virtual double GCost(const state &node1, const state &node2) = 0;

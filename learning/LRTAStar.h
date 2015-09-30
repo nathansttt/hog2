@@ -38,7 +38,7 @@ public:
 		heur[env->GetStateHash(where)].theHeuristic = val-env->HCost(where, to);
 		heur[env->GetStateHash(where)].theState = where;
 	}
-	double HCost(environment *env, const state &from, const state &to)
+	double HCost(environment *env, const state &from, const state &to) const
 	{
 		if (heur.find(env->GetStateHash(from)) != heur.end())
 			return heur[env->GetStateHash(from)].theHeuristic+env->HCost(from, to);

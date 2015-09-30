@@ -51,11 +51,11 @@ public:
 	virtual bool InvertAction(mcMovementAction &a) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const mcMovementState &node1, const mcMovementState &node2);
+	virtual double HCost(const mcMovementState &node1, const mcMovementState &node2) const;
 	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const mcMovementState &node)
+	virtual double HCost(const mcMovementState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
 	virtual double GCost(const mcMovementState &node1, const mcMovementState &node2);

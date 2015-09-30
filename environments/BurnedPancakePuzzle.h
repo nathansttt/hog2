@@ -52,9 +52,9 @@ public:
 
 	virtual uint64_t GetStateHash(const BurnedPancakePuzzleState &s) const;
 
-	double HCost(const BurnedPancakePuzzleState &state1, const BurnedPancakePuzzleState &state2);
-	double Memory_Free_HCost(const BurnedPancakePuzzleState &state1, std::vector<int> &goal_locs);
-	double HCost(const BurnedPancakePuzzleState &state1);
+	double HCost(const BurnedPancakePuzzleState &state1, const BurnedPancakePuzzleState &state2) const;
+	double Memory_Free_HCost(const BurnedPancakePuzzleState &state1, const std::vector<int> &goal_locs) const;
+	double HCost(const BurnedPancakePuzzleState &state1) const;
 
 	double GCost(const BurnedPancakePuzzleState &, const BurnedPancakePuzzleState &) {return 1.0;}
 	double GCost(const BurnedPancakePuzzleState &, const unsigned &) { return 1.0; }
@@ -80,7 +80,7 @@ public:
 
 	void ClearGoal(){} // clears the current stored information of the goal
 
-	bool IsGoalStored(){return goal_stored;} // returns if a goal is stored or not
+	bool IsGoalStored() const {return goal_stored;} // returns if a goal is stored or not
 
 	/**
 	Changes the ordering of operators to the new inputted order

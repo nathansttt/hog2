@@ -64,8 +64,8 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-mm 0 /Users/nathanst/Desktop/pdb1/ /Users/nathanst/Desktop/pdb2/"
-            isEnabled = "YES">
+            argument = "-mm 4 /Users/nathanst/Desktop/pdb1/ /Users/nathanst/Desktop/pdb2/"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-pancake"

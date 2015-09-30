@@ -62,7 +62,7 @@ public:
 //	void SetUseBidirectional(bool use) { swap = use; }
 	
 	OccupancyInterface<pancakeStatePair, pancakeMovePair> *GetOccupancyInfo() { return 0; }
-	virtual double HCost(const pancakeStatePair &state1, const pancakeStatePair &state2);
+	virtual double HCost(const pancakeStatePair &state1, const pancakeStatePair &state2) const;
 	virtual double GCost(const pancakeStatePair &state1, const pancakeStatePair &state2);
 	virtual double GCost(const pancakeStatePair &state1, const pancakeMovePair &state2);
 	virtual bool GoalTest(const pancakeStatePair &state, const pancakeStatePair &goal);
@@ -75,9 +75,9 @@ public:
 	
 	virtual void StoreGoal(pancakeStatePair &) {}
 	virtual void ClearGoal() {}
-	virtual bool IsGoalStored() {return false;}
+	virtual bool IsGoalStored() const {return false;}
 	
-	virtual double HCost(const pancakeStatePair &) {
+	virtual double HCost(const pancakeStatePair &) const {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for SFBDPancakeEnvironment\n");
 		exit(1); return -1.0;}
 	

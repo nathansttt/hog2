@@ -13,11 +13,17 @@
 #include <string.h>
 #include <algorithm>
 
+/**
+ * This class supports compact n-bit arrays. For (1 <= n <= 64). 
+ * It is efficient for powers of two, but less so
+ * for non-powers of two. (Currently about 3x slower.)
+ */
 template <uint64_t numBits>
 class NBitArray
 {
 public:
 	NBitArray(uint64_t numEntries = 0);
+	NBitArray(const char *);
 	~NBitArray();
 	void FillMax();
 	void Clear();
@@ -43,6 +49,14 @@ NBitArray<numBits>::NBitArray(uint64_t numEntries)
 	static_assert(numBits >= 1 && numBits <= 64, "numBits out of bounds!");
 
 	mem = new uint64_t[memorySize];
+}
+
+template <uint64_t numBits>
+NBitArray<numBits>::NBitArray(const char *file)
+:mem(0)
+{
+	static_assert(numBits >= 1 && numBits <= 64, "numBits out of bounds!");
+	Read(file);
 }
 
 template <uint64_t numBits>
@@ -76,6 +90,50 @@ template <uint64_t numBits>
 uint64_t NBitArray<numBits>::Size() const
 {
 	return entries;
+}
+
+template <uint64_t numBits>
+void NBitArray<numBits>::Write(FILE *f)
+{
+	fwrite(&entries, sizeof(uint64_t), 1, f);
+	fwrite(&memorySize, sizeof(uint64_t), 1, f);
+	fwrite(mem, sizeof(uint64_t), memorySize, f);
+}
+
+template <uint64_t numBits>
+void NBitArray<numBits>::Read(FILE *f)
+{
+	delete [] mem;
+	fread(&entries, sizeof(uint64_t), 1, f);
+	fread(&memorySize, sizeof(uint64_t), 1, f);
+	mem = new uint64_t[memorySize];
+	fread(mem, sizeof(uint64_t), memorySize, f);
+}
+
+template <uint64_t numBits>
+void NBitArray<numBits>::Write(const char *file)
+{
+	FILE *f = fopen(file, "w+b");
+	if (f == 0)
+	{
+		perror("Could not open file for writing in NBitArray");
+		return;
+	}
+	Write(f);
+	fclose(f);
+}
+
+template <uint64_t numBits>
+void NBitArray<numBits>::Read(const char *file)
+{
+	FILE *f = fopen(file, "rb");
+	if (f == 0)
+	{
+		perror("Could not open file for reading in NBitArray");
+		return;
+	}
+	Read(f);
+	fclose(f);
 }
 
 template <uint64_t numBits>
@@ -208,5 +266,7 @@ void NBitArray<1>::Set(uint64_t index, uint64_t val)
 	uint64_t mask = ~((0x1ull)<<(1*(index&0x3F)));
 	mem[index>>6] = (mem[index>>6]&mask)|val;
 }
+
+
 
 #endif

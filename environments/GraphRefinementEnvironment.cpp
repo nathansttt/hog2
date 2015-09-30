@@ -80,7 +80,7 @@ void GraphRefinementEnvironment::SetPlanningCorridor(std::vector<graphState> &co
 		corridorTable[corridor[x]] = true;
 }
 
-double GraphRefinementEnvironment::HCost(const graphState &state1, const graphState &state2)
+double GraphRefinementEnvironment::HCost(const graphState &state1, const graphState &state2) const
 {
 	if (useAbstractGoal)
 	{

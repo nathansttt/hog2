@@ -149,7 +149,7 @@ public:
 	virtual bool InvertAction(FlingMove &a) const { assert(false); }
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const FlingBoard &node1, const FlingBoard &node2) { return 0; }
+	virtual double HCost(const FlingBoard &node1, const FlingBoard &node2) const { return 0; }
 	
 	virtual double GCost(const FlingBoard &node1, const FlingBoard &node2) { return 1; }
 	virtual double GCost(const FlingBoard &node, const FlingMove &act) { return 1; }

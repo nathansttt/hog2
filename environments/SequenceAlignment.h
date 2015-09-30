@@ -32,11 +32,11 @@ public:
 	virtual bool InvertAction(SequenceAlignmentAction &a) const;	
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const SequenceAlignmentState &node1, const SequenceAlignmentState &node2);
+	virtual double HCost(const SequenceAlignmentState &node1, const SequenceAlignmentState &node2) const;
 	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const SequenceAlignmentState &node)
+	virtual double HCost(const SequenceAlignmentState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
 	virtual double GCost(const SequenceAlignmentState &node1, const SequenceAlignmentState &node2);

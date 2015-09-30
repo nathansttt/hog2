@@ -92,7 +92,7 @@ bool SteeringEnvironment::InvertAction(steeringAction &a) const
 { return false; }
 
 /** Heuristic value between two arbitrary nodes. **/
-double SteeringEnvironment::HCost(const steeringState &node1, const steeringState &node2)
+double SteeringEnvironment::HCost(const steeringState &node1, const steeringState &node2) const
 { if (node1 == node2) return 0; return 1; }
 
 double SteeringEnvironment::GCost(const steeringState &, const steeringState &)

@@ -32,11 +32,11 @@ public:
 	virtual bool InvertAction(NaryAction &a) const;	
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const NaryState &node1, const NaryState &node2);
+	virtual double HCost(const NaryState &node1, const NaryState &node2) const;
 	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const NaryState &node)
+	virtual double HCost(const NaryState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
 	virtual double GCost(const NaryState &node1, const NaryState &node2);

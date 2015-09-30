@@ -70,14 +70,14 @@ namespace GridLRTA {
 			heur[env->GetStateHash(where)].theState = where;
 #endif
 		}
-		double HCost(MapEnvironment *env, const xyLoc &from, const xyLoc &to)
+		double HCost(MapEnvironment *env, const xyLoc &from, const xyLoc &to) const
 		{
 			if (heur.find(env->GetStateHash(from)) != heur.end())
 				return heur[env->GetStateHash(from)].theHeuristic+
 				env->HCost(from, to);
 			return env->HCost(from, to);
 		}
-		double HCost(const xyLoc &from, const xyLoc &to)
+		double HCost(const xyLoc &from, const xyLoc &to) const
 		{
 			assert(m_pEnv != 0);
 			return HCost(m_pEnv, from, to);

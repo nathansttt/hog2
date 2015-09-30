@@ -449,7 +449,7 @@ bool MNPuzzle::InvertAction(slideDir &a) const
 //}
 //
 // TODO Remove PDB heuristic from this heuristic evaluator.
-double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2)
+double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2) const
 {
 	if (goal_stored)
 		return PermutationPuzzleEnvironment<MNPuzzleState, slideDir>::HCost(state1);
@@ -797,7 +797,7 @@ GraphPuzzleDistanceHeuristic::GraphPuzzleDistanceHeuristic(MNPuzzle &mnp, Graph 
 	}
 }
 
-double GraphPuzzleDistanceHeuristic::HCost(const graphState &state1, const graphState &state2)
+double GraphPuzzleDistanceHeuristic::HCost(const graphState &state1, const graphState &state2) const
 {
 	MNPuzzleState a(3, 3), b(3, 3);
 	puzzle.GetStateFromHash(a, state1);
@@ -836,7 +836,7 @@ MNPuzzleState MNPuzzle::Generate_Random_Puzzle(unsigned num_cols, unsigned num_r
 	return new_puzz;
 }
 
-void MNPuzzle::GetStateFromHash(MNPuzzleState &s, uint64_t hash)
+void MNPuzzle::GetStateFromHash(MNPuzzleState &s, uint64_t hash) const
 {
 	PermutationPuzzleEnvironment<MNPuzzleState,slideDir>::GetStateFromHash(s, hash);
 	for (unsigned int x = 0; x < s.puzzle.size(); x++)

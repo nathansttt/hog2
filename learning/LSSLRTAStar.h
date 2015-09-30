@@ -82,7 +82,7 @@ public:
 			return heur[m_pEnv->GetStateHash(from)].theHeuristic;
 		return 0;
 	}
-	double HCost(environment *env, const state &from, const state &to)
+	double HCost(environment *env, const state &from, const state &to) const
 	{
 		if (heur.find(env->GetStateHash(from)) != heur.end())
 			return heur[env->GetStateHash(from)].theHeuristic+BaseHCost(env, from, to);
@@ -91,7 +91,7 @@ public:
 	double BaseHCost(environment *env, const state &from, const state &to) const
 	{ return initialHeuristicWeight*env->HCost(from, to);
 	}
-	double HCost(const state &from, const state &to)
+	double HCost(const state &from, const state &to) const
 	{ return HCost(m_pEnv, from, to); }
 	
 	double GetMaxStateLearning()

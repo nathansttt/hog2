@@ -124,8 +124,8 @@ public:
 
 	virtual bool InvertAction(deltaSpeedHeading &a) const;
 	
-	virtual double HCost(const xySpeedHeading &node1, const xySpeedHeading &node2);
-	virtual double HCost(const xySpeedHeading &) { assert(false); return 0; }
+	virtual double HCost(const xySpeedHeading &node1, const xySpeedHeading &node2) const;
+	virtual double HCost(const xySpeedHeading &)  const { assert(false); return 0; }
 	virtual double GCost(const xySpeedHeading &node1, const xySpeedHeading &node2);
 	virtual double GCost(const xySpeedHeading &node1, const deltaSpeedHeading &act);
 
@@ -153,9 +153,9 @@ private:
 	void BuildAngleTables();
 	float mySin(int dir) const;
 	float myCos(int dir) const;
-	float LookupStateHash(const xySpeedHeading &s, dirHeuristicTable &t);
-	bool LookupStateHashIndex(const xySpeedHeading &s, int &index1, int &index2);
-	float LookupStateHeuristic(const xySpeedHeading &s1, const xySpeedHeading &s2);
+	float LookupStateHash(const xySpeedHeading &s, const dirHeuristicTable &t) const;
+	bool LookupStateHashIndex(const xySpeedHeading &s, int &index1, int &index2) const;
+	float LookupStateHeuristic(const xySpeedHeading &s1, const xySpeedHeading &s2) const;
 	void RotateCCW(xySpeedHeading &s, unsigned int rotation) const;
 	bool checkLegal;
 	GoalTester *test;

@@ -76,8 +76,7 @@ public:
 	static unsigned GetParity(TopSpinState &state);
 
 	OccupancyInterface<TopSpinState, TopSpinAction> *GetOccupancyInfo() { return 0; }
-	double HCost(const TopSpinState &state1, const TopSpinState &state2);
-//	double HCost(const TopSpinState &state1);
+	double HCost(const TopSpinState &state1, const TopSpinState &state2) const;
 
 	double GCost(const TopSpinState &state1, const TopSpinState &state2);
 	double GCost(const TopSpinState &, const TopSpinAction &);
@@ -103,7 +102,7 @@ public:
 
 	void ClearGoal() { } // clears the current stored information of the goal
 
-	bool IsGoalStored(){return true;} // returns if a goal is stored or not
+	bool IsGoalStored() const {return true;} // returns if a goal is stored or not
 
 	bool State_Check(const TopSpinState &to_check) { return true; }
 

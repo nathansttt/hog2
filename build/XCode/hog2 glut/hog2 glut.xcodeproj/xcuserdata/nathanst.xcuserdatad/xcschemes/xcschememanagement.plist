@@ -44,6 +44,11 @@
 			<key>orderHint</key>
 			<integer>16</integer>
 		</dict>
+		<key>Unit Test.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>22</integer>
+		</dict>
 		<key>bidirectional.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -138,6 +143,11 @@
 			<true/>
 		</dict>
 		<key>C43816F1140C395B007BA75B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4456AE01BBB49D40065CA5A</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -102,11 +102,11 @@ public:
 	virtual bool InvertAction(tAgentAction &a) const;	
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2);
+	virtual double HCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2) const;
 	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const MNAgentPuzzleState &node)
+	virtual double HCost(const MNAgentPuzzleState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
 	virtual double GCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2);

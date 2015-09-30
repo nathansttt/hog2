@@ -59,7 +59,7 @@ void FlipSide::ApplyAction(FlipSideState &s, flipMove a) const
 	}
 }
 
-double FlipSide::HCost(const FlipSideState &state1, const FlipSideState &state2)
+double FlipSide::HCost(const FlipSideState &state1, const FlipSideState &state2) const
 {
 	assert(state1.width==state2.width);
 	std::vector<unsigned int> xloc(state2.width*2);

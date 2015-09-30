@@ -22,8 +22,6 @@ struct HeuristicTreeNode
 	unsigned int numChildren;
 };
 
-#warning TODO: Previously HCost was not const
-
 template <class state>
 class Heuristic {
 public:

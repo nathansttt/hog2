@@ -59,7 +59,7 @@ bool NaryTree::InvertAction(NaryAction &a) const
 { a = -a; return true; }
 
 /** Heuristic value between two arbitrary nodes. **/
-double NaryTree::HCost(const NaryState &node1, const NaryState &node2)
+double NaryTree::HCost(const NaryState &node1, const NaryState &node2) const
 { if (node1 == node2) return 0; return 1; }
 
 double NaryTree::GCost(const NaryState &, const NaryState &)

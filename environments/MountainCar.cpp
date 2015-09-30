@@ -97,7 +97,7 @@ bool MountainCarEnvironment::InvertAction(MountainCarAction &a) const
 }
 
 /** Heuristic value between two arbitrary nodes. **/
-double MountainCarEnvironment::HCost(const MountainCarState &node1, const MountainCarState &node2)
+double MountainCarEnvironment::HCost(const MountainCarState &node1, const MountainCarState &node2) const
 { return 0; }
 
 double MountainCarEnvironment::GCost(const MountainCarState &node1, const MountainCarState &node2)

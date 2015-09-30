@@ -59,10 +59,10 @@ namespace CanonicalGrid {
 		
 		bool InvertAction(tDirection &a) const;
 		
-		double HCost(const xyLoc &) {
+		double HCost(const xyLoc &) const {
 			fprintf(stderr, "ERROR: Single State HCost not implemented for CanonicalGrid\n");
 			exit(1); return -1.0;}
-		double HCost(const xyLoc &node1, const xyLoc &node2);
+		double HCost(const xyLoc &node1, const xyLoc &node2) const;
 		double GCost(const xyLoc &node1, const xyLoc &node2);
 		double GCost(const xyLoc &node1, const tDirection &act);
 		bool GoalTest(const xyLoc &node, const xyLoc &goal);
@@ -86,7 +86,7 @@ namespace CanonicalGrid {
 		
 		void StoreGoal(xyLoc &) {} // stores the locations for the given goal state
 		void ClearGoal() {}
-		bool IsGoalStored() {return false;}
+		bool IsGoalStored() const {return false;}
 		void SetDiagonalCost(double val) { DIAGONAL_COST = val; }
 		double GetDiagonalCost() { return DIAGONAL_COST; }
 		bool FourConnected() { return fourConnected; }

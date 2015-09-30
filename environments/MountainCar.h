@@ -42,11 +42,11 @@ public:
 	virtual bool InvertAction(MountainCarAction &a) const;	
 	
 	/** Heuristic value between two arbitrary nodes. **/
-	virtual double HCost(const MountainCarState &node1, const MountainCarState &node2);
+	virtual double HCost(const MountainCarState &node1, const MountainCarState &node2) const;
 	
 	/** Heuristic value between node and the stored goal. Asserts that the
 	 goal is stored **/
-	virtual double HCost(const MountainCarState &node)
+	virtual double HCost(const MountainCarState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
 	virtual double GCost(const MountainCarState &node1, const MountainCarState &node2);

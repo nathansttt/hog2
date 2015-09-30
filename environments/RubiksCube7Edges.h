@@ -118,7 +118,7 @@ public:
 	virtual void ApplyAction(Rubik7EdgeState &s, Rubik7EdgeAction a) const;
 
 	
-	virtual double HCost(const Rubik7EdgeState &node1, const Rubik7EdgeState &node2) { return 0; }
+	virtual double HCost(const Rubik7EdgeState &node1, const Rubik7EdgeState &node2) const { return 0; }
 	
 	virtual double GCost(const Rubik7EdgeState &node1, const Rubik7EdgeState &node2) { return 1; }
 	virtual double GCost(const Rubik7EdgeState &node, const Rubik7EdgeAction &act) { return 1; }

@@ -482,7 +482,7 @@ void Directional2DEnvironment::UndoAction(xySpeedHeading &s, deltaSpeedHeading d
 	}
 }
 
-double Directional2DEnvironment::HCost(const xySpeedHeading &l1, const xySpeedHeading &l2)
+double Directional2DEnvironment::HCost(const xySpeedHeading &l1, const xySpeedHeading &l2) const
 {
 	float dist = sqrt((l1.x-l2.x)*(l1.x-l2.x)+(l1.y-l2.y)*(l1.y-l2.y));
 	if (motionModel == kHumanoid)
@@ -887,7 +887,7 @@ void Directional2DEnvironment::BuildHTable(dirHeuristicTable &t)
 }
 
 bool Directional2DEnvironment::LookupStateHashIndex(const xySpeedHeading &s,
-													int &index1, int &index2)
+													int &index1, int &index2) const
 {
 	const int speeds[4] = {0, 1, 1, 1}; // offset to make all speeds positive
 	const int angles[4] = {16, 16, 24, 24};
@@ -904,7 +904,7 @@ bool Directional2DEnvironment::LookupStateHashIndex(const xySpeedHeading &s,
 	return true;
 }
 
-float Directional2DEnvironment::LookupStateHash(const xySpeedHeading &s, dirHeuristicTable &t)
+float Directional2DEnvironment::LookupStateHash(const xySpeedHeading &s, const dirHeuristicTable &t) const
 {
 	const int speeds[4] = {0, 1, 1, 1}; // offset to make all speeds positive
 	const int angles[4] = {16, 16, 24, 24};
@@ -923,7 +923,7 @@ float Directional2DEnvironment::LookupStateHash(const xySpeedHeading &s, dirHeur
 	return t.hTable[index1][index2];
 }
 
-float Directional2DEnvironment::LookupStateHeuristic(const xySpeedHeading &s1, const xySpeedHeading &s2)
+float Directional2DEnvironment::LookupStateHeuristic(const xySpeedHeading &s1, const xySpeedHeading &s2) const
 {
 	const int angles[4] = {16, 16, 24, 24};
 	const int angles90[4] = {4, 4, 6, 6};
@@ -966,31 +966,17 @@ float Directional2DEnvironment::LookupStateHeuristic(const xySpeedHeading &s1, c
 	}
 	if (whichHeuristic == -1)
 	{
-		int which = heuristics.size();
-		heuristics.resize(which+1);
-		// build new heuristic
-		heuristics[which].speed = 0;
-		heuristics[which].rotation = s2.rotation;
-		BuildHTable(heuristics[which]);
-		whichHeuristic = which;
+		assert(!"No heuristic built");
+		return 0;
+//		// old code that breaks const correctness
+//		int which = heuristics.size();
+//		heuristics.resize(which+1);
+//		// build new heuristic
+//		heuristics[which].speed = 0;
+//		heuristics[which].rotation = s2.rotation;
+//		BuildHTable(heuristics[which]);
+//		whichHeuristic = which;
 		
-//		if (heuristics.size() > 0)
-//		{
-//			int rotation = -heuristics[0].rotation+s2.rotation;
-//			if (rotation < 0)
-//				rotation += angles[motionModel];
-////			printf("Table rotation: %d; goal rotation: %d; rotating CCW %d\n",
-////				   heuristics[0].rotation, s2.rotation, rotation);
-////			std::cout << "Before rotation: " << s3 << std::endl;
-//			RotateCCW(s3, rotation);
-////			std::cout << "After rotation: " << s3 << std::endl;
-//			//assert(heuristics[x].rotation == s3.rotation);
-//			whichHeuristic = 0;
-//		}
-//		else {
-//			printf("Found no match\n");
-//			return 0;
-//		}
 	}
 	
 //	std::cout << "Heuristic looking up: " << s3 << std::endl;

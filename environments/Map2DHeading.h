@@ -58,10 +58,10 @@ public:
 	
 	//	bool Contractable(const xyhLoc &where);
 	
-	virtual double HCost(const xyhLoc &) {
+	virtual double HCost(const xyhLoc &) const {
 		fprintf(stderr, "ERROR: Single State HCost not implemented\n");
 		exit(1); return -1.0;}
-	virtual double HCost(const xyhLoc &node1, const xyhLoc &node2);
+	virtual double HCost(const xyhLoc &node1, const xyhLoc &node2) const;
 	virtual double GCost(const xyhLoc &node1, const xyhLoc &node2);
 	virtual double GCost(const xyhLoc &node1, const xyhAct &act);
 	bool GoalTest(const xyhLoc &node, const xyhLoc &goal);
@@ -87,7 +87,7 @@ public:
 	
 	void StoreGoal(xyhLoc &) {} // stores the locations for the given goal state
 	void ClearGoal() {}
-	bool IsGoalStored() {return false;}
+	bool IsGoalStored() const {return false;}
 	void SetDiagonalCost(double val) { DIAGONAL_COST = val; }
 	double GetDiagonalCost() { return DIAGONAL_COST; }
 	bool FourConnected() { return fourConnected; }

@@ -74,7 +74,7 @@ namespace FLRTA2 {
 			heur[env->GetStateHash(where)].theState = where;
 #endif
 		}
-		double HCost(environment *env, const state &from, const state &to)
+		double HCost(environment *env, const state &from, const state &to) const
 		{
 			int ID = GetGoalID(to);
 			if (heur.find(env->GetStateHash(from)) != heur.end())
@@ -82,7 +82,7 @@ namespace FLRTA2 {
 				env->HCost(from, to);
 			return env->HCost(from, to);
 		}
-		double HCost(const state &from, const state &to)
+		double HCost(const state &from, const state &to) const
 		{
 			assert(m_pEnv != 0);
 			return HCost(m_pEnv, from, to);

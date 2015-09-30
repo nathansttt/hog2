@@ -126,7 +126,7 @@ bool Map2DConstrainedEnvironment::InvertAction(tDirection &a) const
 
 
 /** Heuristic value between two arbitrary nodes. **/
-double Map2DConstrainedEnvironment::HCost(const xytLoc &node1, const xytLoc &node2)
+double Map2DConstrainedEnvironment::HCost(const xytLoc &node1, const xytLoc &node2) const
 {
 	double res1 = mapEnv->HCost(node1.l, node2.l);
 	double res2 = (node2.t>node1.t)?(node2.t-node1.t):0;
