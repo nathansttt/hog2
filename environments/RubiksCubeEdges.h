@@ -178,9 +178,11 @@ public:
 	uint64_t GetPDBHash(const RubikEdgeState &s, int threadID = 0) const;
 	void GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int threadID = 0) const;
 	
-	const char *GetName();
-	void WritePDBHeader(FILE *f) const;
-	void ReadPDBHeader(FILE *f) const;
+	bool Load(const char *prefix);
+	void Save(const char *prefix);
+	bool Load(FILE *f);
+	void Save(FILE *f);
+	std::string GetFileName(const char *prefix);
 private:
 	static uint64_t Factorial(int val);
 	static uint64_t FactorialUpperK(int n, int k);

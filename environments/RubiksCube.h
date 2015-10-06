@@ -192,12 +192,17 @@ public:
 	uint64_t GetPDBSize() const;
 	uint64_t GetPDBHash(const RubiksState &s, int threadID = 0) const;
 	void GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID = 0) const;
-	const char *GetName();
-	void WritePDBHeader(FILE *f) const;
-	void ReadPDBHeader(FILE *f) const;
+//	const char *GetName();
+	bool Load(const char *prefix);
+	void Save(const char *prefix);
+	bool Load(FILE *f);
+	void Save(FILE *f);
+	std::string GetFileName(const char *prefix);
 private:
 	RubikEdgePDB ePDB;
 	RubikCornerPDB cPDB;
+	std::vector<int> edges;
+	std::vector<int> corners;
 };
 
 #endif /* defined(__hog2_glut__RubiksCube__) */

@@ -22,15 +22,18 @@ public:
 	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const;
 	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const;
 
-	virtual void WritePDBHeader(FILE *f) const;
-	virtual void ReadPDBHeader(FILE *f) const;
+	bool Load(FILE *f);
+	void Save(FILE *f);
+	bool Load(const char *prefix);
+	void Save(const char *prefix);
+	std::string GetFileName(const char *prefix);
 private:
 	uint64_t Factorial(int val) const;
 	uint64_t FactorialUpperK(int n, int k) const;
 	std::vector<int> distinct;
 	size_t puzzleSize;
 	uint64_t pdbSize;
-
+	
 	// cache for computing ranking/unranking
 	mutable std::vector<std::vector<int> > dual;
 	mutable std::vector<std::vector<int> > locs;
@@ -167,20 +170,63 @@ uint64_t PermutationPDB<state, action, environment>::Factorial(int val) const
 }
 
 template <class state, class action, class environment>
-void PermutationPDB<state, action, environment>::WritePDBHeader(FILE *f) const
+std::string PermutationPDB<state, action, environment>::GetFileName(const char *prefix)
 {
-	int num = (int)distinct.size();
-	size_t written;
-	written = fwrite(&num, sizeof(num), 1, f);
-	assert(written == 1);
-	written = fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f);
-	assert(written == distinct.size());
+	std::string fileName;
+	fileName += prefix;
+	// For unix systems, the prefix should always end in a trailing slash
+	if (fileName.back() != '/')
+		fileName+='/';
+	fileName += PDBHeuristic<state, action, environment>::env->GetName();
+	fileName += "-";
+	for (auto x : PDBHeuristic<state, action, environment>::goalState.puzzle)
+	{
+		fileName += std::to_string(x);
+		fileName += ":";
+	}
+	fileName.pop_back(); // remove colon
+	fileName += "-";
+	for (auto x : distinct)
+	{
+		fileName += std::to_string(x);
+		fileName += ":";
+	}
+	fileName.pop_back(); // remove colon
+	fileName += ".pdb";
+	
+	return fileName;
 }
 
 template <class state, class action, class environment>
-void PermutationPDB<state, action, environment>::ReadPDBHeader(FILE *f) const
+bool PermutationPDB<state, action, environment>::Load(const char *prefix)
 {
+	assert(false);
 }
+
+template <class state, class action, class environment>
+void PermutationPDB<state, action, environment>::Save(const char *prefix)
+{
+	assert(false);
+	FILE *f = fopen(GetFileName().c_str(), "w+");
+	PDBHeuristic<state, action, environment>::PDB.Write(f);
+	fclose(f);
+}
+
+//template <class state, class action, class environment>
+//void PermutationPDB<state, action, environment>::WritePDBHeader(FILE *f) const
+//{
+//	int num = (int)distinct.size();
+//	size_t written;
+//	written = fwrite(&num, sizeof(num), 1, f);
+//	assert(written == 1);
+//	written = fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f);
+//	assert(written == distinct.size());
+//}
+//
+//template <class state, class action, class environment>
+//void PermutationPDB<state, action, environment>::ReadPDBHeader(FILE *f) const
+//{
+//}
 
 template <class state, class action, class environment>
 uint64_t PermutationPDB<state, action, environment>::FactorialUpperK(int n, int k) const

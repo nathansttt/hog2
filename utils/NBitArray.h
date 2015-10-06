@@ -32,10 +32,10 @@ public:
 	uint64_t Get(uint64_t index) const;
 	void Set(uint64_t index, uint64_t val);
 
-	void Write(FILE *);
-	void Read(FILE *);
-	void Write(const char *);
-	void Read(const char *);
+	bool Write(FILE *);
+	bool Read(FILE *);
+	bool Write(const char *);
+	bool Read(const char *);
 private:
 	uint64_t *mem;
 	uint64_t entries;
@@ -93,47 +93,62 @@ uint64_t NBitArray<numBits>::Size() const
 }
 
 template <uint64_t numBits>
-void NBitArray<numBits>::Write(FILE *f)
+bool NBitArray<numBits>::Write(FILE *f)
 {
-	fwrite(&entries, sizeof(uint64_t), 1, f);
-	fwrite(&memorySize, sizeof(uint64_t), 1, f);
-	fwrite(mem, sizeof(uint64_t), memorySize, f);
+	if (fwrite(&entries, sizeof(uint64_t), 1, f) != 1)
+		return false;
+	if (fwrite(&memorySize, sizeof(uint64_t), 1, f) != 1)
+		return false;
+	if (fwrite(mem, sizeof(uint64_t), memorySize, f) != memorySize)
+		return false;
+	printf("Wrote %llu bytes to disk\n", memorySize*sizeof(uint64_t));
+	return true;
 }
 
 template <uint64_t numBits>
-void NBitArray<numBits>::Read(FILE *f)
+bool NBitArray<numBits>::Read(FILE *f)
 {
-	delete [] mem;
-	fread(&entries, sizeof(uint64_t), 1, f);
-	fread(&memorySize, sizeof(uint64_t), 1, f);
-	mem = new uint64_t[memorySize];
-	fread(mem, sizeof(uint64_t), memorySize, f);
+	bool success = true;
+	uint64_t e1, m1;
+	success = success&&(fread(&e1, sizeof(uint64_t), 1, f) == 1);
+	success = success&&(fread(&m1, sizeof(uint64_t), 1, f) == 1);
+	if (success)
+	{
+		entries = e1;
+		memorySize = m1;
+		delete [] mem;
+		mem = new uint64_t[memorySize];
+		success = success&&(fread(mem, sizeof(uint64_t), memorySize, f) == memorySize);
+	}
+	return success;
 }
 
 template <uint64_t numBits>
-void NBitArray<numBits>::Write(const char *file)
+bool NBitArray<numBits>::Write(const char *file)
 {
 	FILE *f = fopen(file, "w+b");
 	if (f == 0)
 	{
 		perror("Could not open file for writing in NBitArray");
-		return;
+		return false;
 	}
-	Write(f);
+	bool result = Write(f);
 	fclose(f);
+	return result;
 }
 
 template <uint64_t numBits>
-void NBitArray<numBits>::Read(const char *file)
+bool NBitArray<numBits>::Read(const char *file)
 {
 	FILE *f = fopen(file, "rb");
 	if (f == 0)
 	{
 		perror("Could not open file for reading in NBitArray");
-		return;
+		return false;
 	}
-	Read(f);
+	bool result = Read(f);
 	fclose(f);
+	return result;
 }
 
 template <uint64_t numBits>
@@ -151,49 +166,6 @@ uint64_t NBitArray<numBits>::Get(uint64_t index) const
 	return result;
 }
 
-template <>
-uint64_t NBitArray<64>::Get(uint64_t index) const
-{
-	return mem[index];
-}
-
-template <>
-uint64_t NBitArray<32>::Get(uint64_t index) const
-{
-	return (mem[index>>1]>>(32*(index&0x1)))&0xFFFFFFFF;
-}
-
-template <>
-uint64_t NBitArray<16>::Get(uint64_t index) const
-{
-	return (mem[index>>2]>>(16*(index&0x3)))&0xFFFF;
-}
-
-template <>
-uint64_t NBitArray<8>::Get(uint64_t index) const
-{
-	return (mem[index>>3]>>(8*(index&0x7)))&0xFF;
-}
-
-template <>
-uint64_t NBitArray<4>::Get(uint64_t index) const
-{
-	return (mem[index>>4]>>(4*(index&0xF)))&0xF;
-}
-
-template <>
-uint64_t NBitArray<2>::Get(uint64_t index) const
-{
-	return (mem[index>>5]>>(2*(index&0x1F)))&0x3;
-}
-
-template <>
-uint64_t NBitArray<1>::Get(uint64_t index) const
-{
-	return (mem[index>>6]>>(1*(index&0x3F)))&0x1;
-}
-
-
 template <uint64_t numBits>
 void NBitArray<numBits>::Set(uint64_t index, uint64_t val)
 {
@@ -207,65 +179,37 @@ void NBitArray<numBits>::Set(uint64_t index, uint64_t val)
 	mem[offset1] = (mem[offset1]&(~(bitMask1<<bitOffset1))) | ((val&bitMask1)<<bitOffset1);
 	mem[offset1+1] = (mem[offset1+1]&(~(bitMask2))) | ((val>>bitCount1)&bitMask2);
 	//	uint64_t result = (mem[offset1]>>bitOffset1)&bitMask1;
-//	result = ((mem[offset1+1]&bitMask2)<<bitCount2) | result;
+	//	result = ((mem[offset1+1]&bitMask2)<<bitCount2) | result;
 }
 
 template <>
-void NBitArray<64>::Set(uint64_t index, uint64_t val)
-{
-	mem[index] = val;
-}
-
+uint64_t NBitArray<64>::Get(uint64_t index) const;
 template <>
-void NBitArray<32>::Set(uint64_t index, uint64_t val)
-{
-	val = (val&0xFFFFFFFF)<<(32*(index&0x1));
-	uint64_t mask = ~((0xFFFFFFFFull)<<(32*(index&0x1)));
-	mem[index>>1] = (mem[index>>1]&mask)|val;
-}
-
+uint64_t NBitArray<32>::Get(uint64_t index) const;
 template <>
-void NBitArray<16>::Set(uint64_t index, uint64_t val)
-{
-	val = (val&0xFFFF)<<(16*(index&0x3));
-	uint64_t mask = ~((0xFFFFull)<<(16*(index&0x3)));
-	mem[index>>2] = (mem[index>>2]&mask)|val;
-}
-
+uint64_t NBitArray<16>::Get(uint64_t index) const;
 template <>
-void NBitArray<8>::Set(uint64_t index, uint64_t val)
-{
-	val = (val&0xFF)<<(8*(index&0x7));
-	uint64_t mask = ~((0xFFull)<<(8*(index&0x7)));
-	mem[index>>3] = (mem[index>>3]&mask)|val;
-}
-
+uint64_t NBitArray<8>::Get(uint64_t index) const;
 template <>
-void NBitArray<4>::Set(uint64_t index, uint64_t val)
-{
-	// 2^4 = 16;
-	val = (val&0xF)<<(4*(index&0xF));
-	uint64_t mask = ~((0xFull)<<(4*(index&0xF)));
-	mem[index>>4] = (mem[index>>4]&mask)|val;
-}
-
+uint64_t NBitArray<4>::Get(uint64_t index) const;
 template <>
-void NBitArray<2>::Set(uint64_t index, uint64_t val)
-{
-	// 2^4 = 16;
-	val = (val&0x3)<<(2*(index&0x1F));
-	uint64_t mask = ~((0x3ull)<<(2*(index&0x1F)));
-	mem[index>>5] = (mem[index>>5]&mask)|val;
-}
-
+uint64_t NBitArray<2>::Get(uint64_t index) const;
 template <>
-void NBitArray<1>::Set(uint64_t index, uint64_t val)
-{
-	// 2^4 = 16;
-	val = (val&0x1)<<(1*(index&0x3F));
-	uint64_t mask = ~((0x1ull)<<(1*(index&0x3F)));
-	mem[index>>6] = (mem[index>>6]&mask)|val;
-}
+uint64_t NBitArray<1>::Get(uint64_t index) const;
+template <>
+void NBitArray<64>::Set(uint64_t index, uint64_t val);
+template <>
+void NBitArray<32>::Set(uint64_t index, uint64_t val);
+template <>
+void NBitArray<16>::Set(uint64_t index, uint64_t val);
+template <>
+void NBitArray<8>::Set(uint64_t index, uint64_t val);
+template <>
+void NBitArray<4>::Set(uint64_t index, uint64_t val);
+template <>
+void NBitArray<2>::Set(uint64_t index, uint64_t val);
+template <>
+void NBitArray<1>::Set(uint64_t index, uint64_t val);
 
 
 

@@ -1227,27 +1227,82 @@ void RubikEdgePDB::GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int thr
 
 }
 
-const char *RubikEdgePDB::GetName()
+bool RubikEdgePDB::Load(const char *prefix)
 {
-	static std::string s = "rce-";
-	for (int x = 0; x < edges.size(); x++)
+	FILE *f = fopen(GetFileName(prefix).c_str(), "rb");
+	if (f == 0)
 	{
-		if (x != 0)
-			s+="+";
-		s+=std::to_string(edges[x]);
+		perror("Opening RubiksEdgePDB file");
+		return false;
 	}
-	return s.c_str();
+	Save(f);
+	fclose(f);
+	return true;
 }
 
-
-void RubikEdgePDB::WritePDBHeader(FILE *f) const
+void RubikEdgePDB::Save(const char *prefix)
 {
-	
+	FILE *f = fopen(GetFileName(prefix).c_str(), "w+");
+	if (f == 0)
+	{
+		perror("Opening RubiksEdgePDB file");
+		return;
+	}
+	Save(f);
+	fclose(f);
 }
 
-void RubikEdgePDB::ReadPDBHeader(FILE *f) const
+bool RubikEdgePDB::Load(FILE *f)
 {
+	if (PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge>::Load(f) != true)
+		return false;
+	if (fread(&puzzleSize, sizeof(puzzleSize), 1, f) != 1)
+		return false;
+	if (fread(&pdbSize, sizeof(pdbSize), 1, f) != 1)
+		return false;
+	size_t edgeSize = edges.size();
+	if (fread(&edgeSize, sizeof(edgeSize), 1, f) != 1)
+		return false;
+	edges.resize(edgeSize);
+	if (fread(&edges[0], sizeof(edges[0]), edges.size(), f) != edgeSize)
+		return false;
+	return true;
+}
+
+void RubikEdgePDB::Save(FILE *f)
+{
+	PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge>::Save(f);
+	fwrite(&puzzleSize, sizeof(puzzleSize), 1, f);
+	fwrite(&pdbSize, sizeof(pdbSize), 1, f);
+	size_t edgeSize = edges.size();
+	fwrite(&edgeSize, sizeof(edgeSize), 1, f);
+	fwrite(&edges[0], sizeof(edges[0]), edges.size(), f);
+}
+
+std::string RubikEdgePDB::GetFileName(const char *prefix)
+{
+	std::string fileName;
+	fileName += "RC-E-";
+	// origin state
+	for (int x = 0; x < 12; x++)
+	{
+		fileName += std::to_string(goalState.GetCubeInLoc(x));
+		fileName += ".";
+		fileName += std::to_string(goalState.GetCubeOrientation(goalState.GetCubeInLoc(x)));
+		fileName += ":";
+	}
+	fileName.pop_back();
+	fileName += "-";
+	// pattern
+	for (auto x : edges)
+	{
+		fileName += std::to_string(x);
+		fileName += ":";
+	}
+	fileName.pop_back(); // remove colon
+	fileName += ".pdb";
 	
+	return fileName;
 }
 
 uint64_t RubikEdgePDB::Factorial(int val)

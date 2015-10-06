@@ -822,7 +822,7 @@ int RubiksCube::Edge12PDBDist(const RubiksState &s)
 
 
 RubikPDB::RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners)
-:PDBHeuristic(e), ePDB(&e->e, s.edge, distinctEdges), cPDB(&e->c, s.corner, distinctCorners)
+:PDBHeuristic(e), ePDB(&e->e, s.edge, distinctEdges), cPDB(&e->c, s.corner, distinctCorners), edges(distinctEdges), corners(distinctCorners)
 {
 	
 }
@@ -856,21 +856,127 @@ void RubikPDB::GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID) 
 	cPDB.GetStateFromPDBHash(cornerHash, s.corner);
 }
 
-const char *RubikPDB::GetName()
+//const char *RubikPDB::GetName()
+//{
+//	static std::string s = "";
+//	s += ePDB.GetName();
+//	s += cPDB.GetName();
+//	s += ".pdb";
+//	return s.c_str();
+//}
+
+bool RubikPDB::Load(const char *prefix)
 {
-	static std::string s = "";
-	s += ePDB.GetName();
-	s += cPDB.GetName();
-	s += ".pdb";
-	return s.c_str();
+	FILE *f = fopen(GetFileName(prefix).c_str(), "rb");
+	if (f == 0)
+		return false;
+	bool result = Load(f);
+	fclose(f);
+	if (result)
+		std::cout << "Successfully loaded PDB: " << GetFileName(prefix) << "\n";
+	else
+		std::cout << "Could not load PDB: " << GetFileName(prefix) << "\n";
+	return result;
 }
 
-void RubikPDB::WritePDBHeader(FILE *f) const
+void RubikPDB::Save(const char *prefix)
 {
+	FILE *f = fopen(GetFileName(prefix).c_str(), "w+b");
+	Save(f);
+	fclose(f);
+	std::cout << "Saved PDB: " << GetFileName(prefix) << "\n";
+}
+
+bool RubikPDB::Load(FILE *f)
+{
+	size_t numEdges;
+	if (fread(&numEdges, sizeof(numEdges), 1, f) != 1)
+		return false;
+	edges.resize(numEdges);
+	if (fread(&edges[0], sizeof(edges[0]), edges.size(), f) != edges.size())
+		return false;
+	size_t numCorners;
+	if (fread(&numCorners, sizeof(numCorners), 1, f) != 1)
+		return false;
+	corners.resize(numCorners);
+	if (fread(&corners[0], sizeof(corners[0]), corners.size(), f) != corners.size())
+		return false;
+	if (ePDB.Load(f) == false)
+		return false;
+	if (cPDB.Load(f) == false)
+		return false;
+	if (PDBHeuristic<RubiksState, RubiksAction, RubiksCube>::Load(f) == false)
+		return false;
+	return true;
+}
+
+void RubikPDB::Save(FILE *f)
+{
+	size_t numEdges = edges.size();
+	fwrite(&numEdges, sizeof(numEdges), 1, f);
+	fwrite(&edges[0], sizeof(edges[0]), edges.size(), f);
+	size_t numCorners = corners.size();
+	fwrite(&numCorners, sizeof(numCorners), 1, f);
+	fwrite(&corners[0], sizeof(corners[0]), corners.size(), f);
+	ePDB.Save(f);
+	cPDB.Save(f);
+	PDBHeuristic<RubiksState, RubiksAction, RubiksCube>::Save(f);
+}
+
+std::string RubikPDB::GetFileName(const char *prefix)
+{
+	std::string fileName;
+	fileName += prefix;
+	// For unix systems, the prefix should always end in a trailing slash
+	if (fileName.back() != '/')
+		fileName+='/';
+
+	fileName += "RC-E-";
+	// origin state
+	for (int x = 0; x < 12; x++)
+	{
+		fileName += std::to_string(goalState.edge.GetCubeInLoc(x));
+		fileName += ".";
+		fileName += std::to_string(goalState.edge.GetCubeOrientation(goalState.edge.GetCubeInLoc(x)));
+		fileName += ":";
+	}
+	fileName.pop_back();
+	fileName += "-";
+	// pattern
+	bool added = false;
+	for (auto x : edges)
+	{
+		added = true;
+		fileName += std::to_string(x);
+		fileName += ":";
+	}
+	if (added)
+		fileName.pop_back(); // remove colon
+
+	
+	fileName += "-C-";
+	// origin state
+	for (int x = 0; x < 8; x++)
+	{
+		fileName += std::to_string(goalState.corner.GetCubeInLoc(x));
+		fileName += ".";
+		fileName += std::to_string(goalState.corner.GetCubeOrientation(goalState.corner.GetCubeInLoc(x)));
+		fileName += ":";
+	}
+	fileName.pop_back();
+	// pattern
+	added = false;
+	for (auto x : corners)
+	{
+		added = true;
+		fileName += std::to_string(x);
+		fileName += ":";
+	}
+	if (added)
+		fileName.pop_back(); // remove colon
+	fileName += ".pdb";
+	
+	return fileName;
 	
 }
 
-void RubikPDB::ReadPDBHeader(FILE *f) const
-{
-	
-}

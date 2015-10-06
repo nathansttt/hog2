@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	//PDBFaceTest();
-	KorfAll();
+	//KorfAll();
 	//TestCornerRanking();
 	//TestEdgeRanking();
 	InstallHandlers();
@@ -1651,12 +1651,24 @@ void KorfTest(int which)
 	RubikPDB pdb1(&cube, goal, edges1, blank);
 	RubikPDB pdb2(&cube, goal, edges2, blank);
 	RubikPDB pdb3(&cube, goal, blank, corners);
-	goal.Reset();
-	pdb1.BuildPDB(goal, "rc_e1", std::thread::hardware_concurrency());
-	goal.Reset();
-	pdb2.BuildPDB(goal, "rc_e2", std::thread::hardware_concurrency());
-	goal.Reset();
-	pdb3.BuildPDB(goal, "rc_c1", std::thread::hardware_concurrency());
+	if (!pdb1.Load("/Users/nathanst/Desktop/pdb"))
+	{
+		goal.Reset();
+		pdb1.BuildPDB(goal, "rc_e1", std::thread::hardware_concurrency());
+		pdb1.Save("/Users/nathanst/Desktop/pdb");
+	}
+	if (!pdb2.Load("/Users/nathanst/Desktop/pdb"))
+	{
+		goal.Reset();
+		pdb2.BuildPDB(goal, "rc_e2", std::thread::hardware_concurrency());
+		pdb2.Save("/Users/nathanst/Desktop/pdb");
+	}
+	if (!pdb3.Load("/Users/nathanst/Desktop/pdb"))
+	{
+		goal.Reset();
+		pdb3.BuildPDB(goal, "rc_c1", std::thread::hardware_concurrency());
+		pdb3.Save("/Users/nathanst/Desktop/pdb");
+	}
 	Heuristic<RubiksState> h;
 	h.lookups.push_back({kMaxNode, 1, 3});
 	h.lookups.push_back({kLeafNode, 0, 0});
@@ -1665,7 +1677,8 @@ void KorfTest(int which)
 	h.heuristics.push_back(&pdb1);
 	h.heuristics.push_back(&pdb2);
 	h.heuristics.push_back(&pdb3);
-
+	
+	FILE *f = fopen("/Users/nathanst/temp.rubik", "w+");
 	cube.SetPruneSuccessors(true);
 	Timer t;
 	t.StartTimer();
@@ -1675,6 +1688,16 @@ void KorfTest(int which)
 	std::vector<RubiksAction> path;
 	IDAStar<RubiksState, RubiksAction> ida;
 	ida.SetHeuristic(&h);
+	ida.func = [cube, f](RubiksState nextState, int depth)
+	{
+		uint64_t r1 = cube.c.GetStateHash(nextState.corner);
+		uint64_t r2 = cube.e.GetStateHash(nextState.edge);
+		uint8_t d = depth;
+		fwrite(&r1, sizeof(r1), 1, f);
+		fwrite(&r2, sizeof(r2), 1, f);
+		fwrite(&d, sizeof(d), 1, f);
+	};
+
 	//ida.GetPath(&cube, start, goal, path);
 	t.EndTimer();
 	printf("%1.5fs elapsed\n", t.GetElapsedTime());
@@ -1685,7 +1708,7 @@ void KorfTest(int which)
 
 
 	t.StartTimer();
-
+	
 //	GetInstance(start, which);
 //	cube.ApplyAction(start, 7);
 //	cube.ApplyAction(start, 2);
@@ -1703,6 +1726,7 @@ void KorfTest(int which)
 		   pida.GetNodesExpanded()/t.GetElapsedTime());
 	printf("%llu nodes generated (%1.3f nodes/sec)\n", pida.GetNodesTouched(),
 		   pida.GetNodesTouched()/t.GetElapsedTime());
+	fclose(f);
 }
 
 void KorfAll()

@@ -11,10 +11,13 @@
 #define IDASTAR_H
 
 #include <iostream>
+#include <functional>
 #include "SearchEnvironment.h"
 #include <ext/hash_map>
 #include "FPUtil.h"
 #include "vectorCache.h"
+
+#define DO_LOGGING
 
 typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
 
@@ -70,6 +73,11 @@ private:
 	bool storedHeuristic;
 	Heuristic<state> *heuristic;
 	std::vector<uint64_t> gCostHistogram;
+
+#ifdef DO_LOGGING
+public:
+	std::function<void (state, int)> func;
+#endif
 };
 
 template <class state, class action>
@@ -179,7 +187,6 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 	}
 	return h;
 }
-#include "RubiksCube.h"
 
 template <class state, class action>
 double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env,
@@ -208,6 +215,9 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 	nodesExpanded++;
 	gCostHistogram[g]++;
 	int depth = (int)thePath.size();
+#ifdef DO_LOGGING
+	func(currState, depth);
+#endif
 	
 	for (unsigned int x = 0; x < actions.size(); x++)
 	{

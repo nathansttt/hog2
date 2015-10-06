@@ -1023,6 +1023,30 @@
 		C4673674171DC59800E2A10B /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
 		C4673675171DC59900E2A10B /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
 		C4673676171DC59A00E2A10B /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
+		C4677D061BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D071BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D081BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D091BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D0A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D0B1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D0C1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D0D1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D0E1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D0F1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D101BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D111BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D121BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D131BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D141BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D151BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D161BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D171BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D181BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D191BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D1A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D1B1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D1C1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D1D1BC480DE00D3DAD8 /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; settings = {ASSET_TAGS = (); }; };
 		C4764037191751EC0052CBE7 /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4764035191751EC0052CBE7 /* MinBloom.cpp */; };
 		C4764038191751EC0052CBE7 /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4764035191751EC0052CBE7 /* MinBloom.cpp */; };
 		C4764039191751EC0052CBE7 /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4764035191751EC0052CBE7 /* MinBloom.cpp */; };
@@ -1816,7 +1840,6 @@
 		C4C35ACF16A08CE1000A2BFA /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; };
 		C4C35AD016A08CE1000A2BFA /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; };
 		C4C35AD116A08CE1000A2BFA /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; };
-		C4C35AD216A08CE1000A2BFA /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; };
 		C4C5C37118E9439200915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37518E9439400915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4C5C37A18E9439700915B3D /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
@@ -2746,7 +2769,7 @@
 		C4381776140C39AE007BA75B /* SteeringUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SteeringUnit.h; sourceTree = "<group>"; };
 		C441A3C21A0853030070DC06 /* SharedQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SharedQueue.h; sourceTree = "<group>"; };
 		C4456ADF1BBB3FE70065CA5A /* NBitArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBitArray.h; sourceTree = "<group>"; };
-		C4456B5B1BBB49D40065CA5A /* Canonical Grids copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Canonical Grids copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4456B5B1BBB49D40065CA5A /* Unit Tests.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Unit Tests.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4456B5C1BBB49D40065CA5A /* Unit Test-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Unit Test-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/Unit Test-Info.plist"; sourceTree = "<absolute>"; };
 		C4456B601BBB4A740065CA5A /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4456B621BBB4AB80065CA5A /* NBitVectorTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NBitVectorTest.cpp; sourceTree = "<group>"; };
@@ -2777,6 +2800,7 @@
 		C4673651171CED0600E2A10B /* DiskBitFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiskBitFile.h; sourceTree = "<group>"; };
 		C4673652171CED0600E2A10B /* EnvUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EnvUtil.cpp; sourceTree = "<group>"; };
 		C4673653171CED0600E2A10B /* EnvUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnvUtil.h; sourceTree = "<group>"; };
+		C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NBitArray.cpp; sourceTree = "<group>"; };
 		C4764035191751EC0052CBE7 /* MinBloom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MinBloom.cpp; sourceTree = "<group>"; };
 		C4764036191751EC0052CBE7 /* MinBloom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinBloom.h; sourceTree = "<group>"; };
 		C47BDC4417440B5900DD0928 /* fling.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fling.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -3668,7 +3692,7 @@
 				C4CA9FEA1B26805F00B4A894 /* voxel.app */,
 				C430D2031B2EFF8B00220AEE /* bidirectional.app */,
 				C413C1D41B6BBD60006A0331 /* Canonical Grids.app */,
-				C4456B5B1BBB49D40065CA5A /* Canonical Grids copy.app */,
+				C4456B5B1BBB49D40065CA5A /* Unit Tests.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3936,6 +3960,7 @@
 				C4F9F41013E4FE400077C5A5 /* vectorCache.h */,
 				C46735FF17132CA600E2A10B /* FourBitArray.cpp */,
 				C467360017132CA600E2A10B /* FourBitArray.h */,
+				C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */,
 				C4456ADF1BBB3FE70065CA5A /* NBitArray.h */,
 				C40EB696180CC661001E1E25 /* MMapUtil.cpp */,
 				C40EB6A5180CC69D001E1E25 /* MMapUtil.h */,
@@ -4227,7 +4252,7 @@
 			);
 			name = UnitTest;
 			productName = "3d maps";
-			productReference = C4456B5B1BBB49D40065CA5A /* Canonical Grids copy.app */;
+			productReference = C4456B5B1BBB49D40065CA5A /* Unit Tests.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C447F54A146790A600D6D581 /* Supervised Learning */ = {
@@ -4840,6 +4865,7 @@
 				C413C17B1B6BBD60006A0331 /* BitVector.cpp in Sources */,
 				C413C17C1B6BBD60006A0331 /* FPUtil.cpp in Sources */,
 				C413C17D1B6BBD60006A0331 /* FunctionApproximator.cpp in Sources */,
+				C4677D1B1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C413C17E1B6BBD60006A0331 /* GLUtil.cpp in Sources */,
 				C413C17F1B6BBD60006A0331 /* LinearRegression.cpp in Sources */,
 				C413C1801B6BBD60006A0331 /* Map.cpp in Sources */,
@@ -4996,6 +5022,7 @@
 				C4146DA81830F66100745331 /* MeroB.cpp in Sources */,
 				C4146DA91830F66100745331 /* Path.cpp in Sources */,
 				C4146DAA1830F66100745331 /* Propagation.cpp in Sources */,
+				C4677D141BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4146DAB1830F66100745331 /* MapUnit.cpp in Sources */,
 				C4146DAC1830F66100745331 /* RandomUnits.cpp in Sources */,
 				C4146DAD1830F66100745331 /* RHRUnit.cpp in Sources */,
@@ -5114,6 +5141,7 @@
 				C419EE0C19B9863700AD9D5E /* Heap.cpp in Sources */,
 				C419EE0D19B9863700AD9D5E /* MeroB.cpp in Sources */,
 				C419EE0E19B9863700AD9D5E /* Path.cpp in Sources */,
+				C4677D161BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C419EE0F19B9863700AD9D5E /* Propagation.cpp in Sources */,
 				C419EE1019B9863700AD9D5E /* MapUnit.cpp in Sources */,
 				C419EE1119B9863700AD9D5E /* RandomUnits.cpp in Sources */,
@@ -5269,6 +5297,7 @@
 				C430D1F21B2EFF8B00220AEE /* RubiksCube.cpp in Sources */,
 				C430D1F31B2EFF8B00220AEE /* FourBitArray.cpp in Sources */,
 				C430D1F41B2EFF8B00220AEE /* RubiksCube7Edges.cpp in Sources */,
+				C4677D1A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C430D1F51B2EFF8B00220AEE /* DiskBitFile.cpp in Sources */,
 				C430D1F61B2EFF8B00220AEE /* EnvUtil.cpp in Sources */,
 				C430D1F71B2EFF8B00220AEE /* MMapUtil.cpp in Sources */,
@@ -5344,6 +5373,7 @@
 				C4381737140C395B007BA75B /* NodeLimitAbstraction.cpp in Sources */,
 				C4381738140C395B007BA75B /* RadiusAbstraction.cpp in Sources */,
 				C4381739140C395B007BA75B /* Width.cpp in Sources */,
+				C4677D091BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C438173A140C395B007BA75B /* AStarDelay.cpp in Sources */,
 				C438173B140C395B007BA75B /* FloydWarshall.cpp in Sources */,
 				C438173C140C395B007BA75B /* GraphAlgorithm.cpp in Sources */,
@@ -5474,6 +5504,7 @@
 				C4456B271BBB49D40065CA5A /* Heap.cpp in Sources */,
 				C4456B281BBB49D40065CA5A /* MeroB.cpp in Sources */,
 				C4456B291BBB49D40065CA5A /* Path.cpp in Sources */,
+				C4677D1C1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4456B2B1BBB49D40065CA5A /* Propagation.cpp in Sources */,
 				C4456B2C1BBB49D40065CA5A /* MapUnit.cpp in Sources */,
 				C4456B2D1BBB49D40065CA5A /* RandomUnits.cpp in Sources */,
@@ -5592,6 +5623,7 @@
 				C447F596146790A600D6D581 /* MeroB.cpp in Sources */,
 				C447F597146790A600D6D581 /* Path.cpp in Sources */,
 				C447F598146790A600D6D581 /* Propagation.cpp in Sources */,
+				C4677D0C1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C447F59F146790A600D6D581 /* MapUnit.cpp in Sources */,
 				C447F5A0146790A600D6D581 /* RandomUnits.cpp in Sources */,
 				C447F5A1146790A600D6D581 /* RHRUnit.cpp in Sources */,
@@ -5671,6 +5703,7 @@
 				C46735951710D9EF00E2A10B /* BitVector.cpp in Sources */,
 				C46735961710D9EF00E2A10B /* FPUtil.cpp in Sources */,
 				C46735971710D9EF00E2A10B /* FunctionApproximator.cpp in Sources */,
+				C4677D111BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C46735981710D9EF00E2A10B /* GLUtil.cpp in Sources */,
 				C46735991710D9EF00E2A10B /* LinearRegression.cpp in Sources */,
 				C467359A1710D9EF00E2A10B /* Map.cpp in Sources */,
@@ -5827,6 +5860,7 @@
 				C47BDC1417440B5900DD0928 /* MeroB.cpp in Sources */,
 				C47BDC1517440B5900DD0928 /* Path.cpp in Sources */,
 				C47BDC1617440B5900DD0928 /* Propagation.cpp in Sources */,
+				C4677D121BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C47BDC1717440B5900DD0928 /* MapUnit.cpp in Sources */,
 				C47BDC1817440B5900DD0928 /* RandomUnits.cpp in Sources */,
 				C47BDC1917440B5900DD0928 /* RHRUnit.cpp in Sources */,
@@ -5945,6 +5979,7 @@
 				C47DFCD11A5FACCD00C3961B /* MeroB.cpp in Sources */,
 				C47DFCD21A5FACCD00C3961B /* Path.cpp in Sources */,
 				C47DFCD31A5FACCD00C3961B /* Propagation.cpp in Sources */,
+				C4677D171BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C47DFCD41A5FACCD00C3961B /* MapUnit.cpp in Sources */,
 				C47DFCD51A5FACCD00C3961B /* RandomUnits.cpp in Sources */,
 				C47DFCD61A5FACCD00C3961B /* RHRUnit.cpp in Sources */,
@@ -6064,6 +6099,7 @@
 				C498D8841432777C0053D322 /* MeroB.cpp in Sources */,
 				C498D8851432777C0053D322 /* Path.cpp in Sources */,
 				C498D8861432777C0053D322 /* Propagation.cpp in Sources */,
+				C4677D0B1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C498D88D1432777C0053D322 /* MapUnit.cpp in Sources */,
 				C498D88E1432777C0053D322 /* RandomUnits.cpp in Sources */,
 				C498D88F1432777C0053D322 /* RHRUnit.cpp in Sources */,
@@ -6182,6 +6218,7 @@
 				C49A6FB61499BF41007CEDA2 /* Heap.cpp in Sources */,
 				C49A6FB71499BF41007CEDA2 /* MeroB.cpp in Sources */,
 				C49A6FB81499BF41007CEDA2 /* Path.cpp in Sources */,
+				C4677D0D1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C49A6FB91499BF41007CEDA2 /* Propagation.cpp in Sources */,
 				C49A6FC01499BF41007CEDA2 /* MapUnit.cpp in Sources */,
 				C49A6FC11499BF41007CEDA2 /* RandomUnits.cpp in Sources */,
@@ -6262,6 +6299,7 @@
 				C4A79E2113F03A580064AC6A /* BitVector.cpp in Sources */,
 				C4A79E2213F03A580064AC6A /* FPUtil.cpp in Sources */,
 				C4A79E2313F03A580064AC6A /* FunctionApproximator.cpp in Sources */,
+				C4677D071BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4A79E2413F03A580064AC6A /* GLUtil.cpp in Sources */,
 				C4A79E2513F03A580064AC6A /* LinearRegression.cpp in Sources */,
 				C4A79E2613F03A580064AC6A /* Map.cpp in Sources */,
@@ -6379,6 +6417,7 @@
 				C4A79EA813F256DF0064AC6A /* BitVector.cpp in Sources */,
 				C4A79EA913F256DF0064AC6A /* FPUtil.cpp in Sources */,
 				C4A79EAA13F256DF0064AC6A /* FunctionApproximator.cpp in Sources */,
+				C4677D081BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4A79EAB13F256DF0064AC6A /* GLUtil.cpp in Sources */,
 				C4A79EAC13F256DF0064AC6A /* LinearRegression.cpp in Sources */,
 				C4A79EAD13F256DF0064AC6A /* Map.cpp in Sources */,
@@ -6496,6 +6535,7 @@
 				C4B973AE1426FA4F00758D0D /* BitVector.cpp in Sources */,
 				C4B973AF1426FA4F00758D0D /* FPUtil.cpp in Sources */,
 				C4B973B01426FA4F00758D0D /* FunctionApproximator.cpp in Sources */,
+				C4677D0A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4B973B11426FA4F00758D0D /* GLUtil.cpp in Sources */,
 				C4B973B21426FA4F00758D0D /* LinearRegression.cpp in Sources */,
 				C4B973B31426FA4F00758D0D /* Map.cpp in Sources */,
@@ -6652,6 +6692,7 @@
 				C4C5C3C418EC7C9D00915B3D /* MeroB.cpp in Sources */,
 				C4C5C3C518EC7C9D00915B3D /* Path.cpp in Sources */,
 				C4C5C3C618EC7C9D00915B3D /* Propagation.cpp in Sources */,
+				C4677D151BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4C5C3C718EC7C9D00915B3D /* MapUnit.cpp in Sources */,
 				C4C5C3C818EC7C9D00915B3D /* RandomUnits.cpp in Sources */,
 				C4C5C3C918EC7C9D00915B3D /* RHRUnit.cpp in Sources */,
@@ -6770,6 +6811,7 @@
 				C4C9E507176A7A160027410C /* Heap.cpp in Sources */,
 				C4C9E508176A7A160027410C /* MeroB.cpp in Sources */,
 				C4C9E509176A7A160027410C /* Path.cpp in Sources */,
+				C4677D131BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4C9E50A176A7A160027410C /* Propagation.cpp in Sources */,
 				C4C9E50B176A7A160027410C /* MapUnit.cpp in Sources */,
 				C4C9E50C176A7A160027410C /* RandomUnits.cpp in Sources */,
@@ -6850,6 +6892,7 @@
 				C4CA9F921B26805F00B4A894 /* BitVector.cpp in Sources */,
 				C4CA9F931B26805F00B4A894 /* FPUtil.cpp in Sources */,
 				C4CA9F941B26805F00B4A894 /* FunctionApproximator.cpp in Sources */,
+				C4677D191BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4CA9F951B26805F00B4A894 /* GLUtil.cpp in Sources */,
 				C4CA9F961B26805F00B4A894 /* LinearRegression.cpp in Sources */,
 				C4CA9F971B26805F00B4A894 /* Map.cpp in Sources */,
@@ -7006,6 +7049,7 @@
 				C4D074901A83F32E00DAFFCD /* Heap.cpp in Sources */,
 				C4D074911A83F32E00DAFFCD /* MeroB.cpp in Sources */,
 				C4D074921A83F32E00DAFFCD /* Path.cpp in Sources */,
+				C4677D181BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4D074931A83F32E00DAFFCD /* Propagation.cpp in Sources */,
 				C4D074941A83F32E00DAFFCD /* MapUnit.cpp in Sources */,
 				C4D074951A83F32E00DAFFCD /* RandomUnits.cpp in Sources */,
@@ -7125,6 +7169,7 @@
 				C4D60AA014B22E10007594CD /* Path.cpp in Sources */,
 				C4D60AA114B22E10007594CD /* Propagation.cpp in Sources */,
 				C4D60AA814B22E10007594CD /* MapUnit.cpp in Sources */,
+				C4677D0E1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4D60AA914B22E10007594CD /* RandomUnits.cpp in Sources */,
 				C4D60AAA14B22E10007594CD /* RHRUnit.cpp in Sources */,
 				C4D60AAB14B22E10007594CD /* AbsMapPatrolUnit.cpp in Sources */,
@@ -7194,6 +7239,7 @@
 				C4EE61231651BB9A00B038E5 /* SequenceAlignment.cpp in Sources */,
 				C4EE61241651BB9A00B038E5 /* SFBDPancakePuzzle.cpp in Sources */,
 				C4EE61251651BB9A00B038E5 /* SteeringEnvironment.cpp in Sources */,
+				C4677D1D1BC480DE00D3DAD8 /* RubiksCubeCorners.cpp in Sources */,
 				C4EE61261651BB9A00B038E5 /* TopSpinGraph.cpp in Sources */,
 				C4EE61271651BB9A00B038E5 /* WeightedMap2DEnvironment.cpp in Sources */,
 				C4EE61281651BB9A00B038E5 /* GraphCheck.cpp in Sources */,
@@ -7204,6 +7250,7 @@
 				C4EE612D1651BB9A00B038E5 /* BitVector.cpp in Sources */,
 				C4EE612E1651BB9A00B038E5 /* FPUtil.cpp in Sources */,
 				C4EE612F1651BB9A00B038E5 /* FunctionApproximator.cpp in Sources */,
+				C4677D101BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4EE61301651BB9A00B038E5 /* GLUtil.cpp in Sources */,
 				C4EE61311651BB9A00B038E5 /* LinearRegression.cpp in Sources */,
 				C4EE61321651BB9A00B038E5 /* Map.cpp in Sources */,
@@ -7272,7 +7319,6 @@
 				C4EE616F1651BB9A00B038E5 /* Map2DHeading.cpp in Sources */,
 				C4EE617E1651BC0100B038E5 /* Sample.cpp in Sources */,
 				C4C358B91697ECE2000A2BFA /* RubiksCubeEdges.cpp in Sources */,
-				C4C35AD216A08CE1000A2BFA /* RubiksCubeCorners.cpp in Sources */,
 				C46735F4171135E900E2A10B /* RubiksCube.cpp in Sources */,
 				C467360C17132F8B00E2A10B /* FourBitArray.cpp in Sources */,
 				C4673660171DC56400E2A10B /* DiskBitFile.cpp in Sources */,
@@ -7321,6 +7367,7 @@
 				C4F9F42B13E4FE400077C5A5 /* Graph.cpp in Sources */,
 				C4F9F43A13E4FE400077C5A5 /* BitVector.cpp in Sources */,
 				C4F9F43B13E4FE400077C5A5 /* FPUtil.cpp in Sources */,
+				C4677D061BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4F9F43C13E4FE400077C5A5 /* FunctionApproximator.cpp in Sources */,
 				C4F9F43D13E4FE400077C5A5 /* GLUtil.cpp in Sources */,
 				C4F9F43E13E4FE400077C5A5 /* LinearRegression.cpp in Sources */,
@@ -7438,6 +7485,7 @@
 				C4FBC85D16374C89003C667D /* BitVector.cpp in Sources */,
 				C4FBC85E16374C89003C667D /* FPUtil.cpp in Sources */,
 				C4FBC85F16374C89003C667D /* FunctionApproximator.cpp in Sources */,
+				C4677D0F1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4FBC86016374C89003C667D /* GLUtil.cpp in Sources */,
 				C4FBC86116374C89003C667D /* LinearRegression.cpp in Sources */,
 				C4FBC86216374C89003C667D /* Map.cpp in Sources */,
