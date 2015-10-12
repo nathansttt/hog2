@@ -312,12 +312,20 @@ namespace FLRTA {
 		}
 		double HCost(environment *env, const state &from, const state &to) const
 		{
-			//std::cout << "Hashing state:6 " << std::endl << from << std::endl;
-			if (stateData.find(env->GetStateHash(from)) != stateData.end())
+			auto val = stateData.find(env->GetStateHash(from));
+			if (val != stateData.end())
 			{
-				return stateData[env->GetStateHash(from)].hCost+env->HCost(from, to);
+				return val->second.hCost+env->HCost(from, to);
 			}
 			return env->HCost(from, to);
+
+			
+//			//std::cout << "Hashing state:6 " << std::endl << from << std::endl;
+//			if (stateData.find(env->GetStateHash(from)) != stateData.end())
+//			{
+//				return stateData[env->GetStateHash(from)].hCost+env->HCost(from, to);
+//			}
+//			return env->HCost(from, to);
 		}
 		double HCost(const state &from, const state &to) const
 		{ return HCost(m_pEnv, from, to); }

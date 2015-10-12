@@ -27,7 +27,7 @@ class MyDiffHeuristic: public GraphHeuristic {
 	};
 
 	Graph *GetGraph() { return g; };
-	double HCost( const graphState &s1, const graphState &s2 ) {
+	double HCost( const graphState &s1, const graphState &s2 ) const {
 		return std::max( gdh->HCost( s1, s2 ), gmh->HCost( s1, s2 ) );
 	};
 

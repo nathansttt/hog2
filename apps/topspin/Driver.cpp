@@ -255,7 +255,7 @@ void BuildTS_PDB(unsigned long windowID, tKeyboardModifier , char)
 //		std::cout << s << std::endl;
 //	}
 	
-	pdb.BuildPDB(s, "/Users/nathanst/test.pdb", std::thread::hardware_concurrency());
+	pdb.BuildPDB(s, std::thread::hardware_concurrency());
 	
 	env.Build_PDB(s, pattern, "/Users/nathanst/test2.pdb", std::thread::hardware_concurrency(), false);
 	

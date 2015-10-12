@@ -139,7 +139,7 @@ bool BidirectionalGraphEnvironment::InvertAction(graphMovePair &a) const
 	return false;
 }
 
-double BidirectionalGraphEnvironment::HCost(const graphStatePair &state1, const graphStatePair &)
+double BidirectionalGraphEnvironment::HCost(const graphStatePair &state1, const graphStatePair &) const
 {
 	if (state1.start == state1.goal)
 		return 0;

@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "465847047.546954"
+            timestampString = "466023021.102864"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "275"
-            endingLineNumber = "275"
+            startingLineNumber = "260"
+            endingLineNumber = "260"
             landmarkName = "ThreadWorker(int threadNum, int depth, NBitArray&lt;pdbBits&gt; &amp;DB, //std::vector&lt;uint8_t&gt; &amp;DB, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
             landmarkType = "7">
          </BreakpointContent>
@@ -113,22 +113,6 @@
             endingLineNumber = "1210"
             landmarkName = "RubikEdgePDB::GetStateFromPDBHash(uint64_t hash, RubikEdgeState &amp;s, int threadID)"
             landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "465847047.546954"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1721"
-            endingLineNumber = "1721"
-            landmarkName = "KorfTest(int which)"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1672,12 +1656,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "465860834.844488"
+            timestampString = "466365856.989348"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1657"
-            endingLineNumber = "1657"
-            landmarkName = "KorfTest(int which)"
+            startingLineNumber = "1790"
+            endingLineNumber = "1790"
+            landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1688,12 +1672,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "465860853.049943"
+            timestampString = "466365856.989348"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1654"
-            endingLineNumber = "1654"
-            landmarkName = "KorfTest(int which)"
+            startingLineNumber = "1787"
+            endingLineNumber = "1787"
+            landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1704,12 +1688,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "465861544.471269"
+            timestampString = "466365856.989348"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1658"
-            endingLineNumber = "1658"
-            landmarkName = "KorfTest(int which)"
+            startingLineNumber = "1791"
+            endingLineNumber = "1791"
+            landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1752,12 +1736,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "465863247.099061"
+            timestampString = "466365856.989348"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1666"
-            endingLineNumber = "1666"
-            landmarkName = "KorfTest(int which)"
+            startingLineNumber = "1799"
+            endingLineNumber = "1799"
+            landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

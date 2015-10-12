@@ -84,9 +84,15 @@ public:
 	}
 	double HCost(environment *env, const state &from, const state &to) const
 	{
-		if (heur.find(env->GetStateHash(from)) != heur.end())
-			return heur[env->GetStateHash(from)].theHeuristic+BaseHCost(env, from, to);
-		return BaseHCost(env, from, to);
+		auto val = heur.find(env->GetStateHash(from));
+		if (val != heur.end())
+		{
+			return val->second.theHeuristic+env->HCost(from, to);
+		}
+		return BaseHCost(env, from, to);//env->HCost(from, to);
+//		if (heur.find(env->GetStateHash(from)) != heur.end())
+//			return heur[env->GetStateHash(from)].theHeuristic+BaseHCost(env, from, to);
+//		return BaseHCost(env, from, to);
 	}
 	double BaseHCost(environment *env, const state &from, const state &to) const
 	{ return initialHeuristicWeight*env->HCost(from, to);

@@ -63,7 +63,7 @@ public:
 	void SetDirected(bool b) { directed = b; }
 	
 	OccupancyInterface<graphStatePair, graphMovePair> *GetOccupancyInfo() { return 0; }
-	virtual double HCost(const graphStatePair &state1, const graphStatePair &state2);
+	virtual double HCost(const graphStatePair &state1, const graphStatePair &state2) const;
 	virtual double GCost(const graphStatePair &state1, const graphStatePair &state2);
 	virtual double GCost(const graphStatePair &state1, const graphMovePair &state2);
 	virtual bool GoalTest(const graphStatePair &state, const graphStatePair &goal);
@@ -80,7 +80,7 @@ public:
 	virtual void ClearGoal() {}
 	virtual bool IsGoalStored() {return false;}
 	
-	virtual double HCost(const graphStatePair &) {
+	virtual double HCost(const graphStatePair &) const {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for BidirectionalGraphEnvironment\n");
 		exit(1); return -1.0;}
 	

@@ -182,14 +182,14 @@ std::string PermutationPDB<state, action, environment>::GetFileName(const char *
 	for (auto x : PDBHeuristic<state, action, environment>::goalState.puzzle)
 	{
 		fileName += std::to_string(x);
-		fileName += ":";
+		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
 	fileName += "-";
 	for (auto x : distinct)
 	{
 		fileName += std::to_string(x);
-		fileName += ":";
+		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
 	fileName += ".pdb";
@@ -201,15 +201,29 @@ template <class state, class action, class environment>
 bool PermutationPDB<state, action, environment>::Load(const char *prefix)
 {
 	assert(false);
+	return false;
 }
 
 template <class state, class action, class environment>
 void PermutationPDB<state, action, environment>::Save(const char *prefix)
 {
 	assert(false);
-	FILE *f = fopen(GetFileName().c_str(), "w+");
+	FILE *f = fopen(GetFileName(prefix).c_str(), "w+");
 	PDBHeuristic<state, action, environment>::PDB.Write(f);
 	fclose(f);
+}
+
+template <class state, class action, class environment>
+bool PermutationPDB<state, action, environment>::Load(FILE *f)
+{
+	assert(false);
+	return false;
+}
+
+template <class state, class action, class environment>
+void PermutationPDB<state, action, environment>::Save(FILE *f)
+{
+	assert(false);
 }
 
 //template <class state, class action, class environment>

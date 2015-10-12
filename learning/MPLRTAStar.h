@@ -13,7 +13,8 @@
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
-#include <ext/hash_map>
+//#include <ext/hash_map>
+#include <unordered_map>
 #include "Map2DEnvironment.h"
 
 namespace MPLRTA {
@@ -42,8 +43,11 @@ namespace MPLRTA {
 		}
 		double HCost(MapEnvironment *env, const xyLoc &from, const xyLoc &to) const
 		{
-			if (heur.find(env->GetStateHash(from)) != heur.end())
-				return heur[env->GetStateHash(from)].theHeuristic+env->HCost(from, to);
+			auto val = heur.find(env->GetStateHash(from));
+			if (val != heur.end())
+			{
+				return val->second.theHeuristic+env->HCost(from, to);
+			}
 			return env->HCost(from, to);
 		}
 		void Kill(MapEnvironment *env, const xyLoc &s)
@@ -70,7 +74,7 @@ namespace MPLRTA {
 		void OpenGLDraw() const {}
 		void OpenGLDraw(const MapEnvironment *env) const;
 	private:
-		typedef __gnu_cxx::hash_map<uint64_t, learnedData, Hash64 > LearnedHeuristic;
+		typedef std::unordered_map<uint64_t, learnedData, Hash64 > LearnedHeuristic;
 		
 		LearnedHeuristic heur;
 		xyLoc goal, startState;

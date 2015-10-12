@@ -72,10 +72,16 @@ namespace GridLRTA {
 		}
 		double HCost(MapEnvironment *env, const xyLoc &from, const xyLoc &to) const
 		{
-			if (heur.find(env->GetStateHash(from)) != heur.end())
-				return heur[env->GetStateHash(from)].theHeuristic+
-				env->HCost(from, to);
+			auto val = heur.find(env->GetStateHash(from));
+			if (val != heur.end())
+			{
+				return val->second.theHeuristic+env->HCost(from, to);
+			}
 			return env->HCost(from, to);
+//			if (heur.find(env->GetStateHash(from)) != heur.end())
+//				return heur[env->GetStateHash(from)].theHeuristic+
+//				env->HCost(from, to);
+//			return env->HCost(from, to);
 		}
 		double HCost(const xyLoc &from, const xyLoc &to) const
 		{

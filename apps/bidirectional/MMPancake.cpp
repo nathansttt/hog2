@@ -495,7 +495,7 @@ void BuildHeuristics(int count, PancakePuzzleState start, PancakePuzzleState goa
 
 	PermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> *pdb1;
 	pdb1 = new PermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle>(&pancake, goal, pdb);
-	pdb1->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
 	result.lookups.push_back({kLeafNode, 0, 0});
 	result.heuristics.push_back(pdb1);
 }

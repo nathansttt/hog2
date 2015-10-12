@@ -47,7 +47,7 @@ public:
 	virtual void Save(FILE *f);
 	virtual std::string GetFileName(const char *prefix) = 0;
 	
-	void BuildPDB(const state &goal, const char *pdb_filename, int numThreads);
+	void BuildPDB(const state &goal, int numThreads);
 	void BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads);
 
 	void DivCompress(int factor, bool print_histogram);
@@ -87,7 +87,7 @@ double PDBHeuristic<state, action, environment, pdbBits>::HCost(const state &a, 
 }
 
 template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::BuildPDB(const state &goal, const char *pdb_filename, int numThreads)
+void PDBHeuristic<state, action, environment, pdbBits>::BuildPDB(const state &goal, int numThreads)
 {
 	goalState = goal;
 	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue;
@@ -206,21 +206,6 @@ void PDBHeuristic<state, action, environment, pdbBits>::BuildPDB(const state &go
 		assert(entries == COUNT);
 	}
 	
-	if (pdb_filename != 0)
-	{
-		//TODO fix the output of PDBs
-//		FILE *f = fopen(pdb_filename, "w");
-		//	int num = distinct.size();
-//		WritePDBHeader(f);
-		//	assert(fwrite(&num, sizeof(num), 1, f) == 1);
-		//	assert(fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f) == distinct.size());
-		//PDB.Write(pdb_filename);
-//		assert(fwrite(&DB[0], sizeof(uint8_t), COUNT, f) == COUNT);
-//		fclose(f);
-	}
-	
-//	PDB.push_back(DB); // increase the number of regular PDBs being stored
-//	PDB_distincts.push_back(distinct); // stores distinct
 	//PrintPDBHistogram();
 
 }

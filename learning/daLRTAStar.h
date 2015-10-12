@@ -75,10 +75,17 @@ namespace DALRTA {
 		}
 		double HCost(environment *env, const state &from, const state &to) const
 		{
-			if (heur.find(env->GetStateHash(from)) != heur.end())
-				return heur[env->GetStateHash(from)].theHeuristic+
-				env->HCost(from, to);
+			auto val = heur.find(env->GetStateHash(from));
+			if (val != heur.end())
+			{
+				return val->second.theHeuristic+env->HCost(from, to);
+			}
 			return env->HCost(from, to);
+//
+//			if (heur.find(env->GetStateHash(from)) != heur.end())
+//				return heur[env->GetStateHash(from)].theHeuristic+
+//				env->HCost(from, to);
+//			return env->HCost(from, to);
 		}
 		double HCostLearned(environment *env, const state &from)
 		{

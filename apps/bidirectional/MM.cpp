@@ -540,9 +540,21 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	pdb1->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb2->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb3->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	if (!pdb1->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb1->Save("/Users/nathanst/Desktop/pdb");
+	}
+	if (!pdb2->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb2->Save("/Users/nathanst/Desktop/pdb");
+	}
+	if (!pdb3->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb3->Save("/Users/nathanst/Desktop/pdb");
+	}
 	result.lookups.push_back({kMaxNode, 1, 3});
 	result.lookups.push_back({kLeafNode, 0, 0});
 	result.lookups.push_back({kLeafNode, 1, 0});
@@ -564,11 +576,11 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges3, blank);
 	RubikPDB *pdb4 = new RubikPDB(&cube, goal, blank, corners1);
 	RubikPDB *pdb5 = new RubikPDB(&cube, goal, blank, corners2);
-	pdb1->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb2->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb3->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb4->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb5->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+	pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+	pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+	pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
+	pdb5->BuildPDB(goal, std::thread::hardware_concurrency());
 	result.lookups.push_back({kMaxNode, 1, 5});
 	result.lookups.push_back({kLeafNode, 0, 0});
 	result.lookups.push_back({kLeafNode, 1, 0});
@@ -589,9 +601,21 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	pdb1->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb2->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb3->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	if (!pdb1->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb1->Save("/Users/nathanst/Desktop/pdb");
+	}
+	if (!pdb2->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb2->Save("/Users/nathanst/Desktop/pdb");
+	}
+	if (!pdb3->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb3->Save("/Users/nathanst/Desktop/pdb");
+	}
 	result.lookups.push_back({kMaxNode, 1, 3});
 	result.lookups.push_back({kLeafNode, 0, 0});
 	result.lookups.push_back({kLeafNode, 1, 0});
@@ -608,9 +632,21 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	pdb1->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb2->BuildPDB(goal, 0, std::thread::hardware_concurrency());
-	pdb3->BuildPDB(goal, 0, std::thread::hardware_concurrency());
+	if (!pdb1->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb1->Save("/Users/nathanst/Desktop/pdb");
+	}
+	if (!pdb2->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb2->Save("/Users/nathanst/Desktop/pdb");
+	}
+	if (!pdb3->Load("/Users/nathanst/Desktop/pdb"))
+	{
+		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb3->Save("/Users/nathanst/Desktop/pdb");
+	}
 	result.lookups.push_back({kMaxNode, 1, 3});
 	result.lookups.push_back({kLeafNode, 0, 0});
 	result.lookups.push_back({kLeafNode, 1, 0});

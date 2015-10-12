@@ -138,7 +138,8 @@ void BFS()
 	RubiksCube c;
 	RubiksState s;
 	//uint64_t start1 = strtoll(argv[0], 0, 10);
-	GetInstanceFromStdin(s);
+	//GetInstanceFromStdin(s);
+	GetKorfInstance(s, 0);
 	//GetSuperFlip(s);
 	hash128 start;
 	start.parent = 20;
