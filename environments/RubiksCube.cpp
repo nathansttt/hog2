@@ -824,7 +824,7 @@ int RubiksCube::Edge12PDBDist(const RubiksState &s)
 RubikPDB::RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners)
 :PDBHeuristic(e), ePDB(&e->e, s.edge, distinctEdges), cPDB(&e->c, s.corner, distinctCorners), edges(distinctEdges), corners(distinctCorners)
 {
-	
+	PDBHeuristic<RubiksState, RubiksAction, RubiksCube, 4>::goalState = s;
 }
 
 uint64_t RubikPDB::GetStateHash(const RubiksState &s) const
@@ -905,7 +905,7 @@ bool RubikPDB::Load(FILE *f)
 		return false;
 	if (cPDB.Load(f) == false)
 		return false;
-	if (PDBHeuristic<RubiksState, RubiksAction, RubiksCube>::Load(f) == false)
+	if (PDBHeuristic<RubiksState, RubiksAction, RubiksCube, 4>::Load(f) == false)
 		return false;
 	return true;
 }
@@ -920,7 +920,7 @@ void RubikPDB::Save(FILE *f)
 	fwrite(&corners[0], sizeof(corners[0]), corners.size(), f);
 	ePDB.Save(f);
 	cPDB.Save(f);
-	PDBHeuristic<RubiksState, RubiksAction, RubiksCube>::Save(f);
+	PDBHeuristic<RubiksState, RubiksAction, RubiksCube, 4>::Save(f);
 }
 
 std::string RubikPDB::GetFileName(const char *prefix)
@@ -938,7 +938,7 @@ std::string RubikPDB::GetFileName(const char *prefix)
 		fileName += std::to_string(goalState.edge.GetCubeInLoc(x));
 		fileName += ".";
 		fileName += std::to_string(goalState.edge.GetCubeOrientation(goalState.edge.GetCubeInLoc(x)));
-		fileName += ":";
+		fileName += ";";
 	}
 	fileName.pop_back();
 	fileName += "-";
@@ -948,7 +948,7 @@ std::string RubikPDB::GetFileName(const char *prefix)
 	{
 		added = true;
 		fileName += std::to_string(x);
-		fileName += ":";
+		fileName += ";";
 	}
 	if (added)
 		fileName.pop_back(); // remove colon
@@ -961,7 +961,7 @@ std::string RubikPDB::GetFileName(const char *prefix)
 		fileName += std::to_string(goalState.corner.GetCubeInLoc(x));
 		fileName += ".";
 		fileName += std::to_string(goalState.corner.GetCubeOrientation(goalState.corner.GetCubeInLoc(x)));
-		fileName += ":";
+		fileName += ";";
 	}
 	fileName.pop_back();
 	// pattern
@@ -970,7 +970,7 @@ std::string RubikPDB::GetFileName(const char *prefix)
 	{
 		added = true;
 		fileName += std::to_string(x);
-		fileName += ":";
+		fileName += ";";
 	}
 	if (added)
 		fileName.pop_back(); // remove colon

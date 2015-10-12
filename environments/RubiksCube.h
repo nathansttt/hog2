@@ -184,7 +184,7 @@ public:
 };
 
 
-class RubikPDB : public PDBHeuristic<RubiksState, RubiksAction, RubiksCube> {
+class RubikPDB : public PDBHeuristic<RubiksState, RubiksAction, RubiksCube, 4> {
 public:
 	RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners);
 	uint64_t GetStateHash(const RubiksState &s) const;

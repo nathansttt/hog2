@@ -168,7 +168,7 @@ private:
 	RubikEdgeMove moves[18];
 };
 
-class RubikEdgePDB : public PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge> {
+class RubikEdgePDB : public PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, 4> {
 public:
 	RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges);
 	static uint64_t GetStateSpaceSize();

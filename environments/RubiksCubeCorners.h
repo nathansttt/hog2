@@ -167,7 +167,7 @@ private:
 	RubikCornerMove moves[18];
 };
 
-class RubikCornerPDB : public PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner> {
+class RubikCornerPDB : public PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner, 4> {
 public:
 	RubikCornerPDB(RubiksCorner *e, const RubiksCornerState &s, std::vector<int> &distinctCorners);
 	static uint64_t GetStateSpaceSize();

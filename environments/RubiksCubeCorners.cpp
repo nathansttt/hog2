@@ -1188,7 +1188,7 @@ void RubikCornerPDB::Save(const char *prefix)
 
 bool RubikCornerPDB::Load(FILE *f)
 {
-	if (PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner>::Load(f) == false)
+	if (PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner, 4>::Load(f) == false)
 		return false;
 	if (fread(&puzzleSize, sizeof(puzzleSize), 1, f) != 1)
 		return false;
@@ -1205,7 +1205,7 @@ bool RubikCornerPDB::Load(FILE *f)
 
 void RubikCornerPDB::Save(FILE *f)
 {
-	PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner>::Save(f);
+	PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner, 4>::Save(f);
 	fwrite(&puzzleSize, sizeof(puzzleSize), 1, f);
 	fwrite(&pdbSize, sizeof(pdbSize), 1, f);
 	size_t edgeSize = corners.size();
@@ -1223,7 +1223,7 @@ std::string RubikCornerPDB::GetFileName(const char *prefix)
 		fileName += std::to_string(goalState.GetCubeInLoc(x));
 		fileName += ".";
 		fileName += std::to_string(goalState.GetCubeOrientation(goalState.GetCubeInLoc(x)));
-		fileName += ":";
+		fileName += ";";
 	}
 	fileName.pop_back();
 	fileName += "-";
@@ -1231,7 +1231,7 @@ std::string RubikCornerPDB::GetFileName(const char *prefix)
 	for (auto x : corners)
 	{
 		fileName += std::to_string(x);
-		fileName += ":";
+		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
 	fileName += ".pdb";

@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <xlocale.h>
+#include <unordered_set>
 #include "Common.h"
 #include "Driver.h"
 #include "UnitSimulation.h"
@@ -67,9 +68,11 @@ std::deque<RubiksAction> animateActions;
 void TestCornerRanking();
 void TestEdgeRanking();
 void GetKorfInstance(RubiksState &start, int which);
-void KorfTest(int which);
+void KorfTest(int which, bool use1997heuristic = true);
 void PDBFaceTest();
 void KorfAll();
+
+const char *pdbLocation = "/Users/nathanst/Desktop/pdb";
 
 int main(int argc, char* argv[])
 {
@@ -114,6 +117,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-bloomSearchStdin", "-bloomSearchStdin <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations. Problems from stdin.");
 
 	InstallCommandLineHandler(MyCLHandler, "-korf", "-korf <instance>", "Run the nth Korf instance from his 1997 RC paper using the same PDBs.");
+	InstallCommandLineHandler(MyCLHandler, "-region", "-region", "Analyze regions (preset problem)");
 
 	InstallCommandLineHandler(MyCLHandler, "-minBloomSearch", "-minBloomSearch <corner-prefix> <other-prefix> <8size> <8hash> <9size> <9hash>", "Use bloom filter + corner pdb. Pass data locations");
 	InstallCommandLineHandler(MyCLHandler, "-measure", "-measure interleave", "Measure loss from interleaving versus min");
@@ -225,6 +229,7 @@ void BuildDepthBloomFilter(int size, float space, int numHash, const char *dataL
 void GetBloomStats(uint64_t size, int hash, const char *prefix);
 void BuildMinBloomFilter(float space, int numHash, int finalDepth, const char *dataLoc);
 void GetActionsFromStdin(std::vector<RubiksAction> &acts);
+void RegionAnalysis();
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -238,6 +243,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-extract") == 0)
 	{
 		ExtractStatesAtDepth(argument[1]);
+		exit(0);
+	}
+	else if (strcmp(argument[0], "-region") == 0)
+	{
+		RegionAnalysis();
 		exit(0);
 	}
 	else if (strcmp(argument[0], "-korf") == 0)
@@ -1563,7 +1573,7 @@ void TestCornerRanking()
 		}
 	}
 	cornerState.Reset();
-	pdb.BuildPDB(cornerState, "/Users/nathanst/corner.pdb", std::thread::hardware_concurrency());
+	pdb.BuildPDB(cornerState, std::thread::hardware_concurrency());
 	exit(0);
 }
 
@@ -1603,7 +1613,7 @@ void TestEdgeRanking()
 		}
 	}
 	edgeState.Reset();
-	pdb.BuildPDB(edgeState, "/Users/nathanst/edge.pdb", std::thread::hardware_concurrency());
+	pdb.BuildPDB(edgeState, std::thread::hardware_concurrency());
 	exit(0);
 }
 
@@ -1617,7 +1627,7 @@ void PDBFaceTest()
 	std::vector<int> corners = {};//{0, 1, 2};
 	RubikPDB pdb1(&cube, goal, edges, corners);
 	goal.Reset();
-	pdb1.BuildPDB(goal, "/Users/nathanst/rc_f1", std::thread::hardware_concurrency());
+	pdb1.BuildPDB(goal, std::thread::hardware_concurrency());
 //	Heuristic<RubiksState> h;
 //	h.lookups.push_back({kLeafNode, 0, 0});
 //	h.lookups.push_back({kLeafNode, 1, 0});
@@ -1639,35 +1649,158 @@ void PDBFaceTest()
 //		   ida.GetNodesExpanded()/t.GetElapsedTime());
 }
 
-void KorfTest(int which)
+
+void RegionAnalysis()
+{
+	KorfTest(0, true);
+	KorfTest(0, false);
+	
+	const int bfsDepth = 7;
+//	FILE *f = fopen("/Users/nathanst/rubik1997.bin", "w+");
+//	FILE *f = fopen("/Users/nathanst/rubik888.bin", "w+");
+//	FILE *f = fopen("/Users/nathanst/rubik1997-f0.bin", "w+");
+	std::vector<std::unordered_set<RubiksState> > forward;
+	std::vector<std::unordered_set<RubiksState> > reverse;
+	Timer t;
+	std::vector<RubiksAction> acts;
+	RubiksCube cube;
+	RubiksState goal;
+	RubiksState start;
+	GetInstance(start, 0);
+	
+	reverse.resize(bfsDepth+1);
+	forward.resize(bfsDepth+1);
+	
+	reverse[0].insert(goal);
+	forward[0].insert(start);
+
+	
+	for (int x = 1; x <= bfsDepth; x++)
+	{
+		printf("Starting on depth %d\n", x);
+		t.StartTimer();
+		for (auto state : reverse[x-1])
+		{
+			cube.GetActions(state, acts);
+			for (auto act : acts)
+			{
+				cube.ApplyAction(state, act);
+				if ((x-2 < 0 || reverse[x-2].find(state) == reverse[x-2].end()) &&
+					(x-1 < 0 || reverse[x-1].find(state) == reverse[x-1].end()))
+					reverse[x].insert(state);
+				cube.UndoAction(state, act);
+			}
+		}
+		printf("%lu total states (%1.2fs seconds)\n", reverse[x].size(), t.EndTimer());
+	}
+	for (int x = 1; x <= bfsDepth; x++)
+	{
+		t.StartTimer();
+		printf("Starting on depth %d\n", x);
+		for (auto state : forward[x-1])
+		{
+			cube.GetActions(state, acts);
+			for (auto act : acts)
+			{
+				cube.ApplyAction(state, act);
+				if ((x-2 < 0 || forward[x-2].find(state) == forward[x-2].end()) &&
+					(x-1 < 0 || forward[x-1].find(state) == forward[x-1].end()))
+					forward[x].insert(state);
+				cube.UndoAction(state, act);
+			}
+		}
+		printf("%lu total states (%1.2fs seconds)\n", forward[x].size(), t.EndTimer());
+	}
+
+	for (int x = 0; x < 2; x++)
+	{
+		uint64_t NG = 0;
+		uint64_t NS = 0;
+		uint64_t NN = 0;
+		uint64_t O = 0;
+		
+		FILE *f;
+		if (x == 0)
+			f = fopen("rubik888.bin", "r");
+		if (x == 1)
+			f = fopen("rubik1997.bin", "r");
+		RubiksState s;
+		while (!feof(f))
+		{
+			if (fread(&s, sizeof(s), 1, f) != 1)
+				break;
+			bool ns = false, ng = false;
+			for (const auto &set : reverse)
+			{
+				if (set.find(s) != set.end())
+				{
+					ng = true;
+				}
+			}
+			for (const auto &set : forward)
+			{
+				if (set.find(s) != set.end())
+				{
+					ns = true;
+				}
+			}
+			if (ng && ns)
+				NN++;
+			else if (ng)
+				NG++;
+			else if (ns)
+				NS++;
+			else
+				O++;
+		}
+		printf("NN: %llu NG: %llu NS: %llu O: %llu\n", NN, NG, NS, O);
+		fclose(f);
+	}
+}
+
+void KorfTest(int which, bool use1997heuristic)
 {
 	RubiksCube cube;
 	RubiksState goal;
 	RubiksState start;
-	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
-	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+
+	std::vector<int> edges1;
+	std::vector<int> edges2;
+	std::vector<int> corners;
+	
+	if (use1997heuristic)
+	{
+		edges1 = {1, 3, 8, 9, 10, 11};
+		edges2 = {0, 2, 4, 5, 6, 7};
+		corners = {0, 1, 2, 3, 4, 5, 6, 7};
+	}
+	else {
+		edges1 = {0, 1, 2, 3, 4, 5, 6, 7};
+		edges2 = {1, 3, 5, 7, 8, 9, 10, 11};
+		corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
+	}
+
 	std::vector<int> blank;
 	RubikPDB pdb1(&cube, goal, edges1, blank);
 	RubikPDB pdb2(&cube, goal, edges2, blank);
 	RubikPDB pdb3(&cube, goal, blank, corners);
-	if (!pdb1.Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb1.Load(pdbLocation))
 	{
 		goal.Reset();
-		pdb1.BuildPDB(goal, "rc_e1", std::thread::hardware_concurrency());
-		pdb1.Save("/Users/nathanst/Desktop/pdb");
+		pdb1.BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb1.Save(pdbLocation);
 	}
-	if (!pdb2.Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb2.Load(pdbLocation))
 	{
 		goal.Reset();
-		pdb2.BuildPDB(goal, "rc_e2", std::thread::hardware_concurrency());
-		pdb2.Save("/Users/nathanst/Desktop/pdb");
+		pdb2.BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb2.Save(pdbLocation);
 	}
-	if (!pdb3.Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb3.Load(pdbLocation))
 	{
 		goal.Reset();
-		pdb3.BuildPDB(goal, "rc_c1", std::thread::hardware_concurrency());
-		pdb3.Save("/Users/nathanst/Desktop/pdb");
+		pdb3.BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb3.Save(pdbLocation);
 	}
 	Heuristic<RubiksState> h;
 	h.lookups.push_back({kMaxNode, 1, 3});
@@ -1678,7 +1811,11 @@ void KorfTest(int which)
 	h.heuristics.push_back(&pdb2);
 	h.heuristics.push_back(&pdb3);
 	
-	FILE *f = fopen("/Users/nathanst/temp.rubik", "w+");
+	FILE *f;
+	if (use1997heuristic)
+		f = fopen("rubik1997.bin", "w+");
+	else
+		f = fopen("rubik888.bin", "w+");
 	cube.SetPruneSuccessors(true);
 	Timer t;
 	t.StartTimer();
@@ -1690,16 +1827,12 @@ void KorfTest(int which)
 	ida.SetHeuristic(&h);
 	ida.func = [cube, f](RubiksState nextState, int depth)
 	{
-		uint64_t r1 = cube.c.GetStateHash(nextState.corner);
-		uint64_t r2 = cube.e.GetStateHash(nextState.edge);
-		uint8_t d = depth;
-		fwrite(&r1, sizeof(r1), 1, f);
-		fwrite(&r2, sizeof(r2), 1, f);
-		fwrite(&d, sizeof(d), 1, f);
+		fwrite(&nextState, sizeof(nextState), 1, f);
 	};
 
-	//ida.GetPath(&cube, start, goal, path);
+	ida.GetPath(&cube, start, goal, path);
 	t.EndTimer();
+	fclose(f);
 	printf("%1.5fs elapsed\n", t.GetElapsedTime());
 	printf("%llu nodes expanded (%1.3f nodes/sec)\n", ida.GetNodesExpanded(),
 		   ida.GetNodesExpanded()/t.GetElapsedTime());
@@ -1707,26 +1840,20 @@ void KorfTest(int which)
 		   ida.GetNodesTouched()/t.GetElapsedTime());
 
 
-	t.StartTimer();
-	
-//	GetInstance(start, which);
-//	cube.ApplyAction(start, 7);
-//	cube.ApplyAction(start, 2);
-//	printf("After applying actions 7, 2, heuristic is %1.2f\n", h.HCost(start, goal));
-	
-	//GetInstance(start, which);
-	GetKorfInstance(start, which);
-	goal.Reset();
-	ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> pida;
-	pida.SetHeuristic(&h);
-	pida.GetPath(&cube, start, goal, path);
-	t.EndTimer();
-	printf("%1.5fs elapsed\n", t.GetElapsedTime());
-	printf("%llu nodes expanded (%1.3f nodes/sec)\n", pida.GetNodesExpanded(),
-		   pida.GetNodesExpanded()/t.GetElapsedTime());
-	printf("%llu nodes generated (%1.3f nodes/sec)\n", pida.GetNodesTouched(),
-		   pida.GetNodesTouched()/t.GetElapsedTime());
-	fclose(f);
+//	t.StartTimer();
+//	
+//	//GetInstance(start, which);
+//	GetKorfInstance(start, which);
+//	goal.Reset();
+//	ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> pida;
+//	pida.SetHeuristic(&h);
+//	pida.GetPath(&cube, start, goal, path);
+//	t.EndTimer();
+//	printf("%1.5fs elapsed\n", t.GetElapsedTime());
+//	printf("%llu nodes expanded (%1.3f nodes/sec)\n", pida.GetNodesExpanded(),
+//		   pida.GetNodesExpanded()/t.GetElapsedTime());
+//	printf("%llu nodes generated (%1.3f nodes/sec)\n", pida.GetNodesTouched(),
+//		   pida.GetNodesTouched()/t.GetElapsedTime());
 }
 
 void KorfAll()
@@ -1742,11 +1869,11 @@ void KorfAll()
 	RubikPDB pdb2(&cube, goal, edges2, blank);
 	RubikPDB pdb3(&cube, goal, blank, corners);
 	goal.Reset();
-	pdb1.BuildPDB(goal, "rc_e1", std::thread::hardware_concurrency());
+	pdb1.BuildPDB(goal, std::thread::hardware_concurrency());
 	goal.Reset();
-	pdb2.BuildPDB(goal, "rc_e2", std::thread::hardware_concurrency());
+	pdb2.BuildPDB(goal, std::thread::hardware_concurrency());
 	goal.Reset();
-	pdb3.BuildPDB(goal, "rc_c1", std::thread::hardware_concurrency());
+	pdb3.BuildPDB(goal, std::thread::hardware_concurrency());
 	Heuristic<RubiksState> h;
 	h.lookups.push_back({kMaxNode, 1, 3});
 	h.lookups.push_back({kLeafNode, 0, 0});
