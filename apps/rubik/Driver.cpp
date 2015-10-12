@@ -1684,7 +1684,7 @@ void ParallelExpand(int myID, int totalThreads,
 			}
 			cube.UndoAction(state, act);
 		}
-		if (cache.size() > 1024)
+		if (cache.size() > 4096)
 		{
 			resultLock.lock();
 			for (auto &s : cache)
@@ -1702,7 +1702,7 @@ void ParallelExpand(int myID, int totalThreads,
 
 void RegionAnalysis()
 {
-
+	uint32_t bfsSize[] = {1, 18, 243, 3240, 43239, 574908, 7618438, 100803036, 1332343288};
 	if (!fileExists("rubik888.bin"))
 		KorfTest(0, false);
 	if (!fileExists("rubik1997.bin"))
@@ -1726,12 +1726,17 @@ void RegionAnalysis()
 	
 	reverse.resize(bfsDepth+1);
 	forward.resize(bfsDepth+1);
+	for (int x = 0; x <= bfsDepth; x++)
+	{
+		reverse[x].reserve(bfsSize[x]);
+		forward[x].reserve(bfsSize[x]);
+	}
 	
 	reverse[0].insert(goal);
 	forward[0].insert(start);
 	int numThreads = std::thread::hardware_concurrency();
 	std::vector<std::thread*> threads(numThreads);
-	
+	printf("Using %d threads\n", numThreads);
 	for (int x = 1; x <= bfsDepth; x++)
 	{
 		printf("Starting on depth %d\n", x);
