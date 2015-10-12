@@ -48,6 +48,7 @@
 #include "BitVector.h"
 #include "MinBloom.h"
 #include <deque>
+#include <mutex>
 
 RubiksCube c;
 RubiksAction a;
@@ -1649,11 +1650,66 @@ void PDBFaceTest()
 //		   ida.GetNodesExpanded()/t.GetElapsedTime());
 }
 
+#include <sys/stat.h>
+bool fileExists(const char *name)
+{
+	struct stat buffer;
+	return (stat(name, &buffer) == 0);
+}
+
+std::mutex resultLock;
+
+void ParallelExpand(int myID, int totalThreads,
+					const std::unordered_set<RubiksState> &toExpand,
+					const std::unordered_set<RubiksState> &duplicates,
+					std::unordered_set<RubiksState> &results)
+{
+	RubiksCube cube;
+	std::vector<RubiksAction> acts;
+	std::vector<RubiksState> cache;
+
+	uint64_t counter = 0;
+	for (auto state : toExpand)
+	{
+		counter++;
+		if (myID != counter%totalThreads)
+			continue;
+		cube.GetActions(state, acts);
+		for (auto act : acts)
+		{
+			cube.ApplyAction(state, act);
+			if ((duplicates.find(state) == duplicates.end()) && (toExpand.find(state) == toExpand.end()))
+			{
+				cache.push_back(state);
+			}
+			cube.UndoAction(state, act);
+		}
+		if (cache.size() > 1024)
+		{
+			resultLock.lock();
+			for (auto &s : cache)
+				results.insert(s);
+			resultLock.unlock();
+			cache.clear();
+		}
+	}
+	resultLock.lock();
+	for (auto &s : cache)
+		results.insert(s);
+	resultLock.unlock();
+	cache.clear();
+}
 
 void RegionAnalysis()
 {
-	KorfTest(0, true);
-	KorfTest(0, false);
+
+	if (!fileExists("rubik888.bin"))
+		KorfTest(0, false);
+	if (!fileExists("rubik1997.bin"))
+		KorfTest(0, true);
+
+	RubiksState s;
+
 	
 	const int bfsDepth = 7;
 //	FILE *f = fopen("/Users/nathanst/rubik1997.bin", "w+");
@@ -1673,42 +1729,75 @@ void RegionAnalysis()
 	
 	reverse[0].insert(goal);
 	forward[0].insert(start);
-
+	int numThreads = std::thread::hardware_concurrency();
+	std::vector<std::thread*> threads(numThreads);
 	
 	for (int x = 1; x <= bfsDepth; x++)
 	{
 		printf("Starting on depth %d\n", x);
 		t.StartTimer();
-		for (auto state : reverse[x-1])
+		for (int t = 0; t < numThreads; t++)
 		{
-			cube.GetActions(state, acts);
-			for (auto act : acts)
+			if (x == 1)
 			{
-				cube.ApplyAction(state, act);
-				if ((x-2 < 0 || reverse[x-2].find(state) == reverse[x-2].end()) &&
-					(x-1 < 0 || reverse[x-1].find(state) == reverse[x-1].end()))
-					reverse[x].insert(state);
-				cube.UndoAction(state, act);
+				threads[t] = new std::thread(ParallelExpand, t, numThreads,
+											 std::ref(reverse[x-1]), std::ref(reverse[x-1]), std::ref(reverse[x]));
+			}
+			else {
+				threads[t] = new std::thread(ParallelExpand, t, numThreads,
+											 std::ref(reverse[x-1]), std::ref(reverse[x-2]), std::ref(reverse[x]));
 			}
 		}
+		for (int t = 0; t < numThreads; t++)
+		{
+			threads[t]->join();
+		}
+//		for (auto state : reverse[x-1])
+//		{
+//			cube.GetActions(state, acts);
+//			for (auto act : acts)
+//			{
+//				cube.ApplyAction(state, act);
+//				if ((x-2 < 0 || reverse[x-2].find(state) == reverse[x-2].end()) &&
+//					(x-1 < 0 || reverse[x-1].find(state) == reverse[x-1].end()))
+//					reverse[x].insert(state);
+//				cube.UndoAction(state, act);
+//			}
+//		}
 		printf("%lu total states (%1.2fs seconds)\n", reverse[x].size(), t.EndTimer());
 	}
 	for (int x = 1; x <= bfsDepth; x++)
 	{
 		t.StartTimer();
 		printf("Starting on depth %d\n", x);
-		for (auto state : forward[x-1])
+		for (int t = 0; t < numThreads; t++)
 		{
-			cube.GetActions(state, acts);
-			for (auto act : acts)
+			if (x == 1)
 			{
-				cube.ApplyAction(state, act);
-				if ((x-2 < 0 || forward[x-2].find(state) == forward[x-2].end()) &&
-					(x-1 < 0 || forward[x-1].find(state) == forward[x-1].end()))
-					forward[x].insert(state);
-				cube.UndoAction(state, act);
+				threads[t] = new std::thread(ParallelExpand, t, numThreads,
+											 std::ref(forward[x-1]), std::ref(forward[x-1]), std::ref(forward[x]));
+			}
+			else {
+				threads[t] = new std::thread(ParallelExpand, t, numThreads,
+											 std::ref(forward[x-1]), std::ref(forward[x-2]), std::ref(forward[x]));
 			}
 		}
+		for (int t = 0; t < numThreads; t++)
+		{
+			threads[t]->join();
+		}
+//		for (auto state : forward[x-1])
+//		{
+//			cube.GetActions(state, acts);
+//			for (auto act : acts)
+//			{
+//				cube.ApplyAction(state, act);
+//				if ((x-2 < 0 || forward[x-2].find(state) == forward[x-2].end()) &&
+//					(x-1 < 0 || forward[x-1].find(state) == forward[x-1].end()))
+//					forward[x].insert(state);
+//				cube.UndoAction(state, act);
+//			}
+//		}
 		printf("%lu total states (%1.2fs seconds)\n", forward[x].size(), t.EndTimer());
 	}
 
@@ -1819,8 +1908,8 @@ void KorfTest(int which, bool use1997heuristic)
 	cube.SetPruneSuccessors(true);
 	Timer t;
 	t.StartTimer();
-	//GetInstance(start, which);
-	GetKorfInstance(start, which);
+	GetInstance(start, which);
+	//GetKorfInstance(start, which);
 	goal.Reset();
 	std::vector<RubiksAction> path;
 	IDAStar<RubiksState, RubiksAction> ida;
