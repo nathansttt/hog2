@@ -102,8 +102,7 @@ public:
 
 	OccupancyInterface<MNPuzzleState, slideDir> *GetOccupancyInfo() { return 0; }
 	double HCost(const MNPuzzleState &state1, const MNPuzzleState &state2) const;
-	double HCost(const MNPuzzleState &state1) const
-	{ return PermutationPuzzleEnvironment<MNPuzzleState, slideDir>::HCost(state1); }
+	double HCost(const MNPuzzleState &state1) const;
 	double DefaultH(const MNPuzzleState &s) const;
 
 	double GCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
@@ -184,26 +183,6 @@ public:
 	unsigned Get_Num_Of_Rows(){return height;}
 
 	void Set_Use_Manhattan_Heuristic(bool to_use){use_manhattan = to_use;}
-
-	void PrintHStats()
-	{
-		printf("-\t");
-		for (int x = 0; x < hDist.size(); x++)
-			printf("%d\t", x);
-		printf("\n");
-		for (int y = 0; y <= 12; y++)
-		{
-			printf("%d\t", y);
-			for (int x = 0; x < hDist.size(); x++)
-			{
-				if (y >= hDist[x].size())
-					printf("0\t");
-				else
-					printf("%d\t", hDist[x][y]);
-			}
-			printf("\n");
-		}
-	}
 private:
 //	double DoPDBLookup(const MNPuzzleState &state);
 //	std::vector<std::vector<uint8_t> > PDB;
@@ -216,9 +195,8 @@ private:
 	bool weighted;
 	
 	// stores the heuristic value of each tile-position pair indexed by the tile value (0th index is empty)
-	unsigned **h_increment;
+	std::vector<std::vector<unsigned> > h_increment;
 	MNPuzzleState goal;
-	std::vector<std::vector<int> > hDist;
 };
 
 class GraphPuzzleDistanceHeuristic : public GraphDistanceHeuristic {

@@ -233,11 +233,13 @@ void MNPuzzle::StoreGoal(MNPuzzleState &s)
 		}
 	}
 	
-	h_increment = new unsigned*[width*height];
+	h_increment.resize(width*height);
+	//h_increment = new unsigned*[width*height];
 	
 	for (unsigned int i = 1; i < width*height; i++)
 	{
-		h_increment[i] = new unsigned [width*height];
+		h_increment[i].resize(width*height);
+		//h_increment[i] = new unsigned [width*height];
 	}
 	
 	for (unsigned goal_pos = 0; goal_pos < width*height; goal_pos++)
@@ -267,12 +269,12 @@ void MNPuzzle::ClearGoal()
 	if (goal_stored)
 	{
 		goal_stored = false;
-		// clears memory allocated for h_increment
-		for (unsigned int i = 1; i < width*height; i++)
-		{
-			delete h_increment[i];
-		}
-		delete h_increment;
+//		// clears memory allocated for h_increment
+//		for (unsigned int i = 1; i < width*height; i++)
+//		{
+//			delete h_increment[i];
+//		}
+//		delete h_increment;
 	}
 }
 void MNPuzzle::GetSuccessors(const MNPuzzleState &stateID,
@@ -327,6 +329,11 @@ void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a) const
 				s.blank -= s.width;
 				s.puzzle[s.blank] = tmp;
 			}
+			else {
+				printf("Invalid up operator\n");
+				assert(false);
+				exit(0);
+			}
 			break;
 		case kDown:
 			if (s.blank < s.puzzle.size() - s.width)
@@ -335,6 +342,11 @@ void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a) const
 				s.puzzle[s.blank] = s.puzzle[s.blank+s.width];
 				s.blank += s.width;
 				s.puzzle[s.blank] = tmp;
+			}
+			else {
+				printf("Invalid down operator\n");
+				assert(false);
+				exit(0);
 			}
 			break;
 		case kRight:
@@ -345,6 +357,11 @@ void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a) const
 				s.blank += 1;
 				s.puzzle[s.blank] = tmp;
 			}
+			else {
+				printf("Invalid right operator\n");
+				assert(false);
+				exit(0);
+			}
 			break;
 		case kLeft:
 			if ((s.blank%s.width) > 0)
@@ -353,6 +370,11 @@ void MNPuzzle::ApplyAction(MNPuzzleState &s, slideDir a) const
 				s.puzzle[s.blank] = s.puzzle[s.blank-1];
 				s.blank -= 1;
 				s.puzzle[s.blank] = tmp;
+			}
+			else {
+				printf("Invalid left operator\n");
+				assert(false);
+				exit(0);
 			}
 			break;
 	}
@@ -370,89 +392,15 @@ bool MNPuzzle::InvertAction(slideDir &a) const
 	return true;
 }
 
-//double MNPuzzle::HCost(const MNPuzzleState &state)
-//{
-//	if (!goal_stored)
-//	{
-//		fprintf(stderr, "ERROR: HCost called with a single state and goal is not stored.\n");
-//		exit(1);
-//	}
-//	if (state.height != height || state.width != width)
-//	{
-//		fprintf(stderr, "ERROR: HCost called with a single state with wrong size.\n");
-//		exit(1);
-//	}
-//	
-//	double hval = 0;
-//
-////	if (PDB.size() != 0) // select between PDB and Manhattan distance if given the chance
-////		hval = std::max(hval, DoPDBLookup(state));
-//
-//	if (additive && PDB.size() != 0)
-//	{
-//		int val = 0;
-//
-//		for (unsigned loc = 0; loc < width*height; loc++)
-//		{
-//			if (state.puzzle[loc] > 0)
-//				val += h_increment[state.puzzle[loc]][loc];
-//		}
-//		if (val >= hDist.size())
-//			hDist.resize(val+1);
-//		
-//		uint8_t tmp;
-//		uint8_t total = 0;
-//		for (unsigned int x = 0; x < PDB.size(); x++)
-//		{
-//			uint64_t index = GetPDBHash(state, PDB_distincts[x]);
-//			histogram[PDB[x][index]]++;
-//			tmp = PDB[x][index];
-//			if (tmp >= hDist[val].size())
-//				hDist[val].resize(tmp+1);
-//			hDist[val][tmp]++;
-//			if (tmp > 4) tmp = 4;
-//			total += (double)tmp;
-//		}
-//		return val+total;
-//
-////		hval = PDB_Lookup(state);
-////		for (unsigned loc = 0; loc < width*height; loc++)
-////		{
-////			if (state.puzzle[loc] > 0)
-////				hval += h_increment[state.puzzle[loc]][loc];
-////		}
-////		return hval;
-//	}
-//	
-//	if (use_manhattan)
-//	{
-//		double man_dist = 0;
-//		// increments amound for each tile location
-//		// this calculates the Manhattan distance
-//		for (unsigned loc = 0; loc < width*height; loc++)
-//		{
-//			if (state.puzzle[loc] > 0)
-//				man_dist += h_increment[state.puzzle[loc]][loc];
-//		}
-//		hval = std::max(hval, man_dist);
-//	}
-//	// if no heuristic
-//	else if (PDB.size()==0)
-//	{
-//		if (goal == state)
-//			return 0;
-//		else
-//			return 1;
-//	}
-//	
-//	return hval;
-//}
-//
-// TODO Remove PDB heuristic from this heuristic evaluator.
+double MNPuzzle::HCost(const MNPuzzleState &state1) const
+{
+	return DefaultH(state1);
+}
+
 double MNPuzzle::HCost(const MNPuzzleState &state1, const MNPuzzleState &state2) const
 {
 	if (goal_stored)
-		return PermutationPuzzleEnvironment<MNPuzzleState, slideDir>::HCost(state1);
+		return HCost(state1);
 	if (state1.height != height || state1.width != width)
 	{
 		fprintf(stderr, "ERROR: HCost called with a state with wrong size.\n");
@@ -729,21 +677,6 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s1, const MNPuzzleState &s2, floa
 	}
 	DrawFrame(width, height);
 }
-
-//double MNPuzzle::DoPDBLookup(const MNPuzzleState &state)
-//{
-//	double val = 0;
-//	for (unsigned int x = 0; x < PDB.size(); x++)
-//	{
-//		uint64_t index = GetPDBHash(state, PDBkey[x]);
-//		val = std::max(val, (double)PDB[x][index]);
-//		//val += (double)PDB[x][index];
-//	}
-//	if (width == height) // symmetry
-//	{
-//	}
-//	return val;
-//}
 
 /**
  Reads in MNPuzzle states from the given filename. Each line of the
