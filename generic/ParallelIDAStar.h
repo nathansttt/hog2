@@ -17,7 +17,7 @@
 #include "SharedQueue.h"
 #include <thread>
 
-const int workDepth = 2;
+const int workDepth = 5;
 
 template <class action>
 struct workUnit {
@@ -58,6 +58,7 @@ private:
 	
 	void PrintGHistogram()
 	{
+		return;
 		uint64_t early = 0, late = 0;
 		printf("G-cost distribution\n");
 		for (int x = 0; x < gCostHistogram.size(); x++)
@@ -115,6 +116,7 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 	nextBound = 0;
 	nodesExpanded = nodesTouched = 0;
 	thePath.resize(0);
+	work.resize(0);
 
 	// Set class member
 	goal = to;
@@ -171,21 +173,24 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 				fCostHistogram[y] += work[x].fHistogram[y];
 			}
 			if (work[x].nextBound > nextBound && work[x].nextBound < bestBound)
+			{
+				//printf("Got bound of %1.0f from work %d\n", work[x].nextBound, x);
 				bestBound = work[x].nextBound;
+			}
 			nodesExpanded += work[x].expanded;
 			nodesTouched += work[x].touched;
 			if (work[x].solution.size() != 0)
 			{
-				printf(">>Solution histogram>>\n");
-				PrintGHistogram();
-				printf("<<Solution histogram<<\n");
+//				printf(">>Solution histogram>>\n");
+//				PrintGHistogram();
+//				printf("<<Solution histogram<<\n");
 				thePath = work[x].solution;
 			}
 		}
 		nextBound = bestBound;
-		printf(">>Full histogram>>\n");
-		PrintGHistogram();
-		printf("<<Full histogram<<\n");
+//		printf(">>Full histogram>>\n");
+//		PrintGHistogram();
+//		printf("<<Full histogram<<\n");
 		if (thePath.size() != 0)
 			return;
 	}
@@ -243,6 +248,7 @@ void ParallelIDAStar<environment, state, action>::StartThreadedIteration(environ
 			break;
 		
 		thePath.resize(0);
+		bool passedLimit = false;
 		double g = 0;
 		workUnit<action> localWork = work[nextValue];
 		localWork.solution.resize(0);
@@ -253,20 +259,25 @@ void ParallelIDAStar<environment, state, action>::StartThreadedIteration(environ
 		localWork.nextBound = 10*bound;//FIXME: Better ways to do this
 		localWork.expanded = 0;
 		localWork.touched = 0;
+
 		for (int x = 0; x < workDepth; x++)
 		{
 			g += env.GCost(startState, localWork.pre[x]);
 			env.ApplyAction(startState, localWork.pre[x]);
 			thePath.push_back(localWork.pre[x]);
+			
+			if (!passedLimit && fgreater(g+heuristic->HCost(startState, goal), bound))
+			{
+				localWork.nextBound = g+heuristic->HCost(startState, goal);
+				passedLimit = true;
+			}
 		}
+
 		action last = localWork.pre[workDepth-1];
 		env.InvertAction(last);
 		
-		if (fgreater(g+heuristic->HCost(startState, goal), bound))
+		if (!passedLimit)
 		{
-			localWork.nextBound = g+heuristic->HCost(startState, goal);
-		}
-		else {
 			DoIteration(&env, last, startState, thePath, bound, g, localWork, actCache);
 		}
 		
