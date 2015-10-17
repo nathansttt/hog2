@@ -12,12 +12,15 @@
 #include "PDBHeuristic.h"
 const int maxThreads = 32;
 
+/**
+ * This class does the basic permutation calculation with a regular N^2 permutation
+ * computation.
+ */
 template <class state, class action, class environment>
 class PermutationPDB : public PDBHeuristic<state, action, environment> {
 public:
 	PermutationPDB(environment *e, const state &s, std::vector<int> distincts);
-	virtual uint64_t GetStateHash(const state &s) const;
-	virtual void GetStateFromHash(state &s, uint64_t hash) const;
+
 	virtual uint64_t GetPDBSize() const;
 	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const;
 	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const;
@@ -35,13 +38,13 @@ private:
 	uint64_t pdbSize;
 	
 	// cache for computing ranking/unranking
-	mutable std::vector<std::vector<int> > dual;
-	mutable std::vector<std::vector<int> > locs;
+	mutable std::vector<std::vector<int> > dualCache;
+	mutable std::vector<std::vector<int> > locsCache;
 };
 
 template <class state, class action, class environment>
 PermutationPDB<state, action, environment>::PermutationPDB(environment *e, const state &s, std::vector<int> distincts)
-:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.puzzle.size()), dual(maxThreads), locs(maxThreads)
+:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.puzzle.size()), dualCache(maxThreads), locsCache(maxThreads)
 {
 	pdbSize = 1;
 	for (int x = (int)s.puzzle.size(); x > s.puzzle.size()-distincts.size(); x--)
@@ -51,83 +54,51 @@ PermutationPDB<state, action, environment>::PermutationPDB(environment *e, const
 }
 
 template <class state, class action, class environment>
-uint64_t PermutationPDB<state, action, environment>::GetStateHash(const state &s) const
-{
-	std::vector<int> puzzle = s.puzzle;
-	uint64_t hashVal = 0;
-	int numEntriesLeft = (int)s.puzzle.size();
-	for (unsigned int x = 0; x < s.puzzle.size(); x++)
-	{
-		hashVal += puzzle[x]*Factorial(numEntriesLeft-1);
-		numEntriesLeft--;
-		for (unsigned y = x; y < puzzle.size(); y++)
-		{
-			if (puzzle[y] > puzzle[x])
-				puzzle[y]--;
-		}
-	}
-	return hashVal;
-
-}
-
-template <class state, class action, class environment>
-void PermutationPDB<state, action, environment>::GetStateFromHash(state &s, uint64_t hash) const
-{
-	// WARNING: I removed a temporary cache here that didn't seem necessary
-	uint64_t hashVal = hash;
-	s.puzzle.resize(puzzleSize);
-	
-	int numEntriesLeft = 1;
-	for (int x = (int)s.puzzle.size()-1; x >= 0; x--)
-	{
-		s.puzzle[x] = hashVal%numEntriesLeft;
-		hashVal /= numEntriesLeft;
-		numEntriesLeft++;
-		for (int y = x+1; y < (int) s.puzzle.size(); y++)
-		{
-			if (s.puzzle[y] >= s.puzzle[x])
-				s.puzzle[y]++;
-		}
-	}
-}
-
-template <class state, class action, class environment>
 uint64_t PermutationPDB<state, action, environment>::GetPDBSize() const
 {
 	return pdbSize;
 }
 
+inline void swap(int &a, int &b)
+{
+	int tmp = a;
+	a = b;
+	b = tmp;
+}
+
 template <class state, class action, class environment>
 uint64_t PermutationPDB<state, action, environment>::GetPDBHash(const state &s, int threadID) const
 {
+	std::vector<int> &locs = locsCache[threadID];
+	std::vector<int> &dual = dualCache[threadID];
 	// TODO: test definition
-	locs[threadID].resize(distinct.size()); // vector for distinct item locations
-	dual[threadID].resize(s.puzzle.size()); // vector for distinct item locations
+	locs.resize(distinct.size()); // vector for distinct item locations
+	dual.resize(s.puzzle.size()); // vector for distinct item locations
 	
 	// find item locations
 	for (unsigned int x = 0; x < s.puzzle.size(); x++)
 	{
 		if (s.puzzle[x] != -1)
-			dual[threadID][s.puzzle[x]] = x;
+			dual[s.puzzle[x]] = x;
 	}
 	for (int x = 0; x < distinct.size(); x++)
 	{
-		locs[threadID][x] = dual[threadID][distinct[x]];
+		locs[x] = dual[distinct[x]];
 	}
 	
 	uint64_t hashVal = 0;
 	int numEntriesLeft = (int)s.puzzle.size();
 	
-	for (unsigned int x = 0; x < locs[threadID].size(); x++)
+	for (unsigned int x = 0; x < locs.size(); x++)
 	{
-		hashVal += locs[threadID][x]*FactorialUpperK(numEntriesLeft-1, s.puzzle.size()-distinct.size());
+		hashVal += locs[x]*FactorialUpperK(numEntriesLeft-1, s.puzzle.size()-distinct.size());
 		numEntriesLeft--;
 		
 		// decrement locations of remaining items
-		for (unsigned y = x; y < locs[threadID].size(); y++)
+		for (unsigned y = x; y < locs.size(); y++)
 		{
-			if (locs[threadID][y] > locs[threadID][x])
-				locs[threadID][y]--;
+			if (locs[y] > locs[x])
+				locs[y]--;
 		}
 	}
 	return hashVal;
@@ -137,24 +108,26 @@ template <class state, class action, class environment>
 void PermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t hash, state &s, int threadID) const
 {
 	uint64_t hashVal = hash;
-	dual[threadID].resize(distinct.size());
+	std::vector<int> &dual = dualCache[threadID];
+
+	dual.resize(distinct.size());
 	
 	int numEntriesLeft = puzzleSize-distinct.size()+1;
 	for (int x = distinct.size()-1; x >= 0; x--)
 	{
-		dual[threadID][x] = hashVal%numEntriesLeft;
+		dual[x] = hashVal%numEntriesLeft;
 		hashVal /= numEntriesLeft;
 		numEntriesLeft++;
 		for (int y = x+1; y < distinct.size(); y++)
 		{
-			if (dual[threadID][y] >= dual[threadID][x])
-				dual[threadID][y]++;
+			if (dual[y] >= dual[x])
+				dual[y]++;
 		}
 	}
 	s.puzzle.resize(puzzleSize);
 	std::fill(s.puzzle.begin(), s.puzzle.end(), -1);
-	for (int x = 0; x < dual[threadID].size(); x++)
-		s.puzzle[dual[threadID][x]] = distinct[x];
+	for (int x = 0; x < dual.size(); x++)
+		s.puzzle[dual[x]] = distinct[x];
 }
 
 template <class state, class action, class environment>
@@ -192,7 +165,7 @@ std::string PermutationPDB<state, action, environment>::GetFileName(const char *
 		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
-	fileName += ".pdb";
+	fileName += "-lex.pdb";
 	
 	return fileName;
 }
@@ -226,22 +199,6 @@ void PermutationPDB<state, action, environment>::Save(FILE *f)
 	assert(false);
 }
 
-//template <class state, class action, class environment>
-//void PermutationPDB<state, action, environment>::WritePDBHeader(FILE *f) const
-//{
-//	int num = (int)distinct.size();
-//	size_t written;
-//	written = fwrite(&num, sizeof(num), 1, f);
-//	assert(written == 1);
-//	written = fwrite(&distinct[0], sizeof(distinct[0]), distinct.size(), f);
-//	assert(written == distinct.size());
-//}
-//
-//template <class state, class action, class environment>
-//void PermutationPDB<state, action, environment>::ReadPDBHeader(FILE *f) const
-//{
-//}
-
 template <class state, class action, class environment>
 uint64_t PermutationPDB<state, action, environment>::FactorialUpperK(int n, int k) const
 {
@@ -254,7 +211,6 @@ uint64_t PermutationPDB<state, action, environment>::FactorialUpperK(int n, int 
 	}
 	
 	return value;
-
 }
 
 #endif
