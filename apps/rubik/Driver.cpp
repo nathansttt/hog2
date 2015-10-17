@@ -1757,18 +1757,6 @@ void RegionAnalysis()
 		{
 			threads[t]->join();
 		}
-//		for (auto state : reverse[x-1])
-//		{
-//			cube.GetActions(state, acts);
-//			for (auto act : acts)
-//			{
-//				cube.ApplyAction(state, act);
-//				if ((x-2 < 0 || reverse[x-2].find(state) == reverse[x-2].end()) &&
-//					(x-1 < 0 || reverse[x-1].find(state) == reverse[x-1].end()))
-//					reverse[x].insert(state);
-//				cube.UndoAction(state, act);
-//			}
-//		}
 		printf("%lu total states (%1.2fs seconds)\n", reverse[x].size(), t.EndTimer());
 	}
 	for (int x = 1; x <= bfsDepth; x++)
@@ -1791,18 +1779,6 @@ void RegionAnalysis()
 		{
 			threads[t]->join();
 		}
-//		for (auto state : forward[x-1])
-//		{
-//			cube.GetActions(state, acts);
-//			for (auto act : acts)
-//			{
-//				cube.ApplyAction(state, act);
-//				if ((x-2 < 0 || forward[x-2].find(state) == forward[x-2].end()) &&
-//					(x-1 < 0 || forward[x-1].find(state) == forward[x-1].end()))
-//					forward[x].insert(state);
-//				cube.UndoAction(state, act);
-//			}
-//		}
 		printf("%lu total states (%1.2fs seconds)\n", forward[x].size(), t.EndTimer());
 	}
 
@@ -1906,27 +1882,34 @@ void KorfTest(int which, bool use1997heuristic)
 	h.heuristics.push_back(&pdb3);
 	
 	FILE *f;
+#ifdef DO_LOGGING
 	if (use1997heuristic)
 		f = fopen("rubik1997.bin", "w+");
 	else
 		f = fopen("rubik888.bin", "w+");
+#endif
+	
 	cube.SetPruneSuccessors(true);
 	Timer t;
 	t.StartTimer();
-	GetInstance(start, which);
-	//GetKorfInstance(start, which);
+	//GetInstance(start, which);
+	GetKorfInstance(start, which);
 	goal.Reset();
 	std::vector<RubiksAction> path;
 	IDAStar<RubiksState, RubiksAction> ida;
 	ida.SetHeuristic(&h);
+#ifdef DO_LOGGING
 	ida.func = [cube, f](RubiksState nextState, int depth)
 	{
 		fwrite(&nextState, sizeof(nextState), 1, f);
 	};
-
+#endif
+	
 	ida.GetPath(&cube, start, goal, path);
 	t.EndTimer();
+#ifdef DO_LOGGING
 	fclose(f);
+#endif
 	printf("%1.5fs elapsed\n", t.GetElapsedTime());
 	printf("%llu nodes expanded (%1.3f nodes/sec)\n", ida.GetNodesExpanded(),
 		   ida.GetNodesExpanded()/t.GetElapsedTime());
@@ -1934,20 +1917,20 @@ void KorfTest(int which, bool use1997heuristic)
 		   ida.GetNodesTouched()/t.GetElapsedTime());
 
 
-//	t.StartTimer();
-//	
-//	//GetInstance(start, which);
-//	GetKorfInstance(start, which);
-//	goal.Reset();
-//	ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> pida;
-//	pida.SetHeuristic(&h);
-//	pida.GetPath(&cube, start, goal, path);
-//	t.EndTimer();
-//	printf("%1.5fs elapsed\n", t.GetElapsedTime());
-//	printf("%llu nodes expanded (%1.3f nodes/sec)\n", pida.GetNodesExpanded(),
-//		   pida.GetNodesExpanded()/t.GetElapsedTime());
-//	printf("%llu nodes generated (%1.3f nodes/sec)\n", pida.GetNodesTouched(),
-//		   pida.GetNodesTouched()/t.GetElapsedTime());
+	t.StartTimer();
+	
+	//GetInstance(start, which);
+	GetKorfInstance(start, which);
+	goal.Reset();
+	ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> pida;
+	pida.SetHeuristic(&h);
+	pida.GetPath(&cube, start, goal, path);
+	t.EndTimer();
+	printf("%1.5fs elapsed\n", t.GetElapsedTime());
+	printf("%llu nodes expanded (%1.3f nodes/sec)\n", pida.GetNodesExpanded(),
+		   pida.GetNodesExpanded()/t.GetElapsedTime());
+	printf("%llu nodes generated (%1.3f nodes/sec)\n", pida.GetNodesTouched(),
+		   pida.GetNodesTouched()/t.GetElapsedTime());
 }
 
 void KorfAll()
