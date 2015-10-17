@@ -25,6 +25,7 @@
  *
  */
 
+#include <cstring>
 #include "Common.h"
 #include "Driver.h"
 #include "UnitSimulation.h"
@@ -33,6 +34,7 @@
 #include "RandomUnit.h"
 #include "MNPuzzle.h"
 #include "IDAStar.h"
+#include "ParallelIDAStar.h"
 #include "Timer.h"
 
 void CompareToMinCompression();
@@ -45,6 +47,7 @@ void Test(MNPuzzle &mnp, const char *prefix);
 void MinCompressionTest();
 void MeasureIR(MNPuzzle &mnp);
 void GetBitValueCutoffs(std::vector<int> &cutoffs, int bits);
+void BaselineTest();
 
 void BitDeltaValueCompressionTest(bool weighted);
 void ModValueCompressionTest(bool weighted);
@@ -76,6 +79,7 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
+	InstallKeyboardHandler(MyDisplayHandler, "Test", "Basic test with MD heuristic", kAnyModifier, 't');
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
@@ -90,13 +94,14 @@ void InstallHandlers()
 	InstallKeyboardHandler(BuildSTP_PDB, "Build STP PDBs", "Build PDBs for the STP", kNoModifier, 'a');
 
 	InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
+	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
 	
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
 }
 
-MNPuzzleState s(4,3), t(4, 3);
+MNPuzzleState s(4,4), t(4, 4);
 std::vector<slideDir> moves;
 double v = 1;
 
@@ -112,25 +117,25 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-		ts = new MNPuzzle(4, 3);
-
-		IDAStar<MNPuzzleState, slideDir> ida;
-		for (unsigned int x = 0; x < 500; x++)
-		{
-			std::vector<slideDir> acts;
-			ts->GetActions(s, acts);
-			ts->ApplyAction(s, acts[random()%acts.size()]);
-		}
-		ida.GetPath(ts, s, t, moves);
-		v = 5;
-		std::cout << s << std::endl;
-		for (int x = 0; x < moves.size(); x++)
-		{
-			std::cout << moves[x] << " ";
-		}
-		std::cout << std::endl;
-		t = s;
-		recording = true;
+		ts = new MNPuzzle(4, 4);
+//
+//		IDAStar<MNPuzzleState, slideDir> ida;
+//		for (unsigned int x = 0; x < 500; x++)
+//		{
+//			std::vector<slideDir> acts;
+//			ts->GetActions(s, acts);
+//			ts->ApplyAction(s, acts[random()%acts.size()]);
+//		}
+//		ida.GetPath(ts, s, t, moves);
+//		v = 5;
+//		std::cout << s << std::endl;
+//		for (int x = 0; x < moves.size(); x++)
+//		{
+//			std::cout << moves[x] << " ";
+//		}
+//		std::cout << std::endl;
+//		t = s;
+		//recording = true;
 	}
 }
 
@@ -169,6 +174,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
+	if (strcmp(argument[0], "-test") == 0)
+	{
+		BaselineTest();
+		exit(0);
+	}
 	BuildSTP_PDB(0, kNoModifier, 'a');
 	exit(0);
 	return 2;
@@ -178,6 +188,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case 't': BaselineTest();
 		case 'r': recording = !recording; break;
 		case '0': ts->ApplyAction(s, kUp); break;
 		case '1': ts->ApplyAction(s, kDown); break;
@@ -1259,6 +1270,77 @@ void MeasureIR(MNPuzzle &mnp)
 	printf("Average G: %1.1f, average H: %1.3f\n", sumg/total, sumh/total);
 }
 
+
+void BaselineTest()
+{
+	MNPuzzle mnp(4, 4);
+	MNPuzzleState s(4, 4);
+	MNPuzzleState g(4, 4);
+	g.Reset();
+	mnp.StoreGoal(g);
+	
+	{
+		ParallelIDAStar<MNPuzzle, MNPuzzleState, slideDir> ida;
+		std::vector<slideDir> path1;
+		MNPuzzleState start;
+		Timer t1;
+		t1.StartTimer();
+		uint64_t nodesExpanded = 0;
+		uint64_t nodesGenerated = 0;
+		double totaltime = 0;
+		
+		g.Reset();
+		mnp.StoreGoal(g);
+		for (int x = 0; x < 100; x++)
+		{
+			s = GetInstance(x, mnp.GetWeighted());
+			g.Reset();
+			printf("Problem %d of %d\n", x+1, 100);
+			std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
+			Timer t;
+			t.StartTimer();
+			ida.GetPath(&mnp, s, g, path1);
+			t.EndTimer();
+			totaltime += t.GetElapsedTime();
+			std::cout << "Path found, length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
+			nodesExpanded += ida.GetNodesExpanded();
+			nodesGenerated += ida.GetNodesTouched();
+		}
+		printf("Parallel: %1.2fs elapsed; %llu nodes expanded; %llu nodes generated\n", t1.EndTimer(), nodesExpanded, nodesGenerated);
+	}
+	{
+		IDAStar<MNPuzzleState, slideDir> ida;
+		ida.SetUseBDPathMax(true);
+
+		std::vector<slideDir> path1;
+		MNPuzzleState start;
+		Timer t1;
+		t1.StartTimer();
+		uint64_t nodesExpanded = 0;
+		uint64_t nodesGenerated = 0;
+		double totaltime = 0;
+		
+		g.Reset();
+		mnp.StoreGoal(g);
+		for (int x = 0; x < 100; x++)
+		{
+			s = GetInstance(x, mnp.GetWeighted());
+			g.Reset();
+			printf("Problem %d of %d\n", x+1, 100);
+			std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
+			Timer t;
+			t.StartTimer();
+			ida.GetPath(&mnp, s, g, path1);
+			t.EndTimer();
+			totaltime += t.GetElapsedTime();
+			std::cout << "Path found, length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
+			nodesExpanded += ida.GetNodesExpanded();
+			nodesGenerated += ida.GetNodesTouched();
+		}
+		printf("Sequential: %1.2fs elapsed; %llu nodes expanded; %llu nodes generated\n", t1.EndTimer(), nodesExpanded, nodesGenerated);
+	}
+	
+}
 
 void Test(MNPuzzle &mnp, const char *prefix)
 {
