@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string>
 #include <iostream>
 #include "Map.h"
 #include "MapAbstraction.h"
@@ -126,6 +127,11 @@ public:
 	virtual void GLLabelState(const xyLoc &, const char *) const;
 	virtual void GLLabelState(const xyLoc &s, const char *str, double scale) const;
 	virtual void GLDrawLine(const xyLoc &x, const xyLoc &y) const;
+	
+	std::string SVGDraw();
+	std::string SVGLabelState(const xyLoc &, const char *, double scale) const;
+	std::string SVGDrawLine(const xyLoc &x, const xyLoc &y) const;
+	
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;
 	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;
 	Map* GetMap() const { return map; }

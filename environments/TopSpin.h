@@ -33,6 +33,7 @@ public:
 		for (unsigned int x = 0; x < puzzle.size(); x++)
 			puzzle[x] = x;
 	}
+	void FinishUnranking(const TopSpinState &s) {}
 	std::vector<int> puzzle;
 };
 

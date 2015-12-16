@@ -167,7 +167,7 @@ private:
 	RubikCornerMove moves[18];
 };
 
-class RubikCornerPDB : public PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner, 4> {
+class RubikCornerPDB : public PDBHeuristic<RubiksCornerState, RubiksCornersAction, RubiksCorner, RubiksCornerState, 4> {
 public:
 	RubikCornerPDB(RubiksCorner *e, const RubiksCornerState &s, std::vector<int> &distinctCorners);
 	static uint64_t GetStateSpaceSize();
@@ -175,8 +175,10 @@ public:
 	static void GetStateFromHash(RubiksCornerState &s, uint64_t hash);
 	uint64_t GetPDBSize() const;
 	uint64_t GetPDBHash(const RubiksCornerState &s, int threadID = 0) const;
+	virtual uint64_t GetAbstractHash(const RubiksCornerState &s, int threadID = 0) const { return GetPDBHash(s); }
 	void GetStateFromPDBHash(uint64_t hash, RubiksCornerState &s, int threadID = 0) const;
-	
+	RubiksCornerState GetStateFromAbstractState(RubiksCornerState &s) const { return s; }
+
 	virtual bool Load(const char *prefix);
 	virtual void Save(const char *prefix);
 	virtual bool Load(FILE *f);

@@ -1254,7 +1254,7 @@ void RubikEdgePDB::Save(const char *prefix)
 
 bool RubikEdgePDB::Load(FILE *f)
 {
-	if (PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, 4>::Load(f) != true)
+	if (PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, RubikEdgeState, 4>::Load(f) != true)
 		return false;
 	if (fread(&puzzleSize, sizeof(puzzleSize), 1, f) != 1)
 		return false;
@@ -1271,7 +1271,7 @@ bool RubikEdgePDB::Load(FILE *f)
 
 void RubikEdgePDB::Save(FILE *f)
 {
-	PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, 4>::Save(f);
+	PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, RubikEdgeState, 4>::Save(f);
 	fwrite(&puzzleSize, sizeof(puzzleSize), 1, f);
 	fwrite(&pdbSize, sizeof(pdbSize), 1, f);
 	size_t edgeSize = edges.size();

@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 University of Denver. All rights reserved.
 //
 
-#include "MM.h"
+#include "MMRubik.h"
 #include "IDAStar.h"
 #include "Timer.h"
 #include <string>

@@ -8,6 +8,7 @@
  */
 #include "Map2DEnvironment.h"
 #include "FPUtil.h"
+#include "SVGUtil.h"
 #include <cstring>
 
 MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
@@ -703,6 +704,46 @@ void MapEnvironment::GLLabelState(const xyLoc &s, const char *str) const
 	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
 	glPopMatrix();
 }
+
+std::string MapEnvironment::SVGDraw()
+{
+	std::string s;
+	for (int x = 0; x < map->GetMapWidth(); x++)
+	{
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			if (map->GetTerrainType(x, y) == kGround)
+			{
+				recColor c = {0.5, 0.5, 0};
+				s += SVGDrawRect(x, y, 1, 1, c);
+				//stroke-width="1" stroke="pink" />
+			}
+		}
+	}
+	return s;
+}
+
+std::string MapEnvironment::SVGLabelState(const xyLoc &, const char *str, double scale) const
+{
+	std::string s;
+	s =  "<text x=\"0\" y=\"15\" fill=\"black\">";
+	s += str;
+	s += "</text>";
+	return s;
+}
+
+std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2) const
+{
+	//<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,255,255);stroke-width:1" />
+	std::string s;
+	s = "<line x1 = \"" + std::to_string(p1.x) + "\" ";
+	s +=      "y1 = \"" + std::to_string(p1.y) + "\" ";
+	s +=      "x2 = \"" + std::to_string(p2.x) + "\" ";
+	s +=      "y2 = \"" + std::to_string(p2.y) + "\" ";
+	s += "style=\"stroke:rgb(255,255,255);stroke-width:1\" />";
+	return s;
+}
+
 
 //void MapEnvironment::OpenGLDraw(const xyLoc& initial, const tDirection &dir, GLfloat r, GLfloat g, GLfloat b) const
 //{

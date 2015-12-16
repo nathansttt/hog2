@@ -6,4 +6,4 @@
 //  Copyright © 2015 University of Denver. All rights reserved.
 //
 
-#include "TOH.hpp"
+#include "TOH.h"

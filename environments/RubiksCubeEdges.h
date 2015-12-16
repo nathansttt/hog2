@@ -168,7 +168,7 @@ private:
 	RubikEdgeMove moves[18];
 };
 
-class RubikEdgePDB : public PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, 4> {
+class RubikEdgePDB : public PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, RubikEdgeState, 4> {
 public:
 	RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges);
 	static uint64_t GetStateSpaceSize();
@@ -176,8 +176,10 @@ public:
 	static void GetStateFromHash(RubikEdgeState &s, uint64_t hash);
 	uint64_t GetPDBSize() const;
 	uint64_t GetPDBHash(const RubikEdgeState &s, int threadID = 0) const;
+	virtual uint64_t GetAbstractHash(const RubikEdgeState &s, int threadID = 0) const { return GetPDBHash(s); }
 	void GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int threadID = 0) const;
-	
+	RubikEdgeState GetStateFromAbstractState(RubikEdgeState &s) const { return s; }
+
 	bool Load(const char *prefix);
 	void Save(const char *prefix);
 	bool Load(FILE *f);

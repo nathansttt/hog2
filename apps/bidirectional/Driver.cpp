@@ -36,8 +36,7 @@
 #include "GUICode.h"
 #include "Timer.h"
 #include "RubiksCube.h"
-#include "MM.h"
-#include "MMPancake.h"
+#include "MMRubik.h"
 
 struct hash128
 {
@@ -90,7 +89,7 @@ int main(int argc, char* argv[])
 	}
 	else if (argc > 1 && strcmp(argv[1], "-pancake") == 0)
 	{
-		MMPancake::MM();
+		//MMPancake::MM();
 	}
 	else if (argc >= 5 && strcmp(argv[1], "-mm") == 0)
 	{
@@ -118,6 +117,10 @@ int main(int argc, char* argv[])
 		which = atoi(argv[2]);
 		GetKorfInstance(a, which);
 		MM::MM(a, b, argv[3], argv[4]);
+	}
+	else if (argc > 3 && strcmp(argv[1], "-grid") == 0)
+	{
+		AnalyzeMap(argv[2], argv[3]);
 	}
 	else if (argc > 3 && strcmp(argv[1], "-testPruning") == 0)
 	{

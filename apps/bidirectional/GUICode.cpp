@@ -7,10 +7,14 @@
 //
 
 #include <vector>
+#include <fstream>
 #include "GUICode.h"
+#include "ScenarioLoader.h"
 #include "Map2DEnvironment.h"
 #include "MapOverlay.h"
 #include "TemplateAStar.h"
+#include "MM.h"
+#include "SVGUtil.h"
 
 Map *map = 0;
 MapEnvironment *me = 0;
@@ -20,10 +24,25 @@ xyLoc start, goal;
 std::vector<int> counts;
 
 bool mouseTracking = false;
+bool mouseTracked = false;
 void SetupMapOverlay();
+
+int gStepsPerFrame = 1;
 
 TemplateAStar<xyLoc, tDirection, MapEnvironment> forward;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> backward;
+
+MM<xyLoc, tDirection, MapEnvironment> mm;
+TemplateAStar<xyLoc, tDirection, MapEnvironment> compare;
+bool mmSearchRunning = false;
+bool compareSearchRunning = false;
+bool searchRan = false;
+std::vector<xyLoc> path;
+
+bool recording = false;
+
+std::fstream svgFile;
+bool saveSVG = false;
 
 enum bibfs {
 	NN = 1,
@@ -41,10 +60,18 @@ const char *bibfs_desc[10] = {
 	"", "NN", "NF", "NR", "FN", "FF", "FR", "RN", "RF", "RR"
 };
 
+
+
 void InstallHandlers()
 {
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler);
+	InstallKeyboardHandler(MyKeyboardHandler, "Save SVG", "Export graphics to SVG File", kNoModifier, 's');
+	InstallKeyboardHandler(MyKeyboardHandler, "Record", "Start/stop recording movie", kNoModifier, 'r');
+	InstallKeyboardHandler(MyKeyboardHandler, "Single Viewport", "Set to use a single viewport", kNoModifier, '1');
+	InstallKeyboardHandler(MyKeyboardHandler, "Two Viewports", "Set to use two viewports", kNoModifier, '2');
+	InstallKeyboardHandler(MyKeyboardHandler, "Slower", "Slow down visualization", kNoModifier, '[');
+	InstallKeyboardHandler(MyKeyboardHandler, "Faster", "Speed up visualization", kNoModifier, ']');
 }
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
@@ -69,6 +96,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		delete me;
 		//map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
+		//map = new Map("/Users/nathanst/hog2/maps/da2/w_woundedcoast.map");
+		
 		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
@@ -78,12 +107,88 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
+		me->SetDiagonalCost(1.5);
 	}
 	
 }
 
+void MyKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key)
+{
+	switch (key)
+	{
+		case 's':
+		{
+			svgFile.open("/Users/nathanst/Desktop/test.svg", std::fstream::out | std::fstream::trunc);
+			saveSVG = true;
+			break;
+		}
+		case 'r':
+		{
+			recording = !recording;
+			break;
+		}
+		case '1':
+		{
+			SetNumPorts(windowID, 1);
+			break;
+		}
+		case '2':
+		{
+			SetNumPorts(windowID, 2);
+			break;
+		}
+		case '[':
+		{
+			gStepsPerFrame /= 2;
+			break;
+		}
+		case ']':
+		{
+			gStepsPerFrame *= 2;
+			break;
+		}
+	}
+}
+
+
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	if (saveSVG && viewport == 0)
+	{
+		svgFile << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(10*map->GetMapWidth()+10)+"\" height = \""+std::to_string(10*map->GetMapHeight()+10+100)+"\">";
+		recColor black = {0, 0, 0};
+		recColor white = {1, 1, 1};
+		//svgFile << SVGDrawRect(0, 0, map->GetMapWidth(), map->GetMapHeight()+10+1, white);
+		if (mo)
+		{
+			svgFile << mo->SVGDraw();
+
+			for (int x = 1; x < 10; x++)
+			{
+				recColor r = mo->GetValueColor(x);
+				glColor3f(r.r, r.g, r.b);
+				char num[16];
+				sprintf(num, "%d", counts[x]);
+				
+				svgFile << SVGDrawRect(x*map->GetMapWidth()/11+0, map->GetMapHeight()+2, 5, 5, r);
+				svgFile << SVGDrawText(x*map->GetMapWidth()/11+6, map->GetMapHeight()+4, bibfs_desc[x], black, 3);
+				svgFile << SVGDrawText(x*map->GetMapWidth()/11+6, map->GetMapHeight()+7, num, black, 3);
+			}
+
+			svgFile << SVGDrawText(start.x+1, start.y+2, "start", black, 5);
+			svgFile << SVGDrawText(goal.x+1, goal.y+2, "goal", black, 5);
+		}
+		else {
+			svgFile << me->SVGDraw();
+		}
+		
+		svgFile << "</svg>";
+
+
+		saveSVG = false;
+		svgFile.close();
+	}
+
 	map->OpenGLDraw();
 	if (mo)
 	{
@@ -109,12 +214,52 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		me->SetColor(1.0, 1.0, 1.0);
 		me->GLDrawLine(start, goal);
 	}
-	me->SetColor(1.0, 1.0, 1.0);
-	glLineWidth(1.0);
-	me->GLLabelState(start, "start", map->GetMapHeight()/8.0);
-	me->GLLabelState(goal, "goal", map->GetMapHeight()/8.0);
-	glLineWidth(1.0);
+	if (mouseTracked)
+	{
+		me->SetColor(1.0, 1.0, 1.0);
+		glLineWidth(1.0);
+		me->GLLabelState(start, "start", map->GetMapHeight()/8.0);
+		me->GLLabelState(goal, "goal", map->GetMapHeight()/8.0);
+		glLineWidth(1.0);
+	}
 
+	for (int x = 0; x < gStepsPerFrame; x++)
+	{
+		if (mmSearchRunning)
+		{
+			mmSearchRunning = !mm.DoSingleSearchStep(path);
+			if (!mmSearchRunning)
+				printf("MM*: %llu nodes expanded\n", mm.GetNodesExpanded());
+		}
+	}
+	for (int x = 0; x < gStepsPerFrame; x++)
+	{
+		if (compareSearchRunning)
+		{
+			compareSearchRunning = !compare.DoSingleSearchStep(path);
+			if (!compareSearchRunning)
+			{
+				printf("A*: %llu nodes expanded const %1.1f\n", compare.GetNodesExpanded(), me->GetPathLength(path));
+			}
+		}
+	}
+	if (searchRan)
+	{
+		if (viewport == 0)
+			mm.OpenGLDraw();
+		else if (viewport == 1)
+			compare.OpenGLDraw();
+	}
+
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		static int cnt = 0;
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/BI-%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		SaveScreenshot(windowID, fname);
+		printf("Saved %s\n", fname);
+		cnt++;
+	}
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
@@ -144,6 +289,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 			start.x = x; start.y = y;
 			goal = start;
 			mouseTracking = true;
+			mouseTracked = true;
 			return true;
 		}
 		case kMouseDrag:
@@ -152,6 +298,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 			map->GetPointFromCoordinate(loc, x, y);
 			goal.x = x; goal.y = y;
 			mouseTracking = true;
+			mouseTracked = true;
 			return true;
 		}
 		case kMouseUp:
@@ -160,22 +307,92 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				int x, y;
 				map->GetPointFromCoordinate(loc, x, y);
 				goal.x = x; goal.y = y;
+
+//				start.x = 394;
+//				start.y = 158;
+//				goal.x = 313;
+//				goal.y = 167;
+
+//				start.x = 389;
+//				start.y = 278;
+//				goal.x = 510;
+//				goal.y = 208;
+				
 				mouseTracking = false;
 				SetupMapOverlay();
+				SetNumPorts(windowID, 2);
+				compare.InitializeSearch(me, start, goal, path);
+				mm.InitializeSearch(me, start, goal, me, me, path);
+				mmSearchRunning = true;
+				compareSearchRunning = true;
+				searchRan = true;
 				return true;
 			}
 	}
 	return false;
 }
 
+bibfs GetLocationClassification(xyLoc l, double optimal)
+{
+	double startDist, goalDist;
+	forward.GetClosedListGCost(l, startDist);
+	backward.GetClosedListGCost(l, goalDist);
+
+//	if (startDist < optimal)
+//		return NF;
+//	if (startDist == optimal)
+//		return NN;
+//	return FR;
+	
+	if (startDist <= optimal/2 && goalDist <= optimal/2)
+	{
+		return NN;
+	}
+	else if (startDist <= optimal/2 && goalDist <= optimal)
+	{
+		return NF;
+	}
+	else if (startDist <= optimal/2)
+	{
+		return NR;
+	}
+	else if (startDist <= optimal && goalDist <= optimal/2)
+	{
+		return FN;
+	}
+	else if (startDist <= optimal && goalDist <= optimal)
+	{
+		return FF;
+	}
+	else if (startDist <= optimal)
+	{
+		return FR;
+	}
+	else if (goalDist <= optimal/2)
+	{
+		return RN;
+	}
+	else if (goalDist <= optimal)
+	{
+		return RF;
+	}
+	else {
+		return RR;
+	}
+}
+
 void SetupMapOverlay()
 {
+	if (start.x >= map->GetMapWidth() || start.x < 0 || start.y >= map->GetMapHeight() || start.y < 0)
+	{
+		std::cout << "Invalid path: " << start << " to " << goal << "\n";
+		return;
+	}
 	std::cout << "Doing map overlay from " << start << " to " << goal << "\n";
 	counts.resize(0);
 	counts.resize(10);
 	delete mo;
 	mo = new MapOverlay(map);
-	me->SetDiagonalCost(1.5);
 	forward.SetStopAfterGoal(false);
 	backward.SetStopAfterGoal(false);
 	std::vector<xyLoc> path;
@@ -191,57 +408,13 @@ void SetupMapOverlay()
 			if (map->GetTerrainType(x, y) == kGround)
 			{
 				xyLoc l(x, y);
-				double startDist, goalDist;
-				forward.GetClosedListGCost(l, startDist);
-				backward.GetClosedListGCost(l, goalDist);
-				if (startDist <= optimal/2 && goalDist <= optimal/2)
-				{
-					counts[NN]++;
-					mo->SetOverlayValue(x, y, NN);
-				}
-				else if (startDist <= optimal/2 && goalDist <= optimal)
-				{
-					counts[NF]++;
-					mo->SetOverlayValue(x, y, NF);
-				}
-				else if (startDist <= optimal/2)
-				{
-					counts[NR]++;
-					mo->SetOverlayValue(x, y, NR);
-				}
-				else if (startDist <= optimal && goalDist <= optimal/2)
-				{
-					counts[FN]++;
-					mo->SetOverlayValue(x, y, FN);
-				}
-				else if (startDist <= optimal && goalDist <= optimal)
-				{
-					counts[FF]++;
-					mo->SetOverlayValue(x, y, FF);
-				}
-				else if (startDist <= optimal)
-				{
-					counts[FR]++;
-					mo->SetOverlayValue(x, y, FR);
-				}
-				else if (goalDist <= optimal/2)
-				{
-					counts[RN]++;
-					mo->SetOverlayValue(x, y, RN);
-				}
-				else if (goalDist <= optimal)
-				{
-					counts[RF]++;
-					mo->SetOverlayValue(x, y, RF);
-				}
-				else {
-					counts[RR]++;
-					mo->SetOverlayValue(x, y, RR);
-				}
+				bibfs i = GetLocationClassification(l, optimal);
+				counts[i]++;
+				mo->SetOverlayValue(x, y, i);
 			}
 		}
 	}
-	mo->SetOverlayValue(start.x, start.y, 0);
+	mo->SetTransparentValue(0);
 	mo->SetOverlayValue(start.x, start.y, 10);
 	mo->SetOverlayValue(goal.x, goal.y, 10);
 	for (int x = 0; x < counts.size(); x++)
@@ -262,3 +435,129 @@ void SetupMapOverlay()
 	}
 }
 
+void AnalyzeProblem(Map *m, Experiment e)
+{
+	forward.SetStopAfterGoal(false);
+	backward.SetStopAfterGoal(false);
+	std::vector<xyLoc> path;
+	start.x = e.GetStartX();
+	start.y = e.GetStartY();
+	goal.x = e.GetGoalX();
+	goal.y = e.GetGoalY();
+	
+
+	forward.GetPath(me, start, goal, path);
+	backward.GetPath(me, goal, start, path);
+
+	double optimal;
+	forward.GetClosedListGCost(goal, optimal);
+
+	compare.GetPath(me, start, goal, path);
+	printf("A* path length: %1.2f\t", me->GetPathLength(path));
+	mm.GetPath(me, start, goal, me, me, path);
+	printf("MM path length: %1.2f\n", me->GetPathLength(path));
+
+	printf("A*: %llu\tMM: %llu\t", compare.GetNodesExpanded(), mm.GetNodesExpanded());
+	// full state space
+	{
+		counts.resize(0);
+		counts.resize(10);
+		for (int x = 0; x < m->GetMapWidth(); x++)
+		{
+			for (int y = 0; y < m->GetMapHeight(); y++)
+			{
+				if (m->GetTerrainType(x, y) == kGround)
+				{
+					counts[GetLocationClassification(xyLoc(x, y), optimal)]++;
+				}
+			}
+		}
+		for (int x = 0; x < counts.size(); x++)
+		{
+			switch (x)
+			{
+				case 1: printf("NN: %d\t", counts[x]); break;
+				case 2: printf("NF: %d\t", counts[x]); break;
+				case 3: printf("NR: %d\t", counts[x]); break;
+				case 4: printf("FN: %d\t", counts[x]); break;
+				case 5: printf("FF: %d\t", counts[x]); break;
+				case 6: printf("FR: %d\t", counts[x]); break;
+				case 7: printf("RN: %d\t", counts[x]); break;
+				case 8: printf("RF: %d\t", counts[x]); break;
+				case 9: printf("RR: %d\t", counts[x]); break;
+				default: break;
+			}
+		}
+	}
+	// A*
+	{
+		counts.resize(0);
+		counts.resize(10);
+		for (int x = 0; x < compare.GetNumItems(); x++)
+		{
+			if (compare.GetItem(x).where == kClosedList)
+				counts[GetLocationClassification(compare.GetItem(x).data, optimal)]++;
+		}
+		for (int x = 0; x < counts.size(); x++)
+		{
+			switch (x)
+			{
+				case 1: printf("NN: %d\t", counts[x]); break;
+				case 2: printf("NF: %d\t", counts[x]); break;
+				case 3: printf("NR: %d\t", counts[x]); break;
+				case 4: printf("FN: %d\t", counts[x]); break;
+				case 5: printf("FF: %d\t", counts[x]); break;
+				case 6: printf("FR: %d\t", counts[x]); break;
+				case 7: printf("RN: %d\t", counts[x]); break;
+				case 8: printf("RF: %d\t", counts[x]); break;
+				case 9: printf("RR: %d\t", counts[x]); break;
+				default: break;
+			}
+		}
+	}
+	// MM
+	{
+		counts.resize(0);
+		counts.resize(10);
+		for (int x = 0; x < mm.GetNumForwardItems(); x++)
+		{
+			if (mm.GetForwardItem(x).where == kClosedList)
+				counts[GetLocationClassification(mm.GetForwardItem(x).data, optimal)]++;
+		}
+		for (int x = 0; x < mm.GetNumBackwardItems(); x++)
+		{
+			if (mm.GetBackwardItem(x).where == kClosedList)
+				counts[GetLocationClassification(mm.GetBackwardItem(x).data, optimal)]++;
+		}
+		for (int x = 0; x < counts.size(); x++)
+		{
+			switch (x)
+			{
+				case 1: printf("NN: %d\t", counts[x]); break;
+				case 2: printf("NF: %d\t", counts[x]); break;
+				case 3: printf("NR: %d\t", counts[x]); break;
+				case 4: printf("FN: %d\t", counts[x]); break;
+				case 5: printf("FF: %d\t", counts[x]); break;
+				case 6: printf("FR: %d\t", counts[x]); break;
+				case 7: printf("RN: %d\t", counts[x]); break;
+				case 8: printf("RF: %d\t", counts[x]); break;
+				case 9: printf("RR: %d\t", counts[x]); break;
+				default: break;
+			}
+		}
+	}
+	printf("\n");
+}
+
+void AnalyzeMap(const char *map, const char *scenario)
+{
+	printf("Loading %s with scenario %s\n", map, scenario);
+	ScenarioLoader s(scenario);
+	Map *m = new Map(map);
+	me = new MapEnvironment(m);
+	me->SetDiagonalCost(1.5);
+	for (int x = 0; x < s.GetNumExperiments(); x++)
+	{
+		AnalyzeProblem(m, s.GetNthExperiment(x));
+	}
+}

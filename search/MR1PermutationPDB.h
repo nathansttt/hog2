@@ -10,10 +10,6 @@
 #define MR1PermutationPDB_h
 
 #include "PDBHeuristic.h"
-const int maxThreads = 32;
-
-//Later we will add this paper:
-//http://aaaipress.org/Papers/Workshops/2008/WS-08-10/WS08-10-004.pdf
 
 /**
  * This class uses the first of two Myrvold-Russkey ranking functions
@@ -24,18 +20,20 @@ const int maxThreads = 32;
  * For more details see:
  * http://webhome.cs.uvic.ca/~ruskey/Publications/RankPerm/MyrvoldRuskey.pdf
  */
+
 template <class state, class action, class environment>
 class MR1PermutationPDB : public PDBHeuristic<state, action, environment> {
 public:
 	MR1PermutationPDB(environment *e, const state &s, std::vector<int> distincts);
 	//	virtual uint64_t GetStateHash(const state &s) const;
 	//	virtual void GetStateFromHash(state &s, uint64_t hash) const;
-	
 	virtual uint64_t GetPDBSize() const;
 	
 	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const;
 	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const;
-	
+	virtual uint64_t GetAbstractHash(const state &s, int threadID = 0) const { return GetPDBHash(s); }
+	virtual state GetStateFromAbstractState(state &s) const { return s; }
+
 	bool Load(FILE *f);
 	void Save(FILE *f);
 	bool Load(const char *prefix);
@@ -50,14 +48,16 @@ private:
 	mutable std::vector<std::vector<int> > dualCache;
 	mutable std::vector<std::vector<int> > locsCache;
 	mutable std::vector<std::vector<int> > valueStack;
+
+	state example;
 };
 
 template <class state, class action, class environment>
 MR1PermutationPDB<state, action, environment>::MR1PermutationPDB(environment *e, const state &s, std::vector<int> distincts)
-:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.puzzle.size()), dualCache(maxThreads), locsCache(maxThreads), valueStack(maxThreads)
+:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.puzzle.size()), dualCache(maxThreads), locsCache(maxThreads), valueStack(maxThreads), example(s)
 {
 	pdbSize = 1;
-	for (int x = (int)s.puzzle.size(); x > s.puzzle.size()-distincts.size(); x--)
+	for (int x = (int)example.puzzle.size(); x > example.puzzle.size()-distincts.size(); x--)
 	{
 		pdbSize *= x;
 	}
@@ -82,13 +82,15 @@ uint64_t MR1PermutationPDB<state, action, environment>::GetPDBHash(const state &
 	std::vector<int> &locs = locsCache[threadID];
 	std::vector<int> &dual = dualCache[threadID];
 	std::vector<int> &values = valueStack[threadID];
-	locs.resize(s.puzzle.size()); // vector for distinct item locations
-	dual.resize(s.puzzle.size()); // vector for distinct item locations
+	locs.resize(example.puzzle.size()); // vector for distinct item locations
+	dual.resize(example.puzzle.size()); // vector for distinct item locations
 	values.resize(0);
 	memset(&locs[0], 0xFF, locs.size()*sizeof(locs[0]));
 	memset(&dual[0], 0xFF, dual.size()*sizeof(dual[0]));
+	int puzzleSize = (int)example.puzzle.size();
+
 	// find current duals
-	for (unsigned int x = 0; x < s.puzzle.size(); x++)
+	for (unsigned int x = 0; x < puzzleSize; x++)
 	{
 		if (s.puzzle[x] != -1)
 			dual[s.puzzle[x]] = x;
@@ -96,20 +98,18 @@ uint64_t MR1PermutationPDB<state, action, environment>::GetPDBHash(const state &
 	// get locs by converting from the distinct array
 	for (int x = 0; x < distinct.size(); x++)
 	{
-		locs[s.puzzle.size()-x-1] = dual[distinct[distinct.size()-x-1]];
-		dual[distinct[distinct.size()-x-1]] = -1;
+		locs[puzzleSize-x-1] = dual[distinct[distinct.size()-x-1]];
+		//dual[distinct[distinct.size()-x-1]] = -1;
 	}
+	memset(&dual[0], 0xFF, dual.size()*sizeof(dual[0]));
 	// get new duals for the actual locs (after conversion)
-	for (int x = s.puzzle.size()-distinct.size(); x < s.puzzle.size(); x++)
+	for (int x = puzzleSize-distinct.size(); x < puzzleSize; x++)
 	{
 		dual[locs[x]] = x;
 	}
 	
-	//int ss[12];
-	//int ssLoc = 0;
-	
-	size_t last = s.puzzle.size()-distinct.size();
-	for (size_t i = s.puzzle.size(); i > last; i--)
+	size_t last = puzzleSize-distinct.size();
+	for (size_t i = puzzleSize; i > last; i--)
 	{
 		values.push_back(locs[i-1]); //val = locs[i-1];//get(perm, i-1);
 		
@@ -137,22 +137,23 @@ uint64_t MR1PermutationPDB<state, action, environment>::GetPDBHash(const state &
 template <class state, class action, class environment>
 void MR1PermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t hash, state &s, int threadID) const
 {
+	int puzzleSize = (int)example.puzzle.size();
+	s.puzzle.resize(puzzleSize);
 	std::vector<int> &dual = dualCache[threadID];
-	dual.resize(s.puzzle.size()); // vector for distinct item locations
+	dual.resize(puzzleSize); // vector for distinct item locations
 	for (int x = 0; x < dual.size(); x++)
 		dual[x] = x;
 	
-	size_t last = (s.puzzle.size()-distinct.size());
-//	for (size_t x = 0; x < s.puzzle.size(); x++)
-//		s.puzzle[x] = -1;
-	memset(&s.puzzle[0], 0xFF, s.puzzle.size()*sizeof(s.puzzle[0]));
+	size_t last = (puzzleSize-distinct.size());
+	memset(&s.puzzle[0], 0xFF, puzzleSize*sizeof(s.puzzle[0]));
 	
-	for (size_t i = s.puzzle.size(); i > last; i--)
+	for (size_t i = puzzleSize; i > last; i--)
 	{
 		swap(dual[hash%i], dual[i-1]);
 		hash = hash/i;
 		s.puzzle[dual[i-1]] = distinct[i-last-1];
 	}
+	s.FinishUnranking(example);
 }
 
 template <class state, class action, class environment>

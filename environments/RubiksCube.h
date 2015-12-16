@@ -184,15 +184,20 @@ public:
 };
 
 
-class RubikPDB : public PDBHeuristic<RubiksState, RubiksAction, RubiksCube, 4> {
+class RubikPDB : public PDBHeuristic<RubiksState, RubiksAction, RubiksCube, RubiksState, 4> {
 public:
 	RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners);
 	uint64_t GetStateHash(const RubiksState &s) const;
 	void GetStateFromHash(RubiksState &s, uint64_t hash) const;
+
 	uint64_t GetPDBSize() const;
+	
 	uint64_t GetPDBHash(const RubiksState &s, int threadID = 0) const;
+	virtual uint64_t GetAbstractHash(const RubiksState &s, int threadID = 0) const { return GetPDBHash(s); }
 	void GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID = 0) const;
-//	const char *GetName();
+	RubiksState GetStateFromAbstractState(RubiksState &s) const { return s; }
+
+	//	const char *GetName();
 	bool Load(const char *prefix);
 	void Save(const char *prefix);
 	bool Load(FILE *f);

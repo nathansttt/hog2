@@ -36,6 +36,20 @@ public:
 			puzzle[x] = x;
 		blank = 0;
 	}
+	void FinishUnranking(const MNPuzzleState &s)
+	{
+		width = s.width;
+		height = s.height;
+		for (int x = 0; x < puzzle.size(); x++)
+		{
+			if (puzzle[x] == 0)
+			{
+				blank = x;
+				return;
+			}
+		}
+	}
+
 	unsigned int width, height;
 	unsigned int blank;
 	std::vector<int> puzzle;

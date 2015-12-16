@@ -16,30 +16,36 @@
 #include "SharedQueue.h"
 #include "NBitArray.h"
 #include "Timer.h"
+#include "RangeCompression.h"
 
 enum PDBLookupType {
 	kPlain,
-	kMinCompress,
-	kFractionalCompress,
-	kFractionalModCompress,
+	kDivCompress,
+//	kFractionalCompress,
+//	kFractionalModCompress,
 	kModCompress,
 	kValueCompress,
 	kDivPlusDeltaCompress, // two lookups with the same index, one is div, one is delta
 	kDefaultHeuristic
 };
 
-template <class state, class action, class environment, uint64_t pdbBits = 8>
+const int coarseSize = 1024;
+const int maxThreads = 32; // TODO: This isn't enforced in a static assert
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state = abstractState, uint64_t pdbBits = 8>
 class PDBHeuristic : public Heuristic<state> {
 public:
-	PDBHeuristic(environment *e) :type(kPlain), env(e) {}
+	PDBHeuristic(abstractEnvironment *e) :type(kPlain), env(e) {}
 	virtual ~PDBHeuristic() {}
+
 	virtual double HCost(const state &a, const state &b) const;
 
-//	virtual uint64_t GetStateHash(const state &s) const = 0;
-//	virtual void GetStateFromHash(state &s, uint64_t hash) const = 0;
 	virtual uint64_t GetPDBSize() const = 0;
-	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const = 0;
-	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const = 0;
+
+	virtual uint64_t GetPDBHash(const abstractState &s, int threadID = 0) const = 0;
+	virtual uint64_t GetAbstractHash(const state &s, int threadID = 0) const = 0;
+	virtual void GetStateFromPDBHash(uint64_t hash, abstractState &s, int threadID = 0) const = 0;
+	virtual state GetStateFromAbstractState(abstractState &s) const = 0;
 
 	virtual bool Load(const char *prefix) = 0;
 	virtual void Save(const char *prefix) = 0;
@@ -51,46 +57,65 @@ public:
 	void BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads);
 
 	void DivCompress(int factor, bool print_histogram);
-	void ModCompressPDB(uint64_t newEntries, bool print_histogram);
+	void ModCompress(uint64_t newEntries, bool print_histogram);
+
+	void DeltaCompress(Heuristic<state> *h, state goal, bool print_histogram);
+	
 	void FractionalDivCompress(uint64_t count, bool print_histogram);
 	void FractionalModCompress(uint64_t factor, bool print_histogram);
 	void ValueCompress(int maxValue, bool print_histogram);
 	void ValueCompress(std::vector<int> cutoffs, bool print_histogram);
 	void ValueRangeCompress(int numBits, bool print_histogram);
-	void DeltaCompress(Heuristic<state> *h, state goal, bool print_histogram);
+
+	void PrintHistogram();
+	void GetHistogram(std::vector<uint64_t> &histogram);
 protected:
 	// holds a Pattern Databases
 	NBitArray<pdbBits> PDB;
 	//std::vector<uint8_t> PDB;
 	PDBLookupType type;
-	const int coarseSize = 1024;
-	environment *env;
-	state goalState;
+	uint64_t compressionValue;
+
+	abstractEnvironment *env;
+	abstractState goalState;
 private:
 	void ThreadWorker(int threadNum, int depth,
 					  NBitArray<pdbBits> &DB,
-					  //std::vector<uint8_t> &DB,
+					  std::vector<bool> &coarse,
 					  SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 					  SharedQueue<uint64_t> *results,
 					  std::mutex *lock);
 };
 
-template <class state, class action, class environment, uint64_t pdbBits>
-double PDBHeuristic<state, action, environment, pdbBits>::HCost(const state &a, const state &b) const
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::HCost(const state &a, const state &b) const
 {
 	switch (type)
 	{
-		case kPlain: return PDB.Get(GetPDBHash(a)); //PDB[GetPDBHash(a)];
+		case kPlain:
+		{
+			return PDB.Get(GetAbstractHash(a)); //PDB[GetPDBHash(a)];
+		}
+		case kDivCompress:
+		{
+			return PDB.Get(GetAbstractHash(a)/compressionValue);
+		}
+		case kModCompress:
+		{
+			return PDB.Get(GetAbstractHash(a)%compressionValue);
+		}
+
 		default:
 			assert(!"Not implemented");
 	}
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::BuildPDB(const state &goal, int numThreads)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDB(const state &goal, int numThreads)
 {
-	goalState = goal;
-	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue;
+	GetStateFromPDBHash(this->GetAbstractHash(goal), goalState);
+	//goalState = goal;
+	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue(numThreads*20);
 	SharedQueue<uint64_t> resultQueue;
 	std::mutex lock;
 	
@@ -102,27 +127,27 @@ void PDBHeuristic<state, action, environment, pdbBits>::BuildPDB(const state &go
 	
 	// with weights we have to store the lowest weight stored to make sure
 	// we don't skip regions
-	std::vector<uint8_t> coarseOpen((COUNT+coarseSize-1)/coarseSize);
-	std::fill(coarseOpen.begin(), coarseOpen.end(), 255);
+	std::vector<bool> coarseOpenCurr((COUNT+coarseSize-1)/coarseSize);
+	std::vector<bool> coarseOpenNext((COUNT+coarseSize-1)/coarseSize);
 	
-	uint64_t entries = 0;
+	uint64_t entries = 1;
 	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goal << std::endl;
+	std::cout << "Goal State: " << goalState << std::endl;
 	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goal) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
 	
-	std::cout << "Abstract Goal State: " << goal << std::endl;
-	std::cout << "Abstract PDB Hash of Goal: " << GetPDBHash(goal) << std::endl;
+//	std::cout << "Abstract Goal State: " << goal << std::endl;
+//	std::cout << "Abstract PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
 	Timer t;
 	t.StartTimer();
 	//	q_curr.push_back(goal);
 	//DB[GetPDBHash(goal)] = 0;
-	PDB.Set(GetPDBHash(goal), 0);
+	PDB.Set(GetPDBHash(goalState), 0);
 
-	coarseOpen[GetPDBHash(goal)/coarseSize] = 0;
+	coarseOpenCurr[GetPDBHash(goalState)/coarseSize] = true;
 	int depth = 0;
 	uint64_t newEntries;
 	std::vector<std::thread*> threads(numThreads);
@@ -133,33 +158,31 @@ void PDBHeuristic<state, action, environment, pdbBits>::BuildPDB(const state &go
 		s.StartTimer();
 		for (int x = 0; x < numThreads; x++)
 		{
-			threads[x] = new std::thread(&PDBHeuristic<state, action, environment, pdbBits>::ThreadWorker,
+			threads[x] = new std::thread(&PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ThreadWorker,
 										 this,
-										 x, depth, std::ref(PDB),// &coarseOpen,
+										 x, depth, std::ref(PDB), std::ref(coarseOpenNext),
 										 &workQueue, &resultQueue, &lock);
 		}
 		
 		for (uint64_t x = 0; x < COUNT; x+=coarseSize)
 		{
-			bool submit = false;
-			for (uint64_t t = x; t < std::min(COUNT, x+coarseSize); t++)
+			if (coarseOpenCurr[x/coarseSize])
 			{
-				if (PDB.Get(t) == depth)
-				{
-					submit = true;
-					//newEntries++;
-				}
+				workQueue.WaitAdd({x, std::min(COUNT, x+coarseSize)});
+//				for (uint64_t t = x; t < std::min(COUNT, x+coarseSize); t++)
+//				{
+//					if (PDB.Get(t) == depth)
+//					{
+//						workQueue.WaitAdd({t, std::min(COUNT, x+coarseSize)});
+//						break;
+//					}
+//				}
 			}
-			if (submit)
-			{
-				while (workQueue.size() > 10*numThreads)
-				{ std::this_thread::sleep_for(std::chrono::microseconds(10)); }
-				workQueue.Add({x, std::min(COUNT, x+coarseSize)});
-			}
+			coarseOpenCurr[x/coarseSize] = false;
 		}
 		for (int x = 0; x < numThreads; x++)
 		{
-			workQueue.Add({0,0});
+			workQueue.WaitAdd({0,0});
 		}
 		for (int x = 0; x < numThreads; x++)
 		{
@@ -168,35 +191,34 @@ void PDBHeuristic<state, action, environment, pdbBits>::BuildPDB(const state &go
 			threads[x] = 0;
 		}
 		// read out node counts
-		while (true)
+		uint64_t total = 0;
 		{
 			uint64_t val;
-			if (resultQueue.Remove(val))
+			while (resultQueue.Remove(val))
 			{
-				//newEntries+=val;
-			}
-			else {
-				break;
+				total+=val;
 			}
 		}
 		
-		newEntries = 0;
-		for (uint64_t x = 0; x < COUNT; x++)
-		{
-			if (PDB.Get(x) == depth)
-			{
-				newEntries++;
-			}
-		}
-		entries += newEntries;
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states seen; %llu of %llu total\n",
-			   depth, s.EndTimer(), newEntries, entries, COUNT);
+//		newEntries = 0;
+//		for (uint64_t x = 0; x < COUNT; x++)
+//		{
+//			if (PDB.Get(x) == depth)
+//			{
+//				newEntries++;
+//			}
+//		}
+		entries += total;//newEntries;
+		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+			   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
 		//		depth = coarseOpen[0];
 		//		for (int x = 1; x < coarseOpen.size(); x++)
 		//			depth = min(depth, coarseOpen[x]);
 		//		if (depth == 255) // no new entries!
 		//			break;
+
+		coarseOpenCurr.swap(coarseOpenNext);
 	} while (entries != COUNT);
 	
 	printf("%1.2fs elapsed\n", t.EndTimer());
@@ -205,23 +227,23 @@ void PDBHeuristic<state, action, environment, pdbBits>::BuildPDB(const state &go
 		printf("Entries: %llu; count: %llu\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
-	
+	PrintHistogram();
 	//PrintPDBHistogram();
 
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::ThreadWorker(int threadNum, int depth,
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ThreadWorker(int threadNum, int depth,
 																	 NBitArray<pdbBits> &DB,
-																	 //std::vector<uint8_t> &DB,
+																	 std::vector<bool> &coarse,
 																	 SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 																	 SharedQueue<uint64_t> *results,
 																	 std::mutex *lock)
 {
 	std::pair<uint64_t, uint64_t> p;
 	uint64_t start, end;
-	std::vector<action> acts;
-	state s, t;
+	std::vector<abstractAction> acts;
+	abstractState s(goalState), t(goalState);
 	uint64_t count = 0;
 	
 	struct writeInfo {
@@ -231,11 +253,7 @@ void PDBHeuristic<state, action, environment, pdbBits>::ThreadWorker(int threadN
 	std::vector<writeInfo> cache;
 	while (true)
 	{
-		if (work->Remove(p) == false)
-		{
-			std::this_thread::sleep_for(std::chrono::microseconds(10));
-			continue;
-		}
+		work->WaitRemove(p);
 		if (p.first == p.second)
 		{
 			break;
@@ -248,7 +266,6 @@ void PDBHeuristic<state, action, environment, pdbBits>::ThreadWorker(int threadN
 			int stateDepth = DB.Get(x);
 			if (stateDepth == depth)
 			{
-				count++;
 				GetStateFromPDBHash(x, s, threadNum);
 				//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 				env->GetActions(s, acts);
@@ -271,7 +288,8 @@ void PDBHeuristic<state, action, environment, pdbBits>::ThreadWorker(int threadN
 			{
 				if (d.newGCost < DB.Get(d.rank)) // shorter path
 				{
-					//DB[d.rank] = d.newGCost;
+					count++;
+					coarse[d.rank/coarseSize] = true;
 					DB.Set(d.rank, d.newGCost);
 				}
 			}
@@ -282,62 +300,116 @@ void PDBHeuristic<state, action, environment, pdbBits>::ThreadWorker(int threadN
 	results->Add(count);
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads)
 {
 	assert(!"Not currently implemented.");
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::DivCompress(int factor, bool print_histogram)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::DivCompress(int factor, bool print_histogram)
+{
+	type = kDivCompress;
+	compressionValue = factor;
+	NBitArray<pdbBits> copy(PDB);
+	PDB.Resize((PDB.Size()+compressionValue-1)/compressionValue);
+	PDB.FillMax();
+	for (uint64_t x = 0; x < copy.Size(); x++)
+	{
+		uint64_t newIndex = x/compressionValue;
+		PDB.Set(newIndex, std::min(copy.Get(x), PDB.Get(newIndex)));
+	}
+	if (print_histogram)
+		PrintHistogram();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ModCompress(uint64_t newEntries, bool print_histogram)
+{
+	type = kModCompress;
+	compressionValue = newEntries;
+	NBitArray<pdbBits> copy(PDB);
+	PDB.Resize(compressionValue);
+	PDB.FillMax();
+	for (uint64_t x = 0; x < copy.Size(); x++)
+	{
+		uint64_t newIndex = x%compressionValue;
+		PDB.Set(newIndex, std::min(copy.Get(x), PDB.Get(newIndex)));
+	}
+	if (print_histogram)
+		PrintHistogram();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::DeltaCompress(Heuristic<state> *h, state goal, bool print_histogram)
+{
+	abstractState s;
+	state s1;
+	for (int x = 0; x < PDB.Size(); x++)
+	{
+		GetStateFromPDBHash(x, s);
+		s1 = GetStateFromAbstractState(s);
+		PDB.Set(x, PDB.Get(x) - h->HCost(s1, goal));
+	}
+	if (print_histogram)
+		PrintHistogram();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::FractionalDivCompress(uint64_t count, bool print_histogram)
 {
 	assert(!"Not currently implemented.");
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::ModCompressPDB(uint64_t newEntries, bool print_histogram)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::FractionalModCompress(uint64_t factor, bool print_histogram)
 {
 	assert(!"Not currently implemented.");
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::FractionalDivCompress(uint64_t count, bool print_histogram)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueCompress(int maxValue, bool print_histogram)
 {
 	assert(!"Not currently implemented.");
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::FractionalModCompress(uint64_t factor, bool print_histogram)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueCompress(std::vector<int> cutoffs, bool print_histogram)
 {
 	assert(!"Not currently implemented.");
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::ValueCompress(int maxValue, bool print_histogram)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueRangeCompress(int numBits, bool print_histogram)
 {
-	assert(!"Not currently implemented.");
+	std::vector<uint64_t> dist;
+	std::vector<int> cutoffs;
+	GetHistogram(dist);
+	GetOptimizedBoundaries(dist, 1<<numBits, cutoffs);
+	printf("Setting boundaries [%d values]: ", (1<<numBits));
+	for (int x = 0; x < cutoffs.size(); x++)
+		printf("%d ", cutoffs[x]);
+	printf("\n");
+	cutoffs.push_back(256);
+	
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				PDB.Set(x, cutoffs[y]);
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		PrintHistogram();
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::ValueCompress(std::vector<int> cutoffs, bool print_histogram)
-{
-	assert(!"Not currently implemented.");
-}
-
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::ValueRangeCompress(int numBits, bool print_histogram)
-{
-	assert(!"Not currently implemented.");
-}
-
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::DeltaCompress(Heuristic<state> *h, state goal, bool print_histogram)
-{
-	assert(!"Not currently implemented.");
-}
-
-template <class state, class action, class environment, uint64_t pdbBits>
-bool PDBHeuristic<state, action, environment, pdbBits>::Load(FILE *f)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+bool PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::Load(FILE *f)
 {
 	if (fread(&type, sizeof(type), 1, f) != 1)
 		return false;
@@ -346,12 +418,48 @@ bool PDBHeuristic<state, action, environment, pdbBits>::Load(FILE *f)
 	return PDB.Read(f);
 }
 
-template <class state, class action, class environment, uint64_t pdbBits>
-void PDBHeuristic<state, action, environment, pdbBits>::Save(FILE *f)
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::Save(FILE *f)
 {
 	fwrite(&type, sizeof(type), 1, f);
 	fwrite(&goalState, sizeof(goalState), 1, f);
 	PDB.Write(f);
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::GetHistogram(std::vector<uint64_t> &histogram)
+{
+	histogram.resize(0);
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		if (PDB.Get(x)+1 > histogram.size())
+		{
+			histogram.resize(PDB.Get(x)+1);
+		}
+		histogram[PDB.Get(x)]++;
+	}
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::PrintHistogram()
+{
+	double average;
+	std::vector<uint64_t> histogram;
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		if (PDB.Get(x)+1 > histogram.size())
+		{
+			histogram.resize(PDB.Get(x)+1);
+		}
+		histogram[PDB.Get(x)]++;
+		average += PDB.Get(x);
+	}
+	for (int x = 0; x < histogram.size(); x++)
+	{
+		if (histogram[x] > 0)
+			printf("%d: %llu\n", x, histogram[x]);
+	}
+	printf("Average: %f; count: %llu\n", average/PDB.Size(), PDB.Size());
 }
 
 #endif

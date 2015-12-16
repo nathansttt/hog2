@@ -10,20 +10,22 @@
 #define hog2_glut_PermutationPDB_h
 
 #include "PDBHeuristic.h"
-const int maxThreads = 32;
 
 /**
  * This class does the basic permutation calculation with a regular N^2 permutation
  * computation.
  */
 template <class state, class action, class environment>
-class PermutationPDB : public PDBHeuristic<state, action, environment> {
+class PermutationPDB : public PDBHeuristic<state, action, environment, state> {
 public:
 	PermutationPDB(environment *e, const state &s, std::vector<int> distincts);
 
 	virtual uint64_t GetPDBSize() const;
+
 	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const;
 	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const;
+	virtual uint64_t GetAbstractHash(const state &s, int threadID = 0) const { return GetPDBHash(s); }
+	virtual state GetStateFromAbstractState(state &s) const { return s; }
 
 	bool Load(FILE *f);
 	void Save(FILE *f);
@@ -36,7 +38,7 @@ private:
 	std::vector<int> distinct;
 	size_t puzzleSize;
 	uint64_t pdbSize;
-	
+	state example;
 	// cache for computing ranking/unranking
 	mutable std::vector<std::vector<int> > dualCache;
 	mutable std::vector<std::vector<int> > locsCache;
@@ -44,7 +46,8 @@ private:
 
 template <class state, class action, class environment>
 PermutationPDB<state, action, environment>::PermutationPDB(environment *e, const state &s, std::vector<int> distincts)
-:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.puzzle.size()), dualCache(maxThreads), locsCache(maxThreads)
+:PDBHeuristic<state, action, environment, state>(e), distinct(distincts), puzzleSize(s.puzzle.size()),
+dualCache(maxThreads), locsCache(maxThreads), example(s)
 {
 	pdbSize = 1;
 	for (int x = (int)s.puzzle.size(); x > s.puzzle.size()-distincts.size(); x--)
@@ -57,13 +60,6 @@ template <class state, class action, class environment>
 uint64_t PermutationPDB<state, action, environment>::GetPDBSize() const
 {
 	return pdbSize;
-}
-
-inline void swap(int &a, int &b)
-{
-	int tmp = a;
-	a = b;
-	b = tmp;
 }
 
 template <class state, class action, class environment>
@@ -128,6 +124,7 @@ void PermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t ha
 	std::fill(s.puzzle.begin(), s.puzzle.end(), -1);
 	for (int x = 0; x < dual.size(); x++)
 		s.puzzle[dual[x]] = distinct[x];
+	s.FinishUnranking(example);
 }
 
 template <class state, class action, class environment>
