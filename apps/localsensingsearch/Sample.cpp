@@ -38,6 +38,7 @@
 #include "RIBS.h"
 #include "LRTAStar.h"
 #include "LSSLRTAStar.h"
+#include "gLSSLRTAStar.h"
 #include "ScenarioLoader.h"
 #include "StatUtil.h"
 #include "HeuristicLearningMeasure.h"
@@ -105,7 +106,7 @@ void CreateSimulation(int id)
 //		map->SetTerrainType(mazeSize-2, 1,
 //							mazeSize-2, mazeSize-2, kOutOfBounds);
 //		map->Load("/Users/nathanst/Desktop/100.map");
-//		map->Load("/Users/nathanst/hog2/maps/dao/arena2.map");
+		map->Load("/Users/nathanst/hog2/maps/dao/arena2.map");
 //		map->Load("/Users/nathanst/hog2/maps/random/random512-40-0.map");
 //		map->Load("/Users/nathanst/hog2/maps/wc3maps512/gnollwood.map");
 		
@@ -124,24 +125,25 @@ void CreateSimulation(int id)
 //									0, y+2, kGround);
 //			}
 //		}
-		
-		map = new Map(mazeSize, mazeSize*2);
-		map->SetRectHeight(0, 0, mazeSize-1, 2*mazeSize-1, 0, kOutOfBounds);
-		for (int x = 0; x < mazeSize; x++)
-		{
-			map->SetTerrainType(x, x,
-								x, x+3, kGround);
-			if (1 == x%2)
-				map->SetTerrainType(x, x,
-									x, x+20, kGround);
-			map->SetTerrainType(x, x+20,
-								x, x+21, kGround);
-		}
-		map->SetRectHeight(mazeSize-5*sqrt(mazeSize), 20+mazeSize, mazeSize-1, 20+mazeSize+5*sqrt(mazeSize), 0, kGround);
-		map->SetTerrainType(0, 20+mazeSize,
-							mazeSize-1, 20+mazeSize, kGround);
-		map->SetTerrainType(0, 20+mazeSize,
-							0, 2*mazeSize-1, kGround);
+
+//		// ladder map
+//		map = new Map(mazeSize, mazeSize*2);
+//		map->SetRectHeight(0, 0, mazeSize-1, 2*mazeSize-1, 0, kOutOfBounds);
+//		for (int x = 0; x < mazeSize; x++)
+//		{
+//			map->SetTerrainType(x, x,
+//								x, x+3, kGround);
+//			if (1 == x%2)
+//				map->SetTerrainType(x, x,
+//									x, x+20, kGround);
+//			map->SetTerrainType(x, x+20,
+//								x, x+21, kGround);
+//		}
+//		map->SetRectHeight(mazeSize-5*sqrt(mazeSize), 20+mazeSize, mazeSize-1, 20+mazeSize+5*sqrt(mazeSize), 0, kGround);
+//		map->SetTerrainType(0, 20+mazeSize,
+//							mazeSize-1, 20+mazeSize, kGround);
+//		map->SetTerrainType(0, 20+mazeSize,
+//							0, 2*mazeSize-1, kGround);
 		
 		
 		//MakeMaze(map, 1);
@@ -674,7 +676,9 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				xyLoc a(px1, py1);
 				xyLoc b(px2, py2);
 				
-				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new gLSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+//				LearningUnit<xyLoc, tDirection, MapEnvironment> *u6 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
 				u6->SetSpeed(0.02);
 //
 //				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new FLRTA::FLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
@@ -683,7 +687,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new GridLRTA::GridLRTAStar(10));
 //				u7->SetSpeed(0.02);
 //				LearningUnit<xyLoc, tDirection, MapEnvironment> *u7 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new MPLRTA::MPLRTAStar());
-//				u7->SetSpeed(0.02);
+				u7->SetSpeed(0.02);
 				unitSims[windowID]->ClearAllUnits();
 				unitSims[windowID]->GetStats()->ClearAllStats();
 				unitSims[windowID]->GetStats()->AddFilter("trialDistanceMoved");
@@ -692,7 +696,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				unitSims[windowID]->GetStats()->AddFilter("Trial End");
 
 				unitSims[windowID]->AddUnit(u6);
-//				unitSims[windowID]->AddUnit(u7);
+				unitSims[windowID]->AddUnit(u7);
 				SetNumPorts(windowID, 1);
 			}
 			break;
@@ -870,7 +874,26 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 //	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
 	double weight = 20;
 
-	if (which == -1)
+	if (which == -2)
+	{
+		double maxError = 0;
+		std::vector<xyLoc> thePath;
+		// Run A* and measure maximum heuristic error
+		a1.GetPath(es->GetEnvironment(), a, b, thePath);
+		double pathCost = 0;
+		for (int x = 0; x < thePath.size()-2; x++)
+		{
+			//pathCost += es->GetEnvironment()->GCost(thePath[thePath.size()-2-x], thePath[thePath.size()-1-x]);
+			double diff = es->GetEnvironment()->HCost(thePath[thePath.size()-2-x], thePath[thePath.size()-1]) -
+			es->GetEnvironment()->HCost(thePath[0], thePath[thePath.size()-1]);
+			//pathCost - es->GetEnvironment()->HCost(thePath[thePath.size()-2-x], thePath[thePath.size()-1]);
+			if (diff > maxError)
+				maxError = diff;
+		}
+		printf("h_Delta: %1.2f\n", maxError);
+		return;
+	}
+	else if (which == -1)
 	{
 		double maxError = 0;
 		std::vector<xyLoc> thePath;
@@ -991,6 +1014,27 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
+	else if (which == 13)
+	{
+		printf("Running gLSS-LRTA*(1)\n");
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new gLSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 14)
+	{
+		printf("Running gLSS-LRTA*(10)\n");
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new gLSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 15)
+	{
+		printf("Running gLSS-LRTA*(100)\n");
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, new gLSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
 
 	
 	es->SetTrialLimit(0);
@@ -1000,6 +1044,7 @@ void RunSingleTest(EpSim *es, const Experiment &e, int which)
 	}
 	statValue v;
 	printf("Done\n");
+	
 	int choice = es->GetStats()->FindNextStat("trialDistanceMoved", es->GetUnit(0)->GetName(), 0);
 	es->GetStats()->LookupStat(choice, v);
 	printf("dist-first\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), e.GetBucket(), v.fval);
@@ -1345,14 +1390,37 @@ void RunScalingTest(int size, int which, float weight)
 	es->GetStats()->AddFilter("TotalLearning");
 	es->GetStats()->AddFilter("MakeMoveThinkingTime");
 	es->GetStats()->AddFilter("Trial End");
+	es->GetStats()->AddFilter("MaxStateLearning");
 	es->GetStats()->EnablePrintOutput(false);
 	xyLoc a(0, 0), b(size-1, size-1);
 	xyLoc c(size-3, size-3);
 	
 	HeuristicLearningMeasure<xyLoc, tDirection, MapEnvironment> measure;
 	double requiredLearning = measure.MeasureDifficultly(es->GetEnvironment(), a, b);
-	LSSLRTAStar<xyLoc, tDirection, MapEnvironment> *agent = 0;
-	if (which == 0)
+	LearningAlgorithm<xyLoc, tDirection, MapEnvironment> *agent2 = 0;
+	Heuristic<xyLoc> *agent = 0;
+
+	if (which == -2)
+	{
+		double maxError = 0;
+		std::vector<xyLoc> thePath;
+		// Run A* and measure maximum heuristic error
+		
+		a1.GetPath(es->GetEnvironment(), c, b, thePath);
+		double pathCost = 0;
+		for (int x = 0; x < thePath.size()-2; x++)
+		{
+			//pathCost += es->GetEnvironment()->GCost(thePath[thePath.size()-2-x], thePath[thePath.size()-1-x]);
+			double diff = es->GetEnvironment()->HCost(thePath[thePath.size()-2-x], thePath[thePath.size()-1]) -
+			es->GetEnvironment()->HCost(thePath[0], thePath[thePath.size()-1]);
+			//pathCost - es->GetEnvironment()->HCost(thePath[thePath.size()-2-x], thePath[thePath.size()-1]);
+			if (diff > maxError)
+				maxError = diff;
+		}
+		printf("h_Delta: %1.2f\n", maxError);
+		exit(0);
+	}
+	else if (which == 0)
 	{
 		printf("Running RIBS\n");
 		LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment> *u1 = new LocalSensing::RIBS<xyLoc, tDirection, MapEnvironment>(a, b);
@@ -1362,21 +1430,27 @@ void RunScalingTest(int size, int which, float weight)
 	else if (which == 1)
 	{
 		printf("Running LSSLRTA*\n");
-		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, agent = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1));
+		auto tmp = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1);
+		agent = tmp;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b,  tmp);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 2)
 	{
 		printf("Running LSS-LRTA*(10)\n");
-		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, agent = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10));
+		auto tmp = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10);
+		agent = tmp;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, tmp);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
 	else if (which == 3)
 	{
 		printf("Running LSS-LRTA*(100)\n");
-		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, agent = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100));
+		auto tmp = new LSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100);
+		agent = tmp;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, tmp);
 		u1->SetSpeed(1.0);
 		es->AddUnit(u1);
 	}
@@ -1464,6 +1538,33 @@ void RunScalingTest(int size, int which, float weight)
 		u6->SetSpeed(1.0);
 		es->AddUnit(u6);
 	}
+	else if (which == 13)
+	{
+		printf("Running gLSS-LRTA*(1)\n");
+		auto tmp = new gLSSLRTAStar<xyLoc, tDirection, MapEnvironment>(1);
+		agent = tmp;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, tmp);
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 14)
+	{
+		printf("Running gLSS-LRTA*(10)\n");
+		auto tmp = new gLSSLRTAStar<xyLoc, tDirection, MapEnvironment>(10);
+		agent = tmp;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, tmp);
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
+	else if (which == 15)
+	{
+		printf("Running gLSS-LRTA*(100)\n");
+		auto tmp = new gLSSLRTAStar<xyLoc, tDirection, MapEnvironment>(100);
+		agent = tmp;
+		LearningUnit<xyLoc, tDirection, MapEnvironment> *u1 = new LearningUnit<xyLoc, tDirection, MapEnvironment>(a, b, tmp);
+		u1->SetSpeed(1.0);
+		es->AddUnit(u1);
+	}
 	fflush(stdout);
 	es->SetTrialLimit(0);
 	//es->SetTrialLimit(500000);
@@ -1511,6 +1612,13 @@ void RunScalingTest(int size, int which, float weight)
 		es->GetStats()->LookupStat(choice, v);
 		printf("first-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, v.fval);
 		printf("sum-MakeMoveThinkingTime\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "MakeMoveThinkingTime", es->GetUnit(0)->GetName()));
+	}
+	choice = es->GetStats()->FindNextStat("MaxStateLearning", es->GetUnit(0)->GetName(), 0);
+	if (choice != -1)
+	{
+		es->GetStats()->LookupStat(choice, v);
+		printf("first-MaxLearn\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, v.fval);
+		printf("sum-MaxLearn\t%s\t%d\t%f\n", es->GetUnit(0)->GetName(), size, SumStatEntries(es->GetStats(), "MaxStateLearning", es->GetUnit(0)->GetName()));
 	}
 	
 	es->GetStats()->LookupStat("Trial End", "Race Simulation", v);
