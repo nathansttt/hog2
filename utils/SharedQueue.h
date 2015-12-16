@@ -12,7 +12,7 @@
 #include <iostream>
 #include <mutex>
 #include <deque>
-
+#include <condition_variable>
 /* SharedQueue
  *
  * A producer/consumer queue backed by a deque. Can optionally enforce

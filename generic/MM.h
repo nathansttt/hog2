@@ -10,7 +10,7 @@
 #define MM_h
 
 #include "AStarOpenClosed.h"
-#include "fpUtil.h"
+#include "FPUtil.h"
 
 template <class state>
 struct MMCompare {
