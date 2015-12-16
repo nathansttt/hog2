@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "466023021.102864"
+            timestampString = "469589873.303907"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "260"
-            endingLineNumber = "260"
-            landmarkName = "ThreadWorker(int threadNum, int depth, NBitArray&lt;pdbBits&gt; &amp;DB, //std::vector&lt;uint8_t&gt; &amp;DB, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
+            startingLineNumber = "277"
+            endingLineNumber = "277"
+            landmarkName = "ThreadWorker(int threadNum, int depth, NBitArray&lt;pdbBits&gt; &amp;DB, std::vector&lt;bool&gt; &amp;coarse, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -122,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/ParallelIDAStar.h"
-            timestampString = "463087521.589948"
+            timestampString = "466713447.729305"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "141"
-            endingLineNumber = "141"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
             landmarkName = "GetPath(environment *env, state from, state to, std::vector&lt;action&gt; &amp;thePath)"
             landmarkType = "7">
          </BreakpointContent>
@@ -143,6 +143,22 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "843"
             endingLineNumber = "843"
+            landmarkName = "GetInstance(int which, PancakePuzzleState &amp;s)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/MMPancake.cpp"
+            timestampString = "467532342.990713"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "864"
+            endingLineNumber = "864"
             landmarkName = "MM()"
             landmarkType = "7">
          </BreakpointContent>
@@ -154,27 +170,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/MMPancake.cpp"
-            timestampString = "463961799.896037"
+            timestampString = "467532342.990713"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "863"
-            endingLineNumber = "863"
-            landmarkName = "MM()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../apps/bidirectional/MMPancake.cpp"
-            timestampString = "463961799.896037"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "893"
-            endingLineNumber = "893"
+            startingLineNumber = "894"
+            endingLineNumber = "894"
             landmarkName = "MM()"
             landmarkType = "7">
          </BreakpointContent>
@@ -186,11 +186,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "465328362.019729"
+            timestampString = "468138503.349055"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "57"
-            endingLineNumber = "57"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
             landmarkName = "mem(0)"
             landmarkType = "7">
             <Locations>
@@ -234,11 +234,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "465328362.019729"
+            timestampString = "468138503.349055"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "63"
-            endingLineNumber = "63"
+            startingLineNumber = "75"
+            endingLineNumber = "75"
             landmarkName = "~NBitArray()"
             landmarkType = "7">
             <Locations>
@@ -378,11 +378,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "465328362.019729"
+            timestampString = "468138503.349055"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "43"
-            endingLineNumber = "43"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
             landmarkName = "class NBitArray"
             landmarkType = "3">
             <Locations>
@@ -426,11 +426,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "465328922.138444"
+            timestampString = "468138503.349055"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "84"
-            endingLineNumber = "84"
+            startingLineNumber = "109"
+            endingLineNumber = "109"
             landmarkName = "Resize(uint64_t newMaxEntries)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1529,11 +1529,11 @@
             condition = "index==21"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "465860490.992321"
+            timestampString = "468138503.349055"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "157"
-            endingLineNumber = "157"
+            startingLineNumber = "182"
+            endingLineNumber = "182"
             landmarkName = "Get(uint64_t index)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1577,11 +1577,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "465859910.58587"
+            timestampString = "468138503.349055"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "98"
-            endingLineNumber = "98"
+            startingLineNumber = "123"
+            endingLineNumber = "123"
             landmarkName = "Write(FILE *f)"
             landmarkType = "7">
             <Locations>
@@ -1640,11 +1640,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "465860490.992321"
+            timestampString = "468138503.349055"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "111"
-            endingLineNumber = "111"
+            startingLineNumber = "136"
+            endingLineNumber = "136"
             landmarkName = "Read(FILE *f)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1656,11 +1656,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "466370565.262664"
+            timestampString = "466539022.297462"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1884"
-            endingLineNumber = "1884"
+            startingLineNumber = "1860"
+            endingLineNumber = "1860"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1672,11 +1672,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "466370565.262664"
+            timestampString = "466539022.297462"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1881"
-            endingLineNumber = "1881"
+            startingLineNumber = "1857"
+            endingLineNumber = "1857"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1688,11 +1688,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "466370565.262664"
+            timestampString = "466539022.297462"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1885"
-            endingLineNumber = "1885"
+            startingLineNumber = "1861"
+            endingLineNumber = "1861"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1736,11 +1736,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "466370565.262664"
+            timestampString = "466539022.297462"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1893"
-            endingLineNumber = "1893"
+            startingLineNumber = "1869"
+            endingLineNumber = "1869"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1768,12 +1768,282 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "466370565.262664"
+            timestampString = "466640322.321568"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1933"
-            endingLineNumber = "1933"
+            startingLineNumber = "1916"
+            endingLineNumber = "1916"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../search/MR1PermutationPDB.h"
+            timestampString = "469589873.303907"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "111"
+            endingLineNumber = "111"
+            landmarkName = "GetPDBHash(const state &amp;s, int threadID)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/IDAStar.h"
+            timestampString = "466707257.667267"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "116"
+            endingLineNumber = "116"
+            landmarkName = "GetPath(SearchEnvironment&lt;state, action&gt; *env, state from, state to, std::vector&lt;action&gt; &amp;thePath)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/IDAStar.h"
+            timestampString = "466707261.146839"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "123"
+            endingLineNumber = "123"
+            landmarkName = "GetPath(SearchEnvironment&lt;state, action&gt; *env, state from, state to, std::vector&lt;action&gt; &amp;thePath)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/test/PDBRankingTest.cpp"
+            timestampString = "467052081.775129"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "69"
+            endingLineNumber = "69"
+            landmarkName = "TreePDBTest()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/MM.h"
+            timestampString = "468749127.901335"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "237"
+            endingLineNumber = "237"
+            landmarkName = "Expand(priorityQueue &amp;current, priorityQueue &amp;opposite, Heuristic&lt;state&gt; *heuristic, const state &amp;target)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../algorithms/AStarOpenClosed.h"
+            timestampString = "467746062.500104"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "313"
+            endingLineNumber = "313"
+            landmarkName = "HeapifyDown(unsigned int index)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AStarOpenClosed&lt;recVec, AStarCompare&lt;recVec&gt;, AStarOpenClosedData&lt;recVec&gt; &gt;::HeapifyDown(unsigned int)"
+                  moduleName = "bidirectional"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/algorithms/AStarOpenClosed.h"
+                  timestampString = "467746210.497741"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "313"
+                  endingLineNumber = "313"
+                  offsetFromSymbolStart = "183">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AStarOpenClosed&lt;xyLoc, AStarCompare&lt;xyLoc&gt;, AStarOpenClosedData&lt;xyLoc&gt; &gt;::HeapifyDown(unsigned int)"
+                  moduleName = "bidirectional"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/algorithms/AStarOpenClosed.h"
+                  timestampString = "467746210.497844"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "313"
+                  endingLineNumber = "313"
+                  offsetFromSymbolStart = "183">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AStarOpenClosed&lt;xyLoc, MMCompare&lt;xyLoc&gt;, AStarOpenClosedData&lt;xyLoc&gt; &gt;::HeapifyDown(unsigned int)"
+                  moduleName = "bidirectional"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/algorithms/AStarOpenClosed.h"
+                  timestampString = "467746210.497931"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "313"
+                  endingLineNumber = "313"
+                  offsetFromSymbolStart = "183">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../algorithms/AStarOpenClosed.h"
+            timestampString = "467746066.200027"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "287"
+            endingLineNumber = "287"
+            landmarkName = "HeapifyUp(unsigned int index)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AStarOpenClosed&lt;recVec, AStarCompare&lt;recVec&gt;, AStarOpenClosedData&lt;recVec&gt; &gt;::HeapifyUp(unsigned int)"
+                  moduleName = "bidirectional"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/algorithms/AStarOpenClosed.h"
+                  timestampString = "467746210.498594"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "287"
+                  endingLineNumber = "287"
+                  offsetFromSymbolStart = "95">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AStarOpenClosed&lt;xyLoc, AStarCompare&lt;xyLoc&gt;, AStarOpenClosedData&lt;xyLoc&gt; &gt;::HeapifyUp(unsigned int)"
+                  moduleName = "bidirectional"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/algorithms/AStarOpenClosed.h"
+                  timestampString = "467746210.498701"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "287"
+                  endingLineNumber = "287"
+                  offsetFromSymbolStart = "95">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AStarOpenClosed&lt;xyLoc, MMCompare&lt;xyLoc&gt;, AStarOpenClosedData&lt;xyLoc&gt; &gt;::HeapifyUp(unsigned int)"
+                  moduleName = "bidirectional"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/algorithms/AStarOpenClosed.h"
+                  timestampString = "467746210.498797"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "287"
+                  endingLineNumber = "287"
+                  offsetFromSymbolStart = "95">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../search/PDBHeuristic.h"
+            timestampString = "469589873.303907"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "246"
+            endingLineNumber = "246"
+            landmarkName = "ThreadWorker(int threadNum, int depth, NBitArray&lt;pdbBits&gt; &amp;DB, std::vector&lt;bool&gt; &amp;coarse, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/GUICode.cpp"
+            timestampString = "470065530.620852"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "555"
+            endingLineNumber = "555"
+            landmarkName = "AnalyzeMap(const char *map, const char *scenario)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../learning/gLSSLRTAStar.h"
+            timestampString = "468917854.340835"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "195"
+            endingLineNumber = "195"
+            landmarkName = "GetPath(environment *env, const state&amp; from, const state&amp; to, std::vector&lt;state&gt; &amp;thePath)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/delta/Driver.cpp"
+            timestampString = "470188073.184147"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "202"
+            endingLineNumber = "202"
+            landmarkName = "MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

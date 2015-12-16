@@ -1703,10 +1703,10 @@ void ParallelExpand(int myID, int totalThreads,
 void RegionAnalysis()
 {
 	uint32_t bfsSize[] = {1, 18, 243, 3240, 43239, 574908, 7618438, 100803036, 1332343288};
-	if (!fileExists("rubik888.bin"))
-		KorfTest(0, false);
 	if (!fileExists("rubik1997.bin"))
 		KorfTest(0, true);
+	if (!fileExists("rubik888.bin"))
+		KorfTest(0, false);
 
 	RubiksState s;
 

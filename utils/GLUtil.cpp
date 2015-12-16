@@ -592,6 +592,46 @@ void DrawBox(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad)
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisable(GL_NORMALIZE);
 }
+
+void DrawCylinder(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat innerRad, GLfloat outerRad, GLfloat height)
+{
+	const double resolution = 30;
+	const double step = TWOPI/resolution;
+	glBegin(GL_TRIANGLE_STRIP);
+	glNormal3f(0, 1, 0);
+	for (double t = 0; t < TWOPI; t += step)
+	{
+		glVertex3f(xx+innerRad*cos(t), yy-height/2, zz+innerRad*sin(t));
+		glVertex3f(xx+outerRad*cos(t), yy-height/2, zz+outerRad*sin(t));
+	}
+	glVertex3f(xx+innerRad*cos(0), yy-height/2, zz+innerRad*sin(0));
+	glVertex3f(xx+outerRad*cos(0), yy-height/2, zz+outerRad*sin(0));
+	glEnd();
+
+	glBegin(GL_TRIANGLE_STRIP);
+	glNormal3f(0, -1, 0);
+	for (double t = 0; t < TWOPI; t += step)
+	{
+		glVertex3f(xx+innerRad*cos(t), yy+height/2, zz+innerRad*sin(t));
+		glVertex3f(xx+outerRad*cos(t), yy+height/2, zz+outerRad*sin(t));
+	}
+	glVertex3f(xx+innerRad*cos(0), yy+height/2, zz+innerRad*sin(0));
+	glVertex3f(xx+outerRad*cos(0), yy+height/2, zz+outerRad*sin(0));
+	glEnd();
+
+	glBegin(GL_TRIANGLE_STRIP);
+	for (double t = 0; t < TWOPI; t += step)
+	{
+		glNormal3f(-cos(t), 0, -sin(t));
+		glVertex3f(xx+outerRad*cos(t), yy+height/2, zz+outerRad*sin(t));
+		glVertex3f(xx+outerRad*cos(t), yy-height/2, zz+outerRad*sin(t));
+	}
+	glVertex3f(xx+outerRad*cos(0), yy+height/2, zz+outerRad*sin(0));
+	glVertex3f(xx+outerRad*cos(0), yy-height/2, zz+outerRad*sin(0));
+	glEnd();
+
+}
+
 //
 //void DrawBox(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad)
 //{

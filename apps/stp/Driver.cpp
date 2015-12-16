@@ -27,6 +27,8 @@
 
 #include <cstring>
 #include "Common.h"
+#include "PermutationPDB.h"
+#include "MR1PermutationPDB.h"
 #include "Driver.h"
 #include "UnitSimulation.h"
 #include "EpisodicSimulation.h"
@@ -63,6 +65,8 @@ void ModNodesCompressionTest(bool weighted);
 void ModNodesDeltaCompressionTest(bool weighted);
 void DivNodesCompressionTest(bool weighted);
 void DivNodesDeltaCompressionTest(bool weighted);
+
+MNPuzzleState GetKorfInstance(int which);
 
 MNPuzzle *ts = 0;
 
@@ -118,24 +122,20 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
 		ts = new MNPuzzle(4, 4);
-//
-//		IDAStar<MNPuzzleState, slideDir> ida;
-//		for (unsigned int x = 0; x < 500; x++)
-//		{
-//			std::vector<slideDir> acts;
-//			ts->GetActions(s, acts);
-//			ts->ApplyAction(s, acts[random()%acts.size()]);
-//		}
-//		ida.GetPath(ts, s, t, moves);
-//		v = 5;
-//		std::cout << s << std::endl;
-//		for (int x = 0; x < moves.size(); x++)
-//		{
-//			std::cout << moves[x] << " ";
-//		}
-//		std::cout << std::endl;
-//		t = s;
-		//recording = true;
+		IDAStar<MNPuzzleState, slideDir> ida;
+		s = GetKorfInstance(88);
+		s.puzzle = {0, 1, 2, 3, 4, 5, 6, 7, 13, 9, 10, 11, 8, 12, 14, 15};
+		s.blank = 0;
+		ida.GetPath(ts, s, t, moves);
+		v = 5;
+		std::cout << s << std::endl;
+		for (int x = 0; x < moves.size(); x++)
+		{
+			std::cout << moves[x] << " ";
+		}
+		std::cout << std::endl;
+		t = s;
+//		recording = true;
 	}
 }
 
@@ -188,7 +188,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case 't': BaselineTest();
+		case 't': BaselineTest(); break;
 		case 'r': recording = !recording; break;
 		case '0': ts->ApplyAction(s, kUp); break;
 		case '1': ts->ApplyAction(s, kDown); break;
@@ -210,6 +210,31 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'p':
+		{
+			std::vector<int> pattern = {0, 1, 2, 3, 4, 5, 6};
+			if (0)
+			{
+				t.Reset();
+				MR1PermutationPDB<MNPuzzleState, slideDir, MNPuzzle> pdb(ts, t, pattern);
+				MR1PermutationPDB<MNPuzzleState, slideDir, MNPuzzle> pdb2(ts, t, pattern);
+				pdb.BuildPDB(t, std::thread::hardware_concurrency());
+				pdb.PrintHistogram();
+				pdb.DivCompress(5, true);
+			}
+			{
+				t.Reset();
+				PermutationPDB<MNPuzzleState, slideDir, MNPuzzle> pdb(ts, t, pattern);
+				pdb.BuildPDB(t, std::thread::hardware_concurrency());
+				t.Reset();
+				ts->StoreGoal(t);
+				pdb.DeltaCompress(ts, t, true);
+//				pdb.DivCompress(10, true);
+//
+//				PermutationPDB<MNPuzzleState, slideDir, MNPuzzle> pdb2(ts, t, pattern);
+//				pdb2.BuildPDB(t, std::thread::hardware_concurrency());
+//				pdb2.DeltaCompress(&pdb, t, true);
+			}
+		}
 			break;
 		case 'o':
 		{
@@ -1375,7 +1400,6 @@ void Test(MNPuzzle &mnp, const char *prefix)
 }
 
 
-MNPuzzleState GetKorfInstance(int which);
 
 MNPuzzleState GetInstance(int which, bool weighted)
 {

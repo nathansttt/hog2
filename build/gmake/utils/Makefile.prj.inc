@@ -55,5 +55,6 @@ SRC_CPP = \
 	utils/MapGenerators.cpp \
 	utils/MMapUtil.cpp \
 	utils/NBitArray.cpp \
+	utils/SVGUtil.cpp \
 	utils/RangeCompression.cpp \
 

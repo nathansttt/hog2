@@ -10,6 +10,7 @@
 #include <vector>
 #include "Map.h"
 #include <float.h>
+#include <string>
 
 #ifndef MAPOVERLAY_H
 #define MAPOVERLAY_H
@@ -23,6 +24,7 @@ public:
 	void SetOverlayValue(int x, int y, double value);
 	double GetOverlayValue(int x, int y);
 	void OpenGLDraw() const;
+	std::string SVGDraw() const;
 	void SetTransparentValue(double v) { ignoreVal = v; }
 	recColor GetValueColor(double value);
 	void SetColorMap(int val) { colorMap = val; }

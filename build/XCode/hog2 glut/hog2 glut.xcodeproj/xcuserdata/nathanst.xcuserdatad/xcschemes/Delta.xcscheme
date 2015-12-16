@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0620"
+   LastUpgradeVersion = "0700"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C4CA9F701B26805F00B4A894"
-               BuildableName = "voxel.app"
-               BlueprintName = "voxel"
+               BlueprintIdentifier = "C4765C181BFD57960040E996"
+               BuildableName = "Delta.app"
+               BlueprintName = "Delta"
                ReferencedContainer = "container:hog2 glut.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C4CA9F701B26805F00B4A894"
-            BuildableName = "voxel.app"
-            BlueprintName = "voxel"
+            BlueprintIdentifier = "C4765C181BFD57960040E996"
+            BuildableName = "Delta.app"
+            BlueprintName = "Delta"
             ReferencedContainer = "container:hog2 glut.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -55,9 +55,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C4CA9F701B26805F00B4A894"
-            BuildableName = "voxel.app"
-            BlueprintName = "voxel"
+            BlueprintIdentifier = "C4765C181BFD57960040E996"
+            BuildableName = "Delta.app"
+            BlueprintName = "Delta"
             ReferencedContainer = "container:hog2 glut.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -74,9 +74,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C4CA9F701B26805F00B4A894"
-            BuildableName = "voxel.app"
-            BlueprintName = "voxel"
+            BlueprintIdentifier = "C4765C181BFD57960040E996"
+            BuildableName = "Delta.app"
+            BlueprintName = "Delta"
             ReferencedContainer = "container:hog2 glut.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

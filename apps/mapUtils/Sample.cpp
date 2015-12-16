@@ -1180,7 +1180,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	Graph *g = new Graph();
 	node *n = new node("");
 	g->AddNode(n);
-	FILE *f = fopen("/Users/nathanst/Downloads/USA-road-d.BAY.co", "r");
+	FILE *f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.co", "r");
 	std::vector<double> xloc, yloc;
 	double minx = DBL_MAX, maxx=-DBL_MAX, miny=DBL_MAX, maxy=-DBL_MAX;
 	while (!feof(f))
@@ -1227,7 +1227,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 		//printf("(%f, %f)\n", xloc[x], yloc[x]);
 	}
 	//a 1 2 1988
-	f = fopen("/Users/nathanst/Downloads/USA-road-d.BAY.gr", "r");
+	f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.gr", "r");
 	while (!feof(f))
 	{
 		char line[255];

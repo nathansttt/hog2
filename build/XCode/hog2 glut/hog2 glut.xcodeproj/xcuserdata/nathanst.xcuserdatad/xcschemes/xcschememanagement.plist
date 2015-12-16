@@ -14,6 +14,11 @@
 			<key>orderHint</key>
 			<integer>21</integer>
 		</dict>
+		<key>Delta.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>24</integer>
+		</dict>
 		<key>MAPF.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -38,6 +43,11 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>6</integer>
+		</dict>
+		<key>TOH.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>23</integer>
 		</dict>
 		<key>TopSpin.xcscheme</key>
 		<dict>
@@ -158,6 +168,16 @@
 			<true/>
 		</dict>
 		<key>C46735741710D9EF00E2A10B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C46B6C4B1BD7644F00B10296</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4765C181BFD57960040E996</key>
 		<dict>
 			<key>primary</key>
 			<true/>

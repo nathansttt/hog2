@@ -150,7 +150,7 @@ private:
 template <class state, class action, class environment>
 void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath)
 {
-	// This code measures the size of the first heuristic minima that the agent passes over
+	// This code measures the size of the first heuristic minima that the agent passes over (not well)
 	if (initialHeuristic)
 	{
 		double tmp;

@@ -72,8 +72,7 @@ public:
 	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; theHeuristic = 0; }
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
-	
-	void GetPath(environment *, const state& , const state& , std::vector<action> & ) { assert(false); };
+	void GetPath(environment *, const state& , const state& , std::vector<action> & );
 	
 	AStarOpenClosed<state, AStarCompare<state> > openClosedList;
 	//BucketOpenClosed<state, AStarCompare<state> > openClosedList;
@@ -201,8 +200,27 @@ void TemplateAStar<state,action,environment>::GetPath(environment *_env, const s
 	}
 }
 
+template <class state, class action, class environment>
+void TemplateAStar<state,action,environment>::GetPath(environment *_env, const state& from, const state& to, std::vector<action> &path)
+{
+	std::vector<state> thePath;
+	if (!InitializeSearch(_env, from, to, thePath))
+	{
+		return;
+	}
+	path.resize(0);
+	while (!DoSingleSearchStep(thePath))
+	{
+	}
+	for (int x = 0; x < thePath.size()-1; x++)
+	{
+		path.push_back(_env->GetAction(thePath[x], thePath[x+1]));
+	}
+}
+
+
 /**
- * Initialize the A* search 
+ * Initialize the A* search
  * @author Nathan Sturtevant	
  * @date 03/22/06
  * 

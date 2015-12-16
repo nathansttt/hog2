@@ -137,6 +137,7 @@ void DrawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width)
 void DrawBox(GLfloat x, GLfloat y, GLfloat z, GLfloat radius);
 void DrawBoxFrame(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad);
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
+void DrawCylinder(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat innerRad, GLfloat outerRad, GLfloat height);
 
 void DrawText(double x, double y, double z, double scale, const char *res);
 

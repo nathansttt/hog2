@@ -732,10 +732,8 @@ void buildGL(void)
 #endif
 			break;
 		case kFSAAFast:
-		        #ifndef WIN32
-			//glEnable (GL_MULTISAMPLE_ARB);
-			//glHint (GL_MULTISAMPLE_FILTER_HINT_NV, GL_FASTEST);
-                        #endif
+//			glEnable (GL_MULTISAMPLE_ARB);
+//			glHint (GL_MULTISAMPLE_FILTER_HINT_NV, GL_FASTEST);
 			break;
 		case kFSAANice:
 		        #ifndef WIN32

@@ -24,7 +24,9 @@ class NBitArray
 public:
 	NBitArray(uint64_t numEntries = 0);
 	NBitArray(const char *);
+	NBitArray(const NBitArray &copyMe);
 	~NBitArray();
+	NBitArray &operator=(const NBitArray &copyMe);
 	void FillMax();
 	void Clear();
 	void Resize(uint64_t newMaxEntries);
@@ -60,9 +62,32 @@ NBitArray<numBits>::NBitArray(const char *file)
 }
 
 template <uint64_t numBits>
+NBitArray<numBits>::NBitArray(const NBitArray &copyMe)
+{
+	entries = copyMe.entries;
+	memorySize = copyMe.memorySize;
+	mem = new uint64_t[memorySize];
+	memcpy(mem, copyMe.mem, memorySize*sizeof(mem[0]));
+}
+
+
+template <uint64_t numBits>
 NBitArray<numBits>::~NBitArray()
 {
 	delete [] mem;
+}
+
+template <uint64_t numBits>
+NBitArray<numBits> &NBitArray<numBits>::operator=(const NBitArray &copyMe)
+{
+	if (this == &copyMe)
+		return *this;
+	delete mem;
+	entries = copyMe.entries;
+	memorySize = copyMe.memorySize;
+	mem = new uint64_t[memorySize];
+	memcpy(mem, copyMe.mem, memorySize*sizeof(mem[0]));
+	return *this;
 }
 
 template <uint64_t numBits>

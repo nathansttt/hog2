@@ -28,7 +28,6 @@ PROJECTS = \
   apps/cpdb \
   apps/pathsample \
   apps/puzzlesample \
-  apps/multiagent \
   apps/inconsistency \
   apps/dynamicsearch \
   apps/directional \
@@ -45,7 +44,10 @@ PROJECTS = \
   apps/topspin \
   apps/stp \
   apps/pancake \
+  apps/roads \
   apps/canonicalGrids \
+  apps/delta \
+#  apps/multiagent \
 #  apps/measure_inconsistency 
 #  simulation \
 #  learning \
@@ -91,7 +93,10 @@ PROJECTS_ALL = \
   apps/voxel \
   apps/topspin \
   apps/stp \
+  apps/roads \
+  apps/delta \
   apps/pancake \
+  apps/multiagent \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice
