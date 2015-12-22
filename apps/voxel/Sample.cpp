@@ -30,6 +30,7 @@
 #include "ScenarioLoader.h"
 #include <stdint.h>
 #include <assert.h>
+#include <stdlib.h>
 
 struct voxelWorld {
 	uint32_t header;
