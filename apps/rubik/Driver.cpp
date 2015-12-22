@@ -28,7 +28,6 @@
 #include <cassert>
 #include <stdlib.h>
 #include <limits.h>
-#include <xlocale.h>
 #include <unordered_set>
 #include "Common.h"
 #include "Driver.h"
