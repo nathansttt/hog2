@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <iostream>
+#include <string.h>
 #include "Map.h"
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
