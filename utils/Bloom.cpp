@@ -9,6 +9,8 @@
 #include <cmath>
 #include <limits>
 #include "Bloom.h"
+#include <cstring>
+#include <stdio.h>
 
 //int numHash;
 //uint64_t filterSize;

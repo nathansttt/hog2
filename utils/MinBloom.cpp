@@ -12,6 +12,7 @@
 #include <limits>
 #include "MinBloom.h"
 #include <string.h>
+#include <stdio.h>
 
 // [8 possible hashes][16x 4-bit segments][16 values for 4 bits]
 static uint64_t salt[8] = {0x6B8B4567327B23C6ull, 0x643C986966334873ull, 0x74B0DC5119495CFFull, 0x2AE8944A625558ECull, 0x238E1F2946E87CCDull, 0x3D1B58BA507ED7ABull, 0x2EB141F241B71EFBull, 0x79E2A9E37545E146ull};
