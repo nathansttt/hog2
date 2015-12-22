@@ -46,11 +46,15 @@
 
 bool screenShot = false;
 bool recording = false;
+bool running = false;
+std::vector<graphState> thePath;
 
 void LoadGraph();
 
 GraphDistanceHeuristic *gdh = 0;
 GraphEnvironment *ge = 0;
+
+TemplateAStar<graphState, graphMove, GraphEnvironment> astar;                                                                                                                                                                                                               
 
 int main(int argc, char* argv[])
 {
@@ -112,8 +116,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		ge->OpenGLDraw();
 
-//		node *n = ge->GetGraph()->GetRandomNode();
-//		ge->OpenGLDraw(n->GetNum());
+		if (running)
+		{
+			running = !astar.DoSingleSearchStep(thePath);
+			astar.OpenGLDraw();
+		}
 	}
 
 	if (recording && viewport == GetNumPorts(windowID)-1)
@@ -151,6 +158,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
+	printf("Starting Search\n");
+	running = true;
+	node *n1 = ge->GetGraph()->GetRandomNode();
+	node *n2 = ge->GetGraph()->GetRandomNode();
+	astar.InitializeSearch(ge, n1->GetNum(), n2->GetNum(), thePath);
+	
 }
 
 void LoadGraph()
@@ -222,6 +235,7 @@ void LoadGraph()
 	}
 	fclose(f); 
 	ge = new GraphEnvironment(g);
+	ge->SetDirected(true);
 }
 
 

@@ -252,11 +252,45 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 		glEnd();
 	}
 	else {
+//		glBegin(GL_LINES);
+//		glNormal3f(0, 1, 0);
+
 		node *n = g->GetNode(s);
-		DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
-				   (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
-				   (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
-				   (GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
+//		DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
+//				   (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
+//				   (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
+//				   (GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
+
+		glBegin(GL_LINES);
+		glNormal3f(0, 1, 0);
+		
+		edge_iterator ei = n->getEdgeIter();
+		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
+		{
+			//int x, y;
+			//double offsetx, offsety;
+			node *n;
+			n = g->GetNode(e->getFrom());
+			
+			glColor3f(0, 0, 1);
+			if (e->getMarked())
+				glColor3f(1, 0, 0);
+			
+			GLdouble x, y, z;
+			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+			glVertex3f(x, y, z);
+			
+			n = g->GetNode(e->getTo());
+			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+			
+			glVertex3f(x, y, z);
+		}
+		glEnd();
+
 	}
 }
 
