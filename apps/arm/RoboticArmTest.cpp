@@ -70,7 +70,7 @@ bool recording = false;
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	setlinebuf( stdout );
+	setvbuf(stdout, NULL, _IONBF, 0);
 	RunHOGGUI(argc, argv, 1024, 512);
 }
 
