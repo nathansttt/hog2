@@ -606,7 +606,7 @@ public:
 	uint32_t biClrImportant; // 0
 };
 
-void SaveScreenshot(int windowID, const char *filename)
+void SaveScreenshot(unsigned long windowID, const char *filename)
 {
 	pRecContext pContextInfo = GetContext(windowID);
 

@@ -47,7 +47,13 @@
 bool screenShot = false;
 bool recording = false;
 bool running = false;
+bool showSearch = false;
+bool drawLine = false;
 std::vector<graphState> thePath;
+
+point3d lineStart, lineEnd;
+
+std::string graphFile, coordinatesFile;
 
 void LoadGraph();
 
@@ -55,6 +61,7 @@ GraphDistanceHeuristic *gdh = 0;
 GraphEnvironment *ge = 0;
 
 TemplateAStar<graphState, graphMove, GraphEnvironment> astar;                                                                                                                                                                                                               
+uint32_t gStepsPerFrame = 1;
 
 int main(int argc, char* argv[])
 {
@@ -79,14 +86,19 @@ void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record the screen.", kNoModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset Rotations", "Reset the current rotation/translation of the map.", kAnyModifier, '|');
+	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Simulate search faster.", kNoModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Simulate search slower.", kNoModifier, ']');
 
 	InstallKeyboardHandler(MyPathfindingKeyHandler, "", "", kNoModifier, 'd');
 
 	
 	
-	InstallCommandLineHandler(MyCLHandler, "-makeRoom", "-makeRoom x-dim y-dim roomSie filename", "Resizes map to specified dimensions and saves");
+	InstallCommandLineHandler(MyCLHandler, "-graph", "-graph <filename>", "Specifies file name for graph. Both graph and coordinates must be supplied.");
+	InstallCommandLineHandler(MyCLHandler, "-coord", "-coord <filename>", "Specifies file name for coordinates. Both graph and coordinates must be supplied.");
 
 	InstallWindowHandler(MyWindowHandler);
+
+	InstallMouseClickHandler(MyClickHandler);
 }
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
@@ -102,9 +114,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		LoadGraph();
-//		CreateSimulation(windowID);
 		SetNumPorts(windowID, 1);
-		//SetZoom(windowID, 10);
 	}
 
 }
@@ -118,8 +128,31 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 		if (running)
 		{
-			running = !astar.DoSingleSearchStep(thePath);
+			std::cout << "Expanding next: " << astar.CheckNextNode() << "\n";
+			for (int x = 0; x < gStepsPerFrame && running; x++)
+				running = !astar.DoSingleSearchStep(thePath);
+			if (!running)
+			{
+				for (int x = 1; x < thePath.size(); x++)
+				{
+					ge->GetGraph()->findDirectedEdge(thePath[x-1], thePath[x])->setMarked(true);
+				}
+			}
+		}
+		if (showSearch)
+		{
 			astar.OpenGLDraw();
+		}
+
+		if (drawLine)
+		{
+			glLineWidth(5);
+			glColor4f(1, 1, 1, 0.9);
+			glBegin(GL_LINES);
+			glVertex3f(lineStart.x, lineStart.y, -0.01);
+			glVertex3f(lineEnd.x, lineEnd.y, -0.01);
+			glEnd();
+			glLineWidth(1);
 		}
 	}
 
@@ -137,12 +170,21 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	if (strcmp( argument[0], "-makeRoom" ) == 0 )
+	if (strcmp( argument[0], "-graph" ) == 0 )
 	{
-		if (maxNumArgs <= 4)
+		if (maxNumArgs <= 1)
 			return 0;
-		return maxNumArgs;
+		graphFile = argument[1];
+		return 2;
 	}
+	if (strcmp( argument[0], "-coord" ) == 0 )
+	{
+		if (maxNumArgs <= 1)
+			return 0;
+		coordinatesFile = argument[1];
+		return 2;
+	}
+	return 0;
 }
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
@@ -151,6 +193,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	{
 		case '|': resetCamera(); break;
 		case 'r': recording = !recording; break;
+		case '[': if (gStepsPerFrame > 1) gStepsPerFrame /= 2; break;
+		case ']': gStepsPerFrame *= 2; break;
 		default:
 			break;
 	}
@@ -160,6 +204,11 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
 	printf("Starting Search\n");
 	running = true;
+	showSearch = true;
+	for (int x = 1; x < thePath.size(); x++)
+	{
+		ge->GetGraph()->findDirectedEdge(thePath[x-1], thePath[x])->setMarked(false);
+	}
 	node *n1 = ge->GetGraph()->GetRandomNode();
 	node *n2 = ge->GetGraph()->GetRandomNode();
 	astar.InitializeSearch(ge, n1->GetNum(), n2->GetNum(), thePath);
@@ -171,7 +220,8 @@ void LoadGraph()
 	Graph *g = new Graph();
 	node *n = new node("");
 	g->AddNode(n);
-	FILE *f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.co", "r");
+	FILE *f = fopen(coordinatesFile.c_str(), "r");
+	//FILE *f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.co", "r");
 	std::vector<double> xloc, yloc;
 	double minx = DBL_MAX, maxx=-DBL_MAX, miny=DBL_MAX, maxy=-DBL_MAX;
 	while (!feof(f))
@@ -199,17 +249,19 @@ void LoadGraph()
 	printf("x between (%f, %f), y between (%f, %f)\n",
 		   minx, maxx, miny, maxy);
 	double scale = std::max(maxx-minx,maxy-miny);
+	double xoff = (maxx-minx)-scale;
+	double yoff = (maxy-miny)-scale;
 	for (unsigned int x = 0; x < xloc.size(); x++)
 	{
 		//printf("(%f, %f) -> ", xloc[x], yloc[x]);
 		xloc[x] -= (minx);
 		xloc[x] /= scale;
-		xloc[x] = xloc[x]*2-1;
+		xloc[x] = xloc[x]*2-1+xoff/scale;
 
 		yloc[x] -= (miny);
 		yloc[x] /= scale;
 		yloc[x] = yloc[x]*2-1;
-		yloc[x] = -yloc[x];
+		yloc[x] = -yloc[x]+yoff/scale;
 		
 		node *n = new node("");
 		g->AddNode(n);
@@ -220,7 +272,10 @@ void LoadGraph()
 		//printf("(%f, %f)\n", xloc[x], yloc[x]);
 	}
 	//a 1 2 1988
-	f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.gr", "r");
+	
+	f = fopen(graphFile.c_str(), "r");
+	//f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.gr", "r");
+	int dups = 0;
 	while (!feof(f))
 	{
 		char line[255];
@@ -229,35 +284,108 @@ void LoadGraph()
 		{
 			int x1, y1;
 			sscanf(line, "a %d %d %*d", &x1, &y1);
-			g->AddEdge(new edge(x1, y1, 1.0));
+			if (g->findDirectedEdge(x1, y1) == 0)
+			{
+				g->AddEdge(new edge(x1, y1, 1.0));
+			}
+			else {
+				dups++;
+				//printf("Not adding duplicate directed edge between %d and %d\n", x1, y1);
+			}
 			//printf("%d to %d\n", x1, y1);
 		}
 	}
+	printf("%d dups ignored\n", dups);
 	fclose(f); 
 	ge = new GraphEnvironment(g);
 	ge->SetDirected(true);
 }
 
+bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
+{
+	//	return false;
+	static point3d startLoc;
+	if (mType == kMouseDown)
+	{
+		switch (button)
+		{
+			case kRightButton: printf("Right button\n"); break;
+			case kLeftButton: printf("Left button\n"); break;
+			case kMiddleButton: printf("Middle button\n"); break;
+		}
+	}
+	if (button != kLeftButton)
+		return false;
+	switch (mType)
+	{
+		case kMouseDown:
+		{
+			printf("Hit (%f, %f, %f)\n", loc.x, loc.y, loc.z);
+			lineStart = loc;
+			lineEnd = loc;
+			drawLine = true;
+			running = false;
+			showSearch = false;
+			for (int x = 1; x < thePath.size(); x++)
+			{
+				ge->GetGraph()->findDirectedEdge(thePath[x-1], thePath[x])->setMarked(false);
+			}
 
-//void runProblemSet3(char *scenario)
-//{
-//
-//	TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
-//  astar.SetWeight(0); // Dijkstra's algorithm
-//  astar.SetWeight(1); // A*
-//  astar.SetHeuristic(??); // use a diff heuristic than the environment
-//	std::vector<xyLoc> thePath;
-//	MapEnvironment ma(map);
-//	ma.SetFourConnected();
-//	
-//	for (int x = 0; x < sl.GetNumExperiments(); x++)
-//	{
-//		Timer t;
-//		t.StartTimer();
-//		astar.GetPath(&ma, from, to, thePath);
-//		t.EndTimer();
-//		printf("\tastar\t%ld\t%1.6f\t%llu\t%u\n", thePath.size(), t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNumOpenItems());
-//	}
-//	
-//	exit(0);
-//}
+			return true;
+		}
+		case kMouseDrag:
+		{
+			lineEnd = loc;
+			return true;
+		}
+		case kMouseUp:
+		{
+			printf("UnHit at (%f, %f, %f)\n", loc.x, loc.y, loc.z);
+			lineEnd = loc;
+
+			printf("Starting Search\n");
+			running = true;
+			showSearch = true;
+			// find closest point to start/goal loc and run from there.
+
+			node *start = ge->GetGraph()->GetRandomNode(), *goal = ge->GetGraph()->GetRandomNode();
+			double startDist = 20, goalDist = 20; // maximum actual distance is 4^2 = 16
+			node_iterator ni = ge->GetGraph()->getNodeIter();
+			for (node *next = ge->GetGraph()->nodeIterNext(ni); next;
+				 next = ge->GetGraph()->nodeIterNext(ni))
+			{
+				double xdist = next->GetLabelF(GraphSearchConstants::kXCoordinate)-lineStart.x;
+				double ydist = next->GetLabelF(GraphSearchConstants::kYCoordinate)-lineStart.y;
+				if (xdist*xdist+ydist*ydist < startDist)
+				{
+					startDist = xdist*xdist+ydist*ydist;
+					start = next;
+				}
+				xdist = next->GetLabelF(GraphSearchConstants::kXCoordinate)-lineEnd.x;
+				ydist = next->GetLabelF(GraphSearchConstants::kYCoordinate)-lineEnd.y;
+				if (xdist*xdist+ydist*ydist < goalDist)
+				{
+					goalDist = xdist*xdist+ydist*ydist;
+					goal = next;
+				}
+			}
+			drawLine = false;
+			if (start == goal)
+			{
+				printf("Same start and goal; no search\n");
+				running = false;
+				showSearch = false;
+			}
+			else {
+				printf("Searching from (%1.2f, %1.2f) to (%1.2f, %1.2f)\n",
+					   start->GetLabelF(GraphSearchConstants::kXCoordinate),
+					   start->GetLabelF(GraphSearchConstants::kYCoordinate),
+					   goal->GetLabelF(GraphSearchConstants::kXCoordinate),
+					   goal->GetLabelF(GraphSearchConstants::kYCoordinate));
+				astar.InitializeSearch(ge, start->GetNum(), goal->GetNum(), thePath);
+			}
+			return true;
+		}
+	}
+	return false;
+}

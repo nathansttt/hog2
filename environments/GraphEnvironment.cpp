@@ -198,9 +198,18 @@ void GraphEnvironment::OpenGLDraw() const
 		return;
 	}
 	
+	// Black background behind map
+	glBegin(GL_TRIANGLE_FAN);
+	glColor3f(0, 0, 0);
+	glVertex3f(-1, -1, 0.01);
+	glVertex3f(1, -1, 0.01);
+	glVertex3f(1, 1, 0.01);
+	glVertex3f(-1, 1, 0.01);
+	glEnd();
 	glBegin(GL_LINES);
 	glNormal3f(0, 1, 0);
-		
+
+	GLdouble off = 0;
 	edge_iterator ei = g->getEdgeIter();
 	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	{
@@ -211,20 +220,26 @@ void GraphEnvironment::OpenGLDraw() const
 		
 		glColor3f(0, 1, 0);
 		if (e->getMarked())
-			glColor3f(1, 0, 0);
+		{
+			glColor3f(1, 1, 1);
+			off = -0.001;
+		}
+		else {
+			off = 0;
+		}
 		
 		GLdouble x, y, z;
 		x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
 		y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
 		z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
-		glVertex3f(x, y, z);
+		glVertex3f(x, y, z+off);
 		
 		n = g->GetNode(e->getTo());
 		x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
 		y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
 		z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
 		
-		glVertex3f(x, y, z);
+		glVertex3f(x, y, z+off);
 	}
 	glEnd();
 }
@@ -260,9 +275,13 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 //				   (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
 //				   (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
 //				   (GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
-
+		{
+			GLfloat r, g, b, t;
+			GetColor(r, g, b, t);
+			glColor4f(r, g, b, t);
+		}
+		glLineWidth(5.0);
 		glBegin(GL_LINES);
-		glNormal3f(0, 1, 0);
 		
 		edge_iterator ei = n->getEdgeIter();
 		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
@@ -272,9 +291,9 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 			node *n;
 			n = g->GetNode(e->getFrom());
 			
-			glColor3f(0, 0, 1);
-			if (e->getMarked())
-				glColor3f(1, 0, 0);
+//			glColor3f(0, 0, 1);
+//			if (e->getMarked())
+//				glColor3f(1, 0, 0);
 			
 			GLdouble x, y, z;
 			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
@@ -290,6 +309,8 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 			glVertex3f(x, y, z);
 		}
 		glEnd();
+
+		glLineWidth(1.0);
 
 	}
 }
