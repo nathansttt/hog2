@@ -56,6 +56,9 @@ bool reopenNodes = false;
 bool screenShot = false;
 bool recording = false;
 
+void WeightedAStarExperiments(char *scenario, double weight);
+void DijkstraExperiments(char *scenario, double weight);
+
 std::vector<UnitMapSimulation *> unitSims;
 
 TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
@@ -65,6 +68,7 @@ CanonicalGrid::CanonicalGrid *grid;
 
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
 TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> a2;
+
 MapEnvironment *ma1 = 0;
 CanonicalGrid::CanonicalGrid *ma2 = 0;
 
@@ -97,19 +101,23 @@ void CreateSimulation(int id)
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 
-		map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
+		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/rooms/8room_000.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-16-0.map");
 		
 		//map = new Map("/Users/nathanst/hog2/maps/local/weight.map");
 		//map = new Map("weight.map");
-//		map = new Map(100, 100);
+		map = new Map(16, 16);
+//		for (int y = 8; y < 16; y++)
+//			map->SetTerrainType(0, y, 8, y, kTrees);
 //		map->SetTerrainType(25, 25, kTrees);
 //		map->SetTerrainType(75, 75, kTrees);
 //		map->SetTerrainType(75, 25, kTrees);
 //		map->SetTerrainType(25, 75, kTrees);
 //		map = new Map(mazeSize, mazeSize);
-//		MakeMaze(map, 5);
+		
+//		MakeMaze(map, 2);
+//		MakePseudoMaze(map, 3);
 //		map->Scale(512, 512);
 	}
 	else {
@@ -149,6 +157,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
+	InstallCommandLineHandler(MyCLHandler, "-wastar", "-wastar <scenario> <weight>", "Run weighted A* experiments on scenario with given weight.");
+	InstallCommandLineHandler(MyCLHandler, "-dijkstra", "-dijkstra <scenario> <weight>", "Run Dijkstra experiments on scenario.");
 
 	InstallWindowHandler(MyWindowHandler);
 	
@@ -257,25 +267,27 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 		a1.OpenGLDraw();
 	}
-//	if ((ma2) && viewport == 1)
-//	{
-//		ma2->SetColor(1.0, 0.0, 0.0, 0.5);
-//		if (runningSearch2)
-//		{
-//			ma2->SetColor(1.0, 0.0, 1.0, 0.5);
-//			for (int x = 0; x < gStepsPerFrame; x++)
-//			{
-//				if (a2.DoSingleSearchStep(path))
-//				{
-//					printf("Solution: moves %d, length %f, %lld nodes\n",
-//						   (int)path.size(), ma1->GetPathLength(path), a2.GetNodesExpanded());
-//					runningSearch2 = false;
-//					break;
-//				}
-//			}
-//		}
-//		a2.OpenGLDraw();
-//	}
+
+	if ((ma2) && viewport == 1)
+	{
+		ma2->SetColor(1.0, 0.0, 0.0, 0.5);
+		if (runningSearch2)
+		{
+			ma2->SetColor(1.0, 0.0, 1.0, 0.5);
+			for (int x = 0; x < gStepsPerFrame; x++)
+			{
+				if (a2.DoSingleSearchStep(path2))
+				{
+					printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
+						   (int)path2.size(), ma2->GetPathLength(path2), a2.GetNodesExpanded(),
+						   a2.GetNumOpenItems());
+					runningSearch2 = false;
+					break;
+				}
+			}
+		}
+		a2.OpenGLDraw();
+	}
 
 	
 	if (recording && viewport == GetNumPorts(windowID)-1)
@@ -297,6 +309,20 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			return 0;
 		strncpy(gDefaultMap, argument[1], 1024);
 		return 2;
+	}
+	if (strcmp( argument[0], "-dijkstra" ) == 0 )
+	{
+		if (maxNumArgs <= 2)
+			return 0;
+		DijkstraExperiments(argument[1], atof(argument[2]));
+		return 3;
+	}
+	if (strcmp( argument[0], "-wastar" ) == 0 )
+	{
+		if (maxNumArgs <= 2)
+			return 0;
+		WeightedAStarExperiments(argument[1], atof(argument[2]));
+		return 3;
 	}
 	return 0;
 }
@@ -469,7 +495,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					a1.SetWeight(1.0);
 					a2.SetWeight(1.0);
 
-					Timer t1, t2;
+					Timer t1, t2, t3, t4;
 					t1.StartTimer();
 					a1.GetPath(ma1, s1, g1, path);
 					t1.EndTimer();
@@ -482,26 +508,42 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					t2.EndTimer();
 					printf("Canonical search: %1.4fs, path length %1.6f, %llu nodes\n", t2.GetElapsedTime(), ma2->GetPathLength(path2), a2.GetNodesExpanded());
 					printf("Speedup: %1.5f\n", t1.GetElapsedTime()/t2.GetElapsedTime());
+					printf("Nodes ratio: %1.5f\n", a1.GetNodesExpanded()/float(a2.GetNodesExpanded()));
 					if (!fequal(ma2->GetPathLength(path2), ma1->GetPathLength(path)))
 					{
 						printf("ERROR: path lengths do not match\n");
 						exit(0);
 					}
+
+					a1.SetWeight(10.0);
+					a2.SetWeight(10.0);
+					t3.StartTimer();
+					a1.GetPath(ma1, s1, g1, path);
+					t3.EndTimer();
+					printf("Weighted Regular search: %1.4fs, path length %1.6f, %llu nodes\n", t3.GetElapsedTime(), ma1->GetPathLength(path), a1.GetNodesExpanded());
+					t4.StartTimer();
+					a2.GetPath(ma2, s2, g2, path2);
+					t4.EndTimer();
+					printf("Weighted Canonical search: %1.4fs, path length %1.6f, %llu nodes\n", t4.GetElapsedTime(), ma2->GetPathLength(path2), a2.GetNodesExpanded());
+					printf("wSpeedup: %1.5f\n", t3.GetElapsedTime()/t4.GetElapsedTime());
+					printf("wNodes ratio: %1.5f\n", a1.GetNodesExpanded()/float(a2.GetNodesExpanded()));
 					
-//					for (const auto &s : path2)
-//						std::cout << s << " ";
-//					std::cout << "\n";
+					printf("wwSpeedup: %1.5f\n", t1.GetElapsedTime()/t3.GetElapsedTime());
+					printf("wcSpeedup: %1.5f\n", t2.GetElapsedTime()/t4.GetElapsedTime());
+
+					printf("\n\n");
 				}
 
 				a1.SetWeight(searchWeight);
+				a2.SetWeight(searchWeight);
 				ma1->SetEightConnected();
 
 				a1.InitializeSearch(ma1, s1, g1, path);
 				a2.InitializeSearch(ma2, s2, g2, path2);
 
 				runningSearch1 = true;
-				runningSearch2 = false;
-				SetNumPorts(windowID, 1);
+				runningSearch2 = true;
+				SetNumPorts(windowID, 2);
 //				cameraMoveTo((startLoc.x+loc.x)/2, (startLoc.y+loc.y)/2, -4.0, 1.0, 0);
 //				cameraMoveTo((startLoc.x+loc.x)/2, (startLoc.y+loc.y)/2, -4.0, 1.0, 1);
 			}
@@ -512,3 +554,97 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 	return false;
 }
 
+void WeightedAStarExperiments(char *scenario, double weight)
+{
+	ScenarioLoader s(scenario);
+	Map *m = new Map(s.GetNthExperiment(0).GetMapName());
+	MapEnvironment *me = new MapEnvironment(m);
+	CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+	TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> canAstar;
+
+	Timer t;
+	for (int x = 0; x < s.GetNumExperiments(); x++)
+	{
+		xyLoc start, goal;
+		start.x = s.GetNthExperiment(x).GetStartX();
+		start.y = s.GetNthExperiment(x).GetStartY();
+		goal.x = s.GetNthExperiment(x).GetGoalX();
+		goal.y = s.GetNthExperiment(x).GetGoalY();
+
+		CanonicalGrid::xyLoc cStart, cGoal;
+		cStart.x = s.GetNthExperiment(x).GetStartX();
+		cStart.y = s.GetNthExperiment(x).GetStartY();
+		cGoal.x = s.GetNthExperiment(x).GetGoalX();
+		cGoal.y = s.GetNthExperiment(x).GetGoalY();
+
+		if (s.GetNthExperiment(x).GetBucket() > 0)
+		{
+//			astar.SetWeight(1.0);
+//			t.StartTimer();
+//			astar.GetPath(me, start, goal, path);
+//			t.EndTimer();
+//			printf("%1.4f %f %llu %u ", t.GetElapsedTime(), me->GetPathLength(path), astar.GetNodesExpanded(), astar.GetNumOpenItems());
+			astar.SetWeight(weight);
+			t.StartTimer();
+			astar.GetPath(me, start, goal, path);
+			t.EndTimer();
+			printf("%1.4f %f %llu %u ", t.GetElapsedTime(), me->GetPathLength(path), astar.GetNodesExpanded(), astar.GetNumOpenItems());
+			
+//			canAstar.SetWeight(1.0);
+//			t.StartTimer();
+//			canAstar.GetPath(cge, cStart, cGoal, path2);
+//			t.EndTimer();
+//			printf("%1.4f %f %llu %u ", t.GetElapsedTime(), cge->GetPathLength(path2), canAstar.GetNodesExpanded(), canAstar.GetNumOpenItems());
+			canAstar.SetWeight(weight);
+			t.StartTimer();
+			canAstar.GetPath(cge, cStart, cGoal, path2);
+			t.EndTimer();
+			printf("%1.4f %f %llu %u\n", t.GetElapsedTime(), cge->GetPathLength(path2), canAstar.GetNodesExpanded(), canAstar.GetNumOpenItems());
+		}
+	}
+	exit(0);
+}
+
+void DijkstraExperiments(char *scenario, double weight)
+{
+	ScenarioLoader s(scenario);
+	Map *m = new Map(s.GetNthExperiment(0).GetMapName());
+	MapEnvironment *me = new MapEnvironment(m);
+	CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+	TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> canAstar;
+	astar.SetStopAfterGoal(false);
+	canAstar.SetStopAfterGoal(false);
+	Timer t;
+	for (int x = std::max(s.GetNumExperiments()-10, 0); x < s.GetNumExperiments(); x++)
+	{
+		xyLoc start, goal;
+		goal.x = s.GetNthExperiment(x).GetStartX();
+		goal.y = s.GetNthExperiment(x).GetStartY();
+		start.x = s.GetNthExperiment(x).GetGoalX();
+		start.y = s.GetNthExperiment(x).GetGoalY();
+		
+		CanonicalGrid::xyLoc cStart, cGoal;
+		cGoal.x = s.GetNthExperiment(x).GetStartX();
+		cGoal.y = s.GetNthExperiment(x).GetStartY();
+		cStart.x = s.GetNthExperiment(x).GetGoalX();
+		cStart.y = s.GetNthExperiment(x).GetGoalY();
+		
+		if (s.GetNthExperiment(x).GetBucket() > 0)
+		{
+			astar.SetWeight(1.0);
+			t.StartTimer();
+			astar.GetPath(me, start, goal, path);
+			t.EndTimer();
+			printf("%1.4f %f %llu %u ", t.GetElapsedTime(), me->GetPathLength(path), astar.GetNodesExpanded(), astar.GetNumOpenItems());
+			
+			canAstar.SetWeight(1.0);
+			t.StartTimer();
+			canAstar.GetPath(cge, cStart, cGoal, path2);
+			t.EndTimer();
+			printf("%1.4f %f %llu %u\n", t.GetElapsedTime(), cge->GetPathLength(path2), canAstar.GetNodesExpanded(), canAstar.GetNumOpenItems());
+		}
+	}
+	exit(0);
+}
