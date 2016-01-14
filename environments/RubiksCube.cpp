@@ -824,7 +824,8 @@ int RubiksCube::Edge12PDBDist(const RubiksState &s)
 RubikPDB::RubikPDB(RubiksCube *e, const RubiksState &s, std::vector<int> distinctEdges, std::vector<int> distinctCorners)
 :PDBHeuristic(e), ePDB(&e->e, s.edge, distinctEdges), cPDB(&e->c, s.corner, distinctCorners), edges(distinctEdges), corners(distinctCorners)
 {
-	PDBHeuristic<RubiksState, RubiksAction, RubiksCube, RubiksState, 4>::goalState = s;
+	SetGoal(s);
+	//PDBHeuristic<RubiksState, RubiksAction, RubiksCube, RubiksState, 4>::goalState = s;
 }
 
 uint64_t RubikPDB::GetStateHash(const RubiksState &s) const
@@ -869,7 +870,10 @@ bool RubikPDB::Load(const char *prefix)
 {
 	FILE *f = fopen(GetFileName(prefix).c_str(), "rb");
 	if (f == 0)
+	{
+		std::cout << "Could not load PDB: " << GetFileName(prefix) << "\n";
 		return false;
+	}
 	bool result = Load(f);
 	fclose(f);
 	if (result)
@@ -944,10 +948,10 @@ std::string RubikPDB::GetFileName(const char *prefix)
 	fileName += "-";
 	// pattern
 	bool added = false;
-	for (auto x : edges)
+	for (int x = 0; x < edges.size(); x++)
 	{
 		added = true;
-		fileName += std::to_string(x);
+		fileName += std::to_string(edges[x]);
 		fileName += ";";
 	}
 	if (added)
@@ -966,10 +970,10 @@ std::string RubikPDB::GetFileName(const char *prefix)
 	fileName.pop_back();
 	// pattern
 	added = false;
-	for (auto x : corners)
+	for (int x = 0; x < corners.size(); x++)
 	{
 		added = true;
-		fileName += std::to_string(x);
+		fileName += std::to_string(corners[x]);
 		fileName += ";";
 	}
 	if (added)

@@ -35,8 +35,12 @@ const int maxThreads = 32; // TODO: This isn't enforced in a static assert
 template <class abstractState, class abstractAction, class abstractEnvironment, class state = abstractState, uint64_t pdbBits = 8>
 class PDBHeuristic : public Heuristic<state> {
 public:
-	PDBHeuristic(abstractEnvironment *e) :type(kPlain), env(e) {}
+	PDBHeuristic(abstractEnvironment *e) :type(kPlain), env(e)
+	{ goalSet = false; }
 	virtual ~PDBHeuristic() {}
+
+	void SetGoal(const state &goal)
+	{	GetStateFromPDBHash(this->GetAbstractHash(goal), goalState); goalSet = true; }
 
 	virtual double HCost(const state &a, const state &b) const;
 
@@ -79,6 +83,7 @@ protected:
 	abstractEnvironment *env;
 	abstractState goalState;
 private:
+	bool goalSet;
 	void ThreadWorker(int threadNum, int depth,
 					  NBitArray<pdbBits> &DB,
 					  std::vector<bool> &coarse,
@@ -113,7 +118,8 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
 void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDB(const state &goal, int numThreads)
 {
-	GetStateFromPDBHash(this->GetAbstractHash(goal), goalState);
+	assert(goalSet);
+	//GetStateFromPDBHash(this->GetAbstractHash(goal), goalState);
 	//goalState = goal;
 	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue(numThreads*20);
 	SharedQueue<uint64_t> resultQueue;

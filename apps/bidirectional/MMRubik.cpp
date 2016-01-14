@@ -24,7 +24,7 @@ const int bucketMask = 0x1F;
 
 const char *prefix1;
 const char *prefix2;
-
+const char *hprefix;
 bool finished = false;
 
 int bestSolution;
@@ -121,13 +121,18 @@ std::unordered_map<openData, openList, openDataHash> open;
 std::string GetClosedName(closedData d)
 {
 	std::string s;
-	if (d.dir == kForward)
+	if ((d.bucket%16) < 8)
 	{
 		s += prefix1;
-		s += "forward-";
 	}
 	else {
 		s += prefix2;
+	}
+	if (d.dir == kForward)
+	{
+		s += "forward-";
+	}
+	else {
 		s += "backward-";
 	}
 	s += std::to_string(d.bucket);
@@ -139,14 +144,23 @@ std::string GetClosedName(closedData d)
 
 std::string GetOpenName(const openData &d)
 {
+	/* Previously we split across disks according to forward/backward, but
+	 * this is unbalanced. Now we split according to buckets. With an even
+	 * number of buckets the files should now be even split across two disks.
+	 */
 	std::string s;
-	if (d.dir == kForward)
+	if ((d.bucket%16) < 8)
 	{
 		s += prefix1;
-		s += "forward-";
 	}
 	else {
 		s += prefix2;
+	}
+	if (d.dir == kForward)
+	{
+		s += "forward-";
+	}
+	else {
 		s += "backward-";
 	}
 	s += std::to_string(d.priority);
@@ -487,7 +501,7 @@ void ExpandNextFile()
 	
 	std::unordered_set<uint64_t> states;
 	ReadBucket(states, d);
-	RemoveDuplicates(states, d);
+	RemoveDuplicates(states, d); // delayed duplicate detection
 	WriteToClosed(states, d); // this could run in parallel!
 	timer.EndTimer();
 	
@@ -524,8 +538,8 @@ void ExpandNextFile()
 	printLock.unlock();
 }
 
-//#define KORF97
-#define MASSIVE
+#define KORF97
+//#define MASSIVE
 //#define SMALL
 //#define TINY
 
@@ -540,20 +554,20 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb1->Load(hprefix))
 	{
 		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save("/Users/nathanst/Desktop/pdb");
+		pdb1->Save(hprefix);
 	}
-	if (!pdb2->Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb2->Load(hprefix))
 	{
 		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save("/Users/nathanst/Desktop/pdb");
+		pdb2->Save(hprefix);
 	}
-	if (!pdb3->Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb3->Load(hprefix))
 	{
 		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save("/Users/nathanst/Desktop/pdb");
+		pdb3->Save(hprefix);
 	}
 	result.lookups.push_back({kMaxNode, 1, 3});
 	result.lookups.push_back({kLeafNode, 0, 0});
@@ -601,20 +615,32 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load("/Users/nathanst/Desktop/pdb"))
+
+//	assert(!"File names are getting corrupted here. Perhaps by the abstraction of the goal state");
+//	assert(!"Need to abstract the goal state immediately when creating the pdb instead of only when I build the pdb");
+	if (!pdb1->Load(hprefix))
 	{
 		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save("/Users/nathanst/Desktop/pdb");
+		pdb1->Save(hprefix);
 	}
-	if (!pdb2->Load("/Users/nathanst/Desktop/pdb"))
+	else {
+		printf("Loaded previous heuristic\n");
+	}
+	if (!pdb2->Load(hprefix))
 	{
 		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save("/Users/nathanst/Desktop/pdb");
+		pdb2->Save(hprefix);
 	}
-	if (!pdb3->Load("/Users/nathanst/Desktop/pdb"))
+	else {
+		printf("Loaded previous heuristic\n");
+	}
+	if (!pdb3->Load(hprefix))
 	{
 		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save("/Users/nathanst/Desktop/pdb");
+		pdb3->Save(hprefix);
+	}
+	else {
+		printf("Loaded previous heuristic\n");
 	}
 	result.lookups.push_back({kMaxNode, 1, 3});
 	result.lookups.push_back({kLeafNode, 0, 0});
@@ -632,20 +658,20 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
 	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb1->Load(hprefix))
 	{
 		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save("/Users/nathanst/Desktop/pdb");
+		pdb1->Save(hprefix);
 	}
-	if (!pdb2->Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb2->Load(hprefix))
 	{
 		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save("/Users/nathanst/Desktop/pdb");
+		pdb2->Save(hprefix);
 	}
-	if (!pdb3->Load("/Users/nathanst/Desktop/pdb"))
+	if (!pdb3->Load(hprefix))
 	{
 		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save("/Users/nathanst/Desktop/pdb");
+		pdb3->Save(hprefix);
 	}
 	result.lookups.push_back({kMaxNode, 1, 3});
 	result.lookups.push_back({kLeafNode, 0, 0});
@@ -680,10 +706,11 @@ void GetState(RubiksState &s, int bucket, uint64_t data)
 
 #pragma mark Main Code
 
-void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2)
+void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
 {
 	prefix1 = p1;
 	prefix2 = p2;
+	hprefix = hloc;
 	
 	bestSolution = 100;
 	gDistBackward.resize(12);

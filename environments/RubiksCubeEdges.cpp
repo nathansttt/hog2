@@ -1082,7 +1082,7 @@ void RubikEdge::SetCubeColor(int which, bool face, const RubikEdgeState &s) cons
 RubikEdgePDB::RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges)
 :PDBHeuristic(e), edges(distinctEdges)
 {
-	
+	SetGoal(s);
 }
 
 uint64_t RubikEdgePDB::GetStateSpaceSize()
@@ -1255,7 +1255,9 @@ void RubikEdgePDB::Save(const char *prefix)
 bool RubikEdgePDB::Load(FILE *f)
 {
 	if (PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, RubikEdgeState, 4>::Load(f) != true)
+	{
 		return false;
+	}
 	if (fread(&puzzleSize, sizeof(puzzleSize), 1, f) != 1)
 		return false;
 	if (fread(&pdbSize, sizeof(pdbSize), 1, f) != 1)
@@ -1294,9 +1296,9 @@ std::string RubikEdgePDB::GetFileName(const char *prefix)
 	fileName.pop_back();
 	fileName += "-";
 	// pattern
-	for (auto x : edges)
+	for (int x = 0; x < edges.size(); x++)
 	{
-		fileName += std::to_string(x);
+		fileName += std::to_string(edges[x]);
 		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon

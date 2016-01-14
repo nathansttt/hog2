@@ -78,6 +78,7 @@ void TestPruning(int depth, int bucket);
 const int kNumBuckets = 512;
 void BFS();
 void GetKorfInstance(RubiksState &start, int which);
+void GetSuperFlip(RubiksState &start);
 
 int main(int argc, char* argv[])
 {
@@ -91,8 +92,13 @@ int main(int argc, char* argv[])
 	{
 		//MMPancake::MM();
 	}
-	else if (argc >= 5 && strcmp(argv[1], "-mm") == 0)
+	else if (strcmp(argv[1], "-mm") == 0)
 	{
+		if (argc <= 5)
+		{
+			printf("Usage:\n%s -mm <problem> <tmpdir1 <tmpdir2> <heuristicdir>\n", argv[0]);
+			exit(0);
+		}
 		RubiksState a, b;
 		RubiksCube c;
 		b.Reset();
@@ -115,8 +121,11 @@ int main(int argc, char* argv[])
 
 		int which = 0;
 		which = atoi(argv[2]);
-		GetKorfInstance(a, which);
-		MM::MM(a, b, argv[3], argv[4]);
+		if (which < 10)
+			GetKorfInstance(a, which);
+		else
+			GetSuperFlip(a);
+		MM::MM(a, b, argv[3], argv[4], argv[5]);
 	}
 	else if (argc > 3 && strcmp(argv[1], "-grid") == 0)
 	{

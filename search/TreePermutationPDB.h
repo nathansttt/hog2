@@ -225,16 +225,16 @@ std::string TreePermutationPDB<state, action, environment>::GetFileName(const ch
 		fileName+='/';
 	fileName += PDBHeuristic<state, action, environment>::env->GetName();
 	fileName += "-";
-	for (auto x : PDBHeuristic<state, action, environment>::goalState.puzzle)
+	for (int x = 0; x < PDBHeuristic<state, action, environment>::goalState.puzzle.size(); x++)
 	{
-		fileName += std::to_string(x);
+		fileName += std::to_string(PDBHeuristic<state, action, environment>::goalState.puzzle[x]);
 		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
 	fileName += "-";
-	for (auto x : distinct)
+	for (int x = 0; x < distinct.size(); x++)
 	{
-		fileName += std::to_string(x);
+		fileName += std::to_string(distinct[x]);
 		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon

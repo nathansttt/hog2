@@ -1054,7 +1054,7 @@ void RubiksCorner::SetFaceColor(int face, const RubiksCornerState &s) const
 RubikCornerPDB::RubikCornerPDB(RubiksCorner *e, const RubiksCornerState &s, std::vector<int> &distinctCorners)
 :PDBHeuristic(e), corners(distinctCorners)
 {
-	
+	SetGoal(s);
 }
 
 uint64_t RubikCornerPDB::GetStateSpaceSize()
@@ -1228,9 +1228,9 @@ std::string RubikCornerPDB::GetFileName(const char *prefix)
 	fileName.pop_back();
 	fileName += "-";
 	// pattern
-	for (auto x : corners)
+	for (int x = 0; x < corners.size(); x++)
 	{
-		fileName += std::to_string(x);
+		fileName += std::to_string(corners[x]);
 		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
