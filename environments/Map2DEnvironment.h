@@ -149,6 +149,7 @@ public:
 	void SetEightConnected() { fourConnected = false; }
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Mapenv\n";return oi;}
 	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
+	double GetPathLength(std::vector<xyLoc> &neighbors);
 protected:
 	GraphHeuristic *h;
 	Map *map;

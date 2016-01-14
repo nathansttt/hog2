@@ -792,6 +792,17 @@ void MapEnvironment::GetNextState(const xyLoc &currents, tDirection dir, xyLoc &
 	}	
 }
 
+double MapEnvironment::GetPathLength(std::vector<xyLoc> &neighbors)
+{
+	double length = 0;
+	for (unsigned int x = 1; x < neighbors.size(); x++)
+	{
+		length += HCost(neighbors[x-1], neighbors[x]);
+	}
+	return length;
+}
+
+
 /************************************************************/
 
 AbsMapEnvironment::AbsMapEnvironment(MapAbstraction *_ma)
