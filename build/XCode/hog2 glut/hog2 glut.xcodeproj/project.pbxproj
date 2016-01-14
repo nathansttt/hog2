@@ -858,6 +858,7 @@
 		C454CDC51506013F005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C45EEEDA1B95760500D87F30 /* MMRubik.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45EEED81B95760500D87F30 /* MMRubik.cpp */; };
 		C4625E78177B5CE200D1C8F7 /* TextOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4625E76177B5CE200D1C8F7 /* TextOverlay.cpp */; };
+		C46265771C320893001936F4 /* JPS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46265751C320893001936F4 /* JPS.cpp */; };
 		C46735761710D9EF00E2A10B /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C46735771710D9EF00E2A10B /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
 		C46735781710D9EF00E2A10B /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F37413E4FDBB0077C5A5 /* TextBox.cpp */; };
@@ -1023,54 +1024,54 @@
 		C4673674171DC59800E2A10B /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
 		C4673675171DC59900E2A10B /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
 		C4673676171DC59A00E2A10B /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
-		C4677D061BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D071BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D081BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D091BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D0A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D0B1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D0C1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D0D1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D0E1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D0F1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D101BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D111BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D121BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D131BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D141BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D151BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D161BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D171BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D181BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D191BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D1A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D1B1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D1C1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D1D1BC480DE00D3DAD8 /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4677D211BCECFFC00D3DAD8 /* PDBRankingTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D1F1BCECFFC00D3DAD8 /* PDBRankingTest.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C341BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C351BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C361BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C371BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C381BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C391BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C3A1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C3B1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C3C1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C3D1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C3E1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C3F1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C401BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C411BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C421BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C431BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C441BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C451BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C461BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C471BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C481BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C491BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6C4A1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4677D061BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D071BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D081BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D091BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D0A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D0B1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D0C1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D0D1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D0E1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D0F1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D101BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D111BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D121BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D131BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D141BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D151BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D161BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D171BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D181BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D191BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D1A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D1B1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D1C1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4677D1D1BC480DE00D3DAD8 /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; };
+		C4677D211BCECFFC00D3DAD8 /* PDBRankingTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D1F1BCECFFC00D3DAD8 /* PDBRankingTest.cpp */; };
+		C46B6C341BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C351BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C361BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C371BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C381BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C391BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C3A1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C3B1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C3C1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C3D1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C3E1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C3F1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C401BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C411BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C421BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C431BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C441BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C451BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C461BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C471BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C481BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C491BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C46B6C4A1BD6E3E200B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
 		C46B6C4D1BD7644F00B10296 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C46B6C4E1BD7644F00B10296 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C46B6C4F1BD7644F00B10296 /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
@@ -1106,7 +1107,7 @@
 		C46B6C6D1BD7644F00B10296 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
 		C46B6C6E1BD7644F00B10296 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
 		C46B6C6F1BD7644F00B10296 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F813E4FE400077C5A5 /* FunctionApproximator.cpp */; };
-		C46B6C701BD7644F00B10296 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C46B6C701BD7644F00B10296 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
 		C46B6C711BD7644F00B10296 /* GLUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FA13E4FE400077C5A5 /* GLUtil.cpp */; };
 		C46B6C721BD7644F00B10296 /* LinearRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FC13E4FE400077C5A5 /* LinearRegression.cpp */; };
 		C46B6C731BD7644F00B10296 /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FE13E4FE400077C5A5 /* Map.cpp */; };
@@ -1121,7 +1122,7 @@
 		C46B6C7D1BD7644F00B10296 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44913E4FE590077C5A5 /* AStarOpenClosed.cpp */; };
 		C46B6C7E1BD7644F00B10296 /* GenericAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44C13E4FE590077C5A5 /* GenericAStar.cpp */; };
 		C46B6C7F1BD7644F00B10296 /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44E13E4FE590077C5A5 /* GenericIDAStar.cpp */; };
-		C46B6C801BD7644F00B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
+		C46B6C801BD7644F00B10296 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
 		C46B6C811BD7644F00B10296 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45013E4FE590077C5A5 /* OldSearchEnvironment.cpp */; };
 		C46B6C821BD7644F00B10296 /* OpenClosedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45213E4FE590077C5A5 /* OpenClosedList.cpp */; };
 		C46B6C831BD7644F00B10296 /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
@@ -1188,8 +1189,8 @@
 		C46B6CC21BD7644F00B10296 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F33C13E4FCF70077C5A5 /* InfoPlist.strings */; };
 		C46B6CC31BD7644F00B10296 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34213E4FCF70077C5A5 /* Credits.rtf */; };
 		C46B6CC41BD7644F00B10296 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
-		C46B6CCA1BD764D000B10296 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4CA9FED1B2680D000B4A894 /* Sample.cpp */; settings = {ASSET_TAGS = (); }; };
-		C46B6CE51BD7659500B10296 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6CCC1BD764F600B10296 /* Driver.cpp */; settings = {ASSET_TAGS = (); }; };
+		C46B6CCA1BD764D000B10296 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4CA9FED1B2680D000B4A894 /* Sample.cpp */; };
+		C46B6CE51BD7659500B10296 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6CCC1BD764F600B10296 /* Driver.cpp */; };
 		C4764037191751EC0052CBE7 /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4764035191751EC0052CBE7 /* MinBloom.cpp */; };
 		C4764038191751EC0052CBE7 /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4764035191751EC0052CBE7 /* MinBloom.cpp */; };
 		C4764039191751EC0052CBE7 /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4764035191751EC0052CBE7 /* MinBloom.cpp */; };
@@ -1246,7 +1247,7 @@
 		C4765C3F1BFD57960040E996 /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FE13E4FE400077C5A5 /* Map.cpp */; };
 		C4765C401BFD57960040E996 /* MapOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40013E4FE400077C5A5 /* MapOverlay.cpp */; };
 		C4765C411BFD57960040E996 /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40213E4FE400077C5A5 /* Plot2D.cpp */; };
-		C4765C421BFD57960040E996 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4765C421BFD57960040E996 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
 		C4765C431BFD57960040E996 /* ScenarioLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40413E4FE400077C5A5 /* ScenarioLoader.cpp */; };
 		C4765C441BFD57960040E996 /* StatCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40613E4FE400077C5A5 /* StatCollection.cpp */; };
 		C4765C451BFD57960040E996 /* StatUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40813E4FE400077C5A5 /* StatUtil.cpp */; };
@@ -1280,7 +1281,7 @@
 		C4765C621BFD57960040E996 /* Heap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48E13E4FF610077C5A5 /* Heap.cpp */; };
 		C4765C631BFD57960040E996 /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49013E4FF610077C5A5 /* MeroB.cpp */; };
 		C4765C641BFD57960040E996 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49213E4FF610077C5A5 /* Path.cpp */; };
-		C4765C651BFD57960040E996 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4765C651BFD57960040E996 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
 		C4765C661BFD57960040E996 /* Propagation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49413E4FF610077C5A5 /* Propagation.cpp */; };
 		C4765C671BFD57960040E996 /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4AB13E4FF940077C5A5 /* MapUnit.cpp */; };
 		C4765C681BFD57960040E996 /* RandomUnits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4AD13E4FF940077C5A5 /* RandomUnits.cpp */; };
@@ -1317,7 +1318,7 @@
 		C4765C871BFD57960040E996 /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735FF17132CA600E2A10B /* FourBitArray.cpp */; };
 		C4765C881BFD57960040E996 /* DiskBitFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4673650171CED0600E2A10B /* DiskBitFile.cpp */; };
 		C4765C891BFD57960040E996 /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4673652171CED0600E2A10B /* EnvUtil.cpp */; };
-		C4765C8A1BFD57960040E996 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4765C8A1BFD57960040E996 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
 		C4765C8B1BFD57960040E996 /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
 		C4765C8C1BFD57960040E996 /* MMapUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40EB696180CC661001E1E25 /* MMapUtil.cpp */; };
 		C4765C8E1BFD57960040E996 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F9F33313E4FCF70077C5A5 /* Cocoa.framework */; };
@@ -1326,8 +1327,7 @@
 		C4765C921BFD57960040E996 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F33C13E4FCF70077C5A5 /* InfoPlist.strings */; };
 		C4765C931BFD57960040E996 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34213E4FCF70077C5A5 /* Credits.rtf */; };
 		C4765C941BFD57960040E996 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
-		C4765C9D1BFD581B0040E996 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4765C9B1BFD581B0040E996 /* Driver.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4765C9E1BFD5BBE0040E996 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4765C9B1BFD581B0040E996 /* Driver.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4765C9E1BFD5BBE0040E996 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4765C9B1BFD581B0040E996 /* Driver.cpp */; };
 		C47BDBD017440B5900DD0928 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C47BDBD117440B5900DD0928 /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
 		C47BDBD217440B5900DD0928 /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F37413E4FDBB0077C5A5 /* TextBox.cpp */; };
@@ -2681,35 +2681,156 @@
 		C4D83ECC18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
 		C4D83ECD18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
 		C4D83ECE18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
-		C4E06A641BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A651BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A661BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A671BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A681BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A691BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A6A1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A6B1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A6C1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A6D1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A6E1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A6F1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A701BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A711BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A721BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A731BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A741BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A751BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A761BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A771BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A781BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A791BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A7A1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A7B1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A7C1BE5DE950011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A7D1BE5DE950011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A7E1BE5DE960011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A7F1BE5DE970011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; settings = {ASSET_TAGS = (); }; };
-		C4E06A801BE5DE970011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; settings = {ASSET_TAGS = (); }; };
+		C4E06A641BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A651BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A661BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A671BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A681BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A691BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A6A1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A6B1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A6C1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A6D1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A6E1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A6F1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A701BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A711BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A721BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A731BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A741BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A751BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A761BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A771BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A781BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A791BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A7A1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A7B1BE1FFE80011F120 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E06A7C1BE5DE950011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C4E06A7D1BE5DE950011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C4E06A7E1BE5DE960011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C4E06A7F1BE5DE970011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C4E06A801BE5DE970011F120 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C4E7E6BD1C3DB97D0049D117 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
+		C4E7E6BE1C3DB97D0049D117 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C4E7E6BF1C3DB97D0049D117 /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
+		C4E7E6C01C3DB97D0049D117 /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F37413E4FDBB0077C5A5 /* TextBox.cpp */; };
+		C4E7E6C11C3DB97D0049D117 /* Trackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F37613E4FDBB0077C5A5 /* Trackball.cpp */; };
+		C4E7E6C21C3DB97D0049D117 /* BurnedPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F38B13E4FE3E0077C5A5 /* BurnedPancakePuzzle.cpp */; };
+		C4E7E6C31C3DB97D0049D117 /* ConfigEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F38D13E4FE3E0077C5A5 /* ConfigEnvironment.cpp */; };
+		C4E7E6C41C3DB97D0049D117 /* Directional2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F38F13E4FE3E0077C5A5 /* Directional2DEnvironment.cpp */; };
+		C4E7E6C51C3DB97D0049D117 /* Fling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39113E4FE3E0077C5A5 /* Fling.cpp */; };
+		C4E7E6C61C3DB97D0049D117 /* FlipSide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39313E4FE3E0077C5A5 /* FlipSide.cpp */; };
+		C4E7E6C71C3DB97D0049D117 /* GraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39513E4FE3E0077C5A5 /* GraphEnvironment.cpp */; };
+		C4E7E6C81C3DB97D0049D117 /* GraphRefinementEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39713E4FE3E0077C5A5 /* GraphRefinementEnvironment.cpp */; };
+		C4E7E6C91C3DB97D0049D117 /* Map2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39913E4FE3E0077C5A5 /* Map2DEnvironment.cpp */; };
+		C4E7E6CA1C3DB97D0049D117 /* Map3DGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39B13E4FE3E0077C5A5 /* Map3DGrid.cpp */; };
+		C4E7E6CC1C3DB97D0049D117 /* MinimalSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39D13E4FE3E0077C5A5 /* MinimalSectorAbstraction.cpp */; };
+		C4E7E6CD1C3DB97D0049D117 /* MNAgentPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F39F13E4FE3E0077C5A5 /* MNAgentPuzzle.cpp */; };
+		C4E7E6CE1C3DB97D0049D117 /* MNPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A113E4FE3E0077C5A5 /* MNPuzzle.cpp */; };
+		C4E7E6CF1C3DB97D0049D117 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C4E7E6D01C3DB97D0049D117 /* MountainCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A313E4FE3E0077C5A5 /* MountainCar.cpp */; };
+		C4E7E6D11C3DB97D0049D117 /* NaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A513E4FE3E0077C5A5 /* NaryTree.cpp */; };
+		C4E7E6D21C3DB97D0049D117 /* PancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A713E4FE3E0077C5A5 /* PancakePuzzle.cpp */; };
+		C4E7E6D31C3DB97D0049D117 /* PermutationPuzzleEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3A913E4FE3E0077C5A5 /* PermutationPuzzleEnvironment.cpp */; };
+		C4E7E6D41C3DB97D0049D117 /* RoboticArm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AB13E4FE3E0077C5A5 /* RoboticArm.cpp */; };
+		C4E7E6D51C3DB97D0049D117 /* SequenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AD13E4FE3E0077C5A5 /* SequenceAlignment.cpp */; };
+		C4E7E6D61C3DB97D0049D117 /* SFBDPancakePuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3AF13E4FE3E0077C5A5 /* SFBDPancakePuzzle.cpp */; };
+		C4E7E6D71C3DB97D0049D117 /* SteeringEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B113E4FE3E0077C5A5 /* SteeringEnvironment.cpp */; };
+		C4E7E6D81C3DB97D0049D117 /* TopSpinGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B313E4FE3E0077C5A5 /* TopSpinGraph.cpp */; };
+		C4E7E6D91C3DB97D0049D117 /* WeightedMap2DEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */; };
+		C4E7E6DA1C3DB97D0049D117 /* GraphCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */; };
+		C4E7E6DB1C3DB97D0049D117 /* IDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */; };
+		C4E7E6DC1C3DB97D0049D117 /* RandomUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */; };
+		C4E7E6DD1C3DB97D0049D117 /* Graph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3D013E4FE3F0077C5A5 /* Graph.cpp */; };
+		C4E7E6DE1C3DB97D0049D117 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */; };
+		C4E7E6DF1C3DB97D0049D117 /* FPUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F613E4FE400077C5A5 /* FPUtil.cpp */; };
+		C4E7E6E01C3DB97D0049D117 /* FunctionApproximator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3F813E4FE400077C5A5 /* FunctionApproximator.cpp */; };
+		C4E7E6E11C3DB97D0049D117 /* GLUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FA13E4FE400077C5A5 /* GLUtil.cpp */; };
+		C4E7E6E21C3DB97D0049D117 /* LinearRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FC13E4FE400077C5A5 /* LinearRegression.cpp */; };
+		C4E7E6E31C3DB97D0049D117 /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F3FE13E4FE400077C5A5 /* Map.cpp */; };
+		C4E7E6E41C3DB97D0049D117 /* MapOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40013E4FE400077C5A5 /* MapOverlay.cpp */; };
+		C4E7E6E51C3DB97D0049D117 /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40213E4FE400077C5A5 /* Plot2D.cpp */; };
+		C4E7E6E61C3DB97D0049D117 /* SVGUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */; };
+		C4E7E6E71C3DB97D0049D117 /* ScenarioLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40413E4FE400077C5A5 /* ScenarioLoader.cpp */; };
+		C4E7E6E81C3DB97D0049D117 /* StatCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40613E4FE400077C5A5 /* StatCollection.cpp */; };
+		C4E7E6E91C3DB97D0049D117 /* StatUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40813E4FE400077C5A5 /* StatUtil.cpp */; };
+		C4E7E6EA1C3DB97D0049D117 /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40A13E4FE400077C5A5 /* StringUtils.cpp */; };
+		C4E7E6EB1C3DB97D0049D117 /* SwapEndian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40C13E4FE400077C5A5 /* SwapEndian.cpp */; };
+		C4E7E6EC1C3DB97D0049D117 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F40E13E4FE400077C5A5 /* Timer.cpp */; };
+		C4E7E6ED1C3DB97D0049D117 /* AStarOpenClosed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44913E4FE590077C5A5 /* AStarOpenClosed.cpp */; };
+		C4E7E6EE1C3DB97D0049D117 /* GenericAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44C13E4FE590077C5A5 /* GenericAStar.cpp */; };
+		C4E7E6EF1C3DB97D0049D117 /* CanonicalGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C413C1421B6B0E9E006A0331 /* CanonicalGrid.cpp */; };
+		C4E7E6F01C3DB97D0049D117 /* GenericIDAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F44E13E4FE590077C5A5 /* GenericIDAStar.cpp */; };
+		C4E7E6F11C3DB97D0049D117 /* OldSearchEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45013E4FE590077C5A5 /* OldSearchEnvironment.cpp */; };
+		C4E7E6F21C3DB97D0049D117 /* OpenClosedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45213E4FE590077C5A5 /* OpenClosedList.cpp */; };
+		C4E7E6F31C3DB97D0049D117 /* OpenListB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45413E4FE590077C5A5 /* OpenListB.cpp */; };
+		C4E7E6F41C3DB97D0049D117 /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4E7E6F51C3DB97D0049D117 /* ClusterAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F45F13E4FF250077C5A5 /* ClusterAbstraction.cpp */; };
+		C4E7E6F61C3DB97D0049D117 /* GraphAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46113E4FF250077C5A5 /* GraphAbstraction.cpp */; };
+		C4E7E6F71C3DB97D0049D117 /* LoadedBBAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46313E4FF250077C5A5 /* LoadedBBAbstraction.cpp */; };
+		C4E7E6F81C3DB97D0049D117 /* LoadedCliqueAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46513E4FF250077C5A5 /* LoadedCliqueAbstraction.cpp */; };
+		C4E7E6F91C3DB97D0049D117 /* MapAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46713E4FF250077C5A5 /* MapAbstraction.cpp */; };
+		C4E7E6FA1C3DB97D0049D117 /* MapCliqueAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46913E4FF250077C5A5 /* MapCliqueAbstraction.cpp */; };
+		C4E7E6FB1C3DB97D0049D117 /* MapFlatAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46B13E4FF250077C5A5 /* MapFlatAbstraction.cpp */; };
+		C4E7E6FC1C3DB97D0049D117 /* MapLineAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46D13E4FF250077C5A5 /* MapLineAbstraction.cpp */; };
+		C4E7E6FD1C3DB97D0049D117 /* MapProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F46F13E4FF250077C5A5 /* MapProvider.cpp */; };
+		C4E7E6FE1C3DB97D0049D117 /* MapSectorAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F47113E4FF250077C5A5 /* MapSectorAbstraction.cpp */; };
+		C4E7E6FF1C3DB97D0049D117 /* NodeLimitAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F47313E4FF250077C5A5 /* NodeLimitAbstraction.cpp */; };
+		C4E7E7001C3DB97D0049D117 /* RadiusAbstraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F47513E4FF250077C5A5 /* RadiusAbstraction.cpp */; };
+		C4E7E7011C3DB97D0049D117 /* Width.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F47713E4FF250077C5A5 /* Width.cpp */; };
+		C4E7E7021C3DB97D0049D117 /* AStarDelay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48813E4FF610077C5A5 /* AStarDelay.cpp */; };
+		C4E7E7031C3DB97D0049D117 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48A13E4FF610077C5A5 /* FloydWarshall.cpp */; };
+		C4E7E7041C3DB97D0049D117 /* GraphAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48C13E4FF610077C5A5 /* GraphAlgorithm.cpp */; };
+		C4E7E7051C3DB97D0049D117 /* Heap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F48E13E4FF610077C5A5 /* Heap.cpp */; };
+		C4E7E7061C3DB97D0049D117 /* MeroB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49013E4FF610077C5A5 /* MeroB.cpp */; };
+		C4E7E7071C3DB97D0049D117 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49213E4FF610077C5A5 /* Path.cpp */; };
+		C4E7E7081C3DB97D0049D117 /* NBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4677D051BC2F41600D3DAD8 /* NBitArray.cpp */; };
+		C4E7E7091C3DB97D0049D117 /* Propagation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F49413E4FF610077C5A5 /* Propagation.cpp */; };
+		C4E7E70A1C3DB97D0049D117 /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4AB13E4FF940077C5A5 /* MapUnit.cpp */; };
+		C4E7E70B1C3DB97D0049D117 /* RandomUnits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4AD13E4FF940077C5A5 /* RandomUnits.cpp */; };
+		C4E7E70C1C3DB97D0049D117 /* RHRUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4AF13E4FF940077C5A5 /* RHRUnit.cpp */; };
+		C4E7E70D1C3DB97D0049D117 /* AbsMapPatrolUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4BB13E500100077C5A5 /* AbsMapPatrolUnit.cpp */; };
+		C4E7E70E1C3DB97D0049D117 /* AbsMapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4BD13E500100077C5A5 /* AbsMapUnit.cpp */; };
+		C4E7E70F1C3DB97D0049D117 /* AbsMapUnitGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4BF13E500100077C5A5 /* AbsMapUnitGroup.cpp */; };
+		C4E7E7101C3DB97D0049D117 /* AStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4C213E500100077C5A5 /* AStar.cpp */; };
+		C4E7E7111C3DB97D0049D117 /* AStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4C413E500100077C5A5 /* AStar2.cpp */; };
+		C4E7E7121C3DB97D0049D117 /* AStar3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4C613E500100077C5A5 /* AStar3.cpp */; };
+		C4E7E7131C3DB97D0049D117 /* CFOptimalRefinement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4C813E500100077C5A5 /* CFOptimalRefinement.cpp */; };
+		C4E7E7141C3DB97D0049D117 /* CorridorAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4CA13E500100077C5A5 /* CorridorAStar.cpp */; };
+		C4E7E7151C3DB97D0049D117 /* CRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4CC13E500100077C5A5 /* CRAStar.cpp */; };
+		C4E7E7161C3DB97D0049D117 /* FringeSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4CE13E500100077C5A5 /* FringeSearch.cpp */; };
+		C4E7E7171C3DB97D0049D117 /* TopSpin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C419EDC219B9225700AD9D5E /* TopSpin.cpp */; };
+		C4E7E7181C3DB97D0049D117 /* HPAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D013E500100077C5A5 /* HPAStar.cpp */; };
+		C4E7E7191C3DB97D0049D117 /* IRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D213E500100077C5A5 /* IRAStar.cpp */; };
+		C4E7E71A1C3DB97D0049D117 /* IRDijkstra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D413E500100077C5A5 /* IRDijkstra.cpp */; };
+		C4E7E71B1C3DB97D0049D117 /* PRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D613E500100077C5A5 /* PRAStar.cpp */; };
+		C4E7E71C1C3DB97D0049D117 /* PRAStar2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4D813E500100077C5A5 /* PRAStar2.cpp */; };
+		C4E7E71D1C3DB97D0049D117 /* SearchAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4DA13E500100077C5A5 /* SearchAlgorithm.cpp */; };
+		C4E7E71E1C3DB97D0049D117 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
+		C4E7E71F1C3DB97D0049D117 /* SpreadExecSearchAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4DE13E500100077C5A5 /* SpreadExecSearchAlgorithm.cpp */; };
+		C4E7E7201C3DB97D0049D117 /* SpreadPRAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4E013E500100077C5A5 /* SpreadPRAStar.cpp */; };
+		C4E7E7211C3DB97D0049D117 /* SimpleHierarchicalAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4DC13E500100077C5A5 /* SimpleHierarchicalAStar.cpp */; };
+		C4E7E7221C3DB97D0049D117 /* NQueens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B9740A1426FADE00758D0D /* NQueens.cpp */; };
+		C4E7E7231C3DB97D0049D117 /* MinBloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4764035191751EC0052CBE7 /* MinBloom.cpp */; };
+		C4E7E7241C3DB97D0049D117 /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
+		C4E7E7251C3DB97D0049D117 /* Map2DConstrainedEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C402ED9C15CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp */; };
+		C4E7E7261C3DB97D0049D117 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
+		C4E7E7271C3DB97D0049D117 /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */; };
+		C4E7E7281C3DB97D0049D117 /* RubiksCubeCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */; };
+		C4E7E7291C3DB97D0049D117 /* RubiksCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735E8171135E900E2A10B /* RubiksCube.cpp */; };
+		C4E7E72A1C3DB97D0049D117 /* FourBitArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46735FF17132CA600E2A10B /* FourBitArray.cpp */; };
+		C4E7E72B1C3DB97D0049D117 /* DiskBitFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4673650171CED0600E2A10B /* DiskBitFile.cpp */; };
+		C4E7E72C1C3DB97D0049D117 /* EnvUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4673652171CED0600E2A10B /* EnvUtil.cpp */; };
+		C4E7E72D1C3DB97D0049D117 /* TOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C46B6C321BD6E3E200B10296 /* TOH.cpp */; };
+		C4E7E72E1C3DB97D0049D117 /* RubiksCube7Edges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C467360E1715E96B00E2A10B /* RubiksCube7Edges.cpp */; };
+		C4E7E72F1C3DB97D0049D117 /* MMapUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C40EB696180CC661001E1E25 /* MMapUtil.cpp */; };
+		C4E7E7311C3DB97D0049D117 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F9F33313E4FCF70077C5A5 /* Cocoa.framework */; };
+		C4E7E7321C3DB97D0049D117 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F9F34E13E4FD360077C5A5 /* GLUT.framework */; };
+		C4E7E7331C3DB97D0049D117 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F9F34F13E4FD360077C5A5 /* OpenGL.framework */; };
+		C4E7E7351C3DB97D0049D117 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F33C13E4FCF70077C5A5 /* InfoPlist.strings */; };
+		C4E7E7361C3DB97D0049D117 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34213E4FCF70077C5A5 /* Credits.rtf */; };
+		C4E7E7371C3DB97D0049D117 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
+		C4E7E7411C3DBAE60049D117 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4E7E73E1C3DBADC0049D117 /* Sample.cpp */; };
 		C4EABCDE13E66D14002D87CE /* SimpleHierarchicalAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F4DC13E500100077C5A5 /* SimpleHierarchicalAStar.cpp */; };
 		C4EE610E1651BB9A00B038E5 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C4EE610F1651BB9A00B038E5 /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
@@ -3078,6 +3199,8 @@
 		C45F607E1BDFDEEC0008E33A /* MM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MM.h; sourceTree = "<group>"; };
 		C4625E76177B5CE200D1C8F7 /* TextOverlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextOverlay.cpp; sourceTree = "<group>"; };
 		C4625E77177B5CE200D1C8F7 /* TextOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextOverlay.h; sourceTree = "<group>"; };
+		C46265751C320893001936F4 /* JPS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JPS.cpp; sourceTree = "<group>"; };
+		C46265761C320893001936F4 /* JPS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPS.h; sourceTree = "<group>"; };
 		C46735721710D96000E2A10B /* Driver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C46735731710D96000E2A10B /* Driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C46735E51710D9EF00E2A10B /* rubik.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rubik.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -3189,6 +3312,10 @@
 		C4E487D71B853FFE002753C8 /* Heuristic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Heuristic.h; sourceTree = "<group>"; };
 		C4E487D81B854072002753C8 /* PDBHeuristic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PDBHeuristic.h; sourceTree = "<group>"; };
 		C4E487D91B8F96D4002753C8 /* PermutationPDB.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PermutationPDB.h; sourceTree = "<group>"; };
+		C4E7E73B1C3DB97D0049D117 /* Roads.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roads.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4E7E73C1C3DB97D0049D117 /* Roads-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Roads-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/Roads-Info.plist"; sourceTree = "<absolute>"; };
+		C4E7E73E1C3DBADC0049D117 /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
+		C4E7E73F1C3DBADC0049D117 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		C4EAF19814F6F9D600BCBD57 /* LearningUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LearningUnit.h; sourceTree = "<group>"; };
 		C4EAF19A14F6FB1600BCBD57 /* LearningAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LearningAlgorithm.h; sourceTree = "<group>"; };
 		C4EAF19B14F72B7200BCBD57 /* FLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLRTAStar.h; sourceTree = "<group>"; };
@@ -3654,6 +3781,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C4E7E7301C3DB97D0049D117 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4E7E7311C3DB97D0049D117 /* Cocoa.framework in Frameworks */,
+				C4E7E7321C3DB97D0049D117 /* GLUT.framework in Frameworks */,
+				C4E7E7331C3DB97D0049D117 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C4EE61701651BB9A00B038E5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -3692,6 +3829,8 @@
 			children = (
 				C413C1F11B6BBE09006A0331 /* Sample.cpp */,
 				C413C1F21B6BBE09006A0331 /* Sample.h */,
+				C46265751C320893001936F4 /* JPS.cpp */,
+				C46265761C320893001936F4 /* JPS.h */,
 			);
 			name = canonicalGrids;
 			path = ../canonicalGrids;
@@ -3805,6 +3944,7 @@
 				C46B6CC91BD7644F00B10296 /* TOH Info.plist */,
 				C4765C991BFD57960040E996 /* Delta-Info.plist */,
 				C4456B5C1BBB49D40065CA5A /* Unit Test-Info.plist */,
+				C4E7E73C1C3DB97D0049D117 /* Roads-Info.plist */,
 			);
 			name = plists;
 			sourceTree = "<group>";
@@ -3852,6 +3992,7 @@
 		C498D837143276E50053D322 /* apps */ = {
 			isa = PBXGroup;
 			children = (
+				C4E7E73D1C3DBADC0049D117 /* roads */,
 				C4765C9A1BFD581B0040E996 /* delta */,
 				C46B6CCB1BD764F600B10296 /* TOH */,
 				C4456B5F1BBB4A740065CA5A /* test */,
@@ -4006,6 +4147,16 @@
 			path = ../../../../search;
 			sourceTree = "<group>";
 		};
+		C4E7E73D1C3DBADC0049D117 /* roads */ = {
+			isa = PBXGroup;
+			children = (
+				C4E7E73E1C3DBADC0049D117 /* Sample.cpp */,
+				C4E7E73F1C3DBADC0049D117 /* Sample.h */,
+			);
+			name = roads;
+			path = ../roads;
+			sourceTree = "<group>";
+		};
 		C4EE61081651BB8300B038E5 /* emotion */ = {
 			isa = PBXGroup;
 			children = (
@@ -4054,6 +4205,7 @@
 				C4456B5B1BBB49D40065CA5A /* Unit Tests.app */,
 				C46B6CC81BD7644F00B10296 /* TOH.app */,
 				C4765C981BFD57960040E996 /* Delta.app */,
+				C4E7E73B1C3DB97D0049D117 /* Roads.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -4892,6 +5044,23 @@
 			productReference = C4D60ACB14B22E10007594CD /* puzzleSample.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C4E7E6BB1C3DB97D0049D117 /* Roads */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C4E7E7381C3DB97D0049D117 /* Build configuration list for PBXNativeTarget "Roads" */;
+			buildPhases = (
+				C4E7E6BC1C3DB97D0049D117 /* Sources */,
+				C4E7E7301C3DB97D0049D117 /* Frameworks */,
+				C4E7E7341C3DB97D0049D117 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Roads;
+			productName = "3d maps";
+			productReference = C4E7E73B1C3DB97D0049D117 /* Roads.app */;
+			productType = "com.apple.product-type.application";
+		};
 		C4EE610C1651BB9A00B038E5 /* emotion */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C4EE61781651BB9A00B038E5 /* Build configuration list for PBXNativeTarget "emotion" */;
@@ -4989,6 +5158,7 @@
 				C4456AE01BBB49D40065CA5A /* UnitTest */,
 				C46B6C4B1BD7644F00B10296 /* TOH */,
 				C4765C181BFD57960040E996 /* Delta */,
+				C4E7E6BB1C3DB97D0049D117 /* Roads */,
 			);
 		};
 /* End PBXProject section */
@@ -5214,6 +5384,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C4E7E7341C3DB97D0049D117 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4E7E7351C3DB97D0049D117 /* InfoPlist.strings in Resources */,
+				C4E7E7361C3DB97D0049D117 /* Credits.rtf in Resources */,
+				C4E7E7371C3DB97D0049D117 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C4EE61741651BB9A00B038E5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -5292,6 +5472,7 @@
 				C413C17F1B6BBD60006A0331 /* LinearRegression.cpp in Sources */,
 				C413C1801B6BBD60006A0331 /* Map.cpp in Sources */,
 				C413C1811B6BBD60006A0331 /* MapOverlay.cpp in Sources */,
+				C46265771C320893001936F4 /* JPS.cpp in Sources */,
 				C413C1821B6BBD60006A0331 /* Plot2D.cpp in Sources */,
 				C413C1831B6BBD60006A0331 /* ScenarioLoader.cpp in Sources */,
 				C413C1841B6BBD60006A0331 /* StatCollection.cpp in Sources */,
@@ -7917,6 +8098,128 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C4E7E6BC1C3DB97D0049D117 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4E7E6BD1C3DB97D0049D117 /* Common.cpp in Sources */,
+				C4E7E6BE1C3DB97D0049D117 /* Bloom.cpp in Sources */,
+				C4E7E6BF1C3DB97D0049D117 /* GLUThog.cpp in Sources */,
+				C4E7E6C01C3DB97D0049D117 /* TextBox.cpp in Sources */,
+				C4E7E6C11C3DB97D0049D117 /* Trackball.cpp in Sources */,
+				C4E7E6C21C3DB97D0049D117 /* BurnedPancakePuzzle.cpp in Sources */,
+				C4E7E6C31C3DB97D0049D117 /* ConfigEnvironment.cpp in Sources */,
+				C4E7E6C41C3DB97D0049D117 /* Directional2DEnvironment.cpp in Sources */,
+				C4E7E6C51C3DB97D0049D117 /* Fling.cpp in Sources */,
+				C4E7E6C61C3DB97D0049D117 /* FlipSide.cpp in Sources */,
+				C4E7E6C71C3DB97D0049D117 /* GraphEnvironment.cpp in Sources */,
+				C4E7E6C81C3DB97D0049D117 /* GraphRefinementEnvironment.cpp in Sources */,
+				C4E7E6C91C3DB97D0049D117 /* Map2DEnvironment.cpp in Sources */,
+				C4E7E6CA1C3DB97D0049D117 /* Map3DGrid.cpp in Sources */,
+				C4E7E6CC1C3DB97D0049D117 /* MinimalSectorAbstraction.cpp in Sources */,
+				C4E7E6CD1C3DB97D0049D117 /* MNAgentPuzzle.cpp in Sources */,
+				C4E7E6CE1C3DB97D0049D117 /* MNPuzzle.cpp in Sources */,
+				C4E7E6CF1C3DB97D0049D117 /* RangeCompression.cpp in Sources */,
+				C4E7E6D01C3DB97D0049D117 /* MountainCar.cpp in Sources */,
+				C4E7E6D11C3DB97D0049D117 /* NaryTree.cpp in Sources */,
+				C4E7E6D21C3DB97D0049D117 /* PancakePuzzle.cpp in Sources */,
+				C4E7E6D31C3DB97D0049D117 /* PermutationPuzzleEnvironment.cpp in Sources */,
+				C4E7E6D41C3DB97D0049D117 /* RoboticArm.cpp in Sources */,
+				C4E7E6D51C3DB97D0049D117 /* SequenceAlignment.cpp in Sources */,
+				C4E7E6D61C3DB97D0049D117 /* SFBDPancakePuzzle.cpp in Sources */,
+				C4E7E6D71C3DB97D0049D117 /* SteeringEnvironment.cpp in Sources */,
+				C4E7E6D81C3DB97D0049D117 /* TopSpinGraph.cpp in Sources */,
+				C4E7E6D91C3DB97D0049D117 /* WeightedMap2DEnvironment.cpp in Sources */,
+				C4E7E6DA1C3DB97D0049D117 /* GraphCheck.cpp in Sources */,
+				C4E7E6DB1C3DB97D0049D117 /* IDAStar.cpp in Sources */,
+				C4E7E6DC1C3DB97D0049D117 /* RandomUnit.cpp in Sources */,
+				C4E7E6DD1C3DB97D0049D117 /* Graph.cpp in Sources */,
+				C4E7E6DE1C3DB97D0049D117 /* BitVector.cpp in Sources */,
+				C4E7E6DF1C3DB97D0049D117 /* FPUtil.cpp in Sources */,
+				C4E7E6E01C3DB97D0049D117 /* FunctionApproximator.cpp in Sources */,
+				C4E7E6E11C3DB97D0049D117 /* GLUtil.cpp in Sources */,
+				C4E7E6E21C3DB97D0049D117 /* LinearRegression.cpp in Sources */,
+				C4E7E6E31C3DB97D0049D117 /* Map.cpp in Sources */,
+				C4E7E6E41C3DB97D0049D117 /* MapOverlay.cpp in Sources */,
+				C4E7E6E51C3DB97D0049D117 /* Plot2D.cpp in Sources */,
+				C4E7E6E61C3DB97D0049D117 /* SVGUtil.cpp in Sources */,
+				C4E7E6E71C3DB97D0049D117 /* ScenarioLoader.cpp in Sources */,
+				C4E7E6E81C3DB97D0049D117 /* StatCollection.cpp in Sources */,
+				C4E7E6E91C3DB97D0049D117 /* StatUtil.cpp in Sources */,
+				C4E7E6EA1C3DB97D0049D117 /* StringUtils.cpp in Sources */,
+				C4E7E6EB1C3DB97D0049D117 /* SwapEndian.cpp in Sources */,
+				C4E7E6EC1C3DB97D0049D117 /* Timer.cpp in Sources */,
+				C4E7E6ED1C3DB97D0049D117 /* AStarOpenClosed.cpp in Sources */,
+				C4E7E6EE1C3DB97D0049D117 /* GenericAStar.cpp in Sources */,
+				C4E7E6EF1C3DB97D0049D117 /* CanonicalGrid.cpp in Sources */,
+				C4E7E6F01C3DB97D0049D117 /* GenericIDAStar.cpp in Sources */,
+				C4E7E6F11C3DB97D0049D117 /* OldSearchEnvironment.cpp in Sources */,
+				C4E7E6F21C3DB97D0049D117 /* OpenClosedList.cpp in Sources */,
+				C4E7E6F31C3DB97D0049D117 /* OpenListB.cpp in Sources */,
+				C4E7E6F41C3DB97D0049D117 /* LogisticRegression.cpp in Sources */,
+				C4E7E6F51C3DB97D0049D117 /* ClusterAbstraction.cpp in Sources */,
+				C4E7E6F61C3DB97D0049D117 /* GraphAbstraction.cpp in Sources */,
+				C4E7E6F71C3DB97D0049D117 /* LoadedBBAbstraction.cpp in Sources */,
+				C4E7E6F81C3DB97D0049D117 /* LoadedCliqueAbstraction.cpp in Sources */,
+				C4E7E6F91C3DB97D0049D117 /* MapAbstraction.cpp in Sources */,
+				C4E7E6FA1C3DB97D0049D117 /* MapCliqueAbstraction.cpp in Sources */,
+				C4E7E6FB1C3DB97D0049D117 /* MapFlatAbstraction.cpp in Sources */,
+				C4E7E6FC1C3DB97D0049D117 /* MapLineAbstraction.cpp in Sources */,
+				C4E7E6FD1C3DB97D0049D117 /* MapProvider.cpp in Sources */,
+				C4E7E6FE1C3DB97D0049D117 /* MapSectorAbstraction.cpp in Sources */,
+				C4E7E6FF1C3DB97D0049D117 /* NodeLimitAbstraction.cpp in Sources */,
+				C4E7E7001C3DB97D0049D117 /* RadiusAbstraction.cpp in Sources */,
+				C4E7E7011C3DB97D0049D117 /* Width.cpp in Sources */,
+				C4E7E7021C3DB97D0049D117 /* AStarDelay.cpp in Sources */,
+				C4E7E7031C3DB97D0049D117 /* FloydWarshall.cpp in Sources */,
+				C4E7E7041C3DB97D0049D117 /* GraphAlgorithm.cpp in Sources */,
+				C4E7E7051C3DB97D0049D117 /* Heap.cpp in Sources */,
+				C4E7E7061C3DB97D0049D117 /* MeroB.cpp in Sources */,
+				C4E7E7071C3DB97D0049D117 /* Path.cpp in Sources */,
+				C4E7E7081C3DB97D0049D117 /* NBitArray.cpp in Sources */,
+				C4E7E7091C3DB97D0049D117 /* Propagation.cpp in Sources */,
+				C4E7E70A1C3DB97D0049D117 /* MapUnit.cpp in Sources */,
+				C4E7E70B1C3DB97D0049D117 /* RandomUnits.cpp in Sources */,
+				C4E7E70C1C3DB97D0049D117 /* RHRUnit.cpp in Sources */,
+				C4E7E70D1C3DB97D0049D117 /* AbsMapPatrolUnit.cpp in Sources */,
+				C4E7E70E1C3DB97D0049D117 /* AbsMapUnit.cpp in Sources */,
+				C4E7E70F1C3DB97D0049D117 /* AbsMapUnitGroup.cpp in Sources */,
+				C4E7E7101C3DB97D0049D117 /* AStar.cpp in Sources */,
+				C4E7E7111C3DB97D0049D117 /* AStar2.cpp in Sources */,
+				C4E7E7121C3DB97D0049D117 /* AStar3.cpp in Sources */,
+				C4E7E7131C3DB97D0049D117 /* CFOptimalRefinement.cpp in Sources */,
+				C4E7E7141C3DB97D0049D117 /* CorridorAStar.cpp in Sources */,
+				C4E7E7151C3DB97D0049D117 /* CRAStar.cpp in Sources */,
+				C4E7E7161C3DB97D0049D117 /* FringeSearch.cpp in Sources */,
+				C4E7E7171C3DB97D0049D117 /* TopSpin.cpp in Sources */,
+				C4E7E7181C3DB97D0049D117 /* HPAStar.cpp in Sources */,
+				C4E7E7191C3DB97D0049D117 /* IRAStar.cpp in Sources */,
+				C4E7E71A1C3DB97D0049D117 /* IRDijkstra.cpp in Sources */,
+				C4E7E7411C3DBAE60049D117 /* Sample.cpp in Sources */,
+				C4E7E71B1C3DB97D0049D117 /* PRAStar.cpp in Sources */,
+				C4E7E71C1C3DB97D0049D117 /* PRAStar2.cpp in Sources */,
+				C4E7E71D1C3DB97D0049D117 /* SearchAlgorithm.cpp in Sources */,
+				C4E7E71E1C3DB97D0049D117 /* MapGenerators.cpp in Sources */,
+				C4E7E71F1C3DB97D0049D117 /* SpreadExecSearchAlgorithm.cpp in Sources */,
+				C4E7E7201C3DB97D0049D117 /* SpreadPRAStar.cpp in Sources */,
+				C4E7E7211C3DB97D0049D117 /* SimpleHierarchicalAStar.cpp in Sources */,
+				C4E7E7221C3DB97D0049D117 /* NQueens.cpp in Sources */,
+				C4E7E7231C3DB97D0049D117 /* MinBloom.cpp in Sources */,
+				C4E7E7241C3DB97D0049D117 /* BitMap.cpp in Sources */,
+				C4E7E7251C3DB97D0049D117 /* Map2DConstrainedEnvironment.cpp in Sources */,
+				C4E7E7261C3DB97D0049D117 /* Map2DHeading.cpp in Sources */,
+				C4E7E7271C3DB97D0049D117 /* RubiksCubeEdges.cpp in Sources */,
+				C4E7E7281C3DB97D0049D117 /* RubiksCubeCorners.cpp in Sources */,
+				C4E7E7291C3DB97D0049D117 /* RubiksCube.cpp in Sources */,
+				C4E7E72A1C3DB97D0049D117 /* FourBitArray.cpp in Sources */,
+				C4E7E72B1C3DB97D0049D117 /* DiskBitFile.cpp in Sources */,
+				C4E7E72C1C3DB97D0049D117 /* EnvUtil.cpp in Sources */,
+				C4E7E72D1C3DB97D0049D117 /* TOH.cpp in Sources */,
+				C4E7E72E1C3DB97D0049D117 /* RubiksCube7Edges.cpp in Sources */,
+				C4E7E72F1C3DB97D0049D117 /* MMapUtil.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C4EE610D1651BB9A00B038E5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -8122,7 +8425,6 @@
 				C4F9F4B813E4FF940077C5A5 /* RandomUnits.cpp in Sources */,
 				C4F9F4B913E4FF940077C5A5 /* RHRUnit.cpp in Sources */,
 				C4F9F4E213E500100077C5A5 /* AbsMapPatrolUnit.cpp in Sources */,
-				C4765C9D1BFD581B0040E996 /* Driver.cpp in Sources */,
 				C4F9F4E313E500100077C5A5 /* AbsMapUnit.cpp in Sources */,
 				C4F9F4E413E500100077C5A5 /* AbsMapUnitGroup.cpp in Sources */,
 				C4F9F4E513E500100077C5A5 /* AStar.cpp in Sources */,
@@ -9550,6 +9852,64 @@
 			};
 			name = Release;
 		};
+		C4E7E7391C3DB97D0049D117 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "3d maps/3d maps-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = OS_MAC;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "Roads-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		C4E7E73A1C3DB97D0049D117 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "3d maps/3d maps-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = OS_MAC;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "Roads-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 		C4EE61791651BB9A00B038E5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -9928,6 +10288,15 @@
 			buildConfigurations = (
 				C4D60AC914B22E10007594CD /* Debug */,
 				C4D60ACA14B22E10007594CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C4E7E7381C3DB97D0049D117 /* Build configuration list for PBXNativeTarget "Roads" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C4E7E7391C3DB97D0049D117 /* Debug */,
+				C4E7E73A1C3DB97D0049D117 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
