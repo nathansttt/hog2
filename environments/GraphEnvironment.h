@@ -195,7 +195,7 @@ private:
 		int size = m->GetMapWidth() * m->GetMapHeight();
 		probTable = (bool*)malloc( size );
 		for (int i=0;i<size;i++) {
-#pragma message("drand was removed here. New code hasn't been tested.")
+#pragma message("drand was removed here. New code hasn't been tested.")
 			if ((random()%10000)/10000.0 < prob)
 				probTable[i] = 1;
 			else
