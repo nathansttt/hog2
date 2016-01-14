@@ -22,22 +22,44 @@ struct xyLocParent
 	uint8_t parent;
 };
 
+struct jpsSuccessor
+{
+	jpsSuccessor() {}
+	jpsSuccessor(int x, int y, uint8_t parent, double cost)
+	{ s.loc.x = x; s.loc.y = y; s.parent = parent; this->cost = cost; }
+	xyLocParent s;
+	double cost;
+};
+
 class JPS : public GenericSearchAlgorithm<xyLoc, tDirection, MapEnvironment>
 {
 public:
 	JPS();
 	void GetPath(MapEnvironment *env, const xyLoc &from, const xyLoc &to, std::vector<xyLoc> &path);
 	void GetPath(MapEnvironment *env, const xyLoc &from, const xyLoc &to, std::vector<tDirection> &path);
+	
+	bool InitializeSearch(MapEnvironment *env, const xyLoc& from, const xyLoc& to, std::vector<xyLoc> &thePath);
+	bool DoSingleSearchStep(std::vector<xyLoc> &thePath);
+	
 	const char *GetName() { return "JPS"; }
 	uint64_t GetNodesExpanded() const;
 	uint64_t GetNodesTouched() const;
+	uint64_t GetNumOpenItems() const { return openClosedList.OpenSize(); }
+	void SetWeight(double val) { weight = val; }
 	void LogFinalStats(StatCollection *stats);
 	void OpenGLDraw() const;
 	void OpenGLDraw(const MapEnvironment *env) const;
 private:
-	void GetJPSSuccessors(xyLocParent s);
+	void GetJPSSuccessors(const xyLocParent &s, const xyLoc &goal);
+	void GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, double cost);
+	bool Passable(int x, int y);
+	void ExtractPathToStartFromID(uint64_t node, std::vector<xyLoc> &thePath);
 	AStarOpenClosed<xyLocParent, AStarCompare<xyLocParent> > openClosedList;
-	std::vector<xyLocParent> successors;
+	std::vector<jpsSuccessor> successors;
+	MapEnvironment *env;
+	xyLoc to;
+	uint64_t nodesExpanded, nodesTouched;
+	double weight;
 };
 
 #endif /* JPS_h */
