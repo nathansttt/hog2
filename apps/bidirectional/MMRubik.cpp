@@ -8,6 +8,7 @@
 
 #include "MMRubik.h"
 #include "IDAStar.h"
+#include "ParallelIDAStar.h"
 #include "Timer.h"
 #include <string>
 #include <unordered_set>
@@ -538,6 +539,7 @@ void ExpandNextFile()
 	printLock.unlock();
 }
 
+//#define ZERO
 #define KORF97
 //#define MASSIVE
 //#define SMALL
@@ -547,6 +549,12 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 {
 	RubiksCube cube;
 	std::vector<int> blank;
+#ifdef ZERO
+	ZeroHeuristic<RubiksState> *zero = new ZeroHeuristic<RubiksState>();
+	result.lookups.push_back({kLeafNode, 0, 0});
+	result.heuristics.push_back(zero);
+#endif
+	
 #ifdef TINY
 	std::vector<int> edges1 = {1, 3, 8, 9}; // first 4
 	std::vector<int> edges2 = {0, 2, 4, 5}; // first 4
@@ -750,6 +758,46 @@ void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, c
 	}
 	t.EndTimer();
 	printf("%1.2fs elapsed\n", t.GetElapsedTime());
+}
+
+void CompareIDA(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
+{
+	prefix1 = p1;
+	prefix2 = p2;
+	hprefix = hloc;
+	
+	bestSolution = 100;
+	gDistBackward.resize(12);
+	gDistForward.resize(12);
+	expanded = 0;
+	BuildHeuristics(start, goal, forward);
+	BuildHeuristics(goal, start, reverse);
+	
+	std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+	std::cout << std::setprecision(2);
+	
+	printf("---IDA*---\n");
+	std::vector<RubiksAction> path;
+	Timer t;
+	t.StartTimer();
+	cube.SetPruneSuccessors(true);
+	ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> ida;
+	ida.SetHeuristic(&forward);
+	ida.GetPath(&cube, start, goal, path);
+	t.EndTimer();
+	printf("%1.5fs elapsed\n", t.GetElapsedTime());
+	printf("%llu nodes expanded (%1.3f nodes/sec)\n", ida.GetNodesExpanded(),
+		   ida.GetNodesExpanded()/t.GetElapsedTime());
+	printf("%llu nodes generated (%1.3f nodes/sec)\n", ida.GetNodesTouched(),
+		   ida.GetNodesTouched()/t.GetElapsedTime());
+	printf("Solution cost: %lu\n", path.size());
+
+	std::cout << "Acts: ";
+	for (unsigned int x = 0; x < path.size(); x++)
+	{
+		std::cout << path[x] << " ";
+	}
+	std::cout << "\n";
 }
 
 NAMESPACE_CLOSE(MM)

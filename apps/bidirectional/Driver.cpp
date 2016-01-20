@@ -92,6 +92,33 @@ int main(int argc, char* argv[])
 	{
 		//MMPancake::MM();
 	}
+	else if (strcmp(argv[1], "-pida") == 0)
+	{
+		if (argc <= 5)
+		{
+			printf("Usage:\n%s -pida <problem> <tmpdir1 <tmpdir2> <heuristicdir>\n", argv[0]);
+			exit(0);
+		}
+		RubiksState a, b;
+		RubiksCube c;
+		b.Reset();
+
+		int which = 0;
+		which = atoi(argv[2]);
+		if (which < 10)
+			GetKorfInstance(a, which);
+		else if (which == 19)
+		{
+			GetSuperFlip(a);
+			// Any action will reduce this to 19 moves to solve
+			c.ApplyAction(a, 0);
+		}
+		else if (which == 20)
+		{
+			GetSuperFlip(a);
+		}
+		MM::CompareIDA(a, b, argv[3], argv[4], argv[5]);
+	}
 	else if (strcmp(argv[1], "-mm") == 0)
 	{
 		if (argc <= 5)

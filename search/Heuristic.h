@@ -36,6 +36,12 @@ private:
 };
 
 template <class state>
+class ZeroHeuristic : public Heuristic<state> {
+public:
+	double HCost(const state &a, const state &b) const { return 0; }
+};
+
+template <class state>
 double Heuristic<state>::HCost(const state &s1, const state &s2) const
 {
 	return HCost(s1, s2, 0);

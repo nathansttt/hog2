@@ -17,6 +17,7 @@
 
 namespace MM {
 	void MM(RubiksState &start, RubiksState &goal, const char *prefix1, const char *prefix2, const char *heuristicloc);
+	void CompareIDA(RubiksState &start, RubiksState &goal, const char *prefix1, const char *prefix2, const char *heuristicloc);
 }
 
 #endif /* defined(__hog2_glut__MM__) */
