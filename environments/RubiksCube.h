@@ -65,30 +65,30 @@ static std::ostream &operator<<(std::ostream &out, const RubiksState &s)
 
 typedef int RubiksAction;
 
-static std::ostream &operator<<(std::ostream &out, const RubiksAction &s)
-{
-	switch (s) {
-		case 0: out << "U "; break;
-		case 1: out << "U- "; break;
-		case 2: out << "U2 "; break;
-		case 3: out << "D "; break;
-		case 4: out << "D- "; break;
-		case 5: out << "D2 "; break;
-		case 6: out << "F "; break;
-		case 7: out << "F- "; break;
-		case 8: out << "F2 "; break;
-		case 9: out << "B "; break;
-		case 10: out << "B- "; break;
-		case 11: out << "B2 "; break;
-		case 12: out << "L "; break;
-		case 13: out << "L- "; break;
-		case 14: out << "L2 "; break;
-		case 15: out << "R "; break;
-		case 16: out << "R- "; break;
-		case 17: out << "R2 "; break;
-	}
-	return out;
-}
+//static std::ostream &operator<<(std::ostream &out, const RubiksAction &s)
+//{
+//	switch (s) {
+//		case 0: out << "U "; break;
+//		case 1: out << "U- "; break;
+//		case 2: out << "U2 "; break;
+//		case 3: out << "D "; break;
+//		case 4: out << "D- "; break;
+//		case 5: out << "D2 "; break;
+//		case 6: out << "F "; break;
+//		case 7: out << "F- "; break;
+//		case 8: out << "F2 "; break;
+//		case 9: out << "B "; break;
+//		case 10: out << "B- "; break;
+//		case 11: out << "B2 "; break;
+//		case 12: out << "L "; break;
+//		case 13: out << "L- "; break;
+//		case 14: out << "L2 "; break;
+//		case 15: out << "R "; break;
+//		case 16: out << "R- "; break;
+//		case 17: out << "R2 "; break;
+//	}
+//	return out;
+//}
 
 //class RubikCornerMove {
 //public:
