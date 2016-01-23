@@ -1,9 +1,9 @@
 //
-//  MM.cpp
+//  MM0Rubik.cpp
 //  hog2 glut
 //
-//  Created by Nathan Sturtevant on 8/31/15.
-//  Copyright (c) 2015 University of Denver. All rights reserved.
+//  Created by Nathan Sturtevant on 1/19/16.
+//  Copyright © 2016 University of Denver. All rights reserved.
 //
 
 #include "MMRubik.h"
@@ -14,18 +14,20 @@
 #include <unordered_set>
 #include <iomanip>
 
-NAMESPACE_OPEN(MM)
+#include "MM0Rubik.h"
+
+
+NAMESPACE_OPEN(MM0)
 
 //const int fileBuckets = 8; // must be at least 8
 //const uint64_t bucketBits = 3;
 //const int bucketMask = 0x7;
-//const int fileBuckets = 32; // must be at least 8
-const uint64_t bucketBits = 7;
-const int bucketMask = ((1<<bucketBits)-1);//0x1F;
+const int fileBuckets = 32; // must be at least 8
+const uint64_t bucketBits = 5;
+const int bucketMask = 0x1F;
 
 const char *prefix1;
 const char *prefix2;
-const char *hprefix;
 bool finished = false;
 
 int bestSolution;
@@ -48,9 +50,6 @@ int GetBucket(const RubiksState &s);
 void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result);
 RubiksCube cube;
 
-Heuristic<RubiksState> forward;
-Heuristic<RubiksState> reverse;
-
 enum  tSearchDirection {
 	kForward,
 	kBackward,
@@ -61,18 +60,17 @@ struct openData {
 	tSearchDirection dir;  // at most 2 bits
 	uint8_t priority;      // at most 6 bits
 	uint8_t gcost;         // at most 4 bits
-	uint8_t hcost;         // at most 4 bits
 	uint8_t bucket;        // at most (3) bits
 };
 
 static bool operator==(const openData &a, const openData &b)
 {
-	return (a.dir == b.dir && a.priority == b.priority && a.gcost == b.gcost && a.hcost == b.hcost && a.bucket == b.bucket);
+	return (a.dir == b.dir && a.priority == b.priority && a.gcost == b.gcost && a.bucket == b.bucket);
 }
 
 static std::ostream &operator<<(std::ostream &out, const openData &d)
 {
-	out << "[" << ((d.dir==kForward)?"forward":"backward") << ", p:" << +d.priority << ", g:" << +d.gcost << ", h:" << +d.hcost;
+	out << "[" << ((d.dir==kForward)?"forward":"backward") << ", p:" << +d.priority << ", g:" << +d.gcost;
 	out << ", b:" << +d.bucket << "]";
 	return out;
 }
@@ -81,7 +79,7 @@ struct openDataHash
 {
 	std::size_t operator()(const openData & x) const
 	{
-		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.hcost<<12)|(x.bucket<<20);
+		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.bucket<<20);
 	}
 };
 
@@ -167,10 +165,8 @@ std::string GetOpenName(const openData &d)
 	s += std::to_string(d.priority);
 	s += "-";
 	s += std::to_string(d.gcost);
-	s += "-";
-	s += std::to_string(d.hcost);
-//	s += "-";
-//	s += std::to_string(d.hcost2);
+	//	s += "-";
+	//	s += std::to_string(d.hcost2);
 	s += "-";
 	s += std::to_string(d.bucket);
 	s += ".open";
@@ -193,11 +189,11 @@ openData GetBestFile()
 		else if (s.first.dir == kBackward && s.first.gcost < minGBackward)
 			minGBackward = s.first.gcost;
 		
-		if (s.first.dir == kForward && s.first.gcost+s.first.hcost < minFForward)
-			minFForward = s.first.gcost+s.first.hcost;
-		else if (s.first.dir == kBackward && s.first.gcost+s.first.hcost < minFBackward)
-			minFBackward = s.first.gcost+s.first.hcost;
-
+		if (s.first.dir == kForward && s.first.gcost < minFForward)
+			minFForward = s.first.gcost;
+		else if (s.first.dir == kBackward && s.first.gcost < minFBackward)
+			minFBackward = s.first.gcost;
+		
 		if (s.first.priority < best.priority)
 		{
 			best = s.first;
@@ -210,13 +206,8 @@ openData GetBestFile()
 			{
 				if (s.first.dir == best.dir)
 				{
-					if (s.first.hcost < best.hcost)
+					if (best.bucket > s.first.bucket)
 						best = s.first;
-					else if (s.first.hcost == best.hcost)
-					{
-						if (s.first.bucket < best.bucket)
-							best = s.first;
-					}
 				}
 				else if (s.first.dir == kForward)
 					best = s.first;
@@ -234,11 +225,11 @@ void GetOpenData(const RubiksState &start, tSearchDirection dir, int cost,
 	GetBucketAndData(start, bucket, data);
 	d.dir = dir;
 	d.gcost = cost;
-	d.hcost = (dir==kForward)?forward.HCost(start, start):reverse.HCost(start, start);
+	//d.hcost = (dir==kForward)?forward.HCost(start, start):reverse.HCost(start, start);
 	//d.hcost2 = (dir==kForward)?reverse.HCost(start, start):forward.HCost(start, start);
 	d.bucket = bucket;
 	//d.priority = d.gcost+d.hcost;
-	d.priority = std::max(d.gcost+d.hcost, d.gcost*2);
+	d.priority = d.gcost*2;
 }
 
 void AddStatesToQueue(const openData &d, uint64_t *data, size_t count)
@@ -336,7 +327,7 @@ void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentO
 						bestSolution = std::min(d.gcost + s.first.gcost, bestSolution);
 						printf("Current best solution: %d\n", bestSolution);
 						printLock.unlock();
-
+						
 						if (CanTerminateSearch())
 							return;
 					}
@@ -360,6 +351,17 @@ void ReadBucket(std::unordered_set<uint64_t> &states, openData d)
 	fclose(open[d].f);
 	remove(GetOpenName(d).c_str());
 	open[d].f = 0;
+}
+
+void WriteBucket(std::unordered_set<uint64_t> &states, openData d)
+{
+	assert(open[d].f == 0);
+	open[d].f = fopen(GetOpenName(d).c_str(), "w+b");
+	FILE *f = open[d].f;
+	for (const uint64_t &s : states)
+	{
+		fwrite(&s, sizeof(s), 1, f);
+	}
 }
 
 void RemoveDuplicates(std::unordered_set<uint64_t> &states, openData d)
@@ -398,7 +400,7 @@ void WriteToClosed(std::unordered_set<uint64_t> &states, openData d)
 	c.bucket = d.bucket;
 	c.depth = d.gcost;
 	c.dir = d.dir;
-
+	
 	closedList &cd = closed[c];
 	if (cd.f == 0)
 	{
@@ -421,7 +423,7 @@ void ParallelExpandBucket(openData d, const std::unordered_set<uint64_t> &states
 	{
 		if (finished)
 			break;
-
+		
 		count++;
 		if (myThread != (count%totalThreads))
 			continue;
@@ -435,7 +437,7 @@ void ParallelExpandBucket(openData d, const std::unordered_set<uint64_t> &states
 			openData newData;
 			uint64_t newRank;
 			GetOpenData(tmp, d.dir, d.gcost+1, newData, newRank);
-
+			
 			std::vector<uint64_t> &c = cache[newData];
 			c.push_back(newRank);
 			if (c.size() > cacheSize)
@@ -459,71 +461,33 @@ void ParallelExpandBucket(openData d, const std::unordered_set<uint64_t> &states
 	countLock.unlock();
 }
 
-void ReadAndDDBucket(std::unordered_set<uint64_t> &states, const openData &d)
-{
-	ReadBucket(states, d);
-	RemoveDuplicates(states, d); // delayed duplicate detection
-	WriteToClosed(states, d); // this could run in parallel!
-}
-
-#define DO_PRELOAD
-
 void ExpandNextFile()
 {
-	static bool preLoaded = false;
-	static std::unordered_set<uint64_t> nextStates;
-	static std::unordered_set<uint64_t> states;
-	static openData next;
 	// 1. Get next expansion target
 	openData d = GetBestFile();
 	currentC = d.priority;
-
+	
 	if (CanTerminateSearch())
 		return;
-
+	
 	Timer timer;
 	timer.StartTimer();
 	
-	states.clear();
-	if (preLoaded == false)
-	{
-		ReadAndDDBucket(states, d);
-	}
-	else {
-		if (d == next)
-		{
-			states.swap(nextStates);
-			preLoaded = false;
-		}
-		else {
-			std::cout << "ERROR: pre-loading changed buckets!\n";
-			ReadAndDDBucket(states, d);
-		}
-	}
-	open.erase(open.find(d));
+	std::unordered_set<uint64_t> states;
+	ReadBucket(states, d);
+	//RemoveDuplicates(states, d); // delayed duplicate detection
+	WriteToClosed(states, d); // this could run in parallel!
 	timer.EndTimer();
 	
 	printLock.lock();
 	std::cout << "Next: " << d << " (" << states.size() << " entries) [" << timer.GetElapsedTime() << "s reading/dd] ";
 	printLock.unlock();
-
+	
 	timer.StartTimer();
 	// Read in opposite buckets to check for solutions in parallel to expanding this bucket
-	openLock.lock();
-	std::thread t(CheckSolution, open, d, std::ref(states));
-	openLock.unlock();
-	
-	std::thread *pre = 0;
-	
-#ifdef DO_PRELOAD
-	// 2. Pre-read next bucket if it is the same as us
-	next = GetBestFile();
-	if (next.dir == d.dir && next.gcost == d.gcost && next.bucket != d.bucket)
-	{
-		pre = new std::thread(ReadAndDDBucket, std::ref(nextStates), std::ref(next));
-		preLoaded = true;
-	}
-#endif
+	//openLock.lock();
+	//std::thread t(CheckSolution, open, d, std::ref(states));
+	//openLock.unlock();
 	
 	// 3. expand all states in current bucket & write out successors
 	const int numThreads = std::thread::hardware_concurrency();
@@ -535,185 +499,24 @@ void ExpandNextFile()
 		threads[x]->join();
 		delete threads[x];
 	}
+	open.erase(open.find(d));
 	timer.EndTimer();
 	printLock.lock();
-	std::cout << "[" << timer.GetElapsedTime() << "s expanding]+";
-	printLock.unlock();
-
-	// Close thread that is doing DSD
+	std::cout << "[" << timer.GetElapsedTime() << "s expanding]\n";
 	timer.StartTimer();
-	t.join();
-	timer.EndTimer();
-	printLock.lock();
-	std::cout << "[" << timer.GetElapsedTime() << "s] ";
 	printLock.unlock();
-	
-	// Close thread that is reading previous bucket
-	timer.StartTimer();
-	if (pre != 0)
-	{
-		pre->join();
-		delete pre;
-		pre = 0;
-	}
-	timer.EndTimer();
-	printLock.lock();
-	std::cout << "[" << timer.GetElapsedTime() << "s]\n";
-	printLock.unlock();
-
+//	t.join();
+//	printLock.lock();
+//	timer.EndTimer();
+//	std::cout << "[" << timer.GetElapsedTime() << "s]\n";
+//	printLock.unlock();
 }
-
-#define ZERO
-//#define KORF97
-//#define MASSIVE
-//#define SMALL
-//#define TINY
 
 void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result)
 {
-	RubiksCube cube;
-	std::vector<int> blank;
-#ifdef ZERO
 	ZeroHeuristic<RubiksState> *zero = new ZeroHeuristic<RubiksState>();
 	result.lookups.push_back({kLeafNode, 0, 0});
 	result.heuristics.push_back(zero);
-#endif
-	
-#ifdef TINY
-	std::vector<int> edges1 = {1, 3, 8, 9}; // first 4
-	std::vector<int> edges2 = {0, 2, 4, 5}; // first 4
-	std::vector<int> corners = {0, 1, 2, 3}; // first 4
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load(hprefix))
-	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(hprefix);
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
-
-
-#ifdef SMALL
-	std::vector<int> edges1 = {0, 1, 2, 4, 6};
-	std::vector<int> edges2 = {3, 5};
-	std::vector<int> edges3 = {7, 8, 9, 10, 11};
-	std::vector<int> corners1 = {0, 1, 2, 3, 4, 5};
-	std::vector<int> corners2 = {2, 3, 4, 5, 6, 7};
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges3, blank);
-	RubikPDB *pdb4 = new RubikPDB(&cube, goal, blank, corners1);
-	RubikPDB *pdb5 = new RubikPDB(&cube, goal, blank, corners2);
-	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb5->BuildPDB(goal, std::thread::hardware_concurrency());
-	result.lookups.push_back({kMaxNode, 1, 5});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.lookups.push_back({kLeafNode, 3, 0});
-	result.lookups.push_back({kLeafNode, 4, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-	result.heuristics.push_back(pdb4);
-	result.heuristics.push_back(pdb5);
-#endif
-	
-#ifdef KORF97
-	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
-	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-
-//	assert(!"File names are getting corrupted here. Perhaps by the abstraction of the goal state");
-//	assert(!"Need to abstract the goal state immediately when creating the pdb instead of only when I build the pdb");
-	if (!pdb1->Load(hprefix))
-	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
-	}
-	else {
-		printf("Loaded previous heuristic\n");
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	else {
-		printf("Loaded previous heuristic\n");
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(hprefix);
-	}
-	else {
-		printf("Loaded previous heuristic\n");
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
-
-#ifdef MASSIVE
-	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7};
-	std::vector<int> edges2 = {1, 3, 5, 7, 8, 9, 10, 11};
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load(hprefix))
-	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(hprefix);
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
-
 }
 
 int GetBucket(const RubiksState &s)
@@ -738,19 +541,16 @@ void GetState(RubiksState &s, int bucket, uint64_t data)
 
 #pragma mark Main Code
 
-void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
+void MM0(RubiksState &start, RubiksState &goal, const char *p1, const char *p2)
 {
 	prefix1 = p1;
 	prefix2 = p2;
-	hprefix = hloc;
 	
 	bestSolution = 100;
 	gDistBackward.resize(12);
 	gDistForward.resize(12);
 	expanded = 0;
-	BuildHeuristics(start, goal, forward);
-	BuildHeuristics(goal, start, reverse);
-
+	
 	std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
 	std::cout << std::setprecision(2);
 	
@@ -759,52 +559,35 @@ void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, c
 	printf("---MM*---\n");
 	AddStateToQueue(start, kForward, 0);
 	AddStateToQueue(goal, kBackward, 0);
+	openData last = GetBestFile();
 	while (!open.empty() && !finished)
 	{
+		openData curr = GetBestFile();
+		if (curr.dir != last.dir)
+		{
+			for (const auto &item : open)
+			{
+				if (item.first.dir == last.dir)
+				{
+					Timer s;
+					s.StartTimer();
+					printf("DDD/DSD on %s bucket %d g:%d", last.dir==kForward?"forward":"backward", item.first.bucket, item.first.gcost);
+					std::unordered_set<uint64_t> states;
+					ReadBucket(states, item.first);
+					RemoveDuplicates(states, item.first); // DDD
+					WriteBucket(states, item.first);
+					CheckSolution(open, item.first, std::ref(states)); // DSD
+					s.EndTimer();
+					printf("[%1.2f]\n", s.GetElapsedTime());
+				}
+			}
+		}
 		ExpandNextFile();
+		last = curr;
 	}
 	t.EndTimer();
 	printf("%1.2fs elapsed\n", t.GetElapsedTime());
 }
 
-void CompareIDA(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
-{
-	prefix1 = p1;
-	prefix2 = p2;
-	hprefix = hloc;
-	
-	bestSolution = 100;
-	gDistBackward.resize(12);
-	gDistForward.resize(12);
-	expanded = 0;
-	BuildHeuristics(start, goal, forward);
-	//BuildHeuristics(goal, start, reverse);
-	
-	std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
-	std::cout << std::setprecision(2);
-	
-	printf("---IDA*---\n");
-	std::vector<RubiksAction> path;
-	Timer t;
-	t.StartTimer();
-	cube.SetPruneSuccessors(true);
-	ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> ida;
-	ida.SetHeuristic(&forward);
-	ida.GetPath(&cube, start, goal, path);
-	t.EndTimer();
-	printf("%1.5fs elapsed\n", t.GetElapsedTime());
-	printf("%llu nodes expanded (%1.3f nodes/sec)\n", ida.GetNodesExpanded(),
-		   ida.GetNodesExpanded()/t.GetElapsedTime());
-	printf("%llu nodes generated (%1.3f nodes/sec)\n", ida.GetNodesTouched(),
-		   ida.GetNodesTouched()/t.GetElapsedTime());
-	printf("Solution cost: %lu\n", path.size());
 
-	std::cout << "Acts: ";
-	for (unsigned int x = 0; x < path.size(); x++)
-	{
-		std::cout << path[x] << " ";
-	}
-	std::cout << "\n";
-}
-
-NAMESPACE_CLOSE(MM)
+NAMESPACE_CLOSE(MM0)

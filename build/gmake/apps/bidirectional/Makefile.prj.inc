@@ -70,3 +70,4 @@ SRC_CPP = \
 	apps/bidirectional/GUICode.cpp \
 	apps/bidirectional/Driver.cpp \
 	apps/bidirectional/MMRubik.cpp \
+	apps/bidirectional/MM0Rubik.cpp \

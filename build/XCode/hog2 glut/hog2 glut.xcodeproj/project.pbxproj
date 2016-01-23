@@ -1555,6 +1555,8 @@
 		C47DFD001A5FACCD00C3961B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
 		C47DFD0A1A5FB2AA00C3961B /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C47DFD081A5FB2AA00C3961B /* Driver.cpp */; };
 		C48192EE1894CB1E0039D435 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
+		C483B28F1C4F597E00218DE8 /* MM0Rubik.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C483B28D1C4F597E00218DE8 /* MM0Rubik.cpp */; };
+		C483B2921C50CDB300218DE8 /* CanonicalRTAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C483B2901C50CDB300218DE8 /* CanonicalRTAStar.cpp */; };
 		C4843E2316518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
 		C4843E2416518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
 		C4843E2516518613006A6861 /* Map2DHeading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4843E2116518613006A6861 /* Map2DHeading.cpp */; };
@@ -3244,6 +3246,10 @@
 		C48192B1188DE8440039D435 /* BloomFilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BloomFilter.h; sourceTree = "<group>"; };
 		C48192EC1894CB1E0039D435 /* Bloom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bloom.cpp; sourceTree = "<group>"; };
 		C48192ED1894CB1E0039D435 /* Bloom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bloom.h; sourceTree = "<group>"; };
+		C483B28D1C4F597E00218DE8 /* MM0Rubik.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MM0Rubik.cpp; sourceTree = "<group>"; };
+		C483B28E1C4F597E00218DE8 /* MM0Rubik.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MM0Rubik.h; sourceTree = "<group>"; };
+		C483B2901C50CDB300218DE8 /* CanonicalRTAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CanonicalRTAStar.cpp; sourceTree = "<group>"; };
+		C483B2911C50CDB300218DE8 /* CanonicalRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CanonicalRTAStar.h; sourceTree = "<group>"; };
 		C4843E2116518613006A6861 /* Map2DHeading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map2DHeading.cpp; sourceTree = "<group>"; };
 		C4843E2216518613006A6861 /* Map2DHeading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map2DHeading.h; sourceTree = "<group>"; };
 		C498D8B01432777C0053D322 /* MAPF.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MAPF.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -3866,6 +3872,8 @@
 				C45EEED91B95760500D87F30 /* MMRubik.h */,
 				C413C13F1B6911E9006A0331 /* GUICode.cpp */,
 				C413C1401B6911E9006A0331 /* GUICode.h */,
+				C483B28D1C4F597E00218DE8 /* MM0Rubik.cpp */,
+				C483B28E1C4F597E00218DE8 /* MM0Rubik.h */,
 			);
 			name = bidirectional;
 			path = ../bidirectional;
@@ -4047,6 +4055,8 @@
 				C49A70021499BFCF007CEDA2 /* Sample.cpp */,
 				C49A70031499BFCF007CEDA2 /* Sample.h */,
 				C49A70041499BFCF007CEDA2 /* Sample2.cpp */,
+				C483B2901C50CDB300218DE8 /* CanonicalRTAStar.cpp */,
+				C483B2911C50CDB300218DE8 /* CanonicalRTAStar.h */,
 			);
 			name = localsensingsearch;
 			path = ../localsensingsearch;
@@ -5893,6 +5903,7 @@
 				C430D1E21B2EFF8B00220AEE /* IRAStar.cpp in Sources */,
 				C430D1E31B2EFF8B00220AEE /* IRDijkstra.cpp in Sources */,
 				C430D1E41B2EFF8B00220AEE /* PRAStar.cpp in Sources */,
+				C483B28F1C4F597E00218DE8 /* MM0Rubik.cpp in Sources */,
 				C430D1E51B2EFF8B00220AEE /* PRAStar2.cpp in Sources */,
 				C430D1E61B2EFF8B00220AEE /* SearchAlgorithm.cpp in Sources */,
 				C430D1E71B2EFF8B00220AEE /* SpreadExecSearchAlgorithm.cpp in Sources */,
@@ -7382,6 +7393,7 @@
 				C4B9738A1426FA4F00758D0D /* TextBox.cpp in Sources */,
 				C4B9738B1426FA4F00758D0D /* Trackball.cpp in Sources */,
 				C4B9738C1426FA4F00758D0D /* BurnedPancakePuzzle.cpp in Sources */,
+				C483B2921C50CDB300218DE8 /* CanonicalRTAStar.cpp in Sources */,
 				C4B9738D1426FA4F00758D0D /* ConfigEnvironment.cpp in Sources */,
 				C4B9738E1426FA4F00758D0D /* Directional2DEnvironment.cpp in Sources */,
 				C4B9738F1426FA4F00758D0D /* Fling.cpp in Sources */,

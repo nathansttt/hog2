@@ -75,6 +75,14 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-mm0 0 /Users/nathanst/Desktop/pdb1/ /Users/nathanst/Desktop/pdb2/"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-pida 0 /Users/nathanst/Desktop/pdb1/ /Users/nathanst/Desktop/pdb2/ /Users/nathanst/Desktop/pdb/"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-pancake"
             isEnabled = "NO">
          </CommandLineArgument>
