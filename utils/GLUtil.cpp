@@ -198,8 +198,8 @@ recColor getColor(GLfloat v, GLfloat vmin, GLfloat vmax, int type)
 {
 	double dv,vmid;
 	recColor c(1.0,1.0,1.0);
-  recColor c1,c2,c3;
-  double ratio;
+	recColor c1,c2,c3;
+	double ratio;
 	
 	if (v < vmin)
 		v = vmin;
@@ -667,6 +667,29 @@ void DrawCylinder(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat innerRad, GLfloat 
 //	glVertex3f(xx-rad, yy-rad, zz+rad);
 //	glEnd();
 //}
+
+void OutlineRect(GLdouble left, GLdouble top, GLdouble right, GLdouble bottom, double zz)
+{
+	glDisable(GL_LIGHTING);
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(left, top, zz);
+	glVertex3f(right, top, zz);
+	glVertex3f(right, bottom, zz);
+	glVertex3f(left, bottom, zz);
+	glEnd();
+	
+}
+
+void DrawSquare(GLdouble xx, GLdouble yy, GLdouble zz, GLdouble rad)
+{
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex3f(xx-rad, yy-rad, zz);
+	glVertex3f(xx+rad, yy-rad, zz);
+	glVertex3f(xx-rad, yy+rad, zz);
+	glVertex3f(xx+rad, yy+rad, zz);
+	glEnd();
+
+}
 
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 {

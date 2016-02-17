@@ -8,12 +8,34 @@
 
 #include "SVGUtil.h"
 
+//<svg height="500" width="500">
+//<defs>
+//<radialGradient id="grad1" cx="60%" cy="40%" r="50%" fx="70%" fy="40%">
+//<stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity:0.5" />
+//<stop offset="100%" style="stop-color:rgb(0,0,255);stop-opacity:1" />
+//</radialGradient>
+//</defs>
+//<ellipse cx="200" cy="200" rx="55" ry="55" fill="url(#grad1)" />
+//Sorry, your browser does not support inline SVG.
+//</svg>
+
+
 std::string SVGGetRGB(recColor c)
 {
 	std::string s;
 	s = "rgb(";
 	s += std::to_string(int(c.r*255)) + "," + std::to_string(int(c.g*255)) + "," + std::to_string(int(c.b*255));
 	s += ")";
+	return s;
+}
+
+std::string SVGDrawCircle(double x, double y, double radius, recColor c)
+{
+	//double epsilon = 0.5;
+	std::string s;
+	s += "<circle cx=\"" + std::to_string(10*x);
+	s += "\" cy=\"" + std::to_string(10*y);
+	s += "\" r=\""+std::to_string(radius*10)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
 	return s;
 }
 
@@ -26,6 +48,17 @@ std::string SVGDrawRect(int x, int y, int width, int height, recColor c)
 	s += "\" width=\""+std::to_string(width*10+2*epsilon)+"\" height=\""+std::to_string(height*10+2*epsilon)+"\" style=\"fill:rgb(";//128,128,0
 	s += std::to_string(int(c.r*255)) + "," + std::to_string(int(c.g*255)) + "," + std::to_string(int(c.b*255));
 	s += ");stroke-width:1\" />";
+	return s;
+}
+
+std::string SVGFrameRect(int x, int y, int width, int height, int border, recColor c)
+{
+	double epsilon = 0.5;
+	std::string s;
+	s += "<rect x=\"" + std::to_string(10*x-epsilon);
+	s += "\" y=\"" + std::to_string(10*y-epsilon);
+	s += "\" width=\""+std::to_string(width*10+2*epsilon)+"\" height=\""+std::to_string(height*10+2*epsilon)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c);
+	s += ";stroke-width:"+std::to_string(border)+"\" />";
 	return s;
 }
 

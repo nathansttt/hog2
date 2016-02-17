@@ -137,9 +137,30 @@ void DrawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width)
 void DrawBox(GLfloat x, GLfloat y, GLfloat z, GLfloat radius);
 void DrawBoxFrame(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad);
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
+void DrawSquare(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
 void DrawCylinder(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat innerRad, GLfloat outerRad, GLfloat height);
+void OutlineRect(GLdouble left, GLdouble top, GLdouble right, GLdouble bottom, double zz);
 
 void DrawText(double x, double y, double z, double scale, const char *res);
+
+
+namespace colors
+{
+	const recColor black  = {0.0,0.0,0.0};
+	const recColor white  = {1.0,1.0,1.0}; // white
+	const recColor gray   = {00.5,0.5,0.5}; // green
+
+	const recColor red    = {1.0,0.0,0.0}; // red
+	const recColor green  = {0.0,1.0,0.0}; // green
+	const recColor blue   = {0.0,0.0,1.0}; // blue
+
+	const recColor yellow = {1.0,1.0,0.0}; // yellow
+	const recColor purple = {1.0,0.0,1.0}; // purple
+	const recColor cyan   = {0.0,1.0,1.0}; // cyan
+
+	const recColor orange = {1.0,0.5,0.0}; // orange
+	const recColor pink   = {1.0,0.0,0.5}; // pink
+}
 
 //class OpenGLDrawable {
 //public:
