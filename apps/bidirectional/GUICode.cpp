@@ -32,19 +32,23 @@ int gStepsPerFrame = 1;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> forward;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> backward;
 
+ZeroHeuristic<xyLoc> *z = new ZeroHeuristic<xyLoc>;
+
+
 MM<xyLoc, tDirection, MapEnvironment> mm;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare;
 bool mmSearchRunning = false;
 bool compareSearchRunning = false;
 bool searchRan = false;
 std::vector<xyLoc> path;
-
+std::vector<xyLoc> goalPath;
 bool recording = false;
 
 std::fstream svgFile;
 bool saveSVG = false;
 
 enum bibfs {
+	XX = 0,
 	NN = 1,
 	NF = 2,
 	NR = 3,
@@ -214,7 +218,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		me->SetColor(1.0, 1.0, 1.0);
 		me->GLDrawLine(start, goal);
 	}
-	if (mouseTracked)
+	if (mouseTracked && 0)
 	{
 		me->SetColor(1.0, 1.0, 1.0);
 		glLineWidth(1.0);
@@ -259,6 +263,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
+	}
+	if (goalPath.size() > 0)
+	{
+		goal = goalPath.back();
+		goalPath.pop_back();
+		SetupMapOverlay();
 	}
 }
 
@@ -318,10 +328,23 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //				goal.x = 510;
 //				goal.y = 208;
 				
+				start.x = 75;
+				start.y = 33;
+				goal.x = 93;//78;
+				goal.y = 116;//132-10;
+				
+//				forward.GetPath(me,
+//								{static_cast<uint16_t>(goal.x-17),
+//									static_cast<uint16_t>(goal.y+22)}, goal, goalPath);
+//				recording = true;
+				
+				
 				mouseTracking = false;
 				SetupMapOverlay();
 				SetNumPorts(windowID, 2);
+				compare.SetHeuristic(me);
 				compare.InitializeSearch(me, start, goal, path);
+				//mm.InitializeSearch(me, start, goal, z, z, path);
 				mm.InitializeSearch(me, start, goal, me, me, path);
 				mmSearchRunning = true;
 				compareSearchRunning = true;
@@ -338,46 +361,255 @@ bibfs GetLocationClassification(xyLoc l, double optimal)
 	forward.GetClosedListGCost(l, startDist);
 	backward.GetClosedListGCost(l, goalDist);
 
+	// Only Show NEAR in each direction
+//	if (startDist < optimal/2)
+//		return NF;
+//	if (goalDist < optimal/2)
+//		return FN;
+//	return RR;
+
+	// Only show N*, F*
+//	if (startDist < optimal/2)
+//		return NR;
 //	if (startDist < optimal)
 //		return NF;
-//	if (startDist == optimal)
+//	if (startDist == optimal/2)
 //		return NN;
-//	return FR;
+//	return RR;
+
+	if (0) // Draw MM & A* heuristic regions that don't overlap
+	{
+		bool MM = false;
+		bool ASTAR = false;
+		if (startDist <= optimal && me->HCost(l, goal)+startDist <= optimal)
+			ASTAR = true;
+		if ((startDist <= optimal/2 && me->HCost(l, goal)+startDist <= optimal) ||
+			(goalDist <= optimal/2 && me->HCost(l, start)+goalDist <= optimal))
+			MM = true;
+		if (ASTAR && MM)
+			return XX;
+//			return NF;
+		if (MM)
+			return RN;
+		if (ASTAR)
+			return FN;
+		else return XX;
+	}
 	
-	if (startDist <= optimal/2 && goalDist <= optimal/2)
+	if (0) // Draw MM heuristic regions
 	{
-		return NN;
+		if (startDist <= optimal/2 && goalDist <= optimal/2)
+		{
+			if (me->HCost(l, goal)+startDist > optimal || me->HCost(l, start)+goalDist > optimal)
+				return NN;
+			return RN;
+			//return XX;
+			return NN;
+		}
+		else if (startDist <= optimal/2 && goalDist <= optimal)
+		{
+			if (me->HCost(l, goal)+startDist > optimal)
+				return NN;
+			return RN;
+			return XX;
+			return NF;
+		}
+		else if (startDist <= optimal/2)
+		{
+			if (me->HCost(l, goal)+startDist > optimal)
+				return NN;
+			return RN;
+			return XX;
+			return NR;
+		}
+		else if (startDist <= optimal && goalDist <= optimal/2)
+		{
+			if (me->HCost(l, start)+goalDist > optimal)
+				return NN;
+			return RN;
+			return XX;
+			return FN;
+		}
+		else if (startDist <= optimal && goalDist <= optimal)
+		{
+			return XX;
+			return FF;
+		}
+		else if (startDist <= optimal)
+		{
+			return XX;
+			return FR;
+		}
+		else if (goalDist <= optimal/2)
+		{
+			if (me->HCost(l, start)+goalDist > optimal)
+				return NN;
+			return RN;
+		}
+		else if (goalDist <= optimal)
+		{
+			return XX;
+			return RF;
+		}
+		else {
+			return XX;
+			return RR;
+		}
 	}
-	else if (startDist <= optimal/2 && goalDist <= optimal)
+	
+	if (0) // Draw A* heuristic regions
 	{
-		return NF;
+		if (startDist <= optimal/2 && goalDist <= optimal/2)
+		{
+			if (me->HCost(l, goal)+startDist > optimal)
+				return NN;
+			return RN;
+			//return XX;
+			return NN;
+		}
+		else if (startDist <= optimal/2 && goalDist <= optimal)
+		{
+			if (me->HCost(l, goal)+startDist > optimal)
+				return NR;
+			return FN;
+			return XX;
+			return NF;
+		}
+		else if (startDist <= optimal/2)
+		{
+			if (me->HCost(l, goal)+startDist > optimal)
+				return NR;
+			return FN;
+			return XX;
+			return NR;
+		}
+		else if (startDist <= optimal && goalDist <= optimal/2)
+		{
+			if (me->HCost(l, goal)+startDist > optimal)
+				return NR;
+			return FN;
+			return XX;
+			return FN;
+		}
+		else if (startDist <= optimal && goalDist <= optimal)
+		{
+			if (me->HCost(l, goal)+startDist > optimal)
+				return NR;
+			return FN;
+			return FN;
+			return XX;
+			return FF;
+		}
+		else if (startDist <= optimal)
+		{
+			if (me->HCost(l, goal)+startDist > optimal)
+				return NR;
+			return FN;
+			return XX;
+			return FR;
+		}
+		else if (goalDist <= optimal/2)
+		{
+			return XX;
+			return RN;
+		}
+		else if (goalDist <= optimal)
+		{
+			return XX;
+			return RF;
+		}
+		else {
+			return XX;
+			return RR;
+		}
 	}
-	else if (startDist <= optimal/2)
+	
+	if (0) // DRAW just BFS regions
 	{
-		return NR;
+		if (startDist <= optimal/2 && goalDist <= optimal/2)
+		{
+			return FN;
+			return NN;
+		}
+		else if (startDist <= optimal/2 && goalDist <= optimal)
+		{
+			return FN;
+			return NF;
+		}
+		else if (startDist <= optimal/2)
+		{
+			return FN;
+			return NR;
+		}
+		else if (startDist <= optimal && goalDist <= optimal/2)
+		{
+			return FN;
+			return FN;
+		}
+		else if (startDist <= optimal && goalDist <= optimal)
+		{
+			return FN;
+			return FF;
+		}
+		else if (startDist <= optimal)
+		{
+			return FN;
+			return FR;
+		}
+		else if (goalDist <= optimal/2)
+		{
+			return XX;
+			return RN;
+		}
+		else if (goalDist <= optimal)
+		{
+			return XX;
+			return RF;
+		}
+		else {
+			return XX;
+			return RR;
+		}
 	}
-	else if (startDist <= optimal && goalDist <= optimal/2)
+
+	if (1)
 	{
-		return FN;
-	}
-	else if (startDist <= optimal && goalDist <= optimal)
-	{
-		return FF;
-	}
-	else if (startDist <= optimal)
-	{
-		return FR;
-	}
-	else if (goalDist <= optimal/2)
-	{
-		return RN;
-	}
-	else if (goalDist <= optimal)
-	{
-		return RF;
-	}
-	else {
-		return RR;
+		// DRAW all regions
+		if (startDist <= optimal/2 && goalDist <= optimal/2)
+		{
+			return NN;
+		}
+		else if (startDist <= optimal/2 && goalDist <= optimal)
+		{
+			return NF;
+		}
+		else if (startDist <= optimal/2)
+		{
+			return NR;
+		}
+		else if (startDist <= optimal && goalDist <= optimal/2)
+		{
+			return FN;
+		}
+		else if (startDist <= optimal && goalDist <= optimal)
+		{
+			return FF;
+		}
+		else if (startDist <= optimal)
+		{
+			return FR;
+		}
+		else if (goalDist <= optimal/2)
+		{
+			return RN;
+		}
+		else if (goalDist <= optimal)
+		{
+			return RF;
+		}
+		else {
+			return RR;
+		}
 	}
 }
 
@@ -393,6 +625,19 @@ void SetupMapOverlay()
 	counts.resize(10);
 	delete mo;
 	mo = new MapOverlay(map);
+	mo->SetColorMap(-1);
+
+	mo->SetColor(XX, colors::black);
+	mo->SetColor(NF, colors::orange);
+	mo->SetColor(NR, colors::purple);
+	mo->SetColor(NN, colors::cyan);
+	mo->SetColor(FN, colors::red);
+	mo->SetColor(RN, colors::yellow);
+	mo->SetColor(FF, colors::red);
+	mo->SetColor(FR, colors::red); // colors::orange
+	mo->SetColor(RF, colors::green);
+	mo->SetColor(RR, colors::gray);
+	
 	forward.SetStopAfterGoal(false);
 	backward.SetStopAfterGoal(false);
 	std::vector<xyLoc> path;
@@ -414,7 +659,8 @@ void SetupMapOverlay()
 			}
 		}
 	}
-	mo->SetTransparentValue(0);
+//	mo->SetD
+	mo->SetTransparentValue(XX);
 	mo->SetOverlayValue(start.x, start.y, 10);
 	mo->SetOverlayValue(goal.x, goal.y, 10);
 	for (int x = 0; x < counts.size(); x++)

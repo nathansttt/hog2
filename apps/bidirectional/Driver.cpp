@@ -80,6 +80,7 @@ const int kNumBuckets = 512;
 void BFS();
 void GetKorfInstance(RubiksState &start, int which);
 void GetSuperFlip(RubiksState &start);
+void GetDepth20(RubiksState &start, int which);
 
 int main(int argc, char* argv[])
 {
@@ -187,6 +188,10 @@ int main(int argc, char* argv[])
 		else if (which == 20)
 		{
 			GetSuperFlip(a);
+		}
+		else if (which > 20)
+		{
+			GetDepth20(a, which-21);
 		}
 		MM::MM(a, b, argv[3], argv[4], argv[5]);
 	}
@@ -595,6 +600,44 @@ int GetNextMove(char *input, int &base)
 	}
 	return used;
 }
+
+void GetDepth20(RubiksState &start, int which)
+{
+	const int maxStrLength = 1024;
+	char string[10][maxStrLength] = //"U R2 F B R B2 R U2 L B2 R U- D- R2 F R- L B2 U2 F2";
+	{
+		"B2 L B2 R- F- U- B- L D- F- L U L2 B2 L- D2 B2 D2 R2 B2",
+		"R U2 R D2 R2 B2 L- D- B3 F U B- R- U2 L- D R2 F- U2 L2",
+		"D2 R2 F2 D2 F2 D2 R- F2 D- L2 R B L- F U R- B F2 R2 F-",
+		"D- F- U B2 R2 F R- U2 B- L D F R D2 R2 L2 D- R2 F2 D-",
+		"U2 R2 F2 D- U F2 U2 B U B- R U- F L B R- F L2 D- B",
+		"D B2 D- B2 R2 D- R2 U L R- D B- D R F- D2 R2 U- F- R",
+		"B D- L- F- L F B U- D2 F- R2 B- U F2 R- L U2 R2 F2 B2",
+		"U2 L- U2 F2 L- R D2 L2 B- D2 L F- R- U- L U2 F- D- R B",
+		"F- L B2 R U- B- L U2 D3 F L- R2 U2 D2 B2 R2 D R2 L2 F2",
+		"U2 R2 D2 B U2 B- F D- B- R- D U2 B2 F2 R- D- B U- F- R2"
+	};
+
+	RubiksCube c;
+
+	start.Reset();
+	
+	int index = 0;
+	while (true)
+	{
+		int act;
+		int cnt = GetNextMove(&string[which][index], act);
+		if (cnt == 0)
+		{
+			break;
+		}
+		else {
+			index += cnt;
+		}
+		c.ApplyAction(start, act);
+	}
+}
+
 
 void GetSuperFlip(RubiksState &start)
 {
