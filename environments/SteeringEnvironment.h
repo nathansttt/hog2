@@ -67,12 +67,12 @@ public:
 	virtual double HCost(const steeringState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
-	virtual double GCost(const steeringState &node1, const steeringState &node2);
-	virtual double GCost(const steeringState &node, const steeringAction &act);
-	virtual bool GoalTest(const steeringState &node, const steeringState &goal);
+	virtual double GCost(const steeringState &node1, const steeringState &node2) const;
+	virtual double GCost(const steeringState &node, const steeringAction &act) const;
+	virtual bool GoalTest(const steeringState &node, const steeringState &goal) const;
 	
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(const steeringState &node)
+	virtual bool GoalTest(const steeringState &node) const
 	{ return bValidSearchGoal&&(node == searchGoal); }
 	
 	virtual uint64_t GetStateHash(const steeringState &node) const;

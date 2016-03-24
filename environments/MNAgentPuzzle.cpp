@@ -107,12 +107,12 @@ double MNAgentEnvironment::HCost(const MNAgentPuzzleState &node1, const MNAgentP
 	return 1;
 }
 
-double MNAgentEnvironment::GCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2)
+double MNAgentEnvironment::GCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2) const
 { return 1; }
-double MNAgentEnvironment::GCost(const MNAgentPuzzleState &node, const tAgentAction &act)
+double MNAgentEnvironment::GCost(const MNAgentPuzzleState &node, const tAgentAction &act) const
 { return 1; }
 
-bool MNAgentEnvironment::GoalTest(const MNAgentPuzzleState &node, const MNAgentPuzzleState &goal)
+bool MNAgentEnvironment::GoalTest(const MNAgentPuzzleState &node, const MNAgentPuzzleState &goal) const
 {
 	return (node == goal);
 }

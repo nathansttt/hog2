@@ -17,7 +17,7 @@
 #include "SharedQueue.h"
 #include <thread>
 
-const int workDepth = 5;
+const int workDepth = 3;
 
 template <class action>
 struct workUnit {

@@ -62,11 +62,11 @@ public:
 		fprintf(stderr, "ERROR: Single State HCost not implemented\n");
 		exit(1); return -1.0;}
 	virtual double HCost(const xyhLoc &node1, const xyhLoc &node2) const;
-	virtual double GCost(const xyhLoc &node1, const xyhLoc &node2);
-	virtual double GCost(const xyhLoc &node1, const xyhAct &act);
-	bool GoalTest(const xyhLoc &node, const xyhLoc &goal);
+	virtual double GCost(const xyhLoc &node1, const xyhLoc &node2) const;
+	virtual double GCost(const xyhLoc &node1, const xyhAct &act) const;
+	bool GoalTest(const xyhLoc &node, const xyhLoc &goal) const;
 	
-	bool GoalTest(const xyhLoc &){
+	bool GoalTest(const xyhLoc &) const {
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented \n");
 		exit(1); return false;}
 	
@@ -107,7 +107,7 @@ protected:
 	std::vector<float> sinTable;
 
 	// P is visibility setting
-	double GetCost(const xyhLoc &a, const xyhLoc &b, double P, double d);
+	double GetCost(const xyhLoc &a, const xyhLoc &b, double P, double d) const;
 
 	struct hdData { double seen; double dist; };
 	typedef __gnu_cxx::hash_map<uint64_t, hdData, Hash64> CostTable;

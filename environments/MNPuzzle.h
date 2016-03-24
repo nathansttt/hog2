@@ -119,12 +119,12 @@ public:
 	double HCost(const MNPuzzleState &state1) const;
 	double DefaultH(const MNPuzzleState &s) const;
 
-	double GCost(const MNPuzzleState &state1, const MNPuzzleState &state2);
-	double GCost(const MNPuzzleState &, const slideDir &);
+	double GCost(const MNPuzzleState &state1, const MNPuzzleState &state2) const;
+	double GCost(const MNPuzzleState &, const slideDir &) const;
 	double AdditiveGCost(const MNPuzzleState &, const slideDir &);
-	bool GoalTest(const MNPuzzleState &state, const MNPuzzleState &goal);
+	bool GoalTest(const MNPuzzleState &state, const MNPuzzleState &goal) const;
 
-	bool GoalTest(const MNPuzzleState &s);
+	bool GoalTest(const MNPuzzleState &s) const;
 
 	void GetStateFromPDBHash(uint64_t hash, MNPuzzleState &s,
 							 int count, const std::vector<int> &pattern,

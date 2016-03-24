@@ -520,7 +520,7 @@ bool Directional2DEnvironment::Legal(const xySpeedHeading &node1, const deltaSpe
 	}
 }
 
-double Directional2DEnvironment::GCost(const xySpeedHeading &a, const deltaSpeedHeading &b)
+double Directional2DEnvironment::GCost(const xySpeedHeading &a, const deltaSpeedHeading &b) const
 {
 	if ((motionModel != kTank) && (motionModel != kBetterTank))
 	{
@@ -563,7 +563,7 @@ double Directional2DEnvironment::GCost(const xySpeedHeading &a, const deltaSpeed
 //	return 1.0/fabs(val);
 }
 
-double Directional2DEnvironment::GCost(const xySpeedHeading &a, const xySpeedHeading &b)
+double Directional2DEnvironment::GCost(const xySpeedHeading &a, const xySpeedHeading &b) const
 {
 	if ((motionModel != kTank) && (motionModel != kBetterTank))
 	{
@@ -608,7 +608,7 @@ double Directional2DEnvironment::GCost(const xySpeedHeading &a, const xySpeedHea
 	return 0;
 }
 
-bool Directional2DEnvironment::GoalTest(const xySpeedHeading &node, const xySpeedHeading &goal)
+bool Directional2DEnvironment::GoalTest(const xySpeedHeading &node, const xySpeedHeading &goal) const
 {
 	if (test && test->goalTest(node))
 		return true;

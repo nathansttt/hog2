@@ -36,6 +36,7 @@
 #include "Graph.h"
 #include <ext/hash_map>
 #include <cmath>
+#include <unordered_map>
 
 class Vector2D {
 	public:
@@ -124,8 +125,8 @@ public:
 	WeightedMap2DEnvironment(AbsMapEnvironment *ame);
 	virtual ~WeightedMap2DEnvironment();
 	void ApplyAction(xyLoc &s, tDirection dir) const;
-	virtual double GCost(const xyLoc &node1, const xyLoc &node2);
-	virtual double GCost(const xyLoc &node1, const tDirection &act) { return AbsMapEnvironment::GCost(node1, act); }
+	virtual double GCost(const xyLoc &node1, const xyLoc &node2) const;
+	virtual double GCost(const xyLoc &node1, const tDirection &act) const { return AbsMapEnvironment::GCost(node1, act); }
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Returning "<<oi<<std::endl;return oi;}
 	virtual BaseMapOccupancyInterface* GetOccupancyInfo(){return oi;}
 	void OpenGLDraw() const;
@@ -162,12 +163,13 @@ public:
 	void UsePerceptron(double lr) { usePerceptron = true; learningRate = lr; }
 	
 	double ComputeArrowMetric(bool timed=false,double time=0, bool DoNormalize=false, double maxtime=0);
-	Vector2D GetAngleFromDirection(tDirection dir);
+	Vector2D GetAngleFromDirection(tDirection dir) const;
 
 private:
 	BaseMapOccupancyInterface* oi;
 	
-	typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
+	//typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual>
+	typedef std::unordered_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
 	AngleLookupTable angleLookup;
 	
 	void UpdateAngle(const xyLoc &old, const xyLoc &s, double prop, double t);

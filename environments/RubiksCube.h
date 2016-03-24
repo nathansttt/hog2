@@ -146,12 +146,12 @@ public:
 	 goal is stored **/
 	virtual double HCost(const RubiksState &node) const;
 	
-	virtual double GCost(const RubiksState &node1, const RubiksState &node2) { return 1.0; }
-	virtual double GCost(const RubiksState &node, const RubiksAction &act) { return 1.0; }
-	virtual bool GoalTest(const RubiksState &node, const RubiksState &goal);
+	virtual double GCost(const RubiksState &node1, const RubiksState &node2) const { return 1.0; }
+	virtual double GCost(const RubiksState &node, const RubiksAction &act) const { return 1.0; }
+	virtual bool GoalTest(const RubiksState &node, const RubiksState &goal) const;
 	
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(const RubiksState &node);
+	virtual bool GoalTest(const RubiksState &node) const;
 	
 	virtual uint64_t GetStateHash(const RubiksState &node) const;
 	virtual uint64_t GetCornerHash(const RubiksState &node) const;

@@ -834,19 +834,19 @@ double Map3DGrid::HCost(const state3d &node1, const state3d &node2) const
 	return 1;
 }
 
-double Map3DGrid::GCost(const state3d &node1, const state3d &node2)
+double Map3DGrid::GCost(const state3d &node1, const state3d &node2) const
 {
 	assert(false);
 	return 1;
 }
 
-double Map3DGrid::GCost(const state3d &node, const action3d &act)
+double Map3DGrid::GCost(const state3d &node, const action3d &act) const
 {
 	assert(false);
 	return 1;
 }
 
-bool Map3DGrid::GoalTest(const state3d &node, const state3d &goal)
+bool Map3DGrid::GoalTest(const state3d &node, const state3d &goal) const
 {
 	return (node == goal);
 }

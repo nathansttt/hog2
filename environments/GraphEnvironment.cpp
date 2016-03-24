@@ -154,14 +154,14 @@ double GraphEnvironment::HCost(const graphState &state1, const graphState &state
 	return 1;// this should be the min edge cost in the graph...
 }
 
-double GraphEnvironment::GCost(const graphState &, const graphMove &move)
+double GraphEnvironment::GCost(const graphState &, const graphMove &move) const
 {
 	edge *e = g->FindEdge(move.from, move.to);
 	assert(e);
 	return e->GetWeight();
 }
 
-double GraphEnvironment::GCost(const graphState &state1, const graphState &state2)
+double GraphEnvironment::GCost(const graphState &state1, const graphState &state2) const
 {
 	edge *e = g->FindEdge(state1, state2);
 //	if (!e)
@@ -170,7 +170,7 @@ double GraphEnvironment::GCost(const graphState &state1, const graphState &state
 	return e->GetWeight();
 }
 
-bool GraphEnvironment::GoalTest(const graphState &state, const graphState &goal)
+bool GraphEnvironment::GoalTest(const graphState &state, const graphState &goal) const
 {
 	return state == goal;
 }

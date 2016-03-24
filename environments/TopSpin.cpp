@@ -74,7 +74,7 @@ void TopSpin::StoreGoal(TopSpinState &s)
 {
 }
 
-bool TopSpin::GoalTest(const TopSpinState &s)
+bool TopSpin::GoalTest(const TopSpinState &s) const
 {
 	for (int x = 0; x < numTiles; x++)
 		if (s.puzzle[x] != x)
@@ -181,7 +181,7 @@ double TopSpin::HCost(const TopSpinState &state1, const TopSpinState &state2) co
 //	{7,10,7,3,1,5,10,1,8,8,8,2,7,8,5,8}};
 //int costs[16] = {5,4,3,3,10,2,6,8,4,8,6,2,10,6,5,1}; // 1...10
 static int costs[16] = {16,1,8,15,22,29,17,14,9,20,26,28,3,16,12,18}; // 1...29
-double TopSpin::GCost(const TopSpinState &node, const TopSpinAction &act)
+double TopSpin::GCost(const TopSpinState &node, const TopSpinAction &act) const
 {
 	if (!weighted)
 	{
@@ -193,7 +193,7 @@ double TopSpin::GCost(const TopSpinState &node, const TopSpinAction &act)
 	}
 }
 
-double TopSpin::GCost(const TopSpinState &s1, const TopSpinState &s2)
+double TopSpin::GCost(const TopSpinState &s1, const TopSpinState &s2) const
 {
 	TopSpinAction a = GetAction(s1, s2);
 	return GCost(s1, a);
@@ -213,7 +213,7 @@ double TopSpin::GCost(const TopSpinState &s1, const TopSpinState &s2)
 //	return 1;
 }
 
-bool TopSpin::GoalTest(const TopSpinState &state, const TopSpinState &theGoal)
+bool TopSpin::GoalTest(const TopSpinState &state, const TopSpinState &theGoal) const
 {
 	return (state == theGoal);
 }

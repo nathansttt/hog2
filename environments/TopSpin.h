@@ -79,11 +79,11 @@ public:
 	OccupancyInterface<TopSpinState, TopSpinAction> *GetOccupancyInfo() { return 0; }
 	double HCost(const TopSpinState &state1, const TopSpinState &state2) const;
 
-	double GCost(const TopSpinState &state1, const TopSpinState &state2);
-	double GCost(const TopSpinState &, const TopSpinAction &);
-	bool GoalTest(const TopSpinState &state, const TopSpinState &goal);
+	double GCost(const TopSpinState &state1, const TopSpinState &state2) const;
+	double GCost(const TopSpinState &, const TopSpinAction &) const;
+	bool GoalTest(const TopSpinState &state, const TopSpinState &goal) const;
 
-	bool GoalTest(const TopSpinState &s);
+	bool GoalTest(const TopSpinState &s) const;
 
 	//void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 

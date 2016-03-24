@@ -109,12 +109,12 @@ public:
 	virtual double HCost(const MNAgentPuzzleState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
-	virtual double GCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2);
-	virtual double GCost(const MNAgentPuzzleState &node, const tAgentAction &act);
-	virtual bool GoalTest(const MNAgentPuzzleState &node, const MNAgentPuzzleState &goal);
+	virtual double GCost(const MNAgentPuzzleState &node1, const MNAgentPuzzleState &node2) const;
+	virtual double GCost(const MNAgentPuzzleState &node, const tAgentAction &act) const;
+	virtual bool GoalTest(const MNAgentPuzzleState &node, const MNAgentPuzzleState &goal) const;
 	
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(const MNAgentPuzzleState &node)
+	virtual bool GoalTest(const MNAgentPuzzleState &node) const
 	{ return bValidSearchGoal&&(node == searchGoal); }
 	
 	void SetDomainAbstractionSize(int val) { domainAbstractionSize = val; }

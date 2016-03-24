@@ -392,7 +392,7 @@ void Fling::ClearGoalLoc()
 	specificGoalLoc = false;
 }
 
-bool Fling::GoalTest(const FlingBoard &node, const FlingBoard &goal)
+bool Fling::GoalTest(const FlingBoard &node, const FlingBoard &goal) const
 {
 	if (specificGoalLoc)
 		return (node.locs.size() == 1 && node.locs[0].first == goalLoc);
@@ -968,9 +968,6 @@ bool Fling::unrankPlayer(int64_t theRank, int pieces, FlingBoard &s)
 	unsigned int ls = NUM_PIECES;
 //	memset(s.board, 0, NUM_SPOTS*sizeof(int));
 	s.Reset();
-//	s.board.resize(0);
-//	s.board.resize(s.width*s.height);
-//	s.locs.resize(0);
 	s.locs.resize(pieces);
 	for (int i=0; ls > 0; ++i)
 	{

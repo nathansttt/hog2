@@ -83,10 +83,12 @@ public:
 	
 	int AddNode(node *);
 	node *GetNode(unsigned long num);
+	const node *GetNode(unsigned long num) const;
 	edge *GetEdge(unsigned long num);
 	void AddEdge(edge *);
 	edge *findDirectedEdge(unsigned int from, unsigned int to);
 	edge *FindEdge(unsigned int from, unsigned int to);
+	const edge *FindEdge(unsigned int from, unsigned int to) const;
 	
 	bool relax(edge *e, int weightIndex);
 	bool relaxReverseEdge(edge *e, int weightIndex);

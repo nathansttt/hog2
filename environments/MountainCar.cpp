@@ -100,17 +100,17 @@ bool MountainCarEnvironment::InvertAction(MountainCarAction &a) const
 double MountainCarEnvironment::HCost(const MountainCarState &node1, const MountainCarState &node2) const
 { return 0; }
 
-double MountainCarEnvironment::GCost(const MountainCarState &node1, const MountainCarState &node2)
+double MountainCarEnvironment::GCost(const MountainCarState &node1, const MountainCarState &node2) const
 {
 	return 1;
 }
 
-double MountainCarEnvironment::GCost(const MountainCarState &node, const MountainCarAction &act)
+double MountainCarEnvironment::GCost(const MountainCarState &node, const MountainCarAction &act) const
 {
 	return 1;
 }
 
-bool MountainCarEnvironment::GoalTest(const MountainCarState &node, const MountainCarState &goal)
+bool MountainCarEnvironment::GoalTest(const MountainCarState &node, const MountainCarState &goal) const
 {
 	return fgreater(node.loc, goalPosition);
 }

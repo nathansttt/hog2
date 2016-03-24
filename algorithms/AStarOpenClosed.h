@@ -148,7 +148,7 @@ uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val
 	elements.push_back(dataStructure(val, g, h, parent, 0, kClosedList));
 	if (parent == kTAStarNoNode)
 		elements.back().parentID = elements.size()-1;
-	table[hash] = elements.size(); // hashing to element list location
+	table[hash] = elements.size()-1; // hashing to element list location
 	return elements.size()-1;
 }
 

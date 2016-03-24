@@ -376,14 +376,14 @@ void WeightedMap2DEnvironment::UpdateAngle(const xyLoc &old, const xyLoc &s, dou
 * @return The weighted G-cost between l1 and l2, if there exists
 * an edge between the two locations, DBL_MAX otherwise. 
 */
-double WeightedMap2DEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
+double WeightedMap2DEnvironment::GCost(const xyLoc &l1, const xyLoc &l2) const
 {
 	// Update angles 
- 	if (updateOnQuery)
- 	{
- 		UpdateAngle(l1,l2,queryOldProportion);
- 	}
- 	
+// 	if (updateOnQuery)
+// 	{
+// 		UpdateAngle(l1,l2,queryOldProportion);
+// 	}
+	
 	
 	//std::cou<t<"l1 "<<l1<<" l2 "<<l2<<std::endl;
 	double hCost = HCost(l1, l2);
@@ -408,9 +408,10 @@ double WeightedMap2DEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
 	AngleUtil::AngleSearchNode sn(l1,GetStateHash(l1));
 	
 	double weight1 = 0; double weight2 = 0;
-	if (angleLookup.find(sn) != angleLookup.end())
-		{
-			Vector2D old = angleLookup[sn];
+	auto loc = angleLookup.find(sn);
+	if (loc != angleLookup.end())
+	{
+		Vector2D old = loc->second;//angleLookup[sn];
 			
 			//double returnme = h + ( ((old.x-angle.x)*(old.x-angle.x)+(old.y-angle.y)*(old.y-angle.y)));
 			
@@ -425,14 +426,15 @@ double WeightedMap2DEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
 			}*/
 		}
 		
-		AngleUtil::AngleSearchNode sn2(l2,GetStateHash(l2));
-		if (angleLookup.find(sn) != angleLookup.end())
-		{
-			Vector2D old = angleLookup[sn2];
-			weight2 = diffWeight * ((1 - ((old.x * angle.x)+(old.y * angle.y)))/2);
-		}
+	AngleUtil::AngleSearchNode sn2(l2,GetStateHash(l2));
+	auto loc2 = angleLookup.find(sn);
+	if (loc2 != angleLookup.end())
+	{
+		Vector2D old = loc2->second;//angleLookup[sn2];
+		weight2 = diffWeight * ((1 - ((old.x * angle.x)+(old.y * angle.y)))/2);
+	}
 		
-		return hCost + (0.5 * weight1 + 0.5 * weight2);
+	return hCost + (0.5 * weight1 + 0.5 * weight2);
 	
 /*	if (l1 == l2)
 		return 0;	
@@ -720,7 +722,7 @@ double WeightedMap2DEnvironment::ComputeArrowMetric(bool timed, double time, boo
 	return (totalDotProducts / (double)(numDotProducts));
 }
 
-Vector2D WeightedMap2DEnvironment::GetAngleFromDirection(tDirection dir)
+Vector2D WeightedMap2DEnvironment::GetAngleFromDirection(tDirection dir) const
 {
 	Vector2D angle;
 	

@@ -298,9 +298,9 @@ public:
 
 	OccupancyInterface<graphState, graphMove> *GetOccupancyInfo() { return 0; }
 	virtual double HCost(const graphState &state1, const graphState &state2) const;
-	virtual double GCost(const graphState &state1, const graphState &state2);
-	virtual double GCost(const graphState &state1, const graphMove &state2);
-	virtual bool GoalTest(const graphState &state, const graphState &goal);
+	virtual double GCost(const graphState &state1, const graphState &state2) const;
+	virtual double GCost(const graphState &state1, const graphMove &state2) const;
+	virtual bool GoalTest(const graphState &state, const graphState &goal) const;
 	virtual uint64_t GetStateHash(const graphState &state) const;
 	virtual uint64_t GetActionHash(graphMove act) const;
 	virtual void OpenGLDraw() const;
@@ -318,7 +318,7 @@ public:
 		fprintf(stderr, "ERROR: Single State HCost not implemented for GraphEnvironment\n");
 		exit(1); return -1.0;}
 
-	virtual bool GoalTest(const graphState &){
+	virtual bool GoalTest(const graphState &) const {
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for GraphEnvironment\n");
 		exit(1); return false;
 	}

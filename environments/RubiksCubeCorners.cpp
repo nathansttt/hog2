@@ -357,7 +357,7 @@ bool RubiksCorner::InvertAction(RubiksCornersAction &a) const
 }
 
 /** Goal Test if the goal is stored **/
-bool RubiksCorner::GoalTest(const RubiksCornerState &node)
+bool RubiksCorner::GoalTest(const RubiksCornerState &node) const
 {
 	return node.state == 0;
 }

@@ -72,12 +72,12 @@ public:
 	virtual double HCost(const NQueenState &node) const
 	{ return 0; }
 	
-	virtual double GCost(const NQueenState &node1, const NQueenState &node2) { return 1.0; }
-	virtual double GCost(const NQueenState &node, const NQueenAction &act) { return 1.0; }
-	virtual bool GoalTest(const NQueenState &node, const NQueenState &goal) { return GoalTest(node); }
+	virtual double GCost(const NQueenState &node1, const NQueenState &node2) const { return 1.0; }
+	virtual double GCost(const NQueenState &node, const NQueenAction &act) const { return 1.0; }
+	virtual bool GoalTest(const NQueenState &node, const NQueenState &goal) const { return GoalTest(node); }
 	
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(const NQueenState &node);
+	virtual bool GoalTest(const NQueenState &node) const;
 	
 	virtual uint64_t GetStateHash(const NQueenState &node) const { return 0; }
 	virtual uint64_t GetActionHash(NQueenAction act) const { return 0; }

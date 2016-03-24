@@ -39,12 +39,12 @@ public:
 	virtual double HCost(const NaryState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
-	virtual double GCost(const NaryState &node1, const NaryState &node2);
-	virtual double GCost(const NaryState &node, const NaryAction &act);
-	virtual bool GoalTest(const NaryState &node, const NaryState &goal);
+	virtual double GCost(const NaryState &node1, const NaryState &node2) const;
+	virtual double GCost(const NaryState &node, const NaryAction &act) const;
+	virtual bool GoalTest(const NaryState &node, const NaryState &goal) const;
 	
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(const NaryState &node)
+	virtual bool GoalTest(const NaryState &node) const
 	{ return bValidSearchGoal&&(node == searchGoal); }
 	
 	virtual uint64_t GetStateHash(const NaryState &node) const;

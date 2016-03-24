@@ -268,7 +268,7 @@ namespace CanonicalGrid {
 		return h1;
 	}
 	
-	double CanonicalGrid::GCost(const xyLoc &l, const tDirection &act)
+	double CanonicalGrid::GCost(const xyLoc &l, const tDirection &act) const
 	{
 		const double multiplier = 1.0;
 		switch (act)
@@ -286,7 +286,7 @@ namespace CanonicalGrid {
 		return 0;
 	}
 	
-	double CanonicalGrid::GCost(const xyLoc &l1, const xyLoc &l2)
+	double CanonicalGrid::GCost(const xyLoc &l1, const xyLoc &l2) const
 	{
 		const double multiplier = 1.0;
 		if (l1.x == l2.x) return 1.0*multiplier;
@@ -295,7 +295,7 @@ namespace CanonicalGrid {
 		return DIAGONAL_COST*multiplier;
 	}
 	
-	bool CanonicalGrid::GoalTest(const xyLoc &node, const xyLoc &goal)
+	bool CanonicalGrid::GoalTest(const xyLoc &node, const xyLoc &goal) const
 	{
 		return ((node.x == goal.x) && (node.y == goal.y));
 	}
@@ -324,7 +324,9 @@ namespace CanonicalGrid {
 		GetColor(r, g, b, t);
 		glColor4f(r, g, b, t);
 		//glColor3f(0.5, 0.5, 0.5);
-		DrawSphere(xx, yy, zz, rad);
+		//DrawSphere(xx, yy, zz, rad);
+		//DrawSquare(xx, yy, zz+rad, rad);
+		DrawSquare(xx, yy, zz-rad, rad);
 	}
 	
 	void CanonicalGrid::OpenGLDraw(const xyLoc &l1, const xyLoc &l2, float v) const
@@ -339,7 +341,8 @@ namespace CanonicalGrid {
 		GLfloat r, g, b, t;
 		GetColor(r, g, b, t);
 		glColor4f(r, g, b, t);
-		DrawSphere(xx, yy, zz, rad);
+		DrawSquare(xx, yy, zz+rad, rad);
+		//DrawSphere(xx, yy, zz, rad);
 	}
 	
 	void CanonicalGrid::OpenGLDraw(const xyLoc& initial, const tDirection &dir) const

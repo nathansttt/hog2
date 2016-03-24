@@ -50,7 +50,7 @@ void NQueens::GetNextState(const NQueenState &s, NQueenAction a, NQueenState &s2
 }
 
 /** Goal Test if the goal is stored **/
-bool NQueens::GoalTest(const NQueenState &node)
+bool NQueens::GoalTest(const NQueenState &node) const
 {
 	for (int x = 0; x < node.locs.size(); x++)
 	{

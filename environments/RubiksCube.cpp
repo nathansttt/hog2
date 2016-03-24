@@ -394,14 +394,14 @@ double RubiksCube::HCost(const RubiksState &node) const
 	return HCost(node, node);
 }
 
-bool RubiksCube::GoalTest(const RubiksState &node, const RubiksState &goal)
+bool RubiksCube::GoalTest(const RubiksState &node, const RubiksState &goal) const
 {
 	return (node.corner.state == goal.corner.state &&
 			node.edge.state == goal.edge.state);
 }
 
 /** Goal Test if the goal is stored **/
-bool RubiksCube::GoalTest(const RubiksState &node)
+bool RubiksCube::GoalTest(const RubiksState &node) const
 {
 	assert(false);
 	return false;

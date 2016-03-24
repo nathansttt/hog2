@@ -69,3 +69,4 @@ default : all
 SRC_CPP = \
 	apps/canonicalGrids/Sample.cpp \
 	apps/canonicalGrids/JPS.cpp \
+	apps/canonicalGrids/gJPS.cpp \

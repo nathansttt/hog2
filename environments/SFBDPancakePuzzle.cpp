@@ -160,17 +160,17 @@ double SFBDPancakeEnvironment::HCost(const pancakeStatePair &state1, const panca
 	return pan->HCost(state1.start, state1.goal);
 }
 
-double SFBDPancakeEnvironment::GCost(const pancakeStatePair &, const pancakeMovePair &)
+double SFBDPancakeEnvironment::GCost(const pancakeStatePair &, const pancakeMovePair &) const
 {
 	return 1;
 }
 
-double SFBDPancakeEnvironment::GCost(const pancakeStatePair &, const pancakeStatePair &)
+double SFBDPancakeEnvironment::GCost(const pancakeStatePair &, const pancakeStatePair &) const
 {
 	return 1;
 }
 
-bool SFBDPancakeEnvironment::GoalTest(const pancakeStatePair &state, const pancakeStatePair &)
+bool SFBDPancakeEnvironment::GoalTest(const pancakeStatePair &state, const pancakeStatePair &) const
 {
 	return (state.start == state.goal);	
 }

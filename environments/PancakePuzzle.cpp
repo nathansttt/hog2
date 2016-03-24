@@ -245,12 +245,12 @@ double PancakePuzzle::DefaultH(const PancakePuzzleState &state, const std::vecto
 	return h_count;
 }
 
-bool PancakePuzzle::GoalTest(const PancakePuzzleState &state, const PancakePuzzleState &theGoal)
+bool PancakePuzzle::GoalTest(const PancakePuzzleState &state, const PancakePuzzleState &theGoal) const
 {
 	return (state == theGoal);
 }
 
-bool PancakePuzzle::GoalTest(const PancakePuzzleState &s) {
+bool PancakePuzzle::GoalTest(const PancakePuzzleState &s) const {
 	if (!goal_stored) {
 		fprintf(stderr, "ERROR: GoalTest called with a single state and goal is not stored.\n");
 		exit(1);

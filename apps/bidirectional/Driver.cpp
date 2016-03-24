@@ -38,6 +38,8 @@
 #include "RubiksCube.h"
 #include "MMRubik.h"
 #include "MM0Rubik.h"
+#include "ParallelIDAStar.h"
+void Test100Easy();
 
 struct hash128
 {
@@ -81,6 +83,7 @@ void BFS();
 void GetKorfInstance(RubiksState &start, int which);
 void GetSuperFlip(RubiksState &start);
 void GetDepth20(RubiksState &start, int which);
+void GetRandom15(RubiksState &start, int which);
 
 int main(int argc, char* argv[])
 {
@@ -202,6 +205,11 @@ int main(int argc, char* argv[])
 	else if (argc > 3 && strcmp(argv[1], "-testPruning") == 0)
 	{
 		TestPruning(atoi(argv[2]), atoi(argv[3]));
+	}
+	else if (strcmp(argv[1], "-easy") == 0)
+	{
+		Test100Easy();
+		return 0;
 	}
 	else {
 		InstallHandlers();
@@ -607,7 +615,7 @@ void GetDepth20(RubiksState &start, int which)
 	char string[10][maxStrLength] = //"U R2 F B R B2 R U2 L B2 R U- D- R2 F R- L B2 U2 F2";
 	{
 		"B2 L B2 R- F- U- B- L D- F- L U L2 B2 L- D2 B2 D2 R2 B2",
-		"R U2 R D2 R2 B2 L- D- B3 F U B- R- U2 L- D R2 F- U2 L2",
+		"R U2 R D2 R2 B2 L- D- B- F U B- R- U2 L- D R2 F- U2 L2",
 		"D2 R2 F2 D2 F2 D2 R- F2 D- L2 R B L- F U R- B F2 R2 F-",
 		"D- F- U B2 R2 F R- U2 B- L D F R D2 R2 L2 D- R2 F2 D-",
 		"U2 R2 F2 D- U F2 U2 B U B- R U- F L B R- F L2 D- B",
@@ -798,5 +806,99 @@ void TestPruning(int depth, int bucket)
 	for (int x = 0; x < depths.size(); x++)
 	{
 		printf("%d\t%llu\n", x, depths[x]);
+	}
+}
+
+void GetRandom15(RubiksState &start, int which)
+{
+	RubiksCube c;
+	srandom(which);
+	std::vector<RubiksAction> acts;
+	c.SetPruneSuccessors(true);
+	for (int x = 0; x < 15; x++)
+	{
+		c.GetActions(start, acts);
+		c.ApplyAction(start, acts[random()%acts.size()]);
+	}
+}
+
+void GetKorf1997(Heuristic<RubiksState> &result)
+{
+	const char * hprefix = "/Users/nathanst/Desktop/pdb/";
+	
+	RubiksState goal;
+	RubiksCube cube;
+	std::vector<int> blank;
+	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
+	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
+	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+	
+	//	assert(!"File names are getting corrupted here. Perhaps by the abstraction of the goal state");
+	//	assert(!"Need to abstract the goal state immediately when creating the pdb instead of only when I build the pdb");
+	if (!pdb1->Load(hprefix))
+	{
+		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb1->Save(hprefix);
+	}
+	else {
+		printf("Loaded previous heuristic\n");
+	}
+	if (!pdb2->Load(hprefix))
+	{
+		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb2->Save(hprefix);
+	}
+	else {
+		printf("Loaded previous heuristic\n");
+	}
+	if (!pdb3->Load(hprefix))
+	{
+		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb3->Save(hprefix);
+	}
+	else {
+		printf("Loaded previous heuristic\n");
+	}
+	result.lookups.push_back({kMaxNode, 1, 3});
+	result.lookups.push_back({kLeafNode, 0, 0});
+	result.lookups.push_back({kLeafNode, 1, 0});
+	result.lookups.push_back({kLeafNode, 2, 0});
+	result.heuristics.push_back(pdb1);
+	result.heuristics.push_back(pdb2);
+	result.heuristics.push_back(pdb3);
+}
+
+void Test100Easy()
+{
+	Heuristic<RubiksState> result;
+	std::vector<RubiksAction> path;
+	GetKorf1997(result);
+	Timer t;
+	for (int x = 0; x < 100; x++)
+	{
+		RubiksCube cube;
+		std::vector<RubiksAction> acts;
+		cube.SetPruneSuccessors(true);
+		RubiksState start, goal;
+		GetRandom15(start, x);
+		ParallelIDAStar<RubiksCube, RubiksState, RubiksAction> ida;
+		ida.SetHeuristic(&result);
+		t.StartTimer();
+		ida.GetPath(&cube, start, goal, path);
+		t.EndTimer();
+		printf("%1.5fs elapsed\n", t.GetElapsedTime());
+		printf("%llu nodes expanded (%1.3f nodes/sec)\n", ida.GetNodesExpanded(), ida.GetNodesExpanded()/t.GetElapsedTime());
+		printf("%llu nodes generated (%1.3f nodes/sec)\n", ida.GetNodesTouched(), ida.GetNodesTouched()/t.GetElapsedTime());
+		printf("Solution cost: %lu\n", path.size());
+		
+		std::cout << "Acts: ";
+		for (unsigned int x = 0; x < path.size(); x++)
+		{
+			std::cout << path[x] << " ";
+		}
+		std::cout << "\n";
 	}
 }

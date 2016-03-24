@@ -120,9 +120,9 @@ public:
 	
 	virtual double HCost(const Rubik7EdgeState &node1, const Rubik7EdgeState &node2) const { return 0; }
 	
-	virtual double GCost(const Rubik7EdgeState &node1, const Rubik7EdgeState &node2) { return 1; }
-	virtual double GCost(const Rubik7EdgeState &node, const Rubik7EdgeAction &act) { return 1; }
-	virtual bool GoalTest(const Rubik7EdgeState &node, const Rubik7EdgeState &goal) { return node == goal; }
+	virtual double GCost(const Rubik7EdgeState &node1, const Rubik7EdgeState &node2) const { return 1; }
+	virtual double GCost(const Rubik7EdgeState &node, const Rubik7EdgeAction &act) const { return 1; }
+	virtual bool GoalTest(const Rubik7EdgeState &node, const Rubik7EdgeState &goal) const { return node == goal; }
 	
 
 	void ApplyMove(Rubik7EdgeState &s, Rubik7EdgeMove *a);

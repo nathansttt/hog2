@@ -272,12 +272,12 @@ double BurnedPancakePuzzle::Memory_Free_HCost(const BurnedPancakePuzzleState &st
 	return h_count;
 }
 
-bool BurnedPancakePuzzle::GoalTest(const BurnedPancakePuzzleState &state, const BurnedPancakePuzzleState &theGoal)
+bool BurnedPancakePuzzle::GoalTest(const BurnedPancakePuzzleState &state, const BurnedPancakePuzzleState &theGoal) const
 {
 	return (state == theGoal);
 }
 
-bool BurnedPancakePuzzle::GoalTest(const BurnedPancakePuzzleState &s)
+bool BurnedPancakePuzzle::GoalTest(const BurnedPancakePuzzleState &s) const
 {
 	if (!goal_stored)
 	{

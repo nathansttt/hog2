@@ -260,7 +260,7 @@ void MNPuzzle::StoreGoal(MNPuzzleState &s)
 	goal = s;
 }
 
-bool MNPuzzle::GoalTest(const MNPuzzleState &s)
+bool MNPuzzle::GoalTest(const MNPuzzleState &s) const
 {
 	return (s == goal);
 }
@@ -490,7 +490,7 @@ double MNPuzzle::AdditiveGCost(const MNPuzzleState &s, const slideDir &d)
 	return 1;
 }
 
-double MNPuzzle::GCost(const MNPuzzleState &a, const MNPuzzleState &b)
+double MNPuzzle::GCost(const MNPuzzleState &a, const MNPuzzleState &b) const
 {
 //	int diff = a.blank - b.blank;
 //	
@@ -499,7 +499,7 @@ double MNPuzzle::GCost(const MNPuzzleState &a, const MNPuzzleState &b)
 	return 1;
 }
 
-double MNPuzzle::GCost(const MNPuzzleState &s, const slideDir &d)
+double MNPuzzle::GCost(const MNPuzzleState &s, const slideDir &d) const
 {
 //	double cost;
 //	switch (d)
@@ -518,7 +518,7 @@ double MNPuzzle::GCost(const MNPuzzleState &s, const slideDir &d)
 }
 
 
-bool MNPuzzle::GoalTest(const MNPuzzleState &state, const MNPuzzleState &theGoal)
+bool MNPuzzle::GoalTest(const MNPuzzleState &state, const MNPuzzleState &theGoal) const
 {
 	return (state == theGoal);
 }

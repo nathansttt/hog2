@@ -127,6 +127,23 @@ void PermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t ha
 	s.FinishUnranking(example);
 }
 
+void GetStateFromHash(uint64_t hash, int *pieces, int count)
+{
+	int numEntriesLeft = 1;
+	for (int x = count-1; x >= 0; x--)
+	{
+		pieces[x] = hash%numEntriesLeft;
+		hash /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < count; y++)
+		{
+			if (pieces[y] >= pieces[x])
+				pieces[y]++;
+		}
+	}
+}
+
+
 template <class state, class action, class environment>
 uint64_t PermutationPDB<state, action, environment>::Factorial(int val) const
 {

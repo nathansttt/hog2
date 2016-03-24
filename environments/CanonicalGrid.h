@@ -64,11 +64,11 @@ namespace CanonicalGrid {
 			fprintf(stderr, "ERROR: Single State HCost not implemented for CanonicalGrid\n");
 			exit(1); return -1.0;}
 		double HCost(const xyLoc &node1, const xyLoc &node2) const;
-		double GCost(const xyLoc &node1, const xyLoc &node2);
-		double GCost(const xyLoc &node1, const tDirection &act);
-		bool GoalTest(const xyLoc &node, const xyLoc &goal);
+		double GCost(const xyLoc &node1, const xyLoc &node2) const;
+		double GCost(const xyLoc &node1, const tDirection &act) const;
+		bool GoalTest(const xyLoc &node, const xyLoc &goal) const;
 		
-		bool GoalTest(const xyLoc &){
+		bool GoalTest(const xyLoc &) const {
 			fprintf(stderr, "ERROR: Single State Goal Test not implemented for CanonicalGrid\n");
 			exit(1); return false;}
 		

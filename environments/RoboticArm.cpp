@@ -32,7 +32,7 @@ void armRotations::SetRotation(int which, tRotation dir)
 		case kRotateCCW: value = 1; break;
 		case kNoRotation: value = 0; break;
 	}
-	rotations = (rotations&((~0x3)<<(2*which)))|(value<<2*which);
+	rotations = (rotations&(~((0x3)<<(2*which))))|(value<<(2*which));
 }
 
 int armAngles::GetAngle(int which) const
@@ -133,20 +133,42 @@ int RoboticArm::TipPositionIndex(armAngles &s,
 void RoboticArm::GetSuccessors(const armAngles &nodeID, std::vector<armAngles> &neighbors) const
 {
 	neighbors.resize(0);
-	for (int x = 0; x < nodeID.GetNumArms(); x++)
+//	for (int x = 0; x < nodeID.GetNumArms(); x++)
+//	{
+//		armAngles s = nodeID;
+//		armRotations a;
+//		a.SetRotation(x, kRotateCW);
+//		ApplyAction(s, a);
+//
+//		if (LegalState(s))
+//			neighbors.push_back(s);
+//		
+//		s = nodeID;
+//		a.SetRotation(x, kRotateCCW);
+//		ApplyAction(s, a);
+//
+//		if (LegalState(s))
+//			neighbors.push_back(s);
+//	}
+	int maxVal = pow(3.0, nodeID.GetNumArms());
+	for (int x = 1; x < maxVal; x++)
 	{
 		armAngles s = nodeID;
 		armRotations a;
-		a.SetRotation(x, kRotateCW);
-		ApplyAction(s, a);
-
-		if (LegalState(s))
-			neighbors.push_back(s);
+		int tmp = x;
+		for (int y = 0; y < s.GetNumArms(); y++)
+		{
+			switch (tmp%3)
+			{
+				case 0: a.SetRotation(y, kNoRotation); break;
+				case 1: a.SetRotation(y, kRotateCW); break;
+				case 2: a.SetRotation(y, kRotateCCW); break;
+			}
+			tmp/=3;
+		}
 		
-		s = nodeID;
-		a.SetRotation(x, kRotateCCW);
 		ApplyAction(s, a);
-
+			
 		if (LegalState(s))
 			neighbors.push_back(s);
 	}
@@ -334,7 +356,7 @@ double RoboticArm::GCost(const armAngles &node1, const armRotations &act)
 }
 #endif
 
-bool RoboticArm::GoalTest(const armAngles &node, const armAngles &goal)
+bool RoboticArm::GoalTest(const armAngles &node, const armAngles &goal) const
 {
 	if (!goal.IsGoalState())
 	{

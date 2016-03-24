@@ -67,12 +67,16 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-easy"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-grid /Users/nathanst/hog2/maps/da2/ht_chantry.map /Users/nathanst/hog2/scenarios/da2/ht_chantry.map.scen"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-mm 0 /Users/nathanst/Desktop/pdb1/ /Users/nathanst/Desktop/pdb2/ /Users/nathanst/Desktop/pdb/"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-mm0 0 /Users/nathanst/Desktop/pdb1/ /Users/nathanst/Desktop/pdb2/"

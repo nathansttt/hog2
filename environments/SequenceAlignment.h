@@ -39,12 +39,12 @@ public:
 	virtual double HCost(const SequenceAlignmentState &node) const
 	{ assert(bValidSearchGoal); return HCost(node, searchGoal); }
 	
-	virtual double GCost(const SequenceAlignmentState &node1, const SequenceAlignmentState &node2);
-	virtual double GCost(const SequenceAlignmentState &node, const SequenceAlignmentAction &act);
-	virtual bool GoalTest(const SequenceAlignmentState &node, const SequenceAlignmentState &goal);
+	virtual double GCost(const SequenceAlignmentState &node1, const SequenceAlignmentState &node2) const;
+	virtual double GCost(const SequenceAlignmentState &node, const SequenceAlignmentAction &act) const;
+	virtual bool GoalTest(const SequenceAlignmentState &node, const SequenceAlignmentState &goal) const;
 	
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(const SequenceAlignmentState &node)
+	virtual bool GoalTest(const SequenceAlignmentState &node) const
 	{ return bValidSearchGoal&&(node == searchGoal); }
 	
 	virtual uint64_t GetStateHash(const SequenceAlignmentState &node) const;

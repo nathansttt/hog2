@@ -62,11 +62,11 @@ bool NaryTree::InvertAction(NaryAction &a) const
 double NaryTree::HCost(const NaryState &node1, const NaryState &node2) const
 { if (node1 == node2) return 0; return 1; }
 
-double NaryTree::GCost(const NaryState &, const NaryState &)
+double NaryTree::GCost(const NaryState &, const NaryState &) const
 { return 1; }
-double NaryTree::GCost(const NaryState &, const NaryAction &)
+double NaryTree::GCost(const NaryState &, const NaryAction &) const
 { return 1; }
-bool NaryTree::GoalTest(const NaryState &node, const NaryState &goal)
+bool NaryTree::GoalTest(const NaryState &node, const NaryState &goal) const
 { return node == goal; }
 
 

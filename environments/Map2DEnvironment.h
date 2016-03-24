@@ -34,6 +34,14 @@ public:
 	uint16_t y;
 };
 
+struct xyLocHash
+{
+	std::size_t operator()(const xyLoc & x) const
+	{
+		return (x.x<<16)|(x.y);
+	}
+};
+
 static std::ostream& operator <<(std::ostream & out, const xyLoc &loc)
 {
 	out << "(" << loc.x << ", " << loc.y << ")";
@@ -51,7 +59,7 @@ static bool operator!=(const xyLoc &l1, const xyLoc &l2) {
 
 enum tDirection {
 	kN=0x8, kS=0x4, kE=0x2, kW=0x1, kNW=kN|kW, kNE=kN|kE,
-	kSE=kS|kE, kSW=kS|kW, kStay=0, kTeleport=kSW|kNE
+	kSE=kS|kE, kSW=kS|kW, kStay=0, kTeleport=kSW|kNE, kAll = kSW|kNE
 };
 
 class BaseMapOccupancyInterface : public OccupancyInterface<xyLoc,tDirection>
@@ -110,11 +118,11 @@ public:
 		fprintf(stderr, "ERROR: Single State HCost not implemented for MapEnvironment\n");
 		exit(1); return -1.0;}
 	virtual double HCost(const xyLoc &node1, const xyLoc &node2) const;
-	virtual double GCost(const xyLoc &node1, const xyLoc &node2);
-	virtual double GCost(const xyLoc &node1, const tDirection &act);
-	bool GoalTest(const xyLoc &node, const xyLoc &goal);
+	virtual double GCost(const xyLoc &node1, const xyLoc &node2) const;
+	virtual double GCost(const xyLoc &node1, const tDirection &act) const;
+	bool GoalTest(const xyLoc &node, const xyLoc &goal) const;
 
-	bool GoalTest(const xyLoc &){
+	bool GoalTest(const xyLoc &) const {
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for MapEnvironment\n");
 		exit(1); return false;}
 
@@ -128,9 +136,12 @@ public:
 	virtual void GLLabelState(const xyLoc &s, const char *str, double scale) const;
 	virtual void GLDrawLine(const xyLoc &x, const xyLoc &y) const;
 	
+	std::string SVGHeader();
 	std::string SVGDraw();
+	std::string SVGDraw(const xyLoc &);
 	std::string SVGLabelState(const xyLoc &, const char *, double scale) const;
-	std::string SVGDrawLine(const xyLoc &x, const xyLoc &y) const;
+	std::string SVGDrawLine(const xyLoc &x, const xyLoc &y, int width=1) const;
+	std::string SVGFrameRect(int left, int top, int right, int bottom, int width = 1);
 	
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;
 	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;

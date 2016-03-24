@@ -60,12 +60,12 @@ public:
 	double DefaultH(const PancakePuzzleState &state1, const std::vector<int> &goal_locs) const;
 	double HCost(const PancakePuzzleState &state1) const;
 
-	double GCost(const PancakePuzzleState &, const PancakePuzzleState &) {return 1.0;}
-	double GCost(const PancakePuzzleState &, const PancakePuzzleAction &) { return 1.0; }
+	double GCost(const PancakePuzzleState &, const PancakePuzzleState &) const {return 1.0;}
+	double GCost(const PancakePuzzleState &, const PancakePuzzleAction &) const { return 1.0; }
 
-	bool GoalTest(const PancakePuzzleState &state, const PancakePuzzleState &goal);
+	bool GoalTest(const PancakePuzzleState &state, const PancakePuzzleState &goal) const;
 
-	bool GoalTest(const PancakePuzzleState &s);
+	bool GoalTest(const PancakePuzzleState &s) const;
 
 	uint64_t GetActionHash(PancakePuzzleAction act) const;
 	void StoreGoal(PancakePuzzleState &); // stores the locations for the given goal state

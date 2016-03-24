@@ -79,11 +79,11 @@ public:
 		fprintf(stderr, "ERROR: Single State HCost not implemented for FlipSide\n");
 		exit(1); return -1.0;}
 	double HCost(const FlipSideState &state1, const FlipSideState &state2) const;
-	double GCost(const FlipSideState &state1, const FlipSideState &state2);
-	double GCost(const FlipSideState &, const flipMove &) { return 1.0; }
-	bool GoalTest(const FlipSideState &state, const FlipSideState &goal);
+	double GCost(const FlipSideState &state1, const FlipSideState &state2) const;
+	double GCost(const FlipSideState &, const flipMove &) const { return 1.0; }
+	bool GoalTest(const FlipSideState &state, const FlipSideState &goal) const;
 
-	bool GoalTest(const FlipSideState &){
+	bool GoalTest(const FlipSideState &) const{
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for FlipSide\n");
 		exit(1); return false;}
 

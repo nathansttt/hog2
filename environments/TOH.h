@@ -134,9 +134,9 @@ public:
 
 	/** Heuristic value between two arbitrary nodes. **/
 	double HCost(const TOHState<disks> &node1, const TOHState<disks> &node2) const;
-	double GCost(const TOHState<disks> &node1, const TOHState<disks> &node2) { return 1; }
-	double GCost(const TOHState<disks> &node, const TOHMove &act) { return 1; }
-	bool GoalTest(const TOHState<disks> &node, const TOHState<disks> &goal);
+	double GCost(const TOHState<disks> &node1, const TOHState<disks> &node2) const { return 1; }
+	double GCost(const TOHState<disks> &node, const TOHMove &act) const { return 1; }
+	bool GoalTest(const TOHState<disks> &node, const TOHState<disks> &goal) const;
 
 	uint64_t GetStateHash(const TOHState<disks> &node) const;
 	void GetStateFromHash(uint64_t parent, TOHState<disks> &s) const;
@@ -260,7 +260,7 @@ double TOH<disks>::HCost(const TOHState<disks> &node1, const TOHState<disks> &no
 }
 
 template <int disks>
-bool TOH<disks>::GoalTest(const TOHState<disks> &node, const TOHState<disks> &goal)
+bool TOH<disks>::GoalTest(const TOHState<disks> &node, const TOHState<disks> &goal) const
 {
 	// NOTE: this is using the standard goal state; arbitrary goal states
 	// are more expensive to check

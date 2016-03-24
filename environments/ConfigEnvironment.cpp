@@ -137,21 +137,21 @@ double ConfigEnvironment::HCost(const recVec &node1, const recVec &node2) const
 				(node1.z-node2.z)*(node1.z-node2.z));
 }
 
-double ConfigEnvironment::GCost(const recVec &node1, const  recVec &node2)
+double ConfigEnvironment::GCost(const recVec &node1, const  recVec &node2) const
 {
 	return sqrt((node1.x-node2.x)*(node1.x-node2.x) +
 				(node1.y-node2.y)*(node1.y-node2.y) +
 				(node1.z-node2.z)*(node1.z-node2.z));
 }
 
-double ConfigEnvironment::GCost(const recVec &node1, const line2d &act)
+double ConfigEnvironment::GCost(const recVec &node1, const line2d &act) const
 {
 	return sqrt((node1.x-act.end.x)*(node1.x-act.end.x) +
 				(node1.y-act.end.y)*(node1.y-act.end.y) +
 				(node1.z-act.end.z)*(node1.z-act.end.z));
 }
 
-bool ConfigEnvironment::GoalTest(const recVec &node, const recVec &theGoal)
+bool ConfigEnvironment::GoalTest(const recVec &node, const recVec &theGoal) const
 {
 	return (fequal(node.x, theGoal.x) && fequal(node.y, theGoal.y) && fequal(node.z, theGoal.z));
 }

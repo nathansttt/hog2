@@ -63,7 +63,7 @@ void GraphRefinementEnvironment::GetActions(const graphState &stateID, std::vect
 	assert(false);
 }
 
-bool GraphRefinementEnvironment::GoalTest(const graphState &state, const graphState &goal)
+bool GraphRefinementEnvironment::GoalTest(const graphState &state, const graphState &goal) const
 {
 	if (useAbstractGoal)
 	{

@@ -476,7 +476,7 @@ double MapEnvironment::HCost(const xyLoc &l1, const xyLoc &l2) const
 	return std::max(h1, h2);
 }
 
-double MapEnvironment::GCost(const xyLoc &l, const tDirection &act)
+double MapEnvironment::GCost(const xyLoc &l, const tDirection &act) const
 {
 	double multiplier = 1.0;
 //	if (map->GetTerrainType(l.x, l.y) == kSwamp)
@@ -498,7 +498,7 @@ double MapEnvironment::GCost(const xyLoc &l, const tDirection &act)
 	return 0;
 }
 
-double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
+double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2) const
 {
 	double multiplier = 1.0;
 //	if (map->GetTerrainType(l1.x, l1.y) == kSwamp)
@@ -515,7 +515,7 @@ double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2)
 //	return h;
 }
 
-bool MapEnvironment::GoalTest(const xyLoc &node, const xyLoc &goal)
+bool MapEnvironment::GoalTest(const xyLoc &node, const xyLoc &goal) const
 {
 	return ((node.x == goal.x) && (node.y == goal.y));
 }
@@ -639,18 +639,24 @@ void MapEnvironment::GLDrawLine(const xyLoc &a, const xyLoc &b) const
 	GetColor(rr, gg, bb, t);
 	glColor4f(rr, gg, bb, t);
 
+	
+	glBegin(GL_LINES);
+	glVertex3f(xx1, yy1, zz1-rad/2);
+	glVertex3f(xx2, yy2, zz2-rad/2);
+	glEnd();
+
 //	glEnable(GL_BLEND);
 //	glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
 	//glEnable(GL_POLYGON_SMOOTH);
-	glBegin(GL_TRIANGLE_STRIP);
+//	glBegin(GL_TRIANGLE_STRIP);
+//	//glBegin(GL_QUADS);
+//	glVertex3f(xx1+xoff, yy1+yoff, zz1-rad/2);
+//	glVertex3f(xx2+xoff, yy2+yoff, zz2-rad/2);
+//	glVertex3f(xx1-xoff, yy1-yoff, zz1-rad/2);
+//	glVertex3f(xx2-xoff, yy2-yoff, zz2-rad/2);
+//	glEnd();
 
-	//glBegin(GL_QUADS);
-	glVertex3f(xx1+xoff, yy1+yoff, zz1-rad/2);
-	glVertex3f(xx2+xoff, yy2+yoff, zz2-rad/2);
-	glVertex3f(xx1-xoff, yy1-yoff, zz1-rad/2);
-	glVertex3f(xx2-xoff, yy2-yoff, zz2-rad/2);
-	glEnd();
-//	glDisable(GL_POLYGON_SMOOTH);
+	//	glDisable(GL_POLYGON_SMOOTH);
 	//
 //	glBegin(GL_LINES);
 //	glVertex3f(xx, yy, zz-rad/2);
@@ -705,21 +711,118 @@ void MapEnvironment::GLLabelState(const xyLoc &s, const char *str) const
 	glPopMatrix();
 }
 
+std::string MapEnvironment::SVGHeader()
+{
+	std::string s;
+	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(10*map->GetMapWidth()+10+20)+"\" height = \""+std::to_string(10*map->GetMapHeight()+10+20)+"\">";
+	return s;
+}
+
 std::string MapEnvironment::SVGDraw()
 {
 	std::string s;
-	for (int x = 0; x < map->GetMapWidth(); x++)
+	recColor black = {0.0, 0.0, 0.0};
+	for (int y = 0; y < map->GetMapHeight(); y++)
 	{
-		for (int y = 0; y < map->GetMapHeight(); y++)
+		for (int x = 0; x < map->GetMapWidth(); x++)
 		{
+			bool draw = true;
 			if (map->GetTerrainType(x, y) == kGround)
 			{
-				recColor c = {0.5, 0.5, 0};
-				s += SVGDrawRect(x, y, 1, 1, c);
-				//stroke-width="1" stroke="pink" />
+				recColor c = {0.9, 0.9, 0.9};
+				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+
+				if (x == map->GetMapWidth()-1)
+					s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+				if (y == map->GetMapHeight()-1)
+					s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+			}
+			else if (map->GetTerrainType(x, y) == kTrees)
+			{
+				recColor c = {0.0, 0.5, 0.0};
+				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+
+				if (x == map->GetMapWidth()-1)
+					s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+				if (y == map->GetMapHeight()-1)
+					s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+			}
+			else if (map->GetTerrainType(x, y) == kWater)
+			{
+				recColor c = {0.0, 0.0, 1.0};
+				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+
+				if (x == map->GetMapWidth()-1)
+					s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+				if (y == map->GetMapHeight()-1)
+					s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+			}
+			else if (map->GetTerrainType(x, y) == kSwamp)
+			{
+				recColor c = {0.0, 0.3, 1.0};
+				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+
+			}
+			else {
+				draw = false;
+//				recColor c = {0.0, 0.0, 0.0};
+//				s += SVGDrawRect(x, y, 1, 1, c);
+			}
+
+			if (draw)
+			{
+				SetColor(0.0, 0.0, 0.0);
+
+				// Code does error checking, so this works with x == 0
+				if (map->GetTerrainType(x, y) != map->GetTerrainType(x-1, y))
+				{
+					SetColor(0.0, 0.0, 0.0);
+					s += ::SVGDrawLine(x+1, y+1, x+1, y+1+1, 1, black, false);
+				}
+
+				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y-1))
+				{
+					s += ::SVGDrawLine(x+1, y+1, x+1+1, y+1, 1, black, false);
+				}
+				
+				if (map->GetTerrainType(x, y) != map->GetTerrainType(x+1, y))
+				{
+					s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+				}
+				
+				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y+1))
+				{
+					s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+				}
 			}
 		}
 	}
+	return s;
+}
+
+std::string MapEnvironment::SVGDraw(const xyLoc &l)
+{
+	std::string s;
+	if (map->GetTerrainType(l.x, l.y) == kGround)
+	{
+		recColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+		s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
+		//stroke-width="1" stroke="pink" />
+	}
+	return s;
+}
+
+std::string MapEnvironment::SVGFrameRect(int left, int top, int right, int bottom, int width)
+{
+	std::string s;
+
+	recColor c;// = {0.5, 0.5, 0};
+	GLfloat t;
+	GetColor(c.r, c.g, c.b, t);
+	s += ::SVGFrameRect(left+1, top+1, right-left+1, bottom-top+1, width, c);
+
 	return s;
 }
 
@@ -732,16 +835,21 @@ std::string MapEnvironment::SVGLabelState(const xyLoc &, const char *str, double
 	return s;
 }
 
-std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2) const
+std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2, int width) const
 {
 	//<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,255,255);stroke-width:1" />
-	std::string s;
-	s = "<line x1 = \"" + std::to_string(p1.x) + "\" ";
-	s +=      "y1 = \"" + std::to_string(p1.y) + "\" ";
-	s +=      "x2 = \"" + std::to_string(p2.x) + "\" ";
-	s +=      "y2 = \"" + std::to_string(p2.y) + "\" ";
-	s += "style=\"stroke:rgb(255,255,255);stroke-width:1\" />";
-	return s;
+	//std::string s;
+	recColor c;// = {0.5, 0.5, 0};
+	GLfloat t;
+	GetColor(c.r, c.g, c.b, t);
+	return ::SVGDrawLine(p1.x+1, p1.y+1, p2.x+1, p2.y+1, width, c);
+
+//	s = "<line x1 = \"" + std::to_string(p1.x) + "\" ";
+//	s +=      "y1 = \"" + std::to_string(p1.y) + "\" ";
+//	s +=      "x2 = \"" + std::to_string(p2.x) + "\" ";
+//	s +=      "y2 = \"" + std::to_string(p2.y) + "\" ";
+//	s += "style=\"stroke:"+SVGGetRGB(c)+";stroke-width:"+std::to_string(width)+"\" />";
+//	return s;
 }
 
 

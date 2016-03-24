@@ -47,8 +47,8 @@ public:
 	~TopSpinGraph();
 	void GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const;
 	void GetActions(const graphState &stateID, std::vector<graphMove> &actions) const;
-	bool GoalTest(const graphState &state, const graphState &goal);
-	virtual bool GoalTest(graphState &) { assert(false); return false; }
+	bool GoalTest(const graphState &state, const graphState &goal) const;
+	virtual bool GoalTest(graphState &) const { assert(false); return false; }
 	
 	graphState Dual(graphState s);
 	graphState GetState(const std::vector<int> &configuration) const;

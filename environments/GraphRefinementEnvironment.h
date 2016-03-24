@@ -26,8 +26,8 @@ public:
 	
 	virtual void GetSuccessors(const graphState &stateID, std::vector<graphState> &neighbors) const;
 	virtual void GetActions(const graphState &stateID, std::vector<graphMove> &actions) const;
-	virtual bool GoalTest(const graphState &state, const graphState &goal);
-	virtual bool GoalTest(const graphState &) { assert(false); return false; }
+	virtual bool GoalTest(const graphState &state, const graphState &goal) const;
+	virtual bool GoalTest(const graphState &) const { assert(false); return false; }
 	virtual void SetUseAbstractGoal(bool use, int level) { useAbstractGoal = use; abstractGoalLevel = level; }
 	//void SetPlanningCorridor(std::vector<graphState> &corridor, int level);
 	void SetPlanningCorridor(std::vector<graphState> &corridor, int level, int start = 0);

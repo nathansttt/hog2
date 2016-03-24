@@ -134,7 +134,7 @@ double Map2DConstrainedEnvironment::HCost(const xytLoc &node1, const xytLoc &nod
 	return max(res1, res2);
 }
 
-bool Map2DConstrainedEnvironment::GoalTest(const xytLoc &node, const xytLoc &goal)
+bool Map2DConstrainedEnvironment::GoalTest(const xytLoc &node, const xytLoc &goal) const
 {
 	return (node.l == goal.l && node.t >= goal.t);
 }

@@ -126,14 +126,14 @@ public:
 	
 	virtual double HCost(const xySpeedHeading &node1, const xySpeedHeading &node2) const;
 	virtual double HCost(const xySpeedHeading &)  const { assert(false); return 0; }
-	virtual double GCost(const xySpeedHeading &node1, const xySpeedHeading &node2);
-	virtual double GCost(const xySpeedHeading &node1, const deltaSpeedHeading &act);
+	virtual double GCost(const xySpeedHeading &node1, const xySpeedHeading &node2) const;
+	virtual double GCost(const xySpeedHeading &node1, const deltaSpeedHeading &act) const;
 
 	int GetNumAngles();
 	
 	void SetGoalTest(GoalTester *t) {test = t;}
-	bool GoalTest(const xySpeedHeading &node, const xySpeedHeading &goal);
-	bool GoalTest(const xySpeedHeading &) { assert(false); return false; }
+	bool GoalTest(const xySpeedHeading &node, const xySpeedHeading &goal) const;
+	bool GoalTest(const xySpeedHeading &) const { assert(false); return false; }
 	uint64_t GetStateHash(const xySpeedHeading &node) const;
 	uint64_t GetActionHash(deltaSpeedHeading act) const;
 	virtual void OpenGLDraw() const;

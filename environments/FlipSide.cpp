@@ -106,12 +106,12 @@ double FlipSide::HCost(const FlipSideState &state1, const FlipSideState &state2)
 	return ceil(hval/6);
 }
 
-double FlipSide::GCost(const FlipSideState &, const FlipSideState &)
+double FlipSide::GCost(const FlipSideState &, const FlipSideState &) const
 {
 	return 1;
 }
 
-bool FlipSide::GoalTest(const FlipSideState &state, const FlipSideState &goal)
+bool FlipSide::GoalTest(const FlipSideState &state, const FlipSideState &goal) const
 {
 	return (state == goal);
 }

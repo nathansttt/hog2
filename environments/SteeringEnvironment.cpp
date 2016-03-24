@@ -95,11 +95,11 @@ bool SteeringEnvironment::InvertAction(steeringAction &a) const
 double SteeringEnvironment::HCost(const steeringState &node1, const steeringState &node2) const
 { if (node1 == node2) return 0; return 1; }
 
-double SteeringEnvironment::GCost(const steeringState &, const steeringState &)
+double SteeringEnvironment::GCost(const steeringState &, const steeringState &) const
 { return 1; }
-double SteeringEnvironment::GCost(const steeringState &, const steeringAction &)
+double SteeringEnvironment::GCost(const steeringState &, const steeringAction &) const
 { return 1; }
-bool SteeringEnvironment::GoalTest(const steeringState &node, const steeringState &goal)
+bool SteeringEnvironment::GoalTest(const steeringState &node, const steeringState &goal) const
 { return node == goal; }
 
 

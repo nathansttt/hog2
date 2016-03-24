@@ -151,14 +151,14 @@ public:
 	/** Heuristic value between two arbitrary nodes. **/
 	virtual double HCost(const FlingBoard &node1, const FlingBoard &node2) const { return 0; }
 	
-	virtual double GCost(const FlingBoard &node1, const FlingBoard &node2) { return 1; }
-	virtual double GCost(const FlingBoard &node, const FlingMove &act) { return 1; }
+	virtual double GCost(const FlingBoard &node1, const FlingBoard &node2) const { return 1; }
+	virtual double GCost(const FlingBoard &node, const FlingMove &act) const { return 1; }
 	
 	void SetGoalPanda(int which);
 	void ClearGoalPanda();
 	void SetGoalLoc(int val);
 	void ClearGoalLoc();
-	virtual bool GoalTest(const FlingBoard &node, const FlingBoard &goal);
+	virtual bool GoalTest(const FlingBoard &node, const FlingBoard &goal) const;
 	
 	virtual uint64_t GetStateHash(const FlingBoard &node) const;
 	virtual void GetStateFromHash(uint64_t parent, FlingBoard &s) const;

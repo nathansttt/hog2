@@ -56,12 +56,12 @@ public:
 	double Memory_Free_HCost(const BurnedPancakePuzzleState &state1, const std::vector<int> &goal_locs) const;
 	double HCost(const BurnedPancakePuzzleState &state1) const;
 
-	double GCost(const BurnedPancakePuzzleState &, const BurnedPancakePuzzleState &) {return 1.0;}
-	double GCost(const BurnedPancakePuzzleState &, const unsigned &) { return 1.0; }
+	double GCost(const BurnedPancakePuzzleState &, const BurnedPancakePuzzleState &) const {return 1.0;}
+	double GCost(const BurnedPancakePuzzleState &, const unsigned &) const { return 1.0; }
 
-	bool GoalTest(const BurnedPancakePuzzleState &state, const BurnedPancakePuzzleState &goal);
+	bool GoalTest(const BurnedPancakePuzzleState &state, const BurnedPancakePuzzleState &goal) const;
 
-	bool GoalTest(const BurnedPancakePuzzleState &s);
+	bool GoalTest(const BurnedPancakePuzzleState &s) const;
 
 	uint64_t GetActionHash(unsigned act) const;
 	void StoreGoal(BurnedPancakePuzzleState &); // stores the locations for the given goal state

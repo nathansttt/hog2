@@ -46,8 +46,10 @@ public:
 	uint64_t GetNodesTouched() const;
 	uint64_t GetNumOpenItems() const { return openClosedList.OpenSize(); }
 	void SetWeight(double val) { weight = val; }
+	void SetJumpLimit(uint32_t val) { jumpLimit = val; }
 	void LogFinalStats(StatCollection *stats);
 	void OpenGLDraw() const;
+	std::string SVGDraw();
 	void OpenGLDraw(const MapEnvironment *env) const;
 private:
 	void GetJPSSuccessors(const xyLocParent &s, const xyLoc &goal);
@@ -60,6 +62,7 @@ private:
 	xyLoc to;
 	uint64_t nodesExpanded, nodesTouched;
 	double weight;
+	uint32_t jumpLimit;
 };
 
 #endif /* JPS_h */

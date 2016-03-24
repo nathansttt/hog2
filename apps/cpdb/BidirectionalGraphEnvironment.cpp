@@ -150,14 +150,14 @@ double BidirectionalGraphEnvironment::HCost(const graphStatePair &state1, const 
 	return 1;
 }
 
-double BidirectionalGraphEnvironment::GCost(const graphStatePair &, const graphMovePair &move)
+double BidirectionalGraphEnvironment::GCost(const graphStatePair &, const graphMovePair &move) const
 {
 	edge *e = g->FindEdge(move.from, move.to);
 	assert(e);
 	return e->GetWeight();
 }
 
-double BidirectionalGraphEnvironment::GCost(const graphStatePair &state1, const graphStatePair &state2)
+double BidirectionalGraphEnvironment::GCost(const graphStatePair &state1, const graphStatePair &state2) const
 {
 	edge *e = 0;
 	if (state1.goal == state2.goal)
@@ -172,7 +172,7 @@ double BidirectionalGraphEnvironment::GCost(const graphStatePair &state1, const 
 	return e->GetWeight();
 }
 
-bool BidirectionalGraphEnvironment::GoalTest(const graphStatePair &state, const graphStatePair &)
+bool BidirectionalGraphEnvironment::GoalTest(const graphStatePair &state, const graphStatePair &) const
 {
 	return (state.start == state.goal);	
 }

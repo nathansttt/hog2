@@ -18,6 +18,8 @@ struct MMCompare {
 	{
 		double p1 = std::max(i1.g+i1.h, i1.g*2);
 		double p2 = std::max(i2.g+i2.h, i2.g*2);
+//		double p1 = i1.g+i1.h;
+//		double p2 = i2.g+i2.h;
 		if (fequal(p1, p2))
 		{
 			//return (fgreater(i1.g, i2.g)); // low g-cost over high

@@ -96,6 +96,7 @@ public:
 	int GetMemoryUsage();
 	
 	bool GetClosedListGCost(const state &val, double &gCost) const;
+	bool GetClosedItem(const state &s, AStarOpenClosedData<state> &);
 	unsigned int GetNumOpenItems() { return openClosedList.OpenSize(); }
 	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return openClosedList.Lookat(openClosedList.GetOpenItem(which)); }
 	inline const int GetNumItems() { return openClosedList.size(); }
@@ -570,7 +571,7 @@ int TemplateAStar<state, action,environment>::GetMemoryUsage()
  * @param val The state to lookup in the closed list
  * @gCost The g-cost of the node in the closed list
  * @return success Whether we found the value or not
- * more states
+ * the states
  */
 template <class state, class action, class environment>
 bool TemplateAStar<state, action,environment>::GetClosedListGCost(const state &val, double &gCost) const
@@ -584,6 +585,21 @@ bool TemplateAStar<state, action,environment>::GetClosedListGCost(const state &v
 	}
 	return false;
 }
+
+template <class state, class action, class environment>
+bool TemplateAStar<state, action,environment>::GetClosedItem(const state &s, AStarOpenClosedData<state> &result)
+{
+	uint64_t theID;
+	dataLocation loc = openClosedList.Lookup(env->GetStateHash(s), theID);
+	if (loc == kClosedList)
+	{
+		result = openClosedList.Lookat(theID);
+		return true;
+	}
+	return false;
+
+}
+
 
 /**
  * Draw the open/closed list

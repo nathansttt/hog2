@@ -215,9 +215,9 @@ public:
 	action3d GetAction(const state3d &s1, const state3d &s2) const { return action3d(); }
 	/** Heuristic value between two arbitrary nodes. **/
 	double HCost(const state3d &node1, const state3d &node2) const;
-	double GCost(const state3d &node1, const state3d &node2);
-	double GCost(const state3d &node, const action3d &act);
-	bool GoalTest(const state3d &node, const state3d &goal);
+	double GCost(const state3d &node1, const state3d &node2) const;
+	double GCost(const state3d &node, const action3d &act) const;
+	bool GoalTest(const state3d &node, const state3d &goal) const;
 	
 	uint64_t GetStateHash(const state3d &node) const;
 	uint64_t GetActionHash(action3d act) const;
