@@ -23,6 +23,8 @@ GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 {
 	m = 0;
  	directed = false;
+	drawEdgeCosts = false;
+	drawNodeLabels = false;
 }
 
 GraphEnvironment::GraphEnvironment(Map *_m, Graph *_g, GraphHeuristic *gh)
@@ -30,6 +32,8 @@ GraphEnvironment::GraphEnvironment(Map *_m, Graph *_g, GraphHeuristic *gh)
 {
 	m = _m;
  	directed = false;
+	drawEdgeCosts = false;
+	drawNodeLabels = false;
 }
 
 //GraphEnvironment::GraphEnvironment(Map *m)
@@ -198,9 +202,9 @@ void GraphEnvironment::OpenGLDraw() const
 		return;
 	}
 	
-	// Black background behind map
+	// Hittable background behind graph
 	glBegin(GL_TRIANGLE_FAN);
-	glColor3f(0, 0, 0);
+	glColor4f(0, 0, 0, 0.01);
 	glVertex3f(-1, -1, 0.01);
 	glVertex3f(1, -1, 0.01);
 	glVertex3f(1, 1, 0.01);
@@ -218,7 +222,11 @@ void GraphEnvironment::OpenGLDraw() const
 		node *n;
 		n = g->GetNode(e->getFrom());
 		
-		glColor3f(0, 1, 0);
+		{
+			GLfloat r, g, b, t;
+			GetColor(r, g, b, t);
+			glColor4f(r, g, b, t);
+		}
 		if (e->getMarked())
 		{
 			glColor3f(1, 1, 1);
@@ -242,6 +250,48 @@ void GraphEnvironment::OpenGLDraw() const
 		glVertex3f(x, y, z+off);
 	}
 	glEnd();
+
+	char label[5];
+	if (drawEdgeCosts)
+	{
+		glLineWidth(3.0);
+		glColor4f(0.0, 0.0, 0.0, 1.0);
+		edge_iterator ei = g->getEdgeIter();
+		for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+		{
+			sprintf(label, "%1.2f", e->GetWeight());
+			node *n;
+			n = g->GetNode(e->getFrom());
+			
+			GLdouble x, y, z;
+			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+			
+			n = g->GetNode(e->getTo());
+			x += n->GetLabelF(GraphSearchConstants::kXCoordinate);
+			y += n->GetLabelF(GraphSearchConstants::kYCoordinate);
+			z += n->GetLabelF(GraphSearchConstants::kZCoordinate);
+			
+			DrawText(x/2, y/2, z/2-0.003, 0.2, label);
+		}
+		glLineWidth(1.0);
+	}
+	if (drawNodeLabels)
+	{
+		glLineWidth(3.0);
+		glColor4f(0.0, 0.0, 0.0, 1.0);
+		for (int x = 0; x < g->GetNumNodes(); x++)
+		{
+			node *n = g->GetNode(x);
+			DrawTextCentered(n->GetLabelF(GraphSearchConstants::kXCoordinate),
+							 n->GetLabelF(GraphSearchConstants::kYCoordinate),
+							 n->GetLabelF(GraphSearchConstants::kZCoordinate)-0.003,
+							 0.2, n->GetName());
+		}
+		glLineWidth(1.0);
+	}
+	
 }
 
 void GraphEnvironment::OpenGLDraw(const graphState &s) const
@@ -267,50 +317,55 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 		glEnd();
 	}
 	else {
+
+
+		{
+			GLfloat r, gr, b, t;
+			GetColor(r, gr, b, t);
+			glColor4f(r, gr, b, t);
+
+			
+			node *n = g->GetNode(s);
+			GLdouble x, y, z, rad;
+			x = (GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate);
+			y = (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate);
+			z = (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate);
+			rad = (GLdouble)0.4/(g->GetNumNodes());
+			DrawSquare(x, y, z-0.002, rad);
+			glLineWidth(2.0);
+//			if (r+gr+b < 1.5)
+//				glColor4f(1, 1, 1, t);
+//			else
+			glColor4f(0, 0, 0, t);
+			OutlineRect(x-rad, y-rad, x+rad, y+rad, z-0.0021);
+			glLineWidth(1.0);
+		}
+		//(GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
+
+//		glLineWidth(5.0);
 //		glBegin(GL_LINES);
-//		glNormal3f(0, 1, 0);
-
-		node *n = g->GetNode(s);
-//		DrawSphere((GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate),
-//				   (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate),
-//				   (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate),
-//				   (GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
-		{
-			GLfloat r, g, b, t;
-			GetColor(r, g, b, t);
-			glColor4f(r, g, b, t);
-		}
-		glLineWidth(5.0);
-		glBegin(GL_LINES);
-		
-		edge_iterator ei = n->getEdgeIter();
-		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
-		{
-			//int x, y;
-			//double offsetx, offsety;
-			node *n;
-			n = g->GetNode(e->getFrom());
-			
-//			glColor3f(0, 0, 1);
-//			if (e->getMarked())
-//				glColor3f(1, 0, 0);
-			
-			GLdouble x, y, z;
-			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
-			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
-			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
-			glVertex3f(x, y, z);
-			
-			n = g->GetNode(e->getTo());
-			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
-			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
-			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
-			
-			glVertex3f(x, y, z);
-		}
-		glEnd();
-
-		glLineWidth(1.0);
+//		
+//		edge_iterator ei = n->getEdgeIter();
+//		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
+//		{
+//			node *n;
+//			n = g->GetNode(e->getFrom());
+//			
+//			GLdouble x, y, z;
+//			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+//			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+//			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+//			glVertex3f(x, y, z);
+//			
+//			n = g->GetNode(e->getTo());
+//			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+//			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+//			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+//			
+//			glVertex3f(x, y, z);
+//		}
+//		glEnd();
+//		glLineWidth(1.0);
 
 	}
 }
@@ -319,6 +374,35 @@ void GraphEnvironment::OpenGLDraw(const graphState &, const graphMove &) const
 {
 	// if we want to draw a set of moves we use this to do so
 }
+
+void GraphEnvironment::GLDrawLine(const graphState &from, const graphState &to) const
+{
+	{
+		GLfloat r, g, b, t;
+		GetColor(r, g, b, t);
+		glColor4f(r, g, b, t);
+	}
+
+	
+	glBegin(GL_LINES);
+	
+	GLdouble x, y, z;
+	
+	node *n = g->GetNode(from);
+	x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+	y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+	z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+	glVertex3f(x, y, z);
+	
+	n = g->GetNode(to);
+	x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+	y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+	z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+	glVertex3f(x, y, z);
+
+	glEnd();
+}
+
 
 namespace GraphSearchConstants {
 

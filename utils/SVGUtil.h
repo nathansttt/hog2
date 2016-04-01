@@ -19,4 +19,5 @@ std::string SVGDrawRect(int x, int y, int width, int height, recColor c);
 std::string SVGDrawCircle(double x, double y, double radius, recColor c);
 std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, recColor c, bool center = true);
 std::string SVGDrawText(int x1, int y1, const char *txt, recColor c, int size);
+
 #endif /* SVGUtil_hpp */

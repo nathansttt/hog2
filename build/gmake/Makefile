@@ -47,6 +47,7 @@ PROJECTS = \
   apps/roads \
   apps/canonicalGrids \
   apps/delta \
+  demos/DFID \
 #  apps/multiagent \
 #  apps/measure_inconsistency 
 #  simulation \
@@ -97,6 +98,7 @@ PROJECTS_ALL = \
   apps/delta \
   apps/pancake \
   apps/multiagent \
+  demos/DFID \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice

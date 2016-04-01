@@ -48,6 +48,11 @@ Graph::Graph()
 Graph::~Graph()
 {
 	//	cout << "destructor got called" << endl;
+	Reset();
+}
+
+void Graph::Reset()
+{
 	node_iterator ni;
 	edge_iterator ei;
 	ni = getNodeIter();
@@ -74,6 +79,8 @@ Graph::~Graph()
 		} else
 			break;
 	}
+	_nodes.clear();
+	_edges.clear();
 }
 
 graph_object *Graph::Clone() const

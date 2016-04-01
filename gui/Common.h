@@ -312,7 +312,7 @@ void SaveScreenshot(unsigned long windowID, const char *filename);
 void SetZoom(int windowID, float amount);
 
 void submitTextToBuffer(const char *val);
-void appendTextToBuffer(char *);
+void appendTextToBuffer(const char *);
 pRecContext getCurrentContext();
 pRecContext GetContext(unsigned long windowID);
 void updateModelView(pRecContext pContextInfo, int currPort);

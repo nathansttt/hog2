@@ -14,7 +14,6 @@
 #include <iostream>
 #include <string.h>
 #include "Map.h"
-#include "MapAbstraction.h"
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "ReservationProvider.h"

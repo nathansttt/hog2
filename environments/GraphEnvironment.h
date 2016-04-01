@@ -307,6 +307,7 @@ public:
 	virtual void OpenGLDraw(const graphState &s) const;
 	virtual void OpenGLDraw(const graphState &s, const graphMove &gm) const;
 	virtual void OpenGLDraw(const graphState &s, const graphState&, float) const { OpenGLDraw(s); }
+	virtual void GLDrawLine(const graphState &x, const graphState &y) const;
 
 	Graph *GetGraph() { return g; };
 
@@ -322,12 +323,15 @@ public:
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for GraphEnvironment\n");
 		exit(1); return false;
 	}
-
+	void SetDrawEdgeCosts(bool val) { drawEdgeCosts = val; }
+	void SetDrawNodeLabels(bool val) { drawNodeLabels = val; }
 protected:
 	bool directed;
 	Map *m;
 	Graph *g;
 	GraphHeuristic *h;
+	bool drawEdgeCosts;
+	bool drawNodeLabels;
 };
 
 class AbstractionGraphEnvironment: public GraphEnvironment {

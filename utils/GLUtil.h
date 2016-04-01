@@ -142,6 +142,7 @@ void DrawCylinder(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat innerRad, GLfloat 
 void OutlineRect(GLdouble left, GLdouble top, GLdouble right, GLdouble bottom, double zz);
 
 void DrawText(double x, double y, double z, double scale, const char *res);
+void DrawTextCentered(double x, double y, double z, double scale, const char *res);
 
 
 namespace colors

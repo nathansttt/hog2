@@ -781,12 +781,13 @@ void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius)
 		}
 	}
 	glTranslatef(-_x, -_y, -_z);
+	glDisable(GL_LIGHTING);
 }	
 
 void DrawText(double x, double y, double z, double scale, const char *str)
 {
 	glPushMatrix();
-	
+	//glEnable(GL_LINE_SMOOTH);
 	glTranslatef(x, y, z);
 	glScalef(scale/300, scale/300.0, 1);
 	glRotatef(180, 0.0, 0.0, 1.0);
@@ -794,6 +795,29 @@ void DrawText(double x, double y, double z, double scale, const char *str)
 	glDisable(GL_LIGHTING);
 	for (int which = 0; which < strlen(str); which++)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
+	glEnable(GL_LIGHTING);
+	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
+	glPopMatrix();
+}
+
+void DrawTextCentered(double x, double y, double z, double scale, const char *str)
+{
+	glPushMatrix();
+	
+	int width = 0;
+	for (int which = 0; which < strlen(str); which++)
+		width += glutStrokeWidth(GLUT_STROKE_ROMAN, str[which]);
+	
+	glTranslatef(x, y, z);
+	glScalef(scale/300, scale/300.0, 1);
+	glRotatef(180, 0.0, 0.0, 1.0);
+	glRotatef(180, 0.0, 1.0, 0.0);
+	glDisable(GL_LIGHTING);
+	glTranslatef(-width/2, -4.0/scale, 0);
+	
+	for (int which = 0; which < strlen(str); which++)
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
+
 	glEnable(GL_LIGHTING);
 	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
 	glPopMatrix();

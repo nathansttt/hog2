@@ -115,14 +115,14 @@ void Voxels::ApplyAction(voxelState &s, voxelAction a) const
 
 bool Voxels::InvertAction(voxelAction &a) const
 {
-	
+	return false;
 }
 
 
 /** Heuristic value between two arbitrary nodes. **/
 double Voxels::HCost(const voxelState &node1, const voxelState &node2) const
 {
-	
+	return 0;
 }
 
 double Voxels::GCost(const voxelState &node1, const voxelState &node2) const

@@ -596,7 +596,7 @@ void drawCStringGL (char * cstrOut, GLuint fontList)
 
 TextBox *myTextBox = 0;
 
-void appendTextToBuffer(char *tempStr)
+void appendTextToBuffer(const char *tempStr)
 {
 	int ind = int(strlen(pContextInfo->message));
 	pContextInfo->message[ind] = ' ';
@@ -628,6 +628,7 @@ void drawGL (pRecContext pContextInfo)
 	if (!pContextInfo)
 	 return;
 
+	
 	// clear our drawable
 	glClear(GL_COLOR_BUFFER_BIT);
 	
@@ -665,6 +666,11 @@ void drawGL (pRecContext pContextInfo)
 				glEnd();
 			}
 		}
+	}
+	if (myTextBox)
+	{
+		myTextBox->stepTime(0.1);
+		myTextBox->draw();
 	}
 	glutSwapBuffers();
 

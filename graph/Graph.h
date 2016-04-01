@@ -78,6 +78,10 @@ public:
 	~Graph();
 	graph_object *Clone() const; // clones just the nodes
 	Graph *cloneAll() const;     // clones everything
+	void Reset();
+
+	void Save(const char *file);
+	void Load(const char *file);
 	
 	void Export(const char *fname);
 	

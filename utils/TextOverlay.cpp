@@ -105,8 +105,10 @@ void TextOverlay::OpenGLDraw(int window)
     glColor4f(0.0, 0.0, 0.0, 0.5);
     glVertex3f(-1-0.01, -1-0.07, 0.0);
     glVertex3f( 1+0.01, -1-0.07, 0.0);
-    glVertex3f( 1+0.01, -1+(text.size()-index-1)*0.06+0.01, 0.0);
-    glVertex3f(-1-0.01, -1+(text.size()-index-1)*0.06+0.01, 0.0);
+//    glVertex3f( 1+0.01, -1+(text.size()-index-1)*0.06+0.01, 0.0);
+//    glVertex3f(-1-0.01, -1+(text.size()-index-1)*0.06+0.01, 0.0);
+	glVertex3f( 1+0.01, -1+(maxNumLines-index-1)*0.06+0.01, 0.0);
+	glVertex3f(-1-0.01, -1+(maxNumLines-index-1)*0.06+0.01, 0.0);
     glEnd();
     
 	int lineOffset = 0;

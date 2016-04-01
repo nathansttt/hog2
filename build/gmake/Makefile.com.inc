@@ -41,9 +41,9 @@ else # not darwin
 
 # if Linux need some other pthread call 
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
-COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread #--stdlib=libstdc++ # -lXi -lXmu
+COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread #--stdlib=libstdc++ # -lXi -lXmu
 else
-COMMON_LNFLAGS += -Lapps/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread #--stdlib=libstdc++ # -lXi -lXmu 
+COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread #--stdlib=libstdc++ # -lXi -lXmu 
 endif
 
 ifeq ("$(OPENGL)", "STUB")
