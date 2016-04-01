@@ -48,6 +48,8 @@ PROJECTS = \
   apps/canonicalGrids \
   apps/delta \
   demos/DFID \
+  demos/dijkstra \
+  demos/astar \
 #  apps/multiagent \
 #  apps/measure_inconsistency 
 #  simulation \
@@ -99,6 +101,8 @@ PROJECTS_ALL = \
   apps/pancake \
   apps/multiagent \
   demos/DFID \
+  demos/dijkstra \
+  demos/astar \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice

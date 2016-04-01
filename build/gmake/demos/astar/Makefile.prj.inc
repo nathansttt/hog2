@@ -5,7 +5,7 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/apps/sample/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = DFID
+NAME = astar
 DBG_NAME = $(NAME)
 REL_NAME = $(NAME)
 
@@ -65,4 +65,4 @@ endif
 default : all
 
 SRC_CPP = \
-	demos/DFID/Driver.cpp \
+	demos/astar/Driver.cpp \
