@@ -771,15 +771,114 @@ MNPuzzleState MNPuzzle::Generate_Random_Puzzle(unsigned num_cols, unsigned num_r
 
 void MNPuzzle::GetStateFromHash(MNPuzzleState &s, uint64_t hash) const
 {
-	PermutationPuzzleEnvironment<MNPuzzleState,slideDir>::GetStateFromHash(s, hash);
-	for (unsigned int x = 0; x < s.puzzle.size(); x++)
+	s.puzzle.resize(width*height);
+	int count = s.puzzle.size();
+	int countm2 = s.puzzle.size()-2;
+	uint64_t hashVal = hash;
+	std::vector<int> dual(s.puzzle.size()-2);
+	
+	// unrank the locations of the first 10 tiles
+	int numEntriesLeft = count-countm2+1;
+	for (int x = countm2-1; x >= 0; x--)
 	{
-		if (s.puzzle[x] == 0)
+		dual[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < countm2; y++)
 		{
-			s.blank = x;
-			return;
+			if (dual[y] >= dual[x])
+				dual[y]++;
 		}
 	}
+	// clear puzzle locations
+	for (int x = 0; x < count; x++)
+	{
+		s.puzzle[x] = -1;
+	}
+	// revert locations of tiles into positions in the puzzle
+	for (int x = 0; x < countm2; x++)
+	{
+		s.puzzle[dual[x]] = x;
+	}
+	// reset the cache of the blanks location
+	s.blank = dual[0];
+	
+	// now find the two -1's and assign them
+	// to ensure the right parity
+	int x = 0;
+	int loc1 = -1, loc2 = -1;
+	for (; x < 12; x++)
+	{
+		if (s.puzzle[x] == -1)
+		{
+			loc1 = x;
+			x++;
+			break;
+		}
+	}
+	for (; x < 12; x++)
+	{
+		if (s.puzzle[x] == -1)
+		{
+			loc2 = x;
+			break;
+		}
+	}
+	assert(loc1 != -1 && loc2 != -1);
+	// Choose an arbitrary ordering and then
+	// check the parity. If it's wrong, we just
+	// swap them and are guaranteed to get the right
+	// parity.
+	s.puzzle[loc1] = countm2;
+	s.puzzle[loc2] = countm2+1;
+	if (GetParity(s) == 1)
+	{
+		s.puzzle[loc1] = countm2+1;
+		s.puzzle[loc2] = countm2;
+	}
+}
+
+uint64_t MNPuzzle::GetStateHash(const MNPuzzleState &s) const
+{
+	std::vector<int> locs(s.puzzle.size()-2); // We only rank n-2 of n items; last two are fixed by the parity
+	std::vector<int> dual(s.puzzle.size());
+	
+	// build the representation containing the item locations
+	for (unsigned int x = 0; x < s.puzzle.size(); x++)
+	{
+		dual[s.puzzle[x]] = x;
+	}
+	// build an array with the locations of the first 10 items
+	for (int x = 0; x < s.puzzle.size()-2; x++)
+	{
+		locs[x] = dual[x];
+	}
+	
+	uint32_t hashVal = 0;
+	int numEntriesLeft = s.puzzle.size();
+	
+	// compute the lexographical ranking of the locations
+	// of the first 10 tiles
+	for (unsigned int x = 0; x < s.puzzle.size()-2; x++)
+	{
+		hashVal += locs[x]*Factorial(numEntriesLeft-1)/2;
+		numEntriesLeft--;
+		
+		// decrement locations of remaining items
+		// to keep the numbering compact
+		for (unsigned y = x; y < s.puzzle.size()-2; y++)
+		{
+			if (locs[y] > locs[x])
+				locs[y]--;
+		}
+	}
+	return hashVal;
+}
+
+uint64_t MNPuzzle::GetMaxStateHash() const
+{
+	int val = width*height;
+	return Factorial(val)/2;
 }
 
 

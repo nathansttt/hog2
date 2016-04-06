@@ -25,6 +25,7 @@ GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
  	directed = false;
 	drawEdgeCosts = false;
 	drawNodeLabels = false;
+	nodeScale = 1.0;
 }
 
 GraphEnvironment::GraphEnvironment(Map *_m, Graph *_g, GraphHeuristic *gh)
@@ -34,6 +35,7 @@ GraphEnvironment::GraphEnvironment(Map *_m, Graph *_g, GraphHeuristic *gh)
  	directed = false;
 	drawEdgeCosts = false;
 	drawNodeLabels = false;
+	nodeScale = 1.0;
 }
 
 //GraphEnvironment::GraphEnvironment(Map *m)
@@ -330,7 +332,8 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 			x = (GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate);
 			y = (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate);
 			z = (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate);
-			rad = (GLdouble)0.4/(g->GetNumNodes());
+			//rad = 20*(GLdouble)0.4/(g->GetNumNodes());
+			rad = nodeScale*(GLdouble)0.4/(g->GetNumNodes());
 			DrawSquare(x, y, z-0.002, rad);
 			glLineWidth(2.0);
 //			if (r+gr+b < 1.5)

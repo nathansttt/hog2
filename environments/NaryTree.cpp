@@ -40,6 +40,7 @@ void NaryTree::GetSuccessors(const NaryState &nodeID, std::vector<NaryState> &ne
 
 void NaryTree::GetActions(const NaryState &nodeID, std::vector<NaryAction> &actions) const
 {
+	assert(false); // code not tested -
 	actions.resize(0);
 	if (GetDepth(nodeID) >= d)
 		return;
@@ -56,6 +57,8 @@ NaryAction NaryTree::GetAction(const NaryState &, const NaryState &) const
 
 void NaryTree::ApplyAction(NaryState &s, NaryAction a) const
 {
+	// code not tested - should probably not be adding 1
+	assert(false);
 	if (a > 0)
 		s = s*b+a+1;
 	else {

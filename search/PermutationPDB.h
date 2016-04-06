@@ -49,6 +49,7 @@ PermutationPDB<state, action, environment>::PermutationPDB(environment *e, const
 :PDBHeuristic<state, action, environment, state>(e), distinct(distincts), puzzleSize(s.puzzle.size()),
 dualCache(maxThreads), locsCache(maxThreads), example(s)
 {
+	this->SetGoal(s);
 	pdbSize = 1;
 	for (int x = (int)s.puzzle.size(); x > s.puzzle.size()-distincts.size(); x--)
 	{

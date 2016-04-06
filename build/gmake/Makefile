@@ -50,6 +50,7 @@ PROJECTS = \
   demos/DFID \
   demos/dijkstra \
   demos/astar \
+  demos/idastar \
 #  apps/multiagent \
 #  apps/measure_inconsistency 
 #  simulation \
@@ -103,6 +104,7 @@ PROJECTS_ALL = \
   demos/DFID \
   demos/dijkstra \
   demos/astar \
+  demos/idastar \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice

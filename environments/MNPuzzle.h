@@ -188,8 +188,10 @@ public:
 	std::vector<slideDir> Get_Op_Order(){return ops_in_order;}
 
 	static MNPuzzleState Generate_Random_Puzzle(unsigned num_cols, unsigned num_rows);
-	virtual void GetStateFromHash(MNPuzzleState &s, uint64_t hash) const;
 
+	virtual void GetStateFromHash(MNPuzzleState &s, uint64_t hash) const;
+	uint64_t GetStateHash(const MNPuzzleState &s) const;
+	uint64_t GetMaxStateHash() const;
 	
 	bool State_Check(const MNPuzzleState &to_check);
 

@@ -122,9 +122,10 @@ namespace PermutationPuzzle {
 		double HCost(const state &s, int treeNode,
 					 std::vector<int> &c1, std::vector<int> &c2) const;
 		virtual double DefaultH(const state &s) const { return 0; }
-		uint64_t Factorial(int val) const;
 		void buildCaches() const;
 		
+	protected:
+		uint64_t Factorial(int val) const;
 		uint64_t nUpperk(int n, int k) const;
 		
 		

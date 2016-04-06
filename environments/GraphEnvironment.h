@@ -325,6 +325,7 @@ public:
 	}
 	void SetDrawEdgeCosts(bool val) { drawEdgeCosts = val; }
 	void SetDrawNodeLabels(bool val) { drawNodeLabels = val; }
+	void SetNodeScale(double v) { nodeScale = v; }
 protected:
 	bool directed;
 	Map *m;
@@ -332,6 +333,7 @@ protected:
 	GraphHeuristic *h;
 	bool drawEdgeCosts;
 	bool drawNodeLabels;
+	double nodeScale;
 };
 
 class AbstractionGraphEnvironment: public GraphEnvironment {
