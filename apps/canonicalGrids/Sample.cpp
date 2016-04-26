@@ -74,7 +74,7 @@ CanonicalGrid::CanonicalGrid *grid;
 
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
 TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> a2;
-JPS jps;
+JPS *jps;
 
 MapEnvironment *ma1 = 0;
 CanonicalGrid::CanonicalGrid *ma2 = 0;
@@ -102,6 +102,8 @@ void CreateSimulation(int id)
 		//ht_chantry.arl.map // den012d
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz100d.map");
 		map = new Map("/Users/nathanst/hog2/maps/dao/orz101d.map");
+		//map = new Map("/Users/nathanst/hog2/maps/dao/brc502d.map");
+		
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
@@ -158,6 +160,8 @@ void CreateSimulation(int id)
 		ma2 = new CanonicalGrid::CanonicalGrid(unitSims[id]->GetEnvironment()->GetMap());
 		ma2->SetEightConnected();
 	}
+	jps = new JPS(map);
+	jps->SetJumpLimit(0);
 }
 
 /**
@@ -532,7 +536,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		svgFile << "</svg>";
 		svgFile.close();
 	}
-	if (1) // canonical open gl
+	if (0) // canonical open gl
 	{
 		CanonicalGrid::xyLoc gLoc(px1, py1);
 		std::deque<CanonicalGrid::xyLoc> queue;
@@ -611,7 +615,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		svgFile << ma1->SVGDraw();
 		svgFile << DrawCanonicalOrdering(true);
 
-		svgFile << jps.SVGDraw();
+		svgFile << jps->SVGDraw();
 
 		svgFile << "</svg>";
 		svgFile.close();
@@ -643,7 +647,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				{
 					if (a1.DoSingleSearchStep(path))
 					{
-						printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
+						printf("A* Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
 							   (int)path.size(), ma1->GetPathLength(path), a1.GetNodesExpanded(),
 							   a1.GetNumOpenItems());
 						runningSearch1 = false;
@@ -665,7 +669,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				{
 					if (a2.DoSingleSearchStep(path2))
 					{
-						printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
+						printf("CA* Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
 							   (int)path2.size(), ma2->GetPathLength(path2), a2.GetNodesExpanded(),
 							   a2.GetNumOpenItems());
 						runningSearch2 = false;
@@ -684,17 +688,17 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				ma1->SetColor(1.0, 0.0, 1.0, 0.5);
 				for (int x = 0; x < gStepsPerFrame; x++)
 				{
-					if (jps.DoSingleSearchStep(path3))
+					if (jps->DoSingleSearchStep(path3))
 					{
-	//					printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
-	//						   (int)path2.size(), ma2->GetPathLength(path2), a2.GetNodesExpanded(),
-	//						   a2.GetNumOpenItems());
+						printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
+							   (int)path3.size(), ma1->GetPathLength(path3), jps->GetNodesExpanded(),
+							   jps->GetNumOpenItems());
 						runningSearch3 = false;
 						break;
 					}
 				}
 			}
-			jps.OpenGLDraw();
+			jps->OpenGLDraw();
 		}
 	}
 	else if (GetNumPorts(windowID) == 1)
@@ -707,14 +711,14 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				ma1->SetColor(1.0, 0.0, 1.0, 0.5);
 				for (int x = 0; x < gStepsPerFrame; x++)
 				{
-					if (jps.DoSingleSearchStep(path3))
+					if (jps->DoSingleSearchStep(path3))
 					{
 						runningSearch3 = false;
 						break;
 					}
 				}
 			}
-			jps.OpenGLDraw();
+			jps->OpenGLDraw();
 		}
 	}
 	if (path.size() > 0)
@@ -941,7 +945,24 @@ void TestJPS()
 	}
 	t.EndTimer();
 	printf("%f elapsed added %d of %d to open\n", t.GetElapsedTime(), numAdded, totalStates);
-	
+
+	// 3. Add each to queue
+	IndexOpenClosed<xyLoc> openClosedList2;
+	openClosedList2.Reset(ma1->GetMap()->GetMapHeight()*ma1->GetMap()->GetMapWidth());
+	numAdded = 0;
+	t.StartTimer();
+	for (int x = 0; x < totalStates; x++)
+	{
+		uint64_t objid;
+		if (openClosedList2.Lookup(ma1->GetStateHash(states[x]), objid) != kOpenList)
+		{
+			numAdded++;
+			openClosedList2.AddOpenNode(states[x], ma1->GetStateHash(states[x]), 0, 0);
+		}
+	}
+	t.EndTimer();
+	printf("%f elapsed added %d of %d to open (grid)\n", t.GetElapsedTime(), numAdded, totalStates);
+
 	//	t.StartTimer();
 	//	astar.GetPath(r, s, g, ourPath);
 	//	t.EndTimer();
@@ -952,12 +973,15 @@ void TestJPS()
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
+	TestJPS();
+	return;
+	
 	xyLoc s1;
 	xyLoc g1;
 	s1.x = px1; s1.y = py1;
 	g1.x = px2; g1.y = py2;
 
-	jps.InitializeSearch(ma1, s1, g1, path3);
+	jps->InitializeSearch(ma1, s1, g1, path3);
 
 	int step = 0;
 	bool done = false;
@@ -975,17 +999,16 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 		svgFile << ma1->SVGDraw();
 		svgFile << DrawCanonicalOrdering(true);
 		
-		svgFile << jps.SVGDraw();
+		svgFile << jps->SVGDraw();
 		
 		svgFile << "</svg>";
 		svgFile.close();
 		if (done)
 			break;
-		done = jps.DoSingleSearchStep(path3);
+		done = jps->DoSingleSearchStep(path3);
 		step++;
 	}
 	
-	//TestJPS();
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
@@ -1033,11 +1056,15 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				//a2.SetWeight(1.8);
 				xyLoc s1;
 				xyLoc g1;
+				
+				//156	135	158	142
+//				px1 = 156; px2 = 158;
+//				py1 = 135; py2 = 142;
 				s1.x = px1; s1.y = py1;
 				g1.x = px2; g1.y = py2;
 				CanonicalGrid::xyLoc s2(px1, py1), g2(px2, py2);
 				
-				if (0)
+				if (1)
 				{
 					a1.SetWeight(1.0);
 					a2.SetWeight(1.0);
@@ -1079,10 +1106,10 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					printf("wcSpeedup: %1.5f\n", t2.GetElapsedTime()/t4.GetElapsedTime());
 
 					t1.StartTimer();
-					jps.GetPath(ma1, s1, g1, path);
+					jps->GetPath(ma1, s1, g1, path);
 					t1.EndTimer();
 					
-					printf("JPS: %1.4fs, %llu nodes expanded %llu touched\n", t1.GetElapsedTime(), jps.GetNodesExpanded(), jps.GetNodesTouched());
+					printf("JPS: %1.4fs, %llu nodes expanded %llu touched\n", t1.GetElapsedTime(), jps->GetNodesExpanded(), jps->GetNodesTouched());
 					printf("\n\n");
 				}
 
@@ -1092,11 +1119,12 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 
 				a1.InitializeSearch(ma1, s1, g1, path);
 				a2.InitializeSearch(ma2, s2, g2, path2);
-				jps.InitializeSearch(ma1, s1, g1, path3);
+				jps->InitializeSearch(ma1, s1, g1, path3);
 				runningSearch1 = true;
 				runningSearch2 = true;
 				runningSearch3 = true;
 				SetNumPorts(windowID, 3);
+
 //				cameraMoveTo((startLoc.x+loc.x)/2, (startLoc.y+loc.y)/2, -4.0, 1.0, 0);
 //				cameraMoveTo((startLoc.x+loc.x)/2, (startLoc.y+loc.y)/2, -4.0, 1.0, 1);
 			}
@@ -1112,9 +1140,9 @@ void WeightedAStarExperiments(char *scenario, double weight)
 	ScenarioLoader s(scenario);
 	Map *m = new Map(s.GetNthExperiment(0).GetMapName());
 	MapEnvironment *me = new MapEnvironment(m);
-	CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
-	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
-	TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> canAstar;
+	//CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
+	TemplateAStar<xyLoc, tDirection, MapEnvironment, IndexOpenClosed<xyLoc>> astar;
+	//TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> canAstar;
 
 	Timer t;
 	for (int x = 0; x < s.GetNumExperiments(); x++)
@@ -1125,11 +1153,11 @@ void WeightedAStarExperiments(char *scenario, double weight)
 		goal.x = s.GetNthExperiment(x).GetGoalX();
 		goal.y = s.GetNthExperiment(x).GetGoalY();
 
-		CanonicalGrid::xyLoc cStart, cGoal;
-		cStart.x = s.GetNthExperiment(x).GetStartX();
-		cStart.y = s.GetNthExperiment(x).GetStartY();
-		cGoal.x = s.GetNthExperiment(x).GetGoalX();
-		cGoal.y = s.GetNthExperiment(x).GetGoalY();
+//		CanonicalGrid::xyLoc cStart, cGoal;
+//		cStart.x = s.GetNthExperiment(x).GetStartX();
+//		cStart.y = s.GetNthExperiment(x).GetStartY();
+//		cGoal.x = s.GetNthExperiment(x).GetGoalX();
+//		cGoal.y = s.GetNthExperiment(x).GetGoalY();
 
 		if (s.GetNthExperiment(x).GetBucket() > 0)
 		{
@@ -1149,33 +1177,72 @@ void WeightedCanAStarExperiments(char *scenario, double weight)
 	ScenarioLoader s(scenario);
 	Map *m = new Map(s.GetNthExperiment(0).GetMapName());
 	MapEnvironment *me = new MapEnvironment(m);
-	CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
-	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
-	TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> canAstar;
+	//CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
+	TemplateAStar<xyLoc, tDirection, MapEnvironment, IndexOpenClosed<xyLoc>> astar;
+	//TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> canAstar;
+	JPS jps(m);
 	
+	jps.SetJumpLimit(0);
 	Timer t;
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
-		CanonicalGrid::xyLoc cStart, cGoal;
-		cStart.x = s.GetNthExperiment(x).GetStartX();
-		cStart.y = s.GetNthExperiment(x).GetStartY();
-		cGoal.x = s.GetNthExperiment(x).GetGoalX();
-		cGoal.y = s.GetNthExperiment(x).GetGoalY();
+		xyLoc start, goal;
+		start.x = s.GetNthExperiment(x).GetStartX();
+		start.y = s.GetNthExperiment(x).GetStartY();
+		goal.x = s.GetNthExperiment(x).GetGoalX();
+		goal.y = s.GetNthExperiment(x).GetGoalY();
+		
+		//		CanonicalGrid::xyLoc cStart, cGoal;
+		//		cStart.x = s.GetNthExperiment(x).GetStartX();
+		//		cStart.y = s.GetNthExperiment(x).GetStartY();
+		//		cGoal.x = s.GetNthExperiment(x).GetGoalX();
+		//		cGoal.y = s.GetNthExperiment(x).GetGoalY();
 		
 		if (s.GetNthExperiment(x).GetBucket() > 0)
 		{
-			canAstar.SetWeight(weight);
+			jps.SetWeight(weight);
 			t.StartTimer();
-			canAstar.GetPath(cge, cStart, cGoal, path2);
+			jps.GetPath(me, start, goal, path);
 			t.EndTimer();
 			printf("%1.4f %f %f %llu %llu %u\n",
-				   t.GetElapsedTime(), cge->GetPathLength(path2), s.GetNthExperiment(x).GetDistance(), canAstar.GetNodesExpanded(), canAstar.GetNodesTouched(), canAstar.GetNumOpenItems());
-
-//			printf("%1.4f %f %llu %llu %u\n", t.GetElapsedTime(), cge->GetPathLength(path2), canAstar.GetNodesExpanded(), canAstar.GetNodesTouched(), canAstar.GetNumOpenItems());
+				   t.GetElapsedTime(), me->GetPathLength(path), s.GetNthExperiment(x).GetDistance(), jps.GetNodesExpanded(), jps.GetNodesTouched(), jps.GetNumOpenItems());
 		}
 	}
 	exit(0);
 }
+
+//void WeightedCanAStarExperiments(char *scenario, double weight)
+//{
+//	ScenarioLoader s(scenario);
+//	Map *m = new Map(s.GetNthExperiment(0).GetMapName());
+////	MapEnvironment *me = new MapEnvironment(m);
+//	CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
+////	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+//	TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid, IndexOpenClosed<CanonicalGrid::xyLoc>> canAstar;
+//	
+//	Timer t;
+//	for (int x = 0; x < s.GetNumExperiments(); x++)
+//	{
+//		CanonicalGrid::xyLoc cStart, cGoal;
+//		cStart.x = s.GetNthExperiment(x).GetStartX();
+//		cStart.y = s.GetNthExperiment(x).GetStartY();
+//		cGoal.x = s.GetNthExperiment(x).GetGoalX();
+//		cGoal.y = s.GetNthExperiment(x).GetGoalY();
+//		
+//		if (s.GetNthExperiment(x).GetBucket() > 0)
+//		{
+//			canAstar.SetWeight(weight);
+//			t.StartTimer();
+//			canAstar.GetPath(cge, cStart, cGoal, path2);
+//			t.EndTimer();
+//			printf("%1.4f %f %f %llu %llu %u\n",
+//				   t.GetElapsedTime(), cge->GetPathLength(path2), s.GetNthExperiment(x).GetDistance(), canAstar.GetNodesExpanded(), canAstar.GetNodesTouched(), canAstar.GetNumOpenItems());
+//
+////			printf("%1.4f %f %llu %llu %u\n", t.GetElapsedTime(), cge->GetPathLength(path2), canAstar.GetNodesExpanded(), canAstar.GetNodesTouched(), canAstar.GetNumOpenItems());
+//		}
+//	}
+//	exit(0);
+//}
 
 
 void DijkstraExperiments(char *scenario)
@@ -1184,8 +1251,8 @@ void DijkstraExperiments(char *scenario)
 	Map *m = new Map(s.GetNthExperiment(0).GetMapName());
 	MapEnvironment *me = new MapEnvironment(m);
 	CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
-	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
-	TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> canAstar;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment, IndexOpenClosed<xyLoc>> astar;
+	TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid, IndexOpenClosed<CanonicalGrid::xyLoc>> canAstar;
 	gJPS gjps;
 	astar.SetStopAfterGoal(false);
 	canAstar.SetStopAfterGoal(false);
@@ -1232,17 +1299,17 @@ void JPSExperiments(char *scenario, double weight, uint32_t jump)
 	ScenarioLoader s(scenario);
 	Map *m = new Map(s.GetNthExperiment(0).GetMapName());
 	MapEnvironment *me = new MapEnvironment(m);
-	JPS jps;
+	JPS jps(m);
 	jps.SetJumpLimit(jump);
 	jps.SetWeight(weight);
 	Timer t;
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
 		xyLoc start, goal;
-		goal.x = s.GetNthExperiment(x).GetStartX();
-		goal.y = s.GetNthExperiment(x).GetStartY();
-		start.x = s.GetNthExperiment(x).GetGoalX();
-		start.y = s.GetNthExperiment(x).GetGoalY();
+		start.x = s.GetNthExperiment(x).GetStartX();
+		start.y = s.GetNthExperiment(x).GetStartY();
+		goal.x = s.GetNthExperiment(x).GetGoalX();
+		goal.y = s.GetNthExperiment(x).GetGoalY();
 		
 		if (s.GetNthExperiment(x).GetBucket() > 0)
 		{
@@ -1260,7 +1327,7 @@ void OpenGridExperiments(int width)
 {
 	Map *m = new Map(width, width);
 	MapEnvironment *me = new MapEnvironment(m);
-	JPS jps;
+	JPS jps(m);
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 
 	Timer t;

@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>Canonical Graphs.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>26</integer>
+		</dict>
 		<key>Canonical Grids.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -158,6 +163,11 @@
 			<true/>
 		</dict>
 		<key>C43816F1140C395B007BA75B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C438EA401CBA228B00BBDA21</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -300,9 +300,16 @@ namespace CanonicalGrid {
 		return ((node.x == goal.x) && (node.y == goal.y));
 	}
 	
+	uint64_t CanonicalGrid::GetMaxHash() const
+	{
+		return map->GetMapHeight()*map->GetMapWidth();
+		
+	}
+
 	uint64_t CanonicalGrid::GetStateHash(const xyLoc &node) const
 	{
-		return (((uint64_t)node.x)<<16)|node.y;
+		return node.y*map->GetMapWidth()+node.x;
+		//return (((uint64_t)node.x)<<16)|node.y;
 		//	return (node.x<<16)|node.y;
 	}
 	

@@ -36,7 +36,8 @@ private:
 	void GetJPSSuccessors(int x, int y, uint8_t parent, double cost, uint64_t pid, double pg, bool first = false);
 	bool Passable(int x, int y);
 	void ExtractPathToStartFromID(uint64_t node, std::vector<xyLoc> &thePath);
-	AStarOpenClosed<xyLocParent, AStarCompare<xyLocParent> > openClosedList;
+//	AStarOpenClosed<xyLocParent, AStarCompare<xyLocParent> > openClosedList;
+	IndexOpenClosed<xyLocParent> openClosedList;
 	std::vector<jpsSuccessor> successors;
 	MapEnvironment *env;
 	xyLoc to;

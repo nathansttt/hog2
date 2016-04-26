@@ -15,6 +15,7 @@
 #include "AStarOpenClosed.h"
 // For comparing items in open/closed
 #include "TemplateAStar.h"
+#include "IndexOpenClosed.h"
 
 struct xyLocParent
 {
@@ -34,7 +35,7 @@ struct jpsSuccessor
 class JPS : public GenericSearchAlgorithm<xyLoc, tDirection, MapEnvironment>
 {
 public:
-	JPS();
+	JPS(Map *m);
 	void GetPath(MapEnvironment *env, const xyLoc &from, const xyLoc &to, std::vector<xyLoc> &path);
 	void GetPath(MapEnvironment *env, const xyLoc &from, const xyLoc &to, std::vector<tDirection> &path);
 	
@@ -55,14 +56,20 @@ private:
 	void GetJPSSuccessors(const xyLocParent &s, const xyLoc &goal);
 	void GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, double cost);
 	bool Passable(int x, int y);
+	bool JumpPoint(int x, int y);
+	void SetJumpPoint(int x, int y);
 	void ExtractPathToStartFromID(uint64_t node, std::vector<xyLoc> &thePath);
-	AStarOpenClosed<xyLocParent, AStarCompare<xyLocParent> > openClosedList;
+	//AStarOpenClosed<xyLocParent, AStarCompare<xyLocParent> > openClosedList;
+	IndexOpenClosed<xyLocParent> openClosedList;
 	std::vector<jpsSuccessor> successors;
 	MapEnvironment *env;
 	xyLoc to;
 	uint64_t nodesExpanded, nodesTouched;
 	double weight;
 	uint32_t jumpLimit;
+	int w, h;
+	
+	std::vector<bool> jumpPoints;
 };
 
 #endif /* JPS_h */

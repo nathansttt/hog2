@@ -24,6 +24,7 @@ GraphEnvironment::GraphEnvironment(Graph *_g, GraphHeuristic *gh)
 	m = 0;
  	directed = false;
 	drawEdgeCosts = false;
+	integerEdgeCosts = false;
 	drawNodeLabels = false;
 	nodeScale = 1.0;
 }
@@ -34,6 +35,7 @@ GraphEnvironment::GraphEnvironment(Map *_m, Graph *_g, GraphHeuristic *gh)
 	m = _m;
  	directed = false;
 	drawEdgeCosts = false;
+	integerEdgeCosts = false;
 	drawNodeLabels = false;
 	nodeScale = 1.0;
 }
@@ -231,8 +233,8 @@ void GraphEnvironment::OpenGLDraw() const
 		}
 		if (e->getMarked())
 		{
-			glColor3f(1, 1, 1);
-			off = -0.001;
+			glColor3f(1.0, 0.0, 0.0);
+			off = -0.01;
 		}
 		else {
 			off = 0;
@@ -261,7 +263,10 @@ void GraphEnvironment::OpenGLDraw() const
 		edge_iterator ei = g->getEdgeIter();
 		for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 		{
-			sprintf(label, "%1.2f", e->GetWeight());
+			if (integerEdgeCosts)
+				sprintf(label, "%d", int(e->GetWeight()));
+			else
+				sprintf(label, "%1.2f", e->GetWeight());
 			node *n;
 			n = g->GetNode(e->getFrom());
 			
@@ -420,7 +425,7 @@ namespace GraphSearchConstants {
 	Graph *GetGraph(Map *m)
 	{ return GetEightConnectedGraph(m); }
 
-	Graph *GetEightConnectedGraph(Map *m)
+	Graph *GetEightConnectedGraph(Map *m, bool directed)
 	{
 		Graph *g = new Graph();
 		AddNodesToGraph(m, g);
@@ -428,14 +433,14 @@ namespace GraphSearchConstants {
 		{
 			for (int x = 0; x < m->GetMapWidth(); x++)
 			{
-				AddEdges(m, g, x, y);//, 1.0, 1.5);
+				AddEdges(m, g, x, y, directed);//, 1.0, 1.5);
 			}
 		}
 		// printf("Done\n");
 		return g;
 	}
 	
-	Graph *GetFourConnectedGraph(Map *m)
+	Graph *GetFourConnectedGraph(Map *m, bool directed)
 	{
 		Graph *g = new Graph();
 		AddNodesToGraph(m, g);
@@ -443,7 +448,7 @@ namespace GraphSearchConstants {
 		{
 			for (int x = 0; x < m->GetMapWidth(); x++)
 			{
-				AddEdges(m, g, x, y, 1.0, 0.0, 100, 0);//, 1.0, 1.5);
+				AddEdges(m, g, x, y, directed, 1.0, 0.0, 100, 0);//, 1.0, 1.5);
 			}
 		}
 		// printf("Done\n");
@@ -527,6 +532,7 @@ namespace GraphSearchConstants {
 	 * directional edges, we treat them as being bidirectional.
 	 */
 	void AddEdges(Map *m, Graph *g, int x, int y,
+				  bool directed,
 				  double straigtEdgeCost,
 				  double diagEdgeCost,
 				  int straightEdgeProb,
@@ -547,8 +553,11 @@ namespace GraphSearchConstants {
 				{
 					e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x-1, y).tile1.node, straigtEdgeCost);
 					g->AddEdge(e);
-					e = new edge(m->GetTile(x-1, y).tile1.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
-					g->AddEdge(e);
+					if (directed)
+					{
+						e = new edge(m->GetTile(x-1, y).tile1.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
+						g->AddEdge(e);
+					}
 				}
 			}
 			else if (m->GetTile(x-1, y).tile2.node != kNoGraphNode)
@@ -557,8 +566,11 @@ namespace GraphSearchConstants {
 				{
 					e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x-1, y).tile2.node, straigtEdgeCost);
 					g->AddEdge(e);
-					e = new edge(m->GetTile(x-1, y).tile2.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
-					g->AddEdge(e);
+					if (directed)
+					{
+						e = new edge(m->GetTile(x-1, y).tile2.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
+						g->AddEdge(e);
+					}
 				}
 			}
 		}
@@ -578,8 +590,11 @@ namespace GraphSearchConstants {
 							{
 								e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x, y-1).tile1.node, straigtEdgeCost);
 								g->AddEdge(e);
-								e = new edge(m->GetTile(x, y-1).tile1.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
-								g->AddEdge(e);
+								if (directed)
+								{
+									e = new edge(m->GetTile(x, y-1).tile1.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
+									g->AddEdge(e);
+								}
 							}
 						}
 					}
@@ -589,8 +604,11 @@ namespace GraphSearchConstants {
 						{
 							e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x, y-1).tile2.node, straigtEdgeCost);
 							g->AddEdge(e);
-							e = new edge(m->GetTile(x, y-1).tile2.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
-							g->AddEdge(e);
+							if (directed)
+							{
+								e = new edge(m->GetTile(x, y-1).tile2.node, m->GetTile(x, y).tile1.node, straigtEdgeCost);
+								g->AddEdge(e);
+							}
 						}
 					}
 				}
@@ -604,8 +622,11 @@ namespace GraphSearchConstants {
 						{
 							e = new edge(m->GetTile(x, y).tile2.node, m->GetTile(x, y-1).tile1.node, straigtEdgeCost);
 							g->AddEdge(e);
-							e = new edge(m->GetTile(x, y-1).tile1.node, m->GetTile(x, y).tile2.node, straigtEdgeCost);
-							g->AddEdge(e);
+							if (directed)
+							{
+								e = new edge(m->GetTile(x, y-1).tile1.node, m->GetTile(x, y).tile2.node, straigtEdgeCost);
+								g->AddEdge(e);
+							}
 						}
 					}
 				}
@@ -615,8 +636,11 @@ namespace GraphSearchConstants {
 					{
 						e = new edge(m->GetTile(x, y).tile2.node, m->GetTile(x, y-1).tile2.node, straigtEdgeCost);
 						g->AddEdge(e);
-						e = new edge(m->GetTile(x, y-1).tile2.node, m->GetTile(x, y).tile2.node, straigtEdgeCost);
-						g->AddEdge(e);
+						if (directed)
+						{
+							e = new edge(m->GetTile(x, y-1).tile2.node, m->GetTile(x, y).tile2.node, straigtEdgeCost);
+							g->AddEdge(e);
+						}
 					}
 				}
 			}
@@ -643,8 +667,11 @@ namespace GraphSearchConstants {
 						{
 							e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x-1, y-1).tile1.node, diagEdgeCost);
 							g->AddEdge(e);
-							e = new edge(m->GetTile(x-1, y-1).tile1.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
-							g->AddEdge(e);
+							if (directed)
+							{
+								e = new edge(m->GetTile(x-1, y-1).tile1.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
+								g->AddEdge(e);
+							}
 						}
 					}
 				}
@@ -654,8 +681,11 @@ namespace GraphSearchConstants {
 					{
 						e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x-1, y-1).tile2.node, diagEdgeCost);
 						g->AddEdge(e);
-						e = new edge(m->GetTile(x-1, y-1).tile2.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
-						g->AddEdge(e);
+						if (directed)
+						{
+							e = new edge(m->GetTile(x-1, y-1).tile2.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
+							g->AddEdge(e);
+						}
 					}
 				}
 			}
@@ -682,8 +712,11 @@ namespace GraphSearchConstants {
 						{
 							e = new edge(m->GetTile(x, y).tile1.node, m->GetTile(x+1, y-1).tile1.node, diagEdgeCost);
 							g->AddEdge(e);
-							e = new edge(m->GetTile(x+1, y-1).tile1.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
-							g->AddEdge(e);
+							if (directed)
+							{
+								e = new edge(m->GetTile(x+1, y-1).tile1.node, m->GetTile(x, y).tile1.node, diagEdgeCost);
+								g->AddEdge(e);
+							}
 						}
 					}
 				}
@@ -693,8 +726,11 @@ namespace GraphSearchConstants {
 					{
 						e = new edge(m->GetTile(x, y).tile2.node, m->GetTile(x+1, y-1).tile1.node, diagEdgeCost);
 						g->AddEdge(e);
-						e = new edge(m->GetTile(x+1, y-1).tile1.node, m->GetTile(x, y).tile2.node, diagEdgeCost);
-						g->AddEdge(e);
+						if (directed)
+						{
+							e = new edge(m->GetTile(x+1, y-1).tile1.node, m->GetTile(x, y).tile2.node, diagEdgeCost);
+							g->AddEdge(e);
+						}
 					}
 				}
 			}

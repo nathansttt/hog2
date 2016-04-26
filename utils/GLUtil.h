@@ -149,11 +149,21 @@ namespace colors
 {
 	const recColor black  = {0.0,0.0,0.0};
 	const recColor white  = {1.0,1.0,1.0}; // white
-	const recColor gray   = {00.5,0.5,0.5}; // green
+	const recColor gray   = {0.5,0.5,0.5}; // green
+	const recColor darkgray= {0.25,0.25,0.25}; // green
+	const recColor lightgray={0.75,0.75,0.75}; // green
 
 	const recColor red    = {1.0,0.0,0.0}; // red
+	const recColor darkred= {0.5,0.0,0.0}; // red
+	const recColor lightred= {1.0,0.5,0.5}; // red
+
 	const recColor green  = {0.0,1.0,0.0}; // green
+	const recColor darkgreen= {0.0,0.5,0.0}; // green
+	const recColor lightgreen= {0.5,1.0,0.5}; // green
+
 	const recColor blue   = {0.0,0.0,1.0}; // blue
+	const recColor darkblue   = {0.0,0.0,0.5}; // blue
+	const recColor lightblue   = {0.5,0.5,1.0}; // blue
 
 	const recColor yellow = {1.0,1.0,0.0}; // yellow
 	const recColor purple = {1.0,0.0,1.0}; // purple

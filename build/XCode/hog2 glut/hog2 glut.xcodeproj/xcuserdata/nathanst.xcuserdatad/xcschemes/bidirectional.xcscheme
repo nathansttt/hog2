@@ -68,7 +68,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-easy"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-grid /Users/nathanst/hog2/maps/da2/ht_chantry.map /Users/nathanst/hog2/scenarios/da2/ht_chantry.map.scen"
