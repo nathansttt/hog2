@@ -30,6 +30,7 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
+	environments/Airplane.cpp \
 	environments/GraphEnvironment.cpp \
 	environments/GraphRefinementEnvironment.cpp \
 	environments/Map2DEnvironment.cpp \
