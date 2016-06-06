@@ -795,7 +795,7 @@ void DrawText(double x, double y, double z, double scale, const char *str)
 	glDisable(GL_LIGHTING);
 	for (int which = 0; which < strlen(str); which++)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
-	glEnable(GL_LIGHTING);
+//	glEnable(GL_LIGHTING);
 	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
 	glPopMatrix();
 }

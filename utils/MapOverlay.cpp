@@ -20,7 +20,7 @@ MapOverlay::MapOverlay(Map *_m)
 	values.resize(m->GetMapWidth()*m->GetMapHeight());
 	colorMap = 4;
 	displayList = 0;
-	drawBorders = true;
+	drawBorders = false;
 }
 
 void MapOverlay::Clear()
@@ -74,6 +74,7 @@ void MapOverlay::SetOverlayValue(int x, int y, double value)
 		maxVal = value;
 	if (value < minVal)
 		minVal = value;
+//	printf("Min: %f; max: %f\n", minVal, maxVal);
 	//resetValues();
 }
 
@@ -99,7 +100,9 @@ void MapOverlay::OpenGLDraw() const
 	{
 		glCallList(displayList);
 	}
-	else {
+	else if (!fequal(minVal, maxVal)) // we get unddefined behavior when they are equal`
+	{
+		
 		displayList = glGenLists(1);
 		glNewList(displayList, GL_COMPILE_AND_EXECUTE);
 		
@@ -107,13 +110,18 @@ void MapOverlay::OpenGLDraw() const
 		glNormal3f(0, 0, -1);
 		for (unsigned int t = 0; t < values.size(); t++)
 		{
+			//printf("Drawing: (%ld, %ld): %f\n", t%m->GetMapWidth(), t/m->GetMapWidth(), values[t]);
 			if (fequal(values[t], ignoreVal))
 			{
 				//glColor4f(0.5, 0.5, 0.5, 0.5);
 				continue;
 			}
 			else {
-				recColor r = GetValueColor(values[t]);// getColor(values[t], minVal, maxVal, colorMap);
+				recColor r;
+				if (colorMap == customColorMap)
+					r = GetValueColor(values[t]);
+				else
+					r = getColor(values[t], minVal, maxVal, colorMap);
 				glColor3f(r.r, r.g, r.b);
 			}
 			unsigned int last;
@@ -165,7 +173,7 @@ void MapOverlay::OpenGLDraw() const
 		}
 		
 
-		if (0)// drawColorBar
+		if (1)// drawColorBar
 		{
 			// black background
 			glBegin(GL_QUADS);
@@ -179,6 +187,13 @@ void MapOverlay::OpenGLDraw() const
 			glVertex3f(a-4*wide, b-wide, c-4*radius);
 			glVertex3f(a-wide, b-wide, c-4*radius);
 			glEnd();
+
+			char text[255];
+			sprintf(text, "%1.2f", minVal);
+			glColor3f(1.0, 1.0, 1.0);
+			DrawText(a-wide, b+2*m->GetMapHeight()*radius+wide, c-3*radius, 0.1, text);
+			sprintf(text, "%1.2f", maxVal);
+			DrawText(a-wide, b-wide+0.05, c-3*radius, 0.1, text);
 
 			// white border
 			glBegin(GL_LINE_LOOP);
@@ -259,6 +274,23 @@ void MapOverlay::OpenGLDraw() const
 std::string MapOverlay::SVGDraw() const
 {
 	std::string s;
+	char s1[255];
+	char s2[255];
+	sprintf(s1, "%1.2f", maxVal);
+	sprintf(s2, "%1.2f", minVal);
+	s += "\n";
+	int margin = std::max(1.0, m->GetMapWidth()/40.0);
+	s += SVGDefineGradient(true, true,
+						   getColor(maxVal, minVal, maxVal, colorMap),
+						   getColor(minVal, minVal, maxVal, colorMap), "sideBar");
+	s += "\n";
+	s += SVGDrawRect(-margin, 1, margin, m->GetMapHeight(), "sideBar");
+	s += SVGFrameRect(-margin, 1, margin, m->GetMapHeight(), 1, colors::darkgray);
+	s += "\n";
+	s += SVGDrawText(0, 1+margin, s1, colors::black, margin);
+	s += "\n";
+	s += SVGDrawText(0, m->GetMapHeight()+1, s2, colors::black, margin);
+	s += "\n";
 	for (unsigned int t = 0; t < values.size(); t++)
 	{
 		if (fequal(values[t], ignoreVal))
@@ -267,10 +299,31 @@ std::string MapOverlay::SVGDraw() const
 		}
 		else {
 			recColor r = getColor(values[t], minVal, maxVal, colorMap);
-			s += SVGDrawRect(t%m->GetMapWidth(), t/m->GetMapWidth(), 1, 1, r);
+			s += SVGDrawRect(t%m->GetMapWidth()+1, t/m->GetMapWidth()+1, 1, 1, r);
 		}
 	}
+	
 	recColor black = {0, 0, 0};
+
+//	// terrain borders
+//	for (int y = 0; y < m->GetMapHeight()-1; y++)
+//	{
+//		for (int x = 0; x < m->GetMapWidth()-1; x++)
+//		{
+//			if ((m->GetTerrainType(x, y)>>terrainBits) != (m->GetTerrainType(x+1, y)>>terrainBits))
+//			{
+//				s += SVGDrawLine(x+1, y, x+1, y+1, 2, black, false);
+//			}
+//			if ((m->GetTerrainType(x, y)>>terrainBits) != (m->GetTerrainType(x, y+1)>>terrainBits))
+//			{
+//				s += SVGDrawLine(x, y+1, x+1, y+1, 2, black, false);
+//			}
+//		}
+//	}
+	
+	return s;
+	
+	// value borders
 	for (int x = 0; x < m->GetMapWidth()-1; x++)
 	{
 		for (int y = 0; y < m->GetMapHeight()-1; y++)
@@ -279,18 +332,10 @@ std::string MapOverlay::SVGDraw() const
 			if (values[index] != values[index+1])
 			{
 				s += SVGDrawLine(x+1, y, x+1, y+1, 2, black, false);
-//				GLdouble a, b, c, r;
-//				m->GetOpenGLCoord(x, y, a, b, c, r);
-//				glVertex3f(a+r, b+r, c-1.12*r);
-//				glVertex3f(a+r, b-r, c-1.12*r);
 			}
 			if (values[index] != values[index+m->GetMapWidth()])
 			{
 				s += SVGDrawLine(x, y+1, x+1, y+1, 2, black, false);
-//				GLdouble a, b, c, r;
-//				m->GetOpenGLCoord(x, y, a, b, c, r);
-//				glVertex3f(a-r, b+r, c-1.12*r);
-//				glVertex3f(a+r, b+r, c-1.12*r);
 			}
 		}
 	}

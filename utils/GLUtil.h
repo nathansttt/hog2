@@ -79,14 +79,30 @@ static const double ROOT2D2 = 0.7071067811865475;
  */
 class recVec {
 public:
-	recVec() {}
+	recVec() { x = y = z = 0; }
 	recVec(GLdouble x_i, GLdouble y_i, GLdouble z_i) :x(x_i), y(y_i), z(z_i) {}
 	void normalise();
+	recVec GetNormal(recVec v)
+	{
+		recVec n;
+			
+		v.normalise();
+		this->normalise();
+			
+		n.x = this->y * v.z - this->z * v.y;
+		n.y = this->z * v.x - this->x * v.z;
+		n.z = this->x * v.y - this->y * v.x;
+		n.normalise();
+
+		return n;
+	}
 	GLdouble x,y,z;
 	recVec &operator+=(const recVec &v)
 	{ x += v.x; y += v.y; z += v.z; return *this; }
 	recVec &operator-=(const recVec &v)
 	{ x -= v.x; y -= v.y; z -= v.z; return *this; }
+	recVec operator-(const recVec &v)
+	{ recVec n = *this; n-=v; return n; }
 	recVec &operator*=(GLdouble val)
 	{ x *= val; y *= val; z *= val; return *this; }
 };

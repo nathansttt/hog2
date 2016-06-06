@@ -35,6 +35,8 @@ public:
 	void DecreaseColorMap() { colorMap--; }
 	double GetMaxValue() { return maxVal; }
 	double GetMinValue() { return minVal; }
+
+	static const int customColorMap = -1;
 private:
 	void resetValues();
 	Map *m;
