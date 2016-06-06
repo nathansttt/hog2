@@ -24,6 +24,7 @@ PROJECTS = \
   shared \
   utils \
   apps/arm \
+  apps/airplane \
   apps/localsensingsearch \
   apps/cpdb \
   apps/pathsample \
@@ -79,6 +80,7 @@ PROJECTS_ALL = \
   simulation \
   utils \
   apps/arm \
+  apps/airplane \
   apps/localsensingsearch \
   apps/cpdb \
   apps/pathsample \
