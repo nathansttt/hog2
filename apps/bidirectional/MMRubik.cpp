@@ -813,7 +813,13 @@ void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, c
 	gDistForward.resize(12);
 	expanded = 0;
 	BuildHeuristics(start, goal, forward);
-	BuildHeuristics(goal, start, reverse);
+
+	reverse = forward;
+	for (int x = 0; x < reverse.heuristics.size(); x++)
+	{
+		reverse.heuristics[x] = new RubikArbitraryGoalPDB((RubikPDB*)reverse.heuristics[x]);
+	}
+	//BuildHeuristics(goal, start, reverse);
 
 	std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
 	std::cout << std::setprecision(2);

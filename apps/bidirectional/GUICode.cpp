@@ -695,8 +695,8 @@ void SetupMapOverlay()
 	counts.resize(10);
 	delete mo;
 	mo = new MapOverlay(map);
-	mo->SetColorMap(-1);
-
+	mo->SetColorMap(MapOverlay::customColorMap);
+	
 	mo->SetColor(XX, colors::black);
 
 	mo->SetColor(NN, colors::cyan);

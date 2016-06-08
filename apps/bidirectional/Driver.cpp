@@ -84,11 +84,18 @@ void GetKorfInstance(RubiksState &start, int which);
 void GetSuperFlip(RubiksState &start);
 void GetDepth20(RubiksState &start, int which);
 void GetRandom15(RubiksState &start, int which);
+void DualTest();
+void ArbitraryGoalTest();
 
 int main(int argc, char* argv[])
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	// technically we could/should install a command-line handler and handle these there
+	
+	
+	//	ArbitraryGoalTest();
+	//	DualTest();
+
 	if (argc > 1 && strcmp(argv[1], "-bfs") == 0)
 	{
 		BFS();
@@ -871,6 +878,54 @@ void GetKorf1997(Heuristic<RubiksState> &result)
 	result.heuristics.push_back(pdb3);
 }
 
+void GetKorf1997(Heuristic<RubiksState> &result, const RubiksState &goal)
+{
+	const char * hprefix = "/Users/nathanst/Desktop/pdb/";
+	
+	RubiksCube cube;
+	std::vector<int> blank;
+	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
+	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
+	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+	
+	//	assert(!"File names are getting corrupted here. Perhaps by the abstraction of the goal state");
+	//	assert(!"Need to abstract the goal state immediately when creating the pdb instead of only when I build the pdb");
+	if (!pdb1->Load(hprefix))
+	{
+		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb1->Save(hprefix);
+	}
+	else {
+		printf("Loaded previous heuristic\n");
+	}
+	if (!pdb2->Load(hprefix))
+	{
+		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb2->Save(hprefix);
+	}
+	else {
+		printf("Loaded previous heuristic\n");
+	}
+	if (!pdb3->Load(hprefix))
+	{
+		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb3->Save(hprefix);
+	}
+	else {
+		printf("Loaded previous heuristic\n");
+	}
+	result.lookups.push_back({kMaxNode, 1, 3});
+	result.lookups.push_back({kLeafNode, 0, 0});
+	result.lookups.push_back({kLeafNode, 1, 0});
+	result.lookups.push_back({kLeafNode, 2, 0});
+	result.heuristics.push_back(pdb1);
+	result.heuristics.push_back(pdb2);
+	result.heuristics.push_back(pdb3);
+}
+
 void Test100Easy()
 {
 	Heuristic<RubiksState> result;
@@ -901,4 +956,88 @@ void Test100Easy()
 		}
 		std::cout << "\n";
 	}
+}
+
+void DualTest()
+{
+	Heuristic<RubiksState> result;
+	Heuristic<RubiksState> dual;
+	std::vector<RubiksAction> path;
+	GetKorf1997(result);
+	dual = result;
+	for (int x = 0; x < dual.heuristics.size(); x++)
+	{
+		dual.heuristics[x] = new RubikDualPDB((RubikPDB*)dual.heuristics[x]);
+	}
+
+	RubiksState goal;
+	for (int x = 0; x < 1000; x++)
+	{
+		RubiksCube cube;
+		RubiksState s, d;
+//		std::cout << "start: " << s << "\n";
+		std::vector<int> a;
+		for (int y = 0; y < 20; y++)
+		{
+			a.push_back(random()%18);
+		}
+		for (int x = 0; x < a.size(); x++)
+		{
+			cube.ApplyAction(s, a[x]);
+			cube.UndoAction(d, a[a.size()-x-1]);
+		}
+//		std::cout << "orig: " << s << "\n";
+//		std::cout << "dual: " << d << "\n";
+		printf("Regular heuristic: %f; dual: %f\n", result.HCost(s, goal), result.HCost(d, goal));
+//		//dual.HCost(goal, s);
+		printf("(dual) Regular heuristic: %f; dual: %f\n", dual.HCost(goal, d), dual.HCost(goal, s));
+	}
+	exit(0);
+}
+
+void ArbitraryGoalTest()
+{
+	Heuristic<RubiksState> result;
+	Heuristic<RubiksState> reverse;
+	Heuristic<RubiksState> arbitrary;
+	std::vector<RubiksAction> path;
+
+	RubiksState goal;
+	RubiksCube cube;
+	RubiksState s;
+	for (int y = 0; y < 20; y++)
+	{
+		cube.ApplyAction(s, (y*7)%18);
+	}
+
+	GetKorf1997(result);
+	GetKorf1997(reverse, s);
+	arbitrary = result;
+	for (int x = 0; x < arbitrary.heuristics.size(); x++)
+	{
+		arbitrary.heuristics[x] = new RubikArbitraryGoalPDB((RubikPDB*)arbitrary.heuristics[x]);
+	}
+	
+	printf("Regular heuristic: %f; regular using arbitrary: %f\n\n", result.HCost(s, goal), arbitrary.HCost(s, goal));
+	printf("Reverse heuristic: %f; reverse using arbitrary: %f\n\n", reverse.HCost(goal, s), arbitrary.HCost(goal, s));
+	goal = s;
+	for (int x = 0; x < 2000000; x++)
+	{
+		if (0 == x%1000)
+			printf("--> New state %d of 1000000\n", x+1);
+		cube.ApplyAction(s, random()%18);
+		double h1, h2;
+		h1 = reverse.HCost(s, goal);
+		h2 = arbitrary.HCost(s, goal);
+//		printf("Reverse heuristic: %f; reverse using arbitrary: %f\n", h1, h2);
+		
+		if (h1 != h2)
+		{
+			printf("FAILED\n");
+			exit(0);
+		}
+	}
+	printf("SUCCESS\n");
+	
+	exit(0);
 }
