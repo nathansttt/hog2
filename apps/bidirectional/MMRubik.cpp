@@ -563,11 +563,11 @@ void ExpandNextFile()
 
 }
 
-//#define ZERO
+#define ZERO
 //#define KORF97
-//#define MASSIVE
-//#define MASSIVER
-#define RUBIK_10_2
+//#define RUBIK_888
+//#define RUBIK_10_2
+//#define RUBIK_9_3
 //#define SMALL
 //#define TINY
 
@@ -685,38 +685,7 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 	result.heuristics.push_back(pdb3);
 #endif
 
-#ifdef MASSIVE
-	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7};
-	std::vector<int> edges2 = {1, 3, 5, 7, 8, 9, 10, 11};
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load(hprefix))
-	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(hprefix);
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
-
-#ifdef MASSIVER
+#ifdef RUBIK_888
 	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7};
 	std::vector<int> edges2 = {1, 3, 5, 7, 8, 9, 10, 11};
 	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
@@ -750,6 +719,37 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 #ifdef RUBIK_10_2
 	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 	std::vector<int> edges2 = {10, 11};
+	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+	if (!pdb1->Load(hprefix))
+	{
+		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb1->Save(hprefix);
+	}
+	if (!pdb2->Load(hprefix))
+	{
+		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb2->Save(hprefix);
+	}
+	if (!pdb3->Load(hprefix))
+	{
+		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb3->Save(hprefix);
+	}
+	result.lookups.push_back({kMaxNode, 1, 3});
+	result.lookups.push_back({kLeafNode, 0, 0});
+	result.lookups.push_back({kLeafNode, 1, 0});
+	result.lookups.push_back({kLeafNode, 2, 0});
+	result.heuristics.push_back(pdb1);
+	result.heuristics.push_back(pdb2);
+	result.heuristics.push_back(pdb3);
+#endif
+
+#ifdef RUBIK_9_3
+	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+	std::vector<int> edges2 = {9, 10, 11};
 	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
 	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
