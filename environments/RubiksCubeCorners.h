@@ -75,7 +75,8 @@ static bool operator==(const RubiksCornerState &l1, const RubiksCornerState &l2)
 static std::ostream &operator<<(std::ostream &out, const RubiksCornerState &s)
 {
 	for (int x = 0; x < 8; x++)
-		out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(x) << "] ";
+		//out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(x) << "] ";
+		out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(s.GetCubeInLoc(x)) << "] ";
 	return out;
 }
 

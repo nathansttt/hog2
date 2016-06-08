@@ -235,4 +235,21 @@ private:
 	std::vector<int> corners;
 };
 
+class RubikDualPDB : public Heuristic<RubiksState> {
+public:
+	RubikDualPDB(RubikPDB *pdb);
+	virtual double HCost(const RubiksState &a, const RubiksState &b) const;
+private:
+	RubikPDB *pdb;
+};
+
+class RubikArbitraryGoalPDB : public Heuristic<RubiksState> {
+public:
+	RubikArbitraryGoalPDB(RubikPDB *pdb);
+	virtual double HCost(const RubiksState &a, const RubiksState &b) const;
+private:
+	RubikPDB *pdb;
+};
+
+
 #endif /* defined(__hog2_glut__RubiksCube__) */
