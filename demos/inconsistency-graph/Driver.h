@@ -1,9 +1,12 @@
 /*
- * $Id: timer.h,v 1.5 2006/10/30 17:45:10 nathanst Exp $
+ * $Id: sample.h,v 1.6 2006/09/18 06:23:39 nathanst Exp $
  *
- * timer.h
- * HOG file
- * 
+ *  sample.h
+ *  hog
+ *
+ *  Created by Nathan Sturtevant on 5/31/05.
+ *  Copyright 2005 Nathan Sturtevant, University of Alberta. All rights reserved.
+ *
  * This file is part of HOG.
  *
  * HOG is free software; you can redistribute it and/or modify
@@ -19,26 +22,14 @@
  * You should have received a copy of the GNU General Public License
  * along with HOG; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
  */
 
-#ifndef TIMER_H
-#define TIMER_H
+void MyWindowHandler(unsigned long windowID, tWindowEventType eType);
+void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data);
+void MyDisplayHandler(unsigned long windowID, tKeyboardModifier, char key);
+int MyCLHandler(char *argument[], int maxNumArgs);
+bool MyClickHandler(unsigned long windowID, int x, int y, point3d loc, tButtonType, tMouseEventType);
+void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key);
 
-#include <stdint.h>
-#include <fstream>
-#include <chrono>
-
-class Timer {
-public:
-	Timer();
-	
-	void StartTimer();
-	double EndTimer();
-	double GetElapsedTime();
-private:
-	std::chrono::high_resolution_clock::time_point startTime;
-	double elapsedTime;
-	
-};
-
-#endif // TIMER_H
+void InstallHandlers();

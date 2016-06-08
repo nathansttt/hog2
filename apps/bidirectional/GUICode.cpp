@@ -25,6 +25,8 @@ std::vector<int> counts;
 
 bool mouseTracking = false;
 bool mouseTracked = false;
+bool drawSearch = true;
+bool paused = false;
 void SetupMapOverlay();
 
 int gStepsPerFrame = 1;
@@ -37,8 +39,13 @@ ZeroHeuristic<xyLoc> *z = new ZeroHeuristic<xyLoc>;
 
 MM<xyLoc, tDirection, MapEnvironment> mm;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare;
+MM<xyLoc, tDirection, MapEnvironment> mm0;
+TemplateAStar<xyLoc, tDirection, MapEnvironment> compare0;
+
 bool mmSearchRunning = false;
 bool compareSearchRunning = false;
+bool mm0SearchRunning = false;
+bool compare0SearchRunning = false;
 bool searchRan = false;
 std::vector<xyLoc> path;
 std::vector<xyLoc> goalPath;
@@ -72,8 +79,12 @@ void InstallHandlers()
 	InstallMouseClickHandler(MyClickHandler);
 	InstallKeyboardHandler(MyKeyboardHandler, "Save SVG", "Export graphics to SVG File", kNoModifier, 's');
 	InstallKeyboardHandler(MyKeyboardHandler, "Record", "Start/stop recording movie", kNoModifier, 'r');
+	InstallKeyboardHandler(MyKeyboardHandler, "Draw", "Toggle drawing search", kNoModifier, 'd');
+	InstallKeyboardHandler(MyKeyboardHandler, "Pause", "Toggle pause", kNoModifier, 'p');
 	InstallKeyboardHandler(MyKeyboardHandler, "Single Viewport", "Set to use a single viewport", kNoModifier, '1');
 	InstallKeyboardHandler(MyKeyboardHandler, "Two Viewports", "Set to use two viewports", kNoModifier, '2');
+	InstallKeyboardHandler(MyKeyboardHandler, "Three Viewports", "Set to use three viewports", kNoModifier, '3');
+	InstallKeyboardHandler(MyKeyboardHandler, "Four Viewports", "Set to use four viewports", kNoModifier, '4');
 	InstallKeyboardHandler(MyKeyboardHandler, "Slower", "Slow down visualization", kNoModifier, '[');
 	InstallKeyboardHandler(MyKeyboardHandler, "Faster", "Speed up visualization", kNoModifier, ']');
 }
@@ -131,6 +142,16 @@ void MyKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key)
 			recording = !recording;
 			break;
 		}
+		case 'p':
+		{
+			paused = !paused;
+			break;
+		}
+		case 'd':
+		{
+			drawSearch = !drawSearch;
+			break;
+		}
 		case '1':
 		{
 			SetNumPorts(windowID, 1);
@@ -139,6 +160,16 @@ void MyKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key)
 		case '2':
 		{
 			SetNumPorts(windowID, 2);
+			break;
+		}
+		case '3':
+		{
+			SetNumPorts(windowID, 3);
+			break;
+		}
+		case '4':
+		{
+			SetNumPorts(windowID, 4);
 			break;
 		}
 		case '[':
@@ -227,32 +258,62 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		glLineWidth(1.0);
 	}
 
-	for (int x = 0; x < gStepsPerFrame; x++)
+	if (drawSearch)
 	{
-		if (mmSearchRunning)
+		if (!paused)
 		{
-			mmSearchRunning = !mm.DoSingleSearchStep(path);
-			if (!mmSearchRunning)
-				printf("MM*: %llu nodes expanded\n", mm.GetNodesExpanded());
-		}
-	}
-	for (int x = 0; x < gStepsPerFrame; x++)
-	{
-		if (compareSearchRunning)
-		{
-			compareSearchRunning = !compare.DoSingleSearchStep(path);
-			if (!compareSearchRunning)
+			for (int x = 0; x < gStepsPerFrame; x++)
 			{
-				printf("A*: %llu nodes expanded const %1.1f\n", compare.GetNodesExpanded(), me->GetPathLength(path));
+				if (mmSearchRunning)
+				{
+					mmSearchRunning = !mm.DoSingleSearchStep(path);
+					if (!mmSearchRunning)
+						printf("MM*: %llu nodes expanded\n", mm.GetNodesExpanded());
+				}
+			}
+			for (int x = 0; x < gStepsPerFrame; x++)
+			{
+				if (mm0SearchRunning)
+				{
+					mm0SearchRunning = !mm0.DoSingleSearchStep(path);
+					if (!mm0SearchRunning)
+						printf("MM0: %llu nodes expanded\n", mm0.GetNodesExpanded());
+				}
+			}
+			for (int x = 0; x < gStepsPerFrame; x++)
+			{
+				if (compareSearchRunning)
+				{
+					compareSearchRunning = !compare.DoSingleSearchStep(path);
+					if (!compareSearchRunning)
+					{
+						printf("A*: %llu nodes expanded const %1.1f\n", compare.GetNodesExpanded(), me->GetPathLength(path));
+					}
+				}
+			}
+			for (int x = 0; x < gStepsPerFrame; x++)
+			{
+				if (compare0SearchRunning)
+				{
+					compare0SearchRunning = !compare0.DoSingleSearchStep(path);
+					if (!compare0SearchRunning)
+					{
+						printf("BFS: %llu nodes expanded const %1.1f\n", compare0.GetNodesExpanded(), me->GetPathLength(path));
+					}
+				}
 			}
 		}
-	}
-	if (searchRan)
-	{
-		if (viewport == 0)
-			mm.OpenGLDraw();
-		else if (viewport == 1)
-			compare.OpenGLDraw();
+		if (searchRan)
+		{
+			if (viewport == 0)
+				mm.OpenGLDraw();
+			else if (viewport == 1)
+				compare.OpenGLDraw();
+			else if (viewport == 2)
+				mm0.OpenGLDraw();
+			else if (viewport == 3)
+				compare0.OpenGLDraw();
+		}
 	}
 
 	if (recording && viewport == GetNumPorts(windowID)-1)
@@ -328,10 +389,10 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //				goal.x = 510;
 //				goal.y = 208;
 				
-				start.x = 75;
-				start.y = 33;
-				goal.x = 93;//78;
-				goal.y = 116;//132-10;
+//				start.x = 75;
+//				start.y = 33;
+//				goal.x = 93;//78;
+//				goal.y = 116;//132-10;
 				
 //				forward.GetPath(me,
 //								{static_cast<uint16_t>(goal.x-17),
@@ -341,13 +402,22 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				
 				mouseTracking = false;
 				SetupMapOverlay();
-				SetNumPorts(windowID, 2);
+				SetNumPorts(windowID, 4);
 				compare.SetHeuristic(me);
 				compare.InitializeSearch(me, start, goal, path);
+
+				compare0.SetHeuristic(z);
+				compare0.InitializeSearch(me, start, goal, path);
+
 				//mm.InitializeSearch(me, start, goal, z, z, path);
 				mm.InitializeSearch(me, start, goal, me, me, path);
+				mm0.InitializeSearch(me, start, goal, z, z, path);
+
 				mmSearchRunning = true;
 				compareSearchRunning = true;
+				mm0SearchRunning = true;
+				compare0SearchRunning = true;
+				
 				searchRan = true;
 				return true;
 			}
@@ -625,18 +695,21 @@ void SetupMapOverlay()
 	counts.resize(10);
 	delete mo;
 	mo = new MapOverlay(map);
-	mo->SetColorMap(-1);
-
+	mo->SetColorMap(MapOverlay::customColorMap);
+	
 	mo->SetColor(XX, colors::black);
-	mo->SetColor(NF, colors::orange);
-	mo->SetColor(NR, colors::purple);
+
 	mo->SetColor(NN, colors::cyan);
-	mo->SetColor(FN, colors::red);
-	mo->SetColor(RN, colors::yellow);
-	mo->SetColor(FF, colors::red);
-	mo->SetColor(FR, colors::red); // colors::orange
-	mo->SetColor(RF, colors::green);
-	mo->SetColor(RR, colors::gray);
+	mo->SetColor(NF, colors::lightblue);
+	mo->SetColor(NR, colors::blue);
+	mo->SetColor(FN, colors::lightgreen);
+	mo->SetColor(RN, colors::green);
+
+	mo->SetColor(FF, colors::cyan);
+	mo->SetColor(FR, colors::darkblue);
+	mo->SetColor(RF, colors::darkgreen);
+
+	mo->SetColor(RR, colors::darkgray);
 	
 	forward.SetStopAfterGoal(false);
 	backward.SetStopAfterGoal(false);

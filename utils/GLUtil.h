@@ -79,14 +79,30 @@ static const double ROOT2D2 = 0.7071067811865475;
  */
 class recVec {
 public:
-	recVec() {}
+	recVec() { x = y = z = 0; }
 	recVec(GLdouble x_i, GLdouble y_i, GLdouble z_i) :x(x_i), y(y_i), z(z_i) {}
 	void normalise();
+	recVec GetNormal(recVec v)
+	{
+		recVec n;
+			
+		v.normalise();
+		this->normalise();
+			
+		n.x = this->y * v.z - this->z * v.y;
+		n.y = this->z * v.x - this->x * v.z;
+		n.z = this->x * v.y - this->y * v.x;
+		n.normalise();
+
+		return n;
+	}
 	GLdouble x,y,z;
 	recVec &operator+=(const recVec &v)
 	{ x += v.x; y += v.y; z += v.z; return *this; }
 	recVec &operator-=(const recVec &v)
 	{ x -= v.x; y -= v.y; z -= v.z; return *this; }
+	recVec operator-(const recVec &v)
+	{ recVec n = *this; n-=v; return n; }
 	recVec &operator*=(GLdouble val)
 	{ x *= val; y *= val; z *= val; return *this; }
 };
@@ -149,11 +165,21 @@ namespace colors
 {
 	const recColor black  = {0.0,0.0,0.0};
 	const recColor white  = {1.0,1.0,1.0}; // white
-	const recColor gray   = {00.5,0.5,0.5}; // green
+	const recColor gray   = {0.5,0.5,0.5}; // green
+	const recColor darkgray= {0.25,0.25,0.25}; // green
+	const recColor lightgray={0.75,0.75,0.75}; // green
 
 	const recColor red    = {1.0,0.0,0.0}; // red
+	const recColor darkred= {0.5,0.0,0.0}; // red
+	const recColor lightred= {1.0,0.5,0.5}; // red
+
 	const recColor green  = {0.0,1.0,0.0}; // green
+	const recColor darkgreen= {0.0,0.5,0.0}; // green
+	const recColor lightgreen= {0.5,1.0,0.5}; // green
+
 	const recColor blue   = {0.0,0.0,1.0}; // blue
+	const recColor darkblue   = {0.0,0.0,0.5}; // blue
+	const recColor lightblue   = {0.5,0.5,1.0}; // blue
 
 	const recColor yellow = {1.0,1.0,0.0}; // yellow
 	const recColor purple = {1.0,0.0,1.0}; // purple

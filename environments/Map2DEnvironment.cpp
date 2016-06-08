@@ -520,10 +520,16 @@ bool MapEnvironment::GoalTest(const xyLoc &node, const xyLoc &goal) const
 	return ((node.x == goal.x) && (node.y == goal.y));
 }
 
+uint64_t MapEnvironment::GetMaxHash() const
+{
+	return map->GetMapWidth()*map->GetMapHeight();
+}
+
 uint64_t MapEnvironment::GetStateHash(const xyLoc &node) const
 {
-	return (((uint64_t)node.x)<<16)|node.y;
-//	return (node.x<<16)|node.y;
+	//return (((uint64_t)node.x)<<16)|node.y;
+	return node.y*map->GetMapWidth()+node.x;
+	//	return (node.x<<16)|node.y;
 }
 
 uint64_t MapEnvironment::GetActionHash(tDirection act) const

@@ -19,7 +19,7 @@ bool gJPS::InitializeSearch(MapEnvironment *env, const xyLoc& from, const xyLoc&
 	nodesExpanded = nodesTouched = 0;
 	this->env = env;
 	this->to = to;
-	openClosedList.Reset();
+	openClosedList.Reset(env->GetMap()->GetMapWidth()*env->GetMap()->GetMapHeight());
 	xyLocParent f;
 	f.loc = from;
 	f.parent = 0xFF;
@@ -391,7 +391,7 @@ void gJPS::OpenGLDraw() const
 	}
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
-		const AStarOpenClosedData<xyLocParent> &data = openClosedList.Lookat(x);
+		const auto &data = openClosedList.Lookat(x);
 		if (x == top)
 		{
 			env->SetColor(1.0, 1.0, 0.0, transparency);

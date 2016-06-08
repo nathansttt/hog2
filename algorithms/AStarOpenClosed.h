@@ -66,7 +66,7 @@ class AStarOpenClosed {
 public:
 	AStarOpenClosed();
 	~AStarOpenClosed();
-	void Reset();
+	void Reset(int val=0);
 	uint64_t AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
 	uint64_t AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
 	void KeyChanged(uint64_t objKey);
@@ -109,7 +109,7 @@ AStarOpenClosed<state, CmpKey, dataStructure>::~AStarOpenClosed()
  * Remove all objects from queue.
  */
 template<typename state, typename CmpKey, class dataStructure>
-void AStarOpenClosed<state, CmpKey, dataStructure>::Reset()
+void AStarOpenClosed<state, CmpKey, dataStructure>::Reset(int)
 {
 	table.clear();
 	elements.clear();

@@ -72,6 +72,7 @@ namespace CanonicalGrid {
 			fprintf(stderr, "ERROR: Single State Goal Test not implemented for CanonicalGrid\n");
 			exit(1); return false;}
 		
+		uint64_t GetMaxHash() const;
 		uint64_t GetStateHash(const xyLoc &node) const;
 		uint64_t GetActionHash(tDirection act) const;
 		void OpenGLDraw() const;

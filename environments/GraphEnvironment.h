@@ -57,11 +57,12 @@ namespace GraphSearchConstants
 	const double kStraightEdgeCost = 1.0;
 	const double kDiagonalEdgeCost = ROOT_TWO;
 
-	Graph *GetEightConnectedGraph(Map *m);
-	Graph *GetFourConnectedGraph(Map *m);
+	Graph *GetEightConnectedGraph(Map *m, bool directed = true);
+	Graph *GetFourConnectedGraph(Map *m, bool directed = true);
 	Graph *GetGraph(Map *m);
 	void AddNodesToGraph(Map *m, Graph *g);
 	void AddEdges(Map *m, Graph *g, int x, int y,
+				  bool directed = true,
 				  double straigtEdgeCost = 1.0,
 				  double diagEdgeCost = ROOT_TWO,
 				  int straightEdgeProb = 100,
@@ -323,6 +324,7 @@ public:
 		fprintf(stderr, "ERROR: Single State Goal Test not implemented for GraphEnvironment\n");
 		exit(1); return false;
 	}
+	void SetIntegerEdgeCosts(bool val) { integerEdgeCosts = val; }
 	void SetDrawEdgeCosts(bool val) { drawEdgeCosts = val; }
 	void SetDrawNodeLabels(bool val) { drawNodeLabels = val; }
 	void SetNodeScale(double v) { nodeScale = v; }
@@ -332,6 +334,7 @@ protected:
 	Graph *g;
 	GraphHeuristic *h;
 	bool drawEdgeCosts;
+	bool integerEdgeCosts;
 	bool drawNodeLabels;
 	double nodeScale;
 };

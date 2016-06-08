@@ -10,11 +10,53 @@
 #include <string>
 #include <algorithm>
 
-JPS::JPS()
+JPS::JPS(Map *m)
 {
 	env = 0;
 	weight = 1.0;
 	jumpLimit = -1;
+
+	w = m->GetMapWidth();
+	h = m->GetMapHeight();
+	
+	jumpPoints.resize(m->GetMapWidth()*m->GetMapHeight());
+	for (int y = 0; y < m->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < m->GetMapWidth(); x++)
+		{
+			if (m->GetTerrainType(x, y) != kGround)
+			{
+				SetJumpPoint(x, y);
+				if ((m->GetTerrainType(x+1, y) == kGround) &&
+					(m->GetTerrainType(x, y+1) == kGround))
+					SetJumpPoint(x+1, y+1);
+				if ((m->GetTerrainType(x+1, y) == kGround) &&
+					(m->GetTerrainType(x, y-1) == kGround))
+					SetJumpPoint(x+1, y-1);
+				if ((m->GetTerrainType(x-1, y) == kGround) &&
+					(m->GetTerrainType(x, y+1) == kGround))
+					SetJumpPoint(x-1, y+1);
+				if ((m->GetTerrainType(x-1, y) == kGround) &&
+					(m->GetTerrainType(x, y-1) == kGround))
+					SetJumpPoint(x-1, y-1);
+			}
+			if (y == 0 || y == h-1 || x == 0 || x == w-1)
+				SetJumpPoint(x, y);
+		}
+	}
+//	for (int y = 0; y < m->GetMapHeight(); y++)
+//	{
+//		for (int x = 0; x < m->GetMapWidth(); x++)
+//		{
+//			if (m->GetTerrainType(x, y) != kGround)
+//				printf("x");
+//			else if (JumpPoint(x, y))
+//				printf("j");
+//			else
+//				printf(" ");
+//		}
+//		printf("\n");
+//	}
 }
 
 bool JPS::InitializeSearch(MapEnvironment *env, const xyLoc& from, const xyLoc& to, std::vector<xyLoc> &thePath)
@@ -22,7 +64,9 @@ bool JPS::InitializeSearch(MapEnvironment *env, const xyLoc& from, const xyLoc& 
 	nodesExpanded = nodesTouched = 0;
 	this->env = env;
 	this->to = to;
-	openClosedList.Reset();
+	Map *t = env->GetMap();
+	//openClosedList.Reset();
+	openClosedList.Reset(t->GetMapWidth()*t->GetMapHeight());
 	xyLocParent f;
 	f.loc = from;
 	f.parent = 0xFF;
@@ -99,6 +143,7 @@ bool JPS::DoSingleSearchStep(std::vector<xyLoc> &thePath)
 
 void JPS::GetPath(MapEnvironment *env, const xyLoc &from, const xyLoc &to, std::vector<xyLoc> &path)
 {
+	path.resize(0);
 	InitializeSearch(env, from, to, path);
 	while (DoSingleSearchStep(path) == false)
 	{}
@@ -106,7 +151,6 @@ void JPS::GetPath(MapEnvironment *env, const xyLoc &from, const xyLoc &to, std::
 
 void JPS::GetPath(MapEnvironment *env, const xyLoc &from, const xyLoc &to, std::vector<tDirection> &path)
 {
-	
 }
 
 void JPS::GetJPSSuccessors(const xyLocParent &s, const xyLoc &goal)
@@ -120,6 +164,18 @@ bool JPS::Passable(int x, int y)
 	return env->GetMap()->GetTerrainType(x, y) == kGround;
 }
 
+void JPS::SetJumpPoint(int x, int y)
+{
+	if (x >= 0 && x < w && y >= 0 && y < h)
+		jumpPoints[(y+0)*w+(x+0)] = true;
+}
+
+bool JPS::JumpPoint(int x, int y)
+{
+	return jumpPoints[(y+0)*w+(x+0)];
+}
+
+
 void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, double cost)
 {
 	if (goal.x == x && goal.y == y)
@@ -128,31 +184,41 @@ void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, doub
 		return;
 	}
 	nodesTouched++;
-	int w = env->GetMap()->GetMapWidth();
-	int h = env->GetMap()->GetMapHeight();
 	bool n1 = false, s1 = false, e1 = false, w1 = false;
 	if (parent&kN) // action that got me here
 	{
 		if (y != 0 && Passable(x, (y-1)))
 		{
 			bool a = false, b = false;
-			if (x != 0 && !Passable(x-1, (y)) && Passable(x-1, (y-1)))
-				a = true;
-			if (x != w-1 && !Passable(x+1, (y)) && Passable(x+1, (y-1)))
-				b = true;
+			uint8_t next = 0;
+			if (JumpPoint(x, y-1))
+			{
+				if (x != 0 && !Passable(x-1, (y)) && Passable(x-1, (y-1)))
+					next |= kNW;
+					//a = true;
+				if (x != w-1 && !Passable(x+1, (y)) && Passable(x+1, (y-1)))
+					//b = true;
+					next |= kNE;
+			}
+//			if (!JumpPoint(x, y-1) && (a||b))
+//			{
+//				printf("Whoops! (1)");
+//			}
 			
-			if (a && b)
-			{
-				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNW|kNE), cost+1));
-			}
-			else if (a)
-			{
-				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNW), cost+1));
-			}
-			else if (b)
-			{
-				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNE), cost+1));
-			}
+			if (next)
+				successors.push_back(jpsSuccessor(x, y-1, tDirection(next), cost+1));
+//			if (a && b)
+//			{
+//				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNW|kNE), cost+1));
+//			}
+//			else if (a)
+//			{
+//				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNW), cost+1));
+//			}
+//			else if (b)
+//			{
+//				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNE), cost+1));
+//			}
 			else {
 				if (cost >= jumpLimit)
 				{
@@ -170,24 +236,36 @@ void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, doub
 		if (x != 0 && Passable(x-1, (y)))
 		{
 			bool a = false, b = false;
-			if (y != 0 && !Passable(x, (y-1)) && Passable(x-1, (y-1)))
-				a = true;
-			if (y != h-1 && !Passable(x, (y+1)) && Passable(x-1, (y+1)))
-				b = true;
-			
-			if (a && b)
+			uint8_t next = 0;
+			if (JumpPoint(x-1, y))
 			{
-				successors.push_back(jpsSuccessor(x-1, y, tDirection(kNW|kSW), cost+1));
+				if (y != 0 && !Passable(x, (y-1)) && Passable(x-1, (y-1)))
+					//a = true;
+					next = kNW;
+				if (y != h-1 && !Passable(x, (y+1)) && Passable(x-1, (y+1)))
+					//b = true;
+					next |= kSW;
 			}
-			else if (a)
-			{
-				successors.push_back(jpsSuccessor(x-1, y, tDirection(kNW), cost+1));
-			}
-			else if (b)
-			{
-				//neighbors.push_back(xyLoc(x-1, y, kSW));
-				successors.push_back(jpsSuccessor(x-1, y, tDirection(kSW), cost+1));
-			}
+//			if (!JumpPoint(x-1, y) && (a||b))
+//			{
+//				printf("Whoops! (2) [%d, %d]", x, y);
+//			}
+
+			if (next)
+				successors.push_back(jpsSuccessor(x-1, y, tDirection(next), cost+1));
+//			if (a && b)
+//			{
+//				successors.push_back(jpsSuccessor(x-1, y, tDirection(kNW|kSW), cost+1));
+//			}
+//			else if (a)
+//			{
+//				successors.push_back(jpsSuccessor(x-1, y, tDirection(kNW), cost+1));
+//			}
+//			else if (b)
+//			{
+//				//neighbors.push_back(xyLoc(x-1, y, kSW));
+//				successors.push_back(jpsSuccessor(x-1, y, tDirection(kSW), cost+1));
+//			}
 			else {
 				if (cost >= jumpLimit)
 				{
@@ -205,24 +283,36 @@ void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, doub
 	{
 		if (y != h-1 && Passable(x, (y+1)))
 		{
+			uint8_t next = 0;
 			bool a = false, b = false;
-			if (x != 0 && !Passable(x-1, (y)) && Passable(x-1, (y+1)))
-				a = true;
-			if (x != w-1 && !Passable(x+1, (y)) && Passable(x+1, (y+1)))
-				b = true;
+			if (JumpPoint(x, y+1))
+			{
+				if (x != 0 && !Passable(x-1, (y)) && Passable(x-1, (y+1)))
+					//a = true;
+					next = kSW;
+				if (x != w-1 && !Passable(x+1, (y)) && Passable(x+1, (y+1)))
+					//b = true;
+					next |= kSE;
+			}
+//			if (!JumpPoint(x, y+1) && (a||b))
+//			{
+//				printf("Whoops! (3)");
+//			}
 			
-			if (a && b)
-			{
-				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSE|kSW), cost+1));
-			}
-			else if (a)
-			{
-				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSW), cost+1));
-			}
-			else if (b)
-			{
-				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSE), cost+1));
-			}
+			if (next)
+				successors.push_back(jpsSuccessor(x, y+1, tDirection(next), cost+1));
+//			if (a && b)
+//			{
+//				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSE|kSW), cost+1));
+//			}
+//			else if (a)
+//			{
+//				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSW), cost+1));
+//			}
+//			else if (b)
+//			{
+//				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSE), cost+1));
+//			}
 			else {
 				if (cost >= jumpLimit)
 				{
@@ -239,25 +329,37 @@ void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, doub
 	{
 		if (x != w-1 && Passable(x+1, (y)))
 		{
+			uint8_t next = 0;
 			bool a = false, b = false;
 			
-			if (y != 0 && !Passable(x, (y-1)) && Passable(x+1, (y-1)))
-				a = true;
-			if (y != h-1 && !Passable(x, (y+1)) && Passable(x+1, (y+1)))
-				b = true;
+			if (JumpPoint(x+1, y))
+			{
+				if (y != 0 && !Passable(x, (y-1)) && Passable(x+1, (y-1)))
+					//a = true;
+					next = kNE;
+				if (y != h-1 && !Passable(x, (y+1)) && Passable(x+1, (y+1)))
+					//b = true;
+					next |= kSE;
+			}
+//			if (!JumpPoint(x+1, y) && (a||b))
+//			{
+//				printf("Whoops! (4)");
+//			}
 			
-			if (a && b)
-			{
-				successors.push_back(jpsSuccessor(x+1, y, tDirection(kNE|kSE), cost+1));
-			}
-			else if (a)
-			{
-				successors.push_back(jpsSuccessor(x+1, y, tDirection(kNE), cost+1));
-			}
-			else if (b)
-			{
-				successors.push_back(jpsSuccessor(x+1, y, tDirection(kSE), cost+1));
-			}
+			if (next)
+				successors.push_back(jpsSuccessor(x+1, y, tDirection(next), cost+1));
+//			if (a && b)
+//			{
+//				successors.push_back(jpsSuccessor(x+1, y, tDirection(kNE|kSE), cost+1));
+//			}
+//			else if (a)
+//			{
+//				successors.push_back(jpsSuccessor(x+1, y, tDirection(kNE), cost+1));
+//			}
+//			else if (b)
+//			{
+//				successors.push_back(jpsSuccessor(x+1, y, tDirection(kSE), cost+1));
+//			}
 			else {
 				if (cost >= jumpLimit)
 				{
@@ -362,7 +464,7 @@ std::string JPS::SVGDraw()
 	}
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
-		const AStarOpenClosedData<xyLocParent> &data = openClosedList.Lookat(x);
+		const auto &data = openClosedList.Lookat(x);
 
 		env->SetColor(1.0, 1.0, 1.0);
 		s += env->SVGDrawLine(data.data.loc, openClosedList.Lookat(data.parentID).data.loc, 3);
@@ -371,7 +473,7 @@ std::string JPS::SVGDraw()
 	}
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
-		const AStarOpenClosedData<xyLocParent> &data = openClosedList.Lookat(x);
+		const auto &data = openClosedList.Lookat(x);
 
 		if (x == top)
 		{
@@ -416,8 +518,9 @@ void JPS::OpenGLDraw() const
 	}
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
-		const AStarOpenClosedData<xyLocParent> &data = openClosedList.Lookat(x);
-
+		const auto &data = openClosedList.Lookat(x);
+		if (data.round != openClosedList.GetRound())
+			continue;
 		glLineWidth(2);
 		env->SetColor(1.0, 1.0, 1.0);
 		env->GLDrawLine(data.data.loc, openClosedList.Lookat(data.parentID).data.loc);

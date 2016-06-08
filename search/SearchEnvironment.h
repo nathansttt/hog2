@@ -76,6 +76,7 @@ public:
 	virtual bool GoalTest(const state &node) const
 	{ return bValidSearchGoal&&(node == searchGoal); }
 
+	virtual uint64_t GetMaxHash() const { return 0; }
 	virtual uint64_t GetStateHash(const state &node) const = 0;
 	virtual void GetStateFromHash(uint64_t parent, state &s) const { assert(false); }
 

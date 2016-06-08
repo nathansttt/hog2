@@ -29,6 +29,23 @@ std::string SVGGetRGB(recColor c)
 	return s;
 }
 
+std::string SVGDefineGradient(bool horizontal, bool vertical, recColor c1, recColor c2, const char *name)
+{
+	std::string s;
+	s += "<defs><linearGradient id=\"";
+	s += name;
+	s += "\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">";
+	s += "<stop offset=\"0%\" style=\"stop-color:";
+	s += SVGGetRGB(c1);
+	s += ";stop-opacity:1\" />";
+	s += "<stop offset=\"100%\" style=\"stop-color:";
+	s += SVGGetRGB(c2);
+	s += ";stop-opacity:1\" />";
+	s += "</linearGradient></defs>";
+	
+	return s;
+}
+
 std::string SVGDrawCircle(double x, double y, double radius, recColor c)
 {
 	//double epsilon = 0.5;
@@ -39,9 +56,23 @@ std::string SVGDrawCircle(double x, double y, double radius, recColor c)
 	return s;
 }
 
+std::string SVGDrawRect(int x, int y, int width, int height, const char *gradient)
+{
+	double epsilon = 0.05;
+	std::string s;
+	s += "<rect x=\"" + std::to_string(10*x-epsilon);
+	s += "\" y=\"" + std::to_string(10*y-epsilon);
+	s += "\" width=\""+std::to_string(width*10+2*epsilon)+"\" height=\""+std::to_string(height*10+2*epsilon)+"\" ";
+	s += "fill=\"url(#";
+	s += gradient;
+	s += ")\"";
+	s += " style=\"stroke-width:1\" />";
+	return s;
+}
+
 std::string SVGDrawRect(int x, int y, int width, int height, recColor c)
 {
-	double epsilon = 0.5;
+	double epsilon = 0.05;
 	std::string s;
 	s += "<rect x=\"" + std::to_string(10*x-epsilon);
 	s += "\" y=\"" + std::to_string(10*y-epsilon);
@@ -53,11 +84,11 @@ std::string SVGDrawRect(int x, int y, int width, int height, recColor c)
 
 std::string SVGFrameRect(int x, int y, int width, int height, int border, recColor c)
 {
-	double epsilon = 0.5;
+	double epsilon = 0.05;//0.5;
 	std::string s;
-	s += "<rect x=\"" + std::to_string(10*x-epsilon);
-	s += "\" y=\"" + std::to_string(10*y-epsilon);
-	s += "\" width=\""+std::to_string(width*10+2*epsilon)+"\" height=\""+std::to_string(height*10+2*epsilon)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c);
+	s += "<rect x=\"" + std::to_string(10*x-epsilon+0);
+	s += "\" y=\"" + std::to_string(10*y-epsilon+0);
+	s += "\" width=\""+std::to_string(width*10+2*epsilon-0)+"\" height=\""+std::to_string(height*10+2*epsilon-0)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c);
 	s += ";stroke-width:"+std::to_string(border)+"\" />";
 	return s;
 }
@@ -79,11 +110,11 @@ std::string SVGDrawText(int x1, int y1, const char *txt, recColor c, int size)
 {
 	std::string s;
 	recColor notC = {1-c.r, 1-c.g, 1-c.b};
-	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10)+"\" style=\"fill:"+SVGGetRGB(c);
+	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" style=\"fill:"+SVGGetRGB(c);
 	s += "; font-family:Impact, sans-serif; font-size:"+std::to_string(size*10)+"px; stroke:"+SVGGetRGB(notC)+"; stroke-width:"+std::to_string(size)+"px; stroke-linecap:round;stroke-linejoin:round\">";
 	s += txt;
 	s += "</text>";
-	s += "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10)+"\" style=\"fill:"+SVGGetRGB(c);
+	s += "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" style=\"fill:"+SVGGetRGB(c);
 	s += "; font-family:Impact, sans-serif; font-size:"+std::to_string(size*10)+"px; stroke:"+SVGGetRGB(notC)+"; stroke-width:0px\">";
 	s += txt;
 	s += "</text>";

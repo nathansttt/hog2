@@ -106,7 +106,8 @@ void CreateSimulation(int id)
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz101d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
-		map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
+		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
+		map = new Map("/Users/nathanst/hog2/maps/wc3maps/battleground.map");
 		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		
@@ -234,30 +235,30 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		unitSims[windowID]->StepTime(1.0/30.0);
 	}
 
-	CanonicalGrid::xyLoc gLoc(px2, py2, CanonicalGrid::kAll);
-	//CanonicalGrid::xyLoc gLoc(10, 23, CanonicalGrid::kAll);
-	std::deque<CanonicalGrid::xyLoc> queue;
-	queue.push_back(gLoc);
-	std::vector<CanonicalGrid::xyLoc> v;
-	std::vector<bool> visited(grid->GetMap()->GetMapHeight()*grid->GetMap()->GetMapWidth());
-	while (!queue.empty())
-	{
-		grid->GetSuccessors(queue.front(), v);
-		for (auto &s : v)
-		{
-			if (!visited[s.x+s.y*grid->GetMap()->GetMapWidth()])
-			{
-				grid->SetColor(0.0, 0.0, 0.0);
-				queue.push_back(s);
-			}
-			else {
-				grid->SetColor(1.0, 0.0, 0.0);
-			}
-			grid->GLDrawLine(queue.front(), s);
-			visited[s.x+s.y*grid->GetMap()->GetMapWidth()] = true;
-		}
-		queue.pop_front();
-	}
+//	CanonicalGrid::xyLoc gLoc(px2, py2, CanonicalGrid::kAll);
+//	//CanonicalGrid::xyLoc gLoc(10, 23, CanonicalGrid::kAll);
+//	std::deque<CanonicalGrid::xyLoc> queue;
+//	queue.push_back(gLoc);
+//	std::vector<CanonicalGrid::xyLoc> v;
+//	std::vector<bool> visited(grid->GetMap()->GetMapHeight()*grid->GetMap()->GetMapWidth());
+//	while (!queue.empty())
+//	{
+//		grid->GetSuccessors(queue.front(), v);
+//		for (auto &s : v)
+//		{
+//			if (!visited[s.x+s.y*grid->GetMap()->GetMapWidth()])
+//			{
+//				grid->SetColor(0.0, 0.0, 0.0);
+//				queue.push_back(s);
+//			}
+//			else {
+//				grid->SetColor(1.0, 0.0, 0.0);
+//			}
+//			grid->GLDrawLine(queue.front(), s);
+//			visited[s.x+s.y*grid->GetMap()->GetMapWidth()] = true;
+//		}
+//		queue.pop_front();
+//	}
 	
 	//	for (unsigned int x = 0; x < astars.size(); x++)
 //		astars[x].OpenGLDraw();
@@ -1306,7 +1307,9 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				//px1 = 129-22; py1 = 460-25; px2 = 129; py2 = 460; //128 181 430 364
 
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
-				
+				//331 355 67 318
+				px1 = 331; py1 = 355;
+				px2 = 67; py2 = 318;
 				if (ma1 == 0)
 				{
 					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());

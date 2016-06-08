@@ -573,7 +573,7 @@ void MNPuzzle::OpenGLDraw() const
 
 void DrawTile(float x, float y, char c1, char c2, int w, int h)
 {
-	glLineWidth(10.0);
+	//glLineWidth(10.0);
 	int textWidth = 0;
 	if (c1 != 0)
 		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c1);
@@ -640,6 +640,8 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s) const
 				c1 = '0'+(((s.puzzle[x+y*width])/10)%10);
 			if (s.puzzle[x+y*width] > 0)
 				c2 = '0'+((s.puzzle[x+y*width])%10);
+			if (s.puzzle[x+y*width] == -1)
+				c1 = ' ';
 			DrawTile(x, y, c1, c2, width, height);
 		}
 	}
@@ -658,6 +660,8 @@ void MNPuzzle::OpenGLDraw(const MNPuzzleState &s1, const MNPuzzleState &s2, floa
 				c1 = '0'+(((s2.puzzle[x+y*width])/10)%10);
 			if (s2.puzzle[x+y*width] > 0)
 				c2 = '0'+((s2.puzzle[x+y*width])%10);
+			if (s2.puzzle[x+y*width] == -1)
+				c1 = ' ';
 
 			if (s1.puzzle[x+y*width] == s2.puzzle[x+y*width])
 			{
@@ -807,7 +811,7 @@ void MNPuzzle::GetStateFromHash(MNPuzzleState &s, uint64_t hash) const
 	// to ensure the right parity
 	int x = 0;
 	int loc1 = -1, loc2 = -1;
-	for (; x < 12; x++)
+	for (; x < count; x++)
 	{
 		if (s.puzzle[x] == -1)
 		{
@@ -816,7 +820,7 @@ void MNPuzzle::GetStateFromHash(MNPuzzleState &s, uint64_t hash) const
 			break;
 		}
 	}
-	for (; x < 12; x++)
+	for (; x < count; x++)
 	{
 		if (s.puzzle[x] == -1)
 		{

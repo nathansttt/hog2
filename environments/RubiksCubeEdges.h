@@ -79,7 +79,9 @@ static std::ostream& operator <<(std::ostream & out, const RubikEdgeState &s)
 {
 	for (int x = 0; x < 12; x++)
 	{
-		out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(x) << "] ";
+		//out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(x) << "] ";
+		out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(s.GetCubeInLoc(x)) << "] ";
+
 		//out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(s.GetCubeInLoc(x))?1:0) << " ";
 	}
 	return out;
