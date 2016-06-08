@@ -41,6 +41,8 @@ std::mutex printLock;
 std::mutex countLock;
 std::mutex openLock;
 
+RubiksState startState, goalState;
+
 void GetBucketAndData(const RubiksState &s, int &bucket, uint64_t &data);
 void GetState(RubiksState &s, int bucket, uint64_t data);
 int GetBucket(const RubiksState &s);
@@ -226,15 +228,15 @@ openData GetBestFile()
 	return best;
 }
 
-void GetOpenData(const RubiksState &start, tSearchDirection dir, int cost,
+void GetOpenData(const RubiksState &from, tSearchDirection dir, int cost,
 				 openData &d, uint64_t &data)
 {
 	int bucket;
 	//uint64_t data;
-	GetBucketAndData(start, bucket, data);
+	GetBucketAndData(from, bucket, data);
 	d.dir = dir;
 	d.gcost = cost;
-	d.hcost = (dir==kForward)?forward.HCost(start, start):reverse.HCost(start, start);
+	d.hcost = (dir==kForward)?forward.HCost(from, goalState):reverse.HCost(from, startState);
 	//d.hcost2 = (dir==kForward)?reverse.HCost(start, start):forward.HCost(start, start);
 	d.bucket = bucket;
 	//d.priority = d.gcost+d.hcost;
@@ -804,6 +806,8 @@ void GetState(RubiksState &s, int bucket, uint64_t data)
 
 void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
 {
+	startState = start;
+	goalState = goal;
 	prefix1 = p1;
 	prefix2 = p2;
 	hprefix = hloc;
