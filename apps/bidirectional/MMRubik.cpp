@@ -47,7 +47,7 @@ void GetBucketAndData(const RubiksState &s, int &bucket, uint64_t &data);
 void GetState(RubiksState &s, int bucket, uint64_t data);
 int GetBucket(const RubiksState &s);
 
-void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result);
+void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result, heuristicType h);
 RubiksCube cube;
 
 Heuristic<RubiksState> forward;
@@ -314,6 +314,7 @@ void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentO
 	for (const auto &s : currentOpen)
 	{
 		// Opposite direction, same bucket AND could be a solution (g+g >= C)
+		// TODO: only need to check if we find a better solution (g+g < U)
 		if (s.first.dir != d.dir && s.first.bucket == d.bucket &&
 			d.gcost + s.first.gcost >= currentC)// && d.hcost2 == s.first.hcost)
 		{
@@ -565,7 +566,7 @@ void ExpandNextFile()
 
 }
 
-#define ZERO
+//#define ZERO
 //#define KORF97
 //#define RUBIK_888
 //#define RUBIK_10_2
@@ -573,213 +574,221 @@ void ExpandNextFile()
 //#define SMALL
 //#define TINY
 
-void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result)
+void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result, heuristicType h)
 {
 	RubiksCube cube;
 	std::vector<int> blank;
-#ifdef ZERO
-	ZeroHeuristic<RubiksState> *zero = new ZeroHeuristic<RubiksState>();
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.heuristics.push_back(zero);
-#endif
-	
-#ifdef TINY
-	std::vector<int> edges1 = {1, 3, 8, 9}; // first 4
-	std::vector<int> edges2 = {0, 2, 4, 5}; // first 4
-	std::vector<int> corners = {0, 1, 2, 3}; // first 4
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load(hprefix))
-	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(hprefix);
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
 
-
-#ifdef SMALL
-	std::vector<int> edges1 = {0, 1, 2, 4, 6};
-	std::vector<int> edges2 = {3, 5};
-	std::vector<int> edges3 = {7, 8, 9, 10, 11};
-	std::vector<int> corners1 = {0, 1, 2, 3, 4, 5};
-	std::vector<int> corners2 = {2, 3, 4, 5, 6, 7};
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges3, blank);
-	RubikPDB *pdb4 = new RubikPDB(&cube, goal, blank, corners1);
-	RubikPDB *pdb5 = new RubikPDB(&cube, goal, blank, corners2);
-	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb5->BuildPDB(goal, std::thread::hardware_concurrency());
-	result.lookups.push_back({kMaxNode, 1, 5});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.lookups.push_back({kLeafNode, 3, 0});
-	result.lookups.push_back({kLeafNode, 4, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-	result.heuristics.push_back(pdb4);
-	result.heuristics.push_back(pdb5);
-#endif
-	
-#ifdef KORF97
-	std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
-	std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-
-//	assert(!"File names are getting corrupted here. Perhaps by the abstraction of the goal state");
-//	assert(!"Need to abstract the goal state immediately when creating the pdb instead of only when I build the pdb");
-	if (!pdb1->Load(hprefix))
+	switch (h)
 	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
+		case kNone:
+		{
+			ZeroHeuristic<RubiksState> *zero = new ZeroHeuristic<RubiksState>();
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.heuristics.push_back(zero);
+			break;
+		}
+		case k444:
+		{
+			std::vector<int> edges1 = {1, 3, 8, 9}; // first 4
+			std::vector<int> edges2 = {0, 2, 4, 5}; // first 4
+			std::vector<int> corners = {0, 1, 2, 3}; // first 4
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			result.lookups.push_back({kMaxNode, 1, 3});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+			break;
+		}
+		case kSmall:
+		{
+			assert(!"PDB not being saved!");
+			std::vector<int> edges1 = {0, 1, 2, 4, 6};
+			std::vector<int> edges2 = {3, 5};
+			std::vector<int> edges3 = {7, 8, 9, 10, 11};
+			std::vector<int> corners1 = {0, 1, 2, 3, 4, 5};
+			std::vector<int> corners2 = {2, 3, 4, 5, 6, 7};
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges3, blank);
+			RubikPDB *pdb4 = new RubikPDB(&cube, goal, blank, corners1);
+			RubikPDB *pdb5 = new RubikPDB(&cube, goal, blank, corners2);
+			pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+			pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+			pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+			pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
+			pdb5->BuildPDB(goal, std::thread::hardware_concurrency());
+			result.lookups.push_back({kMaxNode, 1, 5});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.lookups.push_back({kLeafNode, 3, 0});
+			result.lookups.push_back({kLeafNode, 4, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+			result.heuristics.push_back(pdb4);
+			result.heuristics.push_back(pdb5);
+			break;
+		}
+		case k1997:
+		{
+			std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
+			std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
+			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+			
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			else {
+				printf("Loaded previous heuristic\n");
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			else {
+				printf("Loaded previous heuristic\n");
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			else {
+				printf("Loaded previous heuristic\n");
+			}
+			result.lookups.push_back({kMaxNode, 1, 3});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+			break;
+		}
+		case k888:
+		{
+			std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7};
+			std::vector<int> edges2 = {1, 3, 5, 7, 8, 9, 10, 11};
+			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			result.lookups.push_back({kMaxNode, 1, 3});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+		}
+		case k839:
+		{
+			std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+			std::vector<int> edges2 = {9, 10, 11};
+			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			result.lookups.push_back({kMaxNode, 1, 3});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+			break;
+		}
+		case k8210:
+		{
+			std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+			std::vector<int> edges2 = {10, 11};
+			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			result.lookups.push_back({kMaxNode, 1, 3});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+			break;
+		}
 	}
-	else {
-		printf("Loaded previous heuristic\n");
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	else {
-		printf("Loaded previous heuristic\n");
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(g);
-	}
-	else {
-		printf("Loaded previous heuristic\n");
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
-
-#ifdef RUBIK_888
-	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7};
-	std::vector<int> edges2 = {1, 3, 5, 7, 8, 9, 10, 11};
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7}; // first 4
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load(hprefix))
-	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(hprefix);
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
-
-#ifdef RUBIK_10_2
-	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-	std::vector<int> edges2 = {10, 11};
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load(hprefix))
-	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(hprefix);
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
-
-#ifdef RUBIK_9_3
-	std::vector<int> edges1 = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-	std::vector<int> edges2 = {9, 10, 11};
-	std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
-	RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
-	RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-	RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
-	if (!pdb1->Load(hprefix))
-	{
-		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb1->Save(hprefix);
-	}
-	if (!pdb2->Load(hprefix))
-	{
-		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb2->Save(hprefix);
-	}
-	if (!pdb3->Load(hprefix))
-	{
-		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
-		pdb3->Save(hprefix);
-	}
-	result.lookups.push_back({kMaxNode, 1, 3});
-	result.lookups.push_back({kLeafNode, 0, 0});
-	result.lookups.push_back({kLeafNode, 1, 0});
-	result.lookups.push_back({kLeafNode, 2, 0});
-	result.heuristics.push_back(pdb1);
-	result.heuristics.push_back(pdb2);
-	result.heuristics.push_back(pdb3);
-#endif
-
 }
 
 int GetBucket(const RubiksState &s)
@@ -804,7 +813,9 @@ void GetState(RubiksState &s, int bucket, uint64_t data)
 
 #pragma mark Main Code
 
-void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
+void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2,
+		heuristicType h, const char *hloc)
+//void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
 {
 	startState = start;
 	goalState = goal;
@@ -816,7 +827,7 @@ void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, c
 	gDistBackward.resize(12);
 	gDistForward.resize(12);
 	expanded = 0;
-	BuildHeuristics(start, goal, forward);
+	BuildHeuristics(start, goal, forward, h);
 
 	reverse = forward;
 	for (int x = 0; x < reverse.heuristics.size(); x++)
@@ -841,17 +852,16 @@ void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, c
 	printf("%1.2fs elapsed\n", t.GetElapsedTime());
 }
 
-void CompareIDA(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
+void CompareIDA(RubiksState &start, RubiksState &goal, heuristicType h, const char *hloc)
+//void CompareIDA(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
 {
-	prefix1 = p1;
-	prefix2 = p2;
 	hprefix = hloc;
 	
 	bestSolution = 100;
 	gDistBackward.resize(12);
 	gDistForward.resize(12);
 	expanded = 0;
-	BuildHeuristics(start, goal, forward);
+	BuildHeuristics(start, goal, forward, h);
 	//BuildHeuristics(goal, start, reverse);
 	
 	std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);

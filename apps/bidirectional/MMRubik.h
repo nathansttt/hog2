@@ -16,8 +16,19 @@
 #define NAMESPACE_CLOSE(_name) }
 
 namespace MM {
-	void MM(RubiksState &start, RubiksState &goal, const char *prefix1, const char *prefix2, const char *heuristicloc);
-	void CompareIDA(RubiksState &start, RubiksState &goal, const char *prefix1, const char *prefix2, const char *heuristicloc);
+	enum heuristicType {
+		kNone,
+		k444,
+		kSmall,
+		k888,
+		k1997,
+		k839,
+		k8210
+	};
+	
+	void MM(RubiksState &start, RubiksState &goal, const char *prefix1, const char *prefix2,
+			heuristicType h, const char *heuristicloc);
+	void CompareIDA(RubiksState &start, RubiksState &goal, heuristicType h, const char *heuristicloc);
 }
 
 #endif /* defined(__hog2_glut__MM__) */

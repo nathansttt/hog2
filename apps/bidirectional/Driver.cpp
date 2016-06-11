@@ -86,141 +86,143 @@ void GetDepth20(RubiksState &start, int which);
 void GetRandom15(RubiksState &start, int which);
 void DualTest();
 void ArbitraryGoalTest();
+int MyCLHandler(char *argument[], int maxNumArgs);
 
 int main(int argc, char* argv[])
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	// technically we could/should install a command-line handler and handle these there
-	
-	
+	InstallHandlers();
+	InstallCommandLineHandler(MyCLHandler, "-mm", "-mm <tmpdir1 <tmpdir2>", "Run MM");
+	InstallCommandLineHandler(MyCLHandler, "-pida", "-pida", "Run MM");
+	InstallCommandLineHandler(MyCLHandler, "-heuristic", "-heuristic <dir> <1997/888/8210/none>", "Load the given heuristic");
+	InstallCommandLineHandler(MyCLHandler, "-problem", "-problem which", "Load the given problem");
+	RunHOGGUI(argc, argv);
+}
+
+int MyCLHandler(char *argument[], int maxNumArgs)
+{
+	static RubiksState start, goal;
+	static char *heuristicDir = 0;
+	static bool heuristic = false;
+	static bool problem = false;
+	static MM::heuristicType h = MM::kNone;
 	//	ArbitraryGoalTest();
 	//	DualTest();
 
-	if (argc > 1 && strcmp(argv[1], "-bfs") == 0)
+	if (strcmp(argument[0], "-heuristic") == 0) // not hooked up
 	{
-		BFS();
-	}
-	else if (argc > 1 && strcmp(argv[1], "-pancake") == 0)
-	{
-		//MMPancake::MM();
-	}
-	else if (strcmp(argv[1], "-pida") == 0)
-	{
-		if (argc <= 5)
+		if (maxNumArgs <= 2)
 		{
-			printf("Usage:\n%s -pida <problem> <tmpdir1 <tmpdir2> <heuristicdir>\n", argv[0]);
-			exit(0);
+			return 0;
 		}
-		RubiksState a, b;
+		heuristic = true;
+		heuristicDir = argument[1];
+		if (strcmp(argument[2], "1997") == 0)
+			h = MM::k1997;
+		else if (strcmp(argument[2], "888") == 0)
+			h = MM::k888;
+		else if (strcmp(argument[2], "none") == 0)
+			h = MM::kNone;
+		else if (strcmp(argument[2], "8210") == 0)
+			h = MM::k8210;
+		else if (strcmp(argument[2], "839") == 0)
+			h = MM::k839;
+
+		return 3;
+	}
+	else if (strcmp(argument[0], "-problem") == 0) // not hooked up
+	{
+		if (maxNumArgs <= 1)
+		{
+			return 0;
+		}
+		problem = true;
 		RubiksCube c;
-		b.Reset();
+		goal.Reset();
 
 		int which = 0;
-		which = atoi(argv[2]);
+		which = atoi(argument[1]);
 		if (which < 10)
-			GetKorfInstance(a, which);
+			GetKorfInstance(start, which);
 		else if (which == 19)
 		{
-			GetSuperFlip(a);
+			GetSuperFlip(start);
 			// Any action will reduce this to 19 moves to solve
-			c.ApplyAction(a, 0);
+			c.ApplyAction(start, 0);
 		}
 		else if (which == 20)
 		{
-			GetSuperFlip(a);
-		}
-		MM::CompareIDA(a, b, argv[3], argv[4], argv[5]);
-	}
-	else if (strcmp(argv[1], "-mm0") == 0)
-	{
-		if (argc <= 4)
-		{
-			printf("Usage:\n%s -mm0 <problem> <tmpdir1 <tmpdir2>\n", argv[0]);
-			exit(0);
-		}
-		RubiksState a, b;
-		RubiksCube c;
-		b.Reset();
-		
-		int which = 0;
-		which = atoi(argv[2]);
-		if (which < 10)
-			GetKorfInstance(a, which);
-		else if (which == 19)
-		{
-			GetSuperFlip(a);
-			// Any action will reduce this to 19 moves to solve
-			c.ApplyAction(a, 0);
-		}
-		else if (which == 20)
-		{
-			GetSuperFlip(a);
-		}
-		MM0::MM0(a, b, argv[3], argv[4]);
-	}
-	else if (strcmp(argv[1], "-mm") == 0)
-	{
-		if (argc <= 5)
-		{
-			printf("Usage:\n%s -mm <problem> <tmpdir1 <tmpdir2> <heuristicdir>\n", argv[0]);
-			exit(0);
-		}
-		RubiksState a, b;
-		RubiksCube c;
-		b.Reset();
-		// solution depth 12
-//		c.ApplyAction(a, 0*3);
-//		c.ApplyAction(a, 1*3);
-//		c.ApplyAction(a, 2*3);
-//		c.ApplyAction(a, 3*3);
-//		c.ApplyAction(a, 4*3);
-//		c.ApplyAction(a, 5*3);
-//		c.ApplyAction(a, 4*3);
-//		c.ApplyAction(a, 3*3);
-//		c.ApplyAction(a, 2*3);
-//		c.ApplyAction(a, 1*3);
-//		c.ApplyAction(a, 0*3);
-//		c.ApplyAction(a, 1*3);
-//		c.ApplyAction(a, 2*3);
-//		c.ApplyAction(a, 3*3);
-//		c.ApplyAction(a, 4*3);
-
-		int which = 0;
-		which = atoi(argv[2]);
-		if (which < 10)
-			GetKorfInstance(a, which);
-		else if (which == 19)
-		{
-			GetSuperFlip(a);
-			// Any action will reduce this to 19 moves to solve
-			c.ApplyAction(a, 0);
-		}
-		else if (which == 20)
-		{
-			GetSuperFlip(a);
+			GetSuperFlip(start);
 		}
 		else if (which > 20)
 		{
-			GetDepth20(a, which-21);
+			GetDepth20(start, which-21);
 		}
-		MM::MM(a, b, argv[3], argv[4], argv[5]);
+		return 2;
 	}
-	else if (argc > 3 && strcmp(argv[1], "-grid") == 0)
+	else if (strcmp(argument[0], "-bfs") == 0) // not hooked up
 	{
-		AnalyzeMap(argv[2], argv[3]);
+		BFS();
+		return 1;
 	}
-	else if (argc > 3 && strcmp(argv[1], "-testPruning") == 0)
+	else if (strcmp(argument[0], "-pancake") == 0) // not hooked up
 	{
-		TestPruning(atoi(argv[2]), atoi(argv[3]));
+		//MMPancake::MM();
+		return 1;
 	}
-	else if (strcmp(argv[1], "-easy") == 0)
+	else if (strcmp(argument[0], "-pida") == 0)
+	{
+		if (!heuristic || !problem)
+		{
+			printf("Problem and heuristic not defined\n");
+			return 0;
+		}
+		MM::CompareIDA(start, goal, h, heuristicDir);
+		exit(0);
+		return 1;
+	}
+	else if (strcmp(argument[0], "-mm") == 0)
+	{
+		if (maxNumArgs <= 2)
+		{
+			return 0;
+		}
+		if (!heuristic || !problem)
+		{
+			printf("Problem and heuristic not defined\n");
+			return 0;
+		}
+		MM::MM(start, goal, argument[1], argument[2], h, heuristicDir);
+		exit(0);
+		return 3;
+	}
+	/*
+	 * These aren't currently hooked up!
+	 */
+	else if (strcmp(argument[0], "-mm0") == 0) // not hooked up
+	{
+		if (maxNumArgs <= 3)
+		{
+			printf("Usage:\nbidirectional -mm0 <problem> <tmpdir1 <tmpdir2>\n");
+			exit(0);
+		}
+		MM0::MM0(start, goal, argument[2], argument[3]);
+	}
+	else if (maxNumArgs > 2 && strcmp(argument[0], "-grid") == 0)
+	{
+		AnalyzeMap(argument[1], argument[2]);
+		return 3;
+	}
+	else if (maxNumArgs > 2 && strcmp(argument[0], "-testPruning") == 0)
+	{
+		TestPruning(atoi(argument[1]), atoi(argument[2]));
+		return 3;
+	}
+	else if (strcmp(argument[0], "-easy") == 0)
 	{
 		Test100Easy();
-		return 0;
-	}
-	else {
-		InstallHandlers();
-		RunHOGGUI(argc, argv);
+		return 1;
 	}
 }
 
