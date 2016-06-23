@@ -13,6 +13,7 @@
 #include <string>
 #include <unordered_set>
 #include <iomanip>
+#include "SharedQueue.h"
 
 NAMESPACE_OPEN(MM)
 
@@ -58,23 +59,31 @@ enum  tSearchDirection {
 	kBackward,
 };
 
+const int kWorkUnitSize = 16;
+
+struct workUnit {
+	uint64_t work[kWorkUnitSize];
+};
+
+SharedQueue<workUnit> work;
+
 // This tells us the open list buckets
 struct openData {
 	tSearchDirection dir;  // at most 2 bits
 	uint8_t priority;      // at most 6 bits
 	uint8_t gcost;         // at most 4 bits
-	uint8_t hcost;         // at most 4 bits
+	uint8_t fcost;         // at most 4 bits
 	uint16_t bucket;        // at most (3) bits
 };
 
 static bool operator==(const openData &a, const openData &b)
 {
-	return (a.dir == b.dir && a.priority == b.priority && a.gcost == b.gcost && a.hcost == b.hcost && a.bucket == b.bucket);
+	return (a.dir == b.dir && a.priority == b.priority && a.gcost == b.gcost && a.fcost == b.fcost && a.bucket == b.bucket);
 }
 
 static std::ostream &operator<<(std::ostream &out, const openData &d)
 {
-	out << "[" << ((d.dir==kForward)?"forward":"backward") << ", p:" << +d.priority << ", g:" << +d.gcost << ", h:" << +d.hcost;
+	out << "[" << ((d.dir==kForward)?"forward":"backward") << ", p:" << +d.priority << ", g:" << +d.gcost << ", f:" << +d.fcost;
 	out << ", b:" << +d.bucket << "]";
 	return out;
 }
@@ -83,7 +92,7 @@ struct openDataHash
 {
 	std::size_t operator()(const openData & x) const
 	{
-		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.hcost<<12)|(x.bucket<<20);
+		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.fcost<<12)|(x.bucket<<20);
 	}
 };
 
@@ -170,7 +179,7 @@ std::string GetOpenName(const openData &d)
 	s += "-";
 	s += std::to_string(d.gcost);
 	s += "-";
-	s += std::to_string(d.hcost);
+	s += std::to_string(d.fcost);
 //	s += "-";
 //	s += std::to_string(d.hcost2);
 	s += "-";
@@ -195,10 +204,11 @@ openData GetBestFile()
 		else if (s.first.dir == kBackward && s.first.gcost < minGBackward)
 			minGBackward = s.first.gcost;
 		
-		if (s.first.dir == kForward && s.first.gcost+s.first.hcost < minFForward)
-			minFForward = s.first.gcost+s.first.hcost;
-		else if (s.first.dir == kBackward && s.first.gcost+s.first.hcost < minFBackward)
-			minFBackward = s.first.gcost+s.first.hcost;
+		//if (s.first.dir == kForward && s.first.gcost+s.first.hcost < minFForward)
+		if (s.first.dir == kForward && s.first.fcost < minFForward)
+			minFForward = s.first.fcost;
+		else if (s.first.dir == kBackward && s.first.fcost < minFBackward)
+			minFBackward = s.first.fcost;
 
 		if (s.first.priority < best.priority)
 		{
@@ -212,9 +222,9 @@ openData GetBestFile()
 			{
 				if (s.first.dir == best.dir)
 				{
-					if (s.first.hcost < best.hcost)
+					if (s.first.fcost < best.fcost)
 						best = s.first;
-					else if (s.first.hcost == best.hcost)
+					else if (s.first.fcost == best.fcost)
 					{
 						if (s.first.bucket < best.bucket)
 							best = s.first;
@@ -236,11 +246,11 @@ void GetOpenData(const RubiksState &from, tSearchDirection dir, int cost,
 	GetBucketAndData(from, bucket, data);
 	d.dir = dir;
 	d.gcost = cost;
-	d.hcost = (dir==kForward)?forward.HCost(from, goalState):reverse.HCost(from, startState);
+	d.fcost = cost + ((dir==kForward)?forward.HCost(from, goalState):reverse.HCost(from, startState));
 	//d.hcost2 = (dir==kForward)?reverse.HCost(start, start):forward.HCost(start, start);
 	d.bucket = bucket;
 	//d.priority = d.gcost+d.hcost;
-	d.priority = std::max(d.gcost+d.hcost, d.gcost*2);
+	d.priority = std::max(d.fcost, uint8_t(d.gcost*2));
 }
 
 void AddStatesToQueue(const openData &d, uint64_t *data, size_t count)
@@ -420,31 +430,39 @@ void ParallelExpandBucket(openData d, const std::unordered_set<uint64_t> &states
 	RubiksState tmp;
 	uint64_t localExpanded = 0;
 	int count = 0;
-	for (const auto &values : states)
+	//for (const auto &values : states)
+	workUnit item;
+	while (true)
 	{
-		if (finished)
+		work.WaitRemove(item);
+		if (finished || item.work[0] == -1)
 			break;
-
-		count++;
-		if (myThread != (count%totalThreads))
-			continue;
 		
-		localExpanded++;
-		for (int x = 0; x < 18; x++) // TODO: use getactions
+		for (int t = 0; t < kWorkUnitSize; t++)
 		{
-			GetState(tmp, d.bucket, values);
-			// copying 2 64-bit values is faster than undoing a move
-			cube.ApplyAction(tmp, x);
-			openData newData;
-			uint64_t newRank;
-			GetOpenData(tmp, d.dir, d.gcost+1, newData, newRank);
-
-			std::vector<uint64_t> &c = cache[newData];
-			c.push_back(newRank);
-			if (c.size() > cacheSize)
+			uint64_t values = item.work[t];
+			if (values == -1)
+				break;
+			
+			count++;
+			
+			localExpanded++;
+			for (int x = 0; x < 18; x++) // TODO: use getactions
 			{
-				AddStatesToQueue(newData, &c[0], c.size());
-				c.clear();
+				GetState(tmp, d.bucket, values);
+				// copying 2 64-bit values is faster than undoing a move
+				cube.ApplyAction(tmp, x);
+				openData newData;
+				uint64_t newRank;
+				GetOpenData(tmp, d.dir, d.gcost+1, newData, newRank);
+				
+				std::vector<uint64_t> &c = cache[newData];
+				c.push_back(newRank);
+				if (c.size() > cacheSize)
+				{
+					AddStatesToQueue(newData, &c[0], c.size());
+					c.clear();
+				}
 			}
 		}
 	}
@@ -533,6 +551,30 @@ void ExpandNextFile()
 	std::vector<std::thread *> threads;
 	for (int x = 0; x < numThreads; x++)
 		threads.push_back(new std::thread(ParallelExpandBucket, d, std::ref(states), x, numThreads));
+	// Put work for states into queue and send it to threads
+	{
+		int count = 0;
+		workUnit w;
+		for (const auto &values : states)
+		{
+			w.work[count] = values;
+			count++;
+			if (count == kWorkUnitSize)
+			{
+				work.WaitAdd(w);
+				count = 0;
+			}
+		}
+		if (count > 0)
+		{
+			for (int x = count; x < kWorkUnitSize; x++)
+				w.work[x] = -1;
+			work.WaitAdd(w);
+		}
+		w.work[0] = -1;
+		for (int x = 0; x < threads.size(); x++)
+			work.WaitAdd(w);
+	}
 	for (int x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();
