@@ -8,6 +8,7 @@
 
 #include "MR1Permutation.h"
 #include <assert.h>
+#include <string.h>
 
 inline void swap(int &a, int &b)
 {

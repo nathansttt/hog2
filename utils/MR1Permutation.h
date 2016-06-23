@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <stdint.h>
 
 class MR1KPermutation {
 public:
