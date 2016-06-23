@@ -20,7 +20,7 @@ NAMESPACE_OPEN(MM)
 //const uint64_t bucketBits = 3;
 //const int bucketMask = 0x7;
 //const int fileBuckets = 32; // must be at least 8
-const uint64_t bucketBits = 9;
+const uint64_t bucketBits = 5;
 const int bucketMask = ((1<<bucketBits)-1);//0x1F;
 
 const char *prefix1;

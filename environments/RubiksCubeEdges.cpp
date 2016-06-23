@@ -10,6 +10,7 @@
 #include "GLUtil.h"
 #include <cassert>
 #include <string>
+#include <thread>
 
 /**
  *
@@ -412,12 +413,16 @@ inline void swap(uint64_t &state, int loc1, int loc2)
 {
 	loc1<<=2;
 	loc2<<=2;
-	uint64_t val1 = (state>>(loc1))&0xF;
-	uint64_t val2 = (state>>(loc2))&0xF;
-	const uint64_t blank = 0xF;
-	uint64_t mask = (blank<<(loc1))|(blank<<(loc2));
-	state = state&(~mask);
-	state = state|(val1<<(loc2))|(val2<<(loc1));
+	uint64_t val1 = (state>>(loc1));
+	uint64_t val2 = (state>>(loc2));
+
+	uint64_t xord = (val1 ^ val2)&0xF;
+	xord = (xord << loc1) | (xord << loc2);
+	state = state^xord;
+//	const uint64_t blank = 0xF;
+//	uint64_t mask = (blank<<(loc1))|(blank<<(loc2));
+//	state = state&(~mask);
+//	state = state|(val1<<(loc2))|(val2<<(loc1));
 }
 
 int64_t RubikEdge::getMaxSinglePlayerRank() const
@@ -1080,13 +1085,16 @@ void RubikEdge::SetCubeColor(int which, bool face, const RubikEdgeState &s) cons
 
 
 RubikEdgePDB::RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges)
-:PDBHeuristic(e), edges(distinctEdges)
+:PDBHeuristic(e), edges(distinctEdges), puzzles(std::thread::hardware_concurrency())
 {
+	for (int x = 0; x < puzzles.size(); x++)
+		puzzles[x].resize(12);
 	SetGoal(s);
 }
 
 uint64_t RubikEdgePDB::GetStateSpaceSize()
 {
+#pragma message("This code belongs in the RubikEdge, not in the PDB.")
 	return 479001600ll*2048ll;
 }
 
@@ -1138,16 +1146,46 @@ void RubikEdgePDB::GetStateFromHash(RubikEdgeState &s, uint64_t hash)
 	}
 }
 
+//
+
 uint64_t RubikEdgePDB::GetPDBSize() const
 {
 	// last tile is symmetric
 	uint64_t power2[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 2048};
 	int elts = (int)edges.size();
 	return FactorialUpperK(12, 12-elts)*power2[elts];
+//	return mr1.GetMaxRank()*power2[elts];
 }
 
-uint64_t RubikEdgePDB::GetPDBHash(const RubikEdgeState &s, int threadID ) const
+#define MR
+
+uint64_t RubikEdgePDB::GetPDBHash(const RubikEdgeState &s, int threadID) const
 {
+#ifdef MR
+	int puzzle[12] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+	int dual[16]; // seamlessly handle 0xF entries (no cube)
+	int newdual[16]; // seamlessly handle 0xF entries (no cube)
+	int edgeSize = edges.size();
+	int lastPiece = 12-(int)edgeSize;
+	for (int x = 0; x < 12; x++)
+		dual[s.GetCubeInLoc(x)] = x;
+	for (int x = 0; x < edgeSize; x++)
+	{
+		newdual[x] = dual[edges[x]];
+		puzzle[dual[edges[x]]] = x;
+	}
+	uint64_t hashVal = 0;
+	uint64_t part2 = 0;
+	hashVal = mr1.Rank(puzzle, newdual, edgeSize, 12);//mr1.GetRank(puzzle, threadID);
+
+	
+	int limit = std::min((int)edges.size(), 11);
+	for (int x = 0; x < limit; x++)
+	{
+		part2 = part2*2+(s.GetCubeOrientation(edges[x]));
+	}
+	return part2*FactorialUpperK(12, lastPiece)+hashVal;
+#else
 	int puzzle[12];
 	int dual[16]; // seamlessly handle 0xF entries (no cube)
 	int lastPiece = 12-(int)edges.size();
@@ -1178,10 +1216,50 @@ uint64_t RubikEdgePDB::GetPDBHash(const RubikEdgeState &s, int threadID ) const
 		//part2 = part2*3+s.GetCubeOrientation(dual[corners[x]]);
 	}
 	return part2*FactorialUpperK(12, lastPiece)+hashVal;
+#endif
+	
 }
 
 void RubikEdgePDB::GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int threadID) const
 {
+#ifdef MR
+	
+	int lastPiece = 12-(int)edges.size();
+	int puzzle[12] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+	int dual[16] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+	uint64_t hashVal = hash;
+	int edgeSize = edges.size();
+	hash /= FactorialUpperK(12, lastPiece); // for rotations
+	hashVal = hashVal%FactorialUpperK(12, lastPiece); // for pieces
+	
+	mr1.Unrank(hashVal, puzzle, dual, edgeSize, 12);
+	for (int x = 0; x < 12; x++)
+	{
+		s.SetCubeInLoc(x, 0xF);
+		s.SetCubeOrientation(x, 0);
+	}
+	
+	for (int x = 0; x < edgeSize; x++)
+	{
+		s.SetCubeInLoc(dual[x], edges[x]);
+	}
+	
+	int cnt = 0;
+	int limit = std::min((int)edgeSize, 11);
+	for (int x = limit-1; x >= 0; x--)
+	{
+		s.SetCubeOrientation(edges[x], hash%2);
+		cnt += hash%2;
+		hash/=2;
+	}
+	if (edges.size() == 12)
+	{
+		assert(!"Be sure to test this code");
+		s.SetCubeOrientation(edges[11], cnt%2);
+	}
+	
+#else
+	
 	int lastPiece = 12-(int)edges.size();
 	int puzzle[12];
 	int dual[16];
@@ -1223,8 +1301,8 @@ void RubikEdgePDB::GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int thr
 		hash/=2;
 	}
 	if (edges.size() == 12)
-		s.SetCubeOrientation(edges[7], cnt%2);
-
+		s.SetCubeOrientation(edges[11], cnt%2);
+#endif
 }
 
 bool RubikEdgePDB::Load(const char *prefix)
@@ -1302,6 +1380,9 @@ std::string RubikEdgePDB::GetFileName(const char *prefix)
 		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
+#ifdef MR
+	fileName += "-MR";
+#endif
 	fileName += ".pdb";
 	
 	return fileName;

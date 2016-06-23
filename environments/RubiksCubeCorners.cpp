@@ -120,12 +120,18 @@ inline void swap(uint64_t &state, int loc1, int loc2)
 {
 	loc1<<=2;
 	loc2<<=2;
-	uint64_t val1 = (state>>(loc1))&0xF;
-	uint64_t val2 = (state>>(loc2))&0xF;
-	const uint64_t blank = 0xF;
-	uint64_t mask = (blank<<(loc1))|(blank<<(loc2));
-	state = state&(~mask);
-	state = state|(val1<<(loc2))|(val2<<(loc1));
+	uint64_t val1 = (state>>(loc1));
+	uint64_t val2 = (state>>(loc2));
+
+	// more efficient here
+	uint64_t xord = (val1 ^ val2)&0xF;
+	xord = (xord << loc1) | (xord << loc2);
+	state = state^xord;
+	
+//	const uint64_t blank = 0xF;
+//	uint64_t mask = (blank<<(loc1))|(blank<<(loc2));
+//	state = state&(~mask);
+//	state = state|(val1<<(loc2))|(val2<<(loc1));
 }
 
 
@@ -1059,6 +1065,7 @@ RubikCornerPDB::RubikCornerPDB(RubiksCorner *e, const RubiksCornerState &s, std:
 
 uint64_t RubikCornerPDB::GetStateSpaceSize()
 {
+#pragma message("This code belongs in the RubikCorner, not in the PDB.")
 	return 40320ll*2187ll;
 }
 
@@ -1074,48 +1081,115 @@ void RubikCornerPDB::GetStateFromHash(RubiksCornerState &s, uint64_t hash)
 
 uint64_t RubikCornerPDB::GetPDBSize() const
 {
-	uint64_t power3[] = {1, 3, 9, 27, 81, 243, 729, 2187, 2187}; // last tile is symmetric
-	int elts = (int)corners.size();
-	return FactorialUpperK(8, 8-elts)*power3[elts];
+//	uint64_t power3[] = {1, 3, 9, 27, 81, 243, 729, 2187, 2187}; // last tile is symmetric
+//	int elts = (int)corners.size();
+//	return FactorialUpperK(8, 8-elts)*power3[elts];
+	uint64_t answer[] = {1, 24, 504, 9072, 136080, 1632960, 14696640, 88179840, 88179840};
+	return answer[corners.size()];
 }
-
+#define MR
 uint64_t RubikCornerPDB::GetPDBHash(const RubiksCornerState &s, int threadID) const
 {
+#ifdef MR
 	// TODO: handle fewer according to pattern
-	int puzzle[8];
+	int puzzle[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
 	int dual[16]; // seamlessly handle 0xF entries (no cube)
-	int lastPiece = 8-(int)corners.size();
+	int newdual[16]; // seamlessly handle 0xF entries (no cube)
+	int cornerSize = corners.size();
+	int lastPiece = 8-(int)cornerSize;
 	for (int x = 0; x < 8; x++)
 		dual[s.GetCubeInLoc(x)] = x;
-	for (int x = 0; x < corners.size(); x++)
-		puzzle[x] = dual[corners[x]];
-	
+	for (int x = 0; x < cornerSize; x++)
+	{
+		newdual[x] = dual[corners[x]];
+		puzzle[dual[corners[x]]] = x;
+	}
 	uint64_t hashVal = 0;
 	uint64_t part2 = 0;
-	int numEntriesLeft = 8;
-	for (unsigned int x = 0; x < corners.size(); x++)
-	{
-		hashVal += puzzle[x]*FactorialUpperK(numEntriesLeft-1, lastPiece);
+	hashVal = mr1.Rank(puzzle, newdual, cornerSize, 8);//mr1.GetRank(puzzle, threadID);
 
-		numEntriesLeft--;
-		for (unsigned y = x; y < corners.size(); y++)
-		{
-			if (puzzle[y] > puzzle[x])
-				puzzle[y]--;
-		}
-	}
-	int limit = std::min((int)corners.size(), 7);
+	int limit = std::min((int)cornerSize, 7);
 	for (int x = 0; x < limit; x++)
 	{
 		part2 = part2*3+s.GetCubeOrientation(corners[x]);
 		//part2 = part2*3+s.GetCubeOrientation(dual[corners[x]]);
 	}
 	return part2*FactorialUpperK(8, lastPiece)+hashVal;
+
+#else
+
+	// TODO: handle fewer according to pattern
+	int puzzle[8];
+	int dual[16]; // seamlessly handle 0xF entries (no cube)
+	int cornerSize = corners.size();
+	int lastPiece = 8-(int)corners.size();
+	for (int x = 0; x < 8; x++)
+		dual[s.GetCubeInLoc(x)] = x;
+	for (int x = 0; x < cornerSize; x++)
+		puzzle[x] = dual[corners[x]];
+	
+	uint64_t hashVal = 0;
+	uint64_t part2 = 0;
+	int numEntriesLeft = 8;
+	for (unsigned int x = 0; x < cornerSize; x++)
+	{
+		hashVal += puzzle[x]*FactorialUpperK(numEntriesLeft-1, lastPiece);
+		
+		numEntriesLeft--;
+		for (unsigned y = x; y < cornerSize; y++)
+		{
+			if (puzzle[y] > puzzle[x])
+				puzzle[y]--;
+		}
+	}
+	int limit = std::min((int)cornerSize, 7);
+	for (int x = 0; x < limit; x++)
+	{
+		part2 = part2*3+s.GetCubeOrientation(corners[x]);
+		//part2 = part2*3+s.GetCubeOrientation(dual[corners[x]]);
+	}
+	return part2*FactorialUpperK(8, lastPiece)+hashVal;
+#endif
+	
 }
 
 void RubikCornerPDB::GetStateFromPDBHash(uint64_t hash, RubiksCornerState &s, int threadID) const
 {
+#ifdef MR
 	int lastPiece = 8-(int)corners.size();
+	int puzzle[8] = {-1, -1, -1, -1, -1, -1, -1};
+	int dual[16] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+	uint64_t hashVal = hash;
+	int cornerSize = corners.size();
+	hash /= FactorialUpperK(8, lastPiece); // for rotations
+	hashVal = hashVal%FactorialUpperK(8, lastPiece); // for pieces)
+	mr1.Unrank(hashVal, puzzle, dual, cornerSize, 8);
+	
+	for (int x = 0; x < 8; x++)
+	{
+		s.SetCubeInLoc(x, 0xF);
+		s.SetCubeOrientation(x, 0);
+	}
+	
+	for (int x = 0; x < cornerSize; x++)
+	{
+		s.SetCubeInLoc(dual[x], corners[x]);
+	}
+	
+	int cnt = 0;
+	int limit = std::min((int)cornerSize, 7);
+	for (int x = limit-1; x >= 0; x--)
+	{
+		s.SetCubeOrientation(corners[x], hash%3);
+		cnt += hash%3;
+		hash/=3;
+	}
+	if (cornerSize == 8)
+		s.SetCubeOrientation(corners[7], (3-(cnt%3))%3); // 0->0 2->1 1->2
+#else
+	
+	int lastPiece = 8-(int)corners.size();
+	int cornerSize = corners.size();
 	int puzzle[12];
 	int dual[16];
 	uint64_t hashVal = hash;
@@ -1128,7 +1202,7 @@ void RubikCornerPDB::GetStateFromPDBHash(uint64_t hash, RubiksCornerState &s, in
 		puzzle[x] = hashVal%numEntriesLeft;
 		hashVal /= numEntriesLeft;
 		numEntriesLeft++;
-		for (int y = x+1; y < corners.size(); y++)
+		for (int y = x+1; y < cornerSize; y++)
 		{
 			if (puzzle[y] >= puzzle[x])
 				puzzle[y]++;
@@ -1140,7 +1214,7 @@ void RubikCornerPDB::GetStateFromPDBHash(uint64_t hash, RubiksCornerState &s, in
 		s.SetCubeOrientation(x, 0);
 	}
 	
-	for (int x = 0; x < corners.size(); x++)
+	for (int x = 0; x < cornerSize; x++)
 	{
 		s.SetCubeInLoc(puzzle[x], corners[x]);
 		dual[corners[x]] = puzzle[x];
@@ -1151,13 +1225,13 @@ void RubikCornerPDB::GetStateFromPDBHash(uint64_t hash, RubiksCornerState &s, in
 	for (int x = limit-1; x >= 0; x--)
 	{
 		s.SetCubeOrientation(corners[x], hash%3);
-		//s.SetCubeOrientation(dual[corners[x]], hash%3);
 		cnt += hash%3;
 		hash/=3;
 	}
 	if (corners.size() == 8)
-		//s.SetCubeOrientation(corners[7], 2-(cnt%3)); // 0->0 2->1 1->2
 		s.SetCubeOrientation(corners[7], (3-(cnt%3))%3); // 0->0 2->1 1->2
+
+#endif
 }
 
 
@@ -1234,6 +1308,9 @@ std::string RubikCornerPDB::GetFileName(const char *prefix)
 		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
+#ifdef MR
+	fileName += "-MR";
+#endif
 	fileName += ".pdb";
 	
 	return fileName;

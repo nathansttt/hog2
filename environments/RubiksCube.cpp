@@ -846,15 +846,15 @@ uint64_t RubikPDB::GetPDBSize() const
 
 uint64_t RubikPDB::GetPDBHash(const RubiksState &s, int threadID) const
 {
-	return ePDB.GetPDBHash(s.edge)*cPDB.GetPDBSize()+cPDB.GetPDBHash(s.corner);
+	return ePDB.GetPDBHash(s.edge, threadID)*cPDB.GetPDBSize()+cPDB.GetPDBHash(s.corner, threadID);
 }
 
 void RubikPDB::GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID) const
 {
 	uint64_t cornerHash = hash%cPDB.GetPDBSize();
 	uint64_t edgeHash = hash/cPDB.GetPDBSize();
-	ePDB.GetStateFromPDBHash(edgeHash, s.edge);
-	cPDB.GetStateFromPDBHash(cornerHash, s.corner);
+	ePDB.GetStateFromPDBHash(edgeHash, s.edge, threadID);
+	cPDB.GetStateFromPDBHash(cornerHash, s.corner, threadID);
 }
 
 //const char *RubikPDB::GetName()
@@ -935,50 +935,56 @@ std::string RubikPDB::GetFileName(const char *prefix)
 	if (fileName.back() != '/')
 		fileName+='/';
 
-	fileName += "RC-E-";
-	// origin state
-	for (int x = 0; x < 12; x++)
-	{
-		fileName += std::to_string(goalState.edge.GetCubeInLoc(x));
-		fileName += ".";
-		fileName += std::to_string(goalState.edge.GetCubeOrientation(goalState.edge.GetCubeInLoc(x)));
-		fileName += ";";
-	}
-	fileName.pop_back();
+	fileName += ePDB.GetFileName("");
+	for (int x = 0; x < 4; x++) // remove ".pdb"
+		fileName.pop_back();
 	fileName += "-";
-	// pattern
-	bool added = false;
-	for (int x = 0; x < edges.size(); x++)
-	{
-		added = true;
-		fileName += std::to_string(edges[x]);
-		fileName += ";";
-	}
-	if (added)
-		fileName.pop_back(); // remove colon
-
+	fileName += cPDB.GetFileName("");
 	
-	fileName += "-C-";
-	// origin state
-	for (int x = 0; x < 8; x++)
-	{
-		fileName += std::to_string(goalState.corner.GetCubeInLoc(x));
-		fileName += ".";
-		fileName += std::to_string(goalState.corner.GetCubeOrientation(goalState.corner.GetCubeInLoc(x)));
-		fileName += ";";
-	}
-	fileName.pop_back();
-	// pattern
-	added = false;
-	for (int x = 0; x < corners.size(); x++)
-	{
-		added = true;
-		fileName += std::to_string(corners[x]);
-		fileName += ";";
-	}
-	if (added)
-		fileName.pop_back(); // remove colon
-	fileName += ".pdb";
+//	fileName += "RC-E-";
+//	// origin state
+//	for (int x = 0; x < 12; x++)
+//	{
+//		fileName += std::to_string(goalState.edge.GetCubeInLoc(x));
+//		fileName += ".";
+//		fileName += std::to_string(goalState.edge.GetCubeOrientation(goalState.edge.GetCubeInLoc(x)));
+//		fileName += ";";
+//	}
+//	fileName.pop_back();
+//	fileName += "-";
+//	// pattern
+//	bool added = false;
+//	for (int x = 0; x < edges.size(); x++)
+//	{
+//		added = true;
+//		fileName += std::to_string(edges[x]);
+//		fileName += ";";
+//	}
+//	if (added)
+//		fileName.pop_back(); // remove colon
+//
+//	
+//	fileName += "-C-";
+//	// origin state
+//	for (int x = 0; x < 8; x++)
+//	{
+//		fileName += std::to_string(goalState.corner.GetCubeInLoc(x));
+//		fileName += ".";
+//		fileName += std::to_string(goalState.corner.GetCubeOrientation(goalState.corner.GetCubeInLoc(x)));
+//		fileName += ";";
+//	}
+//	fileName.pop_back();
+//	// pattern
+//	added = false;
+//	for (int x = 0; x < corners.size(); x++)
+//	{
+//		added = true;
+//		fileName += std::to_string(corners[x]);
+//		fileName += ";";
+//	}
+//	if (added)
+//		fileName.pop_back(); // remove colon
+//	fileName += ".pdb";
 	
 	return fileName;
 	

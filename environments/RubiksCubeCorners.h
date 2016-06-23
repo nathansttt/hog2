@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <vector>
 #include "PDBHeuristic.h"
+#include "MR1Permutation.h"
 
 class RubiksCornerState
 {
@@ -191,10 +192,11 @@ private:
 	std::vector<int> corners;
 	size_t puzzleSize;
 	uint64_t pdbSize;
+	MR1KPermutation mr1;
 	
 	// cache for computing ranking/unranking
-	mutable std::vector<std::vector<int> > dual;
-	mutable std::vector<std::vector<int> > locs;
+//	mutable std::vector<std::vector<int> > dual;
+//	mutable std::vector<std::vector<int> > locs;
 };
 
 

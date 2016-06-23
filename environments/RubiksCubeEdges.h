@@ -14,6 +14,7 @@
 #include <vector>
 #include "SearchEnvironment.h"
 #include "PDBHeuristic.h"
+#include "MR1Permutation.h"
 
 class RubikEdgeState
 {
@@ -27,6 +28,10 @@ public:
 		state = 0;
 		for (int x = 0; x < 12; x++)
 			SetCubeInLoc(x, x);
+	}
+	void Clear()
+	{
+		state = 0;
 	}
 	void GetDual(RubikEdgeState &s) const;
 	int GetCubeInLoc(int whichLoc) const
@@ -193,10 +198,11 @@ private:
 	std::vector<int> edges;
 	size_t puzzleSize;
 	uint64_t pdbSize;
-	
+	MR1KPermutation mr1;
 	// cache for computing ranking/unranking
-	mutable std::vector<std::vector<int> > dual;
-	mutable std::vector<std::vector<int> > locs;
+	mutable std::vector<std::vector<int> > puzzles;
+//	mutable std::vector<std::vector<int> > dual;
+//	mutable std::vector<std::vector<int> > locs;
 };
 
 

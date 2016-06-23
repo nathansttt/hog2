@@ -71,7 +71,7 @@ namespace std {
 	};
 }
 
-
+void PDBTest();
 void GetInstanceFromStdin(RubiksState &start);
 void WriteStatesToDisk(std::vector<hash128> &states, int depth);
 void ExpandLayer(int depth);
@@ -91,6 +91,7 @@ int MyCLHandler(char *argument[], int maxNumArgs);
 int main(int argc, char* argv[])
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
+
 	// technically we could/should install a command-line handler and handle these there
 	InstallHandlers();
 	InstallCommandLineHandler(MyCLHandler, "-mm", "-mm <tmpdir1 <tmpdir2>", "Run MM");
@@ -829,6 +830,94 @@ void GetRandom15(RubiksState &start, int which)
 		c.GetActions(start, acts);
 		c.ApplyAction(start, acts[random()%acts.size()]);
 	}
+}
+
+void PDBTest()
+{
+	RubiksState goal;
+	RubiksCube cube;
+	std::vector<int> blank;
+	std::vector<int> test = {0, 1, 2};//, 4, 5, 6, 7};
+//	std::vector<int> corners = {0, 1, 2, 3, 4};//, 5, 6, 7};
+//	std::vector<int> edges = {0};
+	std::vector<int> corners = {1, 3, 6};//, 5, 6, 7};
+	std::vector<int> edges = {1, 3, 6};
+	
+
+	if (0)
+	{
+		const int N = 8;
+		const int k = 4;
+		MR1KPermutation p;
+		uint64_t count = 1;
+		for (int x = N; x > (N-k); x--)
+			count *= x;
+		int items[N], dual[N];
+		for (uint64_t x = 0; x < count; x++)
+		{
+			if (0 == x%10000)
+				printf("%llu of %llu\n", x, count);
+			
+			p.Unrank(x, items, dual, k, N);
+
+//			for (int y = 0; y < N; y++)
+//				printf("%d ", items[y]);
+//			printf(" : ");
+//			for (int y = 0; y < N; y++)
+//				printf("%d ", dual[y]);
+//			printf("\n");
+			
+			uint64_t rank = p.Rank(items, dual, k, N);
+//			printf("Unranked %d and got %llu back\n", x, rank);
+			assert(x == rank);
+		}
+		printf("Success!\n");
+		
+//		MR1Permutation mr1(test, 8, std::thread::hardware_concurrency());
+//		std::vector<int> items;
+//		for (int x = 0; x < mr1.GetMaxRank(); x++)
+//		{
+//			mr1.Unrank(x, items);
+//			assert(mr1.GetRank(items) == x);
+//			for (int i : items)
+//				std::cout << i << " ";
+//			std::cout << "\n";
+//		}
+	}
+	RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges, corners);
+	//RubikPDB *pdb3 = new RubikPDB(&cube, goal, test, blank);
+
+	if (0)
+	{
+		for (uint64_t x = 0; x < pdb3->GetPDBSize(); x++)
+		{
+			if (0 == x%10000)
+				printf("%llu of %llu\n", x, pdb3->GetPDBSize());
+			goal.Reset();
+			pdb3->GetStateFromPDBHash(x, goal);
+			uint64_t hash = pdb3->GetPDBHash(goal);
+			if (hash != x)
+			{
+				std::cout << "State " << x << ": " << goal << "\n";
+				pdb3->GetStateFromPDBHash(x-1, goal);
+				std::cout << "State " << x-1 << ": " << goal << "\n";
+				pdb3->GetStateFromPDBHash(x, goal);
+				std::cout << "State " << x << ": " << goal << "\n";
+				pdb3->GetStateFromPDBHash(x, goal);
+
+				std::cout << "Rank: " << pdb3->GetPDBHash(goal) << " (" << hash << ")\n";
+				assert(pdb3->GetPDBHash(goal) == x);
+			}
+		}
+		printf("Done\n");
+		goal.Reset();
+	}
+
+	
+	pdb3->BuildPDBForward(goal, std::thread::hardware_concurrency());
+//	pdb3->BuildPDBBackward(goal, std::thread::hardware_concurrency());
+	pdb3->BuildPDBForwardBackward(goal, std::thread::hardware_concurrency());
+	exit(0);
 }
 
 void GetKorf1997(Heuristic<RubiksState> &result)
