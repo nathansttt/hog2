@@ -57,4 +57,5 @@ SRC_CPP = \
 	utils/NBitArray.cpp \
 	utils/SVGUtil.cpp \
 	utils/RangeCompression.cpp \
+	utils/MR1Permutation.cpp \
 
