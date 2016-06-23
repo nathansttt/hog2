@@ -57,7 +57,12 @@ public:
 	virtual void Save(FILE *f);
 	virtual std::string GetFileName(const char *prefix) = 0;
 	
-	void BuildPDB(const state &goal, int numThreads);
+	void BuildPDB(const state &goal, int numThreads)
+	{ BuildPDBForwardBackward(goal, numThreads); }
+	void BuildPDBForward(const state &goal, int numThreads);
+	void BuildPDBBackward(const state &goal, int numThreads);
+	void BuildPDBForwardBackward(const state &goal, int numThreads);
+
 	void BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads);
 
 	void DivCompress(int factor, bool print_histogram);
@@ -84,12 +89,25 @@ protected:
 	abstractState goalState;
 private:
 	bool goalSet;
-	void ThreadWorker(int threadNum, int depth,
-					  NBitArray<pdbBits> &DB,
-					  std::vector<bool> &coarse,
-					  SharedQueue<std::pair<uint64_t, uint64_t> > *work,
-					  SharedQueue<uint64_t> *results,
-					  std::mutex *lock);
+	void ForwardThreadWorker(int threadNum, int depth,
+							 NBitArray<pdbBits> &DB,
+							 std::vector<bool> &coarse,
+							 SharedQueue<std::pair<uint64_t, uint64_t> > *work,
+							 SharedQueue<uint64_t> *results,
+							 std::mutex *lock);
+	void BackwardThreadWorker(int threadNum, int depth,
+							  NBitArray<pdbBits> &DB,
+							  std::vector<bool> &coarse,
+							  SharedQueue<std::pair<uint64_t, uint64_t> > *work,
+							  SharedQueue<uint64_t> *results,
+							  std::mutex *lock);
+	void ForwardBackwardThreadWorker(int threadNum, int depth, bool forward,
+									 NBitArray<pdbBits> &DB,
+									 std::vector<bool> &coarseOpen,
+									 std::vector<bool> &coarseClosed,
+									 SharedQueue<std::pair<uint64_t, uint64_t> > *work,
+									 SharedQueue<uint64_t> *results,
+									 std::mutex *lock);
 };
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
@@ -116,20 +134,16 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
-void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDB(const state &goal, int numThreads)
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDBForward(const state &goal, int numThreads)
 {
 	assert(goalSet);
-	//GetStateFromPDBHash(this->GetAbstractHash(goal), goalState);
-	//goalState = goal;
 	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue(numThreads*20);
 	SharedQueue<uint64_t> resultQueue;
 	std::mutex lock;
 	
-	uint64_t COUNT = GetPDBSize();//nUpperk(start.puzzle.size(), start.puzzle.size() - distinct.size());
-	//std::vector<uint8_t> &DB = PDB;
+	uint64_t COUNT = GetPDBSize();
 	PDB.Resize(COUNT);
 	PDB.FillMax();
-	//std::fill(DB.begin(), DB.end(), 255);
 	
 	// with weights we have to store the lowest weight stored to make sure
 	// we don't skip regions
@@ -145,12 +159,8 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
 	
-//	std::cout << "Abstract Goal State: " << goal << std::endl;
-//	std::cout << "Abstract PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
 	Timer t;
 	t.StartTimer();
-	//	q_curr.push_back(goal);
-	//DB[GetPDBHash(goal)] = 0;
 	PDB.Set(GetPDBHash(goalState), 0);
 
 	coarseOpenCurr[GetPDBHash(goalState)/coarseSize] = true;
@@ -164,7 +174,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		s.StartTimer();
 		for (int x = 0; x < numThreads; x++)
 		{
-			threads[x] = new std::thread(&PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ThreadWorker,
+			threads[x] = new std::thread(&PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ForwardThreadWorker,
 										 this,
 										 x, depth, std::ref(PDB), std::ref(coarseOpenNext),
 										 &workQueue, &resultQueue, &lock);
@@ -175,14 +185,6 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			if (coarseOpenCurr[x/coarseSize])
 			{
 				workQueue.WaitAdd({x, std::min(COUNT, x+coarseSize)});
-//				for (uint64_t t = x; t < std::min(COUNT, x+coarseSize); t++)
-//				{
-//					if (PDB.Get(t) == depth)
-//					{
-//						workQueue.WaitAdd({t, std::min(COUNT, x+coarseSize)});
-//						break;
-//					}
-//				}
 			}
 			coarseOpenCurr[x/coarseSize] = false;
 		}
@@ -206,24 +208,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			}
 		}
 		
-//		newEntries = 0;
-//		for (uint64_t x = 0; x < COUNT; x++)
-//		{
-//			if (PDB.Get(x) == depth)
-//			{
-//				newEntries++;
-//			}
-//		}
 		entries += total;//newEntries;
 		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
 			   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
-		//		depth = coarseOpen[0];
-		//		for (int x = 1; x < coarseOpen.size(); x++)
-		//			depth = min(depth, coarseOpen[x]);
-		//		if (depth == 255) // no new entries!
-		//			break;
-
 		coarseOpenCurr.swap(coarseOpenNext);
 	} while (entries != COUNT);
 	
@@ -234,18 +222,217 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		assert(entries == COUNT);
 	}
 	PrintHistogram();
-	//PrintPDBHistogram();
-
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
-void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ThreadWorker(int threadNum, int depth,
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDBBackward(const state &goal, int numThreads)
+{
+	assert(goalSet);
+	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue(numThreads*20);
+	SharedQueue<uint64_t> resultQueue;
+	std::mutex lock;
+	
+	uint64_t COUNT = GetPDBSize();
+	PDB.Resize(COUNT);
+	PDB.FillMax();
+	
+	// with weights we have to store the lowest weight stored to make sure
+	// we don't skip regions
+	std::vector<bool> coarseClosed((COUNT+coarseSize-1)/coarseSize);
+	
+	uint64_t entries = 1;
+	std::cout << "Num Entries: " << COUNT << std::endl;
+	std::cout << "Goal State: " << goalState << std::endl;
+	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	
+	std::deque<state> q_curr, q_next;
+	std::vector<state> children;
+	
+	Timer t;
+	t.StartTimer();
+	PDB.Set(GetPDBHash(goalState), 0);
+	
+	int depth = 0;
+	uint64_t newEntries;
+	std::vector<std::thread*> threads(numThreads);
+	printf("Creating %d threads\n", numThreads);
+	do {
+		newEntries = 0;
+		Timer s;
+		s.StartTimer();
+		for (int x = 0; x < numThreads; x++)
+		{
+			threads[x] = new std::thread(&PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BackwardThreadWorker,
+										 this,
+										 x, depth, std::ref(PDB), std::ref(coarseClosed),
+										 &workQueue, &resultQueue, &lock);
+		}
+		for (uint64_t x = 0; x < COUNT; x+=coarseSize)
+		{
+			if (coarseClosed[x/coarseSize] == false)
+			{
+				workQueue.WaitAdd({x, std::min(COUNT, x+coarseSize)});
+			}
+		}
+		for (int x = 0; x < numThreads; x++)
+		{
+			workQueue.WaitAdd({0,0});
+		}
+		for (int x = 0; x < numThreads; x++)
+		{
+			threads[x]->join();
+			delete threads[x];
+			threads[x] = 0;
+		}
+		// read out node counts
+		uint64_t total = 0;
+		{
+			uint64_t val;
+			while (resultQueue.Remove(val))
+			{
+				total+=val;
+			}
+		}
+		
+		entries += total;//newEntries;
+		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+			   depth, s.EndTimer(), total, entries, COUNT);
+		depth++;
+	} while (entries != COUNT);
+	
+	printf("%1.2fs elapsed\n", t.EndTimer());
+	if (entries != COUNT)
+	{
+		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		assert(entries == COUNT);
+	}
+	PrintHistogram();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDBForwardBackward(const state &goal, int numThreads)
+{
+	assert(goalSet);
+	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue(numThreads*20);
+	SharedQueue<uint64_t> resultQueue;
+	std::mutex lock;
+	
+	uint64_t COUNT = GetPDBSize();
+	PDB.Resize(COUNT);
+	PDB.FillMax();
+	
+	// with weights we have to store the lowest weight stored to make sure
+	// we don't skip regions
+	std::vector<bool> coarseClosed((COUNT+coarseSize-1)/coarseSize);
+	std::vector<bool> coarseOpenCurr((COUNT+coarseSize-1)/coarseSize);
+	std::vector<bool> coarseOpenNext((COUNT+coarseSize-1)/coarseSize);
+	
+	uint64_t entries = 1;
+	std::cout << "Num Entries: " << COUNT << std::endl;
+	std::cout << "Goal State: " << goalState << std::endl;
+	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	
+	std::deque<state> q_curr, q_next;
+	std::vector<state> children;
+	std::vector<uint64_t> distribution;
+
+	Timer t;
+	t.StartTimer();
+	PDB.Set(GetPDBHash(goalState), 0);
+	coarseOpenCurr[GetPDBHash(goalState)/coarseSize] = true;
+	distribution.push_back(1);
+	
+	int depth = 0;
+	uint64_t newEntries;
+	bool searchForward = true;
+	std::vector<std::thread*> threads(numThreads);
+	printf("Creating %d threads\n", numThreads);
+	do {
+		newEntries = 0;
+		Timer s;
+		s.StartTimer();
+		for (int x = 0; x < numThreads; x++)
+		{
+			threads[x] = new std::thread(&PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ForwardBackwardThreadWorker,
+										 this,
+										 x, depth, searchForward,
+										 std::ref(PDB), std::ref(coarseOpenNext), std::ref(coarseClosed),
+										 &workQueue, &resultQueue, &lock);
+		}
+		if (searchForward)
+		{
+			for (uint64_t x = 0; x < COUNT; x+=coarseSize)
+			{
+				if (coarseOpenCurr[x/coarseSize])
+				{
+					workQueue.WaitAdd({x, std::min(COUNT, x+coarseSize)});
+				}
+				coarseOpenCurr[x/coarseSize] = false;
+			}
+		}
+		else {
+			for (uint64_t x = 0; x < COUNT; x+=coarseSize)
+			{
+				if (coarseClosed[x/coarseSize] == false)
+				{
+					workQueue.WaitAdd({x, std::min(COUNT, x+coarseSize)});
+				}
+			}
+		}
+
+		for (int x = 0; x < numThreads; x++)
+		{
+			workQueue.WaitAdd({0,0});
+		}
+		for (int x = 0; x < numThreads; x++)
+		{
+			threads[x]->join();
+			delete threads[x];
+			threads[x] = 0;
+		}
+		// read out node counts
+		uint64_t total = 0;
+		{
+			uint64_t val;
+			while (resultQueue.Remove(val))
+			{
+				total+=val;
+			}
+		}
+		entries += total;//newEntries;
+		distribution.push_back(total);
+		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total [%s]\n",
+			   depth, s.EndTimer(), total, entries, COUNT, searchForward?"forward":"backward");
+		if (double(total)*double(total)*0.4 > double(COUNT-entries)*double(distribution[distribution.size()-2]))// || depth == 8)
+			searchForward = false;
+		depth++;
+		coarseOpenCurr.swap(coarseOpenNext);
+	} while (entries != COUNT);
+	
+	printf("%1.2fs elapsed\n", t.EndTimer());
+	if (entries != COUNT)
+	{
+		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		assert(entries == COUNT);
+	}
+	PrintHistogram();
+}
+
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ForwardThreadWorker(int threadNum, int depth,
 																	 NBitArray<pdbBits> &DB,
 																	 std::vector<bool> &coarse,
 																	 SharedQueue<std::pair<uint64_t, uint64_t> > *work,
 																	 SharedQueue<uint64_t> *results,
 																	 std::mutex *lock)
 {
+//	lock->lock();
+//	printf("Thread %d online\n", threadNum);
+//	lock->unlock();
+
 	std::pair<uint64_t, uint64_t> p;
 	uint64_t start, end;
 	std::vector<abstractAction> acts;
@@ -287,21 +474,234 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 				}
 			}
 		}
-		do {
-			// write out everything
+		// write out everything
+		lock->lock();
+		for (auto d : cache)
+		{
+			if (d.newGCost < DB.Get(d.rank)) // shorter path
+			{
+				count++;
+				coarse[d.rank/coarseSize] = true;
+				DB.Set(d.rank, d.newGCost);
+			}
+		}
+		lock->unlock();
+		cache.resize(0);
+	}
+	results->Add(count);
+//	lock->lock();
+//	printf("Thread %d offline\n", threadNum);
+//	lock->unlock();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BackwardThreadWorker(int threadNum, int depth,
+																											NBitArray<pdbBits> &DB,
+																											std::vector<bool> &coarse,
+																											SharedQueue<std::pair<uint64_t, uint64_t> > *work,
+																											SharedQueue<uint64_t> *results,
+																											std::mutex *lock)
+{
+	std::pair<uint64_t, uint64_t> p;
+	uint64_t start, end;
+	std::vector<abstractAction> acts;
+	abstractState s(goalState), t(goalState);
+	uint64_t count = 0;
+	int blankEntries = 0;
+	struct writeInfo {
+		uint64_t rank;
+		int newGCost;
+	};
+	std::vector<writeInfo> cache;
+	while (true)
+	{
+		work->WaitRemove(p);
+		if (p.first == p.second)
+		{
+			break;
+		}
+		start = p.first;
+		end = p.second;
+		//int nextDepth = 255;
+		blankEntries = 0;
+		for (uint64_t x = start; x < end; x++)
+		{
+			int stateDepth = DB.Get(x);
+			if (stateDepth == ((1<<pdbBits)-1))//depth) // pdbBits
+			{
+				blankEntries++;
+				GetStateFromPDBHash(x, s, threadNum);
+				//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
+				env->GetActions(s, acts);
+				for (int y = 0; y < acts.size(); y++)
+				{
+					env->GetNextState(s, acts[y], t);
+					//assert(env->InvertAction(acts[y]) == true);
+					//virtual bool InvertAction(action &a) const = 0;
+
+					uint64_t nextRank = GetPDBHash(t, threadNum);
+					if (DB.Get(nextRank) == depth)
+					{
+						int newCost = depth+(env->GCost(t, acts[y]));
+						cache.push_back({x, newCost});
+						blankEntries--;
+						break;
+					}
+				}
+			}
+		}
+		// write out everything
+		if (cache.size() > 0)
+		{
+			//printf("%d items to write\n", cache.size());
 			lock->lock();
+			if (blankEntries == 0)
+				coarse[start/coarseSize] = true; // closed
 			for (auto d : cache)
 			{
 				if (d.newGCost < DB.Get(d.rank)) // shorter path
 				{
 					count++;
-					coarse[d.rank/coarseSize] = true;
+					DB.Set(d.rank, d.newGCost);
+				}
+			}
+			lock->unlock();
+		}
+		cache.resize(0);
+	}
+	results->Add(count);
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ForwardBackwardThreadWorker(int threadNum, int depth, bool forward,
+																												   NBitArray<pdbBits> &DB,
+																												   std::vector<bool> &coarseOpen,
+																												   std::vector<bool> &coarseClosed,
+																												   SharedQueue<std::pair<uint64_t, uint64_t> > *work,
+																												   SharedQueue<uint64_t> *results,
+																												   std::mutex *lock)
+{
+	std::pair<uint64_t, uint64_t> p;
+	uint64_t start, end;
+	std::vector<abstractAction> acts;
+	abstractState s(goalState), t(goalState);
+	uint64_t count = 0;
+	int blankEntries = 0;
+	struct writeInfo {
+		uint64_t rank;
+		int newGCost;
+	};
+	std::vector<writeInfo> cache;
+	if (forward)
+	{
+		bool allEntriesWritten;
+		while (true)
+		{
+			work->WaitRemove(p);
+			if (p.first == p.second)
+			{
+				break;
+			}
+			start = p.first;
+			end = p.second;
+
+			allEntriesWritten = true;
+			for (uint64_t x = start; x < end; x++)
+			{
+				int stateDepth = DB.Get(x);
+				if (stateDepth > depth)
+					allEntriesWritten = false;
+				if (stateDepth == depth)
+				{
+					GetStateFromPDBHash(x, s, threadNum);
+					//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
+					env->GetActions(s, acts);
+					for (int y = 0; y < acts.size(); y++)
+					{
+						env->GetNextState(s, acts[y], t);
+						assert(env->InvertAction(acts[y]) == true);
+						//virtual bool InvertAction(action &a) const = 0;
+						
+						uint64_t nextRank = GetPDBHash(t, threadNum);
+						int newCost = stateDepth+(env->GCost(t, acts[y]));
+						cache.push_back({nextRank, newCost});
+					}
+				}
+			}
+			// write out everything
+			lock->lock();
+			if (allEntriesWritten)
+				coarseClosed[start/coarseSize] = true;
+			for (auto d : cache)
+			{
+				if (d.newGCost < DB.Get(d.rank)) // shorter path
+				{
+					count++;
+					coarseOpen[d.rank/coarseSize] = true;
 					DB.Set(d.rank, d.newGCost);
 				}
 			}
 			lock->unlock();
 			cache.resize(0);
-		} while (cache.size() != 0);
+		}
+	}
+	else {
+		while (true)
+		{
+			work->WaitRemove(p);
+			if (p.first == p.second)
+			{
+				break;
+			}
+			start = p.first;
+			end = p.second;
+			//int nextDepth = 255;
+			blankEntries = 0;
+			for (uint64_t x = start; x < end; x++)
+			{
+				int stateDepth = DB.Get(x);
+				if (stateDepth == ((1<<pdbBits)-1))//depth) // pdbBits
+				{
+					blankEntries++;
+					GetStateFromPDBHash(x, s, threadNum);
+					//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
+					env->GetActions(s, acts);
+					for (int y = 0; y < acts.size(); y++)
+					{
+						env->GetNextState(s, acts[y], t);
+						//assert(env->InvertAction(acts[y]) == true);
+						//virtual bool InvertAction(action &a) const = 0;
+						
+						uint64_t nextRank = GetPDBHash(t, threadNum);
+						if (DB.Get(nextRank) == depth)
+						{
+							int newCost = depth+(env->GCost(t, acts[y]));
+							cache.push_back({x, newCost});
+							blankEntries--;
+							break;
+						}
+					}
+				}
+			}
+			// write out everything
+			if (cache.size() > 0)
+			{
+				//printf("%d items to write\n", cache.size());
+				lock->lock();
+				if (blankEntries == 0)
+					coarseClosed[start/coarseSize] = true; // closed
+				for (auto d : cache)
+				{
+					if (d.newGCost < DB.Get(d.rank)) // shorter path
+					{
+						count++;
+						DB.Set(d.rank, d.newGCost);
+					}
+				}
+				lock->unlock();
+			}
+			cache.resize(0);
+		}
 	}
 	results->Add(count);
 }
