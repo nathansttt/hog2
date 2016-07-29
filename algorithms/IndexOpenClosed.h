@@ -16,6 +16,8 @@
  *
  */
 
+#include "AStarOpenClosed.h"
+
 template<typename state>
 class IndexOpenClosedData {
 public:
@@ -62,7 +64,7 @@ public:
 	uint64_t Close();
 	void Reopen(uint64_t objKey);
 	
-	uint64_t GetOpenItem(unsigned int which) { return theHeap[which]; }
+	uint64_t GetOpenItem(unsigned int which) const { return theHeap[which]; }
 	size_t OpenSize() const { return theHeap.size(); }
 	size_t ClosedSize() const { return size()-OpenSize(); }
 	size_t size() const { return elements.size(); }
