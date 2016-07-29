@@ -143,6 +143,11 @@ public:
 	std::string SVGLabelState(const xyLoc &, const char *, double scale) const;
 	std::string SVGDrawLine(const xyLoc &x, const xyLoc &y, int width=1) const;
 	std::string SVGFrameRect(int left, int top, int right, int bottom, int width = 1);
+
+	virtual void Draw() const;
+	virtual void Draw(const xyLoc &l) const;
+	virtual void DrawLine(const xyLoc &x, const xyLoc &y, double width = 1.0) const;
+
 	
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;
 	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;

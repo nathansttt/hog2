@@ -10,6 +10,9 @@
 #include "FPUtil.h"
 #include "SVGUtil.h"
 #include <cstring>
+#include "Graphics2D.h"
+
+using namespace Graphics2D;
 
 MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 {
@@ -720,7 +723,12 @@ void MapEnvironment::GLLabelState(const xyLoc &s, const char *str) const
 std::string MapEnvironment::SVGHeader()
 {
 	std::string s;
-	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(10*map->GetMapWidth()+10+20)+"\" height = \""+std::to_string(10*map->GetMapHeight()+10+20)+"\">";
+	// 10% margin on all sides of image
+	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(10*map->GetMapWidth())+"\" height = \""+std::to_string(10*map->GetMapHeight())+"\" ";
+	s += "viewBox=\""+std::to_string(-map->GetMapWidth())+" "+std::to_string(-map->GetMapHeight())+" ";
+	s += std::to_string(12*map->GetMapWidth())+" "+std::to_string(12*map->GetMapHeight())+"\" ";
+	s += "preserveAspectRatio = \"none\" ";
+	s += ">\n";
 	return s;
 }
 
@@ -728,6 +736,8 @@ std::string MapEnvironment::SVGDraw()
 {
 	std::string s;
 	recColor black = {0.0, 0.0, 0.0};
+	
+	// draw tiles
 	for (int y = 0; y < map->GetMapHeight(); y++)
 	{
 		for (int x = 0; x < map->GetMapWidth(); x++)
@@ -737,7 +747,56 @@ std::string MapEnvironment::SVGDraw()
 			{
 				recColor c = {0.9, 0.9, 0.9};
 				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+				s += "\n";
+			}
+			else if (map->GetTerrainType(x, y) == kTrees)
+			{
+				recColor c = {0.0, 0.5, 0.0};
+				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+				s += "\n";
+			}
+			else if (map->GetTerrainType(x, y) == kWater)
+			{
+				recColor c = {0.0, 0.0, 1.0};
+				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+				s += "\n";
+			}
+			else if (map->GetTerrainType(x, y) == kSwamp)
+			{
+				recColor c = {0.0, 0.3, 1.0};
+				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+				s += "\n";
+			}
+			else {
+				draw = false;
+			}
+		}
+	}
+	
+	// draw cell boundaries for open terrain
+	if (0)
+	for (int y = 0; y < map->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < map->GetMapWidth(); x++)
+		{
+			// mark cells on map
+			if ((map->GetTerrainType(x, y)>>terrainBits) == (kGround>>terrainBits))
+			{
+				recColor c = {0.75, 0.75, 0.75};
+				s += ::SVGFrameRect(x+1, y+1, 1, 1, 1, c);
+				s += "\n";
+			}
+		}
+	}
 
+	// draw lines between different terrain types
+	for (int y = 0; y < map->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < map->GetMapWidth(); x++)
+		{
+			bool draw = true;
+			if (map->GetTerrainType(x, y) == kGround)
+			{
 				if (x == map->GetMapWidth()-1)
 					s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
 				if (y == map->GetMapHeight()-1)
@@ -745,9 +804,6 @@ std::string MapEnvironment::SVGDraw()
 			}
 			else if (map->GetTerrainType(x, y) == kTrees)
 			{
-				recColor c = {0.0, 0.5, 0.0};
-				s += SVGDrawRect(x+1, y+1, 1, 1, c);
-
 				if (x == map->GetMapWidth()-1)
 					s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
 				if (y == map->GetMapHeight()-1)
@@ -755,9 +811,6 @@ std::string MapEnvironment::SVGDraw()
 			}
 			else if (map->GetTerrainType(x, y) == kWater)
 			{
-				recColor c = {0.0, 0.0, 1.0};
-				s += SVGDrawRect(x+1, y+1, 1, 1, c);
-
 				if (x == map->GetMapWidth()-1)
 					s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
 				if (y == map->GetMapHeight()-1)
@@ -765,14 +818,9 @@ std::string MapEnvironment::SVGDraw()
 			}
 			else if (map->GetTerrainType(x, y) == kSwamp)
 			{
-				recColor c = {0.0, 0.3, 1.0};
-				s += SVGDrawRect(x+1, y+1, 1, 1, c);
-
 			}
 			else {
 				draw = false;
-//				recColor c = {0.0, 0.0, 0.0};
-//				s += SVGDrawRect(x, y, 1, 1, c);
 			}
 
 			if (draw)
@@ -784,25 +832,32 @@ std::string MapEnvironment::SVGDraw()
 				{
 					SetColor(0.0, 0.0, 0.0);
 					s += ::SVGDrawLine(x+1, y+1, x+1, y+1+1, 1, black, false);
+					s += "\n";
 				}
 
 				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y-1))
 				{
 					s += ::SVGDrawLine(x+1, y+1, x+1+1, y+1, 1, black, false);
+					s += "\n";
 				}
 				
 				if (map->GetTerrainType(x, y) != map->GetTerrainType(x+1, y))
 				{
 					s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+					s += "\n";
 				}
 				
 				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y+1))
 				{
 					s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+					s += "\n";
 				}
 			}
+
 		}
 	}
+	s += "\n";
+
 	return s;
 }
 
@@ -832,13 +887,19 @@ std::string MapEnvironment::SVGFrameRect(int left, int top, int right, int botto
 	return s;
 }
 
-std::string MapEnvironment::SVGLabelState(const xyLoc &, const char *str, double scale) const
+std::string MapEnvironment::SVGLabelState(const xyLoc &l, const char *str, double scale) const
 {
 	std::string s;
-	s =  "<text x=\"0\" y=\"15\" fill=\"black\">";
-	s += str;
-	s += "</text>";
+	recColor c;// = {0.5, 0.5, 0};
+	GLfloat t;
+	GetColor(c.r, c.g, c.b, t);
+	s += SVGDrawText(l.x+0.5+1, l.y+0.5+1+1, str, c, scale);
 	return s;
+//	std::string s;
+//	s =  "<text x=\"0\" y=\"15\" fill=\"black\">";
+//	s += str;
+//	s += "</text>";
+//	return s;
 }
 
 std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2, int width) const
@@ -856,6 +917,180 @@ std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2, int wi
 //	s +=      "y2 = \"" + std::to_string(p2.y) + "\" ";
 //	s += "style=\"stroke:"+SVGGetRGB(c)+";stroke-width:"+std::to_string(width)+"\" />";
 //	return s;
+}
+
+
+void MapEnvironment::Draw() const
+{
+	recColor black = {0.0, 0.0, 0.0};
+	
+	// draw tiles
+	for (int y = 0; y < map->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < map->GetMapWidth(); x++)
+		{
+			bool draw = true;
+			rect r;
+			GLdouble px, py, t, rad;
+			map->GetOpenGLCoord(x, y, px, py, t, rad);
+			r.left = px-rad;
+			r.top = py-rad;
+			r.right = px+rad;
+			r.bottom = py+rad;
+			
+			if (map->GetTerrainType(x, y) == kGround)
+			{
+				recColor c = {0.9, 0.9, 0.9};
+				FillRect(r, c);
+			}
+			else if (map->GetTerrainType(x, y) == kTrees)
+			{
+				recColor c = {0.0, 0.5, 0.0};
+				FillRect(r, c);
+			}
+			else if (map->GetTerrainType(x, y) == kWater)
+			{
+				recColor c = {0.0, 0.0, 1.0};
+				FillRect(r, c);
+			}
+			else if (map->GetTerrainType(x, y) == kSwamp)
+			{
+				recColor c = {0.0, 0.3, 1.0};
+				FillRect(r, c);
+			}
+			else {
+				draw = false;
+			}
+		}
+	}
+	
+	// draw cell boundaries for open terrain
+	if (0)
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			for (int x = 0; x < map->GetMapWidth(); x++)
+			{
+				// mark cells on map
+				if ((map->GetTerrainType(x, y)>>terrainBits) == (kGround>>terrainBits))
+				{
+					recColor c = {0.75, 0.75, 0.75};
+					rect r;
+					GLdouble px, py, t, rad;
+					map->GetOpenGLCoord(x, y, px, py, t, rad);
+					r.left = px-rad;
+					r.top = py-rad;
+					r.right = px+rad;
+					r.bottom = py+rad;
+					FrameRect(r, c);
+				}
+			}
+		}
+	
+	// draw lines between different terrain types
+//	if (0)
+	for (int y = 0; y < map->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < map->GetMapWidth(); x++)
+		{
+			GLdouble px, py, t, rad;
+			map->GetOpenGLCoord(x, y, px, py, t, rad);
+			
+			bool draw = true;
+			if ((map->GetTerrainType(x, y) == kGround) ||
+				(map->GetTerrainType(x, y) == kTrees) ||
+				(map->GetTerrainType(x, y) == kWater))
+			{
+				if (x == map->GetMapWidth()-1)
+				{
+					point2d s = {px+rad, py-rad};
+					point2d g = {px+rad, py+rad};
+					::DrawLine(s, g, 1, black);
+				}
+				if (y == map->GetMapHeight()-1)
+				{
+					point2d s = {px-rad, py+rad};
+					point2d g = {px+rad, py+rad};
+					::DrawLine(s, g, 1, black);
+				}
+			}
+			else if (map->GetTerrainType(x, y) == kSwamp)
+			{
+			}
+			else {
+				draw = false;
+			}
+			
+			if (draw)
+			{
+				// Code does error checking, so this works with x == 0
+				if (map->GetTerrainType(x, y) != map->GetTerrainType(x-1, y))
+				{
+					point2d s = {px-rad, py-rad};
+					point2d g = {px-rad, py+rad};
+					::DrawLine(s, g, 1, black);
+				}
+				
+				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y-1))
+				{
+					point2d s = {px-rad, py-rad};
+					point2d g = {px+rad, py-rad};
+					::DrawLine(s, g, 1, black);
+				}
+				
+				if (map->GetTerrainType(x, y) != map->GetTerrainType(x+1, y))
+				{
+					point2d s = {px+rad, py-rad};
+					point2d g = {px+rad, py+rad};
+					::DrawLine(s, g, 1, black);
+				}
+				
+				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y+1))
+				{
+					point2d s = {px-rad, py+rad};
+					point2d g = {px+rad, py+rad};
+					::DrawLine(s, g, 1, black);
+				}
+			}
+			
+		}
+	}
+}
+
+void MapEnvironment::Draw(const xyLoc &l) const
+{
+	GLdouble px, py, t, rad;
+	map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+
+	//if (map->GetTerrainType(l.x, l.y) == kGround)
+	{
+		recColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+
+		rect r;
+		r.left = px-rad;
+		r.top = py-rad;
+		r.right = px+rad;
+		r.bottom = py+rad;
+
+		//s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
+		::FillCircle(r, c);
+		//stroke-width="1" stroke="pink" />
+	}
+}
+
+void MapEnvironment::DrawLine(const xyLoc &a, const xyLoc &b, double width) const
+{
+	GLdouble xx1, yy1, zz1, rad;
+	GLdouble xx2, yy2, zz2;
+	map->GetOpenGLCoord(a.x, a.y, xx1, yy1, zz1, rad);
+	map->GetOpenGLCoord(b.x, b.y, xx2, yy2, zz2, rad);
+
+	recColor c;// = {0.5, 0.5, 0};
+	GLfloat t;
+	GetColor(c.r, c.g, c.b, t);
+	
+	::DrawLine({xx1, yy1}, {xx2, yy2}, width, c);
 }
 
 
