@@ -59,6 +59,7 @@ bool gJPS::DoSingleSearchStep(std::vector<xyLoc> &thePath)
 						openClosedList.Lookup(theID).parentID = next;
 						openClosedList.Lookup(theID).g = openClosedList.Lookup(next).g+s.cost;
 						openClosedList.Reopen(theID);
+						//std::cout << "Reopening " << openClosedList.Lookup(theID).data.loc << "\n";
 						// This line isn't normally needed, but in some state spaces we might have
 						// equality but different meta information, so we need to make sure that the
 						// meta information is also copied, since this is the most generic A* implementation
@@ -384,6 +385,14 @@ void gJPS::OpenGLDraw() const
 	if (openClosedList.size() == 0)
 		return;
 	uint64_t top = -1;
+	double maxGCost = 0;
+	
+	for (unsigned int x = 0; x < openClosedList.size(); x++)
+	{
+		const auto &data = openClosedList.Lookat(x);
+		if (data.round == openClosedList.GetRound())
+			maxGCost = std::max(maxGCost, data.g);
+	}
 	
 	if (openClosedList.OpenSize() > 0)
 	{
@@ -392,6 +401,9 @@ void gJPS::OpenGLDraw() const
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
 		const auto &data = openClosedList.Lookat(x);
+		if (data.round != openClosedList.GetRound())
+			continue;
+		
 		if (x == top)
 		{
 			env->SetColor(1.0, 1.0, 0.0, transparency);
@@ -409,12 +421,12 @@ void gJPS::OpenGLDraw() const
 		}
 		else if ((data.where == kClosedList) && (data.reopened))
 		{
-			env->SetColor(0.5, 0.0, 0.5, transparency);
+			env->SetColor(data.g/maxGCost, 0.0, 1.0, transparency);
 			env->OpenGLDraw(data.data.loc);
 		}
 		else if (data.where == kClosedList)
 		{
-			env->SetColor(1.0, 0.0, 0.0, transparency);
+			env->SetColor(data.g/maxGCost, 0.0, 0.0, transparency);
 			env->OpenGLDraw(data.data.loc);
 		}
 	}

@@ -43,13 +43,15 @@
 #include "MapGenerators.h"
 #include "FPUtil.h"
 #include "CanonicalGrid.h"
+#include "MapOverlay.h"
 #include "JPS.h"
-#include "gJPS.h"
+#include "CanonicalDijkstra.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
 bool runningSearch2 = false;
 bool runningSearch3 = false;
+bool runningSearch4 = false;
 int px1 = 30, py1 = 79, px2 = 0, py2 = 0;
 int absType = 0;
 int mazeSize = 20;
@@ -58,14 +60,21 @@ double searchWeight = 1;
 bool reopenNodes = false;
 bool screenShot = false;
 bool recording = false;
+int paused = 0;
 
+std::string DrawLimitedJumpPoints(MapEnvironment *me);
+std::string DrawBasicCanonicalOrdering(bool gray = false);
+std::string DrawCanonicalOrdering(bool gray = false);
 void WeightedCanAStarExperiments(char *scenario, double weight);
 void WeightedAStarExperiments(char *scenario, double weight);
 void DijkstraExperiments(char *scenario);
 void JPSExperiments(char *scenario, double weight, uint32_t jump);
 void OpenGridExperiments(int width);
+void ComputeReach();
 
 std::vector<UnitMapSimulation *> unitSims;
+std::vector<double> reach;
+MapOverlay *mo = 0;
 
 TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
 
@@ -75,13 +84,22 @@ CanonicalGrid::CanonicalGrid *grid;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> a1;
 TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> a2;
 JPS *jps;
+JPS *bjps;
+//CanonicalDijkstra *bjps;
 
 MapEnvironment *ma1 = 0;
 CanonicalGrid::CanonicalGrid *ma2 = 0;
 
+//std::string mapName = "/Users/nathanst/hog2/maps/dao/den001d.map";
+//std::string mapName = "/Users/nathanst/hog2/maps/da2/lt_backalley_g.map";
+//std::string mapName = "/Users/nathanst/hog2/maps/dao/orz107d.map";
+std::string mapName = "/Users/nathanst/hog2/maps/dao/den407d.map";
+
+
 std::vector<xyLoc> path;
 std::vector<CanonicalGrid::xyLoc> path2;
 std::vector<xyLoc> path3;
+std::vector<xyLoc> path4;
 
 int main(int argc, char* argv[])
 {
@@ -101,7 +119,12 @@ void CreateSimulation(int id)
 	{
 		//ht_chantry.arl.map // den012d
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz100d.map");
-		map = new Map("/Users/nathanst/hog2/maps/dao/orz101d.map");
+		//map = new Map("/Users/nathanst/hog2/maps/dao/orz101d.map");
+		
+		// good -
+		//map = new Map("/Users/nathanst/hog2/maps/dao/den201d.map");
+		map = new Map(mapName.c_str());
+		
 		//map = new Map("/Users/nathanst/hog2/maps/dao/brc502d.map");
 		
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
@@ -154,6 +177,51 @@ void CreateSimulation(int id)
 	if (ma1 == 0)
 	{
 		ma1 = new MapEnvironment(unitSims[id]->GetEnvironment()->GetMap());
+
+		
+		if ((0))
+		{
+			{
+				// draw basic map with grid and start state
+				std::fstream svgFile;
+				svgFile.open("/Users/nathanst/Desktop/den201d-0.svg", std::fstream::out | std::fstream::trunc);
+				svgFile << ma1->SVGHeader();
+				svgFile << ma1->SVGDraw();
+				px1 = 19; py1 = 18;
+				ma1->SetColor(1, 1, 1);
+				svgFile << ma1->SVGLabelState({20, 20}, "S", 1);
+				svgFile << "</svg>";
+				svgFile.close();
+			}
+			{
+				// draw map with basic canonical ordering
+				std::fstream svgFile;
+				svgFile.open("/Users/nathanst/Desktop/den201d-1.svg", std::fstream::out | std::fstream::trunc);
+				svgFile << ma1->SVGHeader();
+				svgFile << ma1->SVGDraw();
+				px1 = 19; py1 = 18;
+				svgFile << DrawBasicCanonicalOrdering();
+				ma1->SetColor(1, 1, 1);
+				svgFile << ma1->SVGLabelState({20, 20}, "S", 1);
+				svgFile << "</svg>";
+				svgFile.close();
+			}
+			{
+				// draw map with canonical ordering and jump points
+				std::fstream svgFile;
+				svgFile.open("/Users/nathanst/Desktop/den201d-2.svg", std::fstream::out | std::fstream::trunc);
+				svgFile << ma1->SVGHeader();
+				svgFile << ma1->SVGDraw();
+				px1 = 19; py1 = 18;
+				svgFile << DrawCanonicalOrdering();
+				ma1->SetColor(1, 1, 1);
+				svgFile << ma1->SVGLabelState({20, 20}, "S", 1);
+				
+				svgFile << DrawLimitedJumpPoints(ma1);
+				svgFile << "</svg>";
+				svgFile.close();
+			}
+		}
 	}
 	if (ma2 == 0)
 	{
@@ -161,7 +229,12 @@ void CreateSimulation(int id)
 		ma2->SetEightConnected();
 	}
 	jps = new JPS(map);
-	jps->SetJumpLimit(0);
+	jps->SetJumpLimit(-1);
+	bjps = new JPS(map);
+	bjps->SetJumpLimit(4);
+	//bjps->SetWeight(4.0);
+//	bjps = new CanonicalDijkstra();
+	//ComputeReach();
 }
 
 /**
@@ -298,8 +371,6 @@ std::string DrawLimitedJumpPoints(MapEnvironment *me)
 			else {
 				ma1->SetColor(1.0, 0.0, 0.0);
 			}
-			// also draw lines
-			//str += ma1->SVGDrawLine({queue.front().x, queue.front().y}, {s.x, s.y});
 			visited[s.x+s.y*grid->GetMap()->GetMapWidth()] = true;
 			if (((queue.front().parent|s.parent) != (queue.front().parent)) ||
 				(abs(s.x-queue.front().x)+abs(s.y-queue.front().y) <= 1 && (s.parent&(s.parent-1)) != 0))
@@ -310,7 +381,23 @@ std::string DrawLimitedJumpPoints(MapEnvironment *me)
 	return str;
 }
 
-std::string DrawCanonicalOrdering(bool gray = false)
+std::string DrawInitialJumpPoints(MapEnvironment *me)
+{
+	std::string str;
+	xyLoc from(px1, py1);
+	xyLoc to(-1, -1);
+	jps->InitializeSearch(me, from, to, path);
+	jps->DoSingleSearchStep(path);
+	me->SetColor(0.0, 0.0, 0.0);
+	for (int x = 0; x < jps->GetNumOpenItems(); x++)
+	{
+		str += me->SVGDraw(jps->GetOpenItem(x));
+	}
+	return str;
+}
+
+
+std::string DrawCanonicalOrdering(bool gray)
 {
 	std::string str;
 	CanonicalGrid::xyLoc gLoc(px1, py1);
@@ -342,6 +429,341 @@ std::string DrawCanonicalOrdering(bool gray = false)
 			visited[s.x+s.y*grid->GetMap()->GetMapWidth()] = true;
 		}
 		queue.pop_front();
+	}
+	return str;
+	
+}
+
+void AnimateBasicCanonicalOrdering(const std::string file, bool gray, xyLoc l)
+{
+	std::string str;
+	xyLoc gLoc(px1, py1);
+	std::deque<xyLoc> up, down, left, right, upleft, upright, downleft, downright;
+	up.push_back(gLoc);
+	down.push_back(gLoc);
+	left.push_back(gLoc);
+	right.push_back(gLoc);
+	upleft.push_back(gLoc);
+	upright.push_back(gLoc);
+	downleft.push_back(gLoc);
+	downright.push_back(gLoc);
+	
+	int frame = 0;
+	bool stillDrawing = true;
+	while (stillDrawing)
+	{
+		std::string fileName = file;
+		fileName += std::to_string((frame/100)%10);
+		fileName += std::to_string((frame/10)%10);
+		fileName += std::to_string((frame/1)%10);
+		fileName += ".svg";
+		std::fstream svgFile;
+		svgFile.open(fileName.c_str(), std::fstream::out | std::fstream::trunc);
+		svgFile << ma1->SVGHeader();
+		svgFile << ma1->SVGDraw();
+		svgFile << str;
+		ma1->SetColor(1, 1, 1);
+		svgFile << ma1->SVGLabelState(l, "S", 1);
+		svgFile << "</svg>";
+		svgFile.close();
+		frame++;
+		
+		if (gray)
+			ma1->SetColor(0.75, 0.75, 0.75);
+		else
+			ma1->SetColor(0.0, 0.0, 0.0);
+
+		stillDrawing = false;
+		if (upright.size() > 0)
+		{
+			xyLoc curr = upright.front();
+			xyLoc next = curr;
+			next.x += 1;
+			next.y -= 1;
+			upright.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				upright.push_front(next);
+				right.push_front(next);
+				up.push_front(next);
+			}
+			if (upright.size() > 0)
+				stillDrawing = true;
+		}
+		if (upleft.size() > 0)
+		{
+			xyLoc curr = upleft.front();
+			xyLoc next = curr;
+			next.x -= 1;
+			next.y -= 1;
+			upleft.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				upleft.push_front(next);
+				left.push_front(next);
+				up.push_front(next);
+			}
+			if (upleft.size() > 0)
+				stillDrawing = true;
+		}
+		if (downright.size() > 0)
+		{
+			xyLoc curr = downright.front();
+			xyLoc next = curr;
+			next.x += 1;
+			next.y += 1;
+			downright.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				downright.push_front(next);
+				down.push_front(next);
+				right.push_front(next);
+			}
+			if (downright.size() > 0)
+				stillDrawing = true;
+		}
+		if (downleft.size() > 0)
+		{
+			xyLoc curr = downleft.front();
+			xyLoc next = curr;
+			next.x -= 1;
+			next.y += 1;
+			downleft.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				downleft.push_front(next);
+				down.push_front(next);
+				left.push_front(next);
+			}
+			if (downleft.size() > 0)
+				stillDrawing = true;
+		}
+		
+		if (stillDrawing) // draws all diagonals before cardinals
+			continue;
+		xyLoc none(-1, -1);
+		if (up.size() > 0)
+		{
+			up.push_back(none);
+			while (up.front() != none)
+			{
+				xyLoc curr = up.front();
+				xyLoc next = curr;
+				next.y -= 1;
+				up.pop_front();
+				if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+				{
+					str += ma1->SVGDrawLine(curr, next);
+					up.push_back(next);
+				}
+				if (up.size() > 0)
+					stillDrawing = true;
+			}
+			up.pop_front();
+		}
+		if (down.size() > 0)
+		{
+			down.push_back(none);
+			while (down.front() != none)
+			{
+				xyLoc curr = down.front();
+				xyLoc next = curr;
+				next.y += 1;
+				down.pop_front();
+				if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+				{
+					str += ma1->SVGDrawLine(curr, next);
+					down.push_back(next);
+				}
+				if (down.size() > 0)
+					stillDrawing = true;
+			}
+			down.pop_front();
+		}
+		if (left.size() > 0)
+		{
+			left.push_back(none);
+			while (left.front() != none)
+			{
+				xyLoc curr = left.front();
+				xyLoc next = curr;
+				next.x -= 1;
+				left.pop_front();
+				if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+				{
+					str += ma1->SVGDrawLine(curr, next);
+					left.push_back(next);
+				}
+				if (left.size() > 0)
+					stillDrawing = true;
+			}
+			left.pop_front();
+		}
+		if (right.size() > 0)
+		{
+			right.push_back(none);
+			while (right.front() != none)
+			{
+				xyLoc curr = right.front();
+				xyLoc next = curr;
+				next.x += 1;
+				right.pop_front();
+				if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+				{
+					str += ma1->SVGDrawLine(curr, next);
+					right.push_back(next);
+				}
+				if (right.size() > 0)
+					stillDrawing = true;
+			}
+			right.pop_front();
+		}
+	}
+}
+
+
+std::string DrawBasicCanonicalOrdering(bool gray)
+{
+	std::string str;
+	xyLoc gLoc(px1, py1);
+	std::deque<xyLoc> up, down, left, right, upleft, upright, downleft, downright;
+	up.push_back(gLoc);
+	down.push_back(gLoc);
+	left.push_back(gLoc);
+	right.push_back(gLoc);
+	upleft.push_back(gLoc);
+	upright.push_back(gLoc);
+	downleft.push_back(gLoc);
+	downright.push_back(gLoc);
+	
+	if (gray)
+		ma1->SetColor(0.75, 0.75, 0.75);
+	else
+		ma1->SetColor(0.0, 0.0, 0.0);
+	bool stillDrawing = true;
+	while (stillDrawing)
+	{
+		stillDrawing = false;
+		if (up.size() > 0)
+		{
+			xyLoc curr = up.front();
+			xyLoc next = curr;
+			next.y -= 1;
+			up.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				up.push_front(next);
+			}
+			stillDrawing = true;
+		}
+		if (down.size() > 0)
+		{
+			xyLoc curr = down.front();
+			xyLoc next = curr;
+			next.y += 1;
+			down.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				down.push_front(next);
+			}
+			stillDrawing = true;
+		}
+		if (left.size() > 0)
+		{
+			xyLoc curr = left.front();
+			xyLoc next = curr;
+			next.x -= 1;
+			left.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				left.push_front(next);
+			}
+			stillDrawing = true;
+		}
+		if (right.size() > 0)
+		{
+			xyLoc curr = right.front();
+			xyLoc next = curr;
+			next.x += 1;
+			right.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				right.push_front(next);
+			}
+			stillDrawing = true;
+		}
+		if (upright.size() > 0)
+		{
+			xyLoc curr = upright.front();
+			xyLoc next = curr;
+			next.x += 1;
+			next.y -= 1;
+			upright.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				upright.push_front(next);
+				right.push_front(next);
+				up.push_front(next);
+			}
+			stillDrawing = true;
+		}
+		if (upleft.size() > 0)
+		{
+			xyLoc curr = upleft.front();
+			xyLoc next = curr;
+			next.x -= 1;
+			next.y -= 1;
+			upleft.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				upleft.push_front(next);
+				left.push_front(next);
+				up.push_front(next);
+			}
+			stillDrawing = true;
+		}
+		if (downright.size() > 0)
+		{
+			xyLoc curr = downright.front();
+			xyLoc next = curr;
+			next.x += 1;
+			next.y += 1;
+			downright.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				downright.push_front(next);
+				down.push_front(next);
+				right.push_front(next);
+			}
+			stillDrawing = true;
+		}
+		if (downleft.size() > 0)
+		{
+			xyLoc curr = downleft.front();
+			xyLoc next = curr;
+			next.x -= 1;
+			next.y += 1;
+			downleft.pop_front();
+			if (ma1->GetMap()->CanStep(curr.x, curr.y, next.x, next.y))
+			{
+				str += ma1->SVGDrawLine(curr, next);
+				downleft.push_front(next);
+				down.push_front(next);
+				left.push_front(next);
+			}
+			stillDrawing = true;
+		}
 	}
 	return str;
 
@@ -502,13 +924,15 @@ std::string DrawJPSGoalArea(CanonicalGrid::tDirection dir, bool drawBound, bool 
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	if (mo)
+		mo->OpenGLDraw();
 	if (viewport == 0)
 	{
 		unitSims[windowID]->StepTime(1.0/30.0);
 	}
 
 	// draw canonical ordering in SVG
-	if (screenShot)
+	if (screenShot&&0)
 	{
 		std::fstream svgFile;
 		svgFile.open("/Users/nathanst/Desktop/canonical.svg", std::fstream::out | std::fstream::trunc);
@@ -521,7 +945,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		svgFile << "</svg>";
 		svgFile.close();
 	}
-	if (screenShot) // canonical ordering with jump points
+	if (screenShot&&0) // canonical ordering with jump points
 	{
 		std::fstream svgFile;
 		svgFile.open("/Users/nathanst/Desktop/canonical+jp.svg", std::fstream::out | std::fstream::trunc);
@@ -536,8 +960,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		svgFile << "</svg>";
 		svgFile.close();
 	}
-	if (0) // canonical open gl
+	if (px1 != -1) // canonical open gl
 	{
+		glLineWidth(1);
 		CanonicalGrid::xyLoc gLoc(px1, py1);
 		std::deque<CanonicalGrid::xyLoc> queue;
 		queue.push_back(gLoc);
@@ -550,11 +975,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			{
 				if (!visited[s.x+s.y*grid->GetMap()->GetMapWidth()])
 				{
-					grid->SetColor(0.0, 0.0, 0.0);
+					grid->SetColor(0.5, 0.5, 0.5);
 					queue.push_back(s);
 				}
 				else {
-					grid->SetColor(1.0, 0.0, 0.0);
+					grid->SetColor(1.0, 0.5, 0.5);
 				}
 				grid->GLDrawLine(queue.front(), s);
 				visited[s.x+s.y*grid->GetMap()->GetMapWidth()] = true;
@@ -605,18 +1030,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (screenShot)
 	{
 		screenShot = false;
-
+		static int frame = -1;
+		frame++;
 		std::fstream svgFile;
-		svgFile.open("/Users/nathanst/Desktop/jps.svg", std::fstream::out | std::fstream::trunc);
-
+		char name[1024];
+		sprintf(name, "/Users/nathanst/Desktop/jps%d%d.svg", frame/10, frame%10);
+		svgFile.open(name, std::fstream::out | std::fstream::trunc);
 		svgFile << ma1->SVGHeader();
-//		svgFile << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(10*ma1->GetMap()->GetMapWidth()+10)+"\" height = \""+std::to_string(10*ma1->GetMap()->GetMapHeight()+10+100)+"\">";
-		
 		svgFile << ma1->SVGDraw();
 		svgFile << DrawCanonicalOrdering(true);
-
 		svgFile << jps->SVGDraw();
-
 		svgFile << "</svg>";
 		svgFile.close();
 	}
@@ -635,15 +1058,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	
 	
-	if (GetNumPorts(windowID) == 3)
+	if (GetNumPorts(windowID) > 1)
 	{
 		if ((ma1) && (viewport == 0)) // only do this once...
 		{
 			ma1->SetColor(0.0, 0.5, 0.0, 0.75);
-			if (runningSearch1 && !unitSims[windowID]->GetPaused())
+			if (runningSearch1)// && !unitSims[windowID]->GetPaused())
 			{
 				ma1->SetColor(0.0, 0.0, 1.0, 0.75);
-				for (int x = 0; x < gStepsPerFrame; x++)
+				for (int x = 0; x < gStepsPerFrame*paused; x++)
 				{
 					if (a1.DoSingleSearchStep(path))
 					{
@@ -655,8 +1078,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 					}
 				}
 			}
-			if (path.size() == 0)
-				a1.OpenGLDraw();
+			//if (path.size() == 0)
+			a1.OpenGLDraw();
+			if (path.size() > 0)
+			{
+				glLineWidth(10);
+				ma1->SetColor(0.5, 1.0, 1.0);
+				for (int x = 0; x < path.size()-1; x++)
+					ma1->GLDrawLine(path[x], path[x+1]);
+				glLineWidth(1);
+			}
 		}
 
 		if ((ma2) && viewport == 1)
@@ -665,7 +1096,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (runningSearch2)
 			{
 				ma2->SetColor(1.0, 0.0, 1.0, 0.5);
-				for (int x = 0; x < gStepsPerFrame; x++)
+				for (int x = 0; x < gStepsPerFrame*paused; x++)
 				{
 					if (a2.DoSingleSearchStep(path2))
 					{
@@ -677,8 +1108,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 					}
 				}
 			}
-			if (path2.size() == 0)
-				a2.OpenGLDraw();
+			//if (path2.size() == 0)
+			a2.OpenGLDraw();
+			if (path2.size() > 0)
+			{
+				glLineWidth(10);
+				ma1->SetColor(1.0, 0.5, 1.0);
+				for (int x = 0; x < path2.size()-1; x++)
+					ma2->GLDrawLine(path2[x], path2[x+1]);
+				glLineWidth(1);
+			}
 		}
 		if ((ma1) && viewport == 2)
 		{
@@ -686,7 +1125,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (runningSearch3)
 			{
 				ma1->SetColor(1.0, 0.0, 1.0, 0.5);
-				for (int x = 0; x < gStepsPerFrame; x++)
+				for (int x = 0; x < gStepsPerFrame*paused; x++)
 				{
 					if (jps->DoSingleSearchStep(path3))
 					{
@@ -699,6 +1138,44 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				}
 			}
 			jps->OpenGLDraw();
+			if (path3.size() > 0)
+			{
+				glLineWidth(10);
+				ma1->SetColor(1.0, 0.0, 1.0);
+				for (int x = 0; x < path3.size()-1; x++)
+					ma1->GLDrawLine(path3[x], path3[x+1]);
+				glLineWidth(1);
+			}
+
+		}
+		if ((ma1) && viewport == 3)
+		{
+			ma1->SetColor(1.0, 0.0, 0.0, 0.5);
+			if (runningSearch4)
+			{
+				ma1->SetColor(1.0, 0.0, 1.0, 0.5);
+				for (int x = 0; x < gStepsPerFrame*paused; x++)
+				{
+					if (bjps->DoSingleSearchStep(path4))
+					{
+						printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
+							   (int)path4.size(), ma1->GetPathLength(path4), bjps->GetNodesExpanded(),
+							   bjps->GetNumOpenItems());
+						runningSearch4 = false;
+						break;
+					}
+				}
+			}
+			bjps->OpenGLDraw();
+			if (path4.size() > 0)
+			{
+				glLineWidth(10);
+				ma1->SetColor(1.0, 0.0, 1.0);
+				for (int x = 0; x < path4.size()-1; x++)
+					ma1->GLDrawLine(path4[x], path4[x+1]);
+				glLineWidth(1);
+			}
+			
 		}
 	}
 	else if (GetNumPorts(windowID) == 1)
@@ -709,7 +1186,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (runningSearch3)
 			{
 				ma1->SetColor(1.0, 0.0, 1.0, 0.5);
-				for (int x = 0; x < gStepsPerFrame; x++)
+				for (int x = 0; x < gStepsPerFrame*paused; x++)
 				{
 					if (jps->DoSingleSearchStep(path3))
 					{
@@ -720,20 +1197,14 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			}
 			jps->OpenGLDraw();
 		}
-	}
-	if (path.size() > 0)
-	{
-		ma1->SetColor(0.0, 1.0, 1.0);
-		for (int x = 0; x < path.size()-1; x++)
-			ma1->GLDrawLine(path[x], path[x+1]);
-	}
-	if (path3.size() > 0)
-	{
-		glLineWidth(10);
-		ma1->SetColor(1.0, 0.0, 1.0);
-		for (int x = 0; x < path3.size()-1; x++)
-			ma1->GLDrawLine(path3[x], path3[x+1]);
-		glLineWidth(1);
+		if (path3.size() > 0)
+		{
+			glLineWidth(10);
+			ma1->SetColor(1.0, 0.0, 1.0);
+			for (int x = 0; x < path3.size()-1; x++)
+				ma1->GLDrawLine(path3[x], path3[x+1]);
+			glLineWidth(1);
+		}
 	}
 
 	if (recording && viewport == GetNumPorts(windowID)-1)
@@ -800,15 +1271,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	{
 		case '|': resetCamera(); break;
 		case 'r': recording = !recording; break;
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
+		case '0': jps->SetJumpLimit(-1); break;
+		case '1': jps->SetJumpLimit(1); break;
+		case '2': jps->SetJumpLimit(2); break;
+		case '3': jps->SetJumpLimit(4); break;
+		case '4': jps->SetJumpLimit(8); break;
+		case '5': jps->SetJumpLimit(16); break;
+		case '6': jps->SetJumpLimit(32); break;
+		case '7': jps->SetJumpLimit(64); break;
+		case '8': jps->SetJumpLimit(128); break;
 		case '9':
 			break;
 		case 's': screenShot = true; break;
@@ -838,7 +1309,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
 			}
 			break;
-		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
+		case 'p': //unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused());
+			paused = 1-paused;
+			printf("Paused is : %d\n", paused);
+			break;
 		case 'o':
 		{
 			if (runningSearch1)
@@ -859,6 +1333,29 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					runningSearch2 = false;
 				}
 			}
+			if (runningSearch3)
+			{
+				if (jps->DoSingleSearchStep(path3))
+				{
+					printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
+						   (int)path3.size(), ma1->GetPathLength(path3), jps->GetNodesExpanded(),
+						   jps->GetNumOpenItems());
+					runningSearch3 = false;
+					break;
+				}
+			}
+			if (runningSearch4)
+			{
+				if (bjps->DoSingleSearchStep(path4))
+				{
+					printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
+						   (int)path4.size(), ma1->GetPathLength(path4), bjps->GetNodesExpanded(),
+						   bjps->GetNumOpenItems());
+					runningSearch4 = false;
+					break;
+				}
+			}
+
 		}
 			break;
 		default:
@@ -868,9 +1365,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)
 {
-	printf("Testing Dijkstra vs gJPS\n");
+	printf("Testing Dijkstra vs CanonicalDijkstra\n");
 	Map *m = ma1->GetMap();
-	gJPS gjps;
+	CanonicalDijkstra gjps;
 	double t1, t2;
 	Timer t;
 	xyLoc s(px1, py1);
@@ -1011,6 +1508,222 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	
 }
 
+void LogScreenShots(xyLoc l)
+{
+	std::size_t found = mapName.find_last_of("/\\");
+	std::string name = mapName.substr(found+1);
+	std::string prefix = "/Users/nathanst/Desktop/";
+	std::string m1, m2, m3, m4;
+	m1 = prefix+name+"-0.svg";
+	m2 = prefix+name+"-1.svg";
+	m3 = prefix+name+"-2.svg";
+	m4 = prefix+name+"-3.svg";
+	{
+		// draw basic map with grid and start state
+		std::fstream svgFile;
+		svgFile.open(m1.c_str(), std::fstream::out | std::fstream::trunc);
+		svgFile << ma1->SVGHeader();
+		svgFile << ma1->SVGDraw();
+		ma1->SetColor(1, 1, 1);
+		svgFile << ma1->SVGLabelState(l, "S", 1);
+		svgFile << "</svg>";
+		svgFile.close();
+	}
+	{
+		// draw map with basic canonical ordering
+		std::fstream svgFile;
+		svgFile.open(m2.c_str(), std::fstream::out | std::fstream::trunc);
+		svgFile << ma1->SVGHeader();
+		svgFile << ma1->SVGDraw();
+		svgFile << DrawBasicCanonicalOrdering();
+		ma1->SetColor(1, 1, 1);
+		svgFile << ma1->SVGLabelState(l, "S", 1);
+		svgFile << "</svg>";
+		svgFile.close();
+	}
+	{
+		// draw map with basic canonical ordering and initial jump points
+		std::fstream svgFile;
+		svgFile.open(m3.c_str(), std::fstream::out | std::fstream::trunc);
+		svgFile << ma1->SVGHeader();
+		svgFile << ma1->SVGDraw();
+		svgFile << DrawBasicCanonicalOrdering();
+		ma1->SetColor(1, 1, 1);
+		svgFile << ma1->SVGLabelState(l, "S", 1);
+		svgFile << DrawInitialJumpPoints(ma1);
+		svgFile << "</svg>";
+		svgFile.close();
+	}
+	{
+		// draw map with canonical ordering and jump points
+		std::fstream svgFile;
+		svgFile.open(m4.c_str(), std::fstream::out | std::fstream::trunc);
+		svgFile << ma1->SVGHeader();
+		svgFile << ma1->SVGDraw();
+		svgFile << DrawCanonicalOrdering();
+		ma1->SetColor(1, 1, 1);
+		svgFile << ma1->SVGLabelState(l, "S", 1);
+		
+		svgFile << DrawLimitedJumpPoints(ma1);
+		svgFile << "</svg>";
+		svgFile.close();
+	}
+	AnimateBasicCanonicalOrdering(prefix+std::string("anim/")+name, false, l);
+}
+
+void AnimateAlgorithms(const std::string &prefix)
+{
+//	a1.InitializeSearch(ma1, s1, g1, path);
+//	a2.InitializeSearch(ma2, s2, g2, path2);
+//	jps->InitializeSearch(ma1, s1, g1, path3);
+
+	int frame = -1;
+	while (true)
+	{
+		frame++;
+		{
+			std::fstream svgFile;
+			char name[1024];
+			sprintf(name, "%s/jps/%d%d%d%d.svg", prefix.c_str(), (frame/1000)%10, (frame/100)%10, (frame/10)%10, frame%10);
+			svgFile.open(name, std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << DrawCanonicalOrdering(true);
+			svgFile << jps->SVGDraw();
+			svgFile << "</svg>";
+			svgFile.close();
+		}
+		if (jps->DoSingleSearchStep(path3))
+		{
+			frame++;
+			std::fstream svgFile;
+			char name[1024];
+			sprintf(name, "%s/jps/%d%d%d%d.svg", prefix.c_str(), (frame/1000)%10, (frame/100)%10, (frame/10)%10, frame%10);
+			svgFile.open(name, std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << DrawCanonicalOrdering(true);
+			svgFile << jps->SVGDraw();
+			ma1->SetColor(0, 0, 1);
+			for (int x = 0; x < path3.size()-1; x++)
+				svgFile << ma1->SVGDrawLine(path3[x], path3[x+1], 2);
+			svgFile << "</svg>";
+			svgFile.close();
+			break;
+		}
+	}
+
+	
+	frame = -1;
+	while (true)
+	{
+		frame++;
+		{
+			std::fstream svgFile;
+			char name[1024];
+			sprintf(name, "%s/bjps/%d%d%d%d.svg", prefix.c_str(), (frame/1000)%10, (frame/100)%10, (frame/10)%10, frame%10);
+			svgFile.open(name, std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << DrawCanonicalOrdering(true);
+			svgFile << bjps->SVGDraw();
+			svgFile << "</svg>";
+			svgFile.close();
+		}
+		if (bjps->DoSingleSearchStep(path4))
+		{
+			frame++;
+			std::fstream svgFile;
+			char name[1024];
+			sprintf(name, "%s/bjps/%d%d%d%d.svg", prefix.c_str(), (frame/1000)%10, (frame/100)%10, (frame/10)%10, frame%10);
+			svgFile.open(name, std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << DrawCanonicalOrdering(true);
+			svgFile << bjps->SVGDraw();
+			ma1->SetColor(0, 0, 1);
+			for (int x = 0; x < path4.size()-1; x++)
+				svgFile << ma1->SVGDrawLine(path4[x], path4[x+1], 2);
+			svgFile << "</svg>";
+			svgFile.close();
+			break;
+		}
+	}
+
+	frame = -1;
+	while (true)
+	{
+		frame++;
+		{
+			std::fstream svgFile;
+			char name[1024];
+			sprintf(name, "%s/astar/%d%d%d%d.svg", prefix.c_str(), (frame/1000)%10, (frame/100)%10, (frame/10)%10, frame%10);
+			svgFile.open(name, std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << DrawCanonicalOrdering(true);
+			svgFile << a1.SVGDraw();
+			svgFile << "</svg>";
+			svgFile.close();
+		}
+		if (a1.DoSingleSearchStep(path))
+		{
+			frame++;
+			std::fstream svgFile;
+			char name[1024];
+			sprintf(name, "%s/astar/%d%d%d%d.svg", prefix.c_str(), (frame/1000)%10, (frame/100)%10, (frame/10)%10, frame%10);
+			svgFile.open(name, std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << DrawCanonicalOrdering(true);
+			svgFile << a1.SVGDraw();
+			ma1->SetColor(0, 0, 1);
+			for (int x = 0; x < path.size()-1; x++)
+				svgFile << ma1->SVGDrawLine(path[x], path[x+1], 2);
+			svgFile << "</svg>";
+			svgFile.close();
+			break;
+		}
+	}
+
+	frame = -1;
+	while (true)
+	{
+		frame++;
+		{
+			std::fstream svgFile;
+			char name[1024];
+			sprintf(name, "%s/castar/%d%d%d%d.svg", prefix.c_str(), (frame/1000)%10, (frame/100)%10, (frame/10)%10, frame%10);
+			svgFile.open(name, std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << DrawCanonicalOrdering(true);
+			svgFile << a2.SVGDraw();
+			svgFile << "</svg>";
+			svgFile.close();
+		}
+		if (a2.DoSingleSearchStep(path2))
+		{
+			frame++;
+			std::fstream svgFile;
+			char name[1024];
+			sprintf(name, "%s/castar/%d%d%d%d.svg", prefix.c_str(), (frame/1000)%10, (frame/100)%10, (frame/10)%10, frame%10);
+			svgFile.open(name, std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << DrawCanonicalOrdering(true);
+			svgFile << a2.SVGDraw();
+			ma2->SetColor(0, 0, 1);
+			for (int x = 0; x < path2.size()-1; x++)
+				svgFile << ma2->SVGDrawLine(path2[x], path2[x+1], 2);
+			svgFile << "</svg>";
+			svgFile.close();
+			break;
+		}
+	}
+
+}
+
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
 //	return false;
@@ -1026,13 +1739,16 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 	}
 	mouseTracking = false;
 
-	if (button == kRightButton)
+	if (button == kRightButton || button == kLeftButton)
 	{
 		switch (mType)
 		{
 			case kMouseDown:
 				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px1, py1);
 				startLoc = loc;
+				
+				LogScreenShots(xyLoc(px1, py1));
+				
 //				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px1, py1);
 //				printf("Mouse down at (%d, %d)\n", px1, py1);
 				//MyRandomUnitKeyHandler(0, kShiftDown, 0);
@@ -1116,14 +1832,23 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				a1.SetWeight(searchWeight);
 				a2.SetWeight(searchWeight);
 				ma1->SetEightConnected();
-
+				{
+					a1.InitializeSearch(ma1, s1, g1, path);
+					a2.InitializeSearch(ma2, s2, g2, path2);
+					jps->InitializeSearch(ma1, s1, g1, path3);
+					bjps->InitializeSearch(ma1, s1, g1, path3);
+					AnimateAlgorithms("/Users/nathanst/Desktop/anim/");
+				}
+				
 				a1.InitializeSearch(ma1, s1, g1, path);
 				a2.InitializeSearch(ma2, s2, g2, path2);
 				jps->InitializeSearch(ma1, s1, g1, path3);
+				bjps->InitializeSearch(ma1, s1, g1, path4);
 				runningSearch1 = true;
 				runningSearch2 = true;
 				runningSearch3 = true;
-				SetNumPorts(windowID, 3);
+				runningSearch4 = true;
+				SetNumPorts(windowID, 4);
 
 //				cameraMoveTo((startLoc.x+loc.x)/2, (startLoc.y+loc.y)/2, -4.0, 1.0, 0);
 //				cameraMoveTo((startLoc.x+loc.x)/2, (startLoc.y+loc.y)/2, -4.0, 1.0, 1);
@@ -1253,7 +1978,7 @@ void DijkstraExperiments(char *scenario)
 	CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
 	TemplateAStar<xyLoc, tDirection, MapEnvironment, IndexOpenClosed<xyLoc>> astar;
 	TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid, IndexOpenClosed<CanonicalGrid::xyLoc>> canAstar;
-	gJPS gjps;
+	CanonicalDijkstra gjps;
 	astar.SetStopAfterGoal(false);
 	canAstar.SetStopAfterGoal(false);
 	Timer t;
@@ -1352,3 +2077,84 @@ void OpenGridExperiments(int width)
 	exit(0);
 }
 
+void ComputeReach(xyLoc start, TemplateAStar<xyLoc, tDirection, MapEnvironment> &search)
+{
+	std::vector<xyLoc> neighbors;
+	Map *m = ma1->GetMap();
+	
+	for (int i = 0; i < search.GetNumItems(); i++)
+	{
+		const AStarOpenClosedData<xyLoc> &d = search.GetItem(i);
+		ma1->GetSuccessors(d.data, neighbors);
+		bool foundParent = false;
+		// check if we have a neighbor that has this state as a parent
+		for (int x = 0; x < neighbors.size(); x++)
+		{
+			AStarOpenClosedData<xyLoc> n;
+			if (search.GetClosedItem(neighbors[x], n))
+			{
+				if (n.parentID == i)
+				{
+					foundParent = true;
+					break;
+				}
+			}
+		}
+		if (foundParent)
+			continue;
+		
+		// trace from i back to the start state updating the reach of each state
+		double perfectHCost = 0;
+		AStarOpenClosedData<xyLoc> v = search.GetItem(i);
+		int currParent = i;
+		while (true)
+		{
+			int64_t nextParent = v.parentID;
+			if (nextParent == kTAStarNoNode || nextParent == currParent)
+				break;
+			xyLoc next = search.GetItem(nextParent).data;
+			perfectHCost += ma1->GCost(next, v.data);
+			double r = std::min(perfectHCost, search.GetItem(nextParent).g);
+			reach[ma1->GetStateHash(next)] = std::max(r, reach[ma1->GetStateHash(next)]);
+			mo->SetOverlayValue(next.x, next.y, reach[ma1->GetStateHash(next)]);
+			v = search.GetItem(nextParent);
+			currParent = nextParent;
+		}
+	}
+}
+
+// Not using canonical ordering
+void ComputeReach()
+{
+	if (ma1 == 0)
+		return;
+	Map *m = ma1->GetMap();
+	if (mo == 0)
+	{
+		mo = new MapOverlay(m);
+		mo->SetColorMap(2);
+		mo->SetTransparentValue(0.1);
+	}
+	reach.clear();
+	reach.resize(m->GetMapWidth()*m->GetMapHeight());
+
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> search;
+	std::vector<xyLoc> result;
+	search.SetStopAfterGoal(false);
+	for (int y = 0; y < m->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < m->GetMapWidth(); x++)
+		{
+			if (m->GetTerrainType(x, y) == kGround)
+			{
+				xyLoc l(x, y);
+				std::cout << l << "\n";
+				search.GetPath(ma1, l, l, result);
+				ComputeReach(l, search);
+			}
+			else {
+				mo->SetOverlayValue(x, y, 0.1);
+			}
+		}
+	}
+}
