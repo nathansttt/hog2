@@ -33,6 +33,7 @@ SRC_CPP = \
   gui/Common.cpp \
   gui/GLUThog.cpp \
   gui/TextBox.cpp \
+  gui/Graphics2D.cpp \
   gui/Trackball.cpp
 
 
