@@ -46,10 +46,12 @@ public:
 	uint64_t GetNodesExpanded() const;
 	uint64_t GetNodesTouched() const;
 	uint64_t GetNumOpenItems() const { return openClosedList.OpenSize(); }
+	xyLoc GetOpenItem(int which) const { return openClosedList.Lookat(openClosedList.GetOpenItem(which)).data.loc; }
 	void SetWeight(double val) { weight = val; }
 	void SetJumpLimit(uint32_t val) { jumpLimit = val; }
 	void LogFinalStats(StatCollection *stats);
 	void OpenGLDraw() const;
+	void Draw() const;
 	std::string SVGDraw();
 	void OpenGLDraw(const MapEnvironment *env) const;
 private:

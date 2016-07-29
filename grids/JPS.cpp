@@ -9,6 +9,7 @@
 #include "JPS.h"
 #include <string>
 #include <algorithm>
+#include "Graphics2D.h"
 
 JPS::JPS(Map *m)
 {
@@ -62,6 +63,7 @@ JPS::JPS(Map *m)
 bool JPS::InitializeSearch(MapEnvironment *env, const xyLoc& from, const xyLoc& to, std::vector<xyLoc> &thePath)
 {
 	nodesExpanded = nodesTouched = 0;
+	thePath.resize(0);
 	this->env = env;
 	this->to = to;
 	Map *t = env->GetMap();
@@ -99,7 +101,6 @@ bool JPS::DoSingleSearchStep(std::vector<xyLoc> &thePath)
 		
 		successors.resize(0);
 		GetJPSSuccessors(nextState, to);
-		
 		for (const auto &s : successors)
 		{
 			uint64_t theID;
@@ -157,6 +158,11 @@ void JPS::GetJPSSuccessors(const xyLocParent &s, const xyLoc &goal)
 {
 	// write this and return g-cost too
 	GetJPSSuccessors(s.loc.x, s.loc.y, s.parent, goal, 0);
+	// GetJPSSuccessors counts the current state plus all states generated but not put into the
+	// successor list. So, we subtract 1 here to account for the current state, and add the final
+	// successors, as they aren't counted
+	nodesTouched--;
+	nodesTouched += successors.size();
 }
 
 bool JPS::Passable(int x, int y)
@@ -200,25 +206,9 @@ void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, doub
 					//b = true;
 					next |= kNE;
 			}
-//			if (!JumpPoint(x, y-1) && (a||b))
-//			{
-//				printf("Whoops! (1)");
-//			}
 			
 			if (next)
 				successors.push_back(jpsSuccessor(x, y-1, tDirection(next), cost+1));
-//			if (a && b)
-//			{
-//				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNW|kNE), cost+1));
-//			}
-//			else if (a)
-//			{
-//				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNW), cost+1));
-//			}
-//			else if (b)
-//			{
-//				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNE), cost+1));
-//			}
 			else {
 				if (cost >= jumpLimit)
 				{
@@ -246,26 +236,9 @@ void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, doub
 					//b = true;
 					next |= kSW;
 			}
-//			if (!JumpPoint(x-1, y) && (a||b))
-//			{
-//				printf("Whoops! (2) [%d, %d]", x, y);
-//			}
 
 			if (next)
 				successors.push_back(jpsSuccessor(x-1, y, tDirection(next), cost+1));
-//			if (a && b)
-//			{
-//				successors.push_back(jpsSuccessor(x-1, y, tDirection(kNW|kSW), cost+1));
-//			}
-//			else if (a)
-//			{
-//				successors.push_back(jpsSuccessor(x-1, y, tDirection(kNW), cost+1));
-//			}
-//			else if (b)
-//			{
-//				//neighbors.push_back(xyLoc(x-1, y, kSW));
-//				successors.push_back(jpsSuccessor(x-1, y, tDirection(kSW), cost+1));
-//			}
 			else {
 				if (cost >= jumpLimit)
 				{
@@ -294,25 +267,9 @@ void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, doub
 					//b = true;
 					next |= kSE;
 			}
-//			if (!JumpPoint(x, y+1) && (a||b))
-//			{
-//				printf("Whoops! (3)");
-//			}
 			
 			if (next)
 				successors.push_back(jpsSuccessor(x, y+1, tDirection(next), cost+1));
-//			if (a && b)
-//			{
-//				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSE|kSW), cost+1));
-//			}
-//			else if (a)
-//			{
-//				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSW), cost+1));
-//			}
-//			else if (b)
-//			{
-//				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSE), cost+1));
-//			}
 			else {
 				if (cost >= jumpLimit)
 				{
@@ -341,25 +298,9 @@ void JPS::GetJPSSuccessors(int x, int y, uint8_t parent, const xyLoc &goal, doub
 					//b = true;
 					next |= kSE;
 			}
-//			if (!JumpPoint(x+1, y) && (a||b))
-//			{
-//				printf("Whoops! (4)");
-//			}
 			
 			if (next)
 				successors.push_back(jpsSuccessor(x+1, y, tDirection(next), cost+1));
-//			if (a && b)
-//			{
-//				successors.push_back(jpsSuccessor(x+1, y, tDirection(kNE|kSE), cost+1));
-//			}
-//			else if (a)
-//			{
-//				successors.push_back(jpsSuccessor(x+1, y, tDirection(kNE), cost+1));
-//			}
-//			else if (b)
-//			{
-//				successors.push_back(jpsSuccessor(x+1, y, tDirection(kSE), cost+1));
-//			}
 			else {
 				if (cost >= jumpLimit)
 				{
@@ -465,6 +406,8 @@ std::string JPS::SVGDraw()
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
 		const auto &data = openClosedList.Lookat(x);
+		if (data.round != openClosedList.GetRound())
+			continue;
 
 		env->SetColor(1.0, 1.0, 1.0);
 		s += env->SVGDrawLine(data.data.loc, openClosedList.Lookat(data.parentID).data.loc, 3);
@@ -474,13 +417,16 @@ std::string JPS::SVGDraw()
 	for (unsigned int x = 0; x < openClosedList.size(); x++)
 	{
 		const auto &data = openClosedList.Lookat(x);
+		if (data.round != openClosedList.GetRound())
+			continue;
 
-		if (x == top)
+		//if (x == top)
+		if (env->GetStateHash(data.data.loc) == top)
 		{
 			env->SetColor(1.0, 1.0, 0.0, transparency);
 			s+=env->SVGDraw(data.data.loc);
 		}
-		if ((data.where == kOpenList) && (data.reopened))
+		else if ((data.where == kOpenList) && (data.reopened))
 		{
 			env->SetColor(0.0, 0.5, 0.5, transparency);
 			s+=env->SVGDraw(data.data.loc);
@@ -558,3 +504,53 @@ void JPS::OpenGLDraw() const
 }
 
 void JPS::OpenGLDraw(const MapEnvironment *env) const {}
+
+void JPS::Draw() const
+{
+	double transparency = 1.0;
+	if (openClosedList.size() == 0)
+		return;
+	uint64_t top = -1;
+	
+	if (openClosedList.OpenSize() > 0)
+	{
+		top = openClosedList.Peek();
+	}
+	for (unsigned int x = 0; x < openClosedList.size(); x++)
+	{
+		const auto &data = openClosedList.Lookat(x);
+		if (data.round != openClosedList.GetRound())
+			continue;
+
+		env->SetColor(1.0, 1.0, 1.0);
+		env->DrawLine(data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
+		env->SetColor(0.0, 0.0, 0.0);
+		env->DrawLine(data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
+		
+		if (x == top)
+		{
+			env->SetColor(1.0, 1.0, 0.0, transparency);
+			env->Draw(data.data.loc);
+		}
+		else if ((data.where == kOpenList) && (data.reopened))
+		{
+			env->SetColor(0.0, 0.5, 0.5, transparency);
+			env->Draw(data.data.loc);
+		}
+		else if (data.where == kOpenList)
+		{
+			env->SetColor(0.0, 1.0, 0.0, transparency);
+			env->Draw(data.data.loc);
+		}
+		else if ((data.where == kClosedList) && (data.reopened))
+		{
+			env->SetColor(0.5, 0.0, 0.5, transparency);
+			env->Draw(data.data.loc);
+		}
+		else if (data.where == kClosedList)
+		{
+			env->SetColor(1.0, 0.0, 0.0, transparency);
+			env->Draw(data.data.loc);
+		}
+	}
+}
