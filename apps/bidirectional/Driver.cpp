@@ -87,9 +87,11 @@ void GetRandom15(RubiksState &start, int which);
 void DualTest();
 void ArbitraryGoalTest();
 int MyCLHandler(char *argument[], int maxNumArgs);
+void TestDataStructure();
 
 int main(int argc, char* argv[])
 {
+	//TestDataStructure();
 	setvbuf(stdout, NULL, _IONBF, 0);
 
 	// technically we could/should install a command-line handler and handle these there
@@ -99,6 +101,84 @@ int main(int argc, char* argv[])
 	InstallCommandLineHandler(MyCLHandler, "-heuristic", "-heuristic <dir> <1997/888/8210/none>", "Load the given heuristic");
 	InstallCommandLineHandler(MyCLHandler, "-problem", "-problem which", "Load the given problem");
 	RunHOGGUI(argc, argv);
+}
+
+#include "FixedSizeSet.h"
+
+void TestDataStructure()
+{
+	Timer t;
+	const int testSize = 10000000;
+	std::vector<int> elements;
+	for (int x = 0; x < testSize; x++)
+		elements.push_back(random());
+	//std::sort(elements.begin(), elements.end());
+
+	FixedSizeSet<int> test(testSize);
+	std::unordered_set<int> test2;
+
+	t.StartTimer();
+	for (int x = 0; x < testSize; x++)
+		test.insert(elements[x]);
+	t.EndTimer();
+	printf("%1.9fs inserting %d elements (mine)\n", t.GetElapsedTime(), testSize);
+	
+	t.StartTimer();
+	for (int x = 0; x < testSize; x++)
+		test2.insert(elements[x]);
+	t.EndTimer();
+	printf("%1.9fs inserting %d elements (std)\n", t.GetElapsedTime(), testSize);
+
+	// Reset data
+//	{
+//		elements.resize(0);
+//		for (int x = 0; x < testSize; x++)
+//		{
+//			elements.push_back(random());
+//		}
+//	}
+	srandom(43);
+	t.StartTimer();
+	for (int x = 0; x < testSize*10; x++)
+	{
+		auto i = test.find(random());
+		if (i != test.end())
+			test.erase(i);
+	}
+	size_t cnt = 0, sum = 0;
+	for (auto &i : test)
+	{
+		if (i.valid)
+		{
+			cnt++;
+			sum+=i.item;
+		}
+	}
+	t.EndTimer();
+	printf("%1.9fs finding %d elements (mine)\n", t.GetElapsedTime(), testSize);
+	printf("%lu / %lu\n", cnt, sum);
+	
+	srandom(43);
+	t.StartTimer();
+	for (int x = 0; x < testSize*10; x++)
+	{
+		auto i = test2.find(random());
+		if (i != test2.end())
+			test2.erase(i);
+	}
+	cnt = 0; sum = 0;
+	for (auto &i : test2)
+	{
+		cnt++;
+		sum+=i;
+	}
+	t.EndTimer();
+	printf("%1.9fs finding %d elements (std)\n", t.GetElapsedTime(), testSize);
+	printf("%lu / %lu\n", cnt, sum);
+	
+	
+	
+	exit(0);
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)

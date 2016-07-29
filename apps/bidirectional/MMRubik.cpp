@@ -14,6 +14,7 @@
 #include <unordered_set>
 #include <iomanip>
 #include "SharedQueue.h"
+#include "FixedSizeSet.h"
 
 NAMESPACE_OPEN(MM)
 
@@ -44,8 +45,15 @@ std::mutex openLock;
 
 RubiksState startState, goalState;
 //unsigned __int128 i;
-typedef RubiksState diskState;
-//typedef uint64_t diskState;
+//typedef RubiksState diskState;
+typedef uint64_t diskState;
+#define MY_SET
+
+#ifdef MY_SET
+typedef FixedSizeSet<diskState> bucketSet;
+#else
+typedef std::unordered_set<diskState> bucketSet;
+#endif
 
 void GetBucketAndData(const RubiksState &s, int &bucket, diskState &data);
 void GetState(RubiksState &s, int bucket, diskState data);
@@ -72,14 +80,14 @@ enum  tSearchDirection {
 	kBackward,
 };
 
-const int kWorkUnitSize = 128;
-
-struct workUnit {
-	uint8_t count;
-	diskState work[kWorkUnitSize];
-};
-
-SharedQueue<workUnit> work;
+//const int kWorkUnitSize = 128;
+//
+//struct workUnit {
+//	uint8_t count;
+//	diskState work[kWorkUnitSize];
+//};
+//
+//SharedQueue<workUnit> work;
 
 // This tells us the open list buckets
 struct openData {
@@ -111,9 +119,10 @@ struct openDataHash
 };
 
 struct openList {
-	openList() :f(0) {}
+	openList() :f(0), writtenStates(0) {}
 	//std::unordered_set<uint64_t> states;
 	FILE *f;
+	uint64_t writtenStates;
 	uint8_t minf;
 };
 
@@ -148,18 +157,25 @@ std::unordered_map<openData, openList, openDataHash> open;
 std::string GetClosedName(closedData d)
 {
 	std::string s;
-	if ((d.bucket%16) < 8)
-	{
-		s += prefix1;
-	}
-	else {
-		s += prefix2;
-	}
 	if (d.dir == kForward)
 	{
+		if ((d.bucket%16) < 8)
+		{
+			s += prefix1;
+		}
+		else {
+			s += prefix2;
+		}
 		s += "forward-";
 	}
 	else {
+		if ((d.bucket%16) >= 8)
+		{
+			s += prefix1;
+		}
+		else {
+			s += prefix2;
+		}
 		s += "backward-";
 	}
 	s += std::to_string(d.bucket);
@@ -289,7 +305,8 @@ void AddStatesToQueue(const openData &d, diskState *data, size_t count)
 		exit(0);
 	}
 	iter->second.minf = std::min(iter->second.minf, d.fcost);
-	fwrite(data, sizeof(diskState), count, open[d].f);
+	size_t written = fwrite(data, sizeof(diskState), count, open[d].f);
+	open[d].writtenStates += written;
 	openLock.unlock();
 }
 
@@ -336,9 +353,40 @@ bool CanTerminateSearch()
 	return false;
 }
 
-void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentOpen, openData d,
-				   const std::unordered_set<diskState> &states)
+void FindSolutionThread(const openData &d, const openList &l, const bucketSet &states)
 {
+	const size_t bufferSize = 128;
+	diskState buffer[bufferSize];
+	if (l.f == 0)
+	{
+		std::cout << "Error opening " << d << "\n";
+		exit(0);
+	}
+	rewind(l.f);
+	size_t numRead;
+	do {
+		numRead = fread(buffer, sizeof(diskState), bufferSize, l.f);
+		for (int x = 0; x < numRead; x++)
+		{
+			if (states.find(buffer[x]) != states.end())
+			{
+				printLock.lock();
+				printf("\nFound solution cost %d+%d=%d\n", d.gcost, d.gcost, d.gcost + d.gcost);
+				bestSolution = std::min(d.gcost + d.gcost, bestSolution);
+				printf("Current best solution: %d\n", bestSolution);
+				printLock.unlock();
+				
+				if (CanTerminateSearch())
+					return;
+			}
+		}
+	} while (numRead == bufferSize);
+}
+
+void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentOpen, openData d,
+				   const bucketSet &states)
+{
+	std::vector<std::thread *> threads;
 	for (const auto &s : currentOpen)
 	{
 		// Opposite direction, same bucket AND could be a solution (g+g >= C)
@@ -346,42 +394,27 @@ void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentO
 		if (s.first.dir != d.dir && s.first.bucket == d.bucket &&
 			d.gcost + s.first.gcost >= currentC)// && d.hcost2 == s.first.hcost)
 		{
-			const size_t bufferSize = 128;
-			diskState buffer[bufferSize];
-			if (s.second.f == 0)
-			{
-				std::cout << "Error opening " << s.first << "\n";
-				exit(0);
-			}
-			rewind(s.second.f);
-			size_t numRead;
-			do {
-				numRead = fread(buffer, sizeof(diskState), bufferSize, s.second.f);
-				for (int x = 0; x < numRead; x++)
-				{
-					if (states.find(buffer[x]) != states.end())
-					{
-						printLock.lock();
-						//s.second.states.find(data) != s.second.states.end()
-						printf("\nFound solution cost %d+%d=%d\n", d.gcost, s.first.gcost, d.gcost + s.first.gcost);
-						bestSolution = std::min(d.gcost + s.first.gcost, bestSolution);
-						printf("Current best solution: %d\n", bestSolution);
-						printLock.unlock();
-
-						if (CanTerminateSearch())
-							return;
-					}
-				}
-			} while (numRead == bufferSize);
+//			std::thread *t = new std::thread(FindSolutionThread, s.first, s.second, states);
+//			threads.push_back(t);
+			FindSolutionThread(s.first, s.second, states);
 		}
 	}
+//	while (threads.size() > 0)
+//	{
+//		threads.back()->join();
+//		delete threads.back();
+//		threads.pop_back();
+//	}
 }
 
-void ReadBucket(std::unordered_set<diskState> &states, openData d)
+void ReadBucket(bucketSet &states, openData d)
 {
 	const size_t bufferSize = 128;
 	diskState buffer[bufferSize];
 	rewind(open[d].f);
+#ifdef MY_SET
+	states.resize(open[d].writtenStates);
+#endif
 	size_t numRead;
 	do {
 		numRead = fread(buffer, sizeof(diskState), bufferSize, open[d].f);
@@ -393,7 +426,7 @@ void ReadBucket(std::unordered_set<diskState> &states, openData d)
 	open[d].f = 0;
 }
 
-void RemoveDuplicates(std::unordered_set<diskState> &states, openData d)
+void RemoveDuplicates(bucketSet &states, openData d)
 {
 	for (int depth = d.gcost-2; depth < d.gcost; depth++)
 	{
@@ -423,7 +456,7 @@ void RemoveDuplicates(std::unordered_set<diskState> &states, openData d)
 	}
 }
 
-void WriteToClosed(std::unordered_set<diskState> &states, openData d)
+void WriteToClosed(bucketSet &states, openData d)
 {
 	closedData c;
 	c.bucket = d.bucket;
@@ -441,44 +474,42 @@ void WriteToClosed(std::unordered_set<diskState> &states, openData d)
 	}
 }
 
-void ParallelExpandBucket(openData d, const std::unordered_set<diskState> &states, int myThread, int totalThreads)
+void ParallelExpandBucket(openData d, bucketSet &states, int myThread, int totalThreads)
 {
 	const int cacheSize = 1024;
 	std::unordered_map<openData, std::vector<diskState>, openDataHash> cache;
 	RubiksState tmp;
 	uint64_t localExpanded = 0;
 	int count = 0;
-	//for (const auto &values : states)
-	workUnit item;
-	while (true)
+	for (const auto &values : states)
 	{
-		work.WaitRemove(item);
-		if (finished || item.count == 0)
-			break;
-		
-		for (int t = 0; t < item.count; t++)
+		count++;
+		if (myThread != count%totalThreads)
+			continue;
+		diskState v;
+#ifdef MY_SET
+		if (!values.valid)
+			continue;
+		v = values.item;
+#else
+		v = values;
+#endif
+		localExpanded++;
+		for (int x = 0; x < 18; x++) // TODO: use getactions
 		{
-			diskState values = item.work[t];
+			GetState(tmp, d.bucket, v);
+			// copying 2 64-bit values is faster than undoing a move
+			cube.ApplyAction(tmp, x);
+			openData newData;
+			diskState newRank;
+			GetOpenData(tmp, d.dir, d.gcost+1, newData, newRank);
 			
-			count++;
-			
-			localExpanded++;
-			for (int x = 0; x < 18; x++) // TODO: use getactions
+			std::vector<diskState> &c = cache[newData];
+			c.push_back(newRank);
+			if (c.size() > cacheSize)
 			{
-				GetState(tmp, d.bucket, values);
-				// copying 2 64-bit values is faster than undoing a move
-				cube.ApplyAction(tmp, x);
-				openData newData;
-				diskState newRank;
-				GetOpenData(tmp, d.dir, d.gcost+1, newData, newRank);
-				
-				std::vector<diskState> &c = cache[newData];
-				c.push_back(newRank);
-				if (c.size() > cacheSize)
-				{
-					AddStatesToQueue(newData, &c[0], c.size());
-					c.clear();
-				}
+				AddStatesToQueue(newData, &c[0], c.size());
+				c.clear();
 			}
 		}
 	}
@@ -496,7 +527,7 @@ void ParallelExpandBucket(openData d, const std::unordered_set<diskState> &state
 	countLock.unlock();
 }
 
-void ReadAndDDBucket(std::unordered_set<diskState> &states, const openData &d)
+void ReadAndDDBucket(bucketSet &states, const openData &d)
 {
 	ReadBucket(states, d);
 	RemoveDuplicates(states, d); // delayed duplicate detection
@@ -508,8 +539,8 @@ void ReadAndDDBucket(std::unordered_set<diskState> &states, const openData &d)
 void ExpandNextFile()
 {
 	static bool preLoaded = false;
-	static std::unordered_set<diskState> nextStates;
-	static std::unordered_set<diskState> states;
+	static bucketSet nextStates(0);
+	static bucketSet states(0);
 	static openData next;
 	// 1. Get next expansion target
 	openData d = GetBestFile();
@@ -568,29 +599,35 @@ void ExpandNextFile()
 	for (int x = 0; x < numThreads; x++)
 		threads.push_back(new std::thread(ParallelExpandBucket, d, std::ref(states), x, numThreads));
 	// Put work for states into queue and send it to threads
-	{
-		int count = 0;
-		workUnit w;
-		for (const auto &values : states)
-		{
-			w.work[count] = values;
-			count++;
-			if (count == kWorkUnitSize)
-			{
-				w.count = count;
-				work.WaitAdd(w);
-				count = 0;
-			}
-		}
-		if (count > 0)
-		{
-			w.count = count;
-			work.WaitAdd(w);
-		}
-		w.count = 0;
-		for (int x = 0; x < threads.size(); x++)
-			work.WaitAdd(w);
-	}
+//	{
+//		int count = 0;
+//		workUnit w;
+//		for (const auto &values : states)
+//		{
+//#ifdef MY_SET
+//			if (values.valid == false)
+//				continue;
+//			w.work[count] = values.item;
+//#else
+//			w.work[count] = values;
+//#endif
+//			count++;
+//			if (count == kWorkUnitSize)
+//			{
+//				w.count = count;
+//				work.WaitAdd(w);
+//				count = 0;
+//			}
+//		}
+//		if (count > 0)
+//		{
+//			w.count = count;
+//			work.WaitAdd(w);
+//		}
+//		w.count = 0;
+//		for (int x = 0; x < threads.size(); x++)
+//			work.WaitAdd(w);
+//	}
 	for (int x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();
@@ -852,25 +889,33 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 
 int GetBucket(const RubiksState &s)
 {
-//	diskState ehash = RubikEdgePDB::GetStateHash(s.edge);
-//	return ehash&bucketMask;
-	return (s.edge.state^(s.corner.state<<2))&bucketMask;
+	diskState ehash = RubikEdgePDB::GetStateHash(s.edge);
+	return ehash&bucketMask;
+//	return (s.edge.state^(s.corner.state<<2))&bucketMask;
 }
 
-void GetBucketAndData(const RubiksState &s, int &bucket, diskState &data)
+void GetBucketAndData(const RubiksState &s, int &bucket, uint64_t &data)
 {
-//	uint64_t ehash = RubikEdgePDB::GetStateHash(s.edge);
-//	uint64_t chash = RubikCornerPDB::GetStateHash(s.corner);
-//	bucket = ehash&bucketMask;
-//	data = (ehash>>bucketBits)*RubikCornerPDB::GetStateSpaceSize()+chash;
+	uint64_t ehash = RubikEdgePDB::GetStateHash(s.edge);
+	uint64_t chash = RubikCornerPDB::GetStateHash(s.corner);
+	bucket = ehash&bucketMask;
+	data = (ehash>>bucketBits)*RubikCornerPDB::GetStateSpaceSize()+chash;
+}
+
+void GetBucketAndData(const RubiksState &s, int &bucket, RubiksState &data)
+{
 	bucket = GetBucket(s);
 	data = s;
 }
 
-void GetState(RubiksState &s, int bucket, diskState data)
+void GetState(RubiksState &s, int bucket, uint64_t data)
 {
-//	RubikCornerPDB::GetStateFromHash(s.corner, data%RubikCornerPDB::GetStateSpaceSize());
-//	RubikEdgePDB::GetStateFromHash(s.edge, bucket|((data/RubikCornerPDB::GetStateSpaceSize())<<bucketBits));
+	RubikCornerPDB::GetStateFromHash(s.corner, data%RubikCornerPDB::GetStateSpaceSize());
+	RubikEdgePDB::GetStateFromHash(s.edge, bucket|((data/RubikCornerPDB::GetStateSpaceSize())<<bucketBits));
+}
+
+void GetState(RubiksState &s, int bucket, RubiksState data)
+{
 	s = data;
 }
 
@@ -880,6 +925,9 @@ void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2,
 		heuristicType h, const char *hloc)
 //void MM(RubiksState &start, RubiksState &goal, const char *p1, const char *p2, const char *hloc)
 {
+#ifdef MY_SET
+	printf("Using custom set container\n");
+#endif
 	startState = start;
 	goalState = goal;
 	prefix1 = p1;
