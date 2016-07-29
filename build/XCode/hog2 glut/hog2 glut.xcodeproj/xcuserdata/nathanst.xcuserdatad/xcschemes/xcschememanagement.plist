@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>Airplane.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>27</integer>
+		</dict>
 		<key>Canonical Graphs.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -148,6 +153,11 @@
 			<true/>
 		</dict>
 		<key>C4146D621830F66100745331</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C41848981CDACC30008057D1</key>
 		<dict>
 			<key>primary</key>
 			<true/>

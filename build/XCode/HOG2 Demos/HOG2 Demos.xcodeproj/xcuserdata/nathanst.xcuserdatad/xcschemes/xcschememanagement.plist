@@ -4,10 +4,45 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>Bouding Boxes.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
+		</dict>
+		<key>Canonical Dijkstra.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>11</integer>
+		</dict>
 		<key>DFID.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+		<key>DH.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
+		<key>MM Graph.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
+		</dict>
+		<key>Reach.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>7</integer>
+		</dict>
+		<key>Suboptimal Search.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>10</integer>
+		</dict>
+		<key>Transit Routing.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>9</integer>
 		</dict>
 		<key>astar.xcscheme</key>
 		<dict>
@@ -32,7 +67,37 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>C41124641CE5076300EB20CE</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C41124EC1CE50FBF00EB20CE</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C41847871CD920EA008057D1</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C418480E1CD9D140008057D1</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>C41D391A1CAEE39C00CB9200</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C447D34A1CEA782100F76287</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C44DE2C71CF426B7003266B9</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -48,6 +113,11 @@
 			<true/>
 		</dict>
 		<key>C4822EC31CAB9B0B000623FA</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4D216091D25B2B70039F401</key>
 		<dict>
 			<key>primary</key>
 			<true/>
