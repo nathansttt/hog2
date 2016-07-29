@@ -8,6 +8,8 @@
 
 #include "CanonicalGrid.h"
 #include <string.h>
+#include "SVGUtil.h"
+#include "Graphics2D.h"
 
 namespace CanonicalGrid {
 	
@@ -391,8 +393,8 @@ namespace CanonicalGrid {
 		map->GetOpenGLCoord(b.x, b.y, xx2, yy2, zz2, rad);
 		
 		double angle = atan2(yy1-yy2, xx1-xx2);
-		double xoff = sin(2*PI-angle)*rad*0.2;
-		double yoff = cos(2*PI-angle)*rad*0.2;
+		double xoff = sin(2*PI-angle)*rad*0.1;
+		double yoff = cos(2*PI-angle)*rad*0.1;
 		
 		
 		
@@ -451,6 +453,249 @@ namespace CanonicalGrid {
 		glPopMatrix();
 	}
 
+	std::string CanonicalGrid::SVGHeader()
+	{
+		std::string s;
+		// 10% margin on all sides of image
+		s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(10*map->GetMapWidth())+"\" height = \""+std::to_string(10*map->GetMapHeight())+"\" ";
+		s += "viewBox=\""+std::to_string(-map->GetMapWidth())+" "+std::to_string(-map->GetMapHeight())+" ";
+		s += std::to_string(12*map->GetMapWidth())+" "+std::to_string(12*map->GetMapHeight())+"\" ";
+		s += "preserveAspectRatio = \"none\" ";
+		s += ">\n";
+		return s;
+	}
+	
+	std::string CanonicalGrid::SVGDraw()
+	{
+		std::string s;
+		recColor black = {0.0, 0.0, 0.0};
+		
+		// draw tiles
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			for (int x = 0; x < map->GetMapWidth(); x++)
+			{
+				bool draw = true;
+				if (map->GetTerrainType(x, y) == kGround)
+				{
+					recColor c = {0.9, 0.9, 0.9};
+					s += SVGDrawRect(x+1, y+1, 1, 1, c);
+					s += "\n";
+				}
+				else if (map->GetTerrainType(x, y) == kTrees)
+				{
+					recColor c = {0.0, 0.5, 0.0};
+					s += SVGDrawRect(x+1, y+1, 1, 1, c);
+					s += "\n";
+				}
+				else if (map->GetTerrainType(x, y) == kWater)
+				{
+					recColor c = {0.0, 0.0, 1.0};
+					s += SVGDrawRect(x+1, y+1, 1, 1, c);
+					s += "\n";
+				}
+				else if (map->GetTerrainType(x, y) == kSwamp)
+				{
+					recColor c = {0.0, 0.3, 1.0};
+					s += SVGDrawRect(x+1, y+1, 1, 1, c);
+					s += "\n";
+				}
+				else {
+					draw = false;
+				}
+			}
+		}
+		
+		// draw cell boundaries for open terrain
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			for (int x = 0; x < map->GetMapWidth(); x++)
+			{
+				// mark cells on map
+				if ((map->GetTerrainType(x, y)>>terrainBits) == (kGround>>terrainBits))
+				{
+					recColor c = {0.75, 0.75, 0.75};
+					s += ::SVGFrameRect(x+1, y+1, 1, 1, 1, c);
+					s += "\n";
+				}
+			}
+		}
+		
+		// draw lines between different terrain types
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			for (int x = 0; x < map->GetMapWidth(); x++)
+			{
+				bool draw = true;
+				if (map->GetTerrainType(x, y) == kGround)
+				{
+					if (x == map->GetMapWidth()-1)
+						s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+					if (y == map->GetMapHeight()-1)
+						s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+				}
+				else if (map->GetTerrainType(x, y) == kTrees)
+				{
+					if (x == map->GetMapWidth()-1)
+						s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+					if (y == map->GetMapHeight()-1)
+						s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+				}
+				else if (map->GetTerrainType(x, y) == kWater)
+				{
+					if (x == map->GetMapWidth()-1)
+						s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+					if (y == map->GetMapHeight()-1)
+						s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+				}
+				else if (map->GetTerrainType(x, y) == kSwamp)
+				{
+				}
+				else {
+					draw = false;
+				}
+				
+				if (draw)
+				{
+					SetColor(0.0, 0.0, 0.0);
+					
+					// Code does error checking, so this works with x == 0
+					if (map->GetTerrainType(x, y) != map->GetTerrainType(x-1, y))
+					{
+						SetColor(0.0, 0.0, 0.0);
+						s += ::SVGDrawLine(x+1, y+1, x+1, y+1+1, 1, black, false);
+						s += "\n";
+					}
+					
+					if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y-1))
+					{
+						s += ::SVGDrawLine(x+1, y+1, x+1+1, y+1, 1, black, false);
+						s += "\n";
+					}
+					
+					if (map->GetTerrainType(x, y) != map->GetTerrainType(x+1, y))
+					{
+						s += ::SVGDrawLine(x+1+1, y+1, x+1+1, y+1+1, 1, black, false);
+						s += "\n";
+					}
+					
+					if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y+1))
+					{
+						s += ::SVGDrawLine(x+1, y+1+1, x+1+1, y+1+1, 1, black, false);
+						s += "\n";
+					}
+				}
+				
+			}
+		}
+		s += "\n";
+		
+		return s;
+	}
+	
+	std::string CanonicalGrid::SVGDraw(const xyLoc &l)
+	{
+		std::string s;
+		if (map->GetTerrainType(l.x, l.y) == kGround)
+		{
+			recColor c;// = {0.5, 0.5, 0};
+			GLfloat t;
+			GetColor(c.r, c.g, c.b, t);
+			s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
+			//stroke-width="1" stroke="pink" />
+		}
+		return s;
+	}
+	
+	std::string CanonicalGrid::SVGFrameRect(int left, int top, int right, int bottom, int width)
+	{
+		std::string s;
+		
+		recColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+		s += ::SVGFrameRect(left+1, top+1, right-left+1, bottom-top+1, width, c);
+		
+		return s;
+	}
+	
+	std::string CanonicalGrid::SVGLabelState(const xyLoc &l, const char *str, double scale) const
+	{
+		std::string s;
+		recColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+		s += SVGDrawText(l.x+0.5+1, l.y+0.5+1+1, str, c, scale);
+		return s;
+		//	std::string s;
+		//	s =  "<text x=\"0\" y=\"15\" fill=\"black\">";
+		//	s += str;
+		//	s += "</text>";
+		//	return s;
+	}
+	
+	std::string CanonicalGrid::SVGDrawLine(const xyLoc &p1, const xyLoc &p2, int width) const
+	{
+		//<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,255,255);stroke-width:1" />
+		//std::string s;
+		recColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+		return ::SVGDrawLine(p1.x+1, p1.y+1, p2.x+1, p2.y+1, width, c);
+		
+		//	s = "<line x1 = \"" + std::to_string(p1.x) + "\" ";
+		//	s +=      "y1 = \"" + std::to_string(p1.y) + "\" ";
+		//	s +=      "x2 = \"" + std::to_string(p2.x) + "\" ";
+		//	s +=      "y2 = \"" + std::to_string(p2.y) + "\" ";
+		//	s += "style=\"stroke:"+SVGGetRGB(c)+";stroke-width:"+std::to_string(width)+"\" />";
+		//	return s;
+	}
+
+	void CanonicalGrid::DrawOrdering(xyLoc l) const
+	{
+		recColor c;
+		{
+			GLfloat r,g,b,t;
+			GetColor(r, g, b, t);
+			c = {r, g, b};
+		}
+		std::deque<xyLoc> queue;
+		queue.push_back(l);
+		std::vector<xyLoc> v;
+		std::vector<bool> visited(map->GetMapHeight()*map->GetMapWidth());
+		while (!queue.empty())
+		{
+			GetSuccessors(queue.front(), v);
+			for (auto &s : v)
+			{
+				if (!visited[s.x+s.y*map->GetMapWidth()])
+				{
+					queue.push_back(s);
+				}
+//				else {
+//					ma1->SetColor(1.0, 0.0, 0.0);
+//				}
+				Graphics2D::point2d p1, p2;
+				{
+					GLdouble x, y, z, r;
+					map->GetOpenGLCoord(queue.front().x, queue.front().y, x, y, z, r);
+					p1.x = x;
+					p1.y = y;
+				}
+				{
+					GLdouble x, y, z, r;
+					map->GetOpenGLCoord(s.x, s.y, x, y, z, r);
+					p2.x = x;
+					p2.y = y;
+				}
+				Graphics2D::DrawLine(p1, p2, 1, c);
+				visited[s.x+s.y*map->GetMapWidth()] = true;
+			}
+			queue.pop_front();
+		}
+	}
+
+	
 	void CanonicalGrid::GetNextState(const xyLoc &currents, tDirection dir, xyLoc &news) const
 	{
 		news = currents;

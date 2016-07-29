@@ -84,6 +84,15 @@ namespace CanonicalGrid {
 		void GLDrawLine(const xyLoc &x, const xyLoc &y) const;
 		Map* GetMap() const { return map; }
 		
+		std::string SVGHeader();
+		std::string SVGDraw();
+		std::string SVGDraw(const xyLoc &);
+		std::string SVGLabelState(const xyLoc &, const char *, double scale) const;
+		std::string SVGDrawLine(const xyLoc &x, const xyLoc &y, int width=1) const;
+		std::string SVGFrameRect(int left, int top, int right, int bottom, int width = 1);
+		
+		void DrawOrdering(const xyLoc l) const; // Only draws canonical ordering
+		
 		void GetNextState(const xyLoc &currents, tDirection dir, xyLoc &news) const;
 		
 		void StoreGoal(xyLoc &) {} // stores the locations for the given goal state
