@@ -15,8 +15,11 @@ extern "C" {
 #define GLUT_RIGHT_BUTTON  1
 #define GLUT_LEFT_BUTTON   2
 #define GLUT_DOWN          0
+#define GLUT_UP            1
 #define GLUT_WINDOW_WIDTH  0
 #define GLUT_WINDOW_HEIGHT 0
+
+#define GLUT_CURSOR_NONE   101
 
 /* Stroke font constants (use these in GLUT program). */
 #define GLUT_STROKE_ROMAN               ((void*)0)
@@ -37,6 +40,9 @@ void glutInitWindowPosition (int x, int y) ;
 void glutInitWindowSize (int width, int height) ;
 void glutKeyboardFunc (void (*) (unsigned char key, int x, int y)) ;
 void glutMainLoop (void);
+void glutSetCursor(int cursor);
+void glutPassiveMotionFunc(void (*func)(int x, int y));
+void glutWarpPointer(int x, int y);
 
 void glutMotionFunc (void (*) (int x, int y)) ;
 void glutMouseFunc (void (*) (int button, int state, int x, int y)) ;
@@ -54,7 +60,7 @@ int glutBitmapLength(void *font, const unsigned char *string);
 int glutStrokeLength(void *font, const unsigned char *string);
 
 void gluOrtho2D (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top);
-void renderScene();
+	void renderScene();
 }
 
 #endif

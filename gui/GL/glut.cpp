@@ -1,6 +1,6 @@
 #include "glut.h"
 
-void renderScene(){}
+//void renderScene(){}
 
 void glutAddMenuEntry (char *label, int value) {};
 void glutAddSubMenu (char *label, int submenu) {};
@@ -20,6 +20,9 @@ void glutMainLoop (void) {
 	while (1)
 		renderScene();
 };
+void glutSetCursor(int cursor){}
+void glutPassiveMotionFunc(void (*func)(int x, int y)) {};
+void glutWarpPointer(int x, int y){};
 
 void glutMotionFunc (void (*) (int x, int y)) {};
 void glutMouseFunc (void (*) (int button, int state, int x, int y)) {};
