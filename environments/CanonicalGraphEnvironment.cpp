@@ -150,7 +150,7 @@ bool CanonicalGraphEnvironment::GoalTest(const canGraphState &state, const canGr
 
 uint64_t CanonicalGraphEnvironment::GetMaxHash() const
 {
-	g->GetNumNodes();
+	return g->GetNumNodes();
 }
 
 uint64_t CanonicalGraphEnvironment::GetStateHash(const canGraphState &state) const

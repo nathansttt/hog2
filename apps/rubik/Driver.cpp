@@ -394,6 +394,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'p':
+		{
 			SetNumPorts(windowID, 1);
 			SetZoom(windowID, 6);
 			s.Reset();
@@ -406,6 +407,64 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			animateActions.push_back(0);
 			animateActions.push_back(3);
 			printf("Resetting state\n");
+		}
+		{
+			RubiksCube cube;
+			std::vector<int> blank;
+			RubiksState goal;
+			goal.Reset();
+			
+			const char *hprefix = "/Users/nathanst/Desktop/pdb";
+			std::vector<int> edges1 = {1, 3, 8, 9, 10, 11};
+			std::vector<int> edges2 = {0, 2, 4, 5, 6, 7};
+			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+			std::vector<int> edges3 = {0, 2, 4};
+			std::vector<int> corners2 = {0, 1};
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+			RubikPDB *pdb4 = new RubikPDB(&cube, goal, edges3, corners2);
+			
+			//	assert(!"File names are getting corrupted here. Perhaps by the abstraction of the goal state");
+			//	assert(!"Need to abstract the goal state immediately when creating the pdb instead of only when I build the pdb");
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			else {
+				printf("Loaded previous heuristic\n");
+				pdb1->PrintHistogram();
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			else {
+				printf("Loaded previous heuristic\n");
+				pdb2->PrintHistogram();
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			else {
+				printf("Loaded previous heuristic\n");
+				pdb3->PrintHistogram();
+			}
+			if (!pdb4->Load(hprefix))
+			{
+				pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb4->Save(hprefix);
+			}
+			else {
+				printf("Loaded previous heuristic\n");
+				pdb4->PrintHistogram();
+			}
+			
+		}
 			break;
 		case 'o':
 		{

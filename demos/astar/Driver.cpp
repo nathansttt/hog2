@@ -95,7 +95,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
-	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra & A*", kAnyModifier, 'w');
+	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra, A* and Weighted A*", kAnyModifier, 'w');
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
 	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
 	InstallKeyboardHandler(DefaultGraph, "Default", "Build Deafult Graph", kAnyModifier, 'a', 'd');
@@ -247,7 +247,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			break;
 		case 'w':
-			if (weight > 0.5)
+			if (weight == 1.0)
+				weight = 2.0;
+			else if (weight > 1.0)
 				weight = 0.0;
 			else
 				weight = 1.0;
@@ -381,6 +383,7 @@ void ShowSearchInfo()
 	s +=" to ";
 	s += g->GetNode(astar.goal)->GetName();
 	s += " <-----";
+	s += " w:" + MyToString(weight);
 	te.AddLine(s.c_str());
 	te.AddLine("Press 'o' to advance search.");
 	for (int x = 0; x < g->GetNumNodes(); x++)

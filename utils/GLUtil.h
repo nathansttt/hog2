@@ -82,6 +82,7 @@ public:
 	recVec() { x = y = z = 0; }
 	recVec(GLdouble x_i, GLdouble y_i, GLdouble z_i) :x(x_i), y(y_i), z(z_i) {}
 	void normalise();
+	double length() const;
 	recVec GetNormal(recVec v)
 	{
 		recVec n;
@@ -105,11 +106,21 @@ public:
 	{ recVec n = *this; n-=v; return n; }
 	recVec &operator*=(GLdouble val)
 	{ x *= val; y *= val; z *= val; return *this; }
+	recVec operator*(const recVec &val) const
+	{
+		recVec result;
+		result.x = this->y*val.z - this->z*val.y;
+		result.y = this->z*val.x - this->x*val.z;
+		result.z = this->x*val.y - this->y*val.x;
+		result.normalise();
+		return result;
+	}
 };
+
 
 bool operator==(const recVec &l1, const recVec &l2);
 
-std::ostream& operator <<(std::ostream &out, const recVec &loc);
+std::ostream& operator<<(std::ostream &out, const recVec &loc);
 
 
 /**

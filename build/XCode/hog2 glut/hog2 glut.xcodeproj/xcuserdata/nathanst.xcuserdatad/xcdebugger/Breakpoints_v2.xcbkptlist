@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "488138743.159548"
+            timestampString = "491808418.796552"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "470"
-            endingLineNumber = "470"
+            startingLineNumber = "473"
+            endingLineNumber = "473"
             landmarkName = "ForwardThreadWorker(int threadNum, int depth, NBitArray&lt;pdbBits&gt; &amp;DB, std::vector&lt;bool&gt; &amp;coarse, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1768,12 +1768,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/MM.h"
-            timestampString = "484100517.746247"
+            timestampString = "492195413.00003"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "271"
-            endingLineNumber = "271"
-            landmarkName = "Expand(priorityQueue &amp;current, priorityQueue &amp;opposite, Heuristic&lt;state&gt; *heuristic, const state &amp;target)"
+            startingLineNumber = "300"
+            endingLineNumber = "300"
+            landmarkName = "Expand(priorityQueue &amp;current, priorityQueue &amp;opposite, Heuristic&lt;state&gt; *heuristic, const state &amp;target, std::unordered_map&lt;double, int&gt; &amp;ming, std::unordered_map&lt;double, int&gt; &amp;minf)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1908,11 +1908,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "488138743.159548"
+            timestampString = "491808418.796552"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "439"
-            endingLineNumber = "439"
+            startingLineNumber = "442"
+            endingLineNumber = "442"
             landmarkName = "ForwardThreadWorker(int threadNum, int depth, NBitArray&lt;pdbBits&gt; &amp;DB, std::vector&lt;bool&gt; &amp;coarse, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1956,11 +1956,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/delta/Driver.cpp"
-            timestampString = "470188073.184147"
+            timestampString = "492114679.262579"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "202"
-            endingLineNumber = "202"
+            startingLineNumber = "210"
+            endingLineNumber = "210"
             landmarkName = "MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)"
             landmarkType = "7">
          </BreakpointContent>
@@ -2295,7 +2295,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "59"
             endingLineNumber = "59"
-            landmarkName = "MR1KPermutation::Unrank(uint64_t hash, int *puzzle, int *dual, int distinctSize, int puzzleSize, int threadID)"
+            landmarkName = "MR1KPermutation::Unrank(uint64_t hash, int *puzzle, int *dual, int distinctSize, int puzzleSize)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -2306,7 +2306,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "491435682.577724"
+            timestampString = "492068285.927345"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "950"
@@ -2322,11 +2322,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "491435682.577724"
+            timestampString = "492068285.927345"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "979"
-            endingLineNumber = "979"
+            startingLineNumber = "1018"
+            endingLineNumber = "1018"
             landmarkName = "PDBTest()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2338,11 +2338,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "491435682.577724"
+            timestampString = "492068285.927345"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "988"
-            endingLineNumber = "988"
+            startingLineNumber = "1027"
+            endingLineNumber = "1027"
             landmarkName = "PDBTest()"
             landmarkType = "7">
          </BreakpointContent>

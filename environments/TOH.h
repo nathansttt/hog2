@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <cstdint>
+#include <math.h>
 #include "SearchEnvironment.h"
 #include "PDBHeuristic.h"
 

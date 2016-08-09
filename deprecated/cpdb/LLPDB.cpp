@@ -1112,7 +1112,8 @@ void BuildScenarioFiles2()
 
 void TestSTPDiff()
 {
-	std::vector<std::pair<int, int> > problems;
+	assert(!"Code removed - needs updating");
+	/*	std::vector<std::pair<int, int> > problems;
 	MNPuzzle p(3, 3);
 	Graph *g = p.GetGraph();
 	while (problems.size() < 3000)
@@ -1176,10 +1177,13 @@ void TestSTPDiff()
 //		if (gpdh.GetNumHeuristics() == 0)
 //			gpdh.AddHeuristic();
 	}
+	*/
 }
 
 void TestSTPCanonical()
 {
+	assert(!"Code removed - needs updating");
+	/*
 	std::vector<std::pair<int, int> > problems;
 	MNPuzzle p(3, 3);
 	Graph *g = p.GetGraph();
@@ -1228,6 +1232,7 @@ void TestSTPCanonical()
 		}
 		printf("%d\t%1.2f\t%1.2f\t%1.2f\t%1.4f\n", gpdh.GetNumHeuristics(), (double)nodes/problems.size(), (double)touched/problems.size(), (double)hvalues/problems.size(), time/problems.size());
 	}
+	*/
 }
 
 

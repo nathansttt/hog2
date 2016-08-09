@@ -46,12 +46,12 @@ private:
 
 template <class state, class action, class environment>
 PermutationPDB<state, action, environment>::PermutationPDB(environment *e, const state &s, std::vector<int> distincts)
-:PDBHeuristic<state, action, environment, state>(e), distinct(distincts), puzzleSize(s.puzzle.size()),
+:PDBHeuristic<state, action, environment, state>(e), distinct(distincts), puzzleSize(s.size()),
 dualCache(maxThreads), locsCache(maxThreads), example(s)
 {
 	this->SetGoal(s);
 	pdbSize = 1;
-	for (int x = (int)s.puzzle.size(); x > s.puzzle.size()-distincts.size(); x--)
+	for (int x = (int)s.size(); x > s.size()-distincts.size(); x--)
 	{
 		pdbSize *= x;
 	}
@@ -70,10 +70,10 @@ uint64_t PermutationPDB<state, action, environment>::GetPDBHash(const state &s, 
 	std::vector<int> &dual = dualCache[threadID];
 	// TODO: test definition
 	locs.resize(distinct.size()); // vector for distinct item locations
-	dual.resize(s.puzzle.size()); // vector for distinct item locations
+	dual.resize(s.size()); // vector for distinct item locations
 	
 	// find item locations
-	for (unsigned int x = 0; x < s.puzzle.size(); x++)
+	for (unsigned int x = 0; x < s.size(); x++)
 	{
 		if (s.puzzle[x] != -1)
 			dual[s.puzzle[x]] = x;
@@ -84,11 +84,11 @@ uint64_t PermutationPDB<state, action, environment>::GetPDBHash(const state &s, 
 	}
 	
 	uint64_t hashVal = 0;
-	int numEntriesLeft = (int)s.puzzle.size();
+	int numEntriesLeft = (int)s.size();
 	
 	for (unsigned int x = 0; x < locs.size(); x++)
 	{
-		hashVal += locs[x]*FactorialUpperK(numEntriesLeft-1, s.puzzle.size()-distinct.size());
+		hashVal += locs[x]*FactorialUpperK(numEntriesLeft-1, s.size()-distinct.size());
 		numEntriesLeft--;
 		
 		// decrement locations of remaining items
@@ -121,8 +121,8 @@ void PermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t ha
 				dual[y]++;
 		}
 	}
-	s.puzzle.resize(puzzleSize);
-	std::fill(s.puzzle.begin(), s.puzzle.end(), -1);
+//	s.puzzle.resize(puzzleSize);
+	std::fill(&s.puzzle[0], &s.puzzle[s.size()], -1);
 	for (int x = 0; x < dual.size(); x++)
 		s.puzzle[dual[x]] = distinct[x];
 	s.FinishUnranking(example);
@@ -167,7 +167,7 @@ std::string PermutationPDB<state, action, environment>::GetFileName(const char *
 		fileName+='/';
 	fileName += PDBHeuristic<state, action, environment>::env->GetName();
 	fileName += "-";
-	for (int x = 0; x < PDBHeuristic<state, action, environment>::goalState.puzzle.size(); x++)
+	for (int x = 0; x < PDBHeuristic<state, action, environment>::goalState.size(); x++)
 	{
 		fileName += std::to_string(PDBHeuristic<state, action, environment>::goalState.puzzle[x]);
 		fileName += ";";

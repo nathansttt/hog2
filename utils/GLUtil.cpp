@@ -42,7 +42,7 @@ bool operator==(const recVec &l1, const recVec &l2)
 
 std::ostream& operator <<(std::ostream &out, const recVec &loc)
 {
-	out << "(" << loc.x << ", " << loc.y << ")";
+	out << "(" << loc.x << ", " << loc.y << ", " << loc.z <<")";
 	return out;
 }
 	
@@ -54,9 +54,8 @@ std::ostream& operator <<(std::ostream &out, const recVec &loc)
  */
 void recVec::normalise()
 {
-	double length;
-	
-	length = sqrt(x * x + y * y + z * z);
+	double length = this->length();
+
 	if (length != 0)
 	{
 		x /= length;
@@ -68,6 +67,11 @@ void recVec::normalise()
 		y = 0;
 		z = 0;
 	}
+}
+
+double recVec::length() const
+{
+	return sqrt(x * x + y * y + z * z);
 }
 
 bool line2d::crosses(line2d which) const

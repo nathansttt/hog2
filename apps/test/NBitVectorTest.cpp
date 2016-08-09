@@ -10,6 +10,7 @@
 #include "NBitArray.h"
 #include "Timer.h"
 #include "FourBitArray.h"
+#include <assert.h>
 
 void TimingTest()
 {

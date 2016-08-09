@@ -11,6 +11,7 @@
 #include "PancakePuzzle.h"
 #include "TreePermutationPDB.h"
 #include "PermutationPDB.h"
+#include "MR1Permutation.h"
 
 enum ranks {
 	kLex = 0,

@@ -97,6 +97,23 @@ void CreateSimulation(int)
 	r->AddObstacle(line2d(recVec(0.54, 0, 0), recVec(0.52, -0.02, 0)));
 	r->AddObstacle(line2d(recVec(0.52, -0.02, 0), recVec(0.50, 0, 0)));
 #endif
+	
+#if 1
+	line2d l1({-0.37, -1.14, 0}, {-0.99, -0.11, 0});
+	r->AddObstacle(l1);
+	line2d l2({1.18, -0.47, 0}, {0.45, -0.02, 0});
+	r->AddObstacle(l2);
+	line2d l3({0.45, -0.02, 0}, {1.14, 0.40, 0});
+	r->AddObstacle(l3);
+	line2d l4({-1.13, 0.36, 0}, {-0.50, 1.13, 0});
+	r->AddObstacle(l4);
+	line2d l5({0.37, -0.74, 0}, {0.64, -1.16, 0});
+	r->AddObstacle(l5);
+	line2d l6({0.37, -0.74, 0}, {0.11, -1.13, 0});
+	r->AddObstacle(l6);
+	BuildConfigSpace();
+#endif
+	
 
 	config.SetNumArms( numArms );
 	for (int x = 0; x < numArms; x++)
@@ -124,6 +141,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CCW", kNoModifier, 's');
 	InstallKeyboardHandler(MyKeyHandler, "Build Heuristic", "Build differential heuristic", kNoModifier, 'b');
 	InstallKeyboardHandler(MyKeyHandler, "Test Heuristic", "Build & test differential heuristic", kNoModifier, 't');
+	InstallKeyboardHandler(MyKeyHandler, "JPS", "Build & test jps", kNoModifier, 'j');
 	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -144,7 +162,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		CreateSimulation(windowID);
-		SetNumPorts(windowID, 1);
+		SetNumPorts(windowID, 2);
 	}
 }
 
@@ -298,6 +316,68 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
+armAngles GetRandomState()
+{
+	armAngles s, g;
+	s.SetNumArms(2);
+	s.SetAngle(0, random()%1024);
+	s.SetAngle(1, random()%1024);
+	return s;
+}
+
+armAngles GetRandomLegalState()
+{
+	armAngles s;
+	s.SetNumArms(2);
+	do {
+		s.SetAngle(0, random()%1024);
+		s.SetAngle(1, random()%1024);
+	} while (!r->LegalState(s));
+	return s;
+}
+
+void TestJPS()
+{
+	std::vector<armAngles> states;
+	srandom(1234);
+	const int totalStates = 10000;
+	// 1. Generate 10000 states
+	for (int x = 0; x < totalStates; x++)
+	{
+		states.push_back(GetRandomState());
+	}
+	Timer t;
+	// 2. Check validity of each
+	int numLegal = 0;
+	t.StartTimer();
+	for (int x = 0; x < totalStates; x++)
+		numLegal += r->LegalState(states[x])?1:0;
+	t.EndTimer();
+	printf("%f elapsed; %d of %d legal\n", t.GetElapsedTime(), numLegal, totalStates);
+
+	// 3. Add each to queue
+	AStarOpenClosed<armAngles, AStarCompare<armAngles> > openClosedList;
+	int numAdded = 0;
+	t.StartTimer();
+	for (int x = 0; x < totalStates; x++)
+	{
+		uint64_t objid;
+		if (openClosedList.Lookup(r->GetStateHash(states[x]), objid) != kOpenList)
+		{
+			numAdded++;
+			openClosedList.AddOpenNode(states[x], r->GetStateHash(states[x]), 0, 0);
+		}
+	}
+	t.EndTimer();
+	printf("%f elapsed added %d of %d to open\n", t.GetElapsedTime(), numAdded, totalStates);
+	
+//	t.StartTimer();
+//	astar.GetPath(r, s, g, ourPath);
+//	t.EndTimer();
+//	printf("Astar %f %llu %llu %1.2f\n", t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched(), r->GetPathLength(ourPath));
+	
+}
+
 void MyKeyHandler(unsigned long wid, tKeyboardModifier, char key)
 {
 	static int which = 0;
@@ -372,7 +452,12 @@ void MyKeyHandler(unsigned long wid, tKeyboardModifier, char key)
 		else
 			aa->AddDiffTable();
 	}
+	if (key == 'j')
+	{
+		TestJPS();
+	}
 }
+
 
 bool drag = false;
 recVec s, e;
@@ -411,7 +496,7 @@ bool MyClickHandler(unsigned long , int x, int y, point3d loc, tButtonType which
 		line2d l(s, e);
 		if (!(fequal(s.x, e.x) && fequal(s.y, e.y)))
 		{
-			printf("Adding obstacle\n");
+			printf("Adding obstacle (%1.2f, %1.2f) (%1.2f, %1.2f)\n", s.x, s.y, e.x, e.y);
 			r->AddObstacle(l);
 		}
 		BuildConfigSpace();

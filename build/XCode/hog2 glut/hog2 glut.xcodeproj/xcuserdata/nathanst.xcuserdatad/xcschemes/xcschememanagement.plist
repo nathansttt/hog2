@@ -34,11 +34,6 @@
 			<key>orderHint</key>
 			<integer>5</integer>
 		</dict>
-		<key>Pancake.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>17</integer>
-		</dict>
 		<key>Roads.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -63,11 +58,6 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>23</integer>
-		</dict>
-		<key>TopSpin.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>16</integer>
 		</dict>
 		<key>Unit Test.xcscheme</key>
 		<dict>
@@ -118,11 +108,6 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
-		</dict>
-		<key>mc-movement.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>14</integer>
 		</dict>
 		<key>prediction.xcscheme</key>
 		<dict>

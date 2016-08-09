@@ -20,7 +20,7 @@ inline void swap(int &a, int &b)
 uint64_t MR1KPermutation::Rank(int *locs, int *dual, int distinctSize, int puzzleSize) const
 {
 	uint64_t result2 = 0;
-	int multiplier = 1;
+	uint64_t multiplier = 1;
 	for (int i = 0; i < distinctSize; i++)
 	{
 		int tmp = dual[i];

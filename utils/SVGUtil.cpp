@@ -72,7 +72,7 @@ std::string SVGDrawRect(int x, int y, int width, int height, const char *gradien
 
 std::string SVGDrawRect(int x, int y, int width, int height, recColor c)
 {
-	double epsilon = 0.05;
+	double epsilon = 0.20;
 	std::string s;
 	s += "<rect x=\"" + std::to_string(10*x-epsilon);
 	s += "\" y=\"" + std::to_string(10*y-epsilon);

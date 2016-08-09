@@ -54,10 +54,10 @@ private:
 
 template <class state, class action, class environment>
 MR1PermutationPDB<state, action, environment>::MR1PermutationPDB(environment *e, const state &s, std::vector<int> distincts)
-:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.puzzle.size()), dualCache(maxThreads), locsCache(maxThreads), valueStack(maxThreads), example(s)
+:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.size()), dualCache(maxThreads), locsCache(maxThreads), valueStack(maxThreads), example(s)
 {
 	pdbSize = 1;
-	for (int x = (int)example.puzzle.size(); x > example.puzzle.size()-distincts.size(); x--)
+	for (int x = (int)example.size(); x > example.size()-distincts.size(); x--)
 	{
 		pdbSize *= x;
 	}
@@ -82,12 +82,12 @@ uint64_t MR1PermutationPDB<state, action, environment>::GetPDBHash(const state &
 	std::vector<int> &locs = locsCache[threadID];
 	std::vector<int> &dual = dualCache[threadID];
 	std::vector<int> &values = valueStack[threadID];
-	locs.resize(example.puzzle.size()); // vector for distinct item locations
-	dual.resize(example.puzzle.size()); // vector for distinct item locations
+	locs.resize(example.size()); // vector for distinct item locations
+	dual.resize(example.size()); // vector for distinct item locations
 	values.resize(0);
 	memset(&locs[0], 0xFF, locs.size()*sizeof(locs[0]));
 	memset(&dual[0], 0xFF, dual.size()*sizeof(dual[0]));
-	int puzzleSize = (int)example.puzzle.size();
+	int puzzleSize = (int)example.size();
 
 	// find current duals
 	for (unsigned int x = 0; x < puzzleSize; x++)
@@ -137,8 +137,8 @@ uint64_t MR1PermutationPDB<state, action, environment>::GetPDBHash(const state &
 template <class state, class action, class environment>
 void MR1PermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t hash, state &s, int threadID) const
 {
-	int puzzleSize = (int)example.puzzle.size();
-	s.puzzle.resize(puzzleSize);
+	int puzzleSize = (int)example.size();
+	//s.puzzle.resize(puzzleSize);
 	std::vector<int> &dual = dualCache[threadID];
 	dual.resize(puzzleSize); // vector for distinct item locations
 	for (int x = 0; x < dual.size(); x++)
@@ -166,7 +166,7 @@ std::string MR1PermutationPDB<state, action, environment>::GetFileName(const cha
 		fileName+='/';
 	fileName += PDBHeuristic<state, action, environment>::env->GetName();
 	fileName += "-";
-	for (int x = 0; x < PDBHeuristic<state, action, environment>::goalState.puzzle.size(); x++)
+	for (int x = 0; x < PDBHeuristic<state, action, environment>::goalState.size(); x++)
 	{
 		fileName += std::to_string(PDBHeuristic<state, action, environment>::goalState.puzzle[x]);
 		fileName += ";";

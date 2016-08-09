@@ -43,13 +43,19 @@
 #include "MapGenerators.h"
 #include "FPUtil.h"
 #include "CanonicalGrid.h"
+#include "MM.h"
 
 bool screenShot = false;
 bool recording = false;
 bool running = false;
 bool showSearch = false;
+
+bool runningBidirectional = false;
+bool showSearchBidirectional = false;
+
 bool drawLine = false;
 std::vector<graphState> thePath;
+std::vector<graphState> thePath2;
 
 point3d lineStart, lineEnd;
 
@@ -57,18 +63,33 @@ std::string graphFile, coordinatesFile;
 
 void LoadGraph();
 
+int search = 0;
+
 GraphDistanceHeuristic *gdh = 0;
 GraphEnvironment *ge = 0;
 
-TemplateAStar<graphState, graphMove, GraphEnvironment> astar;                                                                                                                                                                                                               
+TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
+MM<graphState, graphMove, GraphEnvironment> mm;
+
 uint32_t gStepsPerFrame = 1;
+double distance(graphState n1, graphState n2);
+
+class GraphDistHeuristic : public Heuristic<graphState> {
+public:
+	double HCost(const graphState &a, const graphState &b) const
+	{
+		return distance(a, b);
+	}
+};
+
+GraphDistHeuristic h;
+ZeroHeuristic<graphState> z;
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1000, 1000);
 }
-
 
 /**
  * This function is used to allocate the unit simulated that you want to run.
@@ -124,13 +145,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	if (ge)
 	{
+		ge->SetColor(1.0, 1.0, 0.5);
 		ge->OpenGLDraw();
 
 		if (running)
 		{
-			std::cout << "Expanding next: " << astar.CheckNextNode() << "\n";
+			//std::cout << "Expanding next: " << astar.CheckNextNode() << "\n";
 			for (int x = 0; x < gStepsPerFrame && running; x++)
+			{
 				running = !astar.DoSingleSearchStep(thePath);
+			}
 			if (!running)
 			{
 				for (int x = 1; x < thePath.size(); x++)
@@ -142,6 +166,26 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (showSearch)
 		{
 			astar.OpenGLDraw();
+		}
+
+		if (runningBidirectional)
+		{
+			//std::cout << "Expanding next: " << astar.CheckNextNode() << "\n";
+			for (int x = 0; x < gStepsPerFrame && runningBidirectional; x++)
+			{
+				runningBidirectional = !mm.DoSingleSearchStep(thePath2);
+			}
+			if (!runningBidirectional)
+			{
+				for (int x = 1; x < thePath.size(); x++)
+				{
+					ge->GetGraph()->findDirectedEdge(thePath[x-1], thePath2[x])->setMarked(true);
+				}
+			}
+		}
+		if (showSearchBidirectional)
+		{
+			mm.OpenGLDraw();
 		}
 
 		if (drawLine)
@@ -160,7 +204,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		static int cnt = 0;
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		sprintf(fname, "/Users/nathanst/Movies/tmp/graph-%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
 		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
@@ -215,11 +259,26 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	
 }
 
+double distance(graphState n1, graphState n2)
+{
+	Graph *g = ge->GetGraph();
+	double dx1 = g->GetNode(n1)->GetLabelF(GraphSearchConstants::kXCoordinate);
+	double dy1 = g->GetNode(n1)->GetLabelF(GraphSearchConstants::kYCoordinate);
+	
+	double dx2 = g->GetNode(n2)->GetLabelF(GraphSearchConstants::kXCoordinate);
+	double dy2 = g->GetNode(n2)->GetLabelF(GraphSearchConstants::kYCoordinate);
+	
+	return sqrt((dx1-dx2)*(dx1-dx2)+(dy1-dy2)*(dy1-dy2));
+}
+
 void LoadGraph()
 {
 	Graph *g = new Graph();
 	node *n = new node("");
 	g->AddNode(n);
+	ge = new GraphEnvironment(g);
+	ge->SetDirected(true);
+
 	FILE *f = fopen(coordinatesFile.c_str(), "r");
 	//FILE *f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.co", "r");
 	std::vector<double> xloc, yloc;
@@ -286,7 +345,7 @@ void LoadGraph()
 			sscanf(line, "a %d %d %*d", &x1, &y1);
 			if (g->findDirectedEdge(x1, y1) == 0)
 			{
-				g->AddEdge(new edge(x1, y1, 1.0));
+				g->AddEdge(new edge(x1, y1, distance(x1, y1)));
 			}
 			else {
 				dups++;
@@ -297,8 +356,6 @@ void LoadGraph()
 	}
 	printf("%d dups ignored\n", dups);
 	fclose(f); 
-	ge = new GraphEnvironment(g);
-	ge->SetDirected(true);
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
@@ -344,8 +401,16 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 			lineEnd = loc;
 
 			printf("Starting Search\n");
-			running = true;
-			showSearch = true;
+			if (search == 0 || search == 1)
+			{
+				running = true;
+				showSearch = true;
+			}
+			else if (search == 2)
+			{
+				showSearchBidirectional = true;
+				runningBidirectional = true;
+			}
 			// find closest point to start/goal loc and run from there.
 
 			node *start = ge->GetGraph()->GetRandomNode(), *goal = ge->GetGraph()->GetRandomNode();
@@ -370,6 +435,8 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				}
 			}
 			drawLine = false;
+			start = ge->GetGraph()->GetNode(216446);
+			goal = ge->GetGraph()->GetNode(108951);
 			if (start == goal)
 			{
 				printf("Same start and goal; no search\n");
@@ -377,12 +444,24 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				showSearch = false;
 			}
 			else {
-				printf("Searching from (%1.2f, %1.2f) to (%1.2f, %1.2f)\n",
+				printf("Searching from (%1.2f, %1.2f) to (%1.2f, %1.2f) [%d to %d]\n",
 					   start->GetLabelF(GraphSearchConstants::kXCoordinate),
 					   start->GetLabelF(GraphSearchConstants::kYCoordinate),
 					   goal->GetLabelF(GraphSearchConstants::kXCoordinate),
-					   goal->GetLabelF(GraphSearchConstants::kYCoordinate));
+					   goal->GetLabelF(GraphSearchConstants::kYCoordinate),
+					   start->GetNum(), goal->GetNum());
 				astar.InitializeSearch(ge, start->GetNum(), goal->GetNum(), thePath);
+				astar.SetHeuristic(&h);
+				if (search == 0)
+					astar.SetWeight(0);
+				else if (search == 1)
+					astar.SetWeight(1);
+				else if (search == 2)
+					mm.InitializeSearch(ge, start->GetNum(), goal->GetNum(), &z, &z, thePath2);
+				else if (search == 3)
+					mm.InitializeSearch(ge, start->GetNum(), goal->GetNum(), &h, &h, thePath2);
+				search++;
+				search = search%4;
 			}
 			return true;
 		}

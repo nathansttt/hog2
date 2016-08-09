@@ -324,13 +324,13 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 		glEnd();
 	}
 	else {
-
-
+		
+		if (drawNodeLabels)// draw states as boxes
 		{
+
 			GLfloat r, gr, b, t;
 			GetColor(r, gr, b, t);
 			glColor4f(r, gr, b, t);
-
 			
 			node *n = g->GetNode(s);
 			GLdouble x, y, z, rad;
@@ -350,32 +350,56 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 		}
 		//(GLdouble)2.0/(g->GetNumNodes()*g->GetNumNodes()));
 
-//		glLineWidth(5.0);
-//		glBegin(GL_LINES);
-//		
-//		edge_iterator ei = n->getEdgeIter();
-//		for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
-//		{
-//			node *n;
-//			n = g->GetNode(e->getFrom());
-//			
-//			GLdouble x, y, z;
-//			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
-//			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
-//			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
-//			glVertex3f(x, y, z);
-//			
-//			n = g->GetNode(e->getTo());
-//			x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
-//			y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
-//			z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
-//			
-//			glVertex3f(x, y, z);
-//		}
-//		glEnd();
-//		glLineWidth(1.0);
 
+		if (1) // draw states by their edges
+		{
+			node *n = g->GetNode(s);
+			glLineWidth(5.0);
+			glBegin(GL_LINES);
+
+			GLfloat r, gr, b, t;
+			GetColor(r, gr, b, t);
+			glColor4f(r, gr, b, t);
+
+			edge_iterator ei = n->getEdgeIter();
+			for (edge *e = n->edgeIterNext(ei); e; e = n->edgeIterNext(ei))
+			{
+				node *n;
+				n = g->GetNode(e->getFrom());
+				
+				GLdouble x, y, z;
+				x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+				y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+				z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+				glVertex3f(x, y, z);
+				
+				n = g->GetNode(e->getTo());
+				x = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+				y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+				z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
+				
+				glVertex3f(x, y, z);
+			}
+			glEnd();
+			glLineWidth(1.0);
+		}
 	}
+}
+
+void GraphEnvironment::GLLabelState(const graphState &s, const char *txt) const
+{
+//	glLineWidth(3.0);
+	glColor4f(0.0, 0.0, 0.0, 1.0);
+	node *n = g->GetNode(s);
+	double rad = nodeScale*(GLdouble)0.4/(g->GetNumNodes());
+//	glPushMatrix();
+//	glTranslatef(rad, -rad, 0);
+	DrawText(n->GetLabelF(GraphSearchConstants::kXCoordinate)+rad,
+			 n->GetLabelF(GraphSearchConstants::kYCoordinate)-rad,
+			 n->GetLabelF(GraphSearchConstants::kZCoordinate)-0.003,
+			 0.2, txt);
+//	glPopMatrix();
+//	glLineWidth(1.0);
 }
 
 void GraphEnvironment::OpenGLDraw(const graphState &, const graphMove &) const

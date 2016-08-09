@@ -924,18 +924,18 @@ void PDBTest()
 	std::vector<int> edges = {1, 3, 6};
 	
 
-	if (0)
+	if (1)
 	{
-		const int N = 8;
-		const int k = 4;
+		const int N = 13;
+		const int k = 13;
 		MR1KPermutation p;
 		uint64_t count = 1;
 		for (int x = N; x > (N-k); x--)
 			count *= x;
 		int items[N], dual[N];
-		for (uint64_t x = 0; x < count; x++)
+		for (uint64_t x = 0; x < 0/*count*/; x++)
 		{
-			if (0 == x%10000)
+			if (0 == x%(count/1000)) // Print every 0.1% complete
 				printf("%llu of %llu\n", x, count);
 			
 			p.Unrank(x, items, dual, k, N);
@@ -948,10 +948,49 @@ void PDBTest()
 //			printf("\n");
 			
 			uint64_t rank = p.Rank(items, dual, k, N);
-//			printf("Unranked %d and got %llu back\n", x, rank);
-			assert(x == rank);
+			if (x != rank)
+			{
+				printf("Unranked %llu and got %llu back\n", x, rank);
+				assert(x == rank);
+			}
 		}
 		printf("Success!\n");
+
+		for (int t = 0; t < 10000; t++)
+		{
+			for (int x = 0; x < N; x++)
+				items[x] = x;
+			std::random_shuffle(&items[0], &items[N]);
+			for (int x = 0; x < N; x++)
+			{
+				printf("%d ", items[x]);
+				dual[items[x]] = x;
+			}
+			printf(": ");
+			for (int x = 0; x < N; x++)
+			{
+				printf("%d ", dual[x]);
+			}
+			printf("\n");
+			uint64_t hash = p.Rank(items, dual, N, N);
+			p.Unrank(hash, items, dual, N, N);
+			for (int x = 0; x < N; x++)
+			{
+				printf("%d ", items[x]);
+			}
+			printf("\n");
+
+			assert(p.Rank(items, dual, N, N) == hash);
+		}
+		//			for (int x = N-1; x >= 0; x++)
+		//			{
+		//				int n = random()%(x+1);
+		//				int temp = items[n];
+		//				items[n] = items[x];
+		//				items[x] = tmp;
+		//			}
+		
+		exit(0);
 		
 //		MR1Permutation mr1(test, 8, std::thread::hardware_concurrency());
 //		std::vector<int> items;

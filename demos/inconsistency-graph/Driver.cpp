@@ -42,14 +42,18 @@ enum mode {
 TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
 std::vector<graphState> path;
 const int kHeuristic = GraphSearchConstants::kTemporaryLabel;
+std::string MyToString(double val);
 
-mode m = kAddNodes;
+mode m = kFindPath;
 
 bool recording = false;
 bool running = false;
-
+bool paused = true;
+bool BPMX = false;
 double edgeCost = 1.0;
 double weight = 1.0;
+int ticksPerNode = 1;
+int currentTick = 0;
 
 int numExampleNodes = 5;
 
@@ -97,6 +101,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
+	InstallKeyboardHandler(MyDisplayHandler, "BPMX", "Toggle BPMX", kAnyModifier, 'x');
 	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
 	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra & A*", kAnyModifier, 'w');
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
@@ -130,6 +135,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		ge->SetDrawNodeLabels(true);
 		ge->SetIntegerEdgeCosts(true);
 		astar.SetReopenNodes(true);
+		astar.SetDirected(true);
 		astar.SetWeight(1.0);
 		astar.SetHeuristic(&h);
 		te.AddLine("A* algorithm sample code");
@@ -158,13 +164,21 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		
 		if (running)
 		{
+			if (!paused)
+			{
+				currentTick++;
+				if (0 == currentTick%ticksPerNode)
+					MyDisplayHandler(windowID, kNoModifier, 'o');
+			}
 			//astar.DoSingleSearchStep(path);
 			astar.OpenGLDraw();
 		}
 		else {
 			ge->SetColor(0.75, 0.75, 1.0);
 			for (int x = 0; x < g->GetNumNodes(); x++)
+			{
 				ge->OpenGLDraw(x);
+			}
 		}
 		
 		if (path.size() > 0)
@@ -176,6 +190,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				ge->GLDrawLine(path[x-1], path[x]);
 			}
 			glLineWidth(1);
+		}
+
+		for (int x = 0; x < g->GetNumNodes(); x++)
+		{
+			ge->GLLabelState(x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
 		}
 	}
 	if (viewport == 1)
@@ -221,33 +240,35 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case ']':
 		{
-			switch (m)
-			{
-				case kAddNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
-				case kAddEdges: m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
-				case kMoveNodes: m = kFindPath; te.AddLine("Current mode: find path"); break;
-				case kFindPath: m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
-			}
+			numExampleNodes++;
+//			switch (m)
+//			{
+//				case kAddNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
+//				case kAddEdges: m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
+//				case kMoveNodes: m = kFindPath; te.AddLine("Current mode: find path"); break;
+//				case kFindPath: m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
+//			}
 
 		}
 			break;
 		case '[':
 		{
-			switch (m)
-			{
-				case kMoveNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
-				case kFindPath: m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
-				case kAddNodes: m = kFindPath; te.AddLine("Current mode: find path"); break;
-				case kAddEdges: m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
-			}
+			numExampleNodes--;
+//			switch (m)
+//			{
+//				case kMoveNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
+//				case kFindPath: m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
+//				case kAddNodes: m = kFindPath; te.AddLine("Current mode: find path"); break;
+//				case kAddEdges: m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
+//			}
 		}
 			break;
 		case '|':
 		{
 			name[0] = 'a';
 			g->Reset();
-			te.AddLine("Current mode: add nodes");
-			m = kAddNodes;
+			//te.AddLine("Current mode: add nodes");
+			m = kFindPath;
 			path.resize(0);
 			running = false;
 		}
@@ -258,6 +279,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			else
 				weight = 1.0;
 			astar.SetWeight(weight);
+			astar.SetUseBPMX(BPMX?1:0);
 			astar.InitializeSearch(ge, astar.start, astar.goal, path);
 			ShowSearchInfo();
 			
@@ -284,14 +306,22 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
 			}
 			break;
+		case 'x':
+			BPMX = !BPMX;
+			if (running)
+			{
+				ShowSearchInfo();
+			}
+			break;
 		case 'p':
-			//running = !running;
+			paused = !paused;
 			break;
 		case 'o':
 		{
 			if (running)
 			{
-				astar.DoSingleSearchStep(path);
+				if (astar.DoSingleSearchStep(path))
+					paused = true;
 				ShowSearchInfo();
 			}
 		}
@@ -382,8 +412,10 @@ void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key)
 			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
 		}
 	}
-	if (key == 'b')
+	if (key == 'b' || key == 'c')
 	{
+		MyDisplayHandler(windowID, kNoModifier, '|'); // clear current graph
+
 		char nodeName[2] = {'a', 0};
 		nodeName[0]+=numExampleNodes-1;
 		for (int x = 0; x <= numExampleNodes; x++)
@@ -397,18 +429,32 @@ void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key)
 				g->AddNode(n = new node(nodeName));
 				nodeName[0]--;
 			}
-			double val = TWOPI*x/(numExampleNodes+1.0)-PI/4;
-			n->SetLabelF(GraphSearchConstants::kXCoordinate, sin(val));
-			n->SetLabelF(GraphSearchConstants::kYCoordinate, cos(val));
+			if (x == 0 || x == 1)
+			{
+				n->SetLabelL(kHeuristic, 0);
+			}
+			else {
+				n->SetLabelL(kHeuristic, (1<<(x-1)) + 2*x - 3);
+			}
+
+			double val = 1.5*PI*x/(numExampleNodes+1.0)-PI/4;
+			n->SetLabelF(GraphSearchConstants::kXCoordinate, 0.8*sin(val));
+			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.8*cos(val));
 			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
 		}
+
+		g->AddEdge(new edge(1,0,(1<<(numExampleNodes-1)) + numExampleNodes - 2));
 		for (int x = 1; x <= numExampleNodes; x++)
 		{
 			for (int y = x+1; y <= numExampleNodes; y++)
 			{
-				g->AddEdge(new edge(x, y, (1<<(numExampleNodes-x))+x-y));
+				g->AddEdge(new edge(y, x, (1<<(y-2)) + y - (1<<(x-1)) - x));
 			}
 		}
+	}
+	if (key == 'c')
+	{
+		g->GetNode(numExampleNodes)->SetLabelL(kHeuristic, 0);
 	}
 }
 #include <iomanip>
@@ -431,6 +477,8 @@ void ShowSearchInfo()
 	s +=" to ";
 	s += g->GetNode(astar.goal)->GetName();
 	s += " <-----";
+	if (BPMX)
+		s += " BPMX";
 	te.AddLine(s.c_str());
 	te.AddLine("Press 'o' to advance search.");
 	for (int x = 0; x < g->GetNumNodes(); x++)
@@ -662,6 +710,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 				{
 					weight = 1.0;
 					astar.SetWeight(weight);
+					astar.SetUseBPMX(BPMX?1:0);
 					astar.InitializeSearch(ge, from, to, path);
 					ShowSearchInfo();
 					

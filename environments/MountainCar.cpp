@@ -8,6 +8,7 @@
  */
 
 #include "MountainCar.h"
+#include <math.h>
 
 MountainCarEnvironment::MountainCarEnvironment()
 {

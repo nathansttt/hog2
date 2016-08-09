@@ -37,23 +37,22 @@
 #include "Timer.h"
 #include "RubiksCubeEdges.h"
 #include "RubiksCubeCorners.h"
+#include "IncrementalDFID.h"
+#include "IncrementalBFS.h"
 
-void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char);
-void STPTest(unsigned long , tKeyboardModifier , char);
-MNPuzzleState GetKorfInstance(int which);
-void CompareToMinCompression();
-void CompareToSmallerPDB();
-void RunStandardTest();
-void RunCompressedTest();
+MNPuzzleState<4, 4> GetKorfInstance(int which);
 
-MNPuzzle *mnp = 0;
+MNPuzzle<4, 4> *mnp = 0;
 
 bool recording = false;
+bool running = false;
+
+int drawMode = 0; // bit 0 [dfs] bit 1 [dfid] bit 2 [bfs]
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
-	RunHOGGUI(argc, argv, 640, 640);
+	RunHOGGUI(argc, argv, 1440, 1080);
 }
 
 /**
@@ -70,10 +69,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
-
-	InstallKeyboardHandler(STPTest, "STP Test", "Test the STP PDBs", kNoModifier, 'd');
-	InstallKeyboardHandler(BuildSTP_PDB, "Build STP PDBs", "Build PDBs for the STP", kNoModifier, 'a');
-
+	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -94,41 +90,74 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
 		if (mnp == 0)
-			mnp = new MNPuzzle(4, 4);
+			mnp = new MNPuzzle<4, 4>;
 	}
 }
 
-MNPuzzleState s(4,4), t(4, 4);
+#include "NaryTree.h"
+
+
+MNPuzzleState<4, 4> s, t;
 std::vector<slideDir> moves;
 double v = 1;
 slideDir lastMove = kUp;
+//NaryTree tree(2, 9);
+//NaryTree tree(4, 5);
+NaryTree tree(3, 5);
+IncrementalDFID<NaryState, NaryAction> dfid(0);
+IncrementalDFID<NaryState, NaryAction> dfs(10);
+IncrementalBFS<NaryState, NaryAction> bfs;
+std::vector<NaryState> path;
+
+NaryState goal = 0;
+
+int frameCnt = 0;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	v += 0.1;
-	if (v > 1)
+	if (running)
 	{
-		s = t;
-		mnp->GetActions(t, moves);
-		slideDir tmp = kUp;
-		do {
-			tmp = moves[random()%moves.size()];
-		} while (tmp == lastMove);
-		mnp->ApplyAction(t, tmp);
-		lastMove = tmp;
-		mnp->InvertAction(lastMove);
-		v = 0;
+		MyDisplayHandler(windowID, kNoModifier, 'o');
 	}
-	mnp->OpenGLDraw(t, s, v);
+	tree.SetWidthScale(double(GetContext(windowID)->globalCamera.viewWidth)/GetContext(windowID)->globalCamera.viewHeight);
+	tree.OpenGLDraw();
+	tree.SetColor(0.0, 1.0, 1.0);
+	tree.OpenGLDraw(goal);
+	
+	tree.SetColor(1, 0, 0);
+	if (drawMode&0x1)
+		dfid.OpenGLDraw();
+	tree.SetColor(0, 1, 0);
+	if (drawMode&0x2)
+		dfs.OpenGLDraw();
+	tree.SetColor(0.75, 0, 0.5);
+	if (drawMode&0x4)
+		bfs.OpenGLDraw();
+
+//	return;
+//	v += 0.1;
+//	if (v > 1)
+//	{
+//		s = t;
+//		mnp->GetActions(t, moves);
+//		slideDir tmp = kUp;
+//		do {
+//			tmp = moves[random()%moves.size()];
+//		} while (tmp == lastMove);
+//		mnp->ApplyAction(t, tmp);
+//		lastMove = tmp;
+//		mnp->InvertAction(lastMove);
+//		v = 0;
+//	}
+//	mnp->OpenGLDraw(t, s, v);
 
 	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
-		static int cnt = 999;
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		sprintf(fname, "/Users/nathanst/Movies/tmp/dfid-%d-%d%d%d%d", tree.GetBranchingFactor(), (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
 		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
-		cnt--;
+		frameCnt++;
 	}
 	return;
 	
@@ -146,7 +175,23 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case 'r': recording = !recording; break;
+		case '{':
+		{
+			goal = tree.GetParent(goal);
+			break;
+		}
+		case ']':
+		{
+			drawMode = (drawMode+2)&0x7;
+		}
+		case '[':
+		{
+			drawMode = (drawMode+7)&0x7;
+		}
+			break;
+		case 'r':
+			recording = !recording; running = true;
+			break;
 		case '0':
 		{
 		}
@@ -156,13 +201,85 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			break;
 		case '2':
+		{
+			frameCnt = 0;
+			tree = NaryTree(2, 8);
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 		case '3':
+		{
+			frameCnt = 0;
+			tree = NaryTree(3, 5);
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 		case '4':
+		{
+			frameCnt = 0;
+			tree = NaryTree(4, 4);
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 		case '5':
+		{
+			frameCnt = 0;
+			tree = NaryTree(5, 4);
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 		case '6':
+		{
+			frameCnt = 0;
+			tree = NaryTree(6, 3);
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 		case '7':
+		{
+			frameCnt = 0;
+			tree = NaryTree(7, 3);
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 		case '8':
+		{
+			frameCnt = 0;
+			tree = NaryTree(8, 3);
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 		case '9':
+		{
+			frameCnt = 0;
+			tree = NaryTree(9, 3);
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 			break;
 		case '\t':
 			if (mod != kShiftDown)
@@ -173,465 +290,48 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'p':
+			running = !running;
 			break;
 		case 'o':
 		{
-			if (!mnp) break;
-			if (mod == kShiftDown)
-			{
-				IDAStar<MNPuzzleState, slideDir> ida;
-				std::vector<slideDir> path1;
-				std::vector<MNPuzzleState> path2;
-				MNPuzzleState s(4, 4);
-				MNPuzzleState g(4, 4);
-				for (unsigned int x = 0; x < 500; x++)
-				{
-					std::vector<slideDir> acts;
-					mnp->GetActions(s, acts);
-					mnp->ApplyAction(s, acts[random()%acts.size()]);
-				}
-				std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
-				Timer t;
-				t.StartTimer();
-				ida.GetPath(mnp, s, g, path1);
-				t.EndTimer();
-				std::cout << "Path found, length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
-//				t.StartTimer();
-//				ida.GetPath(mnp, s, g, path2);
-//				t.EndTimer();
-//				std::cout << "Path found, length " << path2.size() << " time:" << t.GetElapsedTime() << std::endl;
-//				for (unsigned int x = 0; x < path1.size(); x++)
-//					std::cout << path1[x] << std::endl;
-			}
+			if (drawMode&0x1)
+				dfid.DoSingleSearchStep(&tree, 0, goal, path);
+			if (drawMode&0x2)
+				dfs.DoSingleSearchStep(&tree, 0, goal, path);
+			if (drawMode&0x4)
+				bfs.DoSingleSearchStep(&tree, 0, goal, path);
 		}
 			break;
 		default:
 			break;
 	}
+	
+	{
+		char txt[] = "[bf 0]  ";
+		txt[4] += tree.GetBranchingFactor();
+		submitTextToBuffer(txt);
+		switch(drawMode)
+		{
+			case 0: appendTextToBuffer("none"); break;
+			case 1: appendTextToBuffer("DFID"); break;
+			case 2: appendTextToBuffer("DFS"); break;
+			case 3: appendTextToBuffer("DFID+DFS"); break;
+			case 4: appendTextToBuffer("BFS"); break;
+			case 5: appendTextToBuffer("BFS+DFID"); break;
+			case 6: appendTextToBuffer("BFS+DFS"); break;
+			case 7: appendTextToBuffer("all"); break;
+		}
+	}
+
 }
 
-#include "MNAgentPuzzle.h"
-#include "SequenceAlignment.h"
-#include "BFS.h"
-#include "DFID.h"
-#include "DFS.h"
-#include "NaryTree.h"
-
-void BuildSTP_PDB(unsigned long windowID, tKeyboardModifier , char)
-{
-	//CompareToSmallerPDB();
-	//RunStandardTest();
-	RunCompressedTest();
-	//CompareToMinCompression();
-	exit(0);
-	MNPuzzleState tmp(4, 4);
-	mnp->StoreGoal(tmp);
-
-	std::vector<int> tiles;
-
-	tmp.Reset();
-	tiles.resize(0);
-	tiles.push_back(0);
-	tiles.push_back(1);
-	tiles.push_back(4);
-	tiles.push_back(5);
-	mnp->Build_PDB(tmp, tiles, "/Users/nathanst/Desktop/wSTP_0145a.pdb", std::thread::hardware_concurrency(), false);
-	//mnp->Build_PDB(tmp, tiles, "/Users/nathanst/Desktop/wSTP_0145a.pdb", 1, false);
-
-	tmp.Reset();
-	tiles.resize(0);
-	tiles.push_back(0);
-	tiles.push_back(8);
-	tiles.push_back(9);
-	tiles.push_back(12);
-	tiles.push_back(13);
-	mnp->Build_PDB(tmp, tiles, "/Users/nathanst/Desktop/wSTP_0891213a.pdb", std::thread::hardware_concurrency(), false);
-
-	tmp.Reset();
-	tiles.resize(0);
-	tiles.push_back(0);
-	tiles.push_back(1);
-	tiles.push_back(4);
-	tiles.push_back(5);
-	tiles.push_back(8);
-	tiles.push_back(9);
-	tiles.push_back(12);
-	tiles.push_back(13);
-	//mnp->Build_PDB(tmp, tiles, "/Users/nathanst/Desktop/STD_0145a.pdb", 1, false);
-	mnp->Build_PDB(tmp, tiles, "/Users/nathanst/Desktop/wSTP_0-13a.pdb", std::thread::hardware_concurrency(), false);
-
-	//tmp.Reset();
-	//mnp->Build_Regular_PDB(tmp, tiles, "/Users/nathanst/Desktop/STD_0145b.pdb");
-	exit(0);
-//	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_145_add.pdb", true);
-
-	tmp.Reset();
-	tiles.resize(0);
-	tiles.push_back(2);
-	tiles.push_back(3);
-	tiles.push_back(6);
-	tiles.push_back(7);
-//	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_2367_add.pdb", true);
-
-	tmp.Reset();
-	tiles.resize(0);
-	for (int x = 8; x <= 15; x++)
-		tiles.push_back(x);
-//	tiles.push_back(0);
-//	tiles.push_back(10);
-//	tiles.push_back(11);
-//	tiles.push_back(14);
-//	tiles.push_back(15);
-//	tiles.push_back(7);
-//	tiles.push_back(13);
-//	tiles.push_back(14);
-//	tiles.push_back(15);
-	
-	
-	//mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7_add.pdb", true);
-	//mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_1-7+145+2367_add.pdb", true);
-	mnp->Build_Additive_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_8-15_add.pdb", true);
-	//mnp->Build_Regular_PDB(tmp, tiles, "/Users/nathanst/Desktop/pdb7-nosub-fringe.bin");
-}
-
-void STPTest(unsigned long , tKeyboardModifier , char)
-{
-	MNPuzzleState tmp(4, 4);
-	mnp->StoreGoal(tmp);
-
-	IDAStar<MNPuzzleState, slideDir> ida;
-	std::vector<slideDir> path1;
-	MNPuzzleState s(4, 4);
-	MNPuzzleState g(4, 4);
-	//ida.SetUseBDPathMax(true);
-	Timer t;
-	t.StartTimer();
-	uint64_t nodes = 0;
-	for (int x = 0; x < 100; x++)
-	{
-		s = GetKorfInstance(x);
-		g.Reset();
-
-		std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
-		Timer t;
-		t.StartTimer();
-		ida.GetPath(mnp, s, g, path1);
-		t.EndTimer();
-		std::cout << "Path found, length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
-		nodes += ida.GetNodesExpanded();
-	}
-	printf("%1.2fs elapsed; %llu nodes expanded\n", t.EndTimer(), nodes);
-//	for (int x = 0; x < mnp->histogram.size(); x++)
-//	{
-//		printf("%2d  %d\n", x, mnp->histogram[x]);
-//	}
-//
-//	mnp->PrintHStats();
-	
-}
-
-#include <sys/stat.h>
-bool fileExists(const char *name)
-{
-	struct stat buffer;
-	return (stat(name, &buffer) == 0);
-}
-
-void CompareToMinCompression()
-{
-	MNPuzzleState tmp(4, 4);
-	mnp->StoreGoal(tmp);
-	mnp->ClearPDBs();
-	
-	std::vector<int> tiles;
-	
-	const char *PDB1 = "/Users/nathanst/Desktop/STP_0-1-2-3-4-5-6-7.pdb";
-	if (!fileExists(PDB1))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(1);
-		tiles.push_back(2);
-		tiles.push_back(3);
-		tiles.push_back(4);
-		tiles.push_back(5);
-		tiles.push_back(6);
-		tiles.push_back(7);
-		mnp->Build_PDB(tmp, tiles, PDB1, std::thread::hardware_concurrency(), false);
-	}
-	else {
-		mnp->ClearPDBs();
-		tmp.Reset();
-		const int factor = 10;
-		mnp->Load_Regular_PDB(PDB1, tmp, true);
-		mnp->Min_Compress_PDB(0, factor, true);
-		//mnp->Load_Regular_PDB_Min_Compressed(PDB1, tmp, factor, true);
-		//mnp->Load_Regular_PDB("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb", tmp, true);
-
-		mnp->ClearPDBs();
-		tmp.Reset();
-		mnp->Load_Regular_PDB(PDB1, tmp, true);
-		mnp->lookups.push_back({PermutationPuzzle::kLeafMinCompress, factor, 0, 0});
-		mnp->Delta_Compress_PDB(tmp, 1, true);
-		exit(0);
-	}
-	
-	const char *PDB2 = "/Users/nathanst/Desktop/STP_0-8-9-10-11-12-13-14-15.pdb";
-	if (!fileExists(PDB2))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(2);
-		tiles.push_back(3);
-		tiles.push_back(6);
-		tiles.push_back(7);
-		tiles.push_back(10);
-		tiles.push_back(11);
-		tiles.push_back(14);
-		tiles.push_back(15);
-		mnp->Build_PDB(tmp, tiles, PDB2, std::thread::hardware_concurrency(), false);
-	}
-
-	STPTest(0, kNoModifier, 't');
-}
-
-void RunStandardTest()
-{
-	MNPuzzleState tmp(4, 4);
-	mnp->StoreGoal(tmp);
-	mnp->ClearPDBs();
-	
-	std::vector<int> tiles;
-	
-	const char *PDB1 = "/Users/nathanst/Desktop/STP_0-1-2-3-4-5-6-7.pdb";
-	if (!fileExists(PDB1))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(1);
-		tiles.push_back(2);
-		tiles.push_back(3);
-		tiles.push_back(4);
-		tiles.push_back(5);
-		tiles.push_back(6);
-		tiles.push_back(7);
-		mnp->Build_PDB(tmp, tiles, PDB1, std::thread::hardware_concurrency(), false);
-	}
-	else {
-		tmp.Reset();
-		mnp->Load_Regular_PDB(PDB1, tmp, true);
-	}
-	
-	const char *PDB2 = "/Users/nathanst/Desktop/STP_0-8-9-10-11-12-13-14-15.pdb";
-	if (!fileExists(PDB2))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(8);
-		tiles.push_back(9);
-		tiles.push_back(10);
-		tiles.push_back(11);
-		tiles.push_back(12);
-		tiles.push_back(13);
-		tiles.push_back(14);
-		tiles.push_back(15);
-		mnp->Build_PDB(tmp, tiles, PDB2, std::thread::hardware_concurrency(), false);
-	}
-	else {
-		tmp.Reset();
-		mnp->Load_Regular_PDB(PDB2, tmp, true);
-	}
-	mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, 0});
-	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 0});
-	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 1});
-
-	STPTest(0, kNoModifier, 't');
-}
-
-void RunCompressedTest()
-{
-	MNPuzzleState tmp(4, 4);
-	mnp->StoreGoal(tmp);
-	mnp->ClearPDBs();
-	
-	std::vector<int> tiles;
-	
-	const char *PDB2 = "/Users/nathanst/Desktop/STP_0-8-9-10-11-12-13-14-15.pdb";
-	if (!fileExists(PDB2))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(8);
-		tiles.push_back(9);
-		tiles.push_back(10);
-		tiles.push_back(11);
-		tiles.push_back(12);
-		tiles.push_back(13);
-		tiles.push_back(14);
-		tiles.push_back(15);
-		mnp->Build_PDB(tmp, tiles, PDB2, std::thread::hardware_concurrency(), false);
-		mnp->ClearPDBs();
-	}
-
-	const char *PDB3 = "/Users/nathanst/Desktop/STP_0-8-9-12-13.pdb";
-	if (!fileExists(PDB3))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(8);
-		tiles.push_back(9);
-		tiles.push_back(12);
-		tiles.push_back(13);
-		mnp->Build_PDB(tmp, tiles, PDB3, std::thread::hardware_concurrency(), false);
-		mnp->ClearPDBs();
-	}
-	else {
-		mnp->Load_Regular_PDB(PDB3, tmp, true);
-	}
-
-	const char *PDB4 = "/Users/nathanst/Desktop/STP_0-10-11-14-15.pdb";
-	if (!fileExists(PDB4))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(10);
-		tiles.push_back(11);
-		tiles.push_back(14);
-		tiles.push_back(15);
-		mnp->Build_PDB(tmp, tiles, PDB4, std::thread::hardware_concurrency(), false);
-		mnp->ClearPDBs();
-	}
-	else {
-		mnp->Load_Regular_PDB(PDB4, tmp, true);
-	}
-	
-	if (fileExists(PDB2))
-	{
-		tmp.Reset();
-		mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, 0});
-		mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 0});
-		mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 1});
-		//mnp->Load_Regular_PDB_as_Delta(PDB2, tmp, true);
-		assert(!"Need to update code to use new functions");
-	}
-
-	const char *PDB1 = "/Users/nathanst/Desktop/STP_0-1-2-3-4-5-6-7.pdb";
-	if (!fileExists(PDB1))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(1);
-		tiles.push_back(2);
-		tiles.push_back(3);
-		tiles.push_back(4);
-		tiles.push_back(5);
-		tiles.push_back(6);
-		tiles.push_back(7);
-		mnp->Build_PDB(tmp, tiles, PDB1, std::thread::hardware_concurrency(), false);
-	}
-	else {
-		tmp.Reset();
-		mnp->Load_Regular_PDB(PDB1, tmp, true);
-	}
-
-	mnp->lookups.resize(0);
-	// max (2 + max of (0, 1) , 3)
-	mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, -0}); // max of 2 children starting at 1 in the tree
-	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 3});
-	mnp->lookups.push_back({PermutationPuzzle::kAddNode, 2, 3, -0}); // max of 2 children starting at 1 in the tree
-	mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 5, -0}); // max of 2 children starting at 1 in the tree
-	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 2});
-	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 0});
-	mnp->lookups.push_back({PermutationPuzzle::kLeafNode, -0, -0, 1});
-	
-	STPTest(0, kNoModifier, 't');
-}
-
-void CompareToSmallerPDB()
-{
-	MNPuzzleState tmp(4, 4);
-	mnp->StoreGoal(tmp);
-	mnp->ClearPDBs();
-	
-	std::vector<int> tiles;
-	
-	if (!fileExists("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb"))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(1);
-		tiles.push_back(4);
-		tiles.push_back(5);
-		tiles.push_back(8);
-		tiles.push_back(9);
-		tiles.push_back(12);
-		tiles.push_back(13);
-		mnp->Build_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb",
-					   std::thread::hardware_concurrency(), false);
-		mnp->ClearPDBs();
-	}
-
-	if (!fileExists("/Users/nathanst/Desktop/STP_0-1-4-5-8-9.pdb"))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(1);
-		tiles.push_back(4);
-		tiles.push_back(5);
-		tiles.push_back(8);
-		tiles.push_back(9);
-		mnp->Build_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_0-1-4-5-8-9.pdb", std::thread::hardware_concurrency(), false);
-	}
-	else {
-		mnp->Load_Regular_PDB("/Users/nathanst/Desktop/STP_0-1-4-5-8-9.pdb", tmp, true);
-	}
-	
-	if (!fileExists("/Users/nathanst/Desktop/STP_0-4-5-8-9-12-13.pdb"))
-	{
-		tmp.Reset();
-		tiles.resize(0);
-		tiles.push_back(0);
-		tiles.push_back(4);
-		tiles.push_back(5);
-		tiles.push_back(8);
-		tiles.push_back(9);
-		tiles.push_back(12);
-		tiles.push_back(13);
-		mnp->Build_PDB(tmp, tiles, "/Users/nathanst/Desktop/STP_0-4-5-8-9-12-13.pdb", std::thread::hardware_concurrency(), false);
-	}
-	else {
-		mnp->Load_Regular_PDB("/Users/nathanst/Desktop/STP_0-4-5-8-9-12-13.pdb", tmp, true);
-	}
-
-	if (fileExists("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb"))
-	{
-		tmp.Reset();
-//		mnp->lookups.push_back({kLeafDefaultHeuristic, 0, 0, 0});
-		mnp->lookups.push_back({PermutationPuzzle::kMaxNode, 2, 1, 0});
-		mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 0});
-		mnp->lookups.push_back({PermutationPuzzle::kLeafNode, 2, 0, 1});
-		//mnp->Load_Regular_PDB_as_Delta("/Users/nathanst/Desktop/STP_0-1-4-5-8-9-12-13.pdb", tmp, true);
-		assert(!"Need to update code to use new functions");
-	}
-	exit(0);
-}
 
 bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
 {
 	return false;
 }
 
-MNPuzzleState GetKorfInstance(int which)
+MNPuzzleState<4, 4> GetKorfInstance(int which)
 {
 	int instances[100][16] =
 	{{14, 13, 15, 7, 11, 12, 9, 5, 6, 0, 2, 1, 4, 8, 10, 3},
@@ -735,7 +435,7 @@ MNPuzzleState GetKorfInstance(int which)
 		{7, 15, 4, 0, 10, 9, 2, 5, 12, 11, 13, 6, 1, 3, 14, 8},
 		{11, 4, 0, 8, 6, 10, 5, 13, 12, 7, 14, 3, 1, 2, 9, 15}};
 	
-	MNPuzzleState s(4,4);
+	MNPuzzleState<4, 4> s;
 	for (int x = 0; x < 16; x++)
 	{
 		s.puzzle[x] = instances[which][x];

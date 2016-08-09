@@ -67,7 +67,10 @@ public:
 
 	void DivCompress(int factor, bool print_histogram);
 	void ModCompress(uint64_t newEntries, bool print_histogram);
-
+	void ZeroLowValues(int limit)
+	{ for (uint64_t s = 0; s < PDB.Size(); s++)
+		if (PDB.Get(s) < limit) PDB.Set(s, 0); }
+	
 	void DeltaCompress(Heuristic<state> *h, state goal, bool print_histogram);
 	
 	void FractionalDivCompress(uint64_t count, bool print_histogram);
@@ -76,7 +79,7 @@ public:
 	void ValueCompress(std::vector<int> cutoffs, bool print_histogram);
 	void ValueRangeCompress(int numBits, bool print_histogram);
 
-	void PrintHistogram();
+	double PrintHistogram();
 	void GetHistogram(std::vector<uint64_t> &histogram);
 protected:
 	// holds a Pattern Databases
@@ -847,9 +850,12 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
-void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::PrintHistogram()
+double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::PrintHistogram()
 {
-	double average;
+	int factor = 1;
+	if (type == kDivCompress)
+		factor = compressionValue;
+	double average = 0;
 	std::vector<uint64_t> histogram;
 	for (uint64_t x = 0; x < PDB.Size(); x++)
 	{
@@ -857,7 +863,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			histogram.resize(PDB.Get(x)+1);
 		}
-		histogram[PDB.Get(x)]++;
+		histogram[PDB.Get(x)]+=factor;
 		average += PDB.Get(x);
 	}
 	for (int x = 0; x < histogram.size(); x++)
@@ -866,6 +872,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			printf("%d: %llu\n", x, histogram[x]);
 	}
 	printf("Average: %f; count: %llu\n", average/PDB.Size(), PDB.Size());
+	return average/PDB.Size();
 }
 
 #endif

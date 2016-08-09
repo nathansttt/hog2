@@ -27,25 +27,20 @@ PROJECTS = \
   apps/arm \
   apps/airplane \
   apps/localsensingsearch \
-  apps/cpdb \
   apps/pathsample \
   apps/puzzlesample \
   apps/inconsistency \
-  apps/dynamicsearch \
   apps/directional \
   apps/dragonage \
   apps/mapUtils \
   apps/prediction \
   apps/emotion \
-  apps/sfbds \
   apps/3dmaps \
   apps/rubik \
   apps/bidirectional \
   apps/voxel \
   apps/fling \
-  apps/topspin \
   apps/stp \
-  apps/pancake \
   apps/roads \
   apps/canonicalGrids \
   apps/delta \
@@ -53,13 +48,6 @@ PROJECTS = \
   demos/dijkstra \
   demos/astar \
   demos/idastar \
-#  apps/multiagent \
-#  apps/measure_inconsistency 
-#  simulation \
-#  learning \
-#	apps/coprobber
-#  apps/lv.pathfinding	
-#  apps/inconsistency \
 
 
 

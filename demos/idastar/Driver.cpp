@@ -47,13 +47,13 @@ bool recording = false;
 bool running = false;
 double rate = 1.0/32.0;
 
-MNPuzzle mnp(3, 2);
-MNPuzzleState start(3, 2);
-MNPuzzleState goal(3, 2);
-MNPuzzleState t1(3, 2);
-MNPuzzleState t2(3, 2);
-MNPuzzleState t3(3, 2);
-MNPuzzleState t4(3, 2);
+MNPuzzle<3, 2> mnp;
+MNPuzzleState<3, 2> start;
+MNPuzzleState<3, 2> goal;
+MNPuzzleState<3, 2> t1;
+MNPuzzleState<3, 2> t2;
+MNPuzzleState<3, 2> t3;
+MNPuzzleState<3, 2> t4;
 std::vector<slideDir> acts;
 
 Graph *g = 0;
@@ -75,17 +75,19 @@ std::vector<int> p1 = {0, 1, 2};
 std::vector<int> p2 = {0, 3, 4};
 std::vector<int> p3 = {0, 2, 5};
 
-PermutationPDB<MNPuzzleState, slideDir, MNPuzzle> *pdb1 = 0;
-PermutationPDB<MNPuzzleState, slideDir, MNPuzzle> *pdb2 = 0;
-PermutationPDB<MNPuzzleState, slideDir, MNPuzzle> *pdb3 = 0;
+PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>> *pdb1 = 0;
+PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>> *pdb2 = 0;
+PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>> *pdb3 = 0;
 
 int whichHeuristic = 1;
 
 class GraphDistHeuristic : public Heuristic<graphState> {
 public:
+	GraphDistHeuristic(double w = 1.0)
+	:weight(w) {}
 	double HCost(const graphState &a, const graphState &b) const
 	{
-		MNPuzzleState t1(3, 2), t2(3, 2);
+		MNPuzzleState<3, 2> t1, t2;
 		mnp.GetStateFromHash(t1, g->GetNode(a)->GetNum());
 		mnp.GetStateFromHash(t2, g->GetNode(b)->GetNum());
 		//return int(mnp.HCost(t1, t2));
@@ -106,11 +108,14 @@ public:
 			p2 = 0;
 		if (((whichHeuristic>>3)&1) == 0) // P3
 			p3 = 0;
-		return std::max(std::max(std::max(md, p1), p2), p3);
+		return weight*std::max(std::max(std::max(md, p1), p2), p3);
 	}
+private:
+	double weight;
 };
 
 GraphDistHeuristic h;
+GraphDistHeuristic wh(5);
 
 int main(int argc, char* argv[])
 {
@@ -163,9 +168,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		goal.Reset();
 		mnp.StoreGoal(goal);
-		pdb1 = new PermutationPDB<MNPuzzleState, slideDir, MNPuzzle>(&mnp, goal, p1);
-		pdb2 = new PermutationPDB<MNPuzzleState, slideDir, MNPuzzle>(&mnp, goal, p2);
-		pdb3 = new PermutationPDB<MNPuzzleState, slideDir, MNPuzzle>(&mnp, goal, p3);
+		pdb1 = new PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p1);
+		pdb2 = new PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p2);
+		pdb3 = new PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p3);
 		
 		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
 		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
@@ -177,6 +182,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		SetNumPorts(windowID, 2);
 		g = new Graph();
 		ge = new GraphEnvironment(g);
+		ge->SetDrawNodeLabels(true);
+		
 		DefaultGraph(0, kNoModifier, 'a');
 		//ida.DoSingleSearchStep(ge, mnp.GetMaxStateHash()-1, 0, &h, path);
 		MyDisplayHandler(windowID, kNoModifier, 'o');
@@ -532,7 +539,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'o':
 		{
 			ida.GetCurrentPath(lastPath);
-			ida.DoSingleSearchStep(ge, from, 0, &h, path);
+			ida.DoSingleSearchStep(ge, from, 0, &wh, path);
 			ida.GetCurrentPath(currentPath);
 			timer = 0;
 			RedrawTextDisplay();

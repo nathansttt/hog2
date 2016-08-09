@@ -179,6 +179,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-problems3", "-problems3 filename", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems4", "-problems4 filename", "Selects the problem set to run comparing weighted A* with and without re-openings.");
 	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
+	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <map> <output>", "Save the map as SVG format");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallCommandLineHandler(MyCLHandler, "-reduceMap", "-reduceMap input output", "Find the largest connected component in map and reduce.");
 	InstallCommandLineHandler(MyCLHandler, "-highwayDimension", "-highwayDimension map radius", "Measure the highway dimension of a map.");
@@ -838,6 +839,20 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			return 0;
 		screenShot = true;
 		strncpy(gDefaultMap, argument[1], 1024);
+		return 2;
+	}
+	if (strcmp( argument[0], "-svg" ) == 0 )
+	{
+		if (maxNumArgs <= 2)
+			return 0;
+		std::fstream svgFile;
+		MapEnvironment *me = new MapEnvironment(new Map(argument[1]));
+		svgFile.open(argument[2], std::fstream::out | std::fstream::trunc);
+		svgFile << me->SVGHeader();
+		svgFile << me->SVGDraw();
+		svgFile << "</svg>\n";
+		svgFile.close();
+		exit(0);
 		return 2;
 	}
 	if (strcmp( argument[0], "-map" ) == 0 )

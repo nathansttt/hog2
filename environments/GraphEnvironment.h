@@ -302,6 +302,7 @@ public:
 	virtual double GCost(const graphState &state1, const graphState &state2) const;
 	virtual double GCost(const graphState &state1, const graphMove &state2) const;
 	virtual bool GoalTest(const graphState &state, const graphState &goal) const;
+	virtual uint64_t GetMaxHash() const { return g->GetNumNodes(); }
 	virtual uint64_t GetStateHash(const graphState &state) const;
 	virtual uint64_t GetActionHash(graphMove act) const;
 	virtual void OpenGLDraw() const;
@@ -309,6 +310,7 @@ public:
 	virtual void OpenGLDraw(const graphState &s, const graphMove &gm) const;
 	virtual void OpenGLDraw(const graphState &s, const graphState&, float) const { OpenGLDraw(s); }
 	virtual void GLDrawLine(const graphState &x, const graphState &y) const;
+	virtual void GLLabelState(const graphState&, const char *) const;
 
 	Graph *GetGraph() { return g; };
 
