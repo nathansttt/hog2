@@ -11,6 +11,8 @@
 
 #include "AStarOpenClosed.h"
 #include "FPUtil.h"
+#include "Timer.h"
+#include <unordered_map>
 
 template <class state>
 struct MMCompare {
@@ -41,10 +43,6 @@ public:
 						  Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	
-	priorityQueue forwardQueue, backwardQueue;
-	state goal, start;
-	
-	
 	virtual const char *GetName() { return "MM"; }
 	
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
@@ -71,17 +69,46 @@ public:
 	
 //	void SetWeight(double w) {weight = w;}
 private:
+	
+	void ExtractPathToGoal(state &node, std::vector<state> &thePath)
+	{ uint64_t theID; backwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToGoalFromID(theID, thePath); }
+	void ExtractPathToGoalFromID(uint64_t node, std::vector<state> &thePath)
+	{
+		do {
+			thePath.push_back(backwardQueue.Lookup(node).data);
+			node = backwardQueue.Lookup(node).parentID;
+		} while (backwardQueue.Lookup(node).parentID != node);
+		thePath.push_back(backwardQueue.Lookup(node).data);
+	}
+
+	void ExtractPathToStart(state &node, std::vector<state> &thePath)
+	{ uint64_t theID; forwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
+	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
+	{
+		do {
+			thePath.push_back(forwardQueue.Lookup(node).data);
+			node = forwardQueue.Lookup(node).parentID;
+		} while (forwardQueue.Lookup(node).parentID != node);
+		thePath.push_back(forwardQueue.Lookup(node).data);
+	}
+
 	void OpenGLDraw(const priorityQueue &queue) const;
 	
 	void Expand(priorityQueue &current,
 				priorityQueue &opposite,
-				Heuristic<state> *heuristic, const state &target);
+				Heuristic<state> *heuristic,
+				const state &target,
+				std::unordered_map<double, int> &ming,
+				std::unordered_map<double, int> &minf);
+	priorityQueue forwardQueue, backwardQueue;
+	state goal, start;
+	std::unordered_map<double, int> g_f, g_b, f_f, f_b;
 	uint64_t nodesTouched, nodesExpanded;
 	state middleNode;
 	double currentCost;
 	std::vector<state> neighbors;
 	environment *env;
-	
+	Timer t;
 	Heuristic<state> *forwardHeuristic;
 	Heuristic<state> *backwardHeuristic;
 };
@@ -92,7 +119,7 @@ void MM<state, action, environment, priorityQueue>::GetPath(environment *env, co
 {
 	if (InitializeSearch(env, from, to, forward, backward, thePath) == false)
 		return;
-	
+	t.StartTimer();
 	while (!DoSingleSearchStep(thePath))
 	{ }
 }
@@ -130,10 +157,10 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 	}
 	
 	if (forwardQueue.OpenSize() == 0)
-		Expand(backwardQueue, forwardQueue, backwardHeuristic, start);
+		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
 
 	if (backwardQueue.OpenSize() == 0)
-		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal);
+		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
 
 	uint64_t forward = forwardQueue.Peek();
 	uint64_t backward = backwardQueue.Peek();
@@ -141,28 +168,40 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 	const AStarOpenClosedData<state> &nextForward = forwardQueue.Lookat(forward);
 	const AStarOpenClosedData<state> &nextBackward = backwardQueue.Lookat(backward);
 
+	static double oldp1 = 0;
+	static double oldp2 = 0;
 	double p1 = std::max(nextForward.g+nextForward.h, nextForward.g*2);
 	double p2 = std::max(nextBackward.g+nextBackward.h, nextBackward.g*2);
+	if (oldp1 != p1)
+	{
+		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
+		oldp1 = p1;
+	}
+	if (oldp2 != p2)
+	{
+		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
+		oldp2 = p2;
+	}
 	
 	if (fless(p1, p2))
 	{
-		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal);
+		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
 	}
 	else if (fless(p2, p1))
 	{
-		Expand(backwardQueue, forwardQueue, backwardHeuristic, start);
+		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
 	}
 	else { // equal priority
 		if (fless(nextForward.g, nextBackward.g))
 		{
-			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal);
+			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
 		}
 		else if (fless(nextBackward.g, nextForward.g))
 		{
-			Expand(backwardQueue, forwardQueue, backwardHeuristic, start);
+			Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
 		}
 		else {
-			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal);
+			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
 		}
 	}
 	// check if we can terminate
@@ -175,22 +214,34 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 		double minBackwardF =  DBL_MAX;
 		double forwardP;
 		double backwardP;
-		for (int x = 0; x < backwardQueue.OpenSize(); x++)
-		{
-			auto item = backwardQueue.Lookat(backwardQueue.GetOpenItem(x));
-			if (fless(item.g, minBackwardG))
-				minBackwardG = item.g;
-			if (fless(item.g+item.h, minBackwardF))
-				minBackwardF = item.g+item.h;
-		}
-		for (int x = 0; x < forwardQueue.OpenSize(); x++)
-		{
-			auto item = forwardQueue.Lookat(forwardQueue.GetOpenItem(x));
-			if (fless(item.g, minForwardG))
-				minForwardG = item.g;
-			if (fless(item.g+item.h, minForwardF))
-				minForwardF = item.g+item.h;
-		}
+		for (auto i = g_f.begin(); i != g_f.end(); i++)
+			if (i->second > 0 && fless(i->first, minForwardG))
+				minForwardG = i->first;
+		for (auto i = g_b.begin(); i != g_b.end(); i++)
+			if (i->second > 0 && fless(i->first, minBackwardG))
+				minBackwardG = i->first;
+		for (auto i = f_f.begin(); i != f_f.end(); i++)
+			if (i->second > 0 && fless(i->first, minForwardF))
+				minForwardF = i->first;
+		for (auto i = f_b.begin(); i != f_b.end(); i++)
+			if (i->second > 0 && fless(i->first, minBackwardF))
+				minBackwardF = i->first;
+//		for (int x = 0; x < backwardQueue.OpenSize(); x++)
+//		{
+//			auto item = backwardQueue.Lookat(backwardQueue.GetOpenItem(x));
+//			if (fless(item.g, minBackwardG))
+//				minBackwardG = item.g;
+//			if (fless(item.g+item.h, minBackwardF))
+//				minBackwardF = item.g+item.h;
+//		}
+//		for (int x = 0; x < forwardQueue.OpenSize(); x++)
+//		{
+//			auto item = forwardQueue.Lookat(forwardQueue.GetOpenItem(x));
+//			if (fless(item.g, minForwardG))
+//				minForwardG = item.g;
+//			if (fless(item.g+item.h, minForwardF))
+//				minForwardF = item.g+item.h;
+//		}
 		{
 			auto iB = backwardQueue.Lookat(backwardQueue.Peek());
 			backwardP = std::max(iB.g+iB.h, iB.g*2);
@@ -208,24 +259,33 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 			printf("Terminated on backwardf\n");
 			done = true;
 		}
-		if (!fgreater(currentCost, minForwardG+minBackwardG+1)) // TODO: epsilon
+		if (!fgreater(currentCost, minForwardG+minBackwardG+1.0)) // TODO: epsilon
 		{
 			printf("Terminated on g+g+epsilon\n");
 			done = true;
 		}
-		if (!fgreater(currentCost, forwardP))
+		if (!fgreater(currentCost, std::min(forwardP, backwardP)))
 		{
-			printf("Terminated on forwardP\n");
+			printf("Terminated on forwardP/backwardP\n");
 			done = true;
 		}
-		if (!fgreater(currentCost, backwardP))
-		{
-			printf("Terminated on backwardP\n");
-			done = true;
-		}
+//		if (!fgreater(currentCost, backwardP))
+//		{
+//			printf("Terminated on backwardP\n");
+//			done = true;
+//		}
 		// for now, always terminate
 		if (done)
+		{
+			std::vector<state> pFor, pBack;
+			ExtractPathToGoal(middleNode, pBack);
+			ExtractPathToStart(middleNode, pFor);
+			reverse(pFor.begin(), pFor.end());
+			thePath = pFor;
+			thePath.insert( thePath.end(), pBack.begin()+1, pBack.end() );
+			
 			return true;
+		}
 	}
 	return false;
 }
@@ -233,7 +293,9 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 template <class state, class action, class environment, class priorityQueue>
 void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &current,
 														   priorityQueue &opposite,
-														   Heuristic<state> *heuristic, const state &target)
+														   Heuristic<state> *heuristic, const state &target,
+														   std::unordered_map<double, int> &ming,
+														   std::unordered_map<double, int> &minf)
 {
 	uint64_t nextID = current.Close();
 	nodesExpanded++;
@@ -243,33 +305,43 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 	{
 		nodesTouched++;
 		uint64_t childID;
-		auto loc = current.Lookup(env->GetStateHash(succ), childID);
+		uint64_t hash = env->GetStateHash(succ);
+		auto loc = current.Lookup(hash, childID);
+		auto &childData = current.Lookup(childID);
+		auto &parentData = current.Lookup(nextID);
+		ming[parentData.g]--;
+		minf[parentData.g+parentData.h]--;
 		switch (loc)
 		{
 			case kClosedList: // ignore
 				break;
 			case kOpenList: // update cost if needed
 			{
-				double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
-				if (fless(current.Lookup(nextID).g+edgeCost, current.Lookup(childID).g))
+				double edgeCost = env->GCost(parentData.data, succ);
+				if (fless(parentData.g+edgeCost, childData.g))
 				{
-					current.Lookup(childID).parentID = nextID;
-					current.Lookup(childID).g = current.Lookup(nextID).g+edgeCost;
+					ming[childData.g]--;
+					minf[childData.g+childData.h]--;
+					childData.parentID = nextID;
+					childData.g = parentData.g+edgeCost;
 					current.KeyChanged(childID);
+					ming[childData.g]++;
+					minf[childData.g+childData.h]++;
+					
 					
 					// TODO: check if we improved the current solution?
 					uint64_t reverseLoc;
-					auto loc = opposite.Lookup(env->GetStateHash(succ), reverseLoc);
+					auto loc = opposite.Lookup(hash, reverseLoc);
 					if (loc == kOpenList)
 					{
-						if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
+						if (fless(parentData.g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
 							// TODO: store current solution
 							printf("Potential updated solution found, cost: %1.2f + %1.2f = %1.2f\n",
-								   current.Lookup(nextID).g+edgeCost,
+								   parentData.g+edgeCost,
 								   opposite.Lookup(reverseLoc).g,
-								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g);
-							currentCost = current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g;
+								   parentData.g+edgeCost+opposite.Lookup(reverseLoc).g);
+							currentCost = parentData.g+edgeCost + opposite.Lookup(reverseLoc).g;
 							middleNode = succ;
 						}
 					}
@@ -278,15 +350,20 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 				break;
 			case kNotFound:
 			{
-				double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
-				current.AddOpenNode(succ,
-									env->GetStateHash(succ),
-									current.Lookup(nextID).g+edgeCost,
-									heuristic->HCost(succ, target),
+				double edgeCost = env->GCost(parentData.data, succ);
+				double g = parentData.g+edgeCost;
+				double h = heuristic->HCost(succ, target);
+				ming[g]++;
+				minf[g+h]++;
+				current.AddOpenNode(succ, // This may invalidate our references
+									hash,
+									g,
+									h,
 									nextID);
+				
 				// check for solution
 				uint64_t reverseLoc;
-				auto loc = opposite.Lookup(env->GetStateHash(succ), reverseLoc);
+				auto loc = opposite.Lookup(hash, reverseLoc);
 				if (loc == kOpenList)
 				{
 					if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))

@@ -75,6 +75,7 @@ public:
 	inline dataStructure &Lookup(uint64_t objKey) { return elements[objKey]; }
 	inline const dataStructure &Lookat(uint64_t objKey) const { return elements[objKey]; }
 	uint64_t Peek() const;
+	uint64_t Close(uint64_t objKey);
 	uint64_t Close();
 	void Reopen(uint64_t objKey);
 
@@ -207,13 +208,32 @@ uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Peek() const
 }
 
 /**
+ * Move the given item to the closed list and return key.
+ */
+template<typename state, typename CmpKey, class dataStructure>
+uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Close(uint64_t objKey)
+{
+	assert(OpenSize() != 0);
+	uint64_t index = elements[objKey].openLocation;
+	uint64_t ans = theHeap[index];
+	assert(ans == objKey);
+	elements[ans].where = kClosedList;
+	theHeap[index] = theHeap[theHeap.size()-1];
+	elements[theHeap[index]].openLocation = index;
+	theHeap.pop_back();
+	HeapifyDown(index);
+	
+	return ans;
+}
+
+/**
  * Move the best item to the closed list and return key.
  */
 template<typename state, typename CmpKey, class dataStructure>
 uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::Close()
 {
 	assert(OpenSize() != 0);
-
+	
 	uint64_t ans = theHeap[0];
 	elements[ans].where = kClosedList;
 	theHeap[0] = theHeap[theHeap.size()-1];

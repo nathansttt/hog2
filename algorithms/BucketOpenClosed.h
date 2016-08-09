@@ -76,7 +76,7 @@ void BucketOpenClosed<state, CmpKey, dataStructure>::Reset()
 	table.clear();
 	elements.clear();
 	pQueue.resize(0);
-	pQueue.resize(3);
+	//pQueue.resize(3);
 }
 
 //inline uint64_t compactGH(uint64_t g, uint64_t h)
