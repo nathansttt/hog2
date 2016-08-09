@@ -54,7 +54,7 @@ int glutBitmapLength(void *font, const unsigned char *string);
 int glutStrokeLength(void *font, const unsigned char *string);
 
 void gluOrtho2D (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top);
-
+void renderScene();
 }
 
 #endif

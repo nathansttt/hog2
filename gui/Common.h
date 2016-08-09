@@ -19,109 +19,55 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */ 
 
-//#include "Map.h"
-//#include "MapAbstraction.h"
-//#include "UnitSimulation.h"
 #include "GLUtil.h"
 #include <stdio.h>
 #include <cstring>
-//#include "StatCollection.h"
 
 #ifndef COMMON_H
 #define COMMON_H
 
-enum
-{
-	kMainMenu = 500,
-	kCloseMenuItem = 2,
-	kInfoMenuItem = 4,
-	kAnimateMenuItem = 5,
-	kInfoState = 1,
-	kAnimateState = 0
-};
-
-enum {
-	kFSAAOff = 0,
-	kFSAAFast = 1,
-	kFSAANice = 2,
-	kSamples = 4
-};
-
 const int MAXPORTS = 4;
-// camera/context info
-//typedef struct {
-//	GLdouble x,y,z;
-//} recVec;
-
-typedef struct {
-	recVec viewPos; // View position
-	recVec viewDir; // View direction vector
-	recVec viewUp; // View up direction
-	recVec rotPoint; // Point to rotate about
-	GLdouble aperture; // camera aperture
-	GLint viewWidth,viewHeight; // current window/screen height and width
-	GLfloat viewOriginX, viewOriginY; // always 0 
-} recCamera;
 
 typedef struct {
 	GLfloat worldRotation[4];
-	GLfloat objectRotation[4];
-} recRotation;	
+	GLfloat cameraRotation[4];
+} recRotation;
 
 typedef struct {
 	GLdouble left, right, top, bottom, near, far;
 } recFrustum;
 
+typedef struct {
+	recVec viewPos; // View position
+
+	bool thirdPerson;
+	
+	// third-person (?) camera that can be programatically controlled using gluLookAt
+	recVec viewDir; // View direction vector
+	recVec viewUp; // View up direction
+	recRotation rotations; // object/camera rotations
+
+	// Other settings
+	recFrustum frust; // set in updateProjection
+	GLdouble aperture; // camera aperture
+	GLint viewWidth,viewHeight; // current window/screen height and width
+	GLfloat viewOriginX, viewOriginY; // always 0 
+} recCamera;
+
 // per view data
 struct recContext
 {
-#ifdef OS_MAC
-	AGLPixelFormat aglPixFmt;
-	AGLContext aglContext;
-	GLuint boldFontList;
-	GLuint regFontList;
-	EventLoopTimerRef timer;
-	//DMExtendedNotificationUPP  windowEDMUPP;
-	AbsoluteTime time;
-#endif
-
-	bool animate;
-	bool info;
-	bool drawHelp;
-	bool drawCaps;
-	bool polygons;
-	bool lines;
-	bool points;
-	bool showCredits;
-	long lighting;
-//	bool paused;
-	bool drawing;
-	
-	// spin
-//	GLfloat fRot[3];
-//	GLfloat fVel[3];
-//	GLfloat fAccel[3];
-	
 	// camera handling
-	recCamera globalCamera;
+	recCamera globalCamera; // has full screen size; see resizeGL()
+	
 	recCamera camera[MAXPORTS];
-	recRotation rotations[MAXPORTS];
-	recFrustum frust[MAXPORTS];
+
 	int numPorts, currPort;
-	GLfloat shapeSize;
 	bool moveAllPortsTogether;
 	
 	char message[256]; // buffer for message output
 	float msgTime; // message posting time for expiration
 	
-	char * names;
-	
-	long surface; 
-	long colorScheme;
-	unsigned long subdivisions;
-	unsigned long xyRatio;
-	
-	long modeFSAA;
 	unsigned long windowID;
 };
 typedef struct recContext recContext;
@@ -133,9 +79,6 @@ extern pRecContext gTrackingContextInfo;
 
 void updateProjection(pRecContext pContextInfo, int viewPort = -1);
 void drawGL(pRecContext pContextInfo, bool swap);
-#ifdef OS_MAC
-pRecContext GetCurrentContextInfo (WindowRef window);
-#endif
 
 bool DoKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt);
 void SetLighting(unsigned int mode);
@@ -319,11 +262,14 @@ void updateModelView(pRecContext pContextInfo, int currPort);
 void cameraLookAt(GLfloat, GLfloat, GLfloat, float cameraSpeed = 0.1, int port = -1);
 recVec cameraLookingAt(int port = -1);
 void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1, int port = -1);
+void cameraOffset(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1, int port = -1);
 void resetCamera();
 point3d GetOGLPos(pRecContext pContextInfo, int x, int y);
+recVec GetHeading(unsigned long windowID, int which);
+void GetHeading(unsigned long windowID, int which, GLdouble &hx, GLdouble &hy, GLdouble &hz);
 
 void setPortCamera(pRecContext pContextInfo, int currPort);
 void setViewport(pRecContext pContextInfo, int currPort);
-void rotateObject();
+//void rotateObject();
 
 #endif

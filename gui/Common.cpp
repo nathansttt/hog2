@@ -288,18 +288,7 @@ void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType e)
 void initialConditions(pRecContext pContextInfo)
 {
 	pContextInfo->moveAllPortsTogether = true;
-	pContextInfo->info = kInfoState;
-	pContextInfo->animate = kAnimateState;
-	pContextInfo->drawCaps = 0;
-	pContextInfo->drawHelp = 1;
-	pContextInfo->polygons = 1;
-	pContextInfo->lines = 0;
-	pContextInfo->points = 0;
-	pContextInfo->showCredits = 1;
-	pContextInfo->lighting = 4;
 	SetLighting(4);
-//	pContextInfo->paused = false;
-	pContextInfo->drawing = true;
 	pContextInfo->numPorts = 3;
 	pContextInfo->currPort = 0;
 	for (int x = 0; x < MAXPORTS; x++)
@@ -307,22 +296,14 @@ void initialConditions(pRecContext pContextInfo)
 		resetCamera(&pContextInfo->camera[x]);
 		for (int y = 0; y < 4; y++)
 		{
-			pContextInfo->rotations[x].worldRotation[y] = 0;
-			pContextInfo->rotations[x].objectRotation[y] = 0;
+			pContextInfo->camera[x].rotations.worldRotation[y] = 0;
+			pContextInfo->camera[x].rotations.cameraRotation[y] = 0.0001;
 		}
+//		pContextInfo->camera[x].rotations.cameraRotation[0] = 180;
+//		pContextInfo->camera[x].rotations.cameraRotation[2] = 1;
+		pContextInfo->camera[x].thirdPerson = true;
 	}
-	
-#ifdef OS_MAC
-	pContextInfo->timer = NULL;
-#endif
-	
 	gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
-	
-	pContextInfo->surface = 0; 
-	pContextInfo->colorScheme = 4;
-	pContextInfo->subdivisions = 64;
-	pContextInfo->xyRatio = 1;
-	pContextInfo->modeFSAA = 1;
 
 	pContextInfo->windowID = gNextWindowID++;
 }
@@ -341,7 +322,8 @@ void SetLighting(unsigned int mode)
 	
 //	GLfloat position[4] = {7.0,-7.0,12.0,0.0};
 //	GLfloat position[4] = {-1.0,-3.0,5.0,0.0};
-	GLfloat position[4] = {-1.0,5.0,5.0,0.0};
+//	GLfloat position[4] = {-1.0,5.0,5.0,0.0};
+	GLfloat position[4] = {-0.0,1.0,3.0,0.0};
 	GLfloat ambient[4]  = {0.2, 0.2, 0.2, 1.0};
 	GLfloat diffuse[4]  = {1.0, 1.0, 1.0, 1.0};
 	GLfloat specular[4] = {1.0, 1.0, 1.0, 1.0};
@@ -380,16 +362,16 @@ void SetLighting(unsigned int mode)
 	glEnable(GL_LIGHT0);
 }
 
-void rotateObject()
-{
-	pRecContext pContextInfo = getCurrentContext();
-	if (!pContextInfo)
-		return;
-	pContextInfo->rotations[pContextInfo->currPort].objectRotation[0] += 1;
-	pContextInfo->rotations[pContextInfo->currPort].objectRotation[1] = 0;
-	pContextInfo->rotations[pContextInfo->currPort].objectRotation[2] = 1;
-	pContextInfo->rotations[pContextInfo->currPort].objectRotation[3] = 0;
-}
+//void rotateObject()
+//{
+//	pRecContext pContextInfo = getCurrentContext();
+//	if (!pContextInfo)
+//		return;
+//	pContextInfo->rotations[pContextInfo->currPort].objectRotation[0] += 1;
+//	pContextInfo->rotations[pContextInfo->currPort].objectRotation[1] = 0;
+//	pContextInfo->rotations[pContextInfo->currPort].objectRotation[2] = 1;
+//	pContextInfo->rotations[pContextInfo->currPort].objectRotation[3] = 0;
+//}
 
 void resetCamera()
 {
@@ -402,9 +384,11 @@ void resetCamera()
 		resetCamera(&pContextInfo->camera[x]);
 		for (int y = 0; y < 4; y++)
 		{
-			pContextInfo->rotations[x].worldRotation[y] = 0;
-			pContextInfo->rotations[x].objectRotation[y] = 0;
+			pContextInfo->camera[x].rotations.worldRotation[y] = 0;
+			pContextInfo->camera[x].rotations.cameraRotation[y] = 0.0001;
 		}
+//		pContextInfo->camera[x].rotations.cameraRotation[0] = 180;
+//		pContextInfo->camera[x].rotations.cameraRotation[2] = 1;
 	}
 	
 	gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
@@ -418,7 +402,6 @@ void resetCamera()
 void resetCamera(recCamera * pCamera)
 {
 	pCamera->aperture = 10.0;
-	pCamera->rotPoint = gOrigin;
 	
 	pCamera->viewPos.x = 0.0;
 	pCamera->viewPos.y = 0.0;
@@ -428,8 +411,10 @@ void resetCamera(recCamera * pCamera)
 	pCamera->viewDir.z = -pCamera->viewPos.z;
 	
 	pCamera->viewUp.x = 0;  
-	pCamera->viewUp.y = -.1; 
-	pCamera->viewUp.z = -1;
+	pCamera->viewUp.y = -1;//-.1;
+	pCamera->viewUp.z = 0;//-1;
+
+	//pCamera->viewRot.worldRotation = {0,0,0,0};
 }
 
 recVec cameraLookingAt(int port)
@@ -437,7 +422,7 @@ recVec cameraLookingAt(int port)
 	pRecContext pContextInfo = getCurrentContext();
 	if (port == -1)
 		port = pContextInfo->currPort;
-	return pContextInfo->camera[port].viewDir;
+	return /*pContextInfo->camera[port].viewPos-*/pContextInfo->camera[port].viewDir;
 }
 
 
@@ -451,9 +436,8 @@ void cameraLookAt(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
 		port = pContextInfo->currPort;
 	
 	pContextInfo->camera[port].viewDir.x = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.x + cameraSpeed*(x - pContextInfo->camera[port].viewPos.x);
-	pContextInfo->camera[port].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.z + cameraSpeed*(z - pContextInfo->camera[port].viewPos.z);
 	pContextInfo->camera[port].viewDir.y = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.y + cameraSpeed*(y - pContextInfo->camera[port].viewPos.y);
-	
+	pContextInfo->camera[port].viewDir.z = (1-cameraSpeed)*pContextInfo->camera[port].viewDir.z + cameraSpeed*(z - pContextInfo->camera[port].viewPos.z);
 //	pContextInfo->rotations[port].objectRotation[0] *= (1-cameraSpeed);
 //	pContextInfo->rotations[port].worldRotation[0] *= (1-cameraSpeed);
 	updateProjection(pContextInfo);
@@ -472,6 +456,21 @@ void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
 	pContextInfo->camera[port].viewPos.x = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.x + cameraSpeed*x;
 	pContextInfo->camera[port].viewPos.y = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.y + cameraSpeed*y;
 	pContextInfo->camera[port].viewPos.z = (1-cameraSpeed)*pContextInfo->camera[port].viewPos.z + cameraSpeed*z;
+	updateProjection(pContextInfo);
+}
+
+void cameraOffset(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed, int port)
+{
+	pRecContext pContextInfo = getCurrentContext();
+	if (!pContextInfo)
+		return;
+	if (port == -1)
+	{
+		port = pContextInfo->currPort;
+	}
+	pContextInfo->camera[port].viewPos.x += cameraSpeed*x;
+	pContextInfo->camera[port].viewPos.y += cameraSpeed*y;
+	pContextInfo->camera[port].viewPos.z += cameraSpeed*z;
 	updateProjection(pContextInfo);
 }
 
@@ -499,10 +498,10 @@ void setPortCamera(pRecContext pContextInfo, int currPort)
 void setViewport(pRecContext pContextInfo, int currPort)
 {
 	const double ratios[4][4][4] =
-{{{0, 1, 0, 1}}, // x, width%, y, height%
-{{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
-{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
-{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
+	{{{0, 1, 0, 1}}, // x, width%, y, height%
+		{{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
+		{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
+		{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
 	
 	const double *val = ratios[pContextInfo->numPorts-1][currPort];
 	
@@ -517,11 +516,14 @@ point3d GetOGLPos(pRecContext pContextInfo, int x, int y)
 	setViewport(pContextInfo, pContextInfo->currPort);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glFrustum(pContextInfo->frust[pContextInfo->currPort].left, pContextInfo->frust[pContextInfo->currPort].right,
-			  pContextInfo->frust[pContextInfo->currPort].bottom, pContextInfo->frust[pContextInfo->currPort].top,
-			  pContextInfo->frust[pContextInfo->currPort].near, pContextInfo->frust[pContextInfo->currPort].far);
+	glFrustum(pContextInfo->camera[pContextInfo->currPort].frust.left, pContextInfo->camera[pContextInfo->currPort].frust.right,
+			  pContextInfo->camera[pContextInfo->currPort].frust.bottom, pContextInfo->camera[pContextInfo->currPort].frust.top,
+			  pContextInfo->camera[pContextInfo->currPort].frust.near, pContextInfo->camera[pContextInfo->currPort].frust.far);
 	// projection matrix already set	
 	updateModelView(pContextInfo, pContextInfo->currPort);
+	
+	if (pContextInfo->numPorts > 1)
+		HandleFrame(pContextInfo, pContextInfo->currPort);
 	
 	GLint viewport[4];
 	GLdouble modelview[16];
@@ -535,10 +537,12 @@ point3d GetOGLPos(pRecContext pContextInfo, int x, int y)
 	winX = (float)x;
 	winY = (float)viewport[3] - (float)y;
 	glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
-	
 	if (gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ) == GL_FALSE)
 		printf("WARNING: gluUnProject failed\n");
 	
+//	printf("Clicked (%f, %f, %f) [far plane %f near %f]\n", posX, posY, posZ,
+//		   pContextInfo->frust[pContextInfo->currPort].far+pContextInfo->camera[pContextInfo->currPort].viewPos.z,
+//		   pContextInfo->frust[pContextInfo->currPort].near+pContextInfo->camera[pContextInfo->currPort].viewPos.z);
 	return point3d(posX, posY, posZ);
 }
 
@@ -655,17 +659,52 @@ void SetZoom(int windowID, float amount)
 	{
 		for (int x = 0; x < pContextInfo->numPorts; x++)
 		{
-			pContextInfo->camera[x].viewPos.z = -12.5+amount;
-			if (pContextInfo->camera[x].viewPos.z == 0.0) // do not let z = 0.0
-				pContextInfo->camera[x].viewPos.z = 0.0001;
+			pContextInfo->camera[x].aperture = amount;
+//			pContextInfo->camera[x].viewPos.z = -12.5+amount;
+//			if (pContextInfo->camera[x].viewPos.z == 0.0) // do not let z = 0.0
+//				pContextInfo->camera[x].viewPos.z = 0.0001;
 			updateProjection(pContextInfo, x);  // update projection matrix
 		}
 	}
 	else {
-		pContextInfo->camera[pContextInfo->currPort].viewPos.z = -12.5+amount;
-		if (pContextInfo->camera[pContextInfo->currPort].viewPos.z == 0.0) // do not let z = 0.0
-			pContextInfo->camera[pContextInfo->currPort].viewPos.z = 0.0001;
+		pContextInfo->camera[pContextInfo->currPort].aperture = amount;
+//		pContextInfo->camera[pContextInfo->currPort].viewPos.z = -12.5+amount;
+//		if (pContextInfo->camera[pContextInfo->currPort].viewPos.z == 0.0) // do not let z = 0.0
+//			pContextInfo->camera[pContextInfo->currPort].viewPos.z = 0.0001;
 		updateProjection(pContextInfo, pContextInfo->currPort);  // update projection matrix
 	}
 }
 
+recVec GetHeading(unsigned long windowID, int which)
+{
+	recVec v;
+	GetHeading(windowID, which, v.x, v.y, v.z);
+	return v;
+}
+
+void GetHeading(unsigned long windowID, int which, GLdouble &hx, GLdouble &hy, GLdouble &hz)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+
+	double fRot[4];
+	for (int x = 0; x < 4; x++)
+		fRot[x] = pContextInfo->camera[which].rotations.cameraRotation[x];
+	// these formulas are derived from the opengl redbook 1.4 pg 700
+	double xp, yp, zp, len, sa, ca;//hx, hy, hz,
+	len = 1/sqrt(fRot[1]*fRot[1] +
+				 fRot[2]*fRot[2] +
+				 fRot[3]*fRot[3]);
+	xp = fRot[1]*len;
+	yp = fRot[2]*len;
+	zp = fRot[3]*len;
+	ca = cos(-fRot[0]*PI/180);
+	sa = sin(-fRot[0]*PI/180);
+	hx = (1-ca)*xp*zp+sa*yp;
+	hy = (1-ca)*yp*zp-sa*xp;
+	hz = ca+(1-ca)*zp*zp;
+	len = 1/sqrt(hx*hx+hy*hy+hz*hz);
+	hx *= len;
+	hy *= len;
+	hz *= len;
+	printf("Heading vector: (%1.3f, %1.3f, %1.3f)\n", hx, hy, hz);
+}

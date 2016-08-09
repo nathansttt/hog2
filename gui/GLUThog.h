@@ -19,37 +19,38 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
-#ifndef OS_MAC
-
-/* Apple CGSize */
-struct CGSize {
-   float width;
-   float height;
-};
-
-typedef struct CGSize CGSize;
-
-
-/* Apple CGPoint */
-struct CGPoint {
-   float x;
-   float y;
-};
-typedef struct CGPoint CGPoint;
-
-
-/* Apple CGRect */
-struct CGRect {
-   CGPoint origin;
-   CGSize size;
-};
-typedef struct CGRect CGRect;
-
-#endif
+//#ifndef OS_MAC
+//
+///* Apple CGSize */
+//struct CGSize {
+//   float width;
+//   float height;
+//};
+//
+//typedef struct CGSize CGSize;
+//
+//
+///* Apple CGPoint */
+//struct CGPoint {
+//   float x;
+//   float y;
+//};
+//typedef struct CGPoint CGPoint;
+//
+//
+///* Apple CGRect */
+//struct CGRect {
+//   CGPoint origin;
+//   CGSize size;
+//};
+//typedef struct CGRect CGRect;
+//
+//#endif
 
 void createMenus();
 void processMenuEvents(int option);
 void keyPressed(unsigned char key, int x, int y);
+void mouseMovedNoButton(int x, int y);
 void mouseMovedButton(int x, int y);
 void mousePressedButton(int button, int state, int x, int y);
 static void mousePan (int x, int y, pRecContext pContextInfo);
