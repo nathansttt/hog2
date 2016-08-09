@@ -23,6 +23,7 @@
 #include <vector>
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "GLUtil.h"
 #include "Trackball.h"
