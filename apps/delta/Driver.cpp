@@ -67,8 +67,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 
-	InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
-	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
+	//InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
+	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test comparing A*, IDA*, MM");
 	
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler);
@@ -163,6 +163,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
+	TSBiVRC();
 	return 0;
 }
 
