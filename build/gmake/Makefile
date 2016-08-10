@@ -39,6 +39,7 @@ PROJECTS = \
   apps/rubik \
   apps/bidirectional \
   apps/voxel \
+  apps/delta \
   apps/fling \
   apps/stp \
   apps/roads \
