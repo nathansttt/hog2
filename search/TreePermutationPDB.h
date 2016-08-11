@@ -9,7 +9,7 @@
 #ifndef TreePermutationPDB_h
 #define TreePermutationPDB_h
 
-#include "PDBHeuristic.h"
+#include "PermutationPDB.h"
 
 /**
  * This class does the basic permutation calculation in lexicographical order.
@@ -18,28 +18,22 @@
  * to do this in n log n time instead of n^2 time.
  */
 template <class state, class action, class environment>
-class TreePermutationPDB : public PDBHeuristic<state, action, environment> {
+class TreePermutationPDB : public PermutationPDB<state, action, environment> {
 public:
-	TreePermutationPDB(environment *e, const state &s, std::vector<int> distincts);
+	TreePermutationPDB(environment *e, const state &s, const std::vector<int> &distincts);
 	
-	virtual uint64_t GetPDBSize() const;
-
 	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const;
 	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const;
 	virtual uint64_t GetAbstractHash(const state &s, int threadID = 0) const { return GetPDBHash(s); }
 	virtual state GetStateFromAbstractState(state &s) { return s; }
 
-	bool Load(FILE *f);
-	void Save(FILE *f);
-	bool Load(const char *prefix);
-	void Save(const char *prefix);
 	std::string GetFileName(const char *prefix);
 private:
+	using PermutationPDB<state, action, environment>::example;
+	using PermutationPDB<state, action, environment>::distinct;
+
 	uint64_t Factorial(int val) const;
 	uint64_t FactorialUpperK(int n, int k) const;
-	std::vector<int> distinct;
-	size_t puzzleSize;
-	uint64_t pdbSize;
 	
 	const int maxThreads = 32;
 
@@ -93,21 +87,11 @@ inline int mylog2(int val)
 
 
 template <class state, class action, class environment>
-TreePermutationPDB<state, action, environment>::TreePermutationPDB(environment *e, const state &s, std::vector<int> distincts)
-:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.puzzle.size()),
-dualCache(maxThreads), locsCache(maxThreads), tempCache(maxThreads), example(s)
+TreePermutationPDB<state, action, environment>::TreePermutationPDB(environment *e, const state &s, const std::vector<int> &distincts)
+:PermutationPDB<state, action, environment>(e, s, distincts),
+dualCache(maxThreads), locsCache(maxThreads), tempCache(maxThreads)
 {
-	pdbSize = 1;
-	for (int x = (int)s.puzzle.size(); x > s.puzzle.size()-distincts.size(); x--)
-	{
-		pdbSize *= x;
-	}
-}
-
-template <class state, class action, class environment>
-uint64_t TreePermutationPDB<state, action, environment>::GetPDBSize() const
-{
-	return pdbSize;
+	this->SetGoal(s);
 }
 
 template <class state, class action, class environment>
@@ -221,55 +205,12 @@ std::string TreePermutationPDB<state, action, environment>::GetFileName(const ch
 	std::string fileName;
 	fileName += prefix;
 	// For unix systems, the prefix should always end in a trailing slash
-	if (fileName.back() != '/')
+	if (fileName.back() != '/' && prefix[0] != 0)
 		fileName+='/';
-	fileName += PDBHeuristic<state, action, environment>::env->GetName();
-	fileName += "-";
-	for (int x = 0; x < PDBHeuristic<state, action, environment>::goalState.puzzle.size(); x++)
-	{
-		fileName += std::to_string(PDBHeuristic<state, action, environment>::goalState.puzzle[x]);
-		fileName += ";";
-	}
-	fileName.pop_back(); // remove colon
-	fileName += "-";
-	for (int x = 0; x < distinct.size(); x++)
-	{
-		fileName += std::to_string(distinct[x]);
-		fileName += ";";
-	}
-	fileName.pop_back(); // remove colon
+	fileName += PermutationPDB<state, action, environment>::GetFileName("");
 	fileName += "-lex.pdb";
 	
 	return fileName;
-}
-
-template <class state, class action, class environment>
-bool TreePermutationPDB<state, action, environment>::Load(const char *prefix)
-{
-	assert(false);
-	return false;
-}
-
-template <class state, class action, class environment>
-void TreePermutationPDB<state, action, environment>::Save(const char *prefix)
-{
-	assert(false);
-	FILE *f = fopen(GetFileName(prefix).c_str(), "w+");
-	PDBHeuristic<state, action, environment>::PDB.Write(f);
-	fclose(f);
-}
-
-template <class state, class action, class environment>
-bool TreePermutationPDB<state, action, environment>::Load(FILE *f)
-{
-	assert(false);
-	return false;
-}
-
-template <class state, class action, class environment>
-void TreePermutationPDB<state, action, environment>::Save(FILE *f)
-{
-	assert(false);
 }
 
 template <class state, class action, class environment>

@@ -9,7 +9,7 @@
 #ifndef MR1PermutationPDB_h
 #define MR1PermutationPDB_h
 
-#include "PDBHeuristic.h"
+#include "PermutationPDB.h"
 
 /**
  * This class uses the first of two Myrvold-Russkey ranking functions
@@ -22,51 +22,32 @@
  */
 
 template <class state, class action, class environment>
-class MR1PermutationPDB : public PDBHeuristic<state, action, environment> {
+class MR1PermutationPDB : public PermutationPDB<state, action, environment> {
 public:
-	MR1PermutationPDB(environment *e, const state &s, std::vector<int> distincts);
-	//	virtual uint64_t GetStateHash(const state &s) const;
-	//	virtual void GetStateFromHash(state &s, uint64_t hash) const;
-	virtual uint64_t GetPDBSize() const;
+	MR1PermutationPDB(environment *e, const state &s, const std::vector<int> &distincts);
 	
 	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const;
 	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const;
 	virtual uint64_t GetAbstractHash(const state &s, int threadID = 0) const { return GetPDBHash(s); }
 	virtual state GetStateFromAbstractState(state &s) const { return s; }
 
-	bool Load(FILE *f);
-	void Save(FILE *f);
-	bool Load(const char *prefix);
-	void Save(const char *prefix);
 	std::string GetFileName(const char *prefix);
 private:
-	std::vector<int> distinct;
-	size_t puzzleSize;
-	uint64_t pdbSize;
-	
+	using PermutationPDB<state, action, environment>::example;
+	using PermutationPDB<state, action, environment>::distinct;
+
 	// cache for computing ranking/unranking
 	mutable std::vector<std::vector<int> > dualCache;
 	mutable std::vector<std::vector<int> > locsCache;
 	mutable std::vector<std::vector<int> > valueStack;
 
-	state example;
 };
 
 template <class state, class action, class environment>
-MR1PermutationPDB<state, action, environment>::MR1PermutationPDB(environment *e, const state &s, std::vector<int> distincts)
-:PDBHeuristic<state, action, environment>(e), distinct(distincts), puzzleSize(s.size()), dualCache(maxThreads), locsCache(maxThreads), valueStack(maxThreads), example(s)
+MR1PermutationPDB<state, action, environment>::MR1PermutationPDB(environment *e, const state &s, const std::vector<int> & distincts)
+:PermutationPDB<state, action, environment>(e, s, distincts), dualCache(maxThreads), locsCache(maxThreads), valueStack(maxThreads)
 {
-	pdbSize = 1;
-	for (int x = (int)example.size(); x > example.size()-distincts.size(); x--)
-	{
-		pdbSize *= x;
-	}
-}
-
-template <class state, class action, class environment>
-uint64_t MR1PermutationPDB<state, action, environment>::GetPDBSize() const
-{
-	return pdbSize;
+	this->SetGoal(s);
 }
 
 inline void swap(int &a, int &b)
@@ -162,55 +143,13 @@ std::string MR1PermutationPDB<state, action, environment>::GetFileName(const cha
 	std::string fileName;
 	fileName += prefix;
 	// For unix systems, the prefix should always end in a trailing slash
-	if (fileName.back() != '/')
+	if (fileName.back() != '/' && prefix[0] != 0)
 		fileName+='/';
-	fileName += PDBHeuristic<state, action, environment>::env->GetName();
-	fileName += "-";
-	for (int x = 0; x < PDBHeuristic<state, action, environment>::goalState.size(); x++)
-	{
-		fileName += std::to_string(PDBHeuristic<state, action, environment>::goalState.puzzle[x]);
-		fileName += ";";
-	}
-	fileName.pop_back(); // remove colon
-	fileName += "-";
-	for (int x = 0; x < distinct.size(); x++)
-	{
-		fileName += std::to_string(distinct[x]);
-		fileName += ";";
-	}
-	fileName.pop_back(); // remove colon
-	fileName += "-MR.pdb";
+	fileName += PermutationPDB<state, action, environment>::GetFileName("");
+	fileName += "-MR1.pdb";
 	
 	return fileName;
 }
 
-template <class state, class action, class environment>
-bool MR1PermutationPDB<state, action, environment>::Load(const char *prefix)
-{
-	assert(false);
-	return false;
-}
-
-template <class state, class action, class environment>
-void MR1PermutationPDB<state, action, environment>::Save(const char *prefix)
-{
-	assert(false);
-	FILE *f = fopen(GetFileName(prefix).c_str(), "w+");
-	PDBHeuristic<state, action, environment>::PDB.Write(f);
-	fclose(f);
-}
-
-template <class state, class action, class environment>
-bool MR1PermutationPDB<state, action, environment>::Load(FILE *f)
-{
-	assert(false);
-	return false;
-}
-
-template <class state, class action, class environment>
-void MR1PermutationPDB<state, action, environment>::Save(FILE *f)
-{
-	assert(false);
-}
 
 #endif /* MR1PermutationPDB_h */

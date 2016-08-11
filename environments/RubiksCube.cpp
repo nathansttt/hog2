@@ -932,7 +932,7 @@ std::string RubikPDB::GetFileName(const char *prefix)
 	std::string fileName;
 	fileName += prefix;
 	// For unix systems, the prefix should always end in a trailing slash
-	if (fileName.back() != '/')
+	if (fileName.back() != '/' && prefix[0] != 0)
 		fileName+='/';
 
 	fileName += ePDB.GetFileName("");

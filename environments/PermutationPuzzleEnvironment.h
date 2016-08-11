@@ -98,7 +98,7 @@ namespace PermutationPuzzle {
 		void GetStateFromHash(state &s, uint64_t hash) const;
 		uint64_t GetStateHash(const state &s) const;
 		state TranformToStandardGoal(const state &a, const state &b) const;
-		virtual void FinishUnranking(state &s) const {}
+		virtual void FinishUnranking(const state &s) const {}
 //		void PrintPDBHistogram(int which) const;
 //		void GetPDBHistogram(int which, std::vector<uint64_t> &values) const;
 		

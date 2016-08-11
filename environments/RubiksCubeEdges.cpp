@@ -1363,7 +1363,7 @@ std::string RubikEdgePDB::GetFileName(const char *prefix)
 {
 	std::string fileName;
 	fileName += "RC-E-";
-	// origin state
+	// denote the origin state from which the PDB is computed
 	for (int x = 0; x < 12; x++)
 	{
 		fileName += std::to_string(goalState.GetCubeInLoc(x));
@@ -1373,7 +1373,7 @@ std::string RubikEdgePDB::GetFileName(const char *prefix)
 	}
 	fileName.pop_back();
 	fileName += "-";
-	// pattern
+	// denote the pattern used for the PDB
 	for (int x = 0; x < edges.size(); x++)
 	{
 		fileName += std::to_string(edges[x]);

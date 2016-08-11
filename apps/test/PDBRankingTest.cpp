@@ -8,6 +8,7 @@
 
 #include "PDBRankingTest.h"
 #include "MR1PermutationPDB.h"
+#include "LexPermutationPDB.h"
 #include "PancakePuzzle.h"
 #include "TreePermutationPDB.h"
 #include "PermutationPDB.h"
@@ -118,7 +119,7 @@ void JointLexTest()
 	PancakePuzzleState s2(6);
 	std::vector<int> pattern = {0, 1, 2, 3, 4, 5};
 	std::vector<int> pattern2 = {3, 1, 4};
-	PermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb(&p, s, pattern);
+	LexPermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb(&p, s, pattern);
 	TreePermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb2(&p, s, pattern2);
 	
 	for (int x = 0; x < pdb.GetPDBSize(); x++)
@@ -151,7 +152,7 @@ void FullTimingTest(ranks which, int numElts, int pdbElts)
 		for (int x = 0; x < pdbElts; x++)
 			pattern.push_back(x);
 		
-		PermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb(&p, s, pattern);
+		LexPermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb(&p, s, pattern);
 		uint64_t hash = 0;
 		uint64_t count = pdb.GetPDBSize();
 		uint64_t step = std::max(1ull, count>>24);
@@ -228,7 +229,7 @@ void RankTimingTest(ranks which, int numElts, int pdbElts)
 		for (int x = 0; x < pdbElts; x++)
 			pattern.push_back(x);
 		
-		PermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb(&p, s, pattern);
+		LexPermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb(&p, s, pattern);
 		uint64_t hash = 0;
 		uint64_t count = pdb.GetPDBSize();
 		uint64_t step = std::max(1ull, count>>24);
@@ -304,7 +305,7 @@ void UnrankTimingTest(ranks which, int numElts, int pdbElts)
 		for (int x = 0; x < pdbElts; x++)
 			pattern.push_back(x);
 		
-		PermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb(&p, s, pattern);
+		LexPermutationPDB<PancakePuzzleState, PancakePuzzleAction, PancakePuzzle> pdb(&p, s, pattern);
 		uint64_t hash = 0;
 		uint64_t count = pdb.GetPDBSize();
 		uint64_t step = std::max(1ull, count>>24);
