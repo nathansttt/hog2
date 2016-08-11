@@ -8,6 +8,7 @@
 #include <cstring>
 #include "Common.h"
 #include "PermutationPDB.h"
+#include "LexPermutationPDB.h"
 #include "MR1PermutationPDB.h"
 #include "Driver.h"
 #include "UnitSimulation.h"
@@ -28,6 +29,8 @@ void MinDeltaPlusMinTOHTest();
 void TSVRC();
 void TSBiVRC();
 
+char prefix[1024] = "";
+
 const int N = 18;
 const int k = 4;
 const int K = 10;
@@ -36,6 +39,8 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b);
 
 int main(int argc, char* argv[])
 {
+	// Turn off text buffering
+	setvbuf(stdout, NULL, _IONBF, 0);
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 640, 640);
 }
@@ -67,7 +72,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 
-	//InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
+	InstallCommandLineHandler(MyCLHandler, "-pdb", "-pdb <dir>", "Set the directory to use for PDBs");
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test comparing A*, IDA*, MM");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -163,7 +168,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
-	TSBiVRC();
+	if ((strcmp(argument[0], "-pdb") == 0) && maxNumArgs > 1)
+	{
+		strncpy(prefix, argument[1], 1024);
+		return 2;
+	}
+	else if (strcmp(argument[0], "-test") == 0)
+	{
+		TSBiVRC();
+		exit(0);
+	}
 	return 0;
 }
 
@@ -247,23 +261,23 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 	MNPuzzleState<4, 4> t;
 	mnp.StoreGoal(t);
 
-	PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb1(&mnp, t, p1);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb1(&mnp, t, p1);
 	pdb1.BuildPDB(t, std::thread::hardware_concurrency());
 	pdb1.PrintHistogram();
 
-	PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, p2);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, p2);
 	pdb2.BuildPDB(t, std::thread::hardware_concurrency());
 	pdb2.PrintHistogram();
 
-	PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb3(&mnp, t, p3);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb3(&mnp, t, p3);
 	pdb3.BuildPDB(t, std::thread::hardware_concurrency());
 	pdb3.PrintHistogram();
 
-	PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb4(&mnp, t, p4);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb4(&mnp, t, p4);
 	pdb4.BuildPDB(t, std::thread::hardware_concurrency());
 	pdb4.PrintHistogram();
 
-	PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb5(&mnp, t, p5);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb5(&mnp, t, p5);
 	pdb5.BuildPDB(t, std::thread::hardware_concurrency());
 	pdb5.PrintHistogram();
 
@@ -330,8 +344,8 @@ void MDDeltaPlusMinTest()
 
 	// DIV compress + LEX Ranking
 	{
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		
@@ -354,8 +368,8 @@ void MDDeltaPlusMinTest()
 
 	// MOD compression + LEX
 	{
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		
@@ -466,9 +480,9 @@ void MinDeltaPlusMinTest()
 	
 	// DIV compress + LEX Ranking
 	{
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> smallpdb(&mnp, t, pattern2);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> smallpdb(&mnp, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -493,9 +507,9 @@ void MinDeltaPlusMinTest()
 	
 	// MOD compression + LEX
 	{
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
-		PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> smallpdb(&mnp, t, pattern2);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> smallpdb(&mnp, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -600,9 +614,9 @@ void MinDeltaPlusMinTopSpinTest()
 	
 	// DIV compress + LEX Ranking
 	{
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -627,9 +641,9 @@ void MinDeltaPlusMinTopSpinTest()
 	
 	// MOD compression + LEX
 	{
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -693,11 +707,12 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			timer.StartTimer();
 			mm.GetPath(&ts, s, g, f, b, thePath);
 			timer.EndTimer();
-			printf("%llu nodes expanded\n", mm.GetNodesExpanded());
+			printf("%llu nodes expanded; %llu re-expanded\n", mm.GetNodesExpanded(), mm.GetUniqueNodesExpanded());
 			printf("Solution path length %1.0f\n", ts.GetPathLength(thePath));
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 		}
 		
+		if (0)
 		{
 			printf("-=-=-A*-=-=-\n");
 			astar.SetHeuristic(f);
@@ -739,15 +754,114 @@ void TSBiVRC()
 	std::vector<std::vector<double>> averages;
 	
 	// baseline
+	if (0)
 	{
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
-		pdb1.BuildPDB(t, std::thread::hardware_concurrency());
-		pdb2.BuildPDB(t, std::thread::hardware_concurrency());
-		pdb3.BuildPDB(t, std::thread::hardware_concurrency());
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
+		if (!pdb1.Load(prefix))
+		{
+			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb1.Save(prefix);
+		}
+		if (!pdb2.Load(prefix))
+		{
+			pdb2.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb2.Save(prefix);
+		}
+		if (!pdb3.Load(prefix))
+		{
+			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb3.Save(prefix);
+		}
+		
 		Heuristic<TopSpinState<N>> h;
 
+		h.lookups.resize(0);
+		h.lookups.push_back({kMaxNode, 1, 3});
+		h.lookups.push_back({kLeafNode, 0, 0});
+		h.lookups.push_back({kLeafNode, 1, 1});
+		h.lookups.push_back({kLeafNode, 2, 2});
+		h.heuristics.resize(0);
+		h.heuristics.push_back(&pdb1);
+		h.heuristics.push_back(&pdb2);
+		h.heuristics.push_back(&pdb3);
+		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
+		//ZeroHeuristic<TopSpinState<N>> z;
+		TestTSBiVRC(&h, &p);
+	}
+
+	// first VRC test
+	if (1)
+	{
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
+		if (!pdb1.Load(prefix))
+		{
+			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb1.Save(prefix);
+		}
+		if (!pdb2.Load(prefix))
+		{
+			pdb2.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb2.Save(prefix);
+		}
+		if (!pdb3.Load(prefix))
+		{
+			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb3.Save(prefix);
+		}
+		pdb1.ZeroLowValues(7);
+		pdb1.ValueRangeCompress(2, true);
+		pdb2.ZeroLowValues(7);
+		pdb2.ValueRangeCompress(2, true);
+		pdb3.ZeroLowValues(7);
+		pdb3.ValueRangeCompress(2, true);
+		
+		Heuristic<TopSpinState<N>> h;
+		
+		h.lookups.resize(0);
+		h.lookups.push_back({kMaxNode, 1, 3});
+		h.lookups.push_back({kLeafNode, 0, 0});
+		h.lookups.push_back({kLeafNode, 1, 1});
+		h.lookups.push_back({kLeafNode, 2, 2});
+		h.heuristics.resize(0);
+		h.heuristics.push_back(&pdb1);
+		h.heuristics.push_back(&pdb2);
+		h.heuristics.push_back(&pdb3);
+		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
+		//ZeroHeuristic<TopSpinState<N>> z;
+		TestTSBiVRC(&h, &p);
+	}
+
+	// 2x Min Compression Test
+	if (1)
+	{
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
+		if (!pdb1.Load(prefix))
+		{
+			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb1.Save(prefix);
+		}
+		if (!pdb2.Load(prefix))
+		{
+			pdb2.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb2.Save(prefix);
+		}
+		if (!pdb3.Load(prefix))
+		{
+			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb3.Save(prefix);
+		}
+		pdb1.DivCompress(2, true);
+		pdb2.DivCompress(2, true);
+		pdb3.DivCompress(2, true);
+		
+		Heuristic<TopSpinState<N>> h;
+		
 		h.lookups.resize(0);
 		h.lookups.push_back({kMaxNode, 1, 3});
 		h.lookups.push_back({kLeafNode, 0, 0});
@@ -764,8 +878,8 @@ void TSBiVRC()
 	
 	if (0)
 	{
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb(&ts, t, pattern1);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern1);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		
@@ -809,9 +923,9 @@ void TSVRC()
 
 	// MOD compression + LEX
 	{
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
-		PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());

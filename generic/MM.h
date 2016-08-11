@@ -45,7 +45,7 @@ public:
 	
 	virtual const char *GetName() { return "MM"; }
 	
-	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
+	void ResetNodeCount() { nodesExpanded = nodesTouched = uniqueNodesExpanded = 0; }
 	
 //	bool GetClosedListGCost(const state &val, double &gCost) const;
 //	unsigned int GetNumOpenItems() { return openClosedList.OpenSize(); }
@@ -60,6 +60,7 @@ public:
 //	void SetForwardHeuristic(Heuristic<state> *h) { forwardHeuristic = h; }
 //	void SetBackwardHeuristic(Heuristic<state> *h) { backwardHeuristic = h; }
 	
+	uint64_t GetUniqueNodesExpanded() const { return uniqueNodesExpanded; }
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
 	
@@ -103,7 +104,7 @@ private:
 	priorityQueue forwardQueue, backwardQueue;
 	state goal, start;
 	std::unordered_map<double, int> g_f, g_b, f_f, f_b;
-	uint64_t nodesTouched, nodesExpanded;
+	uint64_t nodesTouched, nodesExpanded, uniqueNodesExpanded;
 	state middleNode;
 	double currentCost;
 	std::vector<state> neighbors;
@@ -111,6 +112,9 @@ private:
 	Timer t;
 	Heuristic<state> *forwardHeuristic;
 	Heuristic<state> *backwardHeuristic;
+
+	double oldp1;
+	double oldp2;
 };
 
 template <class state, class action, class environment, class priorityQueue>
@@ -141,6 +145,7 @@ bool MM<state, action, environment, priorityQueue>::InitializeSearch(environment
 	goal = to;
 	if (start == goal)
 		return false;
+	oldp1 = oldp2 = 0;
 
 	forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, forwardHeuristic->HCost(start, goal));
 	backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, forwardHeuristic->HCost(goal, start));
@@ -168,16 +173,14 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 	const AStarOpenClosedData<state> &nextForward = forwardQueue.Lookat(forward);
 	const AStarOpenClosedData<state> &nextBackward = backwardQueue.Lookat(backward);
 
-	static double oldp1 = 0;
-	static double oldp2 = 0;
 	double p1 = std::max(nextForward.g+nextForward.h, nextForward.g*2);
 	double p2 = std::max(nextBackward.g+nextBackward.h, nextBackward.g*2);
-	if (oldp1 != p1)
+	if (p1 > oldp1)
 	{
 		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
 		oldp1 = p1;
 	}
-	if (oldp2 != p2)
+	if (p2 > oldp2)
 	{
 		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
 		oldp2 = p2;
@@ -299,7 +302,9 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 {
 	uint64_t nextID = current.Close();
 	nodesExpanded++;
-
+	if (current.Lookup(nextID).reopened == false)
+		uniqueNodesExpanded++;
+	
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
 	for (auto &succ : neighbors)
 	{
@@ -311,13 +316,31 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 		auto &parentData = current.Lookup(nextID);
 		ming[parentData.g]--;
 		minf[parentData.g+parentData.h]--;
+		double edgeCost = env->GCost(parentData.data, succ);
 		switch (loc)
 		{
 			case kClosedList: // ignore
+				if (fless(parentData.g+edgeCost, childData.g))
+				{
+					childData.h = std::max(childData.h, parentData.h-edgeCost);
+					childData.parentID = nextID;
+					childData.g = parentData.g+edgeCost;
+					ming[childData.g]++;
+					minf[childData.g+childData.h]++;
+					current.Reopen(childID);
+				}
 				break;
 			case kOpenList: // update cost if needed
 			{
-				double edgeCost = env->GCost(parentData.data, succ);
+				// 1-step BPMX
+				parentData.h = std::max(childData.h-edgeCost, parentData.h);
+
+				if (fgreater(parentData.h-edgeCost, childData.h))
+				{
+					minf[childData.g+childData.h]--;
+					childData.h = parentData.h-edgeCost;
+					minf[childData.g+childData.h]++;
+				}
 				if (fless(parentData.g+edgeCost, childData.g))
 				{
 					ming[childData.g]--;
@@ -350,11 +373,13 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 				break;
 			case kNotFound:
 			{
-				double edgeCost = env->GCost(parentData.data, succ);
 				double g = parentData.g+edgeCost;
-				double h = heuristic->HCost(succ, target);
+				double h = std::max(heuristic->HCost(succ, target), parentData.h-edgeCost);
 				ming[g]++;
 				minf[g+h]++;
+				// 1-step BPMX
+				parentData.h = std::max(h-edgeCost, parentData.h);
+
 				current.AddOpenNode(succ, // This may invalidate our references
 									hash,
 									g,
