@@ -27,7 +27,7 @@ void MinDeltaPlusMinTest();
 void MinDeltaPlusMinTopSpinTest();
 void MinDeltaPlusMinTOHTest();
 void TSVRC();
-void TSBiVRC();
+void TSBiVRC(int bits, int compressionFactor);
 
 char prefix[1024] = "";
 
@@ -73,7 +73,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 
 	InstallCommandLineHandler(MyCLHandler, "-pdb", "-pdb <dir>", "Set the directory to use for PDBs");
-	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test comparing A*, IDA*, MM");
+	InstallCommandLineHandler(MyCLHandler, "-test", "-test <bits> <factor>", "Basic test comparing A*, IDA*, MM");
 	
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler);
@@ -173,9 +173,9 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		strncpy(prefix, argument[1], 1024);
 		return 2;
 	}
-	else if (strcmp(argument[0], "-test") == 0)
+	else if (strcmp(argument[0], "-test") == 0 && maxNumArgs > 3)
 	{
-		TSBiVRC();
+		TSBiVRC(atoi(argument[1]), atoi(argument[2]));
 		exit(0);
 	}
 	return 0;
@@ -237,7 +237,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			case 'b':
 		{
-			TSBiVRC();
+			TSBiVRC(4, 1);
 //			ZeroHeuristic<TopSpinState<N>> z;
 //			TestTSBiVRC(&z, &z);
 			break;
@@ -702,6 +702,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 		}
 
+		
 		{
 			printf("-=-=-MM-=-=-\n");
 			timer.StartTimer();
@@ -724,6 +725,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 		}
 		
+		if (0)
 		{
 			printf("-=-=-IDA*-=-=-\n");
 			ida.SetHeuristic(f);
@@ -741,7 +743,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 	exit(0);
 }
 
-void TSBiVRC()
+void TSBiVRC(int bits, int compressionFactor)
 {
 	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
 	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
@@ -812,53 +814,21 @@ void TSBiVRC()
 			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
 			pdb3.Save(prefix);
 		}
-		pdb1.ZeroLowValues(7);
-		pdb1.ValueRangeCompress(2, true);
-		pdb2.ZeroLowValues(7);
-		pdb2.ValueRangeCompress(2, true);
-		pdb3.ZeroLowValues(7);
-		pdb3.ValueRangeCompress(2, true);
-		
-		Heuristic<TopSpinState<N>> h;
-		
-		h.lookups.resize(0);
-		h.lookups.push_back({kMaxNode, 1, 3});
-		h.lookups.push_back({kLeafNode, 0, 0});
-		h.lookups.push_back({kLeafNode, 1, 1});
-		h.lookups.push_back({kLeafNode, 2, 2});
-		h.heuristics.resize(0);
-		h.heuristics.push_back(&pdb1);
-		h.heuristics.push_back(&pdb2);
-		h.heuristics.push_back(&pdb3);
-		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
-		//ZeroHeuristic<TopSpinState<N>> z;
-		TestTSBiVRC(&h, &p);
-	}
-
-	// 2x Min Compression Test
-	if (1)
-	{
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
-		if (!pdb1.Load(prefix))
+		if (bits < 4)
 		{
-			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb1.Save(prefix);
+			pdb1.ZeroLowValues(7);
+			pdb1.ValueRangeCompress(bits, true);
+			pdb2.ZeroLowValues(7);
+			pdb2.ValueRangeCompress(bits, true);
+			pdb3.ZeroLowValues(7);
+			pdb3.ValueRangeCompress(bits, true);
 		}
-		if (!pdb2.Load(prefix))
+		if (compressionFactor > 1)
 		{
-			pdb2.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb2.Save(prefix);
+			pdb1.DivCompress(compressionFactor, true);
+			pdb2.DivCompress(compressionFactor, true);
+			pdb3.DivCompress(compressionFactor, true);
 		}
-		if (!pdb3.Load(prefix))
-		{
-			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb3.Save(prefix);
-		}
-		pdb1.DivCompress(2, true);
-		pdb2.DivCompress(2, true);
-		pdb3.DivCompress(2, true);
 		
 		Heuristic<TopSpinState<N>> h;
 		
