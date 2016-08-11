@@ -33,6 +33,7 @@
 #include "MNPuzzle.h"
 #include "IncrementalIDA.h"
 #include "PermutationPDB.h"
+#include "LexPermutationPDB.h"
 
 IncrementalIDA<graphState, graphMove> ida(0);
 
@@ -168,9 +169,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		goal.Reset();
 		mnp.StoreGoal(goal);
-		pdb1 = new PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p1);
-		pdb2 = new PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p2);
-		pdb3 = new PermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p3);
+		pdb1 = new LexPermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p1);
+		pdb2 = new LexPermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p2);
+		pdb3 = new LexPermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>>(&mnp, goal, p3);
 		
 		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
 		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());

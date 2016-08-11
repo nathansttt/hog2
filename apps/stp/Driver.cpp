@@ -28,6 +28,7 @@
 #include <cstring>
 #include "Common.h"
 #include "PermutationPDB.h"
+#include "LexPermutationPDB.h"
 #include "MR1PermutationPDB.h"
 #include "Driver.h"
 #include "UnitSimulation.h"
@@ -223,7 +224,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			{
 				t.Reset();
-				PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(ts, t, pattern);
+				LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(ts, t, pattern);
 				pdb.BuildPDB(t, std::thread::hardware_concurrency());
 				t.Reset();
 				ts->StoreGoal(t);
