@@ -21,6 +21,7 @@
 #include "Timer.h"
 #include "TopSpin.h"
 #include "TOH.h"
+#include "ParallelIDAStar.h"
 
 void MDDeltaPlusMinTest();
 void MinDeltaPlusMinTest();
@@ -33,7 +34,9 @@ char prefix[1024] = "";
 
 const int N = 18;
 const int k = 4;
-const int K = 10;
+//const int K = 10;
+const int K = 2;
+const int cutoff = 7;
 
 void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b);
 
@@ -173,7 +176,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		strncpy(prefix, argument[1], 1024);
 		return 2;
 	}
-	else if (strcmp(argument[0], "-test") == 0 && maxNumArgs > 3)
+	else if (strcmp(argument[0], "-test") == 0 && maxNumArgs >= 3)
 	{
 		TSBiVRC(atoi(argument[1]), atoi(argument[2]));
 		exit(0);
@@ -672,6 +675,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 {
 	TemplateAStar<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> astar;
 	IDAStar<TopSpinState<N>, TopSpinAction> ida;
+	ParallelIDAStar<TopSpin<N, K>, TopSpinState<N>, TopSpinAction> pida;
 	MM<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> mm;
 	TopSpin<N, K> ts;
 	TopSpinState<N> s;
@@ -703,6 +707,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 		}
 
 		
+		if (1)
 		{
 			printf("-=-=-MM-=-=-\n");
 			timer.StartTimer();
@@ -725,7 +730,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 		}
 		
-		if (0)
+		if (1)
 		{
 			printf("-=-=-IDA*-=-=-\n");
 			ida.SetHeuristic(f);
@@ -738,6 +743,22 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 			ts.SetPruneSuccessors(false);
 		}
+
+		if (0)
+		{
+			
+			printf("-=-=-PIDA*-=-=-\n");
+			pida.SetHeuristic(f);
+			ts.SetPruneSuccessors(true);
+			timer.StartTimer();
+			pida.GetPath(&ts, s, g, actionPath);
+			timer.EndTimer();
+			printf("%llu nodes expanded; %llu generated\n", ida.GetNodesExpanded(), ida.GetNodesTouched());
+			printf("Solution path length %lu\n", actionPath.size());
+			printf("%1.2f elapsed\n", timer.GetElapsedTime());
+			ts.SetPruneSuccessors(false);
+		}
+
 	}
 	
 	exit(0);
@@ -745,10 +766,9 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 
 void TSBiVRC(int bits, int compressionFactor)
 {
-	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
-	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
-	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0, 1};//, 5, 6, 7};
-	int limit = 8;
+	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6};//, 5, 6, 7};
+	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12};//, 5, 6, 7};
+	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0};//, 5, 6, 7};
 	
 	TopSpin<N, K> ts;
 	TopSpinState<N> t, d, goal;
@@ -816,11 +836,11 @@ void TSBiVRC(int bits, int compressionFactor)
 		}
 		if (bits < 4)
 		{
-			pdb1.ZeroLowValues(7);
+			pdb1.ZeroLowValues(cutoff);
 			pdb1.ValueRangeCompress(bits, true);
-			pdb2.ZeroLowValues(7);
+			pdb2.ZeroLowValues(cutoff);
 			pdb2.ValueRangeCompress(bits, true);
-			pdb3.ZeroLowValues(7);
+			pdb3.ZeroLowValues(cutoff);
 			pdb3.ValueRangeCompress(bits, true);
 		}
 		if (compressionFactor > 1)
@@ -863,11 +883,11 @@ void TSBiVRC(int bits, int compressionFactor)
 				printf("[lex][none][min] Compressing by a factor of %d\n", compression);
 				pdb2 = pdb;
 				pdb2.DivCompress(compression, false);
-				pdb2.ZeroLowValues(limit);
+				pdb2.ZeroLowValues(cutoff);
 				pdb2.PrintHistogram();
 
 				printf("[lex][Delta][min] VRC compression to %d bits [factor of %d overall]\n", bits, (4/bits)*compression);
-				pdb2.ZeroLowValues(limit);
+				pdb2.ZeroLowValues(cutoff);
 				pdb2.ValueRangeCompress(bits, false);
 				averages[table[compression]][table[bits]] = pdb2.PrintHistogram();
 			}
