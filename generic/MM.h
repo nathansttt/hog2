@@ -304,7 +304,14 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 	nodesExpanded++;
 	if (current.Lookup(nextID).reopened == false)
 		uniqueNodesExpanded++;
-	
+
+	// decrease count from parent
+	{
+		auto &parentData = current.Lookup(nextID);
+		ming[parentData.g]--;
+		minf[parentData.g+parentData.h]--;
+	}
+
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
 	for (auto &succ : neighbors)
 	{
@@ -314,8 +321,7 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 		auto loc = current.Lookup(hash, childID);
 		auto &childData = current.Lookup(childID);
 		auto &parentData = current.Lookup(nextID);
-		ming[parentData.g]--;
-		minf[parentData.g+parentData.h]--;
+
 		double edgeCost = env->GCost(parentData.data, succ);
 		switch (loc)
 		{
