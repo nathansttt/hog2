@@ -31,6 +31,16 @@ struct MMCompare {
 	}
 };
 
+namespace std {
+	template <> struct hash<std::pair<double, double>>
+	{
+		size_t operator()(const std::pair<double, double> & x) const
+		{
+			return std::hash<double>()(x.first)^(std::hash<double>()(x.second)<<16);
+		}
+	};
+}
+
 
 template <class state, class action, class environment, class priorityQueue = AStarOpenClosed<state, MMCompare<state>> >
 class MM {
@@ -99,11 +109,13 @@ private:
 				priorityQueue &opposite,
 				Heuristic<state> *heuristic,
 				const state &target,
-				std::unordered_map<double, int> &ming,
-				std::unordered_map<double, int> &minf);
+				std::unordered_map<std::pair<double, double>, int> &count);
+//				std::unordered_map<double, int> &ming,
+//				std::unordered_map<double, int> &minf);
 	priorityQueue forwardQueue, backwardQueue;
 	state goal, start;
-	std::unordered_map<double, int> g_f, g_b, f_f, f_b;
+//	std::unordered_map<double, int> g_f, g_b, f_f, f_b;
+	std::unordered_map<std::pair<double, double>, int> f, b;
 	uint64_t nodesTouched, nodesExpanded, uniqueNodesExpanded;
 	state middleNode;
 	double currentCost;
@@ -162,10 +174,12 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 	}
 	
 	if (forwardQueue.OpenSize() == 0)
-		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
-
+		//Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
+		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
+	
 	if (backwardQueue.OpenSize() == 0)
-		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
+		//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
+		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
 
 	uint64_t forward = forwardQueue.Peek();
 	uint64_t backward = backwardQueue.Peek();
@@ -188,23 +202,28 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 	
 	if (fless(p1, p2))
 	{
-		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
+		//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
+		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
 	}
 	else if (fless(p2, p1))
 	{
-		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
+		//Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
+		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
 	}
 	else { // equal priority
 		if (fless(nextForward.g, nextBackward.g))
 		{
-			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
+			//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
+			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
 		}
 		else if (fless(nextBackward.g, nextForward.g))
 		{
-			Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
+			//Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
+			Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
 		}
 		else {
-			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
+			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
+			//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
 		}
 	}
 	// check if we can terminate
@@ -217,18 +236,44 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 		double minBackwardF =  DBL_MAX;
 		double forwardP;
 		double backwardP;
-		for (auto i = g_f.begin(); i != g_f.end(); i++)
-			if (i->second > 0 && fless(i->first, minForwardG))
-				minForwardG = i->first;
-		for (auto i = g_b.begin(); i != g_b.end(); i++)
-			if (i->second > 0 && fless(i->first, minBackwardG))
-				minBackwardG = i->first;
-		for (auto i = f_f.begin(); i != f_f.end(); i++)
-			if (i->second > 0 && fless(i->first, minForwardF))
-				minForwardF = i->first;
-		for (auto i = f_b.begin(); i != f_b.end(); i++)
-			if (i->second > 0 && fless(i->first, minBackwardF))
-				minBackwardF = i->first;
+		
+		for (auto i = f.begin(); i != f.end(); i++)
+		{
+			if (i->second > 0) // some elements
+			{
+				if (i->first.first + i->first.second < currentCost) // termination only stopped by lower f-cost
+				{
+					minForwardG = std::min(minForwardG, i->first.first);
+					minForwardF = std::min(minForwardF, i->first.first+i->first.second);
+				}
+			}
+		}
+		for (auto i = b.begin(); i != b.end(); i++)
+		{
+			if (i->second > 0) // some elements
+			{
+				if (i->first.first + i->first.second < currentCost) // termination only stopped by lower f-cost
+				{
+					minBackwardG = std::min(minBackwardG, i->first.first);
+					minBackwardF = std::min(minBackwardF, i->first.first+i->first.second);
+				}
+			}
+		}
+		
+//		for (auto i = g_f.begin(); i != g_f.end(); i++)
+//			if (i->second > 0 && fless(i->first, minForwardG))
+//				minForwardG = i->first;
+//		for (auto i = g_b.begin(); i != g_b.end(); i++)
+//			if (i->second > 0 && fless(i->first, minBackwardG))
+//				minBackwardG = i->first;
+//		for (auto i = f_f.begin(); i != f_f.end(); i++)
+//			if (i->second > 0 && fless(i->first, minForwardF))
+//				minForwardF = i->first;
+//		for (auto i = f_b.begin(); i != f_b.end(); i++)
+//			if (i->second > 0 && fless(i->first, minBackwardF))
+//				minBackwardF = i->first;
+		
+		
 //		for (int x = 0; x < backwardQueue.OpenSize(); x++)
 //		{
 //			auto item = backwardQueue.Lookat(backwardQueue.GetOpenItem(x));
@@ -297,8 +342,9 @@ template <class state, class action, class environment, class priorityQueue>
 void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &current,
 														   priorityQueue &opposite,
 														   Heuristic<state> *heuristic, const state &target,
-														   std::unordered_map<double, int> &ming,
-														   std::unordered_map<double, int> &minf)
+														   std::unordered_map<std::pair<double, double>, int> &count)
+//														   std::unordered_map<double, int> &ming,
+//														   std::unordered_map<double, int> &minf)
 {
 	uint64_t nextID = current.Close();
 	nodesExpanded++;
@@ -308,8 +354,9 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 	// decrease count from parent
 	{
 		auto &parentData = current.Lookup(nextID);
-		ming[parentData.g]--;
-		minf[parentData.g+parentData.h]--;
+//		ming[parentData.g]--;
+//		minf[parentData.g+parentData.h]--;
+		count[{parentData.g,parentData.h}]--;
 	}
 
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
@@ -331,8 +378,9 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 					childData.h = std::max(childData.h, parentData.h-edgeCost);
 					childData.parentID = nextID;
 					childData.g = parentData.g+edgeCost;
-					ming[childData.g]++;
-					minf[childData.g+childData.h]++;
+//					ming[childData.g]++;
+//					minf[childData.g+childData.h]++;
+					count[{childData.g,childData.h}]++;
 					current.Reopen(childID);
 				}
 				break;
@@ -343,19 +391,23 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 
 				if (fgreater(parentData.h-edgeCost, childData.h))
 				{
-					minf[childData.g+childData.h]--;
+					count[{childData.g,childData.h}]--;
+					//minf[childData.g+childData.h]--;
 					childData.h = parentData.h-edgeCost;
-					minf[childData.g+childData.h]++;
+					//minf[childData.g+childData.h]++;
+					count[{childData.g,childData.h}]++;
 				}
 				if (fless(parentData.g+edgeCost, childData.g))
 				{
-					ming[childData.g]--;
-					minf[childData.g+childData.h]--;
+//					ming[childData.g]--;
+//					minf[childData.g+childData.h]--;
+					count[{childData.g,childData.h}]--;
 					childData.parentID = nextID;
 					childData.g = parentData.g+edgeCost;
 					current.KeyChanged(childID);
-					ming[childData.g]++;
-					minf[childData.g+childData.h]++;
+//					ming[childData.g]++;
+//					minf[childData.g+childData.h]++;
+					count[{childData.g,childData.h}]++;
 					
 					
 					// TODO: check if we improved the current solution?
@@ -381,8 +433,13 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 			{
 				double g = parentData.g+edgeCost;
 				double h = std::max(heuristic->HCost(succ, target), parentData.h-edgeCost);
-				ming[g]++;
-				minf[g+h]++;
+
+				// Ignore nodes that don't have lower f-cost than the incumbant solution
+				if (!fless(g+h, currentCost))
+					break;
+//				ming[g]++;
+//				minf[g+h]++;
+				count[{g,h}]++;
 				// 1-step BPMX
 				parentData.h = std::max(h-edgeCost, parentData.h);
 

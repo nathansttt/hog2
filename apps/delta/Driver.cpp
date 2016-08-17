@@ -34,8 +34,8 @@ char prefix[1024] = "";
 
 const int N = 18;
 const int k = 4;
-//const int K = 10;
-const int K = 2;
+const int K = 10;
+//const int K = 2;
 const int cutoff = 7;
 
 void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b);
@@ -766,9 +766,9 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 
 void TSBiVRC(int bits, int compressionFactor)
 {
-	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6};//, 5, 6, 7};
-	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12};//, 5, 6, 7};
-	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0};//, 5, 6, 7};
+	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
+	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
+	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0, 1};//, 5, 6, 7};
 	
 	TopSpin<N, K> ts;
 	TopSpinState<N> t, d, goal;
