@@ -160,7 +160,7 @@ bool MM<state, action, environment, priorityQueue>::InitializeSearch(environment
 	oldp1 = oldp2 = 0;
 
 	forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, forwardHeuristic->HCost(start, goal));
-	backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, forwardHeuristic->HCost(goal, start));
+	backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start));
 	
 	return true;
 }
