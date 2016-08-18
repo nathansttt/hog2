@@ -834,6 +834,12 @@ void TSBiVRC(int bits, int compressionFactor)
 			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
 			pdb3.Save(prefix);
 		}
+		if (compressionFactor > 1)
+		{
+			pdb1.DivCompress(compressionFactor, true);
+			pdb2.DivCompress(compressionFactor, true);
+			pdb3.DivCompress(compressionFactor, true);
+		}
 		if (bits < 4)
 		{
 			pdb1.ZeroLowValues(cutoff);
@@ -842,12 +848,6 @@ void TSBiVRC(int bits, int compressionFactor)
 			pdb2.ValueRangeCompress(bits, true);
 			pdb3.ZeroLowValues(cutoff);
 			pdb3.ValueRangeCompress(bits, true);
-		}
-		if (compressionFactor > 1)
-		{
-			pdb1.DivCompress(compressionFactor, true);
-			pdb2.DivCompress(compressionFactor, true);
-			pdb3.DivCompress(compressionFactor, true);
 		}
 		
 		Heuristic<TopSpinState<N>> h;
