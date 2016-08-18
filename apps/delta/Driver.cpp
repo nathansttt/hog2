@@ -730,7 +730,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 		}
 		
-		if (1)
+		if (0)
 		{
 			printf("-=-=-IDA*-=-=-\n");
 			ida.SetHeuristic(f);
