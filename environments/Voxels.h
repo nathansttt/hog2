@@ -10,19 +10,17 @@
 #define Voxels_h
 
 #include "SearchEnvironment.h"
+#include <vector>
 
-struct voxelWorld {
-	uint32_t header;
-	float voxelSize;
-	uint64_t numVoxelsGrids;
-	float minbounds[4];
-	float maxbounds[4];
-	uint64_t *morton;
-	uint64_t *grid;
+
+struct OctreeIndex {
+	int layer : 4;
+	int index : 22;
+	int voxel : 6;
 };
 
-
 struct voxelState {
+	OctreeIndex i;
 	uint16_t x, y, z;
 };
 
@@ -63,6 +61,7 @@ class Voxels : public SearchEnvironment<voxelState, voxelAction> {
 public:
 	Voxels(const char *filename);
 	~Voxels();
+	void Export(const char *filename);
 	void GetSuccessors(const voxelState &nodeID, std::vector<voxelState> &neighbors) const;
 	void GetActions(const voxelState &nodeID, std::vector<voxelAction> &actions) const;
 	void ApplyAction(voxelState &s, voxelAction a) const;
@@ -87,6 +86,31 @@ public:
 	void GLLabelState(const voxelState&, const char *) const;
 	void GLDrawLine(const voxelState &x, const voxelState &y) const;
 private:
+	
+	struct voxelWorld {
+		uint32_t header;
+		float voxelSize;
+		uint64_t numVoxelsGrids;
+		float minbounds[4];
+		float maxbounds[4];
+		uint64_t *morton;
+		uint64_t *grid;
+	};
+	
+	std::vector<uint64> mLayer0VoxelGrids;
+	
+	struct OctreeNode {
+		float coordinates[3]; //x,y,z
+		OctreeIndex parent;
+		OctreeIndex firstChild;
+		OctreeIndex neighbors[6];
+	};
+	
+	typedef std::vector<OctreeNode> OctreeLayer;
+	std::vector<OctreeLayer> mOctreeLayers;
+
+	void AddVoxelCubeToOctree(uint64_t values, point3d p);
+	
 	voxelWorld w;
 	point3d GetVoxelCoordinate(uint64_t morton, float voxelSize, const float minbounds[4]) const;
 

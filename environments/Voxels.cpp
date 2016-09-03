@@ -9,20 +9,20 @@
 #include <stdio.h>
 #include "Voxels.h"
 
-// id at each layer of octree
-struct octTreeLink {
-	int layer : 3;
-	int index : 23;
-	int subid : 6; // only valid at layer 0
-};
-
-struct octTreeNode {
-	octTreeLink neighbors[6];
-	point3d origin;
-	float level;
-	octTreeLink parent;
-	octTreeLink firstChild; // (index) of first of 8 children
-};
+//// id at each layer of octree
+//struct octTreeLink {
+//	int layer : 3;
+//	int index : 23;
+//	int subid : 6; // only valid at layer 0
+//};
+//
+//struct octTreeNode {
+//	octTreeLink neighbors[6];
+//	point3d origin;
+//	float level;
+//	octTreeLink parent;
+//	octTreeLink firstChild; // (index) of first of 8 children
+//};
 
 // get successors:
 //  * returns neighbors at the current level or a higher level if none at current level
@@ -36,7 +36,7 @@ bool operator==(const voxelState &v1, const voxelState &v2)
 
 Voxels::Voxels(const char *filename)
 {
-	printf("octTreeLink size: %lu\n",  sizeof(octTreeLink));
+	printf("OctreeIndex size: %lu\n",  sizeof(OctreeIndex));
 	FILE *f = fopen(filename, "r");
 	//FILE *f = fopen("/Users/nathanst/Desktop/3dmaps/Simple_test3dnav.3dnav", "r");
 	if (f == 0)
@@ -44,6 +44,7 @@ Voxels::Voxels(const char *filename)
 		printf("Error opening file\n");
 		exit(0);
 	}
+	point3d minPoint;
 	//voxelWorld w;
 	fread(&w.header, sizeof(w.header), 1, f);
 	printf("Header is 0x%lX\n", w.header);
@@ -54,10 +55,16 @@ Voxels::Voxels(const char *filename)
 	fread(w.minbounds, sizeof(w.minbounds[0]), 4, f);
 	fread(w.maxbounds, sizeof(w.maxbounds[0]), 4, f);
 	printf("Min bounds: ");
+	minPoint.x = w.minbounds[0];
+	minPoint.y = w.minbounds[1];
+	minPoint.z = w.minbounds[2];
+	int maxWidth = 0;
 	for (int x = 0; x < 4; x++)
 	{
 		printf("%f ", w.minbounds[x]);
+		maxWidth = std::max(maxWidth, int(w.maxbounds[x]-w.minbounds[x]));
 	}
+	maxWidth /= w.voxelSize;
 	printf("\n");
 	printf("Max bounds: ");
 	for (int x = 0; x < 4; x++)
@@ -65,17 +72,20 @@ Voxels::Voxels(const char *filename)
 		printf("%f ", w.maxbounds[x]);
 	}
 	printf("\n");
+	printf("Max dimension width = %d\n", maxWidth);
 	w.morton = new uint64_t[w.numVoxelsGrids];
 	w.grid = new uint64_t[w.numVoxelsGrids];
 	for (int x = 0; x < w.numVoxelsGrids; x++)
 	{
-		
 		assert(fread(&w.morton[x], sizeof(w.morton[x]), 1, f) == 1);
 		assert(fread(&w.grid[x], sizeof(w.grid[x]), 1, f) == 1);
 		printf("0x%llX\n", w.morton[x]);
 		point3d p = GetVoxelCoordinate(w.morton[x], w.voxelSize, w.minbounds);
 		printf("(%f, %f, %f)\n", p.x, p.y, p.z);
 		printf("0x%llX\n", w.grid[x]);
+		p -= minPoint;
+		p /= (int)w.voxelSize;
+		AddVoxelCubeToOctree(w.grid[x], p);
 		for (int i = 0; i < 64; i++)
 		{
 			size_t a, b, c;
@@ -97,6 +107,38 @@ Voxels::~Voxels()
 {
 	
 }
+
+void Voxels::Export(const char *filename)
+{
+	FILE *f = fopen(filename, "w+");
+	if (f == 0)
+		return;
+	fprintf(f, "voxel %d %d %d\n",
+			(int)((w.maxbounds[0]-w.minbounds[0])/w.voxelSize),
+			(int)((w.maxbounds[1]-w.minbounds[1])/w.voxelSize),
+			(int)((w.maxbounds[2]-w.minbounds[2])/w.voxelSize));
+
+	for (int x = 0; x < w.numVoxelsGrids; x++)
+	{
+		point3d p = GetVoxelCoordinate(w.morton[x], w.voxelSize, w.minbounds);
+		for (int i = 0; i < 64; i++)
+		{
+			size_t a, b, c;
+			if ((w.grid[x]>>i)&1) // blocked
+			{
+				GetCoordsForIndex(i, a, b, c);
+				fprintf(f, "%d %d %d\n",
+						int(((p.x+a*w.voxelSize)-w.minbounds[0])/w.voxelSize),
+						int(((p.y+b*w.voxelSize)-w.minbounds[1])/w.voxelSize),
+						int(((p.z+c*w.voxelSize)-w.minbounds[2])/w.voxelSize));
+			}
+		}
+	}
+
+	
+	fclose(f);
+}
+
 
 void Voxels::GetSuccessors(const voxelState &nodeID, std::vector<voxelState> &neighbors) const
 {
@@ -173,6 +215,13 @@ point3d Voxels::GetVoxelCoordinate(uint64_t morton, float voxelSize, const float
 	return pt;
 }
 
+void Voxels::AddVoxelCubeToOctree(uint64_t values, point3d p)
+{
+	int index = mLayer0VoxelGrids.size();
+	mLayer0VoxelGrids.push_back(values);
+	
+}
+
 void Voxels::OpenGLDraw() const
 {
 	double xRange = max(w.maxbounds[0],-w.minbounds[0]);
@@ -186,9 +235,9 @@ void Voxels::OpenGLDraw() const
 		for (int i = 0; i < 64; i++)
 		{
 			size_t a, b, c;
-			GetCoordsForIndex(i, a, b, c);
 			if ((w.grid[x]>>i)&1) // blocked
 			{
+				GetCoordsForIndex(i, a, b, c);
 				drawFrame = true;
 				GLfloat rr, gg, bb;
 				rr = (1.+(p.x+a*w.voxelSize)/range)/2.0;
