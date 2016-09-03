@@ -29,14 +29,21 @@ void MinDeltaPlusMinTopSpinTest();
 void MinDeltaPlusMinTOHTest();
 void TSVRC();
 void TSBiVRC(int bits, int compressionFactor);
+template <int N, int k>
+float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr);
+template <int N, int k>
+void PrintHeuristicTables();
+template <int N, int k>
+float PrebuildHeuristic(int elts, bool mr);
 
 char prefix[1024] = "";
 
 const int N = 18;
 const int k = 4;
-const int K = 10;
-//const int K = 2;
-const int cutoff = 7;
+//const int K = 10; // cutoff 7
+//const int K = 4; // cutoff 8
+const int K = 2; // cutoff ?
+const int cutoff = 25;
 
 void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b);
 
@@ -240,9 +247,17 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			case 'b':
 		{
-			TSBiVRC(4, 1);
+//			TSBiVRC(4, 1);
 //			ZeroHeuristic<TopSpinState<N>> z;
 //			TestTSBiVRC(&z, &z);
+//			template <int N, int k>
+//			float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr)
+
+			PrintHeuristicTables<18, 2>();
+			PrintHeuristicTables<18, 4>();
+			PrintHeuristicTables<18, 6>();
+			PrintHeuristicTables<18, 8>();
+			PrintHeuristicTables<18, 10>();
 			break;
 		}
 		default:
@@ -730,7 +745,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 		}
 		
-		if (1)
+		if (0)
 		{
 			printf("-=-=-IDA*-=-=-\n");
 			ida.SetHeuristic(f);
@@ -842,11 +857,11 @@ void TSBiVRC(int bits, int compressionFactor)
 		}
 		if (bits < 4)
 		{
-			pdb1.ZeroLowValues(cutoff);
+			//pdb1.ZeroLowValues(cutoff);
 			pdb1.ValueRangeCompress(bits, true);
-			pdb2.ZeroLowValues(cutoff);
+			//pdb2.ZeroLowValues(cutoff);
 			pdb2.ValueRangeCompress(bits, true);
-			pdb3.ZeroLowValues(cutoff);
+			//pdb3.ZeroLowValues(cutoff);
 			pdb3.ValueRangeCompress(bits, true);
 		}
 		
@@ -900,6 +915,95 @@ void TSBiVRC(int bits, int compressionFactor)
 			printf("\n");
 		}
 	}
+}
+
+
+template <int N, int k>
+void PrintHeuristicTables()
+{
+	for (int mr = 0; mr <= 1; mr++)
+	{
+		for (int elts = 6; elts <= 8; elts++)
+		{
+			PrebuildHeuristic<N, k>(elts, mr);
+		}
+	}
+	
+	printf("Top Spin N=%d, k=%d\n", N, k);
+	for (int div = 0; div <= 1; div++)
+	{
+		for (int mr = 0; mr <= 1; mr++)
+		{
+			for (int elts = 6; elts <= 8; elts++)
+			{
+				printf("Compression: %s; ranking: %s; pattern: %d\n", div?"DIV":"MOD", mr?"MR":"LEX", elts);
+				printf("\t1\t2\t3\t4\t5\t6\n");
+				for (int bits = 2; bits <= 8; bits*=2)
+				{
+					printf("%d\t", bits);
+					for (int factor = 1; factor <= 6; factor++)
+					{
+						printf("%1.3f\t", GetAveragePDBValue<N, k>(elts, bits, factor, div, mr));
+					}
+					printf("\n");
+				}
+			}
+		}
+	}
+}
+
+template <int N, int k>
+float PrebuildHeuristic(int elts, bool mr)
+{
+	std::vector<int> pattern;
+	TopSpin<N, k> ts;
+	TopSpinState<N> t;
+	
+	for (int x = 0; x < elts; x++)
+		pattern.push_back(x);
+	PDBHeuristic<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> *h;
+	if (mr == true)
+		h = new MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, t, pattern);
+	else
+		h = new LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, t, pattern);
+	if (!h->Load(prefix))
+	{
+		h->BuildPDB(t, std::thread::hardware_concurrency());
+		h->Save(prefix);
+	}
+	delete h;
+}
+
+template <int N, int k>
+float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr)
+{
+	std::vector<int> pattern;
+	TopSpin<N, k> ts;
+	TopSpinState<N> t;
+
+	for (int x = 0; x < elts; x++)
+		pattern.push_back(x);
+	PDBHeuristic<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> *h;
+	if (mr == true)
+		h = new MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, t, pattern);
+	else
+		h = new LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, t, pattern);
+	if (!h->Load(prefix))
+	{
+		h->BuildPDB(t, std::thread::hardware_concurrency());
+		h->Save(prefix);
+	}
+	if (factor > 1)
+	{
+		if (div)
+			h->DivCompress(factor, false);
+		else
+			h->ModCompress(factor, false);
+	}
+	h->ValueRangeCompress(bits, false);
+	float f = h->GetAverageValue();
+	delete h;
+	return f;
 }
 
 void TSVRC()
