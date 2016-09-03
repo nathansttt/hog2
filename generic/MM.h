@@ -77,7 +77,21 @@ public:
 	//void FullBPMX(uint64_t nodeID, int distance);
 	
 	void OpenGLDraw() const;
-	
+	void PrintOpenStats(std::unordered_map<std::pair<double, double>, int>  &s)
+	{
+		printf("Search distributions: (%s)\n", ((&s)==(&f))?"forward":"backward");
+		for (auto i = s.begin(); i != s.end(); i++)
+		{
+			if (i->second > 0)
+			{
+				bool ignore = false;
+				ignore = (i->first.first+i->first.second >= currentCost);
+				printf("%c g: %1.1f h: %1.1f count: %d\n", ignore?'*':' ',
+					   i->first.first, i->first.second, i->second);
+			}
+		}
+	}
+
 //	void SetWeight(double w) {weight = w;}
 private:
 	
@@ -119,6 +133,9 @@ private:
 	uint64_t nodesTouched, nodesExpanded, uniqueNodesExpanded;
 	state middleNode;
 	double currentCost;
+	double lastMinForwardG;
+	double lastMinBackwardG;
+
 	std::vector<state> neighbors;
 	environment *env;
 	Timer t;
@@ -158,7 +175,8 @@ bool MM<state, action, environment, priorityQueue>::InitializeSearch(environment
 	if (start == goal)
 		return false;
 	oldp1 = oldp2 = 0;
-
+	lastMinForwardG = 0;
+	lastMinBackwardG = 0;
 	forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, forwardHeuristic->HCost(start, goal));
 	backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start));
 	
@@ -241,7 +259,8 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 		{
 			if (i->second > 0) // some elements
 			{
-				if (i->first.first + i->first.second < currentCost) // termination only stopped by lower f-cost
+				if ((i->first.first + i->first.second < currentCost) && // termination only stopped by lower f-cost
+					(i->first.first + lastMinBackwardG + 1.0 < currentCost))
 				{
 					minForwardG = std::min(minForwardG, i->first.first);
 					minForwardF = std::min(minForwardF, i->first.first+i->first.second);
@@ -252,7 +271,8 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 		{
 			if (i->second > 0) // some elements
 			{
-				if (i->first.first + i->first.second < currentCost) // termination only stopped by lower f-cost
+				if ((i->first.first + i->first.second < currentCost) && // termination only stopped by lower f-cost
+					(i->first.first + lastMinForwardG + 1.0 < currentCost))
 				{
 					minBackwardG = std::min(minBackwardG, i->first.first);
 					minBackwardF = std::min(minBackwardF, i->first.first+i->first.second);
@@ -260,36 +280,6 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 			}
 		}
 		
-//		for (auto i = g_f.begin(); i != g_f.end(); i++)
-//			if (i->second > 0 && fless(i->first, minForwardG))
-//				minForwardG = i->first;
-//		for (auto i = g_b.begin(); i != g_b.end(); i++)
-//			if (i->second > 0 && fless(i->first, minBackwardG))
-//				minBackwardG = i->first;
-//		for (auto i = f_f.begin(); i != f_f.end(); i++)
-//			if (i->second > 0 && fless(i->first, minForwardF))
-//				minForwardF = i->first;
-//		for (auto i = f_b.begin(); i != f_b.end(); i++)
-//			if (i->second > 0 && fless(i->first, minBackwardF))
-//				minBackwardF = i->first;
-		
-		
-//		for (int x = 0; x < backwardQueue.OpenSize(); x++)
-//		{
-//			auto item = backwardQueue.Lookat(backwardQueue.GetOpenItem(x));
-//			if (fless(item.g, minBackwardG))
-//				minBackwardG = item.g;
-//			if (fless(item.g+item.h, minBackwardF))
-//				minBackwardF = item.g+item.h;
-//		}
-//		for (int x = 0; x < forwardQueue.OpenSize(); x++)
-//		{
-//			auto item = forwardQueue.Lookat(forwardQueue.GetOpenItem(x));
-//			if (fless(item.g, minForwardG))
-//				minForwardG = item.g;
-//			if (fless(item.g+item.h, minForwardF))
-//				minForwardF = item.g+item.h;
-//		}
 		{
 			auto iB = backwardQueue.Lookat(backwardQueue.Peek());
 			backwardP = std::max(iB.g+iB.h, iB.g*2);
@@ -297,24 +287,32 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 			forwardP = std::max(iF.g+iF.h, iF.g*2);
 		}
 		bool done = false;
+		if (minForwardF == DBL_MAX)
+		{
+			minForwardF = minForwardG = currentCost+1;
+		}
+		if (minBackwardF == DBL_MAX)
+		{
+			minBackwardF = minBackwardG = currentCost+1;
+		}
 		if (!fgreater(currentCost, minForwardF))
 		{
-			printf("Terminated on forwardf\n");
+			printf("Terminated on forwardf (%f >= %f)\n", minForwardF, currentCost);
 			done = true;
 		}
 		if (!fgreater(currentCost, minBackwardF))
 		{
-			printf("Terminated on backwardf\n");
+			printf("Terminated on backwardf (%f >= %f)\n", minBackwardF, currentCost);
 			done = true;
 		}
 		if (!fgreater(currentCost, minForwardG+minBackwardG+1.0)) // TODO: epsilon
 		{
-			printf("Terminated on g+g+epsilon\n");
+			printf("Terminated on g+g+epsilon (%f+%f+%f >= %f)\n", minForwardG, minBackwardG, 1.0, currentCost);
 			done = true;
 		}
 		if (!fgreater(currentCost, std::min(forwardP, backwardP)))
 		{
-			printf("Terminated on forwardP/backwardP\n");
+			printf("Terminated on forwardP/backwardP (min(%f, %f) >= %f)\n", forwardP, backwardP, currentCost);
 			done = true;
 		}
 //		if (!fgreater(currentCost, backwardP))
@@ -323,8 +321,13 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 //			done = true;
 //		}
 		// for now, always terminate
+		lastMinBackwardG = minBackwardG;
+		lastMinForwardG = minForwardG;
 		if (done)
 		{
+			PrintOpenStats(f);
+			PrintOpenStats(b);
+			
 			std::vector<state> pFor, pBack;
 			ExtractPathToGoal(middleNode, pBack);
 			ExtractPathToStart(middleNode, pFor);
@@ -424,6 +427,8 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 								   parentData.g+edgeCost+opposite.Lookup(reverseLoc).g);
 							currentCost = parentData.g+edgeCost + opposite.Lookup(reverseLoc).g;
 							middleNode = succ;
+							PrintOpenStats(f);
+							PrintOpenStats(b);
 						}
 					}
 				}
@@ -463,6 +468,8 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 							   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g);
 						currentCost = current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g;
 						middleNode = succ;
+						PrintOpenStats(f);
+						PrintOpenStats(b);
 					}
 				}
 			}

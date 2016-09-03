@@ -66,6 +66,7 @@ public:
 	void BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads);
 
 	void DivCompress(int factor, bool print_histogram);
+	void ModCompress(int factor, bool print_histogram);
 	void ModCompress(uint64_t newEntries, bool print_histogram);
 	void ZeroLowValues(int limit)
 	{ for (uint64_t s = 0; s < PDB.Size(); s++)
@@ -80,6 +81,7 @@ public:
 	void ValueRangeCompress(int numBits, bool print_histogram);
 
 	double PrintHistogram();
+	double GetAverageValue();
 	void GetHistogram(std::vector<uint64_t> &histogram);
 protected:
 	// holds a Pattern Databases
@@ -410,6 +412,8 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			   depth, s.EndTimer(), total, entries, COUNT, searchForward?"forward":"backward");
 		if (double(total)*double(total)*0.4 > double(COUNT-entries)*double(distribution[distribution.size()-2]))// || depth == 8)
 			searchForward = false;
+		if (COUNT-entries <= total) // If we wrote more entries than there are left, switch directions
+			searchForward = false;
 		depth++;
 		coarseOpenCurr.swap(coarseOpenNext);
 	} while (entries != COUNT);
@@ -733,6 +737,12 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ModCompress(int factor, bool print_histogram)
+{
+	ModCompress((PDB.Size()+factor-1)/factor, print_histogram);
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
 void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ModCompress(uint64_t newEntries, bool print_histogram)
 {
 	type = kModCompress;
@@ -795,10 +805,13 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::vector<int> cutoffs;
 	GetHistogram(dist);
 	GetOptimizedBoundaries(dist, 1<<numBits, cutoffs);
-	printf("Setting boundaries [%d values]: ", (1<<numBits));
-	for (int x = 0; x < cutoffs.size(); x++)
-		printf("%d ", cutoffs[x]);
-	printf("\n");
+	if (print_histogram)
+	{
+		printf("Setting boundaries [%d values]: ", (1<<numBits));
+		for (int x = 0; x < cutoffs.size(); x++)
+			printf("%d ", cutoffs[x]);
+		printf("\n");
+	}
 	cutoffs.push_back(256);
 	
 	for (uint64_t x = 0; x < PDB.Size(); x++)
@@ -872,6 +885,17 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 			printf("%d: %llu\n", x, histogram[x]);
 	}
 	printf("Average: %f; count: %llu\n", average/PDB.Size(), PDB.Size());
+	return average/PDB.Size();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::GetAverageValue()
+{
+	double average = 0;
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		average += PDB.Get(x);
+	}
 	return average/PDB.Size();
 }
 

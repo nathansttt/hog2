@@ -54,4 +54,5 @@ SRC_CPP = \
 	environments/CanonicalGrid.cpp \
 	environments/Fling.cpp \
 	environments/Voxels.cpp \
+	environments/VoxelGrid.cpp \
 	environments/NaryTree.cpp \

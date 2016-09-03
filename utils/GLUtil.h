@@ -138,9 +138,27 @@ public:
  */
 class point3d {
 public:
-  point3d() {}
-  point3d(GLfloat a, GLfloat b, GLfloat c) :x(a), y(b), z(c) {}
-  GLfloat x, y, z;
+	point3d() {}
+	point3d(GLfloat a, GLfloat b, GLfloat c) :x(a), y(b), z(c) {}
+	GLfloat x, y, z;
+	
+	point3d operator+(const point3d &v) const
+	{ point3d p(*this); p+=v; return p; }
+	point3d operator-(const point3d &v) const
+	{ point3d p(*this); p-=v; return p; }
+	point3d &operator+=(const point3d &v)
+	{ x += v.x; y += v.y; z += v.z; return *this; }
+	point3d &operator-=(const point3d &v)
+	{ x -= v.x; y -= v.y; z -= v.z; return *this; }
+	point3d &operator+=(const int v)
+	{ x += v; y += v; z += v; return *this; }
+	point3d &operator-=(const int v)
+	{ x -= v; y -= v; z -= v; return *this; }
+	point3d &operator*=(const int v)
+	{ x *= v; y *= v; z *= v; return *this; }
+	point3d &operator/=(const int v)
+	{ x /= v; y /= v; z /= v; return *this; }
+
 };
 
 class line2d {

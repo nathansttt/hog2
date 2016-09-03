@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include "Voxels.h"
 #include <iostream>
+#include "VoxelGrid.h"
 
 recVec velocity;
 
@@ -53,6 +54,7 @@ bool recording = false;
 
 //recVec cameraOffset(0,0,0);
 Voxels *v = 0;
+VoxelGrid *vg = 0;
 //voxelWorld theWorld;
 
 int main(int argc, char* argv[])
@@ -78,6 +80,8 @@ void CreateSimulation(int id)
 //	//FILE *f = fopen("/Users/nathanst/Desktop/3dmaps/Simple_test3dnav.3dnav", "r");
 
 	v = new Voxels("/Users/nathanst/Desktop/3dmaps/Complex_test3dnav.3dnav");
+	vg = new VoxelGrid("/Users/nathanst/Desktop/3dmaps/Complex_test3dnav.3dmap");
+//	v = new Voxels("/Users/nathanst/Desktop/3dmaps/Full4_test3dnav.3dnav");
 //	Map *map;
 //	if (gDefaultMap[0] == 0)
 //	{
@@ -127,6 +131,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Fly", "Slide camera right", kAnyModifier, 'd');
 	InstallKeyboardHandler(MyDisplayHandler, "Fly", "Stop moving", kAnyModifier, ' ');
 	InstallWindowHandler(MyWindowHandler);
+	InstallCommandLineHandler(MyCLHandler, "-convert", "-convert <source> <dest>", "Convert a map from the DE format to the repo format");
 //	
 //	InstallMouseClickHandler(MyClickHandler);
 }
@@ -145,7 +150,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		CreateSimulation(windowID);
-		SetNumPorts(windowID, 1);
+		SetNumPorts(windowID, 2);
 	}
 }
 
@@ -215,6 +220,17 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
+int MyCLHandler(char *argument[], int maxNumArgs)
+{
+	if (strcmp(argument[0], "-convert") == 0 && maxNumArgs >= 3)
+	{
+		Voxels v(argument[1]);
+		v.Export(argument[2]);
+		exit(0);
+	}
+	return 0;
+}
+
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 //	static double angle = -PID2;
@@ -230,9 +246,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //	//glTranslatef(cameraOffset.x, cameraOffset.y, cameraOffset.z);
 //	//glScalef(0.25, 0.25, 0.25);
 	
-	cameraOffset(velocity.x, velocity.y, velocity.z);
-	
-	v->OpenGLDraw();
+	if (viewport == 0)
+	{
+		cameraOffset(velocity.x, velocity.y, velocity.z);
+		v->OpenGLDraw();
+	}
+	if (viewport == 1)
+	{
+		vg->OpenGLDraw();
+	}
 	//LoadData();
 	//Draw(theWorld);
 

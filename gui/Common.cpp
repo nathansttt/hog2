@@ -707,5 +707,5 @@ void GetHeading(unsigned long windowID, int which, GLdouble &hx, GLdouble &hy, G
 	hx *= len;
 	hy *= len;
 	hz *= len;
-	printf("Heading vector: (%1.3f, %1.3f, %1.3f)\n", hx, hy, hz);
+//	printf("Heading vector: (%1.3f, %1.3f, %1.3f)\n", hx, hy, hz);
 }
