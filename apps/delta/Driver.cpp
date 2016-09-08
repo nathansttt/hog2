@@ -28,7 +28,8 @@ void MinDeltaPlusMinTest();
 void MinDeltaPlusMinTopSpinTest();
 void MinDeltaPlusMinTOHTest();
 void TSVRC();
-void TSBiVRC(int bits, int compressionFactor);
+void TSIDAVRC(int bits, int compressionFactor, int problem);
+void TSBiVRC(int bits, int compressionFactor, int problem = -1);
 template <int N, int k>
 float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr);
 template <int N, int k>
@@ -42,10 +43,10 @@ const int N = 18;
 const int k = 4;
 //const int K = 10; // cutoff 7
 //const int K = 4; // cutoff 8
-const int K = 2; // cutoff ?
+const int K = 4; // cutoff ?
 const int cutoff = 25;
 
-void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b);
+void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, int problem = -1);
 
 int main(int argc, char* argv[])
 {
@@ -237,12 +238,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'd': if (nextMove == kStay && m->CanStep(start.x, start.y, start.x+1, start.y)) nextMove = kE; break; //start.x++; break;
 			//case 'd':
 		{
-			MinDeltaPlusMinTOHTest();
+//			MinDeltaPlusMinTOHTest();
 			break;
 		}
 		case 'v':
 		{
-			TSVRC();
+//			printf("-=-=-=8 bits=-=-=-\n");
+			TSBiVRC(8, 4);
+//			TSIDAVRC(8, 1, 0);
+//			printf("-=-=-=4 bits=-=-=-\n");
+//			TSBiVRC(4, 1);
+//			GetAveragePDBValue<18, 4>(8, 3, 1, true, false);
+//			TSVRC();
 			break;
 		}
 			case 'b':
@@ -686,7 +693,7 @@ void MinDeltaPlusMinTopSpinTest()
 }
 #include "MM.h"
 
-void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
+void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, int problem)
 {
 	TemplateAStar<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> astar;
 	IDAStar<TopSpinState<N>, TopSpinAction> ida;
@@ -702,7 +709,13 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 	
 	int table[] = {52058078,116173544,208694125,131936966,141559500,133800745,194246206,50028346,167007978,207116816,163867037,119897198,201847476,210859515,117688410,121633885};
 	int table2[] = {145008714,165971878,154717942,218927374,182772845,5808407,19155194,137438954,13143598,124513215,132635260,39667704,2462244,41006424,214146208,54305743};
-	for (int count = 0; count < 50; count++)
+	int first = 0, last = 50;
+	if (problem != -1)
+	{
+		first = problem;
+		last = problem+1;
+	}
+	for (int count = first; count < last; count++)
 	{
 		printf("Seed: %d\n", table[count&0xF]^table2[(count>>4)&0xF]);
 		srandom(table[count&0xF]^table2[(count>>4)&0xF]);
@@ -722,7 +735,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 		}
 
 		
-		if (1)
+		if (0)
 		{
 			printf("-=-=-MM-=-=-\n");
 			timer.StartTimer();
@@ -745,10 +758,11 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 		}
 		
-		if (0)
+		if (1)
 		{
 			printf("-=-=-IDA*-=-=-\n");
 			ida.SetHeuristic(f);
+			ida.SetUseBDPathMax(true);
 			ts.SetPruneSuccessors(true);
 			timer.StartTimer();
 			ida.GetPath(&ts, s, g, actionPath);
@@ -757,6 +771,11 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 			printf("Solution path length %lu\n", actionPath.size());
 			printf("%1.2f elapsed\n", timer.GetElapsedTime());
 			ts.SetPruneSuccessors(false);
+
+//			printf("Dynamic distribution\n");
+//			for (int x = 0; x < 255; x++)
+//				if (f->histogram[x] != 0)
+//					printf("%d\t%llu\n", x, f->histogram[x]);
 		}
 
 		if (0)
@@ -779,7 +798,78 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b)
 	exit(0);
 }
 
-void TSBiVRC(int bits, int compressionFactor)
+void TSIDAVRC(int bits, int compressionFactor, int problem)
+{
+	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
+	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
+	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0, 1};//, 5, 6, 7};
+	
+	TopSpin<N, K> ts;
+	TopSpinState<N> t, d, goal;
+	ts.StoreGoal(t);
+	std::vector<std::vector<double>> averages;
+	
+	if (1)
+	{
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
+		if (!pdb1.Load(prefix))
+		{
+			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb1.Save(prefix);
+		}
+		if (!pdb2.Load(prefix))
+		{
+			pdb2.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb2.Save(prefix);
+		}
+		if (!pdb3.Load(prefix))
+		{
+			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb3.Save(prefix);
+		}
+		if (compressionFactor > 1)
+		{
+			pdb1.DivCompress(compressionFactor, true);
+			pdb2.DivCompress(compressionFactor, true);
+			pdb3.DivCompress(compressionFactor, true);
+		}
+		if (bits < 8)
+		{
+			std::vector<int> v;
+			std::vector<uint64_t> hist;
+			pdb1.GetHistogram(hist);
+			pdb1.PrintHistogram();
+			int interval = 1<<bits;
+			float i = float(hist.size())/float(interval);
+			if (i < 1) i = 1;
+			for (int x = 0; x < interval; x++)
+				v.push_back(int(float(x)*i));
+			pdb1.ValueCompress(v, true);
+			pdb2.ValueCompress(v, true);
+			pdb3.ValueCompress(v, true);
+		}
+		
+		Heuristic<TopSpinState<N>> h;
+		
+		h.lookups.resize(0);
+		h.lookups.push_back({kMaxNode, 1, 3});
+		h.lookups.push_back({kLeafNode, 0, 0});
+		h.lookups.push_back({kLeafNode, 1, 1});
+		h.lookups.push_back({kLeafNode, 2, 2});
+		h.heuristics.resize(0);
+		h.heuristics.push_back(&pdb1);
+		h.heuristics.push_back(&pdb2);
+		h.heuristics.push_back(&pdb3);
+		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
+		//ZeroHeuristic<TopSpinState<N>> z;
+		TestTSBiVRC(&h, &p, problem);
+	}
+}
+
+
+void TSBiVRC(int bits, int compressionFactor, int problem)
 {
 	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
 	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
@@ -825,7 +915,7 @@ void TSBiVRC(int bits, int compressionFactor)
 		h.heuristics.push_back(&pdb3);
 		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
 		//ZeroHeuristic<TopSpinState<N>> z;
-		TestTSBiVRC(&h, &p);
+		TestTSBiVRC(&h, &p, problem);
 	}
 
 	// first VRC test
@@ -855,7 +945,7 @@ void TSBiVRC(int bits, int compressionFactor)
 			pdb2.DivCompress(compressionFactor, true);
 			pdb3.DivCompress(compressionFactor, true);
 		}
-		if (bits < 4)
+		if (bits < 8)
 		{
 			//pdb1.ZeroLowValues(cutoff);
 			pdb1.ValueRangeCompress(bits, true);
@@ -878,7 +968,7 @@ void TSBiVRC(int bits, int compressionFactor)
 		h.heuristics.push_back(&pdb3);
 		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
 		//ZeroHeuristic<TopSpinState<N>> z;
-		TestTSBiVRC(&h, &p);
+		TestTSBiVRC(&h, &p, problem);
 	}
 	
 	if (0)
@@ -1000,7 +1090,7 @@ float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr)
 		else
 			h->ModCompress(factor, false);
 	}
-	h->ValueRangeCompress(bits, false);
+	h->ValueRangeCompress(bits, true);
 	float f = h->GetAverageValue();
 	delete h;
 	return f;

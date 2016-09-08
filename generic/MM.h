@@ -179,7 +179,8 @@ bool MM<state, action, environment, priorityQueue>::InitializeSearch(environment
 	lastMinBackwardG = 0;
 	forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, forwardHeuristic->HCost(start, goal));
 	backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start));
-	
+	f.clear();
+	b.clear();
 	return true;
 }
 
@@ -211,11 +212,13 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 	{
 		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
 		oldp1 = p1;
+		PrintOpenStats(f);
 	}
 	if (p2 > oldp2)
 	{
 		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
 		oldp2 = p2;
+		PrintOpenStats(b);
 	}
 	
 	if (fless(p1, p2))
