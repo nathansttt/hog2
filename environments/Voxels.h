@@ -11,7 +11,7 @@
 
 #include "SearchEnvironment.h"
 #include <vector>
-
+#include <cstdint>
 
 struct OctreeIndex {
 	int layer : 4;
@@ -97,7 +97,7 @@ private:
 		uint64_t *grid;
 	};
 	
-	std::vector<uint64> mLayer0VoxelGrids;
+	std::vector<uint64_t> mLayer0VoxelGrids;
 	
 	struct OctreeNode {
 		float coordinates[3]; //x,y,z
