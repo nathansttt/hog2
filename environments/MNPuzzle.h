@@ -327,39 +327,45 @@ void MNPuzzle<width, height>::Change_Op_Order(std::vector<slideDir> op_order)
 
 template <int width, int height>
 const std::string MNPuzzle<width, height>::GetName(){
-	std::stringstream name;
-	name << width;
-	name << "x";
-	name << height;
-	name << " Sliding Tile Puzzle";
-	
-//	if (PDB_distincts.size() > 0)
+	std::string s = "STP(";
+	s += std::to_string(width);
+	s += ",";
+	s += std::to_string(height);
+	s += ")";
+	return s;
+//	std::stringstream name;
+//	name << width;
+//	name << "x";
+//	name << height;
+//	name << " Sliding Tile Puzzle";
+//	
+////	if (PDB_distincts.size() > 0)
+////	{
+////		name << ", PDBS:";
+////		for (unsigned i = 0; i < PDB_distincts.size(); i++)
+////		{
+////			name << " <";
+////			for (unsigned j = 0; j < PDB_distincts[i].size() - 1; j++)
+////			{
+////				name << PDB_distincts[i][j];
+////				name << ", ";
+////			}
+////			name << PDB_distincts[i].back();
+////			name << ">";
+////		}
+////		name << ", Manhattan Distance";
+////	}
 //	{
-//		name << ", PDBS:";
-//		for (unsigned i = 0; i < PDB_distincts.size(); i++)
-//		{
-//			name << " <";
-//			for (unsigned j = 0; j < PDB_distincts[i].size() - 1; j++)
-//			{
-//				name << PDB_distincts[i][j];
-//				name << ", ";
-//			}
-//			name << PDB_distincts[i].back();
-//			name << ">";
-//		}
 //		name << ", Manhattan Distance";
 //	}
-	{
-		name << ", Manhattan Distance";
-	}
-	
-	name << ", Op Order: ";
-	for (unsigned op_num = 0; op_num < ops_in_order.size() - 1; op_num++){
-		name << ops_in_order[op_num];
-		name << ", ";
-	}
-	name << ops_in_order.back();
-	return name.str();
+//	
+//	name << ", Op Order: ";
+//	for (unsigned op_num = 0; op_num < ops_in_order.size() - 1; op_num++){
+//		name << ops_in_order[op_num];
+//		name << ", ";
+//	}
+//	name << ops_in_order.back();
+//	return name.str();
 }
 
 template <int width, int height>
