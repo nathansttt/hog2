@@ -25,6 +25,7 @@ enum PDBLookupType {
 //	kFractionalModCompress,
 	kModCompress,
 	kValueCompress,
+	kDivPlusValueCompress,
 	kDivPlusDeltaCompress, // two lookups with the same index, one is div, one is delta
 	kDefaultHeuristic
 };
@@ -79,14 +80,26 @@ public:
 	void ValueCompress(int maxValue, bool print_histogram);
 	void ValueCompress(std::vector<int> cutoffs, bool print_histogram);
 	void ValueRangeCompress(int numBits, bool print_histogram);
+	void CustomValueRangeCompress(std::vector<uint64_t> dist, int numBits, bool print_histogram);
 
+	void ValueRangeCompress(PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 5> *, bool print_histogram);
+	void ValueRangeCompress(PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 4> *, bool print_histogram);
+	void ValueRangeCompress(PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 3> *, bool print_histogram);
+	void ValueRangeCompress(PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 2> *, bool print_histogram);
+	void ValueRangeCompress(PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 1> *, bool print_histogram);
+	
 	double PrintHistogram();
 	double GetAverageValue();
 	void GetHistogram(std::vector<uint64_t> &histogram);
-protected:
+//protected:
+//	friend class PDBHeuristic<abstractState, abstractAction, abstractEnvironment, abstractState, 4>;
+//	friend class PDBHeuristic<abstractState, abstractAction, abstractEnvironment, abstractState, 3>;
+//	friend class PDBHeuristic<abstractState, abstractAction, abstractEnvironment, abstractState, 2>;
+//	friend class PDBHeuristic<abstractState, abstractAction, abstractEnvironment, abstractState, 1>;
+
 	// holds a Pattern Databases
 	NBitArray<pdbBits> PDB;
-	//std::vector<uint8_t> PDB;
+	int vrcValues[1<<pdbBits];
 	PDBLookupType type;
 	uint64_t compressionValue;
 
@@ -132,7 +145,14 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 		{
 			return PDB.Get(GetAbstractHash(a)%compressionValue);
 		}
-
+		case kValueCompress:
+		{
+			return vrcValues[PDB.Get(GetAbstractHash(a))]; //PDB[GetPDBHash(a)];
+		}
+		case kDivPlusValueCompress:
+		{
+			return vrcValues[PDB.Get(GetAbstractHash(a)/compressionValue)];
+		}
 		default:
 			assert(!"Not implemented");
 	}
@@ -795,7 +815,60 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
 void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueCompress(std::vector<int> cutoffs, bool print_histogram)
 {
-	assert(!"Not currently implemented.");
+	std::vector<uint64_t> dist;
+	if (print_histogram)
+	{
+		printf("Setting boundaries [%d values]: ", cutoffs.size());
+		for (int x = 0; x < cutoffs.size(); x++)
+			printf("%d ", cutoffs[x]);
+		printf("\n");
+	}
+	cutoffs.push_back(256);
+	
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				PDB.Set(x, cutoffs[y]);
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		PrintHistogram();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::CustomValueRangeCompress(std::vector<uint64_t> dist, int numBits, bool print_histogram)
+{
+	std::vector<int> cutoffs;
+	GetOptimizedBoundaries(dist, 1<<numBits, cutoffs);
+	if (print_histogram)
+	{
+		printf("Setting boundaries [%d values]: ", (1<<numBits));
+		for (int x = 0; x < cutoffs.size(); x++)
+			printf("%d ", cutoffs[x]);
+		printf("\n");
+	}
+	cutoffs.push_back(256);
+	
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				PDB.Set(x, cutoffs[y]);
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		PrintHistogram();
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
@@ -829,6 +902,237 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	if (print_histogram)
 		PrintHistogram();
 }
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueRangeCompress(
+																										  PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 5> *newPDB,
+																										  bool print_histogram)
+{
+	std::vector<uint64_t> dist;
+	std::vector<int> cutoffs;
+	GetHistogram(dist);
+	GetOptimizedBoundaries(dist, 1<<5, cutoffs);
+	if (print_histogram)
+	{
+		printf("Setting boundaries [%d values]: ", (1<<4));
+		for (int x = 0; x < cutoffs.size(); x++)
+			printf("%d ", cutoffs[x]);
+		printf("\n");
+	}
+	if (type == kPlain)
+		newPDB->type = kValueCompress;
+	else if (type == kDivCompress)
+	{
+		newPDB->type = kDivPlusValueCompress;
+		newPDB->compressionValue = compressionValue;
+	}
+	else {
+		printf("Unknown PDB type: %d\n", type);
+	}
+	for (int x = 0; x < cutoffs.size(); x++)
+		newPDB->vrcValues[x] = cutoffs[x];
+	newPDB->PDB.Resize(PDB.Size());
+	cutoffs.push_back(256);
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				newPDB->PDB.Set(x, y);
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		newPDB->PrintHistogram();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueRangeCompress(
+												PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 4> *newPDB,
+																										   bool print_histogram)
+{
+	std::vector<uint64_t> dist;
+	std::vector<int> cutoffs;
+	GetHistogram(dist);
+	GetOptimizedBoundaries(dist, 1<<4, cutoffs);
+	if (print_histogram)
+	{
+		printf("Setting boundaries [%d values]: ", (1<<4));
+		for (int x = 0; x < cutoffs.size(); x++)
+			printf("%d ", cutoffs[x]);
+		printf("\n");
+	}
+	if (type == kPlain)
+		newPDB->type = kValueCompress;
+	else if (type == kDivCompress)
+	{
+		newPDB->type = kDivPlusValueCompress;
+		newPDB->compressionValue = compressionValue;
+	}
+	else {
+		printf("Unknown PDB type: %d\n", type);
+	}
+	for (int x = 0; x < cutoffs.size(); x++)
+		newPDB->vrcValues[x] = cutoffs[x];
+	newPDB->PDB.Resize(PDB.Size());
+	cutoffs.push_back(256);
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				newPDB->PDB.Set(x, y);
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		newPDB->PrintHistogram();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueRangeCompress(PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 3> *newPDB, bool print_histogram)
+{
+	std::vector<uint64_t> dist;
+	std::vector<int> cutoffs;
+	GetHistogram(dist);
+	GetOptimizedBoundaries(dist, 1<<3, cutoffs);
+	if (print_histogram)
+	{
+		printf("Setting boundaries [%d values]: ", (1<<4));
+		for (int x = 0; x < cutoffs.size(); x++)
+			printf("%d ", cutoffs[x]);
+		printf("\n");
+	}
+	if (type == kPlain)
+		newPDB->type = kValueCompress;
+	else if (type == kDivCompress)
+	{
+		newPDB->type = kDivPlusValueCompress;
+		newPDB->compressionValue = compressionValue;
+	}
+	else {
+		printf("Unknown PDB type: %d\n", type);
+	}
+
+	for (int x = 0; x < cutoffs.size(); x++)
+		newPDB->vrcValues[x] = cutoffs[x];
+	newPDB->PDB.Resize(PDB.Size());
+	cutoffs.push_back(256);
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				newPDB->PDB.Set(x, y);
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		newPDB->PrintHistogram();
+
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueRangeCompress(PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 2> *newPDB, bool print_histogram)
+{
+	std::vector<uint64_t> dist;
+	std::vector<int> cutoffs;
+	GetHistogram(dist);
+	GetOptimizedBoundaries(dist, 1<<2, cutoffs);
+	if (print_histogram)
+	{
+		printf("Setting boundaries [%d values]: ", (1<<4));
+		for (int x = 0; x < cutoffs.size(); x++)
+			printf("%d ", cutoffs[x]);
+		printf("\n");
+	}
+	if (type == kPlain)
+		newPDB->type = kValueCompress;
+	else if (type == kDivCompress)
+	{
+		newPDB->type = kDivPlusValueCompress;
+		newPDB->compressionValue = compressionValue;
+	}
+	else {
+		printf("Unknown PDB type: %d\n", type);
+	}
+
+	for (int x = 0; x < cutoffs.size(); x++)
+		newPDB->vrcValues[x] = cutoffs[x];
+	newPDB->PDB.Resize(PDB.Size());
+	cutoffs.push_back(256);
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				newPDB->PDB.Set(x, y);
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		newPDB->PrintHistogram();
+	
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ValueRangeCompress(PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, 1> *newPDB, bool print_histogram)
+{
+	std::vector<uint64_t> dist;
+	std::vector<int> cutoffs;
+	GetHistogram(dist);
+	GetOptimizedBoundaries(dist, 1<<1, cutoffs);
+	if (print_histogram)
+	{
+		printf("Setting boundaries [%d values]: ", (1<<4));
+		for (int x = 0; x < cutoffs.size(); x++)
+			printf("%d ", cutoffs[x]);
+		printf("\n");
+	}
+	if (type == kPlain)
+		newPDB->type = kValueCompress;
+	else if (type == kDivCompress)
+	{
+		newPDB->type = kDivPlusValueCompress;
+		newPDB->compressionValue = compressionValue;
+	}
+	else {
+		printf("Unknown PDB type: %d\n", type);
+	}
+
+	for (int x = 0; x < cutoffs.size(); x++)
+		newPDB->vrcValues[x] = cutoffs[x];
+	newPDB->PDB.Resize(PDB.Size());
+	cutoffs.push_back(256);
+	for (uint64_t x = 0; x < PDB.Size(); x++)
+	{
+		for (int y = 0; y < cutoffs.size(); y++)
+		{
+			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
+			{
+				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				newPDB->PDB.Set(x, y);
+				break;
+			}
+		}
+	}
+	if (print_histogram)
+		newPDB->PrintHistogram();
+	
+}
+
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
 bool PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::Load(FILE *f)
@@ -866,18 +1170,32 @@ template <class abstractState, class abstractAction, class abstractEnvironment, 
 double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::PrintHistogram()
 {
 	int factor = 1;
-	if (type == kDivCompress)
+	if (type == kDivCompress || type == kDivPlusValueCompress)
 		factor = compressionValue;
 	double average = 0;
 	std::vector<uint64_t> histogram;
-	for (uint64_t x = 0; x < PDB.Size(); x++)
+	if (type == kValueCompress || type == kDivPlusValueCompress)
 	{
-		if (PDB.Get(x)+1 > histogram.size())
+		for (uint64_t x = 0; x < PDB.Size(); x++)
 		{
-			histogram.resize(PDB.Get(x)+1);
+			if (vrcValues[PDB.Get(x)]+1 > histogram.size())
+			{
+				histogram.resize(vrcValues[PDB.Get(x)]+1);
+			}
+			histogram[vrcValues[PDB.Get(x)]]+=factor;
+			average += vrcValues[PDB.Get(x)];
 		}
-		histogram[PDB.Get(x)]+=factor;
-		average += PDB.Get(x);
+	}
+	else {
+		for (uint64_t x = 0; x < PDB.Size(); x++)
+		{
+			if (PDB.Get(x)+1 > histogram.size())
+			{
+				histogram.resize(PDB.Get(x)+1);
+			}
+			histogram[PDB.Get(x)]+=factor;
+			average += PDB.Get(x);
+		}
 	}
 	for (int x = 0; x < histogram.size(); x++)
 	{

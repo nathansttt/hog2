@@ -17,8 +17,8 @@
  * http://aaaipress.org/Papers/Workshops/2008/WS-08-10/WS08-10-004.pdf
  * to do this in n log n time instead of n^2 time.
  */
-template <class state, class action, class environment>
-class TreePermutationPDB : public PermutationPDB<state, action, environment> {
+template <class state, class action, class environment, int bits = 8>
+class TreePermutationPDB : public PermutationPDB<state, action, environment, bits> {
 public:
 	TreePermutationPDB(environment *e, const state &s, const std::vector<int> &distincts);
 	
@@ -29,8 +29,8 @@ public:
 
 	std::string GetFileName(const char *prefix);
 private:
-	using PermutationPDB<state, action, environment>::example;
-	using PermutationPDB<state, action, environment>::distinct;
+	using PermutationPDB<state, action, environment, bits>::example;
+	using PermutationPDB<state, action, environment, bits>::distinct;
 
 	uint64_t Factorial(int val) const;
 	uint64_t FactorialUpperK(int n, int k) const;
@@ -86,16 +86,16 @@ inline int mylog2(int val)
 }
 
 
-template <class state, class action, class environment>
-TreePermutationPDB<state, action, environment>::TreePermutationPDB(environment *e, const state &s, const std::vector<int> &distincts)
-:PermutationPDB<state, action, environment>(e, s, distincts),
+template <class state, class action, class environment, int bits>
+TreePermutationPDB<state, action, environment, bits>::TreePermutationPDB(environment *e, const state &s, const std::vector<int> &distincts)
+:PermutationPDB<state, action, environment, bits>(e, s, distincts),
 dualCache(maxThreads), locsCache(maxThreads), tempCache(maxThreads)
 {
 	this->SetGoal(s);
 }
 
-template <class state, class action, class environment>
-uint64_t TreePermutationPDB<state, action, environment>::GetPDBHash(const state &s, int threadID) const
+template <class state, class action, class environment, int bits>
+uint64_t TreePermutationPDB<state, action, environment, bits>::GetPDBHash(const state &s, int threadID) const
 {
 	std::vector<int> &values = locsCache[threadID];
 	std::vector<int> &dual = dualCache[threadID];
@@ -141,8 +141,8 @@ uint64_t TreePermutationPDB<state, action, environment>::GetPDBHash(const state 
 	return rank;
 }
 
-template <class state, class action, class environment>
-void TreePermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t hash, state &s, int threadID) const
+template <class state, class action, class environment, int bits>
+void TreePermutationPDB<state, action, environment, bits>::GetStateFromPDBHash(uint64_t hash, state &s, int threadID) const
 {
 	size_t count = example.puzzle.size();
 	s.puzzle.resize(count);
@@ -187,8 +187,8 @@ void TreePermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_
 	s.FinishUnranking(example);
 }
 
-template <class state, class action, class environment>
-uint64_t TreePermutationPDB<state, action, environment>::Factorial(int val) const
+template <class state, class action, class environment, int bits>
+uint64_t TreePermutationPDB<state, action, environment, bits>::Factorial(int val) const
 {
 	static uint64_t table[21] =
 	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
@@ -199,22 +199,22 @@ uint64_t TreePermutationPDB<state, action, environment>::Factorial(int val) cons
 	return table[val];
 }
 
-template <class state, class action, class environment>
-std::string TreePermutationPDB<state, action, environment>::GetFileName(const char *prefix)
+template <class state, class action, class environment, int bits>
+std::string TreePermutationPDB<state, action, environment, bits>::GetFileName(const char *prefix)
 {
 	std::string fileName;
 	fileName += prefix;
 	// For unix systems, the prefix should always end in a trailing slash
 	if (fileName.back() != '/' && prefix[0] != 0)
 		fileName+='/';
-	fileName += PermutationPDB<state, action, environment>::GetFileName("");
+	fileName += PermutationPDB<state, action, environment, bits>::GetFileName("");
 	fileName += "-lex.pdb";
 	
 	return fileName;
 }
 
-template <class state, class action, class environment>
-uint64_t TreePermutationPDB<state, action, environment>::FactorialUpperK(int n, int k) const
+template <class state, class action, class environment, int bits>
+uint64_t TreePermutationPDB<state, action, environment, bits>::FactorialUpperK(int n, int k) const
 {
 	uint64_t value = 1;
 	assert(n >= 0 && k >= 0);

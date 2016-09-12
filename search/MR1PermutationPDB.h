@@ -21,8 +21,8 @@
  * http://webhome.cs.uvic.ca/~ruskey/Publications/RankPerm/MyrvoldRuskey.pdf
  */
 
-template <class state, class action, class environment>
-class MR1PermutationPDB : public PermutationPDB<state, action, environment> {
+template <class state, class action, class environment, int bits = 8>
+class MR1PermutationPDB : public PermutationPDB<state, action, environment, bits> {
 public:
 	MR1PermutationPDB(environment *e, const state &s, const std::vector<int> &distincts);
 	
@@ -33,8 +33,8 @@ public:
 
 	std::string GetFileName(const char *prefix);
 private:
-	using PermutationPDB<state, action, environment>::example;
-	using PermutationPDB<state, action, environment>::distinct;
+	using PermutationPDB<state, action, environment, bits>::example;
+	using PermutationPDB<state, action, environment, bits>::distinct;
 
 	// cache for computing ranking/unranking
 	mutable std::vector<std::vector<int> > dualCache;
@@ -43,9 +43,9 @@ private:
 
 };
 
-template <class state, class action, class environment>
-MR1PermutationPDB<state, action, environment>::MR1PermutationPDB(environment *e, const state &s, const std::vector<int> & distincts)
-:PermutationPDB<state, action, environment>(e, s, distincts), dualCache(maxThreads), locsCache(maxThreads), valueStack(maxThreads)
+template <class state, class action, class environment, int bits>
+MR1PermutationPDB<state, action, environment, bits>::MR1PermutationPDB(environment *e, const state &s, const std::vector<int> & distincts)
+:PermutationPDB<state, action, environment, bits>(e, s, distincts), dualCache(maxThreads), locsCache(maxThreads), valueStack(maxThreads)
 {
 	this->SetGoal(s);
 }
@@ -57,8 +57,8 @@ inline void swap(int &a, int &b)
 	b = tmp;
 }
 
-template <class state, class action, class environment>
-uint64_t MR1PermutationPDB<state, action, environment>::GetPDBHash(const state &s, int threadID) const
+template <class state, class action, class environment, int bits>
+uint64_t MR1PermutationPDB<state, action, environment, bits>::GetPDBHash(const state &s, int threadID) const
 {
 	std::vector<int> &locs = locsCache[threadID];
 	std::vector<int> &dual = dualCache[threadID];
@@ -115,8 +115,8 @@ uint64_t MR1PermutationPDB<state, action, environment>::GetPDBHash(const state &
 	return result;
 }
 
-template <class state, class action, class environment>
-void MR1PermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t hash, state &s, int threadID) const
+template <class state, class action, class environment, int bits>
+void MR1PermutationPDB<state, action, environment, bits>::GetStateFromPDBHash(uint64_t hash, state &s, int threadID) const
 {
 	int puzzleSize = (int)example.size();
 	//s.puzzle.resize(puzzleSize);
@@ -137,15 +137,15 @@ void MR1PermutationPDB<state, action, environment>::GetStateFromPDBHash(uint64_t
 	s.FinishUnranking(example);
 }
 
-template <class state, class action, class environment>
-std::string MR1PermutationPDB<state, action, environment>::GetFileName(const char *prefix)
+template <class state, class action, class environment, int bits>
+std::string MR1PermutationPDB<state, action, environment, bits>::GetFileName(const char *prefix)
 {
 	std::string fileName;
 	fileName += prefix;
 	// For unix systems, the prefix should always end in a trailing slash
 	if (fileName.back() != '/' && prefix[0] != 0)
 		fileName+='/';
-	fileName += PermutationPDB<state, action, environment>::GetFileName("");
+	fileName += PermutationPDB<state, action, environment, bits>::GetFileName("");
 	fileName += "-MR1.pdb";
 	
 	return fileName;
