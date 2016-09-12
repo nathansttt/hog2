@@ -22,14 +22,20 @@
 #include "TopSpin.h"
 #include "TOH.h"
 #include "ParallelIDAStar.h"
+#include "RubiksCube.h"
+#include "MNPuzzle.h"
 
+void STPTest(int bits, int factor);
+void RubikDynamicTest();
+void GetRubikLength14Instance(RubiksState &start, int which);
+void GetRubikStep14Instance(RubiksState &start, int which);
 void MDDeltaPlusMinTest();
 void MinDeltaPlusMinTest();
 void MinDeltaPlusMinTopSpinTest();
 void MinDeltaPlusMinTOHTest();
 void TSVRC();
-void TSIDAVRC(int bits, int compressionFactor, int problem);
-void TSBiVRC(int bits, int compressionFactor, int problem = -1);
+void TSIDAVRC(int bits, int compressionFactor, int first = 0, int last = 50);
+void TSBiVRC(int bits, int compressionFactor, int first = 0, int last = 50);
 template <int N, int k>
 float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr);
 template <int N, int k>
@@ -40,13 +46,12 @@ float PrebuildHeuristic(int elts, bool mr);
 char prefix[1024] = "";
 
 const int N = 18;
-const int k = 4;
+const int K = 4; // cutoff ?
 //const int K = 10; // cutoff 7
 //const int K = 4; // cutoff 8
-const int K = 4; // cutoff ?
-const int cutoff = 25;
+//const int cutoff = 25;
 
-void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, int problem = -1);
+void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, int first = 0, int last = 50);
 
 int main(int argc, char* argv[])
 {
@@ -85,6 +90,7 @@ void InstallHandlers()
 
 	InstallCommandLineHandler(MyCLHandler, "-pdb", "-pdb <dir>", "Set the directory to use for PDBs");
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test <bits> <factor>", "Basic test comparing A*, IDA*, MM");
+	InstallCommandLineHandler(MyCLHandler, "-rubik", "-rubik", "Duplicating Zahavi et al 2007.");
 	
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler);
@@ -189,6 +195,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		TSBiVRC(atoi(argument[1]), atoi(argument[2]));
 		exit(0);
 	}
+	else if (strcmp(argument[0], "-rubik") == 0 && maxNumArgs >= 1)
+	{
+		RubikDynamicTest();
+		//TSBiVRC(atoi(argument[1]), atoi(argument[2]));
+		exit(0);
+	}
 	return 0;
 }
 
@@ -196,7 +208,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case 'r':
 		case '0':
 		case '1':
 		case '2':
@@ -223,14 +234,37 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case 'p':
 		{
-			MinDeltaPlusMinTest();
+			//MinDeltaPlusMinTest();
+//			STPTest(8, 1);
+			STPTest(4, 1);
+			STPTest(8, 2);
 			break;
 		}
 			break;
 		case 't':
 		{
-			MinDeltaPlusMinTopSpinTest();
-			break;
+			TSBiVRC(8, 1, 0, 10);
+//			TSBiVRC(4, 1, 0, 10);
+//			TSBiVRC(2, 1, 0, 10);
+			exit(0);
+//			std::vector<int> pattern = {0,1,2,3,4,5,6,7};
+//			MNPuzzle<4, 4> mnp;
+//			MNPuzzleState<4, 4> t;
+//			mnp.StoreGoal(t);
+//			LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb1(&mnp, t, pattern);
+//			LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, 4> pdb2(&mnp, t, pattern);
+//			if (pdb1.Load(prefix) == false)
+//			{
+//				pdb1.BuildPDB(t, std::thread::hardware_concurrency());
+//				pdb1.PrintHistogram();
+//			}
+//			printf("Min compress factor 2\n");
+//			pdb1.DivCompress(2, true);
+//			printf("VRC compress into new PDB (fewer bits)");
+//			pdb1.ValueRangeCompress(&pdb2, true);
+//			printf("VRC compress into same PDB");
+//			pdb1.ValueRangeCompress(4, true);
+//			break;
 		}
 		case 'w': if (nextMove == kStay && m->CanStep(start.x, start.y, start.x, start.y-1)) nextMove = kN; break; //start.y--; break;
 		case 's': if (nextMove == kStay && m->CanStep(start.x, start.y, start.x, start.y+1)) nextMove = kS; break; //start.y++; break;
@@ -241,10 +275,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			MinDeltaPlusMinTOHTest();
 			break;
 		}
+		case 'r':
+		{
+			RubikDynamicTest();
+			break;
+		}
 		case 'v':
 		{
 //			printf("-=-=-=8 bits=-=-=-\n");
-			TSBiVRC(8, 4);
+			TSBiVRC(2, 1);
 //			TSIDAVRC(8, 1, 0);
 //			printf("-=-=-=4 bits=-=-=-\n");
 //			TSBiVRC(4, 1);
@@ -579,15 +618,15 @@ void MinDeltaPlusMinTopSpinTest()
 	std::vector<int> pattern = {0, 1, 2, 3, 4, 5, 6};
 	std::vector<int> pattern2 = {0, 1, 2, 3, 4, 5};
 	
-	TopSpin<N, k> ts;
+	TopSpin<N, K> ts;
 	TopSpinState<N> t;
 	ts.StoreGoal(t);
 	
 	// DIV compress + MR Ranking
 	{
-		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
-		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
-		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
+		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb(&ts, t, pattern);
+		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern);
+		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> smallpdb(&ts, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -612,9 +651,9 @@ void MinDeltaPlusMinTopSpinTest()
 	
 	// MOD compress + MR Ranking
 	{
-		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
-		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
-		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
+		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb(&ts, t, pattern);
+		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern);
+		MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> smallpdb(&ts, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -639,9 +678,9 @@ void MinDeltaPlusMinTopSpinTest()
 	
 	// DIV compress + LEX Ranking
 	{
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> smallpdb(&ts, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -666,9 +705,9 @@ void MinDeltaPlusMinTopSpinTest()
 	
 	// MOD compression + LEX
 	{
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> smallpdb(&ts, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -693,7 +732,7 @@ void MinDeltaPlusMinTopSpinTest()
 }
 #include "MM.h"
 
-void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, int problem)
+void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, int first, int last)
 {
 	TemplateAStar<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> astar;
 	IDAStar<TopSpinState<N>, TopSpinAction> ida;
@@ -709,12 +748,6 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, i
 	
 	int table[] = {52058078,116173544,208694125,131936966,141559500,133800745,194246206,50028346,167007978,207116816,163867037,119897198,201847476,210859515,117688410,121633885};
 	int table2[] = {145008714,165971878,154717942,218927374,182772845,5808407,19155194,137438954,13143598,124513215,132635260,39667704,2462244,41006424,214146208,54305743};
-	int first = 0, last = 50;
-	if (problem != -1)
-	{
-		first = problem;
-		last = problem+1;
-	}
 	for (int count = first; count < last; count++)
 	{
 		printf("Seed: %d\n", table[count&0xF]^table2[(count>>4)&0xF]);
@@ -795,10 +828,10 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, i
 
 	}
 	
-	exit(0);
+//	exit(0);
 }
 
-void TSIDAVRC(int bits, int compressionFactor, int problem)
+void TSIDAVRC(int bits, int compressionFactor, int first, int last)
 {
 	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
 	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
@@ -864,66 +897,48 @@ void TSIDAVRC(int bits, int compressionFactor, int problem)
 		h.heuristics.push_back(&pdb3);
 		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
 		//ZeroHeuristic<TopSpinState<N>> z;
-		TestTSBiVRC(&h, &p, problem);
+		TestTSBiVRC(&h, &p, first, last);
 	}
 }
 
 
-void TSBiVRC(int bits, int compressionFactor, int problem)
+void TSBiVRC(int bits, int compressionFactor, int first, int last)
 {
+//	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
+//	std::vector<int> pattern2 = {4, 5, 6, 7, 8, 9, 10, 11};//, 5, 6, 7};
+//	std::vector<int> pattern3 = {8, 9, 10, 11, 0, 1, 2, 3};//, 5, 6, 7};
 	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
 	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
 	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0, 1};//, 5, 6, 7};
+	
+	printf("-->Testing TS(%d, %d): %d bits, %d factor<--\n", N, K, bits, compressionFactor);
 	
 	TopSpin<N, K> ts;
 	TopSpinState<N> t, d, goal;
 	ts.StoreGoal(t);
 	std::vector<std::vector<double>> averages;
 	
-	// baseline
-	if (0)
-	{
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
-		if (!pdb1.Load(prefix))
-		{
-			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb1.Save(prefix);
-		}
-		if (!pdb2.Load(prefix))
-		{
-			pdb2.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb2.Save(prefix);
-		}
-		if (!pdb3.Load(prefix))
-		{
-			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb3.Save(prefix);
-		}
-		
-		Heuristic<TopSpinState<N>> h;
 
-		h.lookups.resize(0);
-		h.lookups.push_back({kMaxNode, 1, 3});
-		h.lookups.push_back({kLeafNode, 0, 0});
-		h.lookups.push_back({kLeafNode, 1, 1});
-		h.lookups.push_back({kLeafNode, 2, 2});
-		h.heuristics.resize(0);
-		h.heuristics.push_back(&pdb1);
-		h.heuristics.push_back(&pdb2);
-		h.heuristics.push_back(&pdb3);
-		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
-		//ZeroHeuristic<TopSpinState<N>> z;
-		TestTSBiVRC(&h, &p, problem);
-	}
-
-	// first VRC test
-	if (1)
 	{
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 8> pdb1(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 8> pdb2(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 8> pdb3(&ts, t, pattern3);
+
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 2> pdb1_2(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 3> pdb1_3(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 4> pdb1_4(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 5> pdb1_5(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 2> pdb2_2(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 3> pdb2_3(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 4> pdb2_4(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 5> pdb2_5(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 2> pdb3_2(&ts, t, pattern3);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 3> pdb3_3(&ts, t, pattern3);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 4> pdb3_4(&ts, t, pattern3);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 5> pdb3_5(&ts, t, pattern3);
+		Heuristic<TopSpinState<N>> *h1 = &pdb1;
+		Heuristic<TopSpinState<N>> *h2 = &pdb2;
+		Heuristic<TopSpinState<N>> *h3 = &pdb3;
 		if (!pdb1.Load(prefix))
 		{
 			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
@@ -945,14 +960,59 @@ void TSBiVRC(int bits, int compressionFactor, int problem)
 			pdb2.DivCompress(compressionFactor, true);
 			pdb3.DivCompress(compressionFactor, true);
 		}
+		
+		std::vector<uint64_t> dist = {1, 281,1329858,6904837,16231845,22415146,26628364,27444566,26581762,24040692,21344755,17742727,13977704,10520226,7509651,5122460,3339498,2108385,1306697,799294,481143,285533,163165,88800,42981,17298,5384,1213,127,4};
+		std::vector<int> cutoffs = {0, 9, 11, 13};
+
 		if (bits < 8)
 		{
-			//pdb1.ZeroLowValues(cutoff);
+			switch (bits)
+			{
+				case 2:
+					pdb1.ValueRangeCompress(&pdb1_2, true);
+					pdb2.ValueRangeCompress(&pdb2_2, true);
+					pdb3.ValueRangeCompress(&pdb3_2, true);
+					h1 = &pdb1_2;
+					h2 = &pdb2_2;
+					h3 = &pdb3_2;
+					break;
+				case 3:
+					pdb1.ValueRangeCompress(&pdb1_3, true);
+					pdb2.ValueRangeCompress(&pdb2_3, true);
+					pdb3.ValueRangeCompress(&pdb3_3, true);
+					h1 = &pdb1_3;
+					h2 = &pdb2_3;
+					h3 = &pdb3_3;
+					break;
+				case 4:
+					pdb1.ValueRangeCompress(&pdb1_4, true);
+					pdb2.ValueRangeCompress(&pdb2_4, true);
+					pdb3.ValueRangeCompress(&pdb3_4, true);
+					h1 = &pdb1_4;
+					h2 = &pdb2_4;
+					h3 = &pdb3_4;
+					break;
+				case 5:
+					pdb1.ValueRangeCompress(&pdb1_5, true);
+					pdb2.ValueRangeCompress(&pdb2_5, true);
+					pdb3.ValueRangeCompress(&pdb3_5, true);
+					h1 = &pdb1_5;
+					h2 = &pdb2_5;
+					h3 = &pdb3_5;
+					break;
+				default:
+					printf("Unhandled number of bits\n");
+					exit(0);
+			}
 			pdb1.ValueRangeCompress(bits, true);
-			//pdb2.ZeroLowValues(cutoff);
 			pdb2.ValueRangeCompress(bits, true);
-			//pdb3.ZeroLowValues(cutoff);
 			pdb3.ValueRangeCompress(bits, true);
+//			pdb1.CustomValueRangeCompress(dist, bits, true);
+//			pdb2.CustomValueRangeCompress(dist, bits, true);
+//			pdb3.CustomValueRangeCompress(dist, bits, true);
+//			pdb1.ValueCompress(cutoffs, true);
+//			pdb2.ValueCompress(cutoffs, true);
+//			pdb3.ValueCompress(cutoffs, true);
 		}
 		
 		Heuristic<TopSpinState<N>> h;
@@ -963,48 +1023,19 @@ void TSBiVRC(int bits, int compressionFactor, int problem)
 		h.lookups.push_back({kLeafNode, 1, 1});
 		h.lookups.push_back({kLeafNode, 2, 2});
 		h.heuristics.resize(0);
-		h.heuristics.push_back(&pdb1);
-		h.heuristics.push_back(&pdb2);
-		h.heuristics.push_back(&pdb3);
+		h.heuristics.push_back(h1);
+		h.heuristics.push_back(h2);
+		h.heuristics.push_back(h3);
 		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
 		//ZeroHeuristic<TopSpinState<N>> z;
-		TestTSBiVRC(&h, &p, problem);
+		TestTSBiVRC(&h, &p, first, last);
+
+		printf("Dynamic distribution\n");
+		for (int x = 0; x < 255; x++)
+			if (h.histogram[x] != 0)
+				printf("%d\t%llu\n", x, h.histogram[x]);
 	}
 	
-	if (0)
-	{
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb(&ts, t, pattern1);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern1);
-		pdb.BuildPDB(t, std::thread::hardware_concurrency());
-		pdb.PrintHistogram();
-		
-		averages.resize(5);
-		for (int compression = 1; compression <= 16; compression*=2)
-		{
-			int table[] = {0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4};
-			averages[table[compression]].resize(4);
-			for (int bits = 1; bits <= 8; bits*=2)
-			{
-				printf("[lex][none][min] Compressing by a factor of %d\n", compression);
-				pdb2 = pdb;
-				pdb2.DivCompress(compression, false);
-				pdb2.ZeroLowValues(cutoff);
-				pdb2.PrintHistogram();
-
-				printf("[lex][Delta][min] VRC compression to %d bits [factor of %d overall]\n", bits, (4/bits)*compression);
-				pdb2.ZeroLowValues(cutoff);
-				pdb2.ValueRangeCompress(bits, false);
-				averages[table[compression]][table[bits]] = pdb2.PrintHistogram();
-			}
-		}
-		
-		for (int x = 0; x < averages.size(); x++)
-		{
-			for (int y = 0; y < averages[x].size(); y++)
-				printf("%1.2f\t", averages[x][averages[x].size()-y-1]);
-			printf("\n");
-		}
-	}
 }
 
 
@@ -1101,15 +1132,15 @@ void TSVRC()
 	std::vector<int> pattern = {0, 1, 2, 3, 4, 5, 6};
 	std::vector<int> pattern2 = {0, 1, 2, 3, 4, 5};
 	
-	TopSpin<N, k> ts;
+	TopSpin<N, K> ts;
 	TopSpinState<N> t;
 	ts.StoreGoal(t);
 
 	// MOD compression + LEX
 	{
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb(&ts, t, pattern);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> pdb2(&ts, t, pattern);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> smallpdb(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> smallpdb(&ts, t, pattern2);
 		pdb.BuildPDB(t, std::thread::hardware_concurrency());
 		pdb.PrintHistogram();
 		smallpdb.BuildPDB(t, std::thread::hardware_concurrency());
@@ -1270,3 +1301,471 @@ void MinDeltaPlusMinTOHTest()
 //	SolveProblem();
 //	break;
 //}
+
+
+void RubikDynamicTest()
+{
+	RubiksCube cube;
+	std::vector<int> blank;
+	RubiksState start, goal;
+	goal.Reset();
+	IDAStar<RubiksState, RubiksAction> ida;
+	Timer timer;
+	std::vector<int> edges = {0, 1, 2, 3, 4, 5, 6};
+	RubikPDB pdb1(&cube, goal, edges, blank);
+	RubikPDB pdb2(&cube, goal, edges, blank);
+	RubikPDB pdb3(&cube, goal, edges, blank);
+	std::vector<RubiksAction> rubikPath;
+	
+	if (!pdb1.Load(prefix))
+	{
+		pdb1.BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb1.Save(prefix);
+	}
+	else {
+		pdb1.PrintHistogram();
+	}
+	if (!pdb2.Load(prefix))
+	{
+		pdb2.BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb2.Save(prefix);
+	}
+	else {
+		pdb2.PrintHistogram();
+	}
+	if (!pdb3.Load(prefix))
+	{
+		pdb3.BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb3.Save(prefix);
+	}
+	else {
+		pdb3.PrintHistogram();
+	}
+	pdb1.DivCompress(2, true);
+	pdb2.ValueRangeCompress(2, true);
+	std::vector<uint64_t> dist = {324941267,1436796583,1486721207,1444732064,1384553281,1253754769,1034699573,712569268,335643524,63842841,375040};
+	pdb3.CustomValueRangeCompress(dist, 2, true);
+	
+	Heuristic<RubiksState> h;
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.heuristics.push_back(&pdb1);
+	
+	cube.SetPruneSuccessors(true);
+
+	printf("-=-=-IDA*-=-=-\n");
+	ida.SetHeuristic(&h);
+	ida.SetUseBDPathMax(true);
+	
+//	printf("-=-=-DIV2-=-=-\n");
+//	h.heuristics.back() = &pdb1;
+//	for (int x = 0; x < 100; x++)
+//	{
+//		GetRubikStep14Instance(start, x);
+//		timer.StartTimer();
+//		goal.Reset();
+//		ida.GetPath(&cube, start, goal, rubikPath);
+//		timer.EndTimer();
+//		printf("%llu nodes expanded; %llu generated\n", ida.GetNodesExpanded(), ida.GetNodesTouched());
+//		printf("Solution path length %lu\n", rubikPath.size());
+//		printf("%1.2f elapsed\n", timer.GetElapsedTime());
+//	}
+//
+	printf("-=-=-VRC2-REG-=-=-\n");
+	h.heuristics.back() = &pdb2;
+	for (int x = 0; x < 100; x++)
+	{
+		GetRubikStep14Instance(start, x);
+		timer.StartTimer();
+		goal.Reset();
+		ida.GetPath(&cube, start, goal, rubikPath);
+		timer.EndTimer();
+		printf("%llu nodes expanded; %llu generated\n", ida.GetNodesExpanded(), ida.GetNodesTouched());
+		printf("Solution path length %lu\n", rubikPath.size());
+		printf("%1.2f elapsed\n", timer.GetElapsedTime());
+	}
+
+//	printf("-=-=-VRC2-CUST-=-=-\n");
+//	h.heuristics.back() = &pdb3;
+//	for (int x = 0; x < 100; x++)
+//	{
+//		GetRubikStep14Instance(start, x);
+//		timer.StartTimer();
+//		goal.Reset();
+//		ida.GetPath(&cube, start, goal, rubikPath);
+//		timer.EndTimer();
+//		printf("%llu nodes expanded; %llu generated\n", ida.GetNodesExpanded(), ida.GetNodesTouched());
+//		printf("Solution path length %lu\n", rubikPath.size());
+//		printf("%1.2f elapsed\n", timer.GetElapsedTime());
+//	}
+
+//	printf("Dynamic distribution\n");
+//	for (int x = 0; x < 255; x++)
+//		if (h.histogram[x] != 0)
+//			printf("%d\t%llu\n", x, h.histogram[x]);
+}
+
+
+void GetRubikLength14Instance(RubiksState &start, int which)
+{
+	RubiksCube c;
+	int instances[100][14] = {
+		{4, 10, 5, 10, 17, 6, 1, 11, 0, 10, 16, 9, 14, 4},
+		{15, 0, 12, 16, 1, 6, 17, 8, 17, 8, 2, 11, 4, 15},
+		{6, 12, 2, 16, 9, 13, 8, 2, 15, 11, 4, 8, 4, 16},
+		{9, 13, 16, 1, 14, 0, 11, 13, 4, 10, 12, 6, 5, 15},
+		{1, 9, 4, 6, 0, 4, 15, 5, 12, 0, 14, 9, 4, 16},
+		{5, 8, 4, 8, 5, 9, 5, 11, 0, 7, 11, 12, 8, 17},
+		{14, 11, 4, 14, 5, 6, 4, 10, 1, 4, 15, 9, 13, 7},
+		{17, 1, 4, 10, 4, 16, 4, 16, 8, 13, 15, 2, 4, 17},
+		{7, 12, 11, 4, 15, 1, 17, 2, 5, 14, 9, 5, 8, 10},
+		{10, 13, 15, 1, 16, 3, 7, 9, 17, 4, 9, 17, 6, 15},
+		{0, 5, 10, 16, 8, 14, 7, 2, 6, 1, 4, 12, 8, 13},
+		{4, 6, 5, 17, 7, 4, 17, 9, 17, 3, 9, 3, 17, 3},
+		{15, 7, 13, 17, 11, 3, 10, 4, 12, 10, 0, 16, 2, 9},
+		{6, 10, 16, 2, 4, 7, 0, 14, 16, 9, 2, 17, 2, 9},
+		{9, 16, 0, 5, 16, 7, 1, 6, 0, 3, 10, 2, 12, 11},
+		{1, 7, 3, 10, 2, 10, 2, 8, 4, 11, 13, 17, 5, 7},
+		{5, 11, 16, 4, 9, 13, 4, 15, 8, 15, 0, 11, 12, 7},
+		{14, 17, 11, 4, 8, 3, 10, 4, 10, 0, 5, 7, 13, 3},
+		{17, 8, 16, 11, 14, 5, 13, 2, 16, 10, 3, 12, 0, 5},
+		{8, 9, 2, 3, 11, 15, 0, 17, 9, 2, 13, 10, 3, 17},
+		{10, 17, 2, 17, 10, 2, 11, 16, 8, 16, 10, 5, 16, 1},
+		{0, 6, 17, 1, 15, 9, 4, 15, 3, 14, 1, 11, 1, 3},
+		{4, 7, 17, 9, 17, 9, 0, 9, 17, 3, 13, 5, 15, 11},
+		{13, 15, 1, 5, 16, 6, 15, 6, 1, 10, 2, 14, 3, 7},
+		{6, 16, 1, 16, 3, 9, 1, 13, 8, 12, 7, 4, 9, 14},
+		{9, 13, 2, 5, 16, 5, 9, 17, 7, 4, 6, 9, 14, 3},
+		{1, 13, 11, 5, 15, 3, 7, 12, 5, 7, 12, 5, 14, 0},
+		{5, 17, 10, 4, 9, 4, 13, 1, 5, 6, 0, 6, 3, 17},
+		{14, 8, 10, 13, 11, 12, 6, 11, 0, 5, 12, 0, 14, 1},
+		{17, 10, 0, 11, 16, 9, 5, 6, 17, 8, 3, 11, 13, 5},
+		{8, 17, 10, 15, 4, 8, 0, 15, 1, 16, 10, 13, 15, 6},
+		{10, 14, 15, 6, 13, 5, 13, 0, 3, 11, 5, 7, 5, 6},
+		{0, 12, 11, 17, 9, 1, 11, 16, 7, 13, 5, 14, 17, 5},
+		{4, 15, 11, 3, 17, 7, 13, 6, 17, 7, 12, 0, 5, 6},
+		{13, 16, 2, 3, 11, 14, 2, 11, 17, 7, 2, 13, 8, 1},
+		{6, 12, 3, 14, 8, 5, 12, 5, 17, 4, 14, 1, 12, 17},
+		{9, 13, 7, 9, 5, 7, 2, 3, 6, 2, 15, 2, 13, 1},
+		{1, 17, 7, 9, 14, 0, 3, 11, 15, 10, 0, 4, 15, 5},
+		{3, 9, 2, 17, 5, 10, 17, 10, 1, 12, 9, 3, 8, 4},
+		{14, 4, 15, 11, 5, 15, 11, 0, 14, 10, 1, 10, 12, 11},
+		{17, 4, 11, 13, 4, 14, 9, 13, 11, 17, 1, 6, 16, 0},
+		{8, 5, 8, 15, 6, 4, 15, 11, 14, 7, 4, 7, 4, 9},
+		{10, 14, 8, 3, 15, 6, 5, 17, 3, 12, 11, 16, 6, 2},
+		{0, 15, 3, 17, 0, 9, 3, 14, 16, 2, 9, 14, 0, 4},
+		{4, 16, 5, 7, 2, 9, 4, 12, 6, 17, 2, 13, 7, 14},
+		{13, 6, 9, 3, 16, 8, 9, 13, 15, 4, 12, 0, 15, 3},
+		{6, 13, 6, 5, 7, 4, 11, 15, 10, 13, 3, 8, 10, 2},
+		{9, 16, 0, 6, 1, 9, 12, 7, 9, 5, 16, 5, 15, 4},
+		{1, 4, 9, 3, 8, 4, 8, 4, 6, 14, 5, 14, 16, 3},
+		{3, 14, 17, 11, 13, 4, 8, 15, 6, 15, 8, 4, 10, 2},
+		{14, 17, 0, 13, 9, 3, 17, 10, 3, 8, 3, 17, 3, 16},
+		{17, 5, 8, 15, 2, 9, 3, 17, 6, 17, 0, 4, 13, 4},
+		{8, 14, 2, 17, 7, 10, 5, 13, 0, 9, 16, 7, 17, 0},
+		{11, 15, 2, 11, 17, 11, 4, 17, 1, 11, 12, 3, 14, 1},
+		{0, 3, 15, 0, 7, 10, 3, 12, 6, 17, 9, 0, 7, 1},
+		{4, 12, 15, 7, 3, 7, 15, 7, 13, 3, 15, 11, 5, 10},
+		{13, 1, 6, 11, 16, 3, 14, 5, 16, 1, 9, 0, 16, 0},
+		{6, 3, 7, 2, 15, 6, 2, 15, 6, 11, 17, 7, 0, 16},
+		{9, 4, 13, 9, 5, 13, 11, 17, 9, 15, 11, 3, 14, 9},
+		{1, 14, 9, 14, 4, 9, 1, 16, 10, 16, 11, 13, 17, 1},
+		{3, 11, 13, 15, 9, 16, 8, 13, 10, 15, 0, 11, 5, 15},
+		{14, 5, 11, 0, 13, 6, 1, 11, 3, 9, 14, 8, 10, 12},
+		{17, 2, 9, 14, 11, 12, 10, 4, 9, 14, 0, 5, 17, 6},
+		{8, 2, 14, 10, 0, 17, 7, 5, 8, 12, 7, 12, 10, 3},
+		{11, 3, 14, 7, 0, 6, 13, 0, 6, 15, 5, 7, 3, 12},
+		{0, 12, 9, 3, 8, 9, 14, 15, 0, 4, 6, 5, 10, 17},
+		{4, 9, 16, 8, 1, 4, 12, 4, 15, 2, 4, 6, 3, 15},
+		{13, 3, 12, 1, 7, 0, 5, 8, 17, 10, 17, 5, 9, 17},
+		{16, 4, 12, 9, 4, 13, 9, 1, 8, 2, 3, 12, 10, 0},
+		{9, 1, 7, 4, 14, 2, 13, 8, 4, 13, 5, 11, 13, 10},
+		{1, 7, 13, 16, 10, 16, 8, 5, 11, 0, 14, 8, 5, 7},
+		{3, 15, 8, 13, 3, 10, 3, 12, 16, 11, 17, 0, 5, 12},
+		{14, 10, 5, 10, 2, 13, 17, 7, 16, 7, 0, 3, 8, 0},
+		{17, 2, 8, 12, 2, 16, 5, 10, 0, 17, 5, 16, 10, 3},
+		{8, 5, 8, 0, 7, 3, 12, 10, 12, 6, 17, 3, 16, 7},
+		{11, 17, 6, 11, 2, 6, 4, 14, 0, 11, 17, 0, 6, 13},
+		{0, 3, 8, 2, 9, 17, 5, 7, 12, 8, 0, 14, 4, 16},
+		{4, 14, 7, 5, 11, 13, 4, 6, 1, 15, 1, 13, 1, 7},
+		{13, 9, 16, 7, 12, 9, 4, 12, 8, 15, 1, 4, 11, 17},
+		{16, 1, 6, 14, 15, 8, 16, 4, 11, 13, 2, 7, 1, 3},
+		{9, 0, 14, 5, 6, 1, 15, 2, 12, 4, 7, 17, 10, 16},
+		{1, 7, 0, 13, 1, 14, 0, 14, 7, 13, 9, 0, 6, 1},
+		{3, 10, 17, 11, 1, 15, 2, 8, 11, 16, 5, 14, 16, 7},
+		{12, 2, 17, 8, 2, 6, 10, 0, 12, 6, 12, 0, 11, 12},
+		{17, 7, 1, 6, 9, 15, 9, 5, 9, 14, 15, 7, 10, 3},
+		{8, 11, 2, 17, 6, 1, 7, 11, 3, 6, 10, 16, 3, 14},
+		{11, 1, 14, 8, 0, 6, 5, 8, 2, 4, 14, 9, 3, 17},
+		{2, 8, 15, 7, 4, 16, 8, 5, 16, 0, 10, 13, 2, 6},
+		{4, 9, 15, 5, 12, 1, 15, 1, 5, 10, 5, 13, 5, 9},
+		{13, 1, 10, 16, 3, 13, 9, 15, 0, 14, 3, 6, 16, 8},
+		{16, 6, 10, 13, 4, 12, 3, 14, 11, 15, 0, 9, 12, 17},
+		{9, 13, 9, 1, 13, 4, 17, 6, 4, 16, 4, 14, 1, 10},
+		{1, 10, 13, 4, 16, 8, 10, 17, 5, 13, 8, 0, 15, 9},
+		{3, 16, 11, 2, 8, 16, 4, 9, 5, 16, 11, 16, 5, 12},
+		{12, 7, 11, 15, 11, 17, 6, 0, 16, 0, 17, 9, 15, 4},
+		{17, 11, 12, 10, 2, 13, 2, 7, 2, 12, 4, 16, 0, 7},
+		{8, 17, 8, 5, 14, 11, 14, 17, 8, 11, 1, 12, 7, 4},
+		{11, 14, 8, 4, 11, 4, 7, 5, 9, 12, 10, 1, 14, 16},
+		{2, 9, 16, 2, 5, 14, 10, 16, 2, 11, 0, 5, 6, 2},
+		{4, 17, 9, 1, 12, 5, 17, 8, 11, 13, 15, 6, 12, 4}
+	};
+	
+	start.Reset();
+	for (int x = 13; x >= 0; x--)
+	{
+		c.UndoAction(start, instances[which][x]);
+		printf("%d ", instances[which][x]);
+	}
+	printf("\n");
+}
+
+void GetRubikStep14Instance(RubiksState &start, int which)
+{
+	RubiksCube c;
+	int table[] = {52058078,116173544,208694125,131936966,141559500,133800745,194246206,50028346,167007978,207116816,163867037,119897198,201847476,210859515,117688410,121633885};
+	int table2[] = {145008714,165971878,154717942,218927374,182772845,5808407,19155194,137438954,13143598,124513215,132635260,39667704,2462244,41006424,214146208,54305743};
+	int first = 0, last = 50;
+	srandom(table[which&0xF]^table2[(which>>4)&0xF]);
+	
+	start.Reset();
+	for (int x = 0; x < 14; x++)
+	{
+		c.ApplyAction(start, random()%18);
+	}
+}
+
+MNPuzzleState<4, 4> GetSTPInstance(int which);
+void STPTest(int bits, int factor)
+{
+	printf("Running with %d bits, %d compression\n", bits, factor);
+	MNPuzzle<4, 4> mnp;
+	MNPuzzleState<4, 4> s;
+	MNPuzzleState<4, 4> g;
+
+	std::vector<int> p1 = {0,1,2,3,4,5,6,7};
+	std::vector<int> p2 = {0,8,9,10,11,12,13,14,15};
+	std::vector<int> p3 = {0,1,4,5,8,9,12,13};
+	std::vector<int> p4 = {0,2,3,6,7,10,11,14,15};
+	mnp.StoreGoal(g);
+	
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb1(&mnp, g, p1);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, g, p2);
+//	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb3(&mnp, g, p3);
+//	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb4(&mnp, g, p4);
+	if (pdb1.Load(prefix) == false)
+	{
+		pdb1.BuildPDB(t, std::thread::hardware_concurrency());
+		pdb1.Save(prefix);
+	}
+	else {
+		pdb1.PrintHistogram();
+	}
+	
+	if (pdb2.Load(prefix) == false)
+	{
+		pdb2.BuildPDB(t, std::thread::hardware_concurrency());
+		pdb2.Save(prefix);
+	}
+	else {
+		pdb2.PrintHistogram();
+	}
+
+//	if (pdb3.Load(prefix) == false)
+//	{
+//		pdb3.BuildPDB(t, std::thread::hardware_concurrency());
+//		pdb3.Save(prefix);
+//	}
+//	else {
+//		pdb3.PrintHistogram();
+//	}
+//
+//	if (pdb4.Load(prefix) == false)
+//	{
+//		pdb4.BuildPDB(t, std::thread::hardware_concurrency());
+//		pdb4.Save(prefix);
+//	}
+//	else {
+//		pdb4.PrintHistogram();
+//	}
+
+	Heuristic<MNPuzzleState<4, 4>> h;
+	
+	h.lookups.resize(0);
+	h.lookups.push_back({kMaxNode, 1, 3});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	h.lookups.push_back({kLeafNode, 1, 2});
+//	h.lookups.push_back({kLeafNode, 1, 3});
+	h.heuristics.resize(0);
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb2);
+	h.heuristics.push_back(&mnp);
+//	h.heuristics.push_back(&pdb3);
+//	h.heuristics.push_back(&pdb4);
+	if (factor > 1)
+	{
+		pdb1.DivCompress(factor, true);
+		pdb2.DivCompress(factor, true);
+	}
+//	pdb3.DivCompress(factor, true);
+//	pdb4.DivCompress(factor, true);
+	if (bits < 8)
+	{
+		pdb1.ValueRangeCompress(bits, true);
+		pdb2.ValueRangeCompress(bits, true);
+	}
+//	pdb3.ValueRangeCompress(bits, true);
+//	pdb4.ValueRangeCompress(bits, true);
+	g.Reset();
+	
+	{
+		IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
+		ida.SetUseBDPathMax(true);
+		ida.SetHeuristic(&h);
+		std::vector<slideDir> path1;
+		MNPuzzleState<4, 4> start;
+		Timer t1;
+		t1.StartTimer();
+		uint64_t nodesExpanded = 0;
+		uint64_t nodesGenerated = 0;
+		double totaltime = 0;
+		
+		
+		
+		g.Reset();
+		mnp.StoreGoal(g);
+		for (int x = 0; x < 100; x++)
+		{
+			s = GetSTPInstance(x);
+			g.Reset();
+			printf("Problem %d of %d\n", x+1, 100);
+			std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
+			Timer timer;
+			timer.StartTimer();
+			ida.GetPath(&mnp, s, g, path1);
+			timer.EndTimer();
+			totaltime += timer.GetElapsedTime();
+			printf("%llu nodes expanded; %llu generated\n", ida.GetNodesExpanded(), ida.GetNodesTouched());
+			printf("Solution path length %lu\n", path1.size());
+			printf("%1.2f elapsed\n", timer.GetElapsedTime());
+			nodesExpanded += ida.GetNodesExpanded();
+			nodesGenerated += ida.GetNodesTouched();
+		}
+		printf("Sequential: %1.2fs elapsed; %llu nodes expanded; %llu nodes generated\n", t1.EndTimer(), nodesExpanded, nodesGenerated);
+	}
+}
+
+MNPuzzleState<4, 4> GetSTPInstance(int which)
+{
+	int instances[100][16] =
+	{{14, 13, 15, 7, 11, 12, 9, 5, 6, 0, 2, 1, 4, 8, 10, 3},
+		{13, 5, 4, 10, 9, 12, 8, 14, 2, 3, 7, 1, 0, 15, 11, 6},
+		{14, 7, 8, 2, 13, 11, 10, 4, 9, 12, 5, 0, 3, 6, 1, 15},
+		{5, 12, 10, 7, 15, 11, 14, 0, 8, 2, 1, 13, 3, 4, 9, 6},
+		{4, 7, 14, 13, 10, 3, 9, 12, 11, 5, 6, 15, 1, 2, 8, 0},
+		{14, 7, 1, 9, 12, 3, 6, 15, 8, 11, 2, 5, 10, 0, 4, 13},
+		{2, 11, 15, 5, 13, 4, 6, 7, 12, 8, 10, 1, 9, 3, 14, 0},
+		{12, 11, 15, 3, 8, 0, 4, 2, 6, 13, 9, 5, 14, 1, 10, 7},
+		{3, 14, 9, 11, 5, 4, 8, 2, 13, 12, 6, 7, 10, 1, 15, 0},
+		{13, 11, 8, 9, 0, 15, 7, 10, 4, 3, 6, 14, 5, 12, 2, 1},
+		{5, 9, 13, 14, 6, 3, 7, 12, 10, 8, 4, 0, 15, 2, 11, 1},
+		{14, 1, 9, 6, 4, 8, 12, 5, 7, 2, 3, 0, 10, 11, 13, 15},
+		{3, 6, 5, 2, 10, 0, 15, 14, 1, 4, 13, 12, 9, 8, 11, 7},
+		{7, 6, 8, 1, 11, 5, 14, 10, 3, 4, 9, 13, 15, 2, 0, 12},
+		{13, 11, 4, 12, 1, 8, 9, 15, 6, 5, 14, 2, 7, 3, 10, 0},
+		{1, 3, 2, 5, 10, 9, 15, 6, 8, 14, 13, 11, 12, 4, 7, 0},
+		{15, 14, 0, 4, 11, 1, 6, 13, 7, 5, 8, 9, 3, 2, 10, 12},
+		{6, 0, 14, 12, 1, 15, 9, 10, 11, 4, 7, 2, 8, 3, 5, 13},
+		{7, 11, 8, 3, 14, 0, 6, 15, 1, 4, 13, 9, 5, 12, 2, 10},
+		{6, 12, 11, 3, 13, 7, 9, 15, 2, 14, 8, 10, 4, 1, 5, 0},
+		{12, 8, 14, 6, 11, 4, 7, 0, 5, 1, 10, 15, 3, 13, 9, 2},
+		{14, 3, 9, 1, 15, 8, 4, 5, 11, 7, 10, 13, 0, 2, 12, 6},
+		{10, 9, 3, 11, 0, 13, 2, 14, 5, 6, 4, 7, 8, 15, 1, 12},
+		{7, 3, 14, 13, 4, 1, 10, 8, 5, 12, 9, 11, 2, 15, 6, 0},
+		{11, 4, 2, 7, 1, 0, 10, 15, 6, 9, 14, 8, 3, 13, 5, 12},
+		{5, 7, 3, 12, 15, 13, 14, 8, 0, 10, 9, 6, 1, 4, 2, 11},
+		{14, 1, 8, 15, 2, 6, 0, 3, 9, 12, 10, 13, 4, 7, 5, 11},
+		{13, 14, 6, 12, 4, 5, 1, 0, 9, 3, 10, 2, 15, 11, 8, 7},
+		{9, 8, 0, 2, 15, 1, 4, 14, 3, 10, 7, 5, 11, 13, 6, 12},
+		{12, 15, 2, 6, 1, 14, 4, 8, 5, 3, 7, 0, 10, 13, 9, 11},
+		{12, 8, 15, 13, 1, 0, 5, 4, 6, 3, 2, 11, 9, 7, 14, 10},
+		{14, 10, 9, 4, 13, 6, 5, 8, 2, 12, 7, 0, 1, 3, 11, 15},
+		{14, 3, 5, 15, 11, 6, 13, 9, 0, 10, 2, 12, 4, 1, 7, 8},
+		{6, 11, 7, 8, 13, 2, 5, 4, 1, 10, 3, 9, 14, 0, 12, 15},
+		{1, 6, 12, 14, 3, 2, 15, 8, 4, 5, 13, 9, 0, 7, 11, 10},
+		{12, 6, 0, 4, 7, 3, 15, 1, 13, 9, 8, 11, 2, 14, 5, 10},
+		{8, 1, 7, 12, 11, 0, 10, 5, 9, 15, 6, 13, 14, 2, 3, 4},
+		{7, 15, 8, 2, 13, 6, 3, 12, 11, 0, 4, 10, 9, 5, 1, 14},
+		{9, 0, 4, 10, 1, 14, 15, 3, 12, 6, 5, 7, 11, 13, 8, 2},
+		{11, 5, 1, 14, 4, 12, 10, 0, 2, 7, 13, 3, 9, 15, 6, 8},
+		{8, 13, 10, 9, 11, 3, 15, 6, 0, 1, 2, 14, 12, 5, 4, 7},
+		{4, 5, 7, 2, 9, 14, 12, 13, 0, 3, 6, 11, 8, 1, 15, 10},
+		{11, 15, 14, 13, 1, 9, 10, 4, 3, 6, 2, 12, 7, 5, 8, 0},
+		{12, 9, 0, 6, 8, 3, 5, 14, 2, 4, 11, 7, 10, 1, 15, 13},
+		{3, 14, 9, 7, 12, 15, 0, 4, 1, 8, 5, 6, 11, 10, 2, 13},
+		{8, 4, 6, 1, 14, 12, 2, 15, 13, 10, 9, 5, 3, 7, 0, 11},
+		{6, 10, 1, 14, 15, 8, 3, 5, 13, 0, 2, 7, 4, 9, 11, 12},
+		{8, 11, 4, 6, 7, 3, 10, 9, 2, 12, 15, 13, 0, 1, 5, 14},
+		{10, 0, 2, 4, 5, 1, 6, 12, 11, 13, 9, 7, 15, 3, 14, 8},
+		{12, 5, 13, 11, 2, 10, 0, 9, 7, 8, 4, 3, 14, 6, 15, 1},
+		{10, 2, 8, 4, 15, 0, 1, 14, 11, 13, 3, 6, 9, 7, 5, 12},
+		{10, 8, 0, 12, 3, 7, 6, 2, 1, 14, 4, 11, 15, 13, 9, 5},
+		{14, 9, 12, 13, 15, 4, 8, 10, 0, 2, 1, 7, 3, 11, 5, 6},
+		{12, 11, 0, 8, 10, 2, 13, 15, 5, 4, 7, 3, 6, 9, 14, 1},
+		{13, 8, 14, 3, 9, 1, 0, 7, 15, 5, 4, 10, 12, 2, 6, 11},
+		{3, 15, 2, 5, 11, 6, 4, 7, 12, 9, 1, 0, 13, 14, 10, 8},
+		{5, 11, 6, 9, 4, 13, 12, 0, 8, 2, 15, 10, 1, 7, 3, 14},
+		{5, 0, 15, 8, 4, 6, 1, 14, 10, 11, 3, 9, 7, 12, 2, 13},
+		{15, 14, 6, 7, 10, 1, 0, 11, 12, 8, 4, 9, 2, 5, 13, 3},
+		{11, 14, 13, 1, 2, 3, 12, 4, 15, 7, 9, 5, 10, 6, 8, 0},
+		{6, 13, 3, 2, 11, 9, 5, 10, 1, 7, 12, 14, 8, 4, 0, 15},
+		{4, 6, 12, 0, 14, 2, 9, 13, 11, 8, 3, 15, 7, 10, 1, 5},
+		{8, 10, 9, 11, 14, 1, 7, 15, 13, 4, 0, 12, 6, 2, 5, 3},
+		{5, 2, 14, 0, 7, 8, 6, 3, 11, 12, 13, 15, 4, 10, 9, 1},
+		{7, 8, 3, 2, 10, 12, 4, 6, 11, 13, 5, 15, 0, 1, 9, 14},
+		{11, 6, 14, 12, 3, 5, 1, 15, 8, 0, 10, 13, 9, 7, 4, 2},
+		{7, 1, 2, 4, 8, 3, 6, 11, 10, 15, 0, 5, 14, 12, 13, 9},
+		{7, 3, 1, 13, 12, 10, 5, 2, 8, 0, 6, 11, 14, 15, 4, 9},
+		{6, 0, 5, 15, 1, 14, 4, 9, 2, 13, 8, 10, 11, 12, 7, 3},
+		{15, 1, 3, 12, 4, 0, 6, 5, 2, 8, 14, 9, 13, 10, 7, 11},
+		{5, 7, 0, 11, 12, 1, 9, 10, 15, 6, 2, 3, 8, 4, 13, 14},
+		{12, 15, 11, 10, 4, 5, 14, 0, 13, 7, 1, 2, 9, 8, 3, 6},
+		{6, 14, 10, 5, 15, 8, 7, 1, 3, 4, 2, 0, 12, 9, 11, 13},
+		{14, 13, 4, 11, 15, 8, 6, 9, 0, 7, 3, 1, 2, 10, 12, 5},
+		{14, 4, 0, 10, 6, 5, 1, 3, 9, 2, 13, 15, 12, 7, 8, 11},
+		{15, 10, 8, 3, 0, 6, 9, 5, 1, 14, 13, 11, 7, 2, 12, 4},
+		{0, 13, 2, 4, 12, 14, 6, 9, 15, 1, 10, 3, 11, 5, 8, 7},
+		{3, 14, 13, 6, 4, 15, 8, 9, 5, 12, 10, 0, 2, 7, 1, 11},
+		{0, 1, 9, 7, 11, 13, 5, 3, 14, 12, 4, 2, 8, 6, 10, 15},
+		{11, 0, 15, 8, 13, 12, 3, 5, 10, 1, 4, 6, 14, 9, 7, 2},
+		{13, 0, 9, 12, 11, 6, 3, 5, 15, 8, 1, 10, 4, 14, 2, 7},
+		{14, 10, 2, 1, 13, 9, 8, 11, 7, 3, 6, 12, 15, 5, 4, 0},
+		{12, 3, 9, 1, 4, 5, 10, 2, 6, 11, 15, 0, 14, 7, 13, 8},
+		{15, 8, 10, 7, 0, 12, 14, 1, 5, 9, 6, 3, 13, 11, 4, 2},
+		{4, 7, 13, 10, 1, 2, 9, 6, 12, 8, 14, 5, 3, 0, 11, 15},
+		{6, 0, 5, 10, 11, 12, 9, 2, 1, 7, 4, 3, 14, 8, 13, 15},
+		{9, 5, 11, 10, 13, 0, 2, 1, 8, 6, 14, 12, 4, 7, 3, 15},
+		{15, 2, 12, 11, 14, 13, 9, 5, 1, 3, 8, 7, 0, 10, 6, 4},
+		{11, 1, 7, 4, 10, 13, 3, 8, 9, 14, 0, 15, 6, 5, 2, 12},
+		{5, 4, 7, 1, 11, 12, 14, 15, 10, 13, 8, 6, 2, 0, 9, 3},
+		{9, 7, 5, 2, 14, 15, 12, 10, 11, 3, 6, 1, 8, 13, 0, 4},
+		{3, 2, 7, 9, 0, 15, 12, 4, 6, 11, 5, 14, 8, 13, 10, 1},
+		{13, 9, 14, 6, 12, 8, 1, 2, 3, 4, 0, 7, 5, 10, 11, 15},
+		{5, 7, 11, 8, 0, 14, 9, 13, 10, 12, 3, 15, 6, 1, 4, 2},
+		{4, 3, 6, 13, 7, 15, 9, 0, 10, 5, 8, 11, 2, 12, 1, 14},
+		{1, 7, 15, 14, 2, 6, 4, 9, 12, 11, 13, 3, 0, 8, 5, 10},
+		{9, 14, 5, 7, 8, 15, 1, 2, 10, 4, 13, 6, 12, 0, 11, 3},
+		{0, 11, 3, 12, 5, 2, 1, 9, 8, 10, 14, 15, 7, 4, 13, 6},
+		{7, 15, 4, 0, 10, 9, 2, 5, 12, 11, 13, 6, 1, 3, 14, 8},
+		{11, 4, 0, 8, 6, 10, 5, 13, 12, 7, 14, 3, 1, 2, 9, 15}};
+	
+	MNPuzzleState<4, 4> s;
+	for (int x = 0; x < 16; x++)
+	{
+		s.puzzle[x] = instances[which][x];
+		if (s.puzzle[x] == 0)
+			s.blank = x;
+	}
+	return s;
+}
