@@ -25,6 +25,7 @@
 #include "RubiksCube.h"
 #include "MNPuzzle.h"
 
+void TOHTest(int deltaFactor, int bits, int factor, int first = 0, int last = 50);
 void STPTest(int bits, int factor);
 void RubikDynamicTest();
 void GetRubikLength14Instance(RubiksState &start, int which);
@@ -34,7 +35,6 @@ void MinDeltaPlusMinTest();
 void MinDeltaPlusMinTopSpinTest();
 void MinDeltaPlusMinTOHTest();
 void TSVRC();
-void TSIDAVRC(int bits, int compressionFactor, int first = 0, int last = 50);
 void TSBiVRC(int bits, int compressionFactor, int first = 0, int last = 50);
 template <int N, int k>
 float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr);
@@ -80,6 +80,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Delta + MD", "Test what happens when we add delta over MD with min compression.", kNoModifier, 'm');
 	InstallKeyboardHandler(MyDisplayHandler, "Delta + Min", "Test what happens when we add delta over min with min compression.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Delta + Min", "Test what happens when we add delta over min with min compression on Top Spin", kAnyModifier, 't');
+	InstallKeyboardHandler(MyDisplayHandler, "TOH", "TOH Test", kAnyModifier, 'h');
 	//InstallKeyboardHandler(MyDisplayHandler, "Delta + Min", "Test what happens when we add delta over min with min compression on TOH", kAnyModifier, 'd');
 
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
@@ -91,6 +92,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-pdb", "-pdb <dir>", "Set the directory to use for PDBs");
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test <bits> <factor>", "Basic test comparing A*, IDA*, MM");
 	InstallCommandLineHandler(MyCLHandler, "-rubik", "-rubik", "Duplicating Zahavi et al 2007.");
+	InstallCommandLineHandler(MyCLHandler, "-toh", "-toh <delta> <bits> <factor>", "Run TOH test with <delta> compression factor, <bits> VC, <factor> min.");
 	
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler);
@@ -201,6 +203,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		//TSBiVRC(atoi(argument[1]), atoi(argument[2]));
 		exit(0);
 	}
+	else if (strcmp(argument[0], "-toh") == 0 && maxNumArgs >= 4)
+	{
+		TOHTest(atoi(argument[1]), atoi(argument[2]), atoi(argument[3]));
+		exit(0);
+	}
 	return 0;
 }
 
@@ -241,11 +248,22 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		}
 			break;
+		case 'h':
+		{
+			//TOHTest(int deltaFactor, int bits, int factor, int first, int last)
+			//TOHTest(64, 8, 1, 0, 10);
+			//TOHTest(64, 2, 1, 0, 10);
+			//TOHTest(64, 8, 4, 0, 10);
+			TOHTest(64, 1, 1, 0, 10);
+			exit(0);
+		}
 		case 't':
 		{
-			TSBiVRC(8, 1, 0, 10);
+//			TSBiVRC(8, 1, 0, 10);
 //			TSBiVRC(4, 1, 0, 10);
+			TSBiVRC(3, 1, 0, 10);
 //			TSBiVRC(2, 1, 0, 10);
+//			TSBiVRC(4, 1);
 			exit(0);
 //			std::vector<int> pattern = {0,1,2,3,4,5,6,7};
 //			MNPuzzle<4, 4> mnp;
@@ -284,7 +302,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 //			printf("-=-=-=8 bits=-=-=-\n");
 			TSBiVRC(2, 1);
-//			TSIDAVRC(8, 1, 0);
 //			printf("-=-=-=4 bits=-=-=-\n");
 //			TSBiVRC(4, 1);
 //			GetAveragePDBValue<18, 4>(8, 3, 1, true, false);
@@ -827,80 +844,10 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, i
 		}
 
 	}
+	mm.PrintHDist();
 	
 //	exit(0);
 }
-
-void TSIDAVRC(int bits, int compressionFactor, int first, int last)
-{
-	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
-	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
-	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0, 1};//, 5, 6, 7};
-	
-	TopSpin<N, K> ts;
-	TopSpinState<N> t, d, goal;
-	ts.StoreGoal(t);
-	std::vector<std::vector<double>> averages;
-	
-	if (1)
-	{
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb1(&ts, t, pattern1);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb2(&ts, t, pattern2);
-		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>> pdb3(&ts, t, pattern3);
-		if (!pdb1.Load(prefix))
-		{
-			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb1.Save(prefix);
-		}
-		if (!pdb2.Load(prefix))
-		{
-			pdb2.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb2.Save(prefix);
-		}
-		if (!pdb3.Load(prefix))
-		{
-			pdb3.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb3.Save(prefix);
-		}
-		if (compressionFactor > 1)
-		{
-			pdb1.DivCompress(compressionFactor, true);
-			pdb2.DivCompress(compressionFactor, true);
-			pdb3.DivCompress(compressionFactor, true);
-		}
-		if (bits < 8)
-		{
-			std::vector<int> v;
-			std::vector<uint64_t> hist;
-			pdb1.GetHistogram(hist);
-			pdb1.PrintHistogram();
-			int interval = 1<<bits;
-			float i = float(hist.size())/float(interval);
-			if (i < 1) i = 1;
-			for (int x = 0; x < interval; x++)
-				v.push_back(int(float(x)*i));
-			pdb1.ValueCompress(v, true);
-			pdb2.ValueCompress(v, true);
-			pdb3.ValueCompress(v, true);
-		}
-		
-		Heuristic<TopSpinState<N>> h;
-		
-		h.lookups.resize(0);
-		h.lookups.push_back({kMaxNode, 1, 3});
-		h.lookups.push_back({kLeafNode, 0, 0});
-		h.lookups.push_back({kLeafNode, 1, 1});
-		h.lookups.push_back({kLeafNode, 2, 2});
-		h.heuristics.resize(0);
-		h.heuristics.push_back(&pdb1);
-		h.heuristics.push_back(&pdb2);
-		h.heuristics.push_back(&pdb3);
-		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
-		//ZeroHeuristic<TopSpinState<N>> z;
-		TestTSBiVRC(&h, &p, first, last);
-	}
-}
-
 
 void TSBiVRC(int bits, int compressionFactor, int first, int last)
 {
@@ -962,57 +909,63 @@ void TSBiVRC(int bits, int compressionFactor, int first, int last)
 		}
 		
 		std::vector<uint64_t> dist = {1, 281,1329858,6904837,16231845,22415146,26628364,27444566,26581762,24040692,21344755,17742727,13977704,10520226,7509651,5122460,3339498,2108385,1306697,799294,481143,285533,163165,88800,42981,17298,5384,1213,127,4};
-		std::vector<int> cutoffs = {0, 9, 11, 13};
+//		std::vector<int> cutoffs = {0, 9, 11, 13};
+		std::vector<int> cutoffs = {0, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24};
 
 		if (bits < 8)
 		{
-			switch (bits)
+			if (1)
 			{
-				case 2:
-					pdb1.ValueRangeCompress(&pdb1_2, true);
-					pdb2.ValueRangeCompress(&pdb2_2, true);
-					pdb3.ValueRangeCompress(&pdb3_2, true);
-					h1 = &pdb1_2;
-					h2 = &pdb2_2;
-					h3 = &pdb3_2;
-					break;
-				case 3:
-					pdb1.ValueRangeCompress(&pdb1_3, true);
-					pdb2.ValueRangeCompress(&pdb2_3, true);
-					pdb3.ValueRangeCompress(&pdb3_3, true);
-					h1 = &pdb1_3;
-					h2 = &pdb2_3;
-					h3 = &pdb3_3;
-					break;
-				case 4:
-					pdb1.ValueRangeCompress(&pdb1_4, true);
-					pdb2.ValueRangeCompress(&pdb2_4, true);
-					pdb3.ValueRangeCompress(&pdb3_4, true);
-					h1 = &pdb1_4;
-					h2 = &pdb2_4;
-					h3 = &pdb3_4;
-					break;
-				case 5:
-					pdb1.ValueRangeCompress(&pdb1_5, true);
-					pdb2.ValueRangeCompress(&pdb2_5, true);
-					pdb3.ValueRangeCompress(&pdb3_5, true);
-					h1 = &pdb1_5;
-					h2 = &pdb2_5;
-					h3 = &pdb3_5;
-					break;
-				default:
-					printf("Unhandled number of bits\n");
-					exit(0);
+				switch (bits)
+				{
+					case 2:
+						pdb1.ValueRangeCompress(&pdb1_2, true);
+						pdb2.ValueRangeCompress(&pdb2_2, true);
+						pdb3.ValueRangeCompress(&pdb3_2, true);
+						h1 = &pdb1_2;
+						h2 = &pdb2_2;
+						h3 = &pdb3_2;
+						break;
+					case 3:
+						pdb1.ValueRangeCompress(&pdb1_3, true);
+						pdb2.ValueRangeCompress(&pdb2_3, true);
+						pdb3.ValueRangeCompress(&pdb3_3, true);
+						h1 = &pdb1_3;
+						h2 = &pdb2_3;
+						h3 = &pdb3_3;
+						break;
+					case 4:
+						pdb1.ValueRangeCompress(&pdb1_4, true);
+						pdb2.ValueRangeCompress(&pdb2_4, true);
+						pdb3.ValueRangeCompress(&pdb3_4, true);
+						h1 = &pdb1_4;
+						h2 = &pdb2_4;
+						h3 = &pdb3_4;
+						break;
+					case 5:
+						pdb1.ValueRangeCompress(&pdb1_5, true);
+						pdb2.ValueRangeCompress(&pdb2_5, true);
+						pdb3.ValueRangeCompress(&pdb3_5, true);
+						h1 = &pdb1_5;
+						h2 = &pdb2_5;
+						h3 = &pdb3_5;
+						break;
+					default:
+						printf("Unhandled number of bits\n");
+						exit(0);
+				}
 			}
-			pdb1.ValueRangeCompress(bits, true);
-			pdb2.ValueRangeCompress(bits, true);
-			pdb3.ValueRangeCompress(bits, true);
-//			pdb1.CustomValueRangeCompress(dist, bits, true);
-//			pdb2.CustomValueRangeCompress(dist, bits, true);
-//			pdb3.CustomValueRangeCompress(dist, bits, true);
-//			pdb1.ValueCompress(cutoffs, true);
-//			pdb2.ValueCompress(cutoffs, true);
-//			pdb3.ValueCompress(cutoffs, true);
+			else {
+				pdb1.ValueRangeCompress(bits, true);
+				pdb2.ValueRangeCompress(bits, true);
+				pdb3.ValueRangeCompress(bits, true);
+//				pdb1.CustomValueRangeCompress(dist, bits, true);
+//				pdb2.CustomValueRangeCompress(dist, bits, true);
+//				pdb3.CustomValueRangeCompress(dist, bits, true);
+//				pdb1.ValueCompress(cutoffs, true);
+//				pdb2.ValueCompress(cutoffs, true);
+//				pdb3.ValueCompress(cutoffs, true);
+			}
 		}
 		
 		Heuristic<TopSpinState<N>> h;
@@ -1185,76 +1138,147 @@ void TSVRC()
 	}
 }
 
-void MinDeltaPlusMinTOHTest()
+template <int N>
+void TestTOH(Heuristic<TOHState<N>> *f, int first, int last)
 {
-	const int numDisks = 15; // disks - 2 (4^13 - 67 million)
+	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
+	IDAStar<TOHState<N>, TOHMove> ida;
+	MM<TOHState<N>, TOHMove, TOH<N>> mm;
+	TOH<N> ts;
+	TOHState<N> s;
+	TOHState<N> g;
+	std::vector<TOHState<N>> thePath;
+	std::vector<TOHMove> actionPath;
+	ts.StoreGoal(g);
+	ZeroHeuristic<TOHState<N>> z;
+	
+	int table[] = {52058078,116173544,208694125,131936966,141559500,133800745,194246206,50028346,167007978,207116816,163867037,119897198,201847476,210859515,117688410,121633885};
+	int table2[] = {145008714,165971878,154717942,218927374,182772845,5808407,19155194,137438954,13143598,124513215,132635260,39667704,2462244,41006424,214146208,54305743};
+	for (int count = first; count < last; count++)
+	{
+		printf("Seed: %d\n", table[count&0xF]^table2[(count>>4)&0xF]);
+		srandom(table[count&0xF]^table2[(count>>4)&0xF]);
+		for (int x = 0; x < 20000; x++)
+		{
+			ts.GetActions(s, actionPath);
+			ts.ApplyAction(s, actionPath[random()%actionPath.size()]);
+		}
+		Timer timer;
+		
+		if (1)
+		{
+			printf("-=-=-A*-=-=-\n");
+			astar.SetUseBPMX(1);
+			astar.SetHeuristic(f);
+			timer.StartTimer();
+			astar.GetPath(&ts, s, g, thePath);
+			timer.EndTimer();
+			printf("%llu nodes expanded\n", astar.GetNodesExpanded());
+			printf("Solution path length %1.0f\n", ts.GetPathLength(thePath));
+			printf("%1.2f elapsed\n", timer.GetElapsedTime());
+		}
+		
+		if (0)
+		{
+			printf("-=-=-IDA*-=-=-\n");
+			ida.SetHeuristic(f);
+			ida.SetUseBDPathMax(true);
+			timer.StartTimer();
+			ida.GetPath(&ts, s, g, actionPath);
+			timer.EndTimer();
+			printf("%llu nodes expanded; %llu generated\n", ida.GetNodesExpanded(), ida.GetNodesTouched());
+			printf("Solution path length %lu\n", actionPath.size());
+			printf("%1.2f elapsed\n", timer.GetElapsedTime());
+			
+			//			printf("Dynamic distribution\n");
+			//			for (int x = 0; x < 255; x++)
+			//				if (f->histogram[x] != 0)
+			//					printf("%d\t%llu\n", x, f->histogram[x]);
+		}
+		
+	}
+	//mm.PrintHDist();
+	
+	//	exit(0);
+}
+
+
+void TOHTest(int deltaFactor, int bits, int factor, int first, int last)
+{
+	printf("--== TOH Test ==--\n");
+	printf("%d delta factor; %d min factor; %d bits\n", deltaFactor, factor, bits);
+	const int numDisks = 16; // [disks - 2] (4^14 - 256 million)
 	TOH<numDisks> toh;
 	TOHState<numDisks> s, g;
 
 	TOHState<numDisks> goal;
 	TOH<numDisks-2> absToh1;
-	TOH<numDisks-4> absToh4;
+//	TOH<numDisks-4> absToh4;
 	TOHState<numDisks-2> absTohState1;
 	TOHPDB<numDisks-2, numDisks> pdb1(&absToh1);
 	TOHPDB<numDisks-2, numDisks> pdb1a(&absToh1);
-	TOHPDB<numDisks-2, numDisks> pdb1b(&absToh1);
-	TOHPDB<numDisks-2, numDisks> pdbSmaller(&absToh1);
-	TOHPDB<numDisks-4, numDisks> pdbSmallest(&absToh4);
+//	TOHPDB<numDisks-2, numDisks> pdb1b(&absToh1);
+//	TOHPDB<numDisks-2, numDisks> pdbSmaller(&absToh1);
+//	TOHPDB<numDisks-4, numDisks> pdbSmallest(&absToh4);
 
-	goal.Reset();
-	pdbSmallest.BuildPDB(goal, std::thread::hardware_concurrency());
-	
 	goal.Reset();
 	pdb1.BuildPDB(goal, std::thread::hardware_concurrency());
-	pdb1b = pdb1;
-	//	goal.Reset();
-//	pdbSmaller.BuildPDB(goal, std::thread::hardware_concurrency());
+	pdb1a = pdb1;
 	
 	printf("Starting TOH DIV\n");
-	{
-		pdbSmaller = pdb1;
-		pdbSmaller.DivCompress(16, true);
 
-		pdb1.PrintHistogram();
-		for (int compression = 2; compression <= 16; compression++)
-		{
-			printf("[toh][DIV] Compressing by a factor of %d\n", compression);
-			pdb1a = pdb1;
-			pdb1a.DivCompress(compression, true);
-		}
-		printf("Performing delta compression. New distribution:\n");
-		pdb1.DeltaCompress(&pdbSmaller, goal, true);
-		for (int compression = 2; compression <= 16; compression++)
-		{
-			printf("[toh][DIV] Compressing by a factor of %d\n", compression);
-			pdb1a = pdb1;
-			pdb1a.DivCompress(compression, true);
-		}
+	printf("Div compress (%d) to get delta:\n", deltaFactor);
+	pdb1a.DivCompress(deltaFactor, true);
+	
+	printf("Delta compress:\n");
+	pdb1.DeltaCompress(&pdb1a, goal, true);
+	printf("Div compress (%d) delta:\n", factor);
+	pdb1.DivCompress(factor, true);
+
+	if (bits < 8)
+	{
+		printf("VR compress (%d bits):\n", bits);
+		pdb1.ValueRangeCompress(bits, true);
 	}
+	Heuristic<TOHState<numDisks>> h;
+	
+	h.lookups.resize(0);
+	h.lookups.push_back({kAddNode, 1, 2});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	h.heuristics.resize(0);
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb1a);
+	TestTOH<numDisks>(&h, first, last);
+	
+	printf("Dynamic distribution\n");
+	for (int x = 0; x < 255; x++)
+		if (h.histogram[x] != 0)
+			printf("%d\t%llu\n", x, h.histogram[x]);
 
 	
-	printf("Starting TOH MOD\n");
-	{
-		pdb1 = pdb1b;
-		pdbSmaller = pdb1;
-		pdbSmaller.ModCompress(pdb1.GetPDBSize()/16, true);
-
-		pdb1.PrintHistogram();
-		for (int compression = 2; compression <= 16; compression++)
-		{
-			printf("[toh][MOD] Compressing by a factor of %d\n", compression);
-			pdb1a = pdb1;
-			pdb1a.ModCompress(pdb1.GetPDBSize()/compression, true);
-		}
-		printf("Performing delta compression. New distribution:\n");
-		pdb1.DeltaCompress(&pdbSmaller, goal, true);
-		for (int compression = 2; compression <= 16; compression++)
-		{
-			printf("[toh][MOD] Compressing by a factor of %d\n", compression);
-			pdb1a = pdb1;
-			pdb1a.ModCompress(pdb1.GetPDBSize()/compression, true);
-		}
-	}
+//	printf("Starting TOH MOD\n");
+//	{
+//		pdb1 = pdb1b;
+//		pdbSmaller = pdb1;
+//		pdbSmaller.ModCompress(pdb1.GetPDBSize()/16, true);
+//
+//		pdb1.PrintHistogram();
+//		for (int compression = 2; compression <= 16; compression++)
+//		{
+//			printf("[toh][MOD] Compressing by a factor of %d\n", compression);
+//			pdb1a = pdb1;
+//			pdb1a.ModCompress(pdb1.GetPDBSize()/compression, true);
+//		}
+//		printf("Performing delta compression. New distribution:\n");
+//		pdb1.DeltaCompress(&pdbSmaller, goal, true);
+//		for (int compression = 2; compression <= 16; compression++)
+//		{
+//			printf("[toh][MOD] Compressing by a factor of %d\n", compression);
+//			pdb1a = pdb1;
+//			pdb1a.ModCompress(pdb1.GetPDBSize()/compression, true);
+//		}
+//	}
 }
 
 /* Code for VRC on TOH */

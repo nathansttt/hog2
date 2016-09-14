@@ -77,6 +77,26 @@ public:
 	//void FullBPMX(uint64_t nodeID, int distance);
 	
 	void OpenGLDraw() const;
+	void PrintHDist()
+	{
+		std::vector<uint64_t> d;
+		for (auto i = dist.begin(); i != dist.end(); i++)
+		{
+			if (i->first.first < i->first.second)
+			{
+				int h = (int)i->first.second;
+				if (h >= d.size())
+					d.resize(h+1);
+				d[h] += i->second;
+			}
+		}
+		printf("MM Dynamic Distribution\n");
+		for (int x = 0; x < d.size(); x++)
+		{
+			if (d[x] != 0)
+				printf("%d\t%llu\n", x, d[x]);
+		}
+	}
 	void PrintOpenStats(std::unordered_map<std::pair<double, double>, int>  &s)
 	{
 		printf("Search distributions: (%s)\n", ((&s)==(&f))?"forward":"backward");
@@ -128,7 +148,7 @@ private:
 //				std::unordered_map<double, int> &minf);
 	priorityQueue forwardQueue, backwardQueue;
 	state goal, start;
-//	std::unordered_map<double, int> g_f, g_b, f_f, f_b;
+	std::unordered_map<std::pair<double, double>, int> dist;
 	std::unordered_map<std::pair<double, double>, int> f, b;
 	uint64_t nodesTouched, nodesExpanded, uniqueNodesExpanded;
 	state middleNode;
@@ -387,6 +407,7 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 //					ming[childData.g]++;
 //					minf[childData.g+childData.h]++;
 					count[{childData.g,childData.h}]++;
+					dist[{childData.g,childData.h}]++;
 					current.Reopen(childID);
 				}
 				break;
@@ -398,22 +419,26 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 				if (fgreater(parentData.h-edgeCost, childData.h))
 				{
 					count[{childData.g,childData.h}]--;
+					dist[{childData.g,childData.h}]--;
 					//minf[childData.g+childData.h]--;
 					childData.h = parentData.h-edgeCost;
 					//minf[childData.g+childData.h]++;
 					count[{childData.g,childData.h}]++;
+					dist[{childData.g,childData.h}]++;
 				}
 				if (fless(parentData.g+edgeCost, childData.g))
 				{
 //					ming[childData.g]--;
 //					minf[childData.g+childData.h]--;
 					count[{childData.g,childData.h}]--;
+					dist[{childData.g,childData.h}]--;
 					childData.parentID = nextID;
 					childData.g = parentData.g+edgeCost;
 					current.KeyChanged(childID);
 //					ming[childData.g]++;
 //					minf[childData.g+childData.h]++;
 					count[{childData.g,childData.h}]++;
+					dist[{childData.g,childData.h}]++;
 					
 					
 					// TODO: check if we improved the current solution?
@@ -448,6 +473,7 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 //				ming[g]++;
 //				minf[g+h]++;
 				count[{g,h}]++;
+				dist[{g,h}]++;
 				// 1-step BPMX
 				parentData.h = std::max(h-edgeCost, parentData.h);
 
