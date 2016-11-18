@@ -774,7 +774,7 @@ std::string MapEnvironment::SVGDraw()
 	}
 	
 	// draw cell boundaries for open terrain
-	if (0)
+	if (1)
 	for (int y = 0; y < map->GetMapHeight(); y++)
 	{
 		for (int x = 0; x < map->GetMapWidth(); x++)
@@ -893,13 +893,28 @@ std::string MapEnvironment::SVGLabelState(const xyLoc &l, const char *str, doubl
 	recColor c;// = {0.5, 0.5, 0};
 	GLfloat t;
 	GetColor(c.r, c.g, c.b, t);
-	s += SVGDrawText(l.x+0.5+1, l.y+0.5+1+1, str, c, scale);
+	s += SVGDrawText(l.x+1+0.3, l.y+1+1, str, c, scale);
 	return s;
 //	std::string s;
 //	s =  "<text x=\"0\" y=\"15\" fill=\"black\">";
 //	s += str;
 //	s += "</text>";
 //	return s;
+}
+
+std::string MapEnvironment::SVGLabelState(const xyLoc &l, const char *str, double scale, double xoff, double yoff) const
+{
+	std::string s;
+	recColor c;// = {0.5, 0.5, 0};
+	GLfloat t;
+	GetColor(c.r, c.g, c.b, t);
+	s += SVGDrawText(l.x+0.5+1+xoff, l.y+0.5+1+1+yoff, str, c, scale);
+	return s;
+	//	std::string s;
+	//	s =  "<text x=\"0\" y=\"15\" fill=\"black\">";
+	//	s += str;
+	//	s += "</text>";
+	//	return s;
 }
 
 std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2, int width) const

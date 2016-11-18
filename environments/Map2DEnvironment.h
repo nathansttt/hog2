@@ -141,6 +141,7 @@ public:
 	std::string SVGDraw();
 	std::string SVGDraw(const xyLoc &);
 	std::string SVGLabelState(const xyLoc &, const char *, double scale) const;
+	std::string SVGLabelState(const xyLoc &, const char *, double scale, double xoff, double yoff) const;
 	std::string SVGDrawLine(const xyLoc &x, const xyLoc &y, int width=1) const;
 	std::string SVGFrameRect(int left, int top, int right, int bottom, int width = 1);
 
