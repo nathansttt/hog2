@@ -88,6 +88,7 @@ void testHeuristic(char *problems);
 
 int main(int argc, char* argv[])
 {
+	setvbuf(stdout, NULL, _IONBF, 0);
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1000, 1000);
 }
@@ -420,50 +421,86 @@ void doExport()
 	exit(0);
 }
 
-double GetPathLengthInRange(GraphEnvironment *ge, graphState &start, graphState &goal, double minLen, double maxLen)
-{
-	std::vector<graphState> endPath;
-	std::vector<graphState> eligible;
-	
-	start = ge->GetGraph()->GetRandomNode()->GetNum();
-	
-	// 2. search to depth d (all g-costs >= d)
-	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
-	theSearch.SetStopAfterGoal(false);
-	theSearch.InitializeSearch(ge, start, start, endPath);
-	while (1)
-	{
-		if (theSearch.GetNumOpenItems() == 0)
-			break;
-		graphState next = theSearch.CheckNextNode();
-		if (theSearch.DoSingleSearchStep(endPath))
-			break;
-		double tmpCost;
-		theSearch.GetClosedListGCost(next, tmpCost);
-		if (tmpCost >= minLen && tmpCost < maxLen)
-			eligible.push_back(next);
-		else if (tmpCost >= maxLen)
-			break;
-	}
-	if (eligible.size() == 0)
-		return 0;
-	goal = eligible[random()%eligible.size()];
-	double cost;
-	theSearch.GetClosedListGCost(goal, cost);
-	assert(cost >= minLen && cost < maxLen);
-
-	if (random()%2) // randomize start and goal
-	{
-		graphState tmp = start;
-		start = goal;
-		goal = tmp;
-	}
-	return cost;
-}
 #include <thread>
 #include "SharedQueue.h"
 SharedQueue<std::pair<graphState, graphState>> workQueue;
 SharedQueue<std::pair<std::pair<graphState, graphState>, double>> resultQueue;
+
+void GetPathLengthInRange(GraphEnvironment *ge, double minLen, double maxLen, int numNeeded)
+{
+	while (resultQueue.size() < numNeeded)
+	{
+		graphState start;
+		graphState goal;
+		double finalCost;
+		std::vector<graphState> endPath;
+		std::vector<graphState> eligible;
+		
+		start = ge->GetGraph()->GetRandomNode()->GetNum();
+		
+		// 2. search to depth d (all g-costs >= d)
+		TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
+		theSearch.SetStopAfterGoal(false);
+		theSearch.InitializeSearch(ge, start, start, endPath);
+		while (1)
+		{
+			if (theSearch.GetNumOpenItems() == 0)
+				break;
+			graphState next = theSearch.CheckNextNode();
+			if (theSearch.DoSingleSearchStep(endPath))
+				break;
+			double tmpCost;
+			theSearch.GetClosedListGCost(next, tmpCost);
+			if (tmpCost >= minLen && tmpCost < maxLen)
+				eligible.push_back(next);
+			else if (tmpCost >= maxLen)
+				break;
+		}
+		if (eligible.size() == 0)
+		{
+			finalCost = 0;
+			continue;
+		}
+		goal = eligible[random()%eligible.size()];
+		double cost;
+		theSearch.GetClosedListGCost(goal, cost);
+		assert(cost >= minLen && cost < maxLen);
+		
+		if (random()%2) // randomize start and goal
+		{
+			graphState tmp = start;
+			start = goal;
+			goal = tmp;
+		}
+		finalCost = cost;
+
+		resultQueue.Add({{start, goal}, finalCost});
+	}
+}
+
+void ThreadedGetPathLengthInRange(GraphEnvironment *ge, std::vector<graphState> &start, std::vector<graphState> &goal,
+								  std::vector<double> &finalCost, double minLen, double maxLen, int numNeeded)
+{
+	std::vector<std::thread *> threads;
+	for (int x = 0; x < std::thread::hardware_concurrency(); x++)
+	{
+		threads.push_back(new std::thread(GetPathLengthInRange, ge, minLen, maxLen, numNeeded));
+	}
+	for (int x = 0; x < threads.size(); x++)
+	{
+		threads[x]->join();
+	}
+	while (resultQueue.size() > 0)
+	{
+		std::pair<std::pair<graphState, graphState>, double> result;
+		resultQueue.WaitRemove(result);
+		start.push_back(result.first.first);
+		goal.push_back(result.first.second);
+		finalCost.push_back(result.second);
+	}
+}
+
+
 
 void PathfindingThread(GraphEnvironment *ge)
 {
@@ -583,34 +620,34 @@ void buildProblemSet()
 	
 	for (int x = 0; x < experiments.size(); x++)
 	{
-		int tries = 0;
-		bool print = true;
-		while (experiments[x].size() != 10 && tries < 300)
+		while (experiments[x].size() != 10)
 		{
-			if (print)
-				printf("Filling bucket %d (cost %d to %d) Have %d so far\n", x, x*4, x*4+4, (int)experiments[x].size());
-			print = false;
-			graphState start, goal;
-			double length = GetPathLengthInRange(ge, start, goal, x*4, x*4+4);
-			if (length == 0)
+			printf("Filling bucket %d (cost %d to %d) Have %d so far\n", x, x*4, x*4+4, (int)experiments[x].size());
+			std::vector<graphState> start, goal;
+			std::vector<double> length;
+
+			ThreadedGetPathLengthInRange(ge, start, goal, length, x*4, x*4+4, 10-int(experiments[x].size()));
+			int success = 0;
+			for (int y = 0; y < start.size(); y++)
 			{
-				tries++;
-				continue;
+				if (startpoints[start[y]]) // no duplicate start locations
+					continue;
+				if (endpoints[goal[y]]) // no duplicate goal locations
+					continue;
+				Experiment e(g->GetNode(start[y])->GetLabelL(GraphSearchConstants::kMapX), g->GetNode(start[y])->GetLabelL(GraphSearchConstants::kMapY),
+							 g->GetNode(goal[y])->GetLabelL(GraphSearchConstants::kMapX), g->GetNode(goal[y])->GetLabelL(GraphSearchConstants::kMapY),
+							 map.GetMapWidth(), map.GetMapHeight(), length[y]/4, length[y], gDefaultMap);
+				experiments[x].push_back(e);
+				startpoints[start[y]] = true;
+				endpoints[goal[y]] = true;
+				success++;
+				if (experiments[x].size() >= 10)
+					break;
 			}
-			
-			if (startpoints[start]) // no duplicate start locations
-				continue;
-			if (endpoints[goal]) // no duplicate goal locations
-				continue;
-			Experiment e(g->GetNode(start)->GetLabelL(GraphSearchConstants::kMapX), g->GetNode(start)->GetLabelL(GraphSearchConstants::kMapY),
-						 g->GetNode(goal)->GetLabelL(GraphSearchConstants::kMapX), g->GetNode(goal)->GetLabelL(GraphSearchConstants::kMapY),
-						 map.GetMapWidth(), map.GetMapHeight(), length/4, length, gDefaultMap);
-			experiments[x].push_back(e);
-			startpoints[start] = true;
-			endpoints[goal] = true;
-			print = true;
+			if (success == 0)
+				break;
 		}
-		if (tries == 200)
+		if (experiments[x].size() != 10)
 		{
 			printf("Can't fill bucket; aborting fill procedure and cutting off scenarios at %d buckets\n", x-1);
 			break;
