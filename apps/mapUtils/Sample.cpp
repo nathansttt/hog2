@@ -82,7 +82,7 @@ std::vector<std::pair<xyLoc, xyLoc>> subgoalEdges;
 Map *ReduceMap(Map *inputMap);
 void MeasureHighwayDimension(Map *m, int depth);
 void EstimateDimension(Map *m);
-void EstimateLongPath(Map *m);
+double EstimateLongPath(Map *m);
 
 void testHeuristic(char *problems);
 
@@ -106,8 +106,9 @@ void CreateSimulation(int id)
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz101d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
+		map = new Map("/Users/nathanst/hog2/maps/local/den407-crop.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
-		map = new Map("/Users/nathanst/hog2/maps/wc3maps/battleground.map");
+		//map = new Map("/Users/nathanst/hog2/maps/wc3maps/battleground.map");
 		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		
@@ -137,7 +138,9 @@ void CreateSimulation(int id)
 	//msa->ToggleDrawAbstraction(2);
 	// ->ToggleDrawAbstraction(3);
 	unitSims.resize(id+1);
-	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map));
+	MapEnvironment *me;
+	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(me = new MapEnvironment(map));
+	me->SetDiagonalCost(1.5);
 	unitSims[id]->SetStepType(kMinTime);
 	SetNumPorts(id, 1);
 	grid = new CanonicalGrid::CanonicalGrid(map);
@@ -160,6 +163,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Reset Rotations", "Reset the current rotation/translation of the map.", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "Detail", "Export detailed SVG from A*", kAnyModifier, 'q');
 	
 	InstallKeyboardHandler(MyPathfindingKeyHandler, "Mapbuilding Unit", "Deploy unit that paths to a target, building a map as it travels", kNoModifier, 'd');
 	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add A* Unit", "Deploys a simple a* unit", kNoModifier, 'a');
@@ -416,55 +420,204 @@ void doExport()
 	exit(0);
 }
 
+double GetPathLengthInRange(GraphEnvironment *ge, graphState &start, graphState &goal, double minLen, double maxLen)
+{
+	std::vector<graphState> endPath;
+	std::vector<graphState> eligible;
+	
+	start = ge->GetGraph()->GetRandomNode()->GetNum();
+	
+	// 2. search to depth d (all g-costs >= d)
+	TemplateAStar<graphState, graphMove, GraphEnvironment> theSearch;
+	theSearch.SetStopAfterGoal(false);
+	theSearch.InitializeSearch(ge, start, start, endPath);
+	while (1)
+	{
+		if (theSearch.GetNumOpenItems() == 0)
+			break;
+		graphState next = theSearch.CheckNextNode();
+		if (theSearch.DoSingleSearchStep(endPath))
+			break;
+		double tmpCost;
+		theSearch.GetClosedListGCost(next, tmpCost);
+		if (tmpCost >= minLen && tmpCost < maxLen)
+			eligible.push_back(next);
+		else if (tmpCost >= maxLen)
+			break;
+	}
+	if (eligible.size() == 0)
+		return 0;
+	goal = eligible[random()%eligible.size()];
+	double cost;
+	theSearch.GetClosedListGCost(goal, cost);
+	assert(cost >= minLen && cost < maxLen);
+
+	if (random()%2) // randomize start and goal
+	{
+		graphState tmp = start;
+		start = goal;
+		goal = tmp;
+	}
+	return cost;
+}
+#include <thread>
+#include "SharedQueue.h"
+SharedQueue<std::pair<graphState, graphState>> workQueue;
+SharedQueue<std::pair<std::pair<graphState, graphState>, double>> resultQueue;
+
+void PathfindingThread(GraphEnvironment *ge)
+{
+	TemplateAStar<graphState, graphMove, GraphEnvironment> searcher;
+
+	std::pair<graphState, graphState> p;
+	std::vector<graphState> thePath;
+	while (true)
+	{
+		workQueue.WaitRemove(p);
+		if (p.first == p.second)
+			return;
+		searcher.GetPath(ge, p.first, p.second, thePath);
+		resultQueue.Add({{p.first, p.second}, ge->GetPathLength(thePath)});
+	}
+}
+
 void buildProblemSet()
 {
 	ScenarioLoader s;
-	printf(gDefaultMap); printf("\n");
+	printf("Generating scenarios for map: %s\n", gDefaultMap);
 	Map map(gDefaultMap);
 	Graph *g = GraphSearchConstants::GetGraph(&map);
 	GraphDistanceHeuristic gdh(g);
 	gdh.SetPlacement(kFarPlacement);
 	// make things go fast; we're doing tons of searches, so use a good heuristic
-	for (unsigned int x = 0; x < 30; x++)
+	for (unsigned int x = 0; x < 10; x++)
 		gdh.AddHeuristic();
 	GraphEnvironment *ge = new GraphEnvironment(&map, g, &gdh);
 	ge->SetDirected(true);
 	
+	int numThreads = std::thread::hardware_concurrency();
+	std::vector<std::thread *> threads;
+	for (int x = 0; x < numThreads; x++)
+	{
+		threads.push_back(new std::thread(PathfindingThread, ge));
+	}
 	std::vector<std::vector<Experiment> > experiments;
-	for (unsigned int x = 0; x < 400000; x++)
+
+	std::vector<bool> startpoints;
+	std::vector<bool> endpoints;
+	endpoints.resize(g->GetNumNodes());
+	startpoints.resize(g->GetNumNodes());
+	//double len = EstimateLongPath(&map);
+	printf("First pass: 100%% random\n");
+	int totalTries = g->GetNumNodes()/10;//9*g->GetNumNodes()/10;
+	for (unsigned int x = 0; x < totalTries; x++)
 	{
 		if (0==x%100)
-		{ printf("\r%d", x); fflush(stdout); }
+		{ printf("\r%d of %d", x, totalTries); fflush(stdout); }
 		node *s1 = g->GetRandomNode();
 		node *g1 = g->GetRandomNode();
-//		uint64_t nodesExpanded = 0;
-//		printf("%d\t%d\t",  s1->GetNum(), g1->GetNum());
+		if (startpoints[s1->GetNum()]) // no duplicate start locations
+		{
+			x--;
+			continue;
+		}
+		if (endpoints[g1->GetNum()]) // no duplicate goal locations
+		{
+			x--;
+			continue;
+		}
+		if (g1->GetNum() == s1->GetNum())
+		{
+			x--;
+			continue;
+		}
+		startpoints[s1->GetNum()] = true;
+		endpoints[g1->GetNum()] = true;
 		graphState gs1, gs2;
 		gs1 = s1->GetNum();
 		gs2 = g1->GetNum();
-		std::vector<graphState> thePath;
-		astar.GetPath(ge, gs1, gs2, thePath);
-//		printf("%d\n", (int)ge->GetPathLength(thePath));
-		if (thePath.size() == 0)
+		workQueue.WaitAdd({gs1, gs2});
+	}
+	for (int x = 0; x < numThreads; x++)
+	{
+		workQueue.WaitAdd({0, 0});
+	}
+	printf("\nDone adding to threads\n");
+	for (unsigned int x = 0; x < totalTries; x++)
+	{
+		if (0==x%100)
+		{ printf("\r%d of %d", x, totalTries); fflush(stdout); }
+		std::pair<std::pair<graphState, graphState>, double> res;
+		resultQueue.WaitRemove(res);
+
+		if (res.second == 0)
+		{
+			startpoints[res.first.first] = false;
+			endpoints[res.first.second] = false;
 			continue;
-		
-		if (experiments.size() <= ge->GetPathLength(thePath)/4)
-			experiments.resize(ge->GetPathLength(thePath)/4+1);
-		if (experiments[ge->GetPathLength(thePath)/4].size() < 10)
+		}
+		node *s1 = g->GetNode(res.first.first);
+		node *g1 = g->GetNode(res.first.second);
+		if (experiments.size() <= res.second/4)
+			experiments.resize(res.second/4+1);
+		if (experiments[res.second/4].size() < 10)
 		{
 			Experiment e(s1->GetLabelL(GraphSearchConstants::kMapX), s1->GetLabelL(GraphSearchConstants::kMapY),
 						 g1->GetLabelL(GraphSearchConstants::kMapX), g1->GetLabelL(GraphSearchConstants::kMapY),
-						 map.GetMapWidth(), map.GetMapHeight(), ge->GetPathLength(thePath)/4, ge->GetPathLength(thePath), gDefaultMap);
-			experiments[ge->GetPathLength(thePath)/4].push_back(e);
+						 map.GetMapWidth(), map.GetMapHeight(), res.second/4, res.second, gDefaultMap);
+			experiments[res.second/4].push_back(e);
 		}
-		bool done = true;
-		for (unsigned int y = 0; y < experiments.size(); y++)
-		{
-			if (experiments[y].size() != 10)
-			{ done = false; break; }
+		else {
+			startpoints[s1->GetNum()] = false;
+			endpoints[g1->GetNum()] = false;
 		}
-		if (done) break;
 	}
+	printf("\nDone receiving from threads\n");
+	
+	for (int x = 0; x < numThreads; x++)
+	{
+		threads[x]->join();
+		delete threads[x];
+	}
+	threads.resize(0);
+	
+	for (int x = 0; x < experiments.size(); x++)
+	{
+		int tries = 0;
+		bool print = true;
+		while (experiments[x].size() != 10 && tries < 300)
+		{
+			if (print)
+				printf("Filling bucket %d (cost %d to %d) Have %d so far\n", x, x*4, x*4+4, (int)experiments[x].size());
+			print = false;
+			graphState start, goal;
+			double length = GetPathLengthInRange(ge, start, goal, x*4, x*4+4);
+			if (length == 0)
+			{
+				tries++;
+				continue;
+			}
+			
+			if (startpoints[start]) // no duplicate start locations
+				continue;
+			if (endpoints[goal]) // no duplicate goal locations
+				continue;
+			Experiment e(g->GetNode(start)->GetLabelL(GraphSearchConstants::kMapX), g->GetNode(start)->GetLabelL(GraphSearchConstants::kMapY),
+						 g->GetNode(goal)->GetLabelL(GraphSearchConstants::kMapX), g->GetNode(goal)->GetLabelL(GraphSearchConstants::kMapY),
+						 map.GetMapWidth(), map.GetMapHeight(), length/4, length, gDefaultMap);
+			experiments[x].push_back(e);
+			startpoints[start] = true;
+			endpoints[goal] = true;
+			print = true;
+		}
+		if (tries == 200)
+		{
+			printf("Can't fill bucket; aborting fill procedure and cutting off scenarios at %d buckets\n", x-1);
+			break;
+		}
+	}
+	
+	
 	for (unsigned int x = 0; x < experiments.size(); x++)
 	{
 		if (x > experiments.size()/10 && experiments[x].size() != 10)
@@ -983,6 +1136,24 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 		}
 			break;
+		case 'q':
+		{
+			std::fstream svgFile;
+			svgFile.open("/Users/nathanst/Desktop/AStarSample.svg", std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			svgFile << a1.SVGDrawDetailed();
+			svgFile << "</svg>\n";
+			svgFile.close();
+			svgFile.open("/Users/nathanst/Desktop/AStarSample2.svg", std::fstream::out | std::fstream::trunc);
+			svgFile << ma1->SVGHeader();
+			svgFile << ma1->SVGDraw();
+			ma1->SetColor(0, 0, 0);
+			svgFile << ma1->SVGLabelState(xyLoc(px1, py1), "S", 1.0, -0.5, -0.5);
+			svgFile << ma1->SVGLabelState(xyLoc(px2, py2), "G", 1.0, -0.5, -0.5);
+			svgFile << "</svg>\n";
+			svgFile.close();
+		}
 		default:
 			break;
 	}
@@ -1323,11 +1494,12 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 
 				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
 				//331 355 67 318
-				px1 = 331; py1 = 355;
-				px2 = 67; py2 = 318;
+//				px1 = 331; py1 = 355;
+//				px2 = 67; py2 = 318;
 				if (ma1 == 0)
 				{
 					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
+					ma1->SetDiagonalCost(1.5);
 //					if (gdh == 0)
 //					{
 //						gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
@@ -1345,6 +1517,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				if (ma2 == 0)
 				{
 					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
+					ma2->SetDiagonalCost(1.5);
 					ma2->SetEightConnected();
 				}
 				
@@ -1600,7 +1773,7 @@ void EstimateDimension(Map *m)
 
 double FindFarDist(Graph *g, node *n, graphState &from, graphState &to);
 
-void EstimateLongPath(Map *m)
+double EstimateLongPath(Map *m)
 {
 	Graph *g = GraphSearchConstants::GetGraph(m);
 	GraphMapHeuristic gh(m, g);
@@ -1619,6 +1792,7 @@ void EstimateLongPath(Map *m)
 		}
 		printf("%f\t%f\t%f\t%f\n", dist, dist/g->GetNumNodes(), heur, dist/heur);
 	}
+	return dist;
 }
 
 double FindFarDist(Graph *g, node *n, graphState &from, graphState &to)
