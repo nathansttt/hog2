@@ -9,7 +9,7 @@
 #include <fstream>
 using std::ifstream;
 using std::ofstream;
-
+#include <iomanip>
 #include "ScenarioLoader.h"
 #include <assert.h>
 
@@ -66,8 +66,8 @@ void ScenarioLoader::Save(const char *fname)
 	
 	float ver = 1.0;
 	ofile<<"version "<<ver<<std::endl;
-	
-	
+	ofile << std::setprecision(8);
+	ofile << std::fixed;
 	for (unsigned int x = 0; x < experiments.size(); x++)
 	{
 		ofile<<experiments[x].bucket<<"\t"<<experiments[x].map<<"\t"<<experiments[x].scaleX<<"\t";
