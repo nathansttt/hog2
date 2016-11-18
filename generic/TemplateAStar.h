@@ -137,6 +137,7 @@ public:
 	void OpenGLDraw() const;
 	void Draw() const;
 	std::string SVGDraw() const;
+	std::string SVGDrawDetailed() const;
 	
 	void SetWeight(double w) {weight = w;}
 private:
@@ -816,6 +817,60 @@ std::string TemplateAStar<state, action,environment,openList>::SVGDraw() const
 			env->SetColor(1.0, 0.0, 0.0, transparency);
 			s+=env->SVGDraw(data.data);
 		}
+	}
+	return s;
+}
+
+template <class state, class action, class environment, class openList>
+std::string TemplateAStar<state, action,environment,openList>::SVGDrawDetailed() const
+{
+	std::string s;
+	double transparency = 1.0;
+	if (openClosedList.size() == 0)
+		return s;
+	uint64_t top = -1;
+	
+	if (openClosedList.OpenSize() > 0)
+	{
+		top = openClosedList.Peek();
+	}
+	for (unsigned int x = 0; x < openClosedList.size(); x++)
+	{
+		const auto &data = openClosedList.Lookat(x);
+		
+//		if (x == top)
+//		{
+//			env->SetColor(1.0, 1.0, 0.0, transparency);
+//			s+=env->SVGDraw(data.data);
+//		}
+//		else if ((data.where == kOpenList) && (data.reopened))
+//		{
+//			env->SetColor(0.0, 0.5, 0.5, transparency);
+//			s+=env->SVGDraw(data.data);
+//		}
+//		else if (data.where == kOpenList)
+//		{
+//			env->SetColor(0.0, 1.0, 0.0, transparency);
+//			s+=env->SVGDraw(data.data);
+//		}
+//		else if ((data.where == kClosedList) && (data.reopened))
+//		{
+//			env->SetColor(0.5, 0.0, 0.5, transparency);
+//			s+=env->SVGDraw(data.data);
+//		}
+//		else if (data.where == kClosedList)
+//		{
+//			env->SetColor(1.0, 0.0, 0.0, transparency);
+//			s+=env->SVGDraw(data.data);
+//		}
+		env->SetColor(0.0, 0.0, 0.0);
+		char d[32];
+		sprintf(d, "%1.1f", data.g+data.h);
+		s+=env->SVGLabelState(data.data, d, 0.35, -0.6, -1.1);
+		sprintf(d, "g:%1.1f", data.g);
+		s+=env->SVGLabelState(data.data, d, 0.25, -0.6,  -0.75);
+		sprintf(d, "h:%1.1f", data.h);
+		s+=env->SVGLabelState(data.data, d, 0.25, -0.6,  -0.48);
 	}
 	return s;
 }
