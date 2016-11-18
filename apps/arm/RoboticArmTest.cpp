@@ -98,7 +98,7 @@ void CreateSimulation(int)
 	r->AddObstacle(line2d(recVec(0.52, -0.02, 0), recVec(0.50, 0, 0)));
 #endif
 	
-#if 1
+#if 0
 	line2d l1({-0.37, -1.14, 0}, {-0.99, -0.11, 0});
 	r->AddObstacle(l1);
 	line2d l2({1.18, -0.47, 0}, {0.45, -0.02, 0});
@@ -117,7 +117,7 @@ void CreateSimulation(int)
 
 	config.SetNumArms( numArms );
 	for (int x = 0; x < numArms; x++)
-		config.SetAngle( x, 512 );
+		config.SetAngle( x, 2 );
 }
 
 /**
@@ -135,6 +135,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	
 	InstallKeyboardHandler(MyKeyHandler, "Config", "Build Configuration Space", kNoModifier, 'c');
+	InstallKeyboardHandler(MyKeyHandler, "Clear", "Clear Configuration Space", kShiftDown, 'c');
 	InstallKeyboardHandler(MyKeyHandler, "Record", "Start recording frames to a file", kNoModifier, 'r');
 	InstallKeyboardHandler(MyKeyHandler, "0-9", "select segment", kNoModifier, '0', '9');
 	InstallKeyboardHandler(MyKeyHandler, "Rotate segment", "rotate segment CW", kNoModifier, 'a');
@@ -264,6 +265,28 @@ void MyFrameHandler(unsigned long id, unsigned int viewport, void *)
 				}
 				glEnd();
 			}
+			
+			char txt[16];
+			glColor3f(1.0, 1.0, 1.0);
+			for (double x = 0; x <= 1024; x+=1024.0/(2.0*4))
+			{
+				if (x != 512)
+				{
+					sprintf(txt, "%d", int(360.0*x/1024.0));
+					DrawTextCentered(2.0*x/1024.0-1, -1.05, 0, .1, txt);
+				}
+			}
+			for (double y = 0; y <= 1024; y+=1024.0/(2.0*4))
+			{
+				if (y != 512)
+				{
+					sprintf(txt, "%d", int(360.0*y/1024.0));
+					DrawTextCentered(-1.05, 2.0*y/1024.0-1, 0, .1, txt);
+				}
+			}
+			glColor3f(0.0, 1.0, 1.0);
+			DrawTextCentered(0, -1.05, 0, .15, "A1");
+			DrawTextCentered(-1.05, 0, 0, .15, "A2");
 		}
 	}
 	if (recording && viewport == GetNumPorts((int)id)-1)
@@ -272,6 +295,7 @@ void MyFrameHandler(unsigned long id, unsigned int viewport, void *)
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/robot-%d%d%d%d", index/1000, (index/100)%10, (index/10)%10, index%10);
 		SaveScreenshot((int)id, fname);
+		printf("%s\n", fname);
 		index++;
 	}
 
@@ -378,7 +402,7 @@ void TestJPS()
 	
 }
 
-void MyKeyHandler(unsigned long wid, tKeyboardModifier, char key)
+void MyKeyHandler(unsigned long wid, tKeyboardModifier mod, char key)
 {
 	static int which = 0;
 	if ((key >= '0') && (key <= '9'))
@@ -386,11 +410,16 @@ void MyKeyHandler(unsigned long wid, tKeyboardModifier, char key)
 		which = key-'0';
 		return;
 	}
-	if (key == 'c')
+	if (key == 'c' && mod == kNoModifier)
 	{
 		SetNumPorts((int)wid, 2);
 		BuildConfigSpace();
-		
+	}
+	if (key == 'c' && mod == kShiftDown)
+	{
+		r->PopObstacle();
+		//		SetNumPorts((int)wid, 2);
+//		BuildConfigSpace();
 	}
 	if (key == 'r')
 	{
@@ -410,8 +439,9 @@ void MyKeyHandler(unsigned long wid, tKeyboardModifier, char key)
 				r->ApplyAction(config, rot);
 				ourPath.resize(0);
 			}
-			printf(" %d:%d", x, config.GetAngle(x));
 		}
+		for (int x = 0; x < numArms; x++)
+			printf(" %d:%d", x, config.GetAngle(x));
 		printf("\n");
 	}
 	if (key == 's')

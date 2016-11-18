@@ -49,6 +49,8 @@ TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 
 bool running = false;
 
+int stepsPerFrame = 1;
+
 void StartSearch();
 Map *ReduceMap(Map *inputMap);
 
@@ -64,21 +66,11 @@ int main(int argc, char* argv[])
 void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
-	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
-	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "Increase Speed", "Increase the number of steps per frame", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Decrease Speed", "Increase the number of steps per frame", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
-	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
-	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra & A*", kAnyModifier, 'w');
-	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
-	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
-
-	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
+	InstallKeyboardHandler(MyDisplayHandler, "Maze", "Load maze", kAnyModifier, 'm');
+	InstallKeyboardHandler(MyDisplayHandler, "Default map", "Load default map", kAnyModifier, 'd');
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -128,7 +120,8 @@ int frameCnt = 0;
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	//me->OpenGLDraw();
-	u->StepTime(1.0);
+	for (int x = 0; x < stepsPerFrame; x++)
+		u->StepTime(0.5);
 	u->OpenGLDraw();
 }
 
@@ -154,10 +147,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case ']':
 		{
+			stepsPerFrame *= 2;
 		}
 			break;
 		case '[':
 		{
+			stepsPerFrame /= 2;
+			if (stepsPerFrame == 0)
+				stepsPerFrame = 1;
 		}
 			break;
 		case '|':
@@ -165,10 +162,35 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			u->ClearAllUnits();
 		}
 			break;
-		case 'w':
+		case 'd':
+		{
+			delete u;
+			delete me->GetMap();
+			delete me;
+
+			Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+			map->SetTileSet(kWinter);
+			me = new MapEnvironment(map);
+			u = new UnitMapSimulation(me);
+			u->SetStepType(kUniTime);
+
 			break;
-		case 'r':
+		}
+		case 'm':
+		{
+			delete u;
+			delete me->GetMap();
+			delete me;
+			
+			Map *map = new Map(40, 40);
+			MakeMaze(map, 1);
+			map->SetTileSet(kWinter);
+			me = new MapEnvironment(map);
+			u = new UnitMapSimulation(me);
+			u->SetStepType(kUniTime);
+			
 			break;
+		}
 		case '0':
 //		case '1': edgeCost = 1.0; te.AddLine("Adding edges; New edges cost 1"); m = kAddEdges; break;
 //		case '2': edgeCost = 2.0; te.AddLine("Adding edges; New edges cost 2"); m = kAddEdges; break;
@@ -214,6 +236,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButtonType button, tMouseEventType mType)
 {
+	static RHRUnit *unit = 0;
 	if (mType == kMouseDown)
 	{
 		switch (button)
@@ -250,6 +273,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		}
 		case kMouseUp:
 		{
+//			if (unit != 0)
+//				unit->Set
 //			int x, y;
 //			me->GetMap()->GetPointFromCoordinate(loc, x, y);
 //			if (me->GetMap()->GetTerrainType(x, y) == kGround)

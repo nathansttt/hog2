@@ -37,9 +37,10 @@
 #include <string>
 
 enum mode {
-	kFindPathWA15 = 0,
-	kFindPathWA30 = 1,
-	kFindPathOptimistic = 2
+	kFindPathWA1 = 0,
+	kFindPathWA15 = 1,
+	kFindPathWA30 = 2,
+	kFindPathOptimistic = 3
 };
 
 MapEnvironment *me = 0;
@@ -224,10 +225,11 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case ']':
 		{
-			m = mode((int(m)+1)%3);
+			m = mode((int(m)+1)%4);
 			switch (m)
 			{
 				//case
+				case kFindPathWA1: submitTextToBuffer("Find A*"); break;
 				case kFindPathWA15: submitTextToBuffer("Find WA* w = 1.5"); break;
 				case kFindPathWA30: submitTextToBuffer("Find WA* w = 3.0"); break;
 				case kFindPathOptimistic: submitTextToBuffer("Find Optimistic Path!"); break;
@@ -238,9 +240,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '[':
 		{
-			m = mode((int(m)+2)%3);
+			m = mode((int(m)+3)%4);
 			switch (m)
 			{
+				case kFindPathWA1: submitTextToBuffer("Find A*"); break;
 				case kFindPathWA15: submitTextToBuffer("Find WA* w = 1.5"); break;
 				case kFindPathWA30: submitTextToBuffer("Find WA* w = 3.0"); break;
 				case kFindPathOptimistic: submitTextToBuffer("Find Optimistic Path!"); break;
@@ -373,6 +376,12 @@ void StartSearch()
 	if (m == kFindPathOptimistic)
 	{
 		optimistic.InitializeSearch(me, start, goal, path);
+		running = true;
+	}
+	else if (m == kFindPathWA1)
+	{
+		astar.SetWeight(1);
+		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
 	else if (m == kFindPathWA15)
