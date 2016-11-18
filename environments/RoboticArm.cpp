@@ -254,8 +254,11 @@ void RoboticArm::AddObstacle(line2d obs)
 
 void RoboticArm::PopObstacle()
 {
-	obstacles.pop_back();
-	ce->PopObstacle();
+	if (obstacles.size() > 0)
+	{
+		obstacles.pop_back();
+		ce->PopObstacle();
+	}
 }
 
 armAngles RoboticArm::GetRandomState()
