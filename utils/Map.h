@@ -23,10 +23,6 @@
 #ifndef MAP_H
 #define MAP_H
 
-static const double ONE = 1.0;
-static const double TWO = 2.0;
-static const double ROOT_TWO = 1.414213562;//1.5f?
-static const double ONE_OVER_ROOT_TWO = 1.0/ROOT_TWO;//0.707106781f;
 
 #include <cassert>
 #include <cmath>
