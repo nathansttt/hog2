@@ -61,6 +61,7 @@ void TextBox::stepTime(double amount)
 
 void TextBox::draw()
 {
+	glLineWidth(1);
 	double wide, charWidth;
 	wide = br.x-tl.x;
 	//high = tl.y-br.y;
