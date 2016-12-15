@@ -531,7 +531,7 @@ void ReadAndDDBucket(bucketSet &states, const openData &d)
 {
 	ReadBucket(states, d);
 	RemoveDuplicates(states, d); // delayed duplicate detection
-	WriteToClosed(states, d); // this could run in parallel!
+	WriteToClosed(states, d); // this could run in parallel! (it is if we pre-load)
 }
 
 #define DO_PRELOAD
@@ -818,6 +818,7 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 			result.heuristics.push_back(pdb1);
 			result.heuristics.push_back(pdb2);
 			result.heuristics.push_back(pdb3);
+			break;
 		}
 		case k839:
 		{
