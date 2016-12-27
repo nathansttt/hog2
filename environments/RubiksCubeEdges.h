@@ -53,8 +53,8 @@ public:
 };
 
 
-//typedef RubikEdgeStateBits RubikEdgeState;
-typedef RubikEdgeStateArray RubikEdgeState;
+typedef RubikEdgeStateBits RubikEdgeState;
+//typedef RubikEdgeStateArray RubikEdgeState;
 
 static bool operator==(const RubikEdgeStateBits &l1, const RubikEdgeStateBits &l2)
 {

@@ -53,8 +53,8 @@ public:
 	uint8_t state[16];
 };
 
-//typedef RubiksCornerStateBits RubiksCornerState;
-typedef RubiksCornerStateArray RubiksCornerState;
+typedef RubiksCornerStateBits RubiksCornerState;
+//typedef RubiksCornerStateArray RubiksCornerState;
 
 namespace std {
 	template <> struct hash<RubiksCornerStateBits>
