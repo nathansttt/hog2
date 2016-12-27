@@ -396,8 +396,8 @@ double RubiksCube::HCost(const RubiksState &node) const
 
 bool RubiksCube::GoalTest(const RubiksState &node, const RubiksState &goal) const
 {
-	return (node.corner.state == goal.corner.state &&
-			node.edge.state == goal.edge.state);
+	return (node.corner == goal.corner &&
+			node.edge == goal.edge);
 }
 
 /** Goal Test if the goal is stored **/

@@ -15,62 +15,81 @@
 #include "PDBHeuristic.h"
 #include "MR1Permutation.h"
 
-class RubiksCornerState
+class RubiksCornerStateBits
 {
 public:
-	RubiksCornerState()
-	{
-		Reset();
-	}
-	void Reset()
-	{
-		state = 0;
-		for (int x = 0; x < 8; x++)
-		{
-			SetCubeInLoc(x, x);
-		}
-	}
-	int GetCubeInLoc(int whichLoc) const
-	{
-		return (state>>(16+4*whichLoc))&0xF;
-	}
-	void SetCubeInLoc(int whichLoc, int cube)
-	{
-		uint64_t blank = 0xF;
-		uint64_t value = cube&0xF;
-		state = state&(~(blank<<(16+4*whichLoc)));
-		state |= (value<<(16+4*whichLoc));
-	}
-	uint64_t GetCubeOrientation(int whichLoc) const
-	{
-		return (state>>(2*whichLoc))&0x3;
-	}
-	void SetCubeOrientation(int whichLoc, int orient) // orientation is the offset of the 0(low) side
-	{
-		if (whichLoc > 7)
-			return;
-		uint64_t blank = 0x3;
-		uint64_t value = orient&0x3;
-		state = state&(~(blank<<(2*whichLoc)));
-		state |= (value<<(2*whichLoc));
-	}
-	int GetFaceInLoc(int whichLoc) const // loc 0...24
-	{
-		int cube = GetCubeInLoc(whichLoc/3);
-		int rot = (int)GetCubeOrientation(cube);
-		return cube*3+(3+(whichLoc%3)-rot)%3;
-	}
+	RubiksCornerStateBits();
+	void Reset();
+	int GetCubeInLoc(unsigned int whichLoc) const;
+	void SetCubeInLoc(unsigned int whichLoc, int cube);
+	uint64_t GetCubeOrientation(unsigned int whichLoc) const;
+	void SetCubeOrientation(unsigned int whichLoc, int orient); // orientation is the offset of the 0(low) side
+	int GetFaceInLoc(unsigned int whichLoc) const;
 	void Rotate(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
 	void Swap(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
 	// 48 bits
 	// 16 bits of rotations
 	// 32 bits of pieces
+//private:
 	uint64_t state;
 };
 
-static bool operator==(const RubiksCornerState &l1, const RubiksCornerState &l2)
+class RubiksCornerStateArray
+{
+public:
+	RubiksCornerStateArray();
+	void Reset();
+	int GetCubeInLoc(unsigned int whichLoc) const;
+	void SetCubeInLoc(unsigned int whichLoc, int cube);
+	uint64_t GetCubeOrientation(unsigned int whichLoc) const;
+	void SetCubeOrientation(unsigned int whichLoc, int orient); // orientation is the offset of the 0(low) side
+	int GetFaceInLoc(unsigned int whichLoc) const; // loc 0...24
+	void Rotate(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
+	void Swap(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
+	// 48 bits
+	// 16 bits of rotations
+	// 32 bits of pieces
+	//private:
+	uint8_t state[16];
+};
+
+//typedef RubiksCornerStateBits RubiksCornerState;
+typedef RubiksCornerStateArray RubiksCornerState;
+
+namespace std {
+	template <> struct hash<RubiksCornerStateBits>
+	{
+		size_t operator()(const RubiksCornerStateBits &s) const
+		{
+			return s.state;
+		}
+	};
+	
+	template <> struct hash<RubiksCornerStateArray>
+	{
+		size_t operator()(const RubiksCornerStateArray &s) const
+		{
+			size_t result = 0;
+			for (int x = 0; x < 16; x++)
+				result ^= (s.state[x])<<(x*4);
+			return result;
+		}
+	};
+}
+
+
+
+static bool operator==(const RubiksCornerStateBits &l1, const RubiksCornerStateBits &l2)
 {
 	return l1.state == l2.state;
+}
+
+static bool operator==(const RubiksCornerStateArray &l1, const RubiksCornerStateArray &l2)
+{
+	for (int x = 0; x < 16; x++)
+		if (l1.state[x] != l2.state[x])
+			return false;
+	return true;
 }
 
 static std::ostream &operator<<(std::ostream &out, const RubiksCornerState &s)
@@ -149,7 +168,8 @@ public:
 	virtual bool GoalTest(const RubiksCornerState &node, const RubiksCornerState &goal) const { return GoalTest(node); }
 	
 	/** Goal Test if the goal is stored **/
-	virtual bool GoalTest(const RubiksCornerState &node) const;
+	virtual bool GoalTest(const RubiksCornerStateBits &node) const;
+	virtual bool GoalTest(const RubiksCornerStateArray &node) const;
 	
 	static uint64_t GetStateHash(const RubiksCornerState &node);
 	static void GetStateFromHash(uint64_t hash, RubiksCornerState &node);

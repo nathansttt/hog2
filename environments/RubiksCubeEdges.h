@@ -16,80 +16,99 @@
 #include "PDBHeuristic.h"
 #include "MR1Permutation.h"
 
-class RubikEdgeState
+class RubikEdgeStateBits
 {
 public:
-	RubikEdgeState()
-	{
-		Reset();
-	}
-	void Reset()
-	{
-		state = 0;
-		for (int x = 0; x < 12; x++)
-			SetCubeInLoc(x, x);
-	}
-	void Clear()
-	{
-		state = 0;
-	}
-	void GetDual(RubikEdgeState &s) const;
-	int GetCubeInLoc(int whichLoc) const
-	{
-		return (state>>(12+4*whichLoc))&0xF;
-	}
-	void SetCubeInLoc(int whichLoc, int cube)
-	{
-		if (whichLoc >= 12)
-			return;
-		uint64_t blank = 0xF;
-		uint64_t value = cube&0xF;
-		state = state&(~(blank<<(12+4*whichLoc)));
-		state |= (value<<(12+4*whichLoc));
-	}
-	bool GetCubeOrientation(int whichLoc) const
-	{
-		return state&(0x1<<whichLoc);
-	}
-	void SetCubeOrientation(int whichLoc, bool flip)
-	{
-		if (whichLoc >= 12)
-			return;
-		uint64_t blank = 0x1;
-		if (flip)
-			state |= (0x1<<whichLoc);
-		else
-			state = state&(~(blank<<whichLoc));
-	}
-	void FlipCubeOrientation(int whichLoc)
-	{
-		if (whichLoc >= 12)
-			return;
-		//		printf("Was: 0x%X [flip %d] -- ", state, whichLoc);
-		state = state^(0x1<<whichLoc);
-		//		printf("Now: 0x%X \n", state);
-	}
+	RubikEdgeStateBits();
+	void Reset();
+	void Clear();
+	void GetDual(RubikEdgeStateBits &s) const;
+	int GetCubeInLoc(int whichLoc) const;
+	void SetCubeInLoc(int whichLoc, int cube);
+	bool GetCubeOrientation(int whichLoc) const;
+	void SetCubeOrientation(int whichLoc, bool flip);
+	void FlipCubeOrientation(int whichLoc);
 	// 60 bits
 	// 12 bits of flips
 	// 48 bits of pieces
 	uint64_t state;
 };
 
-static bool operator==(const RubikEdgeState &l1, const RubikEdgeState &l2)
+class RubikEdgeStateArray
+{
+public:
+	RubikEdgeStateArray();
+	void Reset();
+	void Clear();
+	void GetDual(RubikEdgeStateArray &s) const;
+	int GetCubeInLoc(int whichLoc) const;
+	void SetCubeInLoc(int whichLoc, int cube);
+	bool GetCubeOrientation(int whichLoc) const;
+	void SetCubeOrientation(int whichLoc, bool flip);
+	void FlipCubeOrientation(int whichLoc);
+	// 60 bits
+	// 12 bits of flips
+	// 48 bits of pieces
+	uint8_t state[24];
+};
+
+
+//typedef RubikEdgeStateBits RubikEdgeState;
+typedef RubikEdgeStateArray RubikEdgeState;
+
+static bool operator==(const RubikEdgeStateBits &l1, const RubikEdgeStateBits &l2)
 {
 	return l1.state == l2.state;
 }
 
-static std::ostream& operator <<(std::ostream & out, const RubikEdgeState &s)
+static bool operator==(const RubikEdgeStateArray &l1, const RubikEdgeStateArray &l2)
+{
+	for (int x = 0; x < 24; x++)
+		if (l1.state[x] != l2.state[x])
+			return false;
+	return true;
+}
+
+
+static std::ostream& operator <<(std::ostream & out, const RubikEdgeStateArray &s)
 {
 	for (int x = 0; x < 12; x++)
 	{
-		//out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(x) << "] ";
 		out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(s.GetCubeInLoc(x)) << "] ";
-
-		//out << s.GetCubeInLoc(x) << "-" << (s.GetCubeOrientation(s.GetCubeInLoc(x))?1:0) << " ";
 	}
 	return out;
+}
+
+static std::ostream& operator <<(std::ostream & out, const RubikEdgeStateBits &s)
+{
+	for (int x = 0; x < 12; x++)
+	{
+		out << s.GetCubeInLoc(x) << " [" << s.GetCubeOrientation(s.GetCubeInLoc(x)) << "] ";
+	}
+	return out;
+}
+
+namespace std {
+	template <> struct hash<RubikEdgeStateBits>
+	{
+		size_t operator()(const RubikEdgeStateBits &s) const
+		{
+			return s.state;
+		}
+	};
+	
+	template <> struct hash<RubikEdgeStateArray>
+	{
+		size_t operator()(const RubikEdgeStateArray &s) const
+		{
+			size_t result = 0;
+			for (int x = 0; x < 12; x++)
+				result ^= (s.state[x])<<(x);
+			for (int x = 12; x < 24; x++)
+				result ^= (s.state[x])<<((x-12)*4+12);
+			return result;
+		}
+	};
 }
 
 
@@ -119,16 +138,20 @@ public:
 	virtual void GetSuccessors(const RubikEdgeState &nodeID, std::vector<RubikEdgeState> &neighbors) const;
 	virtual void GetActions(const RubikEdgeState &nodeID, std::vector<RubikEdgeAction> &actions) const;
 	virtual RubikEdgeAction GetAction(const RubikEdgeState &s1, const RubikEdgeState &s2) const;
-	virtual void ApplyAction(RubikEdgeState &s, RubikEdgeAction a) const;
-	virtual void UndoAction(RubikEdgeState &s, RubikEdgeAction a) const;
+	virtual void ApplyAction(RubikEdgeStateArray &s, RubikEdgeAction a) const;
+	virtual void UndoAction(RubikEdgeStateArray &s, RubikEdgeAction a) const;
+	virtual void ApplyAction(RubikEdgeStateBits &s, RubikEdgeAction a) const;
+	virtual void UndoAction(RubikEdgeStateBits &s, RubikEdgeAction a) const;
 
 	
 	/** Heuristic value between two arbitrary nodes. **/
 	virtual double HCost(const RubikEdgeState &node1, const RubikEdgeState &node2) const { return 1; }
 	virtual double GCost(const RubikEdgeState &node1, const RubikEdgeState &node2) const { return 1; }
 	virtual double GCost(const RubikEdgeState &node, const RubikEdgeAction &act) const { return 1; }
-	virtual bool GoalTest(const RubikEdgeState &node, const RubikEdgeState &goal) const { return (node.state == goal.state); }
-
+	virtual bool GoalTest(const RubikEdgeState &node, const RubikEdgeState &goal) const { return GoalTest(node); }
+	bool GoalTest(const RubikEdgeStateBits &) const;
+	bool GoalTest(const RubikEdgeStateArray &) const;
+	
 	void ApplyMove(RubikEdgeState &s, RubikEdgeMove *a);
 	void UndoMove(RubikEdgeState &s, RubikEdgeMove *a);
 	void unrankPlayer(uint64_t d, RubikEdgeState & s, int who)

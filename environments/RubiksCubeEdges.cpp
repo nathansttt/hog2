@@ -40,7 +40,55 @@
  *
  */
  
-void RubikEdgeState::GetDual(RubikEdgeState &s) const
+RubikEdgeStateBits::RubikEdgeStateBits()
+{
+	Reset();
+}
+void RubikEdgeStateBits::Reset()
+{
+	state = 0;
+	for (int x = 0; x < 12; x++)
+		SetCubeInLoc(x, x);
+}
+void RubikEdgeStateBits::Clear()
+{
+	state = 0;
+}
+int RubikEdgeStateBits::GetCubeInLoc(int whichLoc) const
+{
+	return (state>>(12+4*whichLoc))&0xF;
+}
+void RubikEdgeStateBits::SetCubeInLoc(int whichLoc, int cube)
+{
+	if (whichLoc >= 12)
+		return;
+	uint64_t blank = 0xF;
+	uint64_t value = cube&0xF;
+	state = state&(~(blank<<(12+4*whichLoc)));
+	state |= (value<<(12+4*whichLoc));
+}
+bool RubikEdgeStateBits::GetCubeOrientation(int whichLoc) const
+{
+	return state&(0x1<<whichLoc);
+}
+void RubikEdgeStateBits::SetCubeOrientation(int whichLoc, bool flip)
+{
+	if (whichLoc >= 12)
+		return;
+	uint64_t blank = 0x1;
+	if (flip)
+		state |= (0x1<<whichLoc);
+	else
+		state = state&(~(blank<<whichLoc));
+}
+void RubikEdgeStateBits::FlipCubeOrientation(int whichLoc)
+{
+	if (whichLoc >= 12)
+		return;
+	state = state^(0x1<<whichLoc);
+}
+
+void RubikEdgeStateBits::GetDual(RubikEdgeStateBits &s) const
 {
 	for (int x = 0; x < 12; x++)
 	{
@@ -48,6 +96,72 @@ void RubikEdgeState::GetDual(RubikEdgeState &s) const
 		s.SetCubeOrientation(x, GetCubeOrientation(GetCubeInLoc(x)));
 	}
 }
+
+
+RubikEdgeStateArray::RubikEdgeStateArray()
+{
+	Reset();
+}
+void RubikEdgeStateArray::Reset()
+{
+	for (int x = 0; x < 12; x++)
+	{
+		state[x] = 0;
+		SetCubeInLoc(x, x);
+	}
+}
+void RubikEdgeStateArray::Clear()
+{
+	Reset();
+}
+int RubikEdgeStateArray::GetCubeInLoc(int whichLoc) const
+{
+	return state[12+whichLoc];
+	//return (state>>(12+4*whichLoc))&0xF;
+}
+void RubikEdgeStateArray::SetCubeInLoc(int whichLoc, int cube)
+{
+	if (whichLoc >= 12)
+		return;
+	state[whichLoc+12] = cube;
+//	uint64_t blank = 0xF;
+//	uint64_t value = cube&0xF;
+//	state = state&(~(blank<<(12+4*whichLoc)));
+//	state |= (value<<(12+4*whichLoc));
+}
+bool RubikEdgeStateArray::GetCubeOrientation(int whichLoc) const
+{
+	return state[whichLoc];
+	//return state&(0x1<<whichLoc);
+}
+void RubikEdgeStateArray::SetCubeOrientation(int whichLoc, bool flip)
+{
+	if (whichLoc >= 12)
+		return;
+	state[whichLoc] = flip;
+//	uint64_t blank = 0x1;
+//	if (flip)
+//		state |= (0x1<<whichLoc);
+//	else
+//		state = state&(~(blank<<whichLoc));
+}
+void RubikEdgeStateArray::FlipCubeOrientation(int whichLoc)
+{
+	if (whichLoc >= 12)
+		return;
+	state[whichLoc] = !state[whichLoc];
+	//state = state^(0x1<<whichLoc);
+}
+
+void RubikEdgeStateArray::GetDual(RubikEdgeStateArray &s) const
+{
+	for (int x = 0; x < 12; x++)
+	{
+		s.SetCubeInLoc(GetCubeInLoc(x), x);
+		s.SetCubeOrientation(x, GetCubeOrientation(GetCubeInLoc(x)));
+	}
+}
+
 
 void RubikEdge::GetSuccessors(const RubikEdgeState &nodeID, std::vector<RubikEdgeState> &neighbors) const
 {
@@ -94,7 +208,7 @@ void RubikEdge::UndoMove(RubikEdgeState &s, RubikEdgeMove *a)
 	ApplyAction(s, todo);
 }
 
-void RubikEdge::UndoAction(RubikEdgeState &s, RubikEdgeAction a) const
+void RubikEdge::UndoAction(RubikEdgeStateBits &s, RubikEdgeAction a) const
 {
 	RubikEdgeAction todo = a;
 	if (0 == todo%3)
@@ -108,7 +222,22 @@ void RubikEdge::UndoAction(RubikEdgeState &s, RubikEdgeAction a) const
 	ApplyAction(s, todo);
 }
 
-void RubikEdge::ApplyAction(RubikEdgeState &s, RubikEdgeAction a) const
+void RubikEdge::UndoAction(RubikEdgeStateArray &s, RubikEdgeAction a) const
+{
+	RubikEdgeAction todo = a;
+	if (0 == todo%3)
+	{
+		todo += 1;
+	}
+	else if (1 == todo%3)
+	{
+		todo -= 1;
+	}
+	ApplyAction(s, todo);
+}
+
+template <typename t>
+void LocalApplyAction(t &s, RubikEdgeAction a)
 {
 	switch (a)
 	{
@@ -365,6 +494,17 @@ void RubikEdge::ApplyAction(RubikEdgeState &s, RubikEdgeAction a) const
 	
 }
 
+void RubikEdge::ApplyAction(RubikEdgeStateArray &s, RubikEdgeAction a) const
+{
+	LocalApplyAction<RubikEdgeStateArray>(s, a);
+}
+
+void RubikEdge::ApplyAction(RubikEdgeStateBits &s, RubikEdgeAction a) const
+{
+	LocalApplyAction<RubikEdgeStateBits>(s, a);
+}
+
+
 void RubikEdge::GetNextState(const RubikEdgeState &s0, RubikEdgeAction a, RubikEdgeState &s1) const
 {
 	s1 = s0;
@@ -383,6 +523,17 @@ bool RubikEdge::InvertAction(RubikEdgeAction &a) const
 	a += 1;
 	return true;
 
+}
+
+bool RubikEdge::GoalTest(const RubikEdgeStateBits &b) const
+{
+	assert(!"Code not called");
+	return b.state == 0;
+}
+
+bool RubikEdge::GoalTest(const RubikEdgeStateArray &a) const
+{
+	assert(!"Code not called");
 }
 
 
@@ -1383,6 +1534,10 @@ std::string RubikEdgePDB::GetFileName(const char *prefix)
 #ifdef MR
 	fileName += "-MR";
 #endif
+	if (std::is_same<RubikEdgeStateArray,RubikEdgeState>::value)
+	{
+		fileName += "-AR";
+	}
 	fileName += ".pdb";
 	
 	return fileName;

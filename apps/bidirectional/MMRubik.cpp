@@ -94,18 +94,18 @@ struct openData {
 	tSearchDirection dir;  // at most 2 bits
 	uint8_t priority;      // at most 6 bits
 	uint8_t gcost;         // at most 4 bits
-	uint8_t fcost;         // at most 4 bits
+	//uint8_t fcost;         // at most 4 bits
 	uint16_t bucket;        // at most (3) bits
 };
 
 static bool operator==(const openData &a, const openData &b)
 {
-	return (a.dir == b.dir && a.priority == b.priority && a.gcost == b.gcost && a.fcost == b.fcost && a.bucket == b.bucket);
+	return (a.dir == b.dir && a.priority == b.priority && a.gcost == b.gcost /*&& a.fcost == b.fcost*/ && a.bucket == b.bucket);
 }
 
 static std::ostream &operator<<(std::ostream &out, const openData &d)
 {
-	out << "[" << ((d.dir==kForward)?"forward":"backward") << ", p:" << +d.priority << ", g:" << +d.gcost << ", f:" << +d.fcost;
+	out << "[" << ((d.dir==kForward)?"forward":"backward") << ", p:" << +d.priority << ", g:" << +d.gcost;// << ", f:" << +d.fcost;
 	out << ", b:" << +d.bucket << "]";
 	return out;
 }
@@ -114,17 +114,24 @@ struct openDataHash
 {
 	std::size_t operator()(const openData & x) const
 	{
-		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.fcost<<12)|(x.bucket<<20);
+		//return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.fcost<<12)|(x.bucket<<20);
+		return (x.dir)|(x.priority<<2)|(x.gcost<<8)|(x.bucket<<20);
 	}
 };
 
 struct openList {
-	openList() :f(0), writtenStates(0) {}
+	openList() :f(0), writtenStates(0), minf(0xFF) {}
 	//std::unordered_set<uint64_t> states;
 	FILE *f;
 	uint64_t writtenStates;
 	uint8_t minf;
 };
+
+static std::ostream &operator<<(std::ostream &out, const openList &d)
+{
+	out << "[" << d.writtenStates << ", " << +d.minf << "]";
+	return out;
+}
 
 struct closedData {
 	tSearchDirection dir;
@@ -209,8 +216,8 @@ std::string GetOpenName(const openData &d)
 	s += std::to_string(d.priority);
 	s += "-";
 	s += std::to_string(d.gcost);
-	s += "-";
-	s += std::to_string(d.fcost);
+//	s += "-";
+//	s += std::to_string(d.fcost);
 //	s += "-";
 //	s += std::to_string(d.hcost2);
 	s += "-";
@@ -235,12 +242,11 @@ openData GetBestFile()
 		else if (s.first.dir == kBackward && s.first.gcost < minGBackward)
 			minGBackward = s.first.gcost;
 		
-		//if (s.first.dir == kForward && s.first.gcost+s.first.hcost < minFForward)
-		if (s.first.dir == kForward && s.first.fcost < minFForward)
-			minFForward = s.first.fcost;
-		else if (s.first.dir == kBackward && s.first.fcost < minFBackward)
-			minFBackward = s.first.fcost;
-
+		if (s.first.dir == kForward && s.second.minf < minFForward)
+			minFForward = s.second.minf;
+		else if (s.first.dir == kBackward && s.second.minf < minFBackward)
+			minFBackward = s.second.minf;
+		
 		if (s.first.priority < best.priority)
 		{
 			best = s.first;
@@ -253,38 +259,39 @@ openData GetBestFile()
 			{
 				if (s.first.dir == best.dir)
 				{
-					if (s.first.fcost < best.fcost)
-						best = s.first;
-					else if (s.first.fcost == best.fcost)
-					{
+//					if (s.first.fcost < best.fcost)
+//						best = s.first;
+//					else if (s.first.fcost == best.fcost)
+//					{
 						if (s.first.bucket < best.bucket)
 							best = s.first;
-					}
+//					}
 				}
 				else if (s.first.dir == kForward)
 					best = s.first;
 			}
 		}
 	}
+	//printf("Min f forward: %d backward: %d\n", minFForward, minFBackward);
 	return best;
 }
 
 void GetOpenData(const RubiksState &from, tSearchDirection dir, int cost,
-				 openData &d, diskState &data)
+				 openData &d, diskState &data, uint8_t &fcost)
 {
 	int bucket;
 	//uint64_t data;
 	GetBucketAndData(from, bucket, data);
 	d.dir = dir;
 	d.gcost = cost;
-	d.fcost = cost + ((dir==kForward)?forward.HCost(from, goalState):reverse.HCost(from, startState));
+	fcost = cost + ((dir==kForward)?forward.HCost(from, goalState):reverse.HCost(from, startState));
 	//d.hcost2 = (dir==kForward)?reverse.HCost(start, start):forward.HCost(start, start);
 	d.bucket = bucket;
 	//d.priority = d.gcost+d.hcost;
-	d.priority = std::max(d.fcost, uint8_t(d.gcost*2));
+	d.priority = std::max(fcost, uint8_t(d.gcost*2));
 }
 
-void AddStatesToQueue(const openData &d, diskState *data, size_t count)
+void AddStatesToQueue(const openData &d, diskState *data, size_t count, uint8_t minFcost)
 {
 	openLock.lock();
 	auto iter = open.find(d);
@@ -298,29 +305,32 @@ void AddStatesToQueue(const openData &d, diskState *data, size_t count)
 			exit(0);
 		}
 		iter = open.find(d);
+		iter->second.minf = 100; // new file, start with high f-min
 	}
 	if (iter->second.f == 0)
 	{
 		printf("Error - file is null!\n");
 		exit(0);
 	}
-	iter->second.minf = std::min(iter->second.minf, d.fcost);
+	//iter->second.minf = std::min(iter->second.minf, d.fcost);
 	size_t written = fwrite(data, sizeof(diskState), count, open[d].f);
 	open[d].writtenStates += written;
+	open[d].minf = std::min(open[d].minf, minFcost);
 	openLock.unlock();
 }
 
-void AddStateToQueue(openData &d, diskState data)
+void AddStateToQueue(openData &d, diskState data, uint8_t fcost)
 {
-	AddStatesToQueue(d, &data, 1);
+	AddStatesToQueue(d, &data, 1, fcost);
 }
 
 void AddStateToQueue(const RubiksState &start, tSearchDirection dir, int cost)
 {
 	openData d;
 	diskState rank;
-	GetOpenData(start, dir, cost, d, rank);
-	AddStateToQueue(d, rank);
+	uint8_t fcost;
+	GetOpenData(start, dir, cost, d, rank, fcost);
+	AddStateToQueue(d, rank, fcost);
 }
 
 
@@ -477,7 +487,8 @@ void WriteToClosed(bucketSet &states, openData d)
 void ParallelExpandBucket(openData d, bucketSet &states, int myThread, int totalThreads)
 {
 	const int cacheSize = 1024;
-	std::unordered_map<openData, std::vector<diskState>, openDataHash> cache;
+	// stores the min f for this bucket, the files to write
+	std::unordered_map<openData, std::pair<uint8_t, std::vector<diskState>>, openDataHash> cache;
 	RubiksState tmp;
 	uint64_t localExpanded = 0;
 	int count = 0;
@@ -495,35 +506,47 @@ void ParallelExpandBucket(openData d, bucketSet &states, int myThread, int total
 		v = values;
 #endif
 		localExpanded++;
+		// TODO: test whether we should undo or call GetState()
+		GetState(tmp, d.bucket, v);
 		for (int x = 0; x < 18; x++) // TODO: use getactions
 		{
-			GetState(tmp, d.bucket, v);
-			// copying 2 64-bit values is faster than undoing a move
 			cube.ApplyAction(tmp, x);
 			openData newData;
 			diskState newRank;
-			GetOpenData(tmp, d.dir, d.gcost+1, newData, newRank);
+			uint8_t fcost;
+			GetOpenData(tmp, d.dir, d.gcost+1, newData, newRank, fcost);
 			
-			std::vector<diskState> &c = cache[newData];
+			auto &i = cache[newData];
+			std::vector<diskState> &c = i.second;
+			if (i.first == 0)
+				i.first = fcost;
+			else
+				i.first = std::min(i.first, fcost);
 			c.push_back(newRank);
 			if (c.size() > cacheSize)
 			{
-				AddStatesToQueue(newData, &c[0], c.size());
+				AddStatesToQueue(newData, &c[0], c.size(), i.first);
 				c.clear();
 			}
+			cube.UndoAction(tmp, x);
 		}
 	}
 	for (auto &i : cache)
 	{
-		AddStatesToQueue(i.first, &(i.second[0]), i.second.size());
+		if (i.second.second.size() > 0)
+			AddStatesToQueue(i.first, &(i.second.second[0]), i.second.second.size(), i.second.first);
 	}
 	
 	countLock.lock();
 	expanded += localExpanded;
 	if (d.dir == kForward)
+	{
 		gDistForward[d.gcost]+=localExpanded;
-	else
+	}
+	else {
 		gDistBackward[d.gcost]+=localExpanded;
+	}
+	
 	countLock.unlock();
 }
 
@@ -546,6 +569,12 @@ void ExpandNextFile()
 	openData d = GetBestFile();
 	currentC = d.priority;
 
+//	std::cout << "---->Currently on open [" << bestSolution << "]:\n";
+//	for (auto &d : open)
+//	{
+//		std::cout << d.first << "<->" << d.second << "\n";
+//	}
+//	std::cout << "<----\n";
 	if (CanTerminateSearch())
 		return;
 
@@ -568,12 +597,12 @@ void ExpandNextFile()
 			ReadAndDDBucket(states, d);
 		}
 	}
-	open.erase(open.find(d));
 	timer.EndTimer();
 	
 	printLock.lock();
-	std::cout << "Next: " << d << " (" << states.size() << " entries) [" << timer.GetElapsedTime() << "s reading/dd] ";
+	std::cout << "Next: " << d << " (" << states.size() << " entries "<< open.find(d)->second.writtenStates<<") [" << timer.GetElapsedTime() << "s reading/dd] ";
 	printLock.unlock();
+	open.erase(open.find(d));
 
 	timer.StartTimer();
 	// Read in opposite buckets to check for solutions in parallel to expanding this bucket
@@ -598,36 +627,6 @@ void ExpandNextFile()
 	std::vector<std::thread *> threads;
 	for (int x = 0; x < numThreads; x++)
 		threads.push_back(new std::thread(ParallelExpandBucket, d, std::ref(states), x, numThreads));
-	// Put work for states into queue and send it to threads
-//	{
-//		int count = 0;
-//		workUnit w;
-//		for (const auto &values : states)
-//		{
-//#ifdef MY_SET
-//			if (values.valid == false)
-//				continue;
-//			w.work[count] = values.item;
-//#else
-//			w.work[count] = values;
-//#endif
-//			count++;
-//			if (count == kWorkUnitSize)
-//			{
-//				w.count = count;
-//				work.WaitAdd(w);
-//				count = 0;
-//			}
-//		}
-//		if (count > 0)
-//		{
-//			w.count = count;
-//			work.WaitAdd(w);
-//		}
-//		w.count = 0;
-//		for (int x = 0; x < threads.size(); x++)
-//			work.WaitAdd(w);
-//	}
 	for (int x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();
@@ -661,13 +660,6 @@ void ExpandNextFile()
 
 }
 
-//#define ZERO
-//#define KORF97
-//#define RUBIK_888
-//#define RUBIK_10_2
-//#define RUBIK_9_3
-//#define SMALL
-//#define TINY
 
 void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState> &result, heuristicType h)
 {
@@ -890,7 +882,7 @@ void BuildHeuristics(RubiksState start, RubiksState goal, Heuristic<RubiksState>
 
 int GetBucket(const RubiksState &s)
 {
-	diskState ehash = RubikEdgePDB::GetStateHash(s.edge);
+	uint64_t ehash = RubikEdgePDB::GetStateHash(s.edge);
 	return ehash&bucketMask;
 //	return (s.edge.state^(s.corner.state<<2))&bucketMask;
 }

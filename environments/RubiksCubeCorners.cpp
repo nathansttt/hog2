@@ -134,8 +134,59 @@ inline void swap(uint64_t &state, int loc1, int loc2)
 //	state = state|(val1<<(loc2))|(val2<<(loc1));
 }
 
+RubiksCornerStateBits::RubiksCornerStateBits()
+{
+	Reset();
+}
+void RubiksCornerStateBits::Reset()
+{
+	state = 0;
+	for (int x = 0; x < 8; x++)
+	{
+		SetCubeInLoc(x, x);
+	}
+}
 
-void RubiksCornerState::Rotate(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
+int RubiksCornerStateBits::GetCubeInLoc(unsigned int whichLoc) const
+{
+	assert(whichLoc < 8);
+	return (state>>(16+4*whichLoc))&0xF;
+}
+void RubiksCornerStateBits::SetCubeInLoc(unsigned int whichLoc, int cube)
+{
+	assert(whichLoc < 8);
+	uint64_t blank = 0xF;
+	uint64_t value = cube&0xF;
+	state = state&(~(blank<<(16+4*whichLoc)));
+	state |= (value<<(16+4*whichLoc));
+}
+uint64_t RubiksCornerStateBits::GetCubeOrientation(unsigned int whichLoc) const
+{
+//	assert(whichLoc < 8);
+	if (whichLoc > 8)
+	{ return 0x3;}
+	return (state>>(2*whichLoc))&0x3;
+}
+void RubiksCornerStateBits::SetCubeOrientation(unsigned int whichLoc, int orient) // orientation is the offset of the 0(low) side
+{
+	if (whichLoc > 8)
+		return;
+	//assert(whichLoc < 8);
+	uint64_t blank = 0x3;
+	uint64_t value = orient&0x3;
+	state = state&(~(blank<<(2*whichLoc)));
+	state |= (value<<(2*whichLoc));
+}
+int RubiksCornerStateBits::GetFaceInLoc(unsigned int whichLoc) const // loc 0...24
+{
+	assert(whichLoc < 8);
+	int cube = GetCubeInLoc(whichLoc/3);
+	int rot = (int)GetCubeOrientation(cube);
+	return cube*3+(3+(whichLoc%3)-rot)%3;
+}
+
+
+void RubiksCornerStateBits::Rotate(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
 {
 	a = (a<<2) + 16; // multiply by 4 for shifting purposes; add 16 for rotations
 	b = (b<<2) + 16;
@@ -153,7 +204,7 @@ void RubiksCornerState::Rotate(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
 	state = (state&(~mask))|bits;
 }
 
-void RubiksCornerState::Swap(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
+void RubiksCornerStateBits::Swap(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
 {
 	a = (a<<2) + 16; // multiply by 4 for shifting purposes; add 16 for rotations
 	b = (b<<2) + 16;
@@ -170,6 +221,70 @@ void RubiksCornerState::Swap(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
 	mask = (blank<<(a))|(blank<<(b))|(blank<<(c))|(blank<<(d));
 	state = (state&(~mask))|bits;
 }
+
+RubiksCornerStateArray::RubiksCornerStateArray()
+{
+	Reset();
+}
+void RubiksCornerStateArray::Reset()
+{
+	for (int x = 8; x < 16; x++)
+		state[x] = 0;
+	for (int x = 0; x < 8; x++)
+	{
+		SetCubeInLoc(x, x);
+	}
+}
+int RubiksCornerStateArray::GetCubeInLoc(unsigned int whichLoc) const
+{
+	assert(whichLoc < 8);
+	return state[whichLoc];
+}
+void RubiksCornerStateArray::SetCubeInLoc(unsigned int whichLoc, int cube)
+{
+	assert(whichLoc < 8);
+	state[whichLoc] = cube;
+}
+uint64_t RubiksCornerStateArray::GetCubeOrientation(unsigned int whichLoc) const
+{
+	if (whichLoc > 8)
+	{ return 0x3;}
+	return state[whichLoc+8];
+}
+void RubiksCornerStateArray::SetCubeOrientation(unsigned int whichLoc, int orient) // orientation is the offset of the 0(low) side
+{
+	if (whichLoc > 8)
+		return;
+	state[whichLoc+8] = orient;
+}
+int RubiksCornerStateArray::GetFaceInLoc(unsigned int whichLoc) const // loc 0...24
+{
+	int cube = GetCubeInLoc(whichLoc/3);
+	int rot = (int)GetCubeOrientation(cube);
+	return cube*3+(3+(whichLoc%3)-rot)%3;
+}
+void RubiksCornerStateArray::Rotate(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
+{
+	uint8_t tmp = state[d];
+	state[d] = state[c];
+	state[c] = state[b];
+	state[b] = state[a];
+	state[a] = tmp;
+}
+
+void RubiksCornerStateArray::Swap(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
+{
+	uint8_t tmp = state[a];
+	state[a] = state[b];
+	state[b] = tmp;
+	
+	tmp = state[c];
+	state[c] = state[d];
+	state[d] = tmp;
+}
+
+
+
 
 void RubiksCorner::GetSuccessors(const RubiksCornerState &nodeID, std::vector<RubiksCornerState> &neighbors) const
 {
@@ -363,9 +478,17 @@ bool RubiksCorner::InvertAction(RubiksCornersAction &a) const
 }
 
 /** Goal Test if the goal is stored **/
-bool RubiksCorner::GoalTest(const RubiksCornerState &node) const
+bool RubiksCorner::GoalTest(const RubiksCornerStateBits &node) const
 {
 	return node.state == 0;
+}
+
+bool RubiksCorner::GoalTest(const RubiksCornerStateArray &node) const
+{
+	for (int x = 0; x < 16; x++)
+		if (node.state[x] != 0)
+			return false;
+	return true;
 }
 
 void RubiksCorner::ApplyMove(RubiksCornerState &s, RubikCornerMove *a)
@@ -1311,6 +1434,10 @@ std::string RubikCornerPDB::GetFileName(const char *prefix)
 #ifdef MR
 	fileName += "-MR";
 #endif
+	if (std::is_same<RubiksCornerStateArray,RubiksCornerState>::value)
+	{
+		fileName += "-AR";
+	}
 	fileName += ".pdb";
 	
 	return fileName;

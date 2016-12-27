@@ -47,14 +47,15 @@ namespace std {
 	{
 		size_t operator()(const RubiksState & x) const
 		{
-			return x.edge.state^((x.corner.state)<<11);
+			return std::hash<RubikEdgeState>{}(x.edge)^(std::hash<RubiksCornerState>{}(x.corner)<<2);
 		}
 	};
 }
 
 static bool operator==(const RubiksState &l1, const RubiksState &l2)
 {
-	return l1.corner == l2.corner && l1.edge == l2.edge;
+//	return (l1.corner.state == l2.corner.state) && (l1.edge.state == l2.edge.state);
+	return (l1.corner == l2.corner) && (l1.edge == l2.edge);
 }
 
 static std::ostream &operator<<(std::ostream &out, const RubiksState &s)

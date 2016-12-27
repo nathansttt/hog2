@@ -107,79 +107,107 @@ int main(int argc, char* argv[])
 
 void TestDataStructure()
 {
-	Timer t;
-	const int testSize = 10000000;
-	std::vector<int> elements;
-	for (int x = 0; x < testSize; x++)
-		elements.push_back(random());
-	//std::sort(elements.begin(), elements.end());
-
-	FixedSizeSet<int> test(testSize);
-	std::unordered_set<int> test2;
-
-	t.StartTimer();
-	for (int x = 0; x < testSize; x++)
-		test.insert(elements[x]);
-	t.EndTimer();
-	printf("%1.9fs inserting %d elements (mine)\n", t.GetElapsedTime(), testSize);
-	
-	t.StartTimer();
-	for (int x = 0; x < testSize; x++)
-		test2.insert(elements[x]);
-	t.EndTimer();
-	printf("%1.9fs inserting %d elements (std)\n", t.GetElapsedTime(), testSize);
-
-	// Reset data
+	// This tests the states
+	RubikEdgeStateArray ea, ea2;
+	RubikEdgeStateBits eb;
+	RubikEdge edge;
+	uint64_t count = 0;
+	while (true)
+	{
+		count++;
+		if (0 == count%1000000)
+			std::cout << count << "\n";
+		for (int x = 0; x < 12; x++)
+		{
+			if (ea.GetCubeInLoc(x) != eb.GetCubeInLoc(x) || ea.GetCubeOrientation(x) != eb.GetCubeOrientation(x))
+			{
+				std::cout << ea << "\n";
+				std::cout << eb << "\n";
+				exit(0);
+			}
+		}
+		ea2 = ea;
+		int x = random()%18;
+		edge.UndoAction(ea2, x);
+		edge.UndoAction(eb, x);
+		ea = ea2;
+	}
+}
+// This tests the hash table
+//{
+//	Timer t;
+//	const int testSize = 10000000;
+//	std::vector<int> elements;
+//	for (int x = 0; x < testSize; x++)
+//		elements.push_back(random());
+//	//std::sort(elements.begin(), elements.end());
+//
+//	FixedSizeSet<int> test(testSize);
+//	std::unordered_set<int> test2;
+//
+//	t.StartTimer();
+//	for (int x = 0; x < testSize; x++)
+//		test.insert(elements[x]);
+//	t.EndTimer();
+//	printf("%1.9fs inserting %d elements (mine)\n", t.GetElapsedTime(), testSize);
+//	
+//	t.StartTimer();
+//	for (int x = 0; x < testSize; x++)
+//		test2.insert(elements[x]);
+//	t.EndTimer();
+//	printf("%1.9fs inserting %d elements (std)\n", t.GetElapsedTime(), testSize);
+//
+//	// Reset data
+////	{
+////		elements.resize(0);
+////		for (int x = 0; x < testSize; x++)
+////		{
+////			elements.push_back(random());
+////		}
+////	}
+//	srandom(43);
+//	t.StartTimer();
+//	for (int x = 0; x < testSize*10; x++)
 //	{
-//		elements.resize(0);
-//		for (int x = 0; x < testSize; x++)
+//		auto i = test.find(random());
+//		if (i != test.end())
+//			test.erase(i);
+//	}
+//	size_t cnt = 0, sum = 0;
+//	for (auto &i : test)
+//	{
+//		if (i.valid)
 //		{
-//			elements.push_back(random());
+//			cnt++;
+//			sum+=i.item;
 //		}
 //	}
-	srandom(43);
-	t.StartTimer();
-	for (int x = 0; x < testSize*10; x++)
-	{
-		auto i = test.find(random());
-		if (i != test.end())
-			test.erase(i);
-	}
-	size_t cnt = 0, sum = 0;
-	for (auto &i : test)
-	{
-		if (i.valid)
-		{
-			cnt++;
-			sum+=i.item;
-		}
-	}
-	t.EndTimer();
-	printf("%1.9fs finding %d elements (mine)\n", t.GetElapsedTime(), testSize);
-	printf("%lu / %lu\n", cnt, sum);
-	
-	srandom(43);
-	t.StartTimer();
-	for (int x = 0; x < testSize*10; x++)
-	{
-		auto i = test2.find(random());
-		if (i != test2.end())
-			test2.erase(i);
-	}
-	cnt = 0; sum = 0;
-	for (auto &i : test2)
-	{
-		cnt++;
-		sum+=i;
-	}
-	t.EndTimer();
-	printf("%1.9fs finding %d elements (std)\n", t.GetElapsedTime(), testSize);
-	printf("%lu / %lu\n", cnt, sum);
-	
-	
-	
-	exit(0);
-}
+//	t.EndTimer();
+//	printf("%1.9fs finding %d elements (mine)\n", t.GetElapsedTime(), testSize);
+//	printf("%lu / %lu\n", cnt, sum);
+//	
+//	srandom(43);
+//	t.StartTimer();
+//	for (int x = 0; x < testSize*10; x++)
+//	{
+//		auto i = test2.find(random());
+//		if (i != test2.end())
+//			test2.erase(i);
+//	}
+//	cnt = 0; sum = 0;
+//	for (auto &i : test2)
+//	{
+//		cnt++;
+//		sum+=i;
+//	}
+//	t.EndTimer();
+//	printf("%1.9fs finding %d elements (std)\n", t.GetElapsedTime(), testSize);
+//	printf("%lu / %lu\n", cnt, sum);
+//	
+//	
+//	
+//	exit(0);
+//}
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
