@@ -405,7 +405,7 @@ void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentO
 		// Opposite direction, same bucket AND could be a solution (g+g >= C)
 		// TODO: only need to check if we find a better solution (g+g < U)
 		if (s.first.dir != d.dir && s.first.bucket == d.bucket &&
-			d.gcost + s.first.gcost >= currentC)// && d.hcost2 == s.first.hcost)
+			d.gcost + s.first.gcost >= currentC && d.gcost + s.first.gcost < bestSolution)// && d.hcost2 == s.first.hcost)
 		{
 //			std::thread *t = new std::thread(FindSolutionThread, s.first, s.second, states);
 //			threads.push_back(t);
