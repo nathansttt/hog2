@@ -366,7 +366,7 @@ bool CanTerminateSearch()
 	return false;
 }
 
-void FindSolutionThread(const openData &d, const openList &l, const bucketSet &states)
+void FindSolutionThread(const openData &d, const openList &l, int g, const bucketSet &states)
 {
 	const size_t bufferSize = 128;
 	diskState buffer[bufferSize];
@@ -384,8 +384,8 @@ void FindSolutionThread(const openData &d, const openList &l, const bucketSet &s
 			if (states.find(buffer[x]) != states.end())
 			{
 				printLock.lock();
-				printf("\nFound solution cost %d+%d=%d\n", d.gcost, d.gcost, d.gcost + d.gcost);
-				bestSolution = std::min(d.gcost + d.gcost, bestSolution);
+				printf("\nFound solution cost %d+%d=%d\n", d.gcost, g, d.gcost + g);
+				bestSolution = std::min(d.gcost + g, bestSolution);
 				printf("Current best solution: %d\n", bestSolution);
 				printLock.unlock();
 				
@@ -409,7 +409,7 @@ void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentO
 		{
 //			std::thread *t = new std::thread(FindSolutionThread, s.first, s.second, states);
 //			threads.push_back(t);
-			FindSolutionThread(s.first, s.second, states);
+			FindSolutionThread(s.first, s.second, s.first.gcost, states);
 		}
 	}
 //	while (threads.size() > 0)
