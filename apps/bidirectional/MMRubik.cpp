@@ -237,7 +237,7 @@ openData GetBestFile()
 	//return (open.begin())->first;
 	for (const auto &s : open)
 	{
-		std::cout << "--: " << s.first << " minf: " << +s.second.minf << "\n";
+		//std::cout << "--: " << s.first << " minf: " << +s.second.minf << "\n";
 		if (s.first.dir == kForward && s.first.gcost < minGForward)
 			minGForward = s.first.gcost;
 		else if (s.first.dir == kBackward && s.first.gcost < minGBackward)
@@ -338,10 +338,10 @@ void AddStateToQueue(const RubiksState &start, tSearchDirection dir, int cost)
 bool CanTerminateSearch()
 {
 	int val;
-	if (bestSolution <= (val = std::max(currentC, std::max(minFForward, std::max(minFBackward, minGBackward+minGForward+1)))))
+	if (bestSolution <= (val = std::max(currentC, std::max(minFForward, std::max(minFBackward, minGBackward+minGForward)))))
 	{
 		printf("Done!\n");
-		printf("Min fforward %d; minfbackward: %d; g: %d+%d+1; currentC: %d; solution: %d\n",
+		printf("Min fforward %d; minfbackward: %d; g: %d+%d; currentC: %d; solution: %d\n",
 			   minFForward, minFBackward, minGBackward, minGForward, currentC, bestSolution);
 		printf("%llu nodes expanded\n", expanded);
 		printf("Forward Distribution:\n");
@@ -359,8 +359,8 @@ bool CanTerminateSearch()
 			printf("-Triggered by f in the forward direction\n");
 		if (val == minFBackward)
 			printf("-Triggered by f in the backward direction\n");
-		if (val == minGBackward+minGForward+1)
-			printf("-Triggered by gforward+gbackward+1\n");
+		if (val == minGBackward+minGForward)
+			printf("-Triggered by gforward+gbackward\n");
 		return true;
 	}
 	return false;
