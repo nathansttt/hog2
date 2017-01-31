@@ -157,18 +157,18 @@ void TestSTP()
 		t2.StartTimer();
 		astar.GetPath(&mnp, start, goal, astarPath);
 		t2.EndTimer();
-		printf("A* found path length %ld; %llu expanded; %1.2fs elapsed\n", astarPath.size()-1,  astar.GetNodesExpanded(), t3.GetElapsedTime());
+		printf("A* found path length %ld; %llu expanded; %1.2fs elapsed\n", astarPath.size()-1,  astar.GetNodesExpanded(), t2.GetElapsedTime());
 
 		goal.Reset();
 		start = GetKorfInstance(x);
 		t3.StartTimer();
 		boba.GetPath(&mnp, start, goal, &mnp, &mnp, bobaPath);
 		t3.EndTimer();
-		printf("BOBA found path length %ld; %llu expanded; %1.2fs elapsed\n", bobaPath.size()-1,  boba.GetNodesExpanded(), t2.GetElapsedTime());
+		printf("BOBA found path length %ld; %llu expanded; %1.2fs elapsed\n", bobaPath.size()-1,  boba.GetNodesExpanded(), t3.GetElapsedTime());
 
 
 		std::cout << ida.GetNodesExpanded() << "\t" <<  astar.GetNodesExpanded() << "\t" << boba.GetNodesExpanded() << "\t";
-		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\t" << t3.GetElapsedTime() << "\t";
+		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\t" << t3.GetElapsedTime() << "\n";
 		
 		//if (!fequal)
 		if (bobaPath.size() != idaPath.size()+1)
