@@ -69,5 +69,6 @@ default : all
 SRC_CPP = \
 	apps/bidirectional/GUICode.cpp \
 	apps/bidirectional/Driver.cpp \
+	apps/bidirectional/BidirSTP.cpp \
 	apps/bidirectional/MMRubik.cpp \
 	apps/bidirectional/MM0Rubik.cpp \
