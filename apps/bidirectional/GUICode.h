@@ -17,6 +17,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType);
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data);
 void MyKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key);
 void InstallHandlers();
-void AnalyzeMap(const char *, const char *);
+void AnalyzeMap(const char *, const char *, double weight);
+void AnalyzeBOBA(const char *, const char *, double weight);
 
 #endif /* defined(__hog2_glut__GUICode__) */

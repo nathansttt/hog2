@@ -14,12 +14,12 @@
 #include "Timer.h"
 #include <unordered_map>
 
-template <class state>
+template <class state, int epsilon = 0>
 struct MMCompare {
 	bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
 	{
-		double p1 = std::max(i1.g+i1.h, i1.g*2);
-		double p2 = std::max(i2.g+i2.h, i2.g*2);
+		double p1 = std::max(i1.g+i1.h, i1.g*2+epsilon);
+		double p2 = std::max(i2.g+i2.h, i2.g*2+epsilon);
 //		double p1 = i1.g+i1.h;
 //		double p2 = i2.g+i2.h;
 		if (fequal(p1, p2))
@@ -45,7 +45,7 @@ namespace std {
 template <class state, class action, class environment, class priorityQueue = AStarOpenClosed<state, MMCompare<state>> >
 class MM {
 public:
-	MM() { forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); }
+	MM(double epsilon = 1.0):epsilon(epsilon) { forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); }
 	virtual ~MM() {}
 	void GetPath(environment *env, const state& from, const state& to,
 				 Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);
@@ -155,6 +155,7 @@ private:
 	double currentCost;
 	double lastMinForwardG;
 	double lastMinBackwardG;
+	double epsilon;
 
 	std::vector<state> neighbors;
 	environment *env;
@@ -230,15 +231,15 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 	double p2 = std::max(nextBackward.g+nextBackward.h, nextBackward.g*2);
 	if (p1 > oldp1)
 	{
-		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
+//		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
 		oldp1 = p1;
-		PrintOpenStats(f);
+		//PrintOpenStats(f);
 	}
 	if (p2 > oldp2)
 	{
-		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
+//		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
 		oldp2 = p2;
-		PrintOpenStats(b);
+		//PrintOpenStats(b);
 	}
 	
 	if (fless(p1, p2))
@@ -320,22 +321,22 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 		}
 		if (!fgreater(currentCost, minForwardF))
 		{
-			printf("Terminated on forwardf (%f >= %f)\n", minForwardF, currentCost);
+//			printf("Terminated on forwardf (%f >= %f)\n", minForwardF, currentCost);
 			done = true;
 		}
 		if (!fgreater(currentCost, minBackwardF))
 		{
-			printf("Terminated on backwardf (%f >= %f)\n", minBackwardF, currentCost);
+//			printf("Terminated on backwardf (%f >= %f)\n", minBackwardF, currentCost);
 			done = true;
 		}
-		if (!fgreater(currentCost, minForwardG+minBackwardG+1.0)) // TODO: epsilon
+		if (!fgreater(currentCost, minForwardG+minBackwardG+epsilon)) // TODO: epsilon
 		{
-			printf("Terminated on g+g+epsilon (%f+%f+%f >= %f)\n", minForwardG, minBackwardG, 1.0, currentCost);
+//			printf("Terminated on g+g+epsilon (%f+%f+%f >= %f)\n", minForwardG, minBackwardG, epsilon, currentCost);
 			done = true;
 		}
 		if (!fgreater(currentCost, std::min(forwardP, backwardP)))
 		{
-			printf("Terminated on forwardP/backwardP (min(%f, %f) >= %f)\n", forwardP, backwardP, currentCost);
+//			printf("Terminated on forwardP/backwardP (min(%f, %f) >= %f)\n", forwardP, backwardP, currentCost);
 			done = true;
 		}
 //		if (!fgreater(currentCost, backwardP))
@@ -348,8 +349,8 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 		lastMinForwardG = minForwardG;
 		if (done)
 		{
-			PrintOpenStats(f);
-			PrintOpenStats(b);
+//			PrintOpenStats(f);
+//			PrintOpenStats(b);
 			
 			std::vector<state> pFor, pBack;
 			ExtractPathToGoal(middleNode, pBack);
@@ -449,14 +450,14 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 						if (fless(parentData.g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
 							// TODO: store current solution
-							printf("Potential updated solution found, cost: %1.2f + %1.2f = %1.2f\n",
-								   parentData.g+edgeCost,
-								   opposite.Lookup(reverseLoc).g,
-								   parentData.g+edgeCost+opposite.Lookup(reverseLoc).g);
+//							printf("Potential updated solution found, cost: %1.2f + %1.2f = %1.2f\n",
+//								   parentData.g+edgeCost,
+//								   opposite.Lookup(reverseLoc).g,
+//								   parentData.g+edgeCost+opposite.Lookup(reverseLoc).g);
 							currentCost = parentData.g+edgeCost + opposite.Lookup(reverseLoc).g;
 							middleNode = succ;
-							PrintOpenStats(f);
-							PrintOpenStats(b);
+//							PrintOpenStats(f);
+//							PrintOpenStats(b);
 						}
 					}
 				}
@@ -491,14 +492,14 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 					if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 					{
 						// TODO: store current solution
-						printf("Potential solution found, cost: %1.2f + %1.2f = %1.2f\n",
-							   current.Lookup(nextID).g+edgeCost,
-							   opposite.Lookup(reverseLoc).g,
-							   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g);
+//						printf("Potential solution found, cost: %1.2f + %1.2f = %1.2f\n",
+//							   current.Lookup(nextID).g+edgeCost,
+//							   opposite.Lookup(reverseLoc).g,
+//							   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g);
 						currentCost = current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g;
 						middleNode = succ;
-						PrintOpenStats(f);
-						PrintOpenStats(b);
+//						PrintOpenStats(f);
+//						PrintOpenStats(b);
 					}
 				}
 			}

@@ -409,7 +409,7 @@ void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentO
 		{
 //			std::thread *t = new std::thread(FindSolutionThread, s.first, s.second, states);
 //			threads.push_back(t);
-			FindSolutionThread(s.first, s.second, s.first.gcost, states);
+			FindSolutionThread(s.first, s.second, d.gcost, states);
 		}
 	}
 //	while (threads.size() > 0)

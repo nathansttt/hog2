@@ -39,6 +39,8 @@
 #include "MMRubik.h"
 #include "MM0Rubik.h"
 #include "ParallelIDAStar.h"
+#include "BidirSTP.h"
+
 void Test100Easy();
 
 struct hash128
@@ -98,6 +100,10 @@ int main(int argc, char* argv[])
 	InstallHandlers();
 	InstallCommandLineHandler(MyCLHandler, "-mm", "-mm <tmpdir1 <tmpdir2>", "Run MM");
 	InstallCommandLineHandler(MyCLHandler, "-pida", "-pida", "Run MM");
+	InstallCommandLineHandler(MyCLHandler, "-grid", "-grid <map> <scenario> <hweight>", "MM/A* region analysis");
+	InstallCommandLineHandler(MyCLHandler, "-boba", "-boba <map> <scenario> <hweight>", "BOBA test");
+	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp", "BOBA test");
+	//const char *map, const char *scenario, double weight
 	InstallCommandLineHandler(MyCLHandler, "-heuristic", "-heuristic <dir> <1997/888/8210/none>", "Load the given heuristic");
 	InstallCommandLineHandler(MyCLHandler, "-problem", "-problem which", "Load the given problem");
 	RunHOGGUI(argc, argv);
@@ -320,7 +326,22 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (maxNumArgs > 2 && strcmp(argument[0], "-grid") == 0)
 	{
-		AnalyzeMap(argument[1], argument[2]);
+		double weight = 1.0;
+		if (maxNumArgs > 3)
+			weight = atof(argument[3]);
+		AnalyzeMap(argument[1], argument[2], weight);
+		return 3;
+	}
+	else if (maxNumArgs > 2 && strcmp(argument[0], "-stp") == 0)
+	{
+		TestSTP();
+	}
+	else if (maxNumArgs > 2 && strcmp(argument[0], "-boba") == 0)
+	{
+		double weight = 1.0;
+		if (maxNumArgs > 3)
+			weight = atof(argument[3]);
+		AnalyzeBOBA(argument[1], argument[2], weight);
 		return 3;
 	}
 	else if (maxNumArgs > 2 && strcmp(argument[0], "-testPruning") == 0)

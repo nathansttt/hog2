@@ -44,6 +44,17 @@ public:
 };
 
 template <class state>
+class WeightedHeuristic : public Heuristic<state> {
+public:
+	WeightedHeuristic(Heuristic<state> *h, double weight) :h(h), weight(weight){}
+	double HCost(const state &a, const state &b) const { return weight*h->HCost(a, b); }
+private:
+	Heuristic<state> *h;
+	double weight;
+};
+
+
+template <class state>
 double Heuristic<state>::HCost(const state &s1, const state &s2) const
 {
 	return HCost(s1, s2, 0);

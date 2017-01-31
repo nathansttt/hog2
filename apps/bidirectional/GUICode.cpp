@@ -15,6 +15,7 @@
 #include "TemplateAStar.h"
 #include "MM.h"
 #include "SVGUtil.h"
+#include "BOBA.h"
 
 Map *map = 0;
 MapEnvironment *me = 0;
@@ -754,8 +755,10 @@ void SetupMapOverlay()
 	}
 }
 
-void AnalyzeProblem(Map *m, Experiment e)
+void AnalyzeProblem(Map *m, Experiment e, double weight)
 {
+	WeightedHeuristic<xyLoc> wh(me, weight);
+	compare.SetHeuristic(&wh);
 	forward.SetStopAfterGoal(false);
 	backward.SetStopAfterGoal(false);
 	std::vector<xyLoc> path;
@@ -772,9 +775,10 @@ void AnalyzeProblem(Map *m, Experiment e)
 	forward.GetClosedListGCost(goal, optimal);
 
 	compare.GetPath(me, start, goal, path);
-	printf("A* path length: %1.2f\t", me->GetPathLength(path));
-	mm.GetPath(me, start, goal, me, me, path);
-	printf("MM path length: %1.2f\n", me->GetPathLength(path));
+	assert(me->GetPathLength(path) == optimal);
+	//printf("A* path length: %1.2f\t", me->GetPathLength(path));
+	mm.GetPath(me, start, goal, &wh, &wh, path);
+	//printf("MM path length: %1.2f\n", me->GetPathLength(path));
 
 	printf("A*: %llu\tMM: %llu\t", compare.GetNodesExpanded(), mm.GetNodesExpanded());
 	// full state space
@@ -868,7 +872,7 @@ void AnalyzeProblem(Map *m, Experiment e)
 	printf("\n");
 }
 
-void AnalyzeMap(const char *map, const char *scenario)
+void AnalyzeMap(const char *map, const char *scenario, double weight)
 {
 	printf("Loading %s with scenario %s\n", map, scenario);
 	ScenarioLoader s(scenario);
@@ -877,6 +881,67 @@ void AnalyzeMap(const char *map, const char *scenario)
 	me->SetDiagonalCost(1.5);
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
-		AnalyzeProblem(m, s.GetNthExperiment(x));
+		AnalyzeProblem(m, s.GetNthExperiment(x), weight);
 	}
+}
+
+void AnalyzeBOBA(const char *map, const char *scenario, double weight)
+{
+	BOBA<xyLoc, tDirection, MapEnvironment> boba;
+	
+	MM<xyLoc, tDirection, MapEnvironment> mm;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+	
+	printf("Loading %s with scenario %s\n", map, scenario);
+	ScenarioLoader s(scenario);
+	Map *m = new Map(map);
+	me = new MapEnvironment(m);
+	me->SetDiagonalCost(1.5);
+//	me->SetDiagonalCost(ROOT_TWO);
+
+	// 406 is bad!
+	for (int x = s.GetNumExperiments()-1; x >= 0; x--) // 547 to 540
+	{
+		xyLoc start, goal;
+		start.x = s.GetNthExperiment(x).GetStartX();
+		start.y = s.GetNthExperiment(x).GetStartY();
+		goal.x = s.GetNthExperiment(x).GetGoalX();
+		goal.y = s.GetNthExperiment(x).GetGoalY();
+		printf("Problem %d of %d from ", x, s.GetNumExperiments());
+		std::cout << start << " to " << goal << "\n";
+		std::vector<xyLoc> correctPath;
+		std::vector<xyLoc> mmPath;
+		std::vector<xyLoc> bobaPath;
+		astar.SetHeuristic(me);
+		astar.InitializeSearch(me, start, goal, correctPath);
+
+		astar.GetPath(me, start, goal, correctPath);
+		mm.GetPath(me, start, goal, me, me, mmPath);
+		boba.GetPath(me, start, goal, me, me, bobaPath);
+		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\tMM:\t" << mm.GetNodesExpanded() << "\n";
+		
+		//if (!fequal)
+		if (!fequal(me->GetPathLength(bobaPath), me->GetPathLength(correctPath)))
+		{
+			std::cout << "error solution cost:\t expected cost\n";
+			std::cout << me->GetPathLength(bobaPath) << "\t" << me->GetPathLength(correctPath) << "\n";
+			double d;
+			for (auto x : correctPath)
+			{
+				astar.GetClosedListGCost(x, d);
+				auto t = boba.GetNodeForwardLocation(x);
+				auto u = boba.GetNodeBackwardLocation(x);
+				std::cout << x << " is on " << t << " and " << u << "\n";
+				std::cout << "True g: " << d;
+				if (t != kUnseen)
+					std::cout << " forward g: " << boba.GetNodeForwardG(x);
+				if (u != kUnseen)
+					std::cout << " backward g: " << boba.GetNodeBackwardG(x);
+				std::cout << "\n";
+			}
+			exit(0);
+		}
+		
+	}
+	exit(0);
 }
