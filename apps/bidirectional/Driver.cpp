@@ -336,7 +336,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		TestSTP();
 	}
-	else if (maxNumArgs > 2 && strcmp(argument[0], "-boba") == 0)
+	else if (strcmp(argument[0], "-boba") == 0)
 	{
 		double weight = 1.0;
 		if (maxNumArgs > 3)

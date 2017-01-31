@@ -896,8 +896,8 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 	ScenarioLoader s(scenario);
 	Map *m = new Map(map);
 	me = new MapEnvironment(m);
-	me->SetDiagonalCost(1.5);
-//	me->SetDiagonalCost(ROOT_TWO);
+//	me->SetDiagonalCost(1.5);
+	me->SetDiagonalCost(ROOT_TWO);
 
 	// 406 is bad!
 	for (int x = s.GetNumExperiments()-1; x >= 0; x--) // 547 to 540
@@ -916,9 +916,9 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 		astar.InitializeSearch(me, start, goal, correctPath);
 
 		astar.GetPath(me, start, goal, correctPath);
-		mm.GetPath(me, start, goal, me, me, mmPath);
+		//mm.GetPath(me, start, goal, me, me, mmPath);
 		boba.GetPath(me, start, goal, me, me, bobaPath);
-		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\tMM:\t" << mm.GetNodesExpanded() << "\n";
+		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\n";//MM:\t" << mm.GetNodesExpanded() << "\n";
 		
 		//if (!fequal)
 		if (!fequal(me->GetPathLength(bobaPath), me->GetPathLength(correctPath)))

@@ -45,7 +45,7 @@ struct BOBACompareOpenWaiting {
 
 		if (fequal(f1, f2))
 		{
-		    return (!fgreater(i1.g, i2.g)); // high g-cost over low
+		    return (!fless(i1.g, i2.g)); // high g-cost over low
 		}
 		return (fgreater(f1, f2)); // low f over high
 	}
