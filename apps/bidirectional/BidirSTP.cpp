@@ -129,8 +129,56 @@ MNPuzzleState<4, 4> GetKorfInstance(int which)
 void TestSTP()
 {
 	BOBA<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> boba;
+	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
 	MNPuzzle<4,4> mnp;
-//	MM<MNPuzzleState, slideDir, MNPuzzle<4,4>> mm;
+	
+	for (int x = 0; x < 100; x++) // 547 to 540
+	{
+		
+		MNPuzzleState<4, 4> start, goal;
+		printf("Problem %d of %d\n", x+1, 100);
+		
+		std::vector<MNPuzzleState<4,4>> bobaPath;
+		std::vector<MNPuzzleState<4,4>> astarPath;
+		Timer t1, t2;
+		
+		
+		goal.Reset();
+		start = GetKorfInstance(x);
+		t1.StartTimer();
+		astar.GetPath(&mnp, start, goal, astarPath);
+		t1.EndTimer();
+		uint64_t necessary = 0;
+		double solutionCost = mnp.GetPathLength(astarPath);
+		std::cout << astar.GetNumItems() << "\n";
+		for (unsigned int x = 0; x < astar.GetNumItems(); x++)
+		{
+			const auto &item = astar.GetItem(x);
+			if ((item.where == kClosedList) && (item.g+item.h < solutionCost))
+				necessary++;
+		}
+		printf("A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", mnp.GetPathLength(astarPath),
+			   astar.GetNodesExpanded(), necessary, t1.GetElapsedTime());
+		goal.Reset();
+		start = GetKorfInstance(x);
+		t2.StartTimer();
+		boba.GetPath(&mnp, start, goal, &mnp, &mnp, bobaPath);
+		t2.EndTimer();
+		printf("BOBA found path length %ld; %llu expanded; %llu necessary; %1.2fs elapsed\n", bobaPath.size()-1,
+			   boba.GetNodesExpanded(), boba.GetNecessaryExpansions(), t2.GetElapsedTime());
+		
+		
+		std::cout << astar.GetNodesExpanded() << "\t" << boba.GetNodesExpanded() << "\t";
+		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\n";
+	}
+	exit(0);
+}
+
+
+void TestSTPFull()
+{
+	BOBA<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> boba;
+	MNPuzzle<4,4> mnp;
 	IDAStar<MNPuzzleState<4,4>, slideDir> ida;
 	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
 

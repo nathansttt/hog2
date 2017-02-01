@@ -332,11 +332,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		AnalyzeMap(argument[1], argument[2], weight);
 		return 3;
 	}
-	else if (maxNumArgs > 2 && strcmp(argument[0], "-stp") == 0)
+	else if (strcmp(argument[0], "-stp") == 0)
 	{
 		TestSTP();
 	}
-	else if (strcmp(argument[0], "-boba") == 0)
+	else if (maxNumArgs > 2 && strcmp(argument[0], "-boba") == 0)
 	{
 		double weight = 1.0;
 		if (maxNumArgs > 3)

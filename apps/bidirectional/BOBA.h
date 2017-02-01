@@ -15,7 +15,7 @@
 
 #include "BDOpenClosed.h"
 #include "FPUtil.h"
-
+#include <unordered_map>
 
 #define EPSILON 1
 
@@ -30,7 +30,7 @@ struct BOBACompareOpenReady {
 
 		if (fequal(i1.g, i2.g))
 		{
-			return (fgreater(f1, f2)); //equal g, low f over high
+			return (!fless(f1, f2)); //equal g, low f over high
 		}
 		return (fgreater(i1.g, i2.g)); // low g over high
 	}
@@ -71,7 +71,7 @@ public:
 	
 	virtual const char *GetName() { return "BOBA"; }
 	
-	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
+	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; counts.clear(); }
 	
 //	bool GetClosedListGCost(const state &val, double &gCost) const;
 //	unsigned int GetNumOpenItems() { return openClosedList.OpenSize(); }
@@ -116,6 +116,15 @@ public:
 	}
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
+	uint64_t GetNecessaryExpansions() const {
+		uint64_t necessary = 0;
+		for (const auto &i : counts)
+		{
+			if (i.first < currentCost)
+				necessary+=i.second;
+		}
+		return necessary;
+	}
 	double GetSolutionCost() const { return currentCost; }
 	//void FullBPMX(uint64_t nodeID, int distance);
 	
@@ -158,7 +167,7 @@ private:
 	double currentSolutionEstimate;
 	std::vector<state> neighbors;
 	environment *env;
-	
+	std::unordered_map<double, int> counts;
 
 	priorityQueue forwardQueue, backwardQueue;
 	//priorityQueue2 forwardQueue, backwardQueue;
@@ -365,6 +374,7 @@ bool BOBA<state, action, environment, priorityQueue>::ExpandAPair(std::vector<st
 		}
 		return true;
 	}
+	counts[minPr]+=2; // 2 expansions
 	//printf("Expanding F_f = %f; F_b = %f; g+g+epsilon=%f\n", iFReady.g+iFReady.h, iBReady.g + iBReady.h, iFReady.g + iBReady.g + EPSILON);
 	Expand(forwardQueue, backwardQueue, forwardHeuristic, goal);
 	Expand(backwardQueue, forwardQueue, backwardHeuristic, start);
@@ -492,7 +502,7 @@ void BOBA<state, action, environment, priorityQueue>::Expand(priorityQueue &curr
 					double newNodeF = current.Lookup(nextID).g + edgeCost + heuristic->HCost(succ, target);
 					if (fless(newNodeF , currentCost))
 					{
-						if (newNodeF < currentSolutionEstimate)
+						if (fless(newNodeF, currentSolutionEstimate))
 							current.AddOpenNode(succ,
 												env->GetStateHash(succ),
 												current.Lookup(nextID).g + edgeCost,
