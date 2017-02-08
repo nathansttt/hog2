@@ -21,14 +21,14 @@ public:
 		for (unsigned int x = 0; x < N; x++)
 			puzzle[x] = x;
 	}
-	int puzzle[N];
+	uint8_t puzzle[N];
 };
 
 template <int N>
 static std::ostream& operator <<(std::ostream & out, const PancakePuzzleState<N> &loc)
 {
 	for (unsigned int x = 0; x < loc.size(); x++)
-		out << loc.puzzle[x] << " ";
+		out << +loc.puzzle[x] << " ";
 	return out;
 }
 
@@ -44,7 +44,7 @@ static bool operator==(const PancakePuzzleState<N> &l1, const PancakePuzzleState
 template <int N>
 class PancakePuzzle : public PermutationPuzzle::PermutationPuzzleEnvironment<PancakePuzzleState<N>, PancakePuzzleAction> {
 public:
-	PancakePuzzle();
+	PancakePuzzle(int gap = 0);
 	PancakePuzzle(const std::vector<unsigned> op_order); // used to set action order
 
 	~PancakePuzzle();
@@ -130,7 +130,7 @@ private:
 	bool goal_stored; // whether a goal is stored or not
 	bool use_memory_free;
 	bool use_dual_lookup;
-
+	int gap;
 	PancakePuzzleState<N> goal;
 	std::vector<int> goal_locations;
 	//unsigned size;
@@ -141,7 +141,8 @@ private:
 
 
 template <int N>
-PancakePuzzle<N>::PancakePuzzle()
+PancakePuzzle<N>::PancakePuzzle(int gap)
+:gap(gap)
 {
 	assert(N >= 2);
 	
@@ -156,6 +157,7 @@ PancakePuzzle<N>::PancakePuzzle()
 
 template <int N>
 PancakePuzzle<N>::PancakePuzzle(const std::vector<PancakePuzzleAction> op_order)
+:gap(0)
 {
 	Change_Op_Order(op_order);
 	
@@ -366,8 +368,8 @@ double PancakePuzzle<N>::HCost(const PancakePuzzleState<N> &state, const Pancake
 	
 	if (use_memory_free)
 	{
-		assert(!"This code allocates a vector; re-write to be more efficient");
-		std::vector<int> goal_locs(N);
+		//assert(!"This code allocates a vector; re-write to be more efficient");
+		static std::vector<int> goal_locs(N);
 		for (unsigned i = 0; i < N; i++)
 		{
 			goal_locs[goal_state.puzzle[i]] = i;
@@ -389,18 +391,20 @@ double PancakePuzzle<N>::DefaultH(const PancakePuzzleState<N> &state) const
 template <int N>
 double PancakePuzzle<N>::DefaultH(const PancakePuzzleState<N> &state, const std::vector<int> &goal_locs) const
 {
-	if (state.size() != N)
-	{
-		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");
-		exit(1);
-	}
+//	if (state.size() != N)
+//	{
+//		fprintf(stderr, "ERROR: HCost called with state with wrong size.\n");
+//		exit(1);
+//	}
 	
 	double h_count = 0.0;
 	unsigned i = 0;
 	for (; i < N - 1; i++)
 	{
+		if ((goal_locs[state.puzzle[i]] < gap) || (goal_locs[state.puzzle[i+1]] < gap))
+			continue;
 		int diff = goal_locs[state.puzzle[i]] - goal_locs[state.puzzle[i+1]];
-		if (diff > 1 || diff < - 1)
+		if (diff > 1 || diff < -1)
 			h_count++;
 	}
 	if ((unsigned) goal_locs[state.puzzle[i]]!= N -1)
