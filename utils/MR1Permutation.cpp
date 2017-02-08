@@ -10,14 +10,37 @@
 #include <assert.h>
 #include <string.h>
 
-inline void swap(int &a, int &b)
+template <typename T>
+inline void swap(T &a, T &b)
 {
-	int tmp = a;
+	T tmp = a;
 	a = b;
 	b = tmp;
 }
 
 uint64_t MR1KPermutation::Rank(int *locs, int *dual, int distinctSize, int puzzleSize) const
+{
+	uint64_t result2 = 0;
+	uint64_t multiplier = 1;
+	for (int i = 0; i < distinctSize; i++)
+	{
+		int tmp = dual[i];
+		unsigned int tmp2 = locs[i];
+		
+		result2 += (tmp-i)*multiplier;
+		multiplier *= (puzzleSize-i);
+		
+		if (tmp2 < puzzleSize)
+		{
+			swap(locs[i], locs[dual[i]]);
+			swap(dual[tmp2], dual[i]);
+		}
+	}
+	
+	return result2;
+}
+
+uint64_t MR1KPermutation::Rank(uint8_t *locs, uint8_t *dual, int distinctSize, int puzzleSize) const
 {
 	uint64_t result2 = 0;
 	uint64_t multiplier = 1;

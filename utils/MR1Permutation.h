@@ -17,6 +17,7 @@ class MR1KPermutation {
 public:
 	uint64_t Rank(int *items, int *dual, int k, int N) const;
 	void Unrank(uint64_t hash, int *items, int *dual, int k, int N) const;
+	uint64_t Rank(uint8_t *items, uint8_t *dual, int k, int N) const;
 };
 
 
