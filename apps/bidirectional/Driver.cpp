@@ -40,6 +40,7 @@
 #include "MM0Rubik.h"
 #include "ParallelIDAStar.h"
 #include "BidirSTP.h"
+#include "BidirPancake.h"
 
 void Test100Easy();
 
@@ -102,7 +103,8 @@ int main(int argc, char* argv[])
 	InstallCommandLineHandler(MyCLHandler, "-pida", "-pida", "Run MM");
 	InstallCommandLineHandler(MyCLHandler, "-grid", "-grid <map> <scenario> <hweight>", "MM/A* region analysis");
 	InstallCommandLineHandler(MyCLHandler, "-boba", "-boba <map> <scenario> <hweight>", "BOBA test");
-	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp", "BOBA test");
+	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp", "BOBA test on pancake");
+	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake", "BOBA test on pancake");
 	//const char *map, const char *scenario, double weight
 	InstallCommandLineHandler(MyCLHandler, "-heuristic", "-heuristic <dir> <1997/888/8210/none>", "Load the given heuristic");
 	InstallCommandLineHandler(MyCLHandler, "-problem", "-problem which", "Load the given problem");
@@ -283,7 +285,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-pancake") == 0) // not hooked up
 	{
-		//MMPancake::MM();
+		TestPancake();
 		return 1;
 	}
 	else if (strcmp(argument[0], "-pida") == 0)

@@ -30,7 +30,7 @@ bool drawSearch = true;
 bool paused = false;
 void SetupMapOverlay();
 
-int gStepsPerFrame = 1;
+int gStepsPerFrame = 2;
 
 TemplateAStar<xyLoc, tDirection, MapEnvironment> forward;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> backward;
@@ -39,6 +39,7 @@ ZeroHeuristic<xyLoc> *z = new ZeroHeuristic<xyLoc>;
 
 
 MM<xyLoc, tDirection, MapEnvironment> mm;
+BOBA<xyLoc, tDirection, MapEnvironment> boba;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare;
 MM<xyLoc, tDirection, MapEnvironment> mm0;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare0;
@@ -263,13 +264,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		if (!paused)
 		{
-			for (int x = 0; x < gStepsPerFrame; x++)
+			for (int x = 0; x < gStepsPerFrame/2; x++)
 			{
 				if (mmSearchRunning)
 				{
-					mmSearchRunning = !mm.DoSingleSearchStep(path);
+					mmSearchRunning = !boba.DoSingleSearchStep(path);
 					if (!mmSearchRunning)
-						printf("MM*: %llu nodes expanded\n", mm.GetNodesExpanded());
+						printf("BOBA*: %llu nodes expanded\n", boba.GetNodesExpanded());
 				}
 			}
 			for (int x = 0; x < gStepsPerFrame; x++)
@@ -307,7 +308,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (searchRan)
 		{
 			if (viewport == 0)
-				mm.OpenGLDraw();
+				boba.OpenGLDraw();
 			else if (viewport == 1)
 				compare.OpenGLDraw();
 			else if (viewport == 2)
@@ -402,14 +403,14 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				
 				
 				mouseTracking = false;
-				SetupMapOverlay();
-				SetNumPorts(windowID, 4);
+				//SetupMapOverlay();
+				SetNumPorts(windowID, 2);
 				compare.SetHeuristic(me);
 				compare.InitializeSearch(me, start, goal, path);
 
 				compare0.SetHeuristic(z);
 				compare0.InitializeSearch(me, start, goal, path);
-
+				boba.InitializeSearch(me, start, goal, me, me, path);
 				//mm.InitializeSearch(me, start, goal, z, z, path);
 				mm.InitializeSearch(me, start, goal, me, me, path);
 				mm0.InitializeSearch(me, start, goal, z, z, path);

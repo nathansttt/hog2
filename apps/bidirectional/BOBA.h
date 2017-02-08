@@ -389,7 +389,7 @@ bool BOBA<state, action, environment, priorityQueue>::ExpandAPair(std::vector<st
 template <class state, class action, class environment, class priorityQueue>
 bool BOBA<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vector<state> &thePath)
 {
-	ExpandAPair();
+	return ExpandAPair(thePath);
 }
 
 

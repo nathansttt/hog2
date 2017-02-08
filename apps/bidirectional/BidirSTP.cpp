@@ -10,6 +10,7 @@
 #include "MNPuzzle.h"
 #include "BOBA.h"
 #include "IDAStar.h"
+#include "MM.h"
 #include "TemplateAStar.h"
 
 MNPuzzleState<4, 4> GetKorfInstance(int which)
@@ -132,7 +133,7 @@ void TestSTP()
 	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
 	MNPuzzle<4,4> mnp;
 	
-	for (int x = 0; x < 100; x++) // 547 to 540
+	for (int x = 82; x < 83; x++) // 547 to 540
 	{
 		
 		MNPuzzleState<4, 4> start, goal;
@@ -150,7 +151,7 @@ void TestSTP()
 		t1.EndTimer();
 		uint64_t necessary = 0;
 		double solutionCost = mnp.GetPathLength(astarPath);
-		std::cout << astar.GetNumItems() << "\n";
+//		std::cout << astar.GetNumItems() << "\n";
 		for (unsigned int x = 0; x < astar.GetNumItems(); x++)
 		{
 			const auto &item = astar.GetItem(x);
@@ -178,6 +179,7 @@ void TestSTP()
 void TestSTPFull()
 {
 	BOBA<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> boba;
+	MM<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> mm;
 	MNPuzzle<4,4> mnp;
 	IDAStar<MNPuzzleState<4,4>, slideDir> ida;
 	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
@@ -191,7 +193,8 @@ void TestSTPFull()
 		std::vector<slideDir> idaPath;
 		std::vector<MNPuzzleState<4,4>> bobaPath;
 		std::vector<MNPuzzleState<4,4>> astarPath;
-		Timer t1, t2, t3;
+		std::vector<MNPuzzleState<4,4>> mmPath;
+		Timer t1, t2, t3, t4;
 		
 		goal.Reset();
 		start = GetKorfInstance(x);
@@ -213,6 +216,13 @@ void TestSTPFull()
 		boba.GetPath(&mnp, start, goal, &mnp, &mnp, bobaPath);
 		t3.EndTimer();
 		printf("BOBA found path length %ld; %llu expanded; %1.2fs elapsed\n", bobaPath.size()-1,  boba.GetNodesExpanded(), t3.GetElapsedTime());
+
+		goal.Reset();
+		start = GetKorfInstance(x);
+		t4.StartTimer();
+		mm.GetPath(&mnp, start, goal, &mnp, &mnp, mmPath);
+		t4.EndTimer();
+		printf("MM found path length %ld; %llu expanded; %1.2fs elapsed\n", mmPath.size()-1,  mm.GetNodesExpanded(), t3.GetElapsedTime());
 
 
 		std::cout << ida.GetNodesExpanded() << "\t" <<  astar.GetNodesExpanded() << "\t" << boba.GetNodesExpanded() << "\t";
