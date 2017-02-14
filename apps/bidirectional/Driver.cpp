@@ -91,6 +91,7 @@ void DualTest();
 void ArbitraryGoalTest();
 int MyCLHandler(char *argument[], int maxNumArgs);
 void TestDataStructure();
+const char *GetStringFromMove(int move);
 
 int main(int argc, char* argv[])
 {
@@ -108,6 +109,17 @@ int main(int argc, char* argv[])
 	//const char *map, const char *scenario, double weight
 	InstallCommandLineHandler(MyCLHandler, "-heuristic", "-heuristic <dir> <1997/888/8210/none>", "Load the given heuristic");
 	InstallCommandLineHandler(MyCLHandler, "-problem", "-problem which", "Load the given problem");
+
+	//2 8 1 3 17 0 4 8
+	std::cout << GetStringFromMove(2) << " ";
+	std::cout << GetStringFromMove(8) << " ";
+	std::cout << GetStringFromMove(1) << " ";
+	std::cout << GetStringFromMove(3) << " ";
+	std::cout << GetStringFromMove(17) << " ";
+	std::cout << GetStringFromMove(0) << " ";
+	std::cout << GetStringFromMove(4) << " ";
+	std::cout << GetStringFromMove(8) << "\n";
+
 	RunHOGGUI(argc, argv);
 }
 
@@ -271,6 +283,18 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		else if (which == 20)
 		{
 			GetSuperFlip(start);
+		}
+		else if (which == 30)
+		{
+			start.Reset();
+			start.edge.SetCubeInLoc(1, 5);
+			start.edge.SetCubeInLoc(5, 1);
+			start.edge.SetCubeOrientation(5, false);
+			start.edge.SetCubeOrientation(1, false);
+			start.edge.SetCubeInLoc(0, 6);
+			start.edge.SetCubeInLoc(6, 0);
+			start.edge.SetCubeOrientation(6, false);
+			start.edge.SetCubeOrientation(0, false);
 		}
 		else if (which > 20)
 		{
@@ -678,13 +702,26 @@ bool DuplicateDetectLayer(int depth)
 
 
 
+int GetNextMove(const char *input, int &base);
 
 
 
+const char *GetStringFromMove(int move)
+{
+	const char *str[] = {"U", "D", "L", "R", "B", "F", "U-", "D-", "L-", "R-", "B-", "F-", "U2", "D2", "L2", "R2", "B2", "F2"};
+	for (int x = 0; x < 18; x++)
+	{
+		int act;
+		GetNextMove(str[x], act);
+		if (act == move)
+			return str[x];
+	}
+	return "?";
+}
 
 
 
-int GetNextMove(char *input, int &base)
+int GetNextMove(const char *input, int &base)
 {
 	int used = 0;
 	if (isdigit(input[0])) // this is our move notation - numeric

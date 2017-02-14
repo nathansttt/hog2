@@ -15,6 +15,7 @@
 #include "TemplateAStar.h"
 #include "MM.h"
 #include "SVGUtil.h"
+#include "BOBAQueueGF.h"
 #include "BOBA.h"
 
 Map *map = 0;
@@ -111,6 +112,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		
 		delete map;
 		delete me;
+//		map = new Map("/Users/nathanst/hog2/maps/dao/brc000d.map");
+		map = new Map("/Users/nathanst/hog2/maps/dao/brc203d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/w_woundedcoast.map");
@@ -118,7 +121,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
-		map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 		//map = new Map("/Users/nathanst/hog2/maps/rooms/8room_000.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-16-0.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
@@ -381,15 +384,17 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				map->GetPointFromCoordinate(loc, x, y);
 				goal.x = x; goal.y = y;
 
-//				start.x = 394;
-//				start.y = 158;
-//				goal.x = 313;
-//				goal.y = 167;
-
-//				start.x = 389;
-//				start.y = 278;
-//				goal.x = 510;
-//				goal.y = 208;
+				//100, 59) to (176, 112
+//				start.x = 100;
+//				start.y = 59;
+//				goal.x = 176;
+//				goal.y = 112;
+//
+//				//102, 170) to (82, 11 //  100, 192) to (106, 60
+				start.x = 100;
+				start.y = 192;
+				goal.x = 106;
+				goal.y = 60;
 				
 //				start.x = 75;
 //				start.y = 33;
@@ -889,6 +894,7 @@ void AnalyzeMap(const char *map, const char *scenario, double weight)
 void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 {
 	BOBA<xyLoc, tDirection, MapEnvironment> boba;
+	//BOBA<xyLoc, tDirection, MapEnvironment, BOBAQueueGF<xyLoc>, BDOpenClosed<xyLoc, BOBAGLowHigh<xyLoc>, BOBAFLowHigh<xyLoc>>> boba;
 	
 	MM<xyLoc, tDirection, MapEnvironment> mm;
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
@@ -897,12 +903,14 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 	ScenarioLoader s(scenario);
 	Map *m = new Map(map);
 	me = new MapEnvironment(m);
-//	me->SetDiagonalCost(1.5);
-	me->SetDiagonalCost(ROOT_TWO);
+	me->SetDiagonalCost(1.5);
+//	me->SetDiagonalCost(ROOT_TWO);
 
 	// 406 is bad!
 	for (int x = s.GetNumExperiments()-1; x >= 0; x--) // 547 to 540
 	{
+		if (fequal(s.GetNthExperiment(x).GetDistance(), 0))
+			continue;
 		xyLoc start, goal;
 		start.x = s.GetNthExperiment(x).GetStartX();
 		start.y = s.GetNthExperiment(x).GetStartY();
@@ -917,9 +925,9 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 		astar.InitializeSearch(me, start, goal, correctPath);
 
 		astar.GetPath(me, start, goal, correctPath);
-		//mm.GetPath(me, start, goal, me, me, mmPath);
+//		mm.GetPath(me, start, goal, me, me, mmPath);
 		boba.GetPath(me, start, goal, me, me, bobaPath);
-		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\n";//MM:\t" << mm.GetNodesExpanded() << "\n";
+		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\tMM:\t" << mm.GetNodesExpanded() << "\n";
 		
 		//if (!fequal)
 		if (!fequal(me->GetPathLength(bobaPath), me->GetPathLength(correctPath)))
@@ -944,5 +952,27 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 		}
 		
 	}
+	printf("Exiting with no errors\n");
 	exit(0);
+}
+
+#include "RubiksCube.h"
+void tmp()
+{
+	printf("---BOBA*---\n");
+	Timer t;
+	RubiksCube cube;
+	RubiksState start, goal;
+	std::vector<RubiksState> thePath;
+	thePath.clear();
+	ZeroHeuristic<RubiksState> z;
+	t.StartTimer();
+	BOBA<RubiksState, RubiksAction, RubiksCube> boba;
+	boba.GetPath(&cube, start, goal, &z, &z, thePath);
+	
+	t.EndTimer();
+	printf("%llu nodes expanded\n", boba.GetNodesExpanded());
+	printf("%llu neccesary nodes expanded\n", boba.GetNecessaryExpansions());
+	printf("Solution path length %1.0f\n", cube.GetPathLength(thePath));
+	printf("%1.2f elapsed\n", t.GetElapsedTime());
 }
