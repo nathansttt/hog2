@@ -17,6 +17,7 @@
 #include "SVGUtil.h"
 #include "BOBAQueueGF.h"
 #include "BOBA.h"
+#include "BSStar.h"
 
 Map *map = 0;
 MapEnvironment *me = 0;
@@ -44,10 +45,12 @@ BOBA<xyLoc, tDirection, MapEnvironment> boba;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare;
 MM<xyLoc, tDirection, MapEnvironment> mm0;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare0;
+BSStar<xyLoc, tDirection, MapEnvironment> bs;
 
 bool mmSearchRunning = false;
 bool compareSearchRunning = false;
 bool mm0SearchRunning = false;
+bool bsSearchRunning = false;
 bool compare0SearchRunning = false;
 bool searchRan = false;
 std::vector<xyLoc> path;
@@ -287,6 +290,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			}
 			for (int x = 0; x < gStepsPerFrame; x++)
 			{
+				if (bsSearchRunning)
+				{
+					bsSearchRunning = !bs.DoSingleSearchStep(path);
+					if (!bsSearchRunning)
+						printf("BS*: %llu nodes expanded\n", bs.GetNodesExpanded());
+				}
+			}
+			for (int x = 0; x < gStepsPerFrame; x++)
+			{
 				if (compareSearchRunning)
 				{
 					compareSearchRunning = !compare.DoSingleSearchStep(path);
@@ -315,9 +327,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			else if (viewport == 1)
 				compare.OpenGLDraw();
 			else if (viewport == 2)
-				mm0.OpenGLDraw();
+				bs.OpenGLDraw();
 			else if (viewport == 3)
-				compare0.OpenGLDraw();
+				mm.OpenGLDraw();
 		}
 	}
 
@@ -391,10 +403,11 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //				goal.y = 112;
 //
 //				//102, 170) to (82, 11 //  100, 192) to (106, 60
-				start.x = 100;
-				start.y = 192;
-				goal.x = 106;
-				goal.y = 60;
+//101, 143) to (93, 155
+				start.x = 101;
+				start.y = 143;
+				goal.x = 93;
+				goal.y = 155;
 				
 //				start.x = 75;
 //				start.y = 33;
@@ -416,6 +429,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				compare0.SetHeuristic(z);
 				compare0.InitializeSearch(me, start, goal, path);
 				boba.InitializeSearch(me, start, goal, me, me, path);
+				bs.InitializeSearch(me, start, goal, me, me, path);
 				//mm.InitializeSearch(me, start, goal, z, z, path);
 				mm.InitializeSearch(me, start, goal, me, me, path);
 				mm0.InitializeSearch(me, start, goal, z, z, path);
@@ -423,6 +437,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				mmSearchRunning = true;
 				compareSearchRunning = true;
 				mm0SearchRunning = true;
+				bsSearchRunning = true;
 				compare0SearchRunning = true;
 				
 				searchRan = true;
@@ -894,6 +909,7 @@ void AnalyzeMap(const char *map, const char *scenario, double weight)
 void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 {
 	BOBA<xyLoc, tDirection, MapEnvironment> boba;
+	BSStar<xyLoc, tDirection, MapEnvironment> bs;
 	//BOBA<xyLoc, tDirection, MapEnvironment, BOBAQueueGF<xyLoc>, BDOpenClosed<xyLoc, BOBAGLowHigh<xyLoc>, BOBAFLowHigh<xyLoc>>> boba;
 	
 	MM<xyLoc, tDirection, MapEnvironment> mm;
@@ -927,9 +943,11 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 		astar.GetPath(me, start, goal, correctPath);
 //		mm.GetPath(me, start, goal, me, me, mmPath);
 		boba.GetPath(me, start, goal, me, me, bobaPath);
-		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\tMM:\t" << mm.GetNodesExpanded() << "\n";
-		printf("BOBA* total\t%llu\tnecessary\t%llu\tdoubles\t%llu\n", boba.GetNodesExpanded(), boba.GetNecessaryExpansions(), boba.GetDoubleExpansions());
-		printf(" A* total\t%llu\tnecessary\t%llu\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
+		bs.GetPath(me, start, goal, me, me, bobaPath);
+		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\tBS*:\t" << bs.GetNodesExpanded() << "\n";
+		printf("BOBA* total\t%llu\tnecessary\t%llu\tdoubles\t%llu\t", boba.GetNodesExpanded(), boba.GetNecessaryExpansions(), boba.GetDoubleExpansions());
+		printf("A* total\t%llu\tnecessary\t%llu\tratio\t%1.3f\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),
+			   (double)boba.GetNecessaryExpansions()/astar.GetNecessaryExpansions());
 		//if (!fequal)
 		if (!fequal(me->GetPathLength(bobaPath), me->GetPathLength(correctPath)))
 		{

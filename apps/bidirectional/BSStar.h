@@ -54,40 +54,6 @@ public:
 	uint64_t GetNodesTouched() const { return nodesTouched; }
 	
 	void OpenGLDraw() const;
-	void PrintHDist()
-	{
-		std::vector<uint64_t> d;
-		for (auto i = dist.begin(); i != dist.end(); i++)
-		{
-			if (i->first.first < i->first.second)
-			{
-				int h = (int)i->first.second;
-				if (h >= d.size())
-					d.resize(h+1);
-				d[h] += i->second;
-			}
-		}
-		printf("MM Dynamic Distribution\n");
-		for (int x = 0; x < d.size(); x++)
-		{
-			if (d[x] != 0)
-				printf("%d\t%llu\n", x, d[x]);
-		}
-	}
-	void PrintOpenStats(std::unordered_map<std::pair<double, double>, int>  &s)
-	{
-		printf("Search distributions: (%s)\n", ((&s)==(&f))?"forward":"backward");
-		for (auto i = s.begin(); i != s.end(); i++)
-		{
-			if (i->second > 0)
-			{
-				bool ignore = false;
-				ignore = (i->first.first+i->first.second >= currentCost);
-				printf("%c g: %1.1f h: %1.1f count: %d\n", ignore?'*':' ',
-					   i->first.first, i->first.second, i->second);
-			}
-		}
-	}
 	
 	//	void SetWeight(double w) {weight = w;}
 private:
@@ -123,8 +89,8 @@ private:
 				const state &target);
 	priorityQueue forwardQueue, backwardQueue;
 	state goal, start;
-	std::unordered_map<std::pair<double, double>, int> dist;
-	std::unordered_map<std::pair<double, double>, int> f, b;
+//	std::unordered_map<std::pair<double, double>, int> dist;
+//	std::unordered_map<std::pair<double, double>, int> f, b;
 	uint64_t nodesTouched, nodesExpanded, uniqueNodesExpanded;
 	state middleNode;
 	double currentCost;
@@ -175,8 +141,6 @@ bool BSStar<state, action, environment, priorityQueue>::InitializeSearch(environ
 	lastMinBackwardG = 0;
 	forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, forwardHeuristic->HCost(start, goal));
 	backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start));
-	f.clear();
-	b.clear();
 	return true;
 }
 
@@ -198,9 +162,9 @@ bool BSStar<state, action, environment, priorityQueue>::DoSingleSearchStep(std::
 	}
 	
 	if (forwardQueue.size() > backwardQueue.size())
-		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
+		Expand(backwardQueue, forwardQueue, backwardHeuristic, start);
 	else
-		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
+		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal);
 	return false;
 }
 
@@ -209,15 +173,20 @@ void BSStar<state, action, environment, priorityQueue>::Expand(priorityQueue &cu
 														   priorityQueue &opposite,
 														   Heuristic<state> *heuristic, const state &target)
 {
-	uint64_t nextID = current.Close();
+	uint64_t nextID;
+	
+	do {
+		nextID = current.Close();
+		uint64_t reverseLoc;
+		auto loc = opposite.Lookup(env->GetStateHash(current.Lookup(nextID).data), reverseLoc);
+		if (loc == kClosedList)
+			continue;
+	} while (false);
 	
 	// 1. if current closed in opposite direction
 	// 1a. Remove descendents of current in open
 	{
 		// This is done lazily as the search proceeds.
-//		uint64_t reverseLoc;
-//		auto loc = opposite.Lookup(env->GetStateHash(current.Lookup(nextID).data), reverseLoc);
-//		if (loc == kClosedList)
 //		{
 //			env->GetSuccessors(current.Lookup(nextID).data, neighbors);
 //			for (auto &succ : neighbors)
@@ -245,7 +214,7 @@ void BSStar<state, action, environment, priorityQueue>::Expand(priorityQueue &cu
 //				}
 //			}
 //		}
-		return;
+//		return;
 	}
 	
 	// 2. Else expand as usual on current direction
@@ -270,6 +239,11 @@ void BSStar<state, action, environment, priorityQueue>::Expand(priorityQueue &cu
 		auto &parentData = current.Lookup(nextID);
 		
 		double edgeCost = env->GCost(parentData.data, succ);
+
+		// ignore states with greater cost than best solution
+		if (fgreatereq(parentData.g+edgeCost, currentCost))
+			continue;
+		
 		switch (loc)
 		{
 			case kClosedList: // ignore
@@ -283,10 +257,6 @@ void BSStar<state, action, environment, priorityQueue>::Expand(priorityQueue &cu
 				break;
 			case kOpenList: // update cost if needed
 			{
-				if (fgreater(parentData.h-edgeCost, childData.h))
-				{
-					childData.h = parentData.h-edgeCost;
-				}
 				if (fless(parentData.g+edgeCost, childData.g))
 				{
 					childData.parentID = nextID;
@@ -361,10 +331,19 @@ void BSStar<state, action, environment, priorityQueue>::Trim()
 {
 	for (unsigned int x = 0; x < forwardQueue.OpenSize(); x++)
 	{
-		const AStarOpenClosedData<state> &data = forwardQueue.LookAt(forwardQueue.GetItem(forwardQueue.GetOpenItem(x)));
-		if (data.where == kOpenList && fgreatereq(data.g + data.h, currentCost)) // and not start or goal
+		const AStarOpenClosedData<state> &data = forwardQueue.Lookat(forwardQueue.GetOpenItem(x));
+		if (data.where == kOpenList && fgreatereq(data.g + data.h, currentCost) && (data.data != middleNode)) // and not start or goal
 		{
-			forwardQueue.Remove(x);
+			forwardQueue.Remove(env->GetStateHash(data.data));
+		}
+	}
+
+	for (unsigned int x = 0; x < backwardQueue.OpenSize(); x++)
+	{
+		const AStarOpenClosedData<state> &data = backwardQueue.Lookat(backwardQueue.GetOpenItem(x));
+		if (data.where == kOpenList && fgreatereq(data.g + data.h, currentCost) && (data.data != middleNode)) // and not start or goal
+		{
+			backwardQueue.Remove(env->GetStateHash(data.data));
 		}
 	}
 
