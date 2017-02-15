@@ -26,7 +26,7 @@ void TestPancake()
 		
 		PancakePuzzleState<S> start;
 		PancakePuzzleState<S> goal;
-		PancakePuzzle<S> pancake(gap+2);
+		PancakePuzzle<S> pancake(gap);
 		PancakePuzzle<S> pancake2(gap);
 		
 		BOBA<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> boba;
@@ -45,7 +45,7 @@ void TestPancake()
 		for (int x = 0; x < S; x++)
 			start.puzzle[x] = arrangement[x];
 		t1.StartTimer();
-		//astar.GetPath(&pancake, start, goal, astarPath);
+		astar.GetPath(&pancake, start, goal, astarPath);
 		t1.EndTimer();
 		uint64_t necessary = 0;
 		double solutionCost = pancake.GetPathLength(astarPath);
@@ -71,7 +71,7 @@ void TestPancake()
 		for (int x = 0; x < S; x++)
 			start.puzzle[x] = arrangement[x];
 		t3.StartTimer();
-		//idastar.GetPath(&pancake, start, goal, idaPath);
+		idastar.GetPath(&pancake, start, goal, idaPath);
 		t3.EndTimer();
 		printf("IDA* found path length %ld; %llu expanded; %llu generated; %1.2fs elapsed\n", idaPath.size(),
 			   idastar.GetNodesExpanded(), idastar.GetNodesTouched(), t3.GetElapsedTime());

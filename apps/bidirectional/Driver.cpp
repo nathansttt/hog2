@@ -41,6 +41,7 @@
 #include "ParallelIDAStar.h"
 #include "BidirSTP.h"
 #include "BidirPancake.h"
+#include "BidirTOH.h"
 
 void Test100Easy();
 
@@ -106,6 +107,7 @@ int main(int argc, char* argv[])
 	InstallCommandLineHandler(MyCLHandler, "-boba", "-boba <map> <scenario> <hweight>", "BOBA test");
 	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp", "BOBA test on pancake");
 	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake", "BOBA test on pancake");
+	InstallCommandLineHandler(MyCLHandler, "-toh", "-toh", "BOBA test on TOH");
 	//const char *map, const char *scenario, double weight
 	InstallCommandLineHandler(MyCLHandler, "-heuristic", "-heuristic <dir> <1997/888/8210/none>", "Load the given heuristic");
 	InstallCommandLineHandler(MyCLHandler, "-problem", "-problem which", "Load the given problem");
@@ -307,9 +309,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		BFS();
 		return 1;
 	}
-	else if (strcmp(argument[0], "-pancake") == 0) // not hooked up
+	else if (strcmp(argument[0], "-pancake") == 0)
 	{
 		TestPancake();
+		return 1;
+	}
+	else if (strcmp(argument[0], "-toh") == 0)
+	{
+		TOHTest();
 		return 1;
 	}
 	else if (strcmp(argument[0], "-pida") == 0)

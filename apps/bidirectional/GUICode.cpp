@@ -928,7 +928,8 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 //		mm.GetPath(me, start, goal, me, me, mmPath);
 		boba.GetPath(me, start, goal, me, me, bobaPath);
 		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\tMM:\t" << mm.GetNodesExpanded() << "\n";
-		
+		printf("BOBA* total\t%llu\tnecessary\t%llu\tdoubles\t%llu\n", boba.GetNodesExpanded(), boba.GetNecessaryExpansions(), boba.GetDoubleExpansions());
+		printf(" A* total\t%llu\tnecessary\t%llu\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
 		//if (!fequal)
 		if (!fequal(me->GetPathLength(bobaPath), me->GetPathLength(correctPath)))
 		{

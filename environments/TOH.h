@@ -391,7 +391,7 @@ void TOH<disks>::OpenGLDraw(const TOHState<disks>&, const TOHMove&) const
 	
 }
 
-template <int patternDisks, int totalDisks>
+template <int patternDisks, int totalDisks, int offset=0>
 class TOHPDB : public PDBHeuristic<TOHState<patternDisks>, TOHMove, TOH<patternDisks>, TOHState<totalDisks>> {
 public:
 	TOHPDB(TOH<patternDisks> *e)
@@ -408,12 +408,19 @@ public:
 			tmp.counts[x] = start.counts[x];
 			for (int y = 0; y < tmp.counts[x]; y++)
 			{
-				tmp.disks[x][y] = start.disks[x][y]+diff;
+				tmp.disks[x][y] = start.disks[x][y]+diff-offset;
 			}
 		}
 		return tmp;
 	}
-	
+	//
+	// 6 5
+	//
+	// 4 3
+	//
+	// 2
+	//
+	// 1
 	virtual uint64_t GetAbstractHash(const TOHState<totalDisks> &s, int threadID = 0) const
 	{
 		int diff = totalDisks - patternDisks;
@@ -423,8 +430,8 @@ public:
 			for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
 			{
 				// 6 total 2 pattern
-				if (s.GetDiskOnPeg(x, y)-diff > 0)
-					hash |= (uint64_t(x)<<(2*(s.GetDiskOnPeg(x, y)-1-diff)));
+				if ((s.GetDiskOnPeg(x, y) > diff-offset) && (s.GetDiskOnPeg(x, y) <= totalDisks-offset))
+					hash |= (uint64_t(x)<<(2*(s.GetDiskOnPeg(x, y)-1-diff+offset)));
 			}
 		}
 		return hash;

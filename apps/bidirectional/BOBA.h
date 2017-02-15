@@ -85,6 +85,7 @@ public:
 	}
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
+	uint64_t GetDoubleExpansions() const;
 	uint64_t GetNecessaryExpansions() const {
 		uint64_t necessary = 0;
 		for (const auto &i : counts)
@@ -575,6 +576,24 @@ void BOBA<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 }
 
 
+template <class state, class action, class environment, class dataStructure, class priorityQueue>
+uint64_t BOBA<state, action, environment, dataStructure, priorityQueue>::GetDoubleExpansions() const
+{
+	uint64_t doubles = 0;
+	for (unsigned int x = 0; x < queue.forwardQueue.size(); x++)
+	{
+		uint64_t key;
+		const auto &data = queue.forwardQueue.Lookat(x);
+		if (data.where == kClosed)
+		{
+			auto loc = queue.backwardQueue.Lookup(env->GetStateHash(data.data), key);
+			if (loc == kClosed)
+				doubles++;
+		}
+
+	}
+	return doubles;
+}
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
 void BOBA<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw() const

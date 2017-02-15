@@ -121,7 +121,7 @@ public:
 	
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
-	
+	uint64_t GetNecessaryExpansions() const;
 	void LogFinalStats(StatCollection *) {}
 	
 	void SetRadius(double rad) {radius = rad;}
@@ -155,6 +155,7 @@ private:
 	environment *env;
 	bool stopAfterGoal;
 	
+	double goalFCost;
 	double radius; // how far around do we consider other agents?
 	double weight; 
 	bool directed;
@@ -207,7 +208,7 @@ void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env
   	while (!DoSingleSearchStep(thePath))
 	{
 //		if (0 == nodesExpanded%100000)
-//			printf("%llu nodes expanded\n", nodesExpanded);
+//			printf("%llu nodes expanded, %llu generated\n", nodesExpanded, nodesTouched);
 	}
 }
 
@@ -327,6 +328,7 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 		ExtractPathToStartFromID(nodeid, thePath);
 		// Path is backwards - reverse
 		reverse(thePath.begin(), thePath.end()); 
+		goalFCost = openClosedList.Lookup(nodeid).g + openClosedList.Lookup(nodeid).h;
 		return true;
 	}
 	
@@ -568,6 +570,20 @@ const state &TemplateAStar<state, action,environment,openList>::GetParent(const 
 	theID = openClosedList.Lookup(theID).parentID;
 	return openClosedList.Lookup(theID).data;
 }
+
+template <class state, class action, class environment, class openList>
+uint64_t TemplateAStar<state, action,environment,openList>::GetNecessaryExpansions() const
+{
+	uint64_t n = 0;
+	for (unsigned int x = 0; x < openClosedList.size(); x++)
+	{
+		const auto &data = openClosedList.Lookat(x);
+		if (fless(data.g + data.h, goalFCost))
+			n++;
+	}
+	return n;
+}
+
 
 /**
  * A function that prints the number of states in the closed list and open

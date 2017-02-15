@@ -1,13 +1,13 @@
 //
-//  MM.h
+//  BSStar.h
 //  hog2 glut
 //
-//  Created by Nathan Sturtevant on 10/27/15.
-//  Copyright © 2015 University of Denver. All rights reserved.
+//  Created by Nathan Sturtevant on 2/14/17.
+//  Copyright © 2017 University of Denver. All rights reserved.
 //
 
-#ifndef MM_h
-#define MM_h
+#ifndef BSStar_h
+#define BSStar_h
 
 #include "AStarOpenClosed.h"
 #include "FPUtil.h"
@@ -15,13 +15,11 @@
 #include <unordered_map>
 
 template <class state, int epsilon = 1>
-struct MMCompare {
+struct BSCompare {
 	bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
 	{
-		double p1 = std::max(i1.g+i1.h, i1.g*2+epsilon);
-		double p2 = std::max(i2.g+i2.h, i2.g*2+epsilon);
-//		double p1 = i1.g+i1.h;
-//		double p2 = i2.g+i2.h;
+		double p1 = i1.g+i1.h;
+		double p2 = i2.g+i2.h;
 		if (fequal(p1, p2))
 		{
 			//return (fgreater(i1.g, i2.g)); // low g-cost over high
@@ -31,22 +29,11 @@ struct MMCompare {
 	}
 };
 
-namespace std {
-	template <> struct hash<std::pair<double, double>>
-	{
-		size_t operator()(const std::pair<double, double> & x) const
-		{
-			return std::hash<double>()(x.first)^(std::hash<double>()(x.second)<<16);
-		}
-	};
-}
-
-
-template <class state, class action, class environment, class priorityQueue = AStarOpenClosed<state, MMCompare<state>> >
-class MM {
+template <class state, class action, class environment, class priorityQueue = AStarOpenClosed<state, BSCompare<state>> >
+class BSStar {
 public:
-	MM(double epsilon = 1.0):epsilon(epsilon) { forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); }
-	virtual ~MM() {}
+	BSStar() { forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); }
+	virtual ~BSStar() {}
 	void GetPath(environment *env, const state& from, const state& to,
 				 Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);
 	bool InitializeSearch(environment *env, const state& from, const state& to,
@@ -57,24 +44,14 @@ public:
 	
 	void ResetNodeCount() { nodesExpanded = nodesTouched = uniqueNodesExpanded = 0; }
 	
-//	bool GetClosedListGCost(const state &val, double &gCost) const;
-//	unsigned int GetNumOpenItems() { return openClosedList.OpenSize(); }
-//	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return openClosedList.Lookat(openClosedList.GetOpenItem(which)); }
 	inline const int GetNumForwardItems() { return forwardQueue.size(); }
 	inline const AStarOpenClosedData<state> &GetForwardItem(unsigned int which) { return forwardQueue.Lookat(which); }
 	inline const int GetNumBackwardItems() { return backwardQueue.size(); }
 	inline const AStarOpenClosedData<state> &GetBackwardItem(unsigned int which) { return backwardQueue.Lookat(which); }
-//	bool HaveExpandedState(const state &val)
-//	{ uint64_t key; return openClosedList.Lookup(env->GetStateHash(val), key) != kNotFound; }
-//	
-//	void SetForwardHeuristic(Heuristic<state> *h) { forwardHeuristic = h; }
-//	void SetBackwardHeuristic(Heuristic<state> *h) { backwardHeuristic = h; }
 	
 	uint64_t GetUniqueNodesExpanded() const { return uniqueNodesExpanded; }
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
-	
-	//void FullBPMX(uint64_t nodeID, int distance);
 	
 	void OpenGLDraw() const;
 	void PrintHDist()
@@ -111,9 +88,10 @@ public:
 			}
 		}
 	}
-
-//	void SetWeight(double w) {weight = w;}
+	
+	//	void SetWeight(double w) {weight = w;}
 private:
+	void Trim();
 	
 	void ExtractPathToGoal(state &node, std::vector<state> &thePath)
 	{ uint64_t theID; backwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToGoalFromID(theID, thePath); }
@@ -125,7 +103,7 @@ private:
 		} while (backwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(backwardQueue.Lookup(node).data);
 	}
-
+	
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
 	{ uint64_t theID; forwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
@@ -136,16 +114,13 @@ private:
 		} while (forwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(forwardQueue.Lookup(node).data);
 	}
-
+	
 	void OpenGLDraw(const priorityQueue &queue) const;
 	
 	void Expand(priorityQueue &current,
 				priorityQueue &opposite,
 				Heuristic<state> *heuristic,
-				const state &target,
-				std::unordered_map<std::pair<double, double>, int> &count);
-//				std::unordered_map<double, int> &ming,
-//				std::unordered_map<double, int> &minf);
+				const state &target);
 	priorityQueue forwardQueue, backwardQueue;
 	state goal, start;
 	std::unordered_map<std::pair<double, double>, int> dist;
@@ -156,20 +131,20 @@ private:
 	double lastMinForwardG;
 	double lastMinBackwardG;
 	double epsilon;
-
+	
 	std::vector<state> neighbors;
 	environment *env;
 	Timer t;
 	Heuristic<state> *forwardHeuristic;
 	Heuristic<state> *backwardHeuristic;
-
+	
 	double oldp1;
 	double oldp2;
 };
 
 template <class state, class action, class environment, class priorityQueue>
-void MM<state, action, environment, priorityQueue>::GetPath(environment *env, const state& from, const state& to,
-			 Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath)
+void BSStar<state, action, environment, priorityQueue>::GetPath(environment *env, const state& from, const state& to,
+															Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath)
 {
 	if (InitializeSearch(env, from, to, forward, backward, thePath) == false)
 		return;
@@ -179,7 +154,7 @@ void MM<state, action, environment, priorityQueue>::GetPath(environment *env, co
 }
 
 template <class state, class action, class environment, class priorityQueue>
-bool MM<state, action, environment, priorityQueue>::InitializeSearch(environment *env, const state& from, const state& to,
+bool BSStar<state, action, environment, priorityQueue>::InitializeSearch(environment *env, const state& from, const state& to,
 																	 Heuristic<state> *forward, Heuristic<state> *backward,
 																	 std::vector<state> &thePath)
 {
@@ -206,185 +181,83 @@ bool MM<state, action, environment, priorityQueue>::InitializeSearch(environment
 }
 
 template <class state, class action, class environment, class priorityQueue>
-bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vector<state> &thePath)
+bool BSStar<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vector<state> &thePath)
 {
 	if (forwardQueue.OpenSize() == 0 || backwardQueue.OpenSize() == 0)
 	{
-		return true;
-	}
-	
-//	if (forwardQueue.OpenSize() == 0)
-//		//Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
-//		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
-//	
-//	if (backwardQueue.OpenSize() == 0)
-//		//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
-//		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
-
-	uint64_t forward = forwardQueue.Peek();
-	uint64_t backward = backwardQueue.Peek();
-	
-	const AStarOpenClosedData<state> &nextForward = forwardQueue.Lookat(forward);
-	const AStarOpenClosedData<state> &nextBackward = backwardQueue.Lookat(backward);
-
-	double p1 = std::max(nextForward.g+nextForward.h, nextForward.g*2);
-	double p2 = std::max(nextBackward.g+nextBackward.h, nextBackward.g*2);
-	if (p1 > oldp1)
-	{
-//		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
-		oldp1 = p1;
-		//PrintOpenStats(f);
-	}
-	if (p2 > oldp2)
-	{
-//		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
-		oldp2 = p2;
-		//PrintOpenStats(b);
-	}
-	
-	if (fless(p1, p2))
-	{
-		//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
-		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
-	}
-	else if (fless(p2, p1))
-	{
-		//Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
-		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
-	}
-	else { // equal priority
-		if (fless(nextForward.g, nextBackward.g))
+		if (currentCost != DBL_MAX)
 		{
-			//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
-			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
-		}
-		else if (fless(nextBackward.g, nextForward.g))
-		{
-			//Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
-			Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
-		}
-		else {
-			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
-			//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
-		}
-	}
-	// check if we can terminate
-	if (fless(currentCost, DBL_MAX))
-	{
-		// TODO: make this more efficient
-		double minForwardG = DBL_MAX;
-		double minBackwardG = DBL_MAX;
-		double minForwardF = DBL_MAX;
-		double minBackwardF =  DBL_MAX;
-		double forwardP;
-		double backwardP;
-		
-		for (auto i = f.begin(); i != f.end(); i++)
-		{
-			if (i->second > 0) // some elements
-			{
-				if ((i->first.first + i->first.second < currentCost) && // termination only stopped by lower f-cost
-					(i->first.first + lastMinBackwardG + 1.0 < currentCost))
-				{
-					minForwardG = std::min(minForwardG, i->first.first);
-					minForwardF = std::min(minForwardF, i->first.first+i->first.second);
-				}
-			}
-		}
-		for (auto i = b.begin(); i != b.end(); i++)
-		{
-			if (i->second > 0) // some elements
-			{
-				if ((i->first.first + i->first.second < currentCost) && // termination only stopped by lower f-cost
-					(i->first.first + lastMinForwardG + 1.0 < currentCost))
-				{
-					minBackwardG = std::min(minBackwardG, i->first.first);
-					minBackwardF = std::min(minBackwardF, i->first.first+i->first.second);
-				}
-			}
-		}
-		
-		{
-			auto iB = backwardQueue.Lookat(backwardQueue.Peek());
-			backwardP = std::max(iB.g+iB.h, iB.g*2);
-			auto iF = forwardQueue.Lookat(forwardQueue.Peek());
-			forwardP = std::max(iF.g+iF.h, iF.g*2);
-		}
-		bool done = false;
-		if (minForwardF == DBL_MAX)
-		{
-			minForwardF = minForwardG = currentCost+1;
-		}
-		if (minBackwardF == DBL_MAX)
-		{
-			minBackwardF = minBackwardG = currentCost+1;
-		}
-		if (!fgreater(currentCost, minForwardF))
-		{
-//			printf("Terminated on forwardf (%f >= %f)\n", minForwardF, currentCost);
-			done = true;
-		}
-		if (!fgreater(currentCost, minBackwardF))
-		{
-//			printf("Terminated on backwardf (%f >= %f)\n", minBackwardF, currentCost);
-			done = true;
-		}
-		if (!fgreater(currentCost, minForwardG+minBackwardG+epsilon)) // TODO: epsilon
-		{
-//			printf("Terminated on g+g+epsilon (%f+%f+%f >= %f)\n", minForwardG, minBackwardG, epsilon, currentCost);
-			done = true;
-		}
-		if (!fgreater(currentCost, std::min(forwardP, backwardP)))
-		{
-//			printf("Terminated on forwardP/backwardP (min(%f, %f) >= %f)\n", forwardP, backwardP, currentCost);
-			done = true;
-		}
-//		if (!fgreater(currentCost, backwardP))
-//		{
-//			printf("Terminated on backwardP\n");
-//			done = true;
-//		}
-		// for now, always terminate
-		lastMinBackwardG = minBackwardG;
-		lastMinForwardG = minForwardG;
-		if (done)
-		{
-//			PrintOpenStats(f);
-//			PrintOpenStats(b);
-			
 			std::vector<state> pFor, pBack;
 			ExtractPathToGoal(middleNode, pBack);
 			ExtractPathToStart(middleNode, pFor);
 			reverse(pFor.begin(), pFor.end());
 			thePath = pFor;
 			thePath.insert( thePath.end(), pBack.begin()+1, pBack.end() );
-			
-			return true;
 		}
+		return true;
 	}
+	
+	if (forwardQueue.size() > backwardQueue.size())
+		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
+	else
+		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
 	return false;
 }
 
 template <class state, class action, class environment, class priorityQueue>
-void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &current,
+void BSStar<state, action, environment, priorityQueue>::Expand(priorityQueue &current,
 														   priorityQueue &opposite,
-														   Heuristic<state> *heuristic, const state &target,
-														   std::unordered_map<std::pair<double, double>, int> &count)
-//														   std::unordered_map<double, int> &ming,
-//														   std::unordered_map<double, int> &minf)
+														   Heuristic<state> *heuristic, const state &target)
 {
 	uint64_t nextID = current.Close();
+	
+	// 1. if current closed in opposite direction
+	// 1a. Remove descendents of current in open
+	{
+		// This is done lazily as the search proceeds.
+//		uint64_t reverseLoc;
+//		auto loc = opposite.Lookup(env->GetStateHash(current.Lookup(nextID).data), reverseLoc);
+//		if (loc == kClosedList)
+//		{
+//			env->GetSuccessors(current.Lookup(nextID).data, neighbors);
+//			for (auto &succ : neighbors)
+//			{
+//				nodesTouched++;
+//				uint64_t childID;
+//				uint64_t hash = env->GetStateHash(succ);
+//				auto loc = current.Lookup(hash, childID);
+//				auto &childData = current.Lookup(childID);
+//				auto &parentData = current.Lookup(nextID);
+//				
+//				double edgeCost = env->GCost(parentData.data, succ);
+//				if (loc == kOpenList)
+//				{
+//					if (fgreater(parentData.h-edgeCost, childData.h))
+//					{
+//						childData.h = parentData.h-edgeCost;
+//					}
+//					if (fless(parentData.g+edgeCost, childData.g))
+//					{
+//						childData.parentID = nextID;
+//						childData.g = parentData.g+edgeCost;
+//						current.KeyChanged(childID);
+//					}
+//				}
+//			}
+//		}
+		return;
+	}
+	
+	// 2. Else expand as usual on current direction
+	// 2a. Check for bidirectional solution
+	// 2b. Set trim flag
+	
+	// 3. If trim, remove any states with f >= best solution from open (Except start/goal?)
+
+	bool foundBetterSolution = false;
 	nodesExpanded++;
 	if (current.Lookup(nextID).reopened == false)
 		uniqueNodesExpanded++;
-
-	// decrease count from parent
-	{
-		auto &parentData = current.Lookup(nextID);
-//		ming[parentData.g]--;
-//		minf[parentData.g+parentData.h]--;
-		count[{parentData.g,parentData.h}]--;
-	}
 
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
 	for (auto &succ : neighbors)
@@ -395,7 +268,7 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 		auto loc = current.Lookup(hash, childID);
 		auto &childData = current.Lookup(childID);
 		auto &parentData = current.Lookup(nextID);
-
+		
 		double edgeCost = env->GCost(parentData.data, succ);
 		switch (loc)
 		{
@@ -405,41 +278,20 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 					childData.h = std::max(childData.h, parentData.h-edgeCost);
 					childData.parentID = nextID;
 					childData.g = parentData.g+edgeCost;
-//					ming[childData.g]++;
-//					minf[childData.g+childData.h]++;
-					count[{childData.g,childData.h}]++;
-					dist[{childData.g,childData.h}]++;
 					current.Reopen(childID);
 				}
 				break;
 			case kOpenList: // update cost if needed
 			{
-				// 1-step BPMX
-				parentData.h = std::max(childData.h-edgeCost, parentData.h);
-
 				if (fgreater(parentData.h-edgeCost, childData.h))
 				{
-					count[{childData.g,childData.h}]--;
-					dist[{childData.g,childData.h}]--;
-					//minf[childData.g+childData.h]--;
 					childData.h = parentData.h-edgeCost;
-					//minf[childData.g+childData.h]++;
-					count[{childData.g,childData.h}]++;
-					dist[{childData.g,childData.h}]++;
 				}
 				if (fless(parentData.g+edgeCost, childData.g))
 				{
-//					ming[childData.g]--;
-//					minf[childData.g+childData.h]--;
-					count[{childData.g,childData.h}]--;
-					dist[{childData.g,childData.h}]--;
 					childData.parentID = nextID;
 					childData.g = parentData.g+edgeCost;
 					current.KeyChanged(childID);
-//					ming[childData.g]++;
-//					minf[childData.g+childData.h]++;
-					count[{childData.g,childData.h}]++;
-					dist[{childData.g,childData.h}]++;
 					
 					
 					// TODO: check if we improved the current solution?
@@ -449,7 +301,7 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 					{
 						if (fless(parentData.g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
-							// TODO: store current solution
+							foundBetterSolution = true;
 //							printf("Potential updated solution found, cost: %1.2f + %1.2f = %1.2f\n",
 //								   parentData.g+edgeCost,
 //								   opposite.Lookup(reverseLoc).g,
@@ -467,17 +319,11 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 			{
 				double g = parentData.g+edgeCost;
 				double h = std::max(heuristic->HCost(succ, target), parentData.h-edgeCost);
-
+				
 				// Ignore nodes that don't have lower f-cost than the incumbant solution
 				if (!fless(g+h, currentCost))
 					break;
-//				ming[g]++;
-//				minf[g+h]++;
-				count[{g,h}]++;
-				dist[{g,h}]++;
-				// 1-step BPMX
-				parentData.h = std::max(h-edgeCost, parentData.h);
-
+				
 				current.AddOpenNode(succ, // This may invalidate our references
 									hash,
 									g,
@@ -491,7 +337,7 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 				{
 					if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 					{
-						// TODO: store current solution
+						foundBetterSolution = true;
 //						printf("Potential solution found, cost: %1.2f + %1.2f = %1.2f\n",
 //							   current.Lookup(nextID).g+edgeCost,
 //							   opposite.Lookup(reverseLoc).g,
@@ -505,17 +351,34 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 			}
 		}
 	}
+	
+	if (foundBetterSolution)
+		Trim();
 }
 
 template <class state, class action, class environment, class priorityQueue>
-void MM<state, action, environment, priorityQueue>::OpenGLDraw() const
+void BSStar<state, action, environment, priorityQueue>::Trim()
+{
+	for (unsigned int x = 0; x < forwardQueue.OpenSize(); x++)
+	{
+		const AStarOpenClosedData<state> &data = forwardQueue.LookAt(forwardQueue.GetItem(forwardQueue.GetOpenItem(x)));
+		if (data.where == kOpenList && fgreatereq(data.g + data.h, currentCost)) // and not start or goal
+		{
+			forwardQueue.Remove(x);
+		}
+	}
+
+}
+
+template <class state, class action, class environment, class priorityQueue>
+void BSStar<state, action, environment, priorityQueue>::OpenGLDraw() const
 {
 	OpenGLDraw(forwardQueue);
 	OpenGLDraw(backwardQueue);
 }
 
 template <class state, class action, class environment, class priorityQueue>
-void MM<state, action, environment, priorityQueue>::OpenGLDraw(const priorityQueue &queue) const
+void BSStar<state, action, environment, priorityQueue>::OpenGLDraw(const priorityQueue &queue) const
 {
 	double transparency = 0.9;
 	if (queue.size() == 0)
@@ -557,4 +420,5 @@ void MM<state, action, environment, priorityQueue>::OpenGLDraw(const priorityQue
 	}
 }
 
-#endif /* MM_h */
+
+#endif /* BSStar_h */
