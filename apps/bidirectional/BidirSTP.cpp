@@ -8,7 +8,7 @@
 
 #include "BidirSTP.h"
 #include "MNPuzzle.h"
-#include "BOBA.h"
+#include "NBS.h"
 #include "IDAStar.h"
 #include "MM.h"
 #include "BSStar.h"
@@ -130,7 +130,7 @@ MNPuzzleState<4, 4> GetKorfInstance(int which)
 
 void TestSTP()
 {
-	BOBA<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> boba;
+	NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> nbs;
 	MM<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> mm;
 	BSStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> bs;
 	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
@@ -142,7 +142,7 @@ void TestSTP()
 		MNPuzzleState<4, 4> start, goal;
 		printf("Problem %d of %d\n", x+1, 100);
 		
-		std::vector<MNPuzzleState<4,4>> bobaPath;
+		std::vector<MNPuzzleState<4,4>> nbsPath;
 		std::vector<MNPuzzleState<4,4>> astarPath;
 		Timer t1, t2;
 		
@@ -152,44 +152,44 @@ void TestSTP()
 			goal.Reset();
 			start = GetKorfInstance(x);
 			t1.StartTimer();
-			astar.GetPath(&mnp, start, goal, astarPath);
+			//astar.GetPath(&mnp, start, goal, astarPath);
 			t1.EndTimer();
-			printf("A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", mnp.GetPathLength(astarPath),
-				   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+			printf("A* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(astarPath),
+				   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), astar.GetNodesTouched(), t1.GetElapsedTime());
 		}
 		// NBS
 		{
 			goal.Reset();
 			start = GetKorfInstance(x);
 			t2.StartTimer();
-			boba.GetPath(&mnp, start, goal, &mnp, &mnp, bobaPath);
+			nbs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
 			t2.EndTimer();
-			printf("BOBA found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", mnp.GetPathLength(bobaPath),
-				   boba.GetNodesExpanded(), boba.GetNecessaryExpansions(), t2.GetElapsedTime());
+			printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
+				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t2.GetElapsedTime());
 		}
 		// MM
 		{
 			goal.Reset();
 			start = GetKorfInstance(x);
 			t2.StartTimer();
-			mm.GetPath(&mnp, start, goal, &mnp, &mnp, bobaPath);
+			//mm.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
 			t2.EndTimer();
-			printf("MM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", mnp.GetPathLength(bobaPath),
-				   mm.GetNodesExpanded(), 0ull, t2.GetElapsedTime());
+			printf("MM found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
+				   mm.GetNodesExpanded(), 0ull, mm.GetNodesTouched(), t2.GetElapsedTime());
 		}
 		// BS*
 		{
 			goal.Reset();
 			start = GetKorfInstance(x);
 			t2.StartTimer();
-			bs.GetPath(&mnp, start, goal, &mnp, &mnp, bobaPath);
+			bs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
 			t2.EndTimer();
-			printf("BS* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", mnp.GetPathLength(bobaPath),
-				   bs.GetNodesExpanded(), 0ull, t2.GetElapsedTime());
+			printf("BS* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
+				   bs.GetNodesExpanded(), 0ull, bs.GetNodesTouched(), t2.GetElapsedTime());
 		}
 		
 		
-		std::cout << astar.GetNodesExpanded() << "\t" << boba.GetNodesExpanded() << "\t";
+		std::cout << astar.GetNodesExpanded() << "\t" << nbs.GetNodesExpanded() << "\t";
 		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\n";
 	}
 	exit(0);
@@ -198,7 +198,7 @@ void TestSTP()
 
 void TestSTPFull()
 {
-	BOBA<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> boba;
+	NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> nbs;
 	MM<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> mm;
 	MNPuzzle<4,4> mnp;
 	IDAStar<MNPuzzleState<4,4>, slideDir> ida;
@@ -211,7 +211,7 @@ void TestSTPFull()
 		printf("Problem %d of %d\n", x+1, 100);
 		
 		std::vector<slideDir> idaPath;
-		std::vector<MNPuzzleState<4,4>> bobaPath;
+		std::vector<MNPuzzleState<4,4>> nbsPath;
 		std::vector<MNPuzzleState<4,4>> astarPath;
 		std::vector<MNPuzzleState<4,4>> mmPath;
 		Timer t1, t2, t3, t4;
@@ -233,9 +233,9 @@ void TestSTPFull()
 		goal.Reset();
 		start = GetKorfInstance(x);
 		t3.StartTimer();
-		boba.GetPath(&mnp, start, goal, &mnp, &mnp, bobaPath);
+		nbs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
 		t3.EndTimer();
-		printf("BOBA found path length %ld; %llu expanded; %1.2fs elapsed\n", bobaPath.size()-1,  boba.GetNodesExpanded(), t3.GetElapsedTime());
+		printf("NBS found path length %ld; %llu expanded; %1.2fs elapsed\n", nbsPath.size()-1,  nbs.GetNodesExpanded(), t3.GetElapsedTime());
 
 		goal.Reset();
 		start = GetKorfInstance(x);
@@ -245,26 +245,26 @@ void TestSTPFull()
 		printf("MM found path length %ld; %llu expanded; %1.2fs elapsed\n", mmPath.size()-1,  mm.GetNodesExpanded(), t3.GetElapsedTime());
 
 
-		std::cout << ida.GetNodesExpanded() << "\t" <<  astar.GetNodesExpanded() << "\t" << boba.GetNodesExpanded() << "\t";
+		std::cout << ida.GetNodesExpanded() << "\t" <<  astar.GetNodesExpanded() << "\t" << nbs.GetNodesExpanded() << "\t";
 		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\t" << t3.GetElapsedTime() << "\n";
 		
 		//if (!fequal)
-		if (bobaPath.size() != idaPath.size()+1)
+		if (nbsPath.size() != idaPath.size()+1)
 		{
 			std::cout << "error solution cost:\t expected cost\n";
-			std::cout << bobaPath.size() << "\t" << idaPath.size() << "\n";
+			std::cout << nbsPath.size() << "\t" << idaPath.size() << "\n";
 //			double d;
 //			for (auto x : correctPath)
 //			{
 //				astar.GetClosedListGCost(x, d);
-//				auto t = boba.GetNodeForwardLocation(x);
-//				auto u = boba.GetNodeBackwardLocation(x);
+//				auto t = nbs.GetNodeForwardLocation(x);
+//				auto u = nbs.GetNodeBackwardLocation(x);
 //				std::cout << x << " is on " << t << " and " << u << "\n";
 //				std::cout << "True g: " << d;
 //				if (t != kUnseen)
-//					std::cout << " forward g: " << boba.GetNodeForwardG(x);
+//					std::cout << " forward g: " << nbs.GetNodeForwardG(x);
 //				if (u != kUnseen)
-//					std::cout << " backward g: " << boba.GetNodeBackwardG(x);
+//					std::cout << " backward g: " << nbs.GetNodeBackwardG(x);
 //				std::cout << "\n";
 //			}
 			exit(0);

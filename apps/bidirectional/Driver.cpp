@@ -104,10 +104,10 @@ int main(int argc, char* argv[])
 	InstallCommandLineHandler(MyCLHandler, "-mm", "-mm <tmpdir1 <tmpdir2>", "Run MM");
 	InstallCommandLineHandler(MyCLHandler, "-pida", "-pida", "Run MM");
 	InstallCommandLineHandler(MyCLHandler, "-grid", "-grid <map> <scenario> <hweight>", "MM/A* region analysis");
-	InstallCommandLineHandler(MyCLHandler, "-boba", "-boba <map> <scenario> <hweight>", "BOBA test");
-	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp", "BOBA test on pancake");
-	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake", "BOBA test on pancake");
-	InstallCommandLineHandler(MyCLHandler, "-toh", "-toh", "BOBA test on TOH");
+	InstallCommandLineHandler(MyCLHandler, "-nbs", "-nbs <map> <scenario> <hweight>", "NBS test");
+	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp", "NBS test on pancake");
+	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake", "NBS test on pancake");
+	InstallCommandLineHandler(MyCLHandler, "-toh", "-toh", "NBS test on TOH");
 	//const char *map, const char *scenario, double weight
 	InstallCommandLineHandler(MyCLHandler, "-heuristic", "-heuristic <dir> <1997/888/8210/none>", "Load the given heuristic");
 	InstallCommandLineHandler(MyCLHandler, "-problem", "-problem which", "Load the given problem");
@@ -369,12 +369,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		TestSTP();
 	}
-	else if (maxNumArgs > 2 && strcmp(argument[0], "-boba") == 0)
+	else if (maxNumArgs > 2 && strcmp(argument[0], "-nbs") == 0)
 	{
 		double weight = 1.0;
 		if (maxNumArgs > 3)
 			weight = atof(argument[3]);
-		AnalyzeBOBA(argument[1], argument[2], weight);
+		AnalyzeNBS(argument[1], argument[2], weight);
 		return 3;
 	}
 	else if (maxNumArgs > 2 && strcmp(argument[0], "-testPruning") == 0)

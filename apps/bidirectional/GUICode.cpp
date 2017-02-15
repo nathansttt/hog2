@@ -15,8 +15,8 @@
 #include "TemplateAStar.h"
 #include "MM.h"
 #include "SVGUtil.h"
-#include "BOBAQueueGF.h"
-#include "BOBA.h"
+#include "NBSQueueGF.h"
+#include "NBS.h"
 #include "BSStar.h"
 
 Map *map = 0;
@@ -41,7 +41,7 @@ ZeroHeuristic<xyLoc> *z = new ZeroHeuristic<xyLoc>;
 
 
 MM<xyLoc, tDirection, MapEnvironment> mm;
-BOBA<xyLoc, tDirection, MapEnvironment> boba;
+NBS<xyLoc, tDirection, MapEnvironment> nbs;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare;
 MM<xyLoc, tDirection, MapEnvironment> mm0;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare0;
@@ -274,9 +274,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			{
 				if (mmSearchRunning)
 				{
-					mmSearchRunning = !boba.DoSingleSearchStep(path);
+					mmSearchRunning = !nbs.DoSingleSearchStep(path);
 					if (!mmSearchRunning)
-						printf("BOBA*: %llu nodes expanded\n", boba.GetNodesExpanded());
+						printf("NBS*: %llu nodes expanded\n", nbs.GetNodesExpanded());
 				}
 			}
 			for (int x = 0; x < gStepsPerFrame; x++)
@@ -323,7 +323,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (searchRan)
 		{
 			if (viewport == 0)
-				boba.OpenGLDraw();
+				nbs.OpenGLDraw();
 			else if (viewport == 1)
 				compare.OpenGLDraw();
 			else if (viewport == 2)
@@ -428,7 +428,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 
 				compare0.SetHeuristic(z);
 				compare0.InitializeSearch(me, start, goal, path);
-				boba.InitializeSearch(me, start, goal, me, me, path);
+				nbs.InitializeSearch(me, start, goal, me, me, path);
 				bs.InitializeSearch(me, start, goal, me, me, path);
 				//mm.InitializeSearch(me, start, goal, z, z, path);
 				mm.InitializeSearch(me, start, goal, me, me, path);
@@ -906,11 +906,11 @@ void AnalyzeMap(const char *map, const char *scenario, double weight)
 	}
 }
 
-void AnalyzeBOBA(const char *map, const char *scenario, double weight)
+void AnalyzeNBS(const char *map, const char *scenario, double weight)
 {
-	BOBA<xyLoc, tDirection, MapEnvironment> boba;
+	NBS<xyLoc, tDirection, MapEnvironment> nbs;
 	BSStar<xyLoc, tDirection, MapEnvironment> bs;
-	//BOBA<xyLoc, tDirection, MapEnvironment, BOBAQueueGF<xyLoc>, BDOpenClosed<xyLoc, BOBAGLowHigh<xyLoc>, BOBAFLowHigh<xyLoc>>> boba;
+	//NBS<xyLoc, tDirection, MapEnvironment, NBSQueueGF<xyLoc>, BDOpenClosed<xyLoc, NBSGLowHigh<xyLoc>, NBSFLowHigh<xyLoc>>> nbs;
 	
 	MM<xyLoc, tDirection, MapEnvironment> mm;
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
@@ -936,35 +936,35 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 		std::cout << start << " to " << goal << "\n";
 		std::vector<xyLoc> correctPath;
 		std::vector<xyLoc> mmPath;
-		std::vector<xyLoc> bobaPath;
+		std::vector<xyLoc> nbsPath;
 		astar.SetHeuristic(me);
 		astar.InitializeSearch(me, start, goal, correctPath);
 
 		astar.GetPath(me, start, goal, correctPath);
 //		mm.GetPath(me, start, goal, me, me, mmPath);
-		boba.GetPath(me, start, goal, me, me, bobaPath);
-		bs.GetPath(me, start, goal, me, me, bobaPath);
-		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tBOBA:\t" << boba.GetNodesExpanded() << "\tBS*:\t" << bs.GetNodesExpanded() << "\n";
-		printf("BOBA* total\t%llu\tnecessary\t%llu\tdoubles\t%llu\t", boba.GetNodesExpanded(), boba.GetNecessaryExpansions(), boba.GetDoubleExpansions());
+		nbs.GetPath(me, start, goal, me, me, nbsPath);
+		bs.GetPath(me, start, goal, me, me, nbsPath);
+		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tNBS:\t" << nbs.GetNodesExpanded() << "\tBS*:\t" << bs.GetNodesExpanded() << "\n";
+		printf("NBS* total\t%llu\tnecessary\t%llu\tdoubles\t%llu\t", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetDoubleExpansions());
 		printf("A* total\t%llu\tnecessary\t%llu\tratio\t%1.3f\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),
-			   (double)boba.GetNecessaryExpansions()/astar.GetNecessaryExpansions());
+			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions());
 		//if (!fequal)
-		if (!fequal(me->GetPathLength(bobaPath), me->GetPathLength(correctPath)))
+		if (!fequal(me->GetPathLength(nbsPath), me->GetPathLength(correctPath)))
 		{
 			std::cout << "error solution cost:\t expected cost\n";
-			std::cout << me->GetPathLength(bobaPath) << "\t" << me->GetPathLength(correctPath) << "\n";
+			std::cout << me->GetPathLength(nbsPath) << "\t" << me->GetPathLength(correctPath) << "\n";
 			double d;
 			for (auto x : correctPath)
 			{
 				astar.GetClosedListGCost(x, d);
-				auto t = boba.GetNodeForwardLocation(x);
-				auto u = boba.GetNodeBackwardLocation(x);
+				auto t = nbs.GetNodeForwardLocation(x);
+				auto u = nbs.GetNodeBackwardLocation(x);
 				std::cout << x << " is on " << t << " and " << u << "\n";
 				std::cout << "True g: " << d;
 				if (t != kUnseen)
-					std::cout << " forward g: " << boba.GetNodeForwardG(x);
+					std::cout << " forward g: " << nbs.GetNodeForwardG(x);
 				if (u != kUnseen)
-					std::cout << " backward g: " << boba.GetNodeBackwardG(x);
+					std::cout << " backward g: " << nbs.GetNodeBackwardG(x);
 				std::cout << "\n";
 			}
 			exit(0);
@@ -978,7 +978,7 @@ void AnalyzeBOBA(const char *map, const char *scenario, double weight)
 #include "RubiksCube.h"
 void tmp()
 {
-	printf("---BOBA*---\n");
+	printf("---NBS*---\n");
 	Timer t;
 	RubiksCube cube;
 	RubiksState start, goal;
@@ -986,12 +986,12 @@ void tmp()
 	thePath.clear();
 	ZeroHeuristic<RubiksState> z;
 	t.StartTimer();
-	BOBA<RubiksState, RubiksAction, RubiksCube> boba;
-	boba.GetPath(&cube, start, goal, &z, &z, thePath);
+	NBS<RubiksState, RubiksAction, RubiksCube> nbs;
+	nbs.GetPath(&cube, start, goal, &z, &z, thePath);
 	
 	t.EndTimer();
-	printf("%llu nodes expanded\n", boba.GetNodesExpanded());
-	printf("%llu neccesary nodes expanded\n", boba.GetNecessaryExpansions());
+	printf("%llu nodes expanded\n", nbs.GetNodesExpanded());
+	printf("%llu neccesary nodes expanded\n", nbs.GetNecessaryExpansions());
 	printf("Solution path length %1.0f\n", cube.GetPathLength(thePath));
 	printf("%1.2f elapsed\n", t.GetElapsedTime());
 }

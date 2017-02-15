@@ -9,7 +9,7 @@
 #include "BidirPancake.h"
 #include "PancakePuzzle.h"
 #include "TemplateAStar.h"
-#include "BOBA.h"
+#include "NBS.h"
 #include "IDAStar.h"
 #include "MM.h"
 
@@ -29,12 +29,12 @@ void TestPancake()
 		PancakePuzzle<S> pancake(gap);
 		PancakePuzzle<S> pancake2(gap);
 		
-		BOBA<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> boba;
+		NBS<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> nbs;
 		MM<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> mm;
 		TemplateAStar<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> astar;
 		IDAStar<PancakePuzzleState<S>, PancakePuzzleAction> idastar;
 		
-		std::vector<PancakePuzzleState<S>> bobaPath;
+		std::vector<PancakePuzzleState<S>> nbsPath;
 		std::vector<PancakePuzzleState<S>> astarPath;
 		std::vector<PancakePuzzleState<S>> mmPath;
 		std::vector<PancakePuzzleAction> idaPath;
@@ -62,10 +62,10 @@ void TestPancake()
 		for (int x = 0; x < S; x++)
 			start.puzzle[x] = arrangement[x];
 		t2.StartTimer();
-		boba.GetPath(&pancake, start, goal, &pancake, &pancake2, bobaPath);
+		nbs.GetPath(&pancake, start, goal, &pancake, &pancake2, nbsPath);
 		t2.EndTimer();
-		printf("BOBA found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", pancake.GetPathLength(bobaPath),
-			   boba.GetNodesExpanded(), boba.GetNecessaryExpansions(), t2.GetElapsedTime());
+		printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", pancake.GetPathLength(nbsPath),
+			   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime());
 		
 		goal.Reset();
 		for (int x = 0; x < S; x++)
@@ -86,13 +86,13 @@ void TestPancake()
 		printf("MM found path length %1.0f; %llu expanded; %1.2fs elapsed\n", pancake.GetPathLength(mmPath),
 			   mm.GetNodesExpanded(), t4.GetElapsedTime());
 		
-		printf("Problem & IDA* & & A* & & MM & & BOBA* & \\\\\n");
+		printf("Problem & IDA* & & A* & & MM & & NBS* & \\\\\n");
 		printf("%d G-%d & %llu & %1.2fs & %llu & %1.2fs & %llu & %1.2fs & %llu & %1.2fs \\\\ \n", S, gap,
 			   idastar.GetNodesExpanded(), t3.GetElapsedTime(),
 			   astar.GetNodesExpanded(), t1.GetElapsedTime(),
 			   mm.GetNodesExpanded(), t4.GetElapsedTime(),
-			   boba.GetNodesExpanded(), t2.GetElapsedTime());
-//		std::cout << astar.GetNodesExpanded() << "\t" << boba.GetNodesExpanded() << "\t";
+			   nbs.GetNodesExpanded(), t2.GetElapsedTime());
+//		std::cout << astar.GetNodesExpanded() << "\t" << nbs.GetNodesExpanded() << "\t";
 //		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\n";
 	}
 	exit(0);

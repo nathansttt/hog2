@@ -9,7 +9,7 @@
 #include "BidirTOH.h"
 #include "TOH.h"
 #include "TemplateAStar.h"
-#include "BOBA.h"
+#include "NBS.h"
 #include "MM.h"
 
 template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
@@ -44,7 +44,7 @@ template <int N, int pdb1Disks>
 void TestTOH(int first, int last)
 {
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
-	BOBA<TOHState<N>, TOHMove, TOH<N>> boba;
+	NBS<TOHState<N>, TOHMove, TOH<N>> nbs;
 	MM<TOHState<N>, TOHMove, TOH<N>> mm;
 
 	TOH<N> toh;
@@ -83,10 +83,10 @@ void TestTOH(int first, int last)
 		{
 			printf("-=-=-BDS-=-=-\n");
 			timer.StartTimer();
-			boba.GetPath(&toh, s, g, f, b, thePath);
+			nbs.GetPath(&toh, s, g, f, b, thePath);
 			timer.EndTimer();
 			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-			printf("%llu nodes\t%llu necessary\t", boba.GetNodesExpanded(), boba.GetNecessaryExpansions());
+			printf("%llu nodes\t%llu necessary\t", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
 		if (1)
@@ -128,13 +128,14 @@ void TestTOH(int first, int last)
 
 void TOHTest()
 {
-	TestTOH<14, 4>(0, 50);
-	TestTOH<14, 5>(0, 50);
-	TestTOH<14, 6>(0, 50);
-	TestTOH<14, 7>(0, 50);
-	TestTOH<14, 8>(0, 50);
-	TestTOH<14, 9>(0, 50);
-	TestTOH<14, 10>(0, 50);
+	TestTOH<14, 2>(0, 50);
+//	TestTOH<14, 4>(0, 50);
+//	TestTOH<14, 5>(0, 50);
+//	TestTOH<14, 6>(0, 50);
+//	TestTOH<14, 7>(0, 50);
+//	TestTOH<14, 8>(0, 50);
+//	TestTOH<14, 9>(0, 50);
+//	TestTOH<14, 10>(0, 50);
 //	const int numDisks = 16; // [disks - 2] (4^14 - 256 million)
 //	const int pdb1Disks = 10;
 //	const int pdb2Disks = 6;
