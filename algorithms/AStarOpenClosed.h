@@ -74,6 +74,7 @@ public:
 	dataLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
 	inline dataStructure &Lookup(uint64_t objKey) { return elements[objKey]; }
 	inline const dataStructure &Lookat(uint64_t objKey) const { return elements[objKey]; }
+	void Remove(uint64_t hash);
 	uint64_t Peek() const;
 	uint64_t Close(uint64_t objKey);
 	uint64_t Close();
@@ -151,6 +152,22 @@ uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val
 		elements.back().parentID = elements.size()-1;
 	table[hash] = elements.size()-1; // hashing to element list location
 	return elements.size()-1;
+}
+
+/**
+ * Remove item from open/closed
+ */
+template<typename state, typename CmpKey, class dataStructure>
+void AStarOpenClosed<state, CmpKey, dataStructure>::Remove(uint64_t hash)
+{
+	uint64_t index = table[hash];
+	uint64_t openLoc = elements[index].openLocation;
+	uint64_t swappedItem = theHeap.back();
+	table.erase(table.find(hash));
+	theHeap[openLoc] = theHeap.back();
+	theHeap.pop_back();
+	elements[swappedItem].openLocation = openLoc;
+	KeyChanged(openLoc);
 }
 
 /**
