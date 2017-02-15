@@ -84,10 +84,6 @@ static std::ostream& operator <<(std::ostream & out, const slideDir &loc)
 template <int width, int height>
 static bool operator==(const MNPuzzleState<width, height> &l1, const MNPuzzleState<width, height> &l2)
 {
-//	if (l1.width != l2.width)
-//		return false;
-//	if (l1.height != l2.height)
-//		return false;
 	for (unsigned int x = 0; x < l1.size(); x++)
 	{
 		if (l1.puzzle[x] > 0 || l2.puzzle[x] > 0) // don't have to check the blank
@@ -96,6 +92,13 @@ static bool operator==(const MNPuzzleState<width, height> &l1, const MNPuzzleSta
 	}
 	return true;
 }
+
+template <int width, int height>
+static bool operator!=(const MNPuzzleState<width, height> &l1, const MNPuzzleState<width, height> &l2)
+{
+	return !(l1 == l2);
+}
+
 
 template <int width, int height>
 class MNPuzzle : public PermutationPuzzle::PermutationPuzzleEnvironment<MNPuzzleState<width, height>, slideDir> {
