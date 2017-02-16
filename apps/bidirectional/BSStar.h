@@ -175,13 +175,13 @@ void BSStar<state, action, environment, priorityQueue>::Expand(priorityQueue &cu
 {
 	uint64_t nextID;
 	
-	do {
+	while (true) {
 		nextID = current.Close();
 		uint64_t reverseLoc;
 		auto loc = opposite.Lookup(env->GetStateHash(current.Lookup(nextID).data), reverseLoc);
-		if (loc == kClosedList)
-			continue;
-	} while (false);
+		if (loc != kClosedList)
+			break;
+	}
 	
 	// 1. if current closed in opposite direction
 	// 1a. Remove descendents of current in open
