@@ -161,7 +161,7 @@ bool BSStar<state, action, environment, priorityQueue>::DoSingleSearchStep(std::
 		return true;
 	}
 	
-	if (forwardQueue.size() > backwardQueue.size())
+	if (forwardQueue.OpenSize() > backwardQueue.OpenSize())
 		Expand(backwardQueue, forwardQueue, backwardHeuristic, start);
 	else
 		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal);
