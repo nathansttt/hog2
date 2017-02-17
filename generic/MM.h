@@ -73,7 +73,7 @@ public:
 	uint64_t GetUniqueNodesExpanded() const { return uniqueNodesExpanded; }
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
-	
+	uint64_t GetNecessaryExpansions() const;
 	//void FullBPMX(uint64_t nodeID, int distance);
 	
 	void OpenGLDraw() const;
@@ -165,6 +165,7 @@ private:
 
 	double oldp1;
 	double oldp2;
+	bool recheckPath;
 };
 
 template <class state, class action, class environment, class priorityQueue>
@@ -202,6 +203,7 @@ bool MM<state, action, environment, priorityQueue>::InitializeSearch(environment
 	backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start));
 	f.clear();
 	b.clear();
+	recheckPath = false;
 	return true;
 }
 
@@ -269,8 +271,9 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 		}
 	}
 	// check if we can terminate
-	if (fless(currentCost, DBL_MAX))
+	if (recheckPath)
 	{
+		recheckPath = false;
 		// TODO: make this more efficient
 		double minForwardG = DBL_MAX;
 		double minBackwardG = DBL_MAX;
@@ -381,9 +384,11 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 	// decrease count from parent
 	{
 		auto &parentData = current.Lookup(nextID);
-//		ming[parentData.g]--;
-//		minf[parentData.g+parentData.h]--;
 		count[{parentData.g,parentData.h}]--;
+		if (count[{parentData.g,parentData.h}] == 0 && currentCost < DBL_MAX)
+		{
+			recheckPath = true;
+		}
 	}
 
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
@@ -405,8 +410,6 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 					childData.h = std::max(childData.h, parentData.h-edgeCost);
 					childData.parentID = nextID;
 					childData.g = parentData.g+edgeCost;
-//					ming[childData.g]++;
-//					minf[childData.g+childData.h]++;
 					count[{childData.g,childData.h}]++;
 					dist[{childData.g,childData.h}]++;
 					current.Reopen(childID);
@@ -429,15 +432,11 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 				}
 				if (fless(parentData.g+edgeCost, childData.g))
 				{
-//					ming[childData.g]--;
-//					minf[childData.g+childData.h]--;
 					count[{childData.g,childData.h}]--;
 					dist[{childData.g,childData.h}]--;
 					childData.parentID = nextID;
 					childData.g = parentData.g+edgeCost;
 					current.KeyChanged(childID);
-//					ming[childData.g]++;
-//					minf[childData.g+childData.h]++;
 					count[{childData.g,childData.h}]++;
 					dist[{childData.g,childData.h}]++;
 					
@@ -449,6 +448,7 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 					{
 						if (fless(parentData.g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
+							recheckPath = true;
 							// TODO: store current solution
 //							printf("Potential updated solution found, cost: %1.2f + %1.2f = %1.2f\n",
 //								   parentData.g+edgeCost,
@@ -491,6 +491,7 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 				{
 					if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 					{
+						recheckPath = true;
 						// TODO: store current solution
 //						printf("Potential solution found, cost: %1.2f + %1.2f = %1.2f\n",
 //							   current.Lookup(nextID).g+edgeCost,
@@ -505,6 +506,25 @@ void MM<state, action, environment, priorityQueue>::Expand(priorityQueue &curren
 			}
 		}
 	}
+}
+
+template <class state, class action, class environment, class priorityQueue>
+uint64_t MM<state, action, environment, priorityQueue>::GetNecessaryExpansions() const
+{
+	uint64_t count = 0;
+	for (unsigned int x = 0; x < forwardQueue.size(); x++)
+	{
+		const AStarOpenClosedData<state> &data = forwardQueue.Lookat(x);
+		if ((data.where == kClosedList) && (fless(data.g+data.h, currentCost)))
+			count++;
+	}
+	for (unsigned int x = 0; x < backwardQueue.size(); x++)
+	{
+		const AStarOpenClosedData<state> &data = backwardQueue.Lookat(x);
+		if ((data.where == kClosedList) && (fless(data.g+data.h, currentCost)))
+			count++;
+	}
+	return count;
 }
 
 template <class state, class action, class environment, class priorityQueue>

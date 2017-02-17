@@ -11,6 +11,7 @@
 #include "GUICode.h"
 #include "ScenarioLoader.h"
 #include "Map2DEnvironment.h"
+#include "MapGenerators.h"
 #include "MapOverlay.h"
 #include "TemplateAStar.h"
 #include "MM.h"
@@ -87,6 +88,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyKeyboardHandler, "Record", "Start/stop recording movie", kNoModifier, 'r');
 	InstallKeyboardHandler(MyKeyboardHandler, "Draw", "Toggle drawing search", kNoModifier, 'd');
 	InstallKeyboardHandler(MyKeyboardHandler, "Pause", "Toggle pause", kNoModifier, 'p');
+	InstallKeyboardHandler(MyKeyboardHandler, "Step", "Single algorithm step", kNoModifier, 'o');
 	InstallKeyboardHandler(MyKeyboardHandler, "Single Viewport", "Set to use a single viewport", kNoModifier, '1');
 	InstallKeyboardHandler(MyKeyboardHandler, "Two Viewports", "Set to use two viewports", kNoModifier, '2');
 	InstallKeyboardHandler(MyKeyboardHandler, "Three Viewports", "Set to use three viewports", kNoModifier, '3');
@@ -115,8 +117,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		
 		delete map;
 		delete me;
+		//		map = new Map("/Users/nathanst/hog2/maps/dao/brc000d.map");
 //		map = new Map("/Users/nathanst/hog2/maps/dao/brc000d.map");
-		map = new Map("/Users/nathanst/hog2/maps/dao/brc203d.map");
+//		map = new Map("/Users/nathanst/hog2/maps/dao/brc203d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/w_woundedcoast.map");
@@ -127,12 +130,71 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 		//map = new Map("/Users/nathanst/hog2/maps/rooms/8room_000.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-16-0.map");
+		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-1-0.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
+		{
+			map = new Map(128,128);
+			MakeMaze(map, 1);
+		}
+		
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
 		me->SetDiagonalCost(1.5);
 	}
 	
+}
+
+void StepAlgorithms()
+{
+	for (int x = 0; x < gStepsPerFrame/2; x++)
+	{
+		if (mmSearchRunning)
+		{
+			mmSearchRunning = !nbs.DoSingleSearchStep(path);
+			if (!mmSearchRunning)
+				printf("NBS*: %llu nodes expanded\n", nbs.GetNodesExpanded());
+		}
+	}
+	for (int x = 0; x < gStepsPerFrame; x++)
+	{
+		if (mm0SearchRunning)
+		{
+			mm0SearchRunning = !mm0.DoSingleSearchStep(path);
+			if (!mm0SearchRunning)
+				printf("MM0: %llu nodes expanded\n", mm0.GetNodesExpanded());
+		}
+	}
+	for (int x = 0; x < gStepsPerFrame; x++)
+	{
+		if (bsSearchRunning)
+		{
+			bsSearchRunning = !bs.DoSingleSearchStep(path);
+			if (!bsSearchRunning)
+				printf("BS*: %llu nodes expanded\n", bs.GetNodesExpanded());
+		}
+	}
+	for (int x = 0; x < gStepsPerFrame; x++)
+	{
+		if (compareSearchRunning)
+		{
+			compareSearchRunning = !compare.DoSingleSearchStep(path);
+			if (!compareSearchRunning)
+			{
+				printf("A*: %llu nodes expanded const %1.1f\n", compare.GetNodesExpanded(), me->GetPathLength(path));
+			}
+		}
+	}
+	for (int x = 0; x < gStepsPerFrame; x++)
+	{
+		if (compare0SearchRunning)
+		{
+			compare0SearchRunning = !compare0.DoSingleSearchStep(path);
+			if (!compare0SearchRunning)
+			{
+				printf("BFS: %llu nodes expanded const %1.1f\n", compare0.GetNodesExpanded(), me->GetPathLength(path));
+			}
+		}
+	}
 }
 
 void MyKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key)
@@ -153,6 +215,11 @@ void MyKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key)
 		case 'p':
 		{
 			paused = !paused;
+			break;
+		}
+		case 'o':
+		{
+			StepAlgorithms();
 			break;
 		}
 		case 'd':
@@ -270,55 +337,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		if (!paused)
 		{
-			for (int x = 0; x < gStepsPerFrame/2; x++)
-			{
-				if (mmSearchRunning)
-				{
-					mmSearchRunning = !nbs.DoSingleSearchStep(path);
-					if (!mmSearchRunning)
-						printf("NBS*: %llu nodes expanded\n", nbs.GetNodesExpanded());
-				}
-			}
-			for (int x = 0; x < gStepsPerFrame; x++)
-			{
-				if (mm0SearchRunning)
-				{
-					mm0SearchRunning = !mm0.DoSingleSearchStep(path);
-					if (!mm0SearchRunning)
-						printf("MM0: %llu nodes expanded\n", mm0.GetNodesExpanded());
-				}
-			}
-			for (int x = 0; x < gStepsPerFrame; x++)
-			{
-				if (bsSearchRunning)
-				{
-					bsSearchRunning = !bs.DoSingleSearchStep(path);
-					if (!bsSearchRunning)
-						printf("BS*: %llu nodes expanded\n", bs.GetNodesExpanded());
-				}
-			}
-			for (int x = 0; x < gStepsPerFrame; x++)
-			{
-				if (compareSearchRunning)
-				{
-					compareSearchRunning = !compare.DoSingleSearchStep(path);
-					if (!compareSearchRunning)
-					{
-						printf("A*: %llu nodes expanded const %1.1f\n", compare.GetNodesExpanded(), me->GetPathLength(path));
-					}
-				}
-			}
-			for (int x = 0; x < gStepsPerFrame; x++)
-			{
-				if (compare0SearchRunning)
-				{
-					compare0SearchRunning = !compare0.DoSingleSearchStep(path);
-					if (!compare0SearchRunning)
-					{
-						printf("BFS: %llu nodes expanded const %1.1f\n", compare0.GetNodesExpanded(), me->GetPathLength(path));
-					}
-				}
-			}
+			StepAlgorithms();
 		}
 		if (searchRan)
 		{
@@ -363,7 +382,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 			case kMiddleButton: printf("Middle button\n"); break;
 		}
 	}
-	if (button != kRightButton)
+	if (button != kLeftButton)
 		return false;
 	switch (mType)
 	{
@@ -404,10 +423,10 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //
 //				//102, 170) to (82, 11 //  100, 192) to (106, 60
 //101, 143) to (93, 155
-				start.x = 101;
-				start.y = 143;
-				goal.x = 93;
-				goal.y = 155;
+//				start.x = 101;
+//				start.y = 143;
+//				goal.x = 93;
+//				goal.y = 155;
 				
 //				start.x = 75;
 //				start.y = 33;
@@ -422,7 +441,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				
 				mouseTracking = false;
 				//SetupMapOverlay();
-				SetNumPorts(windowID, 2);
+				SetNumPorts(windowID, 3);
 				compare.SetHeuristic(me);
 				compare.InitializeSearch(me, start, goal, path);
 
@@ -913,6 +932,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 	//NBS<xyLoc, tDirection, MapEnvironment, NBSQueueGF<xyLoc>, BDOpenClosed<xyLoc, NBSGLowHigh<xyLoc>, NBSFLowHigh<xyLoc>>> nbs;
 	
 	MM<xyLoc, tDirection, MapEnvironment> mm;
+	MM<xyLoc, tDirection, MapEnvironment> mm0;
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 	
 	printf("Loading %s with scenario %s\n", map, scenario);
@@ -921,7 +941,8 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 	me = new MapEnvironment(m);
 	me->SetDiagonalCost(1.5);
 //	me->SetDiagonalCost(ROOT_TWO);
-
+	Timer t;
+	ZeroHeuristic<xyLoc> z;
 	// 406 is bad!
 	for (int x = s.GetNumExperiments()-1; x >= 0; x--) // 547 to 540
 	{
@@ -936,18 +957,41 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 		std::cout << start << " to " << goal << "\n";
 		std::vector<xyLoc> correctPath;
 		std::vector<xyLoc> mmPath;
+		std::vector<xyLoc> mm0Path;
 		std::vector<xyLoc> nbsPath;
+		std::vector<xyLoc> bsPath;
 		astar.SetHeuristic(me);
-		astar.InitializeSearch(me, start, goal, correctPath);
 
 		astar.GetPath(me, start, goal, correctPath);
-//		mm.GetPath(me, start, goal, me, me, mmPath);
+		printf("%d %1.1f A* nodes: %llu necessary %llu\n", x, me->GetPathLength(correctPath), astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
+		bs.GetPath(me, start, goal, me, me, bsPath);
+		printf("%d %1.1f BS nodes: %llu necessary %llu\n", x, me->GetPathLength(bsPath), bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
+		mm.GetPath(me, start, goal, me, me, mmPath);
+		printf("%d %1.1f MM nodes: %llu necessary %llu\n", x, me->GetPathLength(mmPath), mm.GetNodesExpanded(), mm.GetNecessaryExpansions());
 		nbs.GetPath(me, start, goal, me, me, nbsPath);
-		bs.GetPath(me, start, goal, me, me, nbsPath);
-		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tNBS:\t" << nbs.GetNodesExpanded() << "\tBS*:\t" << bs.GetNodesExpanded() << "\n";
-		printf("NBS* total\t%llu\tnecessary\t%llu\tdoubles\t%llu\t", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetDoubleExpansions());
-		printf("A* total\t%llu\tnecessary\t%llu\tratio\t%1.3f\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),
-			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions());
+		printf("%d %1.1f NBS nodes: %llu necessary %llu\n", x, me->GetPathLength(nbsPath), nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
+		mm0.GetPath(me, start, goal, &z, &z, mm0Path);
+		printf("%d %1.1f MM0 nodes: %llu necessary %llu\n", x, me->GetPathLength(mm0Path), mm0.GetNodesExpanded(), mm0.GetNecessaryExpansions());
+
+		printf("NBSNecessaryRatios: NBS/A* %1.2f NBS/BS %1.2f NBS/MM %1.2f NBS/MM0 %1.2f\n",
+			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions(),
+			   (double)nbs.GetNecessaryExpansions()/bs.GetNecessaryExpansions(),
+			   (double)nbs.GetNecessaryExpansions()/mm.GetNecessaryExpansions(),
+			   (double)nbs.GetNecessaryExpansions()/mm0.GetNecessaryExpansions()
+			   );
+		printf("SelfNecessaryRatios: A* %1.2f BS %1.2f MM %1.2f NBS %1.2f MM0 %1.2f\n",
+			   (double)astar.GetNodesExpanded()/astar.GetNecessaryExpansions(),
+			   (double)bs.GetNodesExpanded()/bs.GetNecessaryExpansions(),
+			   (double)mm.GetNodesExpanded()/mm.GetNecessaryExpansions(),
+			   (double)nbs.GetNodesExpanded()/nbs.GetNecessaryExpansions(),
+			   (double)mm0.GetNodesExpanded()/mm0.GetNecessaryExpansions()
+			   );
+
+//		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tNBS:\t" << nbs.GetNodesExpanded() << "\tBS*:\t" << bs.GetNodesExpanded();
+//		std::cout << "\tMM:\t" << mm.GetNodesExpanded() << "\n";
+//		printf("NBS* total\t%llu\tnecessary\t%llu\tdoubles\t%llu\t", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetDoubleExpansions());
+//		printf("A* total\t%llu\tnecessary\t%llu\tratio\t%1.3f\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),
+//			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions());
 		//if (!fequal)
 		if (!fequal(me->GetPathLength(nbsPath), me->GetPathLength(correctPath)))
 		{

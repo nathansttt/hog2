@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 	InstallCommandLineHandler(MyCLHandler, "-pida", "-pida", "Run MM");
 	InstallCommandLineHandler(MyCLHandler, "-grid", "-grid <map> <scenario> <hweight>", "MM/A* region analysis");
 	InstallCommandLineHandler(MyCLHandler, "-nbs", "-nbs <map> <scenario> <hweight>", "NBS test");
-	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp", "NBS test on pancake");
+	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp <alg>", "A*/BS*/MM/NBS/MM0 test on 15 puzzle 100 korf instances");
 	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake", "NBS test on pancake");
 	InstallCommandLineHandler(MyCLHandler, "-toh", "-toh", "NBS test on TOH");
 	//const char *map, const char *scenario, double weight
@@ -365,9 +365,9 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		AnalyzeMap(argument[1], argument[2], weight);
 		return 3;
 	}
-	else if (strcmp(argument[0], "-stp") == 0)
+	else if (strcmp(argument[0], "-stp") == 0 && maxNumArgs > 1)
 	{
-		TestSTP();
+		TestSTP(atoi(argument[1]));
 	}
 	else if (maxNumArgs > 2 && strcmp(argument[0], "-nbs") == 0)
 	{

@@ -52,7 +52,8 @@ public:
 	uint64_t GetUniqueNodesExpanded() const { return uniqueNodesExpanded; }
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
-	
+	uint64_t GetNecessaryExpansions() const;
+
 	void OpenGLDraw() const;
 	
 	//	void SetWeight(double w) {weight = w;}
@@ -379,6 +380,25 @@ void BSStar<state, action, environment, priorityQueue>::Trim()
 		}
 	}
 
+}
+
+template <class state, class action, class environment, class priorityQueue>
+uint64_t BSStar<state, action, environment, priorityQueue>::GetNecessaryExpansions() const
+{
+	uint64_t count = 0;
+	for (unsigned int x = 0; x < forwardQueue.size(); x++)
+	{
+		const AStarOpenClosedData<state> &data = forwardQueue.Lookat(x);
+		if ((data.where == kClosedList) && (fless(data.g+data.h, currentCost)))
+			count++;
+	}
+	for (unsigned int x = 0; x < backwardQueue.size(); x++)
+	{
+		const AStarOpenClosedData<state> &data = backwardQueue.Lookat(x);
+		if ((data.where == kClosedList) && (fless(data.g+data.h, currentCost)))
+			count++;
+	}
+	return count;
 }
 
 template <class state, class action, class environment, class priorityQueue>
