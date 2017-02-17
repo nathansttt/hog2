@@ -172,7 +172,7 @@ void TestSTP(int algorithm)
 			goal.Reset();
 			start = GetKorfInstance(x);
 			t2.StartTimer();
-			//mm.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
+			mm.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
 			t2.EndTimer();
 			printf("MM found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
 				   mm.GetNodesExpanded(), mm.GetNecessaryExpansions(), mm.GetNodesTouched(), t2.GetElapsedTime());
