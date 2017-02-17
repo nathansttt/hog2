@@ -197,157 +197,6 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::InitializeSe
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
 bool NBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(std::vector<state> &thePath)
 {
-//	if (queue.forwardQueue.OpenSize() == 0 || queue.backwardQueue.OpenSize() == 0)
-//	{
-//		//		printf("No more pairs, terminate! (%f)\n", currentCost);
-//		if (currentCost != DBL_MAX)
-//		{
-//			std::vector<state> pFor, pBack;
-//			ExtractPathToGoal(middleNode, pBack);
-//			ExtractPathToStart(middleNode, pFor);
-//			reverse(pFor.begin(), pFor.end());
-//			thePath = pFor;
-//			thePath.insert( thePath.end(), pBack.begin()+1, pBack.end() );
-//		}
-//		return true;
-//	}
-//	
-//	uint64_t nextIDForward;
-//	uint64_t nextIDBackward;
-//	BDOpenClosedData<state> iFReady, iBReady, iFWaiting, iBWaiting;
-//	
-//	if (queue.forwardQueue.OpenReadySize() == 0)
-//		queue.forwardQueue.PutToReady();
-//	if (queue.backwardQueue.OpenReadySize() == 0)
-//		queue.backwardQueue.PutToReady();
-//	
-//	if (queue.forwardQueue.OpenWaitingSize() > 0)
-//	{
-//		iFWaiting = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenWaiting));
-//		while (iFWaiting.g+iFWaiting.h < currentSolutionEstimate)
-//		{
-//			queue.forwardQueue.PutToReady();
-//			if (queue.forwardQueue.OpenWaitingSize()  == 0)
-//				break;
-//			iFWaiting = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenWaiting));
-//		}
-//	}
-//	if (queue.backwardQueue.OpenWaitingSize() > 0)
-//	{
-//		iBWaiting = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenWaiting));
-//		while (iBWaiting.g+iBWaiting.h < currentSolutionEstimate)
-//		{
-//			queue.backwardQueue.PutToReady();
-//			if (queue.backwardQueue.OpenWaitingSize()  == 0)
-//				break;
-//			iBWaiting = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenWaiting));
-//		}
-//	}
-//	
-//	iFReady = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenReady));
-//	iBReady = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenReady));
-//	
-//	if (queue.forwardQueue.OpenWaitingSize() != 0 || queue.backwardQueue.OpenWaitingSize() != 0)
-//	{
-//		double fBound, gBound;
-//		
-//		gBound = iFReady.g + iBReady.g + EPSILON;
-//		if (queue.forwardQueue.OpenWaitingSize() == 0)
-//		{
-//			iBWaiting = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenWaiting));
-//			fBound = iBWaiting.g + iBWaiting.h;
-//		}
-//		else if (queue.backwardQueue.OpenWaitingSize() == 0)
-//		{
-//			iFWaiting = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenWaiting));
-//			fBound = iFWaiting.g + iFWaiting.h;
-//		}
-//		else//queue.forwardQueue.OpenWaitingSize() > 0 && queue.backwardQueue.OpenWaitingSize() > 0
-//		{
-//			iFWaiting = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenWaiting));
-//			iBWaiting = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenWaiting));
-//			fBound = std::min(iFWaiting.g + iFWaiting.h, iBWaiting.g + iBWaiting.h);
-//		}
-//		
-//		while (fgreater(gBound, fBound))
-//		{
-//			if (queue.forwardQueue.OpenWaitingSize() == 0)
-//				queue.backwardQueue.PutToReady();
-//			else if (queue.backwardQueue.OpenWaitingSize() == 0)
-//				queue.forwardQueue.PutToReady();
-//			else
-//			{
-//				nextIDForward = queue.forwardQueue.Peek(kOpenWaiting);
-//				nextIDBackward = queue.backwardQueue.Peek(kOpenWaiting);
-//				auto iF = queue.forwardQueue.Lookat(nextIDForward);
-//				auto iB = queue.backwardQueue.Lookat(nextIDBackward);
-//				if (fless(iF.g + iF.h, iB.g + iB.h))
-//					queue.forwardQueue.PutToReady();
-//				else
-//					queue.backwardQueue.PutToReady();
-//			}
-//			
-//			if (queue.forwardQueue.OpenWaitingSize() == 0 && queue.backwardQueue.OpenWaitingSize() == 0)
-//				break;
-//			else if (queue.forwardQueue.OpenWaitingSize() == 0)
-//			{
-//				iBWaiting = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenWaiting));
-//				
-//				fBound = iBWaiting.g + iBWaiting.h;
-//			}
-//			else if (queue.backwardQueue.OpenWaitingSize() == 0)
-//			{
-//				iFWaiting = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenWaiting));
-//				fBound = iFWaiting.g + iFWaiting.h;
-//			}
-//			else //queue.forwardQueue.OpenWaitingSize() > 0 && queue.backwardQueue.OpenWaitingSize() > 0
-//			{
-//				iFWaiting = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenWaiting));
-//				iBWaiting = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenWaiting));
-//				
-//				fBound = std::min(iFWaiting.g + iFWaiting.h, iBWaiting.g + iBWaiting.h);
-//				//TODO epsilon
-//			}
-//			iFReady = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenReady));
-//			iBReady = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenReady));
-//			gBound = iFReady.g + iBReady.g + EPSILON;
-//		}
-//		currentSolutionEstimate = fBound;
-//		iFReady = queue.forwardQueue.Lookat(queue.forwardQueue.Peek(kOpenReady));
-//		iBReady = queue.backwardQueue.Lookat(queue.backwardQueue.Peek(kOpenReady));
-//	}
-//	
-//	
-//	if (iFReady.data == iBReady.data) // terminate - fronts equal
-//	{
-//		if (currentCost != DBL_MAX)
-//		{
-//			std::vector<state> pFor, pBack;
-//			ExtractPathToGoal(middleNode, pBack);
-//			ExtractPathToStart(middleNode, pFor);
-//			reverse(pFor.begin(), pFor.end());
-//			thePath = pFor;
-//			thePath.insert( thePath.end(), pBack.begin()+1, pBack.end() );
-//		}
-//		return true;
-//	}
-//	double minPr = std::max(iFReady.g + iFReady.h, iBReady.g + iBReady.h);
-//	minPr = std::max(minPr, iFReady.g + iBReady.g + EPSILON);
-//	if (!fless(minPr, currentCost)) // terminate - priority >= incumbant solution
-//	{
-//		if (currentCost != DBL_MAX)
-//		{
-//			std::vector<state> pFor, pBack;
-//			ExtractPathToGoal(middleNode, pBack);
-//			ExtractPathToStart(middleNode, pFor);
-//			reverse(pFor.begin(), pFor.end());
-//			thePath = pFor;
-//			thePath.insert( thePath.end(), pBack.begin()+1, pBack.end() );
-//		}
-//		return true;
-//	}
-//	counts[minPr]+=2; // 2 expansions
-	//printf("Expanding F_f = %f; F_b = %f; g+g+epsilon=%f\n", iFReady.g+iFReady.h, iBReady.g + iBReady.h, iFReady.g + iBReady.g + EPSILON);
 	uint64_t nForward, nBackward;
 	bool result = queue.GetNextPair(nForward, nBackward);
 	// if failed, see if we have optimal path (but return)
@@ -371,16 +220,11 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(
 		ExtractFromMiddle(thePath);
 		return true;
 	}
-	// else expand both
-	//	Expand(nForward, kForward);
-	//	Expand(nForward, kBackward);
 	
 	counts[queue.GetLowerBound()]+=2;
 	Expand(nForward, queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
 	Expand(nBackward, queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
 	return false;
-	
-	
 }
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
@@ -419,14 +263,6 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 		return;
 	
 	nodesExpanded++;
-	//	if (current.Lookup(nextID).data.x == 201 &&
-	//		(current.Lookup(nextID).data.y == 135 || current.Lookup(nextID).data.y == 136 || current.Lookup(nextID).data.y == 134))
-	//	{
-	//		printf("Expanding (%d, %d)\n", current.Lookup(nextID).data.x, current.Lookup(nextID).data.y);
-	//	}
-	//	else if (&current == &queue.backwardQueue){
-	//		printf("Next f: %f g: %f\n", current.Lookup(nextID).g+current.Lookup(nextID).h, current.Lookup(nextID).g);
-	//	}
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
 	for (auto &succ : neighbors)
 	{
@@ -473,9 +309,6 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 					}
 					else if (loc == kClosed)
 					{
-						//current.Lookup(childID).h = opposite.Lookup(reverseLoc).g;
-						//current.Lookup(childID).g = 100000;
-						//current.KeyChanged(childID);
 						current.Remove(childID);
 					}
 				}
@@ -514,30 +347,6 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 												current.Lookup(nextID).g + edgeCost,
 												heuristic->HCost(succ, target),
 												nextID, kOpenWaiting);
-						//						if (succ.x == 201 &&
-						//							succ.y == 136)
-						//						{
-						//							printf("(201, 136) added with %f + %f = %f\n",
-						//								   current.Lookup(nextID).g + edgeCost,
-						//								   heuristic->HCost(succ, target),
-						//								   current.Lookup(nextID).g + edgeCost+heuristic->HCost(succ, target));
-						//						}
-						//						if (succ.x == 201 &&
-						//							succ.y == 135)
-						//						{
-						//							printf("(201, 135) added with %f + %f = %f\n",
-						//								   current.Lookup(nextID).g + edgeCost,
-						//								   heuristic->HCost(succ, target),
-						//								   current.Lookup(nextID).g + edgeCost+heuristic->HCost(succ, target));
-						//						}
-						//						if (succ.x == 201 &&
-						//							succ.y == 134)
-						//						{
-						//							printf("(201, 134) added with %f + %f = %f\n",
-						//								   current.Lookup(nextID).g + edgeCost,
-						//								   heuristic->HCost(succ, target),
-						//								   current.Lookup(nextID).g + edgeCost+heuristic->HCost(succ, target));
-						//						}
 					}
 					if (loc == kOpenReady || loc == kOpenWaiting)
 					{
