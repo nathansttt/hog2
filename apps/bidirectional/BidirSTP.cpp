@@ -128,7 +128,7 @@ MNPuzzleState<4, 4> GetKorfInstance(int which)
 	return s;
 }
 
-void TestSTP()
+void TestSTP(int algorithm)
 {
 	NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> nbs;
 	MM<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> mm;
@@ -147,7 +147,7 @@ void TestSTP()
 		Timer t1, t2;
 		
 		
-		// A*
+		if (algorithm == 0) // A*
 		{
 			goal.Reset();
 			start = GetKorfInstance(x);
@@ -157,7 +157,27 @@ void TestSTP()
 			printf("A* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(astarPath),
 				   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), astar.GetNodesTouched(), t1.GetElapsedTime());
 		}
-		// NBS
+		if (algorithm == 1) // BS*
+		{
+			goal.Reset();
+			start = GetKorfInstance(x);
+			t2.StartTimer();
+			bs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
+			t2.EndTimer();
+			printf("BS* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
+				   bs.GetNodesExpanded(), bs.GetNecessaryExpansions(), bs.GetNodesTouched(), t2.GetElapsedTime());
+		}
+		if (algorithm == 2) // MM
+		{
+			goal.Reset();
+			start = GetKorfInstance(x);
+			t2.StartTimer();
+			//mm.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
+			t2.EndTimer();
+			printf("MM found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
+				   mm.GetNodesExpanded(), mm.GetNecessaryExpansions(), mm.GetNodesTouched(), t2.GetElapsedTime());
+		}
+		if (algorithm == 3) // NBS
 		{
 			goal.Reset();
 			start = GetKorfInstance(x);
@@ -167,30 +187,21 @@ void TestSTP()
 			printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t2.GetElapsedTime());
 		}
-		// MM
+		if (algorithm == 4) // MM0
 		{
+			ZeroHeuristic<MNPuzzleState<4,4>> z;
 			goal.Reset();
 			start = GetKorfInstance(x);
 			t2.StartTimer();
-			//mm.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
+			mm.GetPath(&mnp, start, goal, &z, &z, nbsPath);
 			t2.EndTimer();
 			printf("MM found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
-				   mm.GetNodesExpanded(), 0ull, mm.GetNodesTouched(), t2.GetElapsedTime());
-		}
-		// BS*
-		{
-			goal.Reset();
-			start = GetKorfInstance(x);
-			t2.StartTimer();
-			bs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
-			t2.EndTimer();
-			printf("BS* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
-				   bs.GetNodesExpanded(), 0ull, bs.GetNodesTouched(), t2.GetElapsedTime());
+				   mm.GetNodesExpanded(), mm.GetNecessaryExpansions(), mm.GetNodesTouched(), t2.GetElapsedTime());
 		}
 		
-		
-		std::cout << astar.GetNodesExpanded() << "\t" << nbs.GetNodesExpanded() << "\t";
-		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\n";
+//		
+//		std::cout << astar.GetNodesExpanded() << "\t" << nbs.GetNodesExpanded() << "\t";
+//		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\n";
 	}
 	exit(0);
 }
