@@ -58,7 +58,8 @@ public:
 	//	void SetWeight(double w) {weight = w;}
 private:
 	void Trim();
-	
+	void Nip(const state &, priorityQueue &reverse);
+
 	void ExtractPathToGoal(state &node, std::vector<state> &thePath)
 	{ uint64_t theID; backwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToGoalFromID(theID, thePath); }
 	void ExtractPathToGoalFromID(uint64_t node, std::vector<state> &thePath)
@@ -185,42 +186,15 @@ void BSStar<state, action, environment, priorityQueue>::Expand(priorityQueue &cu
 			success = true;
 			break;
 		}
+		// We are doing this lazily. It isn't clear from the BS* paper what it means to remove the
+		// descendants. If you have an explicit graph it is handled differently than when the states
+		// only exist in open/closed.
+//		// 1. if current closed in opposite direction
+//		// 1a. Remove descendents of current in open
+//		Nip(current.Lookup(nextID).data, opposite);
 	}
 	if (!success)
 		return;
-	// 1. if current closed in opposite direction
-	// 1a. Remove descendents of current in open
-	{
-		// This is done lazily as the search proceeds.
-//		{
-//			env->GetSuccessors(current.Lookup(nextID).data, neighbors);
-//			for (auto &succ : neighbors)
-//			{
-//				nodesTouched++;
-//				uint64_t childID;
-//				uint64_t hash = env->GetStateHash(succ);
-//				auto loc = current.Lookup(hash, childID);
-//				auto &childData = current.Lookup(childID);
-//				auto &parentData = current.Lookup(nextID);
-//				
-//				double edgeCost = env->GCost(parentData.data, succ);
-//				if (loc == kOpenList)
-//				{
-//					if (fgreater(parentData.h-edgeCost, childData.h))
-//					{
-//						childData.h = parentData.h-edgeCost;
-//					}
-//					if (fless(parentData.g+edgeCost, childData.g))
-//					{
-//						childData.parentID = nextID;
-//						childData.g = parentData.g+edgeCost;
-//						current.KeyChanged(childID);
-//					}
-//				}
-//			}
-//		}
-//		return;
-	}
 	
 	// 2. Else expand as usual on current direction
 	// 2a. Check for bidirectional solution
@@ -329,6 +303,59 @@ void BSStar<state, action, environment, priorityQueue>::Expand(priorityQueue &cu
 	
 	if (foundBetterSolution)
 		Trim();
+}
+
+template <class state, class action, class environment, class priorityQueue>
+void BSStar<state, action, environment, priorityQueue>::Nip(const state &s, priorityQueue &queue)
+{
+	assert(!"Not using this code currently - the correct implementation of 'remove' is unclear from BS*");
+	// At this point parent has been removed from open
+	// Need to find any successors that have a parent id of parent & recursively remove them from open
+
+	std::vector<state> n;
+
+	uint64_t parentID;
+	auto loc = queue.Lookup(env->GetStateHash(s), parentID);
+	assert(loc == kClosedList);
+	env->GetSuccessors(s, n);
+	for (auto &succ : n)
+	{
+		uint64_t childID;
+		uint64_t hash = env->GetStateHash(succ);
+		auto loc = queue.Lookup(hash, childID);
+		auto &childData = queue.Lookup(childID);
+		if (loc == kClosedList && childData.parentID == parentID)
+		{
+			Nip(childData.data, queue);
+		}
+		else if (loc == kOpenList && (childData.parentID == parentID))// && (childData.data != middleNode))
+		{
+			if (childData.data == middleNode)
+			{
+				std::cout << "Error - removing middle node\n";
+				if (&queue == &forwardQueue)
+					std::cout << "In backward search - removing from for\n";
+				else
+					std::cout << "In forward search - removing from back\n";
+				std::cout << "Parent: " << s << "\n";
+				std::cout << "Middle: " << middleNode << "\n";
+				std::vector<state> pFor, pBack, final;
+				ExtractPathToGoal(middleNode, pBack);
+				ExtractPathToStart(middleNode, pFor);
+				reverse(pFor.begin(), pFor.end());
+				std::cout << "Path forward: \n";
+				
+				for (auto &s : pFor)
+					std::cout << s << "\n";
+				std::cout << "Path backward: \n";
+				for (auto &s : pBack)
+					std::cout << s << "\n";
+
+				exit(0);
+			}
+			queue.Remove(env->GetStateHash(childData.data));
+		}
+	}
 }
 
 template <class state, class action, class environment, class priorityQueue>
