@@ -42,6 +42,12 @@ static bool operator==(const PancakePuzzleState<N> &l1, const PancakePuzzleState
 }
 
 template <int N>
+static bool operator!=(const PancakePuzzleState<N> &l1, const PancakePuzzleState<N> &l2)
+{
+	return !(l1==l2);
+}
+
+template <int N>
 class PancakePuzzle : public PermutationPuzzle::PermutationPuzzleEnvironment<PancakePuzzleState<N>, PancakePuzzleAction> {
 public:
 	PancakePuzzle(int gap = 0);
