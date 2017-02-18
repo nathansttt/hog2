@@ -21,7 +21,7 @@
 
 typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
 
-template <class state, class action>
+template <class state, class action, bool verbose = true>
 class IDAStar {
 public:
 	IDAStar() { useHashTable = usePathMax = false; storedHeuristic = false;}
@@ -80,8 +80,8 @@ public:
 #endif
 };
 
-template <class state, class action>
-void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
+template <class state, class action, bool verbose>
+void IDAStar<state, action, verbose>::GetPath(SearchEnvironment<state, action> *env,
 									 state from, state to,
 									 std::vector<state> &thePath)
 {
@@ -98,7 +98,8 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 		//nodeTable.clear();
 		gCostHistogram.clear();
 		gCostHistogram.resize(nextBound+1);
-		printf("Starting iteration with bound %f\n", nextBound);
+		if (verbose)
+			printf("Starting iteration with bound %f\n", nextBound);
 		if (DoIteration(env, from, from, thePath, nextBound, 0, 0) == 0)
 			break;
 		PrintGHistogram();
@@ -106,8 +107,8 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 	PrintGHistogram();
 }
 
-template <class state, class action>
-void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
+template <class state, class action, bool verbose>
+void IDAStar<state, action, verbose>::GetPath(SearchEnvironment<state, action> *env,
 									 state from, state to,
 									 std::vector<action> &thePath)
 {
@@ -130,15 +131,16 @@ void IDAStar<state, action>::GetPath(SearchEnvironment<state, action> *env,
 		//nodeTable.clear();
 		gCostHistogram.clear();
 		gCostHistogram.resize(nextBound+1);
-		printf("Starting iteration with bound %f; %llu expanded, %llu generated\n", nextBound, nodesExpanded, nodesTouched);
+		if (verbose)
+			printf("Starting iteration with bound %f; %llu expanded, %llu generated\n", nextBound, nodesExpanded, nodesTouched);
 		fflush(stdout);
 		DoIteration(env, act[0], from, thePath, nextBound, 0, 0, rootH);
 		PrintGHistogram();
 	}
 }
 
-template <class state, class action>
-double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env,
+template <class state, class action, bool verbose>
+double IDAStar<state, action, verbose>::DoIteration(SearchEnvironment<state, action> *env,
 										   state parent, state currState,
 										   std::vector<state> &thePath, double bound, double g,
 										   double maxH)
@@ -188,8 +190,8 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 	return h;
 }
 
-template <class state, class action>
-double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env,
+template <class state, class action, bool verbose>
+double IDAStar<state, action, verbose>::DoIteration(SearchEnvironment<state, action> *env,
 										   action forbiddenAction, state &currState,
 										   std::vector<action> &thePath, double bound, double g,
 										   double maxH, double parentH)
@@ -259,8 +261,8 @@ double IDAStar<state, action>::DoIteration(SearchEnvironment<state, action> *env
 }
 
 
-template <class state, class action>
-void IDAStar<state, action>::UpdateNextBound(double currBound, double fCost)
+template <class state, class action, bool verbose>
+void IDAStar<state, action, verbose>::UpdateNextBound(double currBound, double fCost)
 {
 	if (!fgreater(nextBound, currBound))
 	{
@@ -277,19 +279,3 @@ void IDAStar<state, action>::UpdateNextBound(double currBound, double fCost)
 
 #endif
 
-//template <class state, class action>
-//class SearchEnvironment {
-//public:
-//	virtual ~SearchEnvironment() {}
-//	virtual void GetSuccessors(const state &nodeID, std::vector<state> &neighbors) = 0;
-//	virtual void GetActions(const state &nodeID, std::vector<action> &actions) = 0;
-//	virtual action GetAction(state &s1, state &s2) = 0;
-//	virtual void ApplyAction(state &s, action a) = 0;
-//	
-//	virtual double HCost(state &node1, state &node2) = 0;
-//	virtual double GCost(state &node1, state &node2) = 0;
-//	virtual bool GoalTest(state &node, state &goal) = 0;
-//	
-//	virtual uint64_t GetStateHash(const state &node) = 0;
-//	virtual uint64_t GetActionHash(action act) = 0;
-//};
