@@ -109,9 +109,9 @@ void TestPancakeTR()
 const int N = 16;
 void TestPancakeRandom()
 {
-	srandom(2017218);
 	for (int gap = 0; gap < 4; gap++)
 	{
+		srandom(2017218);
 		PancakePuzzleState<N> start;
 		PancakePuzzleState<N> original;
 		PancakePuzzleState<N> goal;
