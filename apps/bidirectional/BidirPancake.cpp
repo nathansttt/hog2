@@ -102,8 +102,6 @@ void TestPancakeTR()
 			   astar.GetNodesExpanded(), t1.GetElapsedTime(),
 			   mm.GetNodesExpanded(), t4.GetElapsedTime(),
 			   nbs.GetNodesExpanded(), t2.GetElapsedTime());
-//		std::cout << astar.GetNodesExpanded() << "\t" << nbs.GetNodesExpanded() << "\t";
-//		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\n";
 	}
 	exit(0);
 }
@@ -112,7 +110,7 @@ const int N = 16;
 void TestPancakeRandom()
 {
 	srandom(2017218);
-	for (int gap = 3; gap < 4; gap++)
+	for (int gap = 0; gap < 4; gap++)
 	{
 		PancakePuzzleState<N> start;
 		PancakePuzzleState<N> original;
