@@ -26,11 +26,11 @@ TOH<numDisks-4> absToh3;
 TOHState<numDisks-2> absTohState1;
 TOHState<numDisks-3> absTohState2;
 TOHState<numDisks-4> absTohState3;
-TOHPDB<numDisks-2, numDisks> pdb1(&absToh1);
-TOHPDB<numDisks-2, numDisks> pdb1a(&absToh1);
-TOHPDB<numDisks-2, numDisks> pdb1b(&absToh1);
-TOHPDB<numDisks-3, numDisks> pdb2(&absToh2);
-TOHPDB<numDisks-4, numDisks> pdb3(&absToh3);
+TOHPDB<numDisks-2, numDisks> pdb1(&absToh1, goal);
+TOHPDB<numDisks-2, numDisks> pdb1a(&absToh1, goal);
+TOHPDB<numDisks-2, numDisks> pdb1b(&absToh1, goal);
+TOHPDB<numDisks-3, numDisks> pdb2(&absToh2, goal);
+TOHPDB<numDisks-4, numDisks> pdb3(&absToh3, goal);
 
 Heuristic<TOHState<numDisks>> h;
 

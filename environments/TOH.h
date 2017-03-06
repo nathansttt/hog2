@@ -394,8 +394,8 @@ void TOH<disks>::OpenGLDraw(const TOHState<disks>&, const TOHMove&) const
 template <int patternDisks, int totalDisks, int offset=0>
 class TOHPDB : public PDBHeuristic<TOHState<patternDisks>, TOHMove, TOH<patternDisks>, TOHState<totalDisks>> {
 public:
-	TOHPDB(TOH<patternDisks> *e)
-	:PDBHeuristic<TOHState<patternDisks>, TOHMove, TOH<patternDisks>, TOHState<totalDisks>>(e) { TOHState<totalDisks> g; this->SetGoal(g); }
+	TOHPDB(TOH<patternDisks> *e, const TOHState<totalDisks> &s)
+	:PDBHeuristic<TOHState<patternDisks>, TOHMove, TOH<patternDisks>, TOHState<totalDisks>>(e) { this->SetGoal(s); }
 	virtual ~TOHPDB() {}
 
 	TOHState<totalDisks> GetStateFromAbstractState(TOHState<patternDisks> &start) const
