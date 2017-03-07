@@ -21,9 +21,9 @@ Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
 	TOHState<pdb1Disks> absTohState1;
 	TOHState<pdb2Disks> absTohState2;
 	
-	TOHPDB<pdb1Disks, numDisks, pdb2Disks> *pdb1 = new TOHPDB<pdb1Disks, numDisks, pdb2Disks>(&absToh1); // top disks
-	TOHPDB<pdb2Disks, numDisks> *pdb2 = new TOHPDB<pdb2Disks, numDisks>(&absToh2); // bottom disks
 	
+	TOHPDB<pdb1Disks, numDisks, pdb2Disks> *pdb1 = new TOHPDB<pdb1Disks, numDisks, pdb2Disks>(&absToh1, goal); // top disks
+	TOHPDB<pdb2Disks, numDisks> *pdb2 = new TOHPDB<pdb2Disks, numDisks>(&absToh2, goal); // bottom disks
 	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
 	pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
 	
@@ -78,6 +78,7 @@ void TestTOH(int first, int last)
 		Timer timer;
 	
 		b = BuildPDB<N, pdb1Disks>(s);
+		printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		
 		if (1)
 		{

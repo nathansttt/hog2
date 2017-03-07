@@ -1307,8 +1307,8 @@ void TOHTest(int deltaFactor, int bits, int factor, int first, int last)
 	TOH<numDisks-2> absToh1;
 //	TOH<numDisks-4> absToh4;
 	TOHState<numDisks-2> absTohState1;
-	TOHPDB<numDisks-2, numDisks> pdb1(&absToh1);
-	TOHPDB<numDisks-2, numDisks> pdb1a(&absToh1);
+	TOHPDB<numDisks-2, numDisks> pdb1(&absToh1, goal);
+	TOHPDB<numDisks-2, numDisks> pdb1a(&absToh1, goal);
 //	TOHPDB<numDisks-2, numDisks> pdb1b(&absToh1);
 //	TOHPDB<numDisks-2, numDisks> pdbSmaller(&absToh1);
 //	TOHPDB<numDisks-4, numDisks> pdbSmallest(&absToh4);
