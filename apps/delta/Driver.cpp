@@ -25,6 +25,7 @@
 #include "RubiksCube.h"
 #include "MNPuzzle.h"
 
+void TSBiVRCDelta(int bits, int compressionFactor, int first, int last);
 void TOHTest(int deltaFactor, int bits, int factor, int first = 0, int last = 50);
 void STPTest(int bits, int factor);
 void RubikDynamicTest();
@@ -45,8 +46,11 @@ float PrebuildHeuristic(int elts, bool mr);
 
 char prefix[1024] = "";
 
-const int N = 18;
+const int N = 16;
 const int K = 4; // cutoff ?
+//const int N = 18;
+//const int K = 4; // cutoff ?
+
 //const int K = 10; // cutoff 7
 //const int K = 4; // cutoff 8
 //const int cutoff = 25;
@@ -259,9 +263,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case 't':
 		{
+			TSBiVRCDelta(8, 1, 0, 10);
 //			TSBiVRC(8, 1, 0, 10);
 //			TSBiVRC(4, 1, 0, 10);
-			TSBiVRC(3, 1, 0, 10);
+//			TSBiVRC(3, 1, 0, 10);
 //			TSBiVRC(2, 1, 0, 10);
 //			TSBiVRC(4, 1);
 			exit(0);
@@ -851,12 +856,12 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, i
 
 void TSBiVRC(int bits, int compressionFactor, int first, int last)
 {
-//	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
-//	std::vector<int> pattern2 = {4, 5, 6, 7, 8, 9, 10, 11};//, 5, 6, 7};
-//	std::vector<int> pattern3 = {8, 9, 10, 11, 0, 1, 2, 3};//, 5, 6, 7};
 	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
-	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
-	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0, 1};//, 5, 6, 7};
+	std::vector<int> pattern2 = {4, 5, 6, 7, 8, 9, 10, 11};//, 5, 6, 7};
+	std::vector<int> pattern3 = {8, 9, 10, 11, 0, 1, 2, 3};//, 5, 6, 7};
+//	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
+//	std::vector<int> pattern2 = {6, 7, 8, 9, 10, 11, 12, 13};//, 5, 6, 7};
+//	std::vector<int> pattern3 = {12, 13, 14, 15, 16, 17, 0, 1};//, 5, 6, 7};
 	
 	printf("-->Testing TS(%d, %d): %d bits, %d factor<--\n", N, K, bits, compressionFactor);
 	
@@ -983,6 +988,93 @@ void TSBiVRC(int bits, int compressionFactor, int first, int last)
 		//ZeroHeuristic<TopSpinState<N>> z;
 		TestTSBiVRC(&h, &p, first, last);
 
+		printf("Dynamic distribution\n");
+		for (int x = 0; x < 255; x++)
+			if (h.histogram[x] != 0)
+				printf("%d\t%llu\n", x, h.histogram[x]);
+	}
+	
+}
+
+void TSBiVRCDelta(int bits, int compressionFactor, int first, int last)
+{
+	std::vector<int> pattern1 = {0, 1, 2, 3, 4, 5, 6, 7};//, 5, 6, 7};
+	std::vector<int> pattern2 = {8, 9, 10, 11, 12, 13, 14, 15};//, 5, 6, 7};
+	std::vector<int> pattern1s = {0, 1, 2, 3, 4, 5, 6};//, 5, 6, 7};
+	std::vector<int> pattern2s = {8, 9, 10, 11, 12, 13, 14};//, 5, 6, 7};
+	
+	printf("-->Testing TS(%d, %d): %d bits, %d factor<--\n", N, K, bits, compressionFactor);
+	
+	TopSpin<N, K> ts;
+	TopSpinState<N> t, d, goal;
+	ts.StoreGoal(t);
+	std::vector<std::vector<double>> averages;
+	
+	
+	{
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 8> pdb1(&ts, t, pattern1);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 8> pdb2(&ts, t, pattern2);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 8> pdb1s(&ts, t, pattern1s);
+		LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, K>, 8> pdb2s(&ts, t, pattern2s);
+		
+		if (!pdb1.Load(prefix))
+		{
+			pdb1.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb1.Save(prefix);
+		}
+		if (!pdb2.Load(prefix))
+		{
+			pdb2.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb2.Save(prefix);
+		}
+		if (!pdb1s.Load(prefix))
+		{
+			pdb1s.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb1s.Save(prefix);
+		}
+		if (!pdb2s.Load(prefix))
+		{
+			pdb2s.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb2s.Save(prefix);
+		}
+		
+		printf("Delta compress:\n");
+		pdb1.DeltaCompress(&pdb1s, goal, true);
+		pdb2.DeltaCompress(&pdb2s, goal, true);
+
+		printf("Div compress (%d) delta:\n", compressionFactor);
+		if (compressionFactor > 1)
+		{
+			pdb1.DivCompress(compressionFactor, true);
+			pdb2.DivCompress(compressionFactor, true);
+		}
+		if (bits < 8)
+		{
+			printf("VR compress (%d bits):\n", bits);
+			pdb1.ValueRangeCompress(bits, true);
+			pdb2.ValueRangeCompress(bits, true);
+		}
+		
+		Heuristic<TopSpinState<N>> h;
+		
+		h.lookups.resize(0);
+		h.lookups.push_back({kMaxNode, 1, 2});
+		h.lookups.push_back({kAddNode, 3, 2});
+		h.lookups.push_back({kAddNode, 5, 2});
+		h.lookups.push_back({kLeafNode, 0, 0});
+		h.lookups.push_back({kLeafNode, 1, 1});
+		h.lookups.push_back({kLeafNode, 2, 2});
+		h.lookups.push_back({kLeafNode, 3, 3});
+		h.heuristics.resize(0);
+		h.heuristics.push_back(&pdb1);
+		h.heuristics.push_back(&pdb1s);
+		h.heuristics.push_back(&pdb2);
+		h.heuristics.push_back(&pdb2s);
+		
+		PermutationPuzzle::ArbitraryGoalPermutation<TopSpinState<N>, TopSpin<N, K>> p(&h, &ts);
+		//ZeroHeuristic<TopSpinState<N>> z;
+		TestTSBiVRC(&h, &p, first, last);
+		
 		printf("Dynamic distribution\n");
 		for (int x = 0; x < 255; x++)
 			if (h.histogram[x] != 0)
@@ -1560,6 +1652,7 @@ void GetRubikStep14Instance(RubiksState &start, int which)
 }
 
 MNPuzzleState<4, 4> GetSTPInstance(int which);
+
 void STPTest(int bits, int factor)
 {
 	printf("Running with %d bits, %d compression\n", bits, factor);
@@ -1569,14 +1662,10 @@ void STPTest(int bits, int factor)
 
 	std::vector<int> p1 = {0,1,2,3,4,5,6,7};
 	std::vector<int> p2 = {0,8,9,10,11,12,13,14,15};
-	std::vector<int> p3 = {0,1,4,5,8,9,12,13};
-	std::vector<int> p4 = {0,2,3,6,7,10,11,14,15};
 	mnp.StoreGoal(g);
 	
 	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb1(&mnp, g, p1);
 	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, g, p2);
-//	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb3(&mnp, g, p3);
-//	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb4(&mnp, g, p4);
 	if (pdb1.Load(prefix) == false)
 	{
 		pdb1.BuildPDB(t, std::thread::hardware_concurrency());
@@ -1595,36 +1684,43 @@ void STPTest(int bits, int factor)
 		pdb2.PrintHistogram();
 	}
 
-//	if (pdb3.Load(prefix) == false)
-//	{
-//		pdb3.BuildPDB(t, std::thread::hardware_concurrency());
-//		pdb3.Save(prefix);
-//	}
-//	else {
-//		pdb3.PrintHistogram();
-//	}
-//
-//	if (pdb4.Load(prefix) == false)
-//	{
-//		pdb4.BuildPDB(t, std::thread::hardware_concurrency());
-//		pdb4.Save(prefix);
-//	}
-//	else {
-//		pdb4.PrintHistogram();
-//	}
 
+	
+	printf("Delta compress:\n");
+	pdb1.DeltaCompress(&mnp, g, true);
+	printf("Div compress (%d) delta:\n", factor);
+	pdb1.DivCompress(factor, true);
+	if (bits < 8)
+	{
+		printf("VR compress (%d bits):\n", bits);
+		pdb1.ValueRangeCompress(bits, true);
+	}
+
+	printf("Delta compress:\n");
+	pdb2.DeltaCompress(&mnp, g, true);
+	printf("Div compress (%d) delta:\n", factor);
+	pdb2.DivCompress(factor, true);
+	if (bits < 8)
+	{
+		printf("VR compress (%d bits):\n", bits);
+		pdb2.ValueRangeCompress(bits, true);
+	}
+
+	
 	Heuristic<MNPuzzleState<4, 4>> h;
 	
 	h.lookups.resize(0);
-	h.lookups.push_back({kMaxNode, 1, 3});
+	h.lookups.push_back({kMaxNode, 1, 2});
+	h.lookups.push_back({kAddNode, 1, 2});
+	h.lookups.push_back({kAddNode, 1, 2});
 	h.lookups.push_back({kLeafNode, 0, 0});
 	h.lookups.push_back({kLeafNode, 1, 1});
-	h.lookups.push_back({kLeafNode, 1, 2});
-//	h.lookups.push_back({kLeafNode, 1, 3});
+	h.lookups.push_back({kLeafNode, 2, 2});
+	h.lookups.push_back({kLeafNode, 3, 3});
 	h.heuristics.resize(0);
 	h.heuristics.push_back(&pdb1);
-	h.heuristics.push_back(&pdb2);
 	h.heuristics.push_back(&mnp);
+	h.heuristics.push_back(&pdb2);
 //	h.heuristics.push_back(&pdb3);
 //	h.heuristics.push_back(&pdb4);
 	if (factor > 1)
@@ -1655,8 +1751,6 @@ void STPTest(int bits, int factor)
 		uint64_t nodesGenerated = 0;
 		double totaltime = 0;
 		
-		
-		
 		g.Reset();
 		mnp.StoreGoal(g);
 		for (int x = 0; x < 100; x++)
@@ -1678,6 +1772,12 @@ void STPTest(int bits, int factor)
 		}
 		printf("Sequential: %1.2fs elapsed; %llu nodes expanded; %llu nodes generated\n", t1.EndTimer(), nodesExpanded, nodesGenerated);
 	}
+	
+	printf("Dynamic distribution\n");
+	for (int x = 0; x < 255; x++)
+		if (h.histogram[x] != 0)
+			printf("%d\t%llu\n", x, h.histogram[x]);
+
 }
 
 MNPuzzleState<4, 4> GetSTPInstance(int which)
