@@ -113,6 +113,11 @@ static bool operator==(const TOHState<D> &l1, const TOHState<D> &l2) {
 	return true;
 }
 
+template <int D>
+static bool operator!=(const TOHState<D> &l1, const TOHState<D> &l2) {
+	return !(l1 == l2);
+}
+
 static std::ostream &operator<<(std::ostream &out, const TOHMove &m)
 {
 	out << "(" << +m.source << ", " << +m.dest << ")";
@@ -265,7 +270,8 @@ bool TOH<disks>::GoalTest(const TOHState<disks> &node, const TOHState<disks> &go
 {
 	// NOTE: this is using the standard goal state; arbitrary goal states
 	// are more expensive to check
-	return (node.GetDiskCountOnPeg(3)==disks);
+	return (node == goal);
+	//return (node.GetDiskCountOnPeg(3)==disks);
 }
 
 

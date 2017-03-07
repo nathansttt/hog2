@@ -11,6 +11,7 @@
 #include "TemplateAStar.h"
 #include "NBS.h"
 #include "MM.h"
+#include "BSStar.h"
 
 template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
 Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
@@ -46,6 +47,7 @@ void TestTOH(int first, int last)
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
 	NBS<TOHState<N>, TOHMove, TOH<N>> nbs;
 	MM<TOHState<N>, TOHMove, TOH<N>> mm;
+	BSStar<TOHState<N>, TOHMove, TOH<N>> bs;
 
 	TOH<N> toh;
 	TOHState<N> s;
@@ -81,6 +83,8 @@ void TestTOH(int first, int last)
 			g.disks[whichPeg][g.counts[whichPeg]] = x;
 			g.counts[whichPeg]++;
 		}
+		// Using canonical goal currently - uncomment to use random goal
+		g.Reset();
 		f = BuildPDB<N, pdb1Disks>(g);
 
 		Timer timer;
@@ -95,6 +99,16 @@ void TestTOH(int first, int last)
 			printf("-=-=-NBS-=-=-\n");
 			timer.StartTimer();
 			nbs.GetPath(&toh, s, g, f, b, thePath);
+			timer.EndTimer();
+			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+			printf("%llu nodes\t%llu necessary\t", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
+			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+		}
+		if (1)
+		{
+			printf("-=-=-BS-=-=-\n");
+			timer.StartTimer();
+			bs.GetPath(&toh, s, g, f, b, thePath);
 			timer.EndTimer();
 			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
 			printf("%llu nodes\t%llu necessary\t", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
