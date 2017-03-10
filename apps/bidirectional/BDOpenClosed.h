@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include "AStarOpenClosed.h"
 
+#define ADMISSIBLE
 //struct AHash64 {
 //	size_t operator()(const uint64_t &x) const
 //	{ return (size_t)(x); }
@@ -65,6 +66,10 @@ public:
 	uint64_t Close();
 	uint64_t PutToReady();
 	//void Reopen(uint64_t objKey);
+#ifdef ADMISSIBLE
+	void Reopen(uint64_t objKey);
+#endif // ADMISSIBLE
+
 
 	uint64_t GetOpenItem(unsigned int which, stateLocation where){	return priorityQueues[where][which];}
 	size_t OpenReadySize() const { return priorityQueues[kOpenReady].size(); }
@@ -124,6 +129,22 @@ private:
 	//all the elements, open or closed
 	std::vector<dataStructure> elements;
 };
+
+#ifdef ADMISSIBLE
+
+template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
+void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Reopen(uint64_t objKey)
+{
+	assert(elements[objKey].where == kClosed);
+	elements[objKey].reopened = true;
+	elements[objKey].where = kOpenWaiting;
+	elements[objKey].openLocation = priorityQueues[kOpenWaiting].size();
+	priorityQueues[kOpenWaiting].push_back(objKey);
+	HeapifyUp(priorityQueues[kOpenWaiting].size() - 1, kOpenWaiting);
+}
+
+#endif // ADMISSIBLE
+
 
 
 template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>

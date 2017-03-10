@@ -19,7 +19,10 @@
 #include "NBSQueue.h"
 #include "NBSQueueGF.h"
 
-#define EPSILON 1
+//#define EPSILON 1
+
+// ADMISSIBLE is defined at "BDOpenClosed.h"
+
 
 using std::cout;
 
@@ -278,6 +281,34 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 		switch (loc)
 		{
 			case kClosed: // ignore
+#ifdef ADMISSIBLE
+				if (fless(current.Lookup(nextID).g + edgeCost, current.Lookup(childID).g))
+				{
+					double oldGCost = current.Lookup(childID).g;
+					current.Lookup(childID).parentID = nextID;
+					current.Lookup(childID).g = current.Lookup(nextID).g + edgeCost;
+					current.Reopen(childID);
+
+					// TODO: check if we improved the current solution?
+					uint64_t reverseLoc;
+					auto loc = opposite.Lookup(env->GetStateHash(succ), reverseLoc);
+					if (loc == kOpenReady || loc == kOpenWaiting)
+					{
+						if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
+						{
+							// TODO: store current solution
+							//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+							//								   current.Lookup(nextID).g+edgeCost,
+							//								   opposite.Lookup(reverseLoc).g,
+							//								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
+							//								nodesExpanded);
+							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
+
+							middleNode = succ;
+						}
+					}
+				}
+#endif
 				break;
 			case kOpenReady: // update cost if needed
 			case kOpenWaiting:
@@ -307,10 +338,14 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 							middleNode = succ;
 						}
 					}
+#ifdef ADMISSIBLE
+
+#else
 					else if (loc == kClosed)
 					{
 						current.Remove(childID);
 					}
+#endif // !ADMISSIBLE
 				}
 			}
 				break;
@@ -318,11 +353,15 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 			{
 				uint64_t reverseLoc;
 				auto loc = opposite.Lookup(env->GetStateHash(succ), reverseLoc);
+#ifdef ADMISSIBLE
+
+#else
 				if (loc == kClosed)// then
 				{
 					break;			//do nothing. do not put this node to open
 				}
-				else//loc == kUnseen
+				else//loc == kUnseen or kOpen
+#endif // ADMISSIBLE
 				{
 					//double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
 					//if(fless(current.Lookup(nextID).g + edgeCost + heuristic->HCost(succ, target),currentPr))
