@@ -16,6 +16,7 @@
 #include "Plot2D.h"
 #include "RandomUnit.h"
 #include "MNPuzzle.h"
+#include "PancakePuzzle.h"
 #include "IDAStar.h"
 #include "ParallelIDAStar.h"
 #include "Timer.h"
@@ -37,12 +38,19 @@ void MinDeltaPlusMinTopSpinTest();
 void MinDeltaPlusMinTOHTest();
 void TSVRC();
 void TSBiVRC(int bits, int compressionFactor, int first = 0, int last = 50);
-template <int N, int k>
-float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr);
+void CompressionTest();
+
+template <typename state, typename action, typename environment>
+float GetAveragePDBValue(const std::vector<int> &pattern, int bits, int factor, bool div, bool mr);
+
 template <int N, int k>
 void PrintHeuristicTables();
-template <int N, int k>
-float PrebuildHeuristic(int elts, bool mr);
+
+template <typename state, typename action, typename environment>
+void CompressionExample(std::vector<int> p1, std::vector<int> p2, std::vector<int> p3);
+
+template <typename state, typename action, typename environment>
+void PrebuildHeuristic(const std::vector<int> &pattern, bool mr);
 
 char prefix[1024] = "";
 
@@ -97,6 +105,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test <bits> <factor>", "Basic test comparing A*, IDA*, MM");
 	InstallCommandLineHandler(MyCLHandler, "-rubik", "-rubik", "Duplicating Zahavi et al 2007.");
 	InstallCommandLineHandler(MyCLHandler, "-toh", "-toh <delta> <bits> <factor>", "Run TOH test with <delta> compression factor, <bits> VC, <factor> min.");
+	InstallCommandLineHandler(MyCLHandler, "-compression", "-compression", "Run the basic compression test");
 	
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler);
@@ -212,6 +221,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		TOHTest(atoi(argument[1]), atoi(argument[2]), atoi(argument[3]));
 		exit(0);
 	}
+	else if (strcmp(argument[0], "-compression") == 0)
+	{
+		CompressionTest();
+		exit(0);
+	}
 	return 0;
 }
 
@@ -320,12 +334,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			TestTSBiVRC(&z, &z);
 //			template <int N, int k>
 //			float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr)
+			CompressionTest();
 
-			PrintHeuristicTables<18, 2>();
-			PrintHeuristicTables<18, 4>();
-			PrintHeuristicTables<18, 6>();
-			PrintHeuristicTables<18, 8>();
-			PrintHeuristicTables<18, 10>();
+//			PrintHeuristicTables<18, 2>();
+//			PrintHeuristicTables<18, 4>();
+//			PrintHeuristicTables<18, 6>();
+//			PrintHeuristicTables<18, 8>();
+//			PrintHeuristicTables<18, 10>();
 			break;
 		}
 		default:
@@ -370,6 +385,18 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 	
 	return false;
 }
+
+void CompressionTest()
+{
+	CompressionExample<TopSpinState<18>, TopSpinAction, TopSpin<18,4>>({0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
+	CompressionExample<TopSpinState<18>, TopSpinAction, TopSpin<18,4>>({6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
+	CompressionExample<MNPuzzleState<4,4>, slideDir, MNPuzzle<4,4>>({0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
+	CompressionExample<MNPuzzleState<4,4>, slideDir, MNPuzzle<4,4>>({6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
+	CompressionExample<PancakePuzzleState<18>, unsigned, PancakePuzzle<18>>({0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
+	CompressionExample<PancakePuzzleState<18>, unsigned, PancakePuzzle<18>>({6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
+}
+
+
 
 void MDDeltaPlusMinTest()
 {
@@ -1083,19 +1110,65 @@ void TSBiVRCDelta(int bits, int compressionFactor, int first, int last)
 	
 }
 
+template <typename state, typename action, typename environment>
+void CompressionExample(std::vector<int> p1, std::vector<int> p2, std::vector<int> p3)
+{
+	PrebuildHeuristic<state, action, environment>(p1, false);
+	PrebuildHeuristic<state, action, environment>(p2, false);
+	PrebuildHeuristic<state, action, environment>(p3, false);
 
-template <int N, int k>
+	PrebuildHeuristic<state, action, environment>(p1, true);
+	PrebuildHeuristic<state, action, environment>(p2, true);
+	PrebuildHeuristic<state, action, environment>(p3, true);
+
+	
+	environment e;
+	state s;
+	printf("%d in pattern; %d in state. max compression of %d\n", p1.size(), sizeof(state::puzzle)/sizeof(s.puzzle[0]), -p1.size()+sizeof(state::puzzle)/sizeof(s.puzzle[0]));
+	std::cout << "Domain: " << e.GetName() << "\n";
+	for (int mr = 0; mr <= 1; mr++)
+	{
+		for (int div = 0; div <= 1; div++)
+		{
+			for (int t = 0; t < 3; t++)
+			{
+				std::vector<int> *p;
+				if (t == 0) p = &p1;
+				if (t == 1) p = &p2;
+				if (t == 2) p = &p3;
+				int maxCompression = 1-p->size()+sizeof(state::puzzle)/sizeof(s.puzzle[0]);
+				printf("Compression: %s; ranking: %s; pattern: (", div?"DIV":"MOD", mr?"MR":"LEX");
+				for (auto x : *p)
+					printf("%d,", x);
+				printf(")\n");
+				for (int factor = 1; factor <= maxCompression; factor++)
+					printf("\t%d", factor);
+				printf("\n");
+				for (int factor = 1; factor <= maxCompression; factor++)
+				{
+					printf("%1.3f\t", GetAveragePDBValue<state, action, environment>(*p, 8, factor, div, mr));
+				}
+				printf("\n");
+			}
+		}
+	}
+}
+
+
+
+template <typename state, typename action, typename environment>
 void PrintHeuristicTables()
 {
 	for (int mr = 0; mr <= 1; mr++)
 	{
 		for (int elts = 6; elts <= 8; elts++)
 		{
-			PrebuildHeuristic<N, k>(elts, mr);
+			PrebuildHeuristic<state, action, environment>(elts, mr);
 		}
 	}
 	
-	printf("Top Spin N=%d, k=%d\n", N, k);
+	environment e;
+	std::cout << e.GetName() << "\n";
 	for (int div = 0; div <= 1; div++)
 	{
 		for (int mr = 0; mr <= 1; mr++)
@@ -1109,7 +1182,7 @@ void PrintHeuristicTables()
 					printf("%d\t", bits);
 					for (int factor = 1; factor <= 6; factor++)
 					{
-						printf("%1.3f\t", GetAveragePDBValue<N, k>(elts, bits, factor, div, mr));
+						printf("%1.3f\t", GetAveragePDBValue<state, action, environment>(elts, bits, factor, div, mr));
 					}
 					printf("\n");
 				}
@@ -1118,20 +1191,21 @@ void PrintHeuristicTables()
 	}
 }
 
-template <int N, int k>
-float PrebuildHeuristic(int elts, bool mr)
+template <typename state, typename action, typename environment>
+void PrebuildHeuristic(const std::vector<int> &pattern, bool mr)
 {
-	std::vector<int> pattern;
-	TopSpin<N, k> ts;
-	TopSpinState<N> t;
+//	std::vector<int> pattern;
+	environment ts;
+	state t;
 	
-	for (int x = 0; x < elts; x++)
-		pattern.push_back(x);
-	PDBHeuristic<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> *h;
+//	for (int x = 0; x < elts; x++)
+//		pattern.push_back(x);
+//	std::reverse(pattern.begin(), pattern.end());
+	PDBHeuristic<state, action, environment> *h;
 	if (mr == true)
-		h = new MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, t, pattern);
+		h = new MR1PermutationPDB<state, action, environment>(&ts, t, pattern);
 	else
-		h = new LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, t, pattern);
+		h = new LexPermutationPDB<state, action, environment>(&ts, t, pattern);
 	if (!h->Load(prefix))
 	{
 		h->BuildPDB(t, std::thread::hardware_concurrency());
@@ -1140,20 +1214,21 @@ float PrebuildHeuristic(int elts, bool mr)
 	delete h;
 }
 
-template <int N, int k>
-float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr)
+template <typename state, typename action, typename environment>
+float GetAveragePDBValue(const std::vector<int> &pattern, int bits, int factor, bool div, bool mr)
 {
-	std::vector<int> pattern;
-	TopSpin<N, k> ts;
-	TopSpinState<N> t;
+//	std::vector<int> pattern;
+	environment ts;
+	state t;
 
-	for (int x = 0; x < elts; x++)
-		pattern.push_back(x);
-	PDBHeuristic<TopSpinState<N>, TopSpinAction, TopSpin<N, k>> *h;
+//	for (int x = 0; x < elts; x++)
+//		pattern.push_back(x);
+//	std::reverse(pattern.begin(), pattern.end());
+	PDBHeuristic<state, action, environment> *h;
 	if (mr == true)
-		h = new MR1PermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, t, pattern);
+		h = new MR1PermutationPDB<state, action, environment>(&ts, t, pattern);
 	else
-		h = new LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, t, pattern);
+		h = new LexPermutationPDB<state, action, environment>(&ts, t, pattern);
 	if (!h->Load(prefix))
 	{
 		h->BuildPDB(t, std::thread::hardware_concurrency());
@@ -1166,7 +1241,8 @@ float GetAveragePDBValue(int elts, int bits, int factor, bool div, bool mr)
 		else
 			h->ModCompress(factor, false);
 	}
-	h->ValueRangeCompress(bits, true);
+	if (bits != 8)
+		h->ValueRangeCompress(bits, false);
 	float f = h->GetAverageValue();
 	delete h;
 	return f;
