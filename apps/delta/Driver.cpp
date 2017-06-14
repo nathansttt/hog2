@@ -386,6 +386,7 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 	return false;
 }
 
+void TOHCompressionTest();
 void CompressionTest()
 {
 	CompressionExample<TopSpinState<18>, TopSpinAction, TopSpin<18,4>>({0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
@@ -394,8 +395,69 @@ void CompressionTest()
 	CompressionExample<MNPuzzleState<4,4>, slideDir, MNPuzzle<4,4>>({6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
 	CompressionExample<PancakePuzzleState<18>, unsigned, PancakePuzzle<18>>({0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
 	CompressionExample<PancakePuzzleState<18>, unsigned, PancakePuzzle<18>>({6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
+	TOHCompressionTest();
 }
 
+void TOHCompressionTest()
+{
+	const int numDisks = 16; // [disks - 2] (4^14 - 256 million)
+	TOH<numDisks> toh;
+	TOHState<numDisks> s, g;
+	
+	TOHState<numDisks> goal;
+	TOH<numDisks-1> absToh1;
+	TOH<numDisks-2> absToh2;
+	
+	TOHState<numDisks-1> absTohState1;
+	TOHState<numDisks-2> absTohState2;
+	TOHPDB<numDisks-1, numDisks> pdb1(&absToh1, goal);
+	TOHPDB<numDisks-1, numDisks> pdb1a(&absToh1, goal);
+	TOHPDB<numDisks-2, numDisks> pdb2(&absToh2, goal);
+	TOHPDB<numDisks-2, numDisks> pdb2a(&absToh2, goal);
+	
+	goal.Reset();
+	pdb1.BuildPDB(goal, std::thread::hardware_concurrency());
+	pdb2.BuildPDB(goal, std::thread::hardware_concurrency());
+
+	pdb2a = pdb2;
+	
+	for (int div = 0; div <= 1; div++)
+	{
+		printf("Starting TOH %s\n", div?"DIV":"MOD");
+		for (int x = 1; x <= 16; x *= 2)
+			printf("%d\t", x);
+		printf("\n");
+		for (int x = 1; x <= 16; x *= 2)
+		{
+			pdb1a = pdb1;
+			if (div)
+				pdb1a.DivCompress(x, false);
+			else
+				pdb1a.ModCompress(x, false);
+			printf("%1.4f\t", pdb1a.GetAverageValue());
+		}
+		printf("\n");
+	}
+
+	for (int div = 0; div <= 1; div++)
+	{
+		printf("Starting TOH %s\n", div?"DIV":"MOD");
+		for (int x = 1; x <= 16; x *= 2)
+			printf("%d\t", x);
+		printf("\n");
+		for (int x = 1; x <= 16; x *= 2)
+		{
+			pdb2a = pdb2;
+			if (div)
+				pdb2a.DivCompress(x, false);
+			else
+				pdb2a.ModCompress(x, false);
+			printf("%1.4f\t", pdb2a.GetAverageValue());
+		}
+		printf("\n");
+	}
+
+}
 
 
 void MDDeltaPlusMinTest()

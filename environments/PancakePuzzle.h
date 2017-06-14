@@ -22,7 +22,7 @@ public:
 		for (unsigned int x = 0; x < N; x++)
 			puzzle[x] = x;
 	}
-	uint8_t puzzle[N];
+	int puzzle[N];
 };
 
 template <int N>
