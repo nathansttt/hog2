@@ -20,8 +20,6 @@ struct MMCompare {
 	{
 		double p1 = std::max(i1.g+i1.h, i1.g*2+epsilon);
 		double p2 = std::max(i2.g+i2.h, i2.g*2+epsilon);
-//		double p1 = i1.g+i1.h;
-//		double p2 = i2.g+i2.h;
 		if (fequal(p1, p2))
 		{
 			//return (fgreater(i1.g, i2.g)); // low g-cost over high
@@ -76,6 +74,7 @@ public:
 	uint64_t GetNecessaryExpansions() const;
 	//void FullBPMX(uint64_t nodeID, int distance);
 	
+	std::string SVGDraw() const;
 	void OpenGLDraw() const;
 	void PrintHDist()
 	{
@@ -138,7 +137,8 @@ private:
 	}
 
 	void OpenGLDraw(const priorityQueue &queue) const;
-	
+	std::string SVGDraw(const priorityQueue &queue) const;
+
 	void Expand(priorityQueue &current,
 				priorityQueue &opposite,
 				Heuristic<state> *heuristic,
@@ -515,13 +515,13 @@ uint64_t MM<state, action, environment, priorityQueue>::GetNecessaryExpansions()
 	for (unsigned int x = 0; x < forwardQueue.size(); x++)
 	{
 		const AStarOpenClosedData<state> &data = forwardQueue.Lookat(x);
-		if ((data.where == kClosedList) && (fless(data.g+data.h, currentCost)))
+		if ((data.where == kClosedList) && (fless(data.g+data.h, currentCost)) && fless(data.g*2, currentCost))
 			count++;
 	}
 	for (unsigned int x = 0; x < backwardQueue.size(); x++)
 	{
 		const AStarOpenClosedData<state> &data = backwardQueue.Lookat(x);
-		if ((data.where == kClosedList) && (fless(data.g+data.h, currentCost)))
+		if ((data.where == kClosedList) && (fless(data.g+data.h, currentCost)) && (fless(data.g*2, currentCost)))
 			count++;
 	}
 	return count;
@@ -575,6 +575,61 @@ void MM<state, action, environment, priorityQueue>::OpenGLDraw(const priorityQue
 			env->OpenGLDraw(data.data);
 		}
 	}
+}
+
+template <class state, class action, class environment, class priorityQueue>
+std::string MM<state, action, environment, priorityQueue>::SVGDraw() const
+{
+	std::string s;
+	s += SVGDraw(forwardQueue);
+	s += SVGDraw(backwardQueue);
+	return s;
+}
+
+template <class state, class action, class environment, class priorityQueue>
+std::string MM<state, action, environment, priorityQueue>::SVGDraw(const priorityQueue &queue) const
+{
+	std::string s;
+	double transparency = 1.0;
+	if (queue.size() == 0)
+		return s;
+	uint64_t top = -1;
+	
+	if (queue.OpenSize() > 0)
+	{
+		top = queue.Peek();
+	}
+	for (unsigned int x = 0; x < queue.size(); x++)
+	{
+		const auto &data = queue.Lookat(x);
+		
+		if (x == top)
+		{
+			env->SetColor(1.0, 1.0, 0.0, transparency);
+			s+=env->SVGDraw(data.data);
+		}
+		else if ((data.where == kOpenList) && (data.reopened))
+		{
+			env->SetColor(0.0, 0.5, 0.5, transparency);
+			s+=env->SVGDraw(data.data);
+		}
+		else if (data.where == kOpenList)
+		{
+			env->SetColor(0.0, 1.0, 0.0, transparency);
+			s+=env->SVGDraw(data.data);
+		}
+		else if ((data.where == kClosedList) && (data.reopened))
+		{
+			env->SetColor(0.5, 0.0, 0.5, transparency);
+			s+=env->SVGDraw(data.data);
+		}
+		else if (data.where == kClosedList)
+		{
+			env->SetColor(1.0, 0.0, 0.0, transparency);
+			s+=env->SVGDraw(data.data);
+		}
+	}
+	return s;
 }
 
 #endif /* MM_h */

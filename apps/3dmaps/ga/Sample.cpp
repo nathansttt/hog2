@@ -35,12 +35,14 @@ const int childSize = populationSize*(populationSize-1);
 std::vector<NQueenState> parents(populationSize);
 std::vector<NQueenState> children(childSize);
 
+int boardSize = 8;
+
 struct splitInfo {
 	int parent1, parent2, splitLoc;
 };
 
 std::vector<splitInfo> childrenInfo(childSize);
-
+bool go = false;
 
 NQueens q;
 
@@ -66,10 +68,11 @@ void CreateSimulation(int id)
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
+	InstallKeyboardHandler(MyDisplayHandler, "Toggle Size", "Change the size of the board to 6*(x+2)", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset to random state", kNoModifier, 'r');
+	InstallKeyboardHandler(MyDisplayHandler, "Go Simulation", "Run simulation until convergence", kNoModifier, 'g');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
@@ -95,7 +98,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		SetNumPorts(windowID, 1);
 		
 		for (int x = 0; x < parents.size(); x++)
-			parents[x] = NQueenState();
+			parents[x] = NQueenState(boardSize);
 
 		BuildChildren();
 	}
@@ -103,6 +106,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	const int colorScheme = 6;
 	NQueens env;
 	for (int x = 0; x < populationSize; x++)
 	{
@@ -113,7 +117,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		glScalef(scale, scale, 1);
 		glTranslatef(-inv+1./2.+2.1*x, -inv+1./2., 0);
 		env.OpenGLDraw(parents[x]);
-		recColor c = getColor(x, 0, populationSize-1, 1);// 1, 4
+		recColor c = getColor(x, 0, populationSize-1, colorScheme);// 1, 4
 		env.OpenGLDrawBackground(c.r*0.5, c.g*0.5, c.b*0.5);
 		glPopMatrix();
 	}
@@ -126,16 +130,23 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		glScalef(scale, scale, 1);
 		float realx = x%populationSize;
 		float realy = 1+x/populationSize;
-		glTranslatef(-inv+1./2.+2.1*realx, -inv+1./2.+2.1*realy, 0);
+		glTranslatef(-inv+1./2.+2.1*realx, -inv+1./2.+2.1*realy+3*scale, 0);
 		env.OpenGLDraw(children[x]);
 
-		recColor c = getColor(childrenInfo[x].parent1, 0, populationSize-1, 1);// 1, 4
+		recColor c = getColor(childrenInfo[x].parent1, 0, populationSize-1, colorScheme);// 1, 4
 		env.OpenGLDrawBackground(children[x], c.r*0.5, c.g*0.5, c.b*0.5, 0, childrenInfo[x].splitLoc+1);
-		c = getColor(childrenInfo[x].parent2, 0, populationSize-1, 1);// 1, 4
+		c = getColor(childrenInfo[x].parent2, 0, populationSize-1, colorScheme);// 1, 4
 		env.OpenGLDrawBackground(children[x], c.r*0.5, c.g*0.5, c.b*0.5, childrenInfo[x].splitLoc+1, 8);
 		glPopMatrix();
 	}
-	//	MyDisplayHandler(windowID, kNoModifier, 'o');
+	if (go)
+	{
+		MyDisplayHandler(windowID, kNoModifier, 'o');
+		MyDisplayHandler(windowID, kNoModifier, 'p');
+		for (int x = 0; x < populationSize; x++)
+			if (env.NumCollisions(parents[x]) == 0)
+				go = false;
+	}
 }
 
 
@@ -156,6 +167,17 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
+			//q = NQueenState(6*(key-'0'+1));
+		{
+			boardSize = 4*(key-'0'+1);
+			for (int x = 0; x < parents.size(); x++)
+				parents[x] = NQueenState(boardSize);
+			for (int x = 0; x < children.size(); x++)
+				children[x] = NQueenState(boardSize);
+		}
+			break;
+
 		case '[': break;
 		case ']':  break;
 		case '\t':
@@ -169,7 +191,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'r':
 		{
 			for (int x = 0; x < parents.size(); x++)
-				parents[x] = NQueenState();
+				parents[x] = NQueenState(boardSize);
 		}
 			break;
 		case 'p':
@@ -180,6 +202,11 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'o':
 		{
 			BuildChildren();
+		}
+			break;
+		case 'g':
+		{
+			go = !go;
 		}
 			break;
 		default:
@@ -232,7 +259,7 @@ void BuildChildren()
 		{
 			children[x].locs[t] = parents[p1].locs[t];
 		}
-		for (int t = crossover+1; t <= parents[p2].locs.size(); t++)
+		for (int t = crossover+1; t < parents[p2].locs.size(); t++)
 		{
 			children[x].locs[t] = parents[p2].locs[t];
 		}

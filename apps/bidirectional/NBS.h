@@ -70,7 +70,6 @@ public:
 	}
 	double GetNodeForwardG(const state& s)
 	{
-		
 		uint64_t childID;
 		auto l = queue.forwardQueue.Lookup(env->GetStateHash(s), childID);
 		if (l != kUnseen)
@@ -79,7 +78,6 @@ public:
 	}
 	double GetNodeBackwardG(const state& s)
 	{
-		
 		uint64_t childID;
 		auto l = queue.backwardQueue.Lookup(env->GetStateHash(s), childID);
 		if (l != kUnseen)
@@ -89,7 +87,8 @@ public:
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
 	uint64_t GetDoubleExpansions() const;
-	uint64_t GetNecessaryExpansions() const {
+	uint64_t GetNecessaryExpansions() const
+	{
 		uint64_t necessary = 0;
 		for (const auto &i : counts)
 		{
@@ -97,6 +96,15 @@ public:
 				necessary+=i.second;
 		}
 		return necessary;
+	}
+	// returns 0...1 for the percentage of the optimal path length on each frontier
+	float GetMeetingPoint()
+	{
+		uint64_t fID, bID;
+		queue.backwardQueue.Lookup(env->GetStateHash(middleNode), bID);
+		queue.forwardQueue.Lookup(env->GetStateHash(middleNode), fID);
+		assert (fequal(queue.backwardQueue.Lookup(bID).g+queue.forwardQueue.Lookup(fID).g, currentCost));
+		return queue.backwardQueue.Lookup(bID).g/currentCost;
 	}
 	double GetSolutionCost() const { return currentCost; }
 	
@@ -297,11 +305,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
 							// TODO: store current solution
-							//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
-							//								   current.Lookup(nextID).g+edgeCost,
-							//								   opposite.Lookup(reverseLoc).g,
-							//								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
-							//								nodesExpanded);
+														printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+															   current.Lookup(nextID).g+edgeCost,
+															   opposite.Lookup(reverseLoc).g,
+															   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
+															nodesExpanded);
 							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
 
 							middleNode = succ;
@@ -328,11 +336,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
 							// TODO: store current solution
-//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
-//								   current.Lookup(nextID).g+edgeCost,
-//								   opposite.Lookup(reverseLoc).g,
-//								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
-//								nodesExpanded);
+							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+								   current.Lookup(nextID).g+edgeCost,
+								   opposite.Lookup(reverseLoc).g,
+								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
+								nodesExpanded);
 							currentCost = current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g;
 							
 							middleNode = succ;
@@ -393,11 +401,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
 							// TODO: store current solution
-//							printf("NBS Potential solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
-//								current.Lookup(nextID).g + edgeCost,
-//								opposite.Lookup(reverseLoc).g,
-//								current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
-//								nodesExpanded);
+							printf("NBS Potential solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+								current.Lookup(nextID).g + edgeCost,
+								opposite.Lookup(reverseLoc).g,
+								current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
+								nodesExpanded);
 							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
 							
 							middleNode = succ;

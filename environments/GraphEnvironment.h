@@ -312,6 +312,11 @@ public:
 	virtual void GLDrawLine(const graphState &x, const graphState &y) const;
 	virtual void GLLabelState(const graphState&, const char *) const;
 
+	std::string SVGHeader() const;
+	std::string SVGDraw() const;
+	std::string SVGDraw(const graphState &s) const;
+	std::string SVGLabelState(const graphState &s, const char *) const;
+
 	Graph *GetGraph() { return g; };
 
 	virtual void StoreGoal(graphState &) {}

@@ -12,6 +12,7 @@
 
 void MapUnit::OpenGLDraw(const MapEnvironment *me, const MapSimulationInfo *) const
 {
+//	me->OpenGLDraw(loc);
 	Map *map = me->GetMap();
 	GLdouble xx, yy, zz, rad;
 	if ((loc.x >= map->GetMapWidth()) || (loc.y >= map->GetMapHeight()))

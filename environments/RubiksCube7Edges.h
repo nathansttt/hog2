@@ -41,24 +41,24 @@ public:
 		state = state&(~(blank<<(12+4*whichLoc)));
 		state |= (value<<(12+4*whichLoc));
 	}
-	bool GetCubeOrientation(int whichLoc) const
+	bool GetCubeOrientation(int whichCube) const
 	{
-		return state&(0x1<<whichLoc);
+		return state&(0x1<<whichCube);
 	}
-	void SetCubeOrientation(int whichLoc, bool flip)
+	void SetCubeOrientation(int whichCube, bool flip)
 	{
 		uint64_t blank = 0x1;
 		if (flip)
-			state |= (0x1<<whichLoc);
+			state |= (0x1<<whichCube);
 		else
-			state = state&(~(blank<<whichLoc));
+			state = state&(~(blank<<whichCube));
 	}
-	void FlipCubeOrientation(int whichLoc)
+	void FlipCubeOrientation(int whichCube)
 	{
-//		if (whichLoc == 0xF)
+//		if (whichCube == 0xF)
 //			return;
-		//		printf("Was: 0x%X [flip %d] -- ", state, whichLoc);
-		state = state^(0x1<<whichLoc);
+		//		printf("Was: 0x%X [flip %d] -- ", state, whichCube);
+		state = state^(0x1<<whichCube);
 		//		printf("Now: 0x%X \n", state);
 	}
 	uint64_t state;

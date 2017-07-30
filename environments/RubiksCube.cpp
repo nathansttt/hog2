@@ -536,7 +536,7 @@ void RubiksCube::OpenGLDrawCube(int cube) const
 	float scale = 0.3;
 	float offset = 0.95*scale/3.0;
 	const float offset2 = scale/3.0;
-	const float epsilon = 0.0001;
+	const float epsilon = 0.002;
 	
 	switch (cube)
 	{
@@ -1039,56 +1039,28 @@ double RubikArbitraryGoalPDB::HCost(const RubiksState &a, const RubiksState &b) 
 	RubiksState tmp(a);
 	int dual[12];
 	int rotation[12];
-	// int edgeoff[12];
-	// Relabel b to be the goal
 	for (int x = 0; x < 8; x++)
 	{
 		dual[b.corner.GetCubeInLoc(x)] = x;
 		rotation[b.corner.GetCubeInLoc(x)] = b.corner.GetCubeOrientation(b.corner.GetCubeInLoc(x));
-		//edgeoff[x] = b.corner.GetCubeOrientation(b.corner.GetCubeInLoc(x));
 	}
 	for (int x = 0; x < 8; x++)
 	{
 		tmp.corner.SetCubeInLoc(x, dual[a.corner.GetCubeInLoc(x)]);
-		//tmp.corner.SetCubeOrientation(x, (3 - rotation[a.corner.GetCubeInLoc(x)] + a.corner.GetCubeOrientation(a.corner.GetCubeInLoc(x)))%3);
-		//(3+a.corner.GetCubeOrientation(x)+b.corner.GetCubeOrientation(dual[a.corner.GetCubeInLoc(x)]))%3);
 		tmp.corner.SetCubeOrientation(dual[a.corner.GetCubeInLoc(x)], (3 - rotation[a.corner.GetCubeInLoc(x)] + a.corner.GetCubeOrientation(a.corner.GetCubeInLoc(x)))%3);
 	}
 
 	for (int x = 0; x < 12; x++)
 	{
 		dual[b.edge.GetCubeInLoc(x)] = x;
-		//edgeoff[x] = b.edge.GetCubeOrientation(b.corner.GetCubeInLoc(x));
 		rotation[b.edge.GetCubeInLoc(x)] = b.edge.GetCubeOrientation(b.edge.GetCubeInLoc(x));
 	}
-//	std::cout << "--->";
-//	for (int x = 0; x < 12; x++)
-//		std::cout << x << "[" << rotation[x] << "]->" << dual[x] << " ";
-//	std::cout << "\n";
 	for (int x = 0; x < 12; x++)
 	{
 		tmp.edge.SetCubeInLoc(x, dual[a.edge.GetCubeInLoc(x)]);
-		//tmp.edge.SetCubeOrientation(x, (2+a.edge.GetCubeOrientation(x)-b.edge.GetCubeOrientation(dual[a.edge.GetCubeInLoc(x)]))%2);
 		tmp.edge.SetCubeOrientation(dual[a.edge.GetCubeInLoc(x)], (2 - rotation[a.edge.GetCubeInLoc(x)] + a.edge.GetCubeOrientation(a.edge.GetCubeInLoc(x)))%2);
 	}
 	
-//	std::cout << "Start " << a << "\n";
-//	std::cout << "Goal  " << b << "\n";
-//	std::cout << "Trans " << tmp << "\n";
-	
-//	for (int x = 0; x < 12; x++)
-//	{
-//		for (int y = x+1; y < 12; y++)
-//		{
-//			tmp.edge.SetCubeOrientation(x, 1-tmp.edge.GetCubeOrientation(x));
-//			tmp.edge.SetCubeOrientation(y, 1-tmp.edge.GetCubeOrientation(y));
-//			std::cout << "-*- " << tmp << "\n";
-//			std::cout << "h: " << pdb->HCost(tmp, goal) << "\n";
-//			tmp.edge.SetCubeOrientation(x, 1-tmp.edge.GetCubeOrientation(x));
-//			tmp.edge.SetCubeOrientation(y, 1-tmp.edge.GetCubeOrientation(y));
-//		}
-//	}
-//	std::cout << "h: " << pdb->HCost(tmp, goal) << "\n";
 	return pdb->HCost(tmp, goal);
 	
 }

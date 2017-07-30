@@ -45,7 +45,7 @@ public:
 	virtual void UpdateLocation(environment *, state &, bool success, SimulationInfo<state,action,environment> *) = 0;
 	virtual void GetLocation(state &) = 0;
 	virtual void OpenGLDraw(const environment *, const SimulationInfo<state,action,environment> *) const = 0;
-	virtual void GetGoal(state &s) = 0;
+	virtual void GetGoal(state &s) {};
 	virtual bool Done() { return true;} 
 
 	virtual double GetSpeed() { return speed; }

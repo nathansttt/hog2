@@ -29,6 +29,7 @@ public:
 	virtual void GetLocation(xyLoc &l)
 	{ l = loc; }
 	virtual void OpenGLDraw(const MapEnvironment *, const MapSimulationInfo *) const;
+	virtual void GetGoal(xyLoc &s) { s = loc; }
 protected:
 	GLfloat r, g, b;
 	xyLoc loc;

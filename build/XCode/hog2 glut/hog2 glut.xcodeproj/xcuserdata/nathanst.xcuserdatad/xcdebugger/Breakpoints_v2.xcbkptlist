@@ -10,13 +10,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "491808418.796552"
+            timestampString = "519157214.143117"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "473"
-            endingLineNumber = "473"
+            startingLineNumber = "506"
+            endingLineNumber = "506"
             landmarkName = "ForwardThreadWorker(int threadNum, int depth, NBitArray&lt;pdbBits&gt; &amp;DB, std::vector&lt;bool&gt; &amp;coarse, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeEdges.cpp"
-            timestampString = "488354157.400777"
+            timestampString = "508915511.930355"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1183"
-            endingLineNumber = "1183"
+            startingLineNumber = "1353"
+            endingLineNumber = "1353"
             landmarkName = "RubikEdgePDB::GetPDBHash(const RubikEdgeState &amp;s, int threadID)"
             landmarkType = "5">
          </BreakpointContent>
@@ -48,7 +48,7 @@
             startingLineNumber = "143"
             endingLineNumber = "143"
             landmarkName = "GetPath(environment *env, state from, state to, std::vector&lt;action&gt; &amp;thePath)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -112,7 +112,7 @@
             startingLineNumber = "59"
             endingLineNumber = "59"
             landmarkName = "mem(0)"
-            landmarkType = "7">
+            landmarkType = "9">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -160,7 +160,7 @@
             startingLineNumber = "75"
             endingLineNumber = "75"
             landmarkName = "~NBitArray()"
-            landmarkType = "7">
+            landmarkType = "9">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -352,7 +352,7 @@
             startingLineNumber = "109"
             endingLineNumber = "109"
             landmarkName = "Resize(uint64_t newMaxEntries)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1455,6 +1455,22 @@
             startingLineNumber = "182"
             endingLineNumber = "182"
             landmarkName = "Get(uint64_t index)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/RubiksCubeCorners.cpp"
+            timestampString = "503734395.499926"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1405"
+            endingLineNumber = "1405"
+            landmarkName = "RubikCornerPDB::Save(FILE *f)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1465,29 +1481,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeCorners.cpp"
-            timestampString = "488354157.400777"
+            timestampString = "503734395.499926"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1282"
-            endingLineNumber = "1282"
-            landmarkName = "RubikCornerPDB::Save(FILE *f)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../environments/RubiksCubeCorners.cpp"
-            timestampString = "488354157.400777"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1253"
-            endingLineNumber = "1253"
+            startingLineNumber = "1376"
+            endingLineNumber = "1376"
             landmarkName = "RubikCornerPDB::Save(const char *prefix)"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1503,7 +1503,7 @@
             startingLineNumber = "123"
             endingLineNumber = "123"
             landmarkName = "Write(FILE *f)"
-            landmarkType = "7">
+            landmarkType = "9">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -1566,7 +1566,7 @@
             startingLineNumber = "136"
             endingLineNumber = "136"
             landmarkName = "Read(FILE *f)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1576,11 +1576,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "481676125.381262"
+            timestampString = "508888346.245593"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1918"
-            endingLineNumber = "1918"
+            startingLineNumber = "1934"
+            endingLineNumber = "1934"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1592,11 +1592,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "481676125.381262"
+            timestampString = "508888346.245593"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1915"
-            endingLineNumber = "1915"
+            startingLineNumber = "1931"
+            endingLineNumber = "1931"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1608,11 +1608,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "481676125.381262"
+            timestampString = "508888346.245593"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1919"
-            endingLineNumber = "1919"
+            startingLineNumber = "1935"
+            endingLineNumber = "1935"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1630,7 +1630,7 @@
             startingLineNumber = "908"
             endingLineNumber = "908"
             landmarkName = "RubikPDB::Load(FILE *f)"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1640,11 +1640,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeEdges.cpp"
-            timestampString = "488354157.400777"
+            timestampString = "508915511.930355"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1335"
-            endingLineNumber = "1335"
+            startingLineNumber = "1505"
+            endingLineNumber = "1505"
             landmarkName = "RubikEdgePDB::Load(FILE *f)"
             landmarkType = "5">
          </BreakpointContent>
@@ -1656,11 +1656,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "481676125.381262"
+            timestampString = "508888346.245593"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1927"
-            endingLineNumber = "1927"
+            startingLineNumber = "1943"
+            endingLineNumber = "1943"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1678,7 +1678,7 @@
             startingLineNumber = "877"
             endingLineNumber = "877"
             landmarkName = "RubikPDB::Load(const char *prefix)"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1688,11 +1688,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "481676125.381262"
+            timestampString = "508888346.245593"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1974"
-            endingLineNumber = "1974"
+            startingLineNumber = "1990"
+            endingLineNumber = "1990"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1704,13 +1704,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/MR1PermutationPDB.h"
-            timestampString = "469589873.303907"
+            timestampString = "492559076.82258"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "111"
-            endingLineNumber = "111"
+            startingLineNumber = "92"
+            endingLineNumber = "92"
             landmarkName = "GetPDBHash(const state &amp;s, int threadID)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1720,11 +1720,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/IDAStar.h"
-            timestampString = "466707257.667267"
+            timestampString = "509140075.164067"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "116"
-            endingLineNumber = "116"
+            startingLineNumber = "117"
+            endingLineNumber = "117"
             landmarkName = "GetPath(SearchEnvironment&lt;state, action&gt; *env, state from, state to, std::vector&lt;action&gt; &amp;thePath)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1736,11 +1736,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/IDAStar.h"
-            timestampString = "466707261.146839"
+            timestampString = "509140075.164067"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "123"
-            endingLineNumber = "123"
+            startingLineNumber = "124"
+            endingLineNumber = "124"
             landmarkName = "GetPath(SearchEnvironment&lt;state, action&gt; *env, state from, state to, std::vector&lt;action&gt; &amp;thePath)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1752,11 +1752,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/test/PDBRankingTest.cpp"
-            timestampString = "488097152.299108"
+            timestampString = "492558917.964103"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "70"
-            endingLineNumber = "70"
+            startingLineNumber = "71"
+            endingLineNumber = "71"
             landmarkName = "TreePDBTest()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1767,30 +1767,14 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../../generic/MM.h"
-            timestampString = "492195413.00003"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "300"
-            endingLineNumber = "300"
-            landmarkName = "Expand(priorityQueue &amp;current, priorityQueue &amp;opposite, Heuristic&lt;state&gt; *heuristic, const state &amp;target, std::unordered_map&lt;double, int&gt; &amp;ming, std::unordered_map&lt;double, int&gt; &amp;minf)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "../../../algorithms/AStarOpenClosed.h"
-            timestampString = "467746062.500104"
+            timestampString = "509005803.439552"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "313"
-            endingLineNumber = "313"
+            startingLineNumber = "330"
+            endingLineNumber = "330"
             landmarkName = "HeapifyUp(unsigned int index)"
-            landmarkType = "7">
+            landmarkType = "9">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -1847,11 +1831,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../algorithms/AStarOpenClosed.h"
-            timestampString = "467746066.200027"
+            timestampString = "509005803.439552"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "287"
-            endingLineNumber = "287">
+            startingLineNumber = "304"
+            endingLineNumber = "304">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -1908,13 +1892,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "491808418.796552"
+            timestampString = "519157214.143117"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "442"
-            endingLineNumber = "442"
+            startingLineNumber = "475"
+            endingLineNumber = "475"
             landmarkName = "ForwardThreadWorker(int threadNum, int depth, NBitArray&lt;pdbBits&gt; &amp;DB, std::vector&lt;bool&gt; &amp;coarse, SharedQueue&lt;std::pair&lt;uint64_t, uint64_t&gt; &gt; *work, SharedQueue&lt;uint64_t&gt; *results, std::mutex *lock)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1924,13 +1908,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/GUICode.cpp"
-            timestampString = "482958642.526395"
+            timestampString = "520976178.289056"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "874"
-            endingLineNumber = "874"
-            landmarkName = "AnalyzeMap(const char *map, const char *scenario)"
-            landmarkType = "7">
+            startingLineNumber = "990"
+            endingLineNumber = "990"
+            landmarkName = "AnalyzeMap(const char *map, const char *scenario, double weight)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1956,13 +1940,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/delta/Driver.cpp"
-            timestampString = "492114679.262579"
+            timestampString = "519026407.899946"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "210"
-            endingLineNumber = "210"
+            startingLineNumber = "307"
+            endingLineNumber = "307"
             landmarkName = "MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1972,13 +1956,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/GraphEnvironment.cpp"
-            timestampString = "482129905.48047"
+            timestampString = "513023829.211194"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "344"
-            endingLineNumber = "344"
+            startingLineNumber = "345"
+            endingLineNumber = "345"
             landmarkName = "GraphEnvironment::OpenGLDraw(const graphState &amp;s)"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1988,13 +1972,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/roads/Sample.cpp"
-            timestampString = "484849366.838241"
+            timestampString = "514849003.068854"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "169"
-            endingLineNumber = "169"
+            startingLineNumber = "236"
+            endingLineNumber = "236"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2004,13 +1988,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/roads/Sample.cpp"
-            timestampString = "484849443.380529"
+            timestampString = "514849537.747099"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "422"
-            endingLineNumber = "422"
+            startingLineNumber = "615"
+            endingLineNumber = "615"
             landmarkName = "MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2020,11 +2004,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/MMRubik.cpp"
-            timestampString = "491504398.346392"
+            timestampString = "504569982.770347"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "933"
-            endingLineNumber = "933"
+            startingLineNumber = "929"
+            endingLineNumber = "929"
             landmarkName = "MM(RubiksState &amp;start, RubiksState &amp;goal, const char *p1, const char *p2, heuristicType h, const char *hloc)"
             landmarkType = "7">
          </BreakpointContent>
@@ -2036,13 +2020,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497073838.135257"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1375"
-            endingLineNumber = "1375"
+            startingLineNumber = "1376"
+            endingLineNumber = "1376"
             landmarkName = "MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2052,13 +2036,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497073838.135257"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1400"
-            endingLineNumber = "1400"
+            startingLineNumber = "1401"
+            endingLineNumber = "1401"
             landmarkName = "MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2106,7 +2090,7 @@
             startingLineNumber = "293"
             endingLineNumber = "293"
             landmarkName = "CanonicalGrid::GCost(const xyLoc &amp;l1, const xyLoc &amp;l2)"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2116,11 +2100,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/GraphEnvironment.cpp"
-            timestampString = "484848323.986386"
+            timestampString = "513923748.846575"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "439"
-            endingLineNumber = "439">
+            startingLineNumber = "552"
+            endingLineNumber = "552">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2130,13 +2114,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497073838.135257"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1454"
-            endingLineNumber = "1454"
+            startingLineNumber = "1455"
+            endingLineNumber = "1455"
             landmarkName = "TestJPS()"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2146,13 +2130,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497073838.135257"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1457"
-            endingLineNumber = "1457"
+            startingLineNumber = "1458"
+            endingLineNumber = "1458"
             landmarkName = "TestJPS()"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2162,13 +2146,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497073838.135257"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1130"
-            endingLineNumber = "1130"
+            startingLineNumber = "1131"
+            endingLineNumber = "1131"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2178,13 +2162,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497073838.135257"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1191"
-            endingLineNumber = "1191"
+            startingLineNumber = "1192"
+            endingLineNumber = "1192"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2194,13 +2178,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497073838.135257"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1198"
-            endingLineNumber = "1198"
+            startingLineNumber = "1199"
+            endingLineNumber = "1199"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2210,13 +2194,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497076250.544559"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1825"
-            endingLineNumber = "1825"
+            startingLineNumber = "1835"
+            endingLineNumber = "1835"
             landmarkName = "MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2242,13 +2226,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048286.363397"
+            timestampString = "513543086.974994"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2107"
-            endingLineNumber = "2107"
+            startingLineNumber = "2119"
+            endingLineNumber = "2119"
             landmarkName = "ComputeReach(xyLoc start, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;search)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2258,13 +2242,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048286.363397"
+            timestampString = "513543086.974994"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2109"
-            endingLineNumber = "2109"
+            startingLineNumber = "2121"
+            endingLineNumber = "2121"
             landmarkName = "ComputeReach(xyLoc start, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;search)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2274,13 +2258,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048286.363397"
+            timestampString = "513543086.974994"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2113"
-            endingLineNumber = "2113"
+            startingLineNumber = "2125"
+            endingLineNumber = "2125"
             landmarkName = "ComputeReach(xyLoc start, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;search)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2290,28 +2274,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/MR1Permutation.cpp"
-            timestampString = "488329228.130366"
+            timestampString = "508228691.482386"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "59"
-            endingLineNumber = "59"
+            startingLineNumber = "82"
+            endingLineNumber = "82"
             landmarkName = "MR1KPermutation::Unrank(uint64_t hash, int *puzzle, int *dual, int distinctSize, int puzzleSize)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "492068285.927345"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "950"
-            endingLineNumber = "950"
-            landmarkName = "PDBTest()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -2322,13 +2290,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "492068285.927345"
+            timestampString = "508749301.826576"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1018"
-            endingLineNumber = "1018"
+            startingLineNumber = "1045"
+            endingLineNumber = "1045"
             landmarkName = "PDBTest()"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2338,13 +2306,29 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "492068285.927345"
+            timestampString = "508749301.826576"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1027"
-            endingLineNumber = "1027"
+            startingLineNumber = "1113"
+            endingLineNumber = "1113"
             landmarkName = "PDBTest()"
-            landmarkType = "7">
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/Driver.cpp"
+            timestampString = "508749301.826576"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1122"
+            endingLineNumber = "1122"
+            landmarkName = "PDBTest()"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2354,13 +2338,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "489048127.668476"
+            timestampString = "497076250.544559"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1707"
-            endingLineNumber = "1707"
+            startingLineNumber = "1717"
+            endingLineNumber = "1717"
             landmarkName = "AnimateAlgorithms(const std::string &amp;prefix)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2376,7 +2360,416 @@
             startingLineNumber = "274"
             endingLineNumber = "274"
             landmarkName = "mouseMovedButton(int x, int y)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../search/PermutationPDB.h"
+            timestampString = "495404657.771125"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "145"
+            endingLineNumber = "145"
+            landmarkName = "Save(FILE *f)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;MNPuzzleState&lt;4, 4&gt;, slideDir, MNPuzzle&lt;4, 4&gt; &gt;::Save(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.120629"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "133"
+                  endingLineNumber = "133"
+                  offsetFromSymbolStart = "23">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 4&gt; &gt;::Save(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.120828"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "133"
+                  endingLineNumber = "133"
+                  offsetFromSymbolStart = "23">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 10&gt; &gt;::Save(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.120931"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "133"
+                  endingLineNumber = "133"
+                  offsetFromSymbolStart = "23">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../search/PermutationPDB.h"
+            timestampString = "495404657.771125"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "123"
+            endingLineNumber = "123"
+            landmarkName = "Load(FILE *f)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;MNPuzzleState&lt;4, 4&gt;, slideDir, MNPuzzle&lt;4, 4&gt;, 8&gt;::Load(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "495173972.516454"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "121"
+                  endingLineNumber = "121"
+                  offsetFromSymbolStart = "20">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 4&gt;, 8&gt;::Load(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "495173972.516604"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "121"
+                  endingLineNumber = "121"
+                  offsetFromSymbolStart = "20">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 2&gt;, 8&gt;::Load(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "495173972.51678"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "121"
+                  endingLineNumber = "121"
+                  offsetFromSymbolStart = "20">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 6&gt;, 8&gt;::Load(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "495173972.516878"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "121"
+                  endingLineNumber = "121"
+                  offsetFromSymbolStart = "20">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 8&gt;, 8&gt;::Load(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "495173972.517006"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "121"
+                  endingLineNumber = "121"
+                  offsetFromSymbolStart = "20">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 10&gt;, 8&gt;::Load(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "495173972.517133"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "121"
+                  endingLineNumber = "121"
+                  offsetFromSymbolStart = "20">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../search/PermutationPDB.h"
+            timestampString = "495404657.771125"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "96"
+            endingLineNumber = "96"
+            landmarkName = "Load(const char *prefix)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;MNPuzzleState&lt;4, 4&gt;, slideDir, MNPuzzle&lt;4, 4&gt; &gt;::Load(char const*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.122299"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "94"
+                  endingLineNumber = "94"
+                  offsetFromSymbolStart = "33">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 4&gt; &gt;::Load(char const*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.122398"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "94"
+                  endingLineNumber = "94"
+                  offsetFromSymbolStart = "33">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 10&gt; &gt;::Load(char const*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.12249"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "94"
+                  endingLineNumber = "94"
+                  offsetFromSymbolStart = "33">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../search/PermutationPDB.h"
+            timestampString = "495404657.771125"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "110"
+            endingLineNumber = "110"
+            landmarkName = "Save(const char *prefix)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;MNPuzzleState&lt;4, 4&gt;, slideDir, MNPuzzle&lt;4, 4&gt; &gt;::Save(char const*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.122972"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "103"
+                  endingLineNumber = "103"
+                  offsetFromSymbolStart = "33">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 4&gt; &gt;::Save(char const*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.123103"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "103"
+                  endingLineNumber = "103"
+                  offsetFromSymbolStart = "33">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PermutationPDB&lt;TopSpinState&lt;18&gt;, int, TopSpin&lt;18, 10&gt; &gt;::Save(char const*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/search/PermutationPDB.h"
+                  timestampString = "492559849.123196"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "103"
+                  endingLineNumber = "103"
+                  offsetFromSymbolStart = "33">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/delta/Driver.cpp"
+            timestampString = "519026407.899946"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "205"
+            endingLineNumber = "205"
+            landmarkName = "MyCLHandler(char *argument[], int maxNumArgs)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../utils/NBitArray.h"
+            timestampString = "495154294.652438"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "140"
+            endingLineNumber = "140"
+            landmarkName = "Read(FILE *f)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "NBitArray&lt;8ull&gt;::Read(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/utils/NBitArray.h"
+                  timestampString = "495160346.091428"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "140"
+                  endingLineNumber = "140"
+                  offsetFromSymbolStart = "178">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "NBitArray&lt;4ull&gt;::Read(__sFILE*)"
+                  moduleName = "Delta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/utils/NBitArray.h"
+                  timestampString = "495160346.091523"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "140"
+                  endingLineNumber = "140"
+                  offsetFromSymbolStart = "178">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/voxel/Sample.cpp"
+            timestampString = "519855160.74804"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "278"
+            endingLineNumber = "278"
+            landmarkName = "MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/BSStar.h"
+            timestampString = "509049296.525142"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "152"
+            endingLineNumber = "152"
+            landmarkName = "DoSingleSearchStep(std::vector&lt;state&gt; &amp;thePath)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../gui/GLUThog.cpp"
+            timestampString = "513543311.893307"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "110"
+            endingLineNumber = "110"
+            landmarkName = "createMenus()"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

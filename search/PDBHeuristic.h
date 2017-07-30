@@ -58,13 +58,15 @@ public:
 	virtual void Save(FILE *f);
 	virtual std::string GetFileName(const char *prefix) = 0;
 	
+	/** This methods randomizes the entries in the PDB. Only useful for testing purposes. (eg to test structure in compression) */
+	void ShuffleValues();
 	void BuildPDB(const state &goal, int numThreads)
 	{ BuildPDBForwardBackward(goal, numThreads); }
 	void BuildPDBForward(const state &goal, int numThreads);
 	void BuildPDBBackward(const state &goal, int numThreads);
 	void BuildPDBForwardBackward(const state &goal, int numThreads);
 
-	void BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads);
+	void BuildAdditivePDB(const state &goal, int numThreads);
 
 	void DivCompress(int factor, bool print_histogram);
 	void ModCompress(int factor, bool print_histogram);
@@ -107,6 +109,15 @@ public:
 	abstractState goalState;
 private:
 	bool goalSet;
+	void AdditiveForwardThreadWorker(int threadNum, int depth,
+									 NBitArray<pdbBits> &DB,
+									 std::vector<bool> &coarse,
+									 SharedQueue<std::pair<uint64_t, uint64_t> > *work,
+									 SharedQueue<uint64_t> *results,
+									 std::mutex *lock);
+	void GetAdditiveNeighbors(const abstractState &s,
+							  std::vector<std::pair<abstractState, int>> &neighbors);
+	
 	void ForwardThreadWorker(int threadNum, int depth,
 							 NBitArray<pdbBits> &DB,
 							 std::vector<bool> &coarse,
@@ -734,10 +745,173 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
-void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildAdditivePDB(state &goal, const char *pdb_filename, int numThreads)
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildAdditivePDB(const state &goal, int numThreads)
 {
-	assert(!"Not currently implemented.");
+	assert(goalSet);
+	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue(numThreads*20);
+	SharedQueue<uint64_t> resultQueue;
+	std::mutex lock;
+	
+	uint64_t COUNT = GetPDBSize();
+	PDB.Resize(COUNT);
+	PDB.FillMax();
+	
+	// with weights we have to store the lowest weight stored to make sure
+	// we don't skip regions
+	std::vector<bool> coarseOpenCurr((COUNT+coarseSize-1)/coarseSize);
+	std::vector<bool> coarseOpenNext((COUNT+coarseSize-1)/coarseSize);
+	
+	uint64_t entries = 1;
+	std::cout << "Num Entries: " << COUNT << std::endl;
+	std::cout << "Goal State: " << goalState << std::endl;
+	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	
+	std::deque<state> q_curr, q_next;
+	std::vector<state> children;
+	
+	Timer t;
+	t.StartTimer();
+	PDB.Set(GetPDBHash(goalState), 0);
+	
+	coarseOpenCurr[GetPDBHash(goalState)/coarseSize] = true;
+	int depth = 0;
+	uint64_t newEntries;
+	std::vector<std::thread*> threads(numThreads);
+	printf("Creating %d threads\n", numThreads);
+	do {
+		newEntries = 0;
+		Timer s;
+		s.StartTimer();
+		for (int x = 0; x < numThreads; x++)
+		{
+			threads[x] = new std::thread(&PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::AdditiveForwardThreadWorker,
+										 this,
+										 x, depth, std::ref(PDB), std::ref(coarseOpenNext),
+										 &workQueue, &resultQueue, &lock);
+		}
+		
+		for (uint64_t x = 0; x < COUNT; x+=coarseSize)
+		{
+			if (coarseOpenCurr[x/coarseSize])
+			{
+				workQueue.WaitAdd({x, std::min(COUNT, x+coarseSize)});
+			}
+			coarseOpenCurr[x/coarseSize] = false;
+		}
+		for (int x = 0; x < numThreads; x++)
+		{
+			workQueue.WaitAdd({0,0});
+		}
+		for (int x = 0; x < numThreads; x++)
+		{
+			threads[x]->join();
+			delete threads[x];
+			threads[x] = 0;
+		}
+		// read out node counts
+		uint64_t total = 0;
+		{
+			uint64_t val;
+			while (resultQueue.Remove(val))
+			{
+				total+=val;
+			}
+		}
+		
+		entries += total;//newEntries;
+		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+			   depth, s.EndTimer(), total, entries, COUNT);
+		depth++;
+		coarseOpenCurr.swap(coarseOpenNext);
+	} while (entries != COUNT);
+	
+	printf("%1.2fs elapsed\n", t.EndTimer());
+	if (entries != COUNT)
+	{
+		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		assert(entries == COUNT);
+	}
+	PrintHistogram();
 }
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::GetAdditiveNeighbors(const abstractState &s,
+																											std::vector<std::pair<abstractState, int>> &neighbors)
+{
+	
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::AdditiveForwardThreadWorker(int threadNum, int depth,
+																												   NBitArray<pdbBits> &DB,
+																												   std::vector<bool> &coarse,
+																												   SharedQueue<std::pair<uint64_t, uint64_t> > *work,
+																												   SharedQueue<uint64_t> *results,
+																												   std::mutex *lock)
+{
+	std::pair<uint64_t, uint64_t> p;
+	uint64_t start, end;
+	//std::vector<abstractAction> acts;
+	std::vector<std::pair<abstractState, int>> neighbors;
+	abstractState s(goalState), t(goalState);
+	uint64_t count = 0;
+	
+	struct writeInfo {
+		uint64_t rank;
+		int newGCost;
+	};
+	std::vector<writeInfo> cache;
+	while (true)
+	{
+		work->WaitRemove(p);
+		if (p.first == p.second)
+		{
+			break;
+		}
+		start = p.first;
+		end = p.second;
+		for (uint64_t x = start; x < end; x++)
+		{
+			int stateDepth = DB.Get(x);
+			if (stateDepth == depth)
+			{
+				GetStateFromPDBHash(x, s, threadNum);
+				//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
+				GetAdditiveNeighbors(s, neighbors);
+				for (int y = 0; y < neighbors.size(); y++)
+				{
+					// TODO: Here we need to search until we find states with
+					// non-zero action cost
+					uint64_t nextRank = GetPDBHash(neighbors[y].first, threadNum);
+					int newCost = stateDepth+neighbors[y].second;
+					cache.push_back({nextRank, newCost});
+				}
+			}
+		}
+		// write out everything
+		lock->lock();
+		for (auto d : cache)
+		{
+			if (d.newGCost < DB.Get(d.rank)) // shorter path
+			{
+				count++;
+				coarse[d.rank/coarseSize] = true;
+				DB.Set(d.rank, d.newGCost);
+			}
+		}
+		lock->unlock();
+		cache.resize(0);
+	}
+	results->Add(count);
+}
+
+//template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+//void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::DivCompressHelper(NBitArray<pdbBits> &original,
+//																										 NBitArray<pdbBits> &copy)
+//{
+//	
+//}
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
 void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::DivCompress(int factor, bool print_histogram)
@@ -1215,6 +1389,18 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 		average += PDB.Get(x);
 	}
 	return average/PDB.Size();
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ShuffleValues()
+{
+	for (uint64_t x = PDB.Size(); x > 0; x--)
+	{
+		uint64_t index = (((uint64_t)random()<<32)^(uint64_t)random())%(x);
+		uint64_t tmp = PDB.Get(x-1);
+		PDB.Set(x-1, PDB.Get(index));
+		PDB.Set(index, tmp);
+	}
 }
 
 #endif

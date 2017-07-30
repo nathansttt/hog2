@@ -42,7 +42,7 @@ private:
 
 	double g(double a);
 	double dg(double a);
-	double outputerr(std::vector<double> &output, std::vector<double> &expected, int which);
+	double outputerr(const std::vector<double> &output, const std::vector<double> &expected, int which);
 	
 	double error(double* output);
 	std::vector<std::vector<double> > weight;

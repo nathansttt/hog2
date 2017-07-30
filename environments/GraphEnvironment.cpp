@@ -11,6 +11,7 @@
 #include "GLUtil.h"
 #include "Heap.h"
 #include "FloydWarshall.h"
+#include "SVGUtil.h"
 
 using namespace GraphSearchConstants;
 
@@ -354,7 +355,7 @@ void GraphEnvironment::OpenGLDraw(const graphState &s) const
 		if (1) // draw states by their edges
 		{
 			node *n = g->GetNode(s);
-			glLineWidth(5.0);
+			glLineWidth(2.0);
 			glBegin(GL_LINES);
 
 			GLfloat r, gr, b, t;
@@ -433,6 +434,118 @@ void GraphEnvironment::GLDrawLine(const graphState &from, const graphState &to) 
 	glVertex3f(x, y, z);
 
 	glEnd();
+}
+
+std::string GraphEnvironment::SVGHeader() const
+{
+	std::string s;
+	// 10% margin on all sides of image
+	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(610)+"\" height = \""+std::to_string(610)+"\" ";
+	s += "viewBox=\""+std::to_string(-5)+" "+std::to_string(-5)+" ";
+	s += std::to_string(610)+" "+std::to_string(610)+"\" ";
+	s += "preserveAspectRatio = \"none\" ";
+	s += ">\n";
+	return s;
+}
+std::string GraphEnvironment::SVGLabelState(const graphState &s, const char *str) const
+{
+	float x1, y1;
+	node *n = g->GetNode(s);
+	x1 = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+	y1 = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+	
+	x1 = int((x1+1.0)*300.0+12.0);
+	y1 = int((y1+1.0)*300.0+20.0);
+	
+	return SVGDrawText(x1, y1, str, colors::blue, 24);
+}
+
+std::string GraphEnvironment::SVGDraw(const graphState &s) const
+{
+	float x1, y1;
+	node *n = g->GetNode(s);
+	x1 = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+	y1 = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+
+	x1 = int((x1+1.0)*300.0);
+	y1 = int((y1+1.0)*300.0);
+
+	return SVGDrawCircle(x1, y1, 6, colors::black)+SVGDrawCircle(x1, y1, 2, colors::white);
+}
+
+std::string GraphEnvironment::SVGDraw() const
+{
+	std::string s = "<path d=\"";
+	
+	edge_iterator ei = g->getEdgeIter();
+	int count = 0;
+	int minx = 600, miny=600, maxx = 0, maxy= 0;
+	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
+	{
+		if (e->getFrom() >= e->getTo())
+			continue;
+		//int x, y;
+		//double offsetx, offsety;
+		node *n;
+		n = g->GetNode(e->getFrom());
+		
+		recColor c;
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+
+		if (e->getMarked())
+		{
+//			c.r = 1;
+//			c.g = c.b = 0;
+		}
+		
+		float x1, y1, x2, y2;
+		x1 = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+		y1 = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+	
+		n = g->GetNode(e->getTo());
+		x2 = n->GetLabelF(GraphSearchConstants::kXCoordinate);
+		y2 = n->GetLabelF(GraphSearchConstants::kYCoordinate);
+//	M 100 350 l 150 -300
+		int fx1, fx2, fy1, fy2;
+		fx1 = int((x1+1.0)*300.0);
+		fx2 = int((x2+1.0)*300.0);
+		fy1 = int((y1+1.0)*300.0);
+		fy2 = int((y2+1.0)*300.0);
+		if (fx1 == fx2 && fy1 == fy2)
+			continue;
+		
+		maxx = std::max(maxx, fx1);
+		maxx = std::max(maxx, fx2);
+		minx = std::min(minx, fx1);
+		minx = std::min(minx, fx2);
+
+		maxy = std::max(maxy, fy1);
+		maxy = std::max(maxy, fy2);
+		miny = std::min(miny, fy1);
+		miny = std::min(miny, fy2);
+
+		
+		s += "M "+std::to_string(fx1)+" "+std::to_string(fy1)+" ";
+		s += "L "+std::to_string(fx2)+" "+std::to_string(fy2)+" ";
+
+		if (0 == ++count%200)
+		{
+			s += "\" stroke=\"black\" stroke-width=\"0.1\" fill=\"none\" />\n";
+			s += "<path d=\"";
+		}
+	}
+//	printf("Bounds: (%d, %d) to (%d, %d)\n", minx, miny, maxx, maxy);
+	s += "\" stroke=\"black\" stroke-width=\"0.1\" fill=\"none\" />\n";
+//	for (float x = minx; x <= maxx; x += (maxx-minx)/10.0)
+//	{
+//		s += SVGDrawLine((float)x, (float)miny, (float)x, (float)maxy, 2.0, colors::darkblue);
+//	}
+//	for (float y = miny; y <= maxy; y += (maxy-miny)/10.0)
+//	{
+//		s += SVGDrawLine((float)minx, (float)y, (float)maxx, (float)y, 2.0, colors::darkblue);
+//	}
+	return s;
 }
 
 

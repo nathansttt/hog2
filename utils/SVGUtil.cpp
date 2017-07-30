@@ -46,14 +46,27 @@ std::string SVGDefineGradient(bool horizontal, bool vertical, recColor c1, recCo
 	return s;
 }
 
+std::string SVGFrameCircle(double x, double y, double radius, int border, recColor c)
+{
+	std::string s;
+	s += "<circle cx=\"" + std::to_string(x);
+	s += "\" cy=\"" + std::to_string(y);
+	s += "\" r=\""+std::to_string(radius)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c)+";stroke-width:"+std::to_string(border)+"\" />";
+	return s;
+}
+
 std::string SVGDrawCircle(double x, double y, double radius, recColor c)
 {
 	//double epsilon = 0.5;
 	std::string s;
-	s += "<circle cx=\"" + std::to_string(10*x);
-	s += "\" cy=\"" + std::to_string(10*y);
-	s += "\" r=\""+std::to_string(radius*10)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
+	s += "<circle cx=\"" + std::to_string(x);
+	s += "\" cy=\"" + std::to_string(y);
+	s += "\" r=\""+std::to_string(radius)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
 	return s;
+
+//	s += "<circle cx=\"" + std::to_string(10*x);
+//	s += "\" cy=\"" + std::to_string(10*y);
+//	s += "\" r=\""+std::to_string(radius*10)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
 }
 
 std::string SVGDrawRect(int x, int y, int width, int height, const char *gradient)
@@ -93,24 +106,50 @@ std::string SVGFrameRect(int x, int y, int width, int height, int border, recCol
 	return s;
 }
 
-std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, recColor c, bool center)
+std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, recColor c)
 {
 	std::string s;
-	int offset = center?5:0;
-	s = "<line x1 = \"" + std::to_string(10*x1+offset) + "\" ";
-	s +=      "y1 = \"" + std::to_string(10*y1+offset) + "\" ";
-	s +=      "x2 = \"" + std::to_string(10*x2+offset) + "\" ";
-	s +=      "y2 = \"" + std::to_string(10*y2+offset) + "\" ";
+	s = "<line x1 = \"" + std::to_string(x1) + "\" ";
+	s +=      "y1 = \"" + std::to_string(y1) + "\" ";
+	s +=      "x2 = \"" + std::to_string(x2) + "\" ";
+	s +=      "y2 = \"" + std::to_string(y2) + "\" ";
 	s += "style=\"stroke:"+SVGGetRGB(c);
 	s += ";stroke-width:"+std::to_string(width)+"\" stroke-linecap=\"round\" />";
 	return s;
 }
 
+std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, recColor c, bool center)
+{
+	std::string s;
+	int offset = center?0.5:0;
+	s = "<line x1 = \"" + std::to_string(x1+offset) + "\" ";
+	s +=      "y1 = \"" + std::to_string(y1+offset) + "\" ";
+	s +=      "x2 = \"" + std::to_string(x2+offset) + "\" ";
+	s +=      "y2 = \"" + std::to_string(y2+offset) + "\" ";
+	s += "style=\"stroke:"+SVGGetRGB(c);
+	s += ";stroke-width:"+std::to_string(width)+"\" stroke-linecap=\"round\" />";
+	return s;
+	
+//	std::string s;
+//	int offset = center?5:0;
+//	s = "<line x1 = \"" + std::to_string(10*x1+offset) + "\" ";
+//	s +=      "y1 = \"" + std::to_string(10*y1+offset) + "\" ";
+//	s +=      "x2 = \"" + std::to_string(10*x2+offset) + "\" ";
+//	s +=      "y2 = \"" + std::to_string(10*y2+offset) + "\" ";
+//	s += "style=\"stroke:"+SVGGetRGB(c);
+//	s += ";stroke-width:"+std::to_string(width)+"\" stroke-linecap=\"round\" />";
+//	return s;
+}
+
 std::string SVGDrawText(float x1, float y1, const char *txt, recColor c, double size)
 {
 	std::string s;
-	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
-	s += "; font-family:Helvetica, sans-serif; font-size:"+std::to_string(size*10)+"px\">";
+//	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
+//	s += "; font-family:Helvetica, sans-serif; font-size:"+std::to_string(size*10)+"px\">";
+
+	s =  "<text x=\""+std::to_string(x1)+"\" y=\""+std::to_string(y1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
+	s += "; font-family:Helvetica, sans-serif; font-weight:bold; font-size:"+std::to_string(size)+"px\"";
+	s += " dominant-baseline=\"middle\">";
 	s += txt;
 	s += "</text>\n";
 	//	s += "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" style=\"fill:"+SVGGetRGB(c);

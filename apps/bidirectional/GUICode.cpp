@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <fstream>
+#include <numeric>
 #include "GUICode.h"
 #include "ScenarioLoader.h"
 #include "Map2DEnvironment.h"
@@ -19,6 +20,7 @@
 #include "NBSQueueGF.h"
 #include "NBS.h"
 #include "BSStar.h"
+#include "FFBDS.h"
 
 Map *map = 0;
 MapEnvironment *me = 0;
@@ -37,6 +39,7 @@ int gStepsPerFrame = 2;
 
 TemplateAStar<xyLoc, tDirection, MapEnvironment> forward;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> backward;
+FFBDS<xyLoc, tDirection, MapEnvironment> ff;
 
 ZeroHeuristic<xyLoc> *z = new ZeroHeuristic<xyLoc>;
 
@@ -52,6 +55,7 @@ bool mmSearchRunning = false;
 bool compareSearchRunning = false;
 bool mm0SearchRunning = false;
 bool bsSearchRunning = false;
+bool ffSearchRunning = false;
 bool compare0SearchRunning = false;
 bool searchRan = false;
 std::vector<xyLoc> path;
@@ -120,18 +124,19 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//		map = new Map("/Users/nathanst/hog2/maps/dao/brc000d.map");
 //		map = new Map("/Users/nathanst/hog2/maps/dao/brc000d.map");
 //		map = new Map("/Users/nathanst/hog2/maps/dao/brc203d.map");
-		//map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
+//		map = new Map("/Users/nathanst/hog2/maps/dao/lak308d.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/w_woundedcoast.map");
 		
 		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
-		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+		map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 		//map = new Map("/Users/nathanst/hog2/maps/rooms/8room_000.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-16-0.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-1-0.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
+		if (0)
 		{
 			map = new Map(128,128);
 			MakeMaze(map, 1);
@@ -152,7 +157,16 @@ void StepAlgorithms()
 		{
 			mmSearchRunning = !nbs.DoSingleSearchStep(path);
 			if (!mmSearchRunning)
-				printf("NBS*: %llu nodes expanded\n", nbs.GetNodesExpanded());
+				printf("NBS: %llu nodes expanded cost %1.1f\n", nbs.GetNodesExpanded(), me->GetPathLength(path));
+		}
+	}
+	for (int x = 0; x < gStepsPerFrame/2; x++)
+	{
+		if (ffSearchRunning)
+		{
+			ffSearchRunning = !ff.DoSingleSearchStep(path);
+			if (!ffSearchRunning)
+				printf("FFBDS*: %llu nodes expanded\n", ff.GetNodesExpanded());
 		}
 	}
 	for (int x = 0; x < gStepsPerFrame; x++)
@@ -170,7 +184,7 @@ void StepAlgorithms()
 		{
 			bsSearchRunning = !bs.DoSingleSearchStep(path);
 			if (!bsSearchRunning)
-				printf("BS*: %llu nodes expanded\n", bs.GetNodesExpanded());
+				printf("BS*: %llu nodes expanded cost %1.1f\n", bs.GetNodesExpanded(), me->GetPathLength(path));
 		}
 	}
 	for (int x = 0; x < gStepsPerFrame; x++)
@@ -180,7 +194,7 @@ void StepAlgorithms()
 			compareSearchRunning = !compare.DoSingleSearchStep(path);
 			if (!compareSearchRunning)
 			{
-				printf("A*: %llu nodes expanded const %1.1f\n", compare.GetNodesExpanded(), me->GetPathLength(path));
+				printf("A*: %llu nodes expanded cost %1.1f\n", compare.GetNodesExpanded(), me->GetPathLength(path));
 			}
 		}
 	}
@@ -191,7 +205,7 @@ void StepAlgorithms()
 			compare0SearchRunning = !compare0.DoSingleSearchStep(path);
 			if (!compare0SearchRunning)
 			{
-				printf("BFS: %llu nodes expanded const %1.1f\n", compare0.GetNodesExpanded(), me->GetPathLength(path));
+				printf("BFS: %llu nodes expanded cost %1.1f\n", compare0.GetNodesExpanded(), me->GetPathLength(path));
 			}
 		}
 	}
@@ -250,6 +264,8 @@ void MyKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key)
 		case '[':
 		{
 			gStepsPerFrame /= 2;
+			if (gStepsPerFrame < 2)
+				gStepsPerFrame = 2;
 			break;
 		}
 		case ']':
@@ -346,7 +362,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			else if (viewport == 1)
 				compare.OpenGLDraw();
 			else if (viewport == 2)
-				bs.OpenGLDraw();
+				ff.OpenGLDraw();//bs.OpenGLDraw();
 			else if (viewport == 3)
 				mm.OpenGLDraw();
 		}
@@ -437,7 +453,42 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 //								{static_cast<uint16_t>(goal.x-17),
 //									static_cast<uint16_t>(goal.y+22)}, goal, goalPath);
 //				recording = true;
-				
+				if ((0))
+				{
+					{
+						mm.GetPath(me, start, goal, me, me, path);
+						std::fstream svgFile;
+						me->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+						svgFile.open("/Users/nathanst/mm.svg", std::fstream::out | std::fstream::trunc);
+						svgFile << me->SVGHeader();
+						svgFile << me->SVGDraw();
+						svgFile << mm.SVGDraw();
+						svgFile << "</svg>";
+						svgFile.close();
+					}
+					{
+						forward.GetPath(me, start, goal, path);
+						std::fstream svgFile;
+						me->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+						svgFile.open("/Users/nathanst/forward.svg", std::fstream::out | std::fstream::trunc);
+						svgFile << me->SVGHeader();
+						svgFile << me->SVGDraw();
+						svgFile << forward.SVGDraw();
+						svgFile << "</svg>";
+						svgFile.close();
+					}
+					{
+						backward.GetPath(me, goal, start, path);
+						std::fstream svgFile;
+						me->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+						svgFile.open("/Users/nathanst/backward.svg", std::fstream::out | std::fstream::trunc);
+						svgFile << me->SVGHeader();
+						svgFile << me->SVGDraw();
+						svgFile << backward.SVGDraw();
+						svgFile << "</svg>";
+						svgFile.close();
+					}
+				}
 				
 				mouseTracking = false;
 				//SetupMapOverlay();
@@ -452,11 +503,13 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				//mm.InitializeSearch(me, start, goal, z, z, path);
 				mm.InitializeSearch(me, start, goal, me, me, path);
 				mm0.InitializeSearch(me, start, goal, z, z, path);
-
+				ff.InitializeSearch(me, start, goal, me, path);
+				
 				mmSearchRunning = true;
 				compareSearchRunning = true;
 				mm0SearchRunning = true;
 				bsSearchRunning = true;
+				ffSearchRunning = true;
 				compare0SearchRunning = true;
 				
 				searchRan = true;
@@ -794,8 +847,18 @@ void SetupMapOverlay()
 		}
 	}
 }
+#include "WeightedVertexGraph.h"
+const char *strip(const char *str)
+{
+	static std::string s;
+	s = "";
+	char *p1 = strrchr(str, '.');
+	char *p2 = strrchr(str, '/');
+	s.append(p2+1, p1);
+	return s.c_str();
+}
 
-void AnalyzeProblem(Map *m, Experiment e, double weight)
+void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 {
 	WeightedHeuristic<xyLoc> wh(me, weight);
 	compare.SetHeuristic(&wh);
@@ -807,7 +870,17 @@ void AnalyzeProblem(Map *m, Experiment e, double weight)
 	goal.x = e.GetGoalX();
 	goal.y = e.GetGoalY();
 	
+	{
+		std::string t = "/Users/nathanst/";
+		t += strip(e.GetMapName());
+		t += "_";
+		t += std::to_string(whichProblem);
+		t += ".svg";
+		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, t.c_str());
+		return;
+	}
 
+	
 	forward.GetPath(me, start, goal, path);
 	backward.GetPath(me, goal, start, path);
 
@@ -820,7 +893,6 @@ void AnalyzeProblem(Map *m, Experiment e, double weight)
 	mm.GetPath(me, start, goal, &wh, &wh, path);
 	//printf("MM path length: %1.2f\n", me->GetPathLength(path));
 
-	printf("A*: %llu\tMM: %llu\t", compare.GetNodesExpanded(), mm.GetNodesExpanded());
 	// full state space
 	{
 		counts.resize(0);
@@ -835,6 +907,7 @@ void AnalyzeProblem(Map *m, Experiment e, double weight)
 				}
 			}
 		}
+		printf("MAP: %d\t", std::accumulate(counts.begin(), counts.end(), 1));
 		for (int x = 0; x < counts.size(); x++)
 		{
 			switch (x)
@@ -852,6 +925,7 @@ void AnalyzeProblem(Map *m, Experiment e, double weight)
 			}
 		}
 	}
+	printf("\nA*: %llu\t%llu\t", compare.GetNodesExpanded(), compare.GetNecessaryExpansions());
 	// A*
 	{
 		counts.resize(0);
@@ -879,6 +953,7 @@ void AnalyzeProblem(Map *m, Experiment e, double weight)
 		}
 	}
 	// MM
+	printf("\nMM: %llu\t%llu\t", mm.GetNodesExpanded(), mm.GetNecessaryExpansions());
 	{
 		counts.resize(0);
 		counts.resize(10);
@@ -921,14 +996,19 @@ void AnalyzeMap(const char *map, const char *scenario, double weight)
 	me->SetDiagonalCost(1.5);
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
-		AnalyzeProblem(m, s.GetNthExperiment(x), weight);
+		if (s.GetNthExperiment(x).GetDistance() <= 0)
+			continue;
+		printf("Problem %d of %d\n", x+1, s.GetNumExperiments());
+		AnalyzeProblem(m, x, s.GetNthExperiment(x), weight);
 	}
+	exit(0);
 }
 
 void AnalyzeNBS(const char *map, const char *scenario, double weight)
 {
 	NBS<xyLoc, tDirection, MapEnvironment> nbs;
 	BSStar<xyLoc, tDirection, MapEnvironment> bs;
+	FFBDS<xyLoc, tDirection, MapEnvironment> ff;
 	//NBS<xyLoc, tDirection, MapEnvironment, NBSQueueGF<xyLoc>, BDOpenClosed<xyLoc, NBSGLowHigh<xyLoc>, NBSFLowHigh<xyLoc>>> nbs;
 	
 	MM<xyLoc, tDirection, MapEnvironment> mm;
@@ -953,8 +1033,8 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 		start.y = s.GetNthExperiment(x).GetStartY();
 		goal.x = s.GetNthExperiment(x).GetGoalX();
 		goal.y = s.GetNthExperiment(x).GetGoalY();
-		printf("Problem %d of %d from ", x, s.GetNumExperiments());
-		std::cout << start << " to " << goal << "\n";
+//		printf("Problem %d of %d from ", x, s.GetNumExperiments());
+//		std::cout << start << " to " << goal << "\n";
 		std::vector<xyLoc> correctPath;
 		std::vector<xyLoc> mmPath;
 		std::vector<xyLoc> mm0Path;
@@ -962,30 +1042,33 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 		std::vector<xyLoc> bsPath;
 		astar.SetHeuristic(me);
 
-		astar.GetPath(me, start, goal, correctPath);
-		printf("%d %1.1f A* nodes: %llu necessary %llu\n", x, me->GetPathLength(correctPath), astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
-		bs.GetPath(me, start, goal, me, me, bsPath);
-		printf("%d %1.1f BS nodes: %llu necessary %llu\n", x, me->GetPathLength(bsPath), bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
-		mm.GetPath(me, start, goal, me, me, mmPath);
-		printf("%d %1.1f MM nodes: %llu necessary %llu\n", x, me->GetPathLength(mmPath), mm.GetNodesExpanded(), mm.GetNecessaryExpansions());
+//		astar.GetPath(me, start, goal, correctPath);
+//		printf("%d %1.1f A* nodes: %llu necessary %llu\n", x, me->GetPathLength(correctPath), astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
+//		bs.GetPath(me, start, goal, me, me, bsPath);
+//		printf("%d %1.1f BS nodes: %llu necessary %llu\n", x, me->GetPathLength(bsPath), bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
+//		mm.GetPath(me, start, goal, me, me, mmPath);
+//		printf("%d %1.1f MM nodes: %llu necessary %llu\n", x, me->GetPathLength(mmPath), mm.GetNodesExpanded(), mm.GetNecessaryExpansions());
 		nbs.GetPath(me, start, goal, me, me, nbsPath);
-		printf("%d %1.1f NBS nodes: %llu necessary %llu\n", x, me->GetPathLength(nbsPath), nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-		mm0.GetPath(me, start, goal, &z, &z, mm0Path);
-		printf("%d %1.1f MM0 nodes: %llu necessary %llu\n", x, me->GetPathLength(mm0Path), mm0.GetNodesExpanded(), mm0.GetNecessaryExpansions());
+		printf("%d %1.1f NBS nodes: %llu necessary %llu meeting: %f\n", x, me->GetPathLength(nbsPath), nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetMeetingPoint());
 
-		printf("NBSNecessaryRatios: NBS/A* %1.2f NBS/BS %1.2f NBS/MM %1.2f NBS/MM0 %1.2f\n",
-			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions(),
-			   (double)nbs.GetNecessaryExpansions()/bs.GetNecessaryExpansions(),
-			   (double)nbs.GetNecessaryExpansions()/mm.GetNecessaryExpansions(),
-			   (double)nbs.GetNecessaryExpansions()/mm0.GetNecessaryExpansions()
-			   );
-		printf("SelfNecessaryRatios: A* %1.2f BS %1.2f MM %1.2f NBS %1.2f MM0 %1.2f\n",
-			   (double)astar.GetNodesExpanded()/astar.GetNecessaryExpansions(),
-			   (double)bs.GetNodesExpanded()/bs.GetNecessaryExpansions(),
-			   (double)mm.GetNodesExpanded()/mm.GetNecessaryExpansions(),
-			   (double)nbs.GetNodesExpanded()/nbs.GetNecessaryExpansions(),
-			   (double)mm0.GetNodesExpanded()/mm0.GetNecessaryExpansions()
-			   );
+//		ff.GetPath(me, start, goal, me, bsPath);
+//		printf("%d %1.1f FF nodes: %llu necessary %llu\n", x, me->GetPathLength(nbsPath), ff.GetNodesExpanded(), 0);
+//		mm0.GetPath(me, start, goal, &z, &z, mm0Path);
+//		printf("%d %1.1f MM0 nodes: %llu necessary %llu\n", x, me->GetPathLength(mm0Path), mm0.GetNodesExpanded(), mm0.GetNecessaryExpansions());
+
+//		printf("NBSNecessaryRatios: NBS/A* %1.2f NBS/BS %1.2f NBS/MM %1.2f NBS/MM0 %1.2f\n",
+//			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions(),
+//			   (double)nbs.GetNecessaryExpansions()/bs.GetNecessaryExpansions(),
+//			   (double)nbs.GetNecessaryExpansions()/mm.GetNecessaryExpansions(),
+//			   (double)nbs.GetNecessaryExpansions()/mm0.GetNecessaryExpansions()
+//			   );
+//		printf("SelfNecessaryRatios: A* %1.2f BS %1.2f MM %1.2f NBS %1.2f MM0 %1.2f\n",
+//			   (double)astar.GetNodesExpanded()/astar.GetNecessaryExpansions(),
+//			   (double)bs.GetNodesExpanded()/bs.GetNecessaryExpansions(),
+//			   (double)mm.GetNodesExpanded()/mm.GetNecessaryExpansions(),
+//			   (double)nbs.GetNodesExpanded()/nbs.GetNecessaryExpansions(),
+//			   (double)mm0.GetNodesExpanded()/mm0.GetNecessaryExpansions()
+//			   );
 
 //		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tNBS:\t" << nbs.GetNodesExpanded() << "\tBS*:\t" << bs.GetNodesExpanded();
 //		std::cout << "\tMM:\t" << mm.GetNodesExpanded() << "\n";
@@ -993,7 +1076,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 //		printf("A* total\t%llu\tnecessary\t%llu\tratio\t%1.3f\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),
 //			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions());
 		//if (!fequal)
-		if (!fequal(me->GetPathLength(nbsPath), me->GetPathLength(correctPath)))
+		if (0)//(!fequal(me->GetPathLength(nbsPath), me->GetPathLength(correctPath)))
 		{
 			std::cout << "error solution cost:\t expected cost\n";
 			std::cout << me->GetPathLength(nbsPath) << "\t" << me->GetPathLength(correctPath) << "\n";

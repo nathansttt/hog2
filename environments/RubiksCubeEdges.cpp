@@ -39,7 +39,26 @@
  *    \___9___\|
  *
  */
- 
+
+RubikEdgeState RotateRubikEdgeClockwise(const RubikEdgeState &in, int step)
+{
+	RubikEdgeState e = in;
+	int rotations[] = {8, 9, 1, 2, 0, 6, 7, 11, 10, 3, 4, 5};
+	for (int x = 0; x < 12; x++)
+	{
+		e.SetCubeInLoc(x, in.GetCubeInLoc(rotations[x]));
+		e.SetCubeOrientation(in.GetCubeInLoc(rotations[x]), in.GetCubeOrientation(in.GetCubeInLoc(rotations[x])));
+	}
+	e.FlipCubeOrientation(e.GetCubeInLoc(1));
+	e.FlipCubeOrientation(e.GetCubeInLoc(3));
+	e.FlipCubeOrientation(e.GetCubeInLoc(4));
+	e.FlipCubeOrientation(e.GetCubeInLoc(8));
+	e.FlipCubeOrientation(e.GetCubeInLoc(7));
+	e.FlipCubeOrientation(e.GetCubeInLoc(11));
+	return e;
+}
+
+
 RubikEdgeStateBits::RubikEdgeStateBits()
 {
 	Reset();
@@ -67,25 +86,25 @@ void RubikEdgeStateBits::SetCubeInLoc(int whichLoc, int cube)
 	state = state&(~(blank<<(12+4*whichLoc)));
 	state |= (value<<(12+4*whichLoc));
 }
-bool RubikEdgeStateBits::GetCubeOrientation(int whichLoc) const
+bool RubikEdgeStateBits::GetCubeOrientation(int whichCube) const
 {
-	return state&(0x1<<whichLoc);
+	return state&(0x1<<whichCube);
 }
-void RubikEdgeStateBits::SetCubeOrientation(int whichLoc, bool flip)
+void RubikEdgeStateBits::SetCubeOrientation(int whichCube, bool flip)
 {
-	if (whichLoc >= 12)
+	if (whichCube >= 12)
 		return;
 	uint64_t blank = 0x1;
 	if (flip)
-		state |= (0x1<<whichLoc);
+		state |= (0x1<<whichCube);
 	else
-		state = state&(~(blank<<whichLoc));
+		state = state&(~(blank<<whichCube));
 }
-void RubikEdgeStateBits::FlipCubeOrientation(int whichLoc)
+void RubikEdgeStateBits::FlipCubeOrientation(int whichCube)
 {
-	if (whichLoc >= 12)
+	if (whichCube >= 12)
 		return;
-	state = state^(0x1<<whichLoc);
+	state = state^(0x1<<whichCube);
 }
 
 void RubikEdgeStateBits::GetDual(RubikEdgeStateBits &s) const
@@ -129,27 +148,27 @@ void RubikEdgeStateArray::SetCubeInLoc(int whichLoc, int cube)
 //	state = state&(~(blank<<(12+4*whichLoc)));
 //	state |= (value<<(12+4*whichLoc));
 }
-bool RubikEdgeStateArray::GetCubeOrientation(int whichLoc) const
+bool RubikEdgeStateArray::GetCubeOrientation(int whichCube) const
 {
-	return state[whichLoc];
+	return state[whichCube];
 	//return state&(0x1<<whichLoc);
 }
-void RubikEdgeStateArray::SetCubeOrientation(int whichLoc, bool flip)
+void RubikEdgeStateArray::SetCubeOrientation(int whichCube, bool flip)
 {
-	if (whichLoc >= 12)
+	if (whichCube >= 12)
 		return;
-	state[whichLoc] = flip;
+	state[whichCube] = flip;
 //	uint64_t blank = 0x1;
 //	if (flip)
 //		state |= (0x1<<whichLoc);
 //	else
 //		state = state&(~(blank<<whichLoc));
 }
-void RubikEdgeStateArray::FlipCubeOrientation(int whichLoc)
+void RubikEdgeStateArray::FlipCubeOrientation(int whichCube)
 {
-	if (whichLoc >= 12)
+	if (whichCube >= 12)
 		return;
-	state[whichLoc] = !state[whichLoc];
+	state[whichCube] = !state[whichCube];
 	//state = state^(0x1<<whichLoc);
 }
 
@@ -849,7 +868,7 @@ void RubikEdge::OpenGLDrawCube(const RubikEdgeState &s, int cube) const
 	const float scale = 0.3;
 	const float offset = 0.95*2.0*scale/3.0;
 	const float offset2 = 2.0*scale/3.0;
-	const float epsilon = 0.0001;
+	const float epsilon = 0.002;
 	switch(cube)
 	{
 		case 1: // cube 1

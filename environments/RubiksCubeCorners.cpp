@@ -768,7 +768,7 @@ void RubiksCorner::OpenGLDrawCube(const RubiksCornerState &s, int cube) const
 	const float scale = 0.3;
 	const float offset = 0.95*2.0*scale/3.0;
 	const float offset2 = 2.0*scale/3.0;
-	const float epsilon = 0.0001;
+	const float epsilon = 0.002;
 	switch(cube)
 	{
 		case 0:

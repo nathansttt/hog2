@@ -745,7 +745,8 @@ std::string MapEnvironment::SVGDraw()
 			bool draw = true;
 			if (map->GetTerrainType(x, y) == kGround)
 			{
-				recColor c = {0.9, 0.9, 0.9};
+				recColor c = {0.0, 0.0, 0.0};
+//				recColor c = {0.9, 0.9, 0.9};
 				s += SVGDrawRect(x+1, y+1, 1, 1, c);
 				s += "\n";
 			}
@@ -768,13 +769,17 @@ std::string MapEnvironment::SVGDraw()
 				s += "\n";
 			}
 			else {
+//				recColor c = {0.0, 0.0, 0.0};
+				recColor c = {1.0, 1.0, 1.0};
+				s += SVGDrawRect(x+1, y+1, 1, 1, c);
+				s += "\n";
 				draw = false;
 			}
 		}
 	}
 	
 	// draw cell boundaries for open terrain
-	if (1)
+	if (0)
 	for (int y = 0; y < map->GetMapHeight(); y++)
 	{
 		for (int x = 0; x < map->GetMapWidth(); x++)
@@ -790,6 +795,7 @@ std::string MapEnvironment::SVGDraw()
 	}
 
 	// draw lines between different terrain types
+	if (0)
 	for (int y = 0; y < map->GetMapHeight(); y++)
 	{
 		for (int x = 0; x < map->GetMapWidth(); x++)
@@ -869,7 +875,8 @@ std::string MapEnvironment::SVGDraw(const xyLoc &l)
 		recColor c;// = {0.5, 0.5, 0};
 		GLfloat t;
 		GetColor(c.r, c.g, c.b, t);
-		s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
+		s += SVGDrawRect(l.x+1, l.y+1, 1, 1, c);
+		//s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
 		//stroke-width="1" stroke="pink" />
 	}
 	return s;

@@ -6,4 +6,9 @@
 //  Copyright © 2017 University of Denver. All rights reserved.
 //
 
-#include "BidirRubik.hpp"
+#include "BidirRubik.h"
+
+void RubikTest()
+{
+	
+}

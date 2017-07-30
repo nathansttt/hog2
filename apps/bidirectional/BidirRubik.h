@@ -6,9 +6,11 @@
 //  Copyright © 2017 University of Denver. All rights reserved.
 //
 
-#ifndef BidirRubik_hpp
-#define BidirRubik_hpp
+#ifndef BidirRubik_h
+#define BidirRubik_h
 
 #include <stdio.h>
+
+void RubikTest();
 
 #endif /* BidirRubik_hpp */

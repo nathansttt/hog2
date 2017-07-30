@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/absmapalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/shared -I$(ROOT)/abstraction -I$(ROOT)/gui -I$(ROOT)/simulation -I$(ROOT)/abstractionalgorithms -I$(ROOT)/environments -I$(ROOT)/mapalgorithms -I$(ROOT)/algorithms -I$(ROOT)/generic -I$(ROOT)/utils -I$(ROOT)/graph -I$(ROOT)/search
+PROJ_CXXFLAGS = -I$(ROOT)/absmapalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/shared -I$(ROOT)/abstraction -I$(ROOT)/gui -I$(ROOT)/simulation -I$(ROOT)/abstractionalgorithms -I$(ROOT)/environments -I$(ROOT)/envutil -I$(ROOT)/mapalgorithms -I$(ROOT)/algorithms -I$(ROOT)/generic -I$(ROOT)/utils -I$(ROOT)/graph -I$(ROOT)/search
 
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
@@ -25,8 +25,8 @@ PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
 PROJ_REL_LNFLAGS = -L$(REL_BINDIR)
 
-PROJ_DBG_LIB = -labstraction -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
-PROJ_REL_LIB = -labstraction -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
+PROJ_DBG_LIB = -labstraction -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lenvutil -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
+PROJ_REL_LIB = -labstraction -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lenvutil -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
 
 
 PROJ_DBG_DEP = \
@@ -36,6 +36,7 @@ PROJ_DBG_DEP = \
   $(DBG_BINDIR)/libgui.a \
   $(DBG_BINDIR)/libabstractionalgorithms.a \
   $(DBG_BINDIR)/libenvironments.a \
+  $(DBG_BINDIR)/libenvutil.a \
   $(DBG_BINDIR)/libmapalgorithms.a \
   $(DBG_BINDIR)/libabsmapalgorithms.a \
   $(DBG_BINDIR)/libgraphalgorithms.a \
@@ -51,6 +52,7 @@ PROJ_REL_DEP = \
   $(REL_BINDIR)/libgui.a \
   $(REL_BINDIR)/libabstractionalgorithms.a \
   $(REL_BINDIR)/libenvironments.a \
+  $(REL_BINDIR)/libenvutil.a \
   $(REL_BINDIR)/libmapalgorithms.a \
   $(REL_BINDIR)/libabsmapalgorithms.a \
   $(REL_BINDIR)/libgraphalgorithms.a \

@@ -87,7 +87,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
-	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
+	InstallKeyboardHandler(MyDisplayHandler, "Picture", "Save a picture of the graph.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
 	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
@@ -96,6 +96,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
 	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra, A* and Weighted A*", kAnyModifier, 'w');
+	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph as .svg file", kAnyModifier, 'g');
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
 	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
 	InstallKeyboardHandler(DefaultGraph, "Default", "Build Deafult Graph", kAnyModifier, 'a', 'd');
@@ -281,7 +282,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'p':
-			//running = !running;
+		{
+			std::fstream svgFile;
+			svgFile.open("/Users/nathanst/graph.svg", std::fstream::out | std::fstream::trunc);
+			svgFile << ge->SVGHeader();
+			svgFile << ge->SVGDraw();
+			svgFile << "</svg>";
+			svgFile.close();
+		}
 			break;
 		case 'o':
 		{
@@ -314,6 +322,17 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'l':
 			LoadGraph("save.graph");
+			break;
+		case 'g':
+		{
+			std::fstream svgFile;
+			ge->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+			svgFile.open("/Users/nathanst/graph.svg", std::fstream::out | std::fstream::trunc);
+			svgFile << ge->SVGHeader();
+			svgFile << ge->SVGDraw();			
+			svgFile << "</svg>";
+			svgFile.close();
+		}
 			break;
 		default:
 			break;

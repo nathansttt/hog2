@@ -181,9 +181,11 @@ PancakePuzzle<N>::~PancakePuzzle()
 
 template <int N>
 const std::string PancakePuzzle<N>::GetName(){
-	std::stringstream name;
-	name << std::to_string(N);
-	name << " Pancake Puzzle";
+	std::string s = "Pancake("+std::to_string(N)+")";
+	return s;
+//	std::stringstream name;
+//	name << std::to_string(N);
+//	name << "Pancake(" ;
 	
 //	if (PDB_distincts.size() > 0)
 //	{
@@ -209,13 +211,13 @@ const std::string PancakePuzzle<N>::GetName(){
 //		name << ",No Heuristic";
 //	}
 	
-	name << ", Op Order: ";
-	for (unsigned op_num = 0; op_num < operators.size() - 1; op_num++){
-		name << operators[op_num];
-		name << ", ";
-	}
-	name << operators.back();
-	return name.str();
+//	name << ", Op Order: ";
+//	for (unsigned op_num = 0; op_num < operators.size() - 1; op_num++){
+//		name << operators[op_num];
+//		name << ", ";
+//	}
+//	name << operators.back();
+//	return name.str();
 }
 
 template <int N>

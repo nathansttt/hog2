@@ -289,7 +289,7 @@ void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType e)
 void initialConditions(pRecContext pContextInfo)
 {
 	pContextInfo->moveAllPortsTogether = true;
-	SetLighting(4);
+	SetLighting();
 	pContextInfo->numPorts = 3;
 	pContextInfo->currPort = 0;
 	for (int x = 0; x < MAXPORTS; x++)
@@ -316,45 +316,55 @@ bool DoKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shif
 	return false;
 }
 
-void SetLighting(unsigned int mode)
+void SetLighting(GLfloat ambientf, GLfloat diffusef, GLfloat specularf)
 {
-	GLfloat mat_specular[] = {0.2, 0.2, 0.2, 1.0};
-	GLfloat mat_shininess[] = {50.0};
+//	GLfloat mat_specular[] = {0.2, 0.2, 0.2, 1.0};
+//	GLfloat mat_shininess[] = {50.0};
 	
 //	GLfloat position[4] = {7.0,-7.0,12.0,0.0};
 //	GLfloat position[4] = {-1.0,-3.0,5.0,0.0};
 //	GLfloat position[4] = {-1.0,5.0,5.0,0.0};
-	GLfloat position[4] = {-0.0,1.0,3.0,0.0};
-	GLfloat ambient[4]  = {0.2, 0.2, 0.2, 1.0};
+//	GLfloat position[4] = {-0.0,1.0,3.0,0.0};
+	GLfloat position[4] = {-5.0,5.0,30.0,0.0};
+	GLfloat ambient[4]  = {1.0, 1.0, 1.0, 1.0};
 	GLfloat diffuse[4]  = {1.0, 1.0, 1.0, 1.0};
 	GLfloat specular[4] = {1.0, 1.0, 1.0, 1.0};
+	for (int x = 0; x < 3; x++)
+	{
+		ambient[x] *= ambientf;
+		diffuse[x] *= diffusef;
+		specular[x] *= specularf;
+	}
 	
-	glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
-	glMaterialfv (GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
+//	glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+//	glMaterialfv (GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
 	
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	
-	switch (mode) {
-		case 0:
-			break;
-		case 1:
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_FALSE);
-			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_FALSE);
-			break;
-		case 2:
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_FALSE);
-			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
-			break;
-		case 3:
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
-			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_FALSE);
-			break;
-		case 4:
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
-			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
-			break;
-	}
+//	switch (mode) {
+//		case 0:
+//			break;
+//		case 1:
+//			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_FALSE);
+//			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_FALSE);
+//			break;
+//		case 2:
+//			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_FALSE);
+//			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
+//			break;
+//		case 3:
+//			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
+//			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_FALSE);
+//			break;
+//		case 4:
+//			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
+//			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
+//			break;
+//	}
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
+
 	
 	glLightfv(GL_LIGHT0,GL_POSITION,position);
 	glLightfv(GL_LIGHT0,GL_AMBIENT,ambient);
@@ -698,8 +708,8 @@ void GetHeading(unsigned long windowID, int which, GLdouble &hx, GLdouble &hy, G
 	xp = fRot[1]*len;
 	yp = fRot[2]*len;
 	zp = fRot[3]*len;
-	ca = cos(-fRot[0]*PI/180);
-	sa = sin(-fRot[0]*PI/180);
+	ca = cos(-fRot[0]*PI/180.0);
+	sa = sin(-fRot[0]*PI/180.0);
 	hx = (1-ca)*xp*zp+sa*yp;
 	hy = (1-ca)*yp*zp-sa*xp;
 	hz = ca+(1-ca)*zp*zp;

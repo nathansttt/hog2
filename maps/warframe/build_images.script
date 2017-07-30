@@ -1,0 +1,16 @@
+#!/bin/tcsh
+
+#foreach x ( *.3dmap )
+#  ~/hog2/bin/release/voxel -map $x -capture 60
+#  convert -resize 128 -loop 1 *.bmp $x.gif
+#  convert -resize 512 -loop 1 *.bmp ${x}_big.gif
+#  rm *.bmp
+#end
+
+
+foreach x ( *.3dmap )
+  ~/hog2/bin/release/voxel -map $x -capture 120
+  convert -resize 512 -loop 1 *.bmp ${x}_big.gif
+  rm *.bmp
+end
+

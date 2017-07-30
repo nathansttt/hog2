@@ -75,16 +75,56 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-problem 0"
+            argument = "-grid /Users/nathanst/hog2/maps/dao/brc000d.map /Users/nathanst/hog2/scenarios/dao/brc000d.map.scen"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-grid /Users/nathanst/hog2/maps/bg512/AR0012SR.map /Users/nathanst/hog2/scenarios/bg512/AR0012SR.map.scen"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-problem 0"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-problem 30"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-heuristic /Users/nathanst/Desktop/pdb/ none"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-heuristic /Users/nathanst/Desktop/pdb/ 1997"
-            isEnabled = "YES">
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-heuristic /Users/nathanst/Desktop/pdb/ 888"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-mm /Users/nathanst/Desktop/pdb1/ /Users/nathanst/Desktop/pdb2/"
-            isEnabled = "YES">
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-nbs /Users/nathanst/hog2/maps/bg512/AR0012SR.map /Users/nathanst/hog2/scenarios/bg512/AR0012SR.map.scen"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-nbs /Users/nathanst/hog2/maps/dao/brc000d.map /Users/nathanst/hog2/scenarios/dao/brc000d.map.scen"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-nbs /Users/nathanst/hog2/maps/dao/brc203d.map /Users/nathanst/hog2/scenarios/dao/brc203d.map.scen"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-nbs /Users/nathanst/hog2/maps/mazes/maze512-1-0.map /Users/nathanst/hog2/scenarios/mazes/maze512-1-0.map.scen"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-stp 3"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-pida"
@@ -95,7 +135,15 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-toh"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-pancake"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-stp -1"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>

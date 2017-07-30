@@ -16,6 +16,7 @@ PROJECTS = \
   abstractionalgorithms \
   algorithms \
   environments \
+  envutil \
   generic \
   graph \
   grids \
@@ -61,6 +62,7 @@ PROJECTS_ALL = \
   abstractionalgorithms \
   algorithms \
   environments \
+  envutil \
   generic \
   graph \
   grids \

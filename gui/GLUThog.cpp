@@ -228,9 +228,9 @@ void mouseMovedNoButton(int x, int y)
 		gDollyPanStartPoint[1] = (GLint)y;
 		float rotation[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 		
-		rotation[0] = -dy/24;
-		rotation[1] = 1;
-		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
+//		rotation[0] = -dy/24;
+//		rotation[1] = 1;
+//		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
 		//pContextInfo->controlShip->addRotation(rotation);
 		//addToRotationTrackball(rotation, pContextInfo->fRot);
 		rotation[0] = -dx/24;
@@ -269,28 +269,29 @@ void mouseMovedButton(int x, int y)
 		return;
 	
 	
-	if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
-	{
-		float dx = gDollyPanStartPoint[0]-x;
-		float dy = gDollyPanStartPoint[1]-y;
-		gDollyPanStartPoint[0] = (GLint)x;
-		gDollyPanStartPoint[1] = (GLint)y;
-		float rotation[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-		
-		rotation[0] = -dy/24;
-		rotation[1] = 1;
-		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
-		//pContextInfo->controlShip->addRotation(rotation);
-		//addToRotationTrackball(rotation, pContextInfo->fRot);
-		rotation[0] = -dx/24;
-		rotation[1] = 0;
-		rotation[2] = 1;
-//		if ((pContextInfo->controlShip)  && (rotation[0] != 0))
-//			pContextInfo->controlShip->addRotation(rotation);
-		
-		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
-	}
-	else if (gTrackball) {
+//	if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
+//	{
+//		float dx = gDollyPanStartPoint[0]-x;
+//		float dy = gDollyPanStartPoint[1]-y;
+//		gDollyPanStartPoint[0] = (GLint)x;
+//		gDollyPanStartPoint[1] = (GLint)y;
+//		float rotation[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+//		
+//		rotation[0] = -dy/24;
+//		rotation[1] = 1;
+//		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
+//		//pContextInfo->controlShip->addRotation(rotation);
+//		//addToRotationTrackball(rotation, pContextInfo->fRot);
+//		rotation[0] = -dx/24;
+//		rotation[1] = 0;
+//		rotation[2] = 1;
+////		if ((pContextInfo->controlShip)  && (rotation[0] != 0))
+////			pContextInfo->controlShip->addRotation(rotation);
+//		
+//		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
+//	}
+	//else
+	if (gTrackball) {
 		rollToTrackball((long) x, (long) y, gTrackBallRotation);
 	} 
 	else if (gDolly) {
@@ -674,7 +675,9 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	// mouse transforms object
 	if (pContextInfo->camera[currPort].thirdPerson)
 	{
-		gluLookAt (pContextInfo->camera[currPort].viewPos.x, pContextInfo->camera[currPort].viewPos.y, pContextInfo->camera[currPort].viewPos.z,
+		gluLookAt (pContextInfo->camera[currPort].viewPos.x,
+				   pContextInfo->camera[currPort].viewPos.y,
+				   pContextInfo->camera[currPort].viewPos.z,
 				   pContextInfo->camera[currPort].viewPos.x + pContextInfo->camera[currPort].viewDir.x,
 				   pContextInfo->camera[currPort].viewPos.y + pContextInfo->camera[currPort].viewDir.y,
 				   pContextInfo->camera[currPort].viewPos.z + pContextInfo->camera[currPort].viewDir.z,
@@ -925,5 +928,5 @@ void buildGL(void)
 	// setup viewport and prespective
 	resizeGL(pContextInfo, viewRect); // forces projection matrix update
 		
-	SetLighting (4);
+	SetLighting();
 }

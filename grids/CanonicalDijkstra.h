@@ -36,6 +36,7 @@ public:
 	void Draw() const;
 	void OpenGLDraw(const MapEnvironment *env) const;
 	std::string SVGDraw() const;
+	std::string SVGDrawDetailed() const;
 private:
 	void GetJPSSuccessors(const xyLocParent &s, uint64_t pid, double pg);
 	void GetJPSSuccessors(int x, int y, uint8_t parent, double cost, uint64_t pid, double pg, bool first = false);

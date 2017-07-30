@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C4028A851E4AA301002D6AD7 /* BidirPancake.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4028A831E4AA301002D6AD7 /* BidirPancake.cpp */; };
 		C402ED9E15CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C402ED9C15CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp */; };
 		C402ED9F15CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C402ED9C15CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp */; };
 		C402EDA015CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C402ED9C15CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp */; };
@@ -167,6 +168,33 @@
 		C413C1D01B6BBD60006A0331 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
 		C413C1F31B6BBE09006A0331 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C413C1F11B6BBE09006A0331 /* Sample.cpp */; };
 		C413C1F41B6BBF5A006A0331 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4A79DD813F039C20064AC6A /* Sample.cpp */; };
+		C4144EF51EF85FAA00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EF61EFAE8C600356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EF71EFAE8C600356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EF81EFAE8C700356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EF91EFAE8C700356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EFA1EFAE8C800356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EFB1EFAE8C900356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EFC1EFAE8C900356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EFD1EFAE8CA00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EFE1EFAE8CA00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144EFF1EFAE8CB00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F001EFAE8CC00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F011EFAE8CC00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F021EFAE8CD00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F031EFAE8CD00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F041EFAE8CE00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F051EFAE8CE00356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F061EFAE8D000356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F071EFAE8D000356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F081EFAE8D100356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F091EFAE8D200356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F0A1EFAE8D300356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F0B1EFAE8D300356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F0C1EFAE8D400356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F0D1EFAE8D500356429 /* VoxelTriangleExtraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */; };
+		C4144F101EFD546000356429 /* PancakeInstances.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144F0E1EFD546000356429 /* PancakeInstances.cpp */; };
+		C4144F111EFD546000356429 /* PancakeInstances.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4144F0E1EFD546000356429 /* PancakeInstances.cpp */; };
 		C4146D61182EB9B300745331 /* MotionCaptureMovement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4146D5F182EB9B300745331 /* MotionCaptureMovement.cpp */; };
 		C418489A1CDACC30008057D1 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C418489B1CDACC30008057D1 /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
@@ -888,6 +916,7 @@
 		C447F5C5146790FC00D6D581 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8B3143277BB0053D322 /* Sample.cpp */; };
 		C447F5C61467910100D6D581 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C447F5481467909200D6D581 /* Sample.cpp */; };
 		C447F5CA146843F200D6D581 /* NN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C447F5C7146843A600D6D581 /* NN.cpp */; };
+		C44E46A91E3FEBCB00219964 /* BidirSTP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C44E46A71E3FEBCB00219964 /* BidirSTP.cpp */; };
 		C454CDBE15060139005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C454CDBF1506013A005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C454CDC01506013B005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
@@ -896,6 +925,8 @@
 		C454CDC31506013D005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C454CDC41506013E005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
 		C454CDC51506013F005DDC8E /* BitMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C498D8DC1444F0550053D322 /* BitMap.cpp */; };
+		C456530A1E52E2A2007893EB /* BidirTOH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45653081E52E2A2007893EB /* BidirTOH.cpp */; };
+		C45653241E54FEA6007893EB /* BidirRubik.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45653221E54FEA6007893EB /* BidirRubik.cpp */; };
 		C45EEEDA1B95760500D87F30 /* MMRubik.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45EEED81B95760500D87F30 /* MMRubik.cpp */; };
 		C4625E78177B5CE200D1C8F7 /* TextOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4625E76177B5CE200D1C8F7 /* TextOverlay.cpp */; };
 		C46735761710D9EF00E2A10B /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
@@ -1921,6 +1952,31 @@
 		C4B1DD5A192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
 		C4B1DD5B19359BB60039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
 		C4B1DD5C19359BB80039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
+		C4B6F90F1D72B32E006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9101D72B32E006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9111D72B32E006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9121D72B32E006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9131D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9141D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9151D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9161D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9171D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9181D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9191D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F91A1D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F91B1D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F91C1D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F91D1D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F91E1D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F91F1D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9201D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9211D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9221D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9231D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9241D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9251D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9261D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
+		C4B6F9271D72B32F006422E7 /* VoxelGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */; };
 		C4B971351D39742300922D06 /* Graphics2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4913E981D35958100D71698 /* Graphics2D.cpp */; };
 		C4B973881426FA4F00758D0D /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C4B973891426FA4F00758D0D /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
@@ -3100,6 +3156,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C4028A831E4AA301002D6AD7 /* BidirPancake.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BidirPancake.cpp; sourceTree = "<group>"; };
+		C4028A841E4AA301002D6AD7 /* BidirPancake.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BidirPancake.h; sourceTree = "<group>"; };
+		C4028A861E4E778A002D6AD7 /* NBSQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBSQueue.h; sourceTree = "<group>"; };
+		C4028A871E4FB308002D6AD7 /* NBSQueueGF.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBSQueueGF.h; sourceTree = "<group>"; };
 		C402ED9C15CC883600E1DEA3 /* Map2DConstrainedEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map2DConstrainedEnvironment.cpp; sourceTree = "<group>"; };
 		C402ED9D15CC883600E1DEA3 /* Map2DConstrainedEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map2DConstrainedEnvironment.h; sourceTree = "<group>"; };
 		C402EDA815D0715800E1DEA3 /* CBSUnits.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CBSUnits.cpp; sourceTree = "<group>"; };
@@ -3114,6 +3174,10 @@
 		C413C1D51B6BBD61006A0331 /* mapUtils copy4-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "mapUtils copy4-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/mapUtils copy4-Info.plist"; sourceTree = "<absolute>"; };
 		C413C1F11B6BBE09006A0331 /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C413C1F21B6BBE09006A0331 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
+		C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoxelTriangleExtraction.cpp; sourceTree = "<group>"; };
+		C4144EF41EF85FAA00356429 /* VoxelTriangleExtraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoxelTriangleExtraction.h; sourceTree = "<group>"; };
+		C4144F0E1EFD546000356429 /* PancakeInstances.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PancakeInstances.cpp; sourceTree = "<group>"; };
+		C4144F0F1EFD546000356429 /* PancakeInstances.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PancakeInstances.h; sourceTree = "<group>"; };
 		C4146D5F182EB9B300745331 /* MotionCaptureMovement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MotionCaptureMovement.cpp; sourceTree = "<group>"; };
 		C4146D60182EB9B300745331 /* MotionCaptureMovement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MotionCaptureMovement.h; sourceTree = "<group>"; };
 		C4146DDC1830F66200745331 /* mc-movement-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "mc-movement-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/mc-movement-Info.plist"; sourceTree = "<absolute>"; };
@@ -3164,7 +3228,18 @@
 		C447F5C4146790A700D6D581 /* MAPF copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MAPF copy-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C447F5C7146843A600D6D581 /* NN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NN.cpp; sourceTree = "<group>"; };
 		C447F5C8146843A600D6D581 /* NN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NN.h; sourceTree = "<group>"; };
+		C44E468A1E3D3B1700219964 /* BDOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDOpenClosed.h; sourceTree = "<group>"; };
+		C44E468B1E3D3B1700219964 /* NBS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NBS.h; sourceTree = "<group>"; };
+		C44E46A71E3FEBCB00219964 /* BidirSTP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BidirSTP.cpp; sourceTree = "<group>"; };
+		C44E46A81E3FEBCB00219964 /* BidirSTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BidirSTP.h; sourceTree = "<group>"; };
 		C454CD7A14FD78BB005DDC8E /* MPLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPLRTAStar.h; sourceTree = "<group>"; };
+		C45653081E52E2A2007893EB /* BidirTOH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BidirTOH.cpp; sourceTree = "<group>"; };
+		C45653091E52E2A2007893EB /* BidirTOH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BidirTOH.h; sourceTree = "<group>"; };
+		C456530B1E52E92D007893EB /* BSStar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BSStar.h; sourceTree = "<group>"; };
+		C45653221E54FEA6007893EB /* BidirRubik.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BidirRubik.cpp; sourceTree = "<group>"; };
+		C45653231E54FEA6007893EB /* BidirRubik.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BidirRubik.h; sourceTree = "<group>"; };
+		C456533B1E5BB2EE007893EB /* FFBDS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFBDS.h; sourceTree = "<group>"; };
+		C45A4A441F07731000468506 /* WeightedVertexGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeightedVertexGraph.h; sourceTree = "<group>"; };
 		C45EEED81B95760500D87F30 /* MMRubik.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MMRubik.cpp; sourceTree = "<group>"; };
 		C45EEED91B95760500D87F30 /* MMRubik.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMRubik.h; sourceTree = "<group>"; };
 		C45EEEDB1B97EEE600D87F30 /* ParallelIDAStar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParallelIDAStar.h; sourceTree = "<group>"; };
@@ -3208,6 +3283,7 @@
 		C47BDC4717440BC000DD0928 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C47BDC4817440BC000DD0928 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C47DFD051A5FACCE00C3961B /* TopSpin copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "TopSpin copy-Info.plist"; path = "/Users/nathanst/hog2/build/XCode/hog2 glut/TopSpin copy-Info.plist"; sourceTree = "<absolute>"; };
+		C47F15BF1EA1688200F2E63F /* BidirectionalDijkstra.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BidirectionalDijkstra.h; sourceTree = "<group>"; };
 		C48192B1188DE8440039D435 /* BloomFilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BloomFilter.h; sourceTree = "<group>"; };
 		C48192EC1894CB1E0039D435 /* Bloom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bloom.cpp; sourceTree = "<group>"; };
 		C48192ED1894CB1E0039D435 /* Bloom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bloom.h; sourceTree = "<group>"; };
@@ -3236,6 +3312,7 @@
 		C49A70031499BFCF007CEDA2 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		C49A70041499BFCF007CEDA2 /* Sample2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample2.cpp; sourceTree = "<group>"; };
 		C49A700B14A05540007CEDA2 /* FLRTAStar2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLRTAStar2.h; sourceTree = "<group>"; };
+		C4A502481D5BCB4B00F58A4E /* LexPermutationPDB.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LexPermutationPDB.h; sourceTree = "<group>"; };
 		C4A5F0DD1C5F338600C0671F /* gJPS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gJPS.cpp; sourceTree = "<group>"; };
 		C4A5F0DE1C5F338600C0671F /* gJPS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gJPS.h; sourceTree = "<group>"; };
 		C4A79DD813F039C20064AC6A /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
@@ -3246,6 +3323,8 @@
 		C4A79EFB13F257370064AC6A /* RoboticArmTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoboticArmTest.h; sourceTree = "<group>"; };
 		C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LogisticRegression.cpp; sourceTree = "<group>"; };
 		C4B1DD4A192A75710039A6DF /* LogisticRegression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogisticRegression.h; sourceTree = "<group>"; };
+		C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoxelGrid.cpp; sourceTree = "<group>"; };
+		C4B6F90E1D72B32E006422E7 /* VoxelGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoxelGrid.h; sourceTree = "<group>"; };
 		C4B974021426FA4F00758D0D /* localsearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = localsearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4B974061426FA9C00758D0D /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		C4B974071426FA9C00758D0D /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
@@ -3380,20 +3459,19 @@
 		C4F9F3B413E4FE3E0077C5A5 /* TopSpinGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopSpinGraph.h; sourceTree = "<group>"; };
 		C4F9F3B513E4FE3E0077C5A5 /* WeightedMap2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WeightedMap2DEnvironment.cpp; sourceTree = "<group>"; };
 		C4F9F3B613E4FE3E0077C5A5 /* WeightedMap2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeightedMap2DEnvironment.h; sourceTree = "<group>"; };
-		C4F9F3B813E4FE3E0077C5A5 /* AbstractWeightedSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AbstractWeightedSearchAlgorithm.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		C4F9F3B813E4FE3E0077C5A5 /* AbstractWeightedSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AbstractWeightedSearchAlgorithm.h; sourceTree = "<group>"; };
 		C4F9F3B913E4FE3E0077C5A5 /* BFS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BFS.h; sourceTree = "<group>"; };
 		C4F9F3BA13E4FE3E0077C5A5 /* DFID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DFID.h; sourceTree = "<group>"; };
 		C4F9F3BB13E4FE3E0077C5A5 /* DFS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DFS.h; sourceTree = "<group>"; };
 		C4F9F3BC13E4FE3E0077C5A5 /* FrontierBFS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrontierBFS.h; sourceTree = "<group>"; };
-		C4F9F3BD13E4FE3E0077C5A5 /* GenericPatrolUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = GenericPatrolUnit.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		C4F9F3BD13E4FE3E0077C5A5 /* GenericPatrolUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = GenericPatrolUnit.h; sourceTree = "<group>"; };
 		C4F9F3BE13E4FE3E0077C5A5 /* GenericSearchAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericSearchAlgorithm.h; sourceTree = "<group>"; };
-		C4F9F3BF13E4FE3E0077C5A5 /* GenericSearchUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = GenericSearchUnit.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		C4F9F3BF13E4FE3E0077C5A5 /* GenericSearchUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = GenericSearchUnit.h; sourceTree = "<group>"; };
 		C4F9F3C013E4FE3E0077C5A5 /* GraphCheck.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GraphCheck.cpp; sourceTree = "<group>"; };
 		C4F9F3C113E4FE3E0077C5A5 /* GraphCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphCheck.h; sourceTree = "<group>"; };
 		C4F9F3C213E4FE3E0077C5A5 /* GreedyDMUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GreedyDMUnit.h; sourceTree = "<group>"; };
 		C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IDAStar.cpp; sourceTree = "<group>"; };
 		C4F9F3C413E4FE3E0077C5A5 /* IDAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDAStar.h; sourceTree = "<group>"; };
-		C4F9F3C513E4FE3E0077C5A5 /* IGAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IGAStar.h; sourceTree = "<group>"; };
 		C4F9F3C613E4FE3E0077C5A5 /* OldTemplateAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OldTemplateAStar.h; sourceTree = "<group>"; };
 		C4F9F3C713E4FE3E0077C5A5 /* RandomUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RandomUnit.cpp; sourceTree = "<group>"; };
 		C4F9F3C813E4FE3E0077C5A5 /* RandomUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RandomUnit.h; sourceTree = "<group>"; };
@@ -3811,6 +3889,18 @@
 			path = ../canonicalGrids;
 			sourceTree = "<group>";
 		};
+		C4144EF21EF85FAA00356429 /* envutil */ = {
+			isa = PBXGroup;
+			children = (
+				C4144EF31EF85FAA00356429 /* VoxelTriangleExtraction.cpp */,
+				C4144EF41EF85FAA00356429 /* VoxelTriangleExtraction.h */,
+				C4144F0E1EFD546000356429 /* PancakeInstances.cpp */,
+				C4144F0F1EFD546000356429 /* PancakeInstances.h */,
+			);
+			name = envutil;
+			path = ../../../../envutil;
+			sourceTree = "<group>";
+		};
 		C418491E1CDACC67008057D1 /* airplane */ = {
 			isa = PBXGroup;
 			children = (
@@ -3824,6 +3914,12 @@
 		C430D1851B2EFD1500220AEE /* bidirectional */ = {
 			isa = PBXGroup;
 			children = (
+				C44E468A1E3D3B1700219964 /* BDOpenClosed.h */,
+				C4028A861E4E778A002D6AD7 /* NBSQueue.h */,
+				C4028A871E4FB308002D6AD7 /* NBSQueueGF.h */,
+				C44E468B1E3D3B1700219964 /* NBS.h */,
+				C456533B1E5BB2EE007893EB /* FFBDS.h */,
+				C456530B1E52E92D007893EB /* BSStar.h */,
 				C430D1861B2EFD1500220AEE /* Driver.cpp */,
 				C430D1871B2EFD1500220AEE /* Driver.h */,
 				C430D1881B2EFD1500220AEE /* korf10.txt */,
@@ -3833,6 +3929,14 @@
 				C413C1401B6911E9006A0331 /* GUICode.h */,
 				C483B28D1C4F597E00218DE8 /* MM0Rubik.cpp */,
 				C483B28E1C4F597E00218DE8 /* MM0Rubik.h */,
+				C44E46A71E3FEBCB00219964 /* BidirSTP.cpp */,
+				C44E46A81E3FEBCB00219964 /* BidirSTP.h */,
+				C4028A831E4AA301002D6AD7 /* BidirPancake.cpp */,
+				C4028A841E4AA301002D6AD7 /* BidirPancake.h */,
+				C45653081E52E2A2007893EB /* BidirTOH.cpp */,
+				C45653091E52E2A2007893EB /* BidirTOH.h */,
+				C45653221E54FEA6007893EB /* BidirRubik.cpp */,
+				C45653231E54FEA6007893EB /* BidirRubik.h */,
 			);
 			name = bidirectional;
 			path = ../bidirectional;
@@ -4122,6 +4226,7 @@
 				C4E487D71B853FFE002753C8 /* Heuristic.h */,
 				C4E487D81B854072002753C8 /* PDBHeuristic.h */,
 				C4E487D91B8F96D4002753C8 /* PermutationPDB.h */,
+				C4A502481D5BCB4B00F58A4E /* LexPermutationPDB.h */,
 				C4677D1E1BCEC45200D3DAD8 /* MR1PermutationPDB.h */,
 				C46B6C311BD56D2F00B10296 /* TreePermutationPDB.h */,
 			);
@@ -4227,6 +4332,7 @@
 				C4F9F45C13E4FF240077C5A5 /* abstraction */,
 				C4F9F44813E4FE580077C5A5 /* algorithms */,
 				C4F9F38A13E4FE3D0077C5A5 /* environments */,
+				C4144EF21EF85FAA00356429 /* envutil */,
 				C4F9F3B713E4FE3E0077C5A5 /* generic */,
 				C4F9F3CD13E4FE3E0077C5A5 /* graph */,
 				C4F9F35513E4FDBB0077C5A5 /* gui */,
@@ -4353,6 +4459,8 @@
 				C46B6C321BD6E3E200B10296 /* TOH.cpp */,
 				C42384831C8EAE7900489273 /* Voxels.h */,
 				C42384681C8EAE6400489273 /* Voxels.cpp */,
+				C4B6F90E1D72B32E006422E7 /* VoxelGrid.h */,
+				C4B6F90D1D72B32E006422E7 /* VoxelGrid.cpp */,
 			);
 			name = environments;
 			path = ../../../../environments;
@@ -4361,6 +4469,7 @@
 		C4F9F3B713E4FE3E0077C5A5 /* generic */ = {
 			isa = PBXGroup;
 			children = (
+				C47F15BF1EA1688200F2E63F /* BidirectionalDijkstra.h */,
 				C4F9F3B813E4FE3E0077C5A5 /* AbstractWeightedSearchAlgorithm.h */,
 				C4F9F3B913E4FE3E0077C5A5 /* BFS.h */,
 				C4F9F3BA13E4FE3E0077C5A5 /* DFID.h */,
@@ -4377,7 +4486,6 @@
 				C4F9F3C313E4FE3E0077C5A5 /* IDAStar.cpp */,
 				C4F9F3C413E4FE3E0077C5A5 /* IDAStar.h */,
 				C45EEEDB1B97EEE600D87F30 /* ParallelIDAStar.h */,
-				C4F9F3C513E4FE3E0077C5A5 /* IGAStar.h */,
 				C4F9F3C613E4FE3E0077C5A5 /* OldTemplateAStar.h */,
 				C4F526C014AA79BE00025B71 /* PEAStar.h */,
 				C4E11C2414C7DC5700028081 /* EPEAStar.h */,
@@ -4388,6 +4496,7 @@
 				C4F9F3CB13E4FE3E0077C5A5 /* UnitCostBidirectionalBFS.h */,
 				C4F9F3CC13E4FE3E0077C5A5 /* VisualizableGenericSearchAlgorithm.h */,
 				C45F607E1BDFDEEC0008E33A /* MM.h */,
+				C45A4A441F07731000468506 /* WeightedVertexGraph.h */,
 			);
 			name = generic;
 			path = ../../../../generic;
@@ -5473,6 +5582,7 @@
 				C413C19A1B6BBD60006A0331 /* NodeLimitAbstraction.cpp in Sources */,
 				C413C19B1B6BBD60006A0331 /* RadiusAbstraction.cpp in Sources */,
 				C413C19C1B6BBD60006A0331 /* Width.cpp in Sources */,
+				C4144F071EFAE8D000356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C413C19D1B6BBD60006A0331 /* AStarDelay.cpp in Sources */,
 				C413C19E1B6BBD60006A0331 /* FloydWarshall.cpp in Sources */,
 				C413C19F1B6BBD60006A0331 /* GraphAlgorithm.cpp in Sources */,
@@ -5516,6 +5626,7 @@
 				C413C1C31B6BBD60006A0331 /* RubiksCube.cpp in Sources */,
 				C413C1C41B6BBD60006A0331 /* FourBitArray.cpp in Sources */,
 				C423847E1C8EAE6400489273 /* Voxels.cpp in Sources */,
+				C4B6F9211D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C413C1C51B6BBD60006A0331 /* DiskBitFile.cpp in Sources */,
 				C413C1C61B6BBD60006A0331 /* EnvUtil.cpp in Sources */,
 				C413C1C71B6BBD60006A0331 /* RubiksCube7Edges.cpp in Sources */,
@@ -5575,6 +5686,7 @@
 				C41848C71CDACC30008057D1 /* StatUtil.cpp in Sources */,
 				C41848C81CDACC30008057D1 /* StringUtils.cpp in Sources */,
 				C41848C91CDACC30008057D1 /* SwapEndian.cpp in Sources */,
+				C4B6F9271D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C41848CA1CDACC30008057D1 /* Timer.cpp in Sources */,
 				C41848CB1CDACC30008057D1 /* AStarOpenClosed.cpp in Sources */,
 				C41848CC1CDACC30008057D1 /* Voxels.cpp in Sources */,
@@ -5593,6 +5705,7 @@
 				C41849221CDACC6E008057D1 /* Driver.cpp in Sources */,
 				C41848D91CDACC30008057D1 /* MapAbstraction.cpp in Sources */,
 				C41848DA1CDACC30008057D1 /* MapCliqueAbstraction.cpp in Sources */,
+				C4144F0D1EFAE8D500356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C41848DB1CDACC30008057D1 /* MapFlatAbstraction.cpp in Sources */,
 				C41848DC1CDACC30008057D1 /* MapLineAbstraction.cpp in Sources */,
 				C41848DD1CDACC30008057D1 /* MapProvider.cpp in Sources */,
@@ -5657,6 +5770,7 @@
 			files = (
 				C430D18B1B2EFF8B00220AEE /* Common.cpp in Sources */,
 				C430D18C1B2EFF8B00220AEE /* Bloom.cpp in Sources */,
+				C4144F111EFD546000356429 /* PancakeInstances.cpp in Sources */,
 				C430D18D1B2EFF8B00220AEE /* GLUThog.cpp in Sources */,
 				C430D18E1B2EFF8B00220AEE /* TextBox.cpp in Sources */,
 				C423847D1C8EAE6400489273 /* Voxels.cpp in Sources */,
@@ -5697,6 +5811,7 @@
 				C430D1AF1B2EFF8B00220AEE /* Map.cpp in Sources */,
 				C430D1B01B2EFF8B00220AEE /* MapOverlay.cpp in Sources */,
 				C430D1B11B2EFF8B00220AEE /* Plot2D.cpp in Sources */,
+				C456530A1E52E2A2007893EB /* BidirTOH.cpp in Sources */,
 				C4E06A781BE1FFE80011F120 /* SVGUtil.cpp in Sources */,
 				C430D1B21B2EFF8B00220AEE /* ScenarioLoader.cpp in Sources */,
 				C430D1B31B2EFF8B00220AEE /* StatCollection.cpp in Sources */,
@@ -5715,9 +5830,11 @@
 				C430D1BF1B2EFF8B00220AEE /* GraphAbstraction.cpp in Sources */,
 				C430D1C01B2EFF8B00220AEE /* MapGenerators.cpp in Sources */,
 				C430D1C11B2EFF8B00220AEE /* LoadedBBAbstraction.cpp in Sources */,
+				C4144F061EFAE8D000356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C430D1C21B2EFF8B00220AEE /* LoadedCliqueAbstraction.cpp in Sources */,
 				C413C1581B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C46B6C481BD6E3E200B10296 /* TOH.cpp in Sources */,
+				C4028A851E4AA301002D6AD7 /* BidirPancake.cpp in Sources */,
 				C4E06A7F1BE5DE970011F120 /* RangeCompression.cpp in Sources */,
 				C430D1C31B2EFF8B00220AEE /* MapAbstraction.cpp in Sources */,
 				C430D1C41B2EFF8B00220AEE /* MapCliqueAbstraction.cpp in Sources */,
@@ -5735,6 +5852,7 @@
 				C430D1CF1B2EFF8B00220AEE /* Heap.cpp in Sources */,
 				C430D1D01B2EFF8B00220AEE /* MeroB.cpp in Sources */,
 				C430D1D11B2EFF8B00220AEE /* Path.cpp in Sources */,
+				C44E46A91E3FEBCB00219964 /* BidirSTP.cpp in Sources */,
 				C430D1D21B2EFF8B00220AEE /* Propagation.cpp in Sources */,
 				C430D1D31B2EFF8B00220AEE /* MapUnit.cpp in Sources */,
 				C430D1D41B2EFF8B00220AEE /* RandomUnits.cpp in Sources */,
@@ -5759,6 +5877,7 @@
 				C430D1E51B2EFF8B00220AEE /* PRAStar2.cpp in Sources */,
 				C430D1E61B2EFF8B00220AEE /* SearchAlgorithm.cpp in Sources */,
 				C430D1E71B2EFF8B00220AEE /* SpreadExecSearchAlgorithm.cpp in Sources */,
+				C45653241E54FEA6007893EB /* BidirRubik.cpp in Sources */,
 				C430D1E81B2EFF8B00220AEE /* SpreadPRAStar.cpp in Sources */,
 				C430D1E91B2EFF8B00220AEE /* SimpleHierarchicalAStar.cpp in Sources */,
 				C430D1EA1B2EFF8B00220AEE /* NQueens.cpp in Sources */,
@@ -5771,6 +5890,7 @@
 				C430D1F21B2EFF8B00220AEE /* RubiksCube.cpp in Sources */,
 				C430D1F31B2EFF8B00220AEE /* FourBitArray.cpp in Sources */,
 				C430D1F41B2EFF8B00220AEE /* RubiksCube7Edges.cpp in Sources */,
+				C4B6F9201D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4677D1A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C430D1F51B2EFF8B00220AEE /* DiskBitFile.cpp in Sources */,
 				C430D1F61B2EFF8B00220AEE /* EnvUtil.cpp in Sources */,
@@ -5855,6 +5975,7 @@
 				C438173B140C395B007BA75B /* FloydWarshall.cpp in Sources */,
 				C438173C140C395B007BA75B /* GraphAlgorithm.cpp in Sources */,
 				C438173D140C395B007BA75B /* Heap.cpp in Sources */,
+				C4144EF91EFAE8C700356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C438173E140C395B007BA75B /* MeroB.cpp in Sources */,
 				C438173F140C395B007BA75B /* Path.cpp in Sources */,
 				C4381740140C395B007BA75B /* Propagation.cpp in Sources */,
@@ -5898,6 +6019,7 @@
 				C46735ED171135E900E2A10B /* RubiksCube.cpp in Sources */,
 				C467360417132F8600E2A10B /* FourBitArray.cpp in Sources */,
 				C4673659171DC55E00E2A10B /* DiskBitFile.cpp in Sources */,
+				C4B6F9121D72B32E006422E7 /* VoxelGrid.cpp in Sources */,
 				C4673668171DC56C00E2A10B /* EnvUtil.cpp in Sources */,
 				C4673673171DC59800E2A10B /* RubiksCube7Edges.cpp in Sources */,
 				C4B1DD4E192A75710039A6DF /* LogisticRegression.cpp in Sources */,
@@ -5982,6 +6104,7 @@
 				C438EA841CBA228B00BBDA21 /* NodeLimitAbstraction.cpp in Sources */,
 				C438EA851CBA228B00BBDA21 /* RadiusAbstraction.cpp in Sources */,
 				C438EA861CBA228B00BBDA21 /* Width.cpp in Sources */,
+				C4144F0C1EFAE8D400356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C438EA871CBA228B00BBDA21 /* AStarDelay.cpp in Sources */,
 				C438EA881CBA228B00BBDA21 /* FloydWarshall.cpp in Sources */,
 				C438EA891CBA228B00BBDA21 /* GraphAlgorithm.cpp in Sources */,
@@ -6025,6 +6148,7 @@
 				C438EAAF1CBA228B00BBDA21 /* RubiksCube.cpp in Sources */,
 				C438EAB01CBA228B00BBDA21 /* FourBitArray.cpp in Sources */,
 				C438EAB11CBA228B00BBDA21 /* DiskBitFile.cpp in Sources */,
+				C4B6F9261D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C438EAB21CBA228B00BBDA21 /* EnvUtil.cpp in Sources */,
 				C438EAB31CBA228B00BBDA21 /* TOH.cpp in Sources */,
 				C438EAB41CBA228B00BBDA21 /* RubiksCube7Edges.cpp in Sources */,
@@ -6102,6 +6226,7 @@
 				C4456B1A1BBB49D40065CA5A /* LoadedCliqueAbstraction.cpp in Sources */,
 				C4456B1B1BBB49D40065CA5A /* MapAbstraction.cpp in Sources */,
 				C4456B1C1BBB49D40065CA5A /* MapCliqueAbstraction.cpp in Sources */,
+				C4B6F9221D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4456B1D1BBB49D40065CA5A /* MapFlatAbstraction.cpp in Sources */,
 				C4456B1E1BBB49D40065CA5A /* MapLineAbstraction.cpp in Sources */,
 				C4456B1F1BBB49D40065CA5A /* MapProvider.cpp in Sources */,
@@ -6141,6 +6266,7 @@
 				C4456B411BBB49D40065CA5A /* SpreadPRAStar.cpp in Sources */,
 				C4456B421BBB49D40065CA5A /* SimpleHierarchicalAStar.cpp in Sources */,
 				C4456B431BBB49D40065CA5A /* NQueens.cpp in Sources */,
+				C4144F081EFAE8D100356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4456B441BBB49D40065CA5A /* MinBloom.cpp in Sources */,
 				C4456B451BBB49D40065CA5A /* BitMap.cpp in Sources */,
 				C4456B461BBB49D40065CA5A /* Map2DConstrainedEnvironment.cpp in Sources */,
@@ -6198,6 +6324,7 @@
 				C447F571146790A600D6D581 /* BitVector.cpp in Sources */,
 				C447F572146790A600D6D581 /* FPUtil.cpp in Sources */,
 				C4BD427D1D17BA200089DD61 /* MR1Permutation.cpp in Sources */,
+				C4B6F9151D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C447F573146790A600D6D581 /* FunctionApproximator.cpp in Sources */,
 				C447F574146790A600D6D581 /* GLUtil.cpp in Sources */,
 				C447F575146790A600D6D581 /* LinearRegression.cpp in Sources */,
@@ -6222,6 +6349,7 @@
 				C447F587146790A600D6D581 /* LoadedBBAbstraction.cpp in Sources */,
 				C4D83EC618A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C447F588146790A600D6D581 /* LoadedCliqueAbstraction.cpp in Sources */,
+				C4144EFC1EFAE8C900356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C413C14A1B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C447F589146790A600D6D581 /* MapAbstraction.cpp in Sources */,
 				C447F58A146790A600D6D581 /* MapCliqueAbstraction.cpp in Sources */,
@@ -6321,6 +6449,7 @@
 				C46735951710D9EF00E2A10B /* BitVector.cpp in Sources */,
 				C46735961710D9EF00E2A10B /* FPUtil.cpp in Sources */,
 				C46735971710D9EF00E2A10B /* FunctionApproximator.cpp in Sources */,
+				C4144F011EFAE8CC00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4677D111BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C46735981710D9EF00E2A10B /* GLUtil.cpp in Sources */,
 				C46735991710D9EF00E2A10B /* LinearRegression.cpp in Sources */,
@@ -6343,6 +6472,7 @@
 				C46735A71710D9EF00E2A10B /* OpenClosedList.cpp in Sources */,
 				C46735A81710D9EF00E2A10B /* OpenListB.cpp in Sources */,
 				C46735A91710D9EF00E2A10B /* ClusterAbstraction.cpp in Sources */,
+				C4B6F91A1D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C46735AA1710D9EF00E2A10B /* GraphAbstraction.cpp in Sources */,
 				C4D83ECB18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C46735AB1710D9EF00E2A10B /* LoadedBBAbstraction.cpp in Sources */,
@@ -6445,6 +6575,7 @@
 				C46B6C6C1BD7644F00B10296 /* Graph.cpp in Sources */,
 				C46B6C6D1BD7644F00B10296 /* BitVector.cpp in Sources */,
 				C4BD428E1D17BA200089DD61 /* MR1Permutation.cpp in Sources */,
+				C4B6F9231D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C46B6C6E1BD7644F00B10296 /* FPUtil.cpp in Sources */,
 				C46B6C6F1BD7644F00B10296 /* FunctionApproximator.cpp in Sources */,
 				C46B6C701BD7644F00B10296 /* NBitArray.cpp in Sources */,
@@ -6469,6 +6600,7 @@
 				C46B6C831BD7644F00B10296 /* LogisticRegression.cpp in Sources */,
 				C46B6C841BD7644F00B10296 /* OpenListB.cpp in Sources */,
 				C46B6CE51BD7659500B10296 /* Driver.cpp in Sources */,
+				C4144F091EFAE8D200356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C46B6C851BD7644F00B10296 /* ClusterAbstraction.cpp in Sources */,
 				C46B6C861BD7644F00B10296 /* GraphAbstraction.cpp in Sources */,
 				C46B6C871BD7644F00B10296 /* LoadedBBAbstraction.cpp in Sources */,
@@ -6582,6 +6714,7 @@
 				C4765C471BFD57960040E996 /* SwapEndian.cpp in Sources */,
 				C4765C481BFD57960040E996 /* Timer.cpp in Sources */,
 				C42384811C8EAE6400489273 /* Voxels.cpp in Sources */,
+				C4144F0A1EFAE8D300356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4765C491BFD57960040E996 /* AStarOpenClosed.cpp in Sources */,
 				C4765C4A1BFD57960040E996 /* GenericAStar.cpp in Sources */,
 				C4765C4B1BFD57960040E996 /* CanonicalGrid.cpp in Sources */,
@@ -6616,6 +6749,7 @@
 				C4765C691BFD57960040E996 /* RHRUnit.cpp in Sources */,
 				C4765C6A1BFD57960040E996 /* AbsMapPatrolUnit.cpp in Sources */,
 				C4765C6B1BFD57960040E996 /* AbsMapUnit.cpp in Sources */,
+				C4B6F9241D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4765C6C1BFD57960040E996 /* AbsMapUnitGroup.cpp in Sources */,
 				C4765C6D1BFD57960040E996 /* AStar.cpp in Sources */,
 				C4765C6E1BFD57960040E996 /* AStar2.cpp in Sources */,
@@ -6694,6 +6828,7 @@
 				C47BDBEF17440B5900DD0928 /* BitVector.cpp in Sources */,
 				C47BDBF017440B5900DD0928 /* FPUtil.cpp in Sources */,
 				C4BD42831D17BA200089DD61 /* MR1Permutation.cpp in Sources */,
+				C4B6F91B1D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C47BDBF117440B5900DD0928 /* FunctionApproximator.cpp in Sources */,
 				C47BDBF217440B5900DD0928 /* GLUtil.cpp in Sources */,
 				C47BDBF317440B5900DD0928 /* LinearRegression.cpp in Sources */,
@@ -6718,6 +6853,7 @@
 				C47BDC0517440B5900DD0928 /* LoadedBBAbstraction.cpp in Sources */,
 				C4D83ECC18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C47BDC0617440B5900DD0928 /* LoadedCliqueAbstraction.cpp in Sources */,
+				C4144F021EFAE8CD00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C413C1501B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C47BDC0717440B5900DD0928 /* MapAbstraction.cpp in Sources */,
 				C47BDC0817440B5900DD0928 /* MapCliqueAbstraction.cpp in Sources */,
@@ -6818,6 +6954,7 @@
 				C4B1DD50192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C498D85F1432777C0053D322 /* BitVector.cpp in Sources */,
 				C4BD427C1D17BA200089DD61 /* MR1Permutation.cpp in Sources */,
+				C4B6F9141D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C498D8601432777C0053D322 /* FPUtil.cpp in Sources */,
 				C498D8611432777C0053D322 /* FunctionApproximator.cpp in Sources */,
 				C498D8621432777C0053D322 /* GLUtil.cpp in Sources */,
@@ -6842,6 +6979,7 @@
 				C498D8751432777C0053D322 /* LoadedBBAbstraction.cpp in Sources */,
 				C4D83EC518A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C498D8761432777C0053D322 /* LoadedCliqueAbstraction.cpp in Sources */,
+				C4144EFB1EFAE8C900356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C413C1491B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C498D8771432777C0053D322 /* MapAbstraction.cpp in Sources */,
 				C498D8781432777C0053D322 /* MapCliqueAbstraction.cpp in Sources */,
@@ -6955,6 +7093,7 @@
 				C4C5C37518E9439400915B3D /* Bloom.cpp in Sources */,
 				C49A6F9F1499BF41007CEDA2 /* Timer.cpp in Sources */,
 				C42384701C8EAE6400489273 /* Voxels.cpp in Sources */,
+				C4144EFD1EFAE8CA00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C49A6FA01499BF41007CEDA2 /* AStarOpenClosed.cpp in Sources */,
 				C413C14B1B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C49A6FA11499BF41007CEDA2 /* GenericAStar.cpp in Sources */,
@@ -6989,6 +7128,7 @@
 				C49A6FC21499BF41007CEDA2 /* RHRUnit.cpp in Sources */,
 				C49A6FC31499BF41007CEDA2 /* AbsMapPatrolUnit.cpp in Sources */,
 				C49A6FC41499BF41007CEDA2 /* AbsMapUnit.cpp in Sources */,
+				C4B6F9161D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C49A6FC51499BF41007CEDA2 /* AbsMapUnitGroup.cpp in Sources */,
 				C49A6FC61499BF41007CEDA2 /* AStar.cpp in Sources */,
 				C49A6FC71499BF41007CEDA2 /* AStar2.cpp in Sources */,
@@ -7066,6 +7206,7 @@
 				C4A79E2113F03A580064AC6A /* BitVector.cpp in Sources */,
 				C4A79E2213F03A580064AC6A /* FPUtil.cpp in Sources */,
 				C4A79E2313F03A580064AC6A /* FunctionApproximator.cpp in Sources */,
+				C4144EF71EFAE8C600356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4677D071BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4A79E2413F03A580064AC6A /* GLUtil.cpp in Sources */,
 				C4A79E2513F03A580064AC6A /* LinearRegression.cpp in Sources */,
@@ -7088,6 +7229,7 @@
 				C4A79E3213F03A580064AC6A /* OldSearchEnvironment.cpp in Sources */,
 				C4A79E3313F03A580064AC6A /* OpenClosedList.cpp in Sources */,
 				C4A79E3413F03A580064AC6A /* OpenListB.cpp in Sources */,
+				C4B6F9101D72B32E006422E7 /* VoxelGrid.cpp in Sources */,
 				C4B1DD4C192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4A79E3513F03A580064AC6A /* ClusterAbstraction.cpp in Sources */,
 				C4A79E3613F03A580064AC6A /* GraphAbstraction.cpp in Sources */,
@@ -7189,6 +7331,7 @@
 				C4A79EA813F256DF0064AC6A /* BitVector.cpp in Sources */,
 				C4A79EA913F256DF0064AC6A /* FPUtil.cpp in Sources */,
 				C4A79EAA13F256DF0064AC6A /* FunctionApproximator.cpp in Sources */,
+				C4144EF81EFAE8C700356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4677D081BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4A79EAB13F256DF0064AC6A /* GLUtil.cpp in Sources */,
 				C4A79EAC13F256DF0064AC6A /* LinearRegression.cpp in Sources */,
@@ -7211,6 +7354,7 @@
 				C4A79EBA13F256DF0064AC6A /* OpenClosedList.cpp in Sources */,
 				C4A79EBB13F256DF0064AC6A /* OpenListB.cpp in Sources */,
 				C4B1DD4D192A75710039A6DF /* LogisticRegression.cpp in Sources */,
+				C4B6F9111D72B32E006422E7 /* VoxelGrid.cpp in Sources */,
 				C4A79EBC13F256DF0064AC6A /* ClusterAbstraction.cpp in Sources */,
 				C4A79EBD13F256DF0064AC6A /* GraphAbstraction.cpp in Sources */,
 				C4A79EBE13F256DF0064AC6A /* LoadedBBAbstraction.cpp in Sources */,
@@ -7312,6 +7456,7 @@
 				C4B973A61426FA4F00758D0D /* Graph.cpp in Sources */,
 				C4B973AE1426FA4F00758D0D /* BitVector.cpp in Sources */,
 				C4BD427B1D17BA200089DD61 /* MR1Permutation.cpp in Sources */,
+				C4144EFA1EFAE8C800356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4B973AF1426FA4F00758D0D /* FPUtil.cpp in Sources */,
 				C4B973B01426FA4F00758D0D /* FunctionApproximator.cpp in Sources */,
 				C4677D0A1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
@@ -7334,6 +7479,7 @@
 				C46B6C381BD6E3E200B10296 /* TOH.cpp in Sources */,
 				C4B973C01426FA4F00758D0D /* OpenClosedList.cpp in Sources */,
 				C4B973C11426FA4F00758D0D /* OpenListB.cpp in Sources */,
+				C4B6F9131D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4B1DD4F192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4B973C21426FA4F00758D0D /* ClusterAbstraction.cpp in Sources */,
 				C4B973C31426FA4F00758D0D /* GraphAbstraction.cpp in Sources */,
@@ -7435,6 +7581,7 @@
 				C4C5C39F18EC7C9D00915B3D /* BitVector.cpp in Sources */,
 				C4C5C3A018EC7C9D00915B3D /* FPUtil.cpp in Sources */,
 				C4C5C3A118EC7C9D00915B3D /* FunctionApproximator.cpp in Sources */,
+				C4144F041EFAE8CE00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4C5C3A218EC7C9D00915B3D /* GLUtil.cpp in Sources */,
 				C4C5C3A318EC7C9D00915B3D /* LinearRegression.cpp in Sources */,
 				C4C5C3A418EC7C9D00915B3D /* Map.cpp in Sources */,
@@ -7457,6 +7604,7 @@
 				C4B1DD5A192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4C5C3B318EC7C9D00915B3D /* ClusterAbstraction.cpp in Sources */,
 				C4C5C3B418EC7C9D00915B3D /* GraphAbstraction.cpp in Sources */,
+				C4B6F91D1D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4C5C3B518EC7C9D00915B3D /* LoadedBBAbstraction.cpp in Sources */,
 				C4C5C3B618EC7C9D00915B3D /* LoadedCliqueAbstraction.cpp in Sources */,
 				C413C1531B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
@@ -7572,6 +7720,7 @@
 				C4C5C37118E9439200915B3D /* Bloom.cpp in Sources */,
 				C4C9E4F0176A7A160027410C /* Timer.cpp in Sources */,
 				C42384761C8EAE6400489273 /* Voxels.cpp in Sources */,
+				C4144F031EFAE8CD00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4C9E4F1176A7A160027410C /* AStarOpenClosed.cpp in Sources */,
 				C413C1511B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C4C9E4F2176A7A160027410C /* GenericAStar.cpp in Sources */,
@@ -7606,6 +7755,7 @@
 				C4C9E50D176A7A160027410C /* RHRUnit.cpp in Sources */,
 				C4C9E50E176A7A160027410C /* AbsMapPatrolUnit.cpp in Sources */,
 				C4C9E50F176A7A160027410C /* AbsMapUnit.cpp in Sources */,
+				C4B6F91C1D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4C9E510176A7A160027410C /* AbsMapUnitGroup.cpp in Sources */,
 				C4C9E511176A7A160027410C /* AStar.cpp in Sources */,
 				C4C9E512176A7A160027410C /* AStar2.cpp in Sources */,
@@ -7684,6 +7834,7 @@
 				C413C1571B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C4CA9F911B26805F00B4A894 /* Graph.cpp in Sources */,
 				C4BD428A1D17BA200089DD61 /* MR1Permutation.cpp in Sources */,
+				C4B6F91F1D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4CA9F921B26805F00B4A894 /* BitVector.cpp in Sources */,
 				C4CA9F931B26805F00B4A894 /* FPUtil.cpp in Sources */,
 				C4CA9F941B26805F00B4A894 /* FunctionApproximator.cpp in Sources */,
@@ -7708,6 +7859,7 @@
 				C4CA9FA41B26805F00B4A894 /* OpenClosedList.cpp in Sources */,
 				C4CA9FA51B26805F00B4A894 /* LogisticRegression.cpp in Sources */,
 				C4CA9FA61B26805F00B4A894 /* OpenListB.cpp in Sources */,
+				C4144EF51EF85FAA00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4CA9FA71B26805F00B4A894 /* ClusterAbstraction.cpp in Sources */,
 				C4CA9FA81B26805F00B4A894 /* GraphAbstraction.cpp in Sources */,
 				C4CA9FA91B26805F00B4A894 /* LoadedBBAbstraction.cpp in Sources */,
@@ -7718,6 +7870,7 @@
 				C4CA9FAE1B26805F00B4A894 /* MapLineAbstraction.cpp in Sources */,
 				C4CA9FAF1B26805F00B4A894 /* MapProvider.cpp in Sources */,
 				C4CA9FB01B26805F00B4A894 /* MapSectorAbstraction.cpp in Sources */,
+				C4144F101EFD546000356429 /* PancakeInstances.cpp in Sources */,
 				C4CA9FB11B26805F00B4A894 /* NodeLimitAbstraction.cpp in Sources */,
 				C4CA9FB21B26805F00B4A894 /* RadiusAbstraction.cpp in Sources */,
 				C4CA9FB31B26805F00B4A894 /* Width.cpp in Sources */,
@@ -7821,6 +7974,7 @@
 				C4D074771A83F32E00DAFFCD /* Timer.cpp in Sources */,
 				C4D074781A83F32E00DAFFCD /* AStarOpenClosed.cpp in Sources */,
 				C423847B1C8EAE6400489273 /* Voxels.cpp in Sources */,
+				C4144F051EFAE8CE00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4D074791A83F32E00DAFFCD /* GenericAStar.cpp in Sources */,
 				C413C1561B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C4D0747A1A83F32E00DAFFCD /* GenericIDAStar.cpp in Sources */,
@@ -7855,6 +8009,7 @@
 				C4D074961A83F32E00DAFFCD /* RHRUnit.cpp in Sources */,
 				C4D074971A83F32E00DAFFCD /* AbsMapPatrolUnit.cpp in Sources */,
 				C4D074981A83F32E00DAFFCD /* AbsMapUnit.cpp in Sources */,
+				C4B6F91E1D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4D074991A83F32E00DAFFCD /* AbsMapUnitGroup.cpp in Sources */,
 				C4D0749A1A83F32E00DAFFCD /* AStar.cpp in Sources */,
 				C4D0749B1A83F32E00DAFFCD /* AStar2.cpp in Sources */,
@@ -7933,6 +8088,7 @@
 				C4D60A7A14B22E10007594CD /* BitVector.cpp in Sources */,
 				C4D60A7B14B22E10007594CD /* FPUtil.cpp in Sources */,
 				C4D60A7C14B22E10007594CD /* FunctionApproximator.cpp in Sources */,
+				C4B6F9171D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4D60A7D14B22E10007594CD /* GLUtil.cpp in Sources */,
 				C4D60A7E14B22E10007594CD /* LinearRegression.cpp in Sources */,
 				C4D60A7F14B22E10007594CD /* Map.cpp in Sources */,
@@ -7957,6 +8113,7 @@
 				C4D60A9114B22E10007594CD /* LoadedCliqueAbstraction.cpp in Sources */,
 				C4D60A9214B22E10007594CD /* MapAbstraction.cpp in Sources */,
 				C413C14C1B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
+				C4144EFE1EFAE8CA00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4D60A9314B22E10007594CD /* MapCliqueAbstraction.cpp in Sources */,
 				C4D60A9414B22E10007594CD /* MapFlatAbstraction.cpp in Sources */,
 				C4D60A9514B22E10007594CD /* MapLineAbstraction.cpp in Sources */,
@@ -8070,6 +8227,7 @@
 				C4E7E6EC1C3DB97D0049D117 /* Timer.cpp in Sources */,
 				C4E7E6ED1C3DB97D0049D117 /* AStarOpenClosed.cpp in Sources */,
 				C42384821C8EAE6400489273 /* Voxels.cpp in Sources */,
+				C4144F0B1EFAE8D300356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4E7E6EE1C3DB97D0049D117 /* GenericAStar.cpp in Sources */,
 				C4E7E6EF1C3DB97D0049D117 /* CanonicalGrid.cpp in Sources */,
 				C4E7E6F01C3DB97D0049D117 /* GenericIDAStar.cpp in Sources */,
@@ -8104,6 +8262,7 @@
 				C4E7E70D1C3DB97D0049D117 /* AbsMapPatrolUnit.cpp in Sources */,
 				C4E7E70E1C3DB97D0049D117 /* AbsMapUnit.cpp in Sources */,
 				C4E7E70F1C3DB97D0049D117 /* AbsMapUnitGroup.cpp in Sources */,
+				C4B6F9251D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4E7E7101C3DB97D0049D117 /* AStar.cpp in Sources */,
 				C4E7E7111C3DB97D0049D117 /* AStar2.cpp in Sources */,
 				C4E7E7121C3DB97D0049D117 /* AStar3.cpp in Sources */,
@@ -8181,6 +8340,7 @@
 				C4EE612C1651BB9A00B038E5 /* Graph.cpp in Sources */,
 				C4EE612D1651BB9A00B038E5 /* BitVector.cpp in Sources */,
 				C4EE612E1651BB9A00B038E5 /* FPUtil.cpp in Sources */,
+				C4144F001EFAE8CC00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4EE612F1651BB9A00B038E5 /* FunctionApproximator.cpp in Sources */,
 				C4677D101BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4EE61301651BB9A00B038E5 /* GLUtil.cpp in Sources */,
@@ -8203,6 +8363,7 @@
 				C4EE613E1651BB9A00B038E5 /* OldSearchEnvironment.cpp in Sources */,
 				C4EE613F1651BB9A00B038E5 /* OpenClosedList.cpp in Sources */,
 				C4EE61401651BB9A00B038E5 /* OpenListB.cpp in Sources */,
+				C4B6F9191D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4B1DD55192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4EE61411651BB9A00B038E5 /* ClusterAbstraction.cpp in Sources */,
 				C4EE61421651BB9A00B038E5 /* GraphAbstraction.cpp in Sources */,
@@ -8304,6 +8465,7 @@
 				C4F9F42B13E4FE400077C5A5 /* Graph.cpp in Sources */,
 				C4F9F43A13E4FE400077C5A5 /* BitVector.cpp in Sources */,
 				C4F9F43B13E4FE400077C5A5 /* FPUtil.cpp in Sources */,
+				C4144EF61EFAE8C600356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4677D061BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4F9F43C13E4FE400077C5A5 /* FunctionApproximator.cpp in Sources */,
 				C4F9F43D13E4FE400077C5A5 /* GLUtil.cpp in Sources */,
@@ -8326,6 +8488,7 @@
 				C4F9F45913E4FE590077C5A5 /* OldSearchEnvironment.cpp in Sources */,
 				C4F9F45A13E4FE590077C5A5 /* OpenClosedList.cpp in Sources */,
 				C4B1DD4B192A75710039A6DF /* LogisticRegression.cpp in Sources */,
+				C4B6F90F1D72B32E006422E7 /* VoxelGrid.cpp in Sources */,
 				C4F9F45B13E4FE590077C5A5 /* OpenListB.cpp in Sources */,
 				C4F9F47A13E4FF250077C5A5 /* ClusterAbstraction.cpp in Sources */,
 				C4F9F47B13E4FF250077C5A5 /* GraphAbstraction.cpp in Sources */,
@@ -8427,6 +8590,7 @@
 				C4FBC85D16374C89003C667D /* BitVector.cpp in Sources */,
 				C4FBC85E16374C89003C667D /* FPUtil.cpp in Sources */,
 				C4FBC85F16374C89003C667D /* FunctionApproximator.cpp in Sources */,
+				C4144EFF1EFAE8CB00356429 /* VoxelTriangleExtraction.cpp in Sources */,
 				C4677D0F1BC2F41600D3DAD8 /* NBitArray.cpp in Sources */,
 				C4FBC86016374C89003C667D /* GLUtil.cpp in Sources */,
 				C4FBC86116374C89003C667D /* LinearRegression.cpp in Sources */,
@@ -8449,6 +8613,7 @@
 				C4FBC86F16374C89003C667D /* OpenClosedList.cpp in Sources */,
 				C4FBC87016374C89003C667D /* OpenListB.cpp in Sources */,
 				C4B1DD54192A75710039A6DF /* LogisticRegression.cpp in Sources */,
+				C4B6F9181D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4FBC87116374C89003C667D /* ClusterAbstraction.cpp in Sources */,
 				C4FBC87216374C89003C667D /* GraphAbstraction.cpp in Sources */,
 				C4FBC87316374C89003C667D /* LoadedBBAbstraction.cpp in Sources */,

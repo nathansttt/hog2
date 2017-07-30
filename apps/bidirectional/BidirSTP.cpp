@@ -13,6 +13,7 @@
 #include "MM.h"
 #include "BSStar.h"
 #include "TemplateAStar.h"
+#include "WeightedVertexGraph.h"
 
 MNPuzzleState<4, 4> GetKorfInstance(int which)
 {
@@ -146,7 +147,16 @@ void TestSTP(int algorithm)
 		std::vector<MNPuzzleState<4,4>> astarPath;
 		Timer t1, t2;
 		
-		
+		if (algorithm == -1) // Optimal Analysis
+		{
+			start = GetKorfInstance(x);
+			goal.Reset();
+			std::string t = "/Users/nathanst/stp_";
+			t += std::to_string(x);
+			t += ".svg";
+			GetWeightedVertexGraph<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(start, goal, &mnp, t.c_str());
+		}
+
 		if (algorithm == 0) // A*
 		{
 			goal.Reset();
@@ -206,7 +216,6 @@ void TestSTP(int algorithm)
 	exit(0);
 }
 
-
 void TestSTPFull()
 {
 	NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> nbs;
@@ -217,7 +226,6 @@ void TestSTPFull()
 
 	for (int x = 0; x < 100; x++) // 547 to 540
 	{
-		
 		MNPuzzleState<4, 4> start, goal;
 		printf("Problem %d of %d\n", x+1, 100);
 		

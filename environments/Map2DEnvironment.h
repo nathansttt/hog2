@@ -88,6 +88,18 @@ const tDirection possibleDir[numActions] = { kN, kNE, kE, kSE, kS, kSW, kW, kNW,
 const int kStayIndex = 8; // index of kStay
 
 
+namespace std {
+	
+	template <>
+	struct hash<xyLoc>
+	{
+		std::size_t operator()(const xyLoc& k) const
+		{
+			return (((std::size_t)k.x)<<16)|k.y;
+		}
+	};
+	
+}
 
 
 //typedef OccupancyInterface<xyLoc, tDirection> BaseMapOccupancyInterface;
@@ -111,13 +123,14 @@ public:
 	virtual BaseMapOccupancyInterface *GetOccupancyInfo() { return oi; }
 
 	virtual bool InvertAction(tDirection &a) const;
-
+	std::string GetName() { return std::string(map->GetMapName()); }
 //	bool Contractable(const xyLoc &where);
 	
 	virtual double HCost(const xyLoc &) const {
 		fprintf(stderr, "ERROR: Single State HCost not implemented for MapEnvironment\n");
 		exit(1); return -1.0;}
 	virtual double HCost(const xyLoc &node1, const xyLoc &node2) const;
+
 	virtual double GCost(const xyLoc &node1, const xyLoc &node2) const;
 	virtual double GCost(const xyLoc &node1, const tDirection &act) const;
 	bool GoalTest(const xyLoc &node, const xyLoc &goal) const;

@@ -52,9 +52,10 @@ public:
 	uint8_t state[24];
 };
 
+//typedef RubikEdgeStateBits RubikEdgeState;
+typedef RubikEdgeStateArray RubikEdgeState;
 
-typedef RubikEdgeStateBits RubikEdgeState;
-//typedef RubikEdgeStateArray RubikEdgeState;
+RubikEdgeState RotateRubikEdgeClockwise(const RubikEdgeState &in, int step);
 
 static bool operator==(const RubikEdgeStateBits &l1, const RubikEdgeStateBits &l2)
 {

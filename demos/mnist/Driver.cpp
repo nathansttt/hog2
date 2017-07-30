@@ -28,6 +28,7 @@
 #include "Common.h"
 #include "Driver.h"
 #include <string.h>
+#include <iostream>
 #include "LinearRegression.h"
 #include "LogisticRegression.h"
 #include "NN.h"
@@ -167,7 +168,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		LoadData(test, "t10k-images.idx3-ubyte", "t10k-labels.idx1-ubyte");
 		
 		
-		lr = new NN(784, 1000, 10, 0.01);
+		lr = new NN(784, 500, 10, 0.01);
 //		lr = new LogisticRegression(784, 10, 0.01);
 //		lr = new LinearRegression(784, 10, 0.01);
 	}
@@ -279,55 +280,50 @@ void ShowImage(const image &i, bool rebuild = false)
 		}
 	}
 	
-//	// draw full/weighted images
+//	reverse engineer the best image
 //	
-//	std::vector<double> input(28*28);
-//	std::vector<double> output(10);
-//	double sum = 0;
-//	for (int y = 0; y < 28*28; y++)
+	static std::vector<double> input(28*28, 0.0);
+	if (rebuild)
+	{
+		input.clear();
+		input.resize(28*28);
+	}
+	std::vector<double> output(10);
+	output[i.value] = 1.0;
+	
+	for (int x = 0; x < 20; x++)
+	{
+		lr->GetInput(input, output);
+	}
+//	for (int x = 0; x < 28*28; x++)
 //	{
-//		input[y] = i.pixel[y]/255.0;
-//		sum += input[y];
+//		if (input[x] > 1)
+//			input[x] = 1;
+//		if (input[x] < 0)
+//			input[x] = 0;
 //	}
-//	double *result = lr->test(input);
-//	int maxVal = 0;
-////	printf("0:%1.2f  ", result[0]);
-//	for (int x = 1; x < 10; x++)
-//	{
-////		printf("%d:%1.2f  ", x, result[x]);
-//		if (result[x] > result[maxVal])
-//			maxVal = x;
-//	}
-////	printf("\n");
-//
-//	double maxWeight = -1000;
-//	double minWeight = 1000;
-//	for (int y = 0; y < 28*28; y++)
-//	{
-//		double val = lr->getInputWeight(y, maxVal);
-//		if (val > maxWeight)
-//			maxWeight = val;
-//		if (val < minWeight)
-//			minWeight = val;
-//	}
-//	//printf("[%d] Max: %f, min %f\n", maxVal, maxWeight, minWeight);
-//	for (int x = 0; x < 28; x++)
-//	{
-//		for (int y = 0; y < 28; y++)
-//		{
-//			double v = lr->getInputWeight(x+y*28, maxVal);
-//			if (v > 0)
-//			{
-//				GLfloat color = v/maxWeight;
-//				glColor3f(1-color, 1-color, 1);
-//			}
-//			else if (v < 0){
-//				GLfloat color = v/minWeight;
-//				glColor3f(1, 1-color, 1-color);
-//			}
-//			DrawSquare(-0.0+x/56.0, -0.5+y/56.0, 0, 1/56.0);
-//		}
-//	}
+
+//	for (auto x : input)
+//		std::cout << (int)(x*100) << " ";
+//	std::cout << "\n";
+
+	
+	for (int x = 0; x < 28; x++)
+	{
+		for (int y = 0; y < 28; y++)
+		{
+			glColor3f(input[x+y*28],
+					  input[x+y*28],
+					  input[x+y*28]);
+			DrawSquare(-0.0+x/56.0, -0.5+y/56.0, 0, 1/56.0);
+		}
+	}
+	double *tmp = lr->test(input);
+	for (int x = 0; x < 10; x++)
+	{
+		glColor3f(1-tmp[x], tmp[x], 0);
+		DrawSquare(1/40.0+x/20.0, -0.55, 0.0, 1/40.0);
+	}
 //
 //	{
 //		double maxWeight = -1000;
@@ -408,9 +404,9 @@ void ShowImage(const image &i, bool rebuild = false)
 //		}
 //	}
 	
-//	std::string label;
-//	label = "Actual image ";
-//	label += std::to_string(+i.value);
+	std::string label;
+	label = "Actual image ";
+	label += std::to_string(+i.value);
 //	label += " trained value: ";
 //	label += std::to_string(maxVal);
 //	label += " [";
@@ -419,7 +415,7 @@ void ShowImage(const image &i, bool rebuild = false)
 //	label += std::to_string(result[maxVal]);
 //	label += "]";
 	
-//	submitTextToBuffer(label.c_str());
+	submitTextToBuffer(label.c_str());
 }
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)

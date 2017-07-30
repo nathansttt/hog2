@@ -300,7 +300,7 @@ double NN::dg(double a)
 	return g_a*(1-g_a);
 }
 
-double NN::outputerr(std::vector<double> &out, std::vector<double> &expected, int which)
+double NN::outputerr(const std::vector<double> &out, const std::vector<double> &expected, int which)
 {
 	double err = (expected[which]-out[which]);
 	if (outputActivation == kExponential)
@@ -309,7 +309,7 @@ double NN::outputerr(std::vector<double> &out, std::vector<double> &expected, in
 	return err;
 }
 
-double NN::internalerr(std::vector<double> &out, std::vector<double> &expected, int which)
+double NN::internalerr(const std::vector<double> &out, const std::vector<double> &expected, int which)
 {
 	double answer = 0;
 
@@ -320,7 +320,17 @@ double NN::internalerr(std::vector<double> &out, std::vector<double> &expected, 
 	return answer;
 }
 
-double NN::error(std::vector<double> &target)
+double NN::internalinputerr(const std::vector<double> &out, const std::vector<double> &expected, int which)
+{
+	double answer = 0;
+	
+	for (int x = 0; x < outputs; x++)
+		answer+=hidden[which]*outputerr(out, expected, x)*dg(weights[1][x][which]);
+	
+	return answer;
+}
+
+double NN::error(const std::vector<double> &target)
 {
 	double answer = 0, t;
 	for (int x = 0; x < outputs; x++) // output.length
@@ -393,6 +403,25 @@ double NN::train(std::vector<unsigned int> &input, std::vector<double> &target)
 			errors[0][x][input[y]+1] = (1)*xinternalerror;
 			weights[0][x][input[y]+1] += errors[0][x][input[y]+1];
 		} 
+	}
+	return error(target);
+}
+
+/*
+ * Given the target output, find input that would maximize this classification
+ */
+double NN::GetInput(std::vector<double> &input, const std::vector<double> &target)
+{
+	test(input);
+	
+	// calulate error in hidden layer
+	for (int x = 0; x < hiddens; x++) // weights[0].length
+	{
+		double xinternalerror = internalinputerr(output, target, x);
+		for (int y = 0; y < inputs; y++)
+		{
+			input[y] += weights[0][x][y+1]*xinternalerror;
+		}
 	}
 	return error(target);
 }

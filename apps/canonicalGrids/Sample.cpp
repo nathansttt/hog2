@@ -93,7 +93,8 @@ CanonicalGrid::CanonicalGrid *ma2 = 0;
 //std::string mapName = "/Users/nathanst/hog2/maps/dao/den001d.map";
 //std::string mapName = "/Users/nathanst/hog2/maps/da2/lt_backalley_g.map";
 //std::string mapName = "/Users/nathanst/hog2/maps/dao/orz107d.map";
-std::string mapName = "/Users/nathanst/hog2/maps/dao/den407d.map";
+//std::string mapName = "/Users/nathanst/hog2/maps/dao/den407d.map";
+std::string mapName = "/Users/nathanst/hog2/maps/local/den201d-small.map";
 
 
 std::vector<xyLoc> path;
@@ -1470,22 +1471,23 @@ void TestJPS()
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-	TestJPS();
-	return;
-	
+//	TestJPS();
+//	return;
+
 	xyLoc s1;
 	xyLoc g1;
 	s1.x = px1; s1.y = py1;
 	g1.x = px2; g1.y = py2;
 
-	jps->InitializeSearch(ma1, s1, g1, path3);
-
+	CanonicalDijkstra d;
+	d.InitializeSearch(ma1, s1, g1, path);
+	ma1->SetDiagonalCost(1.5);
 	int step = 0;
 	bool done = false;
 	while (true)
 	{
 		std::fstream svgFile;
-		std::string file = "/Users/nathanst/Movies/tmp/jps";
+		std::string file = "/Users/nathanst/Movies/tmp/cdijkstra";
 		file += std::to_string((step/100)%10);
 		file += std::to_string((step/10)%10);
 		file += std::to_string(step%10);
@@ -1494,15 +1496,15 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 		
 		svgFile << ma1->SVGHeader();
 		svgFile << ma1->SVGDraw();
-		svgFile << DrawCanonicalOrdering(true);
-		
-		svgFile << jps->SVGDraw();
+//		svgFile << DrawCanonicalOrdering(false);
+//		svgFile << d.SVGDraw();
+		svgFile << d.SVGDrawDetailed();
 		
 		svgFile << "</svg>";
 		svgFile.close();
 		if (done)
 			break;
-		done = jps->DoSingleSearchStep(path3);
+		done = d.DoSingleSearchStep(path);
 		step++;
 	}
 	
@@ -1524,6 +1526,8 @@ void LogScreenShots(xyLoc l)
 		svgFile.open(m1.c_str(), std::fstream::out | std::fstream::trunc);
 		svgFile << ma1->SVGHeader();
 		svgFile << ma1->SVGDraw();
+		ma1->SetColor(0, 0, 0);
+		svgFile << ma1->SVGDraw(l);
 		ma1->SetColor(1, 1, 1);
 		svgFile << ma1->SVGLabelState(l, "S", 1);
 		svgFile << "</svg>";
@@ -1536,6 +1540,8 @@ void LogScreenShots(xyLoc l)
 		svgFile << ma1->SVGHeader();
 		svgFile << ma1->SVGDraw();
 		svgFile << DrawBasicCanonicalOrdering();
+		ma1->SetColor(0, 0, 0);
+		svgFile << ma1->SVGDraw(l);
 		ma1->SetColor(1, 1, 1);
 		svgFile << ma1->SVGLabelState(l, "S", 1);
 		svgFile << "</svg>";
@@ -1548,6 +1554,8 @@ void LogScreenShots(xyLoc l)
 		svgFile << ma1->SVGHeader();
 		svgFile << ma1->SVGDraw();
 		svgFile << DrawBasicCanonicalOrdering();
+		ma1->SetColor(0, 0, 0);
+		svgFile << ma1->SVGDraw(l);
 		ma1->SetColor(1, 1, 1);
 		svgFile << ma1->SVGLabelState(l, "S", 1);
 		svgFile << DrawInitialJumpPoints(ma1);
@@ -1561,6 +1569,8 @@ void LogScreenShots(xyLoc l)
 		svgFile << ma1->SVGHeader();
 		svgFile << ma1->SVGDraw();
 		svgFile << DrawCanonicalOrdering();
+		ma1->SetColor(0, 0, 0);
+		svgFile << ma1->SVGDraw(l);
 		ma1->SetColor(1, 1, 1);
 		svgFile << ma1->SVGLabelState(l, "S", 1);
 		
@@ -1832,6 +1842,8 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				a1.SetWeight(searchWeight);
 				a2.SetWeight(searchWeight);
 				ma1->SetEightConnected();
+
+				if (0)
 				{
 					a1.InitializeSearch(ma1, s1, g1, path);
 					a2.InitializeSearch(ma2, s2, g2, path2);

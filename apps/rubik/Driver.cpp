@@ -147,6 +147,20 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 //		std::cout << "Base hash: " << c.c.GetStateHash(s.corner) << "\n";
 //		c.c.GetStateFromHash(c.c.GetStateHash(s.corner), s.corner);
 //		s.edge.Reset();
+		s.Reset();
+//		s.edge.SetCubeInLoc(1, 5);
+//		s.edge.SetCubeInLoc(5, 1);
+//		s.edge.SetCubeOrientation(5, false);
+//		s.edge.SetCubeOrientation(1, false);
+		c.ApplyAction(s, 2);
+		c.ApplyAction(s, 8);
+		c.ApplyAction(s, 1);
+		c.ApplyAction(s, 3);
+		c.ApplyAction(s, 17);
+		c.ApplyAction(s, 0);
+		c.ApplyAction(s, 4);
+		c.ApplyAction(s, 8);
+		
 		glClearColor(0.8, 0.8, 0.8, 1.0);
 		if (animateActions.size() > 0)
 		{
@@ -169,7 +183,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	else if (viewport == 2)
 	{
-		c.OpenGLDrawEdges(s);
+		RubiksState tmp = s;
+		tmp.edge = RotateRubikEdgeClockwise(s.edge, 1);
+		c.OpenGLDrawEdges(tmp);
 	}
 	else if (viewport == 1)
 	{
@@ -467,60 +483,60 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			break;
 		case 'o':
-		{
-			Rubik7EdgeState es7, dual7;
-			Rubik7Edge e7;
-
-			RubikEdgeState es, dual;
-			RubikEdge e;
-
-			static std::vector<RubikEdgeAction> acts;
-			for (int t = 0; t < 5; t++)
-				acts.push_back(random()%18);
-			es7.Reset();
-			es.Reset();
-			e.GetStateFromHash(12345, es);
-			es7.state = es.state;
-			std::cout << "Strt: " << es7 << std::endl;
-			std::cout << "Strt: " << es << std::endl;
-			std::cout << "Acts: ";
-			for (unsigned int x = 0; x < acts.size(); x++)
-			{
-				if (x > 0)
-					std::cout << ", ";
-				e7.ApplyAction(es7, acts[x]);
-				e.ApplyAction(es, acts[x]);
-				std::cout << acts[x];
-			}
-			std::cout << std::endl;;
-			std::cout << "Init: " << es7 << std::endl;
-			std::cout << "Init: " << es << std::endl;
-			es7.GetDual(dual7);
-			es.GetDual(dual);
-			std::cout << "Dual: " << dual7 << std::endl;
-			std::cout << "Dual: " << dual << std::endl;
-			es7.Reset();
-			es.Reset();
-			e.GetStateFromHash(12345, es);
-			es7.state = es.state;
-			for (unsigned int x = 0; x < acts.size(); x++)
-			{
-				e7.UndoAction(es7, acts[acts.size()-x-1]);
-				e.UndoAction(es, acts[acts.size()-x-1]);
-			}
-			std::cout << "Undo: " << es7 << std::endl;
-			std::cout << "Undo: " << es << std::endl;
-			//std::cout << dual << std::endl << std::endl;
-			assert(dual7 == es7);
-			assert(dual == es);
-			for (unsigned int x = 0; x < acts.size(); x++)
-			{
-				e7.ApplyAction(es7, acts[x]);
-				e.ApplyAction(es, acts[x]);
-			}
-			std::cout << es7 << std::endl << std::endl;
-			std::cout << es << std::endl << std::endl;
-		}
+//		{
+//			Rubik7EdgeState es7, dual7;
+//			Rubik7Edge e7;
+//
+//			RubikEdgeState es, dual;
+//			RubikEdge e;
+//
+//			static std::vector<RubikEdgeAction> acts;
+//			for (int t = 0; t < 5; t++)
+//				acts.push_back(random()%18);
+//			es7.Reset();
+//			es.Reset();
+//			e.GetStateFromHash(12345, es);
+//			es7.state = es.state;
+//			std::cout << "Strt: " << es7 << std::endl;
+//			std::cout << "Strt: " << es << std::endl;
+//			std::cout << "Acts: ";
+//			for (unsigned int x = 0; x < acts.size(); x++)
+//			{
+//				if (x > 0)
+//					std::cout << ", ";
+//				e7.ApplyAction(es7, acts[x]);
+//				e.ApplyAction(es, acts[x]);
+//				std::cout << acts[x];
+//			}
+//			std::cout << std::endl;;
+//			std::cout << "Init: " << es7 << std::endl;
+//			std::cout << "Init: " << es << std::endl;
+//			es7.GetDual(dual7);
+//			es.GetDual(dual);
+//			std::cout << "Dual: " << dual7 << std::endl;
+//			std::cout << "Dual: " << dual << std::endl;
+//			es7.Reset();
+//			es.Reset();
+//			e.GetStateFromHash(12345, es);
+//			es7.state = es.state;
+//			for (unsigned int x = 0; x < acts.size(); x++)
+//			{
+//				e7.UndoAction(es7, acts[acts.size()-x-1]);
+//				e.UndoAction(es, acts[acts.size()-x-1]);
+//			}
+//			std::cout << "Undo: " << es7 << std::endl;
+//			std::cout << "Undo: " << es << std::endl;
+//			//std::cout << dual << std::endl << std::endl;
+//			assert(dual7 == es7);
+//			assert(dual == es);
+//			for (unsigned int x = 0; x < acts.size(); x++)
+//			{
+//				e7.ApplyAction(es7, acts[x]);
+//				e.ApplyAction(es, acts[x]);
+//			}
+//			std::cout << es7 << std::endl << std::endl;
+//			std::cout << es << std::endl << std::endl;
+//		}
 			break;
 		case ']':
 			s.Reset();
@@ -2084,6 +2100,20 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 	return false;
 }
 
+int GetNextMove(const char *input, int &base);
+const char *GetStringFromMove(int move)
+{
+	const char *str[] = {"U", "D", "L", "R", "B", "F", "U-", "D-", "L-", "R-", "B-", "F-", "U2", "D2", "L2", "R2", "B2", "F2"};
+	for (int x = 0; x < 18; x++)
+	{
+		int act;
+		GetNextMove(str[x], act);
+		if (act == move)
+			return str[x];
+	}
+	return "?";
+}
+
 int GetNextMove(const char *input, int &base)
 {
 	int used = 0;
@@ -2475,86 +2505,86 @@ void MeasurePDBCompression(int itemsCompressed)
 
 void ExtractStatesAtDepth(const char *theFile)
 {
-	RubikEdge e;
-	RubikEdgeState es;
-
-	std::vector<std::vector<uint64_t> > vals;
-	std::vector<FILE *> files;
-	std::vector<long> counts;
-	vals.resize(10); // 0...9
-	counts.resize(10);
-	std::vector<bucketInfo> data;
-	std::vector<bucketData> buckets;
-	
-	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
-	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
-	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
-	
-	DiskBitFile f(theFile);
-	
-	uint64_t entry = 0;
-	for (int x = 0; x < 10; x++)
-	{
-		char name[255];
-		sprintf(name, "12edge-depth-%d.dat", x);
-		FILE *f = fopen(name, "w+");
-		if (f == 0)
-		{
-			printf("Error opening %s; aborting!\n", name);
-			exit(0);
-		}
-		files.push_back(f);
-	}
-	for (unsigned int x = 0; x < data.size(); x++)
-	{
-		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
-		{
-			bool debug = false;
-			int val = f.ReadFileDepth(data[x].bucketID, y);
-			if (val < 10)
-			{
-				int64_t r1, r2;
-				e.unrankPlayer(entry, es, 0);
-				e.rankPlayer(es, 0, r1, r2);
-				if (r1 != x || r2 != y-data[x].bucketOffset)
-				{
-					printf("Error: entry is %llu, which should map to x: %llu y: %llu. Instead we got r1: %llu, r2: %llu\n", entry, x, y-data[x].bucketOffset, r1, r2);
-					exit(0);
-				}
-				vals[val].push_back(es.state);
-				counts[val]++;
-			}
-			entry++;
-			if (0 == entry%1000000000)
-			{
-				printf("Processing entry %llu\n", entry);
-				fflush(stdout);
-				printf("Flushing files:\n"); fflush(stdout);
-				for (int t = 0; t < 10; t++)
-				{
-					printf("File %d, %ld entries\n", t, vals[t].size()); fflush(stdout);
-					fwrite(&(vals[t][0]), sizeof(uint64_t), vals[t].size(), files[t]);
-					vals[t].resize(0);
-				}
-			}
-		}
-	}
-	printf("%llu entries read total\n", entry);
-	{
-		printf("Processing entry %llu\n", entry); fflush(stdout);
-		printf("Flushing files:\n"); fflush(stdout);
-		for (int x = 0; x < 10; x++)
-		{
-			printf("File %d, %ld entries\n", x, vals[x].size()); fflush(stdout);
-			fwrite(&(vals[x][0]), sizeof(uint64_t), vals[x].size(), files[x]);
-			vals[x].resize(0);
-		}
-	}
-	for (int x = 0; x < 10; x++)
-	{
-		printf("Total entries for file %d: %lu\n", x, counts[x]);
-		fclose(files[x]);
-	}
+//	RubikEdge e;
+//	RubikEdgeState es;
+//
+//	std::vector<std::vector<uint64_t> > vals;
+//	std::vector<FILE *> files;
+//	std::vector<long> counts;
+//	vals.resize(10); // 0...9
+//	counts.resize(10);
+//	std::vector<bucketInfo> data;
+//	std::vector<bucketData> buckets;
+//	
+//	uint64_t maxBuckSize = GetMaxBucketSize<RubikEdge, RubikEdgeState>(true);
+//	InitTwoPieceData<RubikEdge, RubikEdgeState>(data, maxBuckSize);
+//	InitBucketSize<RubikEdge, RubikEdgeState>(buckets, maxBuckSize);
+//	
+//	DiskBitFile f(theFile);
+//	
+//	uint64_t entry = 0;
+//	for (int x = 0; x < 10; x++)
+//	{
+//		char name[255];
+//		sprintf(name, "12edge-depth-%d.dat", x);
+//		FILE *f = fopen(name, "w+");
+//		if (f == 0)
+//		{
+//			printf("Error opening %s; aborting!\n", name);
+//			exit(0);
+//		}
+//		files.push_back(f);
+//	}
+//	for (unsigned int x = 0; x < data.size(); x++)
+//	{
+//		for (int64_t y = data[x].bucketOffset; y < data[x].bucketOffset+data[x].numEntries; y++)
+//		{
+//			bool debug = false;
+//			int val = f.ReadFileDepth(data[x].bucketID, y);
+//			if (val < 10)
+//			{
+//				int64_t r1, r2;
+//				e.unrankPlayer(entry, es, 0);
+//				e.rankPlayer(es, 0, r1, r2);
+//				if (r1 != x || r2 != y-data[x].bucketOffset)
+//				{
+//					printf("Error: entry is %llu, which should map to x: %llu y: %llu. Instead we got r1: %llu, r2: %llu\n", entry, x, y-data[x].bucketOffset, r1, r2);
+//					exit(0);
+//				}
+//				vals[val].push_back(es.state);
+//				counts[val]++;
+//			}
+//			entry++;
+//			if (0 == entry%1000000000)
+//			{
+//				printf("Processing entry %llu\n", entry);
+//				fflush(stdout);
+//				printf("Flushing files:\n"); fflush(stdout);
+//				for (int t = 0; t < 10; t++)
+//				{
+//					printf("File %d, %ld entries\n", t, vals[t].size()); fflush(stdout);
+//					fwrite(&(vals[t][0]), sizeof(uint64_t), vals[t].size(), files[t]);
+//					vals[t].resize(0);
+//				}
+//			}
+//		}
+//	}
+//	printf("%llu entries read total\n", entry);
+//	{
+//		printf("Processing entry %llu\n", entry); fflush(stdout);
+//		printf("Flushing files:\n"); fflush(stdout);
+//		for (int x = 0; x < 10; x++)
+//		{
+//			printf("File %d, %ld entries\n", x, vals[x].size()); fflush(stdout);
+//			fwrite(&(vals[x][0]), sizeof(uint64_t), vals[x].size(), files[x]);
+//			vals[x].resize(0);
+//		}
+//	}
+//	for (int x = 0; x < 10; x++)
+//	{
+//		printf("Total entries for file %d: %lu\n", x, counts[x]);
+//		fclose(files[x]);
+//	}
 }
 
 void TestBloom(int entries, double accuracy)

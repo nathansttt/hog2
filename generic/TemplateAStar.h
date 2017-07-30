@@ -841,7 +841,7 @@ template <class state, class action, class environment, class openList>
 std::string TemplateAStar<state, action,environment,openList>::SVGDrawDetailed() const
 {
 	std::string s;
-	double transparency = 1.0;
+	//double transparency = 1.0;
 	if (openClosedList.size() == 0)
 		return s;
 	uint64_t top = -1;

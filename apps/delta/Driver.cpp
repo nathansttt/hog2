@@ -41,13 +41,13 @@ void TSBiVRC(int bits, int compressionFactor, int first = 0, int last = 50);
 void CompressionTest();
 
 template <typename state, typename action, typename environment>
-float GetAveragePDBValue(const std::vector<int> &pattern, int bits, int factor, bool div, bool mr);
+float GetAveragePDBValue(const std::vector<int> &pattern, int bits, int factor, bool div, bool mr, bool shuffle);
 
 template <int N, int k>
 void PrintHeuristicTables();
 
 template <typename state, typename action, typename environment>
-void CompressionExample(std::vector<int> p1, std::vector<int> p2, std::vector<int> p3);
+void CompressionExample(bool shuffle, std::vector<int> p1, std::vector<int> p2, std::vector<int> p3);
 
 template <typename state, typename action, typename environment>
 void PrebuildHeuristic(const std::vector<int> &pattern, bool mr);
@@ -386,19 +386,23 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 	return false;
 }
 
-void TOHCompressionTest();
+void TOHCompressionTest(bool shuffle);
 void CompressionTest()
 {
-	CompressionExample<TopSpinState<18>, TopSpinAction, TopSpin<18,4>>({0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
-	CompressionExample<TopSpinState<18>, TopSpinAction, TopSpin<18,4>>({6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
-	CompressionExample<MNPuzzleState<4,4>, slideDir, MNPuzzle<4,4>>({0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
-	CompressionExample<MNPuzzleState<4,4>, slideDir, MNPuzzle<4,4>>({6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
-	CompressionExample<PancakePuzzleState<18>, unsigned, PancakePuzzle<18>>({0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
-	CompressionExample<PancakePuzzleState<18>, unsigned, PancakePuzzle<18>>({6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
-	TOHCompressionTest();
+	for (int shuffle = 1; shuffle >= 0; shuffle--)
+	{
+		CompressionExample<TopSpinState<18>, TopSpinAction, TopSpin<18,4>>(shuffle, {0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
+		CompressionExample<TopSpinState<18>, TopSpinAction, TopSpin<18,4>>(shuffle, {6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
+		CompressionExample<MNPuzzleState<4,4>, slideDir, MNPuzzle<4,4>>(shuffle, {0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
+		CompressionExample<MNPuzzleState<4,4>, slideDir, MNPuzzle<4,4>>(shuffle, {6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
+		CompressionExample<PancakePuzzleState<18>, unsigned, PancakePuzzle<18>>(shuffle, {0, 1, 2, 3, 4, 5, 6}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4});
+		CompressionExample<PancakePuzzleState<18>, unsigned, PancakePuzzle<18>>(shuffle, {6, 5, 4, 3, 2, 1, 0}, {5, 4, 3, 2, 1, 0}, {4, 3, 2, 1, 0});
+	}
+	TOHCompressionTest(true);
+	TOHCompressionTest(false);
 }
 
-void TOHCompressionTest()
+void TOHCompressionTest(bool shuffle)
 {
 	const int numDisks = 16; // [disks - 2] (4^14 - 256 million)
 	TOH<numDisks> toh;
@@ -423,13 +427,15 @@ void TOHCompressionTest()
 	
 	for (int div = 0; div <= 1; div++)
 	{
-		printf("Starting TOH %s\n", div?"DIV":"MOD");
+		printf("==Compressing TOH via %s; shuffle: %s\n", div?"DIV":"MOD", shuffle?"true":"false");
 		for (int x = 1; x <= 16; x *= 2)
 			printf("%d\t", x);
 		printf("\n");
 		for (int x = 1; x <= 16; x *= 2)
 		{
 			pdb1a = pdb1;
+			if (shuffle)
+				pdb1a.ShuffleValues();
 			if (div)
 				pdb1a.DivCompress(x, false);
 			else
@@ -441,13 +447,15 @@ void TOHCompressionTest()
 
 	for (int div = 0; div <= 1; div++)
 	{
-		printf("Starting TOH %s\n", div?"DIV":"MOD");
+		printf("==Compressing TOH via %s; shuffle: %s\n", div?"DIV":"MOD", shuffle?"true":"false");
 		for (int x = 1; x <= 16; x *= 2)
 			printf("%d\t", x);
 		printf("\n");
 		for (int x = 1; x <= 16; x *= 2)
 		{
 			pdb2a = pdb2;
+			if (shuffle)
+				pdb2a.ShuffleValues();
 			if (div)
 				pdb2a.DivCompress(x, false);
 			else
@@ -1173,7 +1181,7 @@ void TSBiVRCDelta(int bits, int compressionFactor, int first, int last)
 }
 
 template <typename state, typename action, typename environment>
-void CompressionExample(std::vector<int> p1, std::vector<int> p2, std::vector<int> p3)
+void CompressionExample(bool shuffle, std::vector<int> p1, std::vector<int> p2, std::vector<int> p3)
 {
 	PrebuildHeuristic<state, action, environment>(p1, false);
 	PrebuildHeuristic<state, action, environment>(p2, false);
@@ -1186,7 +1194,7 @@ void CompressionExample(std::vector<int> p1, std::vector<int> p2, std::vector<in
 	
 	environment e;
 	state s;
-	printf("%d in pattern; %d in state. max compression of %d\n", p1.size(), sizeof(state::puzzle)/sizeof(s.puzzle[0]), -p1.size()+sizeof(state::puzzle)/sizeof(s.puzzle[0]));
+	printf("%lu in pattern; %lu in state. max compression of %d\n", p1.size(), sizeof(state::puzzle)/sizeof(s.puzzle[0]), -p1.size()+sizeof(state::puzzle)/sizeof(s.puzzle[0]));
 	std::cout << "Domain: " << e.GetName() << "\n";
 	for (int mr = 0; mr <= 1; mr++)
 	{
@@ -1198,19 +1206,19 @@ void CompressionExample(std::vector<int> p1, std::vector<int> p2, std::vector<in
 				if (t == 0) p = &p1;
 				if (t == 1) p = &p2;
 				if (t == 2) p = &p3;
-				int maxCompression = 1-p->size()+sizeof(state::puzzle)/sizeof(s.puzzle[0]);
-				printf("Compression: %s; ranking: %s; pattern: (", div?"DIV":"MOD", mr?"MR":"LEX");
+				int maxCompression = 1-(int)p->size()+sizeof(state::puzzle)/sizeof(s.puzzle[0]);
+				printf("==Compressing %s via %s; ranking: %s; shuffle: %s; pattern: (", e.GetName().c_str(), div?"DIV":"MOD", mr?"MR":"LEX", shuffle?"true":"false");
 				for (auto x : *p)
 					printf("%d,", x);
 				printf(")\n");
 				for (int factor = 1; factor <= maxCompression; factor++)
-					printf("\t%d", factor);
-				printf("\n");
+					printf("%d\t", factor);
+				printf("%d\n", maxCompression*(maxCompression+1));
 				for (int factor = 1; factor <= maxCompression; factor++)
 				{
-					printf("%1.3f\t", GetAveragePDBValue<state, action, environment>(*p, 8, factor, div, mr));
+					printf("%1.3f\t", GetAveragePDBValue<state, action, environment>(*p, 8, factor, div, mr, shuffle));
 				}
-				printf("\n");
+				printf("%1.3f\n", GetAveragePDBValue<state, action, environment>(*p, 8, maxCompression*(maxCompression+1), div, mr, shuffle));
 			}
 		}
 	}
@@ -1277,7 +1285,7 @@ void PrebuildHeuristic(const std::vector<int> &pattern, bool mr)
 }
 
 template <typename state, typename action, typename environment>
-float GetAveragePDBValue(const std::vector<int> &pattern, int bits, int factor, bool div, bool mr)
+float GetAveragePDBValue(const std::vector<int> &pattern, int bits, int factor, bool div, bool mr, bool shuffle)
 {
 //	std::vector<int> pattern;
 	environment ts;
@@ -1296,6 +1304,8 @@ float GetAveragePDBValue(const std::vector<int> &pattern, int bits, int factor, 
 		h->BuildPDB(t, std::thread::hardware_concurrency());
 		h->Save(prefix);
 	}
+	if (shuffle)
+		h->ShuffleValues();
 	if (factor > 1)
 	{
 		if (div)

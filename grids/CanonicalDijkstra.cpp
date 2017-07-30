@@ -8,6 +8,8 @@
 
 #include "CanonicalDijkstra.h"
 
+const double gDiagCost = 1.5;
+
 CanonicalDijkstra::CanonicalDijkstra()
 {
 	jumpLimit = 16;
@@ -180,9 +182,6 @@ void CanonicalDijkstra::GetJPSSuccessors(int x, int y, uint8_t parent, double co
 				successors.push_back(jpsSuccessor(x, y-1, tDirection(kNE), cost+1));
 			}
 			else {
-				//				if (cost >= jumpLimit)
-				//					successors.push_back(jpsSuccessor(x, y-1, tDirection(kN), cost+1));
-				//				else
 				GetJPSSuccessors(x, y-1, kN, cost+1, pid, pg);
 			}
 			n1 = true;
@@ -212,11 +211,6 @@ void CanonicalDijkstra::GetJPSSuccessors(int x, int y, uint8_t parent, double co
 				successors.push_back(jpsSuccessor(x-1, y, tDirection(kSW), cost+1));
 			}
 			else {
-				//				if (cost >= jumpLimit)
-				//				{
-				//					successors.push_back(jpsSuccessor(x-1, y, tDirection(kW), cost+1));
-				//				}
-				//				else
 				GetJPSSuccessors(x-1, y, kW, cost+1, pid, pg);
 				
 			}
@@ -246,11 +240,6 @@ void CanonicalDijkstra::GetJPSSuccessors(int x, int y, uint8_t parent, double co
 				successors.push_back(jpsSuccessor(x, y+1, tDirection(kSE), cost+1));
 			}
 			else {
-				//				if (cost >= jumpLimit)
-				//				{
-				//					successors.push_back(jpsSuccessor(x, y+1, tDirection(kS), cost+1));
-				//				}
-				//				else
 				GetJPSSuccessors(x, y+1, kS, cost+1, pid, pg);
 			}
 			s1 = true;
@@ -280,11 +269,6 @@ void CanonicalDijkstra::GetJPSSuccessors(int x, int y, uint8_t parent, double co
 				successors.push_back(jpsSuccessor(x+1, y, tDirection(kSE), cost+1));
 			}
 			else {
-				//				if (cost >= jumpLimit)
-				//				{
-				//					successors.push_back(jpsSuccessor(x+1, y, tDirection(kE), cost+1));
-				//				}
-				//				else
 				GetJPSSuccessors(x+1, y, kE, cost+1, pid, pg);
 				
 			}
@@ -295,12 +279,7 @@ void CanonicalDijkstra::GetJPSSuccessors(int x, int y, uint8_t parent, double co
 	{
 		if (x != 0 && y != 0 && Passable(x-1, (y-1)) && n1 && e1)
 		{
-			//			if (cost >= jumpLimit)
-			//			{
-			//				successors.push_back(jpsSuccessor(x-1, y-1, tDirection(kNW), cost+ROOT_TWO));
-			//			}
-			//			else
-			GetJPSSuccessors(x-1, y-1, kNW, cost+ROOT_TWO, pid, pg);
+			GetJPSSuccessors(x-1, y-1, kNW, cost+gDiagCost, pid, pg);
 			
 		}
 	}
@@ -308,12 +287,7 @@ void CanonicalDijkstra::GetJPSSuccessors(int x, int y, uint8_t parent, double co
 	{
 		if (x != w-1 && y != 0 && Passable(x+1, (y-1)) && n1 && w1)
 		{
-			//			if (cost >= jumpLimit)
-			//			{
-			//				successors.push_back(jpsSuccessor(x+1, y-1, tDirection(kNE), cost+ROOT_TWO));
-			//			}
-			//			else
-			GetJPSSuccessors(x+1, y-1, kNE, cost+ROOT_TWO, pid, pg);
+			GetJPSSuccessors(x+1, y-1, kNE, cost+gDiagCost, pid, pg);
 			
 		}
 	}
@@ -321,24 +295,14 @@ void CanonicalDijkstra::GetJPSSuccessors(int x, int y, uint8_t parent, double co
 	{
 		if (x != 0 && y != h-1 && Passable(x-1, (y+1)) && s1 && e1)
 		{
-			//			if (cost >= jumpLimit)
-			//			{
-			//				successors.push_back(jpsSuccessor(x-1, y+1, tDirection(kSW), cost+ROOT_TWO));
-			//			}
-			//			else
-			GetJPSSuccessors(x-1, y+1, kSW, cost+ROOT_TWO, pid, pg);
+			GetJPSSuccessors(x-1, y+1, kSW, cost+gDiagCost, pid, pg);
 		}
 	}
 	if (parent&kSE)
 	{
 		if (x != w-1 && y != h-1 && Passable(x+1, (y+1)) && s1 && w1)
 		{
-			//			if (cost >= jumpLimit)
-			//			{
-			//				successors.push_back(jpsSuccessor(x+1, y+1, tDirection(kSE), cost+ROOT_TWO));
-			//			}
-			//			else
-			GetJPSSuccessors(x+1, y+1, kSE, cost+ROOT_TWO, pid, pg);
+			GetJPSSuccessors(x+1, y+1, kSE, cost+gDiagCost, pid, pg);
 		}
 	}
 }
@@ -542,4 +506,41 @@ std::string CanonicalDijkstra::SVGDraw() const
 		}
 	}
 	return s;
+}
+
+std::string CanonicalDijkstra::SVGDrawDetailed() const
+{
+	std::string s;
+	if (openClosedList.size() == 0)
+		return s;
+	uint64_t top = -1;
+
+	if (openClosedList.OpenSize() > 0)
+	{
+		top = openClosedList.Peek();
+	}
+	for (unsigned int x = 0; x < openClosedList.size(); x++)
+	{
+		const auto &data = openClosedList.Lookat(x);
+		if (data.round != openClosedList.GetRound())
+			continue;
+
+		if (x == top)
+		{
+			env->SetColor(1.0, 1.0, 0.0);
+			s+=env->SVGDraw(data.data.loc);
+		}
+		else if (data.where == kOpenList)
+		{
+			env->SetColor(0.0, 1.0, 0.0, 0.2);
+			s+=env->SVGDraw(data.data.loc);
+		}
+
+		env->SetColor(0.0, 0.0, 0.0);
+		char d[32];
+		sprintf(d, "%1.1f", data.g);
+		s+=env->SVGLabelState(data.data.loc, d, 0.4, -0.2, -0.7);
+	}
+	return s;
+
 }

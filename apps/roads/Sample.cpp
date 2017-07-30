@@ -44,6 +44,8 @@
 #include "FPUtil.h"
 #include "CanonicalGrid.h"
 #include "MM.h"
+#include "BidirectionalDijkstra.h"
+#include "GLUtil.h"
 
 bool screenShot = false;
 bool recording = false;
@@ -63,15 +65,16 @@ std::string graphFile, coordinatesFile;
 
 void LoadGraph();
 
-int search = 0;
+int search = 2;
 
 GraphDistanceHeuristic *gdh = 0;
 GraphEnvironment *ge = 0;
 
 TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
 MM<graphState, graphMove, GraphEnvironment> mm;
+BIdijkstra<graphState, graphMove, GraphEnvironment> bidijkstra;
 
-uint32_t gStepsPerFrame = 1;
+uint32_t gStepsPerFrame = 512;//1;
 double distance(graphState n1, graphState n2);
 
 class GraphDistHeuristic : public Heuristic<graphState> {
@@ -84,6 +87,44 @@ public:
 
 GraphDistHeuristic h;
 ZeroHeuristic<graphState> z;
+
+
+class myHeuristic: public Heuristic<unsigned long>
+{
+	Graph* g;
+	double maxSpeed;
+	double scale;
+	
+public:
+	myHeuristic(Graph* g,double maxSpeed, double scale){
+		this->g = g;
+		this->maxSpeed = maxSpeed;
+		this->scale = scale;
+	}
+	
+	double HCost(const unsigned long &from, const unsigned long &to) const{
+		
+		node* a = g->GetNode(from);
+		node* b = g->GetNode(to);
+		
+		double aX=a->GetLabelF(GraphSearchConstants::kXCoordinate);
+		double aY=a->GetLabelF(GraphSearchConstants::kYCoordinate);
+		double bX=b->GetLabelF(GraphSearchConstants::kXCoordinate);
+		double bY=b->GetLabelF(GraphSearchConstants::kYCoordinate);
+		
+		return scale*sqrt((aX-bX)*(aX-bX)+(aY-bY)*(aY-bY))/(2*maxSpeed);
+		
+	}
+	
+};
+
+
+myHeuristic* h1=NULL;
+string resultDataFileName;
+string pathToInputFiles = "/home/snesawla/thesisData/inputFiles/";
+string pathToResultFiles = "/home/snesawla/thesisData/results/";
+int fileExtensionLength = 3;
+
 
 int main(int argc, char* argv[])
 {
@@ -107,6 +148,7 @@ void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record the screen.", kNoModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset Rotations", "Reset the current rotation/translation of the map.", kAnyModifier, '|');
+	InstallKeyboardHandler(MyDisplayHandler, "Print", "Save map as svg.", kAnyModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Simulate search faster.", kNoModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Simulate search slower.", kNoModifier, ']');
 
@@ -145,8 +187,6 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	if (ge)
 	{
-		ge->SetColor(1.0, 1.0, 0.5);
-		ge->OpenGLDraw();
 
 		if (running)
 		{
@@ -157,10 +197,37 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			}
 			if (!running)
 			{
-				for (int x = 1; x < thePath.size(); x++)
-				{
-					ge->GetGraph()->findDirectedEdge(thePath[x-1], thePath[x])->setMarked(true);
-				}
+//				for (int x = 1; x < thePath.size(); x++)
+//				{
+//					ge->GetGraph()->findDirectedEdge(thePath[x-1], thePath[x])->setMarked(true);
+//				}
+//				for (int x = 0; x < astar.GetNumItems(); x++)
+//				{
+//					node *n = ge->GetGraph()->GetNode(astar.GetItem(x).data);
+//					for (int y = 0; y < n->GetNumEdges(); y++)
+//					{
+//						n->getEdge(y)->setMarked(true);
+//					}
+//				}
+				std::cout << astar.GetNodesExpanded() << " nodes expanded\n";
+
+//				for (int x = 0; x < bidijkstra.GetNumForwardItems(); x++)
+//				{
+//					node *n = ge->GetGraph()->GetNode(bidijkstra.GetForwardItem(x).data);
+//					for (int y = 0; y < n->GetNumEdges(); y++)
+//					{
+//						n->getEdge(y)->setMarked(true);
+//					}
+//				}
+//				for (int x = 0; x < bidijkstra.GetNumBackwardItems(); x++)
+//				{
+//					node *n = ge->GetGraph()->GetNode(bidijkstra.GetBackwardItem(x).data);
+//					for (int y = 0; y < n->GetNumEdges(); y++)
+//					{
+//						n->getEdge(y)->setMarked(true);
+//					}
+//				}
+//				std::cout << bidijkstra.GetNodesExpanded() << " nodes expanded\n";
 			}
 		}
 		if (showSearch)
@@ -173,19 +240,20 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			//std::cout << "Expanding next: " << astar.CheckNextNode() << "\n";
 			for (int x = 0; x < gStepsPerFrame && runningBidirectional; x++)
 			{
-				runningBidirectional = !mm.DoSingleSearchStep(thePath2);
+				runningBidirectional = !bidijkstra.DoSingleSearchStep(thePath2);
 			}
 			if (!runningBidirectional)
 			{
-				for (int x = 1; x < thePath.size(); x++)
-				{
-					ge->GetGraph()->findDirectedEdge(thePath[x-1], thePath2[x])->setMarked(true);
-				}
+				std::cout << bidijkstra.GetNodesExpanded() << " nodes expanded\n";
+				//				for (int x = 1; x < thePath.size(); x++)
+//				{
+//					ge->GetGraph()->findDirectedEdge(thePath[x-1], thePath2[x])->setMarked(true);
+//				}
 			}
 		}
 		if (showSearchBidirectional)
 		{
-			mm.OpenGLDraw();
+			bidijkstra.OpenGLDraw();
 		}
 
 		if (drawLine)
@@ -198,6 +266,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			glEnd();
 			glLineWidth(1);
 		}
+		
+		ge->SetColor(1.0, 1.0, 1.0, 0.5);
+		ge->OpenGLDraw();
 	}
 
 	if (recording && viewport == GetNumPorts(windowID)-1)
@@ -208,6 +279,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
+		if (!running && !runningBidirectional)
+			exit(0);
 	}
 }
 
@@ -239,6 +312,23 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'r': recording = !recording; break;
 		case '[': if (gStepsPerFrame > 1) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;
+		case 'p':
+		{
+			std::fstream svgFile;
+			ge->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+			svgFile.open("/Users/nathanst/graph.svg", std::fstream::out | std::fstream::trunc);
+			svgFile << ge->SVGHeader();
+			svgFile << ge->SVGDraw();
+//			svgFile << ge->SVGDraw(bidijkstra.GetMeetingPoint());
+			svgFile << ge->SVGDraw(84366);
+			svgFile << ge->SVGDraw(192587);
+			svgFile << ge->SVGLabelState(192587, "S");
+			svgFile << ge->SVGLabelState(84366, "G");
+
+			svgFile << "</svg>";
+			svgFile.close();
+			exit(0);
+		}
 		default:
 			break;
 	}
@@ -271,28 +361,52 @@ double distance(graphState n1, graphState n2)
 	return sqrt((dx1-dx2)*(dx1-dx2)+(dy1-dy2)*(dy1-dy2));
 }
 
+#include <regex>
+
 void LoadGraph()
 {
+	double xMin = DBL_MAX;
+	double xMax = -DBL_MAX;
+	double yMin = DBL_MAX;
+	double yMax = -DBL_MAX;
+
+	double scale = 0;
+
+	bool distanceGraph = false;
+	bool timeGraph = false;
+	
+	std::cout<<"file name "<<coordinatesFile.c_str();
+	
+//	if(std::regex_match(graphFile.c_str(), std::regex(pathToInputFiles+"USA-road-d.*")))
+//		distanceGraph = true;
+//	else if(std::regex_match(graphFile.c_str(), std::regex(pathToInputFiles+"USA-road-t.*")))
+		timeGraph = true;
+	
+	
+	std::vector<double> speed;
 	Graph *g = new Graph();
 	node *n = new node("");
 	g->AddNode(n);
-	ge = new GraphEnvironment(g);
-	ge->SetDirected(true);
-
 	FILE *f = fopen(coordinatesFile.c_str(), "r");
 	//FILE *f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.co", "r");
 	std::vector<double> xloc, yloc;
 	double minx = DBL_MAX, maxx=-DBL_MAX, miny=DBL_MAX, maxy=-DBL_MAX;
+	int count=0;
 	while (!feof(f))
 	{
 		char line[255];
 		fgets(line, 255, f);
 		if (line[0] == 'v')
 		{
-			float x1, y1;
+			double x1, y1;
 			int id;
-			if (3 != sscanf(line, "v %d %f %f", &id, &x1, &y1))
+			if (3 != sscanf(line, "v %d %lf %lf", &id, &x1, &y1))
 				continue;
+			if(count==0)
+			{
+				std::cout<<"x1 and y1 after scanning\n"<<x1<<" "<<y1;
+				count++;
+			}
 			//assert(id == xloc.size()+1);
 			xloc.push_back(x1);
 			yloc.push_back(y1);
@@ -304,58 +418,137 @@ void LoadGraph()
 			//if (maxx > -1)
 		}
 	}
-	fclose(f); 
+	std::cout<<"Xloc and yloc before scaling\n"<<xloc[1]<<" "<<yloc[1];
+	fclose(f);
 	printf("x between (%f, %f), y between (%f, %f)\n",
 		   minx, maxx, miny, maxy);
-	double scale = std::max(maxx-minx,maxy-miny);
+	scale = std::max(maxx-minx,maxy-miny);
+	printf("Scale is %f\n", scale);
 	double xoff = (maxx-minx)-scale;
 	double yoff = (maxy-miny)-scale;
+	
 	for (unsigned int x = 0; x < xloc.size(); x++)
 	{
 		//printf("(%f, %f) -> ", xloc[x], yloc[x]);
 		xloc[x] -= (minx);
 		xloc[x] /= scale;
 		xloc[x] = xloc[x]*2-1+xoff/scale;
-
+		
 		yloc[x] -= (miny);
 		yloc[x] /= scale;
 		yloc[x] = yloc[x]*2-1;
 		yloc[x] = -yloc[x]+yoff/scale;
 		
+		if(xloc[x] < xMin)
+			xMin = xloc[x];
+		else if(xloc[x] > xMax)
+			xMax = xloc[x];
+		
+		if(yloc[x] < yMin)
+			yMin = yloc[x];
+		else if(yloc[x] > yMax)
+			yMax = yloc[x];
+		
+		
 		node *n = new node("");
-		g->AddNode(n);
+		int nodeNum = g->AddNode(n);
 		n->SetLabelF(GraphSearchConstants::kXCoordinate, xloc[x]);
 		n->SetLabelF(GraphSearchConstants::kYCoordinate, yloc[x]);
 		n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
 		
-		//printf("(%f, %f)\n", xloc[x], yloc[x]);
+		//std::cout<<" grid y size is "<<grid.size();
+		//std::cout<<" grid x size is "<<grid[0].size();
+		
 	}
 	//a 1 2 1988
+	std::cout<<"xMin is "<<xMin<<" yMin is "<<yMin<< " xMax is "<<xMax<<" yMax is "<<yMax<<std::endl;
+	std::cout<<" min x is "<<minx/scale + xoff;
+	std::cout<<" max x is "<<maxx/scale + xoff;
+	std::cout<<" min y is "<<miny/scale + yoff;
+	std::cout<<" max y is "<<maxy/scale + yoff;
+	
+	
 	
 	f = fopen(graphFile.c_str(), "r");
 	//f = fopen("/Users/nathanst/Downloads/USA-road-d.COL.gr", "r");
 	int dups = 0;
+	long double e=0;
+	double minE=DBL_MAX;
 	while (!feof(f))
 	{
+//		std::cout<<"reading file\n";
 		char line[255];
 		fgets(line, 255, f);
 		if (line[0] == 'a')
 		{
 			int x1, y1;
-			sscanf(line, "a %d %d %*d", &x1, &y1);
+			sscanf(line, "a %d %d %Lf", &x1, &y1,&e);
 			if (g->findDirectedEdge(x1, y1) == 0)
 			{
-				g->AddEdge(new edge(x1, y1, distance(x1, y1)));
+				
+				
+				node* n1=g->GetNode(x1);
+				node* n2=g->GetNode(y1);
+				long double xCoord1 = n1->GetLabelF(GraphSearchConstants::kXCoordinate);
+				long double yCoord1 =n1->GetLabelF(GraphSearchConstants::kYCoordinate);
+				
+				long double xCoord2 = n2->GetLabelF(GraphSearchConstants::kXCoordinate);
+				long double yCoord2 =n2->GetLabelF(GraphSearchConstants::kYCoordinate);
+				
+				long double dist = scale*sqrtf((xCoord1-xCoord2)*(xCoord1-xCoord2) + (yCoord1-yCoord2)*(yCoord1-yCoord2))/2;
+				
+				
+				if(e<minE)
+					minE=e;
+				if (fequal(e, 0))
+					printf("**FOUND ZERO-COST EDGE\n");
+				g->AddEdge(new edge(x1, y1, e));
+				
+				speed.push_back(dist/e);
 			}
-			else {
+			
+			else if(g->findDirectedEdge(x1,y1)->GetWeight() < e)
+				g->findDirectedEdge(x1,y1)->setWeight(e);
+			else{
 				dups++;
 				//printf("Not adding duplicate directed edge between %d and %d\n", x1, y1);
 			}
-			//printf("%d to %d\n", x1, y1);
 		}
 	}
-	printf("%d dups ignored\n", dups);
-	fclose(f); 
+	
+	std::cout<<"minE "<<minE;
+	bidijkstra.SetEpsilon(minE);
+	//printf("%d dups ignored\n", dups);
+	fclose(f);
+	std::cout<<"closed the file\n";
+	ge = new GraphEnvironment(g);
+	ge->SetDirected(true);
+	std::cout<<"created graph environment\n";
+	
+	double maxSpeed = 0;
+	
+	if(distanceGraph)
+		maxSpeed = *(std::max_element(speed.begin(),speed.end()));
+	else if(timeGraph)
+		maxSpeed = *(std::max_element(speed.begin(),speed.end()));
+	else
+	{
+		std::cout<<"\n Invalid graph type";
+		exit(1);
+	}
+	
+	printf(" max element %lf \n",maxSpeed);
+	
+	// create heuristic & pass max speed
+	
+	h1 = new myHeuristic(g,maxSpeed, scale);
+	astar.SetHeuristic(h1);
+	
+	std::cout<<" Set heuristic for A* \n";
+ 
+	//PathFindingKeyHandler13(0,0);
+	//DensityAnalysisKeyHandler(0,0);
+	
 }
 
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
@@ -435,8 +628,11 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				}
 			}
 			drawLine = false;
-			start = ge->GetGraph()->GetNode(216446);
-			goal = ge->GetGraph()->GetNode(108951);
+			start = ge->GetGraph()->GetNode(22636);
+			goal = ge->GetGraph()->GetNode(119223);
+			recording = true;
+//			start = ge->GetGraph()->GetNode(192587);
+//			goal = ge->GetGraph()->GetNode(84366);
 			if (start == goal)
 			{
 				printf("Same start and goal; no search\n");
@@ -451,15 +647,17 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					   goal->GetLabelF(GraphSearchConstants::kYCoordinate),
 					   start->GetNum(), goal->GetNum());
 				astar.InitializeSearch(ge, start->GetNum(), goal->GetNum(), thePath);
-				astar.SetHeuristic(&h);
+//				astar.SetHeuristic(&h);
+				bidijkstra.SetVersion(1);
+				bidijkstra.InitializeSearch(ge, start->GetNum(), goal->GetNum(), thePath);
 				if (search == 0)
 					astar.SetWeight(0);
 				else if (search == 1)
 					astar.SetWeight(1);
 				else if (search == 2)
-					mm.InitializeSearch(ge, start->GetNum(), goal->GetNum(), &z, &z, thePath2);
+					bidijkstra.InitializeSearch(ge, start->GetNum(), goal->GetNum(), thePath2);
 				else if (search == 3)
-					mm.InitializeSearch(ge, start->GetNum(), goal->GetNum(), &h, &h, thePath2);
+					bidijkstra.InitializeSearch(ge, start->GetNum(), goal->GetNum(), thePath2);
 				search++;
 				search = search%4;
 			}

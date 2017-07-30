@@ -81,7 +81,7 @@ void updateProjection(pRecContext pContextInfo, int viewPort = -1);
 void drawGL(pRecContext pContextInfo, bool swap);
 
 bool DoKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt);
-void SetLighting(unsigned int mode);
+void SetLighting(GLfloat ambientf = 0.2f, GLfloat diffusef = 1.0f, GLfloat specularf = 1.0f);
 void initialConditions(pRecContext pContextInfo);
 void resetCamera(recCamera * pCamera);
 

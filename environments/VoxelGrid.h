@@ -14,40 +14,17 @@
 
 
 struct voxelGridState {
+	voxelGridState() {}
+	voxelGridState(uint16_t a, uint16_t b, uint16_t c)
+	:x(a), y(b), z(c) {}
 	uint16_t x, y, z;
 };
 
 bool operator==(const voxelGridState &v1, const voxelGridState &v2);
 
-enum voxelGridAction {
-//	kXpYpZp,
-//	kXpYpZm,
-//	kXpYpZs,
-//	kXpYmZp,
-//	kXpYmZm,
-//	kXpYmZs,
-//	kXpYsZp,
-//	kXpYsZm,
-//	kXpYsZs,
-//	kXmYpZp,
-//	kXmYpZm,
-//	kXmYpZs,
-//	kXmYmZp,
-//	kXmYmZm,
-//	kXmYmZs,
-//	kXmYsZp,
-//	kXmYsZm,
-//	kXmYsZs,
-//	kXsYpZp,
-//	kXsYpZm,
-//	kXsYpZs,
-//	kXsYmZp,
-//	kXsYmZm,
-//	kXsYmZs,
-//	kXsYsZp,
-//	kXsYsZm,
-//	kXsYsZs
-};
+std::ostream &operator<<(std::ostream &out, const voxelGridState &v);
+
+typedef uint8_t voxelGridAction;
 
 class VoxelGrid : public SearchEnvironment<voxelGridState, voxelGridAction> {
 public:
@@ -69,17 +46,38 @@ public:
 
 	uint64_t GetActionHash(voxelGridAction act) const;
 
+	bool IsBlocked(const voxelGridState &s) const;
+	bool IsBlocked(uint16_t x, uint16_t y, uint16_t z) const
+	{ return IsBlocked({x, y, z}); }
+	void GetLimits(int &x, int &y, int &z) const { x = xWidth; y = yWidth; z = zWidth; }
+	voxelGridState GetRandomState();
+	
 	void OpenGLDraw() const;
 	void OpenGLDraw(const voxelGridState&) const;
 	void OpenGLDraw(const voxelGridState&, const voxelGridState&, float) const;
 	void OpenGLDraw(const voxelGridState&, const voxelGridAction&) const;
 	void GLLabelState(const voxelGridState&, const char *) const;
 	void GLDrawLine(const voxelGridState &x, const voxelGridState &y) const;
+
+	bool efficient;
+	void GetGLCoordinate(const voxelGridState &, point3d &) const;
+	void GetGLCornerCoordinate(const voxelGridState &, point3d &) const;
+	void Fill(voxelGridState);
+	void Invert();
 private:
+	void SetUpDrawBuffers();
+	void EfficientDraw() const;
+
+	void GetActionOffsets(voxelGridAction a, int &x, int &y, int &z) const;
+	voxelGridAction MakeAction(int &x, int &y, int &z) const;
+	int GetIndex(const voxelGridState &s) const;
 	int GetIndex(int x, int y, int z) const;
 	void GetCoordinates(int index, int &x, int &y, int &z) const;
+	void GetCoordinates(int index, voxelGridState &s) const;
 	std::vector<bool> voxels;
 	int xWidth, yWidth, zWidth;
+	std::vector<GLfloat> vertices;
+	std::vector<uint32_t> indices;
 };
 
 

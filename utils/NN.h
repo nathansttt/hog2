@@ -21,6 +21,7 @@ public:
 
 	double train(std::vector<double> &input, std::vector<double> &target);
 	double *test(const std::vector<double> &input);
+	double GetInput(std::vector<double> &input, const std::vector<double> &target);
 	double train(std::vector<unsigned int> &input, std::vector<double> &target);
 	double *test(const std::vector<unsigned int> &input);
 
@@ -41,9 +42,10 @@ private:
 	
 	double g(double a);
 	double dg(double a);
-	double outputerr(std::vector<double> &output, std::vector<double> &expected, int which);
-	double internalerr(std::vector<double> &output, std::vector<double> &expected, int which);
-	double error(std::vector<double> &outputs);
+	double outputerr(const std::vector<double> &output, const std::vector<double> &expected, int which);
+	double internalerr(const std::vector<double> &output, const std::vector<double> &expected, int which);
+	double internalinputerr(const std::vector<double> &output, const std::vector<double> &expected, int which);
+	double error(const std::vector<double> &outputs);
 };
 
 

@@ -227,11 +227,9 @@ void perceptron::save(FILE *f)
 ////	return a*(1-a);
 //}
 
-double perceptron::outputerr(std::vector<double> &out, std::vector<double> &expected, int which)
+double perceptron::outputerr(const std::vector<double> &out, const std::vector<double> &expected, int which)
 {
 	double err = (out[which]-expected[which]);
-//	if(	outputActivation == kExponential)
-//		err *= dg(output[which]);
 
 	return err;
 }

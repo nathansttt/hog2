@@ -47,7 +47,7 @@ Voxels::Voxels(const char *filename)
 	point3d minPoint;
 	//voxelWorld w;
 	fread(&w.header, sizeof(w.header), 1, f);
-	printf("Header is 0x%lX\n", w.header);
+	printf("Header is 0x%X\n", w.header);
 	fread(&w.voxelSize, sizeof(w.voxelSize), 1, f);
 	printf("Voxel size is %f\n", w.voxelSize);
 	fread(&w.numVoxelsGrids, sizeof(w.numVoxelsGrids), 1, f);
@@ -113,10 +113,36 @@ void Voxels::Export(const char *filename)
 	FILE *f = fopen(filename, "w+");
 	if (f == 0)
 		return;
-	fprintf(f, "voxel %d %d %d\n",
-			(int)((w.maxbounds[0]-w.minbounds[0])/w.voxelSize),
-			(int)((w.maxbounds[1]-w.minbounds[1])/w.voxelSize),
-			(int)((w.maxbounds[2]-w.minbounds[2])/w.voxelSize));
+	// number of voxels outside min bounded box
+	int buffer = 50;
+	int minx = (int)((w.maxbounds[0]-w.minbounds[0])/w.voxelSize);
+	int miny = (int)((w.maxbounds[1]-w.minbounds[1])/w.voxelSize);
+	int minz = (int)((w.maxbounds[2]-w.minbounds[2])/w.voxelSize);
+	int maxx = 0;
+	int maxy = 0;
+	int maxz = 0;
+	
+	for (int x = 0; x < w.numVoxelsGrids; x++)
+	{
+		point3d p = GetVoxelCoordinate(w.morton[x], w.voxelSize, w.minbounds);
+		for (int i = 0; i < 64; i++)
+		{
+			size_t a, b, c;
+			if ((w.grid[x]>>i)&1) // blocked
+			{
+				GetCoordsForIndex(i, a, b, c);
+				minx = std::min(minx, int(((p.x+a*w.voxelSize)-w.minbounds[0])/w.voxelSize));
+				miny = std::min(miny, int(((p.y+b*w.voxelSize)-w.minbounds[1])/w.voxelSize));
+				minz = std::min(minz, int(((p.z+c*w.voxelSize)-w.minbounds[2])/w.voxelSize));
+				maxx = std::max(maxx, int(((p.x+a*w.voxelSize)-w.minbounds[0])/w.voxelSize));
+				maxy = std::max(maxy, int(((p.y+b*w.voxelSize)-w.minbounds[1])/w.voxelSize));
+				maxz = std::max(maxz, int(((p.z+c*w.voxelSize)-w.minbounds[2])/w.voxelSize));
+			}
+		}
+	}
+
+	
+	fprintf(f, "voxel %d %d %d\n", maxx-minx+1+2*buffer, maxy-miny+1+2*buffer, maxz-minz+1+2*buffer);
 
 	for (int x = 0; x < w.numVoxelsGrids; x++)
 	{
@@ -128,9 +154,9 @@ void Voxels::Export(const char *filename)
 			{
 				GetCoordsForIndex(i, a, b, c);
 				fprintf(f, "%d %d %d\n",
-						int(((p.x+a*w.voxelSize)-w.minbounds[0])/w.voxelSize),
-						int(((p.y+b*w.voxelSize)-w.minbounds[1])/w.voxelSize),
-						int(((p.z+c*w.voxelSize)-w.minbounds[2])/w.voxelSize));
+						int(((p.x+a*w.voxelSize)-w.minbounds[0])/w.voxelSize)-minx+buffer,
+						int(((p.y+b*w.voxelSize)-w.minbounds[1])/w.voxelSize)-miny+buffer,
+						int(((p.z+c*w.voxelSize)-w.minbounds[2])/w.voxelSize)-minz+buffer);
 			}
 		}
 	}
@@ -185,7 +211,7 @@ bool Voxels::GoalTest(const voxelState &node, const voxelState &goal) const
 
 uint64_t Voxels::GetStateHash(const voxelState &node) const
 {
-	return (node.x<<32)|(node.y<<16)|(node.z);
+	return (((uint64_t)node.x)<<32)|(node.y<<16)|(node.z);
 }
 
 void Voxels::GetStateFromHash(uint64_t parent, voxelState &s)
@@ -217,9 +243,8 @@ point3d Voxels::GetVoxelCoordinate(uint64_t morton, float voxelSize, const float
 
 void Voxels::AddVoxelCubeToOctree(uint64_t values, point3d p)
 {
-	int index = mLayer0VoxelGrids.size();
+//	int index = mLayer0VoxelGrids.size();
 	mLayer0VoxelGrids.push_back(values);
-	
 }
 
 void Voxels::OpenGLDraw() const
