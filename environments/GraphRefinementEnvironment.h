@@ -14,6 +14,7 @@
 #include <ext/hash_map>
 #include <iostream>
 #include "GraphEnvironment.h"
+#include "GraphAbstraction.h"
 
 class GraphRefinementEnvironment : public GraphEnvironment
 {

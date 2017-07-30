@@ -31,7 +31,6 @@
 #include "EpisodicSimulation.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
-#include "AStar.h"
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
 #include "LocalSensingUnit.h"

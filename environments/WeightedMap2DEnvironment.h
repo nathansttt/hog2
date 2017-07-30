@@ -118,7 +118,7 @@ enum {
 };
 
 
-class WeightedMap2DEnvironment : public AbsMapEnvironment 
+class WeightedMap2DEnvironment : public AbsMapEnvironment
 {
 public:
 	WeightedMap2DEnvironment(MapAbstraction *ma);

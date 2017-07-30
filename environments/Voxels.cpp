@@ -269,9 +269,9 @@ void Voxels::OpenGLDraw() const
 				gg = (1.+(p.y+b*w.voxelSize)/range)/2.0;
 				bb = (1.+(p.z+c*w.voxelSize)/range)/2.0;
 				// 7?
-				rr = getColor(rr, 0, 1, 7).r;
-				gg = getColor(bb, 0, 1, 9).g*0.9;
-				bb = getColor(bb, 0, 1, 9).b;
+				rr = Colors::GetColor(rr, 0, 1, 7).r;
+				gg = Colors::GetColor(bb, 0, 1, 9).g*0.9;
+				bb = Colors::GetColor(bb, 0, 1, 9).b;
 				glColor3f(gg, rr, bb);
 				glEnable(GL_LIGHTING);
 				DrawBox((p.x+a*w.voxelSize+0.5*w.voxelSize)/range,

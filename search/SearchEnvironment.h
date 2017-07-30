@@ -102,7 +102,7 @@ public:
 protected:
 	bool bValidSearchGoal;
 	state searchGoal;
-	mutable recColor color;
+	mutable rgbColor color;
 	mutable GLfloat transparency;
 };
 

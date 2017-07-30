@@ -20,7 +20,7 @@
 //</svg>
 
 
-std::string SVGGetRGB(recColor c)
+std::string SVGGetRGB(rgbColor c)
 {
 	std::string s;
 	s = "rgb(";
@@ -29,7 +29,7 @@ std::string SVGGetRGB(recColor c)
 	return s;
 }
 
-std::string SVGDefineGradient(bool horizontal, bool vertical, recColor c1, recColor c2, const char *name)
+std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbColor c2, const char *name)
 {
 	std::string s;
 	s += "<defs><linearGradient id=\"";
@@ -46,7 +46,7 @@ std::string SVGDefineGradient(bool horizontal, bool vertical, recColor c1, recCo
 	return s;
 }
 
-std::string SVGFrameCircle(double x, double y, double radius, int border, recColor c)
+std::string SVGFrameCircle(double x, double y, double radius, int border, rgbColor c)
 {
 	std::string s;
 	s += "<circle cx=\"" + std::to_string(x);
@@ -55,7 +55,7 @@ std::string SVGFrameCircle(double x, double y, double radius, int border, recCol
 	return s;
 }
 
-std::string SVGDrawCircle(double x, double y, double radius, recColor c)
+std::string SVGDrawCircle(double x, double y, double radius, rgbColor c)
 {
 	//double epsilon = 0.5;
 	std::string s;
@@ -83,7 +83,7 @@ std::string SVGDrawRect(int x, int y, int width, int height, const char *gradien
 	return s;
 }
 
-std::string SVGDrawRect(int x, int y, int width, int height, recColor c)
+std::string SVGDrawRect(int x, int y, int width, int height, rgbColor c)
 {
 	double epsilon = 0.20;
 	std::string s;
@@ -95,7 +95,7 @@ std::string SVGDrawRect(int x, int y, int width, int height, recColor c)
 	return s;
 }
 
-std::string SVGFrameRect(int x, int y, int width, int height, int border, recColor c)
+std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbColor c)
 {
 	double epsilon = 0.05;//0.5;
 	std::string s;
@@ -106,7 +106,7 @@ std::string SVGFrameRect(int x, int y, int width, int height, int border, recCol
 	return s;
 }
 
-std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, recColor c)
+std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, rgbColor c)
 {
 	std::string s;
 	s = "<line x1 = \"" + std::to_string(x1) + "\" ";
@@ -118,7 +118,7 @@ std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, rec
 	return s;
 }
 
-std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, recColor c, bool center)
+std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, bool center)
 {
 	std::string s;
 	int offset = center?0.5:0;
@@ -141,7 +141,7 @@ std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, recColor c, b
 //	return s;
 }
 
-std::string SVGDrawText(float x1, float y1, const char *txt, recColor c, double size)
+std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size)
 {
 	std::string s;
 //	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
@@ -159,7 +159,7 @@ std::string SVGDrawText(float x1, float y1, const char *txt, recColor c, double 
 	return s;
 }
 
-std::string SVGDrawStrokedText(float x1, float y1, const char *txt, recColor c, recColor strokeColor, double size)
+std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, rgbColor strokeColor, double size)
 {
 	std::string s;
 	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" style=\"fill:"+SVGGetRGB(c);

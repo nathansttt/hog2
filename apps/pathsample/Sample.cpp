@@ -31,10 +31,9 @@
 #include "EpisodicSimulation.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
-#include "AStar.h"
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
-#include "MapSectorAbstraction.h"
+//#include "MapSectorAbstraction.h"
 //#include "ContractionHierarchy.h"
 #include "MapGenerators.h"
 
@@ -55,7 +54,7 @@ MapEnvironment *ma2 = 0;
 GraphDistanceHeuristic *gdh = 0;
 GraphDistanceHeuristic *gdh2 = 0;
 
-MapSectorAbstraction *msa;
+//MapSectorAbstraction *msa;
 
 std::vector<xyLoc> path;
 
@@ -166,7 +165,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //		return;
 	}
 	unitSims[windowID]->GetEnvironment()->GetMap()->OpenGLDraw();
-	if (msa) msa->OpenGLDraw();
+	//if (msa) msa->OpenGLDraw();
 	
 	if (mouseTracking)
 	{
@@ -237,24 +236,6 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 void doExport()
 {
-	Map *map = new Map(gDefaultMap);
-	map->Scale(512, 512);
-	msa = new MapSectorAbstraction(map, 8);
-	msa->ToggleDrawAbstraction(1);
-	Graph *g = msa->GetAbstractGraph(1);
-	printf("g\n%d %d\n", g->GetNumNodes(), g->GetNumEdges());
-	for (int x = 0; x < g->GetNumNodes(); x++)
-	{
-		node *n = g->GetNode(x);
-		int x1, y1;
-		msa->GetTileFromNode(n, x1, y1);
-		printf("%d %d %d\n", x, x1, y1);
-	}
-	for (int x = 0; x < g->GetNumEdges(); x++)
-	{
-		edge *e = g->GetEdge(x);
-		printf("%d %d\n", e->getFrom(), e->getTo());//, (int)(100.0*e->GetWeight())); // %d 0
-	}
 	exit(0);
 }
 
@@ -296,7 +277,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	{
 		case '0': case '1': case '2': case '3': case '4': case '5':
 			case '6': case '7': case '8': case '9':
-			msa->ToggleDrawAbstraction(key); break;
+				//msa->ToggleDrawAbstraction(key); 
+				break;
 		case '[': if (gStepsPerFrame > 2) gStepsPerFrame /= 2; break;
 		case ']': gStepsPerFrame *= 2; break;
 		case '\t':

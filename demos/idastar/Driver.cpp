@@ -213,7 +213,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		for (int x = 0; x < g->GetNumNodes(); x++)
 		{
 			double cost = g->GetNode(x)->GetLabelL(GraphSearchConstants::kTemporaryLabel)+h.HCost(x, 0);
-			recColor c = getColor(cost, startf, goalf, colorScheme);
+			rgbColor c = Colors::GetColor(cost, startf, goalf, colorScheme);
 			if (hit == x)
 			{
 				ge->SetColor(0, 0, 0);

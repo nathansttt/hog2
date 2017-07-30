@@ -22,13 +22,13 @@ namespace Graphics2D {
 		double x, y;
 	};
 	
-	void FrameRect(rect r, recColor c);
-	void FillRect(rect r, recColor c);
-	void FrameCircle(rect r, recColor c);
-	void FillCircle(rect r, recColor c);
+	void FrameRect(rect r, rgbColor c);
+	void FillRect(rect r, rgbColor c);
+	void FrameCircle(rect r, rgbColor c);
+	void FillCircle(rect r, rgbColor c);
 	
-	void DrawLine(point2d start, point2d end, double lineWidth, recColor c);
-	void DrawText(const char *text, point2d location, recColor c, double height);
+	void DrawLine(point2d start, point2d end, double lineWidth, rgbColor c);
+	void DrawText(const char *text, point2d location, rgbColor c, double height);
 
 }
 

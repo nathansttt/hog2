@@ -11,6 +11,7 @@
 #include "FPUtil.h"
 #include "GLUtil.h"
 #include "SVGUtil.h"
+#include "Colors.h"
 
 const double stripResolution = 20;
 
@@ -85,12 +86,12 @@ double MapOverlay::GetOverlayValue(int x, int y)
 	return values[y*m->GetMapWidth()+x];
 }
 
-recColor MapOverlay::GetValueColor(double value) const
+rgbColor MapOverlay::GetValueColor(double value) const
 {
 	int v = (int)value;
 	auto loc = colors.find(v);
 	if (loc == colors.end() || colorMap != -1)
-		return getColor(value, minVal, maxVal, 0);
+		return Colors::GetColor(value, minVal, maxVal, 0);
 	return loc->second;
 }
 
@@ -117,11 +118,11 @@ void MapOverlay::OpenGLDraw() const
 				continue;
 			}
 			else {
-				recColor r;
+				rgbColor r;
 				if (colorMap == customColorMap)
 					r = GetValueColor(values[t]);
 				else
-					r = getColor(values[t], minVal, maxVal, colorMap);
+					r = Colors::GetColor(values[t], minVal, maxVal, colorMap);
 				glColor3f(r.r, r.g, r.b);
 			}
 			unsigned int last;
@@ -210,7 +211,7 @@ void MapOverlay::OpenGLDraw() const
 			m->GetOpenGLCoord(0, 0, a, b, c, radius);
 			for (int x = 0; x <= stripResolution; x++)
 			{
-				recColor r = getColor(minVal + (maxVal-minVal)*((double)x/stripResolution),
+				rgbColor r = Colors::GetColor(minVal + (maxVal-minVal)*((double)x/stripResolution),
 									  minVal, maxVal, colorMap);
 				glColor3f(r.r, r.g, r.b);
 				glVertex3f(a-2*wide, b+2*m->GetMapHeight()*radius*(1.0-(double)x/stripResolution), c-4*radius-radius/8.0);
@@ -281,15 +282,15 @@ std::string MapOverlay::SVGDraw() const
 	s += "\n";
 	int margin = std::max(1.0, m->GetMapWidth()/40.0);
 	s += SVGDefineGradient(true, true,
-						   getColor(maxVal, minVal, maxVal, colorMap),
-						   getColor(minVal, minVal, maxVal, colorMap), "sideBar");
+						   Colors::GetColor(maxVal, minVal, maxVal, colorMap),
+						   Colors::GetColor(minVal, minVal, maxVal, colorMap), "sideBar");
 	s += "\n";
 	s += SVGDrawRect(-margin, 1, margin, m->GetMapHeight(), "sideBar");
-	s += SVGFrameRect(-margin, 1, margin, m->GetMapHeight(), 1, colors::darkgray);
+	s += SVGFrameRect(-margin, 1, margin, m->GetMapHeight(), 1, Colors::darkgray);
 	s += "\n";
-	s += SVGDrawText(0, 1+margin, s1, colors::black, margin);
+	s += SVGDrawText(0, 1+margin, s1, Colors::black, margin);
 	s += "\n";
-	s += SVGDrawText(0, m->GetMapHeight()+1, s2, colors::black, margin);
+	s += SVGDrawText(0, m->GetMapHeight()+1, s2, Colors::black, margin);
 	s += "\n";
 	for (unsigned int t = 0; t < values.size(); t++)
 	{
@@ -298,12 +299,12 @@ std::string MapOverlay::SVGDraw() const
 			continue;
 		}
 		else {
-			recColor r = getColor(values[t], minVal, maxVal, colorMap);
+			rgbColor r = Colors::GetColor(values[t], minVal, maxVal, colorMap);
 			s += SVGDrawRect(t%m->GetMapWidth()+1, t/m->GetMapWidth()+1, 1, 1, r);
 		}
 	}
 	
-	recColor black = {0, 0, 0};
+	rgbColor black = {0, 0, 0};
 
 //	// terrain borders
 //	for (int y = 0; y < m->GetMapHeight()-1; y++)

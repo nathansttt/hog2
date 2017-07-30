@@ -35,7 +35,6 @@
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
 #include "MapSectorAbstraction.h"
-#include "GraphRefinementEnvironment.h"
 #include "ScenarioLoader.h"
 #include "BFS.h"
 #include "PEAStar.h"

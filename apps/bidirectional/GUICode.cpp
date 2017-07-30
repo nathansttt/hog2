@@ -282,8 +282,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (saveSVG && viewport == 0)
 	{
 		svgFile << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(10*map->GetMapWidth()+10)+"\" height = \""+std::to_string(10*map->GetMapHeight()+10+100)+"\">";
-		recColor black = {0, 0, 0};
-		recColor white = {1, 1, 1};
+		rgbColor black = {0, 0, 0};
+		rgbColor white = {1, 1, 1};
 		//svgFile << SVGDrawRect(0, 0, map->GetMapWidth(), map->GetMapHeight()+10+1, white);
 		if (mo)
 		{
@@ -291,7 +291,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 			for (int x = 1; x < 10; x++)
 			{
-				recColor r = mo->GetValueColor(x);
+				rgbColor r = mo->GetValueColor(x);
 				glColor3f(r.r, r.g, r.b);
 				char num[16];
 				sprintf(num, "%d", counts[x]);
@@ -321,7 +321,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		mo->OpenGLDraw();
 		for (int x = 1; x < 10; x++)
 		{
-			recColor r = mo->GetValueColor(x);
+			rgbColor r = mo->GetValueColor(x);
 			glColor3f(r.r, r.g, r.b);
 			DrawBox(-1+0.2*x-1.0/40.0, -1-1.0/40.0, 0, 1.0/40.0);
 			glColor3f(1.0, 1.0, 1.0);
@@ -458,7 +458,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					{
 						mm.GetPath(me, start, goal, me, me, path);
 						std::fstream svgFile;
-						me->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+						me->SetColor(Colors::darkgray.r, Colors::darkgray.g, Colors::darkgray.b);
 						svgFile.open("/Users/nathanst/mm.svg", std::fstream::out | std::fstream::trunc);
 						svgFile << me->SVGHeader();
 						svgFile << me->SVGDraw();
@@ -469,7 +469,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					{
 						forward.GetPath(me, start, goal, path);
 						std::fstream svgFile;
-						me->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+						me->SetColor(Colors::darkgray.r, Colors::darkgray.g, Colors::darkgray.b);
 						svgFile.open("/Users/nathanst/forward.svg", std::fstream::out | std::fstream::trunc);
 						svgFile << me->SVGHeader();
 						svgFile << me->SVGDraw();
@@ -480,7 +480,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					{
 						backward.GetPath(me, goal, start, path);
 						std::fstream svgFile;
-						me->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+						me->SetColor(Colors::darkgray.r, Colors::darkgray.g, Colors::darkgray.b);
 						svgFile.open("/Users/nathanst/backward.svg", std::fstream::out | std::fstream::trunc);
 						svgFile << me->SVGHeader();
 						svgFile << me->SVGDraw();
@@ -791,19 +791,19 @@ void SetupMapOverlay()
 	mo = new MapOverlay(map);
 	mo->SetColorMap(MapOverlay::customColorMap);
 	
-	mo->SetColor(XX, colors::black);
+	mo->SetColor(XX, Colors::black);
 
-	mo->SetColor(NN, colors::cyan);
-	mo->SetColor(NF, colors::lightblue);
-	mo->SetColor(NR, colors::blue);
-	mo->SetColor(FN, colors::lightgreen);
-	mo->SetColor(RN, colors::green);
+	mo->SetColor(NN, Colors::cyan);
+	mo->SetColor(NF, Colors::lightblue);
+	mo->SetColor(NR, Colors::blue);
+	mo->SetColor(FN, Colors::lightgreen);
+	mo->SetColor(RN, Colors::green);
 
-	mo->SetColor(FF, colors::cyan);
-	mo->SetColor(FR, colors::darkblue);
-	mo->SetColor(RF, colors::darkgreen);
+	mo->SetColor(FF, Colors::cyan);
+	mo->SetColor(FR, Colors::darkblue);
+	mo->SetColor(RF, Colors::darkgreen);
 
-	mo->SetColor(RR, colors::darkgray);
+	mo->SetColor(RR, Colors::darkgray);
 	
 	forward.SetStopAfterGoal(false);
 	backward.SetStopAfterGoal(false);

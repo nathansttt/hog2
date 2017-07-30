@@ -339,9 +339,9 @@ void VoxelGrid::SetUpDrawBuffers()
 				vertices.push_back(v.normal[2]);
 				const double range = std::max(xWidth, std::max(yWidth, zWidth))*2;
 //				GLfloat rr, gg, bb;
-//				rr = getColor(rr, 0, 2, 7).r;
-//				gg = getColor(bb, 0, 2, 9).g*0.9;
-//				bb = getColor(bb, 0, 2, 9).b;
+//				rr = GetColor(rr, 0, 2, 7).r;
+//				gg = GetColor(bb, 0, 2, 9).g*0.9;
+//				bb = GetColor(bb, 0, 2, 9).b;
 				if (v.normal[0])
 				{
 					vertices.push_back(1.0-2.0*v.v[0]/range);
@@ -417,9 +417,9 @@ void VoxelGrid::OpenGLDraw() const
 						gg = 1+(2.0*y/range-1.0+(-yWidth+range)/range);
 						bb = 1-(2.0*z/range-1.0+(-zWidth+range)/range);
 						// 7?
-						rr = getColor(rr, 0, 2, 7).r;
-						gg = getColor(bb, 0, 2, 9).g*0.9;
-						bb = getColor(bb, 0, 2, 9).b;
+						rr = Colors::GetColor(rr, 0, 2, 7).r;
+						gg = Colors::GetColor(bb, 0, 2, 9).g*0.9;
+						bb = Colors::GetColor(bb, 0, 2, 9).b;
 						glColor3f(gg, rr, bb);
 						
 						point3d p;

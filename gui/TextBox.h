@@ -40,13 +40,13 @@ public:
 	void draw();
 	point3d getLocation();
 	void destroy();
-	void setColor(recColor _myColor) { myColor = _myColor; }
+	void setColor(rgbColor _myColor) { myColor = _myColor; }
 private:
 	void drawLine(point3d where, int startx, int starty, int offsetx, int offsety, double scale);
 	void drawChar(char c, point3d where, double height);
 	uint32_t getBitmap(char c);
 	point3d tl, br;
-	recColor myColor;
+	rgbColor myColor;
 	char *text;
 	int charLine;
 	bool deform, scrolling;

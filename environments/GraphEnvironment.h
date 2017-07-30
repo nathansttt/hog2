@@ -16,7 +16,7 @@
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "Graph.h"
-#include "GraphAbstraction.h"
+//#include "GraphAbstraction.h"
 #include "GLUtil.h"
 
 #ifndef UINT32_MAX
@@ -138,6 +138,7 @@ private:
 	Graph *g;
 };
 
+/*
 class GraphAbstractionHeuristic : public GraphHeuristic {
 public:
 	GraphAbstractionHeuristic(MapAbstraction *mabs, int lev)
@@ -152,7 +153,7 @@ private:
 	MapAbstraction *mAbs;
 	int level;
 };
-
+*/
 class GraphMapPerfectHeuristic : public GraphHeuristic {
 public:
 	GraphMapPerfectHeuristic(Map *map, Graph *graph):m(map), g(graph)
@@ -345,7 +346,7 @@ protected:
 	bool drawNodeLabels;
 	double nodeScale;
 };
-
+/*
 class AbstractionGraphEnvironment: public GraphEnvironment {
 	public:
 	AbstractionGraphEnvironment( GraphAbstraction *gabs, unsigned int level, GraphHeuristic *gh );
@@ -362,7 +363,7 @@ protected:
 	GraphAbstraction *gabs;
 	double graphscale;
 };
-
+*/
 typedef UnitSimulation<graphState, graphMove, GraphEnvironment> GraphSimulation;
 
 #endif

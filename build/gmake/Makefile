@@ -11,9 +11,6 @@
 # All projects to build in this order.
 PROJECTS = \
   gui/GL \
-  absmapalgorithms \
-  abstraction \
-  abstractionalgorithms \
   algorithms \
   environments \
   envutil \
@@ -23,16 +20,12 @@ PROJECTS = \
   graphalgorithms \
   gui \
   mapalgorithms \
-  shared \
   utils \
   apps/arm \
   apps/airplane \
   apps/localsensingsearch \
   apps/pathsample \
   apps/puzzlesample \
-  apps/inconsistency \
-  apps/directional \
-  apps/dragonage \
   apps/mapUtils \
   apps/prediction \
   apps/emotion \

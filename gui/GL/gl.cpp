@@ -72,6 +72,7 @@ void glTexImage3D (GLenum target, GLint level, GLint internalformat, GLsizei wid
 
 void glDisableClientState (GLenum array) { }
 void glVertexPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) { }
+void glColorPointer( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer ) {}
 void glEnableClientState (GLenum array) { }
 
 void glDrawArrays (GLenum mode, GLint first, GLsizei count) { }

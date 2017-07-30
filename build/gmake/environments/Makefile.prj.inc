@@ -37,7 +37,6 @@ SRC_CPP = \
 	environments/PermutationPuzzleEnvironment.cpp \
 	environments/MNPuzzle.cpp \
 	environments/FlipSide.cpp \
-	environments/WeightedMap2DEnvironment.cpp \
 	environments/Directional2DEnvironment.cpp \
 	environments/TopSpin.cpp	\
 	environments/RoboticArm.cpp  \
@@ -56,3 +55,4 @@ SRC_CPP = \
 	environments/Voxels.cpp \
 	environments/VoxelGrid.cpp \
 	environments/NaryTree.cpp \
+#	environments/WeightedMap2DEnvironment.cpp \

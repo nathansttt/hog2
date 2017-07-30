@@ -31,9 +31,9 @@
 
 #include "BitVector.h"
 #include "Map.h"
-#include "MapAbstraction.h"
+//#include "MapAbstraction.h"
 #include "ReservationProvider.h"
-#include "MapProvider.h"
+//#include "MapProvider.h"
 #include "UnitSimulation.h"
 #include "StatCollection.h"
 

@@ -61,6 +61,8 @@
 #ifndef GLUTIL_H
 #define GLUTIL_H
 
+#include "Colors.h"
+
 //#pragma mark -
 //#pragma mark OpenGL structures:
 
@@ -130,16 +132,6 @@ std::ostream& operator<<(std::ostream &out, const recVec &loc);
 
 
 /**
- * A color; r/g/b are between 0...1
- */
-class recColor {
-public:
-	recColor() {}
-	recColor(GLfloat rr, GLfloat gg, GLfloat bb) :r(rr), g(gg), b(bb) {}
-	GLfloat r,g,b;
-};
-
-/**
  * A point in 3d space. (OpenGL)
  */
 class point3d {
@@ -176,10 +168,6 @@ public:
 	recVec end;
 };
 
-/**
-* Given min/max values, get a color from a color schema
- */
-recColor getColor(GLfloat v, GLfloat vmin, GLfloat vmax, int type);
 
 /** Draw a pyramid with the tip at the given location, given height, and 
 * width from center to edge as width.
@@ -196,39 +184,6 @@ void DrawText(double x, double y, double z, double scale, const char *res);
 void DrawTextCentered(double x, double y, double z, double scale, const char *res);
 
 
-namespace colors
-{
-	const recColor black  = {0.0,0.0,0.0};
-	const recColor white  = {1.0,1.0,1.0}; // white
-	const recColor gray   = {0.5,0.5,0.5}; // green
-	const recColor darkgray= {0.25,0.25,0.25}; // green
-	const recColor lightgray={0.75,0.75,0.75}; // green
-
-	const recColor red    = {1.0,0.0,0.0}; // red
-	const recColor darkred= {0.5,0.0,0.0}; // red
-	const recColor lightred= {1.0,0.5,0.5}; // red
-
-	const recColor green  = {0.0,1.0,0.0}; // green
-	const recColor darkgreen= {0.0,0.5,0.0}; // green
-	const recColor lightgreen= {0.5,1.0,0.5}; // green
-
-	const recColor blue   = {0.0,0.0,1.0}; // blue
-	const recColor darkblue   = {0.0,0.0,0.5}; // blue
-	const recColor lightblue   = {0.5,0.5,1.0}; // blue
-
-	const recColor yellow = {1.0,1.0,0.0}; // yellow
-	const recColor purple = {1.0,0.0,1.0}; // purple
-	const recColor cyan   = {0.0,1.0,1.0}; // cyan
-
-	const recColor orange = {1.0,0.5,0.0}; // orange
-	const recColor pink   = {1.0,0.0,0.5}; // pink
-}
-
-//class OpenGLDrawable {
-//public:
-//	virtual ~OpenGLDrawable() {}
-//	virtual void OpenGLDraw(unsigned long windowID) = 0;
-//};
 
 
 #endif

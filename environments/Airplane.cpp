@@ -334,7 +334,7 @@ void AirplaneEnvironment::OpenGLDraw() const
 		glBegin(GL_TRIANGLE_STRIP);
 		for (int x = 0; x <= width; x++)
 		{
-			recColor c;
+			rgbColor c;
 			
 			recVec a = GetCoordinate(x, y, std::max((int)GetGround(x, y), 20));
 			recVec b = GetCoordinate(x, y+1, std::max((int)GetGround(x, y+1), 20));
@@ -346,7 +346,7 @@ void AirplaneEnvironment::OpenGLDraw() const
 				glColor3f(0, 0, 1);
 			}
 			else {
-				c = getColor(GetGround(x, y), 0, 255, 5);
+				c = Colors::GetColor(GetGround(x, y), 0, 255, 5);
 				glColor3f(c.r, c.g, c.b);
 			}
 			recVec tmp = GetNormal(x, y);
@@ -358,7 +358,7 @@ void AirplaneEnvironment::OpenGLDraw() const
 				glColor3f(0, 0, 1);
 			}
 			else {
-				c = getColor(GetGround(x, y+1), 0, 255, 5);
+				c = Colors::GetColor(GetGround(x, y+1), 0, 255, 5);
 				glColor3f(c.r, c.g, c.b);
 			}
 			tmp = GetNormal(x, y+1);

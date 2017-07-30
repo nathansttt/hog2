@@ -326,7 +326,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'g':
 		{
 			std::fstream svgFile;
-			ge->SetColor(colors::darkgray.r, colors::darkgray.g, colors::darkgray.b);
+			ge->SetColor(Colors::darkgray.r, Colors::darkgray.g, Colors::darkgray.b);
 			svgFile.open("/Users/nathanst/graph.svg", std::fstream::out | std::fstream::trunc);
 			svgFile << ge->SVGHeader();
 			svgFile << ge->SVGDraw();			

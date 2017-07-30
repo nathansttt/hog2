@@ -69,7 +69,7 @@ struct AStarCompare {
 template <class state, class action, class environment, class openList = AStarOpenClosed<state, AStarCompare<state>> >
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; theHeuristic = 0; directed = false; }
+	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; stopAfterGoal = true; weight=1; reopenNodes = false; theHeuristic = 0; directed = false; }
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & );
@@ -89,7 +89,6 @@ public:
 	{ uint64_t theID; openClosedList.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath);
 	const state &GetParent(const state &s);
-	void DoAbstractSearch(){useOccupancyInfo = false; useRadius = false;}
 	virtual const char *GetName();
 	
 	void PrintStats();
@@ -115,6 +114,7 @@ public:
 	void SetReopenNodes(bool re) { reopenNodes = re; }
 	bool GetReopenNodes() { return reopenNodes; }
 
+	// Only necessary for BPMX computation
 	void SetDirected(bool d) { directed = d; }
 	
 	void SetHeuristic(Heuristic<state> *h) { theHeuristic = h; }
@@ -123,11 +123,6 @@ public:
 	uint64_t GetNodesTouched() const { return nodesTouched; }
 	uint64_t GetNecessaryExpansions() const;
 	void LogFinalStats(StatCollection *) {}
-	
-	void SetRadius(double rad) {radius = rad;}
-	double GetRadius() { return radius; }
-	
-	void SetRadiusEnvironment(environment *e) {radEnv = e;}
 	
 	void SetStopAfterGoal(bool val) { stopAfterGoal = val; }
 	bool GetStopAfterGoal() { return stopAfterGoal; }
@@ -142,11 +137,6 @@ public:
 	void SetWeight(double w) {weight = w;}
 private:
 	uint64_t nodesTouched, nodesExpanded;
-//	bool GetNextNode(state &next);
-//	//state Node();
-//	void UpdateClosedNode(environment *env, state& currOpenNode, state& neighbor);
-//	void UpdateWeight(environment *env, state& currOpenNode, state& neighbor);
-//	void AddToOpenList(environment *env, state& currOpenNode, state& neighbor);
 	
 	std::vector<state> neighbors;
 	std::vector<uint64_t> neighborID;
@@ -156,19 +146,14 @@ private:
 	bool stopAfterGoal;
 	
 	double goalFCost;
-	double radius; // how far around do we consider other agents?
-	double weight; 
+	double weight;
 	bool directed;
-	bool useOccupancyInfo;// = false;
-	bool useRadius;// = false;
 	int useBPMX;
 	bool reopenNodes;
 	uint64_t uniqueNodesExpanded;
 	environment *radEnv;
 	Heuristic<state> *theHeuristic;
 };
-
-//static const bool verbose = false;
 
 /**
  * Return the name of the algorithm. 
@@ -244,20 +229,10 @@ void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env
 template <class state, class action, class environment, class openList>
 bool TemplateAStar<state,action,environment,openList>::InitializeSearch(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
 {
-	//lastF = 0;
-	
 	if (theHeuristic == 0)
 		theHeuristic = _env;
 	thePath.resize(0);
-	//if (useRadius)
-	//std::cout<<"Using radius\n";
 	env = _env;
-	if (!radEnv)
-		radEnv = _env;
-	//	closedList.clear();
-	//	openQueue.reset();
-	//	assert(openQueue.size() == 0);
-	//	assert(closedList.size() == 0);
 	openClosedList.Reset(env->GetMaxHash());
 	ResetNodeCount();
 	start = from;
@@ -435,17 +410,7 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 				}
 				break;
 			case kNotFound:
-				// node is occupied; just mark it closed
-				if (useRadius && useOccupancyInfo && env->GetOccupancyInfo() && radEnv && (radEnv->HCost(start, neighbors[x]) < radius) &&(env->GetOccupancyInfo()->GetStateOccupied(neighbors[x])) && ((!(radEnv->GoalTest(neighbors[x], goal)))))
-				{
-					//double edgeCost = env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]);
-					openClosedList.AddClosedNode(neighbors[x],
-												 env->GetStateHash(neighbors[x]),
-												 openClosedList.Lookup(nodeid).g+edgeCosts[x],
-												 std::max(theHeuristic->HCost(neighbors[x], goal), openClosedList.Lookup(nodeid).h-edgeCosts[x]),
-												 nodeid);
-				}
-				else { // add node to open list
+				{ // add node to open list
 					//double edgeCost = env->GCost(openClosedList.Lookup(nodeid).data, neighbors[x]);
 //					std::cout << " adding to open ";
 //					std::cout << double(theHeuristic->HCost(neighbors[x], goal)+openClosedList.Lookup(nodeid).g+edgeCosts[x]);

@@ -27,10 +27,10 @@ public:
 	void OpenGLDraw() const;
 	std::string SVGDraw() const;
 	void SetTransparentValue(double v) { ignoreVal = v; }
-	recColor GetValueColor(double value) const;
+	rgbColor GetValueColor(double value) const;
 	void SetColorMap(int val) { colorMap = val; }
 	int GetColorMap() { return colorMap; }
-	void SetColor(int value, recColor c) { colors[value] = c; }
+	void SetColor(int value, rgbColor c) { colors[value] = c; }
 	void IncreaseColorMap() { colorMap++; }
 	void DecreaseColorMap() { colorMap--; }
 	double GetMaxValue() { return maxVal; }
@@ -41,7 +41,7 @@ private:
 	void resetValues();
 	Map *m;
 	std::vector<double> values;
-	std::unordered_map<int, recColor> colors;
+	std::unordered_map<int, rgbColor> colors;
 	double maxVal, minVal;
 	double ignoreVal;
 	int colorMap;

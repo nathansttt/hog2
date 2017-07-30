@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
 DBG_BINDIR = $(ROOT)/bin/debug
 REL_BINDIR = $(ROOT)/bin/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/graph
+PROJ_CXXFLAGS = -I$(ROOT)/graph -I$(ROOT)/gui
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 
@@ -35,6 +35,7 @@ SRC_CPP = \
 	utils/FPUtil.cpp \
 	utils/FunctionApproximator.cpp \
 	utils/GLUtil.cpp \
+	utils/Colors.cpp \
 	utils/LinearRegression.cpp \
 	utils/Map.cpp \
 	utils/MapOverlay.cpp \

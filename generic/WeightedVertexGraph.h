@@ -172,7 +172,7 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 		{
 			if (fless(i->first + j->first, optCost))
 			{
-				s += SVGDrawLine(100, 75+75*fcnt, width-100, 75+75*bcnt, 1, colors::black);
+				s += SVGDrawLine(100, 75+75*fcnt, width-100, 75+75*bcnt, 1, Colors::black);
 				break;
 			}
 			bcnt--;
@@ -186,13 +186,13 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 		std::string tmp = std::to_string((int)i->first);
 		//std::cout << i->first << " : " << i->second << "\n";
 		if (!fgreater(i->first, forwardOptG))
-			s += SVGDrawCircle(100, 75+75*cnt, 25, colors::lightblue);
+			s += SVGDrawCircle(100, 75+75*cnt, 25, Colors::lightblue);
 		else
-			s += SVGDrawCircle(100, 75+75*cnt, 25, colors::lightgray);
-		s += SVGFrameCircle(100, 75+75*cnt, 25, 1, colors::black);
-		s += SVGDrawText(100, 75+75*cnt, tmp.c_str(), colors::black, 30);
+			s += SVGDrawCircle(100, 75+75*cnt, 25, Colors::lightgray);
+		s += SVGFrameCircle(100, 75+75*cnt, 25, 1, Colors::black);
+		s += SVGDrawText(100, 75+75*cnt, tmp.c_str(), Colors::black, 30);
 		tmp = std::to_string((int)i->second);
-		s += SVGDrawText(37.5, 75+75*cnt, tmp.c_str(), colors::black, 20);
+		s += SVGDrawText(37.5, 75+75*cnt, tmp.c_str(), Colors::black, 20);
 		cnt++;
 	}
 	cnt = 0;
@@ -201,31 +201,31 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 		std::string tmp = std::to_string((int)i->first);
 		//std::cout << i->first << " : " << i->second << "\n";
 		if (!fgreater(i->first, backwardOptG))
-			s += SVGDrawCircle(width-100, 75+75*cnt, 25, colors::lightblue);
+			s += SVGDrawCircle(width-100, 75+75*cnt, 25, Colors::lightblue);
 		else
-			s += SVGDrawCircle(width-100, 75+75*cnt, 25, colors::lightgray);
-		s += SVGFrameCircle(width-100, 75+75*cnt, 25, 1, colors::black);
-		s += SVGDrawText(width-100, 75+75*cnt, tmp.c_str(), colors::black, 30);
+			s += SVGDrawCircle(width-100, 75+75*cnt, 25, Colors::lightgray);
+		s += SVGFrameCircle(width-100, 75+75*cnt, 25, 1, Colors::black);
+		s += SVGDrawText(width-100, 75+75*cnt, tmp.c_str(), Colors::black, 30);
 		tmp = std::to_string((int)i->second);
-		s += SVGDrawText(width-37.5, 75+75*cnt, tmp.c_str(), colors::black, 20);
+		s += SVGDrawText(width-37.5, 75+75*cnt, tmp.c_str(), Colors::black, 20);
 		cnt++;
 	}
 	
-	s += SVGDrawText(width/2, height-100, optCostStr.c_str(), colors::black, 30);
+	s += SVGDrawText(width/2, height-100, optCostStr.c_str(), Colors::black, 30);
 	optCostStr = "Forward A*: "+std::to_string(astarf.GetNecessaryExpansions());
-	s += SVGDrawText(width/2, height-70, optCostStr.c_str(), colors::black, 20);
+	s += SVGDrawText(width/2, height-70, optCostStr.c_str(), Colors::black, 20);
 	optCostStr = "Backward A*: "+std::to_string(astarb.GetNecessaryExpansions());
-	s += SVGDrawText(width/2, height-45, optCostStr.c_str(), colors::black, 20);
+	s += SVGDrawText(width/2, height-45, optCostStr.c_str(), Colors::black, 20);
 	optCostStr = "Optimal: "+std::to_string(totalWork);
-	s += SVGDrawText(width/2, height-20, optCostStr.c_str(), colors::black, 20);
+	s += SVGDrawText(width/2, height-20, optCostStr.c_str(), Colors::black, 20);
 	optCostStr = "Domain: "+e->GetName();
-	s += SVGDrawText(width/2, 20, optCostStr.c_str(), colors::black, 20);
+	s += SVGDrawText(width/2, 20, optCostStr.c_str(), Colors::black, 20);
 	std::stringstream tmp;
 	tmp << "Start: " << start;
-	s += SVGDrawText(width/2, 45, tmp.str().c_str(), colors::black, 20);
+	s += SVGDrawText(width/2, 45, tmp.str().c_str(), Colors::black, 20);
 	tmp.str("");
 	tmp << "Goal: " << goal;
-	s += SVGDrawText(width/2, 70, tmp.str().c_str(), colors::black, 20);
+	s += SVGDrawText(width/2, 70, tmp.str().c_str(), Colors::black, 20);
 
 	std::fstream svgFile;
 	svgFile.open(filename, std::fstream::out | std::fstream::trunc);

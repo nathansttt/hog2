@@ -468,7 +468,7 @@ namespace CanonicalGrid {
 	std::string CanonicalGrid::SVGDraw()
 	{
 		std::string s;
-		recColor black = {0.0, 0.0, 0.0};
+		rgbColor black = {0.0, 0.0, 0.0};
 		
 		// draw tiles
 		for (int y = 0; y < map->GetMapHeight(); y++)
@@ -478,25 +478,25 @@ namespace CanonicalGrid {
 				bool draw = true;
 				if (map->GetTerrainType(x, y) == kGround)
 				{
-					recColor c = {0.9, 0.9, 0.9};
+					rgbColor c = {0.9, 0.9, 0.9};
 					s += SVGDrawRect(x+1, y+1, 1, 1, c);
 					s += "\n";
 				}
 				else if (map->GetTerrainType(x, y) == kTrees)
 				{
-					recColor c = {0.0, 0.5, 0.0};
+					rgbColor c = {0.0, 0.5, 0.0};
 					s += SVGDrawRect(x+1, y+1, 1, 1, c);
 					s += "\n";
 				}
 				else if (map->GetTerrainType(x, y) == kWater)
 				{
-					recColor c = {0.0, 0.0, 1.0};
+					rgbColor c = {0.0, 0.0, 1.0};
 					s += SVGDrawRect(x+1, y+1, 1, 1, c);
 					s += "\n";
 				}
 				else if (map->GetTerrainType(x, y) == kSwamp)
 				{
-					recColor c = {0.0, 0.3, 1.0};
+					rgbColor c = {0.0, 0.3, 1.0};
 					s += SVGDrawRect(x+1, y+1, 1, 1, c);
 					s += "\n";
 				}
@@ -514,7 +514,7 @@ namespace CanonicalGrid {
 				// mark cells on map
 				if ((map->GetTerrainType(x, y)>>terrainBits) == (kGround>>terrainBits))
 				{
-					recColor c = {0.75, 0.75, 0.75};
+					rgbColor c = {0.75, 0.75, 0.75};
 					s += ::SVGFrameRect(x+1, y+1, 1, 1, 1, c);
 					s += "\n";
 				}
@@ -598,7 +598,7 @@ namespace CanonicalGrid {
 		std::string s;
 		if (map->GetTerrainType(l.x, l.y) == kGround)
 		{
-			recColor c;// = {0.5, 0.5, 0};
+			rgbColor c;// = {0.5, 0.5, 0};
 			GLfloat t;
 			GetColor(c.r, c.g, c.b, t);
 			s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
@@ -611,7 +611,7 @@ namespace CanonicalGrid {
 	{
 		std::string s;
 		
-		recColor c;// = {0.5, 0.5, 0};
+		rgbColor c;// = {0.5, 0.5, 0};
 		GLfloat t;
 		GetColor(c.r, c.g, c.b, t);
 		s += ::SVGFrameRect(left+1, top+1, right-left+1, bottom-top+1, width, c);
@@ -622,7 +622,7 @@ namespace CanonicalGrid {
 	std::string CanonicalGrid::SVGLabelState(const xyLoc &l, const char *str, double scale) const
 	{
 		std::string s;
-		recColor c;// = {0.5, 0.5, 0};
+		rgbColor c;// = {0.5, 0.5, 0};
 		GLfloat t;
 		GetColor(c.r, c.g, c.b, t);
 		s += SVGDrawText(l.x+0.5+1, l.y+0.5+1+1, str, c, scale);
@@ -638,7 +638,7 @@ namespace CanonicalGrid {
 	{
 		//<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,255,255);stroke-width:1" />
 		//std::string s;
-		recColor c;// = {0.5, 0.5, 0};
+		rgbColor c;// = {0.5, 0.5, 0};
 		GLfloat t;
 		GetColor(c.r, c.g, c.b, t);
 		return ::SVGDrawLine(p1.x+1, p1.y+1, p2.x+1, p2.y+1, width, c);
@@ -653,7 +653,7 @@ namespace CanonicalGrid {
 
 	void CanonicalGrid::DrawOrdering(xyLoc l) const
 	{
-		recColor c;
+		rgbColor c;
 		{
 			GLfloat r,g,b,t;
 			GetColor(r, g, b, t);

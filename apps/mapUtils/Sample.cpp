@@ -31,11 +31,10 @@
 #include "EpisodicSimulation.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
-#include "AStar.h"
+//#include "AStar.h"
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
-#include "MapSectorAbstraction.h"
-#include "GraphRefinementEnvironment.h"
+//#include "MapSectorAbstraction.h"
 #include "ScenarioLoader.h"
 #include "BFS.h"
 #include "PEAStar.h"
@@ -72,7 +71,7 @@ GraphDistanceHeuristic *gdh = 0;
 
 GraphEnvironment *ge = 0;
 
-MapSectorAbstraction *msa;
+//MapSectorAbstraction *msa;
 
 std::vector<xyLoc> path;
 
@@ -134,7 +133,7 @@ void CreateSimulation(int id)
 		//map->Scale(512, 512);
 	}
 	map->SetTileSet(kWinter);
-	msa = new MapSectorAbstraction(map, 2);
+//	msa = new MapSectorAbstraction(map, 2);
 	//msa->ToggleDrawAbstraction(1);
 	//msa->ToggleDrawAbstraction(2);
 	// ->ToggleDrawAbstraction(3);
@@ -284,7 +283,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //	ge->OpenGLDraw();
 
 	//if (astars.size() > 0)
-	msa->OpenGLDraw();
+//	msa->OpenGLDraw();
 	
 	if (mouseTracking)
 	{
@@ -400,6 +399,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 void doExport()
 {
+	assert(!"Abstraction export deprecated");
+/*
 	Map *map = new Map(gDefaultMap);
 	map->Scale(512, 512);
 	msa = new MapSectorAbstraction(map, 8);
@@ -418,6 +419,7 @@ void doExport()
 		edge *e = g->GetEdge(x);
 		printf("%d %d\n", e->getFrom(), e->getTo());//, (int)(100.0*e->GetWeight())); // %d 0
 	}
+ */
 	exit(0);
 }
 
@@ -763,6 +765,7 @@ void runProblemSet4(char *scenario)
 
 void runProblemSet2(char *problems, int multiplier)
 {
+	/*
 	Map *map = new Map(gDefaultMap);
 	map->Scale(512, 512);
 	msa = new MapSectorAbstraction(map, 8, multiplier);
@@ -818,10 +821,12 @@ void runProblemSet2(char *problems, int multiplier)
 	}
 	fclose(f);
 	exit(0);
+	 */
 }
 
 void runProblemSet(char *problems, int multiplier)
 {
+/*
 	Map *map = new Map(gDefaultMap);
 	map->Scale(512, 512);
 	msa = new MapSectorAbstraction(map, 8, multiplier);
@@ -931,6 +936,7 @@ void runProblemSet(char *problems, int multiplier)
 //		printf("%llu\t%1.2f\n", astar.GetNodesExpanded(), env1.GetPathLength(thePath));
 	}
 	fclose(f);
+ */
 	exit(0);
 }
 
@@ -1114,7 +1120,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '7':
 		case '8':
 		case '9':
-			msa->ToggleDrawAbstraction(key-'0');
+//			msa->ToggleDrawAbstraction(key-'0');
 			break;
 		case 't':
 			reopenNodes = !reopenNodes;
@@ -1309,6 +1315,7 @@ void MySubgoalHandler(unsigned long windowID, tKeyboardModifier, char key)
 
 void MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)
 {
+	/*
 	astars.resize(0);
 	static uint64_t average1=0, average2 = 0;
 	static int count = 0;
@@ -1396,6 +1403,7 @@ void MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)
 		thePath.resize(0);
 		printf("Tot\t%llu\t%llu\n", nodesExpanded, nodesTouched);
 	}
+	 */
 }
 
 

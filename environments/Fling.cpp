@@ -608,7 +608,7 @@ void Fling::OpenGLDraw(const FlingBoard&b) const
 			yLoc += diameter;
 			if (b.HasPiece(x, y))
 			{
-				recColor r = getColor(b.locs[b.GetIndexInLocs(x, y)].second, 0, b.currId, 9); // 4
+				rgbColor r = Colors::GetColor(b.locs[b.GetIndexInLocs(x, y)].second, 0, b.currId, 9); // 4
 				glColor3f(r.r, r.g, r.b);
 				DrawSphere(xLoc, yLoc, 0, radius*0.8);
 			}
@@ -672,7 +672,7 @@ void Fling::OpenGLDrawPlain(const FlingBoard&b) const
 		for (double y = 0; y < b.height; y++)
 		{
 			yLoc += diameter;
-			//recColor r = getColor(x+y*b.width, 0, b.width*b.height, 4);
+			//rgbColor r = GetColor(x+y*b.width, 0, b.width*b.height, 4);
 			
 			if (b.HasPiece(x, y))
 			{
@@ -710,7 +710,7 @@ void Fling::OpenGLDrawAlternate(const FlingBoard &b) const
 		for (double y = 0; y < b.height; y++)
 		{
 			yLoc += diameter;
-			//recColor r = getColor(x+y*b.width, 0, b.width*b.height, 4);
+			//rgbColor r = GetColor(x+y*b.width, 0, b.width*b.height, 4);
 
 			if (b.HasPiece(x, y))
 			{

@@ -25,39 +25,30 @@ PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
 PROJ_REL_LNFLAGS = -L$(REL_BINDIR)
 
-PROJ_DBG_LIB = -lgrids -labstraction -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
-PROJ_REL_LIB = -lgrids -labstraction -lshared -labstraction -lgraph -labstractionalgorithms -lenvironments -lmapalgorithms -lalgorithms -labsmapalgorithms -lgraphalgorithms -lgui -lutils
+PROJ_DBG_LIB = -lgrids -lgraph -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgui -lutils
+PROJ_REL_LIB = -lgrids -lgraph -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgui -lutils
 
 
 PROJ_DBG_DEP = \
   $(DBG_BINDIR)/libutils.a \
   $(DBG_BINDIR)/libgraph.a \
   $(DBG_BINDIR)/libgrids.a \
-  $(DBG_BINDIR)/libabstraction.a \
   $(DBG_BINDIR)/libgui.a \
-  $(DBG_BINDIR)/libabstractionalgorithms.a \
   $(DBG_BINDIR)/libenvironments.a \
   $(DBG_BINDIR)/libmapalgorithms.a \
-  $(DBG_BINDIR)/libabsmapalgorithms.a \
   $(DBG_BINDIR)/libgraphalgorithms.a \
   $(DBG_BINDIR)/libalgorithms.a \
-  $(DBG_BINDIR)/libabstraction.a \
-  $(DBG_BINDIR)/libshared.a 
 
 
 PROJ_REL_DEP = \
   $(REL_BINDIR)/libutils.a \
   $(REL_BINDIR)/libgraph.a \
   $(REL_BINDIR)/libgrids.a \
-  $(REL_BINDIR)/libabstraction.a \
   $(REL_BINDIR)/libgui.a \
-  $(REL_BINDIR)/libabstractionalgorithms.a \
   $(REL_BINDIR)/libenvironments.a \
   $(REL_BINDIR)/libmapalgorithms.a \
-  $(REL_BINDIR)/libabsmapalgorithms.a \
   $(REL_BINDIR)/libgraphalgorithms.a \
   $(REL_BINDIR)/libalgorithms.a \
-  $(REL_BINDIR)/libshared.a 
 
 ifeq ("$(OPENGL)", "STUB")
 PROJ_DBG_LIB += -lSTUB

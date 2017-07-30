@@ -7,6 +7,7 @@
 //
 
 #include "NQueens.h"
+#include "GLUtil.h"
 
 void NQueens::GetSuccessors(const NQueenState &nodeID, std::vector<NQueenState> &neighbors) const
 {

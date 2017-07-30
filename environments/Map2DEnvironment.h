@@ -15,7 +15,7 @@
 #include <string>
 #include <iostream>
 #include "Map.h"
-#include "MapAbstraction.h"
+//#include "MapAbstraction.h"
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "ReservationProvider.h"
@@ -188,7 +188,7 @@ protected:
 	double DIAGONAL_COST;
 	bool fourConnected;
 };
-
+/*
 class AbsMapEnvironment : public MapEnvironment
 {
 public:
@@ -204,9 +204,9 @@ public:
 protected:
 	MapAbstraction *ma;
 };
-
+*/
 typedef UnitSimulation<xyLoc, tDirection, MapEnvironment> UnitMapSimulation;
-typedef UnitSimulation<xyLoc, tDirection, AbsMapEnvironment> UnitAbsMapSimulation;
+//typedef UnitSimulation<xyLoc, tDirection, AbsMapEnvironment> UnitAbsMapSimulation;
 
 
 //template<>

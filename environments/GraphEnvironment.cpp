@@ -457,7 +457,7 @@ std::string GraphEnvironment::SVGLabelState(const graphState &s, const char *str
 	x1 = int((x1+1.0)*300.0+12.0);
 	y1 = int((y1+1.0)*300.0+20.0);
 	
-	return SVGDrawText(x1, y1, str, colors::blue, 24);
+	return SVGDrawText(x1, y1, str, Colors::blue, 24);
 }
 
 std::string GraphEnvironment::SVGDraw(const graphState &s) const
@@ -470,7 +470,7 @@ std::string GraphEnvironment::SVGDraw(const graphState &s) const
 	x1 = int((x1+1.0)*300.0);
 	y1 = int((y1+1.0)*300.0);
 
-	return SVGDrawCircle(x1, y1, 6, colors::black)+SVGDrawCircle(x1, y1, 2, colors::white);
+	return SVGDrawCircle(x1, y1, 6, Colors::black)+SVGDrawCircle(x1, y1, 2, Colors::white);
 }
 
 std::string GraphEnvironment::SVGDraw() const
@@ -489,7 +489,7 @@ std::string GraphEnvironment::SVGDraw() const
 		node *n;
 		n = g->GetNode(e->getFrom());
 		
-		recColor c;
+		rgbColor c;
 		GLfloat t;
 		GetColor(c.r, c.g, c.b, t);
 
@@ -539,11 +539,11 @@ std::string GraphEnvironment::SVGDraw() const
 	s += "\" stroke=\"black\" stroke-width=\"0.1\" fill=\"none\" />\n";
 //	for (float x = minx; x <= maxx; x += (maxx-minx)/10.0)
 //	{
-//		s += SVGDrawLine((float)x, (float)miny, (float)x, (float)maxy, 2.0, colors::darkblue);
+//		s += SVGDrawLine((float)x, (float)miny, (float)x, (float)maxy, 2.0, Colors::darkblue);
 //	}
 //	for (float y = miny; y <= maxy; y += (maxy-miny)/10.0)
 //	{
-//		s += SVGDrawLine((float)minx, (float)y, (float)maxx, (float)y, 2.0, colors::darkblue);
+//		s += SVGDrawLine((float)minx, (float)y, (float)maxx, (float)y, 2.0, Colors::darkblue);
 //	}
 	return s;
 }
@@ -1201,7 +1201,7 @@ void GraphDistanceHeuristic::OpenGLDraw() const
 		y = n->GetLabelF(GraphSearchConstants::kYCoordinate);
 		z = n->GetLabelF(GraphSearchConstants::kZCoordinate);
 		
-		recColor r(1.0, 1.0, 1.0);//getColor((counter+locations[a])%100, 0, 100, 4);
+		rgbColor r(1.0, 1.0, 1.0);//GetColor((counter+locations[a])%100, 0, 100, 4);
 		
 		glColor3f(0.0, 0.0, 1.0);
 		DrawSphere(x, y, z, approxSize);
@@ -1674,7 +1674,7 @@ node *GraphDistanceHeuristic::FindFarNode(node *n)
 //}
 
 
-
+/*
 AbstractionGraphEnvironment::AbstractionGraphEnvironment( GraphAbstraction *_gabs, unsigned int level, GraphHeuristic *gh ):
 	GraphEnvironment( _gabs->GetAbstractGraph(level), gh ), gabs(_gabs)
 {
@@ -1743,3 +1743,5 @@ void AbstractionGraphEnvironment::OpenGLDraw() const {
 	}
 	glEnd();
 };
+
+*/
