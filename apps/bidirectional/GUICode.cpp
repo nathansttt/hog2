@@ -856,8 +856,8 @@ const char *strip(const char *str)
 {
 	static std::string s;
 	s = "";
-	char *p1 = strrchr(str, '.');
-	char *p2 = strrchr(str, '/');
+	const char *p1 = strrchr(str, '.');
+	const char *p2 = strrchr(str, '/');
 	s.append(p2+1, p1);
 	return s.c_str();
 }
