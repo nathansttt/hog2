@@ -84,8 +84,8 @@ void TestTOH(int first, int last)
 			g.disks[whichPeg][g.counts[whichPeg]] = x;
 			g.counts[whichPeg]++;
 		}
-		// Using canonical goal currently - uncomment to use random goal
-		g.Reset();
+		// Using canonical goal currently - comment to use random goal
+		//g.Reset();
 		f = BuildPDB<N, pdb1Disks>(g);
 
 		Timer timer;
