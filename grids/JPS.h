@@ -51,7 +51,7 @@ public:
 	void SetJumpLimit(uint32_t val) { jumpLimit = val; }
 	void LogFinalStats(StatCollection *stats);
 	void OpenGLDraw() const;
-	void Draw() const;
+	void Draw(Graphics::Display &disp) const;
 	std::string SVGDraw();
 	void OpenGLDraw(const MapEnvironment *env) const;
 private:

@@ -9,7 +9,7 @@
 #include "JPS.h"
 #include <string>
 #include <algorithm>
-#include "Graphics2D.h"
+#include "Graphics.h"
 
 JPS::JPS(Map *m)
 {
@@ -505,7 +505,7 @@ void JPS::OpenGLDraw() const
 
 void JPS::OpenGLDraw(const MapEnvironment *env) const {}
 
-void JPS::Draw() const
+void JPS::Draw(Graphics::Display &disp) const
 {
 	double transparency = 1.0;
 	if (openClosedList.size() == 0)
@@ -523,34 +523,34 @@ void JPS::Draw() const
 			continue;
 
 		env->SetColor(1.0, 1.0, 1.0);
-		env->DrawLine(data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
+		env->DrawLine(disp, data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
 		env->SetColor(0.0, 0.0, 0.0);
-		env->DrawLine(data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
+		env->DrawLine(disp, data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
 		
 		if (x == top)
 		{
 			env->SetColor(1.0, 1.0, 0.0, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 		else if ((data.where == kOpenList) && (data.reopened))
 		{
 			env->SetColor(0.0, 0.5, 0.5, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 		else if (data.where == kOpenList)
 		{
 			env->SetColor(0.0, 1.0, 0.0, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 		else if ((data.where == kClosedList) && (data.reopened))
 		{
 			env->SetColor(0.5, 0.0, 0.5, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 		else if (data.where == kClosedList)
 		{
 			env->SetColor(1.0, 0.0, 0.0, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 	}
 }

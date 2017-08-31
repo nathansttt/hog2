@@ -399,7 +399,7 @@ void CanonicalDijkstra::OpenGLDraw() const
 
 void CanonicalDijkstra::OpenGLDraw(const MapEnvironment *env) const {}
 
-void CanonicalDijkstra::Draw() const
+void CanonicalDijkstra::Draw(Graphics::Display &disp) const
 {
 	double transparency = 1.0;
 	if (openClosedList.size() == 0)
@@ -427,27 +427,27 @@ void CanonicalDijkstra::Draw() const
 		if (x == top)
 		{
 			env->SetColor(1.0, 1.0, 0.0, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 		else if ((data.where == kOpenList) && (data.reopened))
 		{
 			env->SetColor(0.0, 0.5, 0.5, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 		else if (data.where == kOpenList)
 		{
 			env->SetColor(0.0, 1.0, 0.0, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 		else if ((data.where == kClosedList) && (data.reopened))
 		{
 			env->SetColor(data.g/maxGCost, 0.0, 1.0, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 		else if (data.where == kClosedList)
 		{
 			env->SetColor(data.g/maxGCost, 0.0, 0.0, transparency);
-			env->Draw(data.data.loc);
+			env->Draw(disp, data.data.loc);
 		}
 	}
 }
