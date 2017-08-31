@@ -336,7 +336,7 @@ void TestPancakeHard()
 			t += ".svg";
 			
 			start = original;
-			GetWeightedVertexGraph<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>(start, goal, &pancake, 0);
+			GetWeightedVertexGraph<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>(start, goal, &pancake, &pancake, &pancake);
 		}
 
 		

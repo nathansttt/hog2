@@ -492,7 +492,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					}
 				}
 
-				GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, 0);
+				GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, me, me);
 				
 				mouseTracking = false;
 				//SetupMapOverlay();
@@ -881,7 +881,7 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 		t += std::to_string(whichProblem);
 		t += ".svg";
 //		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, t.c_str());
-		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, 0);
+		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, me, me);
 
 		Timer timer;
 		NBS<xyLoc, tDirection, MapEnvironment> nbs;

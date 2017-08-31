@@ -15,13 +15,15 @@
 #include <sstream>
 
 template <class state, class action, class environment>
-uint64_t GetWeightedVertexGraph(const state &start, const state &goal, environment *e, const char *filename = 0)
+uint64_t GetWeightedVertexGraph(const state &start, const state &goal, environment *e, Heuristic<state> *f, Heuristic<state> *b, const char *filename = 0)
 {
 //	printf("Analyzing weighted vertext graph.\n");
 	std::vector<state> path;
 	TemplateAStar<state, action, environment> astarf;
 	TemplateAStar<state, action, environment> astarb;
+	astarf.SetHeuristic(f);
 	astarf.GetPath(e, start, goal, path);
+	astarf.SetHeuristic(b);
 	astarb.GetPath(e, goal, start, path);
 	double optCost = e->GetPathLength(path);
 	double forwardOptG = -1;

@@ -154,7 +154,7 @@ void TestSTP(int algorithm)
 			std::string t = "/Users/nathanst/stp_";
 			t += std::to_string(x);
 			t += ".svg";
-			GetWeightedVertexGraph<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(start, goal, &mnp, t.c_str());
+			GetWeightedVertexGraph<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(start, goal, &mnp, &mnp, &mnp, t.c_str());
 		}
 
 		if (algorithm == 0) // A*

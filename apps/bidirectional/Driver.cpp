@@ -1814,7 +1814,7 @@ void Animate()
 		MakeSVG(d, path.c_str(), 800, 800);
 	}
 	
-	GetWeightedVertexGraph<xyLoc, tDirection>(p1, p2, me, "/Users/nathanst/bidir/z.svg");
+	GetWeightedVertexGraph<xyLoc, tDirection>(p1, p2, me, me, me, "/Users/nathanst/bidir/z.svg");
 //	GetWeightedVertexGraph<xyLoc, tDirection>(p2, p1, me, "/Users/nathanst/bidir/z.svg");
 }
 
