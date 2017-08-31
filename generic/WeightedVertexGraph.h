@@ -23,7 +23,7 @@ uint64_t GetWeightedVertexGraph(const state &start, const state &goal, environme
 	TemplateAStar<state, action, environment> astarb;
 	astarf.SetHeuristic(f);
 	astarf.GetPath(e, start, goal, path);
-	astarf.SetHeuristic(b);
+	astarb.SetHeuristic(b);
 	astarb.GetPath(e, goal, start, path);
 	double optCost = e->GetPathLength(path);
 	double forwardOptG = -1;
