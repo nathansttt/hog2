@@ -317,7 +317,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			{
 				node *start = ge->GetGraph()->GetRandomNode();
 				node *goal = ge->GetGraph()->GetRandomNode();
-				GetWeightedVertexGraph<graphState, graphMove, RoadMap>(start->GetNum(), goal->GetNum(), ge, 0);
+				GetWeightedVertexGraph<graphState, graphMove, RoadMap>(start->GetNum(), goal->GetNum(), ge, ge, ge);
 			}
 
 //			std::fstream svgFile;
@@ -362,7 +362,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	{
 		node *start = ge->GetGraph()->GetRandomNode();
 		node *goal = ge->GetGraph()->GetRandomNode();
-		GetWeightedVertexGraph<graphState, graphMove, RoadMap>(start->GetNum(), goal->GetNum(), ge, 0);
+		GetWeightedVertexGraph<graphState, graphMove, RoadMap>(start->GetNum(), goal->GetNum(), ge, ge, ge);
 		uint64_t f, b, m, n, nz;
 		astar.GetPath(ge, start->GetNum(), goal->GetNum(), thePath);
 		f = astar.GetNodesExpanded();
