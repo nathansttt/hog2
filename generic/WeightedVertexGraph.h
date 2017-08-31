@@ -15,8 +15,9 @@
 #include <sstream>
 
 template <class state, class action, class environment>
-void GetWeightedVertexGraph(const state &start, const state &goal, environment *e, const char *filename)
+uint64_t GetWeightedVertexGraph(const state &start, const state &goal, environment *e, const char *filename = 0)
 {
+//	printf("Analyzing weighted vertext graph.\n");
 	std::vector<state> path;
 	TemplateAStar<state, action, environment> astarf;
 	TemplateAStar<state, action, environment> astarb;
@@ -27,10 +28,15 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 	double backwardOptG = -1;
 	int forwardSum = 0;
 	int backwardSum = 0;
-	std::string optCostStr = "Optimal cost: "+std::to_string((int)optCost);
+	std::string optCostStr = "Optimal cost: "+std::to_string(optCost);
+//	std::cout << optCostStr << "\n";
+	// Contains the count of how many states have each g-cost
 	std::map<double, int> m_f, m_b;
 	if (astarf.GetNecessaryExpansions() == 0 || astarb.GetNecessaryExpansions() == 0)
-		return;
+	{
+		printf("No necessary expansions\n");
+		return 0;
+	}
 	for (int x = 0; x < astarf.GetNumItems(); x++)
 	{
 		const auto &i = astarf.GetItem(x);
@@ -50,7 +56,7 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 	if (m_f.size() == 0)
 	{
 		printf("No forward item\n");
-		return;
+		return 0;
 	}
 	for (int x = 0; x < astarb.GetNumItems(); x++)
 	{
@@ -71,7 +77,7 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 	if (m_b.size() == 0)
 	{
 		printf("No backward item\n");
-		return;
+		return 0;
 	}
 //	std::cout << "Forward\n";
 	for (auto i = m_f.begin(); i != m_f.end(); i++)
@@ -94,7 +100,9 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 	s += ">\n";
 
 	int totalWork = backwardSum;
-
+	const int forwardCopy = forwardSum;
+	const int backwardCopy = backwardSum;
+//	printf("--At f: %1f b:%1f work is %d\n", -1.0f, m_b.rbegin()->first, backwardSum);
 	{
 		// compute optimal partition
 		auto fi = m_f.begin();
@@ -107,15 +115,21 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 		// bi points to the last used entry
 		while (true)
 		{
-			// Remove the next backwars entry
-			backwardSum -= bi->second;
-			bi++;
+			do {
+				// Remove the next backwars entry
+				backwardSum -= bi->second;
+//				printf("Subtract %d from back\n", bi->second);
+				bi++;
+				if (bi == m_b.rend())
+					break;
+			} while (fi->first+bi->first > optCost);
 			if (bi == m_b.rend())
 				break;
 			// Find all the necessary forward entries to maintain the vertex cover
 			while (true)
 			{
 				forwardSum += fi->second;
+//				printf("--Add %d to front\n", fi->second);
 				fi++;
 				// If we reach one end, we can remove everything in the other direction
 				if (fi == m_f.end())
@@ -127,14 +141,18 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 					}
 					break;
 				}
-				//printf("%1.1f+%1.1f vs %1.1f\n", fi->first, bi->first, optCost);
-				if (fi->first+bi->first >= optCost)
+//				printf("%1.1f+%1.1f vs %1.1f\n", fi->first, bi->first, optCost);
+				auto tmp = bi;
+				tmp--;
+				if (fi->first+(tmp)->first >= optCost)
 					break;
 
 			}
-			//printf("Considering: %d + %d = %d\n", forwardSum, backwardSum, forwardSum+backwardSum);
+//			printf("Considering: %d + %d = %d\n", forwardSum, backwardSum, forwardSum+backwardSum);
 			if (fi == m_f.end())
 				break;
+//			printf("--At f: %1f b:%1f work is %d\n", fi->first, (bi == m_b.rend())?-1:bi->first, forwardSum+backwardSum);
+			
 			if (forwardSum+backwardSum < totalWork)
 			{
 				totalWork = forwardSum+backwardSum;
@@ -150,18 +168,29 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 			forwardSum += fi->second;
 			fi++;
 		}
+		fi--;
+//		printf("--At f: %1f b:%1f work is %d\n", fi->first, -1.0f, forwardSum+backwardSum);
 		if (forwardSum+backwardSum < totalWork)
 		{
 			totalWork = forwardSum+backwardSum;
-			forwardOptG = (--fi)->first;
+			forwardOptG = fi->first;
 			backwardOptG = -1;
 		}
 	}
-	//printf("Forward optimal dist: %1.1f; backwards optimal distances: %1.1f\n", forwardOptG, backwardOptG);
-	if (forwardOptG == -1 ||  backwardOptG == -1)
+	
 	{
-		return;
+		printf("Forward/Backward/Min: %d %d %d %s\n", forwardCopy, backwardCopy, totalWork,
+			   (std::min(forwardCopy, backwardCopy)!=totalWork)?"bidirectional wins!":"" );
 	}
+	if (filename == 0)
+		return totalWork;
+	
+	//printf("Forward optimal dist: %1.1f; backwards optimal distances: %1.1f\n", forwardOptG, backwardOptG);
+//	if (forwardOptG == -1 ||  backwardOptG == -1)
+//	{
+//		printf("Unidirectional solution\n");
+//		return;
+//	}
 	
 	// TODO: need to use cnt computed from below not i->first / j->first
 	int fcnt = 0;
@@ -170,7 +199,10 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 		int bcnt = m_b.size()-1;
 		for (auto j = m_b.rbegin(); j != m_b.rend(); j++)
 		{
-			if (fless(i->first + j->first, optCost))
+			auto tmp = i;
+			tmp++;
+//			if (fless(i->first + j->first, optCost))
+			if (fless(i->first + j->first, optCost) && ((tmp) == m_f.end() || !fless((tmp)->first + j->first, optCost)))
 			{
 				s += SVGDrawLine(100, 75+75*fcnt, width-100, 75+75*bcnt, 1, Colors::black);
 				break;
@@ -227,12 +259,16 @@ void GetWeightedVertexGraph(const state &start, const state &goal, environment *
 	tmp << "Goal: " << goal;
 	s += SVGDrawText(width/2, 70, tmp.str().c_str(), Colors::black, 20);
 
-	std::fstream svgFile;
-	svgFile.open(filename, std::fstream::out | std::fstream::trunc);
-	svgFile << s;
-	svgFile << "</svg>";
-	svgFile.close();
-	printf("Generated SVG '%s'", filename);
+	if (filename != 0)
+	{
+		std::fstream svgFile;
+		svgFile.open(filename, std::fstream::out | std::fstream::trunc);
+		svgFile << s;
+		svgFile << "</svg>";
+		svgFile.close();
+		printf("Generated SVG '%s'\n", filename);
+	}
+	return totalWork;
 }
 
 #endif /* WeightedVertexGraph_h */

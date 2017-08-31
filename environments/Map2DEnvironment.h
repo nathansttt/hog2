@@ -21,6 +21,7 @@
 #include "ReservationProvider.h"
 #include "BitVector.h"
 #include "GraphEnvironment.h"
+#include "Graphics.h"
 
 #include <cassert>
 
@@ -158,9 +159,14 @@ public:
 	std::string SVGDrawLine(const xyLoc &x, const xyLoc &y, int width=1) const;
 	std::string SVGFrameRect(int left, int top, int right, int bottom, int width = 1);
 
-	virtual void Draw() const;
-	virtual void Draw(const xyLoc &l) const;
-	virtual void DrawLine(const xyLoc &x, const xyLoc &y, double width = 1.0) const;
+	virtual void Draw(Graphics::Display &disp) const;
+	virtual void Draw(Graphics::Display &disp, const xyLoc &l) const;
+	virtual void DrawAlternate(Graphics::Display &disp, const xyLoc &l) const;
+	virtual void Draw(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v) const;
+	virtual void DrawStateLabel(Graphics::Display &disp, const xyLoc &l1, const char *txt) const;
+	virtual void DrawStateLabel(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v, const char *txt) const;
+	virtual void DrawLine(Graphics::Display &disp, const xyLoc &x, const xyLoc &y, double width = 1.0) const;
+	virtual void DrawArrow(Graphics::Display &disp, const xyLoc &x, const xyLoc &y, double width = 1.0) const;
 
 	
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;

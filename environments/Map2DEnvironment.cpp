@@ -10,9 +10,9 @@
 #include "FPUtil.h"
 #include "SVGUtil.h"
 #include <cstring>
-#include "Graphics2D.h"
+#include "Graphics.h"
 
-using namespace Graphics2D;
+using namespace Graphics;
 
 MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 {
@@ -942,11 +942,25 @@ std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2, int wi
 }
 
 
-void MapEnvironment::Draw() const
+void MapEnvironment::Draw(Graphics::Display &disp) const
 {
-	rgbColor black = {0.0, 0.0, 0.0};
+	//rgbColor black = {0.0, 0.0, 0.0};
+//	s += SVGFrameRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
+//					  PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
+//					  PointToSVG(o.r.top, height)-PointToSVG(o.r.bottom, height),
+
+//	disp.FrameRect({-1, -1, 1, -3}, Colors::black, 1);
+	disp.DrawLine({-1, -1}, {-1, 1}, 1, Colors::black);
+	disp.DrawLine({-1, -1}, {1, -1}, 1, Colors::black);
+	disp.DrawLine({1, 1}, {-1, 1}, 1, Colors::black);
+	disp.DrawLine({1, 1}, {1, -1}, 1, Colors::black);
+//	disp.FrameRect({1, -1, -1, 1}, Colors::black, 1);
+//	disp.FrameRect({-1, 1, 1, -1}, Colors::black, 1);
+//	disp.FrameRect({-1, -1, 1, 1}, Colors::black, 1);
+//	disp.FrameRect({-1, -1, 1, 1}, Colors::black, 4);
 	
 	// draw tiles
+	if (0)
 	for (int y = 0; y < map->GetMapHeight(); y++)
 	{
 		for (int x = 0; x < map->GetMapWidth(); x++)
@@ -956,29 +970,29 @@ void MapEnvironment::Draw() const
 			GLdouble px, py, t, rad;
 			map->GetOpenGLCoord(x, y, px, py, t, rad);
 			r.left = px-rad;
-			r.top = py-rad;
+			r.top = py+rad;
 			r.right = px+rad;
-			r.bottom = py+rad;
+			r.bottom = py-rad;
 			
 			if (map->GetTerrainType(x, y) == kGround)
 			{
 				rgbColor c = {0.9, 0.9, 0.9};
-				FillRect(r, c);
+				disp.FillRect(r, c);
 			}
 			else if (map->GetTerrainType(x, y) == kTrees)
 			{
 				rgbColor c = {0.0, 0.5, 0.0};
-				FillRect(r, c);
+				disp.FillRect(r, c);
 			}
 			else if (map->GetTerrainType(x, y) == kWater)
 			{
 				rgbColor c = {0.0, 0.0, 1.0};
-				FillRect(r, c);
+				disp.FillRect(r, c);
 			}
 			else if (map->GetTerrainType(x, y) == kSwamp)
 			{
 				rgbColor c = {0.0, 0.3, 1.0};
-				FillRect(r, c);
+				disp.FillRect(r, c);
 			}
 			else {
 				draw = false;
@@ -1003,7 +1017,7 @@ void MapEnvironment::Draw() const
 					r.top = py-rad;
 					r.right = px+rad;
 					r.bottom = py+rad;
-					FrameRect(r, c);
+					disp.FrameRect(r, c, 1);
 				}
 			}
 		}
@@ -1014,8 +1028,12 @@ void MapEnvironment::Draw() const
 	{
 		for (int x = 0; x < map->GetMapWidth(); x++)
 		{
-			GLdouble px, py, t, rad;
-			map->GetOpenGLCoord(x, y, px, py, t, rad);
+			GLdouble px1, py1, t1, rad1;
+			map->GetOpenGLCoord(x, y, px1, py1, t1, rad1);
+			float px=static_cast<float>(px1);
+			float py=static_cast<float>(py1);
+			float t=static_cast<float>(t1);
+			float rad=static_cast<float>(rad1);
 			
 			bool draw = true;
 			if ((map->GetTerrainType(x, y) == kGround) ||
@@ -1024,15 +1042,15 @@ void MapEnvironment::Draw() const
 			{
 				if (x == map->GetMapWidth()-1)
 				{
-					point2d s = {px+rad, py-rad};
-					point2d g = {px+rad, py+rad};
-					::DrawLine(s, g, 1, black);
+					point s = {px+rad, py-rad};
+					point g = {px+rad, py+rad};
+					disp.DrawLine(s, g, 1, Colors::black);
 				}
 				if (y == map->GetMapHeight()-1)
 				{
-					point2d s = {px-rad, py+rad};
-					point2d g = {px+rad, py+rad};
-					::DrawLine(s, g, 1, black);
+					point s = {px-rad, py+rad};
+					point g = {px+rad, py+rad};
+					disp.DrawLine(s, g, 1, Colors::black);
 				}
 			}
 			else if (map->GetTerrainType(x, y) == kSwamp)
@@ -1047,30 +1065,30 @@ void MapEnvironment::Draw() const
 				// Code does error checking, so this works with x == 0
 				if (map->GetTerrainType(x, y) != map->GetTerrainType(x-1, y))
 				{
-					point2d s = {px-rad, py-rad};
-					point2d g = {px-rad, py+rad};
-					::DrawLine(s, g, 1, black);
+					point s = {px-rad, py-rad};
+					point g = {px-rad, py+rad};
+					disp.DrawLine(s, g, 1, Colors::black);
 				}
 				
 				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y-1))
 				{
-					point2d s = {px-rad, py-rad};
-					point2d g = {px+rad, py-rad};
-					::DrawLine(s, g, 1, black);
+					point s = {px-rad, py-rad};
+					point g = {px+rad, py-rad};
+					disp.DrawLine(s, g, 1, Colors::black);
 				}
 				
 				if (map->GetTerrainType(x, y) != map->GetTerrainType(x+1, y))
 				{
-					point2d s = {px+rad, py-rad};
-					point2d g = {px+rad, py+rad};
-					::DrawLine(s, g, 1, black);
+					point s = {px+rad, py-rad};
+					point g = {px+rad, py+rad};
+					disp.DrawLine(s, g, 1, Colors::black);
 				}
 				
 				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y+1))
 				{
-					point2d s = {px-rad, py+rad};
-					point2d g = {px+rad, py+rad};
-					::DrawLine(s, g, 1, black);
+					point s = {px-rad, py+rad};
+					point g = {px+rad, py+rad};
+					disp.DrawLine(s, g, 1, Colors::black);
 				}
 			}
 			
@@ -1078,7 +1096,7 @@ void MapEnvironment::Draw() const
 	}
 }
 
-void MapEnvironment::Draw(const xyLoc &l) const
+void MapEnvironment::Draw(Graphics::Display &disp, const xyLoc &l) const
 {
 	GLdouble px, py, t, rad;
 	map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
@@ -1096,12 +1114,110 @@ void MapEnvironment::Draw(const xyLoc &l) const
 		r.bottom = py+rad;
 
 		//s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
-		::FillCircle(r, c);
+		disp.FillCircle(r, c);
 		//stroke-width="1" stroke="pink" />
 	}
 }
 
-void MapEnvironment::DrawLine(const xyLoc &a, const xyLoc &b, double width) const
+void MapEnvironment::Draw(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v) const
+{
+	rect r1, r2;
+	rgbColor c;// = {0.5, 0.5, 0};
+	GLfloat t;
+	GetColor(c.r, c.g, c.b, t);
+
+	{
+		GLdouble px, py, t, rad;
+		map->GetOpenGLCoord(l1.x, l1.y, px, py, t, rad);
+
+		rect r;
+		r.left = px-rad;
+		r.top = py-rad;
+		r.right = px+rad;
+		r.bottom = py+rad;
+		r1 = r;
+	}
+	{
+		GLdouble px, py, t, rad;
+		map->GetOpenGLCoord(l2.x, l2.y, px, py, t, rad);
+
+		rect r;
+		r.left = px-rad;
+		r.top = py-rad;
+		r.right = px+rad;
+		r.bottom = py+rad;
+		r2 = r;
+	}
+	rect r;
+	v = 1-v;
+	r.left = v*r1.left+r2.left*(1-v);
+	r.right = v*r1.right+r2.right*(1-v);
+	r.top = v*r1.top+r2.top*(1-v);
+	r.bottom = v*r1.bottom+r2.bottom*(1-v);
+	disp.FrameCircle(r, c, 2);
+}
+
+
+void MapEnvironment::DrawAlternate(Graphics::Display &disp, const xyLoc &l) const
+{
+	GLdouble px, py, t, rad;
+	map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+	
+	//if (map->GetTerrainType(l.x, l.y) == kGround)
+	{
+		rgbColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+		
+		rect r;
+		r.left = px-rad;
+		r.top = py-rad;
+		r.right = px+rad;
+		r.bottom = py+rad;
+		
+		disp.FrameCircle(r, c, 2);
+	}
+}
+
+void MapEnvironment::DrawStateLabel(Graphics::Display &disp, const xyLoc &l, const char *txt) const
+{
+	GLdouble px, py, t, rad;
+	map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+
+	rgbColor c;
+	{
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+	}
+	disp.DrawText(txt, {static_cast<float>(px), static_cast<float>(py)}, c, rad);
+}
+
+void MapEnvironment::DrawStateLabel(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v, const char *txt) const
+{
+	Graphics::point p;
+	GLdouble rad;
+	{
+		GLdouble px, py, t;
+		map->GetOpenGLCoord(l1.x, l1.y, px, py, t, rad);
+		p.x = px;
+		p.y = py;
+	}
+	{
+		GLdouble px, py, t, rad;
+		map->GetOpenGLCoord(l2.x, l2.y, px, py, t, rad);
+		p.x = (1-v)*p.x + (v)*px;
+		p.y = (1-v)*p.y + (v)*py;
+	}
+	rgbColor c;
+	{
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+	}
+	disp.DrawText(txt, p, c, rad);
+}
+
+
+void MapEnvironment::DrawLine(Graphics::Display &disp, const xyLoc &a, const xyLoc &b, double width) const
 {
 	GLdouble xx1, yy1, zz1, rad;
 	GLdouble xx2, yy2, zz2;
@@ -1112,7 +1228,23 @@ void MapEnvironment::DrawLine(const xyLoc &a, const xyLoc &b, double width) cons
 	GLfloat t;
 	GetColor(c.r, c.g, c.b, t);
 	
-	::DrawLine({xx1, yy1}, {xx2, yy2}, width, c);
+	disp.DrawLine({static_cast<float>(xx1), static_cast<float>(yy1)},
+			      {static_cast<float>(xx2), static_cast<float>(yy2)}, width, c);
+}
+
+void MapEnvironment::DrawArrow(Graphics::Display &disp, const xyLoc &a, const xyLoc &b, double width) const
+{
+	GLdouble xx1, yy1, zz1, rad;
+	GLdouble xx2, yy2, zz2;
+	map->GetOpenGLCoord(a.x, a.y, xx1, yy1, zz1, rad);
+	map->GetOpenGLCoord(b.x, b.y, xx2, yy2, zz2, rad);
+	
+	rgbColor c;// = {0.5, 0.5, 0};
+	GLfloat t;
+	GetColor(c.r, c.g, c.b, t);
+	
+	disp.DrawArrow({static_cast<float>(xx1), static_cast<float>(yy1)},
+				  {static_cast<float>(xx2), static_cast<float>(yy2)}, width, c);
 }
 
 

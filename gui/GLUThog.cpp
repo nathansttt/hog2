@@ -19,6 +19,13 @@
  */
 
 
+int hog_main(int argc, char **argv);
+int main(int argc, char **argv)
+{
+	return hog_main(argc, argv);
+}
+
+
 #include "Trackball.h"
 #include "Common.h"
 #include "GLUThog.h"
@@ -60,8 +67,8 @@ void RunHOGGUI(int argc, char** argv, int windowDimension)
 
 void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 {
-  // Init traj global
-  startTrajRecap = false;
+//  // Init traj global
+//  startTrajRecap = false;
 
 	srandom(unsigned(time(0)));
 	
@@ -296,7 +303,17 @@ void mouseMovedButton(int x, int y)
 	} 
 	else if (gDolly) {
 		mouseDolly(x, y, pContextInfo);
-	} 
+		if (pContextInfo->moveAllPortsTogether)
+		{
+			for (int x = 0; x < pContextInfo->numPorts; x++)
+			{
+				updateProjection(pContextInfo, x);  // update projection matrix
+			}
+		}
+		else {
+			updateProjection(pContextInfo, pContextInfo->currPort);  // update projection matrix
+		}
+	}
 	else if (gPan) {
 		mousePan(x, y, pContextInfo);
 	}
@@ -930,3 +947,61 @@ void buildGL(void)
 		
 	SetLighting();
 }
+
+void SetLighting(GLfloat ambientf, GLfloat diffusef, GLfloat specularf)
+{
+	//	GLfloat mat_specular[] = {0.2, 0.2, 0.2, 1.0};
+	//	GLfloat mat_shininess[] = {50.0};
+	
+	//	GLfloat position[4] = {7.0,-7.0,12.0,0.0};
+	//	GLfloat position[4] = {-1.0,-3.0,5.0,0.0};
+	//	GLfloat position[4] = {-1.0,5.0,5.0,0.0};
+	//	GLfloat position[4] = {-0.0,1.0,3.0,0.0};
+	GLfloat position[4] = {-5.0,5.0,30.0,0.0};
+	GLfloat ambient[4]  = {1.0, 1.0, 1.0, 1.0};
+	GLfloat diffuse[4]  = {1.0, 1.0, 1.0, 1.0};
+	GLfloat specular[4] = {1.0, 1.0, 1.0, 1.0};
+	for (int x = 0; x < 3; x++)
+	{
+		ambient[x] *= ambientf;
+		diffuse[x] *= diffusef;
+		specular[x] *= specularf;
+	}
+	
+	//	glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+	//	glMaterialfv (GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
+	
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+	
+	//	switch (mode) {
+	//		case 0:
+	//			break;
+	//		case 1:
+	//			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_FALSE);
+	//			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_FALSE);
+	//			break;
+	//		case 2:
+	//			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_FALSE);
+	//			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
+	//			break;
+	//		case 3:
+	//			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
+	//			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_FALSE);
+	//			break;
+	//		case 4:
+	//			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
+	//			glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
+	//			break;
+	//	}
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
+	
+	
+	glLightfv(GL_LIGHT0,GL_POSITION,position);
+	glLightfv(GL_LIGHT0,GL_AMBIENT,ambient);
+	glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuse);
+	glLightfv(GL_LIGHT0,GL_SPECULAR,specular);
+	glEnable(GL_LIGHT0);
+}
+

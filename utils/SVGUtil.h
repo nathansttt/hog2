@@ -12,6 +12,10 @@
 #include <stdio.h>
 #include <string>
 #include "GLUtil.h"
+#include "Graphics.h"
+#include <sstream>
+#include <iomanip>
+
 
 std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbColor c);
 
@@ -25,5 +29,18 @@ std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double 
 std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, rgbColor strokeColor, double size);
 
 std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbColor c2, const char *name);
+
+std::string MakeSVG(const Graphics::Display &disp, int width, int height);
+void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height);
+
+// Code from: https://stackoverflow.com/questions/16605967/set-precision-of-stdto-string-when-converting-floating-point-values/16606128#16606128
+template <typename T>
+std::string to_string_with_precision(const T a_value, const int n = 6)
+{
+	std::ostringstream out;
+	out << std::setprecision(n) << a_value;
+	return out.str();
+}
+
 
 #endif /* SVGUtil_hpp */

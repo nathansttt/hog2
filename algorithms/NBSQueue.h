@@ -140,6 +140,11 @@ public:
 		backwardQueue.Reset();
 	}
 	double GetLowerBound() { return CLowerBound; }
+	bool TerminateOnG() {
+		if (forwardQueue.OpenReadySize() > 0 && backwardQueue.OpenReadySize() > 0)
+			return CLowerBound == forwardQueue.PeekAt(kOpenReady).g + backwardQueue.PeekAt(kOpenReady).g + epsilon;
+		return false;
+	}
 	BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>> forwardQueue;
 	BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>> backwardQueue;
 private:

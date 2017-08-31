@@ -55,4 +55,5 @@ SRC_CPP = \
 	environments/Voxels.cpp \
 	environments/VoxelGrid.cpp \
 	environments/NaryTree.cpp \
+	environments/RoadMap.cpp \
 #	environments/WeightedMap2DEnvironment.cpp \

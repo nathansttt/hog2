@@ -149,7 +149,7 @@ public:
 	uint64_t GetNumStates(TOHState<disks> &s) const;
 	uint64_t GetActionHash(TOHMove act) const;
 
-
+	std::string GetName() { return "TOH("+std::to_string(disks)+")"; }
 	void OpenGLDraw() const;
 	void OpenGLDraw(const TOHState<disks>&) const;
 	/** Draw the transition at some percentage 0...1 between two TOHState<disks>s */

@@ -44,6 +44,7 @@
 #include "BidirTOH.h"
 
 void Test100Easy();
+void Animate();
 
 struct hash128
 {
@@ -108,6 +109,7 @@ int main(int argc, char* argv[])
 	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp <alg>", "A*/BS*/MM/NBS/MM0 test on 15 puzzle 100 korf instances");
 	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake", "NBS test on pancake");
 	InstallCommandLineHandler(MyCLHandler, "-toh", "-toh", "NBS test on TOH");
+	InstallCommandLineHandler(MyCLHandler, "-animate", "-animate", "Build animation");
 	//const char *map, const char *scenario, double weight
 	InstallCommandLineHandler(MyCLHandler, "-heuristic", "-heuristic <dir> <1997/888/8210/none>", "Load the given heuristic");
 	InstallCommandLineHandler(MyCLHandler, "-problem", "-problem which", "Load the given problem");
@@ -312,6 +314,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-pancake") == 0)
 	{
 		TestPancake();
+		return 1;
+	}
+	else if (strcmp(argument[0], "-animate") == 0)
+	{
+		Animate();
+		exit(0);
 		return 1;
 	}
 	else if (strcmp(argument[0], "-toh") == 0)
@@ -1345,4 +1353,481 @@ void ArbitraryGoalTest()
 	printf("SUCCESS\n");
 	
 	exit(0);
+}
+
+#include "Map2DEnvironment.h"
+#include "SVGUtil.h"
+#include "TemplateAStar.h"
+#include "WeightedVertexGraph.h"
+
+int GetGCount(TemplateAStar<xyLoc, tDirection, MapEnvironment> &astar, double g, double opt);
+
+void Animate()
+{
+	Map *m = new Map("/Users/nathanst/hog2/maps/local/bidir.map");
+	MapEnvironment *me = new MapEnvironment(m);
+	Graphics::Display d;
+	me->SetDiagonalCost(1.5);
+	// Basic map
+	d.StartFrame();
+	me->Draw(d);
+	xyLoc p1 = {9,12};
+	xyLoc p2 = {16,15};
+	me->SetColor(1, 0, 0);
+	me->Draw(d, p1);
+	me->SetColor(0, 0, 1);
+	me->Draw(d, p2);
+	d.EndFrame();
+	MakeSVG(d, "/Users/nathanst/bidir/anim-b0.svg", 800, 800);
+	
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astarf;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astarb;
+	std::vector<xyLoc> path;
+	astarf.GetPath(me, p1, p2, path);
+	astarb.GetPath(me, p2, p1, path);
+	double opt = me->GetPathLength(path);
+
+	// Necessary forward expansions
+	d.StartFrame();
+	me->Draw(d);
+	me->SetColor(1, 0, 0);
+	me->Draw(d, p1);
+	me->SetColor(0, 0, 1);
+	me->Draw(d, p2);
+
+	me->SetColor(1, 0, 0);
+	for (int x = 0; x < astarf.GetNumItems(); x++)
+	{
+		auto i = astarf.GetItem(x);
+		if (i.g+i.h < opt)
+			me->DrawAlternate(d, i.data);
+	}
+	d.EndFrame();
+	MakeSVG(d, "/Users/nathanst/bidir/anim-b1.svg", 800, 800);
+
+	// Necessary backward expansions
+	d.StartFrame();
+	me->Draw(d);
+	me->SetColor(1, 0, 0);
+	me->Draw(d, p1);
+	me->SetColor(0, 0, 1);
+	me->Draw(d, p2);
+	
+	me->SetColor(0, 0, 1);
+	for (int x = 0; x < astarb.GetNumItems(); x++)
+	{
+		auto i = astarb.GetItem(x);
+		if (i.g+i.h < opt)
+			me->DrawAlternate(d, i.data);
+	}
+	d.EndFrame();
+	MakeSVG(d, "/Users/nathanst/bidir/anim-b2.svg", 800, 800);
+
+	// animate necessary states
+
+	const float numFrames = 64;
+	for (int frame = 0; frame <= numFrames; frame++)
+	{
+		d.StartFrame();
+		me->Draw(d);
+
+		uint16_t actual = 0;
+		me->SetColor(1, 0, 0);
+		for (int x = 0; x < astarf.GetNumItems(); x++)
+		{
+			auto i = astarf.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l = {2, actual};
+				me->Draw(d, i.data, l, frame/numFrames);
+				actual++;
+			}
+		}
+		actual = 0;
+		me->SetColor(0, 0, 1);
+		for (int x = 0; x < astarb.GetNumItems(); x++)
+		{
+			auto i = astarb.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l = {23, actual};
+				me->Draw(d, i.data, l, frame/numFrames);
+				actual++;
+			}
+		}
+		d.EndFrame();
+		std::string path = "/Users/nathanst/bidir/part1/anim-a"+std::to_string(frame/10)+std::to_string(frame%10)+".svg";
+		MakeSVG(d, path.c_str(), 800, 800);
+	}
+
+
+	// Draw graph with weights on nodes
+	d.StartFrame();
+	
+	me->Draw(d);
+	{
+		uint16_t actual = 0;
+		me->SetColor(1, 0, 0);
+		for (int x = 0; x < astarf.GetNumItems(); x++)
+		{
+			auto i = astarf.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l = {2, actual};
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l);
+				me->SetColor(1, 0, 0);
+				me->DrawAlternate(d, l);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l, to_string_with_precision(i.g, 2).c_str());
+				//				me->Draw(d, i.data, l, 1.0);
+				actual++;
+			}
+		}
+		actual = 0;
+		me->SetColor(0, 0, 1);
+		for (int x = 0; x < astarb.GetNumItems(); x++)
+		{
+			auto i = astarb.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l = {23, actual};
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l);
+				me->SetColor(0, 0, 1);
+				me->DrawAlternate(d, l);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l, to_string_with_precision(i.g, 2).c_str());
+				actual++;
+			}
+		}
+	}
+	d.EndFrame();
+	MakeSVG(d, "/Users/nathanst/bidir/anim-b3.svg", 800, 800);
+
+	
+	// Draw bipartite graph
+	d.StartFrame();
+	
+	uint16_t actual = 0;
+	me->SetColor(0, 0, 0);
+	for (int x = 0; x < astarf.GetNumItems(); x++)
+	{
+		auto i = astarf.GetItem(x);
+		if (i.g+i.h < opt)
+		{
+			uint16_t actual2 = 0;
+			for (int y = 0; y < astarb.GetNumItems(); y++)
+			{
+				auto j = astarb.GetItem(y);
+				if (i.g+j.g < opt && j.g+j.h < opt)
+				{
+					xyLoc l1 = {2, actual};
+					xyLoc l2 = {23, actual2};
+					me->DrawLine(d, l1, l2, 0.5);
+					actual2++;
+				}
+			}
+			actual++;
+		}
+	}
+	{
+		uint16_t actual = 0;
+		for (int x = 0; x < astarf.GetNumItems(); x++)
+		{
+			auto i = astarf.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l = {2, actual};
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l);
+				me->SetColor(1, 0, 0);
+				me->DrawAlternate(d, l);
+				me->SetColor(0, 0, 0);
+
+				me->DrawStateLabel(d, l, to_string_with_precision(i.g, 2).c_str());
+				actual++;
+			}
+		}
+		actual = 0;
+		for (int x = 0; x < astarb.GetNumItems(); x++)
+		{
+			auto i = astarb.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l = {23, actual};
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l);
+				me->SetColor(0, 0, 1);
+				me->DrawAlternate(d, l);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l, to_string_with_precision(i.g, 2).c_str());
+				actual++;
+			}
+		}
+	}
+	d.EndFrame();
+	MakeSVG(d, "/Users/nathanst/bidir/anim-b4.svg", 800, 800);
+
+	
+	// Animate moving of states according to g-cost
+	for (int frame = 0; frame <= numFrames; frame++)
+	{
+		d.StartFrame();
+		//me->Draw(d);
+		
+		uint16_t actual = 0;
+		for (int x = 0; x < astarf.GetNumItems(); x++)
+		{
+			auto i = astarf.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l1 = {2, actual};
+				xyLoc l2 = {2, static_cast<uint16_t>(i.g*2)};
+				
+				me->SetColor(1, 0, 0);
+				me->Draw(d, l1, l2, frame/numFrames);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l1, l2, frame/numFrames, to_string_with_precision(i.g, 2).c_str());
+				actual++;
+			}
+		}
+		actual = 0;
+		for (int x = 0; x < astarb.GetNumItems(); x++)
+		{
+			auto i = astarb.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l1 = {23, actual};
+				xyLoc l2 = {23, static_cast<uint16_t>(i.g*2)};
+				
+				me->SetColor(0, 0, 1);
+				me->Draw(d, l1, l2, frame/numFrames);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l1, l2, frame/numFrames, to_string_with_precision(i.g, 2).c_str());
+				actual++;
+			}
+		}
+		d.EndFrame();
+		std::string path = "/Users/nathanst/bidir/part2/anim-c"+std::to_string(frame/10)+std::to_string(frame%10)+".svg";
+		MakeSVG(d, path.c_str(), 800, 800);
+	}
+	
+
+	// Draw final graph
+	// Animate moving of states according to g-cost
+	{
+		d.StartFrame();
+//		me->Draw(d);
+		
+		uint16_t actual = 0;
+		for (int x = 0; x < astarf.GetNumItems(); x++)
+		{
+			auto i = astarf.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				xyLoc l2 = {2, static_cast<uint16_t>(i.g*2)};
+				
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l2);
+				me->SetColor(1, 0, 0);
+				me->DrawAlternate(d, l2);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l2, to_string_with_precision(i.g, 2).c_str());
+				l2.x--;
+				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarf, i.g, opt)).c_str());
+				actual++;
+			}
+		}
+		actual = 0;
+		for (int x = 0; x < astarb.GetNumItems(); x++)
+		{
+			auto i = astarb.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				//xyLoc l1 = {23, actual};
+				xyLoc l2 = {23, static_cast<uint16_t>(i.g*2)};
+				
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l2);
+				me->SetColor(0, 0, 1);
+				me->DrawAlternate(d, l2);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l2, to_string_with_precision(i.g, 2).c_str());
+				l2.x++;
+				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarb, i.g, opt)).c_str());
+				actual++;
+			}
+		}
+		d.EndFrame();
+		std::string path = "/Users/nathanst/bidir/anim-b5.svg";
+		MakeSVG(d, path.c_str(), 800, 800);
+	}
+	
+
+	// Draw edges into final graph
+	{
+		d.StartFrame();
+//		me->Draw(d);
+
+		{
+			me->SetColor(0, 0, 0);
+			for (int x = 0; x < astarf.GetNumItems(); x++)
+			{
+				auto i = astarf.GetItem(x);
+				if (i.g+i.h < opt)
+				{
+					for (int y = 0; y < astarb.GetNumItems(); y++)
+					{
+						auto j = astarb.GetItem(y);
+						if (i.g+j.g < opt && j.g+j.h < opt)
+						{
+							xyLoc l1 = {2, static_cast<uint16_t>(i.g*2)};
+							xyLoc l2 = {23, static_cast<uint16_t>(j.g*2)};
+							me->DrawLine(d, l1, l2, 0.5);
+						}
+					}
+				}
+			}
+		}
+
+		
+		uint16_t actual = 0;
+		for (int x = 0; x < astarf.GetNumItems(); x++)
+		{
+			auto i = astarf.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				//				xyLoc l1 = {2, actual};
+				xyLoc l2 = {2, static_cast<uint16_t>(i.g*2)};
+			
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l2);
+				me->SetColor(1, 0, 0);
+				me->DrawAlternate(d, l2);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l2, to_string_with_precision(i.g, 2).c_str());
+				l2.x--;
+				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarf, i.g, opt)).c_str());
+				actual++;
+			}
+		}
+		actual = 0;
+		for (int x = 0; x < astarb.GetNumItems(); x++)
+		{
+			auto i = astarb.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				//xyLoc l1 = {23, actual};
+				xyLoc l2 = {23, static_cast<uint16_t>(i.g*2)};
+				
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l2);
+				me->SetColor(0, 0, 1);
+				me->DrawAlternate(d, l2);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l2, to_string_with_precision(i.g, 2).c_str());
+				l2.x++;
+				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarb, i.g, opt)).c_str());
+				actual++;
+			}
+		}
+		d.EndFrame();
+		std::string path = "/Users/nathanst/bidir/anim-b6.svg";
+		MakeSVG(d, path.c_str(), 800, 800);
+	}
+	
+	// Draw limited edges into final graph
+	{
+		d.StartFrame();
+		//		me->Draw(d);
+		
+		{
+			me->SetColor(0, 0, 0);
+			for (int x = 0; x < astarf.GetNumItems(); x++)
+			{
+				auto i = astarf.GetItem(x);
+				if (i.g+i.h < opt)
+				{
+					double maxNeighbor = 0;
+					for (int y = 0; y < astarb.GetNumItems(); y++)
+					{
+						auto j = astarb.GetItem(y);
+						if (i.g+j.g < opt && j.g+j.h < opt)
+						{
+							maxNeighbor = std::max(maxNeighbor, j.g);
+						}
+					}
+					if (maxNeighbor != 0 && i.g != 0)
+					{
+						xyLoc l1 = {2, static_cast<uint16_t>(i.g*2)};
+						xyLoc l2 = {23, static_cast<uint16_t>(maxNeighbor*2)};
+						me->DrawLine(d, l1, l2, 0.5);
+					}
+				}
+			}
+		}
+		
+		
+		uint16_t actual = 0;
+		for (int x = 0; x < astarf.GetNumItems(); x++)
+		{
+			auto i = astarf.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				//				xyLoc l1 = {2, actual};
+				xyLoc l2 = {2, static_cast<uint16_t>(i.g*2)};
+				
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l2);
+				me->SetColor(1, 0, 0);
+				me->DrawAlternate(d, l2);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l2, to_string_with_precision(i.g, 2).c_str());
+				l2.x--;
+				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarf, i.g, opt)).c_str());
+				actual++;
+			}
+		}
+		actual = 0;
+		for (int x = 0; x < astarb.GetNumItems(); x++)
+		{
+			auto i = astarb.GetItem(x);
+			if (i.g+i.h < opt)
+			{
+				//xyLoc l1 = {23, actual};
+				xyLoc l2 = {23, static_cast<uint16_t>(i.g*2)};
+				
+				me->SetColor(1, 1, 1);
+				me->Draw(d, l2);
+				me->SetColor(0, 0, 1);
+				me->DrawAlternate(d, l2);
+				me->SetColor(0, 0, 0);
+				me->DrawStateLabel(d, l2, to_string_with_precision(i.g, 2).c_str());
+				l2.x++;
+				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarb, i.g, opt)).c_str());
+				actual++;
+			}
+		}
+		d.EndFrame();
+		std::string path = "/Users/nathanst/bidir/anim-b7.svg";
+		MakeSVG(d, path.c_str(), 800, 800);
+	}
+	
+	GetWeightedVertexGraph<xyLoc, tDirection>(p1, p2, me, "/Users/nathanst/bidir/z.svg");
+//	GetWeightedVertexGraph<xyLoc, tDirection>(p2, p1, me, "/Users/nathanst/bidir/z.svg");
+}
+
+int GetGCount(TemplateAStar<xyLoc, tDirection, MapEnvironment> &astar, double g, double opt)
+{
+	int cnt = 0;
+	for (int x = 0; x < astar.GetNumItems(); x++)
+	{
+		auto i = astar.GetItem(x);
+		if (i.g+i.h < opt && i.g == g)
+		{
+			cnt++;
+		}
+	}
+	return cnt;
 }

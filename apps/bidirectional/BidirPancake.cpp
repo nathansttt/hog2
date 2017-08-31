@@ -21,11 +21,38 @@ const int S = 10; // must be factor of sizes below
 void TestPancakeTR();
 void TestPancakeRandom();
 void TestPancakeHard();
-
+void TestRob();
 void TestPancake()
 {
+//	TestRob();
 //	TestPancakeRandom();
 	TestPancakeHard();
+	exit(0);
+}
+
+void TestRob()
+{
+//	0 3 2 1
+	PancakePuzzleState<4> start;
+	PancakePuzzleState<4> goal;
+	PancakePuzzle<4> cake(1);
+	ZeroHeuristic<PancakePuzzleState<4>> z;
+	std::vector<PancakePuzzleState<4>> path;
+	start.puzzle[0] = 0;
+	start.puzzle[1] = 3;
+	start.puzzle[2] = 2;
+	start.puzzle[3] = 1;
+	goal.puzzle[0] = 1;
+	goal.puzzle[1] = 3;
+	goal.puzzle[2] = 2;
+	goal.puzzle[3] = 0;
+	NBS<PancakePuzzleState<4>, PancakePuzzleAction, PancakePuzzle<4>> nbs;
+	MM<PancakePuzzleState<4>, PancakePuzzleAction, PancakePuzzle<4>> mm;
+	mm.GetPath(&cake, start, goal, &cake, &cake, path);
+	printf("MM: %lld expansions\n", mm.GetNodesExpanded());
+	mm.GetPath(&cake, start, goal, &z, &z, path);
+	printf("MM0: %lld expansions\n", mm.GetNodesExpanded());
+	
 	exit(0);
 }
 
@@ -242,7 +269,7 @@ void TestPancakeHard()
 	std::vector<PancakePuzzleAction> idaPath;
 	Timer t1, t2, t3, t4, t5;
 	
-	for (int count = 0; count < 10; count++)
+	for (int count = 0; count < 100; count++)
 	{
 		goal.Reset();
 		original.Reset();
@@ -252,7 +279,7 @@ void TestPancakeHard()
 		std::cout << original << "; Initial heuristic " << pancake.HCost(original, goal) << "\n";
 		
 		// A*
-		if (1)
+		if (0)
 		{
 			TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
 			start = original;
@@ -277,7 +304,7 @@ void TestPancakeHard()
 		}
 
 		// Reverse A*
-		if (1)
+		if (0)
 		{
 			TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
 			start = original;
@@ -301,11 +328,16 @@ void TestPancakeHard()
 //			}
 		}
 		
-		std::string t = "/Users/nathanst/test_";
-		t += std::to_string(count);
-		t += ".svg";
-		
-		GetWeightedVertexGraph<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>(start, goal, &pancake, t.c_str());
+		// Find minimum
+		if (1)
+		{
+			std::string t = "/Users/nathanst/pancake_";
+			t += std::to_string(count);
+			t += ".svg";
+			
+			start = original;
+			GetWeightedVertexGraph<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>(start, goal, &pancake, 0);
+		}
 
 		
 		// NBS

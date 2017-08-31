@@ -21,6 +21,8 @@
 #include "NBS.h"
 #include "BSStar.h"
 #include "FFBDS.h"
+#include "WeightedVertexGraph.h"
+#include "Timer.h"
 
 Map *map = 0;
 MapEnvironment *me = 0;
@@ -131,10 +133,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
-		map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 		//map = new Map("/Users/nathanst/hog2/maps/rooms/8room_000.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-16-0.map");
-		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-1-0.map");
+		map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-1-0.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
 		if (0)
 		{
@@ -489,6 +491,8 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 						svgFile.close();
 					}
 				}
+
+				GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, 0);
 				
 				mouseTracking = false;
 				//SetupMapOverlay();
@@ -876,7 +880,16 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 		t += "_";
 		t += std::to_string(whichProblem);
 		t += ".svg";
-		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, t.c_str());
+//		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, t.c_str());
+		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, 0);
+
+		Timer timer;
+		NBS<xyLoc, tDirection, MapEnvironment> nbs;
+		timer.StartTimer();
+		nbs.GetPath(me, start, goal, me, me, path);
+		timer.EndTimer();
+		printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", me->GetPathLength(path),
+			   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(), nbs.GetMeetingPoint());
 		return;
 	}
 

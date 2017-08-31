@@ -36,9 +36,11 @@
 #include "Timer.h"
 #include "TemplateAStar.h"
 #include "VoxelGrid.h"
+#include "GLUTHog.h"
 
 recVec velocity;
 std::string map;
+void Maze3D(int d);
 
 
 //struct voxelWorld {
@@ -67,6 +69,7 @@ std::vector<voxelGridState> path;
 int main(int argc, char* argv[])
 {
 //	theWorld = LoadData();
+	Maze3D(11);
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 512, 512);
 }
@@ -99,8 +102,8 @@ void CreateSimulation(int id)
 		vg = new VoxelGrid(map.c_str());
 	else
 //		vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/Norm2.3dmap");
-		vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/TR2_1m.3dmap");
-	//vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/A5.3dmap");
+//		vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/TR2_1m.3dmap");
+		vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/A5.3dmap");
 
 	vg->efficient = true;
 
@@ -390,3 +393,453 @@ void BuildBenchmarks(const char *map, int resolution)
 	exit(0);
 }
 
+#include "Map.h"
+#include "MapGenerators.h"
+#include "Graph.h"
+#include "Prim.h"
+#include "Map2DEnvironment.h"
+#include "SVGUtil.h"
+#include <time.h>
+
+bool MakeMazeMST(int d);
+void MazeMazeTree(int d);
+
+void Maze3D(int d)
+{
+	srandom(time(0));
+	int cnt = 0;
+	while (true)
+	{
+		printf("Attept %d\n", ++cnt);
+		bool result = MakeMazeMST(d);
+		if (result)
+			break;
+	}
+	MazeMazeTree(d);
+	exit(0);
+}
+
+edge *GetEdge(Graph *g, int x1, int y1, int z1, int x2, int y2, int z2);
+
+bool MakeMazeMST(int s)
+{
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+	std::vector<xyLoc> path;
+	Graph *g;
+	g = new Graph();
+	int d = s*2+1;
+//	int s = d/2;
+//	d = s*2+1;
+	for (int z = 0; z < 2; z++)
+	{
+		for (int x = 0; x < s; x++)
+		{
+			for (int y = 0; y < s; y++)
+			{
+				// skip top area for logo (no nodes at all)
+				if (z == 0 && (x > s/4 && x < 3*s/4) && (y > s/4 && y < 3*s/4))
+				{
+					continue;
+				}
+				node *n;
+				n = new node("");
+				n->SetLabelL(0, x);
+				n->SetLabelL(1, y);
+				n->SetLabelL(2, z);
+				g->AddNode(n);
+			}
+		}
+	}
+	for (int x = 0; x < g->GetNumNodes(); x++)
+	{
+		node *n1 = g->GetNode(x);
+		for (int y = 0; y < g->GetNumNodes(); y++)
+		{
+			node *n2 = g->GetNode(y);
+			// Node 1 id must be < node 2 id
+			if (x == y || n1->GetNum() >= n2->GetNum())
+				continue;
+
+//			printf("Considering edge (%ld, %ld, %ld) to (%ld, %ld, %ld)\n",
+//				   n1->GetLabelL(0), n1->GetLabelL(1), n1->GetLabelL(2),
+//				   n2->GetLabelL(0), n2->GetLabelL(1), n2->GetLabelL(2));
+
+			int sum = 0;
+			sum += std::abs(n1->GetLabelL(0) - n2->GetLabelL(0));
+			sum += std::abs(n1->GetLabelL(1) - n2->GetLabelL(1));
+			sum += std::abs(n1->GetLabelL(2) - n2->GetLabelL(2));
+
+			// only 1 coordinate changed
+			if (sum == 1)
+			{
+//				printf("Adding edge (%ld, %ld, %ld) to (%ld, %ld, %ld)\n",
+//					   n1->GetLabelL(0), n1->GetLabelL(1), n1->GetLabelL(2),
+//					   n2->GetLabelL(0), n2->GetLabelL(1), n2->GetLabelL(2));
+				edge *e;
+				if (n1->GetLabelL(2) + n2->GetLabelL(2) == 1) // through bottom
+					e = new edge(n1->GetNum(), n2->GetNum(), 100000);
+				else
+					e = new edge(n1->GetNum(), n2->GetNum(), random()%50);
+				g->AddEdge(e);
+			}
+		}
+	}
+
+	
+	// Reweight edges we don't want in the MST
+	
+	// New idea (to implement here)
+			// 0. Board is split into
+			//       Top    saaxxx  Bottom  bbbbbb
+			//              ah  hx          bh  hb
+			//              ha  xh          hc  ch
+			//              aaaxxg          cccccc
+			// 1. Limited holes from top to bottom. Fixed at:
+			//    Corners (start/goal) [should goal be top right?]
+			//    [[OTHER TBA]]
+			// 2. Find MST as normal
+			//
+	{
+		// Start gets no horizontal connections
+		GetEdge(g,
+				0, 0, 1,
+				1, 0, 1)->setWeight(100000);
+		GetEdge(g,
+				0, 0, 1,
+				0, 1, 1)->setWeight(100000);
+		// No down move from start
+		GetEdge(g,
+				0, 0, 0,
+				0, 1, 0)->setWeight(100000);
+		// Start is connected to top
+		GetEdge(g,
+				0, 0, 1,
+				0, 0, 0)->setWeight(0);
+		// Goal gets no horizontal connections
+		GetEdge(g,
+				s-1, s-1, 1,
+				s-2, s-1, 1)->setWeight(100000);
+		GetEdge(g,
+				s-1, s-1, 1,
+				s-1, s-2, 1)->setWeight(100000);
+		// Goal is connected to top
+		GetEdge(g,
+				0, 0, 1,
+				0, 0, 0)->setWeight(0);
+		GetEdge(g,
+				s-1, s-1, 1,
+				s-1, s-1, 0)->setWeight(0);
+		// No left move from goal
+		GetEdge(g,
+				s-1, s-1, 0,
+				s-2, s-1, 0)->setWeight(100000);
+	}
+
+	// Set pass-through points
+	{
+		// top middle-right
+		GetEdge(g,
+				3*s/4-1, 0, 0,
+				3*s/4-1, 0, 1)->setWeight(0);
+		// control edges
+		GetEdge(g,
+				3*s/4-1, 0, 1,
+				3*s/4, 0, 1)->setWeight(100000);
+		GetEdge(g,
+				3*s/4-1, 0, 1,
+				3*s/4-1, 1, 1)->setWeight(100000);
+		// left middle-bottom
+		GetEdge(g,
+				0, 3*s/4-1, 0,
+				0, 3*s/4-1, 1)->setWeight(0);
+		// control edges
+		GetEdge(g,
+				0, 3*s/4-1, 1,
+				0, 3*s/4, 1)->setWeight(100000);
+		GetEdge(g,
+				0, 3*s/4-1, 1,
+				1, 3*s/4-1, 1)->setWeight(100000);
+
+		// corners
+		GetEdge(g,
+				s-1, 0, 0,
+				s-1, 0, 1)->setWeight(0);
+		GetEdge(g,
+				0, s-1, 0,
+				0, s-1, 1)->setWeight(0);
+
+		// bottom middle-right
+		GetEdge(g,
+				3*s/4-1, s-1, 0,
+				3*s/4-1, s-1, 1)->setWeight(0);
+		GetEdge(g,
+				3*s/4-1, s-2, 1,
+				3*s/4-1, s-1, 1)->setWeight(100000);
+		GetEdge(g,
+				3*s/4,   s-1, 1,
+				3*s/4-1, s-1, 1)->setWeight(100000);
+		// rightmiddle-bottom
+		GetEdge(g,
+				s-1, 3*s/4-1, 0,
+				s-1, 3*s/4-1, 1)->setWeight(0);
+		GetEdge(g,
+				s-1, 3*s/4-1, 1,
+				s-2, 3*s/4-1, 1)->setWeight(100000);
+		GetEdge(g,
+				s-1, 3*s/4-1, 1,
+				s-1, 3*s/4, 1)->setWeight(100000);
+
+
+		// final edge
+		GetEdge(g,
+				3*s/4, 3*s/4, 0,
+				3*s/4, 3*s/4, 1)->setWeight(0);
+		GetEdge(g,
+				3*s/4-1, 3*s/4, 1,
+				3*s/4, 3*s/4, 1)->setWeight(100000);
+		GetEdge(g,
+				3*s/4, 3*s/4+1, 1,
+				3*s/4, 3*s/4, 1)->setWeight(100000);
+		GetEdge(g,
+				3*s/4, 3*s/4-1, 1,
+				3*s/4, 3*s/4, 1)->setWeight(100000);
+
+	}
+	
+	// Remove edges across middle
+	{
+		// split from middle across to right
+		for (int x = 0; x < s; x++)
+		{
+			edge *e = GetEdge(g,
+							  x, 3*s/4-1, 0,
+							  x, 3*s/4, 0);
+			if (e) e->setWeight(100000);
+		}
+		
+		// split from middle across to right
+		for (int y = 0; y < s; y++)
+		{
+			edge *e = GetEdge(g,
+							  3*s/4, y, 0,
+							  3*s/4-1, y, 0);
+			if (e) e->setWeight(100000);
+		}
+
+		for (int t = s/2; t < s; t++)
+		{
+			edge *e;
+			e = GetEdge(g,
+						s/2, t, 1,
+						s/2+1, t, 1);
+			if (e) e->setWeight(100000);
+//			else { printf("No edge (%d, %d, %d) (%d, %d, %d)\n", s/2, t, 1, s/2+1, t, 1); }
+			e = GetEdge(g,
+						t, s/2, 1,
+						t, s/2+1, 1);
+			if (e) e->setWeight(100000);
+//			else { printf("No edge (%d %d %d) (%d %d %d)\n", t, s/2, 1, t, s/2+1, 1); }
+			
+		}
+	}
+	
+	Map *m1, *m2, *m3;
+	m1 = new Map(d, d);
+	m2 = new Map(d, d);
+	m3 = new Map(d, d);
+	MapEnvironment me1(m1);
+	MapEnvironment me2(m2);
+	MapEnvironment me3(m3);
+	for (int x = 0; x < d; x++)
+		for (int y = 0; y < d; y++)
+		{
+			m1->SetTerrainType(x, y, kOutOfBounds);
+			m2->SetTerrainType(x, y, kOutOfBounds);
+			m3->SetTerrainType(x, y, kOutOfBounds);
+		}
+
+	Prim(g);
+	const int edgeWidth = 2;
+	const int edgeStart = 1;
+	const int edgeEnd = 1;
+	for (int x = 0; x < g->GetNumEdges(); x++)
+	{
+		edge *e = g->GetEdge(x);
+		if (e->getMarked() == true)
+		{
+			node *n1 = g->GetNode(e->getFrom());
+			node *n2 = g->GetNode(e->getTo());
+			long x1, x2, y1, y2, z1, z2;
+			x1 = n1->GetLabelL(0);
+			x2 = n2->GetLabelL(0);
+			y1 = n1->GetLabelL(1);
+			y2 = n2->GetLabelL(1);
+			z1 = n1->GetLabelL(2);
+			z2 = n2->GetLabelL(2);
+			if (z1 == z2 && z1 == 0)
+			{
+				m1->SetRectHeight(x1*edgeWidth+edgeStart, y1*edgeWidth+edgeStart, x2*edgeWidth+edgeEnd, y2*edgeWidth+edgeEnd, 0, kGround);
+			}
+			else if (z1 == z2 && z1 == 1)
+			{
+				m3->SetRectHeight(x1*edgeWidth+edgeStart, y1*edgeWidth+edgeStart, x2*edgeWidth+edgeEnd, y2*edgeWidth+edgeEnd, 0, kGround);
+			}
+			else if (z1 != z2)
+			{
+				m2->SetRectHeight(x1*edgeWidth+edgeStart, y1*edgeWidth+edgeStart, x1*edgeWidth+edgeEnd, y1*edgeWidth+edgeEnd, 0, kGround);
+			}
+		}
+	}
+	
+	xyLoc start, goal;
+	start = {1, 1};
+	goal = {1, 15};
+	astar.GetPath(&me1, start, goal, path);
+	if (path.size() == 0)
+		return false;
+	start = {1, 1};
+	goal = {15, 1};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
+	astar.GetPath(&me1, start, goal, path);
+	if (path.size() == 0)
+		return false;
+
+	start = {15, 1};
+	goal = {21, 1};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
+	if (m3->GetTerrainType(21, 1) != kGround)
+		return false;
+	astar.GetPath(&me3, start, goal, path);
+	if (path.size() == 0)
+		return false;
+	start = {1, 15};
+	goal = {1, 21};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
+	if (m3->GetTerrainType(1, 21) != kGround)
+		return false;
+	astar.GetPath(&me3, start, goal, path);
+	if (path.size() == 0)
+		return false;
+
+	start = {21, 1};
+	goal = {21, 15};
+	if (m1->GetTerrainType(21, 15) != kGround)
+		return false;
+	astar.GetPath(&me1, start, goal, path);
+	if (path.size() == 0)
+		return false;
+	start = {1, 21};
+	goal = {15, 21};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
+	if (m1->GetTerrainType(15, 21) != kGround)
+		return false;
+	astar.GetPath(&me1, start, goal, path);
+	if (path.size() == 0)
+		return false;
+
+	if (m3->GetTerrainType(15, 21) != kGround)
+		return false;
+	if (m3->GetTerrainType(21, 15) != kGround)
+		return false;
+	
+	
+	m1->Print();
+	printf("\n\n");
+	m2->Print();
+	printf("\n\n");
+	m3->Print();
+
+	Graphics::Display disp;
+	disp.StartFrame();
+	me1.Draw(disp);
+	disp.DrawText("SoCS", {0, -0.22}, Colors::lightgray, 0.35);
+	disp.DrawText("2018", {0, 0.22}, Colors::lightgray, 0.4);
+	disp.EndFrame();
+	MakeSVG(disp, "/Users/nathanst/maze01.svg", 375, 375);
+	disp.StartFrame();
+	me2.Draw(disp);
+	disp.EndFrame();
+	MakeSVG(disp, "/Users/nathanst/maze02.svg", 375, 375);
+	disp.StartFrame();
+	me3.Draw(disp);
+	disp.EndFrame();
+	MakeSVG(disp, "/Users/nathanst/maze03.svg", 375, 375);
+	
+	m1->Save("/Users/nathanst/maze01.map");
+	m2->Save("/Users/nathanst/maze02.map");
+	m3->Save("/Users/nathanst/maze03.map");
+
+	m3->SetRectHeight(0, 0, d-1, d-1, 0, kOutOfBounds);
+	disp.StartFrame();
+	me3.Draw(disp);
+	disp.EndFrame();
+	MakeSVG(disp, "/Users/nathanst/maze04.svg", 375, 375);
+
+	
+	{
+		GLdouble px1, py1, t1, rad1;
+		m1->GetOpenGLCoord(0, 0, px1, py1, t1, rad1);
+		printf("Test: (0, 0) is (%f, %f)\n", px1-rad1, py1-rad1);
+		m1->GetOpenGLCoord((int)m1->GetMapWidth()-1, (int)m1->GetMapHeight()-1, px1, py1, t1, rad1);
+		printf("Test: (%d, %d) is (%f, %f)\n",
+			   m1->GetMapWidth()-1,
+			   m1->GetMapHeight()-1,
+			   px1+rad1, py1+rad1);
+
+	}
+	
+	return true;
+}
+
+// In practice we should use the ranking (constant time) instead of this
+// n^2 algorithm. But, another time.
+edge *GetEdge(Graph *g, int x1, int y1, int z1, int x2, int y2, int z2)
+{
+	for (int t = 0; t < g->GetNumEdges(); t++)
+	{
+		edge *e = g->GetEdge(t);
+		node *n1 = g->GetNode(e->getFrom());
+		node *n2 = g->GetNode(e->getTo());
+//		printf("--Trying (%ld, %ld, %ld) (%ld, %ld, %ld)\n",
+//			   n1->GetLabelL(0), n1->GetLabelL(1), n1->GetLabelL(2),
+//			   n2->GetLabelL(0), n2->GetLabelL(1), n2->GetLabelL(2));
+		if (n1->GetLabelL(0) == x1 &&
+			n1->GetLabelL(1) == y1 &&
+			n1->GetLabelL(2) == z1 &&
+			n2->GetLabelL(0) == x2 &&
+			n2->GetLabelL(1) == y2 &&
+			n2->GetLabelL(2) == z2)
+		{
+//			printf("-Success\n");
+			return e;
+		}
+		if (n2->GetLabelL(0) == x1 &&
+			n2->GetLabelL(1) == y1 &&
+			n2->GetLabelL(2) == z1 &&
+			n1->GetLabelL(0) == x2 &&
+			n1->GetLabelL(1) == y2 &&
+			n1->GetLabelL(2) == z2)
+		{
+//			printf("-Success\n");
+			return e;
+		}
+//		printf("---Failure\n");
+	}
+	return 0;
+}
+
+void MazeMazeTree(int d)
+{
+	return;
+	
+	Map *m1 = new Map(d, d);
+	Map *tmp = new Map(d/2, d/2);
+
+	MakeMaze(tmp, 1, 1, 1);
+	tmp->Print();
+	printf("\n--\n");
+
+	MakeMaze(tmp, 1, d/2-2, 1);
+	tmp->Print();
+	printf("\n--\n");
+
+	MakeMaze(tmp, 1, d/2-2, d/2-2);
+	tmp->Print();
+	printf("\n--\n");
+}

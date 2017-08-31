@@ -20,11 +20,14 @@
  */ 
 
 #include "GLUtil.h"
+#include "Graphics.h"
 #include <stdio.h>
 #include <cstring>
 
 #ifndef COMMON_H
 #define COMMON_H
+
+#define main hog_main
 
 const int MAXPORTS = 4;
 
@@ -68,6 +71,7 @@ struct recContext
 	char message[256]; // buffer for message output
 	float msgTime; // message posting time for expiration
 	
+	Graphics::Display display;
 	unsigned long windowID;
 };
 typedef struct recContext recContext;
@@ -81,7 +85,6 @@ void updateProjection(pRecContext pContextInfo, int viewPort = -1);
 void drawGL(pRecContext pContextInfo, bool swap);
 
 bool DoKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt);
-void SetLighting(GLfloat ambientf = 0.2f, GLfloat diffusef = 1.0f, GLfloat specularf = 1.0f);
 void initialConditions(pRecContext pContextInfo);
 void resetCamera(recCamera * pCamera);
 
@@ -257,6 +260,7 @@ void SetZoom(int windowID, float amount);
 
 void submitTextToBuffer(const char *val);
 void appendTextToBuffer(const char *);
+const char *getTextBuffer();
 pRecContext getCurrentContext();
 pRecContext GetContext(unsigned long windowID);
 void updateModelView(pRecContext pContextInfo, int currPort);

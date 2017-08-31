@@ -11,8 +11,8 @@
 
 #include "Map.h"
 
-void MakeMaze(Map *map, int width = 1);
-void MakeMaze(Map *map, int pathSize);
+void MakeMaze(Map *map, int width = 1, int startx = -1, int starty = -1);
+//void MakeMaze(Map *map, int pathSize);
 void MakeRandomMap(Map *map, int obstacles);
 void MakePseudoMaze(Map *map, int pathSize);
 void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability=80);

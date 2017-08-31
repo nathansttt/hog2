@@ -18,6 +18,7 @@
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include <cassert>
+#include "Graphics.h"
 
 namespace CanonicalGrid {
 	
@@ -91,7 +92,7 @@ namespace CanonicalGrid {
 		std::string SVGDrawLine(const xyLoc &x, const xyLoc &y, int width=1) const;
 		std::string SVGFrameRect(int left, int top, int right, int bottom, int width = 1);
 		
-		void DrawOrdering(const xyLoc l) const; // Only draws canonical ordering
+		void DrawOrdering(::Graphics::Display &disp, const xyLoc l) const; // Only draws canonical ordering
 		
 		void GetNextState(const xyLoc &currents, tDirection dir, xyLoc &news) const;
 		

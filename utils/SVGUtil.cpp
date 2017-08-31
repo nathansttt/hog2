@@ -7,6 +7,8 @@
 //
 
 #include "SVGUtil.h"
+#include <iostream>
+#include <fstream>
 
 //<svg height="500" width="500">
 //<defs>
@@ -85,11 +87,11 @@ std::string SVGDrawRect(int x, int y, int width, int height, const char *gradien
 
 std::string SVGDrawRect(int x, int y, int width, int height, rgbColor c)
 {
-	double epsilon = 0.20;
+	double epsilon = 0.55;
 	std::string s;
-	s += "<rect x=\"" + std::to_string(10*x-epsilon);
-	s += "\" y=\"" + std::to_string(10*y-epsilon);
-	s += "\" width=\""+std::to_string(width*10+2*epsilon)+"\" height=\""+std::to_string(height*10+2*epsilon)+"\" style=\"fill:rgb(";//128,128,0
+	s += "<rect x=\"" + std::to_string(x-epsilon);
+	s += "\" y=\"" + std::to_string(y-epsilon);
+	s += "\" width=\""+std::to_string(width+2*epsilon)+"\" height=\""+std::to_string(height+2*epsilon)+"\" style=\"fill:rgb(";//128,128,0
 	s += std::to_string(int(c.r*255)) + "," + std::to_string(int(c.g*255)) + "," + std::to_string(int(c.b*255));
 	s += ");stroke-width:1\" />";
 	return s;
@@ -97,11 +99,11 @@ std::string SVGDrawRect(int x, int y, int width, int height, rgbColor c)
 
 std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbColor c)
 {
-	double epsilon = 0.05;//0.5;
+	double epsilon = 0;//0.05;//0.5;
 	std::string s;
-	s += "<rect x=\"" + std::to_string(10*x-epsilon+0);
-	s += "\" y=\"" + std::to_string(10*y-epsilon+0);
-	s += "\" width=\""+std::to_string(width*10+2*epsilon-0)+"\" height=\""+std::to_string(height*10+2*epsilon-0)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c);
+	s += "<rect x=\"" + std::to_string(x-epsilon+0);
+	s += "\" y=\"" + std::to_string(y-epsilon+0);
+	s += "\" width=\""+std::to_string(width+2*epsilon-0)+"\" height=\""+std::to_string(height+2*epsilon-0)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c);
 	s += ";stroke-width:"+std::to_string(border)+"\" />";
 	return s;
 }
@@ -148,10 +150,10 @@ std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double 
 //	s += "; font-family:Helvetica, sans-serif; font-size:"+std::to_string(size*10)+"px\">";
 
 	s =  "<text x=\""+std::to_string(x1)+"\" y=\""+std::to_string(y1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
-	s += "; font-family:Helvetica, sans-serif; font-weight:bold; font-size:"+std::to_string(size)+"px\"";
+	s += "; font-family:Impact, sans-serif; font-weight:bold; font-size:"+std::to_string(size)+"px\"";
 	s += " dominant-baseline=\"middle\">";
 	s += txt;
-	s += "</text>\n";
+	s += "</text>";
 	//	s += "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" style=\"fill:"+SVGGetRGB(c);
 	//	s += "; font-family:Impact, sans-serif; font-size:"+std::to_string(size*10)+"px; stroke:"+SVGGetRGB(notC)+"; stroke-width:0px\">";
 	//	s += txt;
@@ -168,3 +170,103 @@ std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, 
 	s += "</text>\n";
 	return s;
 }
+
+
+void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height)
+{
+	std::string s = MakeSVG(disp, width, height);
+	std::fstream myFile;
+	
+	std::fstream svgFile;
+	svgFile.open(filename, std::fstream::out | std::fstream::trunc);
+	svgFile << s;
+	svgFile.close();
+}
+
+float PointToSVG(float p, float multiplier)
+{
+	return (p+1)*multiplier/2.0;
+}
+
+std::string MakeSVG(const Graphics::Display &disp, int width, int height)
+{
+	std::string s;
+	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(width+2)+"\" height = \""+std::to_string(height+2)+"\" ";
+	s += "viewBox = \"-1 -1 "+std::to_string(width+2)+" "+std::to_string(height+2)+"\" ";
+	s += "preserveAspectRatio = \"none\" ";
+	s += ">\n";
+
+//	s += SVGDrawRect(0, 0, width, height, Colors::white);
+	
+	for (int x = 0; x < disp.drawCommands.size(); x++)
+	{
+		switch (disp.drawCommands[x].what)
+		{
+			case Graphics::Display::kLine:
+			{
+				const Graphics::Display::lineInfo &o = disp.drawCommands[x].line; //disp.lines[x];
+				s += SVGDrawLine((o.start.x+1)*width/2.0, (o.start.y+1)*height/2.0, (o.end.x+1)*width/2.0, (o.end.y+1)*height/2.0, o.width, o.c);
+				//		if (o.arrow)
+				//		{
+				//			Graphics::point newEnd = o.end*0.975f+o.start*0.025f;
+				//			Graphics::point p1 = o.end-o.start;
+				//			Graphics::point p2 = o.start;
+				//			p2.z = 1;
+				//			p2 = p1*p2;
+				//			p2.normalise();
+				//			p2 *= (o.end-newEnd).length();
+				//			CGContextMoveToPoint(context, ((o.end.x)*xscale+xoffset), height-(o.end.y*yscale+yoffset));
+				//			CGContextAddLineToPoint(context, ((newEnd.x+p2.x)*xscale+xoffset), height-((newEnd.y+p2.y)*yscale+yoffset));
+				//			CGContextMoveToPoint(context, ((o.end.x)*xscale+xoffset), height-(o.end.y*yscale+yoffset));
+				//			CGContextAddLineToPoint(context, ((newEnd.x-p2.x)*xscale+xoffset), height-((newEnd.y-p2.y)*yscale+yoffset));
+				//		}
+
+				break;
+			}
+			case Graphics::Display::kFillRectangle:
+			{
+				const Graphics::Display::drawInfo &o = disp.drawCommands[x].shape;
+				//disp.filledRects[x];
+				s += SVGDrawRect(PointToSVG(o.r.left, width), PointToSVG(o.r.bottom, height),
+								 PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
+								 PointToSVG(o.r.top, height)-PointToSVG(o.r.bottom, height),
+								 o.c);
+				break;
+			}
+			case Graphics::Display::kFrameRectangle:
+			{
+				const Graphics::Display::drawInfo &o = disp.drawCommands[x].shape;
+				s += SVGFrameRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
+								  PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
+								  PointToSVG(o.r.top, height)-PointToSVG(o.r.bottom, height),
+								  o.width, o.c);
+				break;
+			}
+			case Graphics::Display::kFillOval:
+			{
+				const Graphics::Display::drawInfo &o = disp.drawCommands[x].shape;
+				s += SVGDrawCircle(((o.r.left+o.r.right)/2.0+1)*width/2.0, ((o.r.top+o.r.bottom)/2.0+1)*height/2.0, width*(o.r.right-o.r.left)/4.0, o.c);
+				break;
+			}
+			case Graphics::Display::kFrameOval:
+			{
+				const Graphics::Display::drawInfo &o = disp.drawCommands[x].shape;
+				s += SVGFrameCircle(((o.r.left+o.r.right)/2.0+1)*width/2.0, ((o.r.top+o.r.bottom)/2.0+1)*height/2.0, width*(o.r.right-o.r.left)/4.0, o.width, o.c);
+
+				break;
+			}
+		}
+		s += "\n";
+	}
+	for (int x = 0; x < disp.text.size(); x++)
+	{
+		const auto &i = disp.text[x];
+		s += SVGDrawText(PointToSVG(i.loc.x, width), PointToSVG(i.loc.y, width), i.s.c_str(), i.c, i.size*width/2.0);
+		s += "\n";
+	}
+	
+	s += "\n";
+	s += "</svg>";
+	return s;
+}
+

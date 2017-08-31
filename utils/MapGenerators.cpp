@@ -91,11 +91,19 @@ void MakePseudoMaze(Map *map, int pathSize)
 /**
  * MakeMaze(map)
  */
-void MakeMaze(Map *map, int corridorWidth)
+void MakeMaze(Map *map, int corridorWidth, int startx, int starty)
 {
 	int width = map->GetMapWidth();
 	int height = map->GetMapHeight();
 	int boxSize = corridorWidth+1;
+	if (startx == -1)
+		startx = width/(2*boxSize);
+	else
+		startx = startx-startx%boxSize;
+	if (starty == -1)
+		starty = height/(2*boxSize);
+	else
+		starty = starty-starty%boxSize;
 	// fill the whole map empty
 	map->SetRectHeight(0, 0, width-1, height-1, 0, kGround);
 	// block all the walls
@@ -110,8 +118,8 @@ void MakeMaze(Map *map, int corridorWidth)
 	std::vector<int> x;
 	std::vector<int> y;
 	
-	x.push_back(width/(2*boxSize));
-	y.push_back(height/(2*boxSize));
+	x.push_back(startx);
+	y.push_back(starty);
 	//	x.push_back(0);
 	//	y.push_back(0);
 	//	map->SetHeight(0, 0, 1);

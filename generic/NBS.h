@@ -17,8 +17,8 @@
 #include "FPUtil.h"
 #include <unordered_map>
 #include "NBSQueue.h"
-#include "NBSQueueGF.h"
-
+//#include "NBSQueueGF.h"
+#include "Graphics.h"
 //#define EPSILON 1
 
 // ADMISSIBLE is defined at "BDOpenClosed.h"
@@ -109,6 +109,8 @@ public:
 	double GetSolutionCost() const { return currentCost; }
 	
 	void OpenGLDraw() const;
+	void Draw(Graphics::Display &d) const;
+	void DrawBipartiteGraph(Graphics::Display &d) const;
 	
 	//	void SetWeight(double w) {weight = w;}
 private:
@@ -136,6 +138,7 @@ private:
 	}
 	
 	void OpenGLDraw(const priorityQueue &queue) const;
+	void Draw(Graphics::Display &d, const priorityQueue &queue) const;
 	
 	void Expand(uint64_t nextID,
 				priorityQueue &current,
@@ -223,6 +226,8 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(
 	}
 	else if (queue.forwardQueue.Lookup(nForward).data == queue.backwardQueue.Lookup(nBackward).data) // if success, see if nodes are the same (return path)
 	{
+		if (queue.TerminateOnG())
+			printf("NBS: Lower Bound on C* from g+g (gsum)\n");
 		ExtractFromMiddle(thePath);
 		return true;
 	}
@@ -305,11 +310,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
 							// TODO: store current solution
-														printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
-															   current.Lookup(nextID).g+edgeCost,
-															   opposite.Lookup(reverseLoc).g,
-															   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
-															nodesExpanded);
+//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+//								   current.Lookup(nextID).g+edgeCost,
+//								   opposite.Lookup(reverseLoc).g,
+//								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
+//								   nodesExpanded);
 							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
 
 							middleNode = succ;
@@ -336,11 +341,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
 							// TODO: store current solution
-							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
-								   current.Lookup(nextID).g+edgeCost,
-								   opposite.Lookup(reverseLoc).g,
-								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
-								nodesExpanded);
+//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+//								   current.Lookup(nextID).g+edgeCost,
+//								   opposite.Lookup(reverseLoc).g,
+//								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
+//								nodesExpanded);
 							currentCost = current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g;
 							
 							middleNode = succ;
@@ -401,11 +406,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
 							// TODO: store current solution
-							printf("NBS Potential solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
-								current.Lookup(nextID).g + edgeCost,
-								opposite.Lookup(reverseLoc).g,
-								current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
-								nodesExpanded);
+//							printf("NBS Potential solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+//								current.Lookup(nextID).g + edgeCost,
+//								opposite.Lookup(reverseLoc).g,
+//								current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
+//								nodesExpanded);
 							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
 							
 							middleNode = succ;
@@ -484,5 +489,62 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw(c
 		}
 	}
 }
+
+template <class state, class action, class environment, class dataStructure, class priorityQueue>
+void NBS<state, action, environment, dataStructure, priorityQueue>::Draw(Graphics::Display &d) const
+{
+	Draw(d, queue.forwardQueue);
+	Draw(d, queue.backwardQueue);
+}
+
+template <class state, class action, class environment, class dataStructure, class priorityQueue>
+void NBS<state, action, environment, dataStructure, priorityQueue>::Draw(Graphics::Display &d, const priorityQueue &queue) const
+{
+	double transparency = 0.9;
+	if (queue.size() == 0)
+		return;
+	uint64_t top = -1;
+	//	double minf = 1e9, maxf = 0;
+	if (queue.OpenReadySize() > 0)
+	{
+		top = queue.Peek(kOpenReady);
+	}
+	for (unsigned int x = 0; x < queue.size(); x++)
+	{
+		const auto &data = queue.Lookat(x);
+		if (x == top)
+		{
+			env->SetColor(1.0, 1.0, 0.0, transparency);
+			env->Draw(d, data.data);
+		}
+		if (data.where == kOpenWaiting)
+		{
+			env->SetColor(0.0, 0.5, 0.5, transparency);
+			env->Draw(d, data.data);
+		}
+		else if (data.where == kOpenReady)
+		{
+			env->SetColor(0.0, 1.0, 0.0, transparency);
+			env->Draw(d, data.data);
+		}
+		else if (data.where == kClosed)
+		{
+			env->SetColor(1.0, 0.0, 0.0, transparency);
+			env->Draw(d, data.data);
+		}
+	}
+}
+
+template <class state, class action, class environment, class dataStructure, class priorityQueue>
+void NBS<state, action, environment, dataStructure, priorityQueue>::DrawBipartiteGraph(Graphics::Display &d) const
+{
+	double val = queue.GetLowerBound();
+	//currentCost
+	assert(!"Implementaion incomplete");
+	//	Draw(d, queue.forwardQueue);
+//	Draw(d, queue.backwardQueue);
+}
+//void DrawBipartiteGraph(Graphics::Display &d);
+
 
 #endif /* NBS_h */

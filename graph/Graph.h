@@ -215,6 +215,7 @@ public:
 	// chooses which label will be used as the key for
 	// priority queue
 	void SetKeyLabel(int which) { keyLabel = which; }
+	int GetKeyLabel() { return keyLabel; }
 	double GetKey() { return label[keyLabel].fval; }
 	
 	// set/get various labels for each node

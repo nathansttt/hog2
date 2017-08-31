@@ -36,6 +36,7 @@ SRC_CPP = \
 	graphalgorithms/Propagation.cpp \
 	graphalgorithms/AStarDelay.cpp \
 	graphalgorithms/FloydWarshall.cpp \
+	graphalgorithms/Prim.cpp \
 
 
 

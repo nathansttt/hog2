@@ -9,7 +9,7 @@
 #include "CanonicalGrid.h"
 #include <string.h>
 #include "SVGUtil.h"
-#include "Graphics2D.h"
+#include "Graphics.h"
 
 namespace CanonicalGrid {
 	
@@ -651,7 +651,7 @@ namespace CanonicalGrid {
 		//	return s;
 	}
 
-	void CanonicalGrid::DrawOrdering(xyLoc l) const
+	void CanonicalGrid::DrawOrdering(Graphics::Display &disp, xyLoc l) const
 	{
 		rgbColor c;
 		{
@@ -675,7 +675,7 @@ namespace CanonicalGrid {
 //				else {
 //					ma1->SetColor(1.0, 0.0, 0.0);
 //				}
-				Graphics2D::point2d p1, p2;
+				Graphics::point p1, p2;
 				{
 					GLdouble x, y, z, r;
 					map->GetOpenGLCoord(queue.front().x, queue.front().y, x, y, z, r);
@@ -688,7 +688,7 @@ namespace CanonicalGrid {
 					p2.x = x;
 					p2.y = y;
 				}
-				Graphics2D::DrawLine(p1, p2, 1, c);
+				disp.DrawLine(p1, p2, 1, c);
 				visited[s.x+s.y*map->GetMapWidth()] = true;
 			}
 			queue.pop_front();

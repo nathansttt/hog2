@@ -41,6 +41,7 @@
 #include <iostream>
 #include "FPUtil.h"
 #include <ext/hash_map>
+#include "Graphics.h"
 #include "AStarOpenClosed.h"
 #include "BucketOpenClosed.h"
 //#include "SearchEnvironment.h" // for the SearchEnvironment class
@@ -130,7 +131,7 @@ public:
 	void FullBPMX(uint64_t nodeID, int distance);
 	
 	void OpenGLDraw() const;
-	void Draw() const;
+	void Draw(Graphics::Display &disp) const;
 	std::string SVGDraw() const;
 	std::string SVGDrawDetailed() const;
 	
@@ -703,7 +704,7 @@ void TemplateAStar<state, action,environment,openList>::OpenGLDraw() const
  *
  */
 template <class state, class action, class environment, class openList>
-void TemplateAStar<state, action,environment,openList>::Draw() const
+void TemplateAStar<state, action,environment,openList>::Draw(Graphics::Display &disp) const
 {
 	double transparency = 1.0;
 	if (openClosedList.size() == 0)
@@ -720,22 +721,22 @@ void TemplateAStar<state, action,environment,openList>::Draw() const
 		if (x == top)
 		{
 			env->SetColor(1.0, 1.0, 0.0, transparency);
-			env->Draw(data.data);
+			env->Draw(disp, data.data);
 		}
 		else if ((data.where == kOpenList) && (data.reopened))
 		{
 			env->SetColor(0.0, 0.5, 0.5, transparency);
-			env->Draw(data.data);
+			env->Draw(disp, data.data);
 		}
 		else if (data.where == kOpenList)
 		{
 			env->SetColor(0.0, 1.0, 0.0, transparency);
-			env->Draw(data.data);
+			env->Draw(disp, data.data);
 		}
 		else if ((data.where == kClosedList) && (data.reopened))
 		{
 			env->SetColor(0.5, 0.0, 0.5, transparency);
-			env->Draw(data.data);
+			env->Draw(disp, data.data);
 		}
 		else if (data.where == kClosedList)
 		{
@@ -749,11 +750,11 @@ void TemplateAStar<state, action,environment,openList>::Draw() const
 			else
 				env->SetColor(1.0, 0.0, 0.0, transparency);
 			//			}
-			env->Draw(data.data);
+			env->Draw(disp, data.data);
 		}
 	}
 	env->SetColor(1.0, 0.5, 1.0, 0.5);
-	env->Draw(goal);
+	env->Draw(disp, goal);
 }
 
 template <class state, class action, class environment, class openList>

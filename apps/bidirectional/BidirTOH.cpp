@@ -12,6 +12,7 @@
 #include "NBS.h"
 #include "MM.h"
 #include "BSStar.h"
+#include "WeightedVertexGraph.h"
 
 template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
 Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
@@ -106,35 +107,39 @@ void TestTOH(int first, int last)
 		}
 		if (1)
 		{
-			printf("-=-=-BS-=-=-\n");
-			timer.StartTimer();
-			bs.GetPath(&toh, s, g, f, b, thePath);
-			timer.EndTimer();
-			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-			printf("%llu nodes\t%llu necessary\t", bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
-			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+			GetWeightedVertexGraph<TOHState<N>, TOHMove, TOH<N>>(s, g, &toh);
 		}
-		if (1)
-		{
-			printf("-=-=-MM-=-=-\n");
-			timer.StartTimer();
-			mm.GetPath(&toh, s, g, f, b, thePath);
-			timer.EndTimer();
-			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-			printf("%llu nodes\t%llu necessary\t", mm.GetNodesExpanded(), mm.GetNecessaryExpansions());
-			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-		}
-		if (1)
-		{
-			printf("-=-=-A*-=-=-\n");
-			astar.SetHeuristic(f);
-			timer.StartTimer();
-			astar.GetPath(&toh, s, g, thePath);
-			timer.EndTimer();
-			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-			printf("%llu nodes\t%llu necessary\t", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
-			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-		}
+//		if (1)
+//		{
+//			printf("-=-=-BS-=-=-\n");
+//			timer.StartTimer();
+//			bs.GetPath(&toh, s, g, f, b, thePath);
+//			timer.EndTimer();
+//			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+//			printf("%llu nodes\t%llu necessary\t", bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
+//			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+//		}
+//		if (1)
+//		{
+//			printf("-=-=-MM-=-=-\n");
+//			timer.StartTimer();
+//			mm.GetPath(&toh, s, g, f, b, thePath);
+//			timer.EndTimer();
+//			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+//			printf("%llu nodes\t%llu necessary\t", mm.GetNodesExpanded(), mm.GetNecessaryExpansions());
+//			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+//		}
+//		if (1)
+//		{
+//			printf("-=-=-A*-=-=-\n");
+//			astar.SetHeuristic(f);
+//			timer.StartTimer();
+//			astar.GetPath(&toh, s, g, thePath);
+//			timer.EndTimer();
+//			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+//			printf("%llu nodes\t%llu necessary\t", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
+//			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+//		}
 		while (b->heuristics.size() > 0)
 		{
 			delete b->heuristics.back();

@@ -1829,13 +1829,16 @@ bool Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, 
 		return false;
 	double _scale;
 	if (height > width)
-		_scale = 1/(double)height;
+		_scale = 2.0/(double)(height);
 	else
-		_scale = 1/(double)width;
-	x = (2*_x-width)*_scale;
-	y = (2*_y-height)*_scale;
+		_scale = 2.0/(double)(width);
+	double epsilon = _scale/2.0;
+	x = -1+_x*_scale+epsilon;
+	y = -1+_y*_scale+epsilon;
+//	x = (2*_x-width)*_scale+epsilon;
+//	y = (2*_y-height)*_scale+epsilon;
 	z = -(double)0.5*(land[_x][_y].tile1.corners[0]+land[_x][_y].tile2.corners[0])*(_scale);//+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
-	radius = _scale;
+	radius = epsilon;
 	return true;
 }
 
@@ -1857,16 +1860,18 @@ bool Map::GetOpenGLCoord(float _x, float _y, GLdouble &x, GLdouble &y, GLdouble 
 	}
 	int iX = floor(_x);
 	int iY = floor(_y);
-	double _scale;
-	if (height > width)
-		_scale = 1/(double)height;
-	else
-		_scale = 1/(double)width;
-	x = (2*_x-width)*_scale;
-	y = (2*_y-height)*_scale;
-	z = -(double)0.5*(land[iX][iY].tile1.corners[0]+land[iX][iY].tile2.corners[0])*(_scale);//+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
-	radius = _scale;
-	return true;
+	return GetOpenGLCoord(iX, iY, x, y, z, radius);
+//	double _scale;
+//	if (height > width)
+//		_scale = 1/(double)(height+1);
+//	else
+//		_scale = 1/(double)(width+1);
+//	double epsilon = _scale/2.0;
+//	x = (2*_x-width)*_scale+epsilon;
+//	y = (2*_y-height)*_scale+epsilon;
+//	z = -(double)0.5*(land[iX][iY].tile1.corners[0]+land[iX][iY].tile2.corners[0])*(_scale);//+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
+//	radius = _scale;
+//	return true;
 }
 
 /**
@@ -1879,8 +1884,8 @@ double Map::GetCoordinateScale()
 {
 	//	double scale;
 	if (height > width)
-		return (double)height/2.0;
-	return (double)width/2.0;
+		return (double)(height)/2.0;
+	return (double)(width)/2.0;
 }
 
 void Map::GetPointFromCoordinate(point3d loc, int &px, int &py) const
@@ -1888,11 +1893,16 @@ void Map::GetPointFromCoordinate(point3d loc, int &px, int &py) const
 	double _x, _y;
 	double _scale;
 	if (height > width)
-		_scale = 1/(double)height;
+		_scale = 2.0/(double)(height);
 	else
-		_scale = 1/(double)width;
-	_x = (loc.x/_scale+(double)width)/2.0;
-	_y = (loc.y/_scale+(double)height)/2.0;
+		_scale = 2.0/(double)(width);
+	double epsilon = _scale/2.0;
+
+	_x = (loc.x-epsilon+1)/_scale;
+	_y = (loc.y-epsilon+1)/_scale;
+
+//	_x = ((loc.x-epsilon)/_scale+(double)width)/2.0;
+//	_y = ((loc.y-epsilon)/_scale+(double)height)/2.0;
 	px = (int)(_x+0.5); // round off!
 	py = (int)(_y+0.5);
 	/*
