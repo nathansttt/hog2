@@ -881,7 +881,8 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 		t += std::to_string(whichProblem);
 		t += ".svg";
 //		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, t.c_str());
-		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, me, me);
+		if (GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, me, me) == 0)
+			return;
 
 		Timer timer;
 		NBS<xyLoc, tDirection, MapEnvironment> nbs;

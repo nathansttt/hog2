@@ -329,7 +329,7 @@ void TestPancakeHard()
 		}
 		
 		// Find minimum
-		if (1)
+		if (0)
 		{
 			std::string t = "/Users/nathanst/pancake_";
 			t += std::to_string(count);
@@ -341,7 +341,7 @@ void TestPancakeHard()
 
 		
 		// NBS
-		if (1)
+		if (0)
 		{
 			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
 			goal.Reset();
@@ -350,6 +350,19 @@ void TestPancakeHard()
 			nbs.GetPath(&pancake, start, goal, &pancake, &pancake2, nbsPath);
 			t2.EndTimer();
 			printf("HARD-%d NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, pancake.GetPathLength(nbsPath),
+				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
+		}
+		// NBS0
+		if (1)
+		{
+			ZeroHeuristic<PancakePuzzleState<CNT>> z;
+			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
+			goal.Reset();
+			start = original;
+			t2.StartTimer();
+			nbs.GetPath(&pancake, start, goal, &z, &z, nbsPath);
+			t2.EndTimer();
+			printf("HARD-%d NBS0 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, pancake.GetPathLength(nbsPath),
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
 		}
 		
