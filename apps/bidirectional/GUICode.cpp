@@ -891,6 +891,12 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 		timer.EndTimer();
 		printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", me->GetPathLength(path),
 			   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(), nbs.GetMeetingPoint());
+		ZeroHeuristic<xyLoc> z;
+		timer.StartTimer();
+		nbs.GetPath(me, start, goal, &z, &z, path);
+		timer.EndTimer();
+		printf("NBS0 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", me->GetPathLength(path),
+			   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(), nbs.GetMeetingPoint());
 		return;
 	}
 
