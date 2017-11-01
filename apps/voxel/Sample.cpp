@@ -36,11 +36,12 @@
 #include "Timer.h"
 #include "TemplateAStar.h"
 #include "VoxelGrid.h"
-#include "GLUTHog.h"
+#include "GLUThog.h"
 
 recVec velocity;
 std::string map;
 void Maze3D(int d);
+void CustomMaze();
 
 
 //struct voxelWorld {
@@ -69,7 +70,8 @@ std::vector<voxelGridState> path;
 int main(int argc, char* argv[])
 {
 //	theWorld = LoadData();
-	Maze3D(11);
+	CustomMaze();
+	//	Maze3D(11);
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 512, 512);
 }
@@ -403,6 +405,16 @@ void BuildBenchmarks(const char *map, int resolution)
 
 bool MakeMazeMST(int d);
 void MazeMazeTree(int d);
+void ExportMazes(Map *m1, Map *m2, Map *m3, int mapSize);
+
+void CustomMaze()
+{
+	Map *m1 = new Map("/Users/nathanst/m01.map");
+	Map *m2 = new Map("/Users/nathanst/m02.map");
+	Map *m3 = new Map("/Users/nathanst/m03.map");
+	ExportMazes(m1, m2, m3, m1->GetMapWidth());
+	exit(0);
+}
 
 void Maze3D(int d)
 {
@@ -421,23 +433,23 @@ void Maze3D(int d)
 
 edge *GetEdge(Graph *g, int x1, int y1, int z1, int x2, int y2, int z2);
 
-bool MakeMazeMST(int s)
+bool MakeMazeMST(int mazeSize)
 {
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 	std::vector<xyLoc> path;
 	Graph *g;
 	g = new Graph();
-	int d = s*2+1;
+	int mapSize = mazeSize*2+1;
 //	int s = d/2;
 //	d = s*2+1;
 	for (int z = 0; z < 2; z++)
 	{
-		for (int x = 0; x < s; x++)
+		for (int x = 0; x < mazeSize; x++)
 		{
-			for (int y = 0; y < s; y++)
+			for (int y = 0; y < mazeSize; y++)
 			{
 				// skip top area for logo (no nodes at all)
-				if (z == 0 && (x > s/4 && x < 3*s/4) && (y > s/4 && y < 3*s/4))
+				if (z == 0 && (x > mazeSize/4 && x < 3*mazeSize/4) && (y > mazeSize/4 && y < 3*mazeSize/4))
 				{
 					continue;
 				}
@@ -479,7 +491,7 @@ bool MakeMazeMST(int s)
 				if (n1->GetLabelL(2) + n2->GetLabelL(2) == 1) // through bottom
 					e = new edge(n1->GetNum(), n2->GetNum(), 100000);
 				else
-					e = new edge(n1->GetNum(), n2->GetNum(), random()%50);
+					e = new edge(n1->GetNum(), n2->GetNum(), 100+random()%10);
 				g->AddEdge(e);
 			}
 		}
@@ -500,13 +512,21 @@ bool MakeMazeMST(int s)
 			// 2. Find MST as normal
 			//
 	{
-		// Start gets no horizontal connections
+		// Start gets no horizontal connections on bottom
 		GetEdge(g,
 				0, 0, 1,
 				1, 0, 1)->setWeight(100000);
 		GetEdge(g,
 				0, 0, 1,
 				0, 1, 1)->setWeight(100000);
+		// Goal gets no horizontal connections on bottom
+		GetEdge(g,
+				mazeSize-1, mazeSize-1, 1,
+				mazeSize-2, mazeSize-1, 1)->setWeight(100000);
+		GetEdge(g,
+				mazeSize-1, mazeSize-1, 1,
+				mazeSize-1, mazeSize-2, 1)->setWeight(100000);
+
 		// No down move from start
 		GetEdge(g,
 				0, 0, 0,
@@ -515,128 +535,123 @@ bool MakeMazeMST(int s)
 		GetEdge(g,
 				0, 0, 1,
 				0, 0, 0)->setWeight(0);
-		// Goal gets no horizontal connections
-		GetEdge(g,
-				s-1, s-1, 1,
-				s-2, s-1, 1)->setWeight(100000);
-		GetEdge(g,
-				s-1, s-1, 1,
-				s-1, s-2, 1)->setWeight(100000);
 		// Goal is connected to top
 		GetEdge(g,
 				0, 0, 1,
 				0, 0, 0)->setWeight(0);
 		GetEdge(g,
-				s-1, s-1, 1,
-				s-1, s-1, 0)->setWeight(0);
+				mazeSize-1, mazeSize-1, 1,
+				mazeSize-1, mazeSize-1, 0)->setWeight(0);
 		// No left move from goal
 		GetEdge(g,
-				s-1, s-1, 0,
-				s-2, s-1, 0)->setWeight(100000);
+				mazeSize-1, mazeSize-1, 0,
+				mazeSize-2, mazeSize-1, 0)->setWeight(100000);
 	}
 
 	// Set pass-through points
 	{
 		// top middle-right
 		GetEdge(g,
-				3*s/4-1, 0, 0,
-				3*s/4-1, 0, 1)->setWeight(0);
+				3*mazeSize/4-1, 0, 0,
+				3*mazeSize/4-1, 0, 1)->setWeight(0);
 		// control edges
 		GetEdge(g,
-				3*s/4-1, 0, 1,
-				3*s/4, 0, 1)->setWeight(100000);
+				3*mazeSize/4-1, 0, 1,
+				3*mazeSize/4, 0, 1)->setWeight(100000);
 		GetEdge(g,
-				3*s/4-1, 0, 1,
-				3*s/4-1, 1, 1)->setWeight(100000);
+				3*mazeSize/4-1, 0, 1,
+				3*mazeSize/4-1, 1, 1)->setWeight(100000);
 		// left middle-bottom
 		GetEdge(g,
-				0, 3*s/4-1, 0,
-				0, 3*s/4-1, 1)->setWeight(0);
+				0, 3*mazeSize/4-1, 0,
+				0, 3*mazeSize/4-1, 1)->setWeight(0);
 		// control edges
 		GetEdge(g,
-				0, 3*s/4-1, 1,
-				0, 3*s/4, 1)->setWeight(100000);
+				0, 3*mazeSize/4-1, 1,
+				0, 3*mazeSize/4, 1)->setWeight(100000);
 		GetEdge(g,
-				0, 3*s/4-1, 1,
-				1, 3*s/4-1, 1)->setWeight(100000);
+				0, 3*mazeSize/4-1, 1,
+				1, 3*mazeSize/4-1, 1)->setWeight(100000);
 
 		// corners
 		GetEdge(g,
-				s-1, 0, 0,
-				s-1, 0, 1)->setWeight(0);
+				mazeSize-1, 0, 0,
+				mazeSize-1, 0, 1)->setWeight(0);
 		GetEdge(g,
-				0, s-1, 0,
-				0, s-1, 1)->setWeight(0);
+				0, mazeSize-1, 0,
+				0, mazeSize-1, 1)->setWeight(0);
 
 		// bottom middle-right
 		GetEdge(g,
-				3*s/4-1, s-1, 0,
-				3*s/4-1, s-1, 1)->setWeight(0);
+				3*mazeSize/4-1, mazeSize-1, 0,
+				3*mazeSize/4-1, mazeSize-1, 1)->setWeight(0);
 		GetEdge(g,
-				3*s/4-1, s-2, 1,
-				3*s/4-1, s-1, 1)->setWeight(100000);
+				3*mazeSize/4-1, mazeSize-2, 1,
+				3*mazeSize/4-1, mazeSize-1, 1)->setWeight(100000);
 		GetEdge(g,
-				3*s/4,   s-1, 1,
-				3*s/4-1, s-1, 1)->setWeight(100000);
+				3*mazeSize/4,   mazeSize-1, 1,
+				3*mazeSize/4-1, mazeSize-1, 1)->setWeight(100000);
 		// rightmiddle-bottom
 		GetEdge(g,
-				s-1, 3*s/4-1, 0,
-				s-1, 3*s/4-1, 1)->setWeight(0);
+				mazeSize-1, 3*mazeSize/4-1, 0,
+				mazeSize-1, 3*mazeSize/4-1, 1)->setWeight(0);
 		GetEdge(g,
-				s-1, 3*s/4-1, 1,
-				s-2, 3*s/4-1, 1)->setWeight(100000);
+				mazeSize-1, 3*mazeSize/4-1, 1,
+				mazeSize-2, 3*mazeSize/4-1, 1)->setWeight(100000);
 		GetEdge(g,
-				s-1, 3*s/4-1, 1,
-				s-1, 3*s/4, 1)->setWeight(100000);
+				mazeSize-1, 3*mazeSize/4-1, 1,
+				mazeSize-1, 3*mazeSize/4, 1)->setWeight(100000);
 
 
 		// final edge
 		GetEdge(g,
-				3*s/4, 3*s/4, 0,
-				3*s/4, 3*s/4, 1)->setWeight(0);
+				3*mazeSize/4, 3*mazeSize/4, 0,
+				3*mazeSize/4, 3*mazeSize/4, 1)->setWeight(0);
 		GetEdge(g,
-				3*s/4-1, 3*s/4, 1,
-				3*s/4, 3*s/4, 1)->setWeight(100000);
+				3*mazeSize/4-1, 3*mazeSize/4, 1,
+				3*mazeSize/4, 3*mazeSize/4, 1)->setWeight(100000);
 		GetEdge(g,
-				3*s/4, 3*s/4+1, 1,
-				3*s/4, 3*s/4, 1)->setWeight(100000);
+				3*mazeSize/4, 3*mazeSize/4+1, 1,
+				3*mazeSize/4, 3*mazeSize/4, 1)->setWeight(100000);
 		GetEdge(g,
-				3*s/4, 3*s/4-1, 1,
-				3*s/4, 3*s/4, 1)->setWeight(100000);
+				3*mazeSize/4, 3*mazeSize/4-1, 1,
+				3*mazeSize/4, 3*mazeSize/4, 1)->setWeight(100000);
 
 	}
 	
 	// Remove edges across middle
+	if (1)
 	{
 		// split from middle across to right
-		for (int x = 0; x < s; x++)
+		for (int x = 0; x < mazeSize/2; x++)
 		{
 			edge *e = GetEdge(g,
-							  x, 3*s/4-1, 0,
-							  x, 3*s/4, 0);
+							  x, 3*mazeSize/4-1, 0,
+							  x, 3*mazeSize/4, 0);
 			if (e) e->setWeight(100000);
 		}
 		
 		// split from middle across to right
-		for (int y = 0; y < s; y++)
+		for (int y = 0; y < mazeSize/2; y++)
 		{
 			edge *e = GetEdge(g,
-							  3*s/4, y, 0,
-							  3*s/4-1, y, 0);
+							  3*mazeSize/4, y, 0,
+							  3*mazeSize/4-1, y, 0);
 			if (e) e->setWeight(100000);
 		}
 
-		for (int t = s/2; t < s; t++)
+		if (0)
+		for (int t = mazeSize/2; t < mazeSize; t++)
 		{
 			edge *e;
 			e = GetEdge(g,
-						s/2, t, 1,
-						s/2+1, t, 1);
+						mazeSize/2, t, 1,
+						mazeSize/2+1, t, 1);
 			if (e) e->setWeight(100000);
 //			else { printf("No edge (%d, %d, %d) (%d, %d, %d)\n", s/2, t, 1, s/2+1, t, 1); }
 			e = GetEdge(g,
-						t, s/2, 1,
-						t, s/2+1, 1);
+						t, mazeSize/2, 1,
+						t, mazeSize/2+1, 1);
 			if (e) e->setWeight(100000);
 //			else { printf("No edge (%d %d %d) (%d %d %d)\n", t, s/2, 1, t, s/2+1, 1); }
 			
@@ -644,14 +659,11 @@ bool MakeMazeMST(int s)
 	}
 	
 	Map *m1, *m2, *m3;
-	m1 = new Map(d, d);
-	m2 = new Map(d, d);
-	m3 = new Map(d, d);
-	MapEnvironment me1(m1);
-	MapEnvironment me2(m2);
-	MapEnvironment me3(m3);
-	for (int x = 0; x < d; x++)
-		for (int y = 0; y < d; y++)
+	m1 = new Map(mapSize, mapSize);
+	m2 = new Map(mapSize, mapSize);
+	m3 = new Map(mapSize, mapSize);
+	for (int x = 0; x < mapSize; x++)
+		for (int y = 0; y < mapSize; y++)
 		{
 			m1->SetTerrainType(x, y, kOutOfBounds);
 			m2->SetTerrainType(x, y, kOutOfBounds);
@@ -692,52 +704,62 @@ bool MakeMazeMST(int s)
 	}
 	
 	xyLoc start, goal;
-	start = {1, 1};
-	goal = {1, 15};
-	astar.GetPath(&me1, start, goal, path);
-	if (path.size() == 0)
-		return false;
-	start = {1, 1};
-	goal = {15, 1};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
-	astar.GetPath(&me1, start, goal, path);
-	if (path.size() == 0)
-		return false;
 
-	start = {15, 1};
-	goal = {21, 1};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
-	if (m3->GetTerrainType(21, 1) != kGround)
-		return false;
-	astar.GetPath(&me3, start, goal, path);
-	if (path.size() == 0)
-		return false;
-	start = {1, 15};
-	goal = {1, 21};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
-	if (m3->GetTerrainType(1, 21) != kGround)
-		return false;
-	astar.GetPath(&me3, start, goal, path);
-	if (path.size() == 0)
-		return false;
+	if (0)
+	{
+		MapEnvironment me1(m1);
+		MapEnvironment me2(m2);
+		MapEnvironment me3(m3);
 
-	start = {21, 1};
-	goal = {21, 15};
-	if (m1->GetTerrainType(21, 15) != kGround)
-		return false;
-	astar.GetPath(&me1, start, goal, path);
-	if (path.size() == 0)
-		return false;
-	start = {1, 21};
-	goal = {15, 21};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
-	if (m1->GetTerrainType(15, 21) != kGround)
-		return false;
-	astar.GetPath(&me1, start, goal, path);
-	if (path.size() == 0)
-		return false;
-
-	if (m3->GetTerrainType(15, 21) != kGround)
-		return false;
-	if (m3->GetTerrainType(21, 15) != kGround)
-		return false;
-	
+		// 1. Can get from start to bottom entrances
+		start = {1, 1};
+		goal = {1, 15};
+		astar.GetPath(&me1, start, goal, path);
+		if (path.size() == 0)
+			return false;
+		start = {1, 1};
+		goal = {15, 1};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
+		astar.GetPath(&me1, start, goal, path);
+		if (path.size() == 0)
+			return false;
+		
+		// 2. On bottom can get to secondary points
+		start = {15, 1};
+		goal = {21, 1};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
+		if (m3->GetTerrainType(21, 1) != kGround)
+			return false;
+		astar.GetPath(&me3, start, goal, path);
+		if (path.size() == 0)
+			return false;
+		start = {1, 15};
+		goal = {1, 21};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
+		if (m3->GetTerrainType(1, 21) != kGround)
+			return false;
+		astar.GetPath(&me3, start, goal, path);
+		if (path.size() == 0)
+			return false;
+		
+		// 3. On top can get to goal
+		start = {21, 1};
+		goal = {21, 15};
+		if (m1->GetTerrainType(21, 15) != kGround)
+			return false;
+		astar.GetPath(&me1, start, goal, path);
+		if (path.size() == 0)
+			return false;
+		start = {1, 21};
+		goal = {15, 21};//{static_cast<uint16_t>(1), static_cast<uint16_t>((3*s/4+1)*2+1)};
+		if (m1->GetTerrainType(15, 21) != kGround)
+			return false;
+		astar.GetPath(&me1, start, goal, path);
+		if (path.size() == 0)
+			return false;
+		
+		if (m3->GetTerrainType(15, 21) != kGround)
+			return false;
+		if (m3->GetTerrainType(21, 15) != kGround)
+			return false;
+	}
 	
 	m1->Print();
 	printf("\n\n");
@@ -745,27 +767,57 @@ bool MakeMazeMST(int s)
 	printf("\n\n");
 	m3->Print();
 
+	ExportMazes(m1, m2, m3, mapSize);
+
+	return true;
+}
+
+
+void ExportMazes(Map *m1, Map *m2, Map *m3, int mapSize)
+{
+	MapEnvironment me1(m1);
+	MapEnvironment me2(m2);
+	MapEnvironment me3(m3);
+
+	// Flip m3 so it burns on the same side
+	for (int y = 0; y < m3->GetMapHeight(); y++)
+		for (int x = 0; x < m3->GetMapWidth()/2; x++)
+		{
+			tTerrain tmp = (tTerrain)m3->GetTerrainType(x, y);
+			m3->SetTerrainType(x, y, (tTerrain)m3->GetTerrainType(m3->GetMapWidth()-1-x, y));
+			m3->SetTerrainType(m3->GetMapWidth()-1-x, y, tmp);
+		}
+	
 	Graphics::Display disp;
 	disp.StartFrame();
 	me1.Draw(disp);
-	disp.DrawText("SoCS", {0, -0.22}, Colors::lightgray, 0.35);
-	disp.DrawText("2018", {0, 0.22}, Colors::lightgray, 0.4);
+	disp.DrawText("SoCS", {0, -0.22}, Colors::lightgray, 0.35, "Impact");
+	disp.DrawText("2018", {0, 0.22}, Colors::lightgray, 0.4, "Impact");
 	disp.EndFrame();
 	MakeSVG(disp, "/Users/nathanst/maze01.svg", 375, 375);
 	disp.StartFrame();
 	me2.Draw(disp);
+//	{
+//		xyLoc ss(1,mapSize-2);
+//		xyLoc gg(mapSize-2,1);
+//		me2.SetColor(Colors::lightgray);
+//		me2.DrawStateLabel(disp, ss, "s");
+//		me2.DrawStateLabel(disp, gg, "g");
+//	}
 	disp.EndFrame();
 	MakeSVG(disp, "/Users/nathanst/maze02.svg", 375, 375);
 	disp.StartFrame();
 	me3.Draw(disp);
+	disp.DrawText("g", {-0.865, 0.87}, Colors::lightgray, 0.15);
+	disp.DrawText("s", {0.865, -0.86}, Colors::lightgray, 0.15);
 	disp.EndFrame();
 	MakeSVG(disp, "/Users/nathanst/maze03.svg", 375, 375);
 	
-	m1->Save("/Users/nathanst/maze01.map");
-	m2->Save("/Users/nathanst/maze02.map");
-	m3->Save("/Users/nathanst/maze03.map");
+//	m1->Save("/Users/nathanst/maze01.map");
+//	m2->Save("/Users/nathanst/maze02.map");
+//	m3->Save("/Users/nathanst/maze03.map");
 
-	m3->SetRectHeight(0, 0, d-1, d-1, 0, kOutOfBounds);
+	m3->SetRectHeight(0, 0, mapSize-1, mapSize-1, 0, kOutOfBounds);
 	disp.StartFrame();
 	me3.Draw(disp);
 	disp.EndFrame();
@@ -784,7 +836,6 @@ bool MakeMazeMST(int s)
 
 	}
 	
-	return true;
 }
 
 // In practice we should use the ranking (constant time) instead of this
