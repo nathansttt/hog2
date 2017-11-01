@@ -8,11 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-void renderScene()
-{
-	
-}
-
 int main(int argc, const char * argv[]) {
 	return NSApplicationMain(argc, argv);
 }

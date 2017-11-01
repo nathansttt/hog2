@@ -67,16 +67,20 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-graph /Users/nathanst/Downloads/USA-road-t.NY.gr"
+            argument = "-graph /Users/nathanst/Downloads/USA-road-t.COL.gr"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-coord /Users/nathanst/Downloads/USA-road-d.COL.co"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-graph /Users/nathanst/Downloads/USA-road-t.NY.gr"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-coord /Users/nathanst/Downloads/USA-road-d.NY.co"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-graph /Users/nathanst/Downloads/USA-road-d.CAL.gr"

@@ -6,8 +6,20 @@
 //  Copyright © 2017 NS Software. All rights reserved.
 //
 
-#ifndef DrawView_h
-#define DrawView_h
+#import <Cocoa/Cocoa.h>
+#include <vector>
+#include <unordered_map>
+#include "Graphics.h"
 
 
-#endif /* DrawView_h */
+@interface DrawView : NSView {
+	float height, width;
+	float xoffset, yoffset, xscale, yscale;
+}
+
+@property Graphics::Display *display;
+
+// Convert from screen coordinate to HOG coordinates
+-(point3d)convertToHogCoordinate:(NSPoint)currPoint;
+
+@end

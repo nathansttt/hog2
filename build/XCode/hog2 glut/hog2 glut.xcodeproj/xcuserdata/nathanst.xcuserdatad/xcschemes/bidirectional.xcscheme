@@ -67,6 +67,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-animate"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-easy"
             isEnabled = "NO">
          </CommandLineArgument>
@@ -75,12 +79,16 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-grid /Users/nathanst/hog2/maps/dao/brc000d.map /Users/nathanst/hog2/scenarios/dao/brc000d.map.scen"
+            argument = "-grid /Users/nathanst/hog2/maps/dao/brc000d.map /Users/nathanst/hog2/scenarios/dao/brc000d.map.scen 1.5"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-grid /Users/nathanst/hog2/maps/bg512/AR0012SR.map /Users/nathanst/hog2/scenarios/bg512/AR0012SR.map.scen"
-            isEnabled = "YES">
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-grid /Users/nathanst/hog2/maps/mazes/maze512-1-0.map /Users/nathanst/hog2/scenarios/mazes/maze512-1-0.map.scen"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-problem 0"

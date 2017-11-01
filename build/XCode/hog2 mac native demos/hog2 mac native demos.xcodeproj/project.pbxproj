@@ -70,7 +70,6 @@
 		C4C836C01F2AF6B5004E78C0 /* JPS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835EE1F2AF6B5004E78C0 /* JPS.cpp */; };
 		C4C836C21F2AF6B5004E78C0 /* gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F41F2AF6B5004E78C0 /* gl.cpp */; };
 		C4C836C31F2AF6B5004E78C0 /* glut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F61F2AF6B5004E78C0 /* glut.cpp */; };
-		C4C836C51F2AF6B5004E78C0 /* Graphics2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835FA1F2AF6B5004E78C0 /* Graphics2D.cpp */; };
 		C4C836CE1F2AF6B5004E78C0 /* TextBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836101F2AF6B5004E78C0 /* TextBox.cpp */; };
 		C4C836CF1F2AF6B5004E78C0 /* Trackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836121F2AF6B5004E78C0 /* Trackball.cpp */; };
 		C4C836D01F2AF6B5004E78C0 /* MapUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836201F2AF6B5004E78C0 /* MapUnit.cpp */; };
@@ -107,9 +106,19 @@
 		C4C836F61F2AF6B5004E78C0 /* TextOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836821F2AF6B5004E78C0 /* TextOverlay.cpp */; };
 		C4C836F71F2AF6B5004E78C0 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836841F2AF6B5004E78C0 /* Timer.cpp */; };
 		C4C837321F2D5604004E78C0 /* Colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837301F2D5604004E78C0 /* Colors.cpp */; };
+		C4C837561F2E4164004E78C0 /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837541F2E4164004E78C0 /* Graphics.cpp */; };
+		C4C8375C1F2E95E9004E78C0 /* DrawView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C4C8375B1F2E95E9004E78C0 /* DrawView.mm */; };
+		C4C8375E1F2E9634004E78C0 /* DrawView.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4C8375D1F2E9634004E78C0 /* DrawView.xib */; };
+		C4C837601F326C97004E78C0 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
+		C4C837631F3273F2004E78C0 /* CocoaHOG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837621F3273F2004E78C0 /* CocoaHOG.cpp */; };
+		C4C837671F327785004E78C0 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837651F327785004E78C0 /* Driver.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C4101CF51F465F4200CCBB43 /* NBS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NBS.h; sourceTree = "<group>"; };
+		C4101CF61F465F8500CCBB43 /* BDOpenClosed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDOpenClosed.h; sourceTree = "<group>"; };
+		C4101CF81F46604E00CCBB43 /* NBSQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NBSQueue.h; sourceTree = "<group>"; };
+		C4234D1E1F3426DF00B38A95 /* fMM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fMM.h; sourceTree = "<group>"; };
 		C4C835431F2AF5C7004E78C0 /* hog2 mac native demos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hog2 mac native demos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4C835461F2AF5C7004E78C0 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		C4C835471F2AF5C7004E78C0 /* AppDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
@@ -269,8 +278,6 @@
 		C4C835F71F2AF6B5004E78C0 /* glut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glut.h; sourceTree = "<group>"; };
 		C4C835F81F2AF6B5004E78C0 /* GLUThog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLUThog.cpp; sourceTree = "<group>"; };
 		C4C835F91F2AF6B5004E78C0 /* GLUThog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLUThog.h; sourceTree = "<group>"; };
-		C4C835FA1F2AF6B5004E78C0 /* Graphics2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Graphics2D.cpp; sourceTree = "<group>"; };
-		C4C835FB1F2AF6B5004E78C0 /* Graphics2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graphics2D.h; sourceTree = "<group>"; };
 		C4C836101F2AF6B5004E78C0 /* TextBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextBox.cpp; sourceTree = "<group>"; };
 		C4C836111F2AF6B5004E78C0 /* TextBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextBox.h; sourceTree = "<group>"; };
 		C4C836121F2AF6B5004E78C0 /* Trackball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Trackball.cpp; sourceTree = "<group>"; };
@@ -372,6 +379,15 @@
 		C4C836861F2AF6B5004E78C0 /* vectorCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vectorCache.h; sourceTree = "<group>"; };
 		C4C837301F2D5604004E78C0 /* Colors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Colors.cpp; sourceTree = "<group>"; };
 		C4C837311F2D5604004E78C0 /* Colors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Colors.h; sourceTree = "<group>"; };
+		C4C837541F2E4164004E78C0 /* Graphics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Graphics.cpp; sourceTree = "<group>"; };
+		C4C837551F2E4164004E78C0 /* Graphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graphics.h; sourceTree = "<group>"; };
+		C4C8375B1F2E95E9004E78C0 /* DrawView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DrawView.mm; sourceTree = "<group>"; };
+		C4C8375D1F2E9634004E78C0 /* DrawView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DrawView.xib; sourceTree = "<group>"; };
+		C4C8375F1F30EBD5004E78C0 /* DrawView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DrawView.h; sourceTree = "<group>"; };
+		C4C837611F3272DD004E78C0 /* CocoaHOG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHOG.h; sourceTree = "<group>"; };
+		C4C837621F3273F2004E78C0 /* CocoaHOG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CocoaHOG.cpp; sourceTree = "<group>"; };
+		C4C837651F327785004E78C0 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
+		C4C837661F327785004E78C0 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -412,6 +428,11 @@
 				C4C8354F1F2AF5C7004E78C0 /* Assets.xcassets */,
 				C4C835511F2AF5C7004E78C0 /* Main.storyboard */,
 				C4C835541F2AF5C7004E78C0 /* Info.plist */,
+				C4C8375F1F30EBD5004E78C0 /* DrawView.h */,
+				C4C8375B1F2E95E9004E78C0 /* DrawView.mm */,
+				C4C8375D1F2E9634004E78C0 /* DrawView.xib */,
+				C4C837611F3272DD004E78C0 /* CocoaHOG.h */,
+				C4C837621F3273F2004E78C0 /* CocoaHOG.cpp */,
 				C4C835491F2AF5C7004E78C0 /* Supporting Files */,
 			);
 			path = "hog2 mac native demos";
@@ -441,6 +462,7 @@
 				C4C836261F2AF6B5004E78C0 /* search */,
 				C4C8363D1F2AF6B5004E78C0 /* simulation */,
 				C4C836461F2AF6B5004E78C0 /* utils */,
+				C4C837681F32778F004E78C0 /* demos */,
 			);
 			name = hog2;
 			sourceTree = "<group>";
@@ -448,6 +470,8 @@
 		C4C8355B1F2AF6B4004E78C0 /* algorithms */ = {
 			isa = PBXGroup;
 			children = (
+				C4101CF81F46604E00CCBB43 /* NBSQueue.h */,
+				C4101CF61F465F8500CCBB43 /* BDOpenClosed.h */,
 				C4C8355C1F2AF6B4004E78C0 /* AStarOpenClosed.cpp */,
 				C4C8355D1F2AF6B4004E78C0 /* AStarOpenClosed.h */,
 				C4C8355E1F2AF6B4004E78C0 /* BucketOpenClosed.h */,
@@ -564,6 +588,7 @@
 		C4C835BA1F2AF6B5004E78C0 /* generic */ = {
 			isa = PBXGroup;
 			children = (
+				C4101CF51F465F4200CCBB43 /* NBS.h */,
 				C4C835BB1F2AF6B5004E78C0 /* AbstractWeightedSearchAlgorithm.h */,
 				C4C835BC1F2AF6B5004E78C0 /* BFS.h */,
 				C4C835BD1F2AF6B5004E78C0 /* BidirectionalDijkstra.h */,
@@ -582,6 +607,7 @@
 				C4C835CA1F2AF6B5004E78C0 /* IncrementalBFS.h */,
 				C4C835CB1F2AF6B5004E78C0 /* IncrementalDFID.h */,
 				C4C835CC1F2AF6B5004E78C0 /* IncrementalIDA.h */,
+				C4234D1E1F3426DF00B38A95 /* fMM.h */,
 				C4C835CD1F2AF6B5004E78C0 /* MM.h */,
 				C4C835CE1F2AF6B5004E78C0 /* OldTemplateAStar.h */,
 				C4C835CF1F2AF6B5004E78C0 /* OptimisticSearch.h */,
@@ -646,13 +672,13 @@
 		C4C835F01F2AF6B5004E78C0 /* gui */ = {
 			isa = PBXGroup;
 			children = (
+				C4C837541F2E4164004E78C0 /* Graphics.cpp */,
+				C4C837551F2E4164004E78C0 /* Graphics.h */,
 				C4C835F11F2AF6B5004E78C0 /* Common.cpp */,
 				C4C835F21F2AF6B5004E78C0 /* Common.h */,
 				C4C835F31F2AF6B5004E78C0 /* GL */,
 				C4C835F81F2AF6B5004E78C0 /* GLUThog.cpp */,
 				C4C835F91F2AF6B5004E78C0 /* GLUThog.h */,
-				C4C835FA1F2AF6B5004E78C0 /* Graphics2D.cpp */,
-				C4C835FB1F2AF6B5004E78C0 /* Graphics2D.h */,
 				C4C836101F2AF6B5004E78C0 /* TextBox.cpp */,
 				C4C836111F2AF6B5004E78C0 /* TextBox.h */,
 				C4C836121F2AF6B5004E78C0 /* Trackball.cpp */,
@@ -810,6 +836,24 @@
 			path = ../../../utils;
 			sourceTree = "<group>";
 		};
+		C4C837641F327785004E78C0 /* bidirectional */ = {
+			isa = PBXGroup;
+			children = (
+				C4C837651F327785004E78C0 /* Driver.cpp */,
+				C4C837661F327785004E78C0 /* Driver.h */,
+			);
+			name = bidirectional;
+			path = ../../../demos/bidirectional;
+			sourceTree = "<group>";
+		};
+		C4C837681F32778F004E78C0 /* demos */ = {
+			isa = PBXGroup;
+			children = (
+				C4C837641F327785004E78C0 /* bidirectional */,
+			);
+			name = demos;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -868,6 +912,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4C8375E1F2E9634004E78C0 /* DrawView.xib in Resources */,
 				C4C835501F2AF5C7004E78C0 /* Assets.xcassets in Resources */,
 				C4C835531F2AF5C7004E78C0 /* Main.storyboard in Resources */,
 			);
@@ -906,6 +951,7 @@
 				C4C836B61F2AF6B5004E78C0 /* RandomUnit.cpp in Sources */,
 				C4C8354B1F2AF5C7004E78C0 /* main.m in Sources */,
 				C4C836E51F2AF6B5004E78C0 /* Map.cpp in Sources */,
+				C4C8375C1F2E95E9004E78C0 /* DrawView.mm in Sources */,
 				C4C836BE1F2AF6B5004E78C0 /* Propagation.cpp in Sources */,
 				C4C836A41F2AF6B5004E78C0 /* RoboticArm.cpp in Sources */,
 				C4C836E91F2AF6B5004E78C0 /* MMapUtil.cpp in Sources */,
@@ -924,6 +970,7 @@
 				C4C836D11F2AF6B5004E78C0 /* RandomUnits.cpp in Sources */,
 				C4C836F21F2AF6B5004E78C0 /* StatUtil.cpp in Sources */,
 				C4C836901F2AF6B5004E78C0 /* CanonicalGrid.cpp in Sources */,
+				C4C837671F327785004E78C0 /* Driver.cpp in Sources */,
 				C4C836B81F2AF6B5004E78C0 /* AStarDelay.cpp in Sources */,
 				C4C836BD1F2AF6B5004E78C0 /* Path.cpp in Sources */,
 				C4C836891F2AF6B5004E78C0 /* GenericIDAStar.cpp in Sources */,
@@ -940,6 +987,7 @@
 				C4C836BB1F2AF6B5004E78C0 /* Heap.cpp in Sources */,
 				C4C836E21F2AF6B5004E78C0 /* GLUtil.cpp in Sources */,
 				C4C836DF1F2AF6B5004E78C0 /* FourBitArray.cpp in Sources */,
+				C4C837631F3273F2004E78C0 /* CocoaHOG.cpp in Sources */,
 				C4C836B71F2AF6B5004E78C0 /* Graph.cpp in Sources */,
 				C4C8368B1F2AF6B5004E78C0 /* OpenClosedList.cpp in Sources */,
 				C4C836E81F2AF6B5004E78C0 /* MinBloom.cpp in Sources */,
@@ -967,10 +1015,11 @@
 				C4C836EB1F2AF6B5004E78C0 /* NBitArray.cpp in Sources */,
 				C4C836E11F2AF6B5004E78C0 /* FunctionApproximator.cpp in Sources */,
 				C4C836BF1F2AF6B5004E78C0 /* CanonicalDijkstra.cpp in Sources */,
+				C4C837601F326C97004E78C0 /* Common.cpp in Sources */,
 				C4C836AC1F2AF6B5004E78C0 /* TOH.cpp in Sources */,
 				C4C835481F2AF5C7004E78C0 /* AppDelegate.mm in Sources */,
 				C4C836D21F2AF6B5004E78C0 /* RHRUnit.cpp in Sources */,
-				C4C836C51F2AF6B5004E78C0 /* Graphics2D.cpp in Sources */,
+				C4C837561F2E4164004E78C0 /* Graphics.cpp in Sources */,
 				C4C836871F2AF6B5004E78C0 /* AStarOpenClosed.cpp in Sources */,
 				C4C8368F1F2AF6B5004E78C0 /* CanonicalGraphEnvironment.cpp in Sources */,
 				C4C8368E1F2AF6B5004E78C0 /* BurnedPancakePuzzle.cpp in Sources */,
@@ -1135,6 +1184,7 @@
 				C4C835591F2AF5C7004E78C0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
