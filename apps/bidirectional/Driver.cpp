@@ -1361,24 +1361,42 @@ void ArbitraryGoalTest()
 #include "WeightedVertexGraph.h"
 
 int GetGCount(TemplateAStar<xyLoc, tDirection, MapEnvironment> &astar, double g, double opt);
+void Animate(Map *m, xyLoc p1, xyLoc p2);
 
 void Animate()
 {
-	Map *m = new Map("/Users/nathanst/hog2/maps/local/bidir.map");
+//	Map *m = new Map("/Users/nathanst/hog2/maps/local/bidir.map");
+//	xyLoc p1 = {9,12};
+//	xyLoc p2 = {16,15};
+//	Animate(m, p1, p2);
+
+	Map *m = new Map("/Users/nathanst/hog2/maps/local/bidir2.map");
+	xyLoc p1 = { 5, 8};
+	xyLoc p2 = { 9, 8};
+	Animate(m, p1, p2);
+
+}
+
+void Animate(Map *m, xyLoc p1, xyLoc p2)
+{
+	const int spread = 2;
 	MapEnvironment *me = new MapEnvironment(m);
 	Graphics::Display d;
 	me->SetDiagonalCost(1.5);
+
 	// Basic map
 	d.StartFrame();
 	me->Draw(d);
-	xyLoc p1 = {9,12};
-	xyLoc p2 = {16,15};
 	me->SetColor(1, 0, 0);
 	me->Draw(d, p1);
 	me->SetColor(0, 0, 1);
 	me->Draw(d, p2);
 	d.EndFrame();
 	MakeSVG(d, "/Users/nathanst/bidir/anim-b0.svg", 800, 800);
+	uint16_t rs = m->GetMapWidth()-3;
+	uint16_t ls = 2;
+
+	uint16_t h = m->GetMapHeight();
 	
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> astarf;
 	TemplateAStar<xyLoc, tDirection, MapEnvironment> astarb;
@@ -1438,7 +1456,7 @@ void Animate()
 			auto i = astarf.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {2, actual};
+				xyLoc l = {ls, actual};
 				me->Draw(d, i.data, l, frame/numFrames);
 				actual++;
 			}
@@ -1450,7 +1468,7 @@ void Animate()
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {23, actual};
+				xyLoc l = {rs, actual};
 				me->Draw(d, i.data, l, frame/numFrames);
 				actual++;
 			}
@@ -1473,7 +1491,7 @@ void Animate()
 			auto i = astarf.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {2, actual};
+				xyLoc l = {ls, actual};
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l);
 				me->SetColor(1, 0, 0);
@@ -1491,7 +1509,7 @@ void Animate()
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {23, actual};
+				xyLoc l = {rs, actual};
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l);
 				me->SetColor(0, 0, 1);
@@ -1522,8 +1540,8 @@ void Animate()
 				auto j = astarb.GetItem(y);
 				if (i.g+j.g < opt && j.g+j.h < opt)
 				{
-					xyLoc l1 = {2, actual};
-					xyLoc l2 = {23, actual2};
+					xyLoc l1 = {ls, actual};
+					xyLoc l2 = {rs, actual2};
 					me->DrawLine(d, l1, l2, 0.5);
 					actual2++;
 				}
@@ -1538,7 +1556,7 @@ void Animate()
 			auto i = astarf.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {2, actual};
+				xyLoc l = {ls, actual};
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l);
 				me->SetColor(1, 0, 0);
@@ -1555,7 +1573,7 @@ void Animate()
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {23, actual};
+				xyLoc l = {rs, actual};
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l);
 				me->SetColor(0, 0, 1);
@@ -1582,8 +1600,8 @@ void Animate()
 			auto i = astarf.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l1 = {2, actual};
-				xyLoc l2 = {2, static_cast<uint16_t>(i.g*2)};
+				xyLoc l1 = {ls, actual};
+				xyLoc l2 = {ls, static_cast<uint16_t>(i.g*spread)};
 				
 				me->SetColor(1, 0, 0);
 				me->Draw(d, l1, l2, frame/numFrames);
@@ -1598,8 +1616,8 @@ void Animate()
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l1 = {23, actual};
-				xyLoc l2 = {23, static_cast<uint16_t>(i.g*2)};
+				xyLoc l1 = {rs, actual};
+				xyLoc l2 = {rs, static_cast<uint16_t>(i.g*spread)};
 				
 				me->SetColor(0, 0, 1);
 				me->Draw(d, l1, l2, frame/numFrames);
@@ -1626,7 +1644,7 @@ void Animate()
 			auto i = astarf.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l2 = {2, static_cast<uint16_t>(i.g*2)};
+				xyLoc l2 = {ls, static_cast<uint16_t>(i.g*spread)};
 				
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);
@@ -1636,6 +1654,10 @@ void Animate()
 				me->DrawStateLabel(d, l2, to_string_with_precision(i.g, 2).c_str());
 				l2.x--;
 				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarf, i.g, opt)).c_str());
+				l2.x--;
+				char tmp[2] = {0, 0};
+				tmp[0] = 'a'+(char)i.g;
+				me->DrawStateLabel(d, l2, tmp);
 				actual++;
 			}
 		}
@@ -1645,8 +1667,8 @@ void Animate()
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				//xyLoc l1 = {23, actual};
-				xyLoc l2 = {23, static_cast<uint16_t>(i.g*2)};
+				//xyLoc l1 = {rs, actual};
+				xyLoc l2 = {rs, static_cast<uint16_t>(i.g*spread)};
 				
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);
@@ -1656,6 +1678,10 @@ void Animate()
 				me->DrawStateLabel(d, l2, to_string_with_precision(i.g, 2).c_str());
 				l2.x++;
 				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarb, i.g, opt)).c_str());
+				l2.x++;
+				char tmp[2] = {0, 0};
+				tmp[0] = 'a'+(char)i.g;
+				me->DrawStateLabel(d, l2, tmp);
 				actual++;
 			}
 		}
@@ -1682,8 +1708,8 @@ void Animate()
 						auto j = astarb.GetItem(y);
 						if (i.g+j.g < opt && j.g+j.h < opt)
 						{
-							xyLoc l1 = {2, static_cast<uint16_t>(i.g*2)};
-							xyLoc l2 = {23, static_cast<uint16_t>(j.g*2)};
+							xyLoc l1 = {ls, static_cast<uint16_t>(i.g*spread)};
+							xyLoc l2 = {rs, static_cast<uint16_t>(j.g*spread)};
 							me->DrawLine(d, l1, l2, 0.5);
 						}
 					}
@@ -1698,8 +1724,8 @@ void Animate()
 			auto i = astarf.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				//				xyLoc l1 = {2, actual};
-				xyLoc l2 = {2, static_cast<uint16_t>(i.g*2)};
+				//				xyLoc l1 = {ls, actual};
+				xyLoc l2 = {ls, static_cast<uint16_t>(i.g*spread)};
 			
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);
@@ -1719,7 +1745,7 @@ void Animate()
 			if (i.g+i.h < opt)
 			{
 				//xyLoc l1 = {23, actual};
-				xyLoc l2 = {23, static_cast<uint16_t>(i.g*2)};
+				xyLoc l2 = {rs, static_cast<uint16_t>(i.g*spread)};
 				
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);
@@ -1760,8 +1786,8 @@ void Animate()
 					}
 					if (maxNeighbor != 0 && i.g != 0)
 					{
-						xyLoc l1 = {2, static_cast<uint16_t>(i.g*2)};
-						xyLoc l2 = {23, static_cast<uint16_t>(maxNeighbor*2)};
+						xyLoc l1 = {ls, static_cast<uint16_t>(i.g*spread)};
+						xyLoc l2 = {rs, static_cast<uint16_t>(maxNeighbor*spread)};
 						me->DrawLine(d, l1, l2, 0.5);
 					}
 				}
@@ -1775,8 +1801,8 @@ void Animate()
 			auto i = astarf.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				//				xyLoc l1 = {2, actual};
-				xyLoc l2 = {2, static_cast<uint16_t>(i.g*2)};
+				//				xyLoc l1 = {ls, actual};
+				xyLoc l2 = {ls, static_cast<uint16_t>(i.g*spread)};
 				
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);
@@ -1796,7 +1822,7 @@ void Animate()
 			if (i.g+i.h < opt)
 			{
 				//xyLoc l1 = {23, actual};
-				xyLoc l2 = {23, static_cast<uint16_t>(i.g*2)};
+				xyLoc l2 = {rs, static_cast<uint16_t>(i.g*spread)};
 				
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);

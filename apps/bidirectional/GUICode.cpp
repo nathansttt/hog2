@@ -44,6 +44,7 @@ TemplateAStar<xyLoc, tDirection, MapEnvironment> backward;
 FFBDS<xyLoc, tDirection, MapEnvironment> ff;
 
 ZeroHeuristic<xyLoc> *z = new ZeroHeuristic<xyLoc>;
+WeightedHeuristic<xyLoc> *w = 0;
 
 
 MM<xyLoc, tDirection, MapEnvironment> mm;
@@ -133,10 +134,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//map = new Map("/Users/nathanst/hog2/maps/random/random512-35-6.map");
 		//map = new Map("/Users/nathanst/hog2/maps/da2/lt_backalley_g.map");
 		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
-		//map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+		map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 		//map = new Map("/Users/nathanst/hog2/maps/rooms/8room_000.map");
 		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-16-0.map");
-		map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-1-0.map");
+		//map = new Map("/Users/nathanst/hog2/maps/mazes/maze512-1-0.map");
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
 		if (0)
 		{
@@ -147,6 +148,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
 		me->SetDiagonalCost(1.5);
+		w = new WeightedHeuristic<xyLoc>(me, 1.0);
 	}
 	
 }
@@ -497,12 +499,12 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				mouseTracking = false;
 				//SetupMapOverlay();
 				SetNumPorts(windowID, 3);
-				compare.SetHeuristic(me);
+				compare.SetHeuristic(w);
 				compare.InitializeSearch(me, start, goal, path);
 
 				compare0.SetHeuristic(z);
 				compare0.InitializeSearch(me, start, goal, path);
-				nbs.InitializeSearch(me, start, goal, me, me, path);
+				nbs.InitializeSearch(me, start, goal, w, w, path);
 				bs.InitializeSearch(me, start, goal, me, me, path);
 				//mm.InitializeSearch(me, start, goal, z, z, path);
 				mm.InitializeSearch(me, start, goal, me, me, path);
@@ -864,7 +866,9 @@ const char *strip(const char *str)
 
 void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 {
+	
 	WeightedHeuristic<xyLoc> wh(me, weight);
+
 	compare.SetHeuristic(&wh);
 	forward.SetStopAfterGoal(false);
 	backward.SetStopAfterGoal(false);
@@ -875,28 +879,62 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 	goal.y = e.GetGoalY();
 	
 	{
-		std::string t = "/Users/nathanst/";
-		t += strip(e.GetMapName());
-		t += "_";
-		t += std::to_string(whichProblem);
-		t += ".svg";
-//		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, t.c_str());
-		if (GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, me, me) == 0)
-			return;
-
 		Timer timer;
 		NBS<xyLoc, tDirection, MapEnvironment> nbs;
-		timer.StartTimer();
-		nbs.GetPath(me, start, goal, me, me, path);
-		timer.EndTimer();
-		printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", me->GetPathLength(path),
-			   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(), nbs.GetMeetingPoint());
-		ZeroHeuristic<xyLoc> z;
-		timer.StartTimer();
-		nbs.GetPath(me, start, goal, &z, &z, path);
-		timer.EndTimer();
-		printf("NBS0 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", me->GetPathLength(path),
-			   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(), nbs.GetMeetingPoint());
+		TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+
+		if (1)
+		{
+			astar.SetHeuristic(&wh);
+			astar.GetPath(me, start, goal, path);
+			printf("A*: %llu nodes\n", astar.GetNodesExpanded());
+
+			nbs.GetPath(me, start, goal, &wh, &wh, path);
+			printf("NBS: %llu nodes\n", nbs.GetNodesExpanded());
+		}
+		
+		if (0)
+		{
+			WeightedHeuristic<xyLoc> w(me, 0.5);
+			
+			std::string t = "/Users/nathanst/";
+			t += strip(e.GetMapName());
+			t += "_";
+			t += std::to_string(whichProblem);
+			t += ".svg";
+			//		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, t.c_str());
+			if (GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, &w, &w) == 0)
+				return;
+			
+			
+			timer.StartTimer();
+			nbs.GetPath(me, start, goal, &w, &w, path);
+			timer.EndTimer();
+			printf("NBSW found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", me->GetPathLength(path),
+				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(), nbs.GetMeetingPoint());
+		}
+
+		if (0)
+		{
+			OffsetHeuristic<xyLoc> o(me, 25);
+			if (GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, &o, &o) == 0)
+				return;
+			timer.StartTimer();
+			nbs.GetPath(me, start, goal, &o, &o, path);
+			timer.EndTimer();
+			printf("NBSO found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", me->GetPathLength(path),
+				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(), nbs.GetMeetingPoint());
+		}
+		
+		if (0)
+		{
+			ZeroHeuristic<xyLoc> z;
+			timer.StartTimer();
+			nbs.GetPath(me, start, goal, &z, &z, path);
+			timer.EndTimer();
+			printf("NBS0 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", me->GetPathLength(path),
+				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(), nbs.GetMeetingPoint());
+		}
 		return;
 	}
 
@@ -1009,13 +1047,15 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 
 void AnalyzeMap(const char *map, const char *scenario, double weight)
 {
-	printf("Loading %s with scenario %s\n", map, scenario);
+	printf("Loading %s with scenario %s weight %1.2f\n", map, scenario, weight);
 	ScenarioLoader s(scenario);
 	Map *m = new Map(map);
 	me = new MapEnvironment(m);
 	me->SetDiagonalCost(1.5);
 	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
+//		if (x+1 != 813)
+//			continue;
 		if (s.GetNthExperiment(x).GetDistance() <= 0)
 			continue;
 		printf("Problem %d of %d\n", x+1, s.GetNumExperiments());
