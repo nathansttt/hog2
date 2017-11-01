@@ -340,6 +340,29 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
+void PrintGDistribution(TemplateAStar<graphState, graphMove, RoadMap> &astar)
+{
+	std::vector<int> counts;
+	for (int x = 0; x < astar.GetNumItems(); x++)
+	{
+		auto i = astar.GetItem(x);
+		if (i.where == kClosedList)
+		{
+			int val = i.g;
+			if (val >= counts.size())
+				counts.resize(val+1);
+			counts[val]++;
+		}
+	}
+	for (int x = 0; x < counts.size(); x++)
+	{
+		if (x>0)
+			counts[x] += counts[x-1];
+		if (0 == x%1000)
+			printf("%d : %d\n", x, counts[x]);
+	}
+}
+
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
 //	printf("Starting Search\n");
@@ -354,7 +377,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 //	astar.InitializeSearch(ge, n1->GetNum(), n2->GetNum(), thePath);
 	NBS<graphState, graphMove, RoadMap, NBSQueue<graphState, 0>> nbs;
 	
-	const int count = 50;
+	const int count = 200;
 	srandom(20170825);
 	uint64_t fa=0, ba=0, ma=0, na = 0, nza = 0;
 	ZeroHeuristic<graphState> z;
@@ -362,19 +385,30 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 	{
 		node *start = ge->GetGraph()->GetRandomNode();
 		node *goal = ge->GetGraph()->GetRandomNode();
-		GetWeightedVertexGraph<graphState, graphMove, RoadMap>(start->GetNum(), goal->GetNum(), ge, ge, ge);
+		std::string s = "/Users/nathanst/bidir/roads/COL"+std::to_string(x)+".svg";
+		GetWeightedVertexGraph<graphState, graphMove, RoadMap>(start->GetNum(), goal->GetNum(), ge, ge, ge);//, s.c_str());
 		uint64_t f, b, m, n, nz;
 		astar.GetPath(ge, start->GetNum(), goal->GetNum(), thePath);
-		f = astar.GetNodesExpanded();
+		f = astar.GetNecessaryExpansions();
+		if (x == 5)
+		{
+			printf("Problem %d Forward distribution\n", x);
+			PrintGDistribution(astar);
+		}
 		astar.GetPath(ge, goal->GetNum(), start->GetNum(), thePath);
-		b = astar.GetNodesExpanded();
+		if (x == 5)
+		{
+			printf("Problem %d Backward distribution\n", x);
+			PrintGDistribution(astar);
+		}
+		b = astar.GetNecessaryExpansions();
 		m = std::min(f, b);
 		printf("%1.2f ", ge->GetPathLength(thePath));
 		nbs.GetPath(ge, start->GetNum(), goal->GetNum(), ge, ge, thePath);
-		n = nbs.GetNodesExpanded();
+		n = nbs.GetNecessaryExpansions();
 		printf("%1.2f ", ge->GetPathLength(thePath));
 		nbs.GetPath(ge, start->GetNum(), goal->GetNum(), &z, &z, thePath);
-		nz = nbs.GetNodesExpanded();
+		nz = nbs.GetNecessaryExpansions();
 		printf("%1.2f\n", ge->GetPathLength(thePath));
 		
 		printf("%llu %llu %llu %llu %llu\n", f, b, m, n, nz);
