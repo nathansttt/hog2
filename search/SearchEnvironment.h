@@ -97,6 +97,7 @@ public:
 	virtual void GLLabelState(const state&, const char *) const {} // draw label over state
 	virtual void GLDrawLine(const state &x, const state &y) const {}
 	virtual void GLDrawPath(const std::vector<state> &x) const;
+	virtual void SetColor(const rgbColor &r) const { color = r; }
 	virtual void SetColor(GLfloat rr, GLfloat g, GLfloat b, GLfloat t = 1.0) const { color.r = rr; color.g = g; color.b = b; transparency = t; }
 	virtual void GetColor(GLfloat& rr, GLfloat& g, GLfloat& b, GLfloat &t) const { rr=color.r; g=color.g; b=color.b; t = transparency;}
 protected:

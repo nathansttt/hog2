@@ -48,10 +48,23 @@ class WeightedHeuristic : public Heuristic<state> {
 public:
 	WeightedHeuristic(Heuristic<state> *h, double weight) :h(h), weight(weight){}
 	double HCost(const state &a, const state &b) const { return weight*h->HCost(a, b); }
-private:
+	void SetWeight(double w) { weight = w; }
+//private:
 	Heuristic<state> *h;
 	double weight;
 };
+
+template <class state>
+class OffsetHeuristic : public Heuristic<state> {
+public:
+	OffsetHeuristic(Heuristic<state> *h, double off) :h(h), offset(off){}
+	double HCost(const state &a, const state &b) const { return std::max(h->HCost(a, b)-offset, 0.0); }
+	void SetOffset(double w) { offset = w; }
+	//private:
+	Heuristic<state> *h;
+	double offset;
+};
+
 
 
 template <class state>
