@@ -127,7 +127,11 @@ private:
 	}
 	
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
-	{ uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
+	{
+		uint64_t theID;
+		auto loc = queue.forwardQueue.Lookup(env->GetStateHash(node), theID);
+		ExtractPathToStartFromID(theID, thePath);
+	}
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
 	{
 		do {
@@ -247,7 +251,9 @@ template <class state, class action, class environment, class dataStructure, cla
 void NBS<state, action, environment, dataStructure, priorityQueue>::ExtractFromMiddle(std::vector<state> &thePath)
 {
 	std::vector<state> pFor, pBack;
+//	std::cout << "Extracting from " << middleNode << "\n";
 	ExtractPathToGoal(middleNode, pBack);
+//	std::cout << "And from: Extracting from " << middleNode << "\n";
 	ExtractPathToStart(middleNode, pFor);
 	reverse(pFor.begin(), pFor.end());
 	thePath = pFor;
@@ -273,6 +279,8 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 	//
 	uint64_t tmp = current.Close();
 	assert(tmp == nextID);
+//	if (currentCost != DBL_MAX)
+//		std::cout << "Expanding " << current.Lookup(nextID).data << "\n";
 	
 	//this can happen when we expand a single node instead of a pair
 	if (fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost))
@@ -294,9 +302,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 		switch (loc)
 		{
 			case kClosed: // ignore
+				break;
 #ifdef ADMISSIBLE
 				if (fless(current.Lookup(nextID).g + edgeCost, current.Lookup(childID).g))
 				{
+//					std::cout << "Re-opening node from closed " << current.Lookup(nextID).data << "\n";
 					double oldGCost = current.Lookup(childID).g;
 					current.Lookup(childID).parentID = nextID;
 					current.Lookup(childID).g = current.Lookup(nextID).g + edgeCost;
@@ -309,6 +319,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 					{
 						if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
+							if (currentCost == DBL_MAX)
+							{
+								printf("NBS: first solution %llu\n", nodesExpanded);
+//								std::cout << "Through " << succ << " (not here)\n";
+							}
 							// TODO: store current solution
 //							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
 //								   current.Lookup(nextID).g+edgeCost,
@@ -340,6 +355,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 					{
 						if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
+							if (currentCost == DBL_MAX)
+							{
+								printf("NBS: first solution %llu\n", nodesExpanded);
+								std::cout << "Through " << succ << " (better)\n";
+							}
 							// TODO: store current solution
 //							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
 //								   current.Lookup(nextID).g+edgeCost,
@@ -385,7 +405,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 					//		nextID,0);
 					//else
 					double newNodeF = current.Lookup(nextID).g + edgeCost + heuristic->HCost(succ, target);
-					if (fless(newNodeF , currentCost))
+					if (fless(newNodeF, currentCost))
 					{
 						if (fless(newNodeF, queue.GetLowerBound()))
 							current.AddOpenNode(succ,
@@ -399,23 +419,61 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 												current.Lookup(nextID).g + edgeCost,
 												heuristic->HCost(succ, target),
 												nextID, kOpenWaiting);
-					}
-					if (loc == kOpenReady || loc == kOpenWaiting)
-					{
-						//double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
-						if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
+
+						if (loc == kOpenReady || loc == kOpenWaiting)
 						{
-							// TODO: store current solution
-//							printf("NBS Potential solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
-//								current.Lookup(nextID).g + edgeCost,
-//								opposite.Lookup(reverseLoc).g,
-//								current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
-//								nodesExpanded);
-							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
+							//double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
+							if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
+							{
+								if (currentCost == DBL_MAX)
+								{
+//									if (&current == &queue.forwardQueue)
+//										std::cout << "Searching forward\n";
+//									else
+//										std::cout << "Searching backward\n";
+									printf("NBS: first solution %llu ", nodesExpanded);
+//									
+//									std::cout << "Through " << succ << " (first) \n";
+//									
+//									uint64_t theID;
+//									auto loc = queue.forwardQueue.Lookup(env->GetStateHash(succ), theID);
+//									std::cout << "Forward:\n";
+//									switch (loc)
+//									{
+//										case kOpenReady: std::cout << "Initially in open ready\n"; break;
+//										case kOpenWaiting: std::cout << "Initially in open waiting\n"; break;
+//										case kClosed: std::cout << "Initially in closed\n"; break;
+//										case kUnseen: std::cout << "Initially in UNSEEN\n"; break;
+//									}
+//									loc = queue.backwardQueue.Lookup(env->GetStateHash(succ), theID);
+//									std::cout << "Backward:\n";
+//									switch (loc)
+//									{
+//										case kOpenReady: std::cout << "Initially in open ready\n"; break;
+//										case kOpenWaiting: std::cout << "Initially in open waiting\n"; break;
+//										case kClosed: std::cout << "Initially in closed\n"; break;
+//										case kUnseen: std::cout << "Initially in UNSEEN\n"; break;
+//									}
+									
+								}
+								// TODO: store current solution
+//								printf("NBS Potential solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+//									   current.Lookup(nextID).g + edgeCost,
+//									   opposite.Lookup(reverseLoc).g,
+//									   current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
+//									   nodesExpanded);
+								currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
+								
+								middleNode = succ;
+//								std::cout << "One more time, solution passes through " << middleNode << " (first) \n";
+								
+							}
 							
-							middleNode = succ;
 						}
 						
+					}
+					else {
+						//std::cout << "***Not adding " << succ << " to open because cost is worse than current of " << currentCost << "\n";
 					}
 				}
 				
