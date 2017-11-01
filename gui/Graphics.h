@@ -12,6 +12,7 @@
 #include <vector>
 #include <math.h>
 #include "GLUtil.h" // TODO: needs to be renamed, if data structures are to be more widely re-used
+#include "FPUtil.h"
 
 namespace Graphics {
 
@@ -26,6 +27,9 @@ namespace Graphics {
 		point(float x = 0, float y = 0, float z = 0)
 		:x(x), y(y), z(z) {}
 		float x, y, z;
+
+		bool operator==(const point &p)
+		{ return fequal(p.x, x) && fequal(p.y, y) && fequal(p.z, z); }
 
 		point &operator*=(float i)
 		{ x*= i; y*=i; z*=i; return *this; }
@@ -80,14 +84,10 @@ namespace Graphics {
 		void FillCircle(rect r, rgbColor c);
 		
 		void DrawLine(point start, point end, float lineWidth, rgbColor c);
+		void DrawLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c);
 		void DrawArrow(point start, point end, float lineWidth, rgbColor c);
-		void DrawText(const char *text, point location, rgbColor c, float height);
+		void DrawText(const char *text, point location, rgbColor c, float height, const char *typeface = 0);
 
-//		enum shapeType {
-//			kRectangle,
-//			kOval,
-//			kTriangle // up down left right?
-//		};
 		struct drawInfo {
 			rect r;
 			rgbColor c;
@@ -104,6 +104,7 @@ namespace Graphics {
 			point loc;
 			rgbColor c;
 			float size;
+			std::string typeface;
 		};
 		enum tDrawClass
 		{
@@ -128,11 +129,16 @@ namespace Graphics {
 			union {
 				drawInfo shape;
 				lineInfo line;
-//				textInfo text;
 			};
+		};
+		struct segments {
+			rgbColor c;
+			float size;
+			std::vector<point> points;
 		};
 		std::vector<data> drawCommands;
 		std::vector<textInfo> text;
+		std::vector<segments> lineSegments;
 		
 //		std::vector<drawInfo> framedRects;
 //		std::vector<drawInfo> filledRects;

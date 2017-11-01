@@ -19,6 +19,7 @@ namespace Graphics {
 //		text.clear();
 		drawCommands.clear();
 		text.clear();
+		lineSegments.clear();
 	}
 	
 	void Display::EndFrame()
@@ -64,10 +65,16 @@ namespace Graphics {
 		//drawCommands.push_back({start, end, c, lineWidth, true});
 	}
 
-	void Display::DrawText(const char *textString, point location, rgbColor c, float height)
+	void Display::DrawText(const char *textString, point location, rgbColor c, float height, const char *typeface)
 	{
-		textInfo i = {std::string(textString), location, c, height};
+		textInfo i = {std::string(textString), location, c, height, std::string((typeface==0)?"Helvetica":typeface)};
 		text.push_back(i);
 	}
-	
+
+	void Display::DrawLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c)
+	{
+		segments s = {c, lineWidth, points};
+		lineSegments.push_back(s);
+	}
+
 }
