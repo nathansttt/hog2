@@ -108,6 +108,22 @@ std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbCol
 	return s;
 }
 
+std::string SVGDrawLineSegments(const std::vector<Graphics::point> &lines, float width, rgbColor c)
+{
+	std::string s = "<path d=\"";
+
+	s += "M "+std::to_string(lines[0].x)+" "+std::to_string(lines[0].y)+" L";
+	
+	for (int x = 1; x < lines.size(); x++)
+	{
+		s += " "+std::to_string(lines[x].x)+" "+std::to_string(lines[x].y)+" ";
+	}
+//	s += "\" stroke=\"black\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" vector-effect: \"non-scaling-stroke\";/>\n";
+	s += "\" stroke=\"black\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" />\n";
+	return s;
+}
+
+
 std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, rgbColor c)
 {
 	std::string s;
@@ -143,14 +159,19 @@ std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, b
 //	return s;
 }
 
-std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size)
+std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface)
 {
 	std::string s;
 //	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
 //	s += "; font-family:Helvetica, sans-serif; font-size:"+std::to_string(size*10)+"px\">";
-
+	// Helvetica Impact
 	s =  "<text x=\""+std::to_string(x1)+"\" y=\""+std::to_string(y1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
-	s += "; font-family:Impact, sans-serif; font-weight:bold; font-size:"+std::to_string(size)+"px\"";
+	s += "; font-family:";
+	if (typeface)
+		s += typeface;
+	else
+		s += "Helvetica";
+	s += ", sans-serif; font-weight:bold; font-size:"+std::to_string(size)+"px\"";
 	s += " dominant-baseline=\"middle\">";
 	s += txt;
 	s += "</text>";
@@ -187,6 +208,13 @@ float PointToSVG(float p, float multiplier)
 {
 	return (p+1)*multiplier/2.0;
 }
+
+void PointToSVG(Graphics::point &p, float xmultiplier, float ymultiplier)
+{
+	p.x = (p.x+1)*xmultiplier/2.0;
+	p.y = (p.y+1)*ymultiplier/2.0;
+}
+
 
 std::string MakeSVG(const Graphics::Display &disp, int width, int height)
 {
@@ -261,9 +289,20 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height)
 	for (int x = 0; x < disp.text.size(); x++)
 	{
 		const auto &i = disp.text[x];
-		s += SVGDrawText(PointToSVG(i.loc.x, width), PointToSVG(i.loc.y, width), i.s.c_str(), i.c, i.size*width/2.0);
+		s += SVGDrawText(PointToSVG(i.loc.x, width), PointToSVG(i.loc.y, height), i.s.c_str(), i.c, i.size*width/2.0, i.typeface.c_str());
 		s += "\n";
 	}
+	static std::vector<Graphics::point> outputPoints;
+	for (int x = 0; x < disp.lineSegments.size(); x++)
+	{
+		const auto &i = disp.lineSegments[x];
+		outputPoints = i.points;
+		for (auto &j : outputPoints)
+			PointToSVG(j, width, height);
+		s += SVGDrawLineSegments(outputPoints, i.size, i.c);
+		s += "\n";
+	}
+
 	
 	s += "\n";
 	s += "</svg>";
