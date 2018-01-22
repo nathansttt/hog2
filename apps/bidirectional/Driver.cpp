@@ -1840,7 +1840,7 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 		MakeSVG(d, path.c_str(), 800, 800);
 	}
 	
-	GetWeightedVertexGraph<xyLoc, tDirection>(p1, p2, me, me, me, "/Users/nathanst/bidir/z.svg");
+	BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(p1, p2, me, me, me, "/Users/nathanst/bidir/z.svg");
 //	GetWeightedVertexGraph<xyLoc, tDirection>(p2, p1, me, "/Users/nathanst/bidir/z.svg");
 }
 

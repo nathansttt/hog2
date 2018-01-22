@@ -107,7 +107,7 @@ void TestTOH(int first, int last)
 		}
 		if (1)
 		{
-			GetWeightedVertexGraph<TOHState<N>, TOHMove, TOH<N>>(s, g, &toh, f, b);
+			BidirectionalProblemAnalyzer<TOHState<N>, TOHMove, TOH<N>>::GetWeightedVertexGraph(s, g, &toh, f, b);
 		}
 //		if (1)
 //		{

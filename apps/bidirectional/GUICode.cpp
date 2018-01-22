@@ -494,7 +494,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 					}
 				}
 
-				GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, me, me);
+				BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, me, me);
 				
 				mouseTracking = false;
 				//SetupMapOverlay();
@@ -903,7 +903,7 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 			t += std::to_string(whichProblem);
 			t += ".svg";
 			//		GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, t.c_str());
-			if (GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, &w, &w) == 0)
+			if (BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, &w, &w) == 0)
 				return;
 			
 			
@@ -917,7 +917,7 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 		if (0)
 		{
 			OffsetHeuristic<xyLoc> o(me, 25);
-			if (GetWeightedVertexGraph<xyLoc, tDirection, MapEnvironment>(start, goal, me, &o, &o) == 0)
+			if (BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, &o, &o) == 0)
 				return;
 			timer.StartTimer();
 			nbs.GetPath(me, start, goal, &o, &o, path);
