@@ -16,6 +16,13 @@
 #include <sstream>
 #include <iomanip>
 
+namespace SVG {
+	enum svgAlignment {
+		kLeft,
+		kRight,
+		kCenter
+	};
+}
 
 std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbColor c);
 
@@ -26,7 +33,8 @@ std::string SVGDrawCircle(double x, double y, double radius, rgbColor c);
 std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, bool center = true);
 std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, rgbColor c);
 std::string SVGDrawLineSegments(const std::vector<Graphics::point> &lines, float width, rgbColor c);
-std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface = 0);
+std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface = 0,
+						SVG::svgAlignment align = SVG::kCenter);
 std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, rgbColor strokeColor, double size);
 
 std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbColor c2, const char *name);

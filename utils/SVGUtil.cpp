@@ -159,13 +159,19 @@ std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, b
 //	return s;
 }
 
-std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface)
+std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface, SVG::svgAlignment align)
 {
 	std::string s;
 //	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
 //	s += "; font-family:Helvetica, sans-serif; font-size:"+std::to_string(size*10)+"px\">";
 	// Helvetica Impact
-	s =  "<text x=\""+std::to_string(x1)+"\" y=\""+std::to_string(y1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
+	s =  "<text x=\""+std::to_string(x1)+"\" y=\""+std::to_string(y1)+"\" text-anchor=\"";
+	switch (align) {
+		case SVG::kLeft: s += "start"; break;
+		case SVG::kRight: s += "end"; break;
+		case SVG::kCenter: s += "middle"; break;
+	}//middle
+	s += "\" style=\"fill:"+SVGGetRGB(c);
 	s += "; font-family:";
 	if (typeface)
 		s += typeface;
