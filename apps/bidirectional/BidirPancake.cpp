@@ -20,13 +20,20 @@ const int S = 10; // must be factor of sizes below
 
 void TestPancakeTR();
 void TestPancakeRandom();
-void TestPancakeHard();
+void TestPancakeHard(int gap = 0);
 void TestRob();
+void TestVariants();
+
 void TestPancake()
 {
 //	TestRob();
 //	TestPancakeRandom();
-	TestPancakeHard();
+
+//	TestPancakeHard(0); // GAP heuristic #
+//	TestPancakeHard(1);
+//	TestPancakeHard(2);
+
+	TestVariants();
 	exit(0);
 }
 
@@ -252,14 +259,14 @@ void TestPancakeRandom()
 }
 
 const int CNT = 20;
-void TestPancakeHard()
+void TestPancakeHard(int gap)
 {
 	srandom(2017218);
 	PancakePuzzleState<CNT> start;
 	PancakePuzzleState<CNT> original;
 	PancakePuzzleState<CNT> goal;
-	PancakePuzzle<CNT> pancake;
-	PancakePuzzle<CNT> pancake2;
+	PancakePuzzle<CNT> pancake(gap);
+	PancakePuzzle<CNT> pancake2(gap);
 	
 	
 	std::vector<PancakePuzzleState<CNT>> nbsPath;
@@ -279,14 +286,14 @@ void TestPancakeHard()
 		std::cout << original << "; Initial heuristic " << pancake.HCost(original, goal) << "\n";
 		
 		// A*
-		if (0)
+		if (1)
 		{
 			TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
 			start = original;
 			t1.StartTimer();
 			astar.GetPath(&pancake, start, goal, astarPath);
 			t1.EndTimer();
-			printf("HARD-%d A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake.GetPathLength(astarPath),
+			printf("HARD-%d-G%d A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, gap, pancake.GetPathLength(astarPath),
 				   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
 //			std::unordered_map<int, bool> m;
 //			for (int x = 0; x < astar.GetNumItems(); x++)
@@ -304,14 +311,14 @@ void TestPancakeHard()
 		}
 
 		// Reverse A*
-		if (0)
+		if (1)
 		{
 			TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
 			start = original;
 			t1.StartTimer();
 			astar.GetPath(&pancake, goal, start, astarPath);
 			t1.EndTimer();
-			printf("HARD-%d ReverseA* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake.GetPathLength(astarPath),
+			printf("HARD-%d-G%d ReverseA* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, gap, pancake.GetPathLength(astarPath),
 				   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
 //			std::unordered_map<int, bool> m;
 //			for (int x = 0; x < astar.GetNumItems(); x++)
@@ -329,19 +336,32 @@ void TestPancakeHard()
 		}
 		
 		// Find minimum
-		if (0)
+		if (1)
 		{
-			std::string t = "/Users/nathanst/pancake_";
-			t += std::to_string(count);
-			t += ".svg";
-			
 			start = original;
-			GetWeightedVertexGraph<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>(start, goal, &pancake, &pancake, &pancake);
+
+			std::string t = "/Users/nathanst/bidir/pancake/pancake_";
+			t += std::to_string(count);
+			t += "_GAP";
+			t += std::to_string(gap);
+
+			BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> p(start, goal, &pancake, &pancake, &pancake);
+			p.drawFullGraph = true;
+			p.drawProblemInstance = false;
+			p.drawMinimumVC = true;
+			p.drawAllG = false;
+			p.drawStatistics = false;
+			p.SaveSVG((t+"-full.svg").c_str());
+			p.drawFullGraph = false;
+			p.drawProblemInstance = false;
+			p.drawAllG = true;
+			p.drawStatistics = false;
+			p.SaveSVG((t+"-min.svg").c_str());
 		}
 
 		
 		// NBS
-		if (0)
+		if (1)
 		{
 			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
 			goal.Reset();
@@ -349,11 +369,11 @@ void TestPancakeHard()
 			t2.StartTimer();
 			nbs.GetPath(&pancake, start, goal, &pancake, &pancake2, nbsPath);
 			t2.EndTimer();
-			printf("HARD-%d NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, pancake.GetPathLength(nbsPath),
+			printf("HARD-%d-G%d NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, gap, pancake.GetPathLength(nbsPath),
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
 		}
 		// NBS0
-		if (1)
+		if (0)
 		{
 			ZeroHeuristic<PancakePuzzleState<CNT>> z;
 			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
@@ -362,7 +382,7 @@ void TestPancakeHard()
 			t2.StartTimer();
 			nbs.GetPath(&pancake, start, goal, &z, &z, nbsPath);
 			t2.EndTimer();
-			printf("HARD-%d NBS0 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, pancake.GetPathLength(nbsPath),
+			printf("HARD-%d-G%d NBS0 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, gap, pancake.GetPathLength(nbsPath),
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
 		}
 		
@@ -421,3 +441,99 @@ void TestPancakeHard()
 	}
 }
 
+void Solve(Heuristic<PancakePuzzleState<CNT>> *h, const char *name)
+{
+	PancakePuzzle<CNT> pancake;
+	PancakePuzzleState<CNT> start;
+	PancakePuzzleState<CNT> goal;
+	GetPancakeInstance(start, 11);
+	goal.Reset();
+
+	if (1)
+	{
+		BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> p(start, goal, &pancake, h, h);
+		p.drawProblemInstance = false;
+		p.drawStatistics = false;
+		p.drawMinimumVC = true;
+		p.drawSumOnEdge = true;
+		p.drawShortenedEdges = false;
+
+		p.drawFullGraph = true;
+		p.drawAllG = false;
+		p.flipBackwardsGCost = false;
+		{
+			std::string s(name);
+			s += "-ey-gn-fn.svg";
+			p.SaveSVG(s.c_str());
+		}
+
+		p.drawFullGraph = true;
+		p.drawAllG = false;
+		p.flipBackwardsGCost = true;
+		p.drawSumOnEdge = false;
+		{
+			std::string s(name);
+			s += "-ey-gn-fy.svg";
+			p.SaveSVG(s.c_str());
+		}
+
+		p.drawFullGraph = false;
+		p.drawAllG = true;
+		p.flipBackwardsGCost = true;
+		p.drawSumOnEdge = true;
+		{
+			std::string s(name);
+			s += "-en-gy-fy.svg";
+			p.SaveSVG(s.c_str());
+		}
+
+		p.drawFullGraph = false;
+		p.drawAllG = true;
+		p.flipBackwardsGCost = true;
+		p.drawShortenedEdges = true;
+		p.drawSumOnEdge = true;
+		{
+			std::string s(name);
+			s += "-es-gy-fy.svg";
+			p.SaveSVG(s.c_str());
+		}
+
+}
+	
+	if (0)
+	{
+		std::vector<PancakePuzzleState<CNT>> nbsPath;
+		NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
+		nbs.GetPath(&pancake, start, goal, h, h, nbsPath);
+		printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %f meeting\n", pancake.GetPathLength(nbsPath),
+			   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetMeetingPoint());
+	}
+}
+
+void TestVariants()
+{
+	srandom(2017218);
+	PancakePuzzleState<CNT> start;
+	PancakePuzzleState<CNT> original;
+	PancakePuzzleState<CNT> goal;
+	PancakePuzzle<CNT> pancake;
+	PancakePuzzle<CNT> pancake0(0);
+	PancakePuzzle<CNT> pancake1(1);
+	PancakePuzzle<CNT> pancake2(2);
+	OffsetHeuristic<PancakePuzzleState<CNT>> o1(&pancake0, 1);
+	OffsetHeuristic<PancakePuzzleState<CNT>> o2(&pancake0, 2);
+	OffsetHeuristic<PancakePuzzleState<CNT>> o3(&pancake0, 3);
+	WeightedHeuristic<PancakePuzzleState<CNT>> w9(&pancake0, 0.9);
+	WeightedHeuristic<PancakePuzzleState<CNT>> w8(&pancake0, 0.8);
+	WeightedHeuristic<PancakePuzzleState<CNT>> w7(&pancake0, 0.7);
+
+	Solve(&pancake0, "/Users/nathanst/bidir/pancake/p11_G0");
+	Solve(&pancake1, "/Users/nathanst/bidir/pancake/p11_G1");
+	Solve(&pancake2, "/Users/nathanst/bidir/pancake/p11_G2");
+	Solve(&o1, "/Users/nathanst/bidir/pancake/p11_O1");
+	Solve(&o2, "/Users/nathanst/bidir/pancake/p11_O2");
+	Solve(&o3, "/Users/nathanst/bidir/pancake/p11_O3");
+	Solve(&w9, "/Users/nathanst/bidir/pancake/p11_W9");
+	Solve(&w8, "/Users/nathanst/bidir/pancake/p11_W8");
+	Solve(&w7, "/Users/nathanst/bidir/pancake/p11_W7");
+}
