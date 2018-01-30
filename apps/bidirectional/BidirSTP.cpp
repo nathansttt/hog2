@@ -156,22 +156,22 @@ void TestSTP(int algorithm)
 			t += std::to_string(x+1);
 			
 			BidirectionalProblemAnalyzer<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> p(start, goal, &mnp, &mnp, &mnp);
-			p.drawFullGraph = true;
-			p.drawProblemInstance = false;
-			p.drawMinimumVC = true;
-			p.drawAllG = false;
-			p.drawStatistics = false;
-			p.SaveSVG((t+"-full.svg").c_str());
-			p.drawFullGraph = false;
-			p.drawProblemInstance = false;
-			p.drawAllG = true;
-			p.drawStatistics = false;
-			p.SaveSVG((t+"-min.svg").c_str());
-			printf("Forward: %d\n", p.GetForwardWork());
-			printf("Backward: %d\n", p.GetBackwardWork());
-			printf("Minimum: %d\n", p.GetMinWork());
-			int maxg = p.GetNumGCosts();
-			p.SaveSVG((t+"-shrunk.svg").c_str(), (maxg+11)/12);
+//			p.drawFullGraph = true;
+//			p.drawProblemInstance = false;
+//			p.drawMinimumVC = true;
+//			p.drawAllG = false;
+//			p.drawStatistics = false;
+//			p.SaveSVG((t+"-full.svg").c_str());
+//			p.drawFullGraph = false;
+//			p.drawProblemInstance = false;
+//			p.drawAllG = true;
+//			p.drawStatistics = false;
+//			p.SaveSVG((t+"-min.svg").c_str());
+//			printf("Forward: %d\n", p.GetForwardWork());
+//			printf("Backward: %d\n", p.GetBackwardWork());
+//			printf("Minimum: %d\n", p.GetMinWork());
+//			int maxg = p.GetNumGCosts();
+//			p.SaveSVG((t+"-shrunk.svg").c_str(), (maxg+11)/12);
 
 		}
 
