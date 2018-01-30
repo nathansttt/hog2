@@ -97,6 +97,16 @@ namespace PermutationPuzzle {
 //								 std::vector<int> &dual);
 		void GetStateFromHash(state &s, uint64_t hash) const;
 		uint64_t GetStateHash(const state &s) const;
+		static uint64_t Hash(const state &s)
+		{
+			MR1KPermutation mr1;
+			state tmp = s;
+			state dual;
+			for (int x = 0; x < tmp.size(); x++)
+				dual.puzzle[tmp.puzzle[x]] = x;
+			return mr1.Rank(tmp.puzzle, dual.puzzle, s.size(), s.size());
+		}
+
 		state TranformToStandardGoal(const state &a, const state &b) const;
 		virtual void FinishUnranking(const state &s) const {}
 //		void PrintPDBHistogram(int which) const;

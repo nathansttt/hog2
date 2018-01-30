@@ -143,8 +143,19 @@ private:
 	//unsigned size;
 };
 
-//typedef UnitSimulation<PancakePuzzleState, unsigned, Pancake> PancakeSimulation;
 
+namespace std {
+	
+	template <int N>
+	struct hash<PancakePuzzleState<N>>
+	{
+		std::size_t operator()(const PancakePuzzleState<N>& p) const
+		{
+			return PancakePuzzle<N>::Hash(p);
+		}
+	};
+	
+}
 
 
 template <int N>
