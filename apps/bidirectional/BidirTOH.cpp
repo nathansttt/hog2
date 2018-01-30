@@ -14,6 +14,89 @@
 #include "BSStar.h"
 #include "WeightedVertexGraph.h"
 
+//// Builds two PDBs according to the sizes, plus 2 smaller pdbs that also cover the state space
+//template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
+//Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
+//{
+//	TOH<numDisks> toh;
+//	TOH<pdb1Disks> absToh1;
+//	TOH<pdb2Disks> absToh2;
+//	TOH<pdb2Disks-2> absToh3;
+//	TOH<pdb1Disks+2> absToh4;
+//	TOHState<pdb1Disks> absTohState1;
+//	TOHState<pdb2Disks> absTohState2;
+//
+//
+//	TOHPDB<pdb1Disks, numDisks, pdb2Disks> *pdb1 = new TOHPDB<pdb1Disks, numDisks, pdb2Disks>(&absToh1, goal); // top disks
+//	TOHPDB<pdb2Disks, numDisks> *pdb2 = new TOHPDB<pdb2Disks, numDisks>(&absToh2, goal); // bottom disks
+//	TOHPDB<pdb2Disks-2, numDisks, pdb1Disks+2> *pdb3 = new TOHPDB<pdb2Disks-2, numDisks, pdb1Disks+2>(&absToh3, goal); // top disks
+//	TOHPDB<pdb1Disks+2, numDisks> *pdb4 = new TOHPDB<pdb1Disks+2, numDisks>(&absToh4, goal); // top disks
+//	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+//	pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+//	pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+//	pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
+//
+//	Heuristic<TOHState<numDisks>> *h = new Heuristic<TOHState<numDisks>>;
+//
+//	h->lookups.resize(0);
+//
+//	h->lookups.push_back({kMaxNode, 1, 2});
+//	h->lookups.push_back({kAddNode, 3, 2});
+//	h->lookups.push_back({kAddNode, 5, 2});
+//	h->lookups.push_back({kLeafNode, 0, 0});
+//	h->lookups.push_back({kLeafNode, 1, 1});
+//	h->lookups.push_back({kLeafNode, 2, 2});
+//	h->lookups.push_back({kLeafNode, 3, 3});
+//	h->heuristics.resize(0);
+//	h->heuristics.push_back(pdb1);
+//	h->heuristics.push_back(pdb2);
+//	h->heuristics.push_back(pdb3);
+//	h->heuristics.push_back(pdb4);
+//
+//	return h;
+//}
+
+//// Builds two PDBs that are symmetric for the standard goal - but not necessarily for random goals
+//template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
+//Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
+//{
+//	TOH<numDisks> toh;
+//	TOH<pdb1Disks> absToh1;
+//	TOH<pdb2Disks> absToh2;
+//	TOHState<pdb1Disks> absTohState1;
+//	TOHState<pdb2Disks> absTohState2;
+//
+//
+//	TOHPDB<pdb1Disks, numDisks, pdb2Disks> *pdb1 = new TOHPDB<pdb1Disks, numDisks, pdb2Disks>(&absToh1, goal); // top disks
+//	TOHPDB<pdb2Disks, numDisks> *pdb2 = new TOHPDB<pdb2Disks, numDisks>(&absToh2, goal); // bottom disks
+//	TOHPDB<pdb2Disks, numDisks, pdb1Disks> *pdb3 = new TOHPDB<pdb2Disks, numDisks, pdb1Disks>(&absToh2, goal); // top disks
+//	TOHPDB<pdb1Disks, numDisks> *pdb4 = new TOHPDB<pdb1Disks, numDisks>(&absToh1, goal); // bottom disks
+//	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+//	pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+//	pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+//	pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
+//
+//	Heuristic<TOHState<numDisks>> *h = new Heuristic<TOHState<numDisks>>;
+//
+//	h->lookups.resize(0);
+//
+//	h->lookups.push_back({kMaxNode, 1, 2});
+//	h->lookups.push_back({kAddNode, 3, 2});
+//	h->lookups.push_back({kAddNode, 5, 2});
+//	h->lookups.push_back({kLeafNode, 0, 0});
+//	h->lookups.push_back({kLeafNode, 1, 1});
+//	h->lookups.push_back({kLeafNode, 2, 2});
+//	h->lookups.push_back({kLeafNode, 3, 3});
+//	h->heuristics.resize(0);
+//	h->heuristics.push_back(pdb1);
+//	h->heuristics.push_back(pdb2);
+//	h->heuristics.push_back(pdb3);
+//	h->heuristics.push_back(pdb4);
+//
+//	return h;
+//}
+
+// Builds two PDBs that are symmetric for the standard goal - but not necessarily for random goals
 template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
 Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
 {
@@ -32,21 +115,23 @@ Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
 	Heuristic<TOHState<numDisks>> *h = new Heuristic<TOHState<numDisks>>;
 	
 	h->lookups.resize(0);
+	
 	h->lookups.push_back({kAddNode, 1, 2});
 	h->lookups.push_back({kLeafNode, 0, 0});
 	h->lookups.push_back({kLeafNode, 1, 1});
 	h->heuristics.resize(0);
 	h->heuristics.push_back(pdb1);
 	h->heuristics.push_back(pdb2);
-
+	
 	return h;
 }
+
 
 template <int N, int pdb1Disks>
 void TestTOH(int first, int last)
 {
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
-	NBS<TOHState<N>, TOHMove, TOH<N>> nbs;
+	NBS<TOHState<N>, TOHMove, TOH<N>, NBSQueue<TOHState<N>, 0>> nbs;
 	MM<TOHState<N>, TOHMove, TOH<N>> mm;
 	BSStar<TOHState<N>, TOHMove, TOH<N>> bs;
 
@@ -146,14 +231,14 @@ void TestTOH(int first, int last)
 			b->heuristics.pop_back();
 		}
 		delete b;
+		while (f->heuristics.size() > 0)
+		{
+			delete f->heuristics.back();
+			f->heuristics.pop_back();
+		}
+		delete f;
 	}
 
-	while (f->heuristics.size() > 0)
-	{
-		delete f->heuristics.back();
-		f->heuristics.pop_back();
-	}
-	delete f;
 }
 
 void TOHTest()

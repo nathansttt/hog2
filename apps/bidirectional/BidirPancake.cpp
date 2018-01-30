@@ -15,6 +15,7 @@
 #include "BSStar.h"
 #include "PancakeInstances.h"
 #include "WeightedVertexGraph.h"
+#include "HeuristicError.h"
 
 const int S = 10; // must be factor of sizes below
 
@@ -23,19 +24,21 @@ void TestPancakeRandom();
 void TestPancakeHard(int gap = 0);
 void TestRob();
 void TestVariants();
+void TestError();
 
 void TestPancake()
 {
 //	TestRob();
 //	TestPancakeRandom();
 
-//	TestPancakeHard(0); // GAP heuristic #
-//	TestPancakeHard(1);
-//	TestPancakeHard(2);
-
-	TestVariants();
+	TestPancakeHard(0); // GAP heuristic #
+	TestPancakeHard(1);
+	TestPancakeHard(2);
+//	TestError();
+//	TestVariants();
 	exit(0);
 }
+
 
 void TestRob()
 {
@@ -258,7 +261,7 @@ void TestPancakeRandom()
 	}
 }
 
-const int CNT = 20;
+const int CNT = 16;
 void TestPancakeHard(int gap)
 {
 	srandom(2017218);
@@ -286,7 +289,7 @@ void TestPancakeHard(int gap)
 		std::cout << original << "; Initial heuristic " << pancake.HCost(original, goal) << "\n";
 		
 		// A*
-		if (1)
+		if (0)
 		{
 			TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
 			start = original;
@@ -311,7 +314,7 @@ void TestPancakeHard(int gap)
 		}
 
 		// Reverse A*
-		if (1)
+		if (0)
 		{
 			TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
 			start = original;
@@ -351,12 +354,12 @@ void TestPancakeHard(int gap)
 			p.drawMinimumVC = true;
 			p.drawAllG = false;
 			p.drawStatistics = false;
-			p.SaveSVG((t+"-full.svg").c_str());
+//			p.SaveSVG((t+"-full.svg").c_str());
 			p.drawFullGraph = false;
 			p.drawProblemInstance = false;
 			p.drawAllG = true;
 			p.drawStatistics = false;
-			p.SaveSVG((t+"-min.svg").c_str());
+//			p.SaveSVG((t+"-min.svg").c_str());
 		}
 
 		
@@ -369,7 +372,19 @@ void TestPancakeHard(int gap)
 			t2.StartTimer();
 			nbs.GetPath(&pancake, start, goal, &pancake, &pancake2, nbsPath);
 			t2.EndTimer();
-			printf("HARD-%d-G%d NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, gap, pancake.GetPathLength(nbsPath),
+			printf("HARD-%d-G%d NBSe1 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, gap, pancake.GetPathLength(nbsPath),
+				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
+		}
+		// NBS
+		if (1)
+		{
+			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>, NBSQueue<PancakePuzzleState<CNT>, 0>> nbs;
+			goal.Reset();
+			start = original;
+			t2.StartTimer();
+			nbs.GetPath(&pancake, start, goal, &pancake, &pancake2, nbsPath);
+			t2.EndTimer();
+			printf("HARD-%d-G%d NBSe0 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, gap, pancake.GetPathLength(nbsPath),
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
 		}
 		// NBS0
@@ -509,6 +524,80 @@ void Solve(Heuristic<PancakePuzzleState<CNT>> *h, const char *name)
 			   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetMeetingPoint());
 	}
 }
+
+void TestError()
+{
+	srandom(2017218);
+	PancakePuzzleState<CNT> goal;
+	PancakePuzzle<4> pancake(2);
+	PancakePuzzleState<4> smallGoal;
+	PancakePuzzle<CNT> pancake0(0);
+	PancakePuzzle<CNT> pancake1(1);
+	PancakePuzzle<CNT> pancake2(2);
+	OffsetHeuristic<PancakePuzzleState<CNT>> o1(&pancake0, 1);
+	OffsetHeuristic<PancakePuzzleState<CNT>> o2(&pancake0, 2);
+	OffsetHeuristic<PancakePuzzleState<CNT>> o3(&pancake0, 3);
+	WeightedHeuristic<PancakePuzzleState<CNT>> w9(&pancake0, 0.9);
+	WeightedHeuristic<PancakePuzzleState<CNT>> w8(&pancake0, 0.8);
+	WeightedHeuristic<PancakePuzzleState<CNT>> w7(&pancake0, 0.7);
+
+	goal.Reset();
+	float f;
+
+//	f = MeasureHeuristicErrors(&pancake, smallGoal, &pancake, 3, 2, [](float i){return i < 1;});
+//	printf("GAP\\2 Error percentage: %1.1f (4-pancake)\n", f*100);
+
+	f = MeasureHeuristicErrors(&pancake0, goal, &pancake0, 3, 2, [](float i){return i <1;});
+	printf("GAP\\0 Error percentage (3,2): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake1, goal, &pancake1, 3, 2, [](float i){return i <1;});
+	printf("GAP\\1 Error percentage (3,2): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake2, goal, &pancake2, 3, 2, [](float i){return i <1;});
+	printf("GAP\\2 Error percentage (3,2): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o1, 3, 2, [](float i){return i <1;});
+	printf("GAP-1 Error percentage (3,2): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o2, 3, 2, [](float i){return i <1;});
+	printf("GAP-2 Error percentage (3,2): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o3, 3, 2, [](float i){return i <1;});
+	printf("GAP-3 Error percentage (3,2): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w9, 3, 2, [](float i){return i <1;});
+	printf("GAPx.9 Error percentage (3,2): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w8, 3, 2, [](float i){return i <1;});
+	printf("GAPx.8 Error percentage (3,2): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w7, 3, 2, [](float i){return i <1;});
+	printf("GAPx.7 Error percentage (3,2): %1.1f\n", f*100);
+
+	printf("\n----\n\n");
+	
+	f = MeasureHeuristicErrors(&pancake0, goal, &pancake0, 3, 1, [](float i){return i <2;});
+	printf("GAP\\0 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake1, goal, &pancake1, 3, 1, [](float i){return i <2;});
+	printf("GAP\\1 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake2, goal, &pancake2, 3, 1, [](float i){return i <2;});
+	printf("GAP\\2 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o1, 3, 1, [](float i){return i <2;});
+	printf("GAP-1 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o2, 3, 1, [](float i){return i <2;});
+	printf("GAP-2 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o3, 3, 1, [](float i){return i <2;});
+	printf("GAP-3 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w9, 3, 2, [](float i){return i <2;});
+	printf("GAPx.9 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w8, 3, 2, [](float i){return i <2;});
+	printf("GAPx.8 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w7, 3, 2, [](float i){return i <2;});
+	printf("GAPx.7 Error percentage (3,1): %1.1f\n", f*100);
+
+	
+	f = MeasureHeuristicErrors(&pancake0, goal, &w9, 3, 2, [](float i){return i>=1 && i <2;});
+	printf("GAPx.9 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w8, 3, 2, [](float i){return i>=1 && i <2;});
+	printf("GAPx.8 Error percentage (3,1): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w7, 3, 2, [](float i){return i>=1 && i <2;});
+	printf("GAPx.7 Error percentage (3,1): %1.1f\n", f*100);
+
+	exit(0);
+}
+
 
 void TestVariants()
 {
