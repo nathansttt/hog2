@@ -32,8 +32,8 @@ void TestPancake()
 //	TestPancakeRandom();
 
 	TestPancakeHard(0); // GAP heuristic #
-	TestPancakeHard(1);
-	TestPancakeHard(2);
+//	TestPancakeHard(1);
+//	TestPancakeHard(2);
 //	TestError();
 //	TestVariants();
 	exit(0);
@@ -339,7 +339,7 @@ void TestPancakeHard(int gap)
 		}
 		
 		// Find minimum
-		if (1)
+		if (0)
 		{
 			start = original;
 
@@ -364,7 +364,7 @@ void TestPancakeHard(int gap)
 
 		
 		// NBS
-		if (1)
+		if (0)
 		{
 			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
 			goal.Reset();
@@ -376,7 +376,7 @@ void TestPancakeHard(int gap)
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
 		}
 		// NBS
-		if (1)
+		if (0)
 		{
 			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>, NBSQueue<PancakePuzzleState<CNT>, 0>> nbs;
 			goal.Reset();
@@ -388,10 +388,10 @@ void TestPancakeHard(int gap)
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
 		}
 		// NBS0
-		if (0)
+		if (1)
 		{
 			ZeroHeuristic<PancakePuzzleState<CNT>> z;
-			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
+			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>, NBSQueue<PancakePuzzleState<CNT>, 0>> nbs;
 			goal.Reset();
 			start = original;
 			t2.StartTimer();
