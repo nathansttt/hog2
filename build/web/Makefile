@@ -18,7 +18,7 @@ PROJECTS = \
   graph \
   grids \
   graphalgorithms \
-  gui/html \
+  gui/web \
   mapalgorithms \
   utils \
   demos/bidirnecessary \
