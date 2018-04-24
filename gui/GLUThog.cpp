@@ -808,7 +808,6 @@ void drawGL (pRecContext pContextInfo)
 	if (!pContextInfo)
 	 return;
 
-	
 	// clear our drawable
 	glClear(GL_COLOR_BUFFER_BIT);
 	

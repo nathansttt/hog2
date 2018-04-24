@@ -11,7 +11,7 @@
 
 #include "SearchEnvironment.h"
 #include <vector>
-
+#include "BitMap.h"
 
 struct voxelGridState {
 	voxelGridState() {}
@@ -19,6 +19,18 @@ struct voxelGridState {
 	:x(a), y(b), z(c) {}
 	uint16_t x, y, z;
 };
+
+namespace std {
+	template <>
+	struct hash<voxelGridState>
+	{
+		std::size_t operator()(const voxelGridState& k) const
+		{
+			return ((size_t)k.x<<32)|((size_t)k.y<<16)|k.z;
+		}
+	};
+	
+}
 
 bool operator==(const voxelGridState &v1, const voxelGridState &v2);
 
@@ -58,12 +70,14 @@ public:
 	void OpenGLDraw(const voxelGridState&, const voxelGridAction&) const;
 	void GLLabelState(const voxelGridState&, const char *) const;
 	void GLDrawLine(const voxelGridState &x, const voxelGridState &y) const;
+	void Draw(Graphics::Display &display);
 
 	bool efficient;
 	void GetGLCoordinate(const voxelGridState &, point3d &) const;
 	void GetGLCornerCoordinate(const voxelGridState &, point3d &) const;
 	void Fill(voxelGridState);
 	void Invert();
+	BitMapPic *GetImage(int face);
 private:
 	void SetUpDrawBuffers();
 	void EfficientDraw() const;

@@ -26,6 +26,7 @@ public:
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	void Reset() { bound = initialBound; nextBound = initialBound; path.clear(); history.clear(); }
 	void OpenGLDraw();
+	void Draw(Graphics::Display &display);
 	state GetCurrentState() const { if (path.size() > 0) return path.back(); return start; }
 	void GetCurrentPath(std::vector<state> &p) const { p = path; }
 	int GetCurrentFLimit() { return bound; }
@@ -118,6 +119,13 @@ bool IncrementalIDA<state, action>::DoSingleSearchStep(SearchEnvironment<state, 
 			nextBound = f;
 	}
 	return false;
+}
+
+template <class state, class action>
+void IncrementalIDA<state, action>::Draw(Graphics::Display &display)
+{
+	for (int x = 1; x < path.size(); x++)
+		env->DrawLine(display, path[x-1], path[x], 10);
 }
 
 template <class state, class action>

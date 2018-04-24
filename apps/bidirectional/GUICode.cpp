@@ -868,7 +868,7 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 {
 	
 	WeightedHeuristic<xyLoc> wh(me, weight);
-
+	ZeroHeuristic<xyLoc> z;
 	compare.SetHeuristic(&wh);
 	forward.SetStopAfterGoal(false);
 	backward.SetStopAfterGoal(false);
@@ -880,17 +880,26 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 	
 	{
 		Timer timer;
-		NBS<xyLoc, tDirection, MapEnvironment> nbs;
+		NBS<xyLoc, tDirection, MapEnvironment, NBSQueue<xyLoc, 1>> nbse1;
+		NBS<xyLoc, tDirection, MapEnvironment, NBSQueue<xyLoc, 0>> nbse0;
+		NBS<xyLoc, tDirection, MapEnvironment, NBSQueue<xyLoc, 1>> nbs0e1;
 		TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 
 		if (1)
 		{
-			astar.SetHeuristic(&wh);
-			astar.GetPath(me, start, goal, path);
-			printf("A*: %llu nodes\n", astar.GetNodesExpanded());
+			nbs0e1.GetPath(me, start, goal, &z, &z, path);
+			printf("NBS0e1 found path length %1.0f; %llu expanded; %llu necessary\n", me->GetPathLength(path),
+				   nbs0e1.GetNodesExpanded(), nbs0e1.GetNecessaryExpansions());
 
-			nbs.GetPath(me, start, goal, &wh, &wh, path);
-			printf("NBS: %llu nodes\n", nbs.GetNodesExpanded());
+			nbse0.GetPath(me, start, goal, me, me, path);
+			printf("NBSe0 found path length %1.0f; %llu expanded; %llu necessary\n", me->GetPathLength(path),
+				   nbse0.GetNodesExpanded(), nbse0.GetNecessaryExpansions());
+
+			nbse1.GetPath(me, start, goal, me, me, path);
+			printf("NBSe1 found path length %1.0f; %llu expanded; %llu necessary\n", me->GetPathLength(path),
+				   nbse1.GetNodesExpanded(), nbse1.GetNecessaryExpansions());
+
+			BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, me, me);
 		}
 		
 		if (0)

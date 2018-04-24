@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1600, 800);
+	return 0;
 }
 
 /**
@@ -99,13 +100,20 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	else if (eType == kWindowCreated)
 	{
 		printf("Window %ld created\n", windowID);
-		glClearColor(0.99, 0.99, 0.99, 1.0);
+		//glClearColor(0.99, 0.99, 0.99, 1.0);
+		ReinitViewports(windowID, {-1, -1, 0.0, 1}, kScaleToFill);
+		AddViewport(windowID, {0, -1, 1, 1}, kScaleToFill);
+//		ReinitViewports(windowID, {-1, -1, 1, 0}, kScaleToFill);
+//		AddViewport(windowID, {-1, 0, 1, 1}, kScaleToFill);
+
+		
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
-		SetNumPorts(windowID, 2);
+//		SetNumPorts(windowID, 2);
 		g = new Graph();
 		ge = new GraphEnvironment(g);
 		ge->SetDrawEdgeCosts(true);
 		ge->SetDrawNodeLabels(true);
+		ge->SetIntegerEdgeCosts(true);
 		astar.SetWeight(0);
 		te.AddLine("Dijkstra's algorithm sample code");
 		te.AddLine("Current mode: add nodes (click to add node)");
@@ -117,29 +125,30 @@ int frameCnt = 0;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	Graphics::Display &display = getCurrentContext()->display;
 	if (viewport == 0)
 	{
+		display.FillRect({-1.0, -1.0, 1.0, 1}, Colors::black);
 		if (ge == 0 || g == 0)
 			return;
 		ge->SetColor(0.5, 0.5, 1.0);
-		ge->OpenGLDraw();
-		
+		ge->Draw(display);
 		if (from != -1 && to != -1)
 		{
 			glLineWidth(4.);
 			ge->SetColor(1, 0, 0);
-			ge->GLDrawLine(from, to);
+			ge->DrawLine(display, from, to);
 		}
 		
 		if (running)
 		{
 			//astar.DoSingleSearchStep(path);
-			astar.OpenGLDraw();
+			astar.Draw(display);
 		}
 		else {
 			ge->SetColor(0.75, 0.75, 1.0);
 			for (int x = 0; x < g->GetNumNodes(); x++)
-				ge->OpenGLDraw(x);
+				ge->Draw(display, x);
 		}
 
 		if (path.size() > 0)
@@ -148,32 +157,32 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			glLineWidth(10);
 			for (int x = 1; x < path.size(); x++)
 			{
-				ge->GLDrawLine(path[x-1], path[x]);
+				ge->DrawLine(display, path[x-1], path[x], 10);
 			}
 			glLineWidth(1);
 		}
-}
+	}
 	if (viewport == 1)
 	{
-		te.OpenGLDraw(windowID);
+		te.Draw(display);
 	}
 	
-	if (recording && viewport == GetNumPorts(windowID)-1)
-	{
-		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/dijkstra-%d%d%d%d",
-				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-		SaveScreenshot(windowID, fname);
-		printf("Saved %s\n", fname);
-		frameCnt++;
-		if (path.size() == 0)
-		{
-			MyDisplayHandler(windowID, kNoModifier, 'o');
-		}
-		else {
-			recording = false;
-		}
-	}
+//	if (recording && viewport == GetNumPorts(windowID)-1)
+//	{
+//		char fname[255];
+//		sprintf(fname, "/Users/nathanst/Movies/tmp/dijkstra-%d%d%d%d",
+//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+//		SaveScreenshot(windowID, fname);
+//		printf("Saved %s\n", fname);
+//		frameCnt++;
+//		if (path.size() == 0)
+//		{
+//			MyDisplayHandler(windowID, kNoModifier, 'o');
+//		}
+//		else {
+//			recording = false;
+//		}
+//	}
 	return;
 	
 }
@@ -245,7 +254,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
 			else
 			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+				//SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
 			}
 			break;
 		case 'p':
@@ -442,8 +451,10 @@ node *FindClosestNode(Graph *gr, point3d loc)
 }
 
 
-bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButtonType button, tMouseEventType mType)
+bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d loc, tButtonType button, tMouseEventType mType)
 {
+	if (vp != 0)
+		return false;
 	if (mType == kMouseDown)
 	{
 		switch (button)

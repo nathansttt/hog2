@@ -60,6 +60,7 @@ const float FRAMERATE = 1.0f/30.0f;
 
 -(void)onTick:(NSTimer *)timer {
 	pRecContext pContextInfo = getCurrentContext();
+	pContextInfo->display.StartFrame();
 	for (int x = 0; x < pContextInfo->numPorts; x++)
 	{
 		setViewport(pContextInfo, x);
@@ -69,6 +70,7 @@ const float FRAMERATE = 1.0f/30.0f;
 			HandleFrame(pContextInfo, x);
 		}
 	}
+	pContextInfo->display.EndFrame();
 	[drawingView setNeedsDisplay:YES];
 	if (getTextBuffer() != 0)
 		[messageField setStringValue:[NSString stringWithUTF8String:getTextBuffer()]];
@@ -92,8 +94,10 @@ const float FRAMERATE = 1.0f/30.0f;
 {
 	tButtonType bType = [self getButton:event];
 	NSPoint curPoint = [event locationInWindow];
-	point3d p = [drawingView convertToHogCoordinate:curPoint];
-	HandleMouseClick(getCurrentContext(), curPoint.x, curPoint.y, p, bType, kMouseDown);
+	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
+	HandleMouse(getCurrentContext(), p, bType, kMouseDown);
+//	int viewport = [drawingView getViewport:curPoint];
+//	HandleMouseClick(getCurrentContext(), viewport, curPoint.x, curPoint.y, p, bType, kMouseDown);
 }
 	
 
@@ -102,17 +106,20 @@ const float FRAMERATE = 1.0f/30.0f;
 {
 	tButtonType bType = [self getButton:event];
 	NSPoint curPoint = [event locationInWindow];
-	point3d p = [drawingView convertToHogCoordinate:curPoint];
-	HandleMouseClick(getCurrentContext(), curPoint.x, curPoint.y, p, bType, kMouseUp);
-//	[[self.view window] setFrame:NSMakeRect(0.f, 0.f, 800.f, 800.f) display:YES animate:YES];
+	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
+	HandleMouse(getCurrentContext(), p, bType, kMouseUp);
+//	int viewport = [drawingView getViewport:curPoint];
+//	HandleMouseClick(getCurrentContext(), viewport, curPoint.x, curPoint.y, p, bType, kMouseUp);
 }
 
 -(void)mouseDragged:(NSEvent *)event
 {
 	tButtonType bType = [self getButton:event];
 	NSPoint curPoint = [event locationInWindow];
-	point3d p = [drawingView convertToHogCoordinate:curPoint];
-	HandleMouseClick(getCurrentContext(), curPoint.x, curPoint.y, p, bType, kMouseDrag);
+	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
+	HandleMouse(getCurrentContext(), p, bType, kMouseDrag);
+//	int viewport = [drawingView getViewport:curPoint];
+//	HandleMouseClick(getCurrentContext(), viewport, curPoint.x, curPoint.y, p, bType, kMouseDrag);
 }
 
 
@@ -133,7 +140,10 @@ const float FRAMERATE = 1.0f/30.0f;
 	NSString *characters;
 	characters = [event characters];
 //	printf("%c : %d!\n", [characters characterAtIndex:0], [characters characterAtIndex:0]);
-	DoKeyboardCommand(getCurrentContext(), [characters characterAtIndex:0], false, false, false);
+	bool shift = false;
+	if (isupper([characters characterAtIndex:0]))
+		shift = true;
+	DoKeyboardCommand(getCurrentContext(), [characters characterAtIndex:0], shift?kShiftDown:kNoModifier, false, false);
 }
 
 @end

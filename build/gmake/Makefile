@@ -14,7 +14,6 @@ PROJECTS = \
   algorithms \
   environments \
   envutil \
-  generic \
   graph \
   grids \
   graphalgorithms \
@@ -43,6 +42,7 @@ PROJECTS = \
   demos/dijkstra \
   demos/astar \
   demos/idastar \
+#  generic \
 
 
 

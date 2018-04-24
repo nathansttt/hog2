@@ -184,7 +184,7 @@ void TreePermutationPDB<state, action, environment, bits>::GetStateFromPDBHash(u
 		values[x] = node - (1<<k) + 1;
 		s.puzzle[values[x]] = distinct[x];
 	}
-	s.FinishUnranking(example);
+	s.FinishUnranking();
 }
 
 template <class state, class action, class environment, int bits>

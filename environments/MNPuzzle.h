@@ -34,7 +34,7 @@ public:
 		blank = 0;
 	}
 	size_t size() const { return width*height; }
-	void FinishUnranking(const MNPuzzleState<width, height> &s)
+	void FinishUnranking()
 	{
 		for (int x = 0; x < size(); x++)
 		{
@@ -122,7 +122,7 @@ public:
 
 	double GCost(const MNPuzzleState<width, height> &state1, const MNPuzzleState<width, height> &state2) const;
 	double GCost(const MNPuzzleState<width, height> &, const slideDir &) const;
-	double AdditiveGCost(const MNPuzzleState<width, height> &, const slideDir &);
+//	double AdditiveGCost(const MNPuzzleState<width, height> &, const slideDir &);
 	bool GoalTest(const MNPuzzleState<width, height> &state, const MNPuzzleState<width, height> &goal) const;
 
 	bool GoalTest(const MNPuzzleState<width, height> &s) const;
@@ -131,12 +131,17 @@ public:
 							 int count, const std::vector<int> &pattern,
 							 std::vector<int> &dual);
 	//void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
+	//virtual void FinishUnranking(MNPuzzleState<width, height> &s) const { s.FinishUnranking(); }
 
 	uint64_t GetActionHash(slideDir act) const;
 	void OpenGLDraw() const;
 	void OpenGLDraw(const MNPuzzleState<width, height> &s) const;
 	void OpenGLDraw(const MNPuzzleState<width, height> &l1, const MNPuzzleState<width, height> &l2, float v) const;
 	void OpenGLDraw(const MNPuzzleState<width, height> &, const slideDir &) const { /* currently not drawing moves */ }
+	void Draw(Graphics::Display &display, const MNPuzzleState<width, height>&) const;
+	void Draw(Graphics::Display &display, const MNPuzzleState<width, height> &l1, const MNPuzzleState<width, height> &l2, float v) const;
+
+	
 	void StoreGoal(MNPuzzleState<width, height> &); // stores the locations for the given goal state
 
 	/** Returns stored goal state if it is stored.**/
@@ -190,8 +195,8 @@ public:
 
 	static MNPuzzleState<width, height> Generate_Random_Puzzle();
 
-//	virtual void GetStateFromHash(MNPuzzleState<width, height> &s, uint64_t hash) const;
-//	uint64_t GetStateHash(const MNPuzzleState<width, height> &s) const;
+	virtual void GetStateFromHash(MNPuzzleState<width, height> &s, uint64_t hash) const;
+	uint64_t GetStateHash(const MNPuzzleState<width, height> &s) const;
 	uint64_t GetMaxStateHash() const;
 	
 	bool State_Check(const MNPuzzleState<width, height> &to_check);
@@ -654,8 +659,8 @@ double MNPuzzle<width, height>::HCost(const MNPuzzleState<width, height> &state1
 	if (use_manhattan)
 	{
 		double man_dist = 0;
-		std::vector<int> xloc(width*height);
-		std::vector<int> yloc(width*height);
+		int xloc[width*height];
+		int yloc[width*height];
 		
 		for (unsigned int x = 0; x < width; x++)
 		{
@@ -671,8 +676,12 @@ double MNPuzzle<width, height>::HCost(const MNPuzzleState<width, height> &state1
 			{
 				if (state1.puzzle[x + y*width] != 0)
 				{
-					man_dist += (abs((int)(xloc[state1.puzzle[x + y*width]] - x))
-								 + abs((int)(yloc[state1.puzzle[x + y*width]] - y)));
+					if (weighted)
+						man_dist += (abs((int)(xloc[state1.puzzle[x + y*width]] - x))
+									 + abs((int)(yloc[state1.puzzle[x + y*width]] - y)))*state1.puzzle[x + y*width]*state1.puzzle[x + y*width];
+					else
+						man_dist += (abs((int)(xloc[state1.puzzle[x + y*width]] - x))
+									 + abs((int)(yloc[state1.puzzle[x + y*width]] - y)));
 				}
 			}
 		}
@@ -709,50 +718,51 @@ static int costs[25] =
 	3, 5, 4, 7, 10, 5, 3, 3, 8, 9, 2, 10, 10, 1, 2, 1, 1, 4, 7, 9, 6, 10, 2, 8, 8
 };
 
-template <int width, int height>
-double MNPuzzle<width, height>::AdditiveGCost(const MNPuzzleState<width, height> &s, const slideDir &d)
-{
-	int tile;
-	switch (d)
-	{
-		case kLeft: tile = s.puzzle[s.blank-1]; break;
-		case kUp: tile = s.puzzle[s.blank-height]; break;
-		case kDown: tile = s.puzzle[s.blank+height]; break;
-		case kRight: tile = s.puzzle[s.blank+1]; break;
-	}
-	if (tile == -1)
-		return 0;
-	if (weighted)
-		return costs[s.blank];
-	return 1;
-}
+//template <int width, int height>
+//double MNPuzzle<width, height>::AdditiveGCost(const MNPuzzleState<width, height> &s, const slideDir &d)
+//{
+//	int tile;
+//	switch (d)
+//	{
+//		case kLeft: tile = s.puzzle[s.blank-1]; break;
+//		case kUp: tile = s.puzzle[s.blank-height]; break;
+//		case kDown: tile = s.puzzle[s.blank+height]; break;
+//		case kRight: tile = s.puzzle[s.blank+1]; break;
+//	}
+//	if (tile == -1)
+//		return 0;
+//	if (weighted)
+//		return costs[s.blank];
+//	return 1;
+//}
 
 template <int width, int height>
 double MNPuzzle<width, height>::GCost(const MNPuzzleState<width, height> &a, const MNPuzzleState<width, height> &b) const
 {
-	//	int diff = a.blank - b.blank;
-	//
+	// Options:
+	// * tile squared
+	// square root of tile
+	// tile itself
 	if (weighted)
-		return costs[a.blank];
+		return a.puzzle[b.blank]*a.puzzle[b.blank];
+//		return costs[a.blank];
 	return 1;
 }
 
 template <int width, int height>
 double MNPuzzle<width, height>::GCost(const MNPuzzleState<width, height> &s, const slideDir &d) const
 {
-	//	double cost;
-	//	switch (d)
-	//	{
-	//		case kLeft: cost = s.puzzle[s.blank-1]; break;
-	//		case kUp: cost = s.puzzle[s.blank-s.height]; break;
-	//		case kDown: cost = s.puzzle[s.blank+s.height]; break;
-	//		case kRight: cost = s.puzzle[s.blank+1]; break;
-	//	}
-	//	if (cost < 1) // in PDB might have negative costs
-	//		cost = 1;
-	//	return cost;
-	if (weighted)
-		return costs[s.blank];
+	if (!weighted)
+		return 1;
+
+	switch (d)
+	{
+		case kLeft: return s.puzzle[s.blank-1]*s.puzzle[s.blank-1];
+		case kUp: return s.puzzle[s.blank-width]*s.puzzle[s.blank-width];
+		case kDown: return s.puzzle[s.blank+width]*s.puzzle[s.blank+width];
+		case kRight: return s.puzzle[s.blank+1]*s.puzzle[s.blank+1];
+	}
+	assert(!"Illegal move");
 	return 1;
 }
 
@@ -812,62 +822,91 @@ void MNPuzzle<width, height>::OpenGLDraw() const
 {
 }
 
-void DrawTile(float x, float y, char c1, char c2, int w, int h)
+void DrawTile(float x, float y, char c1, char c2, int w, int h);
+void DrawFrame(int w, int h);
+
+template <int width, int height>
+void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleState<width, height>&s) const
 {
-	//glLineWidth(10.0);
-	int textWidth = 0;
-	if (c1 != 0)
-		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c1);
-	if (c2 != 0)
-		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c2);
-	if (textWidth == 0)
-		return;
-	//printf("%d\n", textWidth);
-	glPushMatrix();
-	glColor3f(0.0, 0.0, 1.0);
-	glTranslatef(x*2.0/w-1.0, (1+y)*2.0/h-1.0-0.15, -0.001);
-	glScalef(1.0/(w*120.0), 1.0/(h*120.0), 1);
-	glRotatef(180, 0.0, 0.0, 1.0);
-	glRotatef(180, 0.0, 1.0, 0.0);
-	glTranslatef(120-textWidth/2, 0, 0);
-	if (c1 != 0)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, c1);
-	if (c2 != 0)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, c2);
-	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
-	glPopMatrix();
-	
-	glLineWidth(1.0);
-	glColor3f(1, 1, 1);
-	glBegin(GL_QUADS);
-	glVertex3f(x*2.0/w-1+.05/w, (y)*2.0/h-1+.05/h, 0.002);
-	glVertex3f((x+1)*2.0/w-1-.05/w, (y)*2.0/h-1+.05/h, 0.002);
-	glVertex3f((x+1)*2.0/w-1-.05/w, (y+1)*2.0/h-1-.05/h, 0.002);
-	glVertex3f(x*2.0/w-1+.05/w, (y+1)*2.0/h-1-.05/h, 0.002);
-	glEnd();
+	float squareSize = std::max(width, height)+1;
+	squareSize = 2.0f/squareSize;
+	float xOrigin = (0-((float)width)/2.0f)*squareSize;
+	float yOrigin = (0-((float)height)/2.0f)*squareSize;
+	char txt[10];
+	display.FillRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::gray);
+	display.FrameRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::lightgray, 4);
+	for (unsigned int y = 0; y < height; y++)
+	{
+		for (unsigned int x = 0; x < width; x++)
+		{
+			if (s.puzzle[x+y*width] != 0)
+			{
+				sprintf(txt, "%d", s.puzzle[x+y*width]);
+				display.FillRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::white);
+				if (s.puzzle[x+y*width] > 0)
+					display.DrawText(txt,
+									 {xOrigin+x*squareSize+squareSize/2.f, yOrigin+y*squareSize+squareSize/2.f},
+									 Colors::blue, squareSize/4.0f, Graphics::textAlignCenter);
+			}
+		}
+	}
 }
 
-void DrawFrame(int w, int h)
+template <int width, int height>
+void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleState<width, height> &s1, const MNPuzzleState<width, height> &s2, float v) const
 {
-	// frame
-	glLineWidth(3.0);
-	glColor3f(1.0, 1.0, 1.0);
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(-1-.05/w, -1-.05/h, 0.002);
-	glVertex3f(1+.05/w, -1-.05/h, 0.002);
-	glVertex3f(1+.05/w, 1+.05/h, 0.002);
-	glVertex3f(-1-.05/w, 1+.05/h, 0.002);
-	glEnd();
-	
-	glColor3f(0.25, 0.25, 0.25);
-	glBegin(GL_QUADS);
-	glVertex3f(-1-.05/w, -1-.05/h, 0.003);
-	glVertex3f(1+.05/w, -1-.05/h, 0.003);
-	glVertex3f(1+.05/w, 1+.05/h, 0.003);
-	glVertex3f(-1-.05/w, 1+.05/h, 0.003);
-	glEnd();
-	glLineWidth(1.0);
+	float squareSize = std::max(width, height)+1;
+	squareSize = 2.0f/squareSize;
+	float xOrigin = (0-((float)width)/2.0f)*squareSize;
+	float yOrigin = (0-((float)height)/2.0f)*squareSize;
+	char txt[10];
+	display.FillRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::gray);
+	display.FrameRect({xOrigin, yOrigin, xOrigin+(width)*squareSize, yOrigin+(height)*squareSize}, Colors::lightgray, 4);
+	for (unsigned int y = 0; y < height; y++)
+	{
+		for (unsigned int x = 0; x < width; x++)
+		{
+			if (s1.puzzle[x+y*width] == s2.puzzle[x+y*width])
+			{
+				if (s1.puzzle[x+y*width] != 0)
+				{
+					sprintf(txt, "%d", s1.puzzle[x+y*width]);
+					display.FillRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::white);
+					if (s1.puzzle[x+y*width] > 0)
+						display.DrawText(txt, {xOrigin+x*squareSize+squareSize/2.f, yOrigin+y*squareSize+squareSize/2.f}, Colors::blue, squareSize/4.0f, Graphics::textAlignCenter);
+				}
+			}
+			else if (s1.puzzle[x+y*width] != 0)
+			{
+				Graphics::point p1 = {xOrigin+x*squareSize, yOrigin+y*squareSize};
+				Graphics::point p2;
+				switch (GetAction(s1, s2))
+				{
+					case kUp:
+						p2  = {xOrigin+x*squareSize, yOrigin+(y+1)*squareSize};
+						break;
+					case kDown:
+						p2  = {xOrigin+x*squareSize, yOrigin+(y-1)*squareSize};
+						break;
+					case kLeft:
+						p2  = {xOrigin+(x+1)*squareSize, yOrigin+(y)*squareSize};
+						break;
+					case kRight:
+						p2  = {xOrigin+(x-1)*squareSize, yOrigin+(y)*squareSize};
+						break;
+
+					default: assert(!"action not found");
+				}
+				sprintf(txt, "%d", s1.puzzle[x+y*width]);
+				display.FillRect({p1.x*v+p2.x*(1-v), p1.y*v+p2.y*(1-v), p1.x*v+p2.x*(1-v)+squareSize, p1.y*v+p2.y*(1-v)+squareSize}, Colors::white);
+
+				if (s1.puzzle[x+y*width] > 0)
+					display.DrawText(txt, {p1.x*v+p2.x*(1-v)+squareSize/2.f, p1.y*v+p2.y*(1-v)+squareSize/2.f}, Colors::blue, squareSize/4.0f, Graphics::textAlignCenter);
+			}
+		}
+	}
 }
+
 
 template <int width, int height>
 void MNPuzzle<width, height>::OpenGLDraw(const MNPuzzleState<width, height> &s) const
@@ -1021,113 +1060,124 @@ MNPuzzleState<width, height> MNPuzzle<width, height>::Generate_Random_Puzzle()
 	return new_puzz;
 }
 
-//template <int width, int height>
-//void MNPuzzle<width, height>::GetStateFromHash(MNPuzzleState<width, height> &s, uint64_t hash) const
-//{
+template <int width, int height>
+void MNPuzzle<width, height>::GetStateFromHash(MNPuzzleState<width, height> &s, uint64_t hash) const
+{
 //	s.puzzle.resize(width*height);
-//	int count = s.puzzle.size();
-//	int countm2 = s.puzzle.size()-2;
-//	uint64_t hashVal = hash;
-//	std::vector<int> dual(s.puzzle.size()-2);
-//	
-//	// unrank the locations of the first 10 tiles
-//	int numEntriesLeft = count-countm2+1;
-//	for (int x = countm2-1; x >= 0; x--)
-//	{
-//		dual[x] = hashVal%numEntriesLeft;
-//		hashVal /= numEntriesLeft;
-//		numEntriesLeft++;
-//		for (int y = x+1; y < countm2; y++)
-//		{
-//			if (dual[y] >= dual[x])
-//				dual[y]++;
-//		}
-//	}
-//	// clear puzzle locations
-//	for (int x = 0; x < count; x++)
-//	{
-//		s.puzzle[x] = -1;
-//	}
-//	// revert locations of tiles into positions in the puzzle
-//	for (int x = 0; x < countm2; x++)
-//	{
-//		s.puzzle[dual[x]] = x;
-//	}
-//	// reset the cache of the blanks location
-//	s.blank = dual[0];
-//	
-//	// now find the two -1's and assign them
-//	// to ensure the right parity
-//	int x = 0;
-//	int loc1 = -1, loc2 = -1;
-//	for (; x < count; x++)
-//	{
-//		if (s.puzzle[x] == -1)
-//		{
-//			loc1 = x;
-//			x++;
-//			break;
-//		}
-//	}
-//	for (; x < count; x++)
-//	{
-//		if (s.puzzle[x] == -1)
-//		{
-//			loc2 = x;
-//			break;
-//		}
-//	}
-//	assert(loc1 != -1 && loc2 != -1);
-//	// Choose an arbitrary ordering and then
-//	// check the parity. If it's wrong, we just
-//	// swap them and are guaranteed to get the right
-//	// parity.
-//	s.puzzle[loc1] = countm2;
-//	s.puzzle[loc2] = countm2+1;
-//	if (GetParity(s) == 1)
-//	{
-//		s.puzzle[loc1] = countm2+1;
-//		s.puzzle[loc2] = countm2;
-//	}
+	int count = width*height;
+	int countm2 = width*height-2;
+	uint64_t hashVal = hash;
+	std::vector<int> dual(width*height-2);
+	
+	// unrank the locations of the first 10 tiles
+	int numEntriesLeft = count-countm2+1;
+	for (int x = countm2-1; x >= 0; x--)
+	{
+		dual[x] = hashVal%numEntriesLeft;
+		hashVal /= numEntriesLeft;
+		numEntriesLeft++;
+		for (int y = x+1; y < countm2; y++)
+		{
+			if (dual[y] >= dual[x])
+				dual[y]++;
+		}
+	}
+	// clear puzzle locations
+	for (int x = 0; x < count; x++)
+	{
+		s.puzzle[x] = -1;
+	}
+	// revert locations of tiles into positions in the puzzle
+	for (int x = 0; x < countm2; x++)
+	{
+		s.puzzle[dual[x]] = x;
+	}
+	// reset the cache of the blanks location
+	s.blank = dual[0];
+	
+	// now find the two -1's and assign them
+	// to ensure the right parity
+	int x = 0;
+	int loc1 = -1, loc2 = -1;
+	for (; x < count; x++)
+	{
+		if (s.puzzle[x] == -1)
+		{
+			loc1 = x;
+			x++;
+			break;
+		}
+	}
+	for (; x < count; x++)
+	{
+		if (s.puzzle[x] == -1)
+		{
+			loc2 = x;
+			break;
+		}
+	}
+	assert(loc1 != -1 && loc2 != -1);
+	// Choose an arbitrary ordering and then
+	// check the parity. If it's wrong, we just
+	// swap them and are guaranteed to get the right
+	// parity.
+	s.puzzle[loc1] = countm2;
+	s.puzzle[loc2] = countm2+1;
+	if (GetParity(s) == 1)
+	{
+		s.puzzle[loc1] = countm2+1;
+		s.puzzle[loc2] = countm2;
+	}
+}
+
+//uint64_t Factorial(int val)
+//{
+//	static uint64_t table[21] =
+//	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
+//		6227020800ll, 87178291200ll, 1307674368000ll, 20922789888000ll, 355687428096000ll,
+//		6402373705728000ll, 121645100408832000ll, 2432902008176640000ll };
+//	if (val > 20)
+//		return (uint64_t)-1;
+//	return table[val];
 //}
 
-//template <int width, int height>
-//uint64_t MNPuzzle<width, height>::GetStateHash(const MNPuzzleState<width, height> &s) const
-//{
-//	std::vector<int> locs(s.puzzle.size()-2); // We only rank n-2 of n items; last two are fixed by the parity
-//	std::vector<int> dual(s.puzzle.size());
-//	
-//	// build the representation containing the item locations
-//	for (unsigned int x = 0; x < s.puzzle.size(); x++)
-//	{
-//		dual[s.puzzle[x]] = x;
-//	}
-//	// build an array with the locations of the first 10 items
-//	for (int x = 0; x < s.puzzle.size()-2; x++)
-//	{
-//		locs[x] = dual[x];
-//	}
-//	
-//	uint32_t hashVal = 0;
-//	int numEntriesLeft = s.puzzle.size();
-//	
-//	// compute the lexographical ranking of the locations
-//	// of the first 10 tiles
-//	for (unsigned int x = 0; x < s.puzzle.size()-2; x++)
-//	{
-//		hashVal += locs[x]*Factorial(numEntriesLeft-1)/2;
-//		numEntriesLeft--;
-//		
-//		// decrement locations of remaining items
-//		// to keep the numbering compact
-//		for (unsigned y = x; y < s.puzzle.size()-2; y++)
-//		{
-//			if (locs[y] > locs[x])
-//				locs[y]--;
-//		}
-//	}
-//	return hashVal;
-//}
+template <int width, int height>
+uint64_t MNPuzzle<width, height>::GetStateHash(const MNPuzzleState<width, height> &s) const
+{
+	std::vector<int> locs(width*height-2); // We only rank n-2 of n items; last two are fixed by the parity
+	std::vector<int> dual(width*height);
+	
+	// build the representation containing the item locations
+	for (unsigned int x = 0; x < width*height; x++)
+	{
+		dual[s.puzzle[x]] = x;
+	}
+	// build an array with the locations of the first 10 items
+	for (int x = 0; x < width*height-2; x++)
+	{
+		locs[x] = dual[x];
+	}
+	
+	uint32_t hashVal = 0;
+	int numEntriesLeft = width*height;
+	
+	// compute the lexographical ranking of the locations
+	// of the first 10 tiles
+	for (unsigned int x = 0; x < width*height-2; x++)
+	{
+		hashVal += locs[x]*PermutationPuzzle::PermutationPuzzleEnvironment<MNPuzzleState<width, height>, slideDir>::Factorial(numEntriesLeft-1)/2;
+		numEntriesLeft--;
+		
+		// decrement locations of remaining items
+		// to keep the numbering compact
+		for (unsigned y = x; y < width*height-2; y++)
+		{
+			if (locs[y] > locs[x])
+				locs[y]--;
+		}
+	}
+	return hashVal;
+}
 
 template <int width, int height>
 uint64_t MNPuzzle<width, height>::GetMaxStateHash() const
@@ -1143,11 +1193,11 @@ template <int width, int height>
 unsigned MNPuzzle<width, height>::GetParity(MNPuzzleState<width, height> &state)
 {
 	unsigned swaps = 0; // counts number of swaps
-	for (unsigned x = 0; x < state.puzzle.size(); x++)
+	for (unsigned x = 0; x < width*height; x++)
 	{
 		if (state.puzzle[x] == 0) // skip blank
 			continue;
-		for (unsigned y = x + 1; y < state.puzzle.size(); y++)
+		for (unsigned y = x + 1; y < width*height; y++)
 		{
 			if (state.puzzle[y] == 0) // skip blank
 				continue;
@@ -1156,13 +1206,13 @@ unsigned MNPuzzle<width, height>::GetParity(MNPuzzleState<width, height> &state)
 		}
 	}
 	// if odd num of columns
-	if ((state.width % 2) == 1)
+	if ((width % 2) == 1)
 	{
 		return swaps % 2;
 	}
 	
 	// if even num of columns
-	return (swaps + (state.puzzle.size()-state.blank-1)/state.width)%2;
+	return (swaps + (width*height-state.blank-1)/width)%2;
 }
 
 template <int width, int height>

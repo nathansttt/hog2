@@ -37,6 +37,13 @@
 #include "fMM.h"
 #include "SVGUtil.h"
 
+enum game {
+	kNotInGame = 0,
+	kUnidirectional = 1,
+	kBidirectional = 2,
+	kBidirectionalTwo = 3
+};
+
 enum mode {
 	kSetStartGoal = 0,
 	kMark = 1,
@@ -62,9 +69,12 @@ NBS<xyLoc, tDirection, MapEnvironment> nbs;
 std::vector<xyLoc> path;
 std::vector<xyLoc> hd;
 std::vector<xyLoc> farStates;
+bool failedBidirectional = false;
+bool mapChanged = true;
 
 xyLoc start, goal, mark, mark2;
 
+game g = kNotInGame;
 mode m = kDrawObstacles;
 algorithm a = kDijkstra;
 
@@ -105,8 +115,6 @@ void InstallHandlers()
 
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Toggle SVG recording", kAnyModifier, 'r');
 
-	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
-	
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
@@ -121,7 +129,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 	else if (eType == kWindowCreated)
 	{
-		printf("Window %ld created\n", windowID);
+//		printf("Window %ld created\n", windowID);
 		//glClearColor(0.99, 0.99, 0.99, 1.0);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
@@ -146,13 +154,14 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		map->SetTerrainType(offset, offset, offset, mapSize-offset, kTrees);
 		map->SetTerrainType(mapSize-offset, offset, mapSize-offset, mapSize-offset, kTrees);
 		map->SetTerrainType(.75*mapSize, .25*mapSize, .75*mapSize, .75*mapSize, kTrees);
-		submitTextToBuffer("Mode: Draw Obstacles");
+		submitTextToBuffer("Modify the map however you want; then choose a start/goal");
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
 		me->SetDiagonalCost(1.5);
 		start.x = start.y = 0xFFFF;
 		mark.x = 0xFFFF;
 		mark2.x = 0xFFFF;
+		printf("Done creating window\n");
 	}
 }
 
@@ -161,7 +170,14 @@ int frameCnt = 0;
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
-	me->Draw(display);
+
+	if (mapChanged)
+	{
+		display.StartBackground();
+		me->Draw(display);
+		display.EndBackground();
+		mapChanged = false;
+	}
 		
 	if (!(start.x == 0xFFFF || running))
 	{
@@ -206,23 +222,75 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 					//AStarForward.GetClosedListGCost(goal, opt);
 					if (i.where == kClosedList && i.g+i.h < opt)
 					{
-						me->SetColor(0.0, 0.0, 0.0);
+						me->SetColor(0.5, 0.5, 0.5);
 						me->DrawAlternate(display, i.data);
 					}
 				}
 			}
 		}
-
+		// Win condition for unidirectional search
+		if (g == kUnidirectional && path.size() != 0)
+		{
+			g = kNotInGame;
+			// Check to see if successful
+			AStarOpenClosedData<xyLoc> item;
+			double opt = me->GetPathLength(path);
+			if (AStarForward.GetClosedItem(mark, item))
+			{
+				if (fless(item.g+item.h, opt))
+				{
+					submitTextToBuffer("You win; marked state was a necessary expansion! Other answers shown.");
+					necessary = true;
+				}
+				else if (fequal(item.g+item.h, opt)) {
+					submitTextToBuffer("Sorry; while your state was expanded, it doesn't have f<C*; try again!");
+					g = kUnidirectional;
+					a = kAStar;
+					m = kMark;
+				}
+			}
+			else { // failed - not expanded
+				submitTextToBuffer("Sorry, your state was not expanded; try another state!");
+				g = kUnidirectional;
+				a = kAStar;
+				m = kMark;
+			}
+		}
+		// Always lose the second game
+		if (g == kBidirectional && path.size() != 0)
+		{
+			m = kMark;
+			submitTextToBuffer("Sorry, your state was not expanded; try another!");
+			failedBidirectional = true;
+		}
+		// Win condition for 2 states
+		if (g == kBidirectionalTwo && path.size() != 0)
+		{
+			// Win if both states are on optimal path
+			auto m1 = find(path.begin(), path.end(), mark);
+			auto m2 = find(path.begin(), path.end(), mark2);
+			if (m1 == path.end() || m2 == path.end())
+			{
+				submitTextToBuffer("Good guess, but there is a better answer; try again!");
+				m = kMark;
+//				mark = mark2 = xyLoc();
+			}
+			else if (m1 != path.end() && m2 != path.end())
+			{
+				submitTextToBuffer("Fantastic! You chose two states on the optimal path; you win!");
+				g = kNotInGame;
+			}
+		}
 	}
 
 	if (mark.x != 0xFFFF)
 	{
-		me->SetColor(0.5, 0, 0);
+		me->SetColor(0, 0, 1);
 		me->DrawAlternate(display, mark);
 	}
 	if (mark2.x != 0xFFFF)
 	{
-		me->SetColor(0, 0, 0.5);
+		me->SetColor(0.5, 0, 1);
 		me->DrawAlternate(display, mark2);
 	}
 
@@ -278,15 +346,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				nbs.DoSingleSearchStep(path);
 			break;
 		case 'm':
-			if (m == kMark)
+			if (mod == kShiftDown)
 			{
 				m = kMark2;
 				submitTextToBuffer("Mode: Mark Second State!");
-			}
-			else if (m == kMark2)
-			{
-				m = kMark;
-				submitTextToBuffer("Mode: Mark State");
 			}
 			else {
 				m = kMark;
@@ -314,7 +377,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			necessary = false;
 			submitTextToBuffer("Mode: Find path (");
 			appendTextToBuffer(GetAlgName());
-			appendTextToBuffer(")");
+			appendTextToBuffer(") [Click to start search]");
 			break;
 		case 'n':
 			necessary = !necessary;
@@ -342,13 +405,62 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			break;
 		case '1':
-			a = kDijkstra; break;
+			if (start == goal)
+			{
+				submitTextToBuffer("Please choose a unique start and goal before getting started");
+				break;
+			}
+			g = kUnidirectional;
+			a = kAStar;
+			m = kMark;
+			mark = mark2 = xyLoc();
+			running = false;
+			necessary = false;
+			submitTextToBuffer("Click a state that you think all unidirectional algorithms must expand when solving this problem");
+			break;
 		case '2':
-			a = kAStar; break;
+			if (start == goal)
+			{
+				submitTextToBuffer("Please choose a unique start and goal before getting started");
+				break;
+			}
+			g = kBidirectional;
+			a = kFMM;
+			m = kMark;
+			mark = mark2 = xyLoc();
+			running = false;
+			necessary = false;
+			submitTextToBuffer("Click a state that you think all bidirectional algorithms must expand when solving this problem");
+			break;
 		case '3':
-			a = kFMM; break;
+			if (!failedBidirectional)
+			{
+				submitTextToBuffer("Try the first bidirectional search game first!");
+				break;
+			}
+			if (start == goal)
+			{
+				submitTextToBuffer("Please choose a unique start and goal before getting started");
+				break;
+			}
+			submitTextToBuffer("Choose two states and see if the oracle can avoid both!");
+			g = kBidirectionalTwo;
+			a = kFMM;
+			m = kMark;
+			mark = mark2 = xyLoc();
+			running = false;
+			necessary = false;
+
+			break;
 		case '4':
-			a = kNBS; break;
+			a = kNBS;
+			m = kFindPath;
+			running = false;
+			necessary = false;
+			submitTextToBuffer("Mode: Find path (");
+			appendTextToBuffer(GetAlgName());
+			appendTextToBuffer(") [Click to start search]");
+			break;
 		case '[':
 			stepsPerFrame /= 2;
 			break;
@@ -364,10 +476,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void SetStartGoalHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 {
+	static bool currentlyDrawing = false;
+
 	switch (mType)
 	{
 		case kMouseDown:
 		{
+			currentlyDrawing = true;
 			running = false;
 			if (me->GetMap()->GetTerrainType(x, y) == kGround)
 			{
@@ -379,7 +494,7 @@ void SetStartGoalHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 		}
 		case kMouseDrag:
 		{
-			if (me->GetMap()->GetTerrainType(x, y) == kGround)
+			if (me->GetMap()->GetTerrainType(x, y) == kGround && currentlyDrawing)
 			{
 				//printf("drag (%d, %d)\n", x, y);
 				goal.x = x;
@@ -389,39 +504,35 @@ void SetStartGoalHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 		}
 		case kMouseUp:
 		{
+			currentlyDrawing = false;
 			if (me->GetMap()->GetTerrainType(x, y) == kGround)
 			{
 				goal.x = x;
 				goal.y = y;
-				AStarForward.GetPath(me, start, goal, path);
-				AStarBackward.GetPath(me, goal, start, path);
+//				AStarForward.GetPath(me, start, goal, path);
+//				AStarBackward.GetPath(me, goal, start, path);
 			}
 		}
 	}
 }
 
-void MarkPointHandler(uint16_t x, uint16_t y, tMouseEventType mType)
-{
-	if (m == kMark)
-	{
-		mark.x = x;
-		mark.y = y;
-	}
-	else if (m == kMark2)
-	{
-		mark2.x = x;
-		mark2.y = y;
-	}
-}
 
 void DrawHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 {
+	static bool currentlyDrawing = false;
 	static bool draw = true;
 	static int lastx = 0, lasty = 0;
 	if (mType == kMouseUp)
+	{
+		currentlyDrawing = false;
 		return;
+	}
+	if (me->GetMap()->GetTerrainType(x, y) == kOutOfBounds)
+		return;
+	mapChanged = true;
 	if (mType == kMouseDown)
 	{
+		currentlyDrawing = true;
 		if (me->GetMap()->GetTerrainType(x, y) == kGround)
 			draw = true;
 		else
@@ -431,7 +542,7 @@ void DrawHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 		else
 			me->GetMap()->SetTerrainType(x, y, kGround);
 	}
-	else if (mType == kMouseDrag)
+	else if (mType == kMouseDrag && currentlyDrawing)
 	{
 		if (draw)
 			me->GetMap()->SetTerrainType(x, y, lastx, lasty, kTrees);
@@ -446,7 +557,10 @@ void GetPathHandler(tMouseEventType mType)
 {
 	if (mType != kMouseUp)
 		return;
-	
+
+	AStarForward.GetPath(me, start, goal, path);
+	AStarBackward.GetPath(me, goal, start, path);
+
 	Heuristic<xyLoc> *h;
 	switch (a)
 	{
@@ -464,7 +578,7 @@ void GetPathHandler(tMouseEventType mType)
 			bool foundForward = AStarForward.GetClosedListGCost(mark, markedDistanceForward);
 			double markedDistanceBackward;
 			bool foundBackward = AStarBackward.GetClosedListGCost(mark, markedDistanceBackward);
-			
+			std::cout << "Marked: " << mark << "\n";
 			if (foundForward && foundBackward)
 			{
 				printf("Found both directions\n");
@@ -482,12 +596,12 @@ void GetPathHandler(tMouseEventType mType)
 			else if (foundForward) // g/fraction > optLen ; fraction < g/optLen
 			{
 				printf("Found forward cost %f\n", markedDistanceForward);
-				fraction = markedDistanceForward/optLen-0.0001;
+				fraction = markedDistanceForward/optLen-0.001;
 			}
 			else if (foundBackward)
 			{
 				printf("Found backward cost %f\n", markedDistanceBackward);
-				fraction = 1-markedDistanceBackward/optLen+0.0001;
+				fraction = 1-markedDistanceBackward/optLen+0.001;
 			}
 //			printf("Marked state forward: %1.2f")
 			// set the fraction to be the fraction of that state along the optimal path
@@ -504,6 +618,45 @@ void GetPathHandler(tMouseEventType mType)
 	running = true;
 }
 
+void MarkPointHandler(uint16_t x, uint16_t y, tMouseEventType mType)
+{
+	if (m == kMark)
+	{
+		mark.x = x;
+		mark.y = y;
+		mark2 = xyLoc();
+		if (g != kNotInGame && mType == kMouseUp)
+		{
+			if (g == kBidirectionalTwo)
+			{
+				running = false;
+				submitTextToBuffer("Choose a second state!");
+				m = kMark2;
+			}
+			else if (g == kBidirectional) {
+				submitTextToBuffer("Oracle selected bidirectional algorithm. Running...");
+				GetPathHandler(kMouseUp);
+				m = kFindPath;
+			}
+			else {
+				submitTextToBuffer("Solving with unidirectional search...");
+				GetPathHandler(kMouseUp);
+				m = kFindPath;
+			}
+		}
+	}
+	else if (m == kMark2)
+	{
+		mark2.x = x;
+		mark2.y = y;
+		if (g == kBidirectionalTwo && mType == kMouseUp)
+		{
+			submitTextToBuffer("Running search to see if you are correct...");
+			GetPathHandler(kMouseUp);
+			m = kFindPath;
+		}
+	}
+}
 
 bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButtonType button, tMouseEventType mType)
 {

@@ -108,7 +108,7 @@ namespace PermutationPuzzle {
 		}
 
 		state TranformToStandardGoal(const state &a, const state &b) const;
-		virtual void FinishUnranking(const state &s) const {}
+		virtual void FinishUnranking(state &s) const {}
 //		void PrintPDBHistogram(int which) const;
 //		void GetPDBHistogram(int which, std::vector<uint64_t> &values) const;
 		
@@ -1309,7 +1309,7 @@ namespace PermutationPuzzle {
 	{
 		state tmp;
 		mr1.Unrank(hash, s.puzzle, tmp.puzzle, s.size(), s.size());
-		FinishUnranking(s);
+		s.FinishUnranking();
 		//		s.puzzle = tmpArray;
 		
 //		std::vector<int> &puzzle = tmpArray;
@@ -1392,7 +1392,7 @@ namespace PermutationPuzzle {
 		{
 			result.puzzle[x] = dual.puzzle[a.puzzle[x]];
 		}
-		FinishUnranking(result);
+		result.FinishUnranking();
 		return result;
 	}
 

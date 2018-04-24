@@ -27,7 +27,7 @@
 using std::cout;
 
 
-template <class state, class action, class environment, class dataStructure = NBSQueue<state>,
+template <class state, class action, class environment, class dataStructure = NBSQueue<state, 1>, // EPSILON
           class priorityQueue = BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>>>
 class NBS {
 public:
@@ -279,8 +279,8 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 	//
 	uint64_t tmp = current.Close();
 	assert(tmp == nextID);
-//	if (currentCost != DBL_MAX)
-//		std::cout << "Expanding " << current.Lookup(nextID).data << "\n";
+	//if (currentCost != DBL_MAX)
+	//std::cout << "Expanding " << current.Lookup(nextID).data << "\n";
 	
 	//this can happen when we expand a single node instead of a pair
 	if (fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost))
@@ -290,6 +290,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
 	for (auto &succ : neighbors)
 	{
+		//std::cout << "--Child " << succ << "\n";
 		nodesTouched++;
 		uint64_t childID;
 		auto loc = current.Lookup(env->GetStateHash(succ), childID);
@@ -302,7 +303,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 		switch (loc)
 		{
 			case kClosed: // ignore
-				break;
+//				break;
 #ifdef ADMISSIBLE
 				if (fless(current.Lookup(nextID).g + edgeCost, current.Lookup(childID).g))
 				{
@@ -321,7 +322,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						{
 							if (currentCost == DBL_MAX)
 							{
-								printf("NBS: first solution %llu\n", nodesExpanded);
+//								printf("NBS: first solution %llu\n", nodesExpanded);
 //								std::cout << "Through " << succ << " (not here)\n";
 							}
 							// TODO: store current solution
@@ -355,11 +356,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 					{
 						if (fless(current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
 						{
-							if (currentCost == DBL_MAX)
-							{
-								printf("NBS: first solution %llu\n", nodesExpanded);
-								std::cout << "Through " << succ << " (better)\n";
-							}
+//							if (currentCost == DBL_MAX)
+//							{
+//								printf("NBS: first solution %llu\n", nodesExpanded);
+//								std::cout << "Through " << succ << " (better)\n";
+//							}
 							// TODO: store current solution
 //							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
 //								   current.Lookup(nextID).g+edgeCost,
@@ -385,11 +386,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 			case kUnseen:
 			{
 				uint64_t reverseLoc;
-				auto loc = opposite.Lookup(env->GetStateHash(succ), reverseLoc);
+				auto locReverse = opposite.Lookup(env->GetStateHash(succ), reverseLoc);
 #ifdef ADMISSIBLE
 
 #else
-				if (loc == kClosed)// then
+				if (locReverse == kClosed)// then
 				{
 					break;			//do nothing. do not put this node to open
 				}
@@ -420,7 +421,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 												heuristic->HCost(succ, target),
 												nextID, kOpenWaiting);
 
-						if (loc == kOpenReady || loc == kOpenWaiting)
+						if (locReverse == kOpenReady || locReverse == kOpenWaiting)
 						{
 							//double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
 							if (fless(current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g, currentCost))
@@ -431,8 +432,8 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 //										std::cout << "Searching forward\n";
 //									else
 //										std::cout << "Searching backward\n";
-									printf("NBS: first solution %llu ", nodesExpanded);
-//									
+//									printf("NBS: first solution %llu ", nodesExpanded);
+//
 //									std::cout << "Through " << succ << " (first) \n";
 //									
 //									uint64_t theID;
@@ -511,20 +512,20 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw()
 }
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-void NBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw(const priorityQueue &queue) const
+void NBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw(const priorityQueue &q) const
 {
 	double transparency = 0.9;
-	if (queue.size() == 0)
+	if (q.size() == 0)
 		return;
 	uint64_t top = -1;
 	//	double minf = 1e9, maxf = 0;
-	if (queue.OpenReadySize() > 0)
+	if (q.OpenReadySize() > 0)
 	{
-		top = queue.Peek(kOpenReady);
+		top = q.Peek(kOpenReady);
 	}
-	for (unsigned int x = 0; x < queue.size(); x++)
+	for (unsigned int x = 0; x < q.size(); x++)
 	{
-		const auto &data = queue.Lookat(x);
+		const auto &data = q.Lookat(x);
 		if (x == top)
 		{
 			env->SetColor(1.0, 1.0, 0.0, transparency);
@@ -542,7 +543,10 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw(c
 		}
 		else if (data.where == kClosed)
 		{
-			env->SetColor(1.0, 0.0, 0.0, transparency);
+			if (&q == &queue.backwardQueue)
+				env->SetColor(1.0, 0.0, 1.0, transparency);
+			else
+				env->SetColor(1.0, 0.0, 0.0, transparency);
 			env->OpenGLDraw(data.data);
 		}
 	}
@@ -556,38 +560,41 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Draw(Graphic
 }
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-void NBS<state, action, environment, dataStructure, priorityQueue>::Draw(Graphics::Display &d, const priorityQueue &queue) const
+void NBS<state, action, environment, dataStructure, priorityQueue>::Draw(Graphics::Display &d, const priorityQueue &q) const
 {
 	double transparency = 0.9;
-	if (queue.size() == 0)
+	if (q.size() == 0)
 		return;
 	uint64_t top = -1;
 	//	double minf = 1e9, maxf = 0;
-	if (queue.OpenReadySize() > 0)
+	if (q.OpenReadySize() > 0)
 	{
-		top = queue.Peek(kOpenReady);
+		top = q.Peek(kOpenReady);
 	}
-	for (unsigned int x = 0; x < queue.size(); x++)
+	for (unsigned int x = 0; x < q.size(); x++)
 	{
-		const auto &data = queue.Lookat(x);
+		const auto &data = q.Lookat(x);
 		if (x == top)
 		{
 			env->SetColor(1.0, 1.0, 0.0, transparency);
 			env->Draw(d, data.data);
 		}
-		if (data.where == kOpenWaiting)
+		else if (data.where == kOpenWaiting)
 		{
-			env->SetColor(0.0, 0.5, 0.5, transparency);
+			env->SetColor(1.0, 0.50, 0.25, transparency);
 			env->Draw(d, data.data);
 		}
 		else if (data.where == kOpenReady)
 		{
-			env->SetColor(0.0, 1.0, 0.0, transparency);
+			env->SetColor(1.0, 0.75, 0.25, transparency);
 			env->Draw(d, data.data);
 		}
 		else if (data.where == kClosed)
 		{
-			env->SetColor(1.0, 0.0, 0.0, transparency);
+			if (&q == &queue.backwardQueue)
+				env->SetColor(0.25, 0.5, 1.0, transparency);
+			else
+				env->SetColor(1.0, 0.0, 0.0, transparency);
 			env->Draw(d, data.data);
 		}
 	}

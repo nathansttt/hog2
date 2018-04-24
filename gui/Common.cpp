@@ -41,6 +41,7 @@ using namespace std;
 static std::vector<commandLineCallbackData *> commandLineCallbacks;
 static std::vector<joystickCallbackData *> joystickCallbacks;
 static std::vector<mouseCallbackData *> mouseCallbacks;
+static std::vector<mouseCallbackData2 *> mouseCallbacks2;
 static std::vector<windowCallbackData *> windowCallbacks;
 static std::vector<frameCallbackData *> glDrawCallbacks;
 
@@ -144,7 +145,6 @@ void HandleFrame(pRecContext pContextInfo, int viewport)
 {
 	glEnable(GL_BLEND); // for text fading
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // ditto
-	pContextInfo->display.StartFrame();
 	for (unsigned int x = 0; x < glDrawCallbacks.size(); x++)
 	{
 		if (glDrawCallbacks[x]->windowID == pContextInfo->windowID)
@@ -198,6 +198,7 @@ void PrintCommandLineArguments()
 // Process command line arguments
 void ProcessCommandLineArgs(int argc, char *argv[])
 {
+	printf("Processing %d command line arguments\n", argc);
 	for (int x = 0; x < argc; x++)
 	{
 		printf("%s ", argv[x]);
@@ -206,7 +207,7 @@ void ProcessCommandLineArgs(int argc, char *argv[])
 	//initializeCommandLineHandlers();
 	// printCommandLineArguments();
 
-	int lastval;
+	int lastval = 1;
 	for (int y = 1; y < argc; )
 	{
 		lastval = y;
@@ -233,6 +234,11 @@ void InstallMouseClickHandler(MouseCallback mC)
 	mouseCallbacks.push_back(new mouseCallbackData(mC));
 }
 
+void InstallMouseClickHandler(MouseCallback2 mC)
+{
+	mouseCallbacks2.push_back(new mouseCallbackData2(mC));
+}
+
 void RemoveMouseClickHandler(MouseCallback mC)
 {
 	for (unsigned int x = 0; x < mouseCallbacks.size(); x++)
@@ -246,13 +252,185 @@ void RemoveMouseClickHandler(MouseCallback mC)
 	}
 }
 
+void RemoveMouseClickHandler(MouseCallback2 mC)
+{
+	for (unsigned int x = 0; x < mouseCallbacks2.size(); x++)
+	{
+		if (mouseCallbacks2[x]->mC == mC)
+		{
+			delete mouseCallbacks2[x];
+			mouseCallbacks2[x] = mouseCallbacks2[mouseCallbacks2.size()-1];
+			mouseCallbacks2.pop_back();
+		}
+	}
+}
+
+void ReinitViewports(unsigned long windowID, const Graphics::rect &r, viewportType v)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+	pContextInfo->numPorts = 1;
+	pContextInfo->viewports[0].bounds = r;
+	pContextInfo->viewports[0].type = v;
+	pContextInfo->viewports[0].active = true;
+	for (int x = 1; x < MAXPORTS; x++)
+		pContextInfo->viewports[x].active = false;
+}
+
+/* Adds a new viewport to the existing viewports and
+ * returns the new viewport numbers
+ */
+int AddViewport(unsigned long windowID, const Graphics::rect &r, viewportType v)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+	if (pContextInfo->numPorts >= MAXPORTS)
+	{
+		printf("Cannot add viewport - reached limit of %d [constant MAXPORTS]\n", MAXPORTS);
+		return -1;
+	}
+	pContextInfo->numPorts++;
+	pContextInfo->viewports[pContextInfo->numPorts-1].bounds = r;
+	pContextInfo->viewports[pContextInfo->numPorts-1].type = v;
+	pContextInfo->viewports[pContextInfo->numPorts-1].active = true;
+	return pContextInfo->numPorts-1;
+}
+
+point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d where)
+{
+	if (v.type == kScaleToFill) 		// just scale regular -1/1 axes into the rectangle
+	{
+		// gets offset into rect
+		where.x -= v.bounds.left;
+		where.x /= (v.bounds.right-v.bounds.left);
+		where.x = where.x*2.0-1.0;
+		where.y -= v.bounds.bottom;
+		where.y /= (v.bounds.top-v.bounds.bottom);
+		where.y = -where.y*2.0+1.0;
+		return where;
+	}
+	else if (v.type == kScaleToSquare)
+	{
+		float localWidth = v.bounds.right-v.bounds.left;
+		float localHeight = v.bounds.bottom-v.bounds.top;
+		// find the smallest dimension; scale into that dimension and then shift into the middle
+		// minSize is in window pixels!
+		float minSize = (pContextInfo->windowWidth*localWidth<pContextInfo->windowHeight*localHeight)?localWidth:localHeight;
+		float xScale;
+		float yScale;
+		point3d center((v.bounds.left+v.bounds.right)/2.f, (v.bounds.top+v.bounds.bottom)/2.f, 0);
+		if (pContextInfo->windowWidth*localWidth < pContextInfo->windowHeight*localHeight)
+		{
+			minSize = localWidth;
+			xScale = 1.0;
+			yScale = (pContextInfo->windowHeight*localHeight)/(pContextInfo->windowWidth*localWidth);
+			//printf("Scaling x:%1.2f, y:%1.2f\n", xScale, yScale);
+		}
+		else {
+			minSize = localHeight;
+			xScale = (pContextInfo->windowWidth*localWidth)/(pContextInfo->windowHeight*localHeight);
+			yScale = 1.0;
+		}
+
+		where.x *= xScale;
+		where.y *= yScale;
+		where *= (minSize/2.0f);
+		where += center;
+
+		
+		return where;
+	}
+	else {
+		printf("Unknown scale type\n");
+		exit(0);
+	}
+}
+
+point3d ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, point3d where)
+{
+	if (v.type == kScaleToFill)
+	{
+		where.x = (where.x+1.0)/2.0;
+		where.x *= (v.bounds.right-v.bounds.left);
+		where.x += v.bounds.left;
+
+		where.y = -(where.y-1.0)/2.0;
+		where.y *= (v.bounds.top-v.bounds.bottom);
+		where.y += v.bounds.bottom;
+		return where;
+	}
+	else if (v.type == kScaleToSquare)
+	{
+//		printf("From (%f, %f) to ", where.x, where.y);
+		float localWidth = v.bounds.right-v.bounds.left;
+		float localHeight = v.bounds.bottom-v.bounds.top;
+		// find the smallest dimension; scale into that dimension and then shift into the middle
+		// minSize is in window pixels!
+		float minSize;// = (pContextInfo->windowWidth*localWidth<pContextInfo->windowHeight*localHeight)?localWidth:localHeight;
+		float xScale;
+		float yScale;
+//		printf("-->Window: w%d h%d\n", pContextInfo->windowWidth, pContextInfo->windowHeight);
+		if (pContextInfo->windowWidth*localWidth < pContextInfo->windowHeight*localHeight)
+		{
+			minSize = localWidth;
+			xScale = 1.0;
+			yScale = (pContextInfo->windowHeight*localHeight)/(pContextInfo->windowWidth*localWidth);
+			//printf("Scaling x:%1.2f, y:%1.2f\n", xScale, yScale);
+		}
+		else {
+			minSize = localHeight;
+			xScale = (pContextInfo->windowWidth*localWidth)/(pContextInfo->windowHeight*localHeight);
+			yScale = 1.0;
+		}
+		point3d center((v.bounds.left+v.bounds.right)/2.f, (v.bounds.top+v.bounds.bottom)/2.f, 0);
+
+		where -= center;
+		where /= (minSize/2.0f);
+		where.x /= xScale;
+		where.y /= yScale;
+//		printf("(%f, %f)\n", where.x, where.y);
+
+		return where;
+	}
+	else {
+		printf("Unknown scale type\n");
+		exit(0);
+	}
+}
+
+
+/* New low-end mouse handler. Does the viewport computation - just requires incoming global HOG coordinates. */
+bool HandleMouse(pRecContext pContextInfo, point3d where, tButtonType button, tMouseEventType mouse)
+{
+	for (int x = MAXPORTS-1; x >= 0; x--)
+	{
+		if (!pContextInfo->viewports[x].active)
+			continue;
+		if (!PointInRect(where, pContextInfo->viewports[x].bounds))
+			continue;
+		// got hit in rect
+		point3d res = GlobalHOGToViewport(pContextInfo, pContextInfo->viewports[x], where);
+		HandleMouseClick(pContextInfo, x, -1, -1, res, button, mouse);
+	}
+	return false;
+}
+
 // this is called by the OS when it gets a click
+bool HandleMouseClick(pRecContext pContextInfo, int viewport, int x, int y, point3d where,
+					  tButtonType button, tMouseEventType mouse)
+{
+	for (unsigned int j = 0; j < mouseCallbacks2.size(); j++)
+	{
+		if (mouseCallbacks2[j]->mC(pContextInfo->windowID, viewport, x, y, where,
+								  button, mouse))
+			return true;
+	}
+	return HandleMouseClick(pContextInfo, x, y, where, button, mouse);
+}
+
 bool HandleMouseClick(pRecContext pContextInfo, int x, int y, point3d where,
 											tButtonType button, tMouseEventType mouse)
 {
 	for (unsigned int j = 0; j < mouseCallbacks.size(); j++)
 	{
-		//printf("Calling mouse callback %d\n", x);
 		if (mouseCallbacks[j]->mC(pContextInfo->windowID, x, y, where,
 															button, mouse))
 			return true;
@@ -308,6 +486,7 @@ void initialConditions(pRecContext pContextInfo)
 	gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
 
 	pContextInfo->windowID = gNextWindowID++;
+	ReinitViewports(pContextInfo->windowID, {-1, -1, 1, 1}, kScaleToSquare);
 }
 
 bool DoKeyboardCommand(pRecContext pContextInfo, unsigned char keyHit, bool shift, bool cntrl, bool alt)
@@ -453,6 +632,7 @@ void setPortCamera(pRecContext pContextInfo, int currPort)
 
 void setViewport(pRecContext pContextInfo, int currPort)
 {
+	pContextInfo->display.SetViewport(currPort);
 	const double ratios[4][4][4] =
 	{{{0, 1, 0, 1}}, // x, width%, y, height%
 		{{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
@@ -507,9 +687,12 @@ void SetNumPorts(unsigned long windowID, int count)
 	pRecContext pContextInfo = GetContext(windowID);
 	if ((count <= MAXPORTS) && (count > 0))
 	{
+		pContextInfo->display.SetNumViewports(count);
+		pContextInfo->display.SetViewport(0);
+		
 		if (pContextInfo->numPorts > count)
 			pContextInfo->currPort = 0;
-
+		
 		pContextInfo->numPorts = count;
 		for (int x = 0; x < pContextInfo->numPorts; x++)
 		{

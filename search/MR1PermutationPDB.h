@@ -134,7 +134,7 @@ void MR1PermutationPDB<state, action, environment, bits>::GetStateFromPDBHash(ui
 		hash = hash/i;
 		s.puzzle[dual[i-1]] = distinct[i-last-1];
 	}
-	s.FinishUnranking(example);
+	s.FinishUnranking();
 }
 
 template <class state, class action, class environment, int bits>

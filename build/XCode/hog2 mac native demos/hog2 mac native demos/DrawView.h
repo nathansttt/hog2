@@ -20,6 +20,7 @@
 @property Graphics::Display *display;
 
 // Convert from screen coordinate to HOG coordinates
--(point3d)convertToHogCoordinate:(NSPoint)currPoint;
+-(point3d)convertToGlobalHogCoordinate:(NSPoint)currPoint;
+-(int)getViewport:(NSPoint)currPoint;
 
 @end

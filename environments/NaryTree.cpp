@@ -97,12 +97,37 @@ uint64_t NaryTree::GetStateHash(const NaryState &node) const
 uint64_t NaryTree::GetActionHash(NaryAction act) const
 { return act+b; }
 
-void NaryTree::GetLocation(const NaryState &s, double &x, double &y) const
+float sqdist(float x1, float y1, float x2, float y2)
+{
+	return (x1-x2)*(x1-x2)+(y1-y2)*(y1-y2);
+}
+
+NaryState NaryTree::GetClosestNode(float x, float y)
+{
+	float bestDist = 100;
+	float x1, y1;
+	uint64_t best = 0;
+	for (uint64_t t = 0; t < totalNodesAtDepth.back(); t++)
+	{
+		GetLocation(t, x1, y1);
+		if (sqdist(x, y, x1, y1) < bestDist)
+		{
+			bestDist = sqdist(x, y, x1, y1);
+			best = t;
+		}
+	}
+	return best;
+}
+
+
+void NaryTree::GetLocation(const NaryState &s, float &x, float &y) const
 {
 	int depth = GetDepth(s);
 	x = -1.0+(2.0*GetOffset(s))/nodesAtDepth[depth]+1.0/nodesAtDepth[depth];
 	x *= scaleWidth;
-	y = 2.0*double(depth)/double(d)-1;
+	y = 2.0*float(depth)/float(d)-1;
+	x *= 0.95;
+	y *= 0.95;
 	//printf("%llu depth %d offset %llu\n", s, depth, GetOffset(s));
 }
 
@@ -137,7 +162,7 @@ NaryState NaryTree::GetParent(NaryState s) const
 void NaryTree::OpenGLDraw() const
 {
 	std::vector<NaryState> succ;
-	double x1, y1, x2, y2;
+	float x1, y1, x2, y2;
 	glBegin(GL_LINES);
 	glColor3f(1.0, 1.0, 1.0);
 	for (uint64_t t = 0; t < totalNodesAtDepth.back(); t++)
@@ -156,7 +181,7 @@ void NaryTree::OpenGLDraw() const
 
 void NaryTree::OpenGLDraw(const NaryState &s) const
 {
-	double x1, y1;
+	float x1, y1;
 	GLfloat r, g, b, t;
 	GetColor(r, g, b, t);
 	glColor4f(r, g, b, t);
@@ -168,7 +193,7 @@ void NaryTree::OpenGLDraw(const NaryState &s) const
 
 void NaryTree::GLDrawLine(const NaryState &s1, const NaryState &s2) const
 {
-	double x1, y1, x2, y2;
+	float x1, y1, x2, y2;
 	GLfloat r, g, b, t;
 	GetColor(r, g, b, t);
 	glLineWidth(6.0);
@@ -181,6 +206,42 @@ void NaryTree::GLDrawLine(const NaryState &s1, const NaryState &s2) const
 	glEnd();
 	glLineWidth(1.0);
 }
+
+void NaryTree::Draw(Graphics::Display &display) const
+{
+	std::vector<NaryState> succ;
+	float x1, y1, x2, y2;
+	for (uint64_t t = 0; t < totalNodesAtDepth.back(); t++)
+	{
+		GetLocation(t, x1, y1);
+		GetSuccessors(t, succ);
+		for (uint64_t s : succ)
+		{
+			GetLocation(s, x2, y2);
+			display.DrawLine({x1, y1}, {x2, y2}, 1, Colors::white);
+		}
+	}
+}
+
+void NaryTree::Draw(Graphics::Display &display, const NaryState &s) const
+{
+	float x1, y1;
+	GetLocation(s, x1, y1);
+	float r1 = 2.0/nodesAtDepth[GetDepth(s)];
+	float r2 = 0.1/d;
+	float r = std::min(r1, r2);
+	display.FillCircle({x1-r, y1-r, x1+r, y1+r}, color);
+}
+
+void NaryTree::DrawLine(Graphics::Display &display, const NaryState &f, const NaryState &t, float width) const
+{
+	float x1, y1;
+	GetLocation(f, x1, y1);
+	float x2, y2;
+	GetLocation(t, x2, y2);
+	display.DrawLine({x1, y1}, {x2, y2}, width, color);
+}
+
 
 void NaryTree::OpenGLDraw(const NaryState&, const NaryState&, float) const { }
 void NaryTree::OpenGLDraw(const NaryState&, const NaryAction&) const { }

@@ -71,6 +71,7 @@ int main(int argc, char* argv[])
 	setvbuf(stdout, NULL, _IONBF, 0);
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 640, 640);
+	return 0;
 }
 
 /**

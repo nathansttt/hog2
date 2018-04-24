@@ -77,6 +77,7 @@ int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1600, 800);
+	return 0;
 }
 
 /**
@@ -85,21 +86,28 @@ int main(int argc, char* argv[])
 void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
-	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Picture", "Save a picture of the graph.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
 	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra, A* and Weighted A*", kAnyModifier, 'w');
+
+	InstallKeyboardHandler(MyDisplayHandler, "Dijkstra", "Use Dijkstra", kAnyModifier, '1');
+	InstallKeyboardHandler(MyDisplayHandler, "A*", "Use A*", kAnyModifier, '2');
+	InstallKeyboardHandler(MyDisplayHandler, "A*", "Use WA*(w = 2)", kAnyModifier, '3');
+	InstallKeyboardHandler(MyDisplayHandler, "A*", "Use WA*(w = 100)", kAnyModifier, '4');
+
+	InstallKeyboardHandler(MyDisplayHandler, "Find Path", "Move to find path mode", kAnyModifier, 'a');
+	InstallKeyboardHandler(MyDisplayHandler, "Add Node", "Move to add node mode", kAnyModifier, 'n');
+	InstallKeyboardHandler(MyDisplayHandler, "Add Edge", "Move to add edge mode", kAnyModifier, 'e');
+	InstallKeyboardHandler(MyDisplayHandler, "Move Node", "Move to move node mode", kAnyModifier, 'm');
+
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph as .svg file", kAnyModifier, 'g');
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
 	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
-	InstallKeyboardHandler(DefaultGraph, "Default", "Build Deafult Graph", kAnyModifier, 'a', 'd');
+	InstallKeyboardHandler(DefaultGraph, "Default", "Build Deafult Graph", kAnyModifier, 'd');
 
 	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -120,6 +128,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		glClearColor(0.99, 0.99, 0.99, 1.0);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
+		
 		SetNumPorts(windowID, 2);
 		g = new Graph();
 		ge = new GraphEnvironment(g);
@@ -130,6 +139,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		te.AddLine("A* algorithm sample code");
 		te.AddLine("Current mode: add nodes (click to add node)");
 		te.AddLine("Press [ or ] to change modes. '?' for help.");
+
+		ReinitViewports(windowID, {-1, -1, 0.0, 1}, kScaleToFill);
+		AddViewport(windowID, {0, -1, 1, 1}, kScaleToFill);
 	}
 }
 
@@ -137,63 +149,61 @@ int frameCnt = 0;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	Graphics::Display &display = getCurrentContext()->display;
 	if (viewport == 0)
 	{
 		if (ge == 0 || g == 0)
 			return;
+		display.FillRect({-1.0, -1.0, 1.0, 1}, Colors::black);
 		ge->SetColor(0.5, 0.5, 1.0);
-		ge->OpenGLDraw();
+		ge->Draw(display);
 		
 		if (from != -1 && to != -1)
 		{
-			glLineWidth(4.);
 			ge->SetColor(1, 0, 0);
-			ge->GLDrawLine(from, to);
+			ge->DrawLine(display, from, to, 4);
 		}
 		
 		if (running)
 		{
-			//astar.DoSingleSearchStep(path);
-			astar.OpenGLDraw();
+			astar.Draw(display);
 		}
 		else {
 			ge->SetColor(0.75, 0.75, 1.0);
 			for (int x = 0; x < g->GetNumNodes(); x++)
-				ge->OpenGLDraw(x);
+				ge->Draw(display, x);
 		}
 		
 		if (path.size() > 0)
 		{
 			ge->SetColor(0, 1, 0);
-			glLineWidth(10);
 			for (int x = 1; x < path.size(); x++)
 			{
-				ge->GLDrawLine(path[x-1], path[x]);
+				ge->DrawLine(display, path[x-1], path[x], 10);
 			}
-			glLineWidth(1);
 		}
 	}
 	if (viewport == 1)
 	{
-		te.OpenGLDraw(windowID);
+		te.Draw(display);
 	}
 	
-	if (recording && viewport == GetNumPorts(windowID)-1)
-	{
-		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/astar-%d%d%d%d",
-				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-		SaveScreenshot(windowID, fname);
-		printf("Saved %s\n", fname);
-		frameCnt++;
-		if (path.size() == 0)
-		{
-			MyDisplayHandler(windowID, kNoModifier, 'o');
-		}
-		else {
-			recording = false;
-		}
-	}
+//	if (recording && viewport == GetNumPorts(windowID)-1)
+//	{
+//		char fname[255];
+//		sprintf(fname, "/Users/nathanst/Movies/tmp/astar-%d%d%d%d",
+//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+//		SaveScreenshot(windowID, fname);
+//		printf("Saved %s\n", fname);
+//		frameCnt++;
+//		if (path.size() == 0)
+//		{
+//			MyDisplayHandler(windowID, kNoModifier, 'o');
+//		}
+//		else {
+//			recording = false;
+//		}
+//	}
 	return;
 	
 }
@@ -210,10 +220,55 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '{':
-		{
+		case 'a':
+			m = kFindPath; te.AddLine("Current mode: find path"); break;
+		case 'n':
+			m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
+		case 'e':
+			m = kAddEdges; te.AddLine("Current mode: add edges"); break;
+		case 'm':
+			m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
+		case '1': // Dijkstra
+			te.AddLine("Algorithm: Dijkstra");
+			weight = 0.0;
+			astar.SetWeight(weight);
+			if (running)
+			{
+				astar.InitializeSearch(ge, astar.start, astar.goal, path);
+				ShowSearchInfo();
+			}
 			break;
-		}
+		case '2': // A*
+			te.AddLine("Algorithm: A*");
+			weight = 1.0;
+			astar.SetWeight(weight);
+			if (running)
+			{
+				astar.InitializeSearch(ge, astar.start, astar.goal, path);
+				ShowSearchInfo();
+			}
+			break;
+		case '3': // WA*(2)
+			te.AddLine("Algorithm: WA*(2)");
+			weight = 2.0;
+			astar.SetWeight(weight);
+			if (running)
+			{
+				astar.InitializeSearch(ge, astar.start, astar.goal, path);
+				ShowSearchInfo();
+			}
+			break;
+		case '4': // WA*(100)
+			te.AddLine("Algorithm: WA*(100)");
+			weight = 100.0;
+			astar.SetWeight(weight);
+			if (running)
+			{
+				astar.InitializeSearch(ge, astar.start, astar.goal, path);
+				ShowSearchInfo();
+			}
+			break;
+
 		case ']':
 		{
 			switch (m)
@@ -247,39 +302,23 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			running = false;
 		}
 			break;
+			
 		case 'w':
 			if (weight == 1.0)
 				weight = 2.0;
-			else if (weight > 1.0)
-				weight = 0.0;
-			else
+			else if (weight == 2.0)
+				weight = 100.0;
+			else if (weight == 0.0)
 				weight = 1.0;
+			else
+				weight = 0.0;
 			astar.SetWeight(weight);
 			astar.InitializeSearch(ge, astar.start, astar.goal, path);
 			ShowSearchInfo();
-			
 			running = true;
 			break;
 		case 'r':
 			recording = !recording;
-			break;
-		case '0':
-//		case '1': edgeCost = 1.0; te.AddLine("Adding edges; New edges cost 1"); m = kAddEdges; break;
-//		case '2': edgeCost = 2.0; te.AddLine("Adding edges; New edges cost 2"); m = kAddEdges; break;
-//		case '3': edgeCost = 3.0; te.AddLine("Adding edges; New edges cost 3"); m = kAddEdges; break;
-//		case '4': edgeCost = 4.0; te.AddLine("Adding edges; New edges cost 4"); m = kAddEdges; break;
-//		case '5': edgeCost = 5.0; te.AddLine("Adding edges; New edges cost 5"); m = kAddEdges; break;
-//		case '6': edgeCost = 6.0; te.AddLine("Adding edges; New edges cost 6"); m = kAddEdges; break;
-//		case '7': edgeCost = 7.0; te.AddLine("Adding edges; New edges cost 7"); m = kAddEdges; break;
-//		case '8': edgeCost = 8.0; te.AddLine("Adding edges; New edges cost 8"); m = kAddEdges; break;
-//		case '9': edgeCost = 9.0; te.AddLine("Adding edges; New edges cost 9"); m = kAddEdges; break;
-		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
 			break;
 		case 'p':
 		{
@@ -342,7 +381,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key)
 {
-	if (key == 'a')
+	if (key == 'd')
 	{
 		MyDisplayHandler(windowID, kNoModifier, '|'); // clear current graph
 		
@@ -402,7 +441,22 @@ void ShowSearchInfo()
 	s +=" to ";
 	s += g->GetNode(astar.goal)->GetName();
 	s += " <-----";
-	s += " w:" + MyToString(weight);
+	if (weight == 0)
+	{
+		s += " Dijkstra";
+	}
+	else if (weight == 1)
+	{
+		s += " A*";
+	}
+	else if (weight == 2)
+	{
+		s += " WA*(2)";
+	}
+	else if (weight == 100)
+	{
+		s += " WA*(100)";
+	}
 	te.AddLine(s.c_str());
 	te.AddLine("Press 'o' to advance search.");
 	for (int x = 0; x < g->GetNumNodes(); x++)

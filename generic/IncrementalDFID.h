@@ -24,6 +24,7 @@ public:
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	void Reset() { bound = initialBound; path.clear(); history.clear(); }
 	void OpenGLDraw();
+	void Draw(Graphics::Display &display);
 	state GetCurrentState() const { return path.back(); }
 private:
 	unsigned long nodesExpanded, nodesTouched;
@@ -112,6 +113,14 @@ void IncrementalDFID<state, action>::OpenGLDraw()
 	for (int x = 1; x < path.size(); x++)
 		env->GLDrawLine(path[x-1], path[x]);
 }
+
+template <class state, class action>
+void IncrementalDFID<state, action>::Draw(Graphics::Display &display)
+{
+	for (int x = 1; x < path.size(); x++)
+		env->DrawLine(display, path[x-1], path[x], 6);
+}
+
 
 
 #endif /* IncrementalDFID_h */

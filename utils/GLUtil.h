@@ -148,13 +148,13 @@ public:
 	{ x += v.x; y += v.y; z += v.z; return *this; }
 	point3d &operator-=(const point3d &v)
 	{ x -= v.x; y -= v.y; z -= v.z; return *this; }
-	point3d &operator+=(const int v)
+	point3d &operator+=(const float v)
 	{ x += v; y += v; z += v; return *this; }
-	point3d &operator-=(const int v)
+	point3d &operator-=(const float v)
 	{ x -= v; y -= v; z -= v; return *this; }
-	point3d &operator*=(const int v)
+	point3d &operator*=(const float v)
 	{ x *= v; y *= v; z *= v; return *this; }
-	point3d &operator/=(const int v)
+	point3d &operator/=(const float v)
 	{ x /= v; y /= v; z /= v; return *this; }
 
 };

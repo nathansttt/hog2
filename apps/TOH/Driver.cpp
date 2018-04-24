@@ -7,7 +7,7 @@
 #include "PermutationPDB.h"
 #include "TemplateAStar.h"
 
-const int numDisks = 16;
+const int numDisks = 7;
 
 TOH<numDisks> toh;
 TOHState<numDisks> s, g;
@@ -65,13 +65,20 @@ void SolveProblem(bool reset = true)
 	Timer t;
 	if (reset)
 	{
-		s.Reset();
-		srandom(1234);
-		for (int x = 0; x < 200; x++)
-		{
-			toh.GetActions(s, solution);
-			toh.ApplyAction(s, solution[random()%solution.size()]);
-		}
+		s.StandardStart();
+		g.Reset();
+		g.counts[2]++;
+		g.counts[3]--;
+		g.disks[2][0] = 4;
+		g.disks[3][3] = 3;
+		g.disks[3][4] = 2;
+		g.disks[3][5] = 1;
+		//		srandom(1234);
+//		for (int x = 0; x < 200; x++)
+//		{
+//			toh.GetActions(s, solution);
+//			toh.ApplyAction(s, solution[random()%solution.size()]);
+//		}
 	}
 	std::cout << s << "\n";
 	//toh.GetStateFromHash(random()%toh.GetNumStates(s), s);
@@ -91,6 +98,10 @@ void SolveProblem(bool reset = true)
 	t.StartTimer();
 	astar.GetPath(&toh, s, g, solution);
 	t.EndTimer();
+	for (auto &m : solution)
+	{
+		std::cout << m << " ";
+	}
 	printf("%1.2fs elapsed; %llu expanded; %llu generated [%lu]\n", t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched(), solution.size());
 }
 
@@ -138,9 +149,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		h.heuristics.push_back(&toh);
 		h.lookups.push_back({kLeafNode, 0, 0});
-//		s.StandardStart();
-//		SolveProblem(false);
-		SpeedTest();
+		s.StandardStart();
+		g.Reset();
+		SolveProblem(true);
+//		SpeedTest();
 	}
 }
 
@@ -197,9 +209,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'r': recording = !recording; break;
 		case 's':
 		{
-			toh.GetStateFromHash(random()%toh.GetNumStates(s), s);
-			g.Reset();
-			SolveProblem(false);
+			//toh.GetStateFromHash(random()%toh.GetNumStates(s), s);
+//			g.Reset();
+			SolveProblem(true);
 //			ida.GetPath(&toh, s, g, solution);
 //			for (auto &m : solution)
 //			{

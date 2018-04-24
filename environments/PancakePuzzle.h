@@ -16,7 +16,7 @@ public:
 		Reset();
 	}
 	size_t size() const { return N; }
-	void FinishUnranking(const PancakePuzzleState &s) {}
+	void FinishUnranking() {}
 	void Reset()
 	{
 		for (unsigned int x = 0; x < N; x++)

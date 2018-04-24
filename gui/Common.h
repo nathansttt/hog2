@@ -29,7 +29,7 @@
 
 #define main hog_main
 
-const int MAXPORTS = 4;
+const int MAXPORTS = 6;
 
 typedef struct {
 	GLfloat worldRotation[4];
@@ -57,6 +57,17 @@ typedef struct {
 	GLfloat viewOriginX, viewOriginY; // always 0 
 } recCamera;
 
+enum viewportType {
+	kScaleToSquare,
+	kScaleToFill
+};
+
+struct viewport {
+	Graphics::rect bounds;
+	viewportType type;
+	bool active; // Is this viewport valid
+};
+
 // per view data
 struct recContext
 {
@@ -67,6 +78,8 @@ struct recContext
 
 	int numPorts, currPort;
 	bool moveAllPortsTogether;
+	viewport viewports[MAXPORTS];
+	int windowHeight, windowWidth;
 	
 	char message[256]; // buffer for message output
 	float msgTime; // message posting time for expiration
@@ -92,10 +105,28 @@ void ProcessCommandLineArgs(int argc, char *argv[]);
 
 extern char gDefaultMap[1024];
 
+/* Window Viewports */
 void SetNumPorts(unsigned long windowID, int count);
 int GetNumPorts(unsigned long windowID);
+
+/* Not currently functional, but purposes is to mark a
+ *  viewport as the one that is receiving input
+ */
 void SetActivePort(unsigned long windowID, int which);
 int GetActivePort(unsigned long windowID);
+
+
+/* Removes all active viewports and adds this one as the first.
+ * rect coordinates are in HOG coordinates.
+ */
+void ReinitViewports(unsigned long windowID, const Graphics::rect &r, viewportType v);
+/* Adds a new viewport to the existing viewports and
+ * returns the new viewport numbers
+ */
+int AddViewport(unsigned long windowID, const Graphics::rect &r, viewportType v);
+
+point3d ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, point3d where);
+point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d where);
 
 enum tKeyboardModifier {
 	kNoModifier,
@@ -146,6 +177,11 @@ typedef void (*JoystickCallback)(unsigned long windowID, double offsetX, double 
  * returns true if the click/movement was handled; false if ignored
  */
 typedef bool (*MouseCallback)(unsigned long windowID, int x, int y, point3d loc, tButtonType, tMouseEventType);
+/**
+ * the new callback handler also passes the viewport frame in which the click occured.
+ * The loc is relative to the frame which was clicked
+ */
+typedef bool (*MouseCallback2)(unsigned long windowID, int viewport, int x, int y, point3d loc, tButtonType, tMouseEventType);
 
 /**
  * a keyboard callback handler is passed the current unit simulation, the key
@@ -208,6 +244,14 @@ public:
 	MouseCallback mC;
 };
 
+class mouseCallbackData2 {
+public:
+	mouseCallbackData2(MouseCallback2 _mC)
+	:mC(_mC)
+	{}
+	MouseCallback2 mC;
+};
+
 class windowCallbackData {
 public:
 	windowCallbackData(WindowCallback _wC)
@@ -237,8 +281,12 @@ void RemoveJoystickHandler(JoystickCallback jC, void *userdata);
 void HandleJoystickMovement(pRecContext pContextInfo, double panX, double panY);
 
 void InstallMouseClickHandler(MouseCallback mC);
+void InstallMouseClickHandler(MouseCallback2 mC);
 void RemoveMouseClickHandler(MouseCallback mC);
+void RemoveMouseClickHandler(MouseCallback2 mC);
+bool HandleMouse(pRecContext pContextInfo, point3d where, tButtonType button, tMouseEventType mouse);
 bool HandleMouseClick(pRecContext pContextInfo, int x, int y, point3d where, tButtonType, tMouseEventType);
+bool HandleMouseClick(pRecContext pContextInfo, int viewport, int x, int y, point3d where, tButtonType, tMouseEventType);
 
 void InstallWindowHandler(WindowCallback wC);
 void RemoveWindowHandler(WindowCallback wC);
@@ -269,6 +317,7 @@ recVec cameraLookingAt(int port = -1);
 void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1, int port = -1);
 void cameraOffset(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1, int port = -1);
 void resetCamera();
+
 point3d GetOGLPos(pRecContext pContextInfo, int x, int y);
 recVec GetHeading(unsigned long windowID, int which);
 void GetHeading(unsigned long windowID, int which, GLdouble &hx, GLdouble &hy, GLdouble &hz);

@@ -48,14 +48,15 @@ void InitTextures()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 	
 		
-		if (p.BytesReversed()) {
+//		if (p.BytesReversed())
+		{
 			// Specify a 2D texture image, providing the a pointer to the image data in memory
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.GetWidth(), p.GetHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, p.GetBytes());
 		}
-		else {
-			// Specify a 2D texture image, providing the a pointer to the image data in memory
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.GetWidth(), p.GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, p.GetBytes());
-		}
+//		else {
+//			// Specify a 2D texture image, providing the a pointer to the image data in memory
+//			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.GetWidth(), p.GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, p.GetBytes());
+//		}
 	}
 }
 

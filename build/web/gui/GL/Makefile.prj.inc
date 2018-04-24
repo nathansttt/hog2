@@ -12,10 +12,10 @@ REL_NAME = lib$(NAME).a
 ROOT = ../../../..
 VPATH = $(ROOT)
 
-DBG_OBJDIR = $(ROOT)/objs/$(NAME)/debug
-REL_OBJDIR = $(ROOT)/objs/$(NAME)/release
-DBG_BINDIR = $(ROOT)/bin/debug
-REL_BINDIR = $(ROOT)/bin/release
+DBG_OBJDIR = $(ROOT)/objs_html/$(NAME)/debug
+REL_OBJDIR = $(ROOT)/objs_html/$(NAME)/release
+DBG_BINDIR = $(ROOT)/html/debug
+REL_BINDIR = $(ROOT)/html/release
 
 PROJ_CXXFLAGS = 
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)

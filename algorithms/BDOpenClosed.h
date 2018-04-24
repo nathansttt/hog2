@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "AStarOpenClosed.h"
 
-#define ADMISSIBLE
+//#define ADMISSIBLE
 //struct AHash64 {
 //	size_t operator()(const uint64_t &x) const
 //	{ return (size_t)(x); }

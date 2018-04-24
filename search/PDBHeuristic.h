@@ -60,6 +60,7 @@ public:
 	
 	/** This methods randomizes the entries in the PDB. Only useful for testing purposes. (eg to test structure in compression) */
 	void ShuffleValues();
+	void BuildPDB(const state &goal);
 	void BuildPDB(const state &goal, int numThreads)
 	{ BuildPDBForwardBackward(goal, numThreads); }
 	void BuildPDBForward(const state &goal, int numThreads);
@@ -167,6 +168,71 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 		default:
 			assert(!"Not implemented");
 	}
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDB(const state &goal)
+{
+	assert(goalSet);
+	
+	uint64_t COUNT = GetPDBSize();
+	PDB.Resize(COUNT);
+	PDB.FillMax();
+	
+	uint64_t entries = 1;
+	std::cout << "Num Entries: " << COUNT << std::endl;
+	std::cout << "Goal State: " << goalState << std::endl;
+	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	
+	std::vector<abstractAction> acts;
+	
+	Timer t;
+	t.StartTimer();
+	PDB.Set(GetPDBHash(goalState), 0);
+	
+	int depth = 0;
+	uint64_t newEntries = 0;
+	abstractState s(goal), u(goal);
+	do {
+		Timer timer;
+		timer.StartTimer();
+		uint64_t total = 0;
+		for (uint64_t i = 0; i < COUNT; i++)
+		{
+			if (PDB.Get(i) == depth)
+			{
+				GetStateFromPDBHash(i, s);
+				env->GetActions(s, acts);
+				for (int y = 0; y < acts.size(); y++)
+				{
+					env->GetNextState(s, acts[y], u);
+					assert(env->InvertAction(acts[y]) == true);
+					
+					uint64_t nextRank = GetPDBHash(u);
+					int newCost = depth+(env->GCost(u, acts[y]));
+					if (PDB.Get(nextRank) > newCost)
+					{
+						PDB.Set(nextRank, newCost);
+						total++;
+					}
+				}
+			}
+		}
+		
+		entries += total;//newEntries;
+		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+			   depth, timer.EndTimer(), total, entries, COUNT);
+		depth++;
+	} while (entries != COUNT);
+	
+	printf("%1.2fs elapsed\n", t.EndTimer());
+	if (entries != COUNT)
+	{
+		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		assert(entries == COUNT);
+	}
+	PrintHistogram();
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
@@ -916,6 +982,8 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
 void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::DivCompress(int factor, bool print_histogram)
 {
+	if (type != kPlain)
+		return;
 	type = kDivCompress;
 	compressionValue = factor;
 	NBitArray<pdbBits> copy(PDB);

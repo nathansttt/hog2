@@ -43,17 +43,28 @@ namespace Colors
 	const rgbColor green  = {0.0,1.0,0.0}; // green
 	const rgbColor darkgreen= {0.0,0.5,0.0}; // green
 	const rgbColor lightgreen= {0.5,1.0,0.5}; // green
+
+	const rgbColor bluegreen   = {0.0,0.65,0.5}; // blue
+
 	
 	const rgbColor blue   = {0.0,0.0,1.0}; // blue
 	const rgbColor darkblue   = {0.0,0.0,0.5}; // blue
 	const rgbColor lightblue   = {0.5,0.5,1.0}; // blue
-	
+	const rgbColor lighterblue   = {0.25,0.25,1.0}; // blue
+
 	const rgbColor yellow = {1.0,1.0,0.0}; // yellow
 	const rgbColor purple = {1.0,0.0,1.0}; // purple
 	const rgbColor cyan   = {0.0,1.0,1.0}; // cyan
 	
 	const rgbColor orange = {1.0,0.5,0.0}; // orange
 	const rgbColor pink   = {1.0,0.0,0.5}; // pink
+
+	const rgbColor cb0    = {0, 0, 0}; // black
+	const rgbColor cb1    = {0, 114.0f/255.0f, 178/255.0f};   // blue
+	const rgbColor cb2    = {204/255.0f, 121/255.0f, 167/255.0f}; // reddish purple
+	const rgbColor cb3    = {230/255.0f, 159/255.0f, 0};   // orange
+	const rgbColor cb4    = {86/255.0f, 180/255.0f, 233/255.0f};  // sky blue
+	const rgbColor cb5    = {213/255.0f, 94/255.0f, 0};   // vermillion
 }
 
 

@@ -32,4 +32,5 @@ default : all
 SRC_CPP = \
 	envutil/VoxelTriangleExtraction.cpp \
 	envutil/PancakeInstances.cpp \
+	envutil/STPInstances.cpp \
 

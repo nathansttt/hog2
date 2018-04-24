@@ -35,7 +35,7 @@ public:
 			puzzle[x] = x;
 	}
 	size_t size() const { return N; }
-	void FinishUnranking(const TopSpinState &s) {}
+	void FinishUnranking() {}
 //	std::vector<int> puzzle;
 	int puzzle[N];
 };

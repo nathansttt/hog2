@@ -320,6 +320,11 @@ void Voxels::GLDrawLine(const voxelState &x, const voxelState &y) const
 	
 }
 
+void Voxels::Draw(Graphics::Display &display)
+{
+	
+}
+
 
 // "Insert" two 0 bits after each of the 10 low bits of x
 uint32_t Voxels::Part1By2(uint32_t x) const

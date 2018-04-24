@@ -31,11 +31,11 @@ void TestPancake()
 //	TestRob();
 //	TestPancakeRandom();
 
-	TestPancakeHard(0); // GAP heuristic #
+//	TestPancakeHard(0); // GAP heuristic #
 //	TestPancakeHard(1);
 //	TestPancakeHard(2);
 //	TestError();
-//	TestVariants();
+	TestVariants();
 	exit(0);
 }
 
@@ -148,7 +148,7 @@ void TestPancakeTR()
 	exit(0);
 }
 
-const int N = 16;
+const int N = 20;
 void TestPancakeRandom()
 {
 	for (int gap = 0; gap < 1; gap++)
@@ -261,7 +261,7 @@ void TestPancakeRandom()
 	}
 }
 
-const int CNT = 16;
+const int CNT = 20;
 void TestPancakeHard(int gap)
 {
 	srandom(2017218);
@@ -492,6 +492,13 @@ void Solve(Heuristic<PancakePuzzleState<CNT>> *h, const char *name)
 			p.SaveSVG(s.c_str());
 		}
 
+		p.drawAllG = true;
+		{
+			std::string s(name);
+			s += "-ey-gy-fy.svg";
+			p.SaveSVG(s.c_str());
+		}
+
 		p.drawFullGraph = false;
 		p.drawAllG = true;
 		p.flipBackwardsGCost = true;
@@ -616,13 +623,14 @@ void TestVariants()
 	WeightedHeuristic<PancakePuzzleState<CNT>> w8(&pancake0, 0.8);
 	WeightedHeuristic<PancakePuzzleState<CNT>> w7(&pancake0, 0.7);
 
-	Solve(&pancake0, "/Users/nathanst/bidir/pancake/p11_G0");
-	Solve(&pancake1, "/Users/nathanst/bidir/pancake/p11_G1");
-	Solve(&pancake2, "/Users/nathanst/bidir/pancake/p11_G2");
-	Solve(&o1, "/Users/nathanst/bidir/pancake/p11_O1");
-	Solve(&o2, "/Users/nathanst/bidir/pancake/p11_O2");
-	Solve(&o3, "/Users/nathanst/bidir/pancake/p11_O3");
-	Solve(&w9, "/Users/nathanst/bidir/pancake/p11_W9");
-	Solve(&w8, "/Users/nathanst/bidir/pancake/p11_W8");
-	Solve(&w7, "/Users/nathanst/bidir/pancake/p11_W7");
+//	Solve(&pancake0, "/Users/nathanst/bidir/pancake/p11_G0");
+//	Solve(&pancake1, "/Users/nathanst/bidir/pancake/p11_G1");
+//	Solve(&pancake2, "/Users/nathanst/bidir/pancake/p11_G2");
+	Solve(&pancake2, "/Users/nathanst/bidir/pancake/p11_G2-E");
+//	Solve(&o1, "/Users/nathanst/bidir/pancake/p11_O1");
+//	Solve(&o2, "/Users/nathanst/bidir/pancake/p11_O2");
+//	Solve(&o3, "/Users/nathanst/bidir/pancake/p11_O3");
+//	Solve(&w9, "/Users/nathanst/bidir/pancake/p11_W9");
+//	Solve(&w8, "/Users/nathanst/bidir/pancake/p11_W8");
+//	Solve(&w7, "/Users/nathanst/bidir/pancake/p11_W7");
 }

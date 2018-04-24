@@ -39,12 +39,13 @@
 bool recording = false;
 bool running = false;
 
-int drawMode = 0; // bit 0 [dfs] bit 1 [dfid] bit 2 [bfs]
+int drawMode = 2; // bit 0 [dfid] bit 1 [dfs] bit 2 [bfs]
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1440, 1080);
+	return 0;
 }
 
 /**
@@ -53,17 +54,16 @@ int main(int argc, char* argv[])
 void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
+	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset run", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
+	InstallKeyboardHandler(MyDisplayHandler, "DFS", "Toggle DFS", kAnyModifier, 'd');
+	InstallKeyboardHandler(MyDisplayHandler, "DFID", "Toggle DFID", kAnyModifier, 'i');
+	InstallKeyboardHandler(MyDisplayHandler, "BFS", "Toggle BFS", kAnyModifier, 'b');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
-
-//	InstallKeyboardHandler(STPTest, "STP Test", "Test the STP PDBs", kNoModifier, 'd');
-//	InstallKeyboardHandler(BuildSTP_PDB, "Build STP PDBs", "Build PDBs for the STP", kNoModifier, 'a');
 
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -84,8 +84,25 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-//		if (mnp == 0)
-//			mnp = new MNPuzzle<4, 4>;
+//		ReinitViewports(windowID, Graphics::rect{-1.f, -1.f, 1.f, 1.f}, kScaleToFill);
+		ReinitViewports(windowID, Graphics::rect{-1.f, -1.f, 1.f, 1.f}, kScaleToSquare);
+		
+		{
+			char txt[] = "Algorithms: ";
+			submitTextToBuffer(txt);
+			switch(drawMode)
+			{
+				case 0: appendTextToBuffer("none"); break;
+				case 1: appendTextToBuffer("DFID"); break;
+				case 2: appendTextToBuffer("DFS"); break;
+				case 3: appendTextToBuffer("DFS+DFID"); break;
+				case 4: appendTextToBuffer("BFS"); break;
+				case 5: appendTextToBuffer("DFID+BFS"); break;
+				case 6: appendTextToBuffer("DFS+BFS"); break;
+				case 7: appendTextToBuffer("DFS+DFID+BFS"); break;
+			}
+		}
+
 	}
 }
 
@@ -100,30 +117,34 @@ IncrementalDFID<NaryState, NaryAction> dfs(10);
 IncrementalBFS<NaryState, NaryAction> bfs;
 std::vector<NaryState> path;
 
-NaryState goal = 0;
+NaryState goal = tree.GetLastNode();
 
 int frameCnt = 0;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	Graphics::Display &display = getCurrentContext()->display;
+	display.FillRect({-1.5, -1.0, 1.5, 1}, Colors::black);
 	if (running)
 	{
 		MyDisplayHandler(windowID, kNoModifier, 'o');
 	}
-	tree.SetWidthScale(double(GetContext(windowID)->globalCamera.viewWidth)/GetContext(windowID)->globalCamera.viewHeight);
-	tree.OpenGLDraw();
+//	printf("Width: %d; height %d\n", GetContext(windowID)->globalCamera.viewWidth, GetContext(windowID)->globalCamera.viewHeight);
+//	tree.SetWidthScale(double(GetContext(windowID)->globalCamera.viewWidth)/GetContext(windowID)->globalCamera.viewHeight);
+	tree.SetWidthScale(1.5);
+	tree.Draw(display);
 	tree.SetColor(0.0, 1.0, 1.0);
-	tree.OpenGLDraw(goal);
+	tree.Draw(display, goal);
 	
 	tree.SetColor(1, 0, 0);
 	if (drawMode&0x1)
-		dfid.OpenGLDraw();
-	tree.SetColor(0, 1, 0);
+		dfid.Draw(display);
+	tree.SetColor(0, 0, 1);
 	if (drawMode&0x2)
-		dfs.OpenGLDraw();
-	tree.SetColor(0.75, 0, 0.5);
+		dfs.Draw(display);
+	tree.SetColor(0.75, 0.5, 0.75);
 	if (drawMode&0x4)
-		bfs.OpenGLDraw();
+		bfs.Draw(display);
 
 	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
@@ -149,6 +170,33 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case 'i':
+		{
+			drawMode ^= 0x1;
+			frameCnt = 0;
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
+		case 'd':
+		{
+			drawMode ^= 0x2;
+			frameCnt = 0;
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
+		case 'b':
+		{
+			drawMode ^= 0x4;
+			frameCnt = 0;
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
+		}
 		case '{':
 		{
 			goal = tree.GetParent(goal);
@@ -163,8 +211,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			drawMode = (drawMode+7)&0x7;
 		}
 			break;
+		case '|':
+			frameCnt = 0;
+			goal = tree.GetLastNode();
+			dfid.Reset();
+			dfs.Reset();
+			bfs.Reset();
+			break;
 		case 'r':
-			recording = !recording; running = true;
+//			recording = !recording; running = true;
 			break;
 		case '0':
 		{
@@ -281,26 +336,33 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 	
 	{
-		char txt[] = "[bf 0]  ";
-		txt[4] += tree.GetBranchingFactor();
+		char txt[] = "Algorithms: ";
 		submitTextToBuffer(txt);
 		switch(drawMode)
 		{
 			case 0: appendTextToBuffer("none"); break;
 			case 1: appendTextToBuffer("DFID"); break;
 			case 2: appendTextToBuffer("DFS"); break;
-			case 3: appendTextToBuffer("DFID+DFS"); break;
+			case 3: appendTextToBuffer("DFS+DFID"); break;
 			case 4: appendTextToBuffer("BFS"); break;
-			case 5: appendTextToBuffer("BFS+DFID"); break;
-			case 6: appendTextToBuffer("BFS+DFS"); break;
-			case 7: appendTextToBuffer("all"); break;
+			case 5: appendTextToBuffer("DFID+BFS"); break;
+			case 6: appendTextToBuffer("DFS+BFS"); break;
+			case 7: appendTextToBuffer("DFS+DFID+BFS"); break;
 		}
 	}
 
 }
 
 
-bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
+bool MyClickHandler(unsigned long , int x, int y, point3d loc, tButtonType , tMouseEventType e)
 {
-	return false;
+	if (e == kMouseDown)
+	{
+		goal = tree.GetClosestNode(loc.x, loc.y);
+		frameCnt = 0;
+		dfid.Reset();
+		dfs.Reset();
+		bfs.Reset();
+	}
+	return true;
 }

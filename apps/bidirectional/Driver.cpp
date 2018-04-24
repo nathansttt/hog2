@@ -85,7 +85,7 @@ void ClearFiles();
 void TestPruning(int depth, int bucket);
 const int kNumBuckets = 512;
 void BFS();
-void GetKorfInstance(RubiksState &start, int which);
+void GetKorfRubikInstance(RubiksState &start, int which);
 void GetSuperFlip(RubiksState &start);
 void GetDepth20(RubiksState &start, int which);
 void GetRandom15(RubiksState &start, int which);
@@ -277,7 +277,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		int which = 0;
 		which = atoi(argument[1]);
 		if (which < 10)
-			GetKorfInstance(start, which);
+			GetKorfRubikInstance(start, which);
 		else if (which == 19)
 		{
 			GetSuperFlip(start);
@@ -407,7 +407,7 @@ void BFS()
 	RubiksState s;
 	//uint64_t start1 = strtoll(argv[0], 0, 10);
 	//GetInstanceFromStdin(s);
-	GetKorfInstance(s, 0);
+	GetKorfRubikInstance(s, 0);
 	//GetSuperFlip(s);
 	hash128 start;
 	start.parent = 20;
@@ -870,7 +870,7 @@ void GetSuperFlip(RubiksState &start)
 	}
 }
 
-void GetKorfInstance(RubiksState &start, int which)
+void GetKorfRubikInstance(RubiksState &start, int which)
 {
 	const int maxStrLength = 1024;
 	assert(which >= 0 && which < 10);
@@ -1365,15 +1365,15 @@ void Animate(Map *m, xyLoc p1, xyLoc p2);
 
 void Animate()
 {
-//	Map *m = new Map("/Users/nathanst/hog2/maps/local/bidir.map");
-//	xyLoc p1 = {9,12};
-//	xyLoc p2 = {16,15};
-//	Animate(m, p1, p2);
-
-	Map *m = new Map("/Users/nathanst/hog2/maps/local/bidir2.map");
-	xyLoc p1 = { 5, 8};
-	xyLoc p2 = { 9, 8};
+	Map *m = new Map("/Users/nathanst/hog2/maps/local/bidir.map");
+	xyLoc p1 = {9,12};
+	xyLoc p2 = {16,15};
 	Animate(m, p1, p2);
+
+//	Map *m = new Map("/Users/nathanst/hog2/maps/local/bidir2.map");
+//	xyLoc p1 = { 5, 8};
+//	xyLoc p2 = { 9, 8};
+//	Animate(m, p1, p2);
 
 }
 
@@ -1468,7 +1468,7 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {rs, actual};
+				xyLoc l = {rs, static_cast<uint16_t>(h-1-actual)};
 				me->Draw(d, i.data, l, frame/numFrames);
 				actual++;
 			}
@@ -1509,7 +1509,7 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {rs, actual};
+				xyLoc l = {rs, static_cast<uint16_t>(h-1-actual)};
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l);
 				me->SetColor(0, 0, 1);
@@ -1540,8 +1540,8 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 				auto j = astarb.GetItem(y);
 				if (i.g+j.g < opt && j.g+j.h < opt)
 				{
-					xyLoc l1 = {ls, actual};
-					xyLoc l2 = {rs, actual2};
+					xyLoc l1 = {ls, static_cast<uint16_t>(actual)};
+					xyLoc l2 = {rs, static_cast<uint16_t>(h-1-actual2)};
 					me->DrawLine(d, l1, l2, 0.5);
 					actual2++;
 				}
@@ -1573,7 +1573,7 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l = {rs, actual};
+				xyLoc l = {rs, static_cast<uint16_t>(h-1-actual)};
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l);
 				me->SetColor(0, 0, 1);
@@ -1587,6 +1587,8 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 	d.EndFrame();
 	MakeSVG(d, "/Users/nathanst/bidir/anim-b4.svg", 800, 800);
 
+	// shouldnt' be hard coded!
+	int newh = 21;
 	
 	// Animate moving of states according to g-cost
 	for (int frame = 0; frame <= numFrames; frame++)
@@ -1616,8 +1618,8 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 			auto i = astarb.GetItem(x);
 			if (i.g+i.h < opt)
 			{
-				xyLoc l1 = {rs, actual};
-				xyLoc l2 = {rs, static_cast<uint16_t>(i.g*spread)};
+				xyLoc l1 = {rs, static_cast<uint16_t>(h-1-actual)};
+				xyLoc l2 = {rs, static_cast<uint16_t>(newh-1-i.g*spread)};
 				
 				me->SetColor(0, 0, 1);
 				me->Draw(d, l1, l2, frame/numFrames);
@@ -1655,9 +1657,9 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 				l2.x--;
 				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarf, i.g, opt)).c_str());
 				l2.x--;
-				char tmp[2] = {0, 0};
-				tmp[0] = 'a'+(char)i.g;
-				me->DrawStateLabel(d, l2, tmp);
+//				char tmp[2] = {0, 0};
+//				tmp[0] = 'a'+(char)i.g;
+//				me->DrawStateLabel(d, l2, tmp);
 				actual++;
 			}
 		}
@@ -1668,7 +1670,7 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 			if (i.g+i.h < opt)
 			{
 				//xyLoc l1 = {rs, actual};
-				xyLoc l2 = {rs, static_cast<uint16_t>(i.g*spread)};
+				xyLoc l2 = {rs, static_cast<uint16_t>(newh-1-i.g*spread)};
 				
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);
@@ -1679,9 +1681,9 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 				l2.x++;
 				me->DrawStateLabel(d, l2, std::to_string(GetGCount(astarb, i.g, opt)).c_str());
 				l2.x++;
-				char tmp[2] = {0, 0};
-				tmp[0] = 'a'+(char)i.g;
-				me->DrawStateLabel(d, l2, tmp);
+//				char tmp[2] = {0, 0};
+//				tmp[0] = 'a'+(char)i.g;
+//				me->DrawStateLabel(d, l2, tmp);
 				actual++;
 			}
 		}
@@ -1709,7 +1711,7 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 						if (i.g+j.g < opt && j.g+j.h < opt)
 						{
 							xyLoc l1 = {ls, static_cast<uint16_t>(i.g*spread)};
-							xyLoc l2 = {rs, static_cast<uint16_t>(j.g*spread)};
+							xyLoc l2 = {rs, static_cast<uint16_t>(newh-1-j.g*spread)};
 							me->DrawLine(d, l1, l2, 0.5);
 						}
 					}
@@ -1745,7 +1747,7 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 			if (i.g+i.h < opt)
 			{
 				//xyLoc l1 = {23, actual};
-				xyLoc l2 = {rs, static_cast<uint16_t>(i.g*spread)};
+				xyLoc l2 = {rs, static_cast<uint16_t>(newh-1-i.g*spread)};
 				
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);
@@ -1787,9 +1789,21 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 					if (maxNeighbor != 0 && i.g != 0)
 					{
 						xyLoc l1 = {ls, static_cast<uint16_t>(i.g*spread)};
-						xyLoc l2 = {rs, static_cast<uint16_t>(maxNeighbor*spread)};
+						xyLoc l2 = {rs, static_cast<uint16_t>(newh-1-maxNeighbor*spread)};
 						me->DrawLine(d, l1, l2, 0.5);
 					}
+//					else {
+//						xyLoc l1 = {ls, static_cast<uint16_t>(i.g*spread)};
+//						xyLoc l2 = {rs, static_cast<uint16_t>(newh-1-maxNeighbor*spread)};
+//						float len = (ls-rs)*(ls-rs)+(i.g*spread-(newh-1-maxNeighbor*spread))*(i.g*spread-(newh-1-maxNeighbor*spread));
+//						float xoff = (rs-ls)/len;
+//						float yoff = (newh-1-maxNeighbor*spread)-(i.g*spread)/len;
+//						len = sqrt(len);
+//						xyLoc l3 = {static_cast<uint16_t>(ls+20*xoff), static_cast<uint16_t>(i.g*spread+20*yoff)};
+//						xyLoc l4 = {static_cast<uint16_t>(rs-20*xoff), static_cast<uint16_t>((newh-1-maxNeighbor*spread)-20*yoff)};
+//						me->DrawLine(d, l1, l3, 0.5);
+//						me->DrawLine(d, l4, l2, 0.5);
+//					}
 				}
 			}
 		}
@@ -1822,7 +1836,7 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 			if (i.g+i.h < opt)
 			{
 				//xyLoc l1 = {23, actual};
-				xyLoc l2 = {rs, static_cast<uint16_t>(i.g*spread)};
+				xyLoc l2 = {rs, static_cast<uint16_t>(newh-1-i.g*spread)};
 				
 				me->SetColor(1, 1, 1);
 				me->Draw(d, l2);
@@ -1838,7 +1852,11 @@ void Animate(Map *m, xyLoc p1, xyLoc p2)
 		d.EndFrame();
 		std::string path = "/Users/nathanst/bidir/anim-b7.svg";
 		MakeSVG(d, path.c_str(), 800, 800);
+		// reset to align in next drawing
 	}
+
+
+
 	
 	BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(p1, p2, me, me, me, "/Users/nathanst/bidir/z.svg");
 //	GetWeightedVertexGraph<xyLoc, tDirection>(p2, p1, me, "/Users/nathanst/bidir/z.svg");

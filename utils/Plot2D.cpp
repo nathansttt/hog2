@@ -15,9 +15,10 @@
 
 namespace Plotting {
 	
-	Line::Line(char *label, tPlotType ptype)
+	Line::Line(const char *label, tPlotType ptype)
 	:plotType(ptype)
 	{
+		width = 1.0;
 		ClearColor();
 		strncpy(name,label,1024);
 		xMin = DBL_MAX;
@@ -26,6 +27,16 @@ namespace Plotting {
 		yMax = DBL_MIN;
 		hidden = false;
 		changedLine = false;
+	}
+
+	void Line::Clear()
+	{
+		x.resize(0);
+		y.resize(0);
+		xMin = DBL_MAX;
+		xMax = DBL_MIN;
+		yMin = DBL_MAX;
+		yMax = DBL_MIN;
 	}
 
 	void Line::AddPoint(double _y)
@@ -112,6 +123,13 @@ namespace Plotting {
 		r = -1;
 	}
 
+	void Line::SetColor(const rgbColor &c)
+	{
+		r = c.r;
+		g = c.g;
+		b = c.b;
+	}
+	
 	void Line::SetColor(double _r, double _g, double _b)
 	{
 		r = _r; g = _g; b = _b;
@@ -151,6 +169,27 @@ namespace Plotting {
 			}
 			break;
 		}
+	}
+
+	void Line::Draw(Graphics::Display &display, double xOff, double yOff, double xScale, double yScale) const
+	{
+		if (x.size() == 0 || hidden)
+			return;
+		
+		// Only does line plots right now
+		std::vector<Graphics::point> points;
+		for (unsigned int t = 0; t < x.size(); t++)
+		{
+			points.push_back({
+				(float)((x[t]+xOff)*xScale),
+				-(float)((y[t]+yOff)*yScale)
+			});
+		}
+//		printf("(%f, %f) -> (%f, %f)",
+//			   (float)((x[0]+xOff)*xScale), (float)-((y[0]+yOff)*yScale),
+//			   (float)((x[x.size()-1]+xOff)*xScale), (float)-((y[x.size()-1]+yOff)*yScale)
+//			   );
+		display.DrawLineSegments(points, width, rgbColor(r, g, b));
 	}
 
 	Plot2D::Plot2D()
@@ -399,4 +438,22 @@ namespace Plotting {
 		
 		glEnable(GL_DEPTH_TEST);
 	}
+	
+	void Plot2D::Draw(Graphics::Display &display) const
+	{
+		double xOffset = (dRight-dLeft)/2.0-dRight;
+		double yOffset = (dTop-dBottom)/2.0-dTop;
+		double xScale = 2.0/(dRight-dLeft);
+		double yScale = 2.0/(dTop-dBottom);
+		
+		display.FillRect({-1, -1, 1, 1}, Colors::white);
+		display.DrawLine({-0.9, 1}, {-0.9, -1}, 2.5, Colors::black); // x-axis
+		display.DrawLine({-1, 0.9}, {1, 0.9}, 2.5, Colors::black); // y-axis
+
+		for (unsigned int x = 0; x < lines.size(); x++)
+		{
+			lines[x]->Draw(display, xOffset, yOffset, xScale*0.9, yScale*0.9);
+		}
+	}
+
 }

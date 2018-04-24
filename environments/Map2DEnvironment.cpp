@@ -10,6 +10,7 @@
 #include "FPUtil.h"
 #include "SVGUtil.h"
 #include <cstring>
+#include <unordered_map>
 #include "Graphics.h"
 
 using namespace Graphics;
@@ -504,10 +505,10 @@ double MapEnvironment::GCost(const xyLoc &l, const tDirection &act) const
 double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2) const
 {
 	double multiplier = 1.0;
-//	if (map->GetTerrainType(l1.x, l1.y) == kSwamp)
-//	{
-//		multiplier = 3.0;
-//	}
+	if (map->GetTerrainType(l1.x, l1.y) == kSwamp)
+	{
+		multiplier = 3.0;
+	}
 	if (l1.x == l2.x) return 1.0*multiplier;
 	if (l1.y == l2.y) return 1.0*multiplier;
 	if (l1 == l2) return 0.0;
@@ -945,22 +946,22 @@ std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2, int wi
 void MapEnvironment::Draw(Graphics::Display &disp) const
 {
 	//rgbColor black = {0.0, 0.0, 0.0};
+	
 //	s += SVGFrameRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
 //					  PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
 //					  PointToSVG(o.r.top, height)-PointToSVG(o.r.bottom, height),
 
-//	disp.FrameRect({-1, -1, 1, -3}, Colors::black, 1);
-	disp.DrawLine({-1, -1}, {-1, 1}, 1, Colors::black);
-	disp.DrawLine({-1, -1}, {1, -1}, 1, Colors::black);
-	disp.DrawLine({1, 1}, {-1, 1}, 1, Colors::black);
-	disp.DrawLine({1, 1}, {1, -1}, 1, Colors::black);
-//	disp.FrameRect({1, -1, -1, 1}, Colors::black, 1);
-//	disp.FrameRect({-1, 1, 1, -1}, Colors::black, 1);
-//	disp.FrameRect({-1, -1, 1, 1}, Colors::black, 1);
-//	disp.FrameRect({-1, -1, 1, 1}, Colors::black, 4);
+	disp.FillRect({-1, -1, 1, 1}, Colors::black);
+//	std::vector<point> frame;
+//	frame.push_back({-1, -1});
+//	frame.push_back({-1, 1});
+//	frame.push_back({1, 1});
+//	frame.push_back({1, -1});
+//	frame.push_back({-1, -1});
+//	disp.DrawLineSegments(frame, 1, Colors::black);
 	
 	// draw tiles
-	if (0)
+	if (1)
 	for (int y = 0; y < map->GetMapHeight(); y++)
 	{
 		for (int x = 0; x < map->GetMapWidth(); x++)
@@ -970,9 +971,9 @@ void MapEnvironment::Draw(Graphics::Display &disp) const
 			GLdouble px, py, t, rad;
 			map->GetOpenGLCoord(x, y, px, py, t, rad);
 			r.left = px-rad;
-			r.top = py+rad;
+			r.top = py-rad;
 			r.right = px+rad;
-			r.bottom = py-rad;
+			r.bottom = py+rad;
 			
 			if (map->GetTerrainType(x, y) == kGround)
 			{
@@ -995,6 +996,8 @@ void MapEnvironment::Draw(Graphics::Display &disp) const
 				disp.FillRect(r, c);
 			}
 			else {
+//				rgbColor c = {0.0, 0.0, 0.0};
+//				disp.FillRect(r, c);
 				draw = false;
 			}
 		}
@@ -1023,75 +1026,115 @@ void MapEnvironment::Draw(Graphics::Display &disp) const
 		}
 	
 	// draw lines between different terrain types
-//	if (0)
-	for (int y = 0; y < map->GetMapHeight(); y++)
+	if (1)
 	{
-		for (int x = 0; x < map->GetMapWidth(); x++)
+		std::vector<std::pair<point, point>> lines;
+		for (int y = 0; y < map->GetMapHeight(); y++)
 		{
-			GLdouble px1, py1, t1, rad1;
-			map->GetOpenGLCoord(x, y, px1, py1, t1, rad1);
-			float px=static_cast<float>(px1);
-			float py=static_cast<float>(py1);
-			float t=static_cast<float>(t1);
-			float rad=static_cast<float>(rad1);
-			
-			bool draw = true;
-			if ((map->GetTerrainType(x, y) == kGround) ||
-				(map->GetTerrainType(x, y) == kTrees) ||
-				(map->GetTerrainType(x, y) == kWater))
+			for (int x = 0; x < map->GetMapWidth(); x++)
 			{
-				if (x == map->GetMapWidth()-1)
+				GLdouble px1, py1, t1, rad1;
+				map->GetOpenGLCoord(x, y, px1, py1, t1, rad1);
+				float px=static_cast<float>(px1);
+				float py=static_cast<float>(py1);
+				float t=static_cast<float>(t1);
+				float rad=static_cast<float>(rad1);
+				
+				bool draw = true;
+				if ((map->GetTerrainType(x, y) == kGround) ||
+					(map->GetTerrainType(x, y) == kTrees) ||
+					(map->GetTerrainType(x, y) == kWater))
 				{
-					point s = {px+rad, py-rad};
-					point g = {px+rad, py+rad};
-					disp.DrawLine(s, g, 1, Colors::black);
+					if (x == map->GetMapWidth()-1)
+					{
+						point s = {px+rad, py-rad};
+						point g = {px+rad, py+rad};
+						//disp.DrawLine(s, g, 1, Colors::black);
+						lines.push_back({s, g});
+					}
+					if (y == map->GetMapHeight()-1)
+					{
+						point s = {px-rad, py+rad};
+						point g = {px+rad, py+rad};
+						//disp.DrawLine(s, g, 1, Colors::black);
+						lines.push_back({s, g});
+					}
 				}
-				if (y == map->GetMapHeight()-1)
+				else if (map->GetTerrainType(x, y) == kSwamp)
 				{
-					point s = {px-rad, py+rad};
-					point g = {px+rad, py+rad};
-					disp.DrawLine(s, g, 1, Colors::black);
 				}
-			}
-			else if (map->GetTerrainType(x, y) == kSwamp)
-			{
-			}
-			else {
-				draw = false;
-			}
-			
-			if (draw)
-			{
-				// Code does error checking, so this works with x == 0
-				if (map->GetTerrainType(x, y) != map->GetTerrainType(x-1, y))
-				{
-					point s = {px-rad, py-rad};
-					point g = {px-rad, py+rad};
-					disp.DrawLine(s, g, 1, Colors::black);
+				else {
+					draw = false;
 				}
 				
-				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y-1))
+				if (draw)
 				{
-					point s = {px-rad, py-rad};
-					point g = {px+rad, py-rad};
-					disp.DrawLine(s, g, 1, Colors::black);
+					// Code does error checking, so this works with x == 0
+					if (map->GetTerrainType(x, y) != map->GetTerrainType(x-1, y))
+					{
+						point s = {px-rad, py-rad};
+						point g = {px-rad, py+rad};
+						//disp.DrawLine(s, g, 1, Colors::black);
+						lines.push_back({s, g});
+					}
+					
+					if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y-1))
+					{
+						point s = {px-rad, py-rad};
+						point g = {px+rad, py-rad};
+						//disp.DrawLine(s, g, 1, Colors::black);
+						lines.push_back({s, g});
+					}
+					
+					if (map->GetTerrainType(x, y) != map->GetTerrainType(x+1, y))
+					{
+						point s = {px+rad, py-rad};
+						point g = {px+rad, py+rad};
+						//disp.DrawLine(s, g, 1, Colors::black);
+						lines.push_back({s, g});
+					}
+					
+					if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y+1))
+					{
+						point s = {px-rad, py+rad};
+						point g = {px+rad, py+rad};
+						//disp.DrawLine(s, g, 1, Colors::black);
+						lines.push_back({s, g});
+					}
 				}
 				
-				if (map->GetTerrainType(x, y) != map->GetTerrainType(x+1, y))
-				{
-					point s = {px+rad, py-rad};
-					point g = {px+rad, py+rad};
-					disp.DrawLine(s, g, 1, Colors::black);
-				}
-				
-				if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y+1))
-				{
-					point s = {px-rad, py+rad};
-					point g = {px+rad, py+rad};
-					disp.DrawLine(s, g, 1, Colors::black);
-				}
 			}
-			
+		}
+		std::vector<point> points;
+		while (lines.size() > 0)
+		{
+			points.resize(0);
+			// Inefficient n^2 algorithm for now
+			points.push_back(lines.back().first);
+			points.push_back(lines.back().second);
+			lines.pop_back();
+			bool found;
+			do {
+				found = false;
+				for (int x = 0; x < lines.size(); x++)
+				{
+					if (lines[x].first == points.back())
+					{
+						points.push_back(lines[x].second);
+						lines.erase(lines.begin()+x);
+						found = true;
+						break;
+					}
+					if (lines[x].second == points.back())
+					{
+						points.push_back(lines[x].first);
+						lines.erase(lines.begin()+x);
+						found = true;
+						break;
+					}
+				}
+			} while (found);
+			disp.DrawLineSegments(points, 1, Colors::black);
 		}
 	}
 }
@@ -1300,7 +1343,7 @@ double MapEnvironment::GetPathLength(std::vector<xyLoc> &neighbors)
 	double length = 0;
 	for (unsigned int x = 1; x < neighbors.size(); x++)
 	{
-		length += HCost(neighbors[x-1], neighbors[x]);
+		length += GCost(neighbors[x-1], neighbors[x]);
 	}
 	return length;
 }

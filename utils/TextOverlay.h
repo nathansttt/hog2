@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <string>
+#include "Graphics.h"
 
 class TextOverlay {
 public:
@@ -23,6 +24,7 @@ public:
 	const char *GetLastLine();
     void Clear();
 	void OpenGLDraw(int window);
+	void Draw(Graphics::Display &display) const;
 private:
     int DrawString(std::string, int start = 0);
     std::vector<std::string> text;

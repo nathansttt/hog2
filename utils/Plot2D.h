@@ -13,6 +13,7 @@
 #include <vector>
 #include "GLUtil.h"
 #include "FPUtil.h"
+#include "Graphics.h"
 
 namespace Plotting {
 
@@ -23,14 +24,18 @@ namespace Plotting {
 
 	class Line {
 	public:
-		Line(char *label, tPlotType = kLinePlot);
+		Line(const char *label, tPlotType = kLinePlot);
 		void AddPoint(double x, double y);
 		void AddPoint(double x);
+		void Clear();
 		const char *GetLabel() { return name; }
 		
 		void ClearColor();
 		void SetColor(double, double, double);
+		void SetColor(const rgbColor &c);
+		void SetWidth(float w) { width = w; }
 		void OpenGLDraw() const;
+		void Draw(Graphics::Display &display, double xOff, double yOff, double xScale, double yScale) const;
 		void SetHidden( bool val) { hidden = val; }
 		bool IsHidden() { return hidden; }
 
@@ -53,6 +58,7 @@ namespace Plotting {
 		std::vector<double> y;
 		bool hidden;
 		char name[1024];
+		float width;
 	};
 
 	class Plot2D {
@@ -61,11 +67,14 @@ namespace Plotting {
 		void AddLine(Line *);
 //		void SetCurrMouse(double, double, Rect &winRect);
 //		void Recenter(double, double, Rect &rectPort);
+		double GetMaxX() { return dRight; }
+		double GetMaxY() { return dTop; }
 		void OffsetCurrMouse(double deltaX, double deltaY);
 		void SetAxis(double, double, double, double);
 		void Zoom(double);
 		void ResetAxis();
 		void OpenGLDraw() const;
+		void Draw(Graphics::Display &display) const;
 		void SmoothLines();
 	private:
 			double mouseXLoc, mouseYLoc;

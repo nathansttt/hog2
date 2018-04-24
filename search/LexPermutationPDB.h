@@ -107,7 +107,7 @@ void LexPermutationPDB<state, action, environment, bits>::GetStateFromPDBHash(ui
 	std::fill(&s.puzzle[0], &s.puzzle[s.size()], -1);
 	for (int x = 0; x < dual.size(); x++)
 		s.puzzle[dual[x]] = distinct[x];
-	s.FinishUnranking(example);
+	s.FinishUnranking();
 }
 
 void GetStateFromHash(uint64_t hash, int *pieces, int count)

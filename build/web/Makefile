@@ -11,18 +11,23 @@
 # All projects to build in this order.
 PROJECTS = \
   gui/GL \
+  gui/ \
   algorithms \
   environments \
   envutil \
-  generic \
   graph \
   grids \
   graphalgorithms \
   gui/web \
   mapalgorithms \
   utils \
+  demos/ida \
   demos/bidirnecessary \
-
+  demos/bidir \
+  demos/DFID \
+  demos/dijkstra \
+  demos/astar \
+  demos/astar-map
 
 
 

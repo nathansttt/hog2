@@ -37,11 +37,15 @@
 #include "TemplateAStar.h"
 #include "VoxelGrid.h"
 #include "GLUThog.h"
+#include "SVGUtil.h"
+#include <unordered_map>
+#include "NBS.h"
 
 recVec velocity;
 std::string map;
 void Maze3D(int d);
 void CustomMaze();
+void BuildBenchmarks(const char *map);
 
 
 //struct voxelWorld {
@@ -70,7 +74,7 @@ std::vector<voxelGridState> path;
 int main(int argc, char* argv[])
 {
 //	theWorld = LoadData();
-	CustomMaze();
+//	CustomMaze();
 	//	Maze3D(11);
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 512, 512);
@@ -83,66 +87,8 @@ int main(int argc, char* argv[])
  */
 void CreateSimulation(int id)
 {
-//	//FILE *f = fopen("/Users/nathanst/Desktop/3DNavMaps/test3dnavC1.3dnav", "r");
-//	//FILE *f = fopen("/Users/nathanst/Desktop/3dmaps/Full4_test3dnav.3dnav", "r");
-//	//FILE *f = fopen("/Users/nathanst/Desktop/3dmaps/Full3_test3dnav.3dnav", "r");
-//	//FILE *f = fopen("/Users/nathanst/Desktop/3dmaps/Full2_test3dnav.3dnav", "r");
-//	//FILE *f = fopen("/Users/nathanst/Desktop/3dmaps/Full1_test3dnav.3dnav", "r");
-//	FILE *f = fopen("/Users/nathanst/Desktop/3dmaps/Complex_test3dnav.3dnav", "r");
-//	//FILE *f = fopen("/Users/nathanst/Desktop/3dmaps/Simple_test3dnav.3dnav", "r");
-
-//	v = new Voxels("/Users/nathanst/Desktop/3dmaps/Complex_test3dnav.3dnav");
-//	v = new Voxels("/Users/nathanst/Desktop/3DNavMaps/test3dnavTR1_1m.3dnav");
-
-	//vg = new VoxelGrid("/Users/nathanst/Desktop/3dmaps/Complex_test3dnav.3dmap");
-//	vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/FC2.3dmap");
-//	vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/Norm1.3dmap");
-//	vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/TR12m.3dmap");
-//	vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/TR11m.3dmap");
-//	vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/A5.3dmap");
-	if (map.size() > 0)
-		vg = new VoxelGrid(map.c_str());
-	else
-//		vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/Norm2.3dmap");
-//		vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/TR2_1m.3dmap");
-		vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/A5.3dmap");
-
+	vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/Complex.3dmap");
 	vg->efficient = true;
-
-	//	v = new Voxels("/Users/nathanst/Desktop/3dmaps/Full4_test3dnav.3dnav");
-//	Map *map;
-//	if (gDefaultMap[0] == 0)
-//	{
-//		map = new Map(mazeSize, mazeSize);
-//		MakeMaze(map, 10);
-////		map->Scale(mazeSize, mazeSize);
-//	}
-//	else {
-//		map = new Map(gDefaultMap);
-//		//map->Scale(512, 512);
-//	}
-//	
-//	if (0 && gDefaultMap[0] == 0)
-//	{
-//		MakeStaircase();
-////		m3d = new Map3DGrid(map, 16);
-//		//m3d->AddMap(map, 0);
-//		m3d->SetDrawGrid(true);
-//		m3d->PrintStats();
-//		//m3d->AddMap(map, 50);
-//	}
-//	else {
-//		m3d = new Map3DGrid(map, 16);
-//	}
-//	map->SetTileSet(kWinter);
-//	msa = new MapSectorAbstraction(map, 8);
-//	msa->ToggleDrawAbstraction(0);
-//	//msa->ToggleDrawAbstraction(2);
-//	//msa->ToggleDrawAbstraction(3);
-//	unitSims.resize(id+1);
-//	unitSims[id] = new UnitSimulation<xyLoc, tDirection, MapEnvironment>(new MapEnvironment(map));
-//	unitSims[id]->SetStepType(kMinTime);
-//	m3d->SetDrawGrid(true);
 }
 
 /**
@@ -165,6 +111,9 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-convert", "-convert <source> <dest>", "Convert a map from the DE format to the repo format");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map <source>", "Use the provided map");
 	InstallCommandLineHandler(MyCLHandler, "-capture", "-capture", "Capture animation");
+	InstallCommandLineHandler(MyCLHandler, "-benchmark", "-benchmark <map>", "Build benchmark problems for map");
+	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg", "capture model as svg (filename(s) will come from -map argument)");
+	InstallCommandLineHandler(MyCLHandler, "-bmp", "-bmp", "capture model as bmp (filename(s) will come from -map argument)");
 //
 //	InstallMouseClickHandler(MyClickHandler);
 }
@@ -319,6 +268,38 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		map = argument[1];
 		return 2;
 	}
+	if (strcmp(argument[0], "-benchmark") == 0 && maxNumArgs >= 2)
+	{
+		BuildBenchmarks(argument[1]);
+		return 2;
+	}
+	if (strcmp(argument[0], "-svg") == 0 && maxNumArgs >= 1)
+	{
+		printf("Loading '%s'\n", map.c_str());
+		VoxelGrid v(map.c_str());
+		printf("Exporting to graphics\n");
+		Graphics::Display d;
+		v.Draw(d);
+		std::string output = map;
+		output+=".svg";
+		printf("Exporting to %s\n", output.c_str());
+		int x, y, z;
+		v.GetLimits(x, y, z);
+		MakeSVG(d, output.c_str(), std::max(x, y), std::max(x, y));
+		exit(0);
+		return 1;
+	}
+	if (strcmp(argument[0], "-bmp") == 0 && maxNumArgs >= 1)
+	{
+		printf("Loading '%s'\n", map.c_str());
+		VoxelGrid v(map.c_str());
+		BitMapPic *bmp = v.GetImage(0);
+		std::string output = map;
+		output+=".bmp";
+		bmp->Save(output.c_str());
+		exit(0);
+		return 1;
+	}
 
 	return 0;
 }
@@ -388,9 +369,60 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 	return false;
 }
 
-void BuildBenchmarks(const char *map, int resolution)
+void BuildBenchmarks(const char *map)
 {
+	std::unordered_map<voxelGridState, bool> locs;
 	VoxelGrid v(map);
+	// 1. Get unique locations nearby set voxels
+	int xmax, ymax, zmax;
+	int range = 4;
+	v.GetLimits(xmax, ymax, zmax);
+	
+	for (uint16_t x = 0; x < xmax; x++)
+	{
+		for (uint16_t y = 0; y < ymax; y++)
+		{
+			for (uint16_t z = 0; z < zmax; z++)
+			{
+				if (v.IsBlocked(x, y, z))
+				{
+					for (uint16_t x1 = x-range; x1 < x+range; x1++)
+					{
+						for (uint16_t y1 = y-range; y1 < y+range; y1++)
+						{
+							for (uint16_t z1 = z-range; z1 < z+range; z1++)
+							{
+								if (!v.IsBlocked(x1, y1, z1))
+									locs[{x1, y1, z1}] = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	// 2. put all locations into a vector
+	std::vector<voxelGridState> values;
+	for (auto i = locs.begin(); i != locs.end(); i++)
+	{
+		values.push_back(i->first);
+	}
+
+	TemplateAStar<voxelGridState, voxelGridAction, VoxelGrid> astar;
+	NBS<voxelGridState, voxelGridAction, VoxelGrid> nbs;
+	voxelGridState s, g;
+	// 3. generate problems
+	for (int x = 0; x < 10000; x++)
+	{
+		do {
+			s = values[random()%values.size()];
+			g = values[random()%values.size()];
+			nbs.GetPath(&v, s, g, &v, &v, path);
+//			astar.GetPath(&v, s, g, path);
+		} while (path.size() == 0 || fequal(v.GetPathLength(path), v.HCost(s, g)));
+		
+		std::cout << s << "\t" << g << "\t" << v.GetPathLength(path) << "\n";
+	}
 	
 	exit(0);
 }

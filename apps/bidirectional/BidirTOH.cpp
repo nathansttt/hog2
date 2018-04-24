@@ -131,7 +131,8 @@ template <int N, int pdb1Disks>
 void TestTOH(int first, int last)
 {
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
-	NBS<TOHState<N>, TOHMove, TOH<N>, NBSQueue<TOHState<N>, 0>> nbs;
+	NBS<TOHState<N>, TOHMove, TOH<N>, NBSQueue<TOHState<N>, 0>> nbse0;
+	NBS<TOHState<N>, TOHMove, TOH<N>, NBSQueue<TOHState<N>, 1>> nbse1;
 	MM<TOHState<N>, TOHMove, TOH<N>> mm;
 	BSStar<TOHState<N>, TOHMove, TOH<N>> bs;
 
@@ -142,7 +143,7 @@ void TestTOH(int first, int last)
 	std::vector<TOHMove> actionPath;
 	Heuristic<TOHState<N>> *f;
 	Heuristic<TOHState<N>> *b;
-
+	ZeroHeuristic<TOHState<N>> z;
 //	g.Reset();
 //	f = BuildPDB<N, pdb1Disks>(g);
 	
@@ -160,7 +161,7 @@ void TestTOH(int first, int last)
 			s.disks[whichPeg][s.counts[whichPeg]] = x;
 			s.counts[whichPeg]++;
 		}
-		b = BuildPDB<N, pdb1Disks>(s);
+//		b = BuildPDB<N, pdb1Disks>(s);
 
 		g.counts[0] = g.counts[1] = g.counts[2] = g.counts[3] = 0;
 		for (int x = N; x > 0; x--)
@@ -171,26 +172,46 @@ void TestTOH(int first, int last)
 		}
 		// Using canonical goal currently - comment to use random goal
 		//g.Reset();
-		f = BuildPDB<N, pdb1Disks>(g);
+//		f = BuildPDB<N, pdb1Disks>(g);
 
 		Timer timer;
 	
-		printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
+//		printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		
 		std::cout << s << "\n";
 		std::cout << g << "\n";
 
-		if (1)
+		if (0)
 		{
-			printf("-=-=-NBS-=-=-\n");
+			printf("-=-=-NBSe0-=-=-\n");
 			timer.StartTimer();
-			nbs.GetPath(&toh, s, g, f, b, thePath);
+			nbse0.GetPath(&toh, s, g, f, b, thePath);
 			timer.EndTimer();
 			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-			printf("%llu nodes\t%llu necessary\t", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
+			printf("%llu nodes\t%llu necessary\t", nbse0.GetNodesExpanded(), nbse0.GetNecessaryExpansions());
+			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+		}
+		if (0)
+		{
+			printf("-=-=-NBSe1-=-=-\n");
+			timer.StartTimer();
+			nbse1.GetPath(&toh, s, g, f, b, thePath);
+			timer.EndTimer();
+			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+			printf("%llu nodes\t%llu necessary\t", nbse1.GetNodesExpanded(), nbse1.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
 		if (1)
+		{
+			printf("-=-=-NBS0e1-=-=-\n");
+			timer.StartTimer();
+			nbse1.GetPath(&toh, s, g, &z, &z, thePath);
+			timer.EndTimer();
+			printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+			printf("%llu nodes\t%llu necessary\t", nbse1.GetNodesExpanded(), nbse1.GetNecessaryExpansions());
+			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+		}
+		if (0)
 		{
 			BidirectionalProblemAnalyzer<TOHState<N>, TOHMove, TOH<N>>::GetWeightedVertexGraph(s, g, &toh, f, b);
 		}
@@ -225,18 +246,18 @@ void TestTOH(int first, int last)
 //			printf("%llu nodes\t%llu necessary\t", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
 //			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 //		}
-		while (b->heuristics.size() > 0)
-		{
-			delete b->heuristics.back();
-			b->heuristics.pop_back();
-		}
-		delete b;
-		while (f->heuristics.size() > 0)
-		{
-			delete f->heuristics.back();
-			f->heuristics.pop_back();
-		}
-		delete f;
+//		while (b->heuristics.size() > 0)
+//		{
+//			delete b->heuristics.back();
+//			b->heuristics.pop_back();
+//		}
+//		delete b;
+//		while (f->heuristics.size() > 0)
+//		{
+//			delete f->heuristics.back();
+//			f->heuristics.pop_back();
+//		}
+//		delete f;
 	}
 
 }

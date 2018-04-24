@@ -59,4 +59,4 @@ SRC_CPP = \
 	utils/SVGUtil.cpp \
 	utils/RangeCompression.cpp \
 	utils/MR1Permutation.cpp \
-
+	utils/Graphics.cpp \

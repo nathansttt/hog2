@@ -25,6 +25,7 @@ public:
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	void Reset() { history.clear(); }
 	void OpenGLDraw();
+	void Draw(Graphics::Display &display);
 private:
 	unsigned long nodesExpanded, nodesTouched;
 	
@@ -86,6 +87,13 @@ void IncrementalBFS<state, action>::OpenGLDraw()
 {
 	for (auto x : history)
 		env->OpenGLDraw(x.first);
+}
+
+template <class state, class action>
+void IncrementalBFS<state, action>::Draw(Graphics::Display &display)
+{
+	for (auto x : history)
+		env->Draw(display, x.first);
 }
 
 

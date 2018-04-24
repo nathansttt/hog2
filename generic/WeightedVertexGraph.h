@@ -247,7 +247,7 @@ public:
 	
 	void SaveSVG(const char *filename)
 	{
-
+		bool eshed = true;
 		const int kLRMargin = 150;
 		const int kTopMargin = 75;
 		const int kBottomMargin = 50;
@@ -261,6 +261,7 @@ public:
 		const int kNodeGap = 75;
 
 		height = kNodeGap*std::max(m_f.size(), m_b.size())+kBottomMargin;
+		if (eshed) height += kNodeGap;
 		width = height*0.5;
 
 		
@@ -402,7 +403,9 @@ public:
 			//std::cout << i->first << " : " << i->second << "\n";
 			int loc = kTopMargin+kNodeGap*cnt;
 			if (flipBackwardsGCost)
+			{
 				loc = height-kBottomMargin-kNodeGap*cnt;
+			}
 			if (flesseq(i->first, backwardOptG) && (i->second != 0 || drawSumOnEdge) && drawMinimumVC)
 				s += SVGDrawCircle(width-kLRMargin, loc, kNodeRadius, Colors::lightblue);
 			else

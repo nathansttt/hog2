@@ -26,8 +26,8 @@ namespace SVG {
 
 std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbColor c);
 
-std::string SVGDrawRect(int x, int y, int width, int height, rgbColor c);
-std::string SVGDrawRect(int x, int y, int width, int height, const char *gradient);
+std::string SVGDrawRect(float x, float y, float width, float height, rgbColor c);
+std::string SVGDrawRect(float x, float y, float width, float height, const char *gradient);
 std::string SVGFrameCircle(double x, double y, double radius, int border, rgbColor c);
 std::string SVGDrawCircle(double x, double y, double radius, rgbColor c);
 std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, bool center = true);

@@ -51,9 +51,9 @@ std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbCo
 std::string SVGFrameCircle(double x, double y, double radius, int border, rgbColor c)
 {
 	std::string s;
-	s += "<circle cx=\"" + std::to_string(x);
-	s += "\" cy=\"" + std::to_string(y);
-	s += "\" r=\""+std::to_string(radius)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c)+";stroke-width:"+std::to_string(border)+"\" />";
+	s += "<circle cx=\"" + to_string_with_precision(x);
+	s += "\" cy=\"" + to_string_with_precision(y);
+	s += "\" r=\""+to_string_with_precision(radius)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c)+";stroke-width:"+to_string_with_precision(border)+"\" />";
 	return s;
 }
 
@@ -61,9 +61,9 @@ std::string SVGDrawCircle(double x, double y, double radius, rgbColor c)
 {
 	//double epsilon = 0.5;
 	std::string s;
-	s += "<circle cx=\"" + std::to_string(x);
-	s += "\" cy=\"" + std::to_string(y);
-	s += "\" r=\""+std::to_string(radius)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
+	s += "<circle cx=\"" + to_string_with_precision(x);
+	s += "\" cy=\"" + to_string_with_precision(y);
+	s += "\" r=\""+to_string_with_precision(radius)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
 	return s;
 
 //	s += "<circle cx=\"" + std::to_string(10*x);
@@ -71,7 +71,7 @@ std::string SVGDrawCircle(double x, double y, double radius, rgbColor c)
 //	s += "\" r=\""+std::to_string(radius*10)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke-width:1\" />";
 }
 
-std::string SVGDrawRect(int x, int y, int width, int height, const char *gradient)
+std::string SVGDrawRect(float x, float y, float width, float height, const char *gradient)
 {
 	double epsilon = 0.05;
 	std::string s;
@@ -85,15 +85,13 @@ std::string SVGDrawRect(int x, int y, int width, int height, const char *gradien
 	return s;
 }
 
-std::string SVGDrawRect(int x, int y, int width, int height, rgbColor c)
+std::string SVGDrawRect(float x, float y, float width, float height, rgbColor c)
 {
-	double epsilon = 0.55;
+	double epsilon = 0;//0.55;
 	std::string s;
-	s += "<rect x=\"" + std::to_string(x-epsilon);
-	s += "\" y=\"" + std::to_string(y-epsilon);
-	s += "\" width=\""+std::to_string(width+2*epsilon)+"\" height=\""+std::to_string(height+2*epsilon)+"\" style=\"fill:rgb(";//128,128,0
-	s += std::to_string(int(c.r*255)) + "," + std::to_string(int(c.g*255)) + "," + std::to_string(int(c.b*255));
-	s += ");stroke-width:1\" />";
+	s += "<rect x=\"" + to_string_with_precision(x-epsilon);
+	s += "\" y=\"" + to_string_with_precision(y-epsilon);
+	s += "\" width=\""+to_string_with_precision(width+2*epsilon, 8)+"\" height=\""+to_string_with_precision(height+2*epsilon, 8)+"\" style=\"fill:"+SVGGetRGB(c)+";stroke:"+SVGGetRGB(c)+"stroke-width:5%\" />";
 	return s;
 }
 
@@ -101,9 +99,9 @@ std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbCol
 {
 	double epsilon = 0;//0.05;//0.5;
 	std::string s;
-	s += "<rect x=\"" + std::to_string(x-epsilon+0);
-	s += "\" y=\"" + std::to_string(y-epsilon+0);
-	s += "\" width=\""+std::to_string(width+2*epsilon-0)+"\" height=\""+std::to_string(height+2*epsilon-0)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c);
+	s += "<rect x=\"" + to_string_with_precision(x-epsilon+0);
+	s += "\" y=\"" + to_string_with_precision(y-epsilon+0);
+	s += "\" width=\""+to_string_with_precision(width+2*epsilon-0)+"\" height=\""+to_string_with_precision(height+2*epsilon-0)+"\" style=\"fill:none;stroke:"+SVGGetRGB(c);
 	s += ";stroke-width:"+std::to_string(border)+"\" />";
 	return s;
 }
@@ -119,7 +117,7 @@ std::string SVGDrawLineSegments(const std::vector<Graphics::point> &lines, float
 		s += " "+std::to_string(lines[x].x)+" "+std::to_string(lines[x].y)+" ";
 	}
 //	s += "\" stroke=\"black\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" vector-effect: \"non-scaling-stroke\";/>\n";
-	s += "\" stroke=\"black\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" />\n";
+	s += "\" stroke=\""+SVGGetRGB(c)+"\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" />\n";
 	return s;
 }
 
@@ -139,7 +137,7 @@ std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, rgb
 std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, bool center)
 {
 	std::string s;
-	int offset = center?0.5:0;
+	float offset = center?0.5:0;
 	s = "<line x1 = \"" + std::to_string(x1+offset) + "\" ";
 	s +=      "y1 = \"" + std::to_string(y1+offset) + "\" ";
 	s +=      "x2 = \"" + std::to_string(x2+offset) + "\" ";
@@ -261,9 +259,9 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height)
 			{
 				const Graphics::Display::drawInfo &o = disp.drawCommands[x].shape;
 				//disp.filledRects[x];
-				s += SVGDrawRect(PointToSVG(o.r.left, width), PointToSVG(o.r.bottom, height),
+				s += SVGDrawRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
 								 PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
-								 PointToSVG(o.r.top, height)-PointToSVG(o.r.bottom, height),
+								 PointToSVG(o.r.bottom, height)-PointToSVG(o.r.top, height),
 								 o.c);
 				break;
 			}
@@ -272,7 +270,7 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height)
 				const Graphics::Display::drawInfo &o = disp.drawCommands[x].shape;
 				s += SVGFrameRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
 								  PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
-								  PointToSVG(o.r.top, height)-PointToSVG(o.r.bottom, height),
+								  PointToSVG(o.r.bottom, height)-PointToSVG(o.r.top, height),
 								  o.width, o.c);
 				break;
 			}

@@ -17,6 +17,7 @@
 #include "Heuristic.h"
 #include "OccupancyInterface.h"
 #include "GLUtil.h"
+#include "Graphics.h"
 
 
 struct Hash64 {
@@ -100,6 +101,11 @@ public:
 	virtual void SetColor(const rgbColor &r) const { color = r; }
 	virtual void SetColor(GLfloat rr, GLfloat g, GLfloat b, GLfloat t = 1.0) const { color.r = rr; color.g = g; color.b = b; transparency = t; }
 	virtual void GetColor(GLfloat& rr, GLfloat& g, GLfloat& b, GLfloat &t) const { rr=color.r; g=color.g; b=color.b; t = transparency;}
+
+	virtual void Draw(Graphics::Display &display) {}
+	virtual void Draw(Graphics::Display &display, const state&) const {}
+	virtual void DrawLine(Graphics::Display &display, const state &x, const state &y, float width = 1.0) const {}
+
 protected:
 	bool bValidSearchGoal;
 	state searchGoal;

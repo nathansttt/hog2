@@ -10,6 +10,7 @@
 
 #include "SearchEnvironment.h"
 #include <vector>
+#include "Graphics.h"
 
 #ifndef NARYTREE_H
 #define NARTTREE_H
@@ -63,10 +64,16 @@ public:
 	//virtual void GLLabelState(const state&, const char *) const {} // draw label over state
 	void GLDrawLine(const NaryState &x, const NaryState &y) const;
 
+	virtual void Draw(Graphics::Display &display) const;
+	virtual void Draw(Graphics::Display &display, const NaryState &s) const;
+	virtual void DrawLine(Graphics::Display &display, const NaryState &, const NaryState &, float width) const;
+
+
+	NaryState GetClosestNode(float x, float y);
 private:
 	int GetDepth(const NaryState s) const;
 	uint64_t GetOffset(const NaryState s) const;
-	void GetLocation(const NaryState &s, double &x, double &y) const;
+	void GetLocation(const NaryState &s, float &x, float &y) const;
 	int b, d;
 	std::vector<uint64_t> nodesAtDepth;
 	std::vector<uint64_t> totalNodesAtDepth;

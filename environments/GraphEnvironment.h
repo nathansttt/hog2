@@ -318,6 +318,11 @@ public:
 	std::string SVGDraw(const graphState &s) const;
 	std::string SVGLabelState(const graphState &s, const char *) const;
 
+	virtual void Draw(Graphics::Display &disp) const;
+	virtual void Draw(Graphics::Display &disp, const graphState &l) const;
+	virtual void DrawStateLabel(Graphics::Display &disp, const graphState &l1, const char *txt) const;
+	virtual void DrawLine(Graphics::Display &disp, const graphState &x, const graphState &y, double width = 1.0) const;
+
 	Graph *GetGraph() { return g; };
 
 	virtual void StoreGoal(graphState &) {}

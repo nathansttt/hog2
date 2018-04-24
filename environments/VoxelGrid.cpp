@@ -59,7 +59,7 @@ VoxelGrid::~VoxelGrid()
 
 bool VoxelGrid::IsBlocked(const voxelGridState &s) const
 {
-	if (s.x < xWidth && s.y < yWidth && s.z < zWidth)
+	if ((s.x < xWidth) && (s.y < yWidth) && (s.z < zWidth))
 		return voxels[GetIndex(s)];
 	return true;
 }
@@ -144,7 +144,7 @@ voxelGridAction VoxelGrid::MakeAction(int &x, int &y, int &z) const
 void VoxelGrid::GetSuccessors(const voxelGridState &nodeID, std::vector<voxelGridState> &neighbors) const
 {
 	assert(voxels[GetIndex(nodeID)] == false);
-
+	neighbors.resize(0);
 	for (int x = -1; x <= 1; x++)
 	{
 		for (int y = -1; y <= 1; y++)
@@ -167,7 +167,8 @@ void VoxelGrid::GetSuccessors(const voxelGridState &nodeID, std::vector<voxelGri
 void VoxelGrid::GetActions(const voxelGridState &nodeID, std::vector<voxelGridAction> &actions) const
 {
 	assert(voxels[GetIndex(nodeID)] == false);
-	
+	actions.resize(0);
+
 	for (int x = -1; x <= 1; x++)
 	{
 		for (int y = -1; y <= 1; y++)
@@ -276,7 +277,7 @@ voxelGridState VoxelGrid::GetRandomState()
 
 uint64_t VoxelGrid::GetStateHash(const voxelGridState &node) const
 {
-	return (uint64_t(node.x)<<32)|(node.y<<16)|(node.z);
+	return (uint64_t(node.x)<<32)|(uint64_t(node.y)<<16)|uint64_t(node.z);
 }
 
 void VoxelGrid::GetStateFromHash(uint64_t parent, voxelGridState &s)
@@ -311,6 +312,7 @@ void VoxelGrid::GetGLCornerCoordinate(const voxelGridState &v, point3d &p) const
 
 void VoxelGrid::SetUpDrawBuffers()
 {
+	printf("Building pre-computed draw buffers\n");
 	vertices.resize(0);
 	indices.resize(0);
 	std::vector<VoxelUtils::triangle> data;
@@ -338,10 +340,6 @@ void VoxelGrid::SetUpDrawBuffers()
 				vertices.push_back(v.normal[1]);
 				vertices.push_back(v.normal[2]);
 				const double range = std::max(xWidth, std::max(yWidth, zWidth))*2;
-//				GLfloat rr, gg, bb;
-//				rr = GetColor(rr, 0, 2, 7).r;
-//				gg = GetColor(bb, 0, 2, 9).g*0.9;
-//				bb = GetColor(bb, 0, 2, 9).b;
 				if (v.normal[0])
 				{
 					vertices.push_back(1.0-2.0*v.v[0]/range);
@@ -413,9 +411,9 @@ void VoxelGrid::OpenGLDraw() const
 					if (voxels[GetIndex(x, y, z)])
 					{
 						GLfloat rr, gg, bb;
-						rr = 1-(2.0*x/range-1.0+(-xWidth+range)/range);
-						gg = 1+(2.0*y/range-1.0+(-yWidth+range)/range);
-						bb = 1-(2.0*z/range-1.0+(-zWidth+range)/range);
+//						rr = 1-(2.0*x/range-1.0+(-xWidth+range)/range);
+//						gg = 1+(2.0*y/range-1.0+(-yWidth+range)/range);
+//						bb = 1-(2.0*z/range-1.0+(-zWidth+range)/range);
 						// 7?
 						rr = Colors::GetColor(rr, 0, 2, 7).r;
 						gg = Colors::GetColor(bb, 0, 2, 9).g*0.9;
@@ -462,4 +460,109 @@ void VoxelGrid::GLDrawLine(const voxelGridState &x, const voxelGridState &y) con
 	glVertex3f(p1.x, p1.y, p1.z);
 	glVertex3f(p2.x, p2.y, p2.z);
 	glEnd();
+}
+
+void VoxelGrid::Draw(Graphics::Display &display)
+{
+	const float range = std::max(xWidth, std::max(yWidth, zWidth));
+	uint16_t minz = zWidth;
+	uint16_t maxz = 0;
+	display.FillRect({-1, -1, 1, 1}, Colors::white);
+	for (uint16_t x = 0; x < xWidth; x++)
+	{
+		for (uint16_t y = 0; y < yWidth; y++)
+		{
+			for (uint16_t z = 0; z < zWidth; z++)
+			{
+				if (voxels[GetIndex(x, y, z)])
+				{
+					minz = std::min(minz, z);
+					maxz = std::max(maxz, z);
+					break;
+				}
+			}
+		}
+	}
+	if (minz == maxz)
+	{
+		maxz++;
+		minz--;
+	}
+	for (uint16_t x = 0; x < xWidth; x++)
+	{
+		for (uint16_t y = 0; y < yWidth; y++)
+		{
+			for (uint16_t z = 0; z < zWidth; z++)
+			{
+				if (voxels[GetIndex(x, y, z)])
+				{
+					rgbColor c = {0.0f, 0.0f, 0.0f};
+					c.b = 1.0f-(z-minz)/(float)(maxz-minz);
+					c.r = c.b/2.0f;
+					c.g = c.b/2.0f;
+
+					point3d p;
+					GetGLCoordinate({x, y, z}, p);
+					Graphics::rect r(p.x-1.f/range, p.y-1.f/range, p.x+1.f/range, p.y+1.f/range); // 1% larger to cover rounding on borders
+					//printf("(%d, %d) -> (%f, %f)\n", x, y, p.x, p.y);
+					display.FillRect(r, c);
+					break;
+				}
+			}
+		}
+	}
+}
+
+BitMapPic *VoxelGrid::GetImage(int face)
+{
+	BitMapPic *b = new BitMapPic(xWidth, yWidth);
+	const float range = std::max(xWidth, std::max(yWidth, zWidth));
+	uint16_t minz = zWidth;
+	uint16_t maxz = 0;
+	for (uint16_t x = 0; x < xWidth; x++)
+	{
+		for (uint16_t y = 0; y < yWidth; y++)
+		{
+			for (uint16_t z = 0; z < zWidth; z++)
+			{
+				if (voxels[GetIndex(x, y, z)])
+				{
+					minz = std::min(minz, z);
+					maxz = std::max(maxz, z);
+					break;
+				}
+			}
+		}
+	}
+	if (minz == maxz)
+	{
+		maxz++;
+		minz--;
+	}
+	for (uint16_t x = 0; x < xWidth; x++)
+	{
+		for (uint16_t y = 0; y < yWidth; y++)
+		{
+			b->SetPixel(x, yWidth-y-1, 255, 255, 255);
+			for (uint16_t z = 0; z < zWidth; z++)
+			{
+				if (voxels[GetIndex(x, y, z)])
+				{
+					rgbColor c = {0.0f, 0.0f, 0.0f};
+					c.b = 1.0f-(z-minz)/(float)(maxz-minz);
+					c.r = c.b/2.0f;
+					c.g = c.b/2.0f;
+					
+//					point3d p;
+//					GetGLCoordinate({x, y, z}, p);
+					//Graphics::rect r(p.x-1.f/range, p.y-1.f/range, p.x+1.f/range, p.y+1.f/range); // 1% larger to cover rounding on borders
+					//printf("(%d, %d) -> (%f, %f)\n", x, y, p.x, p.y);
+					b->SetPixel(x, yWidth-y-1, 255*c.r, 255*c.g, 255*c.b);
+					//display.FillRect(r, c);
+					break;
+				}
+			}
+		}
+	}
+	return b;
 }

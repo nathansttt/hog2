@@ -26,6 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
@@ -45,6 +46,7 @@
       buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -68,7 +70,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-animate"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-easy"
@@ -79,7 +81,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-grid /Users/nathanst/hog2/maps/dao/brc000d.map /Users/nathanst/hog2/scenarios/dao/brc000d.map.scen 1.5"
+            argument = "-grid /Users/nathanst/hog2/maps/dao/brc000d.map /Users/nathanst/hog2/scenarios/dao/brc000d.map.scen"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
@@ -148,7 +150,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-pancake"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-stp -1"
