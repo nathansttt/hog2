@@ -28,19 +28,19 @@
 #include "Common.h"
 #include "Driver.h"
 #include "Map2DEnvironment.h"
-#include "CanonicalGrid.h"
 #include "TemplateAStar.h"
-#include "TextOverlay.h"
 #include "OptimisticSearch.h"
 #include "MapGenerators.h"
-#include "MapOverlay.h"
 #include <string>
 
 enum mode {
 	kFindPathWA1 = 0,
-	kFindPathWA15 = 1,
-	kFindPathWA30 = 2,
-	kFindPathOptimistic = 3
+	kFindPathWA11 = 1,
+	kFindPathWA15 = 2,
+	kFindPathWA30 = 3,
+	kFindPathOptimistic11_15 = 4,
+	kFindPathOptimistic11_3 = 5,
+	kFindPathOptimistic15_3 = 6
 };
 
 MapEnvironment *me = 0;
@@ -55,6 +55,7 @@ mode m = kFindPathWA15;
 int stepsPerFrame = 1;
 bool recording = false;
 bool running = false;
+bool mapChanged = true;
 
 void StartSearch();
 Map *ReduceMap(Map *inputMap);
@@ -63,6 +64,7 @@ int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1200, 1200);
+	return 0;
 }
 
 /**
@@ -70,20 +72,18 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
-	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+//	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
-	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
-	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
-	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra & A*", kAnyModifier, 'w');
-	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
-	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
+	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Run faster", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Run slower", kAnyModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "A*", "A*", kAnyModifier, '1');
+	InstallKeyboardHandler(MyDisplayHandler, "wA*(1.1)", "wA*(1.1)", kAnyModifier, '2');
+	InstallKeyboardHandler(MyDisplayHandler, "wA*(1.5)", "wA*(1.5)", kAnyModifier, '3');
+	InstallKeyboardHandler(MyDisplayHandler, "wA*(3.0)", "wA*(3.0)", kAnyModifier, '4');
+	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, '5');
+	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, '6');
+	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, '7');
 
 	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -106,10 +106,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
 		
-		Map *map = new Map(300, 300);
+		Map *map = new Map(150, 150);
 		//MakeRandomMap(map, 40);
 		//MakeMaze(map, 25);
-		BuildRandomRoomMap(map, 25, 60);
+		BuildRandomRoomMap(map, 10, 60);
 		
 		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
@@ -121,8 +121,16 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		delete map;
 		map = m2;
 
+//		for (int x = 0; x < 300; x++)
+//		for (int y = 0; y < 300; y++)
+//		{
+//			if (map->GetTerrainType(x, y) == kGround)
+//				map->SetTerrainType(x, y, (random()%2)?kSwamp:kGround);
+//		}
+		
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
+		
 		start.x = 0xFFFF;
 		start.y = 0xFFFF;
 	}
@@ -130,72 +138,85 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 int frameCnt = 0;
 
+void StepAlgorithms(int numSteps)
+{
+	if (running && (m == kFindPathOptimistic11_3 || m == kFindPathOptimistic15_3 || m == kFindPathOptimistic11_15))
+	{
+		if (path.size() == 0)
+		{
+			for (int x = 0; x < numSteps && path.size() == 0; x++)
+				optimistic.DoSingleSearchStep(path);
+			if (path.size() != 0)
+			{
+				std::string s = ": "+std::to_string(optimistic.GetNodesExpanded())+" nodes expanded";
+				appendTextToBuffer(s.c_str());
+			}
+		}
+	}
+	else if (running)
+	{
+		if (path.size() == 0)
+		{
+			for (int x = 0; x < numSteps && path.size() == 0; x++)
+				astar.DoSingleSearchStep(path);
+			if (path.size() != 0)
+			{
+				std::string s = ": "+std::to_string(astar.GetNodesExpanded())+" nodes expanded";
+				appendTextToBuffer(s.c_str());
+			}
+		}
+	}
+}
+
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	me->OpenGLDraw();
+	Graphics::Display &display = getCurrentContext()->display;
 	
-	if (start.x != 0xFFFF && start.y != 0xFFFF)
+	if (mapChanged == true)
 	{
-		me->SetColor(0.0, 1.0, 0.0);
-		me->OpenGLDraw(start);
+		display.StartBackground();
+		me->Draw(display);
+		display.EndBackground();
+		mapChanged = false;
+	}
+
+	
+	if (start.x != 0xFFFF && start.y != 0xFFFF && !running)
+	{
+		me->SetColor(Colors::green);
+		me->Draw(display, start);
+		me->SetColor(Colors::red);
+		me->DrawLine(display, start, goal, 10);
 	}
 	
-	if (running && m == kFindPathOptimistic)
+	StepAlgorithms(stepsPerFrame);
+	
+	if (running && (m == kFindPathOptimistic11_3 || m == kFindPathOptimistic15_3 || m == kFindPathOptimistic11_15))
 	{
-		optimistic.OpenGLDraw();
+		optimistic.Draw(display);
 
-		if (path.size() == 0)
+		if (path.size() != 0)
 		{
-			for (int x = 0; x < stepsPerFrame && path.size() == 0; x++)
-				optimistic.DoSingleSearchStep(path);
-		}
-		else {
-			me->SetColor(0, 1, 0);
-			glLineWidth(10);
+			me->SetColor(Colors::green);
 			for (int x = 1; x < path.size(); x++)
 			{
-				me->GLDrawLine(path[x-1], path[x]);
+				me->DrawLine(display, path[x-1], path[x], 5);
 			}
-			glLineWidth(1);
 		}
 	}
-	else if (running && m != kFindPathOptimistic)
+	else if (running)
 	{
-		astar.OpenGLDraw();
+		astar.Draw(display);
 		
-		if (path.size() == 0)
+		if (path.size() != 0)
 		{
-			for (int x = 0; x < stepsPerFrame && path.size() == 0; x++)
-				astar.DoSingleSearchStep(path);
-		}
-		else {
-			me->SetColor(0, 1, 0);
-			glLineWidth(10);
+			me->SetColor(Colors::green);
 			for (int x = 1; x < path.size(); x++)
 			{
-				me->GLDrawLine(path[x-1], path[x]);
+				me->DrawLine(display, path[x-1], path[x], 5);
 			}
-			glLineWidth(1);
 		}
 	}
-
-//	if (recording && viewport == GetNumPorts(windowID)-1)
-//	{
-//		char fname[255];
-//		sprintf(fname, "/Users/nathanst/Movies/tmp/astar-%d%d%d%d",
-//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-//		SaveScreenshot(windowID, fname);
-//		printf("Saved %s\n", fname);
-//		frameCnt++;
-//		if (path.size() == 0)
-//		{
-//			MyDisplayHandler(windowID, kNoModifier, 'o');
-//		}
-//		else {
-//			recording = false;
-//		}
-//	}
-//	return;
 	
 }
 
@@ -211,93 +232,39 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '{':
+		case '[':
 		{
 			stepsPerFrame /= 2;
-			if (stepsPerFrame < 1)
-				stepsPerFrame = 1;
-			break;
-		}
-		case '}':
-		{
-			stepsPerFrame *= 2;
 			break;
 		}
 		case ']':
 		{
-			m = mode((int(m)+1)%4);
-			switch (m)
-			{
-				//case
-				case kFindPathWA1: submitTextToBuffer("Find A*"); break;
-				case kFindPathWA15: submitTextToBuffer("Find WA* w = 1.5"); break;
-				case kFindPathWA30: submitTextToBuffer("Find WA* w = 3.0"); break;
-				case kFindPathOptimistic: submitTextToBuffer("Find Optimistic Path!"); break;
-			}
-			if (start.x != 0xFFFF && start.y != 0xFFFF)
-				StartSearch();
+			if (stepsPerFrame < 32768)
+				stepsPerFrame *= 2;
+			if (stepsPerFrame == 0)
+				stepsPerFrame = 1;
+			break;
 		}
-			break;
-		case '[':
-		{
-			m = mode((int(m)+3)%4);
-			switch (m)
-			{
-				case kFindPathWA1: submitTextToBuffer("Find A*"); break;
-				case kFindPathWA15: submitTextToBuffer("Find WA* w = 1.5"); break;
-				case kFindPathWA30: submitTextToBuffer("Find WA* w = 3.0"); break;
-				case kFindPathOptimistic: submitTextToBuffer("Find Optimistic Path!"); break;
-			}
-			if (start.x != 0xFFFF && start.y != 0xFFFF)
-				StartSearch();
-		}
-			break;
-		case '|':
-		{
-		}
-			break;
-		case 'w':
-//			if (weight > 0.5)
-//				weight = 0.0;
-//			else
-//				weight = 1.0;
-//			astar.SetWeight(weight);
-//			astar.InitializeSearch(ge, astar.start, astar.goal, path);
-//			ShowSearchInfo();
-//			
-//			running = true;
-			break;
 		case 'r':
 			recording = !recording;
 			break;
-		case '0':
-//		case '1': edgeCost = 1.0; te.AddLine("Adding edges; New edges cost 1"); m = kAddEdges; break;
-//		case '2': edgeCost = 2.0; te.AddLine("Adding edges; New edges cost 2"); m = kAddEdges; break;
-//		case '3': edgeCost = 3.0; te.AddLine("Adding edges; New edges cost 3"); m = kAddEdges; break;
-//		case '4': edgeCost = 4.0; te.AddLine("Adding edges; New edges cost 4"); m = kAddEdges; break;
-//		case '5': edgeCost = 5.0; te.AddLine("Adding edges; New edges cost 5"); m = kAddEdges; break;
-//		case '6': edgeCost = 6.0; te.AddLine("Adding edges; New edges cost 6"); m = kAddEdges; break;
-//		case '7': edgeCost = 7.0; te.AddLine("Adding edges; New edges cost 7"); m = kAddEdges; break;
-//		case '8': edgeCost = 8.0; te.AddLine("Adding edges; New edges cost 8"); m = kAddEdges; break;
-//		case '9': edgeCost = 9.0; te.AddLine("Adding edges; New edges cost 9"); m = kAddEdges; break;
-		case '\t':
-			
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
+		case '1': m = kFindPathWA1; submitTextToBuffer("Searching with A*"); StartSearch(); break;
+		case '2': m = kFindPathWA11; submitTextToBuffer("Searching with wA*(1.1)"); StartSearch(); break;
+		case '3': m = kFindPathWA15; submitTextToBuffer("Searching with wA*(1.5)"); StartSearch(); break;
+		case '4': m = kFindPathWA30; submitTextToBuffer("Searching with wA*(3.0)"); StartSearch(); break;
+		case '5':
+			m = kFindPathOptimistic11_15;
+			submitTextToBuffer("Searching with Optimistic(1.1, 1.5)");
+			StartSearch();
 			break;
+		case '6': m = kFindPathOptimistic11_3; submitTextToBuffer("Searching with Optimistic(1.1, 3.0)"); StartSearch(); break;
+		case '7': m = kFindPathOptimistic15_3; submitTextToBuffer("Searching with Optimistic(1.5, 3.0)"); StartSearch(); break;
 		case 'p':
-			//running = !running;
+			stepsPerFrame = 0;
 			break;
 		case 'o':
 		{
-			if (running)
-			{
-				optimistic.DoSingleSearchStep(path);
-			}
+			StepAlgorithms(1);
 		}
 			break;
 		case '?':
@@ -333,12 +300,13 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		{
 			int x, y;
 			me->GetMap()->GetPointFromCoordinate(loc, x, y);
-			if (me->GetMap()->GetTerrainType(x, y) == kGround)
+			if (me->GetMap()->GetTerrainType(x, y) == kGround || me->GetMap()->GetTerrainType(x, y) == kSwamp)
 			{
 				start.x = x;
 				start.y = y;
 				goal = start;
 				printf("Hit (%d, %d)\n", x, y);
+				running = false;
 			}
 			return true;
 		}
@@ -346,7 +314,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		{
 			int x, y;
 			me->GetMap()->GetPointFromCoordinate(loc, x, y);
-			if (me->GetMap()->GetTerrainType(x, y) == kGround)
+			if (me->GetMap()->GetTerrainType(x, y) == kGround || me->GetMap()->GetTerrainType(x, y) == kSwamp)
 			{
 				goal.x = x;
 				goal.y = y;
@@ -357,7 +325,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		{
 			int x, y;
 			me->GetMap()->GetPointFromCoordinate(loc, x, y);
-			if (me->GetMap()->GetTerrainType(x, y) == kGround)
+			if (me->GetMap()->GetTerrainType(x, y) == kGround || me->GetMap()->GetTerrainType(x, y) == kSwamp)
 			{
 				goal.x = x;
 				goal.y = y;
@@ -373,14 +341,38 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 
 void StartSearch()
 {
-	if (m == kFindPathOptimistic)
+	if (start == goal)
+		return;
+	if (m == kFindPathOptimistic11_15)
 	{
+		optimistic.SetWeight(1.5);
+		optimistic.SetOptimalityBound(1.1);
+		optimistic.InitializeSearch(me, start, goal, path);
+		running = true;
+	}
+	else if (m == kFindPathOptimistic11_3)
+	{
+		optimistic.SetWeight(3.0);
+		optimistic.SetOptimalityBound(1.1);
+		optimistic.InitializeSearch(me, start, goal, path);
+		running = true;
+	}
+	else if (m == kFindPathOptimistic15_3)
+	{
+		optimistic.SetWeight(3);
+		optimistic.SetOptimalityBound(1.5);
 		optimistic.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
 	else if (m == kFindPathWA1)
 	{
 		astar.SetWeight(1);
+		astar.InitializeSearch(me, start, goal, path);
+		running = true;
+	}
+	else if (m == kFindPathWA11)
+	{
+		astar.SetWeight(1.1);
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}

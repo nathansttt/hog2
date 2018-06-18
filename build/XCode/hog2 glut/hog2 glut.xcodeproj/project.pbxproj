@@ -1522,6 +1522,7 @@
 		C4BD42901D17BA200089DD61 /* MR1Permutation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BD42751D17BA1F0089DD61 /* MR1Permutation.cpp */; };
 		C4BD42911D17BA200089DD61 /* MR1Permutation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BD42751D17BA1F0089DD61 /* MR1Permutation.cpp */; };
 		C4BD42921D17BA200089DD61 /* MR1Permutation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BD42751D17BA1F0089DD61 /* MR1Permutation.cpp */; };
+		C4BEEC3520A2A271005E8FBD /* BidirTS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BEEC3320A2A270005E8FBD /* BidirTS.cpp */; };
 		C4C358AF1697ECE1000A2BFA /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */; };
 		C4C358B01697ECE2000A2BFA /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */; };
 		C4C358B11697ECE2000A2BFA /* RubiksCubeEdges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */; };
@@ -1964,6 +1965,9 @@
 		C4D60AC614B22E10007594CD /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34213E4FCF70077C5A5 /* Credits.rtf */; };
 		C4D60AC714B22E10007594CD /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
 		C4D60AD214B22E4A007594CD /* PuzzleSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D60AD014B22E4A007594CD /* PuzzleSample.cpp */; };
+		C4D80F3B20ACD0CA0087E08D /* CanonicalReach.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D80F3520ACD0C90087E08D /* CanonicalReach.cpp */; };
+		C4D80F3C20ACD0CA0087E08D /* BoundingBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D80F3820ACD0C90087E08D /* BoundingBox.cpp */; };
+		C4D80F3D20ACD0CA0087E08D /* Reach.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D80F3920ACD0CA0087E08D /* Reach.cpp */; };
 		C4D83EC018A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
 		C4D83EC118A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
 		C4D83EC218A29E7500F1A4D0 /* MapGenerators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */; };
@@ -2488,6 +2492,8 @@
 		C4B9740B1426FADE00758D0D /* NQueens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NQueens.h; sourceTree = "<group>"; };
 		C4BD42751D17BA1F0089DD61 /* MR1Permutation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MR1Permutation.cpp; sourceTree = "<group>"; };
 		C4BD42761D17BA1F0089DD61 /* MR1Permutation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MR1Permutation.h; sourceTree = "<group>"; };
+		C4BEEC3320A2A270005E8FBD /* BidirTS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BidirTS.cpp; sourceTree = "<group>"; };
+		C4BEEC3420A2A271005E8FBD /* BidirTS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BidirTS.h; sourceTree = "<group>"; };
 		C4C358AD1697ECE1000A2BFA /* RubiksCubeEdges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RubiksCubeEdges.cpp; sourceTree = "<group>"; };
 		C4C358AE1697ECE1000A2BFA /* RubiksCubeEdges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RubiksCubeEdges.h; sourceTree = "<group>"; };
 		C4C35AC616A08CE0000A2BFA /* RubiksCubeCorners.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RubiksCubeCorners.cpp; sourceTree = "<group>"; };
@@ -2520,6 +2526,13 @@
 		C4D60ACE14B22E10007594CD /* mapUtils copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mapUtils copy2-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4D60AD014B22E4A007594CD /* PuzzleSample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PuzzleSample.cpp; sourceTree = "<group>"; };
 		C4D60AD114B22E4A007594CD /* PuzzleSample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PuzzleSample.h; sourceTree = "<group>"; };
+		C4D80F3420ACD0BC0087E08D /* Constraint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constraint.h; sourceTree = "<group>"; };
+		C4D80F3520ACD0C90087E08D /* CanonicalReach.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CanonicalReach.cpp; sourceTree = "<group>"; };
+		C4D80F3620ACD0C90087E08D /* BoundingBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoundingBox.h; sourceTree = "<group>"; };
+		C4D80F3720ACD0C90087E08D /* CanonicalReach.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CanonicalReach.h; sourceTree = "<group>"; };
+		C4D80F3820ACD0C90087E08D /* BoundingBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BoundingBox.cpp; sourceTree = "<group>"; };
+		C4D80F3920ACD0CA0087E08D /* Reach.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Reach.cpp; sourceTree = "<group>"; };
+		C4D80F3A20ACD0CA0087E08D /* Reach.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reach.h; sourceTree = "<group>"; };
 		C4D83EBE18A29E7400F1A4D0 /* MapGenerators.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MapGenerators.cpp; sourceTree = "<group>"; };
 		C4D83EBF18A29E7500F1A4D0 /* MapGenerators.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapGenerators.h; sourceTree = "<group>"; };
 		C4E06A621BE1FFE80011F120 /* SVGUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SVGUtil.cpp; sourceTree = "<group>"; };
@@ -2654,7 +2667,7 @@
 		C4F9F3FD13E4FE400077C5A5 /* LinearRegression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinearRegression.h; sourceTree = "<group>"; };
 		C4F9F3FE13E4FE400077C5A5 /* Map.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map.cpp; sourceTree = "<group>"; };
 		C4F9F3FF13E4FE400077C5A5 /* Map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map.h; sourceTree = "<group>"; };
-		C4F9F40013E4FE400077C5A5 /* MapOverlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = MapOverlay.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C4F9F40013E4FE400077C5A5 /* MapOverlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = MapOverlay.cpp; sourceTree = "<group>"; };
 		C4F9F40113E4FE400077C5A5 /* MapOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapOverlay.h; sourceTree = "<group>"; };
 		C4F9F40213E4FE400077C5A5 /* Plot2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plot2D.cpp; sourceTree = "<group>"; };
 		C4F9F40313E4FE400077C5A5 /* Plot2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Plot2D.h; sourceTree = "<group>"; };
@@ -2691,8 +2704,8 @@
 		C4F9F48D13E4FF610077C5A5 /* GraphAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphAlgorithm.h; sourceTree = "<group>"; };
 		C4F9F48E13E4FF610077C5A5 /* Heap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Heap.cpp; sourceTree = "<group>"; };
 		C4F9F48F13E4FF610077C5A5 /* Heap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Heap.h; sourceTree = "<group>"; };
-		C4F9F49013E4FF610077C5A5 /* MeroB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = MeroB.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		C4F9F49113E4FF610077C5A5 /* MeroB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = MeroB.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		C4F9F49013E4FF610077C5A5 /* MeroB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = MeroB.cpp; sourceTree = "<group>"; };
+		C4F9F49113E4FF610077C5A5 /* MeroB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = MeroB.h; sourceTree = "<group>"; };
 		C4F9F49213E4FF610077C5A5 /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Path.cpp; sourceTree = "<group>"; };
 		C4F9F49313E4FF610077C5A5 /* Path.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Path.h; sourceTree = "<group>"; };
 		C4F9F49413E4FF610077C5A5 /* Propagation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = Propagation.cpp; sourceTree = "<group>"; };
@@ -3023,6 +3036,8 @@
 				C4028A841E4AA301002D6AD7 /* BidirPancake.h */,
 				C45653081E52E2A2007893EB /* BidirTOH.cpp */,
 				C45653091E52E2A2007893EB /* BidirTOH.h */,
+				C4BEEC3320A2A270005E8FBD /* BidirTS.cpp */,
+				C4BEEC3420A2A271005E8FBD /* BidirTS.h */,
 				C45653221E54FEA6007893EB /* BidirRubik.cpp */,
 				C45653231E54FEA6007893EB /* BidirRubik.h */,
 			);
@@ -3275,6 +3290,12 @@
 		C4D216961D25B4500039F401 /* grids */ = {
 			isa = PBXGroup;
 			children = (
+				C4D80F3820ACD0C90087E08D /* BoundingBox.cpp */,
+				C4D80F3620ACD0C90087E08D /* BoundingBox.h */,
+				C4D80F3520ACD0C90087E08D /* CanonicalReach.cpp */,
+				C4D80F3720ACD0C90087E08D /* CanonicalReach.h */,
+				C4D80F3920ACD0CA0087E08D /* Reach.cpp */,
+				C4D80F3A20ACD0CA0087E08D /* Reach.h */,
 				C4D216971D25B4500039F401 /* CanonicalDijkstra.cpp */,
 				C4D216981D25B4500039F401 /* CanonicalDijkstra.h */,
 				C4D216991D25B4500039F401 /* JPS.cpp */,
@@ -3297,6 +3318,7 @@
 		C4E487D51B853F85002753C8 /* search */ = {
 			isa = PBXGroup;
 			children = (
+				C4D80F3420ACD0BC0087E08D /* Constraint.h */,
 				C4E487D61B853FD5002753C8 /* SearchEnvironment.h */,
 				C4E487D71B853FFE002753C8 /* Heuristic.h */,
 				C4E487D81B854072002753C8 /* PDBHeuristic.h */,
@@ -4704,6 +4726,7 @@
 				C430D1911B2EFF8B00220AEE /* ConfigEnvironment.cpp in Sources */,
 				C430D1921B2EFF8B00220AEE /* Directional2DEnvironment.cpp in Sources */,
 				C430D1931B2EFF8B00220AEE /* Fling.cpp in Sources */,
+				C4BEEC3520A2A271005E8FBD /* BidirTS.cpp in Sources */,
 				C430D1941B2EFF8B00220AEE /* FlipSide.cpp in Sources */,
 				C430D1951B2EFF8B00220AEE /* GraphEnvironment.cpp in Sources */,
 				C430D1971B2EFF8B00220AEE /* Map2DEnvironment.cpp in Sources */,
@@ -6648,6 +6671,7 @@
 				C4F9F38513E4FDBB0077C5A5 /* Trackball.cpp in Sources */,
 				C4F9F41113E4FE400077C5A5 /* BurnedPancakePuzzle.cpp in Sources */,
 				C4F9F41213E4FE400077C5A5 /* ConfigEnvironment.cpp in Sources */,
+				C4D80F3B20ACD0CA0087E08D /* CanonicalReach.cpp in Sources */,
 				C4F9F41313E4FE400077C5A5 /* Directional2DEnvironment.cpp in Sources */,
 				C4F9F41413E4FE400077C5A5 /* Fling.cpp in Sources */,
 				C4F9F41513E4FE400077C5A5 /* FlipSide.cpp in Sources */,
@@ -6664,6 +6688,8 @@
 				C4F9F42113E4FE400077C5A5 /* RoboticArm.cpp in Sources */,
 				C4F9F42213E4FE400077C5A5 /* SequenceAlignment.cpp in Sources */,
 				C4C837351F2D563C004E78C0 /* Colors.cpp in Sources */,
+				C4D80F3C20ACD0CA0087E08D /* BoundingBox.cpp in Sources */,
+				C4D80F3D20ACD0CA0087E08D /* Reach.cpp in Sources */,
 				C4F9F42313E4FE400077C5A5 /* SFBDPancakePuzzle.cpp in Sources */,
 				C4F9F42413E4FE400077C5A5 /* SteeringEnvironment.cpp in Sources */,
 				C4F9F42513E4FE400077C5A5 /* TopSpinGraph.cpp in Sources */,

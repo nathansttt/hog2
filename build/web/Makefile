@@ -21,13 +21,21 @@ PROJECTS = \
   gui/web \
   mapalgorithms \
   utils \
+  demos/transit-routing-maps \
+  demos/gridabstraction \
+  demos/JPS \
+  demos/bb \
+  demos/reach \
+  demos/dh-place \
   demos/ida \
   demos/bidirnecessary \
   demos/bidir \
+  demos/GMX \
   demos/DFID \
   demos/dijkstra \
   demos/astar \
-  demos/astar-map
+  demos/astar-map \
+  demos/inconsistency-graph 
 
 
 

@@ -65,6 +65,7 @@ SRC_CPP = \
 	apps/bidirectional/Driver.cpp \
 	apps/bidirectional/BidirSTP.cpp \
 	apps/bidirectional/BidirTOH.cpp \
+	apps/bidirectional/BidirTS.cpp \
 	apps/bidirectional/BidirPancake.cpp \
 	apps/bidirectional/MMRubik.cpp \
 	apps/bidirectional/MM0Rubik.cpp \

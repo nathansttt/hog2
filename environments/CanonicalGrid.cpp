@@ -13,6 +13,8 @@
 
 namespace CanonicalGrid {
 	
+	using namespace Graphics;
+	
 	CanonicalGrid::CanonicalGrid(Map *_m)
 	{
 		DIAGONAL_COST = ROOT_TWO;
@@ -158,11 +160,123 @@ namespace CanonicalGrid {
 				}
 			}
 		}
+	}
+
+	void CanonicalGrid::GetFirstJumpPoints(const xyLoc &loc, std::vector<xyLoc> &neighbors) const
+	{
+		neighbors.resize(0);
+		std::vector<xyLoc> oneSuccessor;
+		std::vector<xyLoc> multipleSuccessors;
+		std::vector<xyLoc> succ;
 		
+		multipleSuccessors.push_back(loc);
+		while (multipleSuccessors.size() > 0)
+		{
+			xyLoc tmp = multipleSuccessors.back();
+			multipleSuccessors.pop_back();
+			GetSuccessors(tmp, succ);
+			if (succ.size() == 1)
+			{
+				oneSuccessor.push_back(succ[0]);
+			}
+			else if (succ.size() > 0) {
+				multipleSuccessors.insert( multipleSuccessors.end(), succ.begin(),succ.end());
+			}
+		}
+		while (oneSuccessor.size() > 0)
+		{
+			xyLoc tmp = oneSuccessor.back();
+			oneSuccessor.pop_back();
+			GetSuccessors(tmp, succ);
+			if (succ.size() == 1)
+			{
+				oneSuccessor.push_back(succ[0]);
+			}
+			else if (succ.size() > 0){ // it's a jump point
+				neighbors.push_back(tmp);
+			}
+		}
 	}
 	
+	void CanonicalGrid::GetBasicSuccessors(const xyLoc &loc, std::vector<xyLoc> &neighbors) const
+	{
+		neighbors.resize(0);
+		bool n1 = false, s1 = false, e1 = false, w1 = false;
+		
+		int w = map->GetMapWidth();
+		int h = map->GetMapHeight();
+		if (fourConnected)
+		{
+			printf("Four connected not implemented!\n");
+			assert(false);
+		}
+		else {
+			if (loc.parent&kN) // action that got me here
+			{
+				if (loc.y != 0 && grid[loc.x+(loc.y-1)*w])
+				{
+					neighbors.push_back(xyLoc(loc.x, loc.y-1, kN));
+					n1 = true;
+				}
+			}
+			if (loc.parent&kW) // action that got me here
+			{
+				if (loc.x != 0 && grid[loc.x-1+(loc.y)*w])
+				{
+					neighbors.push_back(xyLoc(loc.x-1, loc.y, kW));
+					e1 = true;
+				}
+			}
+			if (loc.parent&kS) // action that got me here
+			{
+				if (loc.y != h-1 && grid[loc.x+(loc.y+1)*w])
+				{
+					neighbors.push_back(xyLoc(loc.x, loc.y+1, kS));
+					s1 = true;
+				}
+			}
+			if (loc.parent&kE) // action that got me here
+			{
+				if (loc.x != w-1 && grid[loc.x+1+(loc.y)*w])
+				{
+					neighbors.push_back(xyLoc(loc.x+1, loc.y, kE));
+					w1 = true;
+				}
+			}
+			if (loc.parent&kNW)
+			{
+				if (loc.x != 0 && loc.y != 0 && grid[loc.x-1+(loc.y-1)*w] && n1 && e1)
+				{
+					neighbors.push_back(xyLoc(loc.x-1, loc.y-1, kNW));
+				}
+			}
+			if (loc.parent&kNE)
+			{
+				if (loc.x != w-1 && loc.y != 0 && grid[loc.x+1+(loc.y-1)*w] && n1 && w1)
+				{
+					neighbors.push_back(xyLoc(loc.x+1, loc.y-1, kNE));
+				}
+			}
+			if (loc.parent&kSW)
+			{
+				if (loc.x != 0 && loc.y != h-1 && grid[loc.x-1+(loc.y+1)*w] && s1 && e1)
+				{
+					neighbors.push_back(xyLoc(loc.x-1, loc.y+1, kSW));
+				}
+			}
+			if (loc.parent&kSE)
+			{
+				if (loc.x != w-1 && loc.y != h-1 && grid[loc.x+1+(loc.y+1)*w] && s1 && w1)
+				{
+					neighbors.push_back(xyLoc(loc.x+1, loc.y+1, kSE));
+				}
+			}
+		}
+		
+	}
 	void CanonicalGrid::GetActions(const xyLoc &loc, std::vector<tDirection> &actions) const
 	{
+		actions.clear();
 		bool up=false, down=false;
 		if ((map->CanStep(loc.x, loc.y, loc.x, loc.y+1)))
 		{
@@ -651,6 +765,50 @@ namespace CanonicalGrid {
 		//	return s;
 	}
 
+	void CanonicalGrid::DrawBasicOrdering(::Graphics::Display &disp, const xyLoc l) const
+	{
+		rgbColor c;
+		{
+			GLfloat r,g,b,t;
+			GetColor(r, g, b, t);
+			c = {r, g, b};
+		}
+
+		std::deque<xyLoc> queue;
+		queue.push_back(l);
+		std::vector<xyLoc> v;
+		std::vector<bool> visited(map->GetMapHeight()*map->GetMapWidth());
+		while (!queue.empty())
+		{
+			GetBasicSuccessors(queue.front(), v);
+			for (auto &s : v)
+			{
+				if (!visited[s.x+s.y*map->GetMapWidth()])
+				{
+					queue.push_back(s);
+				}
+				//				else {
+				//					ma1->SetColor(1.0, 0.0, 0.0);
+				//				}
+				Graphics::point p1, p2;
+				{
+					GLdouble x, y, z, r;
+					map->GetOpenGLCoord(queue.front().x, queue.front().y, x, y, z, r);
+					p1.x = x;
+					p1.y = y;
+				}
+				{
+					GLdouble x, y, z, r;
+					map->GetOpenGLCoord(s.x, s.y, x, y, z, r);
+					p2.x = x;
+					p2.y = y;
+				}
+				disp.DrawLine(p1, p2, 1, c);
+				visited[s.x+s.y*map->GetMapWidth()] = true;
+			}
+			queue.pop_front();
+		}	}
+
 	void CanonicalGrid::DrawOrdering(Graphics::Display &disp, xyLoc l) const
 	{
 		rgbColor c;
@@ -659,6 +817,9 @@ namespace CanonicalGrid {
 			GetColor(r, g, b, t);
 			c = {r, g, b};
 		}
+		
+		
+		
 		std::deque<xyLoc> queue;
 		queue.push_back(l);
 		std::vector<xyLoc> v;
@@ -695,6 +856,352 @@ namespace CanonicalGrid {
 		}
 	}
 
+	void CanonicalGrid::Draw(Graphics::Display &disp) const
+	{
+		//rgbColor black = {0.0, 0.0, 0.0};
+		
+		//	s += SVGFrameRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
+		//					  PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
+		//					  PointToSVG(o.r.top, height)-PointToSVG(o.r.bottom, height),
+		
+		disp.FillRect({-1, -1, 1, 1}, Colors::black);
+		//	std::vector<point> frame;
+		//	frame.push_back({-1, -1});
+		//	frame.push_back({-1, 1});
+		//	frame.push_back({1, 1});
+		//	frame.push_back({1, -1});
+		//	frame.push_back({-1, -1});
+		//	disp.DrawLineSegments(frame, 1, Colors::black);
+		
+		// draw tiles
+		if (1)
+			for (int y = 0; y < map->GetMapHeight(); y++)
+			{
+				for (int x = 0; x < map->GetMapWidth(); x++)
+				{
+					bool draw = true;
+					Graphics::rect r;
+					GLdouble px, py, t, rad;
+					map->GetOpenGLCoord(x, y, px, py, t, rad);
+					r.left = px-rad;
+					r.top = py-rad;
+					r.right = px+rad;
+					r.bottom = py+rad;
+					
+					if (map->GetTerrainType(x, y) == kGround)
+					{
+						rgbColor c = {0.9, 0.9, 0.9};
+						disp.FillRect(r, c);
+					}
+					else if (map->GetTerrainType(x, y) == kTrees)
+					{
+						rgbColor c = {0.0, 0.5, 0.0};
+						disp.FillRect(r, c);
+					}
+					else if (map->GetTerrainType(x, y) == kWater)
+					{
+						rgbColor c = {0.0, 0.0, 1.0};
+						disp.FillRect(r, c);
+					}
+					else if (map->GetTerrainType(x, y) == kSwamp)
+					{
+						rgbColor c = {0.0, 0.3, 1.0};
+						disp.FillRect(r, c);
+					}
+					else {
+						//				rgbColor c = {0.0, 0.0, 0.0};
+						//				disp.FillRect(r, c);
+						draw = false;
+					}
+				}
+			}
+		
+		// draw cell boundaries for open terrain
+		if (0)
+			for (int y = 0; y < map->GetMapHeight(); y++)
+			{
+				for (int x = 0; x < map->GetMapWidth(); x++)
+				{
+					// mark cells on map
+					if ((map->GetTerrainType(x, y)>>terrainBits) == (kGround>>terrainBits))
+					{
+						rgbColor c = {0.75, 0.75, 0.75};
+						rect r;
+						GLdouble px, py, t, rad;
+						map->GetOpenGLCoord(x, y, px, py, t, rad);
+						r.left = px-rad;
+						r.top = py-rad;
+						r.right = px+rad;
+						r.bottom = py+rad;
+						disp.FrameRect(r, c, 1);
+					}
+				}
+			}
+		
+		// draw lines between different terrain types
+		if (1)
+		{
+			std::vector<std::pair<point, point>> lines;
+			for (int y = 0; y < map->GetMapHeight(); y++)
+			{
+				for (int x = 0; x < map->GetMapWidth(); x++)
+				{
+					GLdouble px1, py1, t1, rad1;
+					map->GetOpenGLCoord(x, y, px1, py1, t1, rad1);
+					float px=static_cast<float>(px1);
+					float py=static_cast<float>(py1);
+					float t=static_cast<float>(t1);
+					float rad=static_cast<float>(rad1);
+					
+					bool draw = true;
+					if ((map->GetTerrainType(x, y) == kGround) ||
+						(map->GetTerrainType(x, y) == kTrees) ||
+						(map->GetTerrainType(x, y) == kWater))
+					{
+						if (x == map->GetMapWidth()-1)
+						{
+							point s = {px+rad, py-rad};
+							point g = {px+rad, py+rad};
+							//disp.DrawLine(s, g, 1, Colors::black);
+							lines.push_back({s, g});
+						}
+						if (y == map->GetMapHeight()-1)
+						{
+							point s = {px-rad, py+rad};
+							point g = {px+rad, py+rad};
+							//disp.DrawLine(s, g, 1, Colors::black);
+							lines.push_back({s, g});
+						}
+					}
+					else if (map->GetTerrainType(x, y) == kSwamp)
+					{
+					}
+					else {
+						draw = false;
+					}
+					
+					if (draw)
+					{
+						// Code does error checking, so this works with x == 0
+						if (map->GetTerrainType(x, y) != map->GetTerrainType(x-1, y))
+						{
+							point s = {px-rad, py-rad};
+							point g = {px-rad, py+rad};
+							//disp.DrawLine(s, g, 1, Colors::black);
+							lines.push_back({s, g});
+						}
+						
+						if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y-1))
+						{
+							point s = {px-rad, py-rad};
+							point g = {px+rad, py-rad};
+							//disp.DrawLine(s, g, 1, Colors::black);
+							lines.push_back({s, g});
+						}
+						
+						if (map->GetTerrainType(x, y) != map->GetTerrainType(x+1, y))
+						{
+							point s = {px+rad, py-rad};
+							point g = {px+rad, py+rad};
+							//disp.DrawLine(s, g, 1, Colors::black);
+							lines.push_back({s, g});
+						}
+						
+						if (map->GetTerrainType(x, y) != map->GetTerrainType(x, y+1))
+						{
+							point s = {px-rad, py+rad};
+							point g = {px+rad, py+rad};
+							//disp.DrawLine(s, g, 1, Colors::black);
+							lines.push_back({s, g});
+						}
+					}
+					
+				}
+			}
+			std::vector<point> points;
+			while (lines.size() > 0)
+			{
+				points.resize(0);
+				// Inefficient n^2 algorithm for now
+				points.push_back(lines.back().first);
+				points.push_back(lines.back().second);
+				lines.pop_back();
+				bool found;
+				do {
+					found = false;
+					for (int x = 0; x < lines.size(); x++)
+					{
+						if (lines[x].first == points.back())
+						{
+							points.push_back(lines[x].second);
+							lines.erase(lines.begin()+x);
+							found = true;
+							break;
+						}
+						if (lines[x].second == points.back())
+						{
+							points.push_back(lines[x].first);
+							lines.erase(lines.begin()+x);
+							found = true;
+							break;
+						}
+					}
+				} while (found);
+				disp.DrawLineSegments(points, 1, Colors::black);
+			}
+		}
+	}
+	
+	void CanonicalGrid::Draw(Graphics::Display &disp, const xyLoc &l) const
+	{
+		GLdouble px, py, t, rad;
+		map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+		
+		//if (map->GetTerrainType(l.x, l.y) == kGround)
+		{
+			rgbColor c;// = {0.5, 0.5, 0};
+			GLfloat t;
+			GetColor(c.r, c.g, c.b, t);
+			
+			rect r;
+			r.left = px-rad;
+			r.top = py-rad;
+			r.right = px+rad;
+			r.bottom = py+rad;
+			
+			//s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
+			disp.FillCircle(r, c);
+			//stroke-width="1" stroke="pink" />
+		}
+	}
+	
+	void CanonicalGrid::Draw(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v) const
+	{
+		rect r1, r2;
+		rgbColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+		
+		{
+			GLdouble px, py, t, rad;
+			map->GetOpenGLCoord(l1.x, l1.y, px, py, t, rad);
+			
+			rect r;
+			r.left = px-rad;
+			r.top = py-rad;
+			r.right = px+rad;
+			r.bottom = py+rad;
+			r1 = r;
+		}
+		{
+			GLdouble px, py, t, rad;
+			map->GetOpenGLCoord(l2.x, l2.y, px, py, t, rad);
+			
+			rect r;
+			r.left = px-rad;
+			r.top = py-rad;
+			r.right = px+rad;
+			r.bottom = py+rad;
+			r2 = r;
+		}
+		rect r;
+		v = 1-v;
+		r.left = v*r1.left+r2.left*(1-v);
+		r.right = v*r1.right+r2.right*(1-v);
+		r.top = v*r1.top+r2.top*(1-v);
+		r.bottom = v*r1.bottom+r2.bottom*(1-v);
+		disp.FrameCircle(r, c, 2);
+	}
+	
+	
+	void CanonicalGrid::DrawAlternate(Graphics::Display &disp, const xyLoc &l) const
+	{
+		GLdouble px, py, t, rad;
+		map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+		
+		//if (map->GetTerrainType(l.x, l.y) == kGround)
+		{
+			rgbColor c;// = {0.5, 0.5, 0};
+			GLfloat t;
+			GetColor(c.r, c.g, c.b, t);
+			
+			rect r;
+			r.left = px-rad;
+			r.top = py-rad;
+			r.right = px+rad;
+			r.bottom = py+rad;
+			
+			disp.FrameCircle(r, c, 2);
+		}
+	}
+	
+	void CanonicalGrid::DrawStateLabel(Graphics::Display &disp, const xyLoc &l, const char *txt) const
+	{
+		GLdouble px, py, t, rad;
+		map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+		
+		rgbColor c;
+		{
+			GLfloat t;
+			GetColor(c.r, c.g, c.b, t);
+		}
+		disp.DrawText(txt, {static_cast<float>(px), static_cast<float>(py)}, c, rad);
+	}
+	
+	void CanonicalGrid::DrawStateLabel(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v, const char *txt) const
+	{
+		Graphics::point p;
+		GLdouble rad;
+		{
+			GLdouble px, py, t;
+			map->GetOpenGLCoord(l1.x, l1.y, px, py, t, rad);
+			p.x = px;
+			p.y = py;
+		}
+		{
+			GLdouble px, py, t, rad;
+			map->GetOpenGLCoord(l2.x, l2.y, px, py, t, rad);
+			p.x = (1-v)*p.x + (v)*px;
+			p.y = (1-v)*p.y + (v)*py;
+		}
+		rgbColor c;
+		{
+			GLfloat t;
+			GetColor(c.r, c.g, c.b, t);
+		}
+		disp.DrawText(txt, p, c, rad);
+	}
+	
+	
+	void CanonicalGrid::DrawLine(Graphics::Display &disp, const xyLoc &a, const xyLoc &b, double width) const
+	{
+		GLdouble xx1, yy1, zz1, rad;
+		GLdouble xx2, yy2, zz2;
+		map->GetOpenGLCoord(a.x, a.y, xx1, yy1, zz1, rad);
+		map->GetOpenGLCoord(b.x, b.y, xx2, yy2, zz2, rad);
+		
+		rgbColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+		
+		disp.DrawLine({static_cast<float>(xx1), static_cast<float>(yy1)},
+					  {static_cast<float>(xx2), static_cast<float>(yy2)}, width, c);
+	}
+	
+	void CanonicalGrid::DrawArrow(Graphics::Display &disp, const xyLoc &a, const xyLoc &b, double width) const
+	{
+		GLdouble xx1, yy1, zz1, rad;
+		GLdouble xx2, yy2, zz2;
+		map->GetOpenGLCoord(a.x, a.y, xx1, yy1, zz1, rad);
+		map->GetOpenGLCoord(b.x, b.y, xx2, yy2, zz2, rad);
+		
+		rgbColor c;// = {0.5, 0.5, 0};
+		GLfloat t;
+		GetColor(c.r, c.g, c.b, t);
+		
+		disp.DrawArrow({static_cast<float>(xx1), static_cast<float>(yy1)},
+					   {static_cast<float>(xx2), static_cast<float>(yy2)}, width, c);
+	}
 	
 	void CanonicalGrid::GetNextState(const xyLoc &currents, tDirection dir, xyLoc &news) const
 	{

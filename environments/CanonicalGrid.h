@@ -92,8 +92,19 @@ namespace CanonicalGrid {
 		std::string SVGDrawLine(const xyLoc &x, const xyLoc &y, int width=1) const;
 		std::string SVGFrameRect(int left, int top, int right, int bottom, int width = 1);
 		
+		virtual void Draw(Graphics::Display &disp) const;
+		virtual void Draw(Graphics::Display &disp, const xyLoc &l) const;
+		virtual void DrawAlternate(Graphics::Display &disp, const xyLoc &l) const;
+		virtual void Draw(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v) const;
+		virtual void DrawStateLabel(Graphics::Display &disp, const xyLoc &l1, const char *txt) const;
+		virtual void DrawStateLabel(Graphics::Display &disp, const xyLoc &l1, const xyLoc &l2, float v, const char *txt) const;
+		virtual void DrawLine(Graphics::Display &disp, const xyLoc &x, const xyLoc &y, double width = 1.0) const;
+		virtual void DrawArrow(Graphics::Display &disp, const xyLoc &x, const xyLoc &y, double width = 1.0) const;
+
+		void DrawBasicOrdering(::Graphics::Display &disp, const xyLoc l) const; // Only draws canonical ordering
 		void DrawOrdering(::Graphics::Display &disp, const xyLoc l) const; // Only draws canonical ordering
-		
+		void GetFirstJumpPoints(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
+
 		void GetNextState(const xyLoc &currents, tDirection dir, xyLoc &news) const;
 		
 		void StoreGoal(xyLoc &) {} // stores the locations for the given goal state
@@ -106,6 +117,7 @@ namespace CanonicalGrid {
 		void SetFourConnected() { fourConnected = true; }
 		void SetEightConnected() { fourConnected = false; }
 	protected:
+		void GetBasicSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
 		Map *map;
 		double DIAGONAL_COST;
 		bool fourConnected;

@@ -25,6 +25,15 @@ std::ostream &operator<<(std::ostream &out, const voxelGridState &v)
 }
 
 
+VoxelGrid::VoxelGrid(int x, int y, int z)
+{
+	xWidth = x;
+	yWidth = y;
+	zWidth = z;
+	efficient = false;
+	voxels.resize(xWidth*yWidth*zWidth);
+}
+
 VoxelGrid::VoxelGrid(const char *filename)
 {
 	efficient = false;
@@ -49,7 +58,6 @@ VoxelGrid::VoxelGrid(const char *filename)
 	
 	fclose(f);
 
-	SetUpDrawBuffers();
 }
 
 VoxelGrid::~VoxelGrid()
@@ -57,11 +65,89 @@ VoxelGrid::~VoxelGrid()
 	
 }
 
+void VoxelGrid::Save(const char *filename)
+{
+	FILE *f = fopen(filename, "w+");
+	if (f == 0)
+	{
+		printf("Error opening file\n");
+		exit(0);
+	}
+	fprintf(f, "voxel %d %d %d\n", xWidth, yWidth, zWidth);
+	for (int x = 0; x < xWidth; x++)
+	{
+		for (int y = 0; y < yWidth; y++)
+		{
+			for (int z = 0; z < zWidth; z++)
+			{
+				if (IsBlocked(x, y, z))
+					fprintf(f, "%d %d %d\n", x, y, z);
+			}
+		}
+	}
+	fclose(f);
+}
+
+void VoxelGrid::SaveInMinBB(const char *filename)
+{
+	int xMax = 0;
+	int yMax = 0;
+	int zMax = 0;
+	int xMin = xWidth;
+	int yMin = yWidth;
+	int zMin = zWidth;
+	
+	for (int x = 0; x < xWidth; x++)
+	{
+		for (int y = 0; y < yWidth; y++)
+		{
+			for (int z = 0; z < zWidth; z++)
+			{
+				if (IsBlocked(x, y, z))
+				{
+					xMax = std::max(xMax, x);
+					xMin = std::min(xMin, x);
+					yMax = std::max(yMax, y);
+					yMin = std::min(yMin, y);
+					zMax = std::max(zMax, z);
+					zMin = std::min(zMin, z);
+				}
+			}
+		}
+	}
+
+	FILE *f = fopen(filename, "w+");
+	if (f == 0)
+	{
+		printf("Error opening file\n");
+		exit(0);
+	}
+	fprintf(f, "voxel %d %d %d\n", xMax-xMin+1, yMax-yMin+1, zMax-zMin+1);
+	for (int x = 0; x < xWidth; x++)
+	{
+		for (int y = 0; y < yWidth; y++)
+		{
+			for (int z = 0; z < zWidth; z++)
+			{
+				if (IsBlocked(x, y, z))
+					fprintf(f, "%d %d %d\n", x-xMin, y-yMin, z-zMin);
+			}
+		}
+	}
+	fclose(f);
+}
+
 bool VoxelGrid::IsBlocked(const voxelGridState &s) const
 {
 	if ((s.x < xWidth) && (s.y < yWidth) && (s.z < zWidth))
 		return voxels[GetIndex(s)];
 	return true;
+}
+
+void VoxelGrid::SetBlocked(const voxelGridState &s, bool block)
+{
+	if ((s.x < xWidth) && (s.y < yWidth) && (s.z < zWidth))
+		voxels[GetIndex(s)] = block;
 }
 
 int VoxelGrid::GetIndex(const voxelGridState &s) const
@@ -90,6 +176,10 @@ void VoxelGrid::GetCoordinates(int index, int &x, int &y, int &z) const
 	y = index/zWidth;
 }
 
+bool VoxelGrid::Legal(const voxelGridState &s)
+{
+	return ((s.x < xWidth) && (s.y < yWidth) && (s.z < zWidth));
+}
 
 void VoxelGrid::Fill(voxelGridState s)
 {
@@ -110,6 +200,7 @@ void VoxelGrid::Fill(voxelGridState s)
 		q.push_back(voxelGridState(n.x, n.y, n.z+1));
 		q.push_back(voxelGridState(n.x, n.y, n.z-1));
 	}
+	if (efficient)
 	SetUpDrawBuffers();
 }
 
@@ -117,7 +208,8 @@ void VoxelGrid::Invert()
 {
 	for (size_t x = 0; x < voxels.size(); x++)
 		voxels[x] = !voxels[x];
-	SetUpDrawBuffers();
+	if (efficient)
+		SetUpDrawBuffers();
 }
 
 
@@ -411,9 +503,9 @@ void VoxelGrid::OpenGLDraw() const
 					if (voxels[GetIndex(x, y, z)])
 					{
 						GLfloat rr, gg, bb;
-//						rr = 1-(2.0*x/range-1.0+(-xWidth+range)/range);
-//						gg = 1+(2.0*y/range-1.0+(-yWidth+range)/range);
-//						bb = 1-(2.0*z/range-1.0+(-zWidth+range)/range);
+						rr = 1-(2.0*x/range-1.0+(-xWidth+range)/range);
+						gg = 1+(2.0*y/range-1.0+(-yWidth+range)/range);
+						bb = 1-(2.0*z/range-1.0+(-zWidth+range)/range);
 						// 7?
 						rr = Colors::GetColor(rr, 0, 2, 7).r;
 						gg = Colors::GetColor(bb, 0, 2, 9).g*0.9;

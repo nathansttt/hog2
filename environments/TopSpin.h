@@ -66,6 +66,12 @@ static bool operator==(const TopSpinState<N> &l1, const TopSpinState<N> &l2)
 	return true;
 }
 
+template <int N>
+static bool operator!=(const TopSpinState<N> &l1, const TopSpinState<N> &l2)
+{
+	return !(l1 == l2);
+}
+
 template <int N, int k>
 class TopSpin : public PermutationPuzzle::PermutationPuzzleEnvironment<TopSpinState<N>, TopSpinAction> {
 public:
@@ -88,7 +94,6 @@ public:
 	double GCost(const TopSpinState<N> &state1, const TopSpinState<N> &state2) const;
 	double GCost(const TopSpinState<N> &, const TopSpinAction &) const;
 	bool GoalTest(const TopSpinState<N> &state, const TopSpinState<N> &goal) const;
-
 	bool GoalTest(const TopSpinState<N> &s) const;
 
 	//void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);

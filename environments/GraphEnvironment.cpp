@@ -472,7 +472,7 @@ std::string GraphEnvironment::SVGDraw(const graphState &s) const
 	x1 = int((x1+1.0)*300.0);
 	y1 = int((y1+1.0)*300.0);
 
-	return SVGDrawCircle(x1, y1, 6, Colors::black)+SVGDrawCircle(x1, y1, 2, Colors::white);
+	return SVGDrawCircle(x1, y1, 6, Colors::black)+SVGDrawCircle(x1, y1, 2, GetColor());
 }
 
 std::string GraphEnvironment::SVGDraw() const
@@ -554,6 +554,7 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 	
+	rgbColor mainColor = GetColor();
 	
 	GLdouble off = 0;
 	edge_iterator ei = g->getEdgeIter();
@@ -574,7 +575,7 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 		x2 = n->GetLabelF(GraphSearchConstants::kXCoordinate);
 		y2 = n->GetLabelF(GraphSearchConstants::kYCoordinate);
 
-		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 1.0, Colors::white);
+		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 1.0, mainColor);
 	}
 	
 	char label[5];
@@ -605,7 +606,7 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 			z += n->GetLabelF(GraphSearchConstants::kZCoordinate);
 			
 			//DrawText(x/2, y/2, z/2-0.003, 0.2, label);
-			disp.DrawText(label, Graphics::point(x/2, y/2), Colors::white, 0.05);
+			disp.DrawText(label, Graphics::point(x/2, y/2), mainColor, 0.05);
 		}
 		glLineWidth(1.0);
 	}
@@ -621,7 +622,7 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 							 n->GetLabelF(GraphSearchConstants::kZCoordinate)-0.003,
 							 0.2, n->GetName());
 			disp.DrawText(n->GetName(), Graphics::point(n->GetLabelF(GraphSearchConstants::kXCoordinate),
-														n->GetLabelF(GraphSearchConstants::kYCoordinate)), Colors::white, 0.05);
+														n->GetLabelF(GraphSearchConstants::kYCoordinate)), mainColor, 0.05);
 		}
 		glLineWidth(1.0);
 	}
@@ -630,10 +631,10 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 
 void GraphEnvironment::Draw(Graphics::Display &disp, const graphState &l) const
 {
-	GLfloat r, gr, b, t;
-	GetColor(r, gr, b, t);
-	glColor4f(r, gr, b, t);
-	rgbColor c{r, gr, b};
+//	GLfloat r, gr, b, t;
+//	GetColor(r, gr, b, t);
+//	glColor4f(r, gr, b, t);
+	rgbColor c  = GetColor();//{r, gr, b};
 	node *n = g->GetNode(l);
 	GLdouble x, y, z, rad;
 	x = (GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate);
@@ -646,7 +647,7 @@ void GraphEnvironment::Draw(Graphics::Display &disp, const graphState &l) const
 	rec.top = y-rad;
 	rec.right = x+rad;
 	rec.bottom = y+rad;
-	disp.FillRect(rec, Colors::gray);
+	disp.FillRect(rec, Colors::lightgray);
 	disp.FrameRect(rec, c, 2.0);
 	DrawSquare(x, y, z-0.002, rad);
 //	glLineWidth(2.0);
@@ -660,7 +661,14 @@ void GraphEnvironment::Draw(Graphics::Display &disp, const graphState &l) const
 
 void GraphEnvironment::DrawStateLabel(Graphics::Display &disp, const graphState &l1, const char *txt) const
 {
-	
+	node *n = g->GetNode(l1);
+	GLdouble x, y, z, rad;
+	x = (GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate);
+	y = (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate);
+	z = (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate);
+	rad = 1.5*nodeScale*(GLdouble)0.4/(g->GetNumNodes());
+
+	disp.DrawText(txt, Graphics::point(x+rad, y-rad), GetColor(), 0.05);
 }
 
 void GraphEnvironment::DrawLine(Graphics::Display &disp, const graphState &from, const graphState &to, double width) const

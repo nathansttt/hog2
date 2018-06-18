@@ -15,6 +15,39 @@
 #include "TemplateAStar.h"
 #include "WeightedVertexGraph.h"
 #include "STPInstances.h"
+#include "LexPermutationPDB.h"
+#include "MR1PermutationPDB.h"
+
+typedef MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> STPPDB;
+void MakePDBs(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleState<4, 4>> &h, MNPuzzle<4,4> &mnp)
+{
+	std::vector<int> p1 = {0,1,2,3,4,5};
+	std::vector<int> p2 = {0,10,11,12,13,14,15};
+	std::vector<int> p3 = {0,6,7,8,9};
+//	std::vector<int> p4 = {0,12,13,14,15};
+//	mnp.StoreGoal(g);
+	STPPDB *pdb1 = new STPPDB(&mnp, g, p1);
+	STPPDB *pdb2 = new STPPDB(&mnp, g, p2);
+	STPPDB *pdb3 = new STPPDB(&mnp, g, p3);
+//	STPPDB *pdb4 = new STPPDB(&mnp, g, p4);
+	pdb1->BuildPDB(g, std::thread::hardware_concurrency());
+	pdb2->BuildPDB(g, std::thread::hardware_concurrency());
+	pdb3->BuildPDB(g, std::thread::hardware_concurrency());
+//	pdb4->BuildPDB(g, std::thread::hardware_concurrency());
+	h.lookups.resize(0);
+	h.lookups.push_back({kMaxNode, 1, 4});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	h.lookups.push_back({kLeafNode, 2, 2});
+	h.lookups.push_back({kLeafNode, 3, 3});
+//	h.lookups.push_back({kLeafNode, 4, 4});
+	h.heuristics.resize(0);
+	h.heuristics.push_back(&mnp);
+	h.heuristics.push_back(pdb1);
+	h.heuristics.push_back(pdb2);
+	h.heuristics.push_back(pdb3);
+//	h.heuristics.push_back(pdb4);
+}
 
 void TestSTP(int algorithm)
 {
@@ -24,17 +57,25 @@ void TestSTP(int algorithm)
 	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
 	MNPuzzle<4,4> mnp;
 	
+	Heuristic<MNPuzzleState<4, 4>> h_f;
+	MNPuzzleState<4, 4> start, goal;
+	MakePDBs(goal, h_f, mnp);
+
+	
 	for (int x = 0; x < 100; x++) // 547 to 540
 	{
-		
-		MNPuzzleState<4, 4> start, goal;
+		Heuristic<MNPuzzleState<4, 4>> h_b;
 		printf("Problem %d of %d\n", x+1, 100);
 		
 		std::vector<MNPuzzleState<4,4>> nbsPath;
 		std::vector<MNPuzzleState<4,4>> astarPath;
 		Timer t1, t2;
-		
-		if (algorithm == -1) // Optimal Analysis
+
+		start = STP::GetKorfInstance(x);
+		goal.Reset();
+		MakePDBs(start, h_b, mnp);
+
+		if (algorithm == -1 || algorithm == 10) // Optimal Analysis
 		{
 			start = STP::GetKorfInstance(x);
 			goal.Reset();
@@ -42,7 +83,7 @@ void TestSTP(int algorithm)
 			std::string t = "/Users/nathanst/bidir/stp/stp_";
 			t += std::to_string(x+1);
 			
-			BidirectionalProblemAnalyzer<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> p(start, goal, &mnp, &mnp, &mnp);
+			BidirectionalProblemAnalyzer<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> p(start, goal, &mnp, &h_f, &h_b);
 //			p.drawFullGraph = true;
 //			p.drawProblemInstance = false;
 //			p.drawMinimumVC = true;
@@ -62,11 +103,12 @@ void TestSTP(int algorithm)
 
 		}
 
-		if (algorithm == 0) // A*
+		if (algorithm == 0 || algorithm == 10) // A*
 		{
 			goal.Reset();
 			start = STP::GetKorfInstance(x);
 			t1.StartTimer();
+			astar.SetHeuristic(&h_f);
 			astar.GetPath(&mnp, start, goal, astarPath);
 			t1.EndTimer();
 			printf("A* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(astarPath),
@@ -92,12 +134,12 @@ void TestSTP(int algorithm)
 			printf("MM found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
 				   mm.GetNodesExpanded(), mm.GetNecessaryExpansions(), mm.GetNodesTouched(), t2.GetElapsedTime());
 		}
-		if (algorithm == 3) // NBS
+		if (algorithm == 3||algorithm == 10) // NBS
 		{
 			goal.Reset();
 			start = STP::GetKorfInstance(x);
 			t2.StartTimer();
-			nbs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
+			nbs.GetPath(&mnp, start, goal, &h_f, &h_b, nbsPath);
 			t2.EndTimer();
 			printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t2.GetElapsedTime());
@@ -114,7 +156,12 @@ void TestSTP(int algorithm)
 				   mm.GetNodesExpanded(), mm.GetNecessaryExpansions(), mm.GetNodesTouched(), t2.GetElapsedTime());
 		}
 		
-//		
+
+		delete h_b.heuristics[1];
+		delete h_b.heuristics[2];
+		delete h_b.heuristics[3];
+//		delete h_b.heuristics[4];
+//
 //		std::cout << astar.GetNodesExpanded() << "\t" << nbs.GetNodesExpanded() << "\t";
 //		std::cout << t1.GetElapsedTime() << "\t" <<  t2.GetElapsedTime() << "\n";
 	}

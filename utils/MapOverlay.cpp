@@ -272,6 +272,25 @@ void MapOverlay::OpenGLDraw() const
 	}
 }
 
+void MapOverlay::Draw(Graphics::Display &display) const
+{
+	for (unsigned int t = 0; t < values.size(); t++)
+	{
+		if (fequal(values[t], ignoreVal))
+		{
+			continue;
+		}
+		else {
+			rgbColor r = Colors::GetColor(values[t], minVal, maxVal, colorMap);
+			GLdouble x, y, z, rad;
+			m->GetOpenGLCoord(static_cast<int>(t%m->GetMapWidth()), static_cast<int>(t/m->GetMapWidth()), x, y, z, rad);
+			display.FillRect({static_cast<float>(x-rad), static_cast<float>(y-rad), static_cast<float>(x+rad), static_cast<float>(y+rad)}, r);
+			//s += SVGDrawRect(t%m->GetMapWidth()+1, t/m->GetMapWidth()+1, 1, 1, r);
+		}
+	}
+
+}
+
 std::string MapOverlay::SVGDraw() const
 {
 	std::string s;

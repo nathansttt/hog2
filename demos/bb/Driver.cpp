@@ -32,61 +32,44 @@
 #include "TemplateAStar.h"
 #include "TextOverlay.h"
 #include "MapOverlay.h"
+#include "BoundingBox.h"
 #include <string>
 
 enum mode {
-	kAddDH = 0,
-	kShowHeuristicDiff = 1,
-	kFindPath = 2
+	kShowBB = 0,
+	kFindPath = 1,
+	kShowBBFromSearch = 2
 };
 
 MapEnvironment *me = 0;
 CanonicalGrid::CanonicalGrid *grid;
-MapOverlay *mo = 0;
-MapOverlay *canmo = 0;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 std::vector<xyLoc> path;
 std::vector<CanonicalGrid::xyLoc> path2;
-void DrawJPSGoalArea(CanonicalGrid::tDirection dir, bool drawBound);
-void DrawRegularGoalArea(tDirection dir, bool drawBound);
+void DrawJPSGoalArea(Graphics::Display &display, CanonicalGrid::tDirection dir, bool drawBound);
+void DrawRegularGoalArea(Graphics::Display &display, tDirection dir, bool drawBound);
+void LoadMap(Map *m);
+void LoadSmallMap(Map *m);
 
 xyLoc start, goal;
 bool showCanonical = false;
-
-mode m = kAddDH;
-void AddDH();
+int stepsPerFrame = 1;
+mode m = kShowBB;
 
 bool recording = false;
 bool running = false;
+bool mapChanged = true;
+bool useBB = false;
 
 CanonicalGrid::tDirection cDir = CanonicalGrid::kN;
 tDirection dir = kN;
-
-struct dh {
-	std::vector<double> depths;
-	xyLoc startLoc;
-};
-
-class DifferentialHeuristic : public Heuristic<xyLoc> {
-public:
-	double HCost(const xyLoc &a, const xyLoc &b) const
-	{
-		//return distance(a, b);
-		double v = e->HCost(a, b);
-		for (int x = 0; x < values.size(); x++)
-			v = std::max(v, fabs(values[x].depths[e->GetStateHash(a)]-values[x].depths[e->GetStateHash(b)]));
-		return v;
-	}
-	MapEnvironment *e;
-	std::vector<dh> values;
-};
-
-DifferentialHeuristic h;
+BoundingBox *bb;
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1200, 1200);
+	return 0;
 }
 
 /**
@@ -95,7 +78,9 @@ int main(int argc, char* argv[])
 void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
+	InstallKeyboardHandler(MyDisplayHandler, "BB", "Show BBs", kAnyModifier, '0');
+	InstallKeyboardHandler(MyDisplayHandler, "A*", "Plain A*", kAnyModifier, '1');
+	InstallKeyboardHandler(MyDisplayHandler, "A*+BB", "A* with BB enhancement", kAnyModifier, '2');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
@@ -131,15 +116,14 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		SetNumPorts(windowID, 1);
 		
 		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
-		Map *map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
-
-		map->SetTileSet(kWinter);
-		mo = new MapOverlay(map);
+		Map *map = new Map(1, 1);//("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
+		LoadSmallMap(map);
+//		Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak103d.map");
+//		map->SetTileSet(kWinter);
 		
 		me = new MapEnvironment(map);
 		grid = new CanonicalGrid::CanonicalGrid(map);
-		h.e = me;
-		astar.SetHeuristic(&h);
+		bb = new BoundingBox(me, false);
 		start.x = 0;
 	}
 }
@@ -148,74 +132,66 @@ int frameCnt = 0;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	me->OpenGLDraw();
-	if (showCanonical)
-		DrawJPSGoalArea(cDir, true);
-	else
-		DrawRegularGoalArea(dir, true);
+	Graphics::Display &display = getCurrentContext()->display;
+	
+	if (!bb->DoneComputing())
+	{
+		float p = bb->IncrementalCompute();
+		std::string s = std::to_string(100.0*p)+"% done";
+		submitTextToBuffer(s.c_str());
+	}
+	
+	if (mapChanged == true)
+	{
+		display.StartBackground();
+		me->Draw(display);
+		display.EndBackground();
+		mapChanged = false;
+	}
 
-//	for (int x = 0; x < h.values.size(); x++)
-//	{
-//		me->SetColor(1.0, 0, 1.0);
-//		me->OpenGLDraw(h.values[x].startLoc);
-//	}
-//	
-//	if (running)
-//	{
-//		astar.OpenGLDraw();
-//
-//		if (path.size() == 0)
-//			astar.DoSingleSearchStep(path);
-//		else {
-//			me->SetColor(0, 1, 0);
-//			glLineWidth(10);
-//			for (int x = 1; x < path.size(); x++)
-//			{
-//				me->GLDrawLine(path[x-1], path[x]);
-//			}
-//			glLineWidth(1);
-//		}
-//
-//	}
-//	if (viewport == 0)
-//	{
-//		
-//		if (running)
-//		{
-//			//astar.DoSingleSearchStep(path);
-//			astar.OpenGLDraw();
-//		}
-//		
-//		if (path.size() > 0)
-//		{
-//			me->SetColor(0, 1, 0);
-//			glLineWidth(10);
-//			for (int x = 1; x < path.size(); x++)
-//			{
-//				me->GLDrawLine(path[x-1], path[x]);
-//			}
-//			glLineWidth(1);
-//		}
-//	}
+	if (m == kShowBB)
+	{
+		if (showCanonical)
+			DrawJPSGoalArea(display, cDir, true);
+		else
+			DrawRegularGoalArea(display, dir, true);
+	}
 
-//	if (recording && viewport == GetNumPorts(windowID)-1)
-//	{
-//		char fname[255];
-//		sprintf(fname, "/Users/nathanst/Movies/tmp/astar-%d%d%d%d",
-//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-//		SaveScreenshot(windowID, fname);
-//		printf("Saved %s\n", fname);
-//		frameCnt++;
-//		if (path.size() == 0)
-//		{
-//			MyDisplayHandler(windowID, kNoModifier, 'o');
-//		}
-//		else {
-//			recording = false;
-//		}
-//	}
-//	return;
-	glLineWidth(1);
+	if (m == kShowBBFromSearch)
+	{
+		bb->Draw(display, start, dir);
+	}
+	
+	if (m == kFindPath)
+	{
+		if (start.x != static_cast<uint16_t>(-1) && start.y != static_cast<uint16_t>(-1) && !running)
+		{
+			me->SetColor(0.0, 1.0, 0.0);
+			me->Draw(display, start);
+			me->SetColor(1.0, 0, 0.0);
+			me->Draw(display, goal);
+			me->DrawLine(display, start, goal);
+		}
+
+		if (running)
+		{
+			astar.Draw(display);
+			
+			for (int x = 0; x < stepsPerFrame; x++)
+				if (path.size() == 0)
+					astar.DoSingleSearchStep(path);
+			
+			if (path.size() != 0)
+			{
+				me->SetColor(Colors::green);
+				for (int x = 1; x < path.size(); x++)
+				{
+					me->DrawLine(display, path[x-1], path[x], 4);
+				}
+			}
+			
+		}
+	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -240,33 +216,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			switch (m)
 			{
 				//case
-				case kAddDH: submitTextToBuffer("Add DH"); break;
-				case kShowHeuristicDiff: submitTextToBuffer("Show Heuristic Diff"); break;
+				case kShowBB: submitTextToBuffer("Show bounding boxes"); break;
 				case kFindPath: submitTextToBuffer("Find Path!"); break;
+				case kShowBBFromSearch: submitTextToBuffer("Show BB (from constraints)!"); break;
 			}
 
 		}
 			break;
 		case '[':
 		{
-			switch (m)
-			{
-//				case kMoveNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
-//				case kFindPath: m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
-//				case kAddNodes: m = kFindPath; te.AddLine("Current mode: find path"); break;
-//				case kAddEdges: m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
-			}
 		}
 			break;
 		case '|':
 		{
-			h.values.resize(0);
-//			name[0] = 'a';
-//			g->Reset();
-//			te.AddLine("Current mode: add nodes");
-//			m = kAddNodes;
-//			path.resize(0);
-//			running = false;
 		}
 			break;
 		case 'w':
@@ -278,29 +240,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			else if (dir == kSW) { dir = kW; cDir = CanonicalGrid::kW; }
 			else if (dir == kW) { dir = kNW; cDir = CanonicalGrid::kNW; }
 			else if (dir == kNW) { dir = kN; cDir = CanonicalGrid::kN; }
-//			if (weight > 0.5)
-//				weight = 0.0;
-//			else
-//				weight = 1.0;
-//			astar.SetWeight(weight);
-//			astar.InitializeSearch(ge, astar.start, astar.goal, path);
-//			ShowSearchInfo();
-//			
-//			running = true;
 			break;
 		case 'r':
 			recording = !recording;
 			break;
-		case '0':
-//		case '1': edgeCost = 1.0; te.AddLine("Adding edges; New edges cost 1"); m = kAddEdges; break;
-//		case '2': edgeCost = 2.0; te.AddLine("Adding edges; New edges cost 2"); m = kAddEdges; break;
-//		case '3': edgeCost = 3.0; te.AddLine("Adding edges; New edges cost 3"); m = kAddEdges; break;
-//		case '4': edgeCost = 4.0; te.AddLine("Adding edges; New edges cost 4"); m = kAddEdges; break;
-//		case '5': edgeCost = 5.0; te.AddLine("Adding edges; New edges cost 5"); m = kAddEdges; break;
-//		case '6': edgeCost = 6.0; te.AddLine("Adding edges; New edges cost 6"); m = kAddEdges; break;
-//		case '7': edgeCost = 7.0; te.AddLine("Adding edges; New edges cost 7"); m = kAddEdges; break;
-//		case '8': edgeCost = 8.0; te.AddLine("Adding edges; New edges cost 8"); m = kAddEdges; break;
-//		case '9': edgeCost = 9.0; te.AddLine("Adding edges; New edges cost 9"); m = kAddEdges; break;
+		case '1': useBB = false; m = kFindPath; submitTextToBuffer("A* using bounding boxes"); break;
+		case '2': useBB = true; m = kFindPath;  submitTextToBuffer("A* not using bounding boxes"); break;
+		case '0': m = kShowBB;
+			break;
 		case '\t':
 			printf("Hit tab!\n");
 			showCanonical = !showCanonical;
@@ -345,79 +292,26 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	
 }
 
-void ShowDiff()
-{
-	mo->Clear();
-	std::vector<xyLoc> p;
-	TemplateAStar<xyLoc, tDirection, MapEnvironment> search;
-	search.SetStopAfterGoal(false);
-	search.GetPath(me, start, start, p);
-	printf("%lld nodes expanded\n", search.GetNodesExpanded());
-	
-	for (int x = 0; x < search.GetNumItems(); x++)
-	{
-		double cost;
-		xyLoc v = search.GetItem(x).data;
-		if (!search.GetClosedListGCost(v, cost))
-			printf("Error reading depth from closed list!\n");
-		else {
-			int hash = me->GetStateHash(v);
-			//printf("(%d, %d): %f\n", v.x, v.y, cost);
-			mo->SetOverlayValue(v.x, v.y, cost-h.HCost(start, v));
-			//printf("Read value: %f\n", mo->GetOverlayValue(v.x, v.y));
-		}
-	}
-}
-
-void AddDH()
-{
-	mo->Clear();
-	dh newDH;
-	mo->SetTransparentValue(0);
-	newDH.startLoc = start;
-	newDH.depths.resize(me->GetMaxHash());
-	std::vector<xyLoc> p;
-	TemplateAStar<xyLoc, tDirection, MapEnvironment> search;
-	search.SetStopAfterGoal(false);
-	search.GetPath(me, start, start, p);
-	
-	for (int x = 0; x < search.GetNumItems(); x++)
-	{
-		double cost;
-		xyLoc v = search.GetItem(x).data;
-		if (!search.GetClosedListGCost(v, cost))
-			printf("Error reading depth from closed list!\n");
-		else {
-			int hash = me->GetStateHash(v);
-			newDH.depths[hash] = cost;
-			//printf("(%d, %d): %f\n", v.x, v.y, cost);
-			mo->SetOverlayValue(v.x, v.y, cost);
-			//printf("Read value: %f\n", mo->GetOverlayValue(v.x, v.y));
-		}
-	}
-	mo->SetColorMap(10);
-	h.values.push_back(newDH);
-}
-
-
 
 bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButtonType button, tMouseEventType mType)
 {
-	if (mType == kMouseDown)
-	{
-		switch (button)
-		{
-			case kRightButton: printf("Right button\n"); break;
-			case kLeftButton: printf("Left button\n"); break;
-			case kMiddleButton: printf("Middle button\n"); break;
-		}
-	}
+//	if (mType == kMouseDown)
+//	{
+//		switch (button)
+//		{
+//			case kRightButton: printf("Right button\n"); break;
+//			case kLeftButton: printf("Left button\n"); break;
+//			case kMiddleButton: printf("Middle button\n"); break;
+//		}
+//	}
 	if (button != kLeftButton)
 		return false;
 	switch (mType)
 	{
 		case kMouseDown:
 		{
+			running = false;
+			path.resize(0);
 			int x, y;
 			me->GetMap()->GetPointFromCoordinate(loc, x, y);
 			if (me->GetMap()->GetTerrainType(x, y) == kGround)
@@ -426,10 +320,6 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 				start.y = y;
 				goal = start;
 				printf("Hit (%d, %d)\n", x, y);
-//				if (m == kAddDH)
-//					AddDH();
-//				if (m == kShowHeuristicDiff)
-//					ShowDiff();
 			}
 			return true;
 		}
@@ -439,35 +329,52 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			me->GetMap()->GetPointFromCoordinate(loc, x, y);
 			if (me->GetMap()->GetTerrainType(x, y) == kGround)
 			{
-				start.x = x;
-				start.y = y;
+				if (m == kFindPath)
+				{
+					goal.x = x;
+					goal.y = y;
+				}
+				else {
+					start.x = x;
+					start.y = y;
+					goal = start;
+				}
 			}
 			break;
 		}
 		case kMouseUp:
 		{
-//			int x, y;
-//			me->GetMap()->GetPointFromCoordinate(loc, x, y);
-//			if (me->GetMap()->GetTerrainType(x, y) == kGround)
-//			{
-//				goal.x = x;
-//				goal.y = y;
-//				printf("UnHit (%d, %d)\n", x, y);
-//			}
-//
-//			if (m == kFindPath)
-//			{
-//				astar.InitializeSearch(me, start, goal, path);
-//				astar.SetHeuristic(&h);
-//				running = true;
-//			}
-//			return true;
+			int x, y;
+			me->GetMap()->GetPointFromCoordinate(loc, x, y);
+			if (me->GetMap()->GetTerrainType(x, y) == kGround)
+			{
+				goal.x = x;
+				goal.y = y;
+				printf("UnHit (%d, %d)\n", x, y);
+
+			
+				if (m == kFindPath)
+				{
+					std::cout << start << " " << goal << "\n";
+//					astar.GetPath(me, start, goal, path);
+//					printf("Path has %d moves; %llu nodes\n", path.size(), astar.GetNodesExpanded());
+					if (useBB)
+						astar.SetConstraint(bb);
+					else
+						astar.SetConstraint(0);
+					astar.InitializeSearch(me, start, goal, path);
+					running = true;
+				}
+
+			}
+
+			return true;
 		}
 	}
 	return false;
 }
 
-void DrawRegularGoalArea(tDirection dir, bool drawBound)
+void DrawRegularGoalArea(Graphics::Display &display, tDirection dir, bool drawBound)
 {
 	if (start.x == 0)
 		return;
@@ -484,11 +391,13 @@ void DrawRegularGoalArea(tDirection dir, bool drawBound)
 	regAstar.SetStopAfterGoal(false);
 	regAstar.GetPath(me, cStart, cStart, path);
 	me->SetColor(0.0, 0.0, 1.0);
-	me->OpenGLDraw(cStart);
+	me->Draw(display, cStart);
 	
 	std::deque<xyLoc> queue;
 	// draw everything
 	me->ApplyAction(cStart, dir);
+	if (me->GetMap()->GetTerrainType(cStart.x, cStart.y) != kGround)
+		return;
 	queue.push_back(cStart);
 	std::vector<xyLoc> v;
 	std::vector<bool> visited(me->GetMap()->GetMapHeight()*me->GetMap()->GetMapWidth());
@@ -507,7 +416,7 @@ void DrawRegularGoalArea(tDirection dir, bool drawBound)
 		{
 			me->GetSuccessors(data.data, v);
 			CanonicalGrid::xyLoc t(data.data.x, data.data.y);
-			grid->OpenGLDraw(t);
+			grid->Draw(display, t);
 			
 			if (data.data.x > maxx)
 				maxx = data.data.x;
@@ -529,17 +438,19 @@ void DrawRegularGoalArea(tDirection dir, bool drawBound)
 	}
 	if (drawBound)
 	{
-		GLdouble t, l, r, b, z, rad, tmp;
+		GLdouble t, l, r, b, z, rad;
 		//printf("Bounds: (%d, %d) to (%d, %d)\n", minx, miny, maxx, maxy);
 		me->GetMap()->GetOpenGLCoord(minx, miny, l, t, z, rad);
 		me->GetMap()->GetOpenGLCoord(maxx, maxy, r, b, z, rad);
 		glColor3f(1.0, 1.0, 1.0);
-		glLineWidth(4.0);
-		OutlineRect(l-rad, t-rad, r+rad, b+rad, z-2*rad);
+		display.FrameRect({static_cast<float>(l-rad),
+			static_cast<float>(t-rad),
+			static_cast<float>(r+rad),
+			static_cast<float>(b+rad)}, Colors::white, 4.0);
 	}
 }
 
-void DrawJPSGoalArea(CanonicalGrid::tDirection dir, bool drawBound)
+void DrawJPSGoalArea(Graphics::Display &display, CanonicalGrid::tDirection dir, bool drawBound)
 {
 	if (start.x == 0)
 		return;
@@ -554,10 +465,14 @@ void DrawJPSGoalArea(CanonicalGrid::tDirection dir, bool drawBound)
 	canAstar.SetWeight(1.0);
 	canAstar.SetStopAfterGoal(false);
 	canAstar.GetPath(grid, cStart, cStart, path2);
-	
+	me->SetColor(0.0, 0.0, 1.0);
+	me->Draw(display, start);
+
 	std::deque<CanonicalGrid::xyLoc> queue;
 	// draw everything
 	grid->ApplyAction(cStart, dir);
+	if (grid->GetMap()->GetTerrainType(cStart.x, cStart.y) != kGround)
+		return;
 	//cStart.y--;
 	queue.push_back(cStart);
 	std::vector<CanonicalGrid::xyLoc> v;
@@ -573,7 +488,8 @@ void DrawJPSGoalArea(CanonicalGrid::tDirection dir, bool drawBound)
 		if (canAstar.GetClosedItem(next, data))
 		{
 			grid->GetSuccessors(data.data, v);
-			grid->OpenGLDraw(data.data);
+			//grid->OpenGLDraw(data.data);
+			grid->Draw(display, data.data);
 			
 			if (data.data.x > maxx)
 				maxx = data.data.x;
@@ -596,12 +512,58 @@ void DrawJPSGoalArea(CanonicalGrid::tDirection dir, bool drawBound)
 	}
 	if (drawBound)
 	{
-		GLdouble t, l, r, b, z, rad, tmp;
+		GLdouble t, l, r, b, z, rad;
 		//printf("Bounds: (%d, %d) to (%d, %d)\n", minx, miny, maxx, maxy);
 		me->GetMap()->GetOpenGLCoord(minx, miny, l, t, z, rad);
 		me->GetMap()->GetOpenGLCoord(maxx, maxy, r, b, z, rad);
 		glColor3f(1.0, 1.0, 1.0);
-		glLineWidth(4.0);
-		OutlineRect(l-rad, t-rad, r+rad, b+rad, z-2*rad);
+		display.FrameRect({static_cast<float>(l-rad),
+			static_cast<float>(t-rad),
+			static_cast<float>(r+rad),
+			static_cast<float>(b+rad)}, Colors::white, 4.0);
 	}
 }
+
+
+void LoadMap(Map *m)
+{
+	m->Scale(162, 141);
+	const char map[] = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.TTT@@@@@@@@@@T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@T.T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....TTTTTTTT..T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTT...............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T................TT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTT@@@@@@@@@@@@@@TTT.............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@@@@@T.............TT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@@@@@T...............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...T@@@@@@@@@@@@@@@@T...............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...T@@@@@@@@@@@@@TTTT...............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..T@@@@@@@@@@@@T...................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTT@@@@@@@@@@@@@@@@@TT..TTT@@@@@@@@@@T...................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.......TTTTTT@@@@TTTTTTT.......TT@@@@@@@T....................TTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTT..........T@@T................TTTTT@TT....................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........T@@T.....................T......................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..........T@@T............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..........T@@T............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TT...........T@@T............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.............T@@T............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTT..........T@T..............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...........TT..............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..........TT..............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TT........................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T........................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T........TT..............TT......TT......................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTT@@TTTTTTT.......TT......TT.....TTTTTTTTTTTTTTTTTTTTTTTTTT.......T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TT.....T@T.....T@T....T@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTT@@@@@@@@@@@@@@@@@T.....T@T.....T@T....T@@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.......TTTTTTTTTTTTTTTTTT.....TTT.....TTT....TTTTTTTTTTTTTTTTTTTTTTTTTTT......T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT......T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@@TTTTTTTTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.........................TTTTTTTTTTTTTTTTTTTT@T....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........TTTTTTTTTT..T@T.............................................TT....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........TTTTTTTTTT..T@T.............................................TT....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT.....T@@@@@@@@@@@@@@@@@@@TTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT.....T@@@@@@@@@@@@@@@@@@T.....TTTT@T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T....................................................T@@@@@@@@@@@@@@@@@@T.........T..@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........TTTTTTTTTT..T@T....................................................T@@@@@@@@@@@@@@@@@@T.............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........TTTTTTTTTT..T@T....................................................T@@@@@@@@@@@@@@@@@@T.............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T....................................................T@@@@@@@@@@@@@@@@@@T.............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....TTTT............T@@T....TTTTTTTTTTTTTTTTTTTT.TT.TTTT....TTTT............T@@@@@@@@@@@@@@@@@@T.........TTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@TTTTTTTTTTTT@@@T....T@@@@@@@@@@@@@@@@@@@T@T.T@@T....T@@T............T@@@@@@@@@@@@@@@@@@@TTT......T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@@@@@@@@T....T@@@@TTT@@@@T@@@@@@@@T..T@@T....T@@T............T@@@@@@@@@@@@@@@@@@@@@T......TTTTT@@@@@@@@@@@@@@@@@TTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@TTTTT@@T....T@@@T...TTTT.T@@@@@@T...T@@T....T@@T............TTTTTT@@@@@@@@TTTTTTTTT...........TTTT@@@@@@@@@TTTT......T@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@T.....T@T....T@@T.........T@@@@@@T....TT......TT...................T@@@@@@T........................T@@@@@@@T..........T@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@T.....T@T....T@T..........TT@@@@@T.................................T@@@@@@T........................T@@@@@@@T..........T@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@T......T@T....T@T............TT@@@T..................................T@@TTT..........................T@@@TTT...........T@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@T......T@T....T@T..............T@@T...................................TT..............................TTT...........TTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@T.....TT......TT..............T@@T.................................................................................TT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@TTT..TT......TT..............T@@T...................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@@T..TT......TT..............T@@T...................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@@T..........................T@@T...................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@@T..........................T@T....................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@@T..........................T@T....................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@@@T.........................T@T....................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@@TT.........................T@T....................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@T...........................T@@TT..................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@T...TT......TT...........TTT@@@@T..................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@T...TT......TT...........T@@@@@T...................................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@T...TT......TT............TT@@@@T................................................................................TT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@TT...T@T....T@T..............T@@@T.................................TT..T............................TTTT..........TTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@T.....T@T....T@T..........TTTT@@@@.................................T@@TT@T..........................T@@@@TT...........T@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@T....T@T....T@T..........T@@@@@@@T................................T@@@@@T..........................T@@@@@T...........T@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@T....T@T....T@@T.........T@@@@@@@@T..TT......TT...................T@@@@@@T.........................T@@@@@@T..........T@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@@TTTT@@T....T@@@T...TTTT.T@@@@@@@@T.T@@T....T@@T............TTTTTT@@@@@@@@TTTT...........TTTTTTTTTT@@@@@@@@TTT.......T@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@@@@@@@@T....T@@@@TTT@@@@T@@@@@@@@@T.T@@T....T@@T............T@@@@@@@@@@@@@@@@@TTTTT......T@@@@@@@@@@@@@@@@@@@@TTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@TTTTTTTTTTTT@@@T....T@@@@@@@@@@@@@@@@@@@@T..T@@T....T@@T............T@@@@@@@@@@@@@@@@@@@@@T......TTTTTTT@@@@T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....TTTT............T@@T....TTTTTTTTTTTTTTTTTTTTT...TTTT....TTTT............T@@@@@@@@@@@@@@@@@@@TTT.............TTTT.T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T....................................................T@@@@@@@@@@@@@@@@@@T.....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........TTTTTTTTTT..T@T....................................................T@@@@@@@@@@@@@@@@@@T.....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........TTTTTTTTTT..T@T....................................................T@@@@@@@@@@@@@@@@@@T.....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T....................................................T@@@@@@@@@@@@@@@@@@T.TT..................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT.....T@@@@@@@@@@@@@@@@@@@@@T....TTT...TT.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT.....T@@@@@@@@@@@@@@@@@@@@@@TTTT@@@TTT@@TTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........TTTTTTTTTT..T@T.............................................TT....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........TTTTTTTTTT..T@T.............................................TT....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.............................................TT....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@T.........................TTTTTTTTTTTTTTTTTTTT@T....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@@TTTTTTTTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T......................TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T......TTTTTTTTTTTTTTTTT......................TTTTTTTTTTTTTTTTTTTTTTTTTT.......T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTT@@@@@@@@@@@@@@@@@TT.....TTT.....TTT....T@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.....T@T.....T@T....T@@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTTTT@@TTTTTTTTT.....T@T.....T@T....TTTTTTTTTTTTTTTTTTTTTTTTTTT......T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T............TT..............TT......TT......................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T............................................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........................................................................TTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T............TT...........................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.............TT...................................................T.......T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.............T@T.............................................TTTTT@TT.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T............T@@T.............................................T@@@@@@T.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T............T@@T.............................................TT@@TTTT.....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...........T@@T...............................................TT.........T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...........T@@T..........................................................TTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...........T@@T.............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TT.........T@@T.............................................................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.TTTTTTT@@@@TTTTTT.......TTTTTTTTTTT....................TTTTTTTTTT.......T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T@@@@@@@@@@@@@@@@@TTT..TT@@@@@@@@@@T....................T@@@@@@@@@TTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T..T@@@@@@@@@@@T....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@T....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T...T@@@@@@@@@@@T....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTT@@@@@@@@@@@@T....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....................T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTT............TTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T............T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T.........T..T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....TTTTT@TT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T....T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+	int which = 0;
+	for (int y = 0; y < m->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < m->GetMapWidth(); x++)
+		{
+			if (map[which] == '.')
+				m->SetTerrainType(x, y, kGround);
+			else if (map[which] == 'T')
+				m->SetTerrainType(x, y, kTrees);
+			else
+				m->SetTerrainType(x, y, kOutOfBounds);
+			which++;
+		}
+	}
+}
+
+
+void LoadSmallMap(Map *m)
+{
+	m->Scale(49, 49);
+	const char map[] = "TTTTTTTTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTT.TT....TTTTTTTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTT..............TTTTTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTT................TTTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTT..................TT@@@@@@@@@@@@@@@@@@@@@@@@TTTTT.................TTT@@@@@@@@@@@@@@@@@@@@@@@@TTTT...................TT@@@@@@@@@@@@@@@@@@@@@@@@T.............TT.......TT@@@@@@@@@@@@@@@@@@@@@@@@T........TTT..TT.......TT@@@@@@@@@@@@@@@@@@@@@@@@T........TTTTTTT.......TT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTTTTTTTTTTT..TTTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTTTTTTTTTTT..TTTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTTTTTTTTTTT...TTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTT.............TT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTT.............TT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTT.............TT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTTT.............TT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTT..............TT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTT..............TT@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTT.......TTT....TT@@@@@@@@@@@@@@@@@@@@@@@@TTT...TT........TTT....TT@@@@@@@@@@@@@@@@@@@@@@@@TTT.............TTT....TT@@@@@@@@@@@@@@@@@@@@@@@@TTT.............TTTTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@TTTTT...........TTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@TTTTTT..........TTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@TTTTTT..........TTTTTTTTTTTTT...TTTT@@@@@@@@@@@@@TTTTTTTTT................TTTT....TTTT@@@@@@@@@@@@TTTTTTTTTT.......................TTTTTTTT@@@@@@@@TTTTTTTTTT.......................TTTTTTTT@@@@@@@@TTTTTT.TTT.........................TTTTTT@@@@@@@@T......TTT.........TTT.TT..........TTTTTT@@@@@@@@...................TTTTTTT.........TTTTTTT..........................TTTTTT..........TTTTTTT.......T......TT..........................TTTTTTT.......T..TTTTTT..........................TTTTTTT.......TTTTTTTTT..........................TTTTTTTTTT....TTTTTTTTT..........................TTTTTTTTTT....@@@@@@@@T.......TT..TT..TTTTTT....TTTTTTTTTT.....@@@@@@@@T..TTTTTTTTTTTTTTTTTTTTTT..........T.....@@@@@@@@T..TTTTTTTTTTTTTTTTTTTTTT................@@@@@@@@T..TTTTTTTTTTTTTTTTTTTTTT................@@@@@@@@T..TTTTTTTTTTTTTTTTTTTTTT.TTTTTTTTTT.....@@@@@@@@T..TTTTTTTTTTTTTTTTTTTTTT.TTTTTTTTTT.....@@@@@@@@TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT....@@@@@@@@TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT....@@@@@@@@.........................................@@@@@@@@.........................................@@@@@@@@.........................................";
+	int which = 0;
+	for (int y = 0; y < m->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < m->GetMapWidth(); x++)
+		{
+			if (map[which] == '.')
+				m->SetTerrainType(x, y, kGround);
+			else if (map[which] == 'T')
+				m->SetTerrainType(x, y, kTrees);
+			else
+				m->SetTerrainType(x, y, kOutOfBounds);
+			which++;
+		}
+	}
+}
+
+

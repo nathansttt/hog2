@@ -30,6 +30,10 @@ PROJ_REL_LIB =
 default : all
 
 SRC_CPP = \
-  grids/CanonicalDijkstra.cpp \
-  grids/JPS.cpp
+	grids/BoundingBox.cpp \
+	grids/CanonicalReach.cpp \
+	grids/Reach.cpp \
+	grids/CanonicalDijkstra.cpp \
+	grids/JPS.cpp \
+	grids/Transit.cpp
 

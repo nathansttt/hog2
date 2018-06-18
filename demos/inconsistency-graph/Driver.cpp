@@ -31,6 +31,7 @@
 #include "TemplateAStar.h"
 #include "TextOverlay.h"
 #include <string>
+#include "SVGUtil.h"
 
 enum mode {
 	kAddNodes,
@@ -84,6 +85,7 @@ int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1600, 800);
+	return 0;
 }
 
 /**
@@ -124,6 +126,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 	else if (eType == kWindowCreated)
 	{
+		ReinitViewports(windowID, {-1, -1, 0.0, 1}, kScaleToFill);
+		AddViewport(windowID, {0, -1, 1, 1}, kScaleToFill);
+
 		printf("Window %ld created\n", windowID);
 		glClearColor(0.99, 0.99, 0.99, 1.0);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
@@ -148,18 +153,23 @@ int frameCnt = 0;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	Graphics::Display &display = getCurrentContext()->display;
+
 	if (viewport == 0)
 	{
+		display.FillRect({-1, -1, 1, 1}, Colors::black);
+
 		if (ge == 0 || g == 0)
 			return;
 		ge->SetColor(0.5, 0.5, 1.0);
-		ge->OpenGLDraw();
+		ge->Draw(display);
 		
 		if (from != -1 && to != -1)
 		{
-			glLineWidth(4.);
+//			glLineWidth(4.);
 			ge->SetColor(1, 0, 0);
-			ge->GLDrawLine(from, to);
+//			ge->GLDrawLine(from, to);
+			ge->DrawLine(display, from, to, 4);
 		}
 		
 		if (running)
@@ -171,53 +181,54 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 					MyDisplayHandler(windowID, kNoModifier, 'o');
 			}
 			//astar.DoSingleSearchStep(path);
-			astar.OpenGLDraw();
+			astar.Draw(display);
 		}
 		else {
 			ge->SetColor(0.75, 0.75, 1.0);
 			for (int x = 0; x < g->GetNumNodes(); x++)
 			{
-				ge->OpenGLDraw(x);
+				ge->Draw(display, x);
 			}
 		}
 		
 		if (path.size() > 0)
 		{
 			ge->SetColor(0, 1, 0);
-			glLineWidth(10);
+//			glLineWidth(10);
 			for (int x = 1; x < path.size(); x++)
 			{
-				ge->GLDrawLine(path[x-1], path[x]);
+				ge->DrawLine(display, path[x-1], path[x], 10);
 			}
-			glLineWidth(1);
+//			glLineWidth(1);
 		}
 
 		for (int x = 0; x < g->GetNumNodes(); x++)
 		{
-			ge->GLLabelState(x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
+			ge->DrawStateLabel(display, x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
+			//ge->GLLabelState(x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
 		}
 	}
 	if (viewport == 1)
 	{
-		te.OpenGLDraw(windowID);
+		te.Draw(display);
 	}
 	
-	if (recording && viewport == GetNumPorts(windowID)-1)
-	{
-		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/astar-%d%d%d%d",
-				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-		SaveScreenshot(windowID, fname);
-		printf("Saved %s\n", fname);
-		frameCnt++;
-		if (path.size() == 0)
-		{
-			MyDisplayHandler(windowID, kNoModifier, 'o');
-		}
-		else {
-			recording = false;
-		}
-	}
+//	if (recording && viewport == GetNumPorts(windowID)-1)
+//	{
+//		char fname[255];
+//		sprintf(fname, "/Users/nathanst/Movies/tmp/astar-%d%d%d%d",
+//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+//		SaveScreenshot(windowID, fname);
+//		printf("Saved %s\n", fname);
+//		frameCnt++;
+//		if (path.size() == 0)
+//		{
+//			MyDisplayHandler(windowID, kNoModifier, 'o');
+//		}
+//		else {
+//			recording = false;
+//		}
+//	}
 	return;
 	
 }
@@ -240,7 +251,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case ']':
 		{
-			numExampleNodes++;
+			if (numExampleNodes < 15)
+				numExampleNodes++;
 //			switch (m)
 //			{
 //				case kAddNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
@@ -253,7 +265,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '[':
 		{
-			numExampleNodes--;
+			if (numExampleNodes > 5)
+				numExampleNodes--;
 //			switch (m)
 //			{
 //				case kMoveNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
@@ -344,10 +357,26 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 			break;
 		case 's':
-			SaveGraph("save.graph");
+//			SaveGraph("save.graph");
+		{
+			Graphics::Display tmp;
+			//tmp.FillRect({-1, -1, 1, 1}, Colors::black);
+			ge->SetColor(Colors::black);
+			ge->Draw(tmp);
+			for (int x = 0; x < g->GetNumNodes(); x++)
+			{
+				ge->SetColor(Colors::black);
+				ge->Draw(tmp, x);
+				ge->SetColor(Colors::red);
+				ge->DrawStateLabel(tmp, x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
+				//ge->GLLabelState(x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
+			}
+
+			MakeSVG(tmp, "/Users/nathanst/Desktop/inc.svg", 400, 400);
+		}
 			break;
 		case 'l':
-			LoadGraph("save.graph");
+//			LoadGraph("save.graph");
 			break;
 		default:
 			break;
@@ -645,7 +674,10 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			}
 			if (m == kAddEdges || m == kFindPath)
 			{
-				from = to = FindClosestNode(g, loc)->GetNum();
+				if (g->GetNumNodes() > 0)
+				{
+					from = to = FindClosestNode(g, loc)->GetNum();
+				}
 			}
 			if (m == kMoveNodes)
 			{
@@ -668,7 +700,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		{
 			if (m == kAddEdges || m == kFindPath)
 			{
-				to = FindClosestNode(g, loc)->GetNum();
+				if (g->GetNumNodes() > 0)
+					to = FindClosestNode(g, loc)->GetNum();
 			}
 			if (m == kMoveNodes)
 			{
@@ -705,7 +738,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			}
 			if (m == kFindPath)
 			{
-				to = FindClosestNode(g, loc)->GetNum();
+				if (g->GetNumNodes() > 0)
+					to = FindClosestNode(g, loc)->GetNum();
 				if (from != to)
 				{
 					weight = 1.0;

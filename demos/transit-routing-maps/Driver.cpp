@@ -32,6 +32,7 @@
 #include "TemplateAStar.h"
 #include "TextOverlay.h"
 #include "MapOverlay.h"
+#include "Transit.h"
 #include <string>
 
 enum mode {
@@ -50,6 +51,9 @@ void DoHighwayDimension(xyLoc s);
 void DoHighwayDimension1(xyLoc s);
 void DoHighwayDimension2(CanonicalGrid::xyLoc s);
 void RedoHDDisplay();
+void LoadMap(Map *m);
+
+Transit *transit = 0;
 
 xyLoc start, goal;
 int hdSearchType = 0;
@@ -58,6 +62,8 @@ mode m = kAddDH;
 
 bool recording = false;
 bool running = false;
+bool mapChanged = true;
+bool startTransit = false;
 
 int radius = 5;
 int multiplier = 4;
@@ -66,6 +72,7 @@ int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1200, 1200);
+	return 0;
 }
 
 /**
@@ -107,31 +114,33 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		//glClearColor(0.99, 0.99, 0.99, 1.0);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
-		SetNumPorts(windowID, 1);
+//		SetNumPorts(windowID, 1);
 		
 		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak303d.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/den201d.map");
-		Map *map = new Map("/Users/nathanst/hog2/maps/dao/hrt201d.map");
-
+		Map *map = new Map(1, 1);//("/Users/nathanst/hog2/maps/dao/hrt201d.map");
+		LoadMap(map);
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
 
-		if ((0))
-		{
-			// draw basic map with grid and start state
-			std::fstream svgFile;
-			svgFile.open("/Users/nathanst/Desktop/transit.svg", std::fstream::out | std::fstream::trunc);
-			svgFile << me->SVGHeader();
-			svgFile << me->SVGDraw();
-//			px1 = 19; py1 = 18;
-//			me->SetColor(1, 1, 1);
-//			svgFile << me->SVGLabelState({20, 20}, "S", 1);
-			svgFile << "</svg>";
-			svgFile.close();
-		}
+		transit = new Transit(map, 5, 10, 30, false);
+		
+//		if ((0))
+//		{
+//			// draw basic map with grid and start state
+//			std::fstream svgFile;
+//			svgFile.open("/Users/nathanst/Desktop/transit.svg", std::fstream::out | std::fstream::trunc);
+//			svgFile << me->SVGHeader();
+//			svgFile << me->SVGDraw();
+////			px1 = 19; py1 = 18;
+////			me->SetColor(1, 1, 1);
+////			svgFile << me->SVGLabelState({20, 20}, "S", 1);
+//			svgFile << "</svg>";
+//			svgFile.close();
+//		}
 	}
 }
 
@@ -139,39 +148,62 @@ int frameCnt = 0;
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	me->OpenGLDraw();
+	Graphics::Display &display = getCurrentContext()->display;
 	
-	if (start.x != -1 && start.y != -1)
+	if (startTransit)
+	{
+		if (!transit->DoneComputing())
+		{
+			float p = transit->IncrementalCompute();
+			std::string s = std::to_string(100.0*p)+"% done";
+			submitTextToBuffer(s.c_str());
+		}
+	}
+	
+	if (mapChanged == true)
+	{
+		display.StartBackground();
+		me->Draw(display);
+		display.EndBackground();
+		mapChanged = false;
+	}
+
+	if (startTransit)
+		transit->Draw(display);
+	//	me->OpenGLDraw();
+	
+	if (start.x != static_cast<uint16_t>(-1) && start.y != static_cast<uint16_t>(-1))
 	{
 		me->SetColor(0.0, 1.0, 0.0);
-		me->OpenGLDraw(start);
+		me->Draw(display, start);
+//		transit->Draw(display, start, goal);
 	}
 
 	me->SetColor(1.0, 0.0, 0.0);
 	for (const xyLoc &l : hd)
-		me->OpenGLDraw(l);
+		me->Draw(display, l);
 
 	me->SetColor(0.0, 0.0, 1.0);
 	for (const xyLoc &l : farStates)
-		me->OpenGLDraw(l);
+		me->Draw(display, l);
 	
-	if (running)
-	{
-		astar.OpenGLDraw();
-
-		if (path.size() == 0)
-			astar.DoSingleSearchStep(path);
-		else {
-			me->SetColor(0, 1, 0);
-			glLineWidth(10);
-			for (int x = 1; x < path.size(); x++)
-			{
-				me->GLDrawLine(path[x-1], path[x]);
-			}
-			glLineWidth(1);
-		}
-
-	}
+//	if (running)
+//	{
+//		astar.OpenGLDraw();
+//
+//		if (path.size() == 0)
+//			astar.DoSingleSearchStep(path);
+//		else {
+//			me->SetColor(0, 1, 0);
+//			glLineWidth(10);
+//			for (int x = 1; x < path.size(); x++)
+//			{
+//				me->GLDrawLine(path[x-1], path[x]);
+//			}
+//			glLineWidth(1);
+//		}
+//
+//	}
 
 //	if (recording && viewport == GetNumPorts(windowID)-1)
 //	{
@@ -207,6 +239,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	{
 		case '{':
 		{
+			startTransit = true;
+			start = goal = xyLoc();
+			hd.clear();
+			farStates.clear();
 			break;
 		}
 		case ']':
@@ -235,6 +271,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '|':
 		{
+			delete transit;
+			transit = new Transit(me->GetMap(), 5, 10, 30, false);
+			startTransit = false;
 		}
 			break;
 		case 'w':
@@ -322,12 +361,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 				start.x = x;
 				start.y = y;
 				goal = start;
-				printf("Hit (%d, %d)\n", x, y);
+//				printf("Hit (%d, %d)\n", x, y);
 				RedoHDDisplay();
-//				if (m == kAddDH)
-//					AddDH();
-//				if (m == kShowHeuristicDiff)
-//					ShowDiff();
 			}
 			return true;
 		}
@@ -339,6 +374,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			{
 				goal.x = x;
 				goal.y = y;
+				start = goal;
+				RedoHDDisplay();
 			}
 			break;
 		}
@@ -350,7 +387,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			{
 				goal.x = x;
 				goal.y = y;
-				printf("UnHit (%d, %d)\n", x, y);
+//				printf("UnHit (%d, %d)\n", x, y);
 			}
 
 			if (m == kFindPath)
@@ -411,12 +448,12 @@ void DoHighwayDimension(xyLoc s)
 				// these are fine, since they require longer paths to reach!
 				if (search.GetStateLocation(t) == kOpenList)
 				{
-					std::cout << "Error: " << t << " found on open!\n";
+					//std::cout << "Error: " << t << " found on open!\n";
 					continue;
 				}
 				else if (search.GetStateLocation(t) == kNotFound)
 				{
-					std::cout << "Error: " << t << " not found!\n";
+					//std::cout << "Error: " << t << " not found!\n";
 					continue;
 				}
 				search2.GetPath(me, s, t, v);
@@ -482,16 +519,17 @@ void DoHighwayDimension1(xyLoc s)
 				// these are fine, since they require longer paths to reach!
 				if (search.GetStateLocation(t) == kOpenList)
 				{
-					std::cout << "Error: " << t << " found on open!\n";
+					//std::cout << "Error: " << t << " found on open!\n";
 					continue;
 				}
 				else if (search.GetStateLocation(t) == kNotFound)
 				{
-					std::cout << "Error: " << t << " not found!\n";
+					//std::cout << "Error: " << t << " not found!\n";
 					continue;
 				}
 				
 				search.ExtractPathToStart(t, v);
+				std::reverse(v.begin(), v.end());
 				for (const xyLoc &l : v)
 				{
 					if (l.y < s.y-radius || l.y > s.y+radius)
@@ -499,8 +537,12 @@ void DoHighwayDimension1(xyLoc s)
 					if ((l.x < s.x-radius) || (l.x > s.x+radius))
 						continue;
 					
+					// only need the first state on the path
 					if (l.x == s.x-radius || l.x == s.x+radius || l.y == s.y-radius || l.y == s.y+radius)
+					{
 						hd.push_back(l);
+						break;
+					}
 				}
 			}
 		}
@@ -515,11 +557,11 @@ void DoHighwayDimension1(xyLoc s)
 void DoHighwayDimension2(CanonicalGrid::xyLoc s)
 {
 	// draw basic map with grid and start state
-	std::fstream svgFile;
-	svgFile.open("/Users/nathanst/Desktop/transit.svg", std::fstream::out | std::fstream::trunc);
-	svgFile << me->SVGHeader();
-	svgFile << me->SVGDraw();
-	svgFile << me->SVGDraw(xyLoc(s.x, s.y));
+//	std::fstream svgFile;
+//	svgFile.open("/Users/nathanst/Desktop/transit.svg", std::fstream::out | std::fstream::trunc);
+//	svgFile << me->SVGHeader();
+//	svgFile << me->SVGDraw();
+//	svgFile << me->SVGDraw(xyLoc(s.x, s.y));
 	
 	
 	
@@ -543,6 +585,8 @@ void DoHighwayDimension2(CanonicalGrid::xyLoc s)
 			break;
 		if (search.DoSingleSearchStep(v))
 			break;
+		if (search.GetNumOpenItems() == 0)
+			break;
 	}
 	for (int y = 0; y < m->GetMapHeight(); y++)
 	{
@@ -565,16 +609,16 @@ void DoHighwayDimension2(CanonicalGrid::xyLoc s)
 				// these are fine, since they require longer paths to reach!
 				if (search.GetStateLocation(t) == kOpenList)
 				{
-					std::cout << "Error: " << t << " found on open!\n";
+					//std::cout << "Error: " << t << " found on open!\n";
 					continue;
 				}
 				else if (search.GetStateLocation(t) == kNotFound)
 				{
-					std::cout << "Error: " << t << " not found!\n";
+					//std::cout << "Error: " << t << " not found!\n";
 					continue;
 				}
 				me->SetColor(0, 0, 1);
-				svgFile << me->SVGDraw(xyLoc(x, y));
+//				svgFile << me->SVGDraw(xyLoc(x, y));
 				search.ExtractPathToStart(t, v);
 				for (const CanonicalGrid::xyLoc &l : v)
 				{
@@ -591,28 +635,28 @@ void DoHighwayDimension2(CanonicalGrid::xyLoc s)
 	}
 	
 	
-	me->SetColor(0.5, 0.5, 0.5);
-	for (int y = 0; y < m->GetMapHeight(); y++)
-	{
-		for (int x = 0; x < m->GetMapWidth(); x++)
-		{
-			if (y < s.y-radius || y > s.y+radius)
-				continue;
-			if ((x < s.x-radius) || (x > s.x+radius))
-				continue;
-			
-			if (m->GetTerrainType(x, y) == kGround &&
-				((x == s.x-radius) ||
-				 (x == s.x+radius) ||
-				 (y == s.y-radius) ||
-				 (y == s.y+radius)))
-			{
-				svgFile << me->SVGDraw(xyLoc(x, y));
-			}
-		}
-	}
-	svgFile << "</svg>";
-	svgFile.close();
+//	me->SetColor(0.5, 0.5, 0.5);
+//	for (int y = 0; y < m->GetMapHeight(); y++)
+//	{
+//		for (int x = 0; x < m->GetMapWidth(); x++)
+//		{
+//			if (y < s.y-radius || y > s.y+radius)
+//				continue;
+//			if ((x < s.x-radius) || (x > s.x+radius))
+//				continue;
+//
+//			if (m->GetTerrainType(x, y) == kGround &&
+//				((x == s.x-radius) ||
+//				 (x == s.x+radius) ||
+//				 (y == s.y-radius) ||
+//				 (y == s.y+radius)))
+//			{
+//				svgFile << me->SVGDraw(xyLoc(x, y));
+//			}
+//		}
+//	}
+//	svgFile << "</svg>";
+//	svgFile.close();
 
 }
 
@@ -632,5 +676,25 @@ void RedoHDDisplay()
 	else {
 		submitTextToBuffer("Showing Regular (Single dijkstra search)");
 		DoHighwayDimension1(start);
+	}
+}
+
+void LoadMap(Map *m)
+{
+	m->Scale(65, 81);
+	const char map[] = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT.TTTTT.TTTTTTT.........TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT........TTTTTT..........TTTTTTTTTTTTTTTTTTTTTTTT....TTTTTTTTTTTTT........TTTTTTT.........TTTTTTTTTTTTTTTTTTTTTTTT...TTTTTTTTTTTTT.........TTTTTTT..........TTTTTTTTTTTTTTTTTTTTT..........TTTTTTTT........TTTTTTTT..........TTTTTTTTTTTTTTTTTTTTT..........TTTTTTT.........TTTTTTTT..........TTTTTTTTTTTTTTTTTTTTT..........TTTTTTT.........TTTTTTT...........TTTTTTT...TTTT...TTTT............TTTTT.........TTTTTTTTT.........TTTTTTT....TTT...TTT.............TTTTT.........TTTTTTTTT..........TTTT............................TTTTTT............TTTTT..........................................TTTTTT............TTTT...........................................TTTTTT............TTTT..........................................TTTTTT.............TTTT...........TTTTT....TTT.....TTT....TTTTTTTTTTTTTTT...........TTTT.........TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT.TTTT.....TTTTTT........TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT.TTTT....TTTTTTT........TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT.TTTT....TTTTT...........TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT.TTTT....................TTTTTTT....TTTTTTTTTTT........TTTTTTTTTT.........................TTTTTTT....TTTTTTTTTTT.....TTTTTTTTTTTTT.........................TTTTT......TTTTTTTTTTT.....TTTTTTTTTTTT..........TTTTTT..........TTTTT......TTTTTTTTTTT.....TTTTTTTTTTTT..........TTTTTT..........TTTTT......TTTTTTTTTTT.....TTTTTTTTTTTT.TTTTTTTTT@TTTTT..........TTTTTT....TTTTTTTTTTTT.....TTTTTTTTTTT..TTTTTTTTT@TTTTT..........TTTTTT....TTTTTTTTTTTT.....TTTTTTTTTTT..TTTTTTTTT@TTTTT...........TTTT.....TTTTTTTTTTTT.....TTTTTTTTTTT..TTTTTTTTT@TTTTT.....................................TTTTTTTTTTT..TTTTTTTTT@TTTTT.....................................TTTTTTTTTTT..TTTTTTTTTTTTTTT...........................................TTTTTTTTTTTTTTTTTTTTTT...........TTTT............................TTTTTTTTTTTTTTTTTTTTTT...........TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT...........TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@T............TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@T............TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@T.................TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT@@@@@@@@@@@@@@@@@T.................TTTTTTT....TTTTTTT.TTTTTTTTTTT@@@@@@@@@@@@@@@@@T.....................TTT.....TTT.............TT@@@@@@@@@@@@@@@@@TT............................................TT@@@@@@@@@@@@@@@@@TT...........................................TTT@@@@@@@@@@@@@@@@TTT...........................................TTT@@@@@@@@@@@@@@@@TTT...........................................TTT@@@@@@@@@@@@@@@@TTT..........................................TTTT@@@@@@@@@@@@@@@@TTTT..................TTTTTTTTT..............TTTT@@@@@@@@@@@@@@@@TTTT..................TTTTTTTTT..............TTTT@@@@@@@@@@@@@@@@TTTT..TTTT.....TTT..TTTTTTTTTTT...............TTT@@@@@@@@@@@@@@@@TTTTTTTTTTT...TTTTTTTTTTTTTTTTTTTTT...TTTTTTTTTTT@@@@@@@@@@@@@@@@TTTTTTTTTTT...TTTTTTTTTTTTTTTTTTTTT...TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT...TTTTTTTTTTTTTTTTTTTTT...TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT...TTTTTTTTTTTTTTTTTTTTTT..TTTTTTTTTTTTTTTTTTT.TTTTTTT.TTTTTTTTT.....TTTTTTTTT.TTTTTTTTTT......TTT@TTTTTTTTTTTT.TTTTTTT.TTTTTTT..........TTTTTT.TTTTTTTTTT......TTT@TTTTTTTTTTTT..TTTTTT.TTTTTTT..........TTTTTT.TTTTTTTTTT.......TT@TTTTTTTT..TT..TTT.TT...TTT........................TTTTT.........TTTTTTT............................................TTTTT.........TTTTTTT............................................TTTTT........TTTTTTTT............................................TTTTT........TTTTTTTT...........TT.T.............................TTTT.........TTTTTTTTT..TT......TTTT....TT.......................TTTT...........TTTTTTT..TTTTT..TTTTT....TTTT.........TTTTTT.TTT..TTTT..........TTTTTTTT..TTTTT...TTTT....TTTT.........TTTTTT.TTTT.TTTT............TTTTTT..TTT.......TT...TTTT..........TTTTTT.TTTT.TTTT.....TTTTTT.TTTTTT.................TTTTT.....TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT....................TT....TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT..............TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT..............TTTTTTTTTTTTTTTTTTTTTTTTT.......TTTTTTTTTTTTTTTTTTT................TTTT...........................TTTTTTTTTTTTTTTTTT...............................................TTTTTTTTTT.....TTT...............................................TTTTTTTTTT.....TTT.................................................TTTTTTT.....TTTT................TTTT.............................TTTTTTT.....TTTT........TTT....TTTTT.............................TTTTTTT.....TTTT........TTT....TTTTT.............................TTTTTTT.....TTTT........TTTTTT..TTTT.............................TTTTTTT.....TTTT........TTTTTT..TTTTTT...........................TTTTTTT.....TTTT........TTTTTT..TTTTTT.............................TTTTT............TTT..TTTTTT.TTTTTTT.............................TTTTT...........TTTT..TTTTTTTTTTTTTT...TTTTTTTTTTTTTTTTTTT.......TTTTT...........TTTT....TTTTTTTTTTTT...TTTTTTTTTTTTTTTTTTT.....TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT";
+	int which = 0;
+	for (int y = 0; y < m->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < m->GetMapWidth(); x++)
+		{
+			if (map[which] == '.')
+				m->SetTerrainType(x, y, kGround);
+			else if (map[which] == 'T')
+				m->SetTerrainType(x, y, kTrees);
+			else
+				m->SetTerrainType(x, y, kOutOfBounds);
+			which++;
+		}
 	}
 }

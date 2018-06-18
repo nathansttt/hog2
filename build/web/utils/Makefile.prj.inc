@@ -56,6 +56,7 @@ SRC_CPP = \
 	utils/MMapUtil.cpp \
 	utils/NBitArray.cpp \
 	utils/SVGUtil.cpp \
+	utils/Graphics.cpp \
 	utils/RangeCompression.cpp \
 	utils/MR1Permutation.cpp \
 

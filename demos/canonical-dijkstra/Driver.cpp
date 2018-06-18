@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1200, 1200);
+	return 0;
 }
 
 /**

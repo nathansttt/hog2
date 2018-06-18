@@ -32,7 +32,7 @@
 #include "GenericAStar.h"
 #include "Map2DEnvironment.h"
 
-int sectorSize = 11;
+//int sectorSize = 11;
 
 #define DIAG_MOVES
 
@@ -551,6 +551,104 @@ void MinimalSectorAbstraction::OpenGLDraw()
         }
     }
     draw = false;
+}
+
+void MinimalSectorAbstraction::Draw(Graphics::Display &display)
+{
+	static bool draw = false;
+	
+	//  this will draw the sectors for the map
+	GLdouble xx, yy, zz, rr;
+//	glColor4f(0.5, 0.0, 0.0, 0.5);
+	map->GetOpenGLCoord(0, 0, xx, yy, zz, rr);
+	
+	// draw grid lines for sectors
+//	glLineWidth(2);
+//	glBegin(GL_LINES);
+	for (int y = 0; y <= numYSectors; y++)
+	{
+		display.DrawLine({static_cast<float>(xx-rr), static_cast<float>(yy-rr+2*y*rr*sectorSize), static_cast<float>(zz-1*rr)},
+						 {static_cast<float>(xx+2*numXSectors*rr*sectorSize), static_cast<float>(yy-rr+2*y*sectorSize*rr), static_cast<float>(zz-1*rr)},
+						 1, Colors::yellow);
+//		glVertex3f(xx-rr, yy-rr+2*y*rr*sectorSize, zz-1*rr);
+//		glVertex3f(xx+2*numXSectors*rr*sectorSize, yy-rr+2*y*sectorSize*rr, zz-1*rr);
+	}
+	for (int x = 0; x <= numXSectors; x++)
+	{
+		display.DrawLine({static_cast<float>(xx-rr+2*x*rr*sectorSize), static_cast<float>(yy-rr), static_cast<float>(zz-1*rr)},
+						 {static_cast<float>(xx-rr+2*x*rr*sectorSize), static_cast<float>(yy-rr+2*numYSectors*rr*sectorSize), static_cast<float>(zz-1*rr)},
+						 1, Colors::yellow);
+//		glVertex3f(xx-rr+2*x*rr*sectorSize, yy-rr, zz-1*rr);
+//		glVertex3f(xx-rr+2*x*rr*sectorSize, yy-rr+2*numYSectors*rr*sectorSize, zz-1*rr);
+	}
+//	glEnd();
+//	glLineWidth(1);
+	
+	rgbColor abstractionColor = Colors::bluegreen;
+	
+//	if (draw) printf("===BEGIN DRAW\n");
+	// now draw the abstraction itself
+	for (unsigned int x = 0; x < sectors.size(); x++)
+	{
+		for (unsigned int y = 0; y < sectors[x].numRegions; y++)
+		{
+//			if (draw) printf("===DRAW SECTOR %d region %d\n", x, y);
+			
+			unsigned int loc1, loc2;
+			std::vector<tempEdgeData> neighbors;
+			GetNeighbors(x, y, neighbors);
+			
+//			glBegin(GL_LINES);
+			GetXYLocation(x, y, loc1, loc2);
+			map->GetOpenGLCoord((int)loc1, (int)loc2, xx, yy, zz, rr);
+			for (unsigned int z = 0; z < neighbors.size(); z++)
+			{
+				GLdouble xx2, yy2, zz2, rr2;
+				// only draw half of the directions, since edges are represented twice
+				switch (neighbors[z].direction)
+				{
+					case 0:
+//						glVertex3f(xx, yy, zz-5.1*rr);
+						GetXYLocation(x-numXSectors, neighbors[z].to, loc1, loc2);
+						map->GetOpenGLCoord((int)loc1, (int)loc2, xx2, yy2, zz2, rr2);
+//						glVertex3f(xx2, yy2, zz2-5.1*rr2);
+						display.DrawLine({static_cast<float>(xx), static_cast<float>(yy), static_cast<float>(zz-5.1*rr)},
+										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, 2, abstractionColor);
+						break;
+					case 1:
+//						glVertex3f(xx, yy, zz-5.1*rr);
+						GetXYLocation(x+1, neighbors[z].to, loc1, loc2);
+						map->GetOpenGLCoord((int)loc1, (int)loc2, xx2, yy2, zz2, rr2);
+//						glVertex3f(xx2, yy2, zz2-5.1*rr2);
+						display.DrawLine({static_cast<float>(xx), static_cast<float>(yy), static_cast<float>(zz-5.1*rr)},
+										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, 2, abstractionColor);
+						break;
+					case 2:
+					case 3: break;
+					case 4:
+//						glVertex3f(xx, yy, zz-5.1*rr);
+						GetXYLocation(x-numXSectors+1, neighbors[z].to, loc1, loc2);
+						map->GetOpenGLCoord((int)loc1, (int)loc2, xx2, yy2, zz2, rr2);
+//						glVertex3f(xx2, yy2, zz2-5.1*rr2);
+						display.DrawLine({static_cast<float>(xx), static_cast<float>(yy), static_cast<float>(zz-5.1*rr)},
+										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, 2, abstractionColor);
+						break;
+					case 5:
+//						glVertex3f(xx, yy, zz-5.1*rr);
+						GetXYLocation(x+numXSectors+1, neighbors[z].to, loc1, loc2);
+						map->GetOpenGLCoord((int)loc1, (int)loc2, xx2, yy2, zz2, rr2);
+//						glVertex3f(xx2, yy2, zz2-5.1*rr2);
+						display.DrawLine({static_cast<float>(xx), static_cast<float>(yy), static_cast<float>(zz-5.1*rr)},
+										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, 2, abstractionColor);
+						break;
+					default:
+						break; // otherwise we draw all edges twice
+				}
+			}
+//			glEnd();
+		}
+	}
+//	draw = false;
 }
 
 /**

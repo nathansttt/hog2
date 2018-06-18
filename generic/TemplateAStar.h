@@ -6,23 +6,6 @@
  * SearchEnvironment
  * @date 3/22/06, modified 06/13/2007
  *
- * This file is part of HOG2.
- * HOG : http://www.cs.ualberta.ca/~nathanst/hog.html
- * HOG2: http://code.google.com/p/hog2/
- *
- * HOG2 is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * HOG2 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with HOG2; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef TemplateAStar_H
@@ -39,6 +22,7 @@
 
 
 #include <iostream>
+#include "Constraint.h"
 #include "FPUtil.h"
 #include <ext/hash_map>
 #include "Graphics.h"
@@ -70,7 +54,11 @@ struct AStarCompare {
 template <class state, class action, class environment, class openList = AStarOpenClosed<state, AStarCompare<state>> >
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; stopAfterGoal = true; weight=1; reopenNodes = false; theHeuristic = 0; directed = false; }
+	TemplateAStar() {
+		ResetNodeCount(); env = 0; useBPMX = 0; stopAfterGoal = true; weight=1; reopenNodes = false; theHeuristic = 0; directed = false;
+		theConstraint = 0;
+		
+	}
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & );
@@ -87,7 +75,12 @@ public:
 	
 	state CheckNextNode();
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
-	{ uint64_t theID; openClosedList.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
+	{
+		thePath.clear();
+		uint64_t theID;
+		if (openClosedList.Lookup(env->GetStateHash(node), theID) != kNotFound)
+			ExtractPathToStartFromID(theID, thePath);
+	}
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath);
 	const state &GetParent(const state &s);
 	virtual const char *GetName();
@@ -119,7 +112,8 @@ public:
 	void SetDirected(bool d) { directed = d; }
 	
 	void SetHeuristic(Heuristic<state> *h) { theHeuristic = h; }
-	
+	void SetConstraint(Constraint<state> *c) { theConstraint = c; }
+
 	uint64_t GetNodesExpanded() const { return nodesExpanded; }
 	uint64_t GetNodesTouched() const { return nodesTouched; }
 	uint64_t GetNecessaryExpansions() const;
@@ -154,6 +148,7 @@ private:
 	uint64_t uniqueNodesExpanded;
 	environment *radEnv;
 	Heuristic<state> *theHeuristic;
+	Constraint<state> *theConstraint;
 };
 
 /**
@@ -354,6 +349,11 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 	for (int x = 0; x < neighbors.size(); x++)
 	{
 		nodesTouched++;
+
+		if (theConstraint &&
+			theConstraint->ShouldNotGenerate(start, openClosedList.Lookup(nodeid).data, neighbors[x],
+											 openClosedList.Lookup(nodeid).g+edgeCosts[x], goal))
+			continue;
 		//double edgeCost;
 //		std::cout << "Checking neighbor: " << neighbors[x] << "\n";
 

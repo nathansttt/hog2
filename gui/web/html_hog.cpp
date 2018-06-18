@@ -375,9 +375,44 @@ void DrawToCanvas(const Graphics::Display &disp)
 	for (int x = 0; x < disp.lineSegments.size(); x++)
 	{
 		const auto &i = disp.lineSegments[x];
+		int r = i.c.r*255.0;
+		int g = i.c.g*255.0;
+		int b = i.c.b*255.0;
 		outputPoints = i.points;
-		for (auto &j : outputPoints)
+		EM_ASM_({
+			var c=document.getElementById("fg");
+			var ctx=c.getContext("2d");
+			ctx.strokeStyle = "rgb("+$0+", "+$1+", "+$2+")";
+			ctx.beginPath();
+		}, r,g,b);
+		for (int x = 0; x < outputPoints.size(); x++)
+		{
+			auto &j = outputPoints[x];
 			PointToCanvas(j, i.viewport);
+			if (x == 0)
+			{
+				EM_ASM_({
+					var c=document.getElementById("fg");
+					var ctx=c.getContext("2d");
+					ctx.moveTo($0, $1);
+				}, j.x, j.y);
+			}
+			else {
+				//var c=document.getElementById(UTF8ToString($0));
+				EM_ASM_({
+					var c=document.getElementById("fg");
+					var ctx=c.getContext("2d");
+					ctx.lineTo($0, $1);
+				}, j.x, j.y);
+			}
+		}
+		EM_ASM_({
+			var c=document.getElementById("fg");
+			var ctx=c.getContext("2d");
+			ctx.lineWidth=$0;
+			ctx.stroke();
+			ctx.lineWidth=1;
+		}, i.size);
 	}
 }
 

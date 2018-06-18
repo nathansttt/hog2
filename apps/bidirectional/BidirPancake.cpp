@@ -472,6 +472,13 @@ void Solve(Heuristic<PancakePuzzleState<CNT>> *h, const char *name)
 		p.drawMinimumVC = true;
 		p.drawSumOnEdge = true;
 		p.drawShortenedEdges = false;
+		{
+			p.drawProblemInstance = true;
+			std::string s(name);
+			s += "-instance.svg";
+			p.SaveSVG(s.c_str());
+			p.drawProblemInstance = false;
+		}
 
 		p.drawFullGraph = true;
 		p.drawAllG = false;

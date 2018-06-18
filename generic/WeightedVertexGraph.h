@@ -139,7 +139,7 @@ public:
 			while (true)
 			{
 				do {
-					// Remove the next backwars entry
+					// Remove the next backwards entry
 					backwardSum -= bi->second;
 					//				printf("Subtract %d from back\n", bi->second);
 					bi++;
@@ -247,7 +247,7 @@ public:
 	
 	void SaveSVG(const char *filename)
 	{
-		bool eshed = true;
+		bool eshed = false;
 		const int kLRMargin = 150;
 		const int kTopMargin = 75;
 		const int kBottomMargin = 50;
@@ -259,7 +259,8 @@ public:
 		
 		const int kNodeRadius = 25;
 		const int kNodeGap = 75;
-
+		const int epsilon = 0;
+		
 		height = kNodeGap*std::max(m_f.size(), m_b.size())+kBottomMargin;
 		if (eshed) height += kNodeGap;
 		width = height*0.5;
@@ -296,7 +297,7 @@ public:
 					
 					if (drawFullGraph)
 					{
-						if (fless(i->first + j->first, optCost) && j->second != 0)
+						if (fless(i->first + j->first+epsilon, optCost) && j->second != 0)
 						{
 							if (flipBackwardsGCost)
 							{
@@ -309,8 +310,8 @@ public:
 					}
 					else {
 						if (!drewBest &&
-							(fless(i->first + j->first, optCost) &&
-							((tmp) == m_f.end() || fgreatereq((tmp)->first + j->first, optCost))
+							(fless(i->first + j->first+epsilon, optCost) &&
+							((tmp) == m_f.end() || fgreatereq((tmp)->first + j->first + epsilon, optCost))
 							&& (j->second != 0 || drawSumOnEdge)))
 						{
 							drewBest = true;
@@ -332,7 +333,7 @@ public:
 						else {
 							if (drawShortenedEdges)
 							{
-								if (fless(i->first + j->first, optCost))
+								if (fless(i->first + j->first + epsilon, optCost))
 								{
 									double p1x, p1y, p2x, p2y;
 									p1x = kLRMargin;

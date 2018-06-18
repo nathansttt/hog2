@@ -137,7 +137,7 @@ std::ostream& operator<<(std::ostream &out, const recVec &loc);
 class point3d {
 public:
 	point3d() {}
-	point3d(GLfloat a, GLfloat b, GLfloat c) :x(a), y(b), z(c) {}
+	point3d(GLfloat a, GLfloat b, GLfloat c=0) :x(a), y(b), z(c) {}
 	GLfloat x, y, z;
 	
 	point3d operator+(const point3d &v) const

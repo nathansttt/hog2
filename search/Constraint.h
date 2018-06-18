@@ -9,5 +9,11 @@
 #ifndef Constraint_h
 #define Constraint_h
 
+template <class state>
+class Constraint {
+public:
+	virtual bool ShouldNotGenerate(const state &start, const state &parent, const state &current, double gCost, const state &goal) const = 0;
+private:
+};
 
 #endif /* Constraint_h */

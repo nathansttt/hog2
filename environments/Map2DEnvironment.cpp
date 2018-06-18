@@ -509,9 +509,9 @@ double MapEnvironment::GCost(const xyLoc &l1, const xyLoc &l2) const
 	{
 		multiplier = 3.0;
 	}
+	if (l1 == l2) return 0.0;
 	if (l1.x == l2.x) return 1.0*multiplier;
 	if (l1.y == l2.y) return 1.0*multiplier;
-	if (l1 == l2) return 0.0;
 	return DIAGONAL_COST*multiplier;
 //	double h = HCost(l1, l2);
 //	if (fgreater(h, DIAGONAL_COST))
@@ -1026,7 +1026,7 @@ void MapEnvironment::Draw(Graphics::Display &disp) const
 		}
 	
 	// draw lines between different terrain types
-	if (1)
+	if (0)
 	{
 		std::vector<std::pair<point, point>> lines;
 		for (int y = 0; y < map->GetMapHeight(); y++)

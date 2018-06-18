@@ -150,10 +150,14 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-pancake"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-ts"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-stp -1"
+            argument = "-stp 10"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>

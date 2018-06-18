@@ -40,8 +40,11 @@ typedef uint8_t voxelGridAction;
 
 class VoxelGrid : public SearchEnvironment<voxelGridState, voxelGridAction> {
 public:
+	VoxelGrid(int x, int y, int z);
 	VoxelGrid(const char *filename);
 	~VoxelGrid();
+	void Save(const char *filename);
+	void SaveInMinBB(const char *filename);
 	void GetSuccessors(const voxelGridState &nodeID, std::vector<voxelGridState> &neighbors) const;
 	void GetActions(const voxelGridState &nodeID, std::vector<voxelGridAction> &actions) const;
 	void ApplyAction(voxelGridState &s, voxelGridAction a) const;
@@ -61,7 +64,11 @@ public:
 	bool IsBlocked(const voxelGridState &s) const;
 	bool IsBlocked(uint16_t x, uint16_t y, uint16_t z) const
 	{ return IsBlocked({x, y, z}); }
+	void SetBlocked(const voxelGridState &s, bool block);
+	void SetBlocked(uint16_t x, uint16_t y, uint16_t z, bool block)
+	{ SetBlocked({x, y, z}, block); }
 	void GetLimits(int &x, int &y, int &z) const { x = xWidth; y = yWidth; z = zWidth; }
+	bool Legal(const voxelGridState &s);
 	voxelGridState GetRandomState();
 	
 	void OpenGLDraw() const;
@@ -72,13 +79,18 @@ public:
 	void GLDrawLine(const voxelGridState &x, const voxelGridState &y) const;
 	void Draw(Graphics::Display &display);
 
-	bool efficient;
 	void GetGLCoordinate(const voxelGridState &, point3d &) const;
 	void GetGLCornerCoordinate(const voxelGridState &, point3d &) const;
 	void Fill(voxelGridState);
 	void Invert();
 	BitMapPic *GetImage(int face);
+	void SetUseEfficientDraw(bool e)
+	{
+		efficient = e;
+		SetUpDrawBuffers();
+	}
 private:
+	bool efficient;
 	void SetUpDrawBuffers();
 	void EfficientDraw() const;
 

@@ -9,6 +9,8 @@
 #ifndef LexPermutationPDB_h
 #define LexPermutationPDB_h
 
+#include "PermutationPDB.h"
+
 /**
  * This class does the basic permutation calculation with a regular N^2 permutation
  * computation.

@@ -12,6 +12,7 @@
 #include <float.h>
 #include <string>
 #include <unordered_map>
+#include "Graphics.h"
 
 #ifndef MAPOVERLAY_H
 #define MAPOVERLAY_H
@@ -26,6 +27,8 @@ public:
 	double GetOverlayValue(int x, int y);
 	void OpenGLDraw() const;
 	std::string SVGDraw() const;
+	void Draw(Graphics::Display &display) const;
+	
 	void SetTransparentValue(double v) { ignoreVal = v; }
 	rgbColor GetValueColor(double value) const;
 	void SetColorMap(int val) { colorMap = val; }

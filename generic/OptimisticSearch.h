@@ -32,10 +32,10 @@ public:
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & );
 	
+	// uses admissible heuristic (regular A* search)
 	openList f;
+	// uses inadmissible heuristic
 	openList fhat;
-	//AStarOpenClosed<state, AStarCompare<state> > openClosedList;
-	//BucketOpenClosed<state, AStarCompare<state> > openClosedList;
 	state goal, start;
 	
 	bool InitializeSearch(environment *env, const state& from, const state& to, std::vector<state> &thePath);
@@ -78,6 +78,7 @@ public:
 	void LogFinalStats(StatCollection *) {}
 	
 	void OpenGLDraw() const;
+	void Draw(Graphics::Display &d) const;
 	
 	void SetWeight(double w) {weight = w;}
 	void SetOptimalityBound(double w) {bound = w;}
@@ -179,10 +180,6 @@ bool OptimisticSearch<state,action,environment,openList>::InitializeSearch(envir
 		theHeuristic = _env;
 	thePath.resize(0);
 	env = _env;
-	//	closedList.clear();
-	//	openQueue.reset();
-	//	assert(openQueue.size() == 0);
-	//	assert(closedList.size() == 0);
 	fhat.Reset(env->GetMaxHash());
 	f.Reset(env->GetMaxHash());
 	ResetNodeCount();
@@ -239,6 +236,7 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 {
 	if (fhat.OpenSize() == 0)
 	{
+		printf("No path\n");
 		thePath.resize(0); // no path found!
 		//closedList.clear();
 		return true;
@@ -247,6 +245,9 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 	// proven within bound
 	if (bound*(f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h) >= bestSolution)
 	{
+		printf("Best solution %1.2f\n", bestSolution);
+		printf("Best on open %1.2f - bound is %1.2f\n", f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h,
+			   (f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h)*bound);
 		ExtractPathToStart(goal, thePath);
 		// Path is backwards - reverse
 		reverse(thePath.begin(), thePath.end());
@@ -265,45 +266,63 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 //		remove n from openfhat
 //	add n to closed
 	
-	uint64_t nodeid;
-	uint64_t f_id;
+	uint64_t nodeOnFHat;
+	uint64_t nodeOnF;
+	// only reopen states taken from f, not fhat
 	bool reopen = true;
-
+	double oldF = f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h;
+	
 	if (fless(fhat.Lookat(fhat.Peek()).g+fhat.Lookat(fhat.Peek()).h, bestSolution))
 	{
-		nodeid = fhat.Close();
-		
-		dataLocation d = f.Lookup(env->GetStateHash(fhat.Lookup(nodeid).data), f_id);
+		nodeOnFHat = fhat.Close();
+		reopen = false;
+		dataLocation d = f.Lookup(env->GetStateHash(fhat.Lookup(nodeOnFHat).data), nodeOnF);
 		assert(d != kNotFound);
-		f.Close(f_id);
+//		f.Close(nodeOnF);
 	}
 	else {
-		f_id = f.Close();
+		nodeOnF = f.Close();
 		reopen = true;
-		dataLocation d = fhat.Lookup(env->GetStateHash(fhat.Lookup(f_id).data), nodeid);
+		dataLocation d = fhat.Lookup(env->GetStateHash(f.Lookup(nodeOnF).data), nodeOnFHat);
 		assert(d != kNotFound);
-		fhat.Close(nodeid);
+		if (d == kOpenList)
+		{
+			fhat.Close(nodeOnFHat);
+			d = fhat.Lookup(env->GetStateHash(f.Lookup(nodeOnF).data), nodeOnFHat);
+			assert(d == kClosedList);
+		}
 	}
 	
-	if (!fhat.Lookup(nodeid).reopened)
+	if (!fequal(oldF, f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h))
+	{		
+		printf("Best solution %1.2f\n", bestSolution);
+		printf("Best on open %1.2f - lower bound is %1.2f\n", f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h,
+			   (f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h)*bound);
+	}
+	if (!fhat.Lookup(nodeOnFHat).reopened)
 		uniqueNodesExpanded++;
 	nodesExpanded++;
 	
 	//	if n is a goal then
 	//		incumbent ← n
-	if (env->GoalTest(fhat.Lookup(nodeid).data, goal))
+	if (env->GoalTest(fhat.Lookup(nodeOnFHat).data, goal))
 	{
 		// Actually extract the path, since the cost may not actually be the g-cost
-		ExtractPathToStartFromID(nodeid, thePath);
+		ExtractPathToStartFromID(nodeOnFHat, thePath);
 		bestSolution = env->GetPathLength(thePath);
+		thePath.resize(0);
+		printf("Best solution %1.2f\n", bestSolution);
+		printf("Best on open %1.2f - lower bound is %1.2f\n", f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h,
+			   (f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h)*bound);
+
 		return false; // check on next iteration through the loop
 	}
 
 	
-	//	std::cout << "Expanding: " << fhat.Lookup(nodeid).data << " with f:";
-	//	std::cout << fhat.Lookup(nodeid).g+fhat.Lookup(nodeid).h << std::endl;
+	//	std::cout << "Expanding: " << fhat.Lookup(nodeOnFHat).data << " with f:";
+	//	std::cout << fhat.Lookup(nodeid).g+fhat.Lookup(nodeOnFHat).h << std::endl;
 	
-	env->GetSuccessors(fhat.Lookup(nodeid).data, neighbors);
+	env->GetSuccessors(fhat.Lookup(nodeOnFHat).data, neighbors);
 
 	// iterate again updating costs and writing out to memory
 	for (int x = 0; x < neighbors.size(); x++)
@@ -312,8 +331,8 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 		dataLocation d_fhat, d_f;
 
 		d_fhat = fhat.Lookup(env->GetStateHash(neighbors[x]), childID_fhat);
-		d_f = fhat.Lookup(env->GetStateHash(neighbors[x]), childID_f);
-		double edgeCost = env->GCost(fhat.Lookup(nodeid).data, neighbors[x]);
+		d_f = f.Lookup(env->GetStateHash(neighbors[x]), childID_f);
+		double edgeCost = env->GCost(fhat.Lookup(nodeOnFHat).data, neighbors[x]);
 		
 		nodesTouched++;
 		
@@ -328,38 +347,41 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 
 		if (d_f == kOpenList) // update cost if on open in
 		{
-			assert(d_fhat == kOpenList);
+			//assert(d_fhat == kOpenList);
 			
-			if (fless(f.Lookup(f_id).g+edgeCost, f.Lookup(childID_f).g))
+			if (fless(f.Lookup(nodeOnF).g+edgeCost, f.Lookup(childID_f).g))
 			{
 				// update in open
-				f.Lookup(childID_f).parentID = f_id;
-				f.Lookup(childID_f).g = f.Lookup(f_id).g+edgeCost;
+				f.Lookup(childID_f).parentID = nodeOnF;
+				f.Lookup(childID_f).g = f.Lookup(nodeOnF).g+edgeCost;
 				f.Lookup(childID_f).data = neighbors[x];
 				f.KeyChanged(childID_f);
 
 				// update in open_hat
-				fhat.Lookup(childID_fhat).parentID = nodeid;
-				fhat.Lookup(childID_fhat).g = fhat.Lookup(nodeid).g+edgeCost;
+				fhat.Lookup(childID_fhat).parentID = nodeOnFHat;
+				fhat.Lookup(childID_fhat).g = f.Lookup(nodeOnF).g+edgeCost;//fhat.Lookup(nodeOnFHat).g+edgeCost;
 				fhat.Lookup(childID_fhat).data = neighbors[x];
-				fhat.KeyChanged(childID_fhat);
+				if (d_fhat == kOpenList)
+					fhat.KeyChanged(childID_fhat);
+				else if (d_fhat == kClosedList && reopen)
+					fhat.Reopen(childID_fhat);
 			}
 		}
 		else if (d_f == kClosedList)
 		{
 			assert(d_fhat == kClosedList);
 
-			if (fless(f.Lookup(f_id).g+edgeCost, f.Lookup(childID_f).g) && reopen)
+			if (fless(f.Lookup(nodeOnF).g+edgeCost, f.Lookup(childID_f).g) && reopen)
 			{
-				f.Lookup(childID_f).parentID = f_id;
-				f.Lookup(childID_f).g = f.Lookup(f_id).g+edgeCost;
+				f.Lookup(childID_f).parentID = nodeOnF;
+				f.Lookup(childID_f).g = f.Lookup(nodeOnF).g+edgeCost;
 				f.Reopen(childID_f);
 				f.Lookup(childID_f).data = neighbors[x];
 
-				fhat.Lookup(childID_fhat).parentID = nodeid;
-				fhat.Lookup(childID_fhat).g = fhat.Lookup(nodeid).g+edgeCost;
-				fhat.Reopen(childID_fhat);
+				fhat.Lookup(childID_fhat).parentID = nodeOnFHat;
+				fhat.Lookup(childID_fhat).g = fhat.Lookup(nodeOnFHat).g+edgeCost;
 				fhat.Lookup(childID_fhat).data = neighbors[x];
+				fhat.Reopen(childID_fhat);
 			}
 		}
 		else {
@@ -367,15 +389,15 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 			assert(d_f == kNotFound);
 			fhat.AddOpenNode(neighbors[x],
 							 env->GetStateHash(neighbors[x]),
-							 fhat.Lookup(nodeid).g+edgeCost,
+							 fhat.Lookup(nodeOnFHat).g+edgeCost,
 							 weight*theHeuristic->HCost(neighbors[x], goal),
-							 nodeid);
+							 nodeOnFHat);
 
 			f.AddOpenNode(neighbors[x],
 						  env->GetStateHash(neighbors[x]),
-						  f.Lookup(f_id).g+edgeCost,
+						  f.Lookup(nodeOnF).g+edgeCost,
 						  theHeuristic->HCost(neighbors[x], goal),
-						  nodeid);
+						  nodeOnF);
 		}
 	}
 	return false;
@@ -573,5 +595,78 @@ void OptimisticSearch<state, action,environment,openList>::OpenGLDraw() const
 	env->OpenGLDraw(goal);
 }
 
+template <class state, class action, class environment, class openList>
+void OptimisticSearch<state, action,environment,openList>::Draw(Graphics::Display &d) const
+{
+	double transparency = 1.0;
+	if (fhat.size() == 0)
+		return;
+	uint64_t top = -1;
+	double bound = DBL_MAX;
+	
+	//	double minf = 1e9, maxf = 0;
+	if (fhat.OpenSize() > 0)
+	{
+		top = fhat.Peek();
+		const auto &i = f.Lookat(f.Peek());
+		bound = i.g+i.h;
+//		printf("Lowest f on open: %f\n", bound);
+	}
+	for (unsigned int x = 0; x < fhat.size(); x++)
+	{
+		const auto &data = fhat.Lookat(x);
+		if (x == top)
+		{
+			env->SetColor(1.0, 1.0, 0.0, transparency);
+			env->Draw(d, data.data);
+		}
+//		if ((data.where == kClosedList && !fgreater(data.g+data.h/weight, bound)))
+//		{
+//			env->SetColor(0.0, 0.0, 1.0, transparency);
+//			env->Draw(d, data.data);
+//		}
+		if ((data.where == kOpenList) && (data.reopened))
+		{
+			env->SetColor(0.0, 0.5, 0.5, transparency);
+			env->Draw(d, data.data);
+		}
+		else if (data.where == kOpenList)
+		{
+			env->SetColor(0.0, 1.0, 0.0, transparency);
+			env->Draw(d, data.data);
+		}
+		else if ((data.where == kClosedList) && (data.reopened))
+		{
+			env->SetColor(0.5, 0.0, 0.5, transparency);
+			env->Draw(d, data.data);
+		}
+		else if (data.where == kClosedList)
+		{
+			//			if (top != -1)
+			//			{
+			//				env->SetColor((data.g+data.h-minf)/(maxf-minf), 0.0, 0.0, transparency);
+			//			}
+			//			else {
+			if (data.parentID == x)
+				env->SetColor(1.0, 0.5, 0.5, transparency);
+			else
+				env->SetColor(1.0, 0.0, 0.0, transparency);
+			//			}
+			env->Draw(d, data.data);
+		}
+	}
+	for (unsigned int x = 0; x < f.size(); x++)
+	{
+		const auto &data = f.Lookat(x);
+		if (data.where == kClosedList)
+		{
+			env->SetColor(0.0, 0.0, 1.0, transparency);
+			env->Draw(d, data.data);
+		}
+
+	}
+	env->SetColor(1.0, 0.5, 1.0, 0.5);
+	env->Draw(d, goal);
+}
 
 #endif /* OptimisticSearch_h */

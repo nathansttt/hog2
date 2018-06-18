@@ -74,7 +74,7 @@ bool mapChanged = true;
 
 xyLoc start, goal, mark, mark2;
 
-game g = kNotInGame;
+game gameMode = kNotInGame;
 mode m = kDrawObstacles;
 algorithm a = kDijkstra;
 
@@ -196,8 +196,18 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		{
 			fmm.Draw(display);
 			for (int x = 0; x < stepsPerFrame; x++)
+			{
 				if (path.size() == 0)
 					fmm.DoSingleSearchStep(path);
+				else {
+					// TODO: fmm is returning the goal twice in the path
+//					printf("Found path: ");
+//					for (auto s : path)
+//						std::cout << s << " ";
+//					std::cout << "\n";
+					break;
+				}
+			}
 		}
 		else {
 			nbs.Draw(display);
@@ -215,12 +225,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 			if (necessary)
 			{
+				double opt = me->GetPathLength(path);
+				//printf("Measuring opt as %f\n", opt);
 				for (int x = 0; x < AStarForward.GetNumItems(); x++)
 				{
 					const auto &i = AStarForward.GetItem(x);
-					double opt = me->GetPathLength(path);
-					//AStarForward.GetClosedListGCost(goal, opt);
-					if (i.where == kClosedList && i.g+i.h < opt)
+					if (i.where == kClosedList && fless(i.g+i.h, opt))
 					{
 						me->SetColor(0.5, 0.5, 0.5);
 						me->DrawAlternate(display, i.data);
@@ -229,9 +239,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			}
 		}
 		// Win condition for unidirectional search
-		if (g == kUnidirectional && path.size() != 0)
+		if (gameMode == kUnidirectional && path.size() != 0)
 		{
-			g = kNotInGame;
+			gameMode = kNotInGame;
 			// Check to see if successful
 			AStarOpenClosedData<xyLoc> item;
 			double opt = me->GetPathLength(path);
@@ -244,27 +254,27 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				}
 				else if (fequal(item.g+item.h, opt)) {
 					submitTextToBuffer("Sorry; while your state was expanded, it doesn't have f<C*; try again!");
-					g = kUnidirectional;
+					gameMode = kUnidirectional;
 					a = kAStar;
 					m = kMark;
 				}
 			}
 			else { // failed - not expanded
 				submitTextToBuffer("Sorry, your state was not expanded; try another state!");
-				g = kUnidirectional;
+				gameMode = kUnidirectional;
 				a = kAStar;
 				m = kMark;
 			}
 		}
 		// Always lose the second game
-		if (g == kBidirectional && path.size() != 0)
+		if (gameMode == kBidirectional && path.size() != 0)
 		{
 			m = kMark;
 			submitTextToBuffer("Sorry, your state was not expanded; try another!");
 			failedBidirectional = true;
 		}
 		// Win condition for 2 states
-		if (g == kBidirectionalTwo && path.size() != 0)
+		if (gameMode == kBidirectionalTwo && path.size() != 0)
 		{
 			// Win if both states are on optimal path
 			auto m1 = find(path.begin(), path.end(), mark);
@@ -278,7 +288,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			else if (m1 != path.end() && m2 != path.end())
 			{
 				submitTextToBuffer("Fantastic! You chose two states on the optimal path; you win!");
-				g = kNotInGame;
+				gameMode = kNotInGame;
 			}
 		}
 	}
@@ -410,7 +420,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				submitTextToBuffer("Please choose a unique start and goal before getting started");
 				break;
 			}
-			g = kUnidirectional;
+			gameMode = kUnidirectional;
 			a = kAStar;
 			m = kMark;
 			mark = mark2 = xyLoc();
@@ -424,7 +434,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				submitTextToBuffer("Please choose a unique start and goal before getting started");
 				break;
 			}
-			g = kBidirectional;
+			gameMode = kBidirectional;
 			a = kFMM;
 			m = kMark;
 			mark = mark2 = xyLoc();
@@ -444,7 +454,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				break;
 			}
 			submitTextToBuffer("Choose two states and see if the oracle can avoid both!");
-			g = kBidirectionalTwo;
+			gameMode = kBidirectionalTwo;
 			a = kFMM;
 			m = kMark;
 			mark = mark2 = xyLoc();
@@ -625,15 +635,15 @@ void MarkPointHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 		mark.x = x;
 		mark.y = y;
 		mark2 = xyLoc();
-		if (g != kNotInGame && mType == kMouseUp)
+		if (gameMode != kNotInGame && mType == kMouseUp)
 		{
-			if (g == kBidirectionalTwo)
+			if (gameMode == kBidirectionalTwo)
 			{
 				running = false;
 				submitTextToBuffer("Choose a second state!");
 				m = kMark2;
 			}
-			else if (g == kBidirectional) {
+			else if (gameMode == kBidirectional) {
 				submitTextToBuffer("Oracle selected bidirectional algorithm. Running...");
 				GetPathHandler(kMouseUp);
 				m = kFindPath;
@@ -649,7 +659,7 @@ void MarkPointHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 	{
 		mark2.x = x;
 		mark2.y = y;
-		if (g == kBidirectionalTwo && mType == kMouseUp)
+		if (gameMode == kBidirectionalTwo && mType == kMouseUp)
 		{
 			submitTextToBuffer("Running search to see if you are correct...");
 			GetPathHandler(kMouseUp);

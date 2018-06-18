@@ -522,10 +522,15 @@ void JPS::Draw(Graphics::Display &disp) const
 		if (data.round != openClosedList.GetRound())
 			continue;
 
-		env->SetColor(1.0, 1.0, 1.0);
-		env->DrawLine(disp, data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
-		env->SetColor(0.0, 0.0, 0.0);
-		env->DrawLine(disp, data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
+		if (jumpLimit != 0)
+		{
+			env->SetColor(Colors::red);
+			env->DrawLine(disp, data.data.loc, openClosedList.Lookat(data.parentID).data.loc, 4);
+			env->SetColor(Colors::white);
+			env->DrawLine(disp, data.data.loc, openClosedList.Lookat(data.parentID).data.loc, 2);
+		}
+//		env->SetColor(0.0, 0.0, 0.0);
+//		env->DrawLine(disp, data.data.loc, openClosedList.Lookat(data.parentID).data.loc);
 		
 		if (x == top)
 		{

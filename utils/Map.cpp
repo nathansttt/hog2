@@ -1828,14 +1828,21 @@ bool Map::GetOpenGLCoord(int _x, int _y, GLdouble &x, GLdouble &y, GLdouble &z, 
 	if (_y >= height) return false;
 	if ((_x == -1) || (_y == -1))
 		return false;
-	double _scale;
+	double _scale, xOffset, yOffset;
 	if (height > width)
+	{
 		_scale = 2.0/(double)(height);
-	else
+		xOffset = (2.0-GetMapWidth()*_scale)*0.5;
+		yOffset = 0;
+	}
+	else {
 		_scale = 2.0/(double)(width);
+		yOffset = (2.0-GetMapHeight()*_scale)*0.5;
+		xOffset = 0;
+	}
 	double epsilon = _scale/2.0;
-	x = -1+_x*_scale+epsilon;
-	y = -1+_y*_scale+epsilon;
+	x = -1+_x*_scale+epsilon+xOffset;
+	y = -1+_y*_scale+epsilon+yOffset;
 //	x = (2*_x-width)*_scale+epsilon;
 //	y = (2*_y-height)*_scale+epsilon;
 	z = -(double)0.5*(land[_x][_y].tile1.corners[0]+land[_x][_y].tile2.corners[0])*(_scale);//+(double)land[_x][_y].tile1.corners[1]/(2*_scale));
@@ -1892,15 +1899,22 @@ double Map::GetCoordinateScale()
 void Map::GetPointFromCoordinate(point3d loc, int &px, int &py) const
 {
 	double _x, _y;
-	double _scale;
+	double _scale, xOffset, yOffset;
 	if (height > width)
+	{
 		_scale = 2.0/(double)(height);
-	else
+		xOffset = (2.0-GetMapWidth()*_scale)*0.5;
+		yOffset = 0;
+	}
+	else {
 		_scale = 2.0/(double)(width);
+		yOffset = (2.0-GetMapHeight()*_scale)*0.5;
+		xOffset = 0;
+	}
 	double epsilon = _scale/2.0;
 
-	_x = (loc.x-epsilon+1)/_scale;
-	_y = (loc.y-epsilon+1)/_scale;
+	_x = (loc.x-epsilon+1-xOffset)/_scale;
+	_y = (loc.y-epsilon+1-yOffset)/_scale;
 
 //	_x = ((loc.x-epsilon)/_scale+(double)width)/2.0;
 //	_y = ((loc.y-epsilon)/_scale+(double)height)/2.0;

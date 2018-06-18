@@ -19,20 +19,50 @@
 			<key>orderHint</key>
 			<integer>2</integer>
 		</dict>
+		<key>Bounding Boxes.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>13</integer>
+		</dict>
 		<key>DFID.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>3</integer>
+		</dict>
+		<key>DH-place.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>10</integer>
 		</dict>
 		<key>Dijkstra.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>4</integer>
 		</dict>
+		<key>GMX.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
+		</dict>
+		<key>Grid Abstraction.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>15</integer>
+		</dict>
 		<key>IDA*.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>7</integer>
+		</dict>
+		<key>Inconsistency.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>9</integer>
+		</dict>
+		<key>JPS.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>11</integer>
 		</dict>
 		<key>NBS.xcscheme</key>
 		<dict>
@@ -43,6 +73,21 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+		<key>Reach.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>12</integer>
+		</dict>
+		<key>Suboptimal Map.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>16</integer>
+		</dict>
+		<key>Transit.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>14</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
@@ -57,7 +102,37 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>C4BEEB0E2096DAD6005E8FBD</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>C4C835421F2AF5C7004E78C0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4D80D3620A2CB480087E08D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4D80E3F20AC03930087E08D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4D80EBF20AC95F30087E08D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4DFD07120B5337F0072F0CB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4DFD0F720BE6D300072F0CB</key>
 		<dict>
 			<key>primary</key>
 			<true/>
