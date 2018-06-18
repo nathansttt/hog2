@@ -428,7 +428,8 @@ void BuildBenchmarks(const char *map)
 //			astar.GetPath(&v, s, g, path);
 		} while (path.size() == 0 || fequal(v.GetPathLength(path), v.HCost(s, g)));
 		
-		std::cout << s << "\t" << g << "\t" << v.GetPathLength(path) << "\n";
+		std::cout << s << "\t" << g << "\t";
+		printf("%1.8f\n", v.GetPathLength(path));
 	}
 	
 	exit(0);
