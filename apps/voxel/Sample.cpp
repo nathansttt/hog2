@@ -40,13 +40,14 @@
 #include "SVGUtil.h"
 #include <unordered_map>
 #include "NBS.h"
+#include <deque>
 
 recVec velocity;
 std::string map;
 void Maze3D(int d);
 void CustomMaze();
 void BuildBenchmarks(const char *map);
-
+void ExtractComponents(const char *map);
 
 //struct voxelWorld {
 //	uint32_t header;
@@ -88,7 +89,7 @@ int main(int argc, char* argv[])
 void CreateSimulation(int id)
 {
 	vg = new VoxelGrid("/Users/nathanst/hog2/maps/warframe/Complex.3dmap");
-	vg->efficient = true;
+	vg->SetUseEfficientDraw(true);
 }
 
 /**
@@ -114,6 +115,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-benchmark", "-benchmark <map>", "Build benchmark problems for map");
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg", "capture model as svg (filename(s) will come from -map argument)");
 	InstallCommandLineHandler(MyCLHandler, "-bmp", "-bmp", "capture model as bmp (filename(s) will come from -map argument)");
+	InstallCommandLineHandler(MyCLHandler, "-extractComponents", "-extractComponents <map>", "extract connected components in map");
 //
 //	InstallMouseClickHandler(MyClickHandler);
 }
@@ -206,7 +208,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case 'e':
 		{
-			vg->efficient = !vg->efficient;
+			//vg->efficient = !vg->efficient;
 			break;
 		}
 		case 'i':
@@ -271,6 +273,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	if (strcmp(argument[0], "-benchmark") == 0 && maxNumArgs >= 2)
 	{
 		BuildBenchmarks(argument[1]);
+		return 2;
+	}
+	if (strcmp(argument[0], "-extractComponents") == 0 && maxNumArgs >= 2)
+	{
+		ExtractComponents(argument[1]);
 		return 2;
 	}
 	if (strcmp(argument[0], "-svg") == 0 && maxNumArgs >= 1)
@@ -375,7 +382,7 @@ void BuildBenchmarks(const char *map)
 	VoxelGrid v(map);
 	// 1. Get unique locations nearby set voxels
 	int xmax, ymax, zmax;
-	int range = 4;
+	int range = 5;
 	v.GetLimits(xmax, ymax, zmax);
 	
 	for (uint16_t x = 0; x < xmax; x++)
@@ -386,11 +393,11 @@ void BuildBenchmarks(const char *map)
 			{
 				if (v.IsBlocked(x, y, z))
 				{
-					for (uint16_t x1 = x-range; x1 < x+range; x1++)
+					for (uint16_t x1 = x-range; x1 <= x+range; x1++)
 					{
-						for (uint16_t y1 = y-range; y1 < y+range; y1++)
+						for (uint16_t y1 = y-range; y1 <= y+range; y1++)
 						{
-							for (uint16_t z1 = z-range; z1 < z+range; z1++)
+							for (uint16_t z1 = z-range; z1 <= z+range; z1++)
 							{
 								if (!v.IsBlocked(x1, y1, z1))
 									locs[{x1, y1, z1}] = true;
@@ -426,6 +433,79 @@ void BuildBenchmarks(const char *map)
 	
 	exit(0);
 }
+
+void BFS(VoxelGrid &v, const voxelGridState &s, std::unordered_map<voxelGridState, bool> &l)
+{
+	std::deque<voxelGridState> q;
+	q.push_back(s);
+	while (q.size() > 0)
+	{
+		voxelGridState next = q.front();
+		q.pop_front();
+		
+		if (!v.Legal(next) || !v.IsBlocked(next))
+			continue;
+		
+		v.SetBlocked(next, false);
+		l[next] = true;
+		
+		if (v.Legal(voxelGridState(next.x+1, next.y, next.z)))
+			q.push_back(voxelGridState(next.x+1, next.y, next.z));
+		if (v.Legal(voxelGridState(next.x-1, next.y, next.z)))
+			q.push_back(voxelGridState(next.x-1, next.y, next.z));
+
+		if (v.Legal(voxelGridState(next.x, next.y+1, next.z)))
+			q.push_back(voxelGridState(next.x, next.y+1, next.z));
+		if (v.Legal(voxelGridState(next.x, next.y-1, next.z)))
+			q.push_back(voxelGridState(next.x, next.y-1, next.z));
+
+		if (v.Legal(voxelGridState(next.x, next.y, next.z+1)))
+			q.push_back(voxelGridState(next.x, next.y, next.z+1));
+		if (v.Legal(voxelGridState(next.x, next.y, next.z-1)))
+			q.push_back(voxelGridState(next.x, next.y, next.z-1));
+	}
+}
+
+void ExtractComponents(const char *map)
+{
+	std::unordered_map<voxelGridState, bool> locs;
+	VoxelGrid v(map);
+	// 1. Get unique locations nearby set voxels
+	int xmax, ymax, zmax;
+	int range = 4;
+	v.GetLimits(xmax, ymax, zmax);
+
+	int count = 0;
+	
+	for (uint16_t x = 0; x < xmax; x++)
+	{
+		for (uint16_t y = 0; y < ymax; y++)
+		{
+			for (uint16_t z = 0; z < zmax; z++)
+			{
+				if (v.IsBlocked(x, y, z))
+				{
+					BFS(v, voxelGridState(x, y, z), locs);
+					printf("Component %d has %d items\n", count, locs.size());
+					VoxelGrid tmp(xmax, ymax, zmax);
+					for (auto i = locs.begin(); i != locs.end(); i++)
+					{
+						tmp.SetBlocked(i->first, true);
+					}
+					std::string name = map;
+					name.substr(0, name.find_last_of("."));
+					name += "-component"+std::to_string(count);
+					name += ".3dmap";
+					tmp.SaveInMinBB(name.c_str());
+					count++;
+					locs.clear();
+				}
+			}
+		}
+	}
+}
+
+
 
 #include "Map.h"
 #include "MapGenerators.h"
