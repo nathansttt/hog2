@@ -387,6 +387,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 
 void BuildBenchmarks(const char *map)
 {
+	srandom(time(0));
 	std::unordered_map<voxelGridState, bool> locs;
 	VoxelGrid v(map);
 	// 1. Get unique locations nearby set voxels
