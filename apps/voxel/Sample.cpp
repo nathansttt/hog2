@@ -270,6 +270,15 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		map = argument[1];
 		return 2;
 	}
+	if (strcmp(argument[0], "-hcost") == 0 && maxNumArgs >= 7)
+	{
+		VoxelGrid v(100, 100, 100);
+		voxelGridState v1(atoi(argument[1]), atoi(argument[2]), atoi(argument[3]));
+		voxelGridState v2(atoi(argument[4]), atoi(argument[5]), atoi(argument[6]));
+		double c = v.HCost(v1, v2);
+		std::cout << "h(" << v1 << ", " << v2 << ") = " << c << "\n";
+		exit(0);
+	}
 	if (strcmp(argument[0], "-benchmark") == 0 && maxNumArgs >= 2)
 	{
 		BuildBenchmarks(argument[1]);
@@ -429,7 +438,7 @@ void BuildBenchmarks(const char *map)
 		} while (path.size() == 0 || fequal(v.GetPathLength(path), v.HCost(s, g)));
 		
 		std::cout << s << "\t" << g << "\t";
-		printf("%1.8f\n", v.GetPathLength(path));
+		printf("%1.8f\t%1.3f\n", v.GetPathLength(path), v.GetPathLength(path)/v.HCost(s, g));
 	}
 	
 	exit(0);
