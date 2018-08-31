@@ -641,7 +641,8 @@ void GraphEnvironment::Draw(Graphics::Display &disp, const graphState &l) const
 	y = (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate);
 	z = (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate);
 	//rad = 20*(GLdouble)0.4/(g->GetNumNodes());
-	rad = nodeScale*(GLdouble)0.4/(g->GetNumNodes());
+	auto i = g->GetNumNodes();
+	rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
 	Graphics::rect rec;
 	rec.left= x-rad;
 	rec.top = y-rad;
