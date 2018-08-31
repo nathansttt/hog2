@@ -847,6 +847,29 @@ void Fling::GLLabelState(const FlingBoard&b, const char *text) const
 
 }
 
+void Fling::IncrementRank(FlingBoard &b) const
+{
+	IncrementRank(b, 0);
+}
+
+int Fling::IncrementRank(FlingBoard &b, int piece) const
+{
+	int currPieceLocation = b.GetPieceLocation(piece);
+	int newPieceLocation;
+	// piece reached end of board
+	if (currPieceLocation == b.height*b.width-1-piece)
+	{
+		newPieceLocation = IncrementRank(b, piece+1)+1;
+	}
+	else {
+		newPieceLocation = currPieceLocation+1;
+	}
+	b.ClearPiece(currPieceLocation);
+	b.SetPiece(newPieceLocation);
+	b.locs[piece].first = newPieceLocation;
+	return newPieceLocation;
+}
+
 
 int64_t Fling::getMaxSinglePlayerRank(int spots, int numPieces)
 {

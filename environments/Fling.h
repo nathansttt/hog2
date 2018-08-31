@@ -165,7 +165,8 @@ public:
 	virtual uint64_t GetActionHash(FlingMove act) const;
 	
 	bool GetXYFromPoint(const FlingBoard &b, point3d loc, int &x, int &y) const;
-	
+	void IncrementRank(FlingBoard &b) const;
+
 	int64_t getMaxSinglePlayerRank(int spots, int numPieces);
 	int64_t getMaxSinglePlayerRank2(int spots, int numPieces);
 	int64_t getMaxSinglePlayerRank2(int spots, int numPieces, int64_t firstIndex);
@@ -192,6 +193,8 @@ public:
 	virtual void GLLabelState(const FlingBoard&, const char *) const;
 
 private:
+	int IncrementRank(FlingBoard &b, int piece) const;
+
 	bool specificGoalLoc;
 	bool specificGoalPanda;
 	int goalLoc;
