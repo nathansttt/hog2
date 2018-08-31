@@ -27,6 +27,13 @@
 
 //#include "BaseMapOccupancyInterface.h"
 
+enum drawOptions {
+	kNoOptions = 0x0,
+	kEfficientCells = 0x1, // This is expensive because the regions are optimized, but results in far fewer drawing commands
+	kTerrainBorderLines = 0x2, // This is expensive because the lines are optimized, but results in far fewer drawing commands
+	kCellBorderLines = 0x4
+};
+
 struct xyLoc {
 public:
 	xyLoc() { x = -1; y = -1; }
@@ -159,7 +166,7 @@ public:
 	std::string SVGLabelState(const xyLoc &, const char *, double scale, double xoff, double yoff) const;
 	std::string SVGDrawLine(const xyLoc &x, const xyLoc &y, int width=1) const;
 	std::string SVGFrameRect(int left, int top, int right, int bottom, int width = 1);
-
+	
 	void Draw(Graphics::Display &disp) const;
 	void Draw(Graphics::Display &disp, const xyLoc &l) const;
 	void DrawAlternate(Graphics::Display &disp, const xyLoc &l) const;
@@ -169,6 +176,7 @@ public:
 	void DrawLine(Graphics::Display &disp, const xyLoc &x, const xyLoc &y, double width = 1.0) const;
 	void DrawArrow(Graphics::Display &disp, const xyLoc &x, const xyLoc &y, double width = 1.0) const;
 
+	void SetDrawOptions(drawOptions o) {drawParams = o; }
 	
 	//virtual void OpenGLDraw(const xyLoc &, const tDirection &, GLfloat r, GLfloat g, GLfloat b) const;
 	//virtual void OpenGLDraw(const xyLoc &l, GLfloat r, GLfloat g, GLfloat b) const;
@@ -188,12 +196,16 @@ public:
 	//virtual BaseMapOccupancyInterface* GetOccupancyInterface(){std::cout<<"Mapenv\n";return oi;}
 	//virtual xyLoc GetNextState(xyLoc &s, tDirection dir);
 	double GetPathLength(std::vector<xyLoc> &neighbors);
+private:
+	void GetMaxRect(long terrain, int x, int y, int endx, int endy, std::vector<bool> &drawn, Graphics::rect &r) const;
+	void DrawSingleTerrain(long terrain, Graphics::Display &disp, std::vector<bool> &drawn) const;
 protected:
 	GraphHeuristic *h;
 	Map *map;
 	BaseMapOccupancyInterface *oi;
 	double DIAGONAL_COST;
 	bool fourConnected;
+	drawOptions drawParams;
 };
 /*
 class AbsMapEnvironment : public MapEnvironment

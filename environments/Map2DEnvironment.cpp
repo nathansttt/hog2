@@ -17,6 +17,7 @@ using namespace Graphics;
 
 MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 {
+	drawParams = kNoOptions;
 	DIAGONAL_COST = ROOT_TWO;
 	map = _m;
 	if (useOccupancy)
@@ -29,6 +30,7 @@ MapEnvironment::MapEnvironment(Map *_m, bool useOccupancy)
 
 MapEnvironment::MapEnvironment(MapEnvironment *me)
 {
+	drawParams = kNoOptions;
 	map = me->map->Clone();
 	h = 0;
 	if (me->oi)
@@ -942,91 +944,236 @@ std::string MapEnvironment::SVGDrawLine(const xyLoc &p1, const xyLoc &p2, int wi
 //	return s;
 }
 
-
-void MapEnvironment::Draw(Graphics::Display &disp) const
+void MapEnvironment::GetMaxRect(long terrain, int startx, int starty, int endx, int endy, std::vector<bool> &drawn, rect &r) const
 {
-	//rgbColor black = {0.0, 0.0, 0.0};
-	
-//	s += SVGFrameRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
-//					  PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
-//					  PointToSVG(o.r.top, height)-PointToSVG(o.r.bottom, height),
+	while (true)
+	{
+		bool successx = true;
+		bool successy = true;
 
-	disp.FillRect({-1, -1, 1, 1}, Colors::black);
-//	std::vector<point> frame;
-//	frame.push_back({-1, -1});
-//	frame.push_back({-1, 1});
-//	frame.push_back({1, 1});
-//	frame.push_back({1, -1});
-//	frame.push_back({-1, -1});
-//	disp.DrawLineSegments(frame, 1, Colors::black);
-	
-	// draw tiles
-	if (1)
+		if (endy+1 >= map->GetMapHeight() || endx+1 >= map->GetMapWidth())
+			break;
+		for (int x = startx; x < endx+1; x++)
+		{
+			if (map->GetTerrainType(x, endy+1) != terrain)// || drawn[endy*map->GetMapWidth()+x])
+			{
+				successx = false;
+				break;
+			}
+		}
+		for (int y = starty; y < endy+1; y++)
+		{
+			if (map->GetTerrainType(endx+1, y) != terrain)// || drawn[y*map->GetMapWidth()+endx])
+			{
+				successy = false;
+				break;
+			}
+		}
+		if (successx && successy)
+		{
+			if (map->GetTerrainType(endx+1, endy+1) != terrain)// || drawn[y*map->GetMapWidth()+endx])
+				successy = false;
+		}
+		if (successx)
+			endy++;
+		if (successy)
+			endx++;
+		if (!successx && !successy)
+			break;
+	}
+	GLdouble x1, x2, y1, y2, tmp, rad;
+	map->GetOpenGLCoord(startx, starty, x1, y1, tmp, rad);
+	map->GetOpenGLCoord(endx, endy, x2, y2, tmp, rad);
+	r = Graphics::rect(x1-rad, y1-rad, x2+rad, y2+rad);
+	for (int y = starty; y <= endy; y++)
+	{
+		for (int x = startx; x <= endx; x++)
+		{
+			drawn[y*map->GetMapWidth()+x] = true;
+		}
+	}
+}
+
+void MapEnvironment::DrawSingleTerrain(long terrain, Graphics::Display &disp, std::vector<bool> &drawn) const
+{
+	rgbColor groundColor = {0.9, 0.9, 0.9};
+	rgbColor treeColor = {0.0, 0.5, 0.0};
+	rgbColor waterColor = {0.0, 0.0, 1.0};
+	rgbColor swampColor = {0.0, 0.3, 1.0};
+	rgbColor otherColor = Colors::black;
+
 	for (int y = 0; y < map->GetMapHeight(); y++)
 	{
 		for (int x = 0; x < map->GetMapWidth(); x++)
 		{
-			bool draw = true;
-			rect r;
-			GLdouble px, py, t, rad;
-			map->GetOpenGLCoord(x, y, px, py, t, rad);
-			r.left = px-rad;
-			r.top = py-rad;
-			r.right = px+rad;
-			r.bottom = py+rad;
-			
-			if (map->GetTerrainType(x, y) == kGround)
+			if (map->GetTerrainType(x, y) != terrain)
+				continue;
+			rgbColor c;
+			if (!drawn[y*map->GetMapWidth()+x])
 			{
-				rgbColor c = {0.9, 0.9, 0.9};
+				switch (terrain)
+				{
+					case kGround: c = groundColor; break;
+					case kTrees: c = treeColor; break;
+					case kWater: c = waterColor; break;
+					case kSwamp: c = swampColor; break;
+					default: c = otherColor; break;
+				}
+				
+				rect r;
+				GetMaxRect(terrain, x, y, x, y, drawn, r);
 				disp.FillRect(r, c);
 			}
-			else if (map->GetTerrainType(x, y) == kTrees)
+		}
+	}
+}
+
+void MapEnvironment::Draw(Graphics::Display &disp) const
+{
+//	kEfficientCells = 0x1,
+//	kTerrainBorderLines = 0x2,
+//	kCellBorderLines = 0x4
+
+	rgbColor groundColor = {0.9, 0.9, 0.9};
+	rgbColor treeColor = {0.0, 0.5, 0.0};
+	rgbColor waterColor = {0.0, 0.0, 1.0};
+	rgbColor swampColor = {0.0, 0.3, 1.0};
+	rgbColor otherColor = Colors::black;
+	
+	disp.FillRect({-1, -1, 1, 1}, Colors::black);
+
+	// draw tiles
+	if (drawParams&kEfficientCells)
+	{
+		long common;
+		int g = 0, t = 0, w = 0, s = 0, o = 0;
+		// get counts of all terrain to fill background color with most common terrain
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			for (int x = 0; x < map->GetMapWidth(); x++)
 			{
-				rgbColor c = {0.0, 0.5, 0.0};
-				disp.FillRect(r, c);
+				switch (map->GetTerrainType(x, y))
+				{
+					case kGround: g++; break;
+					case kTrees: t++; break;
+					case kWater: w++; break;
+					case kSwamp: s++; break;
+					default: o++; break;
+				}
 			}
-			else if (map->GetTerrainType(x, y) == kWater)
+		}
+		rect r;
+		GLdouble px, py, px1, py1, tmp, rad;
+		map->GetOpenGLCoord(0, 0, px, py, tmp, rad);
+		map->GetOpenGLCoord((int)map->GetMapWidth()-1, (int)map->GetMapHeight()-1, px1, py1, tmp, rad);
+		r.left = px-rad;
+		r.top = py-rad;
+		r.right = px1+rad;
+		r.bottom = py1+rad;
+
+		if (g >= t && g >= w && g >= s && g >= o)
+		{
+			common = kGround;
+			disp.FillRect(r, groundColor);
+		}
+		else if (t >= w && t >= s && t >= o)
+		{
+			common = kTrees;
+			disp.FillRect(r, treeColor);
+		}
+		else if (w >= s && w >= o)
+		{
+			common = kWater;
+			disp.FillRect(r, waterColor);
+		}
+		else if (s >= o)
+		{
+			common = kSwamp;
+			disp.FillRect(r, swampColor);
+		}
+		else {
+			common = kOutOfBounds;
+			disp.FillRect(r, otherColor);
+		}
+		
+		// Draw the rest of the map
+		std::vector<bool> drawn(map->GetMapHeight()*map->GetMapWidth());
+		if (common != kSwamp)
+			DrawSingleTerrain(kSwamp, disp, drawn);
+		if (common != kGround)
+			DrawSingleTerrain(kGround, disp, drawn);
+		if (common != kTrees)
+			DrawSingleTerrain(kTrees, disp, drawn);
+		if (common != kWater)
+			DrawSingleTerrain(kWater, disp, drawn);
+		if (common != kOutOfBounds)
+			DrawSingleTerrain(kOutOfBounds, disp, drawn);
+
+
+		
+	}
+	else {
+		for (int y = 0; y < map->GetMapHeight(); y++)
+		{
+			for (int x = 0; x < map->GetMapWidth(); x++)
 			{
-				rgbColor c = {0.0, 0.0, 1.0};
-				disp.FillRect(r, c);
-			}
-			else if (map->GetTerrainType(x, y) == kSwamp)
-			{
-				rgbColor c = {0.0, 0.3, 1.0};
-				disp.FillRect(r, c);
-			}
-			else {
-//				rgbColor c = {0.0, 0.0, 0.0};
-//				disp.FillRect(r, c);
-				draw = false;
+				rect r;
+				GLdouble px, py, t, rad;
+				map->GetOpenGLCoord(x, y, px, py, t, rad);
+				r.left = px-rad;
+				r.top = py-rad;
+				r.right = px+rad;
+				r.bottom = py+rad;
+				
+				rgbColor c;
+				bool draw = true;
+				
+				switch (map->GetTerrainType(x, y))
+				{
+					case kGround: c = groundColor; break;
+					case kTrees: c = treeColor; break;
+					case kWater: c = waterColor; break;
+					case kSwamp: c = swampColor; break;
+					default: draw=false; break;
+				}
+				if (draw)
+				{
+					disp.FillRect(r, c);
+					if (drawParams&kCellBorderLines)
+					{
+						disp.FrameRect(r, Colors::lightgray, rad/10.0);
+					}
+				}
 			}
 		}
 	}
 	
 	// draw cell boundaries for open terrain
-	if (0)
-		for (int y = 0; y < map->GetMapHeight(); y++)
-		{
-			for (int x = 0; x < map->GetMapWidth(); x++)
-			{
-				// mark cells on map
-				if ((map->GetTerrainType(x, y)>>terrainBits) == (kGround>>terrainBits))
-				{
-					rgbColor c = {0.75, 0.75, 0.75};
-					rect r;
-					GLdouble px, py, t, rad;
-					map->GetOpenGLCoord(x, y, px, py, t, rad);
-					r.left = px-rad;
-					r.top = py-rad;
-					r.right = px+rad;
-					r.bottom = py+rad;
-					disp.FrameRect(r, c, 1);
-				}
-			}
-		}
+//	if (drawParams & kTerrainBorderLines)
+//	{
+//		for (int y = 0; y < map->GetMapHeight(); y++)
+//		{
+//			for (int x = 0; x < map->GetMapWidth(); x++)
+//			{
+//				// mark cells on map
+//				if ((map->GetTerrainType(x, y)>>terrainBits) == (kGround>>terrainBits))
+//				{
+//					rgbColor c = {0.75, 0.75, 0.75};
+//					rect r;
+//					GLdouble px, py, t, rad;
+//					map->GetOpenGLCoord(x, y, px, py, t, rad);
+//					r.left = px-rad;
+//					r.top = py-rad;
+//					r.right = px+rad;
+//					r.bottom = py+rad;
+//					disp.FrameRect(r, c, 1);
+//				}
+//			}
+//		}
+//	}
 	
 	// draw lines between different terrain types
-	if (0)
+	if (drawParams & kTerrainBorderLines)
 	{
 		std::vector<std::pair<point, point>> lines;
 		for (int y = 0; y < map->GetMapHeight(); y++)
