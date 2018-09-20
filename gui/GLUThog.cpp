@@ -799,6 +799,111 @@ void submitTextToBuffer(const char *val)
 	myTextBox->setColor(rc);
 }
 
+void DrawGraphics(Graphics::Display &display, int port)
+{
+	float epsilon = 0.0002;
+	float de = 0.00008;
+	for (auto &i: display.backgroundDrawCommands)
+	{
+		if (i.viewport != port)
+			continue;
+		switch (i.what)
+		{
+			case Graphics::Display::kFillRectangle:
+			{
+				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+				glBegin(GL_QUADS);
+				glVertex3f(i.shape.r.left, i.shape.r.bottom, epsilon);
+				glVertex3f(i.shape.r.left, i.shape.r.top, epsilon);
+				glVertex3f(i.shape.r.right, i.shape.r.top, epsilon);
+				glVertex3f(i.shape.r.right, i.shape.r.bottom, epsilon);
+				glEnd();
+				epsilon -= de;
+				break;
+			}
+			case Graphics::Display::kFrameRectangle:
+			{
+				break;
+			}
+			case Graphics::Display::kFillOval:
+			{
+				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+				DrawSphere((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, epsilon, fabs(i.shape.r.top-i.shape.r.bottom)/2.0);
+				break;
+			}
+			case Graphics::Display::kFrameOval:
+			{
+				
+				break;
+			}
+			case Graphics::Display::kLine:
+			{
+				glLineWidth(i.line.width);
+				glBegin(GL_LINES);
+				glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
+				glVertex3f(i.line.start.x, i.line.start.y, epsilon);
+				glVertex3f(i.line.end.x, i.line.end.y, epsilon);
+				glEnd();
+				epsilon -= de;
+				break;
+			}
+		}
+	}
+	for (auto &i: display.drawCommands)
+	{
+		if (i.viewport != port)
+			continue;
+		switch (i.what)
+		{
+			case Graphics::Display::kFillRectangle:
+			{
+				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+				glBegin(GL_QUADS);
+				glVertex3f(i.shape.r.left, i.shape.r.bottom, epsilon);
+				glVertex3f(i.shape.r.left, i.shape.r.top, epsilon);
+				glVertex3f(i.shape.r.right, i.shape.r.top, epsilon);
+				glVertex3f(i.shape.r.right, i.shape.r.bottom, epsilon);
+				glEnd();
+				epsilon -= de;
+				break;
+			}
+			case Graphics::Display::kFrameRectangle:
+			{
+				break;
+			}
+			case Graphics::Display::kFillOval:
+			{
+				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+				DrawSphere((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, epsilon, fabs(i.shape.r.top-i.shape.r.bottom)/2.0);
+				break;
+			}
+			case Graphics::Display::kFrameOval:
+			{
+				break;
+			}
+			case Graphics::Display::kLine:
+			{
+				glLineWidth(i.line.width);
+				glBegin(GL_LINES);
+				glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
+				glVertex3f(i.line.start.x, i.line.start.y, epsilon);
+				glVertex3f(i.line.end.x, i.line.end.y, epsilon);
+				glEnd();
+				epsilon -= de;
+				break;
+			}
+		}
+	}
+//	std::vector<data> backgroundDrawCommands;
+//	std::vector<textInfo> backgroundText;
+//	std::vector<segments> backgroundLineSegments;
+//
+//	std::vector<data> drawCommands;
+//	std::vector<textInfo> text;
+//	std::vector<segments> lineSegments;
+	// These are static items that don't usually change from frame to frame
+
+}
 
 /**
  * Main OpenGL drawing function.
@@ -807,7 +912,7 @@ void drawGL (pRecContext pContextInfo)
 {
 	if (!pContextInfo)
 	 return;
-
+	pContextInfo->display.StartFrame();
 	// clear our drawable
 	glClear(GL_COLOR_BUFFER_BIT);
 	
@@ -829,7 +934,7 @@ void drawGL (pRecContext pContextInfo)
 			updateModelView(pContextInfo, x);
 			
 			HandleFrame(pContextInfo, x);
-			
+			DrawGraphics(pContextInfo->display, x);
 			if (pContextInfo->currPort == x)
 			{
 				glMatrixMode(GL_PROJECTION); glLoadIdentity();
@@ -851,8 +956,8 @@ void drawGL (pRecContext pContextInfo)
 		myTextBox->stepTime(0.1);
 		myTextBox->draw();
 	}
+	pContextInfo->display.EndFrame();
 	glutSwapBuffers();
-
 }
 
 
