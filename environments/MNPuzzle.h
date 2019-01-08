@@ -56,7 +56,7 @@ public:
  * actions are defined similarly.
  */
 enum slideDir {
-	kLeft, kUp, kDown, kRight
+	kLeft, kUp, kDown, kRight, kNoSlide
 };
 
 template <int width, int height>
@@ -99,6 +99,13 @@ static bool operator!=(const MNPuzzleState<width, height> &l1, const MNPuzzleSta
 	return !(l1 == l2);
 }
 
+enum puzzleWeight {
+	kUnitWeight,
+	kSquared,
+	kSquareRoot,
+	kSquarePlusOneRoot,
+	kUnitPlusFrac
+};
 
 template <int width, int height>
 class MNPuzzle : public PermutationPuzzle::PermutationPuzzleEnvironment<MNPuzzleState<width, height>, slideDir> {
@@ -106,14 +113,15 @@ public:
 	MNPuzzle();
 	MNPuzzle(const std::vector<slideDir> op_order); // used to set action order
 	~MNPuzzle();
-	void SetWeighted(bool w) { weighted = w; }
-	bool GetWeighted() const { return weighted; }
+	void SetWeighted(puzzleWeight w) { weight = w; }
+	puzzleWeight GetWeighted() const { return weight; }
 	void GetSuccessors(const MNPuzzleState<width, height> &stateID, std::vector<MNPuzzleState<width, height>> &neighbors) const;
 	void GetActions(const MNPuzzleState<width, height> &stateID, std::vector<slideDir> &actions) const;
 	slideDir GetAction(const MNPuzzleState<width, height> &s1, const MNPuzzleState<width, height> &s2) const;
+	slideDir GetAction(const MNPuzzleState<width, height> &l1, point3d p);
 	void ApplyAction(MNPuzzleState<width, height> &s, slideDir a) const;
 	bool InvertAction(slideDir &a) const;
-	static unsigned GetParity(MNPuzzleState<width, height> &state);
+	static unsigned GetParity(const MNPuzzleState<width, height> &state);
 
 	OccupancyInterface<MNPuzzleState<width, height>, slideDir> *GetOccupancyInfo() { return 0; }
 	double HCost(const MNPuzzleState<width, height> &state1, const MNPuzzleState<width, height> &state2) const;
@@ -213,7 +221,7 @@ private:
 	std::vector<slideDir> ops_in_order;
 	bool goal_stored; // whether a goal is stored or not
 	bool use_manhattan;
-	bool weighted;
+	puzzleWeight weight;
 	
 	// stores the heuristic value of each tile-position pair indexed by the tile value (0th index is empty)
 	std::vector<std::vector<unsigned> > h_increment;
@@ -234,7 +242,7 @@ private:
 template <int width, int height>
 MNPuzzle<width, height>::MNPuzzle()
 {
-	weighted = false;
+	weight = kUnitWeight;
 	// stores applicable operators at each of the width*height positions
 	Change_Op_Order(Get_Op_Order_From_Hash(15)); // Right, Left, Down, Up is default operator ordering
 	goal_stored = false;
@@ -247,7 +255,7 @@ MNPuzzle<width, height>::MNPuzzle(const std::vector<slideDir> op_order)
 	Change_Op_Order(op_order);
 	goal_stored = false;
 	use_manhattan = true;
-	weighted = false;
+	weight = kUnitWeight;
 }
 
 template <int width, int height>
@@ -676,12 +684,28 @@ double MNPuzzle<width, height>::HCost(const MNPuzzleState<width, height> &state1
 			{
 				if (state1.puzzle[x + y*width] != 0)
 				{
-					if (weighted)
-						man_dist += (abs((int)(xloc[state1.puzzle[x + y*width]] - x))
-									 + abs((int)(yloc[state1.puzzle[x + y*width]] - y)))*state1.puzzle[x + y*width]*state1.puzzle[x + y*width];
-					else
-						man_dist += (abs((int)(xloc[state1.puzzle[x + y*width]] - x))
+					double absDist = (abs((int)(xloc[state1.puzzle[x + y*width]] - x))
 									 + abs((int)(yloc[state1.puzzle[x + y*width]] - y)));
+					double movingTile = state1.puzzle[x + y*width];
+					switch (weight)
+					{
+						case kUnitWeight: man_dist += absDist; break;
+						case kUnitPlusFrac: man_dist += absDist*(1.0+1.0/(1.0+movingTile)); break;
+						case kSquared: man_dist += absDist*(movingTile)*(movingTile); break;
+						case kSquareRoot: man_dist += absDist*sqrt(movingTile); break;
+						case kSquarePlusOneRoot:
+						{
+							double tmp = movingTile;
+							tmp = sqrt(tmp*tmp+1);
+							man_dist += tmp*absDist;
+						}
+					}
+//					if (weighted)
+//						man_dist += (abs((int)(xloc[state1.puzzle[x + y*width]] - x))
+//									 + abs((int)(yloc[state1.puzzle[x + y*width]] - y)))*state1.puzzle[x + y*width]*state1.puzzle[x + y*width];
+//					else
+//						man_dist += (abs((int)(xloc[state1.puzzle[x + y*width]] - x))
+//									 + abs((int)(yloc[state1.puzzle[x + y*width]] - y)));
 				}
 			}
 		}
@@ -743,25 +767,68 @@ double MNPuzzle<width, height>::GCost(const MNPuzzleState<width, height> &a, con
 	// * tile squared
 	// square root of tile
 	// tile itself
-	if (weighted)
-		return a.puzzle[b.blank]*a.puzzle[b.blank];
-//		return costs[a.blank];
+	switch (weight)
+	{
+		case kUnitWeight: return 1;
+		case kUnitPlusFrac: return (1.0+1.0/(1.0+a.puzzle[b.blank]));
+		case kSquared: return a.puzzle[b.blank]*a.puzzle[b.blank];
+		case kSquareRoot: return sqrt(a.puzzle[b.blank]);
+		case kSquarePlusOneRoot: return sqrt(1+a.puzzle[b.blank]*a.puzzle[b.blank]);
+	}
+//	if (weighted)
+//		return a.puzzle[b.blank]*a.puzzle[b.blank];
+////		return costs[a.blank];
 	return 1;
 }
 
 template <int width, int height>
 double MNPuzzle<width, height>::GCost(const MNPuzzleState<width, height> &s, const slideDir &d) const
 {
-	if (!weighted)
-		return 1;
-
-	switch (d)
+	switch (weight)
 	{
-		case kLeft: return s.puzzle[s.blank-1]*s.puzzle[s.blank-1];
-		case kUp: return s.puzzle[s.blank-width]*s.puzzle[s.blank-width];
-		case kDown: return s.puzzle[s.blank+width]*s.puzzle[s.blank+width];
-		case kRight: return s.puzzle[s.blank+1]*s.puzzle[s.blank+1];
+		case kUnitWeight: return 1;
+		case kUnitPlusFrac:
+		{
+			switch (d)
+			{
+				case kLeft: return 1.0+1.0/(1.0+s.puzzle[s.blank-1]);
+				case kUp: return 1.0+1.0/(1.0+s.puzzle[s.blank-width]);
+				case kDown: return 1.0+1.0/(1.0+s.puzzle[s.blank+width]);
+				case kRight: return 1.0+1.0/(1.0+s.puzzle[s.blank+1]);
+			}
+		}
+		case kSquared:
+		{
+			switch (d)
+			{
+				case kLeft: return s.puzzle[s.blank-1]*s.puzzle[s.blank-1];
+				case kUp: return s.puzzle[s.blank-width]*s.puzzle[s.blank-width];
+				case kDown: return s.puzzle[s.blank+width]*s.puzzle[s.blank+width];
+				case kRight: return s.puzzle[s.blank+1]*s.puzzle[s.blank+1];
+			}
+		}
+		case kSquareRoot:
+		{
+			switch (d)
+			{
+				case kLeft: return sqrt(s.puzzle[s.blank-1]);
+				case kUp: return sqrt(s.puzzle[s.blank-width]);
+				case kDown: return sqrt(s.puzzle[s.blank+width]);
+				case kRight: return sqrt(s.puzzle[s.blank+1]);
+			}
+		}
+		case kSquarePlusOneRoot:
+		{
+			switch (d)
+			{
+				case kLeft: return sqrt(1+s.puzzle[s.blank-1]*s.puzzle[s.blank-1]);
+				case kUp: return sqrt(1+s.puzzle[s.blank-width]*s.puzzle[s.blank-width]);
+				case kDown: return sqrt(1+s.puzzle[s.blank+width]*s.puzzle[s.blank+width]);
+				case kRight: return sqrt(1+s.puzzle[s.blank+1]*s.puzzle[s.blank+1]);
+			}
+		}
 	}
+
 	assert(!"Illegal move");
 	return 1;
 }
@@ -843,6 +910,7 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 			{
 				sprintf(txt, "%d", s.puzzle[x+y*width]);
 				display.FillRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::white);
+				display.FrameRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::darkblue, 1);
 				if (s.puzzle[x+y*width] > 0)
 					display.DrawText(txt,
 									 {xOrigin+x*squareSize+squareSize/2.f, yOrigin+y*squareSize+squareSize/2.f},
@@ -851,6 +919,57 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 		}
 	}
 }
+
+template <int width, int height>
+slideDir MNPuzzle<width, height>::GetAction(const MNPuzzleState<width, height> &s, point3d p)
+{
+	int hitx=-1, hity=-1;
+	// Find which location was hit
+	{
+		float squareSize = std::max(width, height)+1;
+		squareSize = 2.0f/squareSize;
+		float xOrigin = (0-((float)width)/2.0f)*squareSize;
+		float yOrigin = (0-((float)height)/2.0f)*squareSize;
+		char txt[10];
+		for (unsigned int y = 0; y < height; y++)
+		{
+			for (unsigned int x = 0; x < width; x++)
+			{
+				if (s.puzzle[x+y*width] != 0)
+				{
+					Graphics::rect r = {xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize};
+					if (Graphics::PointInRect(p, r))
+					{
+						hitx = x;
+						hity = y;
+						break;
+					}
+				}
+			}
+		}
+	}
+	if (hitx == -1 || hity == -1)
+		return kNoSlide;
+
+	int x = hitx, y = hity;
+	if (s.puzzle[x+y*width] == 0)
+		return kNoSlide;
+	std::vector<slideDir> acts;
+	GetActions(s, acts);
+	auto tmp = s;
+	for (auto a : acts)
+	{
+		ApplyAction(tmp, a);
+		// If an action makes the place we clicked to be blank, that is the action we want
+		if (tmp.puzzle[x+y*width] == 0)
+		{
+			return a;
+		}
+		this->UndoAction(tmp, a);
+	}
+	return kNoSlide;
+}
+
 
 template <int width, int height>
 void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleState<width, height> &s1, const MNPuzzleState<width, height> &s2, float v) const
@@ -872,6 +991,7 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 				{
 					sprintf(txt, "%d", s1.puzzle[x+y*width]);
 					display.FillRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::white);
+					display.FrameRect({xOrigin+x*squareSize, yOrigin+y*squareSize, xOrigin+(x+1)*squareSize, yOrigin+(y+1)*squareSize}, Colors::darkblue, 1);
 					if (s1.puzzle[x+y*width] > 0)
 						display.DrawText(txt, {xOrigin+x*squareSize+squareSize/2.f, yOrigin+y*squareSize+squareSize/2.f}, Colors::blue, squareSize/4.0f, Graphics::textAlignCenter);
 				}
@@ -899,6 +1019,7 @@ void MNPuzzle<width, height>::Draw(Graphics::Display &display, const MNPuzzleSta
 				}
 				sprintf(txt, "%d", s1.puzzle[x+y*width]);
 				display.FillRect({p1.x*v+p2.x*(1-v), p1.y*v+p2.y*(1-v), p1.x*v+p2.x*(1-v)+squareSize, p1.y*v+p2.y*(1-v)+squareSize}, Colors::white);
+				display.FrameRect({p1.x*v+p2.x*(1-v), p1.y*v+p2.y*(1-v), p1.x*v+p2.x*(1-v)+squareSize, p1.y*v+p2.y*(1-v)+squareSize}, Colors::darkblue, 1);
 
 				if (s1.puzzle[x+y*width] > 0)
 					display.DrawText(txt, {p1.x*v+p2.x*(1-v)+squareSize/2.f, p1.y*v+p2.y*(1-v)+squareSize/2.f}, Colors::blue, squareSize/4.0f, Graphics::textAlignCenter);
@@ -1123,7 +1244,15 @@ void MNPuzzle<width, height>::GetStateFromHash(MNPuzzleState<width, height> &s, 
 	// parity.
 	s.puzzle[loc1] = countm2;
 	s.puzzle[loc2] = countm2+1;
-	if (GetParity(s) == 1)
+	if (IsGoalStored())
+	{
+		if (GetParity(s) != MNPuzzle<width, height>::GetParity(goal))
+		{
+			s.puzzle[loc1] = countm2+1;
+			s.puzzle[loc2] = countm2;
+		}
+	}
+	else if (GetParity(s) == 1)
 	{
 		s.puzzle[loc1] = countm2+1;
 		s.puzzle[loc2] = countm2;
@@ -1190,7 +1319,7 @@ uint64_t MNPuzzle<width, height>::GetMaxStateHash() const
 //	if q is odd, the invariant is the parity (odd or even) of the number of pairs of pieces in reverse order (the parity of the permutation). For the order of the 15 pieces consider line 2 after line 1, etc., like words on a page.
 //	if q is even, the invariant is the parity of the number of pairs of pieces in reverse order plus the row number of the empty square counting from bottom and starting from 0.
 template <int width, int height>
-unsigned MNPuzzle<width, height>::GetParity(MNPuzzleState<width, height> &state)
+unsigned MNPuzzle<width, height>::GetParity(const MNPuzzleState<width, height> &state)
 {
 	unsigned swaps = 0; // counts number of swaps
 	for (unsigned x = 0; x < width*height; x++)
