@@ -68,7 +68,8 @@ public:
 	void SetBlocked(uint16_t x, uint16_t y, uint16_t z, bool block)
 	{ SetBlocked({x, y, z}, block); }
 	void GetLimits(int &x, int &y, int &z) const { x = xWidth; y = yWidth; z = zWidth; }
-	bool Legal(const voxelGridState &s);
+	bool Legal(const voxelGridState &s) const;
+	bool CanMove(const voxelGridState &s1, const voxelGridState &s2) const;
 	voxelGridState GetRandomState();
 	
 	void OpenGLDraw() const;

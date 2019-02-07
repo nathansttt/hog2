@@ -176,9 +176,21 @@ void VoxelGrid::GetCoordinates(int index, int &x, int &y, int &z) const
 	y = index/zWidth;
 }
 
-bool VoxelGrid::Legal(const voxelGridState &s)
+bool VoxelGrid::Legal(const voxelGridState &s) const
 {
 	return ((s.x < xWidth) && (s.y < yWidth) && (s.z < zWidth));
+}
+
+bool VoxelGrid::CanMove(const voxelGridState &s1, const voxelGridState &s2) const
+{
+	return (IsBlocked(s1) ||
+			IsBlocked(s2) ||
+			IsBlocked({s2.x, s1.y, s1.z}) ||
+			IsBlocked({s1.x, s2.y, s1.z}) ||
+			IsBlocked({s1.x, s1.y, s2.z}) ||
+			IsBlocked({s2.x, s2.y, s1.z}) ||
+			IsBlocked({s2.x, s1.y, s2.z}) ||
+			IsBlocked({s1.x, s2.y, s2.z})) == false;
 }
 
 void VoxelGrid::Fill(voxelGridState s)
@@ -243,13 +255,14 @@ void VoxelGrid::GetSuccessors(const voxelGridState &nodeID, std::vector<voxelGri
 		{
 			for (int z = -1; z <= 1; z++)
 			{
+				// This is simple code, but inefficient, because the CanMove checks repeat a lot of tests
 				if ((x|y|z) == 0)
 					continue;
 				voxelGridState s =
 				{static_cast<uint16_t>(nodeID.x+x),
 					static_cast<uint16_t>(nodeID.y+y),
 					static_cast<uint16_t>(nodeID.z+z)};
-				if (IsBlocked(s) == false)
+				if (CanMove(nodeID, s))
 					neighbors.push_back(s);
 			}
 		}
@@ -273,7 +286,7 @@ void VoxelGrid::GetActions(const voxelGridState &nodeID, std::vector<voxelGridAc
 				{static_cast<uint16_t>(nodeID.x+x),
 					static_cast<uint16_t>(nodeID.y+y),
 					static_cast<uint16_t>(nodeID.z+z)};
-				if (IsBlocked(s) == false)
+				if (CanMove(nodeID, s))
 					actions.push_back(MakeAction(x, y, z));
 			}
 		}
