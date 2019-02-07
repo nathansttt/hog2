@@ -53,6 +53,7 @@ double weight = 1.0;
 Graph *g = 0;
 GraphEnvironment *ge;
 graphState from=-1, to=-1;
+Graphics::point currLoc;
 
 TextOverlay te(35);
 
@@ -154,14 +155,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		if (ge == 0 || g == 0)
 			return;
-		display.FillRect({-1.0, -1.0, 1.0, 1}, Colors::black);
-		ge->SetColor(0.5, 0.5, 1.0);
+		display.FillRect({-1.0, -1.0, 1.0, 1}, Colors::white);
+		ge->SetColor(Colors::black);
 		ge->Draw(display);
 		
 		if (from != -1 && to != -1)
 		{
-			ge->SetColor(1, 0, 0);
-			ge->DrawLine(display, from, to, 4);
+			ge->SetColor(Colors::darkred);
+			display.DrawLine(ge->GetLocation(from), currLoc, 2., Colors::lightgray);
+//			ge->SetColor(1, 0, 0);
+//			ge->DrawLine(display, from, to, 4);
 		}
 		
 		if (running)
@@ -170,6 +173,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 		else {
 			ge->SetColor(0.75, 0.75, 1.0);
+			ge->SetColor(Colors::darkgray);
 			for (int x = 0; x < g->GetNumNodes(); x++)
 				ge->Draw(display, x);
 		}
@@ -179,7 +183,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			ge->SetColor(0, 1, 0);
 			for (int x = 1; x < path.size(); x++)
 			{
-				ge->DrawLine(display, path[x-1], path[x], 10);
+				ge->DrawLine(display, path[x-1], path[x], 4);
 			}
 		}
 	}
@@ -237,6 +241,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				astar.InitializeSearch(ge, astar.start, astar.goal, path);
 				ShowSearchInfo();
 			}
+			else {
+				m = kFindPath; te.AddLine("Current mode: find path"); break;
+			}
 			break;
 		case '2': // A*
 			te.AddLine("Algorithm: A*");
@@ -246,6 +253,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			{
 				astar.InitializeSearch(ge, astar.start, astar.goal, path);
 				ShowSearchInfo();
+			}
+			else {
+				m = kFindPath; te.AddLine("Current mode: find path"); break;
 			}
 			break;
 		case '3': // WA*(2)
@@ -257,6 +267,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				astar.InitializeSearch(ge, astar.start, astar.goal, path);
 				ShowSearchInfo();
 			}
+			else {
+				m = kFindPath; te.AddLine("Current mode: find path"); break;
+			}
 			break;
 		case '4': // WA*(100)
 			te.AddLine("Algorithm: WA*(100)");
@@ -266,6 +279,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			{
 				astar.InitializeSearch(ge, astar.start, astar.goal, path);
 				ShowSearchInfo();
+			}
+			else {
+				m = kFindPath; te.AddLine("Current mode: find path"); break;
 			}
 			break;
 
@@ -313,9 +329,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			else
 				weight = 0.0;
 			astar.SetWeight(weight);
-			astar.InitializeSearch(ge, astar.start, astar.goal, path);
-			ShowSearchInfo();
-			running = true;
+			if (running)
+			{
+				astar.InitializeSearch(ge, astar.start, astar.goal, path);
+				ShowSearchInfo();
+			}
+			else {
+				m = kFindPath; te.AddLine("Current mode: find path"); break;
+			}
+
 			break;
 		case 'r':
 			recording = !recording;
@@ -332,7 +354,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'o':
 		{
-			if (running)
+			if (running && path.size() == 0)
 			{
 				astar.DoSingleSearchStep(path);
 				ShowSearchInfo();
@@ -390,14 +412,7 @@ void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key)
 		g->AddNode(new node("c"));
 		g->AddNode(new node("d"));
 		g->AddNode(new node("e"));
-
-		g->AddEdge(new edge(0, 1, 1));
-		g->AddEdge(new edge(0, 2, 2));
-		g->AddEdge(new edge(1, 3, 3));
-		g->AddEdge(new edge(2, 3, 1));
-		g->AddEdge(new edge(2, 4, 9));
-		g->AddEdge(new edge(3, 4, 5));
-
+		name[0] += 5;
 		
 		g->GetNode(0)->SetLabelF(GraphSearchConstants::kXCoordinate, -0.5);
 		g->GetNode(0)->SetLabelF(GraphSearchConstants::kYCoordinate, -0.65);
@@ -419,6 +434,16 @@ void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key)
 		g->GetNode(4)->SetLabelF(GraphSearchConstants::kYCoordinate, 0.75);
 		g->GetNode(4)->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
 	
+		g->AddEdge(new edge(0, 1, distance(0, 1)));
+		g->AddEdge(new edge(0, 2, distance(0, 2)));
+		g->AddEdge(new edge(1, 3, distance(1, 3)));
+		g->AddEdge(new edge(2, 3, distance(2, 3)));
+		g->AddEdge(new edge(2, 4, distance(2, 4)));
+		g->AddEdge(new edge(3, 4, distance(3, 4)));
+
+		// switch to move nodes
+		MyDisplayHandler(windowID, kNoModifier, 'm');
+
 	}
 }
 #include <iomanip>
@@ -562,6 +587,15 @@ double distsquared(unsigned long node, point3d loc)
 	return (dx-loc.x)*(dx-loc.x) + (dy-loc.y)*(dy-loc.y);
 }
 
+double dist(unsigned long node, point3d loc)
+{
+	double dx = g->GetNode(node)->GetLabelF(GraphSearchConstants::kXCoordinate);
+	double dy = g->GetNode(node)->GetLabelF(GraphSearchConstants::kYCoordinate);
+	
+	return sqrt((dx-loc.x)*(dx-loc.x) + (dy-loc.y)*(dy-loc.y));
+}
+
+
 double distance(unsigned long n1, unsigned long n2)
 {
 	double dx1 = g->GetNode(n1)->GetLabelF(GraphSearchConstants::kXCoordinate);
@@ -624,11 +658,11 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			if (m == kAddEdges || m == kFindPath)
 			{
 				from = to = FindClosestNode(g, loc)->GetNum();
+				currLoc = ge->GetLocation(from);
 			}
 			if (m == kMoveNodes)
 			{
 				from = to = FindClosestNode(g, loc)->GetNum();
-
 				if (loc.x > 1) loc.x = 1;
 				if (loc.x < -1) loc.x = -1;
 				if (loc.y > 1) loc.y = 1;
@@ -636,6 +670,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kXCoordinate, loc.x);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kYCoordinate, loc.y);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+				currLoc = ge->GetLocation(from);
 				edge_iterator i = g->GetNode(from)->getEdgeIter();
 				for (edge *e = g->GetNode(from)->edgeIterNext(i); e; e = g->GetNode(from)->edgeIterNext(i))
 					e->setWeight(distance(e->getFrom(), e->getTo()));
@@ -647,6 +682,14 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			if (m == kAddEdges || m == kFindPath)
 			{
 				to = FindClosestNode(g, loc)->GetNum();
+				currLoc = loc;
+				if (dist(to, loc) < 0.2 && to != from)
+				{
+					currLoc = ge->GetLocation(to);
+				}
+				else {
+					to = from;
+				}
 			}
 			if (m == kMoveNodes)
 			{
@@ -657,6 +700,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kXCoordinate, loc.x);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kYCoordinate, loc.y);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+				currLoc = ge->GetLocation(from);
 				edge_iterator i = g->GetNode(from)->getEdgeIter();
 				for (edge *e = g->GetNode(from)->edgeIterNext(i); e; e = g->GetNode(from)->edgeIterNext(i))
 					e->setWeight(distance(e->getFrom(), e->getTo()));
@@ -669,7 +713,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			if (m == kAddEdges)
 			{
 				to = FindClosestNode(g, loc)->GetNum();
-				if (from != to)
+				if (from != to && dist(to, loc) < 0.2)
 				{
 					edge *e;
 					if ((e = g->FindEdge(from, to)) != 0)
@@ -684,9 +728,10 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 			if (m == kFindPath)
 			{
 				to = FindClosestNode(g, loc)->GetNum();
-				if (from != to)
+				currLoc = ge->GetLocation(to);
+				if (from != to && dist(to, loc) < 0.2)
 				{
-					weight = 1.0;
+					//weight = 1.0;
 					astar.SetWeight(weight);
 					astar.InitializeSearch(ge, from, to, path);
 					ShowSearchInfo();
@@ -704,6 +749,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kXCoordinate, loc.x);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kYCoordinate, loc.y);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+				currLoc = ge->GetLocation(from);
+
 				edge_iterator i = g->GetNode(from)->getEdgeIter();
 				for (edge *e = g->GetNode(from)->edgeIterNext(i); e; e = g->GetNode(from)->edgeIterNext(i))
 					e->setWeight(distance(e->getFrom(), e->getTo()));
@@ -764,12 +811,13 @@ void LoadGraph(const char *file)
 			next->SetLabelF(GraphSearchConstants::kZCoordinate, z);
 			g->AddNode(next);
 		}
+		name[0] += numNodes;
 		for (int e = 0; e < numEdges; e++)
 		{
 			int from, to;
 			float weight;
 			fscanf(f, "%d %d %f", &from, &to, &weight);
-			g->AddEdge(new edge(from, to, weight));
+			g->AddEdge(new edge(from, to, distance(from, to)));
 		}
 		fclose(f);
 	}

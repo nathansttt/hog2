@@ -31,26 +31,32 @@
 #include "TemplateAStar.h"
 #include "OptimisticSearch.h"
 #include "MapGenerators.h"
+#include "AStarEpsilon.h"
+#include "DynamicPotentialSearch.h"
 #include <string>
+#include "Plot2D.h"
 
 enum mode {
-	kFindPathWA1 = 0,
-	kFindPathWA11 = 1,
-	kFindPathWA15 = 2,
-	kFindPathWA30 = 3,
-	kFindPathOptimistic11_15 = 4,
-	kFindPathOptimistic11_3 = 5,
-	kFindPathOptimistic15_3 = 6
+	kFindPathAStar = 0,
+	kFindPathWAStar = 1,
+	kFindPathOptimistic = 2,
+	kFindPathAStar_e = 3,
+	kFindPathDPS = 4
 };
+
+double proveBound = 1.5, exploreBound = 3.0;
 
 MapEnvironment *me = 0;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 OptimisticSearch<xyLoc, tDirection, MapEnvironment> optimistic;
+AStarEpsilon<xyLoc, tDirection, MapEnvironment> astar_e(1.5);
+DynamicPotentialSearch<xyLoc, tDirection, MapEnvironment> dps;
 std::vector<xyLoc> path;
+void GetMap(Map *m);
 
 xyLoc start, goal;
 
-mode m = kFindPathWA15;
+mode m = kFindPathAStar;
 
 int stepsPerFrame = 1;
 bool recording = false;
@@ -59,6 +65,8 @@ bool mapChanged = true;
 
 void StartSearch();
 Map *ReduceMap(Map *inputMap);
+
+Plotting::Plot2D plot;
 
 int main(int argc, char* argv[])
 {
@@ -77,13 +85,12 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Run faster", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Run slower", kAnyModifier, '[');
-	InstallKeyboardHandler(MyDisplayHandler, "A*", "A*", kAnyModifier, '1');
-	InstallKeyboardHandler(MyDisplayHandler, "wA*(1.1)", "wA*(1.1)", kAnyModifier, '2');
-	InstallKeyboardHandler(MyDisplayHandler, "wA*(1.5)", "wA*(1.5)", kAnyModifier, '3');
-	InstallKeyboardHandler(MyDisplayHandler, "wA*(3.0)", "wA*(3.0)", kAnyModifier, '4');
-	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, '5');
-	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, '6');
-	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, '7');
+	InstallKeyboardHandler(MyDisplayHandler, "A*", "A*", kAnyModifier, 'a');
+	InstallKeyboardHandler(MyDisplayHandler, "wA*", "wA*", kAnyModifier, 'w');
+	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, 't');
+	InstallKeyboardHandler(MyDisplayHandler, "A*_e", "A*_e", kAnyModifier, 'e');
+	InstallKeyboardHandler(MyDisplayHandler, "DPS", "DPS", kAnyModifier, 'd');
+	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Set weight", kAnyModifier, '0', '9');
 
 	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -104,22 +111,26 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		//glClearColor(0.99, 0.99, 0.99, 1.0);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
-		SetNumPorts(windowID, 1);
-		
-		Map *map = new Map(150, 150);
-		//MakeRandomMap(map, 40);
-		//MakeMaze(map, 25);
-		BuildRandomRoomMap(map, 10, 60);
-		
-		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
-		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
-		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak303d.map");
-		//Map *map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
-		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/den201d.map");
+//		SetNumPorts(windowID, 1);
+		ReinitViewports(windowID, {-1.0f, -1.f, 0.f, 1.f}, kScaleToSquare);
+		AddViewport(windowID, {0.f, -1.f, 1.f, 1.f}, kScaleToSquare); // kTextView
 
-		Map *m2 = ReduceMap(map);
-		delete map;
-		map = m2;
+		Map *map = new Map(150, 150);
+		GetMap(map);
+//		//MakeRandomMap(map, 40);
+//		//MakeMaze(map, 25);
+//		BuildRandomRoomMap(map, 10, 60);
+//
+//		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0011SR.map");
+//		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+//		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak303d.map");
+//		//Map *map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
+//		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/den201d.map");
+//
+//		Map *m2 = ReduceMap(map);
+//		m2->Save("/Users/nathanst/tmp.map");
+//		delete map;
+//		map = m2;
 
 //		for (int x = 0; x < 300; x++)
 //		for (int y = 0; y < 300; y++)
@@ -140,7 +151,7 @@ int frameCnt = 0;
 
 void StepAlgorithms(int numSteps)
 {
-	if (running && (m == kFindPathOptimistic11_3 || m == kFindPathOptimistic15_3 || m == kFindPathOptimistic11_15))
+	if (running && (m == kFindPathOptimistic))
 	{
 		if (path.size() == 0)
 		{
@@ -149,6 +160,32 @@ void StepAlgorithms(int numSteps)
 			if (path.size() != 0)
 			{
 				std::string s = ": "+std::to_string(optimistic.GetNodesExpanded())+" nodes expanded";
+				appendTextToBuffer(s.c_str());
+			}
+		}
+	}
+	else if (running && m == kFindPathAStar_e)
+	{
+		if (path.size() == 0)
+		{
+			for (int x = 0; x < numSteps && path.size() == 0; x++)
+				astar_e.DoSingleSearchStep(path);
+			if (path.size() != 0)
+			{
+				std::string s = ": "+std::to_string(astar_e.GetNodesExpanded())+" nodes expanded";
+				appendTextToBuffer(s.c_str());
+			}
+		}
+	}
+	else if (running && m == kFindPathDPS)
+	{
+		if (path.size() == 0)
+		{
+			for (int x = 0; x < numSteps && path.size() == 0; x++)
+				dps.DoSingleSearchStep(path);
+			if (path.size() != 0)
+			{
+				std::string s = ": "+std::to_string(dps.GetNodesExpanded())+" nodes expanded";
 				appendTextToBuffer(s.c_str());
 			}
 		}
@@ -168,56 +205,302 @@ void StepAlgorithms(int numSteps)
 	}
 }
 
+void GetPlotPoints()
+{
+	if (running && (m == kFindPathOptimistic ))
+	{
+		plot.Clear();
+		
+		for (int x = 0; x < optimistic.GetNumOpenItems(); x++)
+		{
+			const auto &item = optimistic.GetOpenItem(x);
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::blue};
+			plot.AddPoint(p);
+		}
+		for (int x = 0; x < optimistic.GetNumFocalItems(); x++)
+		{
+			const auto &item = optimistic.GetFocalItem(x);
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::red};
+			plot.AddPoint(p);
+		}
+		plot.NormalizeAxes();
+
+		double target;
+		//		astar.DoSingleSearchStep(path);
+		{
+			double w = optimistic.GetOptimalityBound();
+			double g, h;
+			const auto &s = optimistic.CheckNextOpenNode();
+			optimistic.GetOpenListGCost(s, g);
+			h = me->HCost(s, goal);
+			target = w*(g+h);
+			static Plotting::Line upperBound("");
+			static Plotting::Line lowerBound("");
+			static Plotting::Line projectedBound("");
+			upperBound.Clear();
+			upperBound.SetWidth(1);
+			upperBound.SetColor(Colors::darkgreen);
+			upperBound.AddPoint(0, target);
+			upperBound.AddPoint(plot.GetMaxX(), target);
+			
+			lowerBound.Clear();
+			lowerBound.SetWidth(1);
+			lowerBound.SetColor(Colors::darkgreen);
+			lowerBound.AddPoint(0, g+h);
+			lowerBound.AddPoint(plot.GetMaxX(), g+h);
+
+			projectedBound.Clear();
+			projectedBound.SetWidth(1);
+			projectedBound.SetColor(Colors::darkgreen);
+			projectedBound.AddPoint(h, g);
+			projectedBound.AddPoint(0, g+h);
+
+			plot.AddLine(&lowerBound);
+			plot.AddLine(&upperBound);
+			plot.AddLine(&projectedBound);
+		}
+		
+		if (0)
+		{
+			const auto &s = optimistic.CheckNextFocalNode();
+			double g, h;
+			optimistic.GetOpenListGCost(s, g);
+			h = me->HCost(s, goal);
+			
+			static Plotting::Line line("");
+			line.SetWidth(3.0f/5.0f);
+			line.SetColor(Colors::blue);
+			line.Clear();
+			line.AddPoint(h, 0);
+			line.AddPoint(h, target);
+			// if g == 0 h = target/w
+			plot.AddLine(&line);
+		}
+
+	}
+	else if (running && m == kFindPathAStar_e)
+	{
+		plot.Clear();
+
+		for (int x = 0; x < astar_e.GetNumOpenItems(); x++)
+		{
+			const auto &item = astar_e.GetOpenItem(x);
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::blue};
+			plot.AddPoint(p);
+		}
+		for (int x = 0; x < astar_e.GetNumFocalItems(); x++)
+		{
+			const auto &item = astar_e.GetFocalItem(x);
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::red};
+			plot.AddPoint(p);
+		}
+		plot.NormalizeAxes();
+
+		double target;
+		//		astar.DoSingleSearchStep(path);
+		{
+			double w = astar_e.GetOptimalityBound();
+			double g, h;
+			const auto &s = astar_e.CheckNextOpenNode();
+			astar_e.GetOpenListGCost(s, g);
+			h = me->HCost(s, goal);
+			target = w*(g+h);
+
+			plot.AddPoint({h, g, 3.0/5.0, Colors::purple});
+
+			
+			static Plotting::Line upperBound("");
+			static Plotting::Line lowerBound("");
+			static Plotting::Line projectedLowerBound("");
+			upperBound.Clear();
+			upperBound.SetWidth(1);
+			upperBound.SetColor(Colors::darkgreen);
+			upperBound.AddPoint(0, w*(g+h));
+			upperBound.AddPoint(plot.GetMaxX(), w*(g+h));
+//			printf("Min optimal f: %1.2f, upper bound %1.2f\n", g+h, w*(g+h));
+			
+			lowerBound.Clear();
+			lowerBound.SetWidth(1);
+			lowerBound.SetColor(Colors::darkgreen);
+			lowerBound.AddPoint(0, g+h);
+			lowerBound.AddPoint(plot.GetMaxX(), g+h);
+
+			projectedLowerBound.Clear();
+			projectedLowerBound.SetWidth(1);
+			projectedLowerBound.SetColor(Colors::darkgreen);
+			projectedLowerBound.AddPoint(h, g);
+			projectedLowerBound.AddPoint(0, g+h);
+
+
+			plot.AddLine(&lowerBound);
+			plot.AddLine(&upperBound);
+			plot.AddLine(&projectedLowerBound);
+		}
+		
+		if (1)
+		{
+			const auto &s = astar_e.CheckNextFocalNode();
+			double g, h;
+			astar_e.GetFocalListGCost(s, g);
+			h = me->HCost(s, goal);
+
+			static Plotting::Line projectedUpperBound("");
+			projectedUpperBound.Clear();
+			projectedUpperBound.SetWidth(1);
+			projectedUpperBound.SetColor(Colors::darkgreen);
+			projectedUpperBound.AddPoint(h, g);
+			projectedUpperBound.AddPoint(0, g+h);
+
+			plot.AddLine(&projectedUpperBound);
+		}
+	}
+	else if (running && m == kFindPathDPS)
+	{
+		static Plotting::Line l("");
+		l.Clear();
+		l.SetColor(Colors::darkgreen);
+		l.SetWidth(1);
+		plot.Clear();
+		double w = dps.GetOptimalityBound();
+		double fmin = dps.GetBestFMin();
+		double g, h;
+		double maxh = 0;
+		double pr = 0;
+		dps.ResetIterator();
+		while (dps.GetNext(g, h))
+		{
+			if (h == 0)
+				continue;
+			pr = std::max(pr, (fmin*w-g)/h);
+			maxh = std::max(h, maxh);
+			Plotting::Point p = {h, g, 1.0/5.0, Colors::red};
+			plot.AddPoint(p);
+		}
+//		std::cout << "--> Best priority: " << pr << "\n";
+		// pr = (fmin*w-g)/h
+		// h*pr = fmin*w-g
+		// g = fmin*w + h*pr
+		// h = (fmin*w-g)/pr
+		l.AddPoint(0, fmin*w);
+		l.AddPoint(fmin*w/pr, 0);
+		plot.AddLine(&l);
+		//printf("Bounds: x: [%1.2f, %1.2f] y:[%1.2f, %1.2f]\n", plot.GetMinX(), plot.GetMaxX(), plot.GetMinY(), plot.GetMaxY());
+	}
+	else if (running)
+	{
+		plot.Clear();
+		//		astar.DoSingleSearchStep(path);
+		double w = astar.GetWeight();
+		double g, h;
+		static Plotting::Line line("");
+		line.SetWidth(1);
+		line.Clear();
+		const auto &s = astar.CheckNextNode();
+		astar.GetOpenListGCost(s, g);
+		h = me->HCost(s, goal);
+		double target = g+w*h;
+		// f(g, h) = g+w*h = target
+		// if h == 0, g = target
+		line.AddPoint(0, target);
+		line.AddPoint(h, g);
+		// if g == 0 h = target/w
+		line.AddPoint(target/w, 0);
+		line.SetColor(Colors::blue);
+		plot.AddLine(&line);
+		for (int x = 0; x < astar.GetNumOpenItems(); x++)
+		{
+			const auto &item = astar.GetOpenItem(x);
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::red};
+			plot.AddPoint(p);
+		}
+	}
+
+	plot.NormalizeAxes();
+}
+
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
 	
-	if (mapChanged == true)
+	if (viewport == 1)
 	{
-		display.StartBackground();
-		me->Draw(display);
-		display.EndBackground();
-		mapChanged = false;
+		GetPlotPoints();
+		plot.Draw(display);
 	}
-
-	
-	if (start.x != 0xFFFF && start.y != 0xFFFF && !running)
+	if (viewport == 0)
 	{
-		me->SetColor(Colors::green);
-		me->Draw(display, start);
-		me->SetColor(Colors::red);
-		me->DrawLine(display, start, goal, 10);
-	}
-	
-	StepAlgorithms(stepsPerFrame);
-	
-	if (running && (m == kFindPathOptimistic11_3 || m == kFindPathOptimistic15_3 || m == kFindPathOptimistic11_15))
-	{
-		optimistic.Draw(display);
-
-		if (path.size() != 0)
+		if (mapChanged == true)
 		{
-			me->SetColor(Colors::green);
-			for (int x = 1; x < path.size(); x++)
-			{
-				me->DrawLine(display, path[x-1], path[x], 5);
-			}
+			display.StartBackground();
+			me->Draw(display);
+			display.EndBackground();
+			mapChanged = false;
 		}
-	}
-	else if (running)
-	{
-		astar.Draw(display);
 		
-		if (path.size() != 0)
+		
+		if (start.x != 0xFFFF && start.y != 0xFFFF && !running)
 		{
 			me->SetColor(Colors::green);
-			for (int x = 1; x < path.size(); x++)
+			me->Draw(display, start);
+			me->SetColor(Colors::red);
+			me->DrawLine(display, start, goal, 10);
+		}
+		
+		StepAlgorithms(stepsPerFrame);
+		
+		if (running && (m == kFindPathOptimistic))
+		{
+			optimistic.Draw(display);
+			
+			if (path.size() != 0)
 			{
-				me->DrawLine(display, path[x-1], path[x], 5);
+				me->SetColor(Colors::green);
+				for (int x = 1; x < path.size(); x++)
+				{
+					me->DrawLine(display, path[x-1], path[x], 5);
+				}
+			}
+		}
+		else if (running && (m == kFindPathAStar_e))
+		{
+			astar_e.Draw(display);
+			
+			if (path.size() != 0)
+			{
+				me->SetColor(Colors::green);
+				for (int x = 1; x < path.size(); x++)
+				{
+					me->DrawLine(display, path[x-1], path[x], 5);
+				}
+			}
+		}
+		else if (running && (m == kFindPathDPS))
+		{
+			dps.Draw(display);
+			
+			if (path.size() != 0)
+			{
+				me->SetColor(Colors::green);
+				for (int x = 1; x < path.size(); x++)
+				{
+					me->DrawLine(display, path[x-1], path[x], 5);
+				}
+			}
+		}
+		else if (running)
+		{
+			astar.Draw(display);
+			
+			if (path.size() != 0)
+			{
+				me->SetColor(Colors::green);
+				for (int x = 1; x < path.size(); x++)
+				{
+					me->DrawLine(display, path[x-1], path[x], 5);
+				}
 			}
 		}
 	}
-	
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -248,17 +531,24 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'r':
 			recording = !recording;
 			break;
-		case '1': m = kFindPathWA1; submitTextToBuffer("Searching with A*"); StartSearch(); break;
-		case '2': m = kFindPathWA11; submitTextToBuffer("Searching with wA*(1.1)"); StartSearch(); break;
-		case '3': m = kFindPathWA15; submitTextToBuffer("Searching with wA*(1.5)"); StartSearch(); break;
-		case '4': m = kFindPathWA30; submitTextToBuffer("Searching with wA*(3.0)"); StartSearch(); break;
-		case '5':
-			m = kFindPathOptimistic11_15;
-			submitTextToBuffer("Searching with Optimistic(1.1, 1.5)");
-			StartSearch();
-			break;
-		case '6': m = kFindPathOptimistic11_3; submitTextToBuffer("Searching with Optimistic(1.1, 3.0)"); StartSearch(); break;
-		case '7': m = kFindPathOptimistic15_3; submitTextToBuffer("Searching with Optimistic(1.5, 3.0)"); StartSearch(); break;
+		case 'a': m = kFindPathAStar; StartSearch(); break;
+		case 'w': m = kFindPathWAStar; StartSearch(); break;
+		case 't': m = kFindPathOptimistic; StartSearch(); break;
+		case 'e': m = kFindPathAStar_e; StartSearch(); break;
+		case 'd': m = kFindPathDPS; StartSearch(); break;
+		case '1': proveBound = 1.5; StartSearch(); break;
+		case '2': proveBound = 2; StartSearch(); break;
+		case '3': proveBound = 3; StartSearch(); break;
+		case '4': proveBound = 4; StartSearch(); break;
+		case '5': proveBound = 5; StartSearch(); break;
+
+		case '6': exploreBound = 2; StartSearch(); break;
+		case '7': exploreBound = 4; StartSearch(); break;
+		case '8': exploreBound = 8; StartSearch(); break;
+		case '9': exploreBound = 16; StartSearch(); break;
+		case '0': exploreBound = 32; StartSearch(); break;
+
+			
 		case 'p':
 			stepsPerFrame = 0;
 			break;
@@ -343,49 +633,46 @@ void StartSearch()
 {
 	if (start == goal)
 		return;
-	if (m == kFindPathOptimistic11_15)
+	if (m == kFindPathOptimistic)
 	{
-		optimistic.SetWeight(1.5);
-		optimistic.SetOptimalityBound(1.1);
+		submitTextToBuffer("Searching with Optimistic");
+		std::string tmp = "("+std::to_string(proveBound)+", "+std::to_string(exploreBound)+")";
+		appendTextToBuffer(tmp.c_str());
+		optimistic.SetWeight(exploreBound);
+		optimistic.SetOptimalityBound(proveBound);
 		optimistic.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
-	else if (m == kFindPathOptimistic11_3)
+	else if (m == kFindPathAStar)
 	{
-		optimistic.SetWeight(3.0);
-		optimistic.SetOptimalityBound(1.1);
-		optimistic.InitializeSearch(me, start, goal, path);
-		running = true;
-	}
-	else if (m == kFindPathOptimistic15_3)
-	{
-		optimistic.SetWeight(3);
-		optimistic.SetOptimalityBound(1.5);
-		optimistic.InitializeSearch(me, start, goal, path);
-		running = true;
-	}
-	else if (m == kFindPathWA1)
-	{
-		astar.SetWeight(1);
+		submitTextToBuffer("Searching with A*");
+		astar.SetWeight(1.0);
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
-	else if (m == kFindPathWA11)
+	else if (m == kFindPathWAStar)
 	{
-		astar.SetWeight(1.1);
+		submitTextToBuffer("Searching with wA*");
+		std::string tmp = "("+std::to_string(proveBound)+")";
+		appendTextToBuffer(tmp.c_str());
+		astar.SetWeight(proveBound);
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
-	else if (m == kFindPathWA15)
+	else if (m == kFindPathAStar_e)
 	{
-		astar.SetWeight(1.5);
-		astar.InitializeSearch(me, start, goal, path);
+		submitTextToBuffer("Searching with A*_e");
+		std::string tmp = "("+std::to_string(proveBound)+")";
+		astar_e.SetOptimalityBound(proveBound);
+		astar_e.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
-	else if (m == kFindPathWA30)
+	else if (m == kFindPathDPS)
 	{
-		astar.SetWeight(3.0);
-		astar.InitializeSearch(me, start, goal, path);
+		submitTextToBuffer("Searching with DPS");
+		std::string tmp = "("+std::to_string(proveBound)+")";
+		dps.SetOptimalityBound(proveBound);
+		dps.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
 }
@@ -497,4 +784,26 @@ int LabelConnectedComponents(Graph *g)
 	printf("Keeping group %d\n", best);
 	return best;
 	//	kMapX;
+}
+
+
+void GetMap(Map *m)
+{
+	m->Scale(150, 150);
+	const char map[] = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@.@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@.@@@@@@@@@@.@@@@@@@@@@.@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@TTTTTTTTT@.........@.........@.........@.........@...................@.........@...................@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.............................@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@...................@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@...................@.........@.........@.........@.........@...................@...................@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@@@@@@@@@T@@@@@@@@@.@@.@@@@@@@@@@@@@.@@@@.@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@.@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@.@@@@@@.@@@@@@@TTTTTTTTT@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@...................@.........@.........@.........TTTTTTTTTT@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@...................@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@TTTTTTTTT@...................@.........@.........@.........@.........@...................@TTTTTTTTT@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@...................@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@.@@@@@@.@@@@@.@@@@@@@@@.........@.........@.........@.........@.........@.........@TTTTTTTTTTTTTTTTTTT@...................@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.............................@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@...................@.........@.........@.........@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@.@@@@@@@@@@@@@@.@@@@@@@@@@@@@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@...................@.........@.........@.........@.........@TTTTTTTTT@.........@...................@.........@.........@.........@TTTTTTTTTTTTTTTTTTT@.........@.........@...................@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@...................@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@...................@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@...................@.........@.........@TTTTTTTTT@@@@@@@@@@@@.@@@@@@@@.@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@.@@@@@@@@@@@@@@@.@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@T@@@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@...................@.........@TTTTTTTTT@.........@.........@.............................@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT..........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@...................@TTTTTTTTT@.........@...................@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@@@@@@@@@@@@@@@@.@@@@@@@@@@.@@@@@@@T@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@.@@@@@@@@@@@@@@@T@@@@@@@@@T@@@@@@@.........@.........@.........@TTTTTTTTTTTTTTTTTTT@.........@.........@.........@...................@.........@.........@.........@TTTTTTTTT@TTTTTTTTT..........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@...................@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@...................@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@...................@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@...................@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@@@@.@@@@@@@@@@@@@@.@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@.@@@@@@.@@@@@@@@@@@.@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@T@@@@@@@@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@...................@TTTTTTTTT..........@...................@.........@.........@.........@...................@.........@.........@...................@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@...................@.........@.........@.........@...................@.........@.........@.........@.........@TTTTTTTTT@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@@.@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@.@@@@.@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@.@@@@@@@@@@@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@...................@.........@.........@...................@...................@.........@.........@.........@.........@...................@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@@.@@@@@@@@@@@@@@@.@@@@.@@@@@@@@@@@@@.@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@.@@@@@@@@@@@@@@.@@@@@@.@@@@@.@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.......................................@.........@.........@.........@.........@...................@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@.@@@@@@@@@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@...................@.........@.........@.........@.......................................@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@...................@@@.@@@@@@@@@@@@@@@.@@@@@@.@@@@@@@@.@@@@@@@@@@@@@@@@@@@.@@@@@@.@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@.@@@@@.@@@@@@@@@@@@@.@@@@@@@@.@@@@@@@@@@@@@@.@@@@@@@@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@...................@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@@@@@@@@@@@@@@@@.@@@@@@@@@@.@@@.@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TTTTTTTTT@.........@.........@.........@.........@.........@.........@...................@.........@...................@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@...................@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@...................@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@...................@.........@...................@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@...................@.........@...................@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@T@@@@@@@@@T@@@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT..........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@...................@.........@.........@.........@...................@TTTTTTTTT@TTTTTTTTT@TTTTTTTTTTTTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@...................@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@...................@.........@.........@...................@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTTTTTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@...................@...................@.........@.........@...................@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@@@@@.@@@@@@@@@@.@@@@@@@@.@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@.@@@@@@.@@@@@@@@@@.@@@@@@.@@@@@@@@@@@@@.@@@@@@.@@@@@@@T@@@@@@@@@@@@@@T@@@@@@@@@@T@@@@@@@T@@@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@...................@.........@.........@.........@.........@.........@.........@TTTTTTTTTTTTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@...................@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@...................@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@...................@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@@@@@@@@@.@@@@@@@@@@@.@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@T@@@@@@@@@@@@@@@@@@@@@@T@@@@T@@@@@@@.........@.........@.........@.........@.........@...................@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@...................@.........@.........@.........@TTTTTTTTT@TTTTTTTTTTTTTTTTTTT@TTTTTTTTT@TTTTTTTTTTTTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTTTTTTTTTTTT@TTTTTTTTT@TTTTTTTTT@...................@.........@...................@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@.........@.........@.........@.........@.........@.........@.........@.........@.........@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT..........@.........@.........@.........@.........@.........@.........@...................@TTTTTTTTT@TTTTTTTTT@TTTTTTTTT@TTTTTTTTTTTTTTTTTTT@TTTTTTTTT";
+	int which = 0;
+	for (int y = 0; y < m->GetMapHeight(); y++)
+	{
+		for (int x = 0; x < m->GetMapWidth(); x++)
+		{
+			if (map[which] == '.')
+				m->SetTerrainType(x, y, kGround);
+			else if (map[which] == 'S')
+				m->SetTerrainType(x, y, kSwamp);
+			else
+				m->SetTerrainType(x, y, kOutOfBounds);
+			which++;
+		}
+	}
+	mapChanged = true;
 }

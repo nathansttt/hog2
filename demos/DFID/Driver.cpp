@@ -35,6 +35,7 @@
 #include "Timer.h"
 #include "IncrementalDFID.h"
 #include "IncrementalBFS.h"
+#include "SVGUtil.h"
 
 bool recording = false;
 bool running = false;
@@ -55,6 +56,7 @@ void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset run", kAnyModifier, '|');
+	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save SVG", kAnyModifier, 's');
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
@@ -124,7 +126,8 @@ int frameCnt = 0;
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
-	display.FillRect({-1.5, -1.0, 1.5, 1}, Colors::black);
+	display.FillRect({-1.5, -1.0, 1.5, 1}, Colors::white);
+	tree.SetColor(Colors::black);
 	if (running)
 	{
 		MyDisplayHandler(windowID, kNoModifier, 'o');
@@ -209,6 +212,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '[':
 		{
 			drawMode = (drawMode+7)&0x7;
+		}
+			break;
+		case 's':
+		{
+			Graphics::Display d;
+			d.FillRect({-1.0, -1.0, 1.0, 1}, Colors::black);
+			tree.SetWidthScale(1.0);
+			tree.Draw(d);
+			MakeSVG(d, "/Users/nathanst/tree.svg", 1024, 512);
 		}
 			break;
 		case '|':

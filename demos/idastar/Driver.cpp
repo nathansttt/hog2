@@ -74,7 +74,7 @@ std::vector<graphState> path;
 std::vector<graphState> currentPath;
 std::vector<graphState> lastPath;
 
-int colorScheme = 10;
+int colorScheme = 4;// 10, 7 & 4 are reasonable
 
 TextOverlay te(6);
 float timer = 0;
@@ -212,12 +212,12 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//	kPDB2View = 4,
 		//	kPDB3View = 5
 
-		ReinitViewports(windowID, {-1, -1, 0, 1}, kScaleToFill); // kTreeView
-		AddViewport(windowID, {0, -1, 1, 1}, kScaleToFill); // kTextView
-		AddViewport(windowID, {0.25, 0, 0.75, 1}, kScaleToFill); // kStateView
-		AddViewport(windowID, {0, -0.666f+0.2f, 0.333f, 0.2f}, kScaleToFill); // kPDB1View
-		AddViewport(windowID, {0.333f, -0.666f+0.2f, 0.666f, 0.2f}, kScaleToFill); // kPDB2View
-		AddViewport(windowID, {0.666f, -0.666f+0.2f, 1, 0.2f}, kScaleToFill); // kPDB3View
+		ReinitViewports(windowID, {-1, -1, 0, 1}, kScaleToSquare); // kTreeView
+		AddViewport(windowID, {0, -1, 1, 1}, kScaleToSquare); // kTextView
+		AddViewport(windowID, {0.25, 0, 0.75, 1}, kScaleToSquare); // kStateView
+		AddViewport(windowID, {0, -0.666f+0.2f, 0.333f, 0.2f}, kScaleToSquare); // kPDB1View
+		AddViewport(windowID, {0.333f, -0.666f+0.2f, 0.666f, 0.2f}, kScaleToSquare); // kPDB2View
+		AddViewport(windowID, {0.666f, -0.666f+0.2f, 1, 0.2f}, kScaleToSquare); // kPDB3View
 
 		g = new Graph();
 		ge = new GraphEnvironment(g);
@@ -281,11 +281,25 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (timer >= 1 && running)
 			MyDisplayHandler(windowID, kNoModifier, 'o');
 
-		display.FillRect({-1, -1, 1, 1}, Colors::black);
+		display.FillRect({-1, -1, 1, 1}, Colors::white);
 		if (ge == 0 || g == 0)
 			return;
 		ge->SetColor(0.5, 0.5, 1.0);
+		// draws edges but not states
 		ge->Draw(display);
+		
+		// draw in bold the search path
+		if (currentPath.size() > 0)
+		{
+			ge->SetColor(Colors::black);
+			for (int x = 1; x < currentPath.size(); x++)
+			{
+				ge->DrawLine(display, currentPath[x-1], currentPath[x], 5);
+				ge->Draw(display, currentPath[x-1]);
+				//ge->GLDrawLine(path[x-1], path[x]);
+			}
+		}
+
 		
 		ge->SetColor(0.75, 0.75, 1.0);
 		double startf = g->GetNode(from)->GetLabelL(GraphSearchConstants::kTemporaryLabel)+h.HCost(from, 0);
@@ -309,14 +323,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			}
 		}
 		
-		// draw search path
+		// draw search states in bold too
 		if (currentPath.size() > 0)
 		{
-			ge->SetColor(Colors::yellow);
-			for (int x = 1; x < currentPath.size(); x++)
+			ge->SetColor(Colors::black);
+			for (int x = 0; x < currentPath.size(); x++)
 			{
-				ge->DrawLine(display, currentPath[x-1], currentPath[x], 5);
-				//ge->GLDrawLine(path[x-1], path[x]);
+				ge->Draw(display, currentPath[x]);
 			}
 		}
 
@@ -496,11 +509,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			g->Reset();
 			path.resize(0);
 			running = false;
+			submitTextToBuffer("");
 		}
 			break;
 		case 'r':
 			recording = !recording;
 			running = true;
+			submitTextToBuffer("Running automatically");
 			break;
 		case '0':
 		{
@@ -561,7 +576,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'p':
 			running = !running;
 			if (running)
-				printf("Running automatically\n");
+				submitTextToBuffer("Running automatically");
+			else
+				submitTextToBuffer("");
+
 			break;
 		case 'o':
 		{
@@ -726,6 +744,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		case kMouseDown:
 		{
 			printf("Hit (%f, %f, %f)\n", loc.x, loc.y, loc.z);
+			if (running)
+				submitTextToBuffer("Stopped running.");
 			running = false;
 			ida.Reset();
 			currentPath.clear();

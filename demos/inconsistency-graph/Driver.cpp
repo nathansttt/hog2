@@ -126,8 +126,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	}
 	else if (eType == kWindowCreated)
 	{
-		ReinitViewports(windowID, {-1, -1, 0.0, 1}, kScaleToFill);
-		AddViewport(windowID, {0, -1, 1, 1}, kScaleToFill);
+		ReinitViewports(windowID, {-1, -1, 0.0, 1}, kScaleToSquare);
+		AddViewport(windowID, {0, -1, 1, 1}, kScaleToSquare);
 
 		printf("Window %ld created\n", windowID);
 		glClearColor(0.99, 0.99, 0.99, 1.0);
@@ -157,7 +157,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 	if (viewport == 0)
 	{
-		display.FillRect({-1, -1, 1, 1}, Colors::black);
+		display.FillRect({-1, -1, 1, 1}, Colors::white);
 
 		if (ge == 0 || g == 0)
 			return;

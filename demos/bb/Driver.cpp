@@ -58,7 +58,7 @@ mode m = kShowBB;
 
 bool recording = false;
 bool running = false;
-bool mapChanged = true;
+bool didMapChange = true;
 bool useBB = false;
 
 CanonicalGrid::tDirection cDir = CanonicalGrid::kN;
@@ -141,12 +141,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		submitTextToBuffer(s.c_str());
 	}
 	
-	if (mapChanged == true)
+	if (didMapChange == true)
 	{
 		display.StartBackground();
 		me->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		didMapChange = false;
 	}
 
 	if (m == kShowBB)
@@ -244,8 +244,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'r':
 			recording = !recording;
 			break;
-		case '1': useBB = false; m = kFindPath; submitTextToBuffer("A* using bounding boxes"); break;
-		case '2': useBB = true; m = kFindPath;  submitTextToBuffer("A* not using bounding boxes"); break;
+		case '1': useBB = false; m = kFindPath; submitTextToBuffer("A* not using bounding boxes"); break;
+		case '2': useBB = true; m = kFindPath;  submitTextToBuffer("A* using bounding boxes"); break;
 		case '0': m = kShowBB;
 			break;
 		case '\t':

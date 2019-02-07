@@ -52,6 +52,7 @@ double edgeCost = 1.0;
 Graph *g = 0;
 GraphEnvironment *ge;
 graphState from=-1, to=-1;
+Graphics::point currLoc;
 
 TextOverlay te(35);
 
@@ -75,10 +76,15 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
+//	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
+//	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
+	InstallKeyboardHandler(MyDisplayHandler, "Mode forw", "Increase abstraction type", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Mode back", "Decrease abstraction type", kAnyModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "Nodes", "Add Nodes", kAnyModifier, 'n');
+	InstallKeyboardHandler(MyDisplayHandler, "Nodes", "Add Edges", kAnyModifier, 'e');
+	InstallKeyboardHandler(MyDisplayHandler, "Move", "Move Nodes", kAnyModifier, 'm');
+	InstallKeyboardHandler(MyDisplayHandler, "Path", "Find path", kAnyModifier, 'f');
+	
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
 	InstallKeyboardHandler(DefaultGraph, "Default", "Build Deafult Graph", kAnyModifier, 'a', 'd');
@@ -128,16 +134,17 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	Graphics::Display &display = getCurrentContext()->display;
 	if (viewport == 0)
 	{
-		display.FillRect({-1.0, -1.0, 1.0, 1}, Colors::black);
+		display.FillRect({-1.0, -1.0, 1.0, 1}, Colors::white);
 		if (ge == 0 || g == 0)
 			return;
-		ge->SetColor(0.5, 0.5, 1.0);
+		ge->SetColor(Colors::black);
 		ge->Draw(display);
 		if (from != -1 && to != -1)
 		{
-			glLineWidth(4.);
-			ge->SetColor(1, 0, 0);
-			ge->DrawLine(display, from, to);
+//			glLineWidth(3.);
+			ge->SetColor(0.5, 0, 0);
+//			ge->DrawLine(display, from, to);
+			display.DrawLine(ge->GetLocation(from), currLoc, 2., Colors::lightgray);
 		}
 		
 		if (running)
@@ -146,7 +153,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			astar.Draw(display);
 		}
 		else {
-			ge->SetColor(0.75, 0.75, 1.0);
+			//ge->SetColor(0.75, 0.75, 1.0);
+			ge->SetColor(Colors::darkgray);
 			for (int x = 0; x < g->GetNumNodes(); x++)
 				ge->Draw(display, x);
 		}
@@ -154,12 +162,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (path.size() > 0)
 		{
 			ge->SetColor(0, 1, 0);
-			glLineWidth(10);
 			for (int x = 1; x < path.size(); x++)
 			{
-				ge->DrawLine(display, path[x-1], path[x], 10);
+				ge->DrawLine(display, path[x-1], path[x], 4);
 			}
-			glLineWidth(1);
 		}
 	}
 	if (viewport == 1)
@@ -199,10 +205,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '{':
-		{
-			break;
-		}
+		case 'n': m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
+		case 'e': m = kAddEdges; te.AddLine("Current mode: add edges"); break;
+		case 'm': m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
+		case 'f': m = kFindPath; te.AddLine("Current mode: find path"); break;
 		case ']':
 		{
 			switch (m)
@@ -262,7 +268,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'o':
 		{
-			if (running)
+			if (running && path.size() == 0)
 			{
 				astar.DoSingleSearchStep(path);
 				ShowSearchInfo();
@@ -433,6 +439,14 @@ double distsquared(unsigned long node, point3d loc)
 	return (dx-loc.x)*(dx-loc.x) + (dy-loc.y)*(dy-loc.y);
 }
 
+double dist(unsigned long node, point3d loc)
+{
+	double dx = g->GetNode(node)->GetLabelF(GraphSearchConstants::kXCoordinate);
+	double dy = g->GetNode(node)->GetLabelF(GraphSearchConstants::kYCoordinate);
+	
+	return sqrt((dx-loc.x)*(dx-loc.x) + (dy-loc.y)*(dy-loc.y));
+}
+
 node *FindClosestNode(Graph *gr, point3d loc)
 {
 	if (gr->GetNumNodes() == 0)
@@ -486,10 +500,12 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 			if (m == kAddEdges || m == kFindPath)
 			{
 				from = to = FindClosestNode(g, loc)->GetNum();
+				currLoc = ge->GetLocation(from);
 			}
 			if (m == kMoveNodes)
 			{
 				from = to = FindClosestNode(g, loc)->GetNum();
+				currLoc = ge->GetLocation(from);
 			}
 			return true;
 		}
@@ -498,12 +514,21 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 			if (m == kAddEdges || m == kFindPath)
 			{
 				to = FindClosestNode(g, loc)->GetNum();
+				currLoc = loc;
+				if (dist(to, loc) < 0.2 && to != from)
+				{
+					currLoc = ge->GetLocation(to);
+				}
+				else {
+					to = from;
+				}
 			}
 			if (m == kMoveNodes)
 			{
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kXCoordinate, loc.x);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kYCoordinate, loc.y);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+				currLoc = ge->GetLocation(from);
 			}
 			return true;
 		}
@@ -513,7 +538,7 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 			if (m == kAddEdges)
 			{
 				to = FindClosestNode(g, loc)->GetNum();
-				if (from != to)
+				if (from != to && dist(to, loc) < 0.2)
 				{
 					edge *e;
 					if ((e = g->FindEdge(from, to)) != 0)
@@ -528,7 +553,8 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 			if (m == kFindPath)
 			{
 				to = FindClosestNode(g, loc)->GetNum();
-				if (from != to)
+				currLoc = ge->GetLocation(to);
+				if (from != to && dist(to, loc) < 0.2)
 				{
 					astar.InitializeSearch(ge, from, to, path);
 					ShowSearchInfo();
@@ -541,6 +567,7 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kXCoordinate, loc.x);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kYCoordinate, loc.y);
 				g->GetNode(from)->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+				currLoc = ge->GetLocation(from);
 			}
 			from = to = -1;
 			return true;

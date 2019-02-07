@@ -232,7 +232,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 					const auto &i = AStarForward.GetItem(x);
 					if (i.where == kClosedList && fless(i.g+i.h, opt))
 					{
-						me->SetColor(0.5, 0.5, 0.5);
+						me->SetColor(Colors::black);
 						me->DrawAlternate(display, i.data);
 					}
 				}
