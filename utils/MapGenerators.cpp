@@ -8,6 +8,7 @@
 
 #include "MapGenerators.h"
 #include <vector>
+#include <algorithm>
 
 /**
  * MakeMaze(map, pathsize)
