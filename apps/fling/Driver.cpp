@@ -54,6 +54,7 @@ int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 620, 700);
+	return 0;
 }
 
 
@@ -166,6 +167,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(CaptureScreen, "Capture Screen", "Capture Screen Shot", kNoModifier, 'c');
 	InstallKeyboardHandler(RemoveDuplicates, "Remove duplicates", "Analyze states passed in and remove dups", kNoModifier, 'o');
 
+	InstallCommandLineHandler(MyCLHandler, "-rankTest", "-rankTest", "Test incremental versus full unranking.");
 	InstallCommandLineHandler(MyCLHandler, "-generate", "-generate n", "Generate a problem with n tiles and run a BFS.");
 	InstallCommandLineHandler(MyCLHandler, "-extract", "-extract n", "Extract unique boards at level n.");
 	InstallCommandLineHandler(MyCLHandler, "-solve", "-solve n", "Solve all boards up to size n.");
@@ -258,6 +260,47 @@ int dist(int loc1, int loc2)
 	return abs(x1-x2)+abs(y1-y2);
 }
 
+void rankTest()
+{
+	const int numPieces = 8;
+	FlingBoard b1, b2;
+	Fling f;
+	uint64_t maxRank = f.getMaxSinglePlayerRank(56, numPieces);
+	printf("Max rank: %llu\n", maxRank);
+	f.unrankPlayer(0, numPieces, b1);
+	f.unrankPlayer(0, numPieces, b2);
+	float currPerc = 1;
+	printf("Correctness Check\n");
+	for (uint64_t r = 1; r < maxRank; r++)
+	{
+		assert(b1 == b2);
+		if (100.0*r/(float)maxRank > currPerc)
+			printf("%d ", (int)currPerc++);
+		f.IncrementRank(b1);
+		f.unrankPlayer(r, numPieces, b2);
+	}
+	assert(b1 == b2);
+	printf("Test successful\n");
+	printf("Speed Check:\n");
+	f.unrankPlayer(0, numPieces, b1);
+	f.unrankPlayer(0, numPieces, b2);
+	Timer t;
+	t.StartTimer();
+	for (uint64_t r = 1; r < maxRank; r++)
+	{
+		f.IncrementRank(b1);
+	}
+	t.EndTimer();
+	printf("Incremental: %fs elapsed\n", t.GetElapsedTime());
+	t.StartTimer();
+	for (uint64_t r = 1; r < maxRank; r++)
+	{
+		f.unrankPlayer(r, numPieces, b2);
+	}
+	t.EndTimer();
+	printf("Full: %fs elapsed\n", t.GetElapsedTime());
+}
+
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
 //	if (maxNumArgs <= 1)
@@ -269,6 +312,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	if (strcmp(argument[0], "-generate") == 0)
 	{
 		SolveRandomFlingInstance(0, kNoModifier, '0');
+	}
+	else if (strcmp(argument[0], "-rankTest") == 0)
+	{
+		rankTest();
+		exit(0);
 	}
 	else if (strcmp(argument[0], "-extract") == 0)
 	{
