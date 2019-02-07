@@ -10,6 +10,7 @@
 #include <string.h>
 #include "SVGUtil.h"
 #include "Graphics.h"
+ #include <string.h>
 
 namespace CanonicalGrid {
 	
@@ -540,7 +541,8 @@ namespace CanonicalGrid {
 		glRotatef(180, 0.0, 0.0, 1.0);
 		glRotatef(180, 0.0, 1.0, 0.0);
 		glDisable(GL_LIGHTING);
-		for (int which = 0; which < strlen(str); which++)
+		auto len = strlen(str);
+		for (int which = 0; which < len; which++)
 			glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
 		glEnable(GL_LIGHTING);
 		glPopMatrix();
