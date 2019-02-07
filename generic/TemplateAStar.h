@@ -130,6 +130,7 @@ public:
 	std::string SVGDrawDetailed() const;
 	
 	void SetWeight(double w) {weight = w;}
+	double GetWeight() { return weight; }
 private:
 	uint64_t nodesTouched, nodesExpanded;
 	
