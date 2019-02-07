@@ -353,7 +353,7 @@ void TopSpin<N, k>::OpenGLDraw() const
 {
 }
 
-static void DrawCircle(float x, float y, float r1, float r2, int segments)
+static void LocalDrawCircle(float x, float y, float r1, float r2, int segments)
 {
 	float angleStep = TWOPI/segments;
 	//	glBegin(GL_LINE_LOOP);
@@ -415,7 +415,7 @@ void TopSpin<N, k>::OpenGLDraw(const TopSpinState<N> &s) const
 		DrawTSTile(-1+x*diam + diam/2, 0.0f, c1, c2, N, N);
 		glLineWidth(2.0);
 		glColor3f(0.0, 0.3, 0.8);
-		DrawCircle(-1+x*diam + diam/2, 0, diam/2-diam/20, diam/2+diam/20, 50);
+		LocalDrawCircle(-1+x*diam + diam/2, 0, diam/2-diam/20, diam/2+diam/20, 50);
 	}
 }
 
