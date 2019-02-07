@@ -112,6 +112,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-convert", "-convert <source> <dest>", "Convert a map from the DE format to the repo format");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map <source>", "Use the provided map");
 	InstallCommandLineHandler(MyCLHandler, "-capture", "-capture", "Capture animation");
+	InstallCommandLineHandler(MyCLHandler, "-hcost", "-hcost x1 y1 z1 x2 y2 z2", "Compute heuristic between points");
 	InstallCommandLineHandler(MyCLHandler, "-benchmark", "-benchmark <map>", "Build benchmark problems for map");
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg", "capture model as svg (filename(s) will come from -map argument)");
 	InstallCommandLineHandler(MyCLHandler, "-bmp", "-bmp", "capture model as bmp (filename(s) will come from -map argument)");
@@ -276,7 +277,8 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		voxelGridState v1(atoi(argument[1]), atoi(argument[2]), atoi(argument[3]));
 		voxelGridState v2(atoi(argument[4]), atoi(argument[5]), atoi(argument[6]));
 		double c = v.HCost(v1, v2);
-		std::cout << "h(" << v1 << ", " << v2 << ") = " << c << "\n";
+		std::cout << "h(" << v1 << ", " << v2 << ") = ";
+		printf("%1.8f\n", c);
 		exit(0);
 	}
 	if (strcmp(argument[0], "-benchmark") == 0 && maxNumArgs >= 2)
