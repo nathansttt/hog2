@@ -218,6 +218,12 @@ void keyPressed(unsigned char key, int, int)
 
 void mouseMovedNoButton(int x, int y)
 {
+	point3d p = GetOGLPos(pContextInfo, x, y);
+	tButtonType bType = kNoButton;
+	if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseMove))
+		return;
+
+	
 	if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
 	{
 		if (gPan == GL_FALSE)
@@ -801,10 +807,13 @@ void submitTextToBuffer(const char *val)
 
 void DrawGraphics(Graphics::Display &display, int port)
 {
-	float epsilon = 0.0002;
-	float de = 0.00008;
-	for (auto &i: display.backgroundDrawCommands)
+//	float epsilon = 0.0002;
+//	float de = 0.00008;
+	//for (int x = 0; x < display.backgroundDrawCommands.size(); x++)
+	for (int x = display.backgroundDrawCommands.size()-1; x >= 0; x--)
+		//for (auto &i: display.backgroundDrawCommands)
 	{
+		auto &i = display.backgroundDrawCommands[x];
 		if (i.viewport != port)
 			continue;
 		switch (i.what)
@@ -812,23 +821,44 @@ void DrawGraphics(Graphics::Display &display, int port)
 			case Graphics::Display::kFillRectangle:
 			{
 				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+
 				glBegin(GL_QUADS);
-				glVertex3f(i.shape.r.left, i.shape.r.bottom, epsilon);
-				glVertex3f(i.shape.r.left, i.shape.r.top, epsilon);
-				glVertex3f(i.shape.r.right, i.shape.r.top, epsilon);
-				glVertex3f(i.shape.r.right, i.shape.r.bottom, epsilon);
+				glVertex2f(i.shape.r.left, i.shape.r.bottom);
+				glVertex2f(i.shape.r.left, i.shape.r.top);
+				glVertex2f(i.shape.r.right, i.shape.r.top);
+				glVertex2f(i.shape.r.right, i.shape.r.bottom);
 				glEnd();
-				epsilon -= de;
+//				epsilon -= de;
 				break;
 			}
 			case Graphics::Display::kFrameRectangle:
 			{
+				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+				glLineWidth(i.shape.width);
+				glBegin(GL_LINE_LOOP);
+				glVertex2f(i.shape.r.left, i.shape.r.bottom);
+				glVertex2f(i.shape.r.left, i.shape.r.top);
+				glVertex2f(i.shape.r.right, i.shape.r.top);
+				glVertex2f(i.shape.r.right, i.shape.r.bottom);
+				glEnd();
 				break;
 			}
 			case Graphics::Display::kFillOval:
 			{
 				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
-				DrawSphere((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, epsilon, fabs(i.shape.r.top-i.shape.r.bottom)/2.0);
+				DrawCircle((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, fabs(i.shape.r.top-i.shape.r.bottom)/2.0, 64);
+				break;
+			}
+			case Graphics::Display::kFillNGon:
+			{
+				glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
+				DrawCircle(i.polygon.center.x, i.polygon.center.y, i.polygon.radius, i.polygon.segments, i.polygon.rotate);
+				break;
+			}
+			case Graphics::Display::kFrameNGon:
+			{
+				glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
+				//FrameCircle(i.polygon.p.x, i.polygon.p.y, i.polygon.radius, i.polygon.segments, , i.polygon.rotate);
 				break;
 			}
 			case Graphics::Display::kFrameOval:
@@ -841,16 +871,31 @@ void DrawGraphics(Graphics::Display &display, int port)
 				glLineWidth(i.line.width);
 				glBegin(GL_LINES);
 				glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
-				glVertex3f(i.line.start.x, i.line.start.y, epsilon);
-				glVertex3f(i.line.end.x, i.line.end.y, epsilon);
+				glVertex2f(i.line.start.x, i.line.start.y);
+				glVertex2f(i.line.end.x, i.line.end.y);
 				glEnd();
-				epsilon -= de;
+//				epsilon -= de;
 				break;
 			}
 		}
 	}
-	for (auto &i: display.drawCommands)
+	for (auto &i : display.lineSegments)
 	{
+		if (i.viewport != port)
+			continue;
+		glColor3f(i.c.r, i.c.g, i.c.b);
+		glLineWidth(i.size);
+		glBegin(GL_LINE_STRIP);
+		for (auto &p : i.points)
+		{
+			glVertex3f(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+	for (int x = display.drawCommands.size()-1; x >= 0; x--)
+		//for (auto &i: drawCommands)
+	{
+		auto &i = display.drawCommands[x];
 		if (i.viewport != port)
 			continue;
 		switch (i.what)
@@ -859,26 +904,52 @@ void DrawGraphics(Graphics::Display &display, int port)
 			{
 				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
 				glBegin(GL_QUADS);
-				glVertex3f(i.shape.r.left, i.shape.r.bottom, epsilon);
-				glVertex3f(i.shape.r.left, i.shape.r.top, epsilon);
-				glVertex3f(i.shape.r.right, i.shape.r.top, epsilon);
-				glVertex3f(i.shape.r.right, i.shape.r.bottom, epsilon);
+				glVertex2f(i.shape.r.left, i.shape.r.bottom);
+				glVertex2f(i.shape.r.left, i.shape.r.top);
+				glVertex2f(i.shape.r.right, i.shape.r.top);
+				glVertex2f(i.shape.r.right, i.shape.r.bottom);
 				glEnd();
-				epsilon -= de;
+				//				epsilon -= de;
 				break;
 			}
 			case Graphics::Display::kFrameRectangle:
 			{
+				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+				glLineWidth(i.shape.width);
+				glBegin(GL_LINE_LOOP);
+				glVertex2f(i.shape.r.left, i.shape.r.bottom);
+				glVertex2f(i.shape.r.left, i.shape.r.top);
+				glVertex2f(i.shape.r.right, i.shape.r.top);
+				glVertex2f(i.shape.r.right, i.shape.r.bottom);
+				glEnd();
 				break;
 			}
 			case Graphics::Display::kFillOval:
 			{
 				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
-				DrawSphere((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, epsilon, fabs(i.shape.r.top-i.shape.r.bottom)/2.0);
+				//DrawSphere((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, epsilon, fabs(i.shape.r.top-i.shape.r.bottom)/2.0);
+				DrawCircle((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, fabs(i.shape.r.top-i.shape.r.bottom)/2.0, 64);
 				break;
 			}
 			case Graphics::Display::kFrameOval:
 			{
+				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+				FrameCircle((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2,
+							fabs(i.shape.r.top-i.shape.r.bottom)/2.0,
+							i.shape.width,
+							64);
+				break;
+			}
+			case Graphics::Display::kFillNGon:
+			{
+				glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
+				DrawCircle(i.polygon.center.x, i.polygon.center.y, i.polygon.radius, i.polygon.segments, i.polygon.rotate);
+				break;
+			}
+			case Graphics::Display::kFrameNGon:
+			{
+				glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
+				//FrameCircle(i.polygon.p.x, i.polygon.p.y, i.polygon.radius, i.polygon.segments, , i.polygon.rotate);
 				break;
 			}
 			case Graphics::Display::kLine:
@@ -886,14 +957,27 @@ void DrawGraphics(Graphics::Display &display, int port)
 				glLineWidth(i.line.width);
 				glBegin(GL_LINES);
 				glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
-				glVertex3f(i.line.start.x, i.line.start.y, epsilon);
-				glVertex3f(i.line.end.x, i.line.end.y, epsilon);
+				glVertex2f(i.line.start.x, i.line.start.y);
+				glVertex2f(i.line.end.x, i.line.end.y);
 				glEnd();
-				epsilon -= de;
 				break;
 			}
 		}
 	}
+	for (auto &i : display.backgroundLineSegments)
+	{
+		if (i.viewport != port)
+			continue;
+		glColor3f(i.c.r, i.c.g, i.c.b);
+		glLineWidth(i.size);
+		glBegin(GL_LINE_STRIP);
+		for (auto &p : i.points)
+		{
+			glVertex3f(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+
 //	std::vector<data> backgroundDrawCommands;
 //	std::vector<textInfo> backgroundText;
 //	std::vector<segments> backgroundLineSegments;
