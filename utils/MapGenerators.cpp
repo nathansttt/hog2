@@ -284,3 +284,92 @@ void MakeRandomMap(Map *map, int obstacles)
 		map->SetTerrainType(xloc, yloc, kOutOfBounds);
 	}
 }
+
+struct loc { int x; int y; };
+
+void StraightDir(Map *m, loc l, std::vector<loc> &dirs)
+{
+	dirs.resize(0);
+	if ((m->GetTerrainType(l.x+1, l.y) == kGround) && (m->GetTerrainType(l.x-2, l.y) == kTrees))
+		dirs.push_back({l.x-2, l.y});
+	if ((m->GetTerrainType(l.x-1, l.y) == kGround) && (m->GetTerrainType(l.x+2, l.y) == kTrees))
+		dirs.push_back({l.x+2, l.y});
+	if ((m->GetTerrainType(l.x, l.y+1) == kGround) && (m->GetTerrainType(l.x, l.y-2) == kTrees))
+		dirs.push_back({l.x, l.y-2});
+	if ((m->GetTerrainType(l.x, l.y-1) == kGround) && (m->GetTerrainType(l.x, l.y+2) == kTrees))
+		dirs.push_back({l.x, l.y+2});
+
+	if (dirs.size() != 1)
+		dirs.resize(0);
+}
+
+void PossibileDirs(Map *m, loc l, std::vector<loc> &dirs)
+{
+	dirs.resize(0);
+	if ((m->GetTerrainType(l.x+1, l.y) == kTrees) && (m->GetTerrainType(l.x+2, l.y) == kTrees))
+		dirs.push_back({l.x+2, l.y});
+	if ((m->GetTerrainType(l.x-1, l.y) == kTrees) && (m->GetTerrainType(l.x-2, l.y) == kTrees))
+		dirs.push_back({l.x-2, l.y});
+	if ((m->GetTerrainType(l.x, l.y+1) == kTrees) && (m->GetTerrainType(l.x, l.y+2) == kTrees))
+		dirs.push_back({l.x, l.y+2});
+	if ((m->GetTerrainType(l.x, l.y-1) == kTrees) && (m->GetTerrainType(l.x, l.y-2) == kTrees))
+		dirs.push_back({l.x, l.y-2});
+}
+
+void Burrow(Map *m, loc l1, loc l2)
+{
+	m->SetTerrainType(l1.x, l1.y, kGround);
+	m->SetTerrainType(l2.x, l2.y, kGround);
+	m->SetTerrainType((l1.x+l2.x)/2, (l1.y+l2.y)/2, kGround);
+}
+void MakeMaze(Map *m, float straightPercent, float branchPercent)
+{
+	assert(branchPercent >= 0 && branchPercent <= 1 && straightPercent >= 0 && straightPercent <= 1);
+	for (int y = 0; y < m->GetMapHeight(); y++)
+		for (int x = 0; x < m->GetMapWidth(); x++)
+			m->SetTerrainType(x, y, kTrees);
+	std::vector<loc> places;
+	int startx = ((int)random()%m->GetMapWidth())|1;
+	int starty = ((int)random()%m->GetMapHeight())|1;
+	places.push_back({startx, starty});
+	
+	std::vector<loc> straight;
+	std::vector<loc> all;
+	while (places.size() > 0)
+	{
+		// Get random location from eligible locations
+		int which = (int)random()%places.size();
+		//if (74 > random()%100)
+		which = places.size()-1; // continue last direction
+		
+		loc currLoc = places[which];
+		places.erase(places.begin()+which);
+		
+		StraightDir(m, currLoc, straight);
+		PossibileDirs(m, currLoc, all);
+		// with straightPercent, continue straight when possible
+		if (straight.size() > 0 && (random()%10000) < 10000*straightPercent)
+		{
+			Burrow(m, currLoc, straight[0]);
+			places.push_back(straight[0]);
+		}
+		else {
+			// with probabiliy branchPercent, go in 2 directions
+			if ((random()%10000) < 10000*branchPercent)
+			{
+				while (all.size() > 2)
+					all.erase(all.begin()+random()%all.size());
+			}
+			else {
+				while (all.size() > 1)
+					all.erase(all.begin()+random()%all.size());
+			}
+			for (loc next : all)
+			{
+				Burrow(m, currLoc, next);
+				places.push_back(next);
+			}
+			std::random_shuffle ( places.begin(), places.end() );
+		}
+	}
+}
