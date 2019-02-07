@@ -14,6 +14,7 @@
 namespace STP {
 
 	MNPuzzleState<4, 4> GetKorfInstance(int which);
+	MNPuzzleState<4, 4> GetRandomInstance(int walkLength);
 
 }
 #endif /* STPInstances_h */
