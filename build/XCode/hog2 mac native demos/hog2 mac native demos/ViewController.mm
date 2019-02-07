@@ -32,8 +32,10 @@ const float FRAMERATE = 1.0f/30.0f;
 	}
 	
 	hog_main([arguments count], args);
-	
-	
+//	[[[self view] window] setAcceptsMouseMovedEvents:YES];
+	NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self.view bounds] options: (NSTrackingMouseMoved | NSTrackingActiveInKeyWindow | NSTrackingInVisibleRect) owner:self userInfo:nil];
+	[self.view addTrackingArea:trackingArea];
+
 	
 	
 	[NSTimer scheduledTimerWithTimeInterval:FRAMERATE
@@ -73,7 +75,12 @@ const float FRAMERATE = 1.0f/30.0f;
 	pContextInfo->display.EndFrame();
 	[drawingView setNeedsDisplay:YES];
 	if (getTextBuffer() != 0)
-		[messageField setStringValue:[NSString stringWithUTF8String:getTextBuffer()]];
+	{
+		NSString *tmp = [NSString stringWithUTF8String:getTextBuffer()];
+		if ([tmp length] > 99)
+			tmp = [tmp substringToIndex:99];
+		[messageField setStringValue:tmp];
+	}
 }
 
 -(tButtonType)getButton:(NSEvent *)event
@@ -110,6 +117,13 @@ const float FRAMERATE = 1.0f/30.0f;
 	HandleMouse(getCurrentContext(), p, bType, kMouseUp);
 //	int viewport = [drawingView getViewport:curPoint];
 //	HandleMouseClick(getCurrentContext(), viewport, curPoint.x, curPoint.y, p, bType, kMouseUp);
+}
+
+-(void)mouseMoved:(NSEvent *)event
+{
+	NSPoint curPoint = [event locationInWindow];
+	point3d p = [drawingView convertToGlobalHogCoordinate:curPoint];
+	HandleMouse(getCurrentContext(), p, kNoButton, kMouseMove);
 }
 
 -(void)mouseDragged:(NSEvent *)event

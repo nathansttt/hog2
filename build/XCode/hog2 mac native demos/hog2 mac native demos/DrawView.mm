@@ -87,8 +87,9 @@
 			[style setAlignment:NSTextAlignmentCenter];
 		else if (_display->text[x].align == Graphics::textAlignLeft)
 			[style setAlignment:NSTextAlignmentLeft];
+		NSFont *font = [NSFont fontWithName:(NSString *)@"Courier" size:(CGFloat)_display->text[x].size*height/2.0/1.1];
 		NSDictionary *textAttributes =
-		@{NSFontAttributeName: [NSFont monospacedDigitSystemFontOfSize:_display->text[x].size*height/2.0 weight:1.0],
+		@{NSFontAttributeName: font,//[NSFont monospacedDigitSystemFontOfSize:_display->text[x].size*height/2.0 weight:1.0],
 		  NSForegroundColorAttributeName: [NSColor colorWithRed:_display->text[x].c.r green:_display->text[x].c.g blue:_display->text[x].c.b alpha:1.0],
 		  NSParagraphStyleAttributeName: style
 		  };
@@ -173,6 +174,29 @@
 			CGContextStrokeRect(context, [self makeRect:tmp viewport:port]);
 			break;
 		}
+		case Graphics::Display::kFillNGon:
+		{
+			Graphics::Display::shapeInfo &o = d.polygon;
+			CGContextSetRGBFillColor(context, o.c.r, o.c.g, o.c.b, 1.0);
+			double resolution = TWOPI/o.segments;
+			glBegin(GL_TRIANGLE_FAN);
+			for (int x = 0; x <= o.segments; x++)
+			{
+				CGFloat nextx, nexty;
+				nextx = o.center.x+sin(resolution*x+o.rotate*TWOPI/360.0)*o.radius;
+				nexty = o.center.y+cos(resolution*x+o.rotate*TWOPI/360.0)*o.radius;
+				if (x == 0)
+					CGContextMoveToPoint(context,
+											[self hogToScreenX:nextx viewport:port],
+											[self hogToScreenY:nexty viewport:port]);
+				else
+					CGContextAddLineToPoint(context,
+											[self hogToScreenX:nextx viewport:port],
+											[self hogToScreenY:nexty viewport:port]);
+			}
+			CGContextFillPath(context);
+			break;
+		}
 		case Graphics::Display::kFillOval:
 		{
 			Graphics::Display::drawInfo &o = d.shape;
@@ -187,7 +211,7 @@
 			Graphics::Display::drawInfo &o = d.shape;
 			
 			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width);
+			CGContextSetLineWidth(context, o.width*50.0f);
 			CGContextSetLineCap(context, kCGLineCapRound);
 			Graphics::rect &tmp = o.r;
 			CGContextStrokeEllipseInRect(context, [self makeRect:tmp viewport:port]);
@@ -242,6 +266,7 @@ const float epsilon = 0.5f; // in screen pixels
 	point3d p;
 	p.x = 2.0*currPoint.x/width-1.0;
 	p.y = -2.0*currPoint.y/height+1.0;
+	p.z = 0;
 	return p;
 	
 //	switch (_display->GetNumViewports())
@@ -271,6 +296,7 @@ const float epsilon = 0.5f; // in screen pixels
 	point3d p;
 	p.x = (currPoint.x-xoffset)/xscale;
 	p.y = (height-currPoint.y-yoffset)/yscale;
+	p.z = 0;
 	if (p.y < 2.0*(1.0-0.75))
 		return 0;
 	return 1;
