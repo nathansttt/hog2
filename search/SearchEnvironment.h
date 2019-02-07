@@ -84,6 +84,7 @@ public:
 	virtual uint64_t GetActionHash(action act) const = 0;
 
 	virtual double GetPathLength(std::vector<state> &neighbors);
+	virtual double GetPathLength(const state &start, std::vector<action> &neighbors);
 
 	virtual OccupancyInterface<state,action> *GetOccupancyInfo()
 	{ return 0; }
@@ -103,6 +104,7 @@ public:
 	virtual void GetColor(GLfloat& rr, GLfloat& g, GLfloat& b, GLfloat &t) const { rr=color.r; g=color.g; b=color.b; t = transparency;}
 	virtual rgbColor GetColor() const { return color; }
 
+#warning "Draw() should be const"
 	virtual void Draw(Graphics::Display &display) {}
 	virtual void Draw(Graphics::Display &display, const state&) const {}
 	virtual void DrawLine(Graphics::Display &display, const state &x, const state &y, float width = 1.0) const {}
@@ -144,6 +146,21 @@ double SearchEnvironment<state,action>::GetPathLength(std::vector<state> &neighb
 	}
 	return length;
 }
+
+template <class state, class action>
+double SearchEnvironment<state,action>::GetPathLength(const state &start, std::vector<action> &neighbors)
+{
+	state tmp = start;
+	double length = 0;
+	for (unsigned int x = 0; x < neighbors.size(); x++)
+	{
+		length += GCost(tmp, neighbors[x]);
+		ApplyAction(tmp, neighbors[x]);
+	}
+	return length;
+}
+
+
 
 template <class state, class action>
 void SearchEnvironment<state,action>::GLDrawPath(const std::vector<state> &path) const
