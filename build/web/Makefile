@@ -21,6 +21,10 @@ PROJECTS = \
   gui/web \
   mapalgorithms \
   utils \
+  demos/suboptimal-map \
+  demos/STP \
+  demos/witness \
+  demos/witness3 \
   demos/transit-routing-maps \
   demos/gridabstraction \
   demos/JPS \
@@ -57,6 +61,7 @@ PROJECTS_ALL = \
   shared \
   simulation \
   utils \
+  demos/witness3 \
   apps/arm \
   apps/airplane \
   apps/localsensingsearch \

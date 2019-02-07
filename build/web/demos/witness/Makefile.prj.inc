@@ -5,7 +5,7 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/apps/sample/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = astar-graph.js
+NAME = witness.js
 DBG_NAME = $(NAME)
 REL_NAME = $(NAME)
 
@@ -53,7 +53,4 @@ PROJ_REL_DEP = \
 default : all
 
 SRC_CPP = \
-	demos/astar/Driver.cpp 
-
-
-# cat $(SRC_CPP) | grep Install | grep Handler | cut -f 1 -d "," | cut -f 2 -d "(" | cut -f 1 -d ")" | sort | uniq | sed '/^$/d' | awk 'BEGIN { printf("EXPORTED_FUNCTIONS=\"["); b = 0 } { if (b == 7) printf(", "); printf("%c_%s%c", 39, $1, 39); b = 7;} END { printf("]\"\n") }'
+	demos/witness/Driver.cpp 
