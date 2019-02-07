@@ -9,7 +9,7 @@
 #ifndef Colors_h
 #define Colors_h
 
-#include <stdio.h>
+#include <string>
 
 /**
  * A color; r/g/b are between 0...1
@@ -18,9 +18,61 @@ class rgbColor {
 public:
 	rgbColor() {}
 	rgbColor(float rr, float gg, float bb) :r(rr), g(gg), b(bb) {}
+	rgbColor &operator=(const rgbColor & ) = default;
+	void mix(const rgbColor &c, float perc)
+	{
+		r = (1-perc)*r+c.r*perc;
+		g = (1-perc)*g+c.g*perc;
+		b = (1-perc)*b+c.b*perc;
+	}
+	std::string hex() const
+	{ char tmp[255];
+		sprintf(tmp, "#%X%X%X%X%X%X",
+				(int(r*255))/16, (int(r*255))%16,
+				(int(g*255))/16, (int(g*255))%16,
+				(int(b*255))/16, (int(b*255))%16);
+		return tmp;
+	}
+	void hex(const char *str) // get color from #RRGGBB format
+	{
+		if (str[0] != '#')
+		{
+			printf("Conversion failed\n");
+			return;
+		}
+		r = (unhexdigit(str[1])*16+unhexdigit(str[2]))/255.0;
+		g = (unhexdigit(str[3])*16+unhexdigit(str[4]))/255.0;
+		b = (unhexdigit(str[5])*16+unhexdigit(str[6]))/255.0;
+	}
 	float r,g,b;
+private:
+	int unhexdigit(char c)
+	{
+		switch (c)
+		{
+			case '0': return 0;
+			case '1': return 1;
+			case '2': return 2;
+			case '3': return 3;
+			case '4': return 4;
+			case '5': return 5;
+			case '6': return 6;
+			case '7': return 7;
+			case '8': return 8;
+			case '9': return 9;
+			case 'A': return 10;
+			case 'B': return 11;
+			case 'C': return 12;
+			case 'D': return 13;
+			case 'E': return 14;
+			case 'F': return 15;
+		}
+		return 0;
+	}
 };
 
+bool operator==(const rgbColor &r1, const rgbColor &r2);
+bool operator!=(const rgbColor &r1, const rgbColor &r2);
 
 namespace Colors
 {
@@ -31,11 +83,14 @@ namespace Colors
 
 	
 	const rgbColor black  = {0.0,0.0,0.0};
-	const rgbColor white  = {1.0,1.0,1.0}; // white
-	const rgbColor gray   = {0.5,0.5,0.5}; // green
-	const rgbColor darkgray= {0.25,0.25,0.25}; // green
-	const rgbColor lightgray={0.75,0.75,0.75}; // green
-	
+	const rgbColor white  = {1.0,1.0,1.0};
+	const rgbColor gray   = {0.5,0.5,0.5};
+	const rgbColor bluegray   = {0.4,0.5,0.6};
+	const rgbColor darkgray= {0.25,0.25,0.25};
+	const rgbColor darkbluegray= {0.15,0.25,0.35};
+	const rgbColor lightgray={0.75,0.75,0.75};
+	const rgbColor lightbluegray={0.65,0.75,0.85};
+
 	const rgbColor red    = {1.0,0.0,0.0}; // red
 	const rgbColor darkred= {0.5,0.0,0.0}; // red
 	const rgbColor lightred= {1.0,0.5,0.5}; // red

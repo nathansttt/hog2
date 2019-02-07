@@ -8,6 +8,16 @@
 
 #include "Colors.h"
 
+bool operator!=(const rgbColor &r1, const rgbColor &r2)
+{
+	return !(r1 == r2);
+}
+
+bool operator==(const rgbColor &r1, const rgbColor &r2)
+{
+	return r1.r == r2.r && r1.g == r2.g && r1.b == r2.b;
+}
+
 namespace Colors {
 
 
