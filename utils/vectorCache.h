@@ -15,6 +15,8 @@ class vectorCache {
 public:
 	vectorCache() { count = 0; }
 	~vectorCache();
+	vectorCache(const vectorCache<storage> &v) { count = 0; freeList.resize(0); }
+	vectorCache<storage> &operator=(const vectorCache<storage> &v) = delete;
 	std::vector<storage> *getItem();
 	void returnItem(std::vector<storage> *);
 private:
@@ -26,9 +28,11 @@ private:
 template<class storage>
 vectorCache<storage>::~vectorCache<storage>()
 {
+//	printf("Cached storage destroyed\n");
 	for (unsigned int x = 0; x < freeList.size(); x++)
 		delete freeList[x];
 	freeList.resize(0);
+	count = 0;
 }
 
 template<class storage>
