@@ -77,62 +77,6 @@ const char *HOGDoFrame()
 	return "";
 }
 
-///
-//-(CGFloat)hogToScreenX:(CGFloat)x viewport:(int)v
-//{
-//	switch (_display->GetNumViewports())
-//	{
-//		case 1:
-//			return x*xscale+xoffset;
-//		case 2:
-//			if (v == 0)
-//				return (0.75*x*xscale+xoffset);
-//			if (v == 1)
-//				return (0.75*x*xscale+xoffset);
-//	}
-//	return 0;
-//}
-//
-//-(CGFloat)hogToScreenY:(CGFloat)y viewport:(int)v
-//{
-//	switch (_display->GetNumViewports())
-//	{
-//		case 1:
-//			return height-(y*yscale+yoffset);
-//		case 2:
-//			if (v == 0)
-//				return (height-((y*0.75-0.25)*yscale+yoffset));
-//			if (v == 1)
-//				return (height-((y*0.25+0.75)*yscale+yoffset));
-//			assert(!"Shouldn't get here");
-//	}
-//	return 0;
-//}
-//
-//-(point3d)convertToHogCoordinate:(NSPoint)currPoint
-//{
-//	point3d p;
-//	switch (_display->GetNumViewports())
-//	{
-//		case 1:
-//			p.x = (currPoint.x-xoffset)/xscale;
-//			p.y = (height-currPoint.y-yoffset)/yscale;
-//			return p;
-//		case 2:
-//			int v = [self getViewport:currPoint];
-//			if (v == 0)
-//				p.y = (((height-currPoint.y)-yoffset)/yscale+0.25)/0.75;
-//				if (v == 1)
-//					p.y = (((height-currPoint.y)-yoffset)/yscale+0.75)/0.25;
-//					}
-//	//	(currPoint.x - xscale)/( = (0.75*p.x*xscale+xoffset);
-//	p.x = (currPoint.x-xoffset)/(xscale*0.75);
-//
-//	return p;
-//	//point3d p = [drawingView convertToHogCoordinate:curPoint];
-//}
-///
-
 point3d CanvasToPoint(int x, int y)
 {
 	x -= canvasXOffset;
@@ -169,6 +113,7 @@ point3d ConvertCanvasToGlobalHOG(int x, int y)
 	point3d p;
 	p.x = 2.0*x/canvasWidth-1.0;
 	p.y = 2.0*y/canvasHeight-1.0;
+	p.z = 0;
 	return p;
 	
 }
@@ -205,25 +150,6 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 			}, which, r,g,b,
 					PointXToCanvas(o.start.x, d.viewport), PointYToCanvas(o.start.y, d.viewport),
 					PointXToCanvas(o.end.x, d.viewport), PointYToCanvas(o.end.y, d.viewport), o.width);
-			break;
-			
-			
-			//				s += SVGDrawLine((o.start.x+1)*width/2.0, (o.start.y+1)*height/2.0, (o.end.x+1)*width/2.0, (o.end.y+1)*height/2.0, o.width, o.c);
-			//		if (o.arrow)
-			//		{
-			//			Graphics::point newEnd = o.end*0.975f+o.start*0.025f;
-			//			Graphics::point p1 = o.end-o.start;
-			//			Graphics::point p2 = o.start;
-			//			p2.z = 1;
-			//			p2 = p1*p2;
-			//			p2.normalise();
-			//			p2 *= (o.end-newEnd).length();
-			//			CGContextMoveToPoint(context, ((o.end.x)*xscale+xoffset), height-(o.end.y*yscale+yoffset));
-			//			CGContextAddLineToPoint(context, ((newEnd.x+p2.x)*xscale+xoffset), height-((newEnd.y+p2.y)*yscale+yoffset));
-			//			CGContextMoveToPoint(context, ((o.end.x)*xscale+xoffset), height-(o.end.y*yscale+yoffset));
-			//			CGContextAddLineToPoint(context, ((newEnd.x-p2.x)*xscale+xoffset), height-((newEnd.y-p2.y)*yscale+yoffset));
-			//		}
-			
 			break;
 		}
 		case Graphics::Display::kFillRectangle:
@@ -305,6 +231,36 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 					(PointXToCanvas(o.r.right, d.viewport)-PointXToCanvas(o.r.left, d.viewport))/2.0);
 			break;
 		}
+		case Graphics::Display::kFillNGon:
+		{
+			const Graphics::Display::shapeInfo &o = d.polygon;
+			int r = o.c.r*255.0;
+			int g = o.c.g*255.0;
+			int b = o.c.b*255.0;
+			float cx = PointXToCanvas(o.center.x, d.viewport);
+			float cy = PointYToCanvas(o.center.y, d.viewport);
+			float radius = fabs(PointXToCanvas(o.radius, d.viewport)-PointXToCanvas(0, d.viewport));
+			EM_ASM_({
+				var c=document.getElementById(UTF8ToString($0));
+				var ctx=c.getContext("2d");
+				var resolution = 6.283185307/$8;
+
+				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
+				ctx.beginPath();
+				for (var x = 0; x <= $8; x++)
+				{
+					var nextx = $4+Math.sin(resolution*x+$7*0.01745329252)*$6;
+					var nexty = $5+Math.cos(resolution*x+$7*0.01745329252)*$6;
+
+					if (x == 0)
+						ctx.moveTo(nextx, nexty);
+					else
+						ctx.lineTo(nextx, nexty);
+				}
+				ctx.fill();
+			}, which, r,g,b, cx, cy, radius, o.rotate, o.segments);
+
+		}
 	}
 }
 
@@ -312,7 +268,7 @@ void DrawToCanvas(const Graphics::Display &disp)
 {
 	if (disp.BackgroundNeedsRedraw())
 	{
-		printf("Drawing background\n");
+		//printf("Drawing background\n");
 		EM_ASM({
 			var c=document.getElementById("bg");
 			var ctx=c.getContext("2d");
@@ -325,6 +281,42 @@ void DrawToCanvas(const Graphics::Display &disp)
 			//printf("Background command %d\n", x);
 			DoDrawCommand(disp.backgroundDrawCommands[x], "bg");
 		}
+		
+		for (int x = 0; x < disp.backgroundText.size(); x++)
+		{
+			const auto &i = disp.backgroundText[x];
+			int r = i.c.r*255.0;
+			int g = i.c.g*255.0;
+			int b = i.c.b*255.0;
+			
+			if (i.align == Graphics::textAlignCenter)
+			{
+				EM_ASM_({
+					var c=document.getElementById("fg");
+					var ctx=c.getContext("2d");
+					ctx.font = "15px Courier";
+					ctx.textAlign = "center";
+					ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
+					ctx.fillText(UTF8ToString($0),$4,$5);
+				}, i.s.c_str(), r,g,b,
+						PointXToCanvas(i.loc.x, i.viewport),
+						PointYToCanvas(i.loc.y, i.viewport));
+			}
+			else {
+				EM_ASM_({
+					var c=document.getElementById("fg");
+					var ctx=c.getContext("2d");
+					ctx.font = "15px Courier";
+					ctx.textAlign = "left";
+					ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
+					ctx.fillText(UTF8ToString($0),$4,$5);
+				}, i.s.c_str(), r,g,b,
+						PointXToCanvas(i.loc.x, i.viewport),
+						PointYToCanvas(i.loc.y, i.viewport));
+			}
+			
+		}
+
 	}
 	
 	EM_ASM({
@@ -436,10 +428,12 @@ void HOGDoMouse(int x, int y, bool up, bool down, bool drag)
 
 	tMouseEventType t = kMouseDown;
 
-	if  (up)
+	if (up)
 		t = kMouseUp;
-	if (drag)
+	if (drag && down)
 		t = kMouseDrag;
+	if (!up && !down && drag)
+		t = kMouseMove;
 //	int viewport = GetViewport(x, y);
 	
 	HandleMouse(pContextInfo, ConvertCanvasToGlobalHOG(x, y), kLeftButton, t);
