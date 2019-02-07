@@ -42,6 +42,7 @@ PROJECTS = \
   demos/dijkstra \
   demos/astar \
   demos/idastar \
+  papers/EBIS \
 #  generic \
 
 
@@ -93,6 +94,7 @@ PROJECTS_ALL = \
   demos/dijkstra \
   demos/astar \
   demos/idastar \
+  papers/EBIS \
 #	apps/coprobber
 
 # sequentially to avoid same sub-target in sub-make invoked twice
