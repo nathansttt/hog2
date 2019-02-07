@@ -57,9 +57,25 @@ public:
 	
 	bool GetClosedListGCost(const state &val, double &gCost) const;
 	bool GetOpenListGCost(const state &val, double &gCost) const;
+	bool GetFocalListGCost(const state &val, double &gCost) const;
 	bool GetClosedItem(const state &s, AStarOpenClosedData<state> &);
-	unsigned int GetNumOpenItems() { return fhat.OpenSize(); }
-	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return fhat.Lookat(fhat.GetOpenItem(which)); }
+	unsigned int GetNumOpenItems() { return f.OpenSize(); }
+	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return f.Lookat(f.GetOpenItem(which)); }
+	unsigned int GetNumFocalItems() { return fhat.OpenSize(); }
+	inline const AStarOpenClosedData<state> &GetFocalItem(unsigned int which) { return fhat.Lookat(fhat.GetOpenItem(which)); }
+
+	state CheckNextOpenNode()
+	{
+		uint64_t key = f.Peek();
+		return f.Lookup(key).data;
+	}
+	state CheckNextFocalNode()
+	{
+		uint64_t key = fhat.Peek();
+		return fhat.Lookup(key).data;
+	}
+
+	
 	inline const int GetNumItems() { return fhat.size(); }
 	inline const AStarOpenClosedData<state> &GetItem(unsigned int which) { return fhat.Lookat(which); }
 	bool HaveExpandedState(const state &val)
@@ -81,7 +97,9 @@ public:
 	void Draw(Graphics::Display &d) const;
 	
 	void SetWeight(double w) {weight = w;}
+	double GetWeight() { return weight; }
 	void SetOptimalityBound(double w) {bound = w;}
+	double GetOptimalityBound() {return bound;}
 private:
 	uint64_t nodesTouched, nodesExpanded;
 	
@@ -294,7 +312,7 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 	}
 	
 	if (!fequal(oldF, f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h))
-	{		
+	{
 		printf("Best solution %1.2f\n", bestSolution);
 		printf("Best on open %1.2f - lower bound is %1.2f\n", f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h,
 			   (f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h)*bound);
@@ -499,6 +517,19 @@ bool OptimisticSearch<state, action,environment,openList>::GetClosedListGCost(co
 
 template <class state, class action, class environment, class openList>
 bool OptimisticSearch<state, action,environment,openList>::GetOpenListGCost(const state &val, double &gCost) const
+{
+	uint64_t theID;
+	dataLocation loc = f.Lookup(env->GetStateHash(val), theID);
+	if (loc == kOpenList)
+	{
+		gCost = f.Lookat(theID).g;
+		return true;
+	}
+	return false;
+}
+
+template <class state, class action, class environment, class openList>
+bool OptimisticSearch<state, action,environment,openList>::GetFocalListGCost(const state &val, double &gCost) const
 {
 	uint64_t theID;
 	dataLocation loc = fhat.Lookup(env->GetStateHash(val), theID);
