@@ -192,6 +192,13 @@ namespace Plotting {
 		display.DrawLineSegments(points, width, rgbColor(r, g, b));
 	}
 
+	void Point::Draw(Graphics::Display &display, double xOff, double yOff, double xScale, double yScale) const
+	{
+		float xLoc = (x+xOff)*xScale;
+		float yLoc = -(y+yOff)*yScale;
+		display.FillCircle({xLoc, yLoc}, std::min(xScale, yScale)*r, c);
+	}
+	
 	Plot2D::Plot2D()
 	{
 		ResetAxis();
@@ -200,6 +207,14 @@ namespace Plotting {
 		recomputeBorders = true;
 	}
 
+	void Plot2D::Clear()
+	{
+		lines.clear();
+		points.clear();
+		ResetAxis();
+	}
+
+	
 	void Plot2D::AddLine(Line *l)
 	{
 		lines.push_back(l);
@@ -215,8 +230,52 @@ namespace Plotting {
 
 		if (!forceAxis)
 			ResetAxis();
+		
+		dLeft = xMin;
+		dRight = xMax;
+		dTop = yMax;
+		dBottom = yMin;
+
 	}
 
+	void Plot2D::AddPoint(const Point &p)
+	{
+		points.push_back(p);
+
+		if (p.x > xMax)
+			xMax = p.x;
+		if (p.y > yMax)
+			yMax = p.y;
+		if (p.x < xMin)
+			xMin = p.x;
+		if (p.y < yMin)
+			yMin = p.y;
+
+		xMax = std::max(xMax, yMax);
+		yMax = xMax;
+		xMin = std::min(xMin, yMin);
+		yMin = xMin;
+		
+		dLeft = xMin;
+		dRight = xMax;
+		dTop = yMax;
+		dBottom = yMin;
+		
+		int val = 1;
+		while (true)
+		{
+			val *= 2;
+			if (val > xMax)
+			{
+				dRight = val;
+				dTop = val;
+				break;
+			}
+		}
+
+}
+
+	
 	void Plot2D::Zoom(double amt)
 	{
 		printf("Got amt %1.2f\n", amt);
@@ -269,6 +328,26 @@ namespace Plotting {
 				xMin = l->GetMinX();
 			if (l->GetMinY() < yMin)
 				yMin = l->GetMinY();
+		}
+
+		for (const auto &p : points)
+		{
+			if (p.x > xMax)
+				xMax = p.x;
+			if (p.y > yMax)
+				yMax = p.y;
+			if (p.x < xMin)
+				xMin = p.x;
+			if (p.y < yMin)
+				yMin = p.y;
+		}
+		
+		if (xMin > xMax) // valid points
+		{
+			xMin = 0;
+			xMax = 10;
+			yMin = 0;
+			yMax = 10;
 		}
 
 		dLeft = xMin;
@@ -371,6 +450,19 @@ namespace Plotting {
 			lines[x]->Smooth(50);
 		ResetAxis();
 	}
+	
+	void Plot2D::NormalizeAxes()
+	{
+		xMax = std::max(xMax, yMax);
+		yMax = xMax;
+		xMin = std::min(xMin, yMin);
+		yMin = xMin;
+		
+		dLeft = xMin;
+		dRight = xMax;
+		dTop = yMax;
+		dBottom = yMin;
+	}
 
 	void Plot2D::OpenGLDraw() const
 	{
@@ -439,21 +531,38 @@ namespace Plotting {
 		glEnable(GL_DEPTH_TEST);
 	}
 	
+	point3d Plot2D::MakeHOG(double x, double y) const
+	{
+		return point3d((x+xOffset)*xScale, -(y+yOffset)*yScale, 0);
+	}
+
 	void Plot2D::Draw(Graphics::Display &display) const
 	{
-		double xOffset = (dRight-dLeft)/2.0-dRight;
-		double yOffset = (dTop-dBottom)/2.0-dTop;
-		double xScale = 2.0/(dRight-dLeft);
-		double yScale = 2.0/(dTop-dBottom);
-		
+		xOffset = (dRight-dLeft)/2.0-dRight;
+		yOffset = (dTop-dBottom)/2.0-dTop;
+		xScale = 0.9*2.0/(dRight-dLeft);
+		yScale = 0.9*2.0/(dTop-dBottom);
+
 		display.FillRect({-1, -1, 1, 1}, Colors::white);
-		display.DrawLine({-0.9, 1}, {-0.9, -1}, 2.5, Colors::black); // x-axis
-		display.DrawLine({-1, 0.9}, {1, 0.9}, 2.5, Colors::black); // y-axis
+		display.DrawLine(MakeHOG(dLeft, 0), MakeHOG(dRight, 0), 2.5, Colors::black); // x-axis
+		display.DrawLine(MakeHOG(0, dTop), MakeHOG(0, dBottom), 2.5, Colors::black); // y-axis
+		for (int x = 0; x < dRight; x+=10)
+		{
+			display.DrawLine(MakeHOG(x, (dTop-dBottom)/100), MakeHOG(x, -(dTop-dBottom)/100), 1, Colors::black); // x-axis
+		}
+		for (int y = 0; y < dTop; y+=10)
+		{
+			display.DrawLine(MakeHOG((dRight-dLeft)/100, y), MakeHOG(-(dRight-dLeft)/100, y), 1, Colors::black); // x-axis
+		}
 
 		for (unsigned int x = 0; x < lines.size(); x++)
 		{
-			lines[x]->Draw(display, xOffset, yOffset, xScale*0.9, yScale*0.9);
+			lines[x]->Draw(display, xOffset, yOffset, xScale, yScale);
 		}
+
+		for (const auto i : points)
+			i.Draw(display, xOffset, yOffset, xScale, yScale);
+		
 	}
 
 }

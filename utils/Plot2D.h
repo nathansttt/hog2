@@ -61,14 +61,24 @@ namespace Plotting {
 		float width;
 	};
 
+	struct Point {
+		double x, y, r;
+		rgbColor c;
+		void Draw(Graphics::Display &display, double xOff, double yOff, double xScale, double yScale) const;
+	};
+	
 	class Plot2D {
 	public:
 		Plot2D();
+		void Clear();
 		void AddLine(Line *);
+		void AddPoint(const Point &p);
 //		void SetCurrMouse(double, double, Rect &winRect);
 //		void Recenter(double, double, Rect &rectPort);
 		double GetMaxX() { return dRight; }
+		double GetMinX() { return dLeft; }
 		double GetMaxY() { return dTop; }
+		double GetMinY() { return dBottom; }
 		void OffsetCurrMouse(double deltaX, double deltaY);
 		void SetAxis(double, double, double, double);
 		void Zoom(double);
@@ -76,14 +86,22 @@ namespace Plotting {
 		void OpenGLDraw() const;
 		void Draw(Graphics::Display &display) const;
 		void SmoothLines();
+		void NormalizeAxes();
 	private:
-			double mouseXLoc, mouseYLoc;
-			double dLeft, dRight, dTop, dBottom;
-			double xMin, xMax, yMin, yMax;
-			bool forceAxis, drawMouse, recomputeBorders;
-			int lastSelectedLine;
-			std::vector<Line *> lines;
-	};
+		point3d MakeHOG(double x, double y) const;
+		double mouseXLoc, mouseYLoc;
+		double dLeft, dRight, dTop, dBottom;
+		double xMin, xMax, yMin, yMax;
+		bool forceAxis, drawMouse, recomputeBorders;
+		int lastSelectedLine;
+		std::vector<Point> points;
+		std::vector<Line *> lines;
+
+		mutable double xOffset;
+		mutable double yOffset;
+		mutable double xScale;
+		mutable double yScale;
+};
 
 }
 
