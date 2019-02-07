@@ -30,6 +30,10 @@ std::string SVGDrawRect(float x, float y, float width, float height, rgbColor c)
 std::string SVGDrawRect(float x, float y, float width, float height, const char *gradient);
 std::string SVGFrameCircle(double x, double y, double radius, int border, rgbColor c);
 std::string SVGDrawCircle(double x, double y, double radius, rgbColor c);
+
+std::string SVGFrameNGon(double x, double y, double radius, int segments, float rotation, int border, rgbColor c);
+std::string SVGDrawNGon(double x, double y, double radius, int segments, float rotation, rgbColor c);
+
 std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, bool center = true);
 std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, rgbColor c);
 std::string SVGDrawLineSegments(const std::vector<Graphics::point> &lines, float width, rgbColor c);
@@ -39,8 +43,8 @@ std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, 
 
 std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbColor c2, const char *name);
 
-std::string MakeSVG(const Graphics::Display &disp, int width, int height);
-void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height);
+std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport = 0, const char *comment = 0);
+void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport = 0, const char *comment = 0);
 
 // Code from: https://stackoverflow.com/questions/16605967/set-precision-of-stdto-string-when-converting-floating-point-values/16606128#16606128
 template <typename T>
