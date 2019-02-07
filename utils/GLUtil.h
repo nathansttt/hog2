@@ -158,6 +158,8 @@ public:
 	{ x /= v; y /= v; z /= v; return *this; }
 
 };
+inline std::ostream &operator<<(std::ostream &o, const point3d&r)
+{ o << "(" << r.x << ", " << r.y  << ", " << r.z << ")"; return o; }
 
 class line2d {
 public:
@@ -175,6 +177,8 @@ public:
 void DrawPyramid(GLfloat x, GLfloat y, GLfloat z, GLfloat height, GLfloat width);
 void DrawBox(GLfloat x, GLfloat y, GLfloat z, GLfloat radius);
 void DrawBoxFrame(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat rad);
+void DrawCircle(GLdouble _x, GLdouble _y, GLdouble tRadius, int segments = 32, float rotation = 0);
+void FrameCircle(GLdouble _x, GLdouble _y, GLdouble tRadius, GLdouble lineWidth, int segments = 32, float rotation = 0);
 void DrawSphere(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
 void DrawSquare(GLdouble _x, GLdouble _y, GLdouble _z, GLdouble tRadius);
 void DrawCylinder(GLfloat xx, GLfloat yy, GLfloat zz, GLfloat innerRad, GLfloat outerRad, GLfloat height);
