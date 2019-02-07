@@ -122,7 +122,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 //		selection.SetHidden(true);
 		nbsline.SetHidden(true);
 		//SetNumPorts(windowID, 2);
-		ReinitViewports(windowID, Graphics::rect{-1.f, -1.f, 1.f, 0.5f}, kScaleToFill);
+		ReinitViewports(windowID, Graphics::rect{-1.f, -1.f, 1.f, 0.5f}, kScaleToSquare);
 		AddViewport(windowID, Graphics::rect{-1.f, 0.5f, 1.f, 1.f}, kScaleToFill);
 	}
 }
@@ -225,7 +225,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 					continue;
 				if (i.g < C*(1-frac))
 				{
-					me->SetColor(Colors::lighterblue);
+					me->SetColor(Colors::lightblue);
 					me->Draw(display, i.data);
 				}
 				else {
@@ -287,7 +287,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		sprintf(fname, "/Users/nathanst/Movies/tmp/NBS-%d%d%d%d.svg",
 				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
 		
-		MakeSVG(display, fname, 800, 800);
+		MakeSVG(display, fname, 800, 1200);
 		
 		printf("Saved %s\n", fname);
 		frameCnt++;
@@ -484,7 +484,7 @@ void DoLines()
 		totalLine.AddPoint(forwardG, backWork+itemsForward[x].second);
 	}
 	forwardLine.SetColor(Colors::red);
-	backwardLine.SetColor(Colors::lighterblue);
+	backwardLine.SetColor(Colors::lightblue);
 	totalLine.SetColor(Colors::purple);
 	plot.ResetAxis();
 
