@@ -42,20 +42,59 @@ struct NBSCompareOpenWaiting {
 	}
 };
 
-template <typename state, int epsilon = 1>
+template <typename state, int epsilon = 0, bool moveLessEqToOpen = false>
 class NBSQueue {
 public:
 	bool GetNextPair(uint64_t &nextForward, uint64_t &nextBackward)
 	{
 		// move items with f<CLowerBound to ready
-		while (forwardQueue.OpenWaitingSize() != 0 && fless(forwardQueue.PeekAt(kOpenWaiting).g+forwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+		while (forwardQueue.OpenWaitingSize() != 0)
 		{
-			forwardQueue.PutToReady();
+			if (moveLessEqToOpen)
+			{
+				if (flesseq(forwardQueue.PeekAt(kOpenWaiting).g+forwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+					forwardQueue.PutToReady();
+				else
+					break;
+			}
+			else if (!moveLessEqToOpen)
+			{
+				if (fless(forwardQueue.PeekAt(kOpenWaiting).g+forwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+					forwardQueue.PutToReady();
+				else
+					break;
+			}
 		}
-		while (backwardQueue.OpenWaitingSize() != 0 && fless(backwardQueue.PeekAt(kOpenWaiting).g+backwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+		while (backwardQueue.OpenWaitingSize() != 0)
 		{
-			backwardQueue.PutToReady();
+			if (moveLessEqToOpen)
+			{
+				if (flesseq(backwardQueue.PeekAt(kOpenWaiting).g+backwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+					backwardQueue.PutToReady();
+				else
+					break;
+			}
+			else if (!moveLessEqToOpen)
+			{
+				if (fless(backwardQueue.PeekAt(kOpenWaiting).g+backwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+					backwardQueue.PutToReady();
+				else
+					break;
+			}
 		}
+//		while (backwardQueue.OpenWaitingSize() != 0)
+//		{
+//			if (moveLessEqToOpen &&
+//				flesseq(backwardQueue.PeekAt(kOpenWaiting).g+backwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+//			{
+//				backwardQueue.PutToReady();
+//			}
+//			else if (!moveLessEqToOpen &&
+//					 fless(backwardQueue.PeekAt(kOpenWaiting).g+backwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+//			{
+//				backwardQueue.PutToReady();
+//			}
+//		}
 
 		while (true)
 		{
@@ -72,29 +111,6 @@ public:
 			}
 			bool changed = false;
 
-//			if (forwardQueue.OpenWaitingSize() != 0 && backwardQueue.OpenWaitingSize() != 0)
-//			{
-//				const auto i3 = forwardQueue.PeekAt(kOpenWaiting);
-//				const auto i4 = backwardQueue.PeekAt(kOpenWaiting);
-//				if ((!fgreater(i3.g+i3.h, CLowerBound)) && (!fgreater(i4.g+i4.h, CLowerBound)))
-//				{
-//					changed = true;
-//					if (fgreater(i3.g, i4.g))
-//						forwardQueue.PutToReady();
-//					else
-//						backwardQueue.PutToReady();
-//				}
-//				else if (!fgreater(i3.g+i3.h, CLowerBound))
-//				{
-//					changed = true;
-//					forwardQueue.PutToReady();
-//				}
-//				else if (!fgreater(i4.g+i4.h, CLowerBound))
-//				{
-//					changed = true;
-//					backwardQueue.PutToReady();
-//				}
-//			}
 			if (backwardQueue.OpenWaitingSize() != 0)
 			{
 				const auto i4 = backwardQueue.PeekAt(kOpenWaiting);

@@ -9,20 +9,6 @@
  *
  * This file is part of HOG2.
  *
- * HOG2 is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * HOG2 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with HOG; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
  */
 
 #ifndef ASTAROPENCLOSED_H
@@ -70,7 +56,6 @@ public:
 	uint64_t AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
 	uint64_t AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
 	void KeyChanged(uint64_t objKey);
-	//void IncreaseKey(uint64_t objKey);
 	dataLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
 	inline dataStructure &Lookup(uint64_t objKey) { return elements[objKey]; }
 	inline const dataStructure &Lookat(uint64_t objKey) const { return elements[objKey]; }
@@ -176,25 +161,9 @@ void AStarOpenClosed<state, CmpKey, dataStructure>::Remove(uint64_t hash)
 template<typename state, typename CmpKey, class dataStructure>
 void AStarOpenClosed<state, CmpKey, dataStructure>::KeyChanged(uint64_t val)
 {
-//	EqKey eq;
-//	assert(eq(theHeap[table[val]], val));
-//	//HeapifyUp(val->key);
-//	theHeap[table[val]] = val;
 	if (!HeapifyUp(elements[val].openLocation))
 		HeapifyDown(elements[val].openLocation);
 }
-
-///**
-// * Indicate that the key for a particular object has increased.
-// */
-//template<typename state, typename CmpKey, class dataStructure>
-//void AStarOpenClosed<state, CmpKey, dataStructure>::IncreaseKey(uint64_t val)
-//{
-////	EqKey eq;
-////	assert(eq(theHeap[table[val]], val));
-////	theHeap[table[val]] = val;
-//	HeapifyDown(val);
-//}
 
 /**
  * Returns location of object as well as object key.
@@ -275,42 +244,6 @@ void AStarOpenClosed<state, CmpKey, dataStructure>::Reopen(uint64_t objKey)
 	HeapifyUp(theHeap.size()-1);
 }
 
-
-///**
-// * find this object in the Heap and return
-// */
-//template<typename state, typename CmpKey, class dataStructure>
-//OBJ AStarOpenClosed<state, CmpKey, dataStructure>::find(OBJ val)
-//{
-//	if (!IsIn(val))
-//		return OBJ();
-//    return theHeap[table[val]];
-//}
-
-///**
-// * Returns true if no items are in the AStarOpenClosed.
-// */
-//template<typename state, typename CmpKey, class dataStructure>
-//bool AStarOpenClosed<state, CmpKey, dataStructure>::Empty()
-//{
-//	return theHeap.size() == 0;
-//}
-
-///**
-//* Verify that the Heap is internally consistent. Fails assertion if not.
-// */
-//template<typename state, typename CmpKey, class dataStructure>
-//void AStarOpenClosed<state, CmpKey, dataStructure>::verifyData()
-//{
-//	assert(theHeap.size() == table.size());
-//	AStarOpenClosed::IndexTable::iterator iter;
-//	for (iter = table.begin(); iter != table.end(); iter++)
-//	{
-//		EqKey eq;
-//		assert(eq(iter->first, theHeap[iter->second])); 
-//	}
-//}
-
 /**
  * Moves a node up the heap. Returns true if the node was moved, false otherwise.
  */
@@ -352,18 +285,13 @@ void AStarOpenClosed<state, CmpKey, dataStructure>::HeapifyDown(unsigned int ind
 	else
 		which = child2;
 	
-	//if (fless(theHeap[which]->GetKey(), theHeap[index]->GetKey()))
 	if (!(compare(elements[theHeap[which]], elements[theHeap[index]])))
 	{
 		unsigned int tmp = theHeap[which];
 		theHeap[which] = theHeap[index];
-//		table[theHeap[which]] = which;
 		theHeap[index] = tmp;
 		elements[theHeap[which]].openLocation = which;
 		elements[theHeap[index]].openLocation = index;
-		//		table[theHeap[index]] = index;
-		//    theHeap[which]->key = which;
-		//    theHeap[index]->key = index;
 		HeapifyDown(which);
 	}
 }
