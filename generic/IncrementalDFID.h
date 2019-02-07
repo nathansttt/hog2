@@ -74,7 +74,8 @@ bool IncrementalDFID<state, action>::DoSingleSearchStep(SearchEnvironment<state,
 	this->env = env;
 	int depth = history.back().second;
 	env->GetSuccessors(history.back().first, succ);
-	
+	printf("Working at depth %d, bound %d\n", depth, bound);
+	// backtracking step
 	if (path.size() > depth)
 	{
 		path.pop_back();
@@ -94,7 +95,7 @@ bool IncrementalDFID<state, action>::DoSingleSearchStep(SearchEnvironment<state,
 	}
 	
 	history.pop_back();
-	if (depth <= bound)
+	if (depth < bound)
 	{
 		for (int x = succ.size()-1; x >= 0; x--)
 		{
