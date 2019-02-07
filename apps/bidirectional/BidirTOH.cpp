@@ -161,7 +161,7 @@ void TestTOH(int first, int last)
 			s.disks[whichPeg][s.counts[whichPeg]] = x;
 			s.counts[whichPeg]++;
 		}
-//		b = BuildPDB<N, pdb1Disks>(s);
+		b = BuildPDB<N, pdb1Disks>(s);
 
 		g.counts[0] = g.counts[1] = g.counts[2] = g.counts[3] = 0;
 		for (int x = N; x > 0; x--)
@@ -172,7 +172,7 @@ void TestTOH(int first, int last)
 		}
 		// Using canonical goal currently - comment to use random goal
 		//g.Reset();
-//		f = BuildPDB<N, pdb1Disks>(g);
+		f = BuildPDB<N, pdb1Disks>(g);
 
 		Timer timer;
 	
@@ -201,7 +201,7 @@ void TestTOH(int first, int last)
 			printf("%llu nodes\t%llu necessary\t", nbse1.GetNodesExpanded(), nbse1.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (1)
+		if (0)
 		{
 			printf("-=-=-NBS0e1-=-=-\n");
 			timer.StartTimer();
@@ -211,7 +211,7 @@ void TestTOH(int first, int last)
 			printf("%llu nodes\t%llu necessary\t", nbse1.GetNodesExpanded(), nbse1.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (0)
+		if (1)
 		{
 			BidirectionalProblemAnalyzer<TOHState<N>, TOHMove, TOH<N>>::GetWeightedVertexGraph(s, g, &toh, f, b);
 		}

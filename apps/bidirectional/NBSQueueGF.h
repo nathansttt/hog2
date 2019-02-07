@@ -48,14 +48,14 @@ public:
 	bool GetNextPair(uint64_t &nextForward, uint64_t &nextBackward)
 	{
 		// move items with f<CLowerBound to ready
-		while (forwardQueue.OpenWaitingSize() != 0 && fless(forwardQueue.PeekAt(kOpenWaiting).g, GForwardMin))
-		{
-			forwardQueue.PutToReady();
-		}
-		while (backwardQueue.OpenWaitingSize() != 0 && fless(backwardQueue.PeekAt(kOpenWaiting).g, GBackwardMin))
-		{
-			backwardQueue.PutToReady();
-		}
+//		while (forwardQueue.OpenWaitingSize() != 0 && fless(forwardQueue.PeekAt(kOpenWaiting).g, GForwardMin))
+//		{
+//			forwardQueue.PutToReady();
+//		}
+//		while (backwardQueue.OpenWaitingSize() != 0 && fless(backwardQueue.PeekAt(kOpenWaiting).g, GBackwardMin))
+//		{
+//			backwardQueue.PutToReady();
+//		}
 		
 		while (true)
 		{

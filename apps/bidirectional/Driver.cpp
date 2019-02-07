@@ -43,9 +43,11 @@
 #include "BidirPancake.h"
 #include "BidirTOH.h"
 #include "BidirTS.h"
+#include "MapGenerators.h"
 
 void Test100Easy();
 void Animate();
+void Test();
 
 struct hash128
 {
@@ -1882,3 +1884,12 @@ int GetGCount(TemplateAStar<xyLoc, tDirection, MapEnvironment> &astar, double g,
 	}
 	return cnt;
 }
+
+//void Test()
+//{
+//	Map *m = new Map(512, 512);
+//	MakeMaze(m);
+//
+//	exit(0);
+//}
+

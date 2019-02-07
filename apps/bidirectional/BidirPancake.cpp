@@ -33,9 +33,9 @@ void TestPancake()
 
 //	TestPancakeHard(0); // GAP heuristic #
 //	TestPancakeHard(1);
-//	TestPancakeHard(2);
+	TestPancakeHard(2);
 //	TestError();
-	TestVariants();
+//	TestVariants();
 	exit(0);
 }
 
@@ -261,7 +261,7 @@ void TestPancakeRandom()
 	}
 }
 
-const int CNT = 20;
+const int CNT = 16;
 void TestPancakeHard(int gap)
 {
 	srandom(2017218);
@@ -363,16 +363,28 @@ void TestPancakeHard(int gap)
 		}
 
 		
-		// NBS
-		if (0)
+		// NBS e=1
+		if (1)
 		{
-			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
+			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>, NBSQueue<PancakePuzzleState<CNT>, 1>> nbs;
 			goal.Reset();
 			start = original;
 			t2.StartTimer();
 			nbs.GetPath(&pancake, start, goal, &pancake, &pancake2, nbsPath);
 			t2.EndTimer();
 			printf("HARD-%d-G%d NBSe1 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, gap, pancake.GetPathLength(nbsPath),
+				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
+		}
+		// NBS e=1
+		if (1)
+		{
+			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>, NBSQueue<PancakePuzzleState<CNT>, 1, true>> nbs;
+			goal.Reset();
+			start = original;
+			t2.StartTimer();
+			nbs.GetPath(&pancake, start, goal, &pancake, &pancake2, nbsPath);
+			t2.EndTimer();
+			printf("HARD-%d-G%d NBSAe1 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; %f meeting\n", count, gap, pancake.GetPathLength(nbsPath),
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
 		}
 		// NBS
@@ -388,7 +400,7 @@ void TestPancakeHard(int gap)
 				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(), nbs.GetMeetingPoint());
 		}
 		// NBS0
-		if (1)
+		if (0)
 		{
 			ZeroHeuristic<PancakePuzzleState<CNT>> z;
 			NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>, NBSQueue<PancakePuzzleState<CNT>, 0>> nbs;

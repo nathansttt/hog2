@@ -21,6 +21,7 @@
 #include "NBS.h"
 #include "BSStar.h"
 #include "FFBDS.h"
+#include "DVCBS.h"
 #include "WeightedVertexGraph.h"
 #include "Timer.h"
 
@@ -53,13 +54,15 @@ TemplateAStar<xyLoc, tDirection, MapEnvironment> compare;
 MM<xyLoc, tDirection, MapEnvironment> mm0;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> compare0;
 BSStar<xyLoc, tDirection, MapEnvironment> bs;
+DVCBS<xyLoc, tDirection, MapEnvironment> dvcbs;
 
-bool mmSearchRunning = false;
+bool nbsSearchRunning = false;
 bool compareSearchRunning = false;
 bool mm0SearchRunning = false;
 bool bsSearchRunning = false;
 bool ffSearchRunning = false;
 bool compare0SearchRunning = false;
+bool dvcbsSearchRunning = false;
 bool searchRan = false;
 std::vector<xyLoc> path;
 std::vector<xyLoc> goalPath;
@@ -95,6 +98,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyKeyboardHandler, "Record", "Start/stop recording movie", kNoModifier, 'r');
 	InstallKeyboardHandler(MyKeyboardHandler, "Draw", "Toggle drawing search", kNoModifier, 'd');
 	InstallKeyboardHandler(MyKeyboardHandler, "Pause", "Toggle pause", kNoModifier, 'p');
+	InstallKeyboardHandler(MyKeyboardHandler, "Go", "Go solve 100 random problems", kNoModifier, 'g');
 	InstallKeyboardHandler(MyKeyboardHandler, "Step", "Single algorithm step", kNoModifier, 'o');
 	InstallKeyboardHandler(MyKeyboardHandler, "Single Viewport", "Set to use a single viewport", kNoModifier, '1');
 	InstallKeyboardHandler(MyKeyboardHandler, "Two Viewports", "Set to use two viewports", kNoModifier, '2');
@@ -141,8 +145,12 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		//map = new Map("/Users/nathanst/hog2/maps/dao/orz107d.map");
 		if (0)
 		{
-			map = new Map(128,128);
-			MakeMaze(map, 1);
+			map = new Map(128, 128);
+//			MakeMaze(map, 0.1f, 1.0f);
+			MakeMaze(map, 0.95f, 1.0f);
+//			MakeMaze(map, 0.25f, 1.0f);
+
+//			MakeMaze(map, 1);
 		}
 		
 		map->SetTileSet(kWinter);
@@ -157,10 +165,10 @@ void StepAlgorithms()
 {
 	for (int x = 0; x < gStepsPerFrame/2; x++)
 	{
-		if (mmSearchRunning)
+		if (nbsSearchRunning)
 		{
-			mmSearchRunning = !nbs.DoSingleSearchStep(path);
-			if (!mmSearchRunning)
+			nbsSearchRunning = !nbs.DoSingleSearchStep(path);
+			if (!nbsSearchRunning)
 				printf("NBS: %llu nodes expanded cost %1.1f\n", nbs.GetNodesExpanded(), me->GetPathLength(path));
 		}
 	}
@@ -213,12 +221,62 @@ void StepAlgorithms()
 			}
 		}
 	}
+	for (int x = 0; x < gStepsPerFrame; x++)
+	{
+		if (dvcbsSearchRunning)
+		{
+			dvcbsSearchRunning = !dvcbs.DoSingleSearchStep(path);
+			if (!dvcbsSearchRunning)
+			{
+				printf("BFS: %llu nodes expanded cost %1.1f\n", dvcbs.GetNodesExpanded(), me->GetPathLength(path));
+			}
+		}
+	}
+
 }
 
 void MyKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key)
 {
 	switch (key)
 	{
+		case 'g':
+		{
+			for (float p = 1; p <= 16.0; p *= 4)
+			{
+				Map *m = new Map(512, 512);
+				MapEnvironment *env = new MapEnvironment(m);
+				MakeMaze(m, (int)p);
+				//				MakeMaze(m, p, 1.0f);
+
+				const int total = 500;
+				int better = 0;
+				for (int x = 0; x < total; x++)
+				{
+//					MakeMaze(m, p, 1.0f);
+					xyLoc a, b;
+					while (true)
+					{
+						a.x = random()%m->GetMapWidth();
+						a.y = random()%m->GetMapHeight();
+						if (m->GetTerrainType(a.x, a.y) == kGround)
+							break;
+					}
+					while (true)
+					{
+						b.x = random()%m->GetMapWidth();
+						b.y = random()%m->GetMapHeight();
+						if (m->GetTerrainType(b.x, b.y) == kGround)
+							break;
+					}
+					BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment> bpa(a, b, env, env, env);
+					if ((bpa.GetMinWork() != bpa.GetForwardWork()) && (bpa.GetMinWork() != bpa.GetBackwardWork()))
+						better++;
+				}
+				printf("%1.2f : %d of %d\n", p, better, total);
+				delete m;
+				delete env;
+			}
+		}
 		case 's':
 		{
 			svgFile.open("/Users/nathanst/Desktop/test.svg", std::fstream::out | std::fstream::trunc);
@@ -364,11 +422,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (viewport == 0)
 				nbs.OpenGLDraw();
 			else if (viewport == 1)
-				compare.OpenGLDraw();
+				dvcbs.OpenGLDraw();
 			else if (viewport == 2)
-				ff.OpenGLDraw();//bs.OpenGLDraw();
-			else if (viewport == 3)
-				mm.OpenGLDraw();
+				compare.OpenGLDraw();//bs.OpenGLDraw();
+//			else if (viewport == 3)
+//				mm.OpenGLDraw();
 		}
 	}
 
@@ -504,19 +562,20 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 
 				compare0.SetHeuristic(z);
 				compare0.InitializeSearch(me, start, goal, path);
-				nbs.InitializeSearch(me, start, goal, w, w, path);
+				nbs.InitializeSearch(me, start, goal, me, me, path);
 				bs.InitializeSearch(me, start, goal, me, me, path);
 				//mm.InitializeSearch(me, start, goal, z, z, path);
 				mm.InitializeSearch(me, start, goal, me, me, path);
 				mm0.InitializeSearch(me, start, goal, z, z, path);
 				ff.InitializeSearch(me, start, goal, me, path);
-				
-				mmSearchRunning = true;
+				dvcbs.InitializeSearch(me, start, goal, me, me, path);
+				nbsSearchRunning = true;
 				compareSearchRunning = true;
-				mm0SearchRunning = true;
-				bsSearchRunning = true;
-				ffSearchRunning = true;
-				compare0SearchRunning = true;
+//				mm0SearchRunning = true;
+//				bsSearchRunning = true;
+//				ffSearchRunning = true;
+//				compare0SearchRunning = true;
+				dvcbsSearchRunning = true;
 				
 				searchRan = true;
 				return true;
@@ -899,7 +958,9 @@ void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 			printf("NBSe1 found path length %1.0f; %llu expanded; %llu necessary\n", me->GetPathLength(path),
 				   nbse1.GetNodesExpanded(), nbse1.GetNecessaryExpansions());
 
-			BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, me, me);
+//			EuclideanDistance d;
+//			BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, &d, &d);
+//			BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, me, me);
 		}
 		
 		if (0)
