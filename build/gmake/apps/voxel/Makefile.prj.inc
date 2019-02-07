@@ -32,27 +32,23 @@ PROJ_REL_LIB = -lgraph -lenvironments -lenvutil -lmapalgorithms -lalgorithms -lg
 PROJ_DBG_DEP = \
   $(DBG_BINDIR)/libutils.a \
   $(DBG_BINDIR)/libgraph.a \
-  $(DBG_BINDIR)/libabstraction.a \
   $(DBG_BINDIR)/libgui.a \
   $(DBG_BINDIR)/libenvironments.a \
   $(DBG_BINDIR)/libenvutil.a \
   $(DBG_BINDIR)/libmapalgorithms.a \
   $(DBG_BINDIR)/libgraphalgorithms.a \
   $(DBG_BINDIR)/libalgorithms.a \
-  $(DBG_BINDIR)/libabstraction.a \
 
 
 PROJ_REL_DEP = \
   $(REL_BINDIR)/libutils.a \
   $(REL_BINDIR)/libgraph.a \
-  $(REL_BINDIR)/libabstraction.a \
   $(REL_BINDIR)/libgui.a \
   $(REL_BINDIR)/libenvironments.a \
   $(REL_BINDIR)/libenvutil.a \
   $(REL_BINDIR)/libmapalgorithms.a \
   $(REL_BINDIR)/libgraphalgorithms.a \
   $(REL_BINDIR)/libalgorithms.a \
-  $(REL_BINDIR)/libabstraction.a \
 
 ifeq ("$(OPENGL)", "STUB")
 PROJ_DBG_LIB += -lSTUB
