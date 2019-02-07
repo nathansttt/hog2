@@ -334,7 +334,7 @@ void WeightedTest(unsigned long , tKeyboardModifier , char)
 	std::vector<slideDir> path;
 	IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
 	MNPuzzle<4, 4> mnp;
-	mnp.SetWeighted(true);
+	mnp.SetWeighted(kSquared);
 	MNPuzzleState<4, 4> s, g;
 	s = STP::GetKorfInstance(0);
 	ida.GetPath(&mnp, s, g, path);
