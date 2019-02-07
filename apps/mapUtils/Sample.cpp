@@ -42,6 +42,8 @@
 #include "MapGenerators.h"
 #include "FPUtil.h"
 #include "CanonicalGrid.h"
+#include "Graphics.h"
+#include "SVGUtil.h"
 
 bool mouseTracking = false;
 bool runningSearch1 = false;
@@ -172,7 +174,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MySubgoalHandler, "Setup Subgoals", "Set up and display subgoal information", kNoModifier, 's');
 	
 	
-	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Resizes map to specified dimensions and saves");
+	InstallCommandLineHandler(MyCLHandler, "-makeMazeSVG", "-makeMazeSVG x-dim y-dim corridorsize x-output y-output filename", "Makes map and exports as svg");
+	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Makes maze");
 	InstallCommandLineHandler(MyCLHandler, "-makeRoom", "-makeRoom x-dim y-dim roomSie filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-makeRandom", "-makeRandom x-dim y-dim %%obstacles [0-100] filename", "makes a randomly filled with obstacles");
 	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
@@ -183,7 +186,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-problems3", "-problems3 filename", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems4", "-problems4 filename", "Selects the problem set to run comparing weighted A* with and without re-openings.");
 	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
-	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <map> <output>", "Save the map as SVG format");
+	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <map> <output> <optional-x> <optional-y>", "Save the map as SVG format");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
 	InstallCommandLineHandler(MyCLHandler, "-reduceMap", "-reduceMap input output", "Find the largest connected component in map and reduce.");
 	InstallCommandLineHandler(MyCLHandler, "-highwayDimension", "-highwayDimension map radius", "Measure the highway dimension of a map.");
@@ -826,117 +829,27 @@ void runProblemSet2(char *problems, int multiplier)
 
 void runProblemSet(char *problems, int multiplier)
 {
-/*
-	Map *map = new Map(gDefaultMap);
-	map->Scale(512, 512);
-	msa = new MapSectorAbstraction(map, 8, multiplier);
-
-	Graph *g = msa->GetAbstractGraph(1);
-	GraphAbstractionHeuristic gah2(msa, 2);
-	GraphAbstractionHeuristic gah1(msa, 1);
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> searcher;
+	ScenarioLoader s(problems);
+	Map *map = new Map(s.GetNthExperiment(0).GetMapName());
+	map->Scale(s.GetNthExperiment(0).GetXScale(), s.GetNthExperiment(0).GetYScale());
+	MapEnvironment e(map);
 	
-	GraphRefinementEnvironment env2(msa, 2, &gah2);
-	GraphRefinementEnvironment env1(msa, 1, &gah1);
-	env1.SetDirected(false);
-	env2.SetDirected(false);
-	
-	FILE *f = fopen(problems, "r");
-	if (f == 0)
+	for (int x = 0; x < s.GetNumExperiments(); x++)
 	{
-		printf("Cannot open file: '%s'\n", problems);
-		exit(0);
-	}
-	printf("len\tlvl2n\tlvl2nt\tlvl2len\tlvl2tim\tlvl1nf\tlvl1ntf\tlvl1tn\tlvl1tt\tlvl1len_f\ttot\ttott\ttot_len\n");
-	Timer t;
-	while (!feof(f))
-	{
-		int from, to, cost;
-		if (fscanf(f, "%d\t%d\t%d\n", &from, &to, &cost) != 3)
-			break;
-		node *s1 = g->GetNode(from);
-		node *g1 = g->GetNode(to);
-		node *s2 = msa->GetParent(s1);
-		node *g2 = msa->GetParent(g1);
-		uint64_t nodesExpanded = 0;
-		uint64_t nodesTouched = 0;
-		double totalTime = 0;
-		//		printf("Searching from %d to %d in level 1; %d to %d in level 2\n",
-		//			   s1->GetNum(), g1->GetNum(), s2->GetNum(), g2->GetNum());
-		graphState gs1, gs2;
-		gs1 = s2->GetNum();
-		gs2 = g2->GetNum();
-		std::vector<graphState> thePath;
-		std::vector<graphState> abstractPath;
-		t.StartTimer();
-		astar.GetPath(&env2, gs1, gs2, abstractPath);
-		totalTime = t.EndTimer();
-		printf("%d\t", cost);
-		printf("%llu\t%llu\t%1.2f\t%f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env2.GetPathLength(abstractPath), totalTime);
-		if (abstractPath.size() == 0)
+		xyLoc from = xyLoc(s.GetNthExperiment(x).GetStartX(), s.GetNthExperiment(x).GetStartY());
+		xyLoc to = xyLoc(s.GetNthExperiment(x).GetGoalX(), s.GetNthExperiment(x).GetGoalY());
+		searcher.GetPath(&e, from, to, path);
+		if (fgreater(fabs(e.GetPathLength(path)-s.GetNthExperiment(x).GetDistance()), 0.01))
 		{
-			printf("%llu\t%llu\t%llu\t%llu\t%1.2f\t%f\t", (uint64_t)0, (uint64_t)0, astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0, 0.0);
-			printf("%llu\t%llu\t%1.2f\t%f\t%d\t%d\n", astar.GetNodesExpanded(), astar.GetNodesTouched(), 0.0, 0.0, 0, 0);
-//			printf("\n");
-			continue;
+			std::cout << "From: " << from << " to " << to << "\n";
+			printf("Found solution %d length %f; expected %f difference %f\n", map->GetTerrainType(from.x, from.y), e.GetPathLength(path), s.GetNthExperiment(x).GetDistance(),
+				   e.GetPathLength(path)-s.GetNthExperiment(x).GetDistance());
+			exit(1);
 		}
-
-		nodesExpanded += astar.GetNodesExpanded();
-		nodesTouched += astar.GetNodesTouched();
-
-		env1.SetPlanningCorridor(abstractPath, 2);
-		gs1 = s1->GetNum();
-		gs2 = g1->GetNum();
-		t.StartTimer();
-		astar.GetPath(&env1, gs1, gs2, thePath);
-		t.EndTimer();
-		printf("%llu\t%llu\t%llu\t%llu\t%1.2f\t%f\t",
-			   astar.GetNodesExpanded(), astar.GetNodesTouched(),
-			   astar.GetNodesExpanded()+nodesExpanded, astar.GetNodesTouched()+nodesTouched,
-			   env1.GetPathLength(thePath), totalTime+t.GetElapsedTime());
-		
-		int abstractStart = 0;
-		gs1 = s1->GetNum();
-		double totalLength = 0;
-		int refineAmt = 2;
-		int refinedPathNodes = 0;
-		do { // not working yet -- fully check!
-			env1.SetPlanningCorridor(abstractPath, 2, abstractStart);
-			gs2 = g1->GetNum();
-			if (abstractPath.size()-abstractStart > refineAmt)
-			{
-				env1.SetUseAbstractGoal(true, 2);
-				gs2 = abstractPath[abstractStart+refineAmt];
-			}
-			else {
-				env1.SetUseAbstractGoal(false, 0);
-			}
-			t.StartTimer();
-			astar.GetPath(&env1, gs1, gs2, thePath);
-			t.EndTimer();
-			refinedPathNodes += thePath.size();
-			totalTime+=t.GetElapsedTime();
-			abstractStart += refineAmt;
-			gs1 = thePath.back();
-			
-			nodesExpanded += astar.GetNodesExpanded();
-			nodesTouched += astar.GetNodesTouched();
-			totalLength += env1.GetPathLength(thePath);
-			if (thePath.back() == gs2)
-				break;
-		} while (thePath.back() != g1->GetNum());
-		
-//		printf("%llu\t%llu\t%1.2f\t", astar.GetNodesExpanded(), astar.GetNodesTouched(), env1.GetPathLength(thePath));
-		thePath.resize(0);
-		printf("%llu\t%llu\t%1.2f\t%f\t%d\t%d\n", nodesExpanded, nodesTouched, totalLength, totalTime, abstractPath.size(), refinedPathNodes);
-		
-//		gs1 = s1->GetNum();
-//		gs2 = g1->GetNum();
-//		env1.SetPlanningCorridor(abstractPath, 2);
-//		astar.GetPath(&env1, gs1, gs2, thePath);
-//		printf("%llu\t%1.2f\n", astar.GetNodesExpanded(), env1.GetPathLength(thePath));
+		printf("%f\t%llu\n", e.GetPathLength(path), searcher.GetNodesExpanded());
 	}
-	fclose(f);
- */
+	
 	exit(0);
 }
 
@@ -953,6 +866,45 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		exit(0);
 		return 5;
 	}
+	if (strcmp( argument[0], "-makeMazeSVG" ) == 0 )
+	{
+		if (maxNumArgs <= 4)
+			return 0;
+		Map map(atoi(argument[1]), atoi(argument[2]));
+		MakeMaze(&map, atoi(argument[3]));
+		Graphics::Display disp;
+		for (int y = 0; y < map.GetMapHeight(); y++)
+		{
+			for (int x = 0; x < map.GetMapWidth(); x++)
+			{
+				if (x+1 < map.GetMapWidth() && map.GetTerrainType(x, y) != kGround && map.GetTerrainType(x+1, y) != kGround)
+				{
+					GLdouble a, b, c, d, e, f, r;
+					map.GetOpenGLCoord(x, y, a, b, c, r);
+					map.GetOpenGLCoord(x+1, y, d, e, f, r);
+					disp.DrawLine(Graphics::point(a, b), Graphics::point(d, e), 1, Colors::black);
+				}
+				if (y+1 < map.GetMapHeight() && map.GetTerrainType(x, y) != kGround && map.GetTerrainType(x, y+1) != kGround)
+				{
+					GLdouble a, b, c, d, e, f, r;
+					map.GetOpenGLCoord(x, y, a, b, c, r);
+					map.GetOpenGLCoord(x, y+1, d, e, f, r);
+					disp.DrawLine(Graphics::point(a, b), Graphics::point(d, e), 1, Colors::black);
+				}
+			}
+		}
+		{
+			GLdouble a, b, c, r;
+			map.GetOpenGLCoord(1, 1, a, b, c, r);
+			disp.DrawText("S", Graphics::point(a, b), Colors::blue, r*2);
+			map.GetOpenGLCoord((int)map.GetMapWidth()-2, (int)map.GetMapHeight()-2, a, b, c, r);
+			disp.DrawText("F", Graphics::point(a, b), Colors::blue, r*2);
+		}
+		//map.Save(argument[4]);
+		MakeSVG(disp, argument[6], atoi(argument[4]), atoi(argument[5]));
+		exit(0);
+		return 5;
+	}//
 	if (strcmp( argument[0], "-makeMaze" ) == 0 )
 	{
 		if (maxNumArgs <= 4)
@@ -1041,13 +993,30 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		if (maxNumArgs <= 2)
 			return 0;
+		Graphics::Display d;
+		
 		std::fstream svgFile;
 		MapEnvironment *me = new MapEnvironment(new Map(argument[1]));
-		svgFile.open(argument[2], std::fstream::out | std::fstream::trunc);
-		svgFile << me->SVGHeader();
-		svgFile << me->SVGDraw();
-		svgFile << "</svg>\n";
-		svgFile.close();
+		me->SetDrawOptions(kEfficientCells);
+		me->Draw(d);
+		int width = 1024;
+		int height = 1024;
+		if (maxNumArgs >= 3)
+		{
+			height = width = atoi(argument[3]);
+		}
+		if (maxNumArgs >= 4)
+		{
+			height = atoi(argument[4]);
+		}
+		printf("Making image %dx%d\n", width, height);
+
+		MakeSVG(d, argument[2], width, height);
+//		svgFile.open(argument[2], std::fstream::out | std::fstream::trunc);
+//		svgFile << me->SVGHeader();
+//		svgFile << me->SVGDraw();
+//		svgFile << "</svg>\n";
+//		svgFile.close();
 		exit(0);
 		return 2;
 	}
@@ -1079,8 +1048,13 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	}
 	else if (strcmp(argument[0], "-problems" ) == 0 )
 	{
-		if (maxNumArgs <= 2) exit(0);
-		runProblemSet(argument[1], atoi(argument[2]));
+		int val; 
+		if (maxNumArgs <= 1)
+			exit(0);
+		else if (maxNumArgs <= 2)
+			val = 1;
+		else val = atoi(argument[2]);
+		runProblemSet(argument[1], val);
 		return 3;
 	}
 	else if (strcmp(argument[0], "-problems2" ) == 0 )
