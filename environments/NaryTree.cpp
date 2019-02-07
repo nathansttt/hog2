@@ -209,8 +209,10 @@ void NaryTree::GLDrawLine(const NaryState &s1, const NaryState &s2) const
 
 void NaryTree::Draw(Graphics::Display &display) const
 {
+	rgbColor color = GetColor();
 	std::vector<NaryState> succ;
 	float x1, y1, x2, y2;
+	// loop through the total number of nodes in the whole tree
 	for (uint64_t t = 0; t < totalNodesAtDepth.back(); t++)
 	{
 		GetLocation(t, x1, y1);
@@ -218,7 +220,7 @@ void NaryTree::Draw(Graphics::Display &display) const
 		for (uint64_t s : succ)
 		{
 			GetLocation(s, x2, y2);
-			display.DrawLine({x1, y1}, {x2, y2}, 1, Colors::white);
+			display.DrawLine({x1, y1}, {x2, y2}, 2.0-1.8*(((y1+y2)/2.0+1.0)/2.0), color);
 		}
 	}
 }
