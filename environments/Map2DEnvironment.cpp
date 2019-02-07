@@ -1365,7 +1365,8 @@ void MapEnvironment::DrawAlternate(Graphics::Display &disp, const xyLoc &l) cons
 		r.right = px+rad;
 		r.bottom = py+rad;
 		
-		disp.FrameCircle(r, c, 2);
+		disp.FrameCircle({static_cast<float>(px), static_cast<float>(py)}, rad, c, rad);
+//		disp.FrameCircle(r, c, 2);
 	}
 }
 

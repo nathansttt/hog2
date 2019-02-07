@@ -111,6 +111,14 @@ namespace std {
 }
 
 
+class EuclideanDistance : public Heuristic<xyLoc> {
+public:
+	double HCost(const xyLoc &a, const xyLoc &b) const
+	{
+		return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
+	}
+};
+
 //typedef OccupancyInterface<xyLoc, tDirection> BaseMapOccupancyInterface;
 
 
