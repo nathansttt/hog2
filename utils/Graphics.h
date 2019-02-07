@@ -15,23 +15,16 @@
 #include "FPUtil.h"
 
 namespace Graphics {
+	class point;
 
-	struct rect {
-		rect() {}
-		rect(float l, float t, float r, float b)
-		:left(l), top(t), right(r), bottom(b) {}
-		float left, top, right, bottom;
-	};
 	enum textAlign {
 		textAlignCenter,
 		textAlignLeft
 	};
-	bool PointInRect(const point3d &p, const rect &r);
-	
-	inline std::ostream &operator<<(std::ostream &o, const rect&r)
-	{ o << r.left << ", " << r.top  << ", " << r.right << ", " << r.bottom; return o; }
-	
+
+
 	struct point {
+		point(point3d p) :x(p.x), y(p.y), z(p.z) {}
 		point(float x = 0, float y = 0, float z = 0)
 		:x(x), y(y), z(z) {}
 		float x, y, z;
@@ -74,6 +67,24 @@ namespace Graphics {
 			return result;
 		}
 	};
+	
+	struct rect {
+		rect() {}
+		rect(point center, float rad) : left(center.x-rad), top(center.y-rad), right(center.x+rad), bottom(center.y+rad) {}
+		rect(float l, float t, float r, float b)
+		:left(l), top(t), right(r), bottom(b) {}
+		float left, top, right, bottom;
+	};
+	
+	inline std::ostream &operator<<(std::ostream &o, const rect&r)
+	{ o << r.left << ", " << r.top  << ", " << r.right << ", " << r.bottom; return o; }
+	
+	inline std::ostream &operator<<(std::ostream &o, const point&r)
+	{ o << "(" << r.x << ", " << r.y  << ", " << r.z << ")"; return o; }
+
+	bool PointInRect(const point3d &p, const rect &r);
+	bool PointInRect(const point &p, const rect &r);
+
 	/*
 	 * This class represents an abstract display.
 	 *
@@ -95,8 +106,12 @@ namespace Graphics {
 		void FrameRect(rect r, rgbColor c, float lineWidth);
 		void FillRect(rect r, rgbColor c);
 		void FrameCircle(rect r, rgbColor c, float lineWidth); // FIXME: Should be a point and a radius!
+		void FrameCircle(point r, float radius, rgbColor c, float lineWidth); // FIXME: Should be a point and a radius!
 		void FillCircle(rect r, rgbColor c);
-		
+		void FillCircle(point p, float radius, rgbColor c);
+		void FillNGon(point p, float radius, int sides, float rotation, rgbColor c);
+		void FrameNGon(point p, float radius, int sides, float rotation, rgbColor c);
+
 		void DrawLine(point start, point end, float lineWidth, rgbColor c);
 		void DrawLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c);
 		void DrawArrow(point start, point end, float lineWidth, rgbColor c);
@@ -107,6 +122,13 @@ namespace Graphics {
 			rect r;
 			rgbColor c;
 			float width;
+		};
+		struct shapeInfo {
+			point center;
+			rgbColor c;
+			float radius;
+			int segments;
+			float rotate;
 		};
 		struct lineInfo {
 			point start, end;
@@ -129,9 +151,17 @@ namespace Graphics {
 			kFrameRectangle,
 			kFillOval,
 			kFrameOval,
+			kFillNGon,
+			kFrameNGon,
 			kLine
 		};
 		struct data {
+			data(shapeInfo d, tDrawClass t, uint8_t view)
+			{
+				what = t;
+				polygon = d;
+				viewport = view;
+			}
 			data(drawInfo d, tDrawClass t, uint8_t view)
 			{
 				what = t;
@@ -147,6 +177,7 @@ namespace Graphics {
 			tDrawClass what;
 			union {
 				drawInfo shape;
+				shapeInfo polygon;
 				lineInfo line;
 			};
 			uint8_t viewport;

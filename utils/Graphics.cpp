@@ -14,7 +14,11 @@ namespace Graphics {
 		return p.y >= r.top && p.x >= r.left && p.y <= r.bottom && p.x <= r.right;
 	}
 
-	
+	bool PointInRect(const point &p, const rect &r)
+	{
+		return p.y >= r.top && p.x >= r.left && p.y <= r.bottom && p.x <= r.right;
+	}
+
 	Display::Display()
 	{
 		viewport = 0;
@@ -41,9 +45,9 @@ namespace Graphics {
 			backgroundDrawCommands.clear();
 			backgroundText.clear();
 			backgroundLineSegments.clear();
-			backgroundFrame = foregroundFrame;
-			drawingBackground = true;
 		}
+		backgroundFrame = foregroundFrame;
+		drawingBackground = true;
 	}
 	
 	void Display::EndBackground()
@@ -93,6 +97,15 @@ namespace Graphics {
 			drawCommands.push_back({i, kFrameOval, viewport});
 	}
 	
+	void Display::FrameCircle(point p, float radius, rgbColor c, float lineWidth)
+	{
+		drawInfo i = {{p.x-radius, p.y-radius, p.x+radius, p.y+radius}, c, lineWidth};
+		if (drawingBackground)
+			backgroundDrawCommands.push_back({i, kFrameOval, viewport});
+		else
+			drawCommands.push_back({i, kFrameOval, viewport});
+	}
+
 	void Display::FillCircle(rect r, rgbColor c)
 	{
 		drawInfo i = {r, c, 0};
@@ -101,6 +114,34 @@ namespace Graphics {
 		else
 			drawCommands.push_back({i, kFillOval, viewport});
 	}
+
+	void Display::FillCircle(point p, float radius, rgbColor c)
+	{
+		drawInfo i = {{p.x-radius, p.y-radius, p.x+radius, p.y+radius}, c, 0};
+		if (drawingBackground)
+			backgroundDrawCommands.push_back({i, kFillOval, viewport});
+		else
+			drawCommands.push_back({i, kFillOval, viewport});
+	}
+
+	void Display::FillNGon(point p, float radius, int sides, float rotation, rgbColor c)
+	{
+		shapeInfo i = {p, c, radius, sides, rotation};
+		if (drawingBackground)
+			backgroundDrawCommands.push_back({i, kFillNGon, viewport});
+		else
+			drawCommands.push_back({i, kFillNGon, viewport});
+	}
+	
+	void Display::FrameNGon(point p, float radius, int sides, float rotation, rgbColor c)
+	{
+		shapeInfo i = {p, c, radius, sides, rotation};
+		if (drawingBackground)
+			backgroundDrawCommands.push_back({i, kFrameNGon, viewport});
+		else
+			drawCommands.push_back({i, kFrameNGon, viewport});
+	}
+
 	
 	void Display::DrawLine(point start, point end, float lineWidth, rgbColor c)
 	{
