@@ -139,13 +139,15 @@ enum tKeyboardModifier {
 enum tButtonType {
 	kLeftButton,
 	kRightButton,
-	kMiddleButton // option on the mac
+	kMiddleButton, // option on the mac
+	kNoButton
 };
 
-enum tMouseEventType {
-	kMouseDown,
-	kMouseUp,
-	kMouseDrag // option on the mac
+enum tMouseEventType : int {
+	kMouseDown = 0x1,
+	kMouseUp = 0x2,
+	kMouseDrag = 0x4, // option on the mac
+	kMouseMove = 0x8
 };
 
 enum tWindowEventType {
@@ -238,18 +240,20 @@ public:
 
 class mouseCallbackData {
 public:
-	mouseCallbackData(MouseCallback _mC)
-	:mC(_mC)
+	mouseCallbackData(MouseCallback _mC, tMouseEventType _which)
+	:mC(_mC), which(_which)
 	{}
 	MouseCallback mC;
+	tMouseEventType which;
 };
 
 class mouseCallbackData2 {
 public:
-	mouseCallbackData2(MouseCallback2 _mC)
-	:mC(_mC)
+	mouseCallbackData2(MouseCallback2 _mC, tMouseEventType _which)
+	:mC(_mC), which(_which)
 	{}
 	MouseCallback2 mC;
+	tMouseEventType which;
 };
 
 class windowCallbackData {
@@ -280,8 +284,8 @@ void InstallJoystickHandler(JoystickCallback jC, void *userdata);
 void RemoveJoystickHandler(JoystickCallback jC, void *userdata);
 void HandleJoystickMovement(pRecContext pContextInfo, double panX, double panY);
 
-void InstallMouseClickHandler(MouseCallback mC);
-void InstallMouseClickHandler(MouseCallback2 mC);
+void InstallMouseClickHandler(MouseCallback mC, tMouseEventType which = static_cast<tMouseEventType>(kMouseDown|kMouseUp|kMouseDrag));
+void InstallMouseClickHandler(MouseCallback2 mC, tMouseEventType which = static_cast<tMouseEventType>(kMouseDown|kMouseUp|kMouseDrag));
 void RemoveMouseClickHandler(MouseCallback mC);
 void RemoveMouseClickHandler(MouseCallback2 mC);
 bool HandleMouse(pRecContext pContextInfo, point3d where, tButtonType button, tMouseEventType mouse);

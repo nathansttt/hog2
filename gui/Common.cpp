@@ -229,14 +229,14 @@ void ProcessCommandLineArgs(int argc, char *argv[])
 	}
 }
 
-void InstallMouseClickHandler(MouseCallback mC)
+void InstallMouseClickHandler(MouseCallback mC, tMouseEventType which)
 {
-	mouseCallbacks.push_back(new mouseCallbackData(mC));
+	mouseCallbacks.push_back(new mouseCallbackData(mC, which));
 }
 
-void InstallMouseClickHandler(MouseCallback2 mC)
+void InstallMouseClickHandler(MouseCallback2 mC, tMouseEventType which)
 {
-	mouseCallbacks2.push_back(new mouseCallbackData2(mC));
+	mouseCallbacks2.push_back(new mouseCallbackData2(mC, which));
 }
 
 void RemoveMouseClickHandler(MouseCallback mC)
@@ -309,34 +309,66 @@ point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d
 	}
 	else if (v.type == kScaleToSquare)
 	{
-		float localWidth = v.bounds.right-v.bounds.left;
-		float localHeight = v.bounds.bottom-v.bounds.top;
-		// find the smallest dimension; scale into that dimension and then shift into the middle
-		// minSize is in window pixels!
-		float minSize = (pContextInfo->windowWidth*localWidth<pContextInfo->windowHeight*localHeight)?localWidth:localHeight;
-		float xScale;
-		float yScale;
-		point3d center((v.bounds.left+v.bounds.right)/2.f, (v.bounds.top+v.bounds.bottom)/2.f, 0);
-		if (pContextInfo->windowWidth*localWidth < pContextInfo->windowHeight*localHeight)
-		{
-			minSize = localWidth;
-			xScale = 1.0;
-			yScale = (pContextInfo->windowHeight*localHeight)/(pContextInfo->windowWidth*localWidth);
-			//printf("Scaling x:%1.2f, y:%1.2f\n", xScale, yScale);
-		}
-		else {
-			minSize = localHeight;
-			xScale = (pContextInfo->windowWidth*localWidth)/(pContextInfo->windowHeight*localHeight);
-			yScale = 1.0;
-		}
+		double localWidth = v.bounds.right-v.bounds.left;
+		double localHeight = v.bounds.bottom-v.bounds.top;
+		double actualWidth = pContextInfo->windowWidth*localWidth;
+		double actualHeight = pContextInfo->windowHeight*localHeight;
+		double xRatio = actualWidth/actualHeight;
+		double yRatio = actualHeight/actualWidth;
+		xRatio = std::max(xRatio, 1.);
+		yRatio = std::max(yRatio, 1.);
+		
+		where.x *= xRatio;
+		where.x -= v.bounds.left;
+		where.x /= (v.bounds.right-v.bounds.left);
+		where.x = where.x*2.0-1.0;
 
-		where.x *= xScale;
-		where.y *= yScale;
-		where *= (minSize/2.0f);
-		where += center;
+		
+		where.y *= yRatio;
+		where.y -= v.bounds.bottom;
+		where.y /= (v.bounds.top-v.bounds.bottom);
+		where.y = (-where.y)*2.0+1.0;
 
 		
 		return where;
+
+//		// gets offset into rect
+//		where.x -= v.bounds.left;
+//		where.x /= (v.bounds.right-v.bounds.left);
+//		where.x = where.x*2.0-1.0;
+//		where.y -= v.bounds.bottom;
+//		where.y /= (v.bounds.top-v.bounds.bottom);
+//		where.y = -where.y*2.0+1.0;
+//		return where;
+//
+//		float localWidth = v.bounds.right-v.bounds.left;
+//		float localHeight = v.bounds.bottom-v.bounds.top;
+//		// find the smallest dimension; scale into that dimension and then shift into the middle
+//		// minSize is in window pixels!
+//		float minSize = (pContextInfo->windowWidth*localWidth<pContextInfo->windowHeight*localHeight)?localWidth:localHeight;
+//		float xScale;
+//		float yScale;
+//		point3d center((v.bounds.left+v.bounds.right)/2.f, (v.bounds.top+v.bounds.bottom)/2.f, 0);
+//		if (pContextInfo->windowWidth*localWidth < pContextInfo->windowHeight*localHeight)
+//		{
+//			minSize = localWidth;
+//			xScale = 1.0;
+//			yScale = (pContextInfo->windowHeight*localHeight)/(pContextInfo->windowWidth*localWidth);
+//			//printf("Scaling x:%1.2f, y:%1.2f\n", xScale, yScale);
+//		}
+//		else {
+//			minSize = localHeight;
+//			xScale = (pContextInfo->windowWidth*localWidth)/(pContextInfo->windowHeight*localHeight);
+//			yScale = 1.0;
+//		}
+//
+//		where.x *= xScale;
+//		where.y *= yScale;
+//		where *= (minSize/2.0f);
+//		where += center;
+//
+//
+//		return where;
 	}
 	else {
 		printf("Unknown scale type\n");
@@ -359,36 +391,57 @@ point3d ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, point3d
 	}
 	else if (v.type == kScaleToSquare)
 	{
-//		printf("From (%f, %f) to ", where.x, where.y);
-		float localWidth = v.bounds.right-v.bounds.left;
-		float localHeight = v.bounds.bottom-v.bounds.top;
-		// find the smallest dimension; scale into that dimension and then shift into the middle
-		// minSize is in window pixels!
-		float minSize;// = (pContextInfo->windowWidth*localWidth<pContextInfo->windowHeight*localHeight)?localWidth:localHeight;
-		float xScale;
-		float yScale;
-//		printf("-->Window: w%d h%d\n", pContextInfo->windowWidth, pContextInfo->windowHeight);
-		if (pContextInfo->windowWidth*localWidth < pContextInfo->windowHeight*localHeight)
-		{
-			minSize = localWidth;
-			xScale = 1.0;
-			yScale = (pContextInfo->windowHeight*localHeight)/(pContextInfo->windowWidth*localWidth);
-			//printf("Scaling x:%1.2f, y:%1.2f\n", xScale, yScale);
-		}
-		else {
-			minSize = localHeight;
-			xScale = (pContextInfo->windowWidth*localWidth)/(pContextInfo->windowHeight*localHeight);
-			yScale = 1.0;
-		}
-		point3d center((v.bounds.left+v.bounds.right)/2.f, (v.bounds.top+v.bounds.bottom)/2.f, 0);
-
-		where -= center;
-		where /= (minSize/2.0f);
-		where.x /= xScale;
-		where.y /= yScale;
-//		printf("(%f, %f)\n", where.x, where.y);
-
+		double localWidth = v.bounds.right-v.bounds.left;
+		double localHeight = v.bounds.bottom-v.bounds.top;
+		double actualWidth = pContextInfo->windowWidth*localWidth;
+		double actualHeight = pContextInfo->windowHeight*localHeight;
+		double xRatio = actualWidth/actualHeight;
+		double yRatio = actualHeight/actualWidth;
+		xRatio = std::max(xRatio, 1.);
+		yRatio = std::max(yRatio, 1.);
+		
+		where.x = (where.x+1.0)/2.0;
+		where.x *= (v.bounds.right-v.bounds.left);
+		where.x += v.bounds.left;
+		where.x /= xRatio;
+		
+		where.y = -(where.y-1.0)/2.0;
+		where.y *= (v.bounds.top-v.bounds.bottom);
+		where.y += v.bounds.bottom;
+		where.y /= yRatio;
 		return where;
+
+		
+//		//		printf("From (%f, %f) to ", where.x, where.y);
+////		float localWidth = v.bounds.right-v.bounds.left;
+////		float localHeight = v.bounds.bottom-v.bounds.top;
+//		// find the smallest dimension; scale into that dimension and then shift into the middle
+//		// minSize is in window pixels!
+//		float minSize;// = (pContextInfo->windowWidth*localWidth<pContextInfo->windowHeight*localHeight)?localWidth:localHeight;
+//		float xScale;
+//		float yScale;
+////		printf("-->Window: w%d h%d\n", pContextInfo->windowWidth, pContextInfo->windowHeight);
+//		if (pContextInfo->windowWidth*localWidth < pContextInfo->windowHeight*localHeight)
+//		{
+//			minSize = localWidth;
+//			xScale = 1.0;
+//			yScale = (pContextInfo->windowHeight*localHeight)/(pContextInfo->windowWidth*localWidth);
+//			//printf("Scaling x:%1.2f, y:%1.2f\n", xScale, yScale);
+//		}
+//		else {
+//			minSize = localHeight;
+//			xScale = (pContextInfo->windowWidth*localWidth)/(pContextInfo->windowHeight*localHeight);
+//			yScale = 1.0;
+//		}
+//		point3d center((v.bounds.left+v.bounds.right)/2.f, (v.bounds.top+v.bounds.bottom)/2.f, 0);
+//
+//		where -= center;
+//		where /= (minSize/2.0f);
+//		where.x /= xScale;
+//		where.y /= yScale;
+////		printf("(%f, %f)\n", where.x, where.y);
+//
+//		return where;
 	}
 	else {
 		printf("Unknown scale type\n");
@@ -402,13 +455,15 @@ bool HandleMouse(pRecContext pContextInfo, point3d where, tButtonType button, tM
 {
 	for (int x = MAXPORTS-1; x >= 0; x--)
 	{
-		if (!pContextInfo->viewports[x].active)
-			continue;
+//		if (!pContextInfo->viewports[x].active)
+//			continue;
 		if (!PointInRect(where, pContextInfo->viewports[x].bounds))
 			continue;
 		// got hit in rect
 		point3d res = GlobalHOGToViewport(pContextInfo, pContextInfo->viewports[x], where);
-		HandleMouseClick(pContextInfo, x, -1, -1, res, button, mouse);
+		// click handled
+		if (HandleMouseClick(pContextInfo, x, -1, -1, res, button, mouse))
+			return true;
 	}
 	return false;
 }
@@ -419,9 +474,12 @@ bool HandleMouseClick(pRecContext pContextInfo, int viewport, int x, int y, poin
 {
 	for (unsigned int j = 0; j < mouseCallbacks2.size(); j++)
 	{
-		if (mouseCallbacks2[j]->mC(pContextInfo->windowID, viewport, x, y, where,
-								  button, mouse))
-			return true;
+		if (mouseCallbacks2[j]->which&mouse) // need to ask for event to call handler
+		{
+			if (mouseCallbacks2[j]->mC(pContextInfo->windowID, viewport, x, y, where,
+									   button, mouse))
+				return true;
+		}
 	}
 	return HandleMouseClick(pContextInfo, x, y, where, button, mouse);
 }
@@ -431,9 +489,12 @@ bool HandleMouseClick(pRecContext pContextInfo, int x, int y, point3d where,
 {
 	for (unsigned int j = 0; j < mouseCallbacks.size(); j++)
 	{
-		if (mouseCallbacks[j]->mC(pContextInfo->windowID, x, y, where,
-															button, mouse))
-			return true;
+		if (mouseCallbacks[j]->which&mouse) // need to ask for event to call handler
+		{
+			if (mouseCallbacks[j]->mC(pContextInfo->windowID, x, y, where,
+									  button, mouse))
+				return true;
+		}
 	}
 	return false;
 }
