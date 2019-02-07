@@ -9,9 +9,12 @@
 #ifndef BID_h
 #define BID_h
 
+#include "vectorCache.h"
+
 template <class state, class action>
 class BID {
 public:
+	BID(double minGrow, double maxGrow) :c1(minGrow), c2(maxGrow) {}
 //	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
 //				 std::vector<state> &thePath);
 	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
@@ -19,23 +22,31 @@ public:
 	void GetPath(SearchEnvironment<state, action> *env, Heuristic<state> *heuristic, state from, state to,
 				 std::vector<action> &thePath);
 
-	uint64_t GetNodesExpanded() { return nodesExpanded; }
-	uint64_t GetNodesTouched() { return nodesTouched; }
-	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
+	uint64_t GetNodesExpanded() { return totalNodesExpanded; }
+	uint64_t GetNodesTouched() { return totalNodesTouched; }
+	void ResetNodeCount() { totalNodesExpanded = totalNodesTouched = 0; }
 private:
+	struct searchData {
+		double f;
+		double nextF;
+		double failedF;
+		uint64_t nodes;
+	};
 	std::pair<uint32_t, uint32_t> ExponentialSearch();
-	uint32_t BinarySearch(uint32_t b1, uint32_t b2);
-	uint64_t DFBNB(state currState, uint32_t costLimit, uint64_t nodeLimit);
-	uint64_t DFBNBHelper(state &currState, uint32_t pathCost, uint32_t costLimit, uint64_t nodesExpanded, uint64_t nodeLimit);
+	BID<state, action>::searchData BinarySearch(searchData d, uint64_t nodeLimit);
+	BID<state, action>::searchData ExponentialSearch(const searchData &d, uint64_t nodeLimit);
+	BID<state, action>::searchData DFBNB(double costLimit, uint64_t nodeLimit);
+	BID<state, action>::searchData DFBNBHelper(state &currState, double pathCost, double costLimit, searchData &sd,
+						 uint64_t nodeLimit, action forbidden);
 
-	uint64_t nodesExpanded, nodesTouched;
+	uint64_t totalNodesExpanded, totalNodesTouched;
 	Heuristic<state> *h;
 	SearchEnvironment<state, action> *env;
-
+	std::vector<action> solutionPath, currPath;
+	double solutionCost;
+	vectorCache<action> actCache;
 	state start, goal;
-	uint32_t CUpperBound, CLowerBound;
-	uint64_t nodeLowerBound, nodeUpperBound;
-
+	double c1, c2;
 };
 
 template <class state, class action>
@@ -51,118 +62,187 @@ void BID<state, action>::GetPath(SearchEnvironment<state, action> *env, Heuristi
 {
 	this->env = env;
 	h = heuristic;
-	
 	start = from;
 	goal = to;
-	CLowerBound = h->(start, goal);
-	CUpperBound = 0xFFFFFFFF;
-	nodeLowerBound = 1;// Do B&B search to establish the number by initial bound
-	nodeUpperBound = 2;
+	solutionPath.clear();
+	solutionCost = DBL_MAX;
+	ResetNodeCount();
 	
+	printf("EBIS: Baseline search: f: %1.2f\n", h->HCost(from, to));
+	searchData base = DFBNB(h->HCost(from, to), -1);
+	while (solutionCost > base.f)
+	{
+		printf("EBIS: First search: f: %1.2f target: (%llu, %llu]\n",
+			   base.nextF, uint64_t(c1*base.nodes), uint64_t(c2*base.nodes));
+		searchData curr = DFBNB(base.nextF, -1);
+		if (solutionPath.size() != 0)
+		{ thePath = solutionPath; return; }
+
+		// Didn't reach the node expansions bound
+		if (curr.nodes < c1*base.nodes)
+		{
+			printf("EBIS: %llu under target %llu, initiate EXP search\n", curr.nodes, uint64_t(c1*base.nodes));
+			curr = ExponentialSearch(curr, base.nodes);
+
+			// Overshot the node expansions bound
+			if (curr.nodes >= c2*base.nodes)
+			{
+				printf("EBIS: %llu over target %llu, initiate BIN search\n", curr.nodes, uint64_t(c2*base.nodes));
+				curr = BinarySearch(curr, base.nodes);
+			}
+		}
+		if (solutionPath.size() != 0)
+		{ thePath = solutionPath; return; }
+		base = curr;
+	}
+}
+
+template <class state, class action>
+typename BID<state, action>::searchData BID<state, action>::ExponentialSearch(const searchData &d, uint64_t nodeLimit)
+{
+	double delta = std::max(d.nextF - d.f, 1.0); // TODO: replace with a min delta parameter
+	int i = 0;
+	searchData lastSuccess = d;
 	while (true)
 	{
-		// Searches strictly within the node bound until it finds:
-		// 1) A new lower-bound on the solution cost which results in node expansions in the node bounds
-		// 2) A range of solution costs where the first value is below and the last value is outside the node bound range
-		// Additionally, it may reduce CUpperBound as solutions are found
-		// Returns the range of possible costs for this node bound
-		auto p = ExponentialSearch();
+		double bound = d.f + delta*pow(2, i);
+		searchData curr = DFBNB(bound, c2*nodeLimit);
+		if (solutionPath.size() != 0)
+			return curr;
 		
-		// we hit the range
-		if (p.first == p.second)
+		if (c1*nodeLimit <= curr.nodes && curr.nodes < c2*nodeLimit)
 		{
-			continue;
+			printf("EBIS:->EXP: in node window\n");
+			return curr;
 		}
-
-		// Searches between the cost values in the pair to find somewhere where node expansions fall in the bound.
-		// 1) If we don't find a cost between the solution bounds then we search the full iteration that goes over
-		//    the bound, assuming we haven't yet found a solution.
-		// We return the cost bound that we've exhaustively searched
-		CLowerBound = BinarySearch(p.first, p.second, NodeBound);
-	}
-}
-
-// Searches for next c-limit
-template <class state, class action>
-std::pair<uint32_t, uint32_t> BID<state, action>::ExponentialSearch()
-{
-	int k = 1;
-	uint32_t lb;
-	
-	while (true)
-	{
-		lb = CLowerBound+k;
-		uint64_t actual = DFBNB(start, lb); // TODO: Use next limit
-		if (actual >= nodeLowerBound && actual <= nodeUpperBound) // success
+		else if (curr.nodes >= c2*nodeLimit)
 		{
-			// Set next node limits to actual*2 ... actual*10
-			nodeLowerBound = actual*2;
-			nodeUpperBound = actual*10;
-			// Set next cost limit lower bound to be lb
-			return {lb, lb};
+			printf("EBIS:->EXP: over node window\n");
+			lastSuccess.nodes = curr.nodes;
+			lastSuccess.failedF = bound;
+			return lastSuccess;
 		}
-		if (actual > nodeUpperBound) // done
-			return {CLowerBound+k/2, ClowerBound+k};
-		k = k*2;
+		else {
+			printf("EBIS:->EXP: below node window\n");
+			lastSuccess = curr;
+		}
+		i++;
+		if (d.f + delta*pow(2, i) < curr.nextF)
+			printf("EBIS:->EXP: delta too small, increasing growth past nextf\n");
+		while (d.f + delta*pow(2, i) < curr.nextF)
+		{
+			i++;
+		}
 	}
 }
 
-// Search between b1 and b2 exclusive
-// We know b1 is under the range and b2 is over the range
-// Return the cost bound we've searched exhaustively
 template <class state, class action>
-uint32_t BID<state, action>::BinarySearch(uint32_t b1, uint32_t b2, int32_t nodeLimit)
+typename BID<state, action>::searchData BID<state, action>::BinarySearch(searchData d, uint64_t nodeLimit)
 {
-	// base cases (failure)
-	if (b1+1 >= b2)
+	double middlef = (d.failedF + d.f)/2.0;
+	searchData curr;
+	if (middlef <= d.nextF)
 	{
-		// exhaustively search b2 and continue from there
-		uint64_t actual = DFBNB(start, b2, nodeLimit); // TODO: run infinitely
-		// TODO: keep track of next bound in DFBNB
-		nodeLowerBound = actual*2;
-		nodeUpperBound = actual*10;
-		return 0;
+		curr = DFBNB(d.nextF, -1);
+		if (curr.nodes >= c1*nodeLimit)
+			return curr;
 	}
-	// recursive cases
-	// search (b1+b2)/2
-	uint64_t actual = DFBNB(start, (b1+b2)/2, nodeLimit);
+	else {
+		curr = DFBNB(middlef, c2*nodeLimit);
+	}
+	// found and proved solution
+	if (solutionCost <= middlef && curr.nodes < c2*nodeLimit)
+		return curr;
 	
-	if (actual < nodeLimit) // found in bound - (need to check off-by-one computation)
+	if (c1*nodeLimit <= curr.nodes && curr.nodes < c2*nodeLimit)
 	{
-		return BinarySearch((b1+b2)/2, b2, nodeLimit);
+		printf("EBIS:->BIN: in node window\n");
+		return curr;
 	}
-	else { // over bound
-		return BinarySearch(b1, (b1+b2)/2, nodeLimit);
+	else if (curr.nodes >= c2*nodeLimit)
+	{
+		printf("EBIS:->BIN: over node window\n");
+		d.failedF = std::min(middlef, solutionCost);
+		return BinarySearch(d, nodeLimit);
+	}
+	else {
+		printf("EBIS:->BIN: below node window\n");
+		curr.failedF = d.failedF;
+		return BinarySearch(curr, nodeLimit);
 	}
 }
 
+
 template <class state, class action>
-uint64_t BID<state, action>::DFBNB(state currState, uint32_t costLimit, uint64_t nodeLimit)
+typename BID<state, action>::searchData BID<state, action>::DFBNB(double costLimit, uint64_t nodeLimit)
 {
-	return DFBNBHelper(currState, 0, costLimit, 0, nodeLimit);
+	state currState = start;
+	if (nodeLimit != -1)
+		printf("    --+DFBnB f: %1.3f; nodes: %llu; ", costLimit, nodeLimit);
+	else
+		printf("    --+DFBnB f: %1.3f; nodes: ∞; ", costLimit);
+	currPath.clear();
+	searchData sd;
+	sd.nextF = DBL_MAX;
+	sd.f = 0;
+	sd.nodes = 0;
+	action a;
+	sd = DFBNBHelper(currState, 0, costLimit, sd, nodeLimit, a);
+	totalNodesExpanded += sd.nodes;
+	printf("%llu (new) %llu (total), maxf: %f, nextf: %f\n", sd.nodes, totalNodesExpanded, sd.f, sd.nextF);
+	return sd;
 }
 
 template <class state, class action>
-uint64_t BID<state, action>::DFBNBHelper(state &currState, uint32_t pathCost, uint32_t costLimit, uint64_t nodesExpanded, uint64_t nodeLimit)
+typename BID<state, action>::searchData BID<state, action>::DFBNBHelper(state &currState, double pathCost, double costLimit,
+										 searchData &sd, uint64_t nodeLimit, action forbidden)
 {
-	if (pathCost+env->HCost(currState, goal) > costLimit)
-		return nodesExpanded;
-	if (nodesExpanded >= nodeLimit)
-		return nodesExpanded;
+	double currF = pathCost+env->HCost(currState, goal);
+//	printf("-------->%f [%f]\n", currF, pathCost);
+	if (fgreater(currF, costLimit) || fgreatereq(currF, solutionCost))
+	{
+		sd.nextF = std::min(sd.nextF, currF);
+		return sd;
+	}
+	else {
+		sd.f = std::max(currF, sd.f);
+	}
+	
+	if (sd.nodes >= nodeLimit)
+		return sd;
+	if (env->GoalTest(currState, goal))
+	{
+		if (fless(currF, solutionCost))
+		{
+			solutionPath = currPath;
+			solutionCost = currF;
+		}
+		return sd;
+	}
 	
 	// TODO: cache these for later use
-	std::vector<action> acts;
+	std::vector<action> &acts = *actCache.getItem();
 	env->GetActions(currState, acts);
-	nodesExpanded++;
+	sd.nodes++;
+	totalNodesTouched+=acts.size();
+
 	for (int x = 0; x < acts.size(); x++)
 	{
-		uint32_t edgeCost = env->GCost(currState, acts[x]);
+		if (acts[x] == forbidden && currPath.size() > 0)
+			continue;
+		double edgeCost = env->GCost(currState, acts[x]);
 		env->ApplyAction(currState, acts[x]);
-		nodesExpanded = DFBNBHelper(currState, pathCost+edgeCost, costLimit, nodesExpanded, nodeLimit);
+		currPath.push_back(acts[x]);
+		action rev = acts[x];
+		env->InvertAction(rev);
+		sd = DFBNBHelper(currState, pathCost+edgeCost, costLimit, sd, nodeLimit, rev);
+		currPath.pop_back();
 		env->UndoAction(currState, acts[x]);
 	}
-	return nodesExpanded;
+	actCache.returnItem(&acts);
+	return sd;
 }
 
 
 #endif /* BID_h */
+
