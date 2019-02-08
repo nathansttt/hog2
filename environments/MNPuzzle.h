@@ -19,6 +19,7 @@
 #include "Graph.h"
 #include "GraphEnvironment.h"
 #include <sstream>
+#include <array>
 
 template <int width, int height>
 class MNPuzzleState {
@@ -47,7 +48,8 @@ public:
 	}
 
 	unsigned int blank;
-	int puzzle[width*height];
+	std::array<int, width*height> puzzle;
+//	int puzzle[width*height];
 };
 
 /**
@@ -1273,8 +1275,8 @@ void MNPuzzle<width, height>::GetStateFromHash(MNPuzzleState<width, height> &s, 
 template <int width, int height>
 uint64_t MNPuzzle<width, height>::GetStateHash(const MNPuzzleState<width, height> &s) const
 {
-	std::vector<int> locs(width*height-2); // We only rank n-2 of n items; last two are fixed by the parity
-	std::vector<int> dual(width*height);
+	std::array<int, width*height-2> locs;// We only rank n-2 of n items; last two are fixed by the parity
+	std::array<int, width*height> dual;
 	
 	// build the representation containing the item locations
 	for (unsigned int x = 0; x < width*height; x++)
@@ -1287,7 +1289,7 @@ uint64_t MNPuzzle<width, height>::GetStateHash(const MNPuzzleState<width, height
 		locs[x] = dual[x];
 	}
 	
-	uint32_t hashVal = 0;
+	uint64_t hashVal = 0;
 	int numEntriesLeft = width*height;
 	
 	// compute the lexographical ranking of the locations
