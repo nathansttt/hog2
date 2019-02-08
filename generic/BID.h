@@ -21,7 +21,8 @@ public:
 				 std::vector<action> &thePath);
 	void GetPath(SearchEnvironment<state, action> *env, Heuristic<state> *heuristic, state from, state to,
 				 std::vector<action> &thePath);
-
+	void RedoMinWork();
+	
 	uint64_t GetNodesExpanded() { return totalNodesExpanded; }
 	uint64_t GetNodesTouched() { return totalNodesTouched; }
 	void ResetNodeCount() { totalNodesExpanded = totalNodesTouched = 0; }
@@ -243,6 +244,12 @@ typename BID<state, action>::searchData BID<state, action>::DFBNBHelper(state &c
 	return sd;
 }
 
+template <class state, class action>
+void BID<state, action>::RedoMinWork()
+{
+	ResetNodeCount();
+	DFBNB(solutionCost, -1);
+}
 
 #endif /* BID_h */
 
