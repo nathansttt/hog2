@@ -1348,7 +1348,7 @@ namespace PermutationPuzzle {
 //		for (int x = 0; x < tmpArray.size(); x++)
 //			printf("%d ", tmpArray2[x]);
 //		printf("\n");
-		uint64_t hash = mr1.Rank(tmp.puzzle, dual.puzzle, s.size(), s.size());
+		uint64_t hash = mr1.Rank(&tmp.puzzle[0], &dual.puzzle[0], s.size(), s.size());
 //		printf("Hash: %llu\n", hash);
 //		mr1.Unrank(hash, &tmpArray[0], &tmpArray2[0], s.puzzle.size(), s.puzzle.size());
 //		printf("Unrnk: ");
