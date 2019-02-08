@@ -49,9 +49,13 @@ std::vector<slideDir> moves, tmpPath;
 double v = 1;
 
 bool recording = false;
+void TestSTP(int instance, int algorithm);
+void ValidateWeights();
 
 int main(int argc, char* argv[])
 {
+	ValidateWeights();
+	
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 640, 640);
 	return 0;
@@ -173,7 +177,6 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	return;
 	
 }
-void TestSTP(int instance, int algorithm);
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
@@ -197,7 +200,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 void TestSTP(int instance, int algorithm)
 {
 	MNPuzzle<4, 4> stp;
-	MNPuzzleState<4, 4> start, goal;
+	MNPuzzleState<4, 4> start, goal, testStart;
 	std::vector<slideDir> moves, tmpPath;
 
 	stp.SetWeighted(kUnitPlusFrac);
@@ -229,6 +232,12 @@ void TestSTP(int instance, int algorithm)
 			t.EndTimer();
 			printf("EB Search: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
 				   ebis.GetNodesExpanded(), ebis.GetNodesTouched(), stp.GetPathLength(start, tmpPath));
+
+			t.StartTimer();
+			ebis.RedoMinWork();
+			t.EndTimer();
+			printf("DBDFS: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
+				   ebis.GetNodesExpanded(), ebis.GetNodesTouched(), stp.GetPathLength(start, tmpPath));
 		}
 			break;
 		case 2: // A*
@@ -246,6 +255,64 @@ void TestSTP(int instance, int algorithm)
 	
 	exit(0);
 }
+
+//void TestSTP(int instance, int algorithm)
+//{
+//	MNPuzzle<4, 4> stp;
+//	{
+//		MNPuzzleState<4, 4> a, b;
+//		a.puzzle = {4, 1, 2, 3, 8, 5, 6, 7, 12, 10, 0, 11, 13, 9, 14, 15};
+//		b.puzzle = {4, 1, 8, 14, 12, 9, 5, 7, 13, 11, 10, 6, 0, 3, 2, 15};
+//		std::cout << "A hash is " << stp.GetStateHash(a) << "\n";
+//		std::cout << "B hash is " << stp.GetStateHash(b) << "\n";
+//		if (stp.GetStateHash(a) == stp.GetStateHash(b))
+//			exit(1);
+//	}
+//	MNPuzzleState<4, 4> start, goal, next;
+//	std::vector<slideDir> moves, tmpPath;
+//
+//	stp.SetWeighted(kUnitPlusFrac);
+//	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
+//	IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
+//	BID<MNPuzzleState<4, 4>, slideDir> ebis(2, 5);
+//	std::vector<MNPuzzleState<4, 4>> path, ebPath;
+//
+//	//assert(instance >= 0 && instance < 100);
+//	start = STP::GetKorfInstance(20);
+//
+//	ebis.GetPath(&stp, start, goal, tmpPath);
+//	astar.GetPath(&stp, start, goal, path);
+//	ebPath.push_back(start);
+//
+//	next = start;
+//	for (auto i : tmpPath)
+//	{
+//		stp.ApplyAction(next, i);
+//		ebPath.push_back(next);
+//	}
+//
+//	double totalCost = 0;
+//	for (auto &i : ebPath)
+//	{
+//		double cost;
+//		std::cout << i << "\n";
+//		bool found = astar.GetClosedListGCost(i, cost);
+//		if (!found)
+//		{
+//			printf("Not Found!!\n");
+//			break;
+//		}
+//		else {
+//			printf("[%llu] AStar: %f (%f); path: %f\n", stp.GetStateHash(i), cost, cost+stp.HCost(i, goal), totalCost);
+//			if (i == goal)
+//				break;
+//			totalCost += stp.GCost(i, *(&i+1));
+//		}
+//	}
+//
+//	exit(0);
+//}
+
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
@@ -281,3 +348,20 @@ bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEven
 	return false;
 }
 
+void ValidateWeights()
+{
+	MNPuzzle<4, 4> stp;
+	MNPuzzleState<4, 4> s1, s2;
+	std::vector<slideDir> moves;
+	stp.SetWeighted(kUnitPlusFrac);
+	for (int x = 0; x < 100000; x++)
+	{
+		stp.GetActions(s1, moves);
+		auto i = moves[random()%moves.size()];
+		s2 = s1;
+		stp.ApplyAction(s2, i);
+		assert(stp.GCost(s1, s2) == stp.GCost(s1, i));
+		s1 = s2;
+	}
+	printf("Weights validated\n");
+}
