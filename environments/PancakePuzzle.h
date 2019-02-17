@@ -66,8 +66,19 @@ public:
 	double DefaultH(const PancakePuzzleState<N> &state1, const std::vector<int> &goal_locs) const;
 	double HCost(const PancakePuzzleState<N> &state1) const;
 
-	double GCost(const PancakePuzzleState<N> &, const PancakePuzzleState<N> &) const {return 1.0;}
-	double GCost(const PancakePuzzleState<N> &, const PancakePuzzleAction &) const { return 1.0; }
+	double GCost(const PancakePuzzleState<N> &s1, const PancakePuzzleState<N> &s2) const
+	{
+		if (!real) return 1.0;
+		PancakePuzzleAction a;
+		a = GetAction(s1, s2);
+		return GCost(s1, a);
+	}
+	double GCost(const PancakePuzzleState<N> &, const PancakePuzzleAction &a) const
+	{
+		if (!real) return 1.0;
+		else // bigger a is more pancakes - more expensive
+			return 1.0+0.1*(static_cast<double>(a)/static_cast<double>(N));
+	}
 
 	bool GoalTest(const PancakePuzzleState<N> &state, const PancakePuzzleState<N> &goal) const;
 
@@ -130,9 +141,9 @@ public:
 
 	void Set_Use_Memory_Free_Heuristic(bool to_use){use_memory_free = to_use;}
 	void Set_Use_Dual_Lookup( bool to_use ) { use_dual_lookup = to_use; };
-
+	void SetUseRealValueEdges(bool use) { real = use; }
 private:
-
+	bool real;
 	std::vector<PancakePuzzleAction> operators;
 	bool goal_stored; // whether a goal is stored or not
 	bool use_memory_free;
