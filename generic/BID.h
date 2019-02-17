@@ -14,7 +14,7 @@
 template <class state, class action>
 class BID {
 public:
-	BID(double minGrow, double maxGrow) :c1(minGrow), c2(maxGrow) {}
+	BID(double minGrow, double maxGrow, double expEpsilon) :c1(minGrow), c2(maxGrow), initialGap(expEpsilon) {}
 //	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
 //				 std::vector<state> &thePath);
 	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
@@ -48,6 +48,7 @@ private:
 	vectorCache<action> actCache;
 	state start, goal;
 	double c1, c2;
+	double initialGap;
 };
 
 template <class state, class action>
@@ -101,7 +102,7 @@ void BID<state, action>::GetPath(SearchEnvironment<state, action> *env, Heuristi
 template <class state, class action>
 typename BID<state, action>::searchData BID<state, action>::ExponentialSearch(const searchData &d, uint64_t nodeLimit)
 {
-	double delta = std::max(d.nextF - d.f, 1.0); // TODO: replace with a min delta parameter
+	double delta = std::max(d.nextF - d.f, initialGap);
 	int i = 0;
 	searchData lastSuccess = d;
 	while (true)

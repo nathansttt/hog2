@@ -49,7 +49,7 @@ std::vector<slideDir> moves, tmpPath;
 double v = 1;
 
 bool recording = false;
-void TestSTP(int instance, int algorithm);
+void TestSTP(int instance, int algorithm, double minGrowth, double maxGrowth, double startEpsilon);
 void ValidateWeights();
 
 int main(int argc, char* argv[])
@@ -101,7 +101,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		p.SetWeighted(kUnitPlusFrac);
 		TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
 		IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
-		BID<MNPuzzleState<4, 4>, slideDir> ebis(2, 5);
+		BID<MNPuzzleState<4, 4>, slideDir> ebis(2, 5, 1);
 		s = STP::GetKorfInstance(1);
 //		srandom(20181222);
 //		s = STP::GetRandomInstance(135);
@@ -182,12 +182,20 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if (strcmp(argument[0], "-stp") == 0)
 	{
-		if (maxNumArgs >= 3)
-			TestSTP(atoi(argument[1]), atoi(argument[2]));
-		else {
+		double c1 = 2, c2 = 5, ep = -1;
+		if (maxNumArgs < 3)
+		{
 			printf("Error: didn't pass arguments: <instance> <algorithm>\n");
 			exit(0);
 		}
+		if (maxNumArgs >= 4)
+			c1 = atof(argument[3]);
+		if (maxNumArgs >= 5)
+			c2 = atof(argument[4]);
+		if (maxNumArgs >= 6)
+			ep = atof(argument[5]);
+
+		TestSTP(atoi(argument[1]), atoi(argument[2]), c1, c2, ep);
 	}
 	if (strcmp(argument[0], "-test") == 0)
 	{
@@ -197,7 +205,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	return 2;
 }
 
-void TestSTP(int instance, int algorithm)
+void TestSTP(int instance, int algorithm, double minGrowth, double maxGrowth, double startEpsilon)
 {
 	MNPuzzle<4, 4> stp;
 	MNPuzzleState<4, 4> start, goal, testStart;
@@ -206,7 +214,7 @@ void TestSTP(int instance, int algorithm)
 	stp.SetWeighted(kUnitPlusFrac);
 	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
 	IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
-	BID<MNPuzzleState<4, 4>, slideDir> ebis(2, 5);
+	BID<MNPuzzleState<4, 4>, slideDir> ebis(minGrowth, maxGrowth, startEpsilon);
 	std::vector<MNPuzzleState<4, 4>> path;
 
 	assert(instance >= 0 && instance < 100);
@@ -226,8 +234,10 @@ void TestSTP(int instance, int algorithm)
 			break;
 		case 1: // EB Search
 		{
-			std::cout << "EB search from\n" << start << "\n" << goal << "\n";
+			printf("EB(%1.2f, %1.2f, %1.2f): ", minGrowth, maxGrowth, startEpsilon);
+			std::cout << " search from\n" << start << "\n" << goal << "\n";
 			t.StartTimer();
+			
 			ebis.GetPath(&stp, start, goal, tmpPath);
 			t.EndTimer();
 			printf("EB Search: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
