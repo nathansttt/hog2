@@ -33,7 +33,6 @@ private:
 		double failedF;
 		uint64_t nodes;
 	};
-	std::pair<uint32_t, uint32_t> ExponentialSearch();
 	BID<state, action>::searchData BinarySearch(searchData d, uint64_t nodeLimit);
 	BID<state, action>::searchData ExponentialSearch(const searchData &d, uint64_t nodeLimit);
 	BID<state, action>::searchData DFBNB(double costLimit, uint64_t nodeLimit);
@@ -81,13 +80,13 @@ void BID<state, action>::GetPath(SearchEnvironment<state, action> *env, Heuristi
 		{ thePath = solutionPath; return; }
 
 		// Didn't reach the node expansions bound
-		if (curr.nodes < c1*base.nodes)
+		if (curr.nodes < uint64_t(c1*base.nodes))
 		{
 			printf("EBIS: %llu under target %llu, initiate EXP search\n", curr.nodes, uint64_t(c1*base.nodes));
 			curr = ExponentialSearch(curr, base.nodes);
 
 			// Overshot the node expansions bound
-			if (curr.nodes >= c2*base.nodes)
+			if (curr.nodes >= uint64_t(c2*base.nodes))
 			{
 				printf("EBIS: %llu over target %llu, initiate BIN search\n", curr.nodes, uint64_t(c2*base.nodes));
 				curr = BinarySearch(curr, base.nodes);
@@ -102,6 +101,8 @@ void BID<state, action>::GetPath(SearchEnvironment<state, action> *env, Heuristi
 template <class state, class action>
 typename BID<state, action>::searchData BID<state, action>::ExponentialSearch(const searchData &d, uint64_t nodeLimit)
 {
+	uint64_t lowNodes = c1*nodeLimit;
+	uint64_t highNodes = c2*nodeLimit;
 	double delta = std::max(d.nextF - d.f, initialGap);
 	int i = 0;
 	searchData lastSuccess = d;
@@ -109,15 +110,13 @@ typename BID<state, action>::searchData BID<state, action>::ExponentialSearch(co
 	{
 		double bound = d.f + delta*pow(2, i);
 		searchData curr = DFBNB(bound, c2*nodeLimit);
-		if (solutionPath.size() != 0)
-			return curr;
 		
-		if (c1*nodeLimit <= curr.nodes && curr.nodes < c2*nodeLimit)
+		if (lowNodes <= curr.nodes && curr.nodes < highNodes)
 		{
-			printf("EBIS:->EXP: in node window\n");
+			printf("EBIS:->EXP: in node window [%llu <= %llu < %llu]\n", lowNodes, curr.nodes, highNodes);
 			return curr;
 		}
-		else if (curr.nodes >= c2*nodeLimit)
+		else if (curr.nodes >= highNodes)
 		{
 			printf("EBIS:->EXP: over node window\n");
 			lastSuccess.nodes = curr.nodes;
@@ -125,6 +124,11 @@ typename BID<state, action>::searchData BID<state, action>::ExponentialSearch(co
 			return lastSuccess;
 		}
 		else {
+			if (solutionPath.size() != 0)
+			{
+				printf("EBIS:->EXP: Solution proven below window; done\n");
+				return curr;
+			}
 			printf("EBIS:->EXP: below node window\n");
 			lastSuccess = curr;
 		}
@@ -141,27 +145,29 @@ typename BID<state, action>::searchData BID<state, action>::ExponentialSearch(co
 template <class state, class action>
 typename BID<state, action>::searchData BID<state, action>::BinarySearch(searchData d, uint64_t nodeLimit)
 {
+	uint64_t lowNodes = c1*nodeLimit;
+	uint64_t highNodes = c2*nodeLimit;
 	double middlef = (d.failedF + d.f)/2.0;
 	searchData curr;
 	if (middlef <= d.nextF)
 	{
 		curr = DFBNB(d.nextF, -1);
-		if (curr.nodes >= c1*nodeLimit)
+		if (curr.nodes >= lowNodes)
 			return curr;
 	}
 	else {
-		curr = DFBNB(middlef, c2*nodeLimit);
+		curr = DFBNB(middlef, highNodes);
 	}
 	// found and proved solution
-	if (solutionCost <= middlef && curr.nodes < c2*nodeLimit)
+	if (solutionCost <= middlef && curr.nodes < highNodes)
 		return curr;
 	
-	if (c1*nodeLimit <= curr.nodes && curr.nodes < c2*nodeLimit)
+	if (lowNodes <= curr.nodes && curr.nodes < highNodes)
 	{
-		printf("EBIS:->BIN: in node window\n");
+		printf("EBIS:->BIN: in node window [%llu <= %llu < %llu]\n", lowNodes, curr.nodes, highNodes);
 		return curr;
 	}
-	else if (curr.nodes >= c2*nodeLimit)
+	else if (curr.nodes >= highNodes)
 	{
 		printf("EBIS:->BIN: over node window\n");
 		d.failedF = std::min(middlef, solutionCost);
@@ -191,6 +197,12 @@ typename BID<state, action>::searchData BID<state, action>::DFBNB(double costLim
 	action a;
 	sd = DFBNBHelper(currState, 0, costLimit, sd, nodeLimit, a);
 	totalNodesExpanded += sd.nodes;
+	if (sd.nextF == DBL_MAX) // so few nodes expanded we didn't find the next bound
+	{
+		printf(" (oops) ");
+		sd = DFBNBHelper(currState, 0, costLimit, sd, -1, a);
+		totalNodesExpanded += sd.nodes;
+	}
 	printf("%llu (new) %llu (total), maxf: %f, nextf: %f\n", sd.nodes, totalNodesExpanded, sd.f, sd.nextF);
 	return sd;
 }
