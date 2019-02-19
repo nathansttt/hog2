@@ -12,11 +12,9 @@
 #include "vectorCache.h"
 
 template <class state, class action>
-class BID {
+class EBSearch {
 public:
-	BID(double minGrow, double maxGrow, double expEpsilon) :c1(minGrow), c2(maxGrow), initialGap(expEpsilon) {}
-//	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
-//				 std::vector<state> &thePath);
+	EBSearch(double minGrow, double maxGrow, double expEpsilon) :c1(minGrow), c2(maxGrow), initialGap(expEpsilon) {}
 	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
 				 std::vector<action> &thePath);
 	void GetPath(SearchEnvironment<state, action> *env, Heuristic<state> *heuristic, state from, state to,
@@ -33,10 +31,10 @@ private:
 		double failedF;
 		uint64_t nodes;
 	};
-	BID<state, action>::searchData BinarySearch(searchData d, uint64_t nodeLimit);
-	BID<state, action>::searchData ExponentialSearch(const searchData &d, uint64_t nodeLimit);
-	BID<state, action>::searchData DFBNB(double costLimit, uint64_t nodeLimit);
-	BID<state, action>::searchData DFBNBHelper(state &currState, double pathCost, double costLimit, searchData &sd,
+	EBSearch<state, action>::searchData BinarySearch(searchData d, uint64_t nodeLimit);
+	EBSearch<state, action>::searchData ExponentialSearch(const searchData &d, uint64_t nodeLimit);
+	EBSearch<state, action>::searchData DFBNB(double costLimit, uint64_t nodeLimit);
+	EBSearch<state, action>::searchData DFBNBHelper(state &currState, double pathCost, double costLimit, searchData &sd,
 						 uint64_t nodeLimit, action forbidden);
 
 	uint64_t totalNodesExpanded, totalNodesTouched;
@@ -51,14 +49,14 @@ private:
 };
 
 template <class state, class action>
-void BID<state, action>::GetPath(SearchEnvironment<state, action> *env, state from, state to,
+void EBSearch<state, action>::GetPath(SearchEnvironment<state, action> *env, state from, state to,
 								 std::vector<action> &thePath)
 {
 	GetPath(env, env, from, to, thePath);
 }
 
 template <class state, class action>
-void BID<state, action>::GetPath(SearchEnvironment<state, action> *env, Heuristic<state> *heuristic, state from, state to,
+void EBSearch<state, action>::GetPath(SearchEnvironment<state, action> *env, Heuristic<state> *heuristic, state from, state to,
 								 std::vector<action> &thePath)
 {
 	this->env = env;
@@ -99,7 +97,7 @@ void BID<state, action>::GetPath(SearchEnvironment<state, action> *env, Heuristi
 }
 
 template <class state, class action>
-typename BID<state, action>::searchData BID<state, action>::ExponentialSearch(const searchData &d, uint64_t nodeLimit)
+typename EBSearch<state, action>::searchData EBSearch<state, action>::ExponentialSearch(const searchData &d, uint64_t nodeLimit)
 {
 	uint64_t lowNodes = c1*nodeLimit;
 	uint64_t highNodes = c2*nodeLimit;
@@ -143,7 +141,7 @@ typename BID<state, action>::searchData BID<state, action>::ExponentialSearch(co
 }
 
 template <class state, class action>
-typename BID<state, action>::searchData BID<state, action>::BinarySearch(searchData d, uint64_t nodeLimit)
+typename EBSearch<state, action>::searchData EBSearch<state, action>::BinarySearch(searchData d, uint64_t nodeLimit)
 {
 	uint64_t lowNodes = c1*nodeLimit;
 	uint64_t highNodes = c2*nodeLimit;
@@ -182,7 +180,7 @@ typename BID<state, action>::searchData BID<state, action>::BinarySearch(searchD
 
 
 template <class state, class action>
-typename BID<state, action>::searchData BID<state, action>::DFBNB(double costLimit, uint64_t nodeLimit)
+typename EBSearch<state, action>::searchData EBSearch<state, action>::DFBNB(double costLimit, uint64_t nodeLimit)
 {
 	state currState = start;
 	if (nodeLimit != -1)
@@ -208,7 +206,7 @@ typename BID<state, action>::searchData BID<state, action>::DFBNB(double costLim
 }
 
 template <class state, class action>
-typename BID<state, action>::searchData BID<state, action>::DFBNBHelper(state &currState, double pathCost, double costLimit,
+typename EBSearch<state, action>::searchData EBSearch<state, action>::DFBNBHelper(state &currState, double pathCost, double costLimit,
 										 searchData &sd, uint64_t nodeLimit, action forbidden)
 {
 	double currF = pathCost+env->HCost(currState, goal);
@@ -258,7 +256,7 @@ typename BID<state, action>::searchData BID<state, action>::DFBNBHelper(state &c
 }
 
 template <class state, class action>
-void BID<state, action>::RedoMinWork()
+void EBSearch<state, action>::RedoMinWork()
 {
 	ResetNodeCount();
 	DFBNB(solutionCost, -1);

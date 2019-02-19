@@ -40,7 +40,7 @@
 #include "ParallelIDAStar.h"
 #include "Timer.h"
 #include "STPInstances.h"
-#include "BID.h"
+#include "EBSearch.h"
 #include "TemplateAStar.h"
 #include "PancakePuzzle.h"
 #include "PancakeInstances.h"
@@ -108,7 +108,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		p.SetWeighted(kUnitPlusFrac);
 		TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
 		IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
-		BID<MNPuzzleState<4, 4>, slideDir> ebis(2, 5, 1);
+		EBSearch<MNPuzzleState<4, 4>, slideDir> ebis(2, 5, 1);
 		s = STP::GetKorfInstance(1);
 //		srandom(20181222);
 //		s = STP::GetRandomInstance(135);
@@ -295,7 +295,7 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 	
 	TemplateAStar<state, action, environment> astar;
 	IDAStar<state, action> ida;
-	BID<state, action> ebis(minGrowth, maxGrowth, startEpsilon);
+	EBSearch<state, action> ebis(minGrowth, maxGrowth, startEpsilon);
 	std::vector<state> path;
 	
 	Timer t;
