@@ -10,14 +10,24 @@
 #define BID_h
 
 #include "vectorCache.h"
+#include "AStarOpenClosed.h"
 
-template <class state, class action>
+template <class state>
+struct BFHSCompare {
+	bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
+	{
+		return (fgreater(i1.g, i2.g));
+	}
+};
+
+
+template <class state, class action, class environment, bool DFS = true, uint64_t costScale = 1>
 class EBSearch {
 public:
 	EBSearch(double minGrow, double maxGrow, double expEpsilon) :c1(minGrow), c2(maxGrow), initialGap(expEpsilon) {}
-	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
+	void GetPath(environment *env, state from, state to,
 				 std::vector<action> &thePath);
-	void GetPath(SearchEnvironment<state, action> *env, Heuristic<state> *heuristic, state from, state to,
+	void GetPath(environment *env, Heuristic<state> *heuristic, state from, state to,
 				 std::vector<action> &thePath);
 	void RedoMinWork();
 	
@@ -31,32 +41,49 @@ private:
 		double failedF;
 		uint64_t nodes;
 	};
-	EBSearch<state, action>::searchData BinarySearch(searchData d, uint64_t nodeLimit);
-	EBSearch<state, action>::searchData ExponentialSearch(const searchData &d, uint64_t nodeLimit);
-	EBSearch<state, action>::searchData DFBNB(double costLimit, uint64_t nodeLimit);
-	EBSearch<state, action>::searchData DFBNBHelper(state &currState, double pathCost, double costLimit, searchData &sd,
-						 uint64_t nodeLimit, action forbidden);
+	EBSearch<state, action, environment, DFS, costScale>::searchData LowLevelSearch(double costLimit, uint64_t nodeLimit);
+	EBSearch<state, action, environment, DFS, costScale>::searchData BinarySearch(searchData d, uint64_t nodeLimit);
+	EBSearch<state, action, environment, DFS, costScale>::searchData ExponentialSearch(const searchData &d, uint64_t nodeLimit);
 
+	// Functions for DF Search
+	EBSearch<state, action, environment, DFS, costScale>::searchData DFBNB(double costLimit, uint64_t nodeLimit);
+	EBSearch<state, action, environment, DFS, costScale>::searchData DFBNBHelper(state &currState, double pathCost, double costLimit,
+													searchData &sd, uint64_t nodeLimit, action forbidden);
+
+	// Functions for BFHS
+	EBSearch<state, action, environment, DFS, costScale>::searchData BFHS(double costLimit, uint64_t nodeLimit);
+	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath);
+
+	
+	
 	uint64_t totalNodesExpanded, totalNodesTouched;
 	Heuristic<state> *h;
-	SearchEnvironment<state, action> *env;
+	environment *env;
 	std::vector<action> solutionPath, currPath;
 	double solutionCost;
 	vectorCache<action> actCache;
 	state start, goal;
 	double c1, c2;
 	double initialGap;
+
+	// Data for BFHS
+	AStarOpenClosed<state, BFHSCompare<state>> q;
+	std::vector<state> neighbors;
+	std::vector<uint64_t> neighborID;
+	std::vector<double> edgeCosts;
+	std::vector<dataLocation> neighborLoc;
+	std::vector<state> solutionStates;
 };
 
-template <class state, class action>
-void EBSearch<state, action>::GetPath(SearchEnvironment<state, action> *env, state from, state to,
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+void EBSearch<state, action, environment, DFS, costScale>::GetPath(environment *env, state from, state to,
 								 std::vector<action> &thePath)
 {
 	GetPath(env, env, from, to, thePath);
 }
 
-template <class state, class action>
-void EBSearch<state, action>::GetPath(SearchEnvironment<state, action> *env, Heuristic<state> *heuristic, state from, state to,
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+void EBSearch<state, action, environment, DFS, costScale>::GetPath(environment *env, Heuristic<state> *heuristic, state from, state to,
 								 std::vector<action> &thePath)
 {
 	this->env = env;
@@ -68,13 +95,13 @@ void EBSearch<state, action>::GetPath(SearchEnvironment<state, action> *env, Heu
 	ResetNodeCount();
 	
 	printf("EBIS: Baseline search: f: %1.2f\n", h->HCost(from, to));
-	searchData base = DFBNB(h->HCost(from, to), -1);
+	searchData base = LowLevelSearch(h->HCost(from, to), -1);
 	while (solutionCost > base.f)
 	{
 		printf("EBIS: First search: f: %1.2f target: (%llu, %llu]\n",
 			   base.nextF, uint64_t(c1*base.nodes), uint64_t(c2*base.nodes));
-		searchData curr = DFBNB(base.nextF, -1);
-		if (solutionPath.size() != 0)
+		searchData curr = LowLevelSearch(base.nextF, -1);
+		if (solutionCost <= base.nextF)
 		{ thePath = solutionPath; return; }
 
 		// Didn't reach the node expansions bound
@@ -90,14 +117,14 @@ void EBSearch<state, action>::GetPath(SearchEnvironment<state, action> *env, Heu
 				curr = BinarySearch(curr, base.nodes);
 			}
 		}
-		if (solutionPath.size() != 0)
+		if (solutionCost <= curr.f)
 		{ thePath = solutionPath; return; }
 		base = curr;
 	}
 }
 
-template <class state, class action>
-typename EBSearch<state, action>::searchData EBSearch<state, action>::ExponentialSearch(const searchData &d, uint64_t nodeLimit)
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+typename EBSearch<state, action, environment, DFS, costScale>::searchData EBSearch<state, action, environment, DFS, costScale>::ExponentialSearch(const searchData &d, uint64_t nodeLimit)
 {
 	uint64_t lowNodes = c1*nodeLimit;
 	uint64_t highNodes = c2*nodeLimit;
@@ -107,8 +134,14 @@ typename EBSearch<state, action>::searchData EBSearch<state, action>::Exponentia
 	while (true)
 	{
 		double bound = d.f + delta*pow(2, i);
-		searchData curr = DFBNB(bound, c2*nodeLimit);
-		
+		searchData curr = LowLevelSearch(bound, highNodes);
+		if (solutionCost <= bound && curr.nodes < highNodes)
+		{
+			printf("***EBIS:->EXP: Solution proven below window; done\n");
+			curr.f = solutionCost;
+			return curr;
+		}
+
 		if (lowNodes <= curr.nodes && curr.nodes < highNodes)
 		{
 			printf("EBIS:->EXP: in node window [%llu <= %llu < %llu]\n", lowNodes, curr.nodes, highNodes);
@@ -122,11 +155,6 @@ typename EBSearch<state, action>::searchData EBSearch<state, action>::Exponentia
 			return lastSuccess;
 		}
 		else {
-			if (solutionPath.size() != 0)
-			{
-				printf("EBIS:->EXP: Solution proven below window; done\n");
-				return curr;
-			}
 			printf("EBIS:->EXP: below node window\n");
 			lastSuccess = curr;
 		}
@@ -140,8 +168,8 @@ typename EBSearch<state, action>::searchData EBSearch<state, action>::Exponentia
 	}
 }
 
-template <class state, class action>
-typename EBSearch<state, action>::searchData EBSearch<state, action>::BinarySearch(searchData d, uint64_t nodeLimit)
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+typename EBSearch<state, action, environment, DFS, costScale>::searchData EBSearch<state, action, environment, DFS, costScale>::BinarySearch(searchData d, uint64_t nodeLimit)
 {
 	uint64_t lowNodes = c1*nodeLimit;
 	uint64_t highNodes = c2*nodeLimit;
@@ -149,16 +177,22 @@ typename EBSearch<state, action>::searchData EBSearch<state, action>::BinarySear
 	searchData curr;
 	if (middlef <= d.nextF)
 	{
-		curr = DFBNB(d.nextF, -1);
+		middlef = d.nextF;
+		curr = LowLevelSearch(middlef, -1);
+		if (solutionCost <= middlef)
+			curr.f = middlef;
 		if (curr.nodes >= lowNodes)
 			return curr;
 	}
 	else {
-		curr = DFBNB(middlef, highNodes);
+		curr = LowLevelSearch(middlef, highNodes);
 	}
 	// found and proved solution
 	if (solutionCost <= middlef && curr.nodes < highNodes)
+	{
+		curr.f = middlef;
 		return curr;
+	}
 	
 	if (lowNodes <= curr.nodes && curr.nodes < highNodes)
 	{
@@ -178,9 +212,8 @@ typename EBSearch<state, action>::searchData EBSearch<state, action>::BinarySear
 	}
 }
 
-
-template <class state, class action>
-typename EBSearch<state, action>::searchData EBSearch<state, action>::DFBNB(double costLimit, uint64_t nodeLimit)
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+typename EBSearch<state, action, environment, DFS, costScale>::searchData EBSearch<state, action, environment, DFS, costScale>::DFBNB(double costLimit, uint64_t nodeLimit)
 {
 	state currState = start;
 	if (nodeLimit != -1)
@@ -205,11 +238,11 @@ typename EBSearch<state, action>::searchData EBSearch<state, action>::DFBNB(doub
 	return sd;
 }
 
-template <class state, class action>
-typename EBSearch<state, action>::searchData EBSearch<state, action>::DFBNBHelper(state &currState, double pathCost, double costLimit,
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+typename EBSearch<state, action, environment, DFS, costScale>::searchData EBSearch<state, action, environment, DFS, costScale>::DFBNBHelper(state &currState, double pathCost, double costLimit,
 										 searchData &sd, uint64_t nodeLimit, action forbidden)
 {
-	double currF = pathCost+env->HCost(currState, goal);
+	double currF = pathCost+h->HCost(currState, goal);
 //	printf("-------->%f [%f]\n", currF, pathCost);
 	if (fgreater(currF, costLimit) || fgreatereq(currF, solutionCost))
 	{
@@ -255,12 +288,150 @@ typename EBSearch<state, action>::searchData EBSearch<state, action>::DFBNBHelpe
 	return sd;
 }
 
-template <class state, class action>
-void EBSearch<state, action>::RedoMinWork()
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+void EBSearch<state, action, environment, DFS, costScale>::RedoMinWork()
 {
 	ResetNodeCount();
-	DFBNB(solutionCost, -1);
+	printf("EBIS Validation:\n");
+	LowLevelSearch(solutionCost, -1);
 }
 
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+typename EBSearch<state, action, environment, DFS, costScale>::searchData EBSearch<state, action, environment, DFS, costScale>::BFHS(double costLimit, uint64_t nodeLimit)
+{
+	if (nodeLimit == -1 && costLimit == DBL_MAX)
+		printf("    --+BFHS f: ∞; nodes: ∞; ", costLimit, nodeLimit);
+	else if (nodeLimit == -1)
+		printf("    --+BFHS f: %1.3f; nodes: ∞; ", costLimit);
+	else
+		printf("    --+BFHS f: %1.3f; nodes: %llu; ", costLimit, nodeLimit);
+
+	q.Reset(env->GetMaxHash());
+	// put start in open
+	q.AddOpenNode(start, env->GetStateHash(start), 0, 0);
+	double nextCost = DBL_MAX, maxFExpanded = 0;
+	uint64_t nodesExpanded = 0;
+	while (nodesExpanded < nodeLimit && q.OpenSize() > 0)
+	{
+		// expand by low g until
+		// (1) we find the goal
+		// (2) we hit the node limit
+		// (3) we exhaust all states
+		uint64_t nodeid = q.Close();
+		nodesExpanded++;
+		totalNodesExpanded++;
+	
+		maxFExpanded = std::max(maxFExpanded, q.Lookup(nodeid).g+h->HCost(q.Lookup(nodeid).data, goal));
+		
+		if (env->GoalTest(q.Lookup(nodeid).data, goal))
+		{
+			solutionCost = q.Lookup(nodeid).g;
+			ExtractPathToStartFromID(nodeid, solutionStates);
+			// Path is backwards - reverse
+			reverse(solutionStates.begin(), solutionStates.end());
+			// f, nextF, failedF, nodes
+			for (int x = 0; x < solutionStates.size()-1; x++)
+			{
+				solutionPath.push_back(env->GetAction(solutionStates[x], solutionStates[x+1]));
+			}
+			return {q.Lookup(nodeid).g, q.Lookup(nodeid).g, -1, nodesExpanded};
+		}
+		
+		neighbors.resize(0);
+		edgeCosts.resize(0);
+		neighborID.resize(0);
+		neighborLoc.resize(0);
+		
+		//	std::cout << "Expanding: " << q.Lookup(nodeid).data << " with f:";
+		//	std::cout << q.Lookup(nodeid).g << std::endl;
+		
+		env->GetSuccessors(q.Lookup(nodeid).data, neighbors);
+
+		// 1. load all the children
+		for (unsigned int x = 0; x < neighbors.size(); x++)
+		{
+			uint64_t theID;
+			neighborLoc.push_back(q.Lookup(env->GetStateHash(neighbors[x]), theID));
+			neighborID.push_back(theID);
+			edgeCosts.push_back(env->GCost(q.Lookup(nodeid).data, neighbors[x]));
+		}
+		
+		// iterate again updating costs and writing out to memory
+		for (int x = 0; x < neighbors.size(); x++)
+		{
+			totalNodesTouched++;
+			
+			switch (neighborLoc[x])
+			{
+				case kClosedList:
+					break;
+				case kOpenList:
+					if (fless(q.Lookup(nodeid).g+edgeCosts[x], q.Lookup(neighborID[x]).g))
+					{
+						q.Lookup(neighborID[x]).parentID = nodeid;
+						q.Lookup(neighborID[x]).g = q.Lookup(nodeid).g+edgeCosts[x];
+						q.KeyChanged(neighborID[x]);
+					}
+					break;
+				case kNotFound:
+				{
+					double fcost = q.Lookup(nodeid).g+edgeCosts[x]+h->HCost(neighbors[x], goal);
+					// TODO: don't add states with g == best solution when one exists
+					if (fcost > costLimit)
+					{
+						nextCost = std::min(nextCost, fcost);
+					}
+					else {
+						q.AddOpenNode(neighbors[x],
+								  env->GetStateHash(neighbors[x]),
+								  q.Lookup(nodeid).g+edgeCosts[x],
+								  0,
+								  nodeid);
+					}
+				}
+			}
+		}
+	}
+	// f, nextF, failedF, nodes
+
+	if (nextCost == DBL_MAX)
+		printf("%llu (new) %llu (total), maxf: %f, nextf: ∞\n", nodesExpanded, totalNodesExpanded, maxFExpanded);
+	else
+		printf("%llu (new) %llu (total), maxf: %f, nextf: %f\n", nodesExpanded, totalNodesExpanded, maxFExpanded, nextCost);
+
+	// Exceeded node limit
+	if (nodesExpanded == nodeLimit)
+	{
+		return {maxFExpanded, nextCost, maxFExpanded, nodesExpanded};
+	}
+	// expanded all nodes in limit
+	if (q.OpenSize()==0)
+	{
+		return {maxFExpanded, nextCost, -1, nodesExpanded};
+	}
+	assert(!"Shouldn't get here");
+}
+
+template <class state, class action,class environment,bool DFS, uint64_t costScale>
+void EBSearch<state, action, environment, DFS, costScale>::ExtractPathToStartFromID(uint64_t node,
+																	   std::vector<state> &thePath)
+{
+	thePath.clear();
+	do {
+		thePath.push_back(q.Lookup(node).data);
+		node = q.Lookup(node).parentID;
+	} while (q.Lookup(node).parentID != node);
+	thePath.push_back(q.Lookup(node).data);
+}
+
+
+template <class state, class action, class environment, bool DFS, uint64_t costScale>
+typename EBSearch<state, action, environment, DFS, costScale>::searchData EBSearch<state, action, environment, DFS, costScale>::LowLevelSearch(double costLimit, uint64_t nodeLimit)
+{
+	if (DFS)
+		return DFBNB(costLimit, nodeLimit);
+	else
+		return BFHS(costLimit, nodeLimit);
+}
 #endif /* BID_h */
 
