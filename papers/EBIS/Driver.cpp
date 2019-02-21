@@ -45,6 +45,8 @@
 #include "PancakePuzzle.h"
 #include "PancakeInstances.h"
 #include "TOH.h"
+#include "GraphEnvironment.h"
+#include "GraphInconsistencyInstances.h"
 
 MNPuzzle<4, 4> p;
 MNPuzzleState<4, 4> s, t;
@@ -52,9 +54,10 @@ std::vector<slideDir> moves, tmpPath;
 double v = 1;
 
 bool recording = false;
-void TestSTP(int instance, int algorithm, double minGrowth, double maxGrowth, double startEpsilon);
-void TestPancake(int instance, int algorithm, double minGrowth, double maxGrowth, double startEpsilon);
-void TestTOH(int instance, int algorithm, double minGrowth, double maxGrowth, double startEpsilon);
+void TestSTP(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
+void TestPancake(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
+void TestTOH(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
+void TestPolygraph(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
 
 void ValidateWeights();
 
@@ -83,9 +86,9 @@ void InstallHandlers()
 //	InstallKeyboardHandler(STPTest, "STP Test", "Test the STP PDBs", kNoModifier, 'd');
 //	InstallKeyboardHandler(BuildSTP_PDB, "Build STP PDBs", "Build PDBs for the STP", kNoModifier, 'a');
 
-	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp <instance> <algorithm>", "Runs STP with ");
-	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake <instance> <algorithm>", "Runs pancake with ");
-	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
+	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted STP with MD");
+	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted pancake with GAP");
+	InstallCommandLineHandler(MyCLHandler, "-polygraph", "-polygraph <instance> <algorithm> <c1> <c2> <ep>", "Runs worst-case inconsistency graph");
 	
 	InstallWindowHandler(MyWindowHandler);
 
@@ -108,7 +111,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		p.SetWeighted(kUnitPlusFrac);
 		TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
 		IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
-		EBSearch<MNPuzzleState<4, 4>, slideDir> ebis(2, 5, 1);
+		EBSearch<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> ebis(2, 5, 1);
 		s = STP::GetKorfInstance(1);
 //		srandom(20181222);
 //		s = STP::GetRandomInstance(135);
@@ -189,43 +192,61 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 {
 	if (strcmp(argument[0], "-stp") == 0)
 	{
-		double c1 = 2, c2 = 5, ep = -1;
+		int c1 = 2, c2 = 5, ep = -1, scale = 1;
 		if (maxNumArgs < 3)
 		{
 			printf("Error: didn't pass arguments: <instance> <algorithm>\n");
 			exit(0);
 		}
 		if (maxNumArgs >= 4)
-			c1 = atof(argument[3]);
+			c1 = atoi(argument[3]);
 		if (maxNumArgs >= 5)
-			c2 = atof(argument[4]);
+			c2 = atoi(argument[4]);
 		if (maxNumArgs >= 6)
-			ep = atof(argument[5]);
+			ep = atoi(argument[5]);
+		if (maxNumArgs >= 7)
+			scale = atoi(argument[6]);
 
-		TestSTP(atoi(argument[1]), atoi(argument[2]), c1, c2, ep);
+		TestSTP(atoi(argument[1]), atoi(argument[2]), c1, c2, ep, scale);
 	}
 	if (strcmp(argument[0], "-pancake") == 0)
 	{
-		double c1 = 2, c2 = 5, ep = -1;
+		int c1 = 2, c2 = 5, ep = -1, scale = 1;
 		if (maxNumArgs < 3)
 		{
 			printf("Error: didn't pass arguments: <instance> <algorithm>\n");
 			exit(0);
 		}
 		if (maxNumArgs >= 4)
-			c1 = atof(argument[3]);
+			c1 = atoi(argument[3]);
 		if (maxNumArgs >= 5)
-			c2 = atof(argument[4]);
+			c2 = atoi(argument[4]);
 		if (maxNumArgs >= 6)
-			ep = atof(argument[5]);
-		
-		TestPancake(atoi(argument[1]), atoi(argument[2]), c1, c2, ep);
+			ep = atoi(argument[5]);
+		if (maxNumArgs >= 7)
+			scale = atoi(argument[6]);
+
+		TestPancake(atoi(argument[1]), atoi(argument[2]), c1, c2, ep, scale);
 	}
-	if (strcmp(argument[0], "-test") == 0)
+	if (strcmp(argument[0], "-polygraph") == 0)
 	{
-		exit(0);
-	}
-	exit(0);
+		int c1 = 2, c2 = 5, ep = -1, scale = 1;
+		if (maxNumArgs < 3)
+		{
+			printf("Error: didn't pass arguments: <instance> <algorithm>\n");
+			exit(0);
+		}
+		if (maxNumArgs >= 4)
+			c1 = atoi(argument[3]);
+		if (maxNumArgs >= 5)
+			c2 = atoi(argument[4]);
+		if (maxNumArgs >= 6)
+			ep = atoi(argument[5]);
+		if (maxNumArgs >= 7)
+			scale = atoi(argument[6]);
+
+		TestPolygraph(atoi(argument[1]), atoi(argument[2]), c1, c2, ep, scale);
+	}	exit(0);
 	return 2;
 }
 
@@ -288,14 +309,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 //	exit(0);
 //}
 
-template <class state, class action, class environment>
-void Test(environment *e, Heuristic<state> *h, const state &start, const state &goal, int algorithm, double minGrowth, double maxGrowth, double startEpsilon)
+template <class state, class action, class environment, bool DFS = true>
+void Test(environment *e, Heuristic<state> *h, const state &start, const state &goal, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, uint64_t multiple)
 {
 	std::vector<action> moves, tmpPath;
 	
 	TemplateAStar<state, action, environment> astar;
 	IDAStar<state, action> ida;
-	EBSearch<state, action> ebis(minGrowth, maxGrowth, startEpsilon);
+	EBSearch<state, action, environment, DFS> ebis(minGrowth, maxGrowth, startEpsilon, multiple);
 	std::vector<state> path;
 	
 	Timer t;
@@ -333,6 +354,8 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 		{
 			std::cout << "A* searching from\n" << start << "\n" << goal << "\n";
 			astar.SetHeuristic(h);
+			if (DFS == false)
+				astar.SetReopenNodes(true);
 			t.StartTimer();
 			astar.GetPath(e, start, goal, path);
 			t.EndTimer();
@@ -344,7 +367,7 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 	exit(0);
 }
 
-void TestSTP(int instance, int algorithm, double minGrowth, double maxGrowth, double startEpsilon)
+void TestSTP(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale)
 {
 	MNPuzzle<4, 4> stp;
 	MNPuzzleState<4, 4> start, goal;
@@ -353,17 +376,25 @@ void TestSTP(int instance, int algorithm, double minGrowth, double maxGrowth, do
 	
 	assert(instance >= 0 && instance < 100);
 	start = STP::GetKorfInstance(instance);
-	Test<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(&stp, &stp, start, goal, algorithm, minGrowth, maxGrowth, startEpsilon);
+	Test<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(&stp, &stp, start, goal, algorithm, minGrowth, maxGrowth, startEpsilon, scale);
 }
 
-void TestPancake(int instance, int algorithm, double minGrowth, double maxGrowth, double startEpsilon)
+void TestPancake(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale)
 {
 	PancakePuzzle<20> pancake;
 	PancakePuzzleState<20> start, goal;
 	pancake.SetUseRealValueEdges(true);
 	assert(instance >= 0 && instance < 100);
 	GetPancakeInstance(start, instance);
-	Test<PancakePuzzleState<20>, PancakePuzzleAction, PancakePuzzle<20>>(&pancake, &pancake, start, goal, algorithm, minGrowth, maxGrowth, startEpsilon);
+	Test<PancakePuzzleState<20>, PancakePuzzleAction, PancakePuzzle<20>>(&pancake, &pancake, start, goal, algorithm, minGrowth, maxGrowth, startEpsilon, scale);
+}
+
+void TestPolygraph(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale)
+{
+	Graph *g = GraphInconsistencyExamples::GetPolyGraph(instance);
+	GraphEnvironment *ge = new GraphEnvironment(g);
+	GraphInconsistencyExamples::GraphHeuristic h(g);
+	Test<graphState, graphMove, GraphEnvironment, false>(ge, &h, 0, g->GetNumNodes()-1, algorithm, minGrowth, maxGrowth, startEpsilon, scale);
 }
 
 //template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
