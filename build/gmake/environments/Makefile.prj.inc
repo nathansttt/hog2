@@ -41,7 +41,6 @@ SRC_CPP = \
 	environments/TopSpin.cpp	\
 	environments/RoboticArm.cpp  \
 	environments/ConfigEnvironment.cpp \
-	environments/PancakePuzzle.cpp \
 	environments/Map3DGrid.cpp \
 	environments/Map2DHeading.cpp \
 	environments/MinimalSectorAbstraction.cpp \
@@ -57,3 +56,4 @@ SRC_CPP = \
 	environments/NaryTree.cpp \
 	environments/RoadMap.cpp \
 #	environments/WeightedMap2DEnvironment.cpp \
+#	environments/PancakePuzzle.cpp \
