@@ -189,6 +189,12 @@ uint64_t GraphEnvironment::GetStateHash(const graphState &state) const
 	return g->GetNode(state)->getUniqueID();
 }
 
+void GraphEnvironment::GetStateFromHash(uint64_t hash, graphState &s) const
+{
+	s = hash;
+}
+
+
 uint64_t GraphEnvironment::GetActionHash(graphMove act) const
 {
 	return (g->GetNode(act.from)->getUniqueID()<<16)|

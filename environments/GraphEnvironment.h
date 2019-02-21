@@ -305,6 +305,7 @@ public:
 	virtual bool GoalTest(const graphState &state, const graphState &goal) const;
 	virtual uint64_t GetMaxHash() const { return g->GetNumNodes(); }
 	virtual uint64_t GetStateHash(const graphState &state) const;
+	virtual void GetStateFromHash(uint64_t parent, graphState &s) const;
 	virtual uint64_t GetActionHash(graphMove act) const;
 	virtual void OpenGLDraw() const;
 	virtual void OpenGLDraw(const graphState &s) const;
