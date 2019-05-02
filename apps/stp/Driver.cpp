@@ -138,7 +138,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		}
 
 		{
-			std::vector<int> pattern = {0, 1, 2, 3, 4, 5, 6, 7};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
+			std::vector<int> pattern = {1, 2, 3, 4, 5, 6, 7, 0};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
 			
 			t.Reset();
 			ts->SetPattern(pattern);
