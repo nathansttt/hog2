@@ -132,11 +132,13 @@ public:
 
 	double GCost(const MNPuzzleState<width, height> &state1, const MNPuzzleState<width, height> &state2) const;
 	double GCost(const MNPuzzleState<width, height> &, const slideDir &) const;
-//	double AdditiveGCost(const MNPuzzleState<width, height> &, const slideDir &);
 	bool GoalTest(const MNPuzzleState<width, height> &state, const MNPuzzleState<width, height> &goal) const;
 
 	bool GoalTest(const MNPuzzleState<width, height> &s) const;
 
+	double AdditiveGCost(const MNPuzzleState<width, height> &, const slideDir &) const;
+	bool InPattern(int tile) const;
+	void SetPattern(const std::vector<int> &pattern);
 	void GetStateFromPDBHash(uint64_t hash, MNPuzzleState<width, height> &s,
 							 int count, const std::vector<int> &pattern,
 							 std::vector<int> &dual);
@@ -216,6 +218,7 @@ public:
 
 	void Set_Use_Manhattan_Heuristic(bool to_use){use_manhattan = to_use;}
 private:
+	bool pattern[width*height];
 //	double DoPDBLookup(const MNPuzzleState<width, height> &state);
 //	std::vector<std::vector<uint8_t> > PDB;
 //	std::vector<std::vector<int> > PDBkey;
@@ -781,6 +784,34 @@ double MNPuzzle<width, height>::GCost(const MNPuzzleState<width, height> &a, con
 //		return a.puzzle[b.blank]*a.puzzle[b.blank];
 ////		return costs[a.blank];
 	return 1;
+}
+
+template <int width, int height>
+void MNPuzzle<width, height>::SetPattern(const std::vector<int> &pattern)
+{
+	for (int x = 0; x < width*height; x++)
+		this->pattern[x] = false;
+	for (int i : pattern)
+		this->pattern[i] = true;
+}
+
+template <int width, int height>
+bool MNPuzzle<width, height>::InPattern(int tile) const
+{
+	return pattern[tile] == true;
+}
+
+template <int width, int height>
+double MNPuzzle<width, height>::AdditiveGCost(const MNPuzzleState<width, height> &s, const slideDir &d) const
+{
+	switch (d)
+	{
+		case kLeft: return InPattern(s.puzzle[s.blank-1])?GCost(s,d):0;
+		case kUp: return InPattern(s.puzzle[s.blank-width])?GCost(s,d):0;
+		case kDown: return InPattern(s.puzzle[s.blank+width])?GCost(s,d):0;
+		case kRight: return InPattern(s.puzzle[s.blank+1])?GCost(s,d):0;
+	}
+	return 0;
 }
 
 template <int width, int height>

@@ -902,13 +902,6 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
-void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::GetAdditiveNeighbors(const abstractState &s,
-																											std::vector<std::pair<abstractState, int>> &neighbors)
-{
-	
-}
-
-template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
 void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::AdditiveForwardThreadWorker(int threadNum, int depth,
 																												   NBitArray<pdbBits> &DB,
 																												   std::vector<bool> &coarse,
@@ -918,7 +911,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 {
 	std::pair<uint64_t, uint64_t> p;
 	uint64_t start, end;
-	//std::vector<abstractAction> acts;
+	std::vector<abstractAction> acts;
 	std::vector<std::pair<abstractState, int>> neighbors;
 	abstractState s(goalState), t(goalState);
 	uint64_t count = 0;
@@ -928,6 +921,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		int newGCost;
 	};
 	std::vector<writeInfo> cache;
+	std::vector<uint64_t> zeroCostNeighbors;
 	while (true)
 	{
 		work->WaitRemove(p);
@@ -944,30 +938,56 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			{
 				GetStateFromPDBHash(x, s, threadNum);
 				//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
-				GetAdditiveNeighbors(s, neighbors);
-				for (int y = 0; y < neighbors.size(); y++)
+				env->GetActions(s, acts);
+
+				for (int y = 0; y < acts.size(); y++)
 				{
-					// TODO: Here we need to search until we find states with
-					// non-zero action cost
-					uint64_t nextRank = GetPDBHash(neighbors[y].first, threadNum);
-					int newCost = stateDepth+neighbors[y].second;
+					env->GetNextState(s, acts[y], t);
+					assert(env->InvertAction(acts[y]) == true);
+					//virtual bool InvertAction(action &a) const = 0;
+					
+					uint64_t nextRank = GetPDBHash(t, threadNum);
+					int newCost = stateDepth+(env->AdditiveGCost(t, acts[y]));
 					cache.push_back({nextRank, newCost});
 				}
 			}
 		}
 		// write out everything
-		lock->lock();
-		for (auto d : cache)
-		{
-			if (d.newGCost < DB.Get(d.rank)) // shorter path
+		do {
+			lock->lock();
+			for (auto d : cache)
 			{
-				count++;
-				coarse[d.rank/coarseSize] = true;
-				DB.Set(d.rank, d.newGCost);
+				if (d.newGCost < DB.Get(d.rank)) // shorter path
+				{
+					count++;
+					coarse[d.rank/coarseSize] = true;
+					DB.Set(d.rank, d.newGCost);
+					if (d.newGCost == depth) // zero-cost action
+						zeroCostNeighbors.push_back(d.rank);
+				}
 			}
-		}
-		lock->unlock();
-		cache.resize(0);
+			lock->unlock();
+			cache.resize(0);
+			
+			for (auto i : zeroCostNeighbors)
+			{
+				GetStateFromPDBHash(i, s, threadNum);
+				env->GetActions(s, acts);
+				
+				for (int y = 0; y < acts.size(); y++)
+				{
+					env->GetNextState(s, acts[y], t);
+					assert(env->InvertAction(acts[y]) == true);
+					//virtual bool InvertAction(action &a) const = 0;
+					
+					uint64_t nextRank = GetPDBHash(t, threadNum);
+					int newCost = depth+(env->AdditiveGCost(t, acts[y]));
+					cache.push_back({nextRank, newCost});
+				}
+
+			}
+			zeroCostNeighbors.clear();
+		} while (cache.size() > 0);
 	}
 	results->Add(count);
 }

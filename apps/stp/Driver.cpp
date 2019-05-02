@@ -119,19 +119,35 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
+
 		ts = new MNPuzzle<4, 4>;
-		IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
-		s = STP::GetKorfInstance(1);
-		ida.GetPath(ts, s, t, moves);
-		v = 5;
-		std::cout << s << std::endl;
-		for (int x = 0; x < moves.size(); x++)
+		if (0)
 		{
-			std::cout << moves[x] << " ";
+			IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
+			s = STP::GetKorfInstance(1);
+			ida.GetPath(ts, s, t, moves);
+			v = 5;
+			std::cout << s << std::endl;
+			for (int x = 0; x < moves.size(); x++)
+			{
+				std::cout << moves[x] << " ";
+			}
+			std::cout << std::endl;
+			t = s;
+			//		recording = true;
 		}
-		std::cout << std::endl;
-		t = s;
-//		recording = true;
+
+		{
+			std::vector<int> pattern = {0, 1, 2, 3, 4, 5, 6, 7};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
+			
+			t.Reset();
+			ts->SetPattern(pattern);
+			LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(ts, t, pattern);
+			//pdb2.BuildPDB(t, std::thread::hardware_concurrency());
+			pdb2.BuildAdditivePDB(t, std::thread::hardware_concurrency());
+			pdb2.DivCompress(17-pattern.size(), true);
+			exit(0);
+		}
 	}
 }
 
