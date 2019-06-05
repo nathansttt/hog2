@@ -124,5 +124,60 @@ namespace GraphInconsistencyExamples {
 	{
 		return GetExpoGraph(N, false);
 	}
+
 	
+	Graph *GetWeightedInconsistency(float w, int numExampleNodes)
+	{
+		{
+			Graph *g = new Graph();
+			node *n;
+
+			char nodeName[3] = {'t', '0', 0};
+			for (int x = 0; x < numExampleNodes; x++)
+			{
+				n = new node(nodeName);
+				nodeName[1]++;
+				n->SetLabelF(kHeuristic, numExampleNodes-x-1);
+				n->SetLabelF(GraphSearchConstants::kXCoordinate, -0.8+1.6*(double(x)/(numExampleNodes-1)));
+				n->SetLabelF(GraphSearchConstants::kYCoordinate, -0.5);
+				n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+				g->AddNode(n);
+				if (x > 0)
+					g->AddEdge(new edge(n->GetNum()-1, n->GetNum(), 1));
+			}
+			nodeName[0] = 'b';
+			nodeName[1] = '0';
+			for (int x = 0; x < numExampleNodes; x++)
+			{
+				n = new node(nodeName);
+				nodeName[1]++;
+				n->SetLabelF(kHeuristic, numExampleNodes-x-1);
+				n->SetLabelF(GraphSearchConstants::kXCoordinate, -0.8+1.6*(double(x)/(numExampleNodes-1)));
+				n->SetLabelF(GraphSearchConstants::kYCoordinate, 0);
+				n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+				g->AddNode(n);
+				g->AddEdge(new edge(n->GetNum()-numExampleNodes, n->GetNum(), (x+1.0)*(w-1)/w));///(std::max(2.0f, w/(w-1.0f)))));
+				if (x > 0)
+					g->AddEdge(new edge(n->GetNum()-1, n->GetNum(), 1));
+			}
+			n = new node("e");
+			n->SetLabelF(kHeuristic, numExampleNodes);
+			n->SetLabelF(GraphSearchConstants::kXCoordinate, -0.8+1.6*(double(0)/(numExampleNodes-1)));
+			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.5);
+			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+			g->AddNode(n);
+			g->AddEdge(new edge(n->GetNum()-numExampleNodes, n->GetNum(), 1));
+
+			n = new node("g");
+			n->SetLabelF(kHeuristic, 0);
+			n->SetLabelF(GraphSearchConstants::kXCoordinate, -0.8+1.6);
+			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.5);
+			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
+			g->AddNode(n);
+			g->AddEdge(new edge(n->GetNum()-1, n->GetNum(), numExampleNodes));
+
+			return g;
+		}
+	}
+
 }

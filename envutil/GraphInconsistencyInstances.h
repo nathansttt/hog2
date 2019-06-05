@@ -30,6 +30,7 @@ namespace GraphInconsistencyExamples {
 	Graph *GetPolyGraph(int N);
 	Graph *GetExpoGraphA(int N);
 	Graph *GetExpoGraphB(int N);
+	Graph *GetWeightedInconsistency(float w, int N);
 }
 
 #endif /* GraphInconsistencyInstances_h */
