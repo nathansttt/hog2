@@ -110,7 +110,7 @@ void EBSearch<state, action, environment, DFS>::GetPath(environment *env, Heuris
 			   base.nextF, uint64_t(c1*base.nodes), uint64_t(c2*base.nodes));
 		searchData curr = LowLevelSearch(base.nextF, -1);
 		if (solutionCost <= base.nextF)
-		{ thePath = solutionPath; break; }
+			break;
 
 		// Didn't reach the node expansions bound
 		if (curr.nodes < uint64_t(c1*base.nodes))
@@ -126,9 +126,10 @@ void EBSearch<state, action, environment, DFS>::GetPath(environment *env, Heuris
 			}
 		}
 		if (solutionCost <= curr.f)
-		{ thePath = solutionPath; break; }
+			break;
 		base = curr;
 	}
+	thePath = solutionPath;
 	printf("Found solution cost %llu\n", solutionCost);
 }
 
@@ -238,6 +239,8 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 	action a;
 	sd = DFBNBHelper(currState, 0, costLimit, sd, nodeLimit, a);
 	totalNodesExpanded += sd.nodes;
+	// TODO: In practice we should set the nextF to be sd.f
+	// Need to test this.
 	if (sd.nextF == -1ull) // so few nodes expanded we didn't find the next bound
 	{
 		printf(" (oops) ");
@@ -275,7 +278,6 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 		return sd;
 	}
 	
-	// TODO: cache these for later use
 	std::vector<action> &acts = *actCache.getItem();
 	env->GetActions(currState, acts);
 	sd.nodes++;
