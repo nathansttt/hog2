@@ -48,6 +48,8 @@
 #include "GraphEnvironment.h"
 #include "GraphInconsistencyInstances.h"
 #include "IBEX.h"
+#include "EDAStar.h"
+#include "IDAStarCR.h"
 
 MNPuzzle<4, 4> p;
 MNPuzzleState<4, 4> s, t;
@@ -55,7 +57,7 @@ std::vector<slideDir> moves, tmpPath;
 double v = 1;
 
 bool recording = false;
-void TestSTP(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
+void TestSTP(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale, bool unit = false);
 void TestPancake(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
 void TestTOH(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
 void TestPolygraph(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
@@ -87,6 +89,7 @@ void InstallHandlers()
 //	InstallKeyboardHandler(STPTest, "STP Test", "Test the STP PDBs", kNoModifier, 'd');
 //	InstallKeyboardHandler(BuildSTP_PDB, "Build STP PDBs", "Build PDBs for the STP", kNoModifier, 'a');
 
+	InstallCommandLineHandler(MyCLHandler, "-unitstp", "-unitstp <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted STP with MD");
 	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted STP with MD");
 	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted pancake with GAP");
 	InstallCommandLineHandler(MyCLHandler, "-polygraph", "-polygraph <instance> <algorithm> <c1> <c2> <ep>", "Runs worst-case inconsistency graph");
@@ -210,6 +213,25 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 
 		TestSTP(atoi(argument[1]), atoi(argument[2]), c1, c2, ep, scale);
 	}
+	if (strcmp(argument[0], "-unitstp") == 0)
+	{
+		int c1 = 2, c2 = 5, ep = -1, scale = 1;
+		if (maxNumArgs < 3)
+		{
+			printf("Error: didn't pass arguments: <instance> <algorithm>\n");
+			exit(0);
+		}
+		if (maxNumArgs >= 4)
+			c1 = atoi(argument[3]);
+		if (maxNumArgs >= 5)
+			c2 = atoi(argument[4]);
+		if (maxNumArgs >= 6)
+			ep = atoi(argument[5]);
+		if (maxNumArgs >= 7)
+			scale = atoi(argument[6]);
+		
+		TestSTP(atoi(argument[1]), atoi(argument[2]), c1, c2, ep, scale, true);
+	}
 	if (strcmp(argument[0], "-pancake") == 0)
 	{
 		int c1 = 2, c2 = 5, ep = -1, scale = 1;
@@ -251,65 +273,6 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	return 2;
 }
 
-//void TestSTP(int instance, int algorithm, double minGrowth, double maxGrowth, double startEpsilon)
-//{
-//	MNPuzzle<4, 4> stp;
-//	MNPuzzleState<4, 4> start, goal, testStart;
-//	std::vector<slideDir> moves, tmpPath;
-//
-//	stp.SetWeighted(kUnitPlusFrac);
-//	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
-//	IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
-//	BID<MNPuzzleState<4, 4>, slideDir> ebis(minGrowth, maxGrowth, startEpsilon);
-//	std::vector<MNPuzzleState<4, 4>> path;
-//
-//	assert(instance >= 0 && instance < 100);
-//	start = STP::GetKorfInstance(instance);
-//
-//	Timer t;
-//	switch (algorithm)
-//	{
-//		case 0: // IDA*
-//		{
-//			std::cout << "IDA* searching from\n" << start << "\n" << goal << "\n";
-//			t.StartTimer();
-//			ida.GetPath(&stp, start, goal, moves);
-//			t.EndTimer();
-//			printf("IDA*: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(), ida.GetNodesExpanded(), ida.GetNodesTouched(), stp.GetPathLength(start, moves));
-//		}
-//			break;
-//		case 1: // EB Search
-//		{
-//			printf("EB(%1.2f, %1.2f, %1.2f): ", minGrowth, maxGrowth, startEpsilon);
-//			std::cout << " search from\n" << start << "\n" << goal << "\n";
-//			t.StartTimer();
-//
-//			ebis.GetPath(&stp, start, goal, tmpPath);
-//			t.EndTimer();
-//			printf("EB Search: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
-//				   ebis.GetNodesExpanded(), ebis.GetNodesTouched(), stp.GetPathLength(start, tmpPath));
-//
-//			t.StartTimer();
-//			ebis.RedoMinWork();
-//			t.EndTimer();
-//			printf("DBDFS: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
-//				   ebis.GetNodesExpanded(), ebis.GetNodesTouched(), stp.GetPathLength(start, tmpPath));
-//		}
-//			break;
-//		case 2: // A*
-//		{
-//			std::cout << "A* searching from\n" << start << "\n" << goal << "\n";
-//			t.StartTimer();
-//			astar.GetPath(&stp, start, goal, path);
-//			t.EndTimer();
-//			printf("A*: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
-//				   astar.GetNodesExpanded(), astar.GetNodesTouched(), stp.GetPathLength(path));
-//		}
-//			break;
-//	}
-//	exit(0);
-//}
-
 template <class state, class action, class environment, bool DFS = true>
 void Test(environment *e, Heuristic<state> *h, const state &start, const state &goal, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, uint64_t multiple)
 {
@@ -319,9 +282,11 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 	IDAStar<state, action> ida;
 	EBSearch<state, action, environment, DFS> ebis(minGrowth, maxGrowth, startEpsilon, multiple);
 	double gamma = startEpsilon;
-	while (algorithm == 3 && gamma > 10)
+	while ((algorithm == 3 || algorithm == 4) && gamma > 10)
 		gamma /= 10.0;
-	IBEX::IBEX<state, action, environment, DFS> ibex(minGrowth, maxGrowth, gamma);
+	IBEX::IBEX<state, action, environment, DFS> ibex(minGrowth, maxGrowth, gamma, multiple);
+	EDAStar<state, action> eda(gamma);
+	IDAStarCR<state, action> ida_cr;
 	std::vector<state> path;
 	
 	Timer t;
@@ -339,7 +304,7 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 			break;
 		case 1: // EB Search
 		{
-			printf("EB(%1.2f, %1.2f, %1.2f): ", minGrowth, maxGrowth, startEpsilon);
+			printf("EB(%d, %d, %d, %llu): ", minGrowth, maxGrowth, startEpsilon, multiple);
 			std::cout << " search from\n" << start << "\n" << goal << "\n";
 			t.StartTimer();
 			ebis.GetPath(e, h, start, goal, tmpPath);
@@ -369,7 +334,7 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 			break;
 		case 3: // IBEX Search
 		{
-			printf("IBEX(%d, %d, %1.2f): ", minGrowth, maxGrowth, gamma);
+			printf("IBEX(%d, %d, %1.2f, %s): ", minGrowth, maxGrowth, gamma, multiple?"exp":"poly");
 			std::cout << " search from\n" << start << "\n" << goal << "\n";
 			t.StartTimer();
 			
@@ -386,16 +351,47 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 				   ibex.GetNodesExpanded(), ibex.GetNodesTouched(), e->GetPathLength(start, tmpPath));
 		}
 			break;
+		case 4: // EDA* Search
+		{
+			printf("EDA*(%1.2f): ", gamma);
+			std::cout << " search from\n" << start << "\n" << goal << "\n";
+			
+			eda.SetHeuristic(h);
+
+			t.StartTimer();
+			eda.GetPath(e, start, goal, tmpPath);
+			t.EndTimer();
+			printf("EDA*: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
+				   eda.GetNodesExpanded(), eda.GetNodesTouched(), e->GetPathLength(start, tmpPath));
+		}
+			break;
+		case 5: // IDA*_cr Search
+		{
+			printf("IDA*_cr(50, 2)");
+			std::cout << " search from\n" << start << "\n" << goal << "\n";
+			
+			ida_cr.SetHeuristic(h);
+			
+			t.StartTimer();
+			ida_cr.GetPath(e, start, goal, tmpPath);
+			t.EndTimer();
+			printf("IDA*_cr: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
+				   ida_cr.GetNodesExpanded(), ida_cr.GetNodesTouched(), e->GetPathLength(start, tmpPath));
+		}
+			break;
 	}
 	exit(0);
 }
 
-void TestSTP(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale)
+void TestSTP(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale, bool unit)
 {
 	MNPuzzle<4, 4> stp;
 	MNPuzzleState<4, 4> start, goal;
 	
-	stp.SetWeighted(kUnitPlusFrac);
+	if (unit)
+		stp.SetWeighted(kUnitWeight);
+	else
+		stp.SetWeighted(kUnitPlusFrac);
 	
 	assert(instance >= 0 && instance < 100);
 	start = STP::GetKorfInstance(instance);
