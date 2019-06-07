@@ -27,8 +27,8 @@ namespace IBEX {
 	template <class state, class action, class environment, bool DFS = true>
 	class IBEX {
 	public:
-		IBEX(uint64_t minGrow, uint64_t maxGrow, double growthRate)
-		:c1(minGrow), c2(maxGrow), gamma(growthRate)  {}
+		IBEX(uint64_t minGrow, uint64_t maxGrow, double growthRate, bool exponential)
+		:c1(minGrow), c2(maxGrow), gamma(growthRate), oracle(false), exponentialGrowth(exponential)  {}
 		void GetPath(environment *env, state from, state to,
 					 std::vector<action> &thePath);
 		void GetPath(environment *env, Heuristic<state> *heuristic, state from, state to,
@@ -57,8 +57,6 @@ namespace IBEX {
 			}
 		};
 		IBEX<state, action, environment, DFS>::costInterval LowLevelSearch(double costLimit, uint64_t nodeLimit);
-//		IBEX<state, action, environment, DFS>::solutionInterval BinarySearch(searchBounds d, uint64_t nodeLimit);
-//		IBEX<state, action, environment, DFS>::solutionInterval ExponentialSearch(const searchBounds &d, uint64_t nodeLimit);
 		
 		// Functions for DF Search
 		double GCost(const state &s1, const state &s2)
@@ -85,6 +83,9 @@ namespace IBEX {
 		state start, goal;
 		uint64_t c1, c2;
 		double gamma;
+		double dfsLowerBound;
+		bool oracle;
+		bool exponentialGrowth;
 		
 		// Data for BFHS
 		AStarOpenClosed<state, BFHSCompare<state>> q;
@@ -116,15 +117,17 @@ namespace IBEX {
 		
 		uint64_t nodeLB = 1;
 		costInterval solutionInterval;
-//		nodeLB = 83886080/2;
-//		solutionInterval.lowerBound = 63.01167;//HCost(from);
 		solutionInterval.lowerBound = HCost(from);
 		solutionInterval.upperBound = DBL_MAX;
+		//		double baseHCost = HCost(from);
 		while (fgreater(solutionCost, solutionInterval.lowerBound))
 		{
+			double delta = 1;
 			printf("IBEX: Base search: f: %1.5f, cost limit ∞, target [%llu, %llu]\n", solutionInterval.lowerBound, c1*nodeLB, c2*nodeLB);
+//			baseHCost = solutionInterval.lowerBound;
+			dfsLowerBound = solutionInterval.lowerBound;
 			solutionInterval &= LowLevelSearch(solutionInterval.lowerBound, infiniteWorkBound);
-
+			
 			// Move to next iteration
 			if (solutionInterval.nodes >= c1*nodeLB)
 			{
@@ -136,12 +139,25 @@ namespace IBEX {
 			while (!(fequal(solutionInterval.upperBound, solutionInterval.lowerBound) ||
 					 (solutionInterval.nodes >= c1*nodeLB && solutionInterval.nodes < c2*nodeLB)))
 			{
-				double nextCost;
 				if (solutionInterval.upperBound == DBL_MAX)
-					nextCost = solutionInterval.lowerBound * gamma;
+					printf("    ]--Critical f in [%1.5f, ∞]\n", solutionInterval.lowerBound);
+				else
+					printf("    ]--Critical f in [%1.5f, %1.5f]\n", solutionInterval.lowerBound, solutionInterval.upperBound);
+
+				double nextCost;
+				delta *= gamma;
+				if (solutionInterval.upperBound == DBL_MAX)
+				{
+					if (exponentialGrowth)
+						nextCost = solutionInterval.lowerBound+delta;
+//					nextCost = baseHCost+(solutionInterval.lowerBound-baseHCost) * gamma;
+					else
+						nextCost = solutionInterval.lowerBound * gamma;
+				}
 				else
 					nextCost = (solutionInterval.lowerBound+solutionInterval.upperBound)/2.0;
 
+				dfsLowerBound = solutionInterval.lowerBound;
 				solutionInterval &= LowLevelSearch(nextCost, c2*nodeLB);
 			}
 			
@@ -155,95 +171,6 @@ namespace IBEX {
 		printf("Found solution cost %1.5f\n", solutionCost);
 	}
 	
-//	template <class state, class action, class environment, bool DFS>
-//	typename IBEX<state, action, environment, DFS>::searchData IBEX<state, action, environment, DFS>::ExponentialSearch(const searchData &d, uint64_t nodeLimit)
-//	{
-//		uint64_t lowNodes = c1*nodeLimit;
-//		uint64_t highNodes = c2*nodeLimit;
-//		uint64_t delta = std::max(d.nextF - d.f, initialGap);
-//		int i = 0;
-//		searchData lastSuccess = d;
-//		while (true)
-//		{
-//			uint64_t bound = d.f + delta*pow(2, i);
-//			searchData curr = LowLevelSearch(bound, highNodes);
-//			if (solutionCost <= bound && curr.nodes < highNodes)
-//			{
-//				printf("***EBIS:->EXP: Solution proven below window; done\n");
-//				curr.f = solutionCost;
-//				return curr;
-//			}
-//
-//			if (lowNodes <= curr.nodes && curr.nodes < highNodes)
-//			{
-//				printf("EBIS:->EXP: in node window [%llu <= %llu < %llu]\n", lowNodes, curr.nodes, highNodes);
-//				return curr;
-//			}
-//			else if (curr.nodes >= highNodes)
-//			{
-//				printf("EBIS:->EXP: over node window\n");
-//				lastSuccess.nodes = curr.nodes;
-//				lastSuccess.failedF = bound;
-//				return lastSuccess;
-//			}
-//			else {
-//				printf("EBIS:->EXP: below node window\n");
-//				lastSuccess = curr;
-//			}
-//			i++;
-//			if (d.f + delta*pow(2, i) < curr.nextF)
-//				printf("EBIS:->EXP: delta too small, increasing growth past nextf\n");
-//			while (d.f + delta*pow(2, i) < curr.nextF)
-//			{
-//				i++;
-//			}
-//		}
-//	}
-//
-//	template <class state, class action, class environment, bool DFS>
-//	typename IBEX<state, action, environment, DFS>::searchData IBEX<state, action, environment, DFS>::BinarySearch(searchData d, uint64_t nodeLimit)
-//	{
-//		uint64_t lowNodes = c1*nodeLimit;
-//		uint64_t highNodes = c2*nodeLimit;
-//		uint64_t middlef = (d.failedF + d.f)/2.0;
-//		searchData curr;
-//		if (middlef <= d.nextF)
-//		{
-//			middlef = d.nextF;
-//			curr = LowLevelSearch(middlef, infiniteWorkBound);
-//			if (solutionCost <= middlef)
-//				curr.f = middlef;
-//			if (curr.nodes >= lowNodes)
-//				return curr;
-//		}
-//		else {
-//			curr = LowLevelSearch(middlef, highNodes);
-//		}
-//		// found and proved solution
-//		if (solutionCost <= middlef && curr.nodes < highNodes)
-//		{
-//			printf("***EBIS:->BIN: Solution proven below window; done\n");
-//			curr.f = middlef;
-//			return curr;
-//		}
-//
-//		if (lowNodes <= curr.nodes && curr.nodes < highNodes)
-//		{
-//			printf("EBIS:->BIN: in node window [%llu <= %llu < %llu]\n", lowNodes, curr.nodes, highNodes);
-//			return curr;
-//		}
-//		else if (curr.nodes >= highNodes)
-//		{
-//			printf("EBIS:->BIN: over node window\n");
-//			d.failedF = std::min(middlef, solutionCost);
-//			return BinarySearch(d, nodeLimit);
-//		}
-//		else {
-//			printf("EBIS:->BIN: below node window\n");
-//			curr.failedF = d.failedF;
-//			return BinarySearch(curr, nodeLimit);
-//		}
-//	}
 	
 	template <class state, class action, class environment, bool DFS>
 	typename IBEX<state, action, environment, DFS>::costInterval IBEX<state, action, environment, DFS>::DFBNB(double costLimit, uint64_t nodeLimit)
@@ -261,16 +188,7 @@ namespace IBEX {
 		action a;
 		sd = DFBNBHelper(currState, 0, costLimit, sd, nodeLimit, a);
 		totalNodesExpanded += sd.nodes;
-		// TODO: In practice we should set the nextF to be sd.f
-		// Need to test this.
-//		if (sd.nextF == -1ull) // so few nodes expanded we didn't find the next bound
-//		{
-//			printf(" (oops) ");
-//			sd = DFBNBHelper(currState, 0, costLimit, sd, -1ull, a);
-//			totalNodesExpanded += sd.nodes;
-//		}
-		//if (nodesExpanded)
-		// TODO: return ranges here
+
 		costInterval v;
 		if (sd.nodes >= nodeLimit)
 		{
@@ -306,6 +224,10 @@ namespace IBEX {
 	{
 		double currF = pathCost+HCost(currState);
 		//	printf("-------->%f [%f]\n", currF, pathCost);
+		if (fequal(dfsLowerBound, solutionCost) && !oracle)
+		{
+			return sd;
+		}
 		if (fgreater(currF, costLimit))
 		{
 			sd.f_above = std::min(sd.f_above, currF);
@@ -359,7 +281,9 @@ namespace IBEX {
 	{
 		ResetNodeCount();
 		printf("IBEX Validation:\n");
+		oracle = true;
 		LowLevelSearch(solutionCost, -1);
+		oracle = false;
 		return solutionCost;
 	}
 	
