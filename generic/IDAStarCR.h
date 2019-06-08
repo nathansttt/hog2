@@ -85,12 +85,12 @@ void IDAStarCR<state, action, buckets, verbose>::GetPath(SearchEnvironment<state
 		
 		uint64_t newNodes = nodesExpanded-oldNodes;
 		uint64_t total = bucketCount[0];
-		double nextBound = currBound;
+		double nextBound = currBound*(1.0+1.0/100.0);
 		for (int i = 1; i < buckets; i++)
 		{
 			total+=bucketCount[i];
 			if (bucketCount[i] > 0)
-				nextBound = currBound*(1+i/100.0);
+				nextBound = currBound*(1.0+static_cast<double>(i)/100.0);
 			// This is the exponential bound for the paper. But, it would likely be better to grow based on
 			// the last iteration, not the absolute size of a 2^k tree for iteration k.
 			if (total >= (1<<k))
