@@ -379,6 +379,25 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 				   ida_cr.GetNodesExpanded(), ida_cr.GetNodesTouched(), e->GetPathLength(start, tmpPath));
 		}
 			break;
+		case 6: // DovIBEX Search
+		{
+			printf("DovIBEX(%d, %d, %1.2f, %s): ", minGrowth, maxGrowth, gamma, multiple?"exp":"poly");
+			std::cout << " search from\n" << start << "\n" << goal << "\n";
+			t.StartTimer();
+			
+			ibex.Dovetail(e, h, start, goal, tmpPath);
+			t.EndTimer();
+			printf("IBEX: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
+				   ibex.GetNodesExpanded(), ibex.GetNodesTouched(), e->GetPathLength(start, tmpPath));
+			
+			t.StartTimer();
+			double cost = ibex.RedoMinWork();
+			t.EndTimer();
+			assert(fequal(cost, e->GetPathLength(start, tmpPath)));
+			printf("Oracle: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
+				   ibex.GetNodesExpanded(), ibex.GetNodesTouched(), e->GetPathLength(start, tmpPath));
+		}
+			break;
 	}
 	exit(0);
 }
@@ -411,6 +430,7 @@ void TestPancake(int instance, int algorithm, int minGrowth, int maxGrowth, int 
 void TestPolygraph(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale)
 {
 	Graph *g = GraphInconsistencyExamples::GetPolyGraph(instance);
+	printf("Made instance %d with %d nodes\n", instance, g->GetNumNodes());
 	GraphEnvironment *ge = new GraphEnvironment(g);
 	GraphInconsistencyExamples::GraphHeuristic h(g);
 	Test<graphState, graphMove, GraphEnvironment, false>(ge, &h, 0, g->GetNumNodes()-1, algorithm, minGrowth, maxGrowth, startEpsilon, scale);
