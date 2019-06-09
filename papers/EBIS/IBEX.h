@@ -33,6 +33,8 @@ namespace IBEX {
 					 std::vector<action> &thePath);
 		void GetPath(environment *env, Heuristic<state> *heuristic, state from, state to,
 					 std::vector<action> &thePath);
+		void Dovetail(environment *env, Heuristic<state> *heuristic, state from, state to,
+					  std::vector<action> &thePath);
 		double RedoMinWork();
 		
 		uint64_t GetNodesExpanded() { return totalNodesExpanded; }
@@ -347,8 +349,8 @@ namespace IBEX {
 			neighborID.resize(0);
 			neighborLoc.resize(0);
 			
-			//	std::cout << "Expanding: " << q.Lookup(nodeid).data << " with f:";
-			//	std::cout << q.Lookup(nodeid).g << std::endl;
+//				std::cout << "Expanding: " << q.Lookup(nodeid).data << " with f:";
+//				std::cout << q.Lookup(nodeid).g << std::endl;
 			
 			env->GetSuccessors(q.Lookup(nodeid).data, neighbors);
 			
@@ -440,6 +442,102 @@ namespace IBEX {
 			return DFBNB(costLimit, nodeLimit);
 		else
 			return BFHS(costLimit, nodeLimit);
+	}
+
+	/* Node used by the UBS search */
+	class UBSNode {
+	public:
+		UBSNode(int k, int r) : r(r), k(k) {}
+		int r;
+		int k;
+		friend bool operator<(const UBSNode &n1, const UBSNode &n2) {return n1.T() > n2.T();}
+		int T() const {return r * pow(2, k);}
+	};
+	
+	template <class state, class action, class environment, bool DFS>
+	void IBEX<state, action, environment, DFS>::Dovetail(environment *env, Heuristic<state> *heuristic, state from, state to,
+														 std::vector<action> &thePath)
+	{
+		this->env = env;
+		h = heuristic;
+		start = from;
+		goal = to;
+		solutionPath.clear();
+		solutionCost = DBL_MAX;
+		ResetNodeCount();
+
+		//Graph &graph, int alpha, float gamma, Data &data)
+		int alpha=c2;
+		
+		/* lookup table maps programs k to uppder bounds.
+		 Lower bound is tracked globally */
+		std::map<int,float> lookup;
+		/* priority queue for storing the UBS nodes */
+		std::priority_queue<UBSNode> q;
+		q.push(UBSNode(1,1));
+		/* b_low is a lower bound on the optimal budget */
+		uint64_t b_low = 0;
+		float low = HCost(from);
+		while (!q.empty()) {
+			/* get top element from queue */
+			auto n = q.top();
+			q.pop();
+			int k = n.k;
+			int r = n.r;
+			/* set budget */
+			int b = pow(alpha,k);
+			
+			/* skip the query if the budget is known to be insufficient
+			 to find a solution */
+			if (b <= b_low) {
+				continue;
+			}
+			
+			/* check to see if upper bound has been found yet for this program */
+			if (lookup.find(k) == lookup.end()) {
+				lookup[k] = std::numeric_limits<float>::max();
+			}
+			float high = lookup[k];
+			
+			/* compute the cost threshhold for the query */
+			float C;
+			if (exponentialGrowth)
+				C = low + (1<<(r-1));
+			else
+				C = gamma * low;  /* by default, in the binary search mode */
+			if (r == 1)
+			{   /* start with an infinite budget search */
+				C = low;
+				b = infiniteWorkBound;//std::numeric_limits<int>::max();
+			}
+			else if (high != std::numeric_limits<float>::max()) { /* exponential search */
+				C = (low + high) / 2.0;
+			}
+			/* make the query */
+			costInterval i = LowLevelSearch(C, b);
+//			Interval i = query(graph, C, b, data);
+			
+			/* perform the intersection */
+			lookup[k] = min(i.upperBound, high);
+			low = max(low, i.lowerBound);
+			
+			/* the budget was sufficient and no solution found, so update the minimal budget */
+			if (i.upperBound == std::numeric_limits<float>::max()) {
+				b_low = i.nodes;
+			}
+			
+			/* update the UBS */
+			q.push(UBSNode(n.k, n.r+1));
+			if (n.r == 1) {
+				q.push(UBSNode(n.k+1,1));
+			}
+
+			if (flesseq(solutionCost, low))
+			{
+				thePath = solutionPath;
+				break;
+			}
+		}
 	}
 	
 }
