@@ -556,13 +556,48 @@ std::string GraphEnvironment::SVGDraw() const
 	return s;
 }
 
+void GraphEnvironment::DrawLERP(Graphics::Display &disp, Graph *a, Graph *b, float mix) const
+{
+	if ((a == 0) || (a->GetNumNodes() == 0) || b == 0 || b->GetNumNodes() == 0 || b->GetNumNodes() != a->GetNumNodes())
+		return;
+
+	rgbColor mainColor = GetColor();
+	float mixX = (mix<0.6)?(5*mix/3):1;
+	float mixY = (mix<0.4)?0:5*(mix-0.4)/3;
+//	mix = 1-mix;
+	edge_iterator ei = a->getEdgeIter();
+	for (edge *e = a->edgeIterNext(ei); e; e = a->edgeIterNext(ei))
+	{
+		if (e->getFrom() > e->getTo())
+			continue;
+		//int x, y;
+		//double offsetx, offsety;
+		node *n;
+		n = a->GetNode(e->getFrom());
+		node *n2;
+		n2 = b->GetNode(e->getFrom());
+		
+		GLdouble x1, y1;
+		GLdouble x2, y2;
+		x1 = (1-mixX)*n->GetLabelF(GraphSearchConstants::kXCoordinate)+mixX*n2->GetLabelF(GraphSearchConstants::kXCoordinate);
+		y1 = (1-mixY)*n->GetLabelF(GraphSearchConstants::kYCoordinate)+mixY*n2->GetLabelF(GraphSearchConstants::kYCoordinate);
+		
+		n = a->GetNode(e->getTo());
+		n2 = b->GetNode(e->getTo());
+		x2 = (1-mixX)*n->GetLabelF(GraphSearchConstants::kXCoordinate)+mixX*n2->GetLabelF(GraphSearchConstants::kXCoordinate);
+		y2 = (1-mixY)*n->GetLabelF(GraphSearchConstants::kYCoordinate)+mixY*n2->GetLabelF(GraphSearchConstants::kYCoordinate);
+		
+		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 1.0, mainColor);
+	}
+
+}
+
 void GraphEnvironment::Draw(Graphics::Display &disp) const
 {
 	if ((g == 0) || (g->GetNumNodes() == 0)) return;
 	
 	rgbColor mainColor = GetColor();
 	
-	GLdouble off = 0;
 	edge_iterator ei = g->getEdgeIter();
 	for (edge *e = g->edgeIterNext(ei); e; e = g->edgeIterNext(ei))
 	{
@@ -730,6 +765,9 @@ namespace GraphSearchConstants {
 	 * function should not be called multiple times on the same map, because
 	 * the original Graph map lose it's association with the map.
 	 */
+	Graph *GetUndirectedGraph(Map *m)
+	{ return GetEightConnectedGraph(m, false); }
+
 	Graph *GetGraph(Map *m)
 	{ return GetEightConnectedGraph(m); }
 

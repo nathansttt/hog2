@@ -60,6 +60,7 @@ namespace GraphSearchConstants
 	Graph *GetEightConnectedGraph(Map *m, bool directed = true);
 	Graph *GetFourConnectedGraph(Map *m, bool directed = true);
 	Graph *GetGraph(Map *m);
+	Graph *GetUndirectedGraph(Map *m);
 	void AddNodesToGraph(Map *m, Graph *g);
 	void AddEdges(Map *m, Graph *g, int x, int y,
 				  bool directed = true,
@@ -320,6 +321,7 @@ public:
 	std::string SVGLabelState(const graphState &s, const char *) const;
 
 	virtual void Draw(Graphics::Display &disp) const;
+	void DrawLERP(Graphics::Display &disp, Graph *a, Graph *b, float mix) const;
 	virtual void Draw(Graphics::Display &disp, const graphState &l) const;
 	virtual void DrawStateLabel(Graphics::Display &disp, const graphState &l1, const char *txt) const;
 	virtual void DrawLine(Graphics::Display &disp, const graphState &x, const graphState &y, double width = 1.0) const;
