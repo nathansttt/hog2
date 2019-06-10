@@ -486,6 +486,12 @@ namespace IBEX {
 			int r = n.r;
 			/* set budget */
 			int b = pow(alpha,k);
+
+			/* update the UBS */
+			q.push(UBSNode(n.k, n.r+1));
+			if (n.r == 1) {
+				q.push(UBSNode(n.k+1,1));
+			}
 			
 			/* skip the query if the budget is known to be insufficient
 			 to find a solution */
@@ -493,11 +499,18 @@ namespace IBEX {
 				continue;
 			}
 			
+
 			/* check to see if upper bound has been found yet for this program */
 			if (lookup.find(k) == lookup.end()) {
 				lookup[k] = DBL_MAX;//std::numeric_limits<float>::max();
 			}
 			double high = lookup[k];
+
+			if (high != DBL_MAX)
+				printf("Running (k=%d, r=%d) with budget %d; [global] low = %f, [loca] high = %f\n", k, r, b, low, high);
+			else
+				printf("Running (k=%d, r=%d) with budget %d; [global] low = %f, [loca] high = ∞\n", k, r, b, low);
+
 			
 			/* compute the cost threshhold for the query */
 			float C;
@@ -526,11 +539,6 @@ namespace IBEX {
 				b_low = i.nodes;
 			}
 			
-			/* update the UBS */
-			q.push(UBSNode(n.k, n.r+1));
-			if (n.r == 1) {
-				q.push(UBSNode(n.k+1,1));
-			}
 
 			if (flesseq(solutionCost, low))
 			{
