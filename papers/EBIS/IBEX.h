@@ -488,7 +488,6 @@ namespace IBEX {
 			int b = pow(alpha,k);
 
 			/* update the UBS */
-			q.push(UBSNode(n.k, n.r+1));
 			if (n.r == 1) {
 				q.push(UBSNode(n.k+1,1));
 			}
@@ -539,6 +538,8 @@ namespace IBEX {
 				b_low = i.nodes;
 			}
 			
+			/* update the UBS */
+			q.push(UBSNode(n.k, n.r+1));
 
 			if (flesseq(solutionCost, low))
 			{
