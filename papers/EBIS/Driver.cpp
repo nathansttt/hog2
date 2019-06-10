@@ -387,7 +387,7 @@ void Test(environment *e, Heuristic<state> *h, const state &start, const state &
 			
 			ibex.Dovetail(e, h, start, goal, tmpPath);
 			t.EndTimer();
-			printf("IBEX: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
+			printf("DOVIBEX: %1.2fs elapsed; %llu expanded; %llu generated; solution length %f\n", t.GetElapsedTime(),
 				   ibex.GetNodesExpanded(), ibex.GetNodesTouched(), e->GetPathLength(start, tmpPath));
 			
 			t.StartTimer();

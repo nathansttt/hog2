@@ -471,13 +471,13 @@ namespace IBEX {
 		
 		/* lookup table maps programs k to uppder bounds.
 		 Lower bound is tracked globally */
-		std::map<int,float> lookup;
+		std::map<int,double> lookup;
 		/* priority queue for storing the UBS nodes */
 		std::priority_queue<UBSNode> q;
 		q.push(UBSNode(1,1));
 		/* b_low is a lower bound on the optimal budget */
 		uint64_t b_low = 0;
-		float low = HCost(from);
+		double low = HCost(from);
 		while (!q.empty()) {
 			/* get top element from queue */
 			auto n = q.top();
@@ -497,7 +497,7 @@ namespace IBEX {
 			if (lookup.find(k) == lookup.end()) {
 				lookup[k] = std::numeric_limits<float>::max();
 			}
-			float high = lookup[k];
+			double high = lookup[k];
 			
 			/* compute the cost threshhold for the query */
 			float C;
@@ -518,11 +518,11 @@ namespace IBEX {
 //			Interval i = query(graph, C, b, data);
 			
 			/* perform the intersection */
-			lookup[k] = min(i.upperBound, high);
-			low = max(low, i.lowerBound);
+			lookup[k] = std::min(i.upperBound, high);
+			low = std::max(low, i.lowerBound);
 			
 			/* the budget was sufficient and no solution found, so update the minimal budget */
-			if (i.upperBound == std::numeric_limits<float>::max()) {
+			if (i.upperBound == DBL_MAX) {
 				b_low = i.nodes;
 			}
 			
@@ -535,6 +535,7 @@ namespace IBEX {
 			if (flesseq(solutionCost, low))
 			{
 				thePath = solutionPath;
+				printf("Solution cost %f\n", solutionCost);
 				break;
 			}
 		}
