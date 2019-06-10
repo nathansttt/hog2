@@ -495,7 +495,7 @@ namespace IBEX {
 			
 			/* check to see if upper bound has been found yet for this program */
 			if (lookup.find(k) == lookup.end()) {
-				lookup[k] = std::numeric_limits<float>::max();
+				lookup[k] = DBL_MAX;//std::numeric_limits<float>::max();
 			}
 			double high = lookup[k];
 			
@@ -510,7 +510,7 @@ namespace IBEX {
 				C = low;
 				b = infiniteWorkBound;//std::numeric_limits<int>::max();
 			}
-			else if (high != std::numeric_limits<float>::max()) { /* exponential search */
+			else if (high != DBL_MAX) { /* exponential search */
 				C = (low + high) / 2.0;
 			}
 			/* make the query */
@@ -535,7 +535,7 @@ namespace IBEX {
 			if (flesseq(solutionCost, low))
 			{
 				thePath = solutionPath;
-				printf("Solution cost %f\n", solutionCost);
+				printf("proven solution cost %f\n", solutionCost);
 				break;
 			}
 		}
