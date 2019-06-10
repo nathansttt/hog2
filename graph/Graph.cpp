@@ -213,6 +213,9 @@ edge *Graph::findDirectedEdge(unsigned int from, unsigned int to)
 const edge *Graph::FindEdge(unsigned int from, unsigned int to) const
 {
 	const node *n = GetNode(from);
+	const node *t = GetNode(to);
+	if (n->_allEdges.size() > t->_allEdges.size())
+		n = t;
 	if (n)
 	{
 		edge_iterator ei = n->getEdgeIter();
@@ -231,6 +234,9 @@ const edge *Graph::FindEdge(unsigned int from, unsigned int to) const
 edge *Graph::FindEdge(unsigned int from, unsigned int to)
 {
 	node *n = GetNode(from);
+	node *t = GetNode(to);
+	if (n->_allEdges.size() > t->_allEdges.size())
+		n = t;
 	if (n)
 	{
 		edge_iterator ei = n->getEdgeIter();
