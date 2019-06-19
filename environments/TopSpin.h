@@ -95,7 +95,18 @@ public:
 	double GCost(const TopSpinState<N> &, const TopSpinAction &) const;
 	bool GoalTest(const TopSpinState<N> &state, const TopSpinState<N> &goal) const;
 	bool GoalTest(const TopSpinState<N> &s) const;
-
+	void GetGoals(std::vector<TopSpinState<N>> &goals)
+	{
+		goals.clear();
+		TopSpinState<N> s;
+		for (int x = 0; x < N; x++)
+		{
+			for (int y = 0; y < N; y++)
+				s.puzzle[y] = (y+x)%N;
+			goals.push_back(s);
+		}
+	}
+	
 	//void LoadPDB(char *fname, const std::vector<int> &tiles, bool additive);
 
 	uint64_t GetActionHash(TopSpinAction act) const;
@@ -236,7 +247,7 @@ template <int N, int k>
 bool TopSpin<N, k>::GoalTest(const TopSpinState<N> &s) const
 {
 	for (int x = 0; x < N; x++)
-		if (s.puzzle[x] != x)
+		if ((s.puzzle[x]+1)%N != s.puzzle[(x+1)%N])
 			return false;
 	return true;
 }
@@ -314,32 +325,38 @@ double TopSpin<N, k>::HCost(const TopSpinState<N> &state1, const TopSpinState<N>
 }
 
 //static int tscosts[16] = {5,4,3,3,10,2,6,8,4,8,6,2,10,6,5,1}; // 1...10
+//static const int tsCostCount = 16;
 //static int tscosts[16] = {16,1,8,15,22,29,17,14,9,20,26,28,3,16,12,18}; // 1...29
+static const int tsCostCount = 21;
+static int tscosts[21] = {47,45,52,41,56,43,50,46,49,51,48,53,59,58,55,40,57,60,44,42,54}; // [40...60]
+//static const int tsCostCount = 12;
+//static const int tscosts[tsCostCount] = {191,467,63,266,691,697,916,534,486,619,581,766}; // duplicating results run in PSVN
 template <int N, int k>
 double TopSpin<N, k>::GCost(const TopSpinState<N> &node, const TopSpinAction &act) const
 {
-//	if (!weighted)
-//	{
+	if (!weighted)
+	{
 		return 1;
-//	}
-//	else {
-//		assert(N <= 16);
-//		return tscosts[act];
-//	}
+	}
+	else {
+		assert(N <= tsCostCount);
+		return tscosts[act];
+	}
 }
 
 template <int N, int k>
 double TopSpin<N, k>::GCost(const TopSpinState<N> &s1, const TopSpinState<N> &s2) const
 {
-	return 1;
-//	TopSpinAction a = this->GetAction(s1, s2);
-//	return GCost(s1, a);
+//	return 1;
+	TopSpinAction a = this->GetAction(s1, s2);
+	return GCost(s1, a);
 }
 
 template <int N, int k>
 bool TopSpin<N, k>::GoalTest(const TopSpinState<N> &state, const TopSpinState<N> &theGoal) const
 {
-	return (state == theGoal);
+	return GoalTest(state);
+//	return (state == theGoal);
 }
 
 template <int N, int k>
