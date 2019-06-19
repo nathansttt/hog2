@@ -324,11 +324,12 @@ double TopSpin<N, k>::HCost(const TopSpinState<N> &state1, const TopSpinState<N>
 	return 0;
 }
 
-//static int tscosts[16] = {5,4,3,3,10,2,6,8,4,8,6,2,10,6,5,1}; // 1...10
 //static const int tsCostCount = 16;
-//static int tscosts[16] = {16,1,8,15,22,29,17,14,9,20,26,28,3,16,12,18}; // 1...29
+//static int tscosts[tsCostCount] = {5,4,3,3,10,2,6,8,4,8,6,2,10,6,5,1}; // 1...10
+//static const int tsCostCount = 16;
+//static int tscosts[tsCostCount] = {16,1,8,15,22,29,17,14,9,20,26,28,3,16,12,18}; // 1...29
 static const int tsCostCount = 21;
-static int tscosts[21] = {47,45,52,41,56,43,50,46,49,51,48,53,59,58,55,40,57,60,44,42,54}; // [40...60]
+static int tscosts[tsCostCount] = {47,45,52,41,56,43,50,46,49,51,48,53,59,58,55,40,57,60,44,42,54}; // [40...60]
 //static const int tsCostCount = 12;
 //static const int tscosts[tsCostCount] = {191,467,63,266,691,697,916,534,486,619,581,766}; // duplicating results run in PSVN
 template <int N, int k>
