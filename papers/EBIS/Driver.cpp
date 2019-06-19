@@ -50,6 +50,9 @@
 #include "IBEX.h"
 #include "EDAStar.h"
 #include "IDAStarCR.h"
+#include "TopSpin.h"
+#include "TSInstances.h"
+#include "MeroB.h"
 
 MNPuzzle<4, 4> p;
 MNPuzzleState<4, 4> s, t;
@@ -59,6 +62,7 @@ double v = 1;
 bool recording = false;
 void TestSTP(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale, bool unit = false);
 void TestPancake(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
+void TestTopSpin(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
 void TestTOH(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
 void TestPolygraph(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale);
 
@@ -66,6 +70,7 @@ void ValidateWeights();
 
 int main(int argc, char* argv[])
 {
+	setvbuf(stdout, NULL, _IONBF, 0);
 	ValidateWeights();
 	
 	InstallHandlers();
@@ -91,6 +96,7 @@ void InstallHandlers()
 
 	InstallCommandLineHandler(MyCLHandler, "-unitstp", "-unitstp <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted STP with MD");
 	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted STP with MD");
+	InstallCommandLineHandler(MyCLHandler, "-ts", "-ts <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted TS(12,4) with 2 PDB heuristics");
 	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake <instance> <algorithm> <c1> <c2> <ep>", "Runs weighted pancake with GAP");
 	InstallCommandLineHandler(MyCLHandler, "-polygraph", "-polygraph <instance> <algorithm> <c1> <c2> <ep>", "Runs worst-case inconsistency graph");
 	
@@ -269,7 +275,29 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			scale = atoi(argument[6]);
 
 		TestPolygraph(atoi(argument[1]), atoi(argument[2]), c1, c2, ep, scale);
-	}	exit(0);
+	}
+	if (strcmp(argument[0], "-ts") == 0)
+	{
+		int c1 = 2, c2 = 5, ep = -1, scale = 1;
+		if (maxNumArgs < 3)
+		{
+			printf("Error: didn't pass arguments: <instance> <algorithm>\n");
+			exit(0);
+		}
+		if (maxNumArgs >= 4)
+			c1 = atoi(argument[3]);
+		if (maxNumArgs >= 5)
+			c2 = atoi(argument[4]);
+		if (maxNumArgs >= 6)
+			ep = atoi(argument[5]);
+		if (maxNumArgs >= 7)
+			scale = atoi(argument[6]);
+		
+		TestTopSpin(atoi(argument[1]), atoi(argument[2]), c1, c2, ep, scale);
+	}
+
+	
+	exit(0);
 	return 2;
 }
 
@@ -433,7 +461,55 @@ void TestPolygraph(int instance, int algorithm, int minGrowth, int maxGrowth, in
 	printf("Made instance %d with %d nodes\n", instance, g->GetNumNodes());
 	GraphEnvironment *ge = new GraphEnvironment(g);
 	GraphInconsistencyExamples::GraphHeuristic h(g);
+
+	MeroB B;
+	B.SetHeuristic(&h);
+	std::vector<graphState> thePath;
+	B.GetPath(ge, g, 0, g->GetNumNodes()-1, thePath);
+	printf("B: %llu expansions\n", B.GetNodesExpanded());
+	B.SetVersion(MB_BP);
+	B.GetPath(ge, g, 0, g->GetNumNodes()-1, thePath);
+	printf("B': %llu expansions\n", B.GetNodesExpanded());
+
 	Test<graphState, graphMove, GraphEnvironment, false>(ge, &h, 0, g->GetNumNodes()-1, algorithm, minGrowth, maxGrowth, startEpsilon, scale);
+}
+
+void TestTopSpin(int instance, int algorithm, int minGrowth, int maxGrowth, int startEpsilon, int scale)
+{
+	const int N = 12;
+	const int k = 4;
+	std::vector<int> pattern1 = {0, 1, 2, 3};
+	std::vector<int> pattern2 = {4, 5, 6, 7};
+	std::vector<int> pattern3 = {8, 9, 10, 11};
+
+	TopSpin<N, k> ts;
+	TopSpinState<N> start, goal;
+	std::vector<TopSpinState<N>> goals;
+	ts.GetGoals(goals);
+	ts.SetWeighted(true);
+	
+	//MR1PermutationPDB
+	LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>, 16> pdb1(&ts, goals, pattern1);
+	LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>, 16> pdb2(&ts, goals, pattern2);
+	LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>, 16> pdb3(&ts, goals, pattern3);
+	pdb1.BuildPDBForward(goals, std::thread::hardware_concurrency(), false, false);
+	pdb2.BuildPDBForward(goal, std::thread::hardware_concurrency(), false, false);
+	pdb3.BuildPDBForward(goal, std::thread::hardware_concurrency(), false, false);
+
+	Heuristic<TopSpinState<N>> h;
+	h.lookups.resize(0);
+	h.lookups.push_back({kMaxNode, 1, 3});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	h.lookups.push_back({kLeafNode, 2, 2});
+	h.heuristics.resize(0);
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb2);
+	h.heuristics.push_back(&pdb3);
+
+	assert(instance >= 0 && instance < 100);
+	TS::GetTSInstance<N>(start, instance);
+	Test<TopSpinState<N>, TopSpinAction, TopSpin<N, k>>(&ts, &h, start, goal, algorithm, minGrowth, maxGrowth, startEpsilon, scale);
 }
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
