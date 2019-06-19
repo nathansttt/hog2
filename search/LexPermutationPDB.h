@@ -19,6 +19,7 @@ template <class state, class action, class environment, int bits = 8>
 class LexPermutationPDB : public PermutationPDB<state, action, environment, bits> {
 public:
 	LexPermutationPDB(environment *e, const state &s, const std::vector<int> &distincts);
+	LexPermutationPDB(environment *e, const std::vector<state> &s, const std::vector<int> &distincts);
 	virtual uint64_t GetPDBHash(const state &s, int threadID = 0) const;
 	virtual void GetStateFromPDBHash(uint64_t hash, state &s, int threadID = 0) const;
 	virtual uint64_t GetAbstractHash(const state &s, int threadID = 0) const { return GetPDBHash(s); }
@@ -43,6 +44,13 @@ protected:
 template <class state, class action, class environment, int bits>
 LexPermutationPDB<state, action, environment, bits>::LexPermutationPDB(environment *e, const state &s, const std::vector<int> &distincts)
 :PermutationPDB<state, action, environment, bits>(e, s, distincts), dualCache(maxThreads), locsCache(maxThreads)
+{
+	this->SetGoal(s);
+}
+
+template <class state, class action, class environment, int bits>
+LexPermutationPDB<state, action, environment, bits>::LexPermutationPDB(environment *e, const std::vector<state> &s, const std::vector<int> &distincts)
+:PermutationPDB<state, action, environment, bits>(e, s[0], distincts), dualCache(maxThreads), locsCache(maxThreads)
 {
 	this->SetGoal(s);
 }

@@ -41,8 +41,24 @@ public:
 	virtual ~PDBHeuristic() {}
 
 	void SetGoal(const state &goal)
-	{	GetStateFromPDBHash(this->GetAbstractHash(goal), goalState); goalSet = true; }
+	{
+		goalState.resize(1);
+		GetStateFromPDBHash(this->GetAbstractHash(goal), goalState[0]);
+		goalSet = true;
+	}
 
+	void SetGoal(const std::vector<state> &goals)
+	{
+		goalState.resize(0);
+		for (auto &i : goals)
+		{
+			goalState.resize(goalState.size()+1);
+			GetStateFromPDBHash(this->GetAbstractHash(i), goalState[goalState.size()-1]);
+		}
+		goalSet = true;
+	}
+
+	
 	virtual double HCost(const state &a, const state &b) const;
 
 	virtual uint64_t GetPDBSize() const = 0;
@@ -63,7 +79,8 @@ public:
 	void BuildPDB(const state &goal);
 	void BuildPDB(const state &goal, int numThreads)
 	{ BuildPDBForwardBackward(goal, numThreads); }
-	void BuildPDBForward(const state &goal, int numThreads);
+	void BuildPDBForward(const state &goal, int numThreads, bool useCoarseOpen = true, bool verbose = false);
+	void BuildPDBForward(const std::vector<state> &goal, int numThreads, bool useCoarseOpen = true, bool verbose = false);
 	void BuildPDBBackward(const state &goal, int numThreads);
 	void BuildPDBForwardBackward(const state &goal, int numThreads);
 
@@ -107,7 +124,7 @@ public:
 	uint64_t compressionValue;
 
 	abstractEnvironment *env;
-	abstractState goalState;
+	std::vector<abstractState> goalState;
 private:
 	bool goalSet;
 	void AdditiveForwardThreadWorker(int threadNum, int depth,
@@ -179,17 +196,18 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	PDB.Resize(COUNT);
 	PDB.FillMax();
 	
-	uint64_t entries = 1;
+	uint64_t entries = goalState.size();
 	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goalState << std::endl;
+	std::cout << "Goal State: " << goalState[0] << std::endl;
 	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState[0]) << std::endl;
 	
 	std::vector<abstractAction> acts;
 	
 	Timer t;
 	t.StartTimer();
-	PDB.Set(GetPDBHash(goalState), 0);
+	for (auto &i : goalState)
+		PDB.Set(GetPDBHash(i), 0);
 	
 	int depth = 0;
 	uint64_t newEntries = 0;
@@ -236,7 +254,15 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
-void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDBForward(const state &goal, int numThreads)
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDBForward(const state &goal, int numThreads, bool useCoarseOpen, bool verbose)
+{
+	std::vector<state> tmp;
+	tmp.push_back(goal);
+	BuildPDBForward(tmp, numThreads, useCoarseOpen, verbose);
+}
+
+template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildPDBForward(const std::vector<state> &goal, int numThreads, bool useCoarseOpen, bool verbose)
 {
 	assert(goalSet);
 	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue(numThreads*20);
@@ -252,20 +278,23 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::vector<bool> coarseOpenCurr((COUNT+coarseSize-1)/coarseSize);
 	std::vector<bool> coarseOpenNext((COUNT+coarseSize-1)/coarseSize);
 	
-	uint64_t entries = 1;
+	uint64_t entries = goalState.size();
 	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goalState << std::endl;
+	std::cout << "Goal State: " << goalState[0] << std::endl;
 	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState[0]) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
 	
 	Timer t;
 	t.StartTimer();
-	PDB.Set(GetPDBHash(goalState), 0);
+	for (auto &i : goalState)
+	{
+		PDB.Set(GetPDBHash(i), 0);
+		coarseOpenCurr[GetPDBHash(i)/coarseSize] = true;
+	}
 
-	coarseOpenCurr[GetPDBHash(goalState)/coarseSize] = true;
 	int depth = 0;
 	uint64_t newEntries;
 	std::vector<std::thread*> threads(numThreads);
@@ -274,6 +303,20 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		newEntries = 0;
 		Timer s;
 		s.StartTimer();
+
+		// TODO: clean up interface
+		if (!useCoarseOpen)
+		{
+			uint64_t smallestDepth = (1<<pdbBits)-1;
+			for (uint64_t x = 0; x < COUNT; x++)
+			{
+				uint64_t next = PDB.Get(x);
+				if (next >= depth && next < smallestDepth)
+					smallestDepth = next;
+			}
+			depth = smallestDepth;
+		}
+
 		for (int x = 0; x < numThreads; x++)
 		{
 			threads[x] = new std::thread(&PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::ForwardThreadWorker,
@@ -284,7 +327,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		
 		for (uint64_t x = 0; x < COUNT; x+=coarseSize)
 		{
-			if (coarseOpenCurr[x/coarseSize])
+			if ((useCoarseOpen && coarseOpenCurr[x/coarseSize]) || !useCoarseOpen)
 			{
 				workQueue.WaitAdd({x, std::min(COUNT, x+coarseSize)});
 			}
@@ -311,19 +354,23 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		}
 		
 		entries += total;//newEntries;
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
-			   depth, s.EndTimer(), total, entries, COUNT);
+		if (verbose)
+			printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+				   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
 		coarseOpenCurr.swap(coarseOpenNext);
 	} while (entries != COUNT);
 	
-	printf("%1.2fs elapsed\n", t.EndTimer());
+	if (verbose)
+		printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)
 	{
-		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		if (verbose)
+			printf("Entries: %llu; count: %llu\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
-	PrintHistogram();
+	if (verbose)
+		PrintHistogram();
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
@@ -342,18 +389,19 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	// we don't skip regions
 	std::vector<bool> coarseClosed((COUNT+coarseSize-1)/coarseSize);
 	
-	uint64_t entries = 1;
+	uint64_t entries = goalState.size();
 	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goalState << std::endl;
+	std::cout << "Goal State: " << goalState[0] << std::endl;
 	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState[0]) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
 	
 	Timer t;
 	t.StartTimer();
-	PDB.Set(GetPDBHash(goalState), 0);
+	for (auto &i : goalState)
+		PDB.Set(GetPDBHash(i), 0);
 	
 	int depth = 0;
 	uint64_t newEntries;
@@ -430,11 +478,11 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::vector<bool> coarseOpenCurr((COUNT+coarseSize-1)/coarseSize);
 	std::vector<bool> coarseOpenNext((COUNT+coarseSize-1)/coarseSize);
 	
-	uint64_t entries = 1;
+	uint64_t entries = goalState.size();
 	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goalState << std::endl;
+	std::cout << "Goal State: " << goalState[0] << std::endl;
 	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState[0]) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
@@ -442,9 +490,14 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 
 	Timer t;
 	t.StartTimer();
-	PDB.Set(GetPDBHash(goalState), 0);
-	coarseOpenCurr[GetPDBHash(goalState)/coarseSize] = true;
-	distribution.push_back(1);
+	int cnt = 0;
+	for (auto &i : goalState)
+	{
+		PDB.Set(GetPDBHash(i), 0);
+		coarseOpenCurr[GetPDBHash(i)/coarseSize] = true;
+		cnt++;
+	}
+	distribution.push_back(cnt);
 	
 	int depth = 0;
 	uint64_t newEntries;
@@ -540,7 +593,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::pair<uint64_t, uint64_t> p;
 	uint64_t start, end;
 	std::vector<abstractAction> acts;
-	abstractState s(goalState), t(goalState);
+	abstractState s(goalState[0]), t(goalState[0]);
 	uint64_t count = 0;
 	
 	struct writeInfo {
@@ -584,7 +637,8 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (d.newGCost < DB.Get(d.rank)) // shorter path
 			{
-				count++;
+				if (DB.Get(d.rank) == (1<<pdbBits)-1)
+					count++;
 				coarse[d.rank/coarseSize] = true;
 				DB.Set(d.rank, d.newGCost);
 			}
@@ -609,7 +663,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::pair<uint64_t, uint64_t> p;
 	uint64_t start, end;
 	std::vector<abstractAction> acts;
-	abstractState s(goalState), t(goalState);
+	abstractState s(goalState[0]), t(goalState[0]);
 	uint64_t count = 0;
 	int blankEntries = 0;
 	struct writeInfo {
@@ -688,7 +742,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::pair<uint64_t, uint64_t> p;
 	uint64_t start, end;
 	std::vector<abstractAction> acts;
-	abstractState s(goalState), t(goalState);
+	abstractState s(goalState[0]), t(goalState[0]);
 	uint64_t count = 0;
 	int blankEntries = 0;
 	struct writeInfo {
@@ -827,20 +881,22 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::vector<bool> coarseOpenCurr((COUNT+coarseSize-1)/coarseSize);
 	std::vector<bool> coarseOpenNext((COUNT+coarseSize-1)/coarseSize);
 	
-	uint64_t entries = 1;
+	uint64_t entries = goalState.size();
 	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goalState << std::endl;
+	std::cout << "Goal State: " << goalState[0] << std::endl;
 	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState[0]) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
 	
 	Timer t;
 	t.StartTimer();
-	PDB.Set(GetPDBHash(goalState), 0);
-	
-	coarseOpenCurr[GetPDBHash(goalState)/coarseSize] = true;
+	for (auto &i : goalState)
+	{
+		PDB.Set(GetPDBHash(i), 0);
+		coarseOpenCurr[GetPDBHash(i)/coarseSize] = true;
+	}
 	int depth = 0;
 	uint64_t newEntries;
 	std::vector<std::thread*> threads(numThreads);
@@ -913,7 +969,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	uint64_t start, end;
 	std::vector<abstractAction> acts;
 	std::vector<std::pair<abstractState, int>> neighbors;
-	abstractState s(goalState), t(goalState);
+	abstractState s(goalState[0]), t(goalState[0]);
 	uint64_t count = 0;
 	
 	struct writeInfo {
@@ -1401,7 +1457,8 @@ bool PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 {
 	if (fread(&type, sizeof(type), 1, f) != 1)
 		return false;
-	if (fread(&goalState, sizeof(goalState), 1, f) != 1)
+	goalState.resize(0);
+	if (fread(&goalState[0], sizeof(goalState[0]), 1, f) != 1)
 		return false;
 	return PDB.Read(f);
 }
@@ -1410,7 +1467,7 @@ template <class abstractState, class abstractAction, class abstractEnvironment, 
 void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::Save(FILE *f)
 {
 	fwrite(&type, sizeof(type), 1, f);
-	fwrite(&goalState, sizeof(goalState), 1, f);
+	fwrite(&goalState[0], sizeof(goalState[0]), 1, f);
 	PDB.Write(f);
 }
 
