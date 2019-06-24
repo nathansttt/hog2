@@ -1417,9 +1417,9 @@ std::string RubikCornerPDB::GetFileName(const char *prefix)
 	// origin state
 	for (int x = 0; x < 8; x++)
 	{
-		fileName += std::to_string(goalState.GetCubeInLoc(x));
+		fileName += std::to_string(goalState[0].GetCubeInLoc(x));
 		fileName += ".";
-		fileName += std::to_string(goalState.GetCubeOrientation(goalState.GetCubeInLoc(x)));
+		fileName += std::to_string(goalState[0].GetCubeOrientation(goalState[0].GetCubeInLoc(x)));
 		fileName += ";";
 	}
 	fileName.pop_back();
