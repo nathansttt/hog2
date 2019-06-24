@@ -244,13 +244,20 @@ namespace MeroBUtil
 
 class MeroB : public GraphAlgorithm {
 public:
-	MeroB() { verID = MB_A;}
+	MeroB() { verID = MB_A; heuristic = 0; }
 	MeroB(unsigned int v) { verID = v; }
+	void SetVersion(unsigned int v) {verID = v;}
 	virtual ~MeroB() {}
 	void GetPath(GraphEnvironment *env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath);
+	void SetHeuristic(Heuristic<graphState> *heur) {heuristic = heur; }
+	virtual double GetSolutionCost() { return 0; }
+	virtual const char* GetName() { return "MeroB"; }
+	virtual int GetSolutionEdges() { return 0; }
+
 	
 	uint64_t GetNodesExpanded() { return nodesExpanded; }
 	uint64_t GetNodesTouched() { return nodesTouched; }
+	uint64_t GetNodesReopened() { return -1; }
 
 	bool InitializeSearch(GraphEnvironment *env, Graph* g, graphState from, graphState to, std::vector<graphState> &thePath);
 	bool DoSingleSearchStep(std::vector<graphState> &thePath);
@@ -264,6 +271,7 @@ public:
 	void DrawEdge(unsigned int from, unsigned int to, double weight);
 
 private:
+	Heuristic<graphState> *heuristic;
 	unsigned int verID;
 	double F;
 	uint64_t nodesExpanded, nodesTouched;

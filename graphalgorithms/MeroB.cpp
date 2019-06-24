@@ -10,7 +10,7 @@
 #include "MeroB.h"
 #include <cstring>
 
-const static bool verbose = true;
+const static bool verbose = false;
 
 void MeroB::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
 {
@@ -20,13 +20,15 @@ void MeroB::GetPath(GraphEnvironment *_env, Graph* _g, graphState from, graphSta
 	while(!DoSingleSearchStep(thePath)) 
 		{}
 	
-	if (thePath.size() > 0)
+	if (thePath.size() > 0 && verbose)
 		printf("\nNodes expanded=%lld, Nodes touched=%lld.\n",GetNodesExpanded(),GetNodesTouched());
 }
 
 bool MeroB::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState from, graphState to, std::vector<graphState> &thePath) 
 {
 	env = _env;
+	if (heuristic == 0)
+		heuristic = env;
 	g = _g;
 	nodesTouched = nodesExpanded = 0;
 	start = from;
@@ -43,7 +45,7 @@ bool MeroB::InitializeSearch(GraphEnvironment *_env, Graph* _g, graphState from,
 	}
 	
 	// step (1)
-	MeroBUtil::SearchNode first(env->HCost(start, goal), 0, start, start);
+	MeroBUtil::SearchNode first(heuristic->HCost(start, goal), 0, start, start);
 	openQueue.Add(first);
 	
 	//if (verID == MB_B || verID == MB_BP)
@@ -115,7 +117,7 @@ bool MeroB::DoSingleStepA(std::vector<graphState> &thePath)
 		graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double gcost = topNode.gCost + edgeWeight;
-		double h = env->HCost(neighbor,goal);
+		double h = heuristic->HCost(neighbor,goal);
 		double f = gcost + h;
 		
 		/* step (6), neither in OPEN nor CLOSED */
@@ -265,7 +267,7 @@ bool MeroB::DoSingleStepB(std::vector<graphState> &thePath)
 		graphState neighbor = neighbors[x];
 		double edgeWeight = env->GCost(topNodeID,neighbor);
 		double gcost = topNode.gCost + edgeWeight;
-		double h = env->HCost(neighbor,goal);
+		double h = heuristic->HCost(neighbor,goal);
 		double f = gcost + h;
 		
 		/* step (6), neither in OPEN nor CLOSED */
@@ -437,9 +439,9 @@ bool MeroB::DoSingleStepBP(std::vector<graphState> &thePath)
 		}
 		else 
 		{
-			h = max( env->HCost(neighbor,goal), hTop - edgeWeight);
+			h = max( heuristic->HCost(neighbor,goal), hTop - edgeWeight);
 			
-			h_tmp = env->HCost(neighbor,goal);
+			h_tmp = heuristic->HCost(neighbor,goal);
 		}
 		
 		if (verbose) 
@@ -653,7 +655,7 @@ void MeroB::OpenGLDraw() const
 //			DrawSphere(x,y,z,0.025);
 //
 //			memset(buf,0,100);
-//			sprintf(buf,"%d [?,%ld,?]",n->GetNum(), (long)env->HCost(nodeID,goal));
+//			sprintf(buf,"%d [?,%ld,?]",n->GetNum(), (long)h->HCost(nodeID,goal));
 //		}
 //
 //		// draw the text info, in black
