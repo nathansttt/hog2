@@ -26,6 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
@@ -47,6 +48,7 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       displayScaleIsEnabled = "NO"
       displayScale = "1.00"
+      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
       customWorkingDirectory = "/Users/nathanst/hog2/"
@@ -67,6 +69,18 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-highwayDimension maps/dao/lak403d.map 20"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-estimateDimension /Users/nathanst/hog2/maps/cities/map/Berlin_0_1024.map"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-svg /Users/nathanst/hog2/maps/wc3maps512/tranquilpaths.map /Users/nathanst/hog2/maps/wc3maps512/tranquilpaths.svg 1024 1024"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-svg /Users/nathanst/Sites/lab/benchmarks/random/random512-10-0.map /Users/nathanst/Sites/lab/benchmarks/random/random512-10-0.svg 512 512"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument

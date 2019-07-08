@@ -154,7 +154,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-ts"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-stp 10"

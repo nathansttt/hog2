@@ -12,22 +12,32 @@
 		<key>Airplane.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>27</integer>
+			<integer>24</integer>
 		</dict>
 		<key>Canonical Graphs.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>26</integer>
+			<integer>23</integer>
 		</dict>
 		<key>Canonical Grids.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>21</integer>
+			<integer>18</integer>
 		</dict>
 		<key>Delta.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>24</integer>
+			<integer>21</integer>
+		</dict>
+		<key>Dynamic Weighted Abstraction.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>27</integer>
+		</dict>
+		<key>IBEX.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>26</integer>
 		</dict>
 		<key>MAPF.xcscheme</key>
 		<dict>
@@ -37,7 +47,7 @@
 		<key>Roads.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>25</integer>
+			<integer>22</integer>
 		</dict>
 		<key>Robotic Arm.xcscheme</key>
 		<dict>
@@ -47,7 +57,7 @@
 		<key>Sliding Tile Puzzle.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>18</integer>
+			<integer>15</integer>
 		</dict>
 		<key>Supervised Learning.xcscheme</key>
 		<dict>
@@ -57,17 +67,22 @@
 		<key>TOH.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>23</integer>
+			<integer>20</integer>
 		</dict>
 		<key>Unit Test.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>22</integer>
+			<integer>19</integer>
+		</dict>
+		<key>Witness.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>25</integer>
 		</dict>
 		<key>bidirectional.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>20</integer>
+			<integer>17</integer>
 		</dict>
 		<key>directional.xcscheme</key>
 		<dict>
@@ -97,7 +112,7 @@
 		<key>ga.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>15</integer>
+			<integer>14</integer>
 		</dict>
 		<key>localsearch.xcscheme</key>
 		<dict>
@@ -127,7 +142,7 @@
 		<key>voxel.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>19</integer>
+			<integer>16</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
@@ -187,6 +202,11 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>C472A42421CED55F00A1B41E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>C4765C181BFD57960040E996</key>
 		<dict>
 			<key>primary</key>
@@ -223,6 +243,11 @@
 			<true/>
 		</dict>
 		<key>C4A79E7F13F256DF0064AC6A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4AA9A9A228DAB7F00C93F6B</key>
 		<dict>
 			<key>primary</key>
 			<true/>

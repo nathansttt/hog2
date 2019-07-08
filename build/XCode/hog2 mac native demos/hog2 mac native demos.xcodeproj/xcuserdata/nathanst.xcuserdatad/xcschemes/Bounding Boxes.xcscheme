@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0620"
+   LastUpgradeVersion = "0920"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C4D60A5314B22E10007594CD"
-               BuildableName = "puzzleSample.app"
-               BlueprintName = "puzzleSample"
-               ReferencedContainer = "container:hog2 glut.xcodeproj">
+               BlueprintIdentifier = "C4D80EBF20AC95F30087E08D"
+               BuildableName = "Bounding Boxes.app"
+               BlueprintName = "Bounding Boxes"
+               ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,10 +33,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C4D60A5314B22E10007594CD"
-            BuildableName = "puzzleSample.app"
-            BlueprintName = "puzzleSample"
-            ReferencedContainer = "container:hog2 glut.xcodeproj">
+            BlueprintIdentifier = "C4D80EBF20AC95F30087E08D"
+            BuildableName = "Bounding Boxes.app"
+            BlueprintName = "Bounding Boxes"
+            ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -46,24 +46,33 @@
       buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      enableAddressSanitizer = "YES"
+      enableASanStackUseAfterReturn = "YES"
+      enableUBSanitizer = "YES"
       language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
+      stopOnEveryUBSanitizerIssue = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C4D60A5314B22E10007594CD"
-            BuildableName = "puzzleSample.app"
-            BlueprintName = "puzzleSample"
-            ReferencedContainer = "container:hog2 glut.xcodeproj">
+            BlueprintIdentifier = "C4D80EBF20AC95F30087E08D"
+            BuildableName = "Bounding Boxes.app"
+            BlueprintName = "Bounding Boxes"
+            ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
+         <AdditionalOption
+            key = "MallocScribble"
+            value = ""
+            isEnabled = "YES">
+         </AdditionalOption>
       </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
@@ -76,10 +85,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C4D60A5314B22E10007594CD"
-            BuildableName = "puzzleSample.app"
-            BlueprintName = "puzzleSample"
-            ReferencedContainer = "container:hog2 glut.xcodeproj">
+            BlueprintIdentifier = "C4D80EBF20AC95F30087E08D"
+            BuildableName = "Bounding Boxes.app"
+            BlueprintName = "Bounding Boxes"
+            ReferencedContainer = "container:hog2 mac native demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

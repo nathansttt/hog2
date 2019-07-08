@@ -1591,6 +1591,7 @@
 		C4822F3F1CAB9B0B000623FA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4822DB41CAA4239000623FA /* OpenGL.framework */; };
 		C4822F401CAB9B0B000623FA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4822DB71CAA424C000623FA /* Cocoa.framework */; };
 		C4822F4A1CAB9DF9000623FA /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4822F471CAB9B2A000623FA /* Driver.cpp */; };
+		C487FAA221485C5000E18EFE /* Transit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C487FAA121485C4F00E18EFE /* Transit.cpp */; };
 		C49A9EA82079E61000244298 /* Driver GL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C49A9EA72079E61000244298 /* Driver GL.cpp */; };
 		C4BEEB84209A6682005E8FBD /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BEEB83209A6682005E8FBD /* Graphics.cpp */; };
 		C4BEEB85209A668E005E8FBD /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4BEEB83209A6682005E8FBD /* Graphics.cpp */; };
@@ -2089,7 +2090,7 @@
 		C48225851CAA41EE000623FA /* ConfigEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigEnvironment.h; sourceTree = "<group>"; };
 		C48225861CAA41EE000623FA /* Directional2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Directional2DEnvironment.cpp; sourceTree = "<group>"; };
 		C48225871CAA41EE000623FA /* Directional2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Directional2DEnvironment.h; sourceTree = "<group>"; };
-		C48225881CAA41EE000623FA /* Fling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Fling.cpp; sourceTree = "<group>"; };
+		C48225881CAA41EE000623FA /* Fling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Fling.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C48225891CAA41EE000623FA /* Fling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fling.h; sourceTree = "<group>"; };
 		C482258A1CAA41EE000623FA /* FlipSide.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlipSide.cpp; sourceTree = "<group>"; };
 		C482258B1CAA41EE000623FA /* FlipSide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlipSide.h; sourceTree = "<group>"; };
@@ -4124,6 +4125,8 @@
 		C4822F451CAB9B0B000623FA /* astar */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = astar; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4822F471CAB9B2A000623FA /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C4822F481CAB9B2A000623FA /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
+		C487FAA021485C4F00E18EFE /* Transit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Transit.h; sourceTree = "<group>"; };
+		C487FAA121485C4F00E18EFE /* Transit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Transit.cpp; sourceTree = "<group>"; };
 		C49A9EA72079E61000244298 /* Driver GL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Driver GL.cpp"; sourceTree = "<group>"; };
 		C4A502491D5C4CCC00F58A4E /* LexPermutationPDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LexPermutationPDB.h; sourceTree = "<group>"; };
 		C4BEEB82209A6681005E8FBD /* Graphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graphics.h; sourceTree = "<group>"; };
@@ -6876,6 +6879,8 @@
 		C4D2169D1D25B48A0039F401 /* grids */ = {
 			isa = PBXGroup;
 			children = (
+				C487FAA121485C4F00E18EFE /* Transit.cpp */,
+				C487FAA021485C4F00E18EFE /* Transit.h */,
 				C428C9BF20B2770800B27666 /* BoundingBox.cpp */,
 				C428C9BE20B2770800B27666 /* BoundingBox.h */,
 				C4D2169E1D25B48A0039F401 /* CanonicalDijkstra.cpp */,
@@ -8572,6 +8577,7 @@
 				C4822E2D1CAA449B000623FA /* AStar3.cpp in Sources */,
 				C4822DA31CAA41F1000623FA /* MinBloom.cpp in Sources */,
 				C4822D7E1CAA41F1000623FA /* TOH.cpp in Sources */,
+				C487FAA221485C5000E18EFE /* Transit.cpp in Sources */,
 				C40CF8A31D885554001D9F20 /* RandomUnits.cpp in Sources */,
 				C4822D651CAA41F1000623FA /* Fling.cpp in Sources */,
 				C4822E211CAA449B000623FA /* LoadedCliqueAbstraction.cpp in Sources */,
