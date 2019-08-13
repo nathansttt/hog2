@@ -1,9 +1,11 @@
 //
 //  IBEX.h
-//  hog2 glut
+//  hog2
 //
-//  Created by Nathan Sturtevant on 6/3/19.
-//  Copyright © 2019 University of Denver. All rights reserved.
+//  This code contains an implementation of IBEX / BTS / BGS
+//  See also:
+//  https://webdocs.cs.ualberta.ca/~nathanst/papers/IBEX.pdf
+//  https://www.movingai.com/SAS/BTS/
 //
 
 #ifndef IBEX_h
@@ -49,16 +51,14 @@ namespace IBEX {
 		struct costInterval {
 			double lowerBound;
 			double upperBound;
-			uint64_t nodes; // nodes used to search
 			costInterval &operator&=(const costInterval &i)
 			{
 				lowerBound = std::max(lowerBound, i.lowerBound);
 				upperBound = std::min(upperBound, i.upperBound);
-				nodes = i.nodes;
 				return *this;
 			}
 		};
-		IBEX<state, action, environment, DFS>::costInterval LowLevelSearch(double costLimit, uint64_t nodeLimit);
+		IBEX<state, action, environment, DFS>::costInterval LowLevelSearch(double costLimit, uint64_t nodeLimit, uint64_t &nodesUsed);
 		
 		// Functions for DF Search
 		double GCost(const state &s1, const state &s2)
@@ -67,12 +67,12 @@ namespace IBEX {
 		{ return env->GCost(s, a); }
 		double HCost(const state &s)
 		{ return h->HCost(s, goal); }
-		IBEX<state, action, environment, DFS>::costInterval DFBNB(double costLimit, uint64_t nodeLimit);
+		IBEX<state, action, environment, DFS>::costInterval DFBNB(double costLimit, uint64_t nodeLimit, uint64_t &nodesUsed);
 		IBEX<state, action, environment, DFS>::searchBounds DFBNBHelper(state &currState, double pathCost, double costLimit,
 																	  searchBounds &sd, uint64_t nodeLimit, action forbidden);
 		
 		// Functions for BFHS
-		IBEX<state, action, environment, DFS>::costInterval BFHS(double costLimit, uint64_t nodeLimit);
+		IBEX<state, action, environment, DFS>::costInterval BFHS(double costLimit, uint64_t nodeLimit, uint64_t &nodesUsed);
 		void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath);
 		
 		
@@ -119,27 +119,26 @@ namespace IBEX {
 		
 		uint64_t nodeLB = 1;
 		costInterval solutionInterval;
+		uint64_t currentNodesUsed;
 		solutionInterval.lowerBound = HCost(from);
 		solutionInterval.upperBound = DBL_MAX;
-		//		double baseHCost = HCost(from);
 		while (fgreater(solutionCost, solutionInterval.lowerBound))
 		{
 			double delta = 1;
 			printf("IBEX: Base search: f: %1.5f, cost limit ∞, target [%llu, %llu]\n", solutionInterval.lowerBound, c1*nodeLB, c2*nodeLB);
-//			baseHCost = solutionInterval.lowerBound;
 			dfsLowerBound = solutionInterval.lowerBound;
-			solutionInterval &= LowLevelSearch(solutionInterval.lowerBound, infiniteWorkBound);
+			solutionInterval &= LowLevelSearch(solutionInterval.lowerBound, infiniteWorkBound, currentNodesUsed);
 			
 			// Move to next iteration
-			if (solutionInterval.nodes >= c1*nodeLB)
+			if (currentNodesUsed >= c1*nodeLB)
 			{
-				nodeLB = solutionInterval.nodes;
+				nodeLB = currentNodesUsed;
 				solutionInterval.upperBound = DBL_MAX;
 				continue;
 			}
 			
 			while (!(fequal(solutionInterval.upperBound, solutionInterval.lowerBound) ||
-					 (solutionInterval.nodes >= c1*nodeLB && solutionInterval.nodes < c2*nodeLB)))
+					 (currentNodesUsed >= c1*nodeLB && currentNodesUsed < c2*nodeLB)))
 			{
 				if (solutionInterval.upperBound == DBL_MAX)
 					printf("    ]--Critical f in [%1.5f, ∞]\n", solutionInterval.lowerBound);
@@ -160,10 +159,10 @@ namespace IBEX {
 					nextCost = (solutionInterval.lowerBound+solutionInterval.upperBound)/2.0;
 
 				dfsLowerBound = solutionInterval.lowerBound;
-				solutionInterval &= LowLevelSearch(nextCost, c2*nodeLB);
+				solutionInterval &= LowLevelSearch(nextCost, c2*nodeLB, currentNodesUsed);
 			}
 			
-			nodeLB = std::max(solutionInterval.nodes, c1*nodeLB);
+			nodeLB = std::max(currentNodesUsed, c1*nodeLB);
 			solutionInterval.upperBound = DBL_MAX;
 
 			if (fequal(solutionInterval.lowerBound, solutionCost))
@@ -175,7 +174,7 @@ namespace IBEX {
 	
 	
 	template <class state, class action, class environment, bool DFS>
-	typename IBEX<state, action, environment, DFS>::costInterval IBEX<state, action, environment, DFS>::DFBNB(double costLimit, uint64_t nodeLimit)
+	typename IBEX<state, action, environment, DFS>::costInterval IBEX<state, action, environment, DFS>::DFBNB(double costLimit, uint64_t nodeLimit, uint64_t &nodesUsed)
 	{
 		state currState = start;
 		if (nodeLimit == infiniteWorkBound)
@@ -190,7 +189,7 @@ namespace IBEX {
 		action a;
 		sd = DFBNBHelper(currState, 0, costLimit, sd, nodeLimit, a);
 		totalNodesExpanded += sd.nodes;
-
+		
 		costInterval v;
 		if (sd.nodes >= nodeLimit)
 		{
@@ -207,11 +206,11 @@ namespace IBEX {
 			v.upperBound = DBL_MAX;
 			assert(fgreater(sd.f_above, costLimit));
 		}
-		v.nodes = sd.nodes;
+		nodesUsed = sd.nodes;
 		if (v.upperBound == DBL_MAX)
-			printf("%llu (new) %llu (total), solution range: [%1.5f, ∞] ", v.nodes, totalNodesExpanded, v.lowerBound);
+			printf("%llu (new) %llu (total), solution range: [%1.5f, ∞] ", nodesUsed, totalNodesExpanded, v.lowerBound);
 		else
-			printf("%llu (new) %llu (total), solution range: [%1.5f, %1.5f] ", v.nodes, totalNodesExpanded, v.lowerBound, v.upperBound);
+			printf("%llu (new) %llu (total), solution range: [%1.5f, %1.5f] ", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
 		if (solutionCost != DBL_MAX)
 			printf("sol: %1.5f\n", solutionCost);
 		else
@@ -284,13 +283,14 @@ namespace IBEX {
 		ResetNodeCount();
 		printf("IBEX Validation:\n");
 		oracle = true;
-		LowLevelSearch(solutionCost, -1);
+		uint64_t nodesUsed;
+		LowLevelSearch(solutionCost, -1, nodesUsed);
 		oracle = false;
 		return solutionCost;
 	}
 	
 	template <class state, class action, class environment, bool DFS>
-	typename IBEX<state, action, environment, DFS>::costInterval IBEX<state, action, environment, DFS>::BFHS(double costLimit, uint64_t nodeLimit)
+	typename IBEX<state, action, environment, DFS>::costInterval IBEX<state, action, environment, DFS>::BFHS(double costLimit, uint64_t nodeLimit, uint64_t &nodesUsed)
 	{
 		if (nodeLimit == -1ull && costLimit == DBL_MAX)
 			printf("    --+BFHS f: ∞; nodes: ∞; ");
@@ -307,7 +307,7 @@ namespace IBEX {
 		q.Reset(env->GetMaxHash());
 
 		// put start in open
-		q.AddOpenNode(start, env->GetStateHash(start), 0, 0);
+		q.AddOpenNode(start, env->GetStateHash(start), 0, 0, 0);
 		
 		while (sd.nodes < nodeLimit && q.OpenSize() > 0)
 		{
@@ -341,7 +341,8 @@ namespace IBEX {
 					solutionPath.push_back(env->GetAction(solutionStates[x], solutionStates[x+1]));
 				}
 				// TODO: return range here
-				return {q.Lookup(nodeid).g, q.Lookup(nodeid).g, sd.nodes};
+				nodesUsed = sd.nodes;
+				return {q.Lookup(nodeid).g, q.Lookup(nodeid).g};
 			}
 			
 			neighbors.resize(0);
@@ -412,12 +413,13 @@ namespace IBEX {
 			v.lowerBound = sd.f_above;
 			v.upperBound = DBL_MAX;
 		}
-		v.nodes = sd.nodes;
-
+		//v.nodes = sd.nodes;
+		nodesUsed = sd.nodes;
+		
 		if (v.upperBound == DBL_MAX)
-			printf("%llu (new) %llu (total), solution range: [%1.5f, ∞]\n", sd.nodes, totalNodesExpanded, v.lowerBound);
+			printf("%llu (new) %llu (total), solution range: [%1.5f, ∞]\n", nodesUsed, totalNodesExpanded, v.lowerBound);
 		else
-			printf("%llu (new) %llu (total), solution range: [%1.5f, %1.5f]\n", sd.nodes, totalNodesExpanded, v.lowerBound, v.upperBound);
+			printf("%llu (new) %llu (total), solution range: [%1.5f, %1.5f]\n", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
 
 		return v;
 	}
@@ -436,12 +438,12 @@ namespace IBEX {
 	
 	
 	template <class state, class action, class environment, bool DFS>
-	typename IBEX<state, action, environment, DFS>::costInterval IBEX<state, action, environment, DFS>::LowLevelSearch(double costLimit, uint64_t nodeLimit)
+	typename IBEX<state, action, environment, DFS>::costInterval IBEX<state, action, environment, DFS>::LowLevelSearch(double costLimit, uint64_t nodeLimit, uint64_t &nodesUsed)
 	{
 		if (DFS)
-			return DFBNB(costLimit, nodeLimit);
+			return DFBNB(costLimit, nodeLimit, nodesUsed);
 		else
-			return BFHS(costLimit, nodeLimit);
+			return BFHS(costLimit, nodeLimit, nodesUsed);
 	}
 
 	/* Node used by the UBS search */
@@ -526,8 +528,8 @@ namespace IBEX {
 				C = (low + high) / 2.0;
 			}
 			/* make the query */
-			costInterval i = LowLevelSearch(C, b);
-//			Interval i = query(graph, C, b, data);
+			uint64_t nodesUsed;
+			costInterval i = LowLevelSearch(C, b, nodesUsed);
 			
 			/* perform the intersection */
 			lookup[k] = std::min(i.upperBound, high);
@@ -535,7 +537,7 @@ namespace IBEX {
 			
 			/* the budget was sufficient and no solution found, so update the minimal budget */
 			if (i.upperBound == DBL_MAX) {
-				b_low = i.nodes;
+				b_low = nodesUsed;
 			}
 			
 			/* update the UBS */
