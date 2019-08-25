@@ -21,10 +21,40 @@
 #include <algorithm> // for vector reverse
 #include "GenericSearchAlgorithm.h"
 
+template<typename state>
+class OptimisticOpenClosedData {
+public:
+	OptimisticOpenClosedData() { }
+	OptimisticOpenClosedData(const state &theData, double gCost, double hCost, uint64_t parent, uint64_t openLoc, dataLocation location)
+	:data(theData), g(gCost), h(hCost), parentID(parent), openLocation(openLoc), where(location)
+	{ reopened = false; openedFromF = false; }
+	state data;
+	double g;
+	double h;
+	bool openedFromF;
+	uint64_t parentID;
+	uint64_t openLocation;
+	bool reopened;
+	dataLocation where;
+};
+
+template <class state>
+struct OptimisticCompare {
+	// returns true if i2 is preferred over i1
+	bool operator()(const OptimisticOpenClosedData<state> &i1, const OptimisticOpenClosedData<state> &i2) const
+	{
+		if (fequal(i1.g+i1.h, i2.g+i2.h))
+		{
+			return (fless(i1.g, i2.g));
+		}
+		return fgreater(i1.g+i1.h, i2.g+i2.h);
+	}
+};
+
 /**
  * A templated version of A*, based on HOG genericAStar
  */
-template <class state, class action, class environment, class openList = AStarOpenClosed<state, AStarCompare<state>> >
+template <class state, class action, class environment>
 class OptimisticSearch : public GenericSearchAlgorithm<state,action,environment> {
 public:
 	OptimisticSearch() { ResetNodeCount(); env = 0; weight=3; bound = 1.5; theHeuristic = 0;}
@@ -32,6 +62,7 @@ public:
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & );
 	
+	typedef AStarOpenClosed<state, OptimisticCompare<state>, OptimisticOpenClosedData<state>> openList;
 	// uses admissible heuristic (regular A* search)
 	openList f;
 	// uses inadmissible heuristic
@@ -58,11 +89,11 @@ public:
 	bool GetClosedListGCost(const state &val, double &gCost) const;
 	bool GetOpenListGCost(const state &val, double &gCost) const;
 	bool GetFocalListGCost(const state &val, double &gCost) const;
-	bool GetClosedItem(const state &s, AStarOpenClosedData<state> &);
+	bool GetClosedItem(const state &s, OptimisticOpenClosedData<state> &);
 	unsigned int GetNumOpenItems() { return f.OpenSize(); }
-	inline const AStarOpenClosedData<state> &GetOpenItem(unsigned int which) { return f.Lookat(f.GetOpenItem(which)); }
+	inline const OptimisticOpenClosedData<state> &GetOpenItem(unsigned int which) { return f.Lookat(f.GetOpenItem(which)); }
 	unsigned int GetNumFocalItems() { return fhat.OpenSize(); }
-	inline const AStarOpenClosedData<state> &GetFocalItem(unsigned int which) { return fhat.Lookat(fhat.GetOpenItem(which)); }
+	inline const OptimisticOpenClosedData<state> &GetFocalItem(unsigned int which) { return fhat.Lookat(fhat.GetOpenItem(which)); }
 
 	state CheckNextOpenNode()
 	{
@@ -77,7 +108,7 @@ public:
 
 	
 	inline const int GetNumItems() { return fhat.size(); }
-	inline const AStarOpenClosedData<state> &GetItem(unsigned int which) { return fhat.Lookat(which); }
+	inline const OptimisticOpenClosedData<state> &GetItem(unsigned int which) { return fhat.Lookat(which); }
 	bool HaveExpandedState(const state &val)
 	{ uint64_t key; return fhat.Lookup(env->GetStateHash(val), key) != kNotFound; }
 	dataLocation GetStateLocation(const state &val)
@@ -126,8 +157,8 @@ private:
  * @return The name of the algorithm
  */
 
-template <class state, class action, class environment, class openList>
-const char *OptimisticSearch<state,action,environment,openList>::GetName()
+template <class state, class action, class environment>
+const char *OptimisticSearch<state,action,environment>::GetName()
 {
 	static char name[32];
 	sprintf(name, "OptimisticSearch[%1.2f, %1.2f]", bound, weight);
@@ -145,8 +176,8 @@ const char *OptimisticSearch<state,action,environment,openList>::GetName()
  * @param thePath A vector of states which will contain an optimal path
  * between from and to when the function returns, if one exists.
  */
-template <class state, class action, class environment, class openList>
-void OptimisticSearch<state,action,environment,openList>::GetPath(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
+template <class state, class action, class environment>
+void OptimisticSearch<state,action,environment>::GetPath(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
 {
 	//discardcount=0;
 	if (!InitializeSearch(_env, from, to, thePath))
@@ -160,8 +191,8 @@ void OptimisticSearch<state,action,environment,openList>::GetPath(environment *_
 	}
 }
 
-template <class state, class action, class environment, class openList>
-void OptimisticSearch<state,action,environment,openList>::GetPath(environment *_env, const state& from, const state& to, std::vector<action> &path)
+template <class state, class action, class environment>
+void OptimisticSearch<state,action,environment>::GetPath(environment *_env, const state& from, const state& to, std::vector<action> &path)
 {
 	std::vector<state> thePath;
 	if (!InitializeSearch(_env, from, to, thePath))
@@ -189,10 +220,9 @@ void OptimisticSearch<state,action,environment,openList>::GetPath(environment *_
  * @param to The goal state
  * @return TRUE if initialization was successful, FALSE otherwise
  */
-template <class state, class action, class environment, class openList>
-bool OptimisticSearch<state,action,environment,openList>::InitializeSearch(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
+template <class state, class action, class environment>
+bool OptimisticSearch<state,action,environment>::InitializeSearch(environment *_env, const state& from, const state& to, std::vector<state> &thePath)
 {
-	bestSolution = DBL_MAX;
 	
 	if (theHeuristic == 0)
 		theHeuristic = _env;
@@ -209,9 +239,13 @@ bool OptimisticSearch<state,action,environment,openList>::InitializeSearch(envir
 		return false;
 	}
 	
+	// 1.	openf ← {initial}
+	// 2.	openfhat  ← {initial}
+	// 3.	incumbent ← ∞
 	fhat.AddOpenNode(start, env->GetStateHash(start), 0, weight*theHeuristic->HCost(start, goal));
 	f.AddOpenNode(start, env->GetStateHash(start), 0, theHeuristic->HCost(start, goal));
-	
+	bestSolution = DBL_MAX;
+
 	return true;
 }
 
@@ -220,8 +254,8 @@ bool OptimisticSearch<state,action,environment,openList>::InitializeSearch(envir
  * @author Nathan Sturtevant
  * @date 01/06/08
  */
-template <class state, class action, class environment, class openList>
-void OptimisticSearch<state,action,environment,openList>::AddAdditionalStartState(state& newState)
+template <class state, class action, class environment>
+void OptimisticSearch<state,action,environment>::AddAdditionalStartState(state& newState)
 {
 	fhat.AddOpenNode(newState, env->GetStateHash(newState), 0, weight*theHeuristic->HCost(start, goal));
 	f.AddOpenNode(newState, env->GetStateHash(newState), 0, theHeuristic->HCost(start, goal));
@@ -232,8 +266,8 @@ void OptimisticSearch<state,action,environment,openList>::AddAdditionalStartStat
  * @author Nathan Sturtevant
  * @date 09/25/10
  */
-template <class state, class action, class environment, class openList>
-void OptimisticSearch<state,action,environment,openList>::AddAdditionalStartState(state& newState, double cost)
+template <class state, class action, class environment>
+void OptimisticSearch<state,action,environment>::AddAdditionalStartState(state& newState, double cost)
 {
 	fhat.AddOpenNode(newState, env->GetStateHash(newState), cost, weight*theHeuristic->HCost(start, goal));
 	f.AddOpenNode(newState, env->GetStateHash(newState), cost, theHeuristic->HCost(start, goal));
@@ -249,8 +283,8 @@ void OptimisticSearch<state,action,environment,openList>::AddAdditionalStartStat
  * @return TRUE if there is no path or if we have found the goal, FALSE
  * otherwise
  */
-template <class state, class action, class environment, class openList>
-bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std::vector<state> &thePath)
+template <class state, class action, class environment>
+bool OptimisticSearch<state,action,environment>::DoSingleSearchStep(std::vector<state> &thePath)
 {
 	if (fhat.OpenSize() == 0)
 	{
@@ -260,9 +294,10 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 		return true;
 	}
 
-	// proven within bound
+	// 4.	repeat until bound · f (first on openf ) ≥ f (incumbent):
 	if (bound*(f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h) >= bestSolution)
 	{
+		// proven within bound
 		printf("Best solution %1.2f\n", bestSolution);
 		printf("Best on open %1.2f - bound is %1.2f\n", f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h,
 			   (f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h)*bound);
@@ -272,34 +307,31 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 		return true;
 	}
 	
-//	openf ← {initial}
-//	openfhat  ← {initial}
-//	incumbent ← ∞
-//	repeat until bound · f (first on openf ) ≥ f (incumbent):
-//	
-//	if f (first on open fhat) < f (incumbent) then
-//		n ← remove first on openfhat
-//		remove n from openf
-//	else n ← remove first on openf
-//		remove n from openfhat
-//	add n to closed
-	
 	uint64_t nodeOnFHat;
 	uint64_t nodeOnF;
 	// only reopen states taken from f, not fhat
 	bool reopen = true;
 	double oldF = f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h;
 	
+	// 5.	if f (first on open fhat) < f (incumbent) then
 	if (fless(fhat.Lookat(fhat.Peek()).g+fhat.Lookat(fhat.Peek()).h, bestSolution))
 	{
+		// 6.		n ← remove first on openfhat
+		// 7.		remove n from openf
 		nodeOnFHat = fhat.Close();
 		reopen = false;
 		dataLocation d = f.Lookup(env->GetStateHash(fhat.Lookup(nodeOnFHat).data), nodeOnF);
 		assert(d != kNotFound);
-//		f.Close(nodeOnF);
+
+		// 10.	add n to closed
+		f.Close(nodeOnF);
 	}
 	else {
+		// 8.	else n ← remove first on openf
+		// 9.		remove n from openfhat
+		
 		nodeOnF = f.Close();
+		f.Lookup(nodeOnF).openedFromF = true;
 		reopen = true;
 		dataLocation d = fhat.Lookup(env->GetStateHash(f.Lookup(nodeOnF).data), nodeOnFHat);
 		assert(d != kNotFound);
@@ -311,18 +343,20 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 		}
 	}
 	
-	if (!fequal(oldF, f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h))
+	if (bestSolution != DBL_MAX && !fequal(oldF, f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h))
 	{
+		// Show when we push the bound up from openf
 		printf("Best solution %1.2f\n", bestSolution);
 		printf("Best on open %1.2f - lower bound is %1.2f\n", f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h,
 			   (f.Lookat(f.Peek()).g+f.Lookat(f.Peek()).h)*bound);
 	}
+	
 	if (!fhat.Lookup(nodeOnFHat).reopened)
 		uniqueNodesExpanded++;
 	nodesExpanded++;
 	
-	//	if n is a goal then
-	//		incumbent ← n
+	//	11. if n is a goal then
+	//	12. 	incumbent ← n
 	if (env->GoalTest(fhat.Lookup(nodeOnFHat).data, goal))
 	{
 		// Actually extract the path, since the cost may not actually be the g-cost
@@ -343,6 +377,7 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 	env->GetSuccessors(fhat.Lookup(nodeOnFHat).data, neighbors);
 
 	// iterate again updating costs and writing out to memory
+	// 13.	else for each child c of n
 	for (int x = 0; x < neighbors.size(); x++)
 	{
 		uint64_t childID_fhat, childID_f;
@@ -354,17 +389,12 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 		
 		nodesTouched++;
 		
-		//	else for each child c of n
-		//		if c is duplicated in openf then
-		//			if c is better than the duplicate then
-		//				replace copies in openf and openfhat
-		//		else if c is duplicated in closed then
-		//			if c is better than the duplicate then
-		//				add c to openf and openfhat
-		//          else add c to openf and openfhat
 
 		if (d_f == kOpenList) // update cost if on open in
 		{
+			// 14.		if c is duplicated in openf then
+			// 15.			if c is better than the duplicate then
+			// 16.				replace copies in openf and openfhat
 			//assert(d_fhat == kOpenList);
 			
 			if (fless(f.Lookup(nodeOnF).g+edgeCost, f.Lookup(childID_f).g))
@@ -381,16 +411,19 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 				fhat.Lookup(childID_fhat).data = neighbors[x];
 				if (d_fhat == kOpenList)
 					fhat.KeyChanged(childID_fhat);
-				else if (d_fhat == kClosedList && reopen)
+				else if (d_fhat == kClosedList)// && reopen)
 					fhat.Reopen(childID_fhat);
 			}
 		}
+		// 17.		else if c is duplicated in closed then
 		else if (d_f == kClosedList)
 		{
-			assert(d_fhat == kClosedList);
 
-			if (fless(f.Lookup(nodeOnF).g+edgeCost, f.Lookup(childID_f).g) && reopen)
+			assert(d_fhat == kClosedList);
+			if (fless(f.Lookup(nodeOnF).g+edgeCost, f.Lookup(childID_f).g))// && reopen)
 			{
+				// 18.			if c is better than the duplicate then
+				// 19.				add c to openf and openfhat
 				f.Lookup(childID_f).parentID = nodeOnF;
 				f.Lookup(childID_f).g = f.Lookup(nodeOnF).g+edgeCost;
 				f.Reopen(childID_f);
@@ -403,6 +436,7 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
 			}
 		}
 		else {
+			// 20.          else add c to openf and openfhat
 			assert(d_fhat == kNotFound);
 			assert(d_f == kNotFound);
 			fhat.AddOpenNode(neighbors[x],
@@ -428,8 +462,8 @@ bool OptimisticSearch<state,action,environment,openList>::DoSingleSearchStep(std
  *
  * @return The first state in the open list.
  */
-template <class state, class action, class environment, class openList>
-state OptimisticSearch<state, action,environment,openList>::CheckNextNode()
+template <class state, class action, class environment>
+state OptimisticSearch<state, action,environment>::CheckNextNode()
 {
 	uint64_t key = fhat.Peek();
 	return fhat.Lookup(key).data;
@@ -446,8 +480,8 @@ state OptimisticSearch<state, action,environment,openList>::CheckNextNode()
  * @param goalNode the goal state
  * @param thePath will contain the path from goalNode to the start state
  */
-template <class state, class action,class environment,class openList>
-void OptimisticSearch<state, action,environment,openList>::ExtractPathToStartFromID(uint64_t node,
+template <class state, class action,class environment>
+void OptimisticSearch<state, action,environment>::ExtractPathToStartFromID(uint64_t node,
 																				 std::vector<state> &thePath)
 {
 	do {
@@ -457,8 +491,8 @@ void OptimisticSearch<state, action,environment,openList>::ExtractPathToStartFro
 	thePath.push_back(fhat.Lookup(node).data);
 }
 
-template <class state, class action,class environment,class openList>
-const state &OptimisticSearch<state, action,environment,openList>::GetParent(const state &s)
+template <class state, class action,class environment>
+const state &OptimisticSearch<state, action,environment>::GetParent(const state &s)
 {
 	uint64_t theID;
 	fhat.Lookup(env->GetStateHash(s), theID);
@@ -472,8 +506,8 @@ const state &OptimisticSearch<state, action,environment,openList>::GetParent(con
  * @author Nathan Sturtevant
  * @date 03/22/06
  */
-template <class state, class action, class environment, class openList>
-void OptimisticSearch<state, action,environment,openList>::PrintStats()
+template <class state, class action, class environment>
+void OptimisticSearch<state, action,environment>::PrintStats()
 {
 	printf("%u items in closed list\n", (unsigned int)fhat.ClosedSize());
 	printf("%u items in open queue\n", (unsigned int)fhat.OpenSize());
@@ -486,8 +520,8 @@ void OptimisticSearch<state, action,environment,openList>::PrintStats()
  *
  * @return The combined number of elements in the closed list and open queue
  */
-template <class state, class action, class environment, class openList>
-int OptimisticSearch<state, action,environment,openList>::GetMemoryUsage()
+template <class state, class action, class environment>
+int OptimisticSearch<state, action,environment>::GetMemoryUsage()
 {
 	return fhat.size();
 }
@@ -502,8 +536,8 @@ int OptimisticSearch<state, action,environment,openList>::GetMemoryUsage()
  * @return success Whether we found the value or not
  * the states
  */
-template <class state, class action, class environment, class openList>
-bool OptimisticSearch<state, action,environment,openList>::GetClosedListGCost(const state &val, double &gCost) const
+template <class state, class action, class environment>
+bool OptimisticSearch<state, action,environment>::GetClosedListGCost(const state &val, double &gCost) const
 {
 	uint64_t theID;
 	dataLocation loc = fhat.Lookup(env->GetStateHash(val), theID);
@@ -515,8 +549,8 @@ bool OptimisticSearch<state, action,environment,openList>::GetClosedListGCost(co
 	return false;
 }
 
-template <class state, class action, class environment, class openList>
-bool OptimisticSearch<state, action,environment,openList>::GetOpenListGCost(const state &val, double &gCost) const
+template <class state, class action, class environment>
+bool OptimisticSearch<state, action,environment>::GetOpenListGCost(const state &val, double &gCost) const
 {
 	uint64_t theID;
 	dataLocation loc = f.Lookup(env->GetStateHash(val), theID);
@@ -528,8 +562,8 @@ bool OptimisticSearch<state, action,environment,openList>::GetOpenListGCost(cons
 	return false;
 }
 
-template <class state, class action, class environment, class openList>
-bool OptimisticSearch<state, action,environment,openList>::GetFocalListGCost(const state &val, double &gCost) const
+template <class state, class action, class environment>
+bool OptimisticSearch<state, action,environment>::GetFocalListGCost(const state &val, double &gCost) const
 {
 	uint64_t theID;
 	dataLocation loc = fhat.Lookup(env->GetStateHash(val), theID);
@@ -541,8 +575,8 @@ bool OptimisticSearch<state, action,environment,openList>::GetFocalListGCost(con
 	return false;
 }
 
-template <class state, class action, class environment, class openList>
-bool OptimisticSearch<state, action,environment,openList>::GetClosedItem(const state &s, AStarOpenClosedData<state> &result)
+template <class state, class action, class environment>
+bool OptimisticSearch<state, action,environment>::GetClosedItem(const state &s, OptimisticOpenClosedData<state> &result)
 {
 	uint64_t theID;
 	dataLocation loc = fhat.Lookup(env->GetStateHash(s), theID);
@@ -562,8 +596,8 @@ bool OptimisticSearch<state, action,environment,openList>::GetClosedItem(const s
  * @date 03/12/09
  *
  */
-template <class state, class action, class environment, class openList>
-void OptimisticSearch<state, action,environment,openList>::OpenGLDraw() const
+template <class state, class action, class environment>
+void OptimisticSearch<state, action,environment>::OpenGLDraw() const
 {
 	double transparency = 1.0;
 	if (fhat.size() == 0)
@@ -626,8 +660,8 @@ void OptimisticSearch<state, action,environment,openList>::OpenGLDraw() const
 	env->OpenGLDraw(goal);
 }
 
-template <class state, class action, class environment, class openList>
-void OptimisticSearch<state, action,environment,openList>::Draw(Graphics::Display &d) const
+template <class state, class action, class environment>
+void OptimisticSearch<state, action,environment>::Draw(Graphics::Display &d) const
 {
 	double transparency = 1.0;
 	if (fhat.size() == 0)
@@ -689,7 +723,7 @@ void OptimisticSearch<state, action,environment,openList>::Draw(Graphics::Displa
 	for (unsigned int x = 0; x < f.size(); x++)
 	{
 		const auto &data = f.Lookat(x);
-		if (data.where == kClosedList)
+		if (data.openedFromF)
 		{
 			env->SetColor(0.0, 0.0, 1.0, transparency);
 			env->Draw(d, data.data);

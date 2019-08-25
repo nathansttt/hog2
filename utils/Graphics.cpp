@@ -79,6 +79,25 @@ namespace Graphics {
 			drawCommands.push_back({i, kFrameRectangle, viewport});
 	}
 
+	void Display::FrameSquare(point p, float radius, rgbColor c, float lineWidth)
+	{
+		drawInfo i = {{p.x-radius, p.y-radius, p.x+radius, p.y+radius}, c, lineWidth};
+		if (drawingBackground)
+			backgroundDrawCommands.push_back({i, kFrameRectangle, viewport});
+		else
+			drawCommands.push_back({i, kFrameRectangle, viewport});
+
+	}
+
+	void Display::FillSquare(point p, float radius, rgbColor c)
+	{
+		drawInfo i = {{p.x-radius, p.y-radius, p.x+radius, p.y+radius}, c, 0};
+		if (drawingBackground)
+			backgroundDrawCommands.push_back({i, kFillRectangle, viewport});
+		else
+			drawCommands.push_back({i, kFillRectangle, viewport});
+	}
+	
 	void Display::FillRect(rect r, rgbColor c)
 	{
 		drawInfo i = {r, c, 0};

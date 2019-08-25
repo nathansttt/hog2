@@ -181,6 +181,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-buildProblemSet", "-buildProblemSet filename", "Build problem set with the given map.");
+	InstallCommandLineHandler(MyCLHandler, "-buildRandomSet", "-buildRandomSet filename", "Build random problem set with all locations in the map.");
 	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems3", "-problems3 filename", "Selects the problem set to run.");
@@ -523,8 +524,9 @@ void PathfindingThread(GraphEnvironment *ge)
 	}
 }
 
-void buildProblemSet()
+void buildProblemSet(const char *output = 0)
 {
+	srandom(time(0));
 	ScenarioLoader s;
 	printf("Generating scenarios for map: %s\n", gDefaultMap);
 	Map map(gDefaultMap);
@@ -668,12 +670,67 @@ void buildProblemSet()
 			s.AddExperiment(experiments[x][y]);
 	}
 	printf("\n");
-	char name[255];
-	sprintf(name, "%s.scen", gDefaultMap);
-	s.Save(name);
+	if (output == 0)
+	{
+		char name[255];
+		sprintf(name, "%s.scen", gDefaultMap);
+		s.Save(name);
+	}
+	else
+		s.Save(output);
 	exit(0);
 }
 
+void buildRandomSet(const char *output = 0)
+{
+	srandom(time(0));
+	ScenarioLoader s;
+	printf("Generating scenarios for map: %s\n", gDefaultMap);
+	Map map(gDefaultMap);
+	xyLoc start;
+	std::vector<xyLoc> path;
+	std::vector<xyLoc> points;
+	MapEnvironment me(&map);
+	while (true)
+	{
+		start.x = random()%map.GetMapWidth();
+		start.y = random()%map.GetMapWidth();
+		if (map.GetTerrainType(start.x, start.y) == kGround)
+			break;
+	}
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+	astar.SetStopAfterGoal(false);
+	astar.GetPath(&me, start, start, path);
+
+	points.clear();
+	for (int x = 0; x < astar.GetNumItems(); x++)
+	{
+		points.push_back(astar.GetItem(x).data);
+	}
+	std::random_shuffle ( points.begin(), points.end());
+	if (1 == points.size()%2)
+		points.pop_back();
+	if (points.size() > 2000)
+		points.resize(2000);
+	astar.SetStopAfterGoal(true);
+	for (int x = 0; x < points.size(); x+= 2)
+	{
+		astar.GetPath(&me, points[x], points[x+1], path);
+		//	Experiment(int sx,int sy,int gx,int gy,int b, double d, string m)
+		double len = me.GetPathLength(path);
+		Experiment e(points[x].x, points[x].y, points[x+1].x, points[x+1].y, map.GetMapWidth(), map.GetMapHeight(), len/4, len, gDefaultMap);
+		s.AddExperiment(e);
+	}
+	if (output == 0)
+	{
+		char name[255];
+		sprintf(name, "%s.scen", gDefaultMap);
+		s.Save(name);
+	}
+	else
+		s.Save(output);
+	exit(0);
+}
 void runProblemSet3(char *scenario)
 {
 	printf("Loading scenario %s\n", scenario);
@@ -1001,11 +1058,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		me->Draw(d);
 		int width = 1024;
 		int height = 1024;
-		if (maxNumArgs >= 3)
+		if (maxNumArgs > 3)
 		{
 			height = width = atoi(argument[3]);
 		}
-		if (maxNumArgs >= 4)
+		if (maxNumArgs > 4)
 		{
 			height = atoi(argument[4]);
 		}
@@ -1036,7 +1093,19 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp( argument[0], "-buildProblemSet" ) == 0 )
 	{
 		strncpy(gDefaultMap, argument[1], 1024);
-		buildProblemSet();
+		if (maxNumArgs >= 2)
+			buildProblemSet(argument[2]);
+		else
+			buildProblemSet();
+	}
+	else if (strcmp( argument[0], "-buildRandomSet" ) == 0 )
+	{
+		strncpy(gDefaultMap, argument[1], 1024);
+		if (maxNumArgs >= 2)
+			buildRandomSet(argument[2]);
+		else
+			buildRandomSet();
+
 	}
 	else if (strcmp( argument[0], "-size" ) == 0 )
 	{

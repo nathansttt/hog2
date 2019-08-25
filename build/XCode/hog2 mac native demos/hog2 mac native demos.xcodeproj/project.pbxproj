@@ -2198,6 +2198,8 @@
 		C44121BD21FD864100421CD7 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C44121C021FE425800421CD7 /* AStarEpsilon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AStarEpsilon.h; sourceTree = "<group>"; };
 		C444331F22CDC51800744AF2 /* IncrementalBTS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IncrementalBTS.h; sourceTree = "<group>"; };
+		C444332122D3DE5000744AF2 /* IBEX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IBEX.h; sourceTree = "<group>"; };
+		C444333422D8476000744AF2 /* IOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IOS.h; sourceTree = "<group>"; };
 		C449A76E202632A300F9FEB8 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
 		C449A76F202632A300F9FEB8 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C44DFE342203E5AD00A93A71 /* DVCBSOpenClosed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DVCBSOpenClosed.h; sourceTree = "<group>"; };
@@ -3091,30 +3093,33 @@
 		C4C835BA1F2AF6B5004E78C0 /* generic */ = {
 			isa = PBXGroup;
 			children = (
-				C4101CF51F465F4200CCBB43 /* NBS.h */,
 				C4C835BB1F2AF6B5004E78C0 /* AbstractWeightedSearchAlgorithm.h */,
+				C44121C021FE425800421CD7 /* AStarEpsilon.h */,
 				C4C835BC1F2AF6B5004E78C0 /* BFS.h */,
 				C4C835BD1F2AF6B5004E78C0 /* BidirectionalDijkstra.h */,
 				C4C835BE1F2AF6B5004E78C0 /* DFID.h */,
 				C4C835BF1F2AF6B5004E78C0 /* DFS.h */,
+				C44DFE362203E65900A93A71 /* DVCBS.h */,
+				C4BE70C221FA724B009CE25B /* DynamicPotentialSearch.h */,
 				C4C835C01F2AF6B5004E78C0 /* EPEAStar.h */,
+				C4234D1E1F3426DF00B38A95 /* fMM.h */,
 				C4C835C11F2AF6B5004E78C0 /* FrontierBFS.h */,
 				C4C835C21F2AF6B5004E78C0 /* GenericPatrolUnit.h */,
 				C4C835C31F2AF6B5004E78C0 /* GenericSearchAlgorithm.h */,
 				C4C835C41F2AF6B5004E78C0 /* GenericSearchUnit.h */,
 				C4C835C61F2AF6B5004E78C0 /* GraphCheck.h */,
 				C4C835C71F2AF6B5004E78C0 /* GreedyDMUnit.h */,
+				C444332122D3DE5000744AF2 /* IBEX.h */,
 				C4C835C91F2AF6B5004E78C0 /* IDAStar.h */,
 				C4C835CA1F2AF6B5004E78C0 /* IncrementalBFS.h */,
 				C444331F22CDC51800744AF2 /* IncrementalBTS.h */,
 				C4C835CB1F2AF6B5004E78C0 /* IncrementalDFID.h */,
 				C4C835CC1F2AF6B5004E78C0 /* IncrementalIDA.h */,
-				C4234D1E1F3426DF00B38A95 /* fMM.h */,
+				C444333422D8476000744AF2 /* IOS.h */,
 				C4C835CD1F2AF6B5004E78C0 /* MM.h */,
+				C4101CF51F465F4200CCBB43 /* NBS.h */,
 				C4C835CE1F2AF6B5004E78C0 /* OldTemplateAStar.h */,
 				C4C835CF1F2AF6B5004E78C0 /* OptimisticSearch.h */,
-				C44121C021FE425800421CD7 /* AStarEpsilon.h */,
-				C4BE70C221FA724B009CE25B /* DynamicPotentialSearch.h */,
 				C4C835D01F2AF6B5004E78C0 /* ParallelIDAStar.h */,
 				C4C835D11F2AF6B5004E78C0 /* PEAStar.h */,
 				C4C835D31F2AF6B5004E78C0 /* RandomUnit.h */,
@@ -3123,7 +3128,6 @@
 				C4C835D61F2AF6B5004E78C0 /* UnitCostBidirectionalBFS.h */,
 				C4C835D71F2AF6B5004E78C0 /* VisualizableGenericSearchAlgorithm.h */,
 				C4C835D81F2AF6B5004E78C0 /* WeightedVertexGraph.h */,
-				C44DFE362203E65900A93A71 /* DVCBS.h */,
 			);
 			name = generic;
 			path = ../../../generic;

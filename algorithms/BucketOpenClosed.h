@@ -18,8 +18,8 @@ public:
 	BucketOpenClosed();
 	~BucketOpenClosed();
 	void Reset();
-	uint64_t AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
-	uint64_t AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
+	uint64_t AddOpenNode(const state &val, uint64_t hash, double f, double g, double h, uint64_t parent=kTAStarNoNode);
+	uint64_t AddClosedNode(state &val, uint64_t hash, double f, double g, double h, uint64_t parent=kTAStarNoNode);
 	void KeyChanged(uint64_t objKey);
 	//void IncreaseKey(uint64_t objKey);
 	dataLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
@@ -98,7 +98,7 @@ void BucketOpenClosed<state, CmpKey, dataStructure>::Reset()
  * Add object into open list.
  */
 template<typename state, typename CmpKey, class dataStructure>
-uint64_t BucketOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent)
+uint64_t BucketOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state &val, uint64_t hash, double f, double g, double h, uint64_t parent)
 {
 	// should do lookup here...
 	if (table.find(hash) != table.end())
@@ -107,10 +107,10 @@ uint64_t BucketOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state
 		assert(false);
 	}
 	openCount++;
-	uint64_t newg = g;
-	uint64_t newh = h;
-	uint64_t loc = Add(elements.size(), newg+newh);
-	elements.push_back(dataStructure(val, g, h, parent, loc, kOpenList));
+//	uint64_t newg = g;
+//	uint64_t newh = h;
+	uint64_t loc = Add(elements.size(), f);
+	elements.push_back(dataStructure(val, f, g, h, parent, loc, kOpenList));
 	if (parent == kTAStarNoNode)
 		elements.back().parentID = elements.size()-1;
 	table[hash] = elements.size()-1; // hashing to element list location
@@ -123,11 +123,11 @@ uint64_t BucketOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state
  * Add object into closed list.
  */
 template<typename state, typename CmpKey, class dataStructure>
-uint64_t BucketOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent)
+uint64_t BucketOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val, uint64_t hash, double f, double g, double h, uint64_t parent)
 {
 	// should do lookup here...
 	assert(table.find(hash) == table.end());
-	elements.push_back(dataStructure(val, g, h, parent, 0, kClosedList));
+	elements.push_back(dataStructure(val, f, g, h, parent, 0, kClosedList));
 	if (parent == kTAStarNoNode)
 		elements.back().parentID = elements.size()-1;
 	table[hash] = elements.size(); // hashing to element list location

@@ -244,7 +244,10 @@ void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)
 		{
 			if ((random()%100) < openingProbability) // chance of creating hole
 			{
-				for (int z = 0; z < roomSize/8; z++)
+				int val = roomSize/8;
+				if (val == 0)
+					val = 1;
+				for (int z = 0; z < val; z++)
 				{
 					map->SetTerrainType(y+1+random()%(roomSize-1), x, kGround);
 				}
@@ -260,7 +263,10 @@ void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability)
 		{
 			if ((random()%100) < openingProbability) // chance of creating hole
 			{
-				for (int z = 0; z < roomSize/8; z++)
+				int val = roomSize/8;
+				if (val == 0)
+					val = 1;
+				for (int z = 0; z < val; z++)
 				{
 					map->SetTerrainType(x, y+1+random()%(roomSize-1), kGround);
 				}

@@ -62,7 +62,7 @@ private:
 	void SetJumpPoint(int x, int y);
 	void ExtractPathToStartFromID(uint64_t node, std::vector<xyLoc> &thePath);
 	//AStarOpenClosed<xyLocParent, AStarCompare<xyLocParent> > openClosedList;
-	IndexOpenClosed<xyLocParent> openClosedList;
+	IndexOpenClosed<xyLocParent, IndexCompare<xyLocParent>, IndexOpenClosedData<xyLocParent>> openClosedList;
 	std::vector<jpsSuccessor> successors;
 	MapEnvironment *env;
 	xyLoc to;

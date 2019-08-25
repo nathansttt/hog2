@@ -210,6 +210,7 @@ void CreateSimulation(int id)
  */
 void InstallHandlers()
 {
+	InstallKeyboardHandler(MyDisplayHandler, "Toggle Add", "Toggle adding/removing agents", kAnyModifier, 'a');
 	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Edit", "Toggle editing", kAnyModifier, 'e');
@@ -222,9 +223,6 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	
 	InstallKeyboardHandler(MyPathfindingKeyHandler, "Mapbuilding Unit", "Deploy unit that paths to a target, building a map as it travels", kNoModifier, 'd');
-	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add A* Unit", "Deploys a simple a* unit", kNoModifier, 'a');
-	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a randomly moving unit", kShiftDown, 'a');
-	InstallKeyboardHandler(MyRandomUnitKeyHandler, "Add simple Unit", "Deploys a right-hand-rule unit", kControlDown, '1');
 	
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-memory", "-memory <map> <sectors>", "Measures the memory used by a particular map.");
@@ -266,6 +264,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	glColor3f(0, 0, 0);
+	DrawSquare(0, 0, 0.01, 1);
 	if (m3d)
 		m3d->OpenGLDraw();
 }
@@ -464,6 +464,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
+		case 'a':
+			addPoints = !addPoints;
+			break;
 		case 'w':
 			if (searchWeight == 0)
 				searchWeight = 1.0;
@@ -493,10 +496,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		default:
 			break;
 	}
-}
-
-void MyRandomUnitKeyHandler(unsigned long, tKeyboardModifier , char)
-{
 }
 
 
@@ -532,7 +531,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 		return false;
 	mouseTracking = false;
 	state3d s;
-	if (button == kRightButton)
+	if (button == kLeftButton)
 	{
 		switch (mType)
 		{
@@ -575,42 +574,7 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 				else {
 					m3d->RemovePoint(px1, py1, 0);
 				}
-				//			{
-//				if ((px1 == -1) || (px2 == -1))
-//					break;
-//				unitSims[windowID]->GetEnvironment()->GetMap()->GetPointFromCoordinate(loc, px2, py2);
-//				printf("Searching from (%d, %d) to (%d, %d)\n", px1, py1, px2, py2);
-//				
-//				if (ma1 == 0)
-//				{
-//					ma1 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-////					gdh = new GraphMapInconsistentHeuristic(ma1->GetMap(), GraphSearchConstants::GetGraph(ma1->GetMap()));
-////					gdh->SetPlacement(kAvoidPlacement);
-////					ma1->SetGraphHeuristic(gdh);
-////					for (int x = 0; x < 10; x++)
-////						gdh->AddHeuristic();
-////					((GraphMapInconsistentHeuristic*)gdh)->SetNumUsedHeuristics(10);
-////					((GraphMapInconsistentHeuristic*)gdh)->SetMode(kMax);
-//				}
-//				if (ma2 == 0)
-//					ma2 = new MapEnvironment(unitSims[windowID]->GetEnvironment()->GetMap());
-//				
-//				a1.SetStopAfterGoal(true);
-//				a2.SetStopAfterGoal(true);
-//				//a2.SetWeight(1.8);
-//				xyLoc s1;
-//				xyLoc g1;
-//				s1.x = px1; s1.y = py1;
-//				g1.x = px2; g1.y = py2;
-//				
-//				a1.SetWeight(searchWeight);
-//				a1.InitializeSearch(ma1, s1, g1, path);
-//				//a2.InitializeSearch(ma2, s1, g1, path);
-//				a1.SetUseBPMX(0);
-//				runningSearch1 = true;
-//				//runningSearch2 = true;
-//				
-//			}
+
 				break;
 		}
 		return true;

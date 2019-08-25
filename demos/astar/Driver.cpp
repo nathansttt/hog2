@@ -108,7 +108,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph as .svg file", kAnyModifier, 'g');
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
 	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
-	InstallKeyboardHandler(DefaultGraph, "Default", "Build Deafult Graph", kAnyModifier, 'd');
+	InstallKeyboardHandler(BuildGraphFromPuzzle, "Default", "Build Deafult Graph", kAnyModifier, 'd');
 
 	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -401,7 +401,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	
 }
 
-void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key)
+void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	if (key == 'd')
 	{

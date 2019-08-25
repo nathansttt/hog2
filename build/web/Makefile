@@ -21,6 +21,7 @@ PROJECTS = \
   gui/web \
   mapalgorithms \
   utils \
+  demos/fastmap \
   demos/suboptimal-map \
   demos/STP \
   demos/witness \

@@ -346,7 +346,7 @@ bool GetPancakeInstance(PancakePuzzleState<24> &s, int instance)
 
 	if (instance < 0 || instance >= 100)
 		return false;
-	for (int x = 0; x < 20; x++)
+	for (int x = 0; x < 24; x++)
 		s.puzzle[x] = problems[instance][x];
 	return true;
 }
@@ -458,7 +458,7 @@ bool GetPancakeInstance(PancakePuzzleState<28> &s, int instance)
 
 	if (instance < 0 || instance >= 100)
 		return false;
-	for (int x = 0; x < 20; x++)
+	for (int x = 0; x < 28; x++)
 		s.puzzle[x] = problems[instance][x];
 	return true;
 }

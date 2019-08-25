@@ -16,12 +16,13 @@ class IncrementalIDA {
 public:
 	IncrementalIDA(double initialBound = 0) :bound(initialBound), initialBound(initialBound), nextBound(initialBound)
 	{ ResetNodeCount(); previousBound = 0; }
+	bool InitializeSearch(SearchEnvironment<state, action> *env, state from, state to, Heuristic<state> *h,
+						  std::vector<state> &thePath);
 	void GetPath(SearchEnvironment<state, action> *env, state from, state to, Heuristic<state> *h,
 				 std::vector<state> &thePath);
 	void GetPath(SearchEnvironment<state, action> *env, state from, state to,
 				 std::vector<action> &thePath);
-	bool DoSingleSearchStep(SearchEnvironment<state, action> *env, state from, state to,
-							 Heuristic<state> *h, std::vector<state> &thePath);
+	bool DoSingleSearchStep(std::vector<state> &thePath);
 	uint64_t GetNodesExpanded() { return nodesExpanded; }
 	uint64_t GetNodesTouched() { return nodesTouched; }
 	void ResetNodeCount()
@@ -51,68 +52,82 @@ private:
 		std::vector<state> succ;
 	};
 	std::vector<currSearchState> search;
-	
+	bool IterationComplete() { return search.size() == 0; }
 	unsigned long nodesExpanded, nodesTouched;
 	
-	bool DoIteration(SearchEnvironment<state, action> *env,
-					 state parent, state currState,
-					 std::vector<state> &thePath, double bound, double g);
-	bool DoIteration(SearchEnvironment<state, action> *env,
-					 action forbiddenAction, state &currState,
-					 std::vector<action> &thePath, double bound, double g);
+	void SetupIteration(double cost);
+	bool StepIteration();
 	
 	std::vector<std::pair<state, double>> history;
 	std::vector<state> path;
-	state start;
+	state start, goal;
 	double previousBound;
 	double bound;
 	double initialBound;
 	double nextBound;
 	SearchEnvironment<state, action> *env;
+	Heuristic<state> *h;
 	std::vector<state> succ;
 	uint64_t newNodeCount, newNodesLastIteration;
 };
 
 template <class state, class action>
-void IncrementalIDA<state, action>::GetPath(SearchEnvironment<state, action> *env, state from, state to,
+void IncrementalIDA<state, action>::GetPath(SearchEnvironment<state, action> *e, state from, state to,
 											Heuristic<state> *h, std::vector<state> &thePath)
 {
-	while (!DoSingleSearchStep(env, from, to, thePath))
+	if (InitializeSearch(e, from, to, h, thePath))
+		return;
+	while (!DoSingleSearchStep(thePath))
 	{}
 }
 
 template <class state, class action>
-void IncrementalIDA<state, action>::GetPath(SearchEnvironment<state, action> *env, state from, state to,
+void IncrementalIDA<state, action>::GetPath(SearchEnvironment<state, action> *e, state from, state to,
 			 std::vector<action> &thePath)
 {
 	
 }
 
 template <class state, class action>
-bool IncrementalIDA<state, action>::DoSingleSearchStep(SearchEnvironment<state, action> *env, state from, state to,
-													   Heuristic<state> *h, std::vector<state> &thePath)
+bool IncrementalIDA<state, action>::InitializeSearch(SearchEnvironment<state, action> *e, state from, state to, Heuristic<state> *h,
+													 std::vector<state> &thePath)
 {
-	this->env = env;
-	start = from;
-	
-	// starting new iteration
-	if (search.size() == 0)
+	Reset();
+	if (from==to)
 	{
-		search.resize(1);
-		search.back().currState = from;
-		search.back().status = kGoingDown;
-		search.back().pathCost = 0;
-		previousBound = bound;
-		bound = nextBound;
-		nextBound = -1;
-		path.clear();
-		printf("Starting iteration bound %1.1f\n", bound);
-		newNodesLastIteration = newNodeCount;
-		newNodeCount = 0;
-		return false;
+		thePath.clear();
+		thePath.push_back(from);
+		return true;
 	}
+	start = from;
+	goal = to;
+	this->env = e;
+	start = from;
+	this->h = h;
+	SetupIteration(h->HCost(start, goal));
+	return false;
+}
 
-	if (env->GoalTest(search.back().currState, to))
+template <class state, class action>
+void IncrementalIDA<state, action>::SetupIteration(double cost)
+{
+	search.resize(1);
+	search.back().currState = start;
+	search.back().status = kGoingDown;
+	search.back().pathCost = 0;
+	previousBound = bound;
+	bound = cost;//nextBound;
+	nextBound = -1;
+	path.clear();
+//	printf("Starting iteration bound %1.1f\n", bound);
+	newNodesLastIteration = newNodeCount;
+	newNodeCount = 0;
+}
+
+template <class state, class action>
+bool IncrementalIDA<state, action>::StepIteration()
+{
+	if (env->GoalTest(search.back().currState, goal))
 	{
 		printf("Done!");
 		path.resize(0);
@@ -120,10 +135,10 @@ bool IncrementalIDA<state, action>::DoSingleSearchStep(SearchEnvironment<state, 
 			path.push_back(search[x].currState);
 		return true;
 	}
-
+	
 	if (search.back().status == kGoingDown)
 	{
-		double f = search.back().pathCost+h->HCost(search.back().currState, to);
+		double f = search.back().pathCost+h->HCost(search.back().currState, goal);
 		// exceeded path cost bound
 		if (fgreater(f, bound))
 		{
@@ -132,11 +147,11 @@ bool IncrementalIDA<state, action>::DoSingleSearchStep(SearchEnvironment<state, 
 				nextBound = f;
 			else if (fless(f, nextBound))
 				nextBound = f;
-
+			
 			search.pop_back();
 			return false;
 		}
-
+		
 		if (fgreater(f, previousBound) && flesseq(f, bound))
 			newNodeCount++;
 		
@@ -158,7 +173,7 @@ bool IncrementalIDA<state, action>::DoSingleSearchStep(SearchEnvironment<state, 
 		std::reverse(search.back().succ.begin(), search.back().succ.end());
 		//return false;
 	}
-
+	
 	if (search.back().status == kGoingAcross)
 	{
 		// no more succ to go down - go up
@@ -181,54 +196,22 @@ bool IncrementalIDA<state, action>::DoSingleSearchStep(SearchEnvironment<state, 
 	}
 	assert(false);
 	return false;
-//	double currPathCost = history.back().second;
-//	state currState = history.back().first;
-//	env->GetSuccessors(currState, succ);
-//
-//	if (env->GetPathLength(path) > currPathCost)
-//	{
-//		path.pop_back();
-//
-//		// terminating on next step - for visualization only! (avoids flicker)
-//		if (env->GetPathLength(path) <= currPathCost && env->GoalTest(currState, to))
-//			path.push_back(currState);
-//		return false;
-//	}
-//	if (path.size() == 0 || currState != path.back())
-//		path.push_back(currState);
-//
-//	if (1)
-//	{
-//		std::cout << "#-path: ";
-//		for (const auto &o : path)
-//			std::cout << o << " ";
-//		std::cout << "\n";
-//	}
-//
-//	// Later than normal - for the purposes of drawing nicely
-//	if (env->GoalTest(currState, to))
-//	{
-//		printf("Done!");
-//		return true;
-//	}
-//
-//	history.pop_back();
-//	double f = currPathCost+h->HCost(currState, to);
-//	if (f <= bound)
-//	{
-//		for (int x = succ.size()-1; x >= 0; x--)
-//		{
-//			if (path.size() < 2 || path[path.size()-2] != succ[x])
-//				history.push_back({succ[x], currPathCost+env->GCost(currState, succ[x])});
-//		}
-//	}
-//	else {
-//		if (nextBound == -1)
-//			nextBound = currPathCost+h->HCost(currState, to);
-//		else if (f < nextBound)
-//			nextBound = f;
-//	}
-//	return false;
+
+}
+
+
+template <class state, class action>
+bool IncrementalIDA<state, action>::DoSingleSearchStep(std::vector<state> &thePath)
+{
+	// starting new iteration
+	if (IterationComplete())
+	{
+		SetupIteration(nextBound);
+		// pause between iterations
+		return false;
+	}
+
+	return StepIteration();
 }
 
 template <class state, class action>

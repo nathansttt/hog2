@@ -1352,8 +1352,10 @@ void MapEnvironment::DrawAlternate(Graphics::Display &disp, const xyLoc &l) cons
 {
 	GLdouble px, py, t, rad;
 	map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+	if (l.x < 0 || l.x >= map->GetMapWidth() || l.y < 0 || l.y >= map->GetMapHeight())
+		return;
 	
-	//if (map->GetTerrainType(l.x, l.y) == kGround)
+//	if (map->GetTerrainType(l.x, l.y) == kGround)
 	{
 		rgbColor c;// = {0.5, 0.5, 0};
 		GLfloat t;

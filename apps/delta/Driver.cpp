@@ -22,7 +22,6 @@
 #include "Timer.h"
 #include "TopSpin.h"
 #include "TOH.h"
-#include "ParallelIDAStar.h"
 #include "RubiksCube.h"
 #include "MNPuzzle.h"
 
@@ -39,6 +38,7 @@ void MinDeltaPlusMinTOHTest();
 void TSVRC();
 void TSBiVRC(int bits, int compressionFactor, int first = 0, int last = 50);
 void CompressionTest();
+void TeachingExample();
 
 template <typename state, typename action, typename environment>
 float GetAveragePDBValue(const std::vector<int> &pattern, int bits, int factor, bool div, bool mr, bool shuffle);
@@ -67,6 +67,7 @@ void TestTSBiVRC(Heuristic<TopSpinState<N>> *f, Heuristic<TopSpinState<N>> *b, i
 
 int main(int argc, char* argv[])
 {
+	TeachingExample();
 	// Turn off text buffering
 	setvbuf(stdout, NULL, _IONBF, 0);
 	InstallHandlers();
@@ -2041,4 +2042,352 @@ MNPuzzleState<4, 4> GetSTPInstance(int which)
 			s.blank = x;
 	}
 	return s;
+}
+
+void STP()
+{
+	MNPuzzle<4, 4> mnp;
+	Heuristic<MNPuzzleState<4, 4>> h;
+
+	std::vector<int> p1 = {0, 1, 2, 3, 4, 5, 6, 7};
+	std::vector<int> p2 = {0, 8, 9, 12, 13};
+	std::vector<int> p3 = {0, 10, 11, 14, 15};
+	MNPuzzleState<4, 4> start, goal;
+	PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> *pdb1 = 0;
+	PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> *pdb2 = 0;
+	PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> *pdb3 = 0;
+	std::vector<slideDir> path;
+	std::vector<MNPuzzleState<4, 4>> statepath;
+	if (pdb1 == 0)
+	{
+		pdb1 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(&mnp, goal, p1);
+		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+	}
+	if (pdb2 == 0)
+	{
+		pdb2 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(&mnp, goal, p2);
+		pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+	}
+	if (pdb3 == 0)
+	{
+		pdb3 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(&mnp, goal, p3);
+		pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+	}
+	
+	h.lookups.resize(0);
+	h.lookups.push_back({kMaxNode, 1, 4});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	h.lookups.push_back({kLeafNode, 2, 2});
+	h.lookups.push_back({kLeafNode, 3, 3});
+	
+	h.heuristics.resize(0);
+	h.heuristics.push_back(&mnp);
+	h.heuristics.push_back(pdb1);
+	h.heuristics.push_back(pdb2);
+	h.heuristics.push_back(pdb3);
+
+	Timer t2;
+	IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
+	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
+	double pdbTime = 0, mdTime = 0, astarTime = 0;
+	uint64_t pdbExpand = 0, pdbGenerate = 0;
+	uint64_t astarExpand = 0, astarGenerate = 0;
+	uint64_t mdExpand = 0, mdGenerate = 0;
+	for (int x = 0; x < 100; x++)
+	{
+		start = GetSTPInstance(x);
+
+//		printf("IDA*; Heuristic: PDB\n");
+//		ida.SetHeuristic(&h);
+//		t2.StartTimer();
+//		ida.GetPath(&mnp, start, goal, path);
+//		t2.EndTimer();
+//		printf("Problem %d solved; %1.2f elapsed; %llu expanded, %llu generated\n", x+1, t2.GetElapsedTime(),
+//			   ida.GetNodesExpanded(), ida.GetNodesTouched());
+//		pdbTime += t2.GetElapsedTime();
+//		pdbExpand += ida.GetNodesExpanded();
+//		pdbGenerate += ida.GetNodesTouched();
+//
+//		printf("IDA*; Heuristic: MD\n");
+//		ida.SetHeuristic(&mnp);
+//		t2.StartTimer();
+//		ida.GetPath(&mnp, start, goal, path);
+//		t2.EndTimer();
+//		printf("Problem %d solved; %1.2f elapsed; %llu expanded, %llu generated\n", x+1, t2.GetElapsedTime(),
+//			   ida.GetNodesExpanded(), ida.GetNodesTouched());
+//		mdTime += t2.GetElapsedTime();
+//		mdExpand += ida.GetNodesExpanded();
+//		mdGenerate += ida.GetNodesTouched();
+
+		printf("A*; Heuristic: PDB\n");
+		astar.SetHeuristic(&h);
+		t2.StartTimer();
+		astar.GetPath(&mnp, start, goal, statepath);
+		t2.EndTimer();
+		printf("Problem %d solved; %1.2f elapsed; %llu expanded, %llu generated\n", x+1, t2.GetElapsedTime(),
+			   astar.GetNodesExpanded(), astar.GetNodesTouched());
+		astarTime += t2.GetElapsedTime();
+		astarExpand += astar.GetNodesExpanded();
+		astarGenerate += astar.GetNodesTouched();
+
+	}
+//	printf("PDB Time: %1.2f; expansions: %llu; generations %llu\n", pdbTime, pdbExpand, pdbGenerate);
+//	printf("MD Time: %1.2f; expansions: %llu; generations %llu\n", mdTime, mdExpand, mdGenerate);
+	printf("A* PDB Time: %1.2f; expansions: %llu; generations %llu\n", astarTime, astarExpand, astarGenerate);
+}
+
+void TeachingExample()
+{
+	STP(); exit(0);
+
+	MNPuzzle<3, 2> mnp;
+	MNPuzzleState<3, 2> s, g;
+	std::vector<int> pattern = {0, 1};
+	std::vector<int> p2 = {0};
+	std::vector<int> p3 = {1, 0};
+	mnp.StoreGoal(g);
+
+	LexPermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>> pdb(&mnp, g, pattern);
+	LexPermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>> pdb2(&mnp, g, p2);
+	LexPermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>> pdb3(&mnp, g, p3);
+	LexPermutationPDB<MNPuzzleState<3, 2>, slideDir, MNPuzzle<3, 2>> pdb4(&mnp, g, pattern);
+	pdb.BuildPDB(g, std::thread::hardware_concurrency());
+	pdb2.BuildPDB(g, std::thread::hardware_concurrency());
+	pdb3.BuildPDB(g, std::thread::hardware_concurrency());
+	pdb4.BuildPDB(g, std::thread::hardware_concurrency());
+
+	
+	std::cout << "Base PDB:\n";
+	for (uint64_t x = 0; x < pdb.GetPDBSize(); x++)
+	{
+		pdb.GetStateFromPDBHash(x, s);
+		
+		//std::cout << x << ": " << s << "\n";// << "\nH-Cost" << pdb.HCost(s, g) << "\n";
+		std::cout << pdb.HCost(s, g) << " ";
+	}
+	std::cout << "\n";
+	
+	
+	std::cout << "Smaller PDB:\n";
+	for (uint64_t x = 0; x < pdb2.GetPDBSize(); x++)
+	{
+		pdb2.GetStateFromPDBHash(x, s);
+		
+		//std::cout << x << ": " << s << "\n";// << "\nH-Cost" << pdb.HCost(s, g) << "\n";
+		std::cout << pdb2.HCost(s, g) << " ";
+	}
+	std::cout << "\n";
+
+	
+	std::cout << "Base PDB (div compress by 5):\n";
+	pdb.DivCompress(5, false);
+	for (uint64_t x = 0; x < pdb.GetPDBSize(); x++)
+	{
+		pdb.GetStateFromPDBHash(x, s);
+		
+		//std::cout << x << ": " << s << "\n";
+		std::cout << pdb.HCost(s, g) << " ";
+	}
+	std::cout << "\n";
+
+	pdb4.DeltaCompress(&mnp, g, false);
+
+	std::cout << "Base PDB (after delta):\n";
+	for (uint64_t x = 0; x < pdb4.GetPDBSize(); x++)
+	{
+		pdb4.GetStateFromPDBHash(x, s);
+		
+		//std::cout << x << ": " << s << "\n";// << "\nH-Cost" << pdb.HCost(s, g) << "\n";
+		std::cout << pdb4.HCost(s, g) << " ";
+	}
+	std::cout << "\n";
+	std::cout << "Base PDB (with delta recovered):\n";
+	for (uint64_t x = 0; x < pdb4.GetPDBSize(); x++)
+	{
+		pdb4.GetStateFromPDBHash(x, s);
+		
+		//std::cout << x << ": " << s << "\n";// << "\nH-Cost" << pdb.HCost(s, g) << "\n";
+		std::cout << pdb4.HCost(s, g)+mnp.HCost(s) << " ";
+		
+	}
+	std::cout << "\n";
+
+	std::cout << "Base PDB (with delta div compress by 5):\n";
+	pdb4.DivCompress(5, false);
+	for (uint64_t x = 0; x < pdb4.GetPDBSize(); x++)
+	{
+		pdb4.GetStateFromPDBHash(x, s);
+		
+		//std::cout << x << ": " << s << "\n";
+		std::cout << pdb4.HCost(s, g) << " ";
+	}
+	std::cout << "\n";
+
+	std::cout << "Base PDB (with delta - div compress by 5 - recovered delta):\n";
+	pdb4.DivCompress(5, false);
+	for (uint64_t x = 0; x < pdb4.GetPDBSize(); x++)
+	{
+		pdb4.GetStateFromPDBHash(x, s);
+		
+		//std::cout << x << ": " << s << "\n";
+		std::cout << pdb4.HCost(s, g)+mnp.HCost(s) << " ";
+	}
+	std::cout << "\n";
+
+	
+	std::cout << "Larger PDB (different order):\n";
+	for (uint64_t x = 0; x < pdb3.GetPDBSize(); x++)
+	{
+		pdb3.GetStateFromPDBHash(x, s);
+		//std::cout << x << ": " << s << "\n";
+		std::cout << pdb3.HCost(s, g) << " ";
+	}
+	std::cout << "\n";
+
+	std::cout << "Alternate order PDB (div compress by 5):\n";
+	pdb3.DivCompress(5, false);
+	for (uint64_t x = 0; x < pdb3.GetPDBSize(); x++)
+	{
+		pdb3.GetStateFromPDBHash(x, s);
+		//std::cout << x << ": " << s << "\n";
+		std::cout << pdb3.HCost(s, g) << " ";
+	}
+	std::cout << "\n";
+
+	{
+		MNPuzzle<4, 4> mnp;
+		MNPuzzleState<4, 4> s, g;
+		std::vector<int> pattern = {1, 2, 3, 4, 5, 6, 7, 0};
+		mnp.StoreGoal(g);
+		
+		//LexPermutationPDB
+		//MR1PermutationPDB
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb1(&mnp, g, pattern);
+		LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, g, pattern);
+		pdb1.BuildPDB(g, std::thread::hardware_concurrency());
+		pdb2 = pdb1;
+		
+		pdb1.PrintHistogram();
+		pdb1.DivCompress(2, true);
+
+		pdb2.DeltaCompress(&mnp, g, true);
+		pdb2.DivCompress(2, true);
+	}
+	
+	exit(0);
+//	{
+//		MNPuzzle<4, 4> mnp;
+//		MNPuzzleState<4, 4> t;
+//		
+//		// DIV compress + MR Ranking
+//		{
+//			MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
+//			MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
+//			pdb.PrintHistogram();
+//			
+//			for (int compression = 2; compression <= 10; compression++)
+//			{
+//				printf("[mr1][none][min] Compressing by a factor of %d\n", compression);
+//				pdb2 = pdb;
+//				pdb2.DivCompress(compression, true);
+//			}
+//			printf("Performing delta compression. New distribution:\n");
+//			t.Reset();
+//			pdb.DeltaCompress(&mnp, t, true);
+//			for (int compression = 2; compression <= 10; compression++)
+//			{
+//				printf("[mr1][Delta][min] Compressing by a factor of %d\n", compression);
+//				pdb2 = pdb;
+//				pdb2.DivCompress(compression, true);
+//			}
+//		}
+//		
+//		// MOD compress + MR Ranking
+//		{
+//			MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
+//			MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
+//			pdb.BuildPDB(t, std::thread::hardware_concurrency());
+//			pdb.PrintHistogram();
+//			
+//			for (int compression = 2; compression <= 10; compression++)
+//			{
+//				printf("[mr1][none][mod] Compressing by a factor of %d\n", compression);
+//				pdb2 = pdb;
+//				pdb2.ModCompress(pdb.GetPDBSize()/compression, true);
+//			}
+//			printf("Performing delta compression. New distribution:\n");
+//			t.Reset();
+//			pdb.DeltaCompress(&mnp, t, true);
+//			for (int compression = 2; compression <= 10; compression++)
+//			{
+//				printf("[mr1][Delta][mod] Compressing by a factor of %d\n", compression);
+//				pdb2 = pdb;
+//				pdb2.ModCompress(pdb.GetPDBSize()/compression, true);
+//			}
+//		}
+//		
+//		// DIV compress + LEX Ranking
+//		{
+//			LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
+//			LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
+//			pdb.BuildPDB(t, std::thread::hardware_concurrency());
+//			pdb.PrintHistogram();
+//			
+//			for (int compression = 2; compression <= 10; compression++)
+//			{
+//				printf("[lex][none][min] Compressing by a factor of %d\n", compression);
+//				pdb2 = pdb;
+//				pdb2.DivCompress(compression, true);
+//			}
+//			printf("Performing delta compression. New distribution:\n");
+//			t.Reset();
+//			pdb.DeltaCompress(&mnp, t, true);
+//			for (int compression = 2; compression <= 10; compression++)
+//			{
+//				printf("[lex][Delta][min] Compressing by a factor of %d\n", compression);
+//				pdb2 = pdb;
+//				pdb2.DivCompress(compression, true);
+//			}
+//		}
+//		
+//		// MOD compression + LEX
+//		{
+//			LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(&mnp, t, pattern);
+//			LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(&mnp, t, pattern);
+//			pdb.BuildPDB(t, std::thread::hardware_concurrency());
+//			pdb.PrintHistogram();
+//			
+//			for (int compression = 2; compression <= 10; compression++)
+//			{
+//				printf("[lex][none][min] Compressing by a factor of %d\n", compression);
+//				pdb2 = pdb;
+//				pdb2.ModCompress(pdb.GetPDBSize()/compression, true);
+//			}
+//			printf("Performing delta compression. New distribution:\n");
+//			t.Reset();
+//			pdb.DeltaCompress(&mnp, t, true);
+//			for (int compression = 2; compression <= 10; compression++)
+//			{
+//				printf("[lex][Delta][min] Compressing by a factor of %d\n", compression);
+//				pdb2 = pdb;
+//				pdb2.ModCompress(pdb.GetPDBSize()/compression, true);
+//			}
+//		}
+//		
+//		// (0a) for DIV, MOD compression
+//		// (0b) for MR & LEX rankings
+//		
+//		// (1) Build a reasonably sized PDB
+//		
+//		// (2) min compress 2-10x
+//		
+//		// (3) Re-load pdb
+//		
+//		// (4) delta compress
+//		
+//		// (5) min compress 2-10x
+//		
+//	}
+	
 }

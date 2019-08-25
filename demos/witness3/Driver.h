@@ -30,6 +30,6 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *data);
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier, char key);
 int MyCLHandler(char *argument[], int maxNumArgs);
 bool MyClickHandler(unsigned long , int viewport, int windowX, int windowY, point3d loc, tButtonType button, tMouseEventType mType);
-void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key);
+void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char key);
 
 void InstallHandlers();

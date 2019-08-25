@@ -83,13 +83,13 @@ void CanonicalReach::ComputeCanonicalReach(CanonicalGrid::xyLoc start)
 
 	for (int i = 0; i < search.GetNumItems(); i++)
 	{
-		const AStarOpenClosedData<CanonicalGrid::xyLoc> &d = search.GetItem(i);
+		const AStarOpenClosedDataWithF<CanonicalGrid::xyLoc> &d = search.GetItem(i);
 		me->GetSuccessors(d.data, neighbors);
 		bool foundParent = false;
 		// check if we have a neighbor that has this state as a parent
 		for (int x = 0; x < neighbors.size(); x++)
 		{
-			AStarOpenClosedData<CanonicalGrid::xyLoc> n;
+			AStarOpenClosedDataWithF<CanonicalGrid::xyLoc> n;
 			if (search.GetClosedItem(neighbors[x], n))
 			{
 				if (n.parentID == i)
@@ -104,7 +104,7 @@ void CanonicalReach::ComputeCanonicalReach(CanonicalGrid::xyLoc start)
 		
 		// trace from i back to the start state updating the reach of each state
 		double perfectHCost = 0;
-		AStarOpenClosedData<CanonicalGrid::xyLoc> v = search.GetItem(i);
+		AStarOpenClosedDataWithF<CanonicalGrid::xyLoc> v = search.GetItem(i);
 		int currParent = i;
 		while (true)
 		{

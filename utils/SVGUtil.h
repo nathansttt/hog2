@@ -13,8 +13,6 @@
 #include <string>
 #include "GLUtil.h"
 #include "Graphics.h"
-#include <sstream>
-#include <iomanip>
 
 namespace SVG {
 	enum svgAlignment {
@@ -37,6 +35,10 @@ std::string SVGDrawNGon(double x, double y, double radius, int segments, float r
 std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, bool center = true);
 std::string SVGDrawLine(float x1, float y1, float x2, float y2, float width, rgbColor c);
 std::string SVGDrawLineSegments(const std::vector<Graphics::point> &lines, float width, rgbColor c);
+std::string SVGBeginLinePath(float width, rgbColor c);
+std::string SVGAddLinePath(float x1, float y1);
+std::string SVGAddLinePath(float x1, float y1, float x2, float y2);
+std::string SVGEndLinePath();
 std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface = 0,
 						SVG::svgAlignment align = SVG::kCenter);
 std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, rgbColor strokeColor, double size);
@@ -45,15 +47,5 @@ std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbCo
 
 std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport = 0, const char *comment = 0);
 void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport = 0, const char *comment = 0);
-
-// Code from: https://stackoverflow.com/questions/16605967/set-precision-of-stdto-string-when-converting-floating-point-values/16606128#16606128
-template <typename T>
-std::string to_string_with_precision(const T a_value, const int n = 6)
-{
-	std::ostringstream out;
-	out << std::setprecision(n) << a_value;
-	return out.str();
-}
-
 
 #endif /* SVGUtil_hpp */

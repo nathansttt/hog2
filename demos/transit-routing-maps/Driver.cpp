@@ -126,7 +126,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
 
-		transit = new Transit(map, 5, 10, 30, false);
+		transit = new Transit(map, 20, 10, 30, false);
 		
 //		if ((0))
 //		{
@@ -154,9 +154,17 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		if (!transit->DoneComputing())
 		{
-			float p = transit->IncrementalCompute();
-			std::string s = std::to_string(100.0*p)+"% done";
-			submitTextToBuffer(s.c_str());
+			if (running)
+			{
+				float p = transit->IncrementalCompute();
+				std::string s = std::to_string(100.0*p)+"% done";
+				submitTextToBuffer(s.c_str());
+				if (p == 1)
+				{
+					s = " "+std::to_string(100.0*transit->GetPercentTransit())+"% transit";
+					appendTextToBuffer(s.c_str());
+				}
+			}
 		}
 	}
 	
@@ -187,42 +195,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	for (const xyLoc &l : farStates)
 		me->Draw(display, l);
 	
-//	if (running)
-//	{
-//		astar.OpenGLDraw();
-//
-//		if (path.size() == 0)
-//			astar.DoSingleSearchStep(path);
-//		else {
-//			me->SetColor(0, 1, 0);
-//			glLineWidth(10);
-//			for (int x = 1; x < path.size(); x++)
-//			{
-//				me->GLDrawLine(path[x-1], path[x]);
-//			}
-//			glLineWidth(1);
-//		}
-//
-//	}
 
-//	if (recording && viewport == GetNumPorts(windowID)-1)
-//	{
-//		char fname[255];
-//		sprintf(fname, "/Users/nathanst/Movies/tmp/astar-%d%d%d%d",
-//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-//		SaveScreenshot(windowID, fname);
-//		printf("Saved %s\n", fname);
-//		frameCnt++;
-//		if (path.size() == 0)
-//		{
-//			MyDisplayHandler(windowID, kNoModifier, 'o');
-//		}
-//		else {
-//			recording = false;
-//		}
-//	}
-//	return;
-	
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -313,13 +286,20 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'p':
-			//running = !running;
+			running = !running;
 			break;
 		case 'o':
 		{
-			if (running)
+			if (!running)
 			{
-				astar.DoSingleSearchStep(path);
+				float p = transit->IncrementalCompute();
+				std::string s = std::to_string(100.0*p)+"% done";
+				submitTextToBuffer(s.c_str());
+				if (p == 1)
+				{
+					s = " "+std::to_string(100.0*transit->GetPercentTransit())+"% transit";
+					appendTextToBuffer(s.c_str());
+				}
 			}
 		}
 			break;

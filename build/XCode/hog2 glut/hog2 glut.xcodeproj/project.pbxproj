@@ -545,6 +545,24 @@
 		C438EAC71CBA22E300BBDA21 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C438EAC41CBA22DB00BBDA21 /* Driver.cpp */; };
 		C438EAC81CBA233C00BBDA21 /* TextOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4625E76177B5CE200D1C8F7 /* TextOverlay.cpp */; };
 		C438EACB1CBC34F200BBDA21 /* CanonicalGraphEnvironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C438EAC91CBC34F100BBDA21 /* CanonicalGraphEnvironment.cpp */; };
+		C444332222D7B82300744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332322D7B82400744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332422D7B82400744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332522D7B82500744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332622D7B82500744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332722D7B82600744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332822D7B82600744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332922D7B82700744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332A22D7B82800744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332B22D7B82800744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332C22D7B82B00744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332D22D7B82C00744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332E22D7B82C00744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444332F22D7B82D00744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444333022D7B82E00744AF2 /* RangeCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D074CA1A872D3800DAFFCD /* RangeCompression.cpp */; };
+		C444333122D7CC7100744AF2 /* Reach.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D80F3920ACD0CA0087E08D /* Reach.cpp */; };
+		C444333222D7CC7700744AF2 /* CanonicalReach.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D80F3520ACD0C90087E08D /* CanonicalReach.cpp */; };
+		C444333322D7CC7C00744AF2 /* BoundingBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4D80F3820ACD0C90087E08D /* BoundingBox.cpp */; };
 		C4456AE21BBB49D40065CA5A /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35613E4FDBB0077C5A5 /* Common.cpp */; };
 		C4456AE31BBB49D40065CA5A /* Bloom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C48192EC1894CB1E0039D435 /* Bloom.cpp */; };
 		C4456AE41BBB49D40065CA5A /* GLUThog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4F9F35D13E4FDBB0077C5A5 /* GLUThog.cpp */; };
@@ -1590,7 +1608,6 @@
 		C4AA9AFA228DAB7F00C93F6B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C4F9F34813E4FCF80077C5A5 /* MainMenu.xib */; };
 		C4AA9B03228DABF100C93F6B /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AA9B01228DABF100C93F6B /* Driver.cpp */; };
 		C4AA9B06228E49D800C93F6B /* DynamicWeightedGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4AA9B04228E49D700C93F6B /* DynamicWeightedGrid.cpp */; };
-		C4AA9F542188BC8B0007563F /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4765C9B1BFD581B0040E996 /* Driver.cpp */; };
 		C4B1DD4B192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
 		C4B1DD4C192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
 		C4B1DD4D192A75710039A6DF /* LogisticRegression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4B1DD49192A75710039A6DF /* LogisticRegression.cpp */; };
@@ -5041,6 +5058,7 @@
 				C413C16F1B6BBD60006A0331 /* PermutationPuzzleEnvironment.cpp in Sources */,
 				C4D2169C1D25B4500039F401 /* JPS.cpp in Sources */,
 				C413C1701B6BBD60006A0331 /* RoboticArm.cpp in Sources */,
+				C444333322D7CC7C00744AF2 /* BoundingBox.cpp in Sources */,
 				C4E06A7E1BE5DE960011F120 /* RangeCompression.cpp in Sources */,
 				C413C1711B6BBD60006A0331 /* SequenceAlignment.cpp in Sources */,
 				C413C1721B6BBD60006A0331 /* SFBDPancakePuzzle.cpp in Sources */,
@@ -5057,6 +5075,7 @@
 				C413C17E1B6BBD60006A0331 /* GLUtil.cpp in Sources */,
 				C413C17F1B6BBD60006A0331 /* LinearRegression.cpp in Sources */,
 				C413C1801B6BBD60006A0331 /* Map.cpp in Sources */,
+				C444333222D7CC7700744AF2 /* CanonicalReach.cpp in Sources */,
 				C413C1811B6BBD60006A0331 /* MapOverlay.cpp in Sources */,
 				C413C1821B6BBD60006A0331 /* Plot2D.cpp in Sources */,
 				C413C1831B6BBD60006A0331 /* ScenarioLoader.cpp in Sources */,
@@ -5070,6 +5089,7 @@
 				C4E06A791BE1FFE80011F120 /* SVGUtil.cpp in Sources */,
 				C413C18B1B6BBD60006A0331 /* GenericIDAStar.cpp in Sources */,
 				C413C18C1B6BBD60006A0331 /* OldSearchEnvironment.cpp in Sources */,
+				C444333122D7CC7100744AF2 /* Reach.cpp in Sources */,
 				C46B6C491BD6E3E200B10296 /* TOH.cpp in Sources */,
 				C413C18D1B6BBD60006A0331 /* OpenClosedList.cpp in Sources */,
 				C413C18E1B6BBD60006A0331 /* OpenListB.cpp in Sources */,
@@ -5336,6 +5356,7 @@
 				C4381709140C395B007BA75B /* SFBDPancakePuzzle.cpp in Sources */,
 				C438170A140C395B007BA75B /* SteeringEnvironment.cpp in Sources */,
 				C438170B140C395B007BA75B /* TopSpinGraph.cpp in Sources */,
+				C444332D22D7B82C00744AF2 /* RangeCompression.cpp in Sources */,
 				C431A19319212B6300D3CC38 /* Bloom.cpp in Sources */,
 				C4381711140C395B007BA75B /* Graph.cpp in Sources */,
 				C4381719140C395B007BA75B /* BitVector.cpp in Sources */,
@@ -5656,6 +5677,7 @@
 				C447F594146790A600D6D581 /* GraphAlgorithm.cpp in Sources */,
 				C447F595146790A600D6D581 /* Heap.cpp in Sources */,
 				C447F596146790A600D6D581 /* MeroB.cpp in Sources */,
+				C444332A22D7B82800744AF2 /* RangeCompression.cpp in Sources */,
 				C423101720461922000DEC53 /* STPInstances.cpp in Sources */,
 				C4C8373B1F2D563C004E78C0 /* Colors.cpp in Sources */,
 				C447F597146790A600D6D581 /* Path.cpp in Sources */,
@@ -5743,6 +5765,7 @@
 				C4B6F91A1D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4D83ECB18A29E7500F1A4D0 /* MapGenerators.cpp in Sources */,
 				C46735B61710D9EF00E2A10B /* AStarDelay.cpp in Sources */,
+				C444332522D7B82500744AF2 /* RangeCompression.cpp in Sources */,
 				C42384741C8EAE6400489273 /* Voxels.cpp in Sources */,
 				C423101C20461922000DEC53 /* STPInstances.cpp in Sources */,
 				C46735B71710D9EF00E2A10B /* FloydWarshall.cpp in Sources */,
@@ -6118,6 +6141,7 @@
 				C47BDC1217440B5900DD0928 /* GraphAlgorithm.cpp in Sources */,
 				C47BDC1317440B5900DD0928 /* Heap.cpp in Sources */,
 				C47BDC1417440B5900DD0928 /* MeroB.cpp in Sources */,
+				C444332422D7B82400744AF2 /* RangeCompression.cpp in Sources */,
 				C423101D20461922000DEC53 /* STPInstances.cpp in Sources */,
 				C4C837411F2D563C004E78C0 /* Colors.cpp in Sources */,
 				C47BDC1517440B5900DD0928 /* Path.cpp in Sources */,
@@ -6210,6 +6234,7 @@
 				C498D8821432777C0053D322 /* GraphAlgorithm.cpp in Sources */,
 				C498D8831432777C0053D322 /* Heap.cpp in Sources */,
 				C498D8841432777C0053D322 /* MeroB.cpp in Sources */,
+				C444332B22D7B82800744AF2 /* RangeCompression.cpp in Sources */,
 				C423101620461922000DEC53 /* STPInstances.cpp in Sources */,
 				C4C8373A1F2D563C004E78C0 /* Colors.cpp in Sources */,
 				C498D8851432777C0053D322 /* Path.cpp in Sources */,
@@ -6271,6 +6296,7 @@
 				C49A6F8B1499BF41007CEDA2 /* Graph.cpp in Sources */,
 				C49A6F921499BF41007CEDA2 /* BitVector.cpp in Sources */,
 				C49A6F931499BF41007CEDA2 /* FPUtil.cpp in Sources */,
+				C444332922D7B82700744AF2 /* RangeCompression.cpp in Sources */,
 				C49A6F941499BF41007CEDA2 /* FunctionApproximator.cpp in Sources */,
 				C49A6F951499BF41007CEDA2 /* GLUtil.cpp in Sources */,
 				C49A6F961499BF41007CEDA2 /* LinearRegression.cpp in Sources */,
@@ -6390,6 +6416,7 @@
 				C4A79E3413F03A580064AC6A /* OpenListB.cpp in Sources */,
 				C4B6F9101D72B32E006422E7 /* VoxelGrid.cpp in Sources */,
 				C4B1DD4C192A75710039A6DF /* LogisticRegression.cpp in Sources */,
+				C444332F22D7B82D00744AF2 /* RangeCompression.cpp in Sources */,
 				C423846A1C8EAE6400489273 /* Voxels.cpp in Sources */,
 				C423101220461922000DEC53 /* STPInstances.cpp in Sources */,
 				C4A79E4213F03A580064AC6A /* AStarDelay.cpp in Sources */,
@@ -6486,6 +6513,7 @@
 				C4A79ECA13F256DF0064AC6A /* FloydWarshall.cpp in Sources */,
 				C4A79ECB13F256DF0064AC6A /* GraphAlgorithm.cpp in Sources */,
 				C4A79ECC13F256DF0064AC6A /* Heap.cpp in Sources */,
+				C444332E22D7B82C00744AF2 /* RangeCompression.cpp in Sources */,
 				C4A79ECD13F256DF0064AC6A /* MeroB.cpp in Sources */,
 				C4A79ECE13F256DF0064AC6A /* Path.cpp in Sources */,
 				C4A79ECF13F256DF0064AC6A /* Propagation.cpp in Sources */,
@@ -6503,7 +6531,6 @@
 				C46735EC171135E900E2A10B /* RubiksCube.cpp in Sources */,
 				C467360317132F8500E2A10B /* FourBitArray.cpp in Sources */,
 				C4673658171DC55E00E2A10B /* DiskBitFile.cpp in Sources */,
-				C4AA9F542188BC8B0007563F /* Driver.cpp in Sources */,
 				C4673669171DC56D00E2A10B /* EnvUtil.cpp in Sources */,
 				C4673674171DC59800E2A10B /* RubiksCube7Edges.cpp in Sources */,
 				C4101D021F4FCF2100CCBB43 /* RoadMap.cpp in Sources */,
@@ -6668,6 +6695,7 @@
 				C4B973C11426FA4F00758D0D /* OpenListB.cpp in Sources */,
 				C4B6F9131D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4B1DD4F192A75710039A6DF /* LogisticRegression.cpp in Sources */,
+				C444332C22D7B82B00744AF2 /* RangeCompression.cpp in Sources */,
 				C4B973CF1426FA4F00758D0D /* AStarDelay.cpp in Sources */,
 				C423101520461922000DEC53 /* STPInstances.cpp in Sources */,
 				C4B973D01426FA4F00758D0D /* FloydWarshall.cpp in Sources */,
@@ -6759,6 +6787,7 @@
 				C413C1531B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
 				C4C5C3C018EC7C9D00915B3D /* AStarDelay.cpp in Sources */,
 				C4C5C3C118EC7C9D00915B3D /* FloydWarshall.cpp in Sources */,
+				C444332222D7B82300744AF2 /* RangeCompression.cpp in Sources */,
 				C42384781C8EAE6400489273 /* Voxels.cpp in Sources */,
 				C423101F20461922000DEC53 /* STPInstances.cpp in Sources */,
 				C4C5C3C218EC7C9D00915B3D /* GraphAlgorithm.cpp in Sources */,
@@ -6850,6 +6879,7 @@
 				C4C9E504176A7A160027410C /* AStarDelay.cpp in Sources */,
 				C4C9E505176A7A160027410C /* FloydWarshall.cpp in Sources */,
 				C4C9E506176A7A160027410C /* GraphAlgorithm.cpp in Sources */,
+				C444332322D7B82400744AF2 /* RangeCompression.cpp in Sources */,
 				C4C9E507176A7A160027410C /* Heap.cpp in Sources */,
 				C4C9E508176A7A160027410C /* MeroB.cpp in Sources */,
 				C423101E20461922000DEC53 /* STPInstances.cpp in Sources */,
@@ -7215,6 +7245,7 @@
 				C4D60A8A14B22E10007594CD /* GenericIDAStar.cpp in Sources */,
 				C4D60A8B14B22E10007594CD /* OldSearchEnvironment.cpp in Sources */,
 				C4D60A8C14B22E10007594CD /* OpenClosedList.cpp in Sources */,
+				C444332822D7B82600744AF2 /* RangeCompression.cpp in Sources */,
 				C4D60A8D14B22E10007594CD /* OpenListB.cpp in Sources */,
 				C4B1DD53192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C413C14C1B6B0E9E006A0331 /* CanonicalGrid.cpp in Sources */,
@@ -7407,6 +7438,7 @@
 				C4EE61401651BB9A00B038E5 /* OpenListB.cpp in Sources */,
 				C4B6F9191D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4B1DD55192A75710039A6DF /* LogisticRegression.cpp in Sources */,
+				C444332622D7B82500744AF2 /* RangeCompression.cpp in Sources */,
 				C42384731C8EAE6400489273 /* Voxels.cpp in Sources */,
 				C423101B20461922000DEC53 /* STPInstances.cpp in Sources */,
 				C4EE614E1651BB9A00B038E5 /* AStarDelay.cpp in Sources */,
@@ -7467,6 +7499,7 @@
 				C4C837351F2D563C004E78C0 /* Colors.cpp in Sources */,
 				C4D80F3C20ACD0CA0087E08D /* BoundingBox.cpp in Sources */,
 				C4667F1D221CB51400E1070F /* GraphInconsistencyInstances.cpp in Sources */,
+				C444333022D7B82E00744AF2 /* RangeCompression.cpp in Sources */,
 				C4D80F3D20ACD0CA0087E08D /* Reach.cpp in Sources */,
 				C4F9F42313E4FE400077C5A5 /* SFBDPancakePuzzle.cpp in Sources */,
 				C4F9F42413E4FE400077C5A5 /* SteeringEnvironment.cpp in Sources */,
@@ -7593,6 +7626,7 @@
 				C4B1DD54192A75710039A6DF /* LogisticRegression.cpp in Sources */,
 				C4B6F9181D72B32F006422E7 /* VoxelGrid.cpp in Sources */,
 				C4FBC87E16374C89003C667D /* AStarDelay.cpp in Sources */,
+				C444332722D7B82600744AF2 /* RangeCompression.cpp in Sources */,
 				C42384721C8EAE6400489273 /* Voxels.cpp in Sources */,
 				C423101A20461922000DEC53 /* STPInstances.cpp in Sources */,
 				C4FBC87F16374C89003C667D /* FloydWarshall.cpp in Sources */,

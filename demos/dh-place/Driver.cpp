@@ -32,12 +32,14 @@
 #include "TextOverlay.h"
 #include "MapOverlay.h"
 #include <string>
+#include <sstream>
 
 enum mode {
 	kAddDH = 0,
 	kIdentifyLowHeuristic = 1,
 	kIdentifyHighHeuristic = 2,
-	kFindPath = 3
+	kFindPath = 3,
+	kMeasureHeuristic = 4
 };
 
 MapEnvironment *me = 0;
@@ -114,6 +116,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Slow Down", "Decrease speed of A* search", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Add DH", "Switch to mode for add/study DH placement", kAnyModifier, 'a');
 	InstallKeyboardHandler(MyDisplayHandler, "Show DH", "Toggle drawing the DH", kAnyModifier, 'd');
+	InstallKeyboardHandler(MyDisplayHandler, "Measure", "Measure Heuristic", kAnyModifier, 'm');
 	InstallKeyboardHandler(MyDisplayHandler, "Path", "Find path using current DH", kAnyModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Test High", "Test to find state pairs with high heuristic value", kAnyModifier, 'h');
 	InstallKeyboardHandler(MyDisplayHandler, "Test Low", "Test to find state pairs with low heuristic value", kAnyModifier, 'l');
@@ -181,7 +184,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			me->DrawAlternate(display, p);
 
 		if (counter < 15)
-			me->SetColor(Colors::white);
+			me->SetColor(Colors::purple);
 		else
 			me->SetColor(Colors::lighterblue);
 		for (const auto &p : points)
@@ -205,6 +208,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 	}
 	
+	if (m == kMeasureHeuristic)
+	{
+		me->SetColor(Colors::purple);
+		me->DrawLine(display, start, goal, 3);
+	}
 	if (m == kFindPath)
 	{
 		if (!running)
@@ -308,6 +316,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'a':
 			submitTextToBuffer("Click anywhere in the map to place a differential heuristic");
 			m = kAddDH;
+			break;
+		case 'm':
+			if (h.values.size() == 0)
+			{
+				submitTextToBuffer("Error: Must place DH first");
+				break;
+			}
+			m = kMeasureHeuristic;
 			break;
 		case 'd':
 			showDH = !showDH;
@@ -486,6 +502,25 @@ void GetPathHandler(tMouseEventType mType, point3d loc)
 	}
 }
 
+void GetMeasureHandler(tMouseEventType mType, point3d loc)
+{
+	int x, y;
+	me->GetMap()->GetPointFromCoordinate(loc, x, y);
+	xyLoc tmp(x, y);
+	if (me->GetMap()->GetTerrainType(x, y) != kGround)
+		return;
+	
+	switch (mType)
+	{
+		case kMouseDown: goal = start = tmp; running = false; break;
+		case kMouseDrag: goal = tmp; break;
+		case kMouseUp: goal = tmp; break;
+	}
+	std::stringstream ss;
+	ss << "H-cost from " << start << " to " << goal << " is " << h.DHCost(start, goal);
+	submitTextToBuffer(ss.str().c_str());
+}
+
 bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButtonType button, tMouseEventType mType)
 {
 	switch (m)
@@ -494,6 +529,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		case kIdentifyLowHeuristic:
 		case kIdentifyHighHeuristic: DHGoodBadHandler(mType, loc); break;
 		case kFindPath: GetPathHandler(mType, loc); break;
+		case kMeasureHeuristic: GetMeasureHandler(mType, loc); break;
 	}
 	return true;
 }

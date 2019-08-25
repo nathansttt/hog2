@@ -86,13 +86,13 @@ void Reach::ComputeReach(xyLoc start)
 	
 	for (int i = 0; i < search.GetNumItems(); i++)
 	{
-		const AStarOpenClosedData<xyLoc> &d = search.GetItem(i);
+		const AStarOpenClosedDataWithF<xyLoc> &d = search.GetItem(i);
 		me->GetSuccessors(d.data, neighbors);
 		bool foundParent = false;
 		// check if we have a neighbor that has this state as a parent
 		for (int x = 0; x < neighbors.size(); x++)
 		{
-			AStarOpenClosedData<xyLoc> n;
+			AStarOpenClosedDataWithF<xyLoc> n;
 			if (search.GetClosedItem(neighbors[x], n))
 			{
 				if (n.parentID == i)
@@ -107,7 +107,7 @@ void Reach::ComputeReach(xyLoc start)
 		
 		// trace from i back to the start state updating the reach of each state
 		double perfectHCost = 0;
-		AStarOpenClosedData<xyLoc> v = search.GetItem(i);
+		AStarOpenClosedDataWithF<xyLoc> v = search.GetItem(i);
 		int currParent = i;
 		while (true)
 		{

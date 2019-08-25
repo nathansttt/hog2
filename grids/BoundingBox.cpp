@@ -134,7 +134,7 @@ BoundingBox::BB BoundingBox::ComputeBB(xyLoc start, CanonicalGrid::tDirection di
 		
 //		grid->SetColor(0.0, 0.5, 1.0);
 //		me->SetColor(0.0, 0.5, 1.0);
-		AStarOpenClosedData<CanonicalGrid::xyLoc> data;
+		AStarOpenClosedDataWithF<CanonicalGrid::xyLoc> data;
 		if (canAstar.GetClosedItem(next, data))
 		{
 			grid->GetSuccessors(data.data, v);

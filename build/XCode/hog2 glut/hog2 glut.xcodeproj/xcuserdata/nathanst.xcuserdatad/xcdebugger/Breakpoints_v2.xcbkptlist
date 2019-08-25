@@ -1768,13 +1768,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../algorithms/AStarOpenClosed.h"
-            timestampString = "580883863.353241"
+            timestampString = "584569218.253777"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "263"
-            endingLineNumber = "263"
-            landmarkName = "HeapifyUp(unsigned int index)"
-            landmarkType = "9">
+            startingLineNumber = "328"
+            endingLineNumber = "328"
+            landmarkName = "unknown"
+            landmarkType = "0">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -1831,13 +1831,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../algorithms/AStarOpenClosed.h"
-            timestampString = "580883863.353318"
+            timestampString = "584569218.253873"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "246"
-            endingLineNumber = "246"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "311"
+            endingLineNumber = "311"
+            landmarkName = "Lookup(uint64_t hashKey, uint64_t &amp;objKey)"
+            landmarkType = "9">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -1926,7 +1926,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../learning/gLSSLRTAStar.h"
-            timestampString = "468917854.340835"
+            timestampString = "584569218.254066"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "195"
@@ -2022,11 +2022,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497073838.135257"
+            timestampString = "584569218.254324"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1376"
-            endingLineNumber = "1376"
+            startingLineNumber = "1375"
+            endingLineNumber = "1375"
             landmarkName = "MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)"
             landmarkType = "9">
          </BreakpointContent>
@@ -2038,11 +2038,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497073838.135257"
+            timestampString = "584569218.254403"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1401"
-            endingLineNumber = "1401"
+            startingLineNumber = "1400"
+            endingLineNumber = "1400"
             landmarkName = "MyRandomUnitKeyHandler(unsigned long w, tKeyboardModifier , char)"
             landmarkType = "9">
          </BreakpointContent>
@@ -2118,43 +2118,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497073838.135257"
+            timestampString = "584569218.254613"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1455"
-            endingLineNumber = "1455"
-            landmarkName = "TestJPS()"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497073838.135257"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1458"
-            endingLineNumber = "1458"
-            landmarkName = "TestJPS()"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497073838.135257"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1131"
-            endingLineNumber = "1131"
+            startingLineNumber = "1130"
+            endingLineNumber = "1130"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
             landmarkType = "9">
          </BreakpointContent>
@@ -2166,11 +2134,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497073838.135257"
+            timestampString = "584569218.254683"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1192"
-            endingLineNumber = "1192"
+            startingLineNumber = "1191"
+            endingLineNumber = "1191"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
             landmarkType = "9">
          </BreakpointContent>
@@ -2182,11 +2150,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497073838.135257"
+            timestampString = "584569218.2547359"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1199"
-            endingLineNumber = "1199"
+            startingLineNumber = "1198"
+            endingLineNumber = "1198"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
             landmarkType = "9">
          </BreakpointContent>
@@ -2198,11 +2166,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497076250.544559"
+            timestampString = "584569218.2548"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1835"
-            endingLineNumber = "1835"
+            startingLineNumber = "1831"
+            endingLineNumber = "1831"
             landmarkName = "MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)"
             landmarkType = "9">
          </BreakpointContent>
@@ -2230,11 +2198,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "513543086.974994"
+            timestampString = "584569218.254896"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2119"
-            endingLineNumber = "2119"
+            startingLineNumber = "2115"
+            endingLineNumber = "2115"
             landmarkName = "ComputeReach(xyLoc start, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;search)"
             landmarkType = "9">
          </BreakpointContent>
@@ -2246,27 +2214,27 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "513543086.974994"
+            timestampString = "584569218.25495"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "2117"
+            endingLineNumber = "2117"
+            landmarkName = "ComputeReach(xyLoc start, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;search)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/canonicalGrids/Sample.cpp"
+            timestampString = "584569218.255015"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2121"
             endingLineNumber = "2121"
-            landmarkName = "ComputeReach(xyLoc start, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;search)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "513543086.974994"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2125"
-            endingLineNumber = "2125"
             landmarkName = "ComputeReach(xyLoc start, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;search)"
             landmarkType = "9">
          </BreakpointContent>
@@ -2342,11 +2310,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/canonicalGrids/Sample.cpp"
-            timestampString = "497076250.544559"
+            timestampString = "584569218.2552201"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1717"
-            endingLineNumber = "1717"
+            startingLineNumber = "1713"
+            endingLineNumber = "1713"
             landmarkName = "AnimateAlgorithms(const std::string &amp;prefix)"
             landmarkType = "9">
          </BreakpointContent>
@@ -3343,7 +3311,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/EBSearch.h"
-            timestampString = "581405674.9911849"
+            timestampString = "584569218.256529"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "307"

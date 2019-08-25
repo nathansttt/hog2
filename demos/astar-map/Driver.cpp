@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
+//	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record the screen.", kNoModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kNoModifier, 'o');
@@ -78,12 +78,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "WA*(2)", "A* with weight of 2", kNoModifier, '2');
 	InstallKeyboardHandler(MyDisplayHandler, "WA*(10)", "A* with weight of 10", kNoModifier, '3');
 	InstallKeyboardHandler(MyDisplayHandler, "WA*(100)", "A* with weight of 100", kNoModifier, '4');
-	InstallKeyboardHandler(MyDisplayHandler, "Rotate Compression", "Rotate Compression being shown in heuristic", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Rotate Displayed Heuristic", "Rotate which heuristic is shown", kAnyModifier, '{');
-	InstallKeyboardHandler(MyDisplayHandler, "Reset Rotations", "Reset the current rotation/translation of the map.", kAnyModifier, '|');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
-	InstallKeyboardHandler(MyDisplayHandler, "Detail", "Export detailed SVG from A*", kAnyModifier, 'q');
+	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Increase simulation speed", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Decrease simulation speed", kAnyModifier, '[');
 	
 	InstallWindowHandler(MyWindowHandler);
 	
@@ -143,6 +139,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //					printf("Solution: moves %d, length %f, %lld nodes, %u on OPEN\n",
 //						   (int)path.size(), ma1->GetPathLength(path), a1.GetNodesExpanded(),
 //						   a1.GetNumOpenItems());
+				printf("%llu unique expansions, %llu total expansions\n", a1.GetUniqueNodesExpanded(), a1.GetNodesExpanded());
 				runningSearch1 = false;
 				break;
 			}
@@ -168,8 +165,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	char messageString[255];
 	switch (key)
 	{
-		case '|': resetCamera(); break;
-		case 'r': recording = !recording; break;
+		case 'r':
+			a1.SetReopenNodes(!a1.GetReopenNodes());
+			if (a1.GetReopenNodes())
+				submitTextToBuffer("Reopenings enabled");
+			else
+				submitTextToBuffer("Reopenings disabled");
+			break;
 		case '0':
 			searchWeight = 0;
 			submitTextToBuffer("Algorithm: Dijkstra");
@@ -196,7 +198,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '4':
 			searchWeight = 100;
-			submitTextToBuffer("Algorithm: WA*(10)");
+			submitTextToBuffer("Algorithm: WA*(100)");
 			if (runningSearch1 || path.size() > 0)
 				StartSearch();
 			break;
@@ -209,11 +211,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				searchWeight = 100;
 			else if (searchWeight == 100.0)
 				searchWeight = 0;
+			a1.SetWeight(searchWeight);
 			printf("Search weight is %1.2f\n", searchWeight);
 			break;
 		case '[':
 			gStepsPerFrame /= 2;
-			sprintf(messageString, "Speed: %d steps per frame\n", gStepsPerFrame);
+			sprintf(messageString, "Speed: %d steps per frame", gStepsPerFrame);
 			submitTextToBuffer(messageString);
 			break;
 		case ']':
@@ -221,23 +224,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				gStepsPerFrame *= 2;
 			if (gStepsPerFrame == 0)
 				gStepsPerFrame = 1;
-			sprintf(messageString, "Speed: %d steps per frame\n", gStepsPerFrame);
+			sprintf(messageString, "Speed: %d steps per frame", gStepsPerFrame);
 			submitTextToBuffer(messageString);
-			break;
-		case '{':
-			break;
-		case '}':
-			break;
-		case '\t':
 			break;
 //		case 'p': unitSims[windowID]->SetPaused(!unitSims[windowID]->GetPaused()); break;
 		case 'o':
 		{
 		}
 			break;
-		case 'q':
-		{
-		}
 		default:
 			break;
 	}
@@ -252,6 +246,7 @@ void StartSearch()
 	g1.x = px2; g1.y = py2;
 	
 	a1.SetWeight(searchWeight);
+	a1.SetReopenNodes(false);
 	me->SetEightConnected();
 	a1.InitializeSearch(me, s1, g1, path);
 	mouseTracking = false;

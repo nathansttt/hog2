@@ -407,6 +407,16 @@ void Map::loadOctile(FILE *f, int high, int wide)
 						for (int s = 0; s < sizeMultiplier; s++)
 							SetTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
 														 kTrees); break;
+				case 'G':
+					for (int r = 0; r < sizeMultiplier; r++)
+						for (int s = 0; s < sizeMultiplier; s++)
+							SetTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
+										   kGrass); break;
+				case 'B':
+					for (int r = 0; r < sizeMultiplier; r++)
+						for (int s = 0; s < sizeMultiplier; s++)
+							SetTerrainType(x*sizeMultiplier+r, y*sizeMultiplier+s,
+										   kBlight); break;
 				default:
 					for (int r = 0; r < sizeMultiplier; r++)
 						for (int s = 0; s < sizeMultiplier; s++)

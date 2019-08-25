@@ -57,4 +57,5 @@ endif
 default : all
 
 SRC_CPP = \
+	apps/puzzlesample/StephenPuzzle.cpp \
 	apps/puzzlesample/PuzzleSample.cpp \

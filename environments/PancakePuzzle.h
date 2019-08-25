@@ -142,9 +142,11 @@ public:
 	void Set_Use_Memory_Free_Heuristic(bool to_use){use_memory_free = to_use;}
 	void Set_Use_Dual_Lookup( bool to_use ) { use_dual_lookup = to_use; };
 	void SetUseRealValueEdges(bool use) { real = use; }
+	bool pruneActions;
 private:
 	bool real;
 	std::vector<PancakePuzzleAction> operators;
+	mutable std::vector<PancakePuzzleAction> actCache;
 	bool goal_stored; // whether a goal is stored or not
 	bool use_memory_free;
 	bool use_dual_lookup;
@@ -182,6 +184,7 @@ PancakePuzzle<N>::PancakePuzzle(int gap)
 	goal_stored = false;
 	use_memory_free = true;
 	use_dual_lookup = true;
+	pruneActions = false;
 }
 
 template <int N>
@@ -193,6 +196,7 @@ PancakePuzzle<N>::PancakePuzzle(const std::vector<PancakePuzzleAction> op_order)
 	goal_stored = false;
 	use_memory_free = false;
 	use_dual_lookup = true;
+	pruneActions = false;
 }
 
 template <int N>
@@ -247,24 +251,46 @@ void PancakePuzzle<N>::GetSuccessors(const PancakePuzzleState<N> &parent,
 								  std::vector<PancakePuzzleState<N>> &children) const
 {
 	children.resize(0);
-	
-	// all operators are applicable in all states
-	for (unsigned i = 0; i < operators.size(); i++)
+	if (!pruneActions)
 	{
-		children.push_back(parent); // adds a copy of the state to the stack
-		ApplyAction(children.back(), operators[i]);
+		// all operators are applicable in all states
+		for (unsigned i = 0; i < operators.size(); i++)
+		{
+			children.push_back(parent); // adds a copy of the state to the stack
+			ApplyAction(children.back(), operators[i]);
+		}
+	}
+	else {
+		GetActions(parent, actCache);
+		for (unsigned i = 0; i < actCache.size(); i++)
+		{
+			children.push_back(parent); // adds a copy of the state to the stack
+			ApplyAction(children.back(), actCache[i]);
+		}
 	}
 }
 
 template <int N>
-void PancakePuzzle<N>::GetActions(const PancakePuzzleState<N> &, std::vector<PancakePuzzleAction> &actions) const
+void PancakePuzzle<N>::GetActions(const PancakePuzzleState<N> &s, std::vector<PancakePuzzleAction> &actions) const
 {
 	actions.resize(0);
-	
-	// all operators are applicable in all states
-	for (unsigned i = 0; i < operators.size(); i++)
+	if (!pruneActions)
 	{
-		actions.push_back(operators[i]);
+		// all operators are applicable in all states
+		for (unsigned i = 0; i < operators.size(); i++)
+		{
+			actions.push_back(operators[i]);
+		}
+	}
+	else {
+		bool skip = true;
+		for (unsigned i = N; i >= 2; i--)
+		{
+			if (s.puzzle[i-1] == i-1 && skip)
+				continue;
+			skip = false;
+			actions.push_back(i);
+		}
 	}
 }
 

@@ -26,6 +26,7 @@ public:
 	bool DoneComputing();
 	void Draw(Graphics::Display &display);
 	void Draw(Graphics::Display &display, const xyLoc &l1, const xyLoc &l2);
+	double GetPercentTransit();
 private:
 	struct tp {
 		int firstLoc, count;

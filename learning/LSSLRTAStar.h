@@ -209,7 +209,7 @@ void LSSLRTAStar<state, action, environment>::GetPath(environment *env, const st
 	int randCount = 1;
 	for (unsigned int x = 0; x < openSize; x++)
 	{
-		const AStarOpenClosedData<state> data = astar.GetOpenItem(x);
+		const auto data = astar.GetOpenItem(x);
 		double currLearning = HCostLearned(data.data);
 		if (avoidLearning)
 		{

@@ -190,7 +190,7 @@ namespace DALRTA {
 		unsigned int openSize = astar.GetNumOpenItems();
 		for (unsigned int x = 0; x < openSize; x++)
 		{
-			const AStarOpenClosedData<state> data = astar.GetOpenItem(x);
+			const auto data = astar.GetOpenItem(x);
 			if ((bestF == -1) || (fless(HCostLearned(env,data.data)*10000+(data.g+data.h), bestF)))
 			{
 				bestF = HCostLearned(env,data.data)*10000+(data.g+data.h);
@@ -271,7 +271,7 @@ namespace DALRTA {
 		unsigned int openSize = astar.GetNumOpenItems();
 		for (unsigned int x = 0; x < openSize; x++)
 		{
-			const AStarOpenClosedData<state> data = astar.GetOpenItem(x);
+			const auto data = astar.GetOpenItem(x);
 			if (data.data == first)
 				e->SetColor(0, 0.5, 0.5);
 			else

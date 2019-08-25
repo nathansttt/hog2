@@ -237,6 +237,7 @@ public:
 	}
 	void AddTriangleConstraint(int x, int y, int count)
 	{
+		assert(count >= 1 && count <= 3);
 		constraintCount[constraints[x][y].t]--;
 		constraintCount[kTriangle]++;
 		constraints[x][y].t = kTriangle;
@@ -552,13 +553,6 @@ public:
 		}
 	}
 
-private:
-	const float scale = 0.75f;
-	const float gapOffset = scale*2.0f/(width>height?width:height); // size of each square
-	const float lineWidth = gapOffset*0.1f;
-	const float xGap = (((width>height)?(width):(height))-width)*gapOffset/2.0f;
-	const float yGap = -(((width>height)?(width):(height))-height)*gapOffset/2.0f;
-
 	const rgbColor tetrisYellow = {0.862745098f, 0.6549019608f, 0.0f};
 	const rgbColor tetrisBlue = {0.2196078431f, 0.3607843137f, 0.8705882353f};
 	const rgbColor drawColor = Colors::darkbluegray;//Colors::lightblue;
@@ -566,6 +560,13 @@ private:
 	const rgbColor backColor = Colors::gray;
 	const rgbColor outerBackColor = Colors::white;
 	const rgbColor triangleColor = Colors::orange;
+private:
+	const float scale = 0.75f;
+	const float gapOffset = scale*2.0f/(width>height?width:height); // size of each square
+	const float lineWidth = gapOffset*0.1f;
+	const float xGap = (((width>height)?(width):(height))-width)*gapOffset/2.0f;
+	const float yGap = -(((width>height)?(width):(height))-height)*gapOffset/2.0f;
+
 
 	int GetIndex(int x, int y) const { return y*width+x; }
 	int GetX(int index) const { return index%width; }

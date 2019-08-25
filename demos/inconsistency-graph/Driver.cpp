@@ -32,6 +32,7 @@
 #include "TextOverlay.h"
 #include <string>
 #include "SVGUtil.h"
+#include "GraphInconsistencyInstances.h"
 
 enum mode {
 	kAddNodes,
@@ -53,11 +54,11 @@ bool paused = true;
 bool BPMX = false;
 double edgeCost = 1.0;
 double weight = 1.0;
-int ticksPerNode = 1;
+int ticksPerNode = 3;
 int currentTick = 0;
 
 int numExampleNodes = 5;
-
+char graphType = 'b';
 Graph *g = 0;
 GraphEnvironment *ge;
 graphState from=-1, to=-1;
@@ -75,6 +76,8 @@ class GraphDistHeuristic : public Heuristic<graphState> {
 public:
 	double HCost(const graphState &a, const graphState &b) const
 	{
+		if (graphType == 'w')
+			return g->GetNode(a)->GetLabelF(kHeuristic);
 		return g->GetNode(a)->GetLabelL(kHeuristic);
 	}
 };
@@ -98,17 +101,16 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "BPMX", "Toggle BPMX", kAnyModifier, 'x');
 	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
-	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra & A*", kAnyModifier, 'w');
+//	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra & A*", kAnyModifier, 'w');
 	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
 	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
-	InstallKeyboardHandler(DefaultGraph, "Default", "Build Deafult Graph", kAnyModifier, 'a', 'd');
+	InstallKeyboardHandler(BuildGraphFromPuzzle, "Default", "Build Deafult Graph", kAnyModifier, 'a', 'd');
+	InstallKeyboardHandler(BuildGraphFromPuzzle, "Default", "Build Deafult Graph", kAnyModifier, 'w');
 
 	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -143,9 +145,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		astar.SetDirected(true);
 		astar.SetWeight(1.0);
 		astar.SetHeuristic(&h);
-		te.AddLine("A* algorithm sample code");
-		te.AddLine("Current mode: add nodes (click to add node)");
-		te.AddLine("Press [ or ] to change modes. '?' for help.");
+		BuildGraphFromPuzzle(windowID, kNoModifier, graphType);
+		te.AddLine("A* with Inconsistent Heuristics");
+//		te.AddLine("Current mode: add nodes (click to add node)");
+//		te.AddLine("Press [ or ] to change modes. '?' for help.");
 	}
 }
 
@@ -164,12 +167,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		ge->SetColor(0.5, 0.5, 1.0);
 		ge->Draw(display);
 		
-		if (from != -1 && to != -1)
+		if (from != -1 && to != -1 && numExampleNodes <= 8)
 		{
-//			glLineWidth(4.);
-			ge->SetColor(1, 0, 0);
-//			ge->GLDrawLine(from, to);
-			ge->DrawLine(display, from, to, 4);
+			ge->SetColor(Colors::yellow);
+			ge->DrawLine(display, from, to, 1);
 		}
 		
 		if (running)
@@ -204,7 +205,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 		for (int x = 0; x < g->GetNumNodes(); x++)
 		{
-			ge->DrawStateLabel(display, x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
+			if (graphType == 'w')
+				ge->DrawStateLabel(display, x, MyToString(g->GetNode(x)->GetLabelF(kHeuristic)).c_str());
+			else
+				ge->DrawStateLabel(display, x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
 			//ge->GLLabelState(x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
 		}
 	}
@@ -213,14 +217,17 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		te.Draw(display);
 	}
 	
-//	if (recording && viewport == GetNumPorts(windowID)-1)
-//	{
-//		char fname[255];
-//		sprintf(fname, "/Users/nathanst/Movies/tmp/astar-%d%d%d%d",
-//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/inconsistency-%d%d%d%d.svg",
+				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+
+		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0);
+
 //		SaveScreenshot(windowID, fname);
-//		printf("Saved %s\n", fname);
-//		frameCnt++;
+		printf("Saved %s\n", fname);
+		frameCnt++;
 //		if (path.size() == 0)
 //		{
 //			MyDisplayHandler(windowID, kNoModifier, 'o');
@@ -228,7 +235,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //		else {
 //			recording = false;
 //		}
-//	}
+	}
 	return;
 	
 }
@@ -252,38 +259,40 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case ']':
 		{
 			if (numExampleNodes < 15)
+			{
 				numExampleNodes++;
-//			switch (m)
-//			{
-//				case kAddNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
-//				case kAddEdges: m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
-//				case kMoveNodes: m = kFindPath; te.AddLine("Current mode: find path"); break;
-//				case kFindPath: m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
-//			}
-
+				BuildGraphFromPuzzle(windowID, kNoModifier, graphType);
+				if (numExampleNodes > 8)
+				{
+					ge->SetDrawEdgeCosts(false);
+					ge->SetDrawNodeLabels(false);
+				}
+			}
 		}
 			break;
 		case '[':
 		{
-			if (numExampleNodes > 5)
+			if (numExampleNodes > 4)
+			{
 				numExampleNodes--;
-//			switch (m)
-//			{
-//				case kMoveNodes: m = kAddEdges; te.AddLine("Current mode: add edges"); break;
-//				case kFindPath: m = kMoveNodes; te.AddLine("Current mode: moves nodes"); break;
-//				case kAddNodes: m = kFindPath; te.AddLine("Current mode: find path"); break;
-//				case kAddEdges: m = kAddNodes; te.AddLine("Current mode: add nodes"); break;
-//			}
+				BuildGraphFromPuzzle(windowID, kNoModifier, graphType);
+			}
+			if (numExampleNodes <= 8)
+			{
+				ge->SetDrawEdgeCosts(true);
+				ge->SetDrawNodeLabels(true);
+			}
 		}
 			break;
 		case '|':
 		{
-			name[0] = 'a';
-			g->Reset();
-			//te.AddLine("Current mode: add nodes");
-			m = kFindPath;
-			path.resize(0);
-			running = false;
+			BuildGraphFromPuzzle(windowID, kNoModifier, graphType);
+//			name[0] = 'a';
+//			g->Reset();
+//			//te.AddLine("Current mode: add nodes");
+//			m = kFindPath;
+//			path.resize(0);
+//			running = false;
 		}
 			break;
 		case 'w':
@@ -302,23 +311,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			recording = !recording;
 			break;
 		case '0':
-//		case '1': edgeCost = 1.0; te.AddLine("Adding edges; New edges cost 1"); m = kAddEdges; break;
-//		case '2': edgeCost = 2.0; te.AddLine("Adding edges; New edges cost 2"); m = kAddEdges; break;
-//		case '3': edgeCost = 3.0; te.AddLine("Adding edges; New edges cost 3"); m = kAddEdges; break;
-//		case '4': edgeCost = 4.0; te.AddLine("Adding edges; New edges cost 4"); m = kAddEdges; break;
-//		case '5': edgeCost = 5.0; te.AddLine("Adding edges; New edges cost 5"); m = kAddEdges; break;
-//		case '6': edgeCost = 6.0; te.AddLine("Adding edges; New edges cost 6"); m = kAddEdges; break;
-//		case '7': edgeCost = 7.0; te.AddLine("Adding edges; New edges cost 7"); m = kAddEdges; break;
-//		case '8': edgeCost = 8.0; te.AddLine("Adding edges; New edges cost 8"); m = kAddEdges; break;
-//		case '9': edgeCost = 9.0; te.AddLine("Adding edges; New edges cost 9"); m = kAddEdges; break;
-		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
-			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
-			}
-			break;
 		case 'x':
 			BPMX = !BPMX;
 			if (running)
@@ -331,8 +323,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'o':
 		{
-			if (running)
+			if (running && path.size() == 0)
 			{
+				if (astar.GetNumOpenItems() > 0)
+					printf("%1.2f\n", astar.GetOpenItem(0).g+astar.GetOpenItem(0).h);
 				if (astar.DoSingleSearchStep(path))
 					paused = true;
 				ShowSearchInfo();
@@ -341,19 +335,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '?':
 		{
-			te.AddLine("Help:");
-			te.AddLine("-----");
-			te.AddLine("Press '[' and ']' to switch between modes.");
-			te.AddLine("Add nodes: click to add a node to the graph");
-			te.AddLine("Add edges: drag between nodes to add an edge");
-			te.AddLine("           Press 1-9 to change edge weight");
-			te.AddLine("Move nodes: drag to move node locations");
-			te.AddLine("Find Path: Drag to find path between nodes");
-			te.AddLine("           'o' to step pathfinding forward");
-			te.AddLine("           Red nodes: closed list");
-			te.AddLine("           Green nodes: open list");
-			te.AddLine("           Yellow node: next on open list");
-			te.AddLine("           Pink node: goal state");
+//			te.AddLine("Help:");
+//			te.AddLine("-----");
+//			te.AddLine("Press '[' and ']' to switch between modes.");
+//			te.AddLine("Add nodes: click to add a node to the graph");
+//			te.AddLine("Add edges: drag between nodes to add an edge");
+//			te.AddLine("           Press 1-9 to change edge weight");
+//			te.AddLine("Move nodes: drag to move node locations");
+//			te.AddLine("Find Path: Drag to find path between nodes");
+//			te.AddLine("           'o' to step pathfinding forward");
+//			te.AddLine("           Red nodes: closed list");
+//			te.AddLine("           Green nodes: open list");
+//			te.AddLine("           Yellow node: next on open list");
+//			te.AddLine("           Pink node: goal state");
 		}
 			break;
 		case 's':
@@ -384,106 +378,82 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	
 }
 
-void DefaultGraph(unsigned long windowID, tKeyboardModifier mod, char key)
+void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char key)
 {
+	if (key == 'w') // weighted inconsistency
+	{
+		graphType = key;
+		delete g;
+		delete ge;
+		double weight = 3;
+		
+		g = GraphInconsistencyExamples::GetWeightedInconsistency(weight, numExampleNodes);
+		ge = new GraphEnvironment(g);
+		ge->SetDirected(false);
+		ge->SetDrawEdgeCosts(true);
+		ge->SetDrawNodeLabels(true);
+		ge->SetIntegerEdgeCosts(false);
+		
+		from = 0;
+		to = g->GetNumNodes()-1;
+		weight = weight;
+		astar.SetWeight(weight);
+		astar.SetUseBPMX(0);
+		astar.InitializeSearch(ge, from, to, path);
+		ShowSearchInfo();
+		running = true;
+		paused = true;
+		path.clear();
+	}
 	if (key == 'a')
 	{
-		MyDisplayHandler(windowID, kNoModifier, '|'); // clear current graph
+		graphType = key;
+		delete g;
+		delete ge;
 		
-		node *n;
-		
-		n = new node("S");
-		n->SetLabelL(kHeuristic, 0);
-		g->AddNode(n);
-		n->SetLabelF(GraphSearchConstants::kXCoordinate, 0);
-		n->SetLabelF(GraphSearchConstants::kYCoordinate, -0.9);
-		n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
-
-		n = new node("M");
-		n->SetLabelL(kHeuristic, 0);
-		g->AddNode(n);
-		n->SetLabelF(GraphSearchConstants::kXCoordinate, 0);
-		n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.33333);
-		n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
-
-		char nodeName[2] = {'a', 0};
-		for (int x = 0; x < numExampleNodes; x++)
-		{
-			n = new node(nodeName);
-			nodeName[0]++;
-			n->SetLabelL(kHeuristic, numExampleNodes+x);
-
-			n->SetLabelF(GraphSearchConstants::kXCoordinate, -0.8+1.6*(double(x)/(numExampleNodes-1.0)));
-			n->SetLabelF(GraphSearchConstants::kYCoordinate, -0.3333);
-			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
-
-			g->AddNode(n);
-			g->AddEdge(new edge(0, n->GetNum(), 1));
-			g->AddEdge(new edge(n->GetNum(), 1, numExampleNodes-x));
-		}
-
-		nodeName[0] = '1';
-		unsigned int last = 1;
-		for (int x = 0; x < numExampleNodes; x++)
-		{
-			n = new node(nodeName);
-			nodeName[0]++;
-			n->SetLabelL(kHeuristic, 0);
-			g->AddNode(n);
-			if (x == numExampleNodes-1)
-				g->AddEdge(new edge(last, n->GetNum(), numExampleNodes-1));
-			else
-				g->AddEdge(new edge(last, n->GetNum(), 1));
-			last = n->GetNum();
-			
-			n->SetLabelF(GraphSearchConstants::kXCoordinate, -0.8+1.6*(double(x)/(numExampleNodes-1.0)));
-			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.9);
-			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
-		}
+		g = GraphInconsistencyExamples::GetPolyGraph(numExampleNodes);
+		ge = new GraphEnvironment(g);
+		ge->SetDirected(true);
+		ge->SetDrawEdgeCosts(true);
+		ge->SetDrawNodeLabels(true);
+		ge->SetIntegerEdgeCosts(true);
+	
+		from = 0;
+		to = g->GetNumNodes()-1;
+		weight = 1.0;
+		astar.SetWeight(weight);
+		astar.SetUseBPMX(BPMX?1:0);
+		astar.InitializeSearch(ge, from, to, path);
+		ShowSearchInfo();
+		running = true;
+		paused = true;
+		path.clear();
 	}
 	if (key == 'b' || key == 'c')
 	{
-		MyDisplayHandler(windowID, kNoModifier, '|'); // clear current graph
-
-		char nodeName[2] = {'a', 0};
-		nodeName[0]+=numExampleNodes-1;
-		for (int x = 0; x <= numExampleNodes; x++)
-		{
-			node *n;
-			if (x == 0)
-			{
-				g->AddNode(n = new node("G"));
-			}
-			else {
-				g->AddNode(n = new node(nodeName));
-				nodeName[0]--;
-			}
-			if (x == 0 || x == 1)
-			{
-				n->SetLabelL(kHeuristic, 0);
-			}
-			else {
-				n->SetLabelL(kHeuristic, (1<<(x-1)) + 2*x - 3);
-			}
-
-			double val = 1.5*PI*x/(numExampleNodes+1.0)-PI/4;
-			n->SetLabelF(GraphSearchConstants::kXCoordinate, 0.8*sin(val));
-			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.8*cos(val));
-			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
-		}
-
-		g->AddEdge(new edge(1,0,(1<<(numExampleNodes-1)) + numExampleNodes - 2));
-		for (int x = 1; x <= numExampleNodes; x++)
-		{
-			for (int y = x+1; y <= numExampleNodes; y++)
-			{
-				g->AddEdge(new edge(y, x, (1<<(y-2)) + y - (1<<(x-1)) - x));
-			}
-		}
-	}
-	if (key == 'c')
-	{
-		g->GetNode(numExampleNodes)->SetLabelL(kHeuristic, 0);
+		graphType = key;
+		delete g;
+		delete ge;
+		
+		if (key == 'b')
+			g = GraphInconsistencyExamples::GetExpoGraphA(numExampleNodes);
+		else
+			g = GraphInconsistencyExamples::GetExpoGraphB(numExampleNodes);
+		ge = new GraphEnvironment(g);
+		ge->SetDirected(true);
+		ge->SetDrawEdgeCosts(true);
+		ge->SetDrawNodeLabels(true);
+		ge->SetIntegerEdgeCosts(true);
+		to = 0;
+		from = g->GetNumNodes()-1;
+		weight = 1.0;
+		astar.SetWeight(weight);
+		astar.SetUseBPMX(BPMX?1:0);
+		astar.InitializeSearch(ge, from, to, path);
+		ShowSearchInfo();
+		running = true;
+		paused = true;
+		path.clear();
 	}
 }
 #include <iomanip>
@@ -506,6 +476,7 @@ void ShowSearchInfo()
 	s +=" to ";
 	s += g->GetNode(astar.goal)->GetName();
 	s += " <-----";
+	//printf("Start: %d, goal %d. total (%d)\n", astar.start, astar.goal, g->GetNumNodes());
 	if (BPMX)
 		s += " BPMX";
 	te.AddLine(s.c_str());

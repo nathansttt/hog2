@@ -68,7 +68,7 @@ void ModNodesDeltaCompressionTest(bool weighted);
 void DivNodesCompressionTest(bool weighted);
 void DivNodesDeltaCompressionTest(bool weighted);
 
-MNPuzzle<4, 4> *ts = 0;
+MNPuzzle<4, 4> *mnp = 0;
 
 bool recording = false;
 
@@ -120,12 +120,12 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
 
-		ts = new MNPuzzle<4, 4>;
+		mnp = new MNPuzzle<4, 4>;
 		if (0)
 		{
 			IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
 			s = STP::GetKorfInstance(1);
-			ida.GetPath(ts, s, t, moves);
+			ida.GetPath(mnp, s, t, moves);
 			v = 5;
 			std::cout << s << std::endl;
 			for (int x = 0; x < moves.size(); x++)
@@ -138,14 +138,59 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		}
 
 		{
-			std::vector<int> pattern = {1, 2, 3, 4, 5, 6, 7, 0};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
+			//std::vector<int> pattern = {1, 2, 3, 4, 5, 6, 7, 8, 0};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
+			//std::vector<int> pattern = {1, 2, 3, 4, 5, 6, 7, 0};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
+
+			// Build & compress 8-15 Additive PDB
+			if (0)
+			{
+				std::vector<int> pattern = {8, 9, 10, 11, 12, 13, 14, 15, 0};
+				t.Reset();
+				mnp->SetPattern(pattern);
+				mnp->StoreGoal(t);
+				LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(mnp, t, pattern);
+				pdb2.BuildAdditivePDB(t, std::thread::hardware_concurrency());
+				printf("Starting Delta Compress\n");
+				pdb2.DeltaCompress(mnp, t, true);
+				printf("Starting DIV Compress\n");
+				pdb2.DivCompress(17-pattern.size(), true);
+				printf("PDB After DIV:\n");
+				for (int x = 0; x < 20; x++)
+				{
+					pdb2.GetStateFromPDBHash(x, t);
+					std::cout << t << " - " << pdb2.HCost(t, t);
+					std::cout << "\n";
+					//pdb2.Heuristic<MNPuzzleState<4, 4> >::HCost(t, t);
+				}
+				pdb2.Save("/Users/nathanst/");
+			}
 			
-			t.Reset();
-			ts->SetPattern(pattern);
-			LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(ts, t, pattern);
-			//pdb2.BuildPDB(t, std::thread::hardware_concurrency());
-			pdb2.BuildAdditivePDB(t, std::thread::hardware_concurrency());
-			pdb2.DivCompress(17-pattern.size(), true);
+			// Build & compress 8-15 Additive PDB
+			for (int x = 1; x < 4; x++)
+			{
+				std::vector<std::vector<int>> patterns = {{2, 3, 4, 7, 8, 9, 0}, {1, 5, 6, 10, 11, 12, 0}, {13, 14, 18, 19, 23, 24, 0}, {15, 16, 17, 20, 21, 22, 0}};
+
+				std::vector<int> pattern = patterns[x];
+				MNPuzzle<5, 5> mnp55;
+				MNPuzzleState<5, 5> t;
+				t.Reset();
+				mnp55.SetPattern(pattern);
+				mnp55.StoreGoal(t);
+				LexPermutationPDB<MNPuzzleState<5, 5>, slideDir, MNPuzzle<5, 5>> pdb(&mnp55, t, pattern);
+				pdb.BuildAdditivePDB(t, std::thread::hardware_concurrency());
+				printf("Starting Delta Compress\n");
+				pdb.DeltaCompress(&mnp55, t, true);
+				printf("Starting DIV Compress\n");
+				pdb.DivCompress(26-pattern.size(), true);
+				for (int x = 0; x < 20; x++)
+				{
+					pdb.GetStateFromPDBHash(x, t);
+					std::cout << t << " - " << pdb.HCost(t, t);
+					std::cout << "\n";
+				}
+				pdb.Save("/Users/nathanst/");
+			}
+
 			exit(0);
 		}
 	}
@@ -154,13 +199,13 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	//ts->OpenGLDraw(s);
+	//mnp->OpenGLDraw(s);
 
 	v += 0.1;
 	if (v > 1 && moves.size() > 0)
 	{
 		t = s;
-		ts->ApplyAction(s, moves[0]);
+		mnp->ApplyAction(s, moves[0]);
 		v = 0;
 		moves.erase(moves.begin());
 	}
@@ -169,7 +214,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		v = 1;
 		recording = false;
 	}
-	ts->OpenGLDraw(s, t, v);
+	mnp->OpenGLDraw(s, t, v);
 
 	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
@@ -202,10 +247,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	{
 		case 't': BaselineTest(); break;
 		case 'r': recording = !recording; break;
-		case '0': ts->ApplyAction(s, kUp); break;
-		case '1': ts->ApplyAction(s, kDown); break;
-		case '2': ts->ApplyAction(s, kLeft); break;
-		case '3': ts->ApplyAction(s, kRight); break;
+		case '0': mnp->ApplyAction(s, kUp); break;
+		case '1': mnp->ApplyAction(s, kDown); break;
+		case '2': mnp->ApplyAction(s, kLeft); break;
+		case '3': mnp->ApplyAction(s, kRight); break;
 		case '4':
 		case '5':
 		case '6':
@@ -227,19 +272,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			if (0)
 			{
 				t.Reset();
-				MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(ts, t, pattern);
-				MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(ts, t, pattern);
+				MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(mnp, t, pattern);
+				MR1PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(mnp, t, pattern);
 				pdb.BuildPDB(t, std::thread::hardware_concurrency());
 				pdb.PrintHistogram();
 				pdb.DivCompress(5, true);
 			}
 			{
 				t.Reset();
-				LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(ts, t, pattern);
+				LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb(mnp, t, pattern);
 				pdb.BuildPDB(t, std::thread::hardware_concurrency());
 				t.Reset();
-				ts->StoreGoal(t);
-				pdb.DeltaCompress(ts, t, true);
+				mnp->StoreGoal(t);
+				pdb.DeltaCompress(mnp, t, true);
 //				pdb.DivCompress(10, true);
 //
 //				PermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle> pdb2(ts, t, pattern);
@@ -250,7 +295,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'o':
 		{
-			if (!ts) break;
+			if (!mnp) break;
 			if (mod == kShiftDown)
 			{
 				IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
@@ -261,13 +306,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				for (unsigned int x = 0; x < 500; x++)
 				{
 					std::vector<slideDir> acts;
-					ts->GetActions(s, acts);
-					ts->ApplyAction(s, acts[random()%acts.size()]);
+					mnp->GetActions(s, acts);
+					mnp->ApplyAction(s, acts[random()%acts.size()]);
 				}
 				std::cout << "Searching from: " << std::endl << s << std::endl << g << std::endl;
 				Timer t;
 				t.StartTimer();
-				ida.GetPath(ts, s, g, path1);
+				ida.GetPath(mnp, s, g, path1);
 				t.EndTimer();
 				std::cout << "Path found, length " << path1.size() << " time:" << t.GetElapsedTime() << std::endl;
 			}

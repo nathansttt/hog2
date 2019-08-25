@@ -70,7 +70,7 @@ enum tTerrain {
 };
 
 inline bool CanPass(long a, long b)
-{ return (((a&b)&0xF0) != 0); }
+{ return ((a&0xF0) == (b&0xF0)); }
 
 // ground split types
 enum tSplit {

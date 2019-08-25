@@ -27,31 +27,43 @@
 
 #include "Common.h"
 #include "PuzzleSample.h"
-#include "UnitSimulation.h"
-#include "EpisodicSimulation.h"
-#include "Plot2D.h"
-#include "RandomUnit.h"
-#include "MNPuzzle.h"
-#include "FlipSide.h"
-#include "IDAStar.h"
 #include "Timer.h"
-#include "RubiksCubeEdges.h"
-#include "RubiksCubeCorners.h"
-#include "IncrementalDFID.h"
-#include "IncrementalBFS.h"
-#include "STPInstances.h"
+#include "TemplateAStar.h"
+#include "StephenPuzzle.h"
+#include "Map2DEnvironment.h"
+#include "ScreenTransition.h"
+int which = 0;
+StephenPuzzle::StephenPuzzle *puzzle;
+StephenPuzzle::puzzleState s;
+Map *editor;
+MapEnvironment *me;
+LineTransition line(20, 10);
+FallingBoxTransition box(20);
+ScreenTransition *trans;
+//struct firework {
+//	int count;
+//	std::vector<Graphics::point> points;
+//	rgbColor color;
+//};
 
-MNPuzzle<4, 4> *mnp = 0;
+enum gameState {
+	kSolving,
+	kFadeOut,
+	kFadeIn,
+	kFinished
+};
 
-bool recording = false;
-bool running = false;
+gameState currState = kSolving;
 
-int drawMode = 0; // bit 0 [dfs] bit 1 [dfid] bit 2 [bfs]
+bool fireworks = false;
+float firetime = 2;
+Graphics::point p;
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1440, 1080);
+	return 0;
 }
 
 /**
@@ -60,20 +72,31 @@ int main(int argc, char* argv[])
 void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
-	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
-	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
-	
+	InstallKeyboardHandler(MyDisplayHandler, "Up", "", kAnyModifier, 'w');
+	InstallKeyboardHandler(MyDisplayHandler, "Down", "", kAnyModifier, 's');
+	InstallKeyboardHandler(MyDisplayHandler, "Left", "", kNoModifier, 'a');
+	InstallKeyboardHandler(MyDisplayHandler, "Right", "", kAnyModifier, 'd');
+	InstallKeyboardHandler(MyDisplayHandler, "Pick Up", "", kAnyModifier, ' ');
+
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
+}
+
+void LoadMap()
+{
+	if (which == 11)
+	{
+		fireworks = true;
+		return;
+	}
+	std::string mapName ="/Users/nathanst/hog2/maps/local/level"+std::to_string(which)+".map";
+	Map *m = new Map(mapName.c_str());
+	s = puzzle->LoadPuzzle(m);
+	delete m;
+	which++;
 }
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
@@ -87,76 +110,74 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 	{
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
-		SetNumPorts(windowID, 1);
-		if (mnp == 0)
-			mnp = new MNPuzzle<4, 4>;
+
+//		ReinitViewports(windowID, {-1, -1, 0.5f, 1}, kScaleToSquare);
+//		AddViewport(windowID, {0.5f, -1, 1, 1}, kScaleToFill);
+
+		puzzle = new StephenPuzzle::StephenPuzzle();
+		LoadMap();
+		editor = new Map(1,5);
+		editor->SetTerrainType(0, 0, kOutOfBounds);
+		editor->SetTerrainType(0, 1, kGround);
+		editor->SetTerrainType(0, 2, kTrees);
+		editor->SetTerrainType(0, 3, kSwamp);
+		editor->SetTerrainType(0, 4, kGrass);
+		me = new MapEnvironment(editor);
 	}
 }
 
-#include "NaryTree.h"
-
-
-MNPuzzleState<4, 4> s, t;
-std::vector<slideDir> moves;
-double v = 1;
-slideDir lastMove = kUp;
-//NaryTree tree(2, 9);
-//NaryTree tree(4, 5);
-NaryTree tree(3, 5);
-IncrementalDFID<NaryState, NaryAction> dfid(0);
-IncrementalDFID<NaryState, NaryAction> dfs(10);
-IncrementalBFS<NaryState, NaryAction> bfs;
-std::vector<NaryState> path;
-
-NaryState goal = 0;
-
-int frameCnt = 0;
-
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
-	if (running)
-	{
-		MyDisplayHandler(windowID, kNoModifier, 'o');
-	}
-	tree.SetWidthScale(double(GetContext(windowID)->globalCamera.viewWidth)/GetContext(windowID)->globalCamera.viewHeight);
-	tree.OpenGLDraw();
-	tree.SetColor(0.0, 1.0, 1.0);
-	tree.OpenGLDraw(goal);
+	auto &d = GetContext(windowID)->display;
+	d.FillSquare({0,0}, 2, Colors::gray);
 	
-	tree.SetColor(1, 0, 0);
-	if (drawMode&0x1)
-		dfid.OpenGLDraw();
-	tree.SetColor(0, 1, 0);
-	if (drawMode&0x2)
-		dfs.OpenGLDraw();
-	tree.SetColor(0.75, 0, 0.5);
-	if (drawMode&0x4)
-		bfs.OpenGLDraw();
-
-//	return;
-//	v += 0.1;
-//	if (v > 1)
-//	{
-//		s = t;
-//		mnp->GetActions(t, moves);
-//		slideDir tmp = kUp;
-//		do {
-//			tmp = moves[random()%moves.size()];
-//		} while (tmp == lastMove);
-//		mnp->ApplyAction(t, tmp);
-//		lastMove = tmp;
-//		mnp->InvertAction(lastMove);
-//		v = 0;
-//	}
-//	mnp->OpenGLDraw(t, s, v);
-
-	if (recording && viewport == GetNumPorts(windowID)-1)
+	if (viewport == 0)
 	{
-		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/dfid-%d-%d%d%d%d", tree.GetBranchingFactor(), (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-		SaveScreenshot(windowID, fname);
-		printf("Saved %s\n", fname);
-		frameCnt++;
+		puzzle->Draw(d);
+		puzzle->Draw(d, s);
+		std::string tmp = "Level "+std::to_string(which-1);
+		d.DrawText(tmp.c_str(), {-0.0f, -0.8f}, Colors::white, 0.1, Graphics::textAlignCenter);
+		
+		if (fireworks && firetime > 1)
+		{
+			firetime = 0;
+			p.x = ((random()%100)-50)/50.0f;
+			p.y = ((random()%100)-50)/50.0f;
+		}
+		if (fireworks)
+		{
+			for (float t = 0; t < TWOPI; t += PI/5.0f)
+			{
+				float x = sin(t);
+				float y = cos(t)+firetime*firetime;
+				d.DrawLine({p.x+x*firetime, p.y+y*firetime}, {p.x+x*1.4f*firetime, p.y+y*1.4f*firetime}, 1.0, Colors::white);
+			}
+			firetime += 0.03;
+		}
+	}
+	if (viewport == 1)
+	{
+		me->Draw(d);
+	}
+
+	if (currState == kFadeOut)
+	{
+		if (trans->Step(0.03))
+		{
+			LoadMap();
+			currState = kFadeIn;
+			trans = (random()%2)?((ScreenTransition*)&line):((ScreenTransition*)&box);
+			trans->Reset(1);
+		}
+		trans->Draw(d);
+	}
+	else if (currState == kFadeIn)
+	{
+		if (trans->Step(-0.03))
+		{
+			currState = kSolving;
+		}
+		trans->Draw(d);
 	}
 	return;
 	
@@ -174,160 +195,78 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case '{':
+		case 'w':
 		{
-			goal = tree.GetParent(goal);
-			break;
-		}
-		case ']':
-		{
-			drawMode = (drawMode+2)&0x7;
-		}
-		case '[':
-		{
-			drawMode = (drawMode+7)&0x7;
-		}
-			break;
-		case 'r':
-			recording = !recording; running = true;
-			break;
-		case '0':
-		{
-		}
-			break;
-		case '1':
-		{
-		}
-			break;
-		case '2':
-		{
-			frameCnt = 0;
-			tree = NaryTree(2, 8);
-			goal = tree.GetLastNode();
-			dfid.Reset();
-			dfs.Reset();
-			bfs.Reset();
-			break;
-		}
-		case '3':
-		{
-			frameCnt = 0;
-			tree = NaryTree(3, 5);
-			goal = tree.GetLastNode();
-			dfid.Reset();
-			dfs.Reset();
-			bfs.Reset();
-			break;
-		}
-		case '4':
-		{
-			frameCnt = 0;
-			tree = NaryTree(4, 4);
-			goal = tree.GetLastNode();
-			dfid.Reset();
-			dfs.Reset();
-			bfs.Reset();
-			break;
-		}
-		case '5':
-		{
-			frameCnt = 0;
-			tree = NaryTree(5, 4);
-			goal = tree.GetLastNode();
-			dfid.Reset();
-			dfs.Reset();
-			bfs.Reset();
-			break;
-		}
-		case '6':
-		{
-			frameCnt = 0;
-			tree = NaryTree(6, 3);
-			goal = tree.GetLastNode();
-			dfid.Reset();
-			dfs.Reset();
-			bfs.Reset();
-			break;
-		}
-		case '7':
-		{
-			frameCnt = 0;
-			tree = NaryTree(7, 3);
-			goal = tree.GetLastNode();
-			dfid.Reset();
-			dfs.Reset();
-			bfs.Reset();
-			break;
-		}
-		case '8':
-		{
-			frameCnt = 0;
-			tree = NaryTree(8, 3);
-			goal = tree.GetLastNode();
-			dfid.Reset();
-			dfs.Reset();
-			bfs.Reset();
-			break;
-		}
-		case '9':
-		{
-			frameCnt = 0;
-			tree = NaryTree(9, 3);
-			goal = tree.GetLastNode();
-			dfid.Reset();
-			dfs.Reset();
-			bfs.Reset();
-			break;
-		}
-			break;
-		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
+			if (currState != kSolving) break;
+			puzzle->ApplyAction(s, StephenPuzzle::kN);
+			if (puzzle->GoalTest(s))
 			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+				currState = kFadeOut;
+				trans = (random()%2)?((ScreenTransition*)&line):((ScreenTransition*)&box);
+				trans->Reset(0);
 			}
 			break;
-		case 'p':
-			running = !running;
-			break;
-		case 'o':
-		{
-			if (drawMode&0x1)
-				dfid.DoSingleSearchStep(&tree, 0, goal, path);
-			if (drawMode&0x2)
-				dfs.DoSingleSearchStep(&tree, 0, goal, path);
-			if (drawMode&0x4)
-				bfs.DoSingleSearchStep(&tree, 0, goal, path);
 		}
+		case 's':
+		{
+			if (currState != kSolving) break;
+			puzzle->ApplyAction(s, StephenPuzzle::kS);
+			if (puzzle->GoalTest(s))
+			{
+				currState = kFadeOut;
+				trans = (random()%2)?((ScreenTransition*)&line):((ScreenTransition*)&box);
+				trans->Reset(0);
+			}
 			break;
+		}
+		case 'a':
+		{
+			if (currState != kSolving) break;
+			puzzle->ApplyAction(s, StephenPuzzle::kW);
+			if (puzzle->GoalTest(s))
+			{
+				currState = kFadeOut;
+				trans = (random()%2)?((ScreenTransition*)&line):((ScreenTransition*)&box);
+				trans->Reset(0);
+			}
+			break;
+		}
+		case 'd':
+		{
+			if (currState != kSolving) break;
+			puzzle->ApplyAction(s, StephenPuzzle::kE);
+			if (puzzle->GoalTest(s))
+			{
+				currState = kFadeOut;
+				trans = (random()%2)?((ScreenTransition*)&line):((ScreenTransition*)&box);
+				trans->Reset(0);
+			}
+			break;
+		}
+		case ' ':
+		{
+			if (currState != kSolving) break;
+			if (s.carry)
+				puzzle->ApplyAction(s, StephenPuzzle::kDrop);
+			else
+				puzzle->ApplyAction(s, StephenPuzzle::kPickUp);
+			break;
+		}
+		case 'r':
+			currState = kSolving;
+			which = 0;
+			fireworks = false;
+			LoadMap();
+			break;
+
 		default:
 			break;
 	}
 	
-	{
-		char txt[] = "[bf 0]  ";
-		txt[4] += tree.GetBranchingFactor();
-		submitTextToBuffer(txt);
-		switch(drawMode)
-		{
-			case 0: appendTextToBuffer("none"); break;
-			case 1: appendTextToBuffer("DFID"); break;
-			case 2: appendTextToBuffer("DFS"); break;
-			case 3: appendTextToBuffer("DFID+DFS"); break;
-			case 4: appendTextToBuffer("BFS"); break;
-			case 5: appendTextToBuffer("BFS+DFID"); break;
-			case 6: appendTextToBuffer("BFS+DFS"); break;
-			case 7: appendTextToBuffer("all"); break;
-		}
-	}
-
 }
 
 
-bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
+bool MyClickHandler(unsigned long windowID, int viewport, int x, int y, point3d loc, tButtonType, tMouseEventType)
 {
 	return false;
 }
-
-

@@ -29,7 +29,7 @@ namespace Graphics {
 		:x(x), y(y), z(z) {}
 		float x, y, z;
 
-		bool operator==(const point &p)
+		bool operator==(const point &p) const
 		{ return fequal(p.x, x) && fequal(p.y, y) && fequal(p.z, z); }
 
 		point &operator*=(float i)
@@ -105,6 +105,8 @@ namespace Graphics {
 		int GetNumViewports() { return numViewports; }
 		void FrameRect(rect r, rgbColor c, float lineWidth);
 		void FillRect(rect r, rgbColor c);
+		void FrameSquare(point p, float radius, rgbColor c, float lineWidth);
+		void FillSquare(point p, float radius, rgbColor c);
 		void FrameCircle(rect r, rgbColor c, float lineWidth); // FIXME: Should be a point and a radius!
 		void FrameCircle(point r, float radius, rgbColor c, float lineWidth); // FIXME: Should be a point and a radius!
 		void FillCircle(rect r, rgbColor c);

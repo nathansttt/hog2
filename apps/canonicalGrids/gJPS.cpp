@@ -23,7 +23,7 @@ bool gJPS::InitializeSearch(MapEnvironment *env, const xyLoc& from, const xyLoc&
 	xyLocParent f;
 	f.loc = from;
 	f.parent = 0xFF;
-	openClosedList.AddOpenNode(f, env->GetStateHash(from), 0, 0);
+	openClosedList.AddOpenNode(f, env->GetStateHash(from), 0.0, 0.0, 0.0);
 	if (from == to)
 		return false;
 	return true;
@@ -58,6 +58,7 @@ bool gJPS::DoSingleSearchStep(std::vector<xyLoc> &thePath)
 					{
 						openClosedList.Lookup(theID).parentID = next;
 						openClosedList.Lookup(theID).g = openClosedList.Lookup(next).g+s.cost;
+						openClosedList.Lookup(theID).f = openClosedList.Lookup(next).g+s.cost;
 						openClosedList.Reopen(theID);
 						//std::cout << "Reopening " << openClosedList.Lookup(theID).data.loc << "\n";
 						// This line isn't normally needed, but in some state spaces we might have
@@ -74,6 +75,7 @@ bool gJPS::DoSingleSearchStep(std::vector<xyLoc> &thePath)
 					openClosedList.AddOpenNode(s.s,
 											   hash,
 											   openClosedList.Lookup(next).g+s.cost,
+											   openClosedList.Lookup(next).g+s.cost,
 											   0,
 											   next);
 					break;
@@ -85,6 +87,7 @@ bool gJPS::DoSingleSearchStep(std::vector<xyLoc> &thePath)
 //						printf("(%d, %d) updated on open\n", s.s.loc.x,  s.s.loc.y);
 						openClosedList.Lookup(theID).parentID = next;
 						openClosedList.Lookup(theID).g = openClosedList.Lookup(next).g+s.cost;
+						openClosedList.Lookup(theID).f = openClosedList.Lookup(next).g+s.cost;
 						openClosedList.Lookup(theID).data.parent = s.s.parent;
 						openClosedList.KeyChanged(theID);
 					}
@@ -138,7 +141,7 @@ void gJPS::GetJPSSuccessors(int x, int y, uint8_t parent, double cost, uint64_t 
 		if (l == kNotFound) // add to closed
 		{
 //			printf("Setting (%d, %d) to g:%f\n", x, y, pg+cost);
-			openClosedList.AddClosedNode(s, hash, pg+cost, 0, pid);
+			openClosedList.AddClosedNode(s, hash, pg+cost, pg+cost, 0, pid);
 //			printf("Value set to: %f\n", GetClosedGCost(s.loc));
 		}
 		else if (fless(pg+cost, openClosedList.Lookat(theID).g)) // update on closed

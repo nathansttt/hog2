@@ -132,6 +132,7 @@ static bool operator==(const TOHMove &m1, const TOHMove &m2) {
 template <int disks>
 class TOH : public SearchEnvironment<TOHState<disks>, TOHMove> {
 public:
+	TOH() :pruneActions(false) {}
 	~TOH() {}
 	void GetSuccessors(const TOHState<disks> &nodeID, std::vector<TOHState<disks>> &neighbors) const;
 	void GetActions(const TOHState<disks> &nodeID, std::vector<TOHMove> &actions) const;
@@ -146,6 +147,7 @@ public:
 
 	uint64_t GetStateHash(const TOHState<disks> &node) const;
 	void GetStateFromHash(uint64_t parent, TOHState<disks> &s) const;
+	uint64_t GetMaxHash() const { return (1ull)<<(disks*2ull); }
 	uint64_t GetNumStates(TOHState<disks> &s) const;
 	uint64_t GetActionHash(TOHMove act) const;
 
@@ -155,6 +157,8 @@ public:
 	/** Draw the transition at some percentage 0...1 between two TOHState<disks>s */
 	void OpenGLDraw(const TOHState<disks>&, const TOHState<disks>&, float) const;
 	void OpenGLDraw(const TOHState<disks>&, const TOHMove&) const;
+
+	bool pruneActions;
 protected:
 private:
 	// caches
@@ -180,6 +184,20 @@ void TOH<disks>::GetSuccessors(const TOHState<disks> &nodeID, std::vector<TOHSta
 template <int disks>
 void TOH<disks>::GetActions(const TOHState<disks> &s, std::vector<TOHMove> &actions) const
 {
+	bool goalOrdered = false;
+	if (pruneActions)
+	{
+		goalOrdered = true;
+		for (int x = 0; x < s.GetDiskCountOnPeg(3); x++)
+		{
+			if (s.GetDiskOnPeg(3, x) != disks-x)
+			{
+				goalOrdered = false;
+				break;
+			}
+		}
+	}
+	
 	actions.resize(0);
 	if (s.GetSmallestDiskOnPeg(0) < s.GetSmallestDiskOnPeg(1))
 	{
@@ -199,13 +217,14 @@ void TOH<disks>::GetActions(const TOHState<disks> &s, std::vector<TOHMove> &acti
 		if (s.GetDiskCountOnPeg(2) > 0)
 			actions.push_back(TOHMove(2, 0));
 	}
+	
 	if (s.GetSmallestDiskOnPeg(0) < s.GetSmallestDiskOnPeg(3))
 	{
 		if (s.GetDiskCountOnPeg(0) > 0)
 			actions.push_back(TOHMove(0, 3));
 	}
 	else {
-		if (s.GetDiskCountOnPeg(3) > 0)
+		if (s.GetDiskCountOnPeg(3) > 0 && !goalOrdered)
 			actions.push_back(TOHMove(3, 0));
 	}
 	if (s.GetSmallestDiskOnPeg(1) < s.GetSmallestDiskOnPeg(2))
@@ -223,7 +242,7 @@ void TOH<disks>::GetActions(const TOHState<disks> &s, std::vector<TOHMove> &acti
 			actions.push_back(TOHMove(1, 3));
 	}
 	else {
-		if (s.GetDiskCountOnPeg(3) > 0)
+		if (s.GetDiskCountOnPeg(3) > 0 && !goalOrdered)
 			actions.push_back(TOHMove(3, 1));
 	}
 	if (s.GetSmallestDiskOnPeg(2) < s.GetSmallestDiskOnPeg(3))
@@ -232,7 +251,7 @@ void TOH<disks>::GetActions(const TOHState<disks> &s, std::vector<TOHMove> &acti
 			actions.push_back(TOHMove(2, 3));
 	}
 	else {
-		if (s.GetDiskCountOnPeg(3) > 0)
+		if (s.GetDiskCountOnPeg(3) > 0 && !goalOrdered)
 			actions.push_back(TOHMove(3, 2));
 	}
 }

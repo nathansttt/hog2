@@ -47,6 +47,7 @@ std::string map;
 void Maze3D(int d);
 void CustomMaze();
 void BuildBenchmarks(const char *map);
+void SolveBenchmarks(const char *map, const char *bench);
 void ExtractComponents(const char *map);
 
 //struct voxelWorld {
@@ -114,6 +115,8 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-capture", "-capture", "Capture animation");
 	InstallCommandLineHandler(MyCLHandler, "-hcost", "-hcost x1 y1 z1 x2 y2 z2", "Compute heuristic between points");
 	InstallCommandLineHandler(MyCLHandler, "-benchmark", "-benchmark <map>", "Build benchmark problems for map");
+	InstallCommandLineHandler(MyCLHandler, "-solve", "-solve <map> <benchmark>", "Build benchmark problems for map");
+
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg", "capture model as svg (filename(s) will come from -map argument)");
 	InstallCommandLineHandler(MyCLHandler, "-bmp", "-bmp", "capture model as bmp (filename(s) will come from -map argument)");
 	InstallCommandLineHandler(MyCLHandler, "-extractComponents", "-extractComponents <map>", "extract connected components in map");
@@ -286,6 +289,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		BuildBenchmarks(argument[1]);
 		return 2;
 	}
+	if (strcmp(argument[0], "-solve") == 0 && maxNumArgs >= 3)
+	{
+		SolveBenchmarks(argument[1], argument[2]);
+		return 3;
+	}
 	if (strcmp(argument[0], "-extractComponents") == 0 && maxNumArgs >= 2)
 	{
 		ExtractComponents(argument[1]);
@@ -385,6 +393,53 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType button, tMouseEventType mType)
 {
 	return false;
+}
+
+void SolveBenchmarks(const char *map, const char *bench)
+{
+	printf("Solving benchmarks for '%s'\n", map);
+	VoxelGrid v(map);
+	FILE *f = fopen(bench, "r");
+	if (f == 0)
+	{
+		printf("Aborting: cannot open file '%s'\n", bench);
+		exit(0);
+	}
+	TemplateAStar<voxelGridState, voxelGridAction, VoxelGrid> astar;
+	NBS<voxelGridState, voxelGridAction, VoxelGrid> nbs;
+	voxelGridState s, g;
+	char mapname[255];
+	fscanf(f, "version 1\n%s\n", mapname);
+	Timer t;
+//	t.StartTimer();
+	int cnt = 0;
+	while (f != 0)
+	{
+		cnt++;
+		if (cnt == 1000) break;
+		double t1, t2;
+		int cnt = fscanf(f, "%hd %hd %hd %hd %hd %hd %lf %lf\n", &s.x, &s.y, &s.z, &g.x, &g.y, &g.z, &t1, &t2);
+		if (cnt != 8) exit(0);
+		t.StartTimer();
+		astar.GetPath(&v, s, g, path);
+		t.EndTimer();
+		printf("Forward A* Path length %1.8lf [vs %1.8lf] %1.2fs %llu exp %llu gen\n", v.GetPathLength(path), t1, t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched());
+		t.StartTimer();
+		astar.GetPath(&v, g, s, path);
+		t.EndTimer();
+		printf("Backward A* Path length %1.8lf [vs %1.8lf] %1.2fs %llu exp %llu gen\n", v.GetPathLength(path), t1, t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched());
+		t.StartTimer();
+		nbs.GetPath(&v, s, g, &v, &v, path);
+		t.EndTimer();
+//		for (auto i : path)
+//			std::cout << i << " ";
+		printf("NBS Path length %1.8lf [vs %1.8lf] %1.2fs %llu exp %llu gen\n\n", v.GetPathLength(path), t1, t.GetElapsedTime(), nbs.GetNodesExpanded(), nbs.GetNodesTouched());
+	}
+//	t.EndTimer();
+	//printf("NBS:%1.2f ", t.GetElapsedTime());
+	//printf("A:%1.2f ", t.GetElapsedTime());
+	fclose(f);
+	exit(0);
 }
 
 void BuildBenchmarks(const char *map)

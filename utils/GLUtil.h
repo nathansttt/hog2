@@ -27,6 +27,9 @@
 
 #include "FPUtil.h"
 #include <ostream>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 
 #ifdef __APPLE__
 #include "TargetConditionals.h"
@@ -187,6 +190,15 @@ void OutlineRect(GLdouble left, GLdouble top, GLdouble right, GLdouble bottom, d
 void DrawText(double x, double y, double z, double scale, const char *res);
 void DrawTextCentered(double x, double y, double z, double scale, const char *res);
 
+// Code from: https://stackoverflow.com/questions/16605967/set-precision-of-stdto-string-when-converting-floating-point-values/16606128#16606128
+template <typename T>
+std::string to_string_with_precision(const T a_value, const int n = 6)
+{
+	std::ostringstream out;
+	out.precision(n);
+	out << std::fixed << a_value;
+	return out.str();
+}
 
 
 

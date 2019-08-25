@@ -17,7 +17,7 @@ REL_OBJDIR = $(ROOT)/objs_html/$(NAME)/release
 DBG_BINDIR = $(ROOT)/html/debug
 REL_BINDIR = $(ROOT)/html/release
 
-PROJ_CXXFLAGS = -I$(ROOT)/absmapalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/guihtml -I$(ROOT)/gui -I$(ROOT)/simulation -I$(ROOT)/environments -I$(ROOT)/mapalgorithms -I$(ROOT)/algorithms -I$(ROOT)/generic -I$(ROOT)/utils -I$(ROOT)/graph -I$(ROOT)/search 
+PROJ_CXXFLAGS = -I$(ROOT)/absmapalgorithms -I$(ROOT)/graphalgorithms -I$(ROOT)/guihtml -I$(ROOT)/gui -I$(ROOT)/simulation -I$(ROOT)/environments -I$(ROOT)/mapalgorithms -I$(ROOT)/algorithms -I$(ROOT)/generic -I$(ROOT)/utils -I$(ROOT)/graph -I$(ROOT)/search -I$(ROOT)/envutil
 
 PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
@@ -25,8 +25,8 @@ PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
 PROJ_REL_LNFLAGS = -L$(REL_BINDIR)
 
-PROJ_DBG_LIB = -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgraph -lutils -lguihtml -lgui -lSTUB
-PROJ_REL_LIB = -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgraph -lutils -lguihtml -lgui -lSTUB
+PROJ_DBG_LIB = -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgraph -lutils -lguihtml -lgui -lSTUB -lenvutil
+PROJ_REL_LIB = -lenvironments -lmapalgorithms -lalgorithms -lgraphalgorithms -lgraph -lutils -lguihtml -lgui -lSTUB -lenvutil
 
 PROJ_DBG_DEP = \
   $(DBG_BINDIR)/libutils.a \
@@ -37,6 +37,7 @@ PROJ_DBG_DEP = \
   $(DBG_BINDIR)/libalgorithms.a \
   $(DBG_BINDIR)/libguihtml.a \
   $(DBG_BINDIR)/libgui.a \
+  $(DBG_BINDIR)/libenvutil.a \
   $(DBG_BINDIR)/libSTUB.a
 
 PROJ_REL_DEP = \
@@ -48,6 +49,7 @@ PROJ_REL_DEP = \
   $(REL_BINDIR)/libalgorithms.a \
   $(REL_BINDIR)/libguihtml.a \
   $(REL_BINDIR)/libgui.a \
+  $(REL_BINDIR)/libenvutil.a \
   $(REL_BINDIR)/libSTUB.a
 
 default : all

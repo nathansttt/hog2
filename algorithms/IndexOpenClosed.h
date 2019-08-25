@@ -34,6 +34,24 @@ public:
 	dataLocation where;
 };
 
+template<typename state>
+class IndexOpenClosedDataWithF {
+public:
+	IndexOpenClosedDataWithF() {}
+	IndexOpenClosedDataWithF(const state &theData, double fCost, double gCost, double hCost, uint64_t parent, uint64_t openLoc, dataLocation location)
+	:data(theData), f(fCost), g(gCost), h(hCost), parentID(parent), openLocation(openLoc), where(location) { reopened = false; }
+	state data;
+	double f;
+	double g;
+	double h;
+	uint64_t parentID;
+	uint64_t openLocation;
+	uint64_t round;
+	bool reopened;
+	dataLocation where;
+};
+
+
 template <class state>
 struct IndexCompare {
 	bool operator()(const IndexOpenClosedData<state> &i1, const IndexOpenClosedData<state> &i2) const
@@ -46,14 +64,28 @@ struct IndexCompare {
 	}
 };
 
-template<typename state, typename CmpKey = IndexCompare<state>, class dataStructure = IndexOpenClosedData<state> >
+template <class state>
+struct IndexCompareWithF {
+	bool operator()(const IndexOpenClosedDataWithF<state> &i1, const IndexOpenClosedDataWithF<state> &i2) const
+	{
+		if (fequal(i1.f, i2.f))
+		{
+			return (fless(i1.g, i2.g));
+		}
+		return (fgreater(i1.f, i2.f));
+	}
+};
+
+template<typename state, typename CmpKey = IndexCompareWithF<state>, class dataStructure = IndexOpenClosedDataWithF<state> >
 class IndexOpenClosed {
 public:
 	IndexOpenClosed();
 	~IndexOpenClosed();
 	void Reset(int maxID);
 	uint64_t AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
+	uint64_t AddOpenNode(const state &val, uint64_t hash, double f, double g, double h, uint64_t parent=kTAStarNoNode);
 	uint64_t AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
+	uint64_t AddClosedNode(state &val, uint64_t hash, double f, double g, double h, uint64_t parent=kTAStarNoNode);
 	void KeyChanged(uint64_t objKey);
 	//void IncreaseKey(uint64_t objKey);
 	dataLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
@@ -129,6 +161,23 @@ uint64_t IndexOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state 
 	return hash;
 }
 
+template<typename state, typename CmpKey, class dataStructure>
+uint64_t IndexOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state &val, uint64_t hash, double f, double g, double h, uint64_t parent)
+{
+	if (elements[hash].round == currentRound)
+	{
+		// shouldn't be in open/closed already
+		assert(false);
+	}
+	elements[hash] = dataStructure(val, f, g, h, parent, theHeap.size(), kOpenList);
+	elements[hash].round = currentRound;
+	if (parent == kTAStarNoNode)
+		elements[hash].parentID = hash;
+	theHeap.push_back(hash); // adding element id to back of heap
+	HeapifyUp(theHeap.size()-1); // heapify from back of the heap
+	return hash;
+}
+
 /**
  * Add object into closed list.
  */
@@ -138,6 +187,21 @@ uint64_t IndexOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val
 	// shouldn't be in open/closed already
 	assert(elements[hash].round != currentRound);
 	elements[hash] = dataStructure(val, g, h, parent, 0, kClosedList);
+	elements[hash].round = currentRound;
+	if (parent == kTAStarNoNode)
+		elements[hash].parentID = hash;
+	return hash;
+}
+
+/**
+ * Add object into closed list.
+ */
+template<typename state, typename CmpKey, class dataStructure>
+uint64_t IndexOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val, uint64_t hash, double f, double g, double h, uint64_t parent)
+{
+	// shouldn't be in open/closed already
+	assert(elements[hash].round != currentRound);
+	elements[hash] = dataStructure(val, f, g, h, parent, 0, kClosedList);
 	elements[hash].round = currentRound;
 	if (parent == kTAStarNoNode)
 		elements[hash].parentID = hash;

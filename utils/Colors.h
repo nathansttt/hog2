@@ -95,6 +95,7 @@ namespace Colors
 	const rgbColor darkred= {0.5,0.0,0.0}; // red
 	const rgbColor lightred= {1.0,0.5,0.5}; // red
 	const rgbColor lighterred= {1.0,0.75,0.75}; // red
+	const rgbColor brown   = {0.5,0.25,0.0}; // brown
 
 	const rgbColor green  = {0.0,1.0,0.0}; // green
 	const rgbColor darkgreen= {0.0,0.5,0.0}; // green
@@ -108,7 +109,9 @@ namespace Colors
 	const rgbColor lightblue   = {0.5,0.5,1.0}; // blue
 	const rgbColor lighterblue   = {0.75,0.75,1.0}; // blue
 
+	const rgbColor lightyellow = {1.0,1.0,0.5}; // yellow
 	const rgbColor yellow = {1.0,1.0,0.0}; // yellow
+	const rgbColor darkyellow = {0.5,0.5,0.0}; // yellow
 	const rgbColor purple = {1.0,0.0,1.0}; // purple
 	const rgbColor cyan   = {0.0,1.0,1.0}; // cyan
 	

@@ -366,7 +366,7 @@ void CanonicalGraphEnvironment::ComputeOrdering()
 				continue;
 			
 			
-			AStarOpenClosedData<graphState> parent;
+			AStarOpenClosedDataWithF<graphState> parent;
 			astar.GetClosedItem(canonicalNode->GetNum(), parent);
 			
 //			printf("  Checking neighbor %s cost %f\n", canonicalNode->GetName(), parent.g);
@@ -378,7 +378,7 @@ void CanonicalGraphEnvironment::ComputeOrdering()
 					finalNode = g->GetNode(e->getTo());
 				else
 					finalNode = g->GetNode(e->getFrom());
-				AStarOpenClosedData<graphState> child;
+				AStarOpenClosedDataWithF<graphState> child;
 				astar.GetClosedItem(finalNode->GetNum(), child);
 				graphState destNum = finalNode->GetNum();
 //				printf("  --Parent of %s is %s ", finalNode->GetName(), g->GetNode(astar.GetParent(destNum))->GetName());

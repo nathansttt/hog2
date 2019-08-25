@@ -54,7 +54,7 @@ std::vector<slideDir> acts;
 std::vector<MNPuzzleState<4, 4>> path;
 
 
-std::vector<int> p1 = {0, 1, 2, 3};
+std::vector<int> p1 = {0, 1, 2, 3};//, 4, 5, 6, 7};
 std::vector<int> p2 = {0, 4, 5, 6, 7};
 std::vector<int> p3 = {0, 8, 9, 10, 11};
 std::vector<int> p4 = {0, 12, 13, 14, 15};
@@ -96,7 +96,7 @@ void BuildPDBs()
 	if (pdb1 == 0)
 	{
 		pdb1 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(&mnp, goal, p1);
-		pdb1->BuildPDB(goal);
+		pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
 		built = true;
 	}
 	if (pdb2 == 0)
@@ -163,8 +163,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	
 	if (!foundOptimal && tween >= 1+rate)
 	{
-//		BuildPDBs();
-//		ida.SetHeuristic(&h);
+		//BuildPDBs();
+		ida.SetHeuristic(&h);
 		WeightedHeuristic<MNPuzzleState<4, 4>> w(&mnp, 2.0);
 		ida.SetHeuristic(&w);
 		ida.GetPath(&mnp, start, goal, acts);

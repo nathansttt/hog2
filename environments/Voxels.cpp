@@ -320,7 +320,7 @@ void Voxels::GLDrawLine(const voxelState &x, const voxelState &y) const
 	
 }
 
-void Voxels::Draw(Graphics::Display &display)
+void Voxels::Draw(Graphics::Display &display) const
 {
 	
 }

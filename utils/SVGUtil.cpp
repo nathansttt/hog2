@@ -144,6 +144,34 @@ std::string SVGDrawNGon(double _x, double _y, double radius, int segments, float
 //void DrawCircle(GLdouble _x, GLdouble _y, GLdouble tRadius, int segments = 32, float rotation = 0);
 //void FrameCircle(GLdouble _x, GLdouble _y, GLdouble tRadius, GLdouble lineWidth, int segments = 32, float rotation = 0);
 
+std::string SVGBeginLinePath(float width, rgbColor c)
+{
+	return "<path stroke-linecap=\"round\" stroke=\""+SVGGetRGB(c)+"\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" d=\"";
+//
+//	s += "M "+std::to_string(lines[0].x)+" "+std::to_string(lines[0].y)+" L";
+//
+//	for (int x = 1; x < lines.size(); x++)
+//	{
+//		s += " "+std::to_string(lines[x].x)+" "+std::to_string(lines[x].y)+" ";
+//	}
+//	//	s += "\" stroke=\"black\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" vector-effect: \"non-scaling-stroke\";/>\n";
+//	s += "\" stroke=\""+SVGGetRGB(c)+"\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" />\n";
+//
+}
+
+std::string SVGAddLinePath(float x1, float y1)
+{
+	return "L "+std::to_string(x1)+" "+std::to_string(y1)+" ";
+}
+
+std::string SVGAddLinePath(float x1, float y1, float x2, float y2)
+{
+	return "M "+std::to_string(x1)+" "+std::to_string(y1)+" L "+std::to_string(x2)+" "+std::to_string(y2)+" ";
+}
+
+std::string SVGEndLinePath()
+{ return "\" />\n"; }
+
 
 std::string SVGDrawLineSegments(const std::vector<Graphics::point> &lines, float width, rgbColor c)
 {
@@ -269,8 +297,34 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 		{
 			case Graphics::Display::kLine:
 			{
-				const Graphics::Display::lineInfo &o = drawCommands[x].line; //disp.lines[x];
-				s += SVGDrawLine((o.start.x+1)*width/2.0, (o.start.y+1)*height/2.0, (o.end.x+1)*width/2.0, (o.end.y+1)*height/2.0, o.width, o.c);
+				s += SVGBeginLinePath(drawCommands[x].line.width, drawCommands[x].line.c);
+				bool first = true;
+				while (drawCommands[x].what == Graphics::Display::kLine &&
+					   (first ||
+						(drawCommands[x].line.width == drawCommands[x-1].line.width &&
+						 drawCommands[x].line.c == drawCommands[x-1].line.c)))
+				{
+					const Graphics::Display::lineInfo &o = drawCommands[x].line; //disp.lines[x];
+					if (first)
+					{
+						s += SVGAddLinePath(PointToSVG(o.start.x, width), PointToSVG(o.start.y, height),
+											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+						first = false;
+					}
+					else if (drawCommands[x-1].line.end == o.start)
+					{
+						s += SVGAddLinePath(PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+					}
+					else {
+						s += SVGAddLinePath(PointToSVG(o.start.x, width), PointToSVG(o.start.y, height),
+											PointToSVG(o.end.x, width), PointToSVG(o.end.y, height));
+					}
+//					s += SVGDrawLine((o.start.x+1)*width/2.0, (o.start.y+1)*height/2.0, (o.end.x+1)*width/2.0, (o.end.y+1)*height/2.0, o.width, o.c);
+
+					x++;
+				}
+				x--;
+				s += SVGEndLinePath();
 				//		if (o.arrow)
 				//		{
 				//			Graphics::point newEnd = o.end*0.975f+o.start*0.025f;
@@ -376,7 +430,7 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 	std::string s;
 	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(width+3)+"\" height = \""+std::to_string(height+3)+"\" ";
 	s += "viewBox = \"-1 -1 "+std::to_string(width+2)+" "+std::to_string(height+2)+"\" ";
-	s += "preserveAspectRatio = \"none\" shape-rendering=\"auto\""; // crispEdges
+	s += "preserveAspectRatio = \"none\" shape-rendering=\"crispEdges\""; // crispEdges
 	s += ">\n";
 
 //	s += SVGDrawRect(0, 0, width, height, Colors::white);

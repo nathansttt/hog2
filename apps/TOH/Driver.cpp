@@ -7,7 +7,7 @@
 #include "PermutationPDB.h"
 #include "TemplateAStar.h"
 
-const int numDisks = 7;
+const int numDisks = 14;
 
 TOH<numDisks> toh;
 TOHState<numDisks> s, g;
@@ -17,6 +17,8 @@ std::vector<TOHMove> solution;
 
 TemplateAStar<TOHState<numDisks>, TOHMove, TOH<numDisks> >astar;
 
+template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
+Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal);
 
 // PDB info
 TOHState<numDisks> goal;
@@ -35,11 +37,13 @@ TOHPDB<numDisks-4, numDisks> pdb3(&absToh3, goal);
 Heuristic<TOHState<numDisks>> h;
 
 bool recording = false;
+bool running = true;
 
 int main(int argc, char* argv[])
 {
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 640, 640);
+	return 0;
 }
 
 /**
@@ -67,12 +71,12 @@ void SolveProblem(bool reset = true)
 	{
 		s.StandardStart();
 		g.Reset();
-		g.counts[2]++;
-		g.counts[3]--;
-		g.disks[2][0] = 4;
-		g.disks[3][3] = 3;
-		g.disks[3][4] = 2;
-		g.disks[3][5] = 1;
+//		g.counts[2]++;
+//		g.counts[3]--;
+//		g.disks[2][0] = 4;
+//		g.disks[3][3] = 3;
+//		g.disks[3][4] = 2;
+//		g.disks[3][5] = 1;
 		//		srandom(1234);
 //		for (int x = 0; x < 200; x++)
 //		{
@@ -83,18 +87,22 @@ void SolveProblem(bool reset = true)
 	std::cout << s << "\n";
 	//toh.GetStateFromHash(random()%toh.GetNumStates(s), s);
 	//toh.GetStateFromHash(0, s);
-	ida.SetHeuristic(&h);
-	t.StartTimer();
-	//ida.GetPath(&toh, s, g, solution);
-	t.EndTimer();
-	for (auto &m : solution)
-	{
-		std::cout << m << " ";
-	}
-	std::cout << "\n";
-	printf("%1.2fs elapsed; %llu expanded; %llu generated [%lu]\n", t.GetElapsedTime(), ida.GetNodesExpanded(), ida.GetNodesTouched(), solution.size());
+//	ida.SetHeuristic(&h);
+//	t.StartTimer();
+//	//ida.GetPath(&toh, s, g, solution);
+//	t.EndTimer();
+//	for (auto &m : solution)
+//	{
+//		std::cout << m << " ";
+//	}
+//	std::cout << "\n";
+//	printf("%1.2fs elapsed; %llu expanded; %llu generated [%lu]\n", t.GetElapsedTime(), ida.GetNodesExpanded(), ida.GetNodesTouched(), solution.size());
 
-	astar.SetHeuristic(&h);
+	auto *heuristic = BuildPDB<14, 12, 2>(g);
+
+	astar.SetHeuristic(heuristic);
+
+	toh.pruneActions = true;
 	t.StartTimer();
 	astar.GetPath(&toh, s, g, solution);
 	t.EndTimer();
@@ -102,7 +110,18 @@ void SolveProblem(bool reset = true)
 	{
 		std::cout << m << " ";
 	}
-	printf("%1.2fs elapsed; %llu expanded; %llu generated [%lu]\n", t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched(), solution.size());
+	printf("\n[prune] %1.2fs elapsed; %llu expanded; %llu generated [%lu]\n", t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched(), solution.size());
+
+	toh.pruneActions = false;
+	t.StartTimer();
+	astar.GetPath(&toh, s, g, solution);
+	t.EndTimer();
+	for (auto &m : solution)
+	{
+		std::cout << m << " ";
+	}
+	printf("\n[no prune] %1.2fs elapsed; %llu expanded; %llu generated [%lu]\n", t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched(), solution.size());
+
 }
 
 void SpeedTest()
@@ -158,7 +177,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 double v = 1;
 uint64_t counter = 0;
-const int animationFrames = 30;
+const int animationFrames = 60;
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	cameraMoveTo(0, -1, -12.5, 0.05);
@@ -166,7 +185,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	
 	glEnable(GL_LIGHTING);
 	toh.OpenGLDraw();
-	if (solution.size() != 0)
+	if (solution.size() != 0 && running)
 	{
 		toh.GetNextState(s, solution[0], g);
 		toh.OpenGLDraw(s, g, float(counter)/animationFrames);
@@ -176,10 +195,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			toh.ApplyAction(s, solution[0]);
 			solution.erase(solution.begin());
 			if (solution.size() == 0)
-				recording = false;
+				counter = 10;//recording = false;
 		}
 	}
 	else {
+		if (solution.size() == 0)
+		{
+			counter--;
+			if (counter == 0)
+				recording = false;
+		}
 		toh.OpenGLDraw(s);
 	}
 	
@@ -265,6 +290,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case 'p': // div compression
 		{
+//			running = true;
+//			recording = true;
+//			break;
 			goal.Reset();
 			// 268435456 entries (256 MB)
 			// Average: 87.038921 -> 86.762030 -> 86.483987
@@ -291,6 +319,34 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 }
 
+template <int numDisks, int pdb1Disks, int pdb2Disks>
+Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
+{
+	TOH<numDisks> toh;
+	TOH<pdb1Disks> absToh1;
+	TOH<pdb2Disks> absToh2;
+	TOHState<pdb1Disks> absTohState1;
+	TOHState<pdb2Disks> absTohState2;
+	
+	
+	TOHPDB<pdb1Disks, numDisks, pdb2Disks> *pdb1 = new TOHPDB<pdb1Disks, numDisks, pdb2Disks>(&absToh1, goal); // top disks
+	TOHPDB<pdb2Disks, numDisks> *pdb2 = new TOHPDB<pdb2Disks, numDisks>(&absToh2, goal); // bottom disks
+	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+	pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+	
+	Heuristic<TOHState<numDisks>> *h = new Heuristic<TOHState<numDisks>>;
+	
+	h->lookups.resize(0);
+	
+	h->lookups.push_back({kAddNode, 1, 2});
+	h->lookups.push_back({kLeafNode, 0, 0});
+	h->lookups.push_back({kLeafNode, 1, 1});
+	h->heuristics.resize(0);
+	h->heuristics.push_back(pdb1);
+	h->heuristics.push_back(pdb2);
+	
+	return h;
+}
 
 bool MyClickHandler(unsigned long , int, int, point3d , tButtonType , tMouseEventType )
 {

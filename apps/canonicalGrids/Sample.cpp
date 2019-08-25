@@ -31,10 +31,9 @@
 #include "EpisodicSimulation.h"
 #include "Map2DEnvironment.h"
 #include "RandomUnits.h"
-#include "AStar.h"
 #include "TemplateAStar.h"
 #include "GraphEnvironment.h"
-#include "MapSectorAbstraction.h"
+//#include "MapSectorAbstraction.h"
 //#include "GraphRefinementEnvironment.h"
 #include "ScenarioLoader.h"
 #include "BFS.h"
@@ -803,7 +802,7 @@ std::string DrawRegularGoalArea(tDirection dir, bool drawBound, bool svg = false
 		visited[next.x+next.y*ma1->GetMap()->GetMapWidth()] = true;
 		grid->SetColor(1.0, 0.5, 0.0);
 		ma1->SetColor(1.0, 0.5, 0.0);
-		AStarOpenClosedData<xyLoc> data;
+		AStarOpenClosedDataWithF<xyLoc> data;
 		if (regAstar.GetClosedItem(next, data))
 		{
 			ma1->GetSuccessors(data.data, v);
@@ -878,7 +877,7 @@ std::string DrawJPSGoalArea(CanonicalGrid::tDirection dir, bool drawBound, bool 
 		
 		grid->SetColor(0.0, 0.5, 1.0);
 		ma1->SetColor(0.0, 0.5, 1.0);
-		AStarOpenClosedData<CanonicalGrid::xyLoc> data;
+		AStarOpenClosedDataWithF<CanonicalGrid::xyLoc> data;
 		if (canAstar.GetClosedItem(next, data))
 		{
 			grid->GetSuccessors(data.data, v);
@@ -1408,72 +1407,69 @@ xyLoc GetRandomState()
 	return l;
 }
 
-void TestJPS()
-{
-	std::vector<xyLoc> states;
-	srandom(1234);
-	const int totalStates = 10000;
-	// 1. Generate 10000 states
-	for (int x = 0; x < totalStates; x++)
-	{
-		states.push_back(GetRandomState());
-	}
-	Timer t;
-	// 2. Check validity of each
-	int numLegal = 0;
-	t.StartTimer();
-	for (int x = 0; x < totalStates; x++)
-		numLegal += (ma1->GetMap()->GetTerrainType(states[x].x, states[x].y) == kGround)?1:0;
-	//r->LegalState(states[x])?1:0;
-	t.EndTimer();
-	printf("%f elapsed; %d of %d legal\n", t.GetElapsedTime(), numLegal, totalStates);
-	
-	// 3. Add each to queue
-	AStarOpenClosed<xyLoc, AStarCompare<xyLoc> > openClosedList;
-	int numAdded = 0;
-	t.StartTimer();
-	for (int x = 0; x < totalStates; x++)
-	{
-		uint64_t objid;
-		if (openClosedList.Lookup(ma1->GetStateHash(states[x]), objid) != kOpenList)
-		{
-			numAdded++;
-			openClosedList.AddOpenNode(states[x], ma1->GetStateHash(states[x]), 0, 0);
-		}
-	}
-	t.EndTimer();
-	printf("%f elapsed added %d of %d to open\n", t.GetElapsedTime(), numAdded, totalStates);
-
-	// 3. Add each to queue
-	IndexOpenClosed<xyLoc> openClosedList2;
-	openClosedList2.Reset(ma1->GetMap()->GetMapHeight()*ma1->GetMap()->GetMapWidth());
-	numAdded = 0;
-	t.StartTimer();
-	for (int x = 0; x < totalStates; x++)
-	{
-		uint64_t objid;
-		if (openClosedList2.Lookup(ma1->GetStateHash(states[x]), objid) != kOpenList)
-		{
-			numAdded++;
-			openClosedList2.AddOpenNode(states[x], ma1->GetStateHash(states[x]), 0, 0);
-		}
-	}
-	t.EndTimer();
-	printf("%f elapsed added %d of %d to open (grid)\n", t.GetElapsedTime(), numAdded, totalStates);
-
-	//	t.StartTimer();
-	//	astar.GetPath(r, s, g, ourPath);
-	//	t.EndTimer();
-	//	printf("Astar %f %llu %llu %1.2f\n", t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched(), r->GetPathLength(ourPath));
-	
-}
+//void TestJPS()
+//{
+//	std::vector<xyLoc> states;
+//	srandom(1234);
+//	const int totalStates = 10000;
+//	// 1. Generate 10000 states
+//	for (int x = 0; x < totalStates; x++)
+//	{
+//		states.push_back(GetRandomState());
+//	}
+//	Timer t;
+//	// 2. Check validity of each
+//	int numLegal = 0;
+//	t.StartTimer();
+//	for (int x = 0; x < totalStates; x++)
+//		numLegal += (ma1->GetMap()->GetTerrainType(states[x].x, states[x].y) == kGround)?1:0;
+//	//r->LegalState(states[x])?1:0;
+//	t.EndTimer();
+//	printf("%f elapsed; %d of %d legal\n", t.GetElapsedTime(), numLegal, totalStates);
+//	
+//	// 3. Add each to queue
+//	AStarOpenClosed<xyLoc, AStarCompare<xyLoc> > openClosedList;
+//	int numAdded = 0;
+//	t.StartTimer();
+//	for (int x = 0; x < totalStates; x++)
+//	{
+//		uint64_t objid;
+//		if (openClosedList.Lookup(ma1->GetStateHash(states[x]), objid) != kOpenList)
+//		{
+//			numAdded++;
+//			openClosedList.AddOpenNode(states[x], ma1->GetStateHash(states[x]), 0, 0, 0);
+//		}
+//	}
+//	t.EndTimer();
+//	printf("%f elapsed added %d of %d to open\n", t.GetElapsedTime(), numAdded, totalStates);
+//
+//	// 3. Add each to queue
+//	IndexOpenClosed<xyLoc> openClosedList2;
+//	openClosedList2.Reset(ma1->GetMap()->GetMapHeight()*ma1->GetMap()->GetMapWidth());
+//	numAdded = 0;
+//	t.StartTimer();
+//	for (int x = 0; x < totalStates; x++)
+//	{
+//		uint64_t objid;
+//		if (openClosedList2.Lookup(ma1->GetStateHash(states[x]), objid) != kOpenList)
+//		{
+//			numAdded++;
+//			openClosedList2.AddOpenNode(states[x], ma1->GetStateHash(states[x]), 0, 0, 0);
+//		}
+//	}
+//	t.EndTimer();
+//	printf("%f elapsed added %d of %d to open (grid)\n", t.GetElapsedTime(), numAdded, totalStates);
+//
+//	//	t.StartTimer();
+//	//	astar.GetPath(r, s, g, ourPath);
+//	//	t.EndTimer();
+//	//	printf("Astar %f %llu %llu %1.2f\n", t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNodesTouched(), r->GetPathLength(ourPath));
+//	
+//}
 
 
 void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 {
-//	TestJPS();
-//	return;
-
 	xyLoc s1;
 	xyLoc g1;
 	s1.x = px1; s1.y = py1;
@@ -1878,7 +1874,7 @@ void WeightedAStarExperiments(char *scenario, double weight)
 	Map *m = new Map(s.GetNthExperiment(0).GetMapName());
 	MapEnvironment *me = new MapEnvironment(m);
 	//CanonicalGrid::CanonicalGrid *cge = new CanonicalGrid::CanonicalGrid(m);
-	TemplateAStar<xyLoc, tDirection, MapEnvironment, IndexOpenClosed<xyLoc>> astar;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment, IndexOpenClosed<xyLoc, IndexCompareWithF<xyLoc>, IndexOpenClosedDataWithF<xyLoc>>> astar;
 	//TemplateAStar<CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid> canAstar;
 
 	Timer t;
@@ -2096,13 +2092,13 @@ void ComputeReach(xyLoc start, TemplateAStar<xyLoc, tDirection, MapEnvironment> 
 	
 	for (int i = 0; i < search.GetNumItems(); i++)
 	{
-		const AStarOpenClosedData<xyLoc> &d = search.GetItem(i);
+		const AStarOpenClosedDataWithF<xyLoc> &d = search.GetItem(i);
 		ma1->GetSuccessors(d.data, neighbors);
 		bool foundParent = false;
 		// check if we have a neighbor that has this state as a parent
 		for (int x = 0; x < neighbors.size(); x++)
 		{
-			AStarOpenClosedData<xyLoc> n;
+			AStarOpenClosedDataWithF<xyLoc> n;
 			if (search.GetClosedItem(neighbors[x], n))
 			{
 				if (n.parentID == i)
@@ -2117,7 +2113,7 @@ void ComputeReach(xyLoc start, TemplateAStar<xyLoc, tDirection, MapEnvironment> 
 		
 		// trace from i back to the start state updating the reach of each state
 		double perfectHCost = 0;
-		AStarOpenClosedData<xyLoc> v = search.GetItem(i);
+		AStarOpenClosedDataWithF<xyLoc> v = search.GetItem(i);
 		int currParent = i;
 		while (true)
 		{

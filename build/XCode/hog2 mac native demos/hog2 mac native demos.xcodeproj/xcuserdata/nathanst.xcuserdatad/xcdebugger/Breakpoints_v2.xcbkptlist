@@ -106,7 +106,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "hog2 mac native demos/DrawView.mm"
-            timestampString = "571181691.07868"
+            timestampString = "584861800.5003181"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "26"
@@ -170,7 +170,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "hog2 mac native demos/DrawView.mm"
-            timestampString = "571181691.0797991"
+            timestampString = "584861800.5005209"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "228"
@@ -266,7 +266,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "hog2 mac native demos/DrawView.mm"
-            timestampString = "571181691.080465"
+            timestampString = "584861800.5007761"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "97"
@@ -330,7 +330,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "hog2 mac native demos/DrawView.mm"
-            timestampString = "571181691.0806299"
+            timestampString = "584861800.50095"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "211"
@@ -346,7 +346,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "hog2 mac native demos/DrawView.mm"
-            timestampString = "571181691.080671"
+            timestampString = "584861800.500998"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "214"
@@ -583,11 +583,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/suboptimal-map/Driver.cpp"
-            timestampString = "579645658.686752"
+            timestampString = "584896948.615034"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "393"
-            endingLineNumber = "393"
+            startingLineNumber = "469"
+            endingLineNumber = "469"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -599,11 +599,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/suboptimal-map/Driver.cpp"
-            timestampString = "579645658.68682"
+            timestampString = "584896948.615416"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "383"
-            endingLineNumber = "383"
+            startingLineNumber = "459"
+            endingLineNumber = "459"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -615,11 +615,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/suboptimal-map/Driver.cpp"
-            timestampString = "579645658.686872"
+            timestampString = "584896948.615705"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "387"
-            endingLineNumber = "387"
+            startingLineNumber = "463"
+            endingLineNumber = "463"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -694,28 +694,12 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../../generic/IncrementalIDA.h"
-            timestampString = "583909849.628335"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "96"
-            endingLineNumber = "96"
-            landmarkName = "DoSingleSearchStep(SearchEnvironment&lt;state, action&gt; *env, state from, state to, Heuristic&lt;state&gt; *h, std::vector&lt;state&gt; &amp;thePath)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "../../../demos/idastar/Driver.cpp"
-            timestampString = "583909849.62849"
+            timestampString = "584896948.616169"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "296"
-            endingLineNumber = "296"
+            startingLineNumber = "300"
+            endingLineNumber = "300"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
             landmarkType = "9">
          </BreakpointContent>
@@ -727,11 +711,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/idastar/Driver.cpp"
-            timestampString = "583909849.6289819"
+            timestampString = "584896948.616241"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "348"
-            endingLineNumber = "348"
+            startingLineNumber = "352"
+            endingLineNumber = "352"
             landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
             landmarkType = "9">
          </BreakpointContent>
@@ -743,11 +727,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/idastar/Driver.cpp"
-            timestampString = "583909849.629306"
+            timestampString = "584896948.616295"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "428"
-            endingLineNumber = "428"
+            startingLineNumber = "432"
+            endingLineNumber = "432"
             landmarkName = "RedrawTextDisplay()"
             landmarkType = "9">
          </BreakpointContent>
@@ -759,12 +743,76 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/idastar/Driver.cpp"
-            timestampString = "583909849.629631"
+            timestampString = "584896948.616347"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "425"
-            endingLineNumber = "425"
+            startingLineNumber = "429"
+            endingLineNumber = "429"
             landmarkName = "RedrawTextDisplay()"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/idastar/Driver.cpp"
+            timestampString = "584896948.616397"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "340"
+            endingLineNumber = "340"
+            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/OptimisticSearch.h"
+            timestampString = "584896948.616444"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "666"
+            endingLineNumber = "666"
+            landmarkName = "Draw(Graphics::Display &amp;d)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/suboptimal-map/Driver.cpp"
+            timestampString = "584896948.616496"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "557"
+            endingLineNumber = "557"
+            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/suboptimal-map/Driver.cpp"
+            timestampString = "584896948.616758"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "190"
+            endingLineNumber = "190"
+            landmarkName = "StepAlgorithms(int numSteps)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

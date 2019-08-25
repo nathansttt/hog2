@@ -87,6 +87,17 @@ bool Transit::DoneComputing()
 	return done;
 }
 
+double Transit::GetPercentTransit()
+{
+	double val = uniqueTransitPoints.size();
+	int ground = 0;
+	for (int x = 0; x < m->GetMapWidth(); x++)
+		for (int y = 0; y < m->GetMapHeight(); y++)
+			ground += (m->GetTerrainType(x, y)==kGround)?1:0;
+	return val/ground;
+}
+
+
 void Transit::Draw(Graphics::Display &display)
 {
 	if (done == false && apsp == false)
@@ -184,8 +195,8 @@ int Transit::GetIndex(const xyLoc &l1, const xyLoc &l2) const
 
 void Transit::DoStateInBlock(const xyLoc &s)
 {
-	if (m->GetTerrainType(s.x, s.y) != kGround)
-		return;
+//	if (m->GetTerrainType(s.x, s.y) != kGround)
+//		return;
 	
 //	hd.clear();
 //	farStates.clear();
@@ -194,18 +205,31 @@ void Transit::DoStateInBlock(const xyLoc &s)
 	search.SetStopAfterGoal(false);
 	ZeroHeuristic<xyLoc> z;
 	search.SetHeuristic(&z);
-	search.InitializeSearch(me, s, s, v);
+	bool init = false;
+//	search.InitializeSearch(me, s, s, v);
 	for (int y = 0; y < currRad; y++)
 	{
 		for (int x = 0; x < currRad; x++)
 		{
 			// Find transit points at near radius
 			xyLoc tmp(s.x+x, s.y+y);
-			if (x != 0 || y != 0)
+			if (me->GetMap()->GetTerrainType(s.x+x, s.y+y) != kGround)
+				continue;
+			
+			if (!init)
+			{
+				search.InitializeSearch(me, tmp, tmp, v);
+				init = true;
+			}
+			else {
 				search.AddAdditionalStartState(tmp);
+			}
+			//if (x != 0 || y != 0)
 		}
 	}
-
+	if (!init) // no states to handle
+		return;
+	
 	// Search out to find all states at far radius
 	// [more complicated that it seems, because they may not all reachable]
 	while (true)

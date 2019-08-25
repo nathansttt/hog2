@@ -18,6 +18,7 @@
 #include <vector>
 #include <ext/hash_map>
 #include <stdint.h>
+#include <functional>
 
 struct AHash64 {
 	size_t operator()(const uint64_t &x) const
@@ -33,12 +34,13 @@ enum dataLocation {
 const uint64_t kTAStarNoNode = 0xFFFFFFFFFFFFFFFFull;
 
 template<typename state>
-class AStarOpenClosedData {
+class AStarOpenClosedDataWithF {
 public:
-	AStarOpenClosedData() {}
-	AStarOpenClosedData(const state &theData, double gCost, double hCost, uint64_t parent, uint64_t openLoc, dataLocation location)
-	:data(theData), g(gCost), h(hCost), parentID(parent), openLocation(openLoc), where(location) { reopened = false; }
+	AStarOpenClosedDataWithF() {}
+	AStarOpenClosedDataWithF(const state &theData, double fCost, double gCost, double hCost, uint64_t parent, uint64_t openLoc, dataLocation location)
+	:data(theData), f(fCost), g(gCost), h(hCost), parentID(parent), openLocation(openLoc), where(location) { reopened = false; }
 	state data;
+	double f;
 	double g;
 	double h;
 	uint64_t parentID;
@@ -47,13 +49,38 @@ public:
 	dataLocation where;
 };
 
+template<typename state>
+class AStarOpenClosedData {
+public:
+	AStarOpenClosedData() {}
+	AStarOpenClosedData(const state &theData, double gCost, double hCost, uint64_t parent, uint64_t openLoc, dataLocation location)
+	:data(theData), g(gCost), h(hCost), parentID(parent), openLocation(openLoc), where(location) { reopened = false; }
+	state data;
+	// Refactor TODO:
+	// Most of the data here is required by the data structure for sorting purposes.
+	// But, the g/h/(f) cost is specific to a given algorithm. So, g/h/(f) should be factored out
+	// and that should be the templat class, not the full data here.
+	// Bonus: for Canonical A* we can then store the parent action directly in the open list
+	// to avoiding re-copying states in the A* implementation
+	double g;
+	double h;
+	uint64_t parentID;
+	uint64_t openLocation;
+	bool reopened;
+	dataLocation where;
+};
+
+
 template<typename state, typename CmpKey, class dataStructure = AStarOpenClosedData<state> >
 class AStarOpenClosed {
 public:
 	AStarOpenClosed();
 	~AStarOpenClosed();
 	void Reset(int val=0);
+	// TODO: replace f/g/h by a different data structure
+	uint64_t AddOpenNode(const state &val, uint64_t hash, double f, double g, double h, uint64_t parent=kTAStarNoNode);
 	uint64_t AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
+	uint64_t AddClosedNode(state &val, uint64_t hash, double f, double g, double h, uint64_t parent=kTAStarNoNode);
 	uint64_t AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent=kTAStarNoNode);
 	void KeyChanged(uint64_t objKey);
 	dataLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
@@ -65,6 +92,12 @@ public:
 	uint64_t Close();
 	void Reopen(uint64_t objKey);
 
+	void CloseAllOnOpen()
+	{
+		for (int x = 0; x < theHeap.size(); x++)
+			elements[theHeap[x]].where = kClosedList;
+		theHeap.resize(0);
+	}
 	uint64_t GetOpenItem(unsigned int which) { return theHeap[which]; }
 	size_t OpenSize() const { return theHeap.size(); }
 	size_t ClosedSize() const { return size()-OpenSize(); }
@@ -73,9 +106,12 @@ public:
 private:
 	bool HeapifyUp(unsigned int index);
 	void HeapifyDown(unsigned int index);
+	// TODO: don't pass in the hash value any more - use the C++ hash function specialization
+	//	std::hash<state> hashFcn;
 
 	std::vector<uint64_t> theHeap;
 	// storing the element id; looking up with...hash?
+	// TODO: replace this with C++11 data structures
 	typedef __gnu_cxx::hash_map<uint64_t, uint64_t, AHash64> IndexTable;
 	IndexTable table;
 	std::vector<dataStructure > elements;
@@ -107,8 +143,31 @@ void AStarOpenClosed<state, CmpKey, dataStructure>::Reset(int)
  * Add object into open list.
  */
 template<typename state, typename CmpKey, class dataStructure>
+uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state &val, uint64_t hash, double f, double g, double h, uint64_t parent)
+{
+	//size_t hash = hashFcn(val);
+	// should do lookup here...
+	if (table.find(hash) != table.end())
+	{
+		//return -1; // TODO: find correct id and return
+		assert(false);
+	}
+	elements.push_back(dataStructure(val, f, g, h, parent, theHeap.size(), kOpenList));
+	if (parent == kTAStarNoNode)
+		elements.back().parentID = elements.size()-1;
+	table[hash] = elements.size()-1; // hashing to element list location
+	theHeap.push_back(elements.size()-1); // adding element id to back of heap
+	HeapifyUp(theHeap.size()-1); // heapify from back of the heap
+	return elements.size()-1;
+}
+
+/**
+ * Add object into open list.
+ */
+template<typename state, typename CmpKey, class dataStructure>
 uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent)
 {
+	//size_t hash = hashFcn(val);
 	// should do lookup here...
 	if (table.find(hash) != table.end())
 	{
@@ -127,6 +186,18 @@ uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddOpenNode(const state 
 /**
  * Add object into closed list.
  */
+template<typename state, typename CmpKey, class dataStructure>
+uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val, uint64_t hash, double f, double g, double h, uint64_t parent)
+{
+	// should do lookup here...
+	assert(table.find(hash) == table.end());
+	elements.push_back(dataStructure(val, f, g, h, parent, 0, kClosedList));
+	if (parent == kTAStarNoNode)
+		elements.back().parentID = elements.size()-1;
+	table[hash] = elements.size()-1; // hashing to element list location
+	return elements.size()-1;
+}
+
 template<typename state, typename CmpKey, class dataStructure>
 uint64_t AStarOpenClosed<state, CmpKey, dataStructure>::AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent)
 {

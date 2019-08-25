@@ -243,7 +243,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		{
 			gameMode = kNotInGame;
 			// Check to see if successful
-			AStarOpenClosedData<xyLoc> item;
+			AStarOpenClosedDataWithF<xyLoc> item;
 			double opt = me->GetPathLength(path);
 			if (AStarForward.GetClosedItem(mark, item))
 			{

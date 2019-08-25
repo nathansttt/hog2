@@ -106,7 +106,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
 
-		w.AddStarConstraint(1, 1, Colors::orange);
 		
 //		w.AddTriangleConstraint(0, 0, 3);
 //		w.AddTriangleConstraint(0, 1, 2);
@@ -130,9 +129,13 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		s = 	"{\"dim\":\"4x4\",\"cc\":{\"0;0;#FFFFFF\",\"0;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"0;0;#FFFFFF\",\"1;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"0;0;#FFFFFF\",\"1;0;#000000\",\"0;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#FFFFFF\",\"0;0;#0000FF\",\"0;0;#0000FF\",\"1;0;#FFFFFF\"},\"mc\":\"00000010000000000000000000000000000000000000000000000000000000000\"}";
 		s = "{\"dim\":\"4x4\",\"cc\":{\"1;0;#0000FF\",\"0;0;#000026D\",\"0;0;#0029D00\",\"2;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\",\"2;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\",\"1;0;#0000FF\",\"0;0;#000000\",\"0;0;#000000\",\"1;0;#0000FF\"},\"mc\":\"10000000000010000000000000000000100000000000000000000000000000000\"}";
 
-		w.LoadFromHashString(s);
-		
-//		w.AddTetrisConstraint(1, 1, 10);
+//		w.LoadFromHashString(s);
+		w.AddTriangleConstraint(0, 0, 1);
+		w.AddTriangleConstraint(1, 1, 2);
+		w.AddTriangleConstraint(2, 2, 3);
+		w.AddStarConstraint(3, 3, Colors::orange);
+
+		//		w.AddTetrisConstraint(1, 1, 10);
 //		w.AddNegativeTetrisConstraint(1, 0, 3);
 //		w.AddTetrisConstraint(2, 1, 2);
 //		w.AddTetrisConstraint(1, 2, 2);
@@ -192,8 +195,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			ExamineTetris(3);
 //			ExamineMustCrossAndRegions(numRequiredPieces, numSeparationPieces);
 //			ExamineMustCrossAnd3Regions(numRequiredPieces, numSeparationPieces);
-//			ExamineTriangles(9);
-			ExamineRegionsAndStars(3);
+			ExamineTriangles(6);
+//			ExamineRegionsAndStars(0);
 			break;
 		case 'v':
 		{
@@ -720,10 +723,10 @@ void ExamineRegionsAndStars(int count)
 		Witness<puzzleWidth, puzzleHeight> w;
 		WitnessState<puzzleWidth, puzzleHeight> s;
 		
-		static_assert((puzzleWidth==puzzleHeight)&&(puzzleWidth==4), "This code only works for 4x4");
+		static_assert((4==puzzleHeight)&&(puzzleWidth==4), "This code only works for 4x4");
 //		uint64_t variations = pow(4, count-1)*2;
 //		uint64_t maxRank = c.MaxRank(count)*variations;
-		uint64_t variations = pow(2, 8);
+		uint64_t variations = pow(4, 8);
 		uint64_t mcRank = mc.MaxRank(count);
 		uint64_t maxRank = mcRank*variations;//c.MaxRank(count)*variations;
 
@@ -750,20 +753,41 @@ void ExamineRegionsAndStars(int count)
 			uint64_t rank = n%variations;
 			for (int x = 0; x < 4; x++)
 			{
-				if (rank&1)
-					w.AddStarConstraint(x, 0, Colors::blue);
-				else
-					w.AddSeparationConstraint(x, 0, Colors::blue);
-				rank>>=1;
+				rgbColor color;
+				color = (rank&1)?Colors::white:Colors::orange;
+				if (rank&2)
+					w.AddStarConstraint(x, 0, color);
+				else {
+					w.AddTriangleConstraint(x, 0, 1+(rank&1));
+					//w.AddSeparationConstraint(x, 0, color);
+				}
+				rank>>=2;
+
+				color = (rank&1)?Colors::white:Colors::orange;
+				if (rank&2)
+					w.AddStarConstraint(x, 3, color);
+				else {
+//					w.AddSeparationConstraint(x, 3, color);
+					w.AddTriangleConstraint(x, 3, 1+(rank&1));
+				}
+				rank>>=2;
 			}
-			for (int x = 0; x < 4; x++)
-			{
-				if (rank&1)
-					w.AddStarConstraint(x, 3, Colors::blue);
-				else
-					w.AddSeparationConstraint(x, 3, Colors::blue);
-				rank>>=1;
-			}
+//			for (int y = 0; y < 4; y+=3)
+//			{
+//				rgbColor color;
+//				color = (rank&2)?Colors::white:Colors::red;
+//
+//				if (rank&1)
+//					w.AddStarConstraint(0, y, color);
+//				else
+//					w.AddSeparationConstraint(0, y, color);
+//				rank>>=2;
+//				if (rank&1)
+//					w.AddStarConstraint(3, y, color);
+//				else
+//					w.AddSeparationConstraint(3, y, color);
+//				rank>>=2;
+//			}
 			mc.Unrank(n/variations, &items[0], count);
 			for (int x = 0; x < items.size(); x++)
 			{
@@ -771,6 +795,7 @@ void ExamineRegionsAndStars(int count)
 			}
 			
 			int pathSize = 0;
+			//int result = CountSolutions(w, allSolutions, pathSize, minCount+1);
 			int result = CountSolutions(w, allSolutions, currSolutions, forbidden, pathSize, minCount+1);
 			
 			// don't return two puzzles with the same solution

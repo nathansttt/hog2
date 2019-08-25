@@ -86,7 +86,7 @@ public:
 	void GLLabelState(const voxelState&, const char *) const;
 	void GLDrawLine(const voxelState &x, const voxelState &y) const;
 
-	void Draw(Graphics::Display &display);
+	void Draw(Graphics::Display &display) const;
 
 private:
 	

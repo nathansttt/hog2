@@ -389,7 +389,7 @@ void TestJPS()
 		if (openClosedList.Lookup(r->GetStateHash(states[x]), objid) != kOpenList)
 		{
 			numAdded++;
-			openClosedList.AddOpenNode(states[x], r->GetStateHash(states[x]), 0, 0);
+			openClosedList.AddOpenNode(states[x], r->GetStateHash(states[x]), 0.0, 0.0);
 		}
 	}
 	t.EndTimer();

@@ -207,7 +207,7 @@ namespace FLRTA2 {
 		unsigned int openSize = astar.GetNumOpenItems();
 		for (unsigned int x = 0; x < openSize; x++)
 		{
-			const AStarOpenClosedData<state> data = astar.GetOpenItem(x);
+			const auto data = astar.GetOpenItem(x);
 			if ((bestF == -1) || (fless(data.g+data.h, bestF)))
 			{
 				bestF = data.g+data.h;

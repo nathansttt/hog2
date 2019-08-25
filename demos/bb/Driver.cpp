@@ -411,7 +411,7 @@ void DrawRegularGoalArea(Graphics::Display &display, tDirection dir, bool drawBo
 		visited[next.x+next.y*me->GetMap()->GetMapWidth()] = true;
 		grid->SetColor(1.0, 0.5, 0.0);
 		me->SetColor(1.0, 0.5, 0.0);
-		AStarOpenClosedData<xyLoc> data;
+		AStarOpenClosedDataWithF<xyLoc> data;
 		if (regAstar.GetClosedItem(next, data))
 		{
 			me->GetSuccessors(data.data, v);
@@ -484,7 +484,7 @@ void DrawJPSGoalArea(Graphics::Display &display, CanonicalGrid::tDirection dir, 
 		
 		grid->SetColor(0.0, 0.5, 1.0);
 		me->SetColor(0.0, 0.5, 1.0);
-		AStarOpenClosedData<CanonicalGrid::xyLoc> data;
+		AStarOpenClosedDataWithF<CanonicalGrid::xyLoc> data;
 		if (canAstar.GetClosedItem(next, data))
 		{
 			grid->GetSuccessors(data.data, v);

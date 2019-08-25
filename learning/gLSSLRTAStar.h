@@ -256,7 +256,7 @@ void gLSSLRTAStar<state, action, environment>::GetPath(environment *env, const s
 	unsigned int openSize = astar.GetNumOpenItems();
 	for (unsigned int x = 0; x < openSize; x++)
 	{
-		const AStarOpenClosedData<state> data = astar.GetOpenItem(x);
+		const auto data = astar.GetOpenItem(x);
 		double currLearning = HCostLearned(data.data);
 		if (avoidLearning)
 		{

@@ -810,6 +810,19 @@ void DrawGraphics(Graphics::Display &display, int port)
 //	float epsilon = 0.0002;
 //	float de = 0.00008;
 	//for (int x = 0; x < display.backgroundDrawCommands.size(); x++)
+	for (auto &i : display.text)
+	{
+		if (i.viewport != port)
+			continue;
+		glColor3f(i.c.r, i.c.g, i.c.b);
+		DrawText(i.loc.x, i.loc.y,i.loc.z, i.size*2, i.s.c_str());
+		//		std::string s;
+		//		point loc;
+		//		rgbColor c;
+		//		float size;
+		
+	}
+
 	for (int x = display.backgroundDrawCommands.size()-1; x >= 0; x--)
 		//for (auto &i: display.backgroundDrawCommands)
 	{
@@ -977,7 +990,6 @@ void DrawGraphics(Graphics::Display &display, int port)
 		}
 		glEnd();
 	}
-
 //	std::vector<data> backgroundDrawCommands;
 //	std::vector<textInfo> backgroundText;
 //	std::vector<segments> backgroundLineSegments;
