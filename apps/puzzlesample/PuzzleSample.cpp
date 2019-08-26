@@ -33,8 +33,8 @@
 #include "Map2DEnvironment.h"
 #include "ScreenTransition.h"
 int which = 0;
-StephenPuzzle::StephenPuzzle *puzzle;
-StephenPuzzle::puzzleState s;
+SPState::StephenPuzzle *puzzle;
+SPState::puzzleState s;
 Map *editor;
 MapEnvironment *me;
 LineTransition line(20, 10);
@@ -114,7 +114,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 //		ReinitViewports(windowID, {-1, -1, 0.5f, 1}, kScaleToSquare);
 //		AddViewport(windowID, {0.5f, -1, 1, 1}, kScaleToFill);
 
-		puzzle = new StephenPuzzle::StephenPuzzle();
+		puzzle = new SPState::StephenPuzzle();
 		LoadMap();
 		editor = new Map(1,5);
 		editor->SetTerrainType(0, 0, kOutOfBounds);
@@ -198,7 +198,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'w':
 		{
 			if (currState != kSolving) break;
-			puzzle->ApplyAction(s, StephenPuzzle::kN);
+			puzzle->ApplyAction(s, SPState::kN);
 			if (puzzle->GoalTest(s))
 			{
 				currState = kFadeOut;
@@ -210,7 +210,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 's':
 		{
 			if (currState != kSolving) break;
-			puzzle->ApplyAction(s, StephenPuzzle::kS);
+			puzzle->ApplyAction(s, SPState::kS);
 			if (puzzle->GoalTest(s))
 			{
 				currState = kFadeOut;
@@ -222,7 +222,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'a':
 		{
 			if (currState != kSolving) break;
-			puzzle->ApplyAction(s, StephenPuzzle::kW);
+			puzzle->ApplyAction(s, SPState::kW);
 			if (puzzle->GoalTest(s))
 			{
 				currState = kFadeOut;
@@ -234,7 +234,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'd':
 		{
 			if (currState != kSolving) break;
-			puzzle->ApplyAction(s, StephenPuzzle::kE);
+			puzzle->ApplyAction(s, SPState::kE);
 			if (puzzle->GoalTest(s))
 			{
 				currState = kFadeOut;
@@ -247,9 +247,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 			if (currState != kSolving) break;
 			if (s.carry)
-				puzzle->ApplyAction(s, StephenPuzzle::kDrop);
+				puzzle->ApplyAction(s, SPState::kDrop);
 			else
-				puzzle->ApplyAction(s, StephenPuzzle::kPickUp);
+				puzzle->ApplyAction(s, SPState::kPickUp);
 			break;
 		}
 		case 'r':

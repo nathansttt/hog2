@@ -21,7 +21,7 @@
 
 #include <cassert>
 
-namespace StephenPuzzle {
+namespace SPState {
 	
 	struct puzzleState {
 	public:
@@ -117,9 +117,9 @@ namespace StephenPuzzle {
 
 namespace std {
 	template <>
-	struct ::std::hash<StephenPuzzle::puzzleState>
+	struct ::std::hash<SPState::puzzleState>
 	{
-		std::size_t operator()(const StephenPuzzle::puzzleState& k) const
+		std::size_t operator()(const SPState::puzzleState& k) const
 		{
 			return (((std::size_t)k.x)<<16)|k.y;
 		}

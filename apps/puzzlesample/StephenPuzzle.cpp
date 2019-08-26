@@ -15,7 +15,7 @@
 
 using namespace Graphics;
 
-namespace StephenPuzzle {
+namespace SPState {
 	
 	StephenPuzzle::StephenPuzzle()
 	{
