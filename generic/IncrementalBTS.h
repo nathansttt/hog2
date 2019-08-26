@@ -12,6 +12,13 @@
 
 #include "Heuristic.h"
 
+enum IBEXStage {
+	kCompletedFullStage,
+	kIDAStarSearch,
+	kExponentialSearch,
+	kBinarySearch
+};
+
 template <class state, class action>
 class IncrementalBTS {
 public:
@@ -25,6 +32,7 @@ public:
 				 std::vector<action> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	uint64_t GetNodesExpanded() { return nodesExpanded; }
+	uint64_t GetIterationNodesExpanded() { return data.nodesExpanded; }
 	uint64_t GetNodesTouched() { return nodesTouched; }
 	void ResetNodeCount()
 	{
@@ -35,17 +43,30 @@ public:
 		history.clear(); search.clear(); ResetNodeCount(); previousBound = 0; }
 	void OpenGLDraw();
 	void Draw(Graphics::Display &display);
-	state GetCurrentState() const { if (search.size() > 0) return search.back().currState; return start; }
+	state GetCurrentState() const
+	{
+		if (search.size() > 0)
+			return search.back().currState;
+		if (flesseq(solutionCost, data.solutionInterval.lowerBound))
+			return goal;
+		return start;
+		
+	}
 	void GetCurrentPath(std::vector<state> &p) const
 	{ p.clear(); for (auto &i : search) p.push_back(i.currState); }
-	double GetCurrentFLimit() { return bound; }
+	double GetCurrentFLimit() { return std::min(bound, solutionCost); }
 	double GetNextFLimit() { return nextBound; }
 	uint64_t GetNewNodesLastIteration() { return newNodesLastIteration; }
 	const uint64_t c1 = 2;
 	const uint64_t c2 = 8;
 	const uint64_t gamma = 2;
 	const int infiniteWorkBound = -1;
-
+	void GetGlobalCostInterval(double &lower, double &upper)
+	{ lower = data.solutionInterval.lowerBound; upper = data.solutionInterval.upperBound; }
+	void GetNodeInterval(uint64_t &lower, uint64_t &upper)
+	{ lower = data.nodeLB*c1; upper = data.workBound; }
+	std::string stage;
+	IBEXStage currStage;
 private:
 	struct costInterval {
 		double lowerBound;
@@ -146,6 +167,8 @@ bool IncrementalBTS<state, action>::InitializeSearch(SearchEnvironment<state, ac
 	data.delta = 1;
 	solutionCost = DBL_MAX;
 	SetupIteration(h->HCost(start, goal));
+	stage = "IDA* ITERATION";
+	currStage = kIDAStarSearch;
 	return false;
 }
 
@@ -180,8 +203,8 @@ bool IncrementalBTS<state, action>::StepIteration()
 			solutionCost = search.back().pathCost;
 			printf("Found solution cost %f!", solutionCost);
 		}
-		// will check for optimality elsewhere
-		search.pop_back();
+		if (!flesseq(solutionCost, data.solutionInterval.lowerBound))
+			search.pop_back();
 		return false;
 	}
 	
@@ -273,6 +296,11 @@ bool IncrementalBTS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 		uint64_t tmp = nodesExpanded;
 		StepIteration();
 		data.nodesExpanded += nodesExpanded-tmp;
+		if (IterationComplete())
+		{
+			currStage = kCompletedFullStage;
+			stage = "EXP Iter Complete";
+		}
 		return false;
 	}
 	
@@ -300,7 +328,10 @@ bool IncrementalBTS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 	if (data.nodesExpanded >= c1*data.nodeLB && data.workBound == infiniteWorkBound)
 	{
 		printf("Expanded %llu - needed at least %llu\n", data.nodesExpanded, c1*data.nodeLB);
-		printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
+		if (data.solutionInterval.lowerBound == DBL_MAX) // No new nodes in iteration
+			printf("[HIT]--Critical f in [%1.5f, %1.5f]\n", solutionCost, solutionCost);
+		else
+			printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
 		data.nodeLB = data.nodesExpanded;
 		data.solutionInterval.upperBound = DBL_MAX;
 		data.nodesExpanded = 0;
@@ -322,9 +353,16 @@ bool IncrementalBTS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 		double nextCost;
 		data.delta *= gamma;
 		if (data.solutionInterval.upperBound == DBL_MAX)
+		{
 			nextCost = data.solutionInterval.lowerBound+data.delta;
-		else
+			stage = "EXP";
+			currStage = kExponentialSearch;
+		}
+		else {
 			nextCost = (data.solutionInterval.lowerBound+data.solutionInterval.upperBound)/2.0;
+			stage = "BIN";
+			currStage = kBinarySearch;
+		}
 		data.workBound = c2*data.nodeLB;
 		SetupIteration(nextCost);
 		printf("-> Starting new iteration with f: %f; node limit: %llu\n", nextCost, data.workBound);
@@ -332,7 +370,10 @@ bool IncrementalBTS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 		return false;
 	}
 
-	printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
+	if (data.solutionInterval.lowerBound == DBL_MAX)
+		printf("[HIT]--Critical f in [∞, ∞]\n");
+	else
+		printf("[HIT]--Critical f in [%1.5f, ∞]\n", data.solutionInterval.lowerBound);
 	// finished iteration with current bound - ready to start next IBEX/BTS iteration
 	data.nodeLB = std::max(data.nodesExpanded, c1*data.nodeLB);
 	data.solutionInterval.upperBound = DBL_MAX;
@@ -340,6 +381,7 @@ bool IncrementalBTS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 	data.nodesExpanded = 0;
 	data.delta = 1;
 	SetupIteration(nextBound);
+	stage = "NEW ITERATION";
 	return false;
 }
 
