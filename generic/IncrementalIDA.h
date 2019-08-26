@@ -127,7 +127,7 @@ void IncrementalIDA<state, action>::SetupIteration(double cost)
 template <class state, class action>
 bool IncrementalIDA<state, action>::StepIteration()
 {
-	if (env->GoalTest(search.back().currState, goal))
+	if (env->GoalTest(search.back().currState, goal) && flesseq(search.back().pathCost, bound))
 	{
 		printf("Done!");
 		path.resize(0);
