@@ -307,7 +307,7 @@ namespace IBEX {
 		q.Reset(env->GetMaxHash());
 
 		// put start in open
-		q.AddOpenNode(start, env->GetStateHash(start), 0, 0, 0);
+		q.AddOpenNode(start, env->GetStateHash(start), 0.0, 0.0, 0ull);
 		
 		while (sd.nodes < nodeLimit && q.OpenSize() > 0)
 		{
