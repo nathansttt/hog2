@@ -394,7 +394,7 @@ namespace IBEX {
 						q.AddOpenNode(neighbors[x],
 									  env->GetStateHash(neighbors[x]),
 									  childGCost,
-									  0,
+									  0.0,
 									  nodeid);
 					}
 				}

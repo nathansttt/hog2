@@ -397,7 +397,7 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 						q.AddOpenNode(neighbors[x],
 								  env->GetStateHash(neighbors[x]),
 								  q.Lookup(nodeid).g+edgeCosts[x],
-								  0,
+								  0.0,
 								  nodeid);
 					}
 				}
