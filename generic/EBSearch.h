@@ -320,7 +320,7 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 
 	q.Reset(env->GetMaxHash());
 	// put start in open
-	q.AddOpenNode(start, env->GetStateHash(start), 0.0, 0.0, 0ull);
+	q.AddOpenNode(start, env->GetStateHash(start), 0.0, 0.0, (uint64_t)0);
 	uint64_t nextCost = -1, maxFExpanded = 0;
 	uint64_t nodesExpanded = 0;
 	while (nodesExpanded < nodeLimit && q.OpenSize() > 0)
