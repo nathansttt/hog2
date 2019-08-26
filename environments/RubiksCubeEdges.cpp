@@ -1235,6 +1235,11 @@ void RubikEdge::SetCubeColor(int which, bool face, const RubikEdgeState &s) cons
 	
 	int theColor = -1;
 	int cube = s.GetCubeInLoc(which-1);
+	if (cube == 0xF)
+	{
+		glColor3f(0.0, 0.0, 0.0);
+		return;
+	}
 	bool flipped = s.GetCubeOrientation(cube);
 	if (flipped == face)
 		theColor = cubes_first[cube];

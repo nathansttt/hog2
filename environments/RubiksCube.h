@@ -58,6 +58,11 @@ static bool operator==(const RubiksState &l1, const RubiksState &l2)
 	return (l1.corner == l2.corner) && (l1.edge == l2.edge);
 }
 
+static bool operator!=(const RubiksState &l1, const RubiksState &l2)
+{
+	return !(l1 == l2);
+}
+
 static std::ostream &operator<<(std::ostream &out, const RubiksState &s)
 {
 	out << "{" << s.edge << ", " << s.corner << "}";
@@ -126,6 +131,7 @@ public:
 //		} moves[17].next = 0;
 	}
 	~RubiksCube() { /*delete depth8; delete depth9;*/ }
+	std::string GetName() { return "Rubiks Cube"; }
 	void SetPruneSuccessors(bool val) { pruneSuccessors = val; history.resize(0); }
 	virtual void GetSuccessors(const RubiksState &nodeID, std::vector<RubiksState> &neighbors) const;
 	virtual void GetActions(const RubiksState &nodeID, std::vector<RubiksAction> &actions) const;
@@ -223,6 +229,13 @@ public:
 	void GetStateFromPDBHash(uint64_t hash, RubiksState &s, int threadID = 0) const;
 	RubiksState GetStateFromAbstractState(RubiksState &s) const { return s; }
 
+	void OpenGLDraw() const
+	{
+		RubiksState s;
+		GetStateFromPDBHash(0, s);
+		env->OpenGLDraw(s);
+	}
+	
 	//	const char *GetName();
 	bool Load(const char *prefix);
 	void Save(const char *prefix);

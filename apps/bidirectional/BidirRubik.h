@@ -11,6 +11,6 @@
 
 #include <stdio.h>
 
-void RubikTest();
+void TestRubik(int algorithm);
 
 #endif /* BidirRubik_hpp */

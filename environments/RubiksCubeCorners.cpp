@@ -1210,7 +1210,9 @@ uint64_t RubikCornerPDB::GetPDBSize() const
 	uint64_t answer[] = {1, 24, 504, 9072, 136080, 1632960, 14696640, 88179840, 88179840};
 	return answer[corners.size()];
 }
+
 #define MR
+
 uint64_t RubikCornerPDB::GetPDBHash(const RubiksCornerState &s, int threadID) const
 {
 #ifdef MR

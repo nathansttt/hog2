@@ -43,6 +43,7 @@
 #include "BidirPancake.h"
 #include "BidirTOH.h"
 #include "BidirTS.h"
+#include "BidirRubik.h"
 #include "MapGenerators.h"
 
 void Test100Easy();
@@ -110,6 +111,7 @@ int main(int argc, char* argv[])
 	InstallCommandLineHandler(MyCLHandler, "-grid", "-grid <map> <scenario> <hweight>", "MM/A* region analysis");
 	InstallCommandLineHandler(MyCLHandler, "-nbs", "-nbs <map> <scenario> <hweight>", "NBS test");
 	InstallCommandLineHandler(MyCLHandler, "-stp", "-stp <alg>", "A*/BS*/MM/NBS/MM0 test on 15 puzzle 100 korf instances");
+	InstallCommandLineHandler(MyCLHandler, "-rubik", "-rubik <alg>", "A*/BS*/MM/NBS/MM0 test on rubik's cube");
 	InstallCommandLineHandler(MyCLHandler, "-pancake", "-pancake", "NBS test on pancake");
 	InstallCommandLineHandler(MyCLHandler, "-ts", "-ts", "NBS test on TopSpin");
 	InstallCommandLineHandler(MyCLHandler, "-toh", "-toh", "NBS test on TOH");
@@ -385,6 +387,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	else if (strcmp(argument[0], "-stp") == 0 && maxNumArgs > 1)
 	{
 		TestSTP(atoi(argument[1]));
+	}
+	else if (strcmp(argument[0], "-rubik") == 0 && maxNumArgs > 1)
+	{
+		TestRubik(atoi(argument[1]));
 	}
 	else if (maxNumArgs > 2 && strcmp(argument[0], "-nbs") == 0)
 	{

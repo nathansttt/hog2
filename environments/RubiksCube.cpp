@@ -445,15 +445,15 @@ void RubiksCube::OpenGLDraw(const RubiksState&s) const
 {
 	e.OpenGLDraw(s.edge);
 	c.OpenGLDraw(s.corner);
-//	OpenGLDrawCubeBackground();
+	OpenGLDrawCubeBackground();
 	OpenGLDrawCenters();
 }
 
 void RubiksCube::OpenGLDrawCorners(const RubiksState&s) const
 {
 	c.OpenGLDraw(s.corner);
-//	OpenGLDrawCenters();
-//	OpenGLDrawCubeBackground();
+	OpenGLDrawCenters();
+	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawEdges(const RubiksState&s) const
@@ -461,21 +461,21 @@ void RubiksCube::OpenGLDrawEdges(const RubiksState&s) const
 //	Rubik7EdgeState e7tmp;
 //	s.edge7.GetDual(e7tmp);
 	e.OpenGLDraw(s.edge);
-//	OpenGLDrawCenters();
-//	OpenGLDrawCubeBackground();
+	OpenGLDrawCenters();
+	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawEdgeDual(const RubiksState&s) const
 {
 	s.edge.GetDual(dual);
 	e.OpenGLDraw(dual);
-//	OpenGLDrawCenters();
-//	OpenGLDrawCubeBackground();
+	OpenGLDrawCenters();
+	OpenGLDrawCubeBackground();
 }
 
 void RubiksCube::OpenGLDrawCubeBackground() const
 {
-	return;
+//	return;
 	
 	float scale = 0.3;
 	float offset = 0.95*scale/3.0;
@@ -837,6 +837,8 @@ uint64_t RubikPDB::GetStateHash(const RubiksState &s) const
 void RubikPDB::GetStateFromHash(RubiksState &s, uint64_t hash) const
 {
 	//assert(!"Not implemented - need 66 bits!");
+	ePDB.GetStateFromHash(s.edge, hash);
+	cPDB.GetStateFromHash(s.corner, hash);
 }
 
 uint64_t RubikPDB::GetPDBSize() const
