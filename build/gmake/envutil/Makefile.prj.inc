@@ -33,5 +33,6 @@ SRC_CPP = \
 	envutil/VoxelTriangleExtraction.cpp \
 	envutil/PancakeInstances.cpp \
 	envutil/STPInstances.cpp \
+	envutil/RubiksInstances.cpp \
 	envutil/GraphInconsistencyInstances.cpp 
 
