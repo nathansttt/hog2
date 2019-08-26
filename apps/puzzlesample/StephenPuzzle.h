@@ -117,7 +117,7 @@ namespace SPState {
 
 namespace std {
 	template <>
-	struct ::std::hash<SPState::puzzleState>
+	struct hash<SPState::puzzleState>
 	{
 		std::size_t operator()(const SPState::puzzleState& k) const
 		{
