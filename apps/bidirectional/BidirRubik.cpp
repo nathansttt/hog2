@@ -22,7 +22,8 @@ enum heuristicType {
 	k888,
 	k1997,
 	k839,
-	k8210
+	k8210,
+	kCustom
 };
 
 const char *hprefix = "/Users/nathanst/Data/pdb/";
@@ -242,6 +243,56 @@ void BuildHeuristics(RubiksState goal, Heuristic<RubiksState> &result, heuristic
 			result.heuristics.push_back(pdb3);
 			break;
 		}
+		case kCustom:
+		{
+			std::vector<int> edges1 = {0, 1, 2, 3};
+			std::vector<int> edges2 = {4, 5, 6, 7};
+			std::vector<int> edges3 = {8, 9};
+			std::vector<int> edges4 = {10, 11};
+			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+			RubikPDB *pdb4 = new RubikPDB(&cube, goal, blank, corners);
+			RubikPDB *pdb5 = new RubikPDB(&cube, goal, blank, corners);
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			if (!pdb4->Load(hprefix))
+			{
+				pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb4->Save(hprefix);
+			}
+			if (!pdb5->Load(hprefix))
+			{
+				pdb5->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb5->Save(hprefix);
+			}
+			result.lookups.push_back({kMaxNode, 1, 5});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.lookups.push_back({kLeafNode, 3, 0});
+			result.lookups.push_back({kLeafNode, 4, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+			result.heuristics.push_back(pdb4);
+			result.heuristics.push_back(pdb5);
+			break;
+		}
 	}
 }
 
@@ -258,7 +309,7 @@ void TestRubik(int algorithm)
 	Heuristic<RubiksState> h_f;
 	Heuristic<RubiksState> h_b;
 
-	BuildHeuristics(goal, h_f, k1997);
+	BuildHeuristics(goal, h_f, kCustom);
 	h_b = h_f;
 	for (int x = 0; x < h_b.heuristics.size(); x++)
 	{
@@ -284,23 +335,23 @@ void TestRubik(int algorithm)
 			t += "RC_w"+std::to_string(walkLength)+"_"+std::to_string(x+1)+".svg";
 			
 			BidirectionalProblemAnalyzer<RubiksState, RubiksAction, RubiksCube> p(start, goal, &cube, &h_f, &h_b);
+			p.drawProblemInstance = false;
+			p.drawAllG = true;
+			p.flipBackwardsGCost = true;
 			//			p.drawFullGraph = true;
-			//			p.drawProblemInstance = false;
 			//			p.drawMinimumVC = true;
-			//			p.drawAllG = false;
 			//			p.drawStatistics = false;
 			//			p.SaveSVG((t+"-full.svg").c_str());
 			//			p.drawFullGraph = false;
 			//			p.drawProblemInstance = false;
 			//			p.drawAllG = true;
-			//			p.drawStatistics = false;
+			// p.drawStatistics = false;
 			//			p.SaveSVG((t+"-min.svg").c_str());
 			//			printf("Forward: %d\n", p.GetForwardWork());
 			//			printf("Backward: %d\n", p.GetBackwardWork());
 			//			printf("Minimum: %d\n", p.GetMinWork());
 			//			int maxg = p.GetNumGCosts();
 			//p.SaveSVG((t+"-shrunk.svg").c_str(), (maxg+11)/12);
-			p.flipBackwardsGCost = true;
 			p.SaveSVG(t.c_str());
 			
 		}
