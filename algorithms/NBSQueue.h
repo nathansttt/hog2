@@ -10,11 +10,12 @@
 #define NBSQueue_h
 
 #include "BDOpenClosed.h"
+#include "BDIndexOpenClosed.h"
 
 //low g -> low f
-template <class state>
+template <class state, class DS>
 struct NBSCompareOpenReady {
-	bool operator()(const BDOpenClosedData<state> &i1, const BDOpenClosedData<state> &i2) const
+	bool operator()(const DS &i1, const DS &i2) const
 	{
 		double f1 = i1.g + i1.h;
 		double f2 = i2.g + i2.h;
@@ -27,9 +28,9 @@ struct NBSCompareOpenReady {
 	}
 };
 
-template <class state>
+template <class state, class DS>
 struct NBSCompareOpenWaiting {
-	bool operator()(const BDOpenClosedData<state> &i1, const BDOpenClosedData<state> &i2) const
+	bool operator()(const DS &i1, const DS &i2) const
 	{
 		double f1 = i1.g + i1.h;
 		double f2 = i2.g + i2.h;
@@ -42,7 +43,9 @@ struct NBSCompareOpenWaiting {
 	}
 };
 
-template <typename state, int epsilon = 0, bool moveLessEqToOpen = false>
+
+
+template <typename state, int epsilon = 0, bool moveLessEqToOpen = true, class pQueue = BDOpenClosed<state, NBSCompareOpenReady<state, BDOpenClosedData<state>>, NBSCompareOpenWaiting<state, BDOpenClosedData<state>>>>
 class NBSQueue {
 public:
 	bool GetNextPair(uint64_t &nextForward, uint64_t &nextBackward)
@@ -149,11 +152,11 @@ public:
 		}
 		return false;
 	}
-	void Reset()
+	void Reset(int maxHash)
 	{
 		CLowerBound = 0;
-		forwardQueue.Reset();
-		backwardQueue.Reset();
+		forwardQueue.Reset(maxHash);
+		backwardQueue.Reset(maxHash);
 	}
 	double GetLowerBound() { return CLowerBound; }
 	bool TerminateOnG() {
@@ -161,8 +164,8 @@ public:
 			return CLowerBound == forwardQueue.PeekAt(kOpenReady).g + backwardQueue.PeekAt(kOpenReady).g + epsilon;
 		return false;
 	}
-	BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>> forwardQueue;
-	BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>> backwardQueue;
+	pQueue forwardQueue;
+	pQueue backwardQueue;
 private:
 	double CLowerBound;
 };

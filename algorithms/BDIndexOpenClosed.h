@@ -1,9 +1,9 @@
 /*
- *  BDOpenClosed.h
+ *  BDIndexOpenClosed.h
  */
 
-#ifndef BDOPENCLOSED_H
-#define BDOPENCLOSED_H
+#ifndef BDIndexOpenClosed_H
+#define BDIndexOpenClosed_H
 
 #include <cassert>
 #include <vector>
@@ -11,45 +11,34 @@
 #include <stdint.h>
 #include <unordered_map>
 #include "AStarOpenClosed.h"
-
+#include "BDIndexOpenClosed.h"
 //#define ADMISSIBLE
 //struct AHash64 {
 //	size_t operator()(const uint64_t &x) const
 //	{ return (size_t)(x); }
 //};
 
-
-enum stateLocation {
-	kOpenReady = 0,//priority queue 0, low g -> low f
-	kOpenWaiting = 1,//priority queue 1, low f -> low g
-	kClosed,
-	kUnseen
-};
-
-
-const uint64_t kTBDNoNode = 0xFFFFFFFFFFFFFFFFull;
-
 template<typename state>
-class BDOpenClosedData {
+class BDIndexOpenClosedData {
 public:
-	BDOpenClosedData() {}
-	BDOpenClosedData(const state &theData, double gCost, double hCost, uint64_t parent, uint64_t openLoc, stateLocation location)
-	:data(theData), g(gCost), h(hCost), parentID(parent), openLocation(openLoc), where(location) { reopened = false; }
+	BDIndexOpenClosedData() { round = 0; }
+	BDIndexOpenClosedData(const state &theData, double gCost, double hCost, uint64_t parent, uint64_t openLoc, stateLocation location)
+	:data(theData), g(gCost), h(hCost), parentID(parent), openLocation(openLoc), where(location) { reopened = false; round = 0; }
 	state data;
 	double g;
 	double h;
 	uint64_t parentID;
 	uint64_t openLocation;
 	bool reopened;
+	uint32_t round;
 	stateLocation where;
 };
 
-template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure = BDOpenClosedData<state> >
-class BDOpenClosed {
+template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure = BDIndexOpenClosedData<state> >
+class BDIndexOpenClosed {
 public:
-	BDOpenClosed();
-	~BDOpenClosed();
-	void Reset(int);
+	BDIndexOpenClosed();
+	void Reset(int max);
 	uint64_t AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent=kTBDNoNode, stateLocation whichQueue = kOpenWaiting);
 	uint64_t AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent=kTBDNoNode);
 	void KeyChanged(uint64_t objKey);
@@ -120,19 +109,14 @@ private:
 	//2 queues:
 	//priorityQueues[0] is openReady, priorityQueues[1] is openWaiting
 	std::vector<std::vector<uint64_t>> priorityQueues;
-	//std::vector<uint64_t> readyQueue;
-	//std::vector<uint64_t> waitingQueue;
-
-	// storing the element id; looking up with hash
-	std::unordered_map<uint64_t, size_t> table;
-	//all the elements, open or closed
 	std::vector<dataStructure> elements;
+	uint32_t currRound;
 };
 
 #ifdef ADMISSIBLE
 
 template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Reopen(uint64_t objKey)
+void BDIndexOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Reopen(uint64_t objKey)
 {
 	assert(elements[objKey].where == kClosed);
 	elements[objKey].reopened = true;
@@ -147,8 +131,9 @@ void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Reopen(uint64_t objKe
 
 
 template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
-BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::BDOpenClosed()
+BDIndexOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::BDIndexOpenClosed()
 {
+	currRound = 1;
 	std::vector<uint64_t> queue;
 	queue.resize(0);
 	priorityQueues.push_back(queue);
@@ -157,21 +142,16 @@ BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::BDOpenClosed()
 	//waitingQueue.resize(0);
 }
 
-template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
-BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::~BDOpenClosed()
-{
-}
-
 /**
  * Remove all objects from queue.
  */
 template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Reset(int)
+void BDIndexOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Reset(int maxHash)
 {
-	table.clear();
-	elements.clear();
+	elements.resize(maxHash);
 	priorityQueues[0].resize(0);
 	priorityQueues[1].resize(0);
+	currRound++;
 	//readyQueue.resize(0);
 	//waitingQueue.resize(0);
 }
@@ -180,54 +160,54 @@ void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Reset(int)
  * Add object into open list.
  */
 template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-uint64_t BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent, stateLocation whichQueue)
+uint64_t BDIndexOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent, stateLocation whichQueue)
 {
-	// should do lookup here...
-	if (table.find(hash) != table.end())
+	if (elements[hash].round == currRound) // already in open
 	{
 		//return -1; // TODO: find correct id and return
 		assert(false);
 	}
 	if (whichQueue == kOpenReady)
 	{
-		elements.push_back(dataStructure(val, g, h, parent, priorityQueues[0].size() , kOpenReady));
-		
+		elements[hash] = dataStructure(val, g, h, parent, priorityQueues[0].size() , kOpenReady);
 	}
 	else if (whichQueue == kOpenWaiting)
 	{
-		elements.push_back(dataStructure(val, g, h, parent, priorityQueues[1].size(), kOpenWaiting));
+		elements[hash] = dataStructure(val, g, h, parent, priorityQueues[1].size(), kOpenWaiting);
 	}
+	elements[hash].round = currRound;
 
 	if (parent == kTBDNoNode)
-		elements.back().parentID = elements.size()-1;
-	table[hash] = elements.size()-1; // hashing to element list location
+		elements[hash].parentID = hash;
+	//table[hash] = elements.size()-1; // hashing to element list location
 
-	priorityQueues[whichQueue].push_back(elements.size() - 1);
+	priorityQueues[whichQueue].push_back(hash);
 	HeapifyUp(priorityQueues[whichQueue].size() - 1,whichQueue);
 
-	return elements.size()-1;
+	return hash;
 }
 
 /**
  * Add object into closed list.
  */
 template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-uint64_t BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent)
+uint64_t BDIndexOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent)
 {
-	// should do lookup here...
-	assert(table.find(hash) == table.end());
-	elements.push_back(dataStructure(val, g, h, parent, 0, kClosed));
+	assert(elements[hash].currRound < currRound); // already in open/closed
+	//assert(table.find(hash) == table.end());
+	elements[hash] = dataStructure(val, g, h, parent, 0, kClosed);
+	elements[hash].round = currRound;
 	if (parent == kTBDNoNode)
-		elements.back().parentID = elements.size()-1;
-	table[hash] = elements.size()-1; // hashing to element list location
-	return elements.size()-1;
+		elements[hash].parentID = hash;//elements.back().parentID = elements.size()-1;
+//	table[hash] = elements.size()-1; // hashing to element list location
+	return hash;
 }
 
 /**
  * Indicate that the key for a particular object has changed.
  */
 template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::KeyChanged(uint64_t val)
+void BDIndexOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::KeyChanged(uint64_t val)
 {
 //	EqKey eq;
 //	assert(eq(waitingQueue[table[val]], val));
@@ -246,7 +226,7 @@ void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::KeyChanged(uint64_t
 }
 
 template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Remove(uint64_t val)
+void BDIndexOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Remove(uint64_t val)
 {
 
 	int index = elements[val].openLocation;
@@ -266,7 +246,7 @@ void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Remove(uint64_t val)
 // * Indicate that the key for a particular object has increased.
 // */
 //template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-//void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::IncreaseKey(uint64_t val)
+//void BDIndexOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::IncreaseKey(uint64_t val)
 //{
 ////	EqKey eq;
 ////	assert(eq(waitingQueue[table[val]], val));
@@ -278,14 +258,12 @@ void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Remove(uint64_t val)
  * Returns location of object as well as object key.
  */
 
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-stateLocation BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Lookup(uint64_t hashKey, uint64_t &objKey) const
+template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
+stateLocation BDIndexOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Lookup(uint64_t hashKey, uint64_t &objKey) const
 {
-	auto it = table.find(hashKey);
-	if (it == table.end())
+	if (elements[hashKey].round != currRound)
 		return kUnseen;
-	
-	objKey = it->second;
+	objKey = hashKey;
 	return elements[objKey].where;
 }
 
@@ -293,8 +271,8 @@ stateLocation BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Lookup(uin
 /**
  * Peek at the next item to be expanded.
  */
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-uint64_t BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Peek(stateLocation whichQueue) const
+template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
+uint64_t BDIndexOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Peek(stateLocation whichQueue) const
 {
 	if (whichQueue == kOpenReady)
 	{
@@ -310,8 +288,8 @@ uint64_t BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Peek(stateLocatio
 /**
  * Peek at the next item to be expanded.
  */
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-inline const dataStructure &BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::PeekAt(stateLocation whichQueue) const
+template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
+inline const dataStructure &BDIndexOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::PeekAt(stateLocation whichQueue) const
 {
 	if (whichQueue == kOpenReady)
 	{
@@ -330,7 +308,7 @@ inline const dataStructure &BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>
  * Move the best item to the closed list and return key.
  */
 template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-uint64_t BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Close()
+uint64_t BDIndexOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Close()
 {
 	assert(OpenReadySize() != 0);
 
@@ -346,7 +324,7 @@ uint64_t BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Close()
 }
 
 template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
-uint64_t BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::PutToReady()
+uint64_t BDIndexOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::PutToReady()
 {
 	assert(OpenWaitingSize() != 0);
 
@@ -378,8 +356,8 @@ uint64_t BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::PutToReady()
 /**
  * Moves a node up the heap. Returns true if the node was moved, false otherwise.
  */
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-bool BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::HeapifyUp(unsigned int index, stateLocation whichQueue)
+template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
+bool BDIndexOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::HeapifyUp(unsigned int index, stateLocation whichQueue)
 {
 	if (index == 0) return false;
 	int parent = (index-1)/2;
@@ -417,8 +395,8 @@ bool BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::HeapifyUp(unsigned 
 	return false;
 }
 
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::HeapifyDown(unsigned int index, stateLocation whichQueue)
+template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
+void BDIndexOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::HeapifyDown(unsigned int index, stateLocation whichQueue)
 {
 	
 	unsigned int child1 = index*2+1;
