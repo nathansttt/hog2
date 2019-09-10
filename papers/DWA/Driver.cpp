@@ -11,6 +11,7 @@
 #include "NBS.h"
 #include "DynamicWeightedGrid.h"
 #include "SVGUtil.h"
+#include "IndexOpenClosed.h"
 
 DWG::TerrainType t = DWG::kRoad;
 
@@ -23,7 +24,7 @@ enum demoState {
 
 const int sectorSize = 16;
 
-demoState mode = kDrawTerrain;
+demoState mode = kWaitPath;//kDrawTerrain;
 bool recording = false;
 xyLoc start, goal;
 int rate = 20;
@@ -33,8 +34,11 @@ DWG::DynamicWeightedGridEnvironment *env;
 TemplateAStar<DWG::abstractState, DWG::edge, DWG::DynamicWeightedGrid<sectorSize>> absAStar;
 NBS<DWG::abstractState, DWG::edge, DWG::DynamicWeightedGrid<sectorSize>> absNBS;
 
-TemplateAStar<xyLoc, tDirection, DWG::DynamicWeightedGridEnvironment> astar;
-NBS<xyLoc, tDirection, DWG::DynamicWeightedGridEnvironment> nbs;
+TemplateAStar<xyLoc, tDirection, DWG::DynamicWeightedGridEnvironment, IndexOpenClosed<xyLoc>> astar;
+typedef BDIndexOpenClosed<xyLoc,
+						  NBSCompareOpenReady<xyLoc, BDIndexOpenClosedData<xyLoc>>,
+                          NBSCompareOpenWaiting<xyLoc, BDIndexOpenClosedData<xyLoc>>> indexOpenClosed;
+NBS<xyLoc, tDirection, DWG::DynamicWeightedGridEnvironment, NBSQueue<xyLoc, 1, true, indexOpenClosed>, indexOpenClosed> nbs;
 std::vector<xyLoc> path;
 std::vector<xyLoc> wpath;
 std::vector<DWG::abstractState> absPath;
@@ -94,9 +98,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
+		ReinitViewports(windowID, {-2, -1, 1, 2}, kScaleToSquare);
 		recording = false;
-		dwg = new DWG::DynamicWeightedGrid<sectorSize>(128, 128);
-//		dwg = new DWG::DynamicWeightedGrid<sectorSize>("/Users/nathanst/hog2/maps/weighted/Map_1.map");
+//		dwg = new DWG::DynamicWeightedGrid<sectorSize>(128, 128);
+		dwg = new DWG::DynamicWeightedGrid<sectorSize>("/Users/nathanst/hog2/maps/weighted/Map_1.map");
 		env = new DWG::DynamicWeightedGridEnvironment("/Users/nathanst/hog2/maps/weighted/Map1.map");
 		dwg->SetCosts(env->GetCosts());
 	}
@@ -341,12 +346,16 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	uint64_t astarNodes = 0;
 	uint64_t wastarNodes = 0;
 	uint64_t wastarNodes2 = 0;
+	uint64_t wastarNodes3 = 0;
 	uint64_t absNodes = 0;
 	uint64_t firstAbsNodes = 0;
 	double optimalPath = 0;
 	double suboptimalPath = 0;
 	double suboptimalPath2 = 0;
+	double suboptimalPath3 = 0;
 	double absPath = 0;
+	ZeroHeuristic<xyLoc> z;
+	Timer t;
 	for (int x = 0; x < numProblems; x++)
 	{
 		start.x = random()%dwg->GetWidth();
@@ -355,42 +364,70 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		goal.y = random()%dwg->GetHeight();
 
 		std::cout << x+1 << ". Searching from " << start << " to " << goal << "\n";
-//		nbs.GetPath(env, start, goal, env, env, path);
-		printf("NBS: Path found length %f; %llu nodes expanded\n",
-			   env->GetPathLength(path), nbs.GetNodesExpanded());
+		t.StartTimer();
+		nbs.GetPath(env, start, goal, env, env, path);
+		t.EndTimer();
+		printf("NBS: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+			   env->GetPathLength(path), nbs.GetNodesExpanded(), t.GetElapsedTime());
 		nbsNodes += nbs.GetNodesExpanded();
-//		astar.GetPath(env, start, goal, path);
-		printf(" A*: Path found length %f; %llu nodes expanded\n",
-			   env->GetPathLength(path), astar.GetNodesExpanded());
+
+		t.StartTimer();
+		nbs.GetPath(env, start, goal, &z, &z, path);
+		t.EndTimer();
+		printf("NBS0: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+			   env->GetPathLength(path), nbs.GetNodesExpanded(), t.GetElapsedTime());
+
+		t.StartTimer();
+		astar.GetPath(env, start, goal, path);
+		t.EndTimer();
+		printf(" A*: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
 		astarNodes += astar.GetNodesExpanded();
 		optimalPath += env->GetPathLength(path);
+
 		astar.SetWeight(4.0);
-//		astar.GetPath(env, start, goal, path);
-		printf("WA*(4): Path found length %f; %llu nodes expanded\n",
-			   env->GetPathLength(path), astar.GetNodesExpanded());
+		t.StartTimer();
+		astar.GetPath(env, start, goal, path);
+		t.EndTimer();
+		printf("WA*(4): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
 		wastarNodes += astar.GetNodesExpanded();
 		suboptimalPath += env->GetPathLength(path);
 		astar.SetWeight(1.0);
 
+		astar.SetWeight(3.0);
+		t.StartTimer();
+		astar.GetPath(env, start, goal, path);
+		t.EndTimer();
+		printf("WA*(3): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
+		wastarNodes3 += astar.GetNodesExpanded();
+		suboptimalPath3 += env->GetPathLength(path);
+		astar.SetWeight(1.0);
+
 		astar.SetWeight(2.0);
-//		astar.GetPath(env, start, goal, path);
-		printf("WA*(2): Path found length %f; %llu nodes expanded\n",
-			   env->GetPathLength(path), astar.GetNodesExpanded());
+		t.StartTimer();
+		astar.GetPath(env, start, goal, path);
+		t.EndTimer();
+		printf("WA*(2): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
 		wastarNodes2 += astar.GetNodesExpanded();
 		suboptimalPath2 += env->GetPathLength(path);
 		astar.SetWeight(1.0);
 
 		uint64_t tmp2;
+		t.StartTimer();
 		uint64_t tmpNodes = GetPathViaAbstraction(start, goal, path, tmp2);
+		t.EndTimer();
 		firstAbsNodes += tmp2;
 		absNodes += tmpNodes;
 		absPath += env->GetPathLength(path);
-		printf("ABS: Path found length %f; %llu nodes expanded [%llu]\n",
-			   env->GetPathLength(path), tmpNodes, tmp2);
+		printf("ABS: Path found length %f; %llu nodes expanded [%llu]; time: %1.6f\n",
+			   env->GetPathLength(path), tmpNodes, tmp2, t.GetElapsedTime());
 	}
-	printf("A*: %llu\nNBS: %llu\nWA*(2): %llu\nWA*(4): %llu\nABS: %llu [%llu]\n",
+	printf("A*: %llu\nNBS: %llu\nWA*(2): %llu\nWA*(3): %llu\nWA*(4): %llu\nABS: %llu [%llu]\n",
 		   astarNodes/numProblems, nbsNodes/numProblems,
-		   wastarNodes2/numProblems, wastarNodes/numProblems,
+		   wastarNodes2/numProblems, wastarNodes3/numProblems, wastarNodes/numProblems,
 		   absNodes/numProblems, firstAbsNodes/numProblems);
 	printf("Optimal Path: %f\n", optimalPath/numProblems);
 	printf("WA*(2) Path: %f\n", suboptimalPath2/numProblems);
