@@ -180,8 +180,8 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-makeRandom", "-makeRandom x-dim y-dim %%obstacles [0-100] filename", "makes a randomly filled with obstacles");
 	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
-	InstallCommandLineHandler(MyCLHandler, "-buildProblemSet", "-buildProblemSet filename", "Build problem set with the given map.");
-	InstallCommandLineHandler(MyCLHandler, "-buildRandomSet", "-buildRandomSet filename", "Build random problem set with all locations in the map.");
+	InstallCommandLineHandler(MyCLHandler, "-buildProblemSet", "-buildProblemSet <map> <scen>", "Build problem set with the given map.");
+	InstallCommandLineHandler(MyCLHandler, "-buildRandomSet", "-buildRandomSet <map> <scen>", "Build random problem set with all locations in the map.");
 	InstallCommandLineHandler(MyCLHandler, "-problems", "-problems filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems3", "-problems3 filename", "Selects the problem set to run.");
