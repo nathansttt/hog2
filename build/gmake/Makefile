@@ -35,6 +35,7 @@ PROJECTS = \
   apps/delta \
   apps/fling \
   apps/stp \
+  apps/PDB \
   apps/roads \
   apps/canonicalGrids \
   apps/delta \
