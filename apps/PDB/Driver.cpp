@@ -99,7 +99,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		additive = true;
 		return 1;
 	}
-
+	if (strcmp(argument[0], "-path") == 0)
+	{
+		path = argument[1];
+		return 2;
+	}
+	
 	if (strcmp(argument[0], "-pattern") == 0)
 	{
 		int cnt = 1;
