@@ -798,6 +798,8 @@ void MNPuzzle<width, height>::SetPattern(const std::vector<int> &pattern)
 template <int width, int height>
 bool MNPuzzle<width, height>::InPattern(int tile) const
 {
+	if (tile == -1)
+		return false;
 	return pattern[tile] == true;
 }
 
@@ -810,6 +812,7 @@ double MNPuzzle<width, height>::AdditiveGCost(const MNPuzzleState<width, height>
 		case kUp: return InPattern(s.puzzle[s.blank-width])?GCost(s,d):0;
 		case kDown: return InPattern(s.puzzle[s.blank+width])?GCost(s,d):0;
 		case kRight: return InPattern(s.puzzle[s.blank+1])?GCost(s,d):0;
+		case kNoSlide: assert(false);
 	}
 	return 0;
 }
