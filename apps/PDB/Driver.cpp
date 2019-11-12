@@ -39,6 +39,7 @@ bool additive = false;
 bool load = false;
 std::vector<int> pattern;
 std::string path;
+int threads = std::thread::hardware_concurrency();
 
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
@@ -50,6 +51,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-pattern", "-pattern", "Choose tiles in PDB");
 	InstallCommandLineHandler(MyCLHandler, "-additive", "-additive", "Build additive PDB");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load", "Load from disk and print stats");
+	InstallCommandLineHandler(MyCLHandler, "-threads", "-threads <N>", "Use <N> threads");
 	InstallCommandLineHandler(MyCLHandler, "-path", "-path", "Set path for output PDB");
 }
 
@@ -106,6 +108,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		load = true;
 		return 1;
 	}
+	if (strcmp(argument[0], "-threads") == 0)
+	{
+		if (maxNumArgs > 1)
+			threads = atoi(argument[1]);
+		else
+			printf("Error processing thread count; defaulting to %d\n", threads);
+		return 2;
+	}
 	if (strcmp(argument[0], "-path") == 0)
 	{
 		path = argument[1];
@@ -151,11 +161,11 @@ void BuildSTPPDB()
 	if (additive)
 	{
 		mnp.SetPattern(pattern);
-		pdb.BuildAdditivePDB(goal, 1); // parallelism not fixed yet
+		pdb.BuildAdditivePDB(goal, threads); // parallelism not fixed yet
 		pdb.Save(path.c_str());
 	}
 	else {
-		pdb.BuildPDB(goal, std::thread::hardware_concurrency());
+		pdb.BuildPDB(goal, threads);
 		pdb.Save(path.c_str());
 	}
 }
@@ -195,6 +205,6 @@ void BuildRC()
 		}
 	}
 	
-	pdb.BuildPDB(goal, std::thread::hardware_concurrency());
+	pdb.BuildPDB(goal, threads);
 	pdb.Save(path.c_str());
 }
