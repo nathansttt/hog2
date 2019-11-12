@@ -36,6 +36,7 @@ enum Domain {
 };
 Domain domain;
 bool additive = false;
+bool load = false;
 std::vector<int> pattern;
 std::string path;
 
@@ -48,6 +49,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-domain", "-domain", "Select domain to build for. {STP44 STP55 RC}");
 	InstallCommandLineHandler(MyCLHandler, "-pattern", "-pattern", "Choose tiles in PDB");
 	InstallCommandLineHandler(MyCLHandler, "-additive", "-additive", "Build additive PDB");
+	InstallCommandLineHandler(MyCLHandler, "-load", "-load", "Load from disk and print stats");
 	InstallCommandLineHandler(MyCLHandler, "-path", "-path", "Set path for output PDB");
 }
 
@@ -99,6 +101,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		additive = true;
 		return 1;
 	}
+	if (strcmp(argument[0], "-load") == 0)
+	{
+		load = true;
+		return 1;
+	}
 	if (strcmp(argument[0], "-path") == 0)
 	{
 		path = argument[1];
@@ -131,6 +138,16 @@ void BuildSTPPDB()
 	mnp.StoreGoal(goal);
 
 	LexPermutationPDB<MNPuzzleState<width, height>, slideDir, MNPuzzle<width, height>> pdb(&mnp, goal, pattern);
+	if (load)
+	{
+		if (pdb.Load(path.c_str()))
+		{
+			printf("Loaded successfully\n");
+			pdb.PrintHistogram();
+			return;
+		}
+	}
+	
 	if (additive)
 	{
 		mnp.SetPattern(pattern);
@@ -168,6 +185,16 @@ void BuildRC()
 	printf("\n");
 	
 	RubikPDB pdb(&cube, goal, edges, corners);
+	if (load)
+	{
+		if (pdb.Load(path.c_str()))
+		{
+			printf("Loaded successfully\n");
+			pdb.PrintHistogram();
+			return;
+		}
+	}
+	
 	pdb.BuildPDB(goal, std::thread::hardware_concurrency());
 	pdb.Save(path.c_str());
 }
