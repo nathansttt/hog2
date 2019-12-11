@@ -174,15 +174,16 @@ void BuildSTPPDB()
 		pdb.BuildAdditivePDB(goal, threads); // parallelism not fixed yet
 		if (compression != 1)
 		{
+			pdb.DeltaCompress(&mnp, goal, true);
 			pdb.DivCompress(compression, true);
 		}
-		pdb.DeltaCompress(&mnp, goal, true);
 		pdb.Save(path.c_str());
 	}
 	else {
 		pdb.BuildPDB(goal, threads);
 		if (compression != 1)
 		{
+			pdb.DeltaCompress(&mnp, goal, true);
 			pdb.DivCompress(compression, true);
 		}
 		pdb.Save(path.c_str());
