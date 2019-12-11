@@ -40,6 +40,7 @@ bool load = false;
 std::vector<int> pattern;
 std::string path;
 int threads = std::thread::hardware_concurrency();
+int compression = 1;
 
 /**
  * Allows you to install any keyboard handlers needed for program interaction.
@@ -52,7 +53,8 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-additive", "-additive", "Build additive PDB");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load", "Load from disk and print stats");
 	InstallCommandLineHandler(MyCLHandler, "-threads", "-threads <N>", "Use <N> threads");
-	InstallCommandLineHandler(MyCLHandler, "-path", "-path", "Set path for output PDB");
+	InstallCommandLineHandler(MyCLHandler, "-path", "-path <path>", "Set path for output PDB");
+	InstallCommandLineHandler(MyCLHandler, "-compress", "-compress <factor>", "DIV compress PDB by a factor of <factor>");
 }
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
@@ -116,6 +118,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			printf("Error processing thread count; defaulting to %d\n", threads);
 		return 2;
 	}
+	if (strcmp(argument[0], "-compress") == 0)
+	{
+		if (maxNumArgs > 1)
+			compression = atoi(argument[1]);
+		else
+			printf("Error processing compression factor; defaulting to %d\n", compression);
+		return 2;
+	}
 	if (strcmp(argument[0], "-path") == 0)
 	{
 		path = argument[1];
@@ -162,10 +172,19 @@ void BuildSTPPDB()
 	{
 		mnp.SetPattern(pattern);
 		pdb.BuildAdditivePDB(goal, threads); // parallelism not fixed yet
+		if (compression != 1)
+		{
+			pdb.DivCompress(compression, true);
+		}
+		pdb.DeltaCompress(&mnp, goal, true);
 		pdb.Save(path.c_str());
 	}
 	else {
 		pdb.BuildPDB(goal, threads);
+		if (compression != 1)
+		{
+			pdb.DivCompress(compression, true);
+		}
 		pdb.Save(path.c_str());
 	}
 }
@@ -206,5 +225,9 @@ void BuildRC()
 	}
 	
 	pdb.BuildPDB(goal, threads);
+	if (compression != 1)
+	{
+		pdb.DivCompress(compression, true);
+	}
 	pdb.Save(path.c_str());
 }
