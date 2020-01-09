@@ -35,7 +35,8 @@ public:
 			puzzle[x] = x;
 	}
 	size_t size() const { return N; }
-	void FinishUnranking() {}
+	void FinishUnranking()
+	{ }
 //	std::vector<int> puzzle;
 	int puzzle[N];
 };
@@ -60,7 +61,7 @@ static bool operator==(const TopSpinState<N> &l1, const TopSpinState<N> &l2)
 //		return false;
 	for (unsigned int x = 0; x < N; x++)
 	{
-		if (l1.puzzle[x] != l2.puzzle[x])
+		if (l1.puzzle[(x)%N] != l2.puzzle[(x)%N])
 			return false;
 	}
 	return true;
@@ -88,6 +89,7 @@ public:
 	bool InvertAction(TopSpinAction &a) const;
 	static unsigned GetParity(TopSpinState<N> &state);
 
+	
 	OccupancyInterface<TopSpinState<N>, TopSpinAction> *GetOccupancyInfo() { return 0; }
 	double HCost(const TopSpinState<N> &state1, const TopSpinState<N> &state2) const;
 
