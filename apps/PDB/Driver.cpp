@@ -272,7 +272,7 @@ void BuildTS()
 	}
 	else {
 		pdb.BuildPDB(goal, threads);
-		pdb.BuildPDBForward(goals, threads, true, true);
+		//pdb.BuildPDBForward(goals, threads, true, true);
 		if (compression != 1)
 		{
 			pdb.DivCompress(compression, true);
