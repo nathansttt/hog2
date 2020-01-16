@@ -33,7 +33,8 @@ public:
 	uint64_t Size() const;
 	uint64_t Get(uint64_t index) const;
 	void Set(uint64_t index, uint64_t val);
-
+	uint64_t GetMaxValue() const { uint64_t v = 1; return (v<<numBits)-1;}
+	
 	bool Write(FILE *);
 	bool Read(FILE *);
 	bool Write(const char *);

@@ -10,6 +10,14 @@
 #include "NBitArray.h"
 
 template <>
+uint64_t NBitArray<64>::GetMaxValue() const
+{
+	uint64_t v = 0;
+	return ~v;
+}
+
+
+template <>
 uint64_t NBitArray<64>::Get(uint64_t index) const
 {
 	return mem[index];
