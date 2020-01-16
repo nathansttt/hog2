@@ -59,42 +59,10 @@ namespace PermutationPuzzle {
 		PermutationPuzzleEnvironment()
 		:maxItem(0), minPattern(100), additive(false) {}
 		
-//		void Min_Compress_PDB(int whichPDB, int factor, bool print_histogram);
-//		void Fractional_Compress_PDB(int whichPDB, uint64_t count, bool print_histogram);
-//		void Fractional_Mod_Compress_PDB(int whichPDB, uint64_t factor,
-//										 bool print_histogram);
-//		void Mod_Compress_PDB(int whichPDB, uint64_t newEntries, bool print_histogram);
-//		void Value_Compress_PDB(int whichPDB, int maxValue, bool print_histogram);
-//		void Value_Range_Compress_PDB(int whichPDB, int numBits, bool print_histogram);
-//		void Value_Compress_PDB(int whichPDB, std::vector<int> cutoffs, bool print_histogram);
-//		void Delta_Compress_PDB(state goal, int whichPDB, bool print_histogram);
-//		
-//		void Build_PDB(state &start, const std::vector<int> &distinct,
-//					   const char *pdb_filename, int numThreads, bool additive);
-//		void Build_Regular_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename);
-//		void Build_Additive_PDB(state &start, const std::vector<int> &distinct, const char *pdb_filename, bool blank);
-//		void Load_Regular_PDB(const char *fname, state &goal, bool print_histogram);
-//		void Load_Additive_PDB(const state &goal, const char *pdb_filename);
-//		void ClearPDBs()
-//		{       PDB.resize(0); PDB_distincts.resize(0); lookups.resize(0); }
-//		double PDB_Lookup(const state &s) const;
 		double HCost(const state &s) const;
 		virtual double AdditiveGCost(const state &s, const action &d)
 		{ assert(!"Additive Gost used but not defined for this class\n"); }
 		
-//		uint64_t GetPDBHash(const state &s,
-//							const std::vector<int> &distinct) const;
-//		uint64_t Get_PDB_Size(state &start, int pdbEntries);
-//		uint64_t GetPDBHash(const state &s,
-//							const std::vector<int> &distinct,
-//							std::vector<int> &locs,
-//							std::vector<int> &dual) const;
-//		
-//		void GetStateFromPDBHash(uint64_t hash, state &s, int count,
-//								 const std::vector<int> &pattern);
-//		void GetStateFromPDBHash(uint64_t hash, state &s, int count,
-//								 const std::vector<int> &pattern,
-//								 std::vector<int> &dual);
 		void GetStateFromHash(state &s, uint64_t hash) const;
 		uint64_t GetStateHash(const state &s) const;
 		static uint64_t Hash(const state &s)
@@ -1310,26 +1278,6 @@ namespace PermutationPuzzle {
 		state tmp;
 		mr1.Unrank(hash, s.puzzle, tmp.puzzle, s.size(), s.size());
 		s.FinishUnranking();
-		//		s.puzzle = tmpArray;
-		
-//		std::vector<int> &puzzle = tmpArray;
-//		puzzle = s.puzzle;
-//		for (int x = 0; x < puzzle.size(); x++)
-//			tmpArray2[puzzle[x]] = x;
-//		uint64_t hashVal = hash;
-//		
-//		int numEntriesLeft = 1;
-//		for (int x = s.puzzle.size()-1; x >= 0; x--)
-//		{
-//			puzzle[x] = hashVal%numEntriesLeft;
-//			hashVal /= numEntriesLeft;
-//			numEntriesLeft++;
-//			for (int y = x+1; y < (int) s.puzzle.size(); y++)
-//			{
-//				if (puzzle[y] >= puzzle[x])
-//					puzzle[y]++;
-//			}
-//		}
 	}
 	
 	template <class state, class action>
@@ -1340,43 +1288,8 @@ namespace PermutationPuzzle {
 		for (int x = 0; x < tmp.size(); x++)
 			dual.puzzle[tmp.puzzle[x]] = x;
 
-//		printf("Rglr: ");
-//		for (int x = 0; x < tmpArray.size(); x++)
-//			printf("%d ", tmpArray[x]);
-//		printf("\n");
-//		printf("Dual: ");
-//		for (int x = 0; x < tmpArray.size(); x++)
-//			printf("%d ", tmpArray2[x]);
-//		printf("\n");
 		uint64_t hash = mr1.Rank(&tmp.puzzle[0], &dual.puzzle[0], s.size(), s.size());
-//		printf("Hash: %llu\n", hash);
-//		mr1.Unrank(hash, &tmpArray[0], &tmpArray2[0], s.puzzle.size(), s.puzzle.size());
-//		printf("Unrnk: ");
-//		for (int x = 0; x < tmpArray.size(); x++)
-//			printf("%d ", tmpArray[x]);
-//		printf("\n");
-//		printf("Unrnk: ");
-//		for (int x = 0; x < tmpArray2.size(); x++)
-//			printf("%d ", tmpArray2[x]);
-//		printf("\n");
-
 		return hash;
-//		std::vector<int> &puzzle = tmpArray;
-//		puzzle = s.puzzle;
-//		uint64_t hashVal = 0;
-//		int numEntriesLeft = s.puzzle.size();
-//		for (unsigned int x = 0; x < s.puzzle.size(); x++)
-//		{
-//			hashVal += puzzle[x]*Factorial(numEntriesLeft-1);
-//			numEntriesLeft--;
-//			for (unsigned y = x; y < puzzle.size(); y++)
-//			{
-//				if (puzzle[y] > puzzle[x])
-//					puzzle[y]--;
-//			}
-//		}
-//		return hashVal;
- 
 	}
 	
 	template <class state, class action>
