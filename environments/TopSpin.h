@@ -88,8 +88,9 @@ public:
 	void UndoAction(TopSpinState<N> &s, TopSpinAction a) const;
 	bool InvertAction(TopSpinAction &a) const;
 	static unsigned GetParity(TopSpinState<N> &state);
+	void SetPattern(const std::vector<int> &pattern);
+	double AdditiveGCost(const TopSpinState<N> &s, const TopSpinAction &d);
 
-	
 	OccupancyInterface<TopSpinState<N>, TopSpinAction> *GetOccupancyInfo() { return 0; }
 	double HCost(const TopSpinState<N> &state1, const TopSpinState<N> &state2) const;
 
@@ -165,10 +166,12 @@ private:
 	unsigned **h_increment;
 	TopSpinState<N> goal;
 	std::vector<std::vector<int> > hDist;
+	bool pattern[N];
 
 	mutable std::vector<TopSpinAction> history;
 	bool pruneSuccessors;
 	bool weighted;
+	bool additive;
 };
 
 //typedef UnitSimulation<TopSpinState<N>, TopSpinAction, TopSpin> TopSpinSimulation;
@@ -180,6 +183,7 @@ TopSpin<N, k>::TopSpin()
 :PermutationPuzzle::PermutationPuzzleEnvironment<TopSpinState<N>, TopSpinAction>()
 {
 	weighted = false;
+	additive = false;
 	pruneSuccessors = false;
 	for (int x = 0; x < N; x++)
 		operators.push_back(x);
@@ -198,6 +202,32 @@ const std::string TopSpin<N, k>::GetName(){
 	
 	return name.str();
 }
+
+template <int N, int k>
+void TopSpin<N, k>::SetPattern(const std::vector<int> &pattern)
+{
+	if (pattern.size() == 0)
+		additive = false;
+	else
+		additive = true;
+	for (int x = 0; x < N; x++)
+		this->pattern[x] = false;
+	for (int i : pattern)
+		this->pattern[i] = true;
+}
+
+template <int N, int k>
+double TopSpin<N, k>::AdditiveGCost(const TopSpinState<N> &s, const TopSpinAction &a)
+{
+	double cnt = 0;
+	for (int x = 0; x < k; x++)
+	{
+		if (pattern[s.puzzle[(a+x)%N]])
+			cnt++;
+	}
+	return cnt;
+}
+
 
 template <int N, int k>
 void TopSpin<N, k>::ComputeMovePruning()
@@ -337,7 +367,11 @@ static int tscosts[tsCostCount] = {47,45,52,41,56,43,50,46,49,51,48,53,59,58,55,
 template <int N, int k>
 double TopSpin<N, k>::GCost(const TopSpinState<N> &node, const TopSpinAction &act) const
 {
-	if (!weighted)
+	if (additive)
+	{
+		return k;
+	}
+	else if (!weighted)
 	{
 		return 1;
 	}

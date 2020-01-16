@@ -267,7 +267,10 @@ void BuildTS()
 	
 	if (additive)
 	{
-		printf("Abort: Additive TS not yet supported. (TODO: Have actions cost 4 and count the number of tiles moved in each action.");
+		printf("WARNING: Additive TS not yet supported. (TODO: Have actions cost 4 and count the number of tiles moved in each action.");
+		ts.SetPattern(pattern);
+		pdb.BuildAdditivePDB(goal, threads); // parallelism not fixed yet
+
 		exit(0);
 	}
 	else {
