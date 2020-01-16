@@ -84,7 +84,7 @@ public:
 	void BuildPDBBackward(const state &goal, int numThreads);
 	void BuildPDBForwardBackward(const state &goal, int numThreads);
 
-	void BuildAdditivePDB(const state &goal, int numThreads);
+	void BuildAdditivePDB(const state &goal, int numThreads, bool useCourseOpen = true);
 
 	void DivCompress(int factor, bool print_histogram);
 	void ModCompress(int factor, bool print_histogram);
@@ -865,7 +865,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 }
 
 template <class abstractState, class abstractAction, class abstractEnvironment, class state, uint64_t pdbBits>
-void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildAdditivePDB(const state &goal, int numThreads)
+void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdbBits>::BuildAdditivePDB(const state &goal, int numThreads, bool useCourseOpen)
 {
 	assert(goalSet);
 	SharedQueue<std::pair<uint64_t, uint64_t> > workQueue(numThreads*20);
@@ -915,7 +915,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		
 		for (uint64_t x = 0; x < COUNT; x+=coarseSize)
 		{
-			if (coarseOpenCurr[x/coarseSize])
+			if (!useCourseOpen || coarseOpenCurr[x/coarseSize])
 			{
 				workQueue.WaitAdd({x, std::min(COUNT, x+coarseSize)});
 			}
@@ -946,6 +946,20 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
 		coarseOpenCurr.swap(coarseOpenNext);
+
+//		if (total == 0)
+//		{
+//			for (int x = 0; x < PDB.Size(); x++)
+//			{
+//				if (PDB.Get(x) == PDB.GetMaxValue())
+//				{
+//					abstractState s(goalState[0]);
+//					GetStateFromPDBHash(x, s, 0);
+//					std::cout << "Unassigned: [" << x << "]: " << s << "\n";
+//				}
+//			}
+//			break;
+//		}
 	} while (entries != COUNT);
 	
 	printf("%1.2fs elapsed\n", t.EndTimer());
@@ -1013,9 +1027,11 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			lock->lock();
 			for (auto d : cache)
 			{
-				if (d.newGCost < DB.Get(d.rank)) // shorter path
+				auto val = DB.Get(d.rank);
+				if (d.newGCost < val) // shorter path
 				{
-					count++;
+					if (val == DB.GetMaxValue()) // only update count if the value hasn't been set before
+						count++;
 					coarse[d.rank/coarseSize] = true;
 					DB.Set(d.rank, d.newGCost);
 					if (d.newGCost == depth) // zero-cost action

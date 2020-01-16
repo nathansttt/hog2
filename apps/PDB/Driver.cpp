@@ -267,9 +267,9 @@ void BuildTS()
 	
 	if (additive)
 	{
-		printf("WARNING: Additive TS not yet supported. (TODO: Have actions cost 4 and count the number of tiles moved in each action.");
+		printf("WARNING: Additive TS PDBs appear to work but are still being tested.\n");
 		ts.SetPattern(pattern);
-		pdb.BuildAdditivePDB(goal, threads); // parallelism not fixed yet
+		pdb.BuildAdditivePDB(goal, threads, false); // course open doesn't work on non-unit cost domains
 
 		exit(0);
 	}
