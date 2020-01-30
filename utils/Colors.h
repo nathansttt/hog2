@@ -19,6 +19,12 @@ public:
 	rgbColor() {}
 	rgbColor(float rr, float gg, float bb) :r(rr), g(gg), b(bb) {}
 	rgbColor &operator=(const rgbColor & ) = default;
+	rgbColor &operator*=(float p) { r*=p; g*=p; b*=p; return *this; }
+	rgbColor operator*(float p) const { rgbColor tmp(*this); tmp*=p; return tmp; }
+	static rgbColor mix(const rgbColor &c1, const rgbColor &c2, float perc)
+	{
+		return rgbColor((1-perc)*c1.r+c2.r*perc, (1-perc)*c1.g+c2.g*perc, (1-perc)*c1.b+c2.b*perc);
+	}
 	void mix(const rgbColor &c, float perc)
 	{
 		r = (1-perc)*r+c.r*perc;
@@ -113,6 +119,7 @@ namespace Colors
 	const rgbColor yellow = {1.0,1.0,0.0}; // yellow
 	const rgbColor darkyellow = {0.5,0.5,0.0}; // yellow
 	const rgbColor purple = {1.0,0.0,1.0}; // purple
+	const rgbColor darkpurple = {0.5,0.0,0.5}; // 
 	const rgbColor cyan   = {0.0,1.0,1.0}; // cyan
 	
 	const rgbColor orange = {1.0,0.5,0.0}; // orange
