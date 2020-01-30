@@ -18,8 +18,7 @@
 #include <deque>
 #include "Combinations.h"
 #include "SVGUtil.h"
-#include <thread>
-std::mutex lock;
+
 #include <sys/stat.h>
 bool fileExists(const char *name)
 {
