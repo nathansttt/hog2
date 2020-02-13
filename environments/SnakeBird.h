@@ -19,6 +19,7 @@ namespace SnakeBird {
 //
 //
 // world is 20x16 (WxH) = 320
+// world is any x/y, as long as x*y < 512
 // 1 snake = [5 bits, 4 bits] 9 bits head, 2 bits (4 dir) per segment
 // 3 snakes = 27 bits + length
 
@@ -29,7 +30,10 @@ const uint64_t locationMask = 0x1FF;
 const uint64_t snakeLenMask = 0x1F;
 const uint64_t fruitMask = 0x1F;
 const uint64_t snakeBodyMask = 0x3;
-const int kInGoal = 320;
+const uint64_t kOne = 0x1;
+const int kInGoal = 511;
+const uint8_t kNothingPushed = 0xFF;
+const int kMaxPushedObjects = 3;
 
 enum snakeDir : uint8_t {
 	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3
@@ -54,6 +58,9 @@ struct SnakeBirdState {
 	void SetSnakeBodyEnd(int whichSnake, int endOffset)
 	{ snakeHeads &= ~(snakeLenMask<<(2+9*(whichSnake+1)+5*whichSnake)); snakeHeads |= ((endOffset&snakeLenMask)<<(2+9*(whichSnake+1)+5*whichSnake)); }
 	
+	void SetSnakeLength(int whichSnake, int len)
+	{ SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1); }
+	
 	snakeDir GetSnakeDir(int whichSnake, int segment) const
 	{ return static_cast<snakeDir>((snakeBodies>>(2*segment+2*GetSnakeBodyEnd(whichSnake-1)))&snakeBodyMask); }
 	void SetSnakeDir(int whichSnake, int segment, snakeDir dir)
@@ -74,20 +81,51 @@ struct SnakeBirdState {
 		snakeBodies &= (~mask);
 		snakeBodies |= (oldSnake&(mask));
 	}
-	
+	// grow snake by adding dir
+	void InsertSnakeHeadDir(int whichSnake, snakeDir dir)
+	{
+		int start = GetSnakeBodyEnd(whichSnake-1)*2;
+		uint64_t mask = 1; // mask is the low bits to keep
+		mask<<=start;
+		mask -= 1;
+
+		uint64_t a = (snakeBodies&mask);
+		uint64_t b = (dir<<start);
+		uint64_t c = ((snakeBodies&(~mask))<<(2));
+		snakeBodies = a|b|c;
+//		
+//		mask <<= (GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1))*2; // length in bits
+//		mask -= 1;
+//		mask <<= GetSnakeBodyEnd(whichSnake-1)*2;
+//		uint64_t oldSnake = snakeBodies&(mask);
+//		oldSnake<<=2;
+//		oldSnake |= dir<<(GetSnakeBodyEnd(whichSnake-1)*2);
+//		snakeBodies &= (~mask);
+//		snakeBodies |= (oldSnake&(mask));
+	}
+
 	int GetObjectLocation(int whichObstacle) const { return (locBlockFruit>>(9*whichObstacle))&locationMask; }
 	void SetObjectLocation(int whichObstacle, int loc) //{ return (locBlockFruit>>(9*whichObstacle))&locationMask; }
 	{ locBlockFruit &= ~(locationMask<<(whichObstacle*9)); locBlockFruit |= ((loc&locationMask)<<(whichObstacle*9)); }
 	
-	bool GetFruitPresent(int which) const { return (locBlockFruit>>(36+which))&0x1; }
-	void ToggleFruitPresent(int which) { locBlockFruit ^= (fruitMask<<(36+which));}
+	// Fruit is 0 if present 1 if not. Thus by default all fruit is present.
+	bool GetFruitPresent(int which) const { return ((locBlockFruit>>(36+which))&0x1)==0; }
+	void ToggleFruitPresent(int which) { locBlockFruit ^= (kOne<<(36+which));}
+	bool KFruitEaten(int k)
+	{
+		uint64_t mask = (kOne<<(k))-1;
+		return ((locBlockFruit>>36)&mask)==(mask);
+		
+	}
 };
 
 struct SnakeBirdAction {
 	unsigned int bird : 4; // which bird
 	unsigned int direction : 4; // which direction
+	uint8_t pushed[kMaxPushedObjects]; // up to kMaxPushedObjects pushed objects
 	bool operator==(const SnakeBirdAction &a) const
 	{
+		// TODO: need to compare if anything is being pushed
 		return a.bird == bird && a.direction == direction;
 	}
 };
@@ -116,12 +154,16 @@ enum SnakeBirdWorldObject : uint8_t {
 	kSpikes,
 	kPortal,
 	kExit,
-	kFruit
+	kFruit,
+	kSnake1,
+	kSnake2,
+	kSnake3,
+	kSnake4
 };
 
 class SnakeBird : public SearchEnvironment<SnakeBirdState, SnakeBirdAction> {
 public:
-	//SnakeBird()
+	SnakeBird(int width = 20, int height = 16);
 	bool Load(const char *filename);
 	bool Save(const char *filename);
 	SnakeBirdState GetStart();
@@ -190,6 +232,12 @@ public:
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
+	bool CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
+				 SnakeBirdAction &a, int pushObject) const;
+	void Gravity(SnakeBirdState &s) const;
+
+	int GetFruitOffset(int index) const;
+	int width, height;
 	int GetIndex(int x, int y) const;
 	int GetX(int index) const;
 	int GetY(int index) const;
@@ -197,7 +245,11 @@ private:
 	float GetRadius() const;
 	void DrawSnakeSegment(Graphics::Display &display, int x, int y, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo) const;
 
-	std::array<SnakeBirdWorldObject, 320> world; // static world
+	std::array<SnakeBirdWorldObject, 512> world; // static world
+	mutable std::array<SnakeBirdWorldObject, 512> render;
+	std::vector<int> fruit;
+	std::vector<int> objects;
+	//	std::array<
 };
 
 }

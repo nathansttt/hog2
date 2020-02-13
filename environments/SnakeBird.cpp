@@ -10,6 +10,12 @@
 
 namespace SnakeBird {
 
+SnakeBird::SnakeBird(int width, int height)
+:width(width), height(height)
+{
+	assert(width*height < 512);
+}
+
 void SnakeBird::GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const
 {
 	
@@ -29,14 +35,70 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 {
 	actions.clear();
 	SnakeBirdAction a;
+	
+	SnakeBirdWorldObject obj[4] = {kSnake1, kSnake2, kSnake3, kSnake4};
+	std::fill_n(&render[0], 512, kEmpty);
+	
+	// render snakes into world
+	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
+	{
+		int loc = s.GetSnakeHeadLoc(snake);
+		render[loc] = obj[snake];
+		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
+		for (int x = 0; x < len; x++)
+		{
+			switch (s.GetSnakeDir(snake, x))
+			{
+				case kLeft: loc-=height; break;
+				case kRight: loc+=height; break;
+				case kUp: loc-=1; break;
+				case kDown: loc+=1; break;
+			}
+			render[loc] = obj[snake];
+		}
+	}
+	// TODO: render objects as well
+	{
+		
+	}
+	
+//	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
+//	{
+//		int loc = s.GetSnakeHeadLoc(snake);
+//		render[loc] = obj[snake];
+//		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
+//		for (int x = 0; x < len; x++)
+//		{
+//			switch (s.GetSnakeDir(snake, x))
+//			{
+//				case kLeft: loc-=height; break;
+//				case kRight: loc+=height; break;
+//				case kUp: loc-=1; break;
+//				case kDown: loc+=1; break;
+//			}
+//			if (loc-1 < 0 || render[loc-1] == 3)
+//				canPushDir[snake][kLeft] = false;
+//		}
+//	}
+
+	//	for (int y = 0; y < height; y++)
+//	{
+//		for (int x = 0; x < width; x++)
+//		{
+//			printf("%c", 'a'+render[GetIndex(x, y)]);
+//		}
+//		printf("\n");
+//	}
+	
 	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
 	{
 		// first pass - don't allow to move back onto yourself or onto other obstacles
 		int loc = s.GetSnakeHeadLoc(snake);
 		a.bird = snake;
-		
-		// kDown
-		if (world[loc+1] != kGround && world[loc+1] != kSpikes && GetY(loc)+1 < 16) // not blocked directly
+		a.pushed[0] = kNothingPushed;
+
+		// kDown - can never push any object down due to gravity
+		if (world[loc+1] != kGround && world[loc+1] != kSpikes && GetY(loc)+1 < height && render[loc+1] == kEmpty)
 		{
 			if (s.GetSnakeDir(snake, 0) != kDown) // not blocked by snake
 			{
@@ -46,29 +108,31 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 		}
 
 		// kUp
-		if (world[loc-1] != kGround && world[loc-1] != kSpikes && GetY(loc) > 0) // not blocked directly
+		if (world[loc-1] != kGround && world[loc-1] != kSpikes && GetY(loc) > 0 && render[loc-1] != obj[snake])
 		{
-			if (s.GetSnakeDir(snake, 0) != kUp) // not blocked by snake
+			if (s.GetSnakeDir(snake, 0) != kUp && (render[loc-1] == kEmpty || CanPush(s, snake, render[loc-1], kUp, a, 0))) // snake not blocked by self
 			{
 				a.direction = kUp;
 				actions.push_back(a);
 			}
 		}
-
+		
+		a.pushed[0] = kNothingPushed;
 		// kRight
-		if (world[loc+16] != kGround && world[loc+16] != kSpikes && GetX(loc)+1 < 20) // not blocked directly
+		if (world[loc+height] != kGround && world[loc+height] != kSpikes && GetX(loc)+1 < width && render[loc+height] != obj[snake])
 		{
-			if (s.GetSnakeDir(snake, 0) != kRight) // not blocked by snake
+			if (s.GetSnakeDir(snake, 0) != kRight && (render[loc+height] == kEmpty || CanPush(s, snake, render[loc+height], kRight, a, 0))) // not blocked by snake
 			{
 				a.direction = kRight;
 				actions.push_back(a);
 			}
 		}
-
+		
+		a.pushed[0] = kNothingPushed;
 		// kLeft
-		if (world[loc-16] != kGround && world[loc-16] != kSpikes && GetX(loc) > 0) // not blocked directly
+		if (world[loc-height] != kGround && world[loc-height] != kSpikes && GetX(loc) > 0 && render[loc-height] != obj[snake])
 		{
-			if (s.GetSnakeDir(snake, 0) != kLeft) // not blocked by snake
+			if (s.GetSnakeDir(snake, 0) != kLeft && (render[loc-height] == kEmpty || CanPush(s, snake, render[loc-height], kLeft, a, 0))) // not blocked by snake
 			{
 				a.direction = kLeft;
 				actions.push_back(a);
@@ -77,26 +141,200 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 	}
 }
 
+bool SnakeBird::CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
+						SnakeBirdAction &a, int pushObject) const
+{
+	if (pushObject >= kMaxPushedObjects)
+		return false;
+	int pushed;
+	// can't push yourself
+	if (pushObject+1 < kMaxPushedObjects)
+	a.pushed[pushObject+1] = kNothingPushed;
+	switch (obj) {
+		case kSnake1: if (snake == 0) return false; pushed = 0; break;
+		case kSnake2: if (snake == 1) return false; pushed = 1; break;
+		case kSnake3: if (snake == 2) return false; pushed = 2; break;
+		case kSnake4: if (snake == 3) return false; pushed = 3; break;
+		default: return false; break;
+	}
+	// already pushing this
+	for (int x = 0; x < pushObject; x++)
+		if (a.pushed[x] == pushed)
+			return true;
+	// not pushing; put in queue
+	a.pushed[pushObject] = pushed;
+	// Render pushed obj one step in (dir)
+	int loc = s.GetSnakeHeadLoc(pushed);
+	switch (dir)
+	{
+		case kLeft: if (loc < height) return false; loc-=height; break;
+		case kRight: if (loc+height > width*height) return false; loc+=height; break;
+		case kUp: if (loc == 0) return false; loc-=1; break;
+		case kDown: if (loc+1 == width*height) return false; loc+=1; break;
+	}
+	if (world[loc]!=kEmpty)
+		return false;
+	// If moved into location is occupied by another object (not us), see if it can be pushed
+	if ((render[loc] != kEmpty && render[loc] != obj))
+	{
+		if (!CanPush(s, snake, render[loc], dir, a, pushObject+1))
+			return false;
+	}
+
+	int len = s.GetSnakeBodyEnd(pushed)-s.GetSnakeBodyEnd(pushed-1);
+	for (int x = 0; x < len; x++)
+	{
+		switch (s.GetSnakeDir(pushed, x))
+		{
+			case kLeft: if (loc < height) return false; loc-=height; break;
+			case kRight: if (loc+height > width*height) return false; loc+=height; break;
+			case kUp: if (loc == 0) return false; loc-=1; break;
+			case kDown: if (loc+1 == width*height) return false; loc+=1; break;
+		}
+		if (world[loc]!=kEmpty)
+			return false;
+		// If moved into location is occupied by another object (not us), see if it can be pushed
+		if ((render[loc] != kEmpty && render[loc] != obj))
+		{
+			if (!CanPush(s, snake, render[loc], dir, a, pushObject+1))
+				return false;
+		}
+	}
+	// temporarily return false to not push other snakes
+	//return ;
+	return true;
+}
+
+void SnakeBird::Gravity(SnakeBirdState &s) const
+{
+	SnakeBirdWorldObject obj[4] = {kSnake1, kSnake2, kSnake3, kSnake4};
+	std::fill_n(&render[0], 512, kEmpty);
+	// render snakes into world
+	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
+	{
+		int loc = s.GetSnakeHeadLoc(snake);
+		render[loc] = obj[snake];
+		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
+		for (int x = 0; x < len; x++)
+		{
+			switch (s.GetSnakeDir(snake, x))
+			{
+				case kLeft: loc-=height; break;
+				case kRight: loc+=height; break;
+				case kUp: loc-=1; break;
+				case kDown: loc+=1; break;
+			}
+			render[loc] = obj[snake];
+		}
+	}
+}
+
+
 //SnakeBirdAction GetAction(const SnakeBirdState &s1, const SnakeBirdState &s2) const;
 void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 {
 	switch (a.direction)
 	{
 		case kLeft:
-			s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)-16);
-			s.InsertSnakeDir(a.bird, kRight);
+			// exited level
+			if (world[s.GetSnakeHeadLoc(a.bird)-height] == kExit && s.KFruitEaten(fruit.size()))
+			{
+				s.SetSnakeHeadLoc(a.bird, kInGoal);
+				break;
+			}
+
+			// eating fruit
+			if (world[s.GetSnakeHeadLoc(a.bird)-height] == kFruit &&
+				s.GetFruitPresent(GetFruitOffset(s.GetSnakeHeadLoc(a.bird)-height)))
+			{
+				s.ToggleFruitPresent(GetFruitOffset(s.GetSnakeHeadLoc(a.bird)-height));
+				for (int x = a.bird; x < s.GetNumSnakes(); x++)
+					s.SetSnakeBodyEnd(x, s.GetSnakeBodyEnd(x)+1);
+				s.InsertSnakeHeadDir(a.bird, kRight);
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)-height);
+			}
+			else {
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)-height);
+				s.InsertSnakeDir(a.bird, kRight);
+				for (int i = 0; i < 4&&a.pushed[i] != kNothingPushed; i++)
+					s.SetSnakeHeadLoc(a.pushed[i], s.GetSnakeHeadLoc(a.pushed[i])-height);
+			}
 			break;
 		case kRight:
-			s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+16);
-			s.InsertSnakeDir(a.bird, kLeft);
+			// exited level
+			if (world[s.GetSnakeHeadLoc(a.bird)+height] == kExit && s.KFruitEaten(fruit.size()))
+			{
+				s.SetSnakeHeadLoc(a.bird, kInGoal);
+				break;
+			}
+
+			// eating fruit
+			if (world[s.GetSnakeHeadLoc(a.bird)+height] == kFruit &&
+				s.GetFruitPresent(GetFruitOffset(s.GetSnakeHeadLoc(a.bird)+height)))
+			{
+				s.ToggleFruitPresent(GetFruitOffset(s.GetSnakeHeadLoc(a.bird)+height));
+				for (int x = a.bird; x < s.GetNumSnakes(); x++)
+					s.SetSnakeBodyEnd(x, s.GetSnakeBodyEnd(x)+1);
+				s.InsertSnakeHeadDir(a.bird, kLeft);
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+1);
+			}
+			else {
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+height);
+				s.InsertSnakeDir(a.bird, kLeft);
+				for (int i = 0; i < 4&&a.pushed[i] != kNothingPushed; i++)
+					s.SetSnakeHeadLoc(a.pushed[i], s.GetSnakeHeadLoc(a.pushed[i])+height);
+			}
 			break;
 		case kUp:
-			s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)-1);
-			s.InsertSnakeDir(a.bird, kDown);
+			// exited level
+			if (world[s.GetSnakeHeadLoc(a.bird)-1] == kExit && s.KFruitEaten(fruit.size()))
+			{
+				s.SetSnakeHeadLoc(a.bird, kInGoal);
+				break;
+			}
+
+			// eating fruit
+			if (world[s.GetSnakeHeadLoc(a.bird)-1] == kFruit &&
+				s.GetFruitPresent(GetFruitOffset(s.GetSnakeHeadLoc(a.bird)-1)))
+			{
+				s.ToggleFruitPresent(GetFruitOffset(s.GetSnakeHeadLoc(a.bird)-1));
+				for (int x = a.bird; x < s.GetNumSnakes(); x++)
+					s.SetSnakeBodyEnd(x, s.GetSnakeBodyEnd(x)+1);
+				s.InsertSnakeHeadDir(a.bird, kDown);
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)-1);
+			}
+			else {
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)-1);
+				s.InsertSnakeDir(a.bird, kDown);
+				for (int i = 0; i < 4&&a.pushed[i] != kNothingPushed; i++)
+					s.SetSnakeHeadLoc(a.pushed[i], s.GetSnakeHeadLoc(a.pushed[i])-1);
+			}
 			break;
 		case kDown:
-			s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+1);
-			s.InsertSnakeDir(a.bird, kUp);
+			// exited level
+			if (world[s.GetSnakeHeadLoc(a.bird)+1] == kExit && s.KFruitEaten(fruit.size()))
+			{
+				s.SetSnakeHeadLoc(a.bird, kInGoal);
+				break;
+			}
+
+			// eating fruit
+			if (world[s.GetSnakeHeadLoc(a.bird)+1] == kFruit &&
+				s.GetFruitPresent(GetFruitOffset(s.GetSnakeHeadLoc(a.bird)+1)))
+			{
+				s.ToggleFruitPresent(GetFruitOffset(s.GetSnakeHeadLoc(a.bird)+1));
+				for (int x = a.bird; x < s.GetNumSnakes(); x++)
+					s.SetSnakeBodyEnd(x, s.GetSnakeBodyEnd(x)+1);
+				s.InsertSnakeHeadDir(a.bird, kUp);
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+1);
+			}
+			else {
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+1);
+				s.InsertSnakeDir(a.bird, kUp);
+				// removed code -- can't push down
+//				if (a.pushed[0] != kNothingPushed)
+//					s.SetSnakeHeadLoc(a.pushed[0], s.GetSnakeHeadLoc(a.pushed[0])+1);
+			}
 			break;
 	}
 }
@@ -104,7 +342,21 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 {
 	world[GetIndex(x, y)] = o;
+	if (o == kFruit)
+	{
+		fruit.push_back(GetIndex(x, y)); // TODO: check duplicates
+	}
 }
+
+int SnakeBird::GetFruitOffset(int index) const
+{
+	for (int x = 0; x < fruit.size(); x++)
+		if (fruit[x] == index)
+			return x;
+	assert(false);
+	return -1;
+}
+
 
 SnakeBirdWorldObject SnakeBird::GetGroundType(int x, int y)
 {
@@ -114,24 +366,24 @@ SnakeBirdWorldObject SnakeBird::GetGroundType(int x, int y)
 
 int SnakeBird::GetIndex(int x, int y) const
 {
-	return x*16+y;
+	return x*height+y;
 }
 
 int SnakeBird::GetX(int index) const
 {
-	return index/16;
+	return index/height;
 }
 
 int SnakeBird::GetY(int index) const
 {
-	return index%16;
+	return index%height;
 }
 
 void SnakeBird::Draw(Graphics::Display &display)
 {
 	display.FillRect({-1, -1, 1, 0}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
 	display.FillRect({-1, 0, 1, 1}, Colors::darkblue);
-	for (int x = 0; x < 320; x++)
+	for (int x = 0; x < width*height; x++)
 	{
 		Graphics::point p = GetCenter(GetX(x), GetY(x));
 		double radius = GetRadius()*0.95;
@@ -140,7 +392,7 @@ void SnakeBird::Draw(Graphics::Display &display)
 			case kEmpty:
 				break;//display.FillSquare(p, GetRadius(), Colors::lightblue);  break;
 			case kGround:
-				display.FillSquare(p, radius, Colors::brown);
+				display.FillSquare(p, GetRadius(), Colors::brown);
 				break;
 			case kSpikes:
 				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
@@ -159,16 +411,16 @@ void SnakeBird::Draw(Graphics::Display &display)
 				display.FillNGon(p, radius*0.25, 5, 54, Colors::red);
 				break;
 			case kFruit:
-				p.x-=radius/4;
-				display.FillCircle(p, radius/2.0, Colors::green);
-				p.x+=radius/2;
-				display.FillCircle(p, radius/2.0, Colors::green);
+//				p.x-=radius/4;
+//				display.FillCircle(p, radius/2.0, Colors::green);
+//				p.x+=radius/2;
+//				display.FillCircle(p, radius/2.0, Colors::green);
 				break;
 		}
 	}
 	
 //	// draw grid
-//	for (int x = 0; x < 20; x++)
+//	for (int x = 0; x < width; x++)
 //	{
 //		Graphics::point p1, p2;
 //		p1.x = GetX(GetIndex(x, 0))-GetRadius();
@@ -181,7 +433,7 @@ void SnakeBird::Draw(Graphics::Display &display)
 //	{
 //		Graphics::point p1, p2;
 //		p1.x = GetX(GetIndex(0, y))-GetRadius();
-//		p1.y = GetY(GetIndex(20, y))-GetRadius();
+//		p1.y = GetY(GetIndex(width, y))-GetRadius();
 //		p2.y = p1.y;
 //		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
 //	}
@@ -212,14 +464,21 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 	{
 		// get head loc
 		int index = s.GetSnakeHeadLoc(snake);
-
+		if (index == kInGoal)
+			continue;
+		
 		int x = GetX(index);
 		int y = GetY(index);
 //		display.FillSquare(p, GetRadius(), Colors::red);
-		DrawSnakeSegment(display, x, y, c[snake], true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0));
+		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
+
+		if (len%2)
+			DrawSnakeSegment(display, x, y, c[snake]*0.8, true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0));
+		else
+			DrawSnakeSegment(display, x, y, c[snake], true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0));
 
 		int cnt = 0;
-		for (int t = 0; t < s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1); t++)
+		for (int t = 0; t < len; t++)
 		{
 			switch (s.GetSnakeDir(snake, t))
 			{
@@ -239,10 +498,19 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 					break;
 			}
 			bool tail = t+1==(s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1));
-			if ((++cnt)&1)
+			if ((++cnt+len)&1)
 				DrawSnakeSegment(display, x, y, c[snake]*0.8, false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1));
 			else
 				DrawSnakeSegment(display, x, y, c[snake], false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1));
+		}
+	}
+	for (int x = 0; x < fruit.size(); x++)
+	{
+		if (s.GetFruitPresent(x))
+		{
+			Graphics::point p = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
+
+			display.FillCircle(p, GetRadius()*0.8, Colors::orange);
 		}
 	}
 }
