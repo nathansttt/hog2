@@ -48,7 +48,7 @@ std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbCo
 	return s;
 }
 
-std::string SVGFrameCircle(double x, double y, double radius, int border, rgbColor c)
+std::string SVGFrameCircle(double x, double y, double radius, double border, rgbColor c)
 {
 	std::string s;
 	s += "<circle cx=\"" + to_string_with_precision(x);
@@ -96,7 +96,7 @@ std::string SVGDrawRect(float x, float y, float width, float height, rgbColor c)
 	return s;
 }
 
-std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbColor c)
+std::string SVGFrameRect(float x, float y, float width, float height, float border, rgbColor c)
 {
 	double epsilon = 0;//0.05;//0.5;
 	std::string s;
@@ -146,7 +146,7 @@ std::string SVGDrawNGon(double _x, double _y, double radius, int segments, float
 
 std::string SVGBeginLinePath(float width, rgbColor c)
 {
-	return "<path stroke-linecap=\"round\" stroke=\""+SVGGetRGB(c)+"\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" d=\"";
+	return "<path stroke-linejoin=\"round\" stroke-linecap=\"round\" stroke=\""+SVGGetRGB(c)+"\" stroke-width=\""+std::to_string(width)+"\" fill=\"none\" d=\"";
 //
 //	s += "M "+std::to_string(lines[0].x)+" "+std::to_string(lines[0].y)+" L";
 //
@@ -275,6 +275,11 @@ void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int
 	svgFile.close();
 }
 
+float WidthToSVG(float w, float xMultiplier, float yMultiplier)
+{
+	return std::min(xMultiplier, yMultiplier)*((w+1)/2.0-(0+1)/2.0);
+}
+
 float PointToSVG(float p, float multiplier)
 {
 	return (p+1)*multiplier/2.0;
@@ -388,7 +393,7 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 				s += SVGFrameRect(PointToSVG(o.r.left, width), PointToSVG(o.r.top, height),
 								  PointToSVG(o.r.right, width)-PointToSVG(o.r.left, width),
 								  PointToSVG(o.r.bottom, height)-PointToSVG(o.r.top, height),
-								  o.width, o.c);
+								  WidthToSVG(o.width, width, height), o.c);
 				break;
 			}
 			case Graphics::Display::kFillOval:
@@ -430,7 +435,9 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 	std::string s;
 	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(width+3)+"\" height = \""+std::to_string(height+3)+"\" ";
 	s += "viewBox = \"-1 -1 "+std::to_string(width+2)+" "+std::to_string(height+2)+"\" ";
-	s += "preserveAspectRatio = \"none\" shape-rendering=\"crispEdges\""; // crispEdges
+	//s += "preserveAspectRatio = \"none\" shape-rendering=\"crispEdges\""; // crispEdges
+	s += " preserveAspectRatio = \"none\"";
+	s += " shape-rendering=\"crispEdges\""; // crispEdges
 	s += ">\n";
 
 //	s += SVGDrawRect(0, 0, width, height, Colors::white);
@@ -443,9 +450,18 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 		const auto &i = disp.text[x];
 		if (i.viewport == viewport)
 		{
-			s += SVGDrawText(PointToSVG(i.loc.x, width),
-							 PointToSVG(i.loc.y, height),
-							 i.s.c_str(), i.c, i.size*width/2.0, i.typeface.c_str());
+			if (i.align == Graphics::textAlignLeft)
+				s += SVGDrawText(PointToSVG(i.loc.x, width),
+								 PointToSVG(i.loc.y, height),
+								 i.s.c_str(), i.c, i.size*width/2.0, i.typeface.c_str(), SVG::kLeft);
+			else if (i.align == Graphics::textAlignCenter)
+				s += SVGDrawText(PointToSVG(i.loc.x, width),
+								 PointToSVG(i.loc.y, height),
+								 i.s.c_str(), i.c, i.size*width/2.0, i.typeface.c_str(), SVG::kCenter);
+			else
+				s += SVGDrawText(PointToSVG(i.loc.x, width),
+								 PointToSVG(i.loc.y, height),
+								 i.s.c_str(), i.c, i.size*width/2.0, i.typeface.c_str(), SVG::kRight);
 			s += "\n";
 		}
 	}

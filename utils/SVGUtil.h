@@ -22,11 +22,11 @@ namespace SVG {
 	};
 }
 
-std::string SVGFrameRect(int x, int y, int width, int height, int border, rgbColor c);
+std::string SVGFrameRect(float x, float y, float width, float height, float border, rgbColor c);
 
 std::string SVGDrawRect(float x, float y, float width, float height, rgbColor c);
 std::string SVGDrawRect(float x, float y, float width, float height, const char *gradient);
-std::string SVGFrameCircle(double x, double y, double radius, int border, rgbColor c);
+std::string SVGFrameCircle(double x, double y, double radius, double border, rgbColor c);
 std::string SVGDrawCircle(double x, double y, double radius, rgbColor c);
 
 std::string SVGFrameNGon(double x, double y, double radius, int segments, float rotation, int border, rgbColor c);
