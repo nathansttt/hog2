@@ -62,12 +62,90 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Right", "Move right", kAnyModifier, 'd');
 	InstallKeyboardHandler(MyDisplayHandler, "Undo", "Undo last move", kAnyModifier, 'q');
 	InstallKeyboardHandler(MyDisplayHandler, "Next", "Select Next Snake", kAnyModifier, 'e');
+	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset Level", kAnyModifier, 'r');
+	InstallKeyboardHandler(MyDisplayHandler, "Print", "Print screen to file", kAnyModifier, 'p');
 
 	InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
 	
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseUp|kMouseDrag));
+}
+
+void LoadLevel22()
+{
+	sb.SetGroundType(3, 7, SnakeBird::kGround);
+	sb.SetGroundType(3, 8, SnakeBird::kGround);
+	sb.SetGroundType(3, 9, SnakeBird::kGround);
+	sb.SetGroundType(3, 10, SnakeBird::kGround);
+	sb.SetGroundType(4, 7, SnakeBird::kGround);
+	sb.SetGroundType(4, 8, SnakeBird::kGround);
+	sb.SetGroundType(4, 9, SnakeBird::kGround);
+	sb.SetGroundType(4, 10, SnakeBird::kGround);
+	sb.SetGroundType(5, 10, SnakeBird::kGround);
+	sb.SetGroundType(6, 8, SnakeBird::kGround);
+	sb.SetGroundType(6, 10, SnakeBird::kGround);
+	sb.SetGroundType(7, 10, SnakeBird::kGround);
+	sb.SetGroundType(8, 9, SnakeBird::kGround);
+	sb.SetGroundType(8, 10, SnakeBird::kGround);
+	sb.SetGroundType(9, 9, SnakeBird::kGround);
+	sb.SetGroundType(9, 10, SnakeBird::kGround);
+	
+	sb.SetGroundType(5, 1, SnakeBird::kExit);
+	
+	sb.AddSnake(4, 6, {SnakeBird::kLeft, SnakeBird::kLeft});
+	//		sb.AddSnake(10, 10, {SnakeBird::kRight});
+	//		sb.AddSnake(15, 10, {SnakeBird::kRight});
+	//		sb.AddSnake(20, 10, {SnakeBird::kRight});
+	
+	sb.SetGroundType(8, 7, SnakeBird::kBlock1);
+	sb.SetGroundType(8, 8, SnakeBird::kBlock1);
+	sb.SetGroundType(9, 7, SnakeBird::kBlock1);
+	sb.SetGroundType(9, 8, SnakeBird::kBlock1);
+		
+	snake = sb.GetStart();
+	history.clear();
+	history.push_back(snake);
+}
+
+void LoadLevel39()
+{
+	for (int x = 3; x <= 14; x++)
+		sb.SetGroundType(x, 12, SnakeBird::kGround);
+	for (int x = 3; x <= 6; x++)
+		sb.SetGroundType(x, 11, SnakeBird::kGround);
+	for (int x = 9; x <= 14; x++)
+		sb.SetGroundType(x, 11, SnakeBird::kGround);
+	for (int x = 11; x <= 14; x++)
+	{
+		sb.SetGroundType(x, 9, SnakeBird::kGround);
+		sb.SetGroundType(x, 6, SnakeBird::kGround);
+	}
+	for (int x = 10; x <= 14; x++)
+	{
+		sb.SetGroundType(x, 10, SnakeBird::kGround);
+		sb.SetGroundType(x, 8, SnakeBird::kGround);
+		sb.SetGroundType(x, 7, SnakeBird::kGround);
+		sb.SetGroundType(x, 5, SnakeBird::kGround);
+		sb.SetGroundType(x, 4, SnakeBird::kGround);
+	}
+
+	
+	sb.SetGroundType(12, 1, SnakeBird::kExit);
+	
+	sb.AddSnake(6, 8, {SnakeBird::kLeft, SnakeBird::kLeft, SnakeBird::kDown, SnakeBird::kDown});
+	//		sb.AddSnake(10, 10, {SnakeBird::kRight});
+	//		sb.AddSnake(15, 10, {SnakeBird::kRight});
+	//		sb.AddSnake(20, 10, {SnakeBird::kRight});
+	
+	sb.SetGroundType(5, 10, SnakeBird::kBlock1);
+	sb.SetGroundType(6, 10, SnakeBird::kBlock1);
+	sb.SetGroundType(5, 9, SnakeBird::kBlock2);
+	sb.SetGroundType(6, 9, SnakeBird::kBlock2);
+		
+	snake = sb.GetStart();
+	history.clear();
+	history.push_back(snake);
 }
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
@@ -82,28 +160,54 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
+		//LoadLevel22();
+		LoadLevel39();
 		
-		
-		sb.SetGroundType(0, 0, SnakeBird::kEmpty);
-		sb.SetGroundType(1, 0, SnakeBird::kGround);
-		sb.SetGroundType(2, 0, SnakeBird::kSpikes);
-		sb.SetGroundType(3, 0, SnakeBird::kPortal);
-		sb.SetGroundType(4, 0, SnakeBird::kExit);
-		sb.SetGroundType(5, 0, SnakeBird::kFruit);
-		
-		snake.SetNumSnakes(2);
-		snake.SetSnakeHeadLoc(0, 6);
-		snake.SetSnakeBodyEnd(0, 4);
-		snake.SetSnakeDir(0, 0, SnakeBird::kRight);
-		snake.SetSnakeDir(0, 1, SnakeBird::kUp);
-		snake.SetSnakeDir(0, 2, SnakeBird::kRight);
-		snake.SetSnakeDir(0, 3, SnakeBird::kUp);
+//		sb.SetGroundType(0, 0, SnakeBird::kEmpty);
+//		sb.SetGroundType(1, 0, SnakeBird::kGround);
+//		sb.SetGroundType(2, 0, SnakeBird::kSpikes);
+//		sb.SetGroundType(3, 3, SnakeBird::kPortal1);
+//		sb.SetGroundType(4, 0, SnakeBird::kExit);
+//		sb.SetGroundType(5, 0, SnakeBird::kFruit);
+//		sb.SetGroundType(6, 1, SnakeBird::kFruit);
+//		sb.SetGroundType(7, 2, SnakeBird::kFruit);
+//		sb.SetGroundType(10, 3, SnakeBird::kPortal2);
+//
+//		sb.SetGroundType(3, 12, SnakeBird::kSpikes);
+//		sb.SetGroundType(8, 12, SnakeBird::kSpikes);
+//		sb.SetGroundType(15, 12, SnakeBird::kSpikes);
+//		for (int x = 0; x < 20; x++)
+//		{
+//			sb.SetGroundType(x, 13, SnakeBird::kGround);
+//			sb.SetGroundType(x, 14, SnakeBird::kGround);
+//			sb.SetGroundType(x, 15, SnakeBird::kGround);
+//		}
 
-		snake.SetSnakeHeadLoc(1, 61);
-		snake.SetSnakeBodyEnd(1, 6);
-		snake.SetSnakeDir(1, 2, SnakeBird::kRight);
-		snake.SetSnakeDir(1, 3, SnakeBird::kDown);
-		history.push_back(snake);
+
+
+//		snake.SetNumSnakes(3);
+//		snake.SetSnakeHeadLoc(0, 12);
+//		snake.SetSnakeLength(0, 5);
+//		//snake.SetSnakeBodyEnd(0, 4);
+//		snake.SetSnakeDir(0, 0, SnakeBird::kRight);
+//		snake.SetSnakeDir(0, 1, SnakeBird::kUp);
+//		snake.SetSnakeDir(0, 2, SnakeBird::kRight);
+//		snake.SetSnakeDir(0, 3, SnakeBird::kUp);
+//
+//		snake.SetSnakeHeadLoc(1, 56+18);
+//		//snake.SetSnakeBodyEnd(1, 10);
+//		snake.SetSnakeLength(1, 7);
+//		snake.SetSnakeDir(1, 0, SnakeBird::kRight);
+//		snake.SetSnakeDir(1, 1, SnakeBird::kRight);
+//		snake.SetSnakeDir(1, 2, SnakeBird::kDown);
+//		snake.SetSnakeDir(1, 3, SnakeBird::kDown);
+//		snake.SetSnakeDir(1, 4, SnakeBird::kDown);
+//		snake.SetSnakeDir(1, 4, SnakeBird::kRight);
+//
+//		snake.SetSnakeHeadLoc(2, 56+18*4+5);
+//		//snake.SetSnakeBodyEnd(2, 11);
+//		snake.SetSnakeLength(2, 2);
+//		snake.SetSnakeDir(2, 0, SnakeBird::kRight);
 	}
 }
 
@@ -125,41 +229,80 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
-	SnakeBird::SnakeBirdAction a;
-	a.bird = snakeControl;
+//	SnakeBird::SnakeBirdAction a;
+	std::vector<SnakeBird::SnakeBirdAction> acts;
+//	a.bird = snakeControl;
 	switch (key)
 	{
 		case 'w':
-			a.direction = SnakeBird::kUp;
-			if (sb.Legal(snake, a))
+			sb.GetActions(snake, acts);
+			for (auto &a : acts)
 			{
-				sb.ApplyAction(snake, a);
-				history.push_back(snake);
+				if (a.bird == snakeControl && a.direction == SnakeBird::kUp)
+				{
+					sb.ApplyAction(snake, a);
+					history.push_back(snake);
+				}
 			}
+//			a.direction = SnakeBird::kUp;
+//			if (sb.Legal(snake, a))
+//			{
+//				sb.ApplyAction(snake, a);
+//				history.push_back(snake);
+//			}
 			break;
 		case 's':
-			a.direction = SnakeBird::kDown;
-			if (sb.Legal(snake, a))
+			sb.GetActions(snake, acts);
+			for (auto &a : acts)
 			{
-				sb.ApplyAction(snake, a);
-				history.push_back(snake);
+				if (a.bird == snakeControl && a.direction == SnakeBird::kDown)
+				{
+					sb.ApplyAction(snake, a);
+					history.push_back(snake);
+				}
 			}
+//			a.direction = SnakeBird::kDown;
+//			if (sb.Legal(snake, a))
+//			{
+//				sb.ApplyAction(snake, a);
+//				history.push_back(snake);
+//			}
 			break;
 		case 'a':
-			a.direction = SnakeBird::kLeft;
-			if (sb.Legal(snake, a))
+			sb.GetActions(snake, acts);
+			for (auto &a : acts)
 			{
-				sb.ApplyAction(snake, a);
-				history.push_back(snake);
+				if (a.bird == snakeControl && a.direction == SnakeBird::kLeft)
+				{
+					sb.ApplyAction(snake, a);
+					history.push_back(snake);
+				}
 			}
+
+//			a.direction = SnakeBird::kLeft;
+//			if (sb.Legal(snake, a))
+//			{
+//				sb.ApplyAction(snake, a);
+//				history.push_back(snake);
+//			}
 			break;
 		case 'd':
-			a.direction = SnakeBird::kRight;
-			if (sb.Legal(snake, a))
+			sb.GetActions(snake, acts);
+			for (auto &a : acts)
 			{
-				sb.ApplyAction(snake, a);
-				history.push_back(snake);
+				if (a.bird == snakeControl && a.direction == SnakeBird::kRight)
+				{
+					sb.ApplyAction(snake, a);
+					history.push_back(snake);
+				}
 			}
+
+//			a.direction = SnakeBird::kRight;
+//			if (sb.Legal(snake, a))
+//			{
+//				sb.ApplyAction(snake, a);
+//				history.push_back(snake);
+//			}
 			break;
 		case 'q':
 			if (history.size() > 1)
@@ -167,8 +310,22 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			snake = history.back();
 			break;
 		case 'e':
-			snakeControl = (snakeControl+1)%2;
+			snakeControl = (snakeControl+1)%3;
 			break;
+		case 'p':
+		{
+			Graphics::Display d;
+			sb.Draw(d);
+			sb.Draw(d, snake, snakeControl);
+			std::string fname = "/Users/nathanst/Desktop/SVG/sb_";
+			int count = 0;
+			while (fileExists((fname+std::to_string(count)+".svg").c_str()))
+			{
+				count++;
+			}
+			printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
+			MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0);
+		}
 		case 't':
 			break;
 		case 'v':
@@ -196,7 +353,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			}
 		}
 			break;
-		case 'r': recording = !recording; break;
+		case 'r':
+			snake = history[0];
+			history.clear();
+			break;
 		case '\t':
 			if (mod != kShiftDown)
 				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));

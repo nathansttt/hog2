@@ -14,7 +14,36 @@ SnakeBird::SnakeBird(int width, int height)
 :width(width), height(height)
 {
 	assert(width*height < 512);
+	std::fill_n(&world[0], 512, kEmpty);
+	for (int x = 0; x < width; x++)
+		world[GetIndex(x, height-1)] = kSpikes;
 }
+
+SnakeBirdState SnakeBird::GetStart()
+{
+	return startState;
+}
+
+void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
+{
+	int count = startState.GetNumSnakes();
+	startState.SetNumSnakes(count+1);
+	startState.SetSnakeHeadLoc(count, GetIndex(x, y));
+	startState.SetSnakeLength(count, body.size()+1);
+	for (int x = 0; x < body.size(); x++)
+		startState.SetSnakeDir(count, x, body[x]);
+}
+
+bool SnakeBird::Load(const char *filename, SnakeBirdState &)
+{
+	return false;
+}
+
+bool SnakeBird::Save(const char *filename, const SnakeBirdState &)
+{
+	return false;
+}
+
 
 void SnakeBird::GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const
 {
@@ -31,11 +60,8 @@ bool SnakeBird::Legal(SnakeBirdState &s, SnakeBirdAction a)
 	return false;
 }
 
-void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction> &actions) const
+void SnakeBird::Render(const SnakeBirdState &s) const
 {
-	actions.clear();
-	SnakeBirdAction a;
-	
 	SnakeBirdWorldObject obj[4] = {kSnake1, kSnake2, kSnake3, kSnake4};
 	std::fill_n(&render[0], 512, kEmpty);
 	
@@ -43,6 +69,10 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
 	{
 		int loc = s.GetSnakeHeadLoc(snake);
+		if (loc == kInGoal)
+			continue;
+		if (loc == kDead) // no legal actions for any snake if one is dead
+			return;
 		render[loc] = obj[snake];
 		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
 		for (int x = 0; x < len; x++)
@@ -54,86 +84,122 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 				case kUp: loc-=1; break;
 				case kDown: loc+=1; break;
 			}
+			assert(loc >= 0 && loc < width*height);
 			render[loc] = obj[snake];
 		}
 	}
-	// TODO: render objects as well
+	// render fruit into world
+	for (int f = 0; f < fruit.size(); f++)
 	{
-		
+		if (s.GetFruitPresent(f))
+			render[fruit[f]] = kFruit;
 	}
-	
-//	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
-//	{
-//		int loc = s.GetSnakeHeadLoc(snake);
-//		render[loc] = obj[snake];
-//		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
-//		for (int x = 0; x < len; x++)
-//		{
-//			switch (s.GetSnakeDir(snake, x))
-//			{
-//				case kLeft: loc-=height; break;
-//				case kRight: loc+=height; break;
-//				case kUp: loc-=1; break;
-//				case kDown: loc+=1; break;
-//			}
-//			if (loc-1 < 0 || render[loc-1] == 3)
-//				canPushDir[snake][kLeft] = false;
-//		}
-//	}
 
-	//	for (int y = 0; y < height; y++)
-//	{
-//		for (int x = 0; x < width; x++)
-//		{
-//			printf("%c", 'a'+render[GetIndex(x, y)]);
-//		}
-//		printf("\n");
-//	}
+	// render objects into world
+	for (int x = 0; x < 4; x++)
+	{
+		SnakeBirdWorldObject item[4] = {kBlock1, kBlock2, kBlock3, kBlock4};
+
+		for (int i = 0; i < objects[x].size(); i++)
+		{
+			render[GetIndex(GetX(objects[x][i])+GetX(s.GetObjectLocation(x)),
+							GetY(objects[x][i])+GetY(s.GetObjectLocation(x)))] = item[x];
+		}
+	}
+
+}
+
+void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction> &actions) const
+{
+	actions.clear();
+	SnakeBirdAction a;
 	
+	Render(s);
+	SnakeBirdWorldObject obj[4] = {kSnake1, kSnake2, kSnake3, kSnake4};
+
 	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
 	{
 		// first pass - don't allow to move back onto yourself or onto other obstacles
 		int loc = s.GetSnakeHeadLoc(snake);
-		a.bird = snake;
-		a.pushed[0] = kNothingPushed;
+		if (loc == kInGoal)
+			continue;
 
+		a.bird = snake;
+		a.pushed = 0;
 		// kDown - can never push any object down due to gravity
-		if (world[loc+1] != kGround && world[loc+1] != kSpikes && GetY(loc)+1 < height && render[loc+1] == kEmpty)
+		if (!(kGroundMask == (world[loc+1]&kGroundMask)) && // not ground or spikes
+			GetY(loc)+1 < height && // not off screen
+			!(kSnakeMask == (render[loc+1]&kSnakeMask)) && // not snake
+			!(kBlockMask == (render[loc+1]&kBlockMask))) // not block
 		{
-			if (s.GetSnakeDir(snake, 0) != kDown) // not blocked by snake
+			if (s.GetSnakeDir(snake, 0) != kDown) // not blocked by own snake
 			{
 				a.direction = kDown;
 				actions.push_back(a);
 			}
 		}
 
+		a.pushed = 0;
 		// kUp
-		if (world[loc-1] != kGround && world[loc-1] != kSpikes && GetY(loc) > 0 && render[loc-1] != obj[snake])
+		if (!(kGroundMask == (world[loc-1]&kGroundMask)) && // not ground or spikes
+			GetY(loc) > 0 && // not off screen
+			render[loc-1] != obj[snake]) // not self
 		{
-			if (s.GetSnakeDir(snake, 0) != kUp && (render[loc-1] == kEmpty || CanPush(s, snake, render[loc-1], kUp, a, 0))) // snake not blocked by self
+			// check if snake or object which can be pushed
+			if ((kSnakeMask == (render[loc-1]&kSnakeMask)) || (kBlockMask == (render[loc-1]&kBlockMask)))
 			{
+				if (CanPush(s, snake, render[loc-1], kUp, a))
+				{
+					a.direction = kUp;
+					actions.push_back(a);
+				}
+			}
+			else {
+				assert(kCanEnterMask == (world[loc-1]&kCanEnterMask));
 				a.direction = kUp;
 				actions.push_back(a);
 			}
 		}
-		
-		a.pushed[0] = kNothingPushed;
-		// kRight
-		if (world[loc+height] != kGround && world[loc+height] != kSpikes && GetX(loc)+1 < width && render[loc+height] != obj[snake])
+
+		a.pushed = 0;
+		// right
+		if (!(kGroundMask == (world[loc+height]&kGroundMask)) && // not ground or spikes
+			GetX(loc)+1 < width && // not off screen
+			render[loc+height] != obj[snake]) // not self
 		{
-			if (s.GetSnakeDir(snake, 0) != kRight && (render[loc+height] == kEmpty || CanPush(s, snake, render[loc+height], kRight, a, 0))) // not blocked by snake
+			// check if snake or object which can be pushed
+			if ((kSnakeMask == (render[loc+height]&kSnakeMask)) || (kBlockMask == (render[loc+height]&kBlockMask)))
 			{
+				if (CanPush(s, snake, render[loc+height], kRight, a))
+				{
+					a.direction = kRight;
+					actions.push_back(a);
+				}
+			}
+			else {
+				assert(kCanEnterMask == (world[loc+height]&kCanEnterMask));
 				a.direction = kRight;
 				actions.push_back(a);
 			}
 		}
 		
-		a.pushed[0] = kNothingPushed;
-		// kLeft
-		if (world[loc-height] != kGround && world[loc-height] != kSpikes && GetX(loc) > 0 && render[loc-height] != obj[snake])
+		a.pushed = 0;
+		// left
+		if (!(kGroundMask == (world[loc-height]&kGroundMask)) && // not ground or spikes
+			GetX(loc)-1 >= 0 && // not off screen
+			render[loc-height] != obj[snake]) // not self
 		{
-			if (s.GetSnakeDir(snake, 0) != kLeft && (render[loc-height] == kEmpty || CanPush(s, snake, render[loc-height], kLeft, a, 0))) // not blocked by snake
+			// check if snake or object which can be pushed
+			if ((kSnakeMask == (render[loc-height]&kSnakeMask)) || (kBlockMask == (render[loc-height]&kBlockMask)))
 			{
+				if (CanPush(s, snake, render[loc-height], kLeft, a))
+				{
+					a.direction = kLeft;
+					actions.push_back(a);
+				}
+			}
+			else {
+				assert(kCanEnterMask == (world[loc-height]&kCanEnterMask));
 				a.direction = kLeft;
 				actions.push_back(a);
 			}
@@ -142,62 +208,105 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 }
 
 bool SnakeBird::CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
-						SnakeBirdAction &a, int pushObject) const
+						SnakeBirdAction &a) const
 {
-	if (pushObject >= kMaxPushedObjects)
-		return false;
-	int pushed;
+//	if (pushObject >= kMaxPushedObjects)
+//		return false;
+	int pushed = -1;
 	// can't push yourself
-	if (pushObject+1 < kMaxPushedObjects)
-	a.pushed[pushObject+1] = kNothingPushed;
+	//if (pushObject+1 < kMaxPushedObjects)
+	//a.pushed[pushObject+1] = kNothingPushed;
 	switch (obj) {
 		case kSnake1: if (snake == 0) return false; pushed = 0; break;
 		case kSnake2: if (snake == 1) return false; pushed = 1; break;
 		case kSnake3: if (snake == 2) return false; pushed = 2; break;
 		case kSnake4: if (snake == 3) return false; pushed = 3; break;
+		case kBlock1: pushed = 4; break;
+		case kBlock2: pushed = 5; break;
+		case kBlock3: pushed = 6; break;
+		case kBlock4: pushed = 7; break;
 		default: return false; break;
 	}
 	// already pushing this
-	for (int x = 0; x < pushObject; x++)
-		if (a.pushed[x] == pushed)
-			return true;
-	// not pushing; put in queue
-	a.pushed[pushObject] = pushed;
-	// Render pushed obj one step in (dir)
-	int loc = s.GetSnakeHeadLoc(pushed);
-	switch (dir)
+	if ((a.pushed>>pushed)&0x1)
+		return true;
+	
+	// mark object as being pushed
+	a.pushed |= (1<<pushed);
+	
+	if (pushed <= 3) // snake is pushed
 	{
-		case kLeft: if (loc < height) return false; loc-=height; break;
-		case kRight: if (loc+height > width*height) return false; loc+=height; break;
-		case kUp: if (loc == 0) return false; loc-=1; break;
-		case kDown: if (loc+1 == width*height) return false; loc+=1; break;
-	}
-	if (world[loc]!=kEmpty)
-		return false;
-	// If moved into location is occupied by another object (not us), see if it can be pushed
-	if ((render[loc] != kEmpty && render[loc] != obj))
-	{
-		if (!CanPush(s, snake, render[loc], dir, a, pushObject+1))
-			return false;
-	}
-
-	int len = s.GetSnakeBodyEnd(pushed)-s.GetSnakeBodyEnd(pushed-1);
-	for (int x = 0; x < len; x++)
-	{
-		switch (s.GetSnakeDir(pushed, x))
+		// Render pushed obj one step in (dir)
+		int loc = s.GetSnakeHeadLoc(pushed);
+		switch (dir)
 		{
 			case kLeft: if (loc < height) return false; loc-=height; break;
 			case kRight: if (loc+height > width*height) return false; loc+=height; break;
 			case kUp: if (loc == 0) return false; loc-=1; break;
 			case kDown: if (loc+1 == width*height) return false; loc+=1; break;
 		}
-		if (world[loc]!=kEmpty)
+		// cannot push into solid object - except when going down
+		if ((((world[loc]&kGroundMask) == kGroundMask) && dir != kDown) ||
+			(dir == kDown && world[loc] == kGround))
 			return false;
-		// If moved into location is occupied by another object (not us), see if it can be pushed
-		if ((render[loc] != kEmpty && render[loc] != obj))
+		if (render[loc]==kFruit) // cannot push into fruit
+			return false;
+		if (((render[loc]&kSnakeMask) == kSnakeMask) || (render[loc]&kBlockMask) == kBlockMask) // pushable object
 		{
-			if (!CanPush(s, snake, render[loc], dir, a, pushObject+1))
+			if (!CanPush(s, snake, render[loc], dir, a))
 				return false;
+		}
+		
+		int len = s.GetSnakeBodyEnd(pushed)-s.GetSnakeBodyEnd(pushed-1);
+		for (int x = 0; x < len; x++)
+		{
+			switch (s.GetSnakeDir(pushed, x))
+			{
+				case kLeft: if (loc < height) return false; loc-=height; break;
+				case kRight: if (loc+height > width*height) return false; loc+=height; break;
+				case kUp: if (loc == 0) return false; loc-=1; break;
+				case kDown: if (loc+1 == width*height) return false; loc+=1; break;
+			}
+			// TODO: check if snake renders into spikes
+			// cannot push into solid object - except when going down
+			if ((((world[loc]&kGroundMask) == kGroundMask) && dir != kDown) ||
+				(dir == kDown && world[loc] == kGround))
+				return false;
+			if (render[loc]==kFruit) // cannot push into fruit
+				return false;
+			if (((render[loc]&kSnakeMask) == kSnakeMask) || (render[loc]&kBlockMask) == kBlockMask) // pushable object
+			{
+				if (!CanPush(s, snake, render[loc], dir, a))
+					return false;
+			}
+		}
+	}
+	else if (pushed >= 4) // object is pushed
+	{
+		pushed-=4;
+		// Render pushed obj one step in (dir)
+		int loc = s.GetObjectLocation(pushed); // s.GetSnakeHeadLoc(pushed);
+		for (int x = 0; x < objects[pushed].size(); x++)
+		{
+			int pieceLoc = objects[pushed][x];
+			pieceLoc = GetIndex(GetX(objects[pushed][x])+GetX(loc),
+								GetY(objects[pushed][x])+GetY(loc));
+			switch (dir)
+			{
+				case kLeft: if (pieceLoc < height) return false; pieceLoc-=height; break;
+				case kRight: if (pieceLoc+height > width*height) return false; pieceLoc+=height; break;
+				case kUp: if (pieceLoc == 0) return false; pieceLoc-=1; break;
+				case kDown: if (pieceLoc+1 == width*height) return false; pieceLoc+=1; break;
+			}
+			if ((world[pieceLoc]&kGroundMask) == kGroundMask) // cannot push into solid object
+				return false;
+			if (render[pieceLoc]==kFruit) // cannot push into fruit
+				return false;
+			if (((render[pieceLoc]&kSnakeMask) == kSnakeMask) || (render[pieceLoc]&kBlockMask) == kBlockMask) // pushable object
+			{
+				if (!CanPush(s, snake, render[pieceLoc], dir, a))
+					return false;
+			}
 		}
 	}
 	// temporarily return false to not push other snakes
@@ -256,8 +365,37 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 			else {
 				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)-height);
 				s.InsertSnakeDir(a.bird, kRight);
-				for (int i = 0; i < 4&&a.pushed[i] != kNothingPushed; i++)
-					s.SetSnakeHeadLoc(a.pushed[i], s.GetSnakeHeadLoc(a.pushed[i])-height);
+
+				// check for pushed snakes
+				for (int i = 0; i < 4 && (a.pushed>>i); i++)
+				{
+					if ((a.pushed>>i)&0x1)
+					{
+						s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)-height);
+						if (world[s.GetSnakeHeadLoc(i)] == kExit && s.KFruitEaten(fruit.size()))
+						{
+							s.SetSnakeHeadLoc(i, kInGoal);
+						}
+					}
+				}
+				// check for pushed objects
+				for (int i = 4; i < 8 && (a.pushed>>i); i++)
+				{
+					if ((a.pushed>>i)&0x1)
+					{
+						s.SetObjectLocation(i-4, s.GetObjectLocation(i-4)-height);
+					}
+				}
+				// TODO: check for portals on push. Check for valid snake arrangement
+				// check for portals
+				if (s.GetSnakeHeadLoc(a.bird) == portal1Loc)
+				{
+					s.SetSnakeHeadLoc(a.bird, portal2Loc);
+				}
+				else if (s.GetSnakeHeadLoc(a.bird) == portal2Loc)
+				{
+					s.SetSnakeHeadLoc(a.bird, portal1Loc);
+				}
 			}
 			break;
 		case kRight:
@@ -276,13 +414,43 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 				for (int x = a.bird; x < s.GetNumSnakes(); x++)
 					s.SetSnakeBodyEnd(x, s.GetSnakeBodyEnd(x)+1);
 				s.InsertSnakeHeadDir(a.bird, kLeft);
-				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+1);
+				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+height);
 			}
 			else {
 				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+height);
 				s.InsertSnakeDir(a.bird, kLeft);
-				for (int i = 0; i < 4&&a.pushed[i] != kNothingPushed; i++)
-					s.SetSnakeHeadLoc(a.pushed[i], s.GetSnakeHeadLoc(a.pushed[i])+height);
+				
+				// check for pushed snakes
+				for (int i = 0; i < 4 && (a.pushed>>i); i++)
+				{
+					if ((a.pushed>>i)&0x1)
+					{
+						s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)+height);
+						if (world[s.GetSnakeHeadLoc(i)] == kExit && s.KFruitEaten(fruit.size()))
+						{
+							s.SetSnakeHeadLoc(i, kInGoal);
+						}
+					}
+				}
+				// check for pushed objects
+				for (int i = 4; i < 8 && (a.pushed>>i); i++)
+				{
+					if ((a.pushed>>i)&0x1)
+					{
+						s.SetObjectLocation(i-4, s.GetObjectLocation(i-4)+height);
+					}
+				}
+
+				// TODO: check for portals on push. Check for valid snake arrangement
+				// check for portals
+				if (s.GetSnakeHeadLoc(a.bird) == portal1Loc)
+				{
+					s.SetSnakeHeadLoc(a.bird, portal2Loc);
+				}
+				else if (s.GetSnakeHeadLoc(a.bird) == portal2Loc)
+				{
+					s.SetSnakeHeadLoc(a.bird, portal1Loc);
+				}
 			}
 			break;
 		case kUp:
@@ -306,8 +474,38 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 			else {
 				s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)-1);
 				s.InsertSnakeDir(a.bird, kDown);
-				for (int i = 0; i < 4&&a.pushed[i] != kNothingPushed; i++)
-					s.SetSnakeHeadLoc(a.pushed[i], s.GetSnakeHeadLoc(a.pushed[i])-1);
+
+				// check for pushed snakes
+				for (int i = 0; i < 4 && (a.pushed>>i); i++)
+				{
+					if ((a.pushed>>i)&0x1)
+					{
+						s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)-1);
+						if (world[s.GetSnakeHeadLoc(i)] == kExit && s.KFruitEaten(fruit.size()))
+						{
+							s.SetSnakeHeadLoc(i, kInGoal);
+						}
+					}
+				}
+				// check for pushed objects
+				for (int i = 4; i < 8 && (a.pushed>>i); i++)
+				{
+					if ((a.pushed>>i)&0x1)
+					{
+						s.SetObjectLocation(i-4, s.GetObjectLocation(i-4)-1);
+					}
+				}
+
+				// TODO: check for portals on push. Check for valid snake arrangement
+				// check for portals
+				if (s.GetSnakeHeadLoc(a.bird) == portal1Loc)
+				{
+					s.SetSnakeHeadLoc(a.bird, portal2Loc);
+				}
+				else if (s.GetSnakeHeadLoc(a.bird) == portal2Loc)
+				{
+					s.SetSnakeHeadLoc(a.bird, portal1Loc);
+				}
 			}
 			break;
 		case kDown:
@@ -334,18 +532,124 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 				// removed code -- can't push down
 //				if (a.pushed[0] != kNothingPushed)
 //					s.SetSnakeHeadLoc(a.pushed[0], s.GetSnakeHeadLoc(a.pushed[0])+1);
+				// TODO: check for portals on push. Check for valid snake arrangement
+				// check for portals
+				if (s.GetSnakeHeadLoc(a.bird) == portal1Loc)
+				{
+					s.SetSnakeHeadLoc(a.bird, portal2Loc);
+				}
+				else if (s.GetSnakeHeadLoc(a.bird) == portal2Loc)
+				{
+					s.SetSnakeHeadLoc(a.bird, portal1Loc);
+				}
 			}
 			break;
+	}
+	
+	// Now for gravity - which is just pushing the relevant objects down
+	// Try all moved objects to see if they can be pushed down.
+	// Merge the pushable objects into a single bit vector
+	while (true) {
+		SnakeBirdWorldObject objs[8] = {kSnake1, kSnake2, kSnake3, kSnake4, kBlock1, kBlock2, kBlock3, kBlock4};
+		Render(s);
+		uint8_t falling = 0;
+		SnakeBirdAction move;
+		for (int i = 0; i < 8; i++)
+		{
+			move.pushed = 0;
+			// snake isn't in the world
+			if ((i < 4 && i >= s.GetNumSnakes()) || s.GetSnakeHeadLoc(i) == kInGoal)
+				continue;
+			// block isn't in the world
+			if (i >= 4 && objects[i-4].size() == 0)
+				continue;
+
+			if (CanPush(s, -1, objs[i], kDown, move))
+			{
+				falling |= move.pushed;
+			}
+		}
+		if (falling == 0)
+			break;
+		for (int i = 0; i < 8; i++)
+		{
+			if (i < 4 && ((falling>>i)&0x1))
+				s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)+1);
+			if (i >= 4 && ((falling>>i)&0x1))
+				s.SetObjectLocation(i-4, s.GetObjectLocation(i-4)+1);
+		}
 	}
 }
 
 void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 {
+	// TODO: check duplicates and removals for fruit and blocks
+	if (y == height-1)
+	{
+		printf("Error - cannot add terrain at bottom of map\n");
+		return;
+	}
+	
+	if ((o&kBlockMask) == kBlockMask) // block
+	{
+		int which = -1;
+		switch (o)
+		{
+			case kBlock1:
+				which = 0;
+				break;
+			case kBlock2:
+				which = 1;
+				break;
+			case kBlock3:
+				which = 2;
+				break;
+			case kBlock4:
+				which = 3;
+				break;
+			default:
+				assert(!"Can't get here - object is a block");
+				break;
+		}
+		assert(which != -1);
+		// objects are stored as offsets from 0.
+		// The offset in the original world is in startState
+		int newX = x, newY=y;
+		int xOffset = 0, yOffset = 0;
+		if (objects[which].size() > 0) // other objects - get their offset base
+		{
+			xOffset = GetX(startState.GetObjectLocation(which));
+			yOffset = GetY(startState.GetObjectLocation(which));
+		}
+		
+		// Get new base location (minx/y)
+		for (int i = 0; i < objects[which].size(); i++)
+		{
+			newX = std::min(newX, GetX(objects[which][i])+xOffset);
+			newY = std::min(newY, GetY(objects[which][i])+yOffset);
+		}
+		startState.SetObjectLocation(which, GetIndex(newX, newY));
+		for (int i = 0; i < objects[which].size(); i++)
+		{
+			// reset locations based on new base location
+			objects[which][i] = GetIndex(GetX(objects[which][i])+xOffset - newX,
+										 GetY(objects[which][i])+yOffset - newY);
+		}
+		// add new piece of new object
+		objects[which].push_back(GetIndex(x-newX, y-newY));
+		
+		return;
+	}
+
 	world[GetIndex(x, y)] = o;
 	if (o == kFruit)
 	{
-		fruit.push_back(GetIndex(x, y)); // TODO: check duplicates
+		fruit.push_back(GetIndex(x, y));
 	}
+	if (o == kPortal1)
+		portal1Loc = GetIndex(x, y);
+	if (o == kPortal2)
+		portal2Loc = GetIndex(x, y);
 }
 
 int SnakeBird::GetFruitOffset(int index) const
@@ -392,14 +696,23 @@ void SnakeBird::Draw(Graphics::Display &display)
 			case kEmpty:
 				break;//display.FillSquare(p, GetRadius(), Colors::lightblue);  break;
 			case kGround:
-				display.FillSquare(p, GetRadius(), Colors::brown);
+				switch ((GetX(x)*13*+11*GetY(x))%6)
+				{
+					case 0: display.FillSquare(p, GetRadius(), Colors::brown); break;
+					case 1: display.FillSquare(p, GetRadius(), Colors::brown); break;
+					case 2: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
+					case 3: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
+					case 4: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
+					case 5: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
+				}
 				break;
 			case kSpikes:
 				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
 				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
 				break;
 				break;
-			case kPortal:
+			case kPortal1:
+			case kPortal2:
 				display.FillCircle(p, radius, Colors::red);
 				display.FillCircle(p, radius*0.75, Colors::blue);
 				display.FillCircle(p, radius*0.5, Colors::green);
@@ -460,6 +773,7 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s) const
 void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int active) const
 {
 	rgbColor c[4] = {Colors::red, Colors::blue, Colors::green, Colors::yellow};
+	rgbColor objColors[4] = {Colors::red*0.5, Colors::blue*0.5, Colors::green*0.5, Colors::yellow*0.5};
 	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
 	{
 		// get head loc
@@ -502,6 +816,18 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 				DrawSnakeSegment(display, x, y, c[snake]*0.8, false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1));
 			else
 				DrawSnakeSegment(display, x, y, c[snake], false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1));
+		}
+	}
+	
+	// draw objects
+	for (int x = 0; x < 4; x++)
+	{
+		for (int i = 0; i < objects[x].size(); i++)
+		{
+			Graphics::point p = GetCenter(GetX(objects[x][i])+GetX(s.GetObjectLocation(x)),
+										  GetY(objects[x][i])+GetY(s.GetObjectLocation(x)));
+			double radius = GetRadius();//*0.95;
+			display.FrameSquare(p, radius-radius*0.3, objColors[x], radius*0.6);
 		}
 	}
 	for (int x = 0; x < fruit.size(); x++)

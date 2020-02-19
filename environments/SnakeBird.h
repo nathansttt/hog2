@@ -31,9 +31,10 @@ const uint64_t snakeLenMask = 0x1F;
 const uint64_t fruitMask = 0x1F;
 const uint64_t snakeBodyMask = 0x3;
 const uint64_t kOne = 0x1;
+const int kDead = 510;
 const int kInGoal = 511;
 const uint8_t kNothingPushed = 0xFF;
-const int kMaxPushedObjects = 3;
+//const int kMaxPushedObjects = 3;
 
 enum snakeDir : uint8_t {
 	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3
@@ -122,7 +123,7 @@ struct SnakeBirdState {
 struct SnakeBirdAction {
 	unsigned int bird : 4; // which bird
 	unsigned int direction : 4; // which direction
-	uint8_t pushed[kMaxPushedObjects]; // up to kMaxPushedObjects pushed objects
+	uint8_t pushed; // 8 booleans; supporting 4 snakes & 4 blocks
 	bool operator==(const SnakeBirdAction &a) const
 	{
 		// TODO: need to compare if anything is being pushed
@@ -148,25 +149,44 @@ struct SnakeBirdAction {
  * a-z [snake body in order, all letters must be unique in level]
  */
 
+const uint8_t kCanEnterMask = 0x80;
+const uint8_t kGroundMask = 0x40;
+const uint8_t kSnakeMask = 0x10;
+const uint8_t kBlockMask = 0x20;
+
 enum SnakeBirdWorldObject : uint8_t {
-	kEmpty = 0,
-	kGround,
-	kSpikes,
-	kPortal,
-	kExit,
-	kFruit,
-	kSnake1,
-	kSnake2,
-	kSnake3,
-	kSnake4
+	// can always enter, but may have secondary effects
+	kEmpty  = 0x80,
+	kFruit  = 0x81,
+	kExit   = 0x82,
+	kPortal1= 0x83,
+	kPortal2= 0x84,
+
+	// cannot ever enter
+	kGround = 0x40,
+	kSpikes = 0x41,
+
+	// for pushing
+	kBlock1 = 0x20,
+	kBlock2 = 0x21,
+	kBlock3 = 0x22,
+	kBlock4 = 0x23,
+
+	// other snakes
+	kSnake1 = 0x10,
+	kSnake2 = 0x11,
+	kSnake3 = 0x12,
+	kSnake4 = 0x13,
+	
 };
 
 class SnakeBird : public SearchEnvironment<SnakeBirdState, SnakeBirdAction> {
 public:
 	SnakeBird(int width = 20, int height = 16);
-	bool Load(const char *filename);
-	bool Save(const char *filename);
+	bool Load(const char *filename, SnakeBirdState &);
+	bool Save(const char *filename, const SnakeBirdState &);
 	SnakeBirdState GetStart();
+	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
 	SnakeBirdWorldObject GetGroundType(int x, int y);
 
@@ -232,8 +252,9 @@ public:
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
+	void Render(const SnakeBirdState &s) const;
 	bool CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
-				 SnakeBirdAction &a, int pushObject) const;
+				 SnakeBirdAction &a) const;
 	void Gravity(SnakeBirdState &s) const;
 
 	int GetFruitOffset(int index) const;
@@ -244,11 +265,12 @@ private:
 	Graphics::point GetCenter(int x, int y) const;
 	float GetRadius() const;
 	void DrawSnakeSegment(Graphics::Display &display, int x, int y, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo) const;
-
 	std::array<SnakeBirdWorldObject, 512> world; // static world
 	mutable std::array<SnakeBirdWorldObject, 512> render;
 	std::vector<int> fruit;
-	std::vector<int> objects;
+	std::array<std::vector<int>, 4> objects; // offsets from base location
+	int portal1Loc, portal2Loc;
+	SnakeBirdState startState;
 	//	std::array<
 };
 
