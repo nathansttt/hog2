@@ -1,0 +1,5 @@
+language: c++
+branches:
+  except:
+  - master
+  - wiki
