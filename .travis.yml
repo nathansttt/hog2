@@ -1,5 +1,14 @@
 language: c++
 branches:
-  except:
-  - master
-  - wiki
+  only:
+  - PDB-refactor
+
+os:
+  - linux
+
+before_install:
+  - apt install build-essential libglu1-mesa-dev freeglut3-dev
+
+script:
+  - cd build/gmake
+  - make
