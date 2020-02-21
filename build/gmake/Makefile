@@ -8,6 +8,10 @@
 # $Id: Makefile,v 1.5 2006/11/01 23:34:14 nathanst Exp $
 #-----------------------------------------------------------------------------
 
+ROOT = ../..
+BINDIR = $(ROOT)/bin/release/
+prefix = /usr/local/bin
+
 # All projects to build in this order.
 PROJECTS = \
   gui/GL \
@@ -124,14 +128,41 @@ release:
         done
 	@echo ""
 
+
+.PHONY: install
+install:
+	@for file in $$(ls -I '*.a' $(BINDIR)); do \
+           if test -f $(BINDIR)$$file; then \
+              echo "Installing $$file"; \
+              mkdir -p $(prefix); \
+              cp $(BINDIR)$$file $(prefix)/; \
+           fi; \
+        done
+	@echo -e "\nDone\nAll files installed to $(prefix)"
+
+
+.PHONY: uninstall
+uninstall:
+	@for file in $$(ls -I '*.a' $(BINDIR)); do \
+           if test -f $(BINDIR)$$file; then \
+              if test -f $(prefix)/$$file; then \
+                 echo "Removing $(prefix)/$$file"; \
+                 rm $(prefix)/$$file; \
+              fi; \
+           fi; \
+        done
+	@echo -e "\nDone"
+
+
 clean:
 	@for dir in $(PROJECTS); do \
            if test -f $$dir/Makefile; then \
              echo -e "\n--------------- Removing temporary files for $$dir"; \
              $(MAKE) -C $$dir clean || exit -1; \
            fi; \
-         done
+        done
 	@echo ""
+
 
 # sequentially to avoid same sub-target in sub-make invoked twice
 all: override PROJECTS = $(PROJECTS_ALL)
