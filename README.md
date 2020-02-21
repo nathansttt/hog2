@@ -68,4 +68,4 @@ This framework consists of many different applications, each has specific usage 
 
 ## Licence
 
-HOG2 is open source software licensed under the [MIT license](LICESNSE.txt)
+HOG2 is open source software licensed under the [MIT license](LICENSE.txt)
