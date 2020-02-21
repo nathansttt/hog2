@@ -7,7 +7,8 @@ os:
   - linux
 
 before_install:
-  - apt install build-essential libglu1-mesa-dev freeglut3-dev
+  - sudo apt update
+  - sudo apt install build-essential libglu1-mesa-dev freeglut3-dev
 
 script:
   - cd build/gmake
