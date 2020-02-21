@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/zacharyselk/hog2.svg?branch=PDB=refactor)](https://travis-ci.org/zacharyselk/hog2)
+[![Build Status](https://travis-ci.org/zacharyselk/hog2.svg?branch=PDB-refactor)](https://travis-ci.org/zacharyselk/hog2.svg?branch=PDB-refactor)
 
 
 <!-- ABOUT THE PROJECT -->
