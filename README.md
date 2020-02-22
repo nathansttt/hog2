@@ -4,7 +4,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About the Project
 
-HOG2 is a cross platform search framework for a variety of algorithms and domains that runs on all modern operating systems including ios.
+HOG2 (Hierarchical Open Graph 2) is a collection of classes and a tile-based simulator which are designed as a simple model of RTS and other clocked simulation environments. 
 
 
 <!-- GETTING STARTED -->
