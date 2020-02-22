@@ -60,11 +60,6 @@ make
 After this completes the binaries can be found under `../../bin/release/`. To fully install the programs to /usr/local/bin, run `sudo make install` under the `hog2/build/gmake/` directory; to uninstall run `sudo make uninstall` in the same directory. The install location can be changed with `make install prefix=</path/to/dir>`.
 
 
-## Usage
-
-This framework consists of many different applications, each has specific usage information under `apps/<app_name>`.
-
-
 
 ## Licence
 
