@@ -160,8 +160,11 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
+
+		sb.Load("/home/aaron/Desktop/SnakeBird_lvls/Snakebird_lvl_20", snake);
+
 		//LoadLevel22();
-		LoadLevel39();
+		//LoadLevel39();
 		
 //		sb.SetGroundType(0, 0, SnakeBird::kEmpty);
 //		sb.SetGroundType(1, 0, SnakeBird::kGround);

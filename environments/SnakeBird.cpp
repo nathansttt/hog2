@@ -7,6 +7,8 @@
 //
 
 #include "SnakeBird.h"
+#include <fstream>
+using namespace std;
 
 namespace SnakeBird {
 
@@ -36,7 +38,63 @@ void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
 
 bool SnakeBird::Load(const char *filename, SnakeBirdState &)
 {
-	return false;
+
+	ifstream infile;
+	infile.open(filename);
+	if (infile.fail()) {
+		printf("File could not be opened.");
+		return false;
+	}
+	if(infile.is_open()){
+		char ch;
+		int x = 0;
+		int y = 0;
+
+		while (infile.get(ch)) {
+			
+			if(ch == '.'){
+				SetGroundType(x,y,SnakeBirdWorldObject::kEmpty);
+				x++;	
+			}
+			else if(ch == 'G'){
+				SetGroundType(x,y,SnakeBirdWorldObject::kGround);
+				x++;
+			}
+			else if(ch == 'S'){
+				SetGroundType(x,y,SnakeBirdWorldObject::kSpikes);
+				x++;	
+			}
+			else if(ch == 'O'){
+				SetGroundType(x,y,SnakeBirdWorldObject::kPortal1);
+				x++;
+			}
+			else if(ch == 'E'){
+				SetGroundType(x,y,SnakeBirdWorldObject::kExit);
+				x++;
+			}
+			else if(ch == 'F'){
+				SetGroundType(x,y,SnakeBirdWorldObject::kFruit);
+				x++;
+			}
+			else if(ch == '\n'){
+				x = 0;
+				y++;
+			}
+			else{
+
+				SetGroundType(x,y,SnakeBirdWorldObject::kEmpty);
+				x++;	
+			}
+		}
+		infile.close();
+		return  true;
+	}
+	else{
+		return false;
+	}
+	
+
+	
 }
 
 bool SnakeBird::Save(const char *filename, const SnakeBirdState &)
