@@ -72,6 +72,31 @@ void InstallHandlers()
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseUp|kMouseDrag));
 }
 
+void LoadLevel19()
+{
+	sb.SetGroundType(14, 5, SnakeBird::kFruit);
+
+	sb.SetGroundType(1, 4, SnakeBird::kSpikes);
+	sb.SetGroundType(1, 5, SnakeBird::kGround);
+	sb.SetGroundType(4, 3, SnakeBird::kSpikes);
+	sb.SetGroundType(4, 4, SnakeBird::kGround);
+	sb.SetGroundType(3, 5, SnakeBird::kExit);
+
+	sb.SetGroundType(4, 9, SnakeBird::kGround);
+	sb.SetGroundType(4, 10, SnakeBird::kGround);
+	sb.SetGroundType(4, 11, SnakeBird::kGround);
+	sb.SetGroundType(4, 12, SnakeBird::kGround);
+
+	sb.AddSnake(4, 6, {SnakeBird::kRight});
+	sb.AddSnake(5, 7, {SnakeBird::kLeft, SnakeBird::kLeft, SnakeBird::kDown, SnakeBird::kDown, SnakeBird::kDown});
+	sb.AddSnake(4, 8, {SnakeBird::kRight, SnakeBird::kDown, SnakeBird::kDown, SnakeBird::kDown});
+
+
+	snake = sb.GetStart();
+	history.clear();
+	history.push_back(snake);
+}
+
 void LoadLevel22()
 {
 	sb.SetGroundType(3, 7, SnakeBird::kGround);
@@ -160,8 +185,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-		//LoadLevel22();
-		LoadLevel39();
+		LoadLevel19();
+//		LoadLevel22();
+//		LoadLevel39();
 		
 //		sb.SetGroundType(0, 0, SnakeBird::kEmpty);
 //		sb.SetGroundType(1, 0, SnakeBird::kGround);
@@ -310,7 +336,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			snake = history.back();
 			break;
 		case 'e':
-			snakeControl = (snakeControl+1)%3;
+			snakeControl = (snakeControl+1)%snake.GetNumSnakes();
 			break;
 		case 'p':
 		{
@@ -355,7 +381,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'r':
 			snake = history[0];
-			history.clear();
+			history.resize(1);
 			break;
 		case '\t':
 			if (mod != kShiftDown)
