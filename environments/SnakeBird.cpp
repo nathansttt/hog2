@@ -60,7 +60,7 @@ bool SnakeBird::Legal(SnakeBirdState &s, SnakeBirdAction a)
 	return false;
 }
 
-void SnakeBird::Render(const SnakeBirdState &s) const
+bool SnakeBird::Render(const SnakeBirdState &s) const
 {
 	SnakeBirdWorldObject obj[4] = {kSnake1, kSnake2, kSnake3, kSnake4};
 	std::fill_n(&render[0], 512, kEmpty);
@@ -72,8 +72,10 @@ void SnakeBird::Render(const SnakeBirdState &s) const
 		if (loc == kInGoal)
 			continue;
 		if (loc == kDead) // no legal actions for any snake if one is dead
-			return;
+			return false;
 		render[loc] = obj[snake];
+		if (world[loc] == kSpikes)
+			return false;
 		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
 		for (int x = 0; x < len; x++)
 		{
@@ -86,6 +88,8 @@ void SnakeBird::Render(const SnakeBirdState &s) const
 			}
 			assert(loc >= 0 && loc < width*height);
 			render[loc] = obj[snake];
+			if (world[loc] == kSpikes)
+				return false;
 		}
 	}
 	// render fruit into world
@@ -106,7 +110,7 @@ void SnakeBird::Render(const SnakeBirdState &s) const
 							GetY(objects[x][i])+GetY(s.GetObjectLocation(x)))] = item[x];
 		}
 	}
-
+	return true;
 }
 
 void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction> &actions) const
@@ -114,7 +118,9 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 	actions.clear();
 	SnakeBirdAction a;
 	
-	Render(s);
+	bool success = Render(s);
+	if (!success) // something illegal about state - usually has dead snakes
+		return;
 	SnakeBirdWorldObject obj[4] = {kSnake1, kSnake2, kSnake3, kSnake4};
 
 	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
@@ -551,7 +557,9 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 	// Merge the pushable objects into a single bit vector
 	while (true) {
 		SnakeBirdWorldObject objs[8] = {kSnake1, kSnake2, kSnake3, kSnake4, kBlock1, kBlock2, kBlock3, kBlock4};
-		Render(s);
+		bool success = Render(s);
+		if (!success) // someone died as a result of the action
+			return;
 		uint8_t falling = 0;
 		SnakeBirdAction move;
 		for (int i = 0; i < 8; i++)
@@ -685,8 +693,8 @@ int SnakeBird::GetY(int index) const
 
 void SnakeBird::Draw(Graphics::Display &display)
 {
-	display.FillRect({-1, -1, 1, 0}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
-	display.FillRect({-1, 0, 1, 1}, Colors::darkblue);
+	display.FillRect({-1, -1, 1, 0.5}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
+	display.FillRect({-1, 0.5, 1, 1}, Colors::darkblue+Colors::darkred);
 	for (int x = 0; x < width*height; x++)
 	{
 		Graphics::point p = GetCenter(GetX(x), GetY(x));

@@ -252,7 +252,7 @@ public:
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
-	void Render(const SnakeBirdState &s) const;
+	bool Render(const SnakeBirdState &s) const;
 	bool CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
 				 SnakeBirdAction &a) const;
 	void Gravity(SnakeBirdState &s) const;
