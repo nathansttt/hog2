@@ -27,10 +27,12 @@ bool fileExists(const char *name)
 }
 #include "SnakeBird.h"
 
+std::string mapName;
+
 bool recording = false;
 bool parallel = false;
 
-SnakeBird::SnakeBird sb;
+SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
@@ -185,55 +187,17 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-		LoadLevel19();
-//		LoadLevel22();
-//		LoadLevel39();
+		if (mapName.size() != 0)
+		{
+			sb.Load(mapName.c_str());
+			snake = sb.GetStart();
+		}
+		else {
+			LoadLevel19();
+			//		LoadLevel22();
+			//		LoadLevel39();
+		}
 		
-//		sb.SetGroundType(0, 0, SnakeBird::kEmpty);
-//		sb.SetGroundType(1, 0, SnakeBird::kGround);
-//		sb.SetGroundType(2, 0, SnakeBird::kSpikes);
-//		sb.SetGroundType(3, 3, SnakeBird::kPortal1);
-//		sb.SetGroundType(4, 0, SnakeBird::kExit);
-//		sb.SetGroundType(5, 0, SnakeBird::kFruit);
-//		sb.SetGroundType(6, 1, SnakeBird::kFruit);
-//		sb.SetGroundType(7, 2, SnakeBird::kFruit);
-//		sb.SetGroundType(10, 3, SnakeBird::kPortal2);
-//
-//		sb.SetGroundType(3, 12, SnakeBird::kSpikes);
-//		sb.SetGroundType(8, 12, SnakeBird::kSpikes);
-//		sb.SetGroundType(15, 12, SnakeBird::kSpikes);
-//		for (int x = 0; x < 20; x++)
-//		{
-//			sb.SetGroundType(x, 13, SnakeBird::kGround);
-//			sb.SetGroundType(x, 14, SnakeBird::kGround);
-//			sb.SetGroundType(x, 15, SnakeBird::kGround);
-//		}
-
-
-
-//		snake.SetNumSnakes(3);
-//		snake.SetSnakeHeadLoc(0, 12);
-//		snake.SetSnakeLength(0, 5);
-//		//snake.SetSnakeBodyEnd(0, 4);
-//		snake.SetSnakeDir(0, 0, SnakeBird::kRight);
-//		snake.SetSnakeDir(0, 1, SnakeBird::kUp);
-//		snake.SetSnakeDir(0, 2, SnakeBird::kRight);
-//		snake.SetSnakeDir(0, 3, SnakeBird::kUp);
-//
-//		snake.SetSnakeHeadLoc(1, 56+18);
-//		//snake.SetSnakeBodyEnd(1, 10);
-//		snake.SetSnakeLength(1, 7);
-//		snake.SetSnakeDir(1, 0, SnakeBird::kRight);
-//		snake.SetSnakeDir(1, 1, SnakeBird::kRight);
-//		snake.SetSnakeDir(1, 2, SnakeBird::kDown);
-//		snake.SetSnakeDir(1, 3, SnakeBird::kDown);
-//		snake.SetSnakeDir(1, 4, SnakeBird::kDown);
-//		snake.SetSnakeDir(1, 4, SnakeBird::kRight);
-//
-//		snake.SetSnakeHeadLoc(2, 56+18*4+5);
-//		//snake.SetSnakeBodyEnd(2, 11);
-//		snake.SetSnakeLength(2, 2);
-//		snake.SetSnakeDir(2, 0, SnakeBird::kRight);
 	}
 }
 
@@ -254,7 +218,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		if (maxNumArgs > 1)
 		{
-			sb.Load(argument[1], snake);
+			mapName = argument[1];
 			return 2;
 		}
 		printf("Failed -load <file>: missing file name");
