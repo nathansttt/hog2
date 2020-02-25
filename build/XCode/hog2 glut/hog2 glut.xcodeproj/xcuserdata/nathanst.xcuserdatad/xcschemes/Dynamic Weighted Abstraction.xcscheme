@@ -61,6 +61,12 @@
             ReferencedContainer = "container:hog2 glut.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-test /Users/nathanst/hog2/maps/weighted/Map1.map"
+            isEnabled = "NO">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

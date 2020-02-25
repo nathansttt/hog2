@@ -13,7 +13,6 @@
 @interface ViewController : NSViewController
 {
 	__weak IBOutlet DrawView *drawingView;
-	
 	__weak IBOutlet NSTextField *messageField;
 }
 

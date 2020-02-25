@@ -119,7 +119,10 @@
 	{
 		CGContextAddLineToPoint(context, [self hogToScreenX:s.points[y].x viewport:port], [self hogToScreenY:s.points[y].y viewport:port]);
 	}
-	CGContextStrokePath(context);
+	if (s.fill)
+		CGContextFillPath(context);
+	else
+		CGContextStrokePath(context);
 }
 
 -(void)drawCommand:(Graphics::Display::data*)dat
@@ -179,7 +182,7 @@
 			Graphics::Display::shapeInfo &o = d.polygon;
 			CGContextSetRGBFillColor(context, o.c.r, o.c.g, o.c.b, 1.0);
 			double resolution = TWOPI/o.segments;
-			glBegin(GL_TRIANGLE_FAN);
+			//glBegin(GL_TRIANGLE_FAN);
 			for (int x = 0; x <= o.segments; x++)
 			{
 				CGFloat nextx, nexty;

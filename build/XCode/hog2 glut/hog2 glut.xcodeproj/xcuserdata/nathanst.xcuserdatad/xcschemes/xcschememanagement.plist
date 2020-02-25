@@ -44,6 +44,11 @@
 			<key>orderHint</key>
 			<integer>5</integer>
 		</dict>
+		<key>PDB.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>28</integer>
+		</dict>
 		<key>Roads.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -59,6 +64,11 @@
 			<key>orderHint</key>
 			<integer>15</integer>
 		</dict>
+		<key>Snake Bird.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>30</integer>
+		</dict>
 		<key>Supervised Learning.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -73,6 +83,11 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>19</integer>
+		</dict>
+		<key>Witness Editor.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>29</integer>
 		</dict>
 		<key>Witness.xcscheme</key>
 		<dict>
@@ -222,6 +237,21 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>C48E6E5123A99F8C0024D214</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C48E6EB623A99FE50024D214</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C48FE6852343EAD6008864D2</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>C498D8381432777C0053D322</key>
 		<dict>
 			<key>primary</key>
@@ -252,6 +282,11 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>C4B9412823DF534E0091C825</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>C4B973861426FA4F00758D0D</key>
 		<dict>
 			<key>primary</key>
@@ -268,6 +303,11 @@
 			<true/>
 		</dict>
 		<key>C4CA9F701B26805F00B4A894</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C4CCF3252170678E00FF5BA4</key>
 		<dict>
 			<key>primary</key>
 			<true/>

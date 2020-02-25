@@ -34,10 +34,12 @@
 	float height, width;
 	float xoffset, yoffset, xscale, yscale;
 //	Graphics::Display *display;
+//	bool isBackground;
 	//	bool drawMap;
 };
 
 @property Graphics::Display *display;
+@property bool isBackground;
 
 //- (void)clear;
 //- (bool)setLineStartX:(float)x1 StartY:(float)y1 EndX:(float)x2 EndY:(float)y2;
@@ -50,6 +52,7 @@
 //- (void)addCircle:(Graphics::rect)r color:(rgbColor)c;
 //- (void)addFramedCircle:(Graphics::rect)r color:(rgbColor)c;
 - (Graphics::point)getWorldCoordinate:(Graphics::point)point;
+-(point3d)convertToGlobalHogCoordinate:(CGPoint)currPoint;
 
 
 @end

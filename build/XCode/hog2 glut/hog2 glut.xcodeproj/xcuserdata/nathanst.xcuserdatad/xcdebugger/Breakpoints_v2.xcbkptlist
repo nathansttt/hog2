@@ -1,43 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Bucket
+   uuid = "1C5905E4-98A7-4D82-8931-AA4F40997EB0"
    type = "1"
    version = "2.0">
    <Breakpoints>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "25280F47-9B37-48AF-B9FF-8A6A09DA6D92"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "584066649.601598"
+            timestampString = "589264510.864552"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "559"
             endingLineNumber = "559"
-            landmarkName = "BuildPDBForwardBackward(const state &amp;goal, int numThreads)"
+            landmarkName = "BuildPDBForwardBackward(goal, numThreads)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "CFF9CB48-6E53-4DF8-9198-958F2141965B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeEdges.cpp"
-            timestampString = "581924185.953498"
+            timestampString = "585681236.826527"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1353"
-            endingLineNumber = "1353"
-            landmarkName = "RubikEdgePDB::GetPDBHash(const RubikEdgeState &amp;s, int threadID)"
+            startingLineNumber = "1358"
+            endingLineNumber = "1358"
+            landmarkName = "RubikEdgePDB::GetPDBHash(s, threadID)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "7251CA13-A207-4F80-BE04-F688270B9D61"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -54,6 +58,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "09D0D25E-1B9F-432C-B77F-7BC44D029D29"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -70,6 +75,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "480956B9-7B2A-46DB-A225-D99D532838D3"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -86,6 +92,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "197134E0-EE6B-4F8C-A8F1-352BD94A5C20"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -102,19 +109,21 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "2D8A9826-9852-45E4-8D87-14401472C708"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "581884922.078383"
+            timestampString = "591657115.762676"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "59"
             endingLineNumber = "59"
-            landmarkName = "mem(0)"
+            landmarkName = "mem()"
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "2D8A9826-9852-45E4-8D87-14401472C708 - 4f1164b91155d92c"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -130,6 +139,7 @@
                   offsetFromSymbolStart = "21">
                </Location>
                <Location
+                  uuid = "2D8A9826-9852-45E4-8D87-14401472C708 - 91dcfce21833655"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -150,19 +160,21 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "E8EDCAAC-7C81-4094-8069-42AFB5234EE4"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "581884922.0784349"
+            timestampString = "591657115.762742"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "75"
             endingLineNumber = "75"
-            landmarkName = "~NBitArray()"
-            landmarkType = "9">
+            landmarkName = "unknown"
+            landmarkType = "0">
             <Locations>
                <Location
+                  uuid = "E8EDCAAC-7C81-4094-8069-42AFB5234EE4 - aad182137c8d1c2d"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -178,6 +190,7 @@
                   offsetFromSymbolStart = "18">
                </Location>
                <Location
+                  uuid = "E8EDCAAC-7C81-4094-8069-42AFB5234EE4 - a950a4611b7636e4"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -198,6 +211,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A264E4FE-955A-4F40-BA00-698DEE737A1E"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -211,6 +225,7 @@
             landmarkType = "7">
             <Locations>
                <Location
+                  uuid = "A264E4FE-955A-4F40-BA00-698DEE737A1E - 1dc6f2e31cd1e457"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -226,6 +241,7 @@
                   offsetFromSymbolStart = "4">
                </Location>
                <Location
+                  uuid = "A264E4FE-955A-4F40-BA00-698DEE737A1E - dbeb47993218a00e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -246,6 +262,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A4AABA1C-251A-478F-93C6-2E9DC223D0CD"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -259,6 +276,7 @@
             landmarkType = "7">
             <Locations>
                <Location
+                  uuid = "A4AABA1C-251A-478F-93C6-2E9DC223D0CD - 1dc6f2e31cd1e457"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -274,6 +292,7 @@
                   offsetFromSymbolStart = "41">
                </Location>
                <Location
+                  uuid = "A4AABA1C-251A-478F-93C6-2E9DC223D0CD - dbeb47993218a00e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -294,19 +313,21 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "E7A8020D-FDEF-4A6B-9A8D-1472072C1E69"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "581884922.078511"
+            timestampString = "591657115.762845"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "45"
             endingLineNumber = "45"
-            landmarkName = "class NBitArray"
+            landmarkName = "NBitArray"
             landmarkType = "3">
             <Locations>
                <Location
+                  uuid = "E7A8020D-FDEF-4A6B-9A8D-1472072C1E69 - fbef17ffa7f7cd5c"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -322,6 +343,7 @@
                   offsetFromSymbolStart = "65">
                </Location>
                <Location
+                  uuid = "E7A8020D-FDEF-4A6B-9A8D-1472072C1E69 - 5a677b766557c285"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -342,22 +364,24 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "D807F466-75BE-42D3-B698-20AE323EF640"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "581884922.078555"
+            timestampString = "591657115.762894"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "109"
             endingLineNumber = "109"
-            landmarkName = "Resize(uint64_t newMaxEntries)"
+            landmarkName = "Resize(newMaxEntries)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "876A0437-A784-4E8F-8151-445AD4F3375B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -371,6 +395,7 @@
             landmarkType = "7">
             <Locations>
                <Location
+                  uuid = "876A0437-A784-4E8F-8151-445AD4F3375B - 1dc8e8e919d41956"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -386,6 +411,7 @@
                   offsetFromSymbolStart = "360">
                </Location>
                <Location
+                  uuid = "876A0437-A784-4E8F-8151-445AD4F3375B - 1dc6f2e31cd1e457"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -401,6 +427,7 @@
                   offsetFromSymbolStart = "360">
                </Location>
                <Location
+                  uuid = "876A0437-A784-4E8F-8151-445AD4F3375B - 1ddecacbe8a5e85b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -416,6 +443,7 @@
                   offsetFromSymbolStart = "360">
                </Location>
                <Location
+                  uuid = "876A0437-A784-4E8F-8151-445AD4F3375B - e792a6565000d20b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -431,6 +459,7 @@
                   offsetFromSymbolStart = "360">
                </Location>
                <Location
+                  uuid = "876A0437-A784-4E8F-8151-445AD4F3375B - efa2a6645c00d605"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -446,6 +475,7 @@
                   offsetFromSymbolStart = "363">
                </Location>
                <Location
+                  uuid = "876A0437-A784-4E8F-8151-445AD4F3375B - dbeb47993218a00e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -466,6 +496,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -479,6 +510,7 @@
             landmarkType = "7">
             <Locations>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1dcc1cf507ce1350"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -494,6 +526,7 @@
                   offsetFromSymbolStart = "372">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1dcae6ef1acb1e51"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -509,6 +542,7 @@
                   offsetFromSymbolStart = "454">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1dc8e8e919d41956"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -524,6 +558,7 @@
                   offsetFromSymbolStart = "834">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1dc6f2e31cd1e457"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -539,6 +574,7 @@
                   offsetFromSymbolStart = "454">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1dc4f4dd13d2e754"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -554,6 +590,7 @@
                   offsetFromSymbolStart = "834">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1dc2fed716dfe255"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -569,6 +606,7 @@
                   offsetFromSymbolStart = "834">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1dc0c0d115d8ed5a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -584,6 +622,7 @@
                   offsetFromSymbolStart = "834">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1ddecacbe8a5e85b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -599,6 +638,7 @@
                   offsetFromSymbolStart = "446">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - 1ddcccc5efa6eb58"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -614,6 +654,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e78a1e1e7636c001"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -629,6 +670,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e786ea124b33c306"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -644,6 +686,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e782f6064c3cce07"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -659,6 +702,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e79ec27a4139c904"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -674,6 +718,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e79ace6e5a3ad405"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -689,6 +734,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e796da625f07d70a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -704,6 +750,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e792a6565000d20b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -719,6 +766,7 @@
                   offsetFromSymbolStart = "457">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e7aeb24a550ddd08"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -734,6 +782,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e7aabfbe2e0ed809"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -749,6 +798,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - e7a68bb2230bdb0e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -764,6 +814,7 @@
                   offsetFromSymbolStart = "842">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - eb9af60d4e3ccc06"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -779,6 +830,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - eb96c2014339cf07"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -794,6 +846,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - eb92ce75443aca04"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -809,6 +862,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - ebaeda695907d505"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -824,6 +878,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - ebaaa65d5200d00a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -839,6 +894,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - eba6b251570dd30b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -854,6 +910,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - eba2be45280ede08"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -869,6 +926,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - ebbe8bb92d0bd909"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -884,6 +942,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - ebba97ad2614a40e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -899,6 +958,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - ebb763a13b11a70f"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -914,6 +974,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efaace7c463ac807"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -929,6 +990,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efa6da705b07cb04"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -944,6 +1006,7 @@
                   offsetFromSymbolStart = "828">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efa2a6645c00d605"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -959,6 +1022,7 @@
                   offsetFromSymbolStart = "465">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efbeb258510dd10a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -974,6 +1038,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efbabe4c2a0edc0b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -989,6 +1054,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efb68a402f0bdf08"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1004,6 +1070,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efb297b42014da09"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1019,6 +1086,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efcf63a82511a50e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1034,6 +1102,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efcb6f9c3e12a00f"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1049,6 +1118,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - efc77b90331fa30c"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1064,6 +1134,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3baa66b5e00d404"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1079,6 +1150,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3b6b25f530dd705"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1094,6 +1166,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3b2be53540ed20a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1109,6 +1182,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3ce8a47290bdd0b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1124,6 +1198,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3ca97bb2214d808"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1139,6 +1214,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3c763af2711db09"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1154,6 +1230,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3c36fa33812a60e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1169,6 +1246,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3df7b973d1fa10f"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1184,6 +1262,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3db478b3618ac0c"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1199,6 +1278,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d3d753ff0be5af0d"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1214,6 +1294,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7cabe5a560ed005"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1229,6 +1310,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7c68a4e2b0bd30a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1244,6 +1326,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7c296422c14de0b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1259,6 +1342,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7df63b62111d908"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1274,6 +1358,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7db6faa3a12a409"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1289,6 +1374,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7d77b9e3f1fa70e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1304,6 +1390,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7d347923018a20f"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1319,6 +1406,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7ef538635e5ad0c"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1334,6 +1422,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7eb5ffa0ee6a80d"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1349,6 +1438,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - d7e72bee03e3ab12"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1364,6 +1454,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - dbda96492e14dc0a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1379,6 +1470,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - dbd763bd2311df0b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1394,6 +1486,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - dbd36fb12412da08"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1409,6 +1502,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - dbef7ba5391fa509"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1424,6 +1518,7 @@
                   offsetFromSymbolStart = "843">
                </Location>
                <Location
+                  uuid = "C763FED2-3A11-49DE-A34E-C7A834699AEE - dbeb47993218a00e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1444,68 +1539,73 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A0697C86-6B9E-46B2-B9AD-3936514F1CBF"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             condition = "index==21"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "581884922.078627"
+            timestampString = "591657115.7629811"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "182"
             endingLineNumber = "182"
-            landmarkName = "Get(uint64_t index)"
+            landmarkName = "Get(index)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A236C4F5-A8F8-4185-8267-064FC690F972"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeCorners.cpp"
-            timestampString = "581924185.953773"
+            timestampString = "585681236.827131"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1405"
-            endingLineNumber = "1405"
-            landmarkName = "RubikCornerPDB::Save(FILE *f)"
+            startingLineNumber = "1407"
+            endingLineNumber = "1407"
+            landmarkName = "RubikCornerPDB::Save(f)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "26D989B7-2E30-4937-8704-A4FA212A898A"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeCorners.cpp"
-            timestampString = "581924185.953817"
+            timestampString = "585681236.827228"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1376"
-            endingLineNumber = "1376"
-            landmarkName = "RubikCornerPDB::Save(const char *prefix)"
+            startingLineNumber = "1378"
+            endingLineNumber = "1378"
+            landmarkName = "RubikCornerPDB::Save(prefix)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "89B95400-901F-423F-BDEE-F38C85575B01"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "581884922.0786999"
+            timestampString = "591657115.763087"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "123"
             endingLineNumber = "123"
-            landmarkName = "Write(FILE *f)"
+            landmarkName = "Write(f)"
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "89B95400-901F-423F-BDEE-F38C85575B01 - 3e75cd30d4e24d56"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1521,6 +1621,7 @@
                   offsetFromSymbolStart = "57">
                </Location>
                <Location
+                  uuid = "89B95400-901F-423F-BDEE-F38C85575B01 - 5dcc92488868bd7a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1536,6 +1637,7 @@
                   offsetFromSymbolStart = "57">
                </Location>
                <Location
+                  uuid = "89B95400-901F-423F-BDEE-F38C85575B01 - 47dc8c0cd3800942"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1556,31 +1658,33 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "BBFF024C-D97D-49A2-80CE-ADAB4642529B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "581884922.078741"
+            timestampString = "591657115.763145"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "136"
             endingLineNumber = "136"
-            landmarkName = "Read(FILE *f)"
+            landmarkName = "Read(f)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "399C9E12-2EC0-486E-A24A-91067A9679AA"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "508888346.245593"
+            timestampString = "585681236.827365"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1934"
-            endingLineNumber = "1934"
+            startingLineNumber = "1958"
+            endingLineNumber = "1958"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1588,15 +1692,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "817F2D80-2F81-4EAC-BC63-3E7EC764D03E"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "508888346.245593"
+            timestampString = "585681236.8278871"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1931"
-            endingLineNumber = "1931"
+            startingLineNumber = "1955"
+            endingLineNumber = "1955"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1604,15 +1709,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "B8FF1648-B8E6-4180-A094-04C45144C606"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "508888346.245593"
+            timestampString = "585681236.828253"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1935"
-            endingLineNumber = "1935"
+            startingLineNumber = "1959"
+            endingLineNumber = "1959"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1620,47 +1726,50 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "228B1A6B-BFCD-406B-96D9-36B090F3C2F5"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCube.cpp"
-            timestampString = "474445554.04339"
+            timestampString = "591657022.763424"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "908"
-            endingLineNumber = "908"
-            landmarkName = "RubikPDB::Load(FILE *f)"
+            startingLineNumber = "910"
+            endingLineNumber = "910"
+            landmarkName = "RubikPDB::Load(f)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "126073CA-1470-4992-9266-1C4ABF51B702"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCubeEdges.cpp"
-            timestampString = "581924185.9539469"
+            timestampString = "585681236.828706"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1505"
-            endingLineNumber = "1505"
-            landmarkName = "RubikEdgePDB::Load(FILE *f)"
+            startingLineNumber = "1510"
+            endingLineNumber = "1510"
+            landmarkName = "RubikEdgePDB::Load(f)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "DB460CA5-DC36-4566-AB33-63EE16BA97A9"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "508888346.245593"
+            timestampString = "585681236.828758"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1943"
-            endingLineNumber = "1943"
+            startingLineNumber = "1967"
+            endingLineNumber = "1967"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1668,31 +1777,33 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "1A036F23-047F-4BD7-B21C-92EF2B2A62B5"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/RubiksCube.cpp"
-            timestampString = "474445554.04339"
+            timestampString = "591657022.763528"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "877"
-            endingLineNumber = "877"
-            landmarkName = "RubikPDB::Load(const char *prefix)"
+            startingLineNumber = "879"
+            endingLineNumber = "879"
+            landmarkName = "RubikPDB::Load(prefix)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "C49B6759-D30F-4BDF-8A8C-AE79C17F9DA0"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/rubik/Driver.cpp"
-            timestampString = "508888346.245593"
+            timestampString = "585681236.829137"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1990"
-            endingLineNumber = "1990"
+            startingLineNumber = "2014"
+            endingLineNumber = "2014"
             landmarkName = "KorfTest(int which, bool use1997heuristic)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1700,6 +1811,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "949038B7-05A8-41A7-971D-49F4777DD3D8"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -1709,13 +1821,14 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "92"
             endingLineNumber = "92"
-            landmarkName = "GetPDBHash(const state &amp;s, int threadID)"
+            landmarkName = "GetPDBHash(s, threadID)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "2368AC0C-9A42-42EC-B80B-B0CBA50D7BB7"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -1732,6 +1845,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "BBA82908-C52D-4D0B-B9E2-77BC5A60E7B8"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -1748,6 +1862,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "29096262-3022-4AEE-B6DD-719AFE70ECBD"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -1764,19 +1879,21 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "5166AEB7-D1AC-4CBC-897B-AE310248007A"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../algorithms/AStarOpenClosed.h"
-            timestampString = "584569218.253777"
+            timestampString = "586295630.815794"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "328"
             endingLineNumber = "328"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "HeapifyUp(unsigned int index)"
+            landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "5166AEB7-D1AC-4CBC-897B-AE310248007A - 327e015a2970d97b"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1792,6 +1909,7 @@
                   offsetFromSymbolStart = "183">
                </Location>
                <Location
+                  uuid = "5166AEB7-D1AC-4CBC-897B-AE310248007A - 84726583ddbe0ffe"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1807,6 +1925,7 @@
                   offsetFromSymbolStart = "183">
                </Location>
                <Location
+                  uuid = "5166AEB7-D1AC-4CBC-897B-AE310248007A - fdb77504bbf2b8bd"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1827,19 +1946,21 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "F1A131A3-27EF-49B3-8D76-97D278090277"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../algorithms/AStarOpenClosed.h"
-            timestampString = "584569218.253873"
+            timestampString = "586295630.8158571"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "311"
             endingLineNumber = "311"
-            landmarkName = "Lookup(uint64_t hashKey, uint64_t &amp;objKey)"
+            landmarkName = "Reopen(uint64_t objKey)"
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "F1A131A3-27EF-49B3-8D76-97D278090277 - 14c0f2940c7a93df"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1855,6 +1976,7 @@
                   offsetFromSymbolStart = "95">
                </Location>
                <Location
+                  uuid = "F1A131A3-27EF-49B3-8D76-97D278090277 - 9424573ecafd1249"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1870,6 +1992,7 @@
                   offsetFromSymbolStart = "95">
                </Location>
                <Location
+                  uuid = "F1A131A3-27EF-49B3-8D76-97D278090277 - d4bcae4e49e7b281"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1890,22 +2013,24 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "ADC1EFA3-2DF1-40A6-B65B-4313B6C5984F"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../search/PDBHeuristic.h"
-            timestampString = "584066649.6031179"
+            timestampString = "589264510.865549"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "528"
             endingLineNumber = "528"
-            landmarkName = "BuildPDBForwardBackward(const state &amp;goal, int numThreads)"
+            landmarkName = "BuildPDBForwardBackward(goal, numThreads)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "2AA374BA-9917-41A1-A198-706F31276A68"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -1922,6 +2047,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "693B9398-3A90-482C-B7D3-AE9DC47691E3"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -1938,6 +2064,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "6A050051-9B72-47B7-964C-527794F18A43"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -1947,29 +2074,31 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "323"
             endingLineNumber = "323"
-            landmarkName = "MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)"
+            landmarkName = "MyDisplayHandler(windowID, mod, key)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "B6E6E58A-544B-4EEE-AA4F-A143C3B6BA93"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/GraphEnvironment.cpp"
-            timestampString = "579817213.410665"
+            timestampString = "585681236.831509"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "351"
             endingLineNumber = "351"
-            landmarkName = "GraphEnvironment::OpenGLDraw(const graphState &amp;s)"
+            landmarkName = "GraphEnvironment::OpenGLDraw(s)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "18BD6F27-1790-4784-9909-DB5E66DFBD0F"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -1986,6 +2115,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "19DB3797-5E82-4805-A197-3FAECF09F4D1"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2002,22 +2132,24 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "8684D651-C896-4EFB-ADD3-ACD1E07744D6"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/MMRubik.cpp"
-            timestampString = "504569982.770347"
+            timestampString = "589264510.8657759"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "929"
             endingLineNumber = "929"
-            landmarkName = "MM(RubiksState &amp;start, RubiksState &amp;goal, const char *p1, const char *p2, heuristicType h, const char *hloc)"
-            landmarkType = "9">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "49AAA2EA-D1A9-44E5-BD57-BD9569F4D9F1"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2034,6 +2166,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "37481078-24E6-4FB1-A36F-69227806AC0A"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2050,6 +2183,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "6C24E127-73CB-4B70-B33F-1A7F8178F592"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2059,13 +2193,14 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "172"
             endingLineNumber = "172"
-            landmarkName = "RoboticArm::GetSuccessors(const armAngles &amp;nodeID, std::vector&lt;armAngles&gt; &amp;neighbors)"
+            landmarkName = "RoboticArm::GetSuccessors(nodeID, neighbors)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "C8B89846-04C3-4558-ABA6-435E5AC8CB66"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2075,34 +2210,36 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "170"
             endingLineNumber = "170"
-            landmarkName = "RoboticArm::GetSuccessors(const armAngles &amp;nodeID, std::vector&lt;armAngles&gt; &amp;neighbors)"
+            landmarkName = "RoboticArm::GetSuccessors(nodeID, neighbors)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "2E1C17CA-4808-4CE9-B916-796834823A76"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/CanonicalGrid.cpp"
-            timestampString = "572300517.903265"
+            timestampString = "592422656.0615081"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "294"
             endingLineNumber = "294"
-            landmarkName = "CanonicalGrid::GetActions(const xyLoc &amp;loc, std::vector&lt;tDirection&gt; &amp;actions)"
+            landmarkName = "CanonicalGrid::GetActions(loc, actions)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "83E7DE09-A2A8-442D-B9A1-CB19D53491F9"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/GraphEnvironment.cpp"
-            timestampString = "579817213.41126"
+            timestampString = "585681236.83191"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "558"
@@ -2114,6 +2251,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "96D20573-4619-46C3-95A5-6409A36FE8CE"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2130,6 +2268,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "DCB57032-42ED-450C-81D0-2289F810DBF1"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2146,6 +2285,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "1C14EF62-F688-46B3-8A84-F92351EE40DB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2162,6 +2302,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "39BE245F-8DB5-4D6A-ACB7-7F9BE82CC6B3"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2178,6 +2319,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "5FBEDDE3-9A30-44D7-91A1-65572A87208F"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2194,6 +2336,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "7BFDAF73-F3AD-4EF6-90A4-E4107AAECCDB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2210,6 +2353,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A5AA85C8-3464-4E09-AC8E-2082DC5ECCBE"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2226,6 +2370,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "BD80E350-E719-4B3D-BFC0-3B1E26082D14"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2242,6 +2387,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "22C4203E-AB3D-42DF-B12C-A0BF54B15BF8"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2251,22 +2397,23 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "82"
             endingLineNumber = "82"
-            landmarkName = "MR1KPermutation::Unrank(uint64_t hash, int *puzzle, int *dual, int distinctSize, int puzzleSize)"
+            landmarkName = "MR1KPermutation::Unrank(hash, puzzle, dual, distinctSize, puzzleSize)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "F7840664-7A96-4893-93A5-2AB7C531E5AD"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "581898056.392313"
+            timestampString = "589264510.866241"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1062"
-            endingLineNumber = "1062"
+            startingLineNumber = "1068"
+            endingLineNumber = "1068"
             landmarkName = "PDBTest()"
             landmarkType = "9">
          </BreakpointContent>
@@ -2274,15 +2421,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "1F246C89-9508-42F4-9C6A-497F8FF508D4"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "581898056.392357"
+            timestampString = "589264510.866292"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1130"
-            endingLineNumber = "1130"
+            startingLineNumber = "1136"
+            endingLineNumber = "1136"
             landmarkName = "PDBTest()"
             landmarkType = "9">
          </BreakpointContent>
@@ -2290,15 +2438,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "DFF5256C-0343-47F7-B4E4-2B28DF1375B8"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/Driver.cpp"
-            timestampString = "581898056.392396"
+            timestampString = "589264510.8663369"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1139"
-            endingLineNumber = "1139"
+            startingLineNumber = "1145"
+            endingLineNumber = "1145"
             landmarkName = "PDBTest()"
             landmarkType = "9">
          </BreakpointContent>
@@ -2306,6 +2455,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "5C79F0A5-6547-4D52-A66C-8E9CF224DD4E"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2322,6 +2472,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "3DFF16B3-E39A-41DE-B980-0257ADC8937F"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2331,13 +2482,14 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "280"
             endingLineNumber = "280"
-            landmarkName = "mouseMovedButton(int x, int y)"
+            landmarkName = "mouseMovedButton(x, y)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "49D07DA0-3EB0-4A2E-8A06-A37B976AF301"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2347,10 +2499,11 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "145"
             endingLineNumber = "145"
-            landmarkName = "Save(FILE *f)"
+            landmarkName = "Save(f)"
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "49D07DA0-3EB0-4A2E-8A06-A37B976AF301 - c53cfbbfa47e56e8"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2366,6 +2519,7 @@
                   offsetFromSymbolStart = "23">
                </Location>
                <Location
+                  uuid = "49D07DA0-3EB0-4A2E-8A06-A37B976AF301 - 32c648fe4ed4535d"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2381,6 +2535,7 @@
                   offsetFromSymbolStart = "23">
                </Location>
                <Location
+                  uuid = "49D07DA0-3EB0-4A2E-8A06-A37B976AF301 - 7d92e41d3acb3f3"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2401,6 +2556,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "44F12D52-C788-4DF0-A092-25C38935884B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2410,10 +2566,11 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "123"
             endingLineNumber = "123"
-            landmarkName = "Load(FILE *f)"
+            landmarkName = "Load(f)"
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "44F12D52-C788-4DF0-A092-25C38935884B - 662e61d0d63d7097"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2429,6 +2586,7 @@
                   offsetFromSymbolStart = "20">
                </Location>
                <Location
+                  uuid = "44F12D52-C788-4DF0-A092-25C38935884B - 24f9f111e48da344"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2444,6 +2602,7 @@
                   offsetFromSymbolStart = "20">
                </Location>
                <Location
+                  uuid = "44F12D52-C788-4DF0-A092-25C38935884B - 6aba3079feffcf4a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2459,6 +2618,7 @@
                   offsetFromSymbolStart = "20">
                </Location>
                <Location
+                  uuid = "44F12D52-C788-4DF0-A092-25C38935884B - e734b3c9ed5c7746"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2474,6 +2634,7 @@
                   offsetFromSymbolStart = "20">
                </Location>
                <Location
+                  uuid = "44F12D52-C788-4DF0-A092-25C38935884B - a1726ce0136a4b40"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2489,6 +2650,7 @@
                   offsetFromSymbolStart = "20">
                </Location>
                <Location
+                  uuid = "44F12D52-C788-4DF0-A092-25C38935884B - a0e45bde6573a01a"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2509,6 +2671,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "C7C76CCF-7FA6-4993-A7CE-DA85CB641E1B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2518,10 +2681,11 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "96"
             endingLineNumber = "96"
-            landmarkName = "Load(const char *prefix)"
+            landmarkName = "Load(prefix)"
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "C7C76CCF-7FA6-4993-A7CE-DA85CB641E1B - b591b5ff557af560"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2537,6 +2701,7 @@
                   offsetFromSymbolStart = "33">
                </Location>
                <Location
+                  uuid = "C7C76CCF-7FA6-4993-A7CE-DA85CB641E1B - 8d39d215abd14a15"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2552,6 +2717,7 @@
                   offsetFromSymbolStart = "33">
                </Location>
                <Location
+                  uuid = "C7C76CCF-7FA6-4993-A7CE-DA85CB641E1B - 42ca6f848f2c22eb"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2572,6 +2738,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "392E05C3-070D-4458-B2DE-51258039E246"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2581,10 +2748,11 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "110"
             endingLineNumber = "110"
-            landmarkName = "Save(const char *prefix)"
+            landmarkName = "Save(prefix)"
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "392E05C3-070D-4458-B2DE-51258039E246 - ced3eb0d45e82457"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2600,6 +2768,7 @@
                   offsetFromSymbolStart = "33">
                </Location>
                <Location
+                  uuid = "392E05C3-070D-4458-B2DE-51258039E246 - e064036cdcc35b04"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2615,6 +2784,7 @@
                   offsetFromSymbolStart = "33">
                </Location>
                <Location
+                  uuid = "392E05C3-070D-4458-B2DE-51258039E246 - 67c6b13b508015da"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2635,6 +2805,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "744B1678-FB49-4637-B0DD-43013E439421"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2644,26 +2815,28 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "221"
             endingLineNumber = "221"
-            landmarkName = "MyCLHandler(char *argument[], int maxNumArgs)"
+            landmarkName = "MyCLHandler(argument, maxNumArgs)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "7D6F9879-DB33-49A4-8EF0-7DB9D3938192"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../utils/NBitArray.h"
-            timestampString = "581884922.0794539"
+            timestampString = "591657115.763992"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "140"
             endingLineNumber = "140"
-            landmarkName = "Read(FILE *f)"
+            landmarkName = "Read(f)"
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "7D6F9879-DB33-49A4-8EF0-7DB9D3938192 - abcbe1ae74f922ef"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2679,6 +2852,7 @@
                   offsetFromSymbolStart = "178">
                </Location>
                <Location
+                  uuid = "7D6F9879-DB33-49A4-8EF0-7DB9D3938192 - 2a55b5d62781f2eb"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -2699,6 +2873,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "E6BC9273-5C68-4431-9B13-F297585EFE8A"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2715,11 +2890,12 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "645ED582-79EC-4470-8027-8A7EBE945980"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/bidirectional/BSStar.h"
-            timestampString = "509049296.525142"
+            timestampString = "588541490.861856"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "152"
@@ -2731,6 +2907,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "BCC50222-95EB-4BB2-8B89-9C2E64674253"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2747,6 +2924,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "F675A2CE-D957-44D9-9A4B-045A18406FB0"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2763,6 +2941,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "E9EAC90A-B6C1-4293-879B-32950CC1F2BF"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2779,6 +2958,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "6B8A6753-D59B-4ADC-B2E8-03F479147F9C"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2795,6 +2975,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A1120AA7-0238-4262-9F44-5B5F8814F410"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2811,6 +2992,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A962A9EF-481C-479A-A1F7-4370ACA35EAA"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2827,6 +3009,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "BC9CD78C-66FE-4873-BC95-2020084C1286"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2843,6 +3026,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "71E829C3-7B74-4AC9-AB13-6737E47DBB2D"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2859,6 +3043,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "F5465E15-4AA0-499C-B677-6AD698A1F06B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2875,6 +3060,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "64E08C75-5583-4419-99AD-D94E2CAEB539"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2891,6 +3077,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "61D32BD5-9B8E-40F2-A4FE-C8AA472521A8"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2907,6 +3094,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "1B865BDF-AB1F-4FF6-9C51-5263A38E9A06"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2923,11 +3111,12 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A0834F8B-EB75-4ACF-8AB1-9708F15FCC32"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/NBS.h"
-            timestampString = "571769952.029461"
+            timestampString = "586390497.1571831"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "185"
@@ -2939,11 +3128,12 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "A816C0C2-5634-4C81-9EB7-15FF345A7B07"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/NBS.h"
-            timestampString = "571769952.0295039"
+            timestampString = "586390497.157263"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "223"
@@ -2955,11 +3145,12 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "0DD6ED9C-BF32-4761-B1FC-7C869D7CDC40"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/NBS.h"
-            timestampString = "571769952.029546"
+            timestampString = "586390497.157321"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "246"
@@ -2971,6 +3162,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "76F06997-942D-4716-BD1A-56B916B75587"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2980,13 +3172,14 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1121"
             endingLineNumber = "1121"
-            landmarkName = "MapEnvironment::Draw(Graphics::Display &amp;disp)"
+            landmarkName = "MapEnvironment::Draw(disp)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "AC8C7926-90C4-4817-AD42-C4DBC39C731D"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -2996,13 +3189,14 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "345"
             endingLineNumber = "345"
-            landmarkName = "MakeMaze(Map *m, float straightPercent, float branchPercent)"
+            landmarkName = "MakeMaze(m, straightPercent, branchPercent)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "5213A28C-C337-47BC-ADF4-C6486AAEB7BF"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3012,13 +3206,14 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "849"
             endingLineNumber = "849"
-            landmarkName = "DrawGraphics(Graphics::Display &amp;display, int port)"
+            landmarkName = "DrawGraphics(display, port)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "42A672E4-58D5-49F9-95B6-35F2535ADC16"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3026,15 +3221,16 @@
             timestampString = "576186894.6229579"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "474"
-            endingLineNumber = "474"
-            landmarkName = "LoadFromHashString(std::string s)"
-            landmarkType = "9">
+            startingLineNumber = "548"
+            endingLineNumber = "548"
+            landmarkName = "SaveToHashString()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "C0A363B6-5467-4425-8F00-E6F7AAD5BD8B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3051,6 +3247,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "74D9B002-5C97-4E4A-B0ED-387E9D41CF28"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3067,6 +3264,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "D4823ECA-E43F-4BE5-8ADC-C20F3D919256"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3080,6 +3278,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "D4823ECA-E43F-4BE5-8ADC-C20F3D919256 - bf09de0f2b7119fc"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3095,6 +3294,7 @@
                   offsetFromSymbolStart = "826">
                </Location>
                <Location
+                  uuid = "D4823ECA-E43F-4BE5-8ADC-C20F3D919256 - 160fa46069b9a9df"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3115,6 +3315,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "E12C607C-9F58-49B6-BF34-8011B7096F5A"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3128,6 +3329,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "E12C607C-9F58-49B6-BF34-8011B7096F5A - 833f49db05c647d4"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3143,6 +3345,7 @@
                   offsetFromSymbolStart = "1606">
                </Location>
                <Location
+                  uuid = "E12C607C-9F58-49B6-BF34-8011B7096F5A - e345e63e7b2fa025"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3163,6 +3366,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "8390CE47-9598-4367-8EFA-2FA9AB8C94F2"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3176,6 +3380,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "8390CE47-9598-4367-8EFA-2FA9AB8C94F2 - b297b6c2297cdbf0"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3191,6 +3396,7 @@
                   offsetFromSymbolStart = "385">
                </Location>
                <Location
+                  uuid = "8390CE47-9598-4367-8EFA-2FA9AB8C94F2 - efef6405249ee481"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3211,6 +3417,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "56105ACD-AD64-45BB-9117-6DFD8E95D098"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3224,6 +3431,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "56105ACD-AD64-45BB-9117-6DFD8E95D098 - f61e38521364ba44"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3239,6 +3447,7 @@
                   offsetFromSymbolStart = "211">
                </Location>
                <Location
+                  uuid = "56105ACD-AD64-45BB-9117-6DFD8E95D098 - 4cc6d450163c1599"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3259,6 +3468,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "E68C9113-51C2-47B3-A0C0-C4ED4C0472F1"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3272,6 +3482,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "E68C9113-51C2-47B3-A0C0-C4ED4C0472F1 - 833f49db05c647d4"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3287,6 +3498,7 @@
                   offsetFromSymbolStart = "1194">
                </Location>
                <Location
+                  uuid = "E68C9113-51C2-47B3-A0C0-C4ED4C0472F1 - e345e63e7b2fa025"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3307,11 +3519,12 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "0CA90ED9-4685-4DBB-865E-12001BFA15B8"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../generic/EBSearch.h"
-            timestampString = "584569218.256529"
+            timestampString = "589264510.8673871"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "307"
@@ -3320,6 +3533,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "0CA90ED9-4685-4DBB-865E-12001BFA15B8 - 8a892f39a8509fa6"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3335,6 +3549,7 @@
                   offsetFromSymbolStart = "900">
                </Location>
                <Location
+                  uuid = "0CA90ED9-4685-4DBB-865E-12001BFA15B8 - 55317638282eac22"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3350,6 +3565,7 @@
                   offsetFromSymbolStart = "881">
                </Location>
                <Location
+                  uuid = "0CA90ED9-4685-4DBB-865E-12001BFA15B8 - d0fccc8fe5b1e111"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3370,102 +3586,92 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "4C87468E-8C73-4D37-AECB-4E00EE6B43EB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/puzzlesample/PuzzleSample.cpp"
-            timestampString = "580964705.4252"
+            timestampString = "589264510.867456"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "237"
             endingLineNumber = "237"
-            landmarkName = "MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)"
+            landmarkName = "MyDisplayHandler(windowID, mod, key)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "7EBE406C-BBC6-4D9D-88D9-20DBD4632772"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../apps/puzzlesample/PuzzleSample.cpp"
-            timestampString = "580964705.425516"
+            timestampString = "589264510.867501"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "172"
             endingLineNumber = "172"
-            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "C6815917-76AB-4069-95E0-1DCEE5F34AE9"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/DynamicWeightedGrid.cpp"
-            timestampString = "580964705.42559"
+            timestampString = "592422656.06288"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "226"
-            endingLineNumber = "226"
-            landmarkName = "DynamicWeightedGridEnvironment::Draw(Graphics::Display &amp;display, const xyLoc &amp;l)"
+            startingLineNumber = "248"
+            endingLineNumber = "248"
+            landmarkName = "DynamicWeightedGridEnvironment::Draw(display, l)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "D579D154-71C9-4244-B04F-59F678AEFA6F"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/DynamicWeightedGrid.cpp"
-            timestampString = "580964705.425858"
+            timestampString = "592422656.062976"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "206"
-            endingLineNumber = "206"
-            landmarkName = "DynamicWeightedGridEnvironment::GoalTest(const xyLoc &amp;node, const xyLoc &amp;goal)"
+            startingLineNumber = "228"
+            endingLineNumber = "228"
+            landmarkName = "DynamicWeightedGridEnvironment::GoalTest(node, goal)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../papers/DWA/Driver.cpp"
-            timestampString = "581924185.955345"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "160"
-            endingLineNumber = "160"
-            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
+            uuid = "0A1C10A5-8A32-414F-BB5E-EA8CC7BC9FC1"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../environments/DynamicWeightedGrid.h"
-            timestampString = "581924185.955391"
+            timestampString = "592422656.0630521"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "734"
-            endingLineNumber = "734"
-            landmarkName = "GetSuccessors(const abstractState &amp;nodeID, std::vector&lt;abstractState&gt; &amp;neighbors)"
+            startingLineNumber = "753"
+            endingLineNumber = "753"
+            landmarkName = "GetSuccessors(nodeID, neighbors)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "12223645-BF03-43E1-B711-FD5DFD8A9852"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3479,6 +3685,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "12223645-BF03-43E1-B711-FD5DFD8A9852 - e8cfb7d8cb6a82a4"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3494,6 +3701,7 @@
                   offsetFromSymbolStart = "642">
                </Location>
                <Location
+                  uuid = "12223645-BF03-43E1-B711-FD5DFD8A9852 - 4f53f144ea568598"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3509,6 +3717,7 @@
                   offsetFromSymbolStart = "640">
                </Location>
                <Location
+                  uuid = "12223645-BF03-43E1-B711-FD5DFD8A9852 - c63df15c7cdb216"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3529,6 +3738,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "E8DAFFD5-DC0A-4227-BD69-F2A72C805255"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3542,6 +3752,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "E8DAFFD5-DC0A-4227-BD69-F2A72C805255 - f991341fe74cdfc7"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3557,6 +3768,7 @@
                   offsetFromSymbolStart = "368">
                </Location>
                <Location
+                  uuid = "E8DAFFD5-DC0A-4227-BD69-F2A72C805255 - 878b0c976a28616e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3572,6 +3784,7 @@
                   offsetFromSymbolStart = "368">
                </Location>
                <Location
+                  uuid = "E8DAFFD5-DC0A-4227-BD69-F2A72C805255 - 755dbb244ef0aebc"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3592,6 +3805,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "F9420472-0585-4406-BCC9-D6D6A9F5C12B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3605,6 +3819,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "F9420472-0585-4406-BCC9-D6D6A9F5C12B - f991341fe74cdfc7"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3620,6 +3835,7 @@
                   offsetFromSymbolStart = "636">
                </Location>
                <Location
+                  uuid = "F9420472-0585-4406-BCC9-D6D6A9F5C12B - 878b0c976a28616e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3635,6 +3851,7 @@
                   offsetFromSymbolStart = "636">
                </Location>
                <Location
+                  uuid = "F9420472-0585-4406-BCC9-D6D6A9F5C12B - 755dbb244ef0aebc"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3655,6 +3872,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "DE152BA0-8615-4325-9F29-7C770C5D131A"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3668,6 +3886,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "DE152BA0-8615-4325-9F29-7C770C5D131A - d33c7964bd392e35"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3683,6 +3902,7 @@
                   offsetFromSymbolStart = "931">
                </Location>
                <Location
+                  uuid = "DE152BA0-8615-4325-9F29-7C770C5D131A - b9b2661f2ca5126"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3703,6 +3923,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "098CEC94-8EEC-458E-A544-31DF6A006DCB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3716,6 +3937,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "098CEC94-8EEC-458E-A544-31DF6A006DCB - 3c59cd4ece3cda06"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3731,6 +3953,7 @@
                   offsetFromSymbolStart = "48">
                </Location>
                <Location
+                  uuid = "098CEC94-8EEC-458E-A544-31DF6A006DCB - e58ec11118291e15"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3751,6 +3974,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "BEBAD3BE-49F1-4851-A08C-29813D9F57F0"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3767,6 +3991,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "7C78BFF9-6A4D-4150-96BB-DB7BE5EDEAC6"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3783,6 +4008,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "57FEED65-0771-45F0-BA84-271163D249BB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3799,6 +4025,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "B5B02FEA-1C41-4DD4-A9A4-9CA36FEDD2D8"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3812,6 +4039,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "B5B02FEA-1C41-4DD4-A9A4-9CA36FEDD2D8 - 8858406891ec61ca"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3827,6 +4055,7 @@
                   offsetFromSymbolStart = "2482">
                </Location>
                <Location
+                  uuid = "B5B02FEA-1C41-4DD4-A9A4-9CA36FEDD2D8 - 9feecbdd31fe1c19"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3842,6 +4071,7 @@
                   offsetFromSymbolStart = "2469">
                </Location>
                <Location
+                  uuid = "B5B02FEA-1C41-4DD4-A9A4-9CA36FEDD2D8 - 66add224e26e53f4"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3862,6 +4092,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "CA8BFC8F-9F4E-4836-89DA-156F3D12E8A6"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -3875,6 +4106,7 @@
             landmarkType = "9">
             <Locations>
                <Location
+                  uuid = "CA8BFC8F-9F4E-4836-89DA-156F3D12E8A6 - 8858406891ec61ca"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3890,6 +4122,7 @@
                   offsetFromSymbolStart = "3071">
                </Location>
                <Location
+                  uuid = "CA8BFC8F-9F4E-4836-89DA-156F3D12E8A6 - 9feecbdd31fe1c19"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3905,6 +4138,7 @@
                   offsetFromSymbolStart = "3058">
                </Location>
                <Location
+                  uuid = "CA8BFC8F-9F4E-4836-89DA-156F3D12E8A6 - 66add224e26e53f4"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -3920,6 +4154,569 @@
                   offsetFromSymbolStart = "3492">
                </Location>
             </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C8E91A00-27F8-4BE7-8DE9-FB9B62B2BBC4"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/rubik/Driver.cpp"
+            timestampString = "585681236.834365"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "219"
+            endingLineNumber = "219"
+            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B8D0838C-7564-451C-9037-DB181886DF55"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/RubiksCube.cpp"
+            timestampString = "591657022.76495"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "856"
+            endingLineNumber = "856"
+            landmarkName = "RubikPDB::GetStateFromPDBHash(hash, s, threadID)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9026047D-A369-4C41-AE2E-1897350A16D6"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/RubiksCube.cpp"
+            timestampString = "591657022.7649961"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "840"
+            endingLineNumber = "840"
+            landmarkName = "RubikPDB::GetStateFromHash(s, hash)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "045A8D24-9BF9-49D0-8ACC-0B2EF9BEB893"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/NBS.h"
+            timestampString = "586390497.158566"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "199"
+            endingLineNumber = "199"
+            landmarkName = "InitializeSearch(environment *env, const state&amp; from, const state&amp; to, Heuristic&lt;state&gt; *forward, Heuristic&lt;state&gt; *backward, std::vector&lt;state&gt; &amp;thePath)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "045A8D24-9BF9-49D0-8ACC-0B2EF9BEB893 - 1bae63482de7a031"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "NBS&lt;DWG::abstractState, DWG::edge, DWG::DynamicWeightedGrid&lt;16&gt;, NBSQueue&lt;DWG::abstractState, BDOpenClosed&lt;DWG::abstractState, NBSCompareOpenReady&lt;DWG::abstractState, BDOpenClosedData&lt;DWG::abstractState&gt; &gt;, NBSCompareOpenWaiting&lt;DWG::abstractState, BDOpenClosedData&lt;DWG::abstractState&gt; &gt;, BDOpenClosedData&lt;DWG::abstractState&gt; &gt;, 1, false&gt;, BDOpenClosed&lt;DWG::abstractState, NBSCompareOpenReady&lt;DWG::abstractState, BDOpenClosedData&lt;DWG::abstractState&gt; &gt;, NBSCompareOpenWaiting&lt;DWG::abstractState, BDOpenClosedData&lt;DWG::abstractState&gt; &gt;, BDOpenClosedData&lt;DWG::abstractState&gt; &gt; &gt;::InitializeSearch(DWG::DynamicWeightedGrid&lt;16&gt;*, DWG::abstractState const&amp;, DWG::abstractState const&amp;, Heuristic&lt;DWG::abstractState&gt;*, Heuristic&lt;DWG::abstractState&gt;*, std::__1::vector&lt;DWG::abstractState, std::__1::allocator&lt;DWG::abstractState&gt; &gt;&amp;)"
+                  moduleName = "Dynamic Weighted Abstraction"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/generic/NBS.h"
+                  timestampString = "586294791.433406"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "199"
+                  endingLineNumber = "199"
+                  offsetFromSymbolStart = "94">
+               </Location>
+               <Location
+                  uuid = "045A8D24-9BF9-49D0-8ACC-0B2EF9BEB893 - 68a80ab288124e23"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "NBS&lt;xyLoc, tDirection, DWG::DynamicWeightedGridEnvironment, NBSQueue&lt;xyLoc, BDIndexOpenClosed&lt;xyLoc, NBSCompareOpenReady&lt;xyLoc, BDIndexOpenClosedData&lt;xyLoc&gt; &gt;, NBSCompareOpenWaiting&lt;xyLoc, BDIndexOpenClosedData&lt;xyLoc&gt; &gt;, BDIndexOpenClosedData&lt;xyLoc&gt; &gt;, 1, true&gt;, BDIndexOpenClosed&lt;xyLoc, NBSCompareOpenReady&lt;xyLoc, BDIndexOpenClosedData&lt;xyLoc&gt; &gt;, NBSCompareOpenWaiting&lt;xyLoc, BDIndexOpenClosedData&lt;xyLoc&gt; &gt;, BDIndexOpenClosedData&lt;xyLoc&gt; &gt; &gt;::InitializeSearch(DWG::DynamicWeightedGridEnvironment*, xyLoc const&amp;, xyLoc const&amp;, Heuristic&lt;xyLoc&gt;*, Heuristic&lt;xyLoc&gt;*, std::__1::vector&lt;xyLoc, std::__1::allocator&lt;xyLoc&gt; &gt;&amp;)"
+                  moduleName = "Dynamic Weighted Abstraction"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/generic/NBS.h"
+                  timestampString = "586294791.435092"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "199"
+                  endingLineNumber = "199"
+                  offsetFromSymbolStart = "94">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E4A358A8-C325-4B3C-A700-27EF65379CE4"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/bidirectional/BidirRubik.cpp"
+            timestampString = "592174952.095"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "432"
+            endingLineNumber = "432"
+            landmarkName = "TestRubik(algorithm)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "12644B68-410B-4E3B-852E-97364CC9D2E6"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/DynamicWeightedGrid.cpp"
+            timestampString = "592422656.063512"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "216"
+            endingLineNumber = "216"
+            landmarkName = "DynamicWeightedGridEnvironment::GCost(node1, node2)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7540320F-B89C-483A-8C50-D9ED8A30264B"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/MNPuzzle.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "808"
+            endingLineNumber = "808"
+            landmarkName = "GCost(a, b)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "7540320F-B89C-483A-8C50-D9ED8A30264B - 9004f34e7be066de"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MNPuzzle&lt;4, 4&gt;::AdditiveGCost(MNPuzzleState&lt;4, 4&gt; const&amp;, slideDir const&amp;) const"
+                  moduleName = "PDB"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/MNPuzzle.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "807"
+                  endingLineNumber = "807"
+                  offsetFromSymbolStart = "24">
+               </Location>
+               <Location
+                  uuid = "7540320F-B89C-483A-8C50-D9ED8A30264B - 19b206bcb00e3ada"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MNPuzzle&lt;5, 5&gt;::AdditiveGCost(MNPuzzleState&lt;5, 5&gt; const&amp;, slideDir const&amp;) const"
+                  moduleName = "PDB"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/MNPuzzle.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "807"
+                  endingLineNumber = "807"
+                  offsetFromSymbolStart = "24">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9E55B495-3BCC-4307-9C54-893149FAA6CD"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/MNPuzzle.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "809"
+            endingLineNumber = "809"
+            landmarkName = "GCost(a, b)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "385EA0B1-5FAB-48F8-AF2E-23FC86A8C685"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/witness/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
+            landmarkName = "MyWindowHandler(windowID, eType)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0553BF95-5D25-4836-948F-AAED4141A973"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/Witness.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "2044"
+            endingLineNumber = "2044"
+            landmarkName = "Draw(display)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "0553BF95-5D25-4836-948F-AAED4141A973 - ac4134542a3947a2"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Witness&lt;3, 4&gt;::Draw(Graphics::Display&amp;)"
+                  moduleName = "Witness"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/Witness.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1914"
+                  endingLineNumber = "1914"
+                  offsetFromSymbolStart = "2541">
+               </Location>
+               <Location
+                  uuid = "0553BF95-5D25-4836-948F-AAED4141A973 - 7345fb293f25f225"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Witness&lt;2, 2&gt;::Draw(Graphics::Display&amp;)"
+                  moduleName = "Witness"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/Witness.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1914"
+                  endingLineNumber = "1914"
+                  offsetFromSymbolStart = "2525">
+               </Location>
+               <Location
+                  uuid = "0553BF95-5D25-4836-948F-AAED4141A973 - 94a65963814a8da4"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Witness&lt;2, 3&gt;::Draw(Graphics::Display&amp;)"
+                  moduleName = "Witness"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/Witness.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1914"
+                  endingLineNumber = "1914"
+                  offsetFromSymbolStart = "2541">
+               </Location>
+               <Location
+                  uuid = "0553BF95-5D25-4836-948F-AAED4141A973 - b605619c814ac23"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Witness&lt;3, 3&gt;::Draw(Graphics::Display&amp;)"
+                  moduleName = "Witness"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/Witness.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1914"
+                  endingLineNumber = "1914"
+                  offsetFromSymbolStart = "2525">
+               </Location>
+               <Location
+                  uuid = "0553BF95-5D25-4836-948F-AAED4141A973 - 231b30c992fb6621"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Witness&lt;4, 4&gt;::Draw(Graphics::Display&amp;)"
+                  moduleName = "Witness"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/Witness.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1914"
+                  endingLineNumber = "1914"
+                  offsetFromSymbolStart = "2525">
+               </Location>
+               <Location
+                  uuid = "0553BF95-5D25-4836-948F-AAED4141A973 - 447d9704f4e801a0"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Witness&lt;4, 5&gt;::Draw(Graphics::Display&amp;)"
+                  moduleName = "Witness"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/Witness.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1914"
+                  endingLineNumber = "1914"
+                  offsetFromSymbolStart = "2541">
+               </Location>
+               <Location
+                  uuid = "0553BF95-5D25-4836-948F-AAED4141A973 - 3b3793ba3faa202f"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Witness&lt;5, 5&gt;::Draw(Graphics::Display&amp;)"
+                  moduleName = "Witness"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/environments/Witness.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1914"
+                  endingLineNumber = "1914"
+                  offsetFromSymbolStart = "2525">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F63DCE39-D6DD-4F2C-980C-8DEC25B9356A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "690"
+            endingLineNumber = "690"
+            landmarkName = "SnakeBird::GetY(index)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "AD1FD7CF-0096-47FB-B421-DC8D831454CA"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "718"
+            endingLineNumber = "718"
+            landmarkName = "SnakeBird::Draw(display)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7FDBDF39-6D32-4F43-AF23-13D1C14F6813"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "68"
+            endingLineNumber = "68"
+            landmarkName = "SetSnakeDir(whichSnake, segment, dir)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A4CFEC26-F544-42EB-9400-7E6146BA2CD0"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/snakebird/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "285"
+            endingLineNumber = "285"
+            landmarkName = "MyDisplayHandler(windowID, mod, key)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "989657C7-E7D7-4CF5-91E6-F8AD303D441E"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "74"
+            endingLineNumber = "74"
+            landmarkName = "InsertSnakeDir(whichSnake, dir)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F9D0451A-D9D7-472B-9336-790895AC93B1"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
+            landmarkName = "InsertSnakeHeadDir(whichSnake, dir)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E7CD46FD-A716-49E5-B562-59CED28D4331"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "114"
+            endingLineNumber = "114"
+            landmarkName = "SnakeBirdState"
+            landmarkType = "14">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "AAC67185-5453-4EC3-BB42-25BCED82FDD2"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "213"
+            endingLineNumber = "213"
+            landmarkName = "SnakeBird::GetActions(s, actions)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CC7CD29D-6E8C-4ABE-801F-3B657A2887FA"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "155"
+            endingLineNumber = "155"
+            landmarkName = "SnakeBird::GetActions(s, actions)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4CE85BC9-4C48-431A-80CF-E9B2FC9E4092"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "384"
+            endingLineNumber = "384"
+            landmarkName = "SnakeBird::ApplyAction(s, a)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F38B40A4-1322-4948-AAF0-F473EB7D6087"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "355"
+            endingLineNumber = "355"
+            landmarkName = "SnakeBird::ApplyAction(s, a)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6366E2E9-13E3-49C3-9C70-380543E7A512"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../environments/SnakeBird.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "559"
+            endingLineNumber = "559"
+            landmarkName = "SnakeBird::ApplyAction(s, a)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2FB05B03-404B-403C-95E2-47C74AE6EDC5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/snakebird/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "269"
+            endingLineNumber = "269"
+            landmarkName = "MyDisplayHandler(windowID, mod, key)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7C45FC42-1429-4923-B444-62B4160198B5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../apps/snakebird/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "90"
+            endingLineNumber = "90"
+            landmarkName = "LoadLevel19()"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
