@@ -65,8 +65,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset Level", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Print", "Print screen to file", kAnyModifier, 'p');
 
-	InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
-	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
+	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
+//	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
 	
 	InstallWindowHandler(MyWindowHandler);
 	InstallMouseClickHandler(MyClickHandler, static_cast<tMouseEventType>(kMouseMove|kMouseUp|kMouseDrag));
@@ -250,6 +250,17 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 int MyCLHandler(char *argument[], int maxNumArgs)
 {
+	if (strcmp(argument[0], "-load") == 0)
+	{
+		if (maxNumArgs > 1)
+		{
+			sb.Load(argument[1], snake);
+			return 2;
+		}
+		printf("Failed -load <file>: missing file name");
+		return 1;
+		// "/home/aaron/Desktop/SnakeBird_lvls/Snakebird_lvl_20"
+	}
 	return 0;
 }
 
