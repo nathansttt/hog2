@@ -183,8 +183,8 @@ enum SnakeBirdWorldObject : uint8_t {
 class SnakeBird : public SearchEnvironment<SnakeBirdState, SnakeBirdAction> {
 public:
 	SnakeBird(int width = 20, int height = 16);
-	bool Load(const char *filename, SnakeBirdState &);
-	bool Save(const char *filename, const SnakeBirdState &);
+	bool Load(const char *filename);
+	bool Save(const char *filename);
 	SnakeBirdState GetStart();
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);

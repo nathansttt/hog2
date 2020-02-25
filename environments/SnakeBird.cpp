@@ -36,7 +36,7 @@ void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
 		startState.SetSnakeDir(count, x, body[x]);
 }
 
-bool SnakeBird::Load(const char *filename, SnakeBirdState &)
+bool SnakeBird::Load(const char *filename)
 {
 
 	ifstream infile;
@@ -97,7 +97,7 @@ bool SnakeBird::Load(const char *filename, SnakeBirdState &)
 	
 }
 
-bool SnakeBird::Save(const char *filename, const SnakeBirdState &)
+bool SnakeBird::Save(const char *filename)
 {
 	return false;
 }
