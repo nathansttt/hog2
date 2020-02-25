@@ -5,7 +5,7 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/apps/sample/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = ebis
+NAME = ibex
 DBG_NAME = $(NAME)
 REL_NAME = $(NAME)
 
