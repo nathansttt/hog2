@@ -76,9 +76,30 @@ bool SnakeBird::Load(const char *filename)
 				SetGroundType(x,y,SnakeBirdWorldObject::kFruit);
 				x++;
 			}
-			else if(ch == '\n'){
+			else if (ch == '\n')
+			{
 				x = 0;
 				y++;
+			}
+			else if (ch == '1')
+			{
+				SetGroundType(x, y, kBlock1);
+				x++;
+			}
+			else if (ch == '2')
+			{
+				SetGroundType(x, y, kBlock2);
+				x++;
+			}
+			else if (ch == '3')
+			{
+				SetGroundType(x, y, kBlock3);
+				x++;
+			}
+			else if (ch == '4')
+			{
+				SetGroundType(x, y, kBlock4);
+				x++;
 			}
 			else{
 
@@ -828,7 +849,7 @@ Graphics::point SnakeBird::GetCenter(int x, int y) const
 
 float SnakeBird::GetRadius() const
 {
-	return 2.0/40.0;
+	return 2.0/(std::max(width, height)*2.0);
 }
 
 void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s) const
@@ -912,7 +933,7 @@ void SnakeBird::DrawSnakeSegment(Graphics::Display &display, int x, int y, const
 	Graphics::point p = GetCenter(x, y);
 	const float cornerWidth = 0.75;
 	float offset = cornerWidth*GetRadius();
-
+	
 	Graphics::rect r(p, GetRadius());
 	r.top+=offset;
 	r.bottom-=offset;
@@ -973,6 +994,15 @@ void SnakeBird::DrawSnakeSegment(Graphics::Display &display, int x, int y, const
 		p.x+=GetRadius()*0.2;
 		p.y+=2*GetRadius()*0.25;
 		display.FillNGon(p, GetRadius()*0.3, 3, 240, Colors::orange);
+	}
+	
+	
+	// in spikes!
+	if (world[GetIndex(x, y)] == kSpikes)
+	{
+		display.FillNGon(p, GetRadius()*0.95, 3, 0, Colors::darkgray);
+		display.FillNGon(p, GetRadius()*0.95, 3, 60, Colors::gray*0.75f);
+		return;
 	}
 }
 

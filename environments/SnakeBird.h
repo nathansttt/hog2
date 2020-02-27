@@ -50,6 +50,8 @@ struct SnakeBirdState {
 	}
 	int GetNumSnakes() const { return snakeHeads&0x3; }
 	void SetNumSnakes(int count) { snakeHeads = (snakeHeads&(~snakeBodyMask))|(count&0x3); }
+	bool IsInPlay(int whichSnake) const
+	{ return GetSnakeHeadLoc(whichSnake) != kDead && GetSnakeHeadLoc(whichSnake) != kInGoal; }
 	int GetSnakeHeadLoc(int whichSnake) const
 	{ return (snakeHeads>>(2+whichSnake*14))&0x1FF;}
 	void SetSnakeHeadLoc(int whichSnake, int loc)
