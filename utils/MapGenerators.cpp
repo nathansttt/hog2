@@ -380,3 +380,24 @@ void MakeMaze(Map *m, float straightPercent, float branchPercent)
 		}
 	}
 }
+
+Map *MakeWarehouseMap(int columns, int rows, int corridor, int shelfWidth, int shelfHeight, int leftMargin, int rightMargin)
+{
+	int mapWidth = leftMargin+rightMargin+columns*shelfWidth+(columns-1)*corridor+2;
+	int mapHeight = rows*shelfHeight+(rows+1)*corridor+2;
+	Map *map = new Map(mapWidth, mapHeight);
+	// put a 1-width border on the whole map
+	map->SetTerrainType(0, 0, 0, mapHeight-1, kTrees);
+	map->SetTerrainType(mapWidth-1, 0, mapWidth-1, mapHeight-1, kTrees);
+	map->SetTerrainType(0, mapHeight-1, mapWidth-1, mapHeight-1, kTrees);
+	map->SetTerrainType(0, 0, mapWidth-1, 0, kTrees);
+
+	for (int x = 1+leftMargin; x+shelfWidth+rightMargin < mapWidth; x += shelfWidth+corridor)
+	{
+		for (int y = 1+corridor; y+shelfHeight+corridor < mapHeight; y += shelfHeight+corridor)
+		{
+			map->SetRectHeight(x, y, x+shelfWidth-1, y+shelfHeight-1, 0, kTrees);
+		}
+	}
+	return map;
+}

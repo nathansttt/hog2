@@ -17,5 +17,6 @@ void MakeMaze(Map *m, float straightPercent, float branchPercent);
 void MakeRandomMap(Map *map, int obstacles);
 void MakePseudoMaze(Map *map, int pathSize);
 void BuildRandomRoomMap(Map *map, int roomSize, int openingProbability=80);
+Map *MakeWarehouseMap(int columns, int rows, int corridor, int shelfWidth, int shelfHeight, int leftMargin, int rightMargin);
 
 #endif /* defined(MAP_GENERATOR_H) */
