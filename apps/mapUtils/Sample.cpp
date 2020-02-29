@@ -129,6 +129,10 @@ void CreateSimulation(int id)
 //		map = new Map(mazeSize, mazeSize);
 //		MakeMaze(map, 5);
 //		map->Scale(512, 512);
+//		map = MakeWarehouseMap(10, 10, 1, 10, 5, 25, 25);
+//		map = MakeWarehouseMap(20, 20, 1, 10, 5, 50, 50);
+//		map = MakeWarehouseMap(10, 10, 2, 10, 5, 25, 25);
+//		map = MakeWarehouseMap(20, 20, 2, 10, 5, 50, 50);
 	}
 	else {
 		map = new Map(gDefaultMap);
@@ -178,6 +182,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-makeMaze", "-makeMaze x-dim y-dim corridorsize filename", "Makes maze");
 	InstallCommandLineHandler(MyCLHandler, "-makeRoom", "-makeRoom x-dim y-dim roomSie filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-makeRandom", "-makeRandom x-dim y-dim %%obstacles [0-100] filename", "makes a randomly filled with obstacles");
+	InstallCommandLineHandler(MyCLHandler, "-makeWarehouse", "-makeWarehouse <columns> <rows> <corridor> <shelf-width> <shelf-height> <left buffer> <right buffer> <filename>", "Build a warehouse with the given parameters");
 	InstallCommandLineHandler(MyCLHandler, "-resize", "-resize filename x-dim y-dim filename", "Resizes map to specified dimensions and saves");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	InstallCommandLineHandler(MyCLHandler, "-buildProblemSet", "-buildProblemSet <map> <scen>", "Build problem set with the given map.");
@@ -1016,6 +1021,25 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		f->Save(argument[4]);
 		exit(0);
 		return 5;
+	}
+	else if (strcmp( argument[0], "-makeWarehouse" ) == 0 )
+	{
+		if (maxNumArgs <= 8)
+			return 0;
+		// 0: -makeWarehouse
+		// 1:<columns>
+		// 2:<rows>
+		// 3:<corridor>
+		// 4:<shelf-width>
+		// 5:<shelf-height>
+		// 6:<left buffer>
+		// 7:<right buffer>
+		// 8:<filename>
+		Map *map = MakeWarehouseMap(atoi(argument[1]), atoi(argument[2]), atoi(argument[3]), atoi(argument[4]), atoi(argument[5]),
+									atoi(argument[6]), atoi(argument[7]));
+		map->Save(argument[8]);
+		delete map;
+		return 9;
 	}
 	else if (strcmp( argument[0], "-reduceMap" ) == 0 )
 	{
