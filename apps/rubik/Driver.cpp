@@ -52,6 +52,7 @@
 RubiksCube c;
 RubiksAction a;
 RubiksState s;
+RubikPDB *pdb1 = 0;
 
 Rubik7Edge e7;
 Rubik7EdgeState e7s;
@@ -152,17 +153,31 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 //		s.edge.SetCubeInLoc(5, 1);
 //		s.edge.SetCubeOrientation(5, false);
 //		s.edge.SetCubeOrientation(1, false);
-		c.ApplyAction(s, 2);
-		c.ApplyAction(s, 8);
-		c.ApplyAction(s, 1);
-		c.ApplyAction(s, 3);
-		c.ApplyAction(s, 17);
-		c.ApplyAction(s, 0);
-		c.ApplyAction(s, 4);
-		c.ApplyAction(s, 8);
+
+//		c.ApplyAction(s, 2);
+//		c.ApplyAction(s, 8);
+//		c.ApplyAction(s, 1);
+//		c.ApplyAction(s, 3);
+//		c.ApplyAction(s, 17);
+//		c.ApplyAction(s, 0);
+//		c.ApplyAction(s, 4);
+//		c.ApplyAction(s, 8);
 		
+
 		glClearColor(0.8, 0.8, 0.8, 1.0);
-		if (animateActions.size() > 0)
+
+		if (1)
+		{
+			//std::vector<int> edges = {0,1,2,3,4,5};
+			std::vector<int> edges = {0, 1, 2, 3, 4, 5};
+			std::vector<int> corners = {0, 1, 2, 3};
+			s.Reset();
+			pdb1 = new RubikPDB(&c, s, edges, corners);
+			//recording = true;
+			SetNumPorts(windowID, 1);
+			SetZoom(windowID, 6);
+		}
+		else if (animateActions.size() > 0)
 		{
 			SetNumPorts(windowID, 1);
 			SetZoom(windowID, 6);
@@ -192,12 +207,21 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		c.OpenGLDrawCorners(s);
 	}
 	else {
-//		glRotatef(25, 1, 0, 0);
-//		glRotatef(-45, 0, 1, 0);
-
-		if (animateActions.size() == 0)
+		static double tmp = 0;
+		glRotatef(25, 1, 0, 0);
+		glRotatef(-45+tmp, 0, 1, 0);
+		tmp += 1;
+		if (tmp > 360)
+			endRecording = true;
+		
+		if (pdb1 != 0)
+		{
+			pdb1->OpenGLDraw();
+		}
+		else if (animateActions.size() == 0)
 		{
 			c.OpenGLDraw(s);
+			
 		}
 		else {
 			static float t = 0.0;
@@ -219,7 +243,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		static int cnt = 0;
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		sprintf(fname, "/Users/nathanst/Movies/tmp/Rubik-%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
 		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
 		cnt++;
