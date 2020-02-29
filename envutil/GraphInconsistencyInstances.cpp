@@ -21,7 +21,7 @@ namespace GraphInconsistencyExamples {
 		n->SetLabelL(kHeuristic, 0);
 		g->AddNode(n);
 		n->SetLabelF(GraphSearchConstants::kXCoordinate, 0);
-		n->SetLabelF(GraphSearchConstants::kYCoordinate, -0.9);
+		n->SetLabelF(GraphSearchConstants::kYCoordinate, -0.7);
 		n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
 		
 		n = new node("M");
@@ -39,7 +39,7 @@ namespace GraphInconsistencyExamples {
 			n->SetLabelL(kHeuristic, numExampleNodes+x);
 			
 			n->SetLabelF(GraphSearchConstants::kXCoordinate, -0.8+1.6*(double(x)/(numExampleNodes-1.0)));
-			n->SetLabelF(GraphSearchConstants::kYCoordinate, -0.3333);
+			n->SetLabelF(GraphSearchConstants::kYCoordinate, -0.18);
 			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
 			
 			g->AddNode(n);
@@ -62,7 +62,7 @@ namespace GraphInconsistencyExamples {
 			last = n->GetNum();
 			
 			n->SetLabelF(GraphSearchConstants::kXCoordinate, -0.8+1.6*(double(x)/(numExampleNodes-1.0)));
-			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.9);
+			n->SetLabelF(GraphSearchConstants::kYCoordinate, 0.7);
 			n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
 		}
 		return g;
