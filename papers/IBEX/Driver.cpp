@@ -470,8 +470,8 @@ void TestTopSpin(int instance, int algorithm, int minGrowth, int maxGrowth, int 
 	LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>, 16> pdb2(&ts, goals, pattern2);
 	LexPermutationPDB<TopSpinState<N>, TopSpinAction, TopSpin<N, k>, 16> pdb3(&ts, goals, pattern3);
 	pdb1.BuildPDBForward(goals, std::thread::hardware_concurrency(), false, false);
-	pdb2.BuildPDBForward(goal, std::thread::hardware_concurrency(), false, false);
-	pdb3.BuildPDBForward(goal, std::thread::hardware_concurrency(), false, false);
+	pdb2.BuildPDBForward(goals, std::thread::hardware_concurrency(), false, false);
+	pdb3.BuildPDBForward(goals, std::thread::hardware_concurrency(), false, false);
 
 	Heuristic<TopSpinState<N>> h;
 	h.lookups.resize(0);
