@@ -907,15 +907,19 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 	}
 	
 	// draw objects
+	static std::vector<Graphics::point> points;
 	for (int x = 0; x < 4; x++)
 	{
+		points.clear();
 		for (int i = 0; i < objects[x].size(); i++)
 		{
 			Graphics::point p = GetCenter(GetX(objects[x][i])+GetX(s.GetObjectLocation(x)),
 										  GetY(objects[x][i])+GetY(s.GetObjectLocation(x)));
 			double radius = GetRadius();//*0.95;
 			display.FrameSquare(p, radius-radius*0.3, objColors[x], radius*0.6);
+			points.push_back(p);
 		}
+		display.DrawLineSegments(points, GetRadius()*0.3, objColors[x]*0.8);
 	}
 	for (int x = 0; x < fruit.size(); x++)
 	{
