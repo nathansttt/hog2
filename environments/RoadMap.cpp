@@ -205,7 +205,7 @@ void RoadMap::GetActions(const intersection &nodeID, std::vector<neighbor> &acti
 
 neighbor RoadMap::GetAction(const intersection &s1, const intersection &s2) const
 {
-	ge->GetAction(s1, s2);
+	return ge->GetAction(s1, s2);
 }
 
 void RoadMap::ApplyAction(intersection &s, neighbor a) const
