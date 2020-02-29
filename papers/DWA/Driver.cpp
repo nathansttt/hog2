@@ -22,9 +22,16 @@ enum demoState {
 	kDoPathfinding
 };
 
+enum costModel {
+	kHuman,
+	kHumanSpell,
+	kDeer,
+	kSheep
+};
+
 const int sectorSize = 16;
 
-demoState mode = kWaitPath;//kDrawTerrain;
+demoState mode = kDrawTerrain;//kWaitPath;//kDrawTerrain;
 bool recording = false;
 xyLoc start, goal;
 int rate = 20;
@@ -42,6 +49,7 @@ NBS<xyLoc, tDirection, DWG::DynamicWeightedGridEnvironment, NBSQueue<xyLoc, 1, t
 std::vector<xyLoc> path;
 std::vector<xyLoc> wpath;
 std::vector<DWG::abstractState> absPath;
+std::string mapName;
 
 int radius = 0;
 
@@ -57,23 +65,34 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Draw Trees", "Draw trees into terrain", kAnyModifier, 't');
-	InstallKeyboardHandler(MyDisplayHandler, "Draw Swamp", "Draw swamp into terrain", kAnyModifier, 's');
-	InstallKeyboardHandler(MyDisplayHandler, "Draw Road", "Draw road into terrain", kAnyModifier, 'p');
-	InstallKeyboardHandler(MyDisplayHandler, "Draw Ground", "Draw ground into terrain", kAnyModifier, 'g');
-	InstallKeyboardHandler(MyDisplayHandler, "Draw Impassable", "Draw impassable ground", kAnyModifier, 'i');
-	InstallKeyboardHandler(MyDisplayHandler, "Draw Water", "Draw water into terrain", kAnyModifier, 'w');
+	InstallKeyboardHandler(MyDisplayHandler, "Trees", "Draw trees into terrain", kAnyModifier, 't');
+	InstallKeyboardHandler(MyDisplayHandler, "Swamp", "Draw swamp into terrain", kAnyModifier, 's');
+	InstallKeyboardHandler(MyDisplayHandler, "Road", "Draw road into terrain", kAnyModifier, 'p');
+	InstallKeyboardHandler(MyDisplayHandler, "Ground", "Draw ground into terrain", kAnyModifier, 'g');
+	InstallKeyboardHandler(MyDisplayHandler, "Impassable", "Draw impassable ground", kAnyModifier, 'i');
+	InstallKeyboardHandler(MyDisplayHandler, "Water", "Draw water into terrain", kAnyModifier, 'w');
 
 	InstallKeyboardHandler(MyDisplayHandler, "Rad 1", "Set Radius to 1", kAnyModifier, '1');
 	InstallKeyboardHandler(MyDisplayHandler, "Rad 2", "Set Radius to 2", kAnyModifier, '2');
 	InstallKeyboardHandler(MyDisplayHandler, "Rad 3", "Set Radius to 3", kAnyModifier, '3');
+	InstallKeyboardHandler(MyDisplayHandler, "Rad 5", "Set Radius to 5", kAnyModifier, '5');
 
-	InstallKeyboardHandler(MyDisplayHandler, "Search", "Drag to search", kAnyModifier, '/');
-	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Search faster", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Search slower", kAnyModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "Human", "Human cost structure", kAnyModifier, '7');
+	InstallKeyboardHandler(MyDisplayHandler, "Jesus", "Human (walk on water) cost structure", kAnyModifier, '8');
+	InstallKeyboardHandler(MyDisplayHandler, "Sheep", "Sheep cost structure", kAnyModifier, '9');
+	InstallKeyboardHandler(MyDisplayHandler, "Deer", "Deer cost structure", kAnyModifier, '0');
 
-	InstallKeyboardHandler(MyTestHandler, "Text", "Randomly test problems", kAnyModifier, '.');
+	
+	InstallKeyboardHandler(MyDisplayHandler, "Search", "Search for paths", kAnyModifier, '/');
+	InstallKeyboardHandler(MyDisplayHandler, "Edit", "Draw terrain", kAnyModifier, '.');
+	InstallKeyboardHandler(MyDisplayHandler, "Abs", "Toggle Drawing Abstraction", kAnyModifier, 'a');
+//	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
+//	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Search faster", kAnyModifier, ']');
+//	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Search slower", kAnyModifier, '[');
+//	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Search slower", kAnyModifier, '[');
+
+//	InstallKeyboardHandler(MyTestHandler, "Text", "Randomly test problems", kAnyModifier, ',');
+
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <map> <output>", "Make svg of map");
 	InstallCommandLineHandler(MyCLHandler, "-map", "-map <map in> <map out>", "Save map after reducing very small regions");
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test <map>", "Test random problems on given map");
@@ -98,15 +117,65 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-		ReinitViewports(windowID, {-2, -1, 1, 2}, kScaleToSquare);
+		ReinitViewports(windowID, {-1, -1, 1, 1}, kScaleToSquare);
 		recording = false;
-//		dwg = new DWG::DynamicWeightedGrid<sectorSize>(128, 128);
-		dwg = new DWG::DynamicWeightedGrid<sectorSize>("/Users/nathanst/hog2/maps/weighted/Map_1.map");
-		env = new DWG::DynamicWeightedGridEnvironment("/Users/nathanst/hog2/maps/weighted/Map1.map");
-		dwg->SetCosts(env->GetCosts());
+		dwg = new DWG::DynamicWeightedGrid<sectorSize>(128, 128);
+		env = new DWG::DynamicWeightedGridEnvironment(128, 128);
+		auto cost = env->GetCosts();
+		for (auto &i : cost)
+			i = 10;
+		cost[DWG::kGround] = 1.5;
+		cost[DWG::kRoad] = 1.0;
+		cost[DWG::kSwamp] = 5.0;
+		cost[DWG::kWater] = 4.0;
+		cost[DWG::kTrees] = 2.0;
+		env->SetCosts(cost);
+		mode = kDrawTerrain;
+		submitTextToBuffer("Mode: Drawing terrain");
+
+//		dwg = new DWG::DynamicWeightedGrid<sectorSize>("/Users/nathanst/hog2/maps/weighted/Map_1.map");
+//		env = new DWG::DynamicWeightedGridEnvironment("/Users/nathanst/hog2/maps/weighted/Map1.map");
+		dwg->SetCosts(cost);
 	}
 }
 
+void SetCostModel(costModel m)
+{
+	switch (m)
+	{
+		case kHuman:
+			env->SetCost(DWG::kRoad, 1.0);
+			env->SetCost(DWG::kGround, 2.0);
+			env->SetCost(DWG::kWater, 3.0);
+			env->SetCost(DWG::kTrees, 4.0);
+			env->SetCost(DWG::kSwamp, 4.0);
+			break;
+		case kHumanSpell:
+			env->SetCost(DWG::kRoad, 1.0);
+			env->SetCost(DWG::kWater, 1.0);
+			env->SetCost(DWG::kGround, 2.0);
+			env->SetCost(DWG::kSwamp, 4.0);
+			env->SetCost(DWG::kTrees, 4.0);
+			break;
+		case kDeer:
+			env->SetCost(DWG::kTrees, 1.0);
+			env->SetCost(DWG::kGround, 2.0);
+			env->SetCost(DWG::kRoad, 3.0);
+			env->SetCost(DWG::kWater, 4.0);
+			env->SetCost(DWG::kSwamp, 4.0);
+			break;
+		case kSheep:
+			env->SetCost(DWG::kRoad, 1.0);
+			env->SetCost(DWG::kGround, 1.0);
+			env->SetCost(DWG::kTrees, 5.0);
+			env->SetCost(DWG::kWater, 10.0);
+			env->SetCost(DWG::kSwamp, 10.0);
+			break;
+	}
+	dwg->SetCosts(env->GetCosts());
+	submitTextToBuffer("Mode: Find paths");
+	mode = kDrawingPath;
+}
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
@@ -139,7 +208,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			display.DrawLine({x1, y1}, {x2, y2}, 6.0, Colors::purple);
 		}
 	}
-	if (mode == kWaitPath && wpath.size() > 0)
+	if (0 && mode == kWaitPath && wpath.size() > 0)
 	{
 		for (int x = 1; x < wpath.size(); x++)
 		{
@@ -147,7 +216,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			float x2, y2, r2;
 			dwg->GetCoordinate(wpath[x-1], x1, y1, r1);
 			dwg->GetCoordinate(wpath[x],  x2, y2, r2);
-			display.DrawLine({x1, y1}, {x2, y2}, 4.0, Colors::blue);
+			display.DrawLine({x1, y1}, {x2, y2}, 4.0, Colors::yellow);
 		}
 	}
 	if (mode == kDrawingPath)
@@ -160,25 +229,25 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	if (mode == kDoPathfinding)
 	{
-		for (int x = 0; x < rate; x++)
-		{
-			if (astar.DoSingleSearchStep(path) == true)
-			{
-				mode = kWaitPath;
-				printf("Path found length %f; %llu nodes expanded\n",
-					   env->GetPathLength(path), astar.GetNodesExpanded());
-				break;
-			}
-		}
-		astar.Draw(display);
+//		for (int x = 0; x < rate; x++)
+//		{
+//			if (astar.DoSingleSearchStep(path) == true)
+//			{
+//				mode = kWaitPath;
+//				printf("Path found length %f; %llu nodes expanded\n",
+//					   env->GetPathLength(path), astar.GetNodesExpanded());
+//				break;
+//			}
+//		}
+//		astar.Draw(display);
 	}
 	
 	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
-		recording = false;
+		//recording = false;
 		static int cnt = 0;
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/%d%d%d%d", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		sprintf(fname, "/Users/nathanst/Movies/tmp/DWA-%d%d%d%d.svg", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
 		MakeSVG(display, fname, 2048, 2048);
 //		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
@@ -197,7 +266,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			printf("Error: didn't pass argument: <map> <out>\n");
 			exit(0);
 		}
-		DWG::DynamicWeightedGrid<sectorSize> dwg(argument[1]);
+		DWG::DynamicWeightedGrid<128> dwg(argument[1]);
 		Graphics::Display d;
 		dwg.Draw(d);
 		MakeSVG(d, argument[2], 2048, 2048);
@@ -224,7 +293,8 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		dwg = new DWG::DynamicWeightedGrid<sectorSize>(argument[1]);
 		env = new DWG::DynamicWeightedGridEnvironment(argument[1]);
 		dwg->SetCosts(env->GetCosts());
-		MyTestHandler(0, kNoModifier, '.');
+		mapName = argument[1];
+		MyTestHandler(0, kNoModifier, ',');
 
 		exit(0);
 	}
@@ -279,22 +349,30 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	switch (key)
 	{
-		case 't': t = DWG::kTrees; break;
-		case 's': t = DWG::kSwamp; break;
-		case 'p': t = DWG::kRoad; break;
-		case 'g': t = DWG::kGround; break;
-		case 'i': t = DWG::kBlack; break;
-		case 'w': t = DWG::kWater; break;
+		case 't': t = DWG::kTrees; mode = kDrawTerrain; break;
+		case 's': t = DWG::kSwamp; mode = kDrawTerrain; break;
+		case 'p': t = DWG::kRoad; mode = kDrawTerrain; break;
+		case 'g': t = DWG::kGround; mode = kDrawTerrain; break;
+		case 'i': t = DWG::kBlack; mode = kDrawTerrain; break;
+		case 'w': t = DWG::kWater; mode = kDrawTerrain; break;
 		case 'r': recording = !recording; break;
-		case '/':
-			if (mode == kDrawTerrain)
-				mode = kDrawingPath;
-			else mode = kDrawTerrain;
-			submitTextToBuffer((mode==kDrawingPath)?"Choose path":"Draw Terrain");
+		case 'a': dwg->SetDrawAbstraction(!dwg->GetDrawAbstraction()); break;
+		case '.':
+			mode = kDrawTerrain;
+			submitTextToBuffer("Mode: Drawing terrain");
 			break;
-		case '1': radius = 0; break;
-		case '2': radius = 1; break;
-		case '3': radius = 2; break;
+		case '/':
+			mode = kDrawingPath;
+			submitTextToBuffer("Mode: Find paths");
+			break;
+		case '1': radius = 0; mode = kDrawTerrain; submitTextToBuffer("Mode: Drawing terrain"); break;
+		case '2': radius = 1; mode = kDrawTerrain; submitTextToBuffer("Mode: Drawing terrain"); break;
+		case '3': radius = 2; mode = kDrawTerrain; submitTextToBuffer("Mode: Drawing terrain"); break;
+		case '5': radius = 6; mode = kDrawTerrain; submitTextToBuffer("Mode: Drawing terrain"); break;
+		case '7': SetCostModel(kHuman); break;
+		case '8': SetCostModel(kHumanSpell); break;
+		case '9': SetCostModel(kSheep); break;
+		case '0': SetCostModel(kDeer); break;
 		case '[': rate /= 2; if (rate == 0) rate = 1; break;
 		case ']': rate *= 2; break;
 		default:
@@ -321,7 +399,7 @@ uint64_t GetPathViaAbstraction(const xyLoc &start, const xyLoc &goal, std::vecto
 	// 3. Connect abstract regions
 	xyLoc currStart = start;
 //	astar.SetWeight(1.2);
-	for (int x = 1; x < absPath.size()-1; x++)
+	for (int x = 1; x+1 < absPath.size(); x++)
 	{
 		xyLoc end = dwg->GetLocation(absPath[x]);
 		astar.GetPath(env, currStart, end, tmp);
@@ -356,6 +434,7 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	double absPath = 0;
 	ZeroHeuristic<xyLoc> z;
 	Timer t;
+	printf("version 1\n");
 	for (int x = 0; x < numProblems; x++)
 	{
 		start.x = random()%dwg->GetWidth();
@@ -363,76 +442,80 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		goal.x = random()%dwg->GetWidth();
 		goal.y = random()%dwg->GetHeight();
 
-		std::cout << x+1 << ". Searching from " << start << " to " << goal << "\n";
-		t.StartTimer();
-		nbs.GetPath(env, start, goal, env, env, path);
-		t.EndTimer();
-		printf("NBS: Path found length %f; %llu nodes expanded; time: %1.6f\n",
-			   env->GetPathLength(path), nbs.GetNodesExpanded(), t.GetElapsedTime());
-		nbsNodes += nbs.GetNodesExpanded();
-
-		t.StartTimer();
-		nbs.GetPath(env, start, goal, &z, &z, path);
-		t.EndTimer();
-		printf("NBS0: Path found length %f; %llu nodes expanded; time: %1.6f\n",
-			   env->GetPathLength(path), nbs.GetNodesExpanded(), t.GetElapsedTime());
+//		std::cout << x+1 << ". Searching from " << start << " to " << goal << "\n";
+//		t.StartTimer();
+//		nbs.GetPath(env, start, goal, env, env, path);
+//		t.EndTimer();
+//		printf("NBS: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//			   env->GetPathLength(path), nbs.GetNodesExpanded(), t.GetElapsedTime());
+//		nbsNodes += nbs.GetNodesExpanded();
+//
+//		t.StartTimer();
+//		nbs.GetPath(env, start, goal, &z, &z, path);
+//		t.EndTimer();
+//		printf("NBS0: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//			   env->GetPathLength(path), nbs.GetNodesExpanded(), t.GetElapsedTime());
 
 		t.StartTimer();
 		astar.GetPath(env, start, goal, path);
 		t.EndTimer();
-		printf(" A*: Path found length %f; %llu nodes expanded; time: %1.6f\n",
-			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
+//		printf(" A*: Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
 		astarNodes += astar.GetNodesExpanded();
 		optimalPath += env->GetPathLength(path);
 
-		astar.SetWeight(4.0);
-		t.StartTimer();
-		astar.GetPath(env, start, goal, path);
-		t.EndTimer();
-		printf("WA*(4): Path found length %f; %llu nodes expanded; time: %1.6f\n",
-			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
-		wastarNodes += astar.GetNodesExpanded();
-		suboptimalPath += env->GetPathLength(path);
-		astar.SetWeight(1.0);
-
-		astar.SetWeight(3.0);
-		t.StartTimer();
-		astar.GetPath(env, start, goal, path);
-		t.EndTimer();
-		printf("WA*(3): Path found length %f; %llu nodes expanded; time: %1.6f\n",
-			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
-		wastarNodes3 += astar.GetNodesExpanded();
-		suboptimalPath3 += env->GetPathLength(path);
-		astar.SetWeight(1.0);
-
-		astar.SetWeight(2.0);
-		t.StartTimer();
-		astar.GetPath(env, start, goal, path);
-		t.EndTimer();
-		printf("WA*(2): Path found length %f; %llu nodes expanded; time: %1.6f\n",
-			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
-		wastarNodes2 += astar.GetNodesExpanded();
-		suboptimalPath2 += env->GetPathLength(path);
-		astar.SetWeight(1.0);
-
-		uint64_t tmp2;
-		t.StartTimer();
-		uint64_t tmpNodes = GetPathViaAbstraction(start, goal, path, tmp2);
-		t.EndTimer();
-		firstAbsNodes += tmp2;
-		absNodes += tmpNodes;
-		absPath += env->GetPathLength(path);
-		printf("ABS: Path found length %f; %llu nodes expanded [%llu]; time: %1.6f\n",
-			   env->GetPathLength(path), tmpNodes, tmp2, t.GetElapsedTime());
+		printf("%d\t%s\t", (int)env->GetPathLength(path)/4, mapName.c_str());
+		printf("%d\t%d\t%d\t%d\t%d\t%d\t%f\n",
+			   dwg->GetWidth(), dwg->GetHeight(), start.x, start.y, goal.x, goal.y, env->GetPathLength(path));
+		
+//		astar.SetWeight(4.0);
+//		t.StartTimer();
+//		astar.GetPath(env, start, goal, path);
+//		t.EndTimer();
+//		printf("WA*(4): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
+//		wastarNodes += astar.GetNodesExpanded();
+//		suboptimalPath += env->GetPathLength(path);
+//		astar.SetWeight(1.0);
+//
+//		astar.SetWeight(3.0);
+//		t.StartTimer();
+//		astar.GetPath(env, start, goal, path);
+//		t.EndTimer();
+//		printf("WA*(3): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
+//		wastarNodes3 += astar.GetNodesExpanded();
+//		suboptimalPath3 += env->GetPathLength(path);
+//		astar.SetWeight(1.0);
+//
+//		astar.SetWeight(2.0);
+//		t.StartTimer();
+//		astar.GetPath(env, start, goal, path);
+//		t.EndTimer();
+//		printf("WA*(2): Path found length %f; %llu nodes expanded; time: %1.6f\n",
+//			   env->GetPathLength(path), astar.GetNodesExpanded(), t.GetElapsedTime());
+//		wastarNodes2 += astar.GetNodesExpanded();
+//		suboptimalPath2 += env->GetPathLength(path);
+//		astar.SetWeight(1.0);
+//
+//		uint64_t tmp2;
+//		t.StartTimer();
+//		uint64_t tmpNodes = GetPathViaAbstraction(start, goal, path, tmp2);
+//		t.EndTimer();
+//		firstAbsNodes += tmp2;
+//		absNodes += tmpNodes;
+//		absPath += env->GetPathLength(path);
+//		printf("ABS: Path found length %f; %llu nodes expanded [%llu]; time: %1.6f\n",
+//			   env->GetPathLength(path), tmpNodes, tmp2, t.GetElapsedTime());
 	}
-	printf("A*: %llu\nNBS: %llu\nWA*(2): %llu\nWA*(3): %llu\nWA*(4): %llu\nABS: %llu [%llu]\n",
-		   astarNodes/numProblems, nbsNodes/numProblems,
-		   wastarNodes2/numProblems, wastarNodes3/numProblems, wastarNodes/numProblems,
-		   absNodes/numProblems, firstAbsNodes/numProblems);
-	printf("Optimal Path: %f\n", optimalPath/numProblems);
-	printf("WA*(2) Path: %f\n", suboptimalPath2/numProblems);
-	printf("WA*(4) Path: %f\n", suboptimalPath/numProblems);
-	printf("ABS Path: %f\n", absPath/numProblems);
+//	printf("A*: %llu\nNBS: %llu\nWA*(2): %llu\nWA*(3): %llu\nWA*(4): %llu\nABS: %llu [%llu]\n",
+//		   astarNodes/numProblems, nbsNodes/numProblems,
+//		   wastarNodes2/numProblems, wastarNodes3/numProblems, wastarNodes/numProblems,
+//		   absNodes/numProblems, firstAbsNodes/numProblems);
+//	printf("Optimal Path: %f\n", optimalPath/numProblems);
+//	printf("WA*(2) Path: %f\n", suboptimalPath2/numProblems);
+//	printf("WA*(4) Path: %f\n", suboptimalPath/numProblems);
+//	printf("ABS Path: %f\n", absPath/numProblems);
 }
 
 
@@ -442,13 +525,21 @@ bool MyClickHandler(unsigned long , int, int, point3d p, tButtonType , tMouseEve
 	{
 		int x, y;
 		dwg->GetPointFromCoordinate(p, x, y);
+		if (x == -1 || y == -1)
+			return true;
 		for (int ox = -radius; ox <= radius; ox++)
 		{
 			for (int oy = -radius; oy <= radius; oy++)
 			{
+				if (x+ox < 0 || y+oy < 0)
+					continue;
 				xyLoc l(x+ox, y+oy);
 				if (l.x < dwg->GetWidth() && l.y < dwg->GetHeight())
+				{
+//					std::cout << l << "\n";
+					env->SetTerrainType(l, t);
 					dwg->SetTerrainType(l, t);
+				}
 			}
 		}
 	}
@@ -478,28 +569,33 @@ bool MyClickHandler(unsigned long , int, int, point3d p, tButtonType , tMouseEve
 //				printf(" A*: Path found length %f; %llu nodes expanded\n",
 //					   env->GetPathLength(path), astar.GetNodesExpanded());
 //				astar.InitializeSearch(env, start, goal, path);
-			{
-				dwg->ValidateEdges();
-				DWG::abstractState s = dwg->GetState(start);
-				DWG::abstractState g = dwg->GetState(goal);
-				absAStar.GetPath(dwg, s, g, absPath);
-				printf(" A* abstract path cost: %1.2f\n", dwg->GetPathLength(absPath));
-				absNBS.GetPath(dwg, s, g, dwg, dwg, absPath);
-				printf("NBS abstract path cost: %1.2f\n", dwg->GetPathLength(absPath));
-			}
+				
+				if (1)
+				{
+					//dwg->ValidateEdges();
+					DWG::abstractState s = dwg->GetState(start);
+					DWG::abstractState g = dwg->GetState(goal);
+					absAStar.GetPath(dwg, s, g, absPath);
+					printf(" A* abstract path cost: %1.2f\n", dwg->GetPathLength(absPath));
+					absNBS.GetPath(dwg, s, g, dwg, dwg, absPath);
+					printf("NBS abstract path cost: %1.2f\n", dwg->GetPathLength(absPath));
+				}
 
-			{
-				mode = kWaitPath;
-				uint64_t total, init;
-				total = GetPathViaAbstraction(start, goal, path, init);
-				printf("ABS: %1.2f [%llu - %llu]\n", env->GetPathLength(path), total, init);
-				nbs.GetPath(env, start, goal, env, env, path);
-				printf("NBS: %1.2f [%llu]\n", env->GetPathLength(path), nbs.GetNodesExpanded());
-				astar.SetWeight(4);
-				astar.GetPath(env, start, goal, wpath);
-				printf("WA*: %1.2f [%llu]\n", env->GetPathLength(wpath), astar.GetNodesExpanded());
-				astar.SetWeight(1);
-			}
+				if (1)
+				{
+					mode = kWaitPath;
+					uint64_t total, init;
+					total = GetPathViaAbstraction(start, goal, path, init);
+					printf("ABS: %1.2f [%llu - %llu]\n", env->GetPathLength(path), total, init);
+
+					nbs.GetPath(env, start, goal, env, env, path);
+					printf("NBS: %1.2f [%d - %llu]\n", env->GetPathLength(path), path.size(), nbs.GetNodesExpanded());
+
+					astar.SetWeight(10);
+					astar.GetPath(env, start, goal, wpath);
+					printf("WA*: %1.2f [%d - %llu]\n", env->GetPathLength(wpath), path.size(), astar.GetNodesExpanded());
+					astar.SetWeight(1);
+				}
 				break;
 			default: break;
 		}
