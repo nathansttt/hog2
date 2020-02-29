@@ -647,7 +647,9 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 			z += n->GetLabelF(GraphSearchConstants::kZCoordinate);
 			
 			//DrawText(x/2, y/2, z/2-0.003, 0.2, label);
-			disp.DrawText(label, Graphics::point(x/2, y/2), mainColor, 0.05);
+			auto i = g->GetNumNodes();
+			double rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
+			disp.DrawText(label, Graphics::point(x/2, y/2), Colors::black, rad);
 		}
 		glLineWidth(1.0);
 	}
@@ -662,9 +664,11 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 //							 n->GetLabelF(GraphSearchConstants::kYCoordinate),
 //							 n->GetLabelF(GraphSearchConstants::kZCoordinate)-0.003,
 //							 0.2, n->GetName());
+			auto i = g->GetNumNodes();
+			double rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
 			disp.DrawText(n->GetName(), Graphics::point(n->GetLabelF(GraphSearchConstants::kXCoordinate),
 														n->GetLabelF(GraphSearchConstants::kYCoordinate)),
-						  mainColor, 0.05, Graphics::textAlignCenter);
+						  Colors::black, rad, Graphics::textAlignCenter);
 //			disp.DrawText(n->GetName(), Graphics::point(n->GetLabelF(GraphSearchConstants::kXCoordinate),
 //														n->GetLabelF(GraphSearchConstants::kYCoordinate)), mainColor, 0.05);
 		}
@@ -692,10 +696,10 @@ void GraphEnvironment::Draw(Graphics::Display &disp, const graphState &l) const
 	rec.top = y-rad;
 	rec.right = x+rad;
 	rec.bottom = y+rad;
-	rgbColor tmp = c;
-	tmp.mix(Colors::white, 0.5);
-	disp.FillCircle({x, y}, rad, tmp);
-	disp.FrameCircle({x, y}, rad, c, rad);
+//	rgbColor tmp = c;
+//	tmp.mix(Colors::white, 0.5);
+	disp.FillCircle({x, y}, rad, c);
+	disp.FrameCircle({x, y}, rad, Colors::black, rad/2);
 //	disp.FillCircle(rec, tmp);
 //	disp.FrameCircle(rec, c, 2.0);
 	
@@ -719,9 +723,12 @@ void GraphEnvironment::DrawStateLabel(Graphics::Display &disp, const graphState 
 	x = (GLdouble)n->GetLabelF(GraphSearchConstants::kXCoordinate);
 	y = (GLdouble)n->GetLabelF(GraphSearchConstants::kYCoordinate);
 	z = (GLdouble)n->GetLabelF(GraphSearchConstants::kZCoordinate);
-	rad = 1.5*nodeScale*(GLdouble)0.4/(g->GetNumNodes());
+//	rad = 1.5*nodeScale*(GLdouble)0.4/(g->GetNumNodes());
+	auto i = g->GetNumNodes();
+	rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
 
-	disp.DrawText(txt, Graphics::point(x+rad, y-rad), GetColor(), 0.05);
+//	disp.DrawText(txt, Graphics::point(x+rad, y-rad), GetColor(), 0.05);
+	disp.DrawText(txt, Graphics::point(x+rad, y-rad), GetColor(), rad);
 }
 
 void GraphEnvironment::DrawLine(Graphics::Display &disp, const graphState &from, const graphState &to, double width) const
