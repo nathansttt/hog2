@@ -200,7 +200,16 @@ namespace Graphics {
 
 	void Display::DrawLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c)
 	{
-		segments s = {c, lineWidth, points, viewport};
+		segments s = {c, lineWidth, points, false, viewport};
+		if (drawingBackground)
+			backgroundLineSegments.push_back(s);
+		else
+			lineSegments.push_back(s);
+	}
+
+	void Display::FillLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c)
+	{
+		segments s = {c, lineWidth, points, true, viewport};
 		if (drawingBackground)
 			backgroundLineSegments.push_back(s);
 		else

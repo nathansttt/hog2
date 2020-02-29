@@ -74,6 +74,15 @@ namespace Graphics {
 		rect(float l, float t, float r, float b)
 		:left(l), top(t), right(r), bottom(b) {}
 		float left, top, right, bottom;
+
+		rect &operator|=(const rect &val)
+		{
+			left = std::min(left, val.left);
+			right = std::max(right, val.right);
+			top = std::min(top, val.top);
+			bottom = std::max(bottom, val.bottom);
+			return *this;
+		}
 	};
 	
 	inline std::ostream &operator<<(std::ostream &o, const rect&r)
@@ -116,6 +125,7 @@ namespace Graphics {
 
 		void DrawLine(point start, point end, float lineWidth, rgbColor c);
 		void DrawLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c);
+		void FillLineSegments(const std::vector<point> &points, float lineWidth, rgbColor c);
 		void DrawArrow(point start, point end, float lineWidth, rgbColor c);
 		void DrawText(const char *text, point location, rgbColor c, float height, const char *typeface = 0);
 		void DrawText(const char *text, point location, rgbColor c, float height, textAlign align, const char *typeface = 0);
@@ -188,6 +198,7 @@ namespace Graphics {
 			rgbColor c;
 			float size;
 			std::vector<point> points;
+			bool fill;
 			uint8_t viewport;
 		};
 		// These are dynamic items that change from frame to frame
