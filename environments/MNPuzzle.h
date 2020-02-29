@@ -46,11 +46,35 @@ public:
 			}
 		}
 	}
+	bool operator<(const MNPuzzleState &b)
+	{
+		for (int x = 0; x < size(); x++)
+			if (puzzle[x] != b.puzzle[x])
+				return puzzle[x] < b.puzzle[x];
+		return false;
+	}
 
 	unsigned int blank;
 	std::array<int, width*height> puzzle;
 //	int puzzle[width*height];
 };
+
+namespace std {
+	
+	template <int w, int h>
+	struct hash<MNPuzzleState<w, h>>
+	{
+		std::size_t operator()(const MNPuzzleState<w, h>& k) const
+		{
+			size_t hash = 0;
+			for (int x = 0; x < w*h; x++)
+				hash = hash*w*h + k.puzzle[x];
+			return hash;
+		}
+	};
+	
+}
+
 
 /**
  * Note, direction "kLeft" indicates that the blank is being moved to the left.
@@ -1462,31 +1486,37 @@ std::vector<slideDir> MNPuzzle<width, height>::Get_Op_Order_From_Hash(int order_
 	bool down_act = false;
 	bool left_act = false;
 	bool right_act = false;
-	
+
+	printf("Op order: ");
 	for (unsigned i = 0; i < 4; i++)
 	{
 		if (op_nums[i] == 0)
 		{
+			printf("Up ");
 			ops.push_back(kUp);
 			up_act = true;
 		}
 		else if (op_nums[i] == 1)
 		{
+			printf("Left ");
 			ops.push_back(kLeft);
 			left_act = true;
 		}
 		else if (op_nums[i] == 2)
 		{
+			printf("Right ");
 			ops.push_back(kRight);
 			right_act = true;
 		}
 		else if (op_nums[i] == 3)
 		{
+			printf("Down ");
 			ops.push_back(kDown);
 			down_act = true;
 		}
 	}
-	
+	printf("\n");
+
 	assert(up_act);
 	assert(left_act);
 	assert(right_act);
