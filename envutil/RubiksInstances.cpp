@@ -124,6 +124,19 @@ namespace RubiksCubeInstances {
 		}
 	}
 	
+	const char *GetStringFromMove(int move)
+	{
+		const char *str[] = {"U", "D", "L", "R", "B", "F", "U-", "D-", "L-", "R-", "B-", "F-", "U2", "D2", "L2", "R2", "B2", "F2"};
+		for (int x = 0; x < 18; x++)
+		{
+			int act;
+			GetNextMove(str[x], act);
+			if (act == move)
+				return str[x];
+		}
+		return "?";
+	}
+
 	void GetRandomN(RubiksState &start, int N, int which)
 	{
 		start.Reset();
