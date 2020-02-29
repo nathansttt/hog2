@@ -298,6 +298,8 @@ void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType);
 
 void InstallKeyboardHandler(KeyboardCallback kf, const char *title, const char *description,
 														tKeyboardModifier mod, unsigned char firstKey, unsigned char lastKey = 0);
+void GetKeyAssignments(std::vector<char> &keys);
+void GetKeyAssignmentDescriptions(std::vector<std::string> &keys);
 void PrintKeyboardAssignments();
 void InstallCommandLineHandler(CommandLineCallback, const char *, const char *, const char *);
 void PrintCommandLineArguments();

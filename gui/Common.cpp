@@ -87,6 +87,31 @@ void InstallKeyboardHandler(KeyboardCallback kf, const char *title, const char *
 	}
 }
 
+void GetKeyAssignments(std::vector<char> &keys)
+{
+	for (int x = 0; x < 256; x++)
+	{
+		for (keyboardCallbackData *kd = keyboardCallbacks[x]; kd; kd = kd->next)
+		{
+			char val = x;
+			keys.push_back(val);
+//			printf("%s%c\t%s\t%s\n", getModifierText(kd->mod), x, kd->title, kd->desc);
+		}
+	}
+}
+
+void GetKeyAssignmentDescriptions(std::vector<std::string> &keys)
+{
+	for (int x = 0; x < 256; x++)
+	{
+		for (keyboardCallbackData *kd = keyboardCallbacks[x]; kd; kd = kd->next)
+		{
+			char val = x;
+			keys.push_back(kd->title);
+			//			printf("%s%c\t%s\t%s\n", getModifierText(kd->mod), x, kd->title, kd->desc);
+		}
+	}
+}
 void PrintKeyboardAssignments()
 {
 	printf("Legal Keyboard Commands\n-----------------------\n");
