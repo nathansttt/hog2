@@ -848,12 +848,33 @@ void DrawGraphics(Graphics::Display &display, int port)
 			{
 				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
 				glLineWidth(i.shape.width);
-				glBegin(GL_LINE_LOOP);
-				glVertex2f(i.shape.r.left, i.shape.r.bottom);
-				glVertex2f(i.shape.r.left, i.shape.r.top);
-				glVertex2f(i.shape.r.right, i.shape.r.top);
-				glVertex2f(i.shape.r.right, i.shape.r.bottom);
+//				glBegin(GL_LINE_LOOP);
+//				glVertex2f(i.shape.r.left, i.shape.r.bottom);
+//				glVertex2f(i.shape.r.left, i.shape.r.top);
+//				glVertex2f(i.shape.r.right, i.shape.r.top);
+//				glVertex2f(i.shape.r.right, i.shape.r.bottom);
+//				glEnd();
+				
+				glBegin(GL_TRIANGLE_STRIP);
+				GLfloat rad = i.shape.width/2.0;
+				glVertex2f(i.shape.r.left-rad, i.shape.r.bottom+rad);
+				glVertex2f(i.shape.r.left+rad, i.shape.r.bottom-rad);
+				
+				glVertex2f(i.shape.r.left-rad, i.shape.r.top-rad);
+				glVertex2f(i.shape.r.left+rad, i.shape.r.top+rad);
+				
+				glVertex2f(i.shape.r.right+rad, i.shape.r.top-rad);
+				glVertex2f(i.shape.r.right-rad, i.shape.r.top+rad);
+				
+				glVertex2f(i.shape.r.right+rad, i.shape.r.bottom+rad);
+				glVertex2f(i.shape.r.right-rad, i.shape.r.bottom-rad);
+				
+				glVertex2f(i.shape.r.left-rad, i.shape.r.bottom+rad);
+				glVertex2f(i.shape.r.left+rad, i.shape.r.bottom-rad);
+				
 				glEnd();
+
+
 				break;
 			}
 			case Graphics::Display::kFillOval:
@@ -929,12 +950,32 @@ void DrawGraphics(Graphics::Display &display, int port)
 			{
 				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
 				glLineWidth(i.shape.width);
-				glBegin(GL_LINE_LOOP);
-				glVertex2f(i.shape.r.left, i.shape.r.bottom);
-				glVertex2f(i.shape.r.left, i.shape.r.top);
-				glVertex2f(i.shape.r.right, i.shape.r.top);
-				glVertex2f(i.shape.r.right, i.shape.r.bottom);
+				//				glBegin(GL_LINE_LOOP);
+				//				glVertex2f(i.shape.r.left, i.shape.r.bottom);
+				//				glVertex2f(i.shape.r.left, i.shape.r.top);
+				//				glVertex2f(i.shape.r.right, i.shape.r.top);
+				//				glVertex2f(i.shape.r.right, i.shape.r.bottom);
+				//				glEnd();
+				
+				glBegin(GL_TRIANGLE_STRIP);
+				GLfloat rad = i.shape.width/2.0;
+				glVertex2f(i.shape.r.left-rad, i.shape.r.bottom+rad);
+				glVertex2f(i.shape.r.left+rad, i.shape.r.bottom-rad);
+				
+				glVertex2f(i.shape.r.left-rad, i.shape.r.top-rad);
+				glVertex2f(i.shape.r.left+rad, i.shape.r.top+rad);
+				
+				glVertex2f(i.shape.r.right+rad, i.shape.r.top-rad);
+				glVertex2f(i.shape.r.right-rad, i.shape.r.top+rad);
+				
+				glVertex2f(i.shape.r.right+rad, i.shape.r.bottom+rad);
+				glVertex2f(i.shape.r.right-rad, i.shape.r.bottom-rad);
+				
+				glVertex2f(i.shape.r.left-rad, i.shape.r.bottom+rad);
+				glVertex2f(i.shape.r.left+rad, i.shape.r.bottom-rad);
+				
 				glEnd();
+				
 				break;
 			}
 			case Graphics::Display::kFillOval:
