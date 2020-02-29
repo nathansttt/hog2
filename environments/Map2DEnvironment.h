@@ -40,6 +40,14 @@ public:
 	xyLoc(uint16_t _x, uint16_t _y) :x(_x), y(_y) {}
 	uint16_t x;
 	uint16_t y;
+	bool operator<(const xyLoc &b)
+	{
+		if (y == b.y)
+			return (x < b.x);
+		if (y < b.y)
+			return true;
+		return false;
+	}
 };
 
 struct xyLocHash
