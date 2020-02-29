@@ -46,6 +46,25 @@ namespace DWG {
 			costs.push_back(1+0.2*x);
 		std::random_shuffle(costs.begin(), costs.end());
 	}
+
+	DynamicWeightedGridEnvironment::DynamicWeightedGridEnvironment(int width, int height)
+	{
+		mWidth = width;
+		mHeight = height;
+		
+		terrain.resize(mWidth*mHeight);
+		for (uint16_t y = 0; y < mHeight; y++)
+		{
+			for (uint16_t x = 0; x < mWidth; x++)
+			{
+				terrain[y*mWidth+x] = kGround;
+			}
+		}
+		srand(1);
+		for (int x = 0; x < 20; x++)
+			costs.push_back(1+0.2*x);
+		std::random_shuffle(costs.begin(), costs.end());
+	}
 	
 	void DynamicWeightedGridEnvironment::GetSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const
 	{
@@ -191,7 +210,10 @@ namespace DWG {
 		double base = 1.0;
 		if (node1.x != node2.x && node1.y != node2.y)
 			base = M_SQRT2;
-		return base*0.5*(costs[terrain[node2.y*mWidth+node2.x]]+costs[terrain[node1.y*mWidth+node1.x]]);
+		double c1 = costs[terrain[node2.y*mWidth+node2.x]];
+		double c2 = costs[terrain[node1.y*mWidth+node1.x]];
+		double result = base*0.5*(c1+c2);
+		return result;
 	}
 	
 	double DynamicWeightedGridEnvironment::GCost(const xyLoc &node, const tDirection &act) const

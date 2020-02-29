@@ -15,22 +15,22 @@
 namespace DWG {
 	
 	enum TerrainType {
-		kBlack = 0,
-		kDeepWater = 1,
-		kWater = 2,
-		kRiver = 3,
-		kSwamp = 4,
-		kGround = 5,
-		kTrees = 6,
-		kRoad = 7,
-		kDesert = 8,
-		kIce = 9,
-		kJungle = 10,
-		kPlains = 11,
-		kBlight = 12,
-		kTundra = 13,
-		kMountain = 14,
-		kHills = 15
+		kBlack = 0,//A
+ 		kDeepWater = 1,//B
+		kWater = 2,//C
+		kRiver = 3,//D
+		kSwamp = 4,//E
+		kGround = 5,//F
+		kTrees = 6,//G
+		kRoad = 7,//H
+		kDesert = 8,//I
+		kIce = 9,//J
+		kJungle = 10,//K
+		kPlains = 11,//L
+		kBlight = 12,//M
+		kTundra = 13,//N
+		kMountain = 14,//O
+		kHills = 15//P
 	};
 	
 	struct abstractState {
@@ -64,8 +64,8 @@ namespace DWG {
 		std::vector<regionData> regionCenters;
 	};
 	
-	// TODO: Build DynamicWeightedGridAbstractionEnvironment that you can use for search
-	// this code builds the abstraction and draws it, but can't search it
+	// This is a dynamic weighted grid with an abstraction.
+	// As a search environment it returns abstract states.
 	template <int sectorSize>
 	class DynamicWeightedGrid : public SearchEnvironment<abstractState, edge>
 	{
@@ -103,6 +103,10 @@ namespace DWG {
 		{
 			costs = c;
 			ValidateEdges();
+		}
+		void SetCost(TerrainType t, double cost)
+		{
+			costs[t] = cost;
 		}
 		std::vector<double> &GetCosts()
 		{
@@ -142,6 +146,8 @@ namespace DWG {
 			}
 			return numRegions;
 		}
+		void SetDrawAbstraction(bool draw) {drawAbstraction = draw;}
+		bool GetDrawAbstraction() { return drawAbstraction; }
 		void ValidateEdges() const;
 	private:
 		bool FindEdge(int fromSector, int fromRegion, int toSector, int toRegion) const;
@@ -163,7 +169,7 @@ namespace DWG {
 		void SetTerrainTypeNoRepair(const xyLoc &l, TerrainType t);
 		std::vector<SectorData<sectorSize>> sectors;
 		int mWidth, mHeight;
-		bool drawGrid;
+		bool drawAbstraction;
 		std::vector<double> costs;
 	public:
 		void GetCoordinate(const xyLoc &l, float &x, float &y, float &r) const;
@@ -178,15 +184,15 @@ namespace DWG {
 				case kBlack: return Colors::black;
 				case kGround: return Colors::brown;
 				case kTrees: return  Colors::darkgreen;
-				case kSwamp: return  Colors::cyan;
+				case kSwamp: return  Colors::bluegreen;
 				case kRoad: return  Colors::yellow;
 				case kWater: return  Colors::blue;
 				case kDeepWater: return Colors::darkblue;
 				case kRiver: return Colors::lightblue;
 				case kDesert: return Colors::lightyellow;
-				case kIce: return Colors::white;
+				case kIce: return (Colors::white+Colors::cyan);
 				case kJungle: return Colors::darkbluegray;
-				case kPlains: return Colors::purple;
+				case kPlains: return Colors::lightbrown;
 				case kBlight: return Colors::darkyellow;
 				case kTundra: return Colors::lightgray;
 				case kMountain: return Colors::darkgray;
@@ -201,9 +207,11 @@ namespace DWG {
 #pragma mark DynamicWeightedGridEnvironment
 #pragma mark -
 
+	// This is just a dynamic weighted grid
 	class DynamicWeightedGridEnvironment : public SearchEnvironment<xyLoc, tDirection> {
 	public:
 		DynamicWeightedGridEnvironment(const char *map);
+		DynamicWeightedGridEnvironment(int width, int height);
 		void GetSuccessors(const xyLoc &nodeID, std::vector<xyLoc> &neighbors) const;
 		void GetActions(const xyLoc &nodeID, std::vector<tDirection> &actions) const;
 		void ApplyAction(xyLoc &s, tDirection a) const;
@@ -216,6 +224,7 @@ namespace DWG {
 		bool GoalTest(const xyLoc &node, const xyLoc &goal) const;
 		
 		uint64_t GetStateHash(const xyLoc &node) const;
+		uint64_t GetMaxHash() const { return mWidth*mHeight; }
 		uint64_t GetActionHash(tDirection act) const;
 		
 		void Draw(Graphics::Display &display) const;
@@ -228,9 +237,17 @@ namespace DWG {
 		{
 			costs = c;
 		}
+		void SetCost(TerrainType t, double cost)
+		{
+			costs[t] = cost;
+		}
 		std::vector<double> &GetCosts()
 		{
 			return costs;
+		}
+		void SetTerrainType(const xyLoc &l, TerrainType t)
+		{
+			terrain[l.y*mWidth+l.x] = t;
 		}
 	private:
 		void GetCoordinate(const xyLoc &l, float &x, float &y, float &r) const;
@@ -249,6 +266,7 @@ namespace DWG {
 	DynamicWeightedGrid<sectorSize>::DynamicWeightedGrid(int width, int height)
 	:mWidth(width), mHeight(height)
 	{
+		drawAbstraction = false;
 		sectors.resize(GetNumSectors());
 		for (uint16_t y = 0; y < mHeight; y++)
 		{
@@ -263,6 +281,7 @@ namespace DWG {
 	template <int sectorSize>
 	DynamicWeightedGrid<sectorSize>::DynamicWeightedGrid(const char *map, int minRegionSize)
 	{
+		drawAbstraction = false;
 		FILE *f = fopen(map, "r");
 		if (f == 0)
 		{
@@ -923,11 +942,14 @@ namespace DWG {
 			}
 			if (startx < sectorSize)
 			{
-				l.x = regionOffsetX+startx;
-				l.y = regionOffsetY+starty;
-				GetCoordinate(l, x, y, r);
-				display.FillRect({x-r, y-r, x-r+2*r*(sectorSize-startx), y+r},
-								 GetTerrainColor((TerrainType)s.cells[startx][starty]));
+				if (s.cells[startx][starty] != (TerrainType)s.regionCenters[largest].terrain)
+				{
+					l.x = regionOffsetX+startx;
+					l.y = regionOffsetY+starty;
+					GetCoordinate(l, x, y, r);
+					display.FillRect({x-r, y-r, x-r+2*r*(sectorSize-startx), y+r},
+									 GetTerrainColor((TerrainType)s.cells[startx][starty]));
+				}
 			}
 		}
 	}
@@ -939,7 +961,9 @@ namespace DWG {
 		{
 			DrawSector(display, t);
 		}
-//		return;
+		if (!drawAbstraction)
+			return;
+		
 		// Draw sector boundaries
 		for (int x = 0; x < mWidth; x+=sectorSize)
 		{
