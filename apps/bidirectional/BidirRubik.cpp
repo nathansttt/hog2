@@ -23,7 +23,9 @@ enum heuristicType {
 	k1997,
 	k839,
 	k8210,
-	kCustom
+	kCustom1,
+	kCustom2,
+	kCustom3
 };
 
 const char *hprefix = "/Users/nathanst/Data/pdb/";
@@ -243,17 +245,58 @@ void BuildHeuristics(RubiksState goal, Heuristic<RubiksState> &result, heuristic
 			result.heuristics.push_back(pdb3);
 			break;
 		}
-		case kCustom:
+		case kCustom1:
 		{
 			std::vector<int> edges1 = {0, 1, 2, 3};
 			std::vector<int> edges2 = {4, 5, 6, 7};
-			std::vector<int> edges3 = {8, 9};
-			std::vector<int> edges4 = {10, 11};
+			std::vector<int> edges3 = {8, 9, 10, 11};
 			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
 			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
 			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
-			RubikPDB *pdb3 = new RubikPDB(&cube, goal, blank, corners);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges3, blank);
 			RubikPDB *pdb4 = new RubikPDB(&cube, goal, blank, corners);
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			if (!pdb4->Load(hprefix))
+			{
+				pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb4->Save(hprefix);
+			}
+			result.lookups.push_back({kMaxNode, 1, 4});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.lookups.push_back({kLeafNode, 3, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+			result.heuristics.push_back(pdb4);
+			break;
+		}
+		case kCustom2:
+		{
+			std::vector<int> edges1 = {0, 1, 2};
+			std::vector<int> edges2 = {3, 4, 5};
+			std::vector<int> edges3 = {6, 7, 8};
+			std::vector<int> edges4 = {9, 10, 11};
+			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges3, blank);
+			RubikPDB *pdb4 = new RubikPDB(&cube, goal, edges4, blank);
 			RubikPDB *pdb5 = new RubikPDB(&cube, goal, blank, corners);
 			if (!pdb1->Load(hprefix))
 			{
@@ -293,12 +336,80 @@ void BuildHeuristics(RubiksState goal, Heuristic<RubiksState> &result, heuristic
 			result.heuristics.push_back(pdb5);
 			break;
 		}
+		case kCustom3:
+		{
+			std::vector<int> edges1 = {0, 1};
+			std::vector<int> edges2 = {2, 3};
+			std::vector<int> edges3 = {4, 5};
+			std::vector<int> edges4 = {6, 7};
+			std::vector<int> edges5 = {8, 9};
+			std::vector<int> edges6 = {10, 11};
+			std::vector<int> corners = {0, 1, 2, 3, 4, 5, 6, 7};
+			RubikPDB *pdb1 = new RubikPDB(&cube, goal, edges1, blank);
+			RubikPDB *pdb2 = new RubikPDB(&cube, goal, edges2, blank);
+			RubikPDB *pdb3 = new RubikPDB(&cube, goal, edges3, blank);
+			RubikPDB *pdb4 = new RubikPDB(&cube, goal, edges4, blank);
+			RubikPDB *pdb5 = new RubikPDB(&cube, goal, edges5, blank);
+			RubikPDB *pdb6 = new RubikPDB(&cube, goal, edges6, blank);
+			RubikPDB *pdb7 = new RubikPDB(&cube, goal, blank, corners);
+			if (!pdb1->Load(hprefix))
+			{
+				pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb1->Save(hprefix);
+			}
+			if (!pdb2->Load(hprefix))
+			{
+				pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb2->Save(hprefix);
+			}
+			if (!pdb3->Load(hprefix))
+			{
+				pdb3->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb3->Save(hprefix);
+			}
+			if (!pdb4->Load(hprefix))
+			{
+				pdb4->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb4->Save(hprefix);
+			}
+			if (!pdb5->Load(hprefix))
+			{
+				pdb5->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb5->Save(hprefix);
+			}
+			if (!pdb6->Load(hprefix))
+			{
+				pdb6->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb6->Save(hprefix);
+			}
+			if (!pdb7->Load(hprefix))
+			{
+				pdb7->BuildPDB(goal, std::thread::hardware_concurrency());
+				pdb7->Save(hprefix);
+			}
+			result.lookups.push_back({kMaxNode, 1, 7});
+			result.lookups.push_back({kLeafNode, 0, 0});
+			result.lookups.push_back({kLeafNode, 1, 0});
+			result.lookups.push_back({kLeafNode, 2, 0});
+			result.lookups.push_back({kLeafNode, 3, 0});
+			result.lookups.push_back({kLeafNode, 4, 0});
+			result.lookups.push_back({kLeafNode, 5, 0});
+			result.lookups.push_back({kLeafNode, 6, 0});
+			result.heuristics.push_back(pdb1);
+			result.heuristics.push_back(pdb2);
+			result.heuristics.push_back(pdb3);
+			result.heuristics.push_back(pdb4);
+			result.heuristics.push_back(pdb5);
+			result.heuristics.push_back(pdb6);
+			result.heuristics.push_back(pdb7);
+			break;
+		}
 	}
 }
 
 void TestRubik(int algorithm)
 {
-	const int walkLength = 14;
+	const int walkLength = 13;
 	NBS<RubiksState, RubiksAction, RubiksCube> nbs;
 	MM<RubiksState, RubiksAction, RubiksCube> mm;
 	BSStar<RubiksState, RubiksAction, RubiksCube> bs;
@@ -309,7 +420,7 @@ void TestRubik(int algorithm)
 	Heuristic<RubiksState> h_f;
 	Heuristic<RubiksState> h_b;
 
-	BuildHeuristics(goal, h_f, kCustom);
+	BuildHeuristics(goal, h_f, kCustom1);
 	h_b = h_f;
 	for (int x = 0; x < h_b.heuristics.size(); x++)
 	{
@@ -336,8 +447,10 @@ void TestRubik(int algorithm)
 			
 			BidirectionalProblemAnalyzer<RubiksState, RubiksAction, RubiksCube> p(start, goal, &cube, &h_f, &h_b);
 			p.drawProblemInstance = false;
+			p.drawStatistics = false;
 			p.drawAllG = true;
 			p.flipBackwardsGCost = true;
+			p.SaveSVG(t.c_str());
 			//			p.drawFullGraph = true;
 			//			p.drawMinimumVC = true;
 			//			p.drawStatistics = false;
@@ -352,7 +465,6 @@ void TestRubik(int algorithm)
 			//			printf("Minimum: %d\n", p.GetMinWork());
 			//			int maxg = p.GetNumGCosts();
 			//p.SaveSVG((t+"-shrunk.svg").c_str(), (maxg+11)/12);
-			p.SaveSVG(t.c_str());
 			
 		}
 		
