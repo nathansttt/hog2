@@ -1,13 +1,11 @@
 /*
- * $Id: AStarOpenClosed.h,v 1.9 2006/11/27 23:21:37 nathanst Exp $
- *
- *  AStarOpenClosed.h
+ *  $Id: AStarOpenClosed.h
  *  hog2
  *
  *  Created by Nathan Sturtevant on 5/25/09.
- *  Copyright 2009 NS Software. All rights reserved.
+ *  Modified by Nathan Sturtevant on 02/29/20.
  *
- * This file is part of HOG2.
+ * This file is part of HOG2. See https://github.com/nathansttt/hog2 for licensing information.
  *
  */
 
