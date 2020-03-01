@@ -7,6 +7,8 @@
  *
  * This file is part of HOG2. See https://github.com/nathansttt/hog2 for licensing information.
  *
+ * Modified by Zhifu Zhang
+ *
  */
 
 #ifndef OpenListB_H

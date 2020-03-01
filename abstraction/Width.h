@@ -5,6 +5,8 @@
  *  Created by Nathan Sturtevant on 09/18/06.
  *  Modified by Nathan Sturtevant on 02/29/20.
  *
+ * Helper functions for determining edge widths and node widths.
+ *
  * This file is part of HOG2. See https://github.com/nathansttt/hog2 for licensing information.
  *
  */

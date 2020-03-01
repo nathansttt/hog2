@@ -7,6 +7,8 @@
  *
  * This file is part of HOG2. See https://github.com/nathansttt/hog2 for licensing information.
  *
+ * Skipping added by Renee Jansen on 5/15/06.
+ *
  */
 
 #ifndef PRASTAR2_H
