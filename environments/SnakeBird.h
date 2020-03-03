@@ -63,7 +63,9 @@ struct SnakeBirdState {
 	
 	void SetSnakeLength(int whichSnake, int len)
 	{ SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1); }
-	
+	int GetSnakeLength(int whichSnake)
+	{ return GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1)+1; }
+
 	snakeDir GetSnakeDir(int whichSnake, int segment) const
 	{ return static_cast<snakeDir>((snakeBodies>>(2*segment+2*GetSnakeBodyEnd(whichSnake-1)))&snakeBodyMask); }
 	void SetSnakeDir(int whichSnake, int segment, snakeDir dir)

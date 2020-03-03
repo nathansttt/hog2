@@ -175,6 +175,62 @@ void LoadLevel39()
 	history.push_back(snake);
 }
 
+void LoadLevel32()
+{
+	for (int x = 5; x <= 10; x++)
+		sb.SetGroundType(x, 9, SnakeBird::kGround);
+	for (int x = 11; x <= 12; x++)
+		sb.SetGroundType(x, 9, SnakeBird::kSpikes);
+	for (int x = 12; x <= 14; x++)
+		sb.SetGroundType(x, 7, SnakeBird::kGround);
+	for (int y = 5; y <= 7; y++)
+		sb.SetGroundType(8, y, SnakeBird::kGround);
+	for (int y = 4; y <= 5; y++)
+		sb.SetGroundType(13, y, SnakeBird::kGround);
+
+	sb.SetGroundType(6, 6, SnakeBird::kExit);
+	
+	sb.AddSnake(9, 7, {SnakeBird::kRight});
+	sb.AddSnake(10, 8, {SnakeBird::kLeft});
+
+	sb.SetGroundType(12, 6, SnakeBird::kBlock1);
+
+	sb.SetGroundType(8, 8, SnakeBird::kPortal1);
+	sb.SetGroundType(13, 6, SnakeBird::kPortal2);
+
+	snake = sb.GetStart();
+	history.clear();
+	history.push_back(snake);
+}
+
+void LoadLevel63()
+{
+	for (int x = 5; x <= 11; x++)
+		sb.SetGroundType(x, 6, SnakeBird::kGround);
+	for (int x = 13; x <= 13; x++)
+		sb.SetGroundType(x, 6, SnakeBird::kGround);
+	for (int x = 14; x <= 15; x++)
+		sb.SetGroundType(x, 5, SnakeBird::kGround);
+	for (int x = 13; x <= 15; x++)
+		sb.SetGroundType(x, 4, SnakeBird::kGround);
+
+	sb.SetGroundType(14, 2, SnakeBird::kExit);
+	
+	sb.AddSnake(10, 5, {SnakeBird::kRight});
+
+	sb.SetGroundType(10, 4, SnakeBird::kBlock1);
+	sb.SetGroundType(9, 3, SnakeBird::kBlock1);
+	sb.SetGroundType(10, 3, SnakeBird::kBlock1);
+	sb.SetGroundType(11, 3, SnakeBird::kBlock1);
+
+	sb.SetGroundType(6, 3, SnakeBird::kPortal1);
+	sb.SetGroundType(13, 5, SnakeBird::kPortal2);
+
+	snake = sb.GetStart();
+	history.clear();
+	history.push_back(snake);
+}
+
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 {
 	if (eType == kWindowDestroyed)
@@ -193,9 +249,11 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			snake = sb.GetStart();
 		}
 		else {
-			LoadLevel19();
-			//		LoadLevel22();
-			//		LoadLevel39();
+			//LoadLevel19();
+			//LoadLevel22();
+			//LoadLevel39();
+			//LoadLevel63();
+			LoadLevel32();
 		}
 		
 	}
@@ -245,6 +303,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					history.push_back(snake);
 				}
 			}
+			// If snake went into goal, switch active snake
+			for (int x = 0; x < snake.GetNumSnakes(); x++)
+			{
+				if (snake.IsInPlay(snakeControl))
+					break;
+				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
+			}
+
 //			a.direction = SnakeBird::kUp;
 //			if (sb.Legal(snake, a))
 //			{
@@ -262,6 +328,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					history.push_back(snake);
 				}
 			}
+			// If snake went into goal, switch active snake
+			for (int x = 0; x < snake.GetNumSnakes(); x++)
+			{
+				if (snake.IsInPlay(snakeControl))
+					break;
+				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
+			}
 //			a.direction = SnakeBird::kDown;
 //			if (sb.Legal(snake, a))
 //			{
@@ -278,6 +351,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					sb.ApplyAction(snake, a);
 					history.push_back(snake);
 				}
+			}
+			// If snake went into goal, switch active snake
+			for (int x = 0; x < snake.GetNumSnakes(); x++)
+			{
+				if (snake.IsInPlay(snakeControl))
+					break;
+				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
 			}
 
 //			a.direction = SnakeBird::kLeft;
@@ -297,6 +377,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					history.push_back(snake);
 				}
 			}
+			// If snake went into goal, switch active snake
+			for (int x = 0; x < snake.GetNumSnakes(); x++)
+			{
+				if (snake.IsInPlay(snakeControl))
+					break;
+				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
+			}
 
 //			a.direction = SnakeBird::kRight;
 //			if (sb.Legal(snake, a))
@@ -311,7 +398,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			snake = history.back();
 			break;
 		case 'e':
-			snakeControl = (snakeControl+1)%snake.GetNumSnakes();
+			for (int x = 0; x < snake.GetNumSnakes(); x++)
+			{
+				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
+				if (snake.IsInPlay(snakeControl))
+					break;
+			}
 			break;
 		case 'p':
 		{
