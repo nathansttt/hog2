@@ -16,9 +16,24 @@ SnakeBird::SnakeBird(int width, int height)
 :width(width), height(height)
 {
 	assert(width*height < 512);
+	portal1Loc = portal2Loc = -1;
 	std::fill_n(&world[0], 512, kEmpty);
 	for (int x = 0; x < width; x++)
 		world[GetIndex(x, height-1)] = kSpikes;
+}
+
+void SnakeBird::Reset()
+{
+	width = 20;
+	height = 16;
+	portal1Loc = portal2Loc = -1;
+	std::fill_n(&world[0], 512, kEmpty);
+	for (int x = 0; x < width; x++)
+		world[GetIndex(x, height-1)] = kSpikes;
+	startState.Reset();
+	fruit.clear();
+	for (int x = 0; x < objects.size(); x++)
+		objects[x].clear();
 }
 
 SnakeBirdState SnakeBird::GetStart()
@@ -126,7 +141,23 @@ bool SnakeBird::Save(const char *filename)
 
 void SnakeBird::GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const
 {
-	
+	static std::vector<SnakeBirdAction> acts;
+	GetActions(nodeID, acts);
+	neighbors.clear();
+	for (auto &a : acts)
+	{
+		SnakeBirdState s = nodeID;
+		ApplyAction(s, a);
+		bool valid = true;
+		for (int x = s.GetNumSnakes()-1; x >= 0; x--)
+			if (s.GetSnakeHeadLoc(x) == kDead)
+			{
+				valid = false;
+				break;
+			}
+		if (valid)
+			neighbors.push_back(s);
+	}
 }
 
 bool SnakeBird::Legal(SnakeBirdState &s, SnakeBirdAction a)
@@ -479,18 +510,9 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 				s.SetObjectLocation(i-4, newloc);
 			}
 		}
-//		// check for portals
-//		if (s.GetSnakeHeadLoc(a.bird) == portal1Loc)
-//		{
-//			s.SetSnakeHeadLoc(a.bird, portal2Loc);
-//		}
-//		else if (s.GetSnakeHeadLoc(a.bird) == portal2Loc)
-//		{
-//			s.SetSnakeHeadLoc(a.bird, portal1Loc);
-//		}
 	}
 	
-	// hack to make the following loop more generic
+	// Small hack to make the following loop more generic:
 	// Add current bird to list of pushed birds
 	// This will cause us to check it for portals
 	a.pushed |= (1<<a.bird);
@@ -508,7 +530,7 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 			return;
 
 		// Check for snakes which are now on portals
-		// TODO: *and* didn't have an adjacent segment on a portal in the last time step
+		// *and* didn't have an adjacent segment on a portal in the last time step
 		for (int i = 0; i < 4 && (a.pushed>>i); i++)
 		{
 			int snake = i;
@@ -517,40 +539,68 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 				int newloc = s.GetSnakeHeadLoc(snake);
 				int piece = newloc;
 				for (int x = 0; x < s.GetSnakeLength(snake); x++)
-				//for (int x = 0; x < objects[snake].size(); x++)
 				{
-//					int piece = GetIndex(GetX(objects[snake][x])+GetX(newloc),
-//										 GetY(objects[snake][x])+GetY(newloc));
-					bool canTeleport = true;
+					int lastPiece = piece;
 					if (x > 0)
 					{
 						switch (s.GetSnakeDir(snake, x-1))
 						{
-							case kLeft: piece-=height; if (lastAction == kRight) canTeleport = false; break;
-							case kRight: piece+=height; if (lastAction == kLeft) canTeleport = false; break;
-							case kUp: piece-=1; if (lastAction == kDown) canTeleport = false; break;
-							case kDown: piece+=1; if (lastAction == kUp) canTeleport = false; break;
+							case kLeft: piece-=height; break;
+							case kRight: piece+=height; break;
+							case kUp: piece-=1; break;
+							case kDown: piece+=1; break;
 						}
 					}
 					int p1, p2 = -1;
-					if (canTeleport)
+					if (piece == portal1Loc)
 					{
-						if (piece == portal1Loc)
-						{
-							p1 = portal1Loc;
-							p2 = portal2Loc;
-						}
-						else if (piece == portal2Loc)
-						{
-							p1 = portal2Loc;
-							p2 = portal1Loc;
-						}
+						p1 = portal1Loc;
+						p2 = portal2Loc;
+					}
+					else if (piece == portal2Loc)
+					{
+						p1 = portal2Loc;
+						p2 = portal1Loc;
 					}
 
+					// Did the snake just move to adjacent locations?
 					if (p2 != -1)
 					{
-						// TODO: Check if it can be placed in new loc relative to self
-						// TODO: Check if it is offscreen
+						// We are looking at the snake location after it was moved.
+						// Need to check in forward and backwards directions
+						
+//						// If previous piece was at the portal before, don't portal
+//						int previousOnSnake = -1;
+//						// get piece in front of piece on portal
+//						if (x > 0) // Beyond the head; check the previous piece
+//						{
+//							previousOnSnake = lastPiece;
+//						}
+//						// If next piece was at the portal before, don't portal
+//						int nextOnSnake = -1;
+//						if (x < s.GetSnakeLength(snake)-1)
+//						{
+//							switch (s.GetSnakeDir(snake, x))
+//							{
+//								case kLeft: nextOnSnake = piece-height; break;
+//								case kRight: nextOnSnake = piece+height; break;
+//								case kUp: nextOnSnake = piece-1; break;
+//								case kDown: nextOnSnake = piece+1; break;
+//							}
+//						}
+//						if (previousOnSnake == p1 && s.GetSnakeDir(snake, x-1) == opposite)
+//						{ p2 = -1; }
+//						else if (nextOnSnake == p1 && s.GetSnakeDir(snake, x) == lastAction)
+//						{ p2 = -1; }
+						if (x > 0 && s.GetSnakeDir(snake, x-1) == opposite)
+						{ p2 = -1; }
+						else if (x < s.GetSnakeLength(snake)-1 && s.GetSnakeDir(snake, x) == lastAction)
+						{ p2 = -1; }
+					}
+
+					// We have a portal to teleport to
+					if (p2 != -1)
+					{
 						int xChange = -GetX(p1)+GetX(p2);
 						int yChange = -GetY(p1)+GetY(p2);
 
@@ -593,7 +643,6 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 						{
 							int offsetFromPortalX = GetX(newloc)+xChange;
 							int offsetFromPortalY = GetY(newloc)+yChange;
-							//s.SetObjectLocation(snake, GetIndex(offsetFromPortalX, offsetFromPortalY));
 							s.SetSnakeHeadLoc(i, GetIndex(offsetFromPortalX, offsetFromPortalY));
 
 							bool success = Render(s);
@@ -630,7 +679,27 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 						p1 = portal2Loc;
 						p2 = portal1Loc;
 					}
-
+					// Check if our last action suggests that the object was in the portal previously
+					switch (lastAction)
+					{
+						case kLeft:
+							if (p1-height >= 0 && render[p1-height] == objs[i]) // can't teleport
+								p2 = -1;
+							break;
+						case kRight:
+							if (p1+height < width*height && render[p1+height] == objs[i]) // can't teleport
+								p2 = -1;
+							break;
+						case kUp:
+							if (p1-1 >= 0 && render[p1-1] == objs[i]) // can't teleport
+								p2 = -1;
+							break;
+						case kDown:
+							if (p1+1 < width*height && render[p1+1] == objs[i]) // can't teleport
+								p2 = -1;
+							break;
+					}
+					
 					if (p2 != -1)
 					{
 						// TODO: Check if it can be placed in new loc relative to self
@@ -696,6 +765,7 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 		if (falling == 0)
 			break;
 		lastAction = kDown;
+		opposite = kUp;
 		for (int i = 0; i < 8; i++)
 		{
 			if (i < 4 && ((falling>>i)&0x1))
@@ -703,6 +773,7 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 			if (i >= 4 && ((falling>>i)&0x1))
 				s.SetObjectLocation(i-4, s.GetObjectLocation(i-4)+1);
 		}
+		a.pushed = falling;
 	}
 }
 
@@ -808,7 +879,7 @@ int SnakeBird::GetY(int index) const
 	return index%height;
 }
 
-void SnakeBird::Draw(Graphics::Display &display)
+void SnakeBird::Draw(Graphics::Display &display) const
 {
 	display.FillRect({-1, -1, 1, 0.5}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
 	display.FillRect({-1, 0.5, 1, 1}, Colors::darkblue+Colors::darkred);

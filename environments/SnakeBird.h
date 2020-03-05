@@ -45,6 +45,7 @@ struct SnakeBirdState {
 	uint64_t locBlockFruit; // 4*9bit blocks; 28 fruit
 
 	SnakeBirdState() :snakeBodies(0), snakeHeads(0), locBlockFruit(0) {}
+	void Reset() { snakeBodies = snakeHeads = locBlockFruit = 0; }
 	bool operator==(const SnakeBirdState &s) const {
 		return (s.snakeBodies==snakeBodies)&&(s.snakeHeads==snakeHeads)&&(s.locBlockFruit==locBlockFruit);
 	}
@@ -187,6 +188,7 @@ enum SnakeBirdWorldObject : uint8_t {
 class SnakeBird : public SearchEnvironment<SnakeBirdState, SnakeBirdAction> {
 public:
 	SnakeBird(int width = 20, int height = 16);
+	void Reset();
 	bool Load(const char *filename);
 	bool Save(const char *filename);
 	SnakeBirdState GetStart();
@@ -239,7 +241,8 @@ public:
 	uint64_t GetActionHash(SnakeBirdAction act) const {return (act.bird<<2)|act.direction;}
 	uint64_t GetStateHash(const SnakeBirdState &node) const
 	{
-		return node.snakeHeads^node.snakeBodies^node.locBlockFruit;
+		//return node.snakeHeads^(node.snakeBodies>>11)^(node.snakeBodies<<17)^node.locBlockFruit;
+		return node.snakeHeads^(node.snakeBodies)^node.locBlockFruit;
 	}
 
 	void OpenGLDraw() const {}
@@ -251,7 +254,7 @@ public:
 	void GLDrawLine(const SnakeBirdState &x, const SnakeBirdState &y) const {}
 	void GLDrawPath(const std::vector<SnakeBirdState> &x) const {}
 	
-	void Draw(Graphics::Display &display);
+	void Draw(Graphics::Display &display) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
@@ -279,5 +282,18 @@ private:
 };
 
 }
+
+namespace std {
+template <>
+struct hash<SnakeBird::SnakeBirdState>
+{
+	std::size_t operator()(const SnakeBird::SnakeBirdState &k) const
+	{
+		return k.snakeHeads^(k.snakeBodies)^k.locBlockFruit;
+	}
+};
+	
+}
+
 
 #endif /* SnakeBird_h */
