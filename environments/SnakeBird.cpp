@@ -36,9 +36,50 @@ void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
 		startState.SetSnakeDir(count, x, body[x]);
 }
 
+std::vector<snakeDir>  LoadSnake(std:: vector<snakeDir> snakeBod, int width, int pos,std::vector<char> lvl) 
+{
+	bool snakeBuilt = false;
+	while(!snakeBuilt)
+	{
+			//build_snake:
+		if (lvl[pos+1] == 1+lvl[pos]){
+			snakeBod.push_back(kRight);
+			pos++;
+			//goto build_snake;
+		}
+		else if (lvl[pos-1] == 1+lvl[pos])
+		{
+			snakeBod.push_back(kLeft);
+			pos--;
+			//goto build_snake;
+		}
+		else if (lvl[pos+width+1] == 1+lvl[pos])
+		{
+			snakeBod.push_back(kDown);
+			pos+= width +1;
+			//goto build_snake;
+		}
+		else if (lvl[pos-width-1] == 1+lvl[pos])
+		{
+			snakeBod.push_back(kUp);
+			pos-= width -1;
+			//goto build_snake;
+		}
+		else
+		{
+			snakeBuilt = true;
+			return snakeBod;
+		}
+	}
+}
+
+
+
+
+
 bool SnakeBird::Load(const char *filename)
 {
-
+	
 	ifstream infile;
 	infile.open(filename);
 	if (infile.fail()) {
@@ -46,76 +87,92 @@ bool SnakeBird::Load(const char *filename)
 		return false;
 	}
 	if(infile.is_open()){
-		char ch;
+		char ch, ach;
 		int x = 0;
 		int y = 0;
+		int ct = 0;
+	
+		std::string hLine;
+		getline(infile, hLine);
+	 	
+		std::string sHeight = hLine.substr(8,2);
+		std:: string sWidth = hLine.substr(5, 2); 
 
+		int wWidth = std::stoi(sWidth, nullptr, 10);
+		int wHeight = std::stoi(sHeight, nullptr,10);
+		
+		SnakeBird(wWidth, wHeight);
+		
+		std::vector<char> lvlary;
 		while (infile.get(ch)) {
 			
-			if(ch == '.'){
-				SetGroundType(x,y,SnakeBirdWorldObject::kEmpty);
-				x++;	
-			}
-			else if(ch == 'G'){
-				SetGroundType(x,y,SnakeBirdWorldObject::kGround);
-				x++;
-			}
-			else if(ch == 'S'){
-				SetGroundType(x,y,SnakeBirdWorldObject::kSpikes);
-				x++;	
-			}
-			else if(ch == 'O'){
-				SetGroundType(x,y,SnakeBirdWorldObject::kPortal1);
-				x++;
-			}
-			else if(ch == 'E'){
-				SetGroundType(x,y,SnakeBirdWorldObject::kExit);
-				x++;
-			}
-			else if(ch == 'F'){
-				SetGroundType(x,y,SnakeBirdWorldObject::kFruit);
-				x++;
-			}
-			else if (ch == '\n')
+			lvlary.push_back(ch);
+		}
+		
+		std:: vector<snakeDir> bod;
+		bool snakeBuilt = false;
+		for(int a = 0; a <= lvlary.size(); a++)
+		{
+			int b = 0;
+			switch (lvlary[a])
 			{
-				x = 0;
-				y++;
-			}
-			else if (ch == '1')
-			{
-				SetGroundType(x, y, kBlock1);
-				x++;
-			}
-			else if (ch == '2')
-			{
-				SetGroundType(x, y, kBlock2);
-				x++;
-			}
-			else if (ch == '3')
-			{
-				SetGroundType(x, y, kBlock3);
-				x++;
-			}
-			else if (ch == '4')
-			{
-				SetGroundType(x, y, kBlock4);
-				x++;
-			}
-			else{
-
-				SetGroundType(x,y,SnakeBirdWorldObject::kEmpty);
-				x++;	
-			}
+				case '.': SetGroundType(x,y,SnakeBirdWorldObject::kEmpty); x++; break;
+				case 'G': SetGroundType(x,y,SnakeBirdWorldObject::kGround); x++; break;
+				case 'S': SetGroundType(x,y,SnakeBirdWorldObject::kSpikes); x++; break;
+				case 'O': SetGroundType(x,y,SnakeBirdWorldObject::kPortal1); x++; break; 
+				case 'E': SetGroundType(x,y,SnakeBirdWorldObject::kExit); x++; break;
+				case 'F': SetGroundType(x,y,SnakeBirdWorldObject::kFruit); x++; break;
+				case '1': SetGroundType(x, y, kBlock1); x++; break;
+				case '2': SetGroundType(x, y, kBlock2); x++; break;
+				case '3': SetGroundType(x, y, kBlock2); x++; break;
+				case '4': SetGroundType(x, y, kBlock3); x++; break;
+				case '\n': x = 0; y++; break;
+				case '<': 
+					bod.push_back(kRight);
+					b = a;
+					b++;
+					bod = LoadSnake(bod, wWidth, b, lvlary);
+					AddSnake(x, y, bod);
+					bod.clear();
+					x++;
+					break;
+				case '>':
+					bod.push_back(kLeft);
+					b = a;
+					b--;
+					bod = LoadSnake(bod, wWidth, b, lvlary);
+					AddSnake(x, y, bod);
+					bod.clear();
+					x++;
+					break;
+				case '^':
+					bod.push_back(kDown);
+					b = a;
+					b += wWidth+1;
+					bod = LoadSnake(bod, wWidth, b, lvlary);
+					AddSnake(x, y, bod);
+					bod.clear();
+					x++;
+					break;
+				case 'v':
+					bod.push_back(kUp);
+					b = a;
+					b -= wWidth-1;
+					bod = LoadSnake(bod, wWidth, b, lvlary);
+					AddSnake(x, y, bod);
+					bod.clear();
+					x++;
+					break;
+				default: SetGroundType(x,y,SnakeBirdWorldObject::kEmpty); x++; break;
+			}		
 		}
 		infile.close();
 		return  true;
 	}
 	else{
+		cout << "Error loading level.";
 		return false;
-	}
-	
-
-	
+	}	
 }
 
 bool SnakeBird::Save(const char *filename)
@@ -727,8 +784,9 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 		
 		return;
 	}
-
+	
 	world[GetIndex(x, y)] = o;
+
 	if (o == kFruit)
 	{
 		fruit.push_back(GetIndex(x, y));
