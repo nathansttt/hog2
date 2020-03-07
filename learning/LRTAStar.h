@@ -1,9 +1,11 @@
 /*
- * $Id: LRTAStar.h,v 1.3 2005/10/04 21:38:59 bulitko Exp $
+ *  $Id: LRTAStar.h
+ *  hog2
  *
- *  HOG File
+ *  Created by Nathan Sturtevant on 10/04/05.
+ *  Modified by Nathan Sturtevant on 02/29/20.
  *
- *  Created by Shanny Lu on Oct 3, 2005.
+ * This file is part of HOG2. See https://github.com/nathansttt/hog2 for licensing information.
  *
  */
 
