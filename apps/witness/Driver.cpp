@@ -17,7 +17,8 @@
 #include "Witness.h"
 #include "Combinations.h"
 #include "SVGUtil.h"
-
+#include <thread>
+std::mutex lock;
 #include <sys/stat.h>
 bool fileExists(const char *name)
 {
@@ -26,14 +27,14 @@ bool fileExists(const char *name)
 }
 
 bool recording = false;
-
+bool parallel = false;
 // 2x2 + 5 (interesting)
 // 2x5 + 5 [201/200][149][137/139][82][64][50]
 // 3x4 + 5 [481/471][463!][399!][374! - 373][260][150][146][126]
 const int puzzleWidth = 4;
 const int puzzleHeight = 4;
 const int minSolutions = 5000;
-const int numRequiredPieces = 1; // 5
+const int numRequiredPieces = 4; // 5
 const int numSeparationPieces = 4; // 3x4 + 6 [4]
 int currBoard = 0;
 
@@ -57,6 +58,7 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount);
 void ExamineTetris(int count);
 void ExamineTriangles(int count);
 void ExamineRegionsAndStars(int count);
+void ParallelExamine(int count);
 
 template <int puzzleWidth, int puzzleHeight>
 void GetAllSolutions(const Witness<puzzleWidth, puzzleHeight> &w, std::vector<WitnessState<puzzleWidth, puzzleHeight>> &puzzles);
@@ -132,7 +134,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		w.AddTriangleConstraint(1, 1, 2);
 		w.AddTriangleConstraint(2, 2, 3);
 		w.AddStarConstraint(3, 3, Colors::orange);
-
+//		w.AddCannotCrossConstraint(1, 4);
+//		w.AddCannotCrossConstraint(3, 1);
+		w.AddCannotCrossConstraint(false /*vert*/, 2, 1);
+		w.AddCannotCrossConstraint(true /*horiz*/, 0, 2);
 		//		w.AddTetrisConstraint(1, 1, 10);
 //		w.AddNegativeTetrisConstraint(1, 0, 3);
 //		w.AddTetrisConstraint(2, 1, 2);
@@ -188,12 +193,14 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	switch (key)
 	{
 		case 't':
+			ParallelExamine(6);
 //			ExamineMustCross(numRequiredPieces);
 //			w.ClearTetrisConstraints();
-//			ExamineTetris(3);
+//			ExamineTetris(4);
 //			ExamineMustCrossAndRegions(numRequiredPieces, numSeparationPieces);
 //			ExamineMustCrossAnd3Regions(numRequiredPieces, numSeparationPieces);
-			ExamineTriangles(6);
+//			ExamineTriangles(6);
+			//ExamineTriangles(puzzleHeight*puzzleWidth);
 //			ExamineRegionsAndStars(0);
 			break;
 		case 'v':
@@ -379,14 +386,14 @@ void GetAllSolutions()
 
 }
 
-int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
+int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &wp,
 				   const std::vector<WitnessState<puzzleWidth, puzzleHeight>> &allSolutions,
 				   int &len, int limit)
 {
 	int count = 0;
 	for (const auto &i : allSolutions)
 	{
-		if (w.GoalTest(i))
+		if (wp.GoalTest(i))
 		{
 			len = (int)i.path.size();
 			count++;
@@ -426,9 +433,14 @@ int CountSolutions(const Witness<puzzleWidth, puzzleHeight> &w,
 
 void Load(uint64_t which)//, int req, int sep)
 {
-	w = best[which];
-	iws.Reset();
-//	iws.Reset();
+	lock.lock();
+	if (best.size() > which)
+	{
+		w = best[which];
+		iws.Reset();
+	}
+	lock.unlock();
+	//	iws.Reset();
 //
 //		w.ClearMustCrossConstraints();
 //		int *items = new int[req];
@@ -470,7 +482,7 @@ void ExamineMustCross(int count)
 
 	uint64_t minCount = allSolutions.size();
 	int *items = new int[count];
-	Combinations<w.GetNumMustCrossConstraints()> c;
+	Combinations<w.GetNumPathConstraints()> c;
 
 
 	Witness<puzzleWidth, puzzleHeight> w;
@@ -532,7 +544,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
 	//	std::vector<uint64_t> best;
 	int *crossItems = new int[crossCount];
 	int *regionItems = new int[regionCount];
-	Combinations<w.GetNumMustCrossConstraints()> c;
+	Combinations<w.GetNumPathConstraints()> c;
 	Combinations<w.GetNumSeparationConstraints()> regionCombs;
 
 	{
@@ -596,7 +608,7 @@ void ExamineMustCrossAndRegions(int crossCount, int regionCount)
 				}
 			}
 			
-			w.ClearMustCrossConstraints();
+			w.ClearPathConstraints();
 		}
 	}
 	
@@ -623,7 +635,8 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
 	//	std::vector<uint64_t> best;
 	int *crossItems = new int[crossCount];
 	int *regionItems = new int[regionCount];
-	Combinations<w.GetNumMustCrossConstraints()> c;
+	Combinations<w.GetNumPathConstraints()> c;
+//	Combinations<w.GetNumMustCrossConstraints()> c;
 	Combinations<w.GetNumSeparationConstraints()> regionCombs;
 	
 	{
@@ -686,7 +699,7 @@ void ExamineMustCrossAnd3Regions(int crossCount, int regionCount)
 				}
 			}
 			
-			w.ClearMustCrossConstraints();
+			w.ClearPathConstraints();
 		}
 	}
 	
@@ -713,7 +726,7 @@ void ExamineRegionsAndStars(int count)
 	//	std::vector<uint64_t> best;
 	std::vector<int> items(count);
 	Combinations<w.GetNumStarConstraints()> c;
-	Combinations<w.GetNumMustCrossConstraints()> mc;
+	Combinations<w.GetNumPathConstraints()> mc;
 	std::vector<int> forbidden;
 	std::vector<int> currSolutions;
 
@@ -721,7 +734,12 @@ void ExamineRegionsAndStars(int count)
 		Witness<puzzleWidth, puzzleHeight> w;
 		WitnessState<puzzleWidth, puzzleHeight> s;
 		
-		static_assert((4==puzzleHeight)&&(puzzleWidth==4), "This code only works for 4x4");
+		if (puzzleWidth!=4 || puzzleHeight!= 4)
+		{
+			printf("This code only works for 4x4");
+			return;
+		}
+		//static_assert((4==puzzleHeight)&&(puzzleWidth==4), "This code only works for 4x4");
 //		uint64_t variations = pow(4, count-1)*2;
 //		uint64_t maxRank = c.MaxRank(count)*variations;
 		uint64_t variations = pow(4, 8);
@@ -733,7 +751,7 @@ void ExamineRegionsAndStars(int count)
 			if (0 == n%50000)
 				printf("%llu of %llu\n", n, maxRank);
 			w.ClearInnerConstraints();
-			w.ClearMustCrossConstraints();
+			w.ClearPathConstraints();
 //			uint64_t rankPart = n/variations;
 //			uint64_t varPart = n%variations;
 //			c.Unrank(rankPart, &items[0], count);
@@ -754,19 +772,19 @@ void ExamineRegionsAndStars(int count)
 				rgbColor color;
 				color = (rank&1)?Colors::white:Colors::orange;
 				if (rank&2)
-					w.AddStarConstraint(x, 0, color);
+					w.AddStarConstraint(x, 1, color);
 				else {
-					w.AddTriangleConstraint(x, 0, 1+(rank&1));
+					w.AddTriangleConstraint(x, 1, 1+(rank&1));
 					//w.AddSeparationConstraint(x, 0, color);
 				}
 				rank>>=2;
 
 				color = (rank&1)?Colors::white:Colors::orange;
 				if (rank&2)
-					w.AddStarConstraint(x, 3, color);
+					w.AddStarConstraint(x, 2, color);
 				else {
 //					w.AddSeparationConstraint(x, 3, color);
-					w.AddTriangleConstraint(x, 3, 1+(rank&1));
+					w.AddTriangleConstraint(x, 2, 1+(rank&1));
 				}
 				rank>>=2;
 			}
@@ -822,6 +840,147 @@ void ExamineRegionsAndStars(int count)
 		Load(currBoard);
 	}
 	
+}
+
+
+void ParallelExamineHelper(int count, int threadID, int numThreads)
+{
+	best.clear();
+	currBoard = 0;
+	Timer t;
+	t.StartTimer();
+	std::vector<WitnessState<puzzleWidth, puzzleHeight>> allSolutions;
+	GetAllSolutions(allSolutions);
+	
+	Witness<puzzleWidth, puzzleHeight> wp;
+	WitnessState<puzzleWidth, puzzleHeight> s;
+
+	uint64_t minCount = allSolutions.size();
+	int bestPathSize = 0;
+	std::vector<int> items(count);
+	Combinations<wp.GetNumStarConstraints()> c;
+	//	Combinations<wp.GetNumMustCrossConstraints()> mc;
+	std::vector<int> forbidden;
+	std::vector<int> currSolutions;
+	
+	//int *items = new int[count];
+	
+	const int pieceTypes = 6;//24+2;
+	
+	uint64_t pCount = pow(pieceTypes, count);
+	uint64_t maxRank = c.MaxRank(count)*pCount;
+	for (uint64_t rank = threadID; rank < maxRank; rank+=numThreads)
+	{
+//		wp.ClearTetrisConstraints();
+//		wp.ClearStarConstraints();
+		wp.ClearInnerConstraints();
+		if (0 == rank%50000)
+			printf("%llu of %llu\n", rank, maxRank);
+		uint64_t n = rank/pCount; // arrangement on board
+		uint64_t pieces = rank%pCount; // pieces in locations
+		c.Unrank(n, &items[0], count);
+		bool t1 = false, t2 = false, t3 = false, t4 = false, t5 = false, t6 = false;
+		for (int x = 0; x < count; x++)
+		{
+			switch (pieces%pieceTypes)
+			{
+				case 0:
+					wp.AddSeparationConstraint(items[x], Colors::black);
+					t1 = true; break;
+				case 1:
+					wp.AddSeparationConstraint(items[x], Colors::white);
+					t2 = true; break;
+				case 2:
+					wp.AddSeparationConstraint(items[x], Colors::yellow);
+					t3 = true; break;
+				case 3:
+					wp.AddStarConstraint(items[x], Colors::black);
+					t4 = true; break;
+				case 4:
+					wp.AddStarConstraint(items[x], Colors::white);
+					t5 = true; break;
+				case 5:
+					wp.AddStarConstraint(items[x], Colors::yellow);
+					t6 = true; break;
+			}
+		}
+		if (0)
+		{
+			int x=0;
+			if ((pieces%pieceTypes) < 24)
+			{
+				wp.AddTetrisConstraint(items[x], 1+(pieces%pieceTypes));
+				t1 = true;
+			}
+			else {
+//				wp.AddStarConstraint(items[x], wp.tetrisYellow);
+//				wp.AddTriangleConstraint(items[x], (pieces%pieceTypes)-23);
+				if ((pieces%pieceTypes)-24)
+				{
+					wp.AddSeparationConstraint(items[x], Colors::black);
+					t2 = true;
+				}
+				else {
+					wp.AddSeparationConstraint(items[x], Colors::white);
+					t3 = true;
+				}
+			}
+			pieces/=pieceTypes;
+		}
+		if (!(t1 && t2 && t3 && t4 && t5 && t6))
+			continue;
+		
+
+		int pathSize = 0;
+		int result = CountSolutions(wp, allSolutions, pathSize, minCount+1);
+		//int result = CountSolutions(wp, allSolutions, currSolutions, forbidden, pathSize, minCount+1);
+			
+			// don't return two puzzles with the same solution
+//			if (currSolutions.size() == 1)
+//				forbidden.push_back(currSolutions[0]);
+			
+		if ((result < minCount && result > 0) || (result == minCount && pathSize > bestPathSize))
+		{
+			lock.lock();
+			printf("Decreased number of solutions to %d / best path up to %d\n", result, bestPathSize);
+			minCount = result;
+			bestPathSize = pathSize;
+			currBoard = 0;
+			best.clear();
+			best.push_back(wp);
+			lock.unlock();
+		}
+		else if (result == minCount && pathSize == bestPathSize)
+			//				else if (result == minCount)
+		{
+			lock.lock();
+			best.push_back(wp);
+			lock.unlock();
+		}
+	}
+	
+	printf("\n%lu boards with %llu solutions len %d; %1.2fs elapsed\n", best.size(), minCount, bestPathSize, t.EndTimer());
+//	if (best.size() > 0)
+//	{
+//		currBoard = 0;
+//		Load(currBoard);
+//	}
+	parallel = false;
+}
+
+const int numThreads = 1;
+void ParallelExamine(int count)
+{
+	std::vector<std::thread *> t(8);
+	if (!parallel)
+	{
+		parallel = true;
+		for (int x = 0; x < numThreads; x++)
+		{
+			delete t[x];
+			t[x] = new std::thread(ParallelExamineHelper, count, x, numThreads);
+		}
+	}
 }
 
 
@@ -915,9 +1074,9 @@ void ExamineTetris(int count)
 	Witness<puzzleWidth, puzzleHeight> wp;
 	WitnessState<puzzleWidth, puzzleHeight> s;
 	
-	for (int y = 0; y < puzzleHeight+1; y++)
-		for (int x = 0; x < puzzleWidth+1; x++)
-			wp.AddMustCrossConstraint(x, y);
+//	for (int y = 0; y < puzzleHeight+1; y++)
+//		for (int x = 0; x < puzzleWidth+1; x++)
+//			wp.AddMustCrossConstraint(x, y);
 
 	GetAllSolutions(wp, allSolutions);
 	
@@ -925,24 +1084,49 @@ void ExamineTetris(int count)
 	int *items = new int[count];
 	Combinations<wp.GetNumTetrisConstraints()> c;
 	
-	uint64_t pCount = pow(24, count);
+	const int pieceTypes = 24+2;
+	
+	uint64_t pCount = pow(pieceTypes, count);
 	uint64_t maxRank = c.MaxRank(count)*pCount;
 	for (uint64_t rank = 0; rank < maxRank; rank++)
 	{
 		wp.ClearTetrisConstraints();
+		// wp.ClearTriangleConstraints();
+		wp.ClearStarConstraints();
+		wp.ClearSeparationConstraints();
 		if (0 == rank%50000)
 			printf("%llu of %llu\n", rank, maxRank);
 		uint64_t n = rank/pCount; // arrangement on board
 		uint64_t pieces = rank%pCount; // pieces in locations
 		c.Unrank(n, items, count);
+		bool t1 = false, t2 = false;
 		for (int x = 0; x < count; x++)
 		{
-			if (x == 0 && count > 1)
-				wp.AddNegativeTetrisConstraint(items[x], (1+(pieces%24)));
-			else
-				wp.AddTetrisConstraint(items[x], 1+(pieces%24));
-			pieces/=24;
+//			if (x == 0 && count > 1)
+//			{
+//				wp.AddNegativeTetrisConstraint(items[x], (1+(pieces%24)));
+//			}
+//			else {
+			if ((pieces%pieceTypes) < 24)
+			{
+				wp.AddTetrisConstraint(items[x], 1+(pieces%pieceTypes));
+				t1 = true;
+			}
+			else {
+				//wp.AddStarConstraint(items[x], wp.tetrisYellow);
+				//wp.AddTriangleConstraint(items[x], (pieces%pieceTypes)-23);
+				if ((pieces%pieceTypes)-23)
+					wp.AddSeparationConstraint(items[x], Colors::black);
+				else
+					wp.AddSeparationConstraint(items[x], Colors::white);
+				//wp.AddTriangleConstraint(items[x], (pieces%pieceTypes)-23);
+				t2 = true;
+			}
+//			}
+			pieces/=pieceTypes;
 		}
+		if (!(t1 && t2))
+			continue;
 //		w = wp;
 //		if (rank == 2)
 //			break;
@@ -998,19 +1182,26 @@ void ExamineTriangles(int count)
 	int *items = new int[count];
 	Combinations<wp.GetNumTriangleConstraints()> c;
 	
-	uint64_t pCount = pow(3, count);
+	const int NUM_TRI = 4;
+	uint64_t pCount = pow(NUM_TRI, count);
 	uint64_t maxRank = c.MaxRank(count)*pCount;
-	for (uint64_t rank = 0; rank < maxRank; rank++)
+	for (uint64_t rank = maxRank/10; rank < maxRank && best.size() < 5000; rank+=1)
 	{
 		if (0 == rank%50000)
-			printf("%llu of %llu\n", rank, maxRank);
+			printf("%llu of %llu [%d solutions]\n", rank, maxRank, best.size());
 		uint64_t n = rank/pCount; // arrangement on board
 		uint64_t pieces = rank%pCount; // pieces in locations
 		c.Unrank(n, items, count);
 		for (int x = 0; x < count; x++)
 		{
-			wp.AddTriangleConstraint(items[x], 1+(pieces%3));
-			pieces/=3;
+			if (0 == pieces%NUM_TRI)
+			{
+				wp.AddStarConstraint(items[x], wp.triangleColor);
+			}
+			else {
+				wp.AddTriangleConstraint(items[x], 0+(pieces%NUM_TRI));
+			}
+			pieces/=NUM_TRI;
 		}
 		int pathLen = 0;
 		int result = CountSolutions(wp, allSolutions, pathLen, minCount+1);
@@ -1029,7 +1220,7 @@ void ExamineTriangles(int count)
 		{
 			best.push_back(wp);
 		}
-		
+		wp.ClearStarConstraints();
 		wp.ClearTriangleConstraints();
 	}
 	

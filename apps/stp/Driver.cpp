@@ -24,6 +24,8 @@
 #include "ParallelIDAStar.h"
 #include "Timer.h"
 #include "STPInstances.h"
+#include "TemplateAStar.h"
+#include "FocalAdd.h"
 
 void CompareToMinCompression();
 void CompareToSmallerPDB();
@@ -81,7 +83,8 @@ void InstallHandlers()
 
 	InstallCommandLineHandler(MyCLHandler, "-run", "-run", "Runs pre-set experiments.");
 	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
-	
+	InstallCommandLineHandler(MyCLHandler2, "-add", "-add", "Additive test");
+
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
@@ -121,6 +124,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			//		recording = true;
 		}
 
+		if (0)
 		{
 			//std::vector<int> pattern = {1, 2, 3, 4, 5, 6, 7, 8, 0};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
 			//std::vector<int> pattern = {1, 2, 3, 4, 5, 6, 7, 0};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
@@ -128,12 +132,16 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			// Build & compress 8-15 Additive PDB
 			if (0)
 			{
-				std::vector<int> pattern = {8, 9, 10, 11, 12, 13, 14, 15, 0};
+				std::vector<int> pattern = {1, 2, 3, 4, 5, 6, 0};//{8, 9, 10, 11, 12, 13, 14, 15, 0};
+				//std::vector<int> pattern = {8, 9, 10, 11, 12, 13, 14, 15, 0};
 				t.Reset();
 				mnp->SetPattern(pattern);
 				mnp->StoreGoal(t);
 				LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> pdb2(mnp, t, pattern);
-				pdb2.BuildAdditivePDB(t, std::thread::hardware_concurrency());
+				pdb2.BuildAdditivePDB(t, 1/*std::thread::hardware_concurrency()
+										   */);
+				exit(0);
+
 				printf("Starting Delta Compress\n");
 				pdb2.DeltaCompress(mnp, t, true);
 				printf("Starting DIV Compress\n");
@@ -1466,3 +1474,123 @@ void Test(MNPuzzle<4, 4> &mnp, const char *prefix)
 	printf("%s: %1.2fs elapsed; %llu nodes expanded\n", prefix, t1.EndTimer(), nodes);
 }
 
+
+
+int MyCLHandler2(char *argument[], int maxNumArgs)
+{
+	if (strcmp(argument[0], "-add") != 0)
+		return 0;
+	std::string path = argument[1];
+	const int width = 4, height = 4;
+	MNPuzzle<4, 4> mnp;
+	Heuristic<MNPuzzleState<4, 4>> h;
+	MNPuzzleState<4, 4> start, goal;
+	std::vector<slideDir> moves;
+	std::vector<MNPuzzleState<4, 4>> statepath;
+	goal.Reset();
+	mnp.StoreGoal(goal);
+
+	std::vector<int> p1 = {0, 1, 2, 3, 4, 5, 6, 7};
+	std::vector<int> p2 = {0, 8, 9, 10, 11, 12, 13, 14, 15};
+	int threads = std::thread::hardware_concurrency();
+	LexPermutationPDB<MNPuzzleState<width, height>, slideDir, MNPuzzle<width, height>> pdb1(&mnp, goal, p1);
+	LexPermutationPDB<MNPuzzleState<width, height>, slideDir, MNPuzzle<width, height>> pdb2(&mnp, goal, p2);
+
+	if (pdb1.Load(path.c_str()))
+	{
+		printf("Loaded successfully\n");
+//		pdb1.PrintHistogram();
+	}
+	else {
+		mnp.SetPattern(p1);
+		pdb1.BuildAdditivePDB(goal, threads);
+		pdb1.Save(path.c_str());
+	}
+	if (pdb2.Load(path.c_str()))
+	{
+		printf("Loaded successfully\n");
+//		pdb2.PrintHistogram();
+	}
+	else {
+		mnp.SetPattern(p2);
+		pdb2.BuildAdditivePDB(goal, threads);
+		pdb2.Save(path.c_str());
+	}
+
+		h.lookups.resize(0);
+	h.lookups.push_back({kAddNode, 1, 2});
+	h.lookups.push_back({kLeafNode, 0, 0});
+	h.lookups.push_back({kLeafNode, 1, 1});
+	
+	h.heuristics.resize(0);
+	h.heuristics.push_back(&pdb1);
+	h.heuristics.push_back(&pdb2);
+
+	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
+	FocalAdd<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> focal;
+	
+	//	astar.setph
+	for (int addBound = 0; addBound <= 256; addBound*=2)
+	{
+		double pdbTime = 0, mdTime = 0, astarTime = 0;
+		uint64_t pdbExpand = 0, pdbGenerate = 0;
+		uint64_t astarExpand = 0, astarGenerate = 0;
+		uint64_t mdExpand = 0, mdGenerate = 0;
+		int pathLen = 0;
+		Timer t2;
+	
+		const int K = addBound+sqrt(addBound);//addBound*2;
+//		const int addBound = 16;
+		astar.SetPhi([=](double x,double y){return y<K?(x+(y*(K-addBound))/K):(x+y-addBound);});
+		
+		focal.SetOptimalityBound(addBound);
+		focal.SetHeuristic(&h);
+
+		for (int x = 0; x < 100; x++)
+		{
+			start = STP::GetKorfInstance(x);
+			
+			//		printf("IDA*; Heuristic: PDB\n");
+			//		ida.SetHeuristic(&h);
+			//		t2.StartTimer();
+			//		ida.GetPath(&mnp, start, goal, path);
+			//		t2.EndTimer();
+			//		printf("Problem %d solved; %1.2f elapsed; %llu expanded, %llu generated\n", x+1, t2.GetElapsedTime(),
+			//			   ida.GetNodesExpanded(), ida.GetNodesTouched());
+			//		pdbTime += t2.GetElapsedTime();
+			//		pdbExpand += ida.GetNodesExpanded();
+			//		pdbGenerate += ida.GetNodesTouched();
+			//
+			//		printf("IDA*; Heuristic: MD\n");
+			//		ida.SetHeuristic(&mnp);
+			//		t2.StartTimer();
+			//		ida.GetPath(&mnp, start, goal, path);
+			//		t2.EndTimer();
+			//		printf("Problem %d solved; %1.2f elapsed; %llu expanded, %llu generated\n", x+1, t2.GetElapsedTime(),
+			//			   ida.GetNodesExpanded(), ida.GetNodesTouched());
+			//		mdTime += t2.GetElapsedTime();
+			//		mdExpand += ida.GetNodesExpanded();
+			//		mdGenerate += ida.GetNodesTouched();
+			
+			printf("A*; Heuristic: PDB\n");
+			astar.SetHeuristic(&h);
+			t2.StartTimer();
+			focal.GetPath(&mnp, start, goal, statepath);
+//			astar.GetPath(&mnp, start, goal, statepath);
+			t2.EndTimer();
+			printf("Problem %d solved length %d; %1.2f elapsed; %llu expanded, %llu generated\n", x+1, statepath.size(), t2.GetElapsedTime(),
+				   astar.GetNodesExpanded(), astar.GetNodesTouched());
+			pathLen += statepath.size();
+			astarTime += t2.GetElapsedTime();
+			astarExpand += astar.GetNodesExpanded();
+			astarGenerate += astar.GetNodesTouched();
+			
+		}
+		//	printf("PDB Time: %1.2f; expansions: %llu; generations %llu\n", pdbTime, pdbExpand, pdbGenerate);
+		//	printf("MD Time: %1.2f; expansions: %llu; generations %llu\n", mdTime, mdExpand, mdGenerate);
+		printf("[%d-%d] A* PDB Time: %1.2f; length: %d, expansions: %llu; generations %llu\n", addBound, K, astarTime, pathLen, astarExpand, astarGenerate);
+		if (addBound == 0)
+			addBound++;
+	}
+	exit(0);
+}

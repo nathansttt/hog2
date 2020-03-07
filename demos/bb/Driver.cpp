@@ -18,6 +18,7 @@
 #include "MapOverlay.h"
 #include "BoundingBox.h"
 #include <string>
+#include "SVGUtil.h"
 
 enum mode {
 	kShowBB = 0,
@@ -68,10 +69,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step forward .1 sec in history", kAnyModifier, '}');
-	InstallKeyboardHandler(MyDisplayHandler, "Step History", "If the simulation is paused, step back .1 sec in history", kAnyModifier, '{');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Expand states faster", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Slower", "Expand states slower", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
 	InstallKeyboardHandler(MyDisplayHandler, "Rotate dir", "Rotate direction", kAnyModifier, 'w');
@@ -176,6 +175,17 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			
 		}
 	}
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		//recording = false;
+		static int cnt = 0;
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/BB%d%d%d%d.svg", (cnt/1000)%10, (cnt/100)%10, (cnt/10)%10, cnt%10);
+		MakeSVG(display, fname, 2048, 2048);
+		//		SaveScreenshot(windowID, fname);
+		printf("Saved %s\n", fname);
+		cnt++;
+	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -196,19 +206,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		}
 		case ']':
 		{
-			m = mode((int(m)+1)%3);
-			switch (m)
-			{
-				//case
-				case kShowBB: submitTextToBuffer("Show bounding boxes"); break;
-				case kFindPath: submitTextToBuffer("Find Path!"); break;
-				case kShowBBFromSearch: submitTextToBuffer("Show BB (from constraints)!"); break;
-			}
-
+			stepsPerFrame *= 2;
+			break;
 		}
 			break;
 		case '[':
 		{
+			if (stepsPerFrame > 1)
+				stepsPerFrame /= 2;
+			break;
 		}
 			break;
 		case '|':
@@ -230,7 +236,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '1': useBB = false; m = kFindPath; submitTextToBuffer("A* not using bounding boxes"); break;
 		case '2': useBB = true; m = kFindPath;  submitTextToBuffer("A* using bounding boxes"); break;
-		case '0': m = kShowBB;
+		case '0': m = kShowBB; submitTextToBuffer("Showing bounding boxes"); break;
 			break;
 		case '\t':
 			printf("Hit tab!\n");

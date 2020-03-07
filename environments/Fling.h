@@ -202,3 +202,20 @@ private:
 	std::vector<int64_t> binomials;
 
 };
+
+namespace std {
+	
+	template <>
+	struct hash<FlingBoard>
+	{
+		std::size_t operator()(const FlingBoard& node) const
+		{
+			std::size_t hash = 0;
+			for (unsigned int x = 0; x < node.locs.size(); x++)
+			{
+				hash |= (1ull<<node.locs[x].first);
+			}
+		}
+	};
+	
+}

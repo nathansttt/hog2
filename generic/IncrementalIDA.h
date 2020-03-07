@@ -142,7 +142,7 @@ bool IncrementalIDA<state, action>::StepIteration()
 		// exceeded path cost bound
 		if (fgreater(f, bound))
 		{
-			printf("Above bound: %f/%f\n", bound, f);
+//			printf("Above bound: %f/%f\n", bound, f);
 			if (nextBound == -1)
 				nextBound = f;
 			else if (fless(f, nextBound))
@@ -156,7 +156,7 @@ bool IncrementalIDA<state, action>::StepIteration()
 			newNodeCount++;
 		
 		// continue search
-		printf("Generating next set of successors\n");
+//		printf("Generating next set of successors\n");
 		search.back().status = kGoingAcross;
 		env->GetSuccessors(search.back().currState, search.back().succ);
 		nodesExpanded++;
@@ -179,12 +179,12 @@ bool IncrementalIDA<state, action>::StepIteration()
 		// no more succ to go down - go up
 		if (search.back().succ.size() == 0)
 		{
-			printf("Out of successors\n");
+//			printf("Out of successors\n");
 			search.pop_back();
 			return false;
 		}
 		
-		printf("Taking next successors\n");
+//		printf("Taking next successors\n");
 		// going down - generate next successor
 		search.resize(search.size()+1);
 		auto &s = search[search.size()-2];

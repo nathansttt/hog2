@@ -1863,7 +1863,7 @@ void EstimateDimension(Map *m)
 		//printf("%d items on open [%1.1f/%1.1f]\n", theSearch.GetNumOpenItems(), gCost, limit);
 	}	
 	graphState start = n->GetNum();
-	BFS<graphState, graphMove> b;
+	BFS<graphState, graphMove, GraphEnvironment> b;
 	b.GetPath(&ge, start, start, endPath);
 }
 

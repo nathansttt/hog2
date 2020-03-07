@@ -21,6 +21,9 @@
 #include <string>
 #include "Plot2D.h"
 #include "SVGUtil.h"
+#include "Treap.h"
+#include "Focal.h"
+#include "FocalAdd.h"
 
 enum mode {
 	kFindPathAStar = 0,
@@ -30,9 +33,11 @@ enum mode {
 	kFindPathDPS = 4,
 	kFindPathXDP = 5,
 	kFindPathXUP = 6,
-	kFindPathIOS = 7,
-	kFindPathIOSXDP = 8,
-	kFindPathIOSXUP = 9,
+	kFindPathPLXDP = 7,
+	kFindPathPLXUP = 8,
+	kFindPathIOS = 9,
+	kFindPathIOSXDP = 10,
+	kFindPathIOSXUP = 11,
 };
 
 double proveBound = 1.5, exploreBound = 3.0;
@@ -40,9 +45,11 @@ double proveBound = 1.5, exploreBound = 3.0;
 MapEnvironment *me = 0;
 TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 OptimisticSearch<xyLoc, tDirection, MapEnvironment> optimistic;
-AStarEpsilon<xyLoc, tDirection, MapEnvironment> astar_e(1.5);
+//AStarEpsilon<xyLoc, tDirection, MapEnvironment> astar_e(1.5);
 DynamicPotentialSearch<xyLoc, tDirection, MapEnvironment> dps;
 ImprovedOptimisticSearch<xyLoc, tDirection, MapEnvironment> ios;
+//Focal<xyLoc, tDirection, MapEnvironment> astar_e(1.5);
+FocalAdd<xyLoc, tDirection, MapEnvironment> astar_e(0);
 
 std::vector<xyLoc> path;
 void GetMap(Map *m);
@@ -62,8 +69,29 @@ Map *ReduceMap(Map *inputMap);
 
 Plotting::Plot2D plot;
 
+void TestTreap()
+{
+	srandom(time(0));
+	Treap<long> t;
+	for (int x = 0; x < 5000000; x++)
+	{
+		t.Add(random());
+	}
+	t.Verify();
+	printf("%zu items in tree; max depth %d; need %d\n", t.Size(), t.GetHeight(), (int)ceil(log(t.Size())/log(2.0)));
+	while (t.Size() > 100)
+	{
+		size_t s = t.Size()/2;
+		for (int x = 0; x < s; x++)
+			t.RemoveSmallest();
+		printf("%zu items in tree; max depth %d; need %d\n", t.Size(), t.GetHeight(), (int)ceil(log(t.Size())/log(2.0)));
+	}
+	exit(0);
+}
+
 int main(int argc, char* argv[])
 {
+//	TestTreap();
 	InstallHandlers();
 	RunHOGGUI(argc, argv, 1200, 1200);
 	return 0;
@@ -74,7 +102,7 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
+//	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Run faster", kAnyModifier, ']');
@@ -83,6 +111,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "wA*", "wA*", kAnyModifier, 'w');
 	InstallKeyboardHandler(MyDisplayHandler, "wA*(XDP)", "wA*(XDP)", kAnyModifier, 'x');
 	InstallKeyboardHandler(MyDisplayHandler, "wA*(XUP)", "wA*(XUP)", kAnyModifier, 'u');
+	InstallKeyboardHandler(MyDisplayHandler, "wA*(lin)", "wA*(Piecewise XDP)", kAnyModifier, 'l');
+	InstallKeyboardHandler(MyDisplayHandler, "wA*(lin)", "wA*(Piecewise XUP)", kAnyModifier, 'j');
 	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, 't');
 	InstallKeyboardHandler(MyDisplayHandler, "IOS", "Improved Optimistic", kAnyModifier, 'i');
 	InstallKeyboardHandler(MyDisplayHandler, "IOS(XDP)", "Improved Optimistic", kAnyModifier, 'k');
@@ -356,19 +386,20 @@ void GetPlotPoints()
 		for (int x = 0; x < astar_e.GetNumOpenItems(); x++)
 		{
 			const auto &item = astar_e.GetOpenItem(x);
-			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::blue};
+			Plotting::Point p = {me->HCost(item.s, goal), item.g, 1.0/5.0, Colors::blue};
 			plot.AddPoint(p);
 		}
 		for (int x = 0; x < astar_e.GetNumFocalItems(); x++)
 		{
 			const auto &item = astar_e.GetFocalItem(x);
-			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::red};
+			Plotting::Point p = {me->HCost(item.s, goal), item.g, 1.0/5.0, Colors::red};
 			plot.AddPoint(p);
 		}
 		plot.NormalizeAxes();
 
 		double target;
 		//		astar.DoSingleSearchStep(path);
+		if (astar_e.GetNumOpenItems() > 0)
 		{
 			double w = astar_e.GetOptimalityBound();
 			double g, h;
@@ -408,7 +439,7 @@ void GetPlotPoints()
 			plot.AddLine(&projectedLowerBound);
 		}
 		
-		if (1)
+		if (astar_e.GetNumFocalItems() > 0)
 		{
 			const auto &s = astar_e.CheckNextFocalNode();
 			double g, h;
@@ -485,6 +516,44 @@ void GetPlotPoints()
 				for (double x = 0; x <= target; x+=0.5)
 					line.AddPoint(x, (target-x)*(target*w+w*x-x)/target);
 				break;
+			case kFindPathPLXDP:
+			{
+				static Plotting::Line line2("");
+
+				// center quadrant line
+				line2.SetWidth(1);
+				line2.Clear();
+				line2.SetColor(Colors::purple);
+				line2.AddPoint(0, 0);
+				line2.AddPoint(w*target, w*target);
+				plot.AddLine(&line2);
+
+				// lower line
+				line.AddPoint(target, 0);
+				line.AddPoint(target/2, target/2);
+				line.AddPoint(0, target*w);
+
+			}
+				break;
+			case kFindPathPLXUP:
+			{
+				static Plotting::Line line2("");
+				
+				// center quadrant line
+				line2.SetWidth(1);
+				line2.Clear();
+				line2.SetColor(Colors::purple);
+				line2.AddPoint(0, 0);
+				line2.AddPoint(target, target*(2*w-1));
+				plot.AddLine(&line2);
+				
+				// lower line
+				line.AddPoint(target, 0);
+				line.AddPoint(target/2, target*(2*w-1)/2.0);
+				line.AddPoint(0, target*w);
+				
+			}
+				break;
 			default:
 			{
 				// f(g, h) = g+w*h = target
@@ -524,6 +593,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (mapChanged == true)
 		{
 			display.StartBackground();
+			display.FillRect({-1, -1, 1, 1}, Colors::pink);
 			me->Draw(display);
 			display.EndBackground();
 			mapChanged = false;
@@ -654,6 +724,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'd': m = kFindPathDPS; StartSearch(); break;
 		case 'x': m = kFindPathXDP; StartSearch(); break;
 		case 'u': m = kFindPathXUP; StartSearch(); break;
+		case 'l': m = kFindPathPLXDP; StartSearch(); break;
+		case 'j': m = kFindPathPLXUP; StartSearch(); break;
 		case 'i': m = kFindPathIOS; StartSearch(); break;
 		case 'k': m = kFindPathIOSXDP; StartSearch(); break;
 		case 'm': m = kFindPathIOSXUP; StartSearch(); break;
@@ -664,10 +736,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '5': proveBound = 5; StartSearch(); break;
 
 		case '6': exploreBound = 2; StartSearch(); break;
-		case '7': exploreBound = 4; StartSearch(); break;
-		case '8': exploreBound = 8; StartSearch(); break;
-		case '9': exploreBound = 16; StartSearch(); break;
-		case '0': exploreBound = 32; StartSearch(); break;
+		case '7': exploreBound = 3; StartSearch(); break;
+		case '8': exploreBound = 5; StartSearch(); break;
+		case '9': exploreBound = 7; StartSearch(); break;
+		case '0': exploreBound = 9; StartSearch(); break;
 
 			
 		case 'p':
@@ -677,14 +749,6 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 			StepAlgorithms(1);
 		}
-			break;
-		case '?':
-		{
-		}
-			break;
-		case 's':
-			break;
-		case 'l':
 			break;
 		default:
 			break;
@@ -707,6 +771,7 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		return false;
 	switch (mType)
 	{
+		case kMouseMove: break;
 		case kMouseDown:
 		{
 			int x, y;
@@ -723,6 +788,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		}
 		case kMouseDrag:
 		{
+			if (start.x == 0xFFFF)
+				break;
 			int x, y;
 			me->GetMap()->GetPointFromCoordinate(loc, x, y);
 			if (me->GetMap()->GetTerrainType(x, y) == kGround || me->GetMap()->GetTerrainType(x, y) == kSwamp)
@@ -734,6 +801,8 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 		}
 		case kMouseUp:
 		{
+			if (start.x == 0xFFFF)
+				break;
 			int x, y;
 			me->GetMap()->GetPointFromCoordinate(loc, x, y);
 			if (me->GetMap()->GetTerrainType(x, y) == kGround || me->GetMap()->GetTerrainType(x, y) == kSwamp)
@@ -754,6 +823,7 @@ void StartSearch()
 {
 	if (start == goal)
 		return;
+	std::cout << "Searching from " << start << " to " << goal << "\n";
 	if (m == kFindPathOptimistic)
 	{
 		submitTextToBuffer("Searching with Optimistic");
@@ -841,6 +911,41 @@ void StartSearch()
 		appendTextToBuffer(tmp.c_str());
 		astar.SetWeight(proveBound);
 		astar.SetPhi([=](double x,double y){return (y+x+sqrt((y+x)*(y+x)+4*proveBound*(proveBound-1)*x*x))/(2*proveBound);});
+		astar.GetPath(me, start, goal, path);
+		for (int x = 0; x < astar.GetNumOpenItems(); x++)
+		{
+			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f);
+		}
+		//		solutionCost = me->GetPathLength(path);
+		astar.InitializeSearch(me, start, goal, path);
+		running = true;
+	}
+	else if (m == kFindPathPLXDP)
+	{
+		submitTextToBuffer("Searching with wA*(Piecewise Linear Downward)");
+		std::string tmp = "("+std::to_string(proveBound)+")";
+		appendTextToBuffer(tmp.c_str());
+		astar.SetWeight(proveBound);
+//		astar.SetPhi([=](double h,double g){return (h>g)?(g+h):(g/(2.0*proveBound-1.0)+h);});
+		astar.SetPhi([=](double h,double g){return (h>g)?(g+h):(g/proveBound+h*(2*proveBound-1)/proveBound);});
+		astar.GetPath(me, start, goal, path);
+		for (int x = 0; x < astar.GetNumOpenItems(); x++)
+		{
+			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f);
+		}
+		//		solutionCost = me->GetPathLength(path);
+		astar.InitializeSearch(me, start, goal, path);
+		running = true;
+	}
+	else if (m == kFindPathPLXUP)
+	{
+		submitTextToBuffer("Searching with wA*(Piecewise Linear Upward)");
+		std::string tmp = "("+std::to_string(proveBound)+")";
+		appendTextToBuffer(tmp.c_str());
+		astar.SetWeight(proveBound);
+		double w = proveBound;
+		astar.SetPhi([=](double h,double g){return (g < (2*w-1) * h)?(g/(2*w-1) + h):(g/w+h/w);});
+//		astar.SetPhi([=](double h,double g){return (g < (w-1) * h)?(h):(g/w+h/w);});
 		astar.GetPath(me, start, goal, path);
 		for (int x = 0; x < astar.GetNumOpenItems(); x++)
 		{
