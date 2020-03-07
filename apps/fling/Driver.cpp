@@ -115,7 +115,7 @@ void CreateSimulation(int id)
 void GetSolveActions(FlingBoard &solve, std::vector<FlingMove> &acts)
 {
 	acts.resize(0);
-	BFS<FlingBoard, FlingMove> bfs;
+	BFS<FlingBoard, FlingMove, Fling> bfs;
 	bfs.GetPath(&f, solve, g, path);
 	for (int x = 0; x < path.size(); x++)
 		path[x].SetObstacles(solve.GetObstacles());
@@ -347,7 +347,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		}
 		std::cout << b << std::endl;
 		
-		BFS<FlingBoard, FlingMove> bfs;
+		BFS<FlingBoard, FlingMove, Fling> bfs;
 		bfs.GetPath(&f, b, g, path);
 		printf("%llu total nodes expanded in pure bfs\n", bfs.GetNodesExpanded());
 		uint64_t nodesExpanded = DoLimitedBFS(b, path);
@@ -821,7 +821,7 @@ void SolveRandomFlingInstance(unsigned long windowID, tKeyboardModifier , char)
 	std::cout << b << std::endl;
 	
 	std::vector<FlingBoard> path;
-	BFS<FlingBoard, FlingMove> bfs;
+	BFS<FlingBoard, FlingMove, Fling> bfs;
 	bfs.GetPath(&f, b, g, path);
 }
 
@@ -830,7 +830,7 @@ void SolveAndSaveInstance(unsigned long , tKeyboardModifier , char)
 	std::ofstream myfile;
 	myfile.open("/Users/nathanst/boards.txt", std::ios::app | std::ios::out );
 	
-	BFS<FlingBoard, FlingMove> bfs;
+	BFS<FlingBoard, FlingMove, Fling> bfs;
 	bfs.GetPath(&f, b, g, path);
 
 	myfile << "Hash: " << f.GetStateHash(b) << std::endl;
@@ -999,7 +999,7 @@ void ExtractUniqueStates(int depth)
 
 			//if (depth < 5)
 			{
-				BFS<FlingBoard, FlingMove> bfs;
+				BFS<FlingBoard, FlingMove, Fling> bfs;
 				bfs.GetPath(&f, board, g, path);
 				//printf("%llu total nodes expanded in pure bfs\n", bfs.GetNodesExpanded());
 				uint64_t nodesExpanded = DoLimitedBFS(board, path);
@@ -1251,7 +1251,7 @@ void BFSearch(unsigned long windowID, tKeyboardModifier mod, char key)
 	}
 	else {
 		text.AddLine("Full search");
-		BFS<FlingBoard, FlingMove> bfs;
+		BFS<FlingBoard, FlingMove, Fling> bfs;
 		bfs.GetPath(&f, b, g, path);
 		pathLoc = path.size()-1;
 		nodesExpanded = bfs.GetNodesExpanded();
@@ -1956,7 +1956,7 @@ void ThreadedRockAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lo
 	theBoard.SetObstacle(24);
 	theBoard.SetObstacle(31);
 	std::vector<FlingBoard> path;
-	BFS<FlingBoard, FlingMove> bfs;
+	BFS<FlingBoard, FlingMove, Fling> bfs;
 
 	for (uint64_t t = start; t < end; t++)
 	{
@@ -2013,7 +2013,7 @@ void ThreadedFinalPieceAnalyze(int level, uint64_t start, uint64_t end, std::mut
 	uint64_t maxVal = fling.getMaxSinglePlayerRank(56, level);
 	FlingBoard theBoard, g;
 	std::vector<FlingBoard> path;
-	BFS<FlingBoard, FlingMove> bfs;
+	BFS<FlingBoard, FlingMove, Fling> bfs;
 	
 	for (uint64_t t = start; t < end; t++)
 	{
@@ -2052,7 +2052,7 @@ void ThreadedFinalPieceAnalyze(int level, uint64_t start, uint64_t end, std::mut
 			std::cout << "A: ";
 			std::cout << theBoard.GetRawBoard() << " " << path.size();
 
-			BFS<FlingBoard, FlingMove> bfs;
+			BFS<FlingBoard, FlingMove, Fling> bfs;
 			bfs.GetPath(&f, theBoard, g, path);
 			uint64_t nodesExpanded = DoLimitedBFS(theBoard, path);
 			printf(" Ratio: %llu %llu %1.4f\n", bfs.GetNodesExpanded(), nodesExpanded, double(bfs.GetNodesExpanded())/double(nodesExpanded));
