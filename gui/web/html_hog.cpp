@@ -84,6 +84,18 @@ point3d CanvasToPoint(int x, int y)
 	return {static_cast<GLfloat>(2.0*x/canvasScale-1.0), static_cast<GLfloat>(2.0*y/canvasScale-1.0), 0};
 }
 
+float WidthToCanvas(float p, int viewport)
+{
+	pRecContext pContextInfo = getCurrentContext();
+	point3d input1(p, 0.f, 0.f);
+	point3d input2(0, 0.f, 0.f);
+	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[viewport], input1);
+	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[viewport], input2);
+	//	if (v == 1)
+	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
+	return ((result1.x+1.0)*canvasWidth)/2.0-((result2.x+1.0)*canvasWidth)/2.0;
+}
+
 float PointXToCanvas(float p, int viewport)
 {
 	pRecContext pContextInfo = getCurrentContext();
@@ -141,6 +153,7 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
 				ctx.strokeStyle = "rgb("+$1+", "+$2+", "+$3+")";
+				ctx.lineCap = "round";
 				ctx.beginPath();
 				ctx.moveTo($4, $5);
 				ctx.lineTo($6, $7);
@@ -182,10 +195,12 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
 				ctx.strokeStyle = "rgb("+$1+", "+$2+", "+$3+")";
+				ctx.lineWidth = $8;
 				ctx.strokeRect($4,$5,$6,$7);
+				ctx.lineWidth = 1;
 			}, which, r,g,b,
 					PointXToCanvas(o.r.left, d.viewport), PointYToCanvas(o.r.top, d.viewport),
-					cWidth, cHeight);
+					cWidth, cHeight, WidthToCanvas(o.width, d.viewport));
 			break;
 		}
 		case Graphics::Display::kFillOval:
