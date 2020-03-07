@@ -33,15 +33,19 @@
 #include <string>
 #include "SVGUtil.h"
 #include "GraphInconsistencyInstances.h"
+#include "IncrementalBGS.h"
 
 enum mode {
 	kAddNodes,
 	kAddEdges,
 	kMoveNodes,
-	kFindPath
+	kFindPath,
+	kFindPathIbex
 };
 
 TemplateAStar<graphState, graphMove, GraphEnvironment> astar;
+IncrementalBGS<graphState, graphMove> ibex;
+
 std::vector<graphState> path;
 const int kHeuristic = GraphSearchConstants::kTemporaryLabel;
 std::string MyToString(double val);
@@ -54,7 +58,7 @@ bool paused = true;
 bool BPMX = false;
 double edgeCost = 1.0;
 double weight = 1.0;
-int ticksPerNode = 3;
+int ticksPerNode = 1;
 int currentTick = 0;
 
 int numExampleNodes = 5;
@@ -97,20 +101,19 @@ int main(int argc, char* argv[])
 void InstallHandlers()
 {
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
-	InstallKeyboardHandler(MyDisplayHandler, "Cycle Abs. Display", "Cycle which group abstraction is drawn", kAnyModifier, '\t');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Increase abstraction type", kAnyModifier, ']');
-	InstallKeyboardHandler(MyDisplayHandler, "Step Abs Type", "Decrease abstraction type", kAnyModifier, '[');
+	InstallKeyboardHandler(MyDisplayHandler, "Larger", "Larger examples", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Smaller", "Smaller examples", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
 	InstallKeyboardHandler(MyDisplayHandler, "BPMX", "Toggle BPMX", kAnyModifier, 'x');
-	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
+	InstallKeyboardHandler(MyDisplayHandler, "IBEX", "Run IBEX", kAnyModifier, 'i');
+//	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
 //	InstallKeyboardHandler(MyDisplayHandler, "Weight", "Toggle Dijkstra & A*", kAnyModifier, 'w');
-	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
-	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
-	InstallKeyboardHandler(BuildGraphFromPuzzle, "Default", "Build Deafult Graph", kAnyModifier, 'a', 'd');
-	InstallKeyboardHandler(BuildGraphFromPuzzle, "Default", "Build Deafult Graph", kAnyModifier, 'w');
+//	InstallKeyboardHandler(MyDisplayHandler, "Save", "Save current graph", kAnyModifier, 's');
+//	InstallKeyboardHandler(MyDisplayHandler, "Load", "Load last saved graph", kAnyModifier, 'l');
+	InstallKeyboardHandler(BuildGraphFromPuzzle, "Incons.", "Build Inconsistency Graph", kAnyModifier, 'a', 'd');
+	InstallKeyboardHandler(BuildGraphFromPuzzle, "WA*", "Build WA* graph", kAnyModifier, 'w');
 
 	//InstallCommandLineHandler(MyCLHandler, "-map", "-map filename", "Selects the default map to be loaded.");
 	
@@ -164,15 +167,20 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 		if (ge == 0 || g == 0)
 			return;
-		ge->SetColor(0.5, 0.5, 1.0);
+		ge->SetColor(Colors::gray);
 		ge->Draw(display);
 		
-		if (from != -1 && to != -1 && numExampleNodes <= 8)
-		{
-			ge->SetColor(Colors::yellow);
-			ge->DrawLine(display, from, to, 1);
-		}
+//		if (from != -1 && to != -1 && numExampleNodes <= 8)
+//		{
+//			ge->SetColor(Colors::yellow);
+//			ge->DrawLine(display, from, to, 1);
+//		}
 		
+		ge->SetColor(Colors::white);
+		for (int x = 0; x < g->GetNumNodes(); x++)
+		{
+			ge->Draw(display, x);
+		}
 		if (running)
 		{
 			if (!paused)
@@ -182,14 +190,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 					MyDisplayHandler(windowID, kNoModifier, 'o');
 			}
 			//astar.DoSingleSearchStep(path);
-			astar.Draw(display);
-		}
-		else {
-			ge->SetColor(0.75, 0.75, 1.0);
-			for (int x = 0; x < g->GetNumNodes(); x++)
-			{
-				ge->Draw(display, x);
-			}
+			if (m == kFindPath)
+				astar.Draw(display);
+			else if (m == kFindPathIbex)
+				ibex.Draw(display);
 		}
 		
 		if (path.size() > 0)
@@ -205,6 +209,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 		for (int x = 0; x < g->GetNumNodes(); x++)
 		{
+			ge->SetColor(Colors::darkpurple);
 			if (graphType == 'w')
 				ge->DrawStateLabel(display, x, MyToString(g->GetNode(x)->GetLabelF(kHeuristic)).c_str());
 			else
@@ -222,7 +227,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		char fname[255];
 		sprintf(fname, "/Users/nathanst/Movies/tmp/inconsistency-%d%d%d%d.svg",
 				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-
+		
 		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0);
 
 //		SaveScreenshot(windowID, fname);
@@ -267,6 +272,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					ge->SetDrawEdgeCosts(false);
 					ge->SetDrawNodeLabels(false);
 				}
+				else {
+					ge->SetDrawEdgeCosts(true);
+					ge->SetDrawNodeLabels(true);
+				}
 			}
 		}
 			break;
@@ -282,6 +291,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				ge->SetDrawEdgeCosts(true);
 				ge->SetDrawNodeLabels(true);
 			}
+			else {
+				ge->SetDrawEdgeCosts(false);
+				ge->SetDrawNodeLabels(false);
+			}
 		}
 			break;
 		case '|':
@@ -295,11 +308,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			running = false;
 		}
 			break;
+		case 'i':
+			if (m == kFindPathIbex)
+				m = kFindPath;
+			else if (m == kFindPath)
+				m = kFindPathIbex;
+			ShowSearchInfo();
+			break;
 		case 'w':
 			if (weight > 0.5)
 				weight = 0.0;
 			else
 				weight = 1.0;
+			m = kFindPath;
 			astar.SetWeight(weight);
 			astar.SetUseBPMX(BPMX?1:0);
 			astar.InitializeSearch(ge, astar.start, astar.goal, path);
@@ -310,7 +331,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'r':
 			recording = !recording;
 			break;
-		case '0':
+//		case '0':
 		case 'x':
 			BPMX = !BPMX;
 			if (running)
@@ -325,10 +346,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 			if (running && path.size() == 0)
 			{
-				if (astar.GetNumOpenItems() > 0)
-					printf("%1.2f\n", astar.GetOpenItem(0).g+astar.GetOpenItem(0).h);
-				if (astar.DoSingleSearchStep(path))
-					paused = true;
+				if (m == kFindPath)
+				{
+					if (astar.GetNumOpenItems() > 0)
+						printf("%1.2f\n", astar.GetOpenItem(0).g+astar.GetOpenItem(0).h);
+					if (astar.DoSingleSearchStep(path))
+						paused = true;
+				}
+				else if (m == kFindPathIbex)
+				{
+					if (ibex.DoSingleSearchStep(path))
+						paused = true;
+				}
 				ShowSearchInfo();
 			}
 		}
@@ -393,13 +422,13 @@ void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char ke
 		ge->SetDrawEdgeCosts(true);
 		ge->SetDrawNodeLabels(true);
 		ge->SetIntegerEdgeCosts(false);
-		
 		from = 0;
 		to = g->GetNumNodes()-1;
 		weight = weight;
 		astar.SetWeight(weight);
 		astar.SetUseBPMX(0);
 		astar.InitializeSearch(ge, from, to, path);
+		m = kFindPath;
 		ShowSearchInfo();
 		running = true;
 		paused = true;
@@ -424,10 +453,12 @@ void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char ke
 		astar.SetWeight(weight);
 		astar.SetUseBPMX(BPMX?1:0);
 		astar.InitializeSearch(ge, from, to, path);
+		ibex.InitializeSearch(ge, from, to, &h, path);
 		ShowSearchInfo();
 		running = true;
 		paused = true;
 		path.clear();
+		ge->SetNodeScale(2);
 	}
 	if (key == 'b' || key == 'c')
 	{
@@ -450,6 +481,7 @@ void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char ke
 		astar.SetWeight(weight);
 		astar.SetUseBPMX(BPMX?1:0);
 		astar.InitializeSearch(ge, from, to, path);
+		ibex.InitializeSearch(ge, from, to, &h, path);
 		ShowSearchInfo();
 		running = true;
 		paused = true;
@@ -468,6 +500,12 @@ std::string MyToString(double val)
 
 void ShowSearchInfo()
 {
+	if (m == kFindPathIbex)
+	{
+		te.Clear();
+		te.AddLine("IBEX");
+		return;
+	}
 	const int colWidth = 24;
 	std::string s;
 	te.Clear();
@@ -722,6 +760,18 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 					running = true;
 				}
 			}
+			if (m == kFindPathIbex)
+			{
+				if (g->GetNumNodes() > 0)
+					to = FindClosestNode(g, loc)->GetNum();
+				if (from != to)
+				{
+					ibex.InitializeSearch(ge, from, to, &h, path);
+					ShowSearchInfo();
+					running = true;
+				}
+			}
+
 			if (m == kMoveNodes)
 			{
 				if (loc.x > 1) loc.x = 1;
