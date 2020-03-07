@@ -139,8 +139,8 @@ bool SnakeBird::Load(const char *filename)
 				case 'F': SetGroundType(x,y,SnakeBirdWorldObject::kFruit); x++; break;
 				case '1': SetGroundType(x, y, kBlock1); x++; break;
 				case '2': SetGroundType(x, y, kBlock2); x++; break;
-				case '3': SetGroundType(x, y, kBlock2); x++; break;
-				case '4': SetGroundType(x, y, kBlock3); x++; break;
+				case '3': SetGroundType(x, y, kBlock3); x++; break;
+				case '4': SetGroundType(x, y, kBlock4); x++; break;
 				case '\n': x = 0; y++; break;
 				case '<': 
 					bod.push_back(kRight);
