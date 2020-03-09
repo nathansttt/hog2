@@ -116,8 +116,13 @@ bool SnakeBird::Load(const char *filename)
 		int wWidth = std::stoi(sWidth, nullptr, 10);
 		int wHeight = std::stoi(sHeight, nullptr,10);
 		
-		SnakeBird(wWidth, wHeight);
-		
+		//Note that you can't call the constructor again at this point
+		//SnakeBird(wWidth, wHeight);
+		this->width = wWidth;
+		this->height = wHeight;
+		for (int x = 0; x < width; x++)
+			world[GetIndex(x, height-1)] = kSpikes;
+
 		std::vector<char> lvlary;
 		while (infile.get(ch)) {
 			
@@ -270,6 +275,9 @@ bool SnakeBird::Render(const SnakeBirdState &s) const
 	for (int x = 0; x < 4; x++)
 	{
 		SnakeBirdWorldObject item[4] = {kBlock1, kBlock2, kBlock3, kBlock4};
+		if (s.GetObjectLocation(x) == kDead)
+			// continue;  //    allow pushing objects off the board
+			return false; // disallow pushing objects off the board
 
 		for (int i = 0; i < objects[x].size(); i++)
 		{
@@ -459,6 +467,8 @@ bool SnakeBird::CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject
 		pushed-=4;
 		// Render pushed obj one step in (dir)
 		int loc = s.GetObjectLocation(pushed); // s.GetSnakeHeadLoc(pushed);
+		if (loc == kDead)
+			return false;
 		for (int x = 0; x < objects[pushed].size(); x++)
 		{
 			int pieceLoc = objects[pushed][x];
@@ -486,31 +496,6 @@ bool SnakeBird::CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject
 	//return ;
 	return true;
 }
-
-void SnakeBird::Gravity(SnakeBirdState &s) const
-{
-	SnakeBirdWorldObject obj[4] = {kSnake1, kSnake2, kSnake3, kSnake4};
-	std::fill_n(&render[0], 512, kEmpty);
-	// render snakes into world
-	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
-	{
-		int loc = s.GetSnakeHeadLoc(snake);
-		render[loc] = obj[snake];
-		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
-		for (int x = 0; x < len; x++)
-		{
-			switch (s.GetSnakeDir(snake, x))
-			{
-				case kLeft: loc-=height; break;
-				case kRight: loc+=height; break;
-				case kUp: loc-=1; break;
-				case kDown: loc+=1; break;
-			}
-			render[loc] = obj[snake];
-		}
-	}
-}
-
 
 //SnakeBirdAction GetAction(const SnakeBirdState &s1, const SnakeBirdState &s2) const;
 void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
@@ -563,6 +548,8 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 		{
 			if ((a.pushed>>i)&0x1)
 			{
+				if (s.GetObjectLocation(i-4) == kDead)
+					continue;
 				int newloc = s.GetObjectLocation(i-4)+offset;
 				s.SetObjectLocation(i-4, newloc);
 			}
@@ -712,8 +699,7 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 		}
 		
 		// Check for objects which are now on portals
-		// TODO: *and* didn't have an adjacent segment on a portal in the last step
-		// check if any piece is in a portal
+		// and didn't have an adjacent segment on a portal in the last step
 		// If an object teleports we have to re-render
 		for (int i = 4; i < 8 && (a.pushed>>i); i++)
 		{
@@ -721,6 +707,8 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 			if ((a.pushed>>i)&0x1) // ignore if it wasn't moved
 			{
 				int newloc = s.GetObjectLocation(object);
+				if (newloc == kDead)
+					continue;
 				for (int x = 0; x < objects[object].size(); x++)
 				{
 					int piece = GetIndex(GetX(objects[object][x])+GetX(newloc),
@@ -801,6 +789,22 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 			}
 		}
 
+		// check if an object hit the bottom of the world - if so it is dead
+		for (int i = 0; i < objects.size(); i++)
+		{
+			int objLoc = s.GetObjectLocation(i);
+			if (objLoc == kDead)
+				continue;
+			int objectY = GetY(objLoc);
+			for (int j = 0; j < objects[i].size(); j++)
+			{
+				if (objectY+GetY(objects[i][j]) >= height-2)
+				{
+					s.SetObjectLocation(i, kDead);
+					break;
+				}
+			}
+		}
 		
 		uint8_t falling = 0;
 		SnakeBirdAction move;
@@ -810,8 +814,8 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 			// snake isn't in the world
 			if ((i < 4 && i >= s.GetNumSnakes()) || s.GetSnakeHeadLoc(i) == kInGoal)
 				continue;
-			// block isn't in the world
-			if (i >= 4 && objects[i-4].size() == 0)
+			// block isn't in the world (fell out or not there to begin with)
+			if (i >= 4 && (objects[i-4].size() == 0 || s.GetObjectLocation(i-4) == kDead))
 				continue;
 
 			if (CanPush(s, -1, objs[i], kDown, move))
@@ -1078,6 +1082,8 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 	for (int x = 0; x < 4; x++)
 	{
 		points.clear();
+		if (s.GetObjectLocation(x) == kDead)
+			continue;
 		for (int i = 0; i < objects[x].size(); i++)
 		{
 			Graphics::point p = GetCenter(GetX(objects[x][i])+GetX(s.GetObjectLocation(x)),

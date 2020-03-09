@@ -262,7 +262,6 @@ private:
 	bool Render(const SnakeBirdState &s) const;
 	bool CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
 				 SnakeBirdAction &a) const;
-	void Gravity(SnakeBirdState &s) const;
 
 	int GetFruitOffset(int index) const;
 	int width, height;

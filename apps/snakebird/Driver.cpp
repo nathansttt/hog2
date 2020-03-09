@@ -64,6 +64,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Step", "Take next step in solution", kAnyModifier, ']');
 
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
+	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <input> <output>", "Make an .svg of the given level then quit");
 //	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -331,8 +332,24 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		}
 		printf("Failed -load <file>: missing file name");
 		return 1;
-		// "/home/aaron/Desktop/SnakeBird_lvls/Snakebird_lvl_20"
 	}
+	if (strcmp(argument[0], "-svg") == 0)
+	{
+		if (maxNumArgs > 2)
+		{
+			Graphics::Display d;
+			sb.Load(argument[1]);
+			snake = sb.GetStart();
+			sb.Draw(d);
+			sb.Draw(d, snake, snakeControl);
+			std::string fname = argument[2];
+			MakeSVG(d, argument[2], 400, 400, 0);
+		}
+		else
+			printf("Failed -svg <file>: missing file name");
+		exit(0);
+	}
+
 	return 0;
 }
 
