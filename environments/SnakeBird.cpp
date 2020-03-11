@@ -141,10 +141,6 @@ bool SnakeBird::Load(const char *filename)
 		for(int a = 0; a <= lvlary.size(); a++)
 		{
 			int b = 0;
-			if (GetGroundType(8, 7) == kSpikes)
-			{
-				printf("Problem at (%d, %d)\n", x, y);
-			}
 			switch (lvlary[a])
 			{
 				case '.': SetGroundType(x,y,SnakeBirdWorldObject::kEmpty); x++; break;
