@@ -94,7 +94,6 @@ std::vector<snakeDir>  LoadSnake(std:: vector<snakeDir> snakeBod, int width, int
 
 bool SnakeBird::Load(const char *filename)
 {
-	
 	ifstream infile;
 	infile.open(filename);
 	if (infile.fail()) {
@@ -111,11 +110,18 @@ bool SnakeBird::Load(const char *filename)
 		getline(infile, hLine);
 	 	
 		std::string sHeight = hLine.substr(8,2);
-		std:: string sWidth = hLine.substr(5, 2); 
+		std::string sWidth = hLine.substr(5, 2);
 
 		int wWidth = std::stoi(sWidth, nullptr, 10);
 		int wHeight = std::stoi(sHeight, nullptr,10);
-		
+
+		portal1Loc = portal2Loc = -1;
+		std::fill_n(&world[0], 512, kEmpty);
+		startState.Reset();
+		fruit.clear();
+		for (int x = 0; x < objects.size(); x++)
+			objects[x].clear();
+
 		//Note that you can't call the constructor again at this point
 		//SnakeBird(wWidth, wHeight);
 		this->width = wWidth;
@@ -131,6 +137,7 @@ bool SnakeBird::Load(const char *filename)
 		
 		std:: vector<snakeDir> bod;
 		bool snakeBuilt = false;
+		bool madePortal = false;
 		for(int a = 0; a <= lvlary.size(); a++)
 		{
 			int b = 0;
@@ -139,7 +146,17 @@ bool SnakeBird::Load(const char *filename)
 				case '.': SetGroundType(x,y,SnakeBirdWorldObject::kEmpty); x++; break;
 				case 'G': SetGroundType(x,y,SnakeBirdWorldObject::kGround); x++; break;
 				case 'S': SetGroundType(x,y,SnakeBirdWorldObject::kSpikes); x++; break;
-				case 'O': SetGroundType(x,y,SnakeBirdWorldObject::kPortal1); x++; break; 
+				case 'O':
+					if (!madePortal)
+					{
+						SetGroundType(x,y,SnakeBirdWorldObject::kPortal1);
+						madePortal = true;
+					}
+					else {
+						SetGroundType(x,y,SnakeBirdWorldObject::kPortal2);
+					}
+						x++;
+						break;
 				case 'E': SetGroundType(x,y,SnakeBirdWorldObject::kExit); x++; break;
 				case 'F': SetGroundType(x,y,SnakeBirdWorldObject::kFruit); x++; break;
 				case '1': SetGroundType(x, y, kBlock1); x++; break;
@@ -154,6 +171,7 @@ bool SnakeBird::Load(const char *filename)
 					bod = LoadSnake(bod, wWidth, b, lvlary);
 					AddSnake(x, y, bod);
 					bod.clear();
+					SetGroundType(x,y,SnakeBirdWorldObject::kEmpty);
 					x++;
 					break;
 				case '>':
@@ -560,6 +578,9 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 	// Add current bird to list of pushed birds
 	// This will cause us to check it for portals
 	a.pushed |= (1<<a.bird);
+	// keep track of what snakebird was moved
+	// This snakebird we only check the head for portals
+	int firstRoundBird = a.bird;
 	
 	// Now for gravity and portals.
 	// 1. Check if any portals are activated.
@@ -585,6 +606,13 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 				for (int x = 0; x < s.GetSnakeLength(snake); x++)
 				{
 					int lastPiece = piece;
+					// in the first round of gravity/portals
+					// only check the head of the bird that was moved
+					if (i == firstRoundBird && x > 0)
+					{
+						firstRoundBird = -1;
+						break;
+					}
 					if (x > 0)
 					{
 						switch (s.GetSnakeDir(snake, x-1))
@@ -1092,7 +1120,8 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 			display.FrameSquare(p, radius-radius*0.3, objColors[x], radius*0.6);
 			points.push_back(p);
 		}
-		display.DrawLineSegments(points, GetRadius()*0.3, objColors[x]*0.8);
+		if (points.size() > 0)
+			display.DrawLineSegments(points, GetRadius()*0.3, objColors[x]*0.8);
 	}
 	for (int x = 0; x < fruit.size(); x++)
 	{

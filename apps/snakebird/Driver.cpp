@@ -297,6 +297,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		{
 			sb.Load(mapName.c_str());
 			snake = sb.GetStart();
+			history.push_back(snake);
 		}
 		else {
 			//LoadLevel19();
