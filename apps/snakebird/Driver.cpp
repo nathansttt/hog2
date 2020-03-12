@@ -31,6 +31,12 @@ std::string mapName;
 
 bool recording = false;
 bool parallel = false;
+double frameTime = 0; // seconds elapsed in current frame
+double timePerFrame = 0.1; // seconds for drawing each step of frame
+double frameRate = 1.0/30.0;
+SnakeBird::SnakeBirdAnimationStep actionInProgressStep;
+bool actionInProgress = false;
+SnakeBird::SnakeBirdAction inProgress;
 
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
@@ -314,12 +320,23 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	frameTime += frameRate;
+	if (frameTime > timePerFrame)
+	{
+		frameTime = 0;
+		if (actionInProgress == true)
+		{
+			bool complete = sb.ApplyPartialAction(snake, inProgress, actionInProgressStep);
+			actionInProgress = !complete;
+			if (actionInProgressStep.anim == SnakeBird::kTeleport)
+				timePerFrame = 0.05f;
+			else
+				timePerFrame = 0.1f;
+		}
+	}
 	Graphics::Display &d = GetContext(windowID)->display;
 	sb.Draw(d);
 	sb.Draw(d, snake, snakeControl);
-//	iws.IncrementTime();
-//	w.Draw(d);
-//	w.Draw(d, iws);
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -354,6 +371,15 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	return 0;
 }
 
+void HurryUpFinishAction()
+{
+	while (actionInProgress == true)
+	{
+		bool complete = sb.ApplyPartialAction(snake, inProgress, actionInProgressStep);
+		actionInProgress = !complete;
+	}
+}
+
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 //	SnakeBird::SnakeBirdAction a;
@@ -368,12 +394,17 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '4': LoadLevel44(); break;
 		case '5': LoadLevel63(); break;
 		case 'w':
+			HurryUpFinishAction();
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
 				if (a.bird == snakeControl && a.direction == SnakeBird::kUp)
 				{
-					sb.ApplyAction(snake, a);
+					//sb.ApplyAction(snake, a);
+					actionInProgress = true;
+					actionInProgressStep.Reset();
+					inProgress = a;
+					frameTime = 1.0;
 					history.push_back(snake);
 				}
 			}
@@ -385,21 +416,22 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
 			}
 
-//			a.direction = SnakeBird::kUp;
-//			if (sb.Legal(snake, a))
-//			{
-//				sb.ApplyAction(snake, a);
-//				history.push_back(snake);
-//			}
 			break;
 		case 's':
+			HurryUpFinishAction();
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
 				if (a.bird == snakeControl && a.direction == SnakeBird::kDown)
 				{
-					sb.ApplyAction(snake, a);
+					actionInProgress = true;
+					actionInProgressStep.Reset();
+					inProgress = a;
+					frameTime = 1.0;
 					history.push_back(snake);
+
+//					sb.ApplyAction(snake, a);
+//					history.push_back(snake);
 				}
 			}
 			// If snake went into goal, switch active snake
@@ -417,13 +449,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			}
 			break;
 		case 'a':
+			HurryUpFinishAction();
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
 				if (a.bird == snakeControl && a.direction == SnakeBird::kLeft)
 				{
-					sb.ApplyAction(snake, a);
+					actionInProgress = true;
+					actionInProgressStep.Reset();
+					inProgress = a;
+					frameTime = 1.0;
 					history.push_back(snake);
+//					sb.ApplyAction(snake, a);
+//					history.push_back(snake);
 				}
 			}
 			// If snake went into goal, switch active snake
@@ -442,13 +480,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			}
 			break;
 		case 'd':
+			HurryUpFinishAction();
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
 				if (a.bird == snakeControl && a.direction == SnakeBird::kRight)
 				{
-					sb.ApplyAction(snake, a);
+					actionInProgress = true;
+					actionInProgressStep.Reset();
+					inProgress = a;
+					frameTime = 1.0;
 					history.push_back(snake);
+//					sb.ApplyAction(snake, a);
+//					history.push_back(snake);
 				}
 			}
 			// If snake went into goal, switch active snake
@@ -483,10 +527,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case ']':
+			HurryUpFinishAction();
 			if (future.size() > 0)
 			{
+				actionInProgress = true;
+				actionInProgressStep.Reset();
+				inProgress = sb.GetAction(snake, future.back());
+				frameTime = 1.0;
 				history.push_back(snake);
-				snake = future.back();
+				//snake = future.back();
 				future.pop_back();
 			}
 			break;
@@ -494,6 +543,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 			Timer t;
 			BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
+			bfs.SetNodeLimit(75000000); // max 75 million expansions
 			//bfs.DoBFS(&sb, snake);
 			t.StartTimer();
 			bfs.GetPath(&sb, snake, snake, future);
@@ -503,6 +553,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 			if (future.size() > 0)
 			{
+//				for (int x = 0; x < future.size()-1; x++)
+//				{
+//					//Save(sb, future[x], "debug-");
+//					std::cout << sb.GetAction(future[x], future[x+1]) << "\n";
+//				}
+//				std::cout << "\n";
 				std::reverse(future.begin(), future.end());
 				// remove the current state
 				future.pop_back();
