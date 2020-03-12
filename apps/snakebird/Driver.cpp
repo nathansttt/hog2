@@ -505,6 +505,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 			Timer t;
 			BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
+			bfs.SetNodeLimit(20000000);
+
 			//bfs.DoBFS(&sb, snake);
 			t.StartTimer();
 			bfs.GetPath(&sb, snake, snake, future);
