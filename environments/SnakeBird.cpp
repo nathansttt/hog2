@@ -140,6 +140,10 @@ bool SnakeBird::Load(const char *filename)
 		bool madePortal = false;
 		for(int a = 0; a <= lvlary.size(); a++)
 		{
+			if (y == height-1)
+			{
+				break;
+			}
 			int b = 0;
 			switch (lvlary[a])
 			{
