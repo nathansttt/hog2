@@ -31,12 +31,16 @@ std::string mapName;
 
 bool recording = false;
 bool parallel = false;
+double globalTime = 0;
 double frameTime = 0; // seconds elapsed in current frame
 double timePerFrame = 0.1; // seconds for drawing each step of frame
 double frameRate = 1.0/30.0;
 SnakeBird::SnakeBirdAnimationStep actionInProgressStep;
 bool actionInProgress = false;
 SnakeBird::SnakeBirdAction inProgress;
+
+Timer worldClock;
+double lastFrameStart;
 
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
@@ -313,13 +317,19 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			//LoadLevel32();
 			//LoadLevel44();
 		}
-		
+		worldClock.StartTimer();
+		lastFrameStart = worldClock.GetElapsedTime();
 	}
 }
 
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	frameRate = worldClock.EndTimer()-lastFrameStart;
+	lastFrameStart = worldClock.EndTimer();
+//	printf("%f\n", frameRate);
+	
+	globalTime += frameRate;
 	frameTime += frameRate;
 	if (frameTime > timePerFrame)
 	{
@@ -335,8 +345,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 	}
 	Graphics::Display &d = GetContext(windowID)->display;
-	sb.Draw(d);
-	sb.Draw(d, snake, snakeControl);
+	sb.Draw(d, globalTime);
+	sb.Draw(d, snake, snakeControl, globalTime);
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
