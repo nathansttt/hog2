@@ -329,6 +329,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	frameRate = worldClock.EndTimer()-lastFrameStart;
 	lastFrameStart = worldClock.EndTimer();
 //	printf("%f\n", frameRate);
+	static SnakeBird::SnakeBirdState lastFrameSnake = snake;
 	
 	globalTime += frameRate;
 	frameTime += frameRate;
@@ -337,6 +338,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		frameTime = 0;
 		if (actionInProgress == true)
 		{
+			lastFrameSnake = snake;
 			bool complete = sb.ApplyPartialAction(snake, inProgress, actionInProgressStep);
 			actionInProgress = !complete;
 			if (actionInProgressStep.anim == SnakeBird::kTeleport)
@@ -344,10 +346,14 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			else
 				timePerFrame = 0.1f;
 		}
+		else {
+			lastFrameSnake = snake;
+		}
 	}
 	Graphics::Display &d = GetContext(windowID)->display;
 	sb.Draw(d, globalTime);
-	sb.Draw(d, snake, snakeControl, globalTime);
+	//sb.Draw(d, snake, snakeControl, globalTime);
+	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -415,6 +421,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '4': LoadLevel44(); break;
 		case '5': LoadLevel63(); break;
 		case 'w':
+			future.clear();
 			HurryUpFinishAction();
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
@@ -425,7 +432,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					actionInProgress = true;
 					actionInProgressStep.Reset();
 					inProgress = a;
-					frameTime = 1.0;
+					frameTime = timePerFrame;
 					history.push_back(snake);
 				}
 			}
@@ -439,6 +446,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 			break;
 		case 's':
+			future.clear();
 			HurryUpFinishAction();
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
@@ -448,7 +456,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					actionInProgress = true;
 					actionInProgressStep.Reset();
 					inProgress = a;
-					frameTime = 1.0;
+					frameTime = timePerFrame;
 					history.push_back(snake);
 
 //					sb.ApplyAction(snake, a);
@@ -470,6 +478,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			}
 			break;
 		case 'a':
+			future.clear();
 			HurryUpFinishAction();
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
@@ -479,7 +488,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					actionInProgress = true;
 					actionInProgressStep.Reset();
 					inProgress = a;
-					frameTime = 1.0;
+					frameTime = timePerFrame;
 					history.push_back(snake);
 //					sb.ApplyAction(snake, a);
 //					history.push_back(snake);
@@ -501,6 +510,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			}
 			break;
 		case 'd':
+			future.clear();
 			HurryUpFinishAction();
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
@@ -510,7 +520,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					actionInProgress = true;
 					actionInProgressStep.Reset();
 					inProgress = a;
-					frameTime = 1.0;
+					frameTime = timePerFrame;
 					history.push_back(snake);
 //					sb.ApplyAction(snake, a);
 //					history.push_back(snake);
@@ -532,12 +542,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //			}
 			break;
 		case 'q':
+			future.clear();
 			if (history.size() > 1)
 			{
-				future.push_back(history.back());
+				snake = history.back();
 				history.pop_back();
 			}
-			snake = history.back();
 			break;
 		case 'e':
 			for (int x = 0; x < snake.GetNumSnakes(); x++)
@@ -554,7 +564,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				actionInProgress = true;
 				actionInProgressStep.Reset();
 				inProgress = sb.GetAction(snake, future.back());
-				frameTime = 1.0;
+				frameTime = timePerFrame;
 				history.push_back(snake);
 				//snake = future.back();
 				future.pop_back();

@@ -289,6 +289,8 @@ public:
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active, double globalTime) const;
+	void Draw(Graphics::Display &display, const SnakeBirdState&, const SnakeBirdState&,
+			  int active, double percentComplete, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
 	bool Render(const SnakeBirdState &s) const;
@@ -311,7 +313,7 @@ private:
 	int GetY(int index) const;
 	Graphics::point GetCenter(int x, int y) const;
 	float GetRadius() const;
-	void DrawSnakeSegment(Graphics::Display &display, int x, int y, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo) const;
+	void DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo) const;
 	std::array<SnakeBirdWorldObject, 512> world; // static world
 	mutable std::array<SnakeBirdWorldObject, 512> render;
 	std::vector<int> fruit;
