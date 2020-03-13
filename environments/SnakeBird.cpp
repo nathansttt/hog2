@@ -17,6 +17,7 @@ SnakeBird::SnakeBird(int width, int height)
 {
 	assert(width*height < 512);
 	portal1Loc = portal2Loc = -1;
+	exitLoc = -1;
 	std::fill_n(&world[0], 512, kEmpty);
 	for (int x = 0; x < width; x++)
 		world[GetIndex(x, height-1)] = kSpikes;
@@ -27,6 +28,7 @@ void SnakeBird::Reset()
 	width = 20;
 	height = 16;
 	portal1Loc = portal2Loc = -1;
+	exitLoc = -1;
 	std::fill_n(&world[0], 512, kEmpty);
 	for (int x = 0; x < width; x++)
 		world[GetIndex(x, height-1)] = kSpikes;
@@ -116,6 +118,7 @@ bool SnakeBird::Load(const char *filename)
 		int wHeight = std::stoi(sHeight, nullptr,10);
 
 		portal1Loc = portal2Loc = -1;
+		exitLoc = -1;
 		std::fill_n(&world[0], 512, kEmpty);
 		startState.Reset();
 		fruit.clear();
@@ -964,7 +967,7 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 		printf("Error - cannot add terrain at bottom of map\n");
 		return;
 	}
-	
+		
 	if ((o&kBlockMask) == kBlockMask) // block
 	{
 		int which = -1;
@@ -1018,6 +1021,8 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 	
 	world[GetIndex(x, y)] = o;
 
+	if (o == kExit)
+		exitLoc = GetIndex(x, y);
 	if (o == kFruit)
 	{
 		fruit.push_back(GetIndex(x, y));
@@ -1128,6 +1133,89 @@ void SnakeBird::Draw(Graphics::Display &display) const
 //	}
 }
 
+void SnakeBird::Draw(Graphics::Display &display, double time) const
+{
+	display.FillRect({-1, -1, 1, 0.5}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
+	display.FillRect({-1, 0.5, 1, 1}, Colors::darkblue+Colors::darkred);
+	for (int x = 0; x < width*height; x++)
+	{
+		Graphics::point p = GetCenter(GetX(x), GetY(x));
+		double radius = GetRadius()*0.95;
+		switch (world[x])
+		{
+			case kEmpty:
+				break;//display.FillSquare(p, GetRadius(), Colors::lightblue);  break;
+			case kGround:
+				switch ((GetX(x)*13*+11*GetY(x))%6)
+				{
+					case 0: display.FillSquare(p, GetRadius(), Colors::brown); break;
+					case 1: display.FillSquare(p, GetRadius(), Colors::brown); break;
+					case 2: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
+					case 3: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
+					case 4: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
+					case 5: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
+				}
+				break;
+			case kSpikes:
+				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+				break;
+			case kPortal1:
+			case kPortal2:
+			{
+				double offset1 = (sin(time*1.0)); // -1...+1
+				double offset2 = (sin(time*1.5)); // -1...+1
+				double offset3 = (sin(time*2.0)); // -1...+1
+				double offset4 = (sin(time*2.5)); // -1...+1
+				display.FillCircle(p, radius+offset1*radius*0.25, Colors::red);
+				display.FillCircle(p, radius*0.75+offset2*radius*0.2, Colors::blue);
+				display.FillCircle(p, radius*0.5+offset3*radius*0.15, Colors::green);
+				display.FillCircle(p, radius*0.25+offset4*radius*0.1, Colors::purple);
+			}
+				break;
+			case kExit:
+//			{
+//				double offset1 = (sin(time*1.0))*180; // -1...+1
+//				double offset2 = (sin(time*1.5))*180; // -1...+1
+//				double offset3 = (sin(time*2.0))*180; // -1...+1
+////				display.FillNGon(p, radius, 5, 0, Colors::yellow);
+////				display.FillNGon(p, radius*0.66, 5, 36, Colors::orange);
+////				display.FillNGon(p, radius*0.25, 5, 54, Colors::red);
+//				display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
+//				display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
+//				display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
+//			}
+				break;
+			case kFruit:
+//				p.x-=radius/4;
+//				display.FillCircle(p, radius/2.0, Colors::green);
+//				p.x+=radius/2;
+//				display.FillCircle(p, radius/2.0, Colors::green);
+				break;
+		}
+	}
+	
+//	// draw grid
+//	for (int x = 0; x < width; x++)
+//	{
+//		Graphics::point p1, p2;
+//		p1.x = GetX(GetIndex(x, 0))-GetRadius();
+//		p1.y = GetY(GetIndex(x, 0))-GetRadius();
+//		p2.x = p1.x;
+//		p2.y = GetY(GetIndex(x, 16))-GetRadius();
+//		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
+//	}
+//	for (int y = 0; y < 16; y++)
+//	{
+//		Graphics::point p1, p2;
+//		p1.x = GetX(GetIndex(0, y))-GetRadius();
+//		p1.y = GetY(GetIndex(width, y))-GetRadius();
+//		p2.y = p1.y;
+//		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
+//	}
+}
+
+
 Graphics::point SnakeBird::GetCenter(int x, int y) const
 {
 	Graphics::point p;
@@ -1148,6 +1236,34 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s) const
 
 void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int active) const
 {
+	Draw(display, s, active, 0);
+}
+
+void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int active, double globalTime) const
+{
+	// draw exit
+	if (exitLoc != -1)
+	{
+		Graphics::point p = GetCenter(GetX(exitLoc), GetY(exitLoc));
+		double radius = GetRadius()*0.95;
+		double time = globalTime;
+		if (s.KFruitEaten(fruit.size()))
+		{
+			radius = radius+0.25*radius*(1+sin(globalTime*2.5));
+			time *= 2.0;
+		}
+		else {
+			time /= 4.0;
+		}
+		double offset1 = (sin(time*1.0))*180; // -1...+1
+		double offset2 = (sin(time*1.5))*180; // -1...+1
+		double offset3 = (sin(time*2.0))*180; // -1...+1
+		display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
+		display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
+		display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
+	}
+
+	
 	rgbColor c[4] = {Colors::red, Colors::blue, Colors::green, Colors::yellow};
 	rgbColor objColors[4] = {Colors::red*0.5, Colors::blue*0.5, Colors::green*0.5, Colors::yellow*0.5};
 	for (int snake = 0; snake < s.GetNumSnakes(); snake++)

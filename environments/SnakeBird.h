@@ -117,7 +117,7 @@ struct SnakeBirdState {
 	// Fruit is 0 if present 1 if not. Thus by default all fruit is present.
 	bool GetFruitPresent(int which) const { return ((locBlockFruit>>(36+which))&0x1)==0; }
 	void ToggleFruitPresent(int which) { locBlockFruit ^= (kOne<<(36+which));}
-	bool KFruitEaten(int k)
+	bool KFruitEaten(int k) const
 	{
 		uint64_t mask = (kOne<<(k))-1;
 		return ((locBlockFruit>>36)&mask)==(mask);
@@ -285,8 +285,10 @@ public:
 	void GLDrawPath(const std::vector<SnakeBirdState> &x) const {}
 	
 	void Draw(Graphics::Display &display) const;
+	void Draw(Graphics::Display &display, double time) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
+	void Draw(Graphics::Display &display, const SnakeBirdState&, int active, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
 	bool Render(const SnakeBirdState &s) const;
@@ -315,6 +317,7 @@ private:
 	std::vector<int> fruit;
 	std::array<std::vector<int>, 4> objects; // offsets from base location
 	int portal1Loc, portal2Loc;
+	int exitLoc;
 	SnakeBirdState startState;
 	//	std::array<
 };
