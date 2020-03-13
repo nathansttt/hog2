@@ -117,7 +117,7 @@ struct SnakeBirdState {
 	// Fruit is 0 if present 1 if not. Thus by default all fruit is present.
 	bool GetFruitPresent(int which) const { return ((locBlockFruit>>(36+which))&0x1)==0; }
 	void ToggleFruitPresent(int which) { locBlockFruit ^= (kOne<<(36+which));}
-	bool KFruitEaten(int k)
+	bool KFruitEaten(int k) const
 	{
 		uint64_t mask = (kOne<<(k))-1;
 		return ((locBlockFruit>>36)&mask)==(mask);
@@ -136,6 +136,33 @@ struct SnakeBirdAction {
 	}
 };
 
+static std::ostream &operator<<(std::ostream &out, const SnakeBirdAction &a)
+{
+	out << a.bird << " ";
+	switch (a.direction)
+	{
+		case kUp: out << "up"; break;
+		case kDown: out << "down"; break;
+		case kLeft: out << "left"; break;
+		case kRight: out << "right"; break;
+	}
+	return out;
+}
+
+enum SnakeBirdAnimation : uint8_t {
+	kMovement,
+	kFall,
+	kInitialTeleport,
+	kTeleport,
+	kNeedsInitialization
+};
+
+struct SnakeBirdAnimationStep {
+	SnakeBirdAnimationStep() { Reset(); }
+	void Reset() { anim = kNeedsInitialization; }
+	SnakeBirdAnimation anim;
+	SnakeBirdAction a;
+};
 
 /*
  Level files are text
@@ -199,8 +226,11 @@ public:
 	void GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const;
 	void GetActions(const SnakeBirdState &nodeID, std::vector<SnakeBirdAction> &actions) const;
 	
+		
 	//SnakeBirdAction GetAction(const SnakeBirdState &s1, const SnakeBirdState &s2) const;
 	void ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const;
+	/* Applys the next portion of the action - not done until returns true. */
+	bool ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction a, SnakeBirdAnimationStep &step) const;
 	bool Legal(SnakeBirdState &s, SnakeBirdAction a);
 	// Cannot undo actions
 	void UndoAction(SnakeBirdState &s, SnakeBirdAction a) const
@@ -255,14 +285,25 @@ public:
 	void GLDrawPath(const std::vector<SnakeBirdState> &x) const {}
 	
 	void Draw(Graphics::Display &display) const;
+	void Draw(Graphics::Display &display, double time) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
+	void Draw(Graphics::Display &display, const SnakeBirdState&, int active, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
 	bool Render(const SnakeBirdState &s) const;
 	bool CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
 				 SnakeBirdAction &a) const;
 
+	// Apply Move helper functions
+	// check if snakebirds can teleport - return true if one did
+	bool HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
+						 snakeDir lastAction, snakeDir opposite, SnakeBirdAnimationStep step) const;
+	void DoFirstMovement(const SnakeBirdAction &a, int offset, snakeDir opposite, SnakeBirdState &s) const;
+	// returns true if a snake fell
+	bool DoFall(SnakeBirdAction &a, SnakeBirdState &s) const;
+
+	
 	int GetFruitOffset(int index) const;
 	int width, height;
 	int GetIndex(int x, int y) const;
@@ -276,6 +317,7 @@ private:
 	std::vector<int> fruit;
 	std::array<std::vector<int>, 4> objects; // offsets from base location
 	int portal1Loc, portal2Loc;
+	int exitLoc;
 	SnakeBirdState startState;
 	//	std::array<
 };

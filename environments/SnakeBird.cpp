@@ -17,6 +17,7 @@ SnakeBird::SnakeBird(int width, int height)
 {
 	assert(width*height < 512);
 	portal1Loc = portal2Loc = -1;
+	exitLoc = -1;
 	std::fill_n(&world[0], 512, kEmpty);
 	for (int x = 0; x < width; x++)
 		world[GetIndex(x, height-1)] = kSpikes;
@@ -27,6 +28,7 @@ void SnakeBird::Reset()
 	width = 20;
 	height = 16;
 	portal1Loc = portal2Loc = -1;
+	exitLoc = -1;
 	std::fill_n(&world[0], 512, kEmpty);
 	for (int x = 0; x < width; x++)
 		world[GetIndex(x, height-1)] = kSpikes;
@@ -116,6 +118,7 @@ bool SnakeBird::Load(const char *filename)
 		int wHeight = std::stoi(sHeight, nullptr,10);
 
 		portal1Loc = portal2Loc = -1;
+		exitLoc = -1;
 		std::fill_n(&world[0], 512, kEmpty);
 		startState.Reset();
 		fruit.clear();
@@ -519,20 +522,9 @@ bool SnakeBird::CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject
 	return true;
 }
 
-//SnakeBirdAction GetAction(const SnakeBirdState &s1, const SnakeBirdState &s2) const;
-void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
-{
-	int offset;
-	snakeDir opposite;
-	switch (a.direction)
-	{
-		case kLeft: offset = -height; opposite = kRight; break;
-		case kRight: offset = +height; opposite = kLeft; break;
-		case kUp: offset = -1; opposite = kDown; break;
-		case kDown: offset = 1; opposite = kUp; break;
-	}
-	
-	// exited level
+
+void SnakeBird::DoFirstMovement(const SnakeBirdAction &a, int offset,
+								snakeDir opposite, SnakeBirdState &s) const {
 	if (world[s.GetSnakeHeadLoc(a.bird)+offset] == kExit && s.KFruitEaten(fruit.size()))
 	{
 		s.SetSnakeHeadLoc(a.bird, kInGoal);
@@ -577,186 +569,331 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 			}
 		}
 	}
+}
+
+bool SnakeBird::DoFall(SnakeBirdAction &a, SnakeBirdState &s) const
+{
+	const SnakeBirdWorldObject objs[8] = {kSnake1, kSnake2, kSnake3, kSnake4, kBlock1, kBlock2, kBlock3, kBlock4};
+	uint8_t falling = 0;
+	SnakeBirdAction move;
+	// Find which objects can fall
+	for (int i = 0; i < 8; i++)
+	{
+		move.pushed = 0;
+		// snake isn't in the world
+		if ((i < 4 && i >= s.GetNumSnakes()) || s.GetSnakeHeadLoc(i) == kInGoal)
+			continue;
+		// block isn't in the world (fell out or not there to begin with)
+		if (i >= 4 && (objects[i-4].size() == 0 || s.GetObjectLocation(i-4) == kDead))
+			continue;
+		
+		if (CanPush(s, -1, objs[i], kDown, move))
+		{
+			falling |= move.pushed;
+		}
+	}
+	// If nothing can fall, we are done
+	if (falling == 0)
+		return false;
+	
+	// Actually move the objects down
+	for (int i = 0; i < 8; i++)
+	{
+		if (i < 4 && ((falling>>i)&0x1))
+		{
+			s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)+1);
+			if (world[s.GetSnakeHeadLoc(i)] == kExit && s.KFruitEaten(fruit.size()))
+			{
+				s.SetSnakeHeadLoc(i, kInGoal);
+			}
+		}
+		if (i >= 4 && ((falling>>i)&0x1))
+			s.SetObjectLocation(i-4, s.GetObjectLocation(i-4)+1);
+	}
+	a.pushed = falling;
+	
+	// check if an object hit the bottom of the world - if so it is dead
+	for (int i = 0; i < objects.size(); i++)
+	{
+		int objLoc = s.GetObjectLocation(i);
+		if (objLoc == kDead)
+			continue;
+		int objectY = GetY(objLoc);
+		for (int j = 0; j < objects[i].size(); j++)
+		{
+			if (objectY+GetY(objects[i][j]) >= height-2)
+			{
+				s.SetObjectLocation(i, kDead);
+				break;
+			}
+		}
+	}
+	return true;
+}
+
+bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, SnakeBirdAnimationStep &step) const
+{
+//	ApplyAction(s, act);
+//	return true;
+	
+	if (step.anim == kNeedsInitialization)
+	{
+		step.anim = kMovement;
+		step.a = act;
+	}
+	int offset;
+	snakeDir opposite;
+	snakeDir lastAction = (snakeDir)act.direction;
+	switch (step.a.direction)
+	{
+		case kLeft: offset = -height; opposite = kRight; break;
+		case kRight: offset = +height; opposite = kLeft; break;
+		case kUp: offset = -1; opposite = kDown; break;
+		case kDown: offset = 1; opposite = kUp; break;
+	}
+	
+	if (step.anim == kMovement)
+	{
+		// exited level
+		DoFirstMovement(step.a, offset, opposite, s);
+		step.anim = kInitialTeleport;
+		return false;
+	}
 	
 	// Small hack to make the following loop more generic:
 	// Add current bird to list of pushed birds
 	// This will cause us to check it for portals
-	a.pushed |= (1<<a.bird);
-	// keep track of what snakebird was moved
-	// This snakebird we only check the head for portals
-	int firstRoundBird = a.bird;
+	if (step.anim == kInitialTeleport)
+	{
+		step.a.pushed |= (1<<step.a.bird);
+	}
+	else {
+		lastAction = kDown;
+		opposite = kUp;
+	}
 	
 	// Now for gravity and portals.
 	// 1. Check if any portals are activated.
 	// 2. Then try all moved objects to see if they can be pushed down.
 	// 2a. Merge the pushable objects into a single bit vector
 	// 3. If no objects moved, stop; else repeat to 1.
+	bool success = Render(s);
+	if (!success) // someone died as a result of the action
+		return true;
+
+	if (step.anim == kTeleport || step.anim == kInitialTeleport)
+	{
+		bool didTeleport = HandleTeleports(s, step.a, lastAction, opposite, step);
+		if (didTeleport)
+		{
+			step.anim = kFall;
+			return false;
+		}
+	}
+		
+	bool didFall = DoFall(step.a, s);
+	if (!didFall)
+		return true;
+	
+	step.anim = kTeleport;
+	return false;
+}
+
+//SnakeBirdAction GetAction(const SnakeBirdState &s1, const SnakeBirdState &s2) const;
+void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
+{
+	SnakeBirdAnimationStep step;
+	step.anim = kMovement;
+	int offset;
+	snakeDir opposite;
 	snakeDir lastAction = (snakeDir)a.direction;
+	switch (a.direction)
+	{
+		case kLeft: offset = -height; opposite = kRight; break;
+		case kRight: offset = +height; opposite = kLeft; break;
+		case kUp: offset = -1; opposite = kDown; break;
+		case kDown: offset = 1; opposite = kUp; break;
+	}
+	
+	if (step.anim == kMovement)
+	{
+		// exited level
+		DoFirstMovement(a, offset, opposite, s);
+		step.anim = kInitialTeleport;
+	}
+	
+	// Small hack to make the following loop more generic:
+	// Add current bird to list of pushed birds
+	// This will cause us to check it for portals
+	a.pushed |= (1<<a.bird);
+	
+	// Now for gravity and portals.
+	// 1. Check if any portals are activated.
+	// 2. Then try all moved objects to see if they can be pushed down.
+	// 2a. Merge the pushable objects into a single bit vector
+	// 3. If no objects moved, stop; else repeat to 1.
 	while (true) {
-		SnakeBirdWorldObject objs[8] = {kSnake1, kSnake2, kSnake3, kSnake4, kBlock1, kBlock2, kBlock3, kBlock4};
 		bool success = Render(s);
 		if (!success) // someone died as a result of the action
 			return;
 
-		// Check for snakes which are now on portals
-		// *and* didn't have an adjacent segment on a portal in the last time step
-		for (int i = 0; i < 4 && (a.pushed>>i); i++)
+		if (step.anim == kTeleport)
+			HandleTeleports(s, a, kDown, kUp, step);
+		else
+			HandleTeleports(s, a, lastAction, opposite, step);
+		step.anim = kFall;
+		
+		bool didFall = DoFall(a, s);
+		if (!didFall)
+			return;
+		
+		step.anim = kTeleport;
+	}
+}
+
+bool SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
+								snakeDir lastAction, snakeDir opposite, SnakeBirdAnimationStep step) const
+{
+	const SnakeBirdWorldObject objs[8] = {kSnake1, kSnake2, kSnake3, kSnake4, kBlock1, kBlock2, kBlock3, kBlock4};
+	bool didTeleport = false;
+	// Check for snakes which are now on portals
+	// *and* didn't have an adjacent segment on a portal in the last time step
+	for (int i = 0; i < 4 && (a.pushed>>i); i++)
+	{
+		int snake = i;
+		if ((a.pushed>>i)&0x1) // ignore if it wasn't moved
 		{
-			int snake = i;
-			if ((a.pushed>>i)&0x1) // ignore if it wasn't moved
+			int newloc = s.GetSnakeHeadLoc(snake);
+			int piece = newloc;
+			for (int x = 0; x < s.GetSnakeLength(snake); x++)
 			{
-				int newloc = s.GetSnakeHeadLoc(snake);
-				int piece = newloc;
-				for (int x = 0; x < s.GetSnakeLength(snake); x++)
+				//int lastPiece = piece;
+				// in the first round of gravity/portals
+				// only check the head of the bird that was moved
+				if (i == a.bird && step.anim == kInitialTeleport && x > 0)
 				{
-					int lastPiece = piece;
-					// in the first round of gravity/portals
-					// only check the head of the bird that was moved
-					if (i == firstRoundBird && x > 0)
+					break;
+				}
+				if (x > 0)
+				{
+					switch (s.GetSnakeDir(snake, x-1))
 					{
-						firstRoundBird = -1;
-						break;
+						case kLeft: piece-=height; break;
+						case kRight: piece+=height; break;
+						case kUp: piece-=1; break;
+						case kDown: piece+=1; break;
 					}
-					if (x > 0)
-					{
-						switch (s.GetSnakeDir(snake, x-1))
-						{
-							case kLeft: piece-=height; break;
-							case kRight: piece+=height; break;
-							case kUp: piece-=1; break;
-							case kDown: piece+=1; break;
-						}
-					}
-					int p1, p2 = -1;
-					if (piece == portal1Loc)
-					{
-						p1 = portal1Loc;
-						p2 = portal2Loc;
-					}
-					else if (piece == portal2Loc)
-					{
-						p1 = portal2Loc;
-						p2 = portal1Loc;
-					}
+				}
+				int p1, p2 = -1;
+				if (piece == portal1Loc)
+				{
+					p1 = portal1Loc;
+					p2 = portal2Loc;
+				}
+				else if (piece == portal2Loc)
+				{
+					p1 = portal2Loc;
+					p2 = portal1Loc;
+				}
 
-					// Did the snake just move to adjacent locations?
-					if (p2 != -1)
+				// Did the snake just move to adjacent locations?
+				if (p2 != -1)
+				{
+					// We are looking at the snake location after it was moved.
+					// Need to check in forward and backwards directions
+					if (x > 0 && s.GetSnakeDir(snake, x-1) == opposite)
+					{ p2 = -1; }
+					else if (x < s.GetSnakeLength(snake)-1 && s.GetSnakeDir(snake, x) == lastAction)
+					{ p2 = -1; }
+				}
+
+				// We have a portal to teleport to
+				if (p2 != -1)
+				{
+					int xChange = -GetX(p1)+GetX(p2);
+					int yChange = -GetY(p1)+GetY(p2);
+
+					// Validate if the object can be placed in the new location
+					bool valid = true;
+					int newPiece = GetIndex(GetX(newloc)+xChange, GetY(newloc)+yChange);
+					//for (int v = 0; v < objects[snake].size(); v++)
+					for (int v = 0; v < s.GetSnakeLength(snake); v++)
 					{
-						// We are looking at the snake location after it was moved.
-						// Need to check in forward and backwards directions
+						if (v > 0)
+						{
+							switch (s.GetSnakeDir(snake, v-1))
+							{
+								case kLeft: newPiece-=height; break;
+								case kRight: newPiece+=height; break;
+								case kUp: newPiece-=1; break;
+								case kDown: newPiece+=1; break;
+							}
+						}
+
+						if (GetX(newPiece) < 0 ||
+							GetX(newPiece) >= width ||
+							GetY(newPiece) < 0 ||
+							GetY(newPiece) >= height)
+						{
+							valid = false;
+							break;
+						}
 						
-//						// If previous piece was at the portal before, don't portal
-//						int previousOnSnake = -1;
-//						// get piece in front of piece on portal
-//						if (x > 0) // Beyond the head; check the previous piece
-//						{
-//							previousOnSnake = lastPiece;
-//						}
-//						// If next piece was at the portal before, don't portal
-//						int nextOnSnake = -1;
-//						if (x < s.GetSnakeLength(snake)-1)
-//						{
-//							switch (s.GetSnakeDir(snake, x))
-//							{
-//								case kLeft: nextOnSnake = piece-height; break;
-//								case kRight: nextOnSnake = piece+height; break;
-//								case kUp: nextOnSnake = piece-1; break;
-//								case kDown: nextOnSnake = piece+1; break;
-//							}
-//						}
-//						if (previousOnSnake == p1 && s.GetSnakeDir(snake, x-1) == opposite)
-//						{ p2 = -1; }
-//						else if (nextOnSnake == p1 && s.GetSnakeDir(snake, x) == lastAction)
-//						{ p2 = -1; }
-						if (x > 0 && s.GetSnakeDir(snake, x-1) == opposite)
-						{ p2 = -1; }
-						else if (x < s.GetSnakeLength(snake)-1 && s.GetSnakeDir(snake, x) == lastAction)
-						{ p2 = -1; }
+						if (((render[newPiece]&kSnakeMask) == kSnakeMask &&
+							 render[newPiece] != objs[snake]) || // hit another snake
+							((world[newPiece]&kGroundMask) == kGroundMask) || // hit ground
+							((render[newPiece]&kBlockMask) == kBlockMask)) // hit piece
+						{
+							valid = false;
+							break;
+						}
 					}
-
-					// We have a portal to teleport to
-					if (p2 != -1)
+					if (valid)
 					{
-						int xChange = -GetX(p1)+GetX(p2);
-						int yChange = -GetY(p1)+GetY(p2);
-
-						// Validate if the object can be placed in the new location
-						bool valid = true;
-						int newPiece = GetIndex(GetX(newloc)+xChange, GetY(newloc)+yChange);
-						//for (int v = 0; v < objects[snake].size(); v++)
-						for (int v = 0; v < s.GetSnakeLength(snake); v++)
-						{
-							if (v > 0)
-							{
-								switch (s.GetSnakeDir(snake, v-1))
-								{
-									case kLeft: newPiece-=height; break;
-									case kRight: newPiece+=height; break;
-									case kUp: newPiece-=1; break;
-									case kDown: newPiece+=1; break;
-								}
-							}
-
-							if (GetX(newPiece) < 0 ||
-								GetX(newPiece) >= width ||
-								GetY(newPiece) < 0 ||
-								GetY(newPiece) >= height)
-							{
-								valid = false;
-								break;
-							}
-							
-							if (((render[newPiece]&kSnakeMask) == kSnakeMask &&
-								 render[newPiece] != objs[snake]) || // hit another snake
-								((world[newPiece]&kGroundMask) == kGroundMask) || // hit ground
-								((render[newPiece]&kBlockMask) == kBlockMask)) // hit piece
-							{
-								valid = false;
-								break;
-							}
-						}
-						if (valid)
-						{
-							int offsetFromPortalX = GetX(newloc)+xChange;
-							int offsetFromPortalY = GetY(newloc)+yChange;
-							s.SetSnakeHeadLoc(i, GetIndex(offsetFromPortalX, offsetFromPortalY));
-
-							bool success = Render(s);
-							if (!success) // someone died as a result of the action
-								return;
-						}
+						int offsetFromPortalX = GetX(newloc)+xChange;
+						int offsetFromPortalY = GetY(newloc)+yChange;
+						s.SetSnakeHeadLoc(i, GetIndex(offsetFromPortalX, offsetFromPortalY));
+						didTeleport = true;
+						bool success = Render(s);
+						assert(success == true);
+//						if (!success) // someone died as a result of the action
+//							return;
 					}
 				}
 			}
 		}
-		
-		// Check for objects which are now on portals
-		// and didn't have an adjacent segment on a portal in the last step
-		// If an object teleports we have to re-render
-		for (int i = 4; i < 8 && (a.pushed>>i); i++)
+	}
+	
+	// Check for objects which are now on portals
+	// and didn't have an adjacent segment on a portal in the last step
+	// If an object teleports we have to re-render
+	// Note - only one object can teleport, so don't check if a snake teleported
+	for (int i = 4; i < 8 && (a.pushed>>i) && !didTeleport; i++)
+	{
+		int object = i-4;
+		if ((a.pushed>>i)&0x1) // ignore if it wasn't moved
 		{
-			int object = i-4;
-			if ((a.pushed>>i)&0x1) // ignore if it wasn't moved
+			int newloc = s.GetObjectLocation(object);
+			if (newloc == kDead)
+				continue;
+			for (int x = 0; x < objects[object].size(); x++)
 			{
-				int newloc = s.GetObjectLocation(object);
-				if (newloc == kDead)
-					continue;
-				for (int x = 0; x < objects[object].size(); x++)
+				int piece = GetIndex(GetX(objects[object][x])+GetX(newloc),
+									 GetY(objects[object][x])+GetY(newloc));
+				int p1=-1, p2 = -1;
+				if (piece == portal1Loc)
 				{
-					int piece = GetIndex(GetX(objects[object][x])+GetX(newloc),
-										 GetY(objects[object][x])+GetY(newloc));
-					int p1, p2 = -1;
-					if (piece == portal1Loc)
-					{
-						p1 = portal1Loc;
-						p2 = portal2Loc;
-					}
-					else if (piece == portal2Loc)
-					{
-						p1 = portal2Loc;
-						p2 = portal1Loc;
-					}
-					// Check if our last action suggests that the object was in the portal previously
+					p1 = portal1Loc;
+					p2 = portal2Loc;
+				}
+				else if (piece == portal2Loc)
+				{
+					p1 = portal2Loc;
+					p2 = portal1Loc;
+				}
+				// Check if our last action suggests that the object was in the portal previously
+				if (p2 != -1)
+				{
 					switch (lastAction)
 					{
 						case kLeft:
@@ -776,98 +913,54 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 								p2 = -1;
 							break;
 					}
-					
-					if (p2 != -1)
+				}
+				
+				if (p2 != -1)
+				{
+					// TODO: Check if it can be placed in new loc relative to self
+					// TODO: Check if it is offscreen
+					int xChange = -GetX(p1)+GetX(p2);
+					int yChange = -GetY(p1)+GetY(p2);
+
+					// Validate if the object can be placed in the new location
+					bool valid = true;
+					for (int v = 0; v < objects[object].size(); v++)
 					{
-						// TODO: Check if it can be placed in new loc relative to self
-						// TODO: Check if it is offscreen
-						int xChange = -GetX(p1)+GetX(p2);
-						int yChange = -GetY(p1)+GetY(p2);
-
-						// Validate if the object can be placed in the new location
-						bool valid = true;
-						for (int v = 0; v < objects[object].size(); v++)
+						if (GetX(newloc)+GetX(objects[object][v])+xChange < 0 ||
+							GetX(newloc)+GetX(objects[object][v])+xChange >= width ||
+							GetY(newloc)+GetY(objects[object][v])+yChange < 0 ||
+							GetY(newloc)+GetY(objects[object][v])+yChange >= height)
 						{
-							if (GetX(newloc)+GetX(objects[object][v])+xChange < 0 ||
-								GetX(newloc)+GetX(objects[object][v])+xChange >= width ||
-								GetY(newloc)+GetY(objects[object][v])+yChange < 0 ||
-								GetY(newloc)+GetY(objects[object][v])+yChange >= height)
-							{
-								valid = false;
-								break;
-							}
-							int newPiece = GetIndex(GetX(newloc)+GetX(objects[object][v])+xChange,
-													GetY(newloc)+GetY(objects[object][v])+yChange);
-							if (((render[newPiece]&kSnakeMask) == kSnakeMask) || // hit snake
-								((world[newPiece]&kGroundMask) == kGroundMask) || // hit ground
-								((render[newPiece]&kBlockMask) == kBlockMask && render[newPiece] != objs[i])) // hit another piece
-							{
-								valid = false;
-								break;
-							}
+							valid = false;
+							break;
 						}
-						if (valid)
+						int newPiece = GetIndex(GetX(newloc)+GetX(objects[object][v])+xChange,
+												GetY(newloc)+GetY(objects[object][v])+yChange);
+						if (((render[newPiece]&kSnakeMask) == kSnakeMask) || // hit snake
+							((world[newPiece]&kGroundMask) == kGroundMask) || // hit ground
+							((render[newPiece]&kBlockMask) == kBlockMask && render[newPiece] != objs[i])) // hit another piece
 						{
-							int offsetFromPortalX = GetX(newloc)+xChange;
-							int offsetFromPortalY = GetY(newloc)+yChange;
-							s.SetObjectLocation(object, GetIndex(offsetFromPortalX, offsetFromPortalY));
-
-							bool success = Render(s);
-							if (!success) // someone died as a result of the action
-								return;
+							valid = false;
+							break;
 						}
+					}
+					if (valid)
+					{
+						int offsetFromPortalX = GetX(newloc)+xChange;
+						int offsetFromPortalY = GetY(newloc)+yChange;
+						s.SetObjectLocation(object, GetIndex(offsetFromPortalX, offsetFromPortalY));
+						didTeleport = true;
+
+						bool success = Render(s);
+						assert(success == true);
+//						if (!success) // someone died as a result of the action
+//							return;
 					}
 				}
 			}
 		}
-
-		// check if an object hit the bottom of the world - if so it is dead
-		for (int i = 0; i < objects.size(); i++)
-		{
-			int objLoc = s.GetObjectLocation(i);
-			if (objLoc == kDead)
-				continue;
-			int objectY = GetY(objLoc);
-			for (int j = 0; j < objects[i].size(); j++)
-			{
-				if (objectY+GetY(objects[i][j]) >= height-2)
-				{
-					s.SetObjectLocation(i, kDead);
-					break;
-				}
-			}
-		}
-		
-		uint8_t falling = 0;
-		SnakeBirdAction move;
-		for (int i = 0; i < 8; i++)
-		{
-			move.pushed = 0;
-			// snake isn't in the world
-			if ((i < 4 && i >= s.GetNumSnakes()) || s.GetSnakeHeadLoc(i) == kInGoal)
-				continue;
-			// block isn't in the world (fell out or not there to begin with)
-			if (i >= 4 && (objects[i-4].size() == 0 || s.GetObjectLocation(i-4) == kDead))
-				continue;
-
-			if (CanPush(s, -1, objs[i], kDown, move))
-			{
-				falling |= move.pushed;
-			}
-		}
-		if (falling == 0)
-			break;
-		lastAction = kDown;
-		opposite = kUp;
-		for (int i = 0; i < 8; i++)
-		{
-			if (i < 4 && ((falling>>i)&0x1))
-				s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)+1);
-			if (i >= 4 && ((falling>>i)&0x1))
-				s.SetObjectLocation(i-4, s.GetObjectLocation(i-4)+1);
-		}
-		a.pushed = falling;
 	}
+	return didTeleport;
 }
 
 void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
@@ -878,7 +971,7 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 		printf("Error - cannot add terrain at bottom of map\n");
 		return;
 	}
-	
+		
 	if ((o&kBlockMask) == kBlockMask) // block
 	{
 		int which = -1;
@@ -932,6 +1025,8 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 	
 	world[GetIndex(x, y)] = o;
 
+	if (o == kExit)
+		exitLoc = GetIndex(x, y);
 	if (o == kFruit)
 	{
 		fruit.push_back(GetIndex(x, y));
@@ -1042,6 +1137,89 @@ void SnakeBird::Draw(Graphics::Display &display) const
 //	}
 }
 
+void SnakeBird::Draw(Graphics::Display &display, double time) const
+{
+	display.FillRect({-1, -1, 1, 0.5}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
+	display.FillRect({-1, 0.5, 1, 1}, Colors::darkblue+Colors::darkred);
+	for (int x = 0; x < width*height; x++)
+	{
+		Graphics::point p = GetCenter(GetX(x), GetY(x));
+		double radius = GetRadius()*0.95;
+		switch (world[x])
+		{
+			case kEmpty:
+				break;//display.FillSquare(p, GetRadius(), Colors::lightblue);  break;
+			case kGround:
+				switch ((GetX(x)*13*+11*GetY(x))%6)
+				{
+					case 0: display.FillSquare(p, GetRadius(), Colors::brown); break;
+					case 1: display.FillSquare(p, GetRadius(), Colors::brown); break;
+					case 2: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
+					case 3: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
+					case 4: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
+					case 5: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
+				}
+				break;
+			case kSpikes:
+				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+				break;
+			case kPortal1:
+			case kPortal2:
+			{
+				double offset1 = (sin(time*1.0)); // -1...+1
+				double offset2 = (sin(time*1.5)); // -1...+1
+				double offset3 = (sin(time*2.0)); // -1...+1
+				double offset4 = (sin(time*2.5)); // -1...+1
+				display.FillCircle(p, radius+offset1*radius*0.25, Colors::red);
+				display.FillCircle(p, radius*0.75+offset2*radius*0.2, Colors::blue);
+				display.FillCircle(p, radius*0.5+offset3*radius*0.15, Colors::green);
+				display.FillCircle(p, radius*0.25+offset4*radius*0.1, Colors::purple);
+			}
+				break;
+			case kExit:
+//			{
+//				double offset1 = (sin(time*1.0))*180; // -1...+1
+//				double offset2 = (sin(time*1.5))*180; // -1...+1
+//				double offset3 = (sin(time*2.0))*180; // -1...+1
+////				display.FillNGon(p, radius, 5, 0, Colors::yellow);
+////				display.FillNGon(p, radius*0.66, 5, 36, Colors::orange);
+////				display.FillNGon(p, radius*0.25, 5, 54, Colors::red);
+//				display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
+//				display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
+//				display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
+//			}
+				break;
+			case kFruit:
+//				p.x-=radius/4;
+//				display.FillCircle(p, radius/2.0, Colors::green);
+//				p.x+=radius/2;
+//				display.FillCircle(p, radius/2.0, Colors::green);
+				break;
+		}
+	}
+	
+//	// draw grid
+//	for (int x = 0; x < width; x++)
+//	{
+//		Graphics::point p1, p2;
+//		p1.x = GetX(GetIndex(x, 0))-GetRadius();
+//		p1.y = GetY(GetIndex(x, 0))-GetRadius();
+//		p2.x = p1.x;
+//		p2.y = GetY(GetIndex(x, 16))-GetRadius();
+//		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
+//	}
+//	for (int y = 0; y < 16; y++)
+//	{
+//		Graphics::point p1, p2;
+//		p1.x = GetX(GetIndex(0, y))-GetRadius();
+//		p1.y = GetY(GetIndex(width, y))-GetRadius();
+//		p2.y = p1.y;
+//		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
+//	}
+}
+
+
 Graphics::point SnakeBird::GetCenter(int x, int y) const
 {
 	Graphics::point p;
@@ -1062,6 +1240,34 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s) const
 
 void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int active) const
 {
+	Draw(display, s, active, 0);
+}
+
+void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int active, double globalTime) const
+{
+	// draw exit
+	if (exitLoc != -1)
+	{
+		Graphics::point p = GetCenter(GetX(exitLoc), GetY(exitLoc));
+		double radius = GetRadius()*0.95;
+		double time = globalTime;
+		if (s.KFruitEaten(fruit.size()))
+		{
+			radius = radius+0.25*radius*(1+sin(globalTime*2.5));
+			time *= 2.0;
+		}
+		else {
+			time /= 4.0;
+		}
+		double offset1 = (sin(time*1.0))*180; // -1...+1
+		double offset2 = (sin(time*1.5))*180; // -1...+1
+		double offset3 = (sin(time*2.0))*180; // -1...+1
+		display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
+		display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
+		display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
+	}
+
+	
 	rgbColor c[4] = {Colors::red, Colors::blue, Colors::green, Colors::yellow};
 	rgbColor objColors[4] = {Colors::red*0.5, Colors::blue*0.5, Colors::green*0.5, Colors::yellow*0.5};
 	for (int snake = 0; snake < s.GetNumSnakes(); snake++)

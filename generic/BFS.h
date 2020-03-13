@@ -19,7 +19,7 @@
 template <class state, class action, class environment>
 class BFS {
 public:
-	BFS():nodeLimit(~(0ull)) { }
+	BFS():stopAtGoal(true), nodeLimit(~(0ull)) {}
 	virtual ~BFS() {}
 	void DoBFS(environment *env, state from);
 	void GetPath(environment *env, state from, state to,
@@ -29,6 +29,7 @@ public:
 	void ClearNodeLimit() {nodeLimit = ~(0ull);}
 	uint64_t GetNodesExpanded() { return nodesExpanded; }
 	uint64_t GetNodesTouched() { return nodesTouched; }
+	bool stopAtGoal;
 private:
 	uint64_t nodeLimit;
 	uint64_t nodesExpanded, nodesTouched;
@@ -118,6 +119,7 @@ void BFS<state, action, environment>::GetPath(environment *env,
 
 	thePath.resize(0);
 	bool goalFound = false;
+	int numGoals = 0;
 	nodesExpanded = nodesTouched = 0;
 	
 	mOpen.clear();
@@ -137,7 +139,7 @@ void BFS<state, action, environment>::GetPath(environment *env,
 		s = mOpen.front().first;
 		if (mOpen.front().second != currDepth)
 		{
-			printf("%ld tot %d inc %lld b %.2f\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter);
+			printf("%ld tot %d inc %lld b %.2f [%d]\n", currDepth, nodesExpanded, nodesExpanded-lastNodes, (double)(nodesExpanded-lastNodes)/lastIter, numGoals);
 			lastIter = nodesExpanded-lastNodes;
 			lastNodes = nodesExpanded;
 		}			
@@ -146,9 +148,12 @@ void BFS<state, action, environment>::GetPath(environment *env,
 //		depth.pop_front();
 		if (env->GoalTest(s, to))
 		{
-			goal = s;
+			if (numGoals == 0)
+				goal = s;
 			goalFound = true;
-			break;
+			numGoals++;
+			if (stopAtGoal)
+				break;
 		}
 		else { // don't expand goal nodes
 			nodesExpanded++;
