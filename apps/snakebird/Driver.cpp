@@ -75,6 +75,7 @@ void InstallHandlers()
 
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <input> <output>", "Make an .svg of the given level then quit");
+	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs <file>", "Run BFS on the given level and return the info");
 //	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -377,6 +378,16 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			printf("Failed -svg <file>: missing file name");
 		exit(0);
 	}
+	if (strcmp(argument[0], "-bfs") == 0)
+	{
+		if (maxNumArgs > 1)
+		{
+			sb.Load(argument[1]);			
+			snake = sb.GetStart();
+			MyDisplayHandler(0, tKeyboardModifier::kNoModifier, 'b');
+			exit(0);	
+		}	
+	}
 
 	return 0;
 }
@@ -553,7 +564,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		{
 			Timer t;
 			BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
-			bfs.SetNodeLimit(75000000); // max 75 million expansions
+			bfs.SetNodeLimit(20000000);
+//		bfs.SetNodeLimit(75000000); // max 75 million expansions
 			//bfs.DoBFS(&sb, snake);
 			t.StartTimer();
 			bfs.GetPath(&sb, snake, snake, future);
