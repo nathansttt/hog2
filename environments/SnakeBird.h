@@ -64,7 +64,7 @@ struct SnakeBirdState {
 	
 	void SetSnakeLength(int whichSnake, int len)
 	{ SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1); }
-	int GetSnakeLength(int whichSnake)
+	int GetSnakeLength(int whichSnake) const
 	{ return GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1)+1; }
 
 	snakeDir GetSnakeDir(int whichSnake, int segment) const
@@ -99,17 +99,15 @@ struct SnakeBirdState {
 		uint64_t b = (dir<<start);
 		uint64_t c = ((snakeBodies&(~mask))<<(2));
 		snakeBodies = a|b|c;
-//		
-//		mask <<= (GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1))*2; // length in bits
-//		mask -= 1;
-//		mask <<= GetSnakeBodyEnd(whichSnake-1)*2;
-//		uint64_t oldSnake = snakeBodies&(mask);
-//		oldSnake<<=2;
-//		oldSnake |= dir<<(GetSnakeBodyEnd(whichSnake-1)*2);
-//		snakeBodies &= (~mask);
-//		snakeBodies |= (oldSnake&(mask));
 	}
-
+	uint64_t GetBodyBits(int whichSnake) const
+	{
+		uint64_t mask = 1;
+		mask <<= (GetSnakeBodyEnd(whichSnake)-GetSnakeBodyEnd(whichSnake-1))*2; // length in bits
+		mask -= 1;
+		uint64_t result = snakeBodies>>(GetSnakeBodyEnd(whichSnake-1)*2);
+		return result&mask;
+	}
 	int GetObjectLocation(int whichObstacle) const { return (locBlockFruit>>(9*whichObstacle))&locationMask; }
 	void SetObjectLocation(int whichObstacle, int loc) //{ return (locBlockFruit>>(9*whichObstacle))&locationMask; }
 	{ locBlockFruit &= ~(locationMask<<(whichObstacle*9)); locBlockFruit |= ((loc&locationMask)<<(whichObstacle*9)); }
@@ -154,6 +152,9 @@ enum SnakeBirdAnimation : uint8_t {
 	kFall,
 	kInitialTeleport,
 	kTeleport,
+	kWentInGoal,
+	kFellInGoal,
+	kDoneAnimation,
 	kNeedsInitialization
 };
 
@@ -289,6 +290,8 @@ public:
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active, double globalTime) const;
+	void Draw(Graphics::Display &display, const SnakeBirdState&, const SnakeBirdState&,
+			  int active, double percentComplete, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
 	bool Render(const SnakeBirdState &s) const;
@@ -299,9 +302,9 @@ private:
 	// check if snakebirds can teleport - return true if one did
 	bool HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
 						 snakeDir lastAction, snakeDir opposite, SnakeBirdAnimationStep step) const;
-	void DoFirstMovement(const SnakeBirdAction &a, int offset, snakeDir opposite, SnakeBirdState &s) const;
+	SnakeBirdAnimation DoFirstMovement(const SnakeBirdAction &a, int offset, snakeDir opposite, SnakeBirdState &s) const;
 	// returns true if a snake fell
-	bool DoFall(SnakeBirdAction &a, SnakeBirdState &s) const;
+	SnakeBirdAnimation DoFall(SnakeBirdAction &a, SnakeBirdState &s) const;
 
 	
 	int GetFruitOffset(int index) const;
@@ -311,7 +314,11 @@ private:
 	int GetY(int index) const;
 	Graphics::point GetCenter(int x, int y) const;
 	float GetRadius() const;
-	void DrawSnakeSegment(Graphics::Display &display, int x, int y, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo) const;
+	void DrawTranslatingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
+							  int snake, bool isActive, double percentComplete) const;
+	void DrawMovingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
+						 int snake, bool isActive, double percentComplete) const;
+	void DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo) const;
 	std::array<SnakeBirdWorldObject, 512> world; // static world
 	mutable std::array<SnakeBirdWorldObject, 512> render;
 	std::vector<int> fruit;
