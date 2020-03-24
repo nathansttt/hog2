@@ -79,7 +79,7 @@ std::vector<snakeDir>  LoadSnake(std:: vector<snakeDir> snakeBod, int width, int
 		else if (lvl[pos-width-1] == 1+lvl[pos])
 		{
 			snakeBod.push_back(kUp);
-			pos-= width -1;
+			pos-= width +1;
 			//goto build_snake;
 		}
 		else
@@ -202,7 +202,7 @@ bool SnakeBird::Load(const char *filename)
 				case 'v':
 					bod.push_back(kUp);
 					b = a;
-					b -= wWidth-1;
+					b -= wWidth+1;
 					bod = LoadSnake(bod, wWidth, b, lvlary);
 					AddSnake(x, y, bod);
 					bod.clear();
