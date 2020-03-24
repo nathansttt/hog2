@@ -29,6 +29,7 @@ namespace SnakeBird {
 const uint64_t locationMask = 0x1FF;
 const uint64_t snakeLenMask = 0x1F;
 const uint64_t fruitMask = 0x1F;
+const uint64_t snakeHeadMask = 0x7;
 const uint64_t snakeBodyMask = 0x3;
 const uint64_t kOne = 0x1;
 const int kDead = 510;
@@ -41,7 +42,7 @@ enum snakeDir : uint8_t {
 };
 struct SnakeBirdState {
 	uint64_t snakeBodies; // up to 32 in length
-	uint64_t snakeHeads; // up to 4. 2bits (num snakes) + 9 bits head + 5 bits start location of next. (max coordinate) head means snake left level
+	uint64_t snakeHeads; // up to 4. 3bits (num snakes) + 9 bits head + 5 bits start location of next. (max coordinate) head means snake left level
 	uint64_t locBlockFruit; // 4*9bit blocks; 28 fruit
 
 	SnakeBirdState() :snakeBodies(0), snakeHeads(0), locBlockFruit(0) {}
@@ -49,20 +50,21 @@ struct SnakeBirdState {
 	bool operator==(const SnakeBirdState &s) const {
 		return (s.snakeBodies==snakeBodies)&&(s.snakeHeads==snakeHeads)&&(s.locBlockFruit==locBlockFruit);
 	}
-	int GetNumSnakes() const { return snakeHeads&0x3; }
-	void SetNumSnakes(int count) { snakeHeads = (snakeHeads&(~snakeBodyMask))|(count&0x3); }
+	int GetNumSnakes() const { return snakeHeads&snakeHeadMask; }
+	void SetNumSnakes(int count) { snakeHeads = (snakeHeads&(~snakeHeadMask))|(count&snakeHeadMask); }
 	bool IsDead(int whichSnake) const
 	{ return GetSnakeHeadLoc(whichSnake) == kDead; }
 	bool IsInPlay(int whichSnake) const
 	{ return GetSnakeHeadLoc(whichSnake) != kDead && GetSnakeHeadLoc(whichSnake) != kInGoal; }
 	int GetSnakeHeadLoc(int whichSnake) const
-	{ return (snakeHeads>>(2+whichSnake*14))&0x1FF;}
+	{ return (snakeHeads>>(3+whichSnake*14))&0x1FF;}
 	void SetSnakeHeadLoc(int whichSnake, int loc)
-	{ snakeHeads &= ~(locationMask<<(2+whichSnake*14)); snakeHeads |= ((loc&locationMask)<<(2+whichSnake*14)); }
+	{ snakeHeads &= ~(locationMask<<(3+whichSnake*14));
+		snakeHeads |= ((loc&locationMask)<<(3+whichSnake*14)); }
 	int GetSnakeBodyEnd(int whichSnake) const
-	{ return (whichSnake<0)?0:(snakeHeads>>(2+9*(whichSnake+1)+5*whichSnake))&snakeLenMask; }
+	{ return (whichSnake<0)?0:(snakeHeads>>(3+9*(whichSnake+1)+5*whichSnake))&snakeLenMask; }
 	void SetSnakeBodyEnd(int whichSnake, int endOffset)
-	{ snakeHeads &= ~(snakeLenMask<<(2+9*(whichSnake+1)+5*whichSnake)); snakeHeads |= ((endOffset&snakeLenMask)<<(2+9*(whichSnake+1)+5*whichSnake)); }
+	{ snakeHeads &= ~(snakeLenMask<<(3+9*(whichSnake+1)+5*whichSnake)); snakeHeads |= ((endOffset&snakeLenMask)<<(3+9*(whichSnake+1)+5*whichSnake)); }
 	
 	void SetSnakeLength(int whichSnake, int len)
 	{ SetSnakeBodyEnd(whichSnake, GetSnakeBodyEnd(whichSnake-1)+len-1); }
