@@ -51,6 +51,8 @@ struct SnakeBirdState {
 	}
 	int GetNumSnakes() const { return snakeHeads&0x3; }
 	void SetNumSnakes(int count) { snakeHeads = (snakeHeads&(~snakeBodyMask))|(count&0x3); }
+	bool IsDead(int whichSnake) const
+	{ return GetSnakeHeadLoc(whichSnake) == kDead; }
 	bool IsInPlay(int whichSnake) const
 	{ return GetSnakeHeadLoc(whichSnake) != kDead && GetSnakeHeadLoc(whichSnake) != kInGoal; }
 	int GetSnakeHeadLoc(int whichSnake) const
@@ -155,14 +157,16 @@ enum SnakeBirdAnimation : uint8_t {
 	kWentInGoal,
 	kFellInGoal,
 	kDoneAnimation,
+	kPauseWhenDead,
 	kNeedsInitialization
 };
 
 struct SnakeBirdAnimationStep {
 	SnakeBirdAnimationStep() { Reset(); }
-	void Reset() { anim = kNeedsInitialization; }
+	void Reset() { anim = kNeedsInitialization; animationDuration = 0; }
 	SnakeBirdAnimation anim;
 	SnakeBirdAction a;
+	double animationDuration;
 };
 
 /*
@@ -226,7 +230,7 @@ public:
 
 	void GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const;
 	void GetActions(const SnakeBirdState &nodeID, std::vector<SnakeBirdAction> &actions) const;
-	
+	bool LivingState(const SnakeBirdState &s) const { return Render(s); }
 		
 	//SnakeBirdAction GetAction(const SnakeBirdState &s1, const SnakeBirdState &s2) const;
 	void ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const;
@@ -314,11 +318,13 @@ private:
 	int GetY(int index) const;
 	Graphics::point GetCenter(int x, int y) const;
 	float GetRadius() const;
+	void DrawSnakeEnteringGoal(Graphics::Display &display, const SnakeBirdState &s,
+							   int snake, bool isActive, double percentComplete) const;
 	void DrawTranslatingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
 							  int snake, bool isActive, double percentComplete) const;
 	void DrawMovingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
 						 int snake, bool isActive, double percentComplete) const;
-	void DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo) const;
+	void DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo, int whichSnake, bool alive) const;
 	std::array<SnakeBirdWorldObject, 512> world; // static world
 	mutable std::array<SnakeBirdWorldObject, 512> render;
 	std::vector<int> fruit;

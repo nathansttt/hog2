@@ -655,6 +655,9 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 {
 //	ApplyAction(s, act);
 //	return true;
+	if (step.anim == kPauseWhenDead)
+		return true;
+
 	
 	if (step.anim == kNeedsInitialization)
 	{
@@ -676,6 +679,7 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 	{
 		// exited level
 		step.anim = DoFirstMovement(step.a, offset, opposite, s);
+		step.animationDuration = 0.1;
 		return false;
 	}
 
@@ -686,6 +690,8 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 			if (world[s.GetSnakeHeadLoc(i)] == kExit && s.KFruitEaten(fruit.size()))
 			{
 				s.SetSnakeHeadLoc(i, kInGoal);
+				step.animationDuration = s.GetSnakeLength(i)*0.1;
+				break;
 			}
 		}
 		step.anim = kInitialTeleport;
@@ -712,7 +718,11 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 	// 3. If no objects moved, stop; else repeat to 1.
 	bool success = Render(s);
 	if (!success) // someone died as a result of the action
-		return true;
+	{
+		step.animationDuration = 0.5; // then undo automatically
+		step.anim = kPauseWhenDead;
+		return false;
+	}
 
 	if (step.anim == kTeleport || step.anim == kInitialTeleport)
 	{
@@ -720,6 +730,7 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 		if (didTeleport)
 		{
 			step.anim = kFall;
+			step.animationDuration = 0.1;
 			return false;
 		}
 		step.anim = kFall;
@@ -730,6 +741,7 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 		step.anim = DoFall(step.a, s);
 		if (step.anim == kDoneAnimation)
 			return true;
+		step.animationDuration = 0.05; // then undo automatically
 		return false;
 	}
 	
@@ -740,6 +752,8 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 			if (world[s.GetSnakeHeadLoc(i)] == kExit && s.KFruitEaten(fruit.size()))
 			{
 				s.SetSnakeHeadLoc(i, kInGoal);
+				step.animationDuration = s.GetSnakeLength(i)*0.1;
+				break;
 			}
 		}
 		step.anim = kFall;
@@ -1240,8 +1254,11 @@ void SnakeBird::Draw(Graphics::Display &display, double time) const
 				}
 				break;
 			case kSpikes:
-				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
-				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+				if (GetY(x) != height-1)
+				{
+					display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+					display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+				}
 				break;
 			case kPortal1:
 			case kPortal2:
@@ -1257,45 +1274,11 @@ void SnakeBird::Draw(Graphics::Display &display, double time) const
 			}
 				break;
 			case kExit:
-//			{
-//				double offset1 = (sin(time*1.0))*180; // -1...+1
-//				double offset2 = (sin(time*1.5))*180; // -1...+1
-//				double offset3 = (sin(time*2.0))*180; // -1...+1
-////				display.FillNGon(p, radius, 5, 0, Colors::yellow);
-////				display.FillNGon(p, radius*0.66, 5, 36, Colors::orange);
-////				display.FillNGon(p, radius*0.25, 5, 54, Colors::red);
-//				display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
-//				display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
-//				display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
-//			}
 				break;
 			case kFruit:
-//				p.x-=radius/4;
-//				display.FillCircle(p, radius/2.0, Colors::green);
-//				p.x+=radius/2;
-//				display.FillCircle(p, radius/2.0, Colors::green);
 				break;
 		}
 	}
-	
-//	// draw grid
-//	for (int x = 0; x < width; x++)
-//	{
-//		Graphics::point p1, p2;
-//		p1.x = GetX(GetIndex(x, 0))-GetRadius();
-//		p1.y = GetY(GetIndex(x, 0))-GetRadius();
-//		p2.x = p1.x;
-//		p2.y = GetY(GetIndex(x, 16))-GetRadius();
-//		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
-//	}
-//	for (int y = 0; y < 16; y++)
-//	{
-//		Graphics::point p1, p2;
-//		p1.x = GetX(GetIndex(0, y))-GetRadius();
-//		p1.y = GetY(GetIndex(width, y))-GetRadius();
-//		p2.y = p1.y;
-//		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
-//	}
 }
 
 
@@ -1321,6 +1304,59 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 {
 	Draw(display, s, active, 0);
 }
+
+void SnakeBird::DrawSnakeEnteringGoal(Graphics::Display &display,
+									  const SnakeBirdState &s,
+									  int snake, bool isActive, double percentComplete) const
+{
+	const rgbColor snakeColors[4] = {Colors::red, Colors::blue, Colors::green, Colors::yellow};
+	int index = s.GetSnakeHeadLoc(snake);
+	
+	int x = GetX(index);
+	int y = GetY(index);
+	int len = s.GetSnakeLength(snake);
+	float timePerSegment = 1.0f/len;
+	float drawnTime = 0;
+	int nextIn = percentComplete*len;
+	int cnt = 0;
+	
+	int prevx = x, prevy = y; // 2 steps back
+	for (int t = nextIn; t < len; t++)
+	{
+		int lastx = x;
+		int lasty = y;
+		switch (s.GetSnakeDir(snake, cnt))
+		{
+			case kUp: y-=1; break;
+			case kDown: y+=1; break;
+			case kRight: x+=1; break;
+			case kLeft: x-=1; break;
+			default: break;
+		}
+		bool tail = (t+1==len);
+
+		Graphics::point p = GetCenter(lastx, lasty);
+		Graphics::point p2 = GetCenter(prevx, prevy);
+//		rgbColor color = snakeColors[snake]*(((++cnt+len)&1)?0.8:1.0);
+		rgbColor color = snakeColors[snake]*(((lastx+lasty)&1)?0.8:1.0);
+		++cnt;
+		prevx = lastx;
+		prevy = lasty;
+		if (t == len-1)
+		{
+			float perc = percentComplete*len-nextIn;
+			p = p2*perc+p*(1-perc);
+		}
+		
+		DrawSnakeSegment(display, p, color,
+						 (t == nextIn), // head - (was false always?)
+						 tail,  // tail
+						 false, // awake
+						 (t == nextIn)?kUp:s.GetSnakeDir(snake, cnt-2), // dirFrom
+						 tail?kUp:s.GetSnakeDir(snake, cnt-1), snake, s.IsDead(snake)); //dirTo - ignored if tail is true
+	}
+}
+
 
 void SnakeBird::DrawTranslatingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
 									 int snake, bool isActive, double percentComplete) const
@@ -1351,6 +1387,8 @@ void SnakeBird::DrawTranslatingSnake(Graphics::Display &display, const SnakeBird
 		Graphics::point p = GetCenter(x, y);
 		Graphics::point p2 = GetCenter(deltax+x, deltay+y);
 		rgbColor color = snakeColors[snake]*(((++cnt+len)&1)?0.8:1.0);
+//		rgbColor color = snakeColors[snake]*(((x+y)&1)?0.8:1.0);
+//		++cnt;
 		
 		if (oldLen == len)
 		{
@@ -1366,7 +1404,7 @@ void SnakeBird::DrawTranslatingSnake(Graphics::Display &display, const SnakeBird
 						 tail,  // tail
 						 false, // awake
 						 s.GetSnakeDir(snake, t), // dirFrom
-						 tail?kUp:s.GetSnakeDir(snake, t+1)); //dirTo - ignored if tail is true
+						 tail?kUp:s.GetSnakeDir(snake, t+1), snake, s.IsDead(snake)); //dirTo - ignored if tail is true
 	}
 
 	// Now draw head
@@ -1381,8 +1419,9 @@ void SnakeBird::DrawTranslatingSnake(Graphics::Display &display, const SnakeBird
 	Graphics::point p = GetCenter(x, y);
 	Graphics::point p2 = GetCenter(deltax+x, deltay+y);
 	p = p*percentComplete + p2*(1-percentComplete);
+//	rgbColor color = snakeColors[snake]*(((deltax+deltay+x+y)&1)?0.8:1.0);
 	rgbColor color = snakeColors[snake]*((len%2)?0.8:1.0);
-	DrawSnakeSegment(display, p, color, true, false, isActive, kUp, s.GetSnakeDir(snake, 0));
+	DrawSnakeSegment(display, p, color, true, false, isActive, kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
 }
 
 void SnakeBird::DrawMovingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
@@ -1411,13 +1450,15 @@ void SnakeBird::DrawMovingSnake(Graphics::Display &display, const SnakeBirdState
 		if (percentComplete < 0.1 && t == 0)
 			head = true;
 		rgbColor color = snakeColors[snake]*(((++cnt+len)&1)?0.8:1.0);
+//		rgbColor color = snakeColors[snake]*(((x+y)&1)?0.8:1.0);
+//		++cnt;
 		Graphics::point p = GetCenter(x, y);
 		DrawSnakeSegment(display, p, color,
 						 head, // head
 						 false, // tail
 						 false, // awake
 						 fromDir, // dirFrom
-						 toDir); //dirTo - ignored if tail is true
+						 toDir, snake, s.IsDead(snake)); //dirTo - ignored if tail is true
 
 		fromDir = old.GetSnakeDir(snake, t);
 		toDir = old.GetSnakeDir(snake, t+1);
@@ -1440,12 +1481,15 @@ void SnakeBird::DrawMovingSnake(Graphics::Display &display, const SnakeBirdState
 		Graphics::point p2 = GetCenter(x, y);
 		p = p*percentComplete + p2*(1-percentComplete);
 		color = snakeColors[snake]*(((len+1)%2)?0.8:1.0);
-		DrawSnakeSegment(display, p, color, false, true, false, old.GetSnakeDir(snake, len-2), kUp/*next*/);
+//		color = snakeColors[snake]*(((x+y)&1)?0.8:1.0);
+		DrawSnakeSegment(display, p, color, false, true, false, old.GetSnakeDir(snake, len-2), kUp/*next*/, snake, s.IsDead(snake));
 	}
 	else {
 		Graphics::point p = GetCenter(x, y);
 		rgbColor color = snakeColors[snake]*(((++cnt+len)&1)?0.8:1.0);
-		DrawSnakeSegment(display, p, color, false, true, false, old.GetSnakeDir(snake, len-2), kUp/*next*/);
+//		++cnt;
+//		rgbColor color = snakeColors[snake]*(((x+y)&1)?0.8:1.0);
+		DrawSnakeSegment(display, p, color, false, true, false, old.GetSnakeDir(snake, len-2), kUp/*next*/, snake, s.IsDead(snake));
 	}
 	
 	// Now draw moving head
@@ -1459,13 +1503,55 @@ void SnakeBird::DrawMovingSnake(Graphics::Display &display, const SnakeBirdState
 	Graphics::point p2 = GetCenter(deltax+x, deltay+y);
 	p = p*percentComplete + p2*(1-percentComplete);
 	rgbColor color = snakeColors[snake]*((len%2)?0.8:1.0);
-	DrawSnakeSegment(display, p, color, true, false, isActive, kUp, s.GetSnakeDir(snake, 0));
+//	rgbColor color = snakeColors[snake]*(((deltax+deltay+x+y)&1)?0.8:1.0);
+	DrawSnakeSegment(display, p, color, true, false, isActive, kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
 }
 
 
 void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
 					 int active, double percentComplete, double globalTime) const
 {
+	rgbColor snakeColors[4] = {Colors::red, Colors::blue, Colors::green, Colors::yellow};
+	rgbColor objColors[4] = {Colors::red*0.5, Colors::blue*0.5, Colors::green*0.5, Colors::yellow*0.5};
+	
+	// draw bodies
+	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
+	{
+		// get head loc
+		int index = s.GetSnakeHeadLoc(snake);
+//		if (index == kInGoal)
+//			continue;
+		if (index == kInGoal && old.GetSnakeHeadLoc(snake) == kInGoal)
+		{
+			// do nothing
+		}
+		else if (index != kInGoal && old.GetSnakeHeadLoc(snake) == kInGoal) // undoing an action
+		{
+			DrawTranslatingSnake(display, s, s, snake, (active==-1)||(active==snake), percentComplete);
+		}
+		else if (index == kInGoal && old.GetSnakeHeadLoc(snake) != kInGoal) // moved into goal
+		{
+			DrawSnakeEnteringGoal(display, old, snake, (active==-1)||(active==snake), percentComplete);
+		}
+		else if (s.GetBodyBits(snake) == old.GetBodyBits(snake))
+		{
+			// tween entire snake
+			DrawTranslatingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
+			continue;
+		}
+		else if (s.GetSnakeLength(snake) != old.GetSnakeLength(snake))
+		{
+			// body stays the same - just draw head moving
+			DrawMovingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
+			continue;
+		}
+		else {
+			// whole snake moves -
+			DrawMovingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
+			continue;
+		}
+	}
+
 	// draw exit
 	if (exitLoc != -1)
 	{
@@ -1486,99 +1572,6 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState &old, cons
 		display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
 		display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
 		display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
-	}
-
-	rgbColor snakeColors[4] = {Colors::red, Colors::blue, Colors::green, Colors::yellow};
-	rgbColor objColors[4] = {Colors::red*0.5, Colors::blue*0.5, Colors::green*0.5, Colors::yellow*0.5};
-	
-	// draw bodies
-	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
-	{
-		// get head loc
-		int index = s.GetSnakeHeadLoc(snake);
-		if (index == kInGoal)
-			continue;
-
-		
-		if (s.GetBodyBits(snake) == old.GetBodyBits(snake))
-		{
-			// tween entire snake
-			DrawTranslatingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
-			continue;
-		}
-		else if (s.GetSnakeLength(snake) != old.GetSnakeLength(snake))
-		{
-			// body stays the same - just draw head moving
-			DrawMovingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
-			continue;
-		}
-		else {
-			// whole snake moves -
-			DrawMovingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
-			continue;
-		}
-		
-		int x = GetX(index);
-		int y = GetY(index);
-		int deltax = GetX(old.GetSnakeHeadLoc(snake))-x;
-		int deltay = GetY(old.GetSnakeHeadLoc(snake))-y;
-//		display.FillSquare(p, GetRadius(), Colors::red);
-		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
-		int oldLen = old.GetSnakeBodyEnd(snake)-old.GetSnakeBodyEnd(snake-1);
-		
-		int cnt = 0;
-		for (int t = 0; t < len; t++)
-		{
-			switch (s.GetSnakeDir(snake, t))
-			{
-				case kUp: y-=1; break;
-				case kDown: y+=1; break;
-				case kRight: x+=1; break;
-				case kLeft: x-=1; break;
-				default: break;
-			}
-			bool tail = t+1==(s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1));
-			Graphics::point p = GetCenter(x, y);
-			Graphics::point p2 = GetCenter(deltax+x, deltay+y);
-			rgbColor color = snakeColors[snake]*(((++cnt+len)&1)?0.8:1.0);
-
-			if (oldLen == len)
-			{
-				p = p*percentComplete + p2*(1-percentComplete);
-			}
-			else if (tail)
-			{
-				p = p2;
-			}
-			
-			DrawSnakeSegment(display, p, color,
-							 false, // head
-							 tail,  // tail
-							 false, // awake
-							 s.GetSnakeDir(snake, t), // dirFrom
-							 tail?kUp:s.GetSnakeDir(snake, t+1)); //dirTo - ignored if tail is true
-		}
-	}
-	// draw heads
-	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
-	{
-		// get head loc
-		int index = s.GetSnakeHeadLoc(snake);
-		if (index == kInGoal)
-			continue;
-		
-		int x = GetX(index);
-		int y = GetY(index);
-		int deltax = GetX(old.GetSnakeHeadLoc(snake))-x;
-		int deltay = GetY(old.GetSnakeHeadLoc(snake))-y;
-		//		display.FillSquare(p, GetRadius(), Colors::red);
-		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
-		
-		Graphics::point p = GetCenter(x, y);
-		Graphics::point p2 = GetCenter(deltax+x, deltay+y);
-		p = p*percentComplete + p2*(1-percentComplete);
-		rgbColor color = snakeColors[snake]*((len%2)?0.8:1.0);
-		DrawSnakeSegment(display, p, color, true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0));
 	}
 
 	
@@ -1607,12 +1600,43 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState &old, cons
 	{
 		if (s.GetFruitPresent(x))
 		{
+			const float rows = 5;
+			const float counts[] = {3, 4, 3, 2, 1};
 			Graphics::point p = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
-
-			display.FillCircle(p, GetRadius()*0.8, Colors::orange);
+			float grapeRadius = GetRadius()*0.15f;
+			for (int t = 0; t < rows; t++)
+			{
+				for (int v = 0; v < counts[t]; v++)
+				{
+					Graphics::point tmp = p;
+					tmp.y -= rows*grapeRadius;
+					tmp.y += 2*t*grapeRadius;
+					tmp.x = tmp.x-grapeRadius*(counts[t]-1)+v*grapeRadius*2;
+					tmp.x += sin(globalTime*1.1+(t+v)*0.1)*GetRadius()*0.1;
+					tmp.y += cos(globalTime*0.95+(t+v)*0.1)*GetRadius()*0.1;
+					display.FillCircle(tmp, grapeRadius*1.1, Colors::purple*sin(globalTime*1.95+v+t));
+				}
+			}
+			
+//			Graphics::point p = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
+//			Graphics::point p2 = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
+//			Graphics::point p3 = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
+//			p.x  += GetRadius()*0.5+sin(globalTime*0.95)*GetRadius()*0.1;
+//			p.y  += sin(globalTime)*GetRadius()*0.1+GetRadius()*0.25;
+//			p2.x -= GetRadius()*0.5+sin(globalTime*1.05)*GetRadius()*0.1;
+//			p2.y += sin(globalTime*1.1)*GetRadius()*0.1+GetRadius()*0.25;
+//			p3.x -= GetRadius()*0.10;
+//			p3.y -= GetRadius();
+//			//display.FillCircle(p, GetRadius()*0.8, Colors::orange);
+//			display.DrawLine(p, p3, GetRadius()*0.1, Colors::black);
+//			display.DrawLine(p3, p2, GetRadius()*0.1, Colors::black);
+//			display.FillCircle(p, GetRadius()*0.4, Colors::red);
+//			display.FillCircle(p2, GetRadius()*0.4, Colors::red);
 		}
+		
 	}
 }
+
 void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int active, double globalTime) const
 {
 	// draw exit
@@ -1654,9 +1678,9 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 
 		Graphics::point p = GetCenter(x, y);
 		if (len%2)
-			DrawSnakeSegment(display, p, c[snake]*0.8, true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0));
+			DrawSnakeSegment(display, p, c[snake]*0.8, true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
 		else
-			DrawSnakeSegment(display, p, c[snake], true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0));
+			DrawSnakeSegment(display, p, c[snake], true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
 
 		int cnt = 0;
 		for (int t = 0; t < len; t++)
@@ -1681,9 +1705,9 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 			bool tail = t+1==(s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1));
 			Graphics::point p = GetCenter(x, y);
 			if ((++cnt+len)&1)
-				DrawSnakeSegment(display, p, c[snake]*0.8, false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1));
+				DrawSnakeSegment(display, p, c[snake]*0.8, false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1), snake, s.IsDead(snake));
 			else
-				DrawSnakeSegment(display, p, c[snake], false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1));
+				DrawSnakeSegment(display, p, c[snake], false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1), snake, s.IsDead(snake));
 		}
 	}
 	
@@ -1710,13 +1734,19 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int act
 		if (s.GetFruitPresent(x))
 		{
 			Graphics::point p = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
-
-			display.FillCircle(p, GetRadius()*0.8, Colors::orange);
+			Graphics::point p2 = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
+			p.x  += GetRadius()*0.5;
+			p.y  += sin(globalTime)*GetRadius()*0.1;
+			p2.x -= GetRadius()*0.5;
+			p2.y  += sin(globalTime*1.1)*GetRadius()*0.1;
+			//display.FillCircle(p, GetRadius()*0.8, Colors::orange);
+			display.FillCircle(p, GetRadius()*0.4, Colors::red);
+			display.FillCircle(p2, GetRadius()*0.4, Colors::red);
 		}
 	}
 }
 
-void SnakeBird::DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo) const
+void SnakeBird::DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo, int snake, bool isDead) const
 {
 	const float cornerWidth = 0.75;
 	float offset = cornerWidth*GetRadius();
@@ -1769,15 +1799,27 @@ void SnakeBird::DrawSnakeSegment(Graphics::Display &display, Graphics::point p, 
 
 	if (head)
 	{
-		// draw eyes
+		float eyescale = 1+snake/5.0;
+		rgbColor tmp = color*0.5;
+		if (isDead)
+			tmp = Colors::black;
+		else if (awake)
+			tmp = Colors::white;
+		// draw both eyes
 		p.x+=GetRadius()*0.2;
-		display.FillCircle(p, GetRadius()*0.2, awake?Colors::white:(color*0.5));
-		if (awake)
-			display.FillCircle(p, GetRadius()*0.1, Colors::black);
+		display.FillCircle(p, GetRadius()*0.2*eyescale, tmp);
 		p.x-=2*GetRadius()*0.2;
-		display.FillCircle(p, GetRadius()*0.2, awake?Colors::white:(color*0.5));
+		display.FillCircle(p, GetRadius()*0.2*eyescale, tmp);
+		p.x+=2*GetRadius()*0.2;
+
+		// draw iris
 		if (awake)
-			display.FillCircle(p, GetRadius()*0.1, Colors::black);
+			display.FillCircle(p, GetRadius()*0.1*eyescale, Colors::black);
+		p.x-=2*GetRadius()*0.2;
+		//display.FillCircle(p, GetRadius()*0.2*eyescale, awake?Colors::white:(color*0.5));
+		if (awake)
+			display.FillCircle(p, GetRadius()*0.1*eyescale, Colors::black);
+
 		p.x+=GetRadius()*0.2;
 		p.y+=2*GetRadius()*0.25;
 		display.FillNGon(p, GetRadius()*0.3, 3, 240, Colors::orange);
