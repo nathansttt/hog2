@@ -24,13 +24,15 @@ public:
 
 class LineTransition : public ScreenTransition {
 public:
-	LineTransition(int numSegments, int linesPerSegment);
+	LineTransition(int numSegments, int linesPerSegment, rgbColor color = Colors::black);
 	virtual void Reset(float t);
 	virtual bool Step(float delta) ;
 	virtual void Draw(Graphics::Display &d) ;
+	void SetColor(rgbColor c);
 private:
 	float mTime;
 	int numSegments, linesPerSegment;
+	rgbColor color;
 };
 
 class FallingBoxTransition  : public ScreenTransition {

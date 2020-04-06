@@ -8,10 +8,16 @@
 
 #include "ScreenTransition.h"
 
-LineTransition::LineTransition(int seg, int lps)
+LineTransition::LineTransition(int seg, int lps, rgbColor clr)
 {
 	numSegments = seg;
 	linesPerSegment = lps;
+	color = clr;
+}
+
+void LineTransition::SetColor(rgbColor c)
+{
+	color = c;
 }
 
 void LineTransition::Reset(float t)
@@ -38,7 +44,7 @@ void LineTransition::Draw(Graphics::Display &d)
 	for (int x = -2; x < numSegments+2; x++)
 	{
 		Graphics::rect r(-2, -1+x*segmentHeight, 2, -1+x*segmentHeight+mTime*segmentHeight);
-		d.FillRect(r, Colors::black);
+		d.FillRect(r, color);
 	}
 }
 
