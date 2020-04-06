@@ -225,10 +225,14 @@ public:
 	void Reset();
 	bool Load(const char *filename);
 	bool Save(const char *filename);
-	SnakeBirdState GetStart();
+	SnakeBirdState GetStart() const;
+	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
 	SnakeBirdWorldObject GetGroundType(int x, int y);
+	SnakeBirdWorldObject GetRenderedGroundType(const SnakeBirdState &s, int x, int y);
+	int GetWidth() { return width; }
+	int GetHeight() { return height; }
 
 	void GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const;
 	void GetActions(const SnakeBirdState &nodeID, std::vector<SnakeBirdAction> &actions) const;

@@ -38,10 +38,16 @@ void SnakeBird::Reset()
 		objects[x].clear();
 }
 
-SnakeBirdState SnakeBird::GetStart()
+SnakeBirdState SnakeBird::GetStart() const
 {
 	return startState;
 }
+
+void SnakeBird::SetStart(const SnakeBirdState &start)
+{
+	startState = start;
+}
+
 
 void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
 {
@@ -830,6 +836,11 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 		
 		if (step.anim == kFellInGoal)
 		{
+			// check if we died at the same time
+			bool success = Render(s);
+			if (!success)
+				return;
+			
 			for (int i = 0; i < 4; i++)
 			{
 				if (world[s.GetSnakeHeadLoc(i)] == kExit && s.KFruitEaten(fruit.size()))
@@ -1145,6 +1156,17 @@ SnakeBirdWorldObject SnakeBird::GetGroundType(int x, int y)
 	return world[GetIndex(x, y)];
 }
 
+SnakeBirdWorldObject SnakeBird::GetRenderedGroundType(const SnakeBirdState &s, int x, int y)
+{
+	if (GetGroundType(x, y) == kEmpty)
+		return GetGroundType(x, y);
+	bool success = Render(s);
+	if (!success)
+		return kExit;
+	//	assert(success);
+	return render[GetIndex(x, y)];
+}
+
 
 int SnakeBird::GetIndex(int x, int y) const
 {
@@ -1232,8 +1254,9 @@ void SnakeBird::Draw(Graphics::Display &display) const
 
 void SnakeBird::Draw(Graphics::Display &display, double time) const
 {
-	display.FillRect({-1, -1, 1, 0.5}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
-	display.FillRect({-1, 0.5, 1, 1}, Colors::darkblue+Colors::darkred);
+	display.FillRect({-1, -1, 1, 1}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
+	Graphics::point tmp = GetCenter(width, height);
+	display.FillRect({-1, tmp.y-GetRadius(), 1, 1}, Colors::darkblue+Colors::darkred);
 	for (int x = 0; x < width*height; x++)
 	{
 		Graphics::point p = GetCenter(GetX(x), GetY(x));
