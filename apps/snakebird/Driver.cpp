@@ -18,6 +18,7 @@
 #include "SVGUtil.h"
 #include "TemplateAStar.h"
 #include "BFS.h"
+#include "ScreenTransition.h"
 
 #include <sys/stat.h>
 bool fileExists(const char *name)
@@ -30,7 +31,7 @@ bool fileExists(const char *name)
 std::string mapName;
 
 bool recording = false;
-bool parallel = false;
+bool autoSolve = false;
 double globalTime = 0;
 double frameTime = 0; // seconds elapsed in current frame
 double timePerFrame = 0.1; // seconds for drawing each step of frame
@@ -41,12 +42,17 @@ SnakeBird::SnakeBirdAction inProgress;
 
 Timer worldClock;
 double lastFrameStart;
+LineTransition transition(100, 60, Colors::white);
 
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
+SnakeBird::SnakeBirdState lastFrameSnake;
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
+
+void AnalyzeMapChanges();
+
 
 int main(int argc, char* argv[])
 {
@@ -70,8 +76,11 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Next", "Select Next Snake", kAnyModifier, 'e');
 	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset Level", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Print", "Print screen to file", kAnyModifier, 'p');
+	InstallKeyboardHandler(MyDisplayHandler, "Movie", "Record movie frames", kAnyModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Solve", "Build solution", kAnyModifier, 'b');
+	InstallKeyboardHandler(MyDisplayHandler, "Run", "Run solution (build if needed)", kAnyModifier, 'n');
 	InstallKeyboardHandler(MyDisplayHandler, "Step", "Take next step in solution", kAnyModifier, ']');
+	InstallKeyboardHandler(MyDisplayHandler, "Change", "Make one change to increase solution length", kAnyModifier, 'c');
 
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <input> <output>", "Make an .svg of the given level then quit");
@@ -95,6 +104,37 @@ void Save(const SnakeBird::SnakeBird &sb, const SnakeBird::SnakeBirdState &sbs, 
 	}
 	printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
 	MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0);
+}
+
+void UpdateActiveSnake()
+{
+	if (future.size() > 0)
+	{
+		auto act = sb.GetAction(snake, future.back());
+		if (snake.IsInPlay(act.bird))
+			snakeControl = act.bird;
+	}
+
+	if (snakeControl >= snake.GetNumSnakes())
+		snakeControl = 0;
+	
+	// If snake went into goal, switch active snake
+	for (int x = 0; x < snake.GetNumSnakes(); x++)
+	{
+		if (snake.IsInPlay(snakeControl))
+			break;
+		snakeControl = (snakeControl+1)%snake.GetNumSnakes();
+	}
+}
+
+bool NoActionsAvailable()
+{
+	return !sb.LivingState(snake);
+//	static std::vector<SnakeBird::SnakeBirdAction> acts;
+//	if (sb.GoalTest(snake, snake))
+//		return false;
+//	sb.GetActions(snake, acts);
+//	return acts.size() == 0;
 }
 
 void LoadLevel19()
@@ -122,6 +162,9 @@ void LoadLevel19()
 	history.clear();
 	history.push_back(snake);
 	future.clear();
+	actionInProgressStep.Reset();
+	timePerFrame = 0.01;
+	UpdateActiveSnake();
 }
 
 void LoadLevel22()
@@ -160,6 +203,9 @@ void LoadLevel22()
 	history.clear();
 	history.push_back(snake);
 	future.clear();
+	actionInProgressStep.Reset();
+	timePerFrame = 0.01;
+	UpdateActiveSnake();
 }
 
 void LoadLevel39()
@@ -202,6 +248,9 @@ void LoadLevel39()
 	history.clear();
 	history.push_back(snake);
 	future.clear();
+	actionInProgressStep.Reset();
+	timePerFrame = 0.01;
+	UpdateActiveSnake();
 }
 
 void LoadLevel32()
@@ -232,6 +281,9 @@ void LoadLevel32()
 	history.clear();
 	history.push_back(snake);
 	future.clear();
+	actionInProgressStep.Reset();
+	timePerFrame = 0.01;
+	UpdateActiveSnake();
 }
 
 void LoadLevel44()
@@ -260,6 +312,9 @@ void LoadLevel44()
 	history.clear();
 	history.push_back(snake);
 	future.clear();
+	actionInProgressStep.Reset();
+	timePerFrame = 0.01;
+	UpdateActiveSnake();
 }
 
 void LoadLevel63()
@@ -290,6 +345,9 @@ void LoadLevel63()
 	history.clear();
 	history.push_back(snake);
 	future.clear();
+	actionInProgressStep.Reset();
+	timePerFrame = 0.01;
+	UpdateActiveSnake();
 }
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
@@ -326,10 +384,12 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	SetNumPorts(windowID, 1);
 	frameRate = worldClock.EndTimer()-lastFrameStart;
 	lastFrameStart = worldClock.EndTimer();
+	if (recording)
+		frameRate = 1.0/60.0; // fixed frame rate when recording
 //	printf("%f\n", frameRate);
-	static SnakeBird::SnakeBirdState lastFrameSnake = snake;
 	
 	globalTime += frameRate;
 	frameTime += frameRate;
@@ -341,19 +401,59 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			lastFrameSnake = snake;
 			bool complete = sb.ApplyPartialAction(snake, inProgress, actionInProgressStep);
 			actionInProgress = !complete;
-			if (actionInProgressStep.anim == SnakeBird::kTeleport)
-				timePerFrame = 0.05f;
-			else
-				timePerFrame = 0.1f;
+			timePerFrame = actionInProgressStep.animationDuration;
+
+			if (!actionInProgress)
+			{
+				if (NoActionsAvailable())
+					MyDisplayHandler(windowID, kNoModifier, 'q');
+				UpdateActiveSnake();
+			}
+			
+			if (actionInProgress == false && autoSolve == true)
+			{
+				MyDisplayHandler(windowID, kNoModifier, ']');
+			}
 		}
 		else {
+			autoSolve = false;
 			lastFrameSnake = snake;
+			if (NoActionsAvailable())
+			{
+				MyDisplayHandler(windowID, kNoModifier, 'q');
+			}
 		}
 	}
 	Graphics::Display &d = GetContext(windowID)->display;
+		
 	sb.Draw(d, globalTime);
 	//sb.Draw(d, snake, snakeControl, globalTime);
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
+
+	if (sb.GoalTest(snake))
+	{
+		transition.Draw(d);
+		if (transition.Step(frameRate))
+		{
+			d.DrawText("Great Job", {0,0}, Colors::black, 0.25f, Graphics::textAlignCenter);
+			d.DrawText("Level Passed!", {0,0.25}, Colors::black, 0.25f, Graphics::textAlignCenter);
+		}
+	}
+	else {
+		transition.Reset(0);
+	}
+	
+	if (recording)
+	{
+		std::string fname = "/Users/nathanst/Movies/tmp/sb_";
+		static int count = 0;
+		while (fileExists((fname+std::to_string(count)+".svg").c_str()))
+		{
+			count++;
+		}
+		printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
+		MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0);
+	}
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)
@@ -410,7 +510,7 @@ void HurryUpFinishAction()
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 //	SnakeBird::SnakeBirdAction a;
-	std::vector<SnakeBird::SnakeBirdAction> acts;
+	static std::vector<SnakeBird::SnakeBirdAction> acts;
 //	a.bird = snakeControl;
 	switch (key)
 	{
@@ -436,14 +536,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					history.push_back(snake);
 				}
 			}
-			// If snake went into goal, switch active snake
-			for (int x = 0; x < snake.GetNumSnakes(); x++)
-			{
-				if (snake.IsInPlay(snakeControl))
-					break;
-				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
-			}
-
+			UpdateActiveSnake();
 			break;
 		case 's':
 			future.clear();
@@ -463,19 +556,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //					history.push_back(snake);
 				}
 			}
-			// If snake went into goal, switch active snake
-			for (int x = 0; x < snake.GetNumSnakes(); x++)
-			{
-				if (snake.IsInPlay(snakeControl))
-					break;
-				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
-			}
-//			a.direction = SnakeBird::kDown;
-//			if (sb.Legal(snake, a))
-//			{
-//				sb.ApplyAction(snake, a);
-//				history.push_back(snake);
-//			}
+			UpdateActiveSnake();
 			break;
 		case 'a':
 			future.clear();
@@ -494,20 +575,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //					history.push_back(snake);
 				}
 			}
-			// If snake went into goal, switch active snake
-			for (int x = 0; x < snake.GetNumSnakes(); x++)
-			{
-				if (snake.IsInPlay(snakeControl))
-					break;
-				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
-			}
-
-//			a.direction = SnakeBird::kLeft;
-//			if (sb.Legal(snake, a))
-//			{
-//				sb.ApplyAction(snake, a);
-//				history.push_back(snake);
-//			}
+			UpdateActiveSnake();
 			break;
 		case 'd':
 			future.clear();
@@ -526,28 +594,18 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 //					history.push_back(snake);
 				}
 			}
-			// If snake went into goal, switch active snake
-			for (int x = 0; x < snake.GetNumSnakes(); x++)
-			{
-				if (snake.IsInPlay(snakeControl))
-					break;
-				snakeControl = (snakeControl+1)%snake.GetNumSnakes();
-			}
-
-//			a.direction = SnakeBird::kRight;
-//			if (sb.Legal(snake, a))
-//			{
-//				sb.ApplyAction(snake, a);
-//				history.push_back(snake);
-//			}
+			UpdateActiveSnake();
 			break;
 		case 'q':
 			future.clear();
 			if (history.size() > 1)
 			{
 				snake = history.back();
+				lastFrameSnake = snake;
+				timePerFrame = 0.001;
 				history.pop_back();
 			}
+			UpdateActiveSnake();
 			break;
 		case 'e':
 			for (int x = 0; x < snake.GetNumSnakes(); x++)
@@ -570,12 +628,21 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				future.pop_back();
 			}
 			break;
+		case 'n':
+			MyDisplayHandler(windowID, kNoModifier, 'b');
+			autoSolve = true;
+			MyDisplayHandler(windowID, kNoModifier, ']');
+			break;
+		case 'c':
+			AnalyzeMapChanges();
+			break;
 		case 'b':
 		{
 			Timer t;
 			BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
-			bfs.SetNodeLimit(20000000);
-//		bfs.SetNodeLimit(75000000); // max 75 million expansions
+			//bfs.SetNodeLimit(20000000);
+			//bfs.SetNodeLimit(75000000); // max 75 million expansions
+			bfs.SetNodeLimit(150000000); // max 150 million expansions
 			//bfs.DoBFS(&sb, snake);
 			t.StartTimer();
 			bfs.GetPath(&sb, snake, snake, future);
@@ -594,14 +661,15 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				std::reverse(future.begin(), future.end());
 				// remove the current state
 				future.pop_back();
+				UpdateActiveSnake();
 			}
 			break;
 		}
 		case 'p':
 		{
 			Graphics::Display d;
-			sb.Draw(d);
-			sb.Draw(d, snake, snakeControl);
+			sb.Draw(d, globalTime);
+			sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 			std::string fname = "/Users/nathanst/Desktop/SVG/sb_";
 			int count = 0;
 			while (fileExists((fname+std::to_string(count)+".svg").c_str()))
@@ -611,35 +679,16 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
 			MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0);
 		}
+		case 'o':
+			recording = !recording;
+			break;
 		case 't':
 			break;
 		case 'v':
-		{
-		}
-			break;
-//		case 's':
-		{
-//			Graphics::Display d;
-//			//d.FillRect({-1, -1, 1, 1}, Colors::darkgray);
-//			w.Draw(d);
-//			w.Draw(d, iws);
-//			std::string fname = "/Users/nathanst/Desktop/SVG/witness_";
-//			int count = 0;
-//			while (fileExists((fname+std::to_string(count)+".svg").c_str()))
-//			{
-//				count++;
-//			}
-//			printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
-//			MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0, w.SaveToHashString().c_str());
-//
-//			{
-//				int wide, high;
-//				w.GetDimensionsFromHashString(w.SaveToHashString(), wide, high);
-//			}
-		}
 			break;
 		case 'r':
 			snake = history[0];
+			timePerFrame = 0.01;
 			history.resize(1);
 			break;
 		case '\t':
@@ -671,3 +720,78 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 	return true;
 }
 
+void AnalyzeMapChanges()
+{
+	BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
+	bfs.SetNodeLimit(1000000); // max 1 million expansions
+	bfs.SetVerbose(false);
+	std::vector<SnakeBird::SnakeBirdState> path;
+
+	size_t maxLength = 0;
+	SnakeBird::SnakeBird best;
+	SnakeBird::SnakeBirdState current = sb.GetStart();
+	SnakeBird::SnakeBird curr = sb;
+	std::vector<SnakeBird::SnakeBirdWorldObject> order;
+	for (int x = 0; x < sb.GetWidth(); x++)
+	{
+		for (int y = 0; y < sb.GetHeight()-1; y++)
+		{
+			auto renderedType = sb.GetRenderedGroundType(current, x, y);
+			bool valid = false;
+			switch (renderedType)
+			{
+				case SnakeBird::kGround:
+				{
+					valid = true;
+//					order.push_back(SnakeBird::kGround);
+					order.push_back(SnakeBird::kEmpty);
+//					order.push_back(SnakeBird::kFruit);
+					order.push_back(SnakeBird::kSpikes);
+				}
+				case SnakeBird::kSpikes:
+				{
+					valid = true;
+//					order.push_back(SnakeBird::kSpikes);
+					order.push_back(SnakeBird::kGround);
+					order.push_back(SnakeBird::kEmpty);
+//					order.push_back(SnakeBird::kFruit);
+				}
+//				case SnakeBird::kFruit:
+//				{
+////					order.push_back(SnakeBird::kFruit);
+//					order.push_back(SnakeBird::kSpikes);
+//					order.push_back(SnakeBird::kGround);
+//					order.push_back(SnakeBird::kEmpty);
+//				}
+				case SnakeBird::kEmpty:
+				{
+					valid = true;
+//					order.push_back(SnakeBird::kEmpty);
+//					order.push_back(SnakeBird::kFruit);
+					order.push_back(SnakeBird::kSpikes);
+					order.push_back(SnakeBird::kGround);
+				}
+				default:
+					break;
+			}
+	
+			while (order.size() > 0)
+			{
+				sb.SetGroundType(x, y, order.back());
+				order.pop_back();
+				bfs.GetPath(&sb, snake, snake, path);
+				if (path.size() > maxLength)
+				{
+					maxLength = path.size();
+					best = sb;
+				}
+			}
+			sb = curr;//sb.SetStart(current);
+		}
+	}
+	bfs.GetPath(&sb, snake, snake, path);
+	printf("Old: %lu, ", path.size());
+	sb = best;
+	bfs.GetPath(&sb, snake, snake, path);
+	printf("New: %lu\n", path.size());
+}
