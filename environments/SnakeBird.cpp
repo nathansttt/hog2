@@ -1465,7 +1465,7 @@ SnakeBirdWorldObject SnakeBird::GetGroundType(int x, int y)
 
 SnakeBirdWorldObject SnakeBird::GetRenderedGroundType(const SnakeBirdState &s, int x, int y)
 {
-	if (GetGroundType(x, y) == kEmpty || GetGroundType(x, y) == kPortal1 || GetGroundType(x, y) == kPortal2)
+	if (GetGroundType(x, y) != kEmpty)// || GetGroundType(x, y) == kPortal1 || GetGroundType(x, y) == kPortal2)
 		return GetGroundType(x, y);
 	bool success = Render(s);
 	if (!success)
