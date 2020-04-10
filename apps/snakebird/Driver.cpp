@@ -727,6 +727,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
 			MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0);
 		}
+			break;
 		case 'o':
 			recording = !recording;
 			break;
