@@ -13,7 +13,7 @@ using namespace std;
 namespace SnakeBird {
 
 SnakeBird::SnakeBird(int width, int height)
-:width(width), height(height)
+:width(width), height(height), editing(false)
 {
 	assert(width*height < 512);
 	portal1Loc = portal2Loc = -1;
@@ -36,7 +36,33 @@ void SnakeBird::Reset()
 	fruit.clear();
 	for (int x = 0; x < objects.size(); x++)
 		objects[x].clear();
+	editing = false;
 }
+
+void SnakeBird::BeginEditing()
+{
+	editing = true;
+}
+
+void SnakeBird::EndEditing()
+{
+	editing = false;
+	for (int x = 0; x < 4; x++)
+	{
+		bool connected = false;
+		
+		for (int u = 0; u < objects[x].size(); u++)
+		{
+			for (int v = 0; v < objects[x].size(); v++)
+			{
+				if (Distance(objects[x][u], objects[x][v]) == 1)
+					connected = true;
+			}
+		}
+		objectFullyConnected[x] = connected;
+	}
+}
+
 
 SnakeBirdState SnakeBird::GetStart() const
 {
@@ -59,7 +85,7 @@ void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
 		startState.SetSnakeDir(count, x, body[x]);
 }
 
-std::vector<snakeDir>  LoadSnake(std:: vector<snakeDir> snakeBod, int width, int pos,std::vector<char> lvl) 
+std::vector<snakeDir> LoadSnake(std:: vector<snakeDir> snakeBod, int width, int pos,std::vector<char> lvl)
 {
 	bool snakeBuilt = false;
 	while(!snakeBuilt)
@@ -98,10 +124,10 @@ std::vector<snakeDir>  LoadSnake(std:: vector<snakeDir> snakeBod, int width, int
 
 
 
-
-
 bool SnakeBird::Load(const char *filename)
 {
+	BeginEditing();
+	
 	ifstream infile;
 	infile.open(filename);
 	if (infile.fail()) {
@@ -218,10 +244,12 @@ bool SnakeBird::Load(const char *filename)
 			}		
 		}
 		infile.close();
+		EndEditing();
 		return  true;
 	}
 	else{
 		cout << "Error loading level.";
+		EndEditing();
 		return false;
 	}	
 }
@@ -229,6 +257,276 @@ bool SnakeBird::Load(const char *filename)
 bool SnakeBird::Save(const char *filename)
 {
 	return false;
+}
+
+std::string SnakeBird::Hex(int v) const
+{
+    static const char* digits = "0123456789ABCDEF";
+	std::string res;
+	res  = digits[(v>>8)&0xF];
+	res += digits[(v>>4)&0xF];
+	res += digits[(v>>0)&0xF];
+	return res;
+}
+
+int SnakeBird::DeHex(const std::string &s, size_t offset) const
+{
+	int val = 0;
+	if (s.size()-offset < 3)
+		return -1;
+	for (int x = 0; x < 3; x++)
+	{
+		switch (s[offset+x])
+		{
+			case '0': val = val*16+0; break;
+			case '1': val = val*16+1; break;
+			case '2': val = val*16+2; break;
+			case '3': val = val*16+3; break;
+			case '4': val = val*16+4; break;
+			case '5': val = val*16+5; break;
+			case '6': val = val*16+6; break;
+			case '7': val = val*16+7; break;
+			case '8': val = val*16+8; break;
+			case '9': val = val*16+9; break;
+			case 'A': val = val*16+10; break;
+			case 'B': val = val*16+11; break;
+			case 'C': val = val*16+12; break;
+			case 'D': val = val*16+13; break;
+			case 'E': val = val*16+14; break;
+			case 'F': val = val*16+15; break;
+			default: return -1; break;
+		}
+	}
+	return val;
+}
+
+std::string SnakeBird::EncodeLevel() const
+{
+	std::string encoding;
+	// width & height - 2 bytes each
+	encoding += std::to_string(width);
+	encoding += "x";
+	encoding += std::to_string(height);
+	
+	// exit
+	encoding += "E";
+	encoding += Hex(exitLoc);
+	
+	// ground
+	encoding += "G";
+	for (int i = 0; i < width*height; i++)
+	{
+		if (world[i] == kGround)
+			encoding += Hex(i);
+	}
+	
+	// spikes
+	encoding += "K";
+	for (int i = 0; i < width*height; i++)
+	{
+		if (world[i] == kSpikes && GetY(i) != height-1)
+			encoding += Hex(i);
+	}
+
+	// fruit
+	encoding += "F";
+	if (fruit.size() > 0)
+	{
+		for (auto i : fruit)
+		{
+			encoding += Hex(i);
+		}
+	}
+	
+	// portal
+	if (portal1Loc != -1 && portal2Loc != -1)
+	{
+		encoding += "P";
+		encoding += Hex(portal1Loc);
+		encoding += Hex(portal2Loc);
+	}
+	
+	// blocks
+	for (int x = 0; x < objects.size(); x++)
+	{
+		if (objects[x].size() > 0)
+			encoding += "B";
+		for (int i = 0; i < objects[x].size(); i++)
+		{
+			int index = GetIndex(GetX(objects[x][i])+GetX(startState.GetObjectLocation(x)),
+								 GetY(objects[x][i])+GetY(startState.GetObjectLocation(x)));
+			encoding += Hex(index);
+		}
+	}
+	
+	// snakes
+	for (int x = 0; x < startState.GetNumSnakes(); x++)
+	{
+		encoding+="S";
+		encoding+=Hex(startState.GetSnakeHeadLoc(x));
+		
+		for (int y = 0; y < startState.GetSnakeLength(x)-1; y++)
+		{
+			switch (startState.GetSnakeDir(x, y))
+			{
+				case kLeft: encoding+="L"; break;
+				case kRight: encoding+="R"; break;
+				case kDown: encoding+="D"; break;
+				case kUp: encoding+="U"; break;
+			}
+		}
+	}
+	
+	return encoding;
+}
+
+bool SnakeBird::DecodeLevel(const std::string &encoding)
+{
+	portal1Loc = portal2Loc = -1;
+	exitLoc = -1;
+	std::fill_n(&world[0], 512, kEmpty);
+	startState.Reset();
+	fruit.clear();
+	for (int x = 0; x < objects.size(); x++)
+		objects[x].clear();
+
+	BeginEditing();
+	
+	int cnt = sscanf(encoding.c_str(), "%dx%dE", &width, &height);
+	if (cnt != 2 || width < 10 || height < 10)
+	{ Reset(); return false; }
+
+	size_t start = encoding.find_first_of("E");
+	if (start==std::string::npos)
+	{ Reset(); printf("F1\n"); return false; }
+	start++;
+	
+	exitLoc = DeHex(encoding, start);
+	if (exitLoc == -1)
+	{
+		Reset();
+		return false;
+	}
+	SetGroundType(exitLoc, kExit);
+	start+=3;
+	
+	if (start >= encoding.size() || encoding[start] != 'G')
+	{ Reset(); printf("F2\n");return false; }
+	start++;
+	
+	while (start < encoding.size() && encoding[start] != 'K') // go until we see spikes
+	{
+		int next = DeHex(encoding, start);
+		if (next == -1)
+		{ Reset(); printf("F3\n");return false; }
+		start+=3;
+		SetGroundType(next, kGround);
+	}
+	
+	// spikes
+	if (start >= encoding.size() || encoding[start] != 'K')
+	{ Reset(); printf("F4\n");return false; }
+	start++;
+	
+	while (start < encoding.size() && encoding[start] != 'F')  // go until we see fruit
+	{
+		int next = DeHex(encoding, start);
+		if (next == -1)
+		{ Reset(); printf("F5\n");return false; }
+		start+=3;
+		SetGroundType(next, kSpikes);
+	}
+
+	if (start >= encoding.size() || encoding[start] != 'F')
+	{ Reset(); printf("F6\n");return false; }
+	start++;
+
+	while (start < encoding.size() && // might see Portal, Blocks, or Snakes next
+		   encoding[start] != 'P' && encoding[start] != 'B' && encoding[start] != 'S')  // go until we see
+	{
+		int next = DeHex(encoding, start);
+		if (next == -1)
+		{ Reset(); printf("F7\n");return false; }
+		start+=3;
+		SetGroundType(next, kFruit);
+	}
+
+	// portal
+	if (start >= encoding.size())
+	{ Reset(); printf("F8\n");return false; }
+	if (encoding[start] == 'P' && start+7 <= encoding.size())
+	{
+		SetGroundType(DeHex(encoding, start+1), kPortal1);
+		SetGroundType(DeHex(encoding, start+4), kPortal2);
+		start += 7;
+	}
+		
+	// blocks
+	SnakeBirdWorldObject blocks[] = {kBlock1, kBlock2, kBlock3, kBlock4};
+	int whichBlock = 0;
+	while (start < encoding.size() && encoding[start] == 'B')
+	{
+		start++;
+		// Found B, read locations until we get another B or S
+		do {
+			int next = DeHex(encoding, start);
+			if (next == -1)
+			{ Reset(); printf("F9\n");return false; }
+			SetGroundType(next, blocks[whichBlock]);
+			start+=3;
+		} while (start < encoding.size() && encoding[start] != 'B' && encoding[start] != 'S');
+		whichBlock++;
+	}
+	
+	if (encoding[start] != 'S') // snakes now
+	{ Reset(); printf("F10\n");return false; }
+	start++;
+	
+	// snakes
+	int whichSnake = 0;
+	while (start < encoding.size())
+	{
+		std::vector<snakeDir> body;
+		// Found S, read locations until we run out
+		do {
+			int next = DeHex(encoding, start); // head location
+			if (next == -1)
+			{ Reset(); printf("F11\n");return false; }
+			start += 3;
+			
+			body.clear();
+			bool done = false;
+			while (!done)
+			{
+				switch (encoding[start]) // body
+				{
+					case 'U': body.push_back(kUp); break;
+					case 'D': body.push_back(kDown); break;
+					case 'L': body.push_back(kLeft); break;
+					case 'R': body.push_back(kRight); break;
+					case 'S':
+						done = true;
+						break;
+				}
+				start++;
+				if (start >= encoding.size())
+					done = true;
+			}
+			if (body.size() == 0)
+			{ Reset(); printf("F12\n");return false; }
+
+			startState.SetNumSnakes(whichSnake+1);
+			startState.SetSnakeHeadLoc(whichSnake, next);
+			startState.SetSnakeLength(whichSnake, body.size()+1);
+			for (int x = 0; x < body.size(); x++)
+				startState.SetSnakeDir(whichSnake, x, body[x]);
+			whichSnake++;
+		} while (start < encoding.size());
+	}
+	for (int x = 0; x < width; x++)
+		world[GetIndex(x, height-1)] = kSpikes;
+	EndEditing();
+	return true;
 }
 
 
@@ -1067,8 +1365,17 @@ bool SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
 	return didTeleport;
 }
 
+void SnakeBird::SetGroundType(int index, SnakeBirdWorldObject o)
+{
+	SetGroundType(GetX(index), GetY(index), o);
+}
+
 void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 {
+	if (!editing)
+	{
+		printf("!!WARNING: Changing map without enabling editing!!\n");
+	}
 	// TODO: check duplicates and removals for fruit and blocks
 	if (y == height-1)
 	{
@@ -1158,7 +1465,7 @@ SnakeBirdWorldObject SnakeBird::GetGroundType(int x, int y)
 
 SnakeBirdWorldObject SnakeBird::GetRenderedGroundType(const SnakeBirdState &s, int x, int y)
 {
-	if (GetGroundType(x, y) == kEmpty)
+	if (GetGroundType(x, y) == kEmpty || GetGroundType(x, y) == kPortal1 || GetGroundType(x, y) == kPortal2)
 		return GetGroundType(x, y);
 	bool success = Render(s);
 	if (!success)
@@ -1183,74 +1490,86 @@ int SnakeBird::GetY(int index) const
 	return index%height;
 }
 
+int SnakeBird::Distance(int index1, int index2)
+{
+	int x1 = GetX(index1);
+	int y1 = GetY(index1);
+	int x2 = GetX(index2);
+	int y2 = GetY(index2);
+	return  abs(x1-x2)+abs(y1-y2);
+}
+
 void SnakeBird::Draw(Graphics::Display &display) const
 {
-	display.FillRect({-1, -1, 1, 0.5}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
-	display.FillRect({-1, 0.5, 1, 1}, Colors::darkblue+Colors::darkred);
-	for (int x = 0; x < width*height; x++)
-	{
-		Graphics::point p = GetCenter(GetX(x), GetY(x));
-		double radius = GetRadius()*0.95;
-		switch (world[x])
-		{
-			case kEmpty:
-				break;//display.FillSquare(p, GetRadius(), Colors::lightblue);  break;
-			case kGround:
-				switch ((GetX(x)*13*+11*GetY(x))%6)
-				{
-					case 0: display.FillSquare(p, GetRadius(), Colors::brown); break;
-					case 1: display.FillSquare(p, GetRadius(), Colors::brown); break;
-					case 2: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
-					case 3: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
-					case 4: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
-					case 5: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
-				}
-				break;
-			case kSpikes:
-				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
-				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
-				break;
-				break;
-			case kPortal1:
-			case kPortal2:
-				display.FillCircle(p, radius, Colors::red);
-				display.FillCircle(p, radius*0.75, Colors::blue);
-				display.FillCircle(p, radius*0.5, Colors::green);
-				display.FillCircle(p, radius*0.25, Colors::purple);
-				break;
-			case kExit:
-				display.FillNGon(p, radius, 5, 0, Colors::yellow);
-				display.FillNGon(p, radius*0.66, 5, 36, Colors::orange);
-				display.FillNGon(p, radius*0.25, 5, 54, Colors::red);
-				break;
-			case kFruit:
-//				p.x-=radius/4;
-//				display.FillCircle(p, radius/2.0, Colors::green);
-//				p.x+=radius/2;
-//				display.FillCircle(p, radius/2.0, Colors::green);
-				break;
-		}
-	}
-	
-//	// draw grid
-//	for (int x = 0; x < width; x++)
-//	{
-//		Graphics::point p1, p2;
-//		p1.x = GetX(GetIndex(x, 0))-GetRadius();
-//		p1.y = GetY(GetIndex(x, 0))-GetRadius();
-//		p2.x = p1.x;
-//		p2.y = GetY(GetIndex(x, 16))-GetRadius();
-//		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
-//	}
-//	for (int y = 0; y < 16; y++)
-//	{
-//		Graphics::point p1, p2;
-//		p1.x = GetX(GetIndex(0, y))-GetRadius();
-//		p1.y = GetY(GetIndex(width, y))-GetRadius();
-//		p2.y = p1.y;
-//		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
-//	}
+	Draw(display, 0);
 }
+//{
+//	display.FillRect({-1, -1, 1, 0.5}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
+//	display.FillRect({-1, 0.5, 1, 1}, Colors::darkblue+Colors::darkred);
+//	for (int x = 0; x < width*height; x++)
+//	{
+//		Graphics::point p = GetCenter(GetX(x), GetY(x));
+//		double radius = GetRadius()*0.95;
+//		switch (world[x])
+//		{
+//			case kEmpty:
+//				break;//display.FillSquare(p, GetRadius(), Colors::lightblue);  break;
+//			case kGround:
+//				switch ((GetX(x)*13*+11*GetY(x))%6)
+//				{
+//					case 0: display.FillSquare(p, GetRadius(), Colors::brown); break;
+//					case 1: display.FillSquare(p, GetRadius(), Colors::brown); break;
+//					case 2: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
+//					case 3: display.FillSquare(p, GetRadius(), Colors::brown+Colors::gray); break;
+//					case 4: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
+//					case 5: display.FillSquare(p, GetRadius(), Colors::brown*0.8+Colors::darkgreen); break;
+//				}
+//				break;
+//			case kSpikes:
+//				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+//				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+//				break;
+//				break;
+//			case kPortal1:
+//			case kPortal2:
+//				display.FillCircle(p, radius, Colors::red);
+//				display.FillCircle(p, radius*0.75, Colors::blue);
+//				display.FillCircle(p, radius*0.5, Colors::green);
+//				display.FillCircle(p, radius*0.25, Colors::purple);
+//				break;
+//			case kExit:
+//				display.FillNGon(p, radius, 5, 0, Colors::yellow);
+//				display.FillNGon(p, radius*0.66, 5, 36, Colors::orange);
+//				display.FillNGon(p, radius*0.25, 5, 54, Colors::red);
+//				break;
+//			case kFruit:
+////				p.x-=radius/4;
+////				display.FillCircle(p, radius/2.0, Colors::green);
+////				p.x+=radius/2;
+////				display.FillCircle(p, radius/2.0, Colors::green);
+//				break;
+//		}
+//	}
+//
+////	// draw grid
+////	for (int x = 0; x < width; x++)
+////	{
+////		Graphics::point p1, p2;
+////		p1.x = GetX(GetIndex(x, 0))-GetRadius();
+////		p1.y = GetY(GetIndex(x, 0))-GetRadius();
+////		p2.x = p1.x;
+////		p2.y = GetY(GetIndex(x, 16))-GetRadius();
+////		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
+////	}
+////	for (int y = 0; y < 16; y++)
+////	{
+////		Graphics::point p1, p2;
+////		p1.x = GetX(GetIndex(0, y))-GetRadius();
+////		p1.y = GetY(GetIndex(width, y))-GetRadius();
+////		p2.y = p1.y;
+////		display.DrawLine(p1, p2, 0.5, Colors::darkgray);
+////	}
+//}
 
 void SnakeBird::Draw(Graphics::Display &display, double time) const
 {
@@ -1503,7 +1822,7 @@ void SnakeBird::DrawMovingSnake(Graphics::Display &display, const SnakeBirdState
 		Graphics::point p = GetCenter(lastx, lasty);
 		Graphics::point p2 = GetCenter(x, y);
 		p = p*percentComplete + p2*(1-percentComplete);
-		color = snakeColors[snake]*(((len+1)%2)?0.8:1.0);
+		color = snakeColors[snake];//*(((len)%2)?0.8:1.0);
 //		color = snakeColors[snake]*(((x+y)&1)?0.8:1.0);
 		DrawSnakeSegment(display, p, color, false, true, false, old.GetSnakeDir(snake, len-2), kUp/*next*/, snake, s.IsDead(snake));
 	}
@@ -1525,7 +1844,7 @@ void SnakeBird::DrawMovingSnake(Graphics::Display &display, const SnakeBirdState
 	Graphics::point p = GetCenter(x, y);
 	Graphics::point p2 = GetCenter(deltax+x, deltay+y);
 	p = p*percentComplete + p2*(1-percentComplete);
-	rgbColor color = snakeColors[snake]*((len%2)?0.8:1.0);
+	rgbColor color = snakeColors[snake]*((len%2)?1.0:0.8);
 //	rgbColor color = snakeColors[snake]*(((deltax+deltay+x+y)&1)?0.8:1.0);
 	DrawSnakeSegment(display, p, color, true, false, isActive, kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
 }
@@ -1556,16 +1875,16 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState &old, cons
 		{
 			DrawSnakeEnteringGoal(display, old, snake, (active==-1)||(active==snake), percentComplete);
 		}
-		else if (s.GetBodyBits(snake) == old.GetBodyBits(snake))
-		{
-			// tween entire snake
-			DrawTranslatingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
-			continue;
-		}
 		else if (s.GetSnakeLength(snake) != old.GetSnakeLength(snake))
 		{
 			// body stays the same - just draw head moving
 			DrawMovingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
+			continue;
+		}
+		else if (s.GetBodyBits(snake) == old.GetBodyBits(snake))
+		{
+			// tween entire snake
+			DrawTranslatingSnake(display, old, s, snake, (active==-1)||(active==snake), percentComplete);
 			continue;
 		}
 		else {
@@ -1614,7 +1933,8 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState &old, cons
 			p = p*percentComplete+p2*(1-percentComplete);
 			double radius = GetRadius();//*0.95;
 			display.FrameSquare(p, radius-radius*0.3, objColors[x], radius*0.6);
-			points.push_back(p);
+			if (!objectFullyConnected[x])
+				points.push_back(p);
 		}
 		if (points.size() > 0)
 			display.DrawLineSegments(points, GetRadius()*0.3, objColors[x]*0.8);
@@ -1662,112 +1982,116 @@ void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState &old, cons
 
 void SnakeBird::Draw(Graphics::Display &display, const SnakeBirdState&s, int active, double globalTime) const
 {
-	// draw exit
-	if (exitLoc != -1)
-	{
-		Graphics::point p = GetCenter(GetX(exitLoc), GetY(exitLoc));
-		double radius = GetRadius()*0.95;
-		double time = globalTime;
-		if (s.KFruitEaten(fruit.size()))
-		{
-			radius = radius+0.25*radius*(1+sin(globalTime*2.5));
-			time *= 2.0;
-		}
-		else {
-			time /= 4.0;
-		}
-		double offset1 = (sin(time*1.0))*180; // -1...+1
-		double offset2 = (sin(time*1.5))*180; // -1...+1
-		double offset3 = (sin(time*2.0))*180; // -1...+1
-		display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
-		display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
-		display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
-	}
-
-	
-	rgbColor c[4] = {Colors::red, Colors::blue, Colors::green, Colors::yellow};
-	rgbColor objColors[4] = {Colors::red*0.5, Colors::blue*0.5, Colors::green*0.5, Colors::yellow*0.5};
-	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
-	{
-		// get head loc
-		int index = s.GetSnakeHeadLoc(snake);
-		if (index == kInGoal)
-			continue;
-		
-		int x = GetX(index);
-		int y = GetY(index);
-//		display.FillSquare(p, GetRadius(), Colors::red);
-		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
-
-		Graphics::point p = GetCenter(x, y);
-		if (len%2)
-			DrawSnakeSegment(display, p, c[snake]*0.8, true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
-		else
-			DrawSnakeSegment(display, p, c[snake], true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
-
-		int cnt = 0;
-		for (int t = 0; t < len; t++)
-		{
-			switch (s.GetSnakeDir(snake, t))
-			{
-				case kUp:
-					y-=1;
-					break;
-				case kDown:
-					y+=1;
-					break;
-				case kRight:
-					x+=1;
-					break;
-				case kLeft:
-					x-=1;
-					break;
-				default:
-					break;
-			}
-			bool tail = t+1==(s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1));
-			Graphics::point p = GetCenter(x, y);
-			if ((++cnt+len)&1)
-				DrawSnakeSegment(display, p, c[snake]*0.8, false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1), snake, s.IsDead(snake));
-			else
-				DrawSnakeSegment(display, p, c[snake], false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1), snake, s.IsDead(snake));
-		}
-	}
-	
-	// draw objects
-	static std::vector<Graphics::point> points;
-	for (int x = 0; x < 4; x++)
-	{
-		points.clear();
-		if (s.GetObjectLocation(x) == kDead)
-			continue;
-		for (int i = 0; i < objects[x].size(); i++)
-		{
-			Graphics::point p = GetCenter(GetX(objects[x][i])+GetX(s.GetObjectLocation(x)),
-										  GetY(objects[x][i])+GetY(s.GetObjectLocation(x)));
-			double radius = GetRadius();//*0.95;
-			display.FrameSquare(p, radius-radius*0.3, objColors[x], radius*0.6);
-			points.push_back(p);
-		}
-		if (points.size() > 0)
-			display.DrawLineSegments(points, GetRadius()*0.3, objColors[x]*0.8);
-	}
-	for (int x = 0; x < fruit.size(); x++)
-	{
-		if (s.GetFruitPresent(x))
-		{
-			Graphics::point p = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
-			Graphics::point p2 = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
-			p.x  += GetRadius()*0.5;
-			p.y  += sin(globalTime)*GetRadius()*0.1;
-			p2.x -= GetRadius()*0.5;
-			p2.y  += sin(globalTime*1.1)*GetRadius()*0.1;
-			//display.FillCircle(p, GetRadius()*0.8, Colors::orange);
-			display.FillCircle(p, GetRadius()*0.4, Colors::red);
-			display.FillCircle(p2, GetRadius()*0.4, Colors::red);
-		}
-	}
+	Draw(display, s, s, active, 0, globalTime);
 }
+//{
+//	// draw exit
+//	if (exitLoc != -1)
+//	{
+//		Graphics::point p = GetCenter(GetX(exitLoc), GetY(exitLoc));
+//		double radius = GetRadius()*0.95;
+//		double time = globalTime;
+//		if (s.KFruitEaten(fruit.size()))
+//		{
+//			radius = radius+0.25*radius*(1+sin(globalTime*2.5));
+//			time *= 2.0;
+//		}
+//		else {
+//			time /= 4.0;
+//		}
+//		double offset1 = (sin(time*1.0))*180; // -1...+1
+//		double offset2 = (sin(time*1.5))*180; // -1...+1
+//		double offset3 = (sin(time*2.0))*180; // -1...+1
+//		display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
+//		display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
+//		display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
+//	}
+//
+//
+//	rgbColor c[4] = {Colors::red, Colors::blue, Colors::green, Colors::yellow};
+//	rgbColor objColors[4] = {Colors::red*0.5, Colors::blue*0.5, Colors::green*0.5, Colors::yellow*0.5};
+//	for (int snake = 0; snake < s.GetNumSnakes(); snake++)
+//	{
+//		// get head loc
+//		int index = s.GetSnakeHeadLoc(snake);
+//		if (index == kInGoal)
+//			continue;
+//
+//		int x = GetX(index);
+//		int y = GetY(index);
+////		display.FillSquare(p, GetRadius(), Colors::red);
+//		int len = s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1);
+//
+//		Graphics::point p = GetCenter(x, y);
+//		if (len%2)
+//			DrawSnakeSegment(display, p, c[snake]*0.8, true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
+//		else
+//			DrawSnakeSegment(display, p, c[snake], true, false, (active==-1)||(active==snake), kUp, s.GetSnakeDir(snake, 0), snake, s.IsDead(snake));
+//
+//		int cnt = 0;
+//		for (int t = 0; t < len; t++)
+//		{
+//			switch (s.GetSnakeDir(snake, t))
+//			{
+//				case kUp:
+//					y-=1;
+//					break;
+//				case kDown:
+//					y+=1;
+//					break;
+//				case kRight:
+//					x+=1;
+//					break;
+//				case kLeft:
+//					x-=1;
+//					break;
+//				default:
+//					break;
+//			}
+//			bool tail = t+1==(s.GetSnakeBodyEnd(snake)-s.GetSnakeBodyEnd(snake-1));
+//			Graphics::point p = GetCenter(x, y);
+//			if ((++cnt+len)&1)
+//				DrawSnakeSegment(display, p, c[snake]*0.8, false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1), snake, s.IsDead(snake));
+//			else
+//				DrawSnakeSegment(display, p, c[snake], false, tail, false, s.GetSnakeDir(snake, t), tail?kUp:s.GetSnakeDir(snake, t+1), snake, s.IsDead(snake));
+//		}
+//	}
+//
+//	// draw objects
+//	static std::vector<Graphics::point> points;
+//	for (int x = 0; x < 4; x++)
+//	{
+//		points.clear();
+//		if (s.GetObjectLocation(x) == kDead)
+//			continue;
+//		for (int i = 0; i < objects[x].size(); i++)
+//		{
+//			Graphics::point p = GetCenter(GetX(objects[x][i])+GetX(s.GetObjectLocation(x)),
+//										  GetY(objects[x][i])+GetY(s.GetObjectLocation(x)));
+//			double radius = GetRadius();//*0.95;
+//			display.FrameSquare(p, radius-radius*0.3, objColors[x], radius*0.6);
+//			if (!objectFullyConnected[x])
+//				points.push_back(p);
+//		}
+//		if (points.size() > 0)
+//			display.DrawLineSegments(points, GetRadius()*0.3, objColors[x]*0.8);
+//	}
+//	for (int x = 0; x < fruit.size(); x++)
+//	{
+//		if (s.GetFruitPresent(x))
+//		{
+//			Graphics::point p = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
+//			Graphics::point p2 = GetCenter(GetX(fruit[x]), GetY(fruit[x]));
+//			p.x  += GetRadius()*0.5;
+//			p.y  += sin(globalTime)*GetRadius()*0.1;
+//			p2.x -= GetRadius()*0.5;
+//			p2.y  += sin(globalTime*1.1)*GetRadius()*0.1;
+//			//display.FillCircle(p, GetRadius()*0.8, Colors::orange);
+//			display.FillCircle(p, GetRadius()*0.4, Colors::red);
+//			display.FillCircle(p2, GetRadius()*0.4, Colors::red);
+//		}
+//	}
+//}
 
 void SnakeBird::DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo, int snake, bool isDead) const
 {

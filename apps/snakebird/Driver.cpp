@@ -28,8 +28,7 @@ bool fileExists(const char *name)
 }
 #include "SnakeBird.h"
 
-std::string mapName;
-
+bool mapAlreadyLoaded = false;
 bool recording = false;
 bool autoSolve = false;
 double globalTime = 0;
@@ -42,7 +41,7 @@ SnakeBird::SnakeBirdAction inProgress;
 
 Timer worldClock;
 double lastFrameStart;
-LineTransition transition(100, 60, Colors::white);
+LineTransition transition(20, 60, Colors::white);
 
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
@@ -51,7 +50,7 @@ int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
 
-void AnalyzeMapChanges();
+void AnalyzeMapChanges(bool maximize);
 
 
 int main(int argc, char* argv[])
@@ -81,10 +80,13 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Run", "Run solution (build if needed)", kAnyModifier, 'n');
 	InstallKeyboardHandler(MyDisplayHandler, "Step", "Take next step in solution", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Change", "Make one change to increase solution length", kAnyModifier, 'c');
+	InstallKeyboardHandler(MyDisplayHandler, "Change", "Make one change to decrease solution length", kAnyModifier, 'x');
 
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <input> <output>", "Make an .svg of the given level then quit");
 	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs <file>", "Run BFS on the given level and return the info");
+	InstallCommandLineHandler(MyCLHandler, "-encode", "-encode <file>", "Encode level as string");
+	InstallCommandLineHandler(MyCLHandler, "-decode", "-decode <string>", "Decode level from string");
 //	InstallCommandLineHandler(MyCLHandler, "-test", "-test", "Basic test with MD heuristic");
 	
 	InstallWindowHandler(MyWindowHandler);
@@ -139,6 +141,7 @@ bool NoActionsAvailable()
 
 void LoadLevel19()
 {
+	sb.BeginEditing();
 	sb.Reset();
 	sb.SetGroundType(14, 5, SnakeBird::kFruit);
 
@@ -165,10 +168,12 @@ void LoadLevel19()
 	actionInProgressStep.Reset();
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
+	sb.EndEditing();
 }
 
 void LoadLevel22()
 {
+	sb.BeginEditing();
 	sb.Reset();
 	sb.SetGroundType(3, 7, SnakeBird::kGround);
 	sb.SetGroundType(3, 8, SnakeBird::kGround);
@@ -206,10 +211,12 @@ void LoadLevel22()
 	actionInProgressStep.Reset();
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
+	sb.EndEditing();
 }
 
 void LoadLevel39()
 {
+	sb.BeginEditing();
 	sb.Reset();
 	for (int x = 3; x <= 14; x++)
 		sb.SetGroundType(x, 12, SnakeBird::kGround);
@@ -251,10 +258,12 @@ void LoadLevel39()
 	actionInProgressStep.Reset();
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
+	sb.EndEditing();
 }
 
 void LoadLevel32()
 {
+	sb.BeginEditing();
 	sb.Reset();
 	for (int x = 5; x <= 10; x++)
 		sb.SetGroundType(x, 9, SnakeBird::kGround);
@@ -284,10 +293,12 @@ void LoadLevel32()
 	actionInProgressStep.Reset();
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
+	sb.EndEditing();
 }
 
 void LoadLevel44()
 {
+	sb.BeginEditing();
 	sb.Reset();
 	sb.SetGroundType(4, 6, SnakeBird::kSpikes);
 	sb.SetGroundType(6, 7, SnakeBird::kSpikes);
@@ -315,10 +326,12 @@ void LoadLevel44()
 	actionInProgressStep.Reset();
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
+	sb.EndEditing();
 }
 
 void LoadLevel63()
 {
+	sb.BeginEditing();
 	sb.Reset();
 	for (int x = 5; x <= 11; x++)
 		sb.SetGroundType(x, 6, SnakeBird::kGround);
@@ -348,6 +361,7 @@ void LoadLevel63()
 	actionInProgressStep.Reset();
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
+	sb.EndEditing();
 }
 
 void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
@@ -362,13 +376,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		printf("Window %ld created\n", windowID);
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
-		if (mapName.size() != 0)
+		if (!mapAlreadyLoaded)
 		{
-			sb.Load(mapName.c_str());
-			snake = sb.GetStart();
-			history.push_back(snake);
-		}
-		else {
 			//LoadLevel19();
 			//LoadLevel22();
 			//LoadLevel39();
@@ -390,7 +399,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (recording)
 		frameRate = 1.0/60.0; // fixed frame rate when recording
 //	printf("%f\n", frameRate);
-	
+//	frameRate = 1.0/120.0; // fixed frame rate when recording
+
 	globalTime += frameRate;
 	frameTime += frameRate;
 	if (frameTime > timePerFrame)
@@ -430,10 +440,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	//sb.Draw(d, snake, snakeControl, globalTime);
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 
-	if (sb.GoalTest(snake))
+	if (sb.GoalTest(snake) && actionInProgress == false)
 	{
 		transition.Draw(d);
-		if (transition.Step(frameRate))
+		if (transition.Step(frameRate*3))
 		{
 			d.DrawText("Great Job", {0,0}, Colors::black, 0.25f, Graphics::textAlignCenter);
 			d.DrawText("Level Passed!", {0,0.25}, Colors::black, 0.25f, Graphics::textAlignCenter);
@@ -462,7 +472,10 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		if (maxNumArgs > 1)
 		{
-			mapName = argument[1];
+			sb.Load(argument[1]);
+			snake = sb.GetStart();
+			history.push_back(snake);
+			mapAlreadyLoaded = true;
 			return 2;
 		}
 		printf("Failed -load <file>: missing file name");
@@ -493,6 +506,38 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			MyDisplayHandler(0, tKeyboardModifier::kNoModifier, 'b');
 			exit(0);	
 		}	
+	}
+	if (strcmp(argument[0], "-encode") == 0)
+	{
+		if (maxNumArgs > 1)
+		{
+			sb.Load(argument[1]);
+			auto str = sb.EncodeLevel();
+			std::cout << str << "\n";
+			sb.DecodeLevel(sb.EncodeLevel());
+			auto str2 = sb.EncodeLevel();
+			if (str != str2)
+				std::cerr << "ENCODING FAILURE!\n";
+			exit(0);
+		}
+	}
+	if (strcmp(argument[0], "-decode") == 0)
+	{
+		if (maxNumArgs > 1)
+		{
+			sb.DecodeLevel(argument[1]);
+			if (strcmp(argument[1], sb.EncodeLevel().c_str()) != 0)
+			{
+				printf("Decode failure:\n");
+				printf("%s\n", argument[1]);
+				printf("%s\n", sb.EncodeLevel().c_str());
+			}
+			snake = sb.GetStart();
+			history.push_back(snake);
+			mapAlreadyLoaded = true;
+			return 2;
+		}
+		return 1;
 	}
 
 	return 0;
@@ -634,7 +679,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			MyDisplayHandler(windowID, kNoModifier, ']');
 			break;
 		case 'c':
-			AnalyzeMapChanges();
+			AnalyzeMapChanges(true);
+			break;
+		case 'x':
+			AnalyzeMapChanges(false);
 			break;
 		case 'b':
 		{
@@ -720,7 +768,7 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 	return true;
 }
 
-void AnalyzeMapChanges()
+void AnalyzeMapChanges(bool maximize)
 {
 	BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
 	bfs.SetNodeLimit(1000000); // max 1 million expansions
@@ -728,7 +776,8 @@ void AnalyzeMapChanges()
 	std::vector<SnakeBird::SnakeBirdState> path;
 
 	size_t maxLength = 0;
-	SnakeBird::SnakeBird best;
+	size_t minLength = 100000;
+	SnakeBird::SnakeBird bestMin, bestMax;
 	SnakeBird::SnakeBirdState current = sb.GetStart();
 	SnakeBird::SnakeBird curr = sb;
 	std::vector<SnakeBird::SnakeBirdWorldObject> order;
@@ -743,31 +792,18 @@ void AnalyzeMapChanges()
 				case SnakeBird::kGround:
 				{
 					valid = true;
-//					order.push_back(SnakeBird::kGround);
 					order.push_back(SnakeBird::kEmpty);
-//					order.push_back(SnakeBird::kFruit);
 					order.push_back(SnakeBird::kSpikes);
 				}
 				case SnakeBird::kSpikes:
 				{
 					valid = true;
-//					order.push_back(SnakeBird::kSpikes);
 					order.push_back(SnakeBird::kGround);
 					order.push_back(SnakeBird::kEmpty);
-//					order.push_back(SnakeBird::kFruit);
 				}
-//				case SnakeBird::kFruit:
-//				{
-////					order.push_back(SnakeBird::kFruit);
-//					order.push_back(SnakeBird::kSpikes);
-//					order.push_back(SnakeBird::kGround);
-//					order.push_back(SnakeBird::kEmpty);
-//				}
 				case SnakeBird::kEmpty:
 				{
 					valid = true;
-//					order.push_back(SnakeBird::kEmpty);
-//					order.push_back(SnakeBird::kFruit);
 					order.push_back(SnakeBird::kSpikes);
 					order.push_back(SnakeBird::kGround);
 				}
@@ -777,13 +813,20 @@ void AnalyzeMapChanges()
 	
 			while (order.size() > 0)
 			{
+				sb.BeginEditing();
 				sb.SetGroundType(x, y, order.back());
+				sb.EndEditing();
 				order.pop_back();
 				bfs.GetPath(&sb, snake, snake, path);
+				if (path.size() < minLength && path.size() != 0)
+				{
+					minLength = path.size();
+					bestMin = sb;
+				}
 				if (path.size() > maxLength)
 				{
 					maxLength = path.size();
-					best = sb;
+					bestMax = sb;
 				}
 			}
 			sb = curr;//sb.SetStart(current);
@@ -791,7 +834,10 @@ void AnalyzeMapChanges()
 	}
 	bfs.GetPath(&sb, snake, snake, path);
 	printf("Old: %lu, ", path.size());
-	sb = best;
+	if (maximize)
+		sb = bestMax;
+	else
+		sb = bestMin;
 	bfs.GetPath(&sb, snake, snake, path);
 	printf("New: %lu\n", path.size());
 }

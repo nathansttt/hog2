@@ -225,6 +225,12 @@ public:
 	void Reset();
 	bool Load(const char *filename);
 	bool Save(const char *filename);
+	std::string EncodeLevel() const;
+	bool DecodeLevel(const std::string &);
+	
+	void BeginEditing();
+	void EndEditing();
+
 	SnakeBirdState GetStart() const;
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
@@ -267,7 +273,6 @@ public:
 	bool IsGoalStored() const
 	{ return bValidSearchGoal; }
 	
-	
 	/** Heuristic value between two arbitrary nodes. **/
 	double HCost(const SnakeBirdState &node1, const SnakeBirdState &node2) const { return 0; }
 	
@@ -304,6 +309,9 @@ public:
 			  int active, double percentComplete, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
+	std::string Hex(int) const;
+	int DeHex(const std::string &s, size_t offset) const;
+	void SetGroundType(int index, SnakeBirdWorldObject o);
 	bool Render(const SnakeBirdState &s) const;
 	bool CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
 				 SnakeBirdAction &a) const;
@@ -318,10 +326,10 @@ private:
 
 	
 	int GetFruitOffset(int index) const;
-	int width, height;
 	int GetIndex(int x, int y) const;
 	int GetX(int index) const;
 	int GetY(int index) const;
+	int Distance(int index1, int index2);
 	Graphics::point GetCenter(int x, int y) const;
 	float GetRadius() const;
 	void DrawSnakeEnteringGoal(Graphics::Display &display, const SnakeBirdState &s,
@@ -331,13 +339,19 @@ private:
 	void DrawMovingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
 						 int snake, bool isActive, double percentComplete) const;
 	void DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo, int whichSnake, bool alive) const;
+
+	// Member variables
+	int width, height;
+
 	std::array<SnakeBirdWorldObject, 512> world; // static world
 	mutable std::array<SnakeBirdWorldObject, 512> render;
 	std::vector<int> fruit;
 	std::array<std::vector<int>, 4> objects; // offsets from base location
+	std::array<bool, 4> objectFullyConnected;
 	int portal1Loc, portal2Loc;
 	int exitLoc;
 	SnakeBirdState startState;
+	bool editing;
 	//	std::array<
 };
 
