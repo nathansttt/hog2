@@ -14,3 +14,9 @@ $(REL_BINDIR)/$(REL_NAME): $(REL_OBJS)
 	@echo "Creating $@"
 	mkdir -p $(REL_BINDIR)
 	$(AR) -csr $@ $(REL_OBJS)
+
+$(TEST_BINDIR)/$(TEST_NAME): $(TEST_OBJS)
+	@echo "Creating $@"
+	mkdir -p $(TES_BINDIR)
+	$(AR) -csr $@ $(REL_OBJS)
+

@@ -14,3 +14,8 @@ $(REL_BINDIR)/$(REL_NAME): $(REL_OBJS) $(PROJ_REL_DEP)
 	@echo "Linking $@"
 	mkdir -p $(REL_BINDIR)
 	$(LN) -o $@ $(REL_OBJS) $(PROJ_REL_LIB) $(REL_LNFLAGS)
+
+$(TEST_BINDIR)/$(TEST_NAME): $(TEST_OBJS) $(PROJ_TEST_DEP)
+	@echo "Linking $@"
+	mkdir -p $(TEST_BINDIR)
+	$(LN) -o $@ $(TEST_OBJS) $(PROJ_TEST_LIB) $(TEST_LNFLAGS)
