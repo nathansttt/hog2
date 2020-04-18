@@ -36,6 +36,7 @@ const int kDead = 510;
 const int kInGoal = 511;
 const uint8_t kNothingPushed = 0xFF;
 //const int kMaxPushedObjects = 3;
+const int codeSize = 2;
 
 enum snakeDir : uint8_t {
 	kLeft=0x0, kRight=0x1, kUp=0x2, kDown=0x3
@@ -128,6 +129,7 @@ struct SnakeBirdState {
 };
 
 struct SnakeBirdAction {
+	SnakeBirdAction() :bird(0xF), direction(0xF), pushed(0) {}
 	unsigned int bird : 4; // which bird
 	unsigned int direction : 4; // which direction
 	uint8_t pushed; // 8 booleans; supporting 4 snakes & 4 blocks
@@ -243,7 +245,7 @@ public:
 	void GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const;
 	void GetActions(const SnakeBirdState &nodeID, std::vector<SnakeBirdAction> &actions) const;
 	bool LivingState(const SnakeBirdState &s) const { return Render(s); }
-		
+	size_t GetNumFruit() { return fruit.size(); }
 	//SnakeBirdAction GetAction(const SnakeBirdState &s1, const SnakeBirdState &s2) const;
 	void ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const;
 	/* Applys the next portion of the action - not done until returns true. */
@@ -309,8 +311,8 @@ public:
 			  int active, double percentComplete, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 private:
-	std::string Hex(int) const;
-	int DeHex(const std::string &s, size_t offset) const;
+	std::string Code(int) const;
+	int DeCode(const std::string &s, size_t offset) const;
 	void SetGroundType(int index, SnakeBirdWorldObject o);
 	bool Render(const SnakeBirdState &s) const;
 	bool CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
@@ -331,7 +333,10 @@ private:
 	int GetY(int index) const;
 	int Distance(int index1, int index2);
 	Graphics::point GetCenter(int x, int y) const;
+public:
+	// Allows us to draw text overlay
 	float GetRadius() const;
+private:
 	void DrawSnakeEnteringGoal(Graphics::Display &display, const SnakeBirdState &s,
 							   int snake, bool isActive, double percentComplete) const;
 	void DrawTranslatingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
