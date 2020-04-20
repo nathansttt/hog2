@@ -68,7 +68,6 @@ REL_CFLAGS = $(PROJ_REL_CFLAGS) $(COMMON_CFLAGS) -g -O3 #-DNDEBUG
 
 DBG_LNFLAGS = $(PROJ_DBG_LNFLAGS) $(COMMON_LNFLAGS) -g
 REL_LNFLAGS = $(PROJ_REL_LNFLAGS) $(COMMON_LNFLAGS) -g
-TEST_LNFLAGS = $(PROJ_REL_LNFLAGS) $(PROJ_TEST_LNFLAGS) $(COMMON_LNFLAGS) -g
 
 DBG_OBJS = \
   $(patsubst %.cpp, $(DBG_OBJDIR)/%.o, $(SRC_CPP)) \
@@ -76,9 +75,6 @@ DBG_OBJS = \
 REL_OBJS = \
   $(patsubst %.cpp, $(REL_OBJDIR)/%.o, $(SRC_CPP)) \
   $(patsubst %.c, $(REL_OBJDIR)/%.o, $(SRC_C))
-
-TEST_OBJS = \
-  $(patsubst %.cpp, $(TEST_OBJDIR)/%.o, $(SRC_CPP))
 
 #-----------------------------------------------------------------------------
 
@@ -102,18 +98,12 @@ $(REL_OBJDIR)/%.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) -c $(REL_CFLAGS) -o $@ $<
 
-$(TEST_OBJDIR)/%.o: %.cpp
-	@echo "$(notdir $@) (test)"
-	mkdir -p $(dir $@)
-	$(CXX) -c $(REL_CXXFLAGS) -o $@ $<
-
 # Creation of dependency files using the compiler with -MM option and
 # sed for postprocessing of its output (including the dependency file in
 # the target section and adding the correct path to the object file). 
 # Dependency files are separated for each project, even if the
 # object files are shared, since the compiler generated dependency lines
 # contain relative paths.
-
 
 $(DBG_OBJDIR)/%.d: %.cpp
 	@echo "$(notdir $@) (dbg)"
@@ -135,17 +125,9 @@ $(REL_OBJDIR)/%.d: %.c
 	mkdir -p $(dir $@)
 	$(CC) -MM $(REL_CXXFLAGS) $< | sed 's#\([-A-Za-z0-9_,]*\)\.o[ :]*#$(patsubst %.d,%.o,$@) $@ : #g' >$@
 
-$(TEST_OBJDIR)/%.d: %.cpp
-	@echo "$(notdir $@) (test)"
-	mkdir -p $(dir $@)
-	$(CXX) -MM $(TEST_CXXFLAGS) $< | sed 's#\([-A-Za-z0-9_,]*\)\.o[ :]*#$(patsubst %.d,%.o,$@) $@ : #g' >$@
-
-
 debug: $(DBG_BINDIR)/$(DBG_NAME) debug_post_build
 
 release: $(REL_BINDIR)/$(REL_NAME) release_post_build
-
-tests: $(TEST_BINDIR)/$(TEST_NAME)
 
 all: debug release
 
@@ -161,8 +143,6 @@ clean:
 	@rm -f `find $(DBG_OBJDIR) -name "*.o" -o -name "*.d"`
 	@rm -f `find $(REL_OBJDIR) -name "*.o" -o -name "*.d"`
 	@rm -f $(DBG_BINDIR)/$(DBG_NAME) $(REL_BINDIR)/$(REL_NAME)
-
-
 
 #-----------------------------------------------------------------------------
 

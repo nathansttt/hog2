@@ -5,8 +5,9 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/apps/nathan/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = SnakeBirdTest
-TEST_NAME = SnakeBirdTest
+NAME = MNPuzzleTest
+DBG_NAME = $(NAME)
+REL_NAME = $(NAME)
 
 ROOT = ../../../..
 VPATH = $(ROOT)
@@ -24,7 +25,7 @@ PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_TEST_CXXFLAGS = $(PROJ_CXXFLAGS)
 
-#PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
+PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
 PROJ_REL_LNFLAGS = -L$(REL_BINDIR)
 PROJ_TEST_LNFLAGS = -L$(TEST_BINDIR)
 
@@ -76,6 +77,5 @@ endif
 default : all
 
 SRC_CPP = \
-  tests/Json.cpp \
-  tests/SnakeBird/Driver.cpp \
-  tests/SnakeBird/SnakeBirdRunner.cpp \
+  tests/MNPuzzle/Driver.cpp \
+  tests/MNPuzzle/MNPuzzleRunner.cpp \
