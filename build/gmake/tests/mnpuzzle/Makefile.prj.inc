@@ -6,7 +6,8 @@
 #-----------------------------------------------------------------------------
 
 NAME = MNPuzzleTest
-TEST_NAME = MNPuzzleTest
+DBG_NAME = $(NAME)
+REL_NAME = $(NAME)
 
 ROOT = ../../../..
 VPATH = $(ROOT)
@@ -24,7 +25,7 @@ PROJ_DBG_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_REL_CXXFLAGS = $(PROJ_CXXFLAGS)
 PROJ_TEST_CXXFLAGS = $(PROJ_CXXFLAGS)
 
-#PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
+PROJ_DBG_LNFLAGS = -L$(DBG_BINDIR)
 PROJ_REL_LNFLAGS = -L$(REL_BINDIR)
 PROJ_TEST_LNFLAGS = -L$(TEST_BINDIR)
 
