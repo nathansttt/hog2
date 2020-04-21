@@ -50,6 +50,7 @@ PROJECTS = \
   demos/idastar \
   papers/IBEX \
   papers/DWA \
+	tests/mnpuzzle \
 #  generic \
 
 
@@ -105,10 +106,15 @@ PROJECTS_ALL = \
 #  papers/IBEX \
 #	apps/coprobber
 
+TESTS = \
+	tests/mnpuzzle \
+
+
 # sequentially to avoid same sub-target in sub-make invoked twice
 default:
 	$(MAKE) debug
 	$(MAKE) release
+	$(MAKE) tests
 
 debug:
 	@for dir in $(PROJECTS); do \
@@ -128,6 +134,14 @@ release:
         done
 	@echo ""
 
+tests: release
+	@for dir in $(TESTS); do \
+					if test -f $$dir/Makefile; then \
+						echo -e "\n--------------- $$dir (test)"; \
+						$(MAKE) -C $$dir tests || exit -1; \
+					fi; \
+			done
+	@echo ""
 
 .PHONY: install
 install:
