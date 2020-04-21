@@ -61,3 +61,4 @@ SRC_CPP = \
 	utils/MR1Permutation.cpp \
 	utils/Graphics.cpp \
 	utils/ScreenTransition.cpp \
+  utils/Json.cpp \

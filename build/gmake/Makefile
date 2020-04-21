@@ -50,6 +50,7 @@ PROJECTS = \
   demos/idastar \
   papers/IBEX \
   papers/DWA \
+	tests/mnpuzzle \
 #  generic \
 
 
