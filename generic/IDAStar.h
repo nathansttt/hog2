@@ -172,7 +172,7 @@ double IDAStar<state, action, verbose>::DoIteration(SearchEnvironment<state, act
 		double edgeCost = env->GCost(currState, neighbors[x]);
 		double childH = DoIteration(env, currState, neighbors[x], thePath, bound,
 																g+edgeCost, maxH - edgeCost);
-		if (env->GoalTest(thePath.back(), goal))
+		if (env->GoalTest(thePath.back(), goal) && g+edgeCost<=bound) //check that a solution that does not exceed the bound was found
 			return 0;
 		thePath.pop_back();
 		// pathmax
