@@ -567,7 +567,7 @@ void VoxelGrid::GLDrawLine(const voxelGridState &x, const voxelGridState &y) con
 	glEnd();
 }
 
-void VoxelGrid::Draw(Graphics::Display &display)
+void VoxelGrid::Draw(Graphics::Display &display) const
 {
 	const float range = std::max(xWidth, std::max(yWidth, zWidth));
 	uint16_t minz = zWidth;

@@ -78,7 +78,7 @@ public:
 	void OpenGLDraw(const voxelGridState&, const voxelGridAction&) const;
 	void GLLabelState(const voxelGridState&, const char *) const;
 	void GLDrawLine(const voxelGridState &x, const voxelGridState &y) const;
-	void Draw(Graphics::Display &display);
+	void Draw(Graphics::Display &display) const;
 
 	void GetGLCoordinate(const voxelGridState &, point3d &) const;
 	void GetGLCornerCoordinate(const voxelGridState &, point3d &) const;
