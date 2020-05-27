@@ -87,6 +87,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
+	InstallKeyboardHandler(MyDisplayHandler, "Scale+", "Larger scale", kAnyModifier, '}');
+	InstallKeyboardHandler(MyDisplayHandler, "Scale-", "Smaller scale", kAnyModifier, '{');
 	InstallKeyboardHandler(MyDisplayHandler, "Larger", "Larger examples", kAnyModifier, ']');
 	InstallKeyboardHandler(MyDisplayHandler, "Smaller", "Smaller examples", kAnyModifier, '[');
 	InstallKeyboardHandler(MyDisplayHandler, "Clear", "Clear graph", kAnyModifier, '|');
@@ -133,7 +135,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		astar.SetWeight(1.0);
 		astar.SetHeuristic(&h);
 		BuildGraphFromPuzzle(windowID, kNoModifier, graphType);
-		te.AddLine("A* with Inconsistent Heuristics");
+//		te.AddLine("A* with Inconsistent Heuristics");
 //		te.AddLine("Current mode: add nodes (click to add node)");
 //		te.AddLine("Press [ or ] to change modes. '?' for help.");
 	}
@@ -151,15 +153,9 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 		if (ge == 0 || g == 0)
 			return;
-		ge->SetColor(Colors::gray);
+		ge->SetColor(Colors::lightgray);
 		ge->Draw(display);
-		
-//		if (from != -1 && to != -1 && numExampleNodes <= 8)
-//		{
-//			ge->SetColor(Colors::yellow);
-//			ge->DrawLine(display, from, to, 1);
-//		}
-		
+				
 		ge->SetColor(Colors::white);
 		for (int x = 0; x < g->GetNumNodes(); x++)
 		{
@@ -173,22 +169,33 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				if (0 == currentTick%ticksPerNode)
 					MyDisplayHandler(windowID, kNoModifier, 'o');
 			}
-			//astar.DoSingleSearchStep(path);
 			if (m == kFindPath)
 				astar.Draw(display);
 			else if (m == kFindPathIbex)
+			{
 				ibex.Draw(display);
+				std::string tmp = "f-limit: "+ibex.fEquation;
+				//tmp += ibex.GetCurrentFLimit()!=DBL_MAX?to_string_with_precision(ibex.GetCurrentFLimit(), 2):"∞";
+				display.DrawText(tmp.c_str(), {-1+0.05, -0.9}, Colors::black, 0.05, Graphics::textAlignLeft);
+
+				uint64_t small, large;
+				ibex.GetNodeInterval(small, large);
+				tmp = "nodes: ["+std::to_string(small) + ","+ (large==ibex.infiniteWorkBound?"∞":std::to_string(large)) +"]";
+				display.DrawText(tmp.c_str(), {-1+0.05, -0.84}, Colors::black, 0.05, Graphics::textAlignLeft);
+
+
+				tmp = "expand: "+std::to_string(ibex.GetIterationNodesExpanded());
+				display.DrawText(tmp.c_str(), {-1+0.05, -0.78}, Colors::black, 0.05, Graphics::textAlignLeft);
+			}
 		}
 		
 		if (path.size() > 0)
 		{
 			ge->SetColor(0, 1, 0);
-//			glLineWidth(10);
 			for (int x = 1; x < path.size(); x++)
 			{
 				ge->DrawLine(display, path[x-1], path[x], 10);
 			}
-//			glLineWidth(1);
 		}
 
 		for (int x = 0; x < g->GetNumNodes(); x++)
@@ -198,7 +205,6 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				ge->DrawStateLabel(display, x, MyToString(g->GetNode(x)->GetLabelF(kHeuristic)).c_str());
 			else
 				ge->DrawStateLabel(display, x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
-			//ge->GLLabelState(x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
 		}
 	}
 	if (viewport == 1)
@@ -212,7 +218,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		sprintf(fname, "/Users/nathanst/Movies/tmp/inconsistency-%d%d%d%d.svg",
 				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
 		
-		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0);
+		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0, "", false);
 
 //		SaveScreenshot(windowID, fname);
 		printf("Saved %s\n", fname);
@@ -243,6 +249,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	{
 		case '{':
 		{
+			ge->SetNodeScale(ge->GetNodeScale()*0.9);
+			break;
+		}
+		case '}':
+		{
+			ge->SetNodeScale(ge->GetNodeScale()*1.1);
 			break;
 		}
 		case ']':
@@ -253,10 +265,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				BuildGraphFromPuzzle(windowID, kNoModifier, graphType);
 				if (numExampleNodes > 8)
 				{
+					ge->SetNodeScale(2.5);
 					ge->SetDrawEdgeCosts(false);
 					ge->SetDrawNodeLabels(false);
 				}
 				else {
+					ge->SetNodeScale(1.75);
 					ge->SetDrawEdgeCosts(true);
 					ge->SetDrawNodeLabels(true);
 				}
@@ -272,10 +286,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			if (numExampleNodes <= 8)
 			{
+				ge->SetNodeScale(1.75);
 				ge->SetDrawEdgeCosts(true);
 				ge->SetDrawNodeLabels(true);
 			}
 			else {
+				ge->SetNodeScale(2.5);
 				ge->SetDrawEdgeCosts(false);
 				ge->SetDrawNodeLabels(false);
 			}
@@ -294,24 +310,28 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 'i':
 			if (m == kFindPathIbex)
+			{
 				m = kFindPath;
+			}
 			else if (m == kFindPath)
+			{
 				m = kFindPathIbex;
+			}
 			ShowSearchInfo();
 			break;
-		case 'w':
-			if (weight > 0.5)
-				weight = 0.0;
-			else
-				weight = 1.0;
-			m = kFindPath;
-			astar.SetWeight(weight);
-			astar.SetUseBPMX(BPMX?1:0);
-			astar.InitializeSearch(ge, astar.start, astar.goal, path);
-			ShowSearchInfo();
-			
-			running = true;
-			break;
+//		case 'w':
+//			if (weight > 0.5)
+//				weight = 0.0;
+//			else
+//				weight = 1.0;
+//			m = kFindPath;
+//			astar.SetWeight(weight);
+//			astar.SetUseBPMX(BPMX?1:0);
+//			astar.InitializeSearch(ge, astar.start, astar.goal, path);
+//			ShowSearchInfo();
+//
+//			running = true;
+//			break;
 		case 'r':
 			recording = !recording;
 			break;
@@ -379,7 +399,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				//ge->GLLabelState(x, MyToString(g->GetNode(x)->GetLabelL(kHeuristic)).c_str());
 			}
 
-			MakeSVG(tmp, "/Users/nathanst/Desktop/inc.svg", 400, 400);
+			MakeSVG(tmp, "/Users/nathanst/Desktop/inc.svg", 400, 400, 0, "", false);
 		}
 			break;
 		case 'l':
@@ -398,8 +418,9 @@ void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char ke
 		graphType = key;
 		delete g;
 		delete ge;
-		double weight = 3;
-		
+//		double weight = 3;
+		weight = 3;
+
 		g = GraphInconsistencyExamples::GetWeightedInconsistency(weight, numExampleNodes);
 		ge = new GraphEnvironment(g);
 		ge->SetDirected(false);
@@ -408,8 +429,7 @@ void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char ke
 		ge->SetIntegerEdgeCosts(false);
 		from = 0;
 		to = g->GetNumNodes()-1;
-		weight = weight;
-		astar.SetWeight(weight);
+		astar.SetWeight(3);
 		astar.SetUseBPMX(0);
 		astar.InitializeSearch(ge, from, to, path);
 		m = kFindPath;
@@ -417,6 +437,17 @@ void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char ke
 		running = true;
 		paused = true;
 		path.clear();
+		if (numExampleNodes > 8)
+		{
+			ge->SetNodeScale(2.5);
+			ge->SetDrawEdgeCosts(false);
+			ge->SetDrawNodeLabels(false);
+		}
+		else {
+			ge->SetNodeScale(1.75);
+			ge->SetDrawEdgeCosts(true);
+			ge->SetDrawNodeLabels(true);
+		}
 	}
 	if (key == 'a')
 	{
@@ -442,7 +473,17 @@ void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char ke
 		running = true;
 		paused = true;
 		path.clear();
-		ge->SetNodeScale(2);
+		if (numExampleNodes > 8)
+		{
+			ge->SetNodeScale(2.5);
+			ge->SetDrawEdgeCosts(false);
+			ge->SetDrawNodeLabels(false);
+		}
+		else {
+			ge->SetNodeScale(1.75);
+			ge->SetDrawEdgeCosts(true);
+			ge->SetDrawNodeLabels(true);
+		}
 	}
 	if (key == 'b' || key == 'c')
 	{
@@ -470,6 +511,17 @@ void BuildGraphFromPuzzle(unsigned long windowID, tKeyboardModifier mod, char ke
 		running = true;
 		paused = true;
 		path.clear();
+		if (numExampleNodes > 8)
+		{
+			ge->SetNodeScale(2.5);
+			ge->SetDrawEdgeCosts(false);
+			ge->SetDrawNodeLabels(false);
+		}
+		else {
+			ge->SetNodeScale(1.75);
+			ge->SetDrawEdgeCosts(true);
+			ge->SetDrawNodeLabels(true);
+		}
 	}
 }
 #include <iomanip>
@@ -484,92 +536,83 @@ std::string MyToString(double val)
 
 void ShowSearchInfo()
 {
-	if (m == kFindPathIbex)
-	{
-		te.Clear();
-		te.AddLine("IBEX");
-		return;
-	}
 	const int colWidth = 24;
 	std::string s;
 	te.Clear();
-	s = "-----> Searching from ";
+	if (m == kFindPathIbex)
+	{
+		s = "--> IBEX (BGS)";
+		s += " Searching from ";
+	}
+	else {
+		s = "--> A*";
+		if (BPMX)
+			s += "(BPMX)";
+		else
+			s += "(No BPMX)";
+		s += " Searching from ";
+	}
+
 	s +=g->GetNode(astar.start)->GetName();
 	s +=" to ";
 	s += g->GetNode(astar.goal)->GetName();
-	s += " <-----";
+	s += " <--";
 	//printf("Start: %d, goal %d. total (%d)\n", astar.start, astar.goal, g->GetNumNodes());
-	if (BPMX)
-		s += " BPMX";
-	te.AddLine(s.c_str());
-	te.AddLine("Press 'o' to advance search.");
-	for (int x = 0; x < g->GetNumNodes(); x++)
-	{
-		double gcost;
-		s = g->GetNode(x)->GetName();
-		switch (astar.GetStateLocation(x))
-		{
-			case kClosedList:
-			{
-				s += ": Closed  (g: ";
-				astar.GetClosedListGCost(x, gcost);
-				s += MyToString(gcost);
-				s += ", h: ";
-				s += MyToString(h.HCost(x, astar.goal));
-				s += ")";
-			}
-			break;
-			case kOpenList:
-			{
-				s += ": Open    (g: ";
-				astar.GetOpenListGCost(x, gcost);
-				s += MyToString(gcost);
-				s += ", h: ";
-				s += MyToString(h.HCost(x, astar.goal));
-				s += ")";
-			}
-				break;
 
-			case kNotFound:
-				s += ": Ungenerated (h: ";
-				s += MyToString(h.HCost(x, astar.goal));
-				s += ")";
-				break;
+	te.AddLine(s.c_str());
+	
+	//te.AddLine("Press 'o' to advance search.");
+	if (numExampleNodes <= 8)
+	{
+		for (int x = 0; x < g->GetNumNodes(); x++)
+		{
+			double gcost;
+			s = g->GetNode(x)->GetName();
+			switch (astar.GetStateLocation(x))
+			{
+				case kClosedList:
+				{
+					s += ": Closed  (g: ";
+					astar.GetClosedListGCost(x, gcost);
+					s += MyToString(gcost);
+					s += ", h: ";
+					s += MyToString(h.HCost(x, astar.goal));
+					s += ")";
+				}
+					break;
+				case kOpenList:
+				{
+					s += ": Open    (g: ";
+					astar.GetOpenListGCost(x, gcost);
+					s += MyToString(gcost);
+					s += ", h: ";
+					s += MyToString(h.HCost(x, astar.goal));
+					s += ")";
+				}
+					break;
+					
+				case kNotFound:
+					s += ": Ungenerated (h: ";
+					s += MyToString(h.HCost(x, astar.goal));
+					s += ")";
+					break;
+			}
+			
+			te.AddLine(s.c_str());
 		}
 		
-		te.AddLine(s.c_str());
-	}
-
-	te.AddLine("");
-	te.AddLine("Open List:");
-	size_t length = strlen(te.GetLastLine());
-	for (int x = length; x < colWidth; x++)
-		te.AppendToLine(" ");
-	te.AppendToLine("Closed List:");
-
-	std::vector<std::string> open, closed;
-	
-	for (int x = 0; x < astar.GetNumOpenItems(); x++)
-	{
-		auto item = astar.GetOpenItem(x);
-		s = g->GetNode(item.data)->GetName();
-		s += ": ";
-		s += MyToString(item.g+item.h);
-		s += "=";
-		s += MyToString(item.g);
-		s += "+";
-		s += MyToString(item.h);
-		s += " p: ";
-		s += g->GetNode(astar.GetItem(item.parentID).data)->GetName();
-		//te.AddLine(s.c_str());
-		open.push_back(s);
-	}
-	
-	for (int x = 0; x < astar.GetNumItems(); x++)
-	{
-		auto item = astar.GetItem(x);
-		if (item.where == kClosedList)
+		te.AddLine("");
+		te.AddLine("Open List:");
+		size_t length = strlen(te.GetLastLine());
+		for (int x = length; x < colWidth; x++)
+			te.AppendToLine(" ");
+		te.AppendToLine("Closed List:");
+		
+		std::vector<std::string> open, closed;
+		
+		for (int x = 0; x < astar.GetNumOpenItems(); x++)
 		{
+			auto item = astar.GetOpenItem(x);
 			s = g->GetNode(item.data)->GetName();
 			s += ": ";
 			s += MyToString(item.g+item.h);
@@ -580,21 +623,41 @@ void ShowSearchInfo()
 			s += " p: ";
 			s += g->GetNode(astar.GetItem(item.parentID).data)->GetName();
 			//te.AddLine(s.c_str());
-			closed.push_back(s);
+			open.push_back(s);
 		}
-	}
-	for (size_t x = 0; x < open.size(); x++)
-	{
-		te.AddLine(open[x].c_str());
-		for (size_t t = open[x].length(); t < colWidth; t++)
-			te.AppendToLine(" ");
-		if (x < closed.size())
+		
+		for (int x = 0; x < astar.GetNumItems(); x++)
+		{
+			auto item = astar.GetItem(x);
+			if (item.where == kClosedList)
+			{
+				s = g->GetNode(item.data)->GetName();
+				s += ": ";
+				s += MyToString(item.g+item.h);
+				s += "=";
+				s += MyToString(item.g);
+				s += "+";
+				s += MyToString(item.h);
+				s += " p: ";
+				s += g->GetNode(astar.GetItem(item.parentID).data)->GetName();
+				//te.AddLine(s.c_str());
+				closed.push_back(s);
+			}
+		}
+		for (size_t x = 0; x < open.size(); x++)
+		{
+			te.AddLine(open[x].c_str());
+			for (size_t t = open[x].length(); t < colWidth; t++)
+				te.AppendToLine(" ");
+			if (x < closed.size())
+				te.AppendToLine(closed[x].c_str());
+		}
+		for (size_t x = open.size(); x < closed.size(); x++)
+		{
+			te.AddLine("                        ");
 			te.AppendToLine(closed[x].c_str());
-	}
-	for (size_t x = open.size(); x < closed.size(); x++)
-	{
-		te.AddLine("                        ");
-		te.AppendToLine(closed[x].c_str());
+		}
+
 	}
 }
 
