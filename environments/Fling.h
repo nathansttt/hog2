@@ -215,6 +215,7 @@ namespace std {
 			{
 				hash |= (1ull<<node.locs[x].first);
 			}
+			return hash;
 		}
 	};
 	
