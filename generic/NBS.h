@@ -230,8 +230,8 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(
 	}
 	else if (queue.forwardQueue.Lookup(nForward).data == queue.backwardQueue.Lookup(nBackward).data) // if success, see if nodes are the same (return path)
 	{
-		if (queue.TerminateOnG())
-			printf("NBS: Lower Bound on C* from g+g (gsum)\n");
+//		if (queue.TerminateOnG())
+//			printf("NBS: Lower Bound on C* from g+g (gsum)\n");
 		ExtractFromMiddle(thePath);
 		return true;
 	}
