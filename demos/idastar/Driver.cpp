@@ -309,7 +309,7 @@ void DrawEdgesInIteration(Graphics::Display &display)
 			if (flesseq(m, useIDA?ida.GetCurrentFLimit():ibex.GetCurrentFLimit()))
 			{
 				ge->SetColor(Colors::lighterblue);
-				ge->DrawLine(display, e->getFrom(), e->getTo(), 20);
+				ge->DrawLine(display, e->getFrom(), e->getTo(), 40);
 			}
 			//			else if (flesseq(m, ida.GetNextFLimit()))
 			//			{
