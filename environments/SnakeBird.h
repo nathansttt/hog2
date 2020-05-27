@@ -237,7 +237,7 @@ public:
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
-	SnakeBirdWorldObject GetGroundType(int x, int y);
+	SnakeBirdWorldObject GetGroundType(int x, int y) const;
 	SnakeBirdWorldObject GetRenderedGroundType(const SnakeBirdState &s, int x, int y);
 	int GetWidth() { return width; }
 	int GetHeight() { return height; }
@@ -317,7 +317,8 @@ private:
 	bool Render(const SnakeBirdState &s) const;
 	bool CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
 				 SnakeBirdAction &a) const;
-
+	bool IsOnSpikes(const SnakeBirdState &s, int which) const;
+	
 	// Apply Move helper functions
 	// check if snakebirds can teleport - return true if one did
 	bool HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
@@ -343,7 +344,7 @@ private:
 							  int snake, bool isActive, double percentComplete) const;
 	void DrawMovingSnake(Graphics::Display &display, const SnakeBirdState &old, const SnakeBirdState &s,
 						 int snake, bool isActive, double percentComplete) const;
-	void DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo, int whichSnake, bool alive) const;
+	void DrawSnakeSegment(Graphics::Display &display, Graphics::point p, const rgbColor &color, bool head, bool tail, bool awake, snakeDir dirFrom, snakeDir dirTo, int whichSnake, bool isDead) const;
 
 	// Member variables
 	int width, height;
