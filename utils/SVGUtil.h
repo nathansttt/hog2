@@ -20,6 +20,13 @@ namespace SVG {
 		kRight,
 		kCenter
 	};
+
+enum svgBaseline {
+	kBottom,
+	kMiddle,
+	kTop
+};
+
 }
 
 std::string SVGFrameRect(float x, float y, float width, float height, float border, rgbColor c);
@@ -40,12 +47,13 @@ std::string SVGAddLinePath(float x1, float y1);
 std::string SVGAddLinePath(float x1, float y1, float x2, float y2);
 std::string SVGEndLinePath();
 std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface = 0,
-						SVG::svgAlignment align = SVG::kCenter);
+						SVG::svgAlignment align = SVG::kCenter,
+						SVG::svgBaseline base = SVG::kMiddle);
 std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, rgbColor strokeColor, double size);
 
 std::string SVGDefineGradient(bool horizontal, bool vertical, rgbColor c1, rgbColor c2, const char *name);
 
-std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport = 0, const char *comment = 0);
-void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport = 0, const char *comment = 0);
+std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport = 0, const char *comment = 0, bool crisp = true);
+void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport = 0, const char *comment = 0, bool crisp = true);
 
 #endif /* SVGUtil_hpp */

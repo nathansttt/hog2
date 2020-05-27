@@ -224,7 +224,7 @@ std::string SVGDrawLine(int x1, int y1, int x2, int y2, int width, rgbColor c, b
 //	return s;
 }
 
-std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface, SVG::svgAlignment align)
+std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double size, const char *typeface, SVG::svgAlignment align, SVG::svgBaseline base)
 {
 	std::string s;
 //	s =  "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" text-anchor=\"middle\" style=\"fill:"+SVGGetRGB(c);
@@ -243,7 +243,17 @@ std::string SVGDrawText(float x1, float y1, const char *txt, rgbColor c, double 
 	else
 		s += "Helvetica";
 	s += ", sans-serif; font-weight:bold; font-size:"+std::to_string(size)+"px\"";
-	s += " dominant-baseline=\"middle\">";
+	switch (base) {
+		case SVG::kBottom:
+			s += " dominant-baseline=\"baseline\">";
+			break;
+		case SVG::kTop:
+			s += " dominant-baseline=\"hanging\">";
+			break;
+		case SVG::kMiddle:
+			s += " dominant-baseline=\"middle\">";
+			break;
+	}
 	s += txt;
 	s += "</text>";
 	//	s += "<text x=\""+std::to_string(x1*10+2)+"\" y=\""+std::to_string(y1*10-1)+"\" style=\"fill:"+SVGGetRGB(c);
@@ -263,17 +273,6 @@ std::string SVGDrawStrokedText(float x1, float y1, const char *txt, rgbColor c, 
 	return s;
 }
 
-
-void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport, const char *comment)
-{
-	std::string s = MakeSVG(disp, width, height, viewport, comment);
-	std::fstream myFile;
-	
-	std::fstream svgFile;
-	svgFile.open(filename, std::fstream::out | std::fstream::trunc);
-	svgFile << s;
-	svgFile.close();
-}
 
 float WidthToSVG(float w, float xMultiplier, float yMultiplier)
 {
@@ -302,7 +301,8 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 		{
 			case Graphics::Display::kLine:
 			{
-				s += SVGBeginLinePath(drawCommands[x].line.width, drawCommands[x].line.c);
+				//WidthToSVG(i.size, width, height)
+				s += SVGBeginLinePath(WidthToSVG(drawCommands[x].line.width, width, height), drawCommands[x].line.c);
 				bool first = true;
 				while (drawCommands[x].what == Graphics::Display::kLine &&
 					   (first ||
@@ -405,7 +405,8 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 			case Graphics::Display::kFrameOval:
 			{
 				const Graphics::Display::drawInfo &o = drawCommands[x].shape;
-				s += SVGFrameCircle(((o.r.left+o.r.right)/2.0+1)*width/2.0, ((o.r.top+o.r.bottom)/2.0+1)*height/2.0, width*(o.r.right-o.r.left)/4.0, o.width, o.c);
+				s += SVGFrameCircle(((o.r.left+o.r.right)/2.0+1)*width/2.0, ((o.r.top+o.r.bottom)/2.0+1)*height/2.0, width*(o.r.right-o.r.left)/4.0,
+									WidthToSVG(o.width, width, height), o.c);
 				
 				break;
 			}
@@ -430,14 +431,27 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 	}
 }
 
-std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport, const char *comment)
+void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport, const char *comment, bool crisp)
+{
+	std::string s = MakeSVG(disp, width, height, viewport, comment, crisp);
+	std::fstream myFile;
+	
+	std::fstream svgFile;
+	svgFile.open(filename, std::fstream::out | std::fstream::trunc);
+	svgFile << s;
+	svgFile.close();
+}
+
+std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport, const char *comment, bool crisp)
 {
 	std::string s;
-	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(width+3)+"\" height = \""+std::to_string(height+3)+"\" ";
-	s += "viewBox = \"-1 -1 "+std::to_string(width+2)+" "+std::to_string(height+2)+"\" ";
+	s = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width = \""+std::to_string(width)+"\" height = \""+std::to_string(height)+"\" ";
+	s += "viewBox = \"0 0 "+std::to_string(width)+" "+std::to_string(height)+"\" ";
+//	s += "viewBox = \"-1 -1 "+std::to_string(width+2)+" "+std::to_string(height+2)+"\" ";
 	//s += "preserveAspectRatio = \"none\" shape-rendering=\"crispEdges\""; // crispEdges
-	s += " preserveAspectRatio = \"none\"";
-	s += " shape-rendering=\"crispEdges\""; // crispEdges
+	//s += " preserveAspectRatio = \"none\"";
+	if (crisp)
+		s += " shape-rendering=\"crispEdges\""; // crispEdges
 	s += ">\n";
 
 //	s += SVGDrawRect(0, 0, width, height, Colors::white);
@@ -474,7 +488,9 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 			outputPoints = i.points;
 			for (auto &j : outputPoints)
 				PointToSVG(j, width, height);
-			s += SVGDrawLineSegments(outputPoints, i.size, i.c);
+//			s += SVGDrawLineSegments(outputPoints, i.size, i.c);
+			s += SVGDrawLineSegments(outputPoints, WidthToSVG(i.size, width, height), i.c);
+			
 			s += "\n";
 		}
 	}
