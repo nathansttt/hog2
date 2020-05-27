@@ -47,7 +47,7 @@ namespace GraphInconsistencyExamples {
 			g->AddEdge(new edge(n->GetNum(), 1, numExampleNodes-x));
 		}
 		
-		nodeName[0] = '1';
+		nodeName[0] = 'A';
 		unsigned int last = 1;
 		for (int x = 0; x < numExampleNodes; x++)
 		{
