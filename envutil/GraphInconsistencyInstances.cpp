@@ -24,7 +24,7 @@ namespace GraphInconsistencyExamples {
 		n->SetLabelF(GraphSearchConstants::kYCoordinate, -0.7);
 		n->SetLabelF(GraphSearchConstants::kZCoordinate, 0);
 		
-		n = new node("M");
+		n = new node("m");
 		n->SetLabelL(kHeuristic, 0);
 		g->AddNode(n);
 		n->SetLabelF(GraphSearchConstants::kXCoordinate, 0);
