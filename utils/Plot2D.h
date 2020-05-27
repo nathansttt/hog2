@@ -73,7 +73,9 @@ namespace Plotting {
 		void Clear();
 		void AddLine(Line *);
 		void AddPoint(const Point &p);
-//		void SetCurrMouse(double, double, Rect &winRect);
+		void SetXAxisLabel(const char *);
+		void SetYAxisLabel(const char *);
+		//		void SetCurrMouse(double, double, Rect &winRect);
 //		void Recenter(double, double, Rect &rectPort);
 		double GetMaxX() { return dRight; }
 		double GetMinX() { return dLeft; }
@@ -89,6 +91,7 @@ namespace Plotting {
 		void NormalizeAxes();
 	private:
 		point3d MakeHOG(double x, double y) const;
+		double MakeHOGWidth(double w) const;
 		double mouseXLoc, mouseYLoc;
 		double dLeft, dRight, dTop, dBottom;
 		double xMin, xMax, yMin, yMax;
@@ -96,7 +99,7 @@ namespace Plotting {
 		int lastSelectedLine;
 		std::vector<Point> points;
 		std::vector<Line *> lines;
-
+		std::string xLabel, yLabel;
 		mutable double xOffset;
 		mutable double yOffset;
 		mutable double xScale;
