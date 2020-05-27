@@ -344,6 +344,7 @@ public:
 	void SetDrawEdgeCosts(bool val) { drawEdgeCosts = val; }
 	void SetDrawNodeLabels(bool val) { drawNodeLabels = val; }
 	void SetNodeScale(double v) { nodeScale = v; }
+	double GetNodeScale() { return nodeScale; }
 protected:
 	bool directed;
 	Map *m;
