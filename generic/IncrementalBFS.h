@@ -25,7 +25,7 @@ public:
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; }
 	void Reset() { history.clear(); }
 	void OpenGLDraw();
-	void Draw(Graphics::Display &display);
+	void Draw(Graphics::Display &display) const;
 private:
 	unsigned long nodesExpanded, nodesTouched;
 	
@@ -90,7 +90,7 @@ void IncrementalBFS<state, action>::OpenGLDraw()
 }
 
 template <class state, class action>
-void IncrementalBFS<state, action>::Draw(Graphics::Display &display)
+void IncrementalBFS<state, action>::Draw(Graphics::Display &display) const
 {
 	for (auto x : history)
 		env->Draw(display, x.first);

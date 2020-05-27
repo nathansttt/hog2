@@ -36,7 +36,7 @@ public:
 	void Reset() { bound = initialBound; nextBound = initialBound; solutionPath.clear();
 		history.clear(); ResetNodeCount(); previousBound = 0; }
 	void OpenGLDraw();
-	void Draw(Graphics::Display &display);
+	void Draw(Graphics::Display &display) const;
 	state GetCurrentState() const
 	{
 		if (q.size() > 0)
@@ -466,7 +466,7 @@ bool IncrementalBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 }
 
 template <class state, class action>
-void IncrementalBGS<state, action>::Draw(Graphics::Display &disp)
+void IncrementalBGS<state, action>::Draw(Graphics::Display &disp) const
 {
 	double transparency = 1.0;
 	if (q.size() == 0)
