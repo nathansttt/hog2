@@ -99,97 +99,11 @@ void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 
 void createMenus()
 {
-//	int menu, submenu;
-//	
-//	// create the menu and
-//	// tell glut that "processMenuEvents" will 
-//	// handle the events
-//	submenu = glutCreateMenu(processMenuEvents);
-//	glutAddMenuEntry("Map1",'map1');
-//	glutAddMenuEntry("Map2",'map2');
-//	glutAddMenuEntry("Map3",'map3');
-//	menu = glutCreateMenu(processMenuEvents);
-//	
-//	//add entries to our menu
-//	glutAddSubMenu("Open Map",submenu);
-//	glutAddMenuEntry("clear Map...",'clar');
-//	
-//	// attach the menu to the right button
-//	glutAttachMenu(GLUT_MIDDLE_BUTTON);
 }
 
 void processMenuEvents(int option)
 {
-/*
-	switch (option) {
-		case 'map1':
-			sprintf(gDefaultMap, "/Users/nathanst/Development/hog/maps/bgmaps/AR0011SR.map");
-			//processStats(pContextInfo->unitLayer->getStats());
-			//delete pContextInfo->unitLayer;
-			//createSimulation(pContextInfo->unitLayer);
-			break;
-		case 'map2':
-			sprintf(gDefaultMap, "/Users/nathanst/Development/hog/maps/wc3maps/divideandconquer.map");
-			processStats(pContextInfo->unitLayer->getStats());
-			delete pContextInfo->unitLayer;
-			createSimulation(pContextInfo->unitLayer);
-			break;
-		case 'map3':
-			sprintf(gDefaultMap, "/Users/nathanst/Development/hog/maps/wc3maps/mysticisles.map");
-			processStats(pContextInfo->unitLayer->getStats());
-			delete pContextInfo->unitLayer;
-			createSimulation(pContextInfo->unitLayer);
-			break;
-		case 'clar':
-			gDefaultMap[0] = 0;
-			processStats(pContextInfo->unitLayer->getStats());
-			delete pContextInfo->unitLayer;
-			createSimulation(pContextInfo->unitLayer);
-			break;
-		default: printf("Unknown menu event: %d\n", option);
-			break;
-	}
- */
 }
-
-//int processFramesPerSecond(char *argument[], int maxNumArgs)
-//{
-//	if (maxNumArgs <= 1)
-//		return 0;
-//	fps = atof(argument[1]);
-//	if (fps == 0)
-//		fps = 1.0;
-//	return 2;
-//}
-
-//void pointPath() {
-//	
-//	ppMouseClicks = 0;
-//
-//	if (!pointpath) {
-//		glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
-//		backup = new recContext;
-//		*backup = *pContextInfo;
-//		
-//		// Reset the view so that you are looking straight down on the map
-//		resetCamera (&pContextInfo->camera);
-////		pContextInfo->worldRotation[0] = 180;
-////		pContextInfo->worldRotation[1] = 0;
-////		pContextInfo->worldRotation[2] = -.5;
-////		pContextInfo->worldRotation[3] = .5;
-//	}
-//	else {
-//		glutSetCursor(GLUT_CURSOR_INHERIT);
-//		*pContextInfo = *backup;
-//		if (backup) {
-//			delete backup;
-//			backup = 0;
-//		}
-//		
-//	}
-//	
-//	pointpath = 1 - pointpath;
-//}
 
 
 
@@ -603,8 +517,9 @@ void resizeWindow(int x, int y)
 		x++;
 	while (0 != y%4)
 		y++;
-	rect.size.width = x;
-	rect.size.height = y;
+	int scale = 2;//glutGet(GLUT_WINDOW_SCALE);
+	rect.size.width = scale*x;
+	rect.size.height = scale*y;
 	rect.origin.x = 0;
 	rect.origin.y = 0;
 	resizeGL(pContextInfo, rect);
@@ -806,7 +721,10 @@ void DrawGraphics(Graphics::Display &display, int port)
 		if (i.viewport != port)
 			continue;
 		glColor3f(i.c.r, i.c.g, i.c.b);
-		DrawText(i.loc.x, i.loc.y,i.loc.z, i.size*2, i.s.c_str());
+		if (i.align == Graphics::textAlignCenter)
+			DrawTextCentered(i.loc.x, i.loc.y,i.loc.z, i.size*2, i.s.c_str());
+		else
+			DrawText(i.loc.x, i.loc.y,i.loc.z, i.size*2, i.s.c_str());
 		//		std::string s;
 		//		point loc;
 		//		rgbColor c;
@@ -814,109 +732,34 @@ void DrawGraphics(Graphics::Display &display, int port)
 		
 	}
 
-	for (int x = display.backgroundDrawCommands.size()-1; x >= 0; x--)
-		//for (auto &i: display.backgroundDrawCommands)
-	{
-		auto &i = display.backgroundDrawCommands[x];
-		if (i.viewport != port)
-			continue;
-		switch (i.what)
-		{
-			case Graphics::Display::kFillRectangle:
-			{
-				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
-
-				glBegin(GL_QUADS);
-				glVertex2f(i.shape.r.left, i.shape.r.bottom);
-				glVertex2f(i.shape.r.left, i.shape.r.top);
-				glVertex2f(i.shape.r.right, i.shape.r.top);
-				glVertex2f(i.shape.r.right, i.shape.r.bottom);
-				glEnd();
-//				epsilon -= de;
-				break;
-			}
-			case Graphics::Display::kFrameRectangle:
-			{
-				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
-				glLineWidth(i.shape.width);
-//				glBegin(GL_LINE_LOOP);
-//				glVertex2f(i.shape.r.left, i.shape.r.bottom);
-//				glVertex2f(i.shape.r.left, i.shape.r.top);
-//				glVertex2f(i.shape.r.right, i.shape.r.top);
-//				glVertex2f(i.shape.r.right, i.shape.r.bottom);
-//				glEnd();
-				
-				glBegin(GL_TRIANGLE_STRIP);
-				GLfloat rad = i.shape.width/2.0;
-				glVertex2f(i.shape.r.left-rad, i.shape.r.bottom+rad);
-				glVertex2f(i.shape.r.left+rad, i.shape.r.bottom-rad);
-				
-				glVertex2f(i.shape.r.left-rad, i.shape.r.top-rad);
-				glVertex2f(i.shape.r.left+rad, i.shape.r.top+rad);
-				
-				glVertex2f(i.shape.r.right+rad, i.shape.r.top-rad);
-				glVertex2f(i.shape.r.right-rad, i.shape.r.top+rad);
-				
-				glVertex2f(i.shape.r.right+rad, i.shape.r.bottom+rad);
-				glVertex2f(i.shape.r.right-rad, i.shape.r.bottom-rad);
-				
-				glVertex2f(i.shape.r.left-rad, i.shape.r.bottom+rad);
-				glVertex2f(i.shape.r.left+rad, i.shape.r.bottom-rad);
-				
-				glEnd();
-
-
-				break;
-			}
-			case Graphics::Display::kFillOval:
-			{
-				glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
-				DrawCircle((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, fabs(i.shape.r.top-i.shape.r.bottom)/2.0, 64);
-				break;
-			}
-			case Graphics::Display::kFillNGon:
-			{
-				glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
-				DrawCircle(i.polygon.center.x, i.polygon.center.y, i.polygon.radius, i.polygon.segments, i.polygon.rotate);
-				break;
-			}
-			case Graphics::Display::kFrameNGon:
-			{
-				glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
-				//FrameCircle(i.polygon.p.x, i.polygon.p.y, i.polygon.radius, i.polygon.segments, , i.polygon.rotate);
-				break;
-			}
-			case Graphics::Display::kFrameOval:
-			{
-				
-				break;
-			}
-			case Graphics::Display::kLine:
-			{
-				glLineWidth(i.line.width);
-				glBegin(GL_LINES);
-				glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
-				glVertex2f(i.line.start.x, i.line.start.y);
-				glVertex2f(i.line.end.x, i.line.end.y);
-				glEnd();
-//				epsilon -= de;
-				break;
-			}
-		}
-	}
 	for (auto &i : display.lineSegments)
 	{
 		if (i.viewport != port)
 			continue;
 		glColor3f(i.c.r, i.c.g, i.c.b);
-		glLineWidth(i.size);
-		glBegin(GL_LINE_STRIP);
-		for (auto &p : i.points)
+		
+		glBegin(GL_QUADS);
+		for (int t = 0; t < i.points.size()-1; t++)
 		{
-			glVertex3f(p.x, p.y, p.z);
+			GLfloat xOff = i.points[t].x-i.points[t+1].x;
+			GLfloat yOff = i.points[t].y-i.points[t+1].y;
+			GLfloat ratio = i.size/sqrt(xOff*xOff+yOff*yOff);
+			glVertex3f(i.points[t].x-ratio*yOff, i.points[t].y-ratio*xOff, i.points[t].z);
+			glVertex3f(i.points[t].x+ratio*yOff, i.points[t].y+ratio*xOff, i.points[t].z);
+			glVertex3f(i.points[t+1].x+ratio*yOff, i.points[t+1].y+ratio*xOff, i.points[t].z);
+			glVertex3f(i.points[t+1].x-ratio*yOff, i.points[t+1].y-ratio*xOff, i.points[t].z);
 		}
 		glEnd();
+		
+//		glLineWidth(i.size);
+//		glBegin(GL_LINE_STRIP);
+//		for (auto &p : i.points)
+//		{
+//			glVertex3f(p.x, p.y, p.z);
+//		}
+//		glEnd();
 	}
+	
 	for (int x = display.drawCommands.size()-1; x >= 0; x--)
 		//for (auto &i: drawCommands)
 	{
@@ -1014,14 +857,119 @@ void DrawGraphics(Graphics::Display &display, int port)
 		if (i.viewport != port)
 			continue;
 		glColor3f(i.c.r, i.c.g, i.c.b);
-		glLineWidth(i.size);
-		glBegin(GL_LINE_STRIP);
-		for (auto &p : i.points)
+		
+		glBegin(GL_QUADS);
+		for (int t = 0; t < i.points.size()-1; t++)
 		{
-			glVertex3f(p.x, p.y, p.z);
+			GLfloat xOff = i.points[t].x-i.points[t+1].x;
+			GLfloat yOff = i.points[t].y-i.points[t+1].y;
+			GLfloat ratio = i.size/sqrt(xOff*xOff+yOff*yOff);
+			glVertex3f(i.points[t].x-ratio*yOff, i.points[t].y-ratio*xOff, i.points[t].z);
+			glVertex3f(i.points[t].x+ratio*yOff, i.points[t].y+ratio*xOff, i.points[t].z);
+			glVertex3f(i.points[t+1].x+ratio*yOff, i.points[t+1].y+ratio*xOff, i.points[t].z);
+			glVertex3f(i.points[t+1].x-ratio*yOff, i.points[t+1].y-ratio*xOff, i.points[t].z);
 		}
 		glEnd();
+
+//		glLineWidth(i.size);
+//		glBegin(GL_LINE_STRIP);
+//		for (auto &p : i.points)
+//		{
+//			glVertex3f(p.x, p.y, p.z);
+//		}
+//		glEnd();
 	}
+		for (int x = display.backgroundDrawCommands.size()-1; x >= 0; x--)
+			//for (auto &i: display.backgroundDrawCommands)
+		{
+			auto &i = display.backgroundDrawCommands[x];
+			if (i.viewport != port)
+				continue;
+			switch (i.what)
+			{
+				case Graphics::Display::kFillRectangle:
+				{
+					glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+
+					glBegin(GL_QUADS);
+					glVertex2f(i.shape.r.left, i.shape.r.bottom);
+					glVertex2f(i.shape.r.left, i.shape.r.top);
+					glVertex2f(i.shape.r.right, i.shape.r.top);
+					glVertex2f(i.shape.r.right, i.shape.r.bottom);
+					glEnd();
+	//				epsilon -= de;
+					break;
+				}
+				case Graphics::Display::kFrameRectangle:
+				{
+					glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+					glLineWidth(i.shape.width);
+	//				glBegin(GL_LINE_LOOP);
+	//				glVertex2f(i.shape.r.left, i.shape.r.bottom);
+	//				glVertex2f(i.shape.r.left, i.shape.r.top);
+	//				glVertex2f(i.shape.r.right, i.shape.r.top);
+	//				glVertex2f(i.shape.r.right, i.shape.r.bottom);
+	//				glEnd();
+					
+					glBegin(GL_TRIANGLE_STRIP);
+					GLfloat rad = i.shape.width/2.0;
+					glVertex2f(i.shape.r.left-rad, i.shape.r.bottom+rad);
+					glVertex2f(i.shape.r.left+rad, i.shape.r.bottom-rad);
+					
+					glVertex2f(i.shape.r.left-rad, i.shape.r.top-rad);
+					glVertex2f(i.shape.r.left+rad, i.shape.r.top+rad);
+					
+					glVertex2f(i.shape.r.right+rad, i.shape.r.top-rad);
+					glVertex2f(i.shape.r.right-rad, i.shape.r.top+rad);
+					
+					glVertex2f(i.shape.r.right+rad, i.shape.r.bottom+rad);
+					glVertex2f(i.shape.r.right-rad, i.shape.r.bottom-rad);
+					
+					glVertex2f(i.shape.r.left-rad, i.shape.r.bottom+rad);
+					glVertex2f(i.shape.r.left+rad, i.shape.r.bottom-rad);
+					
+					glEnd();
+
+
+					break;
+				}
+				case Graphics::Display::kFillOval:
+				{
+					glColor3f(i.shape.c.r, i.shape.c.g, i.shape.c.b);
+					DrawCircle((i.shape.r.right+i.shape.r.left)/2, (i.shape.r.top+i.shape.r.bottom)/2, fabs(i.shape.r.top-i.shape.r.bottom)/2.0, 64);
+					break;
+				}
+				case Graphics::Display::kFillNGon:
+				{
+					glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
+					DrawCircle(i.polygon.center.x, i.polygon.center.y, i.polygon.radius, i.polygon.segments, i.polygon.rotate);
+					break;
+				}
+				case Graphics::Display::kFrameNGon:
+				{
+					glColor3f(i.polygon.c.r, i.polygon.c.g, i.polygon.c.b);
+					//FrameCircle(i.polygon.p.x, i.polygon.p.y, i.polygon.radius, i.polygon.segments, , i.polygon.rotate);
+					break;
+				}
+				case Graphics::Display::kFrameOval:
+				{
+					
+					break;
+				}
+				case Graphics::Display::kLine:
+				{
+					glLineWidth(i.line.width);
+					glBegin(GL_LINES);
+					glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
+					glVertex2f(i.line.start.x, i.line.start.y);
+					glVertex2f(i.line.end.x, i.line.end.y);
+					glEnd();
+	//				epsilon -= de;
+					break;
+				}
+			}
+		}
+
 //	std::vector<data> backgroundDrawCommands;
 //	std::vector<textInfo> backgroundText;
 //	std::vector<segments> backgroundLineSegments;
@@ -1171,8 +1119,9 @@ void buildGL(void)
 		
 	glClearColor(0.0,0.0,0.0,0.0);
 
-	viewRect.size.width = glutGet(GLUT_WINDOW_WIDTH);
-	viewRect.size.height = glutGet(GLUT_WINDOW_HEIGHT);
+	int scale = 2;//glutGet(GLUT_WINDOW_SCALE);
+	viewRect.size.width = scale*glutGet(GLUT_WINDOW_WIDTH);
+	viewRect.size.height = scale*glutGet(GLUT_WINDOW_HEIGHT);
 	
 	// setup viewport and prespective
 	resizeGL(pContextInfo, viewRect); // forces projection matrix update
