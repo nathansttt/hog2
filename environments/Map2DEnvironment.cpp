@@ -1422,7 +1422,7 @@ void MapEnvironment::DrawLine(Graphics::Display &disp, const xyLoc &a, const xyL
 	GetColor(c.r, c.g, c.b, t);
 	
 	disp.DrawLine({static_cast<float>(xx1), static_cast<float>(yy1)},
-			      {static_cast<float>(xx2), static_cast<float>(yy2)}, width, c);
+				  {static_cast<float>(xx2), static_cast<float>(yy2)}, width*rad*0.1, c);
 }
 
 void MapEnvironment::DrawArrow(Graphics::Display &disp, const xyLoc &a, const xyLoc &b, double width) const
@@ -1437,7 +1437,7 @@ void MapEnvironment::DrawArrow(Graphics::Display &disp, const xyLoc &a, const xy
 	GetColor(c.r, c.g, c.b, t);
 	
 	disp.DrawArrow({static_cast<float>(xx1), static_cast<float>(yy1)},
-				  {static_cast<float>(xx2), static_cast<float>(yy2)}, width, c);
+				   {static_cast<float>(xx2), static_cast<float>(yy2)}, 0.1*rad*width, c);
 }
 
 
