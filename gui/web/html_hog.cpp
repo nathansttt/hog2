@@ -1,6 +1,7 @@
 #include <math.h>
 #include <emscripten.h>
 #include <stdio.h>
+#include <vector>
 #include "Common.h"
 #include "SVGUtil.h"
 
@@ -13,7 +14,7 @@ int canvasYOffset = 0;
 
 const char *HOGDoFrame();
 void HOGDoMouse(int x, int y, bool up, bool down, bool drag);
-void HOGInit();
+void HOGInit(const char *arguments);
 void HOGHitKey(const char *key);
 int hog_main(int argc, char **argv);
 const char *getTextBuffer();
@@ -21,42 +22,48 @@ void DrawToCanvas(const Graphics::Display &disp);
 
 extern "C" {
 
-	void EMSCRIPTEN_KEEPALIVE SetCanvasSize(int x, int y)
-	{
-		canvasWidth = x;
-		canvasHeight = y;
-
-		pRecContext pContextInfo = getCurrentContext();
-		pContextInfo->windowHeight = canvasHeight;
-		pContextInfo->windowWidth = canvasWidth;
-
-		canvasScale = std::min(canvasWidth, canvasHeight);
-		canvasXOffset = (canvasWidth>canvasHeight)?(canvasWidth-canvasHeight):0;
-		canvasYOffset = (canvasHeight>canvasWidth)?(canvasHeight-canvasWidth):0;
-		canvasXOffset /= 2;
-		canvasYOffset /= 2;
-	}
-
-	void EMSCRIPTEN_KEEPALIVE MouseEvent(int x, int y, bool up, bool down, bool drag)
-	{
-		HOGDoMouse(x, y, up, down, drag);
-	}
+void EMSCRIPTEN_KEEPALIVE SetCanvasSize(int x, int y)
+{
+	canvasWidth = x;
+	canvasHeight = y;
 	
-	const char * EMSCRIPTEN_KEEPALIVE DoFrame()
-	{
-		return HOGDoFrame();
-	}
+	pRecContext pContextInfo = getCurrentContext();
+	pContextInfo->windowHeight = canvasHeight;
+	pContextInfo->windowWidth = canvasWidth;
 	
-	void EMSCRIPTEN_KEEPALIVE InitHOG()
-	{
-		HOGInit();
-		SetCanvasSize(canvasWidth, canvasHeight);
-	}
-	
-	void EMSCRIPTEN_KEEPALIVE HitKey(const char *key)
-	{
-		HOGHitKey(key);
-	}
+	canvasScale = std::min(canvasWidth, canvasHeight);
+	canvasXOffset = (canvasWidth>canvasHeight)?(canvasWidth-canvasHeight):0;
+	canvasYOffset = (canvasHeight>canvasWidth)?(canvasHeight-canvasWidth):0;
+	canvasXOffset /= 2;
+	canvasYOffset /= 2;
+}
+
+void EMSCRIPTEN_KEEPALIVE MouseEvent(int x, int y, bool up, bool down, bool drag)
+{
+	HOGDoMouse(x, y, up, down, drag);
+}
+
+const char * EMSCRIPTEN_KEEPALIVE DoFrame()
+{
+	return HOGDoFrame();
+}
+
+void EMSCRIPTEN_KEEPALIVE InitHOGArg(const char *data)
+{
+	HOGInit(data);
+	SetCanvasSize(canvasWidth, canvasHeight);
+}
+
+void EMSCRIPTEN_KEEPALIVE InitHOG()
+{
+	HOGInit(0);
+	SetCanvasSize(canvasWidth, canvasHeight);
+}
+
+void EMSCRIPTEN_KEEPALIVE HitKey(const char *key)
+{
+	HOGHitKey(key);
+}
 
 }
 
@@ -69,8 +76,8 @@ const char *HOGDoFrame()
 		setViewport(pContextInfo, x);
 		HandleFrame(pContextInfo, x);
 	}
-//	if (getTextBuffer() != 0)
-//		pContextInfo->display.DrawText(getTextBuffer(), {0,-0.95}, Colors::gray, 0.04);
+	//	if (getTextBuffer() != 0)
+	//		pContextInfo->display.DrawText(getTextBuffer(), {0,-0.95}, Colors::gray, 0.04);
 	static std::string result;
 	pContextInfo->display.EndFrame();
 	DrawToCanvas(pContextInfo->display);
@@ -104,9 +111,9 @@ float PointXToCanvas(float p, int viewport)
 	//	if (v == 1)
 	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
 	return ((result.x+1.0)*canvasWidth)/2.0;
-
+	
 	// old code
-//	return ((p+1)*canvasScale/2.0)+canvasXOffset;
+	//	return ((p+1)*canvasScale/2.0)+canvasXOffset;
 }
 
 float PointYToCanvas(float p, int viewport)
@@ -115,9 +122,9 @@ float PointYToCanvas(float p, int viewport)
 	point3d input(0.f, p, 0.f);
 	point3d result = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[viewport], input);
 	return ((result.y+1.0)*canvasHeight)/2.0;
-
+	
 	// old code
-//	return ((p+1)*canvasScale/2.0)+canvasYOffset;
+	//	return ((p+1)*canvasScale/2.0)+canvasYOffset;
 }
 
 point3d ConvertCanvasToGlobalHOG(int x, int y)
@@ -134,8 +141,8 @@ void PointToCanvas(Graphics::point &p, int viewport)
 {
 	p.x = PointXToCanvas(p.x, viewport);
 	p.y = PointYToCanvas(p.y, viewport);
-//	p.x = ((p.x+1)*canvasScale/2.0)+canvasXOffset;
-//	p.y = ((p.y+1)*canvasScale/2.0)+canvasYOffset;
+	//	p.x = ((p.x+1)*canvasScale/2.0)+canvasXOffset;
+	//	p.y = ((p.y+1)*canvasScale/2.0)+canvasYOffset;
 }
 
 void DoDrawCommand(const Graphics::Display::data &d, const char *which)
@@ -159,10 +166,10 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				ctx.lineTo($6, $7);
 				ctx.lineWidth=$8;
 				ctx.stroke();
-				ctx.lineWidth=1;
 			}, which, r,g,b,
 					PointXToCanvas(o.start.x, d.viewport), PointYToCanvas(o.start.y, d.viewport),
-					PointXToCanvas(o.end.x, d.viewport), PointYToCanvas(o.end.y, d.viewport), o.width);
+					PointXToCanvas(o.end.x, d.viewport), PointYToCanvas(o.end.y, d.viewport),
+					WidthToCanvas(o.width, d.viewport));
 			break;
 		}
 		case Graphics::Display::kFillRectangle:
@@ -171,15 +178,17 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 			int r = o.c.r*255.0;
 			int g = o.c.g*255.0;
 			int b = o.c.b*255.0;
-			float cWidth = ceilf(PointXToCanvas(o.r.right, d.viewport))-floorf(PointXToCanvas(o.r.left, d.viewport));
-			float cHeight = ceilf(PointYToCanvas(o.r.bottom, d.viewport))-floorf(PointYToCanvas(o.r.top, d.viewport));
+//			float cWidth = ceilf(PointXToCanvas(o.r.right, d.viewport))-floorf(PointXToCanvas(o.r.left, d.viewport));
+//			float cHeight = ceilf(PointYToCanvas(o.r.bottom, d.viewport))-floorf(PointYToCanvas(o.r.top, d.viewport));
+			float cWidth = (PointXToCanvas(o.r.right, d.viewport))-(PointXToCanvas(o.r.left, d.viewport));
+			float cHeight = (PointYToCanvas(o.r.bottom, d.viewport))-(PointYToCanvas(o.r.top, d.viewport));
 			EM_ASM_({
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
 				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
 				ctx.fillRect($4,$5,$6,$7);
 			}, which, r,g,b,
-					floorf(PointXToCanvas(o.r.left, d.viewport)), floorf(PointYToCanvas(o.r.top, d.viewport)),
+					(PointXToCanvas(o.r.left, d.viewport)), (PointYToCanvas(o.r.top, d.viewport)),
 					cWidth, cHeight);
 			break;
 		}
@@ -197,7 +206,7 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				ctx.strokeStyle = "rgb("+$1+", "+$2+", "+$3+")";
 				ctx.lineWidth = $8;
 				ctx.strokeRect($4,$5,$6,$7);
-				ctx.lineWidth = 1;
+				//ctx.lineWidth = 1;
 			}, which, r,g,b,
 					PointXToCanvas(o.r.left, d.viewport), PointYToCanvas(o.r.top, d.viewport),
 					cWidth, cHeight, WidthToCanvas(o.width, d.viewport));
@@ -209,8 +218,8 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 			int r = o.c.r*255.0;
 			int g = o.c.g*255.0;
 			int b = o.c.b*255.0;
-			float cx = (o.r.left+o.r.right)/2.0;
-			float cy = (o.r.top+o.r.bottom)/2.0;
+			float cx = (PointXToCanvas(o.r.right, d.viewport)+PointXToCanvas(o.r.left, d.viewport))/2.0;
+			float cy = (PointYToCanvas(o.r.top, d.viewport)+PointYToCanvas(o.r.bottom, d.viewport))/2.0;
 			float rad = (PointXToCanvas(o.r.right, d.viewport)-PointXToCanvas(o.r.left, d.viewport))/2.0;
 			EM_ASM_({
 				var c=document.getElementById(UTF8ToString($0));
@@ -220,8 +229,8 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				ctx.arc($4,$5,$6,0,2*Math.PI);
 				ctx.fill();
 			}, which, r,g,b,
-					PointXToCanvas(cx, d.viewport),
-					PointYToCanvas(cy, d.viewport),
+					cx,
+					cy,
 					rad);
 			break;
 		}
@@ -237,13 +246,15 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
 				ctx.strokeStyle = "rgb("+$1+", "+$2+", "+$3+")";
+				ctx.lineWidth = $7;
 				ctx.beginPath();
 				ctx.arc($4,$5,$6,0,2*Math.PI);
 				ctx.stroke();
 			}, which, r,g,b,
 					PointXToCanvas(cx, d.viewport),
 					PointYToCanvas(cy, d.viewport),
-					(PointXToCanvas(o.r.right, d.viewport)-PointXToCanvas(o.r.left, d.viewport))/2.0);
+					(PointXToCanvas(o.r.right, d.viewport)-PointXToCanvas(o.r.left, d.viewport))/2.0,
+					WidthToCanvas(o.width, d.viewport));
 			break;
 		}
 		case Graphics::Display::kFillNGon:
@@ -259,14 +270,14 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
 				var resolution = 6.283185307/$8;
-
+				
 				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
 				ctx.beginPath();
 				for (var x = 0; x <= $8; x++)
 				{
 					var nextx = $4+Math.sin(resolution*x+$7*0.01745329252)*$6;
 					var nexty = $5+Math.cos(resolution*x+$7*0.01745329252)*$6;
-
+					
 					if (x == 0)
 						ctx.moveTo(nextx, nexty);
 					else
@@ -274,7 +285,7 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				}
 				ctx.fill();
 			}, which, r,g,b, cx, cy, radius, o.rotate, o.segments);
-
+			
 		}
 	}
 }
@@ -297,41 +308,49 @@ void DrawToCanvas(const Graphics::Display &disp)
 			DoDrawCommand(disp.backgroundDrawCommands[x], "bg");
 		}
 		
+		
+		const char* align[] = {"\"left\"", "\"center\"", "\"right\""};
+		const char* base[] = {"\"top\"", "\"middle\"", "\"bottom\""};
 		for (int x = 0; x < disp.backgroundText.size(); x++)
 		{
 			const auto &i = disp.backgroundText[x];
 			int r = i.c.r*255.0;
 			int g = i.c.g*255.0;
 			int b = i.c.b*255.0;
-			
-			if (i.align == Graphics::textAlignCenter)
+			int alignType = 0;
+			int baseType = 0;
+			switch (i.align)
 			{
-				EM_ASM_({
-					var c=document.getElementById("fg");
-					var ctx=c.getContext("2d");
-					ctx.font = "15px Courier";
-					ctx.textAlign = "center";
-					ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
-					ctx.fillText(UTF8ToString($0),$4,$5);
-				}, i.s.c_str(), r,g,b,
-						PointXToCanvas(i.loc.x, i.viewport),
-						PointYToCanvas(i.loc.y, i.viewport));
+				case Graphics::textAlignLeft: alignType = 0; break;
+				case Graphics::textAlignCenter: alignType = 1; break;
+				case Graphics::textAlignRight: alignType = 2; break;
 			}
-			else {
-				EM_ASM_({
-					var c=document.getElementById("fg");
-					var ctx=c.getContext("2d");
-					ctx.font = "15px Courier";
-					ctx.textAlign = "left";
-					ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
-					ctx.fillText(UTF8ToString($0),$4,$5);
-				}, i.s.c_str(), r,g,b,
-						PointXToCanvas(i.loc.x, i.viewport),
-						PointYToCanvas(i.loc.y, i.viewport));
+			switch (i.base)
+			{
+				case Graphics::textBaselineTop: baseType = 0; break;
+				case Graphics::textBaselineMiddle: baseType = 1; break;
+				case Graphics::textBaselineBottom: baseType = 2; break;
 			}
-			
-		}
 
+			EM_ASM_({
+				var c=document.getElementById("bg");
+				var ctx=c.getContext("2d");
+				ctx.font = $6+"px "+$7;
+				ctx.textAlign = UTF8ToString($8);
+				ctx.textBaseline = UTF8ToString($9);
+				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
+				ctx.fillText(UTF8ToString($0),$4,$5);
+			}, i.s.c_str(), r,g,b,
+					PointXToCanvas(i.loc.x, i.viewport),
+					PointYToCanvas(i.loc.y, i.viewport),
+					WidthToCanvas(i.size, i.viewport),
+//					PointYToCanvas(i.size, i.viewport)-
+//					PointYToCanvas(0, i.viewport),
+					i.typeface.c_str(),
+					align[alignType], base[baseType]);
+
+		}
+		
 	}
 	
 	EM_ASM({
@@ -344,39 +363,50 @@ void DrawToCanvas(const Graphics::Display &disp)
 		DoDrawCommand(disp.drawCommands[x], "fg");
 	}
 	
+	const char* align[] = {"left", "center", "right"};
+	const char* base[] = {"top", "middle", "bottom"};
 	for (int x = 0; x < disp.text.size(); x++)
 	{
 		const auto &i = disp.text[x];
 		int r = i.c.r*255.0;
 		int g = i.c.g*255.0;
 		int b = i.c.b*255.0;
-
-		if (i.align == Graphics::textAlignCenter)
+		
+		int alignType = 0;
+		int baseType = 0;
+		switch (i.align)
 		{
-			EM_ASM_({
-				var c=document.getElementById("fg");
-				var ctx=c.getContext("2d");
-				ctx.font = "15px Courier";
-				ctx.textAlign = "center";
-				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
-				ctx.fillText(UTF8ToString($0),$4,$5);
-			}, i.s.c_str(), r,g,b,
-					PointXToCanvas(i.loc.x, i.viewport),
-					PointYToCanvas(i.loc.y, i.viewport));
+			case Graphics::textAlignLeft: alignType = 0; break;
+			case Graphics::textAlignCenter: alignType = 1; break;
+			case Graphics::textAlignRight: alignType = 2; break;
 		}
-		else {
-			EM_ASM_({
-				var c=document.getElementById("fg");
-				var ctx=c.getContext("2d");
-				ctx.font = "15px Courier";
-				ctx.textAlign = "left";
-				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
-				ctx.fillText(UTF8ToString($0),$4,$5);
-			}, i.s.c_str(), r,g,b,
-					PointXToCanvas(i.loc.x, i.viewport),
-					PointYToCanvas(i.loc.y, i.viewport));
+		switch (i.base)
+		{
+			case Graphics::textBaselineTop: baseType = 0; break;
+			case Graphics::textBaselineMiddle: baseType = 1; break;
+			case Graphics::textBaselineBottom: baseType = 2; break;
 		}
 
+		EM_ASM_({
+			var c=document.getElementById("fg");
+			var ctx=c.getContext("2d");
+			ctx.font = ""+$6+"px "+UTF8ToString($7);
+			//ctx.font = "75px Helvetica";
+			ctx.textAlign = UTF8ToString($8);
+			ctx.textBaseline = UTF8ToString($9);
+			//				ctx.textAlign = "center";
+			ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
+			ctx.fillText(UTF8ToString($0),$4,$5);
+		}, i.s.c_str(), r,g,b,
+				PointXToCanvas(i.loc.x, i.viewport),
+				PointYToCanvas(i.loc.y, i.viewport),
+				WidthToCanvas(i.size, i.viewport),
+//				PointYToCanvas(i.size, i.viewport)-
+//				PointYToCanvas(0, i.viewport), i.typeface.c_str(),
+				i.typeface.c_str(),
+				align[alignType], base[baseType]);
+
+		
 	}
 	static std::vector<Graphics::point> outputPoints;
 	for (int x = 0; x < disp.lineSegments.size(); x++)
@@ -440,24 +470,43 @@ void HOGDoMouse(int x, int y, bool up, bool down, bool drag)
 	pRecContext pContextInfo = getCurrentContext();
 	pContextInfo->windowHeight = canvasHeight;
 	pContextInfo->windowWidth = canvasWidth;
-
+	
 	tMouseEventType t = kMouseDown;
-
+	
 	if (up)
 		t = kMouseUp;
 	if (drag && down)
 		t = kMouseDrag;
 	if (!up && !down && drag)
 		t = kMouseMove;
-//	int viewport = GetViewport(x, y);
+	//	int viewport = GetViewport(x, y);
 	
 	HandleMouse(pContextInfo, ConvertCanvasToGlobalHOG(x, y), kLeftButton, t);
-//	HandleMouseClick(getCurrentContext(), viewport, x, y, p, kLeftButton, t);
+	//	HandleMouseClick(getCurrentContext(), viewport, x, y, p, kLeftButton, t);
 }
 
-void HOGInit()
+void HOGInit(const char *data)
 {		
-	hog_main(0, 0);
+	if (data == 0)
+	{
+		hog_main(0, 0);
+	}
+	else {
+		std::string s(data);
+		std::vector<char*> args;
+		args.push_back(&(s[0]));
+		for (int x = 0; x < s.size(); x++)
+		{
+			if (s[x] == ',')
+			{
+				s[x] = '\0';
+				args.push_back(&(s[x+1]));
+			}
+		}
+		// int argc, char **argv
+		int argc = args.size();
+		hog_main(argc, &(args[0]));
+	}
 	
 	pRecContext pContextInfo = getCurrentContext();
 	initialConditions(pContextInfo);
@@ -533,7 +582,7 @@ void submitTextToBuffer(const char *val)
 		EM_ASM_({
 			document.getElementById("message").innerHTML = UTF8ToString($0);
 		}, textBuffer);
-
+		
 	}
 }
 
@@ -551,11 +600,11 @@ void appendTextToBuffer(const char *next)
 	strcpy(&newStr[oldLen], next);
 	delete [] textBuffer;
 	textBuffer = newStr;
-
+	
 	EM_ASM_({
 		document.getElementById("message").innerHTML = UTF8ToString($0);
 	}, textBuffer);
-
+	
 }
 
 const char *getTextBuffer()
