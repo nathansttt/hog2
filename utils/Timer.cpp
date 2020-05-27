@@ -19,7 +19,6 @@ double Timer::EndTimer()
 	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(difference);
 	elapsedTime = time_span.count();
 	
-	
 	return elapsedTime;
 }
 
