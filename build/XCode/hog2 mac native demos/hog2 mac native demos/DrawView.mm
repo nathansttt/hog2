@@ -87,7 +87,10 @@
 			[style setAlignment:NSTextAlignmentCenter];
 		else if (_display->text[x].align == Graphics::textAlignLeft)
 			[style setAlignment:NSTextAlignmentLeft];
-		NSFont *font = [NSFont fontWithName:(NSString *)@"Courier" size:(CGFloat)_display->text[x].size*height/2.0/1.1];
+		NSString *typeface = [NSString stringWithUTF8String:_display->text[x].typeface.c_str()];
+		CGFloat adjustedHeight = [self hogHeightToScreen:_display->text[x].size viewport:_display->text[x].viewport];
+		NSFont *font = [NSFont fontWithName:(NSString *)typeface //size:(CGFloat)_display->text[x].size*height/2.0/1.1];
+									   size:adjustedHeight];
 		NSDictionary *textAttributes =
 		@{NSFontAttributeName: font,//[NSFont monospacedDigitSystemFontOfSize:_display->text[x].size*height/2.0 weight:1.0],
 		  NSForegroundColorAttributeName: [NSColor colorWithRed:_display->text[x].c.r green:_display->text[x].c.g blue:_display->text[x].c.b alpha:1.0],
@@ -96,11 +99,33 @@
 		NSPoint p;
 		p.x = [self hogToScreenX:_display->text[x].loc.x viewport:_display->text[x].viewport];
 		p.y = [self hogToScreenY:_display->text[x].loc.y viewport:_display->text[x].viewport];
+		switch (_display->text[x].base)
+		{
+			case Graphics::textBaselineBottom: break;
+			case Graphics::textBaselineTop:
+				p.y -= adjustedHeight;
+				break;
+			case Graphics::textBaselineMiddle:
+				p.y -= adjustedHeight/2;
+				break;
+		}
+		CGSize stringWidth = [s sizeWithAttributes:textAttributes];
+		switch(_display->text[x].align)
+		{
+			case Graphics::textAlignLeft:
+				break;
+			case Graphics::textAlignRight:
+				p.x-=stringWidth.width;
+				break;
+			case Graphics::textAlignCenter:
+				p.x -= stringWidth.width/2;
+				break;
+		}
 		//NSLog(@"%f %f", p.x, p.y);
-		if (_display->text[x].align == Graphics::textAlignLeft)
+//		if (_display->text[x].align == Graphics::textAlignLeft)
 			[s drawAtPoint:p withAttributes:textAttributes];
-		else
-			[s drawInRect:CGRectMake(p.x-width, p.y-_display->text[x].size*height/4.0, 2*width, _display->text[x].size*height/2.0) withAttributes:textAttributes];
+//		else
+//			[s drawInRect:CGRectMake(p.x-width, p.y-adjustedHeight, 2*width, adjustedHeight) withAttributes:textAttributes];
 	}
 
 }
@@ -113,7 +138,7 @@
 	if (s.points.size() == 0)
 		return;
 	CGContextSetRGBStrokeColor(context, s.c.r, s.c.g, s.c.b, 1.0);
-	CGContextSetLineWidth(context, s.size);
+	CGContextSetLineWidth(context, [self hogWidthToScreen:s.size viewport:port]);
 	CGContextMoveToPoint(context, [self hogToScreenX:s.points[0].x viewport:port], [self hogToScreenY:s.points[0].y viewport:port]);
 	for (int y = 1; y < s.points.size(); y++)
 	{
@@ -136,7 +161,8 @@
 		{
 			Graphics::Display::lineInfo &o = d.line;
 			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
+			//CGContextSetLineWidth(context, o.width);
 			CGContextSetLineCap(context, kCGLineCapRound);
 			CGContextMoveToPoint(context, [self hogToScreenX:o.start.x viewport:port], [self hogToScreenY:o.start.y viewport:port]);
 			CGContextAddLineToPoint(context, [self hogToScreenX:o.end.x viewport:port], [self hogToScreenY:o.end.y viewport:port]);
@@ -171,7 +197,7 @@
 		{
 			Graphics::Display::drawInfo &o = d.shape;
 			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
 			CGContextSetLineCap(context, kCGLineCapRound);
 			Graphics::rect &tmp = o.r;
 			CGContextStrokeRect(context, [self makeRect:tmp viewport:port]);
@@ -214,7 +240,7 @@
 			Graphics::Display::drawInfo &o = d.shape;
 			
 			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
-			CGContextSetLineWidth(context, o.width*50.0f);
+			CGContextSetLineWidth(context, [self hogWidthToScreen:o.width viewport:port]);
 			CGContextSetLineCap(context, kCGLineCapRound);
 			Graphics::rect &tmp = o.r;
 			CGContextStrokeEllipseInRect(context, [self makeRect:tmp viewport:port]);
@@ -241,6 +267,31 @@ const float epsilon = 0.5f; // in screen pixels
 	result = CGRectInset(result, -epsilon, -epsilon);
 	return result;
 }
+
+-(CGFloat)hogWidthToScreen:(CGFloat)p viewport:(int)v
+{
+	pRecContext pContextInfo = getCurrentContext();
+	point3d input1(p, 0.f, 0.f);
+	point3d input2(0, 0.f, 0.f);
+	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input1);
+	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input2);
+	//	if (v == 1)
+	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
+	return ((result1.x+1.0)*width)/2.0-((result2.x+1.0)*width)/2.0;
+}
+
+-(CGFloat)hogHeightToScreen:(CGFloat)p viewport:(int)v
+{
+	pRecContext pContextInfo = getCurrentContext();
+	point3d input1(0, p, 0.f);
+	point3d input2(0, 0.f, 0.f);
+	point3d result1 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input1);
+	point3d result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input2);
+	//	if (v == 1)
+	//printf("X:%f -> %f\n", x, ((result.x+1.0))/2.0);
+	return ((result1.y+1.0)*height)/2.0-((result2.y+1.0)*height)/2.0;
+}
+
 
 -(CGFloat)hogToScreenX:(CGFloat)x viewport:(int)v
 {
