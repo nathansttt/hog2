@@ -93,13 +93,13 @@ class MinimalSectorAbstraction {
 public:
 	MinimalSectorAbstraction(Map *map, int sectorSize);
 	void OpenGLDraw();
-	void Draw(Graphics::Display &display);
+	void Draw(Graphics::Display &display) const;
 	int GetSector(int x, int y);
 	int GetRegion(int x, int y);
 	void GetXYLocation(unsigned int sector, unsigned int region,
-					   unsigned int &x, unsigned int &y);
+					   unsigned int &x, unsigned int &y) const;
 	void GetNeighbors(unsigned int sector, unsigned int region,
-					  std::vector<tempEdgeData> &edges);
+					  std::vector<tempEdgeData> &edges) const;
 	int GetAdjacentSector(unsigned int sector, int direction);
 	
 	void OptimizeRegionLocations();

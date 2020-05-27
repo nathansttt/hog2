@@ -553,7 +553,7 @@ void MinimalSectorAbstraction::OpenGLDraw()
     draw = false;
 }
 
-void MinimalSectorAbstraction::Draw(Graphics::Display &display)
+void MinimalSectorAbstraction::Draw(Graphics::Display &display) const
 {
 	static bool draw = false;
 	
@@ -667,7 +667,7 @@ void MinimalSectorAbstraction::Draw(Graphics::Display &display)
 void MinimalSectorAbstraction::GetXYLocation(unsigned int sector,
                                              unsigned int region,
                                              unsigned int &x,
-                                             unsigned int &y)
+                                             unsigned int &y) const
 {
     uint8_t loc = memory[sectors[sector].memoryAddress+region*2];
     x = loc%sectorSize;
@@ -690,7 +690,7 @@ void MinimalSectorAbstraction::GetXYLocation(unsigned int sector,
  */
 void MinimalSectorAbstraction::GetNeighbors(unsigned int sector,
                                             unsigned int region,
-                                            std::vector<tempEdgeData> &edges)
+                                            std::vector<tempEdgeData> &edges) const
 {
     edges.resize(0);
     int sectorAddress = sectors[sector].memoryAddress;
