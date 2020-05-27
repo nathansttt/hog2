@@ -61,6 +61,7 @@ public:
 	void GetNodeInterval(uint64_t &lower, uint64_t &upper)
 	{ lower = data.nodeLB*c1; upper = data.workBound; }
 	std::string stage;
+	std::string fEquation;
 private:
 	struct costInterval {
 		double lowerBound;
@@ -174,7 +175,8 @@ bool IncrementalBGS<state, action>::InitializeSearch(SearchEnvironment<state, ac
 	data.nodeLB = 0;
 	data.solutionInterval.lowerBound = h->HCost(start, goal);
 	data.solutionInterval.upperBound = DBL_MAX;
-	data.delta = 1;
+	data.delta = 0;
+	fEquation = to_string_with_precision(h->HCost(start, goal), 0);
 	solutionCost = DBL_MAX;
 	SetupIteration(h->HCost(start, goal));
 	stage = "NEW ITERATION";
@@ -411,6 +413,7 @@ bool IncrementalBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 		data.nodeLB = data.nodesExpanded;
 		data.solutionInterval.upperBound = DBL_MAX;
 		data.nodesExpanded = 0;
+		fEquation = to_string_with_precision(nextBound, 0);
 		SetupIteration(nextBound);
 		return false;
 	}
@@ -427,16 +430,18 @@ bool IncrementalBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 			printf("    ]--Critical f in [%1.5f, %1.5f]\n", data.solutionInterval.lowerBound, data.solutionInterval.upperBound);
 			
 		double nextCost;
-		data.delta *= gamma;
 		if (data.solutionInterval.upperBound == DBL_MAX)
 		{
-			nextCost = data.solutionInterval.lowerBound+data.delta;
+			nextCost = data.solutionInterval.lowerBound+pow(gamma, data.delta);
+			fEquation = to_string_with_precision(data.solutionInterval.lowerBound, 0)+"+"+to_string_with_precision(gamma, 0)+"^"+to_string_with_precision(data.delta, 0)+"="+to_string_with_precision(nextCost, 0);
 			stage = "EXP";
 		}
 		else {
 			nextCost = (data.solutionInterval.lowerBound+data.solutionInterval.upperBound)/2.0;
+			fEquation = "("+to_string_with_precision(data.solutionInterval.lowerBound, 0)+"+"+ to_string_with_precision(data.solutionInterval.upperBound, 0)+")/2"+"="+to_string_with_precision(nextCost, 0);
 			stage = "BIN";
 		}
+		data.delta += 1;
 		data.workBound = c2*data.nodeLB;
 		SetupIteration(nextCost);
 		printf("-> Starting new iteration with f: %f; node limit: %llu\n", nextCost, data.workBound);
@@ -453,7 +458,8 @@ bool IncrementalBGS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 	data.solutionInterval.upperBound = DBL_MAX;
 	data.workBound = infiniteWorkBound;
 	data.nodesExpanded = 0;
-	data.delta = 1;
+	data.delta = 0;
+	fEquation = to_string_with_precision(nextBound, 0);
 	SetupIteration(nextBound);
 	stage = "NEW ITERATION";
 	return false;
