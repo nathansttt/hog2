@@ -60,8 +60,8 @@ public:
 	virtual void GLLabelabstractGridState(const abstractGridState&, const char *) const {}
 	virtual void GLDrawLine(const abstractGridState &x, const abstractGridState &y) const {}
 	
-	virtual void Draw(Graphics::Display &display);
-	virtual void Draw(Graphics::Display &display, const abstractGridState&);
+	virtual void Draw(Graphics::Display &display) const;
+	virtual void Draw(Graphics::Display &display, const abstractGridState&) const;
 	virtual void DrawLine(Graphics::Display &display, const abstractGridState &x, const abstractGridState &y, float width = 1.0) const;
 	
 private:

@@ -113,12 +113,12 @@ uint64_t Map2DSectorAbstraction::GetActionHash(abstractMove act) const
 }
 
 
-void Map2DSectorAbstraction::Draw(Graphics::Display &display)
+void Map2DSectorAbstraction::Draw(Graphics::Display &display) const
 {
 	msa->Draw(display);
 }
 
-void Map2DSectorAbstraction::Draw(Graphics::Display &display, const abstractGridState&g)
+void Map2DSectorAbstraction::Draw(Graphics::Display &display, const abstractGridState&g) const
 {
 	xyLoc l = GetState(g);
 //	me->SetColor(GetColor());
