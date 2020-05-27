@@ -104,8 +104,7 @@ public:
 	virtual void GetColor(GLfloat& rr, GLfloat& g, GLfloat& b, GLfloat &t) const { rr=color.r; g=color.g; b=color.b; t = transparency;}
 	virtual rgbColor GetColor() const { return color; }
 
-#warning "Draw() should be const"
-	virtual void Draw(Graphics::Display &display) {}
+	virtual void Draw(Graphics::Display &display) const {}
 	virtual void Draw(Graphics::Display &display, const state&) const {}
 	virtual void DrawLine(Graphics::Display &display, const state &x, const state &y, float width = 1.0) const {}
 
@@ -131,7 +130,7 @@ action SearchEnvironment<state,action>::GetAction(const state &s1, const state &
 			return a[x];
 		}
 	}
-	assert(!"No legal move found.");
+	fprintf(stderr, "No legal move found.");
 	action act;
 	return act;
 }
