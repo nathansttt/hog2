@@ -149,14 +149,18 @@ void TextOverlay::OpenGLDraw(int window)
 void TextOverlay::Draw(Graphics::Display &display) const
 {
 	const float linesPerPage = 30.0f;
-	int lineOffset = 0;
-	display.FillRect({-1.0, -1.0, 1.0, -1.0f+maxNumLines*2.0f/(linesPerPage+1.f)}, Colors::darkgray);
-	display.FrameRect({-1.0, -1.0, 1.0, -1.0f+maxNumLines*2.0f/(linesPerPage+1.f)}, Colors::white, 1.0);
+//	int lineOffset = 0;
+//	printf("%f: ", -1.0f+maxNumLines*2.0f/(linesPerPage));
+	display.FillRect({-1.0, -1.0, 1.0, -1.0f+maxNumLines*2.0f/(linesPerPage)}, Colors::darkgray);
+	display.FrameRect({-1.0, -1.0, 1.0, -1.0f+maxNumLines*2.0f/(linesPerPage)}, Colors::white, 0.1*2.0/linesPerPage);
 	for (unsigned int x = index; x < text.size(); x++)
 	{
-		Graphics::point p(-1, -1+(x-index+1)*(2.0/(linesPerPage+1)));
-		display.DrawText(text[x].c_str(), p, Colors::white, 2.0/linesPerPage);
+		Graphics::point p(-1, -1+(x-index+1)*(2.0/(linesPerPage)));
+		display.DrawText(text[x].c_str(), p, Colors::white, 2.0/(linesPerPage),
+						 Graphics::textAlignLeft, Graphics::textBaselineBottom, "Courier");
+//		printf("%f ", p.y);
 	}
+//	printf("\n");
 }
 
 int TextOverlay::DrawString(std::string txt, int start)
