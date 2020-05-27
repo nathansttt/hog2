@@ -86,7 +86,7 @@ bool BoundingBox::ShouldNotGenerate(const xyLoc &start, const xyLoc &parent, con
 	return in == false;
 }
 
-void BoundingBox::Draw(Graphics::Display &display, xyLoc start, tDirection dir)
+void BoundingBox::Draw(Graphics::Display &display, xyLoc start, tDirection dir) const
 {
 	if (start.x >= me->GetMap()->GetMapWidth() || start.y >= me->GetMap()->GetMapHeight())
 		return;

@@ -22,7 +22,7 @@ public:
 	double IncrementalCompute();
 	bool DoneComputing();
 	virtual bool ShouldNotGenerate(const xyLoc &start, const xyLoc &parent, const xyLoc &current, double gCost, const xyLoc &goal) const;
-	void Draw(Graphics::Display &display, xyLoc start, tDirection dir);
+	void Draw(Graphics::Display &display, xyLoc start, tDirection dir) const;
 private:
 	struct BB {
 		int minx, miny, maxx, maxy;

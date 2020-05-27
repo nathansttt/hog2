@@ -24,7 +24,7 @@ CanonicalReach::CanonicalReach(CanonicalGrid::CanonicalGrid *m, bool computeNow)
 		IncrementalCompute();
 }
 
-void CanonicalReach::Draw(Graphics::Display &display)
+void CanonicalReach::Draw(Graphics::Display &display) const
 {
 	double maxVal = *std::max_element(reach.begin(), reach.end());
 	for (int xx = 0; xx < me->GetMap()->GetMapWidth(); xx++)

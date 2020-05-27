@@ -98,7 +98,7 @@ double Transit::GetPercentTransit()
 }
 
 
-void Transit::Draw(Graphics::Display &display)
+void Transit::Draw(Graphics::Display &display) const
 {
 	if (done == false && apsp == false)
 	{
@@ -133,25 +133,80 @@ void Transit::Draw(Graphics::Display &display)
 	}
 }
 
-void Transit::Draw(Graphics::Display &display, const xyLoc &l1, const xyLoc &l2)
+void Transit::Draw(Graphics::Display &display, const xyLoc &l1, const xyLoc &l2) const
 {
 	xyLoc bestl1, bestl2;
 	float totalDistance = 100000;
-	const tp &i1 = transitLookup[l1];
-	const tp &i2 = transitLookup[l2];
-
+	tp i1, i2;
+	auto tmp = transitLookup.find(l1);
+	if (tmp != transitLookup.end())
+	{
+		i1 = tmp->second;
+	}
+	else {
+		printf("Lookup failure(%s, %d)\n", __FILE__, __LINE__);
+		return; // failure
+	}
+	tmp = transitLookup.find(l2);
+	if (tmp != transitLookup.end())
+	{
+		i2 = tmp->second;
+	}
+	else {
+		printf("Lookup failure(%s, %d)\n", __FILE__, __LINE__);
+		return; // failure
+	}
+	
 	for (int a1 = 0; a1 < i1.count; a1++)
 	{
 		for (int a2 = 0; a2 < i2.count; a2++)
 		{
-			int index = GetIndex(uniqueTransitPoints[transitPointHash[transitPoints[i1.firstLoc+a1]]],
-								 uniqueTransitPoints[transitPointHash[transitPoints[i2.firstLoc+a2]]]);
+			auto tp1 = transitPoints[i1.firstLoc+a1];
+			auto tp2 = transitPoints[i2.firstLoc+a2];
+			int h1, h2;
+			auto tmp2 = transitPointHash.find(tp1);
+			if (tmp2 != transitPointHash.end())
+			{
+				h1 = tmp2->second;
+			}
+			else {
+				printf("Lookup failure(%s, %d)\n", __FILE__, __LINE__);
+				return;
+			}
+			tmp2 = transitPointHash.find(tp2);
+			if (tmp2 != transitPointHash.end())
+			{
+				h2 = tmp2->second;
+			}
+			else {
+				printf("Lookup failure(%s, %d)\n", __FILE__, __LINE__);
+				return;
+			}
+			auto u1 = uniqueTransitPoints[h1];
+			auto u2 = uniqueTransitPoints[h2];
+			int index = GetIndex(u1, u2);
 			float newDist = distances[index];
 			if (newDist < totalDistance)
 			{
 				totalDistance = newDist;
-				bestl1 = uniqueTransitPoints[transitPointHash[transitPoints[i1.firstLoc+a1]]];
-				bestl2 = uniqueTransitPoints[transitPointHash[transitPoints[i2.firstLoc+a2]]];
+				auto tmp3 = transitPointHash.find(transitPoints[i1.firstLoc+a1]);
+				if (tmp3 != transitPointHash.end())
+				{
+					bestl1 = uniqueTransitPoints[tmp3->second];
+				}
+				else {
+					printf("Lookup failure(%s, %d)\n", __FILE__, __LINE__);
+					return;
+				}
+				auto tmp4 = transitPointHash.find(transitPoints[i2.firstLoc+a2]);
+				if (tmp4 != transitPointHash.end())
+				{
+					bestl2 = uniqueTransitPoints[tmp4->second];
+				}
+				else {
+					printf("Lookup failure(%s, %d)\n", __FILE__, __LINE__);
+					return;
+				}
 			}
 		}
 	}

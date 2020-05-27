@@ -22,7 +22,7 @@ public:
 	double IncrementalCompute();
 	bool DoneComputing();
 	bool ShouldNotGenerate(const xyLoc &start, const xyLoc &parent, const xyLoc &current, double gCost, const xyLoc &goal) const;
-	void Draw(Graphics::Display &display);
+	void Draw(Graphics::Display &display) const;
 
 private:
 	void ComputeCanonicalReach(CanonicalGrid::xyLoc start);

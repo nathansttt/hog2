@@ -24,8 +24,8 @@ public:
 	double HCost(const xyLoc &a, const xyLoc &b) const;
 	double IncrementalCompute();
 	bool DoneComputing();
-	void Draw(Graphics::Display &display);
-	void Draw(Graphics::Display &display, const xyLoc &l1, const xyLoc &l2);
+	void Draw(Graphics::Display &display) const;
+	void Draw(Graphics::Display &display, const xyLoc &l1, const xyLoc &l2) const;
 	double GetPercentTransit();
 private:
 	struct tp {

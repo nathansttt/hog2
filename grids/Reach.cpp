@@ -24,7 +24,7 @@ Reach::Reach(MapEnvironment *m, bool computeNow)
 		IncrementalCompute();
 }
 
-void Reach::Draw(Graphics::Display &display)
+void Reach::Draw(Graphics::Display &display) const
 {
 	double maxVal = *std::max_element(reach.begin(), reach.end());
 	for (int xx = 0; xx < me->GetMap()->GetMapWidth(); xx++)
