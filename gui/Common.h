@@ -118,6 +118,11 @@ int AddViewport(unsigned long windowID, const Graphics::rect &r, viewportType v)
 point3d ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, point3d where);
 point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d where);
 
+const char kLeftArrow  = 0x11;
+const char kRightArrow = 0x12;
+const char kUpArrow    = 0x13;
+const char kDownArrow  = 0x14;
+
 enum tKeyboardModifier {
 	kNoModifier,
 	kAnyModifier,
@@ -189,6 +194,15 @@ typedef void (*KeyboardCallback)(unsigned long windowID, tKeyboardModifier, char
  * of arguments it processed.
  */
 typedef int (*CommandLineCallback)(char**, int);
+
+///**
+// * A data callback handler is called when new data is available from the GUI.
+// * The handler can then read as much data as it wants.
+// *
+// * Implementation postponed for now:
+// *   in some situations can use the text buffer for this purpose
+// */
+//typedef int (*DataCallback)(char**, int);
 
 class commandLineCallbackData {
 public:
@@ -266,6 +280,14 @@ public:
 	void *userData;
 };
 
+//class dataCallbackData {
+//public:
+//	dataCallbackData(DataCallback _dC)
+//	:dC(_dC)
+//	{}
+//	DataCallback dC;
+//};
+
 void InstallFrameHandler(FrameCallback jC, unsigned long windowID, void *userdata);
 void RemoveFrameHandler(FrameCallback jC, unsigned long windowID, void *userdata);
 void HandleFrame(pRecContext pContextInfo, int viewport);
@@ -285,6 +307,9 @@ bool HandleMouseClick(pRecContext pContextInfo, int viewport, int x, int y, poin
 void InstallWindowHandler(WindowCallback wC);
 void RemoveWindowHandler(WindowCallback wC);
 void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType);
+
+//void InstallDataHandler(DataCallback wC);
+//void RemoveDataHandler(DataCallback wC);
 
 void InstallKeyboardHandler(KeyboardCallback kf, const char *title, const char *description,
 														tKeyboardModifier mod, unsigned char firstKey, unsigned char lastKey = 0);

@@ -34,6 +34,7 @@ static std::vector<mouseCallbackData *> mouseCallbacks;
 static std::vector<mouseCallbackData2 *> mouseCallbacks2;
 static std::vector<windowCallbackData *> windowCallbacks;
 static std::vector<frameCallbackData *> glDrawCallbacks;
+//static std::vector<dataCallbackData> dataCallbacks;
 
 static keyboardCallbackData *keyboardCallbacks[256] = 
 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -540,6 +541,24 @@ void HandleWindowEvent(pRecContext pContextInfo, tWindowEventType e)
 		windowCallbacks[j]->wC(pContextInfo->windowID, e);
 	}
 }
+
+//void InstallDataHandler(DataCallback dC)
+//{
+//	dataCallbacks.push_back(dataCallbackData(dC));
+//}
+//
+//void RemoveDataHandler(DataCallback dC)
+//{
+//	for (unsigned int x = 0; x < dataCallbacks.size(); x++)
+//	{
+//		if (dataCallbacks[x].dC == dC)
+//		{
+//			dataCallbacks[x] = dataCallbacks[dataCallbacks.size()-1];
+//			dataCallbacks.pop_back();
+//		}
+//	}
+//}
+
 
 // intializes context conditions
 void initialConditions(pRecContext pContextInfo)
