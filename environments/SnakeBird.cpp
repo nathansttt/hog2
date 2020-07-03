@@ -120,6 +120,8 @@ std::vector<snakeDir> LoadSnake(std:: vector<snakeDir> snakeBod, int width, int 
 			return snakeBod;
 		}
 	}
+	assert(false);
+	return snakeBod;
 }
 
 
@@ -1623,6 +1625,14 @@ void SnakeBird::Draw(Graphics::Display &display, double time) const
 
 }
 
+bool SnakeBird::GetPointFromCoordinate(Graphics::point p, int &x, int &y)
+{
+	x = (p.x+1.0-GetRadius())/(2.0*GetRadius())+0.5;
+	y = (p.y+1.0-GetRadius())/(2.0*GetRadius())+0.5;
+	if (x >= 0 && x < width && y >= 0 && y < height)
+		return true;
+	return false;
+}
 
 Graphics::point SnakeBird::GetCenter(int x, int y) const
 {

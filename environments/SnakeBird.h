@@ -229,7 +229,6 @@ public:
 	bool Save(const char *filename);
 	std::string EncodeLevel() const;
 	bool DecodeLevel(const std::string &);
-	
 	void BeginEditing();
 	void EndEditing();
 
@@ -310,6 +309,10 @@ public:
 	void Draw(Graphics::Display &display, const SnakeBirdState&, const SnakeBirdState&,
 			  int active, double percentComplete, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
+
+	// Allows us to draw text overlay
+	float GetRadius() const;
+	bool GetPointFromCoordinate(Graphics::point p, int &x, int &y);
 private:
 	std::string Code(int) const;
 	int DeCode(const std::string &s, size_t offset) const;
@@ -334,9 +337,7 @@ private:
 	int GetY(int index) const;
 	int Distance(int index1, int index2);
 	Graphics::point GetCenter(int x, int y) const;
-public:
-	// Allows us to draw text overlay
-	float GetRadius() const;
+
 private:
 	void DrawSnakeEnteringGoal(Graphics::Display &display, const SnakeBirdState &s,
 							   int snake, bool isActive, double percentComplete) const;
