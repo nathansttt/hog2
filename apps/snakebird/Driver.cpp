@@ -950,18 +950,21 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 					valid = true;
 					order.push_back(SnakeBird::kEmpty);
 					order.push_back(SnakeBird::kSpikes);
+					break;
 				}
 				case SnakeBird::kSpikes:
 				{
 					valid = true;
 					order.push_back(SnakeBird::kGround);
 					order.push_back(SnakeBird::kEmpty);
+					break;
 				}
 				case SnakeBird::kEmpty:
 				{
 					valid = true;
 					order.push_back(SnakeBird::kSpikes);
 					order.push_back(SnakeBird::kGround);
+					break;
 				}
 				default:
 					break;
