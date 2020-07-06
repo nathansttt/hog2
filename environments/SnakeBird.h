@@ -301,7 +301,9 @@ public:
 	void GLDrawLine(const SnakeBirdState &x, const SnakeBirdState &y) const {}
 	void GLDrawPath(const std::vector<SnakeBirdState> &x) const {}
 	
+
 	void Draw(Graphics::Display &display) const;
+	void Draw(Graphics::Display &display, int x, int y) const;
 	void Draw(Graphics::Display &display, double time) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
