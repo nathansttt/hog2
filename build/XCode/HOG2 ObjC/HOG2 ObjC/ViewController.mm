@@ -153,11 +153,28 @@ const float FRAMERATE = 1.0f/30.0f;
 {
 	NSString *characters;
 	characters = [event characters];
-//	printf("%c : %d!\n", [characters characterAtIndex:0], [characters characterAtIndex:0]);
-	bool shift = false;
-	if (isupper([characters characterAtIndex:0]))
-		shift = true;
-	DoKeyboardCommand(getCurrentContext(), [characters characterAtIndex:0], shift?kShiftDown:kNoModifier, false, false);
+	switch ([characters characterAtIndex:0])
+	{
+		case NSUpArrowFunctionKey:
+			DoKeyboardCommand(getCurrentContext(), kUpArrow, kNoModifier, false, false);
+			break;
+		case NSDownArrowFunctionKey:
+			DoKeyboardCommand(getCurrentContext(), kDownArrow, kNoModifier, false, false);
+			break;
+		case NSRightArrowFunctionKey:
+			DoKeyboardCommand(getCurrentContext(), kRightArrow, kNoModifier, false, false);
+			break;
+		case NSLeftArrowFunctionKey:
+			DoKeyboardCommand(getCurrentContext(), kLeftArrow, kNoModifier, false, false);
+			break;
+		default:
+		{
+			bool shift = false;
+			if (isupper([characters characterAtIndex:0]))
+				shift = true;
+			DoKeyboardCommand(getCurrentContext(), [characters characterAtIndex:0], shift?kShiftDown:kNoModifier, false, false);
+		}
+	}
 }
 
 @end
