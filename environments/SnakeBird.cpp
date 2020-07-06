@@ -1550,6 +1550,12 @@ int SnakeBird::Distance(int index1, int index2)
 	return  abs(x1-x2)+abs(y1-y2);
 }
 
+void SnakeBird::Draw(Graphics::Display &display, int x, int y) const
+{
+	Graphics::point p = GetCenter(x, y);
+	display.FrameRect({p, GetRadius()}, Colors::red, GetRadius()*0.6);
+}
+
 void SnakeBird::Draw(Graphics::Display &display) const
 {
 	display.FillRect({-1.1, -1.1, 1.1, 1.1}, rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5));
