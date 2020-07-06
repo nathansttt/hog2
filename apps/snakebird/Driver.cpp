@@ -56,7 +56,7 @@ std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
 
 void AnalyzeMapChanges(bool maximize, int nodeLimit=1000000);
-void ChangeMap(bool maximize, int nodeLimit=1000000, int x = 1, int y = 1);
+void ChangeMap(int x, int y);
 
 int main(int argc, char* argv[])
 {
@@ -911,7 +911,7 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 		if (sb.GetPointFromCoordinate(p, x, y))
 		{
 			printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
-            ChangeMap (true, 1000000, x, y);
+            ChangeMap (x, y);
 		}
 	}
 	if (e == kMouseUp)
@@ -1003,84 +1003,38 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 	printf("New: %lu\n", path.size());
 }
 
-void ChangeMap(bool maximize, int nodeLimit, int x, int y)
+void ChangeMap(int x, int y)
 {
-    BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
-    bfs.SetNodeLimit(nodeLimit); // max 1 million expansions
-    bfs.SetVerbose(false);
-    std::vector<SnakeBird::SnakeBirdState> path;
-
-    size_t maxLength = 0;
-    size_t minLength = 100000;
-    SnakeBird::SnakeBird bestMin, bestMax;
-    SnakeBird::SnakeBirdState current = sb.GetStart();
-    SnakeBird::SnakeBird curr = sb;
-    std::vector<SnakeBird::SnakeBirdWorldObject> order;
-   /* for (int x = 0; x < sb.GetWidth(); x++)
-    {
-        for (int y = 0; y < sb.GetHeight()-1; y++)
-        {
-    */
-            auto renderedType = sb.GetRenderedGroundType(current, x, y);
-            bool valid = false;
-            switch (renderedType)
-            {
-                case SnakeBird::kGround:
-                {
-                    valid = true;
-                    order.push_back(SnakeBird::kEmpty);
-                    order.push_back(SnakeBird::kSpikes);
-                    break;
-                }
-                case SnakeBird::kSpikes:
-                {
-                    valid = true;
-                    order.push_back(SnakeBird::kGround);
-                    order.push_back(SnakeBird::kEmpty);
-                    break;
-                }
-                case SnakeBird::kEmpty:
-                {
-                    valid = true;
-                    order.push_back(SnakeBird::kSpikes);
-                    order.push_back(SnakeBird::kGround);
-                    break;
-                }
-                default:
-                    break;
-            }
-    
-            while (order.size() > 0)
-            {
-                sb.BeginEditing();
-                sb.SetGroundType(x, y, order.back());
-                sb.EndEditing();
-                gRefreshBackground = true;
-                order.pop_back();
-                bfs.GetPath(&sb, snake, snake, path);
-              /*  if (path.size() < minLength && path.size() != 0)
-                {
-                    minLength = path.size();
-                    bestMin = sb;
-                }
-                if (path.size() > maxLength)
-                {
-                    maxLength = path.size();
-                    bestMax = sb;
-                }
-            }
-            sb = curr;//sb.SetStart(current);
-        }
-    }
-    bfs.GetPath(&sb, snake, snake, path);
-    printf("Old: %lu, ", path.size());
-    if (maximize)
-        sb = bestMax;
-    else
-        sb = bestMin;
-    bfs.GetPath(&sb, snake, snake, path);
-    printf("New: %lu\n", path.size());
-               */
-}
+	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
+	switch (renderedType)
+	{
+		case SnakeBird::kGround:
+		{
+			sb.BeginEditing();
+			sb.SetGroundType(x, y, SnakeBird::kSpikes);
+			sb.EndEditing();
+			gRefreshBackground = true;
+			break;
+		}
+		case SnakeBird::kSpikes:
+		{
+			sb.BeginEditing();
+			sb.SetGroundType(x, y, SnakeBird::kEmpty);
+			sb.EndEditing();
+			gRefreshBackground = true;
+			break;
+		}
+		case SnakeBird::kEmpty:
+		{
+			sb.BeginEditing();
+			sb.SetGroundType(x, y, SnakeBird::kGround);
+			sb.EndEditing();
+			gRefreshBackground = true;
+			break;
+		}
+		default:
+			break;
+	}
+	
 }
                 
