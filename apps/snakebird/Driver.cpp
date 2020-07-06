@@ -56,7 +56,7 @@ std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
 
 void AnalyzeMapChanges(bool maximize, int nodeLimit=1000000);
-
+void ChangeMap(int x, int y);
 
 int main(int argc, char* argv[])
 {
@@ -911,6 +911,7 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 		if (sb.GetPointFromCoordinate(p, x, y))
 		{
 			printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
+            ChangeMap (x, y);
 		}
 	}
 	if (e == kMouseUp)
@@ -1001,3 +1002,39 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 	bfs.GetPath(&sb, snake, snake, path);
 	printf("New: %lu\n", path.size());
 }
+
+void ChangeMap(int x, int y)
+{
+	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
+	switch (renderedType)
+	{
+		case SnakeBird::kGround:
+		{
+			sb.BeginEditing();
+			sb.SetGroundType(x, y, SnakeBird::kSpikes);
+			sb.EndEditing();
+			gRefreshBackground = true;
+			break;
+		}
+		case SnakeBird::kSpikes:
+		{
+			sb.BeginEditing();
+			sb.SetGroundType(x, y, SnakeBird::kEmpty);
+			sb.EndEditing();
+			gRefreshBackground = true;
+			break;
+		}
+		case SnakeBird::kEmpty:
+		{
+			sb.BeginEditing();
+			sb.SetGroundType(x, y, SnakeBird::kGround);
+			sb.EndEditing();
+			gRefreshBackground = true;
+			break;
+		}
+		default:
+			break;
+	}
+	
+}
+                
