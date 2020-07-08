@@ -40,6 +40,8 @@ SnakeBird::SnakeBirdAnimationStep actionInProgressStep;
 bool actionInProgress = false;
 SnakeBird::SnakeBirdAction inProgress;
 bool gRefreshBackground = true;
+bool gEditMap = false;
+int gNumTClicked = 1;
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
 double messageExpireTime = globalTime+10;
@@ -92,7 +94,7 @@ void InstallHandlers()
 #endif
 	InstallKeyboardHandler(MyDisplayHandler, "Change", "Make one change to increase solution length", kAnyModifier, 'c');
 	InstallKeyboardHandler(MyDisplayHandler, "Change", "Make one change to decrease solution length", kAnyModifier, 'x');
-	
+	InstallKeyboardHandler(MyDisplayHandler, "Edit", "Edit Level", kAnyModifier, 't');
 	
 	InstallCommandLineHandler(MyCLHandler, "-change", "-change <input> <nodelimit> <iter>", "Run <iter> times to make the level harder or easier. Outputs the new depth and file coding.");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
@@ -876,6 +878,21 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			recording = !recording;
 			break;
 		case 't':
+			{
+				gNumTClicked++;
+				if (gNumTClicked % 2 == 0)
+				{
+				gEditMap = true;
+				std:: cout << "gEditMap valuse is: " << gEditMap;
+				message = "Edit change";
+				}
+				else if(gNumTClicked % 2 != 0)
+				{
+					gEditMap = false;
+				}
+			}
+			break;
+		case 'y':
 			break;
 		case 'v':
 			break;
@@ -904,14 +921,20 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 {
 	if (e == kMouseDrag) // ignore movement with mouse button down
 		return true;
-	
-	if (e == kMouseDown)
+
+	if ((e == kMouseDown) && (gEditMap == true))
 	{
-		int x, y;
-		if (sb.GetPointFromCoordinate(p, x, y))
+		if (e == kMouseDown)
 		{
-			printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
-            ChangeMap (x, y);
+			int x, y;
+			if (sb.GetPointFromCoordinate(p, x, y))
+			{
+				printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
+				ChangeMap (x, y);
+				
+				std:: cout << "gNumTClicked valuse is: " << gNumTClicked;;
+				
+			}
 		}
 	}
 	if (e == kMouseUp)
@@ -1005,36 +1028,35 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 
 void ChangeMap(int x, int y)
 {
-	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
-	switch (renderedType)
-	{
-		case SnakeBird::kGround:
+		auto renderedType = sb.GetRenderedGroundType(snake, x, y);
+		switch (renderedType)
 		{
-			sb.BeginEditing();
-			sb.SetGroundType(x, y, SnakeBird::kSpikes);
-			sb.EndEditing();
-			gRefreshBackground = true;
-			break;
+			case SnakeBird::kGround:
+			{
+				sb.BeginEditing();
+				sb.SetGroundType(x, y, SnakeBird::kSpikes);
+				sb.EndEditing();
+				gRefreshBackground = true;
+				break;
+			}
+			case SnakeBird::kSpikes:
+			{
+				sb.BeginEditing();
+				sb.SetGroundType(x, y, SnakeBird::kEmpty);
+				sb.EndEditing();
+				gRefreshBackground = true;
+				break;
+			}
+			case SnakeBird::kEmpty:
+			{
+				sb.BeginEditing();
+				sb.SetGroundType(x, y, SnakeBird::kGround);
+				sb.EndEditing();
+				gRefreshBackground = true;
+				break;
+			}
+			default:
+				break;
 		}
-		case SnakeBird::kSpikes:
-		{
-			sb.BeginEditing();
-			sb.SetGroundType(x, y, SnakeBird::kEmpty);
-			sb.EndEditing();
-			gRefreshBackground = true;
-			break;
-		}
-		case SnakeBird::kEmpty:
-		{
-			sb.BeginEditing();
-			sb.SetGroundType(x, y, SnakeBird::kGround);
-			sb.EndEditing();
-			gRefreshBackground = true;
-			break;
-		}
-		default:
-			break;
-	}
-	
 }
-                
+
