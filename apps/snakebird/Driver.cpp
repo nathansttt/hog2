@@ -41,6 +41,7 @@ bool actionInProgress = false;
 SnakeBird::SnakeBirdAction inProgress;
 bool gRefreshBackground = true;
 bool gEditMap = false;
+int gStopSnake = 1;
 int gNumTClicked = 1;
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
@@ -704,7 +705,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
-				if (a.bird == snakeControl && a.direction == SnakeBird::kUp)
+				if (a.bird == snakeControl && a.direction == SnakeBird::kUp && gStopSnake == 1)
 				{
 					//sb.ApplyAction(snake, a);
 					actionInProgress = true;
@@ -723,7 +724,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
-				if (a.bird == snakeControl && a.direction == SnakeBird::kDown)
+				if (a.bird == snakeControl && a.direction == SnakeBird::kDown && gStopSnake == 1)
 				{
 					actionInProgress = true;
 					actionInProgressStep.Reset();
@@ -744,7 +745,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
-				if (a.bird == snakeControl && a.direction == SnakeBird::kLeft)
+				if (a.bird == snakeControl && a.direction == SnakeBird::kLeft && gStopSnake == 1)
 				{
 					actionInProgress = true;
 					actionInProgressStep.Reset();
@@ -764,7 +765,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
-				if (a.bird == snakeControl && a.direction == SnakeBird::kRight)
+				if (a.bird == snakeControl && a.direction == SnakeBird::kRight && gStopSnake == 1)
 				{
 					actionInProgress = true;
 					actionInProgressStep.Reset();
@@ -879,15 +880,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 't':
 			{
+				gStopSnake += 5;
 				gNumTClicked++;
+				
 				if (gNumTClicked % 2 == 0)
 				{
 				gEditMap = true;
 				std:: cout << "gEditMap valuse is: " << gEditMap;
-				message = "Edit change";
+				message = "Editing is Enabled, Don't move the Snake Bird...Cause You Can't";
+				//NoActions();
 				}
 				else if(gNumTClicked % 2 != 0)
 				{
+					gStopSnake = 1;
 					gEditMap = false;
 				}
 			}
