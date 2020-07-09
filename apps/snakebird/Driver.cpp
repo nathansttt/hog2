@@ -42,7 +42,8 @@ SnakeBird::SnakeBirdAction inProgress;
 bool gRefreshBackground = true;
 bool gEditMap = false;
 int gStopSnake = 1;
-int gNumTClicked = 1;
+int gNumTClicked = 21;
+int gKeysPressed;
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
 double messageExpireTime = globalTime+10;
@@ -687,9 +688,23 @@ void HurryUpFinishAction()
 
 void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
-//	SnakeBird::SnakeBirdAction a;
+	//	SnakeBird::SnakeBirdAction a;
 	static std::vector<SnakeBird::SnakeBirdAction> acts;
-//	a.bird = snakeControl;
+	//	a.bird = snakeControl;
+	if (key!= 't' && gNumTClicked % 2 == 0 && gEditMap == true)
+	{
+		std:: cout << "Key valuse is: " << key;
+		message = "This key is disabled. Press 't' to get out of Editing Mode";
+		messageBeginTime = globalTime+0.1;
+		messageExpireTime = globalTime+5;
+	}
+	if ((key == 'a' || key == kLeftArrow || key == 'w'|| key == kUpArrow|| key == 's'|| key == kDownArrow|| key == 'w'||key == 'd'|| key == kRightArrow )&& gNumTClicked % 2 == 0 && gEditMap == true)
+	{
+		message = "You tried to move when I told you not to, but you can't. Sorry";
+		messageBeginTime = globalTime+0.1;
+		messageExpireTime = globalTime+5;
+	}
+	std:: cout << "Key valuse is: " << key;
 	switch (key)
 	{
 		case '0': LoadLevel19(); break;
@@ -731,9 +746,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					inProgress = a;
 					frameTime = timePerFrame;
 					history.push_back(snake);
-
-//					sb.ApplyAction(snake, a);
-//					history.push_back(snake);
+					
+					//					sb.ApplyAction(snake, a);
+					//					history.push_back(snake);
 				}
 			}
 			UpdateActiveSnake();
@@ -752,8 +767,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					inProgress = a;
 					frameTime = timePerFrame;
 					history.push_back(snake);
-//					sb.ApplyAction(snake, a);
-//					history.push_back(snake);
+					//					sb.ApplyAction(snake, a);
+					//					history.push_back(snake);
 				}
 			}
 			UpdateActiveSnake();
@@ -772,26 +787,29 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 					inProgress = a;
 					frameTime = timePerFrame;
 					history.push_back(snake);
-//					sb.ApplyAction(snake, a);
-//					history.push_back(snake);
+					//					sb.ApplyAction(snake, a);
+					//					history.push_back(snake);
 				}
 			}
 			UpdateActiveSnake();
 			break;
 		case 'q':
-			//if (message == "No legal actions; press undo or reset level to continue")
-			message = "";
-			future.clear();
-			if (history.size() > 1)
+			if(gStopSnake == 1)
 			{
-				while (snake == history.back() && history.size() > 2)
+				//if (message == "No legal actions; press undo or reset level to continue")
+				message = "";
+				future.clear();
+				if (history.size() > 1)
+				{
+					while (snake == history.back() && history.size() > 2)
+						history.pop_back();
+					snake = history.back();
+					lastFrameSnake = snake;
+					timePerFrame = 0.001;
 					history.pop_back();
-				snake = history.back();
-				lastFrameSnake = snake;
-				timePerFrame = 0.001;
-				history.pop_back();
+				}
+				UpdateActiveSnake();
 			}
-			UpdateActiveSnake();
 			break;
 		case 'e':
 			for (int x = 0; x < snake.GetNumSnakes(); x++)
@@ -802,28 +820,34 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case ']':
-			HurryUpFinishAction();
-			if (future.size() > 0)
+			if(gStopSnake == 1)
 			{
-				actionInProgress = true;
-				actionInProgressStep.Reset();
-				inProgress = sb.GetAction(snake, future.back());
-				frameTime = timePerFrame;
-				history.push_back(snake);
-				//snake = future.back();
-				future.pop_back();
+				HurryUpFinishAction();
+				if (future.size() > 0)
+				{
+					actionInProgress = true;
+					actionInProgressStep.Reset();
+					inProgress = sb.GetAction(snake, future.back());
+					frameTime = timePerFrame;
+					history.push_back(snake);
+					//snake = future.back();
+					future.pop_back();
+				}
 			}
 			break;
 		case 'n':
-			MyDisplayHandler(windowID, kNoModifier, 'b');
+			if(gStopSnake == 1)
+				MyDisplayHandler(windowID, kNoModifier, 'b');
 			autoSolve = true;
 			MyDisplayHandler(windowID, kNoModifier, ']');
 			break;
 		case 'c':
-			AnalyzeMapChanges(true);
+			if(gStopSnake == 1)
+				AnalyzeMapChanges(true);
 			break;
 		case 'x':
-			AnalyzeMapChanges(false);
+			if(gStopSnake == 1)
+				AnalyzeMapChanges(false);
 			break;
 		case 'b':
 		{
@@ -838,7 +862,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			t.EndTimer();
 			printf("BFS to goal complete in %1.2fs: %llu states reached; path length %lu.\n",
 				   t.GetElapsedTime(), bfs.GetNodesExpanded(), future.size());
-
+			
 			if (future.size() == 0)
 			{
 				message = "Level unsolvable. Reset or undo actions and try again.";
@@ -879,49 +903,67 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			recording = !recording;
 			break;
 		case 't':
+		{
+			if(future.size() == 0 && history.size() == 1 ) //&& autoSolve == false
 			{
-				gStopSnake += 5;
+				gStopSnake = 0;
 				gNumTClicked++;
 				
 				if (gNumTClicked % 2 == 0)
 				{
-				gEditMap = true;
-				std:: cout << "gEditMap valuse is: " << gEditMap;
-				message = "Editing is Enabled, Don't move the Snake Bird...Cause You Can't";
-				//NoActions();
+					gEditMap = true;
+					std:: cout << "gEditMap value is: " << gEditMap;
+					message = "Editing is Enabled. Don't move the Snake Bird...";
+					messageBeginTime = globalTime+0.1;
+					messageExpireTime = globalTime+5;
 				}
-				else if(gNumTClicked % 2 != 0)
+				else if(gNumTClicked % 2 != 0 && gEditMap == true)
 				{
+					message = "Editing off";
+					messageBeginTime = globalTime+0.1;
+					messageExpireTime = globalTime+3;
 					gStopSnake = 1;
 					gEditMap = false;
 				}
 			}
+			else if(!(future.size() == 0 && history.size() == 1 && autoSolve == false))
+			{
+				message = "Reset the level to enable Editing Mode";
+				messageBeginTime = globalTime+0.1;
+				messageExpireTime = globalTime+5;
+				gStopSnake = 1;
+				gEditMap = false;
+			}
+		}
 			break;
 		case 'y':
 			break;
 		case 'v':
 			break;
 		case 'r':
-			message = "";
-			snake = history[0];
-			timePerFrame = 0.01;
-			history.resize(1);
-			future.clear();
-			autoSolve = false;
-			break;
-		case '\t':
-			if (mod != kShiftDown)
-				SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
-			else
+			if(gStopSnake == 1)
 			{
-				SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+				message = "";
+				snake = history[0];
+				timePerFrame = 0.01;
+				history.resize(1);
+				future.clear();
+				autoSolve = false;
 			}
 			break;
-		default:
-			break;
-	}
+		case '\t':
+				if (mod != kShiftDown)
+					SetActivePort(windowID, (GetActivePort(windowID)+1)%GetNumPorts(windowID));
+				
+					else
+					{
+						SetNumPorts(windowID, 1+(GetNumPorts(windowID)%MAXPORTS));
+					}
+					break;
+				default:
+					break;
+				}
 }
-
 bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEventType e)
 {
 	if (e == kMouseDrag) // ignore movement with mouse button down
