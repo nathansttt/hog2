@@ -41,11 +41,9 @@ bool actionInProgress = false;
 SnakeBird::SnakeBirdAction inProgress;
 bool gRefreshBackground = true;
 bool gEditMap = false;
-int gStopSnake = 1;
-int gNumTClicked = 21;
 int gMouseX = -1;
 int gMouseY = -1;
-point3d gMousePoint;
+
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
 double messageExpireTime = globalTime+10;
@@ -492,18 +490,19 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		d.StartBackground();
 		sb.Draw(d);
-		if(gEditMap == true)
-		{
-			if(gMouseX != -1 && gMouseY != -1)
-			{
-			sb.Draw(d, gMouseX, gMouseY);
-			}
-		}
 		d.EndBackground();
 	}
 	//sb.Draw(d, snake, snakeControl, globalTime);
 	sb.Draw(d, globalTime);
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
+	if (gEditMap == true)
+	{
+		if (gMouseX != -1 && gMouseY != -1)
+		{
+			sb.SetColor(Colors::yellow);
+			sb.Draw(d, gMouseX, gMouseY);
+		}
+	}
 
 	if (sb.GoalTest(snake) && actionInProgress == false && quitWhenDoneRecording == false )
 	{
@@ -515,6 +514,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 #ifdef __EMSCRIPTEN__
 			submitTextToBuffer("Done");
 			d.DrawText("Window will close automatically", {0,0.4}, Colors::black, 0.075f, Graphics::textAlignCenter);
+#else
+			d.DrawText("Press 'r' to reset level", {0,0.4}, Colors::black, 0.075f, Graphics::textAlignCenter);
 #endif
 		}
 		transition.Draw(d);
@@ -700,20 +701,26 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 	//	SnakeBird::SnakeBirdAction a;
 	static std::vector<SnakeBird::SnakeBirdAction> acts;
 	//	a.bird = snakeControl;
-	if (key!= 't' && gNumTClicked % 2 == 0 && gEditMap == true)
+	
+	if (gEditMap)
 	{
-		std:: cout << "Key valuse is: " << key;
-		message = "This key is disabled. Press 't' to get out of Editing Mode";
-		messageBeginTime = globalTime+0.1;
-		messageExpireTime = globalTime+5;
+		switch (key)
+		{
+			case 't':
+				message = "Editing mode disabled.";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				gEditMap = false;
+				break;
+			default: // all other keys
+				message = "This key is disabled in edit mode. Press 't' to exit edit mode.";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				break;
+		}
+		return;
 	}
-	if ((key == 'a' || key == kLeftArrow || key == 'w'|| key == kUpArrow|| key == 's'|| key == kDownArrow|| key == 'w'||key == 'd'|| key == kRightArrow )&& gNumTClicked % 2 == 0 && gEditMap == true)
-	{
-		message = "You tried to move when I told you not to, but you can't. Sorry";
-		messageBeginTime = globalTime+0.1;
-		messageExpireTime = globalTime+5;
-	}
-	std:: cout << "Key valuse is: " << key;
+
 	switch (key)
 	{
 		case '0': LoadLevel19(); break;
@@ -729,7 +736,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
-				if (a.bird == snakeControl && a.direction == SnakeBird::kUp && gStopSnake == 1)
+				if (a.bird == snakeControl && a.direction == SnakeBird::kUp)
 				{
 					//sb.ApplyAction(snake, a);
 					actionInProgress = true;
@@ -748,7 +755,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
-				if (a.bird == snakeControl && a.direction == SnakeBird::kDown && gStopSnake == 1)
+				if (a.bird == snakeControl && a.direction == SnakeBird::kDown)
 				{
 					actionInProgress = true;
 					actionInProgressStep.Reset();
@@ -769,7 +776,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
-				if (a.bird == snakeControl && a.direction == SnakeBird::kLeft && gStopSnake == 1)
+				if (a.bird == snakeControl && a.direction == SnakeBird::kLeft)
 				{
 					actionInProgress = true;
 					actionInProgressStep.Reset();
@@ -789,7 +796,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			sb.GetActions(snake, acts);
 			for (auto &a : acts)
 			{
-				if (a.bird == snakeControl && a.direction == SnakeBird::kRight && gStopSnake == 1)
+				if (a.bird == snakeControl && a.direction == SnakeBird::kRight)
 				{
 					actionInProgress = true;
 					actionInProgressStep.Reset();
@@ -803,22 +810,19 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			UpdateActiveSnake();
 			break;
 		case 'q':
-			if(gStopSnake == 1)
+			//if (message == "No legal actions; press undo or reset level to continue")
+			message = "";
+			future.clear();
+			if (history.size() > 1)
 			{
-				//if (message == "No legal actions; press undo or reset level to continue")
-				message = "";
-				future.clear();
-				if (history.size() > 1)
-				{
-					while (snake == history.back() && history.size() > 2)
-						history.pop_back();
-					snake = history.back();
-					lastFrameSnake = snake;
-					timePerFrame = 0.001;
+				while (snake == history.back() && history.size() > 2)
 					history.pop_back();
-				}
-				UpdateActiveSnake();
+				snake = history.back();
+				lastFrameSnake = snake;
+				timePerFrame = 0.001;
+				history.pop_back();
 			}
+			UpdateActiveSnake();
 			break;
 		case 'e':
 			for (int x = 0; x < snake.GetNumSnakes(); x++)
@@ -829,34 +833,28 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case ']':
-			if(gStopSnake == 1)
+			HurryUpFinishAction();
+			if (future.size() > 0)
 			{
-				HurryUpFinishAction();
-				if (future.size() > 0)
-				{
-					actionInProgress = true;
-					actionInProgressStep.Reset();
-					inProgress = sb.GetAction(snake, future.back());
-					frameTime = timePerFrame;
-					history.push_back(snake);
-					//snake = future.back();
-					future.pop_back();
-				}
+				actionInProgress = true;
+				actionInProgressStep.Reset();
+				inProgress = sb.GetAction(snake, future.back());
+				frameTime = timePerFrame;
+				history.push_back(snake);
+				//snake = future.back();
+				future.pop_back();
 			}
 			break;
 		case 'n':
-			if(gStopSnake == 1)
-				MyDisplayHandler(windowID, kNoModifier, 'b');
+			MyDisplayHandler(windowID, kNoModifier, 'b');
 			autoSolve = true;
 			MyDisplayHandler(windowID, kNoModifier, ']');
 			break;
 		case 'c':
-			if(gStopSnake == 1)
-				AnalyzeMapChanges(true);
+			AnalyzeMapChanges(true);
 			break;
 		case 'x':
-			if(gStopSnake == 1)
-				AnalyzeMapChanges(false);
+			AnalyzeMapChanges(false);
 			break;
 		case 'b':
 		{
@@ -913,36 +911,13 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 't':
 		{
-			if(future.size() == 0 && history.size() == 1 && autoSolve == false)
-			{
-				gStopSnake = 0;
-				gNumTClicked++;
-				
-				if (gNumTClicked % 2 == 0)
-				{
-					gEditMap = true;
-	          //    std:: cout << "gEditMap value is: " << gEditMap;
-					message = "Editing is Enabled. Don't move the Snake Bird...";
-					messageBeginTime = globalTime+0.1;
-					messageExpireTime = globalTime+5;
-				}
-				else if(gNumTClicked % 2 != 0 && gEditMap == true)
-				{
-					message = "Editing off";
-					messageBeginTime = globalTime+0.1;
-					messageExpireTime = globalTime+3;
-					gStopSnake = 1;
-					gEditMap = false;
-				}
-			}
-			else if(!(future.size() == 0 && history.size() == 1 && autoSolve == false))
-			{
-				message = "Reset the level to enable Editing Mode";
-				messageBeginTime = globalTime+0.1;
-				messageExpireTime = globalTime+5;
-				gStopSnake = 1;
-				gEditMap = false;
-			}
+			// Reset the level
+			MyDisplayHandler(windowID, kNoModifier, 'r');
+			gEditMap = true;
+			gMouseY = gMouseX = -1;
+			message = "Editing mode enabled.";
+			messageBeginTime = globalTime;
+			messageExpireTime = globalTime+5;
 		}
 			break;
 		case 'y':
@@ -950,15 +925,12 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'v':
 			break;
 		case 'r':
-			if(gStopSnake == 1)
-			{
-				message = "";
-				snake = history[0];
-				timePerFrame = 0.01;
-				history.resize(1);
-				future.clear();
-				autoSolve = false;
-			}
+			message = "";
+			snake = history[0];
+			timePerFrame = 0.01;
+			history.resize(1);
+			future.clear();
+			autoSolve = false;
 			break;
 		case '\t':
 				if (mod != kShiftDown)
@@ -979,16 +951,16 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 	{
 		return true;
 	}
-		if ((e == kMouseDown) && (gEditMap == true))
+
+	if ((e == kMouseDown) && (gEditMap == true))
+	{
+		int x, y;
+		if (sb.GetPointFromCoordinate(p, x, y))
 		{
-			int x, y;
-			if (sb.GetPointFromCoordinate(p, x, y))
-			{
-				printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
-				ChangeMap (x, y);
-				//std:: cout << "gNumTClicked valuse is: " << gNumTClicked;;
-			}
+			printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
+			ChangeMap (x, y);
 		}
+	}
 	
 	if (e == kMouseUp)
 	{
@@ -1000,7 +972,6 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 		{
 			gMouseX = x;
 			gMouseY = y;
-			gMousePoint = p;
 		}
 		else
 		{
