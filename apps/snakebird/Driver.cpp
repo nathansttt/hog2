@@ -492,7 +492,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		d.StartBackground();
 		sb.Draw(d);
-		sb.Draw(d, gMouseX, gMouseY);
+		if(gEditMap == true)
+		{
+			if(gMouseX != -1 && gMouseY != -1)
+			{
+			sb.Draw(d, gMouseX, gMouseY);
+			}
+		}
 		d.EndBackground();
 	}
 	//sb.Draw(d, snake, snakeControl, globalTime);
@@ -980,9 +986,7 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 			{
 				printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
 				ChangeMap (x, y);
-				
-				std:: cout << "gNumTClicked valuse is: " << gNumTClicked;;
-				
+				//std:: cout << "gNumTClicked valuse is: " << gNumTClicked;;
 			}
 		}
 	
