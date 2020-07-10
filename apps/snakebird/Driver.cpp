@@ -43,7 +43,9 @@ bool gRefreshBackground = true;
 bool gEditMap = false;
 int gStopSnake = 1;
 int gNumTClicked = 21;
-int gKeysPressed;
+int gMouseX = -1;
+int gMouseY = -1;
+point3d gMousePoint;
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
 double messageExpireTime = globalTime+10;
@@ -490,6 +492,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		d.StartBackground();
 		sb.Draw(d);
+		sb.Draw(d, gMouseX, gMouseY);
 		d.EndBackground();
 	}
 	//sb.Draw(d, snake, snakeControl, globalTime);
@@ -904,7 +907,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 't':
 		{
-			if(future.size() == 0 && history.size() == 1 ) //&& autoSolve == false
+			if(future.size() == 0 && history.size() == 1 && autoSolve == false)
 			{
 				gStopSnake = 0;
 				gNumTClicked++;
@@ -912,7 +915,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				if (gNumTClicked % 2 == 0)
 				{
 					gEditMap = true;
-					std:: cout << "gEditMap value is: " << gEditMap;
+	          //    std:: cout << "gEditMap value is: " << gEditMap;
 					message = "Editing is Enabled. Don't move the Snake Bird...";
 					messageBeginTime = globalTime+0.1;
 					messageExpireTime = globalTime+5;
@@ -967,11 +970,10 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEventType e)
 {
 	if (e == kMouseDrag) // ignore movement with mouse button down
-		return true;
-
-	if ((e == kMouseDown) && (gEditMap == true))
 	{
-		if (e == kMouseDown)
+		return true;
+	}
+		if ((e == kMouseDown) && (gEditMap == true))
 		{
 			int x, y;
 			if (sb.GetPointFromCoordinate(p, x, y))
@@ -983,14 +985,30 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 				
 			}
 		}
-	}
+	
 	if (e == kMouseUp)
 	{
 	}
+	if (e == kMouseMove && gEditMap == true)
+	{
+		int x, y;
+		if (sb.GetPointFromCoordinate(p, x, y))
+		{
+			gMouseX = x;
+			gMouseY = y;
+			gMousePoint = p;
+		}
+		else
+		{
+			gMouseX = -1;
+			gMouseY = -1;
+		}
+	}
+	/*
 	if (e == kMouseMove)
 	{
 	}
-
+	 */
 	// Don't need any other mouse support
 	return true;
 }
