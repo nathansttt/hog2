@@ -61,6 +61,7 @@ std::vector<SnakeBird::SnakeBirdState> future;
 
 void AnalyzeMapChanges(bool maximize, int nodeLimit=1000000);
 void ChangeMap(int x, int y);
+bool CanChangeMap(int x, int y);
 
 int main(int argc, char* argv[])
 {
@@ -497,9 +498,15 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 	if (gEditMap == true)
 	{
-		if (gMouseX != -1 && gMouseY != -1)
+		//if (gMouseX != -1 && gMouseY != -1)
+		if(CanChangeMap(gMouseX, gMouseY) == true)
 		{
 			sb.SetColor(Colors::yellow);
+			sb.Draw(d, gMouseX, gMouseY);
+		}
+		else
+		{
+			sb.SetColor(Colors::gray);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
 	}
@@ -959,6 +966,7 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 		{
 			printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
 			ChangeMap (x, y);
+			CanChangeMap(x, y);
 		}
 	}
 	
@@ -1100,3 +1108,28 @@ void ChangeMap(int x, int y)
 		}
 }
 
+bool CanChangeMap(int x, int y)
+{
+		auto renderedType = sb.GetRenderedGroundType(snake, x, y);
+		switch (renderedType)
+		{
+			case SnakeBird::kGround:
+			{
+				return true;
+				break;
+			}
+			case SnakeBird::kSpikes:
+			{
+				return true;
+				break;
+			}
+			case SnakeBird::kEmpty:
+			{
+				return true;
+				break;
+			}
+			default:
+				return false;
+				break;
+		}
+}
