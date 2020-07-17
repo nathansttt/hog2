@@ -315,6 +315,8 @@ public:
 	// Allows us to draw text overlay
 	float GetRadius() const;
 	bool GetPointFromCoordinate(Graphics::point p, int &x, int &y);
+	std::vector<int> fruit;
+	std::vector<int> Fposition;
 private:
 	std::string Code(int) const;
 	int DeCode(const std::string &s, size_t offset) const;
@@ -354,7 +356,7 @@ private:
 
 	std::array<SnakeBirdWorldObject, 512> world; // static world
 	mutable std::array<SnakeBirdWorldObject, 512> render;
-	std::vector<int> fruit;
+	
 	std::array<std::vector<int>, 4> objects; // offsets from base location
 	std::array<bool, 4> objectFullyConnected;
 	int portal1Loc, portal2Loc;
