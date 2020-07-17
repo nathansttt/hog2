@@ -44,30 +44,29 @@ bool gEditMap = false;
 int gMouseX = -1;
 int gMouseY = -1;
 int gPKeyPressed = 1;
-int gstoptoggle = 0;
 enum EditorMode : uint8_t {
 	// can always enter, but may have secondary effects
-	kEmpty  = 0x80,
-	kFruit  = 0x81,
-	kExit   = 0x82,
-	kPortal1= 0x83,
-	kPortal2= 0x84,
+	kEmpty,
+	kFruit,
+	kExit,
+	kPortal1,
+	kPortal2,
 
 	// cannot ever enter
-	kGround = 0x40,
-	kSpikes = 0x41,
+	kGround,
+	kSpikes,
 
 	// for pushing
-	kBlock1 = 0x20,
-	kBlock2 = 0x21,
-	kBlock3 = 0x22,
-	kBlock4 = 0x23,
+	kBlock1,
+	kBlock2,
+	kBlock3,
+	kBlock4,
 
 	// other snakes
-	kSnake1 = 0x10,
-	kSnake2 = 0x11,
-	kSnake3 = 0x12,
-	kSnake4 = 0x13,
+	kSnake1,
+	kSnake2,
+	kSnake3,
+	kSnake4,
 };
 EditorMode gEditorMode;
 
@@ -126,18 +125,24 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "Change", "Make one change to decrease solution length", kAnyModifier, 'x');
 	InstallKeyboardHandler(MyDisplayHandler, "Edit", "Edit Level", kAnyModifier, 't');
 	InstallKeyboardHandler(MyDisplayHandler, "Fruit", "Edit Fruit (message)", kAnyModifier, 'f');
-	InstallKeyboardHandler(MyDisplayHandler, "Edit", "Edit Exit (message)", kAnyModifier, 'x');
-	InstallKeyboardHandler(MyDisplayHandler, "Edit", "Edit Ground (message)", kAnyModifier, 'g');
+	InstallKeyboardHandler(MyDisplayHandler, "Exit", "Edit Exit (message)", kAnyModifier, 'x');
+	InstallKeyboardHandler(MyDisplayHandler, "Ground", "Edit Ground (message)", kAnyModifier, 'g');
+	InstallKeyboardHandler(MyDisplayHandler, "Spikes", "Edit Spikes (message)", kAnyModifier, 's');
+	InstallKeyboardHandler(MyDisplayHandler, "Sky", "Edit Sky (message)", kAnyModifier, 'r');
+	InstallKeyboardHandler(MyDisplayHandler, "Toggle Ground", "Toggle Ground Mode (message)", kAnyModifier, 'h');
 	InstallKeyboardHandler(MyDisplayHandler, "Portal", "Edit Portals (message)", kAnyModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Blocks", "Edit Blocks (message)", kAnyModifier, 'b');
-	InstallKeyboardHandler(MyDisplayHandler, "Portal", "Edit Portals (message)", kAnyModifier, 'd');
+	InstallKeyboardHandler(MyDisplayHandler, "Toggle", "Toggle Modes (message)", kAnyModifier, 'd');
 	
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Fruit", "Edit Fruit", kAnyModifier, 'f');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Exit", "Edit Exit", kAnyModifier, 'x');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Ground", "Edit Ground", kAnyModifier, 'g');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Spikes", "Edit Spikes", kAnyModifier, 's');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Sky", "Edit Sky", kAnyModifier, 'r');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Toggle Ground", "Toggle Ground Mode", kAnyModifier, 'h');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Portal", "Edit Portals", kAnyModifier, 'p');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Blocks", "Edit Blocks", kAnyModifier, 'b');
-	InstallKeyboardHandler(EditorKeyBoardHandler, "Toggle", "Toggle Mode", kAnyModifier, 'd');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Toggle", "Toggle Modes", kAnyModifier, 'd');
 	
 	InstallCommandLineHandler(MyCLHandler, "-change", "-change <input> <nodelimit> <iter>", "Run <iter> times to make the level harder or easier. Outputs the new depth and file coding.");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
@@ -774,6 +779,16 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				break;
+			case 's': //spikes
+				message = "Editing Mode: Changing Spikes";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				break;
+			case 'r': //sky
+				message = "Editing Mode: Changing the Sky";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				break;
 			case 'p': //portal
 				message = "Editing Mode: Changing Portals. Press 'p' again to switch portals";
 				messageBeginTime = globalTime;
@@ -785,28 +800,90 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				messageExpireTime = globalTime+5;
 				break;
 			case 'd': //blocks
+			{
 				message = "Editing Mode: Toggle. Press 'd' to toggle modes";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				if(gstoptoggle == 1)
+				switch (gEditorMode)
 				{
-					message = "Editing Mode: Toggle Fruit. Press 'd' to toggle modes";
-					messageBeginTime = globalTime;
-					messageExpireTime = globalTime+5;
-				}
-				if (gstoptoggle == 2)
-				{
-					message = "Editing Mode: Toggle Exit. Press 'd' to toggle modes";
-					messageBeginTime = globalTime;
-					messageExpireTime = globalTime+5;
-				}
-				if (gstoptoggle == 0)
-				{
-					message = "Editing Mode: Toggle Ground. Press 'd' to toggle modes";
-					messageBeginTime = globalTime;
-					messageExpireTime = globalTime+5;
+					case kGround:
+					{
+						message = "Editing Mode: Toggle Ground. Press 'd' to toggle modes";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						break;
+					}
+					case kSpikes:
+					{
+						message = "Editing Mode: Toggle Spikes. Press 'd' to toggle modes";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						break;
+					}
+					case kFruit:
+					{
+						message = "Editing Mode: Toggle Fruit. Press 'd' to toggle modes";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						break;
+					}
+					case kExit:
+					{
+						message = "Editing Mode: Toggle Exit. Press 'd' to toggle modes";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						break;
+					}
+					case kEmpty:
+					{
+						message = "Editing Mode: Toggle Sky. Press 'd' to toggle modes";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						break;
+					}
+					default: // all other keys
+						message = "This key is disabled in edit mode. Press 't' to exit edit mode.";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						break;
 				}
 				break;
+			}
+			case 'h':
+			{
+				if (gEditMap == true)
+				message = "Editing Mode: Toggle Ground Mode. Press 'v' to toggle modes";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				switch (gEditorMode)
+				{
+					case kGround:
+					{
+						message = "Editing Mode: Toggle Ground. Press 'v' to toggle modes";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						
+						break;
+					}
+					case kSpikes:
+					{
+						message = "Editing Mode: Toggle Spikes. Press 'v' to toggle modes";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						break;
+					}
+					case kEmpty:
+					{
+						message = "Editing Mode: Toggle Sky. Press 'v' to toggle modes";
+						messageBeginTime = globalTime;
+						messageExpireTime = globalTime+5;
+						break;
+					}
+					default:
+						break;
+				}
+				break;
+			}
 			default: // all other keys
 				message = "This key is disabled in edit mode. Press 't' to exit edit mode.";
 				messageBeginTime = globalTime;
@@ -1061,35 +1138,78 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 			case 'g': //ground
 				gEditorMode = kGround;
 				break;
-			case 'p': //fruit
-				gPKeyPressed++;
-				if (gPKeyPressed % 2 == 0)
+			case 's': //spikes
+				gEditorMode = kSpikes;
+				break;
+			case 'r': //sky
+				gEditorMode = kEmpty;
+				break;
+			case 'h': //toggle ground modes
+			{
+				switch (gEditorMode)
 				{
-					gEditorMode = kPortal1;
+					case kGround:
+					{
+						EditorKeyBoardHandler(windowID, kNoModifier, 's');
+						std:: cout << "1" << key;
+						break;
+					}
+					case kSpikes:
+					{
+						EditorKeyBoardHandler(windowID, kNoModifier, 'r');
+						std:: cout << "2" << key;
+						break;
+					}
+					case kEmpty:
+					{
+						EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+						std:: cout << "3" << key;
+						break;
+					}
+					default:
+						break;
 				}
-				else
-				{
-					gEditorMode = kPortal2;
-				}
+				break;
+			}
+			case 'p': //portal
+				gEditorMode = kPortal1;
+				//sb.SetGroundType(-1,-1,SnakeBird::kPortal1);
+				//sb.SetGroundType(-1,-1,SnakeBird::kPortal2);
 				break;
 			case 'b':
 				gEditorMode = kBlock1;
 				break;
-			case 'd':
+			case 'd': //toggle modes
 			{
-				gstoptoggle++;
-				if(gstoptoggle == 1)
+				switch (gEditorMode)
 				{
-					gEditorMode = kFruit;
-				}
-				if(gstoptoggle == 2)
-				{
-					gEditorMode = kExit;
-				}
-				if(gstoptoggle == 3)
-				{
-					gEditorMode = kGround;
-					gstoptoggle = 0;
+					case kGround:
+					{
+						EditorKeyBoardHandler(windowID, kNoModifier, 's');
+						break;
+					}
+					case kSpikes:
+					{
+						EditorKeyBoardHandler(windowID, kNoModifier, 'f');
+						break;
+					}
+					case kFruit:
+					{
+						EditorKeyBoardHandler(windowID, kNoModifier, 'x');
+						break;
+					}
+					case kExit:
+					{
+						EditorKeyBoardHandler(windowID, kNoModifier, 'r');
+						break;
+					}
+					case kEmpty:
+					{
+						EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+						break;
+					}
+					default:
+						return;
 				}
 				break;
 			}
@@ -1100,10 +1220,22 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 }
 bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEventType e)
 {
-	if (e == kMouseDrag) // ignore movement with mouse button down
+	if (e == kMouseDrag && gEditMap == true) // ignore movement with mouse button down
 	{
+		int x, y;
+		if (sb.GetPointFromCoordinate(p, x, y))
+		{
+			gMouseX = x;
+			gMouseY = y;
+		}
+		else
+		{
+			gMouseX = -1;
+			gMouseY = -1;
+		}
+
 		return true;
-	}
+		}
 
 	if ((e == kMouseDown) && (gEditMap == true))
 	{
@@ -1221,21 +1353,12 @@ void ChangeMap(int x, int y)
 	{
 		case kGround:
 		{
-			
 			switch (renderedType)
 			{
-				case SnakeBird::kGround:
-				{
-					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kSpikes);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				}
 				case SnakeBird::kSpikes:
 				{
 					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					sb.SetGroundType(x, y, SnakeBird::kGround);
 					sb.EndEditing();
 					gRefreshBackground = true;
 					break;
@@ -1253,6 +1376,64 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.SetGroundType(x, y, SnakeBird::kGround);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
+				default:
+					break;
+			}
+			break;
+		}
+		case kSpikes:
+		{
+			switch (renderedType)
+			{
+				case SnakeBird::kGround:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kSpikes);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
+				case SnakeBird::kEmpty:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kSpikes);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
+				default:
+					break;
+			}
+			break;
+		}
+		case kEmpty:
+		{
+			switch (renderedType)
+			{
+				case SnakeBird::kSpikes:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
+				case SnakeBird::kGround:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
+				case SnakeBird::kFruit:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.EndEditing();
 					gRefreshBackground = true;
 					break;
@@ -1303,7 +1484,6 @@ void ChangeMap(int x, int y)
 				default:
 					break;
 			}
-		default:
 			break;
 		}
 		case kExit:
@@ -1330,6 +1510,35 @@ void ChangeMap(int x, int y)
 					break;
 			}
 		}
+		case kPortal1:
+		{
+			if (gEditorMode == kPortal2)
+			{
+				switch (renderedType)
+				{
+					case SnakeBird::kExit:
+					{
+						sb.BeginEditing();
+						sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+						sb.EndEditing();
+						gRefreshBackground = true;
+						break;
+					}
+					case SnakeBird::kEmpty:
+					{
+						sb.BeginEditing();
+						sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kExit);
+						sb.EndEditing();
+						gRefreshBackground = true;
+						break;
+					}
+					default:
+						break;
+				}
+			}
+		}
+			default:
+			break;
 	}
 }
 
@@ -1342,21 +1551,41 @@ bool CanChangeMap(int x, int y)
 		{
 			switch (renderedType)
 			{
-				case SnakeBird::kGround:
-				{
-					return true;
-					break;
-				}
 				case SnakeBird::kSpikes:
-				{
-					return true;
-					break;
-				}
 				case SnakeBird::kEmpty:
-				{
 					return true;
 					break;
-				}
+				case SnakeBird::kGround:
+				default:
+					return false;
+					break;
+			}
+			break;
+		}
+		case kEmpty:
+		{
+			switch (renderedType)
+			{
+				case SnakeBird::kSpikes:
+				case SnakeBird::kGround:
+					return true;
+					break;
+				case SnakeBird::kEmpty:
+				default:
+					return false;
+					break;
+			}
+			break;
+		}
+		case kSpikes:
+		{
+			switch (renderedType)
+			{
+				case SnakeBird::kEmpty:
+				case SnakeBird::kGround:
+					return true;
+					break;
+				case SnakeBird::kSpikes:
 				default:
 					return false;
 					break;
@@ -1367,26 +1596,12 @@ bool CanChangeMap(int x, int y)
 		{
 			switch (renderedType)
 			{
-				case SnakeBird::kEmpty:
-				{
-					return true;
-					break;
-				}
-				case SnakeBird::kGround:
-				{
-					return true;
-					break;
-				}
-				case SnakeBird::kSpikes:
-				{
-					return true;
-					break;
-				}
 				case SnakeBird::kFruit:
-				{
+				case SnakeBird::kEmpty:
+				case SnakeBird::kGround:
+				case SnakeBird::kSpikes:
 					return true;
 					break;
-				}
 				default:
 					return false;
 					break;
@@ -1397,15 +1612,23 @@ bool CanChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kExit:
-				{
-					return true;
-					break;
-				}
 				case SnakeBird::kEmpty:
-				{
 					return true;
 					break;
-				}
+				default:
+					return false;
+					break;
+			}
+		}
+		case kPortal1:
+		{
+			switch (renderedType)
+			{
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kEmpty:
+					return true;
+					break;
 				default:
 					return false;
 					break;
