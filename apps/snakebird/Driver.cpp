@@ -43,7 +43,7 @@ bool gRefreshBackground = true;
 bool gEditMap = false;
 int gMouseX = -1;
 int gMouseY = -1;
-int gPKeyPressed = 1;
+
 enum EditorMode : uint8_t {
 	// can always enter, but may have secondary effects
 	kEmpty,
@@ -101,38 +101,29 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Up", "Move up", kAnyModifier, 'w');
-	InstallKeyboardHandler(MyDisplayHandler, "Up", "Move up", kAnyModifier, kUpArrow);
-	InstallKeyboardHandler(MyDisplayHandler, "Down", "Move down", kAnyModifier, 's');
-	InstallKeyboardHandler(MyDisplayHandler, "Down", "Move down", kAnyModifier, kDownArrow);
-	InstallKeyboardHandler(MyDisplayHandler, "Left", "Move left", kAnyModifier, 'a');
-	InstallKeyboardHandler(MyDisplayHandler, "Left", "Move left", kAnyModifier, kLeftArrow);
-	InstallKeyboardHandler(MyDisplayHandler, "Right", "Move right", kAnyModifier, 'd');
-	InstallKeyboardHandler(MyDisplayHandler, "Right", "Move right", kAnyModifier, kRightArrow);
-	InstallKeyboardHandler(MyDisplayHandler, "Undo", "Undo last move", kAnyModifier, 'q');
-	InstallKeyboardHandler(MyDisplayHandler, "Next", "Select Next Snake", kAnyModifier, 'e');
-	InstallKeyboardHandler(MyDisplayHandler, "Run", "Run solution (build if needed)", kAnyModifier, 'n');
-	InstallKeyboardHandler(MyDisplayHandler, "Reset", "Reset Level", kAnyModifier, 'r');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Up", "Move up", kAnyModifier, 'w');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Up", "Move up", kAnyModifier, kUpArrow);
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Down", "Move down", kAnyModifier, 's');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Down", "Move down", kAnyModifier, kDownArrow);
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Left", "Move left", kAnyModifier, 'a');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Left", "Move left", kAnyModifier, kLeftArrow);
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Right", "Move right", kAnyModifier, 'd');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Right", "Move right", kAnyModifier, kRightArrow);
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Undo", "Undo last move", kAnyModifier, 'q');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Next", "Select Next Snake", kAnyModifier, 'e');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Run", "Run solution (build if needed)", kAnyModifier, 'n');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Reset", "Reset Level", kAnyModifier, 'r');
 
 #ifndef __EMSCRIPTEN__
-	InstallKeyboardHandler(MyDisplayHandler, "Level", "Goto nth level", kAnyModifier, '0', '5');
-	InstallKeyboardHandler(MyDisplayHandler, "Print", "Print screen to file", kAnyModifier, 'p');
-	InstallKeyboardHandler(MyDisplayHandler, "Movie", "Record movie frames", kAnyModifier, 'o');
-	InstallKeyboardHandler(MyDisplayHandler, "Solve", "Build solution", kAnyModifier, 'b');
-	InstallKeyboardHandler(MyDisplayHandler, "Step", "Take next step in solution", kAnyModifier, ']');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Level", "Goto nth level", kAnyModifier, '0', '5');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Print", "Print screen to file", kAnyModifier, 'p');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Movie", "Record movie frames", kAnyModifier, 'o');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Solve", "Build solution", kAnyModifier, 'b');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Step", "Take next step in solution", kAnyModifier, ']');
 #endif
-	InstallKeyboardHandler(MyDisplayHandler, "Change", "Make one change to increase solution length", kAnyModifier, 'c');
-	InstallKeyboardHandler(MyDisplayHandler, "Change", "Make one change to decrease solution length", kAnyModifier, 'x');
-	InstallKeyboardHandler(MyDisplayHandler, "Edit", "Edit Level", kAnyModifier, 't');
-	InstallKeyboardHandler(MyDisplayHandler, "Fruit", "Edit Fruit (message)", kAnyModifier, 'f');
-	InstallKeyboardHandler(MyDisplayHandler, "Exit", "Edit Exit (message)", kAnyModifier, 'x');
-	InstallKeyboardHandler(MyDisplayHandler, "Ground", "Edit Ground (message)", kAnyModifier, 'g');
-	InstallKeyboardHandler(MyDisplayHandler, "Spikes", "Edit Spikes (message)", kAnyModifier, 's');
-	InstallKeyboardHandler(MyDisplayHandler, "Sky", "Edit Sky (message)", kAnyModifier, 'r');
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle Ground", "Toggle Ground Mode (message)", kAnyModifier, 'h');
-	InstallKeyboardHandler(MyDisplayHandler, "Portal", "Edit Portals (message)", kAnyModifier, 'p');
-	InstallKeyboardHandler(MyDisplayHandler, "Blocks", "Edit Blocks (message)", kAnyModifier, 'b');
-	InstallKeyboardHandler(MyDisplayHandler, "Toggle", "Toggle Modes (message)", kAnyModifier, 'd');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Change", "Make one change to increase solution length", kAnyModifier, 'c');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Change", "Make one change to decrease solution length", kAnyModifier, 'x');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Edit", "Edit Level", kAnyModifier, 't');
 	
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Fruit", "Edit Fruit", kAnyModifier, 'f');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Exit", "Edit Exit", kAnyModifier, 'x');
@@ -505,7 +496,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			if (!actionInProgress)
 			{
 				if (SnakeDead())
-					MyDisplayHandler(windowID, kNoModifier, 'q');
+					GamePlayKeyboardHandler(windowID, kNoModifier, 'q');
 				UpdateActiveSnake();
 				
 				if (autoSolve == false && NoActions())
@@ -519,7 +510,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			
 			if (actionInProgress == false && autoSolve == true)
 			{
-				MyDisplayHandler(windowID, kNoModifier, ']');
+				GamePlayKeyboardHandler(windowID, kNoModifier, ']');
 			}
 		}
 		else {
@@ -527,7 +518,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			lastFrameSnake = snake;
 			if (SnakeDead())
 			{
-				MyDisplayHandler(windowID, kNoModifier, 'q');
+				GamePlayKeyboardHandler(windowID, kNoModifier, 'q');
 			}
 		}
 	}
@@ -544,7 +535,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (gEditMap == true)
 	{
 		//if (gMouseX != -1 && gMouseY != -1)
-		if(CanChangeMap(gMouseX, gMouseY) == true)
+		if (CanChangeMap(gMouseX, gMouseY) == true)
 		{
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
@@ -683,7 +674,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		{
 			sb.Load(argument[1]);			
 			lastFrameSnake = snake = sb.GetStart();
-			MyDisplayHandler(0, tKeyboardModifier::kNoModifier, 'b');
+			GamePlayKeyboardHandler(0, tKeyboardModifier::kNoModifier, 'b');
 			exit(0);	
 		}	
 	}
@@ -730,7 +721,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			mapAlreadyLoaded = true;
 			recording = true;
 			quitWhenDoneRecording = true;
-			MyDisplayHandler(0, tKeyboardModifier::kNoModifier, 'n');
+			GamePlayKeyboardHandler(0, tKeyboardModifier::kNoModifier, 'n');
 			return 2;
 		}
 		return 1;
@@ -748,151 +739,16 @@ void HurryUpFinishAction()
 	}
 }
 
-void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
+void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	//	SnakeBird::SnakeBirdAction a;
 	static std::vector<SnakeBird::SnakeBirdAction> acts;
 	//	a.bird = snakeControl;
 	
-	if (gEditMap)
-	{
-		switch (key)
-		{
-			case 't':
-				message = "Editing mode disabled.";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				gEditMap = false;
-				break;
-			case 'f': //fruit
-				message = "Editing Mode: Adding Fruit";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				break;
-			case 'x': //exit
-				message = "Editing Mode: Moving the Exit";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				break;
-			case 'g': //ground
-				message = "Editing Mode: Changing the Ground";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				break;
-			case 's': //spikes
-				message = "Editing Mode: Changing Spikes";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				break;
-			case 'r': //sky
-				message = "Editing Mode: Changing the Sky";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				break;
-			case 'p': //portal
-				message = "Editing Mode: Changing Portals. Press 'p' again to switch portals";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				break;
-			case 'b': //blocks
-				message = "Editing Mode: Changing Blocks. Press 'b' again to switch blocks";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				break;
-			case 'd': //blocks
-			{
-				message = "Editing Mode: Toggle. Press 'd' to toggle modes";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				switch (gEditorMode)
-				{
-					case kGround:
-					{
-						message = "Editing Mode: Toggle Ground. Press 'd' to toggle modes";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						break;
-					}
-					case kSpikes:
-					{
-						message = "Editing Mode: Toggle Spikes. Press 'd' to toggle modes";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						break;
-					}
-					case kFruit:
-					{
-						message = "Editing Mode: Toggle Fruit. Press 'd' to toggle modes";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						break;
-					}
-					case kExit:
-					{
-						message = "Editing Mode: Toggle Exit. Press 'd' to toggle modes";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						break;
-					}
-					case kEmpty:
-					{
-						message = "Editing Mode: Toggle Sky. Press 'd' to toggle modes";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						break;
-					}
-					default: // all other keys
-						message = "This key is disabled in edit mode. Press 't' to exit edit mode.";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						break;
-				}
-				break;
-			}
-			case 'h':
-			{
-				if (gEditMap == true)
-				message = "Editing Mode: Toggle Ground Mode. Press 'v' to toggle modes";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				switch (gEditorMode)
-				{
-					case kGround:
-					{
-						message = "Editing Mode: Toggle Ground. Press 'v' to toggle modes";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						
-						break;
-					}
-					case kSpikes:
-					{
-						message = "Editing Mode: Toggle Spikes. Press 'v' to toggle modes";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						break;
-					}
-					case kEmpty:
-					{
-						message = "Editing Mode: Toggle Sky. Press 'v' to toggle modes";
-						messageBeginTime = globalTime;
-						messageExpireTime = globalTime+5;
-						break;
-					}
-					default:
-						break;
-				}
-				break;
-			}
-			default: // all other keys
-				message = "This key is disabled in edit mode. Press 't' to exit edit mode.";
-				messageBeginTime = globalTime;
-				messageExpireTime = globalTime+5;
-				break;
-		}
+	// ignore key presses in edit mode
+	if (gEditMap && key != 't')
 		return;
-	}
-
+	
 	switch (key)
 	{
 		case '0': LoadLevel19(); break;
@@ -1018,9 +874,9 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			}
 			break;
 		case 'n':
-			MyDisplayHandler(windowID, kNoModifier, 'b');
+			GamePlayKeyboardHandler(windowID, kNoModifier, 'b');
 			autoSolve = true;
-			MyDisplayHandler(windowID, kNoModifier, ']');
+			GamePlayKeyboardHandler(windowID, kNoModifier, ']');
 			break;
 		case 'c':
 			AnalyzeMapChanges(true);
@@ -1083,14 +939,23 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case 't':
 		{
-			// Reset the level
-			MyDisplayHandler(windowID, kNoModifier, 'r');
-			gEditMap = true;
-			gEditorMode = kGround;
-			gMouseY = gMouseX = -1;
-			message = "Editing mode enabled.";
-			messageBeginTime = globalTime;
-			messageExpireTime = globalTime+5;
+			if (!gEditMap)
+			{
+				// Reset the level
+				GamePlayKeyboardHandler(windowID, kNoModifier, 'r');
+				gEditMap = true;
+				gEditorMode = kGround;
+				gMouseY = gMouseX = -1;
+				message = "Editing mode enabled.";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+			}
+			else {
+				message = "Editing mode disabled.";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				gEditMap = false;
+			}
 		}
 			break;
 		case 'y':
@@ -1130,18 +995,33 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 		switch (key)
 		{
 			case 'f': //fruit
+				message = "Editing Mode: Adding Fruit";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
 				gEditorMode = kFruit;
 				break;
 			case 'x': //exit
+				message = "Editing Mode: Moving the Exit";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
 				gEditorMode = kExit;
 				break;
 			case 'g': //ground
+				message = "Editing Mode: Changing the Ground";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
 				gEditorMode = kGround;
 				break;
 			case 's': //spikes
+				message = "Editing Mode: Changing Spikes";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
 				gEditorMode = kSpikes;
 				break;
 			case 'r': //sky
+				message = "Editing Mode: Changing the Sky";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
 				gEditorMode = kEmpty;
 				break;
 			case 'h': //toggle ground modes
@@ -1151,19 +1031,16 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 					case kGround:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 's');
-						std:: cout << "1" << key;
 						break;
 					}
 					case kSpikes:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'r');
-						std:: cout << "2" << key;
 						break;
 					}
 					case kEmpty:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'g');
-						std:: cout << "3" << key;
 						break;
 					}
 					default:
@@ -1218,6 +1095,7 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 		}
 	}
 }
+
 bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEventType e)
 {
 	if (e == kMouseDrag && gEditMap == true) // ignore movement with mouse button down
@@ -1235,7 +1113,7 @@ bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEven
 		}
 
 		return true;
-		}
+	}
 
 	if ((e == kMouseDown) && (gEditMap == true))
 	{

@@ -1426,6 +1426,7 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 	if (!editing)
 	{
 		printf("!!WARNING: Changing map without enabling editing!!\n");
+		return;
 	}
 	// TODO: check duplicates and removals for fruit and blocks
 	if (y == height-1)
@@ -1434,7 +1435,7 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 		return;
 	}
 		
-	if ((o&kBlockMask) == kBlockMask) // block
+	if ((o&kBlockMask) == kBlockMask) // are you adding a moveable block?
 	{
 		int which = -1;
 		switch (o)
@@ -1486,7 +1487,13 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 	}
 	
 	world[GetIndex(x, y)] = o;
+	// TODO: IF old ground was fruit, find it in the fruit array and remove it by
+	// taking the last item out of the array  and putting it in place of the one removed,
+	// and then shrinking the size by one. -> resize(size()-1)
+	
+	// TODO: If old type was the exit, reset the exit location to -1.
 
+	
 	if (o == kExit)
 		exitLoc = GetIndex(x, y);
 	if (o == kFruit)
