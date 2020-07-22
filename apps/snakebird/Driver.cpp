@@ -44,7 +44,7 @@ bool gEditMap = false;
 int gMouseX = -1;
 int gMouseY = -1;
 
-enum EditorMode : uint8_t {
+enum EditorMode {
 	// can always enter, but may have secondary effects
 	kEmpty,
 	kFruit,

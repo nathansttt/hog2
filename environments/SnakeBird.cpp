@@ -1493,6 +1493,19 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 	
 	// TODO: If old type was the exit, reset the exit location to -1.
 
+	if (o == kEmpty)
+	{
+		exitLoc = -1;
+		std::vector<int>::iterator tor = std::find(fruit.begin(), fruit.end(), GetIndex(x, y));
+		if (tor != fruit.end())
+		{
+			int index = std::distance(fruit.begin(), tor);
+			fruit.erase(fruit.begin() + index);
+			//fruit.insert(fruit.begin() + index, fruit.back());
+			//fruit.resize(fruit.size()-1);t
+		}
+	}
+
 	
 	if (o == kExit)
 		exitLoc = GetIndex(x, y);
