@@ -1495,7 +1495,6 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 
 	if (o == kEmpty)
 	{
-		exitLoc = -1;
 		std::vector<int>::iterator tor = std::find(fruit.begin(), fruit.end(), GetIndex(x, y));
 		if (tor != fruit.end())
 		{
@@ -1504,10 +1503,35 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 			//fruit.insert(fruit.begin() + index, fruit.back());
 			//fruit.resize(fruit.size()-1);t
 		}
+		/*
+		
+		*/
+		if ((GetIndex(x, y) == portal1Loc))
+		{
+			portal1Loc = -1;
+			std:: cout << "atttaaa boiii " << o;
+		}
+		if ((GetIndex(x, y) == portal2Loc))
+		{
+			portal2Loc = -1;
+			std:: cout << "jackkkayyyy " << o;
+		}
 	}
 
-	
+	if (o == kPortal) //figure out where the portal goes
+	{
+		if ((portal2Loc == -1) && (GetIndex(x, y) != portal1Loc))
+		{
+			portal2Loc = GetIndex(x, y);
+		}
+		if ((portal1Loc == -1) && (GetIndex(x, y) != portal2Loc))
+		{
+			portal1Loc = GetIndex(x, y);
+		}
+	}
 	if (o == kExit)
+	{
+		exitLoc = -1;
 		exitLoc = GetIndex(x, y);
 	if (o == kFruit)
 	{

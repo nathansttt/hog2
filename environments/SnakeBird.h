@@ -202,6 +202,7 @@ enum SnakeBirdWorldObject : uint8_t {
 	kExit   = 0x82,
 	kPortal1= 0x83,
 	kPortal2= 0x84,
+	kPortal, //figure out where the portals go
 
 	// cannot ever enter
 	kGround = 0x40,
