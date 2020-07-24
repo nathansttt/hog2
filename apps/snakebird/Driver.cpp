@@ -1244,21 +1244,7 @@ void ChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kSpikes:
-				{
-					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kGround);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				}
 				case SnakeBird::kEmpty:
-				{
-					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kGround);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				}
 				case SnakeBird::kFruit:
 				{
 					sb.BeginEditing();
@@ -1278,16 +1264,11 @@ void ChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kGround:
-				{
-					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kSpikes);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				}
 				case SnakeBird::kEmpty:
+				case SnakeBird::kFruit:
 				{
 					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.SetGroundType(x, y, SnakeBird::kSpikes);
 					sb.EndEditing();
 					gRefreshBackground = true;
@@ -1303,22 +1284,11 @@ void ChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kSpikes:
-				{
-					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kEmpty);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				}
 				case SnakeBird::kGround:
-				{
-					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kEmpty);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				}
 				case SnakeBird::kFruit:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kExit:
 				{
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
@@ -1344,22 +1314,7 @@ void ChangeMap(int x, int y)
 					break;
 				}
 				case SnakeBird::kEmpty:
-				{
-					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kFruit);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				}
 				case SnakeBird::kGround:
-				{
-					sb.BeginEditing();
-					sb.SetGroundType(x, y, SnakeBird::kEmpty);
-					sb.SetGroundType(x, y, SnakeBird::kFruit);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				}
 				case SnakeBird::kSpikes:
 				{
 					sb.BeginEditing();
@@ -1400,27 +1355,25 @@ void ChangeMap(int x, int y)
 		}
 		case kPortal:
 		{
-				switch (renderedType)
+			switch (renderedType)
+			{
+				case SnakeBird::kPortal:
 				{
-					case SnakeBird::kPortal:
-					{
-						sb.BeginEditing();
-						sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
-						sb.EndEditing();
-						gRefreshBackground = true;
-						break;
-					}
-					case SnakeBird::kEmpty:
-					{
-						sb.BeginEditing();
-						sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kExit);
-						sb.EndEditing();
-						gRefreshBackground = true;
-						break;
-					}
-					default:
-						break;
+					sb.BeginEditing();
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
 				}
+				default:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kPortal);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
+			}
 		}
 			default:
 			break;
@@ -1451,6 +1404,10 @@ bool CanChangeMap(int x, int y)
 		{
 			switch (renderedType)
 			{
+				case SnakeBird::kPortal:
+				case SnakeBird::kPortal1:
+				case SnakeBird::kPortal2:
+				case SnakeBird::kFruit:
 				case SnakeBird::kSpikes:
 				case SnakeBird::kGround:
 					return true;
@@ -1505,7 +1462,7 @@ bool CanChangeMap(int x, int y)
 					break;
 			}
 		}
-		case kPortal1:
+		case kPortal:
 		{
 			switch (renderedType)
 			{

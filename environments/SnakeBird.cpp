@@ -1486,61 +1486,63 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 		return;
 	}
 	
+	if (o == kPortal)
+	{
+		if ((portal1Loc == -1) || (portal1Loc == GetIndex(x, y)))
+		{
+			o = kPortal1;
+		}
+		else if ((portal2Loc == -1) || (portal2Loc == GetIndex(x, y)))
+		{
+			o = kPortal2;
+		}
+		else {
+			printf("error cannot determine portal type");
+			return;
+		}
+	}
+	auto oldTerrainType = world[GetIndex(x, y)];
 	world[GetIndex(x, y)] = o;
 	// TODO: IF old ground was fruit, find it in the fruit array and remove it by
 	// taking the last item out of the array  and putting it in place of the one removed,
 	// and then shrinking the size by one. -> resize(size()-1)
 	
 	// TODO: If old type was the exit, reset the exit location to -1.
-
-	if (o == kEmpty)
+	
+	if (oldTerrainType == kFruit)
 	{
 		std::vector<int>::iterator tor = std::find(fruit.begin(), fruit.end(), GetIndex(x, y));
 		if (tor != fruit.end())
 		{
-			int index = std::distance(fruit.begin(), tor);
-			fruit.erase(fruit.begin() + index);
-			//fruit.insert(fruit.begin() + index, fruit.back());
-			//fruit.resize(fruit.size()-1);t
-		}
-		/*
-		
-		*/
-		if ((GetIndex(x, y) == portal1Loc))
-		{
-			portal1Loc = -1;
-			std:: cout << "atttaaa boiii " << o;
-		}
-		if ((GetIndex(x, y) == portal2Loc))
-		{
-			portal2Loc = -1;
-			std:: cout << "jackkkayyyy " << o;
+			fruit.erase(tor);
 		}
 	}
-
-	if (o == kPortal) //figure out where the portal goes
-	{
-		if ((portal2Loc == -1) && (GetIndex(x, y) != portal1Loc))
-		{
-			portal2Loc = GetIndex(x, y);
-		}
-		if ((portal1Loc == -1) && (GetIndex(x, y) != portal2Loc))
-		{
-			portal1Loc = GetIndex(x, y);
-		}
-	}
+	if (o == kFruit)
+		fruit.push_back(GetIndex(x, y));
+	if (oldTerrainType == kExit)
+		exitLoc = -1;
 	if (o == kExit)
 	{
-		exitLoc = -1;
+		if (exitLoc != -1 && exitLoc != GetIndex(x, y))
+			world[exitLoc] = kEmpty;
 		exitLoc = GetIndex(x, y);
-	if (o == kFruit)
-	{
-		fruit.push_back(GetIndex(x, y));
 	}
 	if (o == kPortal1)
+	{
+		if (portal1Loc != -1 && portal1Loc != GetIndex(x, y))
+			world[portal1Loc] = kEmpty;
 		portal1Loc = GetIndex(x, y);
+	}
 	if (o == kPortal2)
+	{
+		if (portal2Loc != -1 && portal2Loc != GetIndex(x, y))
+			world[portal2Loc] = kEmpty;
 		portal2Loc = GetIndex(x, y);
+	}
+	if (oldTerrainType == kPortal1)
+		portal1Loc = -1;
+	if (oldTerrainType == kPortal2)
+		portal2Loc = -1;
 }
 
 int SnakeBird::GetFruitOffset(int index) const
