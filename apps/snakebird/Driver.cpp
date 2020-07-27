@@ -82,6 +82,7 @@ LineTransition transition(20, 60, Colors::white);
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
 SnakeBird::SnakeBirdState lastFrameSnake;
+SnakeBird::SnakeBird editor(11, 11);
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
@@ -468,12 +469,30 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		worldClock.StartTimer();
 		lastFrameStart = worldClock.GetElapsedTime();
+
+		editor.BeginEditing();
+		editor.SetGroundType(1, 1, SnakeBird::kGround);
+		editor.SetGroundType(1, 3, SnakeBird::kSpikes);
+		editor.SetGroundType(1, 5, SnakeBird::kPortal1);
+		editor.SetGroundType(1, 5, SnakeBird::kPortal2);
+		editor.SetGroundType(1, 7, SnakeBird::kFruit);
+		editor.SetGroundType(1, 9, SnakeBird::kExit);
+		editor.EndEditing();
 	}
 }
 
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	if (viewport == 1)
+	{
+		Graphics::Display &d = GetContext(windowID)->display;
+		editor.Draw(d);
+		editor.Draw(d, globalTime);
+		editor.Draw(d, editor.GetStart());
+		return;
+	}
+	
 	frameRate = worldClock.EndTimer()-lastFrameStart;
 	lastFrameStart = worldClock.EndTimer();
 	if (recording)
@@ -950,12 +969,15 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 				message = "Editing mode enabled.";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
+				ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
+				AddViewport(windowID, {0.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare); // (will be editor)
 			}
 			else {
 				message = "Editing mode disabled.";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditMap = false;
+				ReinitViewports(windowID, {-1.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare);
 			}
 		}
 			break;
@@ -1106,8 +1128,14 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 	}
 }
 
-bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEventType e)
+bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonType , tMouseEventType e)
 {
+	if (viewport == 1)
+	{
+		gMouseX = -1;
+		gMouseY = -1;
+		return true;
+	}
 	if (e == kMouseDrag && gEditMap == true) // ignore movement with mouse button down
 	{
 		int x, y;
