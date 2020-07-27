@@ -9,7 +9,7 @@
 #include "SnakeBird.h"
 #include <fstream>
 #include <cmath>
-using namespace std;
+#include <algorithm>
 
 namespace SnakeBird {
 
@@ -130,7 +130,7 @@ bool SnakeBird::Load(const char *filename)
 {
 	BeginEditing();
 	
-	ifstream infile;
+	std::ifstream infile;
 	infile.open(filename);
 	if (infile.fail()) {
 		printf("File could not be opened.");
@@ -251,7 +251,7 @@ bool SnakeBird::Load(const char *filename)
 		return  true;
 	}
 	else {
-		cout << "Error loading level.";
+		std::cout << "Error loading level.";
 		EndEditing();
 		return false;
 	}	
