@@ -82,7 +82,7 @@ LineTransition transition(20, 60, Colors::white);
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
 SnakeBird::SnakeBirdState lastFrameSnake;
-SnakeBird::SnakeBird editor(11, 11);
+SnakeBird::SnakeBird editor(13, 13);
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
@@ -471,12 +471,12 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		lastFrameStart = worldClock.GetElapsedTime();
 
 		editor.BeginEditing();
-		editor.SetGroundType(1, 1, SnakeBird::kGround);
-		editor.SetGroundType(1, 3, SnakeBird::kSpikes);
-		editor.SetGroundType(1, 5, SnakeBird::kPortal1);
-		editor.SetGroundType(1, 5, SnakeBird::kPortal2);
-		editor.SetGroundType(1, 7, SnakeBird::kFruit);
-		editor.SetGroundType(1, 9, SnakeBird::kExit);
+		editor.SetGroundType(1, 3, SnakeBird::kGround);
+		editor.SetGroundType(1, 5, SnakeBird::kSpikes);
+		editor.SetGroundType(1, 7, SnakeBird::kPortal1);
+		editor.SetGroundType(1, 7, SnakeBird::kPortal2);
+		editor.SetGroundType(1, 9, SnakeBird::kFruit);
+		editor.SetGroundType(1, 11, SnakeBird::kExit);
 		editor.EndEditing();
 	}
 }
@@ -487,9 +487,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (viewport == 1)
 	{
 		Graphics::Display &d = GetContext(windowID)->display;
-		editor.Draw(d);
-		editor.Draw(d, globalTime);
-		editor.Draw(d, editor.GetStart());
+		d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
+		//editor.Draw(d);
+		editor.DrawObjects(d, globalTime);
+//		editor.Draw(d, editor.GetStart());
+		editor.DrawLabel(d, 1, 1, "Edit Ground Types");
+		editor.DrawLabel(d, 2, 3, "Ground");
+		editor.DrawLabel(d, 2, 5, "Spikes");
+		editor.DrawLabel(d, 2, 7, "Portal");
+		editor.DrawLabel(d, 2, 9, "Fruit");
+		editor.DrawLabel(d, 2, 11, "Exit");
 		return;
 	}
 	
@@ -554,14 +561,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 	if (gEditMap == true)
 	{
-		//if (gMouseX != -1 && gMouseY != -1)
 		if (CanChangeMap(gMouseX, gMouseY) == true)
 		{
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
-		else
-		{
+		else if (gMouseX != -1 && gMouseY != -1) {
 			sb.SetColor(Colors::gray);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
@@ -587,6 +592,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		transition.Reset(0);
 	}
 	
+	d.FillRect({-2, -2, 2, -1}, Colors::black);
+	d.FillRect({-2, 1, 2, 2}, Colors::black);
+	d.FillRect({-2, -2, -1, 2}, Colors::black);
+	d.FillRect({1, -2, 2, 2}, Colors::black);
+
 	if (recording)
 	{
 		std::string fname = "/Users/nathanst/Movies/tmp/sb_";
