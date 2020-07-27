@@ -304,6 +304,7 @@ public:
 	
 
 	void Draw(Graphics::Display &display) const;
+	void DrawObjects(Graphics::Display &display, double time = 0) const;
 	void Draw(Graphics::Display &display, int x, int y) const;
 	void Draw(Graphics::Display &display, double time) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
@@ -312,7 +313,8 @@ public:
 	void Draw(Graphics::Display &display, const SnakeBirdState&, const SnakeBirdState&,
 			  int active, double percentComplete, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
-
+	void DrawLabel(Graphics::Display &display, int x, int y, const char *str);
+	
 	// Allows us to draw text overlay
 	float GetRadius() const;
 	bool GetPointFromCoordinate(Graphics::point p, int &x, int &y);

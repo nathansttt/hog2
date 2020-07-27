@@ -9,7 +9,7 @@
 #include "SnakeBird.h"
 #include <fstream>
 #include <cmath>
-using namespace std;
+#include <algorithm>
 
 namespace SnakeBird {
 
@@ -130,7 +130,7 @@ bool SnakeBird::Load(const char *filename)
 {
 	BeginEditing();
 	
-	ifstream infile;
+	std::ifstream infile;
 	infile.open(filename);
 	if (infile.fail()) {
 		printf("File could not be opened.");
@@ -251,7 +251,7 @@ bool SnakeBird::Load(const char *filename)
 		return  true;
 	}
 	else {
-		cout << "Error loading level.";
+		std::cout << "Error loading level.";
 		EndEditing();
 		return false;
 	}	
@@ -1638,6 +1638,88 @@ void SnakeBird::Draw(Graphics::Display &display) const
 	}
 }
 
+void SnakeBird::DrawObjects(Graphics::Display &display, double time) const
+{
+	for (int x = 0; x < width*height; x++)
+	{
+		Graphics::point p = GetCenter(GetX(x), GetY(x));
+		double radius = GetRadius()*0.95;
+		switch (world[x])
+		{
+			case kEmpty:
+				break;//display.FillSquare(p, GetRadius(), Colors::lightblue);  break;
+			case kGround:
+				display.FillSquare(p, GetRadius(), Colors::brown); break;
+				break;
+			case kSpikes:
+				if (GetY(x) != height-1)
+				{
+					display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+					display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+				}
+				break;
+			case kPortal1:
+			case kPortal2:
+			{
+				double radius = GetRadius()*0.95;
+				Graphics::point p = GetCenter(GetX(x), GetY(x));
+				double offset1 = (sin(time*1.0)); // -1...+1
+				double offset2 = (sin(time*1.5)); // -1...+1
+				double offset3 = (sin(time*2.0)); // -1...+1
+				double offset4 = (sin(time*2.5)); // -1...+1
+				display.FillCircle(p, radius+offset1*radius*0.25, Colors::red);
+				display.FillCircle(p, radius*0.75+offset2*radius*0.2, Colors::blue);
+				display.FillCircle(p, radius*0.5+offset3*radius*0.15, Colors::green);
+				display.FillCircle(p, radius*0.25+offset4*radius*0.1, Colors::purple);
+			}
+				break;
+			case kFruit:
+			{
+				const float rows = 5;
+				const float counts[] = {3, 4, 3, 2, 1};
+				Graphics::point p = GetCenter(GetX(x), GetY(x));
+				float grapeRadius = GetRadius()*0.15f;
+				for (int t = 0; t < rows; t++)
+				{
+					for (int v = 0; v < counts[t]; v++)
+					{
+						Graphics::point tmp = p;
+						tmp.y -= rows*grapeRadius;
+						tmp.y += 2*t*grapeRadius;
+						tmp.x = tmp.x-grapeRadius*(counts[t]-1)+v*grapeRadius*2;
+						tmp.x += sin(time*1.1+(t+v)*0.1)*GetRadius()*0.1;
+						tmp.y += cos(time*0.95+(t+v)*0.1)*GetRadius()*0.1;
+						display.FillCircle(tmp, grapeRadius*1.1, Colors::purple*sin(time*1.95+v+t));
+					}
+				}
+			}
+				break;
+			case kExit:
+			{
+				Graphics::point p = GetCenter(GetX(exitLoc), GetY(exitLoc));
+				double radius = GetRadius()*0.95;
+				double localTime = time;
+//				if (s.KFruitEaten(fruit.size()))
+//				{
+//					radius = radius+0.25*radius*(1+sin(time*2.5));
+//					localTime *= 2.0;
+//				}
+//				else {
+				localTime /= 4.0;
+//				}
+				double offset1 = (sin(localTime*1.0))*180; // -1...+1
+				double offset2 = (sin(localTime*1.5))*180; // -1...+1
+				double offset3 = (sin(localTime*2.0))*180; // -1...+1
+				display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
+				display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
+				display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
+				break;
+			}
+			default: break;
+		}
+	}
+}
+
 void SnakeBird::Draw(Graphics::Display &display, double time) const
 {
 	for (int x = -2; x <= width+1; x++)
@@ -2158,6 +2240,11 @@ void SnakeBird::DrawSnakeSegment(Graphics::Display &display, Graphics::point p, 
 //		display.FillNGon(p, GetRadius()*0.95, 3, 60, Colors::gray*0.75f);
 //		return;
 //	}
+}
+
+void SnakeBird::DrawLabel(Graphics::Display &display, int x, int y, const char *str)
+{
+	display.DrawText(str, GetCenter(x, y), GetColor(), GetRadius()*1.5, Graphics::textAlignLeft, Graphics::textBaselineMiddle);
 }
 
 

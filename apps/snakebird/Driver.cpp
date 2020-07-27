@@ -82,6 +82,7 @@ LineTransition transition(20, 60, Colors::white);
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
 SnakeBird::SnakeBirdState lastFrameSnake;
+SnakeBird::SnakeBird editor(13, 13);
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
@@ -468,12 +469,37 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		worldClock.StartTimer();
 		lastFrameStart = worldClock.GetElapsedTime();
+
+		editor.BeginEditing();
+		editor.SetGroundType(1, 3, SnakeBird::kGround);
+		editor.SetGroundType(1, 5, SnakeBird::kSpikes);
+		editor.SetGroundType(1, 7, SnakeBird::kPortal1);
+		editor.SetGroundType(1, 7, SnakeBird::kPortal2);
+		editor.SetGroundType(1, 9, SnakeBird::kFruit);
+		editor.SetGroundType(1, 11, SnakeBird::kExit);
+		editor.EndEditing();
 	}
 }
 
 
 void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
+	if (viewport == 1)
+	{
+		Graphics::Display &d = GetContext(windowID)->display;
+		d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
+		//editor.Draw(d);
+		editor.DrawObjects(d, globalTime);
+//		editor.Draw(d, editor.GetStart());
+		editor.DrawLabel(d, 1, 1, "Edit Ground Types");
+		editor.DrawLabel(d, 2, 3, "Ground");
+		editor.DrawLabel(d, 2, 5, "Spikes");
+		editor.DrawLabel(d, 2, 7, "Portal");
+		editor.DrawLabel(d, 2, 9, "Fruit");
+		editor.DrawLabel(d, 2, 11, "Exit");
+		return;
+	}
+	
 	frameRate = worldClock.EndTimer()-lastFrameStart;
 	lastFrameStart = worldClock.EndTimer();
 	if (recording)
@@ -535,14 +561,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 	if (gEditMap == true)
 	{
-		//if (gMouseX != -1 && gMouseY != -1)
 		if (CanChangeMap(gMouseX, gMouseY) == true)
 		{
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
-		else
-		{
+		else if (gMouseX != -1 && gMouseY != -1) {
 			sb.SetColor(Colors::gray);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
@@ -568,6 +592,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		transition.Reset(0);
 	}
 	
+	d.FillRect({-2, -2, 2, -1}, Colors::black);
+	d.FillRect({-2, 1, 2, 2}, Colors::black);
+	d.FillRect({-2, -2, -1, 2}, Colors::black);
+	d.FillRect({1, -2, 2, 2}, Colors::black);
+
 	if (recording)
 	{
 		std::string fname = "/Users/nathanst/Movies/tmp/sb_";
@@ -950,12 +979,15 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 				message = "Editing mode enabled.";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
+				ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
+				AddViewport(windowID, {0.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare); // (will be editor)
 			}
 			else {
 				message = "Editing mode disabled.";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditMap = false;
+				ReinitViewports(windowID, {-1.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare);
 			}
 		}
 			break;
@@ -1106,8 +1138,14 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 	}
 }
 
-bool MyClickHandler(unsigned long, int, int, point3d p, tButtonType , tMouseEventType e)
+bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonType , tMouseEventType e)
 {
+	if (viewport == 1)
+	{
+		gMouseX = -1;
+		gMouseY = -1;
+		return true;
+	}
 	if (e == kMouseDrag && gEditMap == true) // ignore movement with mouse button down
 	{
 		int x, y;
