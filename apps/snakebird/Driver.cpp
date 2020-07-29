@@ -43,6 +43,8 @@ bool gRefreshBackground = true;
 bool gEditMap = false;
 int gMouseX = -1;
 int gMouseY = -1;
+int gMouseEditorX = -1;
+int gMouseEditorY = -1;
 
 enum EditorMode {
 	// can always enter, but may have secondary effects
@@ -493,10 +495,30 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //		editor.Draw(d, editor.GetStart());
 		editor.DrawLabel(d, 1, 1, "Edit Ground Types");
 		editor.DrawLabel(d, 2, 3, "Ground");
+		if (gMouseEditorY == 3)
+		{
+			EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+		}
 		editor.DrawLabel(d, 2, 5, "Spikes");
+		if (gMouseEditorY == 5)
+		{
+			EditorKeyBoardHandler(windowID, kNoModifier, 's');
+		}
 		editor.DrawLabel(d, 2, 7, "Portal");
+		if (gMouseEditorY == 7)
+		{
+			EditorKeyBoardHandler(windowID, kNoModifier, 'p');
+		}
 		editor.DrawLabel(d, 2, 9, "Fruit");
+		if (gMouseEditorY == 9)
+		{
+			EditorKeyBoardHandler(windowID, kNoModifier, 'f');
+		}
 		editor.DrawLabel(d, 2, 11, "Exit");
+		if (gMouseEditorY == 11)
+		{
+			EditorKeyBoardHandler(windowID, kNoModifier, 'x');
+		}
 		return;
 	}
 	
@@ -1144,6 +1166,11 @@ bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonTyp
 	{
 		gMouseX = -1;
 		gMouseY = -1;
+		int x,y;
+		editor.GetPointFromCoordinate(p, x, y);
+		gMouseEditorX = x;
+		gMouseEditorY = y;
+		std:: cout << "jackkkayyyy " << gMouseEditorX;
 		return true;
 	}
 	if (e == kMouseDrag && gEditMap == true) // ignore movement with mouse button down
@@ -1281,6 +1308,14 @@ void ChangeMap(int x, int y)
 		{
 			switch (renderedType)
 			{
+				case SnakeBird::kGround:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
 				case SnakeBird::kSpikes:
 				case SnakeBird::kEmpty:
 				case SnakeBird::kFruit:
@@ -1301,6 +1336,14 @@ void ChangeMap(int x, int y)
 		{
 			switch (renderedType)
 			{
+				case SnakeBird::kSpikes:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
 				case SnakeBird::kGround:
 				case SnakeBird::kEmpty:
 				case SnakeBird::kFruit:
