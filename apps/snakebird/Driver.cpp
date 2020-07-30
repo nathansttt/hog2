@@ -45,6 +45,8 @@ int gMouseX = -1;
 int gMouseY = -1;
 int gMouseEditorX = -1;
 int gMouseEditorY = -1;
+int gClicked = 0;
+int gChange = 0;
 
 enum EditorMode {
 	// can always enter, but may have secondary effects
@@ -492,33 +494,89 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
 		//editor.Draw(d);
 		editor.DrawObjects(d, globalTime);
-//		editor.Draw(d, editor.GetStart());
+		//editor.Draw(d, editor.GetStart());
+		editor.SetColor(Colors::black);
 		editor.DrawLabel(d, 1, 1, "Edit Ground Types");
-		editor.DrawLabel(d, 2, 3, "Ground");
 		if (gMouseEditorY == 3)
 		{
-			EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+			editor.SetColor(Colors::cyan);
+			if (gClicked == 1)
+			{
+				EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+			}
 		}
-		editor.DrawLabel(d, 2, 5, "Spikes");
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gChange == 1)
+		{
+		editor.SetColor(Colors::cyan);
+		}
+		editor.DrawLabel(d, 2, 3, "Ground");
 		if (gMouseEditorY == 5)
 		{
-			EditorKeyBoardHandler(windowID, kNoModifier, 's');
+			editor.SetColor(Colors::cyan);
+			if (gClicked == 1)
+			{
+				EditorKeyBoardHandler(windowID, kNoModifier, 's');
+			}
 		}
-		editor.DrawLabel(d, 2, 7, "Portal");
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gChange == 2)
+		{
+		editor.SetColor(Colors::cyan);
+		}
+		editor.DrawLabel(d, 2, 5, "Spikes");
 		if (gMouseEditorY == 7)
 		{
-			EditorKeyBoardHandler(windowID, kNoModifier, 'p');
+			editor.SetColor(Colors::cyan);
+			if (gClicked == 1)
+			{
+				EditorKeyBoardHandler(windowID, kNoModifier, 'p');
+			}
 		}
-		editor.DrawLabel(d, 2, 9, "Fruit");
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gChange == 3)
+		{
+		editor.SetColor(Colors::cyan);
+		}
+		editor.DrawLabel(d, 2, 7, "Portal");
 		if (gMouseEditorY == 9)
 		{
-			EditorKeyBoardHandler(windowID, kNoModifier, 'f');
+			editor.SetColor(Colors::cyan);
+			if (gClicked == 1)
+			{
+				EditorKeyBoardHandler(windowID, kNoModifier, 'f');
+			}
 		}
-		editor.DrawLabel(d, 2, 11, "Exit");
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gChange == 4)
+		{
+		editor.SetColor(Colors::cyan);
+		}
+		editor.DrawLabel(d, 2, 9, "Fruit");
 		if (gMouseEditorY == 11)
 		{
-			EditorKeyBoardHandler(windowID, kNoModifier, 'x');
+			editor.SetColor(Colors::cyan);
+			if (gClicked == 1)
+			{
+				EditorKeyBoardHandler(windowID, kNoModifier, 'x');
+			}
 		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gChange == 6)
+		{
+		editor.SetColor(Colors::cyan);
+		}
+		editor.DrawLabel(d, 2, 11, "Exit");
 		return;
 	}
 	
@@ -1050,28 +1108,36 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 		switch (key)
 		{
 			case 'f': //fruit
+				gClicked = 0;
 				message = "Editing Mode: Adding Fruit";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kFruit;
+				gChange = 4;
 				break;
 			case 'x': //exit
+				gClicked = 0;
 				message = "Editing Mode: Moving the Exit";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kExit;
+				gChange = 6;
 				break;
 			case 'g': //ground
+				gClicked = 0;
 				message = "Editing Mode: Changing the Ground";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kGround;
+				gChange = 1;
 				break;
 			case 's': //spikes
+				gClicked = 0;
 				message = "Editing Mode: Changing Spikes";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kSpikes;
+				gChange = 2;
 				break;
 			case 'r': //sky
 				message = "Editing Mode: Changing the Sky";
@@ -1080,10 +1146,12 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 				gEditorMode = kEmpty;
 				break;
 			case 'p': //portal
+				gClicked = 0;
 				message = "Editing Mode: Changing Portals";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kPortal;
+				gChange = 3;
 				break;
 			case 'b':
 				message = "Editing Mode: Changing Blocks";
@@ -1170,10 +1238,14 @@ bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonTyp
 		editor.GetPointFromCoordinate(p, x, y);
 		gMouseEditorX = x;
 		gMouseEditorY = y;
-		std:: cout << "jackkkayyyy " << gMouseEditorX;
+		std:: cout << " jackkkayyyy" << gMouseEditorY;
+		std:: cout << " maydayyyy" << gMouseEditorX;
+		if (e == kMouseDown)
+			gClicked = 1;
+			std:: cout << " show it off" << gClicked;
 		return true;
 	}
-	if (e == kMouseDrag && gEditMap == true) // ignore movement with mouse button down
+	if ((e == kMouseDrag) && (gEditMap == true)) // ignore movement with mouse button down
 	{
 		int x, y;
 		if (sb.GetPointFromCoordinate(p, x, y))
@@ -1186,7 +1258,6 @@ bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonTyp
 			gMouseX = -1;
 			gMouseY = -1;
 		}
-
 		return true;
 	}
 
