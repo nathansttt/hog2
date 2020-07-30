@@ -1434,7 +1434,7 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 		printf("Error - cannot add terrain at bottom of map\n");
 		return;
 	}
-		
+	
 	if ((o&kBlockMask) == kBlockMask) // are you adding a moveable block?
 	{
 		int which = -1;
@@ -1539,10 +1539,16 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 			world[portal2Loc] = kEmpty;
 		portal2Loc = GetIndex(x, y);
 	}
-	if (oldTerrainType == kPortal1)
+	if (oldTerrainType == kPortal1 && portal1Loc == GetIndex(x, y))
+	{
+		world[portal1Loc] = kEmpty;
 		portal1Loc = -1;
-	if (oldTerrainType == kPortal2)
+	}
+	if (oldTerrainType == kPortal2 && portal2Loc == GetIndex(x, y))
+	{
+		world[portal2Loc] = kEmpty;
 		portal2Loc = -1;
+	}
 }
 
 int SnakeBird::GetFruitOffset(int index) const

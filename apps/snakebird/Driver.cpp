@@ -478,7 +478,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		editor.SetGroundType(1, 3, SnakeBird::kGround);
 		editor.SetGroundType(1, 5, SnakeBird::kSpikes);
 		editor.SetGroundType(1, 7, SnakeBird::kPortal1);
-		editor.SetGroundType(1, 7, SnakeBird::kPortal2);
 		editor.SetGroundType(1, 9, SnakeBird::kFruit);
 		editor.SetGroundType(1, 11, SnakeBird::kExit);
 		editor.EndEditing();
@@ -495,12 +494,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		//editor.Draw(d);
 		editor.DrawObjects(d, globalTime);
 		//editor.Draw(d, editor.GetStart());
-		editor.SetColor(Colors::black);
+		editor.SetColor(Colors::black); //keep the title black
 		editor.DrawLabel(d, 1, 1, "Edit Ground Types");
 		if (gMouseEditorY == 3)
 		{
 			editor.SetColor(Colors::cyan);
-			if (gClicked == 1)
+			//rectangle (200,200,300,300);
+			if (gClicked == 1)//ground
 			{
 				EditorKeyBoardHandler(windowID, kNoModifier, 'g');
 			}
@@ -513,7 +513,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		editor.SetColor(Colors::cyan);
 		}
 		editor.DrawLabel(d, 2, 3, "Ground");
-		if (gMouseEditorY == 5)
+		if (gMouseEditorY == 5) //spikes
 		{
 			editor.SetColor(Colors::cyan);
 			if (gClicked == 1)
@@ -529,11 +529,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		editor.SetColor(Colors::cyan);
 		}
 		editor.DrawLabel(d, 2, 5, "Spikes");
-		if (gMouseEditorY == 7)
+		if (gMouseEditorY == 7)//portal
 		{
 			editor.SetColor(Colors::cyan);
 			if (gClicked == 1)
 			{
+				EditorKeyBoardHandler(windowID, kNoModifier, 'r');
 				EditorKeyBoardHandler(windowID, kNoModifier, 'p');
 			}
 		}
@@ -545,7 +546,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		editor.SetColor(Colors::cyan);
 		}
 		editor.DrawLabel(d, 2, 7, "Portal");
-		if (gMouseEditorY == 9)
+		if (gMouseEditorY == 9)//fruit
 		{
 			editor.SetColor(Colors::cyan);
 			if (gClicked == 1)
@@ -561,7 +562,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		editor.SetColor(Colors::cyan);
 		}
 		editor.DrawLabel(d, 2, 9, "Fruit");
-		if (gMouseEditorY == 11)
+		if (gMouseEditorY == 11)//exit
 		{
 			editor.SetColor(Colors::cyan);
 			if (gClicked == 1)
@@ -645,10 +646,14 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		{
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
+			sb.GetGroundType(gMouseX, gMouseY);
+			sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kSpikes);
 		}
-		else if (gMouseX != -1 && gMouseY != -1) {
-			sb.SetColor(Colors::gray);
-			sb.Draw(d, gMouseX, gMouseY);
+		else
+		{
+		//	sb.SetColor(Colors::gray);
+		//	sb.Draw(d, gMouseX, gMouseY);
+			sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
 		}
 	}
 
@@ -1238,11 +1243,10 @@ bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonTyp
 		editor.GetPointFromCoordinate(p, x, y);
 		gMouseEditorX = x;
 		gMouseEditorY = y;
-		std:: cout << " jackkkayyyy" << gMouseEditorY;
-		std:: cout << " maydayyyy" << gMouseEditorX;
 		if (e == kMouseDown)
+		{
 			gClicked = 1;
-			std:: cout << " show it off" << gClicked;
+		}
 		return true;
 	}
 	if ((e == kMouseDrag) && (gEditMap == true)) // ignore movement with mouse button down
@@ -1543,9 +1547,9 @@ bool CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kSpikes:
 				case SnakeBird::kEmpty:
+				case SnakeBird::kGround:
 					return true;
 					break;
-				case SnakeBird::kGround:
 				default:
 					return false;
 					break;
@@ -1577,9 +1581,9 @@ bool CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kEmpty:
 				case SnakeBird::kGround:
+				case SnakeBird::kSpikes:
 					return true;
 					break;
-				case SnakeBird::kSpikes:
 				default:
 					return false;
 					break;
