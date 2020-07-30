@@ -45,8 +45,6 @@ int gMouseX = -1;
 int gMouseY = -1;
 int gMouseEditorX = -1;
 int gMouseEditorY = -1;
-int gClicked = 0;
-int gChange = 0;
 
 enum EditorMode {
 	// can always enter, but may have secondary effects
@@ -492,92 +490,75 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		Graphics::Display &d = GetContext(windowID)->display;
 		d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
 		//editor.Draw(d);
-		editor.DrawObjects(d, globalTime);
 		//editor.Draw(d, editor.GetStart());
 		editor.SetColor(Colors::black); //keep the title black
 		editor.DrawLabel(d, 1, 1, "Edit Ground Types");
-		if (gMouseEditorY == 3)
+		if (gMouseEditorY == 3) //ground
 		{
 			editor.SetColor(Colors::cyan);
-			//rectangle (200,200,300,300);
-			if (gClicked == 1)//ground
-			{
-				EditorKeyBoardHandler(windowID, kNoModifier, 'g');
-			}
 		}
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gChange == 1)
+		if (gEditorMode == kGround)
 		{
-		editor.SetColor(Colors::cyan);
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 3);
 		}
 		editor.DrawLabel(d, 2, 3, "Ground");
 		if (gMouseEditorY == 5) //spikes
 		{
 			editor.SetColor(Colors::cyan);
-			if (gClicked == 1)
-			{
-				EditorKeyBoardHandler(windowID, kNoModifier, 's');
-			}
 		}
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gChange == 2)
+		if (gEditorMode == kSpikes)
 		{
-		editor.SetColor(Colors::cyan);
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 5);
 		}
 		editor.DrawLabel(d, 2, 5, "Spikes");
-		if (gMouseEditorY == 7)//portal
+		if (gMouseEditorY == 7) //portal
 		{
 			editor.SetColor(Colors::cyan);
-			if (gClicked == 1)
-			{
-				EditorKeyBoardHandler(windowID, kNoModifier, 'r');
-				EditorKeyBoardHandler(windowID, kNoModifier, 'p');
-			}
 		}
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gChange == 3)
+		if (gEditorMode == kPortal)
 		{
-		editor.SetColor(Colors::cyan);
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 7);
 		}
 		editor.DrawLabel(d, 2, 7, "Portal");
-		if (gMouseEditorY == 9)//fruit
+		if (gMouseEditorY == 9) //fruit
 		{
 			editor.SetColor(Colors::cyan);
-			if (gClicked == 1)
-			{
-				EditorKeyBoardHandler(windowID, kNoModifier, 'f');
-			}
 		}
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gChange == 4)
+		if (gEditorMode == kFruit)
 		{
-		editor.SetColor(Colors::cyan);
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 9);
 		}
 		editor.DrawLabel(d, 2, 9, "Fruit");
-		if (gMouseEditorY == 11)//exit
+		if (gMouseEditorY == 11) //exit
 		{
 			editor.SetColor(Colors::cyan);
-			if (gClicked == 1)
-			{
-				EditorKeyBoardHandler(windowID, kNoModifier, 'x');
-			}
 		}
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gChange == 6)
+		if (gEditorMode == kExit)
 		{
-		editor.SetColor(Colors::cyan);
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 11);
 		}
 		editor.DrawLabel(d, 2, 11, "Exit");
+		editor.DrawObjects(d, globalTime);
 		return;
 	}
 	
@@ -1113,36 +1094,28 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 		switch (key)
 		{
 			case 'f': //fruit
-				gClicked = 0;
 				message = "Editing Mode: Adding Fruit";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kFruit;
-				gChange = 4;
 				break;
 			case 'x': //exit
-				gClicked = 0;
 				message = "Editing Mode: Moving the Exit";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kExit;
-				gChange = 6;
 				break;
 			case 'g': //ground
-				gClicked = 0;
 				message = "Editing Mode: Changing the Ground";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kGround;
-				gChange = 1;
 				break;
 			case 's': //spikes
-				gClicked = 0;
 				message = "Editing Mode: Changing Spikes";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kSpikes;
-				gChange = 2;
 				break;
 			case 'r': //sky
 				message = "Editing Mode: Changing the Sky";
@@ -1151,12 +1124,10 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 				gEditorMode = kEmpty;
 				break;
 			case 'p': //portal
-				gClicked = 0;
 				message = "Editing Mode: Changing Portals";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = kPortal;
-				gChange = 3;
 				break;
 			case 'b':
 				message = "Editing Mode: Changing Blocks";
@@ -1233,7 +1204,7 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 	}
 }
 
-bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonType , tMouseEventType e)
+bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, tButtonType , tMouseEventType e)
 {
 	if (viewport == 1)
 	{
@@ -1245,7 +1216,26 @@ bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonTyp
 		gMouseEditorY = y;
 		if (e == kMouseDown)
 		{
-			gClicked = 1;
+			switch (gMouseEditorY)
+			{
+				case 3:
+					EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+					break;
+				case 5:
+					EditorKeyBoardHandler(windowID, kNoModifier, 's');
+					break;
+				case 7:
+					EditorKeyBoardHandler(windowID, kNoModifier, 'p');
+					break;
+				case 9:
+					EditorKeyBoardHandler(windowID, kNoModifier, 'f');
+					break;
+				case 11:
+					EditorKeyBoardHandler(windowID, kNoModifier, 'x');
+					break;
+				default:
+					break;
+			}
 		}
 		return true;
 	}
