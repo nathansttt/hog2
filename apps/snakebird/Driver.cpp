@@ -43,6 +43,8 @@ bool gRefreshBackground = true;
 bool gEditMap = false;
 int gMouseX = -1;
 int gMouseY = -1;
+int gMouseEditorX = -1;
+int gMouseEditorY = -1;
 
 enum EditorMode {
 	// can always enter, but may have secondary effects
@@ -474,7 +476,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		editor.SetGroundType(1, 3, SnakeBird::kGround);
 		editor.SetGroundType(1, 5, SnakeBird::kSpikes);
 		editor.SetGroundType(1, 7, SnakeBird::kPortal1);
-		editor.SetGroundType(1, 7, SnakeBird::kPortal2);
 		editor.SetGroundType(1, 9, SnakeBird::kFruit);
 		editor.SetGroundType(1, 11, SnakeBird::kExit);
 		editor.EndEditing();
@@ -489,14 +490,75 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		Graphics::Display &d = GetContext(windowID)->display;
 		d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
 		//editor.Draw(d);
-		editor.DrawObjects(d, globalTime);
-//		editor.Draw(d, editor.GetStart());
+		//editor.Draw(d, editor.GetStart());
+		editor.SetColor(Colors::black); //keep the title black
 		editor.DrawLabel(d, 1, 1, "Edit Ground Types");
+		if (gMouseEditorY == 3) //ground
+		{
+			editor.SetColor(Colors::cyan);
+		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gEditorMode == kGround)
+		{
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 3);
+		}
 		editor.DrawLabel(d, 2, 3, "Ground");
+		if (gMouseEditorY == 5) //spikes
+		{
+			editor.SetColor(Colors::cyan);
+		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gEditorMode == kSpikes)
+		{
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 5);
+		}
 		editor.DrawLabel(d, 2, 5, "Spikes");
+		if (gMouseEditorY == 7) //portal
+		{
+			editor.SetColor(Colors::cyan);
+		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gEditorMode == kPortal)
+		{
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 7);
+		}
 		editor.DrawLabel(d, 2, 7, "Portal");
+		if (gMouseEditorY == 9) //fruit
+		{
+			editor.SetColor(Colors::cyan);
+		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gEditorMode == kFruit)
+		{
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 9);
+		}
 		editor.DrawLabel(d, 2, 9, "Fruit");
+		if (gMouseEditorY == 11) //exit
+		{
+			editor.SetColor(Colors::cyan);
+		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gEditorMode == kExit)
+		{
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 1, 11);
+		}
 		editor.DrawLabel(d, 2, 11, "Exit");
+		editor.DrawObjects(d, globalTime);
 		return;
 	}
 	
@@ -565,10 +627,14 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		{
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
+			sb.GetGroundType(gMouseX, gMouseY);
+			sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kSpikes);
 		}
-		else if (gMouseX != -1 && gMouseY != -1) {
-			sb.SetColor(Colors::gray);
-			sb.Draw(d, gMouseX, gMouseY);
+		else
+		{
+		//	sb.SetColor(Colors::gray);
+		//	sb.Draw(d, gMouseX, gMouseY);
+			sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
 		}
 	}
 
@@ -1138,15 +1204,42 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 	}
 }
 
-bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonType , tMouseEventType e)
+bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, tButtonType , tMouseEventType e)
 {
 	if (viewport == 1)
 	{
 		gMouseX = -1;
 		gMouseY = -1;
+		int x,y;
+		editor.GetPointFromCoordinate(p, x, y);
+		gMouseEditorX = x;
+		gMouseEditorY = y;
+		if (e == kMouseDown)
+		{
+			switch (gMouseEditorY)
+			{
+				case 3:
+					EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+					break;
+				case 5:
+					EditorKeyBoardHandler(windowID, kNoModifier, 's');
+					break;
+				case 7:
+					EditorKeyBoardHandler(windowID, kNoModifier, 'p');
+					break;
+				case 9:
+					EditorKeyBoardHandler(windowID, kNoModifier, 'f');
+					break;
+				case 11:
+					EditorKeyBoardHandler(windowID, kNoModifier, 'x');
+					break;
+				default:
+					break;
+			}
+		}
 		return true;
 	}
-	if (e == kMouseDrag && gEditMap == true) // ignore movement with mouse button down
+	if ((e == kMouseDrag) && (gEditMap == true)) // ignore movement with mouse button down
 	{
 		int x, y;
 		if (sb.GetPointFromCoordinate(p, x, y))
@@ -1159,7 +1252,6 @@ bool MyClickHandler(unsigned long, int viewport, int, int, point3d p, tButtonTyp
 			gMouseX = -1;
 			gMouseY = -1;
 		}
-
 		return true;
 	}
 
@@ -1281,6 +1373,14 @@ void ChangeMap(int x, int y)
 		{
 			switch (renderedType)
 			{
+				case SnakeBird::kGround:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
 				case SnakeBird::kSpikes:
 				case SnakeBird::kEmpty:
 				case SnakeBird::kFruit:
@@ -1301,6 +1401,14 @@ void ChangeMap(int x, int y)
 		{
 			switch (renderedType)
 			{
+				case SnakeBird::kSpikes:
+				{
+					sb.BeginEditing();
+					sb.SetGroundType(x, y, SnakeBird::kEmpty);
+					sb.EndEditing();
+					gRefreshBackground = true;
+					break;
+				}
 				case SnakeBird::kGround:
 				case SnakeBird::kEmpty:
 				case SnakeBird::kFruit:
@@ -1429,9 +1537,9 @@ bool CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kSpikes:
 				case SnakeBird::kEmpty:
+				case SnakeBird::kGround:
 					return true;
 					break;
-				case SnakeBird::kGround:
 				default:
 					return false;
 					break;
@@ -1463,9 +1571,9 @@ bool CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kEmpty:
 				case SnakeBird::kGround:
+				case SnakeBird::kSpikes:
 					return true;
 					break;
-				case SnakeBird::kSpikes:
 				default:
 					return false;
 					break;
