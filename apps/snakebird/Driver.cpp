@@ -627,14 +627,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		{
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
-			sb.GetGroundType(gMouseX, gMouseY);
-			sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kSpikes);
 		}
 		else
 		{
-		//	sb.SetColor(Colors::gray);
-		//	sb.Draw(d, gMouseX, gMouseY);
-			sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+			sb.SetColor(Colors::gray);
+			sb.Draw(d, gMouseX, gMouseY);
 		}
 	}
 
@@ -1260,7 +1257,7 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		int x, y;
 		if (sb.GetPointFromCoordinate(p, x, y))
 		{
-			printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
+			//printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
 			ChangeMap (x, y);
 			CanChangeMap(x, y);
 		}
