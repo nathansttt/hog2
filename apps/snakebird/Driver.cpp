@@ -45,33 +45,7 @@ int gMouseX = -1;
 int gMouseY = -1;
 int gMouseEditorX = -1;
 int gMouseEditorY = -1;
-
-enum EditorMode {
-	// can always enter, but may have secondary effects
-	kEmpty,
-	kFruit,
-	kExit,
-	kPortal1,
-	kPortal2,
-	kPortal,
-
-	// cannot ever enter
-	kGround,
-	kSpikes,
-
-	// for pushing
-	kBlock1,
-	kBlock2,
-	kBlock3,
-	kBlock4,
-
-	// other snakes
-	kSnake1,
-	kSnake2,
-	kSnake3,
-	kSnake4,
-};
-EditorMode gEditorMode;
+SnakeBird::SnakeBirdWorldObject gEditorMode;
 
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
@@ -85,6 +59,7 @@ SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
 SnakeBird::SnakeBirdState lastFrameSnake;
 SnakeBird::SnakeBird editor(13, 13);
+SnakeBird::SnakeBird editorOverlay;
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
@@ -500,7 +475,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gEditorMode == kGround)
+		if (gEditorMode == SnakeBird::kGround)
 		{
 			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 			editor.Draw(d, 1, 3);
@@ -513,7 +488,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gEditorMode == kSpikes)
+		if (gEditorMode == SnakeBird::kSpikes)
 		{
 			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 			editor.Draw(d, 1, 5);
@@ -526,7 +501,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gEditorMode == kPortal)
+		if (gEditorMode == SnakeBird::kPortal)
 		{
 			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 			editor.Draw(d, 1, 7);
@@ -539,7 +514,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gEditorMode == kFruit)
+		if (gEditorMode == SnakeBird::kFruit)
 		{
 			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 			editor.Draw(d, 1, 9);
@@ -552,7 +527,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		else {
 			editor.SetColor(Colors::black);
 		}
-		if (gEditorMode == kExit)
+		if (gEditorMode == SnakeBird::kExit)
 		{
 			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 			editor.Draw(d, 1, 11);
@@ -625,13 +600,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	{
 		if (CanChangeMap(gMouseX, gMouseY) == true)
 		{
-			sb.SetColor(Colors::yellow);
-			sb.Draw(d, gMouseX, gMouseY);
-		}
-		else
-		{
-			sb.SetColor(Colors::gray);
-			sb.Draw(d, gMouseX, gMouseY);
+			editorOverlay.BeginEditing();
+			editorOverlay.SetGroundType(gMouseX, gMouseY, gEditorMode);
+			editorOverlay.DrawObjects(d);
+			editorOverlay.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+			editorOverlay.DrawObjects(d);
+			editorOverlay.EndEditing();
 		}
 	}
 
@@ -1037,13 +1011,15 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 				// Reset the level
 				GamePlayKeyboardHandler(windowID, kNoModifier, 'r');
 				gEditMap = true;
-				gEditorMode = kGround;
+				gEditorMode = SnakeBird::kGround;
 				gMouseY = gMouseX = -1;
 				message = "Editing mode enabled.";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
 				AddViewport(windowID, {0.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare); // (will be editor)
+				SnakeBird::SnakeBird tmp(sb.GetWidth(), sb.GetHeight());
+				editorOverlay = tmp;
 			}
 			else {
 				message = "Editing mode disabled.";
@@ -1094,59 +1070,59 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 				message = "Editing Mode: Adding Fruit";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				gEditorMode = kFruit;
+				gEditorMode = SnakeBird::kFruit;
 				break;
 			case 'x': //exit
 				message = "Editing Mode: Moving the Exit";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				gEditorMode = kExit;
+				gEditorMode = SnakeBird::kExit;
 				break;
 			case 'g': //ground
 				message = "Editing Mode: Changing the Ground";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				gEditorMode = kGround;
+				gEditorMode = SnakeBird::kGround;
 				break;
 			case 's': //spikes
 				message = "Editing Mode: Changing Spikes";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				gEditorMode = kSpikes;
+				gEditorMode = SnakeBird::kSpikes;
 				break;
 			case 'r': //sky
 				message = "Editing Mode: Changing the Sky";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				gEditorMode = kEmpty;
+				gEditorMode = SnakeBird::kEmpty;
 				break;
 			case 'p': //portal
 				message = "Editing Mode: Changing Portals";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				gEditorMode = kPortal;
+				gEditorMode = SnakeBird::kPortal;
 				break;
 			case 'b':
 				message = "Editing Mode: Changing Blocks";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				gEditorMode = kBlock1;
+				gEditorMode = SnakeBird::kBlock1;
 				break;
 			case 'h': //toggle ground modes
 			{
 				switch (gEditorMode)
 				{
-					case kGround:
+					case SnakeBird::kGround:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 's');
 						break;
 					}
-					case kSpikes:
+					case SnakeBird::kSpikes:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'r');
 						break;
 					}
-					case kEmpty:
+					case SnakeBird::kEmpty:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'g');
 						break;
@@ -1160,32 +1136,32 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 			{
 				switch (gEditorMode)
 				{
-					case kGround:
+					case SnakeBird::kGround:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 's');
 						break;
 					}
-					case kSpikes:
+					case SnakeBird::kSpikes:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'f');
 						break;
 					}
-					case kFruit:
+					case SnakeBird::kFruit:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'x');
 						break;
 					}
-					case kExit:
+					case SnakeBird::kExit:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'r');
 						break;
 					}
-					case kPortal:
+					case SnakeBird::kPortal:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'p');
 						break;
 					}
-					case kEmpty:
+					case SnakeBird::kEmpty:
 					{
 						EditorKeyBoardHandler(windowID, kNoModifier, 'g');
 						break;
@@ -1207,7 +1183,7 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 	{
 		gMouseX = -1;
 		gMouseY = -1;
-		int x,y;
+		int x, y;
 		editor.GetPointFromCoordinate(p, x, y);
 		gMouseEditorX = x;
 		gMouseEditorY = y;
@@ -1366,7 +1342,7 @@ void ChangeMap(int x, int y)
 	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
 	switch (gEditorMode)
 	{
-		case kGround:
+		case SnakeBird::kGround:
 		{
 			switch (renderedType)
 			{
@@ -1394,7 +1370,7 @@ void ChangeMap(int x, int y)
 			}
 			break;
 		}
-		case kSpikes:
+		case SnakeBird::kSpikes:
 		{
 			switch (renderedType)
 			{
@@ -1422,7 +1398,7 @@ void ChangeMap(int x, int y)
 			}
 			break;
 		}
-		case kEmpty:
+		case SnakeBird::kEmpty:
 		{
 			switch (renderedType)
 			{
@@ -1444,7 +1420,7 @@ void ChangeMap(int x, int y)
 			}
 			break;
 		}
-		case kFruit:
+		case SnakeBird::kFruit:
 		{
 			switch (renderedType)
 			{
@@ -1472,7 +1448,7 @@ void ChangeMap(int x, int y)
 			}
 			break;
 		}
-		case kExit:
+		case SnakeBird::kExit:
 		{
 			switch (renderedType)
 			{
@@ -1496,7 +1472,7 @@ void ChangeMap(int x, int y)
 					break;
 			}
 		}
-		case kPortal:
+		case SnakeBird::kPortal:
 		{
 			switch (renderedType)
 			{
@@ -1528,7 +1504,7 @@ bool CanChangeMap(int x, int y)
 	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
 	switch (gEditorMode)
 	{
-		case kGround:
+		case SnakeBird::kGround:
 		{
 			switch (renderedType)
 			{
@@ -1543,7 +1519,7 @@ bool CanChangeMap(int x, int y)
 			}
 			break;
 		}
-		case kEmpty:
+		case SnakeBird::kEmpty:
 		{
 			switch (renderedType)
 			{
@@ -1562,7 +1538,7 @@ bool CanChangeMap(int x, int y)
 			}
 			break;
 		}
-		case kSpikes:
+		case SnakeBird::kSpikes:
 		{
 			switch (renderedType)
 			{
@@ -1577,7 +1553,7 @@ bool CanChangeMap(int x, int y)
 			}
 			break;
 		}
-		case kFruit:
+		case SnakeBird::kFruit:
 		{
 			switch (renderedType)
 			{
@@ -1592,7 +1568,7 @@ bool CanChangeMap(int x, int y)
 					break;
 			}
 		}
-		case kExit:
+		case SnakeBird::kExit:
 		{
 			switch (renderedType)
 			{
@@ -1605,7 +1581,7 @@ bool CanChangeMap(int x, int y)
 					break;
 			}
 		}
-		case kPortal:
+		case SnakeBird::kPortal:
 		{
 			switch (renderedType)
 			{
