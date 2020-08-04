@@ -9,4 +9,5 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier, char key
 void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier, char key);
 int MyCLHandler(char *argument[], int maxNumArgs);
 bool MyClickHandler(unsigned long windowID, int viewport, int x, int y, point3d loc, tButtonType, tMouseEventType);
+void BreathForSearch();
 void InstallHandlers();
