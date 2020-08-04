@@ -544,12 +544,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			rgbColor c = Colors::black;
 			if (editorMessageExpireTime-globalTime < 1.0)
 			{
-				rgbColor tmp = rgbColor::mix(Colors::cyan, Colors::green, 0.5);
+				rgbColor tmp = rgbColor::mix(Colors::cyan, Colors::yellow, 0.5);
 				c.mix(tmp, 1-(editorMessageExpireTime-globalTime));
 			}
 			else if (globalTime - editorMessageBeginTime < 1.0)
 			{
-				rgbColor tmp = rgbColor::mix(Colors::cyan, Colors::green, 0.5);
+				rgbColor tmp = rgbColor::mix(Colors::cyan, Colors::yellow, 0.5);
 				c.mix(tmp, 1-(globalTime-editorMessageBeginTime));
 			}
 			d.DrawText(editorMessage.c_str(), {-1+editor.GetRadius(),-1+25.5f*editor.GetRadius()}, c, -2+editor.GetRadius(), Graphics::textAlignLeft, "Helvetica");
@@ -1531,7 +1531,10 @@ void BreathForSearch()
 	t.EndTimer();
     if (future.size() != 0)
     {
-        editorMessage = "Level is solvable in moves";
+		std::string path = std::to_string(future.size());
+		std::string words = "Level is solvable in ";
+		std::string moves = " moves";
+		editorMessage = words + path + moves;
         editorMessageBeginTime = globalTime;
         editorMessageExpireTime = globalTime + 5;
     }
