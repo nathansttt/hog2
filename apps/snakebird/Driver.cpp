@@ -51,6 +51,10 @@ std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave
 double messageBeginTime = globalTime-1;
 double messageExpireTime = globalTime+10;
 
+std::string editorMessage;
+double editorMessageBeginTime;
+double editorMessageExpireTime;
+
 Timer worldClock;
 double lastFrameStart;
 LineTransition transition(20, 60, Colors::white);
@@ -534,6 +538,23 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 		editor.DrawLabel(d, 2, 11, "Exit");
 		editor.DrawObjects(d, globalTime);
+		
+		if (editorMessageExpireTime >= globalTime && editorMessageBeginTime <= globalTime)
+		{
+			rgbColor c = Colors::black;
+			if (editorMessageExpireTime-globalTime < 1.0)
+			{
+				rgbColor tmp = rgbColor::mix(Colors::cyan, Colors::green, 0.5);
+				c.mix(tmp, 1-(editorMessageExpireTime-globalTime));
+			}
+			else if (globalTime - editorMessageBeginTime < 1.0)
+			{
+				rgbColor tmp = rgbColor::mix(Colors::cyan, Colors::green, 0.5);
+				c.mix(tmp, 1-(globalTime-editorMessageBeginTime));
+			}
+			d.DrawText(editorMessage.c_str(), {-1+editor.GetRadius(),-1+25.5f*editor.GetRadius()}, c, -2+editor.GetRadius(), Graphics::textAlignLeft, "Helvetica");
+		}
+
 		return;
 	}
 	
@@ -1230,6 +1251,7 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 
 	if ((e == kMouseDown) && (gEditMap == true))
 	{
+		BreathForSearch();
 		int x, y;
 		if (sb.GetPointFromCoordinate(p, x, y))
 		{
@@ -1498,6 +1520,29 @@ void ChangeMap(int x, int y)
 			break;
 	}
 }
+
+void BreathForSearch()
+{
+    Timer t;
+	BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
+	bfs.SetNodeLimit(50000);
+	t.StartTimer();
+	bfs.GetPath(&sb, snake, snake, future);
+	t.EndTimer();
+    if (future.size() != 0)
+    {
+        editorMessage = "Level is solvable in moves";
+        editorMessageBeginTime = globalTime;
+        editorMessageExpireTime = globalTime + 5;
+    }
+    else
+    {
+        editorMessage = "Level unsolvable";
+        editorMessageBeginTime = globalTime;
+        editorMessageExpireTime = globalTime + 5;
+    }
+}
+
 
 bool CanChangeMap(int x, int y)
 {
