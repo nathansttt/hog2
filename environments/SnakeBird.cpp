@@ -13,6 +13,11 @@
 
 namespace SnakeBird {
 
+/**
+ * Construct SnakeBird class.
+ * Note that width and height are currently fixed and can't be changed.
+ * Eventually this should be fixed.
+ */
 SnakeBird::SnakeBird(int width, int height)
 :width(width), height(height), editing(false)
 {
@@ -24,6 +29,7 @@ SnakeBird::SnakeBird(int width, int height)
 		world[GetIndex(x, height-1)] = kSpikes;
 }
 
+/** Reset to initial state and default 20(w)x16(h) map size. */
 void SnakeBird::Reset()
 {
 	width = 20;
@@ -39,11 +45,18 @@ void SnakeBird::Reset()
 		objects[x].clear();
 }
 
+/**
+ * Before the map is changed, this should be called. It allows for internal optimizations after
+ * editing ends.
+ */
 void SnakeBird::BeginEditing()
 {
 	editing = true;
 }
 
+/**
+ * Stop editing the map & apply optimizations to internal data structures.
+ */
 void SnakeBird::EndEditing()
 {
 	editing = false;
@@ -64,17 +77,29 @@ void SnakeBird::EndEditing()
 }
 
 
+/**
+ * The SnakeBird start location and fruit consumption returned is part of the
+ * dynamic state. Everything inside the SnakeBird class is static.
+ * The location of the fruit is static; whether it's been eaten is dynamic.
+ */
 SnakeBirdState SnakeBird::GetStart() const
 {
 	return startState;
 }
 
+/**
+ * Set the initial state of the game.
+ */
 void SnakeBird::SetStart(const SnakeBirdState &start)
 {
 	startState = start;
 }
 
 
+/**
+ * Add a snake to the level at a given location.
+ * Note: Will need to be enhanced to set location of a particular snake.
+ */
 void SnakeBird::AddSnake(int x, int y, const std::vector<snakeDir> &body)
 {
 	int count = startState.GetNumSnakes();
@@ -126,6 +151,9 @@ std::vector<snakeDir> LoadSnake(std:: vector<snakeDir> snakeBod, int width, int 
 
 
 
+/**
+ * Load a map from a filename.
+ */
 bool SnakeBird::Load(const char *filename)
 {
 	BeginEditing();
@@ -257,6 +285,9 @@ bool SnakeBird::Load(const char *filename)
 	}	
 }
 
+/**
+ * Currently not supported.
+ */
 bool SnakeBird::Save(const char *filename)
 {
 	return false;
@@ -318,6 +349,9 @@ int SnakeBird::DeCode(const std::string &s, size_t offset) const
 	return val;
 }
 
+/**
+ * Convert an ASCII map encoding back to a level.
+ */
 std::string SnakeBird::EncodeLevel() const
 {
 	std::string encoding;
@@ -398,6 +432,9 @@ std::string SnakeBird::EncodeLevel() const
 	return encoding;
 }
 
+/**
+ * Convert a map to an ASCII string.
+ */
 bool SnakeBird::DecodeLevel(const std::string &encoding)
 {
 	portal1Loc = portal2Loc = -1;
@@ -548,6 +585,9 @@ bool SnakeBird::DecodeLevel(const std::string &encoding)
 }
 
 
+/**
+ * Return (via references) all of the legal actions in a state.
+ */
 void SnakeBird::GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const
 {
 	static std::vector<SnakeBirdAction> acts;
@@ -569,6 +609,9 @@ void SnakeBird::GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBir
 	}
 }
 
+/**
+ * Return whether an action is legal.
+ */
 bool SnakeBird::Legal(SnakeBirdState &s, SnakeBirdAction a)
 {
 	static std::vector<SnakeBirdAction> acts;
@@ -666,6 +709,9 @@ bool SnakeBird::Render(const SnakeBirdState &s) const
 	return true;
 }
 
+/**
+ * Return (by reference) the legal actions in a state.
+ */
 void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction> &actions) const
 {
 	actions.clear();
@@ -1004,6 +1050,9 @@ SnakeBirdAnimation SnakeBird::DoFall(SnakeBirdAction &a, SnakeBirdState &s) cons
 	return kTeleport;
 }
 
+/**
+ * Do next step of animation. Call until true is returned (when action is fully applied).
+ */
 bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, SnakeBirdAnimationStep &step) const
 {
 //	ApplyAction(s, act);
@@ -1116,6 +1165,9 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 	return false;
 }
 
+/**
+ * Apply a single action, modifying to the next state.
+ */
 //SnakeBirdAction GetAction(const SnakeBirdState &s1, const SnakeBirdState &s2) const;
 void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 {
@@ -1421,6 +1473,9 @@ void SnakeBird::SetGroundType(int index, SnakeBirdWorldObject o)
 	SetGroundType(GetX(index), GetY(index), o);
 }
 
+/**
+ * Change the ground type to a new type. Must enable editing to have an impact.
+ */
 void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 {
 	if (!editing)
@@ -1561,11 +1616,17 @@ int SnakeBird::GetFruitOffset(int index) const
 }
 
 
+/**
+ * Return the primary ground type in the map.
+ */
 SnakeBirdWorldObject SnakeBird::GetGroundType(int x, int y) const
 {
 	return world[GetIndex(x, y)];
 }
 
+/**
+ * Return the rendered ground type on the screen - eg accounting for snakes, moving objects, etc.
+ */
 SnakeBirdWorldObject SnakeBird::GetRenderedGroundType(const SnakeBirdState &s, int x, int y)
 {
 	if (GetGroundType(x, y) != kEmpty)// || GetGroundType(x, y) == kPortal1 || GetGroundType(x, y) == kPortal2)
