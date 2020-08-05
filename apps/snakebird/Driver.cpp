@@ -1720,7 +1720,11 @@ int CanChangeMap(int x, int y)
 					return 2;
 					break;
 				case SnakeBird::kEmpty:
-					//TODO: need to check how many portals there are already
+					if (sb.NumPortals())
+					{
+						return 1;
+					}
+					else
 					return 3;
 					break;
 				default:

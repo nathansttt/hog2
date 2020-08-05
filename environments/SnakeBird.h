@@ -239,6 +239,7 @@ public:
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
+	bool NumPortals();
 	SnakeBirdWorldObject GetGroundType(int x, int y) const;
 	SnakeBirdWorldObject GetRenderedGroundType(const SnakeBirdState &s, int x, int y);
 	int GetWidth() { return width; }

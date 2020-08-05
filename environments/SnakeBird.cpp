@@ -1606,6 +1606,14 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 	}
 }
 
+bool SnakeBird::NumPortals()
+{
+	if (portal1Loc == -1 || portal2Loc == -1)
+		return true;
+	else
+		return false;
+}
+
 int SnakeBird::GetFruitOffset(int index) const
 {
 	for (int x = 0; x < fruit.size(); x++)
