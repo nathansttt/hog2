@@ -62,7 +62,7 @@ LineTransition transition(20, 60, Colors::white);
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
 SnakeBird::SnakeBirdState lastFrameSnake;
-SnakeBird::SnakeBird editor(13, 13);
+SnakeBird::SnakeBird editor(15, 13);
 SnakeBird::SnakeBird editorOverlay;
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
@@ -117,6 +117,8 @@ void InstallHandlers()
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Portal", "Edit Portals", kAnyModifier, 'p');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Blocks", "Edit Blocks", kAnyModifier, 'b');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Toggle", "Toggle Modes", kAnyModifier, 'd');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Increase", "Increase Soultuion", kAnyModifier, 'c');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Decrease", "Decrease Soultution", kAnyModifier, 'v');
 	
 	InstallCommandLineHandler(MyCLHandler, "-change", "-change <input> <nodelimit> <iter>", "Run <iter> times to make the level harder or easier. Outputs the new depth and file coding.");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
@@ -457,6 +459,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		editor.SetGroundType(1, 7, SnakeBird::kPortal1);
 		editor.SetGroundType(1, 9, SnakeBird::kFruit);
 		editor.SetGroundType(1, 11, SnakeBird::kExit);
+		editor.SetGroundType(6, 3, SnakeBird::kSpikes);
+		editor.SetGroundType(6, 5, SnakeBird::kSpikes);
 		editor.EndEditing();
 	}
 }
@@ -472,7 +476,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		//editor.Draw(d, editor.GetStart());
 		editor.SetColor(Colors::black); //keep the title black
 		editor.DrawLabel(d, 1, 1, "Edit Ground Types");
-		if (gMouseEditorY == 3) //ground
+		if (gMouseEditorY == 3 && gMouseEditorX < 6) //ground
 		{
 			editor.SetColor(Colors::cyan);
 		}
@@ -485,7 +489,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editor.Draw(d, 1, 3);
 		}
 		editor.DrawLabel(d, 2, 3, "Ground");
-		if (gMouseEditorY == 5) //spikes
+		if (gMouseEditorY == 5 && gMouseEditorX < 6) //spikes
 		{
 			editor.SetColor(Colors::cyan);
 		}
@@ -498,7 +502,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editor.Draw(d, 1, 5);
 		}
 		editor.DrawLabel(d, 2, 5, "Spikes");
-		if (gMouseEditorY == 7) //portal
+		if (gMouseEditorY == 7 && gMouseEditorX < 6) //portal
 		{
 			editor.SetColor(Colors::cyan);
 		}
@@ -511,7 +515,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editor.Draw(d, 1, 7);
 		}
 		editor.DrawLabel(d, 2, 7, "Portal");
-		if (gMouseEditorY == 9) //fruit
+		if (gMouseEditorY == 9 && gMouseEditorX < 6) //fruit
 		{
 			editor.SetColor(Colors::cyan);
 		}
@@ -524,7 +528,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editor.Draw(d, 1, 9);
 		}
 		editor.DrawLabel(d, 2, 9, "Fruit");
-		if (gMouseEditorY == 11) //exit
+		if (gMouseEditorY == 11 && gMouseEditorX < 6) //exit
 		{
 			editor.SetColor(Colors::cyan);
 		}
@@ -537,6 +541,32 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editor.Draw(d, 1, 11);
 		}
 		editor.DrawLabel(d, 2, 11, "Exit");
+		if (gMouseEditorY == 3 && gMouseEditorX > 6) //AI add obstacle
+		{
+			editor.SetColor(Colors::cyan);
+		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gEditorMode == SnakeBird::kAddSoulutions)
+		{
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 6, 3);
+		}
+		editor.DrawLabel(d, 7, 3, "AI Add Soultuions");
+		if (gMouseEditorY == 5 && gMouseEditorX > 6) //AI delete obstacle
+		{
+			editor.SetColor(Colors::cyan);
+		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		if (gEditorMode == SnakeBird::kSubSoulutions)
+		{
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, 6, 5);
+		}
+		editor.DrawLabel(d, 7, 5, "AI Delete Soultuions");
 		editor.DrawObjects(d, globalTime);
 		
 		if (editorMessageExpireTime >= globalTime && editorMessageBeginTime <= globalTime)
@@ -552,7 +582,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				rgbColor tmp = rgbColor::mix(Colors::cyan, Colors::yellow, 0.5);
 				c.mix(tmp, 1-(globalTime-editorMessageBeginTime));
 			}
-			d.DrawText(editorMessage.c_str(), {-1+editor.GetRadius(),-1+25.5f*editor.GetRadius()}, c, -2+editor.GetRadius(), Graphics::textAlignLeft, "Helvetica");
+			d.DrawText(editorMessage.c_str(), {-1+editor.GetRadius(),-1+27.0f*editor.GetRadius()}, c, -2+editor.GetRadius(), Graphics::textAlignLeft, "Helvetica");
 		}
 
 		return;
@@ -1150,6 +1180,19 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kBlock1;
 				break;
+			case 'c':
+				message = "Editing Mode: Increase soulution";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				gEditorMode = SnakeBird::kAddSoulutions;
+				AnalyzeMapChanges(true);
+				break;
+			case 'v':
+				message = "Editing Mode: Decrease soulution";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				gEditorMode = SnakeBird::kSubSoulutions;
+				AnalyzeMapChanges(false);
 			case 'h': //toggle ground modes
 			{
 				switch (gEditorMode)
@@ -1234,19 +1277,28 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 			switch (gMouseEditorY)
 			{
 				case 3:
-					EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+					if (gMouseEditorX < 6)
+						EditorKeyBoardHandler(windowID, kNoModifier, 'g');
+					if (gMouseEditorX > 6)
+						EditorKeyBoardHandler(windowID, kNoModifier, 'c');
 					break;
 				case 5:
-					EditorKeyBoardHandler(windowID, kNoModifier, 's');
+					if (gMouseEditorX < 6)
+						EditorKeyBoardHandler(windowID, kNoModifier, 's');
+					if (gMouseEditorX > 6)
+						EditorKeyBoardHandler(windowID, kNoModifier, 'v');
 					break;
 				case 7:
-					EditorKeyBoardHandler(windowID, kNoModifier, 'p');
+					if (gMouseEditorX < 6)
+						EditorKeyBoardHandler(windowID, kNoModifier, 'p');
 					break;
 				case 9:
-					EditorKeyBoardHandler(windowID, kNoModifier, 'f');
+					if (gMouseEditorX < 6)
+						EditorKeyBoardHandler(windowID, kNoModifier, 'f');
 					break;
 				case 11:
-					EditorKeyBoardHandler(windowID, kNoModifier, 'x');
+					if (gMouseEditorX < 6)
+						EditorKeyBoardHandler(windowID, kNoModifier, 'x');
 					break;
 				default:
 					break;
@@ -1668,7 +1720,7 @@ int CanChangeMap(int x, int y)
 					return 2;
 					break;
 				case SnakeBird::kEmpty:
-					// TODO: need to check how many portals there are already
+					//TODO: need to check how many portals there are already
 					return 3;
 					break;
 				default:
