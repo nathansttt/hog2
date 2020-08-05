@@ -6,6 +6,7 @@
 
 HOG2 (Hierarchical Open Graph 2) is a collection of classes and a tile-based simulator which are designed as a simple model of RTS and other clocked simulation environments. 
 
+Documentation (much of it older, but starting to be updated) [is available here](https://movingai.com/hog2/).
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -36,7 +37,8 @@ On CentOs and Fedora run:
 ```
 
 #### MacOS
-TODO
+
+Download and install XCode from the App store.
 
 #### Windows 10:
 TODO

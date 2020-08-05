@@ -1668,15 +1668,8 @@ int CanChangeMap(int x, int y)
 					return 2;
 					break;
 				case SnakeBird::kEmpty:
-					if (sb.SetGroundType(gMouseX, gMouseY, gEditorMode))
-					{
-						return 1;
-						break;
-					}
-					else {
-						return 3;
-						break;
-					}
+					// TODO: need to check how many portals there are already
+					return 3;
 					break;
 				default:
 					return 3;
