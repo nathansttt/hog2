@@ -17,18 +17,12 @@
  * 
  * Documentation contents:
  * - \ref Introduction
- *   - \ref Overview "Overview"
+ *   - \ref Introduction "Introduction"
  *   - \ref Install "Getting Started"
- * - \ref Usage
- *   - \ref Demos "Demos"
- *   - \ref Apps "Apps"
+ * - \ref GUI "HOG2 GUI overview"
  * - \ref Development
- *   - \ref Units
- *   - \ref Unit-Groups
- *   - \ref Simulations
- *   - \ref Abstractions
- *   - \ref Starting
- *   - \ref Memory
+ * - \ref Code "Included Code"
+
  */
 
 ///////////////////////////////////////////////
@@ -68,7 +62,7 @@ Next: \ref Usage
 
 ///////////////////////////////////////////////
 
-/*! \page Usage Usage
+/*! \page Code Included Code
 
 After the code base has been compiled, there will be a verity of executable binaries that can
 be run to see the capabilities of HOG2. These binaries are compiled into @code bin/release/@endcode
@@ -143,7 +137,7 @@ Prev: \ref Introduction Next: \ref Development
 
 ///////////////////////////////////////////////
 
-/*! \page HOG2 GUI
+/*! \page GUI HOG2 GUI
 
 \section Building a HOG2 app
 
