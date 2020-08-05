@@ -46,6 +46,11 @@ int gMouseY = -1;
 int gMouseEditorX = -1;
 int gMouseEditorY = -1;
 SnakeBird::SnakeBirdWorldObject gEditorMode;
+enum EditorColor {
+	kYellow,
+	kRed,
+	kGrey,
+};
 
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
@@ -70,7 +75,7 @@ std::vector<SnakeBird::SnakeBirdState> future;
 
 void AnalyzeMapChanges(bool maximize, int nodeLimit=1000000);
 void ChangeMap(int x, int y);
-int CanChangeMap(int x, int y);
+EditorColor CanChangeMap(int x, int y);
 
 int main(int argc, char* argv[])
 {
@@ -649,7 +654,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 	if (gEditMap == true)
 	{
-		if (CanChangeMap(gMouseX, gMouseY) == 2) //add objects
+		if (CanChangeMap(gMouseX, gMouseY) == kRed) //add objects
 		{
 			editorOverlay.BeginEditing();
 			editorOverlay.SetGroundType(gMouseX, gMouseY, gEditorMode);
@@ -659,9 +664,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editorOverlay.EndEditing();
 			sb.SetColor(Colors::red);
 			sb.Draw(d, gMouseX, gMouseY);
-			std:: cout << " hrororooror" << gMouseX;
 		}
-		else if (CanChangeMap(gMouseX, gMouseY) == 1) //take away objects
+		else if (CanChangeMap(gMouseX, gMouseY) == kYellow) //take away objects
 		{
 			editorOverlay.BeginEditing();
 			editorOverlay.SetGroundType(gMouseX, gMouseY, gEditorMode);
@@ -671,13 +675,11 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editorOverlay.EndEditing();
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
-			std:: cout << " maydayyyy" << gMouseY;
 		}
 		else //if you can't do anything at all :(
 		{
 			sb.SetColor(Colors::gray);
 			sb.Draw(d, gMouseX, gMouseY);
-			std:: cout << " timessss" << gMouseY;
 		}
 	}
 
@@ -1621,7 +1623,7 @@ void BreathForSearch()
 }
 
 
-int CanChangeMap(int x, int y)
+EditorColor CanChangeMap(int x, int y)
 {
 	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
 	switch (gEditorMode)
@@ -1632,13 +1634,13 @@ int CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kSpikes:
 				case SnakeBird::kEmpty:
-					return 1;
+					return kYellow;
 					break;
 				case SnakeBird::kGround:
-					return 2;
+					return kRed;
 					break;
 				default:
-					return 3;
+					return kGrey;
 					break;
 			}
 			break;
@@ -1653,11 +1655,11 @@ int CanChangeMap(int x, int y)
 				case SnakeBird::kFruit:
 				case SnakeBird::kSpikes:
 				case SnakeBird::kGround:
-					return 1;
+					return kYellow;
 					break;
 				case SnakeBird::kEmpty:
 				default:
-					return 3;
+					return kGrey;
 					break;
 			}
 			break;
@@ -1668,13 +1670,13 @@ int CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kEmpty:
 				case SnakeBird::kGround:
-					return 1;
+					return kYellow;
 					break;
 				case SnakeBird::kSpikes:
-					return 2;
+					return kRed;
 					break;
 				default:
-					return 3;
+					return kGrey;
 					break;
 			}
 			break;
@@ -1684,15 +1686,15 @@ int CanChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kFruit:
-					return 2;
+					return kRed;
 					break;
 				case SnakeBird::kEmpty:
 				case SnakeBird::kGround:
 				case SnakeBird::kSpikes:
-					return 1;
+					return kYellow;
 					break;
 				default:
-					return 3;
+					return kGrey;
 					break;
 			}
 		}
@@ -1701,13 +1703,13 @@ int CanChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kExit:
-					return 2;
+					return kRed;
 					break;
 				case SnakeBird::kEmpty:
-					return 1;
+					return kYellow;
 					break;
 				default:
-					return 3;
+					return kGrey;
 					break;
 			}
 		}
@@ -1717,23 +1719,23 @@ int CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kPortal1:
 				case SnakeBird::kPortal2:
-					return 2;
+					return kRed;
 					break;
 				case SnakeBird::kEmpty:
 					if (sb.NumPortals())
 					{
-						return 1;
+						return kYellow;
 					}
 					else
-					return 3;
+					return kGrey;
 					break;
 				default:
-					return 3;
+					return kGrey;
 					break;
 			}
 		}
 		default:
-			return 3;
+			return kGrey;
 			break;
 	}
 }
