@@ -70,7 +70,7 @@ std::vector<SnakeBird::SnakeBirdState> future;
 
 void AnalyzeMapChanges(bool maximize, int nodeLimit=1000000);
 void ChangeMap(int x, int y);
-bool CanChangeMap(int x, int y);
+int CanChangeMap(int x, int y);
 
 int main(int argc, char* argv[])
 {
@@ -619,7 +619,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 	if (gEditMap == true)
 	{
-		if (CanChangeMap(gMouseX, gMouseY) == true)
+		if (CanChangeMap(gMouseX, gMouseY) == 2) //add objects
 		{
 			editorOverlay.BeginEditing();
 			editorOverlay.SetGroundType(gMouseX, gMouseY, gEditorMode);
@@ -627,6 +627,27 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editorOverlay.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
 			editorOverlay.DrawObjects(d);
 			editorOverlay.EndEditing();
+			sb.SetColor(Colors::red);
+			sb.Draw(d, gMouseX, gMouseY);
+			std:: cout << " hrororooror" << gMouseX;
+		}
+		else if (CanChangeMap(gMouseX, gMouseY) == 1) //take away objects
+		{
+			editorOverlay.BeginEditing();
+			editorOverlay.SetGroundType(gMouseX, gMouseY, gEditorMode);
+			editorOverlay.DrawObjects(d);
+			editorOverlay.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+			editorOverlay.DrawObjects(d);
+			editorOverlay.EndEditing();
+			sb.SetColor(Colors::yellow);
+			sb.Draw(d, gMouseX, gMouseY);
+			std:: cout << " maydayyyy" << gMouseY;
+		}
+		else //if you can't do anything at all :(
+		{
+			sb.SetColor(Colors::gray);
+			sb.Draw(d, gMouseX, gMouseY);
+			std:: cout << " timessss" << gMouseY;
 		}
 	}
 
@@ -1233,6 +1254,7 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		}
 		return true;
 	}
+
 	if ((e == kMouseDrag) && (gEditMap == true)) // ignore movement with mouse button down
 	{
 		int x, y;
@@ -1248,16 +1270,16 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		}
 		return true;
 	}
-
+	
 	if ((e == kMouseDown) && (gEditMap == true))
 	{
-		BreathForSearch();
 		int x, y;
 		if (sb.GetPointFromCoordinate(p, x, y))
 		{
 			//printf("Hit (%f, %f) -> (%d, %d)\n", p.x, p.y, x, y);
 			ChangeMap (x, y);
-			CanChangeMap(x, y);
+			CanChangeMap(gMouseX, gMouseY);
+			BreathForSearch();
 		}
 	}
 	
@@ -1536,18 +1558,18 @@ void BreathForSearch()
 		std::string moves = " moves";
 		editorMessage = words + path + moves;
         editorMessageBeginTime = globalTime;
-        editorMessageExpireTime = globalTime + 5;
+        editorMessageExpireTime = globalTime + 3;
     }
     else
     {
         editorMessage = "Level unsolvable";
         editorMessageBeginTime = globalTime;
-        editorMessageExpireTime = globalTime + 5;
+        editorMessageExpireTime = globalTime + 3;
     }
 }
 
 
-bool CanChangeMap(int x, int y)
+int CanChangeMap(int x, int y)
 {
 	auto renderedType = sb.GetRenderedGroundType(snake, x, y);
 	switch (gEditorMode)
@@ -1558,11 +1580,13 @@ bool CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kSpikes:
 				case SnakeBird::kEmpty:
+					return 1;
+					break;
 				case SnakeBird::kGround:
-					return true;
+					return 2;
 					break;
 				default:
-					return false;
+					return 3;
 					break;
 			}
 			break;
@@ -1577,11 +1601,11 @@ bool CanChangeMap(int x, int y)
 				case SnakeBird::kFruit:
 				case SnakeBird::kSpikes:
 				case SnakeBird::kGround:
-					return true;
+					return 1;
 					break;
 				case SnakeBird::kEmpty:
 				default:
-					return false;
+					return 3;
 					break;
 			}
 			break;
@@ -1592,11 +1616,13 @@ bool CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kEmpty:
 				case SnakeBird::kGround:
+					return 1;
+					break;
 				case SnakeBird::kSpikes:
-					return true;
+					return 2;
 					break;
 				default:
-					return false;
+					return 3;
 					break;
 			}
 			break;
@@ -1606,13 +1632,15 @@ bool CanChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kFruit:
+					return 2;
+					break;
 				case SnakeBird::kEmpty:
 				case SnakeBird::kGround:
 				case SnakeBird::kSpikes:
-					return true;
+					return 1;
 					break;
 				default:
-					return false;
+					return 3;
 					break;
 			}
 		}
@@ -1621,11 +1649,13 @@ bool CanChangeMap(int x, int y)
 			switch (renderedType)
 			{
 				case SnakeBird::kExit:
+					return 2;
+					break;
 				case SnakeBird::kEmpty:
-					return true;
+					return 1;
 					break;
 				default:
-					return false;
+					return 3;
 					break;
 			}
 		}
@@ -1635,16 +1665,26 @@ bool CanChangeMap(int x, int y)
 			{
 				case SnakeBird::kPortal1:
 				case SnakeBird::kPortal2:
+					return 2;
+					break;
 				case SnakeBird::kEmpty:
-					return true;
+					if (sb.SetGroundType(gMouseX, gMouseY, gEditorMode))
+					{
+						return 1;
+						break;
+					}
+					else {
+						return 3;
+						break;
+					}
 					break;
 				default:
-					return false;
+					return 3;
 					break;
 			}
 		}
 		default:
-			return false;
+			return 3;
 			break;
 	}
 }
