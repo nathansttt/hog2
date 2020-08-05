@@ -1,152 +1,152 @@
 /*! \page DEMOS_ASTAR astar
-TODO
+A demo of A* on a graph.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_ASTAR_MAP astar-map
-TODO
+A demo of A* on a grid graph.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_BB bb
-TODO
+A demo of A* with bounding boxes.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_BIDIR bidir
-TODO
+A bidirectional search demo.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_BIDIR_NECESSARY bidirnecessary
-TODO
+A demo of necessary expansions in bidirectional search.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_CANONICAL_DIJKSTRA canonical-dijkstra
-TODO
+A demo of canonical dijkstra.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_CANONICAL_MAPS canonical-maps
-TODO
+A demo of canonical orders on grid maps.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_DFID DFID
-TODO
+A demo of depth-first iterative deepening.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_DH dh
-TODO
+A demo of differential heuristics.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_DH_PLACE dh-place
-TODO
+
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_DIJKSTRA dijkstra
-TODO
+A demo of Dijkstra's algorithm
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_FASTMAP fastmap
-TODO
+A demo of the fast-map heuristic.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_GMX GMX
-TODO
+A demo of the bidirectional must-expand graph.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_GRID_ABSTRACTION gridabstraction
-TODO
+A demo of abstraction on grids.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_ID_ASTAR idaastar
-TODO
+A demo of IDA*
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_INCONSISTENCY_GRAPH inconsistency-graph
-TODO
+A demo of inconsistent heuristics.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_JPS JPS
-TODO
+A demo of jump-point search.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_KMEANS kmeans
-TODO
+A visualization of k-means.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_MM_GRAPH mm-graph
-TODO
+A demo of the MM algorithm.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_MNIST mnist
-TODO
+A demo of learning algorithms on the MNIST data set.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_NBS nbs
-TODO
+A demo of NBS (near-optimal bidirectional search).
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_REACH reach
-TODO
+A demo of using "reach" to prune maps.
 */
 
 ///////////////////////////////////////////////
@@ -160,14 +160,14 @@ TODO
 
 
 /*! \page DEMOS_STP STP
-TODO
+The sliding-tile puzzle app.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_SUBOPTIMA_MAP suboptima-map
-TODO
+A demo of suboptimal search algorithms.
 */
 
 ///////////////////////////////////////////////
@@ -181,13 +181,13 @@ TODO
 
 
 /*! \page DEMOS_WITNESS witness
-TODO
+A demo containing a number of levels for The Witness.
 */
 
 ///////////////////////////////////////////////
 
 
 /*! \page DEMOS_WITNESS3 witness3
-TODO
+A demo containing a number of 3-wise joint levels for The Witness.
 */
 
