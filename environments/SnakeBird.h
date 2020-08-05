@@ -219,9 +219,6 @@ enum SnakeBirdWorldObject : uint8_t {
 	kSnake2 = 0x11,
 	kSnake3 = 0x12,
 	kSnake4 = 0x13,
-	
-	kAddSoulutions,
-	kSubSoulutions,
 };
 
 class SnakeBird : public SearchEnvironment<SnakeBirdState, SnakeBirdAction> {
