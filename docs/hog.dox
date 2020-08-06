@@ -17,18 +17,12 @@
  * 
  * Documentation contents:
  * - \ref Introduction
- *   - \ref Overview "Overview"
+ *   - \ref Introduction "Introduction"
  *   - \ref Install "Getting Started"
- * - \ref Usage
- *   - \ref Demos "Demos"
- *   - \ref Apps "Apps"
+ * - \ref GUI "HOG2 GUI overview"
  * - \ref Development
- *   - \ref Units
- *   - \ref Unit-Groups
- *   - \ref Simulations
- *   - \ref Abstractions
- *   - \ref Starting
- *   - \ref Memory
+ * - \ref Code "Included Code"
+
  */
 
 ///////////////////////////////////////////////
@@ -37,17 +31,13 @@
 
 \section Overview Overview of HOG2's capabilities
 
-HOG2 is a tile-based simulation designed to provide a simple
-experiment environment useful for RTS and other games. Although
-it is based on a simple simulation model, it contains state-of-the-art
-algorithms for pathfinding and map abstraction.
+HOG2 is a rich environment for deterministic search algorithms. It
+supports running search algorithms across a large number of domains,
+and also supports simulating agents with domains.
 
-The heart of HOG2 is a clock-based simulation. An external program
-advances HOG2's simulation clock and displays (via OpenGL) the current
-view of the world. It is not necessary to understand how the front
-end works or to understand openGL in order to use HOG2. Instead, you
-can just create simple units which interact with their surroundings.
-
+Simulated agents are run in a clock-based simulation. An external program
+advances HOG2's simulation clock and displays the current
+view of the world. 
 
 \section Install Getting started
 
@@ -57,19 +47,22 @@ To begin using HOG2, first install the dependancies to you machine:
 - Debian:@code # apt install git libglu1-mesa-dev freeglut3-dev@endcode
 - Arch:@code # pacman -S git base-devel mesa glu freeglut@endcode
 - CentOS:@code # yum install git make gcc-c++ mesa-libGL-devel mesa-libGLU-devel freeglut-devel@endcode
-
+- MacOS: Install XCode
 
 then clone the git repo from [github](https://github.com/nathansttt/hog2) with: @code $ git clone https://github.com/nathansttt/hog2.git@endcode
 
 Finally move to the hog2/build/gmake directory and run@code $ make@endcode
 
+One the Mac there are also XCode projects in build/XCode.
+
+If you wish to deploy to the web, you must install emscripten, and then you can build from build/web
 
 Next: \ref Usage
 */
 
 ///////////////////////////////////////////////
 
-/*! \page Usage Usage
+/*! \page Code Included Code
 
 After the code base has been compiled, there will be a verity of executable binaries that can
 be run to see the capabilities of HOG2. These binaries are compiled into @code bin/release/@endcode
@@ -111,43 +104,164 @@ and are described below.
 
 \section Demos
 - \ref DEMOS_ASTAR "astar"
-- \ref DEMOS_ASTAR_MAP "astar-map" (not compiled)
-- \ref DEMOS_BB "bb" (not compiled)
-- \ref DEMOS_BIDIR "bidir" (not compiled)
-- \ref DEMOS_BIDIR_NECESSARY "bidirnecessary" (not compiled)
-- \ref DEMOS_CANONICAL_DIJKSTRA "canonical-dijkstra" (not compiled)
-- \ref DEMOS_CANONICAL_MAPS "canonical-maps" (not compiled)
+- \ref DEMOS_ASTAR_MAP "astar-map" (in web build)
+- \ref DEMOS_BB "bb" (in web build)
+- \ref DEMOS_BIDIR "bidir" (in web build)
+- \ref DEMOS_BIDIR_NECESSARY "bidirnecessary" (in web build)
+- \ref DEMOS_CANONICAL_DIJKSTRA "canonical-dijkstra" (in web build)
+- \ref DEMOS_CANONICAL_MAPS "canonical-maps" (in web build)
 - \ref DEMOS_DFID "DFID"
-- \ref DEMOS_DH "dh" (not compiled)
-- \ref DEMOS_DH_PLACE "dh-place" (not compiled)
+- \ref DEMOS_DH "dh" (in web build)
+- \ref DEMOS_DH_PLACE "dh-place" (in web build)
 - \ref DEMOS_DIJKSTRA "dijkstra"
-- \ref DEMOS_FASTMAP "fastmap" (not compiled)
-- \ref DEMOS_GMX "GMX" (not compiled)
-- \ref DEMOS_GRID_ABSTRACTION "gridabstraction" (not compiled)
+- \ref DEMOS_FASTMAP "fastmap" (in web build)
+- \ref DEMOS_GMX "GMX" (in web build)
+- \ref DEMOS_GRID_ABSTRACTION "gridabstraction" (in web build)
 - \ref DEMOS_ID_ASTAR "idaastar"
-- \ref DEMOS_INCONSISTENCY_GRAPH "inconsistency-graph" (not compiled)
-- \ref DEMOS_JPS "JPS" (not compiled)
-- \ref DEMOS_KMEANS "kmeans" (not compiled)
-- \ref DEMOS_MM_GRAPH "mm-graph" (not compiled)
-- \ref DEMOS_MNIST "mnist" (not compiled)
-- \ref DEMOS_NBS "nbs" (not compiled)
-- \ref DEMOS_REACH "reach" (not compiled)
-- \ref DEMOS_SIMPLE_AGENT "simple-agent" (not compiled)
-- \ref DEMOS_STP "STP" (not compiled)
-- \ref DEMOS_SUBOPTIMA_MAP "suboptima-map" (not compiled)
-- \ref DEMOS_TRANIST_ROUTING_MAPS "transit-routing-maps" (not compiled)
-- \ref DEMOS_WITNESS "witness" (not compiled)
-- \ref DEMOS_WITNESS3 "witness3" (not compiled)
+- \ref DEMOS_INCONSISTENCY_GRAPH "inconsistency-graph" (in web build)
+- \ref DEMOS_JPS "JPS" (in web build)
+- \ref DEMOS_KMEANS "kmeans" (in web build)
+- \ref DEMOS_MM_GRAPH "mm-graph" (in web build)
+- \ref DEMOS_MNIST "mnist" (in web build)
+- \ref DEMOS_NBS "nbs" (in web build)
+- \ref DEMOS_REACH "reach" (in web build)
+- \ref DEMOS_SIMPLE_AGENT "simple-agent" (in web build)
+- \ref DEMOS_STP "STP" (in web build)
+- \ref DEMOS_SUBOPTIMA_MAP "suboptima-map" (in web build)
+- \ref DEMOS_TRANIST_ROUTING_MAPS "transit-routing-maps" (in web build)
+- \ref DEMOS_WITNESS "witness" (in web build)
+- \ref DEMOS_WITNESS3 "witness3" (in web build)
 
 Prev: \ref Introduction Next: \ref Development 
 */
 
 ///////////////////////////////////////////////
 
+/*! \page GUI HOG2 GUI
+
+\section Building a HOG2 app
+
+HOG2 uses an event-based GUI, which is described here.
+First you should install handlers for any events that you would like to receive.
+Then, you hand control over to HOG2:
+
+int main(int argc, char* argv[])
+{
+	InstallHandlers();
+	RunHOGGUI(argc, argv, 640, 640);
+	return 0;
+}
+
+\ref createSimulation
+
+\ref initializeKeyboardHandlers
+
+\ref initializeCommandLineHandlers
+
+\subsection CLH Command-Line Handlers
+
+The first thing you need to be concerned with is installing command line handlers.
+These handles will allow you to process command-line arguments. By installing
+handlers with text descriptions, it is possible to have the application automatically
+print help for all command line arguments when it can't process them correctly.
+
+Here is an example of a comand-line handler:
+
+installCommandLineHandler(myCLHandler, "-map", "-map <filename>", "Selects the default map to be loaded.");
+
+A command-line handler looks something like this. It gets a pointer to the current argument list, where
+the first argument is the parameter for the handler. The handler then processes as many arguments as
+it wants, and returns how many arguments were processed.
+
+int myCLHandler(char *argument[], int maxNumArgs)
+{
+	if (maxNumArgs <= 1)
+		return 0;
+	strncpy(gDefaultMap, argument[1], 1024);
+	return 2;
+}
+
+Multiple handlers can be defined for the same argument. They will each get called in turn (no
+order guarantees) until one of the handlers returns a value greater than 0. Given the command-line
+arguments, you probably want to use a global variable to store any parameters that were set.
+
+Given proper command-line arguments, you could just allocate your own simulation, run it,
+and then exit the program, although you may want to do this in createSimulation, after all
+command-line arguments have been handled, unless you can guarantee that a particular command-line
+argument will always be last.
+
+\subsection Creating a window
+
+You will be notified when a window is created via the window handler.
+
+void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
+
+You install a window handler using the following code:
+
+InstallWindowHandler(MyWindowHandler);
+
+A window handler receives events (kWindowDestroyed, kWindowCreated) when windows are created
+or destroyed, and should setup any variables associated with that window. The windowID is a
+unique identifier that is used in other functions to identify that window.
+
+A window handler should typically install a frame handler to be able to draw into the window
+each frame.
+
+\subsection Frame Handlers
+
+Frame handlers are used for drawing each frame of the GUI.
+
+InstallFrameHandler(MyFrameHandler, windowID, 0);
+
+A frame handler function looks like this:
+
+void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
+
+It is passed the window being drawn, the viewport of the window, and a (void *) which can pass
+any data.
+
+You can call GetContext(windowID) to get contextual information about a window. In particular,
+a virtual display can be retrieved and drawn into:
+
+Graphics::Display &d = GetContext(windowID)->display;
+d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
+
+
+\subsection KBH Keyboard Handlers
+
+Keyboard handlers are similar to command-line handlers, in that you install any handlers to
+allow your application to respond to keyboard events. By installing handlers, the program
+can print out all legal key combinations it accepts. \ref initializeKeyboardHandlers might
+look something like this:
+
+void initializeKeyboardHandlers()
+{
+installKeyboardHandler(myDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
+}
+
+In this case, any keys in the range 0..9 will be sent to the function myDisplayHandler, regardless of
+any modifier keys that are down. It is important to note that modifier keys such as SHIFT can often
+change the ASCII value that is passed to the keyboard handler. Keyboard handlers will be called with
+the lowercase equivalent of the key that was pressed, but SHIFT-1 will be reported
+as SHIFT-!, and so will not trigger this handler. Here is an example handler which implements
+the above functionality.
+
+void myDisplayHandler(unitSimulation *unitSim, tKeyboardModifier mod, char key)
+{
+  if (unitSim->getMapAbstractionDisplay())
+    unitSim->getMapAbstractionDisplay()->toggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
+}
+
+
+
+///////////////////////////////////////////////
+
 /*! \page Development
 
-\section Units Basic World Objects
+Note: This is older documentation for simulating agents. It is still accurate, but
+a majority of projects involve other environments besides agent-based environments.
 
+\section Units Basic World Objects
 
 There are two basic types of units that can exist in the world, display units
 and world units. Display units are drawn into the world, and can be used as
@@ -261,8 +375,6 @@ ignored until the simulation is unpaused.
 
 
 
-
-
 \section Abstractions Spacial abstractions of maps
 
 The point of this document is not to completely explain spacial abstractions,
@@ -304,111 +416,6 @@ value. The labels are as follows:
                     children. Arbitrary data can be stored in successive ID's, although there is
                     no guarantee it will be preserved if nodes are deleted out of the graph.
 
-
-
-
-
-\section Starting Putting everything together
-
-To define a new application, you can create a new directory in the apps/ folder.
-To compile this applciation, type "make x" where "x" is the name of the folder you
-created. In the folder you can put an .cpp and .h files that you want for your
-application, but you must define the following functions somewhere inside this
-directory:
-
-\ref processStats
-
-\ref createSimulation
-
-\ref initializeKeyboardHandlers
-
-\ref initializeCommandLineHandlers
-
-The definitions for these functions are in "common.h", so you need to include that
-file as well.
-
-\subsection CLH Command-Line Handlers
-
-The first thing you need to be concerned with is installing command line handlers.
-These handles will allow you to process command-line arguments. By installing
-handlers with text descriptions, it is possible to have the application automatically
-print help for all command line arguments when it can't process them correctly.
-
-Inside initializeCommandLineHandlers you really only need to call the function
-\ref installCommandLineHanders. Here is an example:
-
-installCommandLineHandler(myCLHandler, "-map", "-map <filename>", "Selects the default map to be loaded.");
-
-A command-line handler looks something like this. It gets a pointer to the current argument list, where
-the first argument is the parameter for the handler. The handler then processes as many arguments as
-it wants, and returns how many arguments were processed.
-
-int myCLHandler(char *argument[], int maxNumArgs)
-{
-	if (maxNumArgs <= 1)
-		return 0;
-	strncpy(gDefaultMap, argument[1], 1024);
-	return 2;
-}
-
-Multiple handlers can be defined for the same argument. They will each get called in turn (no
-order guarantees) until one of the handlers returns a value greater than 0. Given the command-line
-arguments, you probably want to use a global variable to store any parameters that were set.
-
-Given proper command-line arguments, you could just allocate your own simulation, run it,
-and then exit the program, although you may want to do this in createSimulation, after all
-command-line arguments have been handled, unless you can guarantee that a particular command-line
-argument will always be last.
-
-\subsection CS Creating the Simulation
-
-The function \ref createSimulation is where you need to allocate a unit simulation. This is
-where you can also set any of the parameters set from the command-line arguments. The simulation
-will start running immediately. If you don't want it to start running, you can pause it here.
-
-Here is a sample implementation:
-
-void createSimulation(unitSimulation * &unitSim)
-{
-	Map *map;
-	if (gDefaultMap[0] == 0)
-		map = new Map(64, 64);
-	else
-		map = new Map(gDefaultMap);
-	unitSim = new unitSimulation(new mapCliqueAbstraction(map));
-}
-
-
-\subsection KBH Keyboard Handlers
-
-Keyboard handlers are similar to command-line handlers, in that you install any handlers to
-allow your application to respond to keyboard events. By installing handlers, the program
-can print out all legal key combinations it accepts. \ref initializeKeyboardHandlers might
-look something like this:
-
-void initializeKeyboardHandlers()
-{
-installKeyboardHandler(myDisplayHandler, "Toggle Abstraction", "Toggle display of the ith level of the abstraction", kAnyModifier, '0', '9');
-}
-
-In this case, any keys in the range 0..9 will be sent to the function myDisplayHandler, regardless of
-any modifier keys that are down. It is important to note that modifier keys such as SHIFT can often
-change the ASCII value that is passed to the keyboard handler. Keyboard handlers will be called with
-the lowercase equivalent of the key that was pressed, but SHIFT-1 will be reported
-as SHIFT-!, and so will not trigger this handler. Here is an example handler which implements
-the above functionality.
-
-void myDisplayHandler(unitSimulation *unitSim, tKeyboardModifier mod, char key)
-{
-  if (unitSim->getMapAbstractionDisplay())
-    unitSim->getMapAbstractionDisplay()->toggleDrawAbstraction(((mod == kControlDown)?10:0)+(key-'0'));
-}
-
-
-\subsection PS Processing Stats
-
-Each time a unit simulation is de-allocated, processStats is called first to allow your application
-to save the stats or do any other processing on them.
 
 
 
