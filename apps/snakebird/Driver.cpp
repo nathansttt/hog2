@@ -683,10 +683,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		transition.Reset(0);
 	}
 	
-	d.FillRect({-2, -2, 2, -1}, Colors::black);
-	d.FillRect({-2, 1, 2, 2}, Colors::black);
-	d.FillRect({-2, -2, -1, 2}, Colors::black);
-	d.FillRect({1, -2, 2, 2}, Colors::black);
+
+	auto c = Colors::black;
+#ifdef __EMSCRIPTEN__
+	c = Colors::white;
+#endif
+
+	d.FillRect({-2, -2, 2, -1}, c);
+	d.FillRect({-2, 1, 2, 2}, c);
+	d.FillRect({-2, -2, -1, 2}, c);
+	d.FillRect({1, -2, 2, 2}, c);
 
 	if (recording)
 	{
