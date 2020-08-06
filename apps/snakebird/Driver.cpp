@@ -587,7 +587,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 				rgbColor tmp = rgbColor::mix(Colors::cyan, Colors::yellow, 0.5);
 				c.mix(tmp, 1-(globalTime-editorMessageBeginTime));
 			}
-			d.DrawText(editorMessage.c_str(), {-1+editor.GetRadius(),-1+27.5f*editor.GetRadius()}, c, -3+editor.GetRadius(), Graphics::textAlignLeft, "Helvetica");
+			d.DrawText(editorMessage.c_str(), {-1+editor.GetRadius(),-1+27.0f*editor.GetRadius()}, c, -2+editor.GetRadius(), Graphics::textAlignLeft, "Helvetica");
 		}
 
 		return;
