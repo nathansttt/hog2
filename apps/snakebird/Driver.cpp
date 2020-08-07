@@ -467,7 +467,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		editor.SetGroundType(kColumn1, 7, SnakeBird::kPortal1);
 		editor.SetGroundType(kColumn1, 9, SnakeBird::kFruit);
 		editor.SetGroundType(kColumn1, 11, SnakeBird::kExit);
-		editor.SetGroundType(kColumn1, 13, SnakeBird::kSpikes);
 		editor.SetGroundType(kColumn2, 3, SnakeBird::kSpikes);
 		editor.SetGroundType(kColumn2, 5, SnakeBird::kSpikes);
 		editor.EndEditing();
@@ -550,19 +549,6 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			editor.Draw(d, 1, 11);
 		}
 		editor.DrawLabel(d, kColumn1+1, 11, "Exit");
-		if (gMouseEditorY == 13 && gMouseEditorX < 6) //Block 1
-		{
-			editor.SetColor(Colors::cyan);
-		}
-		else {
-			editor.SetColor(Colors::black);
-		}
-		if (gEditorMode == SnakeBird::kBlock1)
-		{
-			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-			editor.Draw(d, kColumn1, 13);
-		}
-		editor.DrawLabel(d, kColumn1+1, 13, "Block 1");
 
 		if (gMouseEditorY == 3 && gMouseEditorX > 6) //AI add obstacle
 		{
@@ -1296,10 +1282,6 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 					if (gMouseEditorX < kColumn2)
 						EditorKeyBoardHandler(windowID, kNoModifier, 'x');
 					break;
-				case 13:
-					if (gMouseEditorX < kColumn2)
-						EditorKeyBoardHandler(windowID, kNoModifier, 'b');
-					break;
 				default:
 					break;
 			}
@@ -1593,25 +1575,6 @@ void ChangeMap(int x, int y)
 			}
 			break;
 		}
-		case SnakeBird::kBlock1:
-		{
-			switch (renderedType) {
-				case SnakeBird::kBlock1:
-					sb.BeginEditing();
-					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				case SnakeBird::kEmpty:
-					sb.BeginEditing();
-					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kBlock1);
-					sb.EndEditing();
-					gRefreshBackground = true;
-					break;
-				default:
-					break;
-			}
-		}
 		default:
 			break;
 	}
@@ -1764,19 +1727,6 @@ EditorColor CanChangeMap(int x, int y)
 					break;
 			}
 			break;
-		}
-		case SnakeBird::kBlock1:
-		{
-			switch (renderedType)
-			{
-				case SnakeBird::kBlock1:
-					return kCanRemove;
-					break;
-				case SnakeBird::kEmpty:
-					return kCanAdd;
-				default:
-					break;
-			}
 		}
 		default:
 			return kCannotAddRemove;
