@@ -474,114 +474,130 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 }
 
 
-void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
+static void DrawEditorViewport(unsigned long windowID)
 {
-	if (viewport == 1)
+	Graphics::Display &d = GetContext(windowID)->display;
+	d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
+	//editor.Draw(d);
+	//editor.Draw(d, editor.GetStart());
+	editor.SetColor(Colors::black); //keep the title black
+	editor.DrawLabel(d, kColumn1, 1, "Edit Ground Types");
+	if (gMouseEditorY == 3 && gMouseEditorX < 6) //ground
 	{
-		Graphics::Display &d = GetContext(windowID)->display;
-		d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
-		//editor.Draw(d);
-		//editor.Draw(d, editor.GetStart());
-		editor.SetColor(Colors::black); //keep the title black
-		editor.DrawLabel(d, kColumn1, 1, "Edit Ground Types");
-		if (gMouseEditorY == 3 && gMouseEditorX < 6) //ground
+		editor.SetColor(Colors::cyan);
+	}
+	else {
+		editor.SetColor(Colors::black);
+	}
+	if (gEditorMode == SnakeBird::kGround)
+	{
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+		editor.Draw(d, 1, 3);
+	}
+	editor.DrawLabel(d, kColumn1+1, 3, "Ground");
+	if (gMouseEditorY == 5 && gMouseEditorX < 6) //spikes
+	{
+		editor.SetColor(Colors::cyan);
+	}
+	else {
+		editor.SetColor(Colors::black);
+	}
+	if (gEditorMode == SnakeBird::kSpikes)
+	{
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+		editor.Draw(d, 1, 5);
+	}
+	editor.DrawLabel(d, kColumn1+1, 5, "Spikes");
+	if (gMouseEditorY == 7 && gMouseEditorX < 6) //portal
+	{
+		editor.SetColor(Colors::cyan);
+	}
+	else {
+		editor.SetColor(Colors::black);
+	}
+	if (gEditorMode == SnakeBird::kPortal)
+	{
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+		editor.Draw(d, 1, 7);
+	}
+	editor.DrawLabel(d, kColumn1+1, 7, "Portal");
+	if (gMouseEditorY == 9 && gMouseEditorX < 6) //fruit
+	{
+		editor.SetColor(Colors::cyan);
+	}
+	else {
+		editor.SetColor(Colors::black);
+	}
+	if (gEditorMode == SnakeBird::kFruit)
+	{
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+		editor.Draw(d, 1, 9);
+	}
+	editor.DrawLabel(d, kColumn1+1, 9, "Fruit");
+	if (gMouseEditorY == 11 && gMouseEditorX < 6) //exit
+	{
+		editor.SetColor(Colors::cyan);
+	}
+	else {
+		editor.SetColor(Colors::black);
+	}
+	if (gEditorMode == SnakeBird::kExit)
+	{
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+		editor.Draw(d, 1, 11);
+	}
+	editor.DrawLabel(d, kColumn1+1, 11, "Exit");
+	
+	if (gMouseEditorY == 3 && gMouseEditorX > 6) //AI add obstacle
+	{
+		editor.SetColor(Colors::cyan);
+	}
+	else {
+		editor.SetColor(Colors::black);
+	}
+	editor.DrawLabel(d, kColumn2+1, 3, "EPCG AI+");
+	if (gMouseEditorY == 5 && gMouseEditorX > 6) //AI delete obstacle
+	{
+		editor.SetColor(Colors::cyan);
+	}
+	else {
+		editor.SetColor(Colors::black);
+	}
+	editor.DrawLabel(d, kColumn2+1, 5, "EPCG AI-");
+	
+	editor.DrawObjects(d, globalTime);
+	
+	editor.SetColor(Colors::blue);
+	editor.DrawLabel(d, kColumn1, 14, editorMessage.c_str());
+	
+	if (recording)
+	{
+		std::string fname = "/Users/nathanst/Pictures/SVG/sb-editor_";
+		static int count = 0;
+		while (fileExists((fname+std::to_string(count)+".svg").c_str()))
 		{
-			editor.SetColor(Colors::cyan);
+			count++;
 		}
-		else {
-			editor.SetColor(Colors::black);
-		}
-		if (gEditorMode == SnakeBird::kGround)
+		printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
+		MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 1);
+		
+		if (!autoSolve && quitWhenDoneRecording)
 		{
-			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-			editor.Draw(d, 1, 3);
+			exit(0);
 		}
-		editor.DrawLabel(d, kColumn1+1, 3, "Ground");
-		if (gMouseEditorY == 5 && gMouseEditorX < 6) //spikes
-		{
-			editor.SetColor(Colors::cyan);
-		}
-		else {
-			editor.SetColor(Colors::black);
-		}
-		if (gEditorMode == SnakeBird::kSpikes)
-		{
-			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-			editor.Draw(d, 1, 5);
-		}
-		editor.DrawLabel(d, kColumn1+1, 5, "Spikes");
-		if (gMouseEditorY == 7 && gMouseEditorX < 6) //portal
-		{
-			editor.SetColor(Colors::cyan);
-		}
-		else {
-			editor.SetColor(Colors::black);
-		}
-		if (gEditorMode == SnakeBird::kPortal)
-		{
-			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-			editor.Draw(d, 1, 7);
-		}
-		editor.DrawLabel(d, kColumn1+1, 7, "Portal");
-		if (gMouseEditorY == 9 && gMouseEditorX < 6) //fruit
-		{
-			editor.SetColor(Colors::cyan);
-		}
-		else {
-			editor.SetColor(Colors::black);
-		}
-		if (gEditorMode == SnakeBird::kFruit)
-		{
-			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-			editor.Draw(d, 1, 9);
-		}
-		editor.DrawLabel(d, kColumn1+1, 9, "Fruit");
-		if (gMouseEditorY == 11 && gMouseEditorX < 6) //exit
-		{
-			editor.SetColor(Colors::cyan);
-		}
-		else {
-			editor.SetColor(Colors::black);
-		}
-		if (gEditorMode == SnakeBird::kExit)
-		{
-			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-			editor.Draw(d, 1, 11);
-		}
-		editor.DrawLabel(d, kColumn1+1, 11, "Exit");
-
-		if (gMouseEditorY == 3 && gMouseEditorX > 6) //AI add obstacle
-		{
-			editor.SetColor(Colors::cyan);
-		}
-		else {
-			editor.SetColor(Colors::black);
-		}
-		editor.DrawLabel(d, kColumn2+1, 3, "EPCG AI+");
-		if (gMouseEditorY == 5 && gMouseEditorX > 6) //AI delete obstacle
-		{
-			editor.SetColor(Colors::cyan);
-		}
-		else {
-			editor.SetColor(Colors::black);
-		}
-		editor.DrawLabel(d, kColumn2+1, 5, "EPCG AI-");
-
-		editor.DrawObjects(d, globalTime);
-
-		editor.SetColor(Colors::blue);
-		editor.DrawLabel(d, kColumn1, 14, editorMessage.c_str());
-
-		return;
 	}
 	
+	return;
+}
+
+static void DrawGameViewport(unsigned long windowID) {
 	frameRate = worldClock.EndTimer()-lastFrameStart;
 	lastFrameStart = worldClock.EndTimer();
 	if (recording)
 		frameRate = 1.0/60.0; // fixed frame rate when recording
-//	printf("%f\n", frameRate);
-//	frameRate = 1.0/120.0; // fixed frame rate when recording
-//	frameRate /= 20;
+	//	printf("%f\n", frameRate);
+	//	frameRate = 1.0/120.0; // fixed frame rate when recording
+	//	frameRate /= 20;
 	
 	globalTime += frameRate;
 	frameTime += frameRate;
@@ -594,7 +610,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			bool complete = sb.ApplyPartialAction(snake, inProgress, actionInProgressStep);
 			actionInProgress = !complete;
 			timePerFrame = actionInProgressStep.animationDuration;
-
+			
 			if (!actionInProgress)
 			{
 				if (SnakeDead())
@@ -607,7 +623,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 					messageBeginTime = globalTime+0.5;
 					messageExpireTime = globalTime+10;
 				}
-
+				
 			}
 			
 			if (actionInProgress == false && autoSolve == true)
@@ -662,7 +678,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			sb.Draw(d, gMouseX, gMouseY);
 		}
 	}
-
+	
 	if (sb.GoalTest(snake) && actionInProgress == false && quitWhenDoneRecording == false )
 	{
 		message = "";
@@ -683,20 +699,20 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		transition.Reset(0);
 	}
 	
-
+	
 	auto c = Colors::black;
 #ifdef __EMSCRIPTEN__
 	c = Colors::white;
 #endif
-
+	
 	d.FillRect({-2, -2, 2, -1}, c);
 	d.FillRect({-2, 1, 2, 2}, c);
 	d.FillRect({-2, -2, -1, 2}, c);
 	d.FillRect({1, -2, 2, 2}, c);
-
+	
 	if (recording)
 	{
-		std::string fname = "/Users/nathanst/Movies/tmp/sb_";
+		std::string fname = "/Users/nathanst/Pictures/SVG/sb-game";
 		static int count = 0;
 		while (fileExists((fname+std::to_string(count)+".svg").c_str()))
 		{
@@ -704,7 +720,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		}
 		printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
 		MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0);
-
+		
 		if (!autoSolve && quitWhenDoneRecording)
 		{
 			exit(0);
@@ -725,6 +741,18 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			c.mix(tmp, 1-(globalTime-messageBeginTime));
 		}
 		d.DrawText(message.c_str(), {-1+sb.GetRadius(),-1+1.5f*sb.GetRadius()}, c, sb.GetRadius(), Graphics::textAlignLeft, "Helvetica");
+	}
+}
+
+void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
+{
+	if (viewport == 1)
+	{
+		DrawEditorViewport(windowID);
+	}
+	else if (viewport == 0)
+	{
+		DrawGameViewport(windowID);
 	}
 }
 
@@ -1051,14 +1079,15 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 			sb.Draw(d);
 			sb.Draw(d, globalTime);
 			sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
-			std::string fname = "/Users/nathanst/Desktop/SVG/sb_";
+//			std::string fname = "/Users/nathanst/Desktop/SVG/sb_";
+			std::string fname = "/Users/nathanst/Pictures/SVG/sb_";
 			int count = 0;
 			while (fileExists((fname+std::to_string(count)+".svg").c_str()))
 			{
 				count++;
 			}
 			printf("Save to '%s'\n", (fname+std::to_string(count)+".svg").c_str());
-			MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0);
+			MakeSVG(d, (fname+std::to_string(count)+".svg").c_str(), 400, 400, 0, sb.EncodeLevel().c_str(), true);
 		}
 			break;
 		case 'o':
