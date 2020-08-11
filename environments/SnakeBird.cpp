@@ -1832,71 +1832,101 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 		}
 			break;
 		case kEmpty:
-			display.FillSquare(p, GetRadius(), rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5)); //break;
+			if (time > 0)
+			{
+			display.FillSquare(p, GetRadius(), rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5)); break;
+			}
+			else
 			break;
 		case kGround:
+			if (time > 0)
+			{
 			display.FillSquare(p, GetRadius(), Colors::brown); break;
+			}
+			else
 			break;
 		case kSpikes:
-			if (GetY(x) != height-1)
+			if (time > 0)
 			{
-				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
-				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+				if (GetY(x) != height-1)
+				{
+					display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+					display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
+					break;
+				}
 			}
+			else
 			break;
 		case kPortal1:
 		case kPortal2:
-		{
-			double radius = GetRadius()*0.95;
-			double offset1 = (sin(time*1.0)); // -1...+1
-			double offset2 = (sin(time*1.5)); // -1...+1
-			double offset3 = (sin(time*2.0)); // -1...+1
-			double offset4 = (sin(time*2.5)); // -1...+1
-			display.FillCircle(p, radius+offset1*radius*0.25, Colors::red);
-			display.FillCircle(p, radius*0.75+offset2*radius*0.2, Colors::blue);
-			display.FillCircle(p, radius*0.5+offset3*radius*0.15, Colors::green);
-			display.FillCircle(p, radius*0.25+offset4*radius*0.1, Colors::purple);
-		}
+			if (time > 0)
+			{
+				{
+					double radius = GetRadius()*0.95;
+					double offset1 = (sin(time*1.0)); // -1...+1
+					double offset2 = (sin(time*1.5)); // -1...+1
+					double offset3 = (sin(time*2.0)); // -1...+1
+					double offset4 = (sin(time*2.5)); // -1...+1
+					display.FillCircle(p, radius+offset1*radius*0.25, Colors::red);
+					display.FillCircle(p, radius*0.75+offset2*radius*0.2, Colors::blue);
+					display.FillCircle(p, radius*0.5+offset3*radius*0.15, Colors::green);
+					display.FillCircle(p, radius*0.25+offset4*radius*0.1, Colors::purple);
+				}
+				break;
+			}
+			else
 			break;
 		case kFruit:
 		{
-			const float rows = 5;
-			const float counts[] = {3, 4, 3, 2, 1};
-			float grapeRadius = GetRadius()*0.15f;
-			for (int t = 0; t < rows; t++)
+			if (time > 0)
 			{
-				for (int v = 0; v < counts[t]; v++)
+				const float rows = 5;
+				const float counts[] = {3, 4, 3, 2, 1};
+				float grapeRadius = GetRadius()*0.15f;
+				for (int t = 0; t < rows; t++)
 				{
-					Graphics::point tmp = p;
-					tmp.y -= rows*grapeRadius;
-					tmp.y += 2*t*grapeRadius;
-					tmp.x = tmp.x-grapeRadius*(counts[t]-1)+v*grapeRadius*2;
-					tmp.x += sin(time*1.1+(t+v)*0.1)*GetRadius()*0.1;
-					tmp.y += cos(time*0.95+(t+v)*0.1)*GetRadius()*0.1;
-					display.FillCircle(tmp, grapeRadius*1.1, Colors::purple*sin(time*1.95+v+t));
+					for (int v = 0; v < counts[t]; v++)
+					{
+						Graphics::point tmp = p;
+						tmp.y -= rows*grapeRadius;
+						tmp.y += 2*t*grapeRadius;
+						tmp.x = tmp.x-grapeRadius*(counts[t]-1)+v*grapeRadius*2;
+						tmp.x += sin(time*1.1+(t+v)*0.1)*GetRadius()*0.1;
+						tmp.y += cos(time*0.95+(t+v)*0.1)*GetRadius()*0.1;
+						display.FillCircle(tmp, grapeRadius*1.1, Colors::purple*sin(time*1.95+v+t));
+					}
 				}
+				break;
+			}
+			else
+			{
+			break;
 			}
 		}
-			break;
 		case kExit:
 		{
-			double radius = GetRadius()*0.95;
-			double localTime = time;
-			//				if (s.KFruitEaten(fruit.size()))
-			//				{
-			//					radius = radius+0.25*radius*(1+sin(time*2.5));
-			//					localTime *= 2.0;
-			//				}
-			//				else {
-			localTime /= 4.0;
-			//				}
-			double offset1 = (sin(localTime*1.0))*180; // -1...+1
-			double offset2 = (sin(localTime*1.5))*180; // -1...+1
-			double offset3 = (sin(localTime*2.0))*180; // -1...+1
-			display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
-			display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
-			display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
-			break;
+			if (time > 0)
+			{
+				double radius = GetRadius()*0.95;
+				double localTime = time;
+				//				if (s.KFruitEaten(fruit.size()))
+				//				{
+				//					radius = radius+0.25*radius*(1+sin(time*2.5));
+				//					localTime *= 2.0;
+				//				}
+				//				else {
+				localTime /= 4.0;
+				//				}
+				double offset1 = (sin(localTime*1.0))*180; // -1...+1
+				double offset2 = (sin(localTime*1.5))*180; // -1...+1
+				double offset3 = (sin(localTime*2.0))*180; // -1...+1
+				display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
+				display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
+				display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
+				break;
+			}
+			else
+				break;
 		}
 		default: break;
 	}
