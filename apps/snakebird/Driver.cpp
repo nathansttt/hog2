@@ -473,44 +473,59 @@ static void DrawEditorViewport(unsigned long windowID)
 
 	editor.DrawLabel(d, kColumn1, 1, "Edit Ground Types");
 
+	// TODO: Make the code more general to reduce size
 	if (gMouseEditorY == 3 && gMouseEditorX < kColumn2) //ground
 		editor.SetColor(Colors::cyan);
+	else if (gEditorMode == SnakeBird::kGround)
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 	else
 		editor.SetColor(Colors::black);
 	editor.DrawLabel(d, kColumn1+1, 3, "Ground");
 
 	if (gMouseEditorY == 5 && gMouseEditorX < kColumn2) //ground
 		editor.SetColor(Colors::cyan);
+	else if (gEditorMode == SnakeBird::kSpikes)
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 	else
 		editor.SetColor(Colors::black);
 	editor.DrawLabel(d, kColumn1+1, 5, "Spikes");
 
 	if (gMouseEditorY == 7 && gMouseEditorX < kColumn2) //ground
 		editor.SetColor(Colors::cyan);
+	else if (gEditorMode == SnakeBird::kPortal1)
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 	else
 		editor.SetColor(Colors::black);
 	editor.DrawLabel(d, kColumn1+1, 7, "Portal");
 
 	if (gMouseEditorY == 9 && gMouseEditorX < kColumn2) //ground
 		editor.SetColor(Colors::cyan);
+	else if (gEditorMode == SnakeBird::kFruit)
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 	else
 		editor.SetColor(Colors::black);
 	editor.DrawLabel(d, kColumn1+1, 9, "Fruit");
 
 	if (gMouseEditorY == 11 && gMouseEditorX < kColumn2) //ground
 		editor.SetColor(Colors::cyan);
+	else if (gEditorMode == SnakeBird::kExit)
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 	else
 		editor.SetColor(Colors::black);
 	editor.DrawLabel(d, kColumn1+1, 11, "Exit");
 
 	if (gMouseEditorY == 13 && gMouseEditorX < kColumn2) //ground
 		editor.SetColor(Colors::cyan);
+	else if (gEditorMode == SnakeBird::kBlock1)
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 	else
 		editor.SetColor(Colors::black);
 	editor.DrawLabel(d, kColumn1+1, 13, "Block 1");
 
 	if (gMouseEditorY == 15 && gMouseEditorX < kColumn2) //ground
 		editor.SetColor(Colors::cyan);
+	else if (gEditorMode == SnakeBird::kEmpty)
+		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 	else
 		editor.SetColor(Colors::black);
 	editor.DrawLabel(d, kColumn1+1, 15, "Sky");
@@ -554,121 +569,121 @@ static void DrawEditorViewport(unsigned long windowID)
 		default:
 			break;
 	}
-	if (gMouseEditorY == 3 && gMouseEditorX < 6) //ground
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	if (gEditorMode == SnakeBird::kGround)
-	{
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-		editor.Draw(d, 1, 3);
-	}
-	editor.DrawLabel(d, kColumn1+1, 3, "Ground");
-	if (gMouseEditorY == 5 && gMouseEditorX < 6) //spikes
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	if (gEditorMode == SnakeBird::kSpikes)
-	{
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-		editor.Draw(d, 1, 5);
-	}
-	editor.DrawLabel(d, kColumn1+1, 5, "Spikes");
-	if (gMouseEditorY == 7 && gMouseEditorX < 6) //portal
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	if (gEditorMode == SnakeBird::kPortal)
-	{
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-		editor.Draw(d, 1, 7);
-	}
-	editor.DrawLabel(d, kColumn1+1, 7, "Portal");
-	if (gMouseEditorY == 9 && gMouseEditorX < 6) //fruit
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	if (gEditorMode == SnakeBird::kFruit)
-	{
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-		editor.Draw(d, 1, 9);
-	}
-	editor.DrawLabel(d, kColumn1+1, 9, "Fruit");
-	if (gMouseEditorY == 11 && gMouseEditorX < 6) //exit
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	if (gEditorMode == SnakeBird::kExit)
-	{
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-		editor.Draw(d, 1, 11);
-	}
-	editor.DrawLabel(d, kColumn1+1, 11, "Exit");
-	if (gMouseEditorY == 13 && gMouseEditorX < 6) //Block 1
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-
-	if (gEditorMode == SnakeBird::kBlock1)
-	{
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	editor.DrawLabel(d, kColumn1+1, 13, "Block 1");
-
-	if (gMouseEditorY == 3 && gMouseEditorX > 6) //Sky
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-
-	if (gEditorMode == SnakeBird::kEmpty)
-	{
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	editor.DrawLabel(d, kColumn1+1, 15, "Sky");
-	
-	if (gMouseEditorY == 5 && gMouseEditorX > 6) //AI add obstacle
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	editor.DrawLabel(d, kColumn2+1, 5, "EPCG AI+");
-	if (gMouseEditorY == 7 && gMouseEditorX > 6) //AI delete obstacle
-	{
-		editor.SetColor(Colors::cyan);
-	}
-	else {
-		editor.SetColor(Colors::black);
-	}
-	editor.DrawLabel(d, kColumn2+1, 7, "EPCG AI-");
+//	if (gMouseEditorY == 3 && gMouseEditorX < 6) //ground
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	if (gEditorMode == SnakeBird::kGround)
+//	{
+//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+//		editor.Draw(d, 1, 3);
+//	}
+//	editor.DrawLabel(d, kColumn1+1, 3, "Ground");
+//	if (gMouseEditorY == 5 && gMouseEditorX < 6) //spikes
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	if (gEditorMode == SnakeBird::kSpikes)
+//	{
+//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+//		editor.Draw(d, 1, 5);
+//	}
+//	editor.DrawLabel(d, kColumn1+1, 5, "Spikes");
+//	if (gMouseEditorY == 7 && gMouseEditorX < 6) //portal
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	if (gEditorMode == SnakeBird::kPortal)
+//	{
+//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+//		editor.Draw(d, 1, 7);
+//	}
+//	editor.DrawLabel(d, kColumn1+1, 7, "Portal");
+//	if (gMouseEditorY == 9 && gMouseEditorX < 6) //fruit
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	if (gEditorMode == SnakeBird::kFruit)
+//	{
+//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+//		editor.Draw(d, 1, 9);
+//	}
+//	editor.DrawLabel(d, kColumn1+1, 9, "Fruit");
+//	if (gMouseEditorY == 11 && gMouseEditorX < 6) //exit
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	if (gEditorMode == SnakeBird::kExit)
+//	{
+//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+//		editor.Draw(d, 1, 11);
+//	}
+//	editor.DrawLabel(d, kColumn1+1, 11, "Exit");
+//	if (gMouseEditorY == 13 && gMouseEditorX < 6) //Block 1
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//
+//	if (gEditorMode == SnakeBird::kBlock1)
+//	{
+//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	editor.DrawLabel(d, kColumn1+1, 13, "Block 1");
+//
+//	if (gMouseEditorY == 3 && gMouseEditorX > 6) //Sky
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//
+//	if (gEditorMode == SnakeBird::kEmpty)
+//	{
+//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	editor.DrawLabel(d, kColumn1+1, 15, "Sky");
+//
+//	if (gMouseEditorY == 5 && gMouseEditorX > 6) //AI add obstacle
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	editor.DrawLabel(d, kColumn2+1, 5, "EPCG AI+");
+//	if (gMouseEditorY == 7 && gMouseEditorX > 6) //AI delete obstacle
+//	{
+//		editor.SetColor(Colors::cyan);
+//	}
+//	else {
+//		editor.SetColor(Colors::black);
+//	}
+//	editor.DrawLabel(d, kColumn2+1, 7, "EPCG AI-");
 	
 	editor.DrawObjects(d, globalTime);
 	editor.DrawObject(d, kColumn1, 3, SnakeBird::kGround, globalTime);
