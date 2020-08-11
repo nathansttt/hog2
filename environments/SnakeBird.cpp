@@ -1795,13 +1795,42 @@ void SnakeBird::DrawObjects(Graphics::Display &display, double time) const
 	}
 }
 
-void SnakeBird::DrawEditor(Graphics::Display &display, int x, int y, SnakeBirdWorldObject o, double time) const
+void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWorldObject o, double time) const
 {
 	//Graphics::point p = GetCenter(GetX(x), GetY(x));
+	rgbColor objColors[4] = {Colors::red*0.75, Colors::blue*0.75, Colors::green*0.75, Colors::yellow*0.75};
 	Graphics::point p = GetCenter(x, y);
 	double radius = GetRadius()*0.95;
 	switch (o)
 	{
+		case kBlock1:
+		{
+			radius = GetRadius();
+			Graphics::point p = GetCenter(x, y);
+			display.FrameSquare(p, radius-radius*0.3, objColors[0], radius*0.6);
+		}
+			break;
+		case kBlock2:
+		{
+			radius = GetRadius();
+			Graphics::point p = GetCenter(x, y);
+			display.FrameSquare(p, radius-radius*0.3, objColors[1], radius*0.6);
+		}
+			break;
+		case kBlock3:
+		{
+			radius = GetRadius();
+			Graphics::point p = GetCenter(x, y);
+			display.FrameSquare(p, radius-radius*0.3, objColors[2], radius*0.6);
+		}
+			break;
+		case kBlock4:
+		{
+			radius = GetRadius();
+			Graphics::point p = GetCenter(x, y);
+			display.FrameSquare(p, radius-radius*0.3, objColors[3], radius*0.6);
+		}
+			break;
 		case kEmpty:
 			display.FillSquare(p, GetRadius(), rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5)); //break;
 			break;
@@ -1819,7 +1848,6 @@ void SnakeBird::DrawEditor(Graphics::Display &display, int x, int y, SnakeBirdWo
 		case kPortal2:
 		{
 			double radius = GetRadius()*0.95;
-			Graphics::point p = GetCenter(GetX(x), GetY(x));
 			double offset1 = (sin(time*1.0)); // -1...+1
 			double offset2 = (sin(time*1.5)); // -1...+1
 			double offset3 = (sin(time*2.0)); // -1...+1
@@ -1834,7 +1862,6 @@ void SnakeBird::DrawEditor(Graphics::Display &display, int x, int y, SnakeBirdWo
 		{
 			const float rows = 5;
 			const float counts[] = {3, 4, 3, 2, 1};
-			Graphics::point p = GetCenter(GetX(x), GetY(x));
 			float grapeRadius = GetRadius()*0.15f;
 			for (int t = 0; t < rows; t++)
 			{
@@ -1853,7 +1880,6 @@ void SnakeBird::DrawEditor(Graphics::Display &display, int x, int y, SnakeBirdWo
 			break;
 		case kExit:
 		{
-			Graphics::point p = GetCenter(GetX(exitLoc), GetY(exitLoc));
 			double radius = GetRadius()*0.95;
 			double localTime = time;
 			//				if (s.KFruitEaten(fruit.size()))

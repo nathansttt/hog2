@@ -54,7 +54,7 @@ enum EditorColor {
 };
 enum EditorColumn {
 	kColumn1 = 1,
-	kColumn2 = 7
+	kColumn2 = 8
 };
 
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
@@ -70,8 +70,7 @@ LineTransition transition(20, 60, Colors::white);
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
 SnakeBird::SnakeBirdState lastFrameSnake;
-SnakeBird::SnakeBird editor(16, 16);
-SnakeBird::SnakeBird editorOverlay;
+SnakeBird::SnakeBird editor(18, 18);
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
@@ -460,17 +459,6 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		worldClock.StartTimer();
 		lastFrameStart = worldClock.GetElapsedTime();
-
-		editor.BeginEditing();
-		editor.SetGroundType(kColumn1, 3, SnakeBird::kGround);
-		editor.SetGroundType(kColumn1, 5, SnakeBird::kSpikes);
-		editor.SetGroundType(kColumn1, 7, SnakeBird::kPortal1);
-		editor.SetGroundType(kColumn1, 9, SnakeBird::kFruit);
-		editor.SetGroundType(kColumn1, 11, SnakeBird::kExit);
-		editor.SetGroundType(kColumn1, 13, SnakeBird::kSpikes);
-		editor.SetGroundType(kColumn2, 5, SnakeBird::kSpikes);
-		editor.SetGroundType(kColumn2, 7, SnakeBird::kSpikes);
-		editor.EndEditing();
 	}
 }
 
@@ -482,7 +470,90 @@ static void DrawEditorViewport(unsigned long windowID)
 	//editor.Draw(d);
 	//editor.Draw(d, editor.GetStart());
 	editor.SetColor(Colors::black); //keep the title black
+
 	editor.DrawLabel(d, kColumn1, 1, "Edit Ground Types");
+
+	if (gMouseEditorY == 3 && gMouseEditorX < kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn1+1, 3, "Ground");
+
+	if (gMouseEditorY == 5 && gMouseEditorX < kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn1+1, 5, "Spikes");
+
+	if (gMouseEditorY == 7 && gMouseEditorX < kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn1+1, 7, "Portal");
+
+	if (gMouseEditorY == 9 && gMouseEditorX < kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn1+1, 9, "Fruit");
+
+	if (gMouseEditorY == 11 && gMouseEditorX < kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn1+1, 11, "Exit");
+
+	if (gMouseEditorY == 13 && gMouseEditorX < kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn1+1, 13, "Block 1");
+
+	if (gMouseEditorY == 15 && gMouseEditorX < kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn1+1, 15, "Sky");
+
+	if (gMouseEditorY == 5 && gMouseEditorX >= kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn2+1, 5, "EPCG AI+");
+
+	if (gMouseEditorY == 7 && gMouseEditorX >= kColumn2) //ground
+		editor.SetColor(Colors::cyan);
+	else
+		editor.SetColor(Colors::black);
+	editor.DrawLabel(d, kColumn2+1, 7, "EPCG AI-");
+
+	editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+	switch (gEditorMode)
+	{
+		case SnakeBird::kGround:
+			editor.Draw(d, 1, 3);
+			break;
+		case SnakeBird::kSpikes:
+			editor.Draw(d, 1, 5);
+			break;
+		case SnakeBird::kPortal:
+			editor.Draw(d, 1, 7);
+			break;
+		case SnakeBird::kFruit:
+			editor.Draw(d, 1, 9);
+			break;
+		case SnakeBird::kExit:
+			editor.Draw(d, 1, 11);
+			break;
+		case SnakeBird::kBlock1:
+			editor.Draw(d, 1, 33);
+			break;
+		case SnakeBird::kEmpty:
+			editor.Draw(d, 1, 15);
+			break;
+		default:
+			break;
+	}
 	if (gMouseEditorY == 3 && gMouseEditorX < 6) //ground
 	{
 		editor.SetColor(Colors::cyan);
@@ -555,12 +626,16 @@ static void DrawEditorViewport(unsigned long windowID)
 	else {
 		editor.SetColor(Colors::black);
 	}
+
 	if (gEditorMode == SnakeBird::kBlock1)
 	{
 		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-		editor.Draw(d, 1, 13);
+	}
+	else {
+		editor.SetColor(Colors::black);
 	}
 	editor.DrawLabel(d, kColumn1+1, 13, "Block 1");
+
 	if (gMouseEditorY == 3 && gMouseEditorX > 6) //Sky
 	{
 		editor.SetColor(Colors::cyan);
@@ -568,13 +643,15 @@ static void DrawEditorViewport(unsigned long windowID)
 	else {
 		editor.SetColor(Colors::black);
 	}
+
 	if (gEditorMode == SnakeBird::kEmpty)
 	{
 		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-		editor.Draw(d, kColumn2, 3);
 	}
-	editor.DrawLabel(d, kColumn2+1, 3, "Sky");
-	editor.DrawEditor(d, kColumn2, 3, SnakeBird::kEmpty, globalTime);
+	else {
+		editor.SetColor(Colors::black);
+	}
+	editor.DrawLabel(d, kColumn1+1, 15, "Sky");
 	
 	if (gMouseEditorY == 5 && gMouseEditorX > 6) //AI add obstacle
 	{
@@ -594,9 +671,19 @@ static void DrawEditorViewport(unsigned long windowID)
 	editor.DrawLabel(d, kColumn2+1, 7, "EPCG AI-");
 	
 	editor.DrawObjects(d, globalTime);
+	editor.DrawObject(d, kColumn1, 3, SnakeBird::kGround, globalTime);
+	editor.DrawObject(d, kColumn1, 5, SnakeBird::kSpikes, globalTime);
+	editor.DrawObject(d, kColumn1, 7, SnakeBird::kPortal1, globalTime);
+	editor.DrawObject(d, kColumn1, 9, SnakeBird::kFruit, globalTime);
+	editor.DrawObject(d, kColumn1, 11, SnakeBird::kExit, globalTime);
+	editor.DrawObject(d, kColumn1, 13, SnakeBird::kBlock1, globalTime);
+	editor.DrawObject(d, kColumn1, 15, SnakeBird::kEmpty, globalTime);
+	editor.DrawObject(d, kColumn2, 5, SnakeBird::kSpikes, globalTime);
+	editor.DrawObject(d, kColumn2, 7, SnakeBird::kSpikes, globalTime);
+
 	
 	editor.SetColor(Colors::blue);
-	editor.DrawLabel(d, kColumn1, 14, editorMessage.c_str());
+	editor.DrawLabel(d, kColumn1, 17, editorMessage.c_str());
 	
 	if (recording)
 	{
@@ -682,41 +769,13 @@ static void DrawGameViewport(unsigned long windowID) {
 	{
 		if (CanChangeMap(gMouseX, gMouseY) == kCanRemove) //remove objects
 		{
-			if (gEditorMode == SnakeBird::kEmpty)
-			{
-				editorOverlay.BeginEditing();
-				editorOverlay.DrawEditor(d, gMouseX, gMouseY, SnakeBird::kEmpty);
-				editorOverlay.DrawObjects(d);
-				editorOverlay.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
-				editorOverlay.EndEditing();
-				sb.SetColor(Colors::red);
-				sb.Draw(d, gMouseX, gMouseY);
-			}
-			editorOverlay.BeginEditing();
-			editorOverlay.SetGroundType(gMouseX, gMouseY, gEditorMode);
-			editorOverlay.DrawObjects(d);
-			editorOverlay.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
-			editorOverlay.EndEditing();
+			sb.DrawObject(d, gMouseX, gMouseY, gEditorMode);
 			sb.SetColor(Colors::red);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
 		else if (CanChangeMap(gMouseX, gMouseY) == kCanAdd) //add objects
 		{
-			if (gEditorMode == SnakeBird::kEmpty)
-			{
-				editorOverlay.BeginEditing();
-				editorOverlay.DrawEditor(d, gMouseX, gMouseY, SnakeBird::kEmpty);
-				editorOverlay.DrawObjects(d);
-				editorOverlay.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
-				editorOverlay.EndEditing();
-				sb.SetColor(Colors::yellow);
-				sb.Draw(d, gMouseX, gMouseY);
-			}
-			editorOverlay.BeginEditing();
-			editorOverlay.SetGroundType(gMouseX, gMouseY, gEditorMode);
-			editorOverlay.DrawObjects(d);
-			editorOverlay.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
-			editorOverlay.EndEditing();
+			sb.DrawObject(d, gMouseX, gMouseY, gEditorMode);
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
@@ -1156,7 +1215,6 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 				ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
 				AddViewport(windowID, {0.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare); // (will be editor)
 				SnakeBird::SnakeBird tmp(sb.GetWidth(), sb.GetHeight());
-				editorOverlay = tmp;
 				ShowSolutionLength();
 			}
 			else {
@@ -1338,8 +1396,6 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 				case 3:
 					if (gMouseEditorX < kColumn2)
 						EditorKeyBoardHandler(windowID, kNoModifier, 'g');
-					if (gMouseEditorX >= kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 'r');
 					break;
 				case 5:
 					if (gMouseEditorX < kColumn2)
@@ -1365,6 +1421,9 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 					if (gMouseEditorX < kColumn2)
 						EditorKeyBoardHandler(windowID, kNoModifier, 'b');
 					break;
+				case 15:
+					if (gMouseEditorX < kColumn2)
+						EditorKeyBoardHandler(windowID, kNoModifier, 'r');
 				default:
 					break;
 			}

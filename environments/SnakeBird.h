@@ -305,7 +305,7 @@ public:
 
 	void Draw(Graphics::Display &display) const;
 	void DrawObjects(Graphics::Display &display, double time = 0) const;
-	void DrawEditor(Graphics::Display &display, int x, int y, SnakeBirdWorldObject o, double time = 0) const;
+	void DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWorldObject o, double time = 0) const;
 	void Draw(Graphics::Display &display, int x, int y) const;
 	void Draw(Graphics::Display &display, double time) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
