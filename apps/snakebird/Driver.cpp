@@ -789,13 +789,13 @@ static void DrawGameViewport(unsigned long windowID) {
 	{
 		if (CanChangeMap(gMouseX, gMouseY) == kCanRemove) //remove objects
 		{
-			sb.DrawObject(d, gMouseX, gMouseY, gEditorMode);
+			sb.DrawObject(d, gMouseX, gMouseY, gEditorMode, globalTime);
 			sb.SetColor(Colors::red);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
 		else if (CanChangeMap(gMouseX, gMouseY) == kCanAdd) //add objects
 		{
-			sb.DrawObject(d, gMouseX, gMouseY, gEditorMode);
+			sb.DrawObject(d, gMouseX, gMouseY, gEditorMode, globalTime);
 			sb.SetColor(Colors::yellow);
 			sb.Draw(d, gMouseX, gMouseY);
 		}
