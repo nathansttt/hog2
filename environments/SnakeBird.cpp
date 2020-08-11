@@ -1834,16 +1834,14 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 		case kEmpty:
 			if (time > 0)
 			{
-			display.FillSquare(p, GetRadius(), rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5)); break;
+				display.FillSquare(p, GetRadius(), rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5)); break;
 			}
-			else
 			break;
 		case kGround:
 			if (time > 0)
 			{
-			display.FillSquare(p, GetRadius(), Colors::brown); break;
+				display.FillSquare(p, GetRadius(), Colors::brown); break;
 			}
-			else
 			break;
 		case kSpikes:
 			if (time > 0)
@@ -1852,10 +1850,8 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 				{
 					display.FillNGon(p, radius, 3, 0, Colors::darkgray);
 					display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
-					break;
 				}
 			}
-			else
 			break;
 		case kPortal1:
 		case kPortal2:
@@ -1872,9 +1868,7 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 					display.FillCircle(p, radius*0.5+offset3*radius*0.15, Colors::green);
 					display.FillCircle(p, radius*0.25+offset4*radius*0.1, Colors::purple);
 				}
-				break;
 			}
-			else
 			break;
 		case kFruit:
 		{
@@ -1896,12 +1890,8 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 						display.FillCircle(tmp, grapeRadius*1.1, Colors::purple*sin(time*1.95+v+t));
 					}
 				}
-				break;
 			}
-			else
-			{
 			break;
-			}
 		}
 		case kExit:
 		{
@@ -1925,8 +1915,7 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 				display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
 				break;
 			}
-			else
-				break;
+			break;
 		}
 		default: break;
 	}
