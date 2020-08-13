@@ -456,6 +456,8 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			message = "Welcome to Anhinga! Leave via the yellow exit to pass the level.";
 		else
 			message = "Welcome to Anhinga! Eat the grapes and then leave via the yellow exit.";
+		messageBeginTime = globalTime+0.5;
+		messageExpireTime = globalTime+10;
 
 		worldClock.StartTimer();
 		lastFrameStart = worldClock.GetElapsedTime();
@@ -472,7 +474,7 @@ static void DrawEditorViewport(unsigned long windowID)
 	editor.SetColor(Colors::black); //keep the title black
 
 	editor.DrawLabel(d, kColumn1, 1, "Edit Map");
-	editor.DrawLabel(d, kColumn2, 1, "EPCG AI");
+	editor.DrawLabel(d, kColumn2, 1, "EPCG AI Analysis");
 
 	// TODO: Make the code more general to reduce size
 	if (gMouseEditorY == 3 && gMouseEditorX < kColumn2) //sky
@@ -542,123 +544,6 @@ static void DrawEditorViewport(unsigned long windowID)
 	else
 		editor.SetColor(Colors::black);
 	editor.DrawLabel(d, kColumn2+1, 5, "Decrease Sol. Length");
-
-	
-//	if (gMouseEditorY == 3 && gMouseEditorX < 6) //ground
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	if (gEditorMode == SnakeBird::kGround)
-//	{
-//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-//		editor.Draw(d, 1, 3);
-//	}
-//	editor.DrawLabel(d, kColumn1+1, 3, "Ground");
-//	if (gMouseEditorY == 5 && gMouseEditorX < 6) //spikes
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	if (gEditorMode == SnakeBird::kSpikes)
-//	{
-//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-//		editor.Draw(d, 1, 5);
-//	}
-//	editor.DrawLabel(d, kColumn1+1, 5, "Spikes");
-//	if (gMouseEditorY == 7 && gMouseEditorX < 6) //portal
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	if (gEditorMode == SnakeBird::kPortal)
-//	{
-//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-//		editor.Draw(d, 1, 7);
-//	}
-//	editor.DrawLabel(d, kColumn1+1, 7, "Portal");
-//	if (gMouseEditorY == 9 && gMouseEditorX < 6) //fruit
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	if (gEditorMode == SnakeBird::kFruit)
-//	{
-//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-//		editor.Draw(d, 1, 9);
-//	}
-//	editor.DrawLabel(d, kColumn1+1, 9, "Fruit");
-//	if (gMouseEditorY == 11 && gMouseEditorX < 6) //exit
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	if (gEditorMode == SnakeBird::kExit)
-//	{
-//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-//		editor.Draw(d, 1, 11);
-//	}
-//	editor.DrawLabel(d, kColumn1+1, 11, "Exit");
-//	if (gMouseEditorY == 13 && gMouseEditorX < 6) //Block 1
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//
-//	if (gEditorMode == SnakeBird::kBlock1)
-//	{
-//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	editor.DrawLabel(d, kColumn1+1, 13, "Block 1");
-//
-//	if (gMouseEditorY == 3 && gMouseEditorX > 6) //Sky
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//
-//	if (gEditorMode == SnakeBird::kEmpty)
-//	{
-//		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	editor.DrawLabel(d, kColumn1+1, 15, "Sky");
-//
-//	if (gMouseEditorY == 5 && gMouseEditorX > 6) //AI add obstacle
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	editor.DrawLabel(d, kColumn2+1, 5, "EPCG AI+");
-//	if (gMouseEditorY == 7 && gMouseEditorX > 6) //AI delete obstacle
-//	{
-//		editor.SetColor(Colors::cyan);
-//	}
-//	else {
-//		editor.SetColor(Colors::black);
-//	}
-//	editor.DrawLabel(d, kColumn2+1, 7, "EPCG AI-");
 	
 	editor.DrawObjects(d, globalTime);
 	editor.DrawObject(d, kColumn1, 3, SnakeBird::kEmpty, globalTime); //sky
@@ -668,18 +553,20 @@ static void DrawEditorViewport(unsigned long windowID)
 	editor.DrawObject(d, kColumn1, 11, SnakeBird::kPortal1, globalTime);
 	editor.DrawObject(d, kColumn1, 13, SnakeBird::kBlock1, globalTime);
 	editor.DrawObject(d, kColumn1, 15, SnakeBird::kExit, globalTime);
+	editor.DrawObject(d, kColumn2, 3, SnakeBird::kGround, globalTime);
 	editor.DrawObject(d, kColumn2, 3, SnakeBird::kSpikes, globalTime);
-	editor.DrawObject(d, kColumn2, 3, SnakeBird::kGround, sin(globalTime*7));
-	editor.DrawObject(d, kColumn2, 3, SnakeBird::kEmpty, tan(globalTime*7));
+//	editor.DrawObject(d, kColumn2, 3, SnakeBird::kGround, sin(globalTime*7));
+//	editor.DrawObject(d, kColumn2, 3, SnakeBird::kEmpty, tan(globalTime*7));
+	editor.DrawObject(d, kColumn2, 5, SnakeBird::kGround, globalTime);
 	editor.DrawObject(d, kColumn2, 5, SnakeBird::kSpikes, globalTime);
-	editor.DrawObject(d, kColumn2, 5, SnakeBird::kGround, cos(globalTime*7));
-	editor.DrawObject(d, kColumn2, 5, SnakeBird::kEmpty, sin(globalTime*7));
+//	editor.DrawObject(d, kColumn2, 5, SnakeBird::kEmpty, sin(globalTime*7));
 
 	editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
 	switch (gEditorMode)
 	{
 		case SnakeBird::kEmpty:
 			editor.Draw(d, 1, 3);
+			break;
 		case SnakeBird::kGround:
 			editor.Draw(d, 1, 5);
 			break;
@@ -1568,14 +1455,36 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 		}
 	}
 	bfs.GetPath(&sb, snake, snake, path);
-	printf("Old: %lu, ", path.size());
+//	printf("Old: %lu, ", path.size());
 	if (maximize)
-		sb = bestMax;
-	else
-		sb = bestMin;
-	bfs.GetPath(&sb, snake, snake, path);
-	printf("New: %lu\n", path.size());
-	ShowSolutionLength(path.size());
+	{
+		if (maxLength > path.size()) // found better path
+		{
+			sb = bestMax;
+//			bfs.GetPath(&sb, snake, snake, path);
+//			printf("New: %lu\n", path.size());
+			message = "Solution length increased from "+std::to_string(path.size())+" to "+std::to_string(maxLength);
+			ShowSolutionLength(maxLength);
+		}
+		else {
+			message = "NOTE: No change will make the shortest path longer";
+		}
+	}
+	else {
+		if (minLength < path.size())
+		{
+			sb = bestMin;
+//			bfs.GetPath(&sb, snake, snake, path);
+//			printf("New: %lu\n", path.size());
+			message = "Solution length increased from "+std::to_string(path.size())+" to "+std::to_string(minLength);
+			ShowSolutionLength(minLength);
+		}
+		else {
+			message = "NOTE: No change will make the shortest path shorter";
+		}
+	}
+	messageBeginTime = globalTime;
+	messageExpireTime = globalTime+10;
 }
 
 void ChangeMap(int x, int y)

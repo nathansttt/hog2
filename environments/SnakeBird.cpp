@@ -1774,14 +1774,7 @@ void SnakeBird::DrawObjects(Graphics::Display &display, double time) const
 				Graphics::point p = GetCenter(GetX(exitLoc), GetY(exitLoc));
 				double radius = GetRadius()*0.95;
 				double localTime = time;
-//				if (s.KFruitEaten(fruit.size()))
-//				{
-//					radius = radius+0.25*radius*(1+sin(time*2.5));
-//					localTime *= 2.0;
-//				}
-//				else {
 				localTime /= 4.0;
-//				}
 				double offset1 = (sin(localTime*1.0))*180; // -1...+1
 				double offset2 = (sin(localTime*1.5))*180; // -1...+1
 				double offset3 = (sin(localTime*2.0))*180; // -1...+1
@@ -1797,7 +1790,6 @@ void SnakeBird::DrawObjects(Graphics::Display &display, double time) const
 
 void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWorldObject o, double time) const
 {
-	//Graphics::point p = GetCenter(GetX(x), GetY(x));
 	rgbColor objColors[4] = {Colors::red*0.75, Colors::blue*0.75, Colors::green*0.75, Colors::yellow*0.75};
 	Graphics::point p = GetCenter(x, y);
 	double radius = GetRadius()*0.95;
@@ -1832,89 +1824,63 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 		}
 			break;
 		case kEmpty:
-			if (time > 0)
-			{
-				display.FillSquare(p, GetRadius(), rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5)); break;
-			}
+			display.FillSquare(p, GetRadius(), rgbColor::mix(Colors::cyan, Colors::lightblue, 0.5)); break;
 			break;
 		case kGround:
-			if (time > 0)
-			{
-				display.FillSquare(p, GetRadius(), Colors::brown); break;
-			}
+			display.FillSquare(p, GetRadius(), Colors::brown+Colors::white*0.75); break;
 			break;
 		case kSpikes:
-			if (time > 0)
+			if (y != height-1)
 			{
-				if (GetY(x) != height-1)
-				{
-					display.FillNGon(p, radius, 3, 0, Colors::darkgray);
-					display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
-				}
+				display.FillNGon(p, radius, 3, 0, Colors::darkgray);
+				display.FillNGon(p, radius, 3, 60, Colors::gray*0.75f);
 			}
 			break;
 		case kPortal1:
 		case kPortal2:
-			if (time > 0)
-			{
-				{
-					double radius = GetRadius()*0.95;
-					double offset1 = (sin(time*1.0)); // -1...+1
-					double offset2 = (sin(time*1.5)); // -1...+1
-					double offset3 = (sin(time*2.0)); // -1...+1
-					double offset4 = (sin(time*2.5)); // -1...+1
-					display.FillCircle(p, radius+offset1*radius*0.25, Colors::red);
-					display.FillCircle(p, radius*0.75+offset2*radius*0.2, Colors::blue);
-					display.FillCircle(p, radius*0.5+offset3*radius*0.15, Colors::green);
-					display.FillCircle(p, radius*0.25+offset4*radius*0.1, Colors::purple);
-				}
-			}
+		{
+			double radius = GetRadius()*0.95;
+			double offset1 = (sin(time*1.0)); // -1...+1
+			double offset2 = (sin(time*1.5)); // -1...+1
+			double offset3 = (sin(time*2.0)); // -1...+1
+			double offset4 = (sin(time*2.5)); // -1...+1
+			display.FillCircle(p, radius+offset1*radius*0.25, Colors::red);
+			display.FillCircle(p, radius*0.75+offset2*radius*0.2, Colors::blue);
+			display.FillCircle(p, radius*0.5+offset3*radius*0.15, Colors::green);
+			display.FillCircle(p, radius*0.25+offset4*radius*0.1, Colors::purple);
+		}
 			break;
 		case kFruit:
 		{
-			if (time > 0)
+			const float rows = 5;
+			const float counts[] = {3, 4, 3, 2, 1};
+			float grapeRadius = GetRadius()*0.15f;
+			for (int t = 0; t < rows; t++)
 			{
-				const float rows = 5;
-				const float counts[] = {3, 4, 3, 2, 1};
-				float grapeRadius = GetRadius()*0.15f;
-				for (int t = 0; t < rows; t++)
+				for (int v = 0; v < counts[t]; v++)
 				{
-					for (int v = 0; v < counts[t]; v++)
-					{
-						Graphics::point tmp = p;
-						tmp.y -= rows*grapeRadius;
-						tmp.y += 2*t*grapeRadius;
-						tmp.x = tmp.x-grapeRadius*(counts[t]-1)+v*grapeRadius*2;
-						tmp.x += sin(time*1.1+(t+v)*0.1)*GetRadius()*0.1;
-						tmp.y += cos(time*0.95+(t+v)*0.1)*GetRadius()*0.1;
-						display.FillCircle(tmp, grapeRadius*1.1, Colors::purple*sin(time*1.95+v+t));
-					}
+					Graphics::point tmp = p;
+					tmp.y -= rows*grapeRadius;
+					tmp.y += 2*t*grapeRadius;
+					tmp.x = tmp.x-grapeRadius*(counts[t]-1)+v*grapeRadius*2;
+					tmp.x += sin(time*1.1+(t+v)*0.1)*GetRadius()*0.1;
+					tmp.y += cos(time*0.95+(t+v)*0.1)*GetRadius()*0.1;
+					display.FillCircle(tmp, grapeRadius*1.1, Colors::purple*sin(time*1.95+v+t));
 				}
 			}
 			break;
 		}
 		case kExit:
 		{
-			if (time > 0)
-			{
-				double radius = GetRadius()*0.95;
-				double localTime = time;
-				//				if (s.KFruitEaten(fruit.size()))
-				//				{
-				//					radius = radius+0.25*radius*(1+sin(time*2.5));
-				//					localTime *= 2.0;
-				//				}
-				//				else {
-				localTime /= 4.0;
-				//				}
-				double offset1 = (sin(localTime*1.0))*180; // -1...+1
-				double offset2 = (sin(localTime*1.5))*180; // -1...+1
-				double offset3 = (sin(localTime*2.0))*180; // -1...+1
-				display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
-				display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
-				display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
-				break;
-			}
+			double radius = GetRadius()*0.95;
+			double localTime = time;
+			localTime /= 4.0;
+			double offset1 = (sin(localTime*1.0))*180; // -1...+1
+			double offset2 = (sin(localTime*1.5))*180; // -1...+1
+			double offset3 = (sin(localTime*2.0))*180; // -1...+1
+			display.FillNGon(p, radius, 5, 0+offset1, Colors::yellow);
+			display.FillNGon(p, radius*0.66, 5, 36+offset2, Colors::orange);
+			display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
 			break;
 		}
 		default: break;
