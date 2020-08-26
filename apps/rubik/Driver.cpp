@@ -150,7 +150,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		glClearColor(0.8, 0.8, 0.8, 1.0);
 
-		if (1)
+		if (0)
 		{
 			//std::vector<int> edges = {0,1,2,3,4,5};
 			std::vector<int> edges = {0, 1, 2, 3, 4, 5};
