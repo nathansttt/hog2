@@ -44,6 +44,7 @@ enum Domain {
 Domain domain;
 bool additive = false;
 bool load = false;
+bool delta = false;
 std::vector<int> pattern;
 std::string path;
 int threads = std::thread::hardware_concurrency();
@@ -61,6 +62,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load", "Load from disk and print stats");
 	InstallCommandLineHandler(MyCLHandler, "-threads", "-threads <N>", "Use <N> threads");
 	InstallCommandLineHandler(MyCLHandler, "-path", "-path <path>", "Set path for output PDB");
+	InstallCommandLineHandler(MyCLHandler, "-delta", "-delta", "Use delta PDB");
 	InstallCommandLineHandler(MyCLHandler, "-compress", "-compress <factor>", "DIV compress PDB by a factor of <factor>");
 }
 
@@ -120,6 +122,11 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	if (strcmp(argument[0], "-additive") == 0)
 	{
 		additive = true;
+		return 1;
+	}
+	if (strcmp(argument[0], "-delta") == 0)
+	{
+		delta = true;
 		return 1;
 	}
 	if (strcmp(argument[0], "-load") == 0)
@@ -189,18 +196,20 @@ void BuildSTPPDB()
 	{
 		mnp.SetPattern(pattern);
 		pdb.BuildAdditivePDB(goal, threads); // parallelism not fixed yet
+		if (delta)
+			pdb.DeltaCompress(&mnp, goal, true);
 		if (compression != 1)
 		{
-			pdb.DeltaCompress(&mnp, goal, true);
 			pdb.DivCompress(compression, true);
 		}
 		pdb.Save(path.c_str());
 	}
 	else {
 		pdb.BuildPDB(goal, threads);
+		if (delta)
+			pdb.DeltaCompress(&mnp, goal, true);
 		if (compression != 1)
 		{
-			pdb.DeltaCompress(&mnp, goal, true);
 			pdb.DivCompress(compression, true);
 		}
 		pdb.Save(path.c_str());
@@ -243,6 +252,18 @@ void BuildRC()
 	}
 	
 	pdb.BuildPDB(goal, threads);
+
+	if (delta)
+	{
+		if (edges.size() > 4)
+			edges.resize(4);
+		if (corners.size() > 4)
+			corners.resize(4);
+		printf("Delta compression - building delta\n");
+		RubikPDB pdb2(&cube, goal, edges, corners);
+		pdb2.BuildPDB(goal, threads);
+		pdb.DeltaCompress(&pdb2, goal, true);
+	}
 	if (compression != 1)
 	{
 		pdb.DivCompress(compression, true);
