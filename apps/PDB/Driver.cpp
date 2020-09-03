@@ -18,12 +18,14 @@
 #include "Timer.h"
 #include "TopSpin.h"
 #include "STPInstances.h"
+#include "TOH.h"
 
 template <int width, int height>
 void BuildSTPPDB();
 void BuildRC();
 template <int tiles>
 void BuildTS();
+void BuildTOH();
 
 int main(int argc, char* argv[])
 {
@@ -36,7 +38,8 @@ enum Domain {
 	kRC,
 	kSTP44,
 	kSTP55,
-	kTS16
+	kTS16,
+	kTOH
 };
 Domain domain;
 bool additive = false;
@@ -52,7 +55,7 @@ int compression = 1;
 void InstallHandlers()
 {
 	InstallWindowHandler(MyWindowHandler);
-	InstallCommandLineHandler(MyCLHandler, "-domain", "-domain", "Select domain to build for. {STP44 STP55 RC, TS16}");
+	InstallCommandLineHandler(MyCLHandler, "-domain", "-domain", "Select domain to build for. {STP44 STP55 RC, TS16, TOH}");
 	InstallCommandLineHandler(MyCLHandler, "-pattern", "-pattern", "Choose tiles in PDB");
 	InstallCommandLineHandler(MyCLHandler, "-additive", "-additive", "Build additive PDB");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load", "Load from disk and print stats");
@@ -84,6 +87,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			case kTS16:
 				BuildTS<16>();
 				break;
+			case kTOH:
+				BuildTOH();
+				break;
 		}
 		printf("Done.\n");
 		exit(0);
@@ -96,7 +102,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		if (maxNumArgs <= 1)
 		{
-			printf("Need domain: STP44 STP55 RC TS16\n");
+			printf("Need domain: STP44 STP55 RC TS16 TOH\n");
 			exit(0);
 		}
 		if (strcmp(argument[1], "RC") == 0)
@@ -107,6 +113,8 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 			domain = kSTP55;
 		else if (strcmp(argument[1], "TS16") == 0)
 			domain = kTS16;
+		else if (strcmp(argument[1], "TOH") == 0)
+			domain = kTOH;
 		return 2;
 	}
 	if (strcmp(argument[0], "-additive") == 0)
@@ -283,3 +291,160 @@ void BuildTS()
 		pdb.Save(path.c_str());
 	}
 }
+
+
+template<int pdbDisks, int numDisks>
+void BuildTOHHelper()
+{
+	TOH<numDisks> toh;
+	TOH<pdbDisks> absToh1;
+	TOHState<pdbDisks> absTohState1;
+
+	TOHState<numDisks> goal;
+	goal.Reset();
+	
+	TOHPDB<pdbDisks, numDisks> *pdb1 = new TOHPDB<pdbDisks, numDisks>(&absToh1, goal); // top disks
+	pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
+	if (compression != 1)
+	{
+		pdb1->DivCompress(compression, true);
+		pdb1->Save(path.c_str());
+	}
+	else {
+		pdb1->Save(path.c_str());
+	}
+	delete pdb1;
+}
+
+void BuildTOH()
+{
+	assert(pattern.size() > 1);
+	int pdbDisks = pattern[0];
+	int numDisks = pattern[1];
+	assert(numDisks >= 10 && numDisks <= 16);
+	assert(pdbDisks < numDisks && pdbDisks > 0);
+	
+	switch (numDisks)
+	{
+		case 10:
+			switch (pdbDisks)
+			{
+				case 1: BuildTOHHelper<1, 10>(); break;
+				case 2: BuildTOHHelper<2, 10>(); break;
+				case 3: BuildTOHHelper<3, 10>(); break;
+				case 4: BuildTOHHelper<4, 10>(); break;
+				case 5: BuildTOHHelper<5, 10>(); break;
+				case 6: BuildTOHHelper<6, 10>(); break;
+				case 7: BuildTOHHelper<7, 10>(); break;
+				case 8: BuildTOHHelper<8, 10>(); break;
+				case 9: BuildTOHHelper<9, 10>(); break;
+				default: break;
+			} break;
+		case 11:
+			switch (pdbDisks)
+			{
+				case 1: BuildTOHHelper<1, 11>(); break;
+				case 2: BuildTOHHelper<2, 11>(); break;
+				case 3: BuildTOHHelper<3, 11>(); break;
+				case 4: BuildTOHHelper<4, 11>(); break;
+				case 5: BuildTOHHelper<5, 11>(); break;
+				case 6: BuildTOHHelper<6, 11>(); break;
+				case 7: BuildTOHHelper<7, 11>(); break;
+				case 8: BuildTOHHelper<8, 11>(); break;
+				case 9: BuildTOHHelper<9, 11>(); break;
+				case 10: BuildTOHHelper<10, 11>(); break;
+				default: break;
+			} break;
+		case 12:
+			switch (pdbDisks)
+			{
+				case 1: BuildTOHHelper<1, 12>(); break;
+				case 2: BuildTOHHelper<2, 12>(); break;
+				case 3: BuildTOHHelper<3, 12>(); break;
+				case 4: BuildTOHHelper<4, 12>(); break;
+				case 5: BuildTOHHelper<5, 12>(); break;
+				case 6: BuildTOHHelper<6, 12>(); break;
+				case 7: BuildTOHHelper<7, 12>(); break;
+				case 8: BuildTOHHelper<8, 12>(); break;
+				case 9: BuildTOHHelper<9, 12>(); break;
+				case 10: BuildTOHHelper<10, 12>(); break;
+				case 11: BuildTOHHelper<11, 12>(); break;
+				default: break;
+			} break;
+		case 13:
+			switch (pdbDisks)
+			{
+				case 1: BuildTOHHelper<1, 13>(); break;
+				case 2: BuildTOHHelper<2, 13>(); break;
+				case 3: BuildTOHHelper<3, 13>(); break;
+				case 4: BuildTOHHelper<4, 13>(); break;
+				case 5: BuildTOHHelper<5, 13>(); break;
+				case 6: BuildTOHHelper<6, 13>(); break;
+				case 7: BuildTOHHelper<7, 13>(); break;
+				case 8: BuildTOHHelper<8, 13>(); break;
+				case 9: BuildTOHHelper<9, 13>(); break;
+				case 10: BuildTOHHelper<10, 13>(); break;
+				case 11: BuildTOHHelper<11, 13>(); break;
+				case 12: BuildTOHHelper<12, 13>(); break;
+				default: break;
+			} break;
+		case 14:
+			switch (pdbDisks)
+			{
+				case 1: BuildTOHHelper<1, 14>(); break;
+				case 2: BuildTOHHelper<2, 14>(); break;
+				case 3: BuildTOHHelper<3, 14>(); break;
+				case 4: BuildTOHHelper<4, 14>(); break;
+				case 5: BuildTOHHelper<5, 14>(); break;
+				case 6: BuildTOHHelper<6, 14>(); break;
+				case 7: BuildTOHHelper<7, 14>(); break;
+				case 8: BuildTOHHelper<8, 14>(); break;
+				case 9: BuildTOHHelper<9, 14>(); break;
+				case 10: BuildTOHHelper<10, 14>(); break;
+				case 11: BuildTOHHelper<11, 14>(); break;
+				case 12: BuildTOHHelper<12, 14>(); break;
+				case 13: BuildTOHHelper<13, 14>(); break;
+				default: break;
+			} break;
+		case 15:
+			switch (pdbDisks)
+			{
+				case 1: BuildTOHHelper<1, 15>(); break;
+				case 2: BuildTOHHelper<2, 15>(); break;
+				case 3: BuildTOHHelper<3, 15>(); break;
+				case 4: BuildTOHHelper<4, 15>(); break;
+				case 5: BuildTOHHelper<5, 15>(); break;
+				case 6: BuildTOHHelper<6, 15>(); break;
+				case 7: BuildTOHHelper<7, 15>(); break;
+				case 8: BuildTOHHelper<8, 15>(); break;
+				case 9: BuildTOHHelper<9, 15>(); break;
+				case 10: BuildTOHHelper<10, 15>(); break;
+				case 11: BuildTOHHelper<11, 15>(); break;
+				case 12: BuildTOHHelper<12, 15>(); break;
+				case 13: BuildTOHHelper<13, 15>(); break;
+				case 14: BuildTOHHelper<14, 15>(); break;
+				default: break;
+			} break;
+		case 16:
+			switch (pdbDisks)
+			{
+				case 1: BuildTOHHelper<1, 16>(); break;
+				case 2: BuildTOHHelper<2, 16>(); break;
+				case 3: BuildTOHHelper<3, 16>(); break;
+				case 4: BuildTOHHelper<4, 16>(); break;
+				case 5: BuildTOHHelper<5, 16>(); break;
+				case 6: BuildTOHHelper<6, 16>(); break;
+				case 7: BuildTOHHelper<7, 16>(); break;
+				case 8: BuildTOHHelper<8, 16>(); break;
+				case 9: BuildTOHHelper<9, 16>(); break;
+				case 10: BuildTOHHelper<10, 16>(); break;
+				case 11: BuildTOHHelper<11, 16>(); break;
+				case 12: BuildTOHHelper<12, 16>(); break;
+				case 13: BuildTOHHelper<13, 16>(); break;
+				case 14: BuildTOHHelper<14, 16>(); break;
+				case 15: BuildTOHHelper<15, 16>(); break;
+				default: break;
+			} break;
+	}
+}
+
