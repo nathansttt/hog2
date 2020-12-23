@@ -197,10 +197,8 @@ void Line::Draw(Graphics::Display &display, double xOff, double yOff, double xSc
 void Point::Draw(Graphics::Display &display, double xOff, double yOff, double xScale, double yScale) const
 {
 	double xLoc = (x+xOff)*xScale;
-	double xLoc2 = (x+1+xOff)*xScale;
 	double yLoc = -(y+yOff)*yScale;
-	double yLoc2 = -(y+1+yOff)*yScale;
-	display.FillCircle({(float)xLoc, (float)yLoc}, std::min((-xLoc+xLoc2)/2.0, (-yLoc+yLoc2)/2.0)*r, c);
+	display.FillCircle({(float)xLoc, (float)yLoc}, std::min(xScale, yScale)*r, c);
 }
 
 Plot2D::Plot2D()
