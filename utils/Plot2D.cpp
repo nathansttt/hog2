@@ -189,14 +189,18 @@ void Line::Draw(Graphics::Display &display, double xOff, double yOff, double xSc
 	//			   (float)((x[0]+xOff)*xScale), (float)-((y[0]+yOff)*yScale),
 	//			   (float)((x[x.size()-1]+xOff)*xScale), (float)-((y[x.size()-1]+yOff)*yScale)
 	//			   );
-	display.DrawLineSegments(points, width*xScale, rgbColor(r, g, b));
+	float baseLineSize = 1.0/150.0;
+	display.DrawLineSegments(points, width*baseLineSize, rgbColor(r, g, b));
+//	display.DrawLineSegments(points, width*xScale, rgbColor(r, g, b));
 }
 
 void Point::Draw(Graphics::Display &display, double xOff, double yOff, double xScale, double yScale) const
 {
-	float xLoc = (x+xOff)*xScale;
-	float yLoc = -(y+yOff)*yScale;
-	display.FillCircle({xLoc, yLoc}, std::min(xScale, yScale)*r, c);
+	double xLoc = (x+xOff)*xScale;
+	double xLoc2 = (x+1+xOff)*xScale;
+	double yLoc = -(y+yOff)*yScale;
+	double yLoc2 = -(y+1+yOff)*yScale;
+	display.FillCircle({(float)xLoc, (float)yLoc}, std::min((-xLoc+xLoc2)/2.0, (-yLoc+yLoc2)/2.0)*r, c);
 }
 
 Plot2D::Plot2D()
@@ -549,7 +553,11 @@ point3d Plot2D::MakeHOG(double x, double y) const
 
 double Plot2D::MakeHOGWidth(double w) const
 {
-	return w*xScale;
+	// If we scale the lines as above, they can get really large. The lines
+	// need to always stay the same (relative) size.
+	float baseLineSize = 1.0/150.0;
+	return w*baseLineSize;
+//	return w*xScale;
 }
 
 void Plot2D::Draw(Graphics::Display &display) const
@@ -559,25 +567,27 @@ void Plot2D::Draw(Graphics::Display &display) const
 	xScale = 0.9*2.0/(dRight-dLeft);
 	yScale = 0.9*2.0/(dTop-dBottom);
 	
-	float lineAxisWeight = 2.5;
-	float lineTicWeight = 1;
+	float lineAxisWeight = 2;//*baseLineSize;
+	float lineTicWeight = 1;//*baseLineSize;
 
 	display.FillRect({-1, -1, 1, 1}, Colors::white);
 	display.DrawLine(MakeHOG(dLeft, 0), MakeHOG(dRight, 0), MakeHOGWidth(lineAxisWeight), Colors::black); // x-axis
 	display.DrawLine(MakeHOG(0, dTop), MakeHOG(0, dBottom), MakeHOGWidth(lineAxisWeight), Colors::black); // y-axis
 
-	double fontSize = 4*MakeHOGWidth((dTop-dBottom)/100);
-	display.DrawText(xLabel.c_str(), MakeHOG(dRight+3*(dRight-dLeft)/100, 0), Colors::black, fontSize, Graphics::textAlignCenter);
+	double fontSize = MakeHOGWidth(10);//4;//*MakeHOGWidth((dTop-dBottom)/100);
+	display.DrawText(xLabel.c_str(), MakeHOG(dRight+(dTop-dBottom)/100, 0), Colors::black, fontSize, Graphics::textAlignLeft, Graphics::textBaselineMiddle);
 
-	display.DrawText(yLabel.c_str(), MakeHOG(0, dTop+4*(dTop-dBottom)/100), Colors::black, fontSize, Graphics::textAlignCenter);
+	display.DrawText(yLabel.c_str(), MakeHOG(0, dTop+(dTop-dBottom)/100), Colors::black, fontSize, Graphics::textAlignCenter, Graphics::textBaselineBottom);
 
 	for (int x = 0; x < dRight; x+=10)
 	{
-		display.DrawLine(MakeHOG(x, (dTop-dBottom)/100), MakeHOG(x, -(dTop-dBottom)/100), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
+		display.DrawLine(MakeHOG(x, 0)+point3d(0, fontSize/3), MakeHOG(x, 0)-point3d(0, fontSize/3), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
+//		display.DrawLine(MakeHOG(x, (dTop-dBottom)/100), MakeHOG(x, -(dTop-dBottom)/100), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
 	}
 	for (int y = 0; y < dTop; y+=10)
 	{
-		display.DrawLine(MakeHOG((dRight-dLeft)/100, y), MakeHOG(-(dRight-dLeft)/100, y), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
+		display.DrawLine(MakeHOG(0, y)+point3d(fontSize/3,0), MakeHOG(0, y)-point3d(fontSize/3,0), MakeHOGWidth(lineTicWeight), Colors::black); // y-axis
+//		display.DrawLine(MakeHOG((dRight-dLeft)/100, y), MakeHOG(-(dRight-dLeft)/100, y), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
 	}
 	
 	for (unsigned int x = 0; x < lines.size(); x++)
@@ -587,7 +597,6 @@ void Plot2D::Draw(Graphics::Display &display) const
 	
 	for (const auto i : points)
 		i.Draw(display, xOffset, yOffset, xScale, yScale);
-	
 }
 
 }
