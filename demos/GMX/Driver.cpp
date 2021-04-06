@@ -134,7 +134,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (from != -1)
 		{
 			ge->SetColor(Colors::green);
-			ge->DrawLine(display, from, to, 2.0);
+			ge->DrawLine(display, from, to, 1.5);//1.0/60.0);
 		}
 
 		for (auto i : forward)
@@ -163,45 +163,46 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	for (auto i : forward)
 	{
 		for (int x = 0; x < i.oppositeLine; x++)
-			display.DrawLine(GetCenter(i.r), GetCenter(backward[x].r), 1.0f, Colors::darkgray);
+			display.DrawLine(GetCenter(i.r), GetCenter(backward[x].r), 1.0/90.0f, Colors::darkgray);
 		if (i.oppositeLine != -1)
-			display.DrawLine(GetCenter(i.r), GetCenter(backward[i.oppositeLine].r), 2.0f, i.checkedWrong?Colors::red:Colors::darkgreen);
+			display.DrawLine(GetCenter(i.r), GetCenter(backward[i.oppositeLine].r), 1.0/90.0f, i.checkedWrong?Colors::red:Colors::darkgreen);
 	}
 	
 	if (downNode != -1 && upNode != -1)
 	{
-		display.DrawLine(GetCenter(forward[downNode].r), GetCenter(backward[upNode].r), 1.0, Colors::green);
+		display.DrawLine(GetCenter(forward[downNode].r), GetCenter(backward[upNode].r), 1.0/60.0, Colors::green);
 	}
 
-	
+	float borderSize = 1./90.0;
 	for (auto i : forward)
 	{
 		display.FillCircle(i.r, Colors::lightblue);
 		if (i.checkedWrong)
-			display.FrameCircle(i.r, Colors::orange, 1./30.0);
+			display.FrameCircle(i.r, Colors::orange, 3*borderSize);
 		else if (i.MVC)
-			display.FrameCircle(i.r, Colors::red, 2./30.0);
+			display.FrameCircle(i.r, Colors::red, 3*borderSize);
 		else
-			display.FrameCircle(i.r, Colors::darkblue, 1.0/30.0);
+			display.FrameCircle(i.r, Colors::darkblue, borderSize);
 		std::string name = std::to_string((int)i.gCost);//..to_string_with_precision(i.gCost, 3); //		std::to_string(i.gCost);
 		Graphics::point p = GetCenter(i.r);
-		display.DrawText(i.name.c_str(), p, Colors::white, boxSize/2.0f, Graphics::textAlignCenter);
+		display.DrawText(i.name.c_str(), p, Colors::white, boxSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
 		p.x -= 2*boxSize;
-		display.DrawText(name.c_str(), p, Colors::black, boxSize/2.0f, Graphics::textAlignCenter);
+		display.DrawText(name.c_str(), p, Colors::black, boxSize/2.0f, Graphics::textAlignCenter,
+						 Graphics::textBaselineMiddle);
 	}
 
 	for (auto i : backward)
 	{
 		display.FillCircle(i.r, Colors::lightblue);
 		if (i.MVC)
-			display.FrameCircle(i.r, Colors::purple, 2.0/30.0);
+			display.FrameCircle(i.r, Colors::purple, 3*borderSize);
 		else
-			display.FrameCircle(i.r, Colors::darkblue, 1.0/30.0);
+			display.FrameCircle(i.r, Colors::darkblue, borderSize);
 		std::string name = std::to_string((int)i.gCost);//to_string_with_precision(i.gCost, 3); //		std::to_string(i.gCost);
 		Graphics::point p = GetCenter(i.r);
-		display.DrawText(i.name.c_str(), p, Colors::white, boxSize/2.0f, Graphics::textAlignCenter);
+		display.DrawText(i.name.c_str(), p, Colors::white, boxSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
 		p.x += 2*boxSize;
-		display.DrawText(name.c_str(), p, Colors::black, boxSize/2.0f, Graphics::textAlignCenter);
+		display.DrawText(name.c_str(), p, Colors::black, boxSize/2.0f, Graphics::textAlignCenter, Graphics::textBaselineMiddle);
 	}
 
 }

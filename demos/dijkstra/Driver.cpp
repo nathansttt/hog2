@@ -128,19 +128,18 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 //			glLineWidth(3.);
 			ge->SetColor(0.5, 0, 0);
 //			ge->DrawLine(display, from, to);
-			display.DrawLine(ge->GetLocation(from), currLoc, 2., Colors::lightgray);
+			//display.DrawLine(, currLoc, 2., Colors::lightgray);
+			auto loc1 = ge->GetLocation(from);
+			ge->DrawLine(display, loc1.x, loc1.y, currLoc.x, currLoc.y, 2);
 		}
 		
+		ge->SetColor(Colors::white);
+		for (int x = 0; x < g->GetNumNodes(); x++)
+			ge->Draw(display, x);
 		if (running)
 		{
 			//astar.DoSingleSearchStep(path);
 			astar.Draw(display);
-		}
-		else {
-			//ge->SetColor(0.75, 0.75, 1.0);
-			ge->SetColor(Colors::darkgray);
-			for (int x = 0; x < g->GetNumNodes(); x++)
-				ge->Draw(display, x);
 		}
 
 		if (path.size() > 0)
@@ -483,6 +482,8 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 			}
 			if (m == kAddEdges || m == kFindPath)
 			{
+				if (FindClosestNode(g, loc) == 0)
+					return true;
 				from = to = FindClosestNode(g, loc)->GetNum();
 				currLoc = ge->GetLocation(from);
 			}

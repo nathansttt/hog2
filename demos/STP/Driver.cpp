@@ -60,9 +60,9 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
+//	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Randomize", "Get Random State", kAnyModifier, 's');
-	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
+//	InstallKeyboardHandler(MyDisplayHandler, "Help", "Draw help", kAnyModifier, '?');
 	InstallWindowHandler(MyWindowHandler);
 
 	InstallMouseClickHandler(MyClickHandler);
@@ -153,7 +153,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		ida.SetHeuristic(&w);
 		ida.GetPath(&mnp, start, goal, acts);
 		foundOptimal = true;
-		std::string s = "Solved in "+std::to_string(numActions)+" moves; optimal is between ";
+		std::string s = "You solved with "+std::to_string(numActions)+" moves; optimal is between ";
 		s +=std::to_string(std::max((int)mnp.HCost(start), (int)(2*acts.size()/3)))+" and "+std::to_string(acts.size())+" moves";
 		submitTextToBuffer(s.c_str());
 		printf("%s\n", s.c_str());
