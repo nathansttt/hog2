@@ -434,12 +434,19 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 void MakeSVG(const Graphics::Display &disp, const char *filename, int width, int height, int viewport, const char *comment, bool crisp)
 {
 	std::string s = MakeSVG(disp, width, height, viewport, comment, crisp);
-	std::fstream myFile;
-	
-	std::fstream svgFile;
-	svgFile.open(filename, std::fstream::out | std::fstream::trunc);
-	svgFile << s;
-	svgFile.close();
+	FILE *f = fopen(filename, "w+");
+	if (f == 0)
+	{
+		printf("Error: Could not open file '%s'\n", filename);
+		return;
+	}
+	fputs(s.c_str(), f);
+	fclose(f);
+//	std::fstream myFile;
+//	std::fstream svgFile;
+//	svgFile.open(filename, std::fstream::out | std::fstream::trunc);
+//	svgFile << s;
+//	svgFile.close();
 }
 
 std::string MakeSVG(const Graphics::Display &disp, int width, int height, int viewport, const char *comment, bool crisp)
