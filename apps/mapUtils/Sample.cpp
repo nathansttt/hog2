@@ -175,6 +175,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-problems2", "-problems2 filename sectorMultiplier", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems3", "-problems3 filename", "Selects the problem set to run.");
 	InstallCommandLineHandler(MyCLHandler, "-problems4", "-problems4 filename", "Selects the problem set to run comparing weighted A* with and without re-openings.");
+	InstallCommandLineHandler(MyCLHandler, "-problems5", "-problems5 filename additive_bound", "Selects the problem set to run comparing different methods of additive bounds.");
 	InstallCommandLineHandler(MyCLHandler, "-screen", "-screen <map>", "take a screenshot of the screen and then exit");
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <map> <output> <optional-x> <optional-y>", "Save the map as SVG format");
 	InstallCommandLineHandler(MyCLHandler, "-size", "-batch integer", "If size is set, we create a square maze with the x and y dimensions specified.");
@@ -811,6 +812,86 @@ void runProblemSet4(char *scenario)
 	exit(0);
 }
 
+void runProblemSet5(char *scenario, double bound)
+{
+	printf("Loading scenario %s\n", scenario);
+	ScenarioLoader sl(scenario);
+	
+	printf("Loading map %s\n", sl.GetNthExperiment(0).GetMapName());
+	Map *map = new Map(sl.GetNthExperiment(0).GetMapName());
+	map->Scale(sl.GetNthExperiment(0).GetXScale(),
+			   sl.GetNthExperiment(0).GetYScale());
+	
+	std::vector<xyLoc> thePath;
+	MapEnvironment ma(map);
+	ma.SetEightConnected();
+	//ma.SetFourConnected();
+	
+	// K = bound+1
+	// K = 2*bound
+	// y < K
+
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar2;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar3;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar4;
+	TemplateAStar<xyLoc, tDirection, MapEnvironment> astar5;
+
+	astar2.SetPhi([=](double x,double y){return (y<(bound+1))?(x+y/(bound+1)):(x+y-bound);});
+	astar3.SetPhi([=](double x,double y){return (y<(2*bound))?(x+y/2):(x+y-bound);});
+	astar4.SetReopenNodes(true);
+	
+	for (int x = 0; x < sl.GetNumExperiments(); x++)
+	{
+		if (sl.GetNthExperiment(x).GetBucket() != 32)
+			continue;
+		xyLoc from, to;
+		printf("%d\t", sl.GetNthExperiment(x).GetBucket());
+		from.x = sl.GetNthExperiment(x).GetStartX();
+		from.y = sl.GetNthExperiment(x).GetStartY();
+		to.x = sl.GetNthExperiment(x).GetGoalX();
+		to.y = sl.GetNthExperiment(x).GetGoalY();
+		printf("(%d, %d) (%d, %d)\t", from.x, from.y, to.x, to.y);
+		Timer t;
+		
+		t.StartTimer();
+		astar.GetPath(&ma, from, to, thePath);
+		t.EndTimer();
+		printf("astar-opt\t%1.2f\t%1.6f\t%llu\t%u\t", ma.GetPathLength(thePath), t.GetElapsedTime(), astar.GetNodesExpanded(), astar.GetNumOpenItems());
+
+		t.StartTimer();
+		astar2.GetPath(&ma, from, to, thePath);
+		t.EndTimer();
+		printf("astar-K=b+1\t%1.2f\t%1.6f\t%llu\t%u\t", ma.GetPathLength(thePath), t.GetElapsedTime(), astar2.GetNodesExpanded(), astar2.GetNumOpenItems());
+
+		t.StartTimer();
+		astar3.GetPath(&ma, from, to, thePath);
+		t.EndTimer();
+		printf("astar-K=b*2\t%1.2f\t%1.6f\t%llu\t%u\t", ma.GetPathLength(thePath), t.GetElapsedTime(), astar3.GetNodesExpanded(), astar3.GetNumOpenItems());
+
+		
+		double hi = ma.HCost(from, to);
+		astar4.SetPhi([=](double h,double g){return g+h+bound*std::min(h, hi)/hi;});
+		t.StartTimer();
+		astar4.GetPath(&ma, from, to, thePath);
+		t.EndTimer();
+		
+		printf("\tastar-yes\t%1.2f\t%1.6f\t%llu\t%u\t%u\t", ma.GetPathLength(thePath), t.GetElapsedTime(), astar4.GetNodesExpanded(), astar4.GetNumOpenItems(), astar4.GetNodesExpanded()-astar4.GetUniqueNodesExpanded());
+
+
+		if (hi < bound)
+			hi = bound+1;
+		astar5.SetPhi([=](double x,double y){return (y<hi)?(x+(hi-bound)*y/(hi)):(x+y-bound);});
+		t.StartTimer();
+		astar5.GetPath(&ma, from, to, thePath);
+		t.EndTimer();
+		
+		printf("\tastar\t%1.2f\t%1.6f\t%llu\t%u\n", ma.GetPathLength(thePath), t.GetElapsedTime(), astar5.GetNodesExpanded(), astar5.GetNumOpenItems());
+
+	}
+	
+	exit(0);
+}
 
 void runProblemSet2(char *problems, int multiplier)
 {
@@ -1151,6 +1232,12 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs <= 1) exit(0);
 		runProblemSet4(argument[1]);
 		return 2;
+	}
+	else if (strcmp(argument[0], "-problems5" ) == 0 )
+	{
+		if (maxNumArgs <= 2) exit(0);
+		runProblemSet5(argument[1], atof(argument[2]));
+		return 3;
 	}
 	return 2; //ignore typos
 }
