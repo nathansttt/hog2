@@ -36,6 +36,7 @@ double globalTime = 0;
 double frameTime = 0; // seconds elapsed in current frame
 double timePerFrame = 0.1; // seconds for drawing each step of frame
 double frameRate = 1.0/30.0;
+double gSpeedAdjust = 1;
 SnakeBird::SnakeBirdAnimationStep actionInProgressStep;
 bool actionInProgress = false;
 SnakeBird::SnakeBirdAction inProgress;
@@ -46,6 +47,21 @@ int gMouseY = -1;
 int gMouseEditorX = -1;
 int gMouseEditorY = -1;
 SnakeBird::SnakeBirdWorldObject gEditorMode;
+bool loadPrimer = false;
+
+bool incrementalAnalysis = true;
+const int kNotAnalyzed = 32768;
+const int kDontAnalyze = -32768;
+std::vector<int> editorOverlay;
+int editorOverlayMax = 1;
+int editorOverlayMin = -1;
+int gSolutionLength = 0;
+
+#ifdef __EMSCRIPTEN__
+const int gNodeLimit = 1000000;
+#else
+const int gNodeLimit = 25000000;
+#endif
 
 enum EditorColor {
 	kCanAdd,
@@ -54,8 +70,36 @@ enum EditorColor {
 };
 enum EditorColumn {
 	kColumn1 = 1,
-	kColumn2 = 8
+	kColumn2 = 8,
+	kRightMargin = 18
 };
+struct EditorItem {
+	int x, y;
+	SnakeBird::SnakeBirdWorldObject icon;
+	std::string text;
+	int xLineEnd;
+	char keyEquivalent;
+	bool selectable;
+};
+std::vector<EditorItem> editorItems =
+{
+	{kColumn1, 3, SnakeBird::kEmpty, "Sky", kColumn2, 'r', true},
+	{kColumn1, 5, SnakeBird::kGround, "Ground", kColumn2, 'g', true},
+	{kColumn1, 7, SnakeBird::kSpikes, "Spikes", kColumn2, 's', true},
+	{kColumn1, 9, SnakeBird::kFruit, "Fruit", kColumn2, 'f', true},
+	{kColumn1, 11, SnakeBird::kPortal1, "Portal", kColumn2, 'p', true},
+	{kColumn1, 13, SnakeBird::kBlock1, "Block", kColumn2, 'b', true},
+	{kColumn1, 15, SnakeBird::kExit, "Exit", kColumn2, 'x', true},
+
+	{kColumn2, 3, SnakeBird::kSpikes, "Increase Sol. Length", kRightMargin, 'c', false},
+	{kColumn2, 5, SnakeBird::kSpikes, "Decrease Sol. Length", kRightMargin, 'v', false},
+
+	{kColumn2, 9, SnakeBird::kFruit, "Increase Sol. Length", kRightMargin, '3', false},
+	{kColumn2, 11, SnakeBird::kPortal2, "Increase Sol. Length", kRightMargin, '4', false},
+	{kColumn2, 13, SnakeBird::kBlock1, "Increase Sol. Length", kRightMargin, '1', false},
+	{kColumn2, 15, SnakeBird::kExit, "Increase Sol. Length", kRightMargin, '2', false},
+};
+int kSelectedEditorItem = 0;
 
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
@@ -70,14 +114,19 @@ LineTransition transition(20, 60, Colors::white);
 SnakeBird::SnakeBird sb(20, 20);
 SnakeBird::SnakeBirdState snake;
 SnakeBird::SnakeBirdState lastFrameSnake;
-SnakeBird::SnakeBird editor(18, 18);
+SnakeBird::SnakeBird editor(kRightMargin, kRightMargin);
 int snakeControl = 0;
 std::vector<SnakeBird::SnakeBirdState> history;
 std::vector<SnakeBird::SnakeBirdState> future;
 
+void SetupMapChanges();
+void ProcessSingleMapChange();
 void AnalyzeMapChanges(bool maximize, int nodeLimit=1000000);
+void AnalyzeObject(SnakeBird::SnakeBirdWorldObject oldobj, SnakeBird::SnakeBirdWorldObject newobj, int nodeLimit=1000000);
 void ChangeMap(int x, int y);
 EditorColor CanChangeMap(int x, int y);
+void GetLevelSolution(int nodeLimit = 250000000);
+void StepForwardStoredSolution();
 
 int main(int argc, char* argv[])
 {
@@ -103,9 +152,11 @@ void InstallHandlers()
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Next", "Select Next Snake", kAnyModifier, 'e');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Run", "Run solution (build if needed)", kAnyModifier, 'n');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Reset", "Reset Level", kAnyModifier, 'r');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Framerate", "Adjust framerate", kAnyModifier, 'f');
 
 #ifndef __EMSCRIPTEN__
-	InstallKeyboardHandler(GamePlayKeyboardHandler, "Level", "Goto nth level", kAnyModifier, '0', '5');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Level", "Goto nth level", kAnyModifier, '0', '9');
+	InstallKeyboardHandler(GamePlayKeyboardHandler, "Toggle", "Toggle 0..9 loading regular/primer levels", kAnyModifier, '/');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Print", "Print screen to file", kAnyModifier, 'p');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Movie", "Record movie frames", kAnyModifier, 'o');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Solve", "Build solution", kAnyModifier, 'b');
@@ -124,9 +175,14 @@ void InstallHandlers()
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Portal", "Edit Portals", kAnyModifier, 'p');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Blocks", "Edit Blocks", kAnyModifier, 'b');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Toggle", "Toggle Modes", kAnyModifier, 'd');
-	InstallKeyboardHandler(EditorKeyBoardHandler, "Increase", "Increase Soultuion", kAnyModifier, 'c');
-	InstallKeyboardHandler(EditorKeyBoardHandler, "Decrease", "Decrease Soultution", kAnyModifier, 'v');
-	
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Increase", "Increase Solution", kAnyModifier, 'c');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Decrease", "Decrease Solution", kAnyModifier, 'v');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "EPCG+Block", "Increase length with block", kAnyModifier, '1');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "EPCG+Exit", "Increase length with exit", kAnyModifier, '2');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "EPCG+Fruit", "Increase length with fruit", kAnyModifier, '3');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "EPCG+Portal", "Increase length with portal", kAnyModifier, '4');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Solve", "Show solution", kAnyModifier, 'n');
+
 	InstallCommandLineHandler(MyCLHandler, "-change", "-change <input> <nodelimit> <iter>", "Run <iter> times to make the level harder or easier. Outputs the new depth and file coding.");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <input> <output>", "Make an .svg of the given level then quit");
@@ -144,8 +200,9 @@ void Save(const SnakeBird::SnakeBird &sb, const SnakeBird::SnakeBirdState &sbs, 
 {
 	Graphics::Display d;
 	sb.Draw(d);
-	sb.Draw(d, sbs);
-	std::string fname = "/Users/nathanst/Desktop/SVG/"+prefix;
+	sb.Draw(d, 0);
+	sb.Draw(d, snake, snakeControl);
+	std::string fname = "/Users/nathanst/Pictures/SVG/tmp/"+prefix;
 	int count = 0;
 	while (fileExists((fname+std::to_string(count)+".svg").c_str()))
 	{
@@ -174,6 +231,15 @@ void UpdateActiveSnake()
 			break;
 		snakeControl = (snakeControl+1)%snake.GetNumSnakes();
 	}
+}
+
+void UpdateLevelLink()
+{
+	std::string str = "<input type=\"text\" value=\"https://movingai.com/snakebird/play.html#";
+	str += sb.EncodeLevel();
+	str += "\" id=\"playableurl\">";
+	submitTextToBuffer(str.c_str());
+	std::cout << str << "\n";
 }
 
 bool SnakeDead()
@@ -230,6 +296,7 @@ void LoadLevel19()
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
 	sb.EndEditing();
+	UpdateLevelLink();
 	gRefreshBackground = true;
 }
 
@@ -274,6 +341,7 @@ void LoadLevel22()
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
 	sb.EndEditing();
+	UpdateLevelLink();
 	gRefreshBackground = true;
 }
 
@@ -322,6 +390,7 @@ void LoadLevel39()
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
 	sb.EndEditing();
+	UpdateLevelLink();
 	gRefreshBackground = true;
 }
 
@@ -358,6 +427,7 @@ void LoadLevel32()
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
 	sb.EndEditing();
+	UpdateLevelLink();
 	gRefreshBackground = true;
 }
 
@@ -392,6 +462,7 @@ void LoadLevel44()
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
 	sb.EndEditing();
+	UpdateLevelLink();
 	gRefreshBackground = true;
 }
 
@@ -428,6 +499,8 @@ void LoadLevel63()
 	timePerFrame = 0.01;
 	UpdateActiveSnake();
 	sb.EndEditing();
+	UpdateLevelLink();
+
 	gRefreshBackground = true;
 }
 
@@ -461,6 +534,9 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		worldClock.StartTimer();
 		lastFrameStart = worldClock.GetElapsedTime();
+//		ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
+		ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
+		AddViewport(windowID, {1.0f, -1.0f, 2.0f, 1.0f}, kScaleToSquare); // (will be editor)
 	}
 }
 
@@ -469,128 +545,40 @@ static void DrawEditorViewport(unsigned long windowID)
 {
 	Graphics::Display &d = GetContext(windowID)->display;
 	d.FillRect({-1, -1, 1, 1}, Colors::lightgray);
-	//editor.Draw(d);
-	//editor.Draw(d, editor.GetStart());
+	if (gEditMap == false)
+		return;
+	
+	if (incrementalAnalysis == true && editorOverlay.size() == sb.GetWidth()*sb.GetHeight())
+		ProcessSingleMapChange();
+
 	editor.SetColor(Colors::black); //keep the title black
 
 	editor.DrawLabel(d, kColumn1, 1, "Edit Map");
 	editor.DrawLabel(d, kColumn2, 1, "EPCG AI Analysis");
 
-	// TODO: Make the code more general to reduce size
-	if (gMouseEditorY == 3 && gMouseEditorX < kColumn2) //sky
-		editor.SetColor(Colors::cyan);
-	else if (gEditorMode == SnakeBird::kEmpty)
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn1+1, 3, "Sky");
-	
-	if (gMouseEditorY == 5 && gMouseEditorX < kColumn2) //ground
-		editor.SetColor(Colors::cyan);
-	else if (gEditorMode == SnakeBird::kGround)
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn1+1, 5, "Ground");
-
-	if (gMouseEditorY == 7 && gMouseEditorX < kColumn2) //spikes
-		editor.SetColor(Colors::cyan);
-	else if (gEditorMode == SnakeBird::kSpikes)
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn1+1, 7, "Spikes");
-
-	if (gMouseEditorY == 9 && gMouseEditorX < kColumn2) //fruit
-		editor.SetColor(Colors::cyan);
-	else if (gEditorMode == SnakeBird::kFruit)
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn1+1, 9, "Fruit");
-	
-	if (gMouseEditorY == 11 && gMouseEditorX < kColumn2) //portals
-		editor.SetColor(Colors::cyan);
-	else if (gEditorMode == SnakeBird::kPortal1)
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn1+1, 11, "Portal");
-	
-	if (gMouseEditorY == 13 && gMouseEditorX < kColumn2) //block 1
-		editor.SetColor(Colors::cyan);
-	else if (gEditorMode == SnakeBird::kBlock1)
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn1+1, 13, "Block 1");
-
-	if (gMouseEditorY == 15 && gMouseEditorX < kColumn2) //exit
-		editor.SetColor(Colors::cyan);
-	else if (gEditorMode == SnakeBird::kExit)
-		editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn1+1, 15, "Exit");
-
-	if (gMouseEditorY == 3 && gMouseEditorX >= kColumn2) //increase soulution length
-		editor.SetColor(Colors::cyan);
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn2+1, 3, "Increase Sol. Length");
-
-	if (gMouseEditorY == 5 && gMouseEditorX >= kColumn2) //decrease soulution length
-		editor.SetColor(Colors::cyan);
-	else
-		editor.SetColor(Colors::black);
-	editor.DrawLabel(d, kColumn2+1, 5, "Decrease Sol. Length");
-	
-	editor.DrawObjects(d, globalTime);
-	editor.DrawObject(d, kColumn1, 3, SnakeBird::kEmpty, globalTime); //sky
-	editor.DrawObject(d, kColumn1, 5, SnakeBird::kGround, globalTime);
-	editor.DrawObject(d, kColumn1, 7, SnakeBird::kSpikes, globalTime);
-	editor.DrawObject(d, kColumn1, 9, SnakeBird::kFruit, globalTime);
-	editor.DrawObject(d, kColumn1, 11, SnakeBird::kPortal1, globalTime);
-	editor.DrawObject(d, kColumn1, 13, SnakeBird::kBlock1, globalTime);
-	editor.DrawObject(d, kColumn1, 15, SnakeBird::kExit, globalTime);
-	editor.DrawObject(d, kColumn2, 3, SnakeBird::kGround, globalTime);
-	editor.DrawObject(d, kColumn2, 3, SnakeBird::kSpikes, globalTime);
-//	editor.DrawObject(d, kColumn2, 3, SnakeBird::kGround, sin(globalTime*7));
-//	editor.DrawObject(d, kColumn2, 3, SnakeBird::kEmpty, tan(globalTime*7));
-	editor.DrawObject(d, kColumn2, 5, SnakeBird::kGround, globalTime);
-	editor.DrawObject(d, kColumn2, 5, SnakeBird::kSpikes, globalTime);
-//	editor.DrawObject(d, kColumn2, 5, SnakeBird::kEmpty, sin(globalTime*7));
-
-	editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
-	switch (gEditorMode)
+	for (int t = 0; t < editorItems.size(); t++)
 	{
-		case SnakeBird::kEmpty:
-			editor.Draw(d, 1, 3);
-			break;
-		case SnakeBird::kGround:
-			editor.Draw(d, 1, 5);
-			break;
-		case SnakeBird::kSpikes:
-			editor.Draw(d, 1, 7);
-			break;
-		case SnakeBird::kFruit:
-			editor.Draw(d, 1, 9);
-			break;
-		case SnakeBird::kPortal:
-			editor.Draw(d, 1, 11);
-			break;
-		case SnakeBird::kBlock1:
-			editor.Draw(d, 1, 13);
-			break;
-		case SnakeBird::kExit:
-			editor.Draw(d, 1, 15);
-			break;
-		default:
-			break;
+		if (kSelectedEditorItem == t)
+		{
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+			editor.Draw(d, editorItems[t].x, editorItems[t].y);
+			editor.SetColor(rgbColor::mix(Colors::blue, Colors::cyan, 0.5));
+		}
+		else if (gMouseEditorY == editorItems[t].y &&
+				 gMouseEditorX >= editorItems[t].x &&
+				 gMouseEditorX < editorItems[t].xLineEnd) // mouse over
+		{
+			editor.SetColor(Colors::cyan);
+		}
+		else {
+			editor.SetColor(Colors::black);
+		}
+		editor.DrawLabel(d, editorItems[t].x+1, editorItems[t].y, editorItems[t].text.c_str());
+		editor.DrawObject(d, editorItems[t].x, editorItems[t].y, editorItems[t].icon, globalTime);
 	}
-	
 	editor.SetColor(Colors::blue);
 	editor.DrawLabel(d, kColumn1, 17, editorMessage.c_str());
+//	return;
 	
 	if (recording)
 	{
@@ -614,6 +602,7 @@ static void DrawEditorViewport(unsigned long windowID)
 
 static void DrawGameViewport(unsigned long windowID) {
 	frameRate = worldClock.EndTimer()-lastFrameStart;
+	frameRate *= gSpeedAdjust;
 	lastFrameStart = worldClock.EndTimer();
 	if (recording)
 		frameRate = 1.0/60.0; // fixed frame rate when recording
@@ -650,7 +639,7 @@ static void DrawGameViewport(unsigned long windowID) {
 			
 			if (actionInProgress == false && autoSolve == true)
 			{
-				GamePlayKeyboardHandler(windowID, kNoModifier, ']');
+				StepForwardStoredSolution();
 			}
 		}
 		else {
@@ -674,6 +663,31 @@ static void DrawGameViewport(unsigned long windowID) {
 	sb.Draw(d, lastFrameSnake, snake, snakeControl, frameTime/timePerFrame, globalTime);
 	if (gEditMap == true)
 	{
+		// draw hints at possible changes - drawn below indications from cursor
+		if (incrementalAnalysis == true && editorOverlay.size() == sb.GetWidth()*sb.GetHeight())
+		{
+			for (int x = 0; x < sb.GetWidth(); x++)
+			{
+				for (int y = 0; y < sb.GetHeight(); y++)
+				{
+					if (editorOverlay[y*sb.GetWidth()+x] != kNotAnalyzed &&
+						editorOverlay[y*sb.GetWidth()+x] != kDontAnalyze)
+					{
+						if (editorOverlay[y*sb.GetWidth()+x] > 0)
+						{
+							sb.SetColor(rgbColor(0.5, 0.5+0.5*editorOverlay[y*sb.GetWidth()+x]/(float)editorOverlayMax, 0.5));
+							sb.Draw(d, x, y, 0.35);
+						}
+						else if (editorOverlay[y*sb.GetWidth()+x] < 0) {
+							sb.SetColor(rgbColor(1.0,
+												 1.0-0.5*editorOverlay[y*sb.GetWidth()+x]/(float)editorOverlayMin, 1.0));
+							sb.Draw(d, x, y, 0.35);
+						}
+					}
+				}
+			}
+		}
+
 		if (CanChangeMap(gMouseX, gMouseY) == kCanRemove) //remove objects
 		{
 			sb.DrawObject(d, gMouseX, gMouseY, gEditorMode, globalTime);
@@ -700,12 +714,12 @@ static void DrawGameViewport(unsigned long windowID) {
 		{
 			d.DrawText("Great Job", {0,0}, Colors::black, 0.25f, Graphics::textAlignCenter);
 			d.DrawText("Level Passed!", {0,0.25}, Colors::black, 0.25f, Graphics::textAlignCenter);
-#ifdef __EMSCRIPTEN__
-			submitTextToBuffer("Done");
-			d.DrawText("Window will close automatically", {0,0.4}, Colors::black, 0.075f, Graphics::textAlignCenter);
-#else
+//#ifdef __EMSCRIPTEN__
+//			submitTextToBuffer("Done");
+//			d.DrawText("Window will close automatically", {0,0.4}, Colors::black, 0.075f, Graphics::textAlignCenter);
+//#else
 			d.DrawText("Press 'r' to reset level", {0,0.4}, Colors::black, 0.075f, Graphics::textAlignCenter);
-#endif
+//#endif
 		}
 		transition.Draw(d);
 	}
@@ -719,10 +733,11 @@ static void DrawGameViewport(unsigned long windowID) {
 	c = Colors::white;
 #endif
 	
-	d.FillRect({-2, -2, 2, -1}, c);
-	d.FillRect({-2, 1, 2, 2}, c);
+	// crop outer edges of display
+	d.FillRect({-2, -2, 3, -1}, c);
+	d.FillRect({-2, 1, 3, 2}, c);
 	d.FillRect({-2, -2, -1, 2}, c);
-	d.FillRect({1, -2, 2, 2}, c);
+	d.FillRect({1, -2, 3, 2}, c);
 	
 	if (recording)
 	{
@@ -777,6 +792,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs > 1)
 		{
 			sb.Load(argument[1]);
+			UpdateLevelLink();
 			lastFrameSnake = snake = sb.GetStart();
 			history.push_back(snake);
 			mapAlreadyLoaded = true;
@@ -843,7 +859,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		{
 			sb.Load(argument[1]);			
 			lastFrameSnake = snake = sb.GetStart();
-			GamePlayKeyboardHandler(0, tKeyboardModifier::kNoModifier, 'b');
+			GetLevelSolution();
 			exit(0);	
 		}	
 	}
@@ -866,6 +882,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		if (maxNumArgs > 1)
 		{
 			sb.DecodeLevel(argument[1]);
+			UpdateLevelLink();
 			if (strcmp(argument[1], sb.EncodeLevel().c_str()) != 0)
 			{
 				printf("Decode failure:\n");
@@ -908,8 +925,84 @@ void HurryUpFinishAction()
 	}
 }
 
+void GetLevelSolution(int nodeLimit)
+{
+	Timer t;
+	BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
+	//bfs.SetNodeLimit(20000000);
+	//bfs.SetNodeLimit(75000000); // max 75 million expansions
+	bfs.SetNodeLimit(nodeLimit); // max 250 million expansions
+	//bfs.DoBFS(&sb, snake);
+	t.StartTimer();
+	bfs.GetPath(&sb, snake, snake, future);
+	t.EndTimer();
+	printf("BFS to goal complete in %1.2fs: %llu states reached; path length %lu.\n",
+		   t.GetElapsedTime(), bfs.GetNodesExpanded(), future.size());
+	
+	if (future.size() == 0)
+	{
+		message = "Level unsolvable. Reset or undo actions and try again.";
+		messageExpireTime = globalTime + 5;
+	}
+	if (future.size() > 0)
+	{
+		std::reverse(future.begin(), future.end());
+		// remove the current state
+		future.pop_back();
+		UpdateActiveSnake();
+	}
+}
+
+void StepForwardStoredSolution()
+{
+	HurryUpFinishAction();
+	if (future.size() > 0)
+	{
+		actionInProgress = true;
+		actionInProgressStep.Reset();
+		inProgress = sb.GetAction(snake, future.back());
+		frameTime = timePerFrame;
+		history.push_back(snake);
+		//snake = future.back();
+		future.pop_back();
+	}
+}
+
 void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
+	static std::vector<std::string> sblevels =
+	{
+		"26b17EkcGamanaobdbebfbgbubvbwbxclcmcncoczdcdddedfdtdudvdweiekelemenfbfcfdfefnfoftfufvgegfggghgigkgwgxhbhchnhqhrhshthuiiijikiljajbjcjrjsjtkfkgkikjkkkxkzlalblqlrlsmhmimjmymznanonpnqnrofogKFixnnSdsLL",
+		"12b22EioGfggfggghgigjhchdhehfhvhyhziaibiuivjnKFfhirShxL",
+		"19b13EffGbjbkblbtbubvbwbxbycfcgchcicjckclcqcrcsctcxcydddedfdgdkdldrdsdtdudwdxdyejekelewfjfkfwfxfyKFdhgvSfiRU",
+		"20b13EfrGdwdxejekelewexfifjfvgigjgkgvgwgxgyhihjhkhlhuhvhwhxhyihiiijKeuevhhFegigSfuRR",
+		"20b15EhrGeifzgdgvgwhjhkhlhuKexeyezfogshfFgeSgnLLD",
+		"20b13EfrGesevfkgggiKeifwfxgjFegftSfjLD",
+		"20b13EhhGdsdweeefegehejekepeqeresexfcfdfkftfvKewFetSdvLDD",
+		// 10,24,44 (24 and 44 have 2 snakes but they are easier)
+		"20b15EfiGclczdadodpdtedeeefegeiejexeyfcfdfmfnfofpfqfrfsghgqgrgtgugvgwhdhehfhihjhkhsKFdcgsSflRRU",
+		"20b16EhuGfkflfsgagbgcgqgrKFfrBerfhfxesfifyfjSgoRUSgpRD",
+		"20b13EgfGcxcydkdldxekelgkglKcgckdhfxFefctPdeeiSdiLScwR"
+		// 7-9 have 2 snakes
+//		"19b14EgbGczdadbeneresgjgxhlhzKFSgvRRDSgiRR",
+//		"20b13EisGbwcjckcwcxdjdkdwdxejekgxihiuivjhjiKewfjfwfxgkhihjhkhviiFSduLLDLSdiRR",
+//		"20b22EhsGeyfoftfugpgqhlhmhyihizjdjekaKhfibiuFSgoLLDSjcRDRD"
+	};
+	
+	static std::vector<std::string> sbprimer =
+	{
+		"20b14EijGamazbabmbnbocacbcccocpcqdcdddedmdndqdrdseaeeefegeseteufdfefgfhfifsfufvfwgigjgkgwgxgyhdhehjhkhlhmhrhshthxhyhziaieifigihiliminioisitiuizjajbjcjgjhjkjljmjnjojpjqjzkakbkckdkekqkrksKFSdpLL",
+		"20b13EdeGchctcucvcwdgdhdidjdkdldtdudvdwdxdyeieleyflfygkglgxgyhjhkhlhwhxhyijikiliwixiyjkjlKFhghuhiiiSefL",
+		"20b13EgiGcicucvdhdidudveiekexeyfkflfxfygkglgxgyhlKFcjcwdjdwejewSdgL",
+		"19b20EhiGeneofgfhfifwfzgagbgcgtgugvgwhkhnhohpihiijcjwjxjykqkrkslklllmmfmgKFgqkpShmR",
+		"20b11EdqGcicjckcsctcucvcwcxdddedhdidodsdtdzedeeepeteuezfafefffgfkflfwKFemSdbD",
+		// replace 5 with 63
+		"20b15EijGdidsdtdxdyemeneofbfcfqfrfsgfgggugygzhahnhohphqhrhshwhyhziaicidieifigihiliminioipirisitiuiviwjajbjcjdjejgjhjiKFPduhxBeyfngcfoSfpR",
+		"20b20EhuGfafufvgugvgwhmhohphqhwhxicieifigijikitiujajdjejnjojxjykrkslmKFftizSjwLL",
+		"20b15EdcGcecfcgcpcqcrctcucvdedidjdkdtdveneyezfifjfofrgngogvgwhkhlhthuhvhziaikixizjrjskgkhkukvkwKFfyexhjSdhL",
+		"20b15EdcGbnboccctcxcyczdedidmdndodpdtebecedeeefegeheiejeqereseteuevewfffgfhfifjfofqfufvhticidieikilirisitiuiviwjgjhjijjjkjljmjvjwjxjyjzkakbkekfkkklkmknkokpkqkrktkukzlalblcldlelflgKFSksRDD",
+		"20b12EfgGcfcgcqcrcsdcdddedodpdqeaebecekemeneofafhfifjflfmftfufxfygjgkgvgwhhhihuKFgtSdnL"
+	};
 	//	SnakeBird::SnakeBirdAction a;
 	static std::vector<SnakeBird::SnakeBirdAction> acts;
 	//	a.bird = snakeControl;
@@ -920,12 +1013,41 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 	
 	switch (key)
 	{
-		case '0': LoadLevel19(); break;
-		case '1': LoadLevel22(); break;
-		case '2': LoadLevel32(); break;
-		case '3': LoadLevel39(); break;
-		case '4': LoadLevel44(); break;
-		case '5': LoadLevel63(); break;
+		case 'f':
+			if (gSpeedAdjust > 0.5)
+				gSpeedAdjust = 0.1;
+			else
+				gSpeedAdjust = 1.0;
+			break;
+		case '/': loadPrimer = !loadPrimer; break;
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			if (loadPrimer)
+				sb.DecodeLevel(sbprimer[key-'0']);
+			else
+				sb.DecodeLevel(sblevels[key-'0']);
+			lastFrameSnake = snake = sb.GetStart();
+			history.clear();
+			history.push_back(snake);
+			future.clear();
+			actionInProgressStep.Reset();
+			timePerFrame = 0.01;
+			UpdateActiveSnake();
+			break;
+//		case '0': LoadLevel19(); break;
+//		case '1': LoadLevel22(); break;
+//		case '2': LoadLevel32(); break;
+//		case '3': LoadLevel39(); break;
+//		case '4': LoadLevel44(); break;
+//		case '5': LoadLevel63(); break;
 		case 'w':
 		case kUpArrow:
 			future.clear();
@@ -1030,22 +1152,12 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 			}
 			break;
 		case ']':
-			HurryUpFinishAction();
-			if (future.size() > 0)
-			{
-				actionInProgress = true;
-				actionInProgressStep.Reset();
-				inProgress = sb.GetAction(snake, future.back());
-				frameTime = timePerFrame;
-				history.push_back(snake);
-				//snake = future.back();
-				future.pop_back();
-			}
+			StepForwardStoredSolution();
 			break;
 		case 'n':
-			GamePlayKeyboardHandler(windowID, kNoModifier, 'b');
+			GetLevelSolution(gNodeLimit);
 			autoSolve = true;
-			GamePlayKeyboardHandler(windowID, kNoModifier, ']');
+			StepForwardStoredSolution();
 			break;
 //		case 'c':
 //			AnalyzeMapChanges(true);
@@ -1055,36 +1167,7 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 //			break;
 		case 'b':
 		{
-			Timer t;
-			BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
-			//bfs.SetNodeLimit(20000000);
-			//bfs.SetNodeLimit(75000000); // max 75 million expansions
-			bfs.SetNodeLimit(250000000); // max 250 million expansions
-			//bfs.DoBFS(&sb, snake);
-			t.StartTimer();
-			bfs.GetPath(&sb, snake, snake, future);
-			t.EndTimer();
-			printf("BFS to goal complete in %1.2fs: %llu states reached; path length %lu.\n",
-				   t.GetElapsedTime(), bfs.GetNodesExpanded(), future.size());
-			
-			if (future.size() == 0)
-			{
-				message = "Level unsolvable. Reset or undo actions and try again.";
-				messageExpireTime = globalTime + 5;
-			}
-			if (future.size() > 0)
-			{
-//				for (int x = 0; x < future.size()-1; x++)
-//				{
-//					//Save(sb, future[x], "debug-");
-//					std::cout << sb.GetAction(future[x], future[x+1]) << "\n";
-//				}
-//				std::cout << "\n";
-				std::reverse(future.begin(), future.end());
-				// remove the current state
-				future.pop_back();
-				UpdateActiveSnake();
-			}
+			GetLevelSolution(gNodeLimit);
 			break;
 		}
 		case 'p':
@@ -1114,22 +1197,27 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 				// Reset the level
 				GamePlayKeyboardHandler(windowID, kNoModifier, 'r');
 				gEditMap = true;
-				gEditorMode = SnakeBird::kGround;
+				gEditorMode = SnakeBird::kEmpty;
+				kSelectedEditorItem = 0;
 				gMouseY = gMouseX = -1;
 				message = "Editing mode enabled.";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
-				ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
-				AddViewport(windowID, {0.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare); // (will be editor)
-				SnakeBird::SnakeBird tmp(sb.GetWidth(), sb.GetHeight());
+//				ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
+				MoveViewport(windowID, 1, {0.0f, -1.0f, 1.0f, 1.0f});
+//				AddViewport(windowID, {1.0f, -1.0f, 2.0f, 1.0f}, {0.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare); // (will be editor)
+//				SnakeBird::SnakeBird tmp(sb.GetWidth(), sb.GetHeight());
 				ShowSolutionLength();
+				SetupMapChanges();
 			}
 			else {
 				message = "Editing mode disabled.";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditMap = false;
-				ReinitViewports(windowID, {-1.0f, -1.0f, 1.0f, 1.0f}, kScaleToSquare);
+				MoveViewport(windowID, 1, {1.0f, -1.0f, 2.0f, 1.0f});
+				//ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
+				UpdateLevelLink();
 			}
 		}
 			break;
@@ -1169,53 +1257,85 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 	{
 		switch (key)
 		{
+			case 'n':
+				// turn off editor
+				GamePlayKeyboardHandler(windowID, mod, 't');
+				GetLevelSolution(gNodeLimit);
+				autoSolve = true;
+				StepForwardStoredSolution();
+				break;
 			case 'f': //fruit
 				message = "Editing Mode: Adding Fruit";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kFruit;
+				SetupMapChanges();
 				break;
 			case 'x': //exit
 				message = "Editing Mode: Moving the Exit";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kExit;
+				SetupMapChanges();
 				break;
 			case 'g': //ground
 				message = "Editing Mode: Changing the Ground";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kGround;
+				SetupMapChanges();
 				break;
 			case 's': //spikes
 				message = "Editing Mode: Changing Spikes";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kSpikes;
+				SetupMapChanges();
 				break;
 			case 'r': //sky
 				message = "Editing Mode: Changing the Sky";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kEmpty;
+				SetupMapChanges();
 				break;
 			case 'p': //portal
 				message = "Editing Mode: Changing Portals";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kPortal;
+				editorOverlay.resize(0);
 				break;
 			case 'b':
 				message = "Editing Mode: Changing Blocks";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
 				gEditorMode = SnakeBird::kBlock1;
+				editorOverlay.resize(0);
 				break;
 			case 'c':
-				AnalyzeMapChanges(true);
+				AnalyzeMapChanges(true, gNodeLimit);
 				break;
 			case 'v':
-				AnalyzeMapChanges(false);
+				AnalyzeMapChanges(false, gNodeLimit);
+				break;
+			case '1':
+				AnalyzeObject(SnakeBird::kEmpty, SnakeBird::kBlock1);
+				break;
+			case '2':
+				AnalyzeObject(SnakeBird::kEmpty, SnakeBird::kExit);
+				break;
+			case '3':
+				AnalyzeObject(SnakeBird::kEmpty, SnakeBird::kFruit);
+				break;
+			case '4':
+				if (sb.GetNumPortals() == 1)
+					AnalyzeObject(SnakeBird::kEmpty, SnakeBird::kPortal);
+				else {
+					message = "Must have exactly one portal placed before using EPCG.";
+					messageBeginTime = globalTime+0.01;
+					messageExpireTime = globalTime+5;
+				}
 				break;
 			case 'h': //toggle ground modes
 			{
@@ -1298,41 +1418,16 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		gMouseEditorY = y;
 		if (e == kMouseDown)
 		{
-			switch (gMouseEditorY)
+			for (int t = 0; t < editorItems.size(); t++)
 			{
-				case 3:
-					if (gMouseEditorX < kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 'r');
-					if (gMouseEditorX >= kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 'c');
-					break;
-				case 5:
-					if (gMouseEditorX < kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 'g');
-					if (gMouseEditorX >= kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 'v');
-					break;
-				case 7:
-					if (gMouseEditorX < kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 's');
-					break;
-				case 9:
-					if (gMouseEditorX < kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 'f');
-					break;
-				case 11:
-					if (gMouseEditorX < kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 'p');
-					break;
-				case 13:
-					if (gMouseEditorX < kColumn2)
-						EditorKeyBoardHandler(windowID, kNoModifier, 'b');
-					break;
-				case 15:
-					if (gMouseEditorX < kColumn2)
-					EditorKeyBoardHandler(windowID, kNoModifier, 'x');
-				default:
-					break;
+				if (gMouseEditorY == editorItems[t].y &&
+					gMouseEditorX >= editorItems[t].x &&
+					gMouseEditorX < editorItems[t].xLineEnd) // mouse over
+				{
+					if (editorItems[t].selectable)
+						kSelectedEditorItem = t;
+					EditorKeyBoardHandler(windowID, kNoModifier, editorItems[t].keyEquivalent);
+				}
 			}
 		}
 		return true;
@@ -1363,6 +1458,7 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 			ChangeMap(x, y);
 //			CanChangeMap(gMouseX, gMouseY);
 			ShowSolutionLength();
+			SetupMapChanges();
 		}
 	}
 	
@@ -1386,6 +1482,91 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 	return true;
 }
 
+void SetupMapChanges()
+{
+	editorOverlayMax = 1;
+	editorOverlayMin = -1;
+	editorOverlay.resize(sb.GetWidth()*sb.GetHeight());
+	for (int x = 0; x < sb.GetWidth(); x++)
+	{
+		for (int y = 0; y < sb.GetHeight()-1; y++)
+		{
+			EditorColor c = CanChangeMap(x, y);
+			if (c == kCanAdd)
+			{
+				editorOverlay[y*sb.GetWidth()+x] = kNotAnalyzed;
+				printf("[%d, %d]\n", x, y);
+//				editorOverlay[y*sb.GetWidth()+x] = random()%11-5;
+//				editorOverlayMax = std::max(editorOverlayMax, editorOverlay[y*sb.GetWidth()+x]);
+//				editorOverlayMin = std::min(editorOverlayMin, editorOverlay[y*sb.GetWidth()+x]);
+			}
+			else {
+				editorOverlay[y*sb.GetWidth()+x] = kDontAnalyze;
+			}
+		}
+	}
+}
+
+bool AnalyzeChangeAtLoc(int x, int y)
+{
+	if (editorOverlay[y*sb.GetWidth()+x] == kNotAnalyzed)
+	{
+		BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
+		SnakeBird::SnakeBird curr = sb;
+		SnakeBird::SnakeBirdState s;
+		
+		curr.BeginEditing();
+		curr.SetGroundType(x, y, gEditorMode);
+		curr.EndEditing();
+		
+		s = curr.GetStart();
+		bfs.SetVerbose(false);
+		bfs.SetNodeLimit(50000); // real-time limit
+		bfs.GetPath(&curr, s, s, future);
+		if (future.size() > 0)
+		{
+			editorOverlay[y*sb.GetWidth()+x] = future.size()-gSolutionLength;
+			editorOverlayMax = std::max(editorOverlayMax, editorOverlay[y*sb.GetWidth()+x]);
+			editorOverlayMin = std::min(editorOverlayMin, editorOverlay[y*sb.GetWidth()+x]);
+			//printf("%d, %d -> %d\n", x, y, editorOverlay[y*sb.GetWidth()+x]);
+		}
+		else {
+			//printf("{%d, %d}\n", x, y);
+			editorOverlay[y*sb.GetWidth()+x] = kDontAnalyze;
+		}
+		return true;
+	}
+	return false;
+}
+
+void ProcessSingleMapChange()
+{
+	int yStart = sb.GetY(sb.GetStart().GetSnakeHeadLoc(0));
+	int yUp = yStart;
+	int yDown = yStart+1;
+	while (yUp >= 0 || yDown < sb.GetHeight()-1)
+	{
+		if (yUp >= 0)
+		{
+			for (int x = 0; x < sb.GetWidth(); x++)
+			{
+				if (AnalyzeChangeAtLoc(x, yUp))
+					return;
+			}
+			yUp--;
+		}
+		if (yDown < sb.GetHeight()-1)
+		{
+			for (int x = 0; x < sb.GetWidth(); x++)
+			{
+				if (AnalyzeChangeAtLoc(x, yDown))
+					return;
+			}
+			yDown++;
+		}
+	}
+}
+
 void AnalyzeMapChanges(bool maximize, int nodeLimit)
 {
 	BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
@@ -1396,14 +1577,13 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 	size_t maxLength = 0;
 	size_t minLength = 100000;
 	SnakeBird::SnakeBird bestMin, bestMax;
-	SnakeBird::SnakeBirdState current = sb.GetStart();
 	SnakeBird::SnakeBird curr = sb;
 	std::vector<SnakeBird::SnakeBirdWorldObject> order;
 	for (int x = 0; x < sb.GetWidth(); x++)
 	{
 		for (int y = 0; y < sb.GetHeight()-1; y++)
 		{
-			auto renderedType = sb.GetRenderedGroundType(current, x, y);
+			auto renderedType = sb.GetRenderedGroundType(sb.GetStart(), x, y);
 			bool valid = false;
 			switch (renderedType)
 			{
@@ -1426,6 +1606,7 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 					valid = true;
 					order.push_back(SnakeBird::kSpikes);
 					order.push_back(SnakeBird::kGround);
+//					order.push_back(SnakeBird::kBlock1);
 					break;
 				}
 				default:
@@ -1437,6 +1618,9 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 				sb.BeginEditing();
 				sb.SetGroundType(x, y, order.back());
 				sb.EndEditing();
+				snake = sb.GetStart();
+				//Save(sb, snake, "EPCG-");
+
 				gRefreshBackground = true;
 				order.pop_back();
 				bfs.GetPath(&sb, snake, snake, path);
@@ -1450,8 +1634,10 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 					maxLength = path.size();
 					bestMax = sb;
 				}
+				sb = curr;
 			}
 			sb = curr;//sb.SetStart(current);
+			snake = sb.GetStart();
 		}
 	}
 	bfs.GetPath(&sb, snake, snake, path);
@@ -1461,6 +1647,8 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 		if (maxLength > path.size()) // found better path
 		{
 			sb = bestMax;
+			snake = sb.GetStart();
+			history[0] = snake;
 //			bfs.GetPath(&sb, snake, snake, path);
 //			printf("New: %lu\n", path.size());
 			message = "Solution length increased from "+std::to_string(path.size())+" to "+std::to_string(maxLength);
@@ -1471,9 +1659,11 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 		}
 	}
 	else {
-		if (minLength < path.size())
+		if (minLength < path.size() || (path.size() == 0 && minLength > 0))
 		{
 			sb = bestMin;
+			snake = sb.GetStart();
+			history[0] = snake;
 //			bfs.GetPath(&sb, snake, snake, path);
 //			printf("New: %lu\n", path.size());
 			message = "Solution length increased from "+std::to_string(path.size())+" to "+std::to_string(minLength);
@@ -1485,6 +1675,78 @@ void AnalyzeMapChanges(bool maximize, int nodeLimit)
 	}
 	messageBeginTime = globalTime;
 	messageExpireTime = globalTime+10;
+	UpdateLevelLink();
+}
+
+void AnalyzeObject(SnakeBird::SnakeBirdWorldObject oldobj, SnakeBird::SnakeBirdWorldObject newobj, int nodeLimit)
+{
+	BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
+	bfs.SetNodeLimit(nodeLimit); // max 1 million expansions
+	bfs.SetVerbose(false);
+	std::vector<SnakeBird::SnakeBirdState> path;
+
+	size_t maxLength = 0;
+	size_t minLength = 100000;
+	SnakeBird::SnakeBird bestMin, bestMax;
+	SnakeBird::SnakeBird curr = sb;
+	std::vector<SnakeBird::SnakeBirdWorldObject> order;
+	for (int x = 0; x < sb.GetWidth(); x++)
+	{
+		for (int y = 0; y < sb.GetHeight()-1; y++)
+		{
+			auto renderedType = sb.GetRenderedGroundType(sb.GetStart(), x, y);
+			bool valid = false;
+			if (renderedType == oldobj)
+			{
+				valid = true;
+				order.push_back(newobj);
+			}
+
+			while (order.size() > 0)
+			{
+				sb.BeginEditing();
+				sb.SetGroundType(x, y, order.back());
+				sb.EndEditing();
+				snake = sb.GetStart();
+				//Save(sb, snake, "EPCG-");
+
+				gRefreshBackground = true;
+				order.pop_back();
+				bfs.GetPath(&sb, snake, snake, path);
+				if (path.size() < minLength && path.size() != 0)
+				{
+					minLength = path.size();
+					bestMin = sb;
+				}
+				if (path.size() > maxLength)
+				{
+					maxLength = path.size();
+					bestMax = sb;
+				}
+				sb = curr;
+			}
+			sb = curr;//sb.SetStart(current);
+			snake = sb.GetStart();
+		}
+	}
+	bfs.GetPath(&sb, snake, snake, path);
+//	printf("Old: %lu, ", path.size());
+	if (maxLength > path.size()) // found better path
+	{
+		sb = bestMax;
+		snake = sb.GetStart();
+		history[0] = snake;
+		//			bfs.GetPath(&sb, snake, snake, path);
+		//			printf("New: %lu\n", path.size());
+		message = "Solution length increased from "+std::to_string(path.size())+" to "+std::to_string(maxLength);
+		ShowSolutionLength(maxLength);
+	}
+	else {
+		message = "NOTE: No change will make the shortest path longer";
+	}
+	messageBeginTime = globalTime;
+	messageExpireTime = globalTime+10;
+	UpdateLevelLink();
 }
 
 void ChangeMap(int x, int y)
@@ -1501,6 +1763,7 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
@@ -1512,9 +1775,24 @@ void ChangeMap(int x, int y)
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.SetGroundType(x, y, SnakeBird::kGround);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+					sb.BeginEditing();
+					sb.RemoveBlock(gMouseX, gMouseY);
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kGround);
+					sb.EndEditing();
+					UpdateLevelLink();
+					lastFrameSnake = snake = sb.GetStart();
+					history.clear();
+					history[0] = snake;
+					gRefreshBackground = true;
+					break;
 				default:
 					break;
 			}
@@ -1529,6 +1807,7 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
@@ -1540,9 +1819,22 @@ void ChangeMap(int x, int y)
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.SetGroundType(x, y, SnakeBird::kSpikes);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+					sb.BeginEditing();
+					sb.RemoveBlock(gMouseX, gMouseY);
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kSpikes);
+					sb.EndEditing();
+					UpdateLevelLink();
+					lastFrameSnake = snake = sb.GetStart();
+					gRefreshBackground = true;
+					break;
 				default:
 					break;
 			}
@@ -1562,9 +1854,22 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
+				case SnakeBird::kBlock1:
+				case SnakeBird::kBlock2:
+				case SnakeBird::kBlock3:
+				case SnakeBird::kBlock4:
+					sb.BeginEditing();
+					sb.RemoveBlock(gMouseX, gMouseY);
+					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
+					sb.EndEditing();
+					UpdateLevelLink();
+					lastFrameSnake = snake = sb.GetStart();
+					gRefreshBackground = true;
+					break;
 				default:
 					break;
 			}
@@ -1579,6 +1884,7 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
@@ -1590,6 +1896,7 @@ void ChangeMap(int x, int y)
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.SetGroundType(x, y, SnakeBird::kFruit);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
@@ -1607,6 +1914,7 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kEmpty);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
@@ -1615,6 +1923,7 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(x, y, SnakeBird::kExit);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
@@ -1632,6 +1941,7 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
@@ -1640,6 +1950,7 @@ void ChangeMap(int x, int y)
 					sb.BeginEditing();
 					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kPortal);
 					sb.EndEditing();
+					UpdateLevelLink();
 					gRefreshBackground = true;
 					break;
 				}
@@ -1651,14 +1962,20 @@ void ChangeMap(int x, int y)
 			switch (renderedType) {
 				case SnakeBird::kBlock1:
 					sb.BeginEditing();
+					sb.RemoveBlock(gMouseX, gMouseY);
 					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kEmpty);
 					sb.EndEditing();
+					UpdateLevelLink();
+					lastFrameSnake = snake = sb.GetStart();
 					gRefreshBackground = true;
 					break;
 				case SnakeBird::kEmpty:
 					sb.BeginEditing();
 					sb.SetGroundType(gMouseX, gMouseY, SnakeBird::kBlock1);
 					sb.EndEditing();
+					UpdateLevelLink();
+					lastFrameSnake = snake = sb.GetStart();
+					history[0] = snake;
 					gRefreshBackground = true;
 				default:
 					break;
@@ -1687,6 +2004,7 @@ void ShowSolutionLength(int length)
 	}
     if (length > 0)
     {
+		gSolutionLength = length;
 		std::string path = std::to_string(length);
 		std::string words = "Level is solvable in ";
 		std::string moves = " moves";
@@ -1694,10 +2012,12 @@ void ShowSolutionLength(int length)
     }
 	else if (length < 0)
 	{
+		gSolutionLength = 0;
         editorMessage = "Level unsolvable in current resource limits";
 	}
 	else if (length == 0)
     {
+		gSolutionLength = 0;
         editorMessage = "Level unsolvable";
     }
 }
@@ -1804,7 +2124,7 @@ EditorColor CanChangeMap(int x, int y)
 					return kCanRemove;
 					break;
 				case SnakeBird::kEmpty:
-					if (sb.NumPortals())
+					if (sb.GetNumPortals() < 2)
 					{
 						return kCanAdd;
 					}
