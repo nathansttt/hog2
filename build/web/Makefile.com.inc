@@ -35,8 +35,8 @@ REL_CXXFLAGS = $(PROJ_REL_CXXFLAGS) $(COMMON_CXXFLAGS) -g -O3 #-DNDEBUG
 DBG_CFLAGS = $(PROJ_DBG_CFLAGS) $(COMMON_CFLAGS) -g
 REL_CFLAGS = $(PROJ_REL_CFLAGS) $(COMMON_CFLAGS) -g -O3 #-DNDEBUG
 
-DBG_LNFLAGS = $(PROJ_DBG_LNFLAGS) $(COMMON_LNFLAGS) -g -s EXPORTED_FUNCTIONS="['_InitHOG', '_DoFrame', '_MouseEvent', '_HitKey', '_SetCanvasSize']"
-REL_LNFLAGS = $(PROJ_REL_LNFLAGS) $(COMMON_LNFLAGS) -g -s EXPORTED_FUNCTIONS="['_InitHOG', '_DoFrame', '_MouseEvent', '_HitKey', '_SetCanvasSize']"
+DBG_LNFLAGS = $(PROJ_DBG_LNFLAGS) $(COMMON_LNFLAGS) -g -s EXPORTED_FUNCTIONS="['_InitHOG', '_InitHOGArg', '_DoFrame', '_MouseEvent', '_HitKey', '_SetCanvasSize']" -s EXTRA_EXPORTED_RUNTIME_METHODS=["cwrap"]
+REL_LNFLAGS = $(PROJ_REL_LNFLAGS) $(COMMON_LNFLAGS) -g -O3 -s EXPORTED_FUNCTIONS="['_InitHOG', '_InitHOGArg', '_DoFrame', '_MouseEvent', '_HitKey', '_SetCanvasSize']" -s EXTRA_EXPORTED_RUNTIME_METHODS=["cwrap"]
 
 DBG_OBJS = \
   $(patsubst %.cpp, $(DBG_OBJDIR)/%.o, $(SRC_CPP)) \
