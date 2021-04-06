@@ -34,7 +34,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "522"
             endingLineNumber = "522"
-            landmarkName = "HandleMouseClick(pContextInfo, x, y, where, button, mouse)"
+            landmarkName = "HandleMouseClick(pContextInfo, viewport, x, y, where, button, mouse)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -68,7 +68,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "151"
             endingLineNumber = "151"
-            landmarkName = "InstallFrameHandler(glCall, windowID, userdata)"
+            landmarkName = "RemoveFrameHandler(glCall, windowID, userdata)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -136,7 +136,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "406"
             endingLineNumber = "406"
-            landmarkName = "GetLine(Plotting::Line *l, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;astar, float C, std::vector&lt;std::pair&lt;int, int&gt;&gt; &amp;items, bool reverse = false)"
+            landmarkName = "GetLine(l, astar, C, items)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -153,7 +153,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "421"
             endingLineNumber = "421"
-            landmarkName = "GetLine(Plotting::Line *l, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;astar, float C, std::vector&lt;std::pair&lt;int, int&gt;&gt; &amp;items, bool reverse = false)"
+            landmarkName = "GetLine(l, astar, C, items)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -170,7 +170,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "427"
             endingLineNumber = "427"
-            landmarkName = "GetLine(Plotting::Line *l, TemplateAStar&lt;xyLoc, tDirection, MapEnvironment&gt; &amp;astar, float C, std::vector&lt;std::pair&lt;int, int&gt;&gt; &amp;items, bool reverse = false)"
+            landmarkName = "GetLine(l, astar, C, items)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -185,10 +185,10 @@
             timestampString = "585684013.189308"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "231"
-            endingLineNumber = "231"
-            landmarkName = "@implementation DrawView"
-            landmarkType = "3">
+            startingLineNumber = "257"
+            endingLineNumber = "257"
+            landmarkName = "-makeRect:viewport:"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -204,7 +204,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "145"
             endingLineNumber = "145"
-            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -238,8 +238,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "770"
             endingLineNumber = "770"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "setViewport(pContextInfo, currPort)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -255,7 +255,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "492"
             endingLineNumber = "492"
-            landmarkName = "HandleMouse(pContextInfo, where, button, mouse)"
+            landmarkName = "ViewportToGlobalHOG(pContextInfo, v, where)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -287,8 +287,8 @@
             timestampString = "585684013.189561"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "97"
-            endingLineNumber = "97"
+            startingLineNumber = "100"
+            endingLineNumber = "100"
             landmarkName = "-drawRect:"
             landmarkType = "7">
          </BreakpointContent>
@@ -304,9 +304,9 @@
             timestampString = "544946576.249707"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "158"
-            endingLineNumber = "158"
-            landmarkName = "TextOverlay::Draw(Graphics::Display &amp;display)"
+            startingLineNumber = "159"
+            endingLineNumber = "159"
+            landmarkName = "TextOverlay::Draw(display)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -355,8 +355,8 @@
             timestampString = "585684013.189732"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "214"
-            endingLineNumber = "214"
+            startingLineNumber = "240"
+            endingLineNumber = "240"
             landmarkName = "-drawCommand:"
             landmarkType = "7">
          </BreakpointContent>
@@ -372,8 +372,8 @@
             timestampString = "585684013.189799"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "217"
-            endingLineNumber = "217"
+            startingLineNumber = "243"
+            endingLineNumber = "243"
             landmarkName = "-drawCommand:"
             landmarkType = "7">
          </BreakpointContent>
@@ -395,7 +395,7 @@
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "54189606-C5FE-4A7A-A37F-2A04C6189B95 - a5e169eab7ca22b9"
+                  uuid = "54189606-C5FE-4A7A-A37F-2A04C6189B95 - 4d459a8b74d1e39c"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -411,7 +411,7 @@
                   offsetFromSymbolStart = "436">
                </Location>
                <Location
-                  uuid = "54189606-C5FE-4A7A-A37F-2A04C6189B95 - 35601da7702876b8"
+                  uuid = "54189606-C5FE-4A7A-A37F-2A04C6189B95 - ddc4eec6b333b79d"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -427,7 +427,7 @@
                   offsetFromSymbolStart = "436">
                </Location>
                <Location
-                  uuid = "54189606-C5FE-4A7A-A37F-2A04C6189B95 - 91cd1d93528dcda7"
+                  uuid = "54189606-C5FE-4A7A-A37F-2A04C6189B95 - 7969eef291960c82"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -462,7 +462,7 @@
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "9E232AC0-B8E7-4939-BAED-95FE1CD890B3 - 543f03f01e3ba880"
+                  uuid = "9E232AC0-B8E7-4939-BAED-95FE1CD890B3 - bc9bf091dd206dc7"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -478,7 +478,7 @@
                   offsetFromSymbolStart = "623">
                </Location>
                <Location
-                  uuid = "9E232AC0-B8E7-4939-BAED-95FE1CD890B3 - 72faeca0dd99fc8f"
+                  uuid = "9E232AC0-B8E7-4939-BAED-95FE1CD890B3 - 9a5e1fc11e8239c8"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -494,7 +494,7 @@
                   offsetFromSymbolStart = "623">
                </Location>
                <Location
-                  uuid = "9E232AC0-B8E7-4939-BAED-95FE1CD890B3 - 7d1a8467a0ff538e"
+                  uuid = "9E232AC0-B8E7-4939-BAED-95FE1CD890B3 - 95be770663e496c9"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -529,7 +529,7 @@
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "C60AC300-38AF-40AA-AA96-5904D085593D - 543f03f01e3ba880"
+                  uuid = "C60AC300-38AF-40AA-AA96-5904D085593D - bc9bf091dd206c09"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -545,7 +545,7 @@
                   offsetFromSymbolStart = "708">
                </Location>
                <Location
-                  uuid = "C60AC300-38AF-40AA-AA96-5904D085593D - 72faeca0dd99fc8f"
+                  uuid = "C60AC300-38AF-40AA-AA96-5904D085593D - 9a5e1fc11e823806"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -561,7 +561,7 @@
                   offsetFromSymbolStart = "708">
                </Location>
                <Location
-                  uuid = "C60AC300-38AF-40AA-AA96-5904D085593D - 7d1a8467a0ff538e"
+                  uuid = "C60AC300-38AF-40AA-AA96-5904D085593D - 95be770663e49707"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -590,9 +590,9 @@
             timestampString = "579507142.788736"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "197"
-            endingLineNumber = "197"
-            landmarkName = "Point::Draw(Graphics::Display &amp;display, double xOff, double yOff, double xScale, double yScale)"
+            startingLineNumber = "199"
+            endingLineNumber = "199"
+            landmarkName = "Point::Draw(display, xOff, yOff, xScale, yScale)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -607,9 +607,9 @@
             timestampString = "579507142.78881"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "243"
-            endingLineNumber = "243"
-            landmarkName = "Plot2D::AddPoint(const Point &amp;p)"
+            startingLineNumber = "256"
+            endingLineNumber = "256"
+            landmarkName = "Plot2D::AddPoint(p)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -624,8 +624,8 @@
             timestampString = "592332118.197726"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "483"
-            endingLineNumber = "483"
+            startingLineNumber = "489"
+            endingLineNumber = "489"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -641,8 +641,8 @@
             timestampString = "592332118.213655"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "473"
-            endingLineNumber = "473"
+            startingLineNumber = "479"
+            endingLineNumber = "479"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -658,8 +658,8 @@
             timestampString = "592332118.2140321"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "477"
-            endingLineNumber = "477"
+            startingLineNumber = "483"
+            endingLineNumber = "483"
             landmarkName = "GetPlotPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -677,7 +677,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "371"
             endingLineNumber = "371"
-            landmarkName = "GetNext(double &amp;g, double &amp;h)"
+            landmarkName = "GetNext(g, h)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -694,7 +694,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "372"
             endingLineNumber = "372"
-            landmarkName = "GetNext(double &amp;g, double &amp;h)"
+            landmarkName = "GetNext(g, h)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -711,7 +711,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "145"
             endingLineNumber = "145"
-            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -728,7 +728,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "177"
             endingLineNumber = "177"
-            landmarkName = "DoOneDimension(int label)"
+            landmarkName = "DoOneDimension(label)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -745,7 +745,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "365"
             endingLineNumber = "365"
-            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -762,7 +762,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "425"
             endingLineNumber = "425"
-            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -813,7 +813,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "413"
             endingLineNumber = "413"
-            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -830,7 +830,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "666"
             endingLineNumber = "666"
-            landmarkName = "Draw(Graphics::Display &amp;d)"
+            landmarkName = "Draw(d)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -845,8 +845,8 @@
             timestampString = "592332118.220446"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "610"
-            endingLineNumber = "610"
+            startingLineNumber = "638"
+            endingLineNumber = "638"
             landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
@@ -862,8 +862,8 @@
             timestampString = "592332118.220891"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "203"
-            endingLineNumber = "203"
+            startingLineNumber = "209"
+            endingLineNumber = "209"
             landmarkName = "StepAlgorithms(numSteps)"
             landmarkType = "9">
          </BreakpointContent>
@@ -879,8 +879,8 @@
             timestampString = "587402794.817219"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "693"
-            endingLineNumber = "693"
+            startingLineNumber = "696"
+            endingLineNumber = "696"
             landmarkName = "GraphEnvironment::Draw(disp, l)"
             landmarkType = "7">
          </BreakpointContent>
@@ -889,16 +889,16 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "8DAC9156-8AAB-4D20-BA8A-C6C105E3ECAD"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../demos/inconsistency-graph/Driver.cpp"
             timestampString = "587402794.817364"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "327"
-            endingLineNumber = "327"
-            landmarkName = "MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)"
+            startingLineNumber = "347"
+            endingLineNumber = "347"
+            landmarkName = "MyDisplayHandler(windowID, mod, key)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -915,7 +915,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "314"
             endingLineNumber = "314"
-            landmarkName = "DrawEdgesInIteration(Graphics::Display &amp;display)"
+            landmarkName = "DrawEdgesInIteration(display)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -932,7 +932,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "300"
             endingLineNumber = "300"
-            landmarkName = "DrawEdgesInIteration(Graphics::Display &amp;display)"
+            landmarkName = "DrawEdgesInIteration(display)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1049,9 +1049,9 @@
             timestampString = "587402794.819863"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "196"
-            endingLineNumber = "196"
-            landmarkName = "MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)"
+            startingLineNumber = "203"
+            endingLineNumber = "203"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1066,9 +1066,9 @@
             timestampString = "587402794.8200001"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "368"
-            endingLineNumber = "368"
-            landmarkName = "DoSingleSearchStep(std::vector&lt;state&gt; &amp;thePath)"
+            startingLineNumber = "370"
+            endingLineNumber = "370"
+            landmarkName = "DoSingleSearchStep(thePath)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1083,9 +1083,9 @@
             timestampString = "587402794.820061"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "385"
-            endingLineNumber = "385"
-            landmarkName = "DoSingleSearchStep(std::vector&lt;state&gt; &amp;thePath)"
+            startingLineNumber = "387"
+            endingLineNumber = "387"
+            landmarkName = "DoSingleSearchStep(thePath)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1100,8 +1100,8 @@
             timestampString = "587402794.820109"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "256"
-            endingLineNumber = "256"
+            startingLineNumber = "258"
+            endingLineNumber = "258"
             landmarkName = "StepIteration()"
             landmarkType = "9">
          </BreakpointContent>
@@ -1175,10 +1175,10 @@
             filePath = "../../../demos/suboptimal-map/Driver.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "979"
-            endingLineNumber = "979"
-            landmarkName = "StartSearch()"
-            landmarkType = "9">
+            startingLineNumber = "1038"
+            endingLineNumber = "1038"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1229,7 +1229,7 @@
             landmarkType = "9">
             <Locations>
                <Location
-                  uuid = "473C803D-6E33-4665-B5E6-78D9D1C638A0 - 45bf9e57728c7580"
+                  uuid = "473C803D-6E33-4665-B5E6-78D9D1C638A0 - d9669b159479934e"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1244,7 +1244,7 @@
                   offsetFromSymbolStart = "243">
                </Location>
                <Location
-                  uuid = "473C803D-6E33-4665-B5E6-78D9D1C638A0 - 58651e50eacc7edb"
+                  uuid = "473C803D-6E33-4665-B5E6-78D9D1C638A0 - c4bc1b120c399815"
                   shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -1351,10 +1351,168 @@
             filePath = "../../../demos/ibex/Driver.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "701"
-            endingLineNumber = "701"
+            startingLineNumber = "706"
+            endingLineNumber = "706"
             landmarkName = "MyDisplayHandler(windowID, mod, key)"
             landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B94C0B7A-6408-42E6-BC52-7F27B953AADA"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../gui/GLUThog.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "864"
+            endingLineNumber = "864"
+            landmarkName = "DrawGraphics(display, port)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F3F251EB-A8D0-4F8A-923C-8CF12BD19683"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "hog2 mac native demos/DrawView.mm"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "141"
+            endingLineNumber = "141"
+            landmarkName = "-drawSegments:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6049DFE9-B9C1-45B2-ADF1-265F52C87F0F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "hog2 mac native demos/DrawView.mm"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "109"
+            endingLineNumber = "109"
+            landmarkName = "-drawRect:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9F8CACD0-9BB9-4829-B634-37F2F74EB091"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/bidir/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "243"
+            endingLineNumber = "243"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "23D41BB3-2B1E-49FD-9C51-39FA6B74DCF7"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../demos/bidir/Driver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "251"
+            endingLineNumber = "251"
+            landmarkName = "MyFrameHandler(windowID, viewport)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6D21E04C-A491-4614-962E-2D0B61D80879"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../generic/TemplateAStar.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "269"
+            endingLineNumber = "269"
+            landmarkName = "InitializeSearch(_env, from, to, thePath)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "6D21E04C-A491-4614-962E-2D0B61D80879 - 4f4f810fb11968ac"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TemplateAStar&lt;CanonicalGrid::xyLoc, CanonicalGrid::tDirection, CanonicalGrid::CanonicalGrid, AStarOpenClosed&lt;CanonicalGrid::xyLoc, AStarCompareWithF&lt;CanonicalGrid::xyLoc&gt;, AStarOpenClosedDataWithF&lt;CanonicalGrid::xyLoc&gt; &gt; &gt;::InitializeSearch(CanonicalGrid::CanonicalGrid*, CanonicalGrid::xyLoc const&amp;, CanonicalGrid::xyLoc const&amp;, std::__1::vector&lt;CanonicalGrid::xyLoc, std::__1::allocator&lt;CanonicalGrid::xyLoc&gt; &gt;&amp;)"
+                  moduleName = "Transit"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/generic/TemplateAStar.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "272"
+                  endingLineNumber = "272"
+                  offsetFromSymbolStart = "672">
+               </Location>
+               <Location
+                  uuid = "6D21E04C-A491-4614-962E-2D0B61D80879 - d0a29491c7106ef0"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TemplateAStar&lt;recVec, line2d, ConfigEnvironment, AStarOpenClosed&lt;recVec, AStarCompareWithF&lt;recVec&gt;, AStarOpenClosedDataWithF&lt;recVec&gt; &gt; &gt;::InitializeSearch(ConfigEnvironment*, recVec const&amp;, recVec const&amp;, std::__1::vector&lt;recVec, std::__1::allocator&lt;recVec&gt; &gt;&amp;)"
+                  moduleName = "Transit"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/generic/TemplateAStar.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "272"
+                  endingLineNumber = "272"
+                  offsetFromSymbolStart = "570">
+               </Location>
+               <Location
+                  uuid = "6D21E04C-A491-4614-962E-2D0B61D80879 - 24e1580887c65e12"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TemplateAStar&lt;xyLoc, tDirection, MapEnvironment, AStarOpenClosed&lt;xyLoc, AStarCompareWithF&lt;xyLoc&gt;, AStarOpenClosedDataWithF&lt;xyLoc&gt; &gt; &gt;::InitializeSearch(MapEnvironment*, xyLoc const&amp;, xyLoc const&amp;, std::__1::vector&lt;xyLoc, std::__1::allocator&lt;xyLoc&gt; &gt;&amp;)"
+                  moduleName = "Transit"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/generic/TemplateAStar.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "272"
+                  endingLineNumber = "272"
+                  offsetFromSymbolStart = "677">
+               </Location>
+               <Location
+                  uuid = "6D21E04C-A491-4614-962E-2D0B61D80879 - fde33fb1e9020f6"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TemplateAStar&lt;unsigned long, graphMove, GraphEnvironment, AStarOpenClosed&lt;unsigned long, AStarCompareWithF&lt;unsigned long&gt;, AStarOpenClosedDataWithF&lt;unsigned long&gt; &gt; &gt;::InitializeSearch(GraphEnvironment*, unsigned long const&amp;, unsigned long const&amp;, std::__1::vector&lt;unsigned long, std::__1::allocator&lt;unsigned long&gt; &gt;&amp;)"
+                  moduleName = "Transit"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/nathanst/hog2/generic/TemplateAStar.h"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "272"
+                  endingLineNumber = "272"
+                  offsetFromSymbolStart = "620">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

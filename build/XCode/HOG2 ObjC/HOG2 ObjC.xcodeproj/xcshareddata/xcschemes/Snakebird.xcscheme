@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0620"
+   LastUpgradeVersion = "1150"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C47BDBCE17440B5900DD0928"
-               BuildableName = "fling.app"
-               BlueprintName = "fling"
-               ReferencedContainer = "container:hog2 glut.xcodeproj">
+               BlueprintIdentifier = "C4A54FF924AEFC3400E9FF7F"
+               BuildableName = "HOG2 ObjC.app"
+               BlueprintName = "HOG2 ObjC"
+               ReferencedContainer = "container:HOG2 ObjC.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -27,20 +27,11 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C47BDBCE17440B5900DD0928"
-            BuildableName = "fling.app"
-            BlueprintName = "fling"
-            ReferencedContainer = "container:hog2 glut.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <Testables>
       </Testables>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -53,35 +44,23 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C47BDBCE17440B5900DD0928"
-            BuildableName = "fling.app"
-            BlueprintName = "fling"
-            ReferencedContainer = "container:hog2 glut.xcodeproj">
+            BlueprintIdentifier = "C4A54FF924AEFC3400E9FF7F"
+            BuildableName = "HOG2 ObjC.app"
+            BlueprintName = "HOG2 ObjC"
+            ReferencedContainer = "container:HOG2 ObjC.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-measureSolutionSimilarity 2483028129 "
+            argument = "-load /Users/nathanst/hog2/maps/snakebird/snakebird_0.map"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-solveState 11269445502631952 panda 40"
+            argument = "-decode 20b16EavGcxczdmdndpfmgvgwgxgyhfikKgphviljajljpjqFBgjgzhpgkhqglhrShaDDDSgnLDShuLL"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-rankTest"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-solveState 9147937549459460 rocks"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-bfs 13519603565592592 rocks"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-analyzeHoles 5"
+            argument = "-decode 24b13EjfGcfcgchcjcpcqcwdcdddedjdkdpdqdrdwdxecedejewhkipiqiujcjdjhjpjqjuKfjfwfxghgkgxhvhwhxiiivFPcigjSehLLDLSdvRR"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
@@ -96,10 +75,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C47BDBCE17440B5900DD0928"
-            BuildableName = "fling.app"
-            BlueprintName = "fling"
-            ReferencedContainer = "container:hog2 glut.xcodeproj">
+            BlueprintIdentifier = "C4A54FF924AEFC3400E9FF7F"
+            BuildableName = "HOG2 ObjC.app"
+            BlueprintName = "HOG2 ObjC"
+            ReferencedContainer = "container:HOG2 ObjC.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

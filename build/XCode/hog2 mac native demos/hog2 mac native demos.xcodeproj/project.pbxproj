@@ -934,6 +934,7 @@
 		C472A4F321E3114B00A1B41E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4C8354F1F2AF5C7004E78C0 /* Assets.xcassets */; };
 		C472A4F421E3114B00A1B41E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4C835511F2AF5C7004E78C0 /* Main.storyboard */; };
 		C472A4FD21E3121600A1B41E /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C472A4FB21E3121600A1B41E /* Driver.cpp */; };
+		C489CB52253811F200F3AB55 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C423109A204F3ACF000DEC53 /* Driver.cpp */; };
 		C48E6F2123A9A2740024D214 /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836491F2AF6B5004E78C0 /* BitVector.cpp */; };
 		C48E6F2223A9A2740024D214 /* Colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837301F2D5604004E78C0 /* Colors.cpp */; };
 		C48E6F2323A9A2740024D214 /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836711F2AF6B5004E78C0 /* Plot2D.cpp */; };
@@ -1739,7 +1740,6 @@
 		C4C837601F326C97004E78C0 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C835F11F2AF6B5004E78C0 /* Common.cpp */; };
 		C4C837631F3273F2004E78C0 /* CocoaHOG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837621F3273F2004E78C0 /* CocoaHOG.cpp */; };
 		C4CF76C122F39C46009CF802 /* DynamicWeightedGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4CF76C022F39C46009CF802 /* DynamicWeightedGrid.cpp */; };
-		C4CF76C222F39C58009CF802 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4CF76BC22F39C37009CF802 /* Driver.cpp */; };
 		C4D80D3820A2CB480087E08D /* BitVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836491F2AF6B5004E78C0 /* BitVector.cpp */; };
 		C4D80D3920A2CB480087E08D /* Colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C837301F2D5604004E78C0 /* Colors.cpp */; };
 		C4D80D3A20A2CB480087E08D /* Plot2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4C836711F2AF6B5004E78C0 /* Plot2D.cpp */; };
@@ -2487,7 +2487,7 @@
 		C4C835671F2AF6B4004E78C0 /* OpenClosedList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenClosedList.h; sourceTree = "<group>"; };
 		C4C835681F2AF6B4004E78C0 /* OpenListB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OpenListB.cpp; sourceTree = "<group>"; };
 		C4C835691F2AF6B4004E78C0 /* OpenListB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenListB.h; sourceTree = "<group>"; };
-		C4C8356B1F2AF6B4004E78C0 /* Airplane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = Airplane.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C4C8356B1F2AF6B4004E78C0 /* Airplane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = Airplane.cpp; sourceTree = "<group>"; };
 		C4C8356C1F2AF6B4004E78C0 /* Airplane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Airplane.h; sourceTree = "<group>"; };
 		C4C8356D1F2AF6B4004E78C0 /* BurnedPancakePuzzle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BurnedPancakePuzzle.cpp; sourceTree = "<group>"; };
 		C4C8356E1F2AF6B4004E78C0 /* BurnedPancakePuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BurnedPancakePuzzle.h; sourceTree = "<group>"; };
@@ -2499,11 +2499,11 @@
 		C4C835741F2AF6B4004E78C0 /* ConfigEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigEnvironment.h; sourceTree = "<group>"; };
 		C4C835751F2AF6B4004E78C0 /* Directional2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Directional2DEnvironment.cpp; sourceTree = "<group>"; };
 		C4C835761F2AF6B4004E78C0 /* Directional2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Directional2DEnvironment.h; sourceTree = "<group>"; };
-		C4C835771F2AF6B4004E78C0 /* Fling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = Fling.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C4C835771F2AF6B4004E78C0 /* Fling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = Fling.cpp; sourceTree = "<group>"; };
 		C4C835781F2AF6B4004E78C0 /* Fling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fling.h; sourceTree = "<group>"; };
 		C4C835791F2AF6B4004E78C0 /* FlipSide.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlipSide.cpp; sourceTree = "<group>"; };
 		C4C8357A1F2AF6B4004E78C0 /* FlipSide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlipSide.h; sourceTree = "<group>"; };
-		C4C8357B1F2AF6B4004E78C0 /* GraphEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = GraphEnvironment.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C4C8357B1F2AF6B4004E78C0 /* GraphEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = GraphEnvironment.cpp; sourceTree = "<group>"; };
 		C4C8357C1F2AF6B4004E78C0 /* GraphEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphEnvironment.h; sourceTree = "<group>"; };
 		C4C8357D1F2AF6B4004E78C0 /* GraphRefinementEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GraphRefinementEnvironment.cpp; sourceTree = "<group>"; };
 		C4C8357E1F2AF6B4004E78C0 /* GraphRefinementEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphRefinementEnvironment.h; sourceTree = "<group>"; };
@@ -2552,9 +2552,9 @@
 		C4C835AC1F2AF6B4004E78C0 /* TopSpin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopSpin.h; sourceTree = "<group>"; };
 		C4C835AD1F2AF6B4004E78C0 /* TopSpinGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TopSpinGraph.cpp; sourceTree = "<group>"; };
 		C4C835AE1F2AF6B4004E78C0 /* TopSpinGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopSpinGraph.h; sourceTree = "<group>"; };
-		C4C835AF1F2AF6B4004E78C0 /* VoxelGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = VoxelGrid.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C4C835AF1F2AF6B4004E78C0 /* VoxelGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = VoxelGrid.cpp; sourceTree = "<group>"; };
 		C4C835B01F2AF6B5004E78C0 /* VoxelGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoxelGrid.h; sourceTree = "<group>"; };
-		C4C835B11F2AF6B5004E78C0 /* Voxels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = Voxels.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C4C835B11F2AF6B5004E78C0 /* Voxels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = Voxels.cpp; sourceTree = "<group>"; };
 		C4C835B21F2AF6B5004E78C0 /* Voxels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Voxels.h; sourceTree = "<group>"; };
 		C4C835B31F2AF6B5004E78C0 /* WeightedMap2DEnvironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WeightedMap2DEnvironment.cpp; sourceTree = "<group>"; };
 		C4C835B41F2AF6B5004E78C0 /* WeightedMap2DEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeightedMap2DEnvironment.h; sourceTree = "<group>"; };
@@ -4566,7 +4566,6 @@
 				C4231069204F3AA5000DEC53 /* FourBitArray.cpp in Sources */,
 				C423106A204F3AA5000DEC53 /* CocoaHOG.cpp in Sources */,
 				C423106B204F3AA5000DEC53 /* Graph.cpp in Sources */,
-				C4CF76C222F39C58009CF802 /* Driver.cpp in Sources */,
 				C423106C204F3AA5000DEC53 /* OpenClosedList.cpp in Sources */,
 				C423106D204F3AA5000DEC53 /* MinBloom.cpp in Sources */,
 				C423106E204F3AA5000DEC53 /* JPS.cpp in Sources */,
@@ -4601,6 +4600,7 @@
 				C423108C204F3AA5000DEC53 /* BurnedPancakePuzzle.cpp in Sources */,
 				C423108D204F3AA5000DEC53 /* TextOverlay.cpp in Sources */,
 				C423108E204F3AA5000DEC53 /* GenericAStar.cpp in Sources */,
+				C489CB52253811F200F3AB55 /* Driver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
