@@ -161,7 +161,7 @@ bool SnakeBird::Load(const char *filename)
 	std::ifstream infile;
 	infile.open(filename);
 	if (infile.fail()) {
-		printf("File could not be opened.");
+		printf("File could not be opened.\n");
 		EndEditing();
 		return false;
 	}
@@ -1134,11 +1134,21 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 		{
 			step.anim = kFall;
 			step.animationDuration = 0.1;
+			step.teleportCount++;
 			return false;
 		}
 		step.anim = kFall;
 	}
-	
+
+	if (step.teleportCount > 10)
+	{
+		for (int x = 0; x < s.GetNumSnakes(); x++)
+		s.SetSnakeHeadLoc(x, kDead);
+		step.animationDuration = 0.5; // then undo automatically
+		step.anim = kPauseWhenDead;
+		return false;
+	}
+
 	if (step.anim == kFall)
 	{
 		step.anim = DoFall(step.a, s);
@@ -1220,12 +1230,21 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 
 		if (step.anim == kTeleport)
 		{
-			HandleTeleports(s, a, kDown, kUp, step);
+			if (HandleTeleports(s, a, kDown, kUp, step))
+				step.teleportCount++;
 			step.anim = kFall;
 		}
 		else if (step.anim == kInitialTeleport) {
-			HandleTeleports(s, a, lastAction, opposite, step);
+			if (HandleTeleports(s, a, lastAction, opposite, step))
+				step.teleportCount++;
 			step.anim = kFall;
+		}
+		
+		if (step.teleportCount > 10)
+		{
+			for (int x = 0; x < s.GetNumSnakes(); x++)
+			s.SetSnakeHeadLoc(x, kDead);
+			return;
 		}
 		
 		if (step.anim == kFall)
@@ -1347,7 +1366,8 @@ bool SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
 						if (((render[newPiece]&kSnakeMask) == kSnakeMask &&
 							 render[newPiece] != objs[snake]) || // hit another snake
 							((world[newPiece]&kGroundMask) == kGroundMask) || // hit ground
-							((render[newPiece]&kBlockMask) == kBlockMask)) // hit piece
+							((render[newPiece]&kBlockMask) == kBlockMask) || // hit piece
+							(render[newPiece] == kFruit)) // hit fruit
 						{
 							valid = false;
 							break;
@@ -1474,13 +1494,61 @@ void SnakeBird::SetGroundType(int index, SnakeBirdWorldObject o)
 }
 
 /**
+ * Similar to SetGroundType but only deals with removing blocks
+ */
+void SnakeBird::RemoveBlock(int x, int y)
+{
+	for (int which = 0; which < 4; which++)
+	{
+		if (objects[which].size() <= 0) // no other objects
+			continue;
+
+		int xOffset = 0, yOffset = 0;
+		xOffset = GetX(startState.GetObjectLocation(which));
+		yOffset = GetY(startState.GetObjectLocation(which));
+
+		for (int i = 0; i < objects[which].size(); i++)
+		{
+			if (GetX(objects[which][i])+xOffset == x &&
+				GetY(objects[which][i])+yOffset == y) // remove
+			{
+				objects[which][i] = objects[which].back();
+				objects[which].pop_back();
+				break;
+			}
+		}
+		// quit loop if we removed last object
+		if (objects[which].size() <= 0)
+		{
+			continue;
+		}
+
+		int newX = width, newY=height;
+		
+		// Get new base location (minx/y)
+		for (int i = 0; i < objects[which].size(); i++)
+		{
+			newX = std::min(newX, GetX(objects[which][i])+xOffset);
+			newY = std::min(newY, GetY(objects[which][i])+yOffset);
+		}
+		startState.SetObjectLocation(which, GetIndex(newX, newY));
+		for (int i = 0; i < objects[which].size(); i++)
+		{
+			// reset locations based on new base location
+			objects[which][i] = GetIndex(GetX(objects[which][i])+xOffset - newX,
+										 GetY(objects[which][i])+yOffset - newY);
+		}
+	}
+}
+
+/**
  * Change the ground type to a new type. Must enable editing to have an impact.
  */
 void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 {
 	if (!editing)
 	{
-		printf("!!WARNING: Changing map without enabling editing!!\n");
+		printf("!!WARNING: Cannot change map without enabling editing!!\n");
 		return;
 	}
 	// TODO: check duplicates and removals for fruit and blocks
@@ -1606,12 +1674,18 @@ void SnakeBird::SetGroundType(int x, int y, SnakeBirdWorldObject o)
 	}
 }
 
-bool SnakeBird::NumPortals()
+int SnakeBird::GetNumPortals()
 {
-	if (portal1Loc == -1 || portal2Loc == -1)
-		return true;
-	else
-		return false;
+	int cnt = 0;
+	if (portal1Loc != -1)
+		cnt++;
+	if (portal2Loc != -1)
+		cnt++;
+	return cnt;
+//	if (portal1Loc == -1 || portal2Loc == -1)
+//		return true;
+//	else
+//		return false;
 }
 
 int SnakeBird::GetFruitOffset(int index) const
@@ -1671,10 +1745,10 @@ int SnakeBird::Distance(int index1, int index2)
 	return  abs(x1-x2)+abs(y1-y2);
 }
 
-void SnakeBird::Draw(Graphics::Display &display, int x, int y) const
+void SnakeBird::Draw(Graphics::Display &display, int x, int y, float width) const
 {
 	Graphics::point p = GetCenter(x, y);
-	display.FrameRect({p, GetRadius()}, GetColor(), GetRadius()*0.3);
+	display.FrameRect({p, GetRadius()}, GetColor(), GetRadius()*0.3*width);
 }
 
 void SnakeBird::Draw(Graphics::Display &display) const

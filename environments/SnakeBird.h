@@ -167,10 +167,11 @@ enum SnakeBirdAnimation : uint8_t {
 
 struct SnakeBirdAnimationStep {
 	SnakeBirdAnimationStep() { Reset(); }
-	void Reset() { anim = kNeedsInitialization; animationDuration = 0; }
+	void Reset() { anim = kNeedsInitialization; animationDuration = 0; teleportCount = 0;}
 	SnakeBirdAnimation anim;
 	SnakeBirdAction a;
 	double animationDuration;
+	int teleportCount;
 };
 
 /*
@@ -236,7 +237,8 @@ public:
 	void SetStart(const SnakeBirdState &);
 	void AddSnake(int x, int y, const std::vector<snakeDir> &body);
 	void SetGroundType(int x, int y, SnakeBirdWorldObject o);
-	bool NumPortals();
+	void RemoveBlock(int x, int y);
+	int GetNumPortals();
 	SnakeBirdWorldObject GetGroundType(int x, int y) const;
 	SnakeBirdWorldObject GetRenderedGroundType(const SnakeBirdState &s, int x, int y);
 	int GetWidth() { return width; }
@@ -306,7 +308,7 @@ public:
 	void Draw(Graphics::Display &display) const;
 	void DrawObjects(Graphics::Display &display, double time = 0) const;
 	void DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWorldObject o, double time = 0) const;
-	void Draw(Graphics::Display &display, int x, int y) const;
+	void Draw(Graphics::Display &display, int x, int y, float width = 1.0) const;
 	void Draw(Graphics::Display &display, double time) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&) const;
 	void Draw(Graphics::Display &display, const SnakeBirdState&, int active) const;
@@ -338,9 +340,11 @@ private:
 
 	
 	int GetFruitOffset(int index) const;
+public:
 	int GetIndex(int x, int y) const;
 	int GetX(int index) const;
 	int GetY(int index) const;
+private:
 	int Distance(int index1, int index2);
 	Graphics::point GetCenter(int x, int y) const;
 
