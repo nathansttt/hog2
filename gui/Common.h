@@ -54,6 +54,7 @@ enum viewportType {
 
 struct viewport {
 	Graphics::rect bounds;
+	Graphics::rect finalBound;
 	viewportType type;
 	bool active; // Is this viewport valid
 };
@@ -114,6 +115,8 @@ void ReinitViewports(unsigned long windowID, const Graphics::rect &r, viewportTy
  * returns the new viewport numbers
  */
 int AddViewport(unsigned long windowID, const Graphics::rect &r, viewportType v);
+int AddViewport(unsigned long windowID, const Graphics::rect &initial, const Graphics::rect &fin, viewportType v);
+void MoveViewport(unsigned long windowID, int viewport, const Graphics::rect &newLocation);
 
 point3d ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, point3d where);
 point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d where);

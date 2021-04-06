@@ -166,7 +166,11 @@ void HandleFrame(pRecContext pContextInfo, int viewport)
 		if (glDrawCallbacks[x]->windowID == pContextInfo->windowID)
 			glDrawCallbacks[x]->glCall(pContextInfo->windowID, viewport, glDrawCallbacks[x]->userData);
 	}
-	pContextInfo->display.EndFrame();
+	pContextInfo->display.EndFrame(); // end last frame
+	for (int x = 0; x < pContextInfo->numPorts; x++)
+	{
+		pContextInfo->viewports[x].bounds.lerp(pContextInfo->viewports[x].finalBound, 0.1);
+	}
 }
 
 void InstallJoystickHandler(JoystickCallback jC, void *userdata)
@@ -286,6 +290,7 @@ void ReinitViewports(unsigned long windowID, const Graphics::rect &r, viewportTy
 	pRecContext pContextInfo = GetContext(windowID);
 	pContextInfo->numPorts = 1;
 	pContextInfo->viewports[0].bounds = r;
+	pContextInfo->viewports[0].finalBound = r;
 	pContextInfo->viewports[0].type = v;
 	pContextInfo->viewports[0].active = true;
 	for (int x = 1; x < MAXPORTS; x++)
@@ -305,9 +310,35 @@ int AddViewport(unsigned long windowID, const Graphics::rect &r, viewportType v)
 	}
 	pContextInfo->numPorts++;
 	pContextInfo->viewports[pContextInfo->numPorts-1].bounds = r;
+	pContextInfo->viewports[pContextInfo->numPorts-1].finalBound = r;
 	pContextInfo->viewports[pContextInfo->numPorts-1].type = v;
 	pContextInfo->viewports[pContextInfo->numPorts-1].active = true;
 	return pContextInfo->numPorts-1;
+}
+
+/* Adds a new viewport to the existing viewports and
+ * returns the new viewport numbers. Will animate from initial to final location
+ */
+int AddViewport(unsigned long windowID, const Graphics::rect &initial, const Graphics::rect &fin, viewportType v)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+	if (pContextInfo->numPorts >= MAXPORTS)
+	{
+		printf("Cannot add viewport - reached limit of %d [constant MAXPORTS]\n", MAXPORTS);
+		return -1;
+	}
+	pContextInfo->numPorts++;
+	pContextInfo->viewports[pContextInfo->numPorts-1].bounds = initial;
+	pContextInfo->viewports[pContextInfo->numPorts-1].finalBound = fin;
+	pContextInfo->viewports[pContextInfo->numPorts-1].type = v;
+	pContextInfo->viewports[pContextInfo->numPorts-1].active = true;
+	return pContextInfo->numPorts-1;
+}
+
+void MoveViewport(unsigned long windowID, int port, const Graphics::rect &newLocation)
+{
+	pRecContext pContextInfo = GetContext(windowID);
+	pContextInfo->viewports[port].finalBound = newLocation;
 }
 
 point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d where)
