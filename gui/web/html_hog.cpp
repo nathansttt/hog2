@@ -178,10 +178,10 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 			int r = o.c.r*255.0;
 			int g = o.c.g*255.0;
 			int b = o.c.b*255.0;
-//			float cWidth = ceilf(PointXToCanvas(o.r.right, d.viewport))-floorf(PointXToCanvas(o.r.left, d.viewport));
-//			float cHeight = ceilf(PointYToCanvas(o.r.bottom, d.viewport))-floorf(PointYToCanvas(o.r.top, d.viewport));
-			float cWidth = (PointXToCanvas(o.r.right, d.viewport))-(PointXToCanvas(o.r.left, d.viewport));
-			float cHeight = (PointYToCanvas(o.r.bottom, d.viewport))-(PointYToCanvas(o.r.top, d.viewport));
+			float cWidth = ceilf(PointXToCanvas(o.r.right, d.viewport))-floorf(PointXToCanvas(o.r.left, d.viewport));
+			float cHeight = ceilf(PointYToCanvas(o.r.bottom, d.viewport))-floorf(PointYToCanvas(o.r.top, d.viewport));
+//			float cWidth = (PointXToCanvas(o.r.right, d.viewport))-(PointXToCanvas(o.r.left, d.viewport));
+//			float cHeight = (PointYToCanvas(o.r.bottom, d.viewport))-(PointYToCanvas(o.r.top, d.viewport));
 			EM_ASM_({
 				var c=document.getElementById(UTF8ToString($0));
 				var ctx=c.getContext("2d");
@@ -298,7 +298,7 @@ void DrawToCanvas(const Graphics::Display &disp)
 		EM_ASM({
 			var c=document.getElementById("bg");
 			var ctx=c.getContext("2d");
-			ctx.clearRect(0, 0, c.width, c.height);
+			//ctx.clearRect(0, 0, c.width, c.height);
 			ctx.fillStyle = "rgb(0,0,0)";
 			ctx.fillRect(0, 0, c.width, c.height);
 		});
@@ -449,7 +449,15 @@ void DrawToCanvas(const Graphics::Display &disp)
 			ctx.lineWidth=$0;
 			ctx.stroke();
 			ctx.lineWidth=1;
-		}, i.size);
+		}, WidthToCanvas(i.size, disp.lineSegments[x].viewport));
+//		ctx.lineWidth=$8;
+//		ctx.stroke();
+//	}, which, r,g,b,
+//			PointXToCanvas(o.start.x, d.viewport), PointYToCanvas(o.start.y, d.viewport),
+//			PointXToCanvas(o.end.x, d.viewport), PointYToCanvas(o.end.y, d.viewport),
+//			WidthToCanvas(o.width, d.viewport));
+
+
 	}
 }
 
