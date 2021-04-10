@@ -14,6 +14,7 @@
 #include <vector>
 #include "PDBHeuristic.h"
 #include "MR1Permutation.h"
+#include "SearchEnvironment.h"
 
 class RubiksCornerStateBits
 {
@@ -110,7 +111,7 @@ public:
 	int length() { if (next == 0) return 1; return 1+next->length(); }
 };
 
-class RubiksCorner
+class RubiksCorner : public SearchEnvironment<RubiksCornerState, RubiksCornersAction>
 {
 public:
 	RubiksCorner()
@@ -171,8 +172,8 @@ public:
 	virtual bool GoalTest(const RubiksCornerStateBits &node) const;
 	virtual bool GoalTest(const RubiksCornerStateArray &node) const;
 	
-	static uint64_t GetStateHash(const RubiksCornerState &node);
-	static void GetStateFromHash(uint64_t hash, RubiksCornerState &node);
+	uint64_t GetStateHash(const RubiksCornerState &node) const;
+	void GetStateFromHash(uint64_t hash, RubiksCornerState &node) const;
 	virtual uint64_t GetActionHash(RubiksCornersAction act) const { return 0; }
 	
 	virtual void OpenGLDraw() const;
@@ -181,6 +182,7 @@ public:
 	virtual void OpenGLDraw(const RubiksCornerState&, const RubiksCornerState&, float) const;
 	virtual void OpenGLDraw(const RubiksCornerState&, const RubiksCornersAction&) const;
 	void OpenGLDrawCube(const RubiksCornerState &s, int cube) const;
+
 private:
 	void SetFaceColor(int face, const RubiksCornerState&) const;
 	//	void SetFaceColor(int face, const RubiksCornerState&) const;

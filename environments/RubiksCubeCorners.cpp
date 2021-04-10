@@ -583,7 +583,7 @@ void RubiksCorner::rankPlayerRemaining(const RubiksCornerState &node, int who, i
 }
 
 
-uint64_t RubiksCorner::GetStateHash(const RubiksCornerState &node)
+uint64_t RubiksCorner::GetStateHash(const RubiksCornerState &node) const
 {
 	static uint64_t Factorial[21] =
 	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
@@ -667,7 +667,7 @@ uint64_t RubiksCorner::MRRank(int n, uint64_t perm, uint64_t dual)
 /////
 
 
-void RubiksCorner::GetStateFromHash(uint64_t hash, RubiksCornerState &node)
+void RubiksCorner::GetStateFromHash(uint64_t hash, RubiksCornerState &node) const
 {
 	static uint64_t Factorial[21] =
 	{ 1ll, 1ll, 2ll, 6ll, 24ll, 120ll, 720ll, 5040ll, 40320ll, 362880ll, 3628800ll, 39916800ll, 479001600ll,
@@ -1194,12 +1194,14 @@ uint64_t RubikCornerPDB::GetStateSpaceSize()
 
 uint64_t RubikCornerPDB::GetStateHash(const RubiksCornerState &s)
 {
-	return RubiksCorner::GetStateHash(s);
+	RubiksCorner rc;
+	return rc.GetStateHash(s);
 }
 
 void RubikCornerPDB::GetStateFromHash(RubiksCornerState &s, uint64_t hash)
 {
-	RubiksCorner::GetStateFromHash(hash, s);
+	RubiksCorner rc;
+	rc.GetStateFromHash(hash, s);
 }
 
 uint64_t RubikCornerPDB::GetPDBSize() const
