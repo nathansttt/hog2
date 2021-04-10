@@ -29,6 +29,13 @@
 #include "BidirTS.h"
 #include "BidirRubik.h"
 #include "MapGenerators.h"
+#include "MNPuzzle.h"
+#include "TemplateAStar.h"
+#include "NBS.h"
+#include "WeightedVertexGraph.h"
+#include "PancakePuzzle.h"
+#include "RubiksCubeCorners.h"
+
 
 void Test100Easy();
 void Animate();
@@ -82,9 +89,11 @@ void ArbitraryGoalTest();
 int MyCLHandler(char *argument[], int maxNumArgs);
 void TestDataStructure();
 const char *GetStringFromMove(int move);
+void PathTest();
 
 int main(int argc, char* argv[])
 {
+	PathTest();
 	//TestDataStructure();
 	setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -1882,4 +1891,60 @@ int GetGCount(TemplateAStar<xyLoc, tDirection, MapEnvironment> &astar, double g,
 //
 //	exit(0);
 //}
+
+template <class state, class action, class environment>
+void PathTests()
+{
+	environment mnp;
+	state s, g;
+	std::vector<state> path;
+	std::vector<state> tmp;
+	s.Reset();
+	TemplateAStar<state, action, environment> astar;
+	NBS<state, action, environment> nbs;
+	printf("Finding far state\n");
+	astar.SetStopAfterGoal(false);
+	astar.InitializeSearch(&mnp, s, s, path);
+	while (astar.GetNumOpenItems() > 0)
+	{
+		g = astar.CheckNextNode();
+		astar.DoSingleSearchStep(path);
+	}
+	std::cout << "Nodes: " << astar.GetNodesExpanded() << "\n";
+	astar.ExtractPathToStart(g, path);
+	std::cout << "Path: " << path.size() << "\n";
+	ZeroHeuristic<state> z;
+	// Run BFS
+	printf("Depth\tBFS_b\tBFS_b^0.5\tBFS_f\tBFS_f^0.5\tNBS0\n");
+	astar.SetStopAfterGoal(true);
+	for (int x = 0; x < path.size(); x++)
+	{
+		astar.SetHeuristic(&z);
+		astar.GetPath(&mnp, s, path[x], tmp);
+		printf("%d\t%llu [%d]\t%1.2f", x, astar.GetNodesExpanded(), tmp.size(), sqrt(astar.GetNodesExpanded()));
+
+		astar.SetHeuristic(&z);
+		astar.GetPath(&mnp, path[x], s, tmp);
+		printf("\t%llu [%d]\t%1.2f", astar.GetNodesExpanded(), tmp.size(), sqrt(astar.GetNodesExpanded()));
+
+		nbs.GetPath(&mnp, s, path[x], &z, &z, tmp);
+		printf("\t%llu [%d]\n", nbs.GetNodesExpanded(), tmp.size());
+//		BidirectionalProblemAnalyzer<state, action, environment>::GetWeightedVertexGraph(s, path[x], &mnp, &z, &z);
+
+	}
+}
+
+void PathTest()
+{
+	printf("3x3 STP\n");
+	PathTests<MNPuzzleState<3, 3>, slideDir, MNPuzzle<3, 3>>();
+	printf("9 Pancake\n");
+	PathTests<PancakePuzzleState<9>, PancakePuzzleAction, PancakePuzzle<9>>();
+	printf("10 Pancake\n");
+	PathTests<PancakePuzzleState<10>, PancakePuzzleAction, PancakePuzzle<10>>();
+//	printf("2x2x2 RC\n");
+//	PathTests<RubiksCornerState, RubiksCornersAction, RubiksCorner>();
+	exit(0);
+}
+
 
