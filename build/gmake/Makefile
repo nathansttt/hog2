@@ -48,6 +48,7 @@ PROJECTS = \
   demos/dijkstra \
   demos/astar \
   demos/idastar \
+  demos/fastmap \
   papers/IBEX \
   papers/DWA \
 	tests/mnpuzzle \
