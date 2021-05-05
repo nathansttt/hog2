@@ -15,7 +15,7 @@
 #include "TemplateAStar.h"
 #include "TextOverlay.h"
 #include <string>
-
+#include "SVGUtil.h"
 enum mode {
 	kAddNodes,
 	kAddEdges,
@@ -101,6 +101,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 //		SetNumPorts(windowID, 2);
 		g = new Graph();
 		ge = new GraphEnvironment(g);
+		ge->SetNodeScale(2.5);
 		ge->SetDrawEdgeCosts(true);
 		ge->SetDrawNodeLabels(true);
 		ge->SetIntegerEdgeCosts(true);
@@ -121,7 +122,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		display.FillRect({-1.0, -1.0, 1.0, 1}, Colors::white);
 		if (ge == 0 || g == 0)
 			return;
-		ge->SetColor(Colors::black);
+		ge->SetColor(Colors::gray);
 		ge->Draw(display);
 		if (from != -1 && to != -1)
 		{
@@ -144,10 +145,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 		if (path.size() > 0)
 		{
-			ge->SetColor(0, 1, 0);
+			ge->SetColor(0, 0.5, 0);
 			for (int x = 1; x < path.size(); x++)
 			{
-				ge->DrawLine(display, path[x-1], path[x], 4);
+				ge->DrawLine(display, path[x-1], path[x], 6);
 			}
 		}
 	}
@@ -156,22 +157,22 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		te.Draw(display);
 	}
 	
-//	if (recording && viewport == GetNumPorts(windowID)-1)
-//	{
-//		char fname[255];
-//		sprintf(fname, "/Users/nathanst/Movies/tmp/dijkstra-%d%d%d%d",
-//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-//		SaveScreenshot(windowID, fname);
-//		printf("Saved %s\n", fname);
-//		frameCnt++;
-//		if (path.size() == 0)
-//		{
-//			MyDisplayHandler(windowID, kNoModifier, 'o');
-//		}
-//		else {
-//			recording = false;
-//		}
-//	}
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/dijkstra-%d%d%d%d%d.svg",
+				(frameCnt/10000)%10, (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0, "", false); // sharp edges
+		printf("Saved %s\n", fname);
+		frameCnt++;
+		if (path.size() == 0)
+		{
+			MyDisplayHandler(windowID, kNoModifier, 'o');
+		}
+		else {
+			recording = false;
+		}
+	}
 	return;
 	
 }
