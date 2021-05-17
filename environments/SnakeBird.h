@@ -222,6 +222,12 @@ enum SnakeBirdWorldObject : uint8_t {
 	kSnake4 = 0x13,
 };
 
+enum TeleportResult {
+	kNoTeleport,
+	kTeleportSuccess,
+	kTeleportToExit
+};
+
 class SnakeBird : public SearchEnvironment<SnakeBirdState, SnakeBirdAction> {
 public:
 	SnakeBird(int width = 20, int height = 16);
@@ -241,8 +247,8 @@ public:
 	int GetNumPortals();
 	SnakeBirdWorldObject GetGroundType(int x, int y) const;
 	SnakeBirdWorldObject GetRenderedGroundType(const SnakeBirdState &s, int x, int y);
-	int GetWidth() { return width; }
-	int GetHeight() { return height; }
+	int GetWidth() const { return width; }
+	int GetHeight() const { return height; }
 
 	void GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBirdState> &neighbors) const;
 	void GetActions(const SnakeBirdState &nodeID, std::vector<SnakeBirdAction> &actions) const;
@@ -317,7 +323,8 @@ public:
 			  int active, double percentComplete, double globalTime) const;
 	void DrawLine(Graphics::Display &display, const SnakeBirdState &x, const SnakeBirdState &y, float width = 1.0) const;
 	void DrawLabel(Graphics::Display &display, int x, int y, const char *str);
-	
+	void DrawSmallLabel(Graphics::Display &display, int x, int y, const char *str);
+
 	// Allows us to draw text overlay
 	float GetRadius() const;
 	bool GetPointFromCoordinate(Graphics::point p, int &x, int &y);
@@ -332,8 +339,8 @@ private:
 	
 	// Apply Move helper functions
 	// check if snakebirds can teleport - return true if one did
-	bool HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
-						 snakeDir lastAction, snakeDir opposite, SnakeBirdAnimationStep step) const;
+	TeleportResult HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
+								   snakeDir lastAction, snakeDir opposite, SnakeBirdAnimationStep step) const;
 	SnakeBirdAnimation DoFirstMovement(const SnakeBirdAction &a, int offset, snakeDir opposite, SnakeBirdState &s) const;
 	// returns true if a snake fell
 	SnakeBirdAnimation DoFall(SnakeBirdAction &a, SnakeBirdState &s) const;

@@ -174,11 +174,15 @@ bool SnakeBird::Load(const char *filename)
 		std::string hLine;
 		getline(infile, hLine);
 	 	
-		std::string sHeight = hLine.substr(8,2);
-		std::string sWidth = hLine.substr(5, 2);
-
-		int wWidth = std::stoi(sWidth, nullptr, 10);
-		int wHeight = std::stoi(sHeight, nullptr,10);
+		int wWidth;
+		int wHeight;
+		sscanf(hLine.c_str(), "snake%dx%d", &wWidth, &wHeight);
+		
+//		std::string sHeight = hLine.substr(8,2);
+//		std::string sWidth = hLine.substr(5,2);
+//
+//		int wWidth = std::stoi(sWidth, nullptr, 10);
+//		int wHeight = std::stoi(sHeight, nullptr,10);
 
 		portal1Loc = portal2Loc = -1;
 		exitLoc = -1;
@@ -599,13 +603,29 @@ void SnakeBird::GetSuccessors(const SnakeBirdState &nodeID, std::vector<SnakeBir
 		ApplyAction(s, a);
 		bool valid = true;
 		for (int x = s.GetNumSnakes()-1; x >= 0; x--)
+		{
 			if (s.GetSnakeHeadLoc(x) == kDead)
 			{
 				valid = false;
 				break;
 			}
+		}
 		if (valid)
+		{
+			// Validate that all snakes are in legal locations
+//			for (int x = 0; x < s.GetNumSnakes(); x++)
+//			{
+//				if (s.GetSnakeHeadLoc(x) >= GetWidth()*GetHeight() && s.GetSnakeHeadLoc(x) < kDead)
+//				{
+//					for (int y = 0; y < s.GetNumSnakes(); y++)
+//					printf("%d: %d\n", y, s.GetSnakeHeadLoc(y));
+//					printf("Error - illegal successor\n");
+//					s = nodeID;
+//					ApplyAction(s, a);
+//				}
+//			}
 			neighbors.push_back(s);
+		}
 	}
 }
 
@@ -662,6 +682,8 @@ bool SnakeBird::Render(const SnakeBirdState &s) const
 			continue;
 		if (loc == kDead) // no legal actions for any snake if one is dead
 			return false;
+		if (loc < 0 && loc >= width*height) // pushed offscreen
+			return false;
 		render[loc] = obj[snake];
 		if (world[loc] == kSpikes)
 			return false;
@@ -675,7 +697,9 @@ bool SnakeBird::Render(const SnakeBirdState &s) const
 				case kUp: loc-=1; break;
 				case kDown: loc+=1; break;
 			}
-			assert(loc >= 0 && loc < width*height);
+//  			assert(loc >= 0 && loc < width*height);
+			if (loc < 0 && loc >= width*height)
+				return false;
 			render[loc] = obj[snake];
 			if (world[loc] == kSpikes)
 				return false;
@@ -946,6 +970,18 @@ SnakeBirdAnimation SnakeBird::DoFirstMovement(const SnakeBirdAction &a, int offs
 			s.SetSnakeBodyEnd(x, s.GetSnakeBodyEnd(x)+1);
 		s.InsertSnakeHeadDir(a.bird, opposite);
 		s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+offset);
+
+		// If another snake is on the goal, set didEdit
+		if (s.KFruitEaten(fruit.size()))
+		{
+			for (int x = 0; x < s.GetNumSnakes(); x++)
+			{
+				if (s.GetSnakeHeadLoc(x) == exitLoc)
+				{
+					didExit = true;
+				}
+			}
+		}
 	}
 	else { // normal movement or pushing
 		s.SetSnakeHeadLoc(a.bird, s.GetSnakeHeadLoc(a.bird)+offset);
@@ -956,7 +992,16 @@ SnakeBirdAnimation SnakeBird::DoFirstMovement(const SnakeBirdAction &a, int offs
 		{
 			if ((a.pushed>>i)&0x1)
 			{
-				s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)+offset);
+				// TODO: this pushing action could push a snake offscreen, which is illegal
+				if (s.GetSnakeHeadLoc(i)+offset < 0 || s.GetSnakeHeadLoc(i)+offset >= GetWidth()*GetHeight())
+					s.SetSnakeHeadLoc(i, kDead);
+				else if (abs(GetX(s.GetSnakeHeadLoc(i))-GetX(s.GetSnakeHeadLoc(i)+offset)) > 1)
+					s.SetSnakeHeadLoc(i, kDead);
+//				else if (abs(GetY(s.GetSnakeHeadLoc(i))-GetY(s.GetSnakeHeadLoc(i)+offset)) > 1)
+//					s.SetSnakeHeadLoc(i, kDead);
+				else
+					s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)+offset);
+
 				if (world[s.GetSnakeHeadLoc(i)] == kExit && s.KFruitEaten(fruit.size()))
 				{
 					didExit = true;
@@ -1129,12 +1174,18 @@ bool SnakeBird::ApplyPartialAction(SnakeBirdState &s, SnakeBirdAction act, Snake
 
 	if (step.anim == kTeleport || step.anim == kInitialTeleport)
 	{
-		bool didTeleport = HandleTeleports(s, step.a, lastAction, opposite, step);
-		if (didTeleport)
+		auto didTeleport = HandleTeleports(s, step.a, lastAction, opposite, step);
+		if (didTeleport == kTeleportSuccess)
 		{
 			step.anim = kFall;
 			step.animationDuration = 0.1;
 			step.teleportCount++;
+			return false;
+		}
+		else if (didTeleport == kTeleportToExit)
+		{
+			step.anim = kFellInGoal;
+			step.animationDuration = 0.1;
 			return false;
 		}
 		step.anim = kFall;
@@ -1230,14 +1281,34 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 
 		if (step.anim == kTeleport)
 		{
-			if (HandleTeleports(s, a, kDown, kUp, step))
+			auto didTeleport = HandleTeleports(s, a, kDown, kUp, step);
+			if (didTeleport == kTeleportSuccess)
+			{
 				step.teleportCount++;
-			step.anim = kFall;
+				step.anim = kFall;
+			}
+			else if (didTeleport == kTeleportToExit)
+			{
+				step.anim = kFellInGoal;
+			}
+			else {
+				step.anim = kFall;
+			}
 		}
 		else if (step.anim == kInitialTeleport) {
-			if (HandleTeleports(s, a, lastAction, opposite, step))
+			auto didTeleport = HandleTeleports(s, a, lastAction, opposite, step);
+			if (didTeleport == kTeleportSuccess)
+			{
 				step.teleportCount++;
-			step.anim = kFall;
+				step.anim = kFall;
+			}
+			else if (didTeleport == kTeleportToExit)
+			{
+				step.anim = kFellInGoal;
+			}
+			else {
+				step.anim = kFall;
+			}
 		}
 		
 		if (step.teleportCount > 10)
@@ -1275,11 +1346,12 @@ void SnakeBird::ApplyAction(SnakeBirdState &s, SnakeBirdAction a) const
 	}
 }
 
-bool SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
-								snakeDir lastAction, snakeDir opposite, SnakeBirdAnimationStep step) const
+TeleportResult SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
+										  snakeDir lastAction, snakeDir opposite, SnakeBirdAnimationStep step) const
 {
 	const SnakeBirdWorldObject objs[8] = {kSnake1, kSnake2, kSnake3, kSnake4, kBlock1, kBlock2, kBlock3, kBlock4};
 	bool didTeleport = false;
+	bool didExit = false;
 	// Check for snakes which are now on portals
 	// *and* didn't have an adjacent segment on a portal in the last time step
 	for (int i = 0; i < 4 && (a.pushed>>i); i++)
@@ -1378,6 +1450,8 @@ bool SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
 						int offsetFromPortalX = GetX(newloc)+xChange;
 						int offsetFromPortalY = GetY(newloc)+yChange;
 						s.SetSnakeHeadLoc(i, GetIndex(offsetFromPortalX, offsetFromPortalY));
+						if (s.GetSnakeHeadLoc(i) == exitLoc && s.KFruitEaten(fruit.size()))
+							didExit = true;
 						didTeleport = true;
 						bool success = Render(s);
 						assert(success == true);
@@ -1485,7 +1559,12 @@ bool SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
 			}
 		}
 	}
-	return didTeleport;
+	if (didExit && didTeleport)
+		return kTeleportToExit;
+	if (didTeleport)
+		return kTeleportSuccess;
+	return kNoTeleport;
+//	return didTeleport;
 }
 
 void SnakeBird::SetGroundType(int index, SnakeBirdWorldObject o)
@@ -2486,6 +2565,11 @@ void SnakeBird::DrawSnakeSegment(Graphics::Display &display, Graphics::point p, 
 void SnakeBird::DrawLabel(Graphics::Display &display, int x, int y, const char *str)
 {
 	display.DrawText(str, GetCenter(x, y), GetColor(), GetRadius()*1.5, Graphics::textAlignLeft, Graphics::textBaselineMiddle);
+}
+
+void SnakeBird::DrawSmallLabel(Graphics::Display &display, int x, int y, const char *str)
+{
+	display.DrawText(str, GetCenter(x, y)+Graphics::point(GetRadius()/2, GetRadius()/2), GetColor(), 0.75*GetRadius(), Graphics::textAlignCenter, Graphics::textBaselineMiddle);
 }
 
 
