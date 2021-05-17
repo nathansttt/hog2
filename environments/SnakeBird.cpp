@@ -21,7 +21,8 @@ namespace SnakeBird {
 SnakeBird::SnakeBird(int width, int height)
 :width(width), height(height), editing(false)
 {
-	assert(width*height < 512);
+	assert(width*height <= 512);
+	assert(width >= 5 && height >= 5);
 	portal1Loc = portal2Loc = -1;
 	exitLoc = -1;
 	std::fill_n(&world[0], 512, kEmpty);
@@ -452,7 +453,7 @@ bool SnakeBird::DecodeLevel(const std::string &encoding)
 	BeginEditing();
 	
 	int cnt = sscanf(encoding.c_str(), "%db%dE", &width, &height);
-	if (cnt != 2 || width < 10 || height < 10 || width*height > 510)
+	if (cnt != 2 || width < 5 || height < 5 || width*height > 512)
 	{ Reset(); return false; }
 
 	size_t start = encoding.find_first_of("E");
