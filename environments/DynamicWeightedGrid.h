@@ -971,7 +971,7 @@ namespace DWG {
 			xyLoc l1(x, 0), l2(x, mHeight);
 			GetCoordinate(l1, xx1, yy1, rr);
 			GetCoordinate(l2, xx2, yy2, rr);
-			display.DrawLine({xx1-rr, yy1-rr}, {xx2-rr, yy2-rr}, 0.5, Colors::darkgray);
+			display.DrawLine({xx1-rr, yy1-rr}, {xx2-rr, yy2-rr}, rr*0.5f, Colors::darkgray);
 		}
 		for (int y = 0; y < mHeight; y+=sectorSize)
 		{
@@ -979,7 +979,7 @@ namespace DWG {
 			xyLoc l1(0, y), l2(mWidth, y);
 			GetCoordinate(l1, xx1, yy1, rr);
 			GetCoordinate(l2, xx2, yy2, rr);
-			display.DrawLine({xx1-rr, yy1-rr}, {xx2-rr, yy2-rr}, 0.5, Colors::darkgray);
+			display.DrawLine({xx1-rr, yy1-rr}, {xx2-rr, yy2-rr}, rr*0.5f, Colors::darkgray);
 		}
 		// Draw edges in sectors
 		for (int s = 0; s < GetNumSectors(); s++)
@@ -999,7 +999,7 @@ namespace DWG {
 				float xx1, yy1, rr, xx2, yy2;
 				GetCoordinate(l1, xx1, yy1, rr);
 				GetCoordinate(l2, xx2, yy2, rr);
-				display.DrawLine({xx1, yy1}, {xx2, yy2}, 0.5, Colors::green);
+				display.DrawLine({xx1, yy1}, {xx2, yy2}, rr*0.5f, Colors::green);
 			}
 		}
 	}
