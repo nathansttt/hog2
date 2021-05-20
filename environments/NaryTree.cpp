@@ -220,7 +220,11 @@ void NaryTree::Draw(Graphics::Display &display) const
 		for (uint64_t s : succ)
 		{
 			GetLocation(s, x2, y2);
-			display.DrawLine({x1, y1}, {x2, y2}, 2.0-1.8*(((y1+y2)/2.0+1.0)/2.0), color);
+//			display.DrawLine({x1, y1}, {x2, y2}, 2.0-1.8*(((y1+y2)/2.0+1.0)/2.0), color);
+			float r1 = 1.0/nodesAtDepth[GetDepth(s)];
+			float r2 = 0.1/d;
+			float r = std::min(r1, r2);
+			display.DrawLine({x1, y1}, {x2, y2}, r, color);
 		}
 	}
 }
@@ -241,7 +245,10 @@ void NaryTree::DrawLine(Graphics::Display &display, const NaryState &f, const Na
 	GetLocation(f, x1, y1);
 	float x2, y2;
 	GetLocation(t, x2, y2);
-	display.DrawLine({x1, y1}, {x2, y2}, width, color);
+	float r1 = std::min(1.0/nodesAtDepth[GetDepth(f)], 1.0/nodesAtDepth[GetDepth(t)]);
+	float r2 = 0.1/d;
+	float r = std::min(r1, r2);
+	display.DrawLine({x1, y1}, {x2, y2}, width*r, color);
 }
 
 
