@@ -618,7 +618,8 @@ void GraphEnvironment::Draw(Graphics::Display &disp) const
 		auto i = g->GetNumNodes();
 		auto rad = nodeScale*(GLdouble)0.4/(std::max(i, 8));
 //		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 1.0, mainColor);
-		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.2*rad, mainColor);
+		DrawLine(disp, x1, y1, x2, y2, 1);
+//		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.2*rad, mainColor);
 //		disp.DrawLine(Graphics::point(x1, y1), Graphics::point(x2, y2), 0.1*rad*width, SearchEnvironment::color);
 	}
 	
