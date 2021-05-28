@@ -837,6 +837,14 @@ void SnakeBird::GetActions(const SnakeBirdState &s, std::vector<SnakeBirdAction>
 	}
 }
 
+/**
+ * Can the snake push the given object in the given direction?
+ * \param s The current state of the game
+ * \param snake The snake pushing
+ * \param obj The object being pushed
+ * \param dir The direction it is pushed
+ * \param a The final action, which will contain the objects being used
+ */
 bool SnakeBird::CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject obj, snakeDir dir,
 						SnakeBirdAction &a) const
 {
@@ -934,6 +942,7 @@ bool SnakeBird::CanPush(const SnakeBirdState &s, int snake, SnakeBirdWorldObject
 				return false;
 			if (render[pieceLoc]==kFruit) // cannot push into fruit
 				return false;
+//			if (s.GetSnakeHeadLoc(snake))
 			if (((render[pieceLoc]&kSnakeMask) == kSnakeMask) || (render[pieceLoc]&kBlockMask) == kBlockMask) // pushable object
 			{
 				if (!CanPush(s, snake, render[pieceLoc], dir, a))
@@ -993,13 +1002,15 @@ SnakeBirdAnimation SnakeBird::DoFirstMovement(const SnakeBirdAction &a, int offs
 		{
 			if ((a.pushed>>i)&0x1)
 			{
-				// TODO: this pushing action could push a snake offscreen, which is illegal
+				// This pushing action could push a snake offscreen, which is illegal
+				// So, we check the boundary conditions and kill the snake if it is pushed offscreen
+				// Snakes will later be rendered and killed if they are offscreen
 				if (s.GetSnakeHeadLoc(i)+offset < 0 || s.GetSnakeHeadLoc(i)+offset >= GetWidth()*GetHeight())
 					s.SetSnakeHeadLoc(i, kDead);
 				else if (abs(GetX(s.GetSnakeHeadLoc(i))-GetX(s.GetSnakeHeadLoc(i)+offset)) > 1)
 					s.SetSnakeHeadLoc(i, kDead);
-//				else if (abs(GetY(s.GetSnakeHeadLoc(i))-GetY(s.GetSnakeHeadLoc(i)+offset)) > 1)
-//					s.SetSnakeHeadLoc(i, kDead);
+				else if (abs(GetY(s.GetSnakeHeadLoc(i))-GetY(s.GetSnakeHeadLoc(i)+offset)) > 1)
+					s.SetSnakeHeadLoc(i, kDead);
 				else
 					s.SetSnakeHeadLoc(i, s.GetSnakeHeadLoc(i)+offset);
 
@@ -2037,6 +2048,7 @@ void SnakeBird::DrawObject(Graphics::Display &display, int x, int y, SnakeBirdWo
 			display.FillNGon(p, radius*0.25, 5, 54+offset3, Colors::red);
 			break;
 		}
+		case kNothing:
 		default: break;
 	}
 }
