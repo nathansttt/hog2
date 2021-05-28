@@ -218,12 +218,12 @@ void PrintCommandLineArguments()
 // Process command line arguments
 void ProcessCommandLineArgs(int argc, char *argv[])
 {
-	printf("Processing %d command line arguments\n", argc);
-	for (int x = 0; x < argc; x++)
-	{
-		printf("%s ", argv[x]);
-	}
-	printf("\n");
+//	printf("Processing %d command line arguments\n", argc);
+//	for (int x = 0; x < argc; x++)
+//	{
+//		printf("%s ", argv[x]);
+//	}
+//	printf("\n");
 	//initializeCommandLineHandlers();
 	// printCommandLineArguments();
 
