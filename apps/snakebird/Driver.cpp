@@ -47,6 +47,7 @@ int gMouseY = -1;
 int gMouseEditorX = -1;
 int gMouseEditorY = -1;
 SnakeBird::SnakeBirdWorldObject gEditorMode;
+bool assistiveEditor = true;
 bool loadPrimer = false;
 
 bool incrementalAnalysis = true;
@@ -80,26 +81,29 @@ struct EditorItem {
 	int xLineEnd;
 	char keyEquivalent;
 	bool selectable;
+	bool highlightable;
 };
 std::vector<EditorItem> editorItems =
 {
-	{kColumn1, 3, SnakeBird::kEmpty, "Sky", kColumn2, 'r', true},
-	{kColumn1, 5, SnakeBird::kGround, "Ground", kColumn2, 'g', true},
-	{kColumn1, 7, SnakeBird::kSpikes, "Spikes", kColumn2, 's', true},
-	{kColumn1, 9, SnakeBird::kFruit, "Fruit", kColumn2, 'f', true},
-	{kColumn1, 11, SnakeBird::kPortal1, "Portal", kColumn2, 'p', true},
-	{kColumn1, 13, SnakeBird::kBlock1, "Block", kColumn2, 'b', true},
-	{kColumn1, 15, SnakeBird::kExit, "Exit", kColumn2, 'x', true},
+	{kColumn1, 1, SnakeBird::kNothing, "Edit Map", kColumn2, '\0', false, false},
+	{kColumn1, 3, SnakeBird::kEmpty, "Sky", kColumn2, 'r', true, true},
+	{kColumn1, 5, SnakeBird::kGround, "Ground", kColumn2, 'g', true, true},
+	{kColumn1, 7, SnakeBird::kSpikes, "Spikes", kColumn2, 's', true, true},
+	{kColumn1, 9, SnakeBird::kFruit, "Fruit", kColumn2, 'f', true, true},
+	{kColumn1, 11, SnakeBird::kPortal1, "Portal", kColumn2, 'p', true, true},
+	{kColumn1, 13, SnakeBird::kBlock1, "Block", kColumn2, 'b', true, true},
+	{kColumn1, 15, SnakeBird::kExit, "Exit", kColumn2, 'x', true, true},
 
-	{kColumn2, 3, SnakeBird::kSpikes, "Increase Sol. Length", kRightMargin, 'c', false},
-	{kColumn2, 5, SnakeBird::kSpikes, "Decrease Sol. Length", kRightMargin, 'v', false},
+	{kColumn2, 1, SnakeBird::kNothing, "EPCG AI Analysis", kRightMargin, '\0', false, false},
+	{kColumn2, 3, SnakeBird::kSpikes, "Increase Sol. Length", kRightMargin, 'c', false, true},
+	{kColumn2, 5, SnakeBird::kSpikes, "Decrease Sol. Length", kRightMargin, 'v', false, true},
 
-	{kColumn2, 9, SnakeBird::kFruit, "Increase Sol. Length", kRightMargin, '3', false},
-	{kColumn2, 11, SnakeBird::kPortal2, "Increase Sol. Length", kRightMargin, '4', false},
-	{kColumn2, 13, SnakeBird::kBlock1, "Increase Sol. Length", kRightMargin, '1', false},
-	{kColumn2, 15, SnakeBird::kExit, "Increase Sol. Length", kRightMargin, '2', false},
+	{kColumn2, 9, SnakeBird::kFruit, "Increase Sol. Length", kRightMargin, '3', false, true},
+	{kColumn2, 11, SnakeBird::kPortal2, "Increase Sol. Length", kRightMargin, '4', false, true},
+	{kColumn2, 13, SnakeBird::kBlock1, "Increase Sol. Length", kRightMargin, '1', false, true},
+	{kColumn2, 15, SnakeBird::kExit, "Increase Sol. Length", kRightMargin, '2', false, true},
 };
-int kSelectedEditorItem = 0;
+int kSelectedEditorItem = 1;
 
 std::string message = "Welcome to Anhinga! Eat the grapes (if present) and leave via the yellow exit.";
 double messageBeginTime = globalTime-1;
@@ -154,6 +158,9 @@ void InstallHandlers()
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Reset", "Reset Level", kAnyModifier, 'r');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Framerate", "Adjust framerate", kAnyModifier, 'f');
 
+	InstallKeyboardHandler(EditorStudyKeyboardHandler, "SimpleEditor", "SimpleEditor", kAnyModifier, '$');
+	InstallKeyboardHandler(EditorStudyKeyboardHandler, "BetterEditor", "BetterEditor", kAnyModifier, '^');
+
 #ifndef __EMSCRIPTEN__
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Level", "Goto nth level", kAnyModifier, '0', '9');
 	InstallKeyboardHandler(GamePlayKeyboardHandler, "Toggle", "Toggle 0..9 loading regular/primer levels", kAnyModifier, '/');
@@ -186,6 +193,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-change", "-change <input> <nodelimit> <iter>", "Run <iter> times to make the level harder or easier. Outputs the new depth and file coding.");
 	InstallCommandLineHandler(MyCLHandler, "-load", "-load <file>", "Run snake bird with the given file");
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <input> <output>", "Make an .svg of the given level then quit");
+	InstallCommandLineHandler(MyCLHandler, "-printsvg", "-printsvg <input>", "Print an .svg of the given level then quit");
 	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs <file>", "Run BFS on the given level and return the info");
 	InstallCommandLineHandler(MyCLHandler, "-encode", "-encode <file>", "Encode level as string");
 	InstallCommandLineHandler(MyCLHandler, "-decode", "-decode <string>", "Decode level from string");
@@ -553,8 +561,8 @@ static void DrawEditorViewport(unsigned long windowID)
 
 	editor.SetColor(Colors::black); //keep the title black
 
-	editor.DrawLabel(d, kColumn1, 1, "Edit Map");
-	editor.DrawLabel(d, kColumn2, 1, "EPCG AI Analysis");
+//	editor.DrawLabel(d, kColumn1, 1, "Edit Map");
+//	editor.DrawLabel(d, kColumn2, 1, "EPCG AI Analysis");
 
 	for (int t = 0; t < editorItems.size(); t++)
 	{
@@ -566,7 +574,8 @@ static void DrawEditorViewport(unsigned long windowID)
 		}
 		else if (gMouseEditorY == editorItems[t].y &&
 				 gMouseEditorX >= editorItems[t].x &&
-				 gMouseEditorX < editorItems[t].xLineEnd) // mouse over
+				 gMouseEditorX < editorItems[t].xLineEnd &&
+				 editorItems[t].highlightable) // mouse over
 		{
 			editor.SetColor(Colors::cyan);
 		}
@@ -671,18 +680,17 @@ static void DrawGameViewport(unsigned long windowID) {
 				for (int y = 0; y < sb.GetHeight(); y++)
 				{
 					if (editorOverlay[y*sb.GetWidth()+x] != kNotAnalyzed &&
-						editorOverlay[y*sb.GetWidth()+x] != kDontAnalyze)
+						editorOverlay[y*sb.GetWidth()+x] != kDontAnalyze &&
+						editorOverlay[y*sb.GetWidth()+x] != 0)
 					{
+						
+						sb.SetColor(Colors::yellow);
+						sb.DrawSmallLabel(d, x, y, std::to_string(editorOverlay[y*sb.GetWidth()+x]).c_str());
 						if (editorOverlay[y*sb.GetWidth()+x] > 0)
-						{
-							sb.SetColor(rgbColor(0.5, 0.5+0.5*editorOverlay[y*sb.GetWidth()+x]/(float)editorOverlayMax, 0.5));
-							sb.Draw(d, x, y, 0.35);
-						}
-						else if (editorOverlay[y*sb.GetWidth()+x] < 0) {
-							sb.SetColor(rgbColor(1.0,
-												 1.0-0.5*editorOverlay[y*sb.GetWidth()+x]/(float)editorOverlayMin, 1.0));
-							sb.Draw(d, x, y, 0.35);
-						}
+							sb.SetColor(rgbColor(0.5, 1.0, 0.5));
+						else
+							sb.SetColor(rgbColor(1.0, 0.5, 0.5));
+						sb.Draw(d, x, y, 0.25);
 					}
 				}
 			}
@@ -817,6 +825,21 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		}
 		else
 			printf("Failed -svg <file>: missing file name");
+		exit(0);
+	}
+	if (strcmp(argument[0], "-printsvg") == 0)
+	{
+		if (maxNumArgs > 1)
+		{
+			Graphics::Display d;
+			if (!sb.DecodeLevel(argument[1]))
+				sb.Load(argument[1]);
+			lastFrameSnake = snake = sb.GetStart();
+			sb.Draw(d);
+			sb.Draw(d, 0);
+			sb.Draw(d, snake, snakeControl);
+			std::cout << MakeSVG(d, 150, 150, 0, "", true) << "\n";
+		}
 		exit(0);
 	}
 	// -change <input> <nodelimit> <iter>
@@ -967,6 +990,32 @@ void StepForwardStoredSolution()
 		future.pop_back();
 	}
 }
+
+void EditorStudyKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
+{
+	assistiveEditor = true;
+	incrementalAnalysis = true;
+	switch (key)
+	{
+		case '$': // simple editor
+			assistiveEditor = false;
+			incrementalAnalysis = false;
+		case '^': // complex editor
+			editorItems =
+			{
+				{kColumn1, 1, SnakeBird::kNothing, "Edit Map", kColumn2, '\0', false, false},
+				{kColumn1, 3, SnakeBird::kEmpty, "Sky", kColumn2, 'r', true, true},
+				{kColumn1, 5, SnakeBird::kGround, "Ground", kColumn2, 'g', true, false},
+				{kColumn1, 7, SnakeBird::kSpikes, "Spikes", kColumn2, 's', true, true},
+				{kColumn1, 9, SnakeBird::kFruit, "Fruit", kColumn2, 'f', true, true},
+//				{kColumn1, 11, SnakeBird::kPortal1, "Portal", kColumn2, 'p', true, true},
+//				{kColumn1, 13, SnakeBird::kBlock1, "Block", kColumn2, 'b', true, true},
+				{kColumn1, 15, SnakeBird::kExit, "Exit", kColumn2, 'x', true, true},
+			};
+			break;
+	}
+}
+
 
 void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
@@ -1198,7 +1247,7 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 				GamePlayKeyboardHandler(windowID, kNoModifier, 'r');
 				gEditMap = true;
 				gEditorMode = SnakeBird::kEmpty;
-				kSelectedEditorItem = 0;
+				kSelectedEditorItem = 1;
 				gMouseY = gMouseX = -1;
 				message = "Editing mode enabled.";
 				messageBeginTime = globalTime;
@@ -1988,6 +2037,11 @@ void ChangeMap(int x, int y)
 
 void ShowSolutionLength(int length)
 {
+	if (!assistiveEditor)
+	{
+		editorMessage = "";
+		return;
+	}
 	if (length == 0)
 	{
 		Timer t;
