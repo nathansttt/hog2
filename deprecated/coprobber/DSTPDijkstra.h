@@ -4,7 +4,7 @@
 #include <vector>
 #include <queue>
 #include <ext/hash_set>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "MultiAgentEnvironment.h"
 #include "GraphEnvironment.h"
 #include "Map2DEnvironment.h"
@@ -88,7 +88,7 @@ class DSTPDijkstra: public DSRobberAlgorithm<state,action> {
 
 	typedef std::priority_queue<QueueEntry, std::vector<QueueEntry>, QueueEntryCompare> MyPriorityQueue;
 	typedef __gnu_cxx::hash_set<state, MyStateHash> CopClosedList;
-	typedef __gnu_cxx::hash_map<state, RobberClosedListEntry, MyStateHash> RobberClosedList;
+	typedef std::unordered_map<state, RobberClosedListEntry, MyStateHash> RobberClosedList;
 
 	MyPriorityQueue robber_queue, cop_queue;
 	CopClosedList cop_closed;

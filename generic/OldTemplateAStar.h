@@ -39,7 +39,7 @@
 #endif
 
 #include "FPUtil.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "OpenClosedList.h"
 //#include "SearchEnvironment.h" // for the SearchEnvironment class
 #include "float.h"
@@ -114,7 +114,7 @@ public:
 	typedef OpenClosedList<OldOldTemplateAStarUtil::SearchNode<state>, OldOldTemplateAStarUtil::SearchNodeHash<state>,
 		OldOldTemplateAStarUtil::SearchNodeEqual<state>, OldOldTemplateAStarUtil::SearchNodeCompare<state> > PQueue;
 	
-	typedef __gnu_cxx::hash_map<uint64_t, OldOldTemplateAStarUtil::SearchNode<state>, Hash64 > NodeLookupTable;
+	typedef std::unordered_map<uint64_t, OldOldTemplateAStarUtil::SearchNode<state>, Hash64 > NodeLookupTable;
 	
 	PQueue openQueue;
 	NodeLookupTable closedList; //openList
@@ -587,7 +587,7 @@ int OldTemplateAStar<state, action,environment>::GetMemoryUsage()
  * @return An iterator pointing to the first node in the closed list
  */
 template <class state, class action,class environment>
-//__gnu_cxx::hash_map<state, OldOldTemplateAStarUtil::SearchNode<state> >::const_iterator
+//std::unordered_map<state, OldOldTemplateAStarUtil::SearchNode<state> >::const_iterator
 void OldTemplateAStar<state, action,environment>::GetClosedListIter(closedList_iterator) //const
 {
 	return closedList.begin();

@@ -42,7 +42,7 @@ class IPNTTables {
 			return ( c1 == c2 );
 		}
 	};
-	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash, CRStateEqual> BoundCache;
+	typedef std::unordered_map<CRState, double, CRStateHash, CRStateEqual> BoundCache;
 
 	// transposition tables
 	class TPEntry;
@@ -53,7 +53,7 @@ class IPNTTables {
 		bool operator() ( const TPEntry* p1, const TPEntry* p2 ) const { return (p1==p2); }
 	};
 	typedef __gnu_cxx::hash_set<TPEntry*, TPEntryPointerHash, TPEntryPointerEqual> Transpositions;
-	typedef __gnu_cxx::hash_map<CRState, Transpositions, CRStateHash, CRStateEqual> TTable;
+	typedef std::unordered_map<CRState, Transpositions, CRStateHash, CRStateEqual> TTable;
 
 
 	// the game tree nodes

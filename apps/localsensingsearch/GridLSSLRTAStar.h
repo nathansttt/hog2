@@ -13,7 +13,7 @@
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "TemplateAStar.h"
 #include "Timer.h"
 #include <queue>
@@ -113,8 +113,8 @@ namespace GridLRTA {
 		void OpenGLDraw(const MapEnvironment *env) const;
 	private:
 		typedef std::priority_queue<borderData,std::vector<borderData >,compareBorderData > pQueue;
-		typedef __gnu_cxx::hash_map<uint64_t, lssLearnedData, Hash64 > LearnedHeuristic;
-		typedef __gnu_cxx::hash_map<uint64_t, bool, Hash64 > ClosedList;
+		typedef std::unordered_map<uint64_t, lssLearnedData, Hash64 > LearnedHeuristic;
+		typedef std::unordered_map<uint64_t, bool, Hash64 > ClosedList;
 		
 		
 		void ExpandLSS(MapEnvironment *env, const xyLoc &from, const xyLoc &to, std::vector<xyLoc> &thePath);

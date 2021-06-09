@@ -12,12 +12,12 @@
 #ifndef CLUSTERABSTRACTION_H
 #define CLUSTERABSTRACTION_H
 
-#include <vector>
-#include <ext/hash_map>
-
 #include "MapAbstraction.h"
 #include "Graph.h" 
 #include "Path.h"
+
+#include <unordered_map>
+#include <vector>
 
 typedef enum{HORIZONTAL,VERTICAL} Orientation;
 
@@ -39,7 +39,7 @@ namespace clusterUtil {
 		{ return (size_t)(e->getEdgeNum()); }
 	};
       
-  typedef __gnu_cxx::hash_map<edge*,path*,
+  typedef std::unordered_map<edge*,path*,
 															clusterUtil::EdgeHash, 
 															clusterUtil::EdgeEqual > PathLookupTable;
 }

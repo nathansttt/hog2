@@ -90,7 +90,7 @@ void Reach::ComputeReach(xyLoc start)
 		me->GetSuccessors(d.data, neighbors);
 		bool foundParent = false;
 		// check if we have a neighbor that has this state as a parent
-		for (int x = 0; x < neighbors.size(); x++)
+		for (size_t x = 0; x < neighbors.size(); x++)
 		{
 			AStarOpenClosedDataWithF<xyLoc> n;
 			if (search.GetClosedItem(neighbors[x], n))
@@ -134,4 +134,3 @@ bool Reach::ShouldNotGenerate(const xyLoc &start, const xyLoc &parent, const xyL
 
 //Map *m;
 //std::vector<double> reach;
-

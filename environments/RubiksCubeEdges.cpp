@@ -1262,7 +1262,7 @@ void RubikEdge::SetCubeColor(int which, bool face, const RubikEdgeState &s) cons
 RubikEdgePDB::RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges)
 :PDBHeuristic(e), edges(distinctEdges), puzzles(std::thread::hardware_concurrency())
 {
-	for (int x = 0; x < puzzles.size(); x++)
+	for (size_t x = 0; x < puzzles.size(); x++)
 		puzzles[x].resize(12);
 	SetGoal(s);
 }
@@ -1549,7 +1549,7 @@ std::string RubikEdgePDB::GetFileName(const char *prefix)
 	fileName.pop_back();
 	fileName += "-";
 	// denote the pattern used for the PDB
-	for (int x = 0; x < edges.size(); x++)
+	for (size_t x = 0; x < edges.size(); x++)
 	{
 		fileName += std::to_string(edges[x]);
 		fileName += ";";
@@ -1712,5 +1712,3 @@ std::string RubikEdgeOrientationPDB::GetFileName(const char *prefix)
 	fileName += "RC-E12-OR.pdb";
 	return fileName;
 }
-
-

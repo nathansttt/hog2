@@ -14,7 +14,7 @@
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "TemplateAStar.h"
 #include "Timer.h"
 #include <queue>
@@ -128,8 +128,8 @@ public:
 	void OpenGLDraw() const {}
 	void OpenGLDraw(const environment *env) const;
 private:
-	typedef __gnu_cxx::hash_map<uint64_t, lssLearnedData<state>, Hash64 > LearnedHeuristic;
-	typedef __gnu_cxx::hash_map<uint64_t, bool, Hash64 > ClosedList;
+	typedef std::unordered_map<uint64_t, lssLearnedData<state>, Hash64 > LearnedHeuristic;
+	typedef std::unordered_map<uint64_t, bool, Hash64 > ClosedList;
 	
 	environment *m_pEnv;
 	LearnedHeuristic heur;

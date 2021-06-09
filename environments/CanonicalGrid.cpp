@@ -7,7 +7,6 @@
 //
 
 #include "CanonicalGrid.h"
-#include <string.h>
 #include "SVGUtil.h"
 #include "Graphics.h"
  #include <string.h>
@@ -1031,7 +1030,7 @@ namespace CanonicalGrid {
 				bool found;
 				do {
 					found = false;
-					for (int x = 0; x < lines.size(); x++)
+					for (size_t x = 0; x < lines.size(); x++)
 					{
 						if (lines[x].first == points.back())
 						{

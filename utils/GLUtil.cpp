@@ -532,7 +532,7 @@ void DrawText(double x, double y, double z, double scale, const char *str)
 	glRotatef(180, 0.0, 0.0, 1.0);
 	glRotatef(180, 0.0, 1.0, 0.0);
 	glDisable(GL_LIGHTING);
-	for (int which = 0; which < strlen(str); which++)
+	for (size_t which = 0; which < strlen(str); which++)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
 //	glEnable(GL_LIGHTING);
 	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
@@ -544,7 +544,7 @@ void DrawTextCentered(double x, double y, double z, double scale, const char *st
 	glPushMatrix();
 	
 	int width = 0;
-	for (int which = 0; which < strlen(str); which++)
+	for (size_t which = 0; which < strlen(str); which++)
 		width += glutStrokeWidth(GLUT_STROKE_ROMAN, str[which]);
 	
 	glTranslatef(x, y, z);
@@ -554,7 +554,7 @@ void DrawTextCentered(double x, double y, double z, double scale, const char *st
 	glDisable(GL_LIGHTING);
 	glTranslatef(-width/2, -4.0/scale, 0);
 	
-	for (int which = 0; which < strlen(str); which++)
+	for (size_t which = 0; which < strlen(str); which++)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
 
 //	glEnable(GL_LIGHTING);

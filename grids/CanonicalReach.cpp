@@ -87,7 +87,7 @@ void CanonicalReach::ComputeCanonicalReach(CanonicalGrid::xyLoc start)
 		me->GetSuccessors(d.data, neighbors);
 		bool foundParent = false;
 		// check if we have a neighbor that has this state as a parent
-		for (int x = 0; x < neighbors.size(); x++)
+		for (size_t x = 0; x < neighbors.size(); x++)
 		{
 			AStarOpenClosedDataWithF<CanonicalGrid::xyLoc> n;
 			if (search.GetClosedItem(neighbors[x], n))
@@ -127,5 +127,3 @@ bool CanonicalReach::ShouldNotGenerate(const xyLoc &start, const xyLoc &parent, 
 		return true;
 	return false;
 }
-
-

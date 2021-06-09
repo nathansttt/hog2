@@ -1,6 +1,6 @@
 #include <vector>
 #include <queue>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "MyHash.h"
 #include "GraphEnvironment.h"
 #include "Map2DEnvironment.h"
@@ -51,7 +51,7 @@ class MinimaxAStar {
 	};
 
 	typedef std::priority_queue<QueueEntry, std::vector<QueueEntry>, QueueEntryCompare> MyPriorityQueue;
-	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash> MyClosedList;
+	typedef std::unordered_map<CRState, double, CRStateHash> MyClosedList;
 
 	// constructor
 	// for usage with state=graphState, action=graphMove, environment=GraphEnvironment

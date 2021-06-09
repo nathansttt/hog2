@@ -133,7 +133,7 @@ protected:
 			return regular_state_hash<state>( s );
 		};
 	};
-	typedef __gnu_cxx::hash_map<state, double, RegularHash> DistanceList;
+	typedef std::unordered_map<state, double, RegularHash> DistanceList;
 
 	// traces back the path from q using the closed list
 	void trace_back_path( QueueNode q, std::vector<state> &path );

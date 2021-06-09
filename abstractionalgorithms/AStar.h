@@ -17,8 +17,9 @@
 #include "Path.h"
 #include "GraphAbstraction.h"
 #include "FPUtil.h"
-#include <ext/hash_map>
 #include "OpenClosedList.h"
+
+#include <unordered_map>
 
 namespace AStar3Util
 {
@@ -70,10 +71,10 @@ public:
 	typedef OpenClosedList<AStar3Util::SearchNode, AStar3Util::SearchNodeHash,
 		AStar3Util::SearchNodeEqual, AStar3Util::SearchNodeCompare> PQueue;
 	
-	typedef __gnu_cxx::hash_map<node*, AStar3Util::SearchNode,
+	typedef std::unordered_map<node*, AStar3Util::SearchNode,
 		AStar3Util::NodeHash, AStar3Util::NodeEqual > NodeLookupTable;
 	
-	typedef __gnu_cxx::hash_map<node*, bool,
+	typedef std::unordered_map<node*, bool,
 		AStar3Util::NodeHash, AStar3Util::NodeEqual > Corridor;
 }
 

@@ -160,7 +160,7 @@ bool FlingBoard::CanMove(int which, int x, int y) const
 int FlingBoard::GetIndexInLocs(int offset) const
 {
 	// could do a binary search; TODO: profile to see if necessary
-	for (int i = 0; i < locs.size(); i++)
+	for (size_t i = 0; i < locs.size(); i++)
 	{
 		if (locs[i].first == offset)
 		{
@@ -262,9 +262,9 @@ void GetMirror(const FlingBoard &in, FlingBoard &out, bool h, bool v)
 {
 	out = in;
 	out.Reset();
-	for (int x = 0; x < in.width; x++)
+	for (size_t x = 0; x < in.width; x++)
 	{
-		for (int y = 0; y < in.height; y++)
+		for (size_t y = 0; y < in.height; y++)
 		{
 			if (in.HasPiece(x, y))
 			{
@@ -286,7 +286,7 @@ void ShiftToCorner(FlingBoard &in)
 	while (1)
 	{
 		// find piece
-		for (int x = 0; x < in.width; x++)
+		for (size_t x = 0; x < in.width; x++)
 		{
 			if (in.HasPiece(x, 0))
 			{
@@ -297,9 +297,9 @@ void ShiftToCorner(FlingBoard &in)
 		
 		if (done) break;
 		// move over
-		for (int y = 1; y < in.height; y++)
+		for (size_t y = 1; y < in.height; y++)
 		{
-			for (int x = 0; x < in.width; x++)
+			for (size_t x = 0; x < in.width; x++)
 			{
 				if (in.HasPiece(x, y))
 				{
@@ -311,7 +311,7 @@ void ShiftToCorner(FlingBoard &in)
 	}
 	while (1)
 	{
-		for (int y = 0; y < in.height; y++)
+		for (size_t y = 0; y < in.height; y++)
 		{
 			if (in.HasPiece(0, y))
 			{
@@ -319,9 +319,9 @@ void ShiftToCorner(FlingBoard &in)
 			}
 		}
 		
-		for (int x = 1; x < in.width; x++)
+		for (size_t x = 1; x < in.width; x++)
 		{
-			for (int y = 0; y < in.height; y++)
+			for (size_t y = 0; y < in.height; y++)
 			{
 				if (in.HasPiece(x, y))
 				{
@@ -440,7 +440,7 @@ void Fling::GetActions(const FlingBoard &nodeID, std::vector<FlingMove> &actions
 {
 	actions.resize(0);
 	FlingMove m;
-	for (unsigned int x = 0; x < nodeID.locs.size(); x++)
+	for (size_t x = 0; x < nodeID.locs.size(); x++)
 	{
 		if (nodeID.CanMove(nodeID.locs[x].first, 1, 0))
 		{
@@ -1093,5 +1093,3 @@ int64_t Fling::bi(unsigned int n, unsigned int k)
 	}
 	return num / den;
 }
-
-

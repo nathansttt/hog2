@@ -77,7 +77,7 @@ uint64_t MR1PermutationPDB<state, action, environment, bits>::GetPDBHash(const s
 			dual[s.puzzle[x]] = x;
 	}
 	// get locs by converting from the distinct array
-	for (int x = 0; x < distinct.size(); x++)
+	for (size_t x = 0; x < distinct.size(); x++)
 	{
 		locs[puzzleSize-x-1] = dual[distinct[distinct.size()-x-1]];
 		//dual[distinct[distinct.size()-x-1]] = -1;
@@ -122,7 +122,7 @@ void MR1PermutationPDB<state, action, environment, bits>::GetStateFromPDBHash(ui
 	//s.puzzle.resize(puzzleSize);
 	std::vector<int> &dual = dualCache[threadID];
 	dual.resize(puzzleSize); // vector for distinct item locations
-	for (int x = 0; x < dual.size(); x++)
+	for (size_t x = 0; x < dual.size(); x++)
 		dual[x] = x;
 	
 	size_t last = (puzzleSize-distinct.size());

@@ -907,7 +907,7 @@ namespace DWG {
 		int regionOffsetX = (sector%GetNumXSectors())*sectorSize;
 		int regionOffsetY = (sector/GetNumXSectors())*sectorSize;
 		uint16_t largest = 0;
-		for (int x = 1; x < s.regionCenters.size(); x++)
+		for (size_t x = 1; x < s.regionCenters.size(); x++)
 		{
 			if (s.regionCenters[x].count > s.regionCenters[largest].count)
 				largest = x;

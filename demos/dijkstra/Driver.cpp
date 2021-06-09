@@ -146,7 +146,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (path.size() > 0)
 		{
 			ge->SetColor(0, 0.5, 0);
-			for (int x = 1; x < path.size(); x++)
+			for (size_t x = 1; x < path.size(); x++)
 			{
 				ge->DrawLine(display, path[x-1], path[x], 6);
 			}

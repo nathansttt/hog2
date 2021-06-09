@@ -1,7 +1,7 @@
 #include <vector>
 #include <set>
 #include <queue>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "GraphEnvironment.h"
 #include "OpenClosedList.h"
 
@@ -102,7 +102,7 @@ class TwoCopsRMAStar {
 	MyPriorityQueue queue;
 
 	// closed lists
-	typedef __gnu_cxx::hash_map<Position,unsigned int> MyClosedList;
+	typedef std::unordered_map<Position,unsigned int> MyClosedList;
 	MyClosedList min_cost, max_cost;
 
 	void clear_cache();

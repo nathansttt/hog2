@@ -431,7 +431,7 @@ void ReadBucket(bucketSet &states, openData d)
 	size_t numRead;
 	do {
 		numRead = fread(buffer, sizeof(diskState), bufferSize, open[d].f);
-		for (int x = 0; x < numRead; x++)
+		for (size_t x = 0; x < numRead; x++)
 			states.insert(buffer[x]);
 	} while (numRead == bufferSize);
 	fclose(open[d].f);
@@ -459,7 +459,7 @@ void RemoveDuplicates(bucketSet &states, openData d)
 		size_t numRead;
 		do {
 			numRead = fread(buffer, sizeof(diskState), bufferSize, cd.f);
-			for (int x = 0; x < numRead; x++)
+			for (size_t x = 0; x < numRead; x++)
 			{
 				auto i = states.find(buffer[x]);
 				if (i != states.end())
@@ -626,11 +626,11 @@ void ExpandNextFile()
 #endif
 	
 	// 3. expand all states in current bucket & write out successors
-	const int numThreads = std::thread::hardware_concurrency();
+	const auto numThreads = std::thread::hardware_concurrency();
 	std::vector<std::thread *> threads;
-	for (int x = 0; x < numThreads; x++)
+	for (size_t x = 0; x < numThreads; x++)
 		threads.push_back(new std::thread(ParallelExpandBucket, d, std::ref(states), x, numThreads));
-	for (int x = 0; x < threads.size(); x++)
+	for (size_t x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();
 		delete threads[x];

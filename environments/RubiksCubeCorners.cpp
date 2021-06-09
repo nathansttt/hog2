@@ -1429,7 +1429,7 @@ std::string RubikCornerPDB::GetFileName(const char *prefix)
 	fileName.pop_back();
 	fileName += "-";
 	// pattern
-	for (int x = 0; x < corners.size(); x++)
+	for (size_t x = 0; x < corners.size(); x++)
 	{
 		fileName += std::to_string(corners[x]);
 		fileName += ";";

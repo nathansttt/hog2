@@ -17,7 +17,7 @@
 #include <cassert>
 #include <vector>
 #include <deque>
-#include <ext/hash_map>
+#include <unordered_map>
 
 /**
 * A simple & efficient Heap class.
@@ -48,7 +48,7 @@ private:
   std::vector<OBJ> _elts;
 	void HeapifyUp(unsigned int index);
   void HeapifyDown(unsigned int index);
-	typedef __gnu_cxx::hash_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
+	typedef std::unordered_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
 	IndexTable table;
 };
 

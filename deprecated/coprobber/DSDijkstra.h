@@ -82,7 +82,7 @@ class DSDijkstra {
 	};
 
 	// closed lists
-	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash> ClosedList;
+	typedef std::unordered_map<CRState, double, CRStateHash> ClosedList;
 	ClosedList min_cost, max_cost;
 
 	// TODO: Make this stable, this will only work with edge costs all set to 1

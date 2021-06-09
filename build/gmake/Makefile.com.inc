@@ -6,12 +6,12 @@
 #-----------------------------------------------------------------------------
 
 CXX = g++ # clang++
-COMMON_CXXFLAGS += -Wall -std=c++11 # -stdlib=libc++
+COMMON_CXXFLAGS += -Wall -std=c++11 -Wno-unused-function # -stdlib=libc++
 
 #COMMON_CXXFLAGS += -ansi -pedantic
 
 CC = gcc
-COMMON_CFLAGS += -Wall 
+COMMON_CFLAGS += -Wall -Wno-unused-function
 
 LN = $(CXX)
 #COMMON_LNFLAGS += -stdlib=libc++

@@ -4,7 +4,7 @@
 #include "Map2DEnvironment.h"
 #include "MyHash.h"
 #include <ext/hash_set>
-#include <ext/hash_map>
+#include <unordered_map>
 
 #ifndef TIDASTAR_H
 #define TIDASTAR_H
@@ -38,7 +38,7 @@ class TIDAStar {
 		}
 	};
 //	typedef __gnu_cxx::hash_set<CRState, CRStateHash, CRStateEqual> SearchCache;
-	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash, CRStateEqual> BoundCache;
+	typedef std::unordered_map<CRState, double, CRStateHash, CRStateEqual> BoundCache;
 
 
 	// constructor

@@ -1,6 +1,6 @@
 #include <vector>
 #include <queue>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "MultiAgentEnvironment.h"
 #include "DSCREnvironment.h"
 #include "GraphEnvironment.h"
@@ -70,7 +70,7 @@ class DSRMAStar {
 		}
 	};
 
-	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash> MyClosedList;
+	typedef std::unordered_map<CRState, double, CRStateHash> MyClosedList;
 	// state => value
 //	std::vector<double> min_cost, max_cost;
 	MyClosedList min_cost, max_cost;
