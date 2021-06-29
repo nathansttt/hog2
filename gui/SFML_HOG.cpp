@@ -33,6 +33,7 @@ int main(int argc, char **argv)
 #include <time.h>
 #include <math.h>
 #include <string.h>
+#include <cassert>
 
 using namespace std;
 
