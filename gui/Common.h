@@ -118,8 +118,14 @@ int AddViewport(unsigned long windowID, const Graphics::rect &r, viewportType v)
 int AddViewport(unsigned long windowID, const Graphics::rect &initial, const Graphics::rect &fin, viewportType v);
 void MoveViewport(unsigned long windowID, int viewport, const Graphics::rect &newLocation);
 
-point3d ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, point3d where);
-point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d where);
+Graphics::point ViewportToGlobalHOG(Graphics::point where, int viewport);
+Graphics::rect  ViewportToGlobalHOG(const Graphics::rect &loc, int viewport);
+Graphics::point ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, Graphics::point where);
+float ViewportToGlobalHOGX(float x, int v);
+Graphics::point GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, Graphics::point where);
+Graphics::point GlobalHOGToViewport(Graphics::point where, int viewport);
+Graphics::rect GlobalHOGToViewport(const Graphics::rect &loc, int viewport);
+float GlobalHOGToViewportX(float x, int v);
 
 const char kLeftArrow  = 0x11;
 const char kRightArrow = 0x12;

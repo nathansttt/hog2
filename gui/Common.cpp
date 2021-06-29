@@ -19,6 +19,8 @@
 #include "Trackball.h"
 #include "Common.h"
 
+
+
 // For printing debug info
 //static bool const verbose = false;
 
@@ -97,7 +99,7 @@ void GetKeyAssignmentDescriptions(std::vector<std::string> &keys)
 	{
 		for (keyboardCallbackData *kd = keyboardCallbacks[x]; kd; kd = kd->next)
 		{
-			char val = x;
+			//char val = x;
 			keys.push_back(kd->title);
 			//			printf("%s%c\t%s\t%s\n", getModifierText(kd->mod), x, kd->title, kd->desc);
 		}
@@ -341,7 +343,67 @@ void MoveViewport(unsigned long windowID, int port, const Graphics::rect &newLoc
 	pContextInfo->viewports[port].finalBound = newLocation;
 }
 
-point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d where)
+float GlobalHOGToViewportX(float x, int v)
+{
+	pRecContext pContextInfo = getCurrentContext();
+	Graphics::point input(x, 0.f, 0.f);
+	Graphics::point input2(0, 0.f, 0.f);
+	Graphics::point result = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input);
+	Graphics::point result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input2);
+	return result.x-result2.x;
+	//	return ((result.x+1.0)*pContextInfo->windowWidth)/2.0;
+}
+
+float ViewportToGlobalHOGX(float x, int v)
+{
+	pRecContext pContextInfo = getCurrentContext();
+	Graphics::point input(x, 0.f, 0.f);
+	Graphics::point input2(0, 0.f, 0.f);
+	Graphics::point result = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input);
+	Graphics::point result2 = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input2);
+	return result.x-result2.x;
+	//	return ((result.x+1.0)*pContextInfo->windowWidth)/2.0;
+}
+
+float GlobalHOGToViewportY(float y, int v)
+{
+	pRecContext pContextInfo = getCurrentContext();
+	Graphics::point input(0.f, y, 0.f);
+	Graphics::point result = ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[v], input);
+//	result.y -= pContextInfo->viewports[v].bounds.bottom;
+//	result.y = pContextInfo->viewports[v].bounds.top - result.y;
+	//	if (v == 1)
+//		printf("Y:%f -> %f\n", y, ((result.y+1.0))/2.0);
+	return -((result.y-1.0)*pContextInfo->windowHeight)/2.0;
+}
+
+Graphics::point GlobalHOGToViewport(Graphics::point where, int viewport)
+{
+	auto pContextInfo = getCurrentContext();
+	return GlobalHOGToViewport(pContextInfo, pContextInfo->viewports[viewport], where);
+}
+
+Graphics::point ViewportToGlobalHOG(Graphics::point where, int viewport)
+{
+	auto pContextInfo = getCurrentContext();
+	return ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[viewport], where);
+}
+
+Graphics::rect GlobalHOGToViewport(const Graphics::rect &loc, int port)
+{
+	auto pContextInfo = getCurrentContext();
+	return Graphics::rect(GlobalHOGToViewport(pContextInfo, pContextInfo->viewports[port], {loc.left, loc.top}),
+						  GlobalHOGToViewport(pContextInfo, pContextInfo->viewports[port], {loc.right, loc.bottom}));
+}
+
+Graphics::rect ViewportToGlobalHOG(const Graphics::rect &loc, int port)
+{
+	auto pContextInfo = getCurrentContext();
+	return Graphics::rect(ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[port], {loc.left, loc.top}),
+						  ViewportToGlobalHOG(pContextInfo, pContextInfo->viewports[port], {loc.right, loc.bottom}));
+}
+
+Graphics::point GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, Graphics::point where)
 {
 	if (v.type == kScaleToFill) 		// just scale regular -1/1 axes into the rectangle
 	{
@@ -423,7 +485,7 @@ point3d GlobalHOGToViewport(pRecContext pContextInfo, const viewport &v, point3d
 	}
 }
 
-point3d ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, point3d where)
+Graphics::point ViewportToGlobalHOG(pRecContext pContextInfo, const viewport &v, Graphics::point where)
 {
 	if (v.type == kScaleToFill)
 	{
@@ -507,7 +569,7 @@ bool HandleMouse(pRecContext pContextInfo, point3d where, tButtonType button, tM
 		if (!PointInRect(where, pContextInfo->viewports[x].bounds))
 			continue;
 		// got hit in rect
-		point3d res = GlobalHOGToViewport(pContextInfo, pContextInfo->viewports[x], where);
+		Graphics::point res = GlobalHOGToViewport(pContextInfo, pContextInfo->viewports[x], where);
 		// click handled
 		if (HandleMouseClick(pContextInfo, x, -1, -1, res, button, mouse))
 			return true;
@@ -743,7 +805,9 @@ void setPortCamera(pRecContext pContextInfo, int currPort)
 {{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
 {{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
 	
-	const double *val = ratios[pContextInfo->numPorts-1][currPort];
+	currPort = 0; // NOTE: everyone gets the "full" screen
+	//const double *val = ratios[pContextInfo->numPorts-1][currPort]; 
+	const double *val = ratios[0][currPort];
 	
 	pContextInfo->camera[currPort].viewOriginX = pContextInfo->globalCamera.viewOriginX;
 	pContextInfo->camera[currPort].viewOriginY = pContextInfo->globalCamera.viewOriginY;
@@ -759,18 +823,22 @@ void setPortCamera(pRecContext pContextInfo, int currPort)
 void setViewport(pRecContext pContextInfo, int currPort)
 {
 	pContextInfo->display.SetViewport(currPort);
+	currPort = 0;
+	
 	const double ratios[4][4][4] =
 	{{{0, 1, 0, 1}}, // x, width%, y, height%
 		{{0, 0.5, 0, 1}, {0.5, 0.5, 0, 1}},
 		{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 1, 0, 0.5}},
 		{{0, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}, {0, 0.5, 0, 0.5}, {0.5, 0.5, 0, 0.5}}};
 	
-	const double *val = ratios[pContextInfo->numPorts-1][currPort];
+	const double *val = ratios[0][currPort];
+	//	const double *val = ratios[pContextInfo->numPorts-1][currPort];
 	
 	glViewport(val[0]*pContextInfo->globalCamera.viewWidth,
-						 val[2]*pContextInfo->globalCamera.viewHeight,
-						 val[1]*pContextInfo->globalCamera.viewWidth,
-						 val[3]*pContextInfo->globalCamera.viewHeight);
+			   val[2]*pContextInfo->globalCamera.viewHeight,
+			   val[1]*pContextInfo->globalCamera.viewWidth,
+			   val[3]*pContextInfo->globalCamera.viewHeight);
+	
 }
 
 point3d GetOGLPos(pRecContext pContextInfo, int x, int y)
@@ -894,9 +962,10 @@ void SaveScreenshot(unsigned long windowID, const char *filename)
 	uint32_t height  =pContextInfo->globalCamera.viewHeight;
 	long rowBytes = width * 4;
 	long imageSize = rowBytes * height;
-	char image[imageSize];
+	std::vector<char> image(imageSize);
+//	char image[imageSize];
 	char zero[4] = {0, 0, 0, 0};
-	glReadPixels(0, 0, GLsizei(width), GLsizei(height), GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &image);//GL_BGRA
+	glReadPixels(0, 0, GLsizei(width), GLsizei(height), GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &image[0]);//GL_BGRA
 	
 	bmp_header h;
 	h.biWidth = width;
