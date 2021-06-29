@@ -9,10 +9,10 @@
 #include "Graphics.h"
 
 namespace Graphics {
-bool PointInRect(const point3d &p, const rect &r)
-{
-	return p.y >= r.top && p.x >= r.left && p.y <= r.bottom && p.x <= r.right;
-}
+//bool PointInRect(const point3d &p, const rect &r)
+//{
+//	return p.y >= r.top && p.x >= r.left && p.y <= r.bottom && p.x <= r.right;
+//}
 
 bool PointInRect(const point &p, const rect &r)
 {

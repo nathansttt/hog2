@@ -15,8 +15,7 @@
 #include "FPUtil.h"
 
 namespace Graphics {
-class point;
-
+struct  point;
 enum textAlign {
 	textAlignCenter,
 	textAlignLeft,
@@ -31,7 +30,7 @@ enum textBaseline {
 
 
 struct point {
-	point(point3d p) :x(p.x), y(p.y), z(p.z) {}
+	//point(point3d p) :x(p.x), y(p.y), z(p.z) {}
 	point(float x = 0, float y = 0, float z = 0)
 	:x(x), y(y), z(z) {}
 	float x, y, z;
@@ -39,18 +38,28 @@ struct point {
 	bool operator==(const point &p) const
 	{ return fequal(p.x, x) && fequal(p.y, y) && fequal(p.z, z); }
 	
-	point &operator*=(float i)
-	{ x*= i; y*=i; z*=i; return *this; }
+	point &operator+=(const float v)
+	{ x += v; y += v; z += v; return *this; }
+	point &operator-=(const float v)
+	{ x -= v; y -= v; z -= v; return *this; }
+	point &operator*=(const float v)
+	{ x *= v; y *= v; z *= v; return *this; }
+	point &operator/=(const float v)
+	{ x /= v; y /= v; z /= v; return *this; }
+
 	point &operator+=(const point &i)
 	{ x+=i.x; y+=i.y; z+=i.z; return *this; }
 	point &operator-=(const point &i)
 	{ x-=i.x; y-=i.y; z-=i.z; return *this; }
+
 	point operator*(float i)
 	{ point p = *this; p*=i; return p; }
 	point operator+(const point &i)
 	{ point p = *this; p+=i; return p; }
 	point operator-(const point &i)
 	{ point p = *this; p-=i; return p; }
+
+
 	float length() const
 	{ return sqrtf(x * x + y * y + z * z); }
 	void normalise()
@@ -78,10 +87,22 @@ struct point {
 struct rect {
 	rect() {}
 	rect(point center, float rad) : left(center.x-rad), top(center.y-rad), right(center.x+rad), bottom(center.y+rad) {}
+	rect(point tl, point br) :left(tl.x), top(tl.y), right(br.x), bottom(br.y) {}
 	rect(float l, float t, float r, float b)
 	:left(l), top(t), right(r), bottom(b) {}
 	float left, top, right, bottom;
-	
+	rect inset(float delta)
+	{ return rect(left+delta, top+delta, right-delta, bottom-delta); }
+	rect expand(float delta)
+	{ return rect(left-delta, top-delta, right+delta, bottom+delta); }
+	rect &operator*=(const point &val)
+	{
+		left = left*val.x;
+		right = right*val.x;
+		top = top*val.y;
+		bottom = bottom*val.y;
+		return *this;
+	}
 	rect &operator|=(const rect &val)
 	{
 		left = std::min(left, val.left);
@@ -105,7 +126,7 @@ inline std::ostream &operator<<(std::ostream &o, const rect&r)
 inline std::ostream &operator<<(std::ostream &o, const point&r)
 { o << "(" << r.x << ", " << r.y  << ", " << r.z << ")"; return o; }
 
-bool PointInRect(const point3d &p, const rect &r);
+//bool PointInRect(const point3d &p, const rect &r);
 bool PointInRect(const point &p, const rect &r);
 
 /*

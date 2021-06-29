@@ -577,12 +577,12 @@ void Plot2D::Draw(Graphics::Display &display) const
 
 	display.DrawText(yLabel.c_str(), MakeHOG(0, dTop+(dTop-dBottom)/100), Colors::black, fontSize, Graphics::textAlignCenter, Graphics::textBaselineBottom);
 
-	for (int x = 0; x < dRight; x+=10)
+	for (int x = 0; x < dRight; x+=dRight/10)
 	{
 		display.DrawLine(MakeHOG(x, 0)+point3d(0, fontSize/3), MakeHOG(x, 0)-point3d(0, fontSize/3), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
 //		display.DrawLine(MakeHOG(x, (dTop-dBottom)/100), MakeHOG(x, -(dTop-dBottom)/100), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
 	}
-	for (int y = 0; y < dTop; y+=10)
+	for (int y = 0; y < dTop; y+=dTop/10)
 	{
 		display.DrawLine(MakeHOG(0, y)+point3d(fontSize/3,0), MakeHOG(0, y)-point3d(fontSize/3,0), MakeHOGWidth(lineTicWeight), Colors::black); // y-axis
 //		display.DrawLine(MakeHOG((dRight-dLeft)/100, y), MakeHOG(-(dRight-dLeft)/100, y), MakeHOGWidth(lineTicWeight), Colors::black); // x-axis
