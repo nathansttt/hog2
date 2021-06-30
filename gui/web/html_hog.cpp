@@ -188,7 +188,7 @@ void DoDrawCommand(const Graphics::Display::data &d, const char *which)
 				ctx.fillStyle = "rgb("+$1+", "+$2+", "+$3+")";
 				ctx.fillRect($4,$5,$6,$7);
 			}, which, r,g,b,
-					(PointXToCanvas(o.r.left, d.viewport)), (PointYToCanvas(o.r.top, d.viewport)),
+					floorf(PointXToCanvas(o.r.left, d.viewport)), floorf(PointYToCanvas(o.r.top, d.viewport)),
 					cWidth, cHeight);
 			break;
 		}

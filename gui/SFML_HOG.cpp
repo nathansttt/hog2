@@ -674,13 +674,13 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	// mouse transforms object
 	if (pContextInfo->camera[currPort].thirdPerson)
 	{
-		gluLookAt (pContextInfo->camera[currPort].viewPos.x,
-				   pContextInfo->camera[currPort].viewPos.y,
-				   pContextInfo->camera[currPort].viewPos.z,
-				   pContextInfo->camera[currPort].viewPos.x + pContextInfo->camera[currPort].viewDir.x,
-				   pContextInfo->camera[currPort].viewPos.y + pContextInfo->camera[currPort].viewDir.y,
-				   pContextInfo->camera[currPort].viewPos.z + pContextInfo->camera[currPort].viewDir.z,
-				   pContextInfo->camera[currPort].viewUp.x, pContextInfo->camera[currPort].viewUp.y ,pContextInfo->camera[currPort].viewUp.z);
+		// gluLookAt (pContextInfo->camera[currPort].viewPos.x,
+		// 		   pContextInfo->camera[currPort].viewPos.y,
+		// 		   pContextInfo->camera[currPort].viewPos.z,
+		// 		   pContextInfo->camera[currPort].viewPos.x + pContextInfo->camera[currPort].viewDir.x,
+		// 		   pContextInfo->camera[currPort].viewPos.y + pContextInfo->camera[currPort].viewDir.y,
+		// 		   pContextInfo->camera[currPort].viewPos.z + pContextInfo->camera[currPort].viewDir.z,
+		// 		   pContextInfo->camera[currPort].viewUp.x, pContextInfo->camera[currPort].viewUp.y ,pContextInfo->camera[currPort].viewUp.z);
 
 		if ((gTrackingContextInfo == pContextInfo) && gTrackBallRotation[0] != 0.0f) // if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
 		{
