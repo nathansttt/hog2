@@ -762,7 +762,7 @@ void appendTextToBuffer(const char *tempStr)
 {
 	int ind = int(strlen(pContextInfo->message));
 	pContextInfo->message[ind] = ' ';
-	sprintf(&pContextInfo->message[ind+1], "%s", tempStr);
+	snprintf(&pContextInfo->message[ind+1], 256-(ind+2)"%s", tempStr);
 
 	delete myTextBox;
 	Graphics::point a(-.95, .95, -.95), b(.95, -.95, .95);
