@@ -95,7 +95,7 @@ void TextOverlay::OpenGLDraw(int window)
     glPushMatrix();
     glLoadIdentity();
     glFrustum(-1, 1, -1, 1, 1.9, 2.1);	
-    gluLookAt(0, 0, -2, 0, 0, 0, 0, -1, 0);
+    //gluLookAt(0, 0, -2, 0, 0, 0, 0, -1, 0);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     
