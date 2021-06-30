@@ -36,10 +36,7 @@ endif
 #else # not darwin
 
 # if Linux need some other pthread call 
-ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
-COMMON_LNFLAGS +=  -lGL -lGLU -lglut
-endif
-
+#ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
 #COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -Lpapers/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread #--stdlib=libstdc++ # -lXi -lXmu
 #else
 #COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -Lpapers/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread #--stdlib=libstdc++ # -lXi -lXmu 
