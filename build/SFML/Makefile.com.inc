@@ -37,7 +37,7 @@ endif
 
 # if Linux need some other pthread call 
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
-COMMON_LNFLAGS +=  -lGL #-lGLU -lglut
+COMMON_LNFLAGS +=  -lGL -pthread #-lGLU -lglut
 endif
 #COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -Lpapers/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread #--stdlib=libstdc++ # -lXi -lXmu
 #else
