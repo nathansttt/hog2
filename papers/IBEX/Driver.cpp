@@ -132,7 +132,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		v = 5;
 		std::cout << s << std::endl;
-		for (int x = 0; x < moves.size(); x++)
+		for (size_t x = 0; x < moves.size(); x++)
 		{
 			std::cout << moves[x] << " ";
 		}

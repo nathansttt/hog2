@@ -13,13 +13,13 @@
 #include <iostream>
 #include <functional>
 #include "SearchEnvironment.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "FPUtil.h"
 #include "vectorCache.h"
 
 //#define DO_LOGGING
 
-typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
+typedef std::unordered_map<uint64_t, double> NodeHashTable;
 
 template <class state, class action, bool verbose = true>
 class IDAStar {
@@ -278,4 +278,3 @@ void IDAStar<state, action, verbose>::UpdateNextBound(double currBound, double f
 
 
 #endif
-

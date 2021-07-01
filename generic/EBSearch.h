@@ -283,7 +283,7 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 	sd.nodes++;
 	totalNodesTouched+=acts.size();
 
-	for (int x = 0; x < acts.size(); x++)
+	for (size_t x = 0; x < acts.size(); x++)
 	{
 		if (acts[x] == forbidden && currPath.size() > 0)
 			continue;
@@ -342,9 +342,11 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 			// Path is backwards - reverse
 			reverse(solutionStates.begin(), solutionStates.end());
 			// f, nextF, failedF, nodes
-			for (int x = 0; x < solutionStates.size()-1; x++)
-			{
-				solutionPath.push_back(env->GetAction(solutionStates[x], solutionStates[x+1]));
+			if(solutionStates.size() > 0) {
+				for (size_t x = 0; x < solutionStates.size()-1; x++)
+				{
+					solutionPath.push_back(env->GetAction(solutionStates[x], solutionStates[x+1]));
+				}
 			}
 			return {static_cast<uint64_t>(q.Lookup(nodeid).g), static_cast<uint64_t>(q.Lookup(nodeid).g), -1ull, nodesExpanded};
 		}
@@ -360,7 +362,7 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 		env->GetSuccessors(q.Lookup(nodeid).data, neighbors);
 
 		// 1. load all the children
-		for (unsigned int x = 0; x < neighbors.size(); x++)
+		for (size_t x = 0; x < neighbors.size(); x++)
 		{
 			uint64_t theID;
 			neighborLoc.push_back(q.Lookup(env->GetStateHash(neighbors[x]), theID));
@@ -369,7 +371,7 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 		}
 		
 		// iterate again updating costs and writing out to memory
-		for (int x = 0; x < neighbors.size(); x++)
+		for (size_t x = 0; x < neighbors.size(); x++)
 		{
 			totalNodesTouched++;
 			
@@ -446,4 +448,3 @@ typename EBSearch<state, action, environment, DFS>::searchData EBSearch<state, a
 		return BFHS(costLimit, nodeLimit);
 }
 #endif /* BID_h */
-

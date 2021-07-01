@@ -1,7 +1,7 @@
 #include <vector>
 #include <queue>
 #include <ext/hash_set>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "MultiAgentEnvironment.h"
 #include "GraphEnvironment.h"
 #include "Map2DEnvironment.h"
@@ -42,7 +42,7 @@ class TwoPlayerDijkstra {
 
 	typedef std::priority_queue<QueueEntry, std::vector<QueueEntry>, QueueEntryCompare> MyPriorityQueue;
 	typedef __gnu_cxx::hash_set<state, MyStateHash> CopClosedList;
-	typedef __gnu_cxx::hash_map<state, unsigned int, MyStateHash> RobberClosedList;
+	typedef std::unordered_map<state, unsigned int, MyStateHash> RobberClosedList;
 
 	// constructor
 	TwoPlayerDijkstra( environment *_env, bool _canPass ):

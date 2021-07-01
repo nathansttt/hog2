@@ -599,7 +599,7 @@ void IRAStar::OpenGLDraw() const
 void IRAStar::SetHValues( int f )
 {
 	NodeLookupTable::iterator ni ;
-	//typedef __gnu_cxx::hash_map<uint32_t, GNode> NodeLookupTable;
+	//typedef std::unordered_map<uint32_t, GNode> NodeLookupTable;
 	
 	for ( ni = closedList.begin(); ni != closedList.end(); ni++ )
 	{

@@ -7,7 +7,7 @@
  *
  */
 
-//#include <ext/hash_map>
+//#include <unordered_map>
 #include "GraphEnvironment.h"
 
 //#include "ts.h"
@@ -62,7 +62,7 @@ public:
 	uint64_t GetPDBHash(const graphState &state, int pdb_size) const;
 	uint64_t GetPDBSize(int puzzle_size, int pdb_size) const;
 private:
-	typedef __gnu_cxx::hash_map<uint64_t, unsigned long, Hash64> TopSpinHashTable;
+	typedef std::unordered_map<uint64_t, unsigned long, Hash64> TopSpinHashTable;
 
 	void ExpandNode(const graphState &stateID) const;
 	void Flip(std::vector<int> &arrangement, int index, int radius) const;

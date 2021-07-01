@@ -407,7 +407,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		{
 			//printf("Drawing edge on solution path\n");
 			ge->SetColor(0, 1, 0);
-			for (int x = 1; x < path.size(); x++)
+			for (size_t x = 1; x < path.size(); x++)
 			{
 				ge->DrawLine(display, path[x-1], path[x], 10);
 				//ge->GLDrawLine(path[x-1], path[x]);
@@ -1042,7 +1042,7 @@ void BuildGraphFromPuzzle()
 			{
 //				printf("%d at the average of ", n->GetNum());
 				double avg = 0;
-				for (int y = 0; y < allChildren.size(); y++)
+				for (size_t y = 0; y < allChildren.size(); y++)
 				{
 					avg += g->GetNode(allChildren[y])->GetLabelF(GraphSearchConstants::kXCoordinate);
 //					printf("%d ", allChildren[y]);
@@ -1183,4 +1183,3 @@ bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButt
 	}
 	return false;
 }
-

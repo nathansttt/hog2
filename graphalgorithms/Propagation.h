@@ -16,7 +16,7 @@
 #include "SearchEnvironment.h"
 #include "GraphEnvironment.h"
 #include <deque>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "FPUtil.h"
 #include "OpenListB.h"
 
@@ -420,7 +420,7 @@ namespace PropUtil
 	typedef OpenListB<PropUtil::SearchNode, PropUtil::SearchNodeHash,
 		PropUtil::SearchNodeEqual, PropUtil::SearchNodeCompare, PropUtil::GGreater, PropUtil::FExtract> PQueue;
 
-	typedef __gnu_cxx::hash_map<graphState, PropUtil::SearchNode > NodeLookupTable;
+	typedef std::unordered_map<graphState, PropUtil::SearchNode > NodeLookupTable;
 
 	typedef OpenListB<PropUtil::SearchNode, PropUtil::SearchNodeHash,
 		PropUtil::SearchNodeEqual, PropUtil::GGreater, PropUtil::GGreater, PropUtil::FExtract> GQueue;

@@ -5,7 +5,7 @@
 //#include <utility>
 #include <queue>
 #include <ext/hash_set>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "MultiAgentEnvironment.h"
 #include "GraphEnvironment.h"
 #include "Map2DEnvironment.h"

@@ -14,9 +14,9 @@
 
 #include <cassert>
 #include <vector>
-#include <ext/hash_map>
 #include <stdio.h>
 #include <stdint.h>
+#include <unordered_map>
 
 /**
 * A simple Heap class.
@@ -45,7 +45,7 @@ private:
 	std::vector<OBJ> _elts;
 	void HeapifyUp(unsigned int index);
 	void HeapifyDown(unsigned int index);
-	typedef __gnu_cxx::hash_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
+	typedef std::unordered_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
 	IndexTable table;
 };
 
@@ -121,7 +121,7 @@ template<typename OBJ, class HashKey, class EqKey, class CmpKey>
 bool OpenClosedList<OBJ, HashKey, EqKey, CmpKey>::IsIn(const OBJ val) const
 {
 	EqKey eq;
-	//	typedef __gnu_cxx::hash_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
+	//	typedef std::unordered_map<OBJ, unsigned int, HashKey, EqKey > IndexTable;
 	typename IndexTable::const_iterator it;
 	it = table.find(val);
 	if (it != table.end())

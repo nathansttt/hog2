@@ -478,11 +478,11 @@ void ThreadedGetPathLengthInRange(GraphEnvironment *ge, std::vector<graphState> 
 								  std::vector<double> &finalCost, double minLen, double maxLen, int numNeeded)
 {
 	std::vector<std::thread *> threads;
-	for (int x = 0; x < std::thread::hardware_concurrency(); x++)
+	for (size_t x = 0; x < std::thread::hardware_concurrency(); x++)
 	{
 		threads.push_back(new std::thread(GetPathLengthInRange, ge, minLen, maxLen, numNeeded));
 	}
-	for (int x = 0; x < threads.size(); x++)
+	for (size_t x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();
 	}
@@ -529,9 +529,9 @@ void buildProblemSet(const char *output = 0)
 	GraphEnvironment *ge = new GraphEnvironment(&map, g, &gdh);
 	ge->SetDirected(true);
 	
-	int numThreads = std::thread::hardware_concurrency();
+	const auto numThreads = std::thread::hardware_concurrency();
 	std::vector<std::thread *> threads;
-	for (int x = 0; x < numThreads; x++)
+	for (size_t x = 0; x < numThreads; x++)
 	{
 		threads.push_back(new std::thread(PathfindingThread, ge));
 	}
@@ -544,7 +544,7 @@ void buildProblemSet(const char *output = 0)
 	//double len = EstimateLongPath(&map);
 	printf("First pass: 100%% random\n");
 	int totalTries = g->GetNumNodes()/10;//9*g->GetNumNodes()/10;
-	for (unsigned int x = 0; x < totalTries; x++)
+	for (int x = 0; x < totalTries; x++)
 	{
 		if (0==x%100)
 		{ printf("\r%d of %d", x, totalTries); fflush(stdout); }
@@ -572,7 +572,7 @@ void buildProblemSet(const char *output = 0)
 		gs2 = g1->GetNum();
 		workQueue.WaitAdd({gs1, gs2});
 	}
-	for (int x = 0; x < numThreads; x++)
+	for (size_t x = 0; x < numThreads; x++)
 	{
 		workQueue.WaitAdd({0, 0});
 	}
@@ -608,14 +608,14 @@ void buildProblemSet(const char *output = 0)
 	}
 	printf("\nDone receiving from threads\n");
 	
-	for (int x = 0; x < numThreads; x++)
+	for (size_t x = 0; x < numThreads; x++)
 	{
 		threads[x]->join();
 		delete threads[x];
 	}
 	threads.resize(0);
 	
-	for (int x = 0; x < experiments.size(); x++)
+	for (size_t x = 0; x < experiments.size(); x++)
 	{
 		while (experiments[x].size() != 10)
 		{
@@ -703,7 +703,7 @@ void buildRandomSet(const char *output = 0)
 	if (points.size() > 2000)
 		points.resize(2000);
 	astar.SetStopAfterGoal(true);
-	for (int x = 0; x < points.size(); x+= 2)
+	for (size_t x = 0; x < points.size(); x+= 2)
 	{
 		astar.GetPath(&me, points[x], points[x+1], path);
 		//	Experiment(int sx,int sy,int gx,int gy,int b, double d, string m)
@@ -1373,7 +1373,7 @@ void MySubgoalHandler(unsigned long windowID, tKeyboardModifier, char key)
 //	std::vector<std::pair<xyLoc, xyLoc>> subgoalEdges;
 	Map *map = unitSims[windowID]->GetEnvironment()->GetMap();
 	world.resize(map->GetMapWidth());
-	for (int x = 0; x < world.size(); x++)
+	for (size_t x = 0; x < world.size(); x++)
 	{
 		world[x].resize(map->GetMapHeight());
 		for (int y = 0; y < map->GetMapHeight(); y++)
@@ -2043,4 +2043,3 @@ void testHeuristic(char *problems)
 	
 	exit(0);
 }
-

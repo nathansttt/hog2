@@ -3,7 +3,7 @@
 #include "StatCollection.h"
 #include "GenericStepAlgorithm.h"
 #include <algorithm>
-#include <ext/hash_map>
+#include <unordered_map>
 #include <iostream>
 #include "BeamNode.h"
 #include "StringUtils.h"
@@ -123,9 +123,9 @@ public:
 	bool Node_Stored_In_Beams(state &s, uint64_t hash_value);
 	bool Node_Stored_In_Layer(state &s, uint64_t hash_value, std::vector<BeamNode<state> > &layer);
 
-	void Add_To_Beam_Hash(BeamNode<state> &node, beam_position &position, __gnu_cxx::hash_map<uint64_t, std::vector<beam_position>, Hash64> &node_hash);
+	void Add_To_Beam_Hash(BeamNode<state> &node, beam_position &position, std::unordered_map<uint64_t, std::vector<beam_position>, Hash64> &node_hash);
 
-	void Add_To_Layer_Hash(BeamNode<state> &node, unsigned position, __gnu_cxx::hash_map<uint64_t, std::vector<unsigned>, Hash64> &node_hash);
+	void Add_To_Layer_Hash(BeamNode<state> &node, unsigned position, std::unordered_map<uint64_t, std::vector<unsigned>, Hash64> &node_hash);
 
 	bool debug;
 
@@ -165,8 +165,8 @@ protected:
 
 	std::vector<std::vector <BeamNode<state> > > beams; // beam construct
 
-	__gnu_cxx::hash_map<uint64_t, std::vector<unsigned>, Hash64> nodes_in_current_layer; // nodes in the current layer constructing
-	__gnu_cxx::hash_map<uint64_t, std::vector<beam_position>, Hash64> nodes_in_beam; // nodes in beams not in current layer
+	std::unordered_map<uint64_t, std::vector<unsigned>, Hash64> nodes_in_current_layer; // nodes in the current layer constructing
+	std::unordered_map<uint64_t, std::vector<beam_position>, Hash64> nodes_in_beam; // nodes in beams not in current layer
 
 	environment *my_env;
 	state goal;
@@ -707,7 +707,7 @@ Adds a node to a hash. Assumes that this node is not already in the hash functio
 even if the hash value does exist there.
 **/
 template <class state, class action, class environment>
-void GeneralBeamSearch<state, action, environment>::Add_To_Beam_Hash(BeamNode<state> &node, beam_position &position, __gnu_cxx::hash_map<uint64_t, std::vector<beam_position>, Hash64> &node_hash) {
+void GeneralBeamSearch<state, action, environment>::Add_To_Beam_Hash(BeamNode<state> &node, beam_position &position, std::unordered_map<uint64_t, std::vector<beam_position>, Hash64> &node_hash) {
 
 	assert(prune_dups);
 	if(full_check && node_hash.find(node.my_key) != node_hash.end()) {
@@ -724,7 +724,7 @@ void GeneralBeamSearch<state, action, environment>::Add_To_Beam_Hash(BeamNode<st
 Adds a node to a hash. If full_check is set to true
 **/
 template <class state, class action, class environment>
-void GeneralBeamSearch<state, action, environment>::Add_To_Layer_Hash(BeamNode<state> &node, unsigned position, __gnu_cxx::hash_map<uint64_t, std::vector<unsigned>, Hash64> &node_hash) {
+void GeneralBeamSearch<state, action, environment>::Add_To_Layer_Hash(BeamNode<state> &node, unsigned position, std::unordered_map<uint64_t, std::vector<unsigned>, Hash64> &node_hash) {
 
 	assert(prune_dups);
 	if(full_check && node_hash.find(node.my_key) != node_hash.end()) {

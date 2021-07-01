@@ -186,7 +186,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	
 	if (mode == kWaitPath && path.size() > 0)
 	{
-		for (int x = 1; x < path.size(); x++)
+		for (size_t x = 1; x < path.size(); x++)
 		{
 			float x1, y1, r1;
 			float x2, y2, r2;
@@ -211,7 +211,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	if (0 && mode == kWaitPath && wpath.size() > 0)
 	{
-		for (int x = 1; x < wpath.size(); x++)
+		for (size_t x = 1; x < wpath.size(); x++)
 		{
 			float x1, y1, r1;
 			float x2, y2, r2;
@@ -400,7 +400,7 @@ uint64_t GetPathViaAbstraction(const xyLoc &start, const xyLoc &goal, std::vecto
 	// 3. Connect abstract regions
 	xyLoc currStart = start;
 //	astar.SetWeight(1.2);
-	for (int x = 1; x+1 < absPath.size(); x++)
+	for (size_t x = 1; x+1 < absPath.size(); x++)
 	{
 		xyLoc end = dwg->GetLocation(absPath[x]);
 		astar.GetPath(env, currStart, end, tmp);
@@ -421,13 +421,7 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	srandom(20190529);
 	const int numProblems = 250;
-	uint64_t nbsNodes = 0;
 	uint64_t astarNodes = 0;
-	uint64_t wastarNodes = 0;
-	uint64_t wastarNodes2 = 0;
-	uint64_t wastarNodes3 = 0;
-	uint64_t absNodes = 0;
-	uint64_t firstAbsNodes = 0;
 	double optimalPath = 0;
 	double suboptimalPath = 0;
 	double suboptimalPath2 = 0;
@@ -605,5 +599,3 @@ bool MyClickHandler(unsigned long , int, int, point3d p, tButtonType , tMouseEve
 	
 	return true;
 }
-
-

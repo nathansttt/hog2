@@ -707,7 +707,7 @@ bool SnakeBird::Render(const SnakeBirdState &s) const
 		}
 	}
 	// render fruit into world
-	for (int f = 0; f < fruit.size(); f++)
+	for (size_t f = 0; f < fruit.size(); f++)
 	{
 		if (s.GetFruitPresent(f))
 			render[fruit[f]] = kFruit;
@@ -1085,13 +1085,13 @@ SnakeBirdAnimation SnakeBird::DoFall(SnakeBirdAction &a, SnakeBirdState &s) cons
 	a.pushed = falling;
 	
 	// check if an object hit the bottom of the world - if so it is dead
-	for (int i = 0; i < objects.size(); i++)
+	for (size_t i = 0; i < objects.size(); i++)
 	{
 		int objLoc = s.GetObjectLocation(i);
 		if (objLoc == kDead)
 			continue;
 		int objectY = GetY(objLoc);
-		for (int j = 0; j < objects[i].size(); j++)
+		for (size_t j = 0; j < objects[i].size(); j++)
 		{
 			if (objectY+GetY(objects[i][j]) >= height-2)
 			{
@@ -1487,7 +1487,7 @@ TeleportResult SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
 			int newloc = s.GetObjectLocation(object);
 			if (newloc == kDead)
 				continue;
-			for (int x = 0; x < objects[object].size(); x++)
+			for (size_t x = 0; x < objects[object].size(); x++)
 			{
 				int piece = GetIndex(GetX(objects[object][x])+GetX(newloc),
 									 GetY(objects[object][x])+GetY(newloc));
@@ -1535,7 +1535,7 @@ TeleportResult SnakeBird::HandleTeleports(SnakeBirdState &s, SnakeBirdAction &a,
 
 					// Validate if the object can be placed in the new location
 					bool valid = true;
-					for (int v = 0; v < objects[object].size(); v++)
+					for (size_t v = 0; v < objects[object].size(); v++)
 					{
 						if (GetX(newloc)+GetX(objects[object][v])+xChange < 0 ||
 							GetX(newloc)+GetX(objects[object][v])+xChange >= width ||
@@ -1598,7 +1598,7 @@ void SnakeBird::RemoveBlock(int x, int y)
 		xOffset = GetX(startState.GetObjectLocation(which));
 		yOffset = GetY(startState.GetObjectLocation(which));
 
-		for (int i = 0; i < objects[which].size(); i++)
+		for (size_t i = 0; i < objects[which].size(); i++)
 		{
 			if (GetX(objects[which][i])+xOffset == x &&
 				GetY(objects[which][i])+yOffset == y) // remove
@@ -1617,13 +1617,13 @@ void SnakeBird::RemoveBlock(int x, int y)
 		int newX = width, newY=height;
 		
 		// Get new base location (minx/y)
-		for (int i = 0; i < objects[which].size(); i++)
+		for (size_t i = 0; i < objects[which].size(); i++)
 		{
 			newX = std::min(newX, GetX(objects[which][i])+xOffset);
 			newY = std::min(newY, GetY(objects[which][i])+yOffset);
 		}
 		startState.SetObjectLocation(which, GetIndex(newX, newY));
-		for (int i = 0; i < objects[which].size(); i++)
+		for (size_t i = 0; i < objects[which].size(); i++)
 		{
 			// reset locations based on new base location
 			objects[which][i] = GetIndex(GetX(objects[which][i])+xOffset - newX,

@@ -317,7 +317,7 @@ void CheckSolution(std::unordered_map<openData, openList, openDataHash> currentO
 			size_t numRead;
 			do {
 				numRead = fread(buffer, sizeof(uint64_t), bufferSize, s.second.f);
-				for (int x = 0; x < numRead; x++)
+				for (size_t x = 0; x < numRead; x++)
 				{
 					if (states.find(buffer[x]) != states.end())
 					{
@@ -345,7 +345,7 @@ void ReadBucket(std::unordered_set<uint64_t> &states, openData d)
 	size_t numRead;
 	do {
 		numRead = fread(buffer, sizeof(uint64_t), bufferSize, open[d].f);
-		for (int x = 0; x < numRead; x++)
+		for (size_t x = 0; x < numRead; x++)
 			states.insert(buffer[x]);
 	} while (numRead == bufferSize);
 	fclose(open[d].f);
@@ -384,7 +384,7 @@ void RemoveDuplicates(std::unordered_set<uint64_t> &states, openData d)
 		size_t numRead;
 		do {
 			numRead = fread(buffer, sizeof(uint64_t), bufferSize, cd.f);
-			for (int x = 0; x < numRead; x++)
+			for (size_t x = 0; x < numRead; x++)
 			{
 				auto i = states.find(buffer[x]);
 				if (i != states.end())
@@ -494,7 +494,7 @@ void ExpandNextFile()
 	std::vector<std::thread *> threads;
 	for (int x = 0; x < numThreads; x++)
 		threads.push_back(new std::thread(ParallelExpandBucket, d, std::ref(states), x, numThreads));
-	for (int x = 0; x < threads.size(); x++)
+	for (size_t x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();
 		delete threads[x];

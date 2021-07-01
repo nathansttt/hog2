@@ -2,7 +2,7 @@
 #include <cstring>
 #include <vector>
 #include <time.h>
-#include <ext/hash_map>
+#include <unordered_map>
 #include <math.h>
 #include "FPUtil.h"
 #include "UnitSimulation.h"

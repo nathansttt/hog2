@@ -9,6 +9,7 @@
 #ifndef hog2_glut_Heuristic_h
 #define hog2_glut_Heuristic_h
 
+#include <cstdint>
 #include <vector>
 #include <cstdint>
 
@@ -82,14 +83,14 @@ double Heuristic<state>::HCost(const state &s1, const state &s2, int treeNode) c
 	{
 		case kMaxNode:
 		{
-			for (int x = 0; x < lookups[treeNode].numChildren; x++)
+			for (size_t x = 0; x < lookups[treeNode].numChildren; x++)
 			{
 				hval = std::max(hval, HCost(s1, s2, lookups[treeNode].whichNode+x));
 			}
 		} break;
 		case kAddNode:
 		{
-			for (int x = 0; x < lookups[treeNode].numChildren; x++)
+			for (size_t x = 0; x < lookups[treeNode].numChildren; x++)
 			{
 				hval += HCost(s1, s2, lookups[treeNode].whichNode+x);
 			}

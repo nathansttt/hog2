@@ -30,14 +30,14 @@ public:
 	}
 	void Reset()
 	{
-		for (unsigned int x = 0; x < size(); x++)
+		for (size_t x = 0; x < size(); x++)
 			puzzle[x] = x;
 		blank = 0;
 	}
 	size_t size() const { return width*height; }
 	void FinishUnranking()
 	{
-		for (int x = 0; x < size(); x++)
+		for (size_t x = 0; x < size(); x++)
 		{
 			if (puzzle[x] == 0)
 			{
@@ -48,7 +48,7 @@ public:
 	}
 	bool operator<(const MNPuzzleState &b)
 	{
-		for (int x = 0; x < size(); x++)
+		for (size_t x = 0; x < size(); x++)
 			if (puzzle[x] != b.puzzle[x])
 				return puzzle[x] < b.puzzle[x];
 		return false;
@@ -89,7 +89,7 @@ template <int width, int height>
 static std::ostream& operator <<(std::ostream & out, const MNPuzzleState<width, height> &loc)
 {
 	out << "(" << width << "x" << height << ")";
-	for (unsigned int x = 0; x < loc.size(); x++)
+	for (size_t x = 0; x < loc.size(); x++)
 		out << loc.puzzle[x] << " ";
 	return out;
 }

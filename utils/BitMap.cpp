@@ -74,7 +74,7 @@ BitMapPic::BitMapPic(const char* file)
 					
 					if (header.biBitCount == 32)
 					{
-						for (int x = 0; x < height; x++)
+						for (size_t x = 0; x < height; x++)
 						{
 							if (reverseHeight)
 								fread(&image[(height-x-1)*width*4], sizeof(char), width*4, f);

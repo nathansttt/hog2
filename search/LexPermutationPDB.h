@@ -70,7 +70,7 @@ uint64_t LexPermutationPDB<state, action, environment, bits>::GetPDBHash(const s
 		if (s.puzzle[x] != -1)
 			dual[s.puzzle[x]] = x;
 	}
-	for (int x = 0; x < distinct.size(); x++)
+	for (size_t x = 0; x < distinct.size(); x++)
 	{
 		locs[x] = dual[distinct[x]];
 	}
@@ -107,7 +107,7 @@ void LexPermutationPDB<state, action, environment, bits>::GetStateFromPDBHash(ui
 		dual[x] = hashVal%numEntriesLeft;
 		hashVal /= numEntriesLeft;
 		numEntriesLeft++;
-		for (int y = x+1; y < distinct.size(); y++)
+		for (size_t y = x+1; y < distinct.size(); y++)
 		{
 			if (dual[y] >= dual[x])
 				dual[y]++;

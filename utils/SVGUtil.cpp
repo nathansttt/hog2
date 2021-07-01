@@ -179,7 +179,7 @@ std::string SVGDrawLineSegments(const std::vector<Graphics::point> &lines, float
 
 	s += "M "+std::to_string(lines[0].x)+" "+std::to_string(lines[0].y)+" L";
 	
-	for (int x = 1; x < lines.size(); x++)
+	for (size_t x = 1; x < lines.size(); x++)
 	{
 		s += " "+std::to_string(lines[x].x)+" "+std::to_string(lines[x].y)+" ";
 	}
@@ -293,7 +293,7 @@ void PointToSVG(Graphics::point &p, float xmultiplier, float ymultiplier)
 
 void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std::string &s, int width, int height, int viewport)
 {
-	for (int x = 0; x < drawCommands.size(); x++)
+	for (size_t x = 0; x < drawCommands.size(); x++)
 	{
 		if (drawCommands[x].viewport != viewport)
 			continue;
@@ -466,7 +466,7 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 	HandleCommand(disp.backgroundDrawCommands, s, width, height, viewport);
 	HandleCommand(disp.drawCommands, s, width, height, viewport);
 
-	for (int x = 0; x < disp.text.size(); x++)
+	for (size_t x = 0; x < disp.text.size(); x++)
 	{
 		const auto &i = disp.text[x];
 		if (i.viewport == viewport)
@@ -487,7 +487,7 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 		}
 	}
 	static std::vector<Graphics::point> outputPoints;
-	for (int x = 0; x < disp.lineSegments.size(); x++)
+	for (size_t x = 0; x < disp.lineSegments.size(); x++)
 	{
 		const auto &i = disp.lineSegments[x];
 		if (i.viewport == viewport)
@@ -513,6 +513,3 @@ std::string MakeSVG(const Graphics::Display &disp, int width, int height, int vi
 	s += "</svg>";
 	return s;
 }
-
-
-

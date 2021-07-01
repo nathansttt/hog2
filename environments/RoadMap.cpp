@@ -8,6 +8,8 @@
 
 #include "RoadMap.h"
 
+#include <algorithm>
+
 
 RoadMap::RoadMap(const char *graph, const char *coordinates, bool timeGraph)
 {

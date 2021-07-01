@@ -16,7 +16,7 @@
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "Map2DEnvironment.h"
 #include "CanonicalGrid.h"
 #include <unordered_map>

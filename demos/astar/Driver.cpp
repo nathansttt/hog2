@@ -169,7 +169,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		if (path.size() > 0)
 		{
 			ge->SetColor(0, 1, 0);
-			for (int x = 1; x < path.size(); x++)
+			for (size_t x = 1; x < path.size(); x++)
 			{
 				ge->DrawLine(display, path[x-1], path[x], 4);
 			}
@@ -518,7 +518,7 @@ void ShowSearchInfo()
 
 	std::vector<std::string> open, closed;
 	
-	for (int x = 0; x < astar.GetNumOpenItems(); x++)
+	for (size_t x = 0; x < astar.GetNumOpenItems(); x++)
 	{
 		auto item = astar.GetOpenItem(x);
 		s = g->GetNode(item.data)->GetName();

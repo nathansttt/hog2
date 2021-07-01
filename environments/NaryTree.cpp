@@ -22,7 +22,7 @@ NaryTree::NaryTree(int branchingFactor, int depth) :b(branchingFactor), d(depth)
 		tot*=b;
 		sum += tot;
 	}
-	for (int x = 0; x < nodesAtDepth.size(); x++)
+	for (size_t x = 0; x < nodesAtDepth.size(); x++)
 	{
 		printf("%d %llu %llu\n", x, nodesAtDepth[x], totalNodesAtDepth[x]);
 	}

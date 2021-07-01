@@ -12,12 +12,12 @@
 #include <iostream>
 #include <functional>
 #include "SearchEnvironment.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "FPUtil.h"
 #include "vectorCache.h"
 
 
-typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
+typedef std::unordered_map<uint64_t, double> NodeHashTable;
 
 template <class state, class action, int buckets = 50, bool verbose = true>
 class IDAStarCR {
@@ -152,4 +152,3 @@ void IDAStarCR<state, action, buckets, verbose>::DoIteration(SearchEnvironment<s
 }
 
 #endif
-

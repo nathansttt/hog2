@@ -288,7 +288,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		
 		if (strcmp(argument[1], "apply") == 0)
 		{
-			for (int x = 0; x < acts.size(); x++)
+			for (size_t x = 0; x < acts.size(); x++)
 			{
 				animateActions.push_back(acts[x]);
 			}

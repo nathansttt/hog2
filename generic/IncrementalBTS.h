@@ -201,7 +201,7 @@ bool IncrementalBTS<state, action>::StepIteration()
 		if (fless(search.back().pathCost, solutionCost))
 		{
 			solutionPath.clear();
-			for (int x = 0; x < search.size(); x++)
+			for (size_t x = 0; x < search.size(); x++)
 				solutionPath.push_back(search[x].currState);
 			solutionCost = search.back().pathCost;
 			printf("Found solution cost %f!", solutionCost);
@@ -244,7 +244,7 @@ bool IncrementalBTS<state, action>::StepIteration()
 		search.back().status = kGoingAcross;
 		env->GetSuccessors(search.back().currState, search.back().succ);
 		nodesExpanded++;
-		for (int x = 0; x < search.back().succ.size(); x++)
+		for (size_t x = 0; x < search.back().succ.size(); x++)
 		{
 			if (search.size() > 1 && search.back().succ[x] == search[search.size()-2].currState)
 			{
@@ -395,7 +395,7 @@ bool IncrementalBTS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 template <class state, class action>
 void IncrementalBTS<state, action>::Draw(Graphics::Display &display) const
 {
-	for (int x = 1; x < search.size(); x++)
+	for (size_t x = 1; x < search.size(); x++)
 	{
 		env->DrawLine(display, search[x-1].currState, search[x].currState, 10);
 	}
@@ -406,7 +406,7 @@ void IncrementalBTS<state, action>::OpenGLDraw()
 {
 	//	for (auto x : history)
 	//		env->OpenGLDraw(x.first);
-	for (int x = 1; x < search.size(); x++)
+	for (size_t x = 1; x < search.size(); x++)
 		env->GLDrawLine(search[x-1].currState, search[x].currState, 10);
 	//	for (int x = 1; x < path.size(); x++)
 	//		env->GLDrawLine(path[x-1], path[x]);
