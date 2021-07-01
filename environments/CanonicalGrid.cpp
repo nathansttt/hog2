@@ -542,8 +542,8 @@ namespace CanonicalGrid {
 		glRotatef(180, 0.0, 1.0, 0.0);
 		glDisable(GL_LIGHTING);
 		auto len = strlen(str);
-		for (int which = 0; which < len; which++)
-			glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
+		//for (int which = 0; which < len; which++)
+		//	glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
 		glEnable(GL_LIGHTING);
 		glPopMatrix();
 	}
@@ -563,8 +563,8 @@ namespace CanonicalGrid {
 		glRotatef(180, 0.0, 0.0, 1.0);
 		glRotatef(180, 0.0, 1.0, 0.0);
 		glDisable(GL_LIGHTING);
-		for (int which = 0; which < strlen(str); which++)
-			glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
+		//for (int which = 0; which < strlen(str); which++)
+		//	glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
 		glEnable(GL_LIGHTING);
 		glPopMatrix();
 	}
@@ -799,13 +799,14 @@ namespace CanonicalGrid {
 					p1.x = x;
 					p1.y = y;
 				}
+				GLdouble r;
 				{
-					GLdouble x, y, z, r;
+					GLdouble x, y, z;
 					map->GetOpenGLCoord(s.x, s.y, x, y, z, r);
 					p2.x = x;
 					p2.y = y;
 				}
-				disp.DrawLine(p1, p2, 1, c);
+				disp.DrawLine(p1, p2, r*0.1, c);
 				visited[s.x+s.y*map->GetMapWidth()] = true;
 			}
 			queue.pop_front();
@@ -845,13 +846,14 @@ namespace CanonicalGrid {
 					p1.x = x;
 					p1.y = y;
 				}
+				GLdouble r;
 				{
-					GLdouble x, y, z, r;
+					GLdouble x, y, z;
 					map->GetOpenGLCoord(s.x, s.y, x, y, z, r);
 					p2.x = x;
 					p2.y = y;
 				}
-				disp.DrawLine(p1, p2, 1, c);
+				disp.DrawLine(p1, p2, r*0.1, c);
 				visited[s.x+s.y*map->GetMapWidth()] = true;
 			}
 			queue.pop_front();
@@ -1056,8 +1058,8 @@ namespace CanonicalGrid {
 	
 	void CanonicalGrid::Draw(Graphics::Display &disp, const xyLoc &l) const
 	{
-		GLdouble px, py, t, rad;
-		map->GetOpenGLCoord(l.x, l.y, px, py, t, rad);
+		GLdouble px, py, pz, rad;
+		map->GetOpenGLCoord(l.x, l.y, px, py, pz, rad);
 		
 		//if (map->GetTerrainType(l.x, l.y) == kGround)
 		{
@@ -1065,14 +1067,15 @@ namespace CanonicalGrid {
 			GLfloat t;
 			GetColor(c.r, c.g, c.b, t);
 			
-			rect r;
-			r.left = px-rad;
-			r.top = py-rad;
-			r.right = px+rad;
-			r.bottom = py+rad;
+//			rect r;
+//			r.left = px-rad;
+//			r.top = py-rad;
+//			r.right = px+rad;
+//			r.bottom = py+rad;
 			
 			//s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
-			disp.FillCircle(r, c);
+//			disp.FillCircle(r, c);
+			disp.FillCircle({static_cast<float>(px), static_cast<float>(py)}, rad, c);
 			//stroke-width="1" stroke="pink" />
 		}
 	}

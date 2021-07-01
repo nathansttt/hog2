@@ -156,9 +156,9 @@ void FlipSide::OpenGLDraw(const FlipSideState &s) const
 			glRotatef(180, 0.0, 0.0, 1.0);
 			glRotatef(180, 0.0, 1.0, 0.0);
 			//glTranslatef((float)x/width-0.5, (float)y/2-0.5, 0);
-			if (s.puzzle[x+y*width] > 9)
-				glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+(((s.puzzle[x+y*width])/10)%10));
-			glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+((s.puzzle[x+y*width])%10));
+			//if (s.puzzle[x+y*width] > 9)
+			//	glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+(((s.puzzle[x+y*width])/10)%10));
+			//glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+((s.puzzle[x+y*width])%10));
 			//glTranslatef(-x/width+0.5, -y/2+0.5, 0);
 			glPopMatrix();
 		}

@@ -822,7 +822,7 @@ void Fling::GLLabelState(const FlingBoard&b, const char *text) const
 				for (p = text; *p; p++)
 				{
 					//printf("%c", *p);
-					glutStrokeCharacter(GLUT_STROKE_ROMAN, *p);
+					//glutStrokeCharacter(GLUT_STROKE_ROMAN, *p);
 				}
 				glPopMatrix();
 				//printf("\n");
