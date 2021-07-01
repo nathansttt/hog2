@@ -136,6 +136,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 //		dwg = new DWG::DynamicWeightedGrid<sectorSize>("/Users/nathanst/hog2/maps/weighted/Map_1.map");
 //		env = new DWG::DynamicWeightedGridEnvironment("/Users/nathanst/hog2/maps/weighted/Map1.map");
 		dwg->SetCosts(cost);
+		dwg->SetDrawAbstraction(true);
 	}
 }
 
@@ -191,7 +192,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			float x2, y2, r2;
 			dwg->GetCoordinate(path[x-1], x1, y1, r1);
 			dwg->GetCoordinate(path[x],  x2, y2, r2);
-			display.DrawLine({x1, y1}, {x2, y2}, 4.0, Colors::red);
+			display.DrawLine({x1, y1}, {x2, y2}, r1, Colors::red);
 		}
 	}
 	if (mode == kWaitPath && absPath.size() > 0)
@@ -205,7 +206,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			b = dwg->GetLocation(absPath[x]);
 			dwg->GetCoordinate(a, x1, y1, r1);
 			dwg->GetCoordinate(b, x2, y2, r2);
-			display.DrawLine({x1, y1}, {x2, y2}, 6.0, Colors::purple);
+			display.DrawLine({x1, y1}, {x2, y2}, 1.5f*r1, Colors::purple);
 		}
 	}
 	if (0 && mode == kWaitPath && wpath.size() > 0)
@@ -216,7 +217,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			float x2, y2, r2;
 			dwg->GetCoordinate(wpath[x-1], x1, y1, r1);
 			dwg->GetCoordinate(wpath[x],  x2, y2, r2);
-			display.DrawLine({x1, y1}, {x2, y2}, 4.0, Colors::yellow);
+			display.DrawLine({x1, y1}, {x2, y2}, r1, Colors::yellow);
 		}
 	}
 	if (mode == kDrawingPath)
@@ -225,7 +226,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		float x2, y2, r2;
 		dwg->GetCoordinate(start, x1, y1, r1);
 		dwg->GetCoordinate(goal,  x2, y2, r2);
-		display.DrawLine({x1, y1}, {x2, y2}, 1.0, Colors::red);
+		display.DrawLine({x1, y1}, {x2, y2}, r1*0.5f, Colors::red);
 	}
 	if (mode == kDoPathfinding)
 	{
