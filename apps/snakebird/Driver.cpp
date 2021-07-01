@@ -86,7 +86,7 @@ struct EditorItem {
 std::vector<EditorItem> editorItems =
 {
 	{kColumn1, 1, SnakeBird::kNothing, "Edit Map", kColumn2, '\0', false, false},
-	{kColumn1, 3, SnakeBird::kEmpty, "Sky", kColumn2, 'r', true, true},
+	{kColumn1, 3, SnakeBird::kEmpty, "Sky", kColumn2, 'k', true, true},
 	{kColumn1, 5, SnakeBird::kGround, "Ground", kColumn2, 'g', true, true},
 	{kColumn1, 7, SnakeBird::kSpikes, "Spikes", kColumn2, 's', true, true},
 	{kColumn1, 9, SnakeBird::kFruit, "Fruit", kColumn2, 'f', true, true},
@@ -177,7 +177,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Exit", "Edit Exit", kAnyModifier, 'x');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Ground", "Edit Ground", kAnyModifier, 'g');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Spikes", "Edit Spikes", kAnyModifier, 's');
-	InstallKeyboardHandler(EditorKeyBoardHandler, "Sky", "Edit Sky", kAnyModifier, 'r');
+	InstallKeyboardHandler(EditorKeyBoardHandler, "Sky", "Edit Sky", kAnyModifier, 'k');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Toggle Ground", "Toggle Ground Mode", kAnyModifier, 'h');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Portal", "Edit Portals", kAnyModifier, 'p');
 	InstallKeyboardHandler(EditorKeyBoardHandler, "Blocks", "Edit Blocks", kAnyModifier, 'b');
@@ -195,6 +195,7 @@ void InstallHandlers()
 	InstallCommandLineHandler(MyCLHandler, "-svg", "-svg <input> <output>", "Make an .svg of the given level then quit");
 	InstallCommandLineHandler(MyCLHandler, "-printsvg", "-printsvg <input>", "Print an .svg of the given level then quit");
 	InstallCommandLineHandler(MyCLHandler, "-bfs", "-bfs <file>", "Run BFS on the given level and return the info");
+	InstallCommandLineHandler(MyCLHandler, "-analyzeSolution", "-analyzeSolution <file>", "Given a solution to the problem, find the maximum times that a single state was re-visited by the head of the first snakebird.");
 	InstallCommandLineHandler(MyCLHandler, "-encode", "-encode <file>", "Encode level as string");
 	InstallCommandLineHandler(MyCLHandler, "-decode", "-decode <string>", "Decode level from string");
 	InstallCommandLineHandler(MyCLHandler, "-solve", "-solve <level>", "Solve level and output .svg files for the full solution");
@@ -880,11 +881,37 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		if (maxNumArgs > 1)
 		{
-			sb.Load(argument[1]);			
+			if (!sb.DecodeLevel(argument[1]))
+				sb.Load(argument[1]);
+			//if (sb.Load(argument[1]) == false) // couldn't load file; try encoding
 			lastFrameSnake = snake = sb.GetStart();
 			GetLevelSolution();
 			exit(0);	
 		}	
+	}
+	if (strcmp(argument[0], "-analyzeSolution") == 0)
+	{
+		if (!sb.DecodeLevel(argument[1]))
+			sb.Load(argument[1]);
+		BFS<SnakeBird::SnakeBirdState, SnakeBird::SnakeBirdAction, SnakeBird::SnakeBird> bfs;
+		bfs.SetNodeLimit(250000000); // max 250 million expansions
+		bfs.SetVerbose(false);
+		snake = sb.GetStart();
+		bfs.GetPath(&sb, snake, snake, future);
+		std::unordered_map<int, int> count;
+		for (int x = 0; x < future.size(); x++)
+		{
+			int loc = future[x].GetSnakeHeadLoc(0);
+			count[loc]++;
+//			printf("%d : %d\n", loc, count[loc]);
+		}
+		int maxVal = 0;
+		for (auto i = count.begin(); i != count.end(); i++)
+		{
+			maxVal = std::max(maxVal, i->second);
+		}
+		std::cout << argument[1] << " " << maxVal << "\n";
+		exit(0);
 	}
 	if (strcmp(argument[0], "-encode") == 0)
 	{
@@ -1004,13 +1031,13 @@ void EditorStudyKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, c
 			editorItems =
 			{
 				{kColumn1, 1, SnakeBird::kNothing, "Edit Map", kColumn2, '\0', false, false},
-				{kColumn1, 3, SnakeBird::kEmpty, "Sky", kColumn2, 'r', true, true},
+				{kColumn1, 3, SnakeBird::kEmpty, "Sky", kColumn2, 'k', true, true},
 				{kColumn1, 5, SnakeBird::kGround, "Ground", kColumn2, 'g', true, false},
 				{kColumn1, 7, SnakeBird::kSpikes, "Spikes", kColumn2, 's', true, true},
 				{kColumn1, 9, SnakeBird::kFruit, "Fruit", kColumn2, 'f', true, true},
 //				{kColumn1, 11, SnakeBird::kPortal1, "Portal", kColumn2, 'p', true, true},
 //				{kColumn1, 13, SnakeBird::kBlock1, "Block", kColumn2, 'b', true, true},
-				{kColumn1, 15, SnakeBird::kExit, "Exit", kColumn2, 'x', true, true},
+				{kColumn1, 11, SnakeBird::kExit, "Exit", kColumn2, 'x', true, true},
 			};
 			break;
 	}
@@ -1281,6 +1308,16 @@ void GamePlayKeyboardHandler(unsigned long windowID, tKeyboardModifier mod, char
 			history.resize(1);
 			future.clear();
 			autoSolve = false;
+			if (gEditMap)
+			{
+				message = "Editing mode disabled.";
+				messageBeginTime = globalTime;
+				messageExpireTime = globalTime+5;
+				gEditMap = false;
+				MoveViewport(windowID, 1, {1.0f, -1.0f, 2.0f, 1.0f});
+				//ReinitViewports(windowID, {-1.0f, -1.0f, 0.0f, 1.0f}, kScaleToSquare);
+				UpdateLevelLink();
+			}
 			break;
 		case '\t':
 				if (mod != kShiftDown)
@@ -1341,7 +1378,7 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 				gEditorMode = SnakeBird::kSpikes;
 				SetupMapChanges();
 				break;
-			case 'r': //sky
+			case 'k': //sky
 				message = "Editing Mode: Changing the Sky";
 				messageBeginTime = globalTime;
 				messageExpireTime = globalTime+5;
@@ -1397,7 +1434,7 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 					}
 					case SnakeBird::kSpikes:
 					{
-						EditorKeyBoardHandler(windowID, kNoModifier, 'r');
+						EditorKeyBoardHandler(windowID, kNoModifier, 'k');
 						break;
 					}
 					case SnakeBird::kEmpty:
@@ -1431,7 +1468,7 @@ void EditorKeyBoardHandler(unsigned long windowID, tKeyboardModifier mod, char k
 					}
 					case SnakeBird::kExit:
 					{
-						EditorKeyBoardHandler(windowID, kNoModifier, 'r');
+						EditorKeyBoardHandler(windowID, kNoModifier, 'k');
 						break;
 					}
 					case SnakeBird::kPortal:
