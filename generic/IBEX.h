@@ -260,7 +260,7 @@ namespace IBEX {
 		sd.nodes++;
 		totalNodesTouched+=acts.size();
 		
-		for (int x = 0; x < acts.size(); x++)
+		for (size_t x = 0; x < acts.size(); x++)
 		{
 			if (acts[x] == forbidden && currPath.size() > 0)
 				continue;
@@ -356,7 +356,7 @@ namespace IBEX {
 			env->GetSuccessors(q.Lookup(nodeid).data, neighbors);
 			
 			// 1. load all the children
-			for (unsigned int x = 0; x < neighbors.size(); x++)
+			for (size_t x = 0; x < neighbors.size(); x++)
 			{
 				uint64_t theID;
 				neighborLoc.push_back(q.Lookup(env->GetStateHash(neighbors[x]), theID));
@@ -365,7 +365,7 @@ namespace IBEX {
 			}
 			
 			// iterate again updating costs and writing out to memory
-			for (int x = 0; x < neighbors.size(); x++)
+			for (size_t x = 0; x < neighbors.size(); x++)
 			{
 				totalNodesTouched++;
 			

@@ -14,7 +14,7 @@
 #include "GraphAlgorithm.h"
 #include "SearchEnvironment.h"
 #include "GraphEnvironment.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "FPUtil.h"
 #include "OpenListB.h"
 #include <deque>
@@ -32,7 +32,7 @@
 #define D_SQRT 6
 //const double pi = 3.141592654;
 
-//typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
+//typedef std::unordered_map<uint64_t, double> NodeHashTable;
 
 namespace AStarDelayUtil
 {
@@ -112,7 +112,7 @@ namespace AStarDelayUtil
 	typedef OpenListB<AStarDelayUtil::SearchNode, AStarDelayUtil::SearchNodeHash,
 		AStarDelayUtil::SearchNodeEqual, AStarDelayUtil::SearchNodeCompare, AStarDelayUtil::GGreater, AStarDelayUtil::FExtract> PQueue;
 
-	typedef __gnu_cxx::hash_map<graphState, AStarDelayUtil::SearchNode > NodeLookupTable;
+	typedef std::unordered_map<graphState, AStarDelayUtil::SearchNode > NodeLookupTable;
 
 	typedef OpenListB<AStarDelayUtil::SearchNode, AStarDelayUtil::SearchNodeHash,
 		AStarDelayUtil::SearchNodeEqual, AStarDelayUtil::GGreater, AStarDelayUtil::GGreater, AStarDelayUtil::FExtract> GQueue;

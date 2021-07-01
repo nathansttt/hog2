@@ -71,14 +71,14 @@ std::string PermutationPDB<state, action, environment, bits>::GetFileName(const 
 		fileName+='/';
 	fileName += PDBHeuristic<state, action, environment, state, bits>::env->GetName();
 	fileName += "-";
-	for (int x = 0; x < PDBHeuristic<state, action, environment, state, bits>::goalState.size(); x++)
+	for (size_t x = 0; x < PDBHeuristic<state, action, environment, state, bits>::goalState.size(); x++)
 	{
 		fileName += std::to_string(PDBHeuristic<state, action, environment, state, bits>::goalState[0].puzzle[x]);
 		fileName += ";";
 	}
 	fileName.pop_back(); // remove colon
 	fileName += "-";
-	for (int x = 0; x < distinct.size(); x++)
+	for (size_t x = 0; x < distinct.size(); x++)
 	{
 		fileName += std::to_string(distinct[x]);
 		fileName += ";";

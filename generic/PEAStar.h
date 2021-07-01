@@ -37,7 +37,7 @@
 #endif
 
 #include "FPUtil.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "AStarOpenClosed.h"
 #include "BucketOpenClosed.h"
 //#include "SearchEnvironment.h" // for the SearchEnvironment class

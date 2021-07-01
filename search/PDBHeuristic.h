@@ -222,7 +222,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			{
 				GetStateFromPDBHash(i, s);
 				env->GetActions(s, acts);
-				for (int y = 0; y < acts.size(); y++)
+				for (size_t y = 0; y < acts.size(); y++)
 				{
 					env->GetNextState(s, acts[y], u);
 					assert(env->InvertAction(acts[y]) == true);
@@ -500,12 +500,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	distribution.push_back(cnt);
 	
 	int depth = 0;
-	uint64_t newEntries;
 	bool searchForward = true;
 	std::vector<std::thread*> threads(numThreads);
 	printf("Creating %d threads\n", numThreads);
 	do {
-		newEntries = 0;
 		Timer s;
 		s.StartTimer();
 		for (int x = 0; x < numThreads; x++)
@@ -774,7 +772,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 					GetStateFromPDBHash(x, s, threadNum);
 					//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 					env->GetActions(s, acts);
-					for (int y = 0; y < acts.size(); y++)
+					for (size_t y = 0; y < acts.size(); y++)
 					{
 						env->GetNextState(s, acts[y], t);
 						assert(env->InvertAction(acts[y]) == true);
@@ -824,7 +822,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 					GetStateFromPDBHash(x, s, threadNum);
 					//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 					env->GetActions(s, acts);
-					for (int y = 0; y < acts.size(); y++)
+					for (size_t y = 0; y < acts.size(); y++)
 					{
 						env->GetNextState(s, acts[y], t);
 						//assert(env->InvertAction(acts[y]) == true);
@@ -1010,7 +1008,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 				//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 				env->GetActions(s, acts);
 
-				for (int y = 0; y < acts.size(); y++)
+				for (size_t y = 0; y < acts.size(); y++)
 				{
 					env->GetNextState(s, acts[y], t);
 					assert(env->InvertAction(acts[y]) == true);
@@ -1046,7 +1044,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 				GetStateFromPDBHash(i, s, threadNum);
 				env->GetActions(s, acts);
 				
-				for (int y = 0; y < acts.size(); y++)
+				for (size_t y = 0; y < acts.size(); y++)
 				{
 					env->GetNextState(s, acts[y], t);
 					assert(env->InvertAction(acts[y]) == true);
@@ -1118,7 +1116,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 {
 	abstractState s;
 	state s1;
-	for (int x = 0; x < PDB.Size(); x++)
+	for (size_t x = 0; x < PDB.Size(); x++)
 	{
 		GetStateFromPDBHash(x, s);
 		s1 = GetStateFromAbstractState(s);
@@ -1183,7 +1181,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	if (print_histogram)
 	{
 		printf("Setting boundaries [%d values]: ", (1<<numBits));
-		for (int x = 0; x < cutoffs.size(); x++)
+		for (size_t x = 0; x < cutoffs.size(); x++)
 			printf("%d ", cutoffs[x]);
 		printf("\n");
 	}
@@ -1191,7 +1189,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	
 	for (uint64_t x = 0; x < PDB.Size(); x++)
 	{
-		for (int y = 0; y < cutoffs.size(); y++)
+		for (size_t y = 0; y < cutoffs.size(); y++)
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
@@ -1385,7 +1383,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	if (print_histogram)
 	{
 		printf("Setting boundaries [%d values]: ", (1<<4));
-		for (int x = 0; x < cutoffs.size(); x++)
+		for (size_t x = 0; x < cutoffs.size(); x++)
 			printf("%d ", cutoffs[x]);
 		printf("\n");
 	}
@@ -1400,13 +1398,13 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		printf("Unknown PDB type: %d\n", type);
 	}
 
-	for (int x = 0; x < cutoffs.size(); x++)
+	for (size_t x = 0; x < cutoffs.size(); x++)
 		newPDB->vrcValues[x] = cutoffs[x];
 	newPDB->PDB.Resize(PDB.Size());
 	cutoffs.push_back(256);
 	for (uint64_t x = 0; x < PDB.Size(); x++)
 	{
-		for (int y = 0; y < cutoffs.size(); y++)
+		for (size_t y = 0; y < cutoffs.size(); y++)
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
@@ -1431,7 +1429,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	if (print_histogram)
 	{
 		printf("Setting boundaries [%d values]: ", (1<<4));
-		for (int x = 0; x < cutoffs.size(); x++)
+		for (size_t x = 0; x < cutoffs.size(); x++)
 			printf("%d ", cutoffs[x]);
 		printf("\n");
 	}
@@ -1452,7 +1450,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	cutoffs.push_back(256);
 	for (uint64_t x = 0; x < PDB.Size(); x++)
 	{
-		for (int y = 0; y < cutoffs.size(); y++)
+		for (size_t y = 0; y < cutoffs.size(); y++)
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
@@ -1532,7 +1530,7 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 			average += PDB.Get(x);
 		}
 	}
-	for (int x = 0; x < histogram.size(); x++)
+	for (size_t x = 0; x < histogram.size(); x++)
 	{
 		if (histogram[x] > 0)
 			printf("%d: %llu\n", x, histogram[x]);

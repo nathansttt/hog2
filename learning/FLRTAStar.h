@@ -15,7 +15,7 @@
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "TemplateAStar.h"
 #include "Timer.h"
 #include "vectorCache.h"
@@ -462,8 +462,8 @@ namespace FLRTA {
 		void OpenGLDraw() const {}
 		void OpenGLDraw(const environment *env) const;
 	private:
-		typedef __gnu_cxx::hash_map<uint64_t, learnedStateData<state>, Hash64 > LearnedStateData;
-		typedef __gnu_cxx::hash_map<uint64_t, bool, Hash64 > ClosedList;
+		typedef std::unordered_map<uint64_t, learnedStateData<state>, Hash64 > LearnedStateData;
+		typedef std::unordered_map<uint64_t, bool, Hash64 > ClosedList;
 		void ExtractBestPath(environment *env, const state &from, const state &to, std::vector<state> &thePath);
 		void MakeTrappedMove(environment *env, const state &from, std::vector<state> &thePath);
 		
@@ -966,11 +966,11 @@ namespace FLRTA {
 			dataLocation loc = (aoc.Lookup(m_pEnv->GetStateHash((*it).second.theState), node));
 			//if (loc != kOpenList) continue;
 
-			for (int x = 0; x < (*it).second.children->size(); x++)
+			for (size_t x = 0; x < (*it).second.children->size(); x++)
 			{
 				m_pEnv->GLDrawLine((*it).second.theState, (*it).second.children->at(x));
 			}
-			for (int x = 0; x < (*it).second.parents->size(); x++)
+			for (size_t x = 0; x < (*it).second.parents->size(); x++)
 			{
 				m_pEnv->GLDrawLine((*it).second.theState, (*it).second.parents->at(x));
 			}

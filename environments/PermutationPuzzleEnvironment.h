@@ -70,7 +70,7 @@ namespace PermutationPuzzle {
 			MR1KPermutation mr1;
 			state tmp = s;
 			state dual;
-			for (int x = 0; x < tmp.size(); x++)
+			for (size_t x = 0; x < tmp.size(); x++)
 				dual.puzzle[tmp.puzzle[x]] = x;
 			return mr1.Rank(tmp.puzzle, dual.puzzle, s.size(), s.size());
 		}
@@ -1285,7 +1285,7 @@ namespace PermutationPuzzle {
 	{
 		state tmp = s;
 		state dual;
-		for (int x = 0; x < tmp.size(); x++)
+		for (size_t x = 0; x < tmp.size(); x++)
 			dual.puzzle[tmp.puzzle[x]] = x;
 
 		uint64_t hash = mr1.Rank(&tmp.puzzle[0], &dual.puzzle[0], s.size(), s.size());
@@ -1297,11 +1297,11 @@ namespace PermutationPuzzle {
 	{
 		state dual;
 		state result;
-		for (int x = 0; x < b.size(); x++)
+		for (size_t x = 0; x < b.size(); x++)
 		{
 			dual.puzzle[b.puzzle[x]] = x;
 		}
-		for (int x = 0; x < b.size(); x++)
+		for (size_t x = 0; x < b.size(); x++)
 		{
 			result.puzzle[x] = dual.puzzle[a.puzzle[x]];
 		}
@@ -1359,21 +1359,21 @@ namespace PermutationPuzzle {
 	template <class state, class action>
 	bool PermutationPuzzleEnvironment<state, action>::Check_Permutation(const std::vector<int> &to_check)
 	{
-		unsigned size = to_check.size();
+		const auto size = to_check.size();
 		
 		bool in_puzzle[size];
 		
-		for (unsigned i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			in_puzzle[i] = false;
 		}
 		
-		for (unsigned i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			in_puzzle[to_check[i]] = true;
 		}
 		
-		for (unsigned i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			if (!in_puzzle[i])
 				return false;

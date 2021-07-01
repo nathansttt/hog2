@@ -21,7 +21,7 @@ BitVector::BitVector(uint64_t _size)
 	true_size = _size;
 	size = (_size>>storageBitsPower)+1;
 	storage = new storageElement[size];
-	for (int x = 0; x < size; x++)
+	for (size_t x = 0; x < size; x++)
 		storage[x] = 0;
 	memmap = false;
 }
@@ -135,7 +135,7 @@ void BitVector::Set(uint64_t index, bool value)
 bool BitVector::Equals(BitVector *bv)
 {
 	if (bv->size != size) return false;
-	for (int x = 0; x < size; x++)
+	for (size_t x = 0; x < size; x++)
 		if (storage[x] != bv->storage[x])
 			return false;
 	return true;
@@ -144,7 +144,7 @@ bool BitVector::Equals(BitVector *bv)
 uint64_t BitVector::GetNumSetBits()
 {
 	uint64_t sum = 0;
-	for (int x = 0; x < size; x++)
+	for (size_t x = 0; x < size; x++)
 	{
 		storageElement iter = storage[x];
 		while (iter) {

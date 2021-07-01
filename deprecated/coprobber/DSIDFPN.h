@@ -1,6 +1,6 @@
 #include <vector>
 #include <map>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "MyHash.h" // for uintplus
 #include "MultiAgentEnvironment.h"
 #include "DSCREnvironment.h"
@@ -61,7 +61,7 @@ class DSIDFPN {
 	};
 
 	// bound cache
-	typedef __gnu_cxx::hash_map<unsigned int, double> BoundCache;
+	typedef std::unordered_map<unsigned int, double> BoundCache;
 	// lower and upper bound cache
 	BoundCache min_lcache, max_lcache, min_ucache, max_ucache;
 
@@ -70,7 +70,7 @@ class DSIDFPN {
 		double value;
 		unsigned int pn, dn;
 	};
-	typedef __gnu_cxx::hash_map<unsigned int, TTEntry> OneLevelTT; // position => (dis)proof number bounds
+	typedef std::unordered_map<unsigned int, TTEntry> OneLevelTT; // position => (dis)proof number bounds
 	typedef std::map<double, OneLevelTT > TT; // Transposition Table with caching w.r.t gcost
 	// transposition tables
 	TT min_ttable, max_ttable;

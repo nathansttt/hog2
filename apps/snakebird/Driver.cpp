@@ -564,7 +564,7 @@ static void DrawEditorViewport(unsigned long windowID)
 //	editor.DrawLabel(d, kColumn1, 1, "Edit Map");
 //	editor.DrawLabel(d, kColumn2, 1, "EPCG AI Analysis");
 
-	for (int t = 0; t < editorItems.size(); t++)
+	for (size_t t = 0; t < editorItems.size(); t++)
 	{
 		if (kSelectedEditorItem == t)
 		{
@@ -1467,7 +1467,7 @@ bool MyClickHandler(unsigned long windowID, int viewport, int, int, point3d p, t
 		gMouseEditorY = y;
 		if (e == kMouseDown)
 		{
-			for (int t = 0; t < editorItems.size(); t++)
+			for (size_t t = 0; t < editorItems.size(); t++)
 			{
 				if (gMouseEditorY == editorItems[t].y &&
 					gMouseEditorX >= editorItems[t].x &&

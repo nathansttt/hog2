@@ -12,10 +12,10 @@
 
 #include <iostream>
 #include "SearchEnvironment.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "FPUtil.h"
 
-typedef __gnu_cxx::hash_map<uint64_t, bool, Hash64> FrontierBFSClosedList;
+typedef std::unordered_map<uint64_t, bool, Hash64> FrontierBFSClosedList;
 
 template <class state, class action>
 class FrontierBFS {

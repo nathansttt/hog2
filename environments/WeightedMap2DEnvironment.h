@@ -34,7 +34,6 @@
 #include "BitVector.h"
 #include "OccupancyInterface.h"
 #include "Graph.h"
-#include <ext/hash_map>
 #include <cmath>
 #include <unordered_map>
 
@@ -108,7 +107,7 @@ namespace AngleUtil {
 		size_t operator()(const AngleSearchNode &x) const
 		{ return (size_t)(x.hashKey); } };
 	
-	 typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
+	 typedef std::unordered_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
 };
 
 /** Edge labels */
@@ -168,7 +167,7 @@ public:
 private:
 	BaseMapOccupancyInterface* oi;
 	
-	//typedef __gnu_cxx::hash_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual>
+	//typedef std::unordered_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual>
 	typedef std::unordered_map<AngleUtil::AngleSearchNode,Vector2D, AngleUtil::SearchNodeHash, AngleUtil::SearchNodeEqual> AngleLookupTable;
 	AngleLookupTable angleLookup;
 	
@@ -202,4 +201,3 @@ typedef UnitSimulation<xyLoc, tDirection, WeightedMap2DEnvironment> UnitWeighted
 
 
 #endif
-

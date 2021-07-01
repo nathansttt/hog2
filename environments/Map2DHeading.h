@@ -9,12 +9,12 @@
 #ifndef __hog2_glut__Map2DHeading__
 #define __hog2_glut__Map2DHeading__
 
-#include <iostream>
 #include "SearchEnvironment.h"
 #include "Map.h"
-#include <ext/hash_map>
 
 #include <cassert>
+#include <iostream>
+#include <unordered_map>
 
 //#include "BaseMapOccupancyInterface.h"
 
@@ -110,7 +110,7 @@ protected:
 	double GetCost(const xyhLoc &a, const xyhLoc &b, double P, double d) const;
 
 	struct hdData { double seen; double dist; };
-	typedef __gnu_cxx::hash_map<uint64_t, hdData, Hash64> CostTable;
+	typedef std::unordered_map<uint64_t, hdData, Hash64> CostTable;
 	CostTable costs;
 	bool LegalState(const xyhLoc &s);
 	void BuildAngleTables();

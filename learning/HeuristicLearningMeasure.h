@@ -11,7 +11,7 @@
 #define HEURISTICLEARNINGMEASURE_H
 
 #include "SearchEnvironment.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "TemplateAStar.h"
 #include <iostream>
 #include <queue>
@@ -66,7 +66,7 @@ public:
 	
 	void ShowHistogram()
 	{
-		typedef __gnu_cxx::hash_map<double, sVal, HashDouble> HistogramData;
+		typedef std::unordered_map<double, sVal, HashDouble> HistogramData;
 		HistogramData histogram;
 		for (typename EnvironmentData::const_iterator it = learnData.begin(); it != learnData.end(); it++)
 		{
@@ -103,7 +103,7 @@ public:
 	}
 	
 private:
-	typedef __gnu_cxx::hash_map<uint64_t, stateData<state>, Hash64 > EnvironmentData;
+	typedef std::unordered_map<uint64_t, stateData<state>, Hash64 > EnvironmentData;
 
 	double SumLearningRequired()
 	{

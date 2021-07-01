@@ -1,7 +1,7 @@
 #include <vector>
 #include <set>
 #include <ext/hash_set>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "GraphEnvironment.h"
 
 #ifndef TWOCOPSTIDASTAR_H
@@ -58,7 +58,7 @@ class TwoCopsTIDAStar {
 
 	void clear_bounds_cache();
 
-	typedef __gnu_cxx::hash_map<Position, unsigned int> BoundCache;
+	typedef std::unordered_map<Position, unsigned int> BoundCache;
 	// lower bound cache
 	BoundCache min_lcache, max_lcache;
 	// upper bound cache

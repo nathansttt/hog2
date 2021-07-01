@@ -424,7 +424,7 @@ void VoxelGrid::SetUpDrawBuffers()
 	VoxelUtils::GetTriangles(this, data);
 	std::unordered_map<VoxelUtils::vn, int> index;
 	int next = 0;
-	for (int x = 0; x < data.size(); x++)
+	for (size_t x = 0; x < data.size(); x++)
 	{
 		for (int y = 0; y < 3; y++)
 		{
@@ -467,7 +467,7 @@ void VoxelGrid::SetUpDrawBuffers()
 	}
 	printf("%d individual items\n", next);
 	// get list of surface triangles, normals, and colors
-	for (int x = 0; x < data.size(); x++)
+	for (size_t x = 0; x < data.size(); x++)
 	{
 		for (int y = 0; y < 3; y++)
 		{

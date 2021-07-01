@@ -439,7 +439,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		}
 
 		GetSolveActions(b, stateActs);
-		for (int x = 0; x < stateActs.size(); x++)
+		for (size_t x = 0; x < stateActs.size(); x++)
 		{
 			std::cout << stateActs[stateActs.size()-1-x] << " ";
 		}
@@ -457,7 +457,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		}
 		std::cout << "\n";
 		f.GetStateFromHash(which, b);
-		for (int x = 0; x < stateActs.size(); x++)
+		for (size_t x = 0; x < stateActs.size(); x++)
 		{
 			std::cout << stateActs[stateActs.size()-1-x] << "\n";
 			f.ApplyAction(b, stateActs[stateActs.size()-1-x]);
@@ -485,7 +485,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		
 		GetSolveActions(b, stateActs);
 		std::cout << b << "\n";
-		for (int x = 0; x < stateActs.size(); x++)
+		for (size_t x = 0; x < stateActs.size(); x++)
 		{
 			std::cout << stateActs[stateActs.size()-1-x] << " ";
 		}
@@ -973,7 +973,7 @@ void ExtractUniqueStates(int depth)
 		{
 			f.unrankPlayer(t, depth, board);
 			bool ok = false;
-			for (int x = 0; x < board.width; x++)
+			for (unsigned int x = 0; x < board.width; x++)
 			{
 				if (board.HasPiece(x, 0))
 				{
@@ -984,7 +984,7 @@ void ExtractUniqueStates(int depth)
 			if (ok == false)
 				continue;
 			ok = false;
-			for (int y = 0; y < board.height; y++)
+			for (unsigned int y = 0; y < board.height; y++)
 			{
 				if (board.HasPiece(0, y))
 				{
@@ -1127,7 +1127,7 @@ bool IsSolvable(FlingBoard &theState)
 
 uint64_t RecursiveBFS(FlingBoard from, std::vector<FlingBoard> &thePath, Fling *env)
 {
-	typedef __gnu_cxx::hash_map<uint64_t, uint64_t, Hash64> BFSClosedList;
+	typedef std::unordered_map<uint64_t, uint64_t, Hash64> BFSClosedList;
 	std::deque<FlingBoard> mOpen;
 	std::deque<int> depth;
 	BFSClosedList mClosed; // store parent id!
@@ -1628,9 +1628,9 @@ void RemoveDups(std::vector<uint64_t> &values)
 {
 	std::vector<std::vector<FlingMove> > stateActs;
 
-	for (int x = 0; x < values.size(); x++)
+	for (size_t x = 0; x < values.size(); x++)
 	{
-		for (int y = x+1; y < values.size(); y++)
+		for (size_t y = x+1; y < values.size(); y++)
 		{
 			while (y < values.size() && values[x] == values[y])
 				//if (BitCount(values[x]^values[y]) <= 4)
@@ -1640,7 +1640,7 @@ void RemoveDups(std::vector<uint64_t> &values)
 		}
 	}
 	stateActs.resize(values.size());
-	for (int x = 0; x < values.size(); x++)
+	for (size_t x = 0; x < values.size(); x++)
 	{
 		f.GetStateFromHash(values[x], b);
 		GetSolveActions(b, stateActs[x]);
@@ -1649,9 +1649,9 @@ void RemoveDups(std::vector<uint64_t> &values)
 		printf("(%d)\n", x);
 	}
 	// find exact correlation between moves
-	for (int x = 0; x < values.size(); x++)
+	for (size_t x = 0; x < values.size(); x++)
 	{
-		for (int y = x+1; y < values.size(); y++)
+		for (size_t y = x+1; y < values.size(); y++)
 		{
 			f.GetStateFromHash(values[x], b);
 			std::cout << x << "\n" << b << "\n\n";
@@ -1661,15 +1661,15 @@ void RemoveDups(std::vector<uint64_t> &values)
 			int acts[4] = {-1, -1, -1, -1};
 			bool match = true;
 			// skip the first move, because the last one could go right OR left / down OR up
-			for (int t = 0; t < stateActs[x].size(); t++)
+			for (size_t t = 0; t < stateActs[x].size(); t++)
 				std::cout << stateActs[x][t].dir << " ";
 			printf("(%d)\n", x);
-			for (int t = 0; t < stateActs[y].size(); t++)
+			for (size_t t = 0; t < stateActs[y].size(); t++)
 				std::cout << stateActs[y][t].dir << " ";
 			printf("(%d)\n", y);
 
 			// 1. need constant mapping between actions
-			for (int t = 1; t < stateActs[x].size(); t++)
+			for (size_t t = 1; t < stateActs[x].size(); t++)
 			{
 				std::cout << "Comparing [" << t << "] " << stateActs[x][t].dir << " to " << stateActs[y][t].dir << "\n";
 				if (acts[stateActs[x][t].dir] == -1)
@@ -1712,7 +1712,7 @@ void RemoveDups(std::vector<uint64_t> &values)
 				// 2. also need constant relative flipping
 				int diff = (abs(stateActs[x][1].dir - stateActs[y][1].dir)+2)%2;
 				printf("Looking for offset of %d\n", diff);
-				for (int t = 1; t < stateActs[x].size(); t++)
+				for (size_t t = 1; t < stateActs[x].size(); t++)
 				{
 					printf("Offset between %d and %d is %d\n", stateActs[x][t].dir, stateActs[y][t].dir,
 						   (2+abs(stateActs[x][t].dir - stateActs[y][t].dir))%2);
@@ -1811,7 +1811,7 @@ void RemoveDups(std::vector<uint64_t> &values)
 		}
 	}
 	printf("Final states:\n");
-	for (int x = 0; x < values.size(); x++)
+	for (size_t x = 0; x < values.size(); x++)
 	{
 		f.GetStateFromHash(values[x], b);
 		std::cout << x << "\n" << b << "\n\n";
@@ -1931,17 +1931,17 @@ void ThreadedEndLocAnalyze(int level, uint64_t start, uint64_t end, std::mutex *
 void AnalyzeEndLocs(int level)
 {
 	uint64_t maxVal = f.getMaxSinglePlayerRank(56, level);
-	int numThreads = std::thread::hardware_concurrency();
+	const auto numThreads = std::thread::hardware_concurrency();
 	std::cout << "Running with " << numThreads << " threads\n";
 	
 	uint64_t perThread = maxVal/numThreads;
 	std::vector<std::thread*> threads;
 	std::mutex lock;
-	for (int x = 0; x < numThreads; x++)
+	for (size_t x = 0; x < numThreads; x++)
 	{
 		threads.push_back(new std::thread(ThreadedEndLocAnalyze, level, x*perThread, (x+1)*perThread, &lock));
 	}
-	for (int x = 0; x < threads.size(); x++)
+	for (size_t x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();
 		delete threads[x];
@@ -1990,17 +1990,17 @@ void ThreadedRockAnalyze(int level, uint64_t start, uint64_t end, std::mutex *lo
 void AnalyzeRocks(int level)
 {
 	uint64_t maxVal = f.getMaxSinglePlayerRank(56, level);
-	int numThreads = std::thread::hardware_concurrency();
+	const auto numThreads = std::thread::hardware_concurrency();
 	std::cout << "Running with " << numThreads << " threads\n";
 	
 	uint64_t perThread = maxVal/numThreads;
 	std::vector<std::thread*> threads;
 	std::mutex lock;
-	for (int x = 0; x < numThreads; x++)
+	for (size_t x = 0; x < numThreads; x++)
 	{
 		threads.push_back(new std::thread(ThreadedRockAnalyze, level, x*perThread, (x+1)*perThread, &lock));
 	}
-	for (int x = 0; x < threads.size(); x++)
+	for (size_t x = 0; x < threads.size(); x++)
 	{
 		threads[x]->join();
 		delete threads[x];

@@ -15,7 +15,7 @@
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
-#include <ext/hash_map>
+#include <unordered_map>
 
 namespace HLRTA{
 
@@ -104,7 +104,7 @@ public:
 	void OpenGLDraw() const {}
 	void OpenGLDraw(const environment *env) const;
 private:
-	typedef __gnu_cxx::hash_map<uint64_t, learnedData<state>, Hash64 > LearnedHeuristic;
+	typedef std::unordered_map<uint64_t, learnedData<state>, Hash64 > LearnedHeuristic;
 
 	LearnedHeuristic heur;
 	state goal;

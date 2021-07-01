@@ -11,7 +11,7 @@
 
 #include <iostream>
 #include "SearchEnvironment.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "FPUtil.h"
 #include "vectorCache.h"
 #include "SharedQueue.h"
@@ -110,7 +110,7 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 														  state from, state to,
 														  std::vector<action> &thePath)
 {
-	int numThreads = std::thread::hardware_concurrency();
+	const auto numThreads = std::thread::hardware_concurrency();
 	if (!storedHeuristic)
 		heuristic = env;
 	nextBound = 0;
@@ -133,7 +133,7 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 	// builds a list of all states at a fixed depth
 	// we will then search them in parallel
 	GenerateWork(env, act[0], from, thePath);
-	for (int x = 0; x < work.size(); x++)
+	for (size_t x = 0; x < work.size(); x++)
 		work[x].unitNumber = x;
 	printf("%lu pieces of work generated\n", work.size());
 	foundSolution = work.size() + 1;
@@ -149,11 +149,11 @@ void ParallelIDAStar<environment, state, action>::GetPath(environment *env,
 		printf("Starting iteration with bound %f; %llu expanded, %llu generated\n", nextBound, nodesExpanded, nodesTouched);
 		fflush(stdout);
 		
-		for (int x = 0; x < work.size(); x++)
+		for (size_t x = 0; x < work.size(); x++)
 		{
 			q.Add(x);
 		}
-		for (int x = 0; x < numThreads; x++)
+		for (size_t x = 0; x < numThreads; x++)
 		{
 			threads.push_back(new std::thread(&ParallelIDAStar<environment, state, action>::StartThreadedIteration, this,
 												 *env, from, nextBound));

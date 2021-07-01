@@ -305,7 +305,7 @@ void MyPathfindingKeyHandler(unsigned long windowID, tKeyboardModifier , char)
 void ExportGraph(Map *m, Map2DHeading *env)
 {
 	// export map as graph
-	typedef __gnu_cxx::hash_map<uint64_t, int, Hash64> HT;
+	typedef std::unordered_map<uint64_t, int, Hash64> HT;
 
 	HT table;
 	Graph *g = new Graph();
@@ -388,7 +388,7 @@ void ExportGraph(Map *m)
 	Directional2DEnvironment *env = new Directional2DEnvironment(m, kVehicle, kOctileHeuristic);
 
 	// export map as graph
-	typedef __gnu_cxx::hash_map<uint64_t, int, Hash64> HT;
+	typedef std::unordered_map<uint64_t, int, Hash64> HT;
 	
 	HT table;
 	Graph *g = new Graph();
@@ -622,5 +622,3 @@ bool MyClickHandler(unsigned long windowID, int, int, point3d loc, tButtonType b
 	}
 	return false;
 }
-
-

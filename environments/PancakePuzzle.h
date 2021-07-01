@@ -719,7 +719,7 @@ void PancakePuzzle<N>::OpenGLDraw(const PancakePuzzleState<N> &pps) const
 	double count = pps.size();
 	double widthUnit = 1.5/count;
 	
-	for (int y = 0; y < pps.size(); y++)
+	for (size_t y = 0; y < pps.size(); y++)
 	{
 		for (int x = 0; x <= pps.puzzle[y]; x++)
 		{

@@ -23,10 +23,10 @@
 #endif
 
 #include "FPUtil.h"
-#include <ext/hash_map>
 #include "OpenClosedList.h"
 #include "OldSearchEnvironment.h" // for the SearchEnvironment class
 
+#include <unordered_map>
 
 namespace GenericAStarUtil
 {
@@ -66,9 +66,9 @@ public:
 	typedef OpenClosedList<GenericAStarUtil::SearchNode, GenericAStarUtil::SearchNodeHash,
 		GenericAStarUtil::SearchNodeEqual, GenericAStarUtil::SearchNodeCompare> PQueue;
 	
-	typedef __gnu_cxx::hash_map<uint32_t, GenericAStarUtil::SearchNode > NodeLookupTable;
+	typedef std::unordered_map<uint32_t, GenericAStarUtil::SearchNode > NodeLookupTable;
 	
-	typedef __gnu_cxx::hash_map<uint32_t, bool > Corridor;
+	typedef std::unordered_map<uint32_t, bool > Corridor;
 }
 
 

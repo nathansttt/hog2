@@ -13,7 +13,7 @@
 #include "GraphAlgorithm.h"
 #include "SearchEnvironment.h"
 #include "GraphEnvironment.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "FPUtil.h"
 #include "OpenClosedList.h"
 
@@ -27,7 +27,7 @@
 #define MB_B 2
 #define MB_BP 3
 
-//typedef __gnu_cxx::hash_map<uint64_t, double> NodeHashTable;
+//typedef std::unordered_map<uint64_t, double> NodeHashTable;
 
 namespace MeroBUtil
 {
@@ -236,7 +236,7 @@ namespace MeroBUtil
 	typedef OpenClosedList<MeroBUtil::SearchNode, MeroBUtil::SearchNodeHash,
 		MeroBUtil::SearchNodeEqual, MeroBUtil::SearchNodeCompare> PQueue;
 
-	typedef __gnu_cxx::hash_map<graphState, MeroBUtil::SearchNode > NodeLookupTable;
+	typedef std::unordered_map<graphState, MeroBUtil::SearchNode > NodeLookupTable;
 
 	typedef OpenClosedList<MeroBUtil::SearchNode, MeroBUtil::SearchNodeHash,
 		MeroBUtil::SearchNodeEqual, MeroBUtil::GGreater> GQueue;
