@@ -348,7 +348,7 @@ void cameraMoveTo(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1, int 
 void cameraOffset(GLfloat x, GLfloat y, GLfloat z, float cameraSpeed = 0.1, int port = -1);
 void resetCamera();
 
-point3d GetOGLPos(pRecContext pContextInfo, int x, int y);
+//point3d GetOGLPos(pRecContext pContextInfo, int x, int y);
 recVec GetHeading(unsigned long windowID, int which);
 void GetHeading(unsigned long windowID, int which, GLdouble &hx, GLdouble &hy, GLdouble &hz);
 

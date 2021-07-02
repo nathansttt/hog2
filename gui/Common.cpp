@@ -870,7 +870,7 @@ point3d GetOGLPos(pRecContext pContextInfo, int x, int y)
 	glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
 	// if (gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ) == GL_FALSE)
 		// printf("WARNING: gluUnProject failed\n");
-	assert(!"gluUnProject missing");
+	//assert(!"gluUnProject missing");
 	
 //	printf("Clicked (%f, %f, %f) [far plane %f near %f]\n", posX, posY, posZ,
 //		   pContextInfo->frust[pContextInfo->currPort].far+pContextInfo->camera[pContextInfo->currPort].viewPos.z,
