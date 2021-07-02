@@ -9,9 +9,9 @@
 #ifndef hog2_glut_Heuristic_h
 #define hog2_glut_Heuristic_h
 
-#include <cstdint>
 #include <vector>
 #include <cstdint>
+#include <cstddef>
 
 enum HeuristicTreeNodeType {
 	kMaxNode,
