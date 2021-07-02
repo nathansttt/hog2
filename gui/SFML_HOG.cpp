@@ -14,8 +14,8 @@
 #define GL_SILENCE_DEPRECATION
 
 extern "C" {
-void glutStrokeCharacter(void *font, int character){}
-int glutStrokeWidth(void *font, int character) {}
+	void glutStrokeCharacter(void *font, int character){}
+	int glutStrokeWidth(void *font, int character) {return 0;}
 }
 
 int hog_main(int argc, char **argv);
@@ -233,51 +233,51 @@ void keyPressed(unsigned char key, int, int)
 
 void mouseMovedNoButton(int x, int y)
 {
-	Graphics::point p = GetOGLPos(pContextInfo, x, y);
-	tButtonType bType = kNoButton;
-	if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseMove))
-		return;
+	//Graphics::point p = GetOGLPos(pContextInfo, x, y);
+// 	tButtonType bType = kNoButton;
+// 	if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseMove))
+// 		return;
 
 	
-	if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
-	{
-		if (gPan == GL_FALSE)
-		{
-			gDollyPanStartPoint[0] = (GLint)x;
-			gDollyPanStartPoint[1] = (GLint)y;
-			gTrackingContextInfo = pContextInfo;
-			gPan = GL_TRUE;
-			//glutSetCursor(GLUT_CURSOR_NONE);
-		}
+// 	if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
+// 	{
+// 		if (gPan == GL_FALSE)
+// 		{
+// 			gDollyPanStartPoint[0] = (GLint)x;
+// 			gDollyPanStartPoint[1] = (GLint)y;
+// 			gTrackingContextInfo = pContextInfo;
+// 			gPan = GL_TRUE;
+// 			//glutSetCursor(GLUT_CURSOR_NONE);
+// 		}
 		
-		float dx = gDollyPanStartPoint[0]-x;
-		float dy = gDollyPanStartPoint[1]-y;
-		gDollyPanStartPoint[0] = (GLint)x;
-		gDollyPanStartPoint[1] = (GLint)y;
-		float rotation[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+// 		float dx = gDollyPanStartPoint[0]-x;
+// 		float dy = gDollyPanStartPoint[1]-y;
+// 		gDollyPanStartPoint[0] = (GLint)x;
+// 		gDollyPanStartPoint[1] = (GLint)y;
+// 		float rotation[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 		
-//		rotation[0] = -dy/24;
-//		rotation[1] = 1;
-//		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
-		//pContextInfo->controlShip->addRotation(rotation);
-		//addToRotationTrackball(rotation, pContextInfo->fRot);
-		rotation[0] = -dx/24;
-		rotation[1] = 0;
-		rotation[2] = 1;
-		//		if ((pContextInfo->controlShip)  && (rotation[0] != 0))
-		//			pContextInfo->controlShip->addRotation(rotation);
+// //		rotation[0] = -dy/24;
+// //		rotation[1] = 1;
+// //		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
+// 		//pContextInfo->controlShip->addRotation(rotation);
+// 		//addToRotationTrackball(rotation, pContextInfo->fRot);
+// 		rotation[0] = -dx/24;
+// 		rotation[1] = 0;
+// 		rotation[2] = 1;
+// 		//		if ((pContextInfo->controlShip)  && (rotation[0] != 0))
+// 		//			pContextInfo->controlShip->addRotation(rotation);
 		
-		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
+// 		addToRotationTrackball(rotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
 
 		
-		if (x > pContextInfo->globalCamera.viewWidth ||
-			y > pContextInfo->globalCamera.viewHeight || x < 1 || y < 1)
-		{
-			//glutWarpPointer(pContextInfo->globalCamera.viewWidth/2, pContextInfo->globalCamera.viewHeight/2);
-			gDollyPanStartPoint[0] = (GLint)pContextInfo->globalCamera.viewWidth/2;
-			gDollyPanStartPoint[1] = (GLint)pContextInfo->globalCamera.viewHeight/2;
-		}
-	}
+// 		if (x > pContextInfo->globalCamera.viewWidth ||
+// 			y > pContextInfo->globalCamera.viewHeight || x < 1 || y < 1)
+// 		{
+// 			//glutWarpPointer(pContextInfo->globalCamera.viewWidth/2, pContextInfo->globalCamera.viewHeight/2);
+// 			gDollyPanStartPoint[0] = (GLint)pContextInfo->globalCamera.viewWidth/2;
+// 			gDollyPanStartPoint[1] = (GLint)pContextInfo->globalCamera.viewHeight/2;
+// 		}
+// 	}
 }
 
 /**
@@ -285,17 +285,17 @@ void mouseMovedNoButton(int x, int y)
  */
 void mouseMovedButton(int x, int y)
 {
-	Graphics::point p = GetOGLPos(pContextInfo, x, y);
-	tButtonType bType = kLeftButton;
-	switch (gCurrButton)
-	{
-		//case GLUT_RIGHT_BUTTON: bType = kRightButton; break;
-		//case GLUT_LEFT_BUTTON: bType = kLeftButton; break;
-		//case GLUT_MIDDLE_BUTTON: bType = kMiddleButton; break;
-	}
-	bType = kLeftButton; // TODO: fix with SFML
-	if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseDrag))
-		return;
+	// Graphics::point p = GetOGLPos(pContextInfo, x, y);
+	// tButtonType bType = kLeftButton;
+	// switch (gCurrButton)
+	// {
+	// 	//case GLUT_RIGHT_BUTTON: bType = kRightButton; break;
+	// 	//case GLUT_LEFT_BUTTON: bType = kLeftButton; break;
+	// 	//case GLUT_MIDDLE_BUTTON: bType = kMiddleButton; break;
+	// }
+	// bType = kLeftButton; // TODO: fix with SFML
+	// if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseDrag))
+	// 	return;
 }
 
 
@@ -304,199 +304,199 @@ void mouseMovedButton(int x, int y)
  */
 void mousePressedButton(int button, int state, int x, int y)
 {
-	gCurrButton = button;
-	int modifiers = 0;//glutGetModifiers();
+// 	gCurrButton = button;
+// 	int modifiers = 0;//glutGetModifiers();
 	
-	//printf("Button = %d\n", button);
-	if (state == GLUT_DOWN) {
-		Graphics::point p = GetOGLPos(pContextInfo, x, y);
-		tButtonType bType = kLeftButton;
-		switch (gCurrButton)
-		{
-			case GLUT_RIGHT_BUTTON: bType = kRightButton; break;
-			case GLUT_LEFT_BUTTON: bType = kLeftButton; break;
-			case GLUT_MIDDLE_BUTTON: bType = kMiddleButton; break;
-		}
-		if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseDown))
-			return;
+// 	//printf("Button = %d\n", button);
+// 	if (state == GLUT_DOWN) {
+// 		Graphics::point p = GetOGLPos(pContextInfo, x, y);
+// 		tButtonType bType = kLeftButton;
+// 		switch (gCurrButton)
+// 		{
+// 			case GLUT_RIGHT_BUTTON: bType = kRightButton; break;
+// 			case GLUT_LEFT_BUTTON: bType = kLeftButton; break;
+// 			case GLUT_MIDDLE_BUTTON: bType = kMiddleButton; break;
+// 		}
+// 		if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseDown))
+// 			return;
 	
-		if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
-		{
-			gDollyPanStartPoint[0] = (GLint)x;
-			gDollyPanStartPoint[1] = (GLint)y;
-			gPan = GL_TRUE;
-			gTrackingContextInfo = pContextInfo;
-		}
-		else if ((button == GLUT_RIGHT_BUTTON) || ((button == GLUT_LEFT_BUTTON) && (modifiers == GLUT_ACTIVE_CTRL)))
-		{ // pan
-			if (gTrackball)
-			{ // if we are currently tracking, end trackball
-				gTrackball = GL_FALSE;
-				if (gTrackBallRotation[0] != 0.0)
-				{
-					// Mouse moves world object
-					if (pContextInfo->camera[pContextInfo->currPort].thirdPerson == true)
-					{
-						if (pContextInfo->moveAllPortsTogether)
-						{
-							for (int x = 0; x < pContextInfo->numPorts; x++)
-								addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.worldRotation);
-						}
+// 		if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
+// 		{
+// 			gDollyPanStartPoint[0] = (GLint)x;
+// 			gDollyPanStartPoint[1] = (GLint)y;
+// 			gPan = GL_TRUE;
+// 			gTrackingContextInfo = pContextInfo;
+// 		}
+// 		else if ((button == GLUT_RIGHT_BUTTON) || ((button == GLUT_LEFT_BUTTON) && (modifiers == GLUT_ACTIVE_CTRL)))
+// 		{ // pan
+// 			if (gTrackball)
+// 			{ // if we are currently tracking, end trackball
+// 				gTrackball = GL_FALSE;
+// 				if (gTrackBallRotation[0] != 0.0)
+// 				{
+// 					// Mouse moves world object
+// 					if (pContextInfo->camera[pContextInfo->currPort].thirdPerson == true)
+// 					{
+// 						if (pContextInfo->moveAllPortsTogether)
+// 						{
+// 							for (int x = 0; x < pContextInfo->numPorts; x++)
+// 								addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.worldRotation);
+// 						}
 						
-						else {
-							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.worldRotation);
-						}
-					}
-					else {
-						if (pContextInfo->moveAllPortsTogether)
-						{
-							for (int x = 0; x < pContextInfo->numPorts; x++)
-								addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.cameraRotation);
-						}
+// 						else {
+// 							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.worldRotation);
+// 						}
+// 					}
+// 					else {
+// 						if (pContextInfo->moveAllPortsTogether)
+// 						{
+// 							for (int x = 0; x < pContextInfo->numPorts; x++)
+// 								addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.cameraRotation);
+// 						}
 						
-						else {
-							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
-						}
-					}
-				}
-				gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
-			}
-			else if (gDolly)
-			{ // if we are currently dollying, end dolly
-				gDolly = GL_FALSE;
-			}
-			gDollyPanStartPoint[0] = (GLint)x;
-			gDollyPanStartPoint[1] = (GLint)y;
-			gPan = GL_TRUE;
-			gTrackingContextInfo = pContextInfo;
-		}
-		else if ((button == GLUT_MIDDLE_BUTTON) || ((button == GLUT_LEFT_BUTTON) && (modifiers == GLUT_ACTIVE_SHIFT)))
-		{ // dolly
-			if (gTrackball)
-			{ // if we are currently tracking, end trackball
-				gTrackball = GL_FALSE;
-				if (gTrackBallRotation[0] != 0.0)
-				{
-					// Mouse moves world object
-					if (pContextInfo->camera[pContextInfo->currPort].thirdPerson == true)
-					{
-						if (pContextInfo->moveAllPortsTogether)
-						{
-							for (int x = 0; x < pContextInfo->numPorts; x++)
-								addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.worldRotation);
-						}
+// 						else {
+// 							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
+// 						}
+// 					}
+// 				}
+// 				gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
+// 			}
+// 			else if (gDolly)
+// 			{ // if we are currently dollying, end dolly
+// 				gDolly = GL_FALSE;
+// 			}
+// 			gDollyPanStartPoint[0] = (GLint)x;
+// 			gDollyPanStartPoint[1] = (GLint)y;
+// 			gPan = GL_TRUE;
+// 			gTrackingContextInfo = pContextInfo;
+// 		}
+// 		else if ((button == GLUT_MIDDLE_BUTTON) || ((button == GLUT_LEFT_BUTTON) && (modifiers == GLUT_ACTIVE_SHIFT)))
+// 		{ // dolly
+// 			if (gTrackball)
+// 			{ // if we are currently tracking, end trackball
+// 				gTrackball = GL_FALSE;
+// 				if (gTrackBallRotation[0] != 0.0)
+// 				{
+// 					// Mouse moves world object
+// 					if (pContextInfo->camera[pContextInfo->currPort].thirdPerson == true)
+// 					{
+// 						if (pContextInfo->moveAllPortsTogether)
+// 						{
+// 							for (int x = 0; x < pContextInfo->numPorts; x++)
+// 								addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.worldRotation);
+// 						}
 						
-						else {
-							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.worldRotation);
-						}
-					}
-					else {
-						if (pContextInfo->moveAllPortsTogether)
-						{
-							for (int x = 0; x < pContextInfo->numPorts; x++)
-								addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.cameraRotation);
-						}
+// 						else {
+// 							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.worldRotation);
+// 						}
+// 					}
+// 					else {
+// 						if (pContextInfo->moveAllPortsTogether)
+// 						{
+// 							for (int x = 0; x < pContextInfo->numPorts; x++)
+// 								addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.cameraRotation);
+// 						}
 						
-						else {
-							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
-						}
-					}
-				}
-				gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
-			}
-			else if (gPan)
-			{ // if we are currently panning, end pan
-				gPan = GL_FALSE;
-			}
-			gDollyPanStartPoint[0] = (GLint)x;
-			gDollyPanStartPoint[1] = (GLint)y;
-			gDolly = GL_TRUE;
-			gTrackingContextInfo = pContextInfo;
-		}
-		else if (button == GLUT_LEFT_BUTTON)
-		{ // trackball
-			if (gDolly)
-			{ // if we are currently dollying, end dolly
-				gDolly = GL_FALSE;
-				gTrackingContextInfo = NULL;
-			}
-			else if (gPan)
-			{ // if we are currently panning, end pan
-				gPan = GL_FALSE;
-				gTrackingContextInfo = NULL;
-			}
-			startTrackball((long)x, (long)y,
-										 (long)pContextInfo->camera[pContextInfo->currPort].viewOriginX,
-										 (long)pContextInfo->camera[pContextInfo->currPort].viewOriginY,
-										 pContextInfo->globalCamera.viewWidth,
-										 pContextInfo->globalCamera.viewHeight);
-			gTrackball = GL_TRUE;
-			gTrackingContextInfo = pContextInfo;
-		}
-	}
+// 						else {
+// 							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
+// 						}
+// 					}
+// 				}
+// 				gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
+// 			}
+// 			else if (gPan)
+// 			{ // if we are currently panning, end pan
+// 				gPan = GL_FALSE;
+// 			}
+// 			gDollyPanStartPoint[0] = (GLint)x;
+// 			gDollyPanStartPoint[1] = (GLint)y;
+// 			gDolly = GL_TRUE;
+// 			gTrackingContextInfo = pContextInfo;
+// 		}
+// 		else if (button == GLUT_LEFT_BUTTON)
+// 		{ // trackball
+// 			if (gDolly)
+// 			{ // if we are currently dollying, end dolly
+// 				gDolly = GL_FALSE;
+// 				gTrackingContextInfo = NULL;
+// 			}
+// 			else if (gPan)
+// 			{ // if we are currently panning, end pan
+// 				gPan = GL_FALSE;
+// 				gTrackingContextInfo = NULL;
+// 			}
+// 			startTrackball((long)x, (long)y,
+// 										 (long)pContextInfo->camera[pContextInfo->currPort].viewOriginX,
+// 										 (long)pContextInfo->camera[pContextInfo->currPort].viewOriginY,
+// 										 pContextInfo->globalCamera.viewWidth,
+// 										 pContextInfo->globalCamera.viewHeight);
+// 			gTrackball = GL_TRUE;
+// 			gTrackingContextInfo = pContextInfo;
+// 		}
+// 	}
 
 	
 	
-	if (state == GLUT_UP)
-	{
-		// stop trackball, pan, or dolly
-		Graphics::point p = GetOGLPos(pContextInfo, x, y);
-		tButtonType bType = kLeftButton;
-		switch (gCurrButton)
-		{
-			case GLUT_RIGHT_BUTTON: bType = kRightButton; break;
-			case GLUT_LEFT_BUTTON: bType = kLeftButton; break;
-			case GLUT_MIDDLE_BUTTON: bType = kMiddleButton; break;
-		}
-		if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseUp))
-			return;
-
-		
-		// if we want to handle final movement when mouse is released
-//		if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
-//		{
-//		}
+// 	if (state == GLUT_UP)
+// 	{
+// 		// stop trackball, pan, or dolly
+// 		Graphics::point p = GetOGLPos(pContextInfo, x, y);
+// 		tButtonType bType = kLeftButton;
+// 		switch (gCurrButton)
+// 		{
+// 			case GLUT_RIGHT_BUTTON: bType = kRightButton; break;
+// 			case GLUT_LEFT_BUTTON: bType = kLeftButton; break;
+// 			case GLUT_MIDDLE_BUTTON: bType = kMiddleButton; break;
+// 		}
+// 		if (HandleMouseClick(pContextInfo, x, y, p, bType, kMouseUp))
+// 			return;
 
 		
-		if (gDolly) { // end dolly
-			gDolly = GL_FALSE;
-		} 
-		else if (gPan) { // end pan
-			gPan = GL_FALSE;
-		} 
-		else if (gTrackball) { // end trackball
-			gTrackball = GL_FALSE;
-			if (gTrackBallRotation[0] != 0.0)
-			{
-				// Mouse moves world object
-				if (pContextInfo->camera[pContextInfo->currPort].thirdPerson == true)
-				{
-					if (pContextInfo->moveAllPortsTogether)
-					{
-						for (int x = 0; x < pContextInfo->numPorts; x++)
-							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.worldRotation);
-					}
+// 		// if we want to handle final movement when mouse is released
+// //		if (!pContextInfo->camera[pContextInfo->currPort].thirdPerson)
+// //		{
+// //		}
+
+		
+// 		if (gDolly) { // end dolly
+// 			gDolly = GL_FALSE;
+// 		} 
+// 		else if (gPan) { // end pan
+// 			gPan = GL_FALSE;
+// 		} 
+// 		else if (gTrackball) { // end trackball
+// 			gTrackball = GL_FALSE;
+// 			if (gTrackBallRotation[0] != 0.0)
+// 			{
+// 				// Mouse moves world object
+// 				if (pContextInfo->camera[pContextInfo->currPort].thirdPerson == true)
+// 				{
+// 					if (pContextInfo->moveAllPortsTogether)
+// 					{
+// 						for (int x = 0; x < pContextInfo->numPorts; x++)
+// 							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.worldRotation);
+// 					}
 					
-					else {
-						addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.worldRotation);
-					}
-				}
-				else {
-					if (pContextInfo->moveAllPortsTogether)
-					{
-						for (int x = 0; x < pContextInfo->numPorts; x++)
-							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.cameraRotation);
-					}
+// 					else {
+// 						addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.worldRotation);
+// 					}
+// 				}
+// 				else {
+// 					if (pContextInfo->moveAllPortsTogether)
+// 					{
+// 						for (int x = 0; x < pContextInfo->numPorts; x++)
+// 							addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[x].rotations.cameraRotation);
+// 					}
 					
-					else {
-						addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
-					}
-				}
-			}
-			gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
-		} 
-		gTrackingContextInfo = NULL;
-	}
+// 					else {
+// 						addToRotationTrackball(gTrackBallRotation, pContextInfo->camera[pContextInfo->currPort].rotations.cameraRotation);
+// 					}
+// 				}
+// 			}
+// 			gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
+// 		} 
+// 		gTrackingContextInfo = NULL;
+// 	}
 }
 
 
@@ -662,6 +662,66 @@ void updateProjection(pRecContext pContextInfo, int viewPort)
 }
 
 
+// to perform cross product between 2 vectors in myGluLookAt 
+void CrossProd(float x1, float y1, float z1, float x2, float y2, float z2, float res[3]) 
+{ 
+	res[0] = y1*z2 - y2*z1; 
+	res[1] = x2*z1 - x1*z2; 
+	res[2] = x1*y2 - x2*y1; 
+} 
+
+// my own implementation 
+void MyGluLookAt(float eyeX, float eyeY, float eyeZ, float lookAtX, float lookAtY, float lookAtZ, float upX, float upY, float upZ) 
+{ 
+	// i am not using here proper implementation for vectors. 
+	// if you want, you can replace the arrays with your own 
+	// vector types 
+	float f[3]; 
+	
+	// calculating the viewing vector 
+	f[0] = lookAtX - eyeX; 
+	f[1] = lookAtY - eyeY; 
+	f[2] = lookAtZ - eyeZ; 
+	
+	float fMag, upMag; 
+	fMag = sqrt(f[0]*f[0] + f[1]*f[1] + f[2]*f[2]); 
+	upMag = sqrt(upX*upX + upY*upY + upZ*upZ); 
+	
+	// normalizing the viewing vector 
+	if( fMag != 0) 
+	{ 
+		f[0] = f[0]/fMag; 
+		f[1] = f[1]/fMag; 
+		f[2] = f[2]/fMag; 
+	} 
+	
+	// normalising the up vector. no need for this here if you have your 
+	// up vector already normalised, which is mostly the case. 
+	if( upMag != 0 ) 
+	{ 
+		upX = upX/upMag; 
+		upY = upY/upMag; 
+		upZ = upZ/upMag; 
+	} 
+	
+	float s[3], u[3]; 
+	
+	CrossProd(f[0], f[1], f[2], upX, upY, upZ, s); 
+	CrossProd(s[0], s[1], s[2], f[0], f[1], f[2], u); 
+	
+	float M[]= 
+	{ 
+		s[0], u[0], -f[0], 0, 
+		s[1], u[1], -f[1], 0, 
+		s[2], u[2], -f[2], 0, 
+		0, 0, 0, 1 
+	}; 
+	
+	glMultMatrixf(M); 
+	glTranslatef(-eyeX, -eyeY, -eyeZ); 
+}
+
+
 /**
  * Updates the viewpoint of the model.
  */
@@ -674,13 +734,13 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	// mouse transforms object
 	if (pContextInfo->camera[currPort].thirdPerson)
 	{
-		// gluLookAt (pContextInfo->camera[currPort].viewPos.x,
-		// 		   pContextInfo->camera[currPort].viewPos.y,
-		// 		   pContextInfo->camera[currPort].viewPos.z,
-		// 		   pContextInfo->camera[currPort].viewPos.x + pContextInfo->camera[currPort].viewDir.x,
-		// 		   pContextInfo->camera[currPort].viewPos.y + pContextInfo->camera[currPort].viewDir.y,
-		// 		   pContextInfo->camera[currPort].viewPos.z + pContextInfo->camera[currPort].viewDir.z,
-		// 		   pContextInfo->camera[currPort].viewUp.x, pContextInfo->camera[currPort].viewUp.y ,pContextInfo->camera[currPort].viewUp.z);
+		MyGluLookAt(pContextInfo->camera[currPort].viewPos.x,
+				   pContextInfo->camera[currPort].viewPos.y,
+				   pContextInfo->camera[currPort].viewPos.z,
+				   pContextInfo->camera[currPort].viewPos.x + pContextInfo->camera[currPort].viewDir.x,
+				   pContextInfo->camera[currPort].viewPos.y + pContextInfo->camera[currPort].viewDir.y,
+				   pContextInfo->camera[currPort].viewPos.z + pContextInfo->camera[currPort].viewDir.z,
+		 		   pContextInfo->camera[currPort].viewUp.x, pContextInfo->camera[currPort].viewUp.y ,pContextInfo->camera[currPort].viewUp.z);
 
 		if ((gTrackingContextInfo == pContextInfo) && gTrackBallRotation[0] != 0.0f) // if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
 		{
@@ -698,47 +758,9 @@ void updateModelView(pRecContext pContextInfo, int currPort)
 	}
 	// if mouse moves whole world:
 	else {
-		glRotatef (pContextInfo->camera[currPort].rotations.cameraRotation[0],
-				   pContextInfo->camera[currPort].rotations.cameraRotation[1],
-				   pContextInfo->camera[currPort].rotations.cameraRotation[2],
-				   pContextInfo->camera[currPort].rotations.cameraRotation[3]);
-
-		if ((gTrackingContextInfo == pContextInfo) && gTrackBallRotation[0] != 0.0f) // if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
-		{
-			if (pContextInfo->currPort == currPort || pContextInfo->moveAllPortsTogether)
-				glRotatef (gTrackBallRotation[0], gTrackBallRotation[1], gTrackBallRotation[2], gTrackBallRotation[3]);
-		}
-
-		//glRotatef(fRot[0], fRot[1], fRot[2], fRot[3]);
-//		glTranslated(-viewPos.x, -viewPos.y, -viewPos.z);
-
 		glTranslatef(pContextInfo->camera[currPort].viewPos.x,
 					 pContextInfo->camera[currPort].viewPos.y,
 					 pContextInfo->camera[currPort].viewPos.z);
-
-		if ((gTrackingContextInfo == pContextInfo) && gTrackBallRotation[0] != 0.0f) // if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
-		{
-//			if (pContextInfo->currPort == currPort || pContextInfo->moveAllPortsTogether)
-//				glRotatef (gTrackBallRotation[0], gTrackBallRotation[1], gTrackBallRotation[2], gTrackBallRotation[3]);
-		}
-		else {
-		}
-		
-		// accumlated world rotation via trackball
-		//	glRotatef (pContextInfo->rotations[currPort].worldRotation[0],
-		//			   pContextInfo->rotations[currPort].worldRotation[1],
-		//			   pContextInfo->rotations[currPort].worldRotation[2],
-		//			   pContextInfo->rotations[currPort].worldRotation[3]);
-		
-		
-//		glRotatef (pContextInfo->camera[currPort].rotations.worldRotation[0],
-//				   pContextInfo->camera[currPort].rotations.worldRotation[1],
-//				   pContextInfo->camera[currPort].rotations.worldRotation[2],
-//				   pContextInfo->camera[currPort].rotations.worldRotation[3]);
-//		
-//		glTranslatef(pContextInfo->camera[currPort].viewPos.x,
-//					 pContextInfo->camera[currPort].viewPos.y,
-//					 pContextInfo->camera[currPort].viewPos.z);
 	}
 	
 }
@@ -1083,22 +1105,6 @@ void drawGL (pRecContext pContextInfo, sf::Window &window)
 			updateModelView(pContextInfo, x);			
 			HandleFrame(pContextInfo, x);
 			DrawGraphics(pContextInfo->display, x, window);
-			/*
-			if (pContextInfo->currPort == x)
-			{
-				glMatrixMode(GL_PROJECTION); glLoadIdentity();
-				glMatrixMode(GL_MODELVIEW); glLoadIdentity();
-				gluOrtho2D(0, pContextInfo->camera[x].viewWidth, 0, pContextInfo->camera[x].viewHeight);
-				glDisable(GL_LIGHTING);
-				glColor3ub(255, 255, 255);
-				glBegin(GL_LINE_LOOP);
-				glVertex2i(0, 0);
-				glVertex2i(pContextInfo->camera[x].viewWidth, 0);
-				glVertex2i(pContextInfo->camera[x].viewWidth, pContextInfo->camera[x].viewHeight);
-				glVertex2i(0, pContextInfo->camera[x].viewHeight);
-				glEnd();
-			}
-			*/
 		}
 	}
 	if (myTextBox)
