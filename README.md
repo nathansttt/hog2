@@ -18,22 +18,22 @@ To get started with the HOG2 applications run the following commands
 #### Linux
 On Ubuntu run the following command:
 ```sh
-# apt install build-essential libglu1-mesa-dev freeglut3-dev
+# apt install build-essential libglu1-mesa-dev freeglut3-dev libsfml-dev
 ```
 
 On Debian run:
 ```sh
-# apt install git libglu1-mesa-dev freeglut3-dev
+# apt install git libglu1-mesa-dev freeglut3-dev libsfml-dev
 ```
 
 On Arch run:
 ```sh
-# pacman -S git base-devel mesa glu freeglut
+# pacman -S git base-devel mesa glu freeglut libsfml-dev
 ```
 
 On CentOs and Fedora run:
 ```sh
-# yum install git make gcc-c++ mesa-libGL-devel mesa-libGLU-devel freeglut-devel
+# yum install git make gcc-c++ mesa-libGL-devel mesa-libGLU-devel freeglut-devel libsfml-dev
 ```
 
 #### MacOS
