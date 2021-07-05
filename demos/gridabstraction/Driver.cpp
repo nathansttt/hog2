@@ -117,7 +117,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (mouseTracking)
 	{
 		me->SetColor(Colors::red);
-		me->DrawLine(display,xyLoc(px1, py1), xyLoc(px2, py2));
+		me->DrawLine(display,xyLoc(px1, py1), xyLoc(px2, py2), 8);
 	}
 	
 	if (runningSearch1)
@@ -139,10 +139,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 	if (abstractPath.size() != 0)
 	{
-		msa->SetColor(Colors::green);
+		msa->SetColor(Colors::blue);
 		for (int x = 1; x < abstractPath.size(); x++)
 		{
-			msa->DrawLine(display, abstractPath[x-1], abstractPath[x], 5);
+			msa->DrawLine(display, abstractPath[x-1], abstractPath[x], 16);
 		}
 
 	}
@@ -169,7 +169,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			break;
 		case '[':
 			gStepsPerFrame /= 2;
-			sprintf(messageString, "Speed: %d steps per frame\n", gStepsPerFrame);
+			sprintf(messageString, "Speed: %d steps per frame", gStepsPerFrame);
 			submitTextToBuffer(messageString);
 			break;
 		case ']':
@@ -177,7 +177,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 				gStepsPerFrame *= 2;
 			if (gStepsPerFrame == 0)
 				gStepsPerFrame = 1;
-			sprintf(messageString, "Speed: %d steps per frame\n", gStepsPerFrame);
+			sprintf(messageString, "Speed: %d steps per frame", gStepsPerFrame);
 			submitTextToBuffer(messageString);
 			break;
 		case '{':

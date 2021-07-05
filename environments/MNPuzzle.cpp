@@ -14,10 +14,10 @@ void DrawTile(float x, float y, char c1, char c2, int w, int h)
 {
 	//glLineWidth(10.0);
 	int textWidth = 0;
-	if (c1 != 0)
-		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c1);
-	if (c2 != 0)
-		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c2);
+	//if (c1 != 0)
+	//	textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c1);
+	//	if (c2 != 0)
+	//	textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c2);
 	if (textWidth == 0)
 		return;
 	//printf("%d\n", textWidth);
@@ -28,10 +28,10 @@ void DrawTile(float x, float y, char c1, char c2, int w, int h)
 	glRotatef(180, 0.0, 0.0, 1.0);
 	glRotatef(180, 0.0, 1.0, 0.0);
 	glTranslatef(120-textWidth/2, 0, 0);
-	if (c1 != 0)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, c1);
-	if (c2 != 0)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, c2);
+	//if (c1 != 0)
+	//	glutStrokeCharacter(GLUT_STROKE_ROMAN, c1);
+	//if (c2 != 0)
+	//	glutStrokeCharacter(GLUT_STROKE_ROMAN, c2);
 	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
 	glPopMatrix();
 	

@@ -1262,7 +1262,7 @@ void RubikEdge::SetCubeColor(int which, bool face, const RubikEdgeState &s) cons
 RubikEdgePDB::RubikEdgePDB(RubikEdge *e, const RubikEdgeState &s, std::vector<int> &distinctEdges)
 :PDBHeuristic(e), edges(distinctEdges), puzzles(std::thread::hardware_concurrency())
 {
-	for (int x = 0; x < puzzles.size(); x++)
+	for (size_t x = 0; x < puzzles.size(); x++)
 		puzzles[x].resize(12);
 	SetGoal(s);
 }
@@ -1549,7 +1549,7 @@ std::string RubikEdgePDB::GetFileName(const char *prefix)
 	fileName.pop_back();
 	fileName += "-";
 	// denote the pattern used for the PDB
-	for (int x = 0; x < edges.size(); x++)
+	for (size_t x = 0; x < edges.size(); x++)
 	{
 		fileName += std::to_string(edges[x]);
 		fileName += ";";
@@ -1605,4 +1605,110 @@ uint64_t RubikEdgePDB::FactorialUpperK(int n, int k)
 //	}
 //	
 //	return value;
+}
+
+
+#pragma mark orientation pdb
+
+RubikEdgeOrientationPDB::RubikEdgeOrientationPDB(RubikEdge *e, const RubikEdgeState &s)
+:PDBHeuristic(e)
+{
+	SetGoal(s);
+}
+
+uint64_t RubikEdgeOrientationPDB::GetStateSpaceSize()
+{
+#pragma message("This code belongs in the RubikEdge, not in the PDB.")
+	return 2048ll;
+}
+
+uint64_t RubikEdgeOrientationPDB::GetStateHash(const RubikEdgeState &s)
+{
+	uint64_t hashVal = 0;
+	for (int x = 0; x < 11; x++)
+	{
+		hashVal = (hashVal<<1)+s.GetCubeOrientation(11-x);
+	}
+	return hashVal;
+}
+
+void RubikEdgeOrientationPDB::GetStateFromHash(RubikEdgeState &s, uint64_t hash)
+{
+	int cnt = 0;
+	for (int x = 10; x >= 0; x--)
+	{
+		s.SetCubeOrientation(11-x, hash&0x1);
+		cnt += hash & 0x1;
+		hash >>= 1;
+	}
+	if (1 == cnt%2)
+	{
+		s.SetCubeOrientation(0, true);
+	}
+	else {
+		s.SetCubeOrientation(0, false);
+	}
+}
+
+//
+
+uint64_t RubikEdgeOrientationPDB::GetPDBSize() const
+{
+	return 1<<11;
+}
+
+uint64_t RubikEdgeOrientationPDB::GetPDBHash(const RubikEdgeState &s, int threadID) const
+{
+	return GetStateHash(s);
+}
+
+void RubikEdgeOrientationPDB::GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int threadID) const
+{
+	return GetStateFromHash(s, hash);
+}
+
+bool RubikEdgeOrientationPDB::Load(const char *prefix)
+{
+	FILE *f = fopen(GetFileName(prefix).c_str(), "rb");
+	if (f == 0)
+	{
+		perror("Opening RubiksEdgePDB file");
+		return false;
+	}
+	Save(f);
+	fclose(f);
+	return true;
+}
+
+void RubikEdgeOrientationPDB::Save(const char *prefix)
+{
+	FILE *f = fopen(GetFileName(prefix).c_str(), "w+");
+	if (f == 0)
+	{
+		perror("Opening RubiksEdgePDB file");
+		return;
+	}
+	Save(f);
+	fclose(f);
+}
+
+bool RubikEdgeOrientationPDB::Load(FILE *f)
+{
+	if (PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, RubikEdgeState, 4>::Load(f) != true)
+	{
+		return false;
+	}
+	return true;
+}
+
+void RubikEdgeOrientationPDB::Save(FILE *f)
+{
+	PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, RubikEdgeState, 4>::Save(f);
+}
+
+std::string RubikEdgeOrientationPDB::GetFileName(const char *prefix)
+{
+	std::string fileName;
+	fileName += "RC-E12-OR.pdb";
+	return fileName;
 }

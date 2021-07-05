@@ -70,14 +70,26 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-domain TS16 -pattern 0 1 2 3 4 5 6 7 -compress 88"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-domain RC -pattern 12 13 14 15 16 17 18 19"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-domain RC -pattern 12 13 14 15 16 17 18 19 -delta"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-domain RC -pattern 0 1 2 3 4 5 6 -delta"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-domain RCO"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-domain STP44 -pattern 2 1 0 -additive"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-domain TOH -pattern 14 16 -compress 16"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>

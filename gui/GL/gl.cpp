@@ -78,3 +78,6 @@ void glEnableClientState (GLenum array) { }
 void glDrawArrays (GLenum mode, GLint first, GLsizei count) { }
 void glNormalPointer (GLenum type, GLsizei stride, const GLvoid *pointer) { }
 void glDrawElements (GLenum mode, GLsizei count, GLenum type, const GLvoid *indices) { }
+
+void glMultMatrixd(	const GLdouble * m) {}
+void glMultMatrixf(	const GLfloat * m) {}

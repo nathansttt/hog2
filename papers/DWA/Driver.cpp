@@ -136,6 +136,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 //		dwg = new DWG::DynamicWeightedGrid<sectorSize>("/Users/nathanst/hog2/maps/weighted/Map_1.map");
 //		env = new DWG::DynamicWeightedGridEnvironment("/Users/nathanst/hog2/maps/weighted/Map1.map");
 		dwg->SetCosts(cost);
+		dwg->SetDrawAbstraction(true);
 	}
 }
 
@@ -185,13 +186,13 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	
 	if (mode == kWaitPath && path.size() > 0)
 	{
-		for (int x = 1; x < path.size(); x++)
+		for (size_t x = 1; x < path.size(); x++)
 		{
 			float x1, y1, r1;
 			float x2, y2, r2;
 			dwg->GetCoordinate(path[x-1], x1, y1, r1);
 			dwg->GetCoordinate(path[x],  x2, y2, r2);
-			display.DrawLine({x1, y1}, {x2, y2}, 4.0, Colors::red);
+			display.DrawLine({x1, y1}, {x2, y2}, r1, Colors::red);
 		}
 	}
 	if (mode == kWaitPath && absPath.size() > 0)
@@ -205,18 +206,18 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			b = dwg->GetLocation(absPath[x]);
 			dwg->GetCoordinate(a, x1, y1, r1);
 			dwg->GetCoordinate(b, x2, y2, r2);
-			display.DrawLine({x1, y1}, {x2, y2}, 6.0, Colors::purple);
+			display.DrawLine({x1, y1}, {x2, y2}, 1.5f*r1, Colors::purple);
 		}
 	}
 	if (0 && mode == kWaitPath && wpath.size() > 0)
 	{
-		for (int x = 1; x < wpath.size(); x++)
+		for (size_t x = 1; x < wpath.size(); x++)
 		{
 			float x1, y1, r1;
 			float x2, y2, r2;
 			dwg->GetCoordinate(wpath[x-1], x1, y1, r1);
 			dwg->GetCoordinate(wpath[x],  x2, y2, r2);
-			display.DrawLine({x1, y1}, {x2, y2}, 4.0, Colors::yellow);
+			display.DrawLine({x1, y1}, {x2, y2}, r1, Colors::yellow);
 		}
 	}
 	if (mode == kDrawingPath)
@@ -225,7 +226,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		float x2, y2, r2;
 		dwg->GetCoordinate(start, x1, y1, r1);
 		dwg->GetCoordinate(goal,  x2, y2, r2);
-		display.DrawLine({x1, y1}, {x2, y2}, 1.0, Colors::red);
+		display.DrawLine({x1, y1}, {x2, y2}, r1*0.5f, Colors::red);
 	}
 	if (mode == kDoPathfinding)
 	{
@@ -399,7 +400,7 @@ uint64_t GetPathViaAbstraction(const xyLoc &start, const xyLoc &goal, std::vecto
 	// 3. Connect abstract regions
 	xyLoc currStart = start;
 //	astar.SetWeight(1.2);
-	for (int x = 1; x+1 < absPath.size(); x++)
+	for (size_t x = 1; x+1 < absPath.size(); x++)
 	{
 		xyLoc end = dwg->GetLocation(absPath[x]);
 		astar.GetPath(env, currStart, end, tmp);
@@ -420,13 +421,7 @@ void MyTestHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 {
 	srandom(20190529);
 	const int numProblems = 250;
-	uint64_t nbsNodes = 0;
 	uint64_t astarNodes = 0;
-	uint64_t wastarNodes = 0;
-	uint64_t wastarNodes2 = 0;
-	uint64_t wastarNodes3 = 0;
-	uint64_t absNodes = 0;
-	uint64_t firstAbsNodes = 0;
 	double optimalPath = 0;
 	double suboptimalPath = 0;
 	double suboptimalPath2 = 0;
@@ -604,5 +599,3 @@ bool MyClickHandler(unsigned long , int, int, point3d p, tButtonType , tMouseEve
 	
 	return true;
 }
-
-

@@ -475,9 +475,28 @@ public:
 		this->env->GetStateFromHash(hash, s);
 	}
 	
-	virtual bool Load(const char *prefix) {}
-	virtual void Save(const char *prefix) {}
-	virtual std::string GetFileName(const char *prefix) {}
+	virtual bool Load(const char *prefix)
+	{
+		return false;
+	}
+	virtual void Save(const char *prefix)
+	{
+		FILE *f = fopen(GetFileName(prefix).c_str(), "w+");
+		if (f == 0)
+		{
+			fprintf(stderr, "Error saving");
+			return;
+		}
+		PDBHeuristic<TOHState<patternDisks>, TOHMove, TOH<patternDisks>, TOHState<totalDisks>>::Save(f);
+		fclose(f);
+	}
+	
+	virtual std::string GetFileName(const char *prefix)
+	{
+		std::string s = prefix;
+		s += "TOH4+"+std::to_string(patternDisks)+"+"+std::to_string(totalDisks)+".pdb";
+		return s;
+	}
 };
 
 #endif /* TOH_hpp */

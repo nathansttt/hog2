@@ -229,5 +229,24 @@ private:
 //	mutable std::vector<std::vector<int> > locs;
 };
 
+class RubikEdgeOrientationPDB : public PDBHeuristic<RubikEdgeState, RubikEdgeAction, RubikEdge, RubikEdgeState, 4> {
+public:
+	RubikEdgeOrientationPDB(RubikEdge *e, const RubikEdgeState &s);
+	static uint64_t GetStateSpaceSize();
+	static uint64_t GetStateHash(const RubikEdgeState &s);
+	static void GetStateFromHash(RubikEdgeState &s, uint64_t hash);
+	uint64_t GetPDBSize() const;
+	uint64_t GetPDBHash(const RubikEdgeState &s, int threadID = 0) const;
+	virtual uint64_t GetAbstractHash(const RubikEdgeState &s, int threadID = 0) const { return GetPDBHash(s); }
+	void GetStateFromPDBHash(uint64_t hash, RubikEdgeState &s, int threadID = 0) const;
+	RubikEdgeState GetStateFromAbstractState(RubikEdgeState &s) const { return s; }
+	
+	bool Load(const char *prefix);
+	void Save(const char *prefix);
+	bool Load(FILE *f);
+	void Save(FILE *f);
+	std::string GetFileName(const char *prefix);
+};
+
 
 #endif /* defined(__hog2_glut__RubikEdge__) */

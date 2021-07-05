@@ -150,7 +150,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 
 		glClearColor(0.8, 0.8, 0.8, 1.0);
 
-		if (1)
+		if (0)
 		{
 			//std::vector<int> edges = {0,1,2,3,4,5};
 			std::vector<int> edges = {0, 1, 2, 3, 4, 5};
@@ -288,7 +288,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 		
 		if (strcmp(argument[1], "apply") == 0)
 		{
-			for (int x = 0; x < acts.size(); x++)
+			for (size_t x = 0; x < acts.size(); x++)
 			{
 				animateActions.push_back(acts[x]);
 			}

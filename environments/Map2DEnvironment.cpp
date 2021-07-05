@@ -693,8 +693,8 @@ void MapEnvironment::GLLabelState(const xyLoc &s, const char *str, double scale)
 	glRotatef(180, 0.0, 1.0, 0.0);
 	//glTranslatef((float)x/width-0.5, (float)y/height-0.5, 0);
 	glDisable(GL_LIGHTING);
-	for (int which = 0; which < strlen(str); which++)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
+	//for (int which = 0; which < strlen(str); which++)
+	//	glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
 	glEnable(GL_LIGHTING);
 	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
 	glPopMatrix();
@@ -716,8 +716,8 @@ void MapEnvironment::GLLabelState(const xyLoc &s, const char *str) const
 	glRotatef(180, 0.0, 1.0, 0.0);
 	//glTranslatef((float)x/width-0.5, (float)y/height-0.5, 0);
 	glDisable(GL_LIGHTING);
-	for (int which = 0; which < strlen(str); which++)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
+	//for (int which = 0; which < strlen(str); which++)
+	//	glutStrokeCharacter(GLUT_STROKE_ROMAN, str[which]);
 	glEnable(GL_LIGHTING);
 	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
 	glPopMatrix();

@@ -95,7 +95,7 @@ void TextOverlay::OpenGLDraw(int window)
     glPushMatrix();
     glLoadIdentity();
     glFrustum(-1, 1, -1, 1, 1.9, 2.1);	
-    gluLookAt(0, 0, -2, 0, 0, 0, 0, -1, 0);
+    //gluLookAt(0, 0, -2, 0, 0, 0, 0, -1, 0);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     
@@ -174,12 +174,13 @@ int TextOverlay::DrawString(std::string txt, int start)
 		}
 		if (txt[x] == '\t')
 		{
-			for (int x = 0; x < 3; x++) glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, ' ');
+			//			for (int x = 0; x < 3; x++)
+			//	glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, ' ');
 			//return x+1;
-			cnt+=3;
+			//cnt+=3;
 		}
 		else {
-			glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, txt[x]);
+			//glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, txt[x]);
 			cnt++;
 		}
 		if ((cnt > 45) && (txt[x] == ' '))

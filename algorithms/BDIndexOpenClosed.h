@@ -7,7 +7,7 @@
 
 #include <cassert>
 #include <vector>
-#include <ext/hash_map>
+#include <unordered_map>
 #include <stdint.h>
 #include <unordered_map>
 #include "AStarOpenClosed.h"

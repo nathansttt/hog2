@@ -6,6 +6,7 @@
 #include "SearchEnvironment.h"
 #include "PermutationPuzzleEnvironment.h"
 #include <sstream>
+#include "Permutations.h"
 
 typedef unsigned PancakePuzzleAction;
 
@@ -58,8 +59,13 @@ public:
 	void GetSuccessors(const PancakePuzzleState<N> &state, std::vector<PancakePuzzleState<N>> &neighbors) const;
 	void GetActions(const PancakePuzzleState<N> &state, std::vector<unsigned> &actions) const;
 	PancakePuzzleAction GetAction(const PancakePuzzleState<N> &s1, const PancakePuzzleState<N> &s2) const;
+	PancakePuzzleAction GetAction(const PancakePuzzleState<N> &l1, point3d p) const;
 	void ApplyAction(PancakePuzzleState<N> &s, PancakePuzzleAction a) const;
 	bool InvertAction(PancakePuzzleAction &a) const;
+
+	virtual uint64_t GetMaxHash() const;
+	virtual uint64_t GetStateHash(const PancakePuzzleState<N> &node);
+	virtual void GetStateFromHash(uint64_t parent, PancakePuzzleState<N> &s) const;
 
 	double HCost(const PancakePuzzleState<N> &state1, const PancakePuzzleState<N> &state2) const;
 	double DefaultH(const PancakePuzzleState<N> &state1) const;
@@ -113,6 +119,13 @@ public:
 	void OpenGLDraw(const PancakePuzzleState<N> &) const;
 	void OpenGLDraw(const PancakePuzzleState<N> &, const PancakePuzzleAction &) const {}
 	void OpenGLDraw(const PancakePuzzleState<N>&, const PancakePuzzleState<N>&, float) const {}
+
+	void Draw(Graphics::Display &display) const;
+	void Draw(Graphics::Display &display, const PancakePuzzleState<N>&) const;
+	void Draw(Graphics::Display &display, const PancakePuzzleAction&) const;
+	void Draw(Graphics::Display &display,
+			  const PancakePuzzleState<N> &from,
+			  const PancakePuzzleState<N> &to, float p) const;
 
 	/**
 	**/
@@ -506,7 +519,7 @@ void PancakePuzzle<N>::StoreGoal(PancakePuzzleState<N> &g)
 	goal = g;
 	goal_stored = true;
 	
-//	goal_locations.resize(size);
+	goal_locations.resize(N);
 	for (unsigned i = 0; i < N; i++)
 	{
 		goal_locations[goal.puzzle[i]] = i;
@@ -680,12 +693,33 @@ std::vector<unsigned> PancakePuzzle<N>::Get_Puzzle_Order(int64_t order_num, unsi
 }
 
 template <int N>
+uint64_t PancakePuzzle<N>::GetMaxHash() const
+{
+	Permutations<N> c;
+	return c.MaxRank();
+}
+
+template <int N>
+uint64_t PancakePuzzle<N>::GetStateHash(const PancakePuzzleState<N> &node)
+{
+	Permutations<N> c;
+	return c.Rank(node.puzzle);
+}
+
+template <int N>
+void PancakePuzzle<N>::GetStateFromHash(uint64_t parent, PancakePuzzleState<N> &s) const
+{
+	Permutations<N> c;
+	return c.Unrank(parent, s.puzzle);
+}
+
+template <int N>
 void PancakePuzzle<N>::OpenGLDraw(const PancakePuzzleState<N> &pps) const
 {
 	double count = pps.size();
 	double widthUnit = 1.5/count;
 	
-	for (int y = 0; y < pps.size(); y++)
+	for (size_t y = 0; y < pps.size(); y++)
 	{
 		for (int x = 0; x <= pps.puzzle[y]; x++)
 		{
@@ -694,6 +728,96 @@ void PancakePuzzle<N>::OpenGLDraw(const PancakePuzzleState<N> &pps) const
 					-1+widthUnit*y+widthUnit/2, 0,
 					widthUnit/2);
 		}
+	}
+}
+
+template <int N>
+PancakePuzzleAction PancakePuzzle<N>::GetAction(const PancakePuzzleState<N> &s, point3d p) const
+{
+//	if (p.y > -0.5 && p.y < 0.5)
+//	{
+//		return N-(1-p.y-0.5)*N+1;
+//	}
+//	return 0;
+//
+	for (int x = 0; x < N; x++)
+	{
+		float t = 0.6*s.puzzle[x]/(N-1.0f)+0.1;
+		float v = 1.0f/(N-1.0f);
+		Graphics::rect r(-t, -0.5f+(x)*v, t, -0.5f+(x+1)*v);
+		if (PointInRect(p, r))
+		{
+			return x+1;
+		}
+//		else {
+//			std::cout << "[" << x << "]" << p << " missed [" << r << "]\n";
+//		}
+	}
+	return 0;
+}
+
+template <int N>
+void PancakePuzzle<N>::Draw(Graphics::Display &display) const
+{
+	// no baseline drawing
+	float v = 1.0f/(N-1.0f);
+	display.FillRect(Graphics::rect(-1, -0.5f+(N+1)*v, 1, -0.5f+N*v), Colors::darkgray);
+}
+
+template <int N>
+void PancakePuzzle<N>::Draw(Graphics::Display &display, const PancakePuzzleState<N>&s) const
+{
+	float v = 1.0f/(N-1.0f);
+	for (int x = 0; x < N; x++)
+	{
+		float t = 0.6*s.puzzle[x]/(N-1.0f)+0.1;
+		display.FillRect(Graphics::rect(-t, -0.5f+(x+1)*v, t, -0.5f+x*v), rgbColor(1, t, 0));
+		display.FrameRect(Graphics::rect(-t, -0.5f+(x+1)*v, t, -0.5f+x*v), Colors::black, v*0.1f);
+	}
+}
+
+template <int N>
+void PancakePuzzle<N>::Draw(Graphics::Display &display, const PancakePuzzleAction &a) const
+{
+	float v = 1.0f/(N-1.0f);
+	Graphics::point p1(0, -0.5+v/2);
+	Graphics::point p2(0, -0.5f+(a)*v-v/2);
+//		display.FillRect(Graphics::rect(-t, -0.5f+(x+1)*v, t, -0.5f+x*v), rgbColor(1, t, 0));
+//		display.FrameRect(Graphics::rect(-t, -0.5f+(x+1)*v, t, -0.5f+x*v), Colors::black, v*0.1f);
+	display.DrawArrow(p2, p1, v*0.2, Colors::blue);
+	Graphics::point p3(-0.7, -0.5f+(a)*v);
+	Graphics::point p4(0.7, -0.5f+(a)*v);
+	Graphics::point p5(0.7+0.3, -0.5f+(a)*v-0.3);
+	display.DrawLine(p3, p4, v*0.3, Colors::black);
+	display.DrawLine(p4, p5, v*0.3, Colors::black);
+}
+
+template <int N>
+void PancakePuzzle<N>::Draw(Graphics::Display &display,
+							const PancakePuzzleState<N> &from,
+							const PancakePuzzleState<N> &to, float p) const
+{
+	Graphics::rect fromRect[N];
+	Graphics::rect toRect[N];
+
+	float v = 1.0f/(N-1.0f);
+	for (int x = 0; x < N; x++)
+	{
+		float t = 0.6*from.puzzle[x]/(N-1.0f)+0.1;
+		Graphics::rect r(-t, -0.5f+(x)*v, t, -0.5f+(x+1)*v);
+		fromRect[from.puzzle[x]] = r;
+
+		t = 0.6*to.puzzle[x]/(N-1.0f)+0.1;
+		v = 1.0f/(N-1.0f);
+		r = Graphics::rect(-t, -0.5f+(x)*v, t, -0.5f+(x+1)*v);
+		toRect[to.puzzle[x]] = r;
+	}
+	for (int x = 0; x < N; x++)
+	{
+		float t = 0.6*x/(N-1.0f)+0.1;
+		fromRect[x].lerp(toRect[x], p);
+		display.FillRect(fromRect[x], rgbColor(1, t, 0));
+		display.FrameRect(fromRect[x], Colors::black, v*0.1f);
 	}
 }
 

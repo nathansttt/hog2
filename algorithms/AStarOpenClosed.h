@@ -13,10 +13,10 @@
 #define ASTAROPENCLOSED_H
 
 #include <cassert>
-#include <vector>
-#include <ext/hash_map>
-#include <stdint.h>
 #include <functional>
+#include <stdint.h>
+#include <unordered_map>
+#include <vector>
 
 struct AHash64 {
 	size_t operator()(const uint64_t &x) const
@@ -110,7 +110,7 @@ private:
 	std::vector<uint64_t> theHeap;
 	// storing the element id; looking up with...hash?
 	// TODO: replace this with C++11 data structures
-	typedef __gnu_cxx::hash_map<uint64_t, uint64_t, AHash64> IndexTable;
+	typedef std::unordered_map<uint64_t, uint64_t, AHash64> IndexTable;
 	IndexTable table;
 	std::vector<dataStructure > elements;
 };

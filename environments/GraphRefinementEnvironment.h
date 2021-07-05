@@ -11,7 +11,7 @@
 #define GRAPHREFINEMENTENVIRONMENT_H
 
 #include <stdint.h>
-#include <ext/hash_map>
+#include <unordered_map>
 #include <iostream>
 #include "GraphEnvironment.h"
 #include "GraphAbstraction.h"
@@ -36,7 +36,7 @@ public:
 	double HCost(const graphState &) const { assert(false); return false; }
 private:
 	GraphAbstraction *ga;
-	typedef __gnu_cxx::hash_map<graphState, bool> CorridorCheck;
+	typedef std::unordered_map<graphState, bool> CorridorCheck;
 	int planLevel, corridorLevel, abstractGoalLevel;
 	bool useAbstractGoal;
 	CorridorCheck corridorTable;

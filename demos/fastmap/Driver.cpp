@@ -53,7 +53,7 @@ void NormalizeGraph();
 
 bool recording = false;
 bool running = false;
-bool mapChanged = true;
+bool mapChange = true;
 bool graphChanged = true;
 
 const float lerpspeed = 0.001;
@@ -161,7 +161,8 @@ void CreateMap(mapType which)
 		basege->SetDrawEdgeCosts(false);
 		basege->SetColor(Colors::white);
 	}
-	mapChanged = graphChanged = true;
+	mapChange = true;
+	graphChanged = true;
 }
 
 void DoOneDimension(int label)
@@ -276,7 +277,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	}
 	else { lerp = 1; }
 	
-	if ((mapChanged||graphChanged) == true && viewport == 0)
+	if ((mapChange||graphChanged) == true && viewport == 0)
 	{
 		display.StartBackground();
 		display.FillRect({-1, -1, 1, 1}, Colors::black);
@@ -284,7 +285,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		me->Draw(display);
 //		basege->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 	if (graphChanged == true && viewport == 1)
 	{
@@ -297,6 +298,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			ge->DrawLERP(display, base, g, lerp);
 		}
 		else {
+			ge->SetNodeScale(g->GetNumNodes()/20);
 			ge->Draw(display);
 		}
 		display.EndBackground();

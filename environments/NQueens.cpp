@@ -356,10 +356,10 @@ void NQueens::GLLabelState(const NQueenState &s, int x, int y, int number) const
 	glRotatef(180, 0.0, 0.0, 1.0);
 	glRotatef(180, 0.0, 1.0, 0.0);
 	//glTranslatef((float)x/width-0.5, (float)y/height-0.5, 0);
-	if (number > 9)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+(((number)/10)%10));
-	if (number > 0)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+((number)%10));
+	//if (number > 9)
+	//	glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+(((number)/10)%10));
+	//if (number > 0)
+	//	glutStrokeCharacter(GLUT_STROKE_ROMAN, '0'+((number)%10));
 	//glTranslatef(-x/width+0.5, -y/height+0.5, 0);
 	glPopMatrix();
 

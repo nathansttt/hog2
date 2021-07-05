@@ -110,7 +110,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
 
-		transit = new Transit(map, 20, 10, 30, false);
+		transit = new Transit(map, 22, 11, 22, false);
 		
 //		if ((0))
 //		{
@@ -229,7 +229,8 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '|':
 		{
 			delete transit;
-			transit = new Transit(me->GetMap(), 5, 10, 30, false);
+			transit = new Transit(me->GetMap(), 22, 11, 11, false);
+//			transit = new Transit(me->GetMap(), 30, 15, 15, false);
 			startTransit = false;
 		}
 			break;
@@ -248,15 +249,27 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 			recording = !recording;
 			break;
 		case '0':
-//		case '1': edgeCost = 1.0; te.AddLine("Adding edges; New edges cost 1"); m = kAddEdges; break;
-//		case '2': edgeCost = 2.0; te.AddLine("Adding edges; New edges cost 2"); m = kAddEdges; break;
-//		case '3': edgeCost = 3.0; te.AddLine("Adding edges; New edges cost 3"); m = kAddEdges; break;
-//		case '4': edgeCost = 4.0; te.AddLine("Adding edges; New edges cost 4"); m = kAddEdges; break;
-//		case '5': edgeCost = 5.0; te.AddLine("Adding edges; New edges cost 5"); m = kAddEdges; break;
-//		case '6': edgeCost = 6.0; te.AddLine("Adding edges; New edges cost 6"); m = kAddEdges; break;
-//		case '7': edgeCost = 7.0; te.AddLine("Adding edges; New edges cost 7"); m = kAddEdges; break;
-//		case '8': edgeCost = 8.0; te.AddLine("Adding edges; New edges cost 8"); m = kAddEdges; break;
-//		case '9': edgeCost = 9.0; te.AddLine("Adding edges; New edges cost 9"); m = kAddEdges; break;
+			delete transit;
+			transit = new Transit(me->GetMap(), 22, 11, 11, false);
+			startTransit = false;
+			break;
+		case '1':
+			delete transit;
+			transit = new Transit(me->GetMap(), 10, 5, 5, false);
+			startTransit = false;
+			break;
+		case '2':
+			delete transit;
+			transit = new Transit(me->GetMap(), 22, 11, 22, false);
+			startTransit = false;
+			break;
+		case '3':
+			delete transit;
+			transit = new Transit(me->GetMap(), 10, 5, 10, false);
+			startTransit = false;
+			break;
+		case '4':
+
 		case '\t':
 			printf("Hit tab!\n");
 			hdSearchType = (hdSearchType+1)%3;
@@ -303,21 +316,22 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 
 bool MyClickHandler(unsigned long , int windowX, int windowY, point3d loc, tButtonType button, tMouseEventType mType)
 {
-	if (mType == kMouseDown)
-	{
-		switch (button)
-		{
-			case kRightButton: printf("Right button\n"); break;
-			case kLeftButton: printf("Left button\n"); break;
-			case kMiddleButton: printf("Middle button\n"); break;
-		}
-	}
+//	if (mType == kMouseDown)
+//	{
+//		switch (button)
+//		{
+//			case kRightButton: printf("Right button\n"); break;
+//			case kLeftButton: printf("Left button\n"); break;
+//			case kMiddleButton: printf("Middle button\n"); break;
+//		}
+//	}
 	if (button != kLeftButton)
 		return false;
 	switch (mType)
 	{
 		case kMouseDown:
 		{
+			startTransit = false;
 			int x, y;
 			me->GetMap()->GetPointFromCoordinate(loc, x, y);
 			if (me->GetMap()->GetTerrainType(x, y) == kGround)
@@ -626,6 +640,9 @@ void DoHighwayDimension2(CanonicalGrid::xyLoc s)
 
 void RedoHDDisplay()
 {
+	if (start.x == static_cast<uint16_t>(-1) || start.y == static_cast<uint16_t>(-1))
+		return;
+
 	if (hdSearchType == 0)
 	{
 		submitTextToBuffer("Showing Canonical");

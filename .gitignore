@@ -2,3 +2,4 @@ bin/
 objs/
 html/
 objs_html/
+.DS_Store

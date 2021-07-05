@@ -462,7 +462,7 @@ void MyPathfindingKeyHandler(unsigned long , tKeyboardModifier , char)
 //	Directional2DEnvironment d(&m);
 //	//Directional2DEnvironment(Map *m, model envType = kVehicle, heuristicType heuristic = kExtendedPerimeterHeuristic);
 //	xySpeedHeading l1(50, 50), l2(50, 50);
-//	__gnu_cxx::hash_map<uint64_t, xySpeedHeading, Hash64 > stateTable;
+//	std::unordered_map<uint64_t, xySpeedHeading, Hash64 > stateTable;
 //	
 //	std::vector<xySpeedHeading> path;
 //	TemplateAStar<xySpeedHeading, deltaSpeedHeading, Directional2DEnvironment> alg;

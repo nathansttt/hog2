@@ -11,6 +11,8 @@
 
 #include "Heuristic.h"
 
+#include <algorithm>
+
 template <class state, class action>
 class IncrementalIDA {
 public:
@@ -131,7 +133,7 @@ bool IncrementalIDA<state, action>::StepIteration()
 	{
 		printf("Done!");
 		path.resize(0);
-		for (int x = 0; x < search.size(); x++)
+		for (size_t x = 0; x < search.size(); x++)
 			path.push_back(search[x].currState);
 		return true;
 	}
@@ -160,7 +162,7 @@ bool IncrementalIDA<state, action>::StepIteration()
 		search.back().status = kGoingAcross;
 		env->GetSuccessors(search.back().currState, search.back().succ);
 		nodesExpanded++;
-		for (int x = 0; x < search.back().succ.size(); x++)
+		for (size_t x = 0; x < search.back().succ.size(); x++)
 		{
 			if (search.size() > 1 && search.back().succ[x] == search[search.size()-2].currState)
 			{

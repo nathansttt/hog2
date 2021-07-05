@@ -27,7 +27,7 @@ TemplateAStar<xyLoc, tDirection, MapEnvironment> AStarForward, AStarBackward;
 //fMM<xyLoc, tDirection, MapEnvironment> fmm;
 NBS<xyLoc, tDirection, MapEnvironment> nbs;
 std::vector<xyLoc> path;
-
+ZeroHeuristic<xyLoc> zero;
 xyLoc start, goal;
 
 mode m = kFindPath;
@@ -284,10 +284,10 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (recording )//&& viewport == GetNumPorts(windowID)-1)
 	{
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/NBS-%d%d%d%d.svg",
+		sprintf(fname, "/Users/nathanst/Pictures/SVG/NBS-%d%d%d%d.svg",
 				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
 		
-		MakeSVG(display, fname, 800, 1200);
+		MakeSVG(display, fname, 800, 800);
 		
 		printf("Saved %s\n", fname);
 		frameCnt++;
@@ -531,12 +531,15 @@ void SetStartGoalHandler(uint16_t x, uint16_t y, tMouseEventType mType)
 			{
 				goal.x = x;
 				goal.y = y;
+				AStarForward.SetHeuristic(&zero);
+				AStarBackward.SetHeuristic(&zero);
 				AStarForward.GetPath(me, start, goal, path);
 				AStarBackward.GetPath(me, goal, start, path);
 				DoLines();
 				if (showNBS)
 				{
-					nbs.InitializeSearch(me, start, goal, me, me, path);
+					nbs.InitializeSearch(me, start, goal, &zero, &zero, path);
+//					nbs.InitializeSearch(me, start, goal, me, me, path);
 					running = true;
 					whichAlgorithm = 0;
 				}

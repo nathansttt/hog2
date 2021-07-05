@@ -685,7 +685,7 @@ void MeroB::DrawText(double x, double y, double z, float r, float gg, float b, c
 	int i=0;
 	while(str[i]) 
 	{
-		glutStrokeCharacter(GLUT_STROKE_ROMAN,str[i]);
+		//glutStrokeCharacter(GLUT_STROKE_ROMAN,str[i]);
 		i++;
 	}
 	glPopMatrix();

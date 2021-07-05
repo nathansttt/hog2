@@ -15,7 +15,7 @@
 #include "TemplateAStar.h"
 #include "TextOverlay.h"
 #include <string>
-
+#include "SVGUtil.h"
 enum mode {
 	kAddNodes,
 	kAddEdges,
@@ -101,6 +101,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 //		SetNumPorts(windowID, 2);
 		g = new Graph();
 		ge = new GraphEnvironment(g);
+		ge->SetNodeScale(2.5);
 		ge->SetDrawEdgeCosts(true);
 		ge->SetDrawNodeLabels(true);
 		ge->SetIntegerEdgeCosts(true);
@@ -121,34 +122,33 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		display.FillRect({-1.0, -1.0, 1.0, 1}, Colors::white);
 		if (ge == 0 || g == 0)
 			return;
-		ge->SetColor(Colors::black);
+		ge->SetColor(Colors::gray);
 		ge->Draw(display);
 		if (from != -1 && to != -1)
 		{
 //			glLineWidth(3.);
 			ge->SetColor(0.5, 0, 0);
 //			ge->DrawLine(display, from, to);
-			display.DrawLine(ge->GetLocation(from), currLoc, 2., Colors::lightgray);
+			//display.DrawLine(, currLoc, 2., Colors::lightgray);
+			auto loc1 = ge->GetLocation(from);
+			ge->DrawLine(display, loc1.x, loc1.y, currLoc.x, currLoc.y, 2);
 		}
 		
+		ge->SetColor(Colors::white);
+		for (int x = 0; x < g->GetNumNodes(); x++)
+			ge->Draw(display, x);
 		if (running)
 		{
 			//astar.DoSingleSearchStep(path);
 			astar.Draw(display);
 		}
-		else {
-			//ge->SetColor(0.75, 0.75, 1.0);
-			ge->SetColor(Colors::darkgray);
-			for (int x = 0; x < g->GetNumNodes(); x++)
-				ge->Draw(display, x);
-		}
 
 		if (path.size() > 0)
 		{
-			ge->SetColor(0, 1, 0);
-			for (int x = 1; x < path.size(); x++)
+			ge->SetColor(0, 0.5, 0);
+			for (size_t x = 1; x < path.size(); x++)
 			{
-				ge->DrawLine(display, path[x-1], path[x], 4);
+				ge->DrawLine(display, path[x-1], path[x], 6);
 			}
 		}
 	}
@@ -157,22 +157,22 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		te.Draw(display);
 	}
 	
-//	if (recording && viewport == GetNumPorts(windowID)-1)
-//	{
-//		char fname[255];
-//		sprintf(fname, "/Users/nathanst/Movies/tmp/dijkstra-%d%d%d%d",
-//				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-//		SaveScreenshot(windowID, fname);
-//		printf("Saved %s\n", fname);
-//		frameCnt++;
-//		if (path.size() == 0)
-//		{
-//			MyDisplayHandler(windowID, kNoModifier, 'o');
-//		}
-//		else {
-//			recording = false;
-//		}
-//	}
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/dijkstra-%d%d%d%d%d.svg",
+				(frameCnt/10000)%10, (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0, "", false); // sharp edges
+		printf("Saved %s\n", fname);
+		frameCnt++;
+		if (path.size() == 0)
+		{
+			MyDisplayHandler(windowID, kNoModifier, 'o');
+		}
+		else {
+			recording = false;
+		}
+	}
 	return;
 	
 }
@@ -483,6 +483,8 @@ bool MyClickHandler(unsigned long , int vp, int windowX, int windowY, point3d lo
 			}
 			if (m == kAddEdges || m == kFindPath)
 			{
+				if (FindClosestNode(g, loc) == 0)
+					return true;
 				from = to = FindClosestNode(g, loc)->GetNum();
 				currLoc = ge->GetLocation(from);
 			}

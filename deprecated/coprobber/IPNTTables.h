@@ -40,7 +40,7 @@ class IPNTTables {
 			return ( c1 == c2 );
 		}
 	};
-	typedef __gnu_cxx::hash_map<CRState, double, CRStateHash, CRStateEqual> BoundCache;
+	typedef std::unordered_map<CRState, double, CRStateHash, CRStateEqual> BoundCache;
 
 
 	// transposition tables

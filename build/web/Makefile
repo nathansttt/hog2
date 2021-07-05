@@ -21,6 +21,7 @@ PROJECTS = \
   gui/web \
   mapalgorithms \
   utils \
+  apps/snakebird \
   demos/fastmap \
   demos/suboptimal-map \
   demos/STP \
@@ -40,7 +41,8 @@ PROJECTS = \
   demos/dijkstra \
   demos/astar \
   demos/astar-map \
-  demos/inconsistency-graph 
+  demos/inconsistency-graph \
+  papers/DWA 
 
 
 
@@ -91,7 +93,8 @@ PROJECTS_ALL = \
   demos/dijkstra \
   demos/astar \
   demos/idastar \
-#	apps/coprobber
+  papers/DWA 
+
 
 # sequentially to avoid same sub-target in sub-make invoked twice
 default:

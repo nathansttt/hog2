@@ -38,6 +38,7 @@ enum mode {
 	kFindPathIOS = 9,
 	kFindPathIOSXDP = 10,
 	kFindPathIOSXUP = 11,
+	kFindPathGamma = 12,
 };
 
 double proveBound = 1.5, exploreBound = 3.0;
@@ -68,6 +69,7 @@ void StartSearch();
 Map *ReduceMap(Map *inputMap);
 
 Plotting::Plot2D plot;
+const double pointSize = 2.0;
 
 void TestTreap()
 {
@@ -102,7 +104,7 @@ int main(int argc, char* argv[])
  */
 void InstallHandlers()
 {
-//	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
+	InstallKeyboardHandler(MyDisplayHandler, "Record", "Record a movie", kAnyModifier, 'r');
 	InstallKeyboardHandler(MyDisplayHandler, "Pause Simulation", "Pause simulation execution.", kNoModifier, 'p');
 	InstallKeyboardHandler(MyDisplayHandler, "Step Simulation", "If the simulation is paused, step forward .1 sec.", kAnyModifier, 'o');
 	InstallKeyboardHandler(MyDisplayHandler, "Faster", "Run faster", kAnyModifier, ']');
@@ -113,6 +115,7 @@ void InstallHandlers()
 	InstallKeyboardHandler(MyDisplayHandler, "wA*(XUP)", "wA*(XUP)", kAnyModifier, 'u');
 	InstallKeyboardHandler(MyDisplayHandler, "wA*(lin)", "wA*(Piecewise XDP)", kAnyModifier, 'l');
 	InstallKeyboardHandler(MyDisplayHandler, "wA*(lin)", "wA*(Piecewise XUP)", kAnyModifier, 'j');
+	InstallKeyboardHandler(MyDisplayHandler, "WA*(phi_ab)", "WA*(phi_ab)", kAnyModifier, '+');
 	InstallKeyboardHandler(MyDisplayHandler, "Optimistic", "Optimistic", kAnyModifier, 't');
 	InstallKeyboardHandler(MyDisplayHandler, "IOS", "Improved Optimistic", kAnyModifier, 'i');
 	InstallKeyboardHandler(MyDisplayHandler, "IOS(XDP)", "Improved Optimistic", kAnyModifier, 'k');
@@ -171,8 +174,11 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		map->SetTileSet(kWinter);
 		me = new MapEnvironment(map);
 		
-		start.x = 0xFFFF;
-		start.y = 0xFFFF;
+		start = {65, 146};
+		goal = {65, 3};
+//
+//		start.x = 0xFFFF;
+//		start.y = 0xFFFF;
 	}
 }
 
@@ -188,7 +194,7 @@ void StepAlgorithms(int numSteps)
 				optimistic.DoSingleSearchStep(path);
 			if (path.size() != 0)
 			{
-				std::string s = ": "+std::to_string(optimistic.GetNodesExpanded())+" nodes expanded";
+				std::string s = ": "+std::to_string(optimistic.GetNodesExpanded())+" nodes expanded; solution length "+to_string_with_precision(me->GetPathLength(path), 2);
 				appendTextToBuffer(s.c_str());
 			}
 		}
@@ -201,7 +207,7 @@ void StepAlgorithms(int numSteps)
 				ios.DoSingleSearchStep(path);
 			if (path.size() != 0)
 			{
-				std::string s = ": "+std::to_string(ios.GetNodesExpanded())+" nodes expanded";
+				std::string s = ": "+std::to_string(ios.GetNodesExpanded())+" nodes expanded; solution length "+to_string_with_precision(me->GetPathLength(path), 2);
 				appendTextToBuffer(s.c_str());
 			}
 		}
@@ -214,7 +220,7 @@ void StepAlgorithms(int numSteps)
 				astar_e.DoSingleSearchStep(path);
 			if (path.size() != 0)
 			{
-				std::string s = ": "+std::to_string(astar_e.GetNodesExpanded())+" nodes expanded";
+				std::string s = ": "+std::to_string(astar_e.GetNodesExpanded())+" nodes expanded; solution length "+to_string_with_precision(me->GetPathLength(path), 2);
 				appendTextToBuffer(s.c_str());
 			}
 		}
@@ -227,7 +233,7 @@ void StepAlgorithms(int numSteps)
 				dps.DoSingleSearchStep(path);
 			if (path.size() != 0)
 			{
-				std::string s = ": "+std::to_string(dps.GetNodesExpanded())+" nodes expanded";
+				std::string s = ": "+std::to_string(dps.GetNodesExpanded())+" nodes expanded; solution length "+to_string_with_precision(me->GetPathLength(path), 2);
 				appendTextToBuffer(s.c_str());
 			}
 		}
@@ -240,7 +246,7 @@ void StepAlgorithms(int numSteps)
 				astar.DoSingleSearchStep(path);
 			if (path.size() != 0)
 			{
-				std::string s = ": "+std::to_string(astar.GetNodesExpanded())+" nodes expanded";
+				std::string s = ": "+std::to_string(astar.GetNodesExpanded())+" nodes expanded; solution length "+to_string_with_precision(me->GetPathLength(path), 2);
 				appendTextToBuffer(s.c_str());
 
 				for (int x = 0; x < astar.GetNumItems(); x++)
@@ -265,13 +271,13 @@ void GetPlotPoints()
 		for (int x = 0; x < optimistic.GetNumOpenItems(); x++)
 		{
 			const auto &item = optimistic.GetOpenItem(x);
-			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::blue};
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, pointSize, Colors::blue};
 			plot.AddPoint(p);
 		}
 		for (int x = 0; x < optimistic.GetNumFocalItems(); x++)
 		{
 			const auto &item = optimistic.GetFocalItem(x);
-			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::red};
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, pointSize, Colors::green};
 			plot.AddPoint(p);
 		}
 		plot.NormalizeAxes();
@@ -311,22 +317,22 @@ void GetPlotPoints()
 			plot.AddLine(&projectedBound);
 		}
 		
-		if (0)
-		{
-			const auto &s = optimistic.CheckNextFocalNode();
-			double g, h;
-			optimistic.GetOpenListGCost(s, g);
-			h = me->HCost(s, goal);
-			
-			static Plotting::Line line("");
-			line.SetWidth(3.0f/5.0f);
-			line.SetColor(Colors::blue);
-			line.Clear();
-			line.AddPoint(h, 0);
-			line.AddPoint(h, target);
-			// if g == 0 h = target/w
-			plot.AddLine(&line);
-		}
+//		if (0)
+//		{
+//			const auto &s = optimistic.CheckNextFocalNode();
+//			double g, h;
+//			optimistic.GetOpenListGCost(s, g);
+//			h = me->HCost(s, goal);
+//
+//			static Plotting::Line line("");
+//			line.SetWidth(3.0f/5.0f);
+//			line.SetColor(Colors::blue);
+//			line.Clear();
+//			line.AddPoint(h, 0);
+//			line.AddPoint(h, target);
+//			// if g == 0 h = target/w
+//			plot.AddLine(&line);
+//		}
 
 	}
 	else if (running && ((m == kFindPathIOS || m == kFindPathIOSXDP || m == kFindPathIOSXUP)))
@@ -336,7 +342,7 @@ void GetPlotPoints()
 		for (int x = 0; x < ios.GetNumOpenItems(); x++)
 		{
 			const auto &item = ios.GetOpenItem(x);
-			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::blue};
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, pointSize, Colors::blue};
 			plot.AddPoint(p);
 		}
 		plot.NormalizeAxes();
@@ -386,13 +392,13 @@ void GetPlotPoints()
 		for (int x = 0; x < astar_e.GetNumOpenItems(); x++)
 		{
 			const auto &item = astar_e.GetOpenItem(x);
-			Plotting::Point p = {me->HCost(item.s, goal), item.g, 1.0/5.0, Colors::blue};
+			Plotting::Point p = {me->HCost(item.s, goal), item.g, pointSize, Colors::blue};
 			plot.AddPoint(p);
 		}
 		for (int x = 0; x < astar_e.GetNumFocalItems(); x++)
 		{
 			const auto &item = astar_e.GetFocalItem(x);
-			Plotting::Point p = {me->HCost(item.s, goal), item.g, 1.0/5.0, Colors::red};
+			Plotting::Point p = {me->HCost(item.s, goal), item.g, pointSize, Colors::green};
 			plot.AddPoint(p);
 		}
 		plot.NormalizeAxes();
@@ -477,7 +483,7 @@ void GetPlotPoints()
 				continue;
 			pr = std::max(pr, (fmin*w-g)/h);
 			maxh = std::max(h, maxh);
-			Plotting::Point p = {h, g, 1.0/5.0, Colors::red};
+			Plotting::Point p = {h, g, pointSize, Colors::green};
 			plot.AddPoint(p);
 		}
 //		std::cout << "--> Best priority: " << pr << "\n";
@@ -498,7 +504,7 @@ void GetPlotPoints()
 		double w = astar.GetWeight();
 		double g, h;
 		static Plotting::Line line("");
-		line.SetWidth(1);
+		line.SetWidth(1.0);
 		line.Clear();
 		const auto &next = astar.CheckNextNode();
 		h = me->HCost(next, goal);
@@ -506,6 +512,21 @@ void GetPlotPoints()
 		double target = astar.Phi(h, g);
 		// draw priority function
 		switch (m) {
+			case kFindPathGamma:
+			{
+				double K = me->HCost(start, goal);
+				static Plotting::Line line2("");
+				line2.SetWidth(1);
+				line2.Clear();
+				line2.SetColor(Colors::purple);
+				line2.AddPoint(0, K);
+				line2.AddPoint(solutionCost, K);
+				plot.AddLine(&line2);
+				line.AddPoint(target, 0); // use 10x weight as additive bound
+				line.AddPoint(target-K+w*25, K);
+				line.AddPoint(0, target+w*25);
+			}
+				break;
 			case kFindPathXDP:
 				// XDP: (b−x)(bw−wx+x)/b
 				for (double x = 0; x <= target; x+=0.5)
@@ -544,7 +565,12 @@ void GetPlotPoints()
 				line2.Clear();
 				line2.SetColor(Colors::purple);
 				line2.AddPoint(0, 0);
-				line2.AddPoint(target, target*(2*w-1));
+				line2.AddPoint(w*target/(2*w-1), w*target);
+
+//				line2.AddPoint((2*w-1)*w*target, w*target);
+//				line2.AddPoint(target, target*w);
+				//line2.AddPoint(target/(2*w-1), target);
+				//line2.AddPoint(1.5*target/(2*w-1), 1.5*target);
 				plot.AddLine(&line2);
 				
 				// lower line
@@ -571,7 +597,7 @@ void GetPlotPoints()
 		for (int x = 0; x < astar.GetNumOpenItems(); x++)
 		{
 			const auto &item = astar.GetOpenItem(x);
-			Plotting::Point p = {me->HCost(item.data, goal), item.g, 1.0/5.0, Colors::red};
+			Plotting::Point p = {me->HCost(item.data, goal), item.g, pointSize, Colors::green};
 			plot.AddPoint(p);
 		}
 	}
@@ -586,6 +612,8 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (viewport == 1)
 	{
 		GetPlotPoints();
+		plot.SetXAxisLabel("h");
+		plot.SetYAxisLabel("g");
 		plot.Draw(display);
 	}
 	if (viewport == 0)
@@ -681,9 +709,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	if (recording && viewport == GetNumPorts(windowID)-1)
 	{
 		char fname[255];
-		sprintf(fname, "/Users/nathanst/Movies/tmp/sub-%d%d%d%d.svg",
-				(frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
-		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0);
+		sprintf(fname, "/Users/nathanst/Movies/tmp/1/sub-%d%d%d%d%d.svg",
+				(frameCnt/10000)%10, (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0, "", true); // sharp edges
+		sprintf(fname, "/Users/nathanst/Movies/tmp/2/sub-%d%d%d%d%d.svg",
+				(frameCnt/10000)%10, (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 1, "", false); // smooth eges
 		printf("Saved %s\n", fname);
 		frameCnt++;
 	}
@@ -729,6 +760,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case 'i': m = kFindPathIOS; StartSearch(); break;
 		case 'k': m = kFindPathIOSXDP; StartSearch(); break;
 		case 'm': m = kFindPathIOSXUP; StartSearch(); break;
+		case '+': m = kFindPathGamma; StartSearch(); break;
 		case '1': proveBound = 1.5; StartSearch(); break;
 		case '2': proveBound = 2; StartSearch(); break;
 		case '3': proveBound = 3; StartSearch(); break;
@@ -823,6 +855,7 @@ void StartSearch()
 {
 	if (start == goal)
 		return;
+	solutionCost = 0;
 	std::cout << "Searching from " << start << " to " << goal << "\n";
 	if (m == kFindPathOptimistic)
 	{
@@ -833,6 +866,7 @@ void StartSearch()
 		optimistic.SetOptimalityBound(proveBound);
 		optimistic.GetPath(me, start, goal, path);
 		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", solutionCost);
 		optimistic.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
@@ -842,6 +876,8 @@ void StartSearch()
 		std::string tmp = "";
 		if (m == kFindPathIOSXDP)
 		{
+//			tmp+= "PWXDP";
+//			ios.SetPhi([=](double h,double g){return (h>g)?(g+h):(g/exploreBound+h*(2*exploreBound-1)/exploreBound);});
 			tmp+= "XDP";
 			ios.SetPhi([=](double x,double y){return (y+(2*exploreBound-1)*x+sqrt((y-x)*(y-x)+4*exploreBound*y*x))/(2*exploreBound);});
 		}
@@ -859,6 +895,7 @@ void StartSearch()
 		ios.SetOptimalityBound(proveBound);
 		ios.GetPath(me, start, goal, path);
 		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", solutionCost);
 		ios.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
@@ -868,6 +905,7 @@ void StartSearch()
 		astar.SetWeight(1.0);
 		astar.GetPath(me, start, goal, path);
 		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
@@ -882,9 +920,28 @@ void StartSearch()
 		{
 			double g = astar.GetOpenItem(x).g;
 			double h = astar.GetOpenItem(x).h;
-			solutionCost = std::max(solutionCost, g+h);
+			solutionCost = std::max(solutionCost, g+proveBound*h);
 		}
-//		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
+		astar.InitializeSearch(me, start, goal, path);
+		running = true;
+	}
+	else if (m == kFindPathGamma)
+	{
+		submitTextToBuffer("Searching with PHI_AB - additive bound: ");
+		std::string tmp = "("+std::to_string(proveBound*25)+")";
+		appendTextToBuffer(tmp.c_str());
+		astar.SetWeight(proveBound);
+		double K = me->HCost(start, goal);
+		astar.SetPhi([=](double x,double y)
+					 {return (y<K)?(x+y*(K-25*proveBound)/K):(x+y-25*proveBound);});
+		astar.GetPath(me, start, goal, path);
+		for (int x = 0; x < astar.GetNumOpenItems(); x++)
+		{
+			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f+25*proveBound);
+//			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).h);
+		}
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
@@ -898,9 +955,9 @@ void StartSearch()
 		astar.GetPath(me, start, goal, path);
 		for (int x = 0; x < astar.GetNumOpenItems(); x++)
 		{
-			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f);
+			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f*proveBound);
 		}
-		//		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
@@ -914,15 +971,15 @@ void StartSearch()
 		astar.GetPath(me, start, goal, path);
 		for (int x = 0; x < astar.GetNumOpenItems(); x++)
 		{
-			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f);
+			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f*proveBound);
 		}
-		//		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
 	else if (m == kFindPathPLXDP)
 	{
-		submitTextToBuffer("Searching with wA*(Piecewise Linear Downward)");
+		submitTextToBuffer("Searching with wA*(Piecewise Convex Downward)");
 		std::string tmp = "("+std::to_string(proveBound)+")";
 		appendTextToBuffer(tmp.c_str());
 		astar.SetWeight(proveBound);
@@ -931,15 +988,15 @@ void StartSearch()
 		astar.GetPath(me, start, goal, path);
 		for (int x = 0; x < astar.GetNumOpenItems(); x++)
 		{
-			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f);
+			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f*proveBound);
 		}
-		//		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
 	else if (m == kFindPathPLXUP)
 	{
-		submitTextToBuffer("Searching with wA*(Piecewise Linear Upward)");
+		submitTextToBuffer("Searching with wA*(Piecewise Convex Upward)");
 		std::string tmp = "("+std::to_string(proveBound)+")";
 		appendTextToBuffer(tmp.c_str());
 		astar.SetWeight(proveBound);
@@ -949,9 +1006,9 @@ void StartSearch()
 		astar.GetPath(me, start, goal, path);
 		for (int x = 0; x < astar.GetNumOpenItems(); x++)
 		{
-			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f);
+			solutionCost = std::max(solutionCost, astar.GetOpenItem(x).f*proveBound);
 		}
-		//		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
 		astar.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
@@ -962,6 +1019,7 @@ void StartSearch()
 		astar_e.SetOptimalityBound(proveBound);
 		astar_e.GetPath(me, start, goal, path);
 		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
 		astar_e.InitializeSearch(me, start, goal, path);
 		running = true;
 	}
@@ -972,6 +1030,7 @@ void StartSearch()
 		dps.SetOptimalityBound(proveBound);
 		dps.GetPath(me, start, goal, path);
 		solutionCost = me->GetPathLength(path);
+		printf("Cost: %1.2f\n", me->GetPathLength(path));
 		dps.InitializeSearch(me, start, goal, path);
 		running = true;
 	}

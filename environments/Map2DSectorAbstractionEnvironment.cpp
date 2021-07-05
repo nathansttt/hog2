@@ -132,14 +132,15 @@ void Map2DSectorAbstraction::Draw(Graphics::Display &display, const abstractGrid
 	//if (map->GetTerrainType(l.x, l.y) == kGround)
 	{
 		rad*=3;
-		Graphics::rect r;
-		r.left = px-rad;
-		r.top = py-rad;
-		r.right = px+rad;
-		r.bottom = py+rad;
+//		Graphics::rect r;
+//		r.left = px-rad;
+//		r.top = py-rad;
+//		r.right = px+rad;
+//		r.bottom = py+rad;
 		
 		//s += SVGDrawCircle(l.x+0.5+1, l.y+0.5+1, 0.5, c);
-		display.FillCircle(r, GetColor());
+//		display.FillCircle(r, GetColor());
+		display.FillCircle({static_cast<float>(px), static_cast<float>(py)}, rad, GetColor());
 		//stroke-width="1" stroke="pink" />
 	}
 
@@ -150,7 +151,7 @@ void Map2DSectorAbstraction::Draw(Graphics::Display &display, const abstractGrid
 	for (auto &n : nbr)
 	{
 		next = GetState(n);
-		me->DrawLine(display, curr, next, 2.0);
+		me->DrawLine(display, curr, next, 3);
 	}
 }
 

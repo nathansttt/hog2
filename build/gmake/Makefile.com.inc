@@ -6,12 +6,12 @@
 #-----------------------------------------------------------------------------
 
 CXX = g++ # clang++
-COMMON_CXXFLAGS += -Wall -std=c++11 # -stdlib=libc++
+COMMON_CXXFLAGS += -Wall -std=c++11 -Wno-unused-function # -stdlib=libc++
 
 #COMMON_CXXFLAGS += -ansi -pedantic
 
 CC = gcc
-COMMON_CFLAGS += -Wall 
+COMMON_CFLAGS += -Wall -Wno-unused-function
 
 LN = $(CXX)
 #COMMON_LNFLAGS += -stdlib=libc++
@@ -28,13 +28,13 @@ ifeq ($(findstring "Darwin", "$(shell uname -s)"), "Darwin")
 ifeq ("$(OPENGL)", "STUB")
 COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL
 else
-COMMON_LNFLAGS += -framework Foundation -framework AppKit
+#COMMON_LNFLAGS += -framework Foundation -framework AppKit
 COMMON_CXXFLAGS += -DOS_MAC  
 
 COMMON_LNFLAGS += -framework GLUT -framework OpenGL
-COMMON_CXXFLAGS += -I/System/Library/Frameworks/GLUT.framework/Versions/A/Headers/
-COMMON_CXXFLAGS += -I/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers/
-COMMON_CXXFLAGS += -I/System/Library/Frameworks/AGL.framework/Versions/A/Headers/
+#COMMON_CXXFLAGS += -I/System/Library/Frameworks/GLUT.framework/Versions/A/Headers/
+#COMMON_CXXFLAGS += -I/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers/
+#COMMON_CXXFLAGS += -I/System/Library/Frameworks/AGL.framework/Versions/A/Headers/
 endif
 
 else # not darwin

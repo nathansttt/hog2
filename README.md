@@ -18,22 +18,22 @@ To get started with the HOG2 applications run the following commands
 #### Linux
 On Ubuntu run the following command:
 ```sh
-# apt install build-essential libglu1-mesa-dev freeglut3-dev
+# apt install build-essential libglu1-mesa-dev freeglut3-dev libsfml-dev
 ```
 
 On Debian run:
 ```sh
-# apt install git libglu1-mesa-dev freeglut3-dev
+# apt install git libglu1-mesa-dev freeglut3-dev libsfml-dev
 ```
 
 On Arch run:
 ```sh
-# pacman -S git base-devel mesa glu freeglut
+# pacman -S git base-devel mesa glu freeglut libsfml-dev
 ```
 
 On CentOs and Fedora run:
 ```sh
-# yum install git make gcc-c++ mesa-libGL-devel mesa-libGLU-devel freeglut-devel
+# yum install git make gcc-c++ mesa-libGL-devel mesa-libGLU-devel freeglut-devel libsfml-dev
 ```
 
 #### MacOS
@@ -43,10 +43,9 @@ Download and install XCode from the App store.
 #### Windows 10:
 TODO
 
+### Building
 
-### Installation
-
-To build the project, you must first download the source code:
+To build the project on the command-line, you must first download the source code:
 `$ git clone https://github.com/nathansttt/hog2.git`
 
 Then traverse to the build directory with:
@@ -59,8 +58,15 @@ Finally build the project with make:
 make
 ```
 
-After this completes the binaries can be found under `../../bin/release/`. To fully install the programs to /usr/local/bin, run `sudo make install` under the `hog2/build/gmake/` directory; to uninstall run `sudo make uninstall` in the same directory. The install location can be changed with `make install prefix=</path/to/dir>`.
+After this completes the binaries can be found under `../../bin/release/`.
 
+To build using XCode you can open one of the projects in `build/XCode`. `HOG2 ObjC` contains a full sample application; many demos are available inside the `hog2 mac native demos` project.
+
+### Installation
+
+Typical research usage of HOG2 would not involve installing applications from HOG2.
+
+To fully install the programs to /usr/local/bin, run `sudo make install` under the `hog2/build/gmake/` directory; to uninstall run `sudo make uninstall` in the same directory. The install location can be changed with `make install prefix=</path/to/dir>`.
 
 
 ## Licence

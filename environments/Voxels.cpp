@@ -144,7 +144,7 @@ void Voxels::Export(const char *filename)
 	
 	fprintf(f, "voxel %d %d %d\n", maxx-minx+1+2*buffer, maxy-miny+1+2*buffer, maxz-minz+1+2*buffer);
 
-	for (int x = 0; x < w.numVoxelsGrids; x++)
+	for (size_t x = 0; x < w.numVoxelsGrids; x++)
 	{
 		point3d p = GetVoxelCoordinate(w.morton[x], w.voxelSize, w.minbounds);
 		for (int i = 0; i < 64; i++)
@@ -253,7 +253,7 @@ void Voxels::OpenGLDraw() const
 	double yRange = max(w.maxbounds[1],-w.minbounds[1]);
 	double zRange = max(w.maxbounds[2],-w.minbounds[2]);
 	double range = std::max(xRange, std::max(yRange, zRange));
-	for (int x = 0; x < w.numVoxelsGrids; x++)
+	for (size_t x = 0; x < w.numVoxelsGrids; x++)
 	{
 		point3d p = GetVoxelCoordinate(w.morton[x], w.voxelSize, w.minbounds);
 		bool drawFrame = false;

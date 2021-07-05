@@ -10,11 +10,12 @@
 #ifndef BFS_H
 #define BFS_H
 
-#include <iostream>
 #include "SearchEnvironment.h"
-#include <ext/hash_map>
-#include <unordered_map>
 #include "FPUtil.h"
+
+#include <algorithm>
+#include <iostream>
+#include <unordered_map>
 
 template <class state, class action, class environment>
 class BFS {
@@ -43,7 +44,7 @@ private:
 template <class state, class action, class environment>
 void BFS<state, action, environment>::DoBFS(environment *env, state from)
 {
-//	typedef __gnu_cxx::hash_map<uint64_t, bool, Hash64> BFSClosedList;
+//	typedef std::unordered_map<uint64_t, bool, Hash64> BFSClosedList;
 //	BFSClosedList mClosed; // store parent id!
 	std::deque<state> mOpen;
 	std::deque<int> depth;
@@ -114,7 +115,7 @@ void BFS<state, action, environment>::GetPath(environment *env,
 								 state from, state to,
 								 std::vector<state> &thePath)
 {
-//	typedef __gnu_cxx::hash_map<uint64_t, uint64_t, Hash64> BFSClosedList;
+//	typedef std::unordered_map<uint64_t, uint64_t, Hash64> BFSClosedList;
 	std::deque<std::pair<state, uint16_t>> mOpen;
 	//std::deque<int> depth;
 	std::unordered_map<state, state> mClosed; // store parent with each state

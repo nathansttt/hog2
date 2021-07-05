@@ -556,7 +556,7 @@ void MinimalSectorAbstraction::OpenGLDraw()
 void MinimalSectorAbstraction::Draw(Graphics::Display &display) const
 {
 	static bool draw = false;
-	
+	static float lineScale = 0.5f;
 	//  this will draw the sectors for the map
 	GLdouble xx, yy, zz, rr;
 //	glColor4f(0.5, 0.0, 0.0, 0.5);
@@ -569,7 +569,7 @@ void MinimalSectorAbstraction::Draw(Graphics::Display &display) const
 	{
 		display.DrawLine({static_cast<float>(xx-rr), static_cast<float>(yy-rr+2*y*rr*sectorSize), static_cast<float>(zz-1*rr)},
 						 {static_cast<float>(xx+2*numXSectors*rr*sectorSize), static_cast<float>(yy-rr+2*y*sectorSize*rr), static_cast<float>(zz-1*rr)},
-						 1, Colors::yellow);
+						 lineScale*rr, Colors::yellow);
 //		glVertex3f(xx-rr, yy-rr+2*y*rr*sectorSize, zz-1*rr);
 //		glVertex3f(xx+2*numXSectors*rr*sectorSize, yy-rr+2*y*sectorSize*rr, zz-1*rr);
 	}
@@ -577,7 +577,7 @@ void MinimalSectorAbstraction::Draw(Graphics::Display &display) const
 	{
 		display.DrawLine({static_cast<float>(xx-rr+2*x*rr*sectorSize), static_cast<float>(yy-rr), static_cast<float>(zz-1*rr)},
 						 {static_cast<float>(xx-rr+2*x*rr*sectorSize), static_cast<float>(yy-rr+2*numYSectors*rr*sectorSize), static_cast<float>(zz-1*rr)},
-						 1, Colors::yellow);
+						 lineScale*rr, Colors::yellow);
 //		glVertex3f(xx-rr+2*x*rr*sectorSize, yy-rr, zz-1*rr);
 //		glVertex3f(xx-rr+2*x*rr*sectorSize, yy-rr+2*numYSectors*rr*sectorSize, zz-1*rr);
 	}
@@ -613,7 +613,7 @@ void MinimalSectorAbstraction::Draw(Graphics::Display &display) const
 						map->GetOpenGLCoord((int)loc1, (int)loc2, xx2, yy2, zz2, rr2);
 //						glVertex3f(xx2, yy2, zz2-5.1*rr2);
 						display.DrawLine({static_cast<float>(xx), static_cast<float>(yy), static_cast<float>(zz-5.1*rr)},
-										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, 2, abstractionColor);
+										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, lineScale*rr2, abstractionColor);
 						break;
 					case 1:
 //						glVertex3f(xx, yy, zz-5.1*rr);
@@ -621,7 +621,7 @@ void MinimalSectorAbstraction::Draw(Graphics::Display &display) const
 						map->GetOpenGLCoord((int)loc1, (int)loc2, xx2, yy2, zz2, rr2);
 //						glVertex3f(xx2, yy2, zz2-5.1*rr2);
 						display.DrawLine({static_cast<float>(xx), static_cast<float>(yy), static_cast<float>(zz-5.1*rr)},
-										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, 2, abstractionColor);
+										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, lineScale*rr2, abstractionColor);
 						break;
 					case 2:
 					case 3: break;
@@ -631,7 +631,7 @@ void MinimalSectorAbstraction::Draw(Graphics::Display &display) const
 						map->GetOpenGLCoord((int)loc1, (int)loc2, xx2, yy2, zz2, rr2);
 //						glVertex3f(xx2, yy2, zz2-5.1*rr2);
 						display.DrawLine({static_cast<float>(xx), static_cast<float>(yy), static_cast<float>(zz-5.1*rr)},
-										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, 2, abstractionColor);
+										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, lineScale*rr2, abstractionColor);
 						break;
 					case 5:
 //						glVertex3f(xx, yy, zz-5.1*rr);
@@ -639,7 +639,7 @@ void MinimalSectorAbstraction::Draw(Graphics::Display &display) const
 						map->GetOpenGLCoord((int)loc1, (int)loc2, xx2, yy2, zz2, rr2);
 //						glVertex3f(xx2, yy2, zz2-5.1*rr2);
 						display.DrawLine({static_cast<float>(xx), static_cast<float>(yy), static_cast<float>(zz-5.1*rr)},
-										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, 2, abstractionColor);
+										 {static_cast<float>(xx2), static_cast<float>(yy2), static_cast<float>(zz2-5.1*rr2)}, lineScale*rr2, abstractionColor);
 						break;
 					default:
 						break; // otherwise we draw all edges twice

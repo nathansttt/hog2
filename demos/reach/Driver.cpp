@@ -19,6 +19,7 @@
 #include <string>
 #include "Reach.h"
 #include "CanonicalReach.h"
+#include "SVGUtil.h"
 
 MapEnvironment *me = 0;
 CanonicalGrid::CanonicalGrid *cge = 0;
@@ -94,10 +95,11 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
 		
-		Map *map = new Map(1,1);
-//		LoadMap(map);
-		LoadBigMap(map);
-		//Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+		//Map *map = new Map(1,1);
+		//LoadMap(map);
+		//LoadBigMap(map);
+		Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+//		Map *map = new Map("/Users/nathanst/hog2/maps/dao/brc300d.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak202d.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak303d.map"); // round map
 		//Map *map = new Map("/Users/nathanst/hog2/maps/da2/ht_chantry.map");
@@ -208,6 +210,16 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 	}
 	
+	if (recording && viewport == GetNumPorts(windowID)-1)
+	{
+		char fname[255];
+		sprintf(fname, "/Users/nathanst/Movies/tmp/reach-%d%d%d%d%d.svg",
+				(frameCnt/10000)%10, (frameCnt/1000)%10, (frameCnt/100)%10, (frameCnt/10)%10, frameCnt%10);
+		MakeSVG(GetContext(windowID)->display, fname, 1200, 1200, 0, "", true);
+		printf("Saved %s\n", fname);
+		frameCnt++;
+	}
+
 }
 
 int MyCLHandler(char *argument[], int maxNumArgs)

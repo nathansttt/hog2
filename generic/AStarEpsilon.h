@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include "FPUtil.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "AStarOpenClosed.h"
 #include "BucketOpenClosed.h"
 #include "TemplateAStar.h"

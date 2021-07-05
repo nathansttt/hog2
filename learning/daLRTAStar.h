@@ -13,7 +13,7 @@
 #include "FPUtil.h"
 #include <deque>
 #include <vector>
-#include <ext/hash_map>
+#include <unordered_map>
 #include "TemplateAStar.h"
 #include "Timer.h"
 #include <queue>
@@ -109,8 +109,8 @@ namespace DALRTA {
 		void OpenGLDraw(const environment *env) const;
 	private:
 		typedef std::priority_queue<borderData<state>,std::vector<borderData<state> >,compareBorderData<state> > pQueue;
-		typedef __gnu_cxx::hash_map<uint64_t, lssLearnedData<state>, Hash64 > LearnedHeuristic;
-		typedef __gnu_cxx::hash_map<uint64_t, bool, Hash64 > ClosedList;
+		typedef std::unordered_map<uint64_t, lssLearnedData<state>, Hash64 > LearnedHeuristic;
+		typedef std::unordered_map<uint64_t, bool, Hash64 > ClosedList;
 		
 
 		bool ExpandLSS(environment *env, const state &from, const state &to, std::vector<state> &thePath);

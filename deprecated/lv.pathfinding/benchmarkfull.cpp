@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 #include <string>
-#include <ext/hash_map>
+#include <unordered_map>
 #include <time.h>
 #include <math.h>
 #include <sys/time.h>
@@ -631,4 +631,3 @@ int main(int argc, char* argv[])
    y-axis: time
    each alg has 1 line
 */
-

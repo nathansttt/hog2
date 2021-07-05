@@ -213,10 +213,14 @@ public:
 	void SetLabelF(unsigned int index, double val) const;
 	void SetLabelL(unsigned int index, long val) const;
 	inline double GetLabelF(unsigned int index) const {
-		if (index < label.size()) return label[index].fval; return MAXINT;
+		if (index < label.size())
+			return label[index].fval;
+		return MAXINT;
 	}
 	inline long GetLabelL(unsigned int index) const {
-		if (index < label.size()) return label[index].lval; return MAXINT;
+		if (index < label.size())
+			return label[index].lval;
+		return MAXINT;
 	}
 	
 	// set/get marked edge for each node (limit 1)

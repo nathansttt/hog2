@@ -24,7 +24,7 @@
 #include <iostream>
 #include "Constraint.h"
 #include "FPUtil.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include "Graphics.h"
 #include "AStarOpenClosed.h"
 #include "BucketOpenClosed.h"
@@ -235,7 +235,7 @@ void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env
 	while (!DoSingleSearchStep(thePath))
 	{
 	}
-	for (int x = 0; x < thePath.size()-1; x++)
+	for (size_t x = 0; x < thePath.size()-1; x++)
 	{
 		path.push_back(_env->GetAction(thePath[x], thePath[x+1]));
 	}
@@ -379,7 +379,7 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 	}
 	
 	// iterate again updating costs and writing out to memory
-	for (int x = 0; x < neighbors.size(); x++)
+	for (size_t x = 0; x < neighbors.size(); x++)
 	{
 		nodesTouched++;
 

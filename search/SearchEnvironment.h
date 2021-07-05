@@ -121,7 +121,7 @@ action SearchEnvironment<state,action>::GetAction(const state &s1, const state &
 {
 	std::vector<action> a;
 	GetActions(s1, a);
-	for (int x = 0; x < a.size(); x++)
+	for (size_t x = 0; x < a.size(); x++)
 	{
 		state s = s1;
 		ApplyAction(s, a[x]);
@@ -135,6 +135,11 @@ action SearchEnvironment<state,action>::GetAction(const state &s1, const state &
 	return act;
 }
 
+/*
+ * \param neighbors A vector of adjacent states
+ *
+ * \return The cost of the path
+ */
 template <class state, class action>
 double SearchEnvironment<state,action>::GetPathLength(std::vector<state> &neighbors)
 {

@@ -48,7 +48,7 @@ private:
 	};
 	std::vector<qData> pQueue;
 	// storing the element id; looking up with...hash?
-	typedef __gnu_cxx::hash_map<uint64_t, uint64_t, AHash64> IndexTable;
+	typedef std::unordered_map<uint64_t, uint64_t, AHash64> IndexTable;
 	IndexTable table;
 	std::vector<dataStructure > elements;
 };

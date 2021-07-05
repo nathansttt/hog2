@@ -145,27 +145,31 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 		
 		if (from != -1 && to != -1)
 		{
-			ge->SetColor(Colors::darkred);
-			display.DrawLine(ge->GetLocation(from), currLoc, 2., Colors::lightgray);
+			ge->SetColor(Colors::lightgray);
+			auto loc1 = ge->GetLocation(from);
+			ge->DrawLine(display, loc1.x, loc1.y, currLoc.x, currLoc.y, 2);
 //			ge->SetColor(1, 0, 0);
 //			ge->DrawLine(display, from, to, 4);
 		}
 		
+		ge->SetColor(Colors::white);
+		for (int x = 0; x < g->GetNumNodes(); x++)
+			ge->Draw(display, x);
+
 		if (running)
 		{
 			astar.Draw(display);
 		}
-		else {
-			ge->SetColor(0.75, 0.75, 1.0);
-			ge->SetColor(Colors::darkgray);
-			for (int x = 0; x < g->GetNumNodes(); x++)
-				ge->Draw(display, x);
-		}
+//		else {
+//			ge->SetColor(Colors::white);
+//			for (int x = 0; x < g->GetNumNodes(); x++)
+//				ge->Draw(display, x);
+//		}
 		
 		if (path.size() > 0)
 		{
 			ge->SetColor(0, 1, 0);
-			for (int x = 1; x < path.size(); x++)
+			for (size_t x = 1; x < path.size(); x++)
 			{
 				ge->DrawLine(display, path[x-1], path[x], 4);
 			}
@@ -514,7 +518,7 @@ void ShowSearchInfo()
 
 	std::vector<std::string> open, closed;
 	
-	for (int x = 0; x < astar.GetNumOpenItems(); x++)
+	for (size_t x = 0; x < astar.GetNumOpenItems(); x++)
 	{
 		auto item = astar.GetOpenItem(x);
 		s = g->GetNode(item.data)->GetName();

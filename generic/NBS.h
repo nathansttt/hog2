@@ -129,9 +129,9 @@ private:
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
 	{
 		uint64_t theID;
-		auto loc = queue.forwardQueue.Lookup(env->GetStateHash(node), theID);
 		ExtractPathToStartFromID(theID, thePath);
 	}
+
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
 	{
 		do {
@@ -344,7 +344,6 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 			{
 				if (fless(current.Lookup(nextID).g+edgeCost, current.Lookup(childID).g))
 				{
-					double oldGCost = current.Lookup(childID).g;
 					current.Lookup(childID).parentID = nextID;
 					current.Lookup(childID).g = current.Lookup(nextID).g+edgeCost;
 					current.KeyChanged(childID);

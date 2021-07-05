@@ -48,7 +48,10 @@
 #ifndef GLUTIL_H
 #define GLUTIL_H
 
+class point3d;
+
 #include "Colors.h"
+#include "Graphics.h"
 
 //#pragma mark -
 //#pragma mark OpenGL structures:
@@ -117,36 +120,37 @@ bool operator==(const recVec &l1, const recVec &l2);
 
 std::ostream& operator<<(std::ostream &out, const recVec &loc);
 
-
-/**
- * A point in 3d space. (OpenGL)
- */
-class point3d {
-public:
-	point3d() {}
-	point3d(GLfloat a, GLfloat b, GLfloat c=0) :x(a), y(b), z(c) {}
-	GLfloat x, y, z;
-	
-	point3d operator+(const point3d &v) const
-	{ point3d p(*this); p+=v; return p; }
-	point3d operator-(const point3d &v) const
-	{ point3d p(*this); p-=v; return p; }
-	point3d &operator+=(const point3d &v)
-	{ x += v.x; y += v.y; z += v.z; return *this; }
-	point3d &operator-=(const point3d &v)
-	{ x -= v.x; y -= v.y; z -= v.z; return *this; }
-	point3d &operator+=(const float v)
-	{ x += v; y += v; z += v; return *this; }
-	point3d &operator-=(const float v)
-	{ x -= v; y -= v; z -= v; return *this; }
-	point3d &operator*=(const float v)
-	{ x *= v; y *= v; z *= v; return *this; }
-	point3d &operator/=(const float v)
-	{ x /= v; y /= v; z /= v; return *this; }
-
-};
-inline std::ostream &operator<<(std::ostream &o, const point3d&r)
-{ o << "(" << r.x << ", " << r.y  << ", " << r.z << ")"; return o; }
+#define point3d Graphics::point
+///**
+// * A point in 3d space. (OpenGL)
+// */
+//class point3d {
+//public:
+//	point3d() {}
+//	point3d(Graphics::point p):x(p.x), y(p.y), z(p.z) {}
+//	point3d(GLfloat a, GLfloat b, GLfloat c=0) :x(a), y(b), z(c) {}
+//	GLfloat x, y, z;
+//	
+//	point3d operator+(const point3d &v) const
+//	{ point3d p(*this); p+=v; return p; }
+//	point3d operator-(const point3d &v) const
+//	{ point3d p(*this); p-=v; return p; }
+//	point3d &operator+=(const point3d &v)
+//	{ x += v.x; y += v.y; z += v.z; return *this; }
+//	point3d &operator-=(const point3d &v)
+//	{ x -= v.x; y -= v.y; z -= v.z; return *this; }
+//	point3d &operator+=(const float v)
+//	{ x += v; y += v; z += v; return *this; }
+//	point3d &operator-=(const float v)
+//	{ x -= v; y -= v; z -= v; return *this; }
+//	point3d &operator*=(const float v)
+//	{ x *= v; y *= v; z *= v; return *this; }
+//	point3d &operator/=(const float v)
+//	{ x /= v; y /= v; z /= v; return *this; }
+//
+//};
+//inline std::ostream &operator<<(std::ostream &o, const point3d&r)
+//{ o << "(" << r.x << ", " << r.y  << ", " << r.z << ")"; return o; }
 
 class line2d {
 public:

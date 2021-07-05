@@ -427,10 +427,10 @@ static void DrawTSTile(float x, float y, char c1, char c2, int w, int h)
 	glLineWidth(1.0);
 	int textWidth = 0;
 	//int textHeight = 0;
-	if (c1 != 0)
-		textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c1);
+	//	if (c1 != 0)
+	//	textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c1);
 	//if (c2 != 0)
-	textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c2);
+	//textWidth += glutStrokeWidth(GLUT_STROKE_ROMAN, c2);
 	//printf("%d\n", textWidth);
 	glPushMatrix();
 	glTranslatef(x, y, -0.001);
@@ -438,10 +438,10 @@ static void DrawTSTile(float x, float y, char c1, char c2, int w, int h)
 	glRotatef(180, 0.0, 0.0, 1.0);
 	glRotatef(180, 0.0, 1.0, 0.0);
 	glTranslatef(-textWidth/2, -60, 0);
-	if (c1 != 0)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, c1);
-	if (c2 != 0)
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, c2);
+	//if (c1 != 0)
+	//	glutStrokeCharacter(GLUT_STROKE_ROMAN, c1);
+	//if (c2 != 0)
+	//	glutStrokeCharacter(GLUT_STROKE_ROMAN, c2);
 	glPopMatrix();
 	
 }

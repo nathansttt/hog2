@@ -10,14 +10,16 @@
 #ifndef GRAPHENVIRONMENT_H
 #define GRAPHENVIRONMENT_H
 
-#include <stdint.h>
-#include <ext/hash_map>
-#include <iostream>
+
 #include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "Graph.h"
 //#include "GraphAbstraction.h"
 #include "GLUtil.h"
+
+#include <iostream>
+#include <stdint.h>
+#include <unordered_map>
 
 #ifndef UINT32_MAX
 #define UINT32_MAX        4294967295U
@@ -325,6 +327,7 @@ public:
 	virtual void Draw(Graphics::Display &disp, const graphState &l) const;
 	virtual void DrawStateLabel(Graphics::Display &disp, const graphState &l1, const char *txt) const;
 	virtual void DrawLine(Graphics::Display &disp, const graphState &x, const graphState &y, double width = 1.0) const;
+	virtual void DrawLine(Graphics::Display &disp, float x1, float y1, float x2, float y2, double width = 1.0) const;
 	Graphics::point GetLocation(const graphState &s) const;
 	Graph *GetGraph() { return g; };
 

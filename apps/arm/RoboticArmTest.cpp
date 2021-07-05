@@ -1088,7 +1088,7 @@ void WriteCache(int index, std::vector<armAngles> &values)
 	if (!f) assert(!"Couldn't open file!");
 	for (unsigned int x = 0; x < values.size(); x++)
 	{
-		for (unsigned int y = 0; y < values[x].GetNumArms(); y++)
+		for (int y = 0; y < values[x].GetNumArms(); y++)
 			fprintf(f, "%d ", values[x].GetAngle(y));
 		fprintf(f, "\n");
 	}
