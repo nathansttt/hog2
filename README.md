@@ -43,8 +43,7 @@ Download and install XCode from the App store.
 #### Windows 10:
 TODO
 
-
-### Installation
+### Building
 
 To build the project, you must first download the source code:
 `$ git clone https://github.com/nathansttt/hog2.git`
@@ -59,8 +58,13 @@ Finally build the project with make:
 make
 ```
 
-After this completes the binaries can be found under `../../bin/release/`. To fully install the programs to /usr/local/bin, run `sudo make install` under the `hog2/build/gmake/` directory; to uninstall run `sudo make uninstall` in the same directory. The install location can be changed with `make install prefix=</path/to/dir>`.
+After this completes the binaries can be found under `../../bin/release/`.
 
+### Installation
+
+Typical research usage of HOG2 would not involve installing applications from HOG2.
+
+To fully install the programs to /usr/local/bin, run `sudo make install` under the `hog2/build/gmake/` directory; to uninstall run `sudo make uninstall` in the same directory. The install location can be changed with `make install prefix=</path/to/dir>`.
 
 
 ## Licence
