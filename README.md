@@ -45,7 +45,7 @@ TODO
 
 ### Building
 
-To build the project, you must first download the source code:
+To build the project on the command-line, you must first download the source code:
 `$ git clone https://github.com/nathansttt/hog2.git`
 
 Then traverse to the build directory with:
@@ -59,6 +59,8 @@ make
 ```
 
 After this completes the binaries can be found under `../../bin/release/`.
+
+To build using XCode you can open one of the projects in `build/XCode`. `HOG2 ObjC` contains a full sample application; many demos are available inside the `hog2 mac native demos` project.
 
 ### Installation
 
