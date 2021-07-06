@@ -999,7 +999,8 @@ void MapEnvironment::DrawSingleTerrain(long terrain, Graphics::Display &disp, st
 	rgbColor groundColor = {0.9, 0.9, 0.9};
 	rgbColor treeColor = {0.0, 0.5, 0.0};
 	rgbColor waterColor = {0.0, 0.0, 1.0};
-	rgbColor swampColor = {0.0, 0.3, 1.0};
+	rgbColor swampColor = {0.5, 0.7, 0.8};
+	rgbColor grassColor = {0.5, 1.0, 0.6};
 	rgbColor otherColor = Colors::black;
 
 	for (int y = 0; y < map->GetMapHeight(); y++)
@@ -1017,6 +1018,7 @@ void MapEnvironment::DrawSingleTerrain(long terrain, Graphics::Display &disp, st
 					case kTrees: c = treeColor; break;
 					case kWater: c = waterColor; break;
 					case kSwamp: c = swampColor; break;
+					case kGrass: c = grassColor; break;
 					default: c = otherColor; break;
 				}
 				
@@ -1037,7 +1039,8 @@ void MapEnvironment::Draw(Graphics::Display &disp) const
 	rgbColor groundColor = {0.9, 0.9, 0.9};
 	rgbColor treeColor = {0.0, 0.5, 0.0};
 	rgbColor waterColor = {0.0, 0.0, 1.0};
-	rgbColor swampColor = {0.0, 0.3, 1.0};
+	rgbColor swampColor = {0.5, 0.7, 0.8};
+	rgbColor grassColor = {0.5, 1.0, 0.6};
 	rgbColor otherColor = Colors::black;
 	
 	disp.FillRect({-1, -1, 1, 1}, Colors::black);
@@ -1134,6 +1137,7 @@ void MapEnvironment::Draw(Graphics::Display &disp) const
 					case kTrees: c = treeColor; break;
 					case kWater: c = waterColor; break;
 					case kSwamp: c = swampColor; break;
+					case kGrass: c = grassColor; break;
 					default: draw=false; break;
 				}
 				if (draw)
