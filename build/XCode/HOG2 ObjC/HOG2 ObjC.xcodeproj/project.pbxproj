@@ -448,6 +448,7 @@
 		C4A57B0524AEFEAF00E9FF7F /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		C4A5A49A24AF03EF00E9FF7F /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		C4A5A49B24AF03EF00E9FF7F /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Driver.cpp; sourceTree = "<group>"; };
+		C4B8C6F426521DB700AFD9E6 /* Permutations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Permutations.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -519,6 +520,7 @@
 		C4A5502424AEFD6400E9FF7F /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				C4B8C6F426521DB700AFD9E6 /* Permutations.h */,
 				C4A5502524AEFD6400E9FF7F /* StatUtil.h */,
 				C4A5502624AEFD6400E9FF7F /* MapOverlay.h */,
 				C4A5502724AEFD6400E9FF7F /* Perceptron.h */,
