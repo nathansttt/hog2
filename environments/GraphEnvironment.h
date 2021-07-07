@@ -11,7 +11,6 @@
 #define GRAPHENVIRONMENT_H
 
 
-#include "SearchEnvironment.h"
 #include "UnitSimulation.h"
 #include "Graph.h"
 //#include "GraphAbstraction.h"
