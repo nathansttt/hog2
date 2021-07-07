@@ -49,6 +49,7 @@ PROJECTS = \
   demos/astar \
   demos/idastar \
   demos/fastmap \
+  demos/pancake \
   papers/IBEX \
   papers/DWA \
 	tests/mnpuzzle \
