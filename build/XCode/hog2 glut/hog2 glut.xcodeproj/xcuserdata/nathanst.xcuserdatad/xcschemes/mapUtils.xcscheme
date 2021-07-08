@@ -83,6 +83,10 @@
             argument = "-buildProblemSet /Users/nathanst/hog2/maps/cities/map/Berlin_0_256.map"
             isEnabled = "NO">
          </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-screen /Users/nathanst/hog2/maps/cities/map/Berlin_0_256.map"
+            isEnabled = "YES">
+         </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
    <ProfileAction

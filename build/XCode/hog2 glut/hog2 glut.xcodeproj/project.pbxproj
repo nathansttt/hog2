@@ -3224,6 +3224,7 @@
 		C4EE617D1651BB9A00B038E5 /* emotion-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "emotion-Info.plist"; sourceTree = SOURCE_ROOT; };
 		C4F134CA2089A30B00AC26BC /* Graphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graphics.h; sourceTree = "<group>"; };
 		C4F134CB2089A30B00AC26BC /* Graphics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Graphics.cpp; sourceTree = "<group>"; };
+		C4F3F291267C4CF1001FB029 /* Permutations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Permutations.h; sourceTree = "<group>"; };
 		C4F40A471CC5F53800721F25 /* IndexOpenClosed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IndexOpenClosed.h; sourceTree = "<group>"; };
 		C4F526C014AA79BE00025B71 /* PEAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEAStar.h; sourceTree = "<group>"; };
 		C4F91A3F152F920E007E11DC /* GridLSSLRTAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GridLSSLRTAStar.h; sourceTree = "<group>"; };
@@ -4461,6 +4462,7 @@
 		C4F9F3F313E4FE3F0077C5A5 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				C4F3F291267C4CF1001FB029 /* Permutations.h */,
 				C498D8DC1444F0550053D322 /* BitMap.cpp */,
 				C498D8DD1444F0550053D322 /* BitMap.h */,
 				C4F9F3F413E4FE400077C5A5 /* BitVector.cpp */,
