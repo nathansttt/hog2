@@ -258,12 +258,6 @@ const float epsilon = 0.5f; // in screen pixels
 							   [self hogToScreenY:r.top viewport:v],
 							   [self hogToScreenX:r.right viewport:v]-[self hogToScreenX:r.left viewport:v],
 							   [self hogToScreenY:r.bottom viewport:v]-[self hogToScreenY:r.top viewport:v]);
-//							   (r.right-r.left)*xscale,
-//							   -((r.bottom-r.top)*yscale));
-//							   (r.left*xscale+xoffset),
-//							   height-(r.top*yscale+yoffset),
-//							   ((r.right-r.left)*xscale),
-//							   -((r.bottom-r.top)*yscale));
 	result = CGRectInset(result, -epsilon, -epsilon);
 	return result;
 }
