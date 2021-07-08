@@ -56,6 +56,7 @@ SRC_CPP = \
 	environments/NaryTree.cpp \
 	environments/RoadMap.cpp \
 	environments/SnakeBird.cpp \
+	environments/Racetrack.cpp \
 	environments/DynamicWeightedGrid.cpp \
 #	environments/WeightedMap2DEnvironment.cpp \
 #	environments/PancakePuzzle.cpp \
