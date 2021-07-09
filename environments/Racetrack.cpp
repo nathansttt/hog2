@@ -37,26 +37,31 @@ bool operator==(const RacetrackMove &m1, const RacetrackMove &m2) {
 Racetrack::Racetrack(Map *map)
 {
 	me = new MapEnvironment(map);
-}
+} // Location should always be in the screen
 
 Racetrack::~Racetrack()
 {
 	delete me;
 }
-
+//  --- First Step
 void Racetrack::GetSuccessors(const RacetrackState &nodeID, std::vector<RacetrackState> &neighbors) const
 {
 	
 }
 
 void Racetrack::GetActions(const RacetrackState &nodeID, std::vector<RacetrackMove> &actions) const
-{
+{ // Search up vector -- initialize structs
+
+
+
+
 	
 }
 
 void Racetrack::ApplyAction(RacetrackState &s, RacetrackMove a) const
-{
-	
+{ // When x y velocity and action is applied -- location changes when veolocity changes
+	s.x = s.x + a.xDelta*s.xVelocity;
+	s.y = s.y + a.yDelta*s.yVelocity;
 }
 
 bool Racetrack::InvertAction(RacetrackMove &a) const
@@ -90,9 +95,12 @@ void Racetrack::Draw(Graphics::Display &display) const
 	me->Draw(display);
 }
 
-void Racetrack::Draw(Graphics::Display &display, const RacetrackState&) const
+void Racetrack::Draw(Graphics::Display &display, const RacetrackState &s) const
 {
 	// TODO: draw agent location and movement vector
+// draw a line
+// hog2 graph -- 0,0 in the middle -- upper left -1, -1 bottom left 1, 1 -- window can be scaled -- Coordinates have to be floats
+	std::cout << "...Drawing a car!" << std::endl;
 
 }
 void Racetrack::DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const
