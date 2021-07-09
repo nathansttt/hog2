@@ -222,6 +222,11 @@ const edge *Graph::FindEdge(unsigned int from, unsigned int to) const
 	return 0;
 }
 
+/**
+ * Finds an edge between nodes with ids from and to, no matter which direction
+ *
+ * \return the edge found or null if no edge is found
+ */
 edge *Graph::FindEdge(unsigned int from, unsigned int to)
 {
 	node *n = GetNode(from);

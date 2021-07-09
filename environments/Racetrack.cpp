@@ -7,14 +7,13 @@
 
 std::ostream &operator<<(std::ostream &out, const RacetrackState &s)
 {
-	out << "{" << s.x << ", " << s.y << "}:(" << s.xVelocity << ", " << s.yVelocity << ")";
+	out << "{" << s.loc << "}:(" << s.xVelocity << ", " << s.yVelocity << ")";
 	return out;
 }
 
 bool operator==(const RacetrackState &l1, const RacetrackState &l2) {
 	return
-	((l1.x == l2.x) &&
-	 (l1.y == l2.y) &&
+	((l1 == l2) &&
 	 (l1.xVelocity == l2.xVelocity) &&
 	 (l1.yVelocity == l2.yVelocity));
 }
@@ -37,13 +36,27 @@ bool operator==(const RacetrackMove &m1, const RacetrackMove &m2) {
 Racetrack::Racetrack(Map *map)
 {
 	me = new MapEnvironment(map);
+<<<<<<< HEAD
 } // Location should always be in the screen
+=======
+	this->map = map;
+}
+>>>>>>> 7f796d409e520b96a44987fbf179310cce58d4d4
 
 Racetrack::~Racetrack()
 {
 	delete me;
 }
+<<<<<<< HEAD
 //  --- First Step
+=======
+
+void Racetrack::Reset(RacetrackState &s)
+{
+	
+}
+
+>>>>>>> 7f796d409e520b96a44987fbf179310cce58d4d4
 void Racetrack::GetSuccessors(const RacetrackState &nodeID, std::vector<RacetrackState> &neighbors) const
 {
 	
@@ -102,7 +115,11 @@ void Racetrack::Draw(Graphics::Display &display, const RacetrackState &s) const
 // hog2 graph -- 0,0 in the middle -- upper left -1, -1 bottom left 1, 1 -- window can be scaled -- Coordinates have to be floats
 	std::cout << "...Drawing a car!" << std::endl;
 
+void Racetrack::Draw(Graphics::Display &display, const RacetrackState&s) const
+{
+	// TODO: draw agent location and movement vector
 }
+
 void Racetrack::DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const
 {
 	// TODO: draw line between to locations

@@ -34,6 +34,7 @@ int main(int argc, char **argv)
 #include <math.h>
 #include <string.h>
 #include <cassert>
+#include "MonoFont.h"
 
 using namespace std;
 
@@ -53,7 +54,9 @@ double fps = 30.0;
 int width=100, height=100;
 Graphics::rect screenRect;
 Graphics::point WindowToHOG(const Graphics::point &p);
-
+MonoFont font;
+std::vector<Graphics::Display::lineInfo> textLines;
+	
 pRecContext GetContext(unsigned long windowID)
 {
 	return pContextInfo;
@@ -158,6 +161,7 @@ void RunHOGGUI(int argc, char* argv[], int xDimension, int yDimension)
 					case sf::Mouse::Middle:
 						HandleMouse(pContextInfo, p, kMiddleButton, kMouseDown);
 						break;
+					default: break;
 					}
 				}
 				break;
@@ -891,21 +895,6 @@ void DoDrawCommands(Graphics::Display &display, int port, sf::Window &window, st
 				glVertex2f(r2.left, r2.bottom);
 
 
-				// 				glVertex2f(tmp.left-rad, tmp.bottom+rad);
-				// glVertex2f(tmp.left+rad, tmp.bottom-rad);
-					
-				// glVertex2f(tmp.left-rad, tmp.top-rad);
-				// glVertex2f(tmp.left+rad, tmp.top+rad);
-					
-				// glVertex2f(tmp.right+rad, tmp.top-rad);
-				// glVertex2f(tmp.right-rad, tmp.top+rad);
-					
-				// glVertex2f(tmp.right+rad, tmp.bottom+rad);
-				// glVertex2f(tmp.right-rad, tmp.bottom-rad);
-					
-				// glVertex2f(tmp.left-rad, tmp.bottom+rad);
-				// glVertex2f(tmp.left+rad, tmp.bottom-rad);
-
 				glEnd();
 
 
@@ -948,9 +937,9 @@ void DoDrawCommands(Graphics::Display &display, int port, sf::Window &window, st
 				Graphics::point tmp1 = ViewportToScreen(i.line.start, i.viewport);
 				Graphics::point tmp2 = ViewportToScreen(i.line.end, i.viewport);
 				GLfloat xOff = tmp1.x-tmp2.x;
-				GLfloat yOff = tmp1.y-tmp2.y;
-				GLfloat ratio = ViewportToScreenX(i.line.width, i.viewport)/sqrt(xOff*xOff+yOff*yOff);
-				//std::cout << tmp1 << " <-> " << tmp2 << " " << ratio << "\n";
+				GLfloat yOff = tmp2.y-tmp1.y;
+				GLfloat ratio = ViewportToScreenX(0.5*i.line.width, i.viewport)/sqrt(xOff*xOff+yOff*yOff);
+
 				glBegin(GL_QUADS);
 				glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
 				glVertex3f(tmp1.x-ratio*yOff, tmp1.y-ratio*xOff, tmp1.z);
@@ -958,23 +947,40 @@ void DoDrawCommands(Graphics::Display &display, int port, sf::Window &window, st
 				glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
 				glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
 				glEnd();
-				// printf("{%f, %f}, {%f, %f}, {%f, %f}, {%f, %f}\n",
-				// 	   tmp1.x-ratio*yOff, tmp1.y-ratio*xOff,
-				// 	   tmp1.x+ratio*yOff, tmp1.y+ratio*xOff,
-				// 	   tmp2.x+ratio*yOff, tmp2.y+ratio*xOff,
-				// 	   tmp2.x-ratio*yOff, tmp2.y-ratio*xOff);
-				// glLineWidth(i.line.width);
-				// glBegin(GL_LINES);
-				// glColor3f(i.line.c.r, i.line.c.g, i.line.c.b);
-				// glVertex2f(i.line.start.x, i.line.start.y);
-				// glVertex2f(i.line.end.x, i.line.end.y);
-				// glEnd();
-				//				epsilon -= de;
+				printf("(%f, %f) to (%f, %f); ",
+					   tmp1.x-ratio*yOff, tmp1.y-ratio*xOff,
+					   tmp1.x+ratio*yOff, tmp1.y+ratio*xOff);
+				printf("(%f, %f) to (%f, %f)\n",
+					   tmp2.x+ratio*yOff, tmp2.y+ratio*xOff,
+					   tmp2.x-ratio*yOff, tmp2.y-ratio*xOff);
 				break;
 			}
 		}
 	}
 
+}
+
+void DrawLines(std::vector<Graphics::Display::lineInfo> &textLines, int viewport)
+{
+	for (auto i : textLines)
+	{
+		Graphics::point tmp1 = ViewportToScreen(i.start, viewport);
+		Graphics::point tmp2 = ViewportToScreen(i.end, viewport);
+		GLfloat xOff = tmp1.x-tmp2.x;
+		GLfloat yOff = tmp2.y-tmp1.y;
+		GLfloat wide = ViewportToScreenX(0.5f*i.width, viewport);
+		GLfloat ratio = wide/sqrt(xOff*xOff+yOff*yOff);
+		
+		glBegin(GL_QUADS);
+		glColor3f(i.c.r, i.c.g, i.c.b);
+		glVertex3f(tmp1.x-ratio*yOff, tmp1.y-ratio*xOff, tmp1.z);
+		glVertex3f(tmp1.x+ratio*yOff, tmp1.y+ratio*xOff, tmp1.z);
+		glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
+		glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
+		glEnd();
+		DrawCircle(tmp1.x, tmp1.y, wide, 16);
+		DrawCircle(tmp2.x, tmp2.y, wide, 16);
+	}
 }
 
 void DrawGraphics(Graphics::Display &display, int port, sf::Window &window)
@@ -991,46 +997,29 @@ void DrawGraphics(Graphics::Display &display, int port, sf::Window &window)
 			Graphics::point tmp1 = ViewportToScreen(i.points[t], i.viewport);
 			Graphics::point tmp2 = ViewportToScreen(i.points[t+1], i.viewport);
 			GLfloat xOff = tmp1.x-tmp2.x;
-			GLfloat yOff = tmp1.y-tmp2.y;
-			GLfloat ratio = i.size/sqrt(xOff*xOff+yOff*yOff);
+			GLfloat yOff = tmp2.y-tmp1.y;
+			GLfloat ratio = 0.5f*i.size/sqrt(xOff*xOff+yOff*yOff);
 			glVertex3f(tmp1.x-ratio*yOff, tmp1.y-ratio*xOff, tmp1.z);
 			glVertex3f(tmp1.x+ratio*yOff, tmp1.y+ratio*xOff, tmp1.z);
 			glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
 			glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
 		}
 		glEnd();
-
-//		glLineWidth(i.size);
-//		glBegin(GL_LINE_STRIP);
-//		for (auto &p : i.points)
-//		{
-//			glVertex3f(p.x, p.y, p.z);
-//		}
-//		glEnd();
 	}
-	//for (int x = display.backgroundDrawCommands.size()-1; x >= 0; x--)
 	DoDrawCommands(display, port, window, display.backgroundDrawCommands);
-
-	
-//	float epsilon = 0.0002;
-//	float de = 0.00008;
-	//for (int x = 0; x < display.backgroundDrawCommands.size(); x++)
-	for (auto &i : display.text)
+	for (auto &i : display.backgroundText)
 	{
 		if (i.viewport != port)
 			continue;
-		glColor3f(i.c.r, i.c.g, i.c.b);
-		if (i.align == Graphics::textAlignCenter)
-			DrawTextCentered(i.loc.x, i.loc.y,i.loc.z, i.size*2, i.s.c_str());
-		else
-			DrawText(i.loc.x, i.loc.y,i.loc.z, i.size*2, i.s.c_str());
-		//		std::string s;
-		//		point loc;
-		//		rgbColor c;
-		//		float size;
-		
+
+		font.GetTextLines(textLines,
+						  i.loc, i.s.c_str(), i.size,
+						  i.c,
+						  i.align, i.base);
+		DrawLines(textLines, i.viewport);
 	}
 
+	
 	for (auto &i : display.lineSegments)
 	{
 		if (i.viewport != port)
@@ -1044,35 +1033,28 @@ void DrawGraphics(Graphics::Display &display, int port, sf::Window &window)
 			Graphics::point tmp2 = ViewportToScreen(i.points[t+1], i.viewport);
 			GLfloat xOff = tmp1.x-tmp2.x;
 			GLfloat yOff = tmp1.y-tmp2.y;
-			GLfloat ratio = i.size/sqrt(xOff*xOff+yOff*yOff);
+			GLfloat ratio = 0.5f*i.size/sqrt(xOff*xOff+yOff*yOff);
 			glVertex3f(tmp1.x-ratio*yOff, tmp1.y-ratio*xOff, tmp1.z);
 			glVertex3f(tmp1.x+ratio*yOff, tmp1.y+ratio*xOff, tmp1.z);
 			glVertex3f(tmp2.x+ratio*yOff, tmp2.y+ratio*xOff, tmp1.z);
 			glVertex3f(tmp2.x-ratio*yOff, tmp2.y-ratio*xOff, tmp1.z);
-			// glVertex3f(i.points[t].x-ratio*yOff, i.points[t].y-ratio*xOff, i.points[t].z);
-			// glVertex3f(i.points[t].x+ratio*yOff, i.points[t].y+ratio*xOff, i.points[t].z);
-			// glVertex3f(i.points[t+1].x+ratio*yOff, i.points[t+1].y+ratio*xOff, i.points[t].z);
-			// glVertex3f(i.points[t+1].x-ratio*yOff, i.points[t+1].y-ratio*xOff, i.points[t].z);
 		}
 		glEnd();
 		
-//		glLineWidth(i.size);
-//		glBegin(GL_LINE_STRIP);
-//		for (auto &p : i.points)
-//		{
-//			glVertex3f(p.x, p.y, p.z);
-//		}
-//		glEnd();
-	}
-	
+	}	
 	DoDrawCommands(display, port, window, display.drawCommands);
-//	std::vector<data> backgroundDrawCommands;
-//	std::vector<textInfo> backgroundText;
-//	std::vector<segments> backgroundLineSegments;
-//
-//	std::vector<data> drawCommands;
-//	std::vector<textInfo> text;
-//	std::vector<segments> lineSegments;
+	for (auto &i : display.text)
+	{
+		if (i.viewport != port)
+			continue;
+
+		font.GetTextLines(textLines,
+						  i.loc, i.s.c_str(), i.size,
+						  i.c,
+						  i.align, i.base);
+		DrawLines(textLines, i.viewport);
+	}
+
 }
 
 /**

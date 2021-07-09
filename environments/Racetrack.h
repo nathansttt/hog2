@@ -24,6 +24,9 @@ struct RacetrackMove { // -1, 1
 struct RacetrackState { // State of the car/racetrack
 	int x, y;
 	int xVelocity = 1, yVelocity = 1;
+struct RacetrackState {
+	xyLoc loc;
+	int xVelocity, yVelocity;
 };
 
 std::ostream &operator<<(std::ostream &out, const RacetrackState &s);
@@ -46,6 +49,9 @@ public:
 	{ std::vector<RacetrackState> neighbors; GetSuccessors(stateID, neighbors); return (int)neighbors.size(); }
 	
 	void ApplyAction(RacetrackState &s, RacetrackMove a) const; // a = action s(state) gets changed
+	void Reset(RacetrackState &s);
+	
+	void ApplyAction(RacetrackState &s, RacetrackMove a) const;
 	bool InvertAction(RacetrackMove &a) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
@@ -72,6 +78,7 @@ public:
 protected: // take two states and draw a line
 private:
 	MapEnvironment *me;
+	Map *map;
 };
 
 
