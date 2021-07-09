@@ -22,7 +22,7 @@ struct RacetrackMove {
 };
 
 struct RacetrackState {
-	int x, y;
+	xyLoc loc;
 	int xVelocity, yVelocity;
 };
 
@@ -44,6 +44,8 @@ public:
 	void GetActions(const RacetrackState &nodeID, std::vector<RacetrackMove> &actions) const;
 	int GetNumSuccessors(const RacetrackState &stateID) const
 	{ std::vector<RacetrackState> neighbors; GetSuccessors(stateID, neighbors); return (int)neighbors.size(); }
+	
+	void Reset(RacetrackState &s);
 	
 	void ApplyAction(RacetrackState &s, RacetrackMove a) const;
 	bool InvertAction(RacetrackMove &a) const;
@@ -72,6 +74,7 @@ public:
 protected:
 private:
 	MapEnvironment *me;
+	Map *map;
 };
 
 
