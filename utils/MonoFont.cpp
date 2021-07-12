@@ -12,122 +12,108 @@
 #include <string.h>
 #include "MonoFont.h"
 
-void MonoFont::DrawText(Graphics::point location, const char *text, float height, Graphics::textAlign align, Graphics::textBaseline base)
+/**
+ * \param height Height of the text
+ * \param location Where to draw the text; depends on the alignment and baseline
+ * \param text The text to draw
+ */
+void MonoFont::GetTextLines(std::vector<Graphics::Display::lineInfo> &lines,
+							Graphics::point location,
+							const char *text, float height,
+							const rgbColor &color,
+							Graphics::textAlign align, Graphics::textBaseline base)
 {
+	lines.resize(0);
 	Graphics::point loc = location;
 	// 1. Get character width / space size / text length
-	int length = strlen(text);
-	float textLength = length*height/2.0f;
-	float charLength = height/2.0f + height/4.0f;
-
-	// 2. Get bottom left location of text
+	auto length = strlen(text);
+	float charLength = 5.0f*height/9.0f + 0.5f*height/9.0f;
+	float textLength = length*charLength-0.5f*height/9.0f;
+//	float charLength = height/2.0f + height/4.0f;
+//	float textLength = length*charLength-height/4.0f;
+	
+	// 2. Get top/left location of text
 	loc = location;
+	switch (base)
+	{
+		case Graphics::textBaselineTop:
+			break;
+		case Graphics::textBaselineMiddle:
+			loc.y -= height*0.5f;
+			break;
+		case Graphics::textBaselineBottom:
+			loc.y -= height;
+			break;
+	}
+	switch (align)
+	{
+		case Graphics::textAlignCenter:
+			loc.x -= textLength*0.5f;
+			break;
+		case Graphics::textAlignLeft:
+			break;
+		case Graphics::textAlignRight:
+			loc.x -= textLength;
+			break;
+	}
 	
 	// 3. Draw text
 	for (int x = 0; x < length; x++)
 	{
-		DrawChar(text[x], loc, height);
+		DrawChar(lines, text[x], loc, height, color);
 		loc.x += charLength;
 	}
 }
 
-// void MonoFont::Draw()
-// {
-// 	glLineWidth(1);
-// 	double wide, charWidth;
-// 	wide = br.x-tl.x;
-// 	//high = tl.y-br.y;
-// 	charWidth = wide/charLine;
-// 	GLint matrixMode;
-// 	if (scrolling)
-// 		glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
+/**
+ * \param height Height of the text
+ * \param location Where to draw the text; depends on the alignment and baseline
+ * \param text The text to draw
+ */
+void MonoFont::DrawText(Graphics::Display &display,
+						Graphics::point location,
+						const char *text, float height,
+						const rgbColor &color,
+						Graphics::textAlign align, Graphics::textBaseline base)
+{
+	Graphics::point loc = location;
+	// 1. Get character width / space size / text length
+	auto length = strlen(text);
+	float charLength = 5.0f*height/9.0f + 0.5f*height/9.0f;
+	float textLength = length*charLength-0.5f*height/9.0f;
+
+	// 2. Get top/left location of text
+	loc = location;
+	switch (base)
+	{
+		case Graphics::textBaselineTop:
+			break;
+		case Graphics::textBaselineMiddle:
+			loc.y -= height*0.5f;
+			break;
+		case Graphics::textBaselineBottom:
+			loc.y -= height;
+			break;
+	}
+	switch (align)
+	{
+		case Graphics::textAlignCenter:
+			loc.x -= textLength*0.5f;
+			break;
+		case Graphics::textAlignLeft:
+			break;
+		case Graphics::textAlignRight:
+			loc.x -= textLength;
+			break;
+	}
 	
-// 	glEnable(GL_BLEND); // for text fading
-// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // ditto
-
-// 	if (dList == 0)
-// 	{
-// 		// set orthograhic 1:1  pixel transform in local view coords
-// 		glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
-		
-// 		dList = glGenLists(1);
-// 		glNewList(dList, GL_COMPILE);
-
-// 		glDisable(GL_DEPTH_TEST);
-// 		if ((deform) && (!scrolling))
-// 		{
-// 			glMatrixMode(GL_PROJECTION);
-// 			glPushMatrix();
-// 			glLoadIdentity();
-// 			glMatrixMode(GL_MODELVIEW);
-// 			glPushMatrix();
-// 			glLoadIdentity();
-// 			glColor3f(myColor.r, myColor.g, myColor.b);
-// 		}
-// 		glBegin(GL_LINES);
-//     //printf("drawing text \"%s\"\n", text);
-// 		for (unsigned int x = 0; x < strlen(text); x++)
-// 		{
-// 			point3d np = tl;
-// 			np.x+=(x%charLine)*charWidth+charWidth/7.5;
-// 			np.z-=(x/charLine)*charWidth*2+charWidth/7.5;
-// 			drawChar(text[x], np, 2*(charWidth-charWidth/(7.5/2)));
-//       //printf("%c/%d ", text[x], (int)text[x]);
-// 		}
-//     //printf("\n");
-// 		glEnd();
-
-// 		// reset orginal martices
-// 		if ((deform) && (!scrolling))
-// 		{
-// 			glPopMatrix(); // GL_MODELVIEW
-// 			glMatrixMode(GL_PROJECTION);
-// 			glPopMatrix();
-// 			glMatrixMode(matrixMode);
-// 		}
-// 		glEnable(GL_DEPTH_TEST);
-// 		glEndList();
-
-// 		//glReportError();
-// 	}
-// 	if (dList)
-// 	{
-// 		if (scrolling)
-// 		{
-// 			if (deform)
-// 			{
-// 				glMatrixMode(GL_PROJECTION);
-// 				glPushMatrix();
-// 				glLoadIdentity();
-// 				glMatrixMode(GL_MODELVIEW);
-// 				glPushMatrix();
-// 				glLoadIdentity();
-// 			}
-// 			glColor3f(myColor.r, myColor.g, myColor.b);
-// 			glTranslated(0, elapsedTime/30.0, 0);
-// 			glCallList(dList);
-// 			glColor4f(myColor.r, myColor.g, myColor.b, .5);
-// 			glTranslated(0, -1.0/350.0, 0); // 700 pixel = 2, 1 pixel = 1/350
-// 			glCallList(dList);
-// 			glColor4f(myColor.r, myColor.g, myColor.b, .25);
-// 			glTranslated(0, -1.0/350.0, 0); // 700 pixel = 2, 1 pixel = 1/350
-// 			glCallList(dList);
-// 			glTranslated(0, -elapsedTime/30.0+2.0/350.0, 0);
-
-// 			if (deform)
-// 			{
-// 				glPopMatrix(); // GL_MODELVIEW
-// 				glMatrixMode(GL_PROJECTION);
-// 				glPopMatrix();
-// 				glMatrixMode(matrixMode);
-// 			}
-// 		}
-// 		else
-// 			glCallList(dList);
-// 	}
-// 	glDisable(GL_BLEND); // for text fading
-// }
-
+	// 3. Draw text
+	for (int x = 0; x < length; x++)
+	{
+		DrawChar(display, text[x], loc, height, color);
+		loc.x += charLength;
+	}
+}
 /*
  *  _ _   0, 1
  * |X|X|  2, 3/, 4\, 5, 6/, 7\, 8
@@ -139,7 +125,7 @@ void MonoFont::DrawText(Graphics::point location, const char *text, float height
  *
  */
 
-void MonoFont::DrawChar(char c, point3d where, double height)
+void MonoFont::DrawChar(Graphics::Display &display, char c, point3d where, float height, rgbColor color)
 {
 	uint32_t bMap = GetBitmap(toupper(c));
 	for (int x = 0; x < 30; x++)
@@ -147,36 +133,80 @@ void MonoFont::DrawChar(char c, point3d where, double height)
 		if (bMap&0x1)
 		{
 			switch (x) {
-				case 0: DrawLine(where, 0, 0, 1, 0, height); break;
-				case 1: DrawLine(where, 1, 0, 1, 0, height); break;
-				case 2: DrawLine(where, 0, 0, 0, 1, height); break;
-				case 3: DrawLine(where, 0, 1, 1, -1, height); break;
-				case 4: DrawLine(where, 0, 0, 1, 1, height); break;
-				case 5: DrawLine(where, 1, 0, 0, 1, height); break;
-				case 6: DrawLine(where, 1, 1, 1, -1, height); break;
-				case 7: DrawLine(where, 1, 0, 1, 1, height); break;
-				case 8: DrawLine(where, 2, 0, 0, 1, height); break;
-				case 9: DrawLine(where, 0, 1, 0, 1, height); break;
-				case 10: DrawLine(where, 0, 1, 1, 1, height); break;
-				case 11: DrawLine(where, 1, 1, 0, 1, height); break;
-				case 12: DrawLine(where, 1, 2, 1, -1, height); break;
-				case 13: DrawLine(where, 2, 1, 0, 1, height); break;
-				case 14: DrawLine(where, 0, 2, 1, 0, height); break;
-				case 15: DrawLine(where, 1, 2, 1, 0, height); break;
-				case 16: DrawLine(where, 0, 2, 0, 1, height); break;
-				case 17: DrawLine(where, 0, 3, 1, -1, height); break;
-				case 18: DrawLine(where, 1, 2, 0, 1, height); break;
-				case 19: DrawLine(where, 1, 2, 1, 1, height); break;
-				case 20: DrawLine(where, 2, 2, 0, 1, height); break;
-				case 21: DrawLine(where, 0, 3, 0, 1, height); break;
-				case 22: DrawLine(where, 0, 4, 1, -1, height); break;
-				case 23: DrawLine(where, 0, 3, 1, 1, height); break;
-				case 24: DrawLine(where, 1, 3, 0, 1, height); break;
-				case 25: DrawLine(where, 1, 4, 1, -1, height); break;
-				case 26: DrawLine(where, 1, 3, 1, 1, height); break;
-				case 27: DrawLine(where, 2, 3, 0, 1, height); break;
-				case 28: DrawLine(where, 0, 4, 1, 0, height); break;
-				case 29: DrawLine(where, 1, 4, 1, 0, height); break;
+				case 0: DrawLine(display, where, 0, 0, 1, 0, height, color); break;
+				case 1: DrawLine(display, where, 1, 0, 1, 0, height, color); break;
+				case 2: DrawLine(display, where, 0, 0, 0, 1, height, color); break;
+				case 3: DrawLine(display, where, 0, 1, 1, -1, height, color); break;
+				case 4: DrawLine(display, where, 0, 0, 1, 1, height, color); break;
+				case 5: DrawLine(display, where, 1, 0, 0, 1, height, color); break;
+				case 6: DrawLine(display, where, 1, 1, 1, -1, height, color); break;
+				case 7: DrawLine(display, where, 1, 0, 1, 1, height, color); break;
+				case 8: DrawLine(display, where, 2, 0, 0, 1, height, color); break;
+				case 9: DrawLine(display, where, 0, 1, 0, 1, height, color); break;
+				case 10: DrawLine(display, where, 0, 1, 1, 1, height, color); break;
+				case 11: DrawLine(display, where, 1, 1, 0, 1, height, color); break;
+				case 12: DrawLine(display, where, 1, 2, 1, -1, height, color); break;
+				case 13: DrawLine(display, where, 2, 1, 0, 1, height, color); break;
+				case 14: DrawLine(display, where, 0, 2, 1, 0, height, color); break;
+				case 15: DrawLine(display, where, 1, 2, 1, 0, height, color); break;
+				case 16: DrawLine(display, where, 0, 2, 0, 1, height, color); break;
+				case 17: DrawLine(display, where, 0, 3, 1, -1, height, color); break;
+				case 18: DrawLine(display, where, 1, 2, 0, 1, height, color); break;
+				case 19: DrawLine(display, where, 1, 2, 1, 1, height, color); break;
+				case 20: DrawLine(display, where, 2, 2, 0, 1, height, color); break;
+				case 21: DrawLine(display, where, 0, 3, 0, 1, height, color); break;
+				case 22: DrawLine(display, where, 0, 4, 1, -1, height, color); break;
+				case 23: DrawLine(display, where, 0, 3, 1, 1, height, color); break;
+				case 24: DrawLine(display, where, 1, 3, 0, 1, height, color); break;
+				case 25: DrawLine(display, where, 1, 4, 1, -1, height, color); break;
+				case 26: DrawLine(display, where, 1, 3, 1, 1, height, color); break;
+				case 27: DrawLine(display, where, 2, 3, 0, 1, height, color); break;
+				case 28: DrawLine(display, where, 0, 4, 1, 0, height, color); break;
+				case 29: DrawLine(display, where, 1, 4, 1, 0, height, color); break;
+			}
+		}
+		bMap >>= 1;
+	}
+}
+
+void MonoFont::DrawChar(std::vector<Graphics::Display::lineInfo> &display, char c, point3d where, float height, rgbColor color)
+{
+	uint32_t bMap = GetBitmap(toupper(c));
+	for (int x = 0; x < 30; x++)
+	{
+		if (bMap&0x1)
+		{
+			switch (x) {
+				case 0: DrawLine(display, where, 0, 0, 1, 0, height, color); break;
+				case 1: DrawLine(display, where, 1, 0, 1, 0, height, color); break;
+				case 2: DrawLine(display, where, 0, 0, 0, 1, height, color); break;
+				case 3: DrawLine(display, where, 0, 1, 1, -1, height, color); break;
+				case 4: DrawLine(display, where, 0, 0, 1, 1, height, color); break;
+				case 5: DrawLine(display, where, 1, 0, 0, 1, height, color); break;
+				case 6: DrawLine(display, where, 1, 1, 1, -1, height, color); break;
+				case 7: DrawLine(display, where, 1, 0, 1, 1, height, color); break;
+				case 8: DrawLine(display, where, 2, 0, 0, 1, height, color); break;
+				case 9: DrawLine(display, where, 0, 1, 0, 1, height, color); break;
+				case 10: DrawLine(display, where, 0, 1, 1, 1, height, color); break;
+				case 11: DrawLine(display, where, 1, 1, 0, 1, height, color); break;
+				case 12: DrawLine(display, where, 1, 2, 1, -1, height, color); break;
+				case 13: DrawLine(display, where, 2, 1, 0, 1, height, color); break;
+				case 14: DrawLine(display, where, 0, 2, 1, 0, height, color); break;
+				case 15: DrawLine(display, where, 1, 2, 1, 0, height, color); break;
+				case 16: DrawLine(display, where, 0, 2, 0, 1, height, color); break;
+				case 17: DrawLine(display, where, 0, 3, 1, -1, height, color); break;
+				case 18: DrawLine(display, where, 1, 2, 0, 1, height, color); break;
+				case 19: DrawLine(display, where, 1, 2, 1, 1, height, color); break;
+				case 20: DrawLine(display, where, 2, 2, 0, 1, height, color); break;
+				case 21: DrawLine(display, where, 0, 3, 0, 1, height, color); break;
+				case 22: DrawLine(display, where, 0, 4, 1, -1, height, color); break;
+				case 23: DrawLine(display, where, 0, 3, 1, 1, height, color); break;
+				case 24: DrawLine(display, where, 1, 3, 0, 1, height, color); break;
+				case 25: DrawLine(display, where, 1, 4, 1, -1, height, color); break;
+				case 26: DrawLine(display, where, 1, 3, 1, 1, height, color); break;
+				case 27: DrawLine(display, where, 2, 3, 0, 1, height, color); break;
+				case 28: DrawLine(display, where, 0, 4, 1, 0, height, color); break;
+				case 29: DrawLine(display, where, 1, 4, 1, 0, height, color); break;
 			}
 		}
 		bMap >>= 1;
@@ -355,11 +385,44 @@ uint32_t MonoFont::GetBitmap(char c)
 	return index[(int)c];
 }
 
-// TODO: draw as quads not lines
-void MonoFont::DrawLine(point3d where, int startx, int starty, int offsetx, int offsety, double scale)
+/**
+ * \param where The top left corner of the text
+ * \param scale The height of the text
+ */
+void MonoFont::DrawLine(Graphics::Display &display, point3d where, int startx, int starty, int offsetx, int offsety, float scale, rgbColor color)
 {
+	//float unit = scale/21;
+//	float edgeLength = scale/4.0f;
+//	float lineWidth = scale/9.0f;
+	float lineWidth = scale/9.0f;
+	float edgeLength = 2.0f*lineWidth;//scale/4.0f;
+	Graphics::point p1(where.x+startx*edgeLength+lineWidth/2,
+					   where.y+starty*edgeLength+lineWidth/2);
+	Graphics::point p2(where.x+startx*edgeLength+lineWidth/2+offsetx*edgeLength,
+					   where.y+starty*edgeLength+lineWidth/2+offsety*edgeLength);
+	display.DrawLine(p1, p2, lineWidth, color);
 	// double unit = scale/4;
 	// glVertex2f(where.x+startx*unit, where.y-starty*unit);
 	// glVertex2f(where.x+startx*unit+offsetx*unit, where.y-starty*unit-offsety*unit);
+}
+
+
+
+//struct lineInfo {
+//	point start, end;
+//	rgbColor c;
+//	float width;
+//	bool arrow;
+//};
+void MonoFont::DrawLine(std::vector<Graphics::Display::lineInfo> &lines, point3d where, int startx, int starty, int offsetx, int offsety, float scale, rgbColor color)
+{
+	//float unit = scale/21;
+	float lineWidth = scale/9.0f;
+	float edgeLength = 2.0f*lineWidth;//scale/4.0f;
+	Graphics::point p1(where.x+startx*edgeLength+lineWidth/2,
+					   where.y+starty*edgeLength+lineWidth/2);
+	Graphics::point p2(where.x+startx*edgeLength+lineWidth/2+offsetx*edgeLength,
+					   where.y+starty*edgeLength+lineWidth/2+offsety*edgeLength);
+	lines.push_back({p1, p2, color, lineWidth, false});
 }
 

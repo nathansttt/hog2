@@ -4505,7 +4505,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "697"
             endingLineNumber = "697"
-            landmarkName = "MyDisplayHandler(windowID, mod, key)"
+            landmarkName = "DrawGameViewport(windowID)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4633,7 +4633,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "619"
             endingLineNumber = "619"
-            landmarkName = "MyCLHandler(argument, maxNumArgs)"
+            landmarkName = "DrawGameViewport(windowID)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4649,7 +4649,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "187"
             endingLineNumber = "187"
-            landmarkName = "LoadLevel19()"
+            landmarkName = "InstallHandlers()"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4681,7 +4681,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "809"
             endingLineNumber = "809"
-            landmarkName = "MyDisplayHandler(windowID, mod, key)"
+            landmarkName = "MyCLHandler(argument, maxNumArgs)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4745,7 +4745,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "750"
             endingLineNumber = "750"
-            landmarkName = "MyDisplayHandler(windowID, mod, key)"
+            landmarkName = "DrawGameViewport(windowID)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4777,7 +4777,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "448"
             endingLineNumber = "448"
-            landmarkName = "MyFrameHandler(windowID, viewport)"
+            landmarkName = "LoadLevel44()"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4841,7 +4841,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "447"
             endingLineNumber = "447"
-            landmarkName = "MyFrameHandler(windowID, viewport)"
+            landmarkName = "LoadLevel44()"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4985,7 +4985,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "435"
             endingLineNumber = "435"
-            landmarkName = "MyFrameHandler(windowID, viewport)"
+            landmarkName = "LoadLevel32()"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -5001,8 +5001,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "737"
             endingLineNumber = "737"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "resetCamera(pCamera)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -5065,7 +5065,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "642"
             endingLineNumber = "642"
-            landmarkName = "MyCLHandler(argument, maxNumArgs)"
+            landmarkName = "DrawGameViewport(windowID)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -5113,7 +5113,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "413"
             endingLineNumber = "413"
-            landmarkName = "MyWindowHandler(windowID, eType)"
+            landmarkName = "LoadLevel32()"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

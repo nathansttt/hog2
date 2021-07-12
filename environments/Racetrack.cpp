@@ -7,14 +7,13 @@
 
 std::ostream &operator<<(std::ostream &out, const RacetrackState &s)
 {
-	out << "{" << s.x << ", " << s.y << "}:(" << s.xVelocity << ", " << s.yVelocity << ")";
+	out << "{" << s.loc << "}:(" << s.xVelocity << ", " << s.yVelocity << ")";
 	return out;
 }
 
 bool operator==(const RacetrackState &l1, const RacetrackState &l2) {
 	return
-	((l1.x == l2.x) &&
-	 (l1.y == l2.y) &&
+	((l1 == l2) &&
 	 (l1.xVelocity == l2.xVelocity) &&
 	 (l1.yVelocity == l2.yVelocity));
 }
@@ -37,11 +36,17 @@ bool operator==(const RacetrackMove &m1, const RacetrackMove &m2) {
 Racetrack::Racetrack(Map *map)
 {
 	me = new MapEnvironment(map);
+	this->map = map;
 }
 
 Racetrack::~Racetrack()
 {
 	delete me;
+}
+
+void Racetrack::Reset(RacetrackState &s)
+{
+	
 }
 
 void Racetrack::GetSuccessors(const RacetrackState &nodeID, std::vector<RacetrackState> &neighbors) const
@@ -90,11 +95,11 @@ void Racetrack::Draw(Graphics::Display &display) const
 	me->Draw(display);
 }
 
-void Racetrack::Draw(Graphics::Display &display, const RacetrackState&) const
+void Racetrack::Draw(Graphics::Display &display, const RacetrackState&s) const
 {
 	// TODO: draw agent location and movement vector
-
 }
+
 void Racetrack::DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const
 {
 	// TODO: draw line between to locations

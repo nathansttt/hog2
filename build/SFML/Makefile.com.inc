@@ -26,12 +26,14 @@ AR = ar
 #endif
 
 ifeq ($(findstring "Darwin", "$(shell uname -s)"), "Darwin")
+COMMON_LNFLAGS += -framework OpenGL
+COMMON_CXXFLAGS += -DOS_MAC
+endif
+
 #ifeq ("$(OPENGL)", "STUB")
 #COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL
 #else
-#COMMON_CXXFLAGS += -DOS_MAC  
-COMMON_LNFLAGS += -framework OpenGL
-endif
+
 
 #else # not darwin
 
@@ -39,18 +41,18 @@ endif
 ifeq ($(findstring "Linux", "$(shell uname -s)"), "Linux")
 COMMON_LNFLAGS +=  -lGL -pthread #-lGLU -lglut
 endif
+
 #COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -Lpapers/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -pthread #--stdlib=libstdc++ # -lXi -lXmu
 #else
 #COMMON_LNFLAGS += -Lapps/libs -Ldemos/libs -Lpapers/libs -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lpthread #--stdlib=libstdc++ # -lXi -lXmu 
 #endif
 
 #ifeq ("$(OPENGL)", "STUB")
-COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL
+#COMMON_CXXFLAGS += -I$(ROOT)/gui/ -I$(ROOT)/gui/GL/ -DNO_OPENGL
 #else
 #COMMON_CXXFLAGS += -I/usr/include/GL
 #COMMON_LNFLAGS +=  -lGL -lGLU -lglut
 #endif
-
 #endif
 
 COMMON_LNFLAGS += -lsfml-graphics -lsfml-window -lsfml-system
