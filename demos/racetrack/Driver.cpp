@@ -15,6 +15,7 @@
 #include <string>
 #include "Racetrack.h"
 
+
 bool recording = false;
 bool running = false;
 
@@ -71,8 +72,12 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		ReinitViewports(windowID, {-1, -1, 1, 1}, kScaleToSquare);
 		
-		m = new Map(11, 11);
-		m->SetTerrainType(0, 0, kStartTerrain);
+		m = new Map(30, 30);
+		
+		for (int x = 0; x <10; x++)
+		{
+			m->SetTerrainType(x+10, 0, kStartTerrain);
+		}
 		for (int x = 0; x < 5; x++)
 		{
 			m->SetTerrainType(x, 5, kTrees);
@@ -83,6 +88,7 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 			m->SetTerrainType(x, 9, kEndTerrain);
 		}
 		r = new Racetrack(m);
+		r->Reset(s);
 	}
 }
 
@@ -95,7 +101,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 	// Draw map
 	r->Draw(display);
 	// Draw "racecar"
-	r->Draw(display, s);
+	r->Draw(display, s); //Draws the state of the racetrack
 	
 	return;
 }
@@ -123,27 +129,31 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 	{
 		case 'r':
 			// TODO: Reset to start state
+			r->Reset(s);
 			break;
 			// TODO: Make appropriate movements
 			// TODO: Add support for WASD here
 		case kUpArrow: // y velocity goes up
 			std::cout << "Up arrow!" << std::endl;
-			s.yVelocity = s.yVelocity + 1;
-			if (s.yVelocity > 5){
-				s.yVelocity = 5;
-			}
-			std::cout << s.yVelocity << std::endl;
+			v.xDelta = 0;
+			v.yDelta = -1;
+			r->ApplyAction(s, v);
 			break;
 		case kDownArrow:
 			std::cout << "Down arrow!" << std::endl;
-			s.yVelocity = s.yVelocity - 1;
-			if (s.yVelocity < 0){
-				s.yVelocity = 0;
-			}
+			v.xDelta = 0;
+			v.yDelta = 1;
+			r->ApplyAction(s, v);
 			break;
 		case kLeftArrow:
+			v.xDelta = -1;
+			v.yDelta = 0;
+			r->ApplyAction(s, v);
 			break;
 		case kRightArrow:
+			v.xDelta = 1;
+			v.yDelta = 0;
+			r->ApplyAction(s, v);
 			break;
 		// --- Support for WASD --- //
 		case 'w':
@@ -155,10 +165,44 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key) /
 			std::cout << "The S key!" << std::endl;
 		case 'd':
 			std::cout << "The D key!" << std::endl;
+
 		default:
 			break;
 	}
+	// ---- Boundaries ---- //
+
+	if (s.loc.x > 60000)
+	{
+		std::cout << "Too far left!! D: \n";
+		s.loc.x = 0;
+		s.xVelocity = 0;
+		v.xDelta = 0;
+		
+	}
+	else if (s.loc.x >= m->GetMapWidth())
+	{
+		std::cout << "X LOCATION GREATER THAN MAP WIDTH \n";
+		s.loc.x = m->GetMapWidth()-1;
+		s.xVelocity = 0;
+		v.xDelta = 0;
+	}
+	if (s.loc.y > 60000)
+		{
+			std::cout << "Too high up!! \n";
+			s.loc.y = 0;
+			s.yVelocity = 0;
+			v.yDelta = 0;
+		}
 	
+	else if (s.loc.y >= m->GetMapHeight())
+	{
+		std::cout << "Too far down! \n";
+		s.loc.y = m->GetMapHeight()-1;
+		s.yVelocity = 0;
+		v.yDelta = 0;
+	}
+	std::cout << s.loc.x << ", " << s.loc.y << std::endl;
+	std::cout << m->GetMapWidth() << ", " << m->GetMapHeight() << std::endl;
 }
 
 /*

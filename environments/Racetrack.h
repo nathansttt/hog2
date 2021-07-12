@@ -21,9 +21,7 @@ struct RacetrackMove { // -1, 1
 	int xDelta, yDelta;
 };
 
-struct RacetrackState { // State of the car/racetrack
-	int x, y;
-	int xVelocity = 1, yVelocity = 1;
+
 struct RacetrackState {
 	xyLoc loc;
 	int xVelocity, yVelocity;
@@ -48,10 +46,9 @@ public:
 	int GetNumSuccessors(const RacetrackState &stateID) const
 	{ std::vector<RacetrackState> neighbors; GetSuccessors(stateID, neighbors); return (int)neighbors.size(); }
 	
-	void ApplyAction(RacetrackState &s, RacetrackMove a) const; // a = action s(state) gets changed
-	void Reset(RacetrackState &s);
+	void Reset(RacetrackState &s) const;
 	
-	void ApplyAction(RacetrackState &s, RacetrackMove a) const;
+	void ApplyAction(RacetrackState &s, RacetrackMove a) const;// a = action s(state) gets changed
 	bool InvertAction(RacetrackMove &a) const;
 	
 	/** Heuristic value between two arbitrary nodes. **/
