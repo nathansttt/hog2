@@ -15,9 +15,9 @@
 #include <sstream>
 #include <iomanip>
 
-#ifdef __APPLE__
-#include "TargetConditionals.h"
-#endif
+// #ifdef __APPLE__
+// #include "TargetConditionals.h"
+// #endif
 
 #ifdef NO_OPENGL
 #include "gl.h"
@@ -32,14 +32,14 @@
 
 #ifdef OS_MAC
 #include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <GLUT/glut.h>
-#include <AGL/agl.h>
+//#include <OpenGL/glu.h>
+//#include <GLUT/glut.h>
+//#include <AGL/agl.h>
 #else
 
 #include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
+//#include <GL/glu.h>
+//#include <GL/glut.h>
 #endif
 
 //#endif
