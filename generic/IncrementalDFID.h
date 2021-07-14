@@ -119,7 +119,7 @@ template <class state, class action>
 void IncrementalDFID<state, action>::Draw(Graphics::Display &display) const
 {
 	for (int x = 1; x < path.size(); x++)
-		env->DrawLine(display, path[x-1], path[x], 6);
+		env->DrawLine(display, path[x-1], path[x], 2.0);
 }
 
 
