@@ -20,7 +20,7 @@
 #include "Timer.h"
 #include "TemplateAStar.h"
 #include "VoxelGrid.h"
-#include "GLUThog.h"
+//#include "GLUThog.h"
 #include "SVGUtil.h"
 #include <unordered_map>
 #include "NBS.h"
