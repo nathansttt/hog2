@@ -326,11 +326,11 @@ bool IncrementalBTS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 	}
 	data.solutionInterval &= v;
 	
-	printf("--> Iteration complete - %llu expanded; target [%llu, %llu)\n", data.nodesExpanded, c1*data.nodeLB, c2*data.nodeLB);
+	printf("--> Iteration complete - %" PRId64 " expanded; target [%" PRId64 ", %" PRId64 ")\n", data.nodesExpanded, c1*data.nodeLB, c2*data.nodeLB);
 	// Move to next iteration
 	if (data.nodesExpanded >= c1*data.nodeLB && data.workBound == infiniteWorkBound)
 	{
-		printf("Expanded %llu - needed at least %llu\n", data.nodesExpanded, c1*data.nodeLB);
+		printf("Expanded %" PRId64 " - needed at least %" PRId64 "\n", data.nodesExpanded, c1*data.nodeLB);
 		if (data.solutionInterval.lowerBound == DBL_MAX) // No new nodes in iteration
 			printf("[HIT]--Critical f in [%1.5f, %1.5f]\n", solutionCost, solutionCost);
 		else
@@ -371,7 +371,7 @@ bool IncrementalBTS<state, action>::DoSingleSearchStep(std::vector<state> &thePa
 		data.delta += 1;
 		data.workBound = c2*data.nodeLB;
 		SetupIteration(nextCost);
-		printf("-> Starting new iteration with f: %f; node limit: %llu\n", nextCost, data.workBound);
+		printf("-> Starting new iteration with f: %f; node limit: %" PRId64 "\n", nextCost, data.workBound);
 
 		return false;
 	}

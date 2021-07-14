@@ -471,7 +471,7 @@ void Rubik7Edge::GetStateFromHash(uint64_t hash, Rubik7EdgeState &node) const
 	//int cnt = 0;
 	uint64_t bits = hash*Factorial(12-pieces)/Factorial(12);
 	uint64_t hash2 = hash%(Factorial(12)/Factorial(12-pieces));
-	//printf("-bits: %llu -perm: %llu\n", bits, hash2);
+	//printf("-bits: %" PRId64 " -perm: %" PRId64 "\n", bits, hash2);
 
 	int locs[pieces];
 

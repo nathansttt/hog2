@@ -322,11 +322,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						{
 							if (currentCost == DBL_MAX)
 							{
-								//								printf("NBS: first solution %llu\n", nodesExpanded);
+								//								printf("NBS: first solution %" PRId64 "\n", nodesExpanded);
 								//								std::cout << "Through " << succ << " (not here)\n";
 							}
 							// TODO: store current solution
-							//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+							//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%" PRId64 " nodes)\n",
 							//								   current.Lookup(nextID).g+edgeCost,
 							//								   opposite.Lookup(reverseLoc).g,
 							//								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
@@ -357,11 +357,11 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 						{
 							//							if (currentCost == DBL_MAX)
 							//							{
-							//								printf("NBS: first solution %llu\n", nodesExpanded);
+							//								printf("NBS: first solution %" PRId64 "\n", nodesExpanded);
 							//								std::cout << "Through " << succ << " (better)\n";
 							//							}
 							// TODO: store current solution
-							//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+							//							printf("NBS Potential updated solution found, cost: %1.2f + %1.2f = %1.2f (%" PRId64 " nodes)\n",
 							//								   current.Lookup(nextID).g+edgeCost,
 							//								   opposite.Lookup(reverseLoc).g,
 							//								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
@@ -431,7 +431,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 									//										std::cout << "Searching forward\n";
 									//									else
 									//										std::cout << "Searching backward\n";
-									//									printf("NBS: first solution %llu ", nodesExpanded);
+									//									printf("NBS: first solution %" PRId64 " ", nodesExpanded);
 									//
 									//									std::cout << "Through " << succ << " (first) \n";
 									//
@@ -457,7 +457,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 									
 								}
 								// TODO: store current solution
-								//								printf("NBS Potential solution found, cost: %1.2f + %1.2f = %1.2f (%llu nodes)\n",
+								//								printf("NBS Potential solution found, cost: %1.2f + %1.2f = %1.2f (%" PRId64 " nodes)\n",
 								//									   current.Lookup(nextID).g + edgeCost,
 								//									   opposite.Lookup(reverseLoc).g,
 								//									   current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,

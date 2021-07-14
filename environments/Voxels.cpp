@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include "Voxels.h"
+#include <cinttypes>
 
 //// id at each layer of octree
 //struct octTreeLink {
@@ -51,7 +52,7 @@ Voxels::Voxels(const char *filename)
 	fread(&w.voxelSize, sizeof(w.voxelSize), 1, f);
 	printf("Voxel size is %f\n", w.voxelSize);
 	fread(&w.numVoxelsGrids, sizeof(w.numVoxelsGrids), 1, f);
-	printf("%llu voxel grids to follow\n", w.numVoxelsGrids);
+	printf("%" PRId64 " voxel grids to follow\n", w.numVoxelsGrids);
 	fread(w.minbounds, sizeof(w.minbounds[0]), 4, f);
 	fread(w.maxbounds, sizeof(w.maxbounds[0]), 4, f);
 	printf("Min bounds: ");

@@ -13,6 +13,7 @@
 #include "Graphics.h"
 #include <stdio.h>
 #include <cstring>
+#include <cinttypes>
 
 #ifndef COMMON_H
 #define COMMON_H

@@ -9,6 +9,7 @@
 
 #include "NaryTree.h"
 #include <iostream>
+#include <cinttypes>
 
 NaryTree::NaryTree(int branchingFactor, int depth) :b(branchingFactor), d(depth)
 {
@@ -24,7 +25,7 @@ NaryTree::NaryTree(int branchingFactor, int depth) :b(branchingFactor), d(depth)
 	}
 	for (size_t x = 0; x < nodesAtDepth.size(); x++)
 	{
-		printf("%d %llu %llu\n", x, nodesAtDepth[x], totalNodesAtDepth[x]);
+		printf("%d %" PRId64 " %" PRId64 "\n", x, nodesAtDepth[x], totalNodesAtDepth[x]);
 	}
 }
 
@@ -128,7 +129,7 @@ void NaryTree::GetLocation(const NaryState &s, float &x, float &y) const
 	y = 2.0*float(depth)/float(d)-1;
 	x *= 0.95;
 	y *= 0.95;
-	//printf("%llu depth %d offset %llu\n", s, depth, GetOffset(s));
+	//printf("%" PRId64 " depth %d offset %" PRId64 "\n", s, depth, GetOffset(s));
 }
 
 int NaryTree::GetDepth(const NaryState s) const

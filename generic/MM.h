@@ -13,6 +13,7 @@
 #include "FPUtil.h"
 #include "Timer.h"
 #include <unordered_map>
+#include <cinttypes>
 
 template <class state, int epsilon = 1>
 struct MMCompare {
@@ -85,7 +86,7 @@ public:
 		for (int x = 0; x < d.size(); x++)
 		{
 			if (d[x] != 0)
-				printf("%d\t%llu\n", x, d[x]);
+				printf("%d\t%" PRId64 "\n", x, d[x]);
 		}
 	}
 	void PrintOpenStats(std::unordered_map<std::pair<double, double>, int>  &s)
@@ -225,13 +226,13 @@ bool MM<state, action, environment, priorityQueue>::DoSingleSearchStep(std::vect
 	double p2 = std::max(nextBackward.g+nextBackward.h, nextBackward.g*2);
 	if (p1 > oldp1)
 	{
-//		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
+//		printf("Forward priority to %1.2f [%" PRId64 " expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
 		oldp1 = p1;
 		//PrintOpenStats(f);
 	}
 	if (p2 > oldp2)
 	{
-//		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
+//		printf("Backward priority to %1.2f [%" PRId64 " expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
 		oldp2 = p2;
 		//PrintOpenStats(b);
 	}

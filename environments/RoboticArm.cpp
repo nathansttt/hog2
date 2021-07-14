@@ -866,7 +866,7 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 		}
 	}
 
-	printf( "%llu legal states\n", total );
+	printf( "%" PRId64 " legal states\n", total );
 
 	if ( !count ) {
 	  fclose( nextFile );
@@ -878,7 +878,7 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 	do {
 		total += count;
 		if ( !quiet ) {
-			printf( "%llu states at distance %u\n",
+			printf( "%" PRId64 " states at distance %u\n",
 				count, distance );
 		}
 		curFile = nextFile;
@@ -895,7 +895,7 @@ int ArmToTipHeuristic::GenerateHeuristicSub( const armAngles &sampleArm,
 	fclose( nextFile );
 
 	if ( !quiet ) {
-		printf( "%llu total states\n", total );
+		printf( "%" PRId64 " total states\n", total );
 	}
 
 	// there are a number of small disconnected subspaces,

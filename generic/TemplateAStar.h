@@ -219,7 +219,7 @@ void TemplateAStar<state,action,environment,openList>::GetPath(environment *_env
   	while (!DoSingleSearchStep(thePath))
 	{
 //		if (0 == nodesExpanded%100000)
-//			printf("%llu nodes expanded, %llu generated\n", nodesExpanded, nodesTouched);
+//			printf("%" PRId64 " nodes expanded, %" PRId64 " generated\n", nodesExpanded, nodesTouched);
 	}
 }
 

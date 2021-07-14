@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <algorithm>
+#include <cinttypes>
 
 /**
  * This class supports compact n-bit arrays. For (1 <= n <= 64). 
@@ -127,7 +128,7 @@ bool NBitArray<numBits>::Write(FILE *f)
 		return false;
 	if (fwrite(mem, sizeof(uint64_t), memorySize, f) != memorySize)
 		return false;
-	printf("Wrote %llu bytes to disk\n", memorySize*sizeof(uint64_t));
+	printf("Wrote %" PRId64 " bytes to disk\n", memorySize*sizeof(uint64_t));
 	return true;
 }
 

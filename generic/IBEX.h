@@ -125,7 +125,7 @@ namespace IBEX {
 		while (fgreater(solutionCost, solutionInterval.lowerBound))
 		{
 			double delta = 1;
-			printf("IBEX: Base search: f: %1.5f, cost limit ∞, target [%llu, %llu]\n", solutionInterval.lowerBound, c1*nodeLB, c2*nodeLB);
+			printf("IBEX: Base search: f: %1.5f, cost limit ∞, target [%" PRId64 ", %" PRId64 "]\n", solutionInterval.lowerBound, c1*nodeLB, c2*nodeLB);
 			dfsLowerBound = solutionInterval.lowerBound;
 			solutionInterval &= LowLevelSearch(solutionInterval.lowerBound, infiniteWorkBound, currentNodesUsed);
 			
@@ -180,7 +180,7 @@ namespace IBEX {
 		if (nodeLimit == infiniteWorkBound)
 			printf("    --+DFBnB f: %1.5f; nodes: ∞; ", costLimit);
 		else
-			printf("    --+DFBnB f: %1.5f; nodes: %llu; ", costLimit, nodeLimit);
+			printf("    --+DFBnB f: %1.5f; nodes: %" PRId64 "; ", costLimit, nodeLimit);
 		currPath.clear();
 		searchBounds sd;
 		sd.f_below = 0;
@@ -208,9 +208,9 @@ namespace IBEX {
 		}
 		nodesUsed = sd.nodes;
 		if (v.upperBound == DBL_MAX)
-			printf("%llu (new) %llu (total), solution range: [%1.5f, ∞] ", nodesUsed, totalNodesExpanded, v.lowerBound);
+			printf("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, ∞] ", nodesUsed, totalNodesExpanded, v.lowerBound);
 		else
-			printf("%llu (new) %llu (total), solution range: [%1.5f, %1.5f] ", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
+			printf("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, %1.5f] ", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
 		if (solutionCost != DBL_MAX)
 			printf("sol: %1.5f\n", solutionCost);
 		else
@@ -297,7 +297,7 @@ namespace IBEX {
 		else if (nodeLimit == -1)
 			printf("    --+BFHS f: %1.5f; nodes: ∞; ", costLimit);
 		else
-			printf("    --+BFHS f: %1.5f; nodes: %llu; ", costLimit, nodeLimit);
+			printf("    --+BFHS f: %1.5f; nodes: %" PRId64 "; ", costLimit, nodeLimit);
 		
 		searchBounds sd;
 		sd.f_below = 0;
@@ -417,9 +417,9 @@ namespace IBEX {
 		nodesUsed = sd.nodes;
 		
 		if (v.upperBound == DBL_MAX)
-			printf("%llu (new) %llu (total), solution range: [%1.5f, ∞]\n", nodesUsed, totalNodesExpanded, v.lowerBound);
+			printf("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, ∞]\n", nodesUsed, totalNodesExpanded, v.lowerBound);
 		else
-			printf("%llu (new) %llu (total), solution range: [%1.5f, %1.5f]\n", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
+			printf("%" PRId64 " (new) %" PRId64 " (total), solution range: [%1.5f, %1.5f]\n", nodesUsed, totalNodesExpanded, v.lowerBound, v.upperBound);
 
 		return v;
 	}

@@ -14,6 +14,7 @@
 #include <cassert>
 #include <stdint.h>
 #include <cstdio>
+#include <cinttypes>
 
 const int openSize = 256;
 const int numBuckets = 2;
@@ -229,7 +230,7 @@ uint64_t GetMaxBucketSize(bool print)
 	//	maxBucketSize *= 3;
 	if (print)
 	{
-		printf("%llu total states. Using 2 buckets, each with about %llu entries\n",
+		printf("%" PRId64 " total states. Using 2 buckets, each with about %" PRId64 " entries\n",
 			   statesLeft, maxBucketSize);
 	}
 	return maxBucketSize;
