@@ -226,6 +226,38 @@
 			CGContextFillPath(context);
 			break;
 		}
+		case Graphics::Display::kFrameTriangle:
+		{
+			Graphics::Display::triangleInfo &o = d.triangle;
+			CGContextSetRGBStrokeColor(context, o.c.r, o.c.g, o.c.b, 1.0);
+			CGContextMoveToPoint(context,
+								 [self hogToScreenX:o.p1.x viewport:port],
+								 [self hogToScreenY:o.p1.y viewport:port]);
+			CGContextAddLineToPoint(context,
+									[self hogToScreenX:o.p2.x viewport:port],
+									[self hogToScreenY:o.p2.y viewport:port]);
+			CGContextAddLineToPoint(context,
+									[self hogToScreenX:o.p3.x viewport:port],
+									[self hogToScreenY:o.p3.y viewport:port]);
+			CGContextStrokePath(context);
+		}
+			break;
+		case Graphics::Display::kFillTriangle:
+		{
+			Graphics::Display::triangleInfo &o = d.triangle;
+			CGContextSetRGBFillColor(context, o.c.r, o.c.g, o.c.b, 1.0);
+			CGContextMoveToPoint(context,
+								 [self hogToScreenX:o.p1.x viewport:port],
+								 [self hogToScreenY:o.p1.y viewport:port]);
+			CGContextAddLineToPoint(context,
+									[self hogToScreenX:o.p2.x viewport:port],
+									[self hogToScreenY:o.p2.y viewport:port]);
+			CGContextAddLineToPoint(context,
+									[self hogToScreenX:o.p3.x viewport:port],
+									[self hogToScreenY:o.p3.y viewport:port]);
+			CGContextFillPath(context);
+		}
+			break;
 		case Graphics::Display::kFillOval:
 		{
 			Graphics::Display::drawInfo &o = d.shape;
