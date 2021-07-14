@@ -1009,14 +1009,14 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 					GLdouble a, b, c, d, e, f, r;
 					map.GetOpenGLCoord(x, y, a, b, c, r);
 					map.GetOpenGLCoord(x+1, y, d, e, f, r);
-					disp.DrawLine(Graphics::point(a, b), Graphics::point(d, e), 1, Colors::black);
+					disp.DrawLine(Graphics::point(a, b), Graphics::point(d, e), r/4.0, Colors::black);
 				}
 				if (y+1 < map.GetMapHeight() && map.GetTerrainType(x, y) != kGround && map.GetTerrainType(x, y+1) != kGround)
 				{
 					GLdouble a, b, c, d, e, f, r;
 					map.GetOpenGLCoord(x, y, a, b, c, r);
 					map.GetOpenGLCoord(x, y+1, d, e, f, r);
-					disp.DrawLine(Graphics::point(a, b), Graphics::point(d, e), 1, Colors::black);
+					disp.DrawLine(Graphics::point(a, b), Graphics::point(d, e), r/4.0, Colors::black);
 				}
 			}
 		}
