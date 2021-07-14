@@ -178,6 +178,8 @@ void OutlineRect(GLdouble left, GLdouble top, GLdouble right, GLdouble bottom, d
 void DrawText(double x, double y, double z, double scale, const char *res);
 void DrawTextCentered(double x, double y, double z, double scale, const char *res);
 
+void SetLighting(GLfloat ambientf = 0.2f, GLfloat diffusef = 1.0f, GLfloat specularf = 1.0f);
+
 // Code from: https://stackoverflow.com/questions/16605967/set-precision-of-stdto-string-when-converting-floating-point-values/16606128#16606128
 template <typename T>
 std::string to_string_with_precision(const T a_value, const int n = 6)

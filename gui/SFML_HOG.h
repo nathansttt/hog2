@@ -33,8 +33,6 @@ void resizeGL(pRecContext pContextInfo, int width, int height);
 void updateModelView (pRecContext pContextInfo);
 void pointPath();
 
-void SetLighting(GLfloat ambientf = 0.2f, GLfloat diffusef = 1.0f, GLfloat specularf = 1.0f);
-
 pRecContext getCurrentContext();
 //static void drawCaps (pRecContext pContextInfo) {}
 
