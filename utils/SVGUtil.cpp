@@ -427,6 +427,41 @@ void HandleCommand(const std::vector<Graphics::Display::data> &drawCommands, std
 				s += SVGFrameNGon(p.x, p.y, width*i.radius/2.0, i.segments, i.rotate, 1/*border*/, i.c);
 				break;
 			}
+			case Graphics::Display::kFrameTriangle:
+			{
+				Graphics::point p1, p2, p3;
+				const Graphics::Display::triangleInfo &i = drawCommands[x].triangle;
+				p1 = i.p1;
+				p2 = i.p2;
+				p3 = i.p3;
+				PointToSVG(p1, width, height);
+				PointToSVG(p2, width, height);
+				PointToSVG(p3, width, height);
+				s += "<polygon points=\""+
+				std::to_string(p1.x)+","+std::to_string(p1.y)+" "+
+				std::to_string(p2.x)+","+std::to_string(p2.y)+" "+
+				std::to_string(p3.x)+","+std::to_string(p3.y)+"\" ";
+				s += "style=\"stroke:"+SVGGetRGB(i.c)+";stroke-width:"+std::to_string(i.width)+"\" />";
+//				s += "style=\"fill:"+SVGGetRGB(i.c);
+				//style="fill:lime;stroke:purple;stroke-width:1" />
+				break;
+			}
+			case Graphics::Display::kFillTriangle:
+			{
+				Graphics::point p1, p2, p3;
+				const Graphics::Display::triangleInfo &i = drawCommands[x].triangle;
+				p1 = i.p1;
+				p2 = i.p2;
+				p3 = i.p3;
+				PointToSVG(p1, width, height);
+				PointToSVG(p2, width, height);
+				PointToSVG(p3, width, height);
+				s += "<polygon points=\""+
+				std::to_string(p1.x)+","+std::to_string(p1.y)+" "+
+				std::to_string(p2.x)+","+std::to_string(p2.y)+" "+
+				std::to_string(p3.x)+","+std::to_string(p3.y)+"\" ";
+				s += "style=\"fill:"+SVGGetRGB(i.c)+";\" />";
+			}
 		}
 	}
 }
