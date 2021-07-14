@@ -33,7 +33,7 @@ std::vector<double> regularReach;
 std::vector<double> canonicalReach;
 Reach *reach;
 CanonicalReach *canReach;
-bool mapChanged = true;
+bool mapChange = true;
 
 xyLoc start, goal;
 bool showCanonical = false;
@@ -95,10 +95,10 @@ void MyWindowHandler(unsigned long windowID, tWindowEventType eType)
 		InstallFrameHandler(MyFrameHandler, windowID, 0);
 		SetNumPorts(windowID, 1);
 		
-		//Map *map = new Map(1,1);
+		Map *map = new Map(1,1);
 		//LoadMap(map);
-		//LoadBigMap(map);
-		Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
+		LoadBigMap(map);
+//		Map *map = new Map("/Users/nathanst/hog2/maps/bgmaps/AR0012SR.map");
 //		Map *map = new Map("/Users/nathanst/hog2/maps/dao/brc300d.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak202d.map");
 		//Map *map = new Map("/Users/nathanst/hog2/maps/dao/lak303d.map"); // round map
@@ -168,7 +168,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 
 	Graphics::Display &display = getCurrentContext()->display;
 
-	if (mapChanged == true)
+	if (mapChange == true)
 	{
 		display.StartBackground();
 		me->Draw(display);
@@ -179,7 +179,7 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 			canReach->Draw(display);
 		
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 	
 	if (start.x != static_cast<uint16_t>(-1) && start.y != static_cast<uint16_t>(-1))
@@ -269,7 +269,7 @@ void MyDisplayHandler(unsigned long windowID, tKeyboardModifier mod, char key)
 		case '\t':
 			printf("Hit tab!\n");
 			whichReachDraw = (whichReachDraw+1)%3;
-			mapChanged = true;
+			mapChange = true;
 			break;
 		case 'p':
 			//running = !running;

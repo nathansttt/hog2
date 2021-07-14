@@ -47,7 +47,7 @@ void LoadMap(Map *m);
 
 bool recording = false;
 bool running = false;
-bool mapChanged = true;
+bool mapChange = true;
 
 int stepsPerFrame = 0;
 
@@ -109,12 +109,12 @@ void MyFrameHandler(unsigned long windowID, unsigned int viewport, void *)
 {
 	Graphics::Display &display = getCurrentContext()->display;
 	
-	if (mapChanged == true)
+	if (mapChange == true)
 	{
 		display.StartBackground();
 		me->Draw(display);
 		display.EndBackground();
-		mapChanged = false;
+		mapChange = false;
 	}
 	switch (m)
 	{
