@@ -47,6 +47,7 @@ public:
 	{ std::vector<RacetrackState> neighbors; GetSuccessors(stateID, neighbors); return (int)neighbors.size(); }
 	
 	void Reset(RacetrackState &s) const;
+	void Moving(RacetrackState &s) const;
 	
 	void ApplyAction(RacetrackState &s, RacetrackMove a) const;// a = action s(state) gets changed
 	bool InvertAction(RacetrackMove &a) const;

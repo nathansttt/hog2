@@ -65,6 +65,10 @@ void Racetrack::Reset(RacetrackState &s) const
 	exit(1);
 }
 
+void Racetrack::Moving(RacetrackState &s) const
+{
+	
+}
 
 void Racetrack::GetSuccessors(const RacetrackState &nodeID, std::vector<RacetrackState> &neighbors) const
 {
@@ -103,6 +107,16 @@ bool Racetrack::InvertAction(RacetrackMove &a) const
 bool Racetrack::GoalTest(const RacetrackState &node, const RacetrackState &goal) const
 {
 	// TODO: implement
+	// Use the node to see if the location matches the goal location
+	
+	if (map->GetTerrainType(node.loc.x, node.loc.y) == kEndTerrain)
+	{
+		std::cout << "Touched the goal! \n";
+	}
+	
+	
+	
+
 	return false;
 }
 
@@ -126,12 +140,14 @@ void Racetrack::Draw(Graphics::Display &display, const RacetrackState &s) const
 	// TODO: draw agent location and movement vector
 // draw a line
 // hog2 graph -- 0,0 in the middle -- upper left -1, -1 bottom left 1, 1 -- window can be scaled -- Coordinates have to be floats
-	me->Draw(display, s.loc);
+	
 	xyLoc temp(s.loc.x + s.xVelocity, s.loc.y + s.yVelocity);
 	me->DrawLine(display, s.loc, temp);
+	me->Draw(display, s.loc);
 }
 
 void Racetrack::DrawLine(Graphics::Display &display, const RacetrackState &x, const RacetrackState &y, float width) const
 {
 	// TODO: draw line between to locations
+
 }
